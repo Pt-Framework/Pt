@@ -164,6 +164,9 @@
     form the high-level interface for the serialization of a set of types.
 */
 
+/** @defgroup sigslot Signals and Slots
+*/
+
 /** @namespace Pt
     @brief Core module.
 

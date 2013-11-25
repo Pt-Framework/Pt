@@ -140,10 +140,10 @@ int main(int argc, char* argv[])
     Pt::Arg<std::string> ip(argc, argv, 'i');
     Pt::Arg<unsigned short> port(argc, argv, 'p', 7002);
     Pt::Arg<unsigned> threads(argc, argv, 't', 4);
-    BenchClient::numRequests(Pt::Arg<unsigned>(argc, argv, 'n', 10000));
+    BenchClient::numRequests( Pt::Arg<unsigned>(argc, argv, 'n', 10000).get() );
 
     std::cout << "call " << BenchClient::numRequests() << " requests with " 
-              << threads.getValue() << " threads\n\n"
+              << threads.get() << " threads\n\n"
                  "options:\n"
                  "   -l ip      set ip address of server (default: localhost)\n"
                  "   -p number  set port number of server (default: 7002)\n"
@@ -151,8 +151,8 @@ int main(int argc, char* argv[])
                  "   -n number  set number of requests (default: 10000)\n"
               << std::endl;
 
-    while (clients.size() < threads)
-      clients.push_back(new BenchClient(port));
+    while (clients.size() < threads.get())
+      clients.push_back(new BenchClient(port.get()));
 
     Pt::System::Clock cl;
     cl.start();

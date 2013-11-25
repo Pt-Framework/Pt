@@ -29,12 +29,12 @@ class Delegate : public DelegateBase
               Passes on all arguments to the connected slot and returns the return value
               of that slot. If no slot is connect then an exception is thrown.
             */
-            inline R call(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) const
+            inline R call(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     throw std::logic_error("Delegate<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>::call(): Delegate not connected");
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 return cb->call(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
             }
 
@@ -42,17 +42,17 @@ class Delegate : public DelegateBase
               Passes on all arguments to the connected slot and ignores the return value. If
               No slot is connected, the call is silently ignored.
             */
-            inline void invoke(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) const
+            inline void invoke(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     return;
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 cb->call(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
             }
 
             /** Identical to call(...). */
-            R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) const
+            R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10)
             { return this->call(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); }
     };
 /**
@@ -94,7 +94,7 @@ class DelegateSlot : public BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>
             }
 
         private:
-            mutable ConstMethod<R, Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10 > _method;
+            Method<R, Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10 > _method;
 };
 
 /** Creates and returns a DelegateSlot for the given Delegate. */
@@ -182,12 +182,12 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public DelegateBase
               Passes on all arguments to the connected slot and returns the return value
               of that slot. If no slot is connect then an exception is thrown.
             */
-            inline R call(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) const
+            inline R call(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     throw std::logic_error("Delegate<R,A1,A2,A3,A4,A5,A6,A7,A8,A9>::call(): Delegate not connected");
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 return cb->call(a1,a2,a3,a4,a5,a6,a7,a8,a9);
             }
 
@@ -195,17 +195,17 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public DelegateBase
               Passes on all arguments to the connected slot and ignores the return value. If
               No slot is connected, the call is silently ignored.
             */
-            inline void invoke(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) const
+            inline void invoke(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     return;
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 cb->call(a1,a2,a3,a4,a5,a6,a7,a8,a9);
             }
 
             /** Identical to call(...). */
-            R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) const
+            R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9)
             { return this->call(a1,a2,a3,a4,a5,a6,a7,a8,a9); }
     };
     /** Connect a Delegate to another Delegate.
@@ -271,12 +271,12 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public DelegateBase
               Passes on all arguments to the connected slot and returns the return value
               of that slot. If no slot is connect then an exception is thrown.
             */
-            inline R call(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) const
+            inline R call(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     throw std::logic_error("Delegate<R,A1,A2,A3,A4,A5,A6,A7,A8>::call(): Delegate not connected");
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 return cb->call(a1,a2,a3,a4,a5,a6,a7,a8);
             }
 
@@ -284,17 +284,17 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public DelegateBase
               Passes on all arguments to the connected slot and ignores the return value. If
               No slot is connected, the call is silently ignored.
             */
-            inline void invoke(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) const
+            inline void invoke(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     return;
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 cb->call(a1,a2,a3,a4,a5,a6,a7,a8);
             }
 
             /** Identical to call(...). */
-            R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) const
+            R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8)
             { return this->call(a1,a2,a3,a4,a5,a6,a7,a8); }
     };
     /** Connect a Delegate to another Delegate.
@@ -360,12 +360,12 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public DelegateBase
               Passes on all arguments to the connected slot and returns the return value
               of that slot. If no slot is connect then an exception is thrown.
             */
-            inline R call(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) const
+            inline R call(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     throw std::logic_error("Delegate<R,A1,A2,A3,A4,A5,A6,A7>::call(): Delegate not connected");
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 return cb->call(a1,a2,a3,a4,a5,a6,a7);
             }
 
@@ -373,17 +373,17 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public DelegateBase
               Passes on all arguments to the connected slot and ignores the return value. If
               No slot is connected, the call is silently ignored.
             */
-            inline void invoke(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) const
+            inline void invoke(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     return;
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 cb->call(a1,a2,a3,a4,a5,a6,a7);
             }
 
             /** Identical to call(...). */
-            R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) const
+            R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7)
             { return this->call(a1,a2,a3,a4,a5,a6,a7); }
     };
     /** Connect a Delegate to another Delegate.
@@ -449,12 +449,12 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public DelegateBase
               Passes on all arguments to the connected slot and returns the return value
               of that slot. If no slot is connect then an exception is thrown.
             */
-            inline R call(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) const
+            inline R call(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     throw std::logic_error("Delegate<R,A1,A2,A3,A4,A5,A6>::call(): Delegate not connected");
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 return cb->call(a1,a2,a3,a4,a5,a6);
             }
 
@@ -462,17 +462,17 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public DelegateBase
               Passes on all arguments to the connected slot and ignores the return value. If
               No slot is connected, the call is silently ignored.
             */
-            inline void invoke(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) const
+            inline void invoke(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     return;
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 cb->call(a1,a2,a3,a4,a5,a6);
             }
 
             /** Identical to call(...). */
-            R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) const
+            R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6)
             { return this->call(a1,a2,a3,a4,a5,a6); }
     };
     /** Connect a Delegate to another Delegate.
@@ -538,12 +538,12 @@ class Delegate<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public DelegateBase
               Passes on all arguments to the connected slot and returns the return value
               of that slot. If no slot is connect then an exception is thrown.
             */
-            inline R call(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) const
+            inline R call(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) 
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     throw std::logic_error("Delegate<R,A1,A2,A3,A4,A5>::call(): Delegate not connected");
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 return cb->call(a1,a2,a3,a4,a5);
             }
 
@@ -551,17 +551,17 @@ class Delegate<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public DelegateBase
               Passes on all arguments to the connected slot and ignores the return value. If
               No slot is connected, the call is silently ignored.
             */
-            inline void invoke(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) const
+            inline void invoke(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) 
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     return;
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 cb->call(a1,a2,a3,a4,a5);
             }
 
             /** Identical to call(...). */
-            R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) const
+            R operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) 
             { return this->call(a1,a2,a3,a4,a5); }
     };
     /** Connect a Delegate to another Delegate.
@@ -627,12 +627,12 @@ class Delegate<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public DelegateBa
               Passes on all arguments to the connected slot and returns the return value
               of that slot. If no slot is connect then an exception is thrown.
             */
-            inline R call(A1 a1, A2 a2, A3 a3, A4 a4) const
+            inline R call(A1 a1, A2 a2, A3 a3, A4 a4)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     throw std::logic_error("Delegate<R,A1,A2,A3,A4>::call(): Delegate not connected");
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 return cb->call(a1,a2,a3,a4);
             }
 
@@ -640,17 +640,17 @@ class Delegate<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public DelegateBa
               Passes on all arguments to the connected slot and ignores the return value. If
               No slot is connected, the call is silently ignored.
             */
-            inline void invoke(A1 a1, A2 a2, A3 a3, A4 a4) const
+            inline void invoke(A1 a1, A2 a2, A3 a3, A4 a4)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     return;
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 cb->call(a1,a2,a3,a4);
             }
 
             /** Identical to call(...). */
-            R operator()(A1 a1, A2 a2, A3 a3, A4 a4) const
+            R operator()(A1 a1, A2 a2, A3 a3, A4 a4)
             { return this->call(a1,a2,a3,a4); }
     };
     /** Connect a Delegate to another Delegate.
@@ -716,12 +716,12 @@ class Delegate<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Delegate
               Passes on all arguments to the connected slot and returns the return value
               of that slot. If no slot is connect then an exception is thrown.
             */
-            inline R call(A1 a1, A2 a2, A3 a3) const
+            inline R call(A1 a1, A2 a2, A3 a3)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     throw std::logic_error("Delegate<R,A1,A2,A3>::call(): Delegate not connected");
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 return cb->call(a1,a2,a3);
             }
 
@@ -729,17 +729,17 @@ class Delegate<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Delegate
               Passes on all arguments to the connected slot and ignores the return value. If
               No slot is connected, the call is silently ignored.
             */
-            inline void invoke(A1 a1, A2 a2, A3 a3) const
+            inline void invoke(A1 a1, A2 a2, A3 a3)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     return;
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 cb->call(a1,a2,a3);
             }
 
             /** Identical to call(...). */
-            R operator()(A1 a1, A2 a2, A3 a3) const
+            R operator()(A1 a1, A2 a2, A3 a3)
             { return this->call(a1,a2,a3); }
     };
     /** Connect a Delegate to another Delegate.
@@ -805,12 +805,12 @@ class Delegate<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public Delega
               Passes on all arguments to the connected slot and returns the return value
               of that slot. If no slot is connect then an exception is thrown.
             */
-            inline R call(A1 a1, A2 a2) const
+            inline R call(A1 a1, A2 a2)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     throw std::logic_error("Delegate<R,A1,A2>::call(): Delegate not connected");
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 return cb->call(a1,a2);
             }
 
@@ -818,17 +818,17 @@ class Delegate<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public Delega
               Passes on all arguments to the connected slot and ignores the return value. If
               No slot is connected, the call is silently ignored.
             */
-            inline void invoke(A1 a1, A2 a2) const
+            inline void invoke(A1 a1, A2 a2)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     return;
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 cb->call(a1,a2);
             }
 
             /** Identical to call(...). */
-            R operator()(A1 a1, A2 a2) const
+            R operator()(A1 a1, A2 a2)
             { return this->call(a1,a2); }
     };
     /** Connect a Delegate to another Delegate.
@@ -894,12 +894,12 @@ class Delegate<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public Dele
               Passes on all arguments to the connected slot and returns the return value
               of that slot. If no slot is connect then an exception is thrown.
             */
-            inline R call(A1 a1) const
+            inline R call(A1 a1)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     throw std::logic_error("Delegate<R,A1>::call(): Delegate not connected");
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 return cb->call(a1);
             }
 
@@ -907,17 +907,17 @@ class Delegate<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public Dele
               Passes on all arguments to the connected slot and ignores the return value. If
               No slot is connected, the call is silently ignored.
             */
-            inline void invoke(A1 a1) const
+            inline void invoke(A1 a1)
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     return;
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 cb->call(a1);
             }
 
             /** Identical to call(...). */
-            R operator()(A1 a1) const
+            R operator()(A1 a1)
             { return this->call(a1); }
     };
     /** Connect a Delegate to another Delegate.
@@ -983,12 +983,12 @@ class Delegate<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public De
               Passes on all arguments to the connected slot and returns the return value
               of that slot. If no slot is connect then an exception is thrown.
             */
-            inline R call() const
+            inline R call()
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     throw std::logic_error("Delegate<R>::call(): Delegate not connected");
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 return cb->call();
             }
 
@@ -996,17 +996,17 @@ class Delegate<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public De
               Passes on all arguments to the connected slot and ignores the return value. If
               No slot is connected, the call is silently ignored.
             */
-            inline void invoke() const
+            inline void invoke()
             {
-                if( !_target.valid() ) {
+                if( !_target.isValid() ) {
                     return;
                 }
-                const CallableT* cb = static_cast<const CallableT*>( _target.slot().callable() );
+                const CallableT* cb = static_cast<const CallableT*>( _target.slot()->callable() );
                 cb->call();
             }
 
             /** Identical to call(...). */
-            R operator()() const
+            R operator()()
             { return this->call(); }
     };
     /** Connect a Delegate to another Delegate.

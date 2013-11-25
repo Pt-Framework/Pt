@@ -26,14 +26,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#undef PT_API_EXPORT
-
 #include "Pt/Signal.h"
-
-#include <string>
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
+#include <string>
+#include <cassert>
 
 namespace {
 
@@ -80,6 +78,7 @@ class SignalTest : public Pt::Unit::TestSuite
         , _callee(0)
         {
             Pt::Unit::TestSuite::registerMethod( "Disconnect", *this, &SignalTest::Disconnect );
+            Pt::Unit::TestSuite::registerMethod( "DisconnectWhileSend", *this, &SignalTest::DisconnectWhileSend );
             Pt::Unit::TestSuite::registerMethod( "DeleteWhileSend", *this, &SignalTest::DeleteWhileSend );
             Pt::Unit::TestSuite::registerMethod( "CopySignal", *this, &SignalTest::CopySignal );
             Pt::Unit::TestSuite::registerMethod( "Send0", *this, &SignalTest::Send0 );
@@ -106,16 +105,31 @@ class SignalTest : public Pt::Unit::TestSuite
         {
             Pt::Signal<> sn;
             connect(sn, *this, &SignalTest::method0);
-            disconnect(sn, *this, &SignalTest::method0);;
+            sn -= Pt::slot(*this, &SignalTest::method0);
             PT_UNIT_ASSERT(sn.connectionCount() == 0);
 
             connect(sn, *this, &SignalTest::constMethod0);
-            disconnect(sn, *this, &SignalTest::constMethod0);
+            sn -= Pt::slot(*this, &SignalTest::constMethod0);
             PT_UNIT_ASSERT(sn.connectionCount() == 0);
 
             connect(sn, &function0);
-            disconnect(sn, &function0);
+            sn -= Pt::slot(&function0);
             PT_UNIT_ASSERT(sn.connectionCount() == 0);
+        }
+
+        void DisconnectWhileSend()
+        {
+            connect(*_caller, *this, &SignalTest::method0);
+            connect(*_caller, *this, &SignalTest::disconnectCaller);
+            connect(*_caller, *this, &SignalTest::method0);
+
+            _caller->send();
+            PT_UNIT_ASSERT(_caller->connectionCount() == 0);
+        }
+
+        void disconnectCaller()
+        {
+            _caller->disconnect();
         }
 
         void Send0()

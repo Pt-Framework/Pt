@@ -28,24 +28,17 @@
 
 #include <Pt/Api.h>
 #include <Pt/Slot.h>
-#include <Pt/RefCounted.h>
+#include <Pt/NonCopyable.h>
 
 namespace Pt {
 
 class Connectable;
-class Connection;
+class Slot;
 
-/** @internal
-*/
-class ConnectionData {
+//! @internal
+class ConnectionData 
+{
     public:
-        ConnectionData()
-        : _refs(1)
-        , _valid(false)
-        , _slot(0)
-        , _sender(0)
-        { }
-
         ConnectionData(Connectable& sender, Slot* slot)
         : _refs(1)
         , _valid(true)
@@ -65,23 +58,23 @@ class ConnectionData {
         unsigned refs() const
         { return _refs; }
 
-        bool valid() const
+        bool isValid() const
         { return _valid; }
 
-        void setValid(bool valid)
-        { _valid = valid; }
+        void setInvalid()
+        { _valid = false; }
 
-        Connectable& sender()
-        { return *_sender; }
+        Connectable* sender()
+        { return _sender; }
 
-        const Connectable& sender() const
-        { return *_sender; }
+        const Connectable* sender() const
+        { return _sender; }
 
-        Slot& slot()
-        { return *_slot; }
+        Slot* slot()
+        { return _slot; }
 
-        const Slot& slot() const
-        { return *_slot; }
+        const Slot* slot() const
+        { return _slot; }
 
     private:
         unsigned _refs;
@@ -90,56 +83,40 @@ class ConnectionData {
         Connectable* _sender;
 };
 
-/** @brief Represents a connection between a Signal/Delegate and a slot
+/** @brief Represents a connection between a Signal/Delegate and a slot.
+
     @ingroup sigslot
 */
 class PT_API Connection
 {
     public:
-        Connection()
-        { _data = new ConnectionData(); }
+        Connection();
 
         Connection(Connectable& sender, Slot* slot);
 
-        Connection(const Connection& connection)
-        {
-            _data = connection._data;
-            _data->ref();
-        }
+        Connection(const Connection& connection);
 
         ~Connection();
 
-        bool valid() const
-        { return _data->valid(); }
+        bool isValid() const
+        { return _data && _data->isValid(); }
 
-        const Connectable& sender() const
-        { return _data->sender(); }
+        const Connectable* sender() const
+        { return _data ? _data->sender() : 0; }
 
-        const Slot& slot() const
-        { return _data->slot(); }
+        const Slot* slot() const
+        { return _data ? _data->slot() : 0; }
 
         bool operator!() const
-        { return this->valid() == false; }
+        { return this->isValid() == false; }
 
         void close();
 
-        Connection& operator=(const Connection& connection)
-        {
-            if( 0 == _data->unref() ) 
-            {
-                this->close();
-                delete _data;
-            }
+        Connection& operator=(const Connection& connection);
 
-            _data = connection._data;
-            _data->ref();
-            return (*this);
-        }
-
+        //! @internal @brief Only for std::list::remove.
         bool operator==(const Connection& connection) const
-        {
-            return _data == connection._data;
-        }
+        { return _data == connection._data; }
 
     private:
         ConnectionData* _data;

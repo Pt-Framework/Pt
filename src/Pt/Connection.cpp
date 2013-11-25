@@ -25,12 +25,18 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/Connectable.h"
-#include "Pt/Callable.h"
+#include <Pt/Connectable.h>
+#include <Pt/Slot.h>
 #include <iostream>
 #include <memory>
 
 namespace Pt {
+
+Connection::Connection()
+: _data(0)
+{ 
+}
+
 
 Connection::Connection(Connectable& sender, Slot* slot)
 : _data(0)
@@ -50,34 +56,48 @@ Connection::Connection(Connectable& sender, Slot* slot)
 }
 
 
+Connection::Connection(const Connection& connection)
+: _data(0)
+{
+    _data = connection._data;
+    _data->ref();
+}
+
+
 Connection::~Connection()
 {
-    if( _data->unref() > 0) {
-        return;
-    }
-
-    // close the connection if its still valid
-    if( this->valid() ) {
+    if( _data && 0 == _data->unref() ) 
+    {
         this->close();
+        delete _data;
+    }
+}
+
+
+Connection& Connection::operator=(const Connection& connection)
+{
+    if( _data && 0 == _data->unref() ) 
+    {
+        this->close();
+        delete _data;
     }
 
-    // delete the shared data
-    delete _data;
+    _data = connection._data;
+    _data->ref();
+    return *this;
 }
 
 
 void Connection::close()
 {
-    if( this->valid() )
+    if( this->isValid() )
     {
-	    _data->slot().onDisconnect( *this );
-	    // We set the valid flag here to false since the call above may 
-	    // fail for any reason. If setting the valid flag before, a
-	    // connection may pretend to be closed but it is not and it 
-	    // may reside e.g. in the list of connections of the 
-	    // Connectable class and then provoke an infinite loop.
-	    _data->setValid(false);
-	    _data->sender().onConnectionClose( *this );
+      // prevent infinite loop, because slot and sender might call 
+      // Connection::close again
+      _data->setInvalid();
+	    
+      _data->slot()->onDisconnect( *this );   
+	    _data->sender()->onConnectionClose( *this );
 	}
 }
 

@@ -32,7 +32,7 @@
 
             /** The converse of connect(). */
             template <typename R>
-            void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& slot)
+            void disconnectFrom(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& slot)
             {
                 this->disconnectSlot(slot);
             }
@@ -42,7 +42,7 @@
             order. Their return values are ignored. Calling of connected slots will
             be interrupted if a slot deletes this Signal object or throws an exception.
             */
-            inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) const
+            inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10)
             {
                 if(Connectable::connections().empty()) return;
 
@@ -59,8 +59,8 @@
                     // - The slot might get deleted and thus disconnected from this signal
                     // - The slot might delete this signal and we must end calling any slots immediately
                     // - A new Connection might get added to this Signal in the slot
-                    if( it->valid() && ( &(it->sender()) == this ) ) {
-                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                    if( it->isValid() && it->sender() == this ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot()->callable() );
                         invokable->invoke(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10);
                     }
                     // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
@@ -72,7 +72,7 @@
             }
 
             /** Same as send(...). */
-            inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10) const
+            inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9, A10 a10)
             { this->send(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); }
     };
 
@@ -123,7 +123,7 @@
             }
 
         private:
-            mutable ConstMethod<void, Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10 > _method;
+            Method<void, Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10 > _method;
     };
 
     /** Creates a SignalSlot object from an equivalent Signal. */
@@ -181,37 +181,37 @@
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
     void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& signal, const BasicSlot<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& slot)
     {
-        return signal.disconnect( slot );
+        return signal.disconnectFrom( slot );
     }
 
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
     void operator -=(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& signal, const BasicSlot<R,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& slot)
     {
-        signal.disconnect( slot );
+        signal.disconnectFrom( slot );
     }
 
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
     void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& signal, R(*func)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10))
     {
-        signal.disconnect( slot(func) );
+        signal.disconnectFrom( slot(func) );
     }
 
     template <typename R, typename BaseT, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
     void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& signal, BaseT & object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10))
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R, class BaseT, class ClassT, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
     void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10) const)
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
     void disconnect( Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& sender, Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& receiver )
     {
-        sender.disconnect( slot(receiver) );
+        sender.disconnectFrom( slot(receiver) );
     }
 
     /** Connects a Signal to another Signal. */
@@ -251,7 +251,7 @@
 
             /** The converse of connect(). */
             template <typename R>
-            void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void>& slot)
+            void disconnectFrom(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void>& slot)
             {
                 this->disconnectSlot(slot);
             }
@@ -261,7 +261,7 @@
             order. Their return values are ignored. Calling of connected slots will
             be interrupted if a slot deletes this Signal object or throws an exception.
             */
-            inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) const
+            inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9)
             {
                 if(Connectable::connections().empty()) return;
 
@@ -278,8 +278,8 @@
                     // - The slot might get deleted and thus disconnected from this signal
                     // - The slot might delete this signal and we must end calling any slots immediately
                     // - A new Connection might get added to this Signal in the slot
-                    if( it->valid() && ( &(it->sender()) == this ) ) {
-                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                    if( it->isValid() && it->sender() == this ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot()->callable() );
                         invokable->invoke(a1,a2,a3,a4,a5,a6,a7,a8,a9);
                     }
                     // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
@@ -291,7 +291,7 @@
             }
 
             /** Same as send(...). */
-            inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) const
+            inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9)
             { this->send(a1,a2,a3,a4,a5,a6,a7,a8,a9); }
     };
 
@@ -331,25 +331,25 @@
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
     void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& signal, R(*func)(A1,A2,A3,A4,A5,A6,A7,A8,A9))
     {
-        signal.disconnect( slot(func) );
+        signal.disconnectFrom( slot(func) );
     }
 
     template <typename R, typename BaseT, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
     void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& signal, BaseT & object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9))
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R, class BaseT, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
     void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8,A9) const)
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
     void disconnect( Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& sender, Signal<A1,A2,A3,A4,A5,A6,A7,A8,A9>& receiver )
     {
-        sender.disconnect( slot(receiver) );
+        sender.disconnectFrom( slot(receiver) );
     }
 
     /** Connects a Signal to another Signal. */
@@ -389,7 +389,7 @@
 
             /** The converse of connect(). */
             template <typename R>
-            void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void>& slot)
+            void disconnectFrom(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void>& slot)
             {
                 this->disconnectSlot(slot);
             }
@@ -399,7 +399,7 @@
             order. Their return values are ignored. Calling of connected slots will
             be interrupted if a slot deletes this Signal object or throws an exception.
             */
-            inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) const
+            inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8)
             {
                 if(Connectable::connections().empty()) return;
 
@@ -416,8 +416,8 @@
                     // - The slot might get deleted and thus disconnected from this signal
                     // - The slot might delete this signal and we must end calling any slots immediately
                     // - A new Connection might get added to this Signal in the slot
-                    if( it->valid() && ( &(it->sender()) == this ) ) {
-                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                    if( it->isValid() && it->sender() == this ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot()->callable() );
                         invokable->invoke(a1,a2,a3,a4,a5,a6,a7,a8);
                     }
                     // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
@@ -429,7 +429,7 @@
             }
 
             /** Same as send(...). */
-            inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) const
+            inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8)
             { this->send(a1,a2,a3,a4,a5,a6,a7,a8); }
     };
 
@@ -469,25 +469,25 @@
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
     void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8>& signal, R(*func)(A1,A2,A3,A4,A5,A6,A7,A8))
     {
-        signal.disconnect( slot(func) );
+        signal.disconnectFrom( slot(func) );
     }
 
     template <typename R, typename BaseT, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
     void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8>& signal, BaseT & object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8))
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R, class BaseT, class ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
     void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7,A8>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7,A8) const)
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
     void disconnect( Signal<A1,A2,A3,A4,A5,A6,A7,A8>& sender, Signal<A1,A2,A3,A4,A5,A6,A7,A8>& receiver )
     {
-        sender.disconnect( slot(receiver) );
+        sender.disconnectFrom( slot(receiver) );
     }
 
     /** Connects a Signal to another Signal. */
@@ -527,7 +527,7 @@
 
             /** The converse of connect(). */
             template <typename R>
-            void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void>& slot)
+            void disconnectFrom(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void>& slot)
             {
                 this->disconnectSlot(slot);
             }
@@ -537,7 +537,7 @@
             order. Their return values are ignored. Calling of connected slots will
             be interrupted if a slot deletes this Signal object or throws an exception.
             */
-            inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) const
+            inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) 
             {
                 if(Connectable::connections().empty()) return;
 
@@ -554,8 +554,8 @@
                     // - The slot might get deleted and thus disconnected from this signal
                     // - The slot might delete this signal and we must end calling any slots immediately
                     // - A new Connection might get added to this Signal in the slot
-                    if( it->valid() && ( &(it->sender()) == this ) ) {
-                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                    if( it->isValid() && it->sender() == this ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot()->callable() );
                         invokable->invoke(a1,a2,a3,a4,a5,a6,a7);
                     }
                     // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
@@ -567,7 +567,7 @@
             }
 
             /** Same as send(...). */
-            inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) const
+            inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7) 
             { this->send(a1,a2,a3,a4,a5,a6,a7); }
     };
 
@@ -607,25 +607,25 @@
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
     void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7>& signal, R(*func)(A1,A2,A3,A4,A5,A6,A7))
     {
-        signal.disconnect( slot(func) );
+        signal.disconnectFrom( slot(func) );
     }
 
     template <typename R, typename BaseT, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
     void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7>& signal, BaseT & object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6,A7))
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R, class BaseT, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
     void disconnect(Signal<A1,A2,A3,A4,A5,A6,A7>& signal, ClassT & object, R(BaseT::*memFunc)(A1,A2,A3,A4,A5,A6,A7) const)
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6, class A7>
     void disconnect( Signal<A1,A2,A3,A4,A5,A6,A7>& sender, Signal<A1,A2,A3,A4,A5,A6,A7>& receiver )
     {
-        sender.disconnect( slot(receiver) );
+        sender.disconnectFrom( slot(receiver) );
     }
 
     /** Connects a Signal to another Signal. */
@@ -665,7 +665,7 @@
 
             /** The converse of connect(). */
             template <typename R>
-            void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void>& slot)
+            void disconnectFrom(const BasicSlot<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void>& slot)
             {
                 this->disconnectSlot(slot);
             }
@@ -675,7 +675,7 @@
             order. Their return values are ignored. Calling of connected slots will
             be interrupted if a slot deletes this Signal object or throws an exception.
             */
-            inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) const
+            inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) 
             {
                 if(Connectable::connections().empty()) return;
 
@@ -692,8 +692,8 @@
                     // - The slot might get deleted and thus disconnected from this signal
                     // - The slot might delete this signal and we must end calling any slots immediately
                     // - A new Connection might get added to this Signal in the slot
-                    if( it->valid() && ( &(it->sender()) == this ) ) {
-                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                    if( it->isValid() && it->sender() == this ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot()->callable() );
                         invokable->invoke(a1,a2,a3,a4,a5,a6);
                     }
                     // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
@@ -705,7 +705,7 @@
             }
 
             /** Same as send(...). */
-            inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) const
+            inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) 
             { this->send(a1,a2,a3,a4,a5,a6); }
     };
 
@@ -745,25 +745,25 @@
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6>
     void disconnect(Signal<A1,A2,A3,A4,A5,A6>& signal, R(*func)(A1,A2,A3,A4,A5,A6))
     {
-        signal.disconnect( slot(func) );
+        signal.disconnectFrom( slot(func) );
     }
 
     template <typename R, typename BaseT, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6>
     void disconnect(Signal<A1,A2,A3,A4,A5,A6>& signal, BaseT & object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6))
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R, class BaseT, typename ClassT,class A1, class A2, class A3, class A4, class A5, class A6>
     void disconnect(Signal<A1,A2,A3,A4,A5,A6>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5,A6) const)
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R,class A1, class A2, class A3, class A4, class A5, class A6>
     void disconnect( Signal<A1,A2,A3,A4,A5,A6>& sender, Signal<A1,A2,A3,A4,A5,A6>& receiver )
     {
-        sender.disconnect( slot(receiver) );
+        sender.disconnectFrom( slot(receiver) );
     }
 
     /** Connects a Signal to another Signal. */
@@ -803,7 +803,7 @@
 
             /** The converse of connect(). */
             template <typename R>
-            void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void>& slot)
+            void disconnectFrom(const BasicSlot<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void>& slot)
             {
                 this->disconnectSlot(slot);
             }
@@ -813,7 +813,7 @@
             order. Their return values are ignored. Calling of connected slots will
             be interrupted if a slot deletes this Signal object or throws an exception.
             */
-            inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) const
+            inline void send(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) 
             {
                 if(Connectable::connections().empty()) return;
 
@@ -830,8 +830,8 @@
                     // - The slot might get deleted and thus disconnected from this signal
                     // - The slot might delete this signal and we must end calling any slots immediately
                     // - A new Connection might get added to this Signal in the slot
-                    if( it->valid() && ( &(it->sender()) == this ) ) {
-                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                    if( it->isValid() && it->sender() == this ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot()->callable() );
                         invokable->invoke(a1,a2,a3,a4,a5);
                     }
                     // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
@@ -843,7 +843,7 @@
             }
 
             /** Same as send(...). */
-            inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) const
+            inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) 
             { this->send(a1,a2,a3,a4,a5); }
     };
 
@@ -883,25 +883,25 @@
     template <typename R,class A1, class A2, class A3, class A4, class A5>
     void disconnect(Signal<A1,A2,A3,A4,A5>& signal, R(*func)(A1,A2,A3,A4,A5))
     {
-        signal.disconnect( slot(func) );
+        signal.disconnectFrom( slot(func) );
     }
 
     template <typename R, typename BaseT, typename ClassT,class A1, class A2, class A3, class A4, class A5>
     void disconnect(Signal<A1,A2,A3,A4,A5>& signal, BaseT & object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5))
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R, class BaseT, typename ClassT,class A1, class A2, class A3, class A4, class A5>
     void disconnect(Signal<A1,A2,A3,A4,A5>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4,A5) const)
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R,class A1, class A2, class A3, class A4, class A5>
     void disconnect( Signal<A1,A2,A3,A4,A5>& sender, Signal<A1,A2,A3,A4,A5>& receiver )
     {
-        sender.disconnect( slot(receiver) );
+        sender.disconnectFrom( slot(receiver) );
     }
 
     /** Connects a Signal to another Signal. */
@@ -941,7 +941,7 @@
 
             /** The converse of connect(). */
             template <typename R>
-            void disconnect(const BasicSlot<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void>& slot)
+            void disconnectFrom(const BasicSlot<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void>& slot)
             {
                 this->disconnectSlot(slot);
             }
@@ -951,7 +951,7 @@
             order. Their return values are ignored. Calling of connected slots will
             be interrupted if a slot deletes this Signal object or throws an exception.
             */
-            inline void send(A1 a1, A2 a2, A3 a3, A4 a4) const
+            inline void send(A1 a1, A2 a2, A3 a3, A4 a4) 
             {
                 if(Connectable::connections().empty()) return;
 
@@ -968,8 +968,8 @@
                     // - The slot might get deleted and thus disconnected from this signal
                     // - The slot might delete this signal and we must end calling any slots immediately
                     // - A new Connection might get added to this Signal in the slot
-                    if( it->valid() && ( &(it->sender()) == this ) ) {
-                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                    if( it->isValid() && it->sender() == this ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot()->callable() );
                         invokable->invoke(a1,a2,a3,a4);
                     }
                     // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
@@ -981,7 +981,7 @@
             }
 
             /** Same as send(...). */
-            inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4) const
+            inline void operator()(A1 a1, A2 a2, A3 a3, A4 a4) 
             { this->send(a1,a2,a3,a4); }
     };
 
@@ -1021,25 +1021,25 @@
     template <typename R,class A1, class A2, class A3, class A4>
     void disconnect(Signal<A1,A2,A3,A4>& signal, R(*func)(A1,A2,A3,A4))
     {
-        signal.disconnect( slot(func) );
+        signal.disconnectFrom( slot(func) );
     }
 
     template <typename R, typename BaseT, typename ClassT,class A1, class A2, class A3, class A4>
     void disconnect(Signal<A1,A2,A3,A4>& signal, BaseT & object, R(ClassT::*memFunc)(A1,A2,A3,A4))
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R, class BaseT, typename ClassT,class A1, class A2, class A3, class A4>
     void disconnect(Signal<A1,A2,A3,A4>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3,A4) const)
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R,class A1, class A2, class A3, class A4>
     void disconnect( Signal<A1,A2,A3,A4>& sender, Signal<A1,A2,A3,A4>& receiver )
     {
-        sender.disconnect( slot(receiver) );
+        sender.disconnectFrom( slot(receiver) );
     }
 
     /** Connects a Signal to another Signal. */
@@ -1079,7 +1079,7 @@
 
             /** The converse of connect(). */
             template <typename R>
-            void disconnect(const BasicSlot<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void>& slot)
+            void disconnectFrom(const BasicSlot<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void>& slot)
             {
                 this->disconnectSlot(slot);
             }
@@ -1089,7 +1089,7 @@
             order. Their return values are ignored. Calling of connected slots will
             be interrupted if a slot deletes this Signal object or throws an exception.
             */
-            inline void send(A1 a1, A2 a2, A3 a3) const
+            inline void send(A1 a1, A2 a2, A3 a3) 
             {
                 if(Connectable::connections().empty()) return;
 
@@ -1106,8 +1106,8 @@
                     // - The slot might get deleted and thus disconnected from this signal
                     // - The slot might delete this signal and we must end calling any slots immediately
                     // - A new Connection might get added to this Signal in the slot
-                    if( it->valid() && ( &(it->sender()) == this ) ) {
-                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                    if( it->isValid() && it->sender() == this ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot()->callable() );
                         invokable->invoke(a1,a2,a3);
                     }
                     // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
@@ -1119,7 +1119,7 @@
             }
 
             /** Same as send(...). */
-            inline void operator()(A1 a1, A2 a2, A3 a3) const
+            inline void operator()(A1 a1, A2 a2, A3 a3) 
             { this->send(a1,a2,a3); }
     };
 
@@ -1159,25 +1159,25 @@
     template <typename R,class A1, class A2, class A3>
     void disconnect(Signal<A1,A2,A3>& signal, R(*func)(A1,A2,A3))
     {
-        signal.disconnect( slot(func) );
+        signal.disconnectFrom( slot(func) );
     }
 
     template <typename R, typename BaseT, typename ClassT,class A1, class A2, class A3>
     void disconnect(Signal<A1,A2,A3>& signal, BaseT & object, R(ClassT::*memFunc)(A1,A2,A3))
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R, class BaseT, typename ClassT,class A1, class A2, class A3>
     void disconnect(Signal<A1,A2,A3>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2,A3) const)
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R,class A1, class A2, class A3>
     void disconnect( Signal<A1,A2,A3>& sender, Signal<A1,A2,A3>& receiver )
     {
-        sender.disconnect( slot(receiver) );
+        sender.disconnectFrom( slot(receiver) );
     }
 
     /** Connects a Signal to another Signal. */
@@ -1217,7 +1217,7 @@
 
             /** The converse of connect(). */
             template <typename R>
-            void disconnect(const BasicSlot<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void>& slot)
+            void disconnectFrom(const BasicSlot<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void>& slot)
             {
                 this->disconnectSlot(slot);
             }
@@ -1227,7 +1227,7 @@
             order. Their return values are ignored. Calling of connected slots will
             be interrupted if a slot deletes this Signal object or throws an exception.
             */
-            inline void send(A1 a1, A2 a2) const
+            inline void send(A1 a1, A2 a2) 
             {
                 if(Connectable::connections().empty()) return;
 
@@ -1244,8 +1244,8 @@
                     // - The slot might get deleted and thus disconnected from this signal
                     // - The slot might delete this signal and we must end calling any slots immediately
                     // - A new Connection might get added to this Signal in the slot
-                    if( it->valid() && ( &(it->sender()) == this ) ) {
-                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                    if( it->isValid() && it->sender() == this ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot()->callable() );
                         invokable->invoke(a1,a2);
                     }
                     // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
@@ -1257,7 +1257,7 @@
             }
 
             /** Same as send(...). */
-            inline void operator()(A1 a1, A2 a2) const
+            inline void operator()(A1 a1, A2 a2) 
             { this->send(a1,a2); }
     };
 
@@ -1297,25 +1297,25 @@
     template <typename R,class A1, class A2>
     void disconnect(Signal<A1,A2>& signal, R(*func)(A1,A2))
     {
-        signal.disconnect( slot(func) );
+        signal.disconnectFrom( slot(func) );
     }
 
     template <typename R, typename BaseT, typename ClassT,class A1, class A2>
     void disconnect(Signal<A1,A2>& signal, BaseT & object, R(ClassT::*memFunc)(A1,A2))
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R, class BaseT, typename ClassT,class A1, class A2>
     void disconnect(Signal<A1,A2>& signal, BaseT& object, R(ClassT::*memFunc)(A1,A2) const)
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R,class A1, class A2>
     void disconnect( Signal<A1,A2>& sender, Signal<A1,A2>& receiver )
     {
-        sender.disconnect( slot(receiver) );
+        sender.disconnectFrom( slot(receiver) );
     }
 
     /** Connects a Signal to another Signal. */
@@ -1355,7 +1355,7 @@
 
             /** The converse of connect(). */
             template <typename R>
-            void disconnect(const BasicSlot<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void>& slot)
+            void disconnectFrom(const BasicSlot<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void>& slot)
             {
                 this->disconnectSlot(slot);
             }
@@ -1365,7 +1365,7 @@
             order. Their return values are ignored. Calling of connected slots will
             be interrupted if a slot deletes this Signal object or throws an exception.
             */
-            inline void send(A1 a1) const
+            inline void send(A1 a1) 
             {
                 if(Connectable::connections().empty()) return;
 
@@ -1382,8 +1382,8 @@
                     // - The slot might get deleted and thus disconnected from this signal
                     // - The slot might delete this signal and we must end calling any slots immediately
                     // - A new Connection might get added to this Signal in the slot
-                    if( it->valid() && ( &(it->sender()) == this ) ) {
-                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+                    if( it->isValid() && it->sender() == this ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot()->callable() );
                         invokable->invoke(a1);
                     }
                     // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
@@ -1395,7 +1395,7 @@
             }
 
             /** Same as send(...). */
-            inline void operator()(A1 a1) const
+            inline void operator()(A1 a1) 
             { this->send(a1); }
     };
 
@@ -1435,25 +1435,25 @@
     template <typename R,class A1>
     void disconnect(Signal<A1>& signal, R(*func)(A1))
     {
-        signal.disconnect( slot(func) );
+        signal.disconnectFrom( slot(func) );
     }
 
     template <typename R, typename BaseT, typename ClassT,class A1>
     void disconnect(Signal<A1>& signal, BaseT & object, R(ClassT::*memFunc)(A1))
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R, class BaseT, typename ClassT,class A1>
     void disconnect(Signal<A1>& signal, BaseT& object, R(ClassT::*memFunc)(A1) const)
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R,class A1>
     void disconnect( Signal<A1>& sender, Signal<A1>& receiver )
     {
-        sender.disconnect( slot(receiver) );
+        sender.disconnectFrom( slot(receiver) );
     }
 
     /** Connects a Signal to another Signal. */
@@ -1493,7 +1493,7 @@
 
             /** The converse of connect(). */
             template <typename R>
-            void disconnect(const BasicSlot<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void>& slot)
+            void disconnectFrom(const BasicSlot<R, Void,Void,Void,Void,Void,Void,Void,Void,Void,Void>& slot)
             {
                 this->disconnectSlot(slot);
             }
@@ -1503,9 +1503,10 @@
             order. Their return values are ignored. Calling of connected slots will
             be interrupted if a slot deletes this Signal object or throws an exception.
             */
-            inline void send() const
+            inline void send()
             {
-                if(Connectable::connections().empty()) return;
+                if( Connectable::connections().empty() ) 
+                    return;
 
                 // The sentry will set the Signal to the sending state and reset it to not-sending upon destruction.
                 // In the sending state, removing connection will leave invalid connections in the connection list
@@ -1515,25 +1516,32 @@
 
                 std::list<Connection>::const_iterator it   = Connectable::connections().begin();
                 std::list<Connection>::const_iterator last = --Connectable::connections().end();
-                while(true) {
+                while(true) 
+                {
                     // The following scenarios must be considered when the slot is called:
                     // - The slot might get deleted and thus disconnected from this signal
                     // - The slot might delete this signal and we must end calling any slots immediately
                     // - A new Connection might get added to this Signal in the slot
-                    if( it->valid() && ( &(it->sender()) == this ) ) {
-                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot().callable() );
+
+                    if( it->isValid() && it->sender() == this ) {
+                        const InvokableT* invokable = static_cast<const InvokableT*>( it->slot()->callable() );
                         invokable->invoke();
                     }
+                    
                     // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
-                    if(!sentry) return;
+                    if( ! sentry)
+                        return;
+
                     // Break if this is the last handler
-                    if(it == last) break;
+                    if(it == last) 
+                        break;
+                    
                     ++it;
                 };
             }
 
             /** Same as send(...). */
-            inline void operator()() const
+            inline void operator()()
             { this->send(); }
     };
 
@@ -1564,25 +1572,25 @@
     template <typename R>
     void disconnect(Signal<>& signal, R(*func)())
     {
-        signal.disconnect( slot(func) );
+        signal.disconnectFrom( slot(func) );
     }
 
     template <typename R, typename BaseT, typename ClassT>
     void disconnect(Signal<>& signal, BaseT & object, R(ClassT::*memFunc)())
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R, class BaseT, typename ClassT>
     void disconnect(Signal<>& signal, BaseT& object, R(ClassT::*memFunc)() const)
     {
-        signal.disconnect( slot( object, memFunc ) );
+        signal.disconnectFrom( slot( object, memFunc ) );
     }
 
     template <typename R>
     void disconnect( Signal<>& sender, Signal<>& receiver )
     {
-        sender.disconnect( slot(receiver) );
+        sender.disconnectFrom( slot(receiver) );
     }
 
     /** Connects a Signal to another Signal. */

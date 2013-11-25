@@ -34,62 +34,61 @@
 #include <Pt/Method.h>
 #include <Pt/ConstMethod.h>
 #include <Pt/Connectable.h>
-#include "Pt/SourceInfo.h"
+#include <Pt/SourceInfo.h>
 #include <stdexcept>
 
 namespace Pt {
 
-    /** @internal
-    */
-    class DelegateBase : public Connectable
-    {
-        public:
-            DelegateBase()
-            { }
+/** @internal
+*/
+class DelegateBase : public Connectable
+{
+    public:
+        DelegateBase()
+        { }
 
-            DelegateBase(const DelegateBase& rhs)
-            { DelegateBase::operator=(rhs); }
+        DelegateBase(const DelegateBase& rhs)
+        { DelegateBase::operator=(rhs); }
 
-            DelegateBase& operator=(const DelegateBase& other)
+        DelegateBase& operator=(const DelegateBase& other)
+        {
+            _target.close();
+
+            if( other._target.isValid() )
+            {
+                const Slot* slot = other._target.slot();
+                _target = Connection( *this, slot->clone()  );
+            }
+                
+            return *this;
+        }
+
+        virtual void onConnectionOpen(const Connection& c)
+        {
+            const Connectable* sender = c.sender();
+
+            if( sender == this )
             {
                 _target.close();
-
-                if( !other._target )
-                    return *this;
-
-                const Slot& slot = other._target.slot();
-                _target = Connection( *this, slot.clone()  );
-
-                return *this;
+                _target = c;
             }
 
-            virtual void onConnectionOpen(const Connection& c)
-            {
-                const Connectable& sender = c.sender();
+            Connectable::onConnectionOpen(c);
+        }
 
-                if( &sender == this )
-                {
-                    _target.close();
-                    _target = c;
-                }
+        virtual void onConnectionClose(const Connection& c)
+        {
+            Connectable::onConnectionClose(c);
+        }
 
-                Connectable::onConnectionOpen(c);
-            }
+        bool isConnected() const
+        {
+            return _target.isValid();
+        }
 
-            virtual void onConnectionClose(const Connection& c)
-            {
-                Connectable::onConnectionClose(c);
-            }
-
-            bool isConnected() const
-            {
-                return _target.valid();
-            }
-
-        protected:
-            Connection _target;
-    };
-
+    protected:
+        Connection _target;
+};
 
 #include <Pt/Delegate.tpp>
 

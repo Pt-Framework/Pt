@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Connectable_h
 #define Pt_Connectable_h
 
@@ -35,91 +36,89 @@
 
 namespace Pt {
 
-    /** @brief %Connection management for signal and slot objects
+/** @brief %Connection Management for Signal and Slot Objects.
 
-        This class implements connection management for signal and slot
-        objects. It makes sure that all connections where this object
-        is involved are closed on destruction. Deriving classes can
-        overload Connectable::opened and Connectable::closed to tune
-        connection managenment.
+    This class implements connection management for signal and slot
+    objects. It makes sure that all connections where this object
+    is involved are closed on destruction. Deriving classes can
+    overload Connectable::opened and Connectable::closed to tune
+    connection managenment.
 
-        @ingroup sigslot
-    */
-    class PT_API Connectable
-    {
-        public:
-            /** @brief Default constructor.
+    @ingroup sigslot
+*/
+class PT_API Connectable
+{
+    public:
+        /** @brief Default constructor.
+        */
+        Connectable();
 
-                Creates an empty %Connectable.
-            */
-            Connectable();
+        /** @brief Closes all connections.
 
-            /** @brief Closes all connections.
+            When a %Connectable object is destroyed, it closes all its
+            connections automatically.
+        */
+        virtual ~Connectable();
 
-                When a %Connectable object is destroyed, it closes all its
-                connections automatically.
-            */
-            virtual ~Connectable();
+        //! @brief Closes all connections.
+        void disconnect();
 
-            /** @brief Registers a Connection with the %Connectable.
+        /** @brief Registers a %Connection with the %Connectable.
 
-                This function is called when a new Connection involving
-                this object is opened. The default implementation adds
-                the connection to a list, so the destructor can close it.
+            This function is called when a new Connection involving
+            this object is opened. The default implementation adds
+            the connection to a list, so the destructor can close it.
 
-                @param c Connection being opened
-                @return True if the Connection was accepted
-            */
-            virtual void onConnectionOpen(const Connection& c);
+            @param c Connection being opened
+        */
+        virtual void onConnectionOpen(const Connection& c);
 
-            /** @brief Unregisters a Connection from the %Connectable.
+        /** @brief Unregisters a Connection from the %Connectable.
 
-                This function is called when a new Connection involving
-                this object is closed. The default implementation removes
-                the connection from its list of connections.
+            This function is called when a new Connection involving
+            this object is closed. The default implementation removes
+            the connection from its list of connections.
 
-                @param c Connection being opened
-            */
-            virtual void onConnectionClose(const Connection& c);
+            @param c Connection being opened
+        */
+        virtual void onConnectionClose(const Connection& c);
 
-            //! @internal @brief For unit tests only.
-            std::size_t connectionCount() const
-            { return _connections.size(); }
+        //! @internal @brief For unit tests only.
+        std::size_t connectionCount() const
+        { return _connections.size(); }
 
-        protected:
-            /** @brief Copy constructor
+    protected:
+        /** @brief Copy constructor.
 
-                @sa Connectable::operator=()
-            */
-            Connectable(const Connectable& c);
+            Connectables can be copied if the derived class provides a
+            public copy constructor. This method will not attempt to copy
+            any connections.
+        */
+        Connectable(const Connectable& c);
 
-            /** @brief Assignment operator
+        /** @brief Assignment operator.
 
-                Connectables can be copy constructed if the derived class
-                provides a public copy constructor. Copying a %Connectable
-                will not change its connections.
-            */
-            Connectable& operator=(const Connectable& rhs);
+            Connectables can be copied if the derived class provides a
+            public copy constructor. This method will not attempt to copy
+            any connections.
+        */
+        Connectable& operator=(const Connectable& rhs);
 
-            /** @brief Returns a list of all current connections
-            */
-            const std::list<Connection>& connections() const
-            { return _connections; }
+        /** @brief Returns a list of all current connections.
+        */
+        const std::list<Connection>& connections() const
+        { return _connections; }
 
-            /** @brief Returns a list of all current connections
-            */
-            std::list<Connection>& connections()
-            { return _connections; }
+        /** @brief Returns a list of all current connections.
+        */
+        std::list<Connection>& connections()
+        { return _connections; }
 
-        protected:
-            //! @internal @brief A list of all current connections
-            mutable std::list<Connection> _connections;
-
-            //! @internal
-            void clear();
-    };
+    private:
+        //! @internal @brief A list of all current connections
+        std::list<Connection> _connections;
+};
 	
 } // namespace Pt
-
 
 #endif

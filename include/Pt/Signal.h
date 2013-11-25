@@ -51,7 +51,7 @@ namespace Pt {
         public:
             struct PT_API Sentry
             {
-                Sentry(const SignalBase* signal);
+                Sentry(SignalBase* signal);
 
                 ~Sentry();
 
@@ -60,7 +60,7 @@ namespace Pt {
                 bool operator!() const
                 { return _signal == 0; }
 
-                const SignalBase* _signal;
+                SignalBase* _signal;
             };
 
             SignalBase();
@@ -77,9 +77,9 @@ namespace Pt {
             void disconnectSlot(const Slot&);
 
         private:
-            mutable Sentry* _sentry;
-            mutable bool _sending;
-            mutable bool _dirty;
+            Sentry* _sentry;
+            bool _sending;
+            bool _dirty;
     };
 
 #include <Pt/Signal.tpp>
@@ -96,7 +96,7 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 {
     struct PT_API Sentry
     {
-        Sentry(const Signal* signal);
+        Sentry(Signal* signal);
 
         ~Sentry();
 
@@ -105,7 +105,7 @@ class PT_API Signal<const Pt::Event&> : public Connectable
         bool operator!() const
         { return _signal == 0; }
 
-        const Signal* _signal;
+        Signal* _signal;
     };
 
     class IEventRoute
@@ -120,15 +120,15 @@ class PT_API Signal<const Pt::Event&> : public Connectable
             virtual void route(const Pt::Event& ev)
             {
                 typedef Invokable<const Pt::Event&> InvokableT;
-                const InvokableT* invokable = static_cast<const InvokableT*>( _target.slot().callable() );
+                const InvokableT* invokable = static_cast<const InvokableT*>( _target.slot()->callable() );
                 invokable->invoke(ev);
             }
 
             Connection& connection()
             { return _target; }
 
-            bool valid() const
-            { return _target.valid(); }
+            bool isValid() const
+            { return _target.isValid(); }
 
         private:
             Connection _target;
@@ -145,7 +145,7 @@ class PT_API Signal<const Pt::Event&> : public Connectable
             virtual void route(const Pt::Event& ev)
             {
                 typedef Invokable<const Pt::Event&> InvokableT;
-                const InvokableT* invokable = static_cast<const InvokableT*>( connection().slot().callable() );
+                const InvokableT* invokable = static_cast<const InvokableT*>( connection().slot()->callable() );
 
                 const EventT& event = static_cast<const EventT&>(ev);
                 invokable->invoke(event);
@@ -161,7 +161,7 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 
         ~Signal();
 
-        void send(const Pt::Event& ev) const;
+        void send(const Pt::Event& ev);
 
         template <typename R, typename EventT>
         void disconnect(const BasicSlot<R, const EventT&>& slot)
@@ -219,10 +219,10 @@ class PT_API Signal<const Pt::Event&> : public Connectable
         void removeRoute(const std::type_info* ti, const Slot& slot);
 
     private:
-        mutable RouteMap _routes;
-        mutable Sentry* _sentry;
-        mutable bool _sending;
-        mutable bool _dirty;
+        RouteMap _routes;
+        Sentry* _sentry;
+        bool _sending;
+        bool _dirty;
 };
 
 

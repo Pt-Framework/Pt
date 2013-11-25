@@ -56,14 +56,14 @@ class Composer
         Composer* parent() const
         { return _parent; }
 
-        /** @brief sets the type name of the type to compose.
+        /** @brief Sets the type name of the type to compose.
 
             This is only supported by formats that save typename information.
         */
         void setTypeName(const std::string& type)
         { onSetTypeName( type.c_str(), type.size() ); }
         
-        /** @brief sets the type name of the type to compose.
+        /** @brief Sets the type name of the type to compose.
 
             This is only supported by formats that save typename information.
         */
@@ -234,6 +234,7 @@ class BasicComposer : public Composer
             _current = &_si;
         }
 
+    protected:
         void onSetId(const char* id, size_t len)
         {
             _current->setId(id, len);

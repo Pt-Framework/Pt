@@ -25,8 +25,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_CONVERSINERROR_H
-#define PT_CONVERSINERROR_H
+
+#ifndef PT_CONVERSIONERROR_H
+#define PT_CONVERSIONERROR_H
 
 #include <Pt/Api.h>
 #include <stdexcept>

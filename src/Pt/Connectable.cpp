@@ -27,7 +27,6 @@
  */
 #include "Pt/Connectable.h"
 #include "Pt/Connection.h"
-#include "Pt/Callable.h"
 
 namespace Pt {
 
@@ -42,17 +41,7 @@ Connectable::Connectable(const Connectable&)
 
 Connectable::~Connectable()
 {
-    this->clear();
-}
-
-
-void Connectable::clear()
-{
-    while( !_connections.empty() ) 
-    {
-        Connection connection = _connections.front();
-        connection.close();
-    }
+    this->disconnect();
 }
 
 
@@ -71,6 +60,18 @@ void Connectable::onConnectionOpen(const Connection& c)
 void Connectable::onConnectionClose(const Connection& c)
 {
     _connections.remove(c);
+}
+
+
+void Connectable::disconnect()
+{
+    std::list<Connection>::iterator it = _connections.begin();
+    while( it != _connections.end() )
+    {
+        Connection connection = *it;
+        ++it;
+        connection.close();
+    }
 }
 
 } // namespace Pt

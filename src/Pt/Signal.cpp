@@ -30,7 +30,7 @@
 
 namespace Pt {
 
-SignalBase::Sentry::Sentry(const SignalBase* signal)
+SignalBase::Sentry::Sentry(SignalBase* signal)
 : _signal(signal)
 {
     _signal->_sentry = this;
@@ -57,16 +57,16 @@ void SignalBase::Sentry::detach()
         return;
     }
 
-    std::list<Connection>::iterator it = _signal->_connections.begin();
-    while( it != _signal->_connections.end() )
+    std::list<Connection>::iterator it = _signal->connections().begin();
+    while( it != _signal->connections().end() )
     {
-        if( it->valid() )
+        if( it->isValid() )
         {
             ++it;
         }
         else
         {
-            it = _signal->_connections.erase(it);
+            it = _signal->connections().erase(it);
         }
     }
 
@@ -94,18 +94,18 @@ SignalBase::~SignalBase()
 
 SignalBase& SignalBase::operator=(const SignalBase& other)
 {
-    this->clear();
+    this->disconnect();
 
     std::list<Connection>::const_iterator it = other.connections().begin();
     std::list<Connection>::const_iterator end = other.connections().end();
 
     for( ; it != end; ++it)
     {
-        const Connectable& signal = it->sender();
-        if( &signal == &other)
+        const Connectable* signal = it->sender();
+        if( signal == &other)
         {
-            const Slot& slot = it->slot();
-            Connection connection( *this, slot.clone()  );
+            const Slot* slot = it->slot();
+            Connection connection( *this, slot->clone()  );
         }
     }
 
@@ -143,7 +143,7 @@ void SignalBase::disconnectSlot(const Slot& slot)
 
     for(; it != end; ++it)
     {
-        if( it->slot().equals(slot) )
+        if( it->slot()->equals(slot) )
         {
             it->close();
             return;
@@ -165,7 +165,7 @@ bool CompareEventTypeInfo::operator()(const std::type_info* t1,
 }
 
 
-Signal<const Pt::Event&>::Sentry::Sentry(const Signal* signal)
+Signal<const Pt::Event&>::Sentry::Sentry(Signal* signal)
 : _signal(signal)
 {
     _signal->_sentry = this;
@@ -195,7 +195,7 @@ void Signal<const Pt::Event&>::Sentry::detach()
     Signal::RouteMap::iterator it = _signal->_routes.begin();
     while( it != _signal->_routes.end() )
     {
-        if( it->second->valid() )
+        if( it->second->isValid() )
         {
             ++it;
         }
@@ -232,7 +232,7 @@ Signal<const Pt::Event&>::~Signal()
 }
 
 
-void Signal<const Pt::Event&>::send(const Pt::Event& ev) const
+void Signal<const Pt::Event&>::send(const Pt::Event& ev)
 {
     if(_routes.empty()) return;
 
@@ -251,14 +251,14 @@ void Signal<const Pt::Event&>::send(const Pt::Event& ev) const
         // - The slot might delete this signal and we must end calling any slots immediately
         // - A new Connection might get added to this Signal in the slot
         IEventRoute* route = it->second;
-        if(route->valid()) route->route(ev);
+        if(route->isValid()) route->route(ev);
         // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
         if( !sentry ) return;
     }
 
     for(RouteMap::iterator it  = eqr1.first; it != eqr1.second; ++it) {
         IEventRoute* route = it->second;
-        if(route->valid()) route->route(ev);
+        if(route->isValid()) route->route(ev);
 
         if(!sentry) return;
     }
@@ -324,8 +324,8 @@ void Signal<const Pt::Event&>::send(const Pt::Event& ev) const
 
 void Signal<const Pt::Event&>::onConnectionOpen(const Connection& c)
 {
-    const Connectable& sender = c.sender();
-    if(&sender != this)
+    const Connectable* sender = c.sender();
+    if(sender != this)
     {
         return Connectable::onConnectionOpen(c);
     }
@@ -375,7 +375,7 @@ void Signal<const Pt::Event&>::removeRoute(const Slot& slot)
     while( it != _routes.end() && it->first == 0 )
     {
         IEventRoute* route = it->second;
-        if(route->connection().slot().equals(slot) )
+        if(route->connection().slot()->equals(slot) )
         {
             route->connection().close();
             break;
@@ -390,7 +390,7 @@ void Signal<const Pt::Event&>::removeRoute(const std::type_info* ti, const Slot&
     while(it != _routes.end() && *(it->first) == *ti)
     {
         IEventRoute* route = it->second;
-        if(route->connection().slot().equals(slot) )
+        if(route->connection().slot()->equals(slot) )
         {
             route->connection().close();
             break;

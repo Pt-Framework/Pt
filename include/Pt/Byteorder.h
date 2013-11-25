@@ -76,7 +76,7 @@
       defined(apollo) || defined(__convex__) || defined(_CRAY) || defined(sel)
     #define PT_BE
 #else
-    #error: PT_LE or PT_BE needs to be defined (Pt/Byteorder.h)
+    #error: PT_LE or PT_BE is not defined
 #endif
 
 namespace Pt {
@@ -86,18 +86,17 @@ namespace Pt {
     template <typename T>
     inline T swab16(T value)
     {
-/*
-        union {
-            uint16_t v;
-            uint8_t  b[2];
-        } u;
-        u.v = value;
-        const uint8_t b0 = u.b[0];
-        const uint8_t b1 = u.b[1];
-        u.b[0] = b1;
-        u.b[1] = b0;
-        return(u.v);
-*/
+        //union {
+        //    uint16_t v;
+        //    uint8_t  b[2];
+        //} u;
+        //u.v = value;
+        //const uint8_t b0 = u.b[0];
+        //const uint8_t b1 = u.b[1];
+        //u.b[0] = b1;
+        //u.b[1] = b0;
+        //return(u.v);
+
         return ( (value & 0x00FF) << 8 ) |
                ( (value & 0xFF00) >> 8 );
     }

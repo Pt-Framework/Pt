@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_ConstMethod_h
 #define Pt_ConstMethod_h
 
@@ -36,6 +37,6 @@ namespace Pt {
 
 #include <Pt/ConstMethod.tpp>
 
-} // !namespace Pt
+} // namespace Pt
 
 #endif

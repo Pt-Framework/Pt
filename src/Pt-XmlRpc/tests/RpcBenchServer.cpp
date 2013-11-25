@@ -141,8 +141,8 @@ int main(int argc, char* argv[])
     Pt::Arg<unsigned short> port(argc, argv, 'p', 7002);
     Pt::Arg<unsigned> threads(argc, argv, 't', 4);
 
-    std::cout << "rpc echo server running on port " << port.getValue() << "\n"
-                 "using " << threads.getValue() << " thread(s)\n\n"
+    std::cout << "rpc echo server running on port " << port.get() << "\n"
+                 "using " << threads.get() << " thread(s)\n\n"
                  "options:\n\n"
                  "   -i ip      set listen address (default: all interfaces)\n"
                  "   -p number  set listen port (default: 7002)\n"
@@ -153,8 +153,8 @@ int main(int argc, char* argv[])
     Pt::Http::Server server(loop);
 
     Pt::Http::Server::Options options;
-    options.setMaxThreads(threads);
-    server.listen(ip, port, options);
+    options.setMaxThreads( threads.get() );
+    server.listen(ip.get(), port.get(), options);
     
     EchoService service;
 

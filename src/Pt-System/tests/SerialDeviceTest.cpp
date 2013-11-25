@@ -62,7 +62,7 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
 					std::cout << '.' << std::flush;
 				}
 			}
-			catch(const Pt::System::AccessFailed& f)
+			catch(const Pt::System::AccessFailed&)
 			{
 				std::cerr << "No device found" <<  std::endl;
 				// do not fail in case no device is connected.
@@ -136,7 +136,7 @@ void SerialDeviceTest::ReadPnp()
 
         PT_UNIT_ASSERT(pnpString.empty() == false);
     }
-    catch(const Pt::System::AccessFailed& f)
+    catch(const Pt::System::AccessFailed&)
     {
         reportMessage("No device found");
         // do not fail in case no device is connected.

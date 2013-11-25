@@ -68,7 +68,7 @@ int main(int argc, char** argv)
     Pt::Arg<std::string> file(argc, argv, 'f');
     std::ofstream logFile;
     Pt::Unit::BriefReporter fileReporter;
-    std::string fileName = file.getValue();
+    std::string fileName = file.get();
 
     if( ! fileName.empty() )
     {
@@ -79,7 +79,7 @@ int main(int argc, char** argv)
 
     try {
         Pt::Arg<std::string> test(argc, argv, 't');
-        std::string testName = test.getValue();
+        std::string testName = test.get();
         if( testName.empty() )
         {
             app.run();
