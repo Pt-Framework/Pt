@@ -23,7 +23,6 @@ class Delegate : public DelegateBase
         void disconnect()
         { DelegateBase::disconnectSlot(); }
 
-        template <typename R>
         void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,A10>& slot)
         { DelegateBase::disconnectSlot(slot); }
 
@@ -123,7 +122,6 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void> : public DelegateBase
         void disconnect()
         { DelegateBase::disconnectSlot(); }
 
-        template <typename R>
         void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,A9,Void>& slot)
         { DelegateBase::disconnectSlot(slot); }
 
@@ -173,7 +171,6 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void> : public DelegateBase
         void disconnect()
         { DelegateBase::disconnectSlot(); }
 
-        template <typename R>
         void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,A8,Void,Void>& slot)
         { DelegateBase::disconnectSlot(slot); }
 
@@ -223,7 +220,6 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void> : public DelegateBase
         void disconnect()
         { DelegateBase::disconnectSlot(); }
 
-        template <typename R>
         void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,A7,Void,Void,Void>& slot)
         { DelegateBase::disconnectSlot(slot); }
 
@@ -274,7 +270,6 @@ class Delegate<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void> : public DelegateBase
         void disconnect()
         { DelegateBase::disconnectSlot(); }
 
-        template <typename R>
         void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,A6,Void,Void,Void,Void>& slot)
         { DelegateBase::disconnectSlot(slot); }
 
@@ -324,7 +319,6 @@ class Delegate<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void> : public DelegateBase
         void disconnect()
         { DelegateBase::disconnectSlot(); }
 
-        template <typename R>
         void disconnect(const BasicSlot<R, A1,A2,A3,A4,A5,Void,Void,Void,Void,Void>& slot)
         { DelegateBase::disconnectSlot(slot); }
 
@@ -374,7 +368,6 @@ class Delegate<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void> : public DelegateBa
         void disconnect()
         { DelegateBase::disconnectSlot(); }
 
-        template <typename R>
         void disconnect(const BasicSlot<R, A1,A2,A3,A4,Void,Void,Void,Void,Void,Void>& slot)
         { DelegateBase::disconnectSlot(slot); }
 
@@ -424,7 +417,6 @@ class Delegate<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void> : public Delegate
         void disconnect()
         { DelegateBase::disconnectSlot(); }
 
-        template <typename R>
         void disconnect(const BasicSlot<R, A1,A2,A3,Void,Void,Void,Void,Void,Void,Void>& slot)
         { DelegateBase::disconnectSlot(slot); }
 
@@ -474,7 +466,6 @@ class Delegate<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public Delega
         void disconnect()
         { DelegateBase::disconnectSlot(); }
 
-        template <typename R>
         void disconnect(const BasicSlot<R, A1,A2,Void,Void,Void,Void,Void,Void,Void,Void>& slot)
         { DelegateBase::disconnectSlot(slot); }
 
@@ -524,7 +515,6 @@ class Delegate<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void> : public Dele
         void disconnect()
         { DelegateBase::disconnectSlot(); }
 
-        template <typename R>
         void disconnect(const BasicSlot<R, A1,Void,Void,Void,Void,Void,Void,Void,Void,Void>& slot)
         { DelegateBase::disconnectSlot(slot); }
 
