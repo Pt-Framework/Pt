@@ -11,7 +11,7 @@ namespace Pt {
         \ingroup sigslot
     */
     template < typename R, typename ARGUMENTS>
-    class Delegate : Connectable
+    class Delegate : public Connectable
     {
         public:
             //! @brief Default Constructor.
@@ -24,6 +24,18 @@ namespace Pt {
             /** @brief Connects this object to the given slot and returns that Connection. 
             */
             Connection connect(const BasicSlot<R,ARGUMENTS>& slot);
+
+            /** @brief Disconnects from current target.
+            */
+            void disconnect();
+
+            /** @brief Disconnects from the target.
+            */
+            void disconnect(const BasicSlot<R,ARGUMENTS>& slot);
+
+            /** @brief Returns true if connected to a target.
+            */
+            bool isConnected() const;
 
             /** @brief Calls the slot connected to the %Delegate
 
@@ -70,6 +82,7 @@ class DelegateSlot : public BasicSlot<R, ARGUMENTS>
 
         // inherit doc
         virtual void onDisconnect(const Connection& c);
+
         // inherit doc
         virtual bool equals(const Slot& slot) const;
 

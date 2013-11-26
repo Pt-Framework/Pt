@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_DATETIME_H
 #define PT_DATETIME_H
 
@@ -32,7 +33,6 @@
 #include <Pt/Time.h>
 #include <Pt/Date.h>
 #include <string>
-#include <map>
 
 namespace Pt {
 
@@ -47,8 +47,8 @@ class DateTime
         { }
 
         DateTime(int y, unsigned mon, unsigned d,
-                           unsigned h = 0, unsigned min = 0, 
-                           unsigned s = 0, unsigned ms = 0)
+                 unsigned h = 0, unsigned min = 0, 
+                 unsigned s = 0, unsigned ms = 0)
         : _date(y, mon, d)
         , _time(h, min, s, ms)
         { }
@@ -59,14 +59,6 @@ class DateTime
         { }
 
         DateTime& operator=(const DateTime& dateTime);
-
-        ~DateTime()
-        {}
-
-        static DateTime fromJulianDays(unsigned julianDays)
-        {
-            return DateTime(julianDays);
-        }
 
         /** @brief Creates a DateTime object relative to the Unix epoch.
 
@@ -79,16 +71,12 @@ class DateTime
             DateTime. And accordingly a "GMT" millisecond value will lead
             to a "GMT" DateTime.
         */
-        static inline DateTime fromMSecsSinceEpoch(const Pt::int64_t msecsSinceEpoch)
-        {
-            static const DateTime dt(1970, 1, 1);
-            Timespan ts(msecsSinceEpoch*1000);
-            return dt + ts;
-        }
-
-        //DateTime& operator=(const DateTime& dateTime);
-
-        DateTime& operator=(unsigned julianDay);
+        //static inline DateTime fromMSecsSinceEpoch(const Pt::int64_t msecsSinceEpoch)
+        //{
+        //    static const DateTime dt(1970, 1, 1);
+        //    Timespan ts(msecsSinceEpoch*1000);
+        //    return dt + ts;
+        //}
 
         void set(int year, unsigned month, unsigned day,
                  unsigned hour = 0, unsigned min = 0, unsigned sec = 0, unsigned msec = 0);
@@ -158,11 +146,11 @@ class DateTime
             millisecond value. And  accordingly calling this API on a "GMT"
             DateTime will lead to a "GMT" millisecond value.
         */
-        Pt::int64_t msecsSinceEpoch() const
-        {
-            static const DateTime dt(1970, 1, 1);
-            return (*this - dt).toMSecs();
-        }
+        //Pt::int64_t msecsSinceEpoch() const
+        //{
+        //    static const DateTime dt(1970, 1, 1);
+        //    return (*this - dt).toMSecs();
+        //}
 
         std::string toIsoString() const;
 
@@ -226,6 +214,13 @@ class DateTime
             return *this;
         }
 
+        friend DateTime operator+(const DateTime& dt, const Timespan& ts)
+        {
+            DateTime tmp = dt;
+            tmp += ts;
+            return tmp;
+        }
+
         friend Timespan operator-(const DateTime& first, const DateTime& second)
         {
             Pt::int64_t dayDiff      = Pt::int64_t( first.date().julian() ) -
@@ -237,13 +232,6 @@ class DateTime
             Pt::int64_t result = (dayDiff * Time::MSecsPerDay + milliSecDiff) * 1000;
 
             return result;
-        }
-
-        friend DateTime operator+(const DateTime& dt, const Timespan& ts)
-        {
-            DateTime tmp = dt;
-            tmp += ts;
-            return tmp;
         }
 
         friend DateTime operator-(const DateTime& dt, const Timespan& ts)
@@ -299,6 +287,10 @@ PT_API void convert(DateTime& dt, const std::string& s);
 
 PT_API void convert(std::string& str, const DateTime& dt);
 
+PT_API void convert(DateTime& dt, const String& s);
+
+PT_API void convert(String& str, const DateTime& dt);
+
 
 inline DateTime DateTime::fromIsoString(const std::string& s)
 {
@@ -324,16 +316,8 @@ inline DateTime& DateTime::operator=(const DateTime& dateTime)
 }
 
 
-inline DateTime& DateTime::operator=(unsigned julianDay)
-{
-    _time = Time(0, 0, 0, 0);
-    _date.setJulian(julianDay);
-    return *this;
-}
-
-
 inline void DateTime::set(int y, unsigned mon, unsigned d,
-                   unsigned h, unsigned min, unsigned s, unsigned ms)
+                          unsigned h, unsigned min, unsigned s, unsigned ms)
 {
     _date.set(y, mon, d);
     _time.set(h, min, s, ms);
@@ -341,7 +325,7 @@ inline void DateTime::set(int y, unsigned mon, unsigned d,
 
 
 inline void DateTime::get(int& y, unsigned& mon, unsigned& d,
-                   unsigned& h, unsigned& min, unsigned& s, unsigned& ms) const
+                          unsigned& h, unsigned& min, unsigned& s, unsigned& ms) const
 {
     _date.get(y, mon, d);
     _time.get(h, min, s, ms);
@@ -349,11 +333,11 @@ inline void DateTime::get(int& y, unsigned& mon, unsigned& d,
 
 
 inline bool DateTime::isValid(int year, unsigned month, unsigned day,
-                       unsigned hour, unsigned minute, unsigned second, unsigned msec)
+                              unsigned hour, unsigned minute, unsigned second, unsigned msec)
 {
     return Date::isValid(year, month, day) && Time::isValid(hour, minute, second, msec);
 }
 
-}
+} // namespace Pt
 
 #endif // PT_DATETIME_H

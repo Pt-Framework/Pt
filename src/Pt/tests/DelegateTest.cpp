@@ -98,7 +98,7 @@ class DelegateTest : public Pt::Unit::TestSuite
             // A connect must lead to a new connection
             Callee* recv = new Callee;
             Pt::Delegate<int> delegate;
-            connect( delegate, *recv, &Callee::slot0 );
+            delegate += Pt::slot(*recv, &Callee::slot0);
             PT_UNIT_ASSERT(delegate.connectionCount() == 1);
 
             // A deleted receiver must remove itself from a signal
@@ -108,7 +108,7 @@ class DelegateTest : public Pt::Unit::TestSuite
 
             // A delegate must call its slot when connected
             recv = new Callee;
-            Pt::Connection connection = connect(delegate, *recv, &Callee::slot0 );
+            Pt::Connection connection = delegate += Pt::slot(*recv, &Callee::slot0 );
             int ret = delegate.call();
             PT_UNIT_ASSERT( recv->count() == 1);
             PT_UNIT_ASSERT( ret == 9);
@@ -159,10 +159,10 @@ class DelegateTest : public Pt::Unit::TestSuite
             Pt::Delegate<int> d1;
             Pt::Delegate<int> d2;
 
-            connect( d1, slot(d2) );
+            d1 += Pt::slot(d2);
             PT_UNIT_ASSERT( d1.connectionCount() == 1);
 
-            connect( d2, slot(*recv, &Callee::slot0) );
+            d2 += Pt::slot(*recv, &Callee::slot0);
             PT_UNIT_ASSERT( d2.connectionCount() == 2);
 
             // Slot must be called via delegate chain
@@ -178,7 +178,7 @@ class DelegateTest : public Pt::Unit::TestSuite
             Pt::Delegate<int>* d1 = new Pt::Delegate<int>;
             Pt::Delegate<int> d2;
 
-            Pt::Connection connection1 = connect(*d1, callee, &Callee::slot0);
+            Pt::Connection connection1 = *d1 += Pt::slot(callee, &Callee::slot0);
             PT_UNIT_ASSERT( d1->connectionCount() == 1);
 
             d2 = *d1;
@@ -197,10 +197,10 @@ class DelegateTest : public Pt::Unit::TestSuite
             // will get deleted by slot
             Callee* callee = new Callee;
 
-            connect(*_caller, *callee, &Callee::destroySelf );
+            *_caller += Pt::slot(*callee, &Callee::destroySelf );
             _caller->call();
 
-            connect(*_caller, *this, &DelegateTest::deleteCaller);
+            *_caller += Pt::slot(*this, &DelegateTest::deleteCaller);
             _caller->call();
         }
 

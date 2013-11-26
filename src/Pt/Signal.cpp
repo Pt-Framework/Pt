@@ -94,7 +94,7 @@ SignalBase::~SignalBase()
 
 SignalBase& SignalBase::operator=(const SignalBase& other)
 {
-    this->disconnect();
+    this->disconnectAll();
 
     std::list<Connection>::const_iterator it = other.connections().begin();
     std::list<Connection>::const_iterator end = other.connections().end();
@@ -110,6 +110,23 @@ SignalBase& SignalBase::operator=(const SignalBase& other)
     }
 
     return *this;
+}
+
+
+void SignalBase::disconnect()
+{
+    std::list<Connection>::iterator it = connections().begin();
+    while( it != connections().end() )
+    {
+        if( ! it->isValid() || it->sender() != this ) 
+        {
+            continue;
+        }
+
+        Connection connection = *it;
+        ++it;
+        connection.close();
+    }
 }
 
 
@@ -132,6 +149,23 @@ void SignalBase::onConnectionClose(const Connection& c)
     else
     {
         Connectable::onConnectionClose(c);
+    }
+}
+
+
+void SignalBase::disconnectSlots()
+{
+    std::list<Connection>::iterator it = connections().begin();
+    while( it != connections().end() )
+    {
+        if( ! it->isValid() || it->sender() != this ) 
+        {
+            continue;
+        }
+
+        Connection connection = *it;
+        ++it;
+        connection.close();
     }
 }
 
@@ -319,6 +353,25 @@ void Signal<const Pt::Event&>::send(const Pt::Event& ev)
             return;
     }
 */
+}
+
+
+void Signal<const Pt::Event&>::disconnect()
+{
+    RouteMap::iterator it = _routes.begin();
+    while( it != _routes.end() )
+    {
+        IEventRoute* route = it->second;
+
+        if( ! route->connection().isValid() || route->connection().sender() != this ) 
+        {
+            continue;
+        }
+
+        Connection connection = route->connection();
+        ++it;
+        connection.close();
+    }
 }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 by Marc Boris Duerner
+ * Copyright (C) 2008-2013 by Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Decomposer_h
 #define Pt_Decomposer_h
 

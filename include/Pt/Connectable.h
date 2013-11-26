@@ -61,7 +61,7 @@ class PT_API Connectable
         virtual ~Connectable();
 
         //! @brief Closes all connections.
-        void disconnect();
+        void disconnectAll();
 
         /** @brief Registers a %Connection with the %Connectable.
 

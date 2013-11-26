@@ -416,6 +416,10 @@ void ConversionTest::StringToFloat()
     value = Pt::convert<float>(str);
     PT_UNIT_ASSERT(value != value);
  
+    str = L"NANQ";
+    value = Pt::convert<float>(str);
+    PT_UNIT_ASSERT(value != value);
+
     str = L"inf";
     value = Pt::convert<float>(str);
     PT_UNIT_ASSERT(value == std::numeric_limits<float>::infinity());

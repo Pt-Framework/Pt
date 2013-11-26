@@ -33,8 +33,6 @@
 #include <Pt/ConversionError.h>
 #include <Pt/TypeTraits.h>
 #include <Pt/StringStream.h>
-#include <iostream>
-#include <iomanip>
 #include <sstream>
 #include <string>
 #include <limits>
@@ -80,10 +78,6 @@ PT_API void convert(long double& n, const String& str);
 
 PT_API void convert(int& n, const Pt::Char* str);
 
-//
-// Conversions to or from std::string
-//
-
 PT_API void convert(std::string& s, bool value);
 PT_API void convert(std::string& s, char value);
 PT_API void convert(std::string& s, signed char value);
@@ -114,10 +108,6 @@ PT_API void convert(double& n, const std::string& str);
 PT_API void convert(long double& n, const std::string& str);
 
 PT_API void convert(int& n, const char* str);
-
-//
-// Generic stream-based conversions
-//
 
 /** @brief Convert to string.
 
@@ -177,10 +167,6 @@ T convert(const S& from)
     return value;
 }
 
-//
-// number formatting
-//
-
 /** @brief Formats an integer in a given format.
 
     @ingroup CoreTypes
@@ -208,10 +194,6 @@ OutIterT putFloat(OutIterT it, T d, const FormatT& fmt, int precision);
  */
 template <typename OutIterT, typename T>
 OutIterT putFloat(OutIterT it, T d);
-
-//
-// number parsing
-//
 
 /** @brief Parses an integer value in a given format.
 
@@ -247,6 +229,9 @@ struct NumberFormat
 {
     typedef CharType CharT;
 
+    static bool isSpace(CharT ch)
+    { return (ch == 0x20) || (ch > 0x08 && ch < 0x0e); }
+
     static CharT plus()
     { return '+'; }
 
@@ -262,21 +247,26 @@ struct DecimalFormat : public NumberFormat<CharType>
 
     static const unsigned base = 10;
     
+    /** @brief Converts a digit to a character.
+    */
     static CharT toChar(unsigned char n)
     {
         return '0' + n; 
     }
+
+    /** @brief Returns true if character is a digit.        
+    */
+    static bool isDigit(CharT ch)
+    {
+        typename std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
+        return cc > 47 && cc < 58;
+    }
     
     /** @brief Converts a character to a digit.
-    
-        Returns a number equal or less than the base on success or a number
-        greater than base on failure.
     */
     static unsigned toDigit(CharT ch)
     {
         typename std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
-        
-        // let negatives overrun
         return static_cast<unsigned>(cc - 48);
     }
 };
@@ -288,17 +278,23 @@ struct OctalFormat : public NumberFormat<CharType>
     typedef CharType CharT;
 
     static const unsigned base = 8;
-    
+
+    /** @brief Converts a digit to a character.
+    */
     static CharT toChar(unsigned char n)
     {
         return '0' + n; 
     }
-    
-    /** @brief Converts a character to a digit.
-    
-        Returns a number equal or less than the base on success or a number
-        greater than base on failure.
-        
+
+    /** @brief Returns true if character is a digit.        
+    */
+    static bool isDigit(CharT ch)
+    {
+        typename std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
+        return cc > 47 && cc < 56;
+    }
+
+    /** @brief Converts a character to a digit.        
     */
     static unsigned toDigit(CharT ch)
     {
@@ -316,7 +312,9 @@ struct HexFormat : public NumberFormat<CharType>
     typedef CharType CharT;
 
     static const unsigned base = 16;
-    
+
+    /** @brief Converts a digit to a character.
+    */
     static CharT toChar(unsigned char n)
     {
         n &= 0x1F; // prevent overrun
@@ -324,10 +322,15 @@ struct HexFormat : public NumberFormat<CharType>
         return digtab[n]; 
     }
 
+    /** @brief Returns true if character is a digit.        
+    */
+    static bool isDigit(CharT ch)
+    {
+        typename std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
+        return (cc > 47 && cc < 59) || (cc > 64 && cc < 71) || (cc > 96 && cc < 103);
+    }
+
     /** @brief Converts a character to a digit.
-    
-        Returns a number equal or less than the base on success or a number
-        greater than base on failure.
     */
     static unsigned toDigit(CharT ch)
     {
@@ -341,13 +344,7 @@ struct HexFormat : public NumberFormat<CharType>
 
         typename std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
         
-        // let negatives overrun
-        unsigned uc = static_cast<unsigned>(cc - 48);
-
-        if(uc > 64)
-            return 0xFF;
-        
-        unsigned char idx = static_cast<unsigned char>(uc);
+        unsigned idx = static_cast<unsigned>(cc - 48);
         return chartab[ idx ];
     }
 };
@@ -359,23 +356,27 @@ struct BinaryFormat : public NumberFormat<CharType>
     typedef CharType CharT;
 
     static const unsigned base = 2;
-    
+
+    /** @brief Converts a digit to a character.
+    */
     static CharT toChar(unsigned char n)
     {
         return '0' + n; 
     }
     
-    /** @brief Converts a character to a digit.
-    
-        Returns a number equal or less than the base on success or a number
-        greater than base on failure.
-        
+    /** @brief Returns true if character is a digit.        
+    */
+    static bool isDigit(CharT ch)
+    {
+        typename std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
+        return cc > 47 && cc < 50;
+    }
+
+    /** @brief Converts a character to a digit.        
     */
     static unsigned toDigit(CharT ch)
     {
         typename std::char_traits<CharT>::int_type cc = std::char_traits<CharT>::to_int_type(ch);
-        
-        // let negatives overrun
         return static_cast<unsigned>(cc - 48);
     }
 };
@@ -392,8 +393,37 @@ struct FloatFormat : public DecimalFormat<CharType>
     static CharT e()
     { return 'e'; }
 
-    static CharT E()
-    { return 'E'; }
+    static bool isE(CharT ch)
+    { return ch == 'E' || ch == 'e'; }
+
+    static bool isNan(CharT ch, unsigned pos, bool& isNan)
+    {
+        switch(pos)
+        {
+            case 0: return ch == 'n' || ch == 'N';
+            case 1: return ch == 'a' || ch == 'A';
+            case 2: isNan = ch == 'n' || ch == 'N'; return isNan;
+        }
+
+        return (ch > 46 && ch < 58) || (ch > 64 && ch < 91) || (ch > 96 && ch < 123);
+    }
+
+    static bool isInfinity(CharT ch, unsigned pos, bool& isInf)
+    {
+        switch(pos)
+        {
+            case 0: return ch == 'i' || ch == 'I';
+            case 1: return ch == 'n' || ch == 'N';
+            case 2: isInf = ch == 'f' || ch == 'F'; return isInf;
+            case 3: return ch == 'i' || ch == 'I';
+            case 4: return ch == 'n' || ch == 'N';
+            case 5: return ch == 'i' || ch == 'I';
+            case 6: return ch == 't' || ch == 'T';
+            case 7: isInf = ch == 'y' || ch == 'Y'; return isInf;
+        }
+
+        return false;
+    }
 
     static const CharT* nan()
     { 
@@ -401,83 +431,83 @@ struct FloatFormat : public DecimalFormat<CharType>
         return nanstr; 
     }
 
-    static const CharT* inf()
+    static const CharT* infinity()
     { 
         static const CharT nanstr[] = { 'i', 'n', 'f', 0 };
         return nanstr; 
     }
 };
 
-//! @internal @brief Returns the absolute value of \a i
-inline unsigned char formatAbs(char i, bool& isNeg)
+
+inline unsigned char getAbs(char i, bool& isNeg)
 {
     isNeg = i < 0;
     unsigned char u = isNeg ? -i : static_cast<unsigned char>(i);
     return u;
 }
 
-//! @internal @brief Returns the absolute value of \a i
-inline unsigned char formatAbs(unsigned char i, bool& isNeg)
+
+inline unsigned char getAbs(unsigned char i, bool& isNeg)
 {
     isNeg = false;
     return i;
 }
 
-//! @internal @brief Returns the absolute value of \a i
-inline unsigned short formatAbs(short i, bool& isNeg)
+
+inline unsigned short getAbs(short i, bool& isNeg)
 {
     isNeg = i < 0;
     unsigned short u = isNeg ? -i : static_cast<unsigned short>(i);
     return u;
 }
 
-//! @internal @brief Returns the absolute value of \a i
-inline unsigned short formatAbs(unsigned short i, bool& isNeg)
+
+inline unsigned short getAbs(unsigned short i, bool& isNeg)
 {
     isNeg = false;
     return i;
 }
 
-//! @internal @brief Returns the absolute value of \a i
-inline unsigned int formatAbs(int i, bool& isNeg)
+
+inline unsigned int getAbs(int i, bool& isNeg)
 {
     isNeg = i < 0;
     unsigned int u = isNeg ? -i : static_cast<unsigned int>(i);
     return u;
 }
 
-//! @internal @brief Returns the absolute value of \a i
-inline unsigned int formatAbs(unsigned int i, bool& isNeg)
+
+inline unsigned int getAbs(unsigned int i, bool& isNeg)
 {
     isNeg = false;
     return i;
 }
 
-//! @internal @brief Returns the absolute value of \a i
-inline unsigned long formatAbs(long i, bool& isNeg)
+
+inline unsigned long getAbs(long i, bool& isNeg)
 {
     isNeg = i < 0;
     unsigned long u = isNeg ? -i : static_cast<unsigned long>(i);
     return u;
 }
 
-//! @internal @brief Returns the absolute value of \a i
-inline unsigned long formatAbs(unsigned long i, bool& isNeg)
+
+inline unsigned long getAbs(unsigned long i, bool& isNeg)
 {
     isNeg = false;
     return i;
 }
 
-//! @internal @brief Returns the absolute value of \a i
-inline unsigned long long formatAbs(long long i, bool& isNeg)
+
+inline unsigned long long getAbs(long long i, bool& isNeg)
 {
     isNeg = i < 0;
     unsigned long long u = isNeg ? -i : static_cast<unsigned long long>(i);
     return u;
 }
 
-//! @internal @brief Returns the absolute value of \a i
-inline unsigned long long formatAbs(unsigned long long i, bool& isNeg)
+
+inline unsigned long long getAbs(unsigned long long i, bool& isNeg)
 {
     isNeg = false;
     return i;
@@ -498,7 +528,7 @@ inline CharT* formatInt(CharT* buf, std::size_t buflen, T si, const FormatT& fmt
     const unsigned base = fmt.base;
 
     bool isNeg = false;
-    UnsignedInt u = formatAbs(si, isNeg);
+    UnsignedInt u = getAbs(si, isNeg);
 
     do
     {
@@ -521,8 +551,7 @@ inline CharT* formatInt(CharT* buf, std::size_t buflen, T si, const FormatT& fmt
     return cur;
 }
 
-/** @brief Formats an integer in binary format.
- */
+
 template <typename CharT, typename T>
 inline CharT* formatInt(CharT* buf, std::size_t buflen, T i, const BinaryFormat<CharT>& fmt)
 {
@@ -588,8 +617,8 @@ inline int formatFloat(CharT* fraction, int fractSize, int& intpart, int& exp, T
     
     exp = static_cast<int>( std::floor( std::log10(n) ) );
     
-    // precision specifies the number of digits after the decimal point
-    // in fixed notation
+    // precision for fixed notation is the maximum number of digits after the
+    // decimal point, otherwise the maximum number of significant digits
     if(fixed)
         precision += exp + 1;
 
@@ -664,7 +693,7 @@ inline OutIterT putFloat(OutIterT it, T d, const FormatT& fmt, int precision)
     // 3. Test for infinity
     if( num == std::numeric_limits<T>::infinity() ) 
     {
-        for(const CharT* infstr = fmt.inf(); *infstr != 0; ++infstr)
+        for(const CharT* infstr = fmt.infinity(); *infstr != 0; ++infstr)
         {
             *it = *infstr;
             ++it;
@@ -721,15 +750,21 @@ inline OutIterT putFloat(OutIterT it, T d)
 
 
 template <typename InIterT, typename FormatT>
+InIterT getWhitespace(InIterT it, InIterT end, const FormatT& fmt)
+{   
+    while( it != end && fmt.isSpace(*it) )
+        ++it;
+
+    return it;
+}
+
+
+template <typename InIterT, typename FormatT>
 InIterT getSign(InIterT it, InIterT end, bool& pos, const FormatT& fmt)
 {
     pos = true;
-    
-    // strip leading whitespace, parse sign
-    while (it != end && isspace(*it))
-        ++it;
 
-    if(*it == fmt.minus())
+    if( *it == fmt.minus() )
     {
         pos = false;
         ++it;
@@ -752,6 +787,8 @@ InIterT getInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
     n = 0;
     ok = false;
     UnsignedInt max = static_cast<UnsignedInt>( std::numeric_limits<T>::max() );
+
+    it = getWhitespace(it, end, fmt);
 
     bool pos = false;
     it = getSign(it, end, pos, fmt);
@@ -777,10 +814,10 @@ InIterT getInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
     unsigned d = 0;
     while(it != end)
     {    
-        d = fmt.toDigit(*it);
-        
-        if(d >= base)
+        if( ! fmt.isDigit(*it) )
             break;
+
+        d = fmt.toDigit(*it);
         
         if ( u != 0u && base > (max/u) )
           return it;
@@ -807,7 +844,7 @@ InIterT getInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 template <typename InIterT, typename T>
 InIterT getInt(InIterT it, InIterT end, bool& ok, T& n)
 {
-    typedef typename std::iterator_traits<InIterT>::value_type CharType;
+    typedef typename std::iterator_traits<InIterT>::value_type CharType;    
     return getInt(it, end, ok, n, DecimalFormat<CharType>() );
 }
 
@@ -820,94 +857,49 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
     n = 0.0;
     ok = false;
 
+    it = getWhitespace(it, end, fmt);
+
     bool pos = false;
     it = getSign(it, end, pos, fmt);
     
-    // NaN, -inf, +inf
-    while(it != end)
+    if(it == end)
+        return it;
+
+    unsigned strpos = 0;
+    if( fmt.isNan(*it, strpos, ok) )
     {
-        if(*it == 'n' || *it == 'N')
-        {
-            if(++it == end)
-                return it;
+        while( ++it != end && fmt.isNan(*it, ++strpos, ok) )
+            ;
 
-            if(*it != 'a' && *it != 'A')
-                return it;
-
-            if(++it == end)
-                return it;
-
-            if(*it != 'n' && *it != 'N')
-                return it;
-
+        if(ok)
             n = std::numeric_limits<T>::quiet_NaN();
-            ok = true;
-            return ++it;
-        }
-        else if(*it == 'i' || *it == 'I')
-        {
-            if(++it == end)
-                return it;
 
-            if(*it != 'n' && *it != 'N')
-                return it;
-
-            if(++it == end)
-                return it;
-
-            if(*it != 'f' && *it != 'F')
-                return it;
-
-            if( ++it != end )
-            {
-                if(*it != 'i' && *it != 'I')
-                    return it;
-
-                if(++it == end)
-                    return it;
-
-                if(*it != 'n' && *it != 'N')
-                    return it;
-
-                if(++it == end)
-                    return it;
-
-                if(*it != 'i' && *it != 'I')
-                    return it;
-
-                if(++it == end)
-                    return it;
-
-                if(*it != 't' && *it != 'T')
-                    return it;
-
-                if(++it == end)
-                    return it;
-
-                if(*it != 'y' && *it != 'Y')
-                    return it;
-
-                ++it;
-            }
-
-            n = std::numeric_limits<T>::infinity();
-            if(!pos)
-                n *= -1;
-
-            ok = true;
-            return it;
-        }
-        else
-        {
-            break;
-        }
+        return it;
     }
+
+    strpos = 0;
+    if( fmt.isInfinity(*it, strpos, ok) )
+    {
+        while( ++it != end && fmt.isInfinity(*it, ++strpos, ok) )
+            ;
+
+        if(ok)
+        {
+            n = pos ? std::numeric_limits<T>::infinity() 
+                    : std::numeric_limits<T>::infinity() * -1;
+        }
+
+        return it;
+    }
+
+    if(it == end)
+        return it;
 
     // integral part
     bool withFractional = false;
     for( ; it != end; ++it)
     {
-        if( *it == fmt.point() || *it == fmt.e() || *it == fmt.E() )
+        if( *it == fmt.point() || fmt.isE(*it) )
         {
             if( *it == fmt.point() )
             {
@@ -917,9 +909,10 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
             break;
         }
         
-        unsigned digit = fmt.toDigit(*it); 
-        if(digit >= fmt.base)
+        if( ! fmt.isDigit(*it) )
             return it;
+
+        unsigned digit = fmt.toDigit(*it); 
         
         n *= 10;
         n += digit; 
@@ -955,9 +948,10 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
         T fraction = 0.0;
         for( ; it != end; ++it)
         {
-            unsigned digit = fmt.toDigit(*it); 
-            if(digit >= fmt.base)
+            if( ! fmt.isDigit(*it) )
                 break;
+
+            unsigned digit = fmt.toDigit(*it); 
 
             if( significants <= std::numeric_limits<T>::digits10 )
             {
@@ -975,7 +969,7 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
     }
     
     // exponent [e|E][+|-][0-9]*
-    if(it != end && (*it == fmt.e() || *it == fmt.E()) )
+    if(it != end && fmt.isE(*it) )
     {
         if(++it == end)
             return it;

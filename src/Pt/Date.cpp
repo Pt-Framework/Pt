@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "Pt/Date.h"
 #include "Pt/Convert.h"
 #include "Pt/SerializationInfo.h"
@@ -66,70 +67,6 @@ void jul2greg(unsigned jd, int& y, int& m, int& d)
 }
 
 
-inline unsigned short getNumber2(const char* s)
-{
-    if (! std::isdigit(static_cast<unsigned char>(s[0])) 
-     || ! std::isdigit(static_cast<unsigned char>(s[1])))
-    throw ConversionError("Invalid date format.");
-    return (s[0] - '0') * 10
-        + (s[1] - '0');
-}
-
-
-inline unsigned short getNumber4(const char* s)
-{
-    if ( ! std::isdigit(static_cast<unsigned char>(s[0])) 
-      || ! std::isdigit(static_cast<unsigned char>(s[1]))
-      || ! std::isdigit(static_cast<unsigned char>(s[2]))  
-      || ! std::isdigit(static_cast<unsigned char>(s[3])))
-    throw ConversionError("Invalid date format.");
-
-    return (s[0] - '0') * 1000
-        + (s[1] - '0') * 100
-        + (s[2] - '0') * 10
-        + (s[3] - '0');
-}
-
-
-void convert(std::string& str, const Date& date)
-{
-    // format YYYY-MM-DD
-    //        0....+....1
-
-    int year, month, day;
-    jul2greg(date.julian(), year, month, day);
-
-    char ret[10];
-    unsigned int n = year;
-
-    ret[3] = '0' + n % 10;
-    n /= 10;
-    ret[2] = '0' + n % 10;
-    n /= 10;
-    ret[1] = '0' + n % 10;
-    n /= 10;
-    ret[0] = '0' + n % 10;
-    ret[4] = '-';
-    ret[5] = static_cast<char>('0' + month / 10);
-    ret[6] = '0' + month % 10;
-    ret[7] = '-';
-    ret[8] = static_cast<char>('0' + day / 10);
-    ret[9] = '0' + day % 10;
-
-    str.assign(ret, 10);
-}
-
-
-void convert(Date& date, const std::string& s)
-{
-    if (s.size() < 10 || s.at(4) != '-' || s.at(7) != '-')
-        throw ConversionError("Illegal date format");
-
-    const char* d = s.data();
-    date= Date(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8));
-}
-
-
 void operator>>=(const SerializationInfo& si, Date& date)
 {
     int year = 0;
@@ -156,5 +93,93 @@ void operator<<=(SerializationInfo& si, const Date& date)
     si.setTypeName( Pt::LiteralPtr<char>("Pt::Date") );
 }
 
+
+template <typename CharT>
+inline unsigned short getNumber2(const CharT* s)
+{
+    if (! std::isdigit(static_cast<unsigned char>(s[0])) 
+     || ! std::isdigit(static_cast<unsigned char>(s[1])))
+    throw ConversionError("Invalid date format.");
+    return (s[0] - '0') * 10
+        + (s[1] - '0');
 }
 
+
+template <typename CharT>
+inline unsigned short getNumber4(const CharT* s)
+{
+    if ( ! std::isdigit(static_cast<unsigned char>(s[0])) 
+      || ! std::isdigit(static_cast<unsigned char>(s[1]))
+      || ! std::isdigit(static_cast<unsigned char>(s[2]))  
+      || ! std::isdigit(static_cast<unsigned char>(s[3])))
+    throw ConversionError("Invalid date format.");
+
+    return (s[0] - '0') * 1000
+        + (s[1] - '0') * 100
+        + (s[2] - '0') * 10
+        + (s[3] - '0');
+}
+
+
+template <typename CharT>
+void dateToString(std::basic_string<CharT>& str, const Date& date)
+{
+    // format YYYY-MM-DD
+    //        0....+....1
+
+    int year, month, day;
+    jul2greg(date.julian(), year, month, day);
+
+    CharT ret[10];
+    unsigned int n = year;
+
+    ret[3] = '0' + n % 10;
+    n /= 10;
+    ret[2] = '0' + n % 10;
+    n /= 10;
+    ret[1] = '0' + n % 10;
+    n /= 10;
+    ret[0] = '0' + n % 10;
+    ret[4] = '-';
+    ret[5] = static_cast<char>('0' + month / 10);
+    ret[6] = '0' + month % 10;
+    ret[7] = '-';
+    ret[8] = static_cast<char>('0' + day / 10);
+    ret[9] = '0' + day % 10;
+
+    str.assign(ret, 10);
+}
+
+
+void convert(std::string& str, const Date& date)
+{
+    dateToString(str, date);
+}
+
+
+void convert(Date& date, const std::string& s)
+{
+    if (s.size() < 10 || s.at(4) != '-' || s.at(7) != '-')
+        throw ConversionError("Illegal date format");
+
+    const char* d = s.data();
+    date= Date(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8));
+}
+
+
+void convert(String& str, const Date& date)
+{
+    dateToString(str, date);
+}
+
+
+void convert(Date& date, const String& s)
+{
+    if (s.size() < 10 || s.at(4) != '-' || s.at(7) != '-')
+        throw ConversionError("Illegal date format");
+
+    const Char* d = s.data();
+    date= Date(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8));
+}
+
+} // namespace Pt

@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2004-2007 by Marc Boris Duerner
- * Copyright (C) 2005 Stephan Beal
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Delegate_h
 #define Pt_Delegate_h
 
@@ -34,13 +34,10 @@
 #include <Pt/Method.h>
 #include <Pt/ConstMethod.h>
 #include <Pt/Connectable.h>
-#include <Pt/SourceInfo.h>
 #include <stdexcept>
 
 namespace Pt {
 
-/** @internal
-*/
 class DelegateBase : public Connectable
 {
     public:
@@ -63,6 +60,11 @@ class DelegateBase : public Connectable
             return *this;
         }
 
+        bool isConnected() const
+        {
+            return _target.isValid();
+        }
+
         virtual void onConnectionOpen(const Connection& c)
         {
             const Connectable* sender = c.sender();
@@ -81,9 +83,18 @@ class DelegateBase : public Connectable
             Connectable::onConnectionClose(c);
         }
 
-        bool isConnected() const
+    protected:
+        void disconnectSlot()
         {
-            return _target.isValid();
+            _target.close();
+        }
+
+        void disconnectSlot(const Slot& slot)
+        {
+            if( _target.isValid() && _target.slot()->equals(slot) )
+            {
+                _target.close();
+            }
         }
 
     protected:
@@ -92,6 +103,6 @@ class DelegateBase : public Connectable
 
 #include <Pt/Delegate.tpp>
 
-} // !namespace Pt
+} // namespace Pt
 
 #endif

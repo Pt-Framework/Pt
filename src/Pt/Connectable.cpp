@@ -41,7 +41,7 @@ Connectable::Connectable(const Connectable&)
 
 Connectable::~Connectable()
 {
-    this->disconnect();
+    this->disconnectAll();
 }
 
 
@@ -63,7 +63,7 @@ void Connectable::onConnectionClose(const Connection& c)
 }
 
 
-void Connectable::disconnect()
+void Connectable::disconnectAll()
 {
     std::list<Connection>::iterator it = _connections.begin();
     while( it != _connections.end() )

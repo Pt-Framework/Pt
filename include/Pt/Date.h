@@ -25,11 +25,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_DATE_H
 #define PT_DATE_H
 
 #include <Pt/Api.h>
-#include <Pt/SourceInfo.h>
+#include <Pt/String.h>
 #include <string>
 #include <stdexcept>
 
@@ -61,13 +62,8 @@ PT_API void greg2jul(unsigned& jd, int y, int m, int d);
 //! @internal
 PT_API void jul2greg(unsigned jd, int& y, int& m, int& d);
 
-/*
-  Notes:
-  - Henry F. Fliegel and Thomas C. Van Flandern, "A Machine Algorithm for
-    Processing Calendar Dates". CACM, Vol. 11, No. 10, October 1968, pp 657.
-*/
+/** @brief %Date expressed in year, month, and day.
 
-/** @brief %Date expressed in year, month, and day
     @ingroup DateTime
 */
 class Date
@@ -241,7 +237,7 @@ class Date
 
         /** @brief Returns true if the date is in a leap year
         */
-        bool leapYear() const;
+        bool isLeapYear() const;
 
         /** @brief Assignment operator
         */
@@ -331,7 +327,7 @@ class Date
 
         /** @brief Returns true if the year is in a leap year
         */
-        static bool leapYear(int year);
+        static bool isLeapYear(int year);
 
     private:
         //! @internal
@@ -346,6 +342,10 @@ PT_API void convert(std::string& str, const Date& date);
 
 PT_API void convert(Date& date, const std::string& s);
 
+PT_API void convert(String& str, const Date& date);
+
+PT_API void convert(Date& date, const String& s);
+
 
 inline void Date::get(int& y, unsigned& m, unsigned& d) const
 {
@@ -356,7 +356,7 @@ inline void Date::get(int& y, unsigned& m, unsigned& d) const
 }
 
 
-inline bool Date::leapYear(int y)
+inline bool Date::isLeapYear(int y)
 {
     return ((y%4==0) && (y%100!=0)) || (y%400==0);
 }
@@ -402,7 +402,7 @@ inline unsigned Date::daysInMonth() const
     int y, m, d;
     jul2greg(_julian, y, m, d);
 
-    if( m==2 && leapYear(y) )
+    if( m==2 && isLeapYear(y) )
         return 29;
 
     return monthDays[m];
@@ -420,11 +420,11 @@ inline unsigned Date::dayOfYear() const
 }
 
 
-inline bool Date::leapYear() const
+inline bool Date::isLeapYear() const
 {
     int d,m,y;
     jul2greg(_julian,y,m,d);
-    return leapYear(y);
+    return isLeapYear(y);
 }
 
 

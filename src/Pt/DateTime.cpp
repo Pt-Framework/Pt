@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "Pt/DateTime.h"
 #include "Pt/Convert.h"
 #include "Pt/SerializationInfo.h"
@@ -58,7 +59,8 @@ void operator <<=(SerializationInfo& si, const DateTime& datetime)
 }
 
 
-inline unsigned short getNumber2(const char* s)
+template <typename CharT>
+inline unsigned short getNumber2(const CharT* s)
 {
     if( ! std::isdigit(static_cast<unsigned char>(s[0])) 
      || ! std::isdigit(static_cast<unsigned char>(s[1])) )
@@ -68,7 +70,8 @@ inline unsigned short getNumber2(const char* s)
 }
 
 
-inline unsigned short getNumber3(const char* s)
+template <typename CharT>
+inline unsigned short getNumber3(const CharT* s)
 {
     if (! std::isdigit(static_cast<unsigned char>(s[0])) 
      || ! std::isdigit(static_cast<unsigned char>(s[1])) 
@@ -81,7 +84,8 @@ inline unsigned short getNumber3(const char* s)
 }
 
 
-inline unsigned short getNumber4(const char* s)
+template <typename CharT>
+inline unsigned short getNumber4(const CharT* s)
 {
     if( ! std::isdigit(static_cast<unsigned char>(s[0])) 
      || ! std::isdigit(static_cast<unsigned char>(s[1])) 
@@ -96,34 +100,12 @@ inline unsigned short getNumber4(const char* s)
 }
 
 
-void convert(DateTime& dt, const std::string& s)
-{
-    if (s.size() < 23
-        || s.at(4) != '-'
-        || s.at(7) != '-'
-        || s.at(10) != ' '
-        || s.at(13) != ':'
-        || s.at(16) != ':'
-        || s.at(19) != '.')
-        throw ConversionError("Invalid DateTime format");
-
-    const char* d = s.data();
-
-    dt= DateTime( getNumber4(d),
-                  getNumber2(d + 5),
-                  getNumber2(d + 8),
-                  getNumber2(d + 11),
-                  getNumber2(d + 14),
-                  getNumber2(d + 17),
-                  getNumber3(d + 20) );
-}
-
-
-void convert(std::string& str, const DateTime& dt)
+template <typename CharT>
+void dateTimeToString(std::basic_string<CharT>& str, const DateTime& dt)
 {
     // format YYYY-MM-DD hh:mm:ss.sssss
     //        0....+....1....+....2....+
-    char ret[25];
+    CharT ret[25];
     unsigned int n = dt.date().year();
     ret[3] = '0' + n % 10;
     n /= 10;
@@ -158,5 +140,60 @@ void convert(std::string& str, const DateTime& dt)
     str.assign(ret, 23);
 }
 
+
+void convert(std::string& str, const DateTime& dt)
+{
+    dateTimeToString(str, dt);
 }
 
+void convert(DateTime& dt, const std::string& s)
+{
+    if (s.size() < 23
+        || s.at(4) != '-'
+        || s.at(7) != '-'
+        || s.at(10) != ' '
+        || s.at(13) != ':'
+        || s.at(16) != ':'
+        || s.at(19) != '.')
+        throw ConversionError("Invalid DateTime format");
+
+    const char* d = s.data();
+
+    dt= DateTime( getNumber4(d),
+                  getNumber2(d + 5),
+                  getNumber2(d + 8),
+                  getNumber2(d + 11),
+                  getNumber2(d + 14),
+                  getNumber2(d + 17),
+                  getNumber3(d + 20) );
+}
+
+
+void convert(String& str, const DateTime& dt)
+{
+    dateTimeToString(str, dt);
+}
+
+void convert(DateTime& dt, const String& s)
+{
+    if (s.size() < 23
+        || s.at(4) != '-'
+        || s.at(7) != '-'
+        || s.at(10) != ' '
+        || s.at(13) != ':'
+        || s.at(16) != ':'
+        || s.at(19) != '.')
+        throw ConversionError("Invalid DateTime format");
+
+    const Char* d = s.data();
+
+    dt= DateTime( getNumber4(d),
+                  getNumber2(d + 5),
+                  getNumber2(d + 8),
+                  getNumber2(d + 11),
+                  getNumber2(d + 14),
+                  getNumber2(d + 17),
+                  getNumber3(d + 20) );
+}
+
+} // namespace Pt

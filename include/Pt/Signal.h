@@ -69,11 +69,16 @@ namespace Pt {
 
             SignalBase& operator=(const SignalBase& other);
 
+            // TODO: move to Signal<T...>
+            void disconnect();
+
             virtual void onConnectionOpen(const Connection& c);
 
             virtual void onConnectionClose(const Connection& c);
 
         protected:
+            void disconnectSlots();
+
             void disconnectSlot(const Slot&);
 
         private:
@@ -163,6 +168,8 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 
         void send(const Pt::Event& ev);
 
+        void disconnect();
+
         template <typename R, typename EventT>
         void disconnect(const BasicSlot<R, const EventT&>& slot)
         {
@@ -177,23 +184,6 @@ class PT_API Signal<const Pt::Event&> : public Connectable
             this->addRoute(conn, selectAddRouteOverload);
             return conn;
         }
-
-        /* REMOVED: use connect() instead 
-        template <typename EventT> 
-        void subscribe( const BasicSlot<void, const EventT&>& slot ) 
-        {
-            Connection conn( *this, slot.clone() );
-            const std::type_info& ti = typeid(EventT);
-            this->addRoute( &ti, new EventRoute<EventT>(conn) );
-        }*/
-         
-        /* REMOVED: use disconnect() instead 
-        template <typename EventT> 
-        void unsubscribe( const BasicSlot<void, const EventT&>& slot ) 
-        { 
-            const std::type_info& ti = typeid(EventT);
-            this->removeRoute(&ti, slot);
-        }*/
 
         virtual void onConnectionOpen(const Connection& c);
 
