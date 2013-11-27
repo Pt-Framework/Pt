@@ -30,12 +30,14 @@
 #define Pt_Slot_h
 
 #include <Pt/Api.h>
+#include <Pt/Void.h>
 
 namespace Pt {
 
 class Connection;
 
-class Slot {
+class Slot 
+{
     public:
         virtual ~Slot() {}
 
