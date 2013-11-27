@@ -31,6 +31,7 @@
 #include <Pt/Api.h>
 #include <Pt/String.h>
 #include <Pt/TextCodec.h>
+#include <Pt/StreamBuffer.h>
 #include <Pt/ConversionError.h>
 #include <iostream>
 
@@ -55,7 +56,7 @@ namespace Pt {
     @ingroup Unicode
 */
 template <typename CharT, typename ByteT>
-class BasicTextBuffer : public std::basic_streambuf<CharT>
+class BasicTextBuffer : public BasicStreamBuffer<CharT>
 {
     public:
         typedef ByteT extern_type;

@@ -32,7 +32,7 @@
 
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/Context.h>
-#include <streambuf>
+#include <Pt/StreamBuffer.h>
 #include <ios>
 #include <cstddef>
 
@@ -44,7 +44,7 @@ class Connection;
 
 /** @brief SSL stream buffer.
 */
-class PT_SSL_API StreamBuffer : public std::streambuf
+class PT_SSL_API StreamBuffer : public BasicStreamBuffer<char>
 {
     public:
         /** @brief Construct an SSL stream buffer. 

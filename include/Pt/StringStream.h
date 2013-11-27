@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_STRINGSTREAM_H
 #define PT_STRINGSTREAM_H
 
@@ -42,8 +43,9 @@ class PT_API StringBuffer : public std::basic_stringbuf<Pt::Char>
 {
     public:
         explicit StringBuffer(std::ios::openmode mode = std::ios::in | std::ios::out);
+
         explicit StringBuffer(const Pt::String& str,
-                                    std::ios::openmode mode = std::ios::in | std::ios::out);
+                              std::ios::openmode mode = std::ios::in | std::ios::out);
 };
 
 } // namespace Pt
