@@ -40,7 +40,7 @@ namespace Pt {
          */
         struct Rgb888 {};
 
-#include <Pt/Pack1.h>
+#include <Pt/Pack.h>
         /** @brief Packed 32-bit RGB color class.
          *
          *  This class is exist so that the raw memory buffer of an image implementation

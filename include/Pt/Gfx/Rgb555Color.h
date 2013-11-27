@@ -40,7 +40,7 @@ namespace Pt {
          */
         struct Rgb555 {};
 
-#include <Pt/Pack1.h>
+#include <Pt/Pack.h>
         /** @brief Packed 15-bit RGB color class.
          *
          *  This class is exist so that the raw memory buffer of an image implementation

@@ -141,7 +141,7 @@ int main( int argc, char* argv[] )
         Pt::Gui::Application app;
 
         DrawEllipseDemo demo;
-        connect( demo.closed, app, &Pt::Gui::Application::exit );
+        demo.closed += Pt::slot(app, &Pt::Gui::Application::exit);
 
         demo.resize(400, 300);
         demo.show();

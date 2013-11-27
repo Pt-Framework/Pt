@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_IOStream_h
 #define Pt_IOStream_h
 
@@ -32,6 +33,13 @@
 #include <Pt/StreamBuffer.h>
 #include <iostream>
 #include <algorithm>
+
+#if defined(_MSC_VER) && defined(_WIN32_WCE) 
+    // alternatively compile with /FORCE:multiple
+    template class PT_EXPORT std::basic_istream<char>;
+    template class PT_EXPORT std::basic_ostream<char>;
+    template class PT_EXPORT std::basic_iostream<char>; 
+#endif
 
 namespace Pt {
 
@@ -234,7 +242,6 @@ inline std::streamsize BasicIOStream<CharT, TraitsT>::writesome(CharT* buffer, s
     return _buffer->sputn(buffer, n);
 }
 
-} // !namespace Pt
+} // namespace Pt
 
 #endif
-

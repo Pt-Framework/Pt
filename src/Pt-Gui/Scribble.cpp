@@ -74,15 +74,15 @@ class ScribbleWidget : public Pt::Gui::Widget
             pixmapPainter.fillRect( Gfx::Rect(Gfx::Point(0, 0), this->size() ) );
 
            _redButton->setBackgroundColor( ARgbColor(65535, 0, 0) );
-            connect(_redButton->clicked, *this, &ScribbleWidget::onRedButton);
+            _redButton->clicked += Pt::slot(*this, &ScribbleWidget::onRedButton);
 
             _greenButton->setBackgroundColor( ARgbColor(0, 65535, 0) );
-            connect(_greenButton->clicked, *this, &ScribbleWidget::onGreenButton);
+            _greenButton->clicked += Pt::slot(*this, &ScribbleWidget::onGreenButton);
 
             _blueButton->setBackgroundColor( ARgbColor(20000, 20000, 65535) );
-            connect(_blueButton->clicked, *this, &ScribbleWidget::onBlueButton);
-
-            connect(_clearButton->clicked, *this, &ScribbleWidget::onClearButton);
+            _blueButton->clicked += Pt::slot(*this, &ScribbleWidget::onBlueButton);
+            
+            _clearButton->clicked += Pt::slot(*this, &ScribbleWidget::onClearButton);
         }
 
         void onRedButton()
@@ -221,7 +221,7 @@ int main(int argc, char* argv[])
         Pt::Gui::Application app;
 
         ScribbleWidget widget;
-        connect(widget.closed, app, &Gui::Application::exit);
+        widget.closed += Pt::slot(app, &Gui::Application::exit);
 
         widget.show();
 

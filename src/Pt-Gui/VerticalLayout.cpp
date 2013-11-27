@@ -63,7 +63,7 @@ void VerticalLayout::set(Widget& widget, Orientation orient, const Margin& margi
     WidgetMap::iterator it = _widgets.find(&widget);
 
     if (it == _widgets.end()) {
-        connect(widget.destroyed, *this, &VerticalLayout::remove);
+        widget.destroyed += Pt::slot(*this, &VerticalLayout::remove);
     }
 
     VerticalLayout::LayoutData data(orient, margin);

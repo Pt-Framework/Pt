@@ -101,7 +101,7 @@ SimpleGridLayout::SimpleGridLayout(
 void SimpleGridLayout::setLayoutData(Widget& widget, const SimpleGridLayoutData& layoutData)
 {
     _widget2LayoutData.insert(std::make_pair(&widget, layoutData));
-    connect(widget.destroyed, *this, &SimpleGridLayout::remove);
+    widget.destroyed += Pt::slot(*this, &SimpleGridLayout::remove);
 }
 
 

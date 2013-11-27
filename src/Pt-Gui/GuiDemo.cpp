@@ -103,9 +103,9 @@ int main(int argc, char* argv[])
         gridLayout.update();
 
         MyApplication app(pbar);
-        connect(button1.clicked,   app, &MyApplication::dec);
-        connect(button2.clicked,   app, &MyApplication::inc);
-        connect(mainWidget.closed, app, &MyApplication::exit);
+        button1.clicked += Pt::slot(app, &MyApplication::dec);
+        button2.clicked += Pt::slot(app, &MyApplication::inc);
+        mainWidget.closed += Pt::slot(app, &MyApplication::exit);
         mainWidget.show();
         app.run();
         return 0;

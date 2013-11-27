@@ -204,7 +204,7 @@ int main( int argc, char* argv[] )
         Pt::Gui::Application app;
 
         DrawLineDemo demo;
-        connect( demo.closed, app, &Pt::Gui::Application::exit );
+        demo.closed += Pt::slot(app, &Pt::Gui::Application::exit);
 
         demo.resize(320, 240);
         demo.show();

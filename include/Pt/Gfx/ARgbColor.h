@@ -47,7 +47,7 @@ namespace Pt {
          */
         struct ARgb {};
 
-#include <Pt/Pack1.h>
+#include <Pt/Pack.h>
         /** @brief 64-Bit ARGB color class.
          *
          *  This is the master color model for Pt::Gfx, since it is used by

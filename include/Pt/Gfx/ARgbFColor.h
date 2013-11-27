@@ -41,7 +41,7 @@ namespace Pt {
         struct ARgbF {};
 
 
-#include <Pt/Pack1.h>
+#include <Pt/Pack.h>
         /** @brief Floated ARGB color class.
          *
          *  This is the temporary color model for Pt::Gfx.

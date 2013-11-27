@@ -78,7 +78,7 @@ HorizontalLayout::HorizontalLayout(Widget& widget, WidthBehaviour widthBehaviour
 void HorizontalLayout::setLayoutData(Widget& widget, const HorizontalLayoutData& layoutData)
 {
     _widget2LayoutData.insert(std::make_pair(&widget, layoutData));
-    connect(widget.destroyed, *this, &HorizontalLayout::remove);
+    widget.destroyed += Pt::slot(*this, &HorizontalLayout::remove);
 }
 
 

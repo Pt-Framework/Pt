@@ -40,7 +40,7 @@ namespace Pt {
          */
         struct ARgb8888 {};
 
-#include <Pt/Pack1.h>
+#include <Pt/Pack.h>
         /** @brief Packed 32-bit ARGB color class.
          *
          *  This class is exist so that the raw memory buffer of an image implementation

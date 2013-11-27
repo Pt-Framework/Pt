@@ -195,9 +195,6 @@
     <ClInclude Include="..\..\include\Pt\NonCopyable.h">
       <Filter>Pt</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Pack1.h">
-      <Filter>Pt</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\PackPop.h">
       <Filter>Pt</Filter>
     </ClInclude>
@@ -1314,6 +1311,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.h">
       <Filter>Pt-Hmi\Sources\winrt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Pack.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1335,9 +1335,6 @@
       <Filter>Pt</Filter>
     </None>
     <None Include="..\..\include\Pt\Signal.tpp">
-      <Filter>Pt</Filter>
-    </None>
-    <None Include="..\..\include\Pt\Slot.tpp">
       <Filter>Pt</Filter>
     </None>
     <None Include="..\..\include\Pt\String.tpp">

@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
         Pt::Gui::Application app;
 
         Pt::Gui::Widget widget;
-        connect(widget.closed, app, &Pt::Gui::Application::exit);
+        widget.closed += Pt::slot(app, &Pt::Gui::Application::exit);
 
         widget.show();
 

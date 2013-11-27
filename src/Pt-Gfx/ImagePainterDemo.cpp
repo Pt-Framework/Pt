@@ -6392,7 +6392,7 @@ int main( int argc, char* argv[] )
 		Pt::Gui::Application app;
 
 		ImagePainterDemo imageTest;
-		connect( imageTest.closed, app, &Pt::Gui::Application::exit );
+		imageTest.closed += Pt::slot(app, &Pt::Gui::Application::exit);
 
 		imageTest.show();
 		app.run();

@@ -74,7 +74,7 @@ void BorderLayout::setLayoutData(Widget& widget, Orientation orientation)
         case CENTER: _center = &widget; break;
     }
 
-    connect(widget.destroyed, *this, &BorderLayout::remove);
+    widget.destroyed += Pt::slot(*this, &BorderLayout::remove);
 }
 
 
