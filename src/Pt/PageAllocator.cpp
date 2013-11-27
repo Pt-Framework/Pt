@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009-2010 by Bendri Batti
+ * Copyright (C) 2009-2013 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,7 +34,7 @@ namespace Pt {
 PageAllocator::Page::Page(Page* nextChunk, std::size_t chunkSize)
 : _nextChunk(0)
 , _mem(0)
-, _chunkSize(chunkSize > DEFAULT_VARIABLE_CHUNK_SIZE ? chunkSize : DEFAULT_VARIABLE_CHUNK_SIZE)
+, _chunkSize(chunkSize > MinChunkSize ? chunkSize : MinChunkSize)
 , _bytesAlreadyAllocated(0)
 {
     _nextChunk = nextChunk;
@@ -96,4 +97,4 @@ void PageAllocator::expandStorage(std::size_t size)
     _listOfVariableChunk = new Page(_listOfVariableChunk, size);
 }
 
-}
+} // namespace Pt

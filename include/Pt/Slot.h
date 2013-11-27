@@ -25,34 +25,42 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Slot_h
 #define Pt_Slot_h
 
 #include <Pt/Api.h>
-#include <Pt/Void.h>
 
 namespace Pt {
 
-    class Connection;
+class Connection;
 
-    class Slot {
-        public:
-            virtual ~Slot() {}
+class Slot {
+    public:
+        virtual ~Slot() {}
 
-            virtual Slot* clone() const = 0;
+        virtual Slot* clone() const = 0;
 
-            virtual const void* callable() const = 0;
+        virtual const void* callable() const = 0;
 
-            virtual void onConnect(const Connection& c) = 0;
+        virtual void onConnect(const Connection& c) = 0;
 
-            virtual void onDisconnect(const Connection& c) = 0;
+        virtual void onDisconnect(const Connection& c) = 0;
 
-            virtual bool equals(const Slot& slot) const = 0;
-    };
+        virtual bool equals(const Slot& slot) const = 0;
+};
 
-#include <Pt/Slot.tpp>
+template < typename R, typename A1 = Void,  typename A2 = Void,
+                       typename A3 = Void,  typename A4 = Void,
+                       typename A5 = Void,  typename A6 = Void,
+                       typename A7 = Void,  typename A8 = Void,
+                       typename A9 = Void,  typename A10 = Void >
+class BasicSlot : public Slot 
+{
+    public:
+        virtual Slot* clone() const = 0;
+};
 
-}
+} // namespace Pt
 
 #endif
-

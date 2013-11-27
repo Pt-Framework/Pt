@@ -130,7 +130,7 @@ XmlSerializationContext::~XmlSerializationContext()
 }
 
 
-void XmlSerializationContext::clear()
+void XmlSerializationContext::onClear()
 {
     _refmap.clear();
     _idmap.clear();
@@ -152,7 +152,7 @@ void XmlSerializationContext::clear()
 }
 
 
-bool XmlSerializationContext::beginSave(const void* p, const std::string& n)
+bool XmlSerializationContext::onBeginSave(const void* p, const char* n)
 {
     if( _idmap.find(p) == _idmap.end() )
     {
@@ -166,12 +166,12 @@ bool XmlSerializationContext::beginSave(const void* p, const std::string& n)
 }
 
 
-void XmlSerializationContext::finishSave()
+void XmlSerializationContext::onFinishSave()
 {
 }
 
 
-void XmlSerializationContext::prepareId(const void* p)
+void XmlSerializationContext::onPrepareId(const void* p)
 {
     if(p)
     {
@@ -181,7 +181,7 @@ void XmlSerializationContext::prepareId(const void* p)
 }
 
 
-const char* XmlSerializationContext::getId(const void* p)
+const char* XmlSerializationContext::onGetId(const void* p)
 {
     //std::cerr << "GET ID " << p << std::endl;
     if(p == 0)
@@ -202,7 +202,7 @@ const char* XmlSerializationContext::getId(const void* p)
 }
 
 
-const char* XmlSerializationContext::makeId(const void* p)
+const char* XmlSerializationContext::onMakeId(const void* p)
 {
     //std::cerr << "MAKE ID " << p << std::endl;
 
@@ -224,10 +224,10 @@ const char* XmlSerializationContext::makeId(const void* p)
 }
 
 
-void XmlSerializationContext::beginLoad(void* obj, const std::type_info& fixupInfo,
-                                        const std::string& name, const std::string& id)
+void XmlSerializationContext::onBeginLoad(void* obj, const std::type_info& fixupInfo,
+                                          const char* name, const char* id)
 {
-    if( id.empty() )
+    if( ! id || id[0] == '\0' )
         return;
 
     std::vector<Fixup*>::iterator it;
@@ -244,12 +244,12 @@ void XmlSerializationContext::beginLoad(void* obj, const std::type_info& fixupIn
 }
 
 
-void XmlSerializationContext::finishLoad()
+void XmlSerializationContext::onFinishLoad()
 {
 }
 
 
-void XmlSerializationContext::rebindTarget(const char* id, void* obj)
+void XmlSerializationContext::onRebindTarget(const char* id, void* obj)
 {
     //std::cerr << "rebindTarget: " << id << " to " << obj << std::endl;
     
@@ -266,7 +266,7 @@ void XmlSerializationContext::rebindTarget(const char* id, void* obj)
 }
 
 
-void XmlSerializationContext::rebindFixup(const std::string& id, void* obj, void* from)
+void XmlSerializationContext::onRebindFixup(const char* id, void* obj, void* from)
 {
     //std::cerr << "rebindFixup " << id << " from " << from << " to " << obj << std::endl;
     
@@ -288,7 +288,7 @@ void XmlSerializationContext::rebindFixup(const std::string& id, void* obj, void
 }
 
 
-void XmlSerializationContext::prepareFixup(void* obj, const std::string& id, FixupInfo::FixupHandler fh, unsigned m)
+void XmlSerializationContext::onPrepareFixup(void* obj, const char* id, FixupInfo::FixupHandler fh, unsigned m)
 {
     //std::cerr << "prepareFixup: " << obj << " id " << id << std::endl;
     
@@ -301,7 +301,7 @@ void XmlSerializationContext::prepareFixup(void* obj, const std::string& id, Fix
 }
 
 
-void XmlSerializationContext::fixup()
+void XmlSerializationContext::onFixup()
 {
     std::vector<Fixup*>::iterator it;
     

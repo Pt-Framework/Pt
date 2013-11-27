@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 Marc Boris Duerner , Sven Falk
+ * Copyright (C) 2006-2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -47,7 +47,7 @@ namespace Pt {
     };
     @endcode
   
-    Trying to copy a NonCopyable object will cause compile-time error.
+    Trying to copy a NonCopyable object will cause a compile-time error.
 
     @ingroup CoreTypes
 */
@@ -67,14 +67,12 @@ class NonCopyable {
         /** @brief Declared as private to prevent usage of copy constructor
         */
         NonCopyable(const NonCopyable&);
-        //{ }
 
         /**  @brief Declared as private to prevent usage of assignment operator
         */
         NonCopyable& operator=(const NonCopyable&);
-        //{ return *this; }
 };
 
-}
+} // namespace Pt
 
 #endif

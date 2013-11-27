@@ -147,7 +147,7 @@ const Test* Test::parent() const
 
 void Test::attachReporter(Reporter& r)
 {
-    connect(r.destroyed, *this, &Test::detachReporter);
+    r.destroyed += Pt::slot(*this, &Test::detachReporter);
     _reporter.push_back(&r);
 }
 

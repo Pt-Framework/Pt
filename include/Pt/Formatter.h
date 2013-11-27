@@ -25,12 +25,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Formatter_h
 #define Pt_Formatter_h
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
 #include <string>
+#include <cstddef>
 
 namespace Pt {
 
@@ -68,11 +70,11 @@ class Formatter
         /** @brief Formats a binary value.
         */
         void addBinary(const std::string& name, const std::string& type,
-                       const char* value, size_t length, const std::string& id)
+                       const char* value, std::size_t length, const std::string& id)
         { onAddBinary(name.c_str(), type.c_str(), value, length, id.c_str()); }
 
         void addBinary(const char* name, const char* type,
-                       const char* value, size_t length, const char* id)
+                       const char* value, std::size_t length, const char* id)
         { onAddBinary(name, type, value, length, id); }
 
         /** @brief Formats a boolean value.
@@ -284,7 +286,7 @@ class Formatter
                                  const Pt::Char* value, const char* id) = 0;
 
         virtual void onAddBinary(const char* name, const char* type,
-                                 const char* value, size_t length, const char* id) = 0;
+                                 const char* value, std::size_t length, const char* id) = 0;
 
         virtual void onAddBool(const char* name, bool value,
                                const char* id) = 0;

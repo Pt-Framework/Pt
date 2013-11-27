@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2006-2007 by Sebastian Pieck
  * Copyright (C) 2007-2008 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
@@ -29,15 +28,10 @@
 
 #if defined (__GNUC__)
     // nothing
-#elif defined(_MSC_VER) || defined (__MWERKS_SYMBIAN__)
+#elif defined(_MSC_VER) || defined (__MWERKS_SYMBIAN__) || defined(__xlC__)
     #pragma pack(pop)
-#elif defined(__INTEL_COMPILER)
-    #pragma pack()
-#elif defined(__xlC__)
-    #pragma pack(pop)
-#elif defined(__SUNPRO_C) || defined (__SUNPRO_CC)
+#elif defined(__INTEL_COMPILER) || defined(__SUNPRO_C) || defined (__SUNPRO_CC)
     #pragma pack()
 #else
-    #error MACRO FOR PACKING HAS NOT BEEN DEFINED!!
+    #error PT_PACKED not defined
 #endif
-

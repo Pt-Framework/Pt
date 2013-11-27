@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_SerializationContext_h
 #define Pt_SerializationContext_h
 
@@ -33,7 +34,6 @@
 #include <Pt/FixupInfo.h>
 #include <Pt/SerializationSurrogate.h>
 #include <Pt/SerializationInfo.h>
-#include <map>
 #include <typeinfo>
 #include <string>
 
@@ -53,60 +53,10 @@ class PT_API SerializationContext : public SerializationInfo
         virtual ~SerializationContext();
 
         inline void enableReferencing(bool enabled)
-        {
-            _refsEnabled = enabled;
-        }
+        { _refsEnabled = enabled; }
 
-        inline bool referencingEnabled() const
-        {
-            return _refsEnabled;
-        }
-
-        // TOOD: public non-virtual calls protected virtuals
-
-        /** @brief Clears all content.
-        */
-        virtual void clear();
-
-        // TOOD: public non-virtual / protected virtual
-        virtual bool beginSave(const void* p, const std::string& name);
-
-        // TOOD: public non-virtual / protected virtual
-        virtual void finishSave();
-
-        // TOOD: public non-virtual / protected virtual
-        virtual void prepareId(const void* p);
-
-        // TOOD: public non-virtual / protected virtual
-        virtual const char* getId(const void* p);
-
-        // TOOD: public non-virtual / protected virtual
-        virtual const char* makeId(const void* p);
-
-    public:
-        // TOOD: public non-virtual / protected virtual
-        virtual void beginLoad(void* obj, const std::type_info& fixupInfo,
-                               const std::string& name, const std::string& id);
-
-        // TOOD: public non-virtual / protected virtual
-        virtual void finishLoad();
-
-        // TOOD: public non-virtual / protected virtual
-        virtual void rebindTarget(const char* id, void* obj);
-
-        // TOOD: public non-virtual / protected virtual
-        virtual void rebindFixup(const std::string& id, void* obj, void* prev);
-
-        // TOOD: public non-virtual / protected virtual
-        virtual void prepareFixup(void* obj, const std::string& id, FixupInfo::FixupHandler, unsigned mid);
-
-        // TOOD: public non-virtual / protected virtual
-        virtual void fixup();
-
-    public:
-        void setLimit(size_t n);
-
-        size_t limit() const;
+        inline bool isReferencing() const
+        { return _refsEnabled; }
 
         SerializationInfo* get();
 
@@ -121,9 +71,85 @@ class PT_API SerializationContext : public SerializationInfo
             registerSurrogate(typeid(T), surr);
         }
 
+        template <typename T>
+        void registerSurrogate( const char* typeName,
+                                void (*compose)(const Pt::SerializationInfo& si, T& type),
+                                void (*decompose)(Pt::SerializationInfo& si, const T& type) )
+        {
+            SerializationSurrogate* surr = new BasicSerializationSurrogate<T>(typeName, compose, decompose);
+            registerSurrogate(typeid(T), surr);
+        }
+
         const SerializationSurrogate* getSurrogate(const std::type_info& ti) const;
 
+    public:
+        /** @brief Clears all content.
+        */
+        void clear()
+        { onClear(); }
+
+        bool beginSave(const void* p, const char* name)
+        { return onBeginSave(p, name); }
+
+        void finishSave()
+        { onFinishSave(); }
+
+        void prepareId(const void* p)
+        { onPrepareId(p); }
+
+        const char* getId(const void* p)
+        { return onGetId(p); }
+
+        const char* makeId(const void* p)
+        { return onMakeId(p); }
+
+    public:     
+        void beginLoad(void* obj, const std::type_info& ti,
+                       const char* name, const char* id)
+        { onBeginLoad(obj, ti, name, id); }
+        
+        void finishLoad()
+        { onFinishLoad(); }
+
+        void rebindTarget(const char* id, void* obj)
+        { onRebindTarget(id, obj); }
+
+        void rebindFixup(const char* id, void* obj, void* prev)
+        { onRebindFixup(id, obj, prev); }
+
+        void prepareFixup(void* obj, const char* id, FixupInfo::FixupHandler fh, unsigned mid)
+        { onPrepareFixup(obj, id, fh, mid); }
+
+        void fixup()
+        { onFixup(); }
+
     protected:
+        virtual void onClear();
+
+        virtual bool onBeginSave(const void* p, const char* name);
+
+        virtual void onFinishSave();
+
+        virtual void onPrepareId(const void* p);
+
+        virtual const char* onGetId(const void* p);
+
+        virtual const char* onMakeId(const void* p);
+
+        virtual void onBeginLoad(void* obj, const std::type_info& fixupInfo,
+                                 const char* name, const char* id);
+
+        virtual void onFinishLoad();
+
+        virtual void onRebindTarget(const char* id, void* obj);
+
+        virtual void onRebindFixup(const char* id, void* obj, void* prev);
+
+        virtual void onPrepareFixup(void* obj, const char* id, FixupInfo::FixupHandler fh, unsigned mid);
+
+        virtual void onFixup();
+
+    private:
         void registerSurrogate(const std::type_info& ti, SerializationSurrogate* surrogate);
 
     private:

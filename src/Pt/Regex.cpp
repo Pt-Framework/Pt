@@ -119,13 +119,26 @@ bool Regex::match(const Pt::String& str) const
 
 bool Regex::match(const Pt::String& str, RegexSMatch& smatch) const
 {
+    return match(str.c_str(), smatch);
+}
+
+
+bool Regex::match(const Char* str) const
+{
+    RegexSMatch smatch;
+    return match(str, smatch);
+}
+
+
+bool Regex::match(const Char* str, RegexSMatch& smatch) const
+{
     smatch._size = 0;
-    smatch._str = &str;
+    smatch._str = str;
 
     if( ! _expr )
         return false;
 
-    int ret = regexec( _expr, smatch._match, smatch._str->c_str() );
+    int ret = regexec( _expr, smatch._match, smatch._str );
 
     if(ret == 0)
     {
@@ -183,28 +196,28 @@ bool RegexSMatch::empty() const
 }
 
 
-unsigned RegexSMatch::size() const
+std::size_t RegexSMatch::size() const
 {
     return _size;
 }
 
 
-unsigned RegexSMatch::maxSize() const
+std::size_t RegexSMatch::maxSize() const
 {
     return NSUBEXP;
 }
 
 
-unsigned RegexSMatch::position(unsigned n) const
+std::size_t RegexSMatch::position(std::size_t n) const
 {
     if(n >= _size)
         return 0;
 
-    return _match->startp[n] - _str->c_str();
+    return _match->startp[n] - _str;
 }
 
 
-unsigned RegexSMatch::length(unsigned n) const
+std::size_t RegexSMatch::length(std::size_t n) const
 {
     if(n >= _size)
         return 0;
@@ -213,7 +226,7 @@ unsigned RegexSMatch::length(unsigned n) const
 }
 
 
-Pt::String RegexSMatch::str(unsigned n) const
+Pt::String RegexSMatch::str(std::size_t n) const
 {
     if(n >= _size)
         return String();

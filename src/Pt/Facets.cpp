@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004-2011 Marc Boris Duerner
+ * Copyright (C) 2004-2013 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -340,7 +340,7 @@ inline IterT putFloat(IterT it, T d,
     return it;
 }
 
-}
+} // namespace
 
 namespace std {
 

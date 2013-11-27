@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009-2010 by Bendri Batti
- * Copyright (C) 2009-2012 by Marc Boris Duerner
+ * Copyright (C) 2009-2013 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,7 +46,7 @@ class PT_API PageAllocator : public Pt::Allocator
 {
     public:
         class Page
-        {
+        {              
             public:
                 Page(Page* nextChunk, std::size_t chunkSize);
 
@@ -63,8 +63,6 @@ class PT_API PageAllocator : public Pt::Allocator
                 std::size_t capacity() const
                 { return _chunkSize; }
 
-                enum { DEFAULT_VARIABLE_CHUNK_SIZE = 4096 };
-
             private:
                 Page* _nextChunk;
                 char* _mem;
@@ -72,8 +70,10 @@ class PT_API PageAllocator : public Pt::Allocator
                 std::size_t _bytesAlreadyAllocated;
         };
 
+        enum { MinChunkSize = 4096 };
+
     public:
-        PageAllocator( std::size_t size = 4096 );
+        PageAllocator(std::size_t size = MinChunkSize);
 
         ~PageAllocator();
 
@@ -82,10 +82,12 @@ class PT_API PageAllocator : public Pt::Allocator
         void deallocate( void* p, std::size_t size );
 
     private:
-        Page* _listOfVariableChunk;
         void expandStorage( std::size_t size );
+
+    private:
+        Page* _listOfVariableChunk;
 };
 
-}
-#endif
+} // namespace Pt
 
+#endif

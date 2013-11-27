@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2007 by Dr. Marc Boris Duerner
+ * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "SettingsReader.h"
 #include <Pt/Convert.h>
 
@@ -32,7 +33,7 @@ namespace Pt {
 
 void SettingsReader::State::syntaxError(unsigned line)
 {
-    throw SettingsError( PT_ERROR_MSG("syntax error"), line);
+    throw SettingsError("syntax error", line);
 }
 
 
@@ -128,7 +129,7 @@ void SettingsReader::leaveMember()
     //std::cerr << "@" << std::endl;
 
     if(0 == _current->parent() )
-        throw SettingsError( PT_ERROR_MSG("too many closing braces"), _line);
+        throw SettingsError("too many closing braces", _line);
 
     _current = _current->parent();
     --_depth;
@@ -213,7 +214,7 @@ Pt::Char SettingsReader::getEscaped()
 {
     Pt::Char ch;
     if( ! _is->get(ch) )
-        throw SettingsError( PT_ERROR_MSG("unexpected EOF"), _line );
+        throw SettingsError("unexpected EOF", _line );
 
     switch( ch.value() )
     {
@@ -227,4 +228,4 @@ Pt::Char SettingsReader::getEscaped()
     return ch;
 }
 
-}
+} // namespace Pt

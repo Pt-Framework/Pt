@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2005 by Dr. Marc Boris Duerner
- * Copyright (C) 2005 Stephan Beal
+ * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +25,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/Signal.h"
+
+#include <Pt/Signal.h>
 
 namespace Pt {
 
@@ -110,23 +110,6 @@ SignalBase& SignalBase::operator=(const SignalBase& other)
     }
 
     return *this;
-}
-
-
-void SignalBase::disconnect()
-{
-    std::list<Connection>::iterator it = connections().begin();
-    while( it != connections().end() )
-    {
-        if( ! it->isValid() || it->sender() != this ) 
-        {
-            continue;
-        }
-
-        Connection connection = *it;
-        ++it;
-        connection.close();
-    }
 }
 
 
@@ -268,7 +251,8 @@ Signal<const Pt::Event&>::~Signal()
 
 void Signal<const Pt::Event&>::send(const Pt::Event& ev)
 {
-    if(_routes.empty()) return;
+    if( _routes.empty() )
+        return;
 
     // The sentry will set the Signal to the sending state and reset it to not-sending upon destruction.
     // In the sending state, removing connection will leave invalid connections in the connection list
@@ -279,80 +263,30 @@ void Signal<const Pt::Event&>::send(const Pt::Event& ev)
     std::pair<RouteMap::iterator, RouteMap::iterator> eqr0 = _routes.equal_range(0);
     std::pair<RouteMap::iterator, RouteMap::iterator> eqr1 = _routes.equal_range(&ev.typeInfo());
 
-    for(RouteMap::iterator it  = eqr0.first; it != eqr0.second; ++it) {
+    for(RouteMap::iterator it  = eqr0.first; it != eqr0.second; ++it) 
+    {
         // The following scenarios must be considered when the slot is called:
         // - The slot might get deleted and thus disconnected from this signal
-        // - The slot might delete this signal and we must end calling any slots immediately
+        // - The slot might delete this signal and we must end calling any slots
+        //   immediately
         // - A new Connection might get added to this Signal in the slot
         IEventRoute* route = it->second;
-        if(route->isValid()) route->route(ev);
-        // If this signal gets deleted by the slot, the Sentry will be detached. In this case we bail out immediately
-        if( !sentry ) return;
+        if(route->isValid()) 
+            route->route(ev);
+        
+        // If this signal gets deleted by the slot, the Sentry will be 
+        // detached. In this case we bail out immediately
+        if( ! sentry ) 
+            return;
     }
 
-    for(RouteMap::iterator it  = eqr1.first; it != eqr1.second; ++it) {
+    for(RouteMap::iterator it  = eqr1.first; it != eqr1.second; ++it) 
+    {
         IEventRoute* route = it->second;
         if(route->isValid()) route->route(ev);
 
         if(!sentry) return;
     }
-
-/*
-    // The sentry will set the Signal to the sending state and
-    // reset it to not-sending upon destruction. In the sending
-    // state, removing connection will leave invalid connections
-    // in the connection list to keep the iterator valid, but mark
-    // the Signal dirty. If the Signal is dirty, all invalid
-    // connections will be removed by the Sentry when it destructs..
-    Signal::Sentry sentry(this);
-
-    RouteMap::iterator it = _routes.begin();
-    while( true )
-    {
-        if( it == _routes.end() )
-            return;
-
-        if(it->first != 0)
-            break;
-
-        // The following scenarios must be considered when the
-        // slot is called:
-        // - The slot might get deleted and thus disconnected from
-        //   this signal
-        // - The slot might delete this signal and we must end
-        //   calling any slots immediately
-        // - A new Connection might get added to this Signal in
-        //   the slot
-        IEventRoute* route = it->second;
-        if( route->valid() )
-            route->route(ev);
-
-        // if this signal gets deleted by the slot, the Sentry
-        // will be detached. In this case we bail out immediately
-        if( !sentry )
-            return;
-
-        ++it;
-    }
-
-    const std::type_info& ti = ev.typeInfo();
-
-    it = _routes.lower_bound( &ti );
-    while(it != _routes.end() && *(it->first) == ti)
-    {
-        IEventRoute* route = it->second;
-
-        if(route)
-            route->route(ev);
-
-        ++it;
-
-        // if this signal gets deleted by the slot, the Sentry
-        // will be detached. In this case we bail out immediately
-        if( !sentry )
-            return;
-    }
-*/
 }
 
 
@@ -363,7 +297,7 @@ void Signal<const Pt::Event&>::disconnect()
     {
         IEventRoute* route = it->second;
 
-        if( ! route->connection().isValid() || route->connection().sender() != this ) 
+        if( ! route->isValid() || route->connection().sender() != this ) 
         {
             continue;
         }
@@ -418,7 +352,6 @@ void Signal<const Pt::Event&>::addRoute(const std::type_info* ti, IEventRoute* r
 {
     RouteMap::value_type elem(ti, route);
     _routes.insert( elem );
-    //_routes.insert( std::make_pair(ti, route) );
 }
 
 
@@ -451,4 +384,4 @@ void Signal<const Pt::Event&>::removeRoute(const std::type_info* ti, const Slot&
     }
 }
 
-}
+} // namespace Pt

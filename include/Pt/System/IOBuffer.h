@@ -91,7 +91,7 @@ class PT_SYSTEM_API IOBufferImpl
 };
 
 class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
-               , public Connectable
+                             , public Connectable
 {
     friend class IOBufferImpl;
 

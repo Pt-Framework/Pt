@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004-2011 Marc Boris Duerner
+ * Copyright (C) 2004-2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,7 +36,7 @@
 
 namespace std {
 
-// gcc 3.4.x violates the c++ standard by requiring a __numpunct_cache
+// gcc 3.4.x requires a __numpunct_cache
 template <typename T>
 struct __numpunct_cache;
 
@@ -50,11 +50,12 @@ class PT_API numpunct<Pt::Char> : public locale::facet {
         typedef Pt::Char char_type;
         typedef basic_string<Pt::Char> string_type;
 
-        //#if __GLIBCXX__ <= 20051201 && __GLIBCXX__ >= 20040419
+        // __GLIBCXX__ <= 20051201 && __GLIBCXX__ >= 20040419
         typedef __numpunct_cache<Pt::Char>  __cache_type;
-        //#endif
 
         static locale::id id;
+        
+        // NOTE: rouguwave solaris
         virtual locale::id& __get_id (void) const { return id; }
 
     public:
@@ -259,6 +260,8 @@ class PT_API num_get< Pt::Char,
         typedef ctype_base::mask mask;
 
         static locale::id id;
+
+        // NOTE: rouguwave solaris
         virtual locale::id& __get_id (void) const { return id; }
 
     public:
@@ -356,6 +359,8 @@ class PT_API codecvt<Pt::Char, char, Pt::MBState> : public codecvt_base, public 
 
     public:
         static locale::id id;
+
+        // NOTE: rouguwave solaris
         virtual locale::id& __get_id (void) const { return id; }
 
     public:
@@ -448,6 +453,8 @@ class PT_API codecvt<char, char, Pt::MBState> : public codecvt_base, public loca
 
     public:
         static locale::id id;
+
+        // NOTE: rouguwave solaris
         virtual locale::id& __get_id (void) const { return id; }
 
     public:

@@ -27,9 +27,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/Settings.h"
-#include "SettingsReader.h"
-#include "SettingsWriter.h"
+#include <Pt/Settings.h>
+#include <SettingsReader.h>
+#include <SettingsWriter.h>
 
 namespace Pt {
 
@@ -56,4 +56,4 @@ void Settings::save(std::basic_ostream<Pt::Char>& os ) const
     writer.write(*this);
 }
 
-}
+} // namespace Pt

@@ -109,7 +109,22 @@ class PT_API Settings : private SerializationInfo
                     return Entry(&si);
                 }
 
+                Entry add(const char* name)
+                {
+                    if( ! _si )
+                        return Entry();
+
+                    SerializationInfo& si = _si->addMember(name);
+                    return Entry(&si);
+                }
+
                 void remove(const std::string& name)
+                {
+                    if( _si )
+                        _si->removeMember(name);
+                }
+                
+                void remove(const char* name)
                 {
                     if( _si )
                         _si->removeMember(name);
@@ -141,8 +156,22 @@ class PT_API Settings : private SerializationInfo
                     SerializationInfo* si = _si->findMember(name);
                     return Entry(si);
                 }
+                
+                Entry entry(const char* name) const
+                {
+                    if( ! _si )
+                        return this->end();
 
+                    SerializationInfo* si = _si->findMember(name);
+                    return Entry(si);
+                }
+                
                 Entry operator[] (const std::string& name) const
+                {
+                    return this->entry(name);
+                }
+
+                Entry operator[] (const char* name) const
                 {
                     return this->entry(name);
                 }
@@ -221,7 +250,21 @@ class PT_API Settings : private SerializationInfo
                     return ConstEntry(si);
                 }
 
+                ConstEntry entry(const char* name) const
+                {
+                    if( ! _si )
+                        return end();
+
+                    const SerializationInfo* si = _si->findMember(name);
+                    return ConstEntry(si);
+                }
+
                 ConstEntry operator[] (const std::string& name) const
+                {
+                    return this->entry(name);
+                }
+
+                ConstEntry operator[] (const char* name) const
                 {
                     return this->entry(name);
                 }
@@ -284,7 +327,17 @@ class PT_API Settings : private SerializationInfo
             return root().entry(name);
         }
 
+        ConstEntry entry(const char* name) const
+        {
+            return root().entry(name);
+        }
+
         ConstEntry operator[] (const std::string& name) const
+        {
+            return this->entry(name);
+        }
+
+        ConstEntry operator[] (const char* name) const
         {
             return this->entry(name);
         }
@@ -295,7 +348,18 @@ class PT_API Settings : private SerializationInfo
             return Entry(si);
         }
 
+        Entry entry(const char* name)
+        {
+            SerializationInfo* si = this->findMember(name);
+            return Entry(si);
+        }
+
         Entry operator[] (const std::string& name)
+        {
+            return this->entry(name);
+        }
+
+        Entry operator[] (const char* name)
         {
             return this->entry(name);
         }

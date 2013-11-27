@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004-2007 by Marc Boris Duerner
+ * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,6 +30,7 @@
 #define Pt_Delegate_h
 
 #include <Pt/Void.h>
+#include <Pt/Slot.h>
 #include <Pt/Function.h>
 #include <Pt/Method.h>
 #include <Pt/ConstMethod.h>

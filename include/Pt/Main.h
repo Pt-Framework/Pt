@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_MAIN_H
 #define PT_MAIN_H
 
@@ -35,7 +36,6 @@
 #endif
 
 #ifdef __cplusplus_winrt
-
 [Platform::MTAThread]
 int main(int, char**);
 #endif
@@ -80,6 +80,5 @@ int wmain(int argc, wchar_t* wargv[])
     return ret;
 }
 #endif
-
 
 #endif

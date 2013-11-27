@@ -37,8 +37,6 @@ namespace Pt {
 
 #include <Pt/Method.tpp>
 
-} // !namespace Pt
-
-
+} // namespace Pt
 
 #endif

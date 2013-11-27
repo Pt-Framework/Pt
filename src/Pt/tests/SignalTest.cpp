@@ -104,24 +104,24 @@ class SignalTest : public Pt::Unit::TestSuite
         void Disconnect()
         {
             Pt::Signal<> sn;
-            connect(sn, *this, &SignalTest::method0);
+            sn += Pt::slot(*this, &SignalTest::method0);
             sn -= Pt::slot(*this, &SignalTest::method0);
             PT_UNIT_ASSERT(sn.connectionCount() == 0);
 
-            connect(sn, *this, &SignalTest::constMethod0);
+            sn += Pt::slot(*this, &SignalTest::constMethod0);
             sn -= Pt::slot(*this, &SignalTest::constMethod0);
             PT_UNIT_ASSERT(sn.connectionCount() == 0);
 
-            connect(sn, &function0);
+            sn += Pt::slot(&function0);
             sn -= Pt::slot(&function0);
             PT_UNIT_ASSERT(sn.connectionCount() == 0);
         }
 
         void DisconnectWhileSend()
         {
-            connect(*_caller, *this, &SignalTest::method0);
-            connect(*_caller, *this, &SignalTest::disconnectCaller);
-            connect(*_caller, *this, &SignalTest::method0);
+            *_caller += Pt::slot(*this, &SignalTest::method0);
+            *_caller += Pt::slot(*this, &SignalTest::disconnectCaller);
+            *_caller += Pt::slot(*this, &SignalTest::method0);
 
             _caller->send();
             PT_UNIT_ASSERT(_caller->connectionCount() == 0);
@@ -136,7 +136,7 @@ class SignalTest : public Pt::Unit::TestSuite
         {
             Callee* recv = new Callee;
             Pt::Signal<> signal;
-            connect( signal, slot(*recv, &Callee::slot0) );
+            signal += Pt::slot(*recv, &Callee::slot0);
             PT_UNIT_ASSERT(signal.connectionCount() == 1);
 
             // A deleted receiver must remove itself from a signal
@@ -146,7 +146,7 @@ class SignalTest : public Pt::Unit::TestSuite
 
             // A signal must call its slot when connected
             recv = new Callee;
-            Pt::Connection connection = connect(signal, slot(*recv, &Callee::slot0) );
+            Pt::Connection connection = signal += Pt::slot(*recv, &Callee::slot0);
             signal.send();
             PT_UNIT_ASSERT( recv->count() == 1);
 
@@ -196,8 +196,8 @@ class SignalTest : public Pt::Unit::TestSuite
             Pt::Signal<> signal1;
             Pt::Signal<> signal2;
 
-            connect( signal1, slot(signal2) );
-            connect( signal2, slot(*recv, &Callee::slot0) );
+            signal1 += Pt::slot(signal2);
+            signal2 += Pt::slot(*recv, &Callee::slot0);
 
             // Slot must be called via signal chain
             signal1.send();
@@ -213,8 +213,8 @@ class SignalTest : public Pt::Unit::TestSuite
             Pt::Signal<>* signal2 = new Pt::Signal<>;
             Pt::Signal<> signal3;
 
-            Pt::Connection connection1 = connect(signal1, *signal2);
-            Pt::Connection connection2 = connect(*signal2, callee, &Callee::slot0);
+            Pt::Connection connection1 = signal1 += Pt::slot(*signal2);
+            Pt::Connection connection2 = *signal2 += Pt::slot(callee, &Callee::slot0);
 
             signal3 = *signal2;
             delete signal2;
@@ -225,11 +225,11 @@ class SignalTest : public Pt::Unit::TestSuite
 
         void DeleteWhileSend()
         {
-            connect(*_caller, *this, &SignalTest::method0);
-            connect(*_caller, *this, &SignalTest::deleteCallee );
-            connect(*_caller, *this, &SignalTest::method0);
-            connect(*_caller, *this, &SignalTest::deleteCaller);
-            connect(*_caller, *this, &SignalTest::method0);
+            *_caller += Pt::slot(*this, &SignalTest::method0);
+            *_caller += Pt::slot(*this, &SignalTest::deleteCallee );
+            *_caller += Pt::slot(*this, &SignalTest::method0);
+            *_caller += Pt::slot(*this, &SignalTest::deleteCaller);
+            *_caller += Pt::slot(*this, &SignalTest::method0);
 
             _caller->send();
         }

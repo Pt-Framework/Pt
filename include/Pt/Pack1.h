@@ -27,26 +27,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
-
 #if defined (__GNUC__)
     #define PT_PACKED __attribute__ ((packed))
 #elif defined (_MSC_VER) || defined (__MWERKS_SYMBIAN__)
+    #define PT_PACKED
+
     #pragma pack(push, 1)
-    #ifndef PT_PACKED
-        #define PT_PACKED
-    #endif
+    
     #if ( _MSC_VER >= 800 )
         #pragma warning(disable:4103)
     #endif
 #elif defined(__INTEL_COMPILER) || defined(__xlC__)
-    #pragma pack(1)
-    #ifndef PT_PACKED
-        #define PT_PACKED
-    #endif
-#elif defined(__SUNPRO_C) || defined (__SUNPRO_CC)
-    #pragma pack(1)
     #define PT_PACKED
+
+    #pragma pack(1)
+#elif defined(__SUNPRO_C) || defined (__SUNPRO_CC)
+    #define PT_PACKED
+
+    #pragma pack(1)
 #else
-    #error MACRO FOR PACKING HAS NOT BEEN DEFINED!!
+    #error PT_PACKED not defined
 #endif

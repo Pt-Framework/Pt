@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_SerializationSurrogate_h
 #define Pt_SerializationSurrogate_h
 
@@ -50,6 +51,10 @@ class SerializationSurrogate
 
     protected:
         SerializationSurrogate(const std::string& typeName)
+        : _typeName(typeName)
+        {}
+
+        SerializationSurrogate(const char* typeName)
         : _typeName(typeName)
         {}
 

@@ -1,59 +1,59 @@
 
 namespace Pt {
 
-    /** @brief Connects to one slot and handle return value.
+/** @brief Connects to one slot and handle return value.
 
-        Delegates can only be connected to one slot, but have the advantage
-        that they return the return value of the connected slot when called.
-        There are partial specializations of this class template for up to 
-        ten arguments.
+    Delegates can only be connected to one slot, but have the advantage
+    that they return the return value of the connected slot when called.
+    There are partial specializations of this class template for up to 
+    ten arguments.
 
-        \ingroup sigslot
-    */
-    template < typename R, typename ARGUMENTS>
-    class Delegate : public Connectable
-    {
-        public:
-            //! @brief Default Constructor.
-            Delegate();
+    \ingroup sigslot
+*/
+template < typename R, typename ARGUMENTS>
+class Delegate : public Connectable
+{
+    public:
+        //! @brief Default Constructor.
+        Delegate();
 
-            /** @brief Deeply copies the other %Delegate. 
-            */
-            Delegate(const Delegate& rhs);
+        /** @brief Deeply copies the other %Delegate. 
+        */
+        Delegate(const Delegate& rhs);
 
-            /** @brief Connects this object to the given slot and returns that Connection. 
-            */
-            Connection connect(const BasicSlot<R,ARGUMENTS>& slot);
+        /** @brief Connects this object to the given slot and returns that Connection. 
+        */
+        Connection connect(const BasicSlot<R,ARGUMENTS>& slot);
 
-            /** @brief Disconnects from current target.
-            */
-            void disconnect();
+        /** @brief Disconnects from current target.
+        */
+        void disconnect();
 
-            /** @brief Disconnects from the target.
-            */
-            void disconnect(const BasicSlot<R,ARGUMENTS>& slot);
+        /** @brief Disconnects from the target.
+        */
+        void disconnect(const BasicSlot<R,ARGUMENTS>& slot);
 
-            /** @brief Returns true if connected to a target.
-            */
-            bool isConnected() const;
+        /** @brief Returns true if connected to a target.
+        */
+        bool isConnected() const;
 
-            /** @brief Calls the slot connected to the %Delegate
+        /** @brief Calls the slot connected to the %Delegate
 
-                Passes on all arguments to the connected slot and returns the return value
-                of that slot. If no slot is connect then an exception is thrown.
-            */
-            inline R call(ARGUMENTS) const;
+            Passes on all arguments to the connected slot and returns the return value
+            of that slot. If no slot is connect then an exception is thrown.
+        */
+        inline R call(ARGUMENTS) const;
 
-            /** @brief Invoke the slot connected to the %Delegate
+        /** @brief Invoke the slot connected to the %Delegate
 
-                Passes on all arguments to the connected slot and ignores the return value. If
-                No slot is connected, the call is silently ignored.
-            */
-            inline void invoke(ARGUMENTS) const;
+            Passes on all arguments to the connected slot and ignores the return value. If
+            No slot is connected, the call is silently ignored.
+        */
+        inline void invoke(ARGUMENTS) const;
 
-            //! @brief Same as call()
-            R operator()(ARGUMENTS) const;
-    };
+        //! @brief Same as call()
+        R operator()(ARGUMENTS) const;
+};
 
 /** @brief  Wraps %Delegate objects so that they can act as Slots.
 
@@ -91,35 +91,10 @@ class DelegateSlot : public BasicSlot<R, ARGUMENTS>
         mutable ConstMethod<R, Delegate<R, ARGUMENTS>, ARGUMENTS > _method;
 };
 
-
-/** @brief Creates a %DelegateSlot object from an equivalent %Delegate.
+/** @brief Connect a %Delegate to a slot.
     @ingroup sigslot
 */
 template <typename R, typename ARGS>
-DelegateSlot<R, ARGS> slot( Delegate<R, ARGS>& delegate );
+Connection operator+=(Delegate<R, ARGS>& delegate, const BasicSlot<R, ARGS>& slot);
 
-/** @brief Connect a %Delegate to another %Delegate.
-    @ingroup sigslot
-*/
-template <typename R, typename ARGS>
-Connection connect(Delegate<R, ARGS>& delegate, Delegate<R, ARGS>& receiver);
-
-/** @brief Connect a %Delegate to a function.
-    @ingroup sigslot
-*/
-template <typename R, typename ARGS>
-Connection connect(Delegate<R, ARGS>& delegate, R(*func)(ARGS));
-
-/** @brief Connect a %Delegate to a member function.
-    @ingroup sigslot
-*/
-template <typename R, class BaseT, class ClassT, typename ARGS>
-Connection connect(Delegate<R, ARGS>& delegate, BaseT& object, R(ClassT::*memFunc)(ARGS));
-
-/** @brief Connect a %Delegate to a const member function.
-    @ingroup sigslot
-*/
-template <typename R, class BaseT, class ClassT, typename ARGS>
-Connection connect(Delegate<R>& delegate, BaseT& object, R(ClassT::*memFunc)(ARGS) const);
-
-} // !namespace Pt
+} // namespace Pt

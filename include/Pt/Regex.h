@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Marc Boris Duerner
+ * Copyright (C) 2010-2013 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,8 +31,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
-#include <Pt/SmartPtr.h>
-#include <cstdlib>
+#include <cstddef>
 
 struct pt_regexp;
 struct pt_regmatch_t;
@@ -87,6 +86,10 @@ class PT_API Regex
 
         bool match(const Pt::String& str) const;
 
+        bool match(const Char* str, RegexSMatch& sm) const;
+
+        bool match(const Char* str) const;
+
     private:
         pt_regexp* _expr;
 };
@@ -113,15 +116,15 @@ class PT_API RegexSMatch
 
         /** @brief Returns the number of matches.
         */
-        unsigned size() const;
+        std::size_t size() const;
 
-        unsigned maxSize() const;
+        std::size_t maxSize() const;
 
-        unsigned position(unsigned n = 0) const;
+        std::size_t position(std::size_t n = 0) const;
 
-        unsigned length(unsigned n = 0) const;
+        std::size_t length(std::size_t n = 0) const;
 
-        Pt::String str(unsigned n = 0) const;
+        Pt::String str(std::size_t n = 0) const;
 
         /** @brief Formats a string according to a format specifier.
 
@@ -131,8 +134,8 @@ class PT_API RegexSMatch
         Pt::String format(const Pt::String& str) const;
 
     private:
-        const Pt::String* _str;
-        unsigned _size;
+        const Char* _str;
+        std::size_t _size;
         pt_regmatch_t* _match;
 };
 

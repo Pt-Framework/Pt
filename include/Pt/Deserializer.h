@@ -25,12 +25,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Deserializer_h
 #define Pt_Deserializer_h
 
 #include <Pt/Api.h>
 #include <Pt/Composer.h>
 #include <Pt/Formatter.h>
+#include <Pt/NonCopyable.h>
 #include <Pt/SerializationContext.h>
 
 namespace Pt {
@@ -39,7 +41,7 @@ namespace Pt {
 
     @ingroup Serialization
 */
-class PT_API Deserializer
+class PT_API Deserializer : private NonCopyable
 {
     public:
         Deserializer();
@@ -129,6 +131,7 @@ class PT_API Deserializer
         Composer* _current;
         void* _mem;
         std::size_t _memsize;
+        void* _reserved0; // allocator
 };
 
 } // namespace Pt

@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2005-2006 by Marc Boris Duerner
- * Copyright (C)      2006 by Aloysius Indrayanto
+ * Copyright (C) 2005-2013 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -105,4 +104,3 @@ namespace Pt {
 } // namespace Pt
 
 #endif
-

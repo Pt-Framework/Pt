@@ -103,7 +103,7 @@ class BasicDecomposer : public Decomposer
             _si.setName(name);
 
             Pt::SerializationContext* ctx = _si.context();
-            if( ctx && ctx->referencingEnabled() )
+            if( ctx && ctx->isReferencing() )
             {
                 *ctx << Pt::save() <<= type;
             }

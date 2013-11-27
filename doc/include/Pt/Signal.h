@@ -1,18 +1,6 @@
 #ifndef Pt_Signal_h
 #define Pt_Signal_h
 
-#include <Pt/Api.h>
-#include <Pt/Void.h>
-#include <Pt/Event.h>
-#include <Pt/Function.h>
-#include <Pt/Method.h>
-#include <Pt/ConstMethod.h>
-#include <Pt/Connectable.h>
-
-#include <map>
-#include <list>
-#include <algorithm>
-
 namespace Pt {
 
 /** @brief Multicast %Signal to call multiple slots.
@@ -23,7 +11,8 @@ namespace Pt {
     @ingroup sigslot
 */
 template <typename ARGUMENTS>
-class Signal : public SignalBase {
+class Signal : public Connectable 
+{
     public:
         typedef Invokable<ARGUMENTS> InvokableT;
 
@@ -41,6 +30,10 @@ class Signal : public SignalBase {
         */
         template <typename R>
         Connection connect(const BasicSlot<R, ARGUMENTS>& slot);
+
+        /** @brief Disconnects from current slots.
+        */
+        void disconnect();
 
         /** @brief Disconnects from a slot
         */
@@ -60,7 +53,6 @@ class Signal : public SignalBase {
         */
         inline void operator()(ARGUMENTS args) const;
 };
-
 
 /** @brief  Wraps %Signal objects so that they can act as Slots.
 
@@ -98,61 +90,18 @@ class SignalSlot : public BasicSlot<R, ARGUMENTS>
         mutable ConstMethod<void, Signal<ARGUMENTS>, ARGUMENTS > _method;
 };
 
-
-/** @brief  Creates a %SignalSlot object from an equivalent %Signal.
-    @ingroup sigslot
-*/
-template <typename ARGS>
-SignalSlot<ARGS> slot( Signal<ARGS> & signal );
-
-/** @brief  Connects a %Signal to a function.
+/** @brief  Connects a %Signal to a slot.
     @ingroup sigslot
 */
 template <typename R, typename ARGS>
-Connection connect(Signal<ARGS>& signal, R(*func)(ARGS));
+Connection operator+=(Signal<ARGS>& signal, const BasicSlot<R, ARGS>& slot);
 
-/** @brief  Connects a %Signal to a member function.
+/** @brief  Disconnects a %Signal fro a slot.
     @ingroup sigslot
 */
-template <typename R, class BaseT, class ClassT, class ARGS>
-Connection connect(Signal<ARGS>& signal, BaseT& object, R(ClassT::*memFunc)(ARGS));
+template <typename R, typename ARGS>
+void operator-=(Signal<ARGS>& signal, const BasicSlot<R, ARGS>& slot);
 
-/** @brief  Connects a %Signal to a const member function.
-    @ingroup sigslot
-*/
-template <typename R, class BaseT, class ClassT, class ARGS>
-Connection connect(Signal<ARGS>& signal, BaseT& object, R(ClassT::*memFunc)(ARGS) const);
-
-/** @brief  Connects a %Signal to another %Signal.
-    @ingroup sigslot
-*/
-template <class ARGS>
-Connection connect(Signal<ARGS>& sender, Signal<ARGS>& receiver);
-
-/** @brief Disconnects a %Signal from a function
-    @ingroup sigslot
-*/
-template <typename R,class ARGS>
-void disconnect(Signal<ARGS>& signal, R(*func)(ARGS));
-
-/** @brief Disconnects a %Signal from a member function
-    @ingroup sigslot
-*/
-template <typename R, class BaseT, class ClassT,class ARGS>
-void disconnect(Signal<ARGS>& signal, BaseT& object, R(ClassT::*memFunc)(ARGS));
-
-/** @brief Disconnects a %Signal from a const member function
-    @ingroup sigslot
-*/
-template <typename R, class BaseT, class ClassT, class ARGS>
-void disconnect(Signal<ARGS>& signal, BaseT& object, R(ClassT::*memFunc)(ARGS) const);
-
-/** @brief Disconnects a %Signal from another %Signal
-    @ingroup sigslot
-*/
-template <class ARGS>
-void disconnect(Signal<ARGS>& sender, Signal<ARGS>& receiver);
-
-} // !namespace Pt
+} // namespace Pt
 
 #endif

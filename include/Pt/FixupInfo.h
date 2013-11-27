@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 by Dr. Marc Boris Duerner
+ * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_FixupInfo_h
 #define Pt_FixupInfo_h
 
@@ -69,7 +70,7 @@ class FixupInfo
         {
             if( _target == 0 || typeid(T) != *_type )
             {
-                throw SerializationError("type mismatch during pointer fixup");
+                throw SerializationError("fixup type mismatch");
             }
 
             return static_cast<T*>( _target );

@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2004-2006 by Dr. Marc Boris Duerner
- * Copyright (C) 2005 Stephan Beal
+ * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,59 +32,52 @@
 #include <Pt/Api.h>
 #include <Pt/Void.h>
 #include <Pt/Event.h>
+#include <Pt/Slot.h>
 #include <Pt/Function.h>
 #include <Pt/Method.h>
 #include <Pt/ConstMethod.h>
 #include <Pt/Connectable.h>
-
 #include <map>
-#include <list>
-#include <algorithm>
 
 namespace Pt {
 
-    /** @internal
-    */
-    class PT_API SignalBase : public Connectable
-    {
-        public:
-            struct PT_API Sentry
-            {
-                Sentry(SignalBase* signal);
+class PT_API SignalBase : public Connectable
+{
+    public:
+        struct PT_API Sentry
+        {
+            Sentry(SignalBase* signal);
 
-                ~Sentry();
+            ~Sentry();
 
-                void detach();
+            void detach();
 
-                bool operator!() const
-                { return _signal == 0; }
+            bool operator!() const
+            { return _signal == 0; }
 
-                SignalBase* _signal;
-            };
+            SignalBase* _signal;
+        };
 
-            SignalBase();
+        SignalBase();
 
-            ~SignalBase();
+        ~SignalBase();
 
-            SignalBase& operator=(const SignalBase& other);
+        SignalBase& operator=(const SignalBase& other);
 
-            // TODO: move to Signal<T...>
-            void disconnect();
+        virtual void onConnectionOpen(const Connection& c);
 
-            virtual void onConnectionOpen(const Connection& c);
+        virtual void onConnectionClose(const Connection& c);
 
-            virtual void onConnectionClose(const Connection& c);
+    protected:
+        void disconnectSlots();
 
-        protected:
-            void disconnectSlots();
+        void disconnectSlot(const Slot&);
 
-            void disconnectSlot(const Slot&);
-
-        private:
-            Sentry* _sentry;
-            bool _sending;
-            bool _dirty;
-    };
+    private:
+        Sentry* _sentry;
+        bool _sending;
+        bool _dirty;
+};
 
 #include <Pt/Signal.tpp>
 
@@ -168,14 +160,6 @@ class PT_API Signal<const Pt::Event&> : public Connectable
 
         void send(const Pt::Event& ev);
 
-        void disconnect();
-
-        template <typename R, typename EventT>
-        void disconnect(const BasicSlot<R, const EventT&>& slot)
-        {
-            this->removeRoute(slot);
-        }
-
         template <typename EventT>
         Connection connect( const BasicSlot<void, const EventT&>& slot )
         {
@@ -183,6 +167,14 @@ class PT_API Signal<const Pt::Event&> : public Connectable
             EventT* selectAddRouteOverload = 0;
             this->addRoute(conn, selectAddRouteOverload);
             return conn;
+        }
+
+        void disconnect();
+
+        template <typename R, typename EventT>
+        void disconnect(const BasicSlot<R, const EventT&>& slot)
+        {
+            this->removeRoute(slot);
         }
 
         virtual void onConnectionOpen(const Connection& c);
@@ -241,57 +233,6 @@ void operator -=(Signal<const Pt::Event&>& signal, const BasicSlot<R, const Pt::
     signal.disconnect( slot );
 }
 
-
-template <typename R>
-Connection connect(Signal<const Pt::Event&>& signal, R(*func)(const Pt::Event&))
-{
-    return signal.connect( slot(func) );
-}
-
-template <typename R, class BaseT, class ClassT>
-Connection connect( Signal<const Pt::Event&>& signal,
-                    BaseT& object, R(ClassT::*memFunc)(const Pt::Event&) )
-{
-    return signal.connect( slot(object, memFunc) );
-}
-
-template <typename R, class BaseT, class ClassT>
-Connection connect( Signal<const Pt::Event&>& signal,
-                    BaseT& object, R(ClassT::*memFunc)(const Pt::Event&) const )
-{
-    return signal.connect( slot(object, memFunc) );
-}
-
-inline Connection connect(Signal<const Pt::Event&>& sender, Signal<const Pt::Event&>& receiver)
-{
-    return sender.connect( slot(receiver) );
-}
-
-template <typename R>
-void disconnect(Signal<const Pt::Event&>& signal, R(*func)(const Pt::Event&))
-{
-    signal.disconnect( slot(func) );
-}
-
-template <typename R, class BaseT, class ClassT>
-void disconnect( Signal<const Pt::Event&>& signal,
-                    BaseT& object, R(ClassT::*memFunc)(const Pt::Event&) )
-{
-    signal.disconnect( slot(object, memFunc) );
-}
-
-template <typename R, class BaseT, class ClassT>
-void disconnect( Signal<const Pt::Event&>& signal,
-                    BaseT& object, R(ClassT::*memFunc)(const Pt::Event&) const )
-{
-    signal.disconnect( slot(object, memFunc) );
-}
-
-inline void disconnect(Signal<const Pt::Event&>& sender, Signal<const Pt::Event&>& receiver)
-{
-    sender.disconnect( slot(receiver) );
-}
-
-} // !namespace Pt
+} // namespace Pt
 
 #endif

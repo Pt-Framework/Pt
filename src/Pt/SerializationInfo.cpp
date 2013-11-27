@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 by Dr. Marc Boris Duerner
+ * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -598,7 +598,7 @@ void SerializationInfo::setReference(const void* ref)
 {
     if( _type == Context )
     {
-        if( _context && this->context()->referencingEnabled() )
+        if( _context && this->context()->isReferencing() )
             this->context()->prepareId(ref);
 
         return;
@@ -1579,7 +1579,7 @@ void SerializationInfo::setLongDouble(long double value)
 
 bool SerializationInfo::beginSave(const void* p)
 {
-    if( ! this->context() || ! this->context()->referencingEnabled() )
+    if( ! this->context() || ! this->context()->isReferencing() )
         return true;
 
     if( _type == Context )
@@ -1618,7 +1618,7 @@ bool SerializationInfo::beginSave(const void* p)
 
 void SerializationInfo::finishSave()
 {
-    if( _type == Context && this->context() && this->context()->referencingEnabled() )
+    if( _type == Context && this->context() && this->context()->isReferencing() )
     {
         this->context()->finishSave();
         return;
@@ -1654,7 +1654,7 @@ void SerializationInfo::rebindFixup(void* obj) const
 
 void SerializationInfo::beginLoad(void* p, const std::type_info& ti) const
 {
-    if(_context && _context->referencingEnabled() && (_parent == 0 || _parent->_bound) )
+    if(_context && _context->isReferencing() && (_parent == 0 || _parent->_bound) )
     {
         _bound = true;
         _context->beginLoad(p, ti, _Name, _id);
@@ -1664,7 +1664,7 @@ void SerializationInfo::beginLoad(void* p, const std::type_info& ti) const
 
 void SerializationInfo::finishLoad() const
 {
-    if(_context && _context->referencingEnabled() && _bound)
+    if(_context && _context->isReferencing() && _bound)
     {
         _context->finishLoad();
     }

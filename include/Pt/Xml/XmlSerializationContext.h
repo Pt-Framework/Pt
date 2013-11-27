@@ -50,47 +50,48 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
         //! @brief Destructor.
         ~XmlSerializationContext();
 
+    protected:
         // inherit docs
-        virtual void clear();
+        virtual void onClear();
 
-    public:
         // inherit docs
-        virtual bool beginSave(const void* p, const std::string& name);
+        virtual bool onBeginSave(const void* p, const char* name);
         
         // inherit docs
-        virtual void finishSave();
+        virtual void onFinishSave();
         
         // inherit docs
-        virtual void prepareId(const void* p);
+        virtual void onPrepareId(const void* p);
         
         // inherit docs
-        virtual const char* getId(const void* p);
+        virtual const char* onGetId(const void* p);
         
         // inherit docs
-        virtual const char* makeId(const void* p);
+        virtual const char* onMakeId(const void* p);
 
-    public:
+    protected:
         // inherit docs
-        virtual void beginLoad(void* obj, const std::type_info& fixupInfo,
-                               const std::string& name, const std::string& id);
+        virtual void onBeginLoad(void* obj, const std::type_info& fixupInfo,
+                                 const char* name, const char* id);
         // inherit docs
-        virtual void finishLoad();
+        virtual void onFinishLoad();
         
         // inherit docs
-        virtual void rebindTarget(const char* id, void* obj);
+        virtual void onRebindTarget(const char* id, void* obj);
         
         // inherit docs
-        virtual void rebindFixup(const std::string& id, void* obj, void* prev);
+        virtual void onRebindFixup(const char* id, void* obj, void* prev);
         
         // inherit docs
-        virtual void prepareFixup(void* obj, const std::string& id, FixupInfo::FixupHandler, unsigned m);
+        virtual void onPrepareFixup(void* obj, const char* id, FixupInfo::FixupHandler, unsigned m);
         
         // inherit docs
-        virtual void fixup();
+        virtual void onFixup();
 
     public:
         class Fixup;
 
+    private:
         std::map<const void*, unsigned> _idmap;
         std::map<const void*, std::string> _refmap;
         std::vector<Fixup*> _targets;

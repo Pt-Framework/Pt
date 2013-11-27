@@ -26,11 +26,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/SerializationContext.h"
-#include "Pt/SerializationSurrogate.h"
-#include "Pt/SerializationError.h"
-#include "Pt/PoolAllocator.h"
-
+#include <Pt/SerializationContext.h>
+#include <Pt/SerializationSurrogate.h>
+#include <Pt/SerializationError.h>
+#include <Pt/PoolAllocator.h>
 #include <map>
 #include <cassert>
 
@@ -40,12 +39,10 @@ class SerializationContextImpl
 {
     public:
         SerializationContextImpl()
-        : _limit(64)
-        , _alloc(sizeof(SerializationInfo))
+        : _alloc(sizeof(SerializationInfo))
 
         { }
 
-        size_t _limit;
         MemoryPool _alloc;
         std::map<Pt::TypeInfo, SerializationSurrogate*> _surrmap;
 };
@@ -69,18 +66,6 @@ SerializationContext::~SerializationContext()
     }
 
     delete _cache;
-}
-
-
-size_t SerializationContext::limit() const
-{
-    return _cache->_limit;
-}
-
-
-void SerializationContext::setLimit(size_t n)
-{
-    _cache->_limit = n;
 }
 
 
@@ -122,68 +107,68 @@ const SerializationSurrogate* SerializationContext::getSurrogate(const std::type
 }
 
 
-bool SerializationContext::beginSave(const void* p, const std::string& name)
+void SerializationContext::onClear()
+{
+}
+
+
+bool SerializationContext::onBeginSave(const void* p, const char* name)
 {
     return true;
 }
 
 
-void SerializationContext::finishSave()
+void SerializationContext::onFinishSave()
 {
 }
 
 
-void SerializationContext::prepareId(const void* p)
+void SerializationContext::onPrepareId(const void* p)
 {
     throw SerializationError("missing unlink information");
 }
 
 
-const char* SerializationContext::getId(const void* p)
+const char* SerializationContext::onGetId(const void* p)
 {
     throw SerializationError("missing unlink information");
     return 0;
 }
 
 
-const char* SerializationContext::makeId(const void* p)
+const char* SerializationContext::onMakeId(const void* p)
 {
     return "";
 }
 
 
-void SerializationContext::beginLoad(void* obj, const std::type_info& fixupInfo,
-                                     const std::string& name, const std::string& id)
+void SerializationContext::onBeginLoad(void* obj, const std::type_info& fixupInfo,
+                                       const char* name, const char* id)
 {
 }
 
 
-void SerializationContext::finishLoad()
+void SerializationContext::onFinishLoad()
 {
 }
 
 
-void SerializationContext::rebindTarget(const char* id, void* obj)
+void SerializationContext::onRebindTarget(const char* id, void* obj)
 {
 }
 
 
-void SerializationContext::rebindFixup(const std::string& id, void* obj, void* prev)
+void SerializationContext::onRebindFixup(const char* id, void* obj, void* prev)
 {
 }
 
 
-void SerializationContext::prepareFixup( void* obj, const std::string& id, FixupInfo::FixupHandler, unsigned mid)
+void SerializationContext::onPrepareFixup( void* obj, const char* id, FixupInfo::FixupHandler, unsigned mid)
 {
 }
 
 
-void SerializationContext::fixup()
-{
-}
-
-
-void SerializationContext::clear()
+void SerializationContext::onFixup()
 {
 }
 

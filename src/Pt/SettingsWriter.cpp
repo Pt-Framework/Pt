@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2007 by Dr. Marc Boris Duerner
+ * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "SettingsWriter.h"
 #include <Pt/Convert.h>
 
@@ -88,7 +89,7 @@ Pt::String toString(const Pt::SerializationInfo& si)
     return s;
 }
 
-}
+} // namespace
 
 namespace Pt {
 
@@ -110,10 +111,10 @@ void SettingsWriter::write(const SerializationInfo& si)
             // Array types may have no instance-names
             if( it->findMember("") )
             {
-                *_os << Pt::String::widen( it->name() ) << Pt::String(L" = ");
-                *_os << Pt::String(L"{ ");
+                *_os << Pt::String::widen( it->name() ) << Char(' ') << Char('=') << Char(' ');
+                *_os << Char('{') << Char(' ');
                 this->writeParent( *it, "");
-                *_os << Pt::String(L" }") << std::endl;
+                *_os << Char(' ') << Char('}') << std::endl;
                 continue;
             }
 
@@ -138,7 +139,7 @@ void SettingsWriter::writeParent(const SerializationInfo& sd, const std::string&
 
             // only comma separate array members (which have no name)
             if( separate && name.empty() )
-                *_os << Pt::String(L", ");
+                *_os << Char(',') << Char(' ');
 
              value = toString(*it);
              if( ! prefix.empty() )
@@ -151,14 +152,14 @@ void SettingsWriter::writeParent(const SerializationInfo& sd, const std::string&
         }
         else if( it->isStruct() || it->isSequence() )
         {
-            *_os << Pt::String::widen( prefix ) << '.' << Pt::String::widen( it->name() ) << Pt::String(L" = ");
+            *_os << Pt::String::widen( prefix ) << Char('.') << Pt::String::widen( it->name() ) << Char(' ') << Char('=') << Char(' ');
 
             if( ! it->isSequence() )
                 *_os << Pt::String::widen( it->typeName() );
                 
-            *_os << Pt::String(L"{ ");
+            *_os << Char('{') << Char(' ');
             this->writeChild(*it);
-            *_os << Pt::String(L" }") << std::endl;
+            *_os << Char(' ') << Char('}') << std::endl;
         }
 
         separate = true;
@@ -175,7 +176,7 @@ void SettingsWriter::writeChild(const SerializationInfo& sd)
     for(it = sd.begin(); it != sd.end(); ++it)
     {
         if(separate)
-            *_os << Pt::String(L", ");
+            *_os << Char(',') << Char(' ');
 
         if( it->isScalar() )
         {
@@ -185,11 +186,11 @@ void SettingsWriter::writeChild(const SerializationInfo& sd)
         else if( it->isStruct() || it->isSequence() )
         {
             if( it->name()[0] != '\0' && ! sd.isSequence() )
-                *_os << Pt::String::widen( it->name() ) << Pt::String(L" = ");
+                *_os << Pt::String::widen( it->name() ) << Char(' ') << Char('=') << Char(' ');
 
-            *_os << Pt::String::widen( it->typeName() ) << Pt::String(L"{ ");
+            *_os << Pt::String::widen( it->typeName() ) << Char('{') << Char(' ') ;
             this->writeChild(*it);
-            *_os << Pt::String(L" }");
+            *_os << Char(' ') << Char('}');
         }
 
         separate = true;
@@ -218,27 +219,27 @@ void SettingsWriter::writeEntry(const std::string& name, const Pt::String& value
     if( type.empty() )
     {
         if( name.empty() == false)
-            *_os << Pt::String::widen(name) << Pt::String(L"=");
+            *_os << Pt::String::widen(name) << Char('="');
 
-        *_os  << Pt::String(L"\"");
+        *_os  << Char('\"');
         writeEscapedValue(*_os, value);
-        *_os << Pt::String(L"\"");
+        *_os << Char('\"');
 
         return;
     }
 
     if( name.empty() == false)
-        *_os << Pt::String::widen(name) << Pt::String(L" = ");
+        *_os << Pt::String::widen(name) << Char(' ') << Char('=') << Char(' ');
 
-    *_os << Pt::String::widen(type) << Pt::String(L"(\"");
+    *_os << Pt::String::widen(type) << Char('(') << Char('\"');
     writeEscapedValue(*_os, value);
-    *_os << Pt::String(L"\")");
+    *_os << Char('\"') << Char(')');
 }
 
 
 void SettingsWriter::writeSection(const Pt::String& prefix)
 {
-    *_os << Pt::String(L"[") << prefix << Pt::String(L"]") << std::endl;
+    *_os << Char('[') << prefix << Char(']') << std::endl;
 }
 
-}
+} // namespace Pt

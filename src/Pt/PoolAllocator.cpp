@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009-2010 by Bendri Batti
+ * Copyright (C) 2009-2012 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/PoolAllocator.h"
+#include <Pt/PoolAllocator.h>
 
 namespace Pt {
 
@@ -75,4 +76,4 @@ PoolAllocator::~PoolAllocator()
     }
 }
 
-}
+} // namespace Pt

@@ -33,10 +33,8 @@
 #include <cstddef>
 
 #if defined(_MSC_VER) && defined(_WIN32_WCE) 
-    #include <streambuf> 
-    template class PT_EXPORT std::basic_streambuf<char>; 
-
     // alternatively compile with /FORCE:multiple
+    template class PT_EXPORT std::basic_streambuf<char>; 
 #endif
 
 namespace Pt {

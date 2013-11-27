@@ -26,6 +26,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_REFCOUNTED_H
 #define PT_REFCOUNTED_H
 
@@ -35,64 +36,64 @@
 
 namespace Pt {
 
-    class RefCounted : private NonCopyable
-    {
-        public:
-            RefCounted()
-            : _refs(0)
-            { }
+class RefCounted : private NonCopyable
+{
+    public:
+        RefCounted()
+        : _refs(0)
+        { }
 
-            explicit RefCounted(unsigned refs)
-            : _refs(refs)
-            { }
+        explicit RefCounted(unsigned refs)
+        : _refs(refs)
+        { }
 
-            virtual ~RefCounted()
-            { }
+        virtual ~RefCounted()
+        { }
 
-            virtual unsigned addRef()
-            { return ++_refs; }
+        virtual unsigned addRef()
+        { return ++_refs; }
 
-            virtual void release()
-            {
-                if(--_refs == 0)
-                    delete this;
-            }
+        virtual void release()
+        {
+            if(--_refs == 0)
+                delete this;
+        }
 
-            unsigned refs() const
-            { return _refs; }
+        unsigned refs() const
+        { return _refs; }
 
-        private:
-            unsigned _refs;
-    };
+    private:
+        unsigned _refs;
+};
 
-  class AtomicRefCounted : private NonCopyable
-  {
-      public:
-            AtomicRefCounted()
-            : _refs(0)
-            { }
+class AtomicRefCounted : private NonCopyable
+{
+    public:
+        AtomicRefCounted()
+        : _refs(0)
+        { }
 
-            explicit AtomicRefCounted(unsigned refs)
-            : _refs(refs)
-            { }
+        explicit AtomicRefCounted(unsigned refs)
+        : _refs(refs)
+        { }
 
-            virtual ~AtomicRefCounted()
-            { }
+        virtual ~AtomicRefCounted()
+        { }
 
-            virtual int addRef()
-            { return atomicIncrement(_refs); }
+        virtual int addRef()
+        { return atomicIncrement(_refs); }
 
-            virtual void release()
-            { if (atomicDecrement(_refs) == 0) delete this; }
+        virtual void release()
+        { if (atomicDecrement(_refs) == 0) delete this; }
 
-            int refs() const
-            { return atomicGet(_refs); }
+        int refs() const
+        { return atomicGet(_refs); }
 
-      private:
-            mutable volatile atomic_t _refs;
-  };
+    private:
+        mutable volatile atomic_t _refs;
+};
 
-}
+} // namespace Pt
 
 #endif // PT_REFCOUNTED_H
 

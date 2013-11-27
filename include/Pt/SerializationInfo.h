@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 by Dr. Marc Boris Duerner
+ * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_SerializationInfo_h
 #define Pt_SerializationInfo_h
 
@@ -602,8 +603,6 @@ inline SerializationInfo::ConstIterator SerializationInfo::end() const
 }
 
 
-
-
 class SaveInfo
 {
     public:
@@ -662,8 +661,6 @@ inline void save(SaveInfo& si, const T& type)
         si.out() <<= type;
     }
 }
-
-
 
 
 class LoadInfo
@@ -732,7 +729,6 @@ template <typename T>
 inline void operator <<=(SerializationInfo& si, const T* ptr)
 {
     si.setReference( ptr );
-    //si.setTypeName( Pt::LiteralPtr<char>("reference") );
 }
 
 /** @brief Deserializes a bool
@@ -751,7 +747,6 @@ inline void operator >>=(const SerializationInfo& si, bool& n)
 inline void operator <<=(SerializationInfo& si, bool n)
 {
     si.setBool(n);
-    //si.setTypeName( Pt::LiteralPtr<char>("bool") );
 }
 
 
@@ -764,7 +759,6 @@ inline void operator >>=(const SerializationInfo& si, Pt::int8_t& n)
 inline void operator <<=(SerializationInfo& si, Pt::int8_t n)
 {
     si.setInt8(n);
-    //si.setTypeName( Pt::LiteralPtr<char>("char") );
 }
 
 
@@ -777,7 +771,6 @@ inline void operator >>=(const SerializationInfo& si, Pt::int16_t& n)
 inline void operator <<=(SerializationInfo& si, Pt::int16_t n)
 {
     si.setInt16(n);
-    //si.setTypeName( Pt::LiteralPtr<char>("int") );
 }
 
 
@@ -790,7 +783,6 @@ inline void operator >>=(const SerializationInfo& si, Pt::int32_t& n)
 inline void operator <<=(SerializationInfo& si, Pt::int32_t n)
 {
     si.setInt32(n);
-    //si.setTypeName( Pt::LiteralPtr<char>("int") );
 }
 
 
@@ -803,7 +795,6 @@ inline void operator >>=(const SerializationInfo& si, Pt::int64_t& n)
 inline void operator <<=(SerializationInfo& si, Pt::int64_t n)
 {
     si.setInt64(n);
-    //si.setTypeName( Pt::LiteralPtr<char>("int") );
 }
 
 
@@ -816,7 +807,6 @@ inline void operator >>=(const SerializationInfo& si, Pt::uint8_t& n)
 inline void operator <<=(SerializationInfo& si, Pt::uint8_t n)
 {
     si.setUInt8(n);
-    //si.setTypeName( Pt::LiteralPtr<char>("char") );
 }
 
 
@@ -829,7 +819,6 @@ inline void operator >>=(const SerializationInfo& si, Pt::uint16_t& n)
 inline void operator <<=(SerializationInfo& si, Pt::uint16_t n)
 {
     si.setUInt16(n);
-    //si.setTypeName( Pt::LiteralPtr<char>("int") );
 }
 
 
@@ -842,7 +831,6 @@ inline void operator >>=(const SerializationInfo& si, Pt::uint32_t& n)
 inline void operator <<=(SerializationInfo& si, Pt::uint32_t n)
 {
     si.setUInt32(n);
-    //si.setTypeName( Pt::LiteralPtr<char>("int") );
 }
 
 
@@ -855,7 +843,6 @@ inline void operator >>=(const SerializationInfo& si, Pt::uint64_t& n)
 inline void operator <<=(SerializationInfo& si, Pt::uint64_t n)
 {
     si.setUInt64(n);
-    //si.setTypeName( Pt::LiteralPtr<char>("int") );
 }
 
 /** @brief Deserializes a float value.
@@ -874,7 +861,6 @@ inline void operator >>=(const SerializationInfo& si, float& n)
 inline void operator <<=(SerializationInfo& si, float n)
 {
     si.setFloat(n);
-    //si.setTypeName( Pt::LiteralPtr<char>("double") );
 }
 
 
@@ -887,7 +873,6 @@ inline void operator >>=(const SerializationInfo& si, double& n)
 inline void operator <<=(SerializationInfo& si, double n)
 {
     si.setDouble(n);
-    //si.setTypeName( Pt::LiteralPtr<char>("double") );
 }
 
 
@@ -902,14 +887,12 @@ inline void operator >>=(const SerializationInfo& si, char& ch)
 inline void operator <<=(SerializationInfo& si, char ch)
 {
     si.setChar( Pt::Char(ch) );
-    //si.setTypeName( Pt::LiteralPtr<char>("char") );
 }
 
 
 inline void operator <<=(SerializationInfo& si, const char* str)
 {
     si.setString(str);
-    //si.setTypeName( Pt::LiteralPtr<char>("string") );
 }
 
 /** @brief Deserializes a std::string
@@ -928,7 +911,6 @@ inline void operator >>=(const SerializationInfo& si, std::string& str)
 inline void operator <<=(SerializationInfo& si, const std::string& str)
 {
     si.setString( str.c_str() );
-    //si.setTypeName( Pt::LiteralPtr<char>("std::string") );
 }
 
 
@@ -941,7 +923,6 @@ inline void operator >>=(const SerializationInfo& si, Pt::String& str)
 inline void operator <<=(SerializationInfo& si, const Pt::String& str)
 {
     si.setString(str);
-    //si.setTypeName( Pt::LiteralPtr<char>("Pt::String") );
 }
 
 /** @brief Deserializes a std::vector
@@ -959,7 +940,7 @@ inline void operator >>=(const SerializationInfo& si, std::vector<T, A>& vec)
     for(SerializationInfo::ConstIterator it = si.begin(); it != end; ++it)
     {
         vec.push_back(elem);
-        *it >> Pt::load() >>= vec.back();
+        *it >>= vec.back();
     }
 }
 
