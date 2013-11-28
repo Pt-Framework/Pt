@@ -26,6 +26,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_STRING_H
 #define PT_STRING_H
 
@@ -37,6 +38,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <cctype>
+#include <cstddef>
 
 namespace Pt {
 
@@ -270,7 +272,7 @@ struct char_traits<Pt::Char>
     {
         while(n-- > 0)
         {
-            if( !eq(*s1, *s2) )
+            if( ! eq(*s1, *s2) )
                 return lt(*s1, *s2) ? -1 : +1;
 
             ++s1;
@@ -282,9 +284,10 @@ struct char_traits<Pt::Char>
 
     inline static size_t length(const char_type* s)
     {
-        static const Pt::Char term(0);
+        const Pt::Char term(0);
+        
         std::size_t n = 0;
-        while( !eq(s[n], term) )
+        while( ! eq(s[n], term) )
             ++n;
 
         return n;
@@ -292,9 +295,11 @@ struct char_traits<Pt::Char>
 
     inline static const char_type* find(const char_type* s, size_t n, const char_type& a)
     {
-        while(n-- > 0) {
+        while(n-- > 0) 
+        {
             if (*s == a)
                 return s;
+
             ++s;
         }
 
@@ -303,19 +308,18 @@ struct char_traits<Pt::Char>
 
     inline static char_type* move(char_type* s1, const char_type* s2, size_t n)
     {
-        return (Pt::Char*)std::memmove(s1, s2, n * sizeof(Pt::Char));
+        return (Pt::Char*) std::memmove(s1, s2, n * sizeof(Pt::Char));
     }
 
     inline static char_type* copy(char_type* s1, const char_type* s2, size_t n)
     {
-        return (Pt::Char*)std::memcpy(s1, s2, n * sizeof(Pt::Char));
+        return (Pt::Char*) std::memcpy(s1, s2, n * sizeof(Pt::Char));
     }
 
     inline static char_type* assign(char_type* s, size_t n, char_type a)
     {
-        while(n-- > 0) {
+        while(n-- > 0)
             *(s++) = a;
-        }
 
         return s;
     }
@@ -346,15 +350,16 @@ struct char_traits<Pt::Char>
     }
 };
 
-/** @brief Unicode capable strings
+/** @brief Unicode capable strings.
 
     @ingroup Unicode
 */
 template <>
-class PT_API basic_string< Pt::Char > {
+class PT_API basic_string<Pt::Char> 
+{
     public:
         typedef Pt::Char value_type;
-        typedef size_t size_type;
+        typedef std::size_t size_type;
         typedef char_traits< Pt::Char > traits_type;
         typedef std::allocator<Pt::Char> allocator_type;
         typedef allocator_type::difference_type difference_type;
@@ -385,6 +390,8 @@ class PT_API basic_string< Pt::Char > {
 
         basic_string(const Pt::Char* str, const allocator_type& a = allocator_type());
 
+        basic_string(const Pt::Char* str, size_type n, const allocator_type& a = allocator_type());
+
         basic_string(const wchar_t* str, const allocator_type& a = allocator_type());
 
         basic_string(const wchar_t* str, size_type n, const allocator_type& a = allocator_type());
@@ -395,17 +402,13 @@ class PT_API basic_string< Pt::Char > {
 
         basic_string(const char* str, size_type n, const allocator_type& a = allocator_type());
 
-        basic_string(const Pt::Char* str, size_type n, const allocator_type& a = allocator_type());
-
         basic_string(size_type n, Pt::Char c, const allocator_type& a = allocator_type());
 
         basic_string(const basic_string& str);
 
         basic_string(const basic_string& str, const allocator_type& a);
 
-        basic_string(const basic_string& str, size_type pos, const allocator_type& a = allocator_type());
-
-        basic_string(const basic_string& str, size_type pos, size_type n, const allocator_type& a = allocator_type());
+        basic_string(const basic_string& str, size_type pos, size_type n = npos, const allocator_type& a = allocator_type());
 
         basic_string(const Pt::Char* begin, const Pt::Char* end, const allocator_type& a = allocator_type());
 
@@ -446,14 +449,24 @@ class PT_API basic_string< Pt::Char > {
         { return privdata_ro()[n]; }
 
         reference at(size_type n)
-        { return privdata_rw()[n]; }
+        { 
+            if( n >= size() )
+                throw out_of_range("at");
+
+            return privdata_rw()[n]; 
+        }
 
         const_reference at(size_type n) const
-        { return privdata_ro()[n]; }
+        { 
+            if( n >= size() )
+                throw out_of_range("at");
+            
+            return privdata_ro()[n]; 
+        }
 
     public:
         void push_back(Pt::Char ch)
-        { this->append(1, ch); }
+        { (*this) += ch; }
 
         void resize( size_t n, Pt::Char ch = value_type() );
 
@@ -466,11 +479,8 @@ class PT_API basic_string< Pt::Char > {
 
         size_type copy(Pt::Char* a, size_type n, size_type pos = 0) const;
 
-        basic_string substr(size_type pos, size_type n) const
+        basic_string substr(size_type pos = 0, size_type n = npos) const
         { return basic_string(*this, pos, n); }
-
-        basic_string substr(size_type pos = 0) const
-        { return basic_string(*this, pos); }
 
     public:
         size_type length() const
@@ -612,7 +622,7 @@ class PT_API basic_string< Pt::Char > {
         size_type find(const Pt::Char* str, size_type pos, size_type n) const;
 
         size_type find(const Pt::Char* str, size_type pos = 0) const;
-//
+
         size_type find(Pt::Char ch, size_type pos = 0) const;
 
         size_type rfind(const basic_string& str, size_type pos = npos) const;
@@ -651,10 +661,7 @@ class PT_API basic_string< Pt::Char > {
         size_type find_first_not_of(const Pt::Char* s, size_type pos, size_type n) const;
 
         size_type find_first_not_of(const Pt::Char* str, size_type pos = 0) const
-        {
-            // requires_string(str);
-            return this->find_first_not_of( str, pos, traits_type::length(str) );
-        }
+        { return this->find_first_not_of( str, pos, traits_type::length(str) ); }
 
         size_type find_first_not_of(const Pt::Char ch, size_type pos = 0) const;
 
@@ -664,12 +671,8 @@ class PT_API basic_string< Pt::Char > {
         size_type find_last_not_of(const Pt::Char* tok, size_type pos, size_type n) const;
 
         size_type find_last_not_of(const Pt::Char* str, size_type pos = npos) const
-        {
-            //requires_string(s);
-            return this->find_last_not_of( str, pos, traits_type::length(str) );
-        }
+        { return this->find_last_not_of( str, pos, traits_type::length(str) ); }
 
-        // untested
         size_type find_last_not_of(Pt::Char ch, size_type pos = npos) const;
 
     public:
@@ -692,14 +695,24 @@ class PT_API basic_string< Pt::Char > {
         basic_string& operator=(const string& str)
         { return this->assign(str); }
 
+        basic_string& operator=(const wchar_t* str)
+        { return this->assign(str); }
+
         basic_string& operator=(const char* str)
         { return this->assign(str); }
 
         basic_string& operator=(const Pt::Char* str)
         { return this->assign(str); }
 
-        basic_string& operator=(Pt::Char c)
-        { return this->assign(1, c); }
+        basic_string& operator=(Pt::Char ch)
+        {
+            // no privreserve(1), short string capacity is large enough
+
+            Pt::Char* p = privdata_rw();
+            p[0] = ch;
+            setLength(1);
+            return *this;
+        }
 
         basic_string& operator+=(const basic_string& str)
         { return this->append(str); }
@@ -709,7 +722,8 @@ class PT_API basic_string< Pt::Char > {
 
         inline basic_string& operator+=(Pt::Char c)
         {
-            //return this->append(1, c);
+            // same as return this->append(1, c);
+            // compare performance
 
             size_type len = 0;
             size_type cap = 0;
@@ -756,43 +770,69 @@ class PT_API basic_string< Pt::Char > {
             Pt::Char* _capacity;
         };
 
-        static const unsigned _minN = (sizeof(Ptr) / sizeof(Pt::uint32_t)) + 1;
+        // minimum possible short string character count
+        static const unsigned _minN = (sizeof(Ptr) / sizeof(Pt::Char)) + 1;
+
+        // short string character count
         static const unsigned _nN = _minN < 8 ? 8 : _minN;
+
+        // short string raw storage size in bytes
+        static const unsigned _nS = _nN * sizeof(Pt::Char);
 
         struct Data : public allocator_type
         {
             Data(const allocator_type& a)
             : allocator_type(a)
             {
-                _u._s[0] = 0;
-                _u._s[_nN - 1] = _nN - 1;
+                Pt::Char* str = reinterpret_cast<Pt::Char*>(&_u._s[0]);
+                *str = 0;
+                
+                _u._s[_nS - 1] = _nN - 1;
             }
 
             union
             {
                 Ptr _p;
-                Pt::uint32_t _s[_nN];
+                unsigned char _s[_nS];
             } _u;
-
         } _d;
 
     private:
         const Pt::Char* privdata_ro() const
         { return isShortString() ? shortStringData() : longStringData(); }
+        
         Pt::Char* privdata_rw()
         { return isShortString() ? shortStringData() : longStringData(); }
 
         void privreserve(size_t n);
 
-        bool isShortString() const                    { return shortStringMagic() != 0xffff; }
-        void markLongString()                         { shortStringMagic() = 0xffff; }
-        const Pt::Char* shortStringData() const       { return reinterpret_cast<const Pt::Char*>(&_d._u._s[0]); }
-        Pt::Char* shortStringData()                   { return reinterpret_cast<Pt::Char*>(&_d._u._s[0]); }
-        Pt::uint32_t  shortStringMagic() const        { return _d._u._s[_nN - 1]; }
-        Pt::uint32_t& shortStringMagic()              { return _d._u._s[_nN - 1]; }
-        size_type shortStringLength() const           { return _nN - 1 - shortStringMagic(); }
-        size_type shortStringCapacity() const         { return _nN - 1; }
-        void setShortStringLength(size_type n)        { shortStringData()[n] = Pt::Char(0); shortStringMagic() = _nN - n - 1; }
+        bool isShortString() const                    
+        { return shortStringMagic() != 0xff; }
+        
+        void markLongString()                         
+        { shortStringMagic() = 0xff; }
+        
+        const Pt::Char* shortStringData() const       
+        { return reinterpret_cast<const Pt::Char*>(&_d._u._s[0]); }
+        
+        Pt::Char* shortStringData()                   
+        { return reinterpret_cast<Pt::Char*>(&_d._u._s[0]); }
+        
+        unsigned char shortStringMagic() const        
+        { return _d._u._s[_nS - 1]; }
+        
+        unsigned char& shortStringMagic()              
+        { return _d._u._s[_nS - 1]; }
+        
+        size_type shortStringLength() const           
+        { return _nN - 1 - shortStringMagic(); }
+        
+        size_type shortStringCapacity() const         
+        { return _nN - 1; }
+        
+        void setShortStringLength(size_type n)        
+        { shortStringData()[n] = Pt::Char(0); shortStringMagic() = _nN - n - 1; }
+        
         void shortStringAssign(const Pt::Char* str, size_type n)
         {
             traits_type::copy(shortStringData(), str, n);
@@ -807,10 +847,18 @@ class PT_API basic_string< Pt::Char > {
             shortStringMagic() = _nN - n - 1;
         }
 
-        const Pt::Char* longStringData() const          { return _d._u._p._begin; }
-        Pt::Char* longStringData()                      { return _d._u._p._begin; }
-        size_type longStringLength() const              { return _d._u._p._end - _d._u._p._begin; }
-        size_type longStringCapacity() const            { return _d._u._p._capacity - _d._u._p._begin; }
+        const Pt::Char* longStringData() const          
+        { return _d._u._p._begin; }
+        
+        Pt::Char* longStringData()                      
+        { return _d._u._p._begin; }
+        
+        size_type longStringLength() const              
+        { return _d._u._p._end - _d._u._p._begin; }
+        
+        size_type longStringCapacity() const            
+        { return _d._u._p._capacity - _d._u._p._begin; }
+        
         void setLength(size_type n)
         {
             if (isShortString())
@@ -823,6 +871,11 @@ class PT_API basic_string< Pt::Char > {
         }
     };
 
+    // swap
+    inline void swap(basic_string<Pt::Char>& a, basic_string<Pt::Char>& b)
+    { a.swap(b); }
+
+    // operator +
     inline basic_string<Pt::Char> operator+(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
     { basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
 
@@ -879,6 +932,21 @@ class PT_API basic_string< Pt::Char > {
     inline bool operator!=(const basic_string<Pt::Char>& a, const wchar_t* b)
     { return a.compare(b) != 0; }
 
+    inline bool operator!=(const wchar_t* b, const basic_string<Pt::Char>& a)
+    { return a.compare(b) != 0; }
+
+    inline bool operator!=(const basic_string<Pt::Char>& a, const char* b)
+    { return a.compare(b) != 0; }
+
+    inline bool operator!=(const char* b, const basic_string<Pt::Char>& a)
+    { return a.compare(b) != 0; }
+
+    inline bool operator!=(const basic_string<Pt::Char>& a, const std::string& b)
+    { return a.compare(b) != 0; }
+
+    inline bool operator!=(const std::string& b, const basic_string<Pt::Char>& a)
+    { return a.compare(b) != 0; }
+
     // operator <
     inline bool operator<(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
     { return a.compare(b) < 0; }
@@ -891,6 +959,49 @@ class PT_API basic_string< Pt::Char > {
 
     inline bool operator<(const basic_string<Pt::Char>& a, const wchar_t* b)
     { return a.compare(b) < 0; }
+
+    inline bool operator<(const wchar_t* b, const basic_string<Pt::Char>& a)
+    { return a.compare(b) > 0; }
+
+    inline bool operator<(const basic_string<Pt::Char>& a, const char* b)
+    { return a.compare(b) < 0; }
+
+    inline bool operator<(const char* b, const basic_string<Pt::Char>& a)
+    { return a.compare(b) > 0; }
+
+    inline bool operator<(const basic_string<Pt::Char>& a, const std::string& b)
+    { return a.compare(b) < 0; }
+
+    inline bool operator<(const std::string& b, const basic_string<Pt::Char>& a)
+    { return a.compare(b) > 0; }
+
+    // operator <=
+    inline bool operator<=(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+    { return a.compare(b) <= 0; }
+
+    inline bool operator<=(const Pt::Char* a, const basic_string<Pt::Char>& b)
+    { return b.compare(a) >= 0; }
+
+    inline bool operator<=(const basic_string<Pt::Char>& a, const Pt::Char* b)
+    { return a.compare(b) <= 0; }
+
+    inline bool operator<=(const basic_string<Pt::Char>& a, const wchar_t* b)
+    { return a.compare(b) <= 0; }
+
+    inline bool operator<=(const wchar_t* b, const basic_string<Pt::Char>& a)
+    { return a.compare(b) >= 0; }
+
+    inline bool operator<=(const basic_string<Pt::Char>& a, const char* b)
+    { return a.compare(b) <= 0; }
+
+    inline bool operator<=(const char* b, const basic_string<Pt::Char>& a)
+    { return a.compare(b) >= 0; }
+
+    inline bool operator<=(const basic_string<Pt::Char>& a, const std::string& b)
+    { return a.compare(b) <= 0; }
+
+    inline bool operator<=(const std::string& b, const basic_string<Pt::Char>& a)
+    { return a.compare(b) >= 0; }
 
     // operator >
     inline bool operator>(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
@@ -905,6 +1016,50 @@ class PT_API basic_string< Pt::Char > {
     inline bool operator>(const basic_string<Pt::Char>& a, const wchar_t* b)
     { return a.compare(b) > 0; }
 
+    inline bool operator>(const wchar_t* b, const basic_string<Pt::Char>& a)
+    { return a.compare(b) < 0; }
+
+    inline bool operator>(const basic_string<Pt::Char>& a, const char* b)
+    { return a.compare(b) > 0; }
+
+    inline bool operator>(const char* b, const basic_string<Pt::Char>& a)
+    { return a.compare(b) < 0; }
+
+    inline bool operator>(const basic_string<Pt::Char>& a, const std::string& b)
+    { return a.compare(b) > 0; }
+
+    inline bool operator>(const std::string& b, const basic_string<Pt::Char>& a)
+    { return a.compare(b) < 0; }
+
+    // operator >=
+    inline bool operator>=(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+    { return a.compare(b) >= 0; }
+
+    inline bool operator>=(const Pt::Char* a, const basic_string<Pt::Char>& b)
+    { return b.compare(a) <= 0; }
+
+    inline bool operator>=(const basic_string<Pt::Char>& a, const Pt::Char* b)
+    { return a.compare(b) >= 0; }
+
+    inline bool operator>=(const basic_string<Pt::Char>& a, const wchar_t* b)
+    { return a.compare(b) >= 0; }
+
+    inline bool operator>=(const wchar_t* b, const basic_string<Pt::Char>& a)
+    { return a.compare(b) <= 0; }
+
+    inline bool operator>=(const basic_string<Pt::Char>& a, const char* b)
+    { return a.compare(b) >= 0; }
+
+    inline bool operator>=(const char* b, const basic_string<Pt::Char>& a)
+    { return a.compare(b) <= 0; }
+
+    inline bool operator>=(const basic_string<Pt::Char>& a, const std::string& b)
+    { return a.compare(b) >= 0; }
+
+    inline bool operator>=(const std::string& b, const basic_string<Pt::Char>& a)
+    { return a.compare(b) <= 0; }
+
+    // operator <<
     PT_API ostream& operator<< (ostream& out, const basic_string<Pt::Char>& str);
 
 } // namespace std

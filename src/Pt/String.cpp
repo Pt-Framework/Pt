@@ -195,6 +195,9 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string<Pt::Ch
 }
 
 
+
+
+
 INLINE
 basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const std::string& str)
 {
@@ -216,9 +219,14 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const std::string& str, s
 {
     privreserve(len);
 
+    const char* from = &str.at(pos);
+
+    if( len > str.size() - pos )
+        len = str.size() - pos; 
+
     Pt::Char* p = privdata_rw();
     for (size_type n = 0; n < len; ++n)
-        p[n] = Pt::Char( str[pos + n] );
+        p[n] = Pt::Char( from[n] );
 
     setLength(len);
 
@@ -230,10 +238,11 @@ INLINE
 basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const wchar_t* str)
 {
     size_type length = 0;
-    while (str[length])
-        ++length;
-    assign(str, length);
 
+    while( str[length] )
+        ++length;
+
+    assign(str, length);
     return *this;
 }
 
@@ -243,13 +252,13 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const wchar_t* str, size_
 {
     privreserve(length);
     Pt::Char* d = privdata_rw();
+
     for (unsigned n = 0; n < length; ++n)
     {
         d[n] = str[n];
     }
 
     setLength(length);
-
     return *this;
 }
 
@@ -258,10 +267,11 @@ INLINE
 basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const char* str)
 {
     size_type length = 0;
-    while (str[length])
-        ++length;
-    assign(str, length);
 
+    while( str[length] )
+        ++length;
+
+    assign(str, length);
     return *this;
 }
 
@@ -271,13 +281,13 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const char* str, size_typ
 {
     privreserve(length);
     Pt::Char* d = privdata_rw();
+
     for (unsigned n = 0; n < length; ++n)
     {
         d[n] = Pt::Char(str[n]);
     }
 
     setLength(length);
-
     return *this;
 }
 
@@ -293,7 +303,6 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const Pt::Char* str, size
     }
 
     setLength(length);
-
     return *this;
 }
 
@@ -302,13 +311,12 @@ INLINE
 basic_string<Pt::Char>& basic_string<Pt::Char>::assign(size_type n, Pt::Char ch)
 {
     privreserve(n);
-
     Pt::Char* p = privdata_rw();
+
     for (size_type nn = 0; nn < n; ++nn)
         p[nn] = ch;
 
     setLength(n);
-
     return *this;
 }
 
@@ -318,9 +326,10 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::append(const Pt::Char* str, size
 {
     size_type l = length();
     privreserve(l + n);
+    
     traits_type::copy(privdata_rw() + l, str, n);
+    
     setLength(l + n);
-
     return *this;
 }
 
@@ -331,10 +340,11 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::append(size_type n, Pt::Char ch)
     size_type l = length();
     privreserve(l + n);
     Pt::Char* p = privdata_rw();
+    
     for (size_type nn = 0; nn < n; ++nn)
         p[l + nn] = ch;
+    
     setLength(l + n);
-
     return *this;
 }
 
@@ -343,10 +353,15 @@ INLINE
 basic_string<Pt::Char>& basic_string<Pt::Char>::insert(size_type pos, const Pt::Char* str, size_type n)
 {
     size_type l = length();
+
+    if( pos > l )
+        throw out_of_range("erase");
+
     privreserve(l + n);
-    Pt::Char* p = privdata_rw();
-    traits_type::move(p + pos + n, p + pos, l - pos);
-    traits_type::copy(p + pos, str, n);
+    Pt::Char* p = privdata_rw() + pos;
+
+    traits_type::move(p + n, p, l - pos);
+    traits_type::copy(p, str, n);
     setLength(l + n);
 
     return *this;
@@ -357,13 +372,18 @@ INLINE
 basic_string<Pt::Char>& basic_string<Pt::Char>::insert(size_type pos, size_type n, Pt::Char ch)
 {
     size_type l = length();
-    privreserve(l + n);
-    Pt::Char* p = privdata_rw();
-    traits_type::move(p + pos + n, p + pos, l - pos);
-    for (size_type nn = 0; nn < n; ++nn)
-        p[pos + nn] = ch;
-    setLength(l + n);
+    
+    if( pos > l )
+        throw out_of_range("erase");
 
+    privreserve(l + n);
+    Pt::Char* p = privdata_rw() + pos;
+
+    traits_type::move(p + n, p, l - pos);
+    for (size_type nn = 0; nn < n; ++nn)
+        p[nn] = ch;
+    
+    setLength(l + n);
     return *this;
 }
 
@@ -371,13 +391,19 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::insert(size_type pos, size_type 
 INLINE
 basic_string<Pt::Char>& basic_string<Pt::Char>::erase(size_type pos, size_type n)
 {
-    Pt::Char* p = privdata_rw();
     size_type l = length();
-    if (n == npos || pos + n > l)
-        n = l - pos;
-    traits_type::move(p + pos, p + pos + n, l - pos - n);
-    setLength(l - n);
 
+    if( pos > l )
+        throw out_of_range("erase");
+    
+    Pt::Char* p = privdata_rw();
+
+    if(n > l - pos)
+        n = l - pos;
+
+    traits_type::move(p + pos, p + pos + n, l - pos - n);
+    
+    setLength(l - n);
     return *this;
 }
 
@@ -385,10 +411,17 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::erase(size_type pos, size_type n
 INLINE
 basic_string<Pt::Char>& basic_string<Pt::Char>::replace(size_type pos, size_type n, const Pt::Char* str, size_type n2)
 {
+    size_type l = length();
+
+    if( pos > l )
+        throw out_of_range("replace");
+    
+    if(n > l - pos)
+        n = l - pos;
+
     Pt::Char* p;
-    if (n != n2)
+    if(n != n2)
     {
-        size_type l = length();
         privreserve(l - n + n2);
         p = privdata_rw();
         traits_type::move(p + pos + n2, p + pos + n, l - pos - n);
@@ -403,14 +436,23 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::replace(size_type pos, size_type
     return *this;
 }
 
+////////////
+
 
 INLINE
 basic_string<Pt::Char>& basic_string<Pt::Char>::replace(size_type pos, size_type n, size_type n2, Pt::Char ch)
 {
+    size_type l = length();
+
+    if( pos > l )
+        throw out_of_range("replace");
+    
+    if(n > l - pos)
+        n = l - pos;
+
     Pt::Char* p;
     if (n != n2)
     {
-        size_type l = length();
         privreserve(l - n + n2);
         p = privdata_rw();
         traits_type::move(p + pos + n2, p + pos + n, l - pos - n);
@@ -437,10 +479,39 @@ int basic_string<Pt::Char>::compare(const basic_string& str) const
 
     const int result = traits_type::compare(privdata_ro(), str.privdata_ro(), n);
 
-    // unlike real life, size only matters when the quality is equal
-    if (result == 0) {
+    if (result == 0)
         return static_cast<int>(size - osize);
-    }
+
+    return result;
+}
+
+
+INLINE
+int basic_string<Pt::Char>::compare(const Pt::Char* str) const
+{
+    const size_type size = this->size();
+    size_type osize = traits_type::length(str);
+    size_type n = min(size , osize);
+
+    const int result = traits_type::compare(privdata_ro(), str, n);
+
+    if (result == 0)
+        return static_cast<int>(size - osize);
+
+    return result;
+}
+
+
+INLINE
+int basic_string<Pt::Char>::compare(const Pt::Char* str, size_type osize) const
+{
+    const size_type size = this->size();
+    size_type n = min(size , osize);
+
+    const int result = traits_type::compare(privdata_ro(), str, n);
+
+    if (result == 0)
+        return static_cast<int>(size - osize);
 
     return result;
 }
@@ -452,6 +523,7 @@ int basic_string<Pt::Char>::compare(const char* str) const
     size_type size = length();
     size_type n;
     const Pt::Char* p = privdata_ro();
+    
     for (n = 0; n < size && str[n]; ++n)
     {
         Pt::Char ch(str[n]);
@@ -469,6 +541,7 @@ int basic_string<Pt::Char>::compare(const char* str, size_type len) const
     size_type size = length();
     size_type n;
     const Pt::Char* p = privdata_ro();
+    
     for (n = 0; n < size && n < len; ++n)
     {
         Pt::Char ch(str[n]);
@@ -481,70 +554,58 @@ int basic_string<Pt::Char>::compare(const char* str, size_type len) const
 
 
 INLINE
-int basic_string<Pt::Char>::compare(const Pt::Char* str, size_type osize) const
-{
-    const size_type size = this->size();
-    size_type n = min(size , osize);
-
-    const int result = traits_type::compare(privdata_ro(), str, n);
-
-    // unlike real life, size only matters when the quality is equal
-    if (result == 0) {
-        return static_cast<int>(size - osize);
-    }
-
-    return result;
-}
-
-
-INLINE
 int basic_string<Pt::Char>::compare(const wchar_t* str) const
 {
-    const Pt::Char* self = privdata_ro();
-    while(*self && *str)
+    size_type size = length();
+    size_type n;
+    const Pt::Char* p = privdata_ro();
+    
+    for (n = 0; n < size && str[n]; ++n)
     {
-        if( *self != *str )
-            return *self < Pt::Char(*str) ? -1 : +1;
-
-        ++self;
-        ++str;
+        Pt::Char ch(str[n]);
+        if (p[n] != ch)
+            return p[n] > ch ? 1 : -1;
     }
 
-    return static_cast<int>( *self - Pt::Char(*str) );
+    return n < size ? 1 : str[n] ? -1 : 0;
 }
 
 
 INLINE
-int basic_string<Pt::Char>::compare(const wchar_t* str, size_type n) const
+int basic_string<Pt::Char>::compare(const wchar_t* str, size_type len) const
 {
-    const Pt::Char* self = privdata_ro();
-    size_type nn;
-    for (nn = 0; nn < n; ++nn)
+    size_type size = length();
+    size_type n;
+    const Pt::Char* p = privdata_ro();
+    
+    for (n = 0; n < size && n < len; ++n)
     {
-        if(*self != str[nn])
-            return *self < Pt::Char(str[nn]) ? -1 : +1;
-        ++self;
+        Pt::Char ch(str[n]);
+        if (p[n] != ch)
+            return p[n] > ch ? 1 : -1;
     }
 
-    return *self ? 1 : nn < n ? -1 : 0;
+    return n < size ? 1 : n < len ? -1 : 0;
 }
 
 
 INLINE
 int basic_string<Pt::Char>::compare(size_type pos, size_type n, const Pt::Char* str, size_type n2) const
 {
-    const size_type size = n;
-    const size_type osize = n2;
-    size_type len = min(size , osize);
+    size_type l = length();
 
-    const int result = traits_type::compare(privdata_ro() + pos,
-                                            str,
-                                            len);
+    if( pos > l )
+        throw out_of_range("compare");
+    
+    if(n > l - pos)
+        n = l - pos;
 
-    // unlike real life, size only matters when the quality is equal
-    if (result == 0) {
-        return static_cast<int>(size - osize);
-    }
+    size_type len = min(n , n2);
+
+    const int result = traits_type::compare(privdata_ro() + pos, str, len);
+
+    if (result == 0)
+        return static_cast<int>(n - n2);
 
     return result;
 }
@@ -555,10 +616,16 @@ basic_string<Pt::Char>::size_type
 basic_string<Pt::Char>::find(const Pt::Char* token, size_type pos, size_type n) const
 {
     const size_type size = this->size();
+
+    if( pos >= size )
+        return npos;
+
     const Pt::Char* str = privdata_ro();
 
-    for( ; pos + n <= size; ++pos) {
-        if( 0 == traits_type::compare( str + pos, token, n ) ) {
+    for( ; n <= size - pos; ++pos) 
+    {
+        if( 0 == traits_type::compare( str + pos, token, n ) ) 
+        {
             return pos;
         }
     }
@@ -572,17 +639,16 @@ basic_string<Pt::Char>::size_type
 basic_string<Pt::Char>::find(Pt::Char ch, size_type pos) const
 {
     const size_type size = this->size();
-    if(pos > size) {
+
+    if(pos >= size) 
         return npos;
-    }
 
     const Pt::Char* str = privdata_ro();
     const size_type n = size - pos;
 
     const Pt::Char* found = traits_type::find(str + pos, n, ch);
-    if(found) {
+    if(found) 
         return found - str;
-    }
 
     return npos;
 }
@@ -592,16 +658,16 @@ INLINE
 basic_string<Pt::Char>::size_type
 basic_string<Pt::Char>::rfind(const Pt::Char* token, size_type pos, size_type n) const
 {
-    // FIXME: check length
     const size_type size = this->size();
 
-    if (n > size) {
+    if (n > size || size == 0)
         return npos;
-    }
 
-    pos = min(size_type(size - n), pos);
+    pos = min(size - n, pos);
+
     const Pt::Char* str = privdata_ro();
-    do {
+    do 
+    {
         if (traits_type::compare(str + pos, token, n) == 0)
         return pos;
     }
@@ -624,7 +690,8 @@ basic_string<Pt::Char>::rfind(Pt::Char ch, size_type pos) const
     if(--size > pos)
         size = pos;
 
-    for(++size; size-- > 0; ) {
+    for(++size; size-- > 0; ) 
+    {
         if( traits_type::eq(str[size], ch) )
             return size;
     }
@@ -632,15 +699,16 @@ basic_string<Pt::Char>::rfind(Pt::Char ch, size_type pos) const
     return npos;
 }
 
+
 INLINE
 basic_string<Pt::Char>::size_type
 basic_string<Pt::Char>::find_first_of(const Pt::Char* s, size_type pos, size_type n) const
 {
-    // check length os s against n
     const Pt::Char* str = privdata_ro();
     const size_type size = this->size();
 
-    for (; n && pos < size; ++pos) {
+    for (; pos < size; ++pos) 
+    {
         if( traits_type::find(s, n, str[pos]) )
             return pos;
     }
@@ -648,53 +716,58 @@ basic_string<Pt::Char>::find_first_of(const Pt::Char* s, size_type pos, size_typ
     return npos;
 }
 
+
 INLINE
 basic_string<Pt::Char>::size_type
 basic_string<Pt::Char>::find_last_of(const Pt::Char* s, size_type pos, size_type n) const
 {
-    // check length os s against n
     size_type size = this->size();
     const Pt::Char* str = privdata_ro();
 
-    if (size == 0 ||  n == 0) {
+    if (size == 0 || n == 0)
         return npos;
-    }
 
-    if (--size > pos) {
+    if (--size > pos)
         size = pos;
-    }
 
-    do {
+    do 
+    {
         if( traits_type::find(s, n, str[size]) )
             return size;
     }
     while (size-- != 0);
 
-
     return npos;
 }
+
 
 INLINE
 basic_string<Pt::Char>::size_type
 basic_string<Pt::Char>::find_first_not_of(const Pt::Char* tok, size_type pos, size_type n) const
 {
     const Pt::Char* str = privdata_ro();
+    const size_type size = this->size();
 
-    for (; pos < this->size(); ++pos) {
-        if ( !traits_type::find(tok, n, str[pos]) )
+    for (; pos < size; ++pos) 
+    {
+        if ( ! traits_type::find(tok, n, str[pos]) )
             return pos;
     }
+
     return npos;
 }
+
 
 INLINE
 basic_string<Pt::Char>::size_type
 basic_string<Pt::Char>::find_first_not_of(Pt::Char ch, size_type pos) const
 {
     const Pt::Char* str = privdata_ro();
+    const size_type size = this->size();
 
-    for (; pos < this->size(); ++pos) {
-        if ( !traits_type::eq(str[pos], ch) ) {
+    for (; pos < size; ++pos) 
+    {
+        if ( ! traits_type::eq(str[pos], ch) ) {
             return pos;
         }
     }
@@ -710,20 +783,22 @@ basic_string<Pt::Char>::find_last_not_of(const Pt::Char* tok, size_type pos, siz
     size_type size = this->size();
     const Pt::Char* str = privdata_ro();
 
-    if(size) {
-        if (--size > pos)
-            size = pos;
+    if (size == 0 || n == 0)
+        return npos;
 
-        do {
-            if ( !traits_type::find(tok, n, str[size]) ) {
-                return size;
-            }
-        }
-        while(size--);
+    if (--size > pos)
+        size = pos;
+
+    do 
+    {
+        if ( ! traits_type::find(tok, n, str[size]) )
+            return size;
     }
+    while(size-- != 0);
 
     return npos;
 }
+
 
 INLINE
 basic_string<Pt::Char>::size_type
@@ -732,15 +807,18 @@ basic_string<Pt::Char>::find_last_not_of(Pt::Char ch, size_type pos) const
     size_type size = this->size();
     const Pt::Char* str = privdata_ro();
 
-    if (size) {
-        if (--size > pos)
-            size = pos;
-        do {
-            if( !traits_type::eq(str[size], ch) ) {
-                return size;
-            }
-        } while (size--);
-    }
+    if (size == 0)
+        return npos;
+
+    if (--size > pos)
+        size = pos;
+
+    do 
+    {
+        if( ! traits_type::eq(str[size], ch) )
+            return size;
+    } 
+    while (size--);
 
     return npos;
 }
@@ -756,7 +834,7 @@ std::string basic_string<Pt::Char>::narrow(char dfault) const
     ret.reserve(len);
 
     for (size_type n = 0; n < len; ++n)
-        ret.append( 1, s[n].narrow(dfault) );
+        ret += s[n].narrow(dfault);
 
     return ret;
 }

@@ -104,12 +104,6 @@ inline basic_string<Pt::Char>::basic_string(const basic_string& str, const alloc
     assign(str);
 }
 
-inline basic_string<Pt::Char>::basic_string(const basic_string& str, size_type pos, const allocator_type& a)
-: _d(a)
-{
-    assign(str, pos, str.length() - pos);
-}
-
 
 inline basic_string<Pt::Char>::basic_string(const basic_string& str, size_type pos, size_type n, const allocator_type& a)
 : _d(a)
@@ -135,7 +129,7 @@ basic_string<Pt::Char>::basic_string(InputIterator begin, InputIterator end, con
 
 inline basic_string<Pt::Char>::~basic_string()
 {
-    if (!isShortString())
+    if( ! isShortString() )
     {
         _d.deallocate(longStringData(), longStringCapacity() + 1);
     }
@@ -144,7 +138,12 @@ inline basic_string<Pt::Char>::~basic_string()
 
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string<Pt::Char>& str, size_type pos, size_type n)
 {
-    return this->assign( str.data() + pos, n );   
+    const Pt::Char* from = &str.at(pos);
+
+    if( str.size() - pos < n )
+        n = str.size() - pos; 
+
+    return this->assign( from, n );  
 }
 
 
@@ -152,6 +151,7 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const Pt::Char* st
 {
     return assign(str, traits_type::length(str));
 }
+
 
 template <typename InputIterator>
 basic_string<Pt::Char>& basic_string<Pt::Char>::assign(InputIterator begin, InputIterator end)
@@ -167,6 +167,7 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::append(const Pt::Char* st
     return append( str, traits_type::length(str) );
 }
 
+
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::append(const basic_string& str)
 {
     return this->append( str.data(), str.length() );
@@ -175,7 +176,12 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::append(const basic_string
 
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::append(const basic_string& str, size_type pos, size_type n)
 {
-    return this->append( str.data() + pos, n );
+    const Pt::Char* from = &str.at(pos);
+
+    if( str.size() - pos < n )
+        n = str.size() - pos; 
+
+    return this->append( from, n );
 }
 
 
@@ -184,8 +190,9 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::append(InputIterator begin, Inpu
 {
     while (begin != end)
     {
-        append(1, *begin++);
+        push_back(*begin++);
     }
+    
     return *this;
 }
 
@@ -201,25 +208,38 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::insert(size_type pos, con
     return this->insert( pos, str, traits_type::length(str) );
 }
 
+
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::insert(size_type pos, const basic_string& str)
 {
     return insert(pos, str.privdata_ro(), str.length());
 }
 
+
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::insert(size_type pos, const basic_string& str, size_type pos2, size_type n)
 {
-    return insert(pos, str.privdata_ro() + pos2, n > str.length() ? str.length() : n);
+    if( pos2 > str.size() )
+        throw out_of_range("insert");
+
+    const Pt::Char* from = &str[pos2];
+
+    if( str.size() - pos2 < n )
+        n = str.size() - pos2; 
+
+    return insert(pos, from, n);
 }
+
 
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::insert(iterator p, Pt::Char ch)
 {
     return insert(p - begin(), 1, ch);
 }
 
+
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::insert(iterator p, size_type n, Pt::Char ch)
 {
     return insert(p - begin(), n, ch);
 }
+
 
 inline
 basic_string<Pt::Char>::iterator
@@ -259,6 +279,14 @@ inline
 basic_string<Pt::Char>& basic_string<Pt::Char>::replace(size_type pos, size_type n,
                                                         const basic_string& str, size_type pos2, size_type n2)
 {
+    if( pos2 > str.size() )
+        throw out_of_range("replace");
+
+    const Pt::Char* from = &str[pos2];
+
+    if( str.size() - pos2 < n2 )
+        n2 = str.size() - pos2; 
+
     return replace(pos, n, str.privdata_ro() + pos2, n2);
 }
 
@@ -299,10 +327,10 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::replace(iterator i1, iterator i2
 }
 
 
-inline int basic_string<Pt::Char>::compare(const Pt::Char* str) const
-{
-    return compare(str, traits_type::length(str));
-}
+//inline int basic_string<Pt::Char>::compare(const basic_string& str) const
+//{
+//    return compare( str.data(), str.size() );
+//}
 
 
 inline int basic_string<Pt::Char>::compare(size_type pos, size_type n, const basic_string& str) const
@@ -313,6 +341,14 @@ inline int basic_string<Pt::Char>::compare(size_type pos, size_type n, const bas
 
 inline int basic_string<Pt::Char>::compare(size_type pos, size_type n, const basic_string& str, size_type pos2, size_type n2) const
 {
+    if( pos2 > str.size() )
+        throw out_of_range("compare");
+
+    const Pt::Char* from = &str[pos2];
+
+    if( str.size() - pos2 < n2 )
+        n2 = str.size() - pos2; 
+
     return compare(pos, n, str.privdata_ro() + pos2, n2);
 }
 
@@ -423,6 +459,4 @@ OutIterT basic_string<Pt::Char>::toUtf16(OutIterT to) const
     return to;
 }
 
-
 }
-

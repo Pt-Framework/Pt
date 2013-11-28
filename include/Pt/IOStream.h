@@ -36,6 +36,7 @@
 
 #if defined(_MSC_VER) && defined(_WIN32_WCE) 
     // alternatively compile with /FORCE:multiple
+    template class PT_EXPORT std::basic_ios<char>;
     template class PT_EXPORT std::basic_istream<char>;
     template class PT_EXPORT std::basic_ostream<char>;
     template class PT_EXPORT std::basic_iostream<char>; 

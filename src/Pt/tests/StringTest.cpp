@@ -679,6 +679,10 @@ void StringTest::testLengthAndSize()
     PT_UNIT_ASSERT_EQUALS(s1.length() , 0);
     PT_UNIT_ASSERT_EQUALS(s1.size()   , 0);
 
+    Pt::String s7(L"abcdefg");
+    PT_UNIT_ASSERT_EQUALS(s7.length() , 7);
+    PT_UNIT_ASSERT_EQUALS(s7.size()   , 7);
+
     Pt::String s2(L"ab");
     PT_UNIT_ASSERT_EQUALS(s2.length() , 2);
     PT_UNIT_ASSERT_EQUALS(s2.size()   , 2);
@@ -686,7 +690,6 @@ void StringTest::testLengthAndSize()
     s2 += L"cd";
     PT_UNIT_ASSERT_EQUALS(s2.length() , 4);
     PT_UNIT_ASSERT_EQUALS(s2.size()   , 4);
-
 
     Pt::Char ab[] = { 'a', 'b', '\0' };
     Pt::String s3(ab);

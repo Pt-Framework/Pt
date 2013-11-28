@@ -52,10 +52,64 @@ class PT_API StringBuffer : public std::basic_stringbuf<Pt::Char>
 
 namespace std {
 
-/** @brief Unicode string stream.
+template<>
+class PT_API basic_istringstream<Pt::Char> : public basic_istream<Pt::Char>
+{
+    public:
+        typedef Pt::Char char_type;
+        typedef std::char_traits<Pt::Char> traits_type;
+        typedef std::allocator<Pt::Char> allocator_type;
+        typedef traits_type::int_type int_type;
+        typedef traits_type::pos_type pos_type;
+        typedef traits_type::off_type off_type;
 
-    @ingroup Unicode
-*/
+    public:
+        explicit basic_istringstream(ios_base::openmode mode = ios_base::in);
+
+        explicit basic_istringstream(const Pt::String& str,
+                                    std::ios_base::openmode mode = std::ios_base::in);
+
+        virtual ~basic_istringstream();
+
+        basic_stringbuf<Pt::Char>* rdbuf() const;
+
+        Pt::String str() const;
+
+        void str(const Pt::String& str);
+
+    private:
+        Pt::StringBuffer _buffer;
+};
+
+template<>
+class PT_API basic_ostringstream<Pt::Char> : public basic_ostream<Pt::Char>
+{
+    public:
+        typedef Pt::Char char_type;
+        typedef std::char_traits<Pt::Char> traits_type;
+        typedef std::allocator<Pt::Char> allocator_type;
+        typedef traits_type::int_type int_type;
+        typedef traits_type::pos_type pos_type;
+        typedef traits_type::off_type off_type;
+
+    public:
+        explicit basic_ostringstream(ios_base::openmode mode = ios_base::out);
+
+        explicit basic_ostringstream(const Pt::String& str,
+                                    std::ios_base::openmode mode = std::ios_base::out);
+
+        virtual ~basic_ostringstream();
+
+        basic_stringbuf<Pt::Char>* rdbuf() const;
+
+        Pt::String str() const;
+
+        void str(const Pt::String& str);
+
+    private:
+        Pt::StringBuffer _buffer;
+};
+
 template<>
 class PT_API basic_stringstream<Pt::Char> : public basic_iostream<Pt::Char>
 {
