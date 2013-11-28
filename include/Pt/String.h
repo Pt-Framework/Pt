@@ -396,9 +396,7 @@ class PT_API basic_string<Pt::Char>
 
         basic_string(const wchar_t* str, size_type n, const allocator_type& a = allocator_type());
 
-        explicit basic_string(const std::string& str, const allocator_type& a = allocator_type());
-
-        explicit basic_string(const char* str, const allocator_type& a = allocator_type());
+        basic_string(const char* str, const allocator_type& a = allocator_type());
 
         basic_string(const char* str, size_type n, const allocator_type& a = allocator_type());
 
@@ -508,10 +506,6 @@ class PT_API basic_string<Pt::Char>
 
         basic_string& assign(const basic_string& str, size_type pos, size_type n);
 
-        basic_string& assign(const string& str);
-
-        basic_string& assign(const string& str, size_type pos, size_type n);
-
         basic_string& assign(const wchar_t* str);
 
         basic_string& assign(const wchar_t* str, size_type n);
@@ -589,9 +583,6 @@ class PT_API basic_string<Pt::Char>
 
         basic_string& replace(iterator i1, iterator i2, const basic_string& str);
 
-        //template<InputIterator>
-        //basic_string& replace(iterator i1, iterator i2, InputIterator j1, InputIterator j2);
-
         int compare(const basic_string& str) const;
 
         int compare(const Pt::Char* str) const;
@@ -601,9 +592,6 @@ class PT_API basic_string<Pt::Char>
         int compare(const wchar_t* str) const;
 
         int compare(const wchar_t* str, size_type n) const;
-
-        int compare(const std::string& str) const
-        { return compare(str.data(), str.length()); }
 
         int compare(const char* str) const;
 
@@ -692,9 +680,6 @@ class PT_API basic_string<Pt::Char>
         basic_string& operator=(const basic_string& str)
         { return this->assign(str); }
 
-        basic_string& operator=(const string& str)
-        { return this->assign(str); }
-
         basic_string& operator=(const wchar_t* str)
         { return this->assign(str); }
 
@@ -720,47 +705,7 @@ class PT_API basic_string<Pt::Char>
         basic_string& operator+=(const Pt::Char* str)
         { return this->append(str); }
 
-        inline basic_string& operator+=(Pt::Char c)
-        {
-            // same as return this->append(1, c);
-            // compare performance
-
-            size_type len = 0;
-            size_type cap = 0;
-
-            if( isShortString() )
-            {
-                len = shortStringLength();
-                cap = shortStringCapacity();
-            }
-            else
-            {
-                len = longStringLength();
-                cap = longStringCapacity();
-            }
-            
-            size_type newLen = len + 1;
-            if( newLen > cap )
-                privreserve(newLen);
-
-            if( isShortString() )
-            {
-                Pt::Char* p = shortStringData();
-                p[len] = c;
-
-                setShortStringLength(newLen);
-            }
-            else
-            {
-                Pt::Char* p = longStringData();
-                p[len] = c;
-            
-                _d._u._p._end = _d._u._p._begin + newLen;
-                _d._u._p._begin[newLen] = 0;
-            }
-
-            return *this;
-        }
+        basic_string& operator+=(Pt::Char c);
 
     private:
         struct Ptr
@@ -913,12 +858,6 @@ class PT_API basic_string<Pt::Char>
     inline bool operator==(const char* b, const basic_string<Pt::Char>& a)
     { return a.compare(b) == 0; }
 
-    inline bool operator==(const basic_string<Pt::Char>& a, const std::string& b)
-    { return a.compare(b) == 0; }
-
-    inline bool operator==(const std::string& b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) == 0; }
-
     // operator !=
     inline bool operator!=(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
     { return a.compare(b) != 0; }
@@ -939,12 +878,6 @@ class PT_API basic_string<Pt::Char>
     { return a.compare(b) != 0; }
 
     inline bool operator!=(const char* b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) != 0; }
-
-    inline bool operator!=(const basic_string<Pt::Char>& a, const std::string& b)
-    { return a.compare(b) != 0; }
-
-    inline bool operator!=(const std::string& b, const basic_string<Pt::Char>& a)
     { return a.compare(b) != 0; }
 
     // operator <
@@ -969,12 +902,6 @@ class PT_API basic_string<Pt::Char>
     inline bool operator<(const char* b, const basic_string<Pt::Char>& a)
     { return a.compare(b) > 0; }
 
-    inline bool operator<(const basic_string<Pt::Char>& a, const std::string& b)
-    { return a.compare(b) < 0; }
-
-    inline bool operator<(const std::string& b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) > 0; }
-
     // operator <=
     inline bool operator<=(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
     { return a.compare(b) <= 0; }
@@ -995,12 +922,6 @@ class PT_API basic_string<Pt::Char>
     { return a.compare(b) <= 0; }
 
     inline bool operator<=(const char* b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) >= 0; }
-
-    inline bool operator<=(const basic_string<Pt::Char>& a, const std::string& b)
-    { return a.compare(b) <= 0; }
-
-    inline bool operator<=(const std::string& b, const basic_string<Pt::Char>& a)
     { return a.compare(b) >= 0; }
 
     // operator >
@@ -1025,12 +946,6 @@ class PT_API basic_string<Pt::Char>
     inline bool operator>(const char* b, const basic_string<Pt::Char>& a)
     { return a.compare(b) < 0; }
 
-    inline bool operator>(const basic_string<Pt::Char>& a, const std::string& b)
-    { return a.compare(b) > 0; }
-
-    inline bool operator>(const std::string& b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) < 0; }
-
     // operator >=
     inline bool operator>=(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
     { return a.compare(b) >= 0; }
@@ -1051,12 +966,6 @@ class PT_API basic_string<Pt::Char>
     { return a.compare(b) >= 0; }
 
     inline bool operator>=(const char* b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) <= 0; }
-
-    inline bool operator>=(const basic_string<Pt::Char>& a, const std::string& b)
-    { return a.compare(b) >= 0; }
-
-    inline bool operator>=(const std::string& b, const basic_string<Pt::Char>& a)
     { return a.compare(b) <= 0; }
 
     // operator <<

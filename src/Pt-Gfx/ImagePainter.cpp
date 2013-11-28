@@ -184,7 +184,7 @@ const Font& ImagePainter::font() const
 
 FontMetrics ImagePainter::fontMetrics() const
 {
-    return fontMetrics(L"");
+    return fontMetrics( Pt::String() );
 }
 
 FontMetrics ImagePainter::fontMetrics( String text) const

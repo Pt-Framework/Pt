@@ -219,7 +219,7 @@ void SettingsWriter::writeEntry(const std::string& name, const Pt::String& value
     if( type.empty() )
     {
         if( name.empty() == false)
-            *_os << Pt::String::widen(name) << Char('="');
+            *_os << Pt::String::widen(name) << Char('=');
 
         *_os  << Char('\"');
         writeEscapedValue(*_os, value);

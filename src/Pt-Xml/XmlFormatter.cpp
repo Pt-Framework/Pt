@@ -216,12 +216,12 @@ void XmlFormatter::addValue(const char* name, const char* type,
 
     if (*name)
     {
-        _writer->writeAttribute(L"type", Pt::String(type));
+        _writer->writeAttribute(String("type"), Pt::String(type));
     }
 
     if (*id)
     {
-        _writer->writeAttribute(L"id", Pt::String(id));
+        _writer->writeAttribute(String("id"), Pt::String(id));
     }
 
     _writer->writeCharacters(value);
@@ -235,7 +235,7 @@ void XmlFormatter::onAddReference(const char* name, const char* id)
         return;
 
     _writer->writeStartElement( String::widen(name) );
-    _writer->writeAttribute(L"ref", Pt::String(id));
+    _writer->writeAttribute(String("ref"), Pt::String(id));
     _writer->writeEndElement();
 }
 
@@ -250,12 +250,12 @@ void XmlFormatter::onBeginSequence(const char* name, const char* type,
 
     if(*name)
     {
-        _writer->writeAttribute(L"type", Pt::String(type));
+        _writer->writeAttribute(String("type"), Pt::String(type));
     }
 
     if(*id)
     {
-        _writer->writeAttribute(L"id", Pt::String(id));
+        _writer->writeAttribute(String("id"), Pt::String(id));
     }
 }
 
@@ -289,12 +289,12 @@ void XmlFormatter::onBeginStruct(const char* name, const char* type,
 
     if(*name)
     {
-        _writer->writeAttribute(L"type", Pt::String(type));
+        _writer->writeAttribute(String("type"), Pt::String(type));
     }
 
     if(*id)
     {
-        _writer->writeAttribute(L"id", Pt::String(id));
+        _writer->writeAttribute(String("id"), Pt::String(id));
     }
 }
 
@@ -407,13 +407,13 @@ void XmlFormatter::OnBegin(const Node& node)
 
             const Pt::String& name = se.name().name();
 
-            AttributeList::ConstIterator nodeId = se.attributes().find(L"id");
+            AttributeList::ConstIterator nodeId = se.attributes().find( Pt::String("id") );
             if( nodeId != se.attributes().end() )
             {
                 _composer->setId( nodeId->value().narrow() );
             }
 
-            AttributeList::ConstIterator type = se.attributes().find(L"type");
+            AttributeList::ConstIterator type = se.attributes().find( Pt::String("type"));
             if( type == se.attributes().end() )
             {
                 _composer->setTypeName(name.narrow());
@@ -424,7 +424,7 @@ void XmlFormatter::OnBegin(const Node& node)
                 _valueType = toValueType( type->value() );
             }
 
-            AttributeList::ConstIterator refId = se.attributes().find(L"ref");
+            AttributeList::ConstIterator refId = se.attributes().find( Pt::String("ref"));
             if( refId!= se.attributes().end() )
             {
                 _composer->setReference( refId->value().narrow() );
@@ -601,20 +601,20 @@ void XmlFormatter::beginXmlMember(const Xml::StartElement& se)
     const Pt::String& name = se.name().name();
     _composer = _composer->beginMember(name.narrow() );
 
-    AttributeList::ConstIterator nodeId = se.attributes().find(L"id");
+    AttributeList::ConstIterator nodeId = se.attributes().find(Pt::String("id"));
     if( nodeId != se.attributes().end() )
     {
         _composer->setId( nodeId->value().narrow() );
     }
 
-    AttributeList::ConstIterator type = se.attributes().find(L"type");
+    AttributeList::ConstIterator type = se.attributes().find(Pt::String("type"));
     if( type != se.attributes().end() )
     {
         _composer->setTypeName(type->value().narrow());
         _valueType = toValueType( type->value() );
     }
 
-    AttributeList::ConstIterator refId = se.attributes().find(L"ref");
+    AttributeList::ConstIterator refId = se.attributes().find(Pt::String("ref"));
     if( refId != se.attributes().end() )
     {
         _composer->setReference( refId->value().narrow() );

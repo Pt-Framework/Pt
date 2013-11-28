@@ -33,7 +33,7 @@ namespace Xml {
 
 NamespaceContext::NamespaceContext()
 : _empty(0, String(), String() )
-, _xmlNamespace(0, L"xml", L"http://www.w3.org/XML/1998/namespace")
+, _xmlNamespace(0, String("xml"), String("http://www.w3.org/XML/1998/namespace"))
 {
 }
 

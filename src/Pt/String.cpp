@@ -177,64 +177,6 @@ basic_string<Pt::Char>::copy(Pt::Char* a, size_type n, size_type pos) const
 
 
 INLINE
-basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string<Pt::Char>& str)
-{
-    // self-assignment check
-    if (this == &str)
-    {
-        return *this;
-    }
-
-    privreserve(str.size());
-    Pt::Char* p = privdata_rw();
-    size_type l = str.length();
-    traits_type::copy(p, str.data(), l);
-    setLength(l);
-
-    return *this;
-}
-
-
-
-
-
-INLINE
-basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const std::string& str)
-{
-    size_type len = str.length();
-    privreserve(len);
-
-    Pt::Char* p = privdata_rw();
-    for (size_type n = 0; n < len; ++n)
-        p[n] = Pt::Char( str[n] );
-
-    setLength(len);
-
-    return *this;
-}
-
-
-INLINE
-basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const std::string& str, size_type pos, size_type len)
-{
-    privreserve(len);
-
-    const char* from = &str.at(pos);
-
-    if( len > str.size() - pos )
-        len = str.size() - pos; 
-
-    Pt::Char* p = privdata_rw();
-    for (size_type n = 0; n < len; ++n)
-        p[n] = Pt::Char( from[n] );
-
-    setLength(len);
-
-    return *this;
-}
-
-
-INLINE
 basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const wchar_t* str)
 {
     size_type length = 0;
@@ -285,6 +227,23 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const char* str, size_typ
     for (unsigned n = 0; n < length; ++n)
     {
         d[n] = Pt::Char(str[n]);
+    }
+
+    setLength(length);
+    return *this;
+}
+
+
+INLINE
+basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const Pt::Char* str)
+{
+    size_type length = traits_type::length(str);
+    
+    // self-assignment check
+    if (str != privdata_ro())
+    {
+        privreserve(length);
+        traits_type::copy(privdata_rw(), str, length);
     }
 
     setLength(length);
@@ -436,8 +395,6 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::replace(size_type pos, size_type
     return *this;
 }
 
-////////////
-
 
 INLINE
 basic_string<Pt::Char>& basic_string<Pt::Char>::replace(size_type pos, size_type n, size_type n2, Pt::Char ch)
@@ -467,22 +424,6 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::replace(size_type pos, size_type
         p[pos + nn] = ch;
 
     return *this;
-}
-
-
-INLINE
-int basic_string<Pt::Char>::compare(const basic_string& str) const
-{
-    const size_type size = this->size();
-    const size_type osize = str.size();
-    size_type n = min(size , osize);
-
-    const int result = traits_type::compare(privdata_ro(), str.privdata_ro(), n);
-
-    if (result == 0)
-        return static_cast<int>(size - osize);
-
-    return result;
 }
 
 

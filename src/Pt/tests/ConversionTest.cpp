@@ -116,7 +116,7 @@ void ConversionTest::Bool()
 
 void ConversionTest::NumberOverflow()
 {
-    Pt::String str = L"256";
+    Pt::String str = "256";
     PT_UNIT_ASSERT_THROW( Pt::convert<unsigned char>(str), Pt::ConversionError );
     
     str = L"2000";

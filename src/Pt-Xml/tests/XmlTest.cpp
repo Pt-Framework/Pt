@@ -1351,8 +1351,8 @@ void XmlReaderTest::EmptyDocument()
     
     const Pt::Xml::XmlDeclaration* xmlDecl = reader.input()->declaration();
     PT_UNIT_ASSERT(xmlDecl);
-    PT_UNIT_ASSERT_EQUALS(xmlDecl->version(), L"1.0");
-    PT_UNIT_ASSERT_EQUALS(xmlDecl->encoding(), L"UTF-8");
+    PT_UNIT_ASSERT_EQUALS(xmlDecl->version(), "1.0");
+    PT_UNIT_ASSERT_EQUALS(xmlDecl->encoding(), "UTF-8");
     PT_UNIT_ASSERT_EQUALS(xmlDecl->isStandalone(), false);
 }
 
@@ -2096,7 +2096,7 @@ void XmlReaderTest::CDATAAsCharacters()
     ++it;
     Pt::Xml::Characters* chars = Pt::Xml::toCharacters(&*it);
     PT_UNIT_ASSERT(chars);
-    PT_UNIT_ASSERT_EQUALS(chars->content().narrow(), L"hello<Element>pure &gt; data</Element>world!");
+    PT_UNIT_ASSERT_EQUALS(chars->content(), L"hello<Element>pure &gt; data</Element>world!");
 
     ++it;
     PT_UNIT_ASSERT(it->type() == Pt::Xml::Node::EndElement);
@@ -2240,8 +2240,8 @@ void XmlReaderTest::StartDocument()
 
     const Pt::Xml::XmlDeclaration* xmlDecl = reader.input()->declaration();
     PT_UNIT_ASSERT(xmlDecl);
-    PT_UNIT_ASSERT_EQUALS(xmlDecl->version(), L"1.0");
-    PT_UNIT_ASSERT_EQUALS(xmlDecl->encoding(), L"UTF-8");
+    PT_UNIT_ASSERT_EQUALS(xmlDecl->version(), "1.0");
+    PT_UNIT_ASSERT_EQUALS(xmlDecl->encoding(), "UTF-8");
     PT_UNIT_ASSERT_EQUALS(xmlDecl->isStandalone(), true);
 
     ++it;

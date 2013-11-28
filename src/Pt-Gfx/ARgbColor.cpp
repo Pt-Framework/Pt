@@ -68,19 +68,19 @@ Color<ARgb> Color<ARgb>::fromHtml(const Pt::String& s)
     ss2 << token;
     ss2 >> std::hex >> r;
     ss2.clear();
-    ss2.str( L"" );
+    ss2.str( Pt::String() );
 
     ss.get(token, 3);
     ss2 << token;
     ss2 >> std::hex >> g;
     ss2.clear();
-    ss2.str( L"" );
+    ss2.str( Pt::String()  );
 
     ss.get(token, 3);
     ss2 << token;
     ss2 >> std::hex >> b;
     ss2.clear();
-    ss2.str( L"" );
+    ss2.str( Pt::String()  );
 
     if( ss.fail() )
         throw Pt::ConversionError( "conversion from HTML color code failed" );

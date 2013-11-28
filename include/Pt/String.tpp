@@ -56,13 +56,6 @@ inline basic_string<Pt::Char>::basic_string(const wchar_t* str, size_type length
 }
 
 
-inline basic_string<Pt::Char>::basic_string(const std::string& str, const allocator_type& a)
-: _d(a)
-{
-    assign(str);
-}
-
-
 inline basic_string<Pt::Char>::basic_string(const basic_string& str)
 : _d(str.get_allocator())
 {
@@ -136,6 +129,12 @@ inline basic_string<Pt::Char>::~basic_string()
 }
 
 
+inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string<Pt::Char>& str)
+{
+    return assign( str.c_str(), str.size() );
+}
+
+
 inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string<Pt::Char>& str, size_type pos, size_type n)
 {
     const Pt::Char* from = &str.at(pos);
@@ -144,12 +143,6 @@ inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const basic_string
         n = str.size() - pos; 
 
     return this->assign( from, n );  
-}
-
-
-inline basic_string<Pt::Char>& basic_string<Pt::Char>::assign(const Pt::Char* str)
-{
-    return assign(str, traits_type::length(str));
 }
 
 
@@ -282,8 +275,6 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::replace(size_type pos, size_type
     if( pos2 > str.size() )
         throw out_of_range("replace");
 
-    const Pt::Char* from = &str[pos2];
-
     if( str.size() - pos2 < n2 )
         n2 = str.size() - pos2; 
 
@@ -327,10 +318,10 @@ basic_string<Pt::Char>& basic_string<Pt::Char>::replace(iterator i1, iterator i2
 }
 
 
-//inline int basic_string<Pt::Char>::compare(const basic_string& str) const
-//{
-//    return compare( str.data(), str.size() );
-//}
+inline int basic_string<Pt::Char>::compare(const basic_string& str) const
+{
+    return compare( str.data(), str.size() );
+}
 
 
 inline int basic_string<Pt::Char>::compare(size_type pos, size_type n, const basic_string& str) const
@@ -343,8 +334,6 @@ inline int basic_string<Pt::Char>::compare(size_type pos, size_type n, const bas
 {
     if( pos2 > str.size() )
         throw out_of_range("compare");
-
-    const Pt::Char* from = &str[pos2];
 
     if( str.size() - pos2 < n2 )
         n2 = str.size() - pos2; 
@@ -388,6 +377,47 @@ basic_string<Pt::Char>::size_type
 basic_string<Pt::Char>::rfind(const Pt::Char* str, size_type pos) const
 {
     return this->rfind( str, pos, traits_type::length(str) );
+}
+
+
+inline 
+basic_string<Pt::Char>& basic_string<Pt::Char>::operator+=(Pt::Char c)
+{
+    size_type len = 0;
+    size_type cap = 0;
+
+    if( isShortString() )
+    {
+        len = shortStringLength();
+        cap = shortStringCapacity();
+    }
+    else
+    {
+        len = longStringLength();
+        cap = longStringCapacity();
+    }
+    
+    size_type newLen = len + 1;
+    if( newLen > cap )
+        privreserve(newLen);
+
+    if( isShortString() )
+    {
+        Pt::Char* p = shortStringData();
+        p[len] = c;
+
+        setShortStringLength(newLen);
+    }
+    else
+    {
+        Pt::Char* p = longStringData();
+        p[len] = c;
+    
+        _d._u._p._end = _d._u._p._begin + newLen;
+        _d._u._p._begin[newLen] = 0;
+    }
+
+    return *this;
 }
 
 
