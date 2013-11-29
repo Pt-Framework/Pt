@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 Marc Boris Duerner
+ * Copyright (C) 2004-2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/TextStream.h"
+
+#include <Pt/TextStream.h>
 
 namespace Pt {
 

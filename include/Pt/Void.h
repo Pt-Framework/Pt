@@ -31,43 +31,18 @@
 
 #include <Pt/TypeTraits.h>
 
-
 namespace Pt {
 
-    /** @brief %Void type
+/** @brief %Void type
 
-        The Void type is used as marker type for template specialisations,
-        where void is not enough to indicate an unused template parameter.
+    The Void type is used as marker type for template specialisations,
+    where void is not enough to indicate an unused template parameter.
 
-        @ingroup CoreTypes
-    */
-    struct PT_API Void
-    {};
+    @ingroup CoreTypes
+*/
+struct PT_API Void
+{};
 
+} // namespace Pt
 
-    /** @brief Void compile time type information
-
-        This is the type information for the type Void used by the CTTI system
-        in Pt. It specialises the conceptional TypeTraits struct.
-    */
-    template <>
-    struct TypeTraits<Void>
-    {
-        /** @brief Indicate the TypeTraits for Pt::Void exist
-
-            Specialisation of TypeTraits<>
-        */
-        static bool isSpecialized()
-        { return true; }
-
-        /** @brief Get type name as string
-
-            Specialisation of TypeTraits<>
-        */
-        static const char* typeName()
-        { return "Pt::Void"; }
-    };
-
-}
-
-#endif
+#endif // Pt_Void_h

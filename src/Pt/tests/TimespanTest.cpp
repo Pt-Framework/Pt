@@ -165,38 +165,23 @@ void TimeSpanTest::testComparisonOperators()
     PT_UNIT_ASSERT(ts99  == ts99);
     PT_UNIT_ASSERT(ts100 == ts100);
     PT_UNIT_ASSERT(ts101 == ts101);
-    PT_UNIT_ASSERT(ts99  == 99);
-    PT_UNIT_ASSERT(ts100 == 100);
-    PT_UNIT_ASSERT(ts101 == 101);
 
     PT_UNIT_ASSERT(ts99   != ts100);
     PT_UNIT_ASSERT(ts100  != ts101);
     PT_UNIT_ASSERT(ts101  != ts99);
     PT_UNIT_ASSERT(!(ts99 != ts99));
-    PT_UNIT_ASSERT(ts99   != 100);
-    PT_UNIT_ASSERT(ts100  != 101);
-    PT_UNIT_ASSERT(ts101  != 99);
-    PT_UNIT_ASSERT(!(ts99 != 99));
 
     PT_UNIT_ASSERT(ts99  < ts100);
     PT_UNIT_ASSERT(ts100 < ts101);
-    PT_UNIT_ASSERT(ts99  < 100);
-    PT_UNIT_ASSERT(ts100 < 101);
 
     PT_UNIT_ASSERT(ts99  <= ts100);
     PT_UNIT_ASSERT(ts100 <= ts100);
-    PT_UNIT_ASSERT(ts99  <= 100);
-    PT_UNIT_ASSERT(ts100 <= 100);
 
     PT_UNIT_ASSERT(ts100 > ts99);
     PT_UNIT_ASSERT(ts101 > ts100);
-    PT_UNIT_ASSERT(ts100 > 99);
-    PT_UNIT_ASSERT(ts101 > 100);
 
     PT_UNIT_ASSERT(ts100 >= ts99);
     PT_UNIT_ASSERT(ts100 >= ts100);
-    PT_UNIT_ASSERT(ts100 >= 99);
-    PT_UNIT_ASSERT(ts100 >= 100);
 }
 
 
@@ -206,24 +191,24 @@ void TimeSpanTest::testOperators()
     Pt::Timespan ts6(6);
     Pt::Timespan ts7(7);
 
-    PT_UNIT_ASSERT(ts5 + ts6 == 11);
-    PT_UNIT_ASSERT(ts6 - ts5 == 1);
+    PT_UNIT_ASSERT(ts5 + ts6 == Pt::Timespan(11));
+    PT_UNIT_ASSERT(ts6 - ts5 == Pt::Timespan(1));
 
-    PT_UNIT_ASSERT(ts7 + 2 == 9);
-    PT_UNIT_ASSERT(ts7 - 3 == 4);
+    PT_UNIT_ASSERT(ts7 + Pt::Timespan(2) == Pt::Timespan(9));
+    PT_UNIT_ASSERT(ts7 - Pt::Timespan(3) == Pt::Timespan(4));
     
     ts5 += ts7;
-    PT_UNIT_ASSERT(ts5 == 12);
+    PT_UNIT_ASSERT(ts5 == Pt::Timespan(12));
     
     ts5 -= ts6;
-    PT_UNIT_ASSERT(ts5 == 6);
+    PT_UNIT_ASSERT(ts5 == Pt::Timespan(6));
 
     ts5 = Pt::Timespan(5);
-    ts5 += 7;
-    PT_UNIT_ASSERT(ts5 == 12);
+    ts5 += Pt::Timespan(7);
+    PT_UNIT_ASSERT(ts5 == Pt::Timespan(12));
 
-    ts5 -= 6;
-    PT_UNIT_ASSERT(ts5 == 6);
+    ts5 -= Pt::Timespan(6);
+    PT_UNIT_ASSERT(ts5 == Pt::Timespan(6));
 }
 
 void TimeSpanTest::testSwap()
@@ -231,11 +216,7 @@ void TimeSpanTest::testSwap()
     Pt::Timespan ts99(99);
     Pt::Timespan ts100(100);
 
-    PT_UNIT_ASSERT(ts99  == 99);
-    PT_UNIT_ASSERT(ts100 == 100);
-
-    swap(ts99, ts100);
-    PT_UNIT_ASSERT(ts99  == 100);
-    PT_UNIT_ASSERT(ts100 == 99);
+    std::swap(ts99, ts100);
+    PT_UNIT_ASSERT(ts99  == Pt::Timespan(100));
+    PT_UNIT_ASSERT(ts100 == Pt::Timespan(99));
 }
-

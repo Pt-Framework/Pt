@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_TypeTraits_h
 #define Pt_TypeTraits_h
 
@@ -34,7 +35,8 @@
 namespace Pt {
 
     template <typename T>
-    struct TypeTraitsBase {
+    struct TypeTraitsBase 
+    {
         typedef T Value;
         typedef const T ConstValue;
         typedef T& Reference;
@@ -146,6 +148,8 @@ namespace Pt {
     {
         typedef unsigned char Unsigned;
         typedef signed char Signed;
+
+        static const unsigned int isSigned = 1;
     };
 
     template <>
@@ -153,6 +157,8 @@ namespace Pt {
     {
         typedef unsigned char Unsigned;
         typedef signed char Signed;
+
+        static const unsigned int isSigned = 0;
     };
 
     template <>
@@ -160,6 +166,8 @@ namespace Pt {
     {
         typedef unsigned short Unsigned;
         typedef signed short Signed;
+
+        static const unsigned int isSigned = 1;
     };
 
     template <>
@@ -167,6 +175,8 @@ namespace Pt {
     {
         typedef unsigned short Unsigned;
         typedef signed short Signed;
+
+        static const unsigned int isSigned = 0;
     };
 
     template <>
@@ -174,6 +184,8 @@ namespace Pt {
     {
         typedef unsigned int Unsigned;
         typedef signed int Signed;
+
+        static const unsigned int isSigned = 1;
     };
  
     template <>
@@ -181,6 +193,8 @@ namespace Pt {
     {
         typedef unsigned int Unsigned;
         typedef signed int Signed;
+
+        static const unsigned int isSigned = 0;
     };
 
     template <>
@@ -188,6 +202,8 @@ namespace Pt {
     {
         typedef unsigned long Unsigned;
         typedef signed long Signed;
+
+        static const unsigned int isSigned = 1;
     };
 
     template <>
@@ -195,6 +211,8 @@ namespace Pt {
     {
         typedef unsigned long Unsigned;
         typedef signed long Signed;
+
+        static const unsigned int isSigned = 0;
     };
 
     template <>
@@ -202,6 +220,8 @@ namespace Pt {
     {
         typedef unsigned long long Unsigned;
         typedef signed long long Signed;
+
+        static const unsigned int isSigned = 1;
     };
 
     template <>
@@ -209,9 +229,10 @@ namespace Pt {
     {
         typedef unsigned long long Unsigned;
         typedef signed long long Signed;
+
+        static const unsigned int isSigned = 0;
     };
 
-} // !namespace Pt
+} // namespace Pt
 
-
-#endif
+#endif // Pt_TypeTraits_h

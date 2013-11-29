@@ -178,11 +178,11 @@ class DateTime
             Pt::int64_t days = totalMSecs / Time::MSecsPerDay;
             Pt::int64_t overrun = totalMSecs % Time::MSecsPerDay;
 
-            if( (-overrun) > _time.totalMSecs()  )
+            if( (-overrun) > _time.toMSecs()  )
             {
                 days -= 1;
             }
-            else if( overrun + _time.totalMSecs() > Time::MSecsPerDay)
+            else if( overrun + _time.toMSecs() > Time::MSecsPerDay)
             {
                 days += 1;
             }
@@ -200,11 +200,11 @@ class DateTime
             Pt::int64_t days = totalMSecs / Time::MSecsPerDay;
             Pt::int64_t overrun = totalMSecs % Time::MSecsPerDay;
 
-            if( overrun > _time.totalMSecs() )
+            if( overrun > _time.toMSecs() )
             {
                 days += 1;
             }
-            else if(_time.totalMSecs() - overrun > Time::MSecsPerDay)
+            else if(_time.toMSecs() - overrun > Time::MSecsPerDay)
             {
                 days -= 1;
             }
@@ -226,12 +226,12 @@ class DateTime
             Pt::int64_t dayDiff      = Pt::int64_t( first.date().julian() ) -
                                        Pt::int64_t( second.date().julian() );
 
-            Pt::int64_t milliSecDiff = Pt::int64_t( first.time().totalMSecs() ) -
-                                       Pt::int64_t( second.time().totalMSecs() );
+            Pt::int64_t milliSecDiff = Pt::int64_t( first.time().toMSecs() ) -
+                                       Pt::int64_t( second.time().toMSecs() );
 
             Pt::int64_t result = (dayDiff * Time::MSecsPerDay + milliSecDiff) * 1000;
 
-            return result;
+            return Timespan(result);
         }
 
         friend DateTime operator-(const DateTime& dt, const Timespan& ts)

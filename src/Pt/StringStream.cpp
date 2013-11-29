@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include <Pt/StringStream.h>
 
 namespace Pt {
@@ -60,34 +61,6 @@ basic_istringstream<Pt::Char>::basic_istringstream(const Pt::String& str, std::i
 }
 
 
-basic_istringstream<Pt::Char>::~basic_istringstream()
-{
-}
-
-
-basic_stringbuf<Pt::Char>* basic_istringstream<Pt::Char>::rdbuf() const
-{
-    return (basic_stringbuf<Pt::Char>*)(&_buffer);
-}
-
-
-Pt::String basic_istringstream<Pt::Char>::str() const
-{
-    return _buffer.str();
-}
-
-
-void basic_istringstream<Pt::Char>::str(const Pt::String& str)
-{
-    _buffer.str(str);
-}
-
-
-
-
-
-
-
 basic_ostringstream<Pt::Char>::basic_ostringstream(ios_base::openmode mode)
 : basic_ostream<Pt::Char>(0)
 , _buffer(mode)
@@ -104,40 +77,6 @@ basic_ostringstream<Pt::Char>::basic_ostringstream(const Pt::String& str, std::i
 }
 
 
-basic_ostringstream<Pt::Char>::~basic_ostringstream()
-{
-}
-
-
-basic_stringbuf<Pt::Char>* basic_ostringstream<Pt::Char>::rdbuf() const
-{
-    return (basic_stringbuf<Pt::Char>*)(&_buffer);
-}
-
-
-Pt::String basic_ostringstream<Pt::Char>::str() const
-{
-    return _buffer.str();
-}
-
-
-void basic_ostringstream<Pt::Char>::str(const Pt::String& str)
-{
-    _buffer.str(str);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 basic_stringstream<Pt::Char>::basic_stringstream(ios_base::openmode mode)
 : basic_iostream<Pt::Char>(0)
 , _buffer(mode)
@@ -151,29 +90,6 @@ basic_stringstream<Pt::Char>::basic_stringstream(const Pt::String& str, std::ios
 , _buffer(str, mode)
 {
     init(&_buffer);
-}
-
-
-basic_stringstream<Pt::Char>::~basic_stringstream()
-{
-}
-
-
-basic_stringbuf<Pt::Char>* basic_stringstream<Pt::Char>::rdbuf() const
-{
-    return (basic_stringbuf<Pt::Char>*)(&_buffer);
-}
-
-
-Pt::String basic_stringstream<Pt::Char>::str() const
-{
-    return _buffer.str();
-}
-
-
-void basic_stringstream<Pt::Char>::str(const Pt::String& str)
-{
-    _buffer.str(str);
 }
 
 } // namespace std

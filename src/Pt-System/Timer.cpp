@@ -101,7 +101,7 @@ Timer::~Timer()
 
 bool Timer::started() const
 {
-    return _finished != 0;
+    return ! _finished.isNull();
 }
 
 
@@ -130,7 +130,7 @@ void Timer::start(std::size_t interval)
     }
     else
     {
-        Timespan remaining = Pt::int64_t(_interval) * 1000;
+        Timespan remaining( Pt::int64_t(_interval) * 1000 );
         _finished = now + remaining;
         log_debug("timer set to: " << _finished.toMSecs());
     }
@@ -144,7 +144,7 @@ void Timer::start(std::size_t interval)
 
 void Timer::stop()
 {
-    _finished = 0;
+    _finished.setNull();
 
     if(_loop)
         _loop->onDetachTimer(*this);
@@ -186,7 +186,7 @@ bool Timer::update(const Timespan& now)
         }
         else
         {
-            Timespan remaining = Pt::int64_t(_interval) * 1000;
+            Timespan remaining( Pt::int64_t(_interval) * 1000 );
             _finished += remaining;
             log_debug("timer set to: " << _finished.toMSecs());
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004-2009 Marc Boris Duerner
+ * Copyright (C) 2004-2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_TextBuffer_h
 #define Pt_TextBuffer_h
 
@@ -33,25 +34,10 @@
 #include <Pt/TextCodec.h>
 #include <Pt/StreamBuffer.h>
 #include <Pt/ConversionError.h>
-#include <iostream>
 
 namespace Pt {
 
 /** @brief Converts character sequences with different encodings.
-
-    This class derives from std::basic_streambuf which is the super-class of all stream buffer
-    classes. Stream buffer classes are used to connect to an external device, transport characters
-    from and to this external device and buffer the characters in an internal buffer.
-
-    The internal character set can be specified using the template parameters 'char_type_', the
-    external character set using 'extern_type_'. The external type is the input type and output
-    type when reading from or writing to the external device. The internal type is the type
-    which is used to internally store the data from the external device after the external
-    format was converted using the Codec which is passed when constructing an object of this
-    class.
-
-    The Codec object which is passed as pointer to the constructor will afterwards be completely
-    managed by this class and also be deleted by this class when it's destructed!
 
     @ingroup Unicode
 */
@@ -69,24 +55,6 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         typedef TextCodec<char_type, extern_type> CodecType;
         typedef typename CodecType::result CodecResult;
         typedef MBState state_type;
-
-    private:
-        static const int _pbmax = 4;
-
-        static const int _ebufmax = 256;
-        extern_type _ebuf[_ebufmax];
-        int _ebufsize;
-
-        static const int _ibufmax = 256;
-        intern_type _ibuf[_ibufmax];
-
-        state_type _state;
-
-        CodecType* _codec;
-
-        std::size_t _codecRefs;
-
-        std::basic_ios<extern_type>* _target;
 
     public:
         /** @brief Creates a BasicTextBuffer using the given stream buffer and codec.
@@ -189,6 +157,93 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             _state = state_type();
         }
 
+        void import(std::streamsize size = 0)
+        {
+            if( this->pptr() )
+            {
+                if( -1 == this->terminate() )
+                    return;
+            }
+
+            if( ! this->gptr() )
+            {
+                this->setg(_ibuf, _ibuf, _ibuf);
+            }
+
+            std::basic_streambuf<extern_type>* rdbuf = _target ? _target->rdbuf()
+                                                               : 0;
+            
+            // special case: read available input
+            if(size == 0 && rdbuf)
+                size = rdbuf->in_avail();
+
+            // not more than input buffer size
+            const std::streamsize ebufavail = _ebufmax - _ebufsize;
+            size = ebufavail < size ? ebufavail : size;
+
+            if(size > 0 && rdbuf)
+            {
+                std::streamsize n = rdbuf->sgetn( _ebuf + _ebufsize,  size );
+                _ebufsize += static_cast<int>(n);
+                if(n <= 0)
+                {
+                    // rdbuf == 0 means "at end of input"
+                    rdbuf = 0;
+                }  
+            }
+
+            if( this->gptr() - this->eback() > _pbmax)
+            {
+                std::streamsize movelen = this->egptr() - this->gptr() + _pbmax;
+                std::char_traits<char_type>::move( _ibuf,
+                                                   this->gptr() - _pbmax,
+                                                   static_cast<size_t>(movelen));
+                this->setg(_ibuf, _ibuf + _pbmax, _ibuf + movelen);
+            }
+
+            typename CodecType::result r = decode();
+
+            // fail if partial conversion at the end of input
+            // rdbuf == 0 means "at end of input"
+            if( rdbuf == 0 && _ebufsize == 0 && r == CodecType::partial)
+                throw ConversionError("character encoding");
+        }
+
+        std::streamsize import(const extern_type* buf, std::streamsize size)
+        {
+            if( this->pptr() )
+            {
+                if( -1 == this->terminate() )
+                    return 0;
+            }
+
+            if( ! this->gptr() )
+            {
+                this->setg(_ibuf, _ibuf, _ibuf);
+            }
+
+            const std::streamsize bufavail = _ebufmax - _ebufsize;
+            size = bufavail < size ? bufavail : size;
+            if(size > 0)
+            {
+                std::char_traits<extern_type>::copy( _ebuf + _ebufsize, buf, static_cast<std::size_t>(size) );
+                _ebufsize += static_cast<int>(size);
+            }
+
+            if( this->gptr() - this->eback() > _pbmax)
+            {
+                std::streamsize movelen = this->egptr() - this->gptr() + _pbmax;
+                std::char_traits<char_type>::move( _ibuf,
+                                                   this->gptr() - _pbmax,
+                                                   static_cast<size_t>(movelen));
+                this->setg(_ibuf, _ibuf + _pbmax, _ibuf + movelen);
+            }
+
+            decode();
+
+            return size;
+        }
+
         int terminate()
         {
             if( this->pptr() )
@@ -207,7 +262,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
 
                         if(res == CodecType::error)
                         {
-                            throw ConversionError("character conversion failed");
+                            throw ConversionError("character encoding");
                         }
                         else if(res == CodecType::ok || res == CodecType::partial)
                         {
@@ -299,7 +354,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
                 this->pbump( leftover );
 
                 if(res == CodecType::error)
-                    throw ConversionError("character conversion failed");
+                    throw ConversionError("character encoding");
 
                 if(res == CodecType::partial && _ebufsize == 0)
                     break;
@@ -328,94 +383,6 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
 
             return this->gptr() < this->egptr() ? traits_type::to_int_type( *this->gptr() )
                                                 : traits_type::eof();
-        }
-
-    public:
-        void import(std::streamsize size = 0)
-        {
-            if( this->pptr() )
-            {
-                if( -1 == this->terminate() )
-                    return;
-            }
-
-            if( ! this->gptr() )
-            {
-                this->setg(_ibuf, _ibuf, _ibuf);
-            }
-
-            std::basic_streambuf<extern_type>* rdbuf = _target ? _target->rdbuf()
-                                                               : 0;
-            
-            // special case: read available input
-            if(size == 0 && rdbuf)
-                size = rdbuf->in_avail();
-
-            // not more than input buffer size
-            const std::streamsize ebufavail = _ebufmax - _ebufsize;
-            size = ebufavail < size ? ebufavail : size;
-
-            if(size > 0 && rdbuf)
-            {
-                std::streamsize n = rdbuf->sgetn( _ebuf + _ebufsize,  size );
-                _ebufsize += static_cast<int>(n);
-                if(n <= 0)
-                {
-                    // rdbuf == 0 means "at end of input"
-                    rdbuf = 0;
-                }  
-            }
-
-            if( this->gptr() - this->eback() > _pbmax)
-            {
-                std::streamsize movelen = this->egptr() - this->gptr() + _pbmax;
-                std::char_traits<char_type>::move( _ibuf,
-                                                   this->gptr() - _pbmax,
-                                                   static_cast<size_t>(movelen));
-                this->setg(_ibuf, _ibuf + _pbmax, _ibuf + movelen);
-            }
-
-            typename CodecType::result r = decode();
-
-            // fail if partial conversion at the end of input
-            // rdbuf == 0 means "at end of input"
-            if( rdbuf == 0 && _ebufsize == 0 && r == CodecType::partial)
-                throw ConversionError("character conversion failed");
-        }
-
-        std::streamsize import(const extern_type* buf, std::streamsize size)
-        {
-            if( this->pptr() )
-            {
-                if( -1 == this->terminate() )
-                    return 0;
-            }
-
-            if( ! this->gptr() )
-            {
-                this->setg(_ibuf, _ibuf, _ibuf);
-            }
-
-            const std::streamsize bufavail = _ebufmax - _ebufsize;
-            size = bufavail < size ? bufavail : size;
-            if(size > 0)
-            {
-                std::char_traits<extern_type>::copy( _ebuf + _ebufsize, buf, static_cast<std::size_t>(size) );
-                _ebufsize += static_cast<int>(size);
-            }
-
-            if( this->gptr() - this->eback() > _pbmax)
-            {
-                std::streamsize movelen = this->egptr() - this->gptr() + _pbmax;
-                std::char_traits<char_type>::move( _ibuf,
-                                                   this->gptr() - _pbmax,
-                                                   static_cast<size_t>(movelen));
-                this->setg(_ibuf, _ibuf + _pbmax, _ibuf + movelen);
-            }
-
-            decode();
-
-            return size;
         }
 
     private:
@@ -457,7 +424,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             }
 
             if(r == CodecType::error)
-                throw ConversionError("character conversion failed");
+                throw ConversionError("character encoding");
 
             return r;
         }
@@ -478,13 +445,24 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
                 ++s2;
             }
         }
+
+    private:
+        static const int _pbmax = 4;
+
+        static const int _ebufmax = 256;
+        extern_type _ebuf[_ebufmax];
+        int _ebufsize;
+
+        static const int _ibufmax = 256;
+        intern_type _ibuf[_ibufmax];
+
+        state_type _state;
+        CodecType* _codec;
+        std::size_t _codecRefs;
+        std::basic_ios<extern_type>* _target;
 };
 
-
-/** @brief Buffers the conversion of 8-bit character sequences to unicode.
-
-    The internal type is Pt::Char. The external type is $char$.
-    See BasicTextBuffer for a more detailed description.
+/** @brief Converts 8-bit character sequences to unicode.
 */
 class PT_API TextBuffer : public BasicTextBuffer<Pt::Char, char>
 {
@@ -493,10 +471,6 @@ class PT_API TextBuffer : public BasicTextBuffer<Pt::Char, char>
 
     public:
         /** @brief Constructs a new TextBuffer
-             See BasicTextBuffer::BasicTextBuffer() for a more detailed description.
-
-             @param buffer The buffer (external device) which is wrapped by this object.
-             @param codec The codec which is used to convert data from and to the external device.
         */
         explicit TextBuffer(std::ios& buffer, Codec* codec = 0);
 
@@ -505,5 +479,4 @@ class PT_API TextBuffer : public BasicTextBuffer<Pt::Char, char>
 
 } // namespace Pt
 
-#endif
-
+#endif // Pt_TextBuffer_h

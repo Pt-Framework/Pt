@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004-2007 Marc Boris Duerner
+ * Copyright (C) 2004-2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,13 +25,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_TextStream_h
 #define Pt_TextStream_h
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
 #include <Pt/TextBuffer.h>
-#include <iostream>
+#include <Pt/IOStream.h>
 
 namespace Pt {
 
@@ -58,7 +59,7 @@ namespace Pt {
     @ingroup Unicode
 */
 template <typename CharT, typename ByteT>
-class BasicTextIStream : public std::basic_istream<CharT>
+class BasicTextIStream : public BasicIStream<CharT>
 {
     public:
         typedef ByteT extern_type;
@@ -80,17 +81,17 @@ class BasicTextIStream : public std::basic_istream<CharT>
             also be deleted on destruction
         */
         BasicTextIStream(StreamType& is, CodecType* codec)
-        : std::basic_istream<intern_type>(0)
-        , _buffer( is, codec )
+        : BasicIStream<intern_type>(0)
+        , _tbuffer( is, codec )
         {
-            this->init(&_buffer);
+            this->init(&_tbuffer);
         }
 
         explicit BasicTextIStream(CodecType* codec)
-        : std::basic_istream<intern_type>(0)
-        , _buffer(codec )
+        : BasicIStream<intern_type>(0)
+        , _tbuffer(codec )
         {
-            this->init(&_buffer);
+            this->init(&_tbuffer);
         }
 
         ~BasicTextIStream()
@@ -98,50 +99,49 @@ class BasicTextIStream : public std::basic_istream<CharT>
 
         CodecType* codec()
         { 
-            return _buffer.codec(); 
+            return _tbuffer.codec(); 
         }
 
         void setCodec(CodecType* codec)
         {           
-            _buffer.setCodec(codec);
+            _tbuffer.setCodec(codec);
         }
 
         void attach(StreamType& is)
         {
-            _buffer.attach(is);
+            _tbuffer.attach(is);
         }
 
         void detach()
         {
-            _buffer.detach();
+            _tbuffer.detach();
         }
 
         void discard()
         {
-            _buffer.discard();
+            _tbuffer.discard();
         }
 
         void reset()
         {
-            _buffer.reset();
+            _tbuffer.reset();
         }
 
         void reset(StreamType& is)
         {
-            _buffer.reset(is);
+            _tbuffer.reset(is);
         }
 
         void terminate()
         {
-            _buffer.terminate();
+            _tbuffer.terminate();
         }
 
-        // TODO: rename textBuffer
-        BasicTextBuffer<intern_type, extern_type>& buffer()
-        { return _buffer; }
+        BasicTextBuffer<intern_type, extern_type>& textBuffer()
+        { return _tbuffer; }
 
     private:
-        BasicTextBuffer<intern_type, extern_type> _buffer;
+        BasicTextBuffer<intern_type, extern_type> _tbuffer;
 };
 
 
@@ -168,7 +168,7 @@ class BasicTextIStream : public std::basic_istream<CharT>
     @ingroup Unicode
 */
 template <typename CharT, typename ByteT>
-class BasicTextOStream : public std::basic_ostream<CharT>
+class BasicTextOStream : public BasicOStream<CharT>
 {
     public:
         typedef ByteT extern_type;
@@ -182,7 +182,7 @@ class BasicTextOStream : public std::basic_ostream<CharT>
         typedef TextCodec<char_type, extern_type> CodecType;
 
     public:
-        /** @brief Construct by output stream and codec.
+        /** @brief Construct with output stream and codec.
 
             The output stream @a os is used to write a character sequence
             which has been converted using the codec @a codec. The Codec
@@ -190,64 +190,63 @@ class BasicTextOStream : public std::basic_ostream<CharT>
             by this class and be deleted on destruction
         */
         BasicTextOStream(StreamType& os, CodecType* codec)
-        : std::basic_ostream<intern_type>(0)
-        , _buffer( os , codec )
-        { this->init(&_buffer); }
+        : BasicOStream<intern_type>(0)
+        , _tbuffer( os , codec )
+        { this->init(&_tbuffer); }
 
         explicit BasicTextOStream(CodecType* codec)
-        : std::basic_ostream<intern_type>(0)
-        , _buffer( codec )
-        { this->init(&_buffer); }
+        : BasicOStream<intern_type>(0)
+        , _tbuffer( codec )
+        { this->init(&_tbuffer); }
 
         ~BasicTextOStream()
         {  }
 
         CodecType* codec()
         { 
-            return _buffer.codec(); 
+            return _tbuffer.codec(); 
         }
 
         void setCodec(CodecType* codec)
         {           
-            _buffer.setCodec(codec);
+            _tbuffer.setCodec(codec);
         }
 
         void attach(StreamType& os)
         {
-            _buffer.attach(os);
+            _tbuffer.attach(os);
         }
 
         void detach()
         {
-            _buffer.detach();
+            _tbuffer.detach();
         }
 
         void discard()
         {
-            _buffer.discard();
+            _tbuffer.discard();
         }
 
         void reset()
         {
-            _buffer.reset();
+            _tbuffer.reset();
         }
 
         void reset(StreamType& os)
         {
-            _buffer.reset(os);
+            _tbuffer.reset(os);
         }
 
         void terminate()
         {
-            _buffer.terminate();
+            _tbuffer.terminate();
         }
 
-        // TODO: rename textBuffer
-        BasicTextBuffer<intern_type, extern_type>& buffer()
-        { return _buffer; }
+        BasicTextBuffer<intern_type, extern_type>& textBuffer()
+        { return _tbuffer; }
 
     private:
-        BasicTextBuffer<intern_type, extern_type> _buffer;
+        BasicTextBuffer<intern_type, extern_type> _tbuffer;
 };
 
 /** @brief Converts character sequences using a Codec.
@@ -273,7 +272,7 @@ class BasicTextOStream : public std::basic_ostream<CharT>
     @ingroup Unicode
 */
 template <typename CharT, typename ByteT>
-class BasicTextStream : public std::basic_iostream<CharT>
+class BasicTextStream : public BasicIOStream<CharT>
 {
     public:
         typedef ByteT extern_type;
@@ -296,64 +295,63 @@ class BasicTextStream : public std::basic_iostream<CharT>
             be managed by this class and be deleted on destruction
         */
         BasicTextStream(StreamType& ios, CodecType* codec)
-        : std::basic_iostream<intern_type>(0)
-        , _buffer( ios, codec)
-        { this->init(&_buffer); }
+        : BasicIOStream<intern_type>(0)
+        , _tbuffer( ios, codec)
+        { this->init(&_tbuffer); }
 
         explicit BasicTextStream(CodecType* codec)
-        : std::basic_iostream<intern_type>(0)
-        , _buffer(codec)
-        { this->init(&_buffer); }
+        : BasicIOStream<intern_type>(0)
+        , _tbuffer(codec)
+        { this->init(&_tbuffer); }
 
         ~BasicTextStream()
         { }
 
         CodecType* codec()
         { 
-            return _buffer.codec(); 
+            return _tbuffer.codec(); 
         }
 
         void setCodec(CodecType* codec)
         {           
-            _buffer.setCodec(codec);
+            _tbuffer.setCodec(codec);
         }
 
         void attach(StreamType& ios)
         {
-            _buffer.attach(ios);
+            _tbuffer.attach(ios);
         }
 
         void detach()
         {
-            _buffer.detach();
+            _tbuffer.detach();
         }
 
         void discard()
         {
-            _buffer.discard();
+            _tbuffer.discard();
         }
 
         void reset()
         {
-            _buffer.reset();
+            _tbuffer.reset();
         }
 
         void reset(StreamType& ios)
         {
-            _buffer.reset(ios);
+            _tbuffer.reset(ios);
         }
 
         void terminate()
         {
-            _buffer.terminate();
+            _tbuffer.terminate();
         }
 
-        // TODO: rename textBuffer
-        BasicTextBuffer<intern_type, extern_type>& buffer()
-        { return _buffer; }
+        BasicTextBuffer<intern_type, extern_type>& textBuffer()
+        { return _tbuffer; }
 
     private:
-        BasicTextBuffer<intern_type, extern_type> _buffer;
+        BasicTextBuffer<intern_type, extern_type> _tbuffer;
 };
 
 
@@ -433,5 +431,4 @@ class PT_API TextStream : public BasicTextStream<Char, char>
 
 } // namespace Pt
 
-#endif
-
+#endif // Pt_TextStream_h

@@ -69,13 +69,14 @@ class PT_API basic_istringstream<Pt::Char> : public basic_istream<Pt::Char>
         explicit basic_istringstream(const Pt::String& str,
                                     std::ios_base::openmode mode = std::ios_base::in);
 
-        virtual ~basic_istringstream();
+        basic_stringbuf<Pt::Char>* rdbuf() const
+        { return const_cast<Pt::StringBuffer*>(&_buffer); }
 
-        basic_stringbuf<Pt::Char>* rdbuf() const;
+        Pt::String str() const
+        { return _buffer.str(); }
 
-        Pt::String str() const;
-
-        void str(const Pt::String& str);
+        void str(const Pt::String& str)
+        { _buffer.str(str); }
 
     private:
         Pt::StringBuffer _buffer;
@@ -98,13 +99,14 @@ class PT_API basic_ostringstream<Pt::Char> : public basic_ostream<Pt::Char>
         explicit basic_ostringstream(const Pt::String& str,
                                     std::ios_base::openmode mode = std::ios_base::out);
 
-        virtual ~basic_ostringstream();
+        basic_stringbuf<Pt::Char>* rdbuf() const
+        { return const_cast<Pt::StringBuffer*>(&_buffer); }
 
-        basic_stringbuf<Pt::Char>* rdbuf() const;
+        Pt::String str() const
+        { return _buffer.str(); }
 
-        Pt::String str() const;
-
-        void str(const Pt::String& str);
+        void str(const Pt::String& str)
+        { _buffer.str(str); }
 
     private:
         Pt::StringBuffer _buffer;
@@ -127,13 +129,14 @@ class PT_API basic_stringstream<Pt::Char> : public basic_iostream<Pt::Char>
         explicit basic_stringstream(const Pt::String& str,
                                     std::ios_base::openmode mode = std::ios_base::in | std::ios_base::out);
 
-        virtual ~basic_stringstream();
+        basic_stringbuf<Pt::Char>* rdbuf() const
+        { return const_cast<Pt::StringBuffer*>(&_buffer); }
 
-        basic_stringbuf<Pt::Char>* rdbuf() const;
+        Pt::String str() const
+        { return _buffer.str(); }
 
-        Pt::String str() const;
-
-        void str(const Pt::String& str);
+        void str(const Pt::String& str)
+        { _buffer.str(str); }
 
     private:
         Pt::StringBuffer _buffer;

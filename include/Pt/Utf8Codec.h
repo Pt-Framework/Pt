@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2005 by Marc Boris Duerner
- * Copyright (C) 2005 by Aloysius Indrayanto
+ * Copyright (C) 2005-2013 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Utf8Codec_h
 #define Pt_Utf8Codec_h
 
@@ -60,19 +60,19 @@ class PT_API Utf8Codec : public TextCodec<Char, char>
             */
         explicit Utf8Codec(size_t ref = 0);
 
-        //! Empty destructor
+        //! @brief Destructor.
         virtual ~Utf8Codec()
         {}
 
         //! @brief Decodes UTF-8 to UTF-32.
         virtual result do_in(MBState& s, const char* fromBegin,
-                                        const char* fromEnd, const char*& fromNext,
-                                        Char* toBegin, Char* toEnd, Char*& toNext) const;
+                                         const char* fromEnd, const char*& fromNext,
+                                         Char* toBegin, Char* toEnd, Char*& toNext) const;
 
         //! @brief Encodes UTF-32 to UTF-8.
         virtual result do_out(MBState& s, const Char* fromBegin,
-                                            const Char* fromEnd, const Char*& fromNext,
-                                            char* toBegin, char* toEnd, char*& toNext) const;
+                                          const Char* fromEnd, const Char*& fromNext,
+                                          char* toBegin, char* toEnd, char*& toNext) const;
 
         // inheritdoc
         virtual bool do_always_noconv() const throw();
@@ -102,5 +102,4 @@ class PT_API Utf8Codec : public TextCodec<Char, char>
 
 } //namespace Pt
 
-#endif
-
+#endif // Pt_Utf8Codec_h

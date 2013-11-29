@@ -42,6 +42,7 @@ namespace Pt {
 class PT_API Utf16BECodec : public TextCodec<Char, char> 
 {
     public:
+        //! @brief Constructor.
         explicit Utf16BECodec(size_t ref = 0);
 
         //! @brief Destructor.
@@ -80,6 +81,7 @@ class PT_API Utf16BECodec : public TextCodec<Char, char>
 class PT_API Utf16LECodec : public TextCodec<Char, char> 
 {
     public:
+        //! @brief Constructor.
         explicit Utf16LECodec(size_t ref = 0);
 
         //! @brief Destructor.
@@ -113,5 +115,4 @@ class PT_API Utf16LECodec : public TextCodec<Char, char>
 
 } //namespace Pt
 
-#endif
-
+#endif // Pt_Utf16Codec_h

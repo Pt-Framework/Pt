@@ -25,24 +25,26 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_WinVer_h
 #define Pt_WinVer_h
 
 #ifndef __cplusplus_winrt
-	#if defined(WIN32) || defined(_WIN32) 
-		// Use of features specific Windows versions
-		#ifndef WINVER
-		#define WINVER 0x0501
-		#endif
 
-		#ifndef _WIN32_WINNT
-		#define _WIN32_WINNT 0x0501
-		#endif
+	  #if defined(WIN32) || defined(_WIN32) 
+		    #ifndef WINVER
+		    #define WINVER 0x0501
+		    #endif
 
-		#ifndef _WIN32_WINDOWS
-		#define _WIN32_WINDOWS 0x0410
-		#endif
-	#endif
-#endif
+		    #ifndef _WIN32_WINNT
+		    #define _WIN32_WINNT 0x0501
+		    #endif
 
-#endif
+		    #ifndef _WIN32_WINDOWS
+		    #define _WIN32_WINDOWS 0x0410
+		    #endif
+	  #endif
+
+#endif // __cplusplus_winrt
+
+#endif // Pt_WinVer_h

@@ -200,4 +200,4 @@ std::codecvt_base::result Utf32LECodec::do_unshift(Pt::MBState&, char*, char*, c
 int Utf32LECodec::do_encoding() const throw()
 { return 4; }
 
-}// namespace Pt
+} // namespace Pt

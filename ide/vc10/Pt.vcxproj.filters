@@ -276,9 +276,6 @@
     <ClInclude Include="..\..\include\Pt\Utf8Codec.h">
       <Filter>Pt</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Variant.h">
-      <Filter>Pt</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Void.h">
       <Filter>Pt</Filter>
     </ClInclude>
@@ -1648,9 +1645,6 @@
       <Filter>Pt\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt\tests\TypeTraitsTest.cpp">
-      <Filter>Pt\tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt\tests\VariantTest.cpp">
       <Filter>Pt\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\Application.cpp">

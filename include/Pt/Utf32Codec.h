@@ -112,6 +112,7 @@ class PT_API Utf32LECodec : public TextCodec<Char, char>
         // inheritdoc
         int do_encoding() const throw();
 };
-}// namespace Pt
+
+} // namespace Pt
 
 #endif //Pt_Utf32Codec_h

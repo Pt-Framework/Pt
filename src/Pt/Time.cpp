@@ -25,114 +25,17 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/Time.h"
-#include "Pt/Convert.h"
-#include "Pt/SerializationInfo.h"
-#include <sstream>
+
+#include <Pt/Time.h>
+#include <Pt/Convert.h>
+#include <Pt/SerializationInfo.h>
 #include <cctype>
 
 namespace Pt {
 
 InvalidTime::InvalidTime()
-: std::invalid_argument("Invalid time")
+: std::invalid_argument("invalid time")
 { }
-
-
-inline unsigned short getNumber2(const char* s)
-{
-    if ( ! std::isdigit(s[0]) || ! std::isdigit(s[1]) )
-        throw ConversionError("Invalid Time format");
-
-    return (s[0] - '0') * 10 + (s[1] - '0');
-}
-
-
-inline unsigned short getNumber3(const char* s)
-{
-    if( ! std::isdigit(s[0]) || ! std::isdigit(s[1]) || ! std::isdigit(s[2]) )
-       throw ConversionError("Invalid Time format");
-
-    return ( s[0] - '0') * 100 + (s[1] - '0') * 10 + (s[2] - '0' );
-}
-
-
-void convert(Time& time, const std::string& s)
-{
-    unsigned hour = 0, min = 0, sec = 0, msec = 0;
-
-    if( s.size() < 11 || s.at(2) != ':' || s.at(5) != ':' || s.at(8) != '.')
-        throw ConversionError("Invalid Time format");
-
-	const char* d = s.data();
-	hour = getNumber2(d);
-	min = getNumber2(d + 3);
-	sec = getNumber2(d + 6);
-	msec = getNumber3(d + 9);
-
-	time.set(hour, min, sec, msec);
-}
-
-
-void convert(std::string& str, const Time& time)
-{
-    unsigned hour = 0, minute = 0, second = 0, msec = 0;
-    time.get(hour, minute, second, msec);
-
-    // format hh:mm:ss.sssss
-    //        0....+....1....+
-    char ret[14];
-    ret[0] = static_cast<char>('0' + hour / 10);
-    ret[1] = '0' + hour % 10;
-    ret[2] = ':';
-    ret[3] = static_cast<char>('0' + minute / 10);
-    ret[4] = '0' + minute % 10;
-    ret[5] = ':';
-    ret[6] = static_cast<char>('0' + second / 10);
-    ret[7] = '0' + second % 10;
-    ret[8] = '.';
-    unsigned int n = msec;
-    ret[11] = '0' + n % 10;
-    n /= 10;
-    ret[10] = '0' + n % 10;
-    n /= 10;
-    ret[9] = '0' + n % 10;
-
-    str.assign(ret, 12);
-}
-
-/*void operator >>=(const SerializationInfo& si, Time& time)
-{
-    std::string s;
-    si >>= s;
-    convert(time, s);
-
-    //unsigned hour = si.getValue<unsigned>("hour");
-    //unsigned min = si.getValue<unsigned>("minute");
-    //unsigned sec = si.getValue<unsigned>("second");
-    //unsigned msec = si.getValue<unsigned>("millisec");
-    //time.set(hour, min, sec, msec);
-}*/
-
-/*void operator <<=(SerializationInfo& si, const Time& time)
-{
-    std::string s;
-    convert(s, time);
-    si <<= s;
-    si.setTypeName("Pt::Time");
-
-    //unsigned hour = 0;
-    //unsigned min = 0;
-    //unsigned sec = 0;
-    //unsigned msec = 0;
-    //time.get(hour, min, sec, msec);
-
-    //si.addValue("hour", hour );
-    //si.addValue("minute", min );
-    //si.addValue("second", sec );
-    //si.addValue("millisec", msec );
-    //si.setTypeName("Time");
-}*/
-
 
 void operator>>=(const SerializationInfo& si, Time& time)
 {
@@ -168,6 +71,100 @@ void operator<<=(SerializationInfo& si, const Time& time)
     si.addMember( Pt::LiteralPtr<char>("sec") ) <<=  sec;
     si.addMember( Pt::LiteralPtr<char>("msec") ) <<=  msec;
     si.setTypeName( Pt::LiteralPtr<char>("Pt::Time") );
+}
+
+
+template <typename CharT>
+inline unsigned short getNumber2(const CharT* s)
+{
+    if ( ! std::isdigit(s[0]) || ! std::isdigit(s[1]) )
+        throw ConversionError("invalid time");
+
+    return (s[0] - '0') * 10 + (s[1] - '0');
+}
+
+template <typename CharT>
+inline unsigned short getNumber3(const CharT* s)
+{
+    if( ! std::isdigit(s[0]) || ! std::isdigit(s[1]) || ! std::isdigit(s[2]) )
+       throw ConversionError("invalid time");
+
+    return ( s[0] - '0') * 100 + (s[1] - '0') * 10 + (s[2] - '0' );
+}
+
+
+template <typename CharT>
+void timeToString(std::basic_string<CharT>& str, const Time& time)
+{
+    unsigned hour = 0, minute = 0, second = 0, msec = 0;
+    time.get(hour, minute, second, msec);
+
+    // format hh:mm:ss.sssss
+    //        0....+....1....+
+    CharT ret[14];
+    ret[0] = static_cast<char>('0' + hour / 10);
+    ret[1] = '0' + hour % 10;
+    ret[2] = ':';
+    ret[3] = static_cast<char>('0' + minute / 10);
+    ret[4] = '0' + minute % 10;
+    ret[5] = ':';
+    ret[6] = static_cast<char>('0' + second / 10);
+    ret[7] = '0' + second % 10;
+    ret[8] = '.';
+    unsigned int n = msec;
+    ret[11] = '0' + n % 10;
+    n /= 10;
+    ret[10] = '0' + n % 10;
+    n /= 10;
+    ret[9] = '0' + n % 10;
+
+    str.assign(ret, 12);
+}
+
+
+void convert(std::string& str, const Time& time)
+{
+    timeToString(str, time);
+}
+
+
+void convert(Time& time, const std::string& s)
+{
+    unsigned hour = 0, min = 0, sec = 0, msec = 0;
+
+    if( s.size() < 11 || s.at(2) != ':' || s.at(5) != ':' || s.at(8) != '.')
+        throw ConversionError("invalid time");
+
+	const char* d = s.data();
+	hour = getNumber2(d);
+	min = getNumber2(d + 3);
+	sec = getNumber2(d + 6);
+	msec = getNumber3(d + 9);
+
+	time.set(hour, min, sec, msec);
+}
+
+
+void convert(Pt::String& str, const Time& time)
+{
+    timeToString(str, time);
+}
+
+
+void convert(Time& time, const Pt::String& s)
+{
+    unsigned hour = 0, min = 0, sec = 0, msec = 0;
+
+    if( s.size() < 11 || s.at(2) != ':' || s.at(5) != ':' || s.at(8) != '.')
+        throw ConversionError("invalid time");
+
+	const Char* d = s.data();
+	hour = getNumber2(d);
+	min = getNumber2(d + 3);
+	sec = getNumber2(d + 6);
+	msec = getNumber3(d + 9);
+
+	time.set(hour, min, sec, msec);
 }
 
 } // namespace Pt

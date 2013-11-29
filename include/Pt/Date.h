@@ -320,7 +320,6 @@ class Date
         */
         static Date fromIsoString(const std::string& s);
 
-    public:
         /** \brief Returns true if values describe a valid date
         */
         static bool isValid(int y, int m, int d);

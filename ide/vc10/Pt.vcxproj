@@ -269,7 +269,6 @@
     <ClInclude Include="..\..\include\Pt\Utf16Codec.h" />
     <ClInclude Include="..\..\include\Pt\Utf32Codec.h" />
     <ClInclude Include="..\..\include\Pt\Utf8Codec.h" />
-    <ClInclude Include="..\..\include\Pt\Variant.h" />
     <ClInclude Include="..\..\include\Pt\Void.h" />
     <ClInclude Include="..\..\include\Pt\WinVer.h" />
     <ClInclude Include="..\..\include\Pt\XmlRpc\ActiveProcedure.h" />
@@ -799,7 +798,6 @@
     <ClCompile Include="..\..\src\Pt\tests\TimeTest.cpp" />
     <ClCompile Include="..\..\src\Pt\tests\TypesTest.cpp" />
     <ClCompile Include="..\..\src\Pt\tests\TypeTraitsTest.cpp" />
-    <ClCompile Include="..\..\src\Pt\tests\VariantTest.cpp" />
     <ClCompile Include="..\..\src\Pt\TextBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt\TextStream.cpp" />
     <ClCompile Include="..\..\src\Pt\Time.cpp" />

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2008 by Marc Boris Duerner
+ * Copyright (C) 2006-2013 by Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,20 +25,28 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Timespan_h
 #define Pt_Timespan_h
 
 #include <Pt/Api.h>
 #include <Pt/Types.h>
-#include <algorithm>
 
 namespace Pt {
 
 /** @brief  Represents time spans up to microsecond resolution.
+
     @ingroup DateTime
 */
 class Timespan
 {
+    private:
+        static const Pt::int64_t Milliseconds = 1000;
+        static const Pt::int64_t Seconds      = 1000 * Timespan::Milliseconds;
+        static const Pt::int64_t Minutes      =   60 * Timespan::Seconds;
+        static const Pt::int64_t Hours        =   60 * Timespan::Minutes;
+        static const Pt::int64_t Days         =   24 * Timespan::Hours;
+
     public:
         //! @brief Creates a zero Timespan.
         Timespan()
@@ -46,12 +54,12 @@ class Timespan
         {}
 
         //! @brief Creates a Timespan.
-        Timespan(Pt::int64_t microseconds)
+        explicit Timespan(Pt::int64_t microseconds)
         : _span(microseconds)
         { }
 
         /** @brief Creates a Timespan.
-            Useful for creating a Timespan from a struct timeval.
+            Useful for creating a Timespan from a POSIX timeval struct.
         */
         Timespan(long secs, long microsecs)
         : _span(Pt::int64_t(secs)*Seconds + microsecs)
@@ -70,19 +78,17 @@ class Timespan
         //! @brief Assignment operator.
         Timespan& operator=(const Timespan& timespan);
 
-        //! @brief Assignment operator.
-        Timespan& operator=(Pt::int64_t microseconds);
-
         //! @brief Assigns a new span.
         Timespan& set(int days, int hours, int minutes, int seconds, int microseconds);
 
         /** @brief Assigns a new span.
-            Useful for assigning from a struct timeval.
+            Useful for assigning from a POSIX timeval struct.
         */
         Timespan& set(long seconds, long microseconds);
 
-        //! @brief Swaps the Timespan with another one.
-        void swap(Timespan& timespan);
+        bool isNull() const;
+
+        void setNull();
 
         bool operator==(const Timespan& ts) const;
 
@@ -96,18 +102,6 @@ class Timespan
 
         bool operator<=(const Timespan& ts) const;
 
-        bool operator==(Pt::int64_t microseconds) const;
-
-        bool operator!=(Pt::int64_t microseconds) const;
-
-        bool operator>(Pt::int64_t microseconds) const;
-
-        bool operator>=(Pt::int64_t microseconds) const;
-
-        bool operator<(Pt::int64_t microseconds) const;
-
-        bool operator<=(Pt::int64_t microseconds) const;
-
         Timespan operator+(const Timespan& d) const;
 
         Timespan operator-(const Timespan& d) const;
@@ -115,14 +109,6 @@ class Timespan
         Timespan& operator+=(const Timespan& d);
 
         Timespan& operator-=(const Timespan& d);
-
-        Timespan operator+(Pt::int64_t microseconds) const;
-
-        Timespan operator-(Pt::int64_t microseconds) const;
-
-        Timespan& operator+=(Pt::int64_t microseconds);
-
-        Timespan& operator-=(Pt::int64_t microseconds);
 
         //! @brief Returns the number of days.
         int days() const;
@@ -156,12 +142,6 @@ class Timespan
 
         //! @brief Returns the total number of microseconds.
         Pt::int64_t toUSecs() const;
-
-        static const Pt::int64_t Milliseconds = 1000;
-        static const Pt::int64_t Seconds      = 1000 * Timespan::Milliseconds;
-        static const Pt::int64_t Minutes      =   60 * Timespan::Seconds;
-        static const Pt::int64_t Hours        =   60 * Timespan::Minutes;
-        static const Pt::int64_t Days         =   24 * Timespan::Hours;
 
     private:
         Pt::int64_t _span;
@@ -270,48 +250,6 @@ inline bool Timespan::operator <= (const Timespan& ts) const
 }
 
 
-inline bool Timespan::operator == (Pt::int64_t microseconds) const
-{
-    return _span == microseconds;
-}
-
-
-inline bool Timespan::operator != (Pt::int64_t microseconds) const
-{
-    return _span != microseconds;
-}
-
-
-inline bool Timespan::operator >  (Pt::int64_t microseconds) const
-{
-    return _span > microseconds;
-}
-
-
-inline bool Timespan::operator >= (Pt::int64_t microseconds) const
-{
-    return _span >= microseconds;
-}
-
-
-inline bool Timespan::operator <  (Pt::int64_t microseconds) const
-{
-    return _span < microseconds;
-}
-
-
-inline bool Timespan::operator <= (Pt::int64_t microseconds) const
-{
-    return _span <= microseconds;
-}
-
-
-inline void swap(Timespan& s1, Timespan& s2)
-{
-    s1.swap(s2);
-}
-
-
 inline Timespan::Timespan(int d, int h, int mins, int secs, int microsecs)
 : _span( Pt::int64_t(microsecs) +
          Pt::int64_t(secs)*Seconds +
@@ -335,13 +273,6 @@ inline Timespan& Timespan::operator=(const Timespan& timespan)
 }
 
 
-inline Timespan& Timespan::operator=(Pt::int64_t microseconds)
-{
-    _span = microseconds;
-    return *this;
-}
-
-
 inline Timespan& Timespan::set(int d, int h, int mins, int secs, int microsecs)
 {
     _span = Pt::int64_t(microsecs) +
@@ -360,9 +291,15 @@ inline Timespan& Timespan::set(long secs, long microseconds)
 }
 
 
-inline void Timespan::swap(Timespan& timespan)
+inline bool Timespan::isNull() const
 {
-    std::swap(_span, timespan._span);
+    return _span == 0;
+}
+
+
+inline void Timespan::setNull()
+{
+    _span = 0;
 }
 
 
@@ -391,32 +328,6 @@ inline Timespan& Timespan::operator -= (const Timespan& d)
     return *this;
 }
 
-
-inline Timespan Timespan::operator + (Pt::int64_t microseconds) const
-{
-    return Timespan(_span + microseconds);
-}
-
-
-inline Timespan Timespan::operator - (Pt::int64_t microseconds) const
-{
-    return Timespan(_span - microseconds);
-}
-
-
-inline Timespan& Timespan::operator += (Pt::int64_t microseconds)
-{
-    _span += microseconds;
-    return *this;
-}
-
-
-inline Timespan& Timespan::operator -= (Pt::int64_t microseconds)
-{
-    _span -= microseconds;
-    return *this;
-}
-
 } // namespace Pt
 
-#endif 
+#endif // Pt_Timespan_h

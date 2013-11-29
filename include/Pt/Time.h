@@ -25,12 +25,13 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_TIME_H
 #define PT_TIME_H
 
 #include <Pt/Api.h>
+#include <Pt/String.h>
 #include <Pt/Timespan.h>
-#include <Pt/SourceInfo.h>
 #include <string>
 #include <stdexcept>
 
@@ -76,6 +77,7 @@ class Time
         static const unsigned MSecsPerMinute   = 60000;
         static const unsigned MSecsPerSecond   = 1000;
 
+    public:
         /** \brief Creates a Time set to zero.
         */
         Time()
@@ -120,7 +122,7 @@ class Time
             return _msecs % 1000;
         }
 
-        unsigned totalMSecs() const
+        unsigned toMSecs() const
         { return _msecs; }
 
         void setTotalMSecs(unsigned msecs)
@@ -274,19 +276,12 @@ class Time
         */
         friend Timespan operator-(const Time& a, const Time& b)
         {
-            return b.msecsTo(a) * 1000;
+            return Timespan( b.msecsTo(a) * 1000 );
         }
 
         /** \brief Returns the time in ISO-format (hh:mm:ss.hhh)
         */
         std::string toIsoString() const;
-
-        /** \brief Returns true if values are a valid time
-        */
-        static bool isValid(unsigned h, unsigned m, unsigned s, unsigned ms)
-        {
-            return h < 24 && m < 60 && s < 60 && ms < 1000;
-        }
 
         /** \brief Convert from an ISO time string
 
@@ -295,6 +290,13 @@ class Time
             in ISO-format, InvalidTime is thrown.
         */
         static Time fromIsoString(const std::string& s);
+
+        /** \brief Returns true if values are a valid time
+        */
+        static bool isValid(unsigned h, unsigned m, unsigned s, unsigned ms)
+        {
+            return h < 24 && m < 60 && s < 60 && ms < 1000;
+        }
 
     private:
         //! @internal
@@ -307,7 +309,11 @@ PT_API void operator <<=(SerializationInfo& si, const Time& time);
 
 PT_API void convert(std::string& str, const Pt::Time& time);
 
-PT_API void convert(Pt::Time& time, const std::string& s);
+PT_API void convert(Pt::Time& time, const std::string& str);
+
+PT_API void convert(String& str, const Time& time);
+
+PT_API void convert(Time& time, const String& str);
 
 inline std::string Time::toIsoString() const
 {
