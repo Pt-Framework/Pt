@@ -89,12 +89,12 @@ class PT_API Utf8Codec : public TextCodec<Char, char>
         // inheritdoc
         int do_encoding() const throw();
 
-        static String decode(const char* data, unsigned size);
+        static String decode(const char* data, std::size_t size);
         
         static String decode(const std::string& data)
         { return decode(data.data(), data.size()); }
 
-        static std::string encode(const Char* data, unsigned size);
+        static std::string encode(const Char* data, std::size_t size);
         
         static std::string encode(const String& data)
         { return encode(data.data(), data.size()); }

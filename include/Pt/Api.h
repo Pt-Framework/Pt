@@ -178,11 +178,19 @@
 */
 namespace Pt {
 
+    class Allocator;
     class Any;
     class Connectable;
     class Connection;
+    class Date;
+    class DateTime;
+    class Event;
+    class SerializationContext;
+    class SerializationInfo;
+    class Settings;
     class SourceInfo;
-    class NonCopyable;
+    class Time;
+
 }
 
 /*______ _       _   _                         _____

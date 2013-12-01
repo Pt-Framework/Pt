@@ -25,7 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
+ 
 #ifndef Pt_TextBuffer_h
 #define Pt_TextBuffer_h
 
@@ -258,7 +258,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
                     {
                         extern_type* next = 0;
                         res = _codec->unshift(_state, _ebuf, _ebuf + _ebufmax, next);
-                        _ebufsize = next - _ebuf;
+                        _ebufsize = static_cast<int>(next - _ebuf);
 
                         if(res == CodecType::error)
                         {
@@ -343,7 +343,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
                     toNext += size;
                 }
 
-                _ebufsize += toNext - toBegin;
+                _ebufsize += static_cast<int>(toNext - toBegin);
                 size_t leftover = fromEnd - fromNext;
                 if(leftover && fromNext > fromBegin)
                 {
@@ -351,7 +351,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
                 }
 
                 this->setp( _ibuf, _ibuf + _ibufmax );
-                this->pbump( leftover );
+                this->pbump( static_cast<int>(leftover) );
 
                 if(res == CodecType::error)
                     throw ConversionError("character encoding");

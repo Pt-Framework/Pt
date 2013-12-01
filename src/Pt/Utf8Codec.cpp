@@ -275,7 +275,7 @@ int Utf8Codec::do_encoding() const throw()
     return 0; 
 }
 
-String Utf8Codec::decode(const char* data, unsigned size)
+String Utf8Codec::decode(const char* data, std::size_t size)
 {
     Utf8Codec codec;
 
@@ -309,7 +309,7 @@ String Utf8Codec::decode(const char* data, unsigned size)
     return ret;
 }
 
-std::string Utf8Codec::encode(const Char* data, unsigned size)
+std::string Utf8Codec::encode(const Char* data, std::size_t size)
 {
     Utf8Codec codec;
     char to[64];

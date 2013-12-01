@@ -776,20 +776,23 @@ class PT_API basic_string<Pt::Char>
         { return _nN - 1; }
         
         void setShortStringLength(size_type n)        
-        { shortStringData()[n] = Pt::Char(0); shortStringMagic() = _nN - n - 1; }
+        { 
+            shortStringData()[n] = Pt::Char(0); 
+            shortStringMagic() = static_cast<unsigned char>(_nN - n - 1); 
+        }
         
         void shortStringAssign(const Pt::Char* str, size_type n)
         {
             traits_type::copy(shortStringData(), str, n);
             shortStringData()[n] = Pt::Char(0);
-            shortStringMagic() = _nN - n - 1;
+            shortStringMagic() = static_cast<unsigned char>(_nN - n - 1);
         }
         void shortStringAssign(const wchar_t* str, size_type n)
         {
             for (size_type nn = 0; nn < n; ++nn)
                 shortStringData()[nn] = str[nn];
             shortStringData()[n] = Pt::Char(0);
-            shortStringMagic() = _nN - n - 1;
+            shortStringMagic() = static_cast<unsigned char>(_nN - n - 1);
         }
 
         const Pt::Char* longStringData() const          
