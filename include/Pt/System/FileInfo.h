@@ -73,18 +73,16 @@ class PT_SYSTEM_API FileInfo
             return _type;
         }
 
-        const std::string& path() const
-        { return _path; }
-
         /** @brief Returns the full path of node in the file-system
 
             This method may return a relative path, or a fully qualified one
             depending on how this object was constructed.
         */
+        const std::string& path() const
+        { return _path; }
+
         std::string name() const
-        {
-            return FileInfo::dirName(_path);
-        }
+        { return FileInfo::name(_path); }
 
         static std::string name(const std::string& path);
 
@@ -97,9 +95,7 @@ class PT_SYSTEM_API FileInfo
             character. (A backslash in Windows and a slash in Unix, for example.)
         */
         std::string dirName() const
-        {
-            return FileInfo::dirName(_path);
-        }
+        { return FileInfo::dirName(_path); }
 
         static std::string dirName(const std::string& path);
 

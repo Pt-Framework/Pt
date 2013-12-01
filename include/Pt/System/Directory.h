@@ -25,14 +25,13 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_SYSTEM_DIRECTORY_H
 #define PT_SYSTEM_DIRECTORY_H
 
-#include <Pt/Types.h>
-#include <Pt/SourceInfo.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/FileInfo.h>
-#include <Pt/System/IOError.h>
+#include <Pt/Types.h>
 #include <string>
 #include <iterator>
 
@@ -71,8 +70,11 @@ class PT_SYSTEM_API DirectoryIterator
         : _impl(0)
         { }
 
-        //! @brief Constructs an iterator pointing at the file given by �a path
+        //! @brief Constructs an iterator pointing at the file given by @a path
         DirectoryIterator(const std::string& path);
+
+        //! @brief Constructs an iterator pointing at the file given by @a path
+        DirectoryIterator(const char* path);
 
         //! @brief Copy constructor
         DirectoryIterator(const DirectoryIterator& it);
@@ -130,15 +132,19 @@ class PT_SYSTEM_API Directory
 {
     public:
         typedef DirectoryIterator Iterator;
-        typedef DirectoryIterator iterator;
 
     public:
+        //! @brief Default Constructor
+        Directory();
+
         /** @brief Constructs a %Directory object from the path \a path
 
             If no directory exists at \a path, an exception of type AccessFailed
             is thrown.
         */
         explicit Directory(const std::string& path);
+
+        explicit Directory(const char* path);
 
         /** @brief Constructs a %Directory object from a FileInfo object
 
@@ -163,10 +169,6 @@ class PT_SYSTEM_API Directory
         */
         const std::string& path() const
         { return _path; }
-
-        //! @brief Returns the size of the directory in bytes
-        std::size_t size() const
-        { return 0; }
 
         /** @brief Returns the parent directory path
 
@@ -219,12 +221,6 @@ class PT_SYSTEM_API Directory
         //! @brief Returns the current directory
         static std::string cwd();
 
-        //! @brief Returns the string representng the current directory in path names
-        static std::string curdir();
-
-        //! @brief Returns the string representng the upper directory in path names
-        static std::string updir();
-
         /** @brief Returns the system root path
 
             Returns "/" (root) on Linux, "c:\" on Windows
@@ -240,12 +236,14 @@ class PT_SYSTEM_API Directory
         */
         static std::string tmpdir();
 
-        //! @brief Returns the string representng the separator in path names
+        //! @brief Returns the string representing the separator in path names
         static std::string sep();
 
-    protected:
-        //! @brief Default Constructor
-        Directory();
+        //! @brief Returns the string representng the current directory in path names
+        static std::string curdir();
+
+        //! @brief Returns the string representng the upper directory in path names
+        static std::string updir();
 
     private:
         //! @internal
@@ -270,8 +268,8 @@ inline bool operator!=(const Directory& a, const Directory& b)
     return !(a == b);
 }
 
-}
+} // namespace System
 
-}
+} // namespace Pt
 
-#endif
+#endif // PT_SYSTEM_DIRECTORY_H

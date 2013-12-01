@@ -56,7 +56,4 @@ class ConsoleChannel : public LogChannel
 
 } // namespace Pt
 
-
-#endif
-
-
+#endif // Pt_System_ConsoleChannel_h

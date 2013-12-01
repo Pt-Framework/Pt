@@ -25,14 +25,23 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "DirectoryImpl.h"
-#include "Pt/System/Directory.h"
+#include <Pt/System/Directory.h>
+#include <Pt/System/IOError.h>
+#include <cassert>
 
 namespace Pt {
 
 namespace System {
 
 DirectoryIterator::DirectoryIterator(const std::string& path)
+{
+    _impl = new DirectoryIteratorImpl( path );
+}
+
+
+DirectoryIterator::DirectoryIterator(const char* path)
 {
     _impl = new DirectoryIteratorImpl( path );
 }
@@ -126,6 +135,15 @@ Directory::Directory(const std::string& path)
 }
 
 
+Directory::Directory(const char* path)
+: _path(path)
+, _impl(0)
+{
+    if( ! Directory::exists( path ) )
+        throw AccessFailed(path);
+}
+
+
 Directory::Directory(const FileInfo& fi)
 : _path( fi.path() )
 , _impl(0)
@@ -143,6 +161,7 @@ Directory::Directory(const Directory& dir)
 
 Directory::~Directory()
 {
+    assert(_impl == 0);
     // delete impl
 }
 
@@ -156,7 +175,7 @@ Directory& Directory::operator=(const Directory& dir)
 
 Directory::Iterator Directory::begin() const
 {
-    return DirectoryIterator( path().c_str() );
+    return DirectoryIterator( path() );
 }
 
 
@@ -204,18 +223,6 @@ std::string Directory::cwd()
 }
 
 
-std::string Directory::curdir()
-{
-    return DirectoryImpl::curdir();
-}
-
-
-std::string Directory::updir()
-{
-    return DirectoryImpl::updir();
-}
-
-
 std::string Directory::rootdir()
 {
     return DirectoryImpl::rootdir();
@@ -231,6 +238,18 @@ std::string Directory::tmpdir()
 std::string Directory::sep()
 {
     return DirectoryImpl::sep();
+}
+
+
+std::string Directory::curdir()
+{
+    return DirectoryImpl::curdir();
+}
+
+
+std::string Directory::updir()
+{
+    return DirectoryImpl::updir();
 }
 
 } // namespace System

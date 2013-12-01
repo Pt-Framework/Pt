@@ -29,7 +29,6 @@
 #include "ConsoleChannel.h"
 #include <iostream>
 
-
 namespace Pt {
 
 namespace System {
@@ -59,8 +58,6 @@ void ConsoleChannel::onWrite(const std::string& message)
 {
     std::clog << message;
 }
-
-
 
 } // namespace System
 

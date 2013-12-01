@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_SYSTEM_CONDITION_H
 #define PT_SYSTEM_CONDITION_H
 
@@ -91,8 +92,8 @@ namespace System {
             class ConditionImpl* _impl;
     };
 
-} // !namespace System
+} // namespace System
 
-} // !namespace Pt
+} // namespace Pt
 
-#endif
+#endif // PT_SYSTEM_CONDITION_H

@@ -25,15 +25,15 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_SYSTEM_APPLICATION_H
 #define PT_SYSTEM_APPLICATION_H
 
 #include <Pt/System/Api.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/Arg.h>
-#include <Pt/Connectable.h>
-#include <Pt/Event.h>
 #include <Pt/Signal.h>
+#include <Pt/Connectable.h>
 
 namespace Pt {
 
@@ -146,4 +146,4 @@ class PT_SYSTEM_API Application : public Pt::Connectable
 
 } // namespace Pt
 
-#endif
+#endif // PT_SYSTEM_APPLICATION_H

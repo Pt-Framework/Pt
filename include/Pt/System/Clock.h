@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2006-2008 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,14 +25,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_SYSTEM_CLOCK_H
 #define PT_SYSTEM_CLOCK_H
 
-#include <Pt/Types.h>
+#include <Pt/System/Api.h>
 #include <Pt/DateTime.h>
 #include <Pt/Timespan.h>
 #include <Pt/NonCopyable.h>
-#include <Pt/System/Api.h>
 
 namespace Pt {
 
@@ -82,8 +84,8 @@ class PT_SYSTEM_API Clock : private NonCopyable
         class ClockImpl *_impl;
 };
 
-} //namespace Pt
+} // namespace Pt
 
-} //namespace System
+} // namespace System
 
 #endif // PT_SYSTEM_CLOCK_H

@@ -26,10 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "ApplicationImpl.h"
-#include "Pt/System/Application.h"
-#include "Pt/Event.h"
-#include <string>
-#include <iostream>
+#include <Pt/System/Application.h>
+#include <Pt/Event.h>
 #include <stdexcept>
 
 namespace {
@@ -40,7 +38,7 @@ Pt::System::Application*& getSystemAppPtr()
 	return _app;
 }
 
-}
+} // naamespace
 
 namespace Pt {
 
@@ -71,7 +69,6 @@ Application::Application(EventLoop* loop, int argc, char** argv)
 , _loop(0)
 , _owner(0)
 {
-    // base class already throws if constructed twice
     ::getSystemAppPtr() = this;
 
     _impl = new ApplicationImpl;

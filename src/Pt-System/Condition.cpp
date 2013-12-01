@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2005-2006 by Dr Marc Boris Duerner
- * Copyright (C) 2005-2006 by Sebastian Pieck
+ * Copyright (C) 2005-2013 by Dr Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,8 +25,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "ConditionImpl.h"
-#include "Pt/System/Condition.h"
+#include <Pt/System/Condition.h>
 
 namespace Pt {
 
@@ -70,5 +70,4 @@ void Condition::broadcast()
 
 } // namespace System
 
-} // !namespace Pt
-
+} // namespace Pt
