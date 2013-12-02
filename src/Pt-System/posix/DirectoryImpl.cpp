@@ -44,23 +44,23 @@ namespace System {
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
 : _refs(1),
-  _path(path),
+  //_path(path),
   _handle(0),
   _current(0),
   _dirty(true)
 {
-    init();
+    init( path.c_str() );
 }
 
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
 : _refs(1),
-  _path(path),
+  //_path(path),
   _handle(0),
   _current(0),
   _dirty(true)
 {
-    init();
+    init(path);
 }
 
 
@@ -71,24 +71,24 @@ DirectoryIteratorImpl::~DirectoryIteratorImpl()
 }
 
 
-void DirectoryIteratorImpl::init()
+void DirectoryIteratorImpl::init(const char* path)
 {
-    _handle = ::opendir( _path.c_str() );
+    _handle = ::opendir(path);
     if( ! _handle )
     {
-        throw AccessFailed(_path);
+        throw AccessFailed(path);
     }
 
     // append a trailing slash if not empty, so we can add the
     // directory entry name easily
-    if( ! _path.empty() && _path[_path.size()-1] != '/')
-        _path += '/';
+    //if( pathlen > 0 && _path[pathlen-1] != '/')
+    //    _path += '/';
 
     this->advance();
 }
 
 
-const std::string& DirectoryIteratorImpl::path() const
+/*const std::string& DirectoryIteratorImpl::path() const
 {
     if(_dirty)
     {
@@ -107,7 +107,7 @@ const std::string& DirectoryIteratorImpl::path() const
     }
 
     return _path;
-}
+}*/
 
 
 bool DirectoryIteratorImpl::advance()

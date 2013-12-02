@@ -45,13 +45,15 @@ class DirectoryIteratorImpl
         { }
 
         DirectoryIteratorImpl(const std::string& path);
+        
+        DirectoryIteratorImpl(const char* path);
 
         ~DirectoryIteratorImpl();
 
         const std::string& name() const
         { return _name; }
 
-        const std::string& path() const;
+        //const std::string& path() const;
 
         int ref()
         { return ++_refs; }
@@ -62,11 +64,11 @@ class DirectoryIteratorImpl
         bool advance();
 
     private:
-        void init();
+        void init(const char*);
 
     private:
         unsigned int _refs;
-        mutable std::string _path;
+        //mutable std::string _path;
         mutable std::string _name;
         DIR* _handle;
         ::dirent* _current;
