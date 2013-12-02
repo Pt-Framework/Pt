@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
@@ -26,32 +25,31 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_System_FileDevice_h
 #define Pt_System_FileDevice_h
 
-#include <Pt/NonCopyable.h>
-#include <Pt/System/IODevice.h>
 #include <Pt/System/Api.h>
+#include <Pt/System/IODevice.h>
+#include <string>
+#include <ios>
 
 namespace Pt {
 
 namespace System {
 
+/** @brief Read and write files.
+*/
 class PT_SYSTEM_API FileDevice : public IODevice 
 {
-    friend class FileDeviceImpl;
-
-    private:
-        class FileDeviceImpl* _impl;
-
     public:
         FileDevice();
 
-        FileDevice( const char* path, std::ios::openmode mode);
+        FileDevice(const char* path, std::ios::openmode mode);
 
         ~FileDevice();
 
-        void open( const char* path, std::ios::openmode mode);
+        void open(const char* path, std::ios::openmode mode);
 
         void beginOpen(const char* path, std::ios::openmode mode);
 
@@ -76,18 +74,17 @@ class PT_SYSTEM_API FileDevice : public IODevice
 
         void onClose();
 
+        void onCancel();
+
         void onSetTimeout(size_t timeout);
 
-        bool onSeekable() const
-        { return true; }
+        bool onSeekable() const;
 
         pos_type onSeek(off_type offset, std::ios::seekdir sd);
 
         size_t onRead(char* buffer, size_t count, bool& eof);
 
         size_t onWrite(const char* buffer, size_t count);
-
-        void onCancel();
 
         size_t onPeek(char* buffer, size_t count);
 
@@ -96,6 +93,7 @@ class PT_SYSTEM_API FileDevice : public IODevice
         virtual bool onRun();
 
     private:
+        class FileDeviceImpl* _impl;
         std::string _path;
         Signal<FileDevice&> _opened;
         bool _opening;
@@ -103,6 +101,7 @@ class PT_SYSTEM_API FileDevice : public IODevice
 };
 
 } // namespace System
+
 } // namespace Pt
 
-#endif
+#endif // Pt_System_FileDevice_h

@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_System_FileInfo_h
 #define Pt_System_FileInfo_h
 
@@ -34,6 +35,14 @@
 namespace Pt {
 
 namespace System {
+
+/*  TODO:
+
+    - FileInfo contains file attributes, but no path
+    - In ctor of File and Directory, pass path and FileInfo
+      Directory(string path, FileInfo info);
+      This avoids additional system call to check if path really is a dir.
+*/
 
 /** @brief Provides information about a node in the file-system.
 
@@ -58,6 +67,10 @@ class PT_SYSTEM_API FileInfo
         */
         explicit FileInfo(const std::string& path);
 
+        /** @brief Constructs a %FileInfo object from the path \a path
+        */
+        explicit FileInfo(const char* path);
+
         //! @brief Copy constructor
         FileInfo(const FileInfo& fi);
 
@@ -69,9 +82,7 @@ class PT_SYSTEM_API FileInfo
 
         //! @brief Returns the type of the file node
         Type type() const
-        {
-            return _type;
-        }
+        { return _type; }
 
         /** @brief Returns the full path of node in the file-system
 
@@ -84,8 +95,6 @@ class PT_SYSTEM_API FileInfo
         std::string name() const
         { return FileInfo::name(_path); }
 
-        static std::string name(const std::string& path);
-
         /** @brief Returns the parent directory path
 
             This method might return an empty string if the node was created
@@ -97,29 +106,26 @@ class PT_SYSTEM_API FileInfo
         std::string dirName() const
         { return FileInfo::dirName(_path); }
 
-        static std::string dirName(const std::string& path);
-
         //! @brief Returns the size of the file in bytes
         std::size_t size() const;
 
         //! @brief Returns true if the node is a directory
         bool isDirectory() const
-        {
-            return _type == FileInfo::Directory;
-        }
+        { return type() == FileInfo::Directory; }
 
         //! @brief Returns true if the node is a file
         bool isFile() const
-        {
-            return _type == FileInfo::File;
-        }
+        { return type() == FileInfo::File; }
 
     public:
+        static std::string name(const std::string& path);
+
+        //! @brief Returns the parent directory path
+        static std::string dirName(const std::string& path);
+
         //! @brief Returns true if a file or directory exists at \a path
         static bool exists(const std::string& path)
-        {
-            return FileInfo::getType( path ) != FileInfo::Invalid;
-        }
+        { return FileInfo::getType( path ) != FileInfo::Invalid; }
 
         //! @brief Returns the type of file at \a path
         static Type getType(const std::string& path);
@@ -154,4 +160,4 @@ inline bool operator!=(const FileInfo& a, const FileInfo& b)
 
 } // namespace Pt
 
-#endif
+#endif // Pt_System_FileInfo_h

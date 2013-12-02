@@ -32,6 +32,7 @@
 #include "Pt/System/Logger.h"
 #include "Pt/System/File.h"
 #include "Pt/System/Clock.h"
+#include <Pt/System/IOError.h>
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"

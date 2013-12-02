@@ -53,8 +53,6 @@ class TimerTest : public Pt::Unit::TestSuite
             _count = 0;
 
             _loop = new Pt::System::MainLoop();
-            _loop->timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
-            _loop->setIdleTimeout(2000);
 
             _timer = new Pt::System::Timer();
             _timer->setActive(*_loop);

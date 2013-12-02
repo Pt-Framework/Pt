@@ -102,12 +102,6 @@ DirectoryIterator& DirectoryIterator::operator=(const DirectoryIterator& it)
 }
 
 
-const std::string& DirectoryIterator::path() const
-{
-    return _impl->path();
-}
-
-
 const std::string& DirectoryIterator::operator*() const
 {
     return _impl->name();
@@ -130,8 +124,8 @@ Directory::Directory(const std::string& path)
 : _path(path)
 , _impl(0)
 {
-    if( ! Directory::exists( path.c_str() ) )
-        throw AccessFailed(path);
+    if( ! Directory::exists(_path) )
+        throw AccessFailed(_path);
 }
 
 
@@ -139,8 +133,8 @@ Directory::Directory(const char* path)
 : _path(path)
 , _impl(0)
 {
-    if( ! Directory::exists( path ) )
-        throw AccessFailed(path);
+    if( ! Directory::exists(_path) )
+        throw AccessFailed(_path);
 }
 
 

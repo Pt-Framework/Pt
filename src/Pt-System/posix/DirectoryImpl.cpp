@@ -42,22 +42,6 @@ namespace Pt {
 
 namespace System {
 
-/*void throwDirectoryErrno(const std::string& path, const Pt::SourceInfo& si)
-{
-    switch(errno)
-    {
-        case ELOOP:
-        case ENAMETOOLONG:
-        case ENOENT:
-        case ENOTDIR:
-        case EISDIR:
-            throw DirectoryNotFound(path, si);
-
-        default: throwErrno(path, si);
-    }
-}*/
-
-
 DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
 : _refs(1),
   _path(path),
@@ -65,10 +49,34 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
   _current(0),
   _dirty(true)
 {
-    _handle = ::opendir( path.c_str() );
-    if( !_handle )
+    init();
+}
+
+
+DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
+: _refs(1),
+  _path(path),
+  _handle(0),
+  _current(0),
+  _dirty(true)
+{
+    init();
+}
+
+
+DirectoryIteratorImpl::~DirectoryIteratorImpl()
+{
+    if(_handle)
+        ::closedir(_handle);
+}
+
+
+void DirectoryIteratorImpl::init()
+{
+    _handle = ::opendir( _path.c_str() );
+    if( ! _handle )
     {
-        throw AccessFailed(path);
+        throw AccessFailed(_path);
     }
 
     // append a trailing slash if not empty, so we can add the
@@ -77,13 +85,6 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
         _path += '/';
 
     this->advance();
-}
-
-
-DirectoryIteratorImpl::~DirectoryIteratorImpl()
-{
-    if(_handle)
-        ::closedir(_handle);
 }
 
 

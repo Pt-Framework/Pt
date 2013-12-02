@@ -37,6 +37,8 @@ class DirectoryIteratorImpl
 
         DirectoryIteratorImpl(const std::string& path);
 
+        DirectoryIteratorImpl(const char* path);
+
         ~DirectoryIteratorImpl();
 
         int ref()
@@ -56,11 +58,14 @@ class DirectoryIteratorImpl
             return _name;
         }
 
-        const std::string& path() const;
+        //const std::string& path() const;
+
+    private:
+        void init(const char* path, std::size_t pathlen);
 
     private:
         unsigned int _refs;
-        mutable std::string _path;
+        //mutable std::string _path;
         mutable std::string _name;
         HANDLE _findHandle;
         WIN32_FIND_DATA _current;

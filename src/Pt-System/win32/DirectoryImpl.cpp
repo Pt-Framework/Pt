@@ -57,26 +57,21 @@ namespace System {
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
 : _refs(1),
-  _path(path),
+  //_path(path),
   _findHandle(INVALID_HANDLE_VALUE),
   _dirty(true)
 {
-    std::string firstFile = path;
-    if( ! firstFile.empty() && firstFile[firstFile.size()-1] != '\\' )
-        firstFile += '\\';
+    init(path.c_str(), path.size());
+}
 
-    firstFile += '*';
 
-    std::basic_string<TCHAR> tpath;
-    win32::fromMultiByte( firstFile, tpath );
-    _findHandle = FindFirstFile( tpath.c_str(), &_current );
-
-    if(_findHandle == INVALID_HANDLE_VALUE)
-        throw AccessFailed(path);
-
-    _path = path;
-    if( ! _path.empty() && _path[_path.size()-1] != '\\')
-        _path += '\\';
+DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
+: _refs(1),
+  //_path(path),
+  _findHandle(INVALID_HANDLE_VALUE),
+  _dirty(true)
+{
+    init(path, std::strlen(path));
 }
 
 
@@ -84,6 +79,23 @@ DirectoryIteratorImpl::~DirectoryIteratorImpl()
 {
     if(_findHandle != INVALID_HANDLE_VALUE)
         ::FindClose(_findHandle);
+}
+
+
+void DirectoryIteratorImpl::init(const char* path, std::size_t pathlen)
+{
+    std::basic_string<TCHAR> tpath;
+
+    if( pathlen > 0 && path[pathlen-1] != '\\' )
+        tpath += '\\';
+
+    win32::fromMultiByte( path, tpath );
+    tpath += '*';
+
+    _findHandle = FindFirstFile( tpath.c_str(), &_current );
+
+    if(_findHandle == INVALID_HANDLE_VALUE)
+        throw AccessFailed(path);
 }
 
 
@@ -106,26 +118,26 @@ bool DirectoryIteratorImpl::advance()
 }
 
 
-const std::string& DirectoryIteratorImpl::path() const
-{
-    if(_dirty)
-    {
-        // replace substring after last slash with the new file-name or
-        // append the file-name if we have a trailing slash. Ctor makes
-        // sure we have a trailing slash.
-        std::string::size_type idx = _path.rfind('\\');
-        if(idx != std::string::npos && ++idx < _path.size() )
-        {
-            _path.replace(idx, _path.size(), win32::toMultiByte( _current.cFileName ) );
-        }
-        else
-        {
-            _path += win32::toMultiByte( _current.cFileName );
-        }
-    }
-
-    return _path;
-}
+//const std::string& DirectoryIteratorImpl::path() const
+//{
+//    if(_dirty)
+//    {
+//        // replace substring after last slash with the new file-name or
+//        // append the file-name if we have a trailing slash. Ctor makes
+//        // sure we have a trailing slash.
+//        std::string::size_type idx = _path.rfind('\\');
+//        if(idx != std::string::npos && ++idx < _path.size() )
+//        {
+//            _path.replace(idx, _path.size(), win32::toMultiByte( _current.cFileName ) );
+//        }
+//        else
+//        {
+//            _path += win32::toMultiByte( _current.cFileName );
+//        }
+//    }
+//
+//    return _path;
+//}
 
 
 void DirectoryImpl::create(const std::string& path)

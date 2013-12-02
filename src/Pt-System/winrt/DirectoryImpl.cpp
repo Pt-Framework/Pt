@@ -47,15 +47,36 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
   _findHandle(INVALID_HANDLE_VALUE),
   _dirty(true)
 {
-    std::string firstFile = path;
-    if( ! firstFile.empty() && firstFile[firstFile.size()-1] != '\\' )
-        firstFile += '\\';
+    init();
+}
 
-    firstFile += '*';
+
+DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
+: _refs(1),
+  _path(path),
+  _findHandle(INVALID_HANDLE_VALUE),
+  _dirty(true)
+{
+    init();
+}
+
+
+DirectoryIteratorImpl::~DirectoryIteratorImpl()
+{
+    if(_findHandle != INVALID_HANDLE_VALUE)
+        ::FindClose(_findHandle);
+}
+
+
+void DirectoryIteratorImpl::init()
+{
+    if( ! _path.empty() && _path[_path.size()-1] != '\\' )
+        _path += '\\';
 
     std::wstring wpath;
-    win32::fromMultiByte( firstFile, wpath );
-    
+    win32::fromMultiByte( _path, wpath );
+    wpath += L'*';
+
     _findHandle = FindFirstFileExW( wpath.c_str(), 
                                     FindExInfoStandard,
                                     &_current,
@@ -65,17 +86,6 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
 
     if(_findHandle == INVALID_HANDLE_VALUE)
         throw AccessFailed(path);
-
-    _path = path;
-    if( ! _path.empty() && _path[_path.size()-1] != '\\')
-        _path += '\\';
-}
-
-
-DirectoryIteratorImpl::~DirectoryIteratorImpl()
-{
-    if(_findHandle != INVALID_HANDLE_VALUE)
-        ::FindClose(_findHandle);
 }
 
 

@@ -30,6 +30,7 @@
 #include "Pt/System/FileInfo.h"
 #include "Pt/System/File.h"
 #include "Pt/System/Directory.h"
+#include <Pt/System/IOError.h>
 #include <string>
 #include <iostream>
 #include <memory>

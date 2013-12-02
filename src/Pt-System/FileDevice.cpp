@@ -25,8 +25,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/System/FileDevice.h"
+
 #include "FileDeviceImpl.h"
+#include <Pt/System/FileDevice.h>
 
 namespace Pt {
 
@@ -52,10 +53,12 @@ FileDevice::FileDevice(const char* path, std::ios::openmode mode)
 
 FileDevice::~FileDevice()
 {
-    //if( this->enabled() ) 
-    {
-        try { this->close(); } catch(...) { }
-    }
+    try 
+    { 
+        this->close(); 
+    } 
+    catch(...) 
+    { }
 
     delete _impl;
 }
@@ -63,10 +66,7 @@ FileDevice::~FileDevice()
 
 void FileDevice::open(const char* path, std::ios::openmode mode)
 {
-    //if( this->enabled() ) 
-    {
-        this->close();
-    }
+    this->close();
 
     _impl->open(path, mode);
     _path = path;
@@ -105,6 +105,19 @@ void FileDevice::onClose()
 {
     _impl->close();
     _isOpen = false;
+    _opening = false;
+}
+
+
+void FileDevice::onCancel()
+{
+    if( isActive() )
+    {
+        _impl->cancel( *parent() );
+        _opening = false;
+    }
+
+    IODevice::onCancel();
 }
 
 
@@ -113,6 +126,11 @@ void FileDevice::onSetTimeout(size_t timeout)
     _impl->setTimeout(timeout);
 }
 
+
+bool FileDevice::onSeekable() const
+{ 
+    return true; 
+}
 
 size_t FileDevice::onBeginRead(char* buffer, size_t n, bool& eof)
 {
@@ -155,9 +173,6 @@ FileDevice::pos_type FileDevice::onSeek(off_type offset, std::ios::seekdir sd)
 
 size_t FileDevice::onRead( char* buffer, size_t count, bool& eof )
 {
-    //if(count > SSIZE_MAX)
-    //    count = SSIZE_MAX;
-
     size_t ret = _impl->read( buffer, count, eof );
     return ret;
 }
@@ -166,17 +181,6 @@ size_t FileDevice::onRead( char* buffer, size_t count, bool& eof )
 size_t FileDevice::onWrite(const char* buffer, size_t count)
 {
     return _impl->write(buffer, count);
-}
-
-
-void FileDevice::onCancel()
-{
-    if( isActive() )
-    {
-        _impl->cancel( *parent() );
-    }
-
-    IODevice::onCancel();
 }
 
 
@@ -194,8 +198,6 @@ void FileDevice::onSync() const
 
 bool FileDevice::onRun()
 {
-    //return _impl.run(); 
-
     if( _opening )
     {
         if( _isOpen || _impl->runOpen( *parent() ) )

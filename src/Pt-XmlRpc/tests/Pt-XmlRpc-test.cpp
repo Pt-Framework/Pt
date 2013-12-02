@@ -174,6 +174,7 @@ void operator <<=(Pt::SerializationInfo& si, const Color& color)
 class PtXmlRpcTest : public Pt::Unit::TestSuite
 {
     private:
+        Pt::System::Timer _exitTimer;
         Pt::System::MainLoop* _loop;
         Pt::Http::Server* _server;
         unsigned _count;
@@ -212,9 +213,11 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         void setUp()
         {
             _loop = new Pt::System::MainLoop();
-            _loop->setIdleTimeout(10000);
-            _loop->timeout() += Pt::slot(*this, &PtXmlRpcTest::failTest);
-            _loop->timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
+
+            _exitTimer.setActive(*_loop);
+            _exitTimer.start(10000);
+            _exitTimer.timeout() += Pt::slot(*this, &PtXmlRpcTest::failTest);
+            _exitTimer.timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
 
             _server = new Pt::Http::Server(*_loop, "127.0.0.1", 8001);
         }

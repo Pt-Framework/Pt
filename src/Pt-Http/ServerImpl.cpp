@@ -345,9 +345,9 @@ ServerThread::ServerThread()
 , _isReturned(false)
 , _isServletIdle(false)
 {
-    _loop.event() += Pt::slot(*this, &ServerThread::onAccept);
-    _loop.event() += Pt::slot(*this, &ServerThread::onRemoveServlet);
-    _loop.event() += Pt::slot(*this, &ServerThread::onIsServletIdle);
+    _loop.eventReceived() += Pt::slot(*this, &ServerThread::onAccept);
+    _loop.eventReceived() += Pt::slot(*this, &ServerThread::onRemoveServlet);
+    _loop.eventReceived() += Pt::slot(*this, &ServerThread::onIsServletIdle);
     _thread.start();
 }
 

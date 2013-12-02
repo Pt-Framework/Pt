@@ -37,7 +37,7 @@ MainLoop::MainLoop()
 : EventLoop()
 , _impl(0)
 {
-    _impl = new MainLoopImpl( this->event() );
+    _impl = new MainLoopImpl( this->eventReceived() );
 }
 
 
@@ -45,7 +45,7 @@ MainLoop::MainLoop(Allocator& a)
 : EventLoop()
 , _impl(0)
 {
-    _impl = new MainLoopImpl(this->event(), a);
+    _impl = new MainLoopImpl(this->eventReceived(), a);
 }
 
 

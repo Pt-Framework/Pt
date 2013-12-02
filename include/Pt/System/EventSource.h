@@ -26,6 +26,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_SYSTEM_EVENTSOURCE_H
 #define PT_SYSTEM_EVENTSOURCE_H
 
@@ -104,5 +105,4 @@ class PT_SYSTEM_API EventSource : private NonCopyable
 
 } // namespace Pt
 
-#endif
-
+#endif // PT_SYSTEM_EVENTSOURCE_H

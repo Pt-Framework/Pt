@@ -25,8 +25,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/System/EventSource.h"
-#include "Pt/System/EventSink.h"
+#include <Pt/System/EventSource.h>
+#include <Pt/System/EventSink.h>
 
 namespace Pt {
 
@@ -122,7 +122,6 @@ void EventSource::connect(EventSink& sink)
     const std::type_info* ti = 0;
     SinkMap::value_type elem(ti, &sink);
     _sinks.insert( elem );
-    //_sinks.insert( std::make_pair(ti, &sink) );
 }
 
 
@@ -175,7 +174,6 @@ void EventSource::subscribe(EventSink& sink, const std::type_info& ti)
 
     SinkMap::value_type elem(&ti, &sink);
     _sinks.insert( elem );
-    //_sinks.insert( std::make_pair(&ti, &sink) );
 }
 
 

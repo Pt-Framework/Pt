@@ -31,7 +31,6 @@
 
 #include <Pt/System/Api.h>
 #include <Pt/System/FileInfo.h>
-#include <Pt/Types.h>
 #include <string>
 #include <iterator>
 
@@ -95,9 +94,6 @@ class PT_SYSTEM_API DirectoryIterator
         //! @brief Inequality comparison
         bool operator!=(const DirectoryIterator& it) const
         { return _impl != it._impl; }
-
-        //! @brief Returns the full path of the file the iterator points at
-        const std::string& path() const;
 
         //! @brief Returns the name of the file the iterator points at
         const std::string& operator*() const;

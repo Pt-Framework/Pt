@@ -49,7 +49,27 @@ inline void fromMultiByte(const std::string& from, std::wstring& to)
 }
 
 
+inline void fromMultiByte(const char* from, std::wstring& to)
+{
+    std::size_t length = MultiByteToWideChar(CP_ACP, 0, from, -1, NULL, 0);
+
+    std::vector<wchar_t> wbuf(length);
+    length = MultiByteToWideChar(CP_ACP, 0, from, -1, &wbuf[0], length);
+    if(length == 0)
+    {
+        throw std::runtime_error(PT_SOURCEINFO + "MultiByteToWideChar failed");
+    }
+
+    to.assign(&wbuf[0], length-1);
+}
+
+
 inline void fromMultiByte(const std::string& from, std::string& to)
+{
+    to = from;
+}
+
+inline void fromMultiByte(const char* from, std::string& to)
 {
     to = from;
 }

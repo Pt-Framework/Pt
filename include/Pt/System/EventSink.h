@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2006-2008 Marc Boris Duerner
+ * Copyright (C) 2006-2013 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_SYSTEM_EVENTSINK_H
 #define PT_SYSTEM_EVENTSINK_H
 
@@ -38,51 +38,50 @@ namespace Pt {
 
 namespace System {
 
-    class EventSource;
+class EventSource;
 
-    class PT_SYSTEM_API EventSink : private NonCopyable
-    {
-        friend class EventSource;
+class PT_SYSTEM_API EventSink : private NonCopyable
+{
+    friend class EventSource;
 
-        public:
-            EventSink();
+    public:
+        EventSink();
 
-            virtual ~EventSink();
+        virtual ~EventSink();
 
-            void commitEvent(const Event& event);
+        void commitEvent(const Event& ev);
 
-            void queueEvent(const Event& event);
+        void queueEvent(const Event& ev);
 
-            void wake();
+        void wake();
 
-            // TODO: deprecated, do not use!
-            //
-            /** @brief Processes all events which are currently in the event queue
-            */
-            void processEvents()
-            { this->onProcessEvents(); }
+        /** @brief Processes all events which are currently in the event queue
+            @todo TODO: deprecated, do not use!
+        */
+        void processEvents()
+        { this->onProcessEvents(); }
 
-        protected:
-            virtual void onCommitEvent(const Event& event) = 0;
+    protected:
+        virtual void onCommitEvent(const Event& ev) = 0;
 
-            virtual void onQueueEvent(const Event& event) = 0;
+        virtual void onQueueEvent(const Event& ev) = 0;
 
-            virtual void onWake() = 0;
+        virtual void onWake() = 0;
 
-            virtual void onProcessEvents() = 0;
+        virtual void onProcessEvents() = 0;
 
-        private:
-            void onConnect(EventSource& source);
-            void onDisconnect(EventSource& source);
-            void onUnsubscribe(EventSource& source);
+    private:
+        void onConnect(EventSource& source);
+        void onDisconnect(EventSource& source);
+        void onUnsubscribe(EventSource& source);
 
-        private:
-            mutable RecursiveMutex _mutex;
-            std::list<EventSource*> _sources;
-    };
+    private:
+        mutable RecursiveMutex _mutex;
+        std::list<EventSource*> _sources;
+};
 
 } // namespace System
 
-} // namespace Ptv
+} // namespace Pt
 
-#endif
+#endif // PT_SYSTEM_EVENTSINK_H

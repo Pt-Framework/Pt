@@ -151,7 +151,6 @@ class EventLoopTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "DispatchTest", *this, &EventLoopTest::DispatchTest);
             Pt::Unit::TestSuite::registerMethod( "MaxAlloc", *this, &EventLoopTest::MaxAlloc);
             //Pt::Unit::TestSuite::registerMethod( "LoopBenchmark", *this, &EventLoopTest::LoopBenchmark);
-            Pt::Unit::TestSuite::registerMethod( "IdleTimeout", *this, &EventLoopTest::IdleTimeout);
         }
 
         void setUp()
@@ -173,11 +172,14 @@ class EventLoopTest : public Pt::Unit::TestSuite
         void DispatchTest()
         {
             Pt::System::MainLoop el;
-            el.timeout() += Pt::slot(el, &Pt::System::MainLoop::exit);
-            el.setIdleTimeout(500);
 
-            el.event() += Pt::slot(*this, &EventLoopTest::onE1);
-            el.event() += Pt::slot(*this, &EventLoopTest::onE2);
+            el.eventReceived() += Pt::slot(*this, &EventLoopTest::onE1);
+            el.eventReceived() += Pt::slot(*this, &EventLoopTest::onE2);
+
+            Pt::System::Timer exitTimer;
+            exitTimer.setActive(el);
+            exitTimer.start(500);
+            exitTimer.timeout() += Pt::slot(el, &Pt::System::EventLoop::exit);
 
             el.commitEvent( E1() );
             el.commitEvent( E2() );
@@ -196,21 +198,6 @@ class EventLoopTest : public Pt::Unit::TestSuite
         {
             ++_cnt;
             PT_UNIT_ASSERT(2 == _cnt);
-        }
-
-        void IdleTimeout()
-        {
-            Pt::System::MainLoop el;
-            el.setIdleTimeout(300);
-            el.timeout() += Pt::slot(el, &Pt::System::MainLoop::exit);
-
-            Pt::System::Clock clock;
-            clock.start();
-            el.run();
-            Pt::Timespan elapsed = clock.stop();
-
-            PT_UNIT_ASSERT(elapsed.toMSecs() > 280);
-            PT_UNIT_ASSERT(elapsed.toMSecs() < 320);
         }
 
         void MaxAlloc()

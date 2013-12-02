@@ -170,33 +170,35 @@ class ServerTest : public Pt::Unit::TestSuite
             _chunks.push_back("ChunkD");
             _chunks.push_back("ChunkE");
 
-            loop = new Pt::System::MainLoop();
-            loop->setIdleTimeout(10000);
-            loop->timeout() += Pt::slot(*loop, &Pt::System::MainLoop::exit);
+            _loop = new Pt::System::MainLoop();
+
+            _exitTimer.setActive(*_loop);
+            _exitTimer.start(10000);
+            _exitTimer.timeout() += Pt::slot(*_loop, &Pt::System::EventLoop::exit);
         }
 
         void tearDown()
         {
-            delete loop;
+            delete _loop;
         }
 
         void MaxRequestSize()
         {
             HelloService service;
 
-            Pt::Http::Server server(*loop, "127.0.0.1", 8001);
+            Pt::Http::Server server(*_loop, "127.0.0.1", 8001);
             server.setMaxRequestSize(5);
 
             Pt::Http::MapUrl mapurl("/test", service);
             server.addServlet(mapurl);
 
-            Pt::Http::Client client(*loop, "127.0.0.1", 8001);
+            Pt::Http::Client client(*_loop, "127.0.0.1", 8001);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onMaxRequestSizeReply);
             client.request().setUrl("/test");
             client.request().body() << "Hello World";
             client.beginReceive();
 
-            loop->run();
+            _loop->run();
             PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 400);
         }
 
@@ -206,7 +208,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.finished() )
             {
-                loop->exit();
+                _loop->exit();
                 return;
             }
 
@@ -218,10 +220,10 @@ class ServerTest : public Pt::Unit::TestSuite
             HelloService service;
             Pt::Http::MapUrl mapurl("/test", service);
 
-            Pt::Http::Server server(*loop, "127.0.0.1", 8001);
+            Pt::Http::Server server(*_loop, "127.0.0.1", 8001);
             server.addServlet(mapurl);
 
-            Pt::Http::Client client(*loop, "127.0.0.1", 8001);
+            Pt::Http::Client client(*_loop, "127.0.0.1", 8001);
             client.requestSent() += Pt::slot(*this, &ServerTest::onPipelinedSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onPipelinedReceived);
             client.request().setUrl("/test");
@@ -229,7 +231,7 @@ class ServerTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(client.request().header().has("foo") );
             client.beginSend(true);
 
-            loop->run();
+            _loop->run();
             PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
 
             PT_UNIT_ASSERT_EQUALS(_reply, "Hello World!Hello World!");
@@ -275,7 +277,7 @@ class ServerTest : public Pt::Unit::TestSuite
             {
                 if( _reply == "Hello World!Hello World!")
                 {
-                    loop->exit();
+                    _loop->exit();
                     return;
                 }
             }
@@ -285,17 +287,15 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void NotFound()
         {
-            loop->timeout() += Pt::slot(*loop, &Pt::System::MainLoop::exit);
+            Pt::Http::Server server(*_loop, "127.0.0.1", 8001);
 
-            Pt::Http::Server server(*loop, "127.0.0.1", 8001);
-
-            Pt::Http::Client client(*loop, "127.0.0.1", 8001);
+            Pt::Http::Client client(*_loop, "127.0.0.1", 8001);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
             client.request().setUrl("/index.html");
             client.request().header().set("foo", "bar");
             client.beginReceive();
 
-            loop->run();
+            _loop->run();
         }
 
         void onNotFoundReceived(Pt::Http::Client& client)
@@ -314,7 +314,7 @@ class ServerTest : public Pt::Unit::TestSuite
             if( progress.finished() )
             {
                 PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 404);
-                loop->exit();
+                _loop->exit();
                 return;
             }
 
@@ -331,21 +331,21 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Server::Options options;
             options.setSecure(serverCtx);
             
-            Pt::Http::Server server(*loop);
+            Pt::Http::Server server(*_loop);
             server.listen("127.0.0.1", 8001, options);
 
             Pt::Ssl::Context clientContext;
             setupSslClientContext(clientContext);
             
             // start HTTP client
-            Pt::Http::Client client(*loop, "127.0.0.1", 8001);
+            Pt::Http::Client client(*_loop, "127.0.0.1", 8001);
             client.setSecure(clientContext);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
             client.request().setUrl("/index.html");
             client.request().header().set("foo", "bar");
             client.beginReceive();
 
-            loop->run();
+            _loop->run();
 
             PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 404);
         }
@@ -411,18 +411,18 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void BasicAuthentication()
         {
-            Pt::Http::Server server(*loop, "127.0.0.1", 8001);
+            Pt::Http::Server server(*_loop, "127.0.0.1", 8001);
 
             HelloService service;
             Pt::Http::MapUrl mapurl("/test", service, _authent);
             server.addServlet(mapurl);
 
-            Pt::Http::Client client(*loop, "127.0.0.1", 8001);
+            Pt::Http::Client client(*_loop, "127.0.0.1", 8001);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onBasicAuthenticationReceived);
             client.request().setUrl("/test");
             client.beginReceive();
 
-            loop->run();
+            _loop->run();
             PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
             PT_UNIT_ASSERT_EQUALS(_reply, "Authorization Required Hello World!");
         }
@@ -455,7 +455,7 @@ class ServerTest : public Pt::Unit::TestSuite
             {
                 if( client.reply().statusCode() == 200 )
                 {
-                    loop->exit();
+                    _loop->exit();
                     return;
                 }
 
@@ -469,18 +469,18 @@ class ServerTest : public Pt::Unit::TestSuite
         {
             HelloService service;
 
-            Pt::Http::Server server(*loop, "127.0.0.1", 8001);
+            Pt::Http::Server server(*_loop, "127.0.0.1", 8001);
 
             Pt::Http::MapUrl mapurl("/test", service);
             server.addServlet(mapurl);
 
-            Pt::Http::Client client(*loop, "127.0.0.1", 8001);
+            Pt::Http::Client client(*_loop, "127.0.0.1", 8001);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onHelloReceived);
             client.request().setUrl("/test");
             client.request().header().set("foo", "bar");
             client.beginReceive();
 
-            loop->run();
+            _loop->run();
             PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
             PT_UNIT_ASSERT_EQUALS(_reply, "Hello World!");
         }
@@ -500,7 +500,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.finished() )
             {
-                loop->exit();
+                _loop->exit();
                 return;
             }
 
@@ -511,18 +511,18 @@ class ServerTest : public Pt::Unit::TestSuite
         {
             EchoQueryService service;
 
-            Pt::Http::Server server(*loop, "127.0.0.1", 8001);
+            Pt::Http::Server server(*_loop, "127.0.0.1", 8001);
 
             Pt::Http::MapUrl mapurl("/test", service);
             server.addServlet(mapurl);
 
-            Pt::Http::Client client(*loop, "127.0.0.1", 8001);
+            Pt::Http::Client client(*_loop, "127.0.0.1", 8001);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onQueryStringReceived);
             client.request().setUrl("/test");
             client.request().setQParams("a=4&b=Hello");
             client.beginReceive();
 
-            loop->run();
+            _loop->run();
             PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
             PT_UNIT_ASSERT_EQUALS(_reply, "a=4&b=Hello");
         }
@@ -542,7 +542,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.finished() )
             {
-                loop->exit();
+                _loop->exit();
                 return;
             }
 
@@ -551,13 +551,13 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void ChunkedReply()
         {
-            Pt::Http::Server server(*loop, "127.0.0.1", 8001);
+            Pt::Http::Server server(*_loop, "127.0.0.1", 8001);
 
             ChunkedService service;
             Pt::Http::MapUrl servlet("/test", service);
             server.addServlet(servlet);
 
-            Pt::Http::Client client(*loop, "127.0.0.1", 8001);
+            Pt::Http::Client client(*_loop, "127.0.0.1", 8001);
             client.requestSent() += Pt::slot(*this, &ServerTest::onChunkedSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onChunkedReceived);
             client.request().setUrl("/test");
@@ -566,7 +566,7 @@ class ServerTest : public Pt::Unit::TestSuite
             _chunks.erase( _chunks.begin() );
             client.beginSend(false);
 
-            loop->run();
+            _loop->run();
 
             PT_UNIT_ASSERT_EQUALS(client.reply().statusCode(), 200);
             PT_UNIT_ASSERT_EQUALS(_reply, "Chunk5Chunk4Chunk3Chunk2Chunk1");
@@ -607,7 +607,7 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.finished() )
             {
-                loop->exit();
+                _loop->exit();
                 return;
             }
             
@@ -615,7 +615,8 @@ class ServerTest : public Pt::Unit::TestSuite
         }
 
     private:
-        Pt::System::MainLoop* loop;
+        Pt::System::Timer _exitTimer;
+        Pt::System::MainLoop* _loop;
         std::string _reply;
         std::vector<std::string> _chunks;
         Pt::Http::BasicUserListAuthorizer _authent;

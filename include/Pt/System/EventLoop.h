@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2006-2010 Marc Boris Duerner
+ * Copyright (C) 2006-2013 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_SYSTEM_EVENTLOOP_H
 #define PT_SYSTEM_EVENTLOOP_H
 
@@ -39,7 +39,6 @@
 #include <Pt/System/Timer.h>
 #include <Pt/System/EventSink.h>
 #include <map>
-#include <set>
 #include <deque>
 
 namespace Pt {
@@ -73,24 +72,9 @@ class PT_SYSTEM_API EventLoop : public Connectable
         */
         void exit();
 
-        /** @brief Sets the idle timeout.
-        */
-        void setIdleTimeout(size_t msecs);
-
-        /** @brief Returns the idle timeout.
-        */
-        size_t idleTimeout() const;
-
-        /** @brief Notifies about wait timeouts.
-            This signal is send when the timeout given to a wait
-            call of the selector expires and no activity occured.
-        */
-        Signal<>& timeout();
-
         /** @brief Reports all events
-            TODO: rename to eventReady
         */
-        Signal<const Event&>& event();
+        Signal<const Event&>& eventReceived();
 
         /** @brief Emited when the eventloop is exited.
         */
@@ -115,10 +99,10 @@ class PT_SYSTEM_API EventLoop : public Connectable
         virtual void onExit() = 0;
 
         //! @internal EventSink interface
-        virtual void onCommitEvent(const Event& event) = 0;
+        virtual void onCommitEvent(const Event& ev) = 0;
 
         //! @internal EventSink interface
-        virtual void onQueueEvent(const Event& event) = 0;
+        virtual void onQueueEvent(const Event& ev) = 0;
 
         //! @internal EventSink interface
         virtual void onProcessEvents() = 0;
@@ -145,7 +129,6 @@ class PT_SYSTEM_API EventLoop : public Connectable
         virtual void onIdle(Selectable&) = 0;
 
     private:
-        Timer _idleTimer;
         Signal<> _exited;
         Signal<const Event&> _event;
 };
@@ -189,7 +172,7 @@ class PT_SYSTEM_API TimerQueue
 
         void addTimer(Timer& timer);
 
-        void removeTimer( Timer& timer );
+        void removeTimer(Timer& timer);
 
         size_t processTimers();
 
@@ -201,5 +184,4 @@ class PT_SYSTEM_API TimerQueue
 
 } // namespace Pt
 
-#endif
-
+#endif // PT_SYSTEM_EVENTLOOP_H

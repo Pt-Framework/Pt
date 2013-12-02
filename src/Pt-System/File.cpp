@@ -25,9 +25,10 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "FileImpl.h"
-#include "Pt/System/File.h"
-#include "Pt/System/Directory.h"
+#include <FileImpl.h>
+#include <Pt/System/File.h>
+#include <Pt/System/IOError.h>
+#include <cassert>
 
 namespace Pt {
 
@@ -44,7 +45,16 @@ File::File(const std::string& path)
 , _impl(0)
 {
     if( ! File::exists( _path) )
-        throw AccessFailed(path);
+        throw AccessFailed(_path);
+}
+
+
+File::File(const char* path)
+: _path(path)
+, _impl(0)
+{
+    if( ! File::exists( _path) )
+        throw AccessFailed(_path);
 }
 
 
@@ -66,6 +76,7 @@ File::File(const File& file)
 
 File::~File()
 {
+    assert(_impl == 0);
     // delete _impl;
 }
 

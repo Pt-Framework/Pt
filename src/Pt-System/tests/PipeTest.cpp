@@ -57,8 +57,10 @@ class PipeTest : public Pt::Unit::TestSuite
             _result.clear();
 
             _loop = new Pt::System::MainLoop();
-            _loop->timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
-            _loop->setIdleTimeout(2000);
+
+            _exitTimer.setActive(*_loop);
+            _exitTimer.start(2000);
+            _exitTimer.timeout() += Pt::slot(*_loop, &Pt::System::EventLoop::exit);
         }
 
         void tearDown()
@@ -136,7 +138,7 @@ class PipeTest : public Pt::Unit::TestSuite
             _result.append(_rbuffer, sz);
 
             dev.close();
-            _loop->setIdleTimeout(200);
+            _exitTimer.start(200);
         }
 
         void PipeIOStream()
@@ -179,13 +181,14 @@ class PipeTest : public Pt::Unit::TestSuite
 
         void onStreamOutput(Pt::System::IOBuffer& buffer)
         {
-			buffer.endWrite();
+            buffer.endWrite();
 
             buffer.device()->close();
             inbuf.beginRead();
         }
 
     private:
+        Pt::System::Timer _exitTimer;
         Pt::System::MainLoop* _loop;
         std::string _data;
         char _rbuffer[10];

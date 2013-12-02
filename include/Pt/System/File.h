@@ -25,15 +25,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_System_File_h
 #define Pt_System_File_h
 
-#include <Pt/Types.h>
-#include <Pt/SourceInfo.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/FileInfo.h>
-#include <Pt/System/IOError.h>
 #include <string>
+#include <cstddef>
 
 namespace Pt {
 
@@ -46,12 +45,22 @@ namespace System {
 class PT_SYSTEM_API File
 {
     public:
+        //! @brief Default Constructor
+        File();
+
         /** @brief Constructs a %File object from the path \a path
 
             If no file exists at \a path, an exception of type FileNotFound
             is thrown.
         */
         explicit File(const std::string& path);
+
+        /** @brief Constructs a %File object from the path \a path
+
+            If no file exists at \a path, an exception of type FileNotFound
+            is thrown.
+        */
+        explicit File(const char*path);
 
         /** @brief Constructs a %File object from a FileInfo object
 
@@ -132,10 +141,6 @@ class PT_SYSTEM_API File
         //! @brief Returns true if a file exists at \a path, or false otherwise
         static bool exists(const std::string& path);
 
-    protected:
-        //! @brief Default Constructor
-        File();
-
     private:
         //! @internal
         std::string _path;
@@ -164,4 +169,4 @@ inline bool operator!=(const File& a, const File& b)
 
 } // namespace Pt
 
-#endif
+#endif // Pt_System_File_h

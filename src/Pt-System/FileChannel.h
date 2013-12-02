@@ -57,9 +57,9 @@ class FileChannel : public LogChannel
 
         std::string makePath(std::size_t n);
 
-	private:
-		std::ofstream _fs;
-		std::string _file;
+    private:
+        std::ofstream _fs;
+        std::string _file;
         std::size_t _maxSize;
         std::size_t _numBackup;
         std::size_t _curSize;
@@ -69,5 +69,4 @@ class FileChannel : public LogChannel
 
 } // namespace Pt
 
-
-#endif
+#endif // Pt_System_FileChannel_h

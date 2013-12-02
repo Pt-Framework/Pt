@@ -27,8 +27,8 @@
  */
 
 #include "FileChannel.h"
-#include "Pt/System/Uri.h"
-#include "Pt/System/File.h"
+#include <Pt/System/Uri.h>
+#include <Pt/System/File.h>
 #include <sstream>
 #include <cctype>
 
@@ -133,8 +133,8 @@ void FileChannel::onOpen(const std::string& urlstring)
 void FileChannel::onClose()
 {
     _fs.clear();
-	_fs.close();
-	_curSize = 0;
+    _fs.close();
+    _curSize = 0;
 }
 
 
@@ -161,20 +161,20 @@ void FileChannel::rotate()
 
         if( Pt::System::File::exists(to) ) 
             Pt::System::File(to).remove();
-        //remove( to.c_str() );
 
         for(std::size_t n = _numBackup; n > 0 ; --n)
         {
             std::string from = makePath(n-1);
-            //std::rename( from.c_str(), to.c_str() );
+            
             if( Pt::System::File::exists(from) ) 
                 Pt::System::File(from).move(to);
+            
             to = from;
         }
     }
 
-	_fs.open(_file.c_str(), std::ios_base::out | std::ios_base::trunc);
-	_curSize = 0;
+    _fs.open(_file.c_str(), std::ios_base::out | std::ios_base::trunc);
+    _curSize = 0;
 }
 
 
@@ -183,9 +183,9 @@ std::string FileChannel::makePath(std::size_t n)
     if(n == 0)
         return _file;
 
-	std::ostringstream oss;
-	oss << _file << '.' << n;
-	return oss.str();
+    std::ostringstream oss;
+    oss << _file << '.' << n;
+    return oss.str();
 }
 
 } // namespace System

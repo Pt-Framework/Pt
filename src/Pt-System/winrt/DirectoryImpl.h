@@ -68,6 +68,9 @@ class DirectoryIteratorImpl
         const std::string& path() const;
 
     private:
+        void init();
+
+    private:
         unsigned int _refs;
         mutable std::string _path;
         mutable std::string _name;

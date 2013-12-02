@@ -62,6 +62,9 @@ class DirectoryIteratorImpl
         bool advance();
 
     private:
+        void init();
+
+    private:
         unsigned int _refs;
         mutable std::string _path;
         mutable std::string _name;
@@ -110,5 +113,3 @@ class DirectoryImpl
 } // namespace System
 
 } // namespace Pt
-
-

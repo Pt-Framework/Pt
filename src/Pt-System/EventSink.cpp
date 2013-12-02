@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2007 Marc Boris Duerner
- * Copyright (C) 2007 Laurentiu-Gheorghe Crisan
+ * Copyright (C) 2007-2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,8 +25,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/System/EventSink.h"
-#include "Pt/System/EventSource.h"
+
+#include <Pt/System/EventSink.h>
+#include <Pt/System/EventSource.h>
 
 namespace Pt {
 
