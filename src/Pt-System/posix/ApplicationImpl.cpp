@@ -31,6 +31,7 @@
 #include "Pt/System/Pipe.h"
 #include "Pt/System/Application.h"
 #include "Pt/System/SystemError.h"
+#include "Pt/System/FileInfo.h"
 #include <string.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -172,9 +173,6 @@ bool ApplicationImpl::raiseSystemSignal(int sig)
 
 void ApplicationImpl::chdir(const std::string& path)
 {
-    if( FileInfoImpl::getType( path.c_str() ) != FileInfo::Directory )
-        throw AccessFailed(path);
-
     if( -1 == ::chdir(path.c_str()) )
     {
         throw SystemError("chdir");
@@ -213,11 +211,11 @@ std::string ApplicationImpl::tmpdir()
         return tmpdir;
     }
 
-    return getType("/tmp") == FileStatus::Directory ? "/tmp" 
-                                                    : curdir();
+    return FileInfo::type("/tmp") == FileStatus::Directory ? "/tmp" 
+                                                           : FileInfo::curdir();
 }
         
-const char* ApplicationImpl::rootdir()
+std::string ApplicationImpl::rootdir()
 {
     return "/";
 }

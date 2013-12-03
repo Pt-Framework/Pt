@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "DirectoryImpl.h"
 #include "FileInfoImpl.h"
 #include "Pt/System/SystemError.h"
@@ -44,22 +45,20 @@ namespace Pt {
 namespace System {
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
-: _refs(1),
-  _path(path),
-  _handle(0),
-  _current(0),
-  _dirty(true)
+: _refs(1)
+, _path(path)
+, _handle(0)
+, _current(0)
 {
     init( path.c_str() );
 }
 
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
-: _refs(1),
-  _path(path),
-  _handle(0),
-  _current(0),
-  _dirty(true)
+: _refs(1)
+, _path(path)
+, _handle(0)
+, _current(0)
 {
     init(path);
 }
@@ -120,17 +119,16 @@ bool DirectoryIteratorImpl::advance()
     _current = ::readdir( _handle );
 
     if(_current)
-        _name = _current->d_name;
+    {
+        _path.erase(_pathlen);
+        _path += _current->d_name;
 
-    _path.erase(_pathlen - 1);
-    _path += _current->d_name
-
-    struct stat st;
-    int ret = stat(_path.c_str(), &st);
-    assert(ret == 0);
-    FileStatus::Type type = FileInfoImpl::getType(st);
-    
-    _finfo.init(type, s.st_size);
+        struct stat st;
+        stat(_path.c_str(), &st);
+        FileStatus::Type type = FileInfoImpl::getType(st);
+        
+        _finfo.init(type, st.st_size);
+    }
 
     return _current != 0;
 }

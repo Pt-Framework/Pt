@@ -30,12 +30,11 @@
 #define PT_SYSTEM_APPLICATION_IMPL_H
 
 #include <Pt/System/Api.h>
+#include <string>
 
 namespace Pt {
 
 namespace System  {
-
-class SelectorBase;
 
 class ApplicationImpl
 {

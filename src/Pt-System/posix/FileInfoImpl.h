@@ -27,6 +27,7 @@
  */
 
 #include <Pt/System/FileInfo.h>
+#include <Pt/System/IOError.h>
 #include <string>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -80,7 +81,7 @@ class FileInfoImpl
             return FileStatus::File;
         }
 
-        static FileStatus::Type getType(const stat& st)
+        static FileStatus::Type getType(const struct stat& st)
         {
             if( S_ISREG(st.st_mode) )
             {
@@ -127,9 +128,9 @@ class FileInfoImpl
 
         static void move(const std::string& path, const std::string& to)
         {
-            if (0 != ::rename(oldName.c_str(), newName.c_str()))
+            if (0 != ::rename(path.c_str(), to.c_str()))
             {
-                throw AccessFailed(oldName);
+                throw AccessFailed(path);
             }
         }
         
