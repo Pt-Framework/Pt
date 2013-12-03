@@ -135,7 +135,7 @@ Library& Library::open(const std::string& libname)
     catch(const AccessFailed&)
     { }
 
-    std::string::size_type idx = path.rfind( Directory::sep() );
+    std::string::size_type idx = path.rfind( FileInfo::sep() );
     if(idx == std::string::npos)
     {
         idx = 0;

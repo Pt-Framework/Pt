@@ -82,8 +82,7 @@ class LoggerTest : public Pt::Unit::TestSuite
 
                 if( Pt::System::FileInfo::exists(path) )
                 {
-                    Pt::System::File file(path);
-                    file.remove();
+                    Pt::System::FileInfo::remove(path);
                 }
             }
         }

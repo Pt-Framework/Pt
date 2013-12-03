@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2013 Marc Boris Duerner
+ * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,13 +25,16 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "ApplicationImpl.h"
 #include "PipeImpl.h"
 #include "Pt/System/Pipe.h"
 #include "Pt/System/Application.h"
 #include "Pt/System/SystemError.h"
 #include <string.h>
+#include <sys/types.h>
 #include <fcntl.h>
+#include <errno.h>
 #include <signal.h>
 #include <unistd.h>
 #include <iostream>
@@ -162,6 +167,59 @@ bool ApplicationImpl::raiseSystemSignal(int sig)
     }
     
     return false;
+}
+
+
+void ApplicationImpl::chdir(const std::string& path)
+{
+    if( FileInfoImpl::getType( path.c_str() ) != FileInfo::Directory )
+        throw AccessFailed(path);
+
+    if( -1 == ::chdir(path.c_str()) )
+    {
+        throw SystemError("chdir");
+    }
+}
+
+
+std::string ApplicationImpl::cwd()
+{
+    const long size = pathconf(".", _PC_PATH_MAX);
+    if(size == -1)
+        throw SystemError( PT_ERROR_MSG("pathconf() failed for .") );
+
+    std::vector<char> buffer(size);
+    if( ! getcwd(&buffer[0], size) )
+    {
+        throw SystemError("getcwd");
+    }
+
+    return std::string( &buffer[0] );
+}
+
+
+std::string ApplicationImpl::tmpdir()
+{
+    const char* tmpdir = getenv("TEMP");
+
+    if(tmpdir)
+    {
+        return tmpdir;
+    }
+
+    tmpdir = getenv("TMP");
+    if(tmpdir)
+    {
+        return tmpdir;
+    }
+
+    return getType("/tmp") == FileStatus::Directory ? "/tmp" 
+                                                    : curdir();
+}
+        
+const char* ApplicationImpl::rootdir()
+{
+    return "/";
 }
 
 } // namespace System

@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "ApplicationImpl.h"
 #include <Pt/System/Application.h>
 #include <Pt/Event.h>
@@ -112,6 +113,30 @@ bool Application::catchSystemSignal(int sig)
 bool Application::raiseSystemSignal(int sig)
 {
     return _impl->raiseSystemSignal(sig);
+}
+
+
+void Application::chdir(const std::string& path)
+{
+    ApplicationImpl::chdir(path);
+}
+
+
+std::string Application::cwd()
+{
+    return ApplicationImpl::cwd();
+}
+
+
+std::string Application::rootdir()
+{
+    return ApplicationImpl::rootdir();
+}
+
+
+std::string Application::tmpdir()
+{
+    return ApplicationImpl::tmpdir();
 }
 
 

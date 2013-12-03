@@ -37,100 +37,100 @@ namespace Pt {
 
 namespace System {
 
-std::size_t FileImpl::size(const std::string& path)
-{
-    std::wstring wpath;
-    win32::fromMultiByte(path, wpath);
-
-    WIN32_FILE_ATTRIBUTE_DATA info;
-    BOOL ret = GetFileAttributesExW( wpath.c_str(), GetFileExInfoStandard, &info );
-    if(ret == 0)
-    {
-        throw AccessFailed(path);
-    }
-
-    LARGE_INTEGER li;
-    li.HighPart = info.nFileSizeHigh;
-    li.LowPart = info.nFileSizeLow;
-    return static_cast<std::size_t>(li.QuadPart);
-}
-
-
-void FileImpl::resize(const std::string& path, std::size_t newSize)
-{
-    std::wstring wpath;
-    win32::fromMultiByte(path, wpath);
-
-    HANDLE h = ::CreateFile2(wpath.c_str(),
-                             GENERIC_READ|GENERIC_WRITE,
-                             FILE_SHARE_READ|FILE_SHARE_WRITE,
-                             OPEN_EXISTING,
-                             NULL);
-
-    if(h == INVALID_HANDLE_VALUE)
-        throw AccessFailed(path);
-
-    LARGE_INTEGER liSize;
-    liSize.QuadPart = newSize;
-
-    if( INVALID_SET_FILE_POINTER == ::SetFilePointerEx(h, liSize, NULL, FILE_BEGIN) ||
-        FALSE == ::SetEndOfFile(h) )
-    {
-        ::CloseHandle(h);
-        throw IOError("SetFilePointer");
-    }
-
-    if( FALSE == ::CloseHandle(h) )
-        throw IOError("CloseHandle");
-}
-
-
-void FileImpl::remove(const std::string& path)
-{
-    std::wstring wpath;
-    win32::fromMultiByte(path, wpath);
-
-    if( FALSE == ::DeleteFileW( wpath.c_str() ) )
-        throw AccessFailed(path);
-}
-
-
-void FileImpl::move(const std::string& path, const std::string& to, bool allowCopy)
-{
-    std::wstring wpath;
-    win32::fromMultiByte(path, wpath);
-
-    std::wstring wto;
-    win32::fromMultiByte(to, wto);
-
-    DWORD flags = 0;
-    if(allowCopy)
-        flags = MOVEFILE_COPY_ALLOWED;
-
-    if( FALSE == ::MoveFileExW(wpath.c_str(), wto.c_str(), flags) )
-    {
-        throw AccessFailed(path);
-    }
-}
-
-
-void FileImpl::create(const std::string& path)
-{
-    std::wstring wpath;
-    win32::fromMultiByte(path, wpath);
-
-    HANDLE h = CreateFile2(wpath.c_str(), // file to create
-                           GENERIC_WRITE, // open for writing
-                           0, // do not share
-                           CREATE_NEW,
-                           NULL);
-
-    if (h == INVALID_HANDLE_VALUE)
-        throw AccessFailed(path);
-
-    if( FALSE == ::CloseHandle(h) )
-        throw IOError("CloseHandle");
-}
+//std::size_t FileImpl::size(const std::string& path)
+//{
+//    std::wstring wpath;
+//    win32::fromMultiByte(path, wpath);
+//
+//    WIN32_FILE_ATTRIBUTE_DATA info;
+//    BOOL ret = GetFileAttributesExW( wpath.c_str(), GetFileExInfoStandard, &info );
+//    if(ret == 0)
+//    {
+//        throw AccessFailed(path);
+//    }
+//
+//    LARGE_INTEGER li;
+//    li.HighPart = info.nFileSizeHigh;
+//    li.LowPart = info.nFileSizeLow;
+//    return static_cast<std::size_t>(li.QuadPart);
+//}
+//
+//
+//void FileImpl::resize(const std::string& path, std::size_t newSize)
+//{
+//    std::wstring wpath;
+//    win32::fromMultiByte(path, wpath);
+//
+//    HANDLE h = ::CreateFile2(wpath.c_str(),
+//                             GENERIC_READ|GENERIC_WRITE,
+//                             FILE_SHARE_READ|FILE_SHARE_WRITE,
+//                             OPEN_EXISTING,
+//                             NULL);
+//
+//    if(h == INVALID_HANDLE_VALUE)
+//        throw AccessFailed(path);
+//
+//    LARGE_INTEGER liSize;
+//    liSize.QuadPart = newSize;
+//
+//    if( INVALID_SET_FILE_POINTER == ::SetFilePointerEx(h, liSize, NULL, FILE_BEGIN) ||
+//        FALSE == ::SetEndOfFile(h) )
+//    {
+//        ::CloseHandle(h);
+//        throw IOError("SetFilePointer");
+//    }
+//
+//    if( FALSE == ::CloseHandle(h) )
+//        throw IOError("CloseHandle");
+//}
+//
+//
+//void FileImpl::remove(const std::string& path)
+//{
+//    std::wstring wpath;
+//    win32::fromMultiByte(path, wpath);
+//
+//    if( FALSE == ::DeleteFileW( wpath.c_str() ) )
+//        throw AccessFailed(path);
+//}
+//
+//
+//void FileImpl::move(const std::string& path, const std::string& to, bool allowCopy)
+//{
+//    std::wstring wpath;
+//    win32::fromMultiByte(path, wpath);
+//
+//    std::wstring wto;
+//    win32::fromMultiByte(to, wto);
+//
+//    DWORD flags = 0;
+//    if(allowCopy)
+//        flags = MOVEFILE_COPY_ALLOWED;
+//
+//    if( FALSE == ::MoveFileExW(wpath.c_str(), wto.c_str(), flags) )
+//    {
+//        throw AccessFailed(path);
+//    }
+//}
+//
+//
+//void FileImpl::create(const std::string& path)
+//{
+//    std::wstring wpath;
+//    win32::fromMultiByte(path, wpath);
+//
+//    HANDLE h = CreateFile2(wpath.c_str(), // file to create
+//                           GENERIC_WRITE, // open for writing
+//                           0, // do not share
+//                           CREATE_NEW,
+//                           NULL);
+//
+//    if (h == INVALID_HANDLE_VALUE)
+//        throw AccessFailed(path);
+//
+//    if( FALSE == ::CloseHandle(h) )
+//        throw IOError("CloseHandle");
+//}
 
 } // namespace System
 

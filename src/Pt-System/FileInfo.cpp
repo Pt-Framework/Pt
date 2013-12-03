@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2008 Marc Boris Duerner
+ * Copyright (C) 2006-2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,76 +27,79 @@
  */
 
 #include "FileInfoImpl.h"
-#include "FileImpl.h"
-#include "DirectoryImpl.h"
 #include <Pt/System/FileInfo.h>
 
 namespace Pt {
 
 namespace System {
 
-FileInfo::FileInfo()
-: _type(FileInfo::Invalid)
-, _reserved(0)
-{}
-
-
 FileInfo::FileInfo(const std::string& path)
 : _path(path)
-, _reserved(0)
 {
-    _type = FileInfoImpl::getType( _path );
+    FileStatus::Type type = FileInfoImpl::getType( _path );
+
+    std::size_t size = (type == FileStatus::File) ? FileInfoImpl::size(_path)
+                                                  : 0;
+
+    _status = FileStatus(type, size);
 }
 
 
 FileInfo::FileInfo(const char* path)
 : _path(path)
-, _reserved(0)
 {
-    _type = FileInfoImpl::getType( _path );
+    FileStatus::Type type = FileInfoImpl::getType( _path );
+
+    std::size_t size = (type == FileStatus::File) ? FileInfoImpl::size(_path)
+                                                  : 0;
+
+    _status = FileStatus(type, size);
 }
 
 
-FileInfo::FileInfo(const FileInfo& fi)
-: _type(fi._type)
-, _path(fi._path)
-, _reserved(0)
+void FileInfo::clear()
 {
+	  _path.clear();
+    _status = FileStatus(FileStatus::Invalid, 0);
 }
 
 
-FileInfo::~FileInfo()
+std::string& FileInfo::init(FileStatus::Type type, std::size_t n)
 {
+    _status = FileStatus(type, n);
+    return _path;
 }
 
 
-FileInfo& FileInfo::operator=(const FileInfo& fi)
+FileStatus::Type FileInfo::type(const std::string& path)
 {
-	_type = fi._type;
-	_path = fi._path;
-	return *this;
+    return FileInfoImpl::getType(path);
+}
+
+
+std::size_t FileInfo::size(const std::string& path)
+{
+    return FileInfoImpl::size(path);
 }
 
 
 std::string FileInfo::name(const std::string& path)
 {
-    std::string::size_type pos = path.rfind( DirectoryImpl::sep() );
+    std::string::size_type pos = path.rfind( FileInfoImpl::sep() );
 
     if (pos != std::string::npos)
     {
         return path.substr(pos + 1);
     }
-    else
-    {
-        return path;
-    }
+
+    return path;
 }
 
 
 std::string FileInfo::dirName(const std::string& path)
 {
     // Find last slash. This separates the file name from the path.
-    std::string::size_type pos = path.find_last_of( DirectoryImpl::sep() );
+    std::string::size_type pos = path.find_last_of( FileInfoImpl::sep() );
 
     // If there is no separator, the file is relative to the current 
     // directory. So an empty path is returned.
@@ -111,20 +114,91 @@ std::string FileInfo::dirName(const std::string& path)
 }
 
 
-std::size_t FileInfo::size() const
+std::string FileInfo::baseName(const std::string& path)
 {
-    if(_type == FileInfo::File)
+    std::string::size_type sepPos = path.rfind( FileInfoImpl::sep() );
+
+    if(sepPos == std::string::npos)
     {
-        return FileImpl::size( _path );
+        sepPos = 0;
     }
 
-    return 0;
+    std::string::size_type extPos = path.rfind('.');
+
+    if(extPos == std::string::npos || sepPos >= extPos)
+    {
+        return path.substr(sepPos);
+    }
+
+    return path.substr(sepPos, extPos - sepPos);
 }
 
 
-FileInfo::Type FileInfo::getType(const std::string& path)
+std::string FileInfo::extension(const std::string& path)
 {
-    return FileInfoImpl::getType( path );
+    std::string::size_type sepPos = path.rfind( FileInfoImpl::sep() );
+
+    if(sepPos == std::string::npos)
+    {
+        sepPos = 0;
+    }
+
+    std::string::size_type extPos = path.rfind('.');
+
+    if(extPos == std::string::npos || sepPos >= extPos)
+    {
+        return std::string();
+    }
+
+    return path.substr(extPos + 1);
+}
+
+
+void FileInfo::createFile(const std::string& path)
+{
+    FileInfoImpl::createFile(path);
+}
+
+
+void FileInfo::createDirectory(const std::string& path)
+{
+    FileInfoImpl::createDirectory(path);
+}
+
+
+void FileInfo::resize(const std::string& path, std::size_t n)
+{
+    FileInfoImpl::resize(path, n);
+}
+
+
+void FileInfo::remove(const std::string& path)
+{
+    FileInfoImpl::remove(path);
+}
+
+
+void FileInfo::move(const std::string& path, const std::string& to)
+{
+    FileInfoImpl::move(path, to);
+}
+
+
+const char* FileInfo::sep()
+{
+    return FileInfoImpl::sep();
+}
+
+
+const char* FileInfo::curdir()
+{
+    return FileInfoImpl::curdir();
+}
+
+
+const char* FileInfo::updir()
+{
+    return FileInfoImpl::updir();
 }
 
 } // namespace System

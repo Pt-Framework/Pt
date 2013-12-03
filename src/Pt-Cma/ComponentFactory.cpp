@@ -221,13 +221,13 @@ void ComponentFactory::loadConfiguration(const ComponentLibrary& library, IUnkno
 
     // TODO Later we want to support not only .properties files for component
     // based configuration storage.
-    Pt::System::File libFile( library.path() );
-    std::string configFile = libFile.dirName()
+
+    std::string configFile = System::FileInfo::dirName( library.path() )
                              + std::string( builder.typeId().name() )
                              + ".properties";
 
     // Load configuration if config file exists.
-    if( Pt::System::File::exists( configFile.c_str() ) )
+    if( System::FileInfo::exists( configFile.c_str() ) )
     {
         prefs->loadPrefs(configFile);
     }

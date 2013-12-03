@@ -34,130 +34,96 @@ namespace Pt {
 
 namespace System {
 
-File::File()
-: _impl(0)
-{
-}
-
-
-File::File(const std::string& path)
-: _path(path)
-, _impl(0)
-{
-    if( ! File::exists( _path) )
-        throw AccessFailed(_path);
-}
-
-
-File::File(const char* path)
-: _path(path)
-, _impl(0)
-{
-    if( ! File::exists( _path) )
-        throw AccessFailed(_path);
-}
-
-
-File::File(const FileInfo& fi)
-: _path( fi.path() )
-, _impl(0)
-{
-    if( ! fi.isFile() )
-        throw AccessFailed(fi.path());
-}
-
-
-File::File(const File& file)
-: _path( file.path() )
-, _impl(0)
-{
-}
-
-
-File::~File()
-{
-    assert(_impl == 0);
-    // delete _impl;
-}
-
-
-File& File::operator=(const File& file)
-{
-    _path = file.path();
-    return *this;
-}
-
-
-std::size_t File::size() const
-{
-    return FileImpl::size( path() );
-}
-
-
-void File::resize(std::size_t newSize)
-{
-    FileImpl::resize(path(), newSize);
-}
-
-
-void File::remove()
-{
-    FileImpl::remove( path() );
-}
-
-
-void File::move(const std::string& to, bool allowCopy)
-{
-    FileImpl::move( _path, to, allowCopy );
-    _path = to;
-}
-
-
-std::string File::baseName() const
-{
-    std::string fileName = this->name();
-
-    std::string::size_type extensionPointPos = fileName.rfind('.');
-
-    if (extensionPointPos != std::string::npos)
-    {
-        return fileName.substr(0, extensionPointPos);
-    }
-    else
-    {
-        return fileName;
-    }
-}
-
-
-std::string File::extension() const
-{
-    std::string fileName = this->name();
-
-    std::string::size_type extensionPointPos = fileName.rfind('.');
-
-    if (extensionPointPos != std::string::npos)
-    {
-        return fileName.substr(extensionPointPos + 1);
-    }
-    else
-    {
-        return "";
-    }
-}
-
-
-File File::create(const std::string& path)
-{
-    FileImpl::create(path);
-    return File(path);
-}
-
-
-bool File::exists(const std::string& path)
-{
-    return FileInfo::getType(path) == FileInfo::File;
-}
+//File::File()
+//: _impl(0)
+//{
+//}
+//
+//
+//File::File(const std::string& path)
+//: _path(path)
+//, _impl(0)
+//{
+//    if( ! File::exists( _path) )
+//        throw AccessFailed(_path);
+//}
+//
+//
+//File::File(const char* path)
+//: _path(path)
+//, _impl(0)
+//{
+//    if( ! File::exists( _path) )
+//        throw AccessFailed(_path);
+//}
+//
+//
+//File::File(const FileInfo& fi)
+//: _path( fi.path() )
+//, _impl(0)
+//{
+//    if( ! fi.isFile() )
+//        throw AccessFailed(fi.path());
+//}
+//
+//
+//File::File(const File& file)
+//: _path( file.path() )
+//, _impl(0)
+//{
+//}
+//
+//
+//File::~File()
+//{
+//    assert(_impl == 0);
+//    // delete _impl;
+//}
+//
+//
+//File& File::operator=(const File& file)
+//{
+//    _path = file.path();
+//    return *this;
+//}
+//
+//
+//std::size_t File::size() const
+//{
+//    return FileImpl::size( path() );
+//}
+//
+//
+//void File::resize(std::size_t newSize)
+//{
+//    FileImpl::resize(path(), newSize);
+//}
+//
+//
+//void File::remove()
+//{
+//    FileImpl::remove( path() );
+//}
+//
+//
+//void File::move(const std::string& to)
+//{
+//    FileImpl::move( _path, to, true );
+//    _path = to;
+//}
+//
+//
+//File File::create(const std::string& path)
+//{
+//    FileImpl::create(path);
+//    return File(path);
+//}
+//
+//
+//bool File::exists(const std::string& path)
+//{
+//    return FileInfo::getType(path) == FileInfo::File;
+//}
 
 } // namespace System
 

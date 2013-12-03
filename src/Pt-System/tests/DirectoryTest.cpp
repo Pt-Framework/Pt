@@ -39,7 +39,7 @@ class DirectoryTest : public Pt::Unit::TestSuite
         DirectoryTest()
         : Pt::Unit::TestSuite("DirectoryTest")
         { 
-            Pt::Unit::TestSuite::registerMethod( "allocDir", *this, &DirectoryTest::allocDir );
+            Pt::Unit::TestSuite::registerMethod( "createDir", *this, &DirectoryTest::createDir );
             Pt::Unit::TestSuite::registerMethod( "moveDir", *this, &DirectoryTest::moveDir );
             Pt::Unit::TestSuite::registerMethod( "removeDir", *this, &DirectoryTest::removeDir );
             Pt::Unit::TestSuite::registerMethod( "createFile", *this, &DirectoryTest::createFile );
@@ -58,31 +58,27 @@ class DirectoryTest : public Pt::Unit::TestSuite
         {
             if( Pt::System::FileInfo::exists("xxxDIR") )
             {
-                Pt::System::Directory dirx("xxxDIR");
-                dirx.remove();
+                Pt::System::FileInfo::remove("xxxDIR");
             }
 
             if( Pt::System::FileInfo::exists("yyyDIR") )
             {
-                Pt::System::Directory diry("yyyDIR");
-                diry.remove();
+                Pt::System::FileInfo::remove("yyyDIR");
             }
 
             if( Pt::System::FileInfo::exists("TestFile1") )
             {
-                Pt::System::File f1("TestFile1");
-                f1.remove();
+                Pt::System::FileInfo::remove("TestFile1");
             }
 
             if( Pt::System::FileInfo::exists("TestFile2") )
             {
-                Pt::System::File f2("TestFile2");
-                f2.remove();
+                Pt::System::FileInfo::remove("TestFile2");
             }
         }
 
     protected:
-        void allocDir();
+        void createDir();
         void moveDir();
         void removeDir();
         void createFile();
@@ -93,63 +89,28 @@ class DirectoryTest : public Pt::Unit::TestSuite
 };
 
 
-void DirectoryTest::allocDir()
+void DirectoryTest::createDir()
 {
-    bool ok = true;
-    try {
-        Pt::System::Directory::create("xxxDIR");
-    } catch (...) {
-        ok = false;
-    }
-    PT_UNIT_ASSERT( true == ok );
-    Pt::System::Directory dir2("xxxDIR");
-
-    try {
-        ok = Pt::System::FileInfo::exists("xxxDIR");
-    } catch (...) {
-        ok = false;
-    }
-    PT_UNIT_ASSERT( true == ok );
+    Pt::System::FileInfo::createDirectory("xxxDIR");
+    PT_UNIT_ASSERT( Pt::System::FileInfo::exists("xxxDIR") );
 }
 
 
 void DirectoryTest::moveDir()
 {
+    Pt::System::FileInfo::createDirectory("xxxDIR");
+    Pt::System::FileInfo::move("xxxDIR", "yyyDIR");
 
-    bool ok = true;
-    Pt::System::Directory::create("xxxDIR");
-    try {
-        Pt::System::Directory dir1("xxxDIR");
-        dir1.move("yyyDIR");
-    } catch (...) {
-        ok = false;
-    }
-
-    PT_UNIT_ASSERT(true == ok);
-
-    Pt::System::Directory dir2("yyyDIR");
-
-    try {
-        ok = Pt::System::FileInfo::exists("yyyDIR");
-    } catch (...) {
-        ok = false;
-    }
-    PT_UNIT_ASSERT( true == ok );
-
+    PT_UNIT_ASSERT( ! Pt::System::FileInfo::exists("xxxDIR") );
+    PT_UNIT_ASSERT( Pt::System::FileInfo::exists("yyyDIR") );
 }
 
 void DirectoryTest::removeDir()
 {
-    bool ok = true;
-    Pt::System::Directory::create("yyyDIR");
-    Pt::System::Directory dir1("yyyDIR");
-    try {
-        dir1.remove();
-    } catch (...) {
-        ok = false;
-    }
+    Pt::System::FileInfo::createDirectory("yyyDIR");
+    PT_UNIT_ASSERT( Pt::System::FileInfo::exists("yyyDIR") );
 
-    PT_UNIT_ASSERT( true == ok );
+    Pt::System::FileInfo::remove("yyyDIR");
     PT_UNIT_ASSERT( false == Pt::System::FileInfo::exists("yyyDIR") );
 }
 
@@ -158,60 +119,48 @@ void DirectoryTest::removeDir()
 void DirectoryTest::createFile()
 {
     std::string name = "TestFile1";
-    Pt::System::File::create( name.c_str() );
-    PT_UNIT_ASSERT( 0 == Pt::System::File("TestFile1").size() );
-    PT_UNIT_ASSERT( true == Pt::System::FileInfo::exists("TestFile1") );
+    Pt::System::FileInfo::createFile(name);
+    PT_UNIT_ASSERT( 0 == Pt::System::FileInfo::size(name) );
+    PT_UNIT_ASSERT( true == Pt::System::FileInfo::exists(name) );
 }
 
 
 void DirectoryTest::resizeFile()
 {
     std::string name = "TestFile1";
-    Pt::System::File::create( name.c_str() );
+    Pt::System::FileInfo::createFile(name);
 
-    Pt::System::File file1("TestFile1");
-    file1.resize(1000);
-    PT_UNIT_ASSERT( 1000 == file1.size() );
+    Pt::System::FileInfo::resize(name, 1000);
+    PT_UNIT_ASSERT( 1000 == Pt::System::FileInfo::size(name) );
 }
 
 
 void DirectoryTest::moveFile()
 {
-    std::string name = "TestFile1";
-    bool result = true;
-    Pt::System::File::create( name.c_str() );
-
-    Pt::System::File file1("TestFile1");
-    file1.move("TestFile2");
-    PT_UNIT_ASSERT( true == result );
-
-    Pt::System::File file2("TestFile2");
-    PT_UNIT_ASSERT( Pt::System::FileInfo::exists("TestFile2") );
+    std::string name1 = "TestFile1";
+    std::string name2 = "TestFile2";
+    
+    Pt::System::FileInfo::createFile(name1);
+    Pt::System::FileInfo::move(name1, name2);
+    PT_UNIT_ASSERT( Pt::System::FileInfo::exists(name2) );
 }
 
 
 void DirectoryTest::removeFile()
 {
-    bool result = true;
-    Pt::System::File::create("TestFile1");
-    Pt::System::File file1("TestFile1");
+    std::string name1 = "TestFile1";
 
-    try {
-        file1.remove();
-    } catch (...) {
-        result = false;
-    }
-
-    PT_UNIT_ASSERT( true == result );
-    PT_UNIT_ASSERT( Pt::System::FileInfo::exists("TestFile1") == false );
+    Pt::System::FileInfo::createFile(name1);
+    Pt::System::FileInfo::remove(name1);
+    PT_UNIT_ASSERT( Pt::System::FileInfo::exists(name1) == false );
 }
 
 
 void DirectoryTest::DirectoryIterator()
 {
-    Pt::System::Directory dir1("..");
-    Pt::System::DirectoryIterator it;
-    for(it = dir1.begin(); it != dir1.end(); ++it)
+    Pt::System::DirectoryIterator it( Pt::System::FileInfo::curdir() );
+    Pt::System::DirectoryIterator end;
+    for(; it != end; ++it)
     {
         std::string name = *it;
     }

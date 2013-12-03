@@ -1,7 +1,5 @@
 /*
- * Copyright (C) 2005-2007 by Marc Boris Duerner
- * Copyright (C) 2006-2007 Tobias Mueller
- * Copyright (C) 2006-2007 PTV AG
+ * Copyright (C) 2005-2013 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,37 +37,18 @@ namespace Pt {
 
 namespace System {
 
-/*void throwDirError(const std::string& path, const Pt::SourceInfo& si)
-{
-    DWORD error = GetLastError();
-    switch(error)
-    {
-        case ERROR_BAD_PATHNAME:
-        case ERROR_PATH_NOT_FOUND:
-        case ERROR_OPEN_FAILED:
-            throw DirectoryNotFound(path, si);
-
-        default:
-            throwError(error, path, si);
-    }
-}*/
-
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
-: _refs(1),
-  //_path(path),
-  _findHandle(INVALID_HANDLE_VALUE),
-  _dirty(true)
+: _refs(1)
+, _findHandle(INVALID_HANDLE_VALUE)
 {
     init(path.c_str(), path.size());
 }
 
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
-: _refs(1),
-  //_path(path),
-  _findHandle(INVALID_HANDLE_VALUE),
-  _dirty(true)
+: _refs(1)
+, _findHandle(INVALID_HANDLE_VALUE)
 {
     init(path, std::strlen(path));
 }
@@ -85,11 +64,11 @@ DirectoryIteratorImpl::~DirectoryIteratorImpl()
 void DirectoryIteratorImpl::init(const char* path, std::size_t pathlen)
 {
     std::basic_string<TCHAR> tpath;
+    win32::fromMultiByte( path, tpath );
 
     if( pathlen > 0 && path[pathlen-1] != '\\' )
         tpath += '\\';
-
-    win32::fromMultiByte( path, tpath );
+    
     tpath += '*';
 
     _findHandle = FindFirstFile( tpath.c_str(), &_current );
@@ -101,19 +80,24 @@ void DirectoryIteratorImpl::init(const char* path, std::size_t pathlen)
 
 bool DirectoryIteratorImpl::advance()
 {
-    // the current node becomes invalid now
-    _dirty  = true;
-
-    // _findHandle set to INVALID_HANDLE_VALUE means end
     if( FALSE == FindNextFile(_findHandle, &_current) )
     {
         ::FindClose(_findHandle);
+
+        // INVALID_HANDLE_VALUE means end iterator
         _findHandle = INVALID_HANDLE_VALUE;
-        _name.clear();
+        _finfo.clear();
         return false;
     }
 
-    _name = win32::toMultiByte( _current.cFileName );
+    FileStatus::Type type = FileInfoImpl::getType(_current.dwFileAttributes);
+
+    LARGE_INTEGER li;
+    li.HighPart = _current.nFileSizeHigh;
+    li.LowPart = _current.nFileSizeLow;
+    std::size_t size = static_cast<std::size_t>(li.QuadPart);
+
+    _finfo.init(type, size) = win32::toMultiByte( _current.cFileName );
     return true;
 }
 
@@ -140,91 +124,50 @@ bool DirectoryIteratorImpl::advance()
 //}
 
 
-void DirectoryImpl::create(const std::string& path)
-{
-    std::basic_string<TCHAR> str;
-    win32::fromMultiByte( path, str );
-
-    if( FALSE == ::CreateDirectory(str.c_str(), NULL) )
-        throw AccessFailed(path);
-}
-
-
-void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
-{
-    std::basic_string<TCHAR> from;
-    win32::fromMultiByte( oldName, from );
-    std::basic_string<TCHAR> to;
-    win32::fromMultiByte( newName, to );
-
-#ifdef _WIN32_WCE
-
-    if( FALSE == ::MoveFile( from.c_str(), to.c_str() ) )
-        throw AccessFailed(oldName);
-
-#else
-
-    if( FALSE == ::MoveFileEx( from.c_str(), to.c_str(), MOVEFILE_COPY_ALLOWED) )
-        throw AccessFailed(oldName);
-
-#endif
-}
-
-
-void DirectoryImpl::remove(const std::string& path)
-{
-    std::basic_string<TCHAR> str;
-    win32::fromMultiByte( path, str );
-
-    if( FALSE == ::RemoveDirectory( str.c_str() ) )
-        throw AccessFailed(path);
-}
-
-
-void DirectoryImpl::chdir(const std::string& path)
-{
-#ifdef _WIN32_WCE
-
-    throw std::runtime_error( PT_ERROR_MSG("SetCurrentDirectory not supported.") );
-
-#else
-
-    if( FileInfoImpl::getType( path.c_str() ) != FileInfo::Directory )
-        throw AccessFailed(path);
-
-    if( FALSE == ::SetCurrentDirectory( path.c_str() ) )
-        throw SystemError("SetCurrentDirectory");
-
-#endif
-}
-
-
-std::string DirectoryImpl::cwd()
-{
-#ifdef _WIN32_WCE
-
-    throw std::runtime_error( PT_ERROR_MSG("DirectoryImpl::cwd not supported.") );
-
-#else
-
-    char path[MAX_PATH+2];
-    DWORD len = ::GetCurrentDirectory(MAX_PATH+2, path);
-    return std::string(path, len);
-
-#endif
-}
-
-
-std::string DirectoryImpl::tmpdir()
-{
-    std::string tmpDir = Process::getEnvVar("TEMP");
-    if (tmpDir.length() == 0)
-    {
-        tmpDir = Process::getEnvVar("TMP");
-    }
-
-    return tmpDir;
-}
+//void DirectoryImpl::chdir(const std::string& path)
+//{
+//#ifdef _WIN32_WCE
+//
+//    throw AccessFailed("chdir failed");
+//
+//#else
+//
+//    if( FileInfoImpl::getType( path.c_str() ) != FileStatus::Directory )
+//        throw AccessFailed(path);
+//
+//    if( FALSE == ::SetCurrentDirectory( path.c_str() ) )
+//        throw SystemError("SetCurrentDirectory");
+//
+//#endif
+//}
+//
+//
+//std::string DirectoryImpl::cwd()
+//{
+//#ifdef _WIN32_WCE
+//
+//    throw AccessFailed("cwd failed");
+//
+//#else
+//
+//    char path[MAX_PATH+2];
+//    DWORD len = ::GetCurrentDirectory(MAX_PATH+2, path);
+//    return std::string(path, len);
+//
+//#endif
+//}
+//
+//
+//std::string DirectoryImpl::tmpdir()
+//{
+//    std::string tmpDir = Process::getEnvVar("TEMP");
+//    if (tmpDir.length() == 0)
+//    {
+//        tmpDir = Process::getEnvVar("TMP");
+//    }
+//
+//    return tmpDir;
+//}
 
 } // namespace System
 

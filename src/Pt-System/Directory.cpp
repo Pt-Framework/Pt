@@ -114,137 +114,94 @@ const std::string* DirectoryIterator::operator->() const
 }
 
 
-Directory::Directory()
-: _impl(0)
-{
-}
-
-
-Directory::Directory(const std::string& path)
-: _path(path)
-, _impl(0)
-{
-    if( ! Directory::exists(_path) )
-        throw AccessFailed(_path);
-}
-
-
-Directory::Directory(const char* path)
-: _path(path)
-, _impl(0)
-{
-    if( ! Directory::exists(_path) )
-        throw AccessFailed(_path);
-}
-
-
-Directory::Directory(const FileInfo& fi)
-: _path( fi.path() )
-, _impl(0)
-{
-    if( ! fi.isDirectory() )
-        throw AccessFailed(fi.path());
-}
-
-
-Directory::Directory(const Directory& dir)
-: _path(dir._path)
-{
-}
-
-
-Directory::~Directory()
-{
-    assert(_impl == 0);
-    // delete impl
-}
-
-
-Directory& Directory::operator=(const Directory& dir)
-{
-    _path = dir._path;
-    return *this;
-}
-
-
-Directory::Iterator Directory::begin() const
-{
-    return DirectoryIterator( path() );
-}
-
-
-Directory::Iterator Directory::end() const
-{
-    return DirectoryIterator();
-}
-
-
-void Directory::remove()
-{
-    DirectoryImpl::remove( path() );
-}
-
-
-void Directory::move(const std::string& to)
-{
-    DirectoryImpl::move(path(), to);
-    _path = to;
-}
-
-
-Directory Directory::create(const std::string& path)
-{
-    DirectoryImpl::create( path.c_str() );
-    return Directory(path);
-}
-
-
-bool Directory::exists(const std::string& path)
-{
-    return FileInfo::getType( path.c_str() ) == FileInfo::Directory;
-}
-
-
-void Directory::chdir(const std::string& path)
-{
-    DirectoryImpl::chdir(path);
-}
-
-
-std::string Directory::cwd()
-{
-    return DirectoryImpl::cwd();
-}
-
-
-std::string Directory::rootdir()
-{
-    return DirectoryImpl::rootdir();
-}
-
-
-std::string Directory::tmpdir()
-{
-    return DirectoryImpl::tmpdir();
-}
-
-
-std::string Directory::sep()
-{
-    return DirectoryImpl::sep();
-}
-
-
-std::string Directory::curdir()
-{
-    return DirectoryImpl::curdir();
-}
-
-
-std::string Directory::updir()
-{
-    return DirectoryImpl::updir();
-}
+//Directory::Directory()
+//: _impl(0)
+//{
+//}
+//
+//
+//Directory::Directory(const std::string& path)
+//: _path(path)
+//, _impl(0)
+//{
+//    if( ! Directory::exists(_path) )
+//        throw AccessFailed(_path);
+//}
+//
+//
+//Directory::Directory(const char* path)
+//: _path(path)
+//, _impl(0)
+//{
+//    if( ! Directory::exists(_path) )
+//        throw AccessFailed(_path);
+//}
+//
+//
+//Directory::Directory(const FileInfo& fi)
+//: _path( fi.path() )
+//, _impl(0)
+//{
+//    if( ! fi.isDirectory() )
+//        throw AccessFailed(fi.path());
+//}
+//
+//
+//Directory::Directory(const Directory& dir)
+//: _path(dir._path)
+//{
+//}
+//
+//
+//Directory::~Directory()
+//{
+//    assert(_impl == 0);
+//    // delete impl
+//}
+//
+//
+//Directory& Directory::operator=(const Directory& dir)
+//{
+//    _path = dir._path;
+//    return *this;
+//}
+//
+//
+//Directory::Iterator Directory::begin() const
+//{
+//    return DirectoryIterator( path() );
+//}
+//
+//
+//Directory::Iterator Directory::end() const
+//{
+//    return DirectoryIterator();
+//}
+//
+//
+//void Directory::remove()
+//{
+//    FileInfo::remove( path() );
+//}
+//
+//
+//void Directory::move(const std::string& to)
+//{
+//    FileInfo::move(path(), to);
+//    _path = to;
+//}
+//
+//Directory Directory::create(const std::string& path)
+//{
+//    FileInfo::createDirectory(path);
+//    return Directory(path);
+//}
+//
+//
+//bool Directory::exists(const std::string& path)
+//{
+//    return FileInfo::getType(path) == FileInfo::Directory;
+//}
 
 } // namespace System
 

@@ -30,6 +30,7 @@
 #include "Pt/System/SystemError.h"
 #include "Pt/System/IOError.h"
 #include <vector>
+#include <cassert>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
@@ -44,7 +45,7 @@ namespace System {
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
 : _refs(1),
-  //_path(path),
+  _path(path),
   _handle(0),
   _current(0),
   _dirty(true)
@@ -55,7 +56,7 @@ DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
 : _refs(1),
-  //_path(path),
+  _path(path),
   _handle(0),
   _current(0),
   _dirty(true)
@@ -74,6 +75,7 @@ DirectoryIteratorImpl::~DirectoryIteratorImpl()
 void DirectoryIteratorImpl::init(const char* path)
 {
     _handle = ::opendir(path);
+    
     if( ! _handle )
     {
         throw AccessFailed(path);
@@ -81,8 +83,10 @@ void DirectoryIteratorImpl::init(const char* path)
 
     // append a trailing slash if not empty, so we can add the
     // directory entry name easily
-    //if( pathlen > 0 && _path[pathlen-1] != '/')
-    //    _path += '/';
+    if( ! _path.empty() && _path[_path.size() - 1] != '/')
+        _path += '/';
+
+    _pathlen = _path.size();
 
     this->advance();
 }
@@ -112,90 +116,98 @@ void DirectoryIteratorImpl::init(const char* path)
 
 bool DirectoryIteratorImpl::advance()
 {
-    _dirty  = true;
-
     // _current == 0 means end
     _current = ::readdir( _handle );
 
     if(_current)
         _name = _current->d_name;
 
+    _path.erase(_pathlen - 1);
+    _path += _current->d_name
+
+    struct stat st;
+    int ret = stat(_path.c_str(), &st);
+    assert(ret == 0);
+    FileStatus::Type type = FileInfoImpl::getType(st);
+    
+    _finfo.init(type, s.st_size);
+
     return _current != 0;
 }
 
 
-void DirectoryImpl::create(const std::string& path)
-{
-    if( -1 == ::mkdir(path.c_str(), 0777) )
-    {
-        throw AccessFailed(path);
-    }
-}
-
-
-void DirectoryImpl::remove(const std::string& path)
-{
-    if( -1 == ::rmdir(path.c_str()) )
-    {
-        throw AccessFailed(path);
-    }
-}
-
-
-void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
-{
-    if (0 != ::rename(oldName.c_str(), newName.c_str()))
-    {
-        throw AccessFailed(oldName);
-    }
-}
-
-
-void DirectoryImpl::chdir(const std::string& path)
-{
-    if( FileInfoImpl::getType( path.c_str() ) != FileInfo::Directory )
-        throw AccessFailed(path);
-
-    if( -1 == ::chdir(path.c_str()) )
-    {
-        throw SystemError("chdir");
-    }
-}
-
-
-std::string DirectoryImpl::cwd()
-{
-    const long size = pathconf(".", _PC_PATH_MAX);
-    if(size == -1)
-        throw SystemError( PT_ERROR_MSG("pathconf() failed for .") );
-
-    std::vector<char> buffer(size);
-    if( ! getcwd(&buffer[0], size) )
-    {
-        throw SystemError( PT_ERROR_MSG("getcwd() failed") );
-    }
-
-    return std::string( &buffer[0] );
-}
-
-
-std::string DirectoryImpl::tmpdir()
-{
-    const char* tmpdir = getenv("TEMP");
-
-    if(tmpdir)
-    {
-        return tmpdir;
-    }
-
-    tmpdir = getenv("TMP");
-    if(tmpdir)
-    {
-        return tmpdir;
-    }
-
-    return FileInfoImpl::getType("/tmp") == FileInfo::Directory ? "/tmp" : curdir();
-}
+//void DirectoryImpl::create(const std::string& path)
+//{
+//    if( -1 == ::mkdir(path.c_str(), 0777) )
+//    {
+//        throw AccessFailed(path);
+//    }
+//}
+//
+//
+//void DirectoryImpl::remove(const std::string& path)
+//{
+//    if( -1 == ::rmdir(path.c_str()) )
+//    {
+//        throw AccessFailed(path);
+//    }
+//}
+//
+//
+//void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
+//{
+//    if (0 != ::rename(oldName.c_str(), newName.c_str()))
+//    {
+//        throw AccessFailed(oldName);
+//    }
+//}
+//
+//
+//void DirectoryImpl::chdir(const std::string& path)
+//{
+//    if( FileInfoImpl::getType( path.c_str() ) != FileInfo::Directory )
+//        throw AccessFailed(path);
+//
+//    if( -1 == ::chdir(path.c_str()) )
+//    {
+//        throw SystemError("chdir");
+//    }
+//}
+//
+//
+//std::string DirectoryImpl::cwd()
+//{
+//    const long size = pathconf(".", _PC_PATH_MAX);
+//    if(size == -1)
+//        throw SystemError( PT_ERROR_MSG("pathconf() failed for .") );
+//
+//    std::vector<char> buffer(size);
+//    if( ! getcwd(&buffer[0], size) )
+//    {
+//        throw SystemError( PT_ERROR_MSG("getcwd() failed") );
+//    }
+//
+//    return std::string( &buffer[0] );
+//}
+//
+//
+//std::string DirectoryImpl::tmpdir()
+//{
+//    const char* tmpdir = getenv("TEMP");
+//
+//    if(tmpdir)
+//    {
+//        return tmpdir;
+//    }
+//
+//    tmpdir = getenv("TMP");
+//    if(tmpdir)
+//    {
+//        return tmpdir;
+//    }
+//
+//    return FileInfoImpl::getType("/tmp") == FileInfo::Directory ? "/tmp" : curdir();
+//}
 
 } // namespace System
 

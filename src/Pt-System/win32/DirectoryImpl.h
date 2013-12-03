@@ -17,9 +17,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "Pt/WinVer.h"
-#include "Pt/System/Api.h"
+#include <Pt/WinVer.h>
+#include <Pt/System/Api.h>
+#include <Pt/System/FileInfo.h>
 #include <string>
+#include <cstddef>
 #include <windows.h>
 
 namespace Pt {
@@ -30,9 +32,8 @@ class DirectoryIteratorImpl
 {
     public:
         DirectoryIteratorImpl()
-        : _refs(1),
-        _findHandle(INVALID_HANDLE_VALUE),
-        _dirty(true)
+        : _refs(1)
+        , _findHandle(INVALID_HANDLE_VALUE)
         { }
 
         DirectoryIteratorImpl(const std::string& path);
@@ -42,75 +43,57 @@ class DirectoryIteratorImpl
         ~DirectoryIteratorImpl();
 
         int ref()
-        {
-            return ++_refs;
-        }
+        { return ++_refs; }
 
         int deref()
-        {
-            return --_refs;
-        }
+        { return --_refs;}
 
         bool advance();
 
         const std::string& name() const
-        {
-            return _name;
-        }
-
-        //const std::string& path() const;
+        { return _finfo.path(); }
 
     private:
         void init(const char* path, std::size_t pathlen);
 
     private:
         unsigned int _refs;
-        //mutable std::string _path;
-        mutable std::string _name;
+        FileInfo _finfo;
         HANDLE _findHandle;
         WIN32_FIND_DATA _current;
-        bool _dirty;
 };
 
 
-class DirectoryImpl
-{
-    public:
-        static void create(const std::string& path);
-
-        static void remove(const std::string& path);
-
-        static void move(const std::string& oldName, const std::string& newName);
-
-        static void chdir(const std::string& path);
-
-        static std::string cwd();
-
-        static std::string curdir()
-        {
-            return ".";
-        }
-
-        static std::string updir()
-        {
-            return "..";
-        }
-
-        static std::string rootdir()
-        {
-            return "c:\\";
-        }
-
-        static std::string tmpdir();
-
-        static std::string sep()
-        {
-            return "\\";
-        }
-};
+//class DirectoryImpl
+//{
+//    public:
+//        static void chdir(const std::string& path);
+//
+//        static std::string cwd();
+//
+//        static std::string tmpdir();
+//
+//        static std::string curdir()
+//        {
+//            return ".";
+//        }
+//
+//        static std::string updir()
+//        {
+//            return "..";
+//        }
+//
+//        static std::string rootdir()
+//        {
+//            return "c:\\";
+//        }
+//
+//        static std::string sep()
+//        {
+//            return "\\";
+//        }
+//};
 
 } // namespace System
 
 } // namespace Pt
-
-

@@ -42,128 +42,126 @@ namespace System {
 
     @ingroup FileSystem
  */
-class PT_SYSTEM_API File
-{
-    public:
-        //! @brief Default Constructor
-        File();
-
-        /** @brief Constructs a %File object from the path \a path
-
-            If no file exists at \a path, an exception of type FileNotFound
-            is thrown.
-        */
-        explicit File(const std::string& path);
-
-        /** @brief Constructs a %File object from the path \a path
-
-            If no file exists at \a path, an exception of type FileNotFound
-            is thrown.
-        */
-        explicit File(const char*path);
-
-        /** @brief Constructs a %File object from a FileInfo object
-
-            An exception of type %FileNotFound is thrown if the %FileInfo
-            does not represent a file.
-        */
-        explicit File(const FileInfo& fi);
-
-        //! @brief Copy constructor
-        File(const File& file);
-
-        //! @brief Destrctor
-        ~File();
-
-        //! @brief Assignment operator
-        File& operator=(const File& file);
-
-        /** @brief Returns the full path of file in the file-system
-
-            This method may return a relative path, or a fully qualified one
-            depending on how this object was constructed.
-        */
-        const std::string& path() const
-        { return _path; }
-
-        //! @brief Returns the size of the file in bytes
-        std::size_t size() const;
-
-        /** @brief Returns the parent directory path
-
-            This method might return an empty string if the node was created
-            without a complete path. If the directory is located in the root
-            directory of a unix file system, a slash ("/") is returned. A
-            returned directory path always ends with a trailing path separator
-            character. (A backslash in Windows and a slash in Unix, for example.)
-        */
-        std::string dirName() const
-        {
-            return FileInfo::dirName(_path);
-        }
-
-        //! @brief Returns the file name including an exension
-        std::string name() const
-        {
-            return FileInfo::name(_path);
-        }
-
-        //! @brief Returns the file name without the exension
-        std::string baseName() const;
-
-        //! @brief Returns the file name extension or an empty string if not present
-        std::string extension() const;
-
-        //! @brief Resizes the file to a new size of \a n bytes
-        void resize(std::size_t n);
-
-        /** @brief Removes the file.
-
-            This object will be invalid after calling this method.
-        */
-        void remove();
-
-        /** @brief Moves the file to the location given by \a to
-
-            The %File object will stay valid after this method was called and
-            point to the moved file.
-
-            @param to Location of new file
-            @param allowCopy Allow copy between drives
-            @return True if file successfully moved, otherwise false
-        */
-        void move(const std::string& to, bool allowCopy = true);
-
-    public:
-        //! @brief Creates a new file at the path given by \a path
-        static File create(const std::string& path);
-
-        //! @brief Returns true if a file exists at \a path, or false otherwise
-        static bool exists(const std::string& path);
-
-    private:
-        //! @internal
-        std::string _path;
-
-        //! @internal
-        class FileImpl* _impl;
-};
-
-
-inline bool operator<(const File& a, const File& b)
-{
-    return a.path() < b.path();
-}
-
-inline bool operator==(const File& a, const File& b)
-{
-    return a.path() == b.path();
-}
-
-inline bool operator!=(const File& a, const File& b)
-{
-    return !(a == b);
-}
+//class PT_SYSTEM_API File
+//{
+//    public:
+//        //! @brief Default Constructor
+//        File();
+//
+//        /** @brief Constructs a %File object from the path \a path
+//
+//            If no file exists at \a path, an exception of type FileNotFound
+//            is thrown.
+//        */
+//        explicit File(const std::string& path);
+//
+//        /** @brief Constructs a %File object from the path \a path
+//
+//            If no file exists at \a path, an exception of type FileNotFound
+//            is thrown.
+//        */
+//        explicit File(const char*path);
+//
+//        /** @brief Constructs a %File object from a FileInfo object
+//
+//            An exception of type %FileNotFound is thrown if the %FileInfo
+//            does not represent a file.
+//        */
+//        explicit File(const FileInfo& fi);
+//
+//        //! @brief Copy constructor
+//        File(const File& file);
+//
+//        //! @brief Destrctor
+//        ~File();
+//
+//        //! @brief Assignment operator
+//        File& operator=(const File& file);
+//
+//        /** @brief Returns the full path of file in the file-system
+//
+//            This method may return a relative path, or a fully qualified one
+//            depending on how this object was constructed.
+//        */
+//        const std::string& path() const
+//        { return _path; }
+//
+//        //! @brief Returns the size of the file in bytes
+//        std::size_t size() const;
+//
+//        /** @brief Returns the parent directory path
+//
+//            This method might return an empty string if the node was created
+//            without a complete path. If the directory is located in the root
+//            directory of a unix file system, a slash ("/") is returned. A
+//            returned directory path always ends with a trailing path separator
+//            character. (A backslash in Windows and a slash in Unix, for example.)
+//        */
+//        std::string dirName() const
+//        { return FileInfo::dirName(_path); }
+//
+//        //! @brief Returns the file name including an exension
+//        std::string name() const
+//        { return FileInfo::name(_path); }
+//
+//        //! @brief Returns the file base name
+//        std::string baseName() const
+//        { return FileInfo::baseName(_path); }
+//
+//        //! @brief Returns the file name extension
+//        std::string extension() const
+//        { return FileInfo::extension(_path); }
+//
+//        //! @brief Resizes the file to a new size of \a n bytes
+//        void resize(std::size_t n);
+//
+//        /** @brief Removes the file.
+//
+//            This object will be invalid after calling this method.
+//        */
+//        void remove();
+//
+//        /** @brief Moves the file to the location given by \a to
+//
+//            The %File object will stay valid after this method was called and
+//            point to the moved file.
+//
+//            @param to Location of new file
+//            @param allowCopy Allow copy between drives
+//            @return True if file successfully moved, otherwise false
+//        */
+//        void move(const std::string& to);
+//
+//    public:
+//        //! @brief Creates a new file at the path given by \a path
+//        static File create(const std::string& path);
+//
+//        //! @brief Returns true if a file exists at \a path, or false otherwise
+//        static bool exists(const std::string& path);
+//
+//    private:
+//        //! @internal
+//        std::string _path;
+//
+//        //! @internal
+//        class FileImpl* _impl;
+//};
+//
+//
+//inline bool operator<(const File& a, const File& b)
+//{
+//    return a.path() < b.path();
+//}
+//
+//inline bool operator==(const File& a, const File& b)
+//{
+//    return a.path() == b.path();
+//}
+//
+//inline bool operator!=(const File& a, const File& b)
+//{
+//    return !(a == b);
+//}
 
 } // namespace System
 

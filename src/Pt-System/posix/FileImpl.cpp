@@ -116,79 +116,79 @@ namespace {
 
 }
 
-std::size_t FileImpl::size(const std::string& path)
-{
-    struct stat buff;
-
-    if( 0 != stat(path.c_str(), &buff) )
-    {
-        throw AccessFailed(path);
-    }
-
-    return buff.st_size;
-}
-
-
-void FileImpl::resize(const std::string& path, std::size_t newSize)
-{
-    int ret = 0;
-    do
-    {
-        ret = truncate(path.c_str(), newSize);
-    }
-    while ( ret == EINTR );
-
-    if(ret != 0)
-        throw AccessFailed(path);
-}
-
-
-void FileImpl::remove(const std::string& path)
-{
-    if(0 != ::remove(path.c_str()))
-        throw AccessFailed(path);
-}
-
-
-void FileImpl::move(const std::string& path, const std::string& to, bool allowCopy)
-{
-    int ret = ::rename(path.c_str(), to.c_str());
-    if( 0 != ret )
-    {
-        if( EXDEV == ret )
-        {
-            if( ! allowCopy )
-                throw AccessFailed(path);
-
-            FileDevice f1(path.c_str(), std::ios::in);
-            FileDevice f2(to.c_str(), std::ios::out);
-
-            char buffer[8192];
-            size_t n = 0;
-            do
-            {
-                if( ! f1.eof() )
-                    n = f1.read( buffer + n, sizeof(buffer) - n );
-
-                f2.write( buffer, n );
-            } while(n > 0);
-
-            return;
-        }
-
-        throw AccessFailed(path);
-    }
-}
-
-
-void FileImpl::create(const std::string& path)
-{
-    int fd = open(path.c_str(), O_RDWR|O_EXCL|O_CREAT, 0777);
-    if( fd < 0 )
-        throw AccessFailed(path);
-
-    ::close(fd);
-}
+//std::size_t FileImpl::size(const std::string& path)
+//{
+//    struct stat buff;
+//
+//    if( 0 != stat(path.c_str(), &buff) )
+//    {
+//        throw AccessFailed(path);
+//    }
+//
+//    return buff.st_size;
+//}
+//
+//
+//void FileImpl::resize(const std::string& path, std::size_t newSize)
+//{
+//    int ret = 0;
+//    do
+//    {
+//        ret = truncate(path.c_str(), newSize);
+//    }
+//    while ( ret == EINTR );
+//
+//    if(ret != 0)
+//        throw AccessFailed(path);
+//}
+//
+//
+//void FileImpl::remove(const std::string& path)
+//{
+//    if(0 != ::remove(path.c_str()))
+//        throw AccessFailed(path);
+//}
+//
+//
+//void FileImpl::move(const std::string& path, const std::string& to, bool allowCopy)
+//{
+//    int ret = ::rename(path.c_str(), to.c_str());
+//    if( 0 != ret )
+//    {
+//        if( EXDEV == ret )
+//        {
+//            if( ! allowCopy )
+//                throw AccessFailed(path);
+//
+//            FileDevice f1(path.c_str(), std::ios::in);
+//            FileDevice f2(to.c_str(), std::ios::out);
+//
+//            char buffer[8192];
+//            size_t n = 0;
+//            do
+//            {
+//                if( ! f1.eof() )
+//                    n = f1.read( buffer + n, sizeof(buffer) - n );
+//
+//                f2.write( buffer, n );
+//            } while(n > 0);
+//
+//            return;
+//        }
+//
+//        throw AccessFailed(path);
+//    }
+//}
+//
+//
+//void FileImpl::create(const std::string& path)
+//{
+//    int fd = open(path.c_str(), O_RDWR|O_EXCL|O_CREAT, 0777);
+//    if( fd < 0 )
+//        throw AccessFailed(path);
+//
+//    ::close(fd);
+//}
 
 }
 

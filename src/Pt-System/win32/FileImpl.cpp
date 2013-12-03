@@ -28,6 +28,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "FileImpl.h"
+#include "FileInfoImpl.h"
 #include "Pt/System/SystemError.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/File.h"
@@ -40,201 +41,131 @@ namespace Pt {
 
 namespace System {
 
-/*void throwError(DWORD error, const std::string& path, const Pt::SourceInfo& si)
-{
-//INVALID_DATA,		EINVAL
-//INVALID_PARAMETER,		EINVAL
-//NOT_ENOUGH_MEMORY,		ENOMEM
-//OUTOFMEMORY,		ENOMEM
-//NOT_SAME_DEVICE,		EXDEV
-//DIR_NOT_EMPTY,		ENOTEMPTY
-//HANDLE_EOF,		ENODATA
-//FILE_EXISTS,		EEXIST
-//ALREADY_EXISTS,		EEXIST
-//CANNOT_MAKE,		EPERM
-//DISK_FULL,			ENOSPC
-//HANDLE_DISK_FULL    ENOSPC
-    
-    switch(error)
-    {
-        case ERROR_READ_FAULT:
-        case ERROR_WRITE_FAULT:
-        case ERROR_CRC:
-        case ERROR_IO_DEVICE:
-        case ERROR_NOT_READY:
-        case ERROR_BUSY:
-        case ERROR_CANNOT_MAKE:
-            throw IOError(path, si);
-
-        case ERROR_WRITE_PROTECT:
-        case ERROR_ACCESS_DENIED:
-        case ERROR_SHARING_VIOLATION:
-        case ERROR_LOCK_VIOLATION:
-        case ERROR_NOT_OWNER:
-        case ERROR_CURRENT_DIRECTORY:
-            throw PermissionDenied(path, si);
-
-        case ERROR_FILE_NOT_FOUND:
-        case ERROR_FILENAME_EXCED_RANGE:
-            throw FileNotFound(path, si);
-
-        case ERROR_DIRECTORY:
-            throw DirectoryNotFound(path, si);
-
-        case ERROR_BAD_UNIT:
-        case ERROR_BAD_DEVICE:  
-            throw DeviceNotFound(path, si);
-
-        case ERROR_ALREADY_EXISTS:
-        case ERROR_FILE_EXISTS:
-        case ERROR_BAD_PATHNAME:
-        case ERROR_PATH_NOT_FOUND:
-        case ERROR_FILE_CORRUPT:
-        case ERROR_FILE_INVALID:
-        case ERROR_OPEN_FAILED:
-            throw AccessFailed(path, si);
-
-        default:
-            throw SystemError(path, si);
-    }
-}*/
-
-
-namespace {
-
-/*void throwFileError(const std::string& path, const Pt::SourceInfo& si)
-{
-    DWORD error = GetLastError();
-    switch(error)
-    {
-        case ERROR_BAD_PATHNAME:
-        case ERROR_PATH_NOT_FOUND:
-        case ERROR_OPEN_FAILED:
-            throw FileNotFound(path, si);
-
-        default:
-            throwError(error, path, si);
-    }
-}*/
-
-}
-
-
-std::size_t FileImpl::size(const std::string& path)
-{
-    WIN32_FIND_DATA data;
-    std::basic_string<TCHAR> tpath;
-    win32::fromMultiByte(path, tpath);
-
-    HANDLE h = FindFirstFile(tpath.c_str(), &data);
-    if(h == INVALID_HANDLE_VALUE)
-        throw AccessFailed(path);
-
-    FindClose(h);
-
-    LARGE_INTEGER li;
-    li.HighPart = data.nFileSizeHigh;
-    li.LowPart = data.nFileSizeLow;
-    return static_cast<std::size_t>(li.QuadPart);
-}
-
-
-void FileImpl::resize(const std::string& path, std::size_t newSize)
-{
-    std::basic_string<TCHAR> tpath;
-    win32::fromMultiByte(path, tpath);
-
-    HANDLE h = ::CreateFile( tpath.c_str(),
-                             GENERIC_READ|GENERIC_WRITE,
-                             FILE_SHARE_READ|FILE_SHARE_WRITE,
-                             NULL,
-                             OPEN_EXISTING,
-                             0,
-                             NULL );
-
-    if(h == INVALID_HANDLE_VALUE)
-        throw AccessFailed(path);
-
-    if( INVALID_SET_FILE_POINTER == ::SetFilePointer(h, newSize, NULL, FILE_BEGIN) ||
-        FALSE == ::SetEndOfFile(h) )
-    {
-        ::CloseHandle(h);
-        throw IOError("SetFilePointer");
-    }
-
-    if( FALSE == ::CloseHandle(h) )
-        throw IOError("CloseHandle");
-}
-
-
-void FileImpl::remove(const std::string& path)
-{
-    std::basic_string<TCHAR> tpath;
-    win32::fromMultiByte(path, tpath);
-
-    if( FALSE == ::DeleteFile( tpath.c_str() ) )
-        throw AccessFailed(path);
-}
-
-
-void FileImpl::move(const std::string& path, const std::string& to, bool allowCopy)
-{
-    std::basic_string<TCHAR> tpath;
-    win32::fromMultiByte(path, tpath);
-
-    std::basic_string<TCHAR> tto;
-    win32::fromMultiByte(to, tto);
-
-#ifdef _WIN32_WCE
-    if( FALSE == ::MoveFile(tpath.c_str(), tto.c_str()) )
-    {
-        DWORD error = GetLastError();
-        if(error == ERROR_NOT_SAME_DEVICE)
-        {
-            if( ! allowCopy )
-                throw AccessFailed(path);
-
-            if( FALSE == CopyFile( tpath.c_str(), tto.c_str(), TRUE ) )
-                throw AccessFailed(path);
-
-            FileImpl::remove(path);
-            return;
-        }
-
-        throw AccessFailed(path);
-    }
-#else
-    DWORD flags = 0;
-    if(allowCopy)
-        flags = MOVEFILE_COPY_ALLOWED;
-
-    if( FALSE == ::MoveFileEx(tpath.c_str(), tto.c_str(), flags) )
-    {
-        throw AccessFailed(path);
-    }
-#endif
-}
-
-
-void FileImpl::create(const std::string& path)
-{
-    std::basic_string<TCHAR> tpath;
-    win32::fromMultiByte(path, tpath);
-
-    HANDLE h = CreateFile( tpath.c_str(), // file to create
-                           GENERIC_WRITE, // open for writing
-                           0, // do not share
-                           NULL,
-                           CREATE_NEW,
-                           FILE_ATTRIBUTE_NORMAL,
-                           NULL);
-
-    if (h == INVALID_HANDLE_VALUE)
-        throw AccessFailed(path);
-
-    if( FALSE == ::CloseHandle(h) )
-        throw IOError("CloseHandle");
-}
+//std::size_t FileImpl::size(const std::string& path)
+//{
+//    return FileInfoImpl::size(path);
+//
+//    //WIN32_FIND_DATA data;
+//    //std::basic_string<TCHAR> tpath;
+//    //win32::fromMultiByte(path, tpath);
+//
+//    //HANDLE h = FindFirstFile(tpath.c_str(), &data);
+//    //if(h == INVALID_HANDLE_VALUE)
+//    //    throw AccessFailed(path);
+//
+//    //FindClose(h);
+//
+//    //LARGE_INTEGER li;
+//    //li.HighPart = data.nFileSizeHigh;
+//    //li.LowPart = data.nFileSizeLow;
+//    //return static_cast<std::size_t>(li.QuadPart);
+//}
+//
+//
+//void FileImpl::resize(const std::string& path, std::size_t newSize)
+//{
+//    FileInfoImpl::resize(path, newSize);
+//
+//    //std::basic_string<TCHAR> tpath;
+//    //win32::fromMultiByte(path, tpath);
+//
+//    //HANDLE h = ::CreateFile( tpath.c_str(),
+//    //                         GENERIC_READ|GENERIC_WRITE,
+//    //                         FILE_SHARE_READ|FILE_SHARE_WRITE,
+//    //                         NULL,
+//    //                         OPEN_EXISTING,
+//    //                         0,
+//    //                         NULL );
+//
+//    //if(h == INVALID_HANDLE_VALUE)
+//    //    throw AccessFailed(path);
+//
+//    //if( INVALID_SET_FILE_POINTER == ::SetFilePointer(h, newSize, NULL, FILE_BEGIN) ||
+//    //    FALSE == ::SetEndOfFile(h) )
+//    //{
+//    //    ::CloseHandle(h);
+//    //    throw IOError("SetFilePointer");
+//    //}
+//
+//    //if( FALSE == ::CloseHandle(h) )
+//    //    throw IOError("CloseHandle");
+//}
+//
+//
+//void FileImpl::remove(const std::string& path)
+//{
+//    FileInfoImpl::remove(path);
+//
+//    //std::basic_string<TCHAR> tpath;
+//    //win32::fromMultiByte(path, tpath);
+//
+//    //if( FALSE == ::DeleteFile( tpath.c_str() ) )
+//    //    throw AccessFailed(path);
+//}
+//
+//
+//void FileImpl::move(const std::string& path, const std::string& to, bool allowCopy)
+//{
+//    FileInfoImpl::move(path, to);
+//
+////    std::basic_string<TCHAR> tpath;
+////    win32::fromMultiByte(path, tpath);
+////
+////    std::basic_string<TCHAR> tto;
+////    win32::fromMultiByte(to, tto);
+////
+////#ifdef _WIN32_WCE
+////    if( FALSE == ::MoveFile(tpath.c_str(), tto.c_str()) )
+////    {
+////        DWORD error = GetLastError();
+////        if(error == ERROR_NOT_SAME_DEVICE)
+////        {
+////            if( ! allowCopy )
+////                throw AccessFailed(path);
+////
+////            if( FALSE == CopyFile( tpath.c_str(), tto.c_str(), TRUE ) )
+////                throw AccessFailed(path);
+////
+////            FileImpl::remove(path);
+////            return;
+////        }
+////
+////        throw AccessFailed(path);
+////    }
+////#else
+////    DWORD flags = 0;
+////    if(allowCopy)
+////        flags = MOVEFILE_COPY_ALLOWED;
+////
+////    if( FALSE == ::MoveFileEx(tpath.c_str(), tto.c_str(), flags) )
+////    {
+////        throw AccessFailed(path);
+////    }
+////#endif
+//}
+//
+//
+//void FileImpl::create(const std::string& path)
+//{
+//    FileInfoImpl::createFile(path);
+//
+//    //std::basic_string<TCHAR> tpath;
+//    //win32::fromMultiByte(path, tpath);
+//
+//    //HANDLE h = CreateFile( tpath.c_str(), // file to create
+//    //                       GENERIC_WRITE, // open for writing
+//    //                       0, // do not share
+//    //                       NULL,
+//    //                       CREATE_NEW,
+//    //                       FILE_ATTRIBUTE_NORMAL,
+//    //                       NULL);
+//
+//    //if (h == INVALID_HANDLE_VALUE)
+//    //    throw AccessFailed(path);
+//
+//    //if( FALSE == ::CloseHandle(h) )
+//    //    throw IOError("CloseHandle");
+//}
 
 } // namespace System
 

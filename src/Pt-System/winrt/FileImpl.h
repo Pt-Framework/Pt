@@ -34,19 +34,19 @@ namespace Pt {
 
 namespace System {
 
-class FileImpl
-{
-    public:
-        static std::size_t size(const std::string& path);
-
-        static void resize(const std::string& path, std::size_t n);
-
-        static void remove(const std::string& path);
-
-        static void move(const std::string& path, const std::string& to, bool allowCopy);
-
-        static void create(const std::string& path);
-};
+//class FileImpl
+//{
+//    public:
+//        static std::size_t size(const std::string& path);
+//
+//        static void resize(const std::string& path, std::size_t n);
+//
+//        static void remove(const std::string& path);
+//
+//        static void move(const std::string& path, const std::string& to, bool allowCopy);
+//
+//        static void create(const std::string& path);
+//};
 
 } // namespace System
 

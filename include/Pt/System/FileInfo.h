@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2008 Marc Boris Duerner
+ * Copyright (C) 2006-2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,24 +31,17 @@
 
 #include <Pt/System/Api.h>
 #include <string>
+#include <cstddef>
 
 namespace Pt {
 
 namespace System {
 
-/*  TODO:
-
-    - FileInfo contains file attributes, but no path
-    - In ctor of File and Directory, pass path and FileInfo
-      Directory(string path, FileInfo info);
-      This avoids additional system call to check if path really is a dir.
-*/
-
-/** @brief Provides information about a node in the file-system.
+/** @brief Provides Status about a node in the file-system.
 
     @ingroup FileSystem
 */
-class PT_SYSTEM_API FileInfo
+class FileStatus
 {
     public:
         //! @brief File-node type
@@ -60,8 +53,39 @@ class PT_SYSTEM_API FileInfo
         };
 
     public:
+        FileStatus()
+        : _type(FileStatus::Invalid)
+        , _size(0)
+        {}
+
+        FileStatus(Type t, std::size_t n)
+        : _type(t)
+        , _size(n)
+        { }
+        
+        //! @brief Returns the type of the file node
+        Type type() const
+        { return _type; }
+
+        //! @brief Returns the size of the file in bytes
+        std::size_t size() const
+        { return _size; }
+
+    private:
+        Type _type;
+        std::size_t _size;
+};
+
+/** @brief Provides information about a node in the file-system.
+
+    @ingroup FileSystem
+*/
+class PT_SYSTEM_API FileInfo
+{
+    public:
         //! @brief Default constructor
-        FileInfo();
+        FileInfo()
+        {}
 
         /** @brief Constructs a %FileInfo object from the path \a path
         */
@@ -71,18 +95,12 @@ class PT_SYSTEM_API FileInfo
         */
         explicit FileInfo(const char* path);
 
-        //! @brief Copy constructor
-        FileInfo(const FileInfo& fi);
-
         //! @brief Destructor
-        ~FileInfo();
+        ~FileInfo()
+        {}
 
-        //! @brief Assignment operator
-        FileInfo& operator=(const FileInfo& fi);
-
-        //! @brief Returns the type of the file node
-        Type type() const
-        { return _type; }
+        //! @brief Clears the state.
+        void clear();
 
         /** @brief Returns the full path of node in the file-system
 
@@ -92,6 +110,11 @@ class PT_SYSTEM_API FileInfo
         const std::string& path() const
         { return _path; }
 
+        //! @brief Returns the file status.
+        const FileStatus& status() const
+        { return _status; }
+
+        //! @brief Returns the name including an exension
         std::string name() const
         { return FileInfo::name(_path); }
 
@@ -106,50 +129,82 @@ class PT_SYSTEM_API FileInfo
         std::string dirName() const
         { return FileInfo::dirName(_path); }
 
-        //! @brief Returns the size of the file in bytes
-        std::size_t size() const;
-
         //! @brief Returns true if the node is a directory
         bool isDirectory() const
-        { return type() == FileInfo::Directory; }
+        { return status().type() == FileStatus::Directory; }
 
         //! @brief Returns true if the node is a file
         bool isFile() const
-        { return type() == FileInfo::File; }
+        { return status().type() == FileStatus::File; }
 
     public:
+        //! @brief Returns the type of file at \a path
+        static FileStatus::Type type(const std::string& path);
+
+        //! @brief Returns the size of the file in bytes
+        static std::size_t size(const std::string& path);
+
+        //! @brief Returns true if a file or directory exists at \a path
+        static bool exists(const std::string& path)
+        { return type(path) != FileStatus::Invalid; }
+
+        //! @brief Returns the name including an exension
         static std::string name(const std::string& path);
 
         //! @brief Returns the parent directory path
         static std::string dirName(const std::string& path);
 
-        //! @brief Returns true if a file or directory exists at \a path
-        static bool exists(const std::string& path)
-        { return FileInfo::getType( path ) != FileInfo::Invalid; }
+        //! @brief Returns the file name without the exension
+        static std::string baseName(const std::string& path);
 
-        //! @brief Returns the type of file at \a path
-        static Type getType(const std::string& path);
+        //! @brief Returns the file name extension or an empty string if not present
+        static std::string extension(const std::string& path);
 
+        //! @brief Creates a new file.
+        static void createFile(const std::string& path);
+
+        //! @brief Creates a new directory.
+        static void createDirectory(const std::string& path);
+
+        //! @brief Resizes a file.
+        static void resize(const std::string& path, std::size_t n);
+
+        //! @brief Removes a file or directory.
+        static void remove(const std::string& path);
+
+        //! @brief Moves a file or directory.
+        static void move(const std::string& path, const std::string& to);
+
+    public:
+        //! @brief Returns the string representing the separator in path names
+        static const char* sep();
+
+        //! @brief Returns the string representng the current directory in path names
+        static const char* curdir();
+
+        //! @brief Returns the string representng the upper directory in path names
+        static const char* updir();
+
+    public:
+        std::string& init(FileStatus::Type t, std::size_t n);
+    
     private:
-        //! @internal
-        Type _type;
-
-        //! @internal
         std::string _path;
-
-        //! @internal
-        void* _reserved;
+        FileStatus _status;
 };
+
 
 inline bool operator<(const FileInfo& a, const FileInfo& b)
 {
     return a.path() < b.path();
 }
 
+
 inline bool operator==(const FileInfo& a, const FileInfo& b)
 {
     return a.path() == b.path();
 }
+
 
 inline bool operator!=(const FileInfo& a, const FileInfo& b)
 {

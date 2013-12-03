@@ -32,32 +32,26 @@
 #include "Pt/System/IOError.h"
 #include <windows.h>
 
-using namespace Platform;
-
-using namespace Windows::Storage;
-
+//using namespace Platform;
+//using namespace Windows::Storage;
 
 namespace Pt {
 
 namespace System {
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
-: _refs(1),
-  _path(path),
-  _findHandle(INVALID_HANDLE_VALUE),
-  _dirty(true)
+: _refs(1)
+, _findHandle(INVALID_HANDLE_VALUE)
 {
-    init();
+    init(path.c_str(), path.size());
 }
 
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
-: _refs(1),
-  _path(path),
-  _findHandle(INVALID_HANDLE_VALUE),
-  _dirty(true)
+: _refs(1)
+, _findHandle(INVALID_HANDLE_VALUE)
 {
-    init();
+    init(path, std::strlen(path));
 }
 
 
@@ -68,13 +62,14 @@ DirectoryIteratorImpl::~DirectoryIteratorImpl()
 }
 
 
-void DirectoryIteratorImpl::init()
+void DirectoryIteratorImpl::init(const char* path, std::size_t pathlen)
 {
-    if( ! _path.empty() && _path[_path.size()-1] != '\\' )
-        _path += '\\';
-
     std::wstring wpath;
-    win32::fromMultiByte( _path, wpath );
+    win32::fromMultiByte( path, wpath );
+
+    if( pathlen > 0 && path[pathlen-1] != '\\' )
+        wpath += '\\';
+
     wpath += L'*';
 
     _findHandle = FindFirstFileExW( wpath.c_str(), 
@@ -91,100 +86,105 @@ void DirectoryIteratorImpl::init()
 
 bool DirectoryIteratorImpl::advance()
 {
-    // the current node becomes invalid now
-    _dirty = true;
-
-    // _findHandle set to INVALID_HANDLE_VALUE means end
     if( FALSE == FindNextFileW(_findHandle, &_current) )
     {
         ::FindClose(_findHandle);
+
+        // INVALID_HANDLE_VALUE means end iterator
         _findHandle = INVALID_HANDLE_VALUE;
-        _name.clear();
+        _finfo.clear();
         return false;
     }
 
-    _name = win32::toMultiByte( _current.cFileName );
+    FileStatus::Type type = FileInfoImpl::getType(_current.dwFileAttributes);
+
+    LARGE_INTEGER li;
+    li.HighPart = _current.nFileSizeHigh;
+    li.LowPart = _current.nFileSizeLow;
+    std::size_t size = static_cast<std::size_t>(li.QuadPart);
+
+    _finfo.init(type, size) = win32::toMultiByte( _current.cFileName );
     return true;
 }
 
 
-const std::string& DirectoryIteratorImpl::path() const
-{
-    if(_dirty)
-    {
-        // replace substring after last slash with the new file-name or
-        // append the file-name if we have a trailing slash. Ctor makes
-        // sure we have a trailing slash.
-        std::string::size_type idx = _path.rfind('\\');
-        if(idx != std::string::npos && ++idx < _path.size() )
-        {
-            _path.replace(idx, _path.size(), win32::toMultiByte( _current.cFileName ) );
-        }
-        else
-        {
-            _path += win32::toMultiByte( _current.cFileName );
-        }
-    }
-
-    return _path;
-}
-
-
-void DirectoryImpl::create(const std::string& path)
-{
-    std::wstring wpath;
-    win32::fromMultiByte( path, wpath );
-
-    if( FALSE == ::CreateDirectoryW(wpath.c_str(), NULL) )
-        throw AccessFailed(path);
-}
-
-
-void DirectoryImpl::move(const std::string& from, const std::string& to)
-{
-    std::wstring wfrom;
-    win32::fromMultiByte( from, wfrom );
-    
-    std::wstring wto;
-    win32::fromMultiByte( to, wto );
-
-    if( FALSE == ::MoveFileExW( wfrom.c_str(), wto.c_str(), MOVEFILE_COPY_ALLOWED) )
-        throw AccessFailed(from);
-}
-
-
-void DirectoryImpl::remove(const std::string& path)
-{
-    std::wstring wpath;
-    win32::fromMultiByte( path, wpath );
-
-    if( FALSE == ::RemoveDirectoryW( wpath.c_str() ) )
-        throw AccessFailed(path);
-}
-
-
-void DirectoryImpl::chdir(const std::string& path)
-{
-    throw std::runtime_error("chdir not supported");
-}
-
-
-std::string DirectoryImpl::cwd()
-{
-    // Windows.Storage
-
-    // might want RoamingFolder?
-    String^ path = ApplicationData::Current->LocalFolder->Path;
-	return win32::toMultiByte( path->Data() );
-}
-
-
-std::string DirectoryImpl::tmpdir()
-{
-    // Windows.Storage
-    String^ path = ApplicationData::Current->TemporaryFolder->Path;
-    return win32::toMultiByte( path->Data() );
-}
+//const std::string& DirectoryIteratorImpl::path() const
+//{
+//    if(_dirty)
+//    {
+//        // replace substring after last slash with the new file-name or
+//        // append the file-name if we have a trailing slash. Ctor makes
+//        // sure we have a trailing slash.
+//        std::string::size_type idx = _path.rfind('\\');
+//        if(idx != std::string::npos && ++idx < _path.size() )
+//        {
+//            _path.replace(idx, _path.size(), win32::toMultiByte( _current.cFileName ) );
+//        }
+//        else
+//        {
+//            _path += win32::toMultiByte( _current.cFileName );
+//        }
+//    }
+//
+//    return _path;
+//}
+//
+//
+//void DirectoryImpl::create(const std::string& path)
+//{
+//    std::wstring wpath;
+//    win32::fromMultiByte( path, wpath );
+//
+//    if( FALSE == ::CreateDirectoryW(wpath.c_str(), NULL) )
+//        throw AccessFailed(path);
+//}
+//
+//
+//void DirectoryImpl::move(const std::string& from, const std::string& to)
+//{
+//    std::wstring wfrom;
+//    win32::fromMultiByte( from, wfrom );
+//    
+//    std::wstring wto;
+//    win32::fromMultiByte( to, wto );
+//
+//    if( FALSE == ::MoveFileExW( wfrom.c_str(), wto.c_str(), MOVEFILE_COPY_ALLOWED) )
+//        throw AccessFailed(from);
+//}
+//
+//
+//void DirectoryImpl::remove(const std::string& path)
+//{
+//    std::wstring wpath;
+//    win32::fromMultiByte( path, wpath );
+//
+//    if( FALSE == ::RemoveDirectoryW( wpath.c_str() ) )
+//        throw AccessFailed(path);
+//}
+//
+//
+//void DirectoryImpl::chdir(const std::string& path)
+//{
+//    throw AccessFailed("chdir not supported");
+//}
+//
+//
+//std::string DirectoryImpl::cwd()
+//{
+//    // Windows.Storage
+//
+//    // might want RoamingFolder?
+//    String^ path = ApplicationData::Current->LocalFolder->Path;
+//    return win32::toMultiByte( path->Data() );
+//}
+//
+//
+//std::string DirectoryImpl::tmpdir()
+//{
+//    // Windows.Storage
+//    String^ path = ApplicationData::Current->TemporaryFolder->Path;
+//    return win32::toMultiByte( path->Data() );
+//}
 
 } // namespace System
 

@@ -265,13 +265,13 @@ void SqliteTest::tearDown()
 
     try
     {
-        Pt::System::File("SqliteTest.db").remove();
+        Pt::System::FileInfo::remove("SqliteTest.db");
     }
     catch(...){}
 
     try
     {
-        Pt::System::File("SqliteTestPragma.db").remove();
+        Pt::System::FileInfo::remove("SqliteTestPragma.db");
     }
     catch(...){}
 }
@@ -469,6 +469,6 @@ void SqliteTest::testConcurrency()
     }
     
     PT_UNIT_ASSERT(success);
-    Pt::System::File("SqliteConcurrencyTest.db").remove();
+    Pt::System::FileInfo::remove("SqliteConcurrencyTest.db");
 }
 

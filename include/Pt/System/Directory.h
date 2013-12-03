@@ -44,9 +44,10 @@ namespace System {
     can be used as follows:
 
     \code
-    Directory d("/usr");
-    Directory::iterator it = d.begin();
-    while (it != d.end())
+    Directory::iterator it("/usr");
+    Directory::iterator end;
+
+    while(it != end)
     {
         std::cout << "name : " << *it << std::endl;
         ++it;
@@ -124,145 +125,95 @@ class PT_SYSTEM_API DirectoryIterator
 
     @ingroup FileSystem
 */
-class PT_SYSTEM_API Directory
-{
-    public:
-        typedef DirectoryIterator Iterator;
+//class PT_SYSTEM_API Directory
+//{
+//    public:
+//        typedef DirectoryIterator Iterator;
+//
+//    public:
+//        //! @brief Default Constructor
+//        Directory();
+//
+//        /** @brief Constructs a %Directory object from the path \a path
+//
+//            If no directory exists at \a path, an exception of type AccessFailed
+//            is thrown.
+//        */
+//        explicit Directory(const std::string& path);
+//
+//        explicit Directory(const char* path);
+//
+//        /** @brief Constructs a %Directory object from a FileInfo object
+//
+//            An exception of type %AccessFailed is thrown if the %FileInfo does
+//            not represent a directory.
+//        */
+//        explicit Directory(const FileInfo& fi);
+//
+//        //! @brief Copy constructor
+//        Directory(const Directory& dir);
+//
+//        //! @brief Destructor
+//        ~Directory();
+//
+//        //! @brief Assignment operator
+//        Directory& operator=(const Directory& dir);
+//
+//        /** @brief Returns the path of the directory
+//
+//            This method may return a relative path, or a fully qualified one
+//            depending on how this object was constructed.
+//        */
+//        const std::string& path() const
+//        { return _path; }
+//
+//        /** @brief Removes the directory
+//
+//            This object will be invalid after calling this method.
+//        */
+//        void remove();
+//
+//        /** @brief Moves the directory to the location given by \a to
+//
+//            The %Directory object will stay valid after this method was called and
+//            point to the moved directory.
+//        */
+//        void move(const std::string& to);
+//
+//        //! @brief Returns an iterator to the first entry in the directory.
+//        Iterator begin() const;
+//
+//        //! @brief Returns an iterator to the end of the directory entries.
+//        Iterator end() const;
+//
+//        //! @brief Creates a new file at \a path.
+//        static Directory create(const std::string& path);
+//
+//        //! @brief Returns true if a directory exists at \a path.
+//        static bool exists(const std::string& path);
+//
+//    private:
+//        //! @internal
+//        std::string _path;
+//
+//        //! @internal
+//        class DirectoryImpl* _impl;
+//};
 
-    public:
-        //! @brief Default Constructor
-        Directory();
-
-        /** @brief Constructs a %Directory object from the path \a path
-
-            If no directory exists at \a path, an exception of type AccessFailed
-            is thrown.
-        */
-        explicit Directory(const std::string& path);
-
-        explicit Directory(const char* path);
-
-        /** @brief Constructs a %Directory object from a FileInfo object
-
-            An exception of type %AccessFailed is thrown if the %FileInfo does
-            not represent a directory.
-        */
-        explicit Directory(const FileInfo& fi);
-
-        //! @brief Copy constructor
-        Directory(const Directory& dir);
-
-        //! @brief Destructor
-        ~Directory();
-
-        //! @brief Assignment operator
-        Directory& operator=(const Directory& dir);
-
-        /** @brief Returns the path of the directory
-
-            This method may return a relative path, or a fully qualified one
-            depending on how this object was constructed.
-        */
-        const std::string& path() const
-        { return _path; }
-
-        /** @brief Returns the parent directory path
-
-            This method might return an empty string if the node was created
-            without a complete path. If the directory is located in the root
-            directory of a unix file system, a slash ("/") is returned. A
-            returned directory path always ends with a trailing path separator
-            character. (A backslash in Windows and a slash in Unix, for example.)
-        */
-        std::string dirName() const
-        {
-            return FileInfo::dirName(_path);
-        }
-
-        //! @brief Returns the name of the directory excluding the path.
-        std::string name() const
-        {
-            return FileInfo::name(_path);
-        }
-
-        /** @brief Removes the directory
-
-            This object will be invalid after calling this method.
-        */
-        void remove();
-
-        /** @brief Moves the directory to the location given by \a to
-
-            The %Directory object will stay valid after this method was called and
-            point to the moved directory.
-        */
-        void move(const std::string& to);
-
-        //! @brief Returns an iterator to the first entry in the directory.
-        Iterator begin() const;
-
-        //! @brief Returns an iterator to the end of the directory entries.
-        Iterator end() const;
-
-    public:
-        //! @brief Creates a new directory at the path given by \a path
-        static Directory create(const std::string& path);
-
-        //! @brief Returns true if a directory exists at \a path, or false otherwise
-        static bool exists(const std::string& path);
-
-        //! @brief Changes the current directory
-        static void chdir(const std::string& path);
-
-        //! @brief Returns the current directory
-        static std::string cwd();
-
-        /** @brief Returns the system root path
-
-            Returns "/" (root) on Linux, "c:\" on Windows
-        */
-        static std::string rootdir();
-
-        /** @brief Returns the systems tmp directory.
-
-            The environment variables TEMP and TMP are checked first. If not set,
-            "/tmp" is returned if it exists. If none of the environment variables
-            are set and the default system tmp directory does not exist, the 
-            current directory is returned.
-        */
-        static std::string tmpdir();
-
-        //! @brief Returns the string representing the separator in path names
-        static std::string sep();
-
-        //! @brief Returns the string representng the current directory in path names
-        static std::string curdir();
-
-        //! @brief Returns the string representng the upper directory in path names
-        static std::string updir();
-
-    private:
-        //! @internal
-        std::string _path;
-
-        //! @internal
-        class DirectoryImpl* _impl;
-};
-
-inline bool operator<(const Directory& a, const Directory& b)
-{
-    return a.path() < b.path();
-}
-
-inline bool operator==(const Directory& a, const Directory& b)
-{
-    return a.path() == b.path();
-}
-
-inline bool operator!=(const Directory& a, const Directory& b)
-{
-    return !(a == b);
-}
+//inline bool operator<(const Directory& a, const Directory& b)
+//{
+//    return a.path() < b.path();
+//}
+//
+//inline bool operator==(const Directory& a, const Directory& b)
+//{
+//    return a.path() == b.path();
+//}
+//
+//inline bool operator!=(const Directory& a, const Directory& b)
+//{
+//    return !(a == b);
+//}
 
 } // namespace System
 
