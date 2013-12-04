@@ -43,18 +43,20 @@
 
 namespace {
 
-    void checkExitCode(DWORD exitCode)
-    {
-        switch(exitCode)
-        {
-            case 0xC0000005: // access violation
-            case 3:          // abort()
-                throw Pt::System::ProcessFailed();
+static const UINT AbortExitCode = 3;
 
-            default:
-                break;
-        }
+void checkExitCode(DWORD exitCode)
+{
+    switch(exitCode)
+    {
+        case 0xC0000005: // access violation
+        case AbortExitCode:          // abort()
+            throw Pt::System::ProcessFailed();
+
+        default:
+            break;
     }
+}
 
 }
 
@@ -109,7 +111,7 @@ void ProcessImpl::start()
 
     // Standard Input
 
-    if( _procInfo.stdInputRedirected() )
+    if( _procInfo.isStdInputRedirected() )
     {
         _stdinPipe = new Pipe();
 
@@ -117,14 +119,14 @@ void ProcessImpl::start()
                               HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
         m_startUp.hStdInput = _stdinPipe->impl()->out().handle();
     }
-    else if( _procInfo.stdInputClosed() )
+    else if( _procInfo.isStdInputClosed() )
     {
         m_startUp.hStdInput = INVALID_HANDLE_VALUE;
     }
 
     // Standard Output
 
-    if( _procInfo.stdOutputRedirected() )
+    if( _procInfo.isStdOutputRedirected() )
     {
         _stdoutPipe = new Pipe();
 
@@ -132,14 +134,14 @@ void ProcessImpl::start()
                               HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
         m_startUp.hStdOutput = _stdoutPipe->impl()->in().handle();
     }
-    else if( _procInfo.stdOutputClosed() )
+    else if( _procInfo.isStdOutputClosed() )
     {
         m_startUp.hStdOutput = INVALID_HANDLE_VALUE;
     }
 
     // Standard Error
 
-    if( _procInfo.stdErrorRedirected() )
+    if( _procInfo.isStdErrorRedirected() )
     {
         _stderrPipe = new Pipe();
 
@@ -147,17 +149,17 @@ void ProcessImpl::start()
                               HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
         m_startUp.hStdError = _stderrPipe->impl()->in().handle();
     }
-    else if( _procInfo.stdErrorAsOutput() )
+    else if( _procInfo.isStdErrorAsOutput() )
     {
         m_startUp.hStdError = m_startUp.hStdOutput;
     }
-    else if( _procInfo.stdErrorClosed() )
+    else if( _procInfo.isStdErrorClosed() )
     {
         m_startUp.hStdError = INVALID_HANDLE_VALUE;
     }
 
     // TODO ???
-    // if (_procInfo.detach())
+    // if (_procInfo.isDetached())
     // {
     // }
 
@@ -204,7 +206,7 @@ void ProcessImpl::start()
 
 void ProcessImpl::kill()
 {
-    if( 0 == TerminateProcess(m_pid.hProcess, 1) )
+    if( 0 == TerminateProcess(m_pid.hProcess, AbortExitCode) )
     {
         throw SystemError( PT_ERROR_MSG("TerminateProcess failed") );
     }
@@ -257,162 +259,6 @@ bool ProcessImpl::tryWait(int& status)
     throw SystemError( PT_ERROR_MSG("WaitForSingleObject failed") );
     return false;
 }
-
-
-unsigned long ProcessImpl::usedMemory()
-{
-#ifndef _WIN32_WCE
-    PROCESS_MEMORY_COUNTERS pmc;
-
-    if(GetProcessMemoryInfo( GetCurrentProcess(), &pmc, sizeof(pmc)))
-    {
-        return (unsigned long)(pmc.PagefileUsage / 1024);
-    }
-    else
-    {
-        return 0;
-    }
-#else
-    return 0;
-#endif
-}
-
-
-#ifdef _WIN32_WCE
-
-std::string ProcessImpl::getEnvVar(const std::string& name)
-{
-    HKEY hk;
-
-    long ret = RegOpenKeyEx( HKEY_LOCAL_MACHINE,
-                                _T("Software\\Pt\\environment"),
-                                0,
-                                KEY_QUERY_VALUE,
-                                &hk );
-
-    if(ret != ERROR_SUCCESS)
-    {
-        throw SystemError( PT_ERROR_MSG("Could not open Registry") );
-    }
-
-    DWORD type = REG_SZ;
-    DWORD byteLength = MAX_PATH * sizeof(TCHAR);
-    TCHAR data[MAX_PATH] = {0};
-    std::basic_string<TCHAR> wname;
-    win32::fromMultiByte(name, wname);
-
-    ret = RegQueryValueEx(hk, wname.c_str(), NULL, &type, (LPBYTE)data, &byteLength);
-
-    RegCloseKey(hk);
-
-    if(ret != ERROR_SUCCESS)
-    {
-        throw SystemError( PT_ERROR_MSG("Could not query Registry") );
-    }
-
-    if( byteLength == 0 || data[0] == 0 )
-        return "";
-
-    return win32::toMultiByte( (LPCTSTR)data );
-}
-
-
-void ProcessImpl::unsetEnvVar(const std::string& name)
-{
-    ProcessImpl::setEnvVar(name, "");
-}
-
-
-void ProcessImpl::setEnvVar(const std::string& name, const std::string& value)
-{
-    HKEY hk;
-    DWORD ret = 0;
-    ret = RegCreateKeyEx( HKEY_LOCAL_MACHINE,
-                            _T("Software\\Pt\\environment"),
-                            0,
-                            _T(""),
-                            0,
-                            0,
-                            NULL,
-                            &hk,
-                            &ret );
-    if(ret != ERROR_SUCCESS)
-    {
-        throw SystemError( PT_ERROR_MSG("Could not create Registry key") );
-    }
-
-    std::basic_string<TCHAR> wname;
-    win32::fromMultiByte(name, wname);
-    std::basic_string<TCHAR> wvalue;
-    win32::fromMultiByte(value, wvalue);
-
-    LPBYTE data = (LPBYTE)wvalue.c_str();
-    DWORD size = wvalue.size() * sizeof(TCHAR);
-
-    LONG lret = RegSetValueEx(hk, wname.c_str(), 0, REG_SZ, data, size);
-    RegCloseKey(hk);
-
-    if(lret != ERROR_SUCCESS)
-        throw SystemError( PT_ERROR_MSG("Could not set Registry value") );
-}
-
-#else
-
-void ProcessImpl::setEnvVar(const std::string& name, const std::string& value)
-{
-    if( 0 == SetEnvironmentVariable(name.c_str(), value.c_str()) )
-    {
-        throw SystemError("Set Environment Variable Error!");
-    }
-}
-
-
-void ProcessImpl::unsetEnvVar(const std::string& name)
-{
-    if( 0 == SetEnvironmentVariable(name.c_str(), NULL) )
-    {
-        throw SystemError("UnSet Environment Variable Error!");
-    }
-}
-
-
-std::string ProcessImpl::getEnvVar(const std::string& name)
-{
-    char cp[200];
-    std::string ret;
-    DWORD cnt;
-    cnt = GetEnvironmentVariable(name.c_str(), cp, 200);
-    if( 0 == cnt )
-    {
-        cnt = GetLastError();
-        if( ERROR_ENVVAR_NOT_FOUND ==  cnt )
-        {
-            return ret;
-        }
-        throw SystemError("Get Environment Variable Error 1!");
-    }
-    if(cnt<200)
-    {
-        ret=cp;
-    }
-    else
-    {
-        char *cp2 = new char[cnt+1];
-        cnt = GetEnvironmentVariable(name.c_str(), cp2, cnt);
-        if( 0 == cnt )
-        {
-            delete[] cp2;
-            throw SystemError("Get Environment Variable Error 2!");
-        }
-
-        ret = cp2;
-        delete [] cp2;
-    }
-
-    return ret;
-}
-
-#endif
 
 } // namespace Pt
 

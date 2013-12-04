@@ -33,12 +33,15 @@
 #include "Pt/System/SystemError.h"
 #include "Pt/System/FileInfo.h"
 #include <string.h>
+#include <stdlib.h>
 #include <sys/types.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <signal.h>
 #include <unistd.h>
-#include <iostream>
+
 
 #ifndef SA_RESTART
 #define SA_RESTART 0
@@ -46,43 +49,43 @@
 
 namespace {
 
-    Pt::System::Pipe* pt_signal_pipe = 0;
-    static char _signalBuffer[128];
+Pt::System::Pipe* pt_signal_pipe = 0;
+static char _signalBuffer[128];
 
-    void initSignalPipe(Pt::System::EventLoop& loop)
+void initSignalPipe(Pt::System::EventLoop& loop)
+{
+    if( ! pt_signal_pipe )
     {
-        if( ! pt_signal_pipe )
-        {
-            pt_signal_pipe = new Pt::System::Pipe();
-            pt_signal_pipe->out().setActive(loop);
-            pt_signal_pipe->out().beginRead( _signalBuffer, sizeof(_signalBuffer) );
-        }
+        pt_signal_pipe = new Pt::System::Pipe();
+        pt_signal_pipe->out().setActive(loop);
+        pt_signal_pipe->out().beginRead( _signalBuffer, sizeof(_signalBuffer) );
     }
+}
 
-    void processSignal(Pt::System::IODevice& device)
+void processSignal(Pt::System::IODevice& device)
+{
+    try
     {
-        try
-        {
-            size_t n = device.endRead();
+        size_t n = device.endRead();
 
-            int sigNo = 0;
-            char* it = _signalBuffer;
-            char* last = &_signalBuffer[ n- sizeof(sigNo) ];
-            while(it <= last)
-            {
-                memcpy(&sigNo, it, sizeof(sigNo));
-                Pt::System::Application::instance().systemSignal().send(sigNo);
-                it += sizeof(sigNo);
-            }
-
-            device.beginRead( _signalBuffer, sizeof(_signalBuffer) );
-        }
-        catch(...)
+        int sigNo = 0;
+        char* it = _signalBuffer;
+        char* last = &_signalBuffer[ n- sizeof(sigNo) ];
+        while(it <= last)
         {
-            device.beginRead( _signalBuffer, sizeof(_signalBuffer) );
-            throw;
+            memcpy(&sigNo, it, sizeof(sigNo));
+            Pt::System::Application::instance().systemSignal().send(sigNo);
+            it += sizeof(sigNo);
         }
+
+        device.beginRead( _signalBuffer, sizeof(_signalBuffer) );
     }
+    catch(...)
+    {
+        device.beginRead( _signalBuffer, sizeof(_signalBuffer) );
+        throw;
+    }
+}
 
 }
 
@@ -218,6 +221,45 @@ std::string ApplicationImpl::tmpdir()
 std::string ApplicationImpl::rootdir()
 {
     return "/";
+}
+
+
+void ApplicationImpl::setEnvVar(const std::string& name, const std::string& value)
+{
+    if( 0 > ::setenv(name.c_str(), value.c_str(), 1) )
+    {
+        throw SystemError( PT_ERROR_MSG("setenv failed") );
+    }
+}
+
+
+void ApplicationImpl::unsetEnvVar(const std::string& name)
+{
+    ::unsetenv( name.c_str() );
+}
+
+
+std::string ApplicationImpl::getEnvVar(const std::string& name)
+{
+    std::string ret;
+    const char* cp = ::getenv(name.c_str());
+    if( NULL == cp )
+    {
+        return ret;
+    }
+    ret = cp;
+    return ret;
+}
+
+
+unsigned long ApplicationImpl::usedMemory()
+{
+    struct rusage usage;
+    int r =  getrusage(RUSAGE_SELF, &usage);
+    if( r == -1)
+        throw SystemError( PT_ERROR_MSG("getrusage failed") );
+
+    return usage.ru_idrss;
 }
 
 } // namespace System

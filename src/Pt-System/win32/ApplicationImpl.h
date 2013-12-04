@@ -61,10 +61,10 @@ class ApplicationImpl
 
         static std::string tmpdir()
         {
-            std::string tmpDir = Process::getEnvVar("TEMP");
+            std::string tmpDir = getEnvVar("TEMP");
             if(tmpDir.length() == 0)
             {
-                tmpDir = Process::getEnvVar("TMP");
+                tmpDir = getEnvVar("TMP");
             }
 
             return tmpDir;
@@ -74,6 +74,14 @@ class ApplicationImpl
         {
             return "c:\\";
         }
+
+        static unsigned long usedMemory();
+
+        static void setEnvVar(const std::string& name, const std::string& value);
+
+        static void unsetEnvVar(const std::string& name);
+
+        static std::string getEnvVar(const std::string& name);
 };
 
 } // namespace System

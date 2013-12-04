@@ -61,6 +61,14 @@ class ApplicationImpl
         static std::string tmpdir();
         
         static std::string rootdir();
+
+        static unsigned long usedMemory();
+
+        static void setEnvVar(const std::string& name, const std::string& value);
+
+        static void unsetEnvVar(const std::string& name);
+
+        static std::string getEnvVar(const std::string& name);
 };
 
 } // namespace System

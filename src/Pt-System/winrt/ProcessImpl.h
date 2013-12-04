@@ -67,21 +67,6 @@ class ProcessImpl : private NonCopyable
         IODevice* stdError()
         { return 0; }
 
-        // move to Application class
-        static unsigned long usedMemory();
-
-        // move to Application class
-        static void sleep(unsigned int milliSec);
-
-        // move to Application class
-        static void setEnvVar(const std::string& name, const std::string& value);
-
-        // move to Application class
-        static void unsetEnvVar(const std::string& name);
-
-        // move to Application class
-        static std::string getEnvVar(const std::string& name);
-
     private:
         ProcessInfo _procInfo;
         Process::State _state;

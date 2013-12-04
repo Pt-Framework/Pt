@@ -149,6 +149,26 @@ class PT_SYSTEM_API Application : public Pt::Connectable
         */
         static std::string tmpdir();
 
+        //! Set environment variable
+        /**
+            @throw SystemError
+        */
+        static void setEnvVar(const std::string& name, const std::string& value);
+
+        //! Unset environment variable
+        /**
+            @throw SystemError
+        */
+        static void unsetEnvVar(const std::string& name);
+
+        //! Get environment variable
+        /**
+            @throw SystemError
+        */
+        static std::string getEnvVar(const std::string& name);
+
+        static unsigned long usedMemory();
+
         //! @internal
         ApplicationImpl& impl()
         { return *_impl; }

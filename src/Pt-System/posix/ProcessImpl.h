@@ -43,16 +43,6 @@ class ProcessImpl : private NonCopyable
         IODevice* stdError()
         { return _stdError; }
 
-        static void setEnvVar(const std::string& name, const std::string& value);
-
-        static void unsetEnvVar(const std::string& name);
-
-        static std::string getEnvVar(const std::string& name);
-
-        static void sleep(size_t msecs);
-
-        static unsigned long usedMemory();
-
     private:
         pid_t _pid;
         Process::State _state;

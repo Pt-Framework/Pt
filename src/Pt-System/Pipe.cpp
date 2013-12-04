@@ -1,8 +1,5 @@
 /*
- * Copyright (C) 2006-2007 Marc Boris Duerner
- * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2006-2007 PTV AG
- * Copyright (C) 2009 Tommi Maekitalo
+ * Copyright (C) 2006-2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/System/Pipe.h"
 #include "PipeImpl.h"
+#include <Pt/System/Pipe.h>
 
 namespace Pt {
 

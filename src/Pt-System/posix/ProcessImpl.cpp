@@ -23,19 +23,19 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "ProcessImpl.h"
 #include "PipeImpl.h"
-
-#include <cstdio>
 #include <vector>
+#include <cstdio>
 #include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
 #include <cstring> // strerror()
+#include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/time.h>
-#include <sys/resource.h>
+#include <unistd.h>
 
 namespace Pt {
 
@@ -293,52 +293,6 @@ bool ProcessImpl::tryWait(int& status)
     return true;
 }
 
-
-void ProcessImpl::setEnvVar(const std::string& name, const std::string& value)
-{
-    if( 0 > ::setenv(name.c_str(), value.c_str(), 1) )
-    {
-        throw SystemError( PT_ERROR_MSG("setenv failed") );
-    }
-}
-
-
-void ProcessImpl::unsetEnvVar(const std::string& name)
-{
-    ::unsetenv( name.c_str() );
-}
-
-
-std::string ProcessImpl::getEnvVar(const std::string& name)
-{
-    std::string ret;
-    const char* cp = ::getenv(name.c_str());
-    if( NULL == cp )
-    {
-        return ret;
-    }
-    ret = cp;
-    return ret;
-}
-
-
-void ProcessImpl::sleep(size_t milliSec)
-{
-    usleep(milliSec*1000);
-}
-
-
-unsigned long ProcessImpl::usedMemory()
-{
-    struct rusage usage;
-    int r =  getrusage(RUSAGE_SELF, &usage);
-    if( r == -1)
-        throw SystemError( PT_ERROR_MSG("getrusage failed") );
-
-    return usage.ru_idrss;
-}
-
 } // namespace Pt
 
 } //namespace System
-

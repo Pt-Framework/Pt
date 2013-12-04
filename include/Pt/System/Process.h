@@ -31,10 +31,11 @@
 
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
+#include <Pt/System/SystemError.h>
 #include <Pt/NonCopyable.h>
 #include <string>
 #include <vector>
-#include <stdexcept>
+#include <cstddef>
 
 namespace Pt {
 
@@ -45,12 +46,13 @@ namespace System {
     This exception is thrown, when a process does not terminate
     normally in wait().
 */
-class ProcessFailed : public std::runtime_error
+class PT_SYSTEM_API ProcessFailed : public SystemError
 {
     public:
-        ProcessFailed()
-            : std::runtime_error("process failed")
-            { }
+        ProcessFailed();
+
+        ~ProcessFailed() throw()
+        {}
 };
 
 
@@ -69,50 +71,54 @@ class ProcessInfo
         //! process info can contain at least the command
         ProcessInfo(const std::string& command);
 
-        const std::string& command() const;
+        const std::string& command() const
+        { return _command; }
 
         /** @brief Adds an argument to the list of arguments
         */
-        ProcessInfo& addArg(const std::string& argument);
+        ProcessInfo& addArg(const std::string& argument)
+        { _args.push_back(argument); return *this; }
 
-        unsigned argCount() const;
+        std::size_t argCount() const
+        { return _args.size(); }
 
-        const std::string& arg(unsigned idx) const;
+        const std::string& arg(std::size_t idx) const
+        { return _args.at(idx); }
 
-        bool detach() const
+        bool isDetached() const
         { return _detach; }
 
-        void detach(bool sw)
+        void setDetached(bool sw)
         { _detach = sw; }
 
         void setStdInput(IOMode mode)
         { _stdinMode = mode; }
 
-        bool stdInputClosed() const
+        bool isStdInputClosed() const
         { return (_stdinMode & Close) == Close; }
 
-        bool stdInputRedirected() const
-        { return (_stdinMode & Redirect)== Redirect; }
+        bool isStdInputRedirected() const
+        { return (_stdinMode & Redirect) == Redirect; }
 
         void setStdOutput(IOMode mode)
         { _stdoutMode = mode; }
 
-        bool stdOutputClosed() const
+        bool isStdOutputClosed() const
         { return (_stdoutMode & Close) == Close; }
 
-        bool stdOutputRedirected() const
+        bool isStdOutputRedirected() const
         { return (_stdoutMode & Redirect) == Redirect; }
 
         void setStdError(IOMode mode)
         { _stderrMode = mode; }
 
-        bool stdErrorClosed() const
+        bool isStdErrorClosed() const
         { return (_stderrMode & Close) == Close; }
 
-        bool stdErrorRedirected() const
+        bool isStdErrorRedirected() const
         { return (_stderrMode & Redirect) == Redirect; }
 
-        bool stdErrorAsOutput() const
+        bool isStdErrorAsOutput() const
         { return (_stderrMode & ToStdOut) == ToStdOut; }
 
     private:
@@ -137,36 +143,36 @@ class PT_SYSTEM_API Process : private NonCopyable
         };
 
     public:
-        //! Constructs a Process with a command including its arguments
-        /**
+        /** @brief Constructs a Process with a command including its arguments.
+        
             @param command Name of the executable along with its arguments
         */
         explicit Process(const std::string& command);
 
-        //! Constructs a Process with a process info structure
+        //! @brief Constructs a Process with a process info structure
         explicit Process(const ProcessInfo& procInfo);
 
-        //! Dtor
+        //! @brief Destructor
         ~Process();
 
         const ProcessInfo& procInfo() const;
 
         State state() const;
 
-        //! Start/Create the Process
-        /**
+        /** @brief Start/Create the Process
+        
             @throw SystemError
         */
         void start();
 
-        //! Kills the Process
-        /**
+        /** @brief Kills the Process
+        
             @throw SystemError
         */
         void kill();
 
-        //! Waits until the Process ends
-        /**
+        /** @brief Waits until the Process ends
+        
             @throw SystemError
         */
         int wait();
@@ -176,37 +182,6 @@ class PT_SYSTEM_API Process : private NonCopyable
         IODevice* stdOutput();
 
         IODevice* stdError();
-
-        // TODO: move to Application class
-        //! Set environment variable
-        /**
-            @throw SystemError
-        */
-        static void setEnvVar(const std::string& name, const std::string& value);
-
-        // TODO: move to Application class
-        //! Unset environment variable
-        /**
-            @throw SystemError
-        */
-        static void unsetEnvVar(const std::string& name);
-
-        // TODO: move to Application class
-        //! Get environment variable
-        /**
-            @throw SystemError
-        */
-        static std::string getEnvVar(const std::string& name);
-
-        // vmove to Application class
-        //! Called Process Sleeps milliSec Seconds
-        /**
-            @throw SystemError
-        */
-        static void sleep(size_t milliSec);
-
-        // TODO: move to Application class
-        static unsigned long usedMemory();
 
     private:
         class ProcessImpl *_impl;
@@ -222,34 +197,9 @@ inline ProcessInfo::ProcessInfo(const std::string& command)
 {
 }
 
+} // namespace System
 
-inline const std::string& ProcessInfo::command() const
-{
-    return _command;
-}
-
-
-inline ProcessInfo& ProcessInfo::addArg(const std::string& argument)
-{
-    _args.push_back(argument);
-    return *this;
-}
-
-
-inline unsigned ProcessInfo::argCount() const
-{
-    return _args.size();
-}
-
-
-inline const std::string& ProcessInfo::arg(unsigned idx) const
-{
-    return _args.at(idx);
-}
-
-}
-
-}
+} // namespace Pt
 
 #endif // PT_SYSTEM_PROCESS_H
 

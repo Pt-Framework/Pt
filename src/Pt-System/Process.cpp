@@ -33,6 +33,12 @@ namespace Pt {
 
 namespace System {
 
+ProcessFailed::ProcessFailed()
+: SystemError("process failed")
+{ 
+}
+
+
 Process::Process(const std::string& command)
 {
     _impl = new ProcessImpl( ProcessInfo(command) );
@@ -102,36 +108,6 @@ IODevice* Process::stdOutput()
 IODevice* Process::stdError()
 {
     return _impl->stdError();
-}
-
-
-void Process::setEnvVar(const std::string& name, const std::string& value)
-{
-    ProcessImpl::setEnvVar(name, value);
-}
-
-
-void Process::unsetEnvVar(const std::string& name)
-{
-     ProcessImpl::unsetEnvVar(name);
-}
-
-
-std::string Process::getEnvVar(const std::string& name)
-{
-     return ProcessImpl::getEnvVar(name);
-}
-
-
-void Process::sleep(size_t milliSec)
-{
-     ProcessImpl::sleep(milliSec);
-}
-
-
-unsigned long Process::usedMemory()
-{
-     return ProcessImpl::usedMemory();
 }
 
 } // namespace System

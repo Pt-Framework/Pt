@@ -391,7 +391,6 @@
     <ClInclude Include="..\..\src\Pt-System\win32\MutexImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\PipeImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\ProcessImpl.h" />
-    <ClInclude Include="..\..\src\Pt-System\win32\ProcessImplBase.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\Selector.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\SemaphoreImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\SerialDeviceImpl.h" />
@@ -654,7 +653,6 @@
     <ClCompile Include="..\..\src\Pt-System\MainLoop.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Mutex.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Pipe.cpp" />
-    <ClCompile Include="..\..\src\Pt-System\Plugin.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Process.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Selectable.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Semaphore.cpp" />
@@ -688,7 +686,6 @@
     <ClCompile Include="..\..\src\Pt-System\win32\MutexImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-System\win32\PipeImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-System\win32\ProcessImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-System\win32\ProcessImplBase.cpp" />
     <ClCompile Include="..\..\src\Pt-System\win32\Selector.cpp" />
     <ClCompile Include="..\..\src\Pt-System\win32\SemaphoreImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-System\win32\SerialDeviceImpl.cpp" />

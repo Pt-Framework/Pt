@@ -25,7 +25,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "Pt/System/Process.h"
+#include "Pt/System/Application.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
@@ -145,9 +147,9 @@ void ProcessTest::ProcessAbort()
 
 void ProcessTest::EnvVar()
 {
-    Pt::System::Process::setEnvVar("PT_PROCESS_TEST", "true");
-    std::string value = Pt::System::Process::getEnvVar("PT_PROCESS_TEST");
-	reportMessage( "value: " + value);
+    Pt::System::Application::setEnvVar("PT_PROCESS_TEST", "true");
+    std::string value = Pt::System::Application::getEnvVar("PT_PROCESS_TEST");
+    reportMessage( "value: " + value);
     PT_UNIT_ASSERT( value == "true");
 }
 

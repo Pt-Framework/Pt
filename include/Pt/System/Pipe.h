@@ -1,8 +1,5 @@
 /*
- * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2006-2007 Marc Boris Duerner
- * Copyright (C) 2006-2007 PTV AG
- * Copyright (C) 2009 Tommi Maekitalo
+ * Copyright (C) 2006-2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_System_Pipe_h
 #define Pt_System_Pipe_h
 
@@ -49,36 +47,14 @@ namespace System {
     system-dependent and therefore unspecified. Many pipe implementations will
     buffer up to a certain number of bytes between input and output, but such
     buffering should not be assumed.
-
-    The following code writes data to a pipe and reads it afterwards:
-    @code
-    int main( )
-    {
-        Pt::System::Pipe pipe;
-        pipe.output().write("Hello World!", 12);
-        pipe.output().sync();
-
-        Pt::System::Selector selector;
-        selector.addDevice( pipe.input(), Pt::System::Selector::WaitInput );
-        selector.wait();
-
-        char buffer[20];
-        size_t sz = pipe.input().read(buffer, 20);
-
-        return 0;
-    }
-    @endcode
 */
-
-    class PipeImpl;
-
 class PT_SYSTEM_API Pipe : public NonCopyable
 {
     private:
         class PipeImpl* _impl;
 
     public:
-        /** @brief Creates the pipe with two IODevices
+        /** @brief Creates the pipe with two IODevices.
 
             The default constructor will create the pipe and the appropriate
             IODevices to read and write to the pipe.
@@ -115,4 +91,4 @@ class PT_SYSTEM_API Pipe : public NonCopyable
 
 } // namespace Pt
 
-#endif
+#endif // Pt_System_Pipe_h

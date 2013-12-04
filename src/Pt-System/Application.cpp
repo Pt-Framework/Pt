@@ -140,6 +140,30 @@ std::string Application::tmpdir()
 }
 
 
+void Application::setEnvVar(const std::string& name, const std::string& value)
+{
+    ApplicationImpl::setEnvVar(name, value);
+}
+
+
+void Application::unsetEnvVar(const std::string& name)
+{
+     ApplicationImpl::unsetEnvVar(name);
+}
+
+
+std::string Application::getEnvVar(const std::string& name)
+{
+     return ApplicationImpl::getEnvVar(name);
+}
+
+
+unsigned long Application::usedMemory()
+{
+     return ApplicationImpl::usedMemory();
+}
+
+
 void Application::init(EventLoop& loop)
 {
     _loop = &loop;

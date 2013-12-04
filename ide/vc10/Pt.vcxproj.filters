@@ -345,9 +345,6 @@
     <ClInclude Include="..\..\src\Pt-System\win32\ProcessImpl.h">
       <Filter>Pt-System\win32</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-System\win32\ProcessImplBase.h">
-      <Filter>Pt-System\win32</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-System\win32\Selector.h">
       <Filter>Pt-System\win32</Filter>
     </ClInclude>
@@ -1704,9 +1701,6 @@
     <ClCompile Include="..\..\src\Pt-System\Pipe.cpp">
       <Filter>Pt-System</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-System\Plugin.cpp">
-      <Filter>Pt-System</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\Process.cpp">
       <Filter>Pt-System</Filter>
     </ClCompile>
@@ -1768,9 +1762,6 @@
       <Filter>Pt-System\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\win32\ProcessImpl.cpp">
-      <Filter>Pt-System\win32</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-System\win32\ProcessImplBase.cpp">
       <Filter>Pt-System\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\win32\Selector.cpp">

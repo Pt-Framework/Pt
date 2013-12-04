@@ -98,6 +98,30 @@ std::string ApplicationImpl::rootdir()
     return "c:\\";
 }
 
+
+unsigned long ApplicationImpl::usedMemory()
+{
+    return 0;
+}
+
+
+void ApplicationImpl::setEnvVar(const std::string& name, const std::string& value)
+{
+    // TODO: implement file based environment in app data dir
+}
+
+
+void ApplicationImpl::unsetEnvVar(const std::string& name)
+{
+    // TODO: implement file based environment in app data dir
+}
+
+
+std::string ApplicationImpl::getEnvVar(const std::string& name)
+{
+    return std::string();
+}
+
 } // namespace System
 
 } // namespace Pt

@@ -49,9 +49,6 @@ class ProcessImpl : private NonCopyable
         ~ProcessImpl();
 
     public:
-        static void sleep(unsigned int milliSec)
-        { ::Sleep(milliSec); }
-
         const ProcessInfo& procInfo() const
         { return _procInfo; }
 
@@ -66,8 +63,6 @@ class ProcessImpl : private NonCopyable
 
         bool tryWait(int& status);
 
-        static unsigned long usedMemory();
-
         IODevice* stdInput()
         { return _stdinPipe?  &_stdinPipe->in() : 0; }
 
@@ -76,12 +71,6 @@ class ProcessImpl : private NonCopyable
 
         IODevice* stdError()
         { return _stderrPipe?  &_stderrPipe->out() : 0; }
-
-        static void setEnvVar(const std::string& name, const std::string& value);
-
-        static void unsetEnvVar(const std::string& name);
-
-        static std::string getEnvVar(const std::string& name);
 
     private:
         PROCESS_INFORMATION m_pid;

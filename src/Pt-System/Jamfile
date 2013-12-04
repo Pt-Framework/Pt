@@ -28,7 +28,6 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           MainLoop.cpp
                           Mutex.cpp
                           Pipe.cpp
-                          Plugin.cpp
                           Process.cpp
                           Selectable.cpp
                           SerialDevice.cpp

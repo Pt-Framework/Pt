@@ -28,8 +28,6 @@
 
 #include "ProcessImpl.h"
 #include <Pt/System/SystemError.h>
-#include <chrono>
-#include <thread>
 
 namespace Pt {
 
@@ -68,38 +66,6 @@ bool ProcessImpl::tryWait(int& status)
 {
     return false;
 }
-
-
-void ProcessImpl::sleep(unsigned int milliSec)
-{
-    std::chrono::milliseconds msecs(milliSec);
-    std::this_thread::sleep_for(msecs);
-}
-
-
-unsigned long ProcessImpl::usedMemory()
-{
-    return 0;
-}
-
-
-void ProcessImpl::setEnvVar(const std::string& name, const std::string& value)
-{
-    // TODO: implement file based environment in app data dir
-}
-
-
-void ProcessImpl::unsetEnvVar(const std::string& name)
-{
-    // TODO: implement file based environment in app data dir
-}
-
-
-std::string ProcessImpl::getEnvVar(const std::string& name)
-{
-    return std::string();
-}
-
 
 } // namespace Pt
 
