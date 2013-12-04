@@ -79,24 +79,24 @@ void ProcessImpl::start()
     _stderrPipe = 0;
     _stdError = 0;
 
-    if (_procInfo.stdInputRedirected())
+    if (_procInfo.isStdInputRedirected())
     {
         _stdinPipe = new Pipe();
         _stdInput = &_stdinPipe->in();
     }
 
-    if (_procInfo.stdOutputRedirected())
+    if (_procInfo.isStdOutputRedirected())
     {
         _stdoutPipe = new Pipe();
         _stdOutput = &_stdoutPipe->out();
     }
 
-    if (_procInfo.stdErrorRedirected() )
+    if (_procInfo.isStdErrorRedirected() )
     {
         _stderrPipe = new Pipe();
         _stdError = &_stderrPipe->out();
     }
-    else if (_procInfo.stdErrorAsOutput())
+    else if (_procInfo.isStdErrorAsOutput())
     {
         _stdError = &_stdinPipe->out();
     }
@@ -115,7 +115,7 @@ void ProcessImpl::start()
     {
         // check detach state
 
-        if (_procInfo.detach())
+        if (_procInfo.isDetached())
         {
             _pid = fork();
             if( _pid < 0 )
@@ -134,11 +134,11 @@ void ProcessImpl::start()
 
         // redirect stdin
 
-        if (_procInfo.stdInputClosed())
+        if (_procInfo.isStdInputClosed())
         {
             std::fclose(stdin);
         }
-        else if (_procInfo.stdInputRedirected())
+        else if (_procInfo.isStdInputRedirected())
         {
             _stdinPipe->in().close();
             _stdinPipe->impl()->redirectStdin();
@@ -150,11 +150,11 @@ void ProcessImpl::start()
 
         // redirect stdout
 
-        if (_procInfo.stdOutputClosed())
+        if (_procInfo.isStdOutputClosed())
         {
             std::fclose(stdout);
         }
-        else if (_procInfo.stdOutputRedirected())
+        else if (_procInfo.isStdOutputRedirected())
         {
             _stdoutPipe->out().close();
             _stdoutPipe->impl()->redirectStdout();
@@ -166,15 +166,15 @@ void ProcessImpl::start()
 
         // redirect stderr
 
-        if (_procInfo.stdErrorClosed())
+        if (_procInfo.isStdErrorClosed())
         {
             std::fclose(stderr);
         }
-        else if (_procInfo.stdErrorRedirected())
+        else if (_procInfo.isStdErrorRedirected())
         {
             _stderrPipe->impl()->redirectStderr();
         }
-        else if (_procInfo.stdErrorAsOutput())
+        else if (_procInfo.isStdErrorAsOutput())
         {
             _stdoutPipe->impl()->redirectStderr(false);
         }
@@ -213,7 +213,7 @@ void ProcessImpl::start()
             std::exit(-1);
         }
     }
-    else if (_procInfo.detach())
+    else if (_procInfo.isDetached())
     {
         // wait for 1st child to exit
         wait();
@@ -225,13 +225,13 @@ void ProcessImpl::start()
 
         // check for open pipes
 
-        if (_procInfo.stdInputRedirected())
+        if (_procInfo.isStdInputRedirected())
             _stdinPipe->out().close();
 
-        if (_procInfo.stdOutputRedirected())
+        if (_procInfo.isStdOutputRedirected())
             _stdoutPipe->in().close();
 
-        if (_procInfo.stdErrorRedirected())
+        if (_procInfo.isStdErrorRedirected())
             _stderrPipe->in().close();
     }
 }
