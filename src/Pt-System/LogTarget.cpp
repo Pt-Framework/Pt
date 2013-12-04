@@ -27,7 +27,7 @@
  */
 
 #include "LogManager.h"
-#include "Pt/System/LogTarget.h"
+#include <Pt/System/LogTarget.h>
 #include <cassert>
 
 namespace Pt {

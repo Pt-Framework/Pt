@@ -138,15 +138,15 @@ void FileChannel::onClose()
 }
 
 
-void FileChannel::onWrite(const std::string& message)
+void FileChannel::onWrite(const char* msg, std::size_t msglen)
 {
-    if(_curSize + message.size() > _maxSize)
+    if(_curSize + msglen > _maxSize)
     {
         this->rotate();
     }
 
-    _fs << message << std::flush;
-    _curSize += message.size();
+    _fs.write(msg, msglen) << std::flush;
+    _curSize += msglen;
 }
 
 

@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2004-2006 Marc Boris Duerner
- * Copyright (C) 2005 Aloysius Indrayanto
+ * Copyright (C) 2004-2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -82,4 +81,4 @@ class PT_SYSTEM_API AccessFailed : public IOError
 
 } // namespace Pt
 
-#endif
+#endif // PT_SYSTEM_IOERROR_H

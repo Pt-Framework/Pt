@@ -424,4 +424,4 @@ struct LoggerStaticInit
 #define logger_log_debug(logger, expr) logger_log_impl(logger, Debug, expr)
 #define logger_log_trace(logger, expr) logger_log_impl(logger, Trace, expr)
 
-#endif
+#endif // Pt_System_Logger_h

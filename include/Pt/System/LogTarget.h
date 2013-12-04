@@ -162,4 +162,4 @@ class PT_SYSTEM_API LogTarget : protected Pt::NonCopyable
 
 } // namespace Pt
 
-#endif
+#endif // Pt_System_LogTarget_h

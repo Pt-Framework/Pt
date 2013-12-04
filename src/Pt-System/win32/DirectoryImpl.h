@@ -50,8 +50,8 @@ class DirectoryIteratorImpl
 
         bool advance();
 
-        const std::string& name() const
-        { return _finfo.path(); }
+        const FileInfo& get() const
+        { return _finfo; }
 
     private:
         void init(const char* path, std::size_t pathlen);

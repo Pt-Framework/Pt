@@ -30,8 +30,6 @@
 #define Pt_System_LogLevel_h
 
 #include <Pt/System/Api.h>
-#include <string>
-#include <stdexcept>
 
 namespace Pt {
 
@@ -50,10 +48,10 @@ enum LogLevel {
     Trace = 600
 };
 
-}
+} // namespace System
 
-}
+} // namespace Pt
 
-#endif
+#endif // Pt_System_LogLevel_h
 
 

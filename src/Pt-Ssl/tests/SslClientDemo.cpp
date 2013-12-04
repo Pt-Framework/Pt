@@ -141,7 +141,7 @@ class SslClient : public Pt::Connectable
             {
                 _ios.ioBuffer().endRead();
             
-                if( _ios.device()->eof() )
+                if( _ios.device()->isEof() )
                     throw Pt::System::IOError("connection lost");
             }
 
@@ -183,7 +183,7 @@ class SslClient : public Pt::Connectable
         {
             _ios.ioBuffer().endRead();
 
-            if( _ios.device()->eof() )
+            if( _ios.device()->isEof() )
                 throw Pt::System::IOError("connection lost");
 
             for(;;)

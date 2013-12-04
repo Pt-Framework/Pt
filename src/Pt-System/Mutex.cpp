@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "MutexImpl.h"
-#include "Pt/System/Mutex.h"
+#include <Pt/System/Mutex.h>
 
 namespace Pt {
 
@@ -175,6 +175,6 @@ bool ReadWriteMutex::unlockNoThrow()
     return false;
 }
 
-}
+} // namespace System
 
-}
+} // namespace Pt

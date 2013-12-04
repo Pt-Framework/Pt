@@ -50,8 +50,8 @@ class DirectoryIteratorImpl
 
         ~DirectoryIteratorImpl();
 
-        const std::string& name() const
-        { return _finfo.path(); }
+        const FileInfo& get() const
+        { return _finfo; }
 
         int ref()
         { return ++_refs; }

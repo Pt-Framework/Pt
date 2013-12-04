@@ -449,7 +449,6 @@
     <None Include="..\..\src\Pt-Ssl\Jamfile" />
     <None Include="..\..\src\Pt-Ssl\tests\Jamfile" />
     <None Include="..\..\src\Pt-System\Jamfile" />
-    <None Include="..\..\src\Pt-System\Makefile.am" />
     <None Include="..\..\src\Pt-System\tests\Jamfile" />
     <None Include="..\..\src\Pt-System\tests\Makefile.am" />
     <None Include="..\..\src\Pt-Unit\Jamfile" />

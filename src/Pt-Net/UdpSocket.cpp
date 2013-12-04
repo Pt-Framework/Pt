@@ -255,7 +255,7 @@ bool UdpSocket::onRun()
         return false;
     }
 
-    if( this->reading() )
+    if( this->isReading() )
     {
         if( _ravail || _impl->runRead( *parent() ) )
         {
@@ -264,7 +264,7 @@ bool UdpSocket::onRun()
         }
     }
 
-    if( this->writing() )
+    if( this->isWriting() )
     {
         if( _wavail || _impl->runWrite( *parent() ) )
         {

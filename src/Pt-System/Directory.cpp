@@ -47,6 +47,12 @@ DirectoryIterator::DirectoryIterator(const char* path)
 }
 
 
+DirectoryIterator::DirectoryIterator(const FileInfo& fi)
+{
+    _impl = new DirectoryIteratorImpl( fi.path() );
+}
+
+
 DirectoryIterator::DirectoryIterator(const DirectoryIterator& it)
 : _impl(0)
 {
@@ -102,15 +108,15 @@ DirectoryIterator& DirectoryIterator::operator=(const DirectoryIterator& it)
 }
 
 
-const std::string& DirectoryIterator::operator*() const
+const FileInfo& DirectoryIterator::operator*() const
 {
-    return _impl->name();
+    return _impl->get();
 }
 
 
-const std::string* DirectoryIterator::operator->() const
+const FileInfo* DirectoryIterator::operator->() const
 {
-    return &_impl->name();
+    return &_impl->get();
 }
 
 

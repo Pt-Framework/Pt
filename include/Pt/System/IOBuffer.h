@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2012 Marc Boris Duerner
+ * Copyright (C) 2005-2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,30 +25,32 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_System_IOBuffer_h
 #define Pt_System_IOBuffer_h
 
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
+#include <Pt/Signal.h>
 #include <Pt/StreamBuffer.h>
-#include <streambuf>
-#include <ios>
-#include <cstring>
 
 namespace Pt {
 
 namespace System {
 
-class PT_SYSTEM_API IOBufferImpl 
+/** @brief Stream buffer for I/O devices.
+*/
+class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
+                             , public Connectable
 {
     public:
-        IOBufferImpl();
+        explicit IOBuffer(size_t bufferSize = 8192, bool extend = false);
 
-        ~IOBufferImpl();
+        explicit IOBuffer(IODevice& ioDevice, size_t bufferSize = 8192, bool extend = false);
 
-        void init(IOBuffer& sb, size_t bufferSize, bool extend);
+        ~IOBuffer();
 
-        IODevice* ioDevice()
+        IODevice* device()
         { return _ioDevice; }
 
         Signal<IOBuffer&>& inputReady()
@@ -57,133 +59,67 @@ class PT_SYSTEM_API IOBufferImpl
         Signal<IOBuffer&>& outputReady()
         { return _outputReady; }
 
-        void attach(IOBuffer& sb, IODevice& ioDevice);
-        void detach(IOBuffer& sb);
-        void beginRead(IOBuffer& sb);
-        void onRead(IOBuffer& sb);
-        size_t endRead(IOBuffer& sb);
-        size_t beginWrite(IOBuffer& sb);
-        void onWrite(IOBuffer& sb);
-        size_t endWrite(IOBuffer& sb);
-        void discard(IOBuffer& sb);
+        void attach(IODevice& ioDevice);
+
+        void detach();
+        
+        void reset();
+
+        void discard();
+        
+        void beginRead();
+
+        //! @internal
+        void onRead(IODevice& dev);
+
+        size_t endRead();
+
+        void beginWrite();
+
+        //! @internal
+        void onWrite(IODevice& dev);
+
+        size_t endWrite();
+
         bool isReading() const;
+        
         bool isWriting() const;
-        int sync(IOBuffer& sb);
-        std::streambuf::int_type underflow(IOBuffer& sb);
-        std::streambuf::int_type overflow(IOBuffer& sb, std::streambuf::int_type ch);
-        std::streambuf::pos_type seekoff(IOBuffer& sb, std::streambuf::off_type off, std::ios::seekdir dir, std::ios::openmode);
-        std::streambuf::pos_type seekpos(IOBuffer& sb, std::streambuf::pos_type p, std::ios::openmode mode);
-        std::streamsize showmanyc(IOBuffer& sb);
-        std::streamsize showfull(IOBuffer& sb);
-        std::streambuf::int_type pbackfail(IOBuffer& sb, std::streambuf::int_type c);
+
+    protected:
+        //! @internal
+        void init(size_t bufferSize, bool extend);
+
+        virtual std::streamsize showmanyc();
+
+        virtual std::streamsize showfull();
+
+        virtual int sync();
+
+        virtual int_type underflow();
+
+        virtual int_type overflow(int_type ch);
+
+        virtual pos_type seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode);
+
+        virtual pos_type seekpos(pos_type p, std::ios::openmode mode );
+
+        virtual int_type pbackfail(int_type c);
 
     private:
+        Signal<IOBuffer&> _inputReady;
+        Signal<IOBuffer&> _outputReady;
         IODevice*    _ioDevice;
         size_t       _ibufferSize;
         char*        _ibuffer;
         std::size_t  _obufferSize;
         char*        _obuffer;
-        const size_t _pbmax;
         bool         _oextend;
 
-        Signal<IOBuffer&> _inputReady;
-        Signal<IOBuffer&> _outputReady;
-};
-
-class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
-                             , public Connectable
-{
-    friend class IOBufferImpl;
-
-    public:
-        explicit IOBuffer(size_t bufferSize = 8192, bool extend = false)
-        : _impl()
-        {
-            _impl.init(*this, bufferSize, extend);
-        }
-
-        explicit IOBuffer(IODevice& ioDevice, size_t bufferSize = 8192, bool extend = false)
-        : _impl()
-        {
-            _impl.init(*this, bufferSize, extend);
-            _impl.attach(*this, ioDevice); 
-        }
-
-        ~IOBuffer();
-
-        IODevice* device()
-        { return _impl.ioDevice(); }
-
-        Signal<IOBuffer&>& inputReady()
-        { return _impl.inputReady(); }
-
-        Signal<IOBuffer&>& outputReady()
-        { return _impl.outputReady(); }
-
-        void attach(IODevice& ioDevice)
-        { _impl.attach(*this, ioDevice); }
-
-        void detach()
-        { _impl.detach(*this); }
-
-        void beginRead()
-        { _impl.beginRead(*this); }
-
-        void onRead(IODevice& dev)
-        { _impl.onRead(*this); }
-
-        size_t endRead()
-        { return _impl.endRead(*this); }
-
-        void beginWrite()
-        { _impl.beginWrite(*this); }
-
-        void onWrite(IODevice& dev)
-        { _impl.onWrite(*this); }
-
-        size_t endWrite()
-        { return _impl.endWrite(*this); }
-
-        void discard()
-        { _impl.discard(*this); }
-
-        bool isReading() const
-        { return _impl.isReading(); }
-        
-        bool isWriting() const
-        { return _impl.isWriting(); }
-
-    protected:
-        virtual std::streamsize showmanyc()
-        { return _impl.showmanyc(*this); }
-
-        virtual std::streamsize showfull()
-        { return _impl.showfull(*this); }
-
-        virtual int sync()
-        { return _impl.sync(*this); }
-
-        virtual int_type underflow()
-        { return _impl.underflow(*this); }
-
-        virtual int_type overflow(int_type ch)
-        { return _impl.overflow(*this, ch); }
-
-        virtual pos_type seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode)
-        { return _impl.seekoff(*this, offset, sd, mode); }
-
-        virtual pos_type seekpos(pos_type p, std::ios::openmode mode )
-        { return _impl.seekpos(*this, p, mode); }
-
-        virtual int_type pbackfail(int_type c)
-        { return _impl.pbackfail(*this, c); }
-
-    private:
-        IOBufferImpl _impl;
+        static const unsigned _pbmax = 4;
 };
 
 } // namespace System
 
 } // namespace Pt
 
-#endif
+#endif // Pt_System_IOBuffer_h

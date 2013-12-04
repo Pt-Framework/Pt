@@ -151,4 +151,4 @@ class LogRecord : protected Pt::NonCopyable
 
 } // namespace Pt
 
-#endif
+#endif // Pt_System_LogRecord_h

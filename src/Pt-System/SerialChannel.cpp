@@ -87,13 +87,12 @@ void SerialChannel::onClose()
 }
 
 
-void SerialChannel::onWrite(const std::string& message)
+void SerialChannel::onWrite(const char* msg, std::size_t msglen)
 {
     //if(_device.enabled() == false)
     //    return;
 
-    _device.write( message.data(), message.size() );
-    _device.write("\r\n", 2);
+    _device.write(msg, msglen);
     _device.sync();
 }
 

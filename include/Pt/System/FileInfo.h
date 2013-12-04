@@ -30,6 +30,7 @@
 #define Pt_System_FileInfo_h
 
 #include <Pt/System/Api.h>
+#include <Pt/Types.h>
 #include <string>
 #include <cstddef>
 
@@ -56,11 +57,13 @@ class FileStatus
         FileStatus()
         : _type(FileStatus::Invalid)
         , _size(0)
+        , _perms(0)
         {}
 
         FileStatus(Type t, std::size_t n)
         : _type(t)
         , _size(n)
+        , _perms(0)
         { }
         
         //! @brief Returns the type of the file node
@@ -74,9 +77,16 @@ class FileStatus
     private:
         Type _type;
         std::size_t _size;
+        Pt::uint32_t _perms;
 };
 
 /** @brief Provides information about a node in the file-system.
+
+    The %FileInfo class provides operations to query information about
+    files and directories in the file system and to add, remove and modify
+    them. When a %FileInfo is constructed, the file information is read from
+    the file system and cached as member variables. All operations are
+    available as non-member functions.
 
     @ingroup FileSystem
 */
@@ -194,18 +204,28 @@ class PT_SYSTEM_API FileInfo
 };
 
 
+/** @brief Compare two %FileInfo objects.
+
+    @related FileInfo
+*/
 inline bool operator<(const FileInfo& a, const FileInfo& b)
 {
     return a.path() < b.path();
 }
 
+/** @brief Compare two %FileInfo objects.
 
+    @related FileInfo
+*/
 inline bool operator==(const FileInfo& a, const FileInfo& b)
 {
     return a.path() == b.path();
 }
 
+/** @brief Compare two %FileInfo objects.
 
+    @related FileInfo
+*/
 inline bool operator!=(const FileInfo& a, const FileInfo& b)
 {
     return !(a == b);

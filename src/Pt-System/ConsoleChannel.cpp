@@ -54,9 +54,9 @@ void ConsoleChannel::onClose()
 }
 
 
-void ConsoleChannel::onWrite(const std::string& message)
+void ConsoleChannel::onWrite(const char* msg, std::size_t msglen)
 {
-    std::clog << message;
+    std::clog.write(msg, msglen);
 }
 
 } // namespace System

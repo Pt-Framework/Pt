@@ -77,7 +77,7 @@ class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
             The URL is specific to the channel and may contain attributes
             to open it correctly.
         */
-        void open(const std::string urlstr)
+        void open(const std::string& urlstr)
         { 
           _url = urlstr;
           this->onOpen(urlstr); 
@@ -94,7 +94,7 @@ class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
         /** @brief Writes data to the channel
         */
         void write(const std::string& message)
-        { this->onWrite( message); }
+        { this->onWrite( message.data(), message.size() ); }
 
     protected:
         /** @brief Open the channel from URL
@@ -110,15 +110,15 @@ class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
 
         /** @brief Writes data to the channel
         */
-        virtual void onWrite(const std::string& message) = 0;
+        virtual void onWrite(const char* msg, std::size_t msglen) = 0;
         
     private:
         std::string _url;
         std::size_t _refs;
 };
 
-}
+} // namespace System
 
-}
+} // namespace Pt
 
-#endif
+#endif // Pt_System_LogChannel_h

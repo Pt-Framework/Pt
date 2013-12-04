@@ -25,14 +25,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "LibraryImpl.h"
-#include "Pt/System/Library.h"
-#include "Pt/System/FileInfo.h"
-#include "Pt/System/File.h"
-#include "Pt/System/Directory.h"
+#include <Pt/System/Library.h>
+#include <Pt/System/FileInfo.h>
 #include <Pt/System/IOError.h>
-#include <string>
-#include <iostream>
 #include <memory>
 
 namespace Pt {
@@ -40,7 +37,13 @@ namespace Pt {
 namespace System {
 
 SymbolNotFound::SymbolNotFound(const std::string& sym)
-: SystemError("symbol not found: " + sym)
+: SystemError("symbol not found")
+, _symbol(sym)
+{ }
+
+
+SymbolNotFound::SymbolNotFound(const char* sym)
+: SystemError("symbol not found")
 , _symbol(sym)
 { }
 
@@ -53,6 +56,16 @@ Library::Library()
 
 
 Library::Library(const std::string& path)
+: _impl(0)
+{
+    std::auto_ptr<LibraryImpl> impl( new LibraryImpl() );
+    _impl = impl.get();
+    open(path);
+    impl.release();
+}
+
+
+Library::Library(const char* path)
 : _impl(0)
 {
     std::auto_ptr<LibraryImpl> impl( new LibraryImpl() );
@@ -109,21 +122,29 @@ void Library::detach()
         delete x;
 }
 
+
 Library& Library::open(const std::string& libname)
 {
+    return open( libname.c_str() );
+}
+
+
+Library& Library::open(const char* libname)
+{
     this->detach();
+    
+    std::string path = libname;
 
     try
     {
-        //log_debug("search for library \"" << libname << '"');
-        _impl->open(libname);
-        _path = libname;
+        //log_debug("search for library \"" << path << '"');
+        _impl->open(path);
+        _path = path;
         return *this;
     }
     catch(const AccessFailed&)
     { }
 
-    std::string path = libname;
     path += suffix();
     try
     {
@@ -179,6 +200,7 @@ Symbol Library::getSymbol(const char* symbol) const
     return Symbol(*this, sym);
 }
 
+
 Library::operator const void*() const
 {
     return _impl->failed() ? 0 : this;
@@ -211,7 +233,3 @@ std::string Library::prefix()
 } // namespace System
 
 } // namespace Pt
-
-
-void pt_system_testLibrary()
-{ std::cerr << "ptv_system_testLibrary() called." << std::endl; }

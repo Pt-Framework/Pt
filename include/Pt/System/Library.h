@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_SYSTEM_LIBRARY_H
 #define PT_SYSTEM_LIBRARY_H
 
@@ -42,10 +43,10 @@ class Symbol;
 */
 class PT_SYSTEM_API SymbolNotFound : public SystemError
 {
-    std::string _symbol;
-
     public:
         SymbolNotFound(const std::string& sym);
+
+        SymbolNotFound(const char* sym);
 
         //! @brief Destructor
         ~SymbolNotFound() throw()
@@ -54,6 +55,9 @@ class PT_SYSTEM_API SymbolNotFound : public SystemError
         //! @brief Returns the symbol, which was not found
         const std::string& symbol() const
         { return _symbol; }
+
+    private:
+        std::string _symbol;
 };
 
 /** @brief Shared library loader
@@ -88,6 +92,9 @@ class PT_SYSTEM_API Library
         */
         explicit Library(const std::string& path);
 
+        //! @brief Loads a shared library.
+        explicit Library(const char* path);
+
         Library(const Library& other);
 
         Library& operator=(const Library& other);
@@ -105,6 +112,10 @@ class PT_SYSTEM_API Library
         */
         Library& open(const std::string& path);
 
+        //! @brief Loads a shared library.
+        Library& open(const char* path);
+
+        //! @brief Closes the shared library.
         void close();
 
         /** @brief Resolves the symbol \a symbol from the shared library
@@ -122,6 +133,10 @@ class PT_SYSTEM_API Library
          */
         operator const void*() const;
 
+        /** @brief Resolves the symbol \a symbol from the shared library.
+
+            Throws SymbolNotFound if the symbol could not be resolved.
+         */
         Symbol getSymbol(const char* symbol) const;
 
         /** @brief Returns true if invalid
@@ -186,10 +201,4 @@ class Symbol
 
 } // namespace Pt
 
-extern "C" {
-    //! @internal
-    PT_SYSTEM_API void pt_system_testLibrary();
-
-}
-
-#endif
+#endif // PT_SYSTEM_LIBRARY_H

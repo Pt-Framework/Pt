@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2005-2008 by Marc Boris Duerner
- * Copyright (C) 2010-2010 by Aloysius Indrayanto
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_System_Mutex_h
 #define Pt_System_Mutex_h
 
@@ -262,9 +262,9 @@ class RecursiveLock : private NonCopyable
         const RecursiveMutex& mutex() const
         { return _mutex; }
 
-        private:
-            RecursiveMutex& _mutex;
-            bool _isLocked;
+    private:
+        RecursiveMutex& _mutex;
+        bool _isLocked;
 };
 
 /** @brief Synchronisation device similar to a POSIX rwlock
@@ -308,6 +308,7 @@ class PT_SYSTEM_API ReadWriteMutex : private NonCopyable
         //! @brief Releases the read or write lock.
         void unlock();
 
+        //! @internal
         bool unlockNoThrow();
 
     private:
@@ -508,8 +509,8 @@ class SpinLock : private NonCopyable
         bool _locked;
 };
 
-} // !namespace System
+} // namespace System
 
-} // !namespace Pt
+} // namespace Pt
 
-#endif
+#endif // Pt_System_Mutex_h

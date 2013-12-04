@@ -410,16 +410,16 @@ void PipeIODevice::onCancel()
 
 bool PipeIODevice::onRun()
 {
-    if( this->reading() )
+    if( this->isReading() )
     {
-        if( _ravail || eof() || _impl.runRead( *parent() ) )
+        if( _ravail || isEof() || _impl.runRead( *parent() ) )
         {
             inputReady().send(*this);
             return true;
         }
     }
 
-    if( this->writing() )
+    if( this->isWriting() )
     {
         if( _wavail || _impl.runWrite( *parent() ) )
         {

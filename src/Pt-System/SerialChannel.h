@@ -53,7 +53,7 @@ class SerialChannel : public Pt::Connectable
 
         virtual void onClose();
 
-        virtual void onWrite(const std::string& message);
+        virtual void onWrite(const char* msg, std::size_t msglen);
 
     private:
         Pt::System::SerialDevice _device;

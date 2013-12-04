@@ -59,6 +59,7 @@ class PT_SYSTEM_API EventLoop : public Connectable
 
     public:
         static const std::size_t WaitInfinite = static_cast<const std::size_t>(-1);
+        static const std::size_t WaitMax = WaitInfinite - 1;
 
         /** @brief Destructs the EventLoop.
         */

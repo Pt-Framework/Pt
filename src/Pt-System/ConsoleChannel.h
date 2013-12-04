@@ -49,7 +49,7 @@ class ConsoleChannel : public LogChannel
 
         virtual void onClose();
 
-        virtual void onWrite(const std::string& message);
+        virtual void onWrite(const char* msg, std::size_t msglen);
 };
 
 } // namespace System

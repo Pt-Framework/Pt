@@ -164,7 +164,7 @@ size_t FileDevice::size() const
 
 FileDevice::pos_type FileDevice::onSeek(off_type offset, std::ios::seekdir sd)
 {
-    if( _opening || this->reading() || this->writing() )
+    if( _opening || this->isReading() || this->isWriting() )
         throw IOPending( PT_ERROR_MSG("I/O operation pending") );
     
     return _impl->seek(offset, sd);
@@ -209,16 +209,16 @@ bool FileDevice::onRun()
         return false;
     }
 
-    if( this->reading() )
+    if( this->isReading() )
     {
-        if( _ravail || eof() || _impl->runRead( *parent() ) )
+        if( _ravail || isEof() || _impl->runRead( *parent() ) )
         {
             inputReady().send(*this);
             return true;
         }
     }
 
-    if( this->writing() )
+    if( this->isWriting() )
     {
         if( _wavail || _impl->runWrite( *parent() ) )
         {

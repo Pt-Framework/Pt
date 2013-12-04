@@ -239,9 +239,13 @@ size_t TimerQueue::processTimers()
         if( now < timer->finished() )
         {
             Pt::int64_t remaining = (timer->finished() - now).toUSecs();
-            lowestTimeout = (remaining / 1000);
+            
+            Pt::int64_t remainingMSecs = remaining / 1000;
             if(remaining % 1000 > 0) 
-                ++lowestTimeout;
+                ++remainingMSecs;
+
+            lowestTimeout = (remainingMSecs <= EventLoop::WaitMax) ? static_cast<std::size_t>(remainingMSecs)
+                                                                   : EventLoop::WaitMax ;
 
             log_trace("no more timer expired: " << timer->finished().toMSecs());
             break;

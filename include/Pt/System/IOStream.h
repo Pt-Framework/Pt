@@ -25,12 +25,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_System_IOStream_h
 #define Pt_System_IOStream_h
 
 #include <Pt/System/Api.h>
 #include <Pt/System/IOBuffer.h>
 #include <Pt/IOStream.h>
+#include <cstddef>
 
 namespace Pt {
 
@@ -39,20 +41,30 @@ namespace System {
 class IStream : public BasicIStream<char>
 {
     public:
-        explicit IStream(size_t bufferSize = 8192, bool extend = false);
+        explicit IStream(std::size_t bufferSize = 8192, bool extend = false);
         
-        explicit IStream(IODevice& device, size_t bufferSize = 8192, bool extend = false);
+        explicit IStream(IODevice& device, std::size_t bufferSize = 8192, bool extend = false);
         
         ~IStream()
         {}
 
         IOBuffer& ioBuffer()
         { return _buffer; }
-
-        IODevice* attach(IODevice& device);
-
+        
         IODevice* device()
         { return _buffer.device(); }
+        
+        void attach(IODevice& dev)
+        { _buffer.attach(dev); }
+
+        void detach()
+        { _buffer.detach(); }
+
+        void discard()
+        { _buffer.discard(); }
+
+        void reset()
+        { _buffer.reset(); }
 
     private:
         IOBuffer _buffer;
@@ -62,9 +74,9 @@ class IStream : public BasicIStream<char>
 class OStream : public BasicOStream<char>
 {
     public:
-        explicit OStream(size_t bufferSize = 8192, bool extend = false);
+        explicit OStream(std::size_t bufferSize = 8192, bool extend = false);
 
-        explicit OStream(IODevice& device, size_t bufferSize = 8192, bool extend = false);
+        explicit OStream(IODevice& device, std::size_t bufferSize = 8192, bool extend = false);
 
         ~OStream()
         {}
@@ -72,10 +84,20 @@ class OStream : public BasicOStream<char>
         IOBuffer& ioBuffer()
         { return _buffer; }
 
-        IODevice* attach(IODevice& device);
-
         IODevice* device()
         { return _buffer.device(); }
+
+        void attach(IODevice& dev)
+        { _buffer.attach(dev); }
+
+        void detach()
+        { _buffer.detach(); }
+
+        void discard()
+        { _buffer.discard(); }
+
+        void reset()
+        { _buffer.reset(); }
     
     private:
         IOBuffer _buffer;
@@ -85,9 +107,9 @@ class OStream : public BasicOStream<char>
 class IOStream : public BasicIOStream<char>
 {
     public:
-        explicit IOStream(size_t bufferSize = 8192, bool extend = false);
+        explicit IOStream(std::size_t bufferSize = 8192, bool extend = false);
 
-        explicit IOStream(IODevice& device, size_t bufferSize = 8192, bool extend = false);
+        explicit IOStream(IODevice& device, std::size_t bufferSize = 8192, bool extend = false);
 
         ~IOStream()
         {}
@@ -95,17 +117,27 @@ class IOStream : public BasicIOStream<char>
         IOBuffer& ioBuffer()
         { return _buffer; }
 
-        IODevice* attach(IODevice& device);
-
         IODevice* device()
         { return _buffer.device(); }
+
+        void attach(IODevice& dev)
+        { _buffer.attach(dev); }
+
+        void detach()
+        { _buffer.detach(); }
+
+        void discard()
+        { _buffer.discard(); }
+
+        void reset()
+        { _buffer.reset(); }
     
     private:
         IOBuffer _buffer;
 };
 
 
-inline IStream::IStream(size_t bufferSize, bool extend)
+inline IStream::IStream(std::size_t bufferSize, bool extend)
 : BasicIStream<char>(0)
 , _buffer(bufferSize, extend)
 {
@@ -113,7 +145,7 @@ inline IStream::IStream(size_t bufferSize, bool extend)
 }
 
 
-inline IStream::IStream(IODevice& device, size_t bufferSize, bool extend)
+inline IStream::IStream(IODevice& device, std::size_t bufferSize, bool extend)
 : BasicIStream<char>(0)
 , _buffer(device, bufferSize, extend)
 {
@@ -121,15 +153,7 @@ inline IStream::IStream(IODevice& device, size_t bufferSize, bool extend)
 }
 
 
-inline IODevice* IStream::attach(IODevice& dev)
-{
-    IODevice* ret = this->device();
-    _buffer.attach(dev);
-    return ret;
-}
-
-
-inline OStream::OStream(size_t bufferSize, bool extend)
+inline OStream::OStream(std::size_t bufferSize, bool extend)
 : BasicOStream<char>(0)
 , _buffer(bufferSize, extend)
 {
@@ -137,7 +161,7 @@ inline OStream::OStream(size_t bufferSize, bool extend)
 }
 
 
-inline OStream::OStream(IODevice& device, size_t bufferSize, bool extend)
+inline OStream::OStream(IODevice& device, std::size_t bufferSize, bool extend)
 : BasicOStream<char>(0)
 , _buffer(device, bufferSize, extend)
 {
@@ -145,15 +169,7 @@ inline OStream::OStream(IODevice& device, size_t bufferSize, bool extend)
 }
 
 
-inline IODevice* OStream::attach(IODevice& dev)
-{
-    IODevice* ret = this->device();
-    _buffer.attach(dev);
-    return ret;
-}
-
-
-inline IOStream::IOStream(size_t bufferSize, bool extend)
+inline IOStream::IOStream(std::size_t bufferSize, bool extend)
 : BasicIOStream<char>(0)
 , _buffer(bufferSize, extend)
 {
@@ -161,24 +177,15 @@ inline IOStream::IOStream(size_t bufferSize, bool extend)
 }
 
 
-inline IOStream::IOStream(IODevice& device, size_t bufferSize, bool extend)
+inline IOStream::IOStream(IODevice& device, std::size_t bufferSize, bool extend)
 : BasicIOStream<char>(0)
 , _buffer(device, bufferSize, extend)
 {
     this->setBuffer(&_buffer);
-}
-
-
-inline IODevice* IOStream::attach(IODevice& dev)
-{
-    IODevice* ret = this->device();
-    _buffer.attach(dev);
-    return ret;
 }
 
 } // namespace System
 
-} // !namespace Pt
+} // namespace Pt
 
-#endif
-
+#endif // Pt_System_IOStream_h

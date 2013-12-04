@@ -65,16 +65,20 @@ class PT_SYSTEM_API DirectoryIterator
         typedef const std::string* pointer;
         typedef const std::string& reference;
 
+    public:
         //! @brief Default constructor
         DirectoryIterator()
         : _impl(0)
         { }
 
         //! @brief Constructs an iterator pointing at the file given by @a path
-        DirectoryIterator(const std::string& path);
+        explicit DirectoryIterator(const std::string& path);
 
         //! @brief Constructs an iterator pointing at the file given by @a path
-        DirectoryIterator(const char* path);
+        explicit DirectoryIterator(const char* path);
+
+        //! @brief Constructs an iterator pointing at @a fi
+        explicit DirectoryIterator(const FileInfo& fi);
 
         //! @brief Copy constructor
         DirectoryIterator(const DirectoryIterator& it);
@@ -97,10 +101,10 @@ class PT_SYSTEM_API DirectoryIterator
         { return _impl != it._impl; }
 
         //! @brief Returns the name of the file the iterator points at
-        const std::string& operator*() const;
+        const FileInfo& operator*() const;
 
         //! @brief Returns the name of the file the iterator points at
-        const std::string* operator->() const;
+        const FileInfo* operator->() const;
 
     private:
         //! @internal

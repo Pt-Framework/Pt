@@ -1349,9 +1349,6 @@
     <None Include="..\..\src\Pt-System\Jamfile">
       <Filter>Pt-System</Filter>
     </None>
-    <None Include="..\..\src\Pt-System\Makefile.am">
-      <Filter>Pt-System</Filter>
-    </None>
     <None Include="..\..\src\Pt-System\tests\Jamfile">
       <Filter>Pt-System\tests</Filter>
     </None>

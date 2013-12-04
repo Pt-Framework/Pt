@@ -29,15 +29,15 @@
 #ifndef Pt_System_LogManager_h
 #define Pt_System_LogManager_h
 
-#include "Pt/System/Api.h"
-#include "ConsoleChannel.h"
-#include "FileChannel.h"
-#include "SerialChannel.h"
-#include "Pt/System/LogLevel.h"
-#include "Pt/System/Mutex.h"
-#include "Pt/System/Plugin.h"
-#include "Pt/NonCopyable.h"
-#include "Pt/Settings.h"
+#include <Pt/System/Api.h>
+#include <ConsoleChannel.h>
+#include <FileChannel.h>
+#include <SerialChannel.h>
+#include <Pt/System/LogLevel.h>
+#include <Pt/System/Mutex.h>
+#include <Pt/System/Plugin.h>
+#include <Pt/NonCopyable.h>
+#include <Pt/Settings.h>
 #include <string>
 #include <map>
 
@@ -140,9 +140,9 @@ class LogManagerStaticInit
         }
 };
 
-}
+} // namespace System
 
-}
+} // namespace Pt
 
-#endif
+#endif // Pt_System_LogManager_h
 

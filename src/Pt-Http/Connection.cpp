@@ -521,7 +521,7 @@ MessageProgress Connection::endSendRequest()
     {
         endWrite();
 
-        if( _socket.eof() )
+        if( _socket.isEof() )
         {
             throw System::IOError("connection lost");
         }
@@ -624,7 +624,7 @@ MessageProgress Connection::endSendReply()
         endWrite();
     }
 
-    if( _socket.eof() )
+    if( _socket.isEof() )
     {
         throw System::IOError("connection lost");
     }
@@ -808,7 +808,7 @@ MessageProgress Connection::endReceiveRequest()
 
     // TODO: throw if SSL shutdown was received
 
-    if( _socket.eof() )
+    if( _socket.isEof() )
     {
         throw System::IOError("connection lost");
     }
@@ -921,7 +921,7 @@ MessageProgress Connection::endReceiveReply()
 
     // TODO: throw if SSL shutdown was received
 
-    if( _socket.eof() )
+    if( _socket.isEof() )
     {
         throw System::IOError("connection lost");
     }

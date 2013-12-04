@@ -479,6 +479,6 @@ void LogManager::log(LogTarget& t, const LogRecord& record)
     }
 }
 
-}
+} // namespace System
 
-}
+} // namespace Pt

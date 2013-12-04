@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2012 Marc Boris Duerner
+ * Copyright (C) 2005-2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/System/IOBuffer.h"
+#include <Pt/System/IOBuffer.h>
+#include <Pt/System/IOError.h>
 #include <algorithm>
 #include <stdexcept>
 #include <cstring>
@@ -35,30 +36,38 @@ namespace Pt {
 
 namespace System {
 
-IOBuffer::~IOBuffer()
-{}
-
-
-IOBufferImpl::IOBufferImpl()
+IOBuffer::IOBuffer(size_t bufferSize, bool extend)
 : _ioDevice   (0)
 , _ibufferSize(0)
 , _ibuffer    (0)
 , _obufferSize(0)
 , _obuffer    (0)
-, _pbmax      (4)
 , _oextend    (false)
 {
+    init(bufferSize, extend);
+}
+
+IOBuffer::IOBuffer(IODevice& ioDevice, size_t bufferSize, bool extend)
+: _ioDevice   (0)
+, _ibufferSize(0)
+, _ibuffer    (0)
+, _obufferSize(0)
+, _obuffer    (0)
+, _oextend    (false)
+{
+    init(bufferSize, extend);
+    attach(ioDevice); 
 }
 
 
-IOBufferImpl::~IOBufferImpl()
+IOBuffer::~IOBuffer()
 {
     delete _ibuffer;
     delete _obuffer;
 }
 
 
-void IOBufferImpl::init(IOBuffer& sb, size_t bufferSize, bool extend)
+void IOBuffer::init(size_t bufferSize, bool extend)
 {
     _ibufferSize = bufferSize + 4;
     _ibuffer = 0;
@@ -66,60 +75,81 @@ void IOBufferImpl::init(IOBuffer& sb, size_t bufferSize, bool extend)
     _obuffer = 0;
     _oextend = extend;
 
-    if( sb.gptr() )
-        sb.setg(_ibuffer, _ibuffer + _ibufferSize, _ibuffer + _ibufferSize);
+    if( gptr() )
+        setg(_ibuffer, _ibuffer + _ibufferSize, _ibuffer + _ibufferSize);
 
-    if( sb.pptr() )
-        sb.setp(_obuffer, _obuffer + _obufferSize);
+    if( pptr() )
+        setp(_obuffer, _obuffer + _obufferSize);
 }
 
 
-void IOBufferImpl::attach(IOBuffer& sb, IODevice& ioDevice)
-{
-    if( ioDevice.reading() || ioDevice.writing() )
-        throw IOPending( PT_ERROR_MSG("IODevice in use") );
+void IOBuffer::attach(IODevice& ioDevice)
+{ 
+    if( ioDevice.isReading() || ioDevice.isWriting() )
+        throw IOPending("IODevice in use");
 
-    this->detach(sb);
+    this->detach();
 
     _ioDevice = &ioDevice;
-    ioDevice.inputReady() += slot(sb, &IOBuffer::onRead);
-    ioDevice.outputReady() += slot(sb, &IOBuffer::onWrite);
+    ioDevice.inputReady() += slot(*this, &IOBuffer::onRead);
+    ioDevice.outputReady() += slot(*this, &IOBuffer::onWrite);
 }
 
 
-void IOBufferImpl::detach(IOBuffer& sb)
-{
+void IOBuffer::detach()
+{ 
     if( ! _ioDevice)
         return;
 
-    if( _ioDevice->reading() || _ioDevice->writing() )
-        throw IOPending( PT_ERROR_MSG("IODevice in use") );
+    if( _ioDevice->isReading() || _ioDevice->isWriting() )
+        throw IOPending("IODevice in use");
 
-    _ioDevice->inputReady() -= slot(sb, &IOBuffer::onRead);
-    _ioDevice->outputReady() -= slot(sb, &IOBuffer::onWrite);
+    _ioDevice->inputReady() -= slot(*this, &IOBuffer::onRead);
+    _ioDevice->outputReady() -= slot(*this, &IOBuffer::onWrite);
     _ioDevice = 0;
 }
 
 
-void IOBufferImpl::beginRead(IOBuffer& sb)
+void IOBuffer::reset()
 {
-    if(_ioDevice == 0 || _ioDevice->reading())
+    discard();
+    detach();
+}
+
+
+void IOBuffer::discard()
+{
+    if(_ioDevice && (_ioDevice->isReading() || _ioDevice->isWriting()))
+        throw IOPending("IOBuffer in use");
+
+    setg(0, 0, 0);
+
+    if(_obuffer)
+        setp(_obuffer, _obuffer + _obufferSize);
+    else
+        setp(0, 0);
+}
+
+
+void IOBuffer::beginRead()
+{
+    if(_ioDevice == 0 || _ioDevice->isReading())
         return;
 
-    if(!_ibuffer)
+    if( ! _ibuffer)
         _ibuffer = new char[_ibufferSize];
 
     size_t putback = _pbmax;
     size_t leftover = 0;
 
     // Keep chars for putback
-    if(sb.gptr())
+    if( gptr() )
     {
-        putback    = std::min<size_t>(sb.gptr() - sb.eback(), _pbmax);
+        putback    = std::min<size_t>(gptr() - eback(), _pbmax);
         char* to   = _ibuffer + _pbmax - putback;
-        char* from = sb.gptr() - putback;
+        char* from = gptr() - putback;
 
-        leftover = sb.egptr() - sb.gptr();
+        leftover = egptr() - gptr();
         std::memmove(to, from, putback + leftover);
     }
 
@@ -130,62 +160,62 @@ void IOBufferImpl::beginRead(IOBuffer& sb)
 
     _ioDevice->beginRead(_ibuffer + used, _ibufferSize - used);
 
-    sb.setg(_ibuffer + (_pbmax - putback), // start of get area
-            _ibuffer + used,               // gptr position
-            _ibuffer + used);              // end of get area
+    setg(_ibuffer + (_pbmax - putback), // start of get area
+         _ibuffer + used,               // gptr position
+         _ibuffer + used);              // end of get area
 }
 
 
-void IOBufferImpl::onRead(IOBuffer& sb)
+void IOBuffer::onRead(IODevice& dev)
 { 
-    _inputReady.send(sb); 
+    _inputReady.send(*this); 
 }
 
 
-size_t IOBufferImpl::endRead(IOBuffer& sb)
+size_t IOBuffer::endRead()
 {
     size_t readSize = _ioDevice->endRead();
 
-    sb.setg(sb.eback(),             // start of get area
-            sb.gptr(),              // gptr position
-            sb.egptr() + readSize); // end of get area
+    setg(eback(),             // start of get area
+         gptr(),              // gptr position
+         egptr() + readSize); // end of get area
 
     return readSize;
 }
 
 
-size_t IOBufferImpl::beginWrite(IOBuffer& sb)
+void IOBuffer::beginWrite()
 {
-    if(_ioDevice == 0 || _ioDevice->writing())
-        return 0;
+    if(_ioDevice == 0 || _ioDevice->isWriting())
+        return;
 
-    if(sb.pptr())
+    if( pptr() )
     {
-        size_t avail = sb.pptr() - sb.pbase();
+        size_t avail = pptr() - pbase();
         if(avail > 0)
-            return _ioDevice->beginWrite(_obuffer, avail);
+        {
+            _ioDevice->beginWrite(_obuffer, avail);
+        }
     }
-
-    return 0;
 }
 
 
-void IOBufferImpl::onWrite(IOBuffer& sb)
+void IOBuffer::onWrite(IODevice& dev)
 { 
-    _outputReady.send(sb); 
+    _outputReady.send(*this); 
 }
 
 
-size_t IOBufferImpl::endWrite(IOBuffer& sb)
+size_t IOBuffer::endWrite()
 {
     typedef IOBuffer::traits_type traits_type;
 
     size_t leftover = 0;
     size_t written  = 0;
 
-    if(sb.pptr())
+    if( pptr() )
     {
-        size_t avail = sb.pptr() - sb.pbase();
+        size_t avail = pptr() - pbase();
         written      = _ioDevice->endWrite();
 
         leftover = avail - written;
@@ -193,51 +223,54 @@ size_t IOBufferImpl::endWrite(IOBuffer& sb)
             traits_type::move(_obuffer, _obuffer + written, leftover);
     }
 
-    sb.setp(_obuffer, _obuffer + _obufferSize);
-    sb.pbump(leftover);
+    setp(_obuffer, _obuffer + _obufferSize);
+    pbump(leftover);
 
     return written;
 }
 
 
-void IOBufferImpl::discard(IOBuffer& sb)
+bool IOBuffer::isReading() const
 {
-    if(_ioDevice && (_ioDevice->reading() || _ioDevice->writing()))
-        throw IOPending(PT_ERROR_MSG("discard failed - streambuffer is in use"));
-
-    sb.setg(0, 0, 0);
-
-    if(_obuffer)
-        sb.setp(_obuffer, _obuffer + _obufferSize);
-    else
-        sb.setp(0, 0);
+    return _ioDevice ? _ioDevice->isReading() : false;
 }
 
 
-bool IOBufferImpl::isReading() const
+bool IOBuffer::isWriting() const
 {
-    return _ioDevice ? _ioDevice->reading() : false;
+    return _ioDevice ? _ioDevice->isWriting() : false;
 }
 
 
-bool IOBufferImpl::isWriting() const
+std::streamsize IOBuffer::showmanyc()
 {
-    return _ioDevice ? _ioDevice->writing() : false;
+    if( ! _ioDevice || _ioDevice->isEof() )
+    {
+        return -1;
+    }
+
+    return 0;
 }
 
 
-int IOBufferImpl::sync(IOBuffer& sb)
+std::streamsize IOBuffer::showfull()
+{ 
+    return 0; 
+}
+
+
+int IOBuffer::sync()
 {
     typedef IOBuffer::traits_type traits_type;
 
     if(!_ioDevice )
         return 0;
 
-    if(sb.pptr())
+    if( pptr() )
     {
-        while(sb.pptr() > sb.pbase())
+        while(pptr() > pbase())
         {
-            const IOBuffer::int_type ch = sb.overflow(traits_type::eof());
+            const IOBuffer::int_type ch = overflow(traits_type::eof());
             if(ch == traits_type::eof())
                 return -1;
 
@@ -249,20 +282,20 @@ int IOBufferImpl::sync(IOBuffer& sb)
 }
 
 
-std::streambuf::int_type IOBufferImpl::underflow(IOBuffer& sb)
+std::streambuf::int_type IOBuffer::underflow()
 {
     typedef IOBuffer::traits_type traits_type;
 
     if(!_ioDevice)
         return traits_type::eof();
 
-    if(_ioDevice->reading())
-        sb.endRead();
+    if(_ioDevice->isReading())
+        endRead();
 
-    if(sb.gptr() < sb.egptr())
-        return traits_type::to_int_type(*(sb.gptr()));
+    if( gptr() < egptr() )
+        return traits_type::to_int_type( *gptr() );
 
-    if(_ioDevice->eof())
+    if(_ioDevice->isEof())
         return traits_type::eof();
 
     if(!_ibuffer)
@@ -270,28 +303,28 @@ std::streambuf::int_type IOBufferImpl::underflow(IOBuffer& sb)
 
     size_t putback = _pbmax;
 
-    if(sb.gptr())
+    if( gptr() )
     {
-        putback = std::min<size_t>(sb.gptr() - sb.eback(), _pbmax);
+        putback = std::min<size_t>(gptr() - eback(), _pbmax);
         std::memmove(_ibuffer + (_pbmax - putback),
-                        sb.gptr() - putback,
-                        putback );
+                     gptr() - putback,
+                     putback );
     }
 
     size_t readSize = _ioDevice->read(_ibuffer + _pbmax, _ibufferSize - _pbmax);
 
-    sb.setg(_ibuffer + _pbmax - putback,    // start of get area
-            _ibuffer + _pbmax,              // gptr position
-            _ibuffer + _pbmax + readSize ); // end of get area
+    setg(_ibuffer + _pbmax - putback,    // start of get area
+         _ibuffer + _pbmax,              // gptr position
+         _ibuffer + _pbmax + readSize ); // end of get area
 
-    if(_ioDevice->eof())
+    if(_ioDevice->isEof())
         return traits_type::eof();
 
-    return traits_type::to_int_type(*(sb.gptr()));
+    return traits_type::to_int_type( *gptr() );
 }
 
 
-std::streambuf::int_type IOBufferImpl::overflow(IOBuffer& sb, std::streambuf::int_type ch)
+std::streambuf::int_type IOBuffer::overflow(std::streambuf::int_type ch)
 {
     typedef IOBuffer::traits_type traits_type;
 
@@ -301,24 +334,24 @@ std::streambuf::int_type IOBufferImpl::overflow(IOBuffer& sb, std::streambuf::in
     if(!_obuffer)
     {
         _obuffer = new char[_obufferSize];
-        sb.setp(_obuffer, _obuffer + _obufferSize);
+        setp(_obuffer, _obuffer + _obufferSize);
     }
-    else if(_ioDevice->writing()) // beginWrite is unfinished
+    else if(_ioDevice->isWriting()) // beginWrite is unfinished
     {
-        sb.endWrite();
+        endWrite();
     }
     else if(traits_type::eq_int_type(ch, traits_type::eof()) || ! _oextend)
     {
         // normal blocking overflow case
-        size_t avail    = sb.pptr() - _obuffer;
+        size_t avail    = pptr() - _obuffer;
         size_t written  = _ioDevice->write(_obuffer, avail);
         size_t leftover = avail - written;
 
         if(leftover > 0)
             traits_type::move(_obuffer, _obuffer + written, leftover);
 
-        sb.setp(_obuffer, _obuffer + _obufferSize);
-        sb.pbump(leftover);
+        setp(_obuffer, _obuffer + _obufferSize);
+        pbump(leftover);
     }
     else
     {
@@ -328,8 +361,8 @@ std::streambuf::int_type IOBufferImpl::overflow(IOBuffer& sb, std::streambuf::in
         char* buf = new char[ bufsize ];
         traits_type::copy(buf, _obuffer, _obufferSize);
         std::swap(_obuffer, buf);
-        sb.setp(_obuffer, _obuffer + bufsize);
-        sb.pbump(_obufferSize);
+        setp(_obuffer, _obuffer + bufsize);
+        pbump(_obufferSize);
         _obufferSize = bufsize;
         delete [] buf;
     }
@@ -337,63 +370,46 @@ std::streambuf::int_type IOBufferImpl::overflow(IOBuffer& sb, std::streambuf::in
     // if the overflow char is not EOF put it in buffer
     if(traits_type::eq_int_type(ch, traits_type::eof()) == false)
     {
-        *sb.pptr() = traits_type::to_char_type(ch);
-        sb.pbump(1);
+        *pptr() = traits_type::to_char_type(ch);
+        pbump(1);
     }
 
     return traits_type::not_eof(ch);
 }
 
 
-std::streambuf::pos_type IOBufferImpl::seekoff(IOBuffer& sb, std::streambuf::off_type off, std::ios::seekdir dir, std::ios::openmode)
+std::streambuf::pos_type IOBuffer::seekoff(std::streambuf::off_type off, std::ios::seekdir dir, std::ios::openmode)
 {
     typedef IOBuffer::pos_type pos_type;
     typedef IOBuffer::off_type off_type;
 
     pos_type ret = pos_type(off_type(-1));
 
-    if(!_ioDevice || /*! _ioDevice->enabled() ||*/ !_ioDevice->seekable() || off == 0)
+    if( ! _ioDevice || ! _ioDevice->seekable() || off == 0)
         return ret;
 
-    if(_ioDevice->writing())
-        sb.endWrite();
+    if(_ioDevice->isWriting())
+        endWrite();
 
-    if(_ioDevice->reading())
-        sb.endRead();
+    if(_ioDevice->isReading())
+        endRead();
 
     ret = _ioDevice->seek(off, dir);
 
     // Eliminate currently buffered sequence
-    sb.discard();
+    discard();
 
     return ret;
 }
 
 
-std::streambuf::pos_type IOBufferImpl::seekpos(IOBuffer& sb, std::streambuf::pos_type p, std::ios::openmode mode)
+std::streambuf::pos_type IOBuffer::seekpos(std::streambuf::pos_type p, std::ios::openmode mode)
 { 
-    return sb.seekoff(p, std::ios::beg, mode); 
+    return seekoff(p, std::ios::beg, mode); 
 }
 
 
-std::streamsize IOBufferImpl::showmanyc(IOBuffer& sb)
-{
-    if( ! _ioDevice || _ioDevice->eof() )
-    {
-        return -1;
-    }
-
-    return 0;
-}
-
-
-std::streamsize IOBufferImpl::showfull(IOBuffer& sb)
-{ 
-    return 0; 
-}
-
-
-std::streambuf::int_type IOBufferImpl::pbackfail(IOBuffer& sb, std::streambuf::int_type)
+IOBuffer::int_type IOBuffer::pbackfail(std::streambuf::int_type)
 {
     typedef IOBuffer::traits_type traits_type;
     return traits_type::eof();

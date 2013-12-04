@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2012 Marc Boris Duerner
+ * Copyright (C) 2006-2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,15 +25,15 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_System_IODevice_h
 #define Pt_System_IODevice_h
 
-#include <Pt/Types.h>
-#include <Pt/Signal.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/IOError.h>
 #include <Pt/System/Selectable.h>
-#include <limits>
+#include <Pt/Types.h>
+#include <Pt/Signal.h>
 #include <ios>
 
 namespace Pt {
@@ -57,7 +57,7 @@ class PT_SYSTEM_API IODevice : public Selectable
     public:
         typedef std::char_traits<char>::pos_type pos_type;
         typedef std::char_traits<char>::off_type off_type;
-        typedef std::ios_base::seekdir SeekDir;
+        typedef std::ios_base::seekdir seekdir;
 
     public:
         //! @brief Destructor
@@ -65,11 +65,11 @@ class PT_SYSTEM_API IODevice : public Selectable
 
         void close();
 
-        void setTimeout(size_t timeout);
+        void setTimeout(std::size_t timeout);
 
-        void beginRead(char* buffer, size_t n);
+        void beginRead(char* buffer, std::size_t n);
 
-        size_t endRead();
+        std::size_t endRead();
 
         //! @brief Read data from I/O device
         /*!
@@ -83,11 +83,11 @@ class PT_SYSTEM_API IODevice : public Selectable
             \return number of bytes read, which may be less than requested.
             \throw IOError
          */
-        size_t read(char* buffer, size_t n);
+        std::size_t read(char* buffer, std::size_t n);
 
-        size_t beginWrite(const char* buffer, size_t n);
+        void beginWrite(const char* buffer, std::size_t n);
 
-        size_t endWrite();
+        std::size_t endWrite();
 
         //! @brief Write data to I/O device
         /**
@@ -101,7 +101,7 @@ class PT_SYSTEM_API IODevice : public Selectable
             \return number of bytes written, which may be less than requested.
             \throw IOError
          */
-        size_t write(const char* buffer, size_t n);
+        std::size_t write(const char* buffer, std::size_t n);
 
         //! @brief Returns true if device is seekable
         /**
@@ -121,7 +121,7 @@ class PT_SYSTEM_API IODevice : public Selectable
             \return New abosulte read positing.
             \throw IOError
         */
-        pos_type seek(off_type offset, std::ios::seekdir sd);
+        pos_type seek(off_type offset, seekdir sd);
 
         //! @brief Read data from I/O device without consuming them
         /**
@@ -136,7 +136,7 @@ class PT_SYSTEM_API IODevice : public Selectable
             \return number of bytes peek.
             \throw IOError
         */
-        size_t peek(char* buffer, size_t n);
+        std::size_t peek(char* buffer, std::size_t n);
 
         //! @brief Synchronize device
         /**
@@ -162,14 +162,15 @@ class PT_SYSTEM_API IODevice : public Selectable
 
             \return true if the I/O device is usable, false otherwise.
         */
-        bool eof() const;
+        bool isEof() const;
 
         /** @brief Notifies about available data
 
             This signal is send when the IODevice is monitored
             in a Selector or EventLoop and data becomes available.
         */
-        Signal<IODevice&>& inputReady();
+        Signal<IODevice&>& inputReady()
+        { return _inputReady; }
 
         /** @brief Notifies when data can be written
 
@@ -177,30 +178,31 @@ class PT_SYSTEM_API IODevice : public Selectable
             in a Selector or EventLoop and the device is ready
             to write data.
         */
-        Signal<IODevice&>& outputReady();
+        Signal<IODevice&>& outputReady()
+        { return _outputReady; }
 
-        bool reading() const
+        bool isReading() const
         { return _rbuf != 0; }
 
-        bool writing() const
+        bool isWriting() const
         { return _wbuf != 0; }
 
         char* rbuf() const
         { return _rbuf; }
 
-        size_t rbuflen() const
+        std::size_t rbuflen() const
         { return _rbuflen; }
 
-        size_t ravail() const
+        std::size_t ravail() const
         { return _ravail; }
 
         const char* wbuf() const
         { return _wbuf; }
 
-        size_t wbuflen() const
+        std::size_t wbuflen() const
         { return _wbuflen; }
 
-        size_t wavail() const
+        std::size_t wavail() const
         { return _wavail; }
 
     protected:
@@ -210,27 +212,27 @@ class PT_SYSTEM_API IODevice : public Selectable
         //! @brief Closes all resources and cancels any outstanding operations
         virtual void onClose() = 0;
 
-        virtual void onSetTimeout(size_t timeout) = 0;
+        virtual void onSetTimeout(std::size_t timeout) = 0;
 
-        virtual size_t onBeginRead(char* buffer, size_t n, bool& eof) = 0;
+        virtual std::size_t onBeginRead(char* buffer, std::size_t n, bool& eof) = 0;
 
-        virtual size_t onEndRead(char* buffer, size_t n, bool& eof) = 0;
+        virtual std::size_t onEndRead(char* buffer, std::size_t n, bool& eof) = 0;
 
         //! @brief Read bytes from device
-        virtual size_t onRead(char* buffer, size_t count, bool& eof) = 0;
+        virtual std::size_t onRead(char* buffer, std::size_t count, bool& eof) = 0;
 
-        virtual size_t onBeginWrite(const char* buffer, size_t n) = 0;
+        virtual std::size_t onBeginWrite(const char* buffer, std::size_t n) = 0;
 
-        virtual size_t onEndWrite(const char* buffer, size_t n) = 0;
+        virtual std::size_t onEndWrite(const char* buffer, std::size_t n) = 0;
 
         //! @brief Write bytes to device
-        virtual size_t onWrite(const char* buffer, size_t count) = 0;
+        virtual std::size_t onWrite(const char* buffer, std::size_t count) = 0;
 
         //! @brief Cancel all I/O operations,
         virtual void onCancel();
 
         //! @brief Read data from I/O device without consuming them
-        virtual size_t onPeek(char*, size_t)
+        virtual std::size_t onPeek(char*, std::size_t)
         { return 0; }
 
         //! @brief Returns true if device is seekable
@@ -246,7 +248,7 @@ class PT_SYSTEM_API IODevice : public Selectable
         { }
 
         //! @brief Returns the size of the device
-        virtual size_t onSize() const
+        virtual std::size_t onSize() const
         { return 0; }
 
         //! @brief Sets or unsets the device to eof
@@ -257,11 +259,11 @@ class PT_SYSTEM_API IODevice : public Selectable
 
     protected:
         char* _rbuf;
-        size_t _rbuflen;
-        size_t _ravail;
+        std::size_t _rbuflen;
+        std::size_t _ravail;
         const char* _wbuf;
-        size_t _wbuflen;
-        size_t _wavail;
+        std::size_t _wbuflen;
+        std::size_t _wavail;
         Signal<IODevice&> _inputReady;
         Signal<IODevice&> _outputReady;
         void* _reserved;
@@ -271,4 +273,4 @@ class PT_SYSTEM_API IODevice : public Selectable
 
 } // namespace Pt
 
-#endif
+#endif // Pt_System_IODevice_h

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004-2008 Marc Boris Duerner
+ * Copyright (C) 2004-2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,9 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/System/IODevice.h"
-#include <cstring>
-#include <cassert>
+#include <Pt/System/IODevice.h>
 
 namespace Pt {
 
@@ -47,7 +45,8 @@ IODevice::IODevice()
 
 
 IODevice::~IODevice()
-{ }
+{
+}
 
 
 void IODevice::close()
@@ -58,21 +57,21 @@ void IODevice::close()
 }
 
 
-void IODevice::setTimeout(size_t timeout)
+void IODevice::setTimeout(std::size_t timeout)
 {
     this->onSetTimeout(timeout);
 }
 
 
-void IODevice::beginRead(char* buffer, size_t n)
+void IODevice::beginRead(char* buffer, std::size_t n)
 {
     if( ! isActive() )
-        throw std::logic_error( PT_ERROR_MSG("I/O device not active") );
+        throw std::logic_error("I/O device not active");
 
     if (_rbuf || _wbuf)
-        throw IOPending( PT_ERROR_MSG("I/O operation pending") );
+        throw IOPending("I/O operation pending");
 
-    size_t r = this->onBeginRead(buffer, n, _eof);
+    std::size_t r = this->onBeginRead(buffer, n, _eof);
 
     if(r > 0 || _eof)
         this->setReady(); 
@@ -83,12 +82,12 @@ void IODevice::beginRead(char* buffer, size_t n)
 }
 
 
-size_t IODevice::endRead()
+std::size_t IODevice::endRead()
 {
     if( ! _rbuf )
         return 0;
 
-    size_t n = 0;
+    std::size_t n = 0;
 
     if(_ravail > 0 || _eof)
     {
@@ -119,24 +118,24 @@ size_t IODevice::endRead()
 }
 
 
-size_t IODevice::read(char* buffer, size_t n)
+std::size_t IODevice::read(char* buffer, std::size_t n)
 {
     if( _rbuf || _wbuf)
-        throw IOPending( PT_ERROR_MSG("I/O operation pending") );
+        throw IOPending("I/O operation pending");
 
     return this->onRead(buffer, n, _eof);
 }
 
 
-size_t IODevice::beginWrite(const char* buffer, size_t n)
+void IODevice::beginWrite(const char* buffer, std::size_t n)
 {
     if( ! isActive() )
-        throw std::logic_error( PT_ERROR_MSG("I/O device not active") );
+        throw std::logic_error("I/O device not active");
 
     if (_wbuf || _rbuf)
-        throw IOPending( PT_ERROR_MSG("I/O operation pending") );
+        throw IOPending("I/O operation pending");
 
-    size_t r = this->onBeginWrite(buffer, n);
+    std::size_t r = this->onBeginWrite(buffer, n);
 
     if(r > 0)
         this->setReady(); 
@@ -144,17 +143,15 @@ size_t IODevice::beginWrite(const char* buffer, size_t n)
     _wbuf = buffer;
     _wbuflen = n;
     _wavail = r;
-
-    return r;
 }
 
 
-size_t IODevice::endWrite()
+std::size_t IODevice::endWrite()
 {
     if( ! _wbuf )
         return 0;
 
-    size_t n = 0;
+    std::size_t n = 0;
 
     if(_wavail > 0)
     {
@@ -185,10 +182,10 @@ size_t IODevice::endWrite()
 }
 
 
-size_t IODevice::write(const char* buffer, size_t n)
+std::size_t IODevice::write(const char* buffer, std::size_t n)
 {
     if( _rbuf || _wbuf)
-        throw IOPending( PT_ERROR_MSG("I/O operation pending") );
+        throw IOPending("I/O operation pending");
 
     return this->onWrite(buffer, n);
 }
@@ -212,7 +209,7 @@ bool IODevice::seekable() const
 }
 
 
-IODevice::pos_type IODevice::seek(off_type offset, std::ios::seekdir sd)
+IODevice::pos_type IODevice::seek(off_type offset, seekdir sd)
 {
     off_type ret = this->onSeek(offset, sd);
     if( ret != off_type(-1) )
@@ -222,7 +219,7 @@ IODevice::pos_type IODevice::seek(off_type offset, std::ios::seekdir sd)
 }
 
 
-size_t IODevice::peek(char* buffer, size_t n)
+std::size_t IODevice::peek(char* buffer, std::size_t n)
 { 
     return this->onPeek(buffer, n); 
 }
@@ -240,7 +237,7 @@ IODevice::pos_type IODevice::position()
 }
 
 
-bool IODevice::eof() const
+bool IODevice::isEof() const
 { 
     return _eof; 
 }
@@ -251,18 +248,6 @@ void IODevice::setEof(bool eof)
     _eof = eof; 
 }
 
+} // namespace System
 
-Signal<IODevice&>& IODevice::inputReady()
-{
-    return _inputReady;
-}
-
-
-Signal<IODevice&>& IODevice::outputReady()
-{
-    return _outputReady;
-}
-
-}
-
-}
+} // namespace Pt

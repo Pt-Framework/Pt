@@ -162,7 +162,7 @@ void DirectoryTest::DirectoryIterator()
     Pt::System::DirectoryIterator end;
     for(; it != end; ++it)
     {
-        std::string name = *it;
+        std::string name = it->path();
     }
 }
 

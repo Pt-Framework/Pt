@@ -119,7 +119,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             socket.accept(server);
 
             size_t count = 0;
-            while( ! socket.eof() )
+            while( ! socket.isEof() )
             {
                 char buf[100];
                 size_t n = socket.read( buf, sizeof(buf) );
@@ -191,9 +191,9 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             _client->setActive(*_loop);
             _client->beginConnect("127.0.0.1", 9000);
 
-            PT_UNIT_ASSERT( ! _client->eof() );
+            PT_UNIT_ASSERT( ! _client->isEof() );
             _loop->run();
-            PT_UNIT_ASSERT( _client->eof() );
+            PT_UNIT_ASSERT( _client->isEof() );
 
             //std::cerr << "RESULT: " << _client->eof() << " " << _client->isConnected() << std::endl;
         }
@@ -214,9 +214,9 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             _client->setActive(*_loop);
             _client->beginConnect("127.0.0.1", 9000);
 
-            PT_UNIT_ASSERT( ! _acceptor->eof() );
+            PT_UNIT_ASSERT( ! _acceptor->isEof() );
             _loop->run();
-            PT_UNIT_ASSERT( _acceptor->eof() );
+            PT_UNIT_ASSERT( _acceptor->isEof() );
         }
 
         void onAcceptAndClose(Pt::Net::TcpServer& server)
@@ -244,7 +244,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             //this->reportMessage("on read EOF");
             std::size_t n = device.endRead();
             PT_UNIT_ASSERT(n == 0);
-            PT_UNIT_ASSERT(device.eof());
+            PT_UNIT_ASSERT(device.isEof());
             _loop->exit();
         }
 
