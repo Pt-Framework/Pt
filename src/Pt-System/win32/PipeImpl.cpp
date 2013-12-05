@@ -107,7 +107,8 @@ void PipeIODevice::onClose()
 
 void PipeIODevice::onCancel()
 {
-    parent()->selector().disable(_ioh);
+    if( loop() )
+        loop()->selector().disable(_ioh);
 }
 
 
@@ -131,7 +132,7 @@ bool PipeIODevice::onRun()
 }
 
 
-size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
+size_t PipeIODevice::onBeginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
     if( Read != _mode )
         throw IOError( PT_ERROR_MSG("Could not read from write only pipe") );
@@ -139,14 +140,14 @@ size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
     if(_bufferSize)
         return std::min(_bufferSize, n);
 
-    parent()->selector().enable(_ioh);
+    loop.selector().enable(_ioh);
     return 0;
 }
 
 
-size_t PipeIODevice::onEndRead(char* buffer, size_t n, bool& eof)
+size_t PipeIODevice::onEndRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
-    parent()->selector().disable(_ioh);
+    loop.selector().disable(_ioh);
 
     DWORD readBytes = 0;
     DWORD flags     = 0;
@@ -180,21 +181,21 @@ size_t PipeIODevice::onEndRead(char* buffer, size_t n, bool& eof)
 }
 
 
-size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
+size_t PipeIODevice::onBeginWrite(EventLoop& loop, const char* buffer, size_t n)
 {
     if( Write != _mode )
     {
         throw IOError( PT_ERROR_MSG("Could not write on a read only pipe") );
     }
     
-    parent()->selector().enable(_ioh);
+    loop.selector().enable(_ioh);
     return 0;
 }
 
 
-size_t PipeIODevice::onEndWrite(const char* buffer, size_t n)
+size_t PipeIODevice::onEndWrite(EventLoop& loop, const char* buffer, size_t n)
 {
-    parent()->selector().disable(_ioh);
+    loop.selector().disable(_ioh);
 
     DWORD bytesToWrite = std::min<DWORD>(_wbuflen, _msgSize);
 

@@ -129,7 +129,7 @@ std::string ApplicationImpl::getEnvVar(const std::string& name)
 
 void ApplicationImpl::unsetEnvVar(const std::string& name)
 {
-    ProcessImpl::setEnvVar(name, "");
+    ApplicationImpl::setEnvVar(name, "");
 }
 
 

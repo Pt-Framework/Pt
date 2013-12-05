@@ -36,6 +36,7 @@
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/System/Logger.h>
 #include <Pt/System/SystemError.h>
+#include <limits>
 #include <cstring>
 #include <cassert>
 

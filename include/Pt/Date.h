@@ -264,42 +264,6 @@ class Date
         Date& operator--()
         { _julian--; return *this; }
 
-        /** @brief Returns true if the dates are equal
-        */
-        bool operator==(const Date& date) const
-        { return _julian==date._julian; }
-
-        /** @brief Returns true if the dates are not equal
-        */
-        bool operator!=(const Date& date) const
-        { return _julian!=date._julian; }
-
-        /** @brief Less-than comparison operator
-        */
-        bool operator<(const Date& date) const
-        { return _julian<date._julian; }
-
-        /** @brief Less-than-equal comparison operator
-        */
-        bool operator<=(const Date& date) const
-        { return _julian<=date._julian; }
-
-        /** @brief Greater-than comparison operator
-        */
-        bool operator>(const Date& date) const
-        { return _julian>date._julian; }
-
-        /** @brief Greater-than-equal comparison operator
-        */
-        bool operator>=(const Date& date) const
-        { return _julian>=date._julian; }
-
-        friend inline Date operator+(const Date& d, int days);
-
-        friend inline Date operator+(int days, const Date& d);
-
-        friend inline int operator-(const Date& a, const Date& b);
-
         /** \brief Returns the date in ISO-format
 
             Converts the date in ISO-format (yyyy-mm-dd).
@@ -332,6 +296,60 @@ class Date
         //! @internal
         unsigned _julian;
 };
+
+/** @brief Returns true if the dates are equal.
+
+    @related Date
+*/
+inline bool operator==(const Date& a, const Date& b)
+{ return a.julian() == b.julian(); }
+
+/** @brief Returns true if the dates are not equal.
+
+    @related Date
+*/
+inline bool operator!=(const Date& a, const Date& b)
+{ return a.julian() != b.julian(); }
+
+/** @brief Less-than comparison operator.
+
+    @related Date
+*/
+inline bool operator<(const Date& a, const Date& b)
+{ return a.julian() < b.julian(); }
+
+/** @brief Less-than-equal comparison operator.
+
+    @related Date
+*/
+inline bool operator<=(const Date& a, const Date& b)
+{ return a.julian() <= b.julian(); }
+
+/** @brief Greater-than comparison operator.
+
+    @related Date
+*/
+inline bool operator>(const Date& a, const Date& b)
+{ return a.julian() > b.julian(); }
+
+/** @brief Greater-than-equal comparison operator.
+
+    @related Date
+*/
+inline bool operator>=(const Date& a, const Date& b) 
+{ return a.julian() >= b.julian(); }
+
+
+inline Date operator+(const Date& d, int days)
+{ return Date(d.julian() + days); }
+
+
+inline Date operator+(int days, const Date& d)
+{ return Date(days + d.julian()); }
+
+
+inline int operator-(const Date& a, const Date& b)
+{ return a.julian() - b.julian(); }
 
 PT_API void operator >>=(const SerializationInfo& si, Date& date);
 
@@ -453,18 +471,6 @@ inline Date Date::fromIsoString(const std::string& s)
     return date;
 }
 
+} // namespace Pt
 
-inline Date operator+(const Date& d, int days)
-{ return Date(d._julian + days); }
-
-
-inline Date operator+(int days, const Date& d)
-{ return Date(days + d._julian); }
-
-
-inline int operator-(const Date& a, const Date& b)
-{ return a._julian - b._julian; }
-
-}
-
-#endif
+#endif // PT_DATE_H

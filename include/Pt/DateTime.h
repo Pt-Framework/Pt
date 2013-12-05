@@ -137,38 +137,12 @@ class DateTime
         unsigned msec() const
         { return time().msec(); }
 
-        /** @brief Returns the milliseconds relative to the Unix-epoch.
-
-            The calculation does currently not take care of any time zones.
-            I.e. the milliseconds will be calculated as if they were in the
-            same time zone as the reference (January 1st 1970). Thus calling
-            this API on a "time-zoned" DateTime will lead to a "time-zoned"
-            millisecond value. And  accordingly calling this API on a "GMT"
-            DateTime will lead to a "GMT" millisecond value.
-        */
-        //Pt::int64_t msecsSinceEpoch() const
-        //{
-        //    static const DateTime dt(1970, 1, 1);
-        //    return (*this - dt).toMSecs();
-        //}
-
         std::string toIsoString() const;
 
         static DateTime fromIsoString(const std::string& s);
 
         static bool isValid(int year, unsigned month, unsigned day,
                             unsigned hour, unsigned minute, unsigned second, unsigned msec);
-
-
-        bool operator==(const DateTime& rhs) const
-        {
-            return !operator!=(rhs);
-        }
-
-        bool operator!=(const DateTime& rhs) const
-        {
-            return _date != rhs._date || _time != rhs._time ;
-        }
 
         /** @brief Assignment by sum operator
         */
@@ -214,61 +188,6 @@ class DateTime
             return *this;
         }
 
-        friend DateTime operator+(const DateTime& dt, const Timespan& ts)
-        {
-            DateTime tmp = dt;
-            tmp += ts;
-            return tmp;
-        }
-
-        friend Timespan operator-(const DateTime& first, const DateTime& second)
-        {
-            Pt::int64_t dayDiff      = Pt::int64_t( first.date().julian() ) -
-                                       Pt::int64_t( second.date().julian() );
-
-            Pt::int64_t milliSecDiff = Pt::int64_t( first.time().toMSecs() ) -
-                                       Pt::int64_t( second.time().toMSecs() );
-
-            Pt::int64_t result = (dayDiff * Time::MSecsPerDay + milliSecDiff) * 1000;
-
-            return Timespan(result);
-        }
-
-        friend DateTime operator-(const DateTime& dt, const Timespan& ts)
-        {
-            DateTime tmp = dt;
-            tmp -= ts;
-            return tmp;
-        }
-
-        bool operator< (const DateTime& dt) const
-        {
-            return _date < dt._date
-                || (_date == dt._date
-                  && _time < dt._time);
-        }
-
-        bool operator<= (const DateTime& dt) const
-        {
-            return _date < dt._date
-                || (_date == dt._date
-                  && _time <= dt._time);
-        }
-
-        bool operator> (const DateTime& dt) const
-        {
-            return _date > dt._date
-                || (_date == dt._date
-                  && _time > dt._time);
-        }
-
-        bool operator>= (const DateTime& dt) const
-        {
-            return _date > dt._date
-                || (_date == dt._date
-                  && _time >= dt._time);
-        }
-
     private:
         DateTime(unsigned jd)
         : _date(jd)
@@ -278,6 +197,77 @@ class DateTime
         Date _date;
         Time _time;
 };
+
+
+inline DateTime operator+(const DateTime& dt, const Timespan& ts)
+{
+    DateTime tmp = dt;
+    tmp += ts;
+    return tmp;
+}
+
+
+inline Timespan operator-(const DateTime& first, const DateTime& second)
+{
+    Pt::int64_t dayDiff      = Pt::int64_t( first.date().julian() ) -
+                                Pt::int64_t( second.date().julian() );
+
+    Pt::int64_t milliSecDiff = Pt::int64_t( first.time().toMSecs() ) -
+                                Pt::int64_t( second.time().toMSecs() );
+
+    Pt::int64_t result = (dayDiff * Time::MSecsPerDay + milliSecDiff) * 1000;
+
+    return Timespan(result);
+}
+
+
+inline DateTime operator-(const DateTime& dt, const Timespan& ts)
+{
+    DateTime tmp = dt;
+    tmp -= ts;
+    return tmp;
+}
+
+
+inline bool operator< (const DateTime& a, const DateTime& b)
+{
+    return a.date() < b.date()
+        || (a.date() == b.date()
+          && a.time() < b.time());
+}
+
+inline bool operator<= (const DateTime& a, const DateTime& b)
+{
+    return a.date() < b.date()
+        || (a.date() == b.date()
+          && a.time() <= b.time());
+}
+
+inline bool operator> (const DateTime& a, const DateTime& b)
+{
+    return a.date() > b.date()
+        || (a.date() == b.date()
+          && a.time() > b.time());
+}
+
+inline bool operator>= (const DateTime& a, const DateTime& b)
+{
+    return a.date() > b.date()
+        || (a.date() == b.date()
+          && a.time() >= b.time());
+}
+
+
+inline bool operator==(const DateTime& a, const DateTime& b)
+{
+    return a.date() == b.date() && a.time() == b.time();
+}
+
+inline bool operator!=(const DateTime& a, const DateTime& b)
+{
+    return a.date() != b.date() || a.time() != b.time();
+}
+
 
 PT_API void operator >>=(const SerializationInfo& si, DateTime& dt);
 

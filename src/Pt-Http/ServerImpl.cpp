@@ -33,6 +33,7 @@
 #include <Pt/Http/Authorizer.h>
 #include <Pt/Http/HttpError.h>
 #include <Pt/System/Logger.h>
+#include <limits>
 #include <memory>
 #include <cassert>
 

@@ -169,7 +169,7 @@ void SerialDeviceImpl::run()
         
         if( ret == TRUE && (_event & (EV_TXEMPTY|EV_RXCHAR)) )
         {         
-            _device.setReady();
+            _device.loop()->setReady(_device);
         }        
         else
         {
