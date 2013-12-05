@@ -53,10 +53,10 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
 
 				for(;;)
 				{ 
-					serdev.setSignal(Pt::System::SerialDevice::SET_RTS);
+					serdev.setSignal(Pt::System::SerialDevice::SetRts);
 					Pt::System::Thread::sleep( 500 );
 
-					serdev.setSignal(Pt::System::SerialDevice::CLR_RTS);
+					serdev.setSignal(Pt::System::SerialDevice::ClearRts);
 					Pt::System::Thread::sleep( 500 );
 
 					std::cout << '.' << std::flush;

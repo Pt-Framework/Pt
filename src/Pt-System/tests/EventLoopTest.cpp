@@ -34,6 +34,7 @@
 
 #include "Pt/System/Selectable.h"
 #include "Pt/System/Thread.h"
+#include "Pt/System/Mutex.h"
 
 class TestAllocator : public Pt::Allocator
 {
@@ -103,24 +104,43 @@ class TestSelectable : public Pt::System::Selectable
         , _thread( Pt::callable(*this, &TestSelectable::executeThread) )
         { }
 
-        void start(Pt::System::EventLoop& loop)
+        void begin()
         {
-            setActive(loop);
-            _loop = &loop;
+            if( ! _loop)
+                throw std::logic_error("TestSelectable not active");
+            
             _thread.start();
         }
 
     protected:
         void executeThread()
         {
+            Pt::System::EventLoop* loop = 0;
+
+            Pt::System::MutexLock lock(_mtx);
+            loop = _loop;
+            lock.unlock();
+
             for(unsigned n = 0; n < 5; ++n)
             {
                 Pt::System::Thread::sleep(500);
-                _loop->setReady(*this);
-                _loop->wake();
+                loop->setReady(*this);
+                loop->wake();
             }
 
-            _loop->exit();
+            loop->exit();
+        }
+        
+        virtual void onAttach(Pt::System::EventLoop& loop)
+        {
+            Pt::System::MutexLock lock(_mtx);
+            _loop = &loop;
+        }
+
+        virtual void onDetach(Pt::System::EventLoop& loop)
+        {
+            Pt::System::MutexLock lock(_mtx);
+            _loop = 0;
         }
 
         bool onRun()
@@ -136,6 +156,7 @@ class TestSelectable : public Pt::System::Selectable
         }
 
     private:
+        Pt::System::Mutex _mtx;
         Pt::System::EventLoop* _loop;
         Pt::System::AttachedThread _thread;
 };
@@ -164,7 +185,9 @@ class EventLoopTest : public Pt::Unit::TestSuite
             TestSelectable ts;
             
             Pt::System::MainLoop el;
-            ts.start(el);
+
+            ts.setActive(el);
+            ts.begin();
 
             el.run();
         }

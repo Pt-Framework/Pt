@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2004-2007 Marc Boris Duerner
- * Copyright (C) 2005-2007 Aloysius Indrayanto
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,11 +25,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_System_SystemError_h
 #define Pt_System_SystemError_h
 
 #include <Pt/System/Api.h>
-#include <Pt/SourceInfo.h>
 #include <stdexcept>
 #include <string>
 
@@ -51,23 +50,8 @@ class PT_SYSTEM_API SystemError : public std::runtime_error
         {}
 };
 
-/** @brief Thrown, when a shared library could not be loaded
-*/
-/*class PT_SYSTEM_API OpenLibraryFailed : public SystemError
-{
-    public:
-        //! @brief Constructs from a message string and source info
-        OpenLibraryFailed(const std::string& msg, const Pt::SourceInfo& si);
-
-        //! @brief Destructor
-        ~OpenLibraryFailed() throw()
-        {}
-};*/
-
-
-
 } // namespace System
 
 } // namespace Pt
 
-#endif
+#endif // Pt_System_SystemError_h

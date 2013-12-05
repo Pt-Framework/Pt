@@ -38,8 +38,7 @@ namespace Pt {
 
 namespace System {
 
-class SerialChannel : public Pt::Connectable
-                    , public LogChannel
+class SerialChannel : public LogChannel
 {
     public:
         SerialChannel();
@@ -47,8 +46,6 @@ class SerialChannel : public Pt::Connectable
         ~SerialChannel();
 
     protected:
-        void processEvent(const Pt::Event& ev);
-
         virtual void onOpen(const std::string& url);
 
         virtual void onClose();
@@ -63,7 +60,4 @@ class SerialChannel : public Pt::Connectable
 
 } // namespace Pt
 
-
-#endif
-
-
+#endif // Pt_System_SerialChannel_h

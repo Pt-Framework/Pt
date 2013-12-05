@@ -207,7 +207,7 @@ class ServerImpl : public Connectable
         ~ServerImpl();
 
         System::EventLoop* loop()
-        { return _serverSocket.parent(); }
+        { return _serverSocket.loop(); }
 
         void setActive(System::EventLoop& eventLoop)
         { _serverSocket.setActive(eventLoop); }

@@ -190,7 +190,7 @@ TimerQueue::~TimerQueue()
 
 void TimerQueue::addTimer(Timer& timer)
 {
-    if( timer.started() )
+    if( timer.isStarted() )
     {
         TimerMap::value_type elem(timer.finished(), &timer);
         _timers.insert(elem);

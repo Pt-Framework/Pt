@@ -25,6 +25,10 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
+#ifndef Pt_System_Uri_h
+#define Pt_System_Uri_h
+
 #include <Pt/System/Api.h>
 #include <string>
 #include <stdexcept>
@@ -33,7 +37,7 @@ namespace Pt {
 
 namespace System {
 
-class PT_SYSTEM_API InvalidUri : public std::invalid_argument
+class PT_SYSTEM_API InvalidUri : public std::runtime_error
 {
     public:
         InvalidUri(const std::string& uri);
@@ -50,73 +54,78 @@ class PT_SYSTEM_API InvalidUri : public std::invalid_argument
 
 class PT_SYSTEM_API Uri
 {
-  bool _ipv6;
-  std::string _protocol;
-  std::string _user;
-  std::string _password;
-  std::string _host;
-  unsigned short int _port;
-  std::string _path;
-  std::string _query;
-  std::string _fragment;
+    public:
+        Uri()
+        : _port(0)
+        , _ipv6(false)
+        { }
 
-public:
-  Uri()  { }
+        Uri(const std::string& str);
 
-  Uri(const std::string& str);
+        void protocol(const std::string& protocol)
+        { _protocol = protocol; }
 
-  void protocol(const std::string& protocol)
-    { _protocol = protocol; }
+        const std::string& protocol() const
+        { return _protocol; }
 
-  const std::string& protocol() const
-    { return _protocol; }
+        void user(const std::string& user)
+        { _user = user; }
 
-  void user(const std::string& user)
-    { _user = user; }
+        const std::string& user() const
+        { return _user; }
 
-  const std::string& user() const
-    { return _user; }
+        void password(const std::string& password)
+        { _password = password; }
 
-  void password(const std::string& password)
-    { _password = password; }
+        const std::string& password() const
+        { return _password; }
 
-  const std::string& password() const
-    { return _password; }
+        void host(const std::string& host)
+        { _host = host; }
 
-  void host(const std::string& host)
-    { _host = host; }
+        const std::string& host() const
+        { return _host; }
 
-  const std::string& host() const
-    { return _host; }
+        void port(unsigned short int p)
+        { _port = p; }
 
-  void port(unsigned short int p)
-    { _port = p; }
+        unsigned short int port() const
+        { return _port; }
 
-  unsigned short int port() const
-    { return _port; }
+        void path(const std::string& path)
+        { _path = path; }
 
-  void path(const std::string& path)
-    { _path = path; }
+        const std::string& path() const
+        { return _path; }
 
-  const std::string& path() const
-    { return _path; }
+        void query(const std::string& query)
+        { _query = query; }
 
-  void query(const std::string& query)
-    { _query = query; }
+        const std::string& query() const
+        { return _query; }
 
-  const std::string& query() const
-    { return _query; }
+        void fragment(const std::string& fragment)
+        { _fragment = fragment; }
 
-  void fragment(const std::string& fragment)
-    { _fragment = fragment; }
+        const std::string& fragment() const
+        { return _fragment; }
 
-  const std::string& fragment() const
-    { return _fragment; }
+        std::string str() const;
 
-  std::string str() const;
+    private:
+        std::string _protocol;
+        std::string _user;
+        std::string _password;
+        std::string _host;
+        unsigned short int _port;
+        bool _ipv6;
+        std::string _path;
+        std::string _query;
+        std::string _fragment;
 };
 
 } // namespace System
 
 } // namespace Pt
 
+#endif // Pt_System_Uri_h

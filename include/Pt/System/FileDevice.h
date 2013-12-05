@@ -45,11 +45,17 @@ class PT_SYSTEM_API FileDevice : public IODevice
     public:
         FileDevice();
 
+        FileDevice(const std::string& path, std::ios::openmode mode);
+
         FileDevice(const char* path, std::ios::openmode mode);
 
         ~FileDevice();
 
+        void open(const std::string& path, std::ios::openmode mode);
+
         void open(const char* path, std::ios::openmode mode);
+
+        void beginOpen(const std::string& path, std::ios::openmode mode);
 
         void beginOpen(const char* path, std::ios::openmode mode);
 
@@ -64,13 +70,13 @@ class PT_SYSTEM_API FileDevice : public IODevice
         { return _opened; }
 
     protected:
-        size_t onBeginRead(char* buffer, size_t n, bool& eof);
+        size_t onBeginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
 
-        size_t onEndRead(char* buffer, size_t n, bool& eof);
+        size_t onEndRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
 
-        size_t onBeginWrite(const char* buffer, size_t n);
+        size_t onBeginWrite(EventLoop& loop, const char* buffer, size_t n);
 
-        size_t onEndWrite(const char* buffer, size_t n);
+        size_t onEndWrite(EventLoop& loop, const char* buffer, size_t n);
 
         void onClose();
 

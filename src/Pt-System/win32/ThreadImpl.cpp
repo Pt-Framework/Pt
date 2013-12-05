@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 by PTV AG
+ * Copyright (C) 2006-2008 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,13 +33,6 @@ namespace Pt {
 
 namespace System {
 
-ThreadImpl::~ThreadImpl()
-{
-    this->close();
-    delete _cb;
-}
-
-
 void ThreadImpl::init(const Callable<void>& cb)
 {
     delete _cb;
@@ -70,7 +63,7 @@ void ThreadImpl::start()
     if(_handle == NULL) 
     {
         _id = 0;
-        throw SystemError( PT_ERROR_MSG("Thread creation failed") );
+        throw SystemError("Thread creation failed");
     }
 }
 
@@ -79,16 +72,7 @@ void ThreadImpl::join()
 {
     DWORD status = ::WaitForSingleObject(_handle, INFINITE);
     if( status != WAIT_OBJECT_0 )
-        throw SystemError( PT_ERROR_MSG("Could not join thread") );
-
-    _id = 0;
-}
-
-
-void ThreadImpl::terminate()
-{
-    if( ! TerminateThread(_handle, 0) )
-        throw SystemError( PT_ERROR_MSG("Could not kill thread.") );
+        throw SystemError("Could not join thread");
 
     _id = 0;
 }

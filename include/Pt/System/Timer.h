@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2006-2013 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,131 +25,134 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_System_Timer_h
 #define Pt_System_Timer_h
 
+#include <Pt/System/Api.h>
 #include <Pt/Signal.h>
 #include <Pt/Timespan.h>
-#include <Pt/System/Api.h>
-#include <vector>
 #include <cstddef>
 
 namespace Pt {
 
 namespace System {
 
-    /** @brief Notifies clients in constant intervals
+/** @brief Notifies clients in constant intervals
 
-        Timers can be used to be notified if a time interval expires. It
-        usually works with an event loop, where the Timer
-        needs to be registered. Timers send the timeout signal
-        in given intervals, to which the interested clients connect. The
-        interval can be changed at any time and timers
-        can switch between an active and inactive state.
-        The following code calls the function onTimer every second:
-        @code
-        void onTimer()
-        {
-            std::cerr << "Time out!\n";
-        }
-
-        int main()
-        {
-            Pt::System::EventLoop loop;
-  
-            Pt::System::Timer timer;
-            timer.timeout() += Pt::slot(onTimer);
-            timer.setActive(loop);
-            timer.start(1000);
-
-            loop.run();
-            return 0;
-        }
-        @endcode
-    */
-    class PT_SYSTEM_API Timer
+    Timers can be used to be notified if a time interval expires. It
+    usually works with an event loop, where the Timer
+    needs to be registered. Timers send the timeout signal
+    in given intervals, to which the interested clients connect. The
+    interval can be changed at any time and timers
+    can switch between an active and inactive state.
+    The following code calls the function onTimer every second:
+    @code
+    void onTimer()
     {
-        class Sentry;
+        std::cerr << "Time out!\n";
+    }
 
-        public:
-            /** @brief Default constructor
+    int main()
+    {
+        Pt::System::EventLoop loop;
+  
+        Pt::System::Timer timer;
+        timer.timeout() += Pt::slot(onTimer);
+        timer.setActive(loop);
+        timer.start(1000);
 
-                Constructs an inactive timer.
-            */
-            Timer();
+        loop.run();
+        return 0;
+    }
+    @endcode
+*/
+class PT_SYSTEM_API Timer
+{
+    class Sentry;
 
-            /** @brief Destructor
+    public:
+        /** @brief Default constructor
 
-                The destructor sends the destroyed signal.
-            */
-            ~Timer();
+            Constructs an inactive timer.
+        */
+        Timer();
 
-            EventLoop* parent()
-            { return _loop; }
+        /** @brief Destructor
 
-            void setActive(EventLoop& loop);
+            The destructor sends the destroyed signal.
+        */
+        ~Timer();
 
-            void detach();
+        EventLoop* parent()
+        { return _loop; }
 
-            /** @brief Returs true if timer was started
-            */
-            bool started() const;
+        EventLoop* loop()
+        { return _loop; }
 
-            /** @brief Returns the current timer interval
+        void setActive(EventLoop& loop);
 
-                Returns the current interval of the timer in milliseconds.
-            */
-            std::size_t interval() const;
+        void detach();
 
-            /** @brief Starts the timer
+        /** @brief Returs true if timer was started
+        */
+        bool isStarted() const;
 
-                Start a timer from the moment this method is called. The
-                Timer needs to be registered with an event loop,
-                otherwise the timeout signal will not be sent.
+        /** @brief Returns the current timer interval
 
-                @param interval Timeout interval in milliseconds
-            */
-            void start(std::size_t interval);
+            Returns the current interval of the timer in milliseconds.
+        */
+        std::size_t interval() const;
 
-            /** @brief Stops the timer
+        /** @brief Starts the timer
 
-                If the Timer is registered with an event loop,
-                the timout signal will not be sent anymore.
-            */
-            void stop();
+            Start a timer from the moment this method is called. The
+            Timer needs to be registered with an event loop,
+            otherwise the timeout signal will not be sent.
 
-            /** @brief Update the timer
+            @param interval Timeout interval in milliseconds
+        */
+        void start(std::size_t interval);
 
-                This method is supposed to be called by the
-                event loop. If the interval timeout is passed the Timer
-                will send the timeout signal and return true, otherwise
-                internal times are updated and false is returned.
-            */
-            bool update();
+        /** @brief Stops the timer
 
-            bool update(const Timespan& now);
+            If the Timer is registered with an event loop,
+            the timout signal will not be sent anymore.
+        */
+        void stop();
 
-            /** @brief Notifies about interval timeouts
+        /** @brief Update the timer
 
-                This signal is sent if the interval time has expired.
-            */
-            Signal<>& timeout()
-            { return _timeout; }
+            This method is supposed to be called by the
+            event loop. If the interval timeout is passed the Timer
+            will send the timeout signal and return true, otherwise
+            internal times are updated and false is returned.
+        */
+        bool update();
 
-            const Timespan& finished() const
-            { return _finished; }
+        bool update(const Timespan& now);
 
-        private:
-            Sentry*     _sentry;
-            EventLoop*  _loop;
-            std::size_t _interval;
-            Timespan    _finished;
-            Signal<>    _timeout;
-            void*       _reserved;
-    };
+        /** @brief Notifies about interval timeouts
 
-}
+            This signal is sent if the interval time has expired.
+        */
+        Signal<>& timeout()
+        { return _timeout; }
 
-}
+        const Timespan& finished() const
+        { return _finished; }
 
-#endif
+    private:
+        Sentry*     _sentry;
+        EventLoop*  _loop;
+        std::size_t _interval;
+        Timespan    _finished;
+        Signal<>    _timeout;
+        void*       _reserved;
+};
+
+} // namespace System
+
+} // namespace Pt
+
+#endif // Pt_System_Timer_h

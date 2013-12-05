@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 by PTV AG
+ * Copyright (C) 2006-2008 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "ThreadImpl.h"
 #include <Pt/System/SystemError.h>
 #include <chrono>
@@ -45,17 +46,6 @@ void ThreadImplFunction(const Callable<void>& cb)
     }
 }
 
-ThreadImpl::~ThreadImpl()
-{
-    if (_thread != 0) 
-    {
-        delete _thread;
-        _thread = 0;
-    }
-    
-    delete _cb;
-}
-
 
 void ThreadImpl::init(const Callable<void>& cb)
 {
@@ -69,12 +59,6 @@ void ThreadImpl::start()
     try
     {
         _thread = new std::thread( &ThreadImplFunction, std::ref(*_cb) );
-
-		if(_detach)
-		{
-			_thread->detach();
-			_detach = false;
-		}
     }
     catch(const std::system_error&)
     {
@@ -87,8 +71,6 @@ void ThreadImpl::detach()
 { 
     if(_thread)
         _thread->detach();
-	else
-		_detach = true;
 }
 
 

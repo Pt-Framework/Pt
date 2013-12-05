@@ -35,7 +35,7 @@
 namespace Pt {
 
 InvalidDate::InvalidDate()
-: std::invalid_argument("Invalid date")
+: std::runtime_error("Invalid date")
 {
 }
 

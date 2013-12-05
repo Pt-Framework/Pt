@@ -46,7 +46,7 @@ class SerializationInfo;
 
     @ingroup DateTime
 */
-class PT_API InvalidTime : public std::invalid_argument
+class PT_API InvalidTime : public std::runtime_error
 {
     public:
         //! @brief Constructor.

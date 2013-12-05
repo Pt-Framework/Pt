@@ -107,19 +107,19 @@ class PT_NET_API TcpSocket : public System::IODevice
         virtual bool onRun();
 
         // inherit doc
-        virtual size_t onBeginRead(char* buffer, size_t n, bool& eof);
+        virtual size_t onBeginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
 
         // inherit doc
-        virtual size_t onEndRead(char* buffer, size_t n, bool& eof);
+        virtual size_t onEndRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
 
         // inherit doc
         virtual size_t onRead(char* buffer, size_t count, bool& eof);
 
         // inherit doc
-        virtual size_t onBeginWrite(const char* buffer, size_t n);
+        virtual size_t onBeginWrite(System::EventLoop& loop, const char* buffer, size_t n);
 
         // inherit doc
-        virtual size_t onEndWrite(const char* buffer, size_t n);
+        virtual size_t onEndWrite(System::EventLoop& loop, const char* buffer, size_t n);
 
         // inherit doc
         virtual size_t onWrite(const char* buffer, size_t count);

@@ -67,15 +67,16 @@ bool UdpSocket::beginBind(const std::string& ipaddr, unsigned short int port, co
 
 bool UdpSocket::beginBind(const Endpoint& addrinfo, const Options& o)
 {
-    if( ! isActive() )
-        throw std::logic_error( PT_ERROR_MSG("socket not active") );
+    System::EventLoop* loop = this->loop();
+    if( ! loop )
+        throw std::logic_error("socket not active");
 
-    bool ret = _impl->beginBind(*parent(), addrinfo, o);
+    bool ret = _impl->beginBind(*loop, addrinfo, o);
     _binding = true;
     
     if(ret)
     {
-        this->setReady();
+        loop->setReady(*this);
     }
 
     return ret;
@@ -89,7 +90,7 @@ void UdpSocket::endBind()
         if(_binding)
         {
             _binding = false;
-            _impl->endBind( *parent() );
+            _impl->endBind( *loop() );
             this->setEof(false);
         }
     }
@@ -123,15 +124,16 @@ bool UdpSocket::beginConnect(const std::string& ipaddr, unsigned short int port,
 
 bool UdpSocket::beginConnect(const Endpoint& addrinfo, const Options& opts)
 {
-    if( ! isActive() )
+    System::EventLoop* loop = this->loop();
+    if( ! loop )
         throw std::logic_error( PT_ERROR_MSG("socket not active") );
 
-    bool ret = _impl->beginConnect(*parent(), addrinfo, opts);
+    bool ret = _impl->beginConnect(*loop, addrinfo, opts);
     _connecting = true;
     
     if(ret)
     {
-        this->setReady();
+        loop->setReady(*this);
     }
 
     return ret;
@@ -145,7 +147,7 @@ void UdpSocket::endConnect()
         if(_connecting)
         {
             _connecting = false;
-            _impl->endConnect( *parent() );
+            _impl->endConnect( *loop() );
             this->setEof(false);
         }
     }
@@ -235,7 +237,7 @@ bool UdpSocket::onRun()
 {
     if( _connecting )
     {
-        if( this->isConnected() || _impl->runConnect( *parent() ) )
+        if( this->isConnected() || _impl->runConnect( *loop() ) )
         {
             connected().send(*this);
             return true;
@@ -246,7 +248,7 @@ bool UdpSocket::onRun()
 
     if( _binding )
     {
-        if( this->isBound() || _impl->runBind( *parent() ) )
+        if( this->isBound() || _impl->runBind( *loop() ) )
         {
             bound().send(*this);
             return true;
@@ -257,7 +259,7 @@ bool UdpSocket::onRun()
 
     if( this->isReading() )
     {
-        if( _ravail || _impl->runRead( *parent() ) )
+        if( _ravail || _impl->runRead( *loop() ) )
         {
             inputReady().send(*this);
             return true;
@@ -266,7 +268,7 @@ bool UdpSocket::onRun()
 
     if( this->isWriting() )
     {
-        if( _wavail || _impl->runWrite( *parent() ) )
+        if( _wavail || _impl->runWrite( *loop() ) )
         {
             outputReady().send(*this);
             return true;
@@ -277,18 +279,15 @@ bool UdpSocket::onRun()
 }
 
 
-size_t UdpSocket::onBeginRead(char* buffer, size_t n, bool& eof)
+size_t UdpSocket::onBeginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
-    //if( ! _impl->isConnected() && ! _impl->isBound() )
-    //    throw System::IOError("socket not connected");
-
-    return _impl->beginRead(*parent(), buffer, n, eof);
+    return _impl->beginRead(loop, buffer, n, eof);
 }
 
 
-size_t UdpSocket::onEndRead(char* buffer, size_t n, bool& eof)
+size_t UdpSocket::onEndRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
-    return _impl->endRead(*parent(), buffer, n, eof);
+    return _impl->endRead(loop, buffer, n, eof);
 }
 
 
@@ -298,18 +297,15 @@ size_t UdpSocket::onRead(char* buffer, size_t count, bool& eof)
 }
 
 
-size_t UdpSocket::onBeginWrite(const char* buffer, size_t n)
+size_t UdpSocket::onBeginWrite(System::EventLoop& loop, const char* buffer, size_t n)
 {
-    //if( ! _impl->isConnected() && ! _impl->isBound() )
-    //    throw System::IOError("socket not connected");
-
-    return _impl->beginWrite(*parent(), buffer, n);
+    return _impl->beginWrite(loop, buffer, n);
 }
 
 
-size_t UdpSocket::onEndWrite(const char* buffer, size_t n)
+size_t UdpSocket::onEndWrite(System::EventLoop& loop, const char* buffer, size_t n)
 {
-    return _impl->endWrite(*parent(), buffer, n);
+    return _impl->endWrite(loop, buffer, n);
 }
 
 
@@ -321,9 +317,10 @@ size_t UdpSocket::onWrite(const char* buffer, size_t count)
 
 void UdpSocket::onCancel()
 {
-    if( this->isActive() )
+    System::EventLoop* loop = this->loop();
+    if( loop )
     {
-        _impl->cancel( *parent() );
+        _impl->cancel(*loop);
         _connecting = false;
         _binding = false;
     }

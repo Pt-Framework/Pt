@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2004-2007 Marc Boris Duerner
- * Copyright (C) 2005-2007 Aloysius Indrayanto
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +25,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/System/SystemError.h"
+
+#include <Pt/System/SystemError.h>
 
 namespace Pt {
 
@@ -41,14 +41,6 @@ SystemError::SystemError(const char* what)
 : std::runtime_error(what)
 { }
 
-
-/*OpenLibraryFailed::OpenLibraryFailed(const std::string& msg, const Pt::SourceInfo& si)
-: SystemError(msg, si)
-{ }
-*/
-
-
-
 } // namespace System
 
-} // namespace Ptv
+} // namespace Pt

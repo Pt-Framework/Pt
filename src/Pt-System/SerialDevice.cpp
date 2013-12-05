@@ -48,6 +48,14 @@ SerialDevice::SerialDevice( const std::string& file, std::ios::openmode mode)
 }
 
 
+SerialDevice::SerialDevice( const char* file, std::ios::openmode mode)
+: _impl( 0 )
+{
+    _impl = new SerialDeviceImpl(*this);
+    this->open( file, mode);
+}
+
+
 SerialDevice::~SerialDevice()
 {
     try
@@ -68,14 +76,10 @@ void SerialDevice::open( const std::string& file, std::ios::openmode mode)
 }
 
 
-void SerialDevice::onCancel()
+void SerialDevice::open( const char* file, std::ios::openmode mode)
 {
-    if( isActive() )
-    {
-        _impl->cancel( *parent() );
-    }
-
-    IODevice::onCancel();
+    this->close();
+    _impl->open( file, mode );
 }
 
 
@@ -85,27 +89,27 @@ void SerialDevice::onSetTimeout(size_t timeout)
 }
 
 
-size_t SerialDevice::onBeginRead(char* buffer, size_t n, bool& eof)
+size_t SerialDevice::onBeginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
-    return _impl->beginRead(*parent(), buffer, n, eof);
+    return _impl->beginRead(loop, buffer, n, eof);
 }
 
 
-size_t SerialDevice::onEndRead(char* buffer, size_t n, bool& eof)
+size_t SerialDevice::onEndRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
-    return _impl->endRead(*parent(), buffer, n, eof);
+    return _impl->endRead(loop, buffer, n, eof);
 }
 
 
-size_t SerialDevice::onBeginWrite(const char* buffer, size_t n)
+size_t SerialDevice::onBeginWrite(EventLoop& loop, const char* buffer, size_t n)
 {
-    return _impl->beginWrite(*parent(), buffer, n);
+    return _impl->beginWrite(loop, buffer, n);
 }
 
 
-size_t SerialDevice::onEndWrite(const char* buffer, size_t n)
+size_t SerialDevice::onEndWrite(EventLoop& loop, const char* buffer, size_t n)
 {
-    return _impl->endWrite(*parent(), buffer, n);
+    return _impl->endWrite(loop, buffer, n);
 }
 
 
@@ -157,7 +161,7 @@ SerialDevice::Parity SerialDevice::parity() const
 }
 
 
-void SerialDevice::setFlowControl( FlowControl flowControl )
+void SerialDevice::setFlowControl(FlowControl flowControl)
 {
     _impl->setFlowControl(  flowControl );
 }
@@ -168,7 +172,7 @@ SerialDevice::FlowControl SerialDevice::flowControl() const
     return _impl->flowControl();
 }
 
-bool SerialDevice::setSignal(SerialDevice::SerialLine signal)
+bool SerialDevice::setSignal(Signal signal)
 {
     return _impl->setSignal(signal);
 }
@@ -198,11 +202,23 @@ void SerialDevice::onSync() const
 }
 
 
+void SerialDevice::onCancel()
+{
+    EventLoop* loop = this->loop();
+    if( loop )
+    {
+        _impl->cancel(*loop);
+    }
+
+    IODevice::onCancel();
+}
+
+
 bool SerialDevice::onRun()
 {
     if( this->isReading() )
     {
-        if( _ravail || isEof() || _impl->runRead( *parent() ) )
+        if( _ravail || isEof() || _impl->runRead( *loop() ) )
         {
             inputReady().send(*this);
             return true;
@@ -211,7 +227,7 @@ bool SerialDevice::onRun()
 
     if( this->isWriting() )
     {
-        if( _wavail || _impl->runWrite( *parent() ) )
+        if( _wavail || _impl->runWrite( *loop() ) )
         {
             outputReady().send(*this);
             return true;

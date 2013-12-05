@@ -139,17 +139,18 @@ bool TcpSocket::beginConnect(const std::string& ipaddr, unsigned short int port,
 
 bool TcpSocket::beginConnect(const Endpoint& addrinfo, const Options&)
 {
-    if( ! isActive() )
+    System::EventLoop* loop = this->loop();
+    if( ! loop )
         throw std::logic_error( PT_ERROR_MSG("socket not active") );
 
     this->close();
 
-    bool ret = _impl->beginConnect(*parent(), addrinfo);
+    bool ret = _impl->beginConnect(*loop, addrinfo);
     _connecting = true;
     
     if(ret)
     {
-        this->setReady();
+        loop->setReady(*this);
     }
 
     return ret;
@@ -163,7 +164,7 @@ void TcpSocket::endConnect()
         if(_connecting)
         {
             _connecting = false;
-            _impl->endConnect( *parent() );
+            _impl->endConnect( *loop() );
         }
     }
     catch (...)
@@ -196,7 +197,7 @@ bool TcpSocket::onRun()
 {
     if( _connecting )
     {
-        if( this->isConnected() || _impl->runConnect( *parent() ) )
+        if( this->isConnected() || _impl->runConnect( *loop() ) )
         {
             connected().send(*this);
             return true;
@@ -207,7 +208,7 @@ bool TcpSocket::onRun()
 
     if( this->isReading() )
     {
-        if( _ravail || isEof() || _impl->runRead( *parent() ) )
+        if( _ravail || isEof() || _impl->runRead( *loop() ) )
         {
             inputReady().send(*this);
             return true;
@@ -216,7 +217,7 @@ bool TcpSocket::onRun()
 
     if( this->isWriting() )
     {
-        if( _wavail || _impl->runWrite( *parent() ) )
+        if( _wavail || _impl->runWrite( *loop() ) )
         {
             outputReady().send(*this);
             return true;
@@ -227,15 +228,15 @@ bool TcpSocket::onRun()
 }
 
 
-size_t TcpSocket::onBeginRead(char* buffer, size_t n, bool& eof)
+size_t TcpSocket::onBeginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
-    return _impl->beginRead(*parent(), buffer, n, eof);
+    return _impl->beginRead(loop, buffer, n, eof);
 }
 
 
-size_t TcpSocket::onEndRead(char* buffer, size_t n, bool& eof)
+size_t TcpSocket::onEndRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
-    return _impl->endRead(*parent(), buffer, n, eof);
+    return _impl->endRead(loop, buffer, n, eof);
 }
 
 
@@ -245,15 +246,15 @@ size_t TcpSocket::onRead(char* buffer, size_t count, bool& eof)
 }
 
 
-size_t TcpSocket::onBeginWrite(const char* buffer, size_t n)
+size_t TcpSocket::onBeginWrite(System::EventLoop& loop, const char* buffer, size_t n)
 {
-    return _impl->beginWrite(*parent(), buffer, n);
+    return _impl->beginWrite(loop, buffer, n);
 }
 
 
-size_t TcpSocket::onEndWrite(const char* buffer, size_t n)
+size_t TcpSocket::onEndWrite(System::EventLoop& loop, const char* buffer, size_t n)
 {
-    return _impl->endWrite(*parent(), buffer, n);
+    return _impl->endWrite(loop, buffer, n);
 }
 
 
@@ -265,9 +266,10 @@ size_t TcpSocket::onWrite(const char* buffer, size_t count)
 
 void TcpSocket::onCancel()
 {
-    if( isActive() )
+    System::EventLoop* loop = this->loop();
+    if( loop )
     {
-        _impl->cancel( *parent() );
+        _impl->cancel(*loop);
         _connecting = false;
     }
 

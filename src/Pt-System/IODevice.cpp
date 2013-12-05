@@ -27,13 +27,15 @@
  */
 
 #include <Pt/System/IODevice.h>
+#include <Pt/System/EventLoop.h>
 
 namespace Pt {
 
 namespace System {
 
 IODevice::IODevice()
-: _eof(false)
+: _loop(0)
+, _eof(false)
 , _rbuf(0)
 , _rbuflen(0)
 , _ravail(0)
@@ -65,16 +67,17 @@ void IODevice::setTimeout(std::size_t timeout)
 
 void IODevice::beginRead(char* buffer, std::size_t n)
 {
-    if( ! isActive() )
+    EventLoop* loop = this->loop();
+    if( ! loop )
         throw std::logic_error("I/O device not active");
 
     if (_rbuf || _wbuf)
         throw IOPending("I/O operation pending");
 
-    std::size_t r = this->onBeginRead(buffer, n, _eof);
+    std::size_t r = this->onBeginRead(*loop, buffer, n, _eof);
 
     if(r > 0 || _eof)
-        this->setReady(); 
+        loop->setReady(*this); 
 
     _rbuf = buffer;
     _rbuflen = n;
@@ -100,7 +103,7 @@ std::size_t IODevice::endRead()
 
     try
     {
-        n = this->onEndRead(_rbuf, _rbuflen, _eof);
+        n = this->onEndRead(*_loop, _rbuf, _rbuflen, _eof);
     }
     catch (...)
     {
@@ -129,16 +132,17 @@ std::size_t IODevice::read(char* buffer, std::size_t n)
 
 void IODevice::beginWrite(const char* buffer, std::size_t n)
 {
-    if( ! isActive() )
+    EventLoop* loop = this->loop();
+    if( ! loop )
         throw std::logic_error("I/O device not active");
 
     if (_wbuf || _rbuf)
         throw IOPending("I/O operation pending");
 
-    std::size_t r = this->onBeginWrite(buffer, n);
+    std::size_t r = this->onBeginWrite(*loop, buffer, n);
 
     if(r > 0)
-        this->setReady(); 
+        loop->setReady(*this); 
 
     _wbuf = buffer;
     _wbuflen = n;
@@ -164,7 +168,7 @@ std::size_t IODevice::endWrite()
 
     try
     {
-        n = onEndWrite(_wbuf, _wbuflen);
+        n = onEndWrite(*_loop, _wbuf, _wbuflen);
     }
     catch (...)
     {
@@ -188,18 +192,6 @@ std::size_t IODevice::write(const char* buffer, std::size_t n)
         throw IOPending("I/O operation pending");
 
     return this->onWrite(buffer, n);
-}
-
-
-void IODevice::onCancel()
-{
-    _rbuf = 0;
-    _rbuflen = 0;
-    _ravail = 0;
-
-    _wbuf = 0;
-    _wbuflen = 0;
-    _wavail = 0;
 }
 
 
@@ -246,6 +238,30 @@ bool IODevice::isEof() const
 void IODevice::setEof(bool eof)
 { 
     _eof = eof; 
+}
+
+
+void IODevice::onAttach(EventLoop& loop)
+{ 
+    _loop = &loop;
+}
+
+
+void IODevice::onDetach(EventLoop& loop)
+{ 
+    _loop = 0; 
+}
+
+
+void IODevice::onCancel()
+{
+    _rbuf = 0;
+    _rbuflen = 0;
+    _ravail = 0;
+
+    _wbuf = 0;
+    _wbuflen = 0;
+    _wavail = 0;
 }
 
 } // namespace System

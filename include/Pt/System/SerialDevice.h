@@ -26,6 +26,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_SYSTEM_SERIALDEVICE_H
 #define PT_SYSTEM_SERIALDEVICE_H
 
@@ -121,16 +122,16 @@ class PT_SYSTEM_API SerialDevice : public IODevice
             TwoStopBits
         };
 
-        enum SerialLine
+        enum Signal
         {
-            CLR_BREAK,
-            CLR_DTR,
-            CLR_RTS,
-            SET_BREAK,
-            SET_DTR,
-            SET_RTS,
-            SET_XOFF,
-            SET_XON,
+            ClearBreak,
+            ClearDtr,
+            ClearRts,
+            SetBreak,
+            SetDtr,
+            SetRts,
+            SetXOff,
+            SetXOn,
         };
 
         //! Default constructor.
@@ -138,14 +139,22 @@ class PT_SYSTEM_API SerialDevice : public IODevice
 
         /** @brief Constructs a serial device and open the specified device file
          */
-        SerialDevice( const std::string& file, std::ios::openmode mode);
+        SerialDevice(const std::string& file, std::ios::openmode mode);
+
+        /** @brief Constructs a serial device and open the specified device file
+         */
+        SerialDevice(const char* file, std::ios::openmode mode);
 
         //! @brief Destructor
         virtual ~SerialDevice();
 
         /** @brief Open the specified device file
          */
-        void open( const std::string& file, std::ios::openmode mode);
+        void open(const std::string& file, std::ios::openmode mode);
+
+        /** @brief Open the specified device file
+         */
+        void open(const char* file, std::ios::openmode mode);
 
         //! @brief Sets the baud rate
         void setBaudRate( unsigned rate );
@@ -177,34 +186,35 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         //! @brief Gets the current flow control kind
         FlowControl flowControl() const;
 
-        bool setSignal(SerialDevice::SerialLine signal);
+        //! @brief Triggers a signal.
+        bool setSignal(Signal signal);
 
     protected:
         void onClose();
 
         void onSetTimeout(size_t timeout);
 
-        size_t onBeginRead(char* buffer, size_t n, bool& eof);
+        size_t onBeginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
 
-        size_t onEndRead(char* buffer, size_t n, bool& eof);
+        size_t onEndRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
 
-        size_t onBeginWrite(const char* buffer, size_t n);
+        size_t onBeginWrite(EventLoop& loop, const char* buffer, size_t n);
 
-        size_t onEndWrite(const char* buffer, size_t n);
+        size_t onEndWrite(EventLoop& loop, const char* buffer, size_t n);
 
         size_t onRead(char* buffer, size_t count, bool& eof);
 
         size_t onWrite(const char* buffer, size_t count);
 
-        bool onRun();
+        void onSync() const;
 
         void onCancel();
 
-        void onSync() const;
+        bool onRun();
 };
 
-} //namespace System
+} // namespace System
 
-} //namespace Pt
+} // namespace Pt
 
-#endif
+#endif // PT_SYSTEM_SERIALDEVICE_H

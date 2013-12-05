@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2006-2013 Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -23,10 +25,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/System/Timer.h"
-#include "Pt/System/Clock.h"
-#include "Pt/System/EventLoop.h"
-#include "Pt/System/Logger.h"
+
+#include <Pt/System/Timer.h>
+#include <Pt/System/Clock.h>
+#include <Pt/System/EventLoop.h>
+#include <Pt/System/Logger.h>
 #include <limits>
 #include <cassert>
 
@@ -99,7 +102,7 @@ Timer::~Timer()
 }
 
 
-bool Timer::started() const
+bool Timer::isStarted() const
 {
     return ! _finished.isNull();
 }
@@ -113,7 +116,7 @@ std::size_t Timer::interval() const
 
 void Timer::start(std::size_t interval)
 {
-    if( started() )
+    if( isStarted() )
         this->stop();
 
     _interval = interval;
@@ -153,7 +156,7 @@ void Timer::stop()
 
 bool Timer::update()
 {
-    if(started() == false)
+    if(isStarted() == false)
         return false;
 
     Timespan now = Clock::getSystemTicks();
@@ -165,7 +168,7 @@ bool Timer::update(const Timespan& now)
 {
     log_trace("Timer::update " << now.toUSecs() << " usecs");
 
-    if(started() == false)
+    if(isStarted() == false)
         return false;
 
     bool hasElapsed = now >= _finished;
@@ -173,7 +176,7 @@ bool Timer::update(const Timespan& now)
 
     Timer::Sentry sentry(_sentry);
 
-    while( started() && now >= _finished )
+    while( isStarted() && now >= _finished )
     {
         log_debug("executing timer: " << _finished.toUSecs() << " usecs");
 
@@ -227,7 +230,6 @@ void Timer::detach()
     _loop = 0;
 }
 
-}
+} // namespace System
 
-}
-
+} // namespace Pt

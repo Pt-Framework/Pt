@@ -25,12 +25,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_SELECTABLELIST_H
 #define PT_SELECTABLELIST_H
 
-#include "Pt/System/Api.h"
-#include "Pt/System/Selectable.h"
-#include <iostream>
+#include <Pt/System/Api.h>
+#include <Pt/System/Selectable.h>
 #include <cassert>
 
 namespace Pt {
@@ -86,6 +86,12 @@ class SelectableList : private Selectable
         }
 
     protected:
+        virtual void onAttach(EventLoop& loop)
+        {}
+
+        virtual void onDetach(EventLoop& loop)
+        {}
+
         virtual void onCancel()
         { }
 
@@ -131,5 +137,4 @@ inline void link(Selectable& s, SelectableList& list)
 
 } // namespace Pt
 
-#endif
-
+#endif // PT_SELECTABLELIST_H

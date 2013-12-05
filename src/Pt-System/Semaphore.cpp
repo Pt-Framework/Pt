@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 by Marc Boris Duerner
+ * Copyright (C) 2005-2013 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,8 +25,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "SemaphoreImpl.h"
-#include "Pt/System/Semaphore.h"
+#include <Pt/System/Semaphore.h>
 
 namespace Pt {
 

@@ -31,6 +31,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
+#include <stdexcept>
 #include <cstddef>
 
 struct pt_regexp;

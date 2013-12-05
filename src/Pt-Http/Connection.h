@@ -38,6 +38,7 @@
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/System/IOBuffer.h>
 #include <Pt/System/Timer.h>
+#include <Pt/System/EventLoop.h>
 #include <Pt/Signal.h>
 #include <Pt/Connectable.h>
 
@@ -69,13 +70,23 @@ class Socket : public Net::TcpSocket
         void setInputPipelined()
         { 
             _input = true;
-            this->setReady(); 
+
+            System::EventLoop* loop = this->loop();
+            if( ! loop )
+                throw std::logic_error("socket not active");
+            
+            loop->setReady(*this); 
         }
 
         void setOutputPipelined()
         { 
             _output = true;
-            this->setReady(); 
+            
+            System::EventLoop* loop = this->loop();
+            if( ! loop )
+                throw std::logic_error("socket not active");
+            
+            loop->setReady(*this);  
         }
 
         Signal<>& outputPipelined()
@@ -185,7 +196,7 @@ class Connection : public Connectable
         void setActive(System::EventLoop& loop);
 
         System::EventLoop* loop() const
-        { return _socket.parent(); }
+        { return _socket.loop(); }
 
         void setTimeout(std::size_t timeout)
         { 

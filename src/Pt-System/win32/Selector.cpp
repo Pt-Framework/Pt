@@ -41,13 +41,13 @@ Selector::Selector()
 
     _wakeEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
     if( _wakeEvent == NULL )
-        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
+        throw SystemError("CreateEvent failed");
 
     _ioEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
     if( _ioEvent == NULL )
     {
         CloseHandle( _wakeEvent );
-        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
+        throw SystemError("CreateEvent failed");
     }
 
     _handles.add( _wakeEvent );
@@ -194,7 +194,7 @@ DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bo
     if(result == WAIT_FAILED)
     {
         //DWORD err = GetLastError();
-        throw SystemError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
+        throw SystemError("WaitForMultipleObjects");
     }
 
     if( result == WAIT_TIMEOUT)

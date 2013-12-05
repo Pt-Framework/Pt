@@ -28,6 +28,7 @@
 
 #include "FileDeviceImpl.h"
 #include <Pt/System/FileDevice.h>
+#include <Pt/System/EventLoop.h>
 
 namespace Pt {
 
@@ -38,6 +39,16 @@ FileDevice::FileDevice()
 , _isOpen(false)
 {
     _impl = new FileDeviceImpl(*this);
+}
+
+
+FileDevice::FileDevice(const std::string& path, std::ios::openmode mode)
+: _opening(false)
+, _isOpen(false)
+{
+    _impl = new FileDeviceImpl(*this);
+
+    this->open( path, mode);
 }
 
 
@@ -64,6 +75,12 @@ FileDevice::~FileDevice()
 }
 
 
+void FileDevice::open(const std::string& path, std::ios::openmode mode)
+{
+    open( path.c_str(), mode );
+}
+
+
 void FileDevice::open(const char* path, std::ios::openmode mode)
 {
     this->close();
@@ -73,19 +90,26 @@ void FileDevice::open(const char* path, std::ios::openmode mode)
 }
 
 
+void FileDevice::beginOpen(const std::string& path, std::ios::openmode mode)
+{
+    beginOpen( path.c_str(), mode );
+}
+
+
 void FileDevice::beginOpen(const char* path, std::ios::openmode mode)
 {
-    if( ! isActive() )
-        throw std::logic_error( PT_ERROR_MSG("I/O device not active") );
+    EventLoop* loop = this->loop();
+    if( ! loop )
+        throw std::logic_error("I/O device not active" );
 
     this->close();
 
-    _isOpen = _impl->beginOpen(*parent(), path, mode);
+    _isOpen = _impl->beginOpen(*loop, path, mode);
     _opening = true;
 
     if(_isOpen)
     {
-        this->setReady(); 
+        loop->setReady(*this); 
     }
 }
 
@@ -95,7 +119,7 @@ void FileDevice::endOpen()
     if(_opening)
     {
         _opening = false;
-        _impl->endOpen(*parent());
+        _impl->endOpen( *loop() );
         _isOpen = true;
     }
 }
@@ -111,9 +135,10 @@ void FileDevice::onClose()
 
 void FileDevice::onCancel()
 {
-    if( isActive() )
+    EventLoop* loop = this->loop();
+    if( loop )
     {
-        _impl->cancel( *parent() );
+        _impl->cancel(*loop);
         _opening = false;
     }
 
@@ -132,27 +157,27 @@ bool FileDevice::onSeekable() const
     return true; 
 }
 
-size_t FileDevice::onBeginRead(char* buffer, size_t n, bool& eof)
+size_t FileDevice::onBeginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
-    return _impl->beginRead(*parent(), buffer, n, eof);
+    return _impl->beginRead(loop, buffer, n, eof);
 }
 
 
-size_t FileDevice::onEndRead(char* buffer, size_t n, bool& eof)
+size_t FileDevice::onEndRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
-    return _impl->endRead(*parent(), buffer, n, eof);
+    return _impl->endRead(loop, buffer, n, eof);
 }
 
 
-size_t FileDevice::onBeginWrite(const char* buffer, size_t n)
+size_t FileDevice::onBeginWrite(EventLoop& loop, const char* buffer, size_t n)
 {
-    return _impl->beginWrite(*parent(), buffer, n);
+    return _impl->beginWrite(loop, buffer, n);
 }
 
 
-size_t FileDevice::onEndWrite(const char* buffer, size_t n)
+size_t FileDevice::onEndWrite(EventLoop& loop, const char* buffer, size_t n)
 {
-    return _impl->endWrite( *parent(), buffer, n );
+    return _impl->endWrite(loop, buffer, n );
 }
 
 
@@ -200,7 +225,7 @@ bool FileDevice::onRun()
 {
     if( _opening )
     {
-        if( _isOpen || _impl->runOpen( *parent() ) )
+        if( _isOpen || _impl->runOpen( *loop() ) )
         {
             opened().send(*this);
             return true;
@@ -211,7 +236,7 @@ bool FileDevice::onRun()
 
     if( this->isReading() )
     {
-        if( _ravail || isEof() || _impl->runRead( *parent() ) )
+        if( _ravail || isEof() || _impl->runRead( *loop() ) )
         {
             inputReady().send(*this);
             return true;
@@ -220,7 +245,7 @@ bool FileDevice::onRun()
 
     if( this->isWriting() )
     {
-        if( _wavail || _impl->runWrite( *parent() ) )
+        if( _wavail || _impl->runWrite( *loop() ) )
         {
             outputReady().send(*this);
             return true;

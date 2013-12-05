@@ -578,32 +578,32 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
     return SerialDevice::ParityEven;
 }
 
-bool SerialDeviceImpl::setSignal(SerialDevice::SerialLine signal)
+bool SerialDeviceImpl::setSignal(SerialDevice::Signal signal)
 {
     switch(signal)
     {
-        case SerialDevice::CLR_BREAK:
+        case SerialDevice::ClearBreak:
             return EscapeCommFunction(handle(), CLRBREAK) > 0;
         break;
-        case SerialDevice::CLR_DTR:
+        case SerialDevice::ClearDtr:
             return EscapeCommFunction(handle(), CLRDTR) > 0;
         break;
-        case SerialDevice::CLR_RTS:
+        case SerialDevice::ClearRts:
             return EscapeCommFunction(handle(), CLRRTS) > 0;
         break;
-        case SerialDevice::SET_BREAK:
+        case SerialDevice::SetBreak:
             return EscapeCommFunction(handle(), SETBREAK) > 0;
         break;
-        case SerialDevice::SET_DTR:
+        case SerialDevice::SetDtr:
             return EscapeCommFunction(handle(), SETDTR) > 0;
         break;
-        case SerialDevice::SET_RTS:
+        case SerialDevice::SetRts:
             return EscapeCommFunction(handle(), SETRTS) > 0;
         break;
-        case SerialDevice::SET_XOFF:
+        case SerialDevice::SetXOff:
             return EscapeCommFunction(handle(), SETXOFF) > 0;
         break;
-        case SerialDevice::SET_XON:
+        case SerialDevice::SetXOn:
             return EscapeCommFunction(handle(), SETXON) > 0;
         break;
     }

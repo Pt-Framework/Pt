@@ -30,6 +30,7 @@
 #define Pt_Net_TcpServer_h
 
 #include <Pt/Net/Api.h>
+#include <Pt/Signal.h>
 #include <Pt/System/Selectable.h>
 #include <string>
 
@@ -97,19 +98,27 @@ class PT_NET_API TcpServer : public System::Selectable
 
         Signal<TcpServer&>& connectionPending();
 
+        //! @brief Returns the parent event loop in which operations are running
+        System::EventLoop* loop() const
+         { return _loop; }
+
         //! @internal
         TcpServerImpl& impl() const;
 
     protected:
+        virtual void onAttach(System::EventLoop& loop)
+        { _loop = &loop;}
+
+        virtual void onDetach(System::EventLoop& loop)
+        { _loop = 0; }
+
         virtual void onCancel();
         
         virtual bool onRun();
 
     private:
-        //! @internal
+        System::EventLoop* _loop;
         TcpServerImpl* _impl;
-
-        //! @internal
         Signal<TcpServer&> _connectionPending;
 };
 

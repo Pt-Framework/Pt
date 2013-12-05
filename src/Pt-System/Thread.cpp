@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2008 Marc Boris Duerner
+ * Copyright (C) 2006-2013 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,9 +25,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "ThreadImpl.h"
-#include "Pt/System/Thread.h"
+#include <Pt/System/Thread.h>
 #include <Pt/System/EventLoop.h>
+#include <Pt/System/SystemError.h>
 
 namespace Pt {
 
@@ -35,6 +37,7 @@ namespace System {
 
 Thread::Thread()
 : _state(Thread::Ready)
+, _detach(false)
 , _impl(0)
 {
     _impl = new ThreadImpl();
@@ -43,6 +46,7 @@ Thread::Thread()
 
 Thread::Thread(const Callable<void>& cb)
 : _state(Thread::Ready)
+, _detach(false)
 , _impl(0)
 {
     _impl = new ThreadImpl();
@@ -52,32 +56,68 @@ Thread::Thread(const Callable<void>& cb)
 
 Thread::Thread(EventLoop& loop)
 : _state(Thread::Ready)
+, _detach(false)
 , _impl(0)
 {
     _impl = new ThreadImpl();
-	_impl->init( callable(loop, &EventLoop::run) );
+    _impl->init( callable(loop, &EventLoop::run) );
 }
 
 
 Thread::~Thread()
 {
+    if(_state == Running)
+        std::terminate();
+
     delete _impl;
 }
 
 
 void Thread::init(const Callable<void>& cb)
 {
-	_impl->init(cb);
+    if( this->state() == Ready )
+    {
+        _impl->init(cb);
+    }
 }
 
 
 void Thread::start()
 {
-    if( this->state() == Ready )
+    if( _state == Ready )
     {
         _impl->start();
         _state = Thread::Running;
+
+        if(_detach)
+            detach();
     }
+}
+
+
+void Thread::detach()
+{
+    if( _state == Ready )
+    {
+        _detach = true;
+        return;
+    }
+
+    if( _state != Running && _state != Detached )
+        throw SystemError("thread not detachable");
+
+    _impl->detach();
+    _state = Detached;
+}
+
+
+void Thread::join()
+{
+    if( _state != Running && _state != Joined )
+        throw SystemError("thread not joinable");
+
+    _impl->join();
+    _state = Thread::Joined;
 }
 
 
@@ -99,38 +139,17 @@ void Thread::sleep(unsigned int ms)
 }
 
 
-void Thread::detach()
-{
-    _impl->detach();
-}
-
-
-void Thread::join()
-{
-    if( this->state() == Running )
-    {
-        _impl->join();
-        _state = Thread::Finished;
-    }
-}
-
-
 bool Thread::joinNoThrow()
 {
     bool ret = true;
 
-    if( this->state() == Running )
+    try
     {
-        try
-        {
-            _impl->join();
-        }
-        catch(...)
-        {
-            ret = false;
-        }
-
-        _state = Thread::Finished;
+        _impl->join();
+    }
+    catch(...)
+    {
+        ret = false;
     }
 
     return ret;
@@ -138,5 +157,4 @@ bool Thread::joinNoThrow()
 
 } // namespace System
 
-} // !namespace Pt
-
+} // namespace Pt

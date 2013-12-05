@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 Marc Boris Duerner
+ * Copyright (C) 2008-2013 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/System/Selectable.h"
+#include <Pt/System/Selectable.h>
+#include <Pt/System/EventLoop.h>
 #include <stdexcept>
 #include <cassert>
 
@@ -65,15 +66,9 @@ void Selectable::setActive(EventLoop& parent)
     assert(_prev == 0);
     assert(_next == 0);
 
-    //this->onAttach(parent);
+    this->onAttach(parent);
     parent.onAttachSelectable(*this);
     _parent = &parent;
-}
-
-
-bool Selectable::isActive() const
-{ 
-    return _parent != 0; 
 }
 
 
@@ -83,28 +78,13 @@ void Selectable::detach()
     {
         this->cancel();
 
-        //this->onDetach(*_parent);
+        this->onDetach(*_parent);
         _parent->onDetachSelectable(*this);
         _parent = 0;
     }
 
     assert(_prev == 0);
     assert(_next == 0);
-}
-
-
-EventLoop* Selectable::parent() const
-{
-    return _parent;
-}
-
-
-void Selectable::setReady()
-{
-    if( ! _parent)
-        throw std::logic_error("selectable not active");
-
-    _parent->setReady(*this);
 }
 
 
@@ -126,140 +106,6 @@ bool Selectable::run()
     return this->onRun(); 
 }
 
+} // namespace System
 
-
-
-
-
-
-
-/*void Selectable::setAvail()
-{
-    if(_parent)
-        _parent->onAvail(*this); 
-
-    _state = Avail;
-}
-
-
-void Selectable::setIdle()
-{
-    if(_parent)
-        _parent->onIdle(*this);
-
-    _state = Idle;
-}*/
-
-
-
-/*bool Selectable::wait(std::size_t msecs)
-{
-    return this->onWait(msecs);
-}*/
-
-
-/*bool Selectable::avail() const
-{
-    return this->isAvail();
-}*/
-
-
-/*bool Selectable::enabled() const
-{
-    return _state != Disabled;
-}*/
-
-
-/*void Selectable::setEnabled(bool isEnabled)
-{
-    if(isEnabled)
-    {
-        //if(_state == Disabled)
-        //    _state = Active;
-    }
-    else // disable
-    {
-        if(_parent)
-        {
-           if(_state == Avail)
-           {
-                _parent->onIdle(*this);
-                _state = Idle;
-           }
-        }
-
-        //_state = Disabled;
-    }
-}*/
-
-
-/*bool Selectable::idle() const
-{
-    return _state == Idle;
-}*/
-
-
-/*void Selectable::setIdle()
-{ 
-    if(_parent)
-        _parent->onIdle(*this);
-    
-    _state = Idle; 
-}*/
-
-
-/*void Selectable::setActive()
-{ 
-    if(_parent)
-        _parent->onActive(*this); 
-
-    _state = Busy;
-}*/
-
-
-/*void Selectable::setAvail()
-{ 
-    if(_parent)
-        _parent->onAvail(*this); 
-
-    _state = Avail;
-}*/
-
-/*void Selectable::setState(State state)
-{
-    if(state == Disabled)
-    {
-        if(_parent)
-        {
-            _parent->onDisable(*this);
-        }
-    }
-    else if(_state == Disabled)
-    {
-        if(_parent)
-        {
-            _parent->onEnable(*this);
-        }
-    }
-
-    //State prev = _state;
-    _state = state;
-
-    // TODO: rename onChanged to onAvail
-    // TODO: Disabled and Idle are somewhat the same state
-    if(_parent)
-    {
-        if( _state == Avail)
-        {
-            //_parent->onChanged(*this);
-        }
-        else if(_state == Idle || _state == Busy)
-        {
-            //_parent->onChanged(*this);
-        }
-    }
-}*/
-
-}
-
-}
+} // namespace Pt

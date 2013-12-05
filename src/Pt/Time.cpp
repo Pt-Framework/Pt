@@ -34,7 +34,7 @@
 namespace Pt {
 
 InvalidTime::InvalidTime()
-: std::invalid_argument("invalid time")
+: std::runtime_error("invalid time")
 { }
 
 void operator>>=(const SerializationInfo& si, Time& time)

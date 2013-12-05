@@ -27,8 +27,9 @@
  */
 
 #include "TcpServerImpl.h"
-#include "Pt/Net/TcpServer.h"
-#include "Pt/Net/AddressInUse.h"
+#include <Pt/Net/TcpServer.h>
+#include <Pt/Net/AddressInUse.h>
+#include <Pt/System/EventLoop.h>
 #include <memory>
 
 namespace Pt {
@@ -36,14 +37,16 @@ namespace Pt {
 namespace Net {
 
 TcpServer::TcpServer()
-: _impl(0)
+: _loop(0)
+, _impl(0)
 {
     _impl = new TcpServerImpl(*this);
 }
 
 
 TcpServer::TcpServer(const std::string& ipaddr, unsigned short int port, const Options& options)
-: _impl(0)
+: _loop(0)
+, _impl(0)
 {
     _impl = new TcpServerImpl(*this);
     std::auto_ptr<TcpServerImpl> impl(_impl);
@@ -55,7 +58,8 @@ TcpServer::TcpServer(const std::string& ipaddr, unsigned short int port, const O
 
 
 TcpServer::TcpServer(const Endpoint& ipaddr, const Options& options)
-: _impl(0)
+: _loop(0)
+, _impl(0)
 {
     _impl = new TcpServerImpl(*this);
     std::auto_ptr<TcpServerImpl> impl(_impl);
@@ -95,10 +99,11 @@ void TcpServer::listen(const Endpoint& ipaddr, const Options& options)
 
 void TcpServer::beginAccept()
 {
-    if( ! isActive() )
+    System::EventLoop* loop = this->loop();
+    if( ! loop )
         throw std::logic_error("TCP server not active");
 
-    _impl->beginAccept( *parent() );
+    _impl->beginAccept( *loop );
 }
 
 
@@ -122,8 +127,9 @@ TcpServerImpl& TcpServer::impl() const
 
 void TcpServer::onCancel()
 {
-    if( this->isActive() )
-        _impl->cancel( *parent() );
+    System::EventLoop* loop = this->loop();
+    if( loop )
+        _impl->cancel( *loop );
 }
 
 

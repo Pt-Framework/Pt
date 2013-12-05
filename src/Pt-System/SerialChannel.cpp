@@ -31,7 +31,6 @@
 #include <iostream>
 #include <sstream>
 
-
 namespace Pt {
 
 namespace System {
@@ -56,24 +55,19 @@ void SerialChannel::onOpen(const std::string& urlstr)
 {
     //TODO Use System::Url for "comm" scheme as soon as protocol handler for "comm" is implemented
     //System::Url url(urlstr);
-    std::stringstream sStream(urlstr);
+    
+    std::istringstream iss(urlstr);
     std::string protocol;
-    std::getline(sStream, protocol, ':');
-    if( protocol != "comm" )
+    std::getline(iss, protocol, ':');
+    if( protocol != "comm" || iss.get() != '/' || iss.get() != '/' )
     {
-        throw Pt::System::AccessFailed( "Unexpected protocol type: " + protocol );
+        throw std::invalid_argument("invalid url");
     }
-    if( sStream.get() != '/' )
-    {
-        throw Pt::System::AccessFailed( "Malformed URL! Expected '/' after protocol part." );
-    }
-    if( sStream.get() != '/' )
-    {
-        throw Pt::System::AccessFailed( "Malformed URL! Expected '/' after protocol part." );
-    }
+    
     std::string path;
-    std::getline( sStream, path );
+    std::getline( iss, path );
     _device.open( path, std::ios::out );
+
     _device.setBaudRate(Pt::System::SerialDevice::BaudRate4800);
     _device.setCharSize(8);
     _device.setStopBits(Pt::System::SerialDevice::OneStopBit);
@@ -89,9 +83,6 @@ void SerialChannel::onClose()
 
 void SerialChannel::onWrite(const char* msg, std::size_t msglen)
 {
-    //if(_device.enabled() == false)
-    //    return;
-
     _device.write(msg, msglen);
     _device.sync();
 }

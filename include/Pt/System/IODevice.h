@@ -205,6 +205,10 @@ class PT_SYSTEM_API IODevice : public Selectable
         std::size_t wavail() const
         { return _wavail; }
 
+        //! @internal
+        EventLoop* loop() const
+         { return _loop; }
+
     protected:
         //! @brief Default Constructor
         IODevice();
@@ -214,25 +218,22 @@ class PT_SYSTEM_API IODevice : public Selectable
 
         virtual void onSetTimeout(std::size_t timeout) = 0;
 
-        virtual std::size_t onBeginRead(char* buffer, std::size_t n, bool& eof) = 0;
+        virtual std::size_t onBeginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof) = 0;
 
-        virtual std::size_t onEndRead(char* buffer, std::size_t n, bool& eof) = 0;
+        virtual std::size_t onEndRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof) = 0;
 
         //! @brief Read bytes from device
         virtual std::size_t onRead(char* buffer, std::size_t count, bool& eof) = 0;
 
-        virtual std::size_t onBeginWrite(const char* buffer, std::size_t n) = 0;
+        virtual std::size_t onBeginWrite(EventLoop& loop, const char* buffer, std::size_t n) = 0;
 
-        virtual std::size_t onEndWrite(const char* buffer, std::size_t n) = 0;
+        virtual std::size_t onEndWrite(EventLoop& loop, const char* buffer, std::size_t n) = 0;
 
         //! @brief Write bytes to device
         virtual std::size_t onWrite(const char* buffer, std::size_t count) = 0;
 
-        //! @brief Cancel all I/O operations,
-        virtual void onCancel();
-
         //! @brief Read data from I/O device without consuming them
-        virtual std::size_t onPeek(char*, std::size_t)
+        virtual std::size_t onPeek(char* buffer, std::size_t)
         { return 0; }
 
         //! @brief Returns true if device is seekable
@@ -247,17 +248,18 @@ class PT_SYSTEM_API IODevice : public Selectable
         virtual void onSync() const
         { }
 
-        //! @brief Returns the size of the device
-        virtual std::size_t onSize() const
-        { return 0; }
-
         //! @brief Sets or unsets the device to eof
         void setEof(bool eof);
 
-    private:
-        bool _eof;
+        virtual void onAttach(EventLoop& loop);
+
+        virtual void onDetach(EventLoop& loop);
+
+        //! @brief Cancel all I/O operations.
+        virtual void onCancel();
 
     protected:
+        EventLoop* _loop;
         char* _rbuf;
         std::size_t _rbuflen;
         std::size_t _ravail;
@@ -267,6 +269,9 @@ class PT_SYSTEM_API IODevice : public Selectable
         Signal<IODevice&> _inputReady;
         Signal<IODevice&> _outputReady;
         void* _reserved;
+
+    private:
+        bool _eof;
 };
 
 } // namespace System

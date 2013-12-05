@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "ThreadImpl.h"
 #include "Pt/System/SystemError.h"
 #include <errno.h>
@@ -60,19 +61,6 @@ namespace Pt {
 
 namespace System {
 
-void ThreadImpl::detach()
-{
-    if( _id )
-    {
-        int ret = pthread_detach(_id);
-        if(ret != 0)
-            throw SystemError( PT_ERROR_MSG("pthread_detach") );
-    }
-
-    _detached = true;
-}
-
-
 void ThreadImpl::init(const Callable<void>& cb)
 {
     delete _cb;
@@ -96,9 +84,17 @@ void ThreadImpl::start()
 
     if(ret != 0)
         throw SystemError( PT_ERROR_MSG("pthread_create") );
+}
 
-    if (_detached)
-        detach();
+
+void ThreadImpl::detach()
+{
+    if( _id )
+    {
+        int ret = pthread_detach(_id);
+        if(ret != 0)
+            throw SystemError( PT_ERROR_MSG("pthread_detach") );
+    }
 }
 
 
@@ -109,14 +105,6 @@ void ThreadImpl::join()
 
     if(ret != 0)
         throw SystemError( PT_ERROR_MSG("pthread_join") );
-}
-
-
-void ThreadImpl::terminate()
-{
-    int ret = pthread_kill(_id, SIGKILL);
-    if(ret != 0)
-        throw SystemError( PT_ERROR_MSG("pthread_kill") );
 }
 
 }

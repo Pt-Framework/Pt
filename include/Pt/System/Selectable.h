@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2012 Marc Boris Duerner
+ * Copyright (C) 2008-2013 Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,17 +25,18 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_SELECTABLE_H
 #define PT_SELECTABLE_H
 
-#include <Pt/NonCopyable.h>
 #include <Pt/System/Api.h>
-#include <Pt/System/EventLoop.h>
+#include <Pt/NonCopyable.h>
 
 namespace Pt {
 
 namespace System {
 
+class EventLoop;
 class SelectableList;
 
 //! @brief Dispatches operations through an event loop
@@ -50,14 +51,8 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Sets the parent loop, so that operations can be run
         void setActive(EventLoop& parent);
 
-        //! @brief Returns true if operations can be run
-        bool isActive() const;
-
         //! @brief Remove from event loop and cancels outstanding operations
         void detach();
-
-        //! @brief Returns the parent event loop in which operations are running
-        EventLoop* parent() const;
 
         //! @brief Cancels all operations
         void cancel();
@@ -65,9 +60,7 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         //! @brief Run operation if it is ready
         bool run();
 
-        //! @brief Notify readiness to the parent EventLoop 
-        void setReady();
-
+        //! @internal
         Selectable* next()
         { return _next; }
 
@@ -76,10 +69,10 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
         Selectable();
 
         //! @brief Attached to loop
-        //virtual void onAttach(EventLoop& loop) = 0;
+        virtual void onAttach(EventLoop& loop) = 0;
 
         //! @brief Detached from loop
-        //virtual void onDetach(EventLoop& loop) = 0;
+        virtual void onDetach(EventLoop& loop) = 0;
 
         //! @brief Blocks until operation has cancelled
         virtual void onCancel() = 0;
@@ -97,5 +90,4 @@ class PT_SYSTEM_API Selectable : protected NonCopyable
 
 } // namespace Pt
 
-#endif
-
+#endif // PT_SELECTABLE_H
