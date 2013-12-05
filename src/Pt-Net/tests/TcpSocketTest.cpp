@@ -145,9 +145,14 @@ class TcpSocketTest : public Pt::Unit::TestSuite
         void ConnectFailed()
         {
             // some OS do not recognize that the IP is not reachable and connect runs for
-            // 75 sec timeout for each resolved address. I this case, the slot to report
+            // 75 sec timeout for each resolved address. In this case, the slot to report
             // finished connects is alled only after a very long time and the idle timeout
             // of the event loop comes first.
+
+            Pt::System::Timer exitTimer;
+            exitTimer.setActive(*_loop);
+            exitTimer.timeout() += Pt::slot(*_loop, &Pt::System::EventLoop::exit);
+            exitTimer.start(1000);
 
             Pt::Net::TcpSocket client;
             client.setActive(*_loop);
