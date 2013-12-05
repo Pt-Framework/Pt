@@ -40,7 +40,7 @@ namespace System {
 ConditionImpl::ConditionImpl()
 {
     if ( pthread_cond_init( &_cond, NULL ) != 0)
-        throw SystemError( PT_ERROR_MSG("pthread_cond_init failed") );
+        throw SystemError("pthread_cond_init failed");
 }
 
 
@@ -53,7 +53,7 @@ ConditionImpl::~ConditionImpl()
 void ConditionImpl::wait(Mutex& mtx)
 {
     if ( pthread_cond_wait(&_cond, mtx.impl().handle() ) != 0)
-       throw SystemError( PT_ERROR_MSG("pthread_cond_wait failed") );
+       throw SystemError("pthread_cond_wait failed");
 }
 
 
@@ -76,7 +76,7 @@ bool ConditionImpl::wait(Mutex& mtx, unsigned int ms)
     while(result == EINTR);
 
     if(result != 0 && result != ETIMEDOUT)
-        throw SystemError( PT_ERROR_MSG("pthread_cond_timedwait failed") );
+        throw SystemError("pthread_cond_timedwait failed");
 
     return result != ETIMEDOUT;
 }
@@ -85,14 +85,14 @@ bool ConditionImpl::wait(Mutex& mtx, unsigned int ms)
 void ConditionImpl::signal()
 {
     if( pthread_cond_signal( &_cond ) != 0 )
-        throw SystemError( PT_ERROR_MSG("pthread_cond_signal failed") );
+        throw SystemError("pthread_cond_signal failed");
 }
 
 
 void ConditionImpl::broadcast()
 {
     if( pthread_cond_broadcast( &_cond ) != 0 )
-        throw SystemError( PT_ERROR_MSG("pthread_cond_broadcast failed") );
+        throw SystemError("pthread_cond_broadcast failed");
 }
 
 }

@@ -29,6 +29,7 @@
 #include "TcpSocketImpl.h"
 #include "Pt/Net/TcpSocket.h"
 #include "Pt/System/IOError.h"
+#include "Pt/System/EventLoop.h"
 #include <stdexcept>
 #include <memory>
 #include <iostream>
@@ -147,7 +148,6 @@ bool TcpSocket::beginConnect(const Endpoint& addrinfo, const Options&)
 
     bool ret = _impl->beginConnect(*loop, addrinfo);
     _connecting = true;
-    
     if(ret)
     {
         loop->setReady(*this);

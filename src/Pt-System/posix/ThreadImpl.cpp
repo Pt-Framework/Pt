@@ -83,7 +83,7 @@ void ThreadImpl::start()
     pthread_attr_destroy(&attrs);
 
     if(ret != 0)
-        throw SystemError( PT_ERROR_MSG("pthread_create") );
+        throw SystemError("pthread_create");
 }
 
 
@@ -93,7 +93,7 @@ void ThreadImpl::detach()
     {
         int ret = pthread_detach(_id);
         if(ret != 0)
-            throw SystemError( PT_ERROR_MSG("pthread_detach") );
+            throw SystemError("pthread_detach");
     }
 }
 
@@ -104,7 +104,7 @@ void ThreadImpl::join()
     int ret = pthread_join(_id, &threadRet);
 
     if(ret != 0)
-        throw SystemError( PT_ERROR_MSG("pthread_join") );
+        throw SystemError("pthread_join");
 }
 
 }

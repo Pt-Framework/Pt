@@ -63,7 +63,7 @@ class SerialDeviceImpl : public IODeviceImpl
 
         SerialDevice::FlowControl flowControl() const;
         
-        bool setSignal(SerialDevice::SerialLine signal);
+        bool setSignal(SerialDevice::Signal signal);
 
         //void setTimeout( size_t msec );
 

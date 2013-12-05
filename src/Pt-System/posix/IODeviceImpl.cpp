@@ -30,6 +30,7 @@
 #include "IODeviceImpl.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/Logger.h"
+#include "Pt/System/EventLoop.h"
 #include <cerrno>
 #include <cassert>
 

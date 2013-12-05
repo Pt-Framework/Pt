@@ -78,7 +78,7 @@ bool PipeIODevice::onRun()
 { 
     if( this->isReading() )
     {
-        if( _ravail || isEof() || _impl.runRead( *parent() ) )
+        if( _ravail || isEof() || _impl.runRead( *loop() ) )
         {
             inputReady().send(*this);
             return true;
@@ -87,7 +87,7 @@ bool PipeIODevice::onRun()
 
     if( this->isWriting() )
     {
-        if( _wavail || _impl.runWrite( *parent() ) )
+        if( _wavail || _impl.runWrite( *loop() ) )
         {
             outputReady().send(*this);
             return true;
@@ -100,24 +100,24 @@ bool PipeIODevice::onRun()
 
 void PipeIODevice::onCancel()
 {
-    if( isActive() )
+    if( loop() )
     {
-        _impl.cancel( *parent() );
+        _impl.cancel( *loop() );
     }
 
     IODevice::onCancel();
 }
 
 
-size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
+size_t PipeIODevice::onBeginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
-    return _impl.beginRead(*parent(), buffer, n, eof);
+    return _impl.beginRead(loop, buffer, n, eof);
 }
 
 
-size_t PipeIODevice::onEndRead(char* buffer, size_t n, bool& eof)
+size_t PipeIODevice::onEndRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 {
-    return _impl.endRead(*parent(), buffer, n, eof);
+    return _impl.endRead(loop, buffer, n, eof);
 }
 
 
@@ -127,15 +127,15 @@ size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
 }
 
 
-size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
+size_t PipeIODevice::onBeginWrite(EventLoop& loop, const char* buffer, size_t n)
 {
-    return _impl.beginWrite(*parent(), buffer, n);
+    return _impl.beginWrite(loop, buffer, n);
 }
 
 
-size_t PipeIODevice::onEndWrite(const char* buffer, size_t n)
+size_t PipeIODevice::onEndWrite(EventLoop& loop, const char* buffer, size_t n)
 {
-    return _impl.endWrite(*parent(), buffer, n);
+    return _impl.endWrite(loop, buffer, n);
 }
 
 

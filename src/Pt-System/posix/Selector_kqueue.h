@@ -31,8 +31,10 @@
 #include "../SelectableList.h"
 #include "Pt/System/Api.h"
 #include "Pt/System/Clock.h"
+#include "Pt/System/EventLoop.h"
 #include "Pt/System/Selectable.h"
 
+#include <vector>
 #include <set>
 #include <cassert>
 #include <cstddef>

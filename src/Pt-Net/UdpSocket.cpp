@@ -30,6 +30,7 @@
 #include "Pt/Net/UdpSocket.h"
 #include <stdexcept>
 #include <memory>
+#include <Pt/System/EventLoop.h>
 #include <Pt/System/IOError.h>
 
 namespace Pt {

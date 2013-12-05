@@ -221,7 +221,7 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
     {
         _acceptedFd = fd;
         log_debug("immediate accept " << this->fd());
-        _server.setReady();
+        loop.setReady(_server);
         return;
     }
 
@@ -247,10 +247,10 @@ int TcpServerImpl::accept(const TcpSocket::Options& o)
         return fd;
     }
 
-    if( _server.parent() )
+    if( _server.loop() )
     {
          log_debug("end accept " << this->fd());
-        _server.parent()->selector().endRead( &_ioh );
+        _server.loop()->selector().endRead( &_ioh );
     }
     
     //TODO ECONNABORTED EINTR EPERM    
@@ -307,7 +307,7 @@ bool TcpServerImpl::run()
         return true;
     }
 
-    System::Selector& selector = _server.parent()->selector();
+    System::Selector& selector = _server.loop()->selector();
     return selector.isReadable(&_ioh);
 }
 

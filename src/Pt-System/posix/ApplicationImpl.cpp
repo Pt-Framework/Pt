@@ -32,6 +32,7 @@
 #include "Pt/System/Application.h"
 #include "Pt/System/SystemError.h"
 #include "Pt/System/FileInfo.h"
+#include <vector>
 #include <string.h>
 #include <stdlib.h>
 #include <sys/types.h>

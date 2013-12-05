@@ -448,10 +448,8 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
     return _flowControl;
 }
 
-bool SerialDeviceImpl::setSignal(SerialDevice::SerialLine signal)
-{    
-
-
+bool SerialDeviceImpl::setSignal(SerialDevice::Signal signal)
+{
 	struct termios ios;
 
 	if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
@@ -465,37 +463,37 @@ bool SerialDeviceImpl::setSignal(SerialDevice::SerialLine signal)
 	switch(signal)
     {	
 #ifdef TIOCSBRK
-        case SerialDevice::SET_BREAK:
+        case SerialDevice::SetBreak:
 			ioctl(IODeviceImpl::fd(), TIOCSBRK, 0);
 		break;
 
-		case SerialDevice::CLR_BREAK:            
+		case SerialDevice::ClearBreak:            
 			ioctl(IODeviceImpl::fd(), TIOCCBRK, 0);			  
         break;
 #endif
 
 #ifdef TIOCM_DTR
-        case SerialDevice::SET_DTR:		
+        case SerialDevice::SetDtr:		
 			flags |= TIOCM_DTR;
         break;
 
-        case SerialDevice::CLR_DTR:
+        case SerialDevice::ClearDtr:
            flags &= ~TIOCM_DTR;
         break;
 
-		case SerialDevice::SET_RTS:
+		case SerialDevice::SetRts:
 			flags |= TIOCM_RTS;
         break;
 
-		case SerialDevice::CLR_RTS:
+		case SerialDevice::ClearRts:
 			flags &= ~TIOCM_RTS;
         break;
 #endif
-        case SerialDevice::SET_XON:
+        case SerialDevice::SetXOn:
 			ios.c_iflag |= IXON;
         break;
 
-        case SerialDevice::SET_XOFF:
+        case SerialDevice::SetXOff:
 			ios.c_iflag |= IXOFF;
         break;
     }
