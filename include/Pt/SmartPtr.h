@@ -295,50 +295,50 @@ class AutoPtr : public Destroy
         typedef T element_type;
 
         // constructor
-        explicit AutoPtr(T* ptr = 0) throw()
+        explicit AutoPtr(T* ptr = 0)
         : ap(ptr)
         { }
 
         // copy constructors (with implicit conversion)
         // - note: nonconstant parameter
-        AutoPtr (AutoPtr& rhs) throw()
+        AutoPtr (AutoPtr& rhs)
           : ap(rhs.release()) {
         }
 
         template<class Y>
-        AutoPtr (AutoPtr<Y>& rhs) throw()
+        AutoPtr (AutoPtr<Y>& rhs)
           : ap(rhs.release()) {
         }
 
         // assignments (with implicit conversion)
         // - note: nonconstant parameter
-        AutoPtr& operator= (AutoPtr& rhs) throw() {
+        AutoPtr& operator= (AutoPtr& rhs) {
             reset(rhs.release());
             return *this;
         }
 
         template<class Y>
-        AutoPtr& operator= (AutoPtr<Y>& rhs) throw()
+        AutoPtr& operator= (AutoPtr<Y>& rhs)
         {
             reset(rhs.release());
             return *this;
         }
 
         // destructor
-        ~AutoPtr() throw()
+        ~AutoPtr()
         { this->destroy(ap); }
 
         // value access
-        T* get() const throw() {
+        T* get() const {
             return ap;
         }
-        T& operator*() const throw() {
+        T& operator*() const {
             return *ap;
         }
-        T* operator->() const throw() {
+        T* operator->() const {
             return ap;
         }
-        bool operator!() const throw() {
+        bool operator!() const {
             return ap == 0;
         }
         /** @brief Bool conversion operator
@@ -352,14 +352,14 @@ class AutoPtr : public Destroy
         { return ap != 0; }
 
         // release ownership
-        T* release() throw() {
+        T* release() {
             T* tmp(ap);
             ap = 0;
             return tmp;
         }
 
         // reset value
-        void reset (T* ptr=0) throw() {
+        void reset (T* ptr=0) {
             if (ap != ptr) {
                 this->destroy(ap);
                 ap = ptr;
@@ -385,10 +385,47 @@ class AutoPtr : public Destroy
         }
 };
 
+/** \brief Equality comparison operator.
+*/
+template <typename T, typename D, typename T2, typename D2>
+bool operator==(const AutoPtr<T, D>& a, const AutoPtr<T2, D2>& b)
+{ return a.get() == b.get(); }
+
+
+template <typename T, typename D, typename T2>
+bool operator==(const AutoPtr<T, D>& a, const T2* b)
+{ return a.get() == b; }
+
+
+/** \brief Equality comparison operator.
+*/
+template <typename T, typename D, typename T2, typename D2>
+bool operator!=(const AutoPtr<T, D>& a, const AutoPtr<T2, D2>& b)
+{ return a.get() != b.get(); }
+
+
+template <typename T, typename D, typename T2>
+bool operator!=(const AutoPtr<T, D>& a, const T2* b)
+{ return a.get() != b; }
+
+
+/** \brief Less-than comparison operator
+*/
+template <typename T, typename D, typename T2, typename D2>
+bool operator<(const AutoPtr<T, D>& a, const AutoPtr<T2, D2>& b)
+{ return a.v() < b.get(); }
+
+
+template <typename T, typename D, typename T2>
+bool operator<(const AutoPtr<T, D>& a, const T2* b)
+{ return a.get() < b; }
+
+
+
 
 template <typename T,
-          template <class> class OwnershipPolicy = ExternalRefCounted,
-          template <class> class DestroyPolicy = DeletePolicy>
+          typename OwnershipPolicy = ExternalRefCounted<T>,
+          typename DestroyPolicy = DeletePolicy<T> >
 /** @brief Policy based smart pointer.
 
     The SmartPtr implements a model that determines how the contained
@@ -406,8 +443,8 @@ template <typename T,
     \param Model Model for linking/unlinking.
     \param DestroyPolicy policy, to destroy the object.
 */
-class SmartPtr : public OwnershipPolicy<T>,
-                  public DestroyPolicy<T>
+class SmartPtr : public OwnershipPolicy,
+                 public DestroyPolicy
 {
     private:
         //! \brief The raw pointer
@@ -451,8 +488,10 @@ class SmartPtr : public OwnershipPolicy<T>,
             SmartPtr goes out of scope.
         */
         ~SmartPtr()
-        { if (this->unlink(object))
-              this->destroy(object); }
+        { 
+            if (this->unlink(object))
+                this->destroy(object); 
+        }
 
         /** \brief Assign from another SmartPtr.
 
@@ -497,36 +536,6 @@ class SmartPtr : public OwnershipPolicy<T>,
         T& operator*() const
         { return *object; }
 
-        /** \brief Equality comparison operator
-
-            Two SmartPtr are considered equal when they contain the same
-            heap object.
-
-            \return true if the SmartPtr point to the same object.
-        */
-        bool operator== (const T* p) const
-        { return object == p; }
-
-        /** \brief Equality comparison operator
-
-            Two SmartPtr are considered equal when they contain the same
-            heap object.
-
-            \return true if the SmartPtr point to different objects.
-        */
-        bool operator!= (const T* p) const
-        { return object != p; }
-
-        /** \brief Less-than comparison operator
-
-            A SmartPtr is considered less than another when the adress of
-            the raw pointer is less.
-
-            \return true if the raw pointer is less than the other raw pointer.
-        */
-        bool operator< (const T* p) const
-        { return object < p; }
-
         /** \brief Negate operator
 
             This operator matches the behavious of raw pointers. True will be
@@ -554,7 +563,7 @@ class SmartPtr : public OwnershipPolicy<T>,
 
             \return Pointer to the heap object
         */
-        T* getPointer()
+        T* get()
         { return object; }
 
         /** \brief Returns a pointer to the heap object
@@ -564,26 +573,51 @@ class SmartPtr : public OwnershipPolicy<T>,
 
             \return Pointer to the heap object
         */
-        const T* getPointer() const
-        { return object; }
-
-        /** \brief Implicit conversion to the contained pointer type.
-
-            Return a copy of the pointer that this object owns. The
-            SmartPtr still manages the memory.
-        */
-
-        operator T* ()
-        { return object; }
-
-        /** \brief Implicit conversion to the contained pointer type.
-
-            Return a copy of the pointer that this object owns. The
-            SmartPtr still manages the memory.
-        */
-        operator const T* () const
+        const T* get() const
         { return object; }
 };
+
+
+/** \brief Equality comparison operator
+
+    @related SmartPtr
+*/
+template <typename T, class O, typename D, typename T2, typename O2, typename D2>
+bool operator==(const SmartPtr<T, O, D>& a, const SmartPtr<T2, O2, D2>& b)
+{ return a.get() == b.get(); }
+
+
+template <typename T, typename O, typename D, typename T2>
+bool operator==(const SmartPtr<T, O, D>& a, const T2* b)
+{ return a.get() == b; }
+
+
+/** \brief Equality comparison operator.
+
+    @related SmartPtr
+*/
+template <typename T, typename O, typename D, typename T2, typename O2, typename D2>
+bool operator!=(const SmartPtr<T, O, D>& a, const SmartPtr<T2, O2, D2>& b)
+{ return a.get() != b.get(); }
+
+
+template <typename T, typename O, typename D, typename T2>
+bool operator!=(const SmartPtr<T, O, D>& a, const T2* b)
+{ return a.get() != b; }
+
+
+/** \brief Less-than comparison operator
+
+    @related SmartPtr
+*/
+template <typename T, typename O, typename D, typename T2, typename O2, typename D2>
+bool operator<(const SmartPtr<T, O, D>& a, const SmartPtr<T2, O2, D2>& b)
+{ return a.get() < b.get(); }
+
+
+template <typename T, typename O, typename D, typename T2>
+bool operator<(const SmartPtr<T, O, D>& a, const T2* b)
+{ return a.get() < b; }
 
 
 template <typename T, template <class> class M, template <class> class D >
@@ -626,9 +660,9 @@ void operator >>=(const Pt::SerializationInfo& si, SmartPtr<T, M>& sp)
 template <typename T, template <class> class M, template <class> class D >
 void save(Pt::SaveInfo& si, const SmartPtr<T,M, D>& sp)
 {
-    if( ! sp.getPointer() || ! si.save( *sp ) )
+    if( ! sp.get() || ! si.save( *sp ) )
     {
-        si.out() <<= sp.getPointer();
+        si.out() <<= sp.get();
     }
 }
 

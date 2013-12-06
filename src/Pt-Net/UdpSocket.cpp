@@ -37,6 +37,31 @@ namespace Pt {
 
 namespace Net {
 
+UdpSocketOptions::UdpSocketOptions()
+: _flags(0)
+, _hoplimit(1)
+{
+}
+
+
+UdpSocketOptions::UdpSocketOptions(const UdpSocketOptions& opts)
+: _flags(opts._flags)
+{
+}
+
+
+UdpSocketOptions::~UdpSocketOptions()
+{
+}
+
+
+UdpSocketOptions& UdpSocketOptions::operator=(const UdpSocketOptions& opts)
+{
+    _flags = opts._flags;
+    return *this;
+}
+
+
 UdpSocket::UdpSocket()
 : _impl(0)
 , _connecting(false)

@@ -62,7 +62,7 @@ namespace Db {
 
         private:
             //! \brief Reference counted implementation
-            SmartPtr<IResult, InternalRefCounted > _result;
+            SmartPtr<IResult, InternalRefCounted<IResult> > _result;
 
         public:
             //! \brief default constructor

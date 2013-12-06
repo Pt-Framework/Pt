@@ -32,10 +32,57 @@
 #include <Pt/Net/Api.h>
 #include <Pt/Net/Endpoint.h>
 #include <Pt/System/IODevice.h>
+#include <cstddef>
 
 namespace Pt {
 
 namespace Net {
+
+union int_or_ptr_t
+{
+    void* p;
+    std::size_t s;
+};
+
+
+/** @brief UDP socket options
+ */
+class PT_NET_API UdpSocketOptions
+{
+    public:
+        UdpSocketOptions();
+
+        UdpSocketOptions(const UdpSocketOptions& opts);
+
+        ~UdpSocketOptions();
+
+        UdpSocketOptions& operator=(const UdpSocketOptions& opts);
+                
+        bool isBroadcast() const
+        { return (_flags & Broadcast) != 0; }
+                
+        void setBroadcast()
+        { _flags |= Broadcast; }
+
+        int hopLimit() const
+        { return _hoplimit; }
+
+        void setHopLimit(int n)
+        { _hoplimit = n; }
+
+    private:
+        //! @internal
+        enum Flags
+        { 
+            Broadcast = 1
+        };
+
+        unsigned long _flags;
+        int _hoplimit;
+        int_or_ptr_t _r0;
+        int_or_ptr_t _r1;
+};
+
 
 /** @brief UDP server and client socket
  */
@@ -45,7 +92,7 @@ class PT_NET_API UdpSocket : public System::IODevice
         class Options
         {
             public:
-                explicit Options()
+                Options()
                 : _flags(0)
                 {}
                 

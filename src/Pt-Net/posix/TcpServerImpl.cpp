@@ -240,6 +240,7 @@ int TcpServerImpl::accept(const TcpSocket::Options& o)
 {
     log_debug( "accept " << this->fd() );
 
+    // connection immediately accepted in beginAccept
     if(_acceptedFd != -1)
     {
         int fd = _acceptedFd;
@@ -247,11 +248,14 @@ int TcpServerImpl::accept(const TcpSocket::Options& o)
         return fd;
     }
 
+    // in case beginAccept was called previously
     if( _server.loop() )
     {
          log_debug("end accept " << this->fd());
         _server.loop()->selector().endRead( &_ioh );
     }
+
+    // in any case block until connection is accepted
     
     //TODO ECONNABORTED EINTR EPERM    
     sockaddr_storage peeraddr;
@@ -297,7 +301,7 @@ void TcpServerImpl::cancel(System::EventLoop& loop)
 }
 
 
-bool TcpServerImpl::run()
+bool TcpServerImpl::run(System::EventLoop& loop)
 {
     if(this->fd() < 0)
         return false;
@@ -307,7 +311,7 @@ bool TcpServerImpl::run()
         return true;
     }
 
-    System::Selector& selector = _server.loop()->selector();
+    System::Selector& selector = loop.selector();
     return selector.isReadable(&_ioh);
 }
 

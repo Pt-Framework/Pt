@@ -135,9 +135,15 @@ void TcpServer::onCancel()
 
 bool TcpServer::onRun()
 {
-    bool avail = _impl->run();
-    if(avail)
-        _connectionPending.send(*this);
+    bool avail = false;
+
+    System::EventLoop* eloop = loop();
+    if(eloop)
+    {
+        avail = _impl->run(*eloop);
+        if(avail)
+            _connectionPending.send(*this);
+    }
 
     return avail;
 }

@@ -43,6 +43,7 @@ int main(int, char**);
 #ifdef _WIN32_WCE
 
 #include <string.h>
+#include <stdlib.h>
 
 int main(int, char**);
 
@@ -79,6 +80,7 @@ int wmain(int argc, wchar_t* wargv[])
 
     return ret;
 }
-#endif
 
-#endif
+#endif // _WIN32_WCE
+
+#endif // PT_MAIN_H

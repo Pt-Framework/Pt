@@ -94,7 +94,7 @@ class TcpServerImpl
 
         void cancel(System::EventLoop& s);
     
-        bool run();
+        bool run(System::EventLoop& loop);
 };
 
 } // namespace Net

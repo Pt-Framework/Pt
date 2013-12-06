@@ -98,7 +98,7 @@ namespace Db {
         }
         else
         {
-            return Statement(it->second);
+            return Statement( it->second.get() );
         }
     }
 

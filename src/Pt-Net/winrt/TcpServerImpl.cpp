@@ -198,7 +198,7 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
 }
 
 
-bool TcpServerImpl::run()
+bool TcpServerImpl::run(System::EventLoop& loop)
 {
     log_debug("TcpServerImpl::avail");
     

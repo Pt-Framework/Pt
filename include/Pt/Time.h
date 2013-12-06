@@ -30,6 +30,7 @@
 #define PT_TIME_H
 
 #include <Pt/Api.h>
+#include <Pt/Types.h>
 #include <Pt/String.h>
 #include <Pt/Timespan.h>
 #include <string>
@@ -63,19 +64,19 @@ class PT_API InvalidTime : public std::runtime_error
 class Time
 {
     public:
-        static const unsigned MaxHours         = 23;
-        static const unsigned HoursPerDay      = 24;
-        static const unsigned MaxMinutes       = 59;
-        static const unsigned MinutesPerHour   = 60;
-        static const unsigned MinutesPerDay    = 1440;
-        static const unsigned MaxSeconds       = 59;
-        static const unsigned SecondsPerDay    = 86400;
-        static const unsigned SecondsPerHour   = 3600;
-        static const unsigned SecondsPerMinute = 60;
-        static const unsigned MSecsPerDay      = 86400000;
-        static const unsigned MSecsPerHour     = 3600000;
-        static const unsigned MSecsPerMinute   = 60000;
-        static const unsigned MSecsPerSecond   = 1000;
+        static const uint32_t MaxHours         = 23;
+        static const uint32_t HoursPerDay      = 24;
+        static const uint32_t MaxMinutes       = 59;
+        static const uint32_t MinutesPerHour   = 60;
+        static const uint32_t MinutesPerDay    = 1440;
+        static const uint32_t MaxSeconds       = 59;
+        static const uint32_t SecondsPerDay    = 86400;
+        static const uint32_t SecondsPerHour   = 3600;
+        static const uint32_t SecondsPerMinute = 60;
+        static const uint32_t MSecsPerDay      = 86400000;
+        static const uint32_t MSecsPerHour     = 3600000;
+        static const uint32_t MSecsPerMinute   = 60000;
+        static const uint32_t MSecsPerSecond   = 1000;
 
     public:
         /** \brief Creates a Time set to zero.
@@ -122,10 +123,10 @@ class Time
             return _msecs % 1000;
         }
 
-        unsigned toMSecs() const
+        inline uint32_t toMSecs() const
         { return _msecs; }
 
-        void setTotalMSecs(unsigned msecs)
+        void setTotalMSecs(uint32_t msecs)
         { _msecs = msecs; }
 
         /** \brief Sets the time.
@@ -167,9 +168,9 @@ class Time
 
         /** @brief Determines seconds until another time
         */
-        int secsTo(const Time &t) const
+        int secsUntil(const Time &t) const
         {
-            return static_cast<int>( msecsTo(t) / 1000 );
+            return static_cast<int>( msecsUntil(t) / 1000 );
         }
 
         /** @brief Adds milliseconds to the time
@@ -183,11 +184,11 @@ class Time
             if (ms < 0)
             {
                 Pt::int64_t negdays = (MSecsPerDay - ms) / MSecsPerDay;
-                t._msecs = static_cast<unsigned>((_msecs + ms + negdays * MSecsPerDay) % MSecsPerDay);
+                t._msecs = static_cast<uint32_t>((_msecs + ms + negdays * MSecsPerDay) % MSecsPerDay);
             }
             else
             {
-                t._msecs = static_cast<unsigned>((_msecs + ms) % MSecsPerDay);
+                t._msecs = static_cast<uint32_t>((_msecs + ms) % MSecsPerDay);
             }
 
             return t;
@@ -195,7 +196,7 @@ class Time
 
         /** @brief Determines milliseconds until another time
         */
-        Pt::int64_t msecsTo(const Time &t) const
+        Pt::int64_t msecsUntil(const Time &t) const
         {
             if(t._msecs > _msecs)
                 return t._msecs - _msecs;
@@ -208,43 +209,13 @@ class Time
         Time& operator=(const Time& other)
         { _msecs=other._msecs; return *this; }
 
-        /** @brief Equal comparison operator
-        */
-        bool operator==(const Time& other) const
-        { return _msecs == other._msecs; }
-
-        /** @brief Inequal comparison operator
-        */
-        bool operator!=(const Time& other) const
-        { return _msecs != other._msecs; }
-
-        /** @brief Less-than comparison operator
-        */
-        bool operator<(const Time& other) const
-        { return _msecs < other._msecs; }
-
-        /** @brief Less-than-or-equal comparison operator
-        */
-        bool operator<=(const Time& other) const
-        { return _msecs <= other._msecs; }
-
-        /** @brief Greater-than comparison operator
-        */
-        bool operator>(const Time& other) const
-        { return _msecs > other._msecs; }
-
-        /** @brief Greater-than-or-equal comparison operator
-        */
-        bool operator>=(const Time& other) const
-        { return _msecs >= other._msecs; }
-
         /** @brief Assignment by sum operator
         */
         Time& operator+=(const Timespan& ts)
         {
             Pt::int64_t msecs = ( _msecs + ts.toMSecs() ) % MSecsPerDay;
             msecs = msecs < 0 ? MSecsPerDay + msecs : msecs;
-            _msecs = static_cast<unsigned>(msecs);
+            _msecs = static_cast<uint32_t>(msecs);
             return *this;
         }
 
@@ -254,29 +225,8 @@ class Time
         {
             Pt::int64_t msecs = ( _msecs - ts.toMSecs() ) % MSecsPerDay;
             msecs = msecs < 0 ? MSecsPerDay + msecs : msecs;
-            _msecs = static_cast<unsigned>(msecs);
+            _msecs = static_cast<uint32_t>(msecs);
             return *this;
-        }
-
-        /** @brief Addition operator
-        */
-        friend Time operator+(const Time& time, const Timespan& ts)
-        {
-            return time.addMSecs( ts.toMSecs() );
-        }
-
-        /** @brief Substraction operator
-        */
-        friend Time operator-(const Time& time, const Timespan& ts)
-        {
-            return time.addMSecs( -ts.toMSecs() );
-        }
-
-        /** @brief Substraction operator
-        */
-        friend Timespan operator-(const Time& a, const Time& b)
-        {
-            return Timespan( b.msecsTo(a) * 1000 );
         }
 
         /** \brief Returns the time in ISO-format (hh:mm:ss.hhh)
@@ -300,8 +250,55 @@ class Time
 
     private:
         //! @internal
-        unsigned _msecs;
+        Pt::uint32_t _msecs;
 };
+
+
+/** @brief Equal comparison operator
+*/
+inline bool operator==(const Time& a, const Time& b)
+{ return a.toMSecs() == b.toMSecs(); }
+
+/** @brief Inequal comparison operator
+*/
+inline bool operator!=(const Time& a, const Time& b)
+{ return a.toMSecs() != b.toMSecs(); }
+
+/** @brief Less-than comparison operator
+*/
+inline bool operator<(const Time& a, const Time& b)
+{ return a.toMSecs() < b.toMSecs(); }
+
+/** @brief Less-than-or-equal comparison operator
+*/
+inline bool operator<=(const Time& a, const Time& b)
+{ return a.toMSecs() <= b.toMSecs(); }
+
+/** @brief Greater-than comparison operator
+*/
+inline bool operator>(const Time& a, const Time& b)
+{ return a.toMSecs() > b.toMSecs(); }
+
+/** @brief Greater-than-or-equal comparison operator
+*/
+inline bool operator>=(const Time& a, const Time& b)
+{ return a.toMSecs() >= b.toMSecs(); }
+
+/** @brief Addition operator
+*/
+inline Time operator+(const Time& time, const Timespan& ts)
+{ return time.addMSecs( ts.toMSecs() ); }
+
+/** @brief Substraction operator
+*/
+inline Time operator-(const Time& time, const Timespan& ts)
+{ return time.addMSecs( -ts.toMSecs() ); }
+
+/** @brief Substraction operator
+*/
+inline Timespan operator-(const Time& a, const Time& b)
+{ return Timespan( b.msecsUntil(a) * 1000 ); }
+
 
 PT_API void operator >>=(const SerializationInfo& si, Time& time);
 

@@ -78,7 +78,7 @@ class TcpServerImpl
 
         void cancel(System::EventLoop& s);
 
-        bool run();
+        bool run(System::EventLoop& loop);
 
         void setTimeout(std::size_t msecs)
         { _timeout = msecs; }

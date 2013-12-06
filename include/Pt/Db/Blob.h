@@ -186,7 +186,7 @@ class Blob
     };
 
     //! @brief Pointer to shared data
-    SmartPtr<IBlob, InternalRefCounted, Release> m_data;
+    SmartPtr<IBlob, InternalRefCounted<IBlob>, Release<IBlob> > m_data;
 
 public:
     Blob()

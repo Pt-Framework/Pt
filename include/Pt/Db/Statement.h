@@ -69,7 +69,7 @@ namespace Db {
 
         private:
             //! \brief Shared Implementation
-            SmartPtr<IStatement, InternalRefCounted> _stmt;
+            SmartPtr<IStatement, InternalRefCounted<IStatement> > _stmt;
 
         public:
             /** \brief Construct a statement from a specific implementation
@@ -320,7 +320,7 @@ namespace Db {
     {
         private:
             Row _current;
-            SmartPtr<ICursor, InternalRefCounted > _cursor;
+            SmartPtr<ICursor, InternalRefCounted<ICursor> > _cursor;
 
         public:
             /** \brief Construct an iterator from a specific implementation

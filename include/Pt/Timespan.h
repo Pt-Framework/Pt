@@ -63,8 +63,8 @@ class Timespan
         */
         Timespan(long secs, long microsecs)
         : _span(Pt::int64_t(secs)*Seconds + microsecs)
-        {
-        }
+        { }
+
         //! @brief Creates a Timespan.
         Timespan(int days, int hours, int minutes, int secs, int microseconds);
 
@@ -89,22 +89,6 @@ class Timespan
         bool isNull() const;
 
         void setNull();
-
-        bool operator==(const Timespan& ts) const;
-
-        bool operator!=(const Timespan& ts) const;
-
-        bool operator>(const Timespan& ts) const;
-
-        bool operator>=(const Timespan& ts) const;
-
-        bool operator<(const Timespan& ts) const;
-
-        bool operator<=(const Timespan& ts) const;
-
-        Timespan operator+(const Timespan& d) const;
-
-        Timespan operator-(const Timespan& d) const;
 
         Timespan& operator+=(const Timespan& d);
 
@@ -138,14 +122,48 @@ class Timespan
         Pt::int64_t toMSecs() const;
 
         //! @brief Returns the fractions of a millisecond in microseconds (0 to 999).
-        int usecs() const;
+        int usecs() const
+        { return int(_span % 1000); }
 
         //! @brief Returns the total number of microseconds.
-        Pt::int64_t toUSecs() const;
+        inline Pt::int64_t toUSecs() const
+        { return _span; }
 
     private:
         Pt::int64_t _span;
 };
+
+
+inline bool operator ==(const Timespan& a, const Timespan& b)
+{ return a.toUSecs() == b.toUSecs(); }
+
+
+inline bool operator !=(const Timespan& a, const Timespan& b)
+{ return a.toUSecs() != b.toUSecs(); }
+
+
+inline bool operator >(const Timespan& a, const Timespan& b)
+{ return a.toUSecs() > b.toUSecs(); }
+
+
+inline bool operator >=(const Timespan& a, const Timespan& b)
+{ return a.toUSecs() >= b.toUSecs(); }
+
+
+inline bool operator <(const Timespan& a, const Timespan& b)
+{ return a.toUSecs() < b.toUSecs(); }
+
+
+inline bool operator <=(const Timespan& a, const Timespan& b)
+{ return a.toUSecs() <= b.toUSecs(); }
+
+
+inline Timespan operator +(const Timespan& a, const Timespan& b)
+{ return Timespan(a.toUSecs() + b.toUSecs()); }
+
+
+inline Timespan operator -(const Timespan& a, const Timespan& b)
+{ return Timespan(a.toUSecs() - b.toUSecs()); }
 
 
 inline int Timespan::days() const
@@ -202,54 +220,6 @@ inline Pt::int64_t Timespan::toMSecs() const
 }
 
 
-inline int Timespan::usecs() const
-{
-    return int(_span % 1000);
-}
-
-
-inline Pt::int64_t Timespan::toUSecs() const
-{
-    return _span;
-}
-
-
-inline bool Timespan::operator == (const Timespan& ts) const
-{
-    return _span == ts._span;
-}
-
-
-inline bool Timespan::operator != (const Timespan& ts) const
-{
-    return _span != ts._span;
-}
-
-
-inline bool Timespan::operator >  (const Timespan& ts) const
-{
-    return _span > ts._span;
-}
-
-
-inline bool Timespan::operator >= (const Timespan& ts) const
-{
-    return _span >= ts._span;
-}
-
-
-inline bool Timespan::operator <  (const Timespan& ts) const
-{
-    return _span < ts._span;
-}
-
-
-inline bool Timespan::operator <= (const Timespan& ts) const
-{
-    return _span <= ts._span;
-}
-
-
 inline Timespan::Timespan(int d, int h, int mins, int secs, int microsecs)
 : _span( Pt::int64_t(microsecs) +
          Pt::int64_t(secs)*Seconds +
@@ -301,19 +271,6 @@ inline void Timespan::setNull()
 {
     _span = 0;
 }
-
-
-inline Timespan Timespan::operator + (const Timespan& d) const
-{
-    return Timespan(_span + d._span);
-}
-
-
-inline Timespan Timespan::operator - (const Timespan& d) const
-{
-    return Timespan(_span - d._span);
-}
-
 
 inline Timespan& Timespan::operator += (const Timespan& d)
 {

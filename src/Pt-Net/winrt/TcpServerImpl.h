@@ -58,7 +58,7 @@ class TcpServerImpl
 
         void listen(const Endpoint& e, const TcpServer::Options& options);
 
-        bool run();
+        bool run(System::EventLoop& loop);
 
         void setTimeout(std::size_t msecs)
         { }

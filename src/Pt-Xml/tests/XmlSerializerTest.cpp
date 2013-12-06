@@ -220,8 +220,8 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             //std::cerr << "========================\n" << std::endl;
 
             PT_UNIT_ASSERT( date1 == date2);
-            PT_UNIT_ASSERT( datesp3.getPointer() == datesp4.getPointer() );
-            PT_UNIT_ASSERT( nullDate.getPointer() == 0);
+            PT_UNIT_ASSERT( datesp3.get() == datesp4.get() );
+            PT_UNIT_ASSERT( nullDate.get() == 0);
         }
 
         void MultiSet()
