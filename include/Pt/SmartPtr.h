@@ -620,8 +620,8 @@ bool operator<(const SmartPtr<T, O, D>& a, const T2* b)
 { return a.get() < b; }
 
 
-template <typename T, template <class> class M, template <class> class D >
-void fixup(const Pt::FixupInfo& fixup, SmartPtr<T,M, D>& fixme)
+template <typename T, typename M, typename D >
+void fixup(const Pt::FixupInfo& fixup, SmartPtr<T, M, D>& fixme)
 {
     if( fixup.isNull() )
     {
@@ -629,14 +629,14 @@ void fixup(const Pt::FixupInfo& fixup, SmartPtr<T,M, D>& fixme)
     }
     else
     {
-        const SmartPtr<T,M, D>* to = fixup.getTarget< SmartPtr<T,M, D> >();
+        const SmartPtr<T,M, D>* to = fixup.getTarget< SmartPtr<T, M, D> >();
         fixme = *to;
     }
 }
 
 
-template <typename T, template <class> class M, template <class> class D >
-void load(const LoadInfo& li, SmartPtr<T,M, D>& sp)
+template <typename T, typename M, typename D >
+void load(const LoadInfo& li, SmartPtr<T, M, D>& sp)
 {
     if( li.in().isReference() )
     {
@@ -649,7 +649,7 @@ void load(const LoadInfo& li, SmartPtr<T,M, D>& sp)
 }
 
 
-template <typename T, template <class> class M>
+template <typename T, typename M>
 void operator >>=(const Pt::SerializationInfo& si, SmartPtr<T, M>& sp)
 {
     sp = new T();
@@ -657,8 +657,8 @@ void operator >>=(const Pt::SerializationInfo& si, SmartPtr<T, M>& sp)
 }
 
 
-template <typename T, template <class> class M, template <class> class D >
-void save(Pt::SaveInfo& si, const SmartPtr<T,M, D>& sp)
+template <typename T, typename M, typename D >
+void save(Pt::SaveInfo& si, const SmartPtr<T, M, D>& sp)
 {
     if( ! sp.get() || ! si.save( *sp ) )
     {
@@ -667,8 +667,8 @@ void save(Pt::SaveInfo& si, const SmartPtr<T,M, D>& sp)
 }
 
 
-template <typename T, template <class> class M, template <class> class D >
-void operator <<=(Pt::SerializationInfo& si, const SmartPtr<T,M, D>& sp)
+template <typename T, typename M, typename D >
+void operator <<=(Pt::SerializationInfo& si, const SmartPtr<T, M, D>& sp)
 {
     if( sp.getPointer() )
     {
