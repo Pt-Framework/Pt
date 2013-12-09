@@ -236,7 +236,7 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
 }
 
 
-int TcpServerImpl::accept(const TcpSocket::Options& o)
+int TcpServerImpl::accept(const TcpSocketOptions& o)
 {
     log_debug( "accept " << this->fd() );
 

@@ -58,9 +58,6 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         void remoteEndpoint(Endpoint& ep) const;
 
-        bool isConnected() const
-        { return _isConnected; }
-
         void connect(const Endpoint& ep, const TcpSocketOptions&);
 
         bool beginConnect(System::EventLoop& loop, const Endpoint& ep, const TcpSocketOptions&);

@@ -90,7 +90,7 @@ class TcpServerImpl
         int fd() const
         { return _ioh.fd; }
 
-        int accept(const TcpSocket::Options& o);
+        int accept(const TcpSocketOptions& o);
 
         void cancel(System::EventLoop& s);
     

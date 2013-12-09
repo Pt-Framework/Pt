@@ -267,6 +267,7 @@ void TcpSocket::endConnect()
         {
             _connecting = false;
             _impl->endConnect( *loop() );
+            _isConnected = true;
         }
     }
     catch (...)
