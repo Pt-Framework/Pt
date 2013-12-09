@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2006-2013 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,6 +31,7 @@
 
 #include <Pt/Net/Api.h>
 #include <Pt/Net/Endpoint.h>
+#include <Pt/Types.h>
 #include <Pt/System/IODevice.h>
 #include <cstddef>
 
@@ -38,14 +39,7 @@ namespace Pt {
 
 namespace Net {
 
-union int_or_ptr_t
-{
-    void* p;
-    std::size_t s;
-};
-
-
-/** @brief UDP socket options
+/** @brief UDP socket options.
  */
 class PT_NET_API UdpSocketOptions
 {
@@ -77,85 +71,78 @@ class PT_NET_API UdpSocketOptions
             Broadcast = 1
         };
 
-        unsigned long _flags;
+        Pt::uint32_t _flags;
         int _hoplimit;
-        int_or_ptr_t _r0;
-        int_or_ptr_t _r1;
+        varint_t _r0;
+        varint_t _r1;
+        varint_t _r2;
 };
 
 
-/** @brief UDP server and client socket
+/** @brief UDP server and client socket.
  */
 class PT_NET_API UdpSocket : public System::IODevice
 {
     public:
-        class Options
-        {
-            public:
-                Options()
-                : _flags(0)
-                {}
-                
-                bool isBroadcast() const
-                { return (_flags & Broadcast) != 0; }
-                
-                void setBroadcast()
-                { _flags |= Broadcast; }
-
-                int hopLimit() const
-                { return _hoplimit; }
-
-                void setHopLimit(int n)
-                { _hoplimit = n; }
-
-            private:
-                enum SocketFlags 
-                { 
-                    Broadcast = 1,
-                };
-
-                unsigned long _flags;
-                int _hoplimit;
-        };
-
-    public:
         UdpSocket();
+
+        explicit UdpSocket(System::EventLoop& loop);
 
         ~UdpSocket();
 
-        bool beginBind(const Endpoint& addrinfo, const Options& o = Options());
+        void bind(const Endpoint& ep);
 
-        bool beginBind(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
+        void bind(const Endpoint& ep, const UdpSocketOptions& o);
+
+        void bind(const std::string& ipaddr, unsigned short int port);
+
+        void bind(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& o);
+
+        bool beginBind(const Endpoint& ep);
+
+        bool beginBind(const Endpoint& ep, const UdpSocketOptions& o);
+
+        bool beginBind(const std::string& ipaddr, unsigned short int port);
+
+        bool beginBind(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& o);
 
         void endBind();
 
         Signal<UdpSocket&>& bound()
         { return _bound; }
 
-        void bind(const Endpoint& addrinfo, const Options& o = Options());
+        bool isBound() const;
 
-        void bind(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
+        void connect(const Endpoint& ep);
 
-        bool beginConnect(const Endpoint& addrinfo, const Options& o = Options());
+        void connect(const Endpoint& ep, const UdpSocketOptions& o);
 
-        bool beginConnect(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
+        void connect(const std::string& ipaddr, unsigned short int port);
+
+        void connect(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& o);
+
+        void setTarget(const Endpoint& ep);
+
+        void setTarget(const Endpoint& ep, const UdpSocketOptions& o);
+
+        void setTarget(const std::string& ipaddr, unsigned short int port);
+
+        void setTarget(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& o);
+
+        bool beginConnect(const Endpoint& ep);
+
+        bool beginConnect(const Endpoint& ep, const UdpSocketOptions& o);
+
+        bool beginConnect(const std::string& ipaddr, unsigned short int port);
+
+        bool beginConnect(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& o);
 
         void endConnect();
 
         Signal<UdpSocket&>& connected()
         { return _connected; }
 
-        void connect(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
-
-        void connect(const Endpoint& addrinfo, const Options& o = Options());
-
-        void setTarget(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
-
-        void setTarget(const Endpoint& addrinfo, const Options& o = Options());
-
         bool isConnected() const;
-
-        bool isBound() const;
 
         void joinMulticastGroup(const std::string& ipaddr);
 
@@ -204,10 +191,10 @@ class PT_NET_API UdpSocket : public System::IODevice
         Signal<UdpSocket&> _connected;
 
         //! @internal
-        bool _connecting;
+        Signal<UdpSocket&> _bound;
 
         //! @internal
-        Signal<UdpSocket&> _bound;
+        bool _connecting;
 
         //! @internal
         bool _binding;

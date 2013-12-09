@@ -116,14 +116,14 @@ void TcpServerImpl::cancel(System::EventLoop& loop)
 
 
 void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port,
-                           const TcpServer::Options& options)
+                           const TcpServerOptions& options)
 {
     Endpoint e(ipaddr, port);
     listen(e, options);
 }
 
 
-void TcpServerImpl::listen(const Endpoint& ep, const TcpServer::Options& options)
+void TcpServerImpl::listen(const Endpoint& ep, const TcpServerOptions& options)
 {
     log_debug("listen on " << ep.toString());
 

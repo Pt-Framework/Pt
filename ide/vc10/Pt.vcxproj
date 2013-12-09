@@ -440,7 +440,6 @@
     <None Include="..\..\src\Pt-Http\Jamfile" />
     <None Include="..\..\src\Pt-Http\tests\Jamfile" />
     <None Include="..\..\src\Pt-Net\Jamfile" />
-    <None Include="..\..\src\Pt-Net\Makefile.am" />
     <None Include="..\..\src\Pt-Net\tests\Jamfile" />
     <None Include="..\..\src\Pt-Net\tests\Makefile.am" />
     <None Include="..\..\src\Pt-Reflex\Jamfile" />

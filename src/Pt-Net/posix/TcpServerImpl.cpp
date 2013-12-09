@@ -92,7 +92,7 @@ void TcpServerImpl::close()
 }
 
 
-void TcpServerImpl::listen(const Endpoint& ep, const TcpServer::Options& options)
+void TcpServerImpl::listen(const Endpoint& ep, const TcpServerOptions& options)
 {
     static const int on = 1;
 
@@ -167,9 +167,9 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServer::Options& options
             }
 
 #ifdef TCP_DEFER_ACCEPT
-            if( options.deferAccept() )
+            if( options.acceptDeferred() > 0 )
             {
-                int deferSecs = 30;
+                int deferSecs = options.acceptDeferred();
 
                 log_debug("set TCP_DEFER_ACCEPT to " << deferSecs);
 
@@ -195,7 +195,7 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServer::Options& options
 }
                     
 void TcpServerImpl::listen(const std::string& ipaddr,  unsigned short int port,
-                           const TcpServer::Options& options)
+                           const TcpServerOptions& options)
 {
 
     log_debug("listen on " << ipaddr << " port " << port);

@@ -37,12 +37,14 @@ namespace Pt {
 
 namespace Net {
 
-/** @brief Network address is already used
+/** @brief Network address is already used.
  */
 class PT_NET_API AddressInUse : public System::AccessFailed
 {
     public:
         AddressInUse(const std::string& endpoint);
+
+        AddressInUse(const char* endpoint);
 
         ~AddressInUse() throw()
         {}
@@ -52,5 +54,4 @@ class PT_NET_API AddressInUse : public System::AccessFailed
 
 } // namespace Pt
 
-#endif
-
+#endif // Pt_Net_AddressInUse_h

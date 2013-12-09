@@ -110,7 +110,7 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         virtual void onDetachSelectable(System::Selectable&);
 
-        virtual void onIdle(System::Selectable& s);
+        virtual void onCancel(System::Selectable& s);
 
         virtual void onReady(System::Selectable& s);
 

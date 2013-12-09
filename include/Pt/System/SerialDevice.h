@@ -32,6 +32,7 @@
 
 #include <Pt/System/Api.h>
 #include <Pt/System/IODevice.h>
+#include <Pt/Types.h>
 
 namespace Pt {
 
@@ -70,10 +71,9 @@ namespace System {
 */
 class PT_SYSTEM_API SerialDevice : public IODevice
 {
-    friend class SerialDeviceImpl;
-
    private:
         class SerialDeviceImpl* _impl;
+        Pt::uint32_t _r0;
 
    public:
         enum BaudRate

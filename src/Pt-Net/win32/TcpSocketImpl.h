@@ -68,18 +68,15 @@ class TcpSocketImpl
 
         void cancel(System::EventLoop& loop);
 
-        bool isConnected() const
-        { return _isConnected; }
+        void accept(TcpServer& server, const TcpSocketOptions& o);
 
-        void accept(const TcpServer& server, const TcpSocket::Options& o);
+        void connect(const Endpoint& addrinfo, const TcpSocketOptions&);
 
-        void connect(const Endpoint& addrinfo);
-
-        bool beginConnect(System::EventLoop& loop, const Endpoint& addrinfo);
+        bool beginConnect(System::EventLoop& loop, const Endpoint& addrinfo, const TcpSocketOptions&);
 
         void endConnect(System::EventLoop& loop);
 
-        bool runConnect(System::EventLoop& loop);
+        bool runConnect(System::EventLoop& loop, bool& isConnected);
 
         size_t beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
 
@@ -124,7 +121,6 @@ class TcpSocketImpl
         WSABUF _sendBuffer;
         WSABUF _receiveBuffer;
         bool _fdClose;
-        bool _isConnected;
         long _eventFlags;
 };
 

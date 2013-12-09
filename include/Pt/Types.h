@@ -146,6 +146,18 @@ namespace Pt {
     #define PT_WITH_LONG_LONG 1
 #endif
 
+//! @internal
+union varint_t
+{
+    void* ptr;
+    bool b;
+    int i;
+    unsigned u;
+    long l;
+    unsigned long ul;
+    std::size_t s;
+};
+
 } // namespace Pt
 
 #endif // Pt_Types_h

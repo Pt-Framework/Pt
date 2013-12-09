@@ -48,18 +48,6 @@ EventLoop::~EventLoop()
 }
 
 
-Signal<const Event&>& EventLoop::eventReceived()
-{ 
-    return _event; 
-}
-
-
-Signal<>& EventLoop::exited()
-{ 
-    return _exited; 
-}
-
-
 void EventLoop::run()
 {
     this->onRun();

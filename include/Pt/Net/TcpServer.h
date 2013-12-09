@@ -30,7 +30,9 @@
 #define Pt_Net_TcpServer_h
 
 #include <Pt/Net/Api.h>
+#include <Pt/Net/Endpoint.h>
 #include <Pt/Signal.h>
+#include <Pt/Types.h>
 #include <Pt/System/Selectable.h>
 #include <string>
 
@@ -38,79 +40,94 @@ namespace Pt {
 
 namespace Net {
 
-class TcpServerImpl;
-class Endpoint;
+/** @brief TCP server options.
+ */
+class PT_NET_API TcpServerOptions
+{
+    public:
+        TcpServerOptions(int backlog = 5);
 
-/** @brief TCP server socket
+        TcpServerOptions(const TcpServerOptions& opts);
+
+        ~TcpServerOptions();
+
+        TcpServerOptions& operator=(const TcpServerOptions& opts);
+
+        int acceptDeferred() const
+        { return _deferAccept; }
+                
+        void setDeferAccept(int n)
+        { _deferAccept = n; }
+
+        int backlog() const
+        { return _backlog; }
+
+        void setBacklog(int backlog)
+        { _backlog = backlog; }
+
+    private:
+        Pt::uint32_t _flags;
+        int _backlog;
+        int _deferAccept;
+        varint_t _r0;
+        varint_t _r1;
+        varint_t _r2;
+};
+
+class TcpServerImpl;
+
+/** @brief TCP server socket.
  */
 class PT_NET_API TcpServer : public System::Selectable
 {
     public:
-        class Options
-        {
-            public:
-                explicit Options(int backlog = 5)
-                : _flags(0)
-                , _backlog(backlog)
-                {}
-
-                bool deferAccept() const
-                { return (_flags & DeferAccept) != 0; }
-                
-                void setDeferAccept()
-                { _flags |= DeferAccept; }
-
-                int backlog() const
-                { return _backlog; }
-
-                void setBacklog(int backlog)
-                { _backlog = backlog; }
-
-            private:
-                enum SocketFlags 
-                { 
-                    DeferAccept = 1,
-                };
-
-            private:
-                unsigned long _flags;
-                int _backlog;
-        };
-
-    public:
         TcpServer();
+
+        explicit TcpServer(System::EventLoop& loop);
         
         /** @brief Creates a server socket and listens on an address
         */
-        TcpServer(const std::string& ipaddr, unsigned short int port, const Options& options = Options());
+        explicit TcpServer(const Endpoint& ep);
 
-        TcpServer(const Endpoint& ipaddr, const Options& options = Options());
-        
+        TcpServer(const Endpoint& ep, const TcpServerOptions& options);
+
+        TcpServer(const std::string& ipaddr, unsigned short int port);
+
+        TcpServer(const std::string& ipaddr, unsigned short int port, const TcpServerOptions& options);
+
         ~TcpServer();
-        
-        void listen(const std::string& ipaddr, unsigned short int port, const Options& options = Options());
 
-        void listen(const Endpoint& ipaddr, const Options& options = Options());
+        void listen(const Endpoint& ep);
         
+        void listen(const Endpoint& ep, const TcpServerOptions& options);
+
+        void listen(const std::string& ipaddr, unsigned short int port);
+
+        void listen(const std::string& ipaddr, unsigned short int port, const TcpServerOptions& options);
+
         void beginAccept();
         
         void close();
 
-        Signal<TcpServer&>& connectionPending();
+        Signal<TcpServer&>& connectionPending()
+        { return _connectionPending; }
 
         //! @brief Returns the parent event loop in which operations are running
         System::EventLoop* loop() const
-         { return _loop; }
+        { return _loop; }
 
         //! @internal
-        TcpServerImpl& impl() const;
+        const TcpServerImpl& impl() const
+        { return *_impl; }
+
+        //! @internal
+        TcpServerImpl& impl()
+        { return *_impl; }
 
     protected:
-        virtual void onAttach(System::EventLoop& loop)
-        { _loop = &loop;}
+        virtual void onAttach(System::EventLoop& loop);
 
-        virtual void onDetach(System::EventLoop& loop)
-        { _loop = 0; }
+        virtual void onDetach(System::EventLoop& loop);
 
         virtual void onCancel();
         
@@ -126,4 +143,4 @@ class PT_NET_API TcpServer : public System::Selectable
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Net_TcpServer_h

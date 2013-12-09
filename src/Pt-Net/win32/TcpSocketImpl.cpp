@@ -50,7 +50,6 @@ TcpSocketImpl::TcpSocketImpl(TcpSocket& socket)
 : _errorPending(false)
 , _fd(INVALID_SOCKET)
 , _fdClose(false)
-, _isConnected(false)
 , _eventFlags(FD_CLOSE)
 , _timeout(System::EventLoop::WaitInfinite)
 , _ioh(socket)
@@ -101,23 +100,20 @@ void TcpSocketImpl::close()
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
     _fdClose = false;
-    _isConnected = false;
     _errorPending = false;
 }
 
 
-void TcpSocketImpl::accept(const TcpServer& server, const TcpSocket::Options&)
+void TcpSocketImpl::accept(TcpServer& server, const TcpSocketOptions&)
 {
     _fd = server.impl().accept();
-    _isConnected = true;
     log_debug("accepted " << _fd);
 }
 
 
-void TcpSocketImpl::connect(const Endpoint& ep)
+void TcpSocketImpl::connect(const Endpoint& ep, const TcpSocketOptions&)
 {
     log_debug("connect");
-    assert( ! _isConnected );
 
     _addrInfo.resolve( ep );
     _addrInfoPtr = _addrInfo.begin();
@@ -128,8 +124,6 @@ void TcpSocketImpl::connect(const Endpoint& ep)
 
 void TcpSocketImpl::connect()
 {
-    assert( ! _isConnected );
-
     for( ; ; ++_addrInfoPtr)
     {
         if(_addrInfoPtr == _addrInfo.end())
@@ -151,9 +145,7 @@ void TcpSocketImpl::connect()
         log_debug("created socket " << _fd);
         
         if( ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
-        {
-            _isConnected = true;
-        
+        {       
             //Set socket to non-blocking mode
             argp = 1;
             ::ioctlsocket(_fd, FIONBIO, &argp);
@@ -165,9 +157,8 @@ void TcpSocketImpl::connect()
 }
 
 
-bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep)
+bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep, const TcpSocketOptions&)
 {
-    assert( ! _isConnected );
     log_debug("begin connect");
 
     _errorPending = false;
@@ -181,8 +172,7 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep)
     _addrInfo.resolve(ep);
     _addrInfoPtr = _addrInfo.begin();
 
-    _isConnected = beginConnect();
-    return _isConnected;
+    return beginConnect();
 }
 
 
@@ -204,7 +194,6 @@ bool TcpSocketImpl::beginConnect()
 
         if( ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
         {
-            _isConnected = true;
             log_debug("immediate connect");
             return true;
         }
@@ -234,9 +223,6 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
     if(_errorPending)
         throw System::AccessFailed(_addrInfo.host() );
 
-    if( _isConnected )
-        return;
-
     log_info("async connect not yet ready socket=" << _fd);
 
     _eventFlags |= FD_CONNECT;
@@ -263,7 +249,6 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
             if(events.iErrorCode[s] == 0)
             {
                 log_debug("connected " << _fd);
-                _isConnected = true;
                 return;
             }
         }
@@ -281,7 +266,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
 }
 
 
-bool TcpSocketImpl::runConnect(System::EventLoop& loop)
+bool TcpSocketImpl::runConnect(System::EventLoop& loop, bool& isConnected)
 {
     WSANETWORKEVENTS events;
 
@@ -305,7 +290,6 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
     if(events.iErrorCode[s] == 0)
     {
         log_debug("connect was successful");
-        _isConnected = true;
         return true;
     }
 
@@ -316,14 +300,14 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop)
     try 
     {
         ++_addrInfoPtr;
-        _isConnected = beginConnect();
+        isConnected = beginConnect();
     }
     catch(const System::IOError&)
     {
         _errorPending = true;
     }
 
-    return _isConnected || _errorPending;
+    return isConnected || _errorPending;
 }
 
 
@@ -337,7 +321,6 @@ bool TcpSocketImpl::runRead(System::EventLoop& loop)
     if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
     {
         _fdClose = true;
-        //_isConnected = false;
         return true;
     }
 
@@ -360,7 +343,6 @@ bool TcpSocketImpl::runWrite(System::EventLoop& loop)
     if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
     {
         _fdClose = true;
-        //_isConnected = false;
         return true;
     }
 

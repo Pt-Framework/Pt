@@ -27,61 +27,134 @@
  */
 
 #include "TcpSocketImpl.h"
-#include "Pt/Net/TcpSocket.h"
-#include "Pt/System/IOError.h"
-#include "Pt/System/EventLoop.h"
+#include <Pt/Net/TcpSocket.h>
+#include <Pt/System/EventLoop.h>
 #include <stdexcept>
 #include <memory>
-#include <iostream>
 #include <cassert>
 
 namespace Pt {
 
 namespace Net {
 
+TcpSocketOptions::TcpSocketOptions()
+: _flags(0)
+{
+}
+
+
+TcpSocketOptions::TcpSocketOptions(const TcpSocketOptions& opts)
+{
+}
+
+
+TcpSocketOptions::~TcpSocketOptions()
+{
+}
+
+
+TcpSocketOptions& TcpSocketOptions::operator=(const TcpSocketOptions& opts)
+{
+    return *this;
+}
+
+
 TcpSocket::TcpSocket()
 : _impl(0)
 , _connecting(false)
+, _isConnected(false)
 {
     _impl = new TcpSocketImpl(*this);
 }
 
 
-TcpSocket::TcpSocket(const TcpServer& server, const Options& opts)
+TcpSocket::TcpSocket(System::EventLoop& loop)
 : _impl(0)
 , _connecting(false)
+, _isConnected(false)
+{
+    _impl = new TcpSocketImpl(*this);
+    std::auto_ptr<TcpSocketImpl> impl(_impl);
+
+    setActive(loop);
+    impl.release();
+}
+
+
+TcpSocket::TcpSocket(TcpServer& server)
+: _impl(0)
+, _connecting(false)
+, _isConnected(false)
+{
+    _impl = new TcpSocketImpl(*this);
+    std::auto_ptr<TcpSocketImpl> impl(_impl);
+
+    this->accept(server);
+    impl.release();
+}
+
+
+TcpSocket::TcpSocket(TcpServer& server, const TcpSocketOptions& opts)
+: _impl(0)
+, _connecting(false)
+, _isConnected(false)
 {
     _impl = new TcpSocketImpl(*this);
     std::auto_ptr<TcpSocketImpl> impl(_impl);
 
     this->accept(server, opts);
-
     impl.release();
 }
 
 
-TcpSocket::TcpSocket(const std::string& ipaddr, unsigned short int port, const Options&)
+TcpSocket::TcpSocket(const Endpoint& ep)
 : _impl(0)
 , _connecting(false)
+, _isConnected(false)
+{
+    _impl = new TcpSocketImpl(*this);
+    std::auto_ptr<TcpSocketImpl> impl(_impl);
+
+    this->connect(ep);
+    impl.release();
+}
+
+
+TcpSocket::TcpSocket(const Endpoint& ep, const TcpSocketOptions& opts)
+: _impl(0)
+, _connecting(false)
+, _isConnected(false)
+{
+    _impl = new TcpSocketImpl(*this);
+    std::auto_ptr<TcpSocketImpl> impl(_impl);
+
+    this->connect(ep, opts);
+    impl.release();
+}
+
+
+TcpSocket::TcpSocket(const std::string& ipaddr, unsigned short int port)
+: _impl(0)
+, _connecting(false)
+, _isConnected(false)
 {
     _impl = new TcpSocketImpl(*this);
     std::auto_ptr<TcpSocketImpl> impl(_impl);
 
     this->connect(ipaddr, port);
-
     impl.release();
 }
 
 
-TcpSocket::TcpSocket(const Endpoint& addrinfo, const Options&)
+TcpSocket::TcpSocket(const std::string& ipaddr, unsigned short int port, const TcpSocketOptions& opts)
 : _impl(0)
 , _connecting(false)
+, _isConnected(false)
 {
     _impl = new TcpSocketImpl(*this);
     std::auto_ptr<TcpSocketImpl> impl(_impl);
 
-    this->connect(addrinfo);
-
+    this->connect(ipaddr, port, opts);
     impl.release();
 }
 
@@ -99,61 +172,84 @@ TcpSocket::~TcpSocket()
 }
 
 
-void TcpSocket::localEndpoint(Endpoint& ep) const
+void TcpSocket::accept(TcpServer& server)
 {
-    _impl->localEndpoint(ep);
+    TcpSocketOptions opts;
+    accept(server, opts);
 }
 
 
-void TcpSocket::remoteEndpoint(Endpoint& ep) const
-{
-    _impl->remoteEndpoint(ep);
-}
-
-
-void TcpSocket::accept(const TcpServer& server, const Options& o)
+void TcpSocket::accept(TcpServer& server, const TcpSocketOptions& o)
 {
     this->close();
 
     _impl->accept(server, o);
+    _isConnected = true;
 }
 
 
-void TcpSocket::connect(const Endpoint& addrinfo, const Options&)
+void TcpSocket::connect(const Endpoint& addrinfo)
+{
+    TcpSocketOptions opts;
+    connect(addrinfo, opts);
+}
+
+
+void TcpSocket::connect(const Endpoint& addrinfo, const TcpSocketOptions& opts)
 {
     this->close();
-    _impl->connect(addrinfo);
+    
+    _impl->connect(addrinfo, opts);
+    _isConnected = true;
 }
 
 
-void TcpSocket::connect(const std::string& ipaddr, unsigned short int port, const Options&)
+void TcpSocket::connect(const std::string& ipaddr, unsigned short int port)
 { 
-    connect(Endpoint(ipaddr, port)); 
+    connect( Endpoint(ipaddr, port) ); 
 }
 
 
-bool TcpSocket::beginConnect(const std::string& ipaddr, unsigned short int port, const Options&)
+void TcpSocket::connect(const std::string& ipaddr, unsigned short int port, const TcpSocketOptions& opts)
 { 
-    return beginConnect(Endpoint(ipaddr, port)); 
+    connect(Endpoint(ipaddr, port), opts); 
 }
 
 
-bool TcpSocket::beginConnect(const Endpoint& addrinfo, const Options&)
+void TcpSocket::beginConnect(const Endpoint& ep)
+{
+    TcpSocketOptions opts;
+    return beginConnect(ep, opts);
+}
+
+
+void TcpSocket::beginConnect(const Endpoint& ep, const TcpSocketOptions& opts)
 {
     System::EventLoop* loop = this->loop();
     if( ! loop )
-        throw std::logic_error( PT_ERROR_MSG("socket not active") );
+        throw std::logic_error("socket not active");
 
     this->close();
 
-    bool ret = _impl->beginConnect(*loop, addrinfo);
+    _isConnected = _impl->beginConnect(*loop, ep, opts);
     _connecting = true;
-    if(ret)
+    
+    if(_isConnected)
     {
         loop->setReady(*this);
     }
+}
 
-    return ret;
+
+void TcpSocket::beginConnect(const std::string& ipaddr, unsigned short int port)
+{ 
+    return beginConnect( Endpoint(ipaddr, port) ); 
+}
+
+
+void TcpSocket::beginConnect(const std::string& ipaddr, unsigned short int port, const TcpSocketOptions& opts)
+{ 
+    return beginConnect(Endpoint(ipaddr, port), opts); 
 }
 
 
@@ -161,6 +257,12 @@ void TcpSocket::endConnect()
 {
     try
     {
+        if( _isConnected )
+        {
+            _connecting = false;
+            return;
+        }
+
         if(_connecting)
         {
             _connecting = false;
@@ -175,19 +277,27 @@ void TcpSocket::endConnect()
 }
 
 
-bool TcpSocket::isConnected() const
+void TcpSocket::localEndpoint(Endpoint& ep) const
 {
-    return _impl->isConnected();
+    _impl->localEndpoint(ep);
+}
+
+
+void TcpSocket::remoteEndpoint(Endpoint& ep) const
+{
+    _impl->remoteEndpoint(ep);
 }
 
 
 void TcpSocket::onClose()
 {
     _impl->close();
+    _connecting = false;
+    _isConnected = false;
 }
 
 
-void TcpSocket::onSetTimeout(size_t timeout)
+void TcpSocket::onSetTimeout(std::size_t timeout)
 {
     _impl->setTimeout(timeout);
 }
@@ -197,7 +307,7 @@ bool TcpSocket::onRun()
 {
     if( _connecting )
     {
-        if( this->isConnected() || _impl->runConnect( *loop() ) )
+        if( this->isConnected() || _impl->runConnect( *loop(), _isConnected ) )
         {
             connected().send(*this);
             return true;
@@ -228,37 +338,37 @@ bool TcpSocket::onRun()
 }
 
 
-size_t TcpSocket::onBeginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t TcpSocket::onBeginRead(System::EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     return _impl->beginRead(loop, buffer, n, eof);
 }
 
 
-size_t TcpSocket::onEndRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t TcpSocket::onEndRead(System::EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     return _impl->endRead(loop, buffer, n, eof);
 }
 
 
-size_t TcpSocket::onRead(char* buffer, size_t count, bool& eof)
+std::size_t TcpSocket::onRead(char* buffer, std::size_t count, bool& eof)
 {
     return _impl->read(buffer, count, eof);
 }
 
 
-size_t TcpSocket::onBeginWrite(System::EventLoop& loop, const char* buffer, size_t n)
+std::size_t TcpSocket::onBeginWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
 {
     return _impl->beginWrite(loop, buffer, n);
 }
 
 
-size_t TcpSocket::onEndWrite(System::EventLoop& loop, const char* buffer, size_t n)
+std::size_t TcpSocket::onEndWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
 {
     return _impl->endWrite(loop, buffer, n);
 }
 
 
-size_t TcpSocket::onWrite(const char* buffer, size_t count)
+std::size_t TcpSocket::onWrite(const char* buffer, std::size_t count)
 {
     return _impl->write(buffer, count);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2007 by Dr. Marc Boris Duerner
+ * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_NET_API_H
 #define PT_NET_API_H
 
@@ -43,7 +44,7 @@
 namespace Pt {
 
 /** @namespace Pt::Net
-    @brief Network and Socket Programming
+    @brief Network and Socket Programming.
 */
 namespace Net {
 
@@ -57,4 +58,4 @@ class UdpSocket;
 
 } // namespace Pt
  
-#endif
+#endif // PT_NET_API_H

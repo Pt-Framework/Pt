@@ -69,6 +69,9 @@ class PT_SYSTEM_API FileDevice : public IODevice
         Signal<FileDevice&>& opened()
         { return _opened; }
 
+        bool isOpen() const
+        { return _isOpen; }
+
     protected:
         size_t onBeginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
 

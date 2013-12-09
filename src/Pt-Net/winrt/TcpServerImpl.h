@@ -54,9 +54,9 @@ class TcpServerImpl
         Windows::Networking::Sockets::StreamSocket^ accept();
 
         void listen(const std::string& ipaddr, unsigned short int port,
-                    const TcpServer::Options& options);
+                    const TcpServerOptions& options);
 
-        void listen(const Endpoint& e, const TcpServer::Options& options);
+        void listen(const Endpoint& e, const TcpServerOptions& options);
 
         bool run(System::EventLoop& loop);
 

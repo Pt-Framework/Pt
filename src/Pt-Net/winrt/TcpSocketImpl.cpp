@@ -103,7 +103,7 @@ void TcpSocketImpl::close()
 }
 
 
-void TcpSocketImpl::accept(const TcpServer& server, const TcpSocket::Options&)
+void TcpSocketImpl::accept(TcpServer& server, const TcpSocketOptions&)
 {
     assert( ! _isConnected );
 
@@ -113,7 +113,7 @@ void TcpSocketImpl::accept(const TcpServer& server, const TcpSocket::Options&)
 }
 
 
-void TcpSocketImpl::connect(const Endpoint& ep)
+void TcpSocketImpl::connect(const Endpoint& ep, const TcpSocketOptions&)
 {
     log_debug( "connecting socket to " << ep.toString() );
     assert( ! _isConnected );
@@ -122,7 +122,7 @@ void TcpSocketImpl::connect(const Endpoint& ep)
 }
 
 
-bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep)
+bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep, const TcpSocketOptions&)
 {
     assert( ! _isConnected );
     log_debug( "begin connecting socket to " << ep.toString() );
@@ -159,7 +159,7 @@ bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep)
 }
 
 
-bool TcpSocketImpl::runConnect(System::EventLoop& loop)
+bool TcpSocketImpl::runConnect(System::EventLoop& loop, bool& isConnected)
 {
     // this method is called by the event loop, when it wakes up and checks
     // the devices in the ready state. When true is returned, the connected

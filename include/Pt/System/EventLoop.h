@@ -75,11 +75,13 @@ class PT_SYSTEM_API EventLoop : public Connectable
 
         /** @brief Reports all events
         */
-        Signal<const Event&>& eventReceived();
+        Signal<const Event&>& eventReceived()
+        { return _event; }
 
         /** @brief Emited when the eventloop is exited.
         */
-        Signal<>& exited();
+        Signal<>& exited()
+        { return _exited; }
 
         /** @brief Set the Selectable to ready-state.
         */
@@ -126,8 +128,8 @@ class PT_SYSTEM_API EventLoop : public Connectable
         //! @internal Mark the selectable as ready
         virtual void onReady(Selectable&) = 0;
 
-        //! @internal Mark the selecatble as not ready
-        virtual void onIdle(Selectable&) = 0;
+        //! @internal Mark the selectable as not ready
+        virtual void onCancel(Selectable&) = 0;
 
     private:
         Signal<> _exited;

@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/Net/AddressInUse.h"
+#include <Pt/Net/AddressInUse.h>
 
 namespace Pt {
 
@@ -36,7 +36,11 @@ AddressInUse::AddressInUse(const std::string& endpoint)
 : AccessFailed(endpoint)
 { }
 
+
+AddressInUse::AddressInUse(const char* endpoint)
+: AccessFailed(endpoint)
+{ }
+
 } // namespace Net
 
 } // namespace Pt
-

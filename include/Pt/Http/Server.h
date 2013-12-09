@@ -80,14 +80,14 @@ class PT_HTTP_API Server : public Connectable
                 Ssl::Context* sslContext() const
                 { return _sslctx; }
 
-                Net::TcpServer::Options& tcp()
+                Net::TcpServerOptions& tcp()
                 { return _tcpOptions; }
 
-                const Net::TcpServer::Options& tcp() const
+                const Net::TcpServerOptions& tcp() const
                 { return _tcpOptions; }
 
             private:
-                Net::TcpServer::Options _tcpOptions;
+                Net::TcpServerOptions _tcpOptions;
                 std::size_t _maxThreads;
                 Ssl::Context* _sslctx;
         };

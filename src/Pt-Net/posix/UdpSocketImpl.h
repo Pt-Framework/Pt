@@ -54,23 +54,23 @@ class UdpSocketImpl : public System::IODeviceImpl
 
         void close();
 
-        bool beginBind(System::EventLoop& loop, const Endpoint& ep, const UdpSocket::Options& o);
+        bool beginBind(System::EventLoop& loop, const Endpoint& ep, const UdpSocketOptions& o);
 
         bool runBind(System::EventLoop& loop);
 
         void endBind(System::EventLoop& loop);
 
-        void bind(const Endpoint& ep, const UdpSocket::Options& o);
+        void bind(const Endpoint& ep, const UdpSocketOptions& o);
 
-        bool beginConnect(System::EventLoop& loop, const Endpoint& ep, const UdpSocket::Options& o);
+        bool beginConnect(System::EventLoop& loop, const Endpoint& ep, const UdpSocketOptions& o);
 
         bool runConnect(System::EventLoop& loop);
 
         void endConnect(System::EventLoop& loop);
 
-        void connect(const Endpoint& ep, const UdpSocket::Options& o);
+        void connect(const Endpoint& ep, const UdpSocketOptions& o);
 
-        void setTarget(const Endpoint& ep, const UdpSocket::Options& o);
+        void setTarget(const Endpoint& ep, const UdpSocketOptions& o);
 
         bool isConnected() const;
 

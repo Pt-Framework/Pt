@@ -116,7 +116,7 @@ class PT_SYSTEM_API MainLoop : public EventLoop
 
         virtual void onDetachSelectable(Selectable&);
 
-        virtual void onIdle(Selectable& s);
+        virtual void onCancel(Selectable& s);
 
         virtual void onReady(Selectable& s);
 

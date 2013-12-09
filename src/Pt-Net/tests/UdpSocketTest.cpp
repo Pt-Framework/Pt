@@ -143,7 +143,7 @@ class UdpSocketTest : public Pt::Unit::TestSuite
 
         void Broadcast()
         {
-            Pt::Net::UdpSocket::Options opts;
+            Pt::Net::UdpSocketOptions opts;
             opts.setBroadcast();
 
             _sender->setActive(*_loop);

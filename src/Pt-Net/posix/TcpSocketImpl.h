@@ -52,7 +52,7 @@ class TcpSocketImpl : public System::IODeviceImpl
 
         void cancel(System::EventLoop& loop);
 
-        bool runConnect(System::EventLoop& loop);
+        bool runConnect(System::EventLoop& loop, bool& isConnected);
 
         void localEndpoint(Endpoint& ep) const;
 
@@ -61,13 +61,13 @@ class TcpSocketImpl : public System::IODeviceImpl
         bool isConnected() const
         { return _isConnected; }
 
-        void connect(const Endpoint& ep);
+        void connect(const Endpoint& ep, const TcpSocketOptions&);
 
-        bool beginConnect(System::EventLoop& loop, const Endpoint& ep);
+        bool beginConnect(System::EventLoop& loop, const Endpoint& ep, const TcpSocketOptions&);
 
         void endConnect(System::EventLoop& loop);
 
-        void accept(const TcpServer& server, const TcpSocket::Options& o);
+        void accept(TcpServer& server, const TcpSocketOptions& o);
 
     protected:
         void connect();
@@ -77,7 +77,6 @@ class TcpSocketImpl : public System::IODeviceImpl
     private:
         TcpSocket& _socket;
         bool _errorPending;
-        bool _isConnected;
         AddrInfo _addrInfo;
         AddrInfo::const_iterator _addrInfoPtr;
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2009 by Marc Boris Duerner, Tommi Maekitalo
+ * Copyright (C) 2006-2013 by Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,11 +27,11 @@
  */
 
 #include "UdpSocketImpl.h"
-#include "Pt/Net/UdpSocket.h"
-#include <stdexcept>
-#include <memory>
+#include <Pt/Net/UdpSocket.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/System/IOError.h>
+#include <stdexcept>
+#include <memory>
 
 namespace Pt {
 
@@ -46,6 +46,7 @@ UdpSocketOptions::UdpSocketOptions()
 
 UdpSocketOptions::UdpSocketOptions(const UdpSocketOptions& opts)
 : _flags(opts._flags)
+, _hoplimit(opts._hoplimit)
 {
 }
 
@@ -58,8 +59,11 @@ UdpSocketOptions::~UdpSocketOptions()
 UdpSocketOptions& UdpSocketOptions::operator=(const UdpSocketOptions& opts)
 {
     _flags = opts._flags;
+    _hoplimit = opts._hoplimit;
     return *this;
 }
+
+
 
 
 UdpSocket::UdpSocket()
@@ -68,6 +72,19 @@ UdpSocket::UdpSocket()
 , _binding(false)
 {
     _impl = new UdpSocketImpl(*this);
+}
+
+
+UdpSocket::UdpSocket(System::EventLoop& loop)
+: _impl(0)
+, _connecting(false)
+, _binding(false)
+{
+    _impl = new UdpSocketImpl(*this);
+    std::auto_ptr<UdpSocketImpl> impl(_impl);
+
+    setActive(loop);
+    impl.release();
 }
 
 
@@ -84,14 +101,42 @@ UdpSocket::~UdpSocket()
 }
 
 
-bool UdpSocket::beginBind(const std::string& ipaddr, unsigned short int port, const Options& o)
-{ 
-    Endpoint ai(ipaddr, port);
-    return beginBind( ai, o); 
+void UdpSocket::bind(const Endpoint& ep)
+{
+    UdpSocketOptions opts;
+    bind(ep, opts);
 }
 
 
-bool UdpSocket::beginBind(const Endpoint& addrinfo, const Options& o)
+void UdpSocket::bind(const Endpoint& ep, const UdpSocketOptions& opts)
+{
+    _impl->bind(ep, opts);
+    this->setEof(false);
+}
+
+
+void UdpSocket::bind(const std::string& ipaddr, unsigned short int port)
+{
+    Endpoint ep(ipaddr, port);
+    bind(ep);
+}
+
+
+void UdpSocket::bind(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& opts)
+{
+    Endpoint ep(ipaddr, port);
+    bind(ep, opts);
+}
+
+
+bool UdpSocket::beginBind(const Endpoint& ep)
+{
+    UdpSocketOptions opts;
+    return beginBind(ep, opts);
+}
+
+
+bool UdpSocket::beginBind(const Endpoint& addrinfo, const UdpSocketOptions& o)
 {
     System::EventLoop* loop = this->loop();
     if( ! loop )
@@ -106,6 +151,20 @@ bool UdpSocket::beginBind(const Endpoint& addrinfo, const Options& o)
     }
 
     return ret;
+}
+
+
+bool UdpSocket::beginBind(const std::string& ipaddr, unsigned short int port)
+{ 
+    Endpoint ep(ipaddr, port);
+    return beginBind(ep); 
+}
+
+
+bool UdpSocket::beginBind(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& o)
+{ 
+    Endpoint ep(ipaddr, port);
+    return beginBind( ep, o); 
 }
 
 
@@ -128,33 +187,78 @@ void UdpSocket::endBind()
 }
 
 
-void UdpSocket::bind(const Endpoint& addrinfo, const Options& opts)
+bool UdpSocket::isBound() const
 {
-    _impl->bind(addrinfo, opts);
+    return _impl->isBound();
+}
+
+
+void UdpSocket::connect(const Endpoint& ep)
+{
+    UdpSocketOptions opts;
+    connect(ep, opts);
+}
+
+
+void UdpSocket::connect(const Endpoint& ep, const UdpSocketOptions& opts)
+{
+    _impl->connect(ep, opts);
     this->setEof(false);
 }
 
 
-void UdpSocket::bind(const std::string& ipaddr, unsigned short int port, const Options& opts)
+void UdpSocket::connect(const std::string& ipaddr, unsigned short int port)
 {
-    Endpoint ai(ipaddr, port);
-    bind(ai, opts);
+    connect( Endpoint(ipaddr, port) );
 }
 
 
-bool UdpSocket::beginConnect(const std::string& ipaddr, unsigned short int port, const Options& opts)
-{ 
-    return beginConnect(Endpoint(ipaddr, port), opts); 
+void UdpSocket::connect(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& opts)
+{
+    connect( Endpoint(ipaddr, port), opts );
 }
 
 
-bool UdpSocket::beginConnect(const Endpoint& addrinfo, const Options& opts)
+void UdpSocket::setTarget(const Endpoint& ep)
+{
+    UdpSocketOptions opts;
+    setTarget(ep, opts);
+}
+
+
+void UdpSocket::setTarget(const Endpoint& ep, const UdpSocketOptions& opts)
+{
+    _impl->setTarget(ep, opts);
+    this->setEof(false);
+}
+
+
+void UdpSocket::setTarget(const std::string& ipaddr, unsigned short int port)
+{
+    setTarget( Endpoint(ipaddr, port) );
+}
+
+
+void UdpSocket::setTarget(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& opts)
+{
+    setTarget(Endpoint(ipaddr, port), opts);
+}
+
+
+bool UdpSocket::beginConnect(const Endpoint& ep)
+{
+    UdpSocketOptions opts;
+    return beginConnect(ep, opts);
+}
+
+
+bool UdpSocket::beginConnect(const Endpoint& ep, const UdpSocketOptions& opts)
 {
     System::EventLoop* loop = this->loop();
     if( ! loop )
         throw std::logic_error( PT_ERROR_MSG("socket not active") );
 
-    bool ret = _impl->beginConnect(*loop, addrinfo, opts);
+    bool ret = _impl->beginConnect(*loop, ep, opts);
     _connecting = true;
     
     if(ret)
@@ -163,6 +267,18 @@ bool UdpSocket::beginConnect(const Endpoint& addrinfo, const Options& opts)
     }
 
     return ret;
+}
+
+
+bool UdpSocket::beginConnect(const std::string& ipaddr, unsigned short int port)
+{ 
+    return beginConnect( Endpoint(ipaddr, port) ); 
+}
+
+
+bool UdpSocket::beginConnect(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& opts)
+{ 
+    return beginConnect(Endpoint(ipaddr, port), opts); 
 }
 
 
@@ -185,41 +301,9 @@ void UdpSocket::endConnect()
 }
 
 
-void UdpSocket::connect(const std::string& ipaddr, unsigned short int port, const Options& opts)
-{
-    connect( Endpoint(ipaddr, port), opts );
-}
-
-
-void UdpSocket::connect(const Endpoint& addrinfo, const Options& opts)
-{
-    _impl->connect(addrinfo, opts);
-    this->setEof(false);
-}
-
-
-void UdpSocket::setTarget(const std::string& ipaddr, unsigned short int port, const Options& opts)
-{
-    _impl->setTarget(Endpoint(ipaddr, port), opts);
-    this->setEof(false);
-}
-
-
-void UdpSocket::setTarget(const Endpoint& addrinfo, const Options& opts)
-{
-    _impl->setTarget(addrinfo, opts);
-    this->setEof(false);
-}
-
 bool UdpSocket::isConnected() const
 {
     return _impl->isConnected();
-}
-
-
-bool UdpSocket::isBound() const
-{
-    return _impl->isBound();
 }
 
 
@@ -250,6 +334,9 @@ const Endpoint& UdpSocket::remoteEndpoint() const
 void UdpSocket::onClose()
 {
     _impl->close();
+
+    _connecting = false;
+    _binding = false;
 }
 
 
@@ -354,6 +441,6 @@ void UdpSocket::onCancel()
     IODevice::onCancel();
 }
 
-} //namespace Net
+} // namespace Net
 
 } // namespace Pt

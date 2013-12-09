@@ -73,7 +73,7 @@ void MainLoop::onDetachSelectable(Selectable& s)
 }
 
 
-void MainLoop::onIdle(Selectable& s)
+void MainLoop::onCancel(Selectable& s)
 {
     _impl->idle(s);
 }

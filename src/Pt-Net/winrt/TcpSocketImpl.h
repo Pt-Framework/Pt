@@ -55,15 +55,15 @@ class TcpSocketImpl
         bool isConnected() const
         { return _isConnected; }
 
-        void accept(const TcpServer& server, const TcpSocket::Options& o);
+        void accept(TcpServer& server, const TcpSocketOptions& o);
 
-        void connect(const Endpoint& ep);
+        void connect(const Endpoint& ep, const TcpSocketOptions&);
 
-        bool beginConnect(System::EventLoop& loop, const Endpoint& ep);
+        bool beginConnect(System::EventLoop& loop, const Endpoint& ep, const TcpSocketOptions&);
 
         void endConnect(System::EventLoop& loop);
 
-        bool runConnect(System::EventLoop& loop);
+        bool runConnect(System::EventLoop& loop, bool& isConnected);
 
         size_t beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
 

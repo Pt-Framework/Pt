@@ -74,10 +74,12 @@ class PT_NET_API Endpoint
         explicit Endpoint(EndpointImpl* impl);
 
         //! @internal
-        EndpointImpl* impl();
+        EndpointImpl* impl()
+        { return _impl; }
 
         //! @internal
-        const EndpointImpl* impl() const;
+        const EndpointImpl* impl() const
+        { return _impl; }
 
     private:
         EndpointImpl* _impl;

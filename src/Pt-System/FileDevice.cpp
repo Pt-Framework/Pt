@@ -116,6 +116,12 @@ void FileDevice::beginOpen(const char* path, std::ios::openmode mode)
 
 void FileDevice::endOpen()
 {
+    if(_isOpen)
+    {
+        _opening = false;
+        return;
+    }
+
     if(_opening)
     {
         _opening = false;

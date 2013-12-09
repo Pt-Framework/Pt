@@ -66,18 +66,6 @@ Endpoint::~Endpoint()
 }
 
 
-EndpointImpl* Endpoint::impl()               
-{ 
-    return _impl; 
-}
-
-
-const EndpointImpl* Endpoint::impl() const   
-{ 
-    return _impl; 
-}
-
-
 Endpoint& Endpoint::operator= (const Endpoint& src)
 {
     *_impl = *src._impl;

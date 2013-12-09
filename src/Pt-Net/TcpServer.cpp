@@ -28,13 +28,45 @@
 
 #include "TcpServerImpl.h"
 #include <Pt/Net/TcpServer.h>
-#include <Pt/Net/AddressInUse.h>
+#include <Pt/Net/Endpoint.h>
 #include <Pt/System/EventLoop.h>
+#include <stdexcept>
 #include <memory>
 
 namespace Pt {
 
 namespace Net {
+
+TcpServerOptions::TcpServerOptions(int backlog)
+: _flags(0)
+, _backlog(backlog)
+, _deferAccept(-1)
+{}
+
+
+TcpServerOptions::TcpServerOptions(const TcpServerOptions& opts)
+: _flags(opts._flags)
+, _backlog(opts._backlog)
+, _deferAccept(opts._deferAccept)
+{
+}
+
+
+TcpServerOptions::~TcpServerOptions()
+{
+}
+
+
+TcpServerOptions& TcpServerOptions::operator=(const TcpServerOptions& opts)
+{
+    _flags = opts._flags;
+    _backlog = opts._backlog;
+    _deferAccept = opts._deferAccept;
+    return *this;
+}
+
+
+
 
 TcpServer::TcpServer()
 : _loop(0)
@@ -44,20 +76,33 @@ TcpServer::TcpServer()
 }
 
 
-TcpServer::TcpServer(const std::string& ipaddr, unsigned short int port, const Options& options)
+TcpServer::TcpServer(System::EventLoop& loop)
 : _loop(0)
 , _impl(0)
 {
     _impl = new TcpServerImpl(*this);
     std::auto_ptr<TcpServerImpl> impl(_impl);
 
-    this->listen(ipaddr, port, options);
+    setActive(loop);
 
     impl.release();
 }
 
 
-TcpServer::TcpServer(const Endpoint& ipaddr, const Options& options)
+TcpServer::TcpServer(const Endpoint& ep)
+: _loop(0)
+, _impl(0)
+{
+    _impl = new TcpServerImpl(*this);
+    std::auto_ptr<TcpServerImpl> impl(_impl);
+
+    this->listen(ep);
+
+    impl.release();
+}
+
+
+TcpServer::TcpServer(const Endpoint& ipaddr, const TcpServerOptions& options)
 : _loop(0)
 , _impl(0)
 {
@@ -65,6 +110,32 @@ TcpServer::TcpServer(const Endpoint& ipaddr, const Options& options)
     std::auto_ptr<TcpServerImpl> impl(_impl);
 
     this->listen(ipaddr, options);
+
+    impl.release();
+}
+
+
+TcpServer::TcpServer(const std::string& ipaddr, unsigned short int port)
+: _loop(0)
+, _impl(0)
+{
+    _impl = new TcpServerImpl(*this);
+    std::auto_ptr<TcpServerImpl> impl(_impl);
+
+    this->listen(ipaddr, port);
+
+    impl.release();
+}
+
+
+TcpServer::TcpServer(const std::string& ipaddr, unsigned short int port, const TcpServerOptions& options)
+: _loop(0)
+, _impl(0)
+{
+    _impl = new TcpServerImpl(*this);
+    std::auto_ptr<TcpServerImpl> impl(_impl);
+
+    this->listen(ipaddr, port, options);
 
     impl.release();
 }
@@ -83,17 +154,31 @@ TcpServer::~TcpServer()
 }
 
 
-void TcpServer::listen(const std::string& ipaddr, unsigned short int port, const Options& options)
+void TcpServer::listen(const Endpoint& ep)
 {
-    this->close();
-    _impl->listen(ipaddr, port, options);
+    TcpServerOptions opts;
+    listen(ep, opts);
 }
 
 
-void TcpServer::listen(const Endpoint& ipaddr, const Options& options)
+void TcpServer::listen(const Endpoint& ep, const TcpServerOptions& options)
 {
     this->close();
-    _impl->listen(ipaddr, options);
+    _impl->listen(ep, options);
+}
+
+
+void TcpServer::listen(const std::string& ipaddr, unsigned short int port)
+{
+    Endpoint ep(ipaddr, port);
+    listen(ep);
+}
+
+
+void TcpServer::listen(const std::string& ipaddr, unsigned short int port, const TcpServerOptions& options)
+{
+    Endpoint ep(ipaddr, port);
+    listen(ep, options);
 }
 
 
@@ -113,15 +198,15 @@ void TcpServer::close()
 }
 
 
-Signal<TcpServer&>& TcpServer::connectionPending()
-{ 
-    return _connectionPending; 
+void TcpServer::onAttach(System::EventLoop& loop)
+{
+    _loop = &loop;
 }
 
 
-TcpServerImpl& TcpServer::impl() const
+void TcpServer::onDetach(System::EventLoop& loop)
 {
-    return *_impl;
+    _loop = 0; 
 }
 
 

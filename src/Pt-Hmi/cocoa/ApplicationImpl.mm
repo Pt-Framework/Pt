@@ -167,7 +167,7 @@ void ApplicationImpl::onDetachSelectable(System::Selectable& s)
     System::SelectableList::unlink(s);
 }
 
-void ApplicationImpl::onIdle(System::Selectable& s)
+void ApplicationImpl::onCancel(System::Selectable& s)
 { 
     System::MutexLock lock(_mutex);
 

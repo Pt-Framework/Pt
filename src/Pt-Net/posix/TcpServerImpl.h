@@ -78,9 +78,9 @@ class TcpServerImpl
 
         void listen(const std::string& ipaddr,
                     unsigned short int port,
-                    const TcpServer::Options& options);
+                    const TcpServerOptions& options);
 
-        void listen(const Endpoint& ep, const TcpServer::Options& options);
+        void listen(const Endpoint& ep, const TcpServerOptions& options);
 
         void beginAccept(System::EventLoop& loop);
 

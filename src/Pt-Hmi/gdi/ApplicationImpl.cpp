@@ -180,7 +180,7 @@ void ApplicationImpl::onDetachSelectable(System::Selectable& s)
     _selector.detach(s); 
 }
 
-void ApplicationImpl::onIdle(System::Selectable& s)
+void ApplicationImpl::onCancel(System::Selectable& s)
 {
     Pt::System::MutexLock lock(_mutex);
 

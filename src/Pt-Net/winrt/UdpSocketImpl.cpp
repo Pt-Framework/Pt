@@ -138,7 +138,7 @@ void UdpSocketImpl::close()
 
 bool UdpSocketImpl::beginBind(System::EventLoop& loop, 
                               const Endpoint& ep, 
-                              const UdpSocket::Options& o)
+                              const UdpSocketOptions& o)
 {
     log_debug( "begin binding socket to " << ep.toString() );
 
@@ -206,7 +206,7 @@ void UdpSocketImpl::endBind(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::bind(const Endpoint& ep, const UdpSocket::Options&)
+void UdpSocketImpl::bind(const Endpoint& ep, const UdpSocketOptions&)
 {
     throw System::IOError("blocking I/O not supported");
     _isBound = true;
@@ -217,7 +217,7 @@ void UdpSocketImpl::bind(const Endpoint& ep, const UdpSocket::Options&)
 //  <Capabilities>
 //    <Capability Name="internetClientServer" />
 
-bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep, const UdpSocket::Options&)
+bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep, const UdpSocketOptions&)
 {
     log_debug( "begin connecting socket to " << ep.toString() );
 
@@ -284,14 +284,14 @@ void UdpSocketImpl::endConnect(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::connect(const Endpoint& ep, const UdpSocket::Options& o)
+void UdpSocketImpl::connect(const Endpoint& ep, const UdpSocketOptions& o)
 {
     throw System::IOError("blocking I/O not supported");
     _isConnected = true;
 }
 
 
-void UdpSocketImpl::setTarget(const Endpoint& ep, const UdpSocket::Options& o)
+void UdpSocketImpl::setTarget(const Endpoint& ep, const UdpSocketOptions& o)
 {
     const std::string& host = ep.impl()->host();
     std::wstring whost(host.begin(), host.end());

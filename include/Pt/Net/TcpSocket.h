@@ -32,97 +32,137 @@
 #include <Pt/Net/Api.h>
 #include <Pt/Net/Endpoint.h>
 #include <Pt/System/IODevice.h>
+#include <Pt/Types.h>
 #include <string>
+#include <cstddef>
 
 namespace Pt {
 
 namespace Net {
 
-/** @brief TCP client socket
+// TCP_NODELAY
+// SO_KEEPALIVE
+// SO_SNDBUF 
+
+/** @brief TCP socket options.
+ */
+class PT_NET_API TcpSocketOptions
+{
+    public:
+        TcpSocketOptions();
+
+        TcpSocketOptions(const TcpSocketOptions& opts);
+
+        ~TcpSocketOptions();
+
+        TcpSocketOptions& operator=(const TcpSocketOptions& opts);
+
+    private:
+        Pt::uint32_t _flags;
+        int _sndbufSize;
+        varint_t _r0;
+        varint_t _r1;
+        varint_t _r2;
+};
+
+
+/** @brief TCP client socket.
  */
 class PT_NET_API TcpSocket : public System::IODevice
 {
     public:
-        // TCP_NODELAY
-        // SO_KEEPALIVE
-        // SO_SNDBUF 
-        class Options
-        {
-            public:
-                explicit Options()
-                : _flags(0)
-                {}
-
-            private:
-                unsigned long _flags;
-        };
-
-    public:
+        //! @brief Default Constructor.
         TcpSocket();
 
-        TcpSocket(const TcpServer& server, const Options& o = Options());
+        //! @brief Construct with event loop.
+        explicit TcpSocket(System::EventLoop& loop);
 
-        /** @brief Connect to a host
+        //! @brief Accepts a connection.
+        explicit TcpSocket(TcpServer& server);
+
+        //! @brief Accepts a connection.
+        TcpSocket(TcpServer& server, const TcpSocketOptions& o);
+
+        /** @brief Connects to a host.
             
             @throw System::AccessFailed if the host is not reachable
          */
-        TcpSocket(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
+        explicit TcpSocket(const Endpoint& ep);
+       
+        TcpSocket(const Endpoint& ep, const TcpSocketOptions& o);
+        
+        TcpSocket(const std::string& ipaddr, unsigned short int port);
 
-        explicit TcpSocket(const Endpoint& addrinfo, const Options& o = Options());
+        TcpSocket(const std::string& ipaddr, unsigned short int port, const TcpSocketOptions& o);
 
+        //! @brief Destructor.
         ~TcpSocket();
 
-        void localEndpoint(Endpoint& ep) const;
+        //! @brief Accepts a connection.
+        void accept(TcpServer& server);
 
-        void remoteEndpoint(Endpoint& ep) const;
+        //! @brief Accepts a connection.
+        void accept(TcpServer& server, const TcpSocketOptions& o);
 
-        void accept(const TcpServer& server, const Options& o = Options());
-
-        void connect(const Endpoint& addrinfo, const Options& o = Options());
-
-        /** @brief Connect to a host
+        /** @brief Connect to a host.
             
             @throw System::AccessFailed if the host is not reachable
          */
-        void connect(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
+        void connect(const Endpoint& ep);
+        
+        void connect(const Endpoint& ep, const TcpSocketOptions& o);
 
-        bool beginConnect(const Endpoint& addrinfo, const Options& o = Options());
+        void connect(const std::string& ipaddr, unsigned short int port);
 
-        bool beginConnect(const std::string& ipaddr, unsigned short int port, const Options& o = Options());
+        void connect(const std::string& ipaddr, unsigned short int port, const TcpSocketOptions& o);
+
+        void beginConnect(const Endpoint& ep);
+
+        void beginConnect(const Endpoint& ep, const TcpSocketOptions& o);
+
+        void beginConnect(const std::string& ipaddr, unsigned short int port);
+
+        void beginConnect(const std::string& ipaddr, unsigned short int port, const TcpSocketOptions& o);
 
         void endConnect();
 
         Signal<TcpSocket&>& connected()
         { return _connected; }
 
-        bool isConnected() const;
+        bool isConnected() const
+        { return _isConnected; }
+
+        void localEndpoint(Endpoint& ep) const;
+
+        void remoteEndpoint(Endpoint& ep) const;
 
     protected:
         // inherit doc
         virtual void onClose();
 
-        virtual void onSetTimeout(size_t timeout);
+        // inherit doc
+        virtual void onSetTimeout(std::size_t timeout);
 
         // inherit doc
         virtual bool onRun();
 
         // inherit doc
-        virtual size_t onBeginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
+        virtual std::size_t onBeginRead(System::EventLoop& loop, char* buffer, std::size_t n, bool& eof);
 
         // inherit doc
-        virtual size_t onEndRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
+        virtual std::size_t onEndRead(System::EventLoop& loop, char* buffer, std::size_t n, bool& eof);
 
         // inherit doc
-        virtual size_t onRead(char* buffer, size_t count, bool& eof);
+        virtual std::size_t onRead(char* buffer, std::size_t count, bool& eof);
 
         // inherit doc
-        virtual size_t onBeginWrite(System::EventLoop& loop, const char* buffer, size_t n);
+        virtual std::size_t onBeginWrite(System::EventLoop& loop, const char* buffer, std::size_t n);
 
         // inherit doc
-        virtual size_t onEndWrite(System::EventLoop& loop, const char* buffer, size_t n);
+        virtual std::size_t onEndWrite(System::EventLoop& loop, const char* buffer, std::size_t n);
 
         // inherit doc
-        virtual size_t onWrite(const char* buffer, size_t count);
+        virtual std::size_t onWrite(const char* buffer, std::size_t count);
 
         // inherit doc
         virtual void onCancel();
@@ -138,12 +178,11 @@ class PT_NET_API TcpSocket : public System::IODevice
         bool _connecting;
 
         //! @internal
-        bool _reservedForIsConnectedFlag;
+        bool _isConnected;
 };
 
 } // namespace Net
 
 } // namespace Pt
 
-#endif
-
+#endif // Pt_Net_TcpSocket_h

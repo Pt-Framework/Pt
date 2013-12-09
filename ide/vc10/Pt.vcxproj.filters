@@ -1366,9 +1366,6 @@
     <None Include="..\..\src\Pt-Net\Jamfile">
       <Filter>Pt-Net</Filter>
     </None>
-    <None Include="..\..\src\Pt-Net\Makefile.am">
-      <Filter>Pt-Net</Filter>
-    </None>
     <None Include="..\..\src\Pt-Net\tests\Jamfile">
       <Filter>Pt-Net\tests</Filter>
     </None>

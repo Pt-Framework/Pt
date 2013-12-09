@@ -103,7 +103,7 @@ void UdpSocketImpl::close()
 }
 
 
-bool UdpSocketImpl::beginBind(System::EventLoop& loop, const Endpoint& ai, const UdpSocket::Options& o)
+bool UdpSocketImpl::beginBind(System::EventLoop& loop, const Endpoint& ai, const UdpSocketOptions& o)
 {
     log_debug( "begin binding socket to " << ai.toString() );
 
@@ -124,7 +124,7 @@ void UdpSocketImpl::endBind(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::bind(const Endpoint& e, const UdpSocket::Options& opts)
+void UdpSocketImpl::bind(const Endpoint& e, const UdpSocketOptions& opts)
 {
     log_debug( "bind socket to " << e.toString() );
 
@@ -195,7 +195,7 @@ void UdpSocketImpl::bind(const Endpoint& e, const UdpSocket::Options& opts)
 }
 
 
-bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ai, const UdpSocket::Options& o)
+bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ai, const UdpSocketOptions& o)
 {
     log_debug( "begin connecting socket to " << ai.toString() );
 
@@ -215,7 +215,7 @@ void UdpSocketImpl::endConnect(System::EventLoop& loop)
 }
 
 
-void UdpSocketImpl::connect(const Endpoint& ep, const UdpSocket::Options& opts)
+void UdpSocketImpl::connect(const Endpoint& ep, const UdpSocketOptions& opts)
 {
     AddrInfo ainfo;
     ainfo.resolve(ep);
@@ -279,7 +279,7 @@ void UdpSocketImpl::connect(const Endpoint& ep, const UdpSocket::Options& opts)
 }
 
 
-void UdpSocketImpl::setTarget(const Endpoint& ep, const UdpSocket::Options& opts)
+void UdpSocketImpl::setTarget(const Endpoint& ep, const UdpSocketOptions& opts)
 {
     AddrInfo ainfo;
     ainfo.resolve(ep);
