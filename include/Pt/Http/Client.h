@@ -42,6 +42,7 @@ class EventLoop;
 
 namespace Net {
 class Endpoint;
+class TcpSocketOptions;
 }
 
 namespace Ssl {
@@ -50,21 +51,23 @@ class Context;
 
 namespace Http {
 
-class Reply;
-class Request;
-class MessageProgress;
-
+/** @brief An HTTP client.
+*/
 class PT_HTTP_API Client : public Connectable
                          , private NonCopyable
 {
     public:
         Client();
         
+        explicit Client(const Net::Endpoint& ep);
+
+        Client(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts);
+
         explicit Client(System::EventLoop& loop);
 
-        Client(System::EventLoop& loop, const std::string& host, unsigned short int port);
-        
-        Client(System::EventLoop& loop, const Net::Endpoint& addrinfo);
+        Client(System::EventLoop& loop, const Net::Endpoint& ep);
+
+        Client(System::EventLoop& loop, const Net::Endpoint& ep, const Net::TcpSocketOptions& opts);
 
         ~Client();
 
@@ -72,13 +75,31 @@ class PT_HTTP_API Client : public Connectable
 
         void setActive(System::EventLoop& loop);
 
-        void setHost(const Net::Endpoint& addrinfo);
+        /** @brief Set timeout for I/O operations.
+        */
+        void setTimeout(std::size_t timeout);
+
+        void setSecure(Ssl::Context& ctx);
+
+        /** @brief Set host to connect to.
+        */
+        void setHost(const Net::Endpoint& ep);
+
+        void setHost(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts);
         
         void setHost(const std::string& host, unsigned short int port);
 
+        void setHost(const std::string& host, unsigned short int port, const Net::TcpSocketOptions& opts);
+
         const Net::Endpoint& host() const;
 
-        void setSecure(Ssl::Context& ctx);
+        Request& request();
+
+        const Request& request() const;
+
+        Reply& reply();
+
+        const Reply& reply() const;
 
         void beginSend(bool finished = true);
 
@@ -98,18 +119,6 @@ class PT_HTTP_API Client : public Connectable
 
         void cancel();
 
-        Request& request();
-
-        const Request& request() const;
-
-        Reply& reply();
-
-        const Reply& reply() const;
-
-        /** @brief Set timeout for I/O operations.
-        */
-        void setTimeout(std::size_t timeout);
-
         /** @brief Blocks until request is sent.
         */
         void send(bool finished = true);
@@ -124,6 +133,9 @@ class PT_HTTP_API Client : public Connectable
         void onReplyReceived(Reply& r);
 
     private:
+        void init();
+
+    private:
         class ClientImpl* _impl;
 };
 
@@ -131,4 +143,4 @@ class PT_HTTP_API Client : public Connectable
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Http_Client_h

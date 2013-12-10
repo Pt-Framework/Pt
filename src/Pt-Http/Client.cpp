@@ -30,6 +30,7 @@
 #include <Pt/Http/Client.h>
 #include <Pt/Net/Endpoint.h>
 #include <Pt/System/Logger.h>
+#include <memory>
 
 log_define("Pt.Http.Client")
 
@@ -40,114 +41,184 @@ namespace Http {
 Client::Client()
 : _impl( new ClientImpl() )
 {
-    _impl->request().outputSent() += Pt::slot(*this, &Client::onRequestSent);
-    _impl->reply().inputReceived() += Pt::slot(*this, &Client::onReplyReceived);
+    std::auto_ptr<ClientImpl> impl(_impl);
+    
+    init();
+    
+    impl.release();
 }
+
+
+Client::Client(const Net::Endpoint& ep)
+: _impl( new ClientImpl() )
+{
+    std::auto_ptr<ClientImpl> impl(_impl);
+
+    init();
+    _impl->setHost(ep);
+
+    impl.release();
+}
+
+
+Client::Client(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts)
+: _impl( new ClientImpl() )
+{
+    std::auto_ptr<ClientImpl> impl(_impl);
+
+    init();
+    _impl->setHost(ep, opts);
+
+    impl.release();
+}
+
 
 Client::Client(System::EventLoop& loop)
 : _impl( new ClientImpl() )
 {
-    _impl->request().outputSent() += Pt::slot(*this, &Client::onRequestSent);
-    _impl->reply().inputReceived() += Pt::slot(*this, &Client::onReplyReceived);
+    std::auto_ptr<ClientImpl> impl(_impl);
 
+    init();
     _impl->setActive(loop);
+
+    impl.release();
 }
 
 
-Client::Client(System::EventLoop& loop, const Net::Endpoint& addrinfo)
+Client::Client(System::EventLoop& loop, const Net::Endpoint& ep)
 : _impl( new ClientImpl() )
+{
+    std::auto_ptr<ClientImpl> impl(_impl);
+
+    init();
+    _impl->setActive(loop);
+    _impl->setHost(ep);
+
+    impl.release();
+}
+
+
+Client::Client(System::EventLoop& loop, const Net::Endpoint& ep, const Net::TcpSocketOptions& opts)
+: _impl( new ClientImpl() )
+{
+    std::auto_ptr<ClientImpl> impl(_impl);
+
+    init();
+    _impl->setActive(loop);
+    _impl->setHost(ep, opts);
+
+    impl.release();
+}
+
+
+void Client::init()
 {
     _impl->request().outputSent() += Pt::slot(*this, &Client::onRequestSent);
     _impl->reply().inputReceived() += Pt::slot(*this, &Client::onReplyReceived);
-
-    _impl->setActive(loop);
-    _impl->setHost(addrinfo);
 }
 
-Client::Client(System::EventLoop& loop, const std::string& host, unsigned short int port)
-: _impl( new ClientImpl() )
-{
-    _impl->request().outputSent() += Pt::slot(*this, &Client::onRequestSent);
-    _impl->reply().inputReceived() += Pt::slot(*this, &Client::onReplyReceived);
-
-    _impl->setActive(loop);
-    _impl->setHost( Net::Endpoint(host, port) );
-}
 
 Client::~Client()
 {
     delete _impl;
 }
 
-void Client::setHost(const Net::Endpoint& addrinfo)
-{
-    _impl->setHost(addrinfo);
-}
-
-void Client::setHost(const std::string& host, unsigned short int port)
-{
-    _impl->setHost( Net::Endpoint(host, port) );
-}
-
-const Net::Endpoint& Client::host() const
-{
-    return _impl->host();
-}
 
 System::EventLoop* Client::loop() const
 {
     return _impl->loop();
 }
 
+
 void Client::setActive(System::EventLoop& selector)
 {
     _impl->setActive(selector);
 }
 
-void Client::setSecure(Ssl::Context& ctx)
-{
-    _impl->setSecure(ctx);
-}
 
 void Client::setTimeout(std::size_t timeout)
 {
     _impl->setTimeout(timeout);
 }
 
+
+void Client::setSecure(Ssl::Context& ctx)
+{
+    _impl->setSecure(ctx);
+}
+
+
+void Client::setHost(const Net::Endpoint& ep)
+{
+    _impl->setHost(ep);
+}
+
+
+void Client::setHost(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts)
+{
+    _impl->setHost(ep, opts);
+}
+
+
+void Client::setHost(const std::string& host, unsigned short int port)
+{
+    _impl->setHost( Net::Endpoint(host, port) );
+}
+
+
+void Client::setHost(const std::string& host, unsigned short int port, const Net::TcpSocketOptions& opts)
+{
+    _impl->setHost( Net::Endpoint(host, port), opts );
+}
+
+
+const Net::Endpoint& Client::host() const
+{
+    return _impl->host();
+}
+
+
 void Client::send(bool finished)
 {
     return _impl->send(finished);
 }
+
 
 std::istream& Client::receive()
 {
     return _impl->receive();
 }
 
+
 void Client::beginSend(bool finished)
 {
     _impl->beginSend(finished);
 }
+
 
 MessageProgress Client::endSend()
 {
     return _impl->endSend();
 }
 
+
 void Client::beginReceive()
 {
     _impl->beginReceive();
 }
+
 
 MessageProgress Client::endReceive()
 {
     return _impl->endReceive();
 }
 
+
 Signal<Client&>& Client::requestSent()
 { 
     return _impl->requestSent(); 
 }
+
 
 Signal<Client&>& Client::replyReceived()
 { 
@@ -159,15 +230,18 @@ Request& Client::request()
     return _impl->request();
 }
 
+
 const Request& Client::request() const
 { 
     return _impl->request();
 }
 
+
 Reply& Client::reply()
 {
     return _impl->reply();
 }
+
 
 const Reply& Client::reply() const
 {
@@ -179,6 +253,7 @@ void Client::cancel()
 {
     _impl->cancel();
 }
+
 
 void Client::onRequestSent(Request& r)
 {

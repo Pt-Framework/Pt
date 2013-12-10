@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2007 by Dr. Marc Boris Duerner
+ * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,6 +46,19 @@ namespace Pt {
     @brief HTTP server and client
 */
 namespace Http {
+
+class Authenticator;
+class Authorizer;
+class Client;
+class Credential;
+class Message;
+class MessageHeader;
+class MessageProgress;
+class Reply;
+class Request;
+class Server;
+class Service;
+class Servlet;
 
 } // namespace Net
 

@@ -218,6 +218,15 @@ class ServerImpl : public Connectable
         void setTimeout(std::size_t ms)
         { _timeout = ms; }
 
+        void setSecure(Ssl::Context& ctx)
+        { _sslctx = &ctx; }
+
+        std::size_t maxThreads() const
+        { return _maxThreads; }
+
+        void setMaxThreads(std::size_t m)
+        { _maxThreads = m; }
+
         std::size_t keepAliveTimeout() const
         { return _keepAliveTimeout; }
 
@@ -230,7 +239,7 @@ class ServerImpl : public Connectable
         void setMaxRequestSize(std::size_t maxSize)
         { _maxRequestSize = maxSize; }
 
-        void listen(const Pt::Net::Endpoint& addr, const Server::Options& options);
+        void listen(const Pt::Net::Endpoint& addr, const Net::TcpServerOptions& opts);
 
         void cancel();
 
@@ -275,6 +284,7 @@ class ServerImpl : public Connectable
         std::vector<ServerThread*> _serverThreads;
         std::vector<Acceptor*> _handlers;
         unsigned _useWorker;
+        std::size_t _maxThreads;
         std::size_t _timeout;
         std::size_t _keepAliveTimeout;
         std::size_t _maxRequestSize;

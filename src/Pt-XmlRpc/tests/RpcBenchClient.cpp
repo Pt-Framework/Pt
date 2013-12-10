@@ -28,6 +28,7 @@
 
 #include <Pt/XmlRpc/RemoteProcedure.h>
 #include <Pt/XmlRpc/HttpClient.h>
+#include <Pt/Net/Endpoint.h>
 #include <Pt/System/Application.h>
 #include <Pt/System/Thread.h>
 #include <Pt/System/Mutex.h>
@@ -55,7 +56,8 @@ class BenchClient
         echo(client, "echo"),
         thread(Pt::callable(*this, &BenchClient::exec))
     { 
-        client.setTarget("", port, "/myservice");
+        Pt::Net::Endpoint ep("", port);
+        client.setTarget(ep, "/myservice");
     }
 
     static unsigned numRequests()

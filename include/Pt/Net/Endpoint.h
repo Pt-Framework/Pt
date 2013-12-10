@@ -50,6 +50,8 @@ class PT_NET_API Endpoint
 
         Endpoint(const std::string& host, unsigned short port);
 
+        Endpoint(const char* host, unsigned short port);
+
         Endpoint(const Endpoint& src);
 
         ~Endpoint();

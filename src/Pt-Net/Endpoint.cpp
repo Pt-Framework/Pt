@@ -53,6 +53,13 @@ Endpoint::Endpoint(const std::string& host, unsigned short port)
 }
 
 
+Endpoint::Endpoint(const char* host, unsigned short port)
+: _impl(0)
+{
+    _impl = new EndpointImpl(host, port);
+}
+
+
 Endpoint::Endpoint(const Endpoint& src)
 : _impl(0)
 {

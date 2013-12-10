@@ -32,7 +32,7 @@
 #include <cctype>
 #include <sstream>
 #include <stdio.h>
-#include <string.h>
+#include <cstring>
 
 #define log_define(a)
 #define log_trace(a)

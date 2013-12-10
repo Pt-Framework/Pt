@@ -136,6 +136,19 @@ void Connection::setHost(const Net::Endpoint& addrinfo)
     _addrInfo = addrinfo;
 }
 
+
+void Connection::setHost(const Net::Endpoint& addrinfo, const Net::TcpSocketOptions& opts)
+{
+    if(_state != NotConnected)
+    {
+        cancel();
+    }
+
+    _addrInfo = addrinfo;
+    _tcpOptions = opts;
+}
+
+
 #ifdef PT_HTTP_WITH_SSL
 void Connection::setSecure(Ssl::Context& ctx)
 {
@@ -205,7 +218,7 @@ void Connection::sendRequest(Request& request)
     if( ! isConnected() )
     {
         log_debug("opening new connection to " << _addrInfo.toString());
-        _socket.connect(_addrInfo);
+        _socket.connect(_addrInfo, _tcpOptions);
 #ifdef PT_HTTP_WITH_SSL
         if(_ssl)
         {
@@ -350,7 +363,7 @@ void Connection::beginSendRequest(Request& request)
     {
         log_debug("opening new connection to " << _addrInfo.toString());
         _timer.start( _timeout );
-        _socket.beginConnect(_addrInfo);
+        _socket.beginConnect(_addrInfo, _tcpOptions);
         return;
     }
 

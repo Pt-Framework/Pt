@@ -73,23 +73,23 @@ HttpClient::HttpClient()
 }
 
 
-HttpClient::HttpClient(const Net::Endpoint& addrinfo, 
+HttpClient::HttpClient(const Net::Endpoint& ep, 
                        const std::string& url)
 : _v1(0)
 , _v2(0)
 {
     init();
-    setTarget(addrinfo, url);
+    setTarget(ep, url);
 }
 
 
-HttpClient::HttpClient(const std::string& addr, unsigned short port, 
+HttpClient::HttpClient(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts, 
                        const std::string& url)
 : _v1(0)
 , _v2(0)
 {
     init();
-    setTarget(addr, port, url);
+    setTarget(ep, opts, url);
 }
 
 
@@ -102,26 +102,26 @@ HttpClient::HttpClient(System::EventLoop& loop)
 }
 
 
-HttpClient::HttpClient(System::EventLoop& loop, const Net::Endpoint& addrinfo,
+HttpClient::HttpClient(System::EventLoop& loop, const Net::Endpoint& ep,
                        const std::string& url)
 : _client(loop)
 , _v1(0)
 , _v2(0)
 {
     init();
-    setTarget(addrinfo, url);
+    setTarget(ep, url);
 }
 
 
-HttpClient::HttpClient(System::EventLoop& loop, 
-                       const std::string& addr, unsigned short port, 
+HttpClient::HttpClient(System::EventLoop& loop, const Net::Endpoint& ep,
+                       const Net::TcpSocketOptions& opts,
                        const std::string& url)
 : _client(loop)
 , _v1(0)
 , _v2(0)
 {
     init();
-    setTarget(addr, port, url);
+    setTarget(ep, opts, url);
 }
 
 
@@ -161,35 +161,30 @@ void HttpClient::setTimeout(std::size_t timeout)
 }
 
 
-void HttpClient::setTarget(const Net::Endpoint& addrinfo, const std::string& url)
+void HttpClient::setTarget(const Net::Endpoint& ep, const std::string& url)
 {
-    _client.setHost(addrinfo);
+    _client.setHost(ep);
     _client.request().setUrl(url);
 }
 
 
-void HttpClient::setTarget(const std::string& addr, unsigned short port, const std::string& url)
+void HttpClient::setTarget(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts,
+                           const std::string& url)
 {
-    _client.setHost(addr, port);
+    _client.setHost(ep, opts);
     _client.request().setUrl(url);
 }
 
 
-void HttpClient::setServiceUrl(const std::string& serviceUrl)
+void HttpClient::setServiceUrl(const std::string& url)
 {
-    _client.request().setUrl(serviceUrl);
+    _client.request().setUrl(url);
 }
 
 
-void HttpClient::setHost(const Net::Endpoint& addrinfo)
+void HttpClient::setHost(const Net::Endpoint& ep)
 {
-    _client.setHost(addrinfo);
-}
-
-   
-void HttpClient::setHost(const std::string& host, unsigned short int port)
-{
-    _client.setHost(host, port);
+    _client.setHost(ep);
 }
 
 

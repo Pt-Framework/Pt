@@ -144,7 +144,7 @@ class ServerTest : public Pt::Unit::TestSuite
         {
             Pt::System::Logger::setLogLevel("Pt", Pt::System::Error);
 
-            _authent.setUser( Pt::Http::Credentials("testo", "testpwd") );
+            _authent.setUser( Pt::Http::Credential("testo", "testpwd") );
 
             this->registerMethod( "NotFound", *this, &ServerTest::NotFound);
 #ifdef PT_HTTP_WITH_SSL
@@ -192,7 +192,8 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::MapUrl mapurl("/test", service);
             server.addServlet(mapurl);
 
-            Pt::Http::Client client(*_loop, "127.0.0.1", 8001);
+            Pt::Http::Client client(*_loop);
+            client.setHost("127.0.0.1", 8001);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onMaxRequestSizeReply);
             client.request().setUrl("/test");
             client.request().body() << "Hello World";
@@ -223,7 +224,8 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::Server server(*_loop, "127.0.0.1", 8001);
             server.addServlet(mapurl);
 
-            Pt::Http::Client client(*_loop, "127.0.0.1", 8001);
+            Pt::Http::Client client(*_loop);
+            client.setHost("127.0.0.1", 8001);
             client.requestSent() += Pt::slot(*this, &ServerTest::onPipelinedSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onPipelinedReceived);
             client.request().setUrl("/test");
@@ -289,7 +291,8 @@ class ServerTest : public Pt::Unit::TestSuite
         {
             Pt::Http::Server server(*_loop, "127.0.0.1", 8001);
 
-            Pt::Http::Client client(*_loop, "127.0.0.1", 8001);
+            Pt::Http::Client client(*_loop);
+            client.setHost("127.0.0.1", 8001);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
             client.request().setUrl("/index.html");
             client.request().header().set("foo", "bar");
@@ -327,18 +330,17 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Ssl::Context serverCtx;
             setupSslServerContext(serverCtx);
             
-            // start HTTP server
-            Pt::Http::Server::Options options;
-            options.setSecure(serverCtx);
-            
+            // start HTTP server          
             Pt::Http::Server server(*_loop);
-            server.listen("127.0.0.1", 8001, options);
+            server.setSecure(serverCtx);
+            server.listen("127.0.0.1", 8001);
 
             Pt::Ssl::Context clientContext;
             setupSslClientContext(clientContext);
             
             // start HTTP client
-            Pt::Http::Client client(*_loop, "127.0.0.1", 8001);
+            Pt::Http::Client client(*_loop);
+            client.setHost("127.0.0.1", 8001);
             client.setSecure(clientContext);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
             client.request().setUrl("/index.html");
@@ -417,7 +419,8 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::MapUrl mapurl("/test", service, _authent);
             server.addServlet(mapurl);
 
-            Pt::Http::Client client(*_loop, "127.0.0.1", 8001);
+            Pt::Http::Client client(*_loop);
+            client.setHost("127.0.0.1", 8001);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onBasicAuthenticationReceived);
             client.request().setUrl("/test");
             client.beginReceive();
@@ -433,12 +436,12 @@ class ServerTest : public Pt::Unit::TestSuite
 
             if( progress.header() )
             {
-                if( client.reply().statusCode() == 401)
+                if( client.reply().statusCode() == Pt::Http::Reply::Unauthorized)
                 {
                     PT_UNIT_ASSERT(client.reply().header().has("WWW-Authenticate"));
 
                     Pt::Http::Authenticator auth;
-                    auth.setCredentials("test-realm", Pt::Http::Credentials("testo", "testpwd"));
+                    auth.setCredential("test-realm", Pt::Http::Credential("testo", "testpwd"));
                     bool authOk = auth.authenticate(client.request(), client.reply());
                     PT_UNIT_ASSERT(authOk);
 
@@ -474,7 +477,8 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::MapUrl mapurl("/test", service);
             server.addServlet(mapurl);
 
-            Pt::Http::Client client(*_loop, "127.0.0.1", 8001);
+            Pt::Http::Client client(*_loop);
+            client.setHost("127.0.0.1", 8001);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onHelloReceived);
             client.request().setUrl("/test");
             client.request().header().set("foo", "bar");
@@ -516,7 +520,8 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::MapUrl mapurl("/test", service);
             server.addServlet(mapurl);
 
-            Pt::Http::Client client(*_loop, "127.0.0.1", 8001);
+            Pt::Http::Client client(*_loop);
+            client.setHost("127.0.0.1", 8001);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onQueryStringReceived);
             client.request().setUrl("/test");
             client.request().setQParams("a=4&b=Hello");
@@ -557,7 +562,8 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Http::MapUrl servlet("/test", service);
             server.addServlet(servlet);
 
-            Pt::Http::Client client(*_loop, "127.0.0.1", 8001);
+            Pt::Http::Client client(*_loop);
+            client.setHost("127.0.0.1", 8001);
             client.requestSent() += Pt::slot(*this, &ServerTest::onChunkedSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onChunkedReceived);
             client.request().setUrl("/test");

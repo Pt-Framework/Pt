@@ -51,13 +51,13 @@ class PT_XMLRPC_API HttpClient : public Client
 
         /** @brief Construct with host and service URL.
         */
-        HttpClient(const Net::Endpoint& addrinfo, 
-                   const std::string& serviceUrl);
+        HttpClient(const Net::Endpoint& ep, 
+                   const std::string& url);
 
         /** @brief Construct with host and service URL.
         */
-        HttpClient(const std::string& addr, unsigned short port,
-                   const std::string& serviceUrl);
+        HttpClient(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts, 
+                   const std::string& url);
 
         /** @brief Construct with EventLoop used for I/O.
         */
@@ -65,14 +65,14 @@ class PT_XMLRPC_API HttpClient : public Client
 
         /** @brief Construct with host and service URL.
         */
-        HttpClient(System::EventLoop& loop, const Net::Endpoint& addrinfo, 
-                   const std::string& serviceUrl);
+        HttpClient(System::EventLoop& loop, const Net::Endpoint& ep, 
+                   const std::string& url);
 
         /** @brief Construct with host and service URL.
         */
-        HttpClient(System::EventLoop& loop, 
-                   const std::string& addr, unsigned short port, 
-                   const std::string& serviceUrl);
+        HttpClient(System::EventLoop& loop, const Net::Endpoint& ep, 
+                   const Net::TcpSocketOptions& opts, 
+                   const std::string& url);
 
         /** @brief Destructor.
         */
@@ -96,25 +96,21 @@ class PT_XMLRPC_API HttpClient : public Client
 
         /** @brief Sets target host and service URL.
         */
-        void setTarget(const Net::Endpoint& addrinfo, 
-                       const std::string& serviceUrl);
+        void setTarget(const Net::Endpoint& ep, 
+                       const std::string& url);
 
         /** @brief Sets target host and service URL.
         */
-        void setTarget(const std::string& addr, unsigned short port,
-                       const std::string& serviceUrl);
+        void setTarget(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts, 
+                       const std::string& url);
 
         /** @brief Sets the service URL.
         */
-        void setServiceUrl(const std::string& serviceUrl);
+        void setServiceUrl(const std::string& url);
 
         /** @brief Sets host to connect.
         */
         void setHost(const Net::Endpoint& addrinfo);
-        
-        /** @brief Sets host to connect.
-        */
-        void setHost(const std::string& host, unsigned short int port);
 
         /** @brief Returns target host.
         */

@@ -82,6 +82,12 @@ Authorizer::Authorizer(const std::string& realm)
 { }
 
 
+Authorizer::Authorizer(const char* realm)
+: _useCount(0)
+, _realm(realm)
+{ }
+
+
 Authorizer::~Authorizer() 
 { }
 
@@ -130,6 +136,12 @@ BasicAuthorizer::BasicAuthorizer(const std::string& realm)
 }
 
 
+BasicAuthorizer::BasicAuthorizer(const char* realm)
+: Authorizer(realm)
+{ 
+}
+
+
 BasicAuthorizer::~BasicAuthorizer()
 { 
 }
@@ -138,7 +150,7 @@ BasicAuthorizer::~BasicAuthorizer()
 Authorization* BasicAuthorizer::onBeginAuthorize(const Request& req, Reply& reply, bool& granted)
 {
     std::string token;
-    Credentials cred;
+    Credential cred;
     Authorization* author = 0;
     granted = false;
 
@@ -182,13 +194,19 @@ BasicUserListAuthorizer::BasicUserListAuthorizer(const std::string& realm)
 }
 
 
+BasicUserListAuthorizer::BasicUserListAuthorizer(const char* realm)
+: BasicAuthorizer(realm)
+{ 
+}
+
+
 BasicUserListAuthorizer::~BasicUserListAuthorizer()
 { 
     clear(); 
 }
 
 
-void BasicUserListAuthorizer::setUser(const Credentials& cred)
+void BasicUserListAuthorizer::setUser(const Credential& cred)
 { 
     System::MutexLock lock(_mutex);
     _passwd[cred.user()] = cred.password(); 
@@ -202,6 +220,13 @@ void BasicUserListAuthorizer::removeUser(const std::string& user)
 }
 
 
+void BasicUserListAuthorizer::removeUser(const char* user)
+{ 
+    System::MutexLock lock(_mutex);
+    _passwd.erase(user); 
+}
+
+
 void BasicUserListAuthorizer::clear()
 { 
     System::MutexLock lock(_mutex);
@@ -209,7 +234,7 @@ void BasicUserListAuthorizer::clear()
 }
 
 
-Authorization* BasicUserListAuthorizer::onAuthorizeCredentials(const Credentials& cred, bool& granted)
+Authorization* BasicUserListAuthorizer::onAuthorizeCredentials(const Credential& cred, bool& granted)
 {
     std::map<std::string, std::string>::iterator it = _passwd.find(cred.user());
     granted = (it != _passwd.end() && it->second == cred.password());
@@ -222,6 +247,6 @@ void BasicUserListAuthorizer::onReleaseAuthorization(Authorization* auth)
     throw std::logic_error("BasicUserListAuthorizer::onReleaseAuthorization");
 }
 
-}
+} // namespace Http
 
-}
+} // namespace Pt

@@ -30,7 +30,6 @@
 #define Pt_Net_TcpServer_h
 
 #include <Pt/Net/Api.h>
-#include <Pt/Net/Endpoint.h>
 #include <Pt/Signal.h>
 #include <Pt/Types.h>
 #include <Pt/System/Selectable.h>

@@ -36,9 +36,6 @@ namespace Pt {
 namespace Http {
 
 Service::Service()
-: _r0(0)
-, _r1(0)
-, _r2(0)
 { 
 }
 

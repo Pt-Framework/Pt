@@ -46,7 +46,7 @@ class Service;
 class PT_HTTP_API Responder
 {
     public:
-        Responder(Service& s);
+        explicit Responder(Service& s);
 
         virtual ~Responder();
 
@@ -81,4 +81,4 @@ class PT_HTTP_API Responder
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Http_Responder_h

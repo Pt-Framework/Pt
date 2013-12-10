@@ -31,23 +31,35 @@
 
 #include <Pt/Http/Api.h>
 #include <string>
+#include <map>
 
 namespace Pt {
 
 namespace Http {
 
-class Credentials
+class Credential
 {
     public:
-        Credentials()
+        Credential()
         {}
 
-        Credentials(const std::string& user, const std::string& passwd)
+        Credential(const std::string& user, const std::string& passwd)
+        : _user(user)
+        , _passwd(passwd)
+        {}
+
+        Credential(const char* user, const char* passwd)
         : _user(user)
         , _passwd(passwd)
         {}
 
         void set(const std::string& user, const std::string& passwd)
+        {
+            _user = user;
+            _passwd = passwd;
+        }
+
+        void set(const char* user, const char* passwd)
         {
             _user = user;
             _passwd = passwd;
@@ -69,6 +81,9 @@ class Credentials
         std::string _user;
         std::string _passwd;
 };
+
+
+typedef std::map<std::string, Credential> Credentials;
 
 } // namespace Http
 

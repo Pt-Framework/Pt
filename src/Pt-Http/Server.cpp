@@ -30,6 +30,7 @@
 #include <Pt/Http/Server.h>
 #include <Pt/Http/Servlet.h>
 #include <Pt/Net/Endpoint.h>
+#include <memory>
 
 namespace Pt {
 
@@ -46,25 +47,58 @@ Server::Server(System::EventLoop& loop)
 : _impl(0)
 {
     _impl = new ServerImpl();
+    std::auto_ptr<ServerImpl> impl(_impl);
+
     setActive(loop);
+    impl.release();
 }
 
 
-Server::Server(System::EventLoop& loop, const std::string& ip, unsigned short int port, const Options& options)
+Server::Server(System::EventLoop& loop, const Pt::Net::Endpoint& ep)
 : _impl(0)
 {
     _impl = new ServerImpl();
+    std::auto_ptr<ServerImpl> impl(_impl);
+    
     setActive(loop);
-    listen(ip, port, options);
+    listen(ep);
+    impl.release();
 }
 
 
-Server::Server(System::EventLoop& loop, const Pt::Net::Endpoint& addr, const Options& options)
+Server::Server(System::EventLoop& loop, const Pt::Net::Endpoint& ep, const Net::TcpServerOptions& opts)
 : _impl(0)
 {
     _impl = new ServerImpl();
+    std::auto_ptr<ServerImpl> impl(_impl);
+    
     setActive(loop);
-    listen(addr, options);
+    listen(ep, opts);
+    impl.release();
+}
+
+
+Server::Server(System::EventLoop& loop, const std::string& ip, unsigned short int port)
+: _impl(0)
+{
+    _impl = new ServerImpl();
+    std::auto_ptr<ServerImpl> impl(_impl);
+    
+    setActive(loop);
+    listen(ip, port);
+    impl.release();
+}
+
+
+Server::Server(System::EventLoop& loop, const std::string& ip, unsigned short int port, const Net::TcpServerOptions& opts)
+: _impl(0)
+{
+    _impl = new ServerImpl();
+    std::auto_ptr<ServerImpl> impl(_impl);
+    
+    setActive(loop);
+    listen(ip, port, opts);
+    impl.release();
 }
 
 
@@ -98,6 +132,24 @@ void Server::setTimeout(std::size_t ms)
 }
 
 
+void Server::setSecure(Ssl::Context& ctx)
+{
+    _impl->setSecure(ctx); 
+}
+
+
+std::size_t Server::maxThreads() const
+{ 
+    return _impl->maxThreads(); 
+}
+
+
+void Server::setMaxThreads(std::size_t m)
+{ 
+    _impl->setMaxThreads(m); 
+}
+
+
 std::size_t Server::keepAliveTimeout() const
 {
     return _impl->keepAliveTimeout();
@@ -122,16 +174,29 @@ void Server::setMaxRequestSize(std::size_t maxSize)
 }
 
 
-void Server::listen(const Pt::Net::Endpoint& addr, const Options& options)
+void Server::listen(const Pt::Net::Endpoint& ep)
 {
-    _impl->listen(addr, options);
+    Net::TcpServerOptions opts;
+    listen(ep, opts);
 }
 
 
-void Server::listen(const std::string& ip, unsigned short int port, const Options& options)
+void Server::listen(const Pt::Net::Endpoint& ep, const Net::TcpServerOptions& opts)
 {
-    Net::Endpoint ai(ip, port);
-    _impl->listen(ai, options);
+    _impl->listen(ep, opts);
+}
+
+
+void Server::listen(const std::string& ip, unsigned short int port)
+{
+    Net::TcpServerOptions opts;
+    listen(ip, port, opts);
+}
+
+void Server::listen(const std::string& ip, unsigned short int port, const Net::TcpServerOptions& opts)
+{
+    Net::Endpoint ep(ip, port);
+    listen(ep, opts);
 }
 
 

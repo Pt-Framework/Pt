@@ -32,7 +32,6 @@
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/ServiceDefinition.h>
 #include <Pt/Http/Service.h>
-#include <Pt/NonCopyable.h>
 
 namespace Pt {
 
@@ -45,7 +44,6 @@ namespace XmlRpc {
     this service.
 */
 class PT_XMLRPC_API HttpService : public Http::Service
-                                , private NonCopyable
 {
     public:
         /** @brief Constructs with RPC service.

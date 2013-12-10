@@ -497,6 +497,7 @@ void ServerThread::onHandlerFinished(Acceptor& handler)
 ServerImpl::ServerImpl()
 : _sslctx(0)
 , _useWorker(0)
+, _maxThreads(1)
 , _timeout(30000)
 , _keepAliveTimeout(30000)
 , _maxRequestSize( std::numeric_limits<std::size_t>::max() )
@@ -516,7 +517,7 @@ ServerImpl::~ServerImpl()
 }
 
 
-void ServerImpl::listen(const Pt::Net::Endpoint& addr, const Server::Options& options)
+void ServerImpl::listen(const Pt::Net::Endpoint& addr, const Net::TcpServerOptions& opts)
 {
     std::vector<ServerThread*>::iterator thread;
     for(thread = _serverThreads.begin(); thread != _serverThreads.end(); ++thread)
@@ -527,14 +528,14 @@ void ServerImpl::listen(const Pt::Net::Endpoint& addr, const Server::Options& op
 
     _serverThreads.clear();
 
-#ifdef PT_HTTP_WITH_SSL
-        _sslctx = options.sslContext();
-#endif
+//#ifdef PT_HTTP_WITH_SSL
+//        _sslctx = options.sslContext();
+//#endif
 
-    _serverSocket.listen(addr, options.tcp());
+    _serverSocket.listen(addr, opts);
     _serverSocket.beginAccept();
 
-    for(unsigned n = 1; n < options.maxThreads(); ++n)
+    for(unsigned n = 1; n < _maxThreads; ++n)
     {
         ServerThread* st = new ServerThread();
 

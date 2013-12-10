@@ -39,7 +39,6 @@ void Request::beginReceive()
     setReceiving(true);
     Message::setBuffer( connection().buffer() );
     connection().beginReceiveRequest(*this);
-    
 }
 
 

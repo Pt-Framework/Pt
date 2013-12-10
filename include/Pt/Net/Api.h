@@ -51,8 +51,11 @@ namespace Net {
 class AddressInUse;
 class Endpoint;
 class TcpServer;
+class TcpServerOptions;
 class TcpSocket;
+class TcpSocketOptions;
 class UdpSocket;
+class UdpSocketOptions;
 
 } // namespace Net
 

@@ -349,4 +349,4 @@ class PT_HTTP_API Message
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Http_Message_h

@@ -38,12 +38,7 @@ namespace Pt {
 
 namespace Http {
 
-Authentication::~Authentication()
-{
-}
-
-
-bool BasicAuthentication::authenticate(CredentialsMap& credentials, Request& request, const Reply& reply) const
+bool BasicAuthentication::authenticate(Credentials& credentials, Request& request, const Reply& reply) const
 { 
     const char* auth = reply.header().get("WWW-Authenticate");
     if( ! auth)
@@ -62,7 +57,7 @@ bool BasicAuthentication::authenticate(CredentialsMap& credentials, Request& req
     getline(iss, token, '"');
     getline(iss, token, '"');
 
-    CredentialsMap::iterator it = credentials.find(token);
+    Credentials::iterator it = credentials.find(token);
     if( it == credentials.end() )
         return false;
 
@@ -84,14 +79,19 @@ Authenticator::Authenticator()
     addAuthentication(_basicAuth);
 }
      
-        
+
+Authenticator::~Authenticator()
+{
+}
+
+
 void Authenticator::addAuthentication(const Authentication& auth)
 {
     _auths.push_back(&auth);
 }
 
 
-void Authenticator::setCredentials(const std::string& realm, const Credentials& cred)
+void Authenticator::setCredential(const std::string& realm, const Credential& cred)
 { 
     _credentials[realm] = cred; 
 }

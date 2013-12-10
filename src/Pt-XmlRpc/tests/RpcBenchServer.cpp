@@ -150,11 +150,10 @@ int main(int argc, char* argv[])
               << std::endl;
 
     Pt::System::MainLoop loop;
+    
     Pt::Http::Server server(loop);
-
-    Pt::Http::Server::Options options;
-    options.setMaxThreads( threads.get() );
-    server.listen(ip.get(), port.get(), options);
+    server.setMaxThreads( threads.get() );
+    server.listen(ip.get(), port.get());
     
     EchoService service;
 

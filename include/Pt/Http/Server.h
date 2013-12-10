@@ -30,7 +30,6 @@
 #define Pt_Http_Server_h
 
 #include <Pt/Http/Api.h>
-#include <Pt/Net/TcpServer.h>
 #include <Pt/Connectable.h>
 #include <Pt/NonCopyable.h>
 #include <string>
@@ -44,6 +43,7 @@ class EventLoop;
 
 namespace Net {
 class Endpoint;
+class TcpServerOptions;
 }
 
 namespace Ssl {
@@ -54,52 +54,24 @@ namespace Http {
 
 class Request;
 class Servlet;
-class ServerImpl;
 
+/** @brief An HTTP server.
+*/
 class PT_HTTP_API Server : public Connectable
                          , private NonCopyable
 {
-    public:
-        class Options
-        {
-            public:
-                Options()
-                : _maxThreads(1)
-                , _sslctx(0)
-                {}
-
-                unsigned maxThreads() const
-                { return _maxThreads; }
-
-                void setMaxThreads(unsigned m)
-                { _maxThreads = m; }
-
-                void setSecure(Ssl::Context& ctx)
-                { _sslctx = &ctx; }
-
-                Ssl::Context* sslContext() const
-                { return _sslctx; }
-
-                Net::TcpServerOptions& tcp()
-                { return _tcpOptions; }
-
-                const Net::TcpServerOptions& tcp() const
-                { return _tcpOptions; }
-
-            private:
-                Net::TcpServerOptions _tcpOptions;
-                std::size_t _maxThreads;
-                Ssl::Context* _sslctx;
-        };
-
     public:
         Server();
 
         explicit Server(System::EventLoop& loop);
 
-        Server(System::EventLoop& loop, const std::string& ip, unsigned short int port, const Options& = Options());
+        Server(System::EventLoop& loop, const Net::Endpoint& ep);
 
-        Server(System::EventLoop& loop, const Net::Endpoint& addr, const Options& = Options());
+        Server(System::EventLoop& loop, const Net::Endpoint& ep, const Net::TcpServerOptions& opts);
+
+        Server(System::EventLoop& loop, const std::string& ip, unsigned short int port);
+
+        Server(System::EventLoop& loop, const std::string& ip, unsigned short int port, const Net::TcpServerOptions& opts);
 
         ~Server();
 
@@ -111,6 +83,12 @@ class PT_HTTP_API Server : public Connectable
 
         void setTimeout(std::size_t ms);
 
+        void setSecure(Ssl::Context& ctx);
+
+        std::size_t maxThreads() const;
+
+        void setMaxThreads(std::size_t m);
+
         std::size_t keepAliveTimeout() const;
 
         void setKeepAliveTimeout(std::size_t ms);
@@ -119,9 +97,13 @@ class PT_HTTP_API Server : public Connectable
 
         void setMaxRequestSize(std::size_t maxSize);
 
-        void listen(const std::string& ip, unsigned short int port, const Options& options = Options());
+        void listen(const Net::Endpoint& ep);
 
-        void listen(const Net::Endpoint& addr, const Options& options = Options());
+        void listen(const Net::Endpoint& ep, const Net::TcpServerOptions& opts);
+
+        void listen(const std::string& ip, unsigned short int port);
+
+        void listen(const std::string& ip, unsigned short int port, const Net::TcpServerOptions& opts);
 
         void cancel();
 
@@ -136,11 +118,11 @@ class PT_HTTP_API Server : public Connectable
         Servlet* getServlet(const Request& request);
 
     private:
-        ServerImpl* _impl;
+        class ServerImpl* _impl;
 };
 
 } // namespace Http
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Http_Server_h

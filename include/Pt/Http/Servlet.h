@@ -88,7 +88,7 @@ class PT_HTTP_API Servlet : private NonCopyable
         Authorizer* _auth;
 };
 
-// TODO: use RegExp for URL matching
+
 class PT_HTTP_API MapUrl : public Servlet
 {
     public:
@@ -109,6 +109,7 @@ class PT_HTTP_API MapUrl : public Servlet
         std::string _url;
 };
 
+
 class PT_HTTP_API MapAny : public Servlet
 {
     public:
@@ -128,5 +129,4 @@ class PT_HTTP_API MapAny : public Servlet
 
 } // namespace Pt
 
-#endif
-
+#endif // Pt_Http_Servlet_h

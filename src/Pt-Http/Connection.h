@@ -188,6 +188,8 @@ class Connection : public Connectable
 
         void setHost(const Net::Endpoint& addrinfo);
 
+        void setHost(const Net::Endpoint& addrinfo, const Net::TcpSocketOptions& opts);
+
         const Net::Endpoint& host() const
         { return _addrInfo; }
 
@@ -282,6 +284,7 @@ class Connection : public Connectable
         System::IOBuffer _sockbuf;
         std::iostream _sockios;
         Net::Endpoint _addrInfo;
+        Net::TcpSocketOptions _tcpOptions;
 
         bool _ssl;
 #ifdef PT_HTTP_WITH_SSL

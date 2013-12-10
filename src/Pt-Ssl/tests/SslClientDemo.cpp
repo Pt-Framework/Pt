@@ -93,7 +93,7 @@ class SslClient : public Pt::Connectable
         void beginConnect()
         {
             log_info("connecting to " << _host << ':' << _port);
-            _tcpSocket.beginConnect(_host, _port);
+            _tcpSocket.beginConnect(_host.c_str(), _port);
             
             _endExecute = &SslClient::endConnect;
         }

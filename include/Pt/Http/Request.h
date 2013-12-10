@@ -43,7 +43,19 @@ class PT_HTTP_API Request : public Message
     friend class Connection;
 
     public:
-        explicit Request( Http::Connection& conn, const std::string& url = std::string() )
+        explicit Request(Http::Connection& conn)
+        : Message(conn)
+        , _url()
+        , _method("GET")
+        { }
+
+        Request( Http::Connection& conn, const std::string& url)
+        : Message(conn)
+        , _url(url)
+        , _method("GET")
+        { }
+
+        Request( Http::Connection& conn, const char* url)
         : Message(conn)
         , _url(url)
         , _method("GET")
@@ -55,16 +67,25 @@ class PT_HTTP_API Request : public Message
         void setUrl(const std::string& u)
         { _url = u; }
 
+        void setUrl(const char* u)
+        { _url = u; }
+
         const std::string& method() const
         { return _method; }
         
         void setMethod(const std::string& m)
         { _method = m; }
 
+        void setMethod(const char* m)
+        { _method = m; }
+
         const std::string& qparams() const
         { return _qparams; }
 
         void setQParams(const std::string& p)
+        { _qparams = p; }
+
+        void setQParams(const char* p)
         { _qparams = p; }
 
         void beginReceive();
@@ -104,4 +125,4 @@ class PT_HTTP_API Request : public Message
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Http_Request_h

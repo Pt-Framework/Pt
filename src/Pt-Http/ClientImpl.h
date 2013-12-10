@@ -95,6 +95,9 @@ class ClientImpl : public Connectable
         void setHost(const Net::Endpoint& addrinfo)
         { _conn.setHost(addrinfo); }
 
+        void setHost(const Net::Endpoint& addrinfo, const Net::TcpSocketOptions& opts)
+        { _conn.setHost(addrinfo, opts); }
+
         const Net::Endpoint& host() const
         { return _conn.host(); }
 

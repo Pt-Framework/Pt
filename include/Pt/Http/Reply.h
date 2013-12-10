@@ -67,6 +67,12 @@ class PT_HTTP_API Reply : public Message
             _statusText = txt;
         }
 
+        void setStatus(unsigned code, const char* txt)
+        {
+            _statusCode = code;
+            _statusText = txt;
+        }
+
         unsigned statusCode() const
         { return _statusCode; }
 
@@ -109,4 +115,4 @@ class PT_HTTP_API Reply : public Message
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Http_Reply_h

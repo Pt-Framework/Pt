@@ -100,7 +100,8 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void runClient()
         {
-            Pt::Net::TcpSocket socket("127.0.0.1", 5050);
+            Pt::Net::TcpSocket socket;
+            socket.connect("127.0.0.1", 5050);
             
             char buf[100];
             std::memset( buf, 42, sizeof(buf) );

@@ -74,6 +74,8 @@ class PT_HTTP_API Authorizer : private Pt::NonCopyable
     public:
         Authorizer(const std::string& realm);
 
+        Authorizer(const char* realm);
+
         virtual ~Authorizer();
        
         const std::string& realm() const;
@@ -100,12 +102,14 @@ class PT_HTTP_API BasicAuthorizer : public Authorizer
     public:
         BasicAuthorizer(const std::string& realm);
 
+        BasicAuthorizer(const char* realm);
+
         ~BasicAuthorizer();
 
     protected:
         virtual Authorization* onBeginAuthorize(const Request& req, Reply& reply, bool& granted);
 
-        virtual Authorization* onAuthorizeCredentials(const Credentials& cred, bool& granted) = 0;
+        virtual Authorization* onAuthorizeCredentials(const Credential& cred, bool& granted) = 0;
 };
 
 
@@ -114,16 +118,20 @@ class PT_HTTP_API BasicUserListAuthorizer : public BasicAuthorizer
     public:
         BasicUserListAuthorizer(const std::string& realm);
 
+        BasicUserListAuthorizer(const char* realm);
+
         ~BasicUserListAuthorizer();
 
-        void setUser(const Credentials& cred);
+        void setUser(const Credential& cred);
 
         void removeUser(const std::string& user);
+
+        void removeUser(const char* user);
 
         void clear();
 
     protected:
-        virtual Authorization* onAuthorizeCredentials(const Credentials& cred, bool& granted);
+        virtual Authorization* onAuthorizeCredentials(const Credential& cred, bool& granted);
 
         virtual void onReleaseAuthorization(Authorization* auth);
 
@@ -136,4 +144,4 @@ class PT_HTTP_API BasicUserListAuthorizer : public BasicAuthorizer
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Http_Authorizer_h
