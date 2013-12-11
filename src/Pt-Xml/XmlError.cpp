@@ -44,14 +44,14 @@ XmlError::XmlError(const char* what)
 }
 
 
-SyntaxError::SyntaxError(const std::string& what, unsigned line)
+SyntaxError::SyntaxError(const std::string& what, std::size_t line)
 : XmlError(what)
 , _line(line)
 {
 }
 
 
-SyntaxError::SyntaxError(const char* what, unsigned line)
+SyntaxError::SyntaxError(const char* what, std::size_t line)
 : XmlError(what)
 , _line(line)
 {
