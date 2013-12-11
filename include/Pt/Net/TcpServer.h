@@ -30,10 +30,9 @@
 #define Pt_Net_TcpServer_h
 
 #include <Pt/Net/Api.h>
+#include <Pt/System/Selectable.h>
 #include <Pt/Signal.h>
 #include <Pt/Types.h>
-#include <Pt/System/Selectable.h>
-#include <string>
 
 namespace Pt {
 
@@ -88,21 +87,11 @@ class PT_NET_API TcpServer : public System::Selectable
         */
         explicit TcpServer(const Endpoint& ep);
 
-        TcpServer(const Endpoint& ep, const TcpServerOptions& options);
-
-        TcpServer(const std::string& ipaddr, unsigned short int port);
-
-        TcpServer(const std::string& ipaddr, unsigned short int port, const TcpServerOptions& options);
-
         ~TcpServer();
 
         void listen(const Endpoint& ep);
         
         void listen(const Endpoint& ep, const TcpServerOptions& options);
-
-        void listen(const std::string& ipaddr, unsigned short int port);
-
-        void listen(const std::string& ipaddr, unsigned short int port, const TcpServerOptions& options);
 
         void beginAccept();
         

@@ -115,20 +115,6 @@ void UdpSocket::bind(const Endpoint& ep, const UdpSocketOptions& opts)
 }
 
 
-void UdpSocket::bind(const std::string& ipaddr, unsigned short int port)
-{
-    Endpoint ep(ipaddr, port);
-    bind(ep);
-}
-
-
-void UdpSocket::bind(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& opts)
-{
-    Endpoint ep(ipaddr, port);
-    bind(ep, opts);
-}
-
-
 bool UdpSocket::beginBind(const Endpoint& ep)
 {
     UdpSocketOptions opts;
@@ -151,20 +137,6 @@ bool UdpSocket::beginBind(const Endpoint& addrinfo, const UdpSocketOptions& o)
     }
 
     return ret;
-}
-
-
-bool UdpSocket::beginBind(const std::string& ipaddr, unsigned short int port)
-{ 
-    Endpoint ep(ipaddr, port);
-    return beginBind(ep); 
-}
-
-
-bool UdpSocket::beginBind(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& o)
-{ 
-    Endpoint ep(ipaddr, port);
-    return beginBind( ep, o); 
 }
 
 
@@ -207,18 +179,6 @@ void UdpSocket::connect(const Endpoint& ep, const UdpSocketOptions& opts)
 }
 
 
-void UdpSocket::connect(const std::string& ipaddr, unsigned short int port)
-{
-    connect( Endpoint(ipaddr, port) );
-}
-
-
-void UdpSocket::connect(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& opts)
-{
-    connect( Endpoint(ipaddr, port), opts );
-}
-
-
 void UdpSocket::setTarget(const Endpoint& ep)
 {
     UdpSocketOptions opts;
@@ -230,18 +190,6 @@ void UdpSocket::setTarget(const Endpoint& ep, const UdpSocketOptions& opts)
 {
     _impl->setTarget(ep, opts);
     this->setEof(false);
-}
-
-
-void UdpSocket::setTarget(const std::string& ipaddr, unsigned short int port)
-{
-    setTarget( Endpoint(ipaddr, port) );
-}
-
-
-void UdpSocket::setTarget(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& opts)
-{
-    setTarget(Endpoint(ipaddr, port), opts);
 }
 
 
@@ -267,18 +215,6 @@ bool UdpSocket::beginConnect(const Endpoint& ep, const UdpSocketOptions& opts)
     }
 
     return ret;
-}
-
-
-bool UdpSocket::beginConnect(const std::string& ipaddr, unsigned short int port)
-{ 
-    return beginConnect( Endpoint(ipaddr, port) ); 
-}
-
-
-bool UdpSocket::beginConnect(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& opts)
-{ 
-    return beginConnect(Endpoint(ipaddr, port), opts); 
 }
 
 
@@ -340,7 +276,7 @@ void UdpSocket::onClose()
 }
 
 
-void UdpSocket::onSetTimeout(size_t timeout)
+void UdpSocket::onSetTimeout(std::size_t timeout)
 {
     _impl->setTimeout(timeout);
 }
@@ -392,37 +328,37 @@ bool UdpSocket::onRun()
 }
 
 
-size_t UdpSocket::onBeginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t UdpSocket::onBeginRead(System::EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     return _impl->beginRead(loop, buffer, n, eof);
 }
 
 
-size_t UdpSocket::onEndRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t UdpSocket::onEndRead(System::EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     return _impl->endRead(loop, buffer, n, eof);
 }
 
 
-size_t UdpSocket::onRead(char* buffer, size_t count, bool& eof)
+std::size_t UdpSocket::onRead(char* buffer, std::size_t count, bool& eof)
 {
     return _impl->read(buffer, count, eof);
 }
 
 
-size_t UdpSocket::onBeginWrite(System::EventLoop& loop, const char* buffer, size_t n)
+std::size_t UdpSocket::onBeginWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
 {
     return _impl->beginWrite(loop, buffer, n);
 }
 
 
-size_t UdpSocket::onEndWrite(System::EventLoop& loop, const char* buffer, size_t n)
+std::size_t UdpSocket::onEndWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
 {
     return _impl->endWrite(loop, buffer, n);
 }
 
 
-size_t UdpSocket::onWrite(const char* buffer, size_t count)
+std::size_t UdpSocket::onWrite(const char* buffer, std::size_t count)
 {
     return _impl->write(buffer, count);
 }

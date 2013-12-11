@@ -85,15 +85,17 @@ class UdpSocketTest : public Pt::Unit::TestSuite
 
         void Unicast()
         {
+            Pt::Net::Endpoint ep("127.0.0.1", 8000);
+
             _receiver->setActive(*_loop);
             _receiver->bound() += Pt::slot(*this, &UdpSocketTest::onUnicastBind);
             _receiver->inputReady() += Pt::slot(*this, &UdpSocketTest::onUnicastInput);
-            _receiver->beginBind("127.0.0.1", 8000);
+            _receiver->beginBind(ep);
 
             _sender->setActive(*_loop);
             _sender->connected() += Pt::slot(*this, &UdpSocketTest::onUnicastConnect);
             _sender->outputReady() += Pt::slot(*this, &UdpSocketTest::onUnicastOutput);
-            _sender->beginConnect("127.0.0.1", 8000);
+            _sender->beginConnect(ep);
 
             _loop->run();
 
@@ -187,13 +189,15 @@ class UdpSocketTest : public Pt::Unit::TestSuite
 
         void Multicast()
         {
+            Pt::Net::Endpoint ep("224.0.1.1", 8000);
+
             _receiver->setActive(*_loop);
             _receiver->bound() += Pt::slot(*this, &UdpSocketTest::onMulticastBind);
             _receiver->inputReady() += Pt::slot(*this, &UdpSocketTest::onMulticastInput);
             _receiver->beginBind( Pt::Net::Endpoint::ip4Any(8000) );
 
             _sender->setActive(*_loop);
-            _sender->setTarget("224.0.1.1", 8000);
+            _sender->setTarget(ep);
             _sender->outputReady() += Pt::slot(*this, &UdpSocketTest::onMulticastOutput);
             
             _loop->run();

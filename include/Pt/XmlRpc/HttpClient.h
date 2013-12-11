@@ -51,13 +51,7 @@ class PT_XMLRPC_API HttpClient : public Client
 
         /** @brief Construct with host and service URL.
         */
-        HttpClient(const Net::Endpoint& ep, 
-                   const std::string& url);
-
-        /** @brief Construct with host and service URL.
-        */
-        HttpClient(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts, 
-                   const std::string& url);
+        HttpClient(const Net::Endpoint& ep, const std::string& url);
 
         /** @brief Construct with EventLoop used for I/O.
         */
@@ -66,12 +60,6 @@ class PT_XMLRPC_API HttpClient : public Client
         /** @brief Construct with host and service URL.
         */
         HttpClient(System::EventLoop& loop, const Net::Endpoint& ep, 
-                   const std::string& url);
-
-        /** @brief Construct with host and service URL.
-        */
-        HttpClient(System::EventLoop& loop, const Net::Endpoint& ep, 
-                   const Net::TcpSocketOptions& opts, 
                    const std::string& url);
 
         /** @brief Destructor.
@@ -96,21 +84,28 @@ class PT_XMLRPC_API HttpClient : public Client
 
         /** @brief Sets target host and service URL.
         */
-        void setTarget(const Net::Endpoint& ep, 
-                       const std::string& url);
+        void setTarget(const Net::Endpoint& ep, const std::string& url);
 
         /** @brief Sets target host and service URL.
         */
         void setTarget(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts, 
                        const std::string& url);
 
+        /** @brief Sets host to connect.
+        */
+        void setHost(const Net::Endpoint& ep);
+
+        /** @brief Sets host to connect.
+        */
+        void setHost(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts);
+
         /** @brief Sets the service URL.
         */
         void setServiceUrl(const std::string& url);
 
-        /** @brief Sets host to connect.
+        /** @brief Sets the service URL.
         */
-        void setHost(const Net::Endpoint& addrinfo);
+        void setServiceUrl(const char* url);
 
         /** @brief Returns target host.
         */
@@ -139,8 +134,8 @@ class PT_XMLRPC_API HttpClient : public Client
 
     private:
         Http::Client _client;
-        void* _v1;
-        void* _v2;
+        void* _r1;
+        void* _r2;
 };
 
 } // namespace XmlRpc

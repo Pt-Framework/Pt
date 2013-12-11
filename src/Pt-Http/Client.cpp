@@ -61,18 +61,6 @@ Client::Client(const Net::Endpoint& ep)
 }
 
 
-Client::Client(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts)
-: _impl( new ClientImpl() )
-{
-    std::auto_ptr<ClientImpl> impl(_impl);
-
-    init();
-    _impl->setHost(ep, opts);
-
-    impl.release();
-}
-
-
 Client::Client(System::EventLoop& loop)
 : _impl( new ClientImpl() )
 {
@@ -93,19 +81,6 @@ Client::Client(System::EventLoop& loop, const Net::Endpoint& ep)
     init();
     _impl->setActive(loop);
     _impl->setHost(ep);
-
-    impl.release();
-}
-
-
-Client::Client(System::EventLoop& loop, const Net::Endpoint& ep, const Net::TcpSocketOptions& opts)
-: _impl( new ClientImpl() )
-{
-    std::auto_ptr<ClientImpl> impl(_impl);
-
-    init();
-    _impl->setActive(loop);
-    _impl->setHost(ep, opts);
 
     impl.release();
 }
@@ -157,18 +132,6 @@ void Client::setHost(const Net::Endpoint& ep)
 void Client::setHost(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts)
 {
     _impl->setHost(ep, opts);
-}
-
-
-void Client::setHost(const std::string& host, unsigned short int port)
-{
-    _impl->setHost( Net::Endpoint(host, port) );
-}
-
-
-void Client::setHost(const std::string& host, unsigned short int port, const Net::TcpSocketOptions& opts)
-{
-    _impl->setHost( Net::Endpoint(host, port), opts );
 }
 
 

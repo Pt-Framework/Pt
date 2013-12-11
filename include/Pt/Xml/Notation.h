@@ -82,4 +82,4 @@ class Notation
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Xml_Notation_h

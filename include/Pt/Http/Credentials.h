@@ -82,9 +82,6 @@ class Credential
         std::string _passwd;
 };
 
-
-typedef std::map<std::string, Credential> Credentials;
-
 } // namespace Http
 
 } // namespace Pt

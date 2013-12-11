@@ -48,17 +48,17 @@ namespace Pt {
 */
 namespace Ssl {
     
-    class Certificate;
-    class CertificateStore;
-    class Context;
-    class HandshakeFailed;
-    class InvalidCertificate;
-    class IOStream;
-    class SslError;
-    class StreamBuffer;
+class Certificate;
+class CertificateStore;
+class Context;
+class HandshakeFailed;
+class InvalidCertificate;
+class IOStream;
+class SslError;
+class StreamBuffer;
 
 } // namespace Ssl
 
 } // namespace Pt
 
-#endif
+#endif // PT_SSL_API_H

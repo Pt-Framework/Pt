@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Xml_DocType_h
 #define Pt_Xml_DocType_h
 
@@ -32,6 +33,7 @@
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/QName.h>
 #include <Pt/String.h>
+#include <Pt/Types.h>
 #include <Pt/NonCopyable.h>
 
 namespace Pt {
@@ -107,7 +109,7 @@ class PT_XML_API DocType : public Node
         DocTypeDefinition* _dtd;
         Pt::String _publicId;
         Pt::String _systemId;
-        int _internal;
+        Pt::varint_t _internal;
 };
 
 /** @brief Casts a generic node to a DocType node.
@@ -178,7 +180,7 @@ class PT_XML_API EndDocType : public Node
         { return Node::EndDocType; }
 
     private:
-        int _internal;
+        Pt::varint_t _internal;
 };
 
 /** @brief Casts a generic node to a EndDocType node.
@@ -213,4 +215,4 @@ inline const EndDocType& toEndDocType(const Node& node)
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Xml_DocType_h

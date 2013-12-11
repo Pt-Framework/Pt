@@ -113,4 +113,4 @@ class XmlResolver
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Xml_XmlResolver_h

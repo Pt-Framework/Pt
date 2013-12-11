@@ -220,7 +220,8 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _exitTimer.timeout() += Pt::slot(*this, &PtXmlRpcTest::failTest);
             _exitTimer.timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
 
-            _server = new Pt::Http::Server(*_loop, "127.0.0.1", 8001);
+            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            _server = new Pt::Http::Server(*_loop, ep);
         }
 
         void tearDown()

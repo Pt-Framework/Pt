@@ -339,14 +339,14 @@ std::streamsize Connection::write(const char* buf, size_t n)
 }
 
 
-std::streamsize Connection::read(char* buf, size_t n, std::streamsize isize)
+std::streamsize Connection::read(char* buf, size_t n, std::streamsize maxImport)
 {
     std::streambuf* sb = _ios->rdbuf();
     if( ! sb)
         return 0;
 
-    if(isize == 0) 
-        isize = sb->in_avail();
+    if(maxImport == 0) 
+        maxImport = sb->in_avail();
 
     while(true) 
     {
@@ -380,7 +380,7 @@ std::streamsize Connection::read(char* buf, size_t n, std::streamsize isize)
             throw SslError("SSL_read");
         }
 
-        if(isize == 0)
+        if(maxImport == 0)
             return 0;
 
         // Refill the BIO with encoded bytes for decoding
@@ -390,7 +390,7 @@ std::streamsize Connection::read(char* buf, size_t n, std::streamsize isize)
         if(bm->max == bm->length)
             continue;
 
-        const std::streamsize refill = std::min(static_cast<std::streamsize>(bm->max - bm->length), isize);
+        const std::streamsize refill = std::min(static_cast<std::streamsize>(bm->max - bm->length), maxImport);
         log_debug("get " << refill << " bytes from _ios");
         
         std::streamsize gcount = sb->sgetn(bm->data + bm->length, refill);
@@ -400,7 +400,7 @@ std::streamsize Connection::read(char* buf, size_t n, std::streamsize isize)
         bm->length += static_cast<int>( gcount );
         log_debug("Wrote " << gcount << " bytes from _ios to _in BUF_MEM");
 
-        isize -= gcount;
+        maxImport -= gcount;
     }
 
     return 0;

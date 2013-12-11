@@ -87,8 +87,6 @@ namespace Pt {
 namespace Xml {
 
 DocTypeDefinition::DocTypeDefinition()
-: _v1(0)
-, _v2(0)
 {
 }
 

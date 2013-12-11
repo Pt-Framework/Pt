@@ -184,16 +184,17 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void MaxRequestSize()
         {
+            Pt::Net::Endpoint ep("127.0.0.1", 8001);
             HelloService service;
-
-            Pt::Http::Server server(*_loop, "127.0.0.1", 8001);
+            
+            Pt::Http::Server server(*_loop, ep);
             server.setMaxRequestSize(5);
 
             Pt::Http::MapUrl mapurl("/test", service);
             server.addServlet(mapurl);
 
             Pt::Http::Client client(*_loop);
-            client.setHost("127.0.0.1", 8001);
+            client.setHost(ep);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onMaxRequestSizeReply);
             client.request().setUrl("/test");
             client.request().body() << "Hello World";
@@ -218,14 +219,16 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void PipelinedRequests()
         {
+            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+
             HelloService service;
             Pt::Http::MapUrl mapurl("/test", service);
 
-            Pt::Http::Server server(*_loop, "127.0.0.1", 8001);
+            Pt::Http::Server server(*_loop, ep);
             server.addServlet(mapurl);
 
             Pt::Http::Client client(*_loop);
-            client.setHost("127.0.0.1", 8001);
+            client.setHost(ep);
             client.requestSent() += Pt::slot(*this, &ServerTest::onPipelinedSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onPipelinedReceived);
             client.request().setUrl("/test");
@@ -289,10 +292,12 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void NotFound()
         {
-            Pt::Http::Server server(*_loop, "127.0.0.1", 8001);
+            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            
+            Pt::Http::Server server(*_loop, ep);
 
             Pt::Http::Client client(*_loop);
-            client.setHost("127.0.0.1", 8001);
+            client.setHost(ep);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
             client.request().setUrl("/index.html");
             client.request().header().set("foo", "bar");
@@ -327,20 +332,22 @@ class ServerTest : public Pt::Unit::TestSuite
 #ifdef PT_HTTP_WITH_SSL
         void NotFoundHttps()
         {
+            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+
             Pt::Ssl::Context serverCtx;
             setupSslServerContext(serverCtx);
             
             // start HTTP server          
             Pt::Http::Server server(*_loop);
             server.setSecure(serverCtx);
-            server.listen("127.0.0.1", 8001);
+            server.listen(ep);
 
             Pt::Ssl::Context clientContext;
             setupSslClientContext(clientContext);
             
             // start HTTP client
             Pt::Http::Client client(*_loop);
-            client.setHost("127.0.0.1", 8001);
+            client.setHost(ep);
             client.setSecure(clientContext);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onNotFoundReceived);
             client.request().setUrl("/index.html");
@@ -413,14 +420,16 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void BasicAuthentication()
         {
-            Pt::Http::Server server(*_loop, "127.0.0.1", 8001);
+            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+
+            Pt::Http::Server server(*_loop, ep);
 
             HelloService service;
             Pt::Http::MapUrl mapurl("/test", service, _authent);
             server.addServlet(mapurl);
 
             Pt::Http::Client client(*_loop);
-            client.setHost("127.0.0.1", 8001);
+            client.setHost(ep);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onBasicAuthenticationReceived);
             client.request().setUrl("/test");
             client.beginReceive();
@@ -470,15 +479,16 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void ReplyWithBody()
         {
-            HelloService service;
+            Pt::Net::Endpoint ep("127.0.0.1", 8001);
 
-            Pt::Http::Server server(*_loop, "127.0.0.1", 8001);
+            HelloService service;
+            Pt::Http::Server server(*_loop, ep);
 
             Pt::Http::MapUrl mapurl("/test", service);
             server.addServlet(mapurl);
 
             Pt::Http::Client client(*_loop);
-            client.setHost("127.0.0.1", 8001);
+            client.setHost(ep);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onHelloReceived);
             client.request().setUrl("/test");
             client.request().header().set("foo", "bar");
@@ -513,15 +523,17 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void QueryString()
         {
+            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            
             EchoQueryService service;
 
-            Pt::Http::Server server(*_loop, "127.0.0.1", 8001);
+            Pt::Http::Server server(*_loop, ep);
 
             Pt::Http::MapUrl mapurl("/test", service);
             server.addServlet(mapurl);
 
             Pt::Http::Client client(*_loop);
-            client.setHost("127.0.0.1", 8001);
+            client.setHost(ep);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onQueryStringReceived);
             client.request().setUrl("/test");
             client.request().setQParams("a=4&b=Hello");
@@ -556,14 +568,16 @@ class ServerTest : public Pt::Unit::TestSuite
 
         void ChunkedReply()
         {
-            Pt::Http::Server server(*_loop, "127.0.0.1", 8001);
+            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+
+            Pt::Http::Server server(*_loop, ep);
 
             ChunkedService service;
             Pt::Http::MapUrl servlet("/test", service);
             server.addServlet(servlet);
 
             Pt::Http::Client client(*_loop);
-            client.setHost("127.0.0.1", 8001);
+            client.setHost(ep);
             client.requestSent() += Pt::slot(*this, &ServerTest::onChunkedSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onChunkedReceived);
             client.request().setUrl("/test");

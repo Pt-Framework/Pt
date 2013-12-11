@@ -102,45 +102,6 @@ TcpServer::TcpServer(const Endpoint& ep)
 }
 
 
-TcpServer::TcpServer(const Endpoint& ipaddr, const TcpServerOptions& options)
-: _loop(0)
-, _impl(0)
-{
-    _impl = new TcpServerImpl(*this);
-    std::auto_ptr<TcpServerImpl> impl(_impl);
-
-    this->listen(ipaddr, options);
-
-    impl.release();
-}
-
-
-TcpServer::TcpServer(const std::string& ipaddr, unsigned short int port)
-: _loop(0)
-, _impl(0)
-{
-    _impl = new TcpServerImpl(*this);
-    std::auto_ptr<TcpServerImpl> impl(_impl);
-
-    this->listen(ipaddr, port);
-
-    impl.release();
-}
-
-
-TcpServer::TcpServer(const std::string& ipaddr, unsigned short int port, const TcpServerOptions& options)
-: _loop(0)
-, _impl(0)
-{
-    _impl = new TcpServerImpl(*this);
-    std::auto_ptr<TcpServerImpl> impl(_impl);
-
-    this->listen(ipaddr, port, options);
-
-    impl.release();
-}
-
-
 TcpServer::~TcpServer()
 {
     try
@@ -165,20 +126,6 @@ void TcpServer::listen(const Endpoint& ep, const TcpServerOptions& options)
 {
     this->close();
     _impl->listen(ep, options);
-}
-
-
-void TcpServer::listen(const std::string& ipaddr, unsigned short int port)
-{
-    Endpoint ep(ipaddr, port);
-    listen(ep);
-}
-
-
-void TcpServer::listen(const std::string& ipaddr, unsigned short int port, const TcpServerOptions& options)
-{
-    Endpoint ep(ipaddr, port);
-    listen(ep, options);
 }
 
 

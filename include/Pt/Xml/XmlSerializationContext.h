@@ -31,6 +31,7 @@
 
 #include <Pt/Xml/Api.h>
 #include <Pt/SerializationContext.h>
+#include <Pt/Types.h>
 #include <map>
 #include <vector>
 #include <string>
@@ -43,6 +44,9 @@ namespace Xml {
 */
 class PT_XML_API XmlSerializationContext : public SerializationContext
 {
+    public:
+        class Fixup;
+
     public:
         //! @brief Default Constructor.
         XmlSerializationContext();
@@ -88,20 +92,24 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
         // inherit docs
         virtual void onFixup();
 
-    public:
-        class Fixup;
+    private:
+        XmlSerializationContext(const XmlSerializationContext& si)
+        {}
+
+        XmlSerializationContext& operator=(const XmlSerializationContext& si)
+        { return *this; }
 
     private:
         std::map<const void*, unsigned> _idmap;
         std::map<const void*, std::string> _refmap;
         std::vector<Fixup*> _targets;
         std::vector<Fixup*> _pointers; 
-        void* _v1; // allocator
-        void* _v2;
+        Pt::varint_t _r1; // allocator
+        Pt::varint_t _r2;
 };
 
 } // namespace Xml
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Xml_XmlSerializationContext_h

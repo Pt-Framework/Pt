@@ -66,42 +66,6 @@ Server::Server(System::EventLoop& loop, const Pt::Net::Endpoint& ep)
 }
 
 
-Server::Server(System::EventLoop& loop, const Pt::Net::Endpoint& ep, const Net::TcpServerOptions& opts)
-: _impl(0)
-{
-    _impl = new ServerImpl();
-    std::auto_ptr<ServerImpl> impl(_impl);
-    
-    setActive(loop);
-    listen(ep, opts);
-    impl.release();
-}
-
-
-Server::Server(System::EventLoop& loop, const std::string& ip, unsigned short int port)
-: _impl(0)
-{
-    _impl = new ServerImpl();
-    std::auto_ptr<ServerImpl> impl(_impl);
-    
-    setActive(loop);
-    listen(ip, port);
-    impl.release();
-}
-
-
-Server::Server(System::EventLoop& loop, const std::string& ip, unsigned short int port, const Net::TcpServerOptions& opts)
-: _impl(0)
-{
-    _impl = new ServerImpl();
-    std::auto_ptr<ServerImpl> impl(_impl);
-    
-    setActive(loop);
-    listen(ip, port, opts);
-    impl.release();
-}
-
-
 Server::~Server()
 {
     delete _impl;
@@ -184,19 +148,6 @@ void Server::listen(const Pt::Net::Endpoint& ep)
 void Server::listen(const Pt::Net::Endpoint& ep, const Net::TcpServerOptions& opts)
 {
     _impl->listen(ep, opts);
-}
-
-
-void Server::listen(const std::string& ip, unsigned short int port)
-{
-    Net::TcpServerOptions opts;
-    listen(ip, port, opts);
-}
-
-void Server::listen(const std::string& ip, unsigned short int port, const Net::TcpServerOptions& opts)
-{
-    Net::Endpoint ep(ip, port);
-    listen(ep, opts);
 }
 
 

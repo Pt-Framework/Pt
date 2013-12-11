@@ -77,27 +77,27 @@ class NamespaceContext : private NonCopyable
 
         /** @brief Adds a namespace to the stack.
         */
-        void pushNamespace(unsigned depth, const String& prefix, const String& name);
+        void pushNamespace(std::size_t depth, const String& prefix, const String& name);
 
         /** @brief Adds a default namespace to the stack.
         */
-        void pushDefaultNamespace(unsigned depth, const String& name);
+        void pushDefaultNamespace(std::size_t depth, const String& name);
 
         /** @brief Unsets a namespace.
         */
-        void unsetNamespace(unsigned depth, const String& prefix);
+        void unsetNamespace(std::size_t depth, const String& prefix);
 
         /** @brief Unsets the default namespace.
         */
-        void unsetDefaultNamespace(unsigned depth);
+        void unsetDefaultNamespace(std::size_t depth);
 
-        const Namespace* startElement(unsigned depth, NamespaceMapping& nsmap, const String& prefix) const;
+        const Namespace* startElement(std::size_t depth, NamespaceMapping& nsmap, const String& prefix) const;
 
-        const Namespace* endElement(unsigned depth, NamespaceMapping& nsmap, const String& prefix) const;
+        const Namespace* endElement(std::size_t depth, NamespaceMapping& nsmap, const String& prefix) const;
 
         /** @brief Removes all namespaces at greater or equal depth.
         */
-        std::size_t popNamespace(unsigned depth);
+        std::size_t popNamespace(std::size_t depth);
 
         const Namespace& emptyNamespace() const
         { return _empty; }

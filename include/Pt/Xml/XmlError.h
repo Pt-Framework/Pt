@@ -25,12 +25,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Xml_XmlError_h
 #define Pt_Xml_XmlError_h
 
 #include <Pt/Xml/Api.h>
-#include <Pt/String.h>
+#include <string>
 #include <stdexcept>
+#include <cstddef>
 
 namespace Pt {
 
@@ -41,6 +43,10 @@ namespace Xml {
 class PT_XML_API XmlError : public std::runtime_error
 {
     public:
+        /** @brief Construct with message.
+        */
+        explicit XmlError(const std::string& what);
+
         /** @brief Construct with message.
         */
         explicit XmlError(const char* what);
@@ -58,7 +64,11 @@ class PT_XML_API SyntaxError : public XmlError
     public:
         /** @brief Construct with message and line number.
         */
-        SyntaxError(const char* what, unsigned line);
+        SyntaxError(const std::string& what, std::size_t line);
+
+        /** @brief Construct with message and line number.
+        */
+        SyntaxError(const char* what, std::size_t line);
 
         /** @brief Destructor.
         */
@@ -67,15 +77,15 @@ class PT_XML_API SyntaxError : public XmlError
 
         /** @brief Line count where the error in the document occured.
         */
-        unsigned line() const
+        std::size_t line() const
         { return _line; }
 
     private:
-        unsigned _line;
+        std::size_t _line;
 };
 
 } // namespace Xml
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Xml_XmlError_h

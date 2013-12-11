@@ -461,4 +461,4 @@ bool resolveHtmlEntity(Pt::String& entity)
     return false;
 }
 
-}
+} // namespace

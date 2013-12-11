@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Xml_Node_h
 #define Pt_Xml_Node_h
 
@@ -153,4 +154,4 @@ const T& nodeCast(const Node& node)
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Xml_Node_h

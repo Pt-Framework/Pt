@@ -100,8 +100,10 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void runClient()
         {
+            Pt::Net::Endpoint ep("127.0.0.1", 5050);
+
             Pt::Net::TcpSocket socket;
-            socket.connect("127.0.0.1", 5050);
+            socket.connect(ep);
             
             char buf[100];
             std::memset( buf, 42, sizeof(buf) );
@@ -132,7 +134,8 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void BlockingTCP()
         {            
-            Pt::Net::TcpServer server("127.0.0.1", 5050);
+            Pt::Net::Endpoint ep("127.0.0.1", 5050);
+            Pt::Net::TcpServer server(ep);
             server.connectionPending() += Pt::slot(*this, &TcpSocketTest::runServer);
             server.setActive(*_loop);                    
             server.beginAccept();         
@@ -161,7 +164,8 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
             try
             {
-                client.beginConnect("127.0.0.5", 9000);
+                Pt::Net::Endpoint ep("127.0.0.5", 9000);
+                client.beginConnect(ep);
             }
             catch(const Pt::System::IOError&)
             {
@@ -184,7 +188,9 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void CloseOnAccept()
         {
-            Pt::Net::TcpServer server("127.0.0.1", 9000);
+            Pt::Net::Endpoint ep("127.0.0.1", 9000);
+
+            Pt::Net::TcpServer server(ep);
             server.connectionPending() += Pt::slot(*this, &TcpSocketTest::onAcceptAndClose);
             server.setActive(*_loop);
             server.beginAccept();
@@ -195,7 +201,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             _client->connected() += Pt::slot(*this, &TcpSocketTest::onConnectAndBeginRead);
             _client->inputReady() += Pt::slot(*this, &TcpSocketTest::onInputExpectEof);
             _client->setActive(*_loop);
-            _client->beginConnect("127.0.0.1", 9000);
+            _client->beginConnect(ep);
 
             PT_UNIT_ASSERT( ! _client->isEof() );
             _loop->run();
@@ -218,8 +224,8 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             _client->connected() += Pt::slot(*this, &TcpSocketTest::onConnectAndClose);
             _client->inputReady() += Pt::slot(*this, &TcpSocketTest::onInputExpectEof);
             _client->setActive(*_loop);
-            _client->beginConnect("127.0.0.1", 9000);
-
+            _client->beginConnect(Pt::Net::Endpoint::ip4Loopback(9000));
+            
             PT_UNIT_ASSERT( ! _acceptor->isEof() );
             _loop->run();
             PT_UNIT_ASSERT( _acceptor->isEof() );
@@ -261,7 +267,9 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void NonBlockingWithLoop()
         {
-            Pt::Net::TcpServer server("127.0.0.1", 9000);
+            Pt::Net::Endpoint ep("127.0.0.1", 9000);
+
+            Pt::Net::TcpServer server(ep);
             {
                 //this->reportMessage("\nSTART");
 
@@ -276,7 +284,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
                 client.connected() += Pt::slot(*this, &TcpSocketTest::onConnectAndBeginWrite);
                 client.outputReady() += Pt::slot(*this, &TcpSocketTest::onOutput);
                 client.setActive(*_loop);
-                client.beginConnect("127.0.0.1", 9000);
+                client.beginConnect(ep);
 
                 _loop->run();
 
@@ -286,7 +294,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
                 _loop  = 0;
             }
 
-            server.listen("127.0.0.1", 9000);
+            server.listen(ep);
 
             PT_UNIT_ASSERT( 0 == std::strncmp(input, "Hello World !!!", 15) );
             //this->reportMessage("FINISHED");

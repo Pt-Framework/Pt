@@ -32,7 +32,7 @@
 #include <Pt/Http/Api.h>
 #include <Pt/Signal.h>
 #include <Pt/NonCopyable.h>
-#include <string>
+#include <cstddef>
 
 namespace Pt {
 
@@ -61,13 +61,9 @@ class PT_HTTP_API Client : public Connectable
         
         explicit Client(const Net::Endpoint& ep);
 
-        Client(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts);
-
         explicit Client(System::EventLoop& loop);
 
         Client(System::EventLoop& loop, const Net::Endpoint& ep);
-
-        Client(System::EventLoop& loop, const Net::Endpoint& ep, const Net::TcpSocketOptions& opts);
 
         ~Client();
 
@@ -86,10 +82,6 @@ class PT_HTTP_API Client : public Connectable
         void setHost(const Net::Endpoint& ep);
 
         void setHost(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts);
-        
-        void setHost(const std::string& host, unsigned short int port);
-
-        void setHost(const std::string& host, unsigned short int port, const Net::TcpSocketOptions& opts);
 
         const Net::Endpoint& host() const;
 

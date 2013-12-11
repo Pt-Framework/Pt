@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2010-2010 by Aloysius Indrayanto
  * Copyright (C) 2010-2012 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
@@ -26,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_SSL_SSLERROR_H
 #define PT_SSL_SSLERROR_H
 
@@ -45,6 +45,9 @@ class PT_SSL_API SslError : public System::IOError
         //! @brief Contructs with message.
         SslError(const std::string& what);
 
+        //! @brief Contructs with message.
+        SslError(const char* what);
+
         //! @brief Destructor.
         ~SslError() throw();
 };
@@ -57,10 +60,12 @@ class PT_SSL_API HandshakeFailed : public SslError
         //! @brief Contructs with message.
         HandshakeFailed(const std::string& what) throw();
 
+        //! @brief Contructs with message.
+        HandshakeFailed(const char* what) throw();
+
         //! @brief Destructor.
         ~HandshakeFailed() throw();
 };
-
 
 /** @brief Invalid SSL certificate or certificate chain.
   */
@@ -69,6 +74,9 @@ class PT_SSL_API InvalidCertificate : public SslError
     public:
         //! @brief Contructs with message.
         InvalidCertificate(const std::string& what) throw();
+
+        //! @brief Contructs with message.
+        InvalidCertificate(const char* what) throw();
 
         //! @brief Destructor.
         ~InvalidCertificate() throw();

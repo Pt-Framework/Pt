@@ -132,4 +132,4 @@ inline const ProcessingInstruction& toProcessingInstruction(const Node& node)
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Xml_ProcessingInstruction_h

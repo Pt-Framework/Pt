@@ -49,11 +49,11 @@ class PT_SSL_API StreamBuffer : public BasicStreamBuffer<char>
     public:
         /** @brief Construct an SSL stream buffer. 
         */
-        StreamBuffer(size_t bufferSize = 1024);
+        StreamBuffer(std::size_t bufferSize = 1024);
 
         /** @brief Construct an SSL stream buffer.. 
         */
-        StreamBuffer(Context& ctx, std::ios& ios, OpenMode mode, size_t bufferSize = 1024);
+        StreamBuffer(Context& ctx, std::ios& ios, OpenMode mode, std::size_t bufferSize = 1024);
 
         /** @brief Destructor. 
         */
@@ -115,19 +115,26 @@ class PT_SSL_API StreamBuffer : public BasicStreamBuffer<char>
         // inheritdoc
         virtual std::streamsize showmanyc();
 
+        // inheritdoc
+        virtual std::streamsize showfull();
+
+        // inheritdoc
         virtual int sync();
         
+        // inheritdoc
         virtual int_type underflow();
         
+        // inheritdoc
         virtual int_type overflow(int_type ch);
 
     private:
         Connection*  _connection;
-        size_t       _ibufferSize;
+        std::size_t  _ibufferSize;
         char*        _ibuffer;
         std::size_t  _obufferSize;
         char*        _obuffer;
-        const size_t _pbmax;
+
+        static const unsigned _pbmax = 4;
 };
 
 } // namespace Ssl

@@ -328,7 +328,7 @@ std::streamsize Connection::write(const char* buf, size_t n)
 }
 
 
-std::streamsize Connection::read(char* buf, size_t n, std::streamsize isize)
+std::streamsize Connection::read(char* buf, size_t n, std::streamsize maxImport)
 {
     log_trace("Connection::read");
 
@@ -336,14 +336,16 @@ std::streamsize Connection::read(char* buf, size_t n, std::streamsize isize)
     if( ! sb)
         return 0;
 
-    if(isize == 0) 
-        isize = sb->in_avail();
+    if(maxImport == 0) 
+        maxImport = sb->in_avail();
 
     size_t processed = 0;
 
-    // TODO: consume isize bytes from input
+    // TODO: consume not more than maxImport bytes from input,
+    //       also look at readHandshake
     
     _isReading = true;
+    _maxImport = maxImport;
     OSStatus error = SSLRead(_context, buf, n, &processed);
     _isReading = false;
 

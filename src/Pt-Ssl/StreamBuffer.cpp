@@ -42,24 +42,22 @@ namespace Pt {
 
 namespace Ssl {
 
-StreamBuffer::StreamBuffer(size_t bufferSize)
+StreamBuffer::StreamBuffer(std::size_t bufferSize)
 : _connection(0)
 , _ibufferSize(bufferSize + 4)
 , _ibuffer(0)
 , _obufferSize(bufferSize)
 , _obuffer(0)
-, _pbmax(4)
 {
 }
 
 
-StreamBuffer::StreamBuffer(Context& ctx, std::ios& ios, OpenMode mode, size_t bufferSize)
+StreamBuffer::StreamBuffer(Context& ctx, std::ios& ios, OpenMode mode, std::size_t bufferSize)
 : _connection(0)
 , _ibufferSize(bufferSize + 4)
 , _ibuffer(0)
 , _obufferSize(bufferSize)
 , _obuffer(0)
-, _pbmax(4)
 {
     this->open(ctx, ios, mode);
 }
@@ -169,7 +167,7 @@ bool StreamBuffer::isClosed() const
 }
 
 
-void StreamBuffer::import(std::streamsize isize)
+void StreamBuffer::import(std::streamsize maxImport)
 {
     log_trace("StreamBuffer::do_underflow");
 
@@ -190,11 +188,11 @@ void StreamBuffer::import(std::streamsize isize)
     }
 
     // Move unread bytes and putback to front
-    size_t putback  = _pbmax;
-    size_t leftover = 0;
+    std::size_t putback  = _pbmax;
+    std::size_t leftover = 0;
     if( this->gptr() ) 
     {
-        putback = std::min<size_t>( this->gptr() - this->eback(), _pbmax);
+        putback = std::min<std::size_t>( this->gptr() - this->eback(), _pbmax);
         char* to = _ibuffer + _pbmax - putback;
         char* from = this->gptr() - putback;
 
@@ -207,13 +205,13 @@ void StreamBuffer::import(std::streamsize isize)
     }
 
     // We only have to make some progress
-    size_t used = _pbmax + leftover;
-    size_t unused = _ibufferSize - used;
+    std::size_t used = _pbmax + leftover;
+    std::size_t unused = _ibufferSize - used;
 
     log_debug("get area free space: " << unused);
     assert(unused);
 
-    std::streamsize readSize = _connection->read(_ibuffer + used, unused, isize);
+    std::streamsize readSize = _connection->read(_ibuffer + used, unused, maxImport);
     log_debug("read " << readSize << " bytes from connection");
 
     if(readSize > 0)
@@ -233,6 +231,12 @@ std::streamsize StreamBuffer::showmanyc()
     // return _connection && _connection->rdbuf() ? _target->rdbuf()->in_avail() : -1;
 
     return 0;
+}
+
+
+std::streamsize StreamBuffer::showfull()
+{ 
+    return 0; 
 }
 
 

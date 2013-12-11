@@ -413,4 +413,4 @@ inline const StartElement& toStartElement(const Node& node)
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Xml_StartElement_h

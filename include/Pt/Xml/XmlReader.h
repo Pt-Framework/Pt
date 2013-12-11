@@ -306,8 +306,8 @@ inline InputIterator XmlReader::end() const
     return InputIterator(); 
 }
 
-}
+} // namespace Xml
 
-}
+} // namespace Pt
 
-#endif
+#endif // Pt_Xml_XmlReader_h

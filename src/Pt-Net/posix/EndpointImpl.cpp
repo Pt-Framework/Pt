@@ -138,7 +138,7 @@ EndpointImpl* EndpointImpl::ip4Any(unsigned short port)
     sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(&impl->_addr);
     addr->sin_family = AF_INET;
     addr->sin_port = htons(port);
-    addr->sin_addr.s_addr = INADDR_ANY;
+    addr->sin_addr.s_addr = htonl(INADDR_ANY);
 
     impl->_addrlen = sizeof(sockaddr_in);
 
@@ -153,7 +153,7 @@ EndpointImpl* EndpointImpl::ip4Loopback(unsigned short port)
     sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(&impl->_addr);
     addr->sin_family = AF_INET;
     addr->sin_port = htons(port);
-    addr->sin_addr.s_addr = INADDR_LOOPBACK;
+    addr->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
     impl->_addrlen = sizeof(sockaddr_in);
 
@@ -168,7 +168,7 @@ EndpointImpl* EndpointImpl::ip4Broadcast(unsigned short port)
     sockaddr_in* addr = reinterpret_cast<sockaddr_in*>(&impl->_addr);
     addr->sin_family = AF_INET;
     addr->sin_port = htons(port);
-    addr->sin_addr.s_addr = INADDR_BROADCAST;
+    addr->sin_addr.s_addr = htonl(INADDR_BROADCAST);
     
     impl->_addrlen = sizeof(sockaddr_in);
 

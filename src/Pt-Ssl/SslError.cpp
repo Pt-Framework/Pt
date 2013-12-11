@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2010-2010 by Aloysius Indrayanto
  * Copyright (C) 2010-2012 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
@@ -38,6 +37,11 @@ SslError::SslError(const std::string& what)
 {}
 
 
+SslError::SslError(const char* what)
+: System::IOError(what)
+{}
+
+
 SslError::~SslError() throw()
 {}
 
@@ -47,11 +51,21 @@ HandshakeFailed::HandshakeFailed(const std::string& what) throw()
 {}
 
 
+HandshakeFailed::HandshakeFailed(const char* what) throw()
+: SslError(what)
+{}
+
+
 HandshakeFailed::~HandshakeFailed() throw()
 {}
 
 
 InvalidCertificate::InvalidCertificate(const std::string& what) throw()
+: SslError(what)
+{}
+
+
+InvalidCertificate::InvalidCertificate(const char* what) throw()
 : SslError(what)
 {}
 

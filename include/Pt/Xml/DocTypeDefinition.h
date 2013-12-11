@@ -33,6 +33,7 @@
 #include <Pt/Xml/Node.h>
 #include <Pt/Xml/QName.h>
 #include <Pt/String.h>
+#include <Pt/Types.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
 
@@ -130,12 +131,12 @@ class PT_XML_API DocTypeDefinition : private NonCopyable
         Entities _entities;
         Entities _paramEntities;
         Notations _notations;
-        void* _v1; // allocator
-        void* _v2;
+        Pt::varint_t _r1; // allocator
+        Pt::varint_t _r2;
 };
 
 } // namespace Xml
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Xml_DocTypeDefinition_h

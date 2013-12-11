@@ -108,4 +108,4 @@ inline const StartDocument& toStartDocument(const Node& node)
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Xml_StartDocument_h

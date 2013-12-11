@@ -31,8 +31,8 @@
 
 #include <Pt/Net/Api.h>
 #include <Pt/Net/Endpoint.h>
-#include <Pt/Types.h>
 #include <Pt/System/IODevice.h>
+#include <Pt/Types.h>
 #include <cstddef>
 
 namespace Pt {
@@ -94,17 +94,9 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         void bind(const Endpoint& ep, const UdpSocketOptions& o);
 
-        void bind(const std::string& ipaddr, unsigned short int port);
-
-        void bind(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& o);
-
         bool beginBind(const Endpoint& ep);
 
         bool beginBind(const Endpoint& ep, const UdpSocketOptions& o);
-
-        bool beginBind(const std::string& ipaddr, unsigned short int port);
-
-        bool beginBind(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& o);
 
         void endBind();
 
@@ -117,25 +109,13 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         void connect(const Endpoint& ep, const UdpSocketOptions& o);
 
-        void connect(const std::string& ipaddr, unsigned short int port);
-
-        void connect(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& o);
-
         void setTarget(const Endpoint& ep);
 
         void setTarget(const Endpoint& ep, const UdpSocketOptions& o);
 
-        void setTarget(const std::string& ipaddr, unsigned short int port);
-
-        void setTarget(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& o);
-
         bool beginConnect(const Endpoint& ep);
 
         bool beginConnect(const Endpoint& ep, const UdpSocketOptions& o);
-
-        bool beginConnect(const std::string& ipaddr, unsigned short int port);
-
-        bool beginConnect(const std::string& ipaddr, unsigned short int port, const UdpSocketOptions& o);
 
         void endConnect();
 
@@ -157,28 +137,28 @@ class PT_NET_API UdpSocket : public System::IODevice
         virtual void onClose();
 
         // inherit doc
-        void onSetTimeout(size_t timeout);
+        void onSetTimeout(std::size_t timeout);
 
         // inherit doc
         virtual bool onRun();
 
         // inherit doc
-        virtual size_t onBeginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
+        virtual std::size_t onBeginRead(System::EventLoop& loop, char* buffer, std::size_t n, bool& eof);
 
         // inherit doc
-        virtual size_t onEndRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof);
+        virtual std::size_t onEndRead(System::EventLoop& loop, char* buffer, std::size_t n, bool& eof);
 
         // inherit doc
-        virtual size_t onRead(char* buffer, size_t count, bool& eof);
+        virtual std::size_t onRead(char* buffer, std::size_t count, bool& eof);
 
         // inherit doc
-        virtual size_t onBeginWrite(System::EventLoop& loop, const char* buffer, size_t n);
+        virtual std::size_t onBeginWrite(System::EventLoop& loop, const char* buffer, std::size_t n);
 
         // inherit doc
-        virtual size_t onEndWrite(System::EventLoop& loop, const char* buffer, size_t n);
+        virtual std::size_t onEndWrite(System::EventLoop& loop, const char* buffer, std::size_t n);
 
         // inherit doc
-        virtual size_t onWrite(const char* buffer, size_t count);
+        virtual std::size_t onWrite(const char* buffer, std::size_t count);
 
         // inherit doc
         virtual void onCancel();

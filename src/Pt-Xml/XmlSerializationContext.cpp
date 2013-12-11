@@ -25,9 +25,10 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/Xml/XmlSerializationContext.h"
-#include "Pt/Xml/XmlFormatter.h"
-#include "Pt/Convert.h"
+
+#include <Pt/Xml/XmlSerializationContext.h>
+#include <Pt/Xml/XmlFormatter.h>
+#include <Pt/Convert.h>
 #include <algorithm>
 #include <memory>
 
@@ -61,7 +62,7 @@ inline Iter lowerBound(Iter first, Iter last, const T& value, Pred pred)
     return first;
 }
 
-}
+} // namespace
 
 namespace Pt {
 
@@ -117,8 +118,6 @@ bool lessFixupId(XmlSerializationContext::Fixup* f, const std::string& id)
 
 
 XmlSerializationContext::XmlSerializationContext()
-: _v1(0)
-, _v2(0)
 {
     this->enableReferencing(true);
 }

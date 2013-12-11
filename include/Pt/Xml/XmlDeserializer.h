@@ -95,4 +95,4 @@ class XmlDeserializer : public Deserializer
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Xml_XmlDeserializer_h

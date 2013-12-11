@@ -25,16 +25,16 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/Xml/XmlFormatter.h"
-#include "Pt/Xml/XmlSerializationContext.h"
-#include "Pt/Xml/XmlWriter.h"
-#include "Pt/Xml/XmlReader.h"
-#include "Pt/Xml/StartElement.h"
-#include "Pt/Xml/EndElement.h"
-#include "Pt/Xml/Characters.h"
+#include <Pt/Xml/XmlFormatter.h>
+#include <Pt/Xml/XmlSerializationContext.h>
+#include <Pt/Xml/XmlWriter.h>
+#include <Pt/Xml/XmlReader.h>
+#include <Pt/Xml/StartElement.h>
+#include <Pt/Xml/EndElement.h>
+#include <Pt/Xml/Characters.h>
 #include <Pt/Composer.h>
-#include "Pt/Convert.h"
-#include "Pt/String.h"
+#include <Pt/Convert.h>
+#include <Pt/String.h>
 #include <cassert>
 
 namespace Pt {

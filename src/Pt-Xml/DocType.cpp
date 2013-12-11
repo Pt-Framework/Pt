@@ -38,8 +38,8 @@ namespace Xml {
 DocType::DocType(DocTypeDefinition& dtd)
 : Node(Node::DocType)
 , _dtd(&dtd)
-, _internal(0)
 {
+    _internal.i = 0;
 }
 
 
@@ -52,7 +52,7 @@ void DocType::clear()
 { 
     _publicId.clear();
     _systemId.clear();
-    _internal = 0;
+    _internal.i = 0;
 }
 
 
@@ -64,13 +64,13 @@ bool DocType::isExternal() const
 
 bool DocType::isInternal() const
 { 
-    return _internal == 1; 
+    return _internal.i == 1; 
 }
 
 
 void DocType::setInternal(bool hasInternal)
 {
-    _internal = hasInternal ? 1 : 0;
+    _internal.i = hasInternal ? 1 : 0;
 }
 
 
@@ -82,8 +82,8 @@ const QName& DocType::rootName() const
 
 EndDocType::EndDocType()
 : Node(Node::EndDocType)
-, _internal(0)
 {
+    _internal.i = 0;
 }
 
 
@@ -94,25 +94,25 @@ EndDocType::~EndDocType()
 
 void EndDocType::clear()
 { 
-    _internal = 0;
+    _internal.i = 0;
 }
 
 
 bool EndDocType::isExternal() const
 { 
-    return _internal != 1;
+    return _internal.i != 1;
 }
 
 
 bool EndDocType::isInternal() const
 { 
-    return _internal == 1; 
+    return _internal.i == 1; 
 }
 
 
 void EndDocType::setInternal(bool value)
 {
-    _internal = value ? 1 : 0;
+    _internal.i = value ? 1 : 0;
 }
 
 } // namespace Xml

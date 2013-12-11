@@ -31,6 +31,7 @@
 
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/StreamBuffer.h>
+#include <Pt/NonCopyable.h>
 #include <Pt/IOStream.h>
 
 namespace Pt {
@@ -39,13 +40,14 @@ namespace Ssl {
 
 /** @brief SSL stream.
 */
-class IOStream : public std::iostream
+class IOStream : public BasicIOStream<char>
+               , private NonCopyable
 {
     public:
         /** @brief Construct an SSL stream. 
         */
-        IOStream(size_t bufferSize = 1024)
-        : std::iostream(0)
+        IOStream(std::size_t bufferSize = 1024)
+        : BasicIOStream<char>(0)
         , _sb(bufferSize)
         {
             init(&_sb);
@@ -53,8 +55,8 @@ class IOStream : public std::iostream
 
         /** @brief Constructs an open SSL stream. 
         */
-        IOStream(Context& ctx, std::iostream& ios, OpenMode mode, size_t bufferSize = 1024)
-        : std::iostream(0)
+        IOStream(Context& ctx, std::iostream& ios, OpenMode mode, std::size_t bufferSize = 1024)
+        : BasicIOStream<char>(0)
         , _sb(ctx, ios, mode, bufferSize)
         {
             init(&_sb);        

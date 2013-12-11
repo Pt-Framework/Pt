@@ -72,4 +72,4 @@ class PT_XML_API DocTypeValidator : private NonCopyable
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Xml_DocTypeValidator_h

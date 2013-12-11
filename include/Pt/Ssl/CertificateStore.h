@@ -33,6 +33,7 @@
 #include <Pt/Ssl/Certificate.h>
 #include <string>
 #include <iosfwd>
+#include <cstddef>
 
 namespace Pt {
 
@@ -62,7 +63,7 @@ class PT_SSL_API CertificateStore
 
         /** @brief Loads PKCS12 data from memory.
         */
-        void loadPkcs12(const char* data, size_t len, const char* passwd);
+        void loadPkcs12(const char* data, std::size_t len, const char* passwd);
 
         /** @brief Finds a certificate by subject.
 
@@ -79,7 +80,7 @@ class PT_SSL_API CertificateStore
         */
         const Certificate& getCertificate(const std::string& subject);
 
-        /** @brief Returns the number of ccertificates in the store.
+        /** @brief Returns the number of certificates in the store.
         */
         std::size_t size() const;
 

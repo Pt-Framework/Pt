@@ -115,13 +115,6 @@ class PT_API SerializationInfo
 
         ~SerializationInfo();
 
-    private:
-        SerializationInfo(const SerializationInfo& si)
-        {}
-
-        SerializationInfo& operator=(const SerializationInfo& si)
-        { return *this; }
-
     public:
         void clear();
 
@@ -414,6 +407,13 @@ class PT_API SerializationInfo
         void clearValue();
 
         SerializationInfo& addChild();
+
+    private:
+        SerializationInfo(const SerializationInfo& si)
+        {}
+
+        SerializationInfo& operator=(const SerializationInfo& si)
+        { return *this; }
 
     private:
         struct Ref

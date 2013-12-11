@@ -32,6 +32,7 @@
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
 #include <Pt/TextStream.h>
+#include <cstddef>
 
 namespace Pt {
 
@@ -343,4 +344,4 @@ inline void XmlWriter::writeProcessingInstruction(const Pt::String& target, cons
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Xml_XmlWriter_h

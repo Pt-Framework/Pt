@@ -59,6 +59,8 @@ TcpSocketOptions& TcpSocketOptions::operator=(const TcpSocketOptions& opts)
 }
 
 
+
+
 TcpSocket::TcpSocket()
 : _impl(0)
 , _connecting(false)
@@ -94,19 +96,6 @@ TcpSocket::TcpSocket(TcpServer& server)
 }
 
 
-TcpSocket::TcpSocket(TcpServer& server, const TcpSocketOptions& opts)
-: _impl(0)
-, _connecting(false)
-, _isConnected(false)
-{
-    _impl = new TcpSocketImpl(*this);
-    std::auto_ptr<TcpSocketImpl> impl(_impl);
-
-    this->accept(server, opts);
-    impl.release();
-}
-
-
 TcpSocket::TcpSocket(const Endpoint& ep)
 : _impl(0)
 , _connecting(false)
@@ -116,45 +105,6 @@ TcpSocket::TcpSocket(const Endpoint& ep)
     std::auto_ptr<TcpSocketImpl> impl(_impl);
 
     this->connect(ep);
-    impl.release();
-}
-
-
-TcpSocket::TcpSocket(const Endpoint& ep, const TcpSocketOptions& opts)
-: _impl(0)
-, _connecting(false)
-, _isConnected(false)
-{
-    _impl = new TcpSocketImpl(*this);
-    std::auto_ptr<TcpSocketImpl> impl(_impl);
-
-    this->connect(ep, opts);
-    impl.release();
-}
-
-
-TcpSocket::TcpSocket(const std::string& ipaddr, unsigned short int port)
-: _impl(0)
-, _connecting(false)
-, _isConnected(false)
-{
-    _impl = new TcpSocketImpl(*this);
-    std::auto_ptr<TcpSocketImpl> impl(_impl);
-
-    this->connect(ipaddr, port);
-    impl.release();
-}
-
-
-TcpSocket::TcpSocket(const std::string& ipaddr, unsigned short int port, const TcpSocketOptions& opts)
-: _impl(0)
-, _connecting(false)
-, _isConnected(false)
-{
-    _impl = new TcpSocketImpl(*this);
-    std::auto_ptr<TcpSocketImpl> impl(_impl);
-
-    this->connect(ipaddr, port, opts);
     impl.release();
 }
 
@@ -204,18 +154,6 @@ void TcpSocket::connect(const Endpoint& addrinfo, const TcpSocketOptions& opts)
 }
 
 
-void TcpSocket::connect(const std::string& ipaddr, unsigned short int port)
-{ 
-    connect( Endpoint(ipaddr, port) ); 
-}
-
-
-void TcpSocket::connect(const std::string& ipaddr, unsigned short int port, const TcpSocketOptions& opts)
-{ 
-    connect(Endpoint(ipaddr, port), opts); 
-}
-
-
 void TcpSocket::beginConnect(const Endpoint& ep)
 {
     TcpSocketOptions opts;
@@ -238,18 +176,6 @@ void TcpSocket::beginConnect(const Endpoint& ep, const TcpSocketOptions& opts)
     {
         loop->setReady(*this);
     }
-}
-
-
-void TcpSocket::beginConnect(const std::string& ipaddr, unsigned short int port)
-{ 
-    return beginConnect( Endpoint(ipaddr, port) ); 
-}
-
-
-void TcpSocket::beginConnect(const std::string& ipaddr, unsigned short int port, const TcpSocketOptions& opts)
-{ 
-    return beginConnect(Endpoint(ipaddr, port), opts); 
 }
 
 

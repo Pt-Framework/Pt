@@ -63,7 +63,7 @@ const Namespace& NamespaceContext::getDefaultNamespace() const
 }
 
 
-const Namespace* NamespaceContext::startElement(unsigned depth, NamespaceMapping& nsmap, const String& prefix) const
+const Namespace* NamespaceContext::startElement(std::size_t depth, NamespaceMapping& nsmap, const String& prefix) const
 {
     std::vector<Namespace>::const_reverse_iterator iter;
 
@@ -138,7 +138,7 @@ const Namespace* NamespaceContext::findPrefix(const Char* prefix, std::size_t n)
 }
 
 
-const Namespace* NamespaceContext::endElement(unsigned depth, NamespaceMapping& nsmap, const String& prefix) const
+const Namespace* NamespaceContext::endElement(std::size_t depth, NamespaceMapping& nsmap, const String& prefix) const
 {
     std::vector<Namespace>::const_reverse_iterator iter;
 
@@ -219,34 +219,34 @@ const Namespace* NamespaceContext::findUri(const Char* ns, std::size_t n) const
 }
 
 
-void NamespaceContext::pushNamespace(unsigned depth, const String& prefix, const String& name)
+void NamespaceContext::pushNamespace(std::size_t depth, const String& prefix, const String& name)
 {
     _namespaces.push_back( Namespace(depth, prefix, name) );
 }
 
 
-void NamespaceContext::pushDefaultNamespace(unsigned depth, const String& name)
+void NamespaceContext::pushDefaultNamespace(std::size_t depth, const String& name)
 {
     // Namespace without prefix is default namespace
     _namespaces.push_back( Namespace(depth, String(), name) );
 }
 
 
-void NamespaceContext::unsetNamespace(unsigned depth, const String& prefix)
+void NamespaceContext::unsetNamespace(std::size_t depth, const String& prefix)
 {
     // Namespace without name is an explicitly unset namespace
     _namespaces.push_back( Namespace(depth, prefix, String()) );
 }
 
 
-void NamespaceContext::unsetDefaultNamespace(unsigned depth)
+void NamespaceContext::unsetDefaultNamespace(std::size_t depth)
 {
     // Namespace without name is an explicitly unset namespace
     _namespaces.push_back( Namespace(depth, String(), String()) );
 }
 
 
-std::size_t NamespaceContext::popNamespace(unsigned depth)
+std::size_t NamespaceContext::popNamespace(std::size_t depth)
 {
     std::size_t size = 0;
     while( ! _namespaces.empty() && _namespaces.back().depth() >= depth)

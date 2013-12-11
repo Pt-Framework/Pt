@@ -33,7 +33,6 @@
 #include <Pt/Net/Endpoint.h>
 #include <Pt/System/IODevice.h>
 #include <Pt/Types.h>
-#include <string>
 #include <cstddef>
 
 namespace Pt {
@@ -80,20 +79,11 @@ class PT_NET_API TcpSocket : public System::IODevice
         //! @brief Accepts a connection.
         explicit TcpSocket(TcpServer& server);
 
-        //! @brief Accepts a connection.
-        TcpSocket(TcpServer& server, const TcpSocketOptions& o);
-
         /** @brief Connects to a host.
             
             @throw System::AccessFailed if the host is not reachable
          */
         explicit TcpSocket(const Endpoint& ep);
-       
-        TcpSocket(const Endpoint& ep, const TcpSocketOptions& o);
-        
-        TcpSocket(const std::string& ipaddr, unsigned short int port);
-
-        TcpSocket(const std::string& ipaddr, unsigned short int port, const TcpSocketOptions& o);
 
         //! @brief Destructor.
         ~TcpSocket();
@@ -112,17 +102,9 @@ class PT_NET_API TcpSocket : public System::IODevice
         
         void connect(const Endpoint& ep, const TcpSocketOptions& o);
 
-        void connect(const std::string& ipaddr, unsigned short int port);
-
-        void connect(const std::string& ipaddr, unsigned short int port, const TcpSocketOptions& o);
-
         void beginConnect(const Endpoint& ep);
 
         void beginConnect(const Endpoint& ep, const TcpSocketOptions& o);
-
-        void beginConnect(const std::string& ipaddr, unsigned short int port);
-
-        void beginConnect(const std::string& ipaddr, unsigned short int port, const TcpSocketOptions& o);
 
         void endConnect();
 

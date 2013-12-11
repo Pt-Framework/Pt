@@ -60,5 +60,3 @@ const CertificateImpl* Certificate::impl() const
 } // namespace Ssl
 
 } // namespace Pt
-
-

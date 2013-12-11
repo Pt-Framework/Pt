@@ -25,12 +25,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Xml_Namespace_h
 #define Pt_Xml_Namespace_h
 
 #include <Pt/Xml/Api.h>
 #include <Pt/String.h>
 #include <vector>
+#include <cstddef>
 
 namespace Pt {
 
@@ -46,7 +48,7 @@ class Namespace
     public:
         /** @brief Constructs a Namespace with scope depth, name and prefix.
         */
-        Namespace(unsigned depth, const String& prefix, const String& uri)
+        Namespace(std::size_t depth, const String& prefix, const String& uri)
         : _depth(depth)
         , _prefix(prefix)
         , _uri(uri)
@@ -54,7 +56,7 @@ class Namespace
 
         /** @brief Returns the scope depth of the namespace.
         */
-        unsigned depth() const
+        std::size_t depth() const
         { return _depth; }
         
         /** @brief Returns the prefix of this namespace.
@@ -88,7 +90,7 @@ class Namespace
         { return _uri.empty(); }
 
     private:
-        unsigned _depth;
+        std::size_t _depth;
         String _prefix;
         String _uri;
 };
@@ -162,8 +164,8 @@ class NamespaceMapping
         std::vector<Entry> _entries;
 };
 
-}
+} // namespace Xml
 
-}
+} // namespace Pt
 
-#endif
+#endif // Pt_Xml_Namespace_h

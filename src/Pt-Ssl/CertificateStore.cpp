@@ -70,7 +70,7 @@ void CertificateStore::loadPkcs12(std::istream& is, const char* passwd)
 }
 
 
-void CertificateStore::loadPkcs12(const char* data, size_t len, const char* passwd)
+void CertificateStore::loadPkcs12(const char* data, std::size_t len, const char* passwd)
 {
     _impl->loadPkcs12(data, len, passwd);
 }

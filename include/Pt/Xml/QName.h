@@ -144,4 +144,4 @@ inline bool operator<(const QName& a, const QName& b)
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Xml_QName_h

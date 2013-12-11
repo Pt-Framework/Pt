@@ -66,8 +66,8 @@ namespace Pt {
 namespace XmlRpc {
 
 HttpClient::HttpClient()
-: _v1(0)
-, _v2(0)
+: _r1(0)
+, _r2(0)
 {
     init();
 }
@@ -75,28 +75,18 @@ HttpClient::HttpClient()
 
 HttpClient::HttpClient(const Net::Endpoint& ep, 
                        const std::string& url)
-: _v1(0)
-, _v2(0)
+: _r1(0)
+, _r2(0)
 {
     init();
     setTarget(ep, url);
-}
-
-
-HttpClient::HttpClient(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts, 
-                       const std::string& url)
-: _v1(0)
-, _v2(0)
-{
-    init();
-    setTarget(ep, opts, url);
 }
 
 
 HttpClient::HttpClient(System::EventLoop& loop)
 : _client(loop)
-, _v1(0)
-, _v2(0)
+, _r1(0)
+, _r2(0)
 {
     init();
 }
@@ -105,23 +95,11 @@ HttpClient::HttpClient(System::EventLoop& loop)
 HttpClient::HttpClient(System::EventLoop& loop, const Net::Endpoint& ep,
                        const std::string& url)
 : _client(loop)
-, _v1(0)
-, _v2(0)
+, _r1(0)
+, _r2(0)
 {
     init();
     setTarget(ep, url);
-}
-
-
-HttpClient::HttpClient(System::EventLoop& loop, const Net::Endpoint& ep,
-                       const Net::TcpSocketOptions& opts,
-                       const std::string& url)
-: _client(loop)
-, _v1(0)
-, _v2(0)
-{
-    init();
-    setTarget(ep, opts, url);
 }
 
 
@@ -176,15 +154,27 @@ void HttpClient::setTarget(const Net::Endpoint& ep, const Net::TcpSocketOptions&
 }
 
 
+void HttpClient::setHost(const Net::Endpoint& ep)
+{
+    _client.setHost(ep);
+}
+
+
+void HttpClient::setHost(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts)
+{
+    _client.setHost(ep, opts);
+}
+
+
 void HttpClient::setServiceUrl(const std::string& url)
 {
     _client.request().setUrl(url);
 }
 
 
-void HttpClient::setHost(const Net::Endpoint& ep)
+void HttpClient::setServiceUrl(const char* url)
 {
-    _client.setHost(ep);
+    _client.request().setUrl(url);
 }
 
 

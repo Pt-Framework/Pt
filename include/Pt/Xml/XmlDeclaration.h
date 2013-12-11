@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Xml_XmlDeclaration_h
 #define Pt_Xml_XmlDeclaration_h
 
@@ -86,7 +87,6 @@ class XmlDeclaration
         void setStandalone(bool value)
         { _standalone = value; }
 
-
     private:
         std::string _version;
         std::string _encoding;
@@ -97,4 +97,4 @@ class XmlDeclaration
 
 } // namespace Pt
 
-#endif
+#endif // Pt_Xml_XmlDeclaration_h

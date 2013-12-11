@@ -32,7 +32,6 @@
 #include <Pt/Http/Api.h>
 #include <Pt/Connectable.h>
 #include <Pt/NonCopyable.h>
-#include <string>
 #include <cstddef>
 
 namespace Pt {
@@ -52,9 +51,6 @@ class Context;
 
 namespace Http {
 
-class Request;
-class Servlet;
-
 /** @brief An HTTP server.
 */
 class PT_HTTP_API Server : public Connectable
@@ -66,12 +62,6 @@ class PT_HTTP_API Server : public Connectable
         explicit Server(System::EventLoop& loop);
 
         Server(System::EventLoop& loop, const Net::Endpoint& ep);
-
-        Server(System::EventLoop& loop, const Net::Endpoint& ep, const Net::TcpServerOptions& opts);
-
-        Server(System::EventLoop& loop, const std::string& ip, unsigned short int port);
-
-        Server(System::EventLoop& loop, const std::string& ip, unsigned short int port, const Net::TcpServerOptions& opts);
 
         ~Server();
 
@@ -100,10 +90,6 @@ class PT_HTTP_API Server : public Connectable
         void listen(const Net::Endpoint& ep);
 
         void listen(const Net::Endpoint& ep, const Net::TcpServerOptions& opts);
-
-        void listen(const std::string& ip, unsigned short int port);
-
-        void listen(const std::string& ip, unsigned short int port, const Net::TcpServerOptions& opts);
 
         void cancel();
 

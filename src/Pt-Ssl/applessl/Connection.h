@@ -80,6 +80,7 @@ class Connection
         Context* _ctx;
         SSLContextRef   _context;
         std::ios* _ios;
+        std::streamsize _maxImport;
         std::streamsize _iocount;
         bool _connected;
         bool _wantRead;

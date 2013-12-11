@@ -45,6 +45,9 @@ class Reply;
 class Authentication
 {
     public:
+        typedef std::map<std::string, Credential> Credentials;
+
+    public:
         Authentication(const std::string& name)
         : _name(name) 
         {}
@@ -82,6 +85,9 @@ class PT_HTTP_API BasicAuthentication : public Authentication
 
 class PT_HTTP_API Authenticator : private NonCopyable
 {
+    public:
+        typedef std::map<std::string, Credential> Credentials;
+
     public:
         Authenticator();
 

@@ -25,14 +25,28 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "Pt/Xml/XmlError.h"
 
 namespace Pt {
 
 namespace Xml {
 
+XmlError::XmlError(const std::string& what)
+: std::runtime_error(what)
+{
+}
+
+
 XmlError::XmlError(const char* what)
 : std::runtime_error(what)
+{
+}
+
+
+SyntaxError::SyntaxError(const std::string& what, unsigned line)
+: XmlError(what)
+, _line(line)
 {
 }
 

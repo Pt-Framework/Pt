@@ -30,6 +30,7 @@
 #include <Pt/XmlRpc/HttpService.h>
 #include <Pt/Http/Server.h>
 #include <Pt/Http/Servlet.h>
+#include <Pt/Net/Endpoint.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/Arg.h>
 #include <Pt/Main.h>
@@ -153,7 +154,9 @@ int main(int argc, char* argv[])
     
     Pt::Http::Server server(loop);
     server.setMaxThreads( threads.get() );
-    server.listen(ip.get(), port.get());
+
+    Pt::Net::Endpoint ep(ip.get(), port.get());
+    server.listen(ep);
     
     EchoService service;
 
