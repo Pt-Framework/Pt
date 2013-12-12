@@ -66,7 +66,13 @@ class Decomposer
         : _parent(0)
         {}
 
-        virtual void onFormat(Formatter& formatter) = 0;
+        virtual void onFormat(Formatter& formatter)
+        {
+            onBeginFormat(formatter);
+
+            while( onAdvanceFormat(formatter) != _parent )
+                ;
+        }
 
         virtual void onBeginFormat(Formatter& formatter) = 0;
 

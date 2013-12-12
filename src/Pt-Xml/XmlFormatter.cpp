@@ -214,12 +214,12 @@ void XmlFormatter::addValue(const char* name, const char* type,
 
     _writer->writeStartElement( String::widen( *name ? name : type ) );
 
-    if (*name)
+    if(*type)
     {
         _writer->writeAttribute(String("type"), Pt::String(type));
     }
 
-    if (*id)
+    if(*id)
     {
         _writer->writeAttribute(String("id"), Pt::String(id));
     }
@@ -248,7 +248,7 @@ void XmlFormatter::onBeginSequence(const char* name, const char* type,
 
     _writer->writeStartElement( String::widen( *name ? name : "array" ) );
 
-    if(*name)
+    if(*type)
     {
         _writer->writeAttribute(String("type"), Pt::String(type));
     }
@@ -287,7 +287,7 @@ void XmlFormatter::onBeginStruct(const char* name, const char* type,
 
     _writer->writeStartElement( String::widen( *name ? name : "object" ) );
 
-    if(*name)
+    if(*type)
     {
         _writer->writeAttribute(String("type"), Pt::String(type));
     }
@@ -626,7 +626,7 @@ void XmlFormatter::beginXmlMember(const Xml::StartElement& se)
 }
 
 
-void XmlFormatter::finishXmlMember(const Xml::EndElement& )
+void XmlFormatter::finishXmlMember(const Xml::EndElement& e)
 {
     _composer = _composer->finish();
     _processNode = &XmlFormatter::OnMemberEnd;

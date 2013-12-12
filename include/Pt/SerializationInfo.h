@@ -78,7 +78,9 @@ class PT_API SerializationInfo
             LongDouble = 16,
             Binary     = 17,
             Struct     = 18,
-            Sequence   = 19
+            Sequence   = 19,
+            Dict       = 20,
+            DictElement= 21
         };
 
         class Iterator;
@@ -132,6 +134,9 @@ class PT_API SerializationInfo
         inline bool isStruct() const
         { return _type == Struct; }
 
+        inline bool isDict() const
+        { return _type == Dict; }
+
         inline bool isSequence() const
         { return _type == Sequence; }
 
@@ -139,6 +144,8 @@ class PT_API SerializationInfo
         { return _type == Reference; }
 
         void setSequence();
+
+        void setDict();
 
         SerializationContext* context() const
         { return _context; }
@@ -297,9 +304,17 @@ class PT_API SerializationInfo
         
         void removeMember(const char* name);
 
-        /** @brief Serialization of member data
+        /** @brief Serialization of sequence elements
         */
         SerializationInfo& addElement();
+
+        /** @brief Serialization of dict elements
+        */       
+        SerializationInfo& addDictElement();
+
+        SerializationInfo& addDictKey();
+
+        SerializationInfo& addDictValue();
 
         /** @brief Deserialization of member data
         */
@@ -385,14 +400,7 @@ class PT_API SerializationInfo
         void setContextual(SerializationContext& ctx);
 
         template <typename T>
-        const BasicSerializationSurrogate<T>* getSurrogate() const
-        {
-            const SerializationSurrogate* surr = this->getSurrogate( typeid(T) );
-            if( ! surr )
-                return 0;
-
-            return static_cast<const BasicSerializationSurrogate<T>*>(surr);
-        }
+        const BasicSerializationSurrogate<T>* getSurrogate() const;
 
         /** @internal This is needed as a workaround for some compilers (GCC 3.x),
             so the getSurrogate template can be found.
@@ -479,6 +487,18 @@ class PT_API SerializationInfo
         // 7 - type id
 };
 
+
+template <typename T>
+inline const BasicSerializationSurrogate<T>* SerializationInfo::getSurrogate() const
+{
+    const SerializationSurrogate* surr = this->getSurrogate( typeid(T) );
+    if( ! surr )
+        return 0;
+
+    return static_cast<const BasicSerializationSurrogate<T>*>(surr);
+}
+
+
 template <typename T>
 inline bool SerializationInfo::compose(T& type) const
 {
@@ -490,6 +510,7 @@ inline bool SerializationInfo::compose(T& type) const
     return true;
 }
 
+
 template <typename T>
 inline bool SerializationInfo::decompose(const T& type)
 {
@@ -498,7 +519,6 @@ inline bool SerializationInfo::decompose(const T& type)
         return false;
 
     surr->decompose(*this, type);
-    this->setTypeName( surr->typeName() );
     return true;
 }
 
@@ -1143,12 +1163,16 @@ inline void operator >>=(const SerializationInfo& si, std::map<K, V, P, A>& map)
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
         K k;
-        it->getMember("first") >>= k;
+        
+        SerializationInfo::ConstIterator kv = it->begin();
+        if( kv != it->end() )
+            *kv >>= k;
 
         std::pair<K, V> elem( k, V() );
         pos = map.insert(elem);
-        if( pos.second )
-            it->getMember("second") >> Pt::load() >>= pos.first->second;
+
+        if( pos.second && ++kv != it->end() )
+            *kv >> Pt::load() >>= pos.first->second;
     }
 }
 
@@ -1160,12 +1184,15 @@ inline void operator <<=(SerializationInfo& si, const std::map<K, V, P, A>& map)
 
     for(it = map.begin(); it != map.end(); ++it)
     {
-        si.addElement() << Pt::save() <<= *it;
+        SerializationInfo& elem = si.addDictElement();
+        elem.addDictKey() <<= it->first;
+        elem.addDictValue() << Pt::save() <<= it->second;
     }
 
     si.setTypeName( Pt::LiteralPtr<char>("std::map") );
-    si.setSequence();
+    si.setDict();
 }
+
 
 
 template <typename K, typename V, typename P, typename A>
@@ -1177,12 +1204,16 @@ inline void operator >>=(const SerializationInfo& si, std::multimap<K, V, P, A>&
     for(SerializationInfo::ConstIterator it = si.begin(); it != si.end(); ++it)
     {
         K k;
-        it->getMember("first") >>= k;
+        
+        SerializationInfo::ConstIterator kv = it->begin();
+        if( kv != it->end() )
+            *kv >>= k;
 
         std::pair<K, V> elem( k, V() );
         mit = multimap.insert(elem);
 
-        it->getMember("second") >> Pt::load() >>= mit->second;
+        if( ++kv != it->end() )
+            *kv >> Pt::load() >>= mit->second;
     }
 }
 
@@ -1194,13 +1225,15 @@ inline void operator <<=(SerializationInfo& si, const std::multimap<T, C, P, A>&
 
     for(it = multimap.begin(); it != multimap.end(); ++it)
     {
-        si.addElement() << Pt::save() <<= *it;
+        SerializationInfo& elem = si.addDictElement();
+        elem.addDictKey() <<= it->first;
+        elem.addDictValue() << Pt::save() <<= it->second;
     }
 
     si.setTypeName( Pt::LiteralPtr<char>("std::multimap") );
-    si.setSequence();
+    si.setDict();
 }
 
 } // namespace Pt
 
-#endif
+#endif // Pt_SerializationInfo_h

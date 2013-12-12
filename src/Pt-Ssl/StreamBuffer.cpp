@@ -265,7 +265,9 @@ StreamBuffer::int_type StreamBuffer::underflow()
     if( this->gptr() < this->egptr() )
         return traits_type::to_int_type( *this->gptr() );
 
-    this->import(_ibufferSize);
+    // TODO: special value to indicate blocking I/O
+    std::streamsize max = std::numeric_limits<std::streamsize>::max();
+    this->import(max);
 
     //if( 0 == this->do_underflow(_ibufferSize) )
     //{

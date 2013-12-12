@@ -79,6 +79,7 @@ class BasicSerializationSurrogate : public SerializationSurrogate
         void decompose(Pt::SerializationInfo& si, const T& type) const
         {
             _decompose(si, type);
+            si.setTypeName( typeName() );
         }
 
         void compose(const Pt::SerializationInfo& si, T& type) const

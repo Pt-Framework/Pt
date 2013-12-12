@@ -175,7 +175,12 @@ bool Connection::readHandshake()
 {
     log_trace("Connection::readHandshake");
 
+    std::streambuf* sb = _ios->rdbuf();
+    if( ! sb)
+        return true;
+
     // TODO: find better way for _wantRead and _iocount flags
+    _maxImport = sb->in_avail();
     _wantRead = false;
     _isReading = true;
     OSStatus status = SSLHandshake(_context);
@@ -249,6 +254,10 @@ bool Connection::shutdown()
     if( ! _connected )
         return true;
 
+    std::streambuf* sb = _ios->rdbuf();
+    if( ! sb)
+        return false;
+
     if( ! _sentShutdown)
     {
         // write shutdown notify
@@ -281,6 +290,7 @@ bool Connection::shutdown()
     // read shutdown notify
     log_debug("read shutdown notify");
 
+    _maxImport = sb->in_avail();
     _wantRead = false;
     _isReading = true;
     OSStatus error = SSLClose(_context);
@@ -318,6 +328,10 @@ bool Connection::isClosed() const
 
 std::streamsize Connection::write(const char* buf, size_t n)
 {
+    std::streambuf* sb = _ios->rdbuf();
+    if( ! sb)
+        return 0;
+
     size_t processed = 0;
     OSStatus error = SSLWrite(_context, buf, n, &processed);
     
@@ -341,8 +355,7 @@ std::streamsize Connection::read(char* buf, size_t n, std::streamsize maxImport)
 
     size_t processed = 0;
 
-    // TODO: consume not more than maxImport bytes from input,
-    //       also look at readHandshake
+    // TODO: also look at readHandshake
     
     _isReading = true;
     _maxImport = maxImport;
@@ -377,7 +390,8 @@ OSStatus Connection::sslRead(void* data, size_t* n)
         return errSSLWouldBlock;
     }       
 
-    if(sb->in_avail() <= 0)
+    //if(sb->in_avail() <= 0)
+    if(_maxImport <= 0)
     {
         _wantRead = true;
         *n = 0;
@@ -385,12 +399,16 @@ OSStatus Connection::sslRead(void* data, size_t* n)
     }  
 
     log_debug("avail input: " << sb->in_avail());
-    std::streamsize gsize = std::min( sb->in_avail(), static_cast<std::streamsize>(*n) );
+    
+    //std::streamsize gsize = std::min( sb->in_avail(), static_cast<std::streamsize>(*n) ); 
+    std::streamsize gsize = std::min( _maxImport, static_cast<std::streamsize>(*n) );
     std::streamsize r = sb->sgetn(reinterpret_cast<char*>(data), gsize);
     log_debug("read " << r << " bytes from input");
 
     OSStatus ret = noErr;
-    if( static_cast<size_t>(r) < (*n) )
+    
+    // if less is received than requested, the decoder cannot make progress
+    if( static_cast<size_t>(r) < (*n) ) // is this correct?
     {
         ret = errSSLWouldBlock;
     }

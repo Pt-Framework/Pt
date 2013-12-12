@@ -118,6 +118,13 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
     {
         formatter.beginMember(_Name);
     }
+    else if( this->parent() && this->parent()->type() == DictElement )
+    {
+        if( this->sibling() )
+            formatter.beginDictKey();
+        else
+            formatter.beginDictValue();
+    }
     else if( this->parent() && this->parent()->type() == Sequence )
     {
         formatter.beginElement();
@@ -132,10 +139,6 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
         case Char:
             formatter.addChar( _Name, _value.ui32, _id );
             break;
-
-        //case Char8:
-        //    formatter.addChar8( _Name, _value.ui32, _id );
-        //    break;
 
         case Int8:
             formatter.addInt8( _Name, static_cast<Pt::int8_t>(_value.l), _id );
@@ -201,11 +204,7 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
             formatter.addBinary( _Name, _TypeName, data, len, _id );
              break;
         }
-        //case Str8:
-        //{
-        //    formatter.addString8( _Name, _value.cstr, _id );
-        //    break;
-        //}
+
         case Str:
         {
             formatter.addString( _Name, _TypeName, _value.ustr.str, _id );
@@ -225,6 +224,18 @@ SerializationInfo::Iterator SerializationInfo::beginFormat(Formatter& formatter)
         case Struct:
         {
             formatter.beginStruct( _Name, this->typeName(), this->id() );
+            return this->begin();
+        }
+
+        case Dict:
+        {
+            formatter.beginDict( _Name, this->typeName(), this->id() );
+            return this->begin();
+        }
+
+        case DictElement:
+        {
+            formatter.beginDictElement();
             return this->begin();
         }
 
@@ -248,6 +259,14 @@ void SerializationInfo::endFormat(Formatter& formatter)
     {
         formatter.finishStruct();
     }
+    else if(_type == SerializationInfo::Dict)
+    {
+        formatter.finishDict();
+    }
+    else if(_type == SerializationInfo::DictElement)
+    {
+        formatter.finishDictElement();
+    }
     else if(_type == Pt::SerializationInfo::Sequence)
     {
         formatter.finishSequence();
@@ -256,6 +275,13 @@ void SerializationInfo::endFormat(Formatter& formatter)
     if( this->parent() && this->parent()->type() == Struct )
     {
         formatter.finishMember();
+    }
+    else if( this->parent() && this->parent()->type() == DictElement )
+    {
+        if( this->sibling() )
+            formatter.finishDictKey();
+        else
+            formatter.finishDictValue();
     }
     else if( this->parent() && this->parent()->type() == Sequence )
     {
@@ -275,10 +301,6 @@ void SerializationInfo::format(Formatter& formatter)
         case Char:
             formatter.addChar( _Name, _value.ui32, _id );
             break;
-
-        //case Char8:
-        //    formatter.addChar8( _Name, _value.ui32, _id );
-        //    break;
 
         case Int8:
             formatter.addInt8( _Name, static_cast<Pt::int8_t>(_value.l), _id );
@@ -344,11 +366,7 @@ void SerializationInfo::format(Formatter& formatter)
             formatter.addBinary( _Name, _TypeName, data, len, _id );
             break;
         }
-        //case Str8:
-        //{
-        //    formatter.addString8( _Name, _value.cstr, _id );
-        //    break;
-        //}
+
         case Str:
         {
             formatter.addString( _Name, _TypeName, _value.ustr.str, _id );
@@ -380,6 +398,38 @@ void SerializationInfo::format(Formatter& formatter)
             }
 
             formatter.finishStruct();
+            break;
+        }
+
+        case Dict:
+        {
+            formatter.beginDict( _Name, this->typeName(), this->id() );
+
+            SerializationInfo::Iterator it;
+            SerializationInfo::Iterator end = this->end();
+            for(it = this->begin(); it != end; ++it)
+            {
+                formatter.beginDictElement();
+
+                SerializationInfo::Iterator kv = it->begin();
+                if( kv != it->end() )
+                {
+                    formatter.beginDictKey();
+                    kv->format(formatter);
+                    formatter.finishDictKey();
+                }
+                
+                if( ++kv != it->end() )
+                {
+                    formatter.beginDictValue();
+                    kv->format(formatter);
+                    formatter.finishDictValue();
+                }
+
+                formatter.finishDictElement();
+            }
+
+            formatter.finishDict();
             break;
         }
 
@@ -435,6 +485,8 @@ void SerializationInfo::clearValue()
     switch(_type)
     {
         case Struct:
+        case Dict:
+        case DictElement:
         case Sequence:
         {
             for(SerializationInfo* it = _value.seq.first; it != 0; )
@@ -573,8 +625,27 @@ void SerializationInfo::setSequence()
         _isCompound = true;
     }
 
-
     _type = Sequence;
+}
+
+
+void SerializationInfo::setDict()
+{
+    if(_type == SerializationInfo::Context)
+        return;
+
+    if( ! _isCompound )
+    {
+        this->clearValue();
+
+        _value.seq.first = 0;
+        _value.seq.last = 0;
+        _value.seq.size = 0;
+
+        _isCompound = true;
+    }
+
+    _type = Dict;
 }
 
 
@@ -1670,6 +1741,7 @@ void SerializationInfo::finishLoad() const
     }
 }
 
+
 SerializationInfo& SerializationInfo::addMember(const char* name, size_t len)
 {
     if( _type == Context )
@@ -1786,6 +1858,78 @@ SerializationInfo& SerializationInfo::addElement()
     }
 
     _type = Sequence;
+
+    return this->addChild();
+}
+
+
+SerializationInfo& SerializationInfo::addDictElement()
+{
+    if( _type == Context )
+    {
+        freeRefStr2(_Name, _flags, NAME_REF_BIT);
+        return *this;
+    }
+
+   if( ! _isCompound )
+    {
+        this->clearValue();
+
+        _value.seq.size = 0;
+        _value.seq.first = 0;
+        _value.seq.last = 0;
+        _isCompound = true;
+    }
+
+    _type = Dict;
+
+    return this->addChild();
+}
+
+
+SerializationInfo& SerializationInfo::addDictKey()
+{
+    if( _type == Context )
+    {
+        freeRefStr2(_Name, _flags, NAME_REF_BIT);
+        return *this;
+    }
+
+    if( ! _isCompound )
+    {
+        clearValue();
+
+        _value.seq.size = 0;
+        _value.seq.first = 0;
+        _value.seq.last = 0;
+        _isCompound = true;
+    }
+
+    _type = DictElement;
+
+    return this->addChild();
+}
+
+
+SerializationInfo& SerializationInfo::addDictValue()
+{
+    if( _type == Context )
+    {
+        freeRefStr2(_Name, _flags, NAME_REF_BIT);
+        return *this;
+    }
+
+    if( ! _isCompound )
+    {
+        clearValue();
+
+        _value.seq.size = 0;
+        _value.seq.first = 0;
+        _value.seq.last = 0;
+        _isCompound = true;
+    }
+
+    _type = DictElement;
 
     return this->addChild();
 }

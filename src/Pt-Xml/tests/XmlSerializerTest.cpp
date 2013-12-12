@@ -146,6 +146,7 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
         {
             Pt::Unit::TestSuite::registerMethod( "Reference", *this, &XmlSerializerTest::Reference );
             Pt::Unit::TestSuite::registerMethod( "MultiSet", *this, &XmlSerializerTest::MultiSet );
+            Pt::Unit::TestSuite::registerMethod( "Dict", *this, &XmlSerializerTest::Dict );
             Pt::Unit::TestSuite::registerMethod( "Object", *this, &XmlSerializerTest::Object );
             Pt::Unit::TestSuite::registerMethod( "AdvanceObject", *this, &XmlSerializerTest::AdvanceObject );
         }
@@ -268,6 +269,43 @@ class XmlSerializerTest: public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( dates.size() == 3 );
             PT_UNIT_ASSERT( dateptr == &(*dates.begin()) );
             std::cerr << "dateptr:" << dateptr->toIsoString() << std::endl;
+        }
+
+        void Dict()
+        {
+            std::map<int, int> numbers;
+            numbers[1] = 4;
+            numbers[2] = 5;
+            numbers[3] = 6;
+
+            std::stringstream output;
+            Pt::TextOStream tos(output, new Pt::Utf8Codec);
+            Pt::Xml::XmlWriter writer(tos);
+            Pt::Xml::XmlSerializer ser(writer);
+
+            ser.begin(numbers, "numbers");
+
+            while( ! ser.advance() )
+                ;
+
+            ser.finish();
+            tos.flush();
+
+            std::cerr << std::endl << output.str() << std::endl << std::endl;
+
+            numbers.clear();
+
+            std::stringstream input( output.str() );
+            Pt::Xml::BinaryInputSource is(input);
+            Pt::Xml::XmlReader reader(is);
+            Pt::Xml::XmlDeserializer deser(reader);
+
+            deser.begin(numbers);
+            deser.finish();
+
+            deser.fixup();
+
+            PT_UNIT_ASSERT( numbers.size() == 3 );
         }
 
         void Object()

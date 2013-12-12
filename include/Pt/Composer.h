@@ -155,6 +155,21 @@ class Composer
         Composer* beginElement()
         { return onBeginElement(); }
 
+        /** @brief Begins composition of a dict key.
+
+            Returns a composer for the key of the dict element. A subsequent
+            call of beginDictValue returns a composer to the value of the
+            dict element. For both finish() has to be called, after the value
+            was completely composed.
+        */
+        Composer* beginDictElement()
+        { return onBeginDictElement(); }
+
+        /** @brief Begins composition of a dict value.
+        */
+        Composer* beginDictValue()
+        { return onBeginDictValue(); }
+
         /** @brief Finishes composition of a struct or sequence member.
         */
         Composer* finish()
@@ -201,6 +216,15 @@ class Composer
 
         virtual Composer* onBeginElement()
         { throw SerializationError("unexpected sequence"); }
+
+        virtual Composer* onBeginDictElement()
+        { throw SerializationError("unexpected dict"); }
+
+        virtual Composer* onBeginDictKey()
+        { throw SerializationError("unexpected dict"); }
+
+        virtual Composer* onBeginDictValue()
+        { throw SerializationError("unexpected dict"); }
 
         virtual Composer* onFinish()
         { return _parent; }
@@ -295,6 +319,27 @@ class BasicComposer : public Composer
         Composer* onBeginElement()
         {
             SerializationInfo& child = _current->addElement();
+            _current = &child;
+            return this;
+        }
+
+        Composer* onBeginDictElement()
+        {
+            SerializationInfo& child = _current->addDictElement();
+            _current = &child;
+            return this;
+        }
+
+        Composer* onBeginDictKey()
+        {
+            SerializationInfo& child = _current->addDictKey();
+            _current = &child;
+            return this;
+        }
+
+        Composer* onBeginDictValue()
+        {
+            SerializationInfo& child = _current->addDictValue();
             _current = &child;
             return this;
         }

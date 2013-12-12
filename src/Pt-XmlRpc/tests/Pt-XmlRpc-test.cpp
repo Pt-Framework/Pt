@@ -89,23 +89,6 @@ class BasicDecomposer< std::vector<T> > : public Decomposer
             _name = name;
         }
 
-        void onFormat(Formatter& formatter)
-        {
-            formatter.beginSequence(_name.c_str(), "std::vector", "");
-
-            typename std::vector<T>::const_iterator it;
-            for(it = _type->begin(); it != _type->end(); ++it)
-            {
-                formatter.beginElement();
-                _elemDecomposer.begin(*it, "");
-                _elemDecomposer.format(formatter);
-
-                formatter.finishElement();
-            }
-
-            formatter.finishSequence();
-        }
-
         void onBeginFormat(Formatter& formatter)
         {
             formatter.beginSequence(_name.c_str(), "std::vector", "");

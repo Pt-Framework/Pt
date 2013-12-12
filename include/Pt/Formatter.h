@@ -215,31 +215,6 @@ class Formatter
         void addReference(const char* name, const char* refId)
         { onAddReference(name, refId); }
 
-        /** @brief Formats the begin of an array.
-        */
-        void beginSequence(const std::string& name, const std::string& type,
-                           const std::string& id)
-        { onBeginSequence(name.c_str(), type.c_str(), id.c_str()); }
-
-        void beginSequence(const char* name, const char* type,
-                           const char* id)
-        { onBeginSequence(name, type, id); }
-
-        /** @brief Formats the begin of an array element.
-        */
-        void beginElement()
-        { onBeginElement(); }
-
-        /** @brief Formats the end of an array element.
-        */
-        void finishElement()
-        { onFinishElement(); }
-
-        /** @brief Formats the end of an array.
-        */
-        void finishSequence()
-        { onFinishSequence(); }
-
         /** @brief Formats the begin of a struct.
         */
         void beginStruct(const std::string& name, const std::string& type,
@@ -267,6 +242,72 @@ class Formatter
         */
         void finishStruct()
         { onFinishStruct(); }
+
+        /** @brief Formats the begin of an array.
+        */
+        void beginSequence(const std::string& name, const std::string& type,
+                           const std::string& id)
+        { onBeginSequence(name.c_str(), type.c_str(), id.c_str()); }
+
+        void beginSequence(const char* name, const char* type,
+                           const char* id)
+        { onBeginSequence(name, type, id); }
+
+        /** @brief Formats the begin of an array element.
+        */
+        void beginElement()
+        { onBeginElement(); }
+
+        /** @brief Formats the end of an array element.
+        */
+        void finishElement()
+        { onFinishElement(); }
+
+        /** @brief Formats the end of an array.
+        */
+        void finishSequence()
+        { onFinishSequence(); }
+
+        /** @brief Formats the begin of a dict.
+        */
+        void beginDict(const std::string& name, const std::string& type,
+                           const std::string& id)
+        { onBeginDict(name.c_str(), type.c_str(), id.c_str()); }
+
+        void beginDict(const char* name, const char* type,
+                           const char* id)
+        { onBeginDict(name, type, id); }
+
+        void beginDictElement()
+        { onBeginDictElement(); }
+
+        void finishDictElement()
+        { onFinishDictElement(); }
+
+        /** @brief Formats the begin of a dict key.
+        */
+        void beginDictKey()
+        { onBeginDictKey(); }
+
+        /** @brief Formats the end of a dict key.
+        */
+        void finishDictKey()
+        { onFinishDictKey(); }
+
+        /** @brief Formats the begin of a dict value.
+        */
+        void beginDictValue()
+        { onBeginDictValue(); }
+
+        /** @brief Formats the end of a dict value.
+        */
+        void finishDictValue()
+        { onFinishDictValue(); }
+
+        /** @brief Formats the end of a dict.
+        */
+        void finishDict()
+        { onFinishDict(); }
 
     public:
         //! @brief Begin to parse to a composer
@@ -329,15 +370,6 @@ class Formatter
 
         virtual void onAddReference(const char* name, const char* refId) = 0;
 
-        virtual void onBeginSequence(const char* name, const char* type,
-                                  const char* id) = 0;
-
-        virtual void onBeginElement() = 0;
-
-        virtual void onFinishElement() = 0;
-
-        virtual void onFinishSequence() = 0;
-
         virtual void onBeginStruct(const char* name, const char* type,
                                    const char* id) = 0;
 
@@ -346,6 +378,40 @@ class Formatter
         virtual void onFinishMember() = 0;
 
         virtual void onFinishStruct() = 0;
+
+        virtual void onBeginSequence(const char* name, const char* type,
+                                     const char* id) = 0;
+
+        virtual void onBeginElement() = 0;
+
+        virtual void onFinishElement() = 0;
+
+        virtual void onFinishSequence() = 0;
+
+        virtual void onBeginDict(const char* name, const char* type,
+                                 const char* id)
+        { onBeginSequence(name, type, id); }
+
+        virtual void onBeginDictElement()
+        { onBeginSequence("", "", ""); }
+
+        virtual void onBeginDictKey()
+        { onBeginElement(); }
+
+        virtual void onFinishDictKey()
+        { onFinishElement(); }
+
+        virtual void onBeginDictValue()
+        {  onBeginElement();  }
+
+        virtual void onFinishDictValue()
+        { onFinishElement(); }
+
+        virtual void onFinishDictElement()
+        { onFinishSequence(); }
+
+        virtual void onFinishDict()
+        { onFinishSequence(); }
 
     protected:
         //! @brief Begin to parse to a composer
