@@ -169,7 +169,7 @@ bool StreamBuffer::isClosed() const
 
 void StreamBuffer::import(std::streamsize maxImport)
 {
-    log_trace("StreamBuffer::do_underflow");
+    log_trace("StreamBuffer::import");
 
     if( ! _connection )
         return;

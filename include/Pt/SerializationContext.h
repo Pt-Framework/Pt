@@ -32,8 +32,8 @@
 #include <Pt/Api.h>
 #include <Pt/TypeInfo.h>
 #include <Pt/FixupInfo.h>
-#include <Pt/SerializationSurrogate.h>
 #include <Pt/SerializationInfo.h>
+#include <Pt/SerializationSurrogate.h>
 #include <typeinfo>
 #include <string>
 

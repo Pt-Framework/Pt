@@ -30,67 +30,14 @@
 #define Pt_SerializationSurrogate_h
 
 #include <Pt/Api.h>
+#include <Pt/SerializationInfo.h>
 #include <string>
 
 namespace Pt {
 
 class SerializationInfo;
 
-/** @brief Customizes type serialization.
 
-    @ingroup Serialization
-*/
-class SerializationSurrogate
-{
-    public:
-        virtual ~SerializationSurrogate()
-        {}
-
-        const std::string& typeName() const
-        { return _typeName; }
-
-    protected:
-        SerializationSurrogate(const std::string& typeName)
-        : _typeName(typeName)
-        {}
-
-        SerializationSurrogate(const char* typeName)
-        : _typeName(typeName)
-        {}
-
-    private:
-        std::string _typeName;
-};
-
-
-template <typename T>
-class BasicSerializationSurrogate : public SerializationSurrogate
-{
-    public:
-        typedef void (*Compose)(const Pt::SerializationInfo& si, T& type);
-        typedef void (*Decompose)(Pt::SerializationInfo& si, const T& type);
-
-        BasicSerializationSurrogate(const std::string& typeName, Compose c, Decompose d)
-        : SerializationSurrogate( typeName )
-        , _decompose(d)
-        , _compose(c)
-        {}
-
-        void decompose(Pt::SerializationInfo& si, const T& type) const
-        {
-            _decompose(si, type);
-            si.setTypeName( typeName() );
-        }
-
-        void compose(const Pt::SerializationInfo& si, T& type) const
-        {
-            _compose(si, type);
-        }
-
-    private:
-        Decompose _decompose;
-        Compose _compose;
-};
 
 } // namespace Pt
 

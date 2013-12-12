@@ -179,7 +179,6 @@ bool Connection::readHandshake()
     if( ! sb)
         return true;
 
-    // TODO: find better way for _wantRead and _iocount flags
     _maxImport = sb->in_avail();
     _wantRead = false;
     _isReading = true;
@@ -194,6 +193,7 @@ bool Connection::readHandshake()
         _connected = true;
         return false;
     }
+
 #ifdef PT_IOS
     if(status == errSSLPeerAuthCompleted)
 #else
@@ -354,8 +354,6 @@ std::streamsize Connection::read(char* buf, size_t n, std::streamsize maxImport)
         maxImport = sb->in_avail();
 
     size_t processed = 0;
-
-    // TODO: also look at readHandshake
     
     _isReading = true;
     _maxImport = maxImport;
@@ -390,7 +388,7 @@ OSStatus Connection::sslRead(void* data, size_t* n)
         return errSSLWouldBlock;
     }       
 
-    //if(sb->in_avail() <= 0)
+    log_debug("max input: " << _maxImport);
     if(_maxImport <= 0)
     {
         _wantRead = true;
@@ -398,22 +396,19 @@ OSStatus Connection::sslRead(void* data, size_t* n)
         return errSSLWouldBlock;
     }  
 
-    log_debug("avail input: " << sb->in_avail());
-    
-    //std::streamsize gsize = std::min( sb->in_avail(), static_cast<std::streamsize>(*n) ); 
     std::streamsize gsize = std::min( _maxImport, static_cast<std::streamsize>(*n) );
     std::streamsize r = sb->sgetn(reinterpret_cast<char*>(data), gsize);
     log_debug("read " << r << " bytes from input");
 
+    _maxImport -= r;
+
     OSStatus ret = noErr;
     
-    // if less is received than requested, the decoder cannot make progress
-    if( static_cast<size_t>(r) < (*n) ) // is this correct?
+    if( static_cast<size_t>(r) < (*n) )
     {
+        _wantRead = true;
         ret = errSSLWouldBlock;
     }
-
-    *n = static_cast<size_t>(r);
 
     if(r <= 0)
     {
@@ -421,6 +416,8 @@ OSStatus Connection::sslRead(void* data, size_t* n)
     }
     
     log_debug("sslRead: " << ret);
+    
+    *n = static_cast<size_t>(r);
     return ret;
 }
 
