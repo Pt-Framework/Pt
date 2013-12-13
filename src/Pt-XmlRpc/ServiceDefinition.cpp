@@ -26,15 +26,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/XmlRpc/ServiceDefinition.h"
+#include <Pt/XmlRpc/ServiceDefinition.h>
 
 namespace Pt {
 
 namespace XmlRpc {
 
 ServiceDefinition::ServiceDefinition()
-: _r1(0)
-, _r2(0)
 { 
 }
 
@@ -90,6 +88,6 @@ void ServiceDefinition::registerProcedure(const std::string& name, ServiceProced
     }
 }
 
-}
+} // namespace XmlRpc
 
-}
+} // namespace Pt

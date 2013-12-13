@@ -33,6 +33,7 @@
 #include <Pt/Formatter.h>
 #include <Pt/Decomposer.h>
 #include <Pt/SerializationContext.h>
+#include <Pt/Types.h>
 #include <vector>
 
 namespace Pt {
@@ -118,7 +119,7 @@ class PT_API Serializer
         Formatter* _formatter;
         std::vector<Decomposer*> _stack;
         Decomposer* _current;
-        void* _alloc;
+        Pt::varint_t _r0; // allocator
 };
 
 } // namespace Pt

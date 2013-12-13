@@ -104,7 +104,7 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
         std::map<const void*, std::string> _refmap;
         std::vector<Fixup*> _targets;
         std::vector<Fixup*> _pointers; 
-        Pt::varint_t _r1; // allocator
+        Pt::varint_t _r1;
         Pt::varint_t _r2;
 };
 

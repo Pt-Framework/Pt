@@ -37,7 +37,6 @@ Deserializer::Deserializer()
 , _current(0)
 , _mem(0)
 , _memsize(0)
-, _reserved0(0)
 {}
 
 

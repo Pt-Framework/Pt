@@ -1100,4 +1100,4 @@ class ActiveProcedureDef : public ServiceProcedureDef
 
 } // namespace Pt
 
-#endif // PT_XMLRPC_SERVICEPROCEDURE_H
+#endif // PT_XMLRPC_ACTIVEPROCEDURE_H

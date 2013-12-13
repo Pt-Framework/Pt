@@ -63,15 +63,6 @@ class PT_API SerializationContext : public SerializationInfo
         void push(SerializationInfo* si);
 
         template <typename T>
-        const BasicSerializationSurrogate<T>* getSurrogate() const;
-
-        /** @internal This is needed as a workaround for some compilers (GCC 3.x),
-            so the getSurrogate template can be found.
-        */
-        template <typename T>
-        friend const BasicSerializationSurrogate<T>* getSurrogate(SerializationContext*);
-
-        template <typename T>
         void registerSurrogate( const std::string& typeName,
                                 void (*compose)(const Pt::SerializationInfo& si, T& type),
                                 void (*decompose)(Pt::SerializationInfo& si, const T& type) );
@@ -80,6 +71,20 @@ class PT_API SerializationContext : public SerializationInfo
         void registerSurrogate( const char* typeName,
                                 void (*compose)(const Pt::SerializationInfo& si, T& type),
                                 void (*decompose)(Pt::SerializationInfo& si, const T& type) );
+
+        template <typename T>
+        bool compose(const SerializationInfo& si, T& type) const;
+
+        template <typename T>
+        bool decompose(SerializationInfo& si, const T& type);
+
+        template <typename T>
+        const BasicSerializationSurrogate<T>* getSurrogate() const;
+
+        /** @internal Workaround for some compilers (GCC 3.x).
+        */
+        template <typename T>
+        friend const BasicSerializationSurrogate<T>* getSurrogate(SerializationContext*);
 
         const SerializationSurrogate* getSurrogate(const std::type_info& ti) const;
 
@@ -166,6 +171,31 @@ class PT_API SerializationContext : public SerializationInfo
 
 
 template <typename T>
+inline bool SerializationContext::compose(const SerializationInfo& si, T& type) const
+{
+    const BasicSerializationSurrogate<T>* surr = this->getSurrogate<T>();
+    if( ! surr )
+        return false;
+
+    surr->compose(si, type);
+    return true;
+}
+
+
+template <typename T>
+inline bool SerializationContext::decompose(SerializationInfo& si, const T& type)
+{
+    const BasicSerializationSurrogate<T>* surr = this->getSurrogate<T>();
+    if( ! surr )
+        return false;
+
+    surr->decompose(si, type);
+    si.setTypeName( surr->typeName() );
+    return true;
+}
+
+
+template <typename T>
 inline const BasicSerializationSurrogate<T>* SerializationContext::getSurrogate() const
 {
     const SerializationSurrogate* surr = this->getSurrogate( typeid(T) );
@@ -184,6 +214,7 @@ inline void SerializationContext::registerSurrogate( const std::string& typeName
     SerializationSurrogate* surr = new BasicSerializationSurrogate<T>(typeName, compose, decompose);
     registerSurrogate(typeid(T), surr);
 }
+
 
 template <typename T>
 inline void SerializationContext::registerSurrogate( const char* typeName,

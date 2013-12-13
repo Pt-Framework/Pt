@@ -66,8 +66,6 @@ namespace Pt {
 namespace XmlRpc {
 
 HttpClient::HttpClient()
-: _r1(0)
-, _r2(0)
 {
     init();
 }
@@ -75,8 +73,6 @@ HttpClient::HttpClient()
 
 HttpClient::HttpClient(const Net::Endpoint& ep, 
                        const std::string& url)
-: _r1(0)
-, _r2(0)
 {
     init();
     setTarget(ep, url);
@@ -85,8 +81,6 @@ HttpClient::HttpClient(const Net::Endpoint& ep,
 
 HttpClient::HttpClient(System::EventLoop& loop)
 : _client(loop)
-, _r1(0)
-, _r2(0)
 {
     init();
 }
@@ -95,8 +89,6 @@ HttpClient::HttpClient(System::EventLoop& loop)
 HttpClient::HttpClient(System::EventLoop& loop, const Net::Endpoint& ep,
                        const std::string& url)
 : _client(loop)
-, _r1(0)
-, _r2(0)
 {
     init();
     setTarget(ep, url);
@@ -181,12 +173,6 @@ void HttpClient::setServiceUrl(const char* url)
 const Net::Endpoint& HttpClient::host() const
 {
     return _client.host();
-}
-
-
-Http::Client& HttpClient::httpClient()
-{
-    return _client;
 }
 
 

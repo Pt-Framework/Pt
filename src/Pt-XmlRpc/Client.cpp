@@ -75,8 +75,6 @@ Client::Client()
 , _formatter(_ts)
 , _error(false)
 , _isFault(false)
-, _r1(0)
-, _r2(0)
 {
 }
 

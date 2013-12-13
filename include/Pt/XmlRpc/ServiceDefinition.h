@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_XmlRpc_ServiceDefinition_h
 #define Pt_XmlRpc_ServiceDefinition_h
 
@@ -33,6 +34,7 @@
 #include <Pt/XmlRpc/ServiceProcedure.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/Types.h>
 #include <string>
 #include <map>
 
@@ -310,12 +312,12 @@ class PT_XMLRPC_API ServiceDefinition : private NonCopyable
         typedef std::map<std::string, ServiceProcedureDef*> ProcedureMap;
         ProcedureMap _procedures;
         System::Mutex _mtx;
-        void* _r1;
-        void* _r2;
+        Pt::varint_t _r1;
+        Pt::varint_t _r2;
 };
 
 } // namespace XmlRpc
 
 } // namespace Pt
 
-#endif
+#endif // Pt_XmlRpc_ServiceDefinition_h

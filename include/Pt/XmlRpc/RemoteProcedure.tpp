@@ -795,8 +795,8 @@ class RemoteProcedure<R,
         }
 };
 
-}
+} // namespace XmlRpc
 
-}
+} // namespace Pt
 
 #endif // PT_XMLRPC_REMOTEPROCEDURE_TPP

@@ -268,7 +268,7 @@ class PT_SYSTEM_API IODevice : public Selectable
         std::size_t _wavail;
         Signal<IODevice&> _inputReady;
         Signal<IODevice&> _outputReady;
-        void* _reserved;
+        Pt::varint_t _reserved;
 
     private:
         bool _eof;

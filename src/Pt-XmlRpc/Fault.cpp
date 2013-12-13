@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2009 by Dr. Marc Boris Duerner
- * Copyright (C) 2009 by Tommi Meakitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,12 +31,18 @@ namespace Pt {
 
 namespace XmlRpc {
 
+Fault::Fault(const std::string& msg, int rc)
+: _msg(msg)
+, _rc(rc)
+{ }
+
+
 Fault::Fault(const char* msg, int rc)
 : _msg(msg)
 , _rc(rc)
 {
 }
 
-}
+} // namespace XmlRpc
 
-}
+} // namespace Pt

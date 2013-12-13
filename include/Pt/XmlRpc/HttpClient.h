@@ -33,6 +33,7 @@
 #include <Pt/XmlRpc/Client.h>
 #include <Pt/Http/Client.h>
 #include <Pt/Connectable.h>
+#include <Pt/Types.h>
 #include <string>
 
 namespace Pt {
@@ -111,9 +112,6 @@ class PT_XMLRPC_API HttpClient : public Client
         */
         const Net::Endpoint& host() const;
 
-        //! @internal
-        Http::Client& httpClient();
-
     protected:       
         // inheritdoc
         virtual void onInvoke();
@@ -134,12 +132,12 @@ class PT_XMLRPC_API HttpClient : public Client
 
     private:
         Http::Client _client;
-        void* _r1;
-        void* _r2;
+        Pt::varint_t _r1;
+        Pt::varint_t _r2;
 };
 
 } // namespace XmlRpc
 
 } // namespace Pt
 
-#endif
+#endif // Pt_XmlRpc_HttpClient_h

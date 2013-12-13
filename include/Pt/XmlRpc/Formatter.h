@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_XmlRpc_Formatter_h
 #define Pt_XmlRpc_Formatter_h
 
@@ -34,6 +35,7 @@
 #include <Pt/Formatter.h>
 #include <Pt/String.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/Types.h>
 #include <string>
 #include <iostream>
 
@@ -55,7 +57,7 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
 
         void attach(std::basic_ostream<Char>& os);
 
-        /** @internal @brief onParse()onParseSome() should be implemented 
+        /** @internal @brief onParse() onParseSome() should be implemented 
             instead of this method.
         */
         bool advance(const Pt::Xml::Node& node);
@@ -160,12 +162,12 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
         std::basic_ostream<Char>* _os;
         Pt::String _str;
 
-        void* _r1;
-        void* _r2;
+        Pt::varint_t _r1;
+        Pt::varint_t _r2;
 };
 
 } // namespace XmlRpc
 
 } // namespace Pt
 
-#endif
+#endif // Pt_XmlRpc_Formatter_h

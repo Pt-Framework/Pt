@@ -25,16 +25,17 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/XmlRpc/Responder.h"
-#include "Pt/XmlRpc/Fault.h"
-#include "Pt/XmlRpc/ServiceDefinition.h"
-#include "Pt/Xml/XmlError.h"
-#include "Pt/Xml/StartElement.h"
-#include "Pt/Xml/Characters.h"
-#include "Pt/Xml/EndElement.h"
+
+#include <Pt/XmlRpc/Responder.h>
+#include <Pt/XmlRpc/Fault.h>
+#include <Pt/XmlRpc/ServiceDefinition.h>
+#include <Pt/Xml/XmlError.h>
+#include <Pt/Xml/StartElement.h>
+#include <Pt/Xml/Characters.h>
+#include <Pt/Xml/EndElement.h>
 #include <Pt/System/Logger.h>
-#include "Pt/Utf8Codec.h"
-#include "Pt/Convert.h"
+#include <Pt/Utf8Codec.h>
+#include <Pt/Convert.h>
 #include <cassert>
 
 log_define("Pt.XmlRpc.Responder")
@@ -94,8 +95,6 @@ Responder::Responder(ServiceDefinition& service)
 , _result(0)
 , _formatter(_ts)
 , _isFault(false)
-, _r1(0)
-, _r2(0)
 {
 }
 

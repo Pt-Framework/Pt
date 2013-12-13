@@ -64,10 +64,7 @@ class PT_XMLRPC_API Fault : public std::exception
 
         /** @brief Construct with message and error code.
         */
-        Fault(const std::string& msg, int rc)
-        : _msg(msg)
-        , _rc(rc)
-        { }
+        Fault(const std::string& msg, int rc);
 
         /** @brief Construct with message and error code.
         */

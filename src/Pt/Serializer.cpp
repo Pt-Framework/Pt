@@ -36,7 +36,6 @@ Serializer::Serializer()
 : _context(0)
 , _formatter(0)
 , _current(0)
-, _alloc(0)
 {}
 
 

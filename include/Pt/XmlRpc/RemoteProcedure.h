@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_XmlRpc_RemoteProcedure_h
 #define Pt_XmlRpc_RemoteProcedure_h
 
@@ -105,7 +106,7 @@ class Result
         /** @brief Ends a remote procedure call.
 
             This method ends a remote procedure call when the RemoteProcedure
-            sends thie finished signal. If the procedure has failed, an exception
+            sends the finished signal. If the procedure has failed, an exception
             of type Fault is thrown. Other exceptions might be raised depending
             on the used Client.
         */
@@ -167,4 +168,4 @@ class RemoteProcedureBase : public RemoteCall
 
 #include <Pt/XmlRpc/RemoteProcedure.tpp>
 
-#endif
+#endif // Pt_XmlRpc_RemoteProcedure_h

@@ -32,6 +32,7 @@
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/ServiceDefinition.h>
 #include <Pt/Http/Service.h>
+#include <Pt/Types.h>
 
 namespace Pt {
 
@@ -63,12 +64,12 @@ class PT_XMLRPC_API HttpService : public Http::Service
 
     private:
         XmlRpc::ServiceDefinition* _rpcService;
-        void* _r1;
-        void* _r2;
+        Pt::varint_t _r1;
+        Pt::varint_t _r2;
 };
 
 } // namespace XmlRpc
 
 } // namespace Pt
 
-#endif
+#endif // Pt_XmlRpc_HttpService_h

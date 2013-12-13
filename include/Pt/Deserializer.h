@@ -131,7 +131,7 @@ class PT_API Deserializer : private NonCopyable
         Composer* _current;
         void* _mem;
         std::size_t _memsize;
-        void* _reserved0; // allocator
+        Pt::varint_t _r0; // allocator
 };
 
 } // namespace Pt

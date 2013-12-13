@@ -384,6 +384,7 @@ OSStatus Connection::sslRead(void* data, size_t* n)
 
     if(_isWriting || ! sb)
     {
+        // _wantRead = true;
         *n = 0;
         return errSSLWouldBlock;
     }       

@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2009 by Dr. Marc Boris Duerner
- * Copyright (C) 2009 by Tommi Meakitalo
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -143,8 +142,6 @@ Formatter::Formatter(std::basic_ostream<Char>& os)
 , _state(OnParam)
 , _composer(0)
 , _os(&os)
-, _r1(0)
-, _r2(0)
 { 
 }
 

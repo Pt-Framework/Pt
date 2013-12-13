@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_XmlRpc_Client_h
 #define Pt_XmlRpc_Client_h
 
@@ -38,6 +39,7 @@
 #include <Pt/Utf8Codec.h>
 #include <Pt/TextStream.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/Types.h>
 #include <Pt/SerializationContext.h>
 #include <string>
 
@@ -222,12 +224,12 @@ class PT_XMLRPC_API Client : private NonCopyable
         BasicComposer<Fault> _fh;
         bool _error;
         bool _isFault;
-        void* _r1;
-        void* _r2;
+        Pt::varint_t _r1;
+        Pt::varint_t _r2;
 };
 
 } // namespace XmlRpc
 
 } // namespace Pt
 
-#endif
+#endif // Pt_XmlRpc_Client_h
