@@ -378,24 +378,17 @@ std::streamsize Connection::read(char* buf, size_t n, std::streamsize maxImport)
 OSStatus Connection::sslRead(void* data, size_t* n)
 {    
     log_trace("Connection::sslRead: wants " << *n << " bytes");
-
+    
     _wantRead = false;
     std::streambuf* sb = _ios->rdbuf();
 
-    if(_isWriting || ! sb)
-    {
-        // _wantRead = true;
-        *n = 0;
-        return errSSLWouldBlock;
-    }       
-
     log_debug("max input: " << _maxImport);
-    if(_maxImport <= 0)
+    if(_isWriting || ! sb || _maxImport <= 0)
     {
         _wantRead = true;
         *n = 0;
         return errSSLWouldBlock;
-    }  
+    }       
 
     std::streamsize gsize = std::min( _maxImport, static_cast<std::streamsize>(*n) );
     std::streamsize r = sb->sgetn(reinterpret_cast<char*>(data), gsize);
