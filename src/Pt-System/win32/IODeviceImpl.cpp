@@ -71,10 +71,25 @@ void IODeviceImpl::close()
 // OverlappedIODeviceImpl
 /////////////////////////////////////////////////////////////////////
 
+OverlappedIODeviceImpl::OverlappedIODeviceImpl()
+: _ioh()
+, _ioEvent(NULL)
+, _timeout(INFINITE)
+{
+    _readOv.Offset = 0;
+    _readOv.OffsetHigh = 0;
+    _readOv.hEvent = NULL;
+
+    _writeOv.Offset = 0;
+    _writeOv.OffsetHigh = 0;
+    _writeOv.hEvent = NULL;
+}
+
+
 OverlappedIODeviceImpl::OverlappedIODeviceImpl(IODevice& dev)
 : _ioh(dev)
 , _ioEvent(NULL)
-, _timeout(System::EventLoop::WaitInfinite)
+, _timeout(INFINITE)
 {
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
@@ -90,6 +105,12 @@ OverlappedIODeviceImpl::~OverlappedIODeviceImpl()
 {
     if(_ioEvent)
         CloseHandle(_ioEvent);
+}
+
+
+void OverlappedIODeviceImpl::init(IODevice& dev)
+{
+    _ioh.init(dev);
 }
 
 
@@ -160,11 +181,14 @@ size_t OverlappedIODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n
         _writeOv.hEvent = _ioh.handle();
     }
 
+    DWORD bufsize = n > std::numeric_limits<DWORD>::max() ? std::numeric_limits<DWORD>::max()
+                                                          : static_cast<DWORD>(n);
+
     // if we can can read data immediately, we return the number of bytes
     // that were read, so the EventLoop calls onAvail, even if the event 
     // in the overlapped struct is not fired
     DWORD readBytes = 0;
-    if( FALSE == ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv) )
+    if( FALSE == ReadFile(handle(), (void*)buffer, bufsize, &readBytes, &_readOv) )
     {
         DWORD err = GetLastError();
         if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
@@ -188,7 +212,7 @@ size_t OverlappedIODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n
 }
 
 
-size_t OverlappedIODeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+size_t OverlappedIODeviceImpl::endRead(EventLoop& loop, char* buffer, size_t, bool& eof)
 {
     // finishes the overlapped operation. Blocks until data is available,
     // so beginRead can be ended by endRead without a wait step.
@@ -196,7 +220,7 @@ size_t OverlappedIODeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, 
     if( FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
     {
         DWORD err = GetLastError();
-        if( ERROR_BROKEN_PIPE == err || ERROR_BROKEN_PIPE == err )
+        if( ERROR_BROKEN_PIPE == err )
         {
             eof = true;
         }
@@ -212,11 +236,8 @@ size_t OverlappedIODeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, 
 }
 
 
-size_t OverlappedIODeviceImpl::read(char* buffer, size_t count, bool& eof)
+size_t OverlappedIODeviceImpl::read(char* buffer, size_t n, bool& eof)
 {
-    DWORD timeout = _timeout == EventLoop::WaitInfinite ? INFINITE 
-                                                        : static_cast<size_t>(_timeout);
-
     if( ! _ioEvent)
     {
         _ioEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
@@ -229,8 +250,11 @@ size_t OverlappedIODeviceImpl::read(char* buffer, size_t count, bool& eof)
     ov.OffsetHigh = _readOv.OffsetHigh;
     ov.hEvent = _ioEvent;
 
+    DWORD bufsize = n > std::numeric_limits<DWORD>::max() ? std::numeric_limits<DWORD>::max()
+                                                          : static_cast<DWORD>(n);
+
     DWORD readBytes = 0;
-    if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, &ov) )
+    if( FALSE == ReadFile(handle(), (void*)buffer, bufsize, &readBytes, &ov) )
     {
         DWORD err = GetLastError();
         if(ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err)
@@ -244,7 +268,7 @@ size_t OverlappedIODeviceImpl::read(char* buffer, size_t count, bool& eof)
             throw IOError("ReadFile failed");
         }
 
-        DWORD result = WaitForSingleObject(ov.hEvent, timeout);
+        DWORD result = WaitForSingleObject(ov.hEvent, _timeout);
         if(result != WAIT_OBJECT_0)
         {
             throw IOError("ReadFile timeout");
@@ -271,8 +295,11 @@ size_t OverlappedIODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, s
         _writeOv.hEvent = _ioh.handle();
     }
 
+    DWORD bufsize = n > std::numeric_limits<DWORD>::max() ? std::numeric_limits<DWORD>::max()
+                                                          : static_cast<DWORD>(n);
+
     DWORD writtenBytes = 0;
-    if( FALSE == WriteFile(handle(), (void*)buffer, n, &writtenBytes, &_writeOv) )
+    if( FALSE == WriteFile(handle(), (void*)buffer, bufsize, &writtenBytes, &_writeOv) )
     {
         DWORD err = GetLastError();
         if( ERROR_IO_PENDING == err )
@@ -304,11 +331,8 @@ size_t OverlappedIODeviceImpl::endWrite(EventLoop& loop, const char* buffer, siz
 }
 
 
-size_t OverlappedIODeviceImpl::write(const char* buffer, size_t count)
+size_t OverlappedIODeviceImpl::write(const char* buffer, size_t n)
 {
-    DWORD timeout = _timeout == EventLoop::WaitInfinite ? INFINITE 
-                                                        : static_cast<size_t>(_timeout);
-
     if( ! _ioEvent)
     {
         _ioEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
@@ -321,8 +345,11 @@ size_t OverlappedIODeviceImpl::write(const char* buffer, size_t count)
     ov.OffsetHigh = _writeOv.OffsetHigh;
     ov.hEvent = _ioEvent;
 
+    DWORD bufsize = n > std::numeric_limits<DWORD>::max() ? std::numeric_limits<DWORD>::max()
+                                                          : static_cast<DWORD>(n);
+
     DWORD writtenBytes = 0;
-    if( FALSE == WriteFile(handle(), (void*)buffer, count, &writtenBytes, &ov) )
+    if( FALSE == WriteFile(handle(), (void*)buffer, bufsize, &writtenBytes, &ov) )
     {
         DWORD err = GetLastError();
         if( ERROR_IO_PENDING != err )
@@ -330,7 +357,7 @@ size_t OverlappedIODeviceImpl::write(const char* buffer, size_t count)
             throw IOError("WriteFile");
         }
         
-        DWORD result = WaitForSingleObject(ov.hEvent, timeout);
+        DWORD result = WaitForSingleObject(ov.hEvent, _timeout);
         if(result != WAIT_OBJECT_0)
         {
             throw IOError("ReadFile timeout");

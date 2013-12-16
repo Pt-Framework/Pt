@@ -56,12 +56,12 @@ int main( int argc, char* argv[])
 
     if (readRetcode)
     {
-        int retcode;
-        std::cin >> retcode;
-        if (!std::cin)
+        int rc;
+        std::cin >> rc;
+        if ( ! std::cin )
             abort();
 
-        return retcode;
+        return rc;
     }
 
 #endif

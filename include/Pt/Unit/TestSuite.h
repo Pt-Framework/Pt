@@ -80,7 +80,7 @@ namespace Unit {
             class PT_UNIT_API Context : public TestContext
             {
                 public:
-                    Context(TestFixture& fixture, TestMethod& test, const SerializationInfo* args, unsigned argCount)
+                    Context(TestFixture& fixture, TestMethod& test, const SerializationInfo* args, std::size_t argCount)
                     : TestContext(fixture, test)
                     , _test(test)
                     , _args(args)
@@ -99,7 +99,7 @@ namespace Unit {
                 private:
                     TestMethod& _test;
                     const SerializationInfo* _args;
-                    unsigned _argCount;
+                    std::size_t _argCount;
             };
 
         public:

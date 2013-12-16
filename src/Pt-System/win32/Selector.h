@@ -30,12 +30,11 @@
 #define PT_SYSTEM_SELECTOR_H
 
 #include "../SelectableList.h"
-#include "Pt/WinVer.h"
-#include "Pt/System/Api.h"
-#include "Pt/System/Api.h"
-#include "Pt/System/Mutex.h"
-#include "Pt/System/EventLoop.h"
-#include <iostream>
+#include <Pt/WinVer.h>
+#include <Pt/System/Api.h>
+#include <Pt/System/IOError.h>
+#include <Pt/System/Mutex.h>
+#include <Pt/System/EventLoop.h>
 #include <vector>
 #include <list>
 #include <windows.h>
@@ -63,6 +62,9 @@ struct IOHandle
     , _handle(h)
     {}
 
+    void init(Selectable& s)
+    { sel = &s; }
+
     HANDLE handle()
     { return _handle; }
 
@@ -87,6 +89,9 @@ class IOTable
 
         void add(IOHandle& handle)
         {
+            if(_handles.size() + _dirty.size() > MAXIMUM_WAIT_OBJECTS)
+                throw IOError("too many I/O handles");
+
             _dirty.push_back(&handle);
         }
 
@@ -129,8 +134,8 @@ class IOTable
             return &_handles[0];
         }
 
-        size_t size() const
-        { return _handles.size(); }
+        DWORD size() const
+        { return static_cast<DWORD>( _handles.size() ); }
 
         Selectable* at(size_t n)
         { return _selectables[n]; }

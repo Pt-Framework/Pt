@@ -281,6 +281,9 @@ void HttpBuffer::import(std::streamsize n)
         log_debug("available: " << n);
     }
 
+    if(n < 0)
+        n = 0;
+
     // Move unread bytes and putback to front
     size_t putback  = MaxPutback;
     size_t leftover = 0;
@@ -315,13 +318,17 @@ void HttpBuffer::import(std::streamsize n)
         }
     }
 
-    size_t unused = sizeof(_buffer) - (MaxPutback + leftover);
+    std::streamsize unused = sizeof(_buffer) - (MaxPutback + leftover);
     log_debug("unused buffer area: " << unused);
-    if(n > unused)
+
+    // read no more than unused space in buffer area
+    if( n > unused )
         n = unused;
 
     log_debug("content-length: " << _contentLength);
-    if(n > _contentLength)
+
+    // read no more than content length
+    if( static_cast<std::size_t>(n) > _contentLength )
         n = _contentLength;
 
     if( this->isEnd() )

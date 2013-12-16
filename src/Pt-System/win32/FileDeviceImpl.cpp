@@ -160,7 +160,10 @@ FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir
             break;
     }
 
-    DWORD ret = SetFilePointer(handle(), offset, NULL, whence);
+    LARGE_INTEGER li;
+    li.QuadPart = offset;
+
+    DWORD ret = SetFilePointer(handle(), li.LowPart, &li.HighPart, whence);
 
     if(ret == INVALID_SET_FILE_POINTER)
         throw IOError( PT_ERROR_MSG("Could not set file pointer") );

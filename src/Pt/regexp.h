@@ -39,7 +39,7 @@ struct pt_regexp
     CHARTYPE regstart;        /* Internal use only. */
     char reganch;        /* Internal use only. */
     CHARTYPE *regmust;        /* Internal use only. */
-    int regmlen;        /* Internal use only. */
+    size_t regmlen;        /* Internal use only. */
     CHARTYPE program[1];    /* Unwarranted chumminess with compiler. */
 };
 

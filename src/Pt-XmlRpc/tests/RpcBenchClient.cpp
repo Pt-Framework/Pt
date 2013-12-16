@@ -54,8 +54,9 @@ class BenchClient
     explicit BenchClient(unsigned short port)
       : client(),
         echo(client, "echo"),
-        thread(Pt::callable(*this, &BenchClient::exec))
-    { 
+        thread()
+    {  
+        thread.init( Pt::callable(*this, &BenchClient::exec) );
         Pt::Net::Endpoint ep("", port);
         client.setTarget(ep, "/myservice");
     }

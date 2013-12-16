@@ -350,8 +350,9 @@ IODevice& PipeImpl::in()
 #else  // normal WIN32
 
 PipeIODevice::PipeIODevice()
-: _impl(*this)
+: _impl()
 {
+    _impl.init(*this);
 }
 
 

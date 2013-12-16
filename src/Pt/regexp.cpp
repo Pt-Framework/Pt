@@ -302,7 +302,7 @@ pt_regexp* regcomp( const CHARTYPE *exp )
     register regexp_ptr rx;
     register CHARTYPE *scan;
     register CHARTYPE *longest;
-    register unsigned len;
+    register size_t len;
     ///CHARTYPE *regparse;
     parse_state state;
     int flags;
@@ -842,9 +842,10 @@ regtail(
     }
 
     if (OP(scan) == BACK)
-        offset = scan - val;
+        offset = static_cast<int>(scan - val);
     else
-        offset = val - scan;
+        offset = static_cast<int>(val - scan);
+
     *(scan+1) = (offset>>8)&0377;
     *(scan+2) = offset&0377;
 }
@@ -1057,7 +1058,7 @@ regmatch( match_state* state, CHARTYPE *prog )
                 /* Inline the first character, for speed. */
                 if (*opnd != *state->reginput)
                     return(0);
-                len = strlen(opnd);
+                len = static_cast<int>( strlen(opnd) );
                 if (len > 1 && strncmp(opnd, state->reginput, len) != 0)
                     return(0);
                 state->reginput += len;
@@ -1214,7 +1215,7 @@ regrepeat( match_state* state, CHARTYPE *p )
     opnd = OPERAND(p);
     switch (OP(p)) {
     case ANY:
-        count = strlen(scan);
+        count = static_cast<int>( strlen(scan) );
         scan += count;
         break;
     case EXACTLY:

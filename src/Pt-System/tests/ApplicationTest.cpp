@@ -78,7 +78,7 @@ class ApplicationTest : public Pt::Unit::TestSuite
             app.raiseSystemSignal(SIGALRM);
 
             app.run();
-            PT_UNIT_ASSERT(_cnt == hasSigUsr1 + hasSigAlrm);
+            PT_UNIT_ASSERT( _cnt == (hasSigUsr1 + hasSigAlrm) );
         }
 
         void onSignal(int sig)

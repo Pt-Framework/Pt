@@ -31,7 +31,7 @@
 
 namespace Pt {
 
-void SettingsReader::State::syntaxError(unsigned line)
+void SettingsReader::State::syntaxError(std::size_t line)
 {
     throw SettingsError("syntax error", line);
 }

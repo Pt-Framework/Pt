@@ -68,10 +68,20 @@ class OverlappedIODeviceImpl : public IODeviceImpl
     public:
         OverlappedIODeviceImpl(IODevice& dev);
 
+        OverlappedIODeviceImpl();
+
         ~OverlappedIODeviceImpl();
 
+        void init(IODevice& dev);
+
         void setTimeout(std::size_t msecs)
-        { _timeout = msecs; }
+        {
+            DWORD maxTimeout = std::numeric_limits<DWORD>::max() - 1;
+            
+            _timeout = (msecs == EventLoop::WaitInfinite) ? INFINITE
+                           : (msecs > maxTimeout) ? maxTimeout 
+                               : static_cast<DWORD>(msecs);
+        }
 
         std::size_t timeout() const
         { return _timeout; }
@@ -101,7 +111,7 @@ class OverlappedIODeviceImpl : public IODeviceImpl
         OVERLAPPED _readOv;
         OVERLAPPED _writeOv;
         HANDLE _ioEvent;
-        std::size_t _timeout;
+        DWORD _timeout;
 };
 
 #endif

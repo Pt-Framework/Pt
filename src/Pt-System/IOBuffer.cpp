@@ -224,7 +224,7 @@ size_t IOBuffer::endWrite()
     }
 
     setp(_obuffer, _obuffer + _obufferSize);
-    pbump(leftover);
+    pbump( static_cast<int>(leftover) );
 
     return written;
 }
@@ -351,7 +351,7 @@ std::streambuf::int_type IOBuffer::overflow(std::streambuf::int_type ch)
             traits_type::move(_obuffer, _obuffer + written, leftover);
 
         setp(_obuffer, _obuffer + _obufferSize);
-        pbump(leftover);
+        pbump( static_cast<int>(leftover) );
     }
     else
     {
@@ -362,7 +362,7 @@ std::streambuf::int_type IOBuffer::overflow(std::streambuf::int_type ch)
         traits_type::copy(buf, _obuffer, _obufferSize);
         std::swap(_obuffer, buf);
         setp(_obuffer, _obuffer + bufsize);
-        pbump(_obufferSize);
+        pbump( static_cast<int>(_obufferSize) );
         _obufferSize = bufsize;
         delete [] buf;
     }

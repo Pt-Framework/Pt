@@ -167,7 +167,9 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServerOptions& options)
 #endif
     
         log_debug("bind ");
-        if( ::bind(_fd, it->ai_addr, it->ai_addrlen) == 0 )
+        socklen_t addrlen = static_cast<socklen_t>(it->ai_addrlen);
+        
+        if( ::bind(_fd, it->ai_addr, addrlen) == 0 )
         {
    
             log_debug("listen ");
@@ -278,7 +280,12 @@ int TcpServerImpl::waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, size_t t
     struct timeval tv;
     if(timeout != System::EventLoop::WaitInfinite)
     {
-        tv.tv_sec = timeout / 1000;
+        std::size_t timeoutSecs = timeout / 1000;
+        unsigned long maxSecs = std::numeric_limits<long>::max();
+
+        tv.tv_sec = timeoutSecs > maxSecs ? static_cast<long>(maxSecs) 
+                                          : static_cast<long>(timeoutSecs);
+        
         tv.tv_usec = (timeout % 1000) * 1000;
         tval = &tv;
     }

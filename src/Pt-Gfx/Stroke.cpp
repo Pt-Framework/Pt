@@ -43,10 +43,10 @@ Stroke::~Stroke()
         
 void Stroke::stroke( Pt::Gfx::ARgbImage& image, const Pen& pen, ssize_t xpos, ssize_t ypos)
 {
-    if( xpos < 0  || xpos >= image.width())
+    if( xpos < 0  || static_cast<size_t>(xpos) >= image.width())
         return;
 
-    if( ypos <0 || ypos >= image.height())
+    if( ypos <0 || static_cast<size_t>(ypos) >= image.height())
         return;
 
     image.pixel(xpos,ypos) = pen.color();

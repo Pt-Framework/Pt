@@ -211,10 +211,10 @@ LogTarget& LogManager::target(const std::string& name)
     Pt::System::RecursiveLock lock( _mutex );
 
     // find requested logger amongst the existing ones
-    std::map<std::string, LogTarget*>::iterator it = _targetMap.find(name);
-    if( it != _targetMap.end() )
+    std::map<std::string, LogTarget*>::iterator iter = _targetMap.find(name);
+    if( iter != _targetMap.end() )
     {
-        return *it->second;
+        return *iter->second;
     }
 
     // logger needs to be created as a child of an existing logger

@@ -129,18 +129,13 @@ void Selector::wake()
 }
 
 
-bool Selector::waitForWake(size_t timeoutUMSecs)
+bool Selector::waitForWake(size_t timeoutMSecs)
 {
-    // convert unsigned to signed
-    DWORD msecs = timeoutUMSecs;
-    if(timeoutUMSecs == EventLoop::WaitInfinite)
-    {
-        msecs = INFINITE;
-    }
-    else if( timeoutUMSecs > std::numeric_limits<DWORD>::max() )
-    {
-        msecs = std::numeric_limits<DWORD>::max();
-    }
+    DWORD maxTimeout = std::numeric_limits<DWORD>::max() - 1;
+    
+    DWORD msecs = (timeoutMSecs == EventLoop::WaitInfinite) ? INFINITE
+                    : (timeoutMSecs > maxTimeout) ? maxTimeout 
+                        : static_cast<DWORD>(timeoutMSecs);
 
     HANDLE* handles = _handles.buildHandles();
 

@@ -44,7 +44,7 @@ class Base64Codec : public TextCodec<char, char>
     public:
         /** @brief Default constructor.
         */
-        explicit Base64Codec(size_t ref = 0)
+        explicit Base64Codec(std::size_t ref = 0)
         : TextCodec<char, char>(ref)
         {}
 
@@ -86,10 +86,10 @@ class Base64Codec : public TextCodec<char, char>
 
         // inherit docs
         int do_length(MBState& s, const char* fromBegin,
-                      const char* fromEnd, size_t max) const
+                      const char* fromEnd, std::size_t max) const
         {
-            const int from = (fromEnd - fromBegin) / 4;
-            const int to = max / 3;
+            const int from = static_cast<int>( (fromEnd - fromBegin) / 4 );
+            const int to = static_cast<int>( max / 3 );
             return to > from ? from * 4 : to * 4;
         }
 

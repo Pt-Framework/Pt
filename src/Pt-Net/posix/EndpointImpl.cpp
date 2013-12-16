@@ -113,7 +113,7 @@ std::string EndpointImpl::toString() const
         char addrStr[64] = {0};
         char serviceStr[64] = {0};
 
-        if( 0 == getnameinfo(addr(), _addrlen, addrStr, 64, serviceStr, 64, NI_NUMERICHOST) )
+        if( 0 == getnameinfo(addr(), static_cast<socklen_t>(_addrlen), addrStr, 64, serviceStr, 64, NI_NUMERICHOST) )
         {
             str += addrStr;
             str += ':';

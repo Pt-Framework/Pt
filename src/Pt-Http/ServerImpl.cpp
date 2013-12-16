@@ -535,7 +535,7 @@ void ServerImpl::listen(const Pt::Net::Endpoint& addr, const Net::TcpServerOptio
     _serverSocket.listen(addr, opts);
     _serverSocket.beginAccept();
 
-    for(unsigned n = 1; n < _maxThreads; ++n)
+    for(std::size_t n = 1; n < _maxThreads; ++n)
     {
         ServerThread* st = new ServerThread();
 

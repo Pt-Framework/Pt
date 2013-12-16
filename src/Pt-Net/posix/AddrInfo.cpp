@@ -110,7 +110,8 @@ std::string AddrInfo::host()
         char addrStr[64] = {0};
         char serviceStr[64] = {0};
 
-        if( 0 == getnameinfo(_special.ai_addr, _special.ai_addrlen, addrStr, 64, serviceStr, 64, NI_NUMERICHOST) )
+        socklen_t addrlen = static_cast<socklen_t>(_special.ai_addrlen);
+        if( 0 == getnameinfo(_special.ai_addr, addrlen, addrStr, 64, serviceStr, 64, NI_NUMERICHOST) )
         {
             str += addrStr;
             str += ':';

@@ -31,6 +31,7 @@
 #include <Pt/Api.h>
 #include <Pt/SerializationInfo.h>
 #include <string>
+#include <cstddef>
 
 namespace Pt {
 
@@ -40,7 +41,7 @@ class PT_API SettingsError : public SerializationError
 {
     public:
         //! @brief Constructor.
-        SettingsError(const char* what, unsigned line);
+        SettingsError(const char* what, std::size_t line);
 
         //! @brief Destructor.
         ~SettingsError() throw()
@@ -48,12 +49,12 @@ class PT_API SettingsError : public SerializationError
 
         /** @brief Returns the line number where the error occured.
         */
-        unsigned line() const
+        std::size_t line() const
         { return _line; }
 
     private:
         //! @internal
-        unsigned _line;
+        std::size_t _line;
 };
 
 /** @brief Store application settings

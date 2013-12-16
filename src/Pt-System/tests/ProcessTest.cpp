@@ -76,7 +76,7 @@ void ProcessTest::RedirectStdout()
     p.wait();
 
     char buffer[1024];
-    int n = p.stdOutput()->read( buffer, sizeof(buffer));
+    std::size_t n = p.stdOutput()->read( buffer, sizeof(buffer));
     buffer[n] = '\0';
 
     reportMessage( std::string("child output: ") + buffer);
@@ -101,7 +101,7 @@ void ProcessTest::RedirectStderr()
     p.wait();
 
     char buffer[1024];
-    int n = p.stdError()->read( buffer, sizeof(buffer));
+    std::size_t n = p.stdError()->read( buffer, sizeof(buffer));
     buffer[n] = '\0';
 
     reportMessage( std::string("child output: ") + buffer);

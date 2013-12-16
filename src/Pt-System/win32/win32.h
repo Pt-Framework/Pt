@@ -17,7 +17,7 @@ namespace win32 {
 
 inline std::string toMultiByte(const wchar_t* from)
 {
-    std::size_t length = WideCharToMultiByte(CP_ACP, 0, from, -1, NULL, 0, NULL, NULL);
+    int length = WideCharToMultiByte(CP_ACP, 0, from, -1, NULL, 0, NULL, NULL);
 
     std::vector<char> str(length);
     int ret = WideCharToMultiByte(CP_ACP, 0, from, -1, &str[0], length, NULL, NULL);
@@ -36,7 +36,7 @@ inline std::string toMultiByte(const char* from)
 
 inline void fromMultiByte(const std::string& from, std::wstring& to)
 {
-    std::size_t length = MultiByteToWideChar(CP_ACP, 0, from.c_str(), -1, NULL, 0);
+    int length = MultiByteToWideChar(CP_ACP, 0, from.c_str(), -1, NULL, 0);
 
     std::vector<wchar_t> wbuf(length);
     length = MultiByteToWideChar(CP_ACP, 0, from.c_str(), -1, &wbuf[0], length);
@@ -51,7 +51,7 @@ inline void fromMultiByte(const std::string& from, std::wstring& to)
 
 inline void fromMultiByte(const char* from, std::wstring& to)
 {
-    std::size_t length = MultiByteToWideChar(CP_ACP, 0, from, -1, NULL, 0);
+    int length = MultiByteToWideChar(CP_ACP, 0, from, -1, NULL, 0);
 
     std::vector<wchar_t> wbuf(length);
     length = MultiByteToWideChar(CP_ACP, 0, from, -1, &wbuf[0], length);

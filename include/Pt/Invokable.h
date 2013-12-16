@@ -39,7 +39,7 @@ class Callback
     public:
         virtual ~Callback() {}
 
-        virtual bool equals(const Callback& cb) const
+        virtual bool equals(const Callback&) const
         { return false; }
 };
 

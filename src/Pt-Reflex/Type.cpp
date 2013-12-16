@@ -92,7 +92,7 @@ ConstructorTable::ConstIterator ConstructorTable::end() const
 }
 
 
-unsigned ConstructorTable::size() const
+std::size_t ConstructorTable::size() const
 {
     return _entries.size();
 
@@ -162,7 +162,7 @@ Pt::Reflex::ConstructorInfo* ConstructorTable::find(Pt::Reflex::Type** args, std
 
 bool ConstructorTable::insert(Pt::Reflex::ConstructorInfo* ci)
 {
-    unsigned nargs = ci->psize();
+    std::size_t nargs = ci->psize();
 
     Container::iterator it;
     for(it = _entries.begin(); it != _entries.end(); ++it)
@@ -273,7 +273,7 @@ MethodTable::ConstIterator MethodTable::end() const
 }
 
 
-unsigned MethodTable::size() const
+std::size_t MethodTable::size() const
 {
     return _entries.size();
 
@@ -385,7 +385,7 @@ unsigned MethodTable::findId(const std::string& name, Pt::Reflex::Type** args, s
 
 void MethodTable::insert(Pt::Reflex::MethodInfo* mi)
 {
-    unsigned nargs = mi->psize();
+    std::size_t nargs = mi->psize();
 
     //
     //  overwrite method if found
@@ -508,7 +508,7 @@ PropertyTable::ConstIterator PropertyTable::end() const
 }
 
 
-unsigned PropertyTable::size() const
+std::size_t PropertyTable::size() const
 {
     return _entries.size();
 

@@ -2,6 +2,7 @@ SubDir PT_TOP src Pt-Gfx freetype src ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirHdrs $(PT_TOP)/src/Pt-Gfx/freetype/include ;
 SubDirCcFlags [ FDefines FT2_BUILD_LIBRARY ] ;
+SubDirCcFlags [ FDefines _CRT_SECURE_NO_WARNINGS ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx freetype ;
 
 Library Pt-Gfx-freetype :

@@ -155,7 +155,7 @@ bool XmlSerializationContext::onBeginSave(const void* p, const char* n)
 {
     if( _idmap.find(p) == _idmap.end() )
     {
-        unsigned id = _idmap.size();
+        std::size_t id = _idmap.size();
         //std::cerr << "BEGIN SAVE " << p << " " << n << std::endl;
         _idmap[p] = id;
         return true;

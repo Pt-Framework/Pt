@@ -175,7 +175,9 @@ void UdpSocketImpl::bind(const Endpoint& e, const UdpSocketOptions& opts)
         }
 #endif
 
-        if( ::bind(_fd, it->ai_addr, it->ai_addrlen) == 0 )
+        socklen_t addrlen = static_cast<socklen_t>(it->ai_addrlen);
+        
+        if( ::bind(_fd, it->ai_addr, addrlen) == 0 )
         {
             _isBound = true;
             std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
@@ -265,7 +267,9 @@ void UdpSocketImpl::connect(const Endpoint& ep, const UdpSocketOptions& opts)
 
         std::memmove(&_sendAddr, it->ai_addr, it->ai_addrlen);
 
-        if( 0 == ::connect(_fd, it->ai_addr, it->ai_addrlen) )
+        socklen_t addrlen = static_cast<socklen_t>(it->ai_addrlen);
+
+        if( 0 == ::connect(_fd, it->ai_addr, addrlen) )
         {
             _isConnected = true;
             return;
@@ -526,17 +530,16 @@ bool UdpSocketImpl::runWrite(System::EventLoop& loop)
 }
 
 
-size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
+size_t UdpSocketImpl::read(char* buffer, size_t n, bool& eof)
 {
-    WSABUF recvbuf;
-    recvbuf.buf = buffer;
-    recvbuf.len = count;
+    unsigned int maxLen = std::numeric_limits<int>::max();
+    int buflen = n > maxLen ? static_cast<int>(maxLen) : static_cast<int>(n);
 
     sockaddr_storage peerAddr;
     int addrlen = sizeof(peerAddr);
     sockaddr* addr = reinterpret_cast<sockaddr*>(&peerAddr);
 
-    int len = recvfrom( _fd, recvbuf.buf, recvbuf.len, 0, 
+    int len = recvfrom( _fd, buffer, buflen, 0, 
                         addr, &addrlen );
 
     if( len == -1 && WSAGetLastError() == WSAEWOULDBLOCK)
@@ -547,7 +550,7 @@ size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
     
         this->waitSelect(&fds, 0, 0, _timeout);
 
-        len = recvfrom( _fd, recvbuf.buf, recvbuf.len, 0,
+        len = recvfrom( _fd, buffer, buflen, 0,
                         addr,  &addrlen );
 
         if(len < 0)
@@ -570,8 +573,9 @@ size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
     assert(buffer != 0);
     _eventFlags |= FD_READ;
 
+    ULONG maxLen = std::numeric_limits<ULONG>::max();
     _receiveBuffer.buf = buffer;
-    _receiveBuffer.len = n;
+    _receiveBuffer.len = n > maxLen ? maxLen : static_cast<ULONG>(n);
 
     setEventFlags(_ioh.handle(), _eventFlags);
     return 0;
@@ -617,10 +621,13 @@ size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
 }
 
 
-size_t UdpSocketImpl::write(const char* buffer, size_t count)
+size_t UdpSocketImpl::write(const char* buffer, size_t n)
 {
+    unsigned int maxLen = std::numeric_limits<int>::max();
+    int buflen = n > maxLen ? static_cast<int>(maxLen) : static_cast<int>(n);
+
     int addrlen = sizeof(_sendAddr);
-    int len = sendto( _fd, buffer, count, 
+    int len = sendto( _fd, buffer, buflen, 
                       0, (sockaddr*)&_sendAddr, addrlen );
 
     if( len == -1 && WSAGetLastError() == WSAEWOULDBLOCK)
@@ -631,7 +638,7 @@ size_t UdpSocketImpl::write(const char* buffer, size_t count)
     
         this->waitSelect(0, &fds, 0, _timeout);
 
-        len = sendto( _fd, buffer, count, 0,
+        len = sendto( _fd, buffer, buflen, 0,
                         (sockaddr*) &_sendAddr, addrlen );
 
         if(len < 0)
@@ -650,8 +657,9 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
         loop.selector().enableOverlapped(_ioh);
     }
 
-     _sendBuffer.buf = const_cast<char*>(buffer);
-    _sendBuffer.len = n;
+    ULONG maxLen = std::numeric_limits<ULONG>::max();
+    _sendBuffer.buf = const_cast<char*>(buffer);
+    _sendBuffer.len = n > maxLen ? maxLen : static_cast<ULONG>(n);
 
     DWORD numberOfBytesSent = 0;
 
@@ -709,7 +717,12 @@ int UdpSocketImpl::waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, size_t t
     struct timeval tv;
     if(timeout != System::EventLoop::WaitInfinite)
     {
-        tv.tv_sec = timeout / 1000;
+        std::size_t timeoutSecs = timeout / 1000;
+        unsigned long maxSecs = std::numeric_limits<long>::max();
+
+        tv.tv_sec = timeoutSecs > maxSecs ? static_cast<long>(maxSecs) 
+                                          : static_cast<long>(timeoutSecs);
+        
         tv.tv_usec = (timeout % 1000) * 1000;
         tval = &tv;
     }

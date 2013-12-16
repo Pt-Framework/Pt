@@ -162,7 +162,7 @@ void MessageHeader::remove(const char* key)
     {
         if (compareIgnoreCase(key, it->name()) == 0)
         {
-            unsigned slen = it->value() - it->name() + std::strlen(it->value()) + 1;
+            std::size_t slen = it->value() - it->name() + std::strlen(it->value()) + 1;
 
             std::memcpy(
                 const_cast<char*>(it->name()),

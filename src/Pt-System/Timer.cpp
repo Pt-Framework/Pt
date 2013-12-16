@@ -39,9 +39,9 @@ namespace {
 
 inline bool checkInterval(std::size_t interval, const Pt::Timespan& now)
 {
-    Pt::int64_t maxInterval = std::numeric_limits<Pt::int64_t>::max() / 1000;
+    Pt::int64_t maxInterval = Pt::Timespan::maxMSecs();
     maxInterval -= now.toMSecs();
-    return interval > maxInterval;
+    return interval > static_cast<Pt::uint64_t>(maxInterval);
 }
 
 }

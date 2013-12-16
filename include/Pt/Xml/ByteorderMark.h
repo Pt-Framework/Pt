@@ -83,7 +83,7 @@ class ByteorderMark
         /** @brief Sets the endianess of the document encoding.
         */
         void setEndianess(Endianess e)
-        { _endianess = e; }
+        { _endianess = static_cast<unsigned char>(e); }
 
         /** @brief Returns the word width of the encoding.
         */
@@ -103,7 +103,7 @@ class ByteorderMark
         /** @brief Sets the type of encoding.
         */
         void setEncoding(Encoding e)
-        { _encoding = static_cast<Encoding>(e); }
+        { _encoding = static_cast<unsigned char>(e); }
 
     private:
         unsigned char _endianess;

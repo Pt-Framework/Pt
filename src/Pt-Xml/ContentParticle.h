@@ -62,10 +62,10 @@ class ContentParticle
         void setNext(ContentParticle& state)
         { _out = &state; }
 
-        void setId(unsigned id)
+        void setId(std::size_t id)
         { _id = id; }
 
-        unsigned id() const
+        std::size_t id() const
         { return _id; }
 
     protected:
@@ -76,7 +76,7 @@ class ContentParticle
 
     private:
         ContentParticle* _out;
-        unsigned _id;
+        std::size_t _id;
 };
 
 
@@ -91,7 +91,7 @@ class ContentParticleList
 
         bool isValid() const;
 
-        bool setVisited(unsigned id);
+        bool setVisited(std::size_t id);
 
         void add(const ContentParticle* p);
 

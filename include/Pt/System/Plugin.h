@@ -45,21 +45,21 @@ class PluginId
 {
     public:
         PluginId(const std::type_info& iface)
-        : _iface(iface)
+        : _iface(&iface)
         { }
 
         virtual ~PluginId()
         { }
 
         const std::type_info& iface() const
-        { return _iface; }
+        { return *_iface; }
 
         virtual const char* feature() const = 0;
 
         virtual const char* info() const = 0;
 
     private:
-        const std::type_info& _iface;
+        const std::type_info* _iface;
 };
 
 

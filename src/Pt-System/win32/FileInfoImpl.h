@@ -137,7 +137,10 @@ class FileInfoImpl
             if(h == INVALID_HANDLE_VALUE)
                 throw AccessFailed(path);
 
-            if( INVALID_SET_FILE_POINTER == ::SetFilePointer(h, newSize, NULL, FILE_BEGIN) ||
+            LARGE_INTEGER li;
+            li.QuadPart = newSize;
+
+            if( INVALID_SET_FILE_POINTER == ::SetFilePointer(h, li.LowPart, &li.HighPart, FILE_BEGIN) ||
                 FALSE == ::SetEndOfFile(h) )
             {
                 ::CloseHandle(h);

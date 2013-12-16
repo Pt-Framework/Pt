@@ -3650,11 +3650,11 @@ class XmlReaderImpl
                     
                     for(std::size_t n = 0; n < tokenSize; ++n)
                     {
-                        Pt::Char c = _token[n];
+                        Pt::Char d = _token[n];
                         //if(c == ' ' || c == '\n' || c == '\r' || c == '\t')
                         //    _chars.appendSpace(c);
                         //else
-                            _chars.append(c);
+                            _chars.append(d);
                     }
 
                     if(_chunkSize >= _maxChunkSize)
@@ -4098,11 +4098,11 @@ class XmlReaderImpl
                 const QName& attrName = it->name();
                 _usedSize -= attrName.prefix().size() + attrName.name().size() + it->value().size();
                 
-                const Namespace* ns = _nsctx.findPrefix( it->name().prefix() );
-                if( ! ns )
+                const Namespace* nsp = _nsctx.findPrefix( it->name().prefix() );
+                if( ! nsp )
                     throw SyntaxError("undeclared namespace prefix", line());
 
-                it->setNamespace(*ns);
+                it->setNamespace(*nsp);
 
                 // If the declared value is not CDATA, then discard any leading and
                 // trailing space (#x20) characters and replace sequences of space

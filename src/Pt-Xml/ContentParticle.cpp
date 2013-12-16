@@ -70,7 +70,7 @@ bool ContentParticleList::advance(Node& node)
 }
 
 
-bool ContentParticleList::setVisited(unsigned id)
+bool ContentParticleList::setVisited(std::size_t id)
 { 
     if(_nodes.at(id) == _stepId)
         return true;

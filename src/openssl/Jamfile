@@ -8,6 +8,7 @@ SubDirHdrs $(PT_TOP)/src/openssl/crypto/evp ;
 SubDirHdrs $(PT_TOP)/src/openssl/crypto/modes ;
 
 SubDirCcFlags $(OPENSSL_CFLAGS) ;
+SubDirCcFlags [ FDefines _CRT_SECURE_NO_WARNINGS ] ;
 
  SubDirCcFlags [ FDefines OPENSSL_NO_DEPRECATED ] ;
  SubDirCcFlags [ FDefines OPENSSL_NO_ENGINE ] ;

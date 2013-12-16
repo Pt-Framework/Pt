@@ -100,7 +100,7 @@ class PT_XML_API XmlSerializationContext : public SerializationContext
         { return *this; }
 
     private:
-        std::map<const void*, unsigned> _idmap;
+        std::map<const void*, std::size_t> _idmap;
         std::map<const void*, std::string> _refmap;
         std::vector<Fixup*> _targets;
         std::vector<Fixup*> _pointers; 

@@ -31,6 +31,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/Types.h>
+#include <limits>
 
 namespace Pt {
 
@@ -128,6 +129,10 @@ class Timespan
         //! @brief Returns the total number of microseconds.
         inline Pt::int64_t toUSecs() const
         { return _span; }
+
+        // @internal
+        inline static Pt::int64_t maxMSecs()
+        { return std::numeric_limits<Pt::int64_t>::max() / 1000; }
 
     private:
         Pt::int64_t _span;

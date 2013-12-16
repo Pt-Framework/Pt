@@ -181,7 +181,7 @@ class SettingsReader
                 }
 
             protected:
-                void syntaxError(unsigned line);
+                void syntaxError(std::size_t line);
         };
 
 

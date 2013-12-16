@@ -283,7 +283,7 @@ class ServerImpl : public Connectable
         Ssl::Context* _sslctx;
         std::vector<ServerThread*> _serverThreads;
         std::vector<Acceptor*> _handlers;
-        unsigned _useWorker;
+        std::size_t _useWorker;
         std::size_t _maxThreads;
         std::size_t _timeout;
         std::size_t _keepAliveTimeout;

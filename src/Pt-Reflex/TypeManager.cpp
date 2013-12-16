@@ -95,7 +95,7 @@ FunctionTable::ConstIterator FunctionTable::end() const
 }
 
 
-unsigned FunctionTable::size() const
+std::size_t FunctionTable::size() const
 {
     return _entries.size();
 
@@ -178,7 +178,7 @@ Pt::Reflex::FunctionInfo* FunctionTable::find(const std::string& name, Pt::Refle
 
 bool FunctionTable::insert(Pt::Reflex::FunctionInfo* fi)
 {
-    unsigned nargs = fi->psize();
+    std::size_t nargs = fi->psize();
 
     Container::iterator it;
     for(it = _entries.begin(); it != _entries.end(); ++it)
@@ -287,7 +287,7 @@ TypeTable::ConstIterator TypeTable::end() const
 }
 
 
-unsigned TypeTable::size() const
+std::size_t TypeTable::size() const
 {
     return _entries.size();
 

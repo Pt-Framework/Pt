@@ -144,7 +144,9 @@ void TcpSocketImpl::connect()
         ::ioctlsocket(_fd, FIONBIO, &argp);
         log_debug("created socket " << _fd);
         
-        if( ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
+        socklen_t addrlen = static_cast<socklen_t>(_addrInfoPtr->ai_addrlen);
+
+        if( ::connect(_fd, _addrInfoPtr->ai_addr, addrlen) == 0 )
         {       
             //Set socket to non-blocking mode
             argp = 1;
@@ -192,7 +194,9 @@ bool TcpSocketImpl::beginConnect()
     
         log_debug("created socket " << _fd);
 
-        if( ::connect(_fd, _addrInfoPtr->ai_addr, _addrInfoPtr->ai_addrlen) == 0 )
+        socklen_t addrlen = static_cast<socklen_t>(_addrInfoPtr->ai_addrlen);
+
+        if( ::connect(_fd, _addrInfoPtr->ai_addr, addrlen) == 0 )
         {
             log_debug("immediate connect");
             return true;
@@ -355,22 +359,18 @@ bool TcpSocketImpl::runWrite(System::EventLoop& loop)
 }
 
 
-bool TcpSocketImpl::wait(std::size_t umsecs)
+bool TcpSocketImpl::wait(std::size_t msecs)
 {
-    log_debug(_fd << " wait " << umsecs);
+    log_debug(_fd << " wait " << msecs);
 
-    int msecs = umsecs;
-    if(umsecs == Pt::System::EventLoop::WaitInfinite)
-    {
-        msecs = INFINITE;
-    }
-    else if( umsecs > static_cast<size_t>(std::numeric_limits<int>::max()))
-    {
-        msecs = std::numeric_limits<int>::max();
-    }
+    DWORD maxTimeout = std::numeric_limits<DWORD>::max() - 1;
+            
+    DWORD timeout = (msecs == System::EventLoop::WaitInfinite) ? INFINITE
+                      : (msecs > maxTimeout) ? maxTimeout 
+                          : static_cast<DWORD>(msecs);
 
     HANDLE h = _ioh.handle();
-    if( WSA_WAIT_TIMEOUT != WSAWaitForMultipleEvents(1, &h, FALSE, msecs, FALSE) )
+    if( WSA_WAIT_TIMEOUT != WSAWaitForMultipleEvents(1, &h, FALSE, timeout, FALSE) )
     {      
         return true;
     }
@@ -424,15 +424,16 @@ size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
     assert(buffer != 0);
     _eventFlags |= FD_READ;
 
+    ULONG maxLen = std::numeric_limits<ULONG>::max();
     _receiveBuffer.buf = buffer;
-    _receiveBuffer.len = n;
+    _receiveBuffer.len = n > maxLen ? maxLen : static_cast<ULONG>(n);
 
     setEventFlags(_ioh.handle(), _eventFlags);
     return 0;
 }
 
 
-size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
+size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t, bool& eof)
 {
     log_debug(_fd << " endRead");
     _eventFlags &= ~FD_READ;
@@ -475,7 +476,7 @@ size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
 }
 
 
-size_t TcpSocketImpl::read(char* buffer, size_t count, bool& eof)
+size_t TcpSocketImpl::read(char* buf, std::size_t n, bool& eof)
 {
     fd_set fds;
     FD_ZERO(&fds);
@@ -483,7 +484,10 @@ size_t TcpSocketImpl::read(char* buffer, size_t count, bool& eof)
 
     this->waitSelect(&fds, 0, 0, _timeout);
 
-    int len = ::recv(_fd, buffer, count, 0);
+    unsigned int maxLen = std::numeric_limits<int>::max();
+    int bufsize = n > maxLen ? static_cast<int>(maxLen) : static_cast<int>(n);
+
+    int len = ::recv(_fd, buf, bufsize, 0);
     if( len == 0)
         eof = true;
     else if(len < 0)
@@ -502,8 +506,9 @@ size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
         loop.selector().enableOverlapped(_ioh);
     }
 
+    ULONG maxLen = std::numeric_limits<ULONG>::max();
     _sendBuffer.buf = const_cast<char*>(buffer);
-    _sendBuffer.len = n;
+    _sendBuffer.len = n > maxLen ? maxLen : static_cast<ULONG>(n);
 
     log_debug("previous FD_CLOSE:" << _fdClose);
 
@@ -561,7 +566,7 @@ size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
 }
 
 
-size_t TcpSocketImpl::write(const char* buffer, size_t count)
+size_t TcpSocketImpl::write(const char* buffer, size_t n)
 {
     log_debug(_fd << " write");
 
@@ -571,8 +576,9 @@ size_t TcpSocketImpl::write(const char* buffer, size_t count)
 
     this->waitSelect(0, &fds, 0, _timeout);
 
+    ULONG maxLen = std::numeric_limits<ULONG>::max();
     _sendBuffer.buf = const_cast<char*>(buffer);
-    _sendBuffer.len = count;
+    _sendBuffer.len = n > maxLen ? maxLen : static_cast<ULONG>(n);
 
     DWORD numberOfBytesSent = 0;
     int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
@@ -589,7 +595,12 @@ int TcpSocketImpl::waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, size_t t
     struct timeval tv;
     if(timeout != System::EventLoop::WaitInfinite)
     {
-        tv.tv_sec = timeout / 1000;
+        std::size_t timeoutSecs = timeout / 1000;
+        unsigned long maxSecs = std::numeric_limits<long>::max();
+
+        tv.tv_sec = timeoutSecs > maxSecs ? static_cast<long>(maxSecs) 
+                                          : static_cast<long>(timeoutSecs);
+        
         tv.tv_usec = (timeout % 1000) * 1000;
         tval = &tv;
     }

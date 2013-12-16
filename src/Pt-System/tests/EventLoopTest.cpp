@@ -101,8 +101,10 @@ class TestSelectable : public Pt::System::Selectable
         TestSelectable()
         : Pt::System::Selectable()
         , _loop(0)
-        , _thread( Pt::callable(*this, &TestSelectable::executeThread) )
-        { }
+        , _thread()
+        { 
+            _thread.init( Pt::callable(*this, &TestSelectable::executeThread) );
+        }
 
         void begin()
         {

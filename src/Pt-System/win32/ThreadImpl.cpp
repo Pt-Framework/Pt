@@ -52,7 +52,7 @@ void ThreadImpl::close()
 
 void ThreadImpl::start() 
 {
-    SIZE_T stackSize = 0;
+    unsigned stackSize = 0;
 
 #ifdef _WIN32_WCE
     _handle = ::CreateThread(NULL, stackSize, entry, this, 0, &_id);

@@ -33,7 +33,7 @@
 
 namespace Pt {
 
-SettingsError::SettingsError(const char* what, unsigned line)
+SettingsError::SettingsError(const char* what, std::size_t line)
 : SerializationError(what)
 , _line(line)
 {}

@@ -219,7 +219,7 @@ void ImagePainter::drawText( const Gfx::Point& to, const String& text, const Pt:
 
 void ImagePainter::drawRect(const  Gfx::Rect& rect)
 {
-	
+    
     this->drawLine(rect.topLeft(), rect.topRight() );
 
     this->drawLine(Pt::Gfx::Point( rect.topRight().x(), rect.topRight().y()),
@@ -267,47 +267,44 @@ void ImagePainter::fillPolygon( const  Gfx::Point* points, const size_t pointCou
 
 void ImagePainter::drawImage( const  Gfx::Point& to, const ARgbImage& image )
 {
-	int startX =  to.x();
-	int stopX =  to.x() + image.width();
-	
-	if( startX < 0)
-		startX = 0;
-	
-	if( startX > _image.width())
-		startX = _image.width();
+    Pt::ssize_t startX =  to.x();
+    Pt::ssize_t stopX =  to.x() + image.width();
+    
+    if( startX < 0)
+        startX = 0;
+    
+    if( static_cast<size_t>(startX) > _image.width())
+        startX = _image.width();
 
-	
-	if( stopX < 0)
-		stopX = 0;
-	
-	if( stopX > _image.width())
-		stopX = _image.width();
+    if( stopX < 0)
+        stopX = 0;
+    
+    if( static_cast<size_t>(stopX) > _image.width())
+        stopX = _image.width();
 
-	int startY =  to.y();
-	int stopY =  to.y() + image.height();
-		
-	if( startY < 0)
-		startY = 0;
-	
-	if( startY > _image.height())
-		startY = _image.height();
+    Pt::ssize_t startY =  to.y();
+    Pt::ssize_t stopY =  to.y() + image.height();
+        
+    if( startY < 0)
+        startY = 0;
+    
+    if( static_cast<size_t>(startY) > _image.height())
+        startY = _image.height();
 
 
-	if( stopY < 0)
-		stopY = 0;
-	
-	if( stopY > _image.height())
-		stopY = _image.height();
+    if( stopY < 0)
+        stopY = 0;
+    
+    if( static_cast<size_t>(stopY) > _image.height())
+        stopY = _image.height();
 
-    for( size_t y = startY; y < stopY; ++y)
+    for( Pt::ssize_t y = startY; y < stopY; ++y)
     {
-
-        for( size_t x = startX; x < stopX; ++x)
+        for( Pt::ssize_t x = startX; x < stopX; ++x)
         {
-            
-			_image.at(x,y) = image.at(x -startX, y -startY);
-		}
-	}
+            _image.at(x,y) = image.at(x -startX, y -startY);
+        }
+    }
 }
 
 void ImagePainter::drawImage( const  Gfx::Point& to, const ARgbImage& image, const Region& imageRegion )

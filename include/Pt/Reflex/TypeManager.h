@@ -148,7 +148,7 @@ class PT_REFLEX_API FunctionTable
 
         ConstIterator end() const;
 
-        unsigned size() const;
+        std::size_t size() const;
 
         Pt::Reflex::FunctionInfo* find(const std::string& name);
 
@@ -268,7 +268,7 @@ class PT_REFLEX_API TypeTable
 
         ConstIterator end() const;
 
-        unsigned size() const;
+        std::size_t size() const;
 
         Pt::Reflex::Type* find(const std::type_info& ti);
 

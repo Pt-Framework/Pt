@@ -306,7 +306,7 @@ void SerializationTest::Benchmark1()
     Pt::String num(L"111");
     Pt::StringStream input(L"111 222 333 444 555");
     std::vector<int> vec;
-    int u = 0;
+    std::size_t u = 0;
     int v = 0;
 
     Pt::SerializationContext context;
@@ -367,7 +367,7 @@ void SerializationTest::Benchmark2()
 
     Pt::StringStream input(L"111 222 333 444 555");
     std::vector<int> vec;
-    int u = 0;
+    std::size_t u = 0;
     int v = 0;
 
     Pt::System::Clock clock;
@@ -430,7 +430,7 @@ void SerializationTest::Benchmark3()
 
     Pt::StringStream input(L"111 222 333 444 555");
     std::vector<int> vec;
-    int u = 0;
+    std::size_t u = 0;
     int v = 0;
     Pt::System::Clock clock;
     clock.start();
