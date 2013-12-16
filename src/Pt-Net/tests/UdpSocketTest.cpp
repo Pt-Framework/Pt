@@ -173,15 +173,17 @@ class UdpSocketTest : public Pt::Unit::TestSuite
         void onBroadcastOutput(Pt::System::IODevice& device)
         {
             std::size_t n = device.endWrite();
+            PT_UNIT_ASSERT(n > 10);
             //this->reportMessage("OUTPUT SENT");
         }
 
         void onBroadcastInput(Pt::System::IODevice& device)
         {
-            char* buffer = device.rbuf();
+            //char* buffer = device.rbuf();
             std::size_t n = device.endRead();
+            PT_UNIT_ASSERT(n > 10);
 
-            std::string msg(buffer, n);
+            //std::string msg(buffer, n);
             //this->reportMessage("INPUT RECVD: " + msg);
 
             _loop->exit();
@@ -230,6 +232,7 @@ class UdpSocketTest : public Pt::Unit::TestSuite
         {
             //char* buffer = device.rbuf();
             std::size_t n = device.endRead();
+            PT_UNIT_ASSERT(n > 10);
 
             std::cerr << "PEER: " << _receiver->remoteEndpoint().toString() << std::endl;
 

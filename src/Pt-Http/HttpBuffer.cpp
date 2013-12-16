@@ -42,7 +42,7 @@ namespace {
   {
     std::string s;
     
-    if (ch >= 32 && ch <= 127)
+    if (ch >= 32)
     {
       s += '<' ;
       s += ch; 

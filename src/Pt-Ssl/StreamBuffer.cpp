@@ -44,7 +44,7 @@ namespace Ssl {
 
 StreamBuffer::StreamBuffer(std::size_t bufferSize)
 : _connection(0)
-, _ibufferSize(bufferSize + 4)
+, _ibufferSize(bufferSize + _pbmax)
 , _ibuffer(0)
 , _obufferSize(bufferSize)
 , _obuffer(0)
@@ -54,7 +54,7 @@ StreamBuffer::StreamBuffer(std::size_t bufferSize)
 
 StreamBuffer::StreamBuffer(Context& ctx, std::ios& ios, OpenMode mode, std::size_t bufferSize)
 : _connection(0)
-, _ibufferSize(bufferSize + 4)
+, _ibufferSize(bufferSize + _pbmax)
 , _ibuffer(0)
 , _obufferSize(bufferSize)
 , _obuffer(0)
@@ -180,16 +180,17 @@ void StreamBuffer::import(std::streamsize maxImport)
         _ibuffer = new char[_ibufferSize];
     }
 
-    // Return 0 if full
-    if(_ibufferSize == (this->egptr() - this->gptr() + _pbmax))
+    // return if full
+    std::size_t leftover = this->egptr() - this->gptr();
+
+    if( leftover == _ibufferSize - _pbmax)
     {
         log_debug("get area is full");
         return;
     }
 
-    // Move unread bytes and putback to front
+    // move unread bytes and putback to front
     std::size_t putback  = _pbmax;
-    std::size_t leftover = 0;
     if( this->gptr() ) 
     {
         putback = std::min<std::size_t>( this->gptr() - this->eback(), _pbmax);

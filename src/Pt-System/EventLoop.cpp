@@ -214,7 +214,6 @@ size_t TimerQueue::processTimers()
 
     Timespan now = Clock::getSystemTicks();
     Timer* timer = _timers.begin()->second;
-    bool timerActive = now >= timer->finished();
 
     log_trace("now: " << now.toMSecs());
     log_trace("first timer at: " << timer->finished().toMSecs());
@@ -228,7 +227,7 @@ size_t TimerQueue::processTimers()
         {
             Pt::int64_t remaining = (timer->finished() - now).toUSecs();
             
-            Pt::int64_t remainingMSecs = remaining / 1000;
+            Pt::uint64_t remainingMSecs = static_cast<Pt::uint64_t>(remaining / 1000);
             if(remaining % 1000 > 0) 
                 ++remainingMSecs;
 

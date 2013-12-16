@@ -50,7 +50,7 @@ class ContextTest : public Pt::Unit::TestSuite
         void Assign()
         {
             const char* serverCerts = reinterpret_cast<const char*>(serverPkcs12);
-            const char* clientCerts = reinterpret_cast<const char*>(clientPkcs12);
+            //const char* clientCerts = reinterpret_cast<const char*>(clientPkcs12);
             const char* caCerts = reinterpret_cast<const char*>(caPkcs12);
 
             Pt::Ssl::CertificateStore store;

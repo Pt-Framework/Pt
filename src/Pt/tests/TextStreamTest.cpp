@@ -247,7 +247,7 @@ void TextStreamTest::InvalidUTF8()
 void TextStreamTest::UTF8ToUnicode()
 {
     Pt::TextStream ts( new Pt::Utf8Codec() );
-    std::streamsize n = ts.textBuffer().import(TextUTF8, std::strlen(TextUTF8));
+    ts.textBuffer().import(TextUTF8, std::strlen(TextUTF8));
 
     PT_UNIT_ASSERT(ts.get() == TextUnicode[0].value());
     PT_UNIT_ASSERT(ts.get() == TextUnicode[1].value());
@@ -274,7 +274,7 @@ void TextStreamTest::UnicodeToUTF8()
 void TextStreamTest::UTF16ToUnicode()
 {
     Pt::TextStream ts( new Pt::Utf16BECodec() );
-    std::streamsize n = ts.textBuffer().import(TextUTF16BE, std::strlen(TextUTF16BE));
+    ts.textBuffer().import(TextUTF16BE, std::strlen(TextUTF16BE));
 
     PT_UNIT_ASSERT(ts.get() == TextUnicode[0].value());
     PT_UNIT_ASSERT(ts.get() == TextUnicode[1].value());
@@ -300,7 +300,7 @@ void TextStreamTest::UnicodeToUTF16()
 void TextStreamTest::UTF16LeToUnicode()
 {
     Pt::TextStream ts( new Pt::Utf16LECodec() );
-    std::streamsize n = ts.textBuffer().import(TextUTF16LE, std::strlen(TextUTF16LE));
+    ts.textBuffer().import(TextUTF16LE, std::strlen(TextUTF16LE));
 
     PT_UNIT_ASSERT(ts.get() == TextUnicode[0].value());
     PT_UNIT_ASSERT(ts.get() == TextUnicode[1].value());
@@ -327,7 +327,7 @@ void TextStreamTest::UnicodeToUTF16Le()
 void TextStreamTest::UTF32BeToUnicode()
 {
     Pt::TextStream ts( new Pt::Utf32BECodec() );
-    std::streamsize n = ts.textBuffer().import(TextUTF32BE, sizeof(TextUTF32BE) - 1);
+    ts.textBuffer().import(TextUTF32BE, sizeof(TextUTF32BE) - 1);
 
     PT_UNIT_ASSERT(ts.get() == TextUnicode[0].value());
     PT_UNIT_ASSERT(ts.get() == TextUnicode[1].value());
@@ -351,15 +351,10 @@ void TextStreamTest::UnicodeToUTF32Be()
 }
 
 
-
-
-
-
-
 void TextStreamTest::UTF32LeToUnicode()
 {
     Pt::TextStream ts( new Pt::Utf32LECodec() );
-    std::streamsize n = ts.textBuffer().import(TextUTF32LE, sizeof(TextUTF32LE) - 1);
+    ts.textBuffer().import(TextUTF32LE, sizeof(TextUTF32LE) - 1);
 
     PT_UNIT_ASSERT(ts.get() == TextUnicode[0].value());
     PT_UNIT_ASSERT(ts.get() == TextUnicode[1].value());

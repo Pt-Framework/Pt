@@ -179,7 +179,7 @@ class SelectorImpl : public Selector
             _wakePipe.wake();
         }
 
-        bool waitForWake(size_t msecs)
+        bool waitForWake(std::size_t msecs)
         {
             // process kevents which are left over from the last iteration
             // because of an exception
@@ -263,10 +263,10 @@ class SelectorImpl : public Selector
         
                 if(msecs != EventLoop::WaitInfinite)
                 { 
-                    if(elapsed >= msecs)
+                    if( static_cast<Pt::uint64_t>(elapsed) >= msecs )
                         break; // timeout
             
-                    msecs -= int(elapsed);
+                    msecs -= static_cast<std::size_t>(elapsed);
                 }
             }
         

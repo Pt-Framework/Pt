@@ -211,12 +211,12 @@ int strncmp(const Pt::Char* c1, const Pt::Char* c2, size_t n)
 }
 
 
-const Pt::Char* strchr(const Pt::Char* str, int c)
+const Pt::Char* strchr(const Pt::Char* str, const Pt::Char& c)
 {
     const Pt::Char term(0);
     while( *str != term )
     {
-        if (*str == c)
+        if( *str == c )
             return str;
 
         ++str;
@@ -226,12 +226,12 @@ const Pt::Char* strchr(const Pt::Char* str, int c)
 }
 
 
-Pt::Char* strchr(Pt::Char* str, int c)
+Pt::Char* strchr(Pt::Char* str, const Pt::Char& c)
 {
     const Pt::Char term(0);
     while( *str != term )
     {
-        if (*str == c)
+        if ( *str == c )
             return str;
 
         ++str;

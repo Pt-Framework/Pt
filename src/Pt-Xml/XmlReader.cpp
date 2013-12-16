@@ -108,10 +108,13 @@ void normalizeAttributeValue(String& value)
 
 class XmlReaderImpl
 {
-    typedef void (XmlReaderImpl::*ParseFunc)(int);
+    
+    typedef std::char_traits<Char>::int_type int_type;
+
+    typedef void (XmlReaderImpl::*ParseFunc)(int_type);
 
     private:
-        void OnDocType(int c)
+        void OnDocType(int_type c)
         {
             Char ch = notEof(c);
 
@@ -133,7 +136,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void AfterDocType(int c)
+        void AfterDocType(int_type c)
         {
             Char ch = notEof(c);
 
@@ -153,7 +156,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdPublic(int c)
+        void OnDtdPublic(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -176,7 +179,7 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::OnDtdBeforePublicId;
         }
 
-        void OnDtdBeforePublicId(int c)
+        void OnDtdBeforePublicId(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -200,7 +203,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdPublicId(int c)
+        void OnDtdPublicId(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -218,7 +221,7 @@ class XmlReaderImpl
             ++_usedSize;
         }
 
-        void OnDtdSystem(int c)
+        void OnDtdSystem(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -241,7 +244,7 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::OnDtdBeforeSystemId;
         }
 
-        void OnDtdBeforeSystemId(int c)
+        void OnDtdBeforeSystemId(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -265,7 +268,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdSystemId(int c)
+        void OnDtdSystemId(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -297,7 +300,7 @@ class XmlReaderImpl
         // The use of parameter entities in the internal subset is restricted
         // furthermore.
         
-        void OnDtdParameterEntityReference(int c)
+        void OnDtdParameterEntityReference(int_type c)
         {
             Char ch = notEof(c);
 
@@ -330,7 +333,7 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::OnDtdParameterEntityReference;
         }
 
-        void OnDtdRootName(int c)
+        void OnDtdRootName(int_type c)
         {
             Char ch = notEof(c);
 
@@ -375,7 +378,7 @@ class XmlReaderImpl
         // subset MUST be considered to occur before the external subset. This
         // has the effect that entity and attribute-list declarations in the
         // internal subset take precedence over those in the external subset.
-        void AfterDtdRootName(int c)
+        void AfterDtdRootName(int_type c)
         {
             Char ch = notEof(c);
 
@@ -422,14 +425,14 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdExternalPublicId(int c)
+        void OnDtdExternalPublicId(int_type c)
         {
             _docType.setPublicId(_token);
             _token.clear();
             _parse = &XmlReaderImpl::OnDtdAfterExternalPublicId;
         }
 
-        void OnDtdAfterExternalPublicId(int c)
+        void OnDtdAfterExternalPublicId(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -471,14 +474,14 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdExternalSystemId(int c)
+        void OnDtdExternalSystemId(int_type c)
         {
             _docType.setSystemId(_token);
             _token.clear();
             _parse = &XmlReaderImpl::OnDtdAfterExternalSystemId;
         }
 
-        void OnDtdAfterExternalSystemId(int c)
+        void OnDtdAfterExternalSystemId(int_type c)
         {
             Char ch = notEof(c);
 
@@ -512,7 +515,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdInternal(int c)
+        void OnDtdInternal(int_type c)
         {
             Char ch = notEof(c);
 
@@ -545,7 +548,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
         
-        void OnDtdExternal(int c)
+        void OnDtdExternal(int_type c)
         {
             if( ! _input.isExternalDtd() )
             {
@@ -587,7 +590,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdTag(int c)
+        void OnDtdTag(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -613,7 +616,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdTagExclam(int c)
+        void OnDtdTagExclam(int_type c)
         {
             Pt::Char ch = notEof(c);
             
@@ -646,7 +649,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdTagEnd(int c)
+        void OnDtdTagEnd(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -670,7 +673,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdTagName(int c)
+        void OnDtdTagName(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -721,7 +724,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
         
-        void OnDtdBeforeIgnoreOrInclude(int c)
+        void OnDtdBeforeIgnoreOrInclude(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -746,7 +749,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdIgnoreOrInclude(int c)
+        void OnDtdIgnoreOrInclude(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -803,7 +806,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdIgnoreBegin(int c)
+        void OnDtdIgnoreBegin(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -827,7 +830,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdIgnore(int c)
+        void OnDtdIgnore(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -838,7 +841,7 @@ class XmlReaderImpl
             }
         }
 
-        void OnDtdIgnoreEnd(int c)
+        void OnDtdIgnoreEnd(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -851,7 +854,7 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::OnDtdIgnore; 
         }
 
-        void OnDtdIncludeBegin(int c)
+        void OnDtdIncludeBegin(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -876,7 +879,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdIncludeEnd(int c)
+        void OnDtdIncludeEnd(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -895,7 +898,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdIncludeEnd2(int c)
+        void OnDtdIncludeEnd2(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -914,7 +917,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdNotationBegin(int c)
+        void OnDtdNotationBegin(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -943,7 +946,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
         
-        void OnDtdNotationName(int c)
+        void OnDtdNotationName(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -978,7 +981,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdNotationAfterName(int c)
+        void OnDtdNotationAfterName(int_type c)
         {
             Pt::Char ch = notEof(c);
             
@@ -1013,7 +1016,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdNotationPublicId(int c)
+        void OnDtdNotationPublicId(int_type c)
         {
             // can be NULL if already declared
             if(_notation)
@@ -1023,7 +1026,7 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::OnDtdNotationAfterPublicId;
         }
 
-        void OnDtdNotationAfterPublicId(int c)
+        void OnDtdNotationAfterPublicId(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1057,7 +1060,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdNotationSystemId(int c)
+        void OnDtdNotationSystemId(int_type c)
         {
             if(_notation)
                 _notation->setSystemId(_token);
@@ -1067,7 +1070,7 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::OnDtdTagEnd;
         }
 
-        void OnDtdEntityBegin(int c)
+        void OnDtdEntityBegin(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1099,7 +1102,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdParamEntityBegin(int c)
+        void OnDtdParamEntityBegin(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1121,7 +1124,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdBeforeParamEntityName(int c)
+        void OnDtdBeforeParamEntityName(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1151,7 +1154,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdEntityName(int c)
+        void OnDtdEntityName(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1193,7 +1196,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
         
-        void OnDtdEntityAfterName(int c)
+        void OnDtdEntityAfterName(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1236,7 +1239,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdEntityPublicId(int c)
+        void OnDtdEntityPublicId(int_type c)
         {
             if(_entity)
                 _entity->setPublicId(_token);
@@ -1247,7 +1250,7 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::OnDtdEntityAfterPublicId;
         }
 
-        void OnDtdEntityAfterPublicId(int c)
+        void OnDtdEntityAfterPublicId(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1291,7 +1294,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdEntitySystemId(int c)
+        void OnDtdEntitySystemId(int_type c)
         {
             if(_entity)
                 _entity->setSystemId(_token);
@@ -1302,7 +1305,7 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::OnDtdEntityAfterSystemId;
         }
         
-        void OnDtdEntityAfterSystemId(int c)
+        void OnDtdEntityAfterSystemId(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1339,7 +1342,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdEntityNDATA(int c)
+        void OnDtdEntityNDATA(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1367,7 +1370,7 @@ class XmlReaderImpl
             _token += ch;
         }
 
-        void OnDtdEntityAfterNDATA(int c)
+        void OnDtdEntityAfterNDATA(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1393,7 +1396,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdEntityNotation(int c)
+        void OnDtdEntityNotation(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1449,7 +1452,7 @@ class XmlReaderImpl
         // entity reference. Character references are replaced immediately
         // with the specified character. Parameter entity references must be
         // be resolved recursively.
-        void OnDtdEntityValue(int c)
+        void OnDtdEntityValue(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1488,7 +1491,7 @@ class XmlReaderImpl
         
         // Entity references in entity value literals are left as is except
         // numerical character rerefences, which are resolved immediately
-        void OnEntityValueCharacterReference(int c)
+        void OnEntityValueCharacterReference(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1530,7 +1533,7 @@ class XmlReaderImpl
             ++_usedSize;
         }
 
-        void OnDtdEntityValueParameterEntityReference(int c)
+        void OnDtdEntityValueParameterEntityReference(int_type c)
         {
             Pt::Char ch = notEof(c);
             
@@ -1569,7 +1572,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdAttListBegin(int c)
+        void OnDtdAttListBegin(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1599,7 +1602,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdAttListName(int c)
+        void OnDtdAttListName(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1646,7 +1649,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdBeforeAttrName(int c)
+        void OnDtdBeforeAttrName(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1675,7 +1678,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error: invalid attribute name", line());
         }
 
-        void OnDtdAttrName(int c)
+        void OnDtdAttrName(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1713,7 +1716,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error: invalid attribute name", line());
         }
 
-        void OnDtdAfterAttrName(int c)
+        void OnDtdAfterAttrName(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1758,7 +1761,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdAttrEnum(int c)
+        void OnDtdAttrEnum(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1790,7 +1793,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdAttrEnumValue(int c)
+        void OnDtdAttrEnumValue(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1849,7 +1852,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdAttrAfterEnumValue(int c)
+        void OnDtdAttrAfterEnumValue(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1879,7 +1882,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdAttrEnumSep(int c)
+        void OnDtdAttrEnumSep(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1912,7 +1915,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdAfterAttrEnumSep(int c)
+        void OnDtdAfterAttrEnumSep(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -1944,7 +1947,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdAttrType(int c)
+        void OnDtdAttrType(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2021,7 +2024,7 @@ class XmlReaderImpl
             _token += ch;
         }
 
-        void OnDtdAfterAttrNotation(int c)
+        void OnDtdAfterAttrNotation(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2045,7 +2048,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdAttrNotationBegin(int c)
+        void OnDtdAttrNotationBegin(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2075,7 +2078,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdAttrNotationId(int c)
+        void OnDtdAttrNotationId(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2134,7 +2137,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdAttrAfterNotationId(int c)
+        void OnDtdAttrAfterNotationId(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2162,7 +2165,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdAttrNotationSep(int c)
+        void OnDtdAttrNotationSep(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2192,7 +2195,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdAfterAttrType(int c)
+        void OnDtdAfterAttrType(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2217,7 +2220,7 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::OnDtdAttrMode;
         }
 
-        void OnDtdAttrMode(int c)
+        void OnDtdAttrMode(int_type c)
         {
             Pt::Char ch = notEof(c);
             
@@ -2265,7 +2268,7 @@ class XmlReaderImpl
             (this->*_parse)(c);
         }
 
-        void OnDtdAfterAttrMode(int c)
+        void OnDtdAfterAttrMode(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2303,7 +2306,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdAfterDtdAttrFixed(int c)
+        void OnDtdAfterDtdAttrFixed(int_type c)
         {
             Pt::Char ch = notEof(c);
             
@@ -2325,7 +2328,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdAttrDefault(int c)
+        void OnDtdAttrDefault(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2348,7 +2351,7 @@ class XmlReaderImpl
             ++_usedSize;
         }
 
-        void OnDtdElementBegin(int c)
+        void OnDtdElementBegin(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2378,7 +2381,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdElementName(int c)
+        void OnDtdElementName(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2433,7 +2436,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdElementContentBegin(int c)
+        void OnDtdElementContentBegin(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2465,7 +2468,7 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::OnDtdElementContent;
         }
         
-        void OnDtdEmptyOrAny(int c)
+        void OnDtdEmptyOrAny(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2520,7 +2523,7 @@ class XmlReaderImpl
             _contentModel = 0;
         }
 
-        void OnDtdElementContent(int c)
+        void OnDtdElementContent(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2559,7 +2562,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdIdentifier(int c)
+        void OnDtdIdentifier(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2644,7 +2647,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
         
-        void OnDtdUnrayOp(int c)
+        void OnDtdUnrayOp(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2695,7 +2698,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
         
-        void OnDtdBinaryOp(int c)
+        void OnDtdBinaryOp(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2739,7 +2742,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdContentExprEnd(int c)
+        void OnDtdContentExprEnd(int_type c)
         {
             Pt::Char ch = notEof(c);
 
@@ -2809,7 +2812,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void OnDtdInternalEnd(int c)
+        void OnDtdInternalEnd(int_type c)
         {
             Char ch = notEof(c);
 
@@ -2841,7 +2844,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void onDocumentBegin(int c)
+        void onDocumentBegin(int_type c)
         {
             if( c == std::char_traits<Char>::eof() ) //signed unsigned
             {
@@ -2872,7 +2875,7 @@ class XmlReaderImpl
             }
         }
 
-        void onProcessingInstructionBegin(int c)
+        void onProcessingInstructionBegin(int_type c)
         {
             Char ch = notEof(c);
 
@@ -2887,7 +2890,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void onProcessingInstruction(int c)
+        void onProcessingInstruction(int_type c)
         {
             Char ch = notEof(c);
 
@@ -2904,7 +2907,7 @@ class XmlReaderImpl
             ++_usedSize;
         }
 
-        void onProcessingInstructionData(int c)
+        void onProcessingInstructionData(int_type c)
         {
             Char ch = notEof(c);
 
@@ -2928,7 +2931,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void onProcessingInstructionEnd(int c)
+        void onProcessingInstructionEnd(int_type c)
         {
             Char ch = notEof(c);
 
@@ -2947,7 +2950,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void beforeComment(int c)
+        void beforeComment(int_type c)
         {
             if(c == '-')
             {
@@ -2959,7 +2962,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void onComment(int c)
+        void onComment(int_type c)
         {
             Char ch = notEof(c);
             
@@ -2976,7 +2979,7 @@ class XmlReaderImpl
             ++_usedSize;
         }
 
-        void afterComment(int c)
+        void afterComment(int_type c)
         {
             Char ch = notEof(c);
 
@@ -2996,7 +2999,7 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::onComment;
         }
 
-        void onCommentEnd(int c)
+        void onCommentEnd(int_type c)
         {
             Char ch = notEof(c);
             
@@ -3015,7 +3018,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void onTagExclam(int c)
+        void onTagExclam(int_type c)
         {
             Char ch = notEof(c);
 
@@ -3043,7 +3046,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         };
 
-        void onTag(int c)
+        void onTag(int_type c)
         {
             switch(c)
             {
@@ -3073,7 +3076,7 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::onStartElement;
         }
 
-        void afterTag(int c)
+        void afterTag(int_type c)
         {
             assert(depth() != 0);
             
@@ -3116,7 +3119,7 @@ class XmlReaderImpl
             }
         }
 
-        void onStartElement(int c)
+        void onStartElement(int_type c)
         {
             switch(c)
             {
@@ -3164,7 +3167,7 @@ class XmlReaderImpl
             ++_usedSize;
         }
 
-        void afterStartElement(int c)
+        void afterStartElement(int_type c)
         {
             // remove attribute names from name stack
             std::size_t n = _nameStack.size();
@@ -3176,7 +3179,7 @@ class XmlReaderImpl
             afterTag(c);
         }
 
-        void beforeAttribute(int c)
+        void beforeAttribute(int_type c)
         {
             Char ch = notEof(c);
 
@@ -3217,7 +3220,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void onAttributeName(int c)
+        void onAttributeName(int_type c)
         {
             Char ch = notEof(c);
 
@@ -3254,7 +3257,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void afterAttributeName(int c)
+        void afterAttributeName(int_type c)
         {
             Char ch = notEof(c);
 
@@ -3272,7 +3275,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void beforeAttributeValue(int c)
+        void beforeAttributeValue(int_type c)
         {
             Char ch = notEof(c);
 
@@ -3311,7 +3314,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void onNamespace(int c)
+        void onNamespace(int_type c)
         {
             Char ch = notEof(c);
 
@@ -3335,13 +3338,12 @@ class XmlReaderImpl
             ++_usedSize;
         }
 
-        void onDefaultNamespace(int c)
+        void onDefaultNamespace(int_type c)
         {
             Char ch = notEof(c);
 
             if( isQuoteEnd(ch) )
             {
-                const QName& name = _nameStack.top();
                 _nsctx.pushDefaultNamespace(_depth + 1, _token);
 
                 _usedSize -= _nameStack.pop();
@@ -3358,7 +3360,7 @@ class XmlReaderImpl
             ++_usedSize;
         }
         
-        void onAttributeValue(int c)
+        void onAttributeValue(int_type c)
         {
             Char ch = notEof(c);
             assert(_attr);
@@ -3397,7 +3399,7 @@ class XmlReaderImpl
             ++_usedSize;
         }
 
-        void onAttributeEntityReference(int c)
+        void onAttributeEntityReference(int_type c)
         {
             Char ch = notEof(c);
 
@@ -3437,7 +3439,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         };
 
-        void onEmptyElement(int c)
+        void onEmptyElement(int_type c)
         {
             Char ch = notEof(c);
 
@@ -3463,7 +3465,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         }
 
-        void onEndElement(int c)
+        void onEndElement(int_type c)
         {           
             if( _nameStack.empty() )
                 throw SyntaxError("unmatched element", line());
@@ -3479,7 +3481,7 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::onEndElementName;
         }
 
-        void onEndElementName(int c)
+        void onEndElementName(int_type c)
         {  
             switch(c)
             {
@@ -3516,7 +3518,7 @@ class XmlReaderImpl
             ++_back;
         }
     
-        void afterEndElementName(int c)
+        void afterEndElementName(int_type c)
         {          
             switch(c)
             {
@@ -3537,7 +3539,7 @@ class XmlReaderImpl
             }
         }
 
-        void afterEndElement(int c)
+        void afterEndElement(int_type c)
         {
             _usedSize -= _nameStack.pop() + _nsctx.popNamespace( _depth + 1 );
 
@@ -3553,7 +3555,7 @@ class XmlReaderImpl
             }
         }
 
-        void onCharacters(int c)
+        void onCharacters(int_type c)
         {
             Char ch = notEof(c);
 
@@ -3601,7 +3603,7 @@ class XmlReaderImpl
             }
         }
 
-        void onCharactersCR(int c)
+        void onCharactersCR(int_type c)
         {
             if(c != '\n')
             {
@@ -3614,14 +3616,14 @@ class XmlReaderImpl
             onCharacters(c);
         }
 
-        void onCharactersMax(int c)
+        void onCharactersMax(int_type c)
         {
             _chars.clear();
             _parse = &XmlReaderImpl::onCharacters;
             onCharacters(c);
         }
 
-        void onEntityReference(int c)
+        void onEntityReference(int_type c)
         {
             Char ch = notEof(c);
 
@@ -3676,7 +3678,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         };
 
-        void beforeCData(int c)
+        void beforeCData(int_type c)
         {
             Char ch = notEof(c);
 
@@ -3716,7 +3718,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         };
 
-        void onCDataBegin(int c)
+        void onCDataBegin(int_type c)
         {
             if(_options & ReportCData)
             {
@@ -3728,7 +3730,7 @@ class XmlReaderImpl
             onCData(c);
         }
 
-        void onCData(int c)
+        void onCData(int_type c)
         {
             Char ch = notEof(c);
             if(ch == ']')
@@ -3751,7 +3753,7 @@ class XmlReaderImpl
             }
         }
 
-        void onCDataMax(int c)
+        void onCDataMax(int_type c)
         {
             _chars.clear();
 
@@ -3762,7 +3764,7 @@ class XmlReaderImpl
             onCData(c);
         }
 
-        void onCDataClose0(int c)
+        void onCDataClose0(int_type c)
         {
             Char ch = notEof(c);
             
@@ -3779,7 +3781,7 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::onCData;
         }
 
-        void onCDataClose1(int c)
+        void onCDataClose1(int_type c)
         {
             Char ch = notEof(c);
             
@@ -3802,7 +3804,7 @@ class XmlReaderImpl
             _parse = &XmlReaderImpl::onCData;
         }
 
-        void afterCData(int c)
+        void afterCData(int_type c)
         {
             if( _options & ReportCData )
                 _chars.clear();
@@ -3811,7 +3813,7 @@ class XmlReaderImpl
             afterTag(c);
         }
 
-        void onEpilog(int c)
+        void onEpilog(int_type c)
         {
             if( c == std::char_traits<Char>::eof() )
             {
@@ -3835,7 +3837,7 @@ class XmlReaderImpl
             throw SyntaxError("XML syntax error", line());
         };
 
-        void onProlog(int c)
+        void onProlog(int_type c)
         {           
             if( c == std::char_traits<Char>::eof() )
             {
@@ -3859,7 +3861,7 @@ class XmlReaderImpl
         }
 
     private:
-        inline Char notEof(int c) const
+        inline Char notEof(int_type c) const
         {
             if( c == std::char_traits<Char>::eof() )
             {

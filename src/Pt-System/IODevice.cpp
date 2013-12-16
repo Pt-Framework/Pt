@@ -35,13 +35,13 @@ namespace System {
 
 IODevice::IODevice()
 : _loop(0)
-, _eof(false)
 , _rbuf(0)
 , _rbuflen(0)
 , _ravail(0)
 , _wbuf(0)
 , _wbuflen(0)
 , _wavail(0)
+, _eof(false)
 { }
 
 
