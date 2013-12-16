@@ -60,14 +60,14 @@ class Char
         {}
 
         //! @brief Construct from signed char.
-        Char(signed char ch)
-        : _value( (unsigned char)ch )
-        {}
+        //Char(signed char ch)
+        //: _value( (unsigned char)ch )
+        //{}
 
         //! @brief Construct from unsigned char.
-        Char(unsigned char ch)
-        : _value(ch)
-        {}
+        //Char(unsigned char ch)
+        //: _value(ch)
+        //{}
 
         //! @brief Construct from int.
         Char(int val)
