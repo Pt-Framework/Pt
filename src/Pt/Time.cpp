@@ -79,7 +79,7 @@ inline unsigned short getNumber2(const Char* s)
     if ( ! isdigit(s[0]) || ! isdigit(s[1]) )
         throw ConversionError("invalid time");
 
-    return (s[0] - '0') * 10 + (s[1] - '0');
+    return (s[0].value() - '0') * 10 + (s[1].value() - '0');
 }
 
 
@@ -88,7 +88,7 @@ inline unsigned short getNumber3(const Char* s)
     if( ! isdigit(s[0]) || ! isdigit(s[1]) || ! isdigit(s[2]) )
        throw ConversionError("invalid time");
 
-    return ( s[0] - '0') * 100 + (s[1] - '0') * 10 + (s[2] - '0' );
+    return ( s[0].value() - '0') * 100 + (s[1].value() - '0') * 10 + (s[2].value() - '0' );
 }
 
 

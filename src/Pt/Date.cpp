@@ -99,8 +99,8 @@ inline unsigned short getNumber2(const Char* s)
     if( ! isdigit(s[0]) 
      || ! isdigit(s[1]) )
     throw ConversionError("Invalid date format.");
-    return unsigned(s[0] - '0') * 10
-         + unsigned(s[1] - '0');
+    return (s[0].value() - '0') * 10
+         + (s[1].value() - '0');
 }
 
 
@@ -112,10 +112,10 @@ inline unsigned short getNumber4(const Char* s)
       || ! isdigit(s[3]) )
     throw ConversionError("Invalid date format.");
 
-    return unsigned(s[0] - '0') * 1000
-         + unsigned(s[1] - '0') * 100
-         + unsigned(s[2] - '0') * 10
-         + unsigned(s[3] - '0');
+    return (s[0].value() - '0') * 1000
+         + (s[1].value() - '0') * 100
+         + (s[2].value() - '0') * 10
+         + (s[3].value() - '0');
 }
 
 

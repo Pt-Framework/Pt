@@ -59,7 +59,6 @@ class CharTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "testAssign", *this, &CharTest::testAssign  );
             Pt::Unit::TestSuite::registerMethod( "testCategory", *this, &CharTest::testCategory  );
             Pt::Unit::TestSuite::registerMethod( "testCompare", *this, &CharTest::testCompare  );
-            Pt::Unit::TestSuite::registerMethod( "testOperators", *this, &CharTest::testOperators  );
         }
 
     protected:
@@ -291,18 +290,4 @@ void CharTest::testCompare()
     PT_UNIT_ASSERT(b != a1);
     PT_UNIT_ASSERT(a1 < b);
     PT_UNIT_ASSERT(b > a1);
-}
-
-
-void CharTest::testOperators()
-{
-    Pt::Char a('a'); // 97
-    Pt::Char z('z'); // 122
-    Pt::Char r;
-
-    r = z - a;
-    PT_UNIT_ASSERT(r == 25);
-
-    r = z - 'a';
-    PT_UNIT_ASSERT(r == 25);
 }
