@@ -74,8 +74,8 @@ class Char
         { return _value; }
         
         //! @brief Returns the unicode value.
-        //operator uint32_t() const
-        //{ return _value; }
+        operator uint32_t() const
+        { return _value; }
 
         //! @brief Assignment operator.
         Char& operator=(const Char& ch)
@@ -98,23 +98,23 @@ class Char
         Pt::uint32_t _value;
 };
 
-inline bool operator ==(const Char& a, const Char& b)
-{ return a.value() == b.value(); }
+//inline bool operator ==(const Char& a, const Char& b)
+//{ return a.value() == b.value(); }
 
-inline bool operator !=(const Char& a, const Char& b)
-{ return a.value() != b.value(); }
+//inline bool operator !=(const Char& a, const Char& b)
+//{ return a.value() != b.value(); }
 
-inline bool operator >(const Char& a, const Char& b)
-{ return a.value() > b.value(); }
+//inline bool operator >(const Char& a, const Char& b)
+//{ return a.value() > b.value(); }
 
-inline bool operator >=(const Char& a, const Char& b)
-{ return a.value() >= b.value(); }
+//nline bool operator >=(const Char& a, const Char& b)
+//{ return a.value() >= b.value(); }
 
-inline bool operator <(const Char& a, const Char& b)
-{ return a.value() < b.value(); }
+//inline bool operator <(const Char& a, const Char& b)
+//{ return a.value() < b.value(); }
 
-inline bool operator <=(const Char& a, const Char& b)
-{ return a.value() <= b.value(); }
+//inline bool operator <=(const Char& a, const Char& b)
+//{ return a.value() <= b.value(); }
 
 //inline Pt::uint32_t operator -(const Char& a, const Char& b)
 //{ return a.value() - b.value(); }
