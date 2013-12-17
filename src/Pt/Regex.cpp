@@ -31,6 +31,7 @@
 #include <stdexcept>
 #include <cctype>
 #include <cassert>
+#include <cstdlib>
 
 namespace Pt {
 
