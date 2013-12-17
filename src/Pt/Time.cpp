@@ -74,8 +74,25 @@ void operator<<=(SerializationInfo& si, const Time& time)
 }
 
 
-template <typename CharT>
-inline unsigned short getNumber2(const CharT* s)
+inline unsigned short getNumber2(const Char* s)
+{
+    if ( ! isdigit(s[0]) || ! isdigit(s[1]) )
+        throw ConversionError("invalid time");
+
+    return (s[0] - '0') * 10 + (s[1] - '0');
+}
+
+
+inline unsigned short getNumber3(const Char* s)
+{
+    if( ! isdigit(s[0]) || ! isdigit(s[1]) || ! isdigit(s[2]) )
+       throw ConversionError("invalid time");
+
+    return ( s[0] - '0') * 100 + (s[1] - '0') * 10 + (s[2] - '0' );
+}
+
+
+inline unsigned short getNumber2(const char* s)
 {
     if ( ! std::isdigit(s[0]) || ! std::isdigit(s[1]) )
         throw ConversionError("invalid time");
@@ -83,8 +100,8 @@ inline unsigned short getNumber2(const CharT* s)
     return (s[0] - '0') * 10 + (s[1] - '0');
 }
 
-template <typename CharT>
-inline unsigned short getNumber3(const CharT* s)
+
+inline unsigned short getNumber3(const char* s)
 {
     if( ! std::isdigit(s[0]) || ! std::isdigit(s[1]) || ! std::isdigit(s[2]) )
        throw ConversionError("invalid time");

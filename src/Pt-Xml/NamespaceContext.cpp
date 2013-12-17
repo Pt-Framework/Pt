@@ -259,49 +259,6 @@ std::size_t NamespaceContext::popNamespace(std::size_t depth)
     return size;
 }
 
-
-//void NamespaceContext::getMapped(unsigned depth, NamespaceMapping& nsmap) const
-//{
-//    std::vector<Namespace>::const_reverse_iterator iter;
-//
-//    for(iter = _namespaces.rbegin(); iter != _namespaces.rend(); ++iter)
-//    {
-//        if( iter->depth() != depth )
-//            break;
-//
-//        if( iter->isUnset() )
-//            nsmap.addUnmapped(*iter);
-//        else
-//            nsmap.addMapped(*iter);
-//    }
-//}
-
-
-//void NamespaceContext::getUnmapped(unsigned depth, NamespaceMapping& nsmap) const
-//{
-//    std::vector<Namespace>::const_reverse_iterator iter;
-//
-//    for(iter = _namespaces.rbegin(); iter != _namespaces.rend(); ++iter)
-//    {
-//        if( iter->depth() < depth )
-//            break;
-//
-//        std::vector<Namespace>::const_reverse_iterator it = iter;
-//
-//        for(++it; it != _namespaces.rend(); ++it)
-//        {
-//          if( it->prefix() == iter->prefix() && ! it->isUnset() )
-//          {
-//              nsmap.addMapped(*it);
-//              break;
-//          }
-//        }
-//
-//        if(it == _namespaces.rend())
-//            nsmap.addUnmapped(*iter);
-//    }
-//}
-
 } // namespace Xml
 
 } // namespace Pt

@@ -269,7 +269,7 @@ MessageBuffer::int_type MessageBuffer::overflow(int_type ch)
         char* buf = new char[ bufsize ];
         traits_type::copy(buf, _buffer, _bufferSize);
         std::swap(_buffer, buf);
-        
+
         this->setp(_buffer, _buffer + bufsize);
         this->pbump(_bufferSize);
 

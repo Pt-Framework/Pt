@@ -25,16 +25,13 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#undef PT_API_EXPORT
-
-//#include <vld.h>
-//#include <vldapi.h>
 
 #include "Pt/Api.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/String.h"
+#include "Pt/NumericCast.h"
 #include <string>
 #include <sstream>
 

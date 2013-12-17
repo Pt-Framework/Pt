@@ -94,24 +94,47 @@ void operator<<=(SerializationInfo& si, const Date& date)
 }
 
 
-template <typename CharT>
-inline unsigned short getNumber2(const CharT* s)
+inline unsigned short getNumber2(const Char* s)
 {
-    if (! std::isdigit(static_cast<unsigned char>(s[0])) 
-     || ! std::isdigit(static_cast<unsigned char>(s[1])))
+    if( ! isdigit(s[0]) 
+     || ! isdigit(s[1]) )
+    throw ConversionError("Invalid date format.");
+    return unsigned(s[0] - '0') * 10
+         + unsigned(s[1] - '0');
+}
+
+
+inline unsigned short getNumber4(const Char* s)
+{
+    if ( ! isdigit(s[0]) 
+      || ! isdigit(s[1])
+      || ! isdigit(s[2])  
+      || ! isdigit(s[3]) )
+    throw ConversionError("Invalid date format.");
+
+    return unsigned(s[0] - '0') * 1000
+         + unsigned(s[1] - '0') * 100
+         + unsigned(s[2] - '0') * 10
+         + unsigned(s[3] - '0');
+}
+
+
+inline unsigned short getNumber2(const char* s)
+{
+    if( ! std::isdigit(static_cast<unsigned char>(s[0])) 
+     || ! std::isdigit(static_cast<unsigned char>(s[1])) )
     throw ConversionError("Invalid date format.");
     return (s[0] - '0') * 10
         + (s[1] - '0');
 }
 
 
-template <typename CharT>
-inline unsigned short getNumber4(const CharT* s)
+inline unsigned short getNumber4(const char* s)
 {
     if ( ! std::isdigit(static_cast<unsigned char>(s[0])) 
       || ! std::isdigit(static_cast<unsigned char>(s[1]))
       || ! std::isdigit(static_cast<unsigned char>(s[2]))  
-      || ! std::isdigit(static_cast<unsigned char>(s[3])))
+      || ! std::isdigit(static_cast<unsigned char>(s[3])) )
     throw ConversionError("Invalid date format.");
 
     return (s[0] - '0') * 1000

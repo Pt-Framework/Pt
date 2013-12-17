@@ -47,7 +47,8 @@ namespace sqlite {
 
     Value StmtRow::getValue(size_type field_num) const
     {
-        return Value(new StmtValue(_stmt, field_num));
+        int n = static_cast<int>(field_num);
+        return Value(new StmtValue(_stmt, n));
     }
 
 } // namespace sqlite

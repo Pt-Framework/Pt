@@ -53,7 +53,7 @@ class QNameStack
         {
             _cur->clear();
 
-            while(! empty() )
+            while( ! empty() )
                 pop();
         }
 

@@ -1149,7 +1149,7 @@ void SerializationInfo::getChar(char c) const
     Pt::Char ch;
     this->getChar(ch);
     // TODO: consider SerializationError on overflow
-    c = static_cast<int>(ch);
+    c = static_cast<char>( ch.value() );
 }
 
 
@@ -1207,7 +1207,7 @@ void SerializationInfo::setChar(const Pt::Char& c)
     this->clearValue();
 
     _isCompound = false;
-    _value.ui32 = c;
+    _value.ui32 = c.value();
     _type = Char;
 }
 

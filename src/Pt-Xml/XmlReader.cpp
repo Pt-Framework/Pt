@@ -108,7 +108,6 @@ void normalizeAttributeValue(String& value)
 
 class XmlReaderImpl
 {
-    
     typedef std::char_traits<Char>::int_type int_type;
 
     typedef void (XmlReaderImpl::*ParseFunc)(int_type);
@@ -3739,10 +3738,7 @@ class XmlReaderImpl
                 return;
             }
 
-            //if( isSpace(ch) )
-            //    _chars.appendSpace(ch);
-            //else
-                _chars.append(ch);
+            _chars.append(ch);
 
             ++_chunkSize;
 
@@ -3878,7 +3874,7 @@ class XmlReaderImpl
 
         inline void setQuotedBegin(Char ch)
         {
-            _quotChar = static_cast<char>( ch.value() );
+            _quotChar = static_cast<unsigned char>( ch.value() );
         }
 
         inline bool isQuoteEnd(Char ch) const
@@ -4470,7 +4466,7 @@ class XmlReaderImpl
         ContentModelBuilder _cmBuilder;
 
         bool _paramEntity;
-        char _quotChar;
+        unsigned char _quotChar;
         QName _qname;
         std::stack<ParseFunc> _parseStack;
 

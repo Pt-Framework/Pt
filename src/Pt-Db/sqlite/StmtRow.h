@@ -45,6 +45,7 @@ namespace sqlite {
             { }
 
         size_t size() const;
+
         Value getValue(size_type field_num) const;
 
         // specific methods of sqlite-driver

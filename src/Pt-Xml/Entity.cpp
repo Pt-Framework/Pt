@@ -72,7 +72,7 @@ bool resolveDefaultEntity(String& entity)
 
     if( ! entity.empty() )
     {
-          switch( entity[0] )
+          switch( entity[0].value() )
           {
               case 'a':
                   if(entity == "apos")

@@ -446,6 +446,17 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             }
         }
 
+        template <typename A>
+        void copyChars(A* s1, const Char* s2, size_t n)
+        {
+            while(n-- > 0)
+            {
+                *s1 = s2->value();
+                ++s1;
+                ++s2;
+            }
+        }
+
     private:
         static const int _pbmax = 4;
 

@@ -305,23 +305,4 @@ void CharTest::testOperators()
 
     r = z - 'a';
     PT_UNIT_ASSERT(r == 25);
-
-    r = z + a;
-    PT_UNIT_ASSERT(r == 219);
-
-    r = z + 'a';
-    PT_UNIT_ASSERT(r == 219);
-
-    Pt::Char v1(0x1E0); // 111100000
-    Pt::Char v2(0x10F); // 100001111
-
-    r = v1 | v2;
-    PT_UNIT_ASSERT(r == 0x1EF); // 111101111
-
-
-    Pt::Char v3(0x3C); // 000111100
-    Pt::Char v4(0x0F); // 000001111
-
-    r = v3 & v4;
-    PT_UNIT_ASSERT(r == 0x0C); // 000001100
 }

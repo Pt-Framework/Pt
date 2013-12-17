@@ -94,7 +94,10 @@ namespace sqlite {
             const char* tzTail;
             //log_debug("sqlite3_prepare(" << _conn->getSqlite3() << ", \"" << _query
             //  << "\", " << &_stmt << ", " << &tzTail << ')');
-            int ret = ::sqlite3_prepare(_conn->getSqlite3(), _query.data(), _query.size(), &_stmt, &tzTail);
+            
+            int n = static_cast<int>( _query.size() );
+
+            int ret = ::sqlite3_prepare(_conn->getSqlite3(), _query.data(), n, &_stmt, &tzTail);
             if(ret != SQLITE_OK)
             {
                 Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
@@ -305,7 +308,9 @@ namespace sqlite {
             //log_debug("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
             //<< ", " << data.size() << ", SQLITE_TRANSIENT)");
 
-            int ret = ::sqlite3_bind_text(stmt, idx, data.c_str(), data.size(), SQLITE_TRANSIENT);
+            int n = static_cast<int>( data.size() );
+
+            int ret = ::sqlite3_bind_text(stmt, idx, data.c_str(), n, SQLITE_TRANSIENT);
 
             if(ret != SQLITE_OK)
             {
@@ -325,8 +330,10 @@ namespace sqlite {
 
             //log_debug("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
             //<< ", " << data.size() << ", SQLITE_TRANSIENT)");
+            
+            int n = static_cast<int>( data.size() );
 
-            int ret = ::sqlite3_bind_blob(stmt, idx, data.data(), data.size(), SQLITE_TRANSIENT);
+            int ret = ::sqlite3_bind_blob(stmt, idx, data.data(), n, SQLITE_TRANSIENT);
 
             if(ret != SQLITE_OK)
             {
@@ -390,7 +397,7 @@ namespace sqlite {
                 for (int i = 0; i < count; ++i)
                 {
                     //log_debug("sqlite3_column_text(" << _stmt << ", " << i << ')');
-                    size_t bytes = ::sqlite3_column_bytes(_stmt, i);
+                    int bytes = ::sqlite3_column_bytes(_stmt, i);
                     const unsigned char* txt = sqlite3_column_text(_stmt, i);
                     Value v;
                     if (txt)
