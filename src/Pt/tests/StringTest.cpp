@@ -31,7 +31,6 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/String.h"
-#include "Pt/NumericCast.h"
 #include <string>
 #include <sstream>
 
