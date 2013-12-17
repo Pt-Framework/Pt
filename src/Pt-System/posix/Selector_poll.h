@@ -33,7 +33,7 @@
 #include "Pt/System/Clock.h"
 #include "Pt/System/Selectable.h"
 
-#include <set>
+#include <vector>
 #include <limits>
 #include <cassert>
 #include <cstddef>

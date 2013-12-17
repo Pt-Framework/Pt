@@ -115,7 +115,7 @@ class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
         char*        _obuffer;
         bool         _oextend;
 
-        static const unsigned _pbmax = 4;
+        static const int _pbmax = 4;
 };
 
 } // namespace System

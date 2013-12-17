@@ -30,6 +30,8 @@
 
 #include "Selector.h"
 #include "Pt/System/Api.h"
+#include <Pt/System/Mutex.h>
+#include <Pt/System/EventLoop.h>
 #include "Pt/Signal.h"
 
 #ifdef __APPLE__

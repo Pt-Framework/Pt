@@ -127,11 +127,11 @@ Utf16BECodec::result Utf16BECodec::do_out(MBState& s, const Char* fromBegin,
         }
         else
         {
-            Pt::uint16_t ch0 = (Pt::uint16_t)(0xd800 | (Pt::uint16_t)(ch >> 10) - 0x0040);
+            Pt::uint16_t ch0 = (Pt::uint16_t)(0xd800 | ((Pt::uint16_t)(ch >> 10) - 0x0040));
             *toNext++ = (char)(ch0 >> 8);
             *toNext++ = (char)ch0;
 
-            ch0 = (Pt::uint16_t)(0xdc00 | (Pt::uint16_t)ch & 0x03ff);
+            ch0 = (Pt::uint16_t)(0xdc00 | ((Pt::uint16_t)ch & 0x03ff));
             *toNext++ = (char)(ch0 >> 8);
             *toNext++ = (char)ch0;
         }
@@ -293,11 +293,11 @@ Utf16LECodec::result Utf16LECodec::do_out(MBState& s, const Char* fromBegin,
         }
         else
         {
-            Pt::uint16_t ch0 = (Pt::uint16_t)(0xd800 | (Pt::uint16_t)(ch >> 10) - 0x0040);
+            Pt::uint16_t ch0 = (Pt::uint16_t)(0xd800 | ((Pt::uint16_t)(ch >> 10) - 0x0040));
             *toNext++ = (char)ch0;
             *toNext++ = (char)(ch0 >> 8);
 
-            ch0 = (Pt::uint16_t)(0xdc00 | (Pt::uint16_t)ch & 0x03ff);
+            ch0 = (Pt::uint16_t)(0xdc00 | ((Pt::uint16_t)ch & 0x03ff));
             *toNext++ = (char)ch0;
             *toNext++ = (char)(ch0 >> 8);
         }

@@ -32,6 +32,7 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include <string>
+#include <cstdlib>
 #include <iostream>
 
 
