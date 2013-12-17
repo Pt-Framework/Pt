@@ -134,15 +134,21 @@
  * Using two bytes for the "next" pointer is vast overkill for most things,
  * but allows patterns to get big without disasters.
  */
-#define    OP(p)    (*(p))
-#define    NEXT(p)    (((*((p)+1)&0377)<<8) + (*((p)+2)&0377))
+//#define    OP(p)    (*(p))
+//#define    NEXT(p)    (((*((p)+1)&0377)<<8) + (*((p)+2)&0377))
+#define    OP(p)    ( (p)->value() )
+#define    NEXT(p)    ( ((((p)+1)->value() & 0377) << 8) + (((p)+2)->value() & 0377) )
 #define    OPERAND(p)    ((p) + 3)
 
 /*
  * Utility definitions.
  */
+// #define TO_INTTYPE(c) (c)
+#define TO_INTTYPE(c) ( (c).value() )
+
 #ifndef CHARBITS
-#define    UCHARAT(p)    ((int)*(UCHARTYPE*)(p))
+//#define    UCHARAT(p)    ((int)*(UCHARTYPE*)(p))
+#define    UCHARAT(p)    ( (int) ((p)->value()) )
 #else
 #define    UCHARAT(p)    ((int)*(p)&CHARBITS)
 #endif
@@ -188,7 +194,7 @@ STATIC CHARTYPE *regpiece( parse_state* state, int *flagp );
 STATIC CHARTYPE *regatom( parse_state* state, int *flagp );
 STATIC CHARTYPE *regnode( parse_state* state,int op );
 STATIC CHARTYPE *regnext( register CHARTYPE *p );
-STATIC void regc( parse_state* state, int b );
+STATIC void regc( parse_state* state, INTTYPE b );
 STATIC void reginsert( parse_state* state, CHARTYPE op, CHARTYPE *opnd );
 STATIC void regtail( CHARTYPE *p, CHARTYPE *val );
 STATIC void regoptail( CHARTYPE *p, CHARTYPE *val );
@@ -582,7 +588,9 @@ regatom( parse_state* state, int *flagp )
 
     *flagp = WORST;        /* Tentatively. */
 
-    switch (*state->regparse++) {
+    const CHARTYPE* cparsed = state->regparse++;
+    switch ( cparsed->value() ) 
+    {
     /* FIXME: these chars only have meaning at beg/end of pat? */
     case '^':
         ret = regnode(state, BOL);
@@ -648,7 +656,9 @@ regatom( parse_state* state, int *flagp )
         FAIL("?+* follows nothing");
         break;
     case '\\':
-        switch (*state->regparse++) {
+        cparsed = state->regparse++;
+        switch ( cparsed->value() ) 
+        {
         case '\0':
             FAIL("trailing \\");
             break;
@@ -698,7 +708,7 @@ regatom( parse_state* state, int *flagp )
             ret = regnode(state, EXACTLY);
             for ( regprev = 0 ; ; ) {
                 ch = *state->regparse++;    /* Get current char */
-                switch (*state->regparse) {    /* look at next one */
+                switch ( state->regparse->value() ) {    /* look at next one */
 
                 default:
                     regc(state, ch);    /* Add cur to string */
@@ -722,7 +732,7 @@ regatom( parse_state* state, int *flagp )
 
                 case '\\':
                     regc(state, ch);    /* Cur char OK */
-                    switch (state->regparse[1]){ /* Look after \ */
+                    switch ( state->regparse[1].value() ){ /* Look after \ */
                     case '\0':
                     case '<':
                     case '>':
@@ -777,7 +787,7 @@ regnode( parse_state* state, int op )
  - regc - emit (if appropriate) a byte of code
  */
 static void
-regc( parse_state* state, int b )
+regc( parse_state* state, INTTYPE b )
 {
     if (state->regcode != &regdummy)
         *state->regcode++ = b;

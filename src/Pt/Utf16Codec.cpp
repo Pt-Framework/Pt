@@ -97,7 +97,8 @@ Utf16BECodec::result Utf16BECodec::do_out(MBState& s, const Char* fromBegin,
     while(fromNext != fromEnd && 2 <= toEnd - toNext)
     {
         bool multi = false;
-        Pt::uint32_t ch = *fromNext++;
+        Pt::uint32_t ch = fromNext->value();
+        fromNext++;
 
         if(0x0010FFFF < ch)
             return std::codecvt_base::error;
@@ -266,7 +267,8 @@ Utf16LECodec::result Utf16LECodec::do_out(MBState& s, const Char* fromBegin,
     while( fromNext != fromEnd && 2 <= toEnd - toNext )
     {
         bool multi = false;
-        Pt::uint32_t ch = *fromNext++;
+        Pt::uint32_t ch = fromNext->value();
+        fromNext++;
 
         if (0x0010FFFF  < ch)
             return std::codecvt_base::error;

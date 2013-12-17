@@ -17,9 +17,11 @@
 
 // #define CHARTYPE char
 // #define UCHARTYPE unsigned char
+// #define INTTYPE int
 
 #define CHARTYPE Pt::Char
-#define UCHARTYPE Pt::Char
+#define UCHARTYPE Pt::uint32_t
+#define INTTYPE Pt::Char
 
 /*
  * The first byte of the regexp internal "program" is actually this magic

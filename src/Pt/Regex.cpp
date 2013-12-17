@@ -272,7 +272,7 @@ Pt::String RegexSMatch::format(const Pt::String& str) const
         {
           ret = Pt::String(str.begin(), it - 1);
             
-          unsigned n = ch - '0';
+          unsigned n = ch.value() - '0';
           if(n < _size)
           {
             const Pt::Char* s = _match->startp[n];
@@ -300,7 +300,7 @@ Pt::String RegexSMatch::format(const Pt::String& str) const
       case state_var1:
         if( isdigit(ch) )
         {
-          unsigned n = ch - '0';
+          unsigned n = ch.value() - '0';
 
           if(n < _size)
           {

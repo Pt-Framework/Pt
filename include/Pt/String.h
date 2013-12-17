@@ -59,16 +59,6 @@ class Char
         : _value( (unsigned char)ch )
         {}
 
-        //! @brief Construct from signed char.
-        //Char(signed char ch)
-        //: _value( (unsigned char)ch )
-        //{}
-
-        //! @brief Construct from unsigned char.
-        //Char(unsigned char ch)
-        //: _value(ch)
-        //{}
-
         //! @brief Construct from int.
         Char(int val)
         : _value( (unsigned)(val) )
@@ -84,8 +74,8 @@ class Char
         { return _value; }
         
         //! @brief Returns the unicode value.
-        operator uint32_t() const
-        { return _value; }
+        //operator uint32_t() const
+        //{ return _value; }
 
         //! @brief Assignment operator.
         Char& operator=(const Char& ch)
@@ -108,18 +98,26 @@ class Char
         Pt::uint32_t _value;
 };
 
-
 inline bool operator ==(const Char& a, const Char& b)
 { return a.value() == b.value(); }
 
+inline bool operator !=(const Char& a, const Char& b)
+{ return a.value() != b.value(); }
 
-inline bool operator ==(const Char& a, char b)
-{ return a.value() == static_cast<unsigned char>(b); }
+inline bool operator >(const Char& a, const Char& b)
+{ return a.value() > b.value(); }
 
+inline bool operator >=(const Char& a, const Char& b)
+{ return a.value() >= b.value(); }
 
-inline bool operator ==(const Char& a, int b)
-{ return a.value() == static_cast<unsigned>(b); }
+inline bool operator <(const Char& a, const Char& b)
+{ return a.value() < b.value(); }
 
+inline bool operator <=(const Char& a, const Char& b)
+{ return a.value() <= b.value(); }
+
+//inline Pt::uint32_t operator -(const Char& a, const Char& b)
+//{ return a.value() - b.value(); }
 
 //! @internal @brief Returns the ctype mask for the \a ch.
 PT_API std::ctype_base::mask ctypeMask(const Char& ch);
@@ -830,162 +828,162 @@ class PT_API basic_string<Pt::Char>
                 _d._u._p._begin[n] = 0;
             }
         }
-    };
+};
 
-    // swap
-    inline void swap(basic_string<Pt::Char>& a, basic_string<Pt::Char>& b)
-    { a.swap(b); }
+// swap
+inline void swap(basic_string<Pt::Char>& a, basic_string<Pt::Char>& b)
+{ a.swap(b); }
 
-    // operator +
-    inline basic_string<Pt::Char> operator+(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
-    { basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
+// operator +
+inline basic_string<Pt::Char> operator+(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+{ basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
 
-    inline basic_string<Pt::Char> operator+(const basic_string<Pt::Char>& a, const Pt::Char* b)
-    { basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
+inline basic_string<Pt::Char> operator+(const basic_string<Pt::Char>& a, const Pt::Char* b)
+{ basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
 
-    inline basic_string<Pt::Char> operator+(const Pt::Char* a, const basic_string<Pt::Char>& b)
-    { basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
+inline basic_string<Pt::Char> operator+(const Pt::Char* a, const basic_string<Pt::Char>& b)
+{ basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
 
-    inline basic_string<Pt::Char> operator+(const basic_string<Pt::Char>& a, Pt::Char b)
-    { basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
+inline basic_string<Pt::Char> operator+(const basic_string<Pt::Char>& a, Pt::Char b)
+{ basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
 
-    inline basic_string<Pt::Char> operator+(Pt::Char a, const basic_string<Pt::Char>& b)
-    { basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
+inline basic_string<Pt::Char> operator+(Pt::Char a, const basic_string<Pt::Char>& b)
+{ basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
 
-    // operator ==
-    inline bool operator==(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
-    { return a.compare(b) == 0; }
+// operator ==
+inline bool operator==(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+{ return a.compare(b) == 0; }
 
-    inline bool operator==(const Pt::Char* a, const basic_string<Pt::Char>& b)
-    { return b.compare(a) == 0; }
+inline bool operator==(const Pt::Char* a, const basic_string<Pt::Char>& b)
+{ return b.compare(a) == 0; }
 
-    inline bool operator==(const basic_string<Pt::Char>& a, const Pt::Char* b)
-    { return a.compare(b) == 0; }
+inline bool operator==(const basic_string<Pt::Char>& a, const Pt::Char* b)
+{ return a.compare(b) == 0; }
 
-    inline bool operator==(const basic_string<Pt::Char>& a, const wchar_t* b)
-    { return a.compare(b) == 0; }
+inline bool operator==(const basic_string<Pt::Char>& a, const wchar_t* b)
+{ return a.compare(b) == 0; }
 
-    inline bool operator==(const wchar_t* b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) == 0; }
+inline bool operator==(const wchar_t* b, const basic_string<Pt::Char>& a)
+{ return a.compare(b) == 0; }
 
-    inline bool operator==(const basic_string<Pt::Char>& a, const char* b)
-    { return a.compare(b) == 0; }
+inline bool operator==(const basic_string<Pt::Char>& a, const char* b)
+{ return a.compare(b) == 0; }
 
-    inline bool operator==(const char* b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) == 0; }
+inline bool operator==(const char* b, const basic_string<Pt::Char>& a)
+{ return a.compare(b) == 0; }
 
-    // operator !=
-    inline bool operator!=(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
-    { return a.compare(b) != 0; }
+// operator !=
+inline bool operator!=(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+{ return a.compare(b) != 0; }
 
-    inline bool operator!=(const Pt::Char* a, const basic_string<Pt::Char>& b)
-    { return b.compare(a) != 0; }
+inline bool operator!=(const Pt::Char* a, const basic_string<Pt::Char>& b)
+{ return b.compare(a) != 0; }
 
-    inline bool operator!=(const basic_string<Pt::Char>& a, const Pt::Char* b)
-    { return a.compare(b) != 0; }
+inline bool operator!=(const basic_string<Pt::Char>& a, const Pt::Char* b)
+{ return a.compare(b) != 0; }
 
-    inline bool operator!=(const basic_string<Pt::Char>& a, const wchar_t* b)
-    { return a.compare(b) != 0; }
+inline bool operator!=(const basic_string<Pt::Char>& a, const wchar_t* b)
+{ return a.compare(b) != 0; }
 
-    inline bool operator!=(const wchar_t* b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) != 0; }
+inline bool operator!=(const wchar_t* b, const basic_string<Pt::Char>& a)
+{ return a.compare(b) != 0; }
 
-    inline bool operator!=(const basic_string<Pt::Char>& a, const char* b)
-    { return a.compare(b) != 0; }
+inline bool operator!=(const basic_string<Pt::Char>& a, const char* b)
+{ return a.compare(b) != 0; }
 
-    inline bool operator!=(const char* b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) != 0; }
+inline bool operator!=(const char* b, const basic_string<Pt::Char>& a)
+{ return a.compare(b) != 0; }
 
-    // operator <
-    inline bool operator<(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
-    { return a.compare(b) < 0; }
+// operator <
+inline bool operator<(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+{ return a.compare(b) < 0; }
 
-    inline bool operator<(const Pt::Char* a, const basic_string<Pt::Char>& b)
-    { return b.compare(a) > 0; }
+inline bool operator<(const Pt::Char* a, const basic_string<Pt::Char>& b)
+{ return b.compare(a) > 0; }
 
-    inline bool operator<(const basic_string<Pt::Char>& a, const Pt::Char* b)
-    { return a.compare(b) < 0; }
+inline bool operator<(const basic_string<Pt::Char>& a, const Pt::Char* b)
+{ return a.compare(b) < 0; }
 
-    inline bool operator<(const basic_string<Pt::Char>& a, const wchar_t* b)
-    { return a.compare(b) < 0; }
+inline bool operator<(const basic_string<Pt::Char>& a, const wchar_t* b)
+{ return a.compare(b) < 0; }
 
-    inline bool operator<(const wchar_t* b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) > 0; }
+inline bool operator<(const wchar_t* b, const basic_string<Pt::Char>& a)
+{ return a.compare(b) > 0; }
 
-    inline bool operator<(const basic_string<Pt::Char>& a, const char* b)
-    { return a.compare(b) < 0; }
+inline bool operator<(const basic_string<Pt::Char>& a, const char* b)
+{ return a.compare(b) < 0; }
 
-    inline bool operator<(const char* b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) > 0; }
+inline bool operator<(const char* b, const basic_string<Pt::Char>& a)
+{ return a.compare(b) > 0; }
 
-    // operator <=
-    inline bool operator<=(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
-    { return a.compare(b) <= 0; }
+// operator <=
+inline bool operator<=(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+{ return a.compare(b) <= 0; }
 
-    inline bool operator<=(const Pt::Char* a, const basic_string<Pt::Char>& b)
-    { return b.compare(a) >= 0; }
+inline bool operator<=(const Pt::Char* a, const basic_string<Pt::Char>& b)
+{ return b.compare(a) >= 0; }
 
-    inline bool operator<=(const basic_string<Pt::Char>& a, const Pt::Char* b)
-    { return a.compare(b) <= 0; }
+inline bool operator<=(const basic_string<Pt::Char>& a, const Pt::Char* b)
+{ return a.compare(b) <= 0; }
 
-    inline bool operator<=(const basic_string<Pt::Char>& a, const wchar_t* b)
-    { return a.compare(b) <= 0; }
+inline bool operator<=(const basic_string<Pt::Char>& a, const wchar_t* b)
+{ return a.compare(b) <= 0; }
 
-    inline bool operator<=(const wchar_t* b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) >= 0; }
+inline bool operator<=(const wchar_t* b, const basic_string<Pt::Char>& a)
+{ return a.compare(b) >= 0; }
 
-    inline bool operator<=(const basic_string<Pt::Char>& a, const char* b)
-    { return a.compare(b) <= 0; }
+inline bool operator<=(const basic_string<Pt::Char>& a, const char* b)
+{ return a.compare(b) <= 0; }
 
-    inline bool operator<=(const char* b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) >= 0; }
+inline bool operator<=(const char* b, const basic_string<Pt::Char>& a)
+{ return a.compare(b) >= 0; }
 
-    // operator >
-    inline bool operator>(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
-    { return a.compare(b) > 0; }
+// operator >
+inline bool operator>(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+{ return a.compare(b) > 0; }
 
-    inline bool operator>(const Pt::Char* a, const basic_string<Pt::Char>& b)
-    { return b.compare(a) < 0; }
+inline bool operator>(const Pt::Char* a, const basic_string<Pt::Char>& b)
+{ return b.compare(a) < 0; }
 
-    inline bool operator>(const basic_string<Pt::Char>& a, const Pt::Char* b)
-    { return a.compare(b) > 0; }
+inline bool operator>(const basic_string<Pt::Char>& a, const Pt::Char* b)
+{ return a.compare(b) > 0; }
 
-    inline bool operator>(const basic_string<Pt::Char>& a, const wchar_t* b)
-    { return a.compare(b) > 0; }
+inline bool operator>(const basic_string<Pt::Char>& a, const wchar_t* b)
+{ return a.compare(b) > 0; }
 
-    inline bool operator>(const wchar_t* b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) < 0; }
+inline bool operator>(const wchar_t* b, const basic_string<Pt::Char>& a)
+{ return a.compare(b) < 0; }
 
-    inline bool operator>(const basic_string<Pt::Char>& a, const char* b)
-    { return a.compare(b) > 0; }
+inline bool operator>(const basic_string<Pt::Char>& a, const char* b)
+{ return a.compare(b) > 0; }
 
-    inline bool operator>(const char* b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) < 0; }
+inline bool operator>(const char* b, const basic_string<Pt::Char>& a)
+{ return a.compare(b) < 0; }
 
-    // operator >=
-    inline bool operator>=(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
-    { return a.compare(b) >= 0; }
+// operator >=
+inline bool operator>=(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+{ return a.compare(b) >= 0; }
 
-    inline bool operator>=(const Pt::Char* a, const basic_string<Pt::Char>& b)
-    { return b.compare(a) <= 0; }
+inline bool operator>=(const Pt::Char* a, const basic_string<Pt::Char>& b)
+{ return b.compare(a) <= 0; }
 
-    inline bool operator>=(const basic_string<Pt::Char>& a, const Pt::Char* b)
-    { return a.compare(b) >= 0; }
+inline bool operator>=(const basic_string<Pt::Char>& a, const Pt::Char* b)
+{ return a.compare(b) >= 0; }
 
-    inline bool operator>=(const basic_string<Pt::Char>& a, const wchar_t* b)
-    { return a.compare(b) >= 0; }
+inline bool operator>=(const basic_string<Pt::Char>& a, const wchar_t* b)
+{ return a.compare(b) >= 0; }
 
-    inline bool operator>=(const wchar_t* b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) <= 0; }
+inline bool operator>=(const wchar_t* b, const basic_string<Pt::Char>& a)
+{ return a.compare(b) <= 0; }
 
-    inline bool operator>=(const basic_string<Pt::Char>& a, const char* b)
-    { return a.compare(b) >= 0; }
+inline bool operator>=(const basic_string<Pt::Char>& a, const char* b)
+{ return a.compare(b) >= 0; }
 
-    inline bool operator>=(const char* b, const basic_string<Pt::Char>& a)
-    { return a.compare(b) <= 0; }
+inline bool operator>=(const char* b, const basic_string<Pt::Char>& a)
+{ return a.compare(b) <= 0; }
 
-    // operator <<
-    PT_API ostream& operator<< (ostream& out, const basic_string<Pt::Char>& str);
+// operator <<
+PT_API ostream& operator<< (ostream& out, const basic_string<Pt::Char>& str);
 
 } // namespace std
 

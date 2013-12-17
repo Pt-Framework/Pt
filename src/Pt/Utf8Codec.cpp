@@ -32,8 +32,8 @@
 #define halfShift uint32_t(10)
 #define halfBase Pt::Char(0x0010000)
 #define halfMask Pt::Char(0x3FF)
-#define byteMask Pt::Char(0xBF)
-#define byteMark Pt::Char(0x80)
+#define byteMask uint32_t(0xBF)
+#define byteMark uint32_t(0x80)
 
 namespace
 {
@@ -172,18 +172,18 @@ Utf8Codec::result Utf8Codec::do_in(MBState& s, const char* fromBegin, const char
 
 
 Utf8Codec::result Utf8Codec::do_out(MBState& s, const Pt::Char* fromBegin, const Pt::Char* fromEnd, const Pt::Char*& fromNext,
-                                                  char* toBegin, char* toEnd, char*& toNext) const
+                                                char* toBegin, char* toEnd, char*& toNext) const
 {
     result retstat = ok;
     fromNext  = fromBegin;
     toNext = toBegin;
-    Pt::uint32_t ch;
-
+    
     size_t bytesToWrite;
 
     while(fromNext < fromEnd) 
     {
-        ch = *fromNext;
+        Pt::uint32_t ch = fromNext->value();
+
         if (ch >= SurHighStart && ch <= SurLowEnd) 
         {
             retstat = error;
@@ -211,7 +211,7 @@ Utf8Codec::result Utf8Codec::do_out(MBState& s, const Pt::Char* fromBegin, const
         else 
         {
             bytesToWrite = 3;
-            ch = ReplacementChar;
+            ch = ReplacementChar.value();
         }
 
         uint8_t* current = (uint8_t*)(toNext + bytesToWrite);
