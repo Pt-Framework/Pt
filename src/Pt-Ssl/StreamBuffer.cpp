@@ -33,6 +33,7 @@
 #include <Pt/Ssl/SslError.h>
 #include <Pt/System/Logger.h>
 #include <Pt/System/IOError.h>
+#include <limits>
 #include <cassert>
 #include <cstring>
 
