@@ -301,7 +301,7 @@ std::size_t IODeviceImpl::write( const char* buffer, std::size_t count )
 }
 
 
-bool IODeviceImpl::wait(std::std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds)
+bool IODeviceImpl::wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds)
 {
     struct timeval* timeout = 0;
     struct timeval tv;
