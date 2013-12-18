@@ -239,7 +239,9 @@ void ContextImpl::setProtocol(Protocol protocol)
     _protocol = protocol;
 
     const char* ciphers = v2 ? "ALL:!aNULL:!eNULL" : "ALL:!aNULL:!eNULL:!SSLv2";
-    int ret = SSL_CTX_set_cipher_list(_ctx, ciphers);
+    
+    int ret = 0;
+    ret = SSL_CTX_set_cipher_list(_ctx, ciphers);
     assert(ret != 0);
 }
 
