@@ -134,7 +134,7 @@ class PT_SSL_API StreamBuffer : public BasicStreamBuffer<char>
         std::size_t  _obufferSize;
         char*        _obuffer;
 
-        static const unsigned _pbmax = 4;
+        static const int _pbmax = 4;
 };
 
 } // namespace Ssl
