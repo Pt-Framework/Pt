@@ -125,7 +125,7 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServerOptions& options)
           if (::setsockopt(this->fd(), IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0)
           {
               log_debug("could not set socket option IPV6_V6ONLY, errno=" << errno <<
-                        ": " << strerror(errno));
+                        ": " << std::strerror(errno));
               close();
               throw System::SystemError("setsockopt IPV6_V6ONLY");
           }

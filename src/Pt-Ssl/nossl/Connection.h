@@ -32,6 +32,7 @@
 #include <Pt/Ssl/Api.h>
 #include <Pt/Ssl/Context.h>
 #include <ios>
+#include <cstddef>
 
 namespace Pt {
 
@@ -59,9 +60,9 @@ class Connection
 
         bool isClosed() const;
 
-        std::streamsize write(const char* buf, size_t n);
+        std::streamsize write(const char* buf, std::size_t n);
 
-        std::streamsize read(char* buf, size_t n, std::streamsize isize);
+        std::streamsize read(char* buf, std::size_t n, std::streamsize isize);
 
     private:
         Context* _ctx;

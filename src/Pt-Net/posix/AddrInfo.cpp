@@ -60,7 +60,7 @@ void AddrInfo::resolve(const Endpoint& ep, bool passive)
     if(addrlen > 0)
     {
         const sockaddr* addr = impl->addr();
-        memcpy(&_addr, addr, addrlen);
+        std::memcpy(&_addr, addr, addrlen);
     
         _special.ai_family = _addr.ss_family;
         _special.ai_addr = reinterpret_cast<sockaddr*>(&_addr);
@@ -72,7 +72,7 @@ void AddrInfo::resolve(const Endpoint& ep, bool passive)
     }
 
     struct addrinfo hints;
-    memset(&hints, 0, sizeof(hints));
+    std::memset(&hints, 0, sizeof(hints));
 
     if( passive )
         hints.ai_flags |= AI_PASSIVE;
@@ -95,8 +95,8 @@ void AddrInfo::clear()
         _gainfo = 0;
     }
 
-    memset( &_special, 0, sizeof(_special) );
-    memset( &_addr, 0, sizeof(_addr) );
+    std::memset( &_special, 0, sizeof(_special) );
+    std::memset( &_addr, 0, sizeof(_addr) );
     _ai = 0;
 }
 

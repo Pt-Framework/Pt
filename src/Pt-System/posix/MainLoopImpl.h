@@ -33,6 +33,7 @@
 #include <Pt/System/Mutex.h>
 #include <Pt/System/EventLoop.h>
 #include "Pt/Signal.h"
+#include <vector>
 
 #ifdef __APPLE__
     #define PT_WITH_BSD_KQUEUE

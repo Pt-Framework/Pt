@@ -60,7 +60,7 @@ EndpointImpl::EndpointImpl(const EndpointImpl& ep)
 {
     if(ep._addrlen)
     {
-        memcpy(&_addr, ep.addr(), ep._addrlen);
+        std::memcpy(&_addr, ep.addr(), ep._addrlen);
         _addrlen = ep._addrlen;
     }
 }
@@ -83,7 +83,7 @@ void EndpointImpl::init(const sockaddr* addr, std::size_t addrlen)
 {  
     clear();
 
-    memcpy(&_addr, addr, addrlen);
+    std::memcpy(&_addr, addr, addrlen);
     _addrlen = addrlen;
 }
 
@@ -96,7 +96,7 @@ EndpointImpl& EndpointImpl::operator=(const EndpointImpl& ainfo)
 
     if(ainfo._addrlen)
     {      
-        memcpy(&_addr, ainfo.addr(), ainfo._addrlen);
+        std::memcpy(&_addr, ainfo.addr(), ainfo._addrlen);
         _addrlen = ainfo._addrlen;
     }
     
