@@ -173,7 +173,7 @@ class PipeTest : public Pt::Unit::TestSuite
             std::streamsize n = buffer.sgetn( in, buffer.in_avail() );
             PT_UNIT_ASSERT( 0 < n );
 
-            std::string data(in, static_cast<size_t>(n));
+            std::string data(in, static_cast<std::size_t>(n));
             PT_UNIT_ASSERT( _data.find(data) == 0 );
 
             _loop->exit();
