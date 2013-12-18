@@ -154,7 +154,8 @@ ContextImpl::ContextImpl(Protocol protocol)
     switch(_protocol) 
     {
         case SSLv2: 
-            _ctx = SSL_CTX_new( SSLv2_method () ); 
+            // SSLv2_method is not available everywhere (check OPENSSL_NO_SSL2)
+            _ctx = SSL_CTX_new( SSLv23_method () ); 
             break;
         
         case SSLv3or2: 
@@ -215,7 +216,8 @@ void ContextImpl::setProtocol(Protocol protocol)
     switch(protocol) 
     {
         case SSLv2: 
-            SSL_CTX_set_ssl_version(_ctx, SSLv2_method() );
+            // SSLv2_method is not available everywhere (check OPENSSL_NO_SSL2)
+            SSL_CTX_set_ssl_version(_ctx, SSLv23_method() );
             v2 = true;
             break;
         
