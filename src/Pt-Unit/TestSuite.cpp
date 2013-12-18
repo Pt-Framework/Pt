@@ -79,7 +79,7 @@ void TestSuite::run()
 }
 
 
-void TestSuite::runTest( const std::string& name, const SerializationInfo* si, size_t argCount )
+void TestSuite::runTest( const std::string& name, const SerializationInfo* si, std::size_t argCount )
 {
     TestMethod* test = this->findTest(name);
     if(!test)

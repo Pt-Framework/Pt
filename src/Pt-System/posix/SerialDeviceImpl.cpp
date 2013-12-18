@@ -420,7 +420,7 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
     _flowControl = flowControl;
 }
 
-/*void SerialDeviceImpl::setTimeout( size_t msec )
+/*void SerialDeviceImpl::setTimeout( std::size_t msec )
 {
     struct termios ios;
 
@@ -433,7 +433,7 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 
 }*/
 
-/*size_t SerialDeviceImpl::timeout() const
+/*std::size_t SerialDeviceImpl::timeout() const
 {
     struct termios ios;
 

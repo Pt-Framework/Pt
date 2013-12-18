@@ -102,7 +102,7 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
                              const char* id);
 
         void onAddBinary(const char* name, const char* type,
-                         const char* value, size_t length, const char* id);
+                         const char* value, std::size_t length, const char* id);
 
         void onAddReference(const char* name, const char* id);
 

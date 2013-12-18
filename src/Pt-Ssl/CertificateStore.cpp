@@ -30,6 +30,7 @@
 #include <Pt/Ssl/SslError.h>
 #include <Pt/Ssl/CertificateStore.h>
 #include <Pt/System/Logger.h>
+#include <vector>
 #include <cassert>
 
 log_define("Pt.Ssl.CertificateStore")

@@ -120,7 +120,7 @@ class PT_API Deserializer : private NonCopyable
 
     private:
         //! @internal
-        void* allocate(size_t n);
+        void* allocate(std::size_t n);
 
         //! @internal
         void deallocate(void* p);

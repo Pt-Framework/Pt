@@ -128,7 +128,7 @@ inline void operator >>=(const Pt::SerializationInfo& si, Fault& fault)
 
 inline void operator <<=(Pt::SerializationInfo& si, const Fault& fault)
 {
-    si.addMember("faultCode") <<= fault.rc();
+    si.addMember("faultCode") <<= static_cast<Pt::int32_t>( fault.rc() );
     si.addMember("faultString").setString( fault.text() );
 }
 

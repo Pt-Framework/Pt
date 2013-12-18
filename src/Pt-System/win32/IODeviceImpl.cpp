@@ -172,7 +172,7 @@ bool OverlappedIODeviceImpl::runWrite(EventLoop& loop)
 }
 
 
-size_t OverlappedIODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t OverlappedIODeviceImpl::beginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     if(_readOv.hEvent == NULL)
     {
@@ -212,7 +212,7 @@ size_t OverlappedIODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n
 }
 
 
-size_t OverlappedIODeviceImpl::endRead(EventLoop& loop, char* buffer, size_t, bool& eof)
+std::size_t OverlappedIODeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t, bool& eof)
 {
     // finishes the overlapped operation. Blocks until data is available,
     // so beginRead can be ended by endRead without a wait step.
@@ -236,7 +236,7 @@ size_t OverlappedIODeviceImpl::endRead(EventLoop& loop, char* buffer, size_t, bo
 }
 
 
-size_t OverlappedIODeviceImpl::read(char* buffer, size_t n, bool& eof)
+std::size_t OverlappedIODeviceImpl::read(char* buffer, std::size_t n, bool& eof)
 {
     if( ! _ioEvent)
     {
@@ -286,7 +286,7 @@ size_t OverlappedIODeviceImpl::read(char* buffer, size_t n, bool& eof)
 }
 
 
-size_t OverlappedIODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t OverlappedIODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     if(_readOv.hEvent == NULL)
     {
@@ -318,7 +318,7 @@ size_t OverlappedIODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, s
 }
 
 
-size_t OverlappedIODeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t OverlappedIODeviceImpl::endWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     DWORD writtenBytes = 0;
     if (GetOverlappedResult( handle(), &_writeOv, &writtenBytes, FALSE) == FALSE )
@@ -331,7 +331,7 @@ size_t OverlappedIODeviceImpl::endWrite(EventLoop& loop, const char* buffer, siz
 }
 
 
-size_t OverlappedIODeviceImpl::write(const char* buffer, size_t n)
+std::size_t OverlappedIODeviceImpl::write(const char* buffer, std::size_t n)
 {
     if( ! _ioEvent)
     {

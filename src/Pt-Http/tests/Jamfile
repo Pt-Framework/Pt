@@ -13,14 +13,6 @@ Main Pt-Http-test : Pt-Http-test.cpp
                     ParserTest.cpp
                     ;
 
-if $(WITH_SSL)
-{
-    LinkSharedLibraries Pt-Http-test : Pt Pt-Http Pt-Net Pt-Ssl Pt-System Pt-Unit ;
-}
-else
-{
-    LinkSharedLibraries Pt-Http-test : Pt Pt-Http Pt-Net Pt-System Pt-Unit ;
-}
-
+LinkSharedLibraries Pt-Http-test : Pt Pt-Http Pt-Net Pt-Ssl Pt-System Pt-Unit ;
 MakeLocate Pt-Http-test : $(PT_OUTPUT_TARGET) ;
 RunUnitTest Pt-Http-test : $(PT_OUTPUT_TEST) ;

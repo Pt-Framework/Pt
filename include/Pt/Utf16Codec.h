@@ -43,7 +43,7 @@ class PT_API Utf16BECodec : public TextCodec<Char, char>
 {
     public:
         //! @brief Constructor.
-        explicit Utf16BECodec(size_t ref = 0);
+        explicit Utf16BECodec(std::size_t ref = 0);
 
         //! @brief Destructor.
         virtual ~Utf16BECodec();
@@ -82,7 +82,7 @@ class PT_API Utf16LECodec : public TextCodec<Char, char>
 {
     public:
         //! @brief Constructor.
-        explicit Utf16LECodec(size_t ref = 0);
+        explicit Utf16LECodec(std::size_t ref = 0);
 
         //! @brief Destructor.
         virtual ~Utf16LECodec();

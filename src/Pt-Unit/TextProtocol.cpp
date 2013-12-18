@@ -140,7 +140,7 @@ void TextProtocol::run(Pt::Unit::TestSuite& suite)
 
             // SerializationInfo is not copy-constructible
             SerializationInfo siArgs[10];
-            size_t n = 0;
+            std::size_t n = 0;
             while( getline(lineReader, paramType, ':') )
             {
                 //paramType.erase(0, paramType.find_first_not_of(", \t"));

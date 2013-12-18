@@ -56,7 +56,7 @@ void AddrInfo::resolve(const Endpoint& ep, bool passive)
 
     const EndpointImpl* impl = ep.impl();
 
-    const size_t addrlen = impl->addrlen();
+    const std::size_t addrlen = impl->addrlen();
     if(addrlen > 0)
     {
         const sockaddr* addr = impl->addr();

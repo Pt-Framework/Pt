@@ -164,7 +164,7 @@ namespace {
 //            FileDevice f2(to.c_str(), std::ios::out);
 //
 //            char buffer[8192];
-//            size_t n = 0;
+//            std::size_t n = 0;
 //            do
 //            {
 //                if( ! f1.eof() )

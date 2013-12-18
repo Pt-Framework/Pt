@@ -197,7 +197,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
                 std::streamsize movelen = this->egptr() - this->gptr() + _pbmax;
                 std::char_traits<char_type>::move( _ibuf,
                                                    this->gptr() - _pbmax,
-                                                   static_cast<size_t>(movelen));
+                                                   static_cast<std::size_t>(movelen));
                 this->setg(_ibuf, _ibuf + _pbmax, _ibuf + movelen);
             }
 
@@ -235,7 +235,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
                 std::streamsize movelen = this->egptr() - this->gptr() + _pbmax;
                 std::char_traits<char_type>::move( _ibuf,
                                                    this->gptr() - _pbmax,
-                                                   static_cast<size_t>(movelen));
+                                                   static_cast<std::size_t>(movelen));
                 this->setg(_ibuf, _ibuf + _pbmax, _ibuf + movelen);
             }
 
@@ -333,9 +333,9 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
 
                 if(res == CodecType::noconv)
                 {
-                    size_t fromSize = fromEnd - fromBegin;
-                    size_t toSize   = toEnd - toBegin;
-                    size_t size     = toSize < fromSize ? toSize : fromSize;
+                    std::size_t fromSize = fromEnd - fromBegin;
+                    std::size_t toSize   = toEnd - toBegin;
+                    std::size_t size     = toSize < fromSize ? toSize : fromSize;
 
                     this->copyChars( toBegin, fromBegin, size );
 
@@ -344,7 +344,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
                 }
 
                 _ebufsize += static_cast<int>(toNext - toBegin);
-                size_t leftover = fromEnd - fromNext;
+                std::size_t leftover = fromEnd - fromNext;
                 if(leftover && fromNext > fromBegin)
                 {
                     std::char_traits<char_type>::move(_ibuf, fromNext, leftover);
@@ -430,13 +430,13 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         }
 
         template <typename T>
-        void copyChars(T* s1, const T* s2, size_t n)
+        void copyChars(T* s1, const T* s2, std::size_t n)
         {
             std::char_traits<T>::copy(s1, s2, n);
         }
 
         template <typename A, typename B>
-        void copyChars(A* s1, const B* s2, size_t n)
+        void copyChars(A* s1, const B* s2, std::size_t n)
         {
             while(n-- > 0)
             {
@@ -447,7 +447,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         }
 
         template <typename A>
-        void copyChars(A* s1, const Char* s2, size_t n)
+        void copyChars(A* s1, const Char* s2, std::size_t n)
         {
             while(n-- > 0)
             {

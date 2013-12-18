@@ -107,7 +107,7 @@ void IODeviceImpl::close()
 }
 
 
-IOResult& IODeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
+IOResult& IODeviceImpl::beginRead(char* buffer, std::size_t n, bool& eof)
 {
     _readResult.setFd(_fd);
     _readResult.attach(buffer, n);
@@ -115,16 +115,16 @@ IOResult& IODeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
 }
 
 
-size_t IODeviceImpl::endRead(IOResult& result, bool& eof)
+std::size_t IODeviceImpl::endRead(IOResult& result, bool& eof)
 {
     assert( &result == &_readResult );
 
-    size_t n = this->read( result.impl()->buffer(), result.impl()->bufferSize(), eof );
+    std::size_t n = this->read( result.impl()->buffer(), result.impl()->bufferSize(), eof );
     return n;
 }
 
 
-size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
+std::size_t IODeviceImpl::read( char* buffer, std::size_t count, bool& eof )
 {
     eof = false;
     ssize_t ret = 0;
@@ -150,7 +150,7 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
 }
 
 
-IOResult& IODeviceImpl::beginWrite(const char* buffer, size_t n)
+IOResult& IODeviceImpl::beginWrite(const char* buffer, std::size_t n)
 {
     _writeResult.setFd(_fd);
     _writeResult.attach( (char*)buffer, n);
@@ -158,16 +158,16 @@ IOResult& IODeviceImpl::beginWrite(const char* buffer, size_t n)
 }
 
 
-size_t IODeviceImpl::endWrite(IOResult& result)
+std::size_t IODeviceImpl::endWrite(IOResult& result)
 {
     assert( &result == &_writeResult );
 
-    size_t n = this->write( result.impl()->buffer(), result.impl()->bufferSize() );
+    std::size_t n = this->write( result.impl()->buffer(), result.impl()->bufferSize() );
     return n;
 }
 
 
-size_t IODeviceImpl::write( const char* buffer, size_t count )
+std::size_t IODeviceImpl::write( const char* buffer, std::size_t count )
 {
     ssize_t ret = 0;
 

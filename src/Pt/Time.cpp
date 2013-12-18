@@ -66,10 +66,10 @@ void operator<<=(SerializationInfo& si, const Time& time)
     unsigned msec = 0;
     time.get(hour, min, sec, msec);
 
-    si.addMember( Pt::LiteralPtr<char>("hour") ) <<=  hour;
-    si.addMember( Pt::LiteralPtr<char>("min") ) <<= min;
-    si.addMember( Pt::LiteralPtr<char>("sec") ) <<=  sec;
-    si.addMember( Pt::LiteralPtr<char>("msec") ) <<=  msec;
+    si.addMember( Pt::LiteralPtr<char>("hour") ) <<= static_cast<uint16_t>(hour);
+    si.addMember( Pt::LiteralPtr<char>("min") ) <<= static_cast<uint16_t>(min);
+    si.addMember( Pt::LiteralPtr<char>("sec") ) <<= static_cast<uint16_t>(sec);
+    si.addMember( Pt::LiteralPtr<char>("msec") ) <<= static_cast<uint16_t>(msec);
     si.setTypeName( Pt::LiteralPtr<char>("Pt::Time") );
 }
 

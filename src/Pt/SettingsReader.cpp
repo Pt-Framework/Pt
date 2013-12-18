@@ -89,7 +89,7 @@ void SettingsReader::enterMember()
         // Add a serialization node for the parent if not present.
         // In this example the parent is a.b
         //
-        size_t pos = name.rfind('.');
+        std::size_t pos = name.rfind('.');
         if(pos != std::string::npos)
         {
             std::string root = name.substr( 0, pos );

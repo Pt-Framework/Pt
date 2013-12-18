@@ -57,7 +57,7 @@ void PipeIODevice::init(PipeImpl* pipe)
 }
 
 
-void PipeIODevice::onSetTimeout(size_t timeout)
+void PipeIODevice::onSetTimeout(std::size_t timeout)
 {
     _timeout = timeout;
 }
@@ -105,7 +105,7 @@ bool PipeIODevice::onRun()
 }
 
 
-size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
+std::size_t PipeIODevice::onBeginRead(char* buffer, std::size_t n, bool& eof)
 {
     if(_mode != Read)
     {
@@ -116,20 +116,20 @@ size_t PipeIODevice::onBeginRead(char* buffer, size_t n, bool& eof)
 }
 
 
-size_t PipeIODevice::onEndRead(char* buffer, size_t n, bool& eof)
+std::size_t PipeIODevice::onEndRead(char* buffer, std::size_t n, bool& eof)
 {
     return _pipe->endRead(buffer, n, eof);
 }
 
 
-size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
+std::size_t PipeIODevice::onRead(char* buffer, std::size_t count, bool& eof)
 {
     throw IOError("blocking I/O not supported");
     return 0;
 }
 
 
-size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
+std::size_t PipeIODevice::onBeginWrite(const char* buffer, std::size_t n)
 {
     if(_mode != Write)
     {
@@ -140,13 +140,13 @@ size_t PipeIODevice::onBeginWrite(const char* buffer, size_t n)
 }
 
 
-size_t PipeIODevice::onEndWrite(const char* buffer, size_t n)
+std::size_t PipeIODevice::onEndWrite(const char* buffer, std::size_t n)
 {
     return _pipe->endWrite(buffer, n);
 }
 
 
-size_t PipeIODevice::onWrite(const char* buffer, size_t count)
+std::size_t PipeIODevice::onWrite(const char* buffer, std::size_t count)
 {
     throw IOError("blocking I/O not supported");
     return 0;
@@ -160,7 +160,7 @@ void PipeIODevice::onSync() const
 
 
 
-static const size_t MaxBufferSize = 16384;
+static const std::size_t MaxBufferSize = 16384;
 
 
 PipeImpl::PipeImpl()
@@ -193,7 +193,7 @@ void PipeImpl::close()
 }
 
 
-size_t PipeImpl::beginRead(EventLoop& loop, char* buf, size_t n, bool&)
+std::size_t PipeImpl::beginRead(EventLoop& loop, char* buf, std::size_t n, bool&)
 {
     MutexLock lock(_mtx);
     
@@ -216,13 +216,13 @@ bool PipeImpl::readAvail()
 }
 
 
-size_t PipeImpl::endRead(char* buf, size_t n, bool& eof)
+std::size_t PipeImpl::endRead(char* buf, std::size_t n, bool& eof)
 {
     MutexLock lock(_mtx);
 
     _readLoop = 0;
 
-    size_t readSize = std::min<size_t>( n, _buffer.size() );
+    std::size_t readSize = std::min<std::size_t>( n, _buffer.size() );
 	if (readSize == 0)
 	{
 		eof = _eof;
@@ -243,7 +243,7 @@ size_t PipeImpl::endRead(char* buf, size_t n, bool& eof)
 }
 
 
-size_t PipeImpl::beginWrite(EventLoop& loop, const char* buf, size_t n)
+std::size_t PipeImpl::beginWrite(EventLoop& loop, const char* buf, std::size_t n)
 {
     MutexLock lock(_mtx);
     
@@ -266,13 +266,13 @@ bool PipeImpl::writeAvail()
 }
 
 
-size_t PipeImpl::endWrite(const char* buf, size_t n)
+std::size_t PipeImpl::endWrite(const char* buf, std::size_t n)
 {
     MutexLock lock(_mtx);
 
     _writeLoop = 0;
 
-    size_t writeSize = std::min<size_t>( n, MaxBufferSize - _buffer.size() );
+    std::size_t writeSize = std::min<std::size_t>( n, MaxBufferSize - _buffer.size() );
     _buffer.insert(_buffer.end(), buf, buf + writeSize);
 
     if(_readLoop)

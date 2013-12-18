@@ -109,7 +109,7 @@ class PT_API Serializer
 
     private:
         //! @internal
-        void* allocate(size_t n);
+        void* allocate(std::size_t n);
 
         //! @internal
         void deallocate(void* p);

@@ -51,7 +51,7 @@ namespace Db {
     {
         public:
             //! \brief The size-type used for the Value class.
-            typedef size_t size_type;
+            typedef std::size_t size_type;
 
         private:
             //! \brief Reference counted implementation.

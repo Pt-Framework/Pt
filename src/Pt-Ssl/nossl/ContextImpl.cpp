@@ -1,13 +1,11 @@
 /*
- * Copyright (C) 2006 by Tommi Maekitalo
- * Copyright (C) 2006 by Marc Boris Duerner
- * Copyright (C) 2006 by Stefan Bueder
- * 
+ * Copyright (C) 2010-2012 by Marc Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,55 +15,93 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_DB_IRESULT_H
-#define PT_DB_IRESULT_H
+#include "ContextImpl.h"
+#include "CertificateImpl.h"
+#include <Pt/Ssl/SslError.h>
+#include <Pt/System/Logger.h>
 
-#include <Pt/Api.h>
-#include <Pt/Types.h>
-#include <Pt/RefCounted.h>
-#include <Pt/Db/Api.h>
-
+log_define("Pt.Ssl.Context")
 
 namespace Pt {
 
-namespace Db {
+namespace Ssl {
 
-    class Row;
+ContextImpl::ContextImpl(Protocol protocol)
+: _protocol(protocol)
+, _verify(TryVerify)
+, _verifyDepth(1)
+{
+}
 
-    /** \brief Interface for DB Values
-        \see Db::Result
-    */
-    class PT_DB_API IResult : public RefCounted
-    {
-    public:
-        typedef std::size_t size_type;
-        typedef Row value_type;
 
-    public:
-        virtual ~IResult()  
-        { }
+ContextImpl::~ContextImpl()
+{
+}
 
-        virtual Row getRow(size_type tup_num) const = 0;
 
-        virtual size_type size() const = 0;
+Protocol ContextImpl::protocol() const
+{ 
+    return _protocol; 
+}
 
-        virtual size_type getFieldCount() const = 0;
-    };
-  
-} // namespace Db
+
+void ContextImpl::setProtocol(Protocol protocol)
+{
+    _protocol = protocol;
+}
+
+
+void ContextImpl::setVerifyDepth(int n)
+{
+    _verifyDepth = n;
+}
+
+
+VerifyMode ContextImpl::verifyMode() const
+{ 
+    return _verify; 
+}
+
+
+void ContextImpl::setVerifyMode(VerifyMode m)
+{
+    _verify = m;
+}
+
+
+void ContextImpl::assign(const ContextImpl& ctx)
+{
+    log_trace("ContextImpl::assign");
+    setProtocol(ctx._protocol);
+    setVerifyMode(ctx._verify);
+}
+
+
+void ContextImpl::addCACertificate(const Certificate& trustedCert)
+{
+}
+
+
+void ContextImpl::setIdentity(const Certificate& cert)
+{
+}
+
+
+void ContextImpl::addCertificate(const Certificate& certificate)
+{
+}
+
+} // namespace Ssl
 
 } // namespace Pt
-
-#endif // PTV_DB_IRESULT_H
-

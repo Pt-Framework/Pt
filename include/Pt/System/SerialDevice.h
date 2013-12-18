@@ -192,19 +192,19 @@ class PT_SYSTEM_API SerialDevice : public IODevice
     protected:
         void onClose();
 
-        void onSetTimeout(size_t timeout);
+        void onSetTimeout(std::size_t timeout);
 
-        size_t onBeginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
+        std::size_t onBeginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof);
 
-        size_t onEndRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
+        std::size_t onEndRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof);
 
-        size_t onBeginWrite(EventLoop& loop, const char* buffer, size_t n);
+        std::size_t onBeginWrite(EventLoop& loop, const char* buffer, std::size_t n);
 
-        size_t onEndWrite(EventLoop& loop, const char* buffer, size_t n);
+        std::size_t onEndWrite(EventLoop& loop, const char* buffer, std::size_t n);
 
-        size_t onRead(char* buffer, size_t count, bool& eof);
+        std::size_t onRead(char* buffer, std::size_t count, bool& eof);
 
-        size_t onWrite(const char* buffer, size_t count);
+        std::size_t onWrite(const char* buffer, std::size_t count);
 
         void onSync() const;
 

@@ -193,23 +193,25 @@ if ! $(WITH_SSL)
     }
 }
 
+if ! $(WITH_SSL)
+{
+    PT_SSL_IMPL = "nossl" ;
+}
+
+Configure WITH_SSL ;
 EchoOption WITH_SSL : "SSL support" : $(WITH_SSL:E="no")  ;
 
-if $(WITH_SSL)
-{
-    Configure WITH_SSL ;
+Configure PT_SSL_IMPL ;
+EchoOption PT_SSL_IMPL : "SSL implementation" ;
 
-    Configure PT_SSL_IMPL ;
-    EchoOption PT_SSL_IMPL : "SSL implementation" ;
+EchoOption --with-openssl : "Builtin OpenSSL library" : $(WITH_OPENSSL:E="no") ;
 
-    EchoOption --with-openssl : "Builtin OpenSSL library" : $(WITH_OPENSSL:E="no") ;
+Configure SSL_INCLUDES ;
+EchoOption SSL_INCLUDES : "SSL includes" ;
 
-    Configure SSL_INCLUDES ;
-    EchoOption SSL_INCLUDES : "SSL includes" ;
+Configure SSL_LINKLIBS ;
+EchoOption SSL_LINKLIBS : "SSL libs" ;
 
-    Configure SSL_LINKLIBS ;
-    EchoOption SSL_LINKLIBS : "SSL libs" ;
-}
 
 #############################################################################
 # Gfx libraries and includes

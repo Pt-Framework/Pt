@@ -351,7 +351,7 @@ namespace std {
 locale::id numpunct<Pt::Char>::id;
 
 
-numpunct<Pt::Char>::numpunct(size_t refs)
+numpunct<Pt::Char>::numpunct(std::size_t refs)
 : locale::facet(refs)
 { }
 
@@ -425,7 +425,7 @@ num_put<Pt::Char, ostreambuf_iterator<Pt::Char> >::do_put(iter_type s, ios_base&
  
     streamsize width = f.width(0);
    
-    if( str.size() >= static_cast<size_t>(width) )
+    if( str.size() >= static_cast<std::size_t>(width) )
     {
         return std::copy(str.begin(), str.end(), s);
     }
@@ -586,7 +586,7 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
         bool true_ok  = true;
         bool false_ok = true;
 
-        size_t n = 0;
+        std::size_t n = 0;
         for ( ; it != end; ++it) 
         {
             Pt::Char c = *it;
@@ -926,13 +926,13 @@ std::locale::id ctype<Pt::Char>::id;
 
 #if (defined _MSC_VER || defined __QNX__ || defined __xlC__)
 
-ctype<Pt::Char>::ctype(size_t refs)
+ctype<Pt::Char>::ctype(std::size_t refs)
 : ctype_base(refs)
 { }
 
 #else
 
-ctype<Pt::Char>::ctype(size_t refs)
+ctype<Pt::Char>::ctype(std::size_t refs)
 : locale::facet(refs)
 { }
 
@@ -1066,13 +1066,13 @@ std::locale::id codecvt<Pt::Char, char, Pt::MBState>::id;
 
 #if defined _MSC_VER || __QNX__
 
-codecvt<Pt::Char, char, Pt::MBState>::codecvt(size_t ref)
+codecvt<Pt::Char, char, Pt::MBState>::codecvt(std::size_t ref)
 : codecvt_base(ref)
 {}
 
 #else
 
-codecvt<Pt::Char, char, Pt::MBState>::codecvt(size_t ref)
+codecvt<Pt::Char, char, Pt::MBState>::codecvt(std::size_t ref)
 : locale::facet(ref)
 {}
 
@@ -1089,13 +1089,13 @@ std::locale::id codecvt<char, char, Pt::MBState>::id;
 
 #if defined _MSC_VER || __QNX__
 
-codecvt<char, char, Pt::MBState>::codecvt(size_t ref)
+codecvt<char, char, Pt::MBState>::codecvt(std::size_t ref)
 : codecvt_base(ref)
 {}
 
 #else
 
-codecvt<char, char, Pt::MBState>::codecvt(size_t ref)
+codecvt<char, char, Pt::MBState>::codecvt(std::size_t ref)
 : locale::facet(ref)
 {}
 

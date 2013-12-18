@@ -530,7 +530,7 @@ bool UdpSocketImpl::runWrite(System::EventLoop& loop)
 }
 
 
-size_t UdpSocketImpl::read(char* buffer, size_t n, bool& eof)
+std::size_t UdpSocketImpl::read(char* buffer, std::size_t n, bool& eof)
 {
     unsigned int maxLen = std::numeric_limits<int>::max();
     int buflen = n > maxLen ? static_cast<int>(maxLen) : static_cast<int>(n);
@@ -563,7 +563,7 @@ size_t UdpSocketImpl::read(char* buffer, size_t n, bool& eof)
 }
 
 
-size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
@@ -582,7 +582,7 @@ size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
 }
 
 
-size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     _eventFlags &= ~FD_READ;
     setEventFlags(_ioh.handle(), _eventFlags);
@@ -621,7 +621,7 @@ size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t n, b
 }
 
 
-size_t UdpSocketImpl::write(const char* buffer, size_t n)
+std::size_t UdpSocketImpl::write(const char* buffer, std::size_t n)
 {
     unsigned int maxLen = std::numeric_limits<int>::max();
     int buflen = n > maxLen ? static_cast<int>(maxLen) : static_cast<int>(n);
@@ -650,7 +650,7 @@ size_t UdpSocketImpl::write(const char* buffer, size_t n)
 
 
 
-size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, size_t n)
+std::size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
 {
     if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
@@ -680,7 +680,7 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
 }
 
 
-size_t UdpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size_t n)
+std::size_t UdpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
 {
     _eventFlags &= ~FD_WRITE;
 
@@ -711,7 +711,7 @@ size_t UdpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
 }
 
 
-int UdpSocketImpl::waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, size_t timeout)
+int UdpSocketImpl::waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, std::size_t timeout)
 {
     struct timeval* tval = 0;
     struct timeval tv;

@@ -27,12 +27,14 @@
  */
 
 #include "ServerImpl.h"
+
 #include <Pt/Http/Servlet.h>
 #include <Pt/Http/Service.h>
 #include <Pt/Http/Responder.h>
 #include <Pt/Http/Authorizer.h>
 #include <Pt/Http/HttpError.h>
 #include <Pt/System/Logger.h>
+
 #include <limits>
 #include <memory>
 #include <cassert>
@@ -361,10 +363,8 @@ ServerThread::~ServerThread()
 
 void ServerThread::setSecure(Ssl::Context& ctx)
 {
-#ifdef PT_HTTP_WITH_SSL
     _sslctx.assign(ctx);
     _ssl = true;
-#endif
 }
         
 
@@ -427,10 +427,8 @@ void ServerThread::onAccept(const AcceptEvent& ev)
     _handlers.push_back(handler);
     handler->finished() += Pt::slot(*this, &ServerThread::onHandlerFinished);
 
-#ifdef PT_HTTP_WITH_SSL
     if(_ssl)
         handler->setSecure(_sslctx);
-#endif
 
     handler->beginServe(_loop);
 }
@@ -528,10 +526,6 @@ void ServerImpl::listen(const Pt::Net::Endpoint& addr, const Net::TcpServerOptio
 
     _serverThreads.clear();
 
-//#ifdef PT_HTTP_WITH_SSL
-//        _sslctx = options.sslContext();
-//#endif
-
     _serverSocket.listen(addr, opts);
     _serverSocket.beginAccept();
 
@@ -539,10 +533,8 @@ void ServerImpl::listen(const Pt::Net::Endpoint& addr, const Net::TcpServerOptio
     {
         ServerThread* st = new ServerThread();
 
-#ifdef PT_HTTP_WITH_SSL
         if(_sslctx)
             st->setSecure(*_sslctx);
-#endif
 
         _serverThreads.push_back(st);
     }

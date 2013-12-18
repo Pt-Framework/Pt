@@ -158,7 +158,7 @@ void FileDeviceImpl::resize(off_type size)
 }
 
 
-size_t FileDeviceImpl::size()
+std::size_t FileDeviceImpl::size()
 {
     struct stat buff;
     int ret = fstat(fd(), &buff);
@@ -169,10 +169,10 @@ size_t FileDeviceImpl::size()
 }
 
 
-size_t FileDeviceImpl::peek(char* buffer, size_t count)
+std::size_t FileDeviceImpl::peek(char* buffer, std::size_t count)
 {
     bool eof;
-    size_t ret = this->read(buffer, count, eof);
+    std::size_t ret = this->read(buffer, count, eof);
 
     // if we could read data seek back
     if(ret > 0)

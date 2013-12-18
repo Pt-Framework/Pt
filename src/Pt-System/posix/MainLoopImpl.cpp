@@ -110,7 +110,7 @@ bool MainLoopImpl::waitNext()
     log_trace("MainLoopImpl::waitNext");
 
     bool isActive = true;
-    size_t msecs = _timerQueue.processTimers();
+    std::size_t msecs = _timerQueue.processTimers();
 
     log_debug("next timer expires in: " << msecs << " msecs");
 

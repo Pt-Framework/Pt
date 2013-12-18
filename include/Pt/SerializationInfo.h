@@ -175,7 +175,7 @@ class PT_API SerializationInfo
 
         void setTypeName(const char* type);
 
-        void setTypeName(const char* type, size_t len);
+        void setTypeName(const char* type, std::size_t len);
         
         void setTypeName(const LiteralPtr<char>& type);
 
@@ -186,7 +186,7 @@ class PT_API SerializationInfo
 
         void setName(const char* name);
 
-        void setName(const char* type, size_t len);
+        void setName(const char* type, std::size_t len);
         
         void setName(const LiteralPtr<char>& type);
 
@@ -197,7 +197,7 @@ class PT_API SerializationInfo
 
         void setId(const char* id);
 
-        void setId(const char* id, size_t len);
+        void setId(const char* id, std::size_t len);
 
         void getString(std::string& s, const TextCodec<Pt::Char, char>& codec) const;
 
@@ -207,7 +207,7 @@ class PT_API SerializationInfo
 
         void setString(const char* s);
 
-        void setString(const char* s, size_t len, const TextCodec<Pt::Char, char>& codec);
+        void setString(const char* s, std::size_t len, const TextCodec<Pt::Char, char>& codec);
 
         void setString(const std::string& s);
 
@@ -217,11 +217,11 @@ class PT_API SerializationInfo
         void setString(const Pt::String& s)
         { setString( s.c_str(), s.length() ); }
 
-        void setString(const Pt::Char* s, size_t len);
+        void setString(const Pt::Char* s, std::size_t len);
 
-        const char* getBinary(size_t& length) const;
+        const char* getBinary(std::size_t& length) const;
 
-        void setBinary(const char* data, size_t length);
+        void setBinary(const char* data, std::size_t length);
 
         void getChar(char c) const;
 
@@ -295,7 +295,7 @@ class PT_API SerializationInfo
         SerializationInfo& addMember(const char* name)
         { return this->addMember(name, std::strlen(name)); }
         
-        SerializationInfo& addMember(const char* name, size_t len);
+        SerializationInfo& addMember(const char* name, std::size_t len);
         
         SerializationInfo& addMember(const LiteralPtr<char>& name);
 
@@ -347,7 +347,7 @@ class PT_API SerializationInfo
         
         SerializationInfo* findMember(const char* name);
 
-        size_t memberCount() const;
+        std::size_t memberCount() const;
 
         SerializationInfo* sibling() const
         { return _next; }
@@ -374,7 +374,7 @@ class PT_API SerializationInfo
 
         /** @brief Deserialization of weak pointers (parse phase)
         */
-        void setReference(const char* id, size_t idlen);
+        void setReference(const char* id, std::size_t idlen);
 
         /** @brief Deserialization of references
         */
@@ -434,20 +434,20 @@ class PT_API SerializationInfo
         struct BlobValue
         {
             char* data;
-            size_t length;
+            std::size_t length;
         };
 
         struct StrValue
         {
             Pt::Char* str;
-            size_t length;
+            std::size_t length;
         };
 
         struct Seq
         {
             SerializationInfo* first;
             SerializationInfo* last;
-            size_t size;
+            std::size_t size;
         };
 
         union Variant

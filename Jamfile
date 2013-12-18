@@ -93,15 +93,11 @@ if $(SYS)
     SubInclude PT_TOP src Pt-Db ;
     SubInclude PT_TOP src Pt-Http ;
     SubInclude PT_TOP src Pt-XmlRpc ;
+    SubInclude PT_TOP src Pt-Ssl ;
 
-    if $(WITH_SSL) = yes
+    if $(WITH_OPENSSL)
     {
-        SubInclude PT_TOP src Pt-Ssl ;
-
-        if $(WITH_OPENSSL)
-        {
-            SubInclude PT_TOP src openssl ;
-        }
+        SubInclude PT_TOP src openssl ;
     }
     
     if $(GUI)

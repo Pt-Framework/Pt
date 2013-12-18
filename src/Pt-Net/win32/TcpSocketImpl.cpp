@@ -405,7 +405,7 @@ void TcpSocketImpl::remoteEndpoint(Endpoint& ep) const
 }
 
 
-size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     log_debug(_fd << " beginRead");
 
@@ -433,7 +433,7 @@ size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
 }
 
 
-size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t, bool& eof)
+std::size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, std::size_t, bool& eof)
 {
     log_debug(_fd << " endRead");
     _eventFlags &= ~FD_READ;
@@ -476,7 +476,7 @@ size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t, boo
 }
 
 
-size_t TcpSocketImpl::read(char* buf, std::size_t n, bool& eof)
+std::size_t TcpSocketImpl::read(char* buf, std::size_t n, bool& eof)
 {
     fd_set fds;
     FD_ZERO(&fds);
@@ -493,11 +493,11 @@ size_t TcpSocketImpl::read(char* buf, std::size_t n, bool& eof)
     else if(len < 0)
         throw System::IOError("recv");
 
-    return static_cast<size_t>(len);
+    return static_cast<std::size_t>(len);
 }
 
 
-size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, size_t n)
+std::size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
 {
     log_debug(_fd << " beginWrite");
 
@@ -538,7 +538,7 @@ size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
 }
 
 
-size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size_t n)
+std::size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
 {
     log_debug(_fd << " endWrite");
 
@@ -566,7 +566,7 @@ size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
 }
 
 
-size_t TcpSocketImpl::write(const char* buffer, size_t n)
+std::size_t TcpSocketImpl::write(const char* buffer, std::size_t n)
 {
     log_debug(_fd << " write");
 
@@ -589,7 +589,7 @@ size_t TcpSocketImpl::write(const char* buffer, size_t n)
 }
 
 
-int TcpSocketImpl::waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, size_t timeout)
+int TcpSocketImpl::waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, std::size_t timeout)
 {
     struct timeval* tval = 0;
     struct timeval tv;

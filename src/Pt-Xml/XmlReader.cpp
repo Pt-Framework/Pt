@@ -4334,7 +4334,7 @@ class XmlReaderImpl
         DocTypeDefinition& dtd()
         { return _dtd; }
 
-        size_t depth() const
+        std::size_t depth() const
         { return _depth; }
 
         inline void incDepth()
@@ -4631,7 +4631,7 @@ const DocTypeDefinition& XmlReader::dtd() const
 }
 
 
-size_t XmlReader::depth() const
+std::size_t XmlReader::depth() const
 {
     return _impl->depth();
 }

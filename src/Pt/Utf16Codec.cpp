@@ -32,7 +32,7 @@ const Pt::Char MaxUtf16 = 0x0010FFFF;
 
 namespace Pt {
 
-Utf16BECodec::Utf16BECodec(size_t ref)
+Utf16BECodec::Utf16BECodec(std::size_t ref)
 : Pt::TextCodec<Char, char>(ref)
 {}
 
@@ -142,9 +142,9 @@ Utf16BECodec::result Utf16BECodec::do_out(MBState& s, const Char* fromBegin,
 }
 
 
-int Utf16BECodec::do_length(MBState& s, const char* fromBegin, const char* fromEnd, size_t max) const
+int Utf16BECodec::do_length(MBState& s, const char* fromBegin, const char* fromEnd, std::size_t max) const
 {
-    size_t count = 0;
+    std::size_t count = 0;
     MBState state = s;
 
     while(count < max && fromBegin != fromEnd)
@@ -202,7 +202,7 @@ int Utf16BECodec::do_encoding() const throw()
 
 
 
-Utf16LECodec::Utf16LECodec(size_t ref)
+Utf16LECodec::Utf16LECodec(std::size_t ref)
 : Pt::TextCodec<Char, char>(ref)
 {}
 
@@ -308,9 +308,9 @@ Utf16LECodec::result Utf16LECodec::do_out(MBState& s, const Char* fromBegin,
 }
 
 
-int Utf16LECodec::do_length(MBState& s, const char* fromBegin, const char* fromEnd, size_t max) const
+int Utf16LECodec::do_length(MBState& s, const char* fromBegin, const char* fromEnd, std::size_t max) const
 {
-    size_t count = 0;
+    std::size_t count = 0;
     MBState state = s;
 
     while( count < max && fromBegin != fromEnd )

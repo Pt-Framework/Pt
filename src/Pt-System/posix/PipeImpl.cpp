@@ -68,7 +68,7 @@ void PipeIODevice::onClose()
 }
 
 
-void PipeIODevice::onSetTimeout(size_t timeout)
+void PipeIODevice::onSetTimeout(std::size_t timeout)
 {
     _impl.setTimeout(timeout);
 }
@@ -109,37 +109,37 @@ void PipeIODevice::onCancel()
 }
 
 
-size_t PipeIODevice::onBeginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t PipeIODevice::onBeginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     return _impl.beginRead(loop, buffer, n, eof);
 }
 
 
-size_t PipeIODevice::onEndRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t PipeIODevice::onEndRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     return _impl.endRead(loop, buffer, n, eof);
 }
 
 
-size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
+std::size_t PipeIODevice::onRead(char* buffer, std::size_t count, bool& eof)
 {
     return _impl.read(buffer, count, eof);
 }
 
 
-size_t PipeIODevice::onBeginWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t PipeIODevice::onBeginWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     return _impl.beginWrite(loop, buffer, n);
 }
 
 
-size_t PipeIODevice::onEndWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t PipeIODevice::onEndWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     return _impl.endWrite(loop, buffer, n);
 }
 
 
-size_t PipeIODevice::onWrite(const char* buffer, size_t count)
+std::size_t PipeIODevice::onWrite(const char* buffer, std::size_t count)
 {
     return _impl.write(buffer, count);
 }

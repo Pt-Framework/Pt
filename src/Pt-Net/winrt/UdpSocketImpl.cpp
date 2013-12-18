@@ -391,7 +391,7 @@ void UdpSocketImpl::onMessageReceived(DatagramSocket^ socket,
 }
 
 
-size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     System::MutexLock lock(_mtx);
     
@@ -407,7 +407,7 @@ bool UdpSocketImpl::runRead(System::EventLoop& loop)
 }
 
 
-size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t bufSize, bool& eof)
+std::size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, std::size_t bufSize, bool& eof)
 {
     System::MutexLock lock(_mtx);
     _loop = 0;
@@ -422,7 +422,7 @@ size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t bufS
 
     DataReader^ reader = m.reader;
 
-    const size_t avail = reader->UnconsumedBufferLength;
+    const std::size_t avail = reader->UnconsumedBufferLength;
 
     unsigned n = 0;
     for( ; n < avail && n < bufSize; ++n)
@@ -436,15 +436,15 @@ size_t UdpSocketImpl::endRead(System::EventLoop& loop, char* buffer, size_t bufS
 }
 
 
-size_t UdpSocketImpl::read(char* buffer, size_t count, bool& eof)
+std::size_t UdpSocketImpl::read(char* buffer, std::size_t count, bool& eof)
 {
     throw System::IOError("blocking I/O not supported");
     return 0;
 }
 
 
-size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, 
-                                 const char* buffer, size_t bufSize)
+std::size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, 
+                                 const char* buffer, std::size_t bufSize)
 {
     log_debug("beginWrite " << bufSize);
 
@@ -501,18 +501,18 @@ bool UdpSocketImpl::runWrite(System::EventLoop& loop)
 }
 
 
-size_t UdpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size_t n)
+std::size_t UdpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
 {
     log_debug("endWrite");
 
-    const size_t written = _storeOp->GetResults();
+    const std::size_t written = _storeOp->GetResults();
 
     _storeOp = nullptr;
     return _storeCount;
 }
 
 
-size_t UdpSocketImpl::write(const char* buffer, size_t n)
+std::size_t UdpSocketImpl::write(const char* buffer, std::size_t n)
 {
     throw System::IOError("blocking I/O not supported");
     return 0;

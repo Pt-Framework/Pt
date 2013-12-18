@@ -121,11 +121,11 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             Pt::Net::TcpSocket socket;
             socket.accept(server);
 
-            size_t count = 0;
+            std::size_t count = 0;
             while( ! socket.isEof() )
             {
                 char buf[100];
-                size_t n = socket.read( buf, sizeof(buf) );
+                std::size_t n = socket.read( buf, sizeof(buf) );
                 count += n;
             }
             

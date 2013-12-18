@@ -1,13 +1,12 @@
 /*
- * Copyright (C) 2006 by Tommi Maekitalo
- * Copyright (C) 2006 by Marc Boris Duerner
- * Copyright (C) 2006 by Stefan Bueder
- * 
+ * Copyright (C) 2010-2010 by Aloysius Indrayanto
+ * Copyright (C) 2010-2012 by Marc Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,55 +16,49 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_DB_IRESULT_H
-#define PT_DB_IRESULT_H
+#include "CertificateStoreImpl.h"
+#include <Pt/System/Logger.h>
 
-#include <Pt/Api.h>
-#include <Pt/Types.h>
-#include <Pt/RefCounted.h>
-#include <Pt/Db/Api.h>
 
+log_define("Pt.Ssl.CertificateStore")
 
 namespace Pt {
 
-namespace Db {
+namespace Ssl {
 
-    class Row;
+CertificateStoreImpl::CertificateStoreImpl()
+{
+}
 
-    /** \brief Interface for DB Values
-        \see Db::Result
-    */
-    class PT_DB_API IResult : public RefCounted
-    {
-    public:
-        typedef std::size_t size_type;
-        typedef Row value_type;
 
-    public:
-        virtual ~IResult()  
-        { }
+CertificateStoreImpl::~CertificateStoreImpl()
+{
+}
 
-        virtual Row getRow(size_type tup_num) const = 0;
 
-        virtual size_type size() const = 0;
+void CertificateStoreImpl::loadPkcs12(const char* pkcs12, std::size_t len, const char* passwd)
+{
+    log_debug("loadPkcs12: " << passwd);            
+}
 
-        virtual size_type getFieldCount() const = 0;
-    };
-  
-} // namespace Db
+
+const Certificate* CertificateStoreImpl::findCertificate(const std::string& subject)
+{
+    log_trace("find certificate: " << subject);
+    return 0;
+}
+
+} // namespace Ssl
 
 } // namespace Pt
-
-#endif // PTV_DB_IRESULT_H
-

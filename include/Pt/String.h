@@ -279,7 +279,7 @@ struct char_traits<Pt::Char>
         return c1 < c2;
     }
 
-    inline static int compare(const char_type* s1, const char_type* s2, size_t n)
+    inline static int compare(const char_type* s1, const char_type* s2, std::size_t n)
     {
         while(n-- > 0)
         {
@@ -293,7 +293,7 @@ struct char_traits<Pt::Char>
         return 0;
     }
 
-    inline static size_t length(const char_type* s)
+    inline static std::size_t length(const char_type* s)
     {
         const Pt::Char term(0);
         
@@ -304,7 +304,7 @@ struct char_traits<Pt::Char>
         return n;
     }
 
-    inline static const char_type* find(const char_type* s, size_t n, const char_type& a)
+    inline static const char_type* find(const char_type* s, std::size_t n, const char_type& a)
     {
         while(n-- > 0) 
         {
@@ -317,17 +317,17 @@ struct char_traits<Pt::Char>
         return 0;
     }
 
-    inline static char_type* move(char_type* s1, const char_type* s2, size_t n)
+    inline static char_type* move(char_type* s1, const char_type* s2, std::size_t n)
     {
         return (Pt::Char*) std::memmove(s1, s2, n * sizeof(Pt::Char));
     }
 
-    inline static char_type* copy(char_type* s1, const char_type* s2, size_t n)
+    inline static char_type* copy(char_type* s1, const char_type* s2, std::size_t n)
     {
         return (Pt::Char*) std::memcpy(s1, s2, n * sizeof(Pt::Char));
     }
 
-    inline static char_type* assign(char_type* s, size_t n, char_type a)
+    inline static char_type* assign(char_type* s, std::size_t n, char_type a)
     {
         while(n-- > 0)
             *(s++) = a;
@@ -477,9 +477,9 @@ class PT_API basic_string<Pt::Char>
         void push_back(Pt::Char ch)
         { (*this) += ch; }
 
-        void resize( size_t n, Pt::Char ch = value_type() );
+        void resize( std::size_t n, Pt::Char ch = value_type() );
 
-        void reserve(size_t n = 0);
+        void reserve(std::size_t n = 0);
 
         void swap(basic_string& str);
 
@@ -760,7 +760,7 @@ class PT_API basic_string<Pt::Char>
         Pt::Char* privdata_rw()
         { return isShortString() ? shortStringData() : longStringData(); }
 
-        void privreserve(size_t n);
+        void privreserve(std::size_t n);
 
         bool isShortString() const                    
         { return shortStringMagic() != 0xff; }

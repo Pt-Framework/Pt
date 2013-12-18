@@ -1,13 +1,11 @@
 /*
- * Copyright (C) 2006 by Tommi Maekitalo
- * Copyright (C) 2006 by Marc Boris Duerner
- * Copyright (C) 2006 by Stefan Bueder
- * 
+ * Copyright (C) 2010-2012 by Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,55 +15,96 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_DB_IRESULT_H
-#define PT_DB_IRESULT_H
+#include "Connection.h"
+#include <Pt/Ssl/SslError.h>
+#include <Pt/System/Logger.h>
+#include <streambuf>
 
-#include <Pt/Api.h>
-#include <Pt/Types.h>
-#include <Pt/RefCounted.h>
-#include <Pt/Db/Api.h>
-
+log_define("Pt.Ssl.StreamBuffer")
 
 namespace Pt {
 
-namespace Db {
+namespace Ssl {
 
-    class Row;
+Connection::Connection(Context& ctx, std::ios& ios, OpenMode omode)
+: _ctx(&ctx)
+, _ios(&ios)
+{
+}
 
-    /** \brief Interface for DB Values
-        \see Db::Result
-    */
-    class PT_DB_API IResult : public RefCounted
-    {
-    public:
-        typedef std::size_t size_type;
-        typedef Row value_type;
 
-    public:
-        virtual ~IResult()  
-        { }
+Connection::~Connection()
+{
+}
 
-        virtual Row getRow(size_type tup_num) const = 0;
 
-        virtual size_type size() const = 0;
+const char* Connection::currentCipher() const
+{
+    return "NONE";
+}
 
-        virtual size_type getFieldCount() const = 0;
-    };
-  
-} // namespace Db
+
+bool Connection::writeHandshake()
+{
+    log_trace("Connection::writeHandshake");
+    throw HandshakeFailed("SSL handshake failed");
+
+    return false;
+}
+
+
+bool Connection::readHandshake()
+{
+    log_trace("Connection::readHandshake");
+    throw HandshakeFailed("SSL handshake failed");
+}
+
+
+bool Connection::shutdown()
+{
+    log_debug("shutdown failed");
+    throw SslError("shutdown failed");
+    
+    return false;
+}
+
+
+bool Connection::isShutdown() const
+{
+    return false;
+}
+
+
+bool Connection::isClosed() const
+{   
+    return true;
+}
+
+
+std::streamsize Connection::write(const char* buf, std::size_t n)
+{
+    log_trace("Connection::write");
+    throw SslError("encoding failed");
+}
+
+
+std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxImport)
+{
+    log_trace("Connection::read");
+    throw SslError("decoding failed");
+}
+
+} // namespace Ssl
 
 } // namespace Pt
-
-#endif // PTV_DB_IRESULT_H
-

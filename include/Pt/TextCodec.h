@@ -69,7 +69,7 @@ class TextCodec : public std::codecvt<I, E, Pt::MBState>
          * @param ref This parameter is passed to std::codecvt. When ref == 0 the locale takes care
          * of deleting the facet. If ref == 1 the locale does not destroy the facet.
          */
-        TextCodec(size_t ref = 0)
+        TextCodec(std::size_t ref = 0)
         : std::codecvt<InternT, ExternT, MBState>(ref)
         , _refs(ref)
         {}
@@ -79,11 +79,11 @@ class TextCodec : public std::codecvt<I, E, Pt::MBState>
         virtual ~TextCodec()
         {}
 
-        size_t refs() const
+        std::size_t refs() const
         { return _refs; }
 
     private:
-        size_t _refs;
+        std::size_t _refs;
 };
 
 }

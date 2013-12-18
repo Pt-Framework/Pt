@@ -274,7 +274,7 @@ void TcpServerImpl::setEventFlags(HANDLE ev, long events)
 }
 
 
-int TcpServerImpl::waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, size_t timeout)
+int TcpServerImpl::waitSelect(fd_set* rfds, fd_set* wfds, fd_set* efds, std::size_t timeout)
 {
     struct timeval* tval = 0;
     struct timeval tv;

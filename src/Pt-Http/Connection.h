@@ -35,16 +35,13 @@
 #include <Pt/Http/Api.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
+#include <Pt/Ssl/StreamBuffer.h>
 #include <Pt/Net/TcpSocket.h>
 #include <Pt/System/IOBuffer.h>
 #include <Pt/System/Timer.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/Signal.h>
 #include <Pt/Connectable.h>
-
-#ifdef PT_HTTP_WITH_SSL
-#include <Pt/Ssl/StreamBuffer.h>
-#endif
 
 #include <iostream>
 
@@ -287,10 +284,9 @@ class Connection : public Connectable
         Net::TcpSocketOptions _tcpOptions;
 
         bool _ssl;
-#ifdef PT_HTTP_WITH_SSL
         Ssl::Context* _ctx;
         Ssl::StreamBuffer _sslbuf;
-#endif
+
         HttpBuffer _httpbuf;
         std::ostream _os; // TODO: remove, only needed to write hex values
 

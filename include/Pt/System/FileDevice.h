@@ -64,7 +64,7 @@ class PT_SYSTEM_API FileDevice : public IODevice
         const char* path() const
         { return _path.c_str(); }
 
-        size_t size() const;
+        std::size_t size() const;
 
         Signal<FileDevice&>& opened()
         { return _opened; }
@@ -73,29 +73,29 @@ class PT_SYSTEM_API FileDevice : public IODevice
         { return _isOpen; }
 
     protected:
-        size_t onBeginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
+        std::size_t onBeginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof);
 
-        size_t onEndRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
+        std::size_t onEndRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof);
 
-        size_t onBeginWrite(EventLoop& loop, const char* buffer, size_t n);
+        std::size_t onBeginWrite(EventLoop& loop, const char* buffer, std::size_t n);
 
-        size_t onEndWrite(EventLoop& loop, const char* buffer, size_t n);
+        std::size_t onEndWrite(EventLoop& loop, const char* buffer, std::size_t n);
 
         void onClose();
 
         void onCancel();
 
-        void onSetTimeout(size_t timeout);
+        void onSetTimeout(std::size_t timeout);
 
         bool onSeekable() const;
 
         pos_type onSeek(off_type offset, std::ios::seekdir sd);
 
-        size_t onRead(char* buffer, size_t count, bool& eof);
+        std::size_t onRead(char* buffer, std::size_t count, bool& eof);
 
-        size_t onWrite(const char* buffer, size_t count);
+        std::size_t onWrite(const char* buffer, std::size_t count);
 
-        size_t onPeek(char* buffer, size_t count);
+        std::size_t onPeek(char* buffer, std::size_t count);
 
         void onSync() const;
 

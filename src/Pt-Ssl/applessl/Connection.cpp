@@ -326,13 +326,13 @@ bool Connection::isClosed() const
 }
 
 
-std::streamsize Connection::write(const char* buf, size_t n)
+std::streamsize Connection::write(const char* buf, std::size_t n)
 {
     std::streambuf* sb = _ios->rdbuf();
     if( ! sb)
         return 0;
 
-    size_t processed = 0;
+    std::size_t processed = 0;
     OSStatus error = SSLWrite(_context, buf, n, &processed);
     
     if(error != noErr && error != errSSLWouldBlock)
@@ -342,7 +342,7 @@ std::streamsize Connection::write(const char* buf, size_t n)
 }
 
 
-std::streamsize Connection::read(char* buf, size_t n, std::streamsize maxImport)
+std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxImport)
 {
     log_trace("Connection::read");
 
@@ -353,7 +353,7 @@ std::streamsize Connection::read(char* buf, size_t n, std::streamsize maxImport)
     if(maxImport == 0) 
         maxImport = sb->in_avail();
 
-    size_t processed = 0;
+    std::size_t processed = 0;
     
     _isReading = true;
     _maxImport = maxImport;
@@ -375,7 +375,7 @@ std::streamsize Connection::read(char* buf, size_t n, std::streamsize maxImport)
 }
 
 
-OSStatus Connection::sslRead(void* data, size_t* n)
+OSStatus Connection::sslRead(void* data, std::size_t* n)
 {    
     log_trace("Connection::sslRead: wants " << *n << " bytes");
     
@@ -398,7 +398,7 @@ OSStatus Connection::sslRead(void* data, size_t* n)
 
     OSStatus ret = noErr;
     
-    if( static_cast<size_t>(r) < (*n) )
+    if( static_cast<std::size_t>(r) < (*n) )
     {
         _wantRead = true;
         ret = errSSLWouldBlock;
@@ -411,12 +411,12 @@ OSStatus Connection::sslRead(void* data, size_t* n)
     
     log_debug("sslRead: " << ret);
     
-    *n = static_cast<size_t>(r);
+    *n = static_cast<std::size_t>(r);
     return ret;
 }
 
 
-OSStatus Connection::sslWrite(const void* data, size_t* n)
+OSStatus Connection::sslWrite(const void* data, std::size_t* n)
 {           
     log_trace("Connection::sslWrite: " << *n);
     
@@ -433,7 +433,7 @@ OSStatus Connection::sslWrite(const void* data, size_t* n)
     log_trace("wrote " << _iocount << " bytes to output");
 
     OSStatus ret = noErr;
-    if( static_cast<size_t>(_iocount) < *n)
+    if( static_cast<std::size_t>(_iocount) < *n)
     {
         ret = errSSLClosedAbort;
     }
@@ -443,13 +443,13 @@ OSStatus Connection::sslWrite(const void* data, size_t* n)
 }
 
 
-OSStatus Connection::sslWriteCallback(SSLConnectionRef connection, const void* data, size_t* n)
+OSStatus Connection::sslWriteCallback(SSLConnectionRef connection, const void* data, std::size_t* n)
 {
     return ((Connection*)(connection))->sslWrite(data, n);
 }
 
 
-OSStatus Connection::sslReadCallback(SSLConnectionRef connection, void* data, size_t* n)
+OSStatus Connection::sslReadCallback(SSLConnectionRef connection, void* data, std::size_t* n)
 {
     return ((Connection*)(connection))->sslRead(data, n);
 }

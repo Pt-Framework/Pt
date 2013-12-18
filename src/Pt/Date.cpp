@@ -87,9 +87,9 @@ void operator<<=(SerializationInfo& si, const Date& date)
     if( si.decompose(date) )
         return;
 
-    si.addMember( Pt::LiteralPtr<char>("year") ) <<=  date.year();
-    si.addMember( Pt::LiteralPtr<char>("month") ) <<= date.month();
-    si.addMember( Pt::LiteralPtr<char>("day") ) <<=  date.day();
+    si.addMember( Pt::LiteralPtr<char>("year") ) <<= static_cast<int32_t>( date.year() );
+    si.addMember( Pt::LiteralPtr<char>("month") ) <<= static_cast<uint16_t>( date.month() );
+    si.addMember( Pt::LiteralPtr<char>("day") ) <<= static_cast<uint16_t>( date.day() );
     si.setTypeName( Pt::LiteralPtr<char>("Pt::Date") );
 }
 

@@ -35,4 +35,7 @@ else
     LinkLibs Pt-Ssl : $(SSL_LINKLIBS) ;
 }
 
-SubInclude PT_TOP src Pt-Ssl tests ;
+if $(WITH_SSL)
+{
+    SubInclude PT_TOP src Pt-Ssl tests ;
+}

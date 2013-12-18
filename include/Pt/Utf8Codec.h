@@ -58,7 +58,7 @@ class PT_API Utf8Codec : public TextCodec<Char, char>
             * @param ref This optional parameter is passed to std::codecvt. When ref == 0 the locale takes
             * care of deleting the facet. If ref == 1 the locale does not destroy the facet. Default value is 0.
             */
-        explicit Utf8Codec(size_t ref = 0);
+        explicit Utf8Codec(std::size_t ref = 0);
 
         //! @brief Destructor.
         virtual ~Utf8Codec()
@@ -78,7 +78,7 @@ class PT_API Utf8Codec : public TextCodec<Char, char>
         virtual bool do_always_noconv() const throw();
 
         // inheritdoc
-        virtual int do_length(MBState& s, const char* fromBegin, const char* fromEnd, size_t max) const;
+        virtual int do_length(MBState& s, const char* fromBegin, const char* fromEnd, std::size_t max) const;
 
         // inheritdoc
         virtual int do_max_length() const throw();

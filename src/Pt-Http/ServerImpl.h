@@ -30,10 +30,12 @@
 #define Pt_Http_ServerImpl_h
 
 #include "Connection.h"
+
 #include <Pt/Http/Api.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/Server.h>
+#include <Pt/Ssl/Context.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/System/Thread.h>
@@ -41,10 +43,6 @@
 #include <Pt/System/Condition.h>
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
-
-#ifdef PT_HTTP_WITH_SSL
-#include <Pt/Ssl/Context.h>
-#endif
 
 #include <vector>
 #include <string>
@@ -186,9 +184,8 @@ class ServerThread : public Connectable
         Pt::System::MainLoop _loop;
         
         bool _ssl;
-#ifdef PT_HTTP_WITH_SSL
         Ssl::Context _sslctx;
-#endif
+
         Pt::System::AttachedThread _thread;
         std::vector<Acceptor*> _handlers;
 

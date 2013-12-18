@@ -27,6 +27,7 @@
  */
 
 #include "Connection.h"
+
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/HttpError.h>
@@ -35,6 +36,7 @@
 #include <Pt/TextStream.h>
 #include <Pt/Base64Codec.h>
 #include <Pt/Convert.h>
+
 #include <iterator>
 #include <cassert>
 
@@ -77,10 +79,8 @@ Connection::Connection()
 , _sockbuf(8192, true)
 , _sockios(&_sockbuf)
 , _ssl(false)
-#ifdef PT_HTTP_WITH_SSL
 , _ctx(0)
 , _sslbuf()
-#endif
 , _httpbuf()
 , _os(&_sockbuf)
 , _timeout(WaitInfinite)
@@ -149,7 +149,6 @@ void Connection::setHost(const Net::Endpoint& addrinfo, const Net::TcpSocketOpti
 }
 
 
-#ifdef PT_HTTP_WITH_SSL
 void Connection::setSecure(Ssl::Context& ctx)
 {
     log_debug("initialize HTTPS connection");
@@ -174,13 +173,6 @@ void Connection::setSecure(Ssl::Context& ctx)
     _os.rdbuf(&_sslbuf);
 }
 
-#else
-
-void Connection::setSecure(Ssl::Context&)
-{
-}
-
-#endif
 
 void Connection::setActive(System::EventLoop& loop)
 {
@@ -219,7 +211,7 @@ void Connection::sendRequest(Request& request)
     {
         log_debug("opening new connection to " << _addrInfo.toString());
         _socket.connect(_addrInfo, _tcpOptions);
-#ifdef PT_HTTP_WITH_SSL
+
         if(_ssl)
         {
             log_debug("SSL connect");
@@ -244,7 +236,6 @@ void Connection::sendRequest(Request& request)
                 log_debug("continuing handshake");
             }
         }
-#endif
     }
     
     std::ostream& os = _os; 
@@ -293,13 +284,11 @@ void Connection::sendRequest(Request& request)
         }
     }
 
-#ifdef PT_HTTP_WITH_SSL
     if(_ssl)
     {
         log_debug("flushing ssl buffer");
         _sslbuf.pubsync();
     }
-#endif
 
     log_debug("flushing socket buffer: " << _sockbuf.out_avail());
     _sockbuf.pubsync();
@@ -367,7 +356,6 @@ void Connection::beginSendRequest(Request& request)
         return;
     }
 
-#ifdef PT_HTTP_WITH_SSL
     if(_state == SslHandshake)
     {
         log_debug("begining SSL handshake");
@@ -427,8 +415,6 @@ void Connection::beginSendRequest(Request& request)
         _timer.stop();
         _state = Connected;
     }
-
-#endif
 
     std::ostream& os = _os; //( _httpbuf.buffer() );
     MessageBuffer& mbuf = _request->buffer();
@@ -511,7 +497,6 @@ MessageProgress Connection::endSendRequest()
         return progress;
     }
 
-#ifdef PT_HTTP_WITH_SSL
     if(_state == SslHandshakeWrite)
     {
         log_debug("wrote SSL handshake");
@@ -525,7 +510,6 @@ MessageProgress Connection::endSendRequest()
         _sockbuf.endRead();
         return progress;
     }
-#endif
 
     Request* req = _request;
     _request = 0;
@@ -681,7 +665,6 @@ void Connection::beginReceiveRequest(Request& request)
 
     _request = &request;
 
-#ifdef PT_HTTP_WITH_SSL
     if(_state == SslNotAccepted)
     {
         log_debug("beginning SSL handshake");
@@ -742,8 +725,6 @@ void Connection::beginReceiveRequest(Request& request)
         _state = Accepted;
     }
 
-#endif
-
     // send remaining pipelined replies, if no further requests
     // are in the pipeline.
     if( outputAvailable() && ! inputAvailable() )
@@ -788,8 +769,6 @@ MessageProgress Connection::endReceiveRequest()
 
     if(_onTimeout)
         throw HttpError("timeout");
-
-#ifdef PT_HTTP_WITH_SSL
    
     if(_state == SslAcceptWrite)
     {
@@ -804,8 +783,6 @@ MessageProgress Connection::endReceiveRequest()
         _sockbuf.endRead();
         return progress;
     }
-
-#endif
 
     if(_state == ReplyOutputPending)
     {
@@ -1085,7 +1062,6 @@ void Connection::onHttpOutput(System::IOBuffer&)
 
 void Connection::beginRead()
 {
-#ifdef PT_HTTP_WITH_SSL
     if(_ssl)
     {
         _sslbuf.import();
@@ -1096,7 +1072,7 @@ void Connection::beginRead()
             return;
         }
     }
-#endif
+
     if( _sockbuf.in_avail() )
         _socket.setInputPipelined();
     else
@@ -1110,12 +1086,10 @@ void Connection::endRead()
 
     std::size_t readSize = _sockbuf.endRead();
 
-#ifdef PT_HTTP_WITH_SSL
     if(_ssl)
     {
         _sslbuf.import();
     }
-#endif
 
     _readBytes += readSize;
 
@@ -1140,14 +1114,12 @@ void Connection::endRead()
 
 bool Connection::inputAvailable()
 {
-#ifdef PT_HTTP_WITH_SSL
     if(_ssl)
     {
         //_sslbuf.import();
         if( _sslbuf.in_avail() > 0 ) 
             return true;
     }
-#endif
 
     return _sockbuf.in_avail() > 0;
 }
@@ -1157,13 +1129,11 @@ void Connection::beginWrite()
 {
     log_debug("Connection::beginWrite");
 
-#ifdef PT_HTTP_WITH_SSL
     if(_ssl)
     {
         log_debug("flushing ssl buffer");
         _sslbuf.pubsync();
     }
-#endif
 
     log_debug("begin writing socket buffer: " << _sockbuf.out_avail());
     _timer.start(_timeout);
@@ -1180,13 +1150,12 @@ void Connection::endWrite()
 
 bool Connection::outputAvailable()
 {
-#ifdef PT_HTTP_WITH_SSL
     if(_ssl)
     {
         // TODO: implement Ssl::StreamBuffer::out_avail...
         _sslbuf.pubsync();
     }
-#endif
+
     return _sockbuf.out_avail() > 0;
 }
 

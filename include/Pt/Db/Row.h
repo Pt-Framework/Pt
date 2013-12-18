@@ -51,7 +51,7 @@ namespace Db {
             class ConstIterator;
 
             //! \brief The size-type used by Row.
-            typedef size_t size_type;
+            typedef std::size_t size_type;
 
             //! \brief The value-type contained in the row.
             typedef Value value_type;

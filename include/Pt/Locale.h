@@ -29,6 +29,7 @@
 #define PT_LOCALE_H
 
 #include <Pt/Api.h>
+#include <Pt/Types.h>
 
 #ifdef _WIN32_WCE
     // WinCE does not provide locale-classes
@@ -63,7 +64,7 @@ class codecvt : public std::codecvt_base
         typedef S StateT; 
     
     public: 
-        codecvt(size_t ref = 0)
+        codecvt(std::size_t ref = 0)
         {}
         
         virtual ~codecvt()
@@ -100,7 +101,7 @@ class codecvt : public std::codecvt_base
         { return this->do_always_noconv(); }
 
         int length(StateT& state, const ExternT* from,
-                   const ExternT* end, size_t max) const
+                   const ExternT* end, std::size_t max) const
         { return this->do_length(state, from, end, max); }
 
         int max_length() const
@@ -118,7 +119,7 @@ class codecvt : public std::codecvt_base
         virtual bool do_always_noconv() const = 0;
 
         virtual int do_length(StateT& s, const ExternT* fromBegin, 
-                              const ExternT* fromEnd, size_t max) const = 0;
+                              const ExternT* fromEnd, std::size_t max) const = 0;
 
         virtual int do_max_length() const = 0;
 
@@ -149,7 +150,7 @@ class ctype_base
 
         typedef unsigned short mask;
 
-        ctype_base(size_t _refs = 0)
+        ctype_base(std::size_t _refs = 0)
         { }
 };
 

@@ -70,7 +70,7 @@ void ThreadImpl::init(const Callable<void>& cb)
 
 void ThreadImpl::start()
 {
-    size_t stacksize = 0;
+    std::size_t stacksize = 0;
 
     pthread_attr_t attrs;
     pthread_attr_init(&attrs);

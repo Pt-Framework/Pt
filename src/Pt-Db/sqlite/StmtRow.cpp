@@ -40,9 +40,9 @@ namespace Db {
 
 namespace sqlite {
 
-    size_t StmtRow::size() const
+    std::size_t StmtRow::size() const
     {
-        return static_cast<size_t>(::sqlite3_column_count(_stmt));
+        return static_cast<std::size_t>(::sqlite3_column_count(_stmt));
     }
 
     Value StmtRow::getValue(size_type field_num) const

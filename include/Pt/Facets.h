@@ -59,7 +59,7 @@ class PT_API numpunct<Pt::Char> : public locale::facet {
         virtual locale::id& __get_id (void) const { return id; }
 
     public:
-        explicit numpunct(size_t refs = 0);
+        explicit numpunct(std::size_t refs = 0);
 
         virtual ~numpunct();
 
@@ -97,7 +97,7 @@ class PT_API num_put< Pt::Char,
         typedef Pt::Char char_type;
         typedef ostreambuf_iterator<Pt::Char> iter_type;
 
-        explicit num_put(size_t refs = 0)
+        explicit num_put(std::size_t refs = 0)
         : locale::facet(refs)
         { }
 
@@ -172,7 +172,7 @@ class PT_API num_get< Pt::Char,
         typedef Pt::Char char_type;
         typedef istreambuf_iterator<Pt::Char> iter_type;
 
-        explicit num_get(size_t refs = 0)
+        explicit num_get(std::size_t refs = 0)
         : locale::facet(refs)
         {}
 
@@ -265,7 +265,7 @@ class PT_API num_get< Pt::Char,
         virtual locale::id& __get_id (void) const { return id; }
 
     public:
-        explicit ctype(size_t refs = 0);
+        explicit ctype(std::size_t refs = 0);
 
         virtual ~ctype();
 
@@ -364,7 +364,7 @@ class PT_API codecvt<Pt::Char, char, Pt::MBState> : public codecvt_base, public 
         virtual locale::id& __get_id (void) const { return id; }
 
     public:
-        explicit codecvt(size_t ref = 0);
+        explicit codecvt(std::size_t ref = 0);
 
         virtual ~codecvt();
 
@@ -399,7 +399,7 @@ class PT_API codecvt<Pt::Char, char, Pt::MBState> : public codecvt_base, public 
         { return this->do_always_noconv(); }
 
         int length(Pt::MBState& state, const char* from,
-                   const char* end, size_t max) const
+                   const char* end, std::size_t max) const
         { return this->do_length(state, from, end, max); }
 
         int max_length() const
@@ -434,7 +434,7 @@ class PT_API codecvt<Pt::Char, char, Pt::MBState> : public codecvt_base, public 
         virtual int do_length(Pt::MBState&, 
                               const char* from,
                               const char* end, 
-                              size_t max) const = 0;
+                              std::size_t max) const = 0;
 
         virtual int do_max_length() const throw() = 0;
 };
@@ -458,7 +458,7 @@ class PT_API codecvt<char, char, Pt::MBState> : public codecvt_base, public loca
         virtual locale::id& __get_id (void) const { return id; }
 
     public:
-        explicit codecvt(size_t ref = 0);
+        explicit codecvt(std::size_t ref = 0);
 
         virtual ~codecvt();
 
@@ -492,7 +492,7 @@ class PT_API codecvt<char, char, Pt::MBState> : public codecvt_base, public loca
         { return this->do_always_noconv(); }
 
         int length(Pt::MBState& state, const char* from,
-                   const char* end, size_t max) const
+                   const char* end, std::size_t max) const
         { return this->do_length(state, from, end, max); }
 
         int max_length() const
@@ -527,7 +527,7 @@ class PT_API codecvt<char, char, Pt::MBState> : public codecvt_base, public loca
         virtual int do_length(Pt::MBState&, 
                               const char* from,
                               const char* end, 
-                              size_t max) const = 0;
+                              std::size_t max) const = 0;
 
         virtual int do_max_length() const throw() = 0;
 }; 

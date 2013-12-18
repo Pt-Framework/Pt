@@ -137,7 +137,7 @@ void IODeviceImpl::cancel(EventLoop& loop)
 }
 
 
-size_t IODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t IODeviceImpl::beginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     log_debug("begin read on fd:" << _ioh.fd);
     
@@ -147,7 +147,7 @@ size_t IODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eo
         if (ret > 0)
         {
             log_debug("read:" << ret << " bytes");
-            return static_cast<size_t>(ret);
+            return static_cast<std::size_t>(ret);
         }
 
         if(ret == 0 || errno == ECONNRESET)
@@ -169,7 +169,7 @@ size_t IODeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eo
 }
 
 
-size_t IODeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t IODeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     log_debug("end read on fd:" << _ioh.fd);
 
@@ -185,7 +185,7 @@ size_t IODeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
 }
 
 
-size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
+std::size_t IODeviceImpl::read( char* buffer, std::size_t count, bool& eof )
 {
     ssize_t ret = 0;
 
@@ -223,7 +223,7 @@ size_t IODeviceImpl::read( char* buffer, size_t count, bool& eof )
 }
 
 
-size_t IODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t IODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     log_debug("begin write on fd:" << _ioh.fd);
 
@@ -233,7 +233,7 @@ size_t IODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
         if (ret > 0)
         {
             log_debug("wrote:" << ret << " bytes");
-            return static_cast<size_t>(ret);
+            return static_cast<std::size_t>(ret);
         }
 
         if (ret == 0 || errno == ECONNRESET || errno == EPIPE)
@@ -251,7 +251,7 @@ size_t IODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
 }
 
 
-size_t IODeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t IODeviceImpl::endWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     log_debug("end write on fd:" << _ioh.fd);
 
@@ -267,7 +267,7 @@ size_t IODeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
 }
 
 
-size_t IODeviceImpl::write( const char* buffer, size_t count )
+std::size_t IODeviceImpl::write( const char* buffer, std::size_t count )
 {
     ssize_t ret = 0;
 
@@ -301,7 +301,7 @@ size_t IODeviceImpl::write( const char* buffer, size_t count )
 }
 
 
-bool IODeviceImpl::wait(std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds)
+bool IODeviceImpl::wait(std::std::size_t msecs, fd_set* rfds, fd_set* wfds, fd_set* efds)
 {
     struct timeval* timeout = 0;
     struct timeval tv;
@@ -449,7 +449,7 @@ bool IODeviceImpl::runWrite(EventLoop& loop)
 }*/
 
 
-/*size_t IODeviceImpl::beginRead(char* buffer, size_t n, bool&)
+/*std::size_t IODeviceImpl::beginRead(char* buffer, std::size_t n, bool&)
 {
     assert( _device.parent() );
 
@@ -463,7 +463,7 @@ bool IODeviceImpl::runWrite(EventLoop& loop)
 }*/
 
 
-/*size_t IODeviceImpl::endRead(bool& eof)
+/*std::size_t IODeviceImpl::endRead(bool& eof)
 {
     assert( _device.parent() );
 
@@ -483,12 +483,12 @@ bool IODeviceImpl::runWrite(EventLoop& loop)
 }*/
 
 
-/*size_t IODeviceImpl::beginWrite(const char* buffer, size_t n)
+/*std::size_t IODeviceImpl::beginWrite(const char* buffer, std::size_t n)
 {
     ssize_t ret = ::write(_fd, (const void*)buffer, n);
 
     if (ret > 0)
-        return static_cast<size_t>(ret);
+        return static_cast<std::size_t>(ret);
 
     if (ret == 0 || errno == ECONNRESET || errno == EPIPE)
         throw System::IOError("lost connection to peer");
@@ -504,7 +504,7 @@ bool IODeviceImpl::runWrite(EventLoop& loop)
 }*/
 
 
-/*size_t IODeviceImpl::endWrite()
+/*std::size_t IODeviceImpl::endWrite()
 {
     EventLoop* loop = _device.parent();
     if( loop && _iohandle )
@@ -520,7 +520,7 @@ bool IODeviceImpl::runWrite(EventLoop& loop)
 
     //if (_device.wavail() > 0)
     //{
-    //    size_t n = _device.wavail();
+    //    std::size_t n = _device.wavail();
     //    return n;
     //}
 

@@ -106,7 +106,7 @@ bool MainLoopImpl::processEvents()
 
 bool MainLoopImpl::waitNext()
 {
-    size_t timeout = _timerQueue.processTimers();
+    std::size_t timeout = _timerQueue.processTimers();
 
     // check all selectables that did not require waiting
     while( true )

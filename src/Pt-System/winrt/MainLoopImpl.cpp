@@ -140,13 +140,13 @@ bool MainLoopImpl::processEvents()
 // TODO: rename runNext, wait for next activity and run it
 bool MainLoopImpl::waitNext()
 {
-    size_t timeout = _timerQueue.processTimers();
+    std::size_t timeout = _timerQueue.processTimers();
 
     // check all selectables that did not require waiting, but
     // for fairness reasons check only as many selectables as
     // were ready in the first place.
 
-    size_t n = 0;
+    std::size_t n = 0;
     while( true )
     {
         Pt::System::MutexLock lock(_mutex);

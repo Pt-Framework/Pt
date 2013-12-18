@@ -1,13 +1,11 @@
 /*
- * Copyright (C) 2006 by Tommi Maekitalo
- * Copyright (C) 2006 by Marc Boris Duerner
- * Copyright (C) 2006 by Stefan Bueder
- * 
+ * Copyright (C) 2010-2012 by Marc Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -17,55 +15,64 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_DB_IRESULT_H
-#define PT_DB_IRESULT_H
+#ifndef PT_SSL_CERTIFICATEIMPL_H
+#define PT_SSL_CERTIFICATEIMPL_H
 
-#include <Pt/Api.h>
-#include <Pt/Types.h>
-#include <Pt/RefCounted.h>
-#include <Pt/Db/Api.h>
-
+#include <Pt/Ssl/Api.h>
+#include <string>
 
 namespace Pt {
 
-namespace Db {
+namespace Ssl {
 
-    class Row;
-
-    /** \brief Interface for DB Values
-        \see Db::Result
-    */
-    class PT_DB_API IResult : public RefCounted
-    {
+class CertificateImpl
+{
     public:
-        typedef std::size_t size_type;
-        typedef Row value_type;
-
-    public:
-        virtual ~IResult()  
+        CertificateImpl()
         { }
 
-        virtual Row getRow(size_type tup_num) const = 0;
+        ~CertificateImpl()
+        { }
 
-        virtual size_type size() const = 0;
+        int serialNumber() const
+        {
+            return 0;
+        }
 
-        virtual size_type getFieldCount() const = 0;
-    };
-  
-} // namespace Db
+        std::string issuer() const
+        {
+            return std::string();
+        }
+
+        std::string subject() const
+        {
+            return "Unknown Organization, Unknown Name";
+        }
+        
+        std::string notBefore() const
+        {
+            return std::string();
+        }
+
+        std::string notAfter() const
+        {
+           return std::string();
+        }
+};
+
+} // namespace Ssl
 
 } // namespace Pt
 
-#endif // PTV_DB_IRESULT_H
-
+#endif

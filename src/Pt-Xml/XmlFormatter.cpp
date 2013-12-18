@@ -106,7 +106,7 @@ void XmlFormatter::onAddString(const char* name, const char* type,
 
 
 void XmlFormatter::onAddBinary(const char* name, const char* type,
-                               const char* value, size_t length, const char* id)
+                               const char* value, std::size_t length, const char* id)
 {
     convert(_value, std::string(value, length));
     this->addValue(name, type, _value.c_str(), id);

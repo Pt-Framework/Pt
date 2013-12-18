@@ -84,7 +84,7 @@ void PipeIODevice::open(HANDLE h)
 }
 
 
-void PipeIODevice::onSetTimeout(size_t timeout)
+void PipeIODevice::onSetTimeout(std::size_t timeout)
 {
     _timeout = timeout;
 }
@@ -132,7 +132,7 @@ bool PipeIODevice::onRun()
 }
 
 
-size_t PipeIODevice::onBeginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t PipeIODevice::onBeginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     if( Read != _mode )
         throw IOError( PT_ERROR_MSG("Could not read from write only pipe") );
@@ -145,7 +145,7 @@ size_t PipeIODevice::onBeginRead(EventLoop& loop, char* buffer, size_t n, bool& 
 }
 
 
-size_t PipeIODevice::onEndRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t PipeIODevice::onEndRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     loop.selector().disable(_ioh);
 
@@ -181,7 +181,7 @@ size_t PipeIODevice::onEndRead(EventLoop& loop, char* buffer, size_t n, bool& eo
 }
 
 
-size_t PipeIODevice::onBeginWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t PipeIODevice::onBeginWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     if( Write != _mode )
     {
@@ -193,7 +193,7 @@ size_t PipeIODevice::onBeginWrite(EventLoop& loop, const char* buffer, size_t n)
 }
 
 
-size_t PipeIODevice::onEndWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t PipeIODevice::onEndWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     loop.selector().disable(_ioh);
 
@@ -208,7 +208,7 @@ size_t PipeIODevice::onEndWrite(EventLoop& loop, const char* buffer, size_t n)
 }
 
 
-size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
+std::size_t PipeIODevice::onRead(char* buffer, std::size_t count, bool& eof)
 {
     if( Read != _mode )
         throw IOError( PT_ERROR_MSG("Could not read from write only pipe") );
@@ -218,7 +218,7 @@ size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
     eof = false;
 
     DWORD timeout = _timeout == EventLoop::WaitInfinite ? INFINITE 
-                                                        : static_cast<size_t>(_timeout);
+                                                        : static_cast<std::size_t>(_timeout);
 
     if(_bufferSize) 
     {
@@ -244,24 +244,24 @@ size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
 }
 
 
-void PipeIODevice::writeMessage(const char* buffer, size_t count)
+void PipeIODevice::writeMessage(const char* buffer, std::size_t count)
 {
     DWORD timeout = _timeout == EventLoop::WaitInfinite ? INFINITE 
-                                                        : static_cast<size_t>(_timeout);
+                                                        : static_cast<std::size_t>(_timeout);
 
     if( FALSE == WriteMsgQueue(handle(), (LPVOID) buffer, count, timeout, 0) )
         throw IOError("WriteMsgQueue failed");
 }
 
 
-size_t PipeIODevice::onWrite(const char* buffer, size_t count)
+std::size_t PipeIODevice::onWrite(const char* buffer, std::size_t count)
 {
     if( Write != _mode )
         throw IOError( PT_ERROR_MSG("Could not write on a read only pipe") );
 
     
     DWORD timeout = _timeout == EventLoop::WaitInfinite ? INFINITE 
-                                                        : static_cast<size_t>(_timeout);
+                                                        : static_cast<std::size_t>(_timeout);
 
     DWORD bytesToWrite = std::min<DWORD>(count, _msgSize);
     if ( FALSE == WriteMsgQueue(handle(), (LPVOID) buffer, bytesToWrite, timeout, 0))
@@ -374,7 +374,7 @@ void PipeIODevice::open(HANDLE handle)
 }
 
 
-void PipeIODevice::onSetTimeout(size_t timeout)
+void PipeIODevice::onSetTimeout(std::size_t timeout)
 {
     _impl.setTimeout(timeout);
 }
@@ -435,37 +435,37 @@ bool PipeIODevice::onRun()
 }
 
 
-size_t PipeIODevice::onBeginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t PipeIODevice::onBeginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     return _impl.beginRead(loop, buffer, n, eof);
 }
 
 
-size_t PipeIODevice::onEndRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t PipeIODevice::onEndRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     return _impl.endRead(loop, buffer, n, eof);
 }
 
 
-size_t PipeIODevice::onRead(char* buffer, size_t count, bool& eof)
+std::size_t PipeIODevice::onRead(char* buffer, std::size_t count, bool& eof)
 {
     return _impl.read(buffer, count, eof);
 }
 
 
-size_t PipeIODevice::onBeginWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t PipeIODevice::onBeginWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     return _impl.beginWrite(loop, buffer, n);
 }
 
 
-size_t PipeIODevice::onEndWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t PipeIODevice::onEndWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     return _impl.endWrite(loop, buffer, n);
 }
 
 
-size_t PipeIODevice::onWrite(const char* buffer, size_t count)
+std::size_t PipeIODevice::onWrite(const char* buffer, std::size_t count)
 {
     return _impl.write(buffer, count);
 }
@@ -577,7 +577,7 @@ LONG PipeImpl::_nameId = 0;
     if( ! prevHandle && _rbuf )
     {
         bool eof = false;
-        size_t n = this->onBeginRead(_rbuf, _rbuflen, eof);
+        std::size_t n = this->onBeginRead(_rbuf, _rbuflen, eof);
         if(eof || n > 0)
             avail = true;
 
@@ -587,7 +587,7 @@ LONG PipeImpl::_nameId = 0;
     // see above. onBeginWrite could not do anything when it was called
     if( ! prevHandle && _wbuf)
     {
-        size_t n = this->onBeginWrite(_wbuf, _wbuflen);
+        std::size_t n = this->onBeginWrite(_wbuf, _wbuflen);
         if(n > 0)
             avail = true;
     }

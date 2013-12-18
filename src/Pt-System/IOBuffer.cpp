@@ -36,7 +36,7 @@ namespace Pt {
 
 namespace System {
 
-IOBuffer::IOBuffer(size_t bufferSize, bool extend)
+IOBuffer::IOBuffer(std::size_t bufferSize, bool extend)
 : _ioDevice   (0)
 , _ibufferSize(0)
 , _ibuffer    (0)
@@ -47,7 +47,7 @@ IOBuffer::IOBuffer(size_t bufferSize, bool extend)
     init(bufferSize, extend);
 }
 
-IOBuffer::IOBuffer(IODevice& ioDevice, size_t bufferSize, bool extend)
+IOBuffer::IOBuffer(IODevice& ioDevice, std::size_t bufferSize, bool extend)
 : _ioDevice   (0)
 , _ibufferSize(0)
 , _ibuffer    (0)
@@ -67,7 +67,7 @@ IOBuffer::~IOBuffer()
 }
 
 
-void IOBuffer::init(size_t bufferSize, bool extend)
+void IOBuffer::init(std::size_t bufferSize, bool extend)
 {
     _ibufferSize = bufferSize + 4;
     _ibuffer = 0;
@@ -139,13 +139,13 @@ void IOBuffer::beginRead()
     if( ! _ibuffer)
         _ibuffer = new char[_ibufferSize];
 
-    size_t putback = _pbmax;
-    size_t leftover = 0;
+    std::size_t putback = _pbmax;
+    std::size_t leftover = 0;
 
     // Keep chars for putback
     if( gptr() )
     {
-        putback    = std::min<size_t>(gptr() - eback(), _pbmax);
+        putback    = std::min<std::size_t>(gptr() - eback(), _pbmax);
         char* to   = _ibuffer + _pbmax - putback;
         char* from = gptr() - putback;
 
@@ -153,7 +153,7 @@ void IOBuffer::beginRead()
         std::memmove(to, from, putback + leftover);
     }
 
-    size_t used = _pbmax + leftover;
+    std::size_t used = _pbmax + leftover;
 
     if(_ibufferSize == used)
         throw std::logic_error(PT_ERROR_MSG("IOBuffer is full"));
@@ -172,9 +172,9 @@ void IOBuffer::onRead(IODevice& dev)
 }
 
 
-size_t IOBuffer::endRead()
+std::size_t IOBuffer::endRead()
 {
-    size_t readSize = _ioDevice->endRead();
+    std::size_t readSize = _ioDevice->endRead();
 
     setg(eback(),             // start of get area
          gptr(),              // gptr position
@@ -191,7 +191,7 @@ void IOBuffer::beginWrite()
 
     if( pptr() )
     {
-        size_t avail = pptr() - pbase();
+        std::size_t avail = pptr() - pbase();
         if(avail > 0)
         {
             _ioDevice->beginWrite(_obuffer, avail);
@@ -206,16 +206,16 @@ void IOBuffer::onWrite(IODevice& dev)
 }
 
 
-size_t IOBuffer::endWrite()
+std::size_t IOBuffer::endWrite()
 {
     typedef IOBuffer::traits_type traits_type;
 
-    size_t leftover = 0;
-    size_t written  = 0;
+    std::size_t leftover = 0;
+    std::size_t written  = 0;
 
     if( pptr() )
     {
-        size_t avail = pptr() - pbase();
+        std::size_t avail = pptr() - pbase();
         written      = _ioDevice->endWrite();
 
         leftover = avail - written;
@@ -301,17 +301,17 @@ std::streambuf::int_type IOBuffer::underflow()
     if(!_ibuffer)
         _ibuffer = new char[_ibufferSize];
 
-    size_t putback = _pbmax;
+    std::size_t putback = _pbmax;
 
     if( gptr() )
     {
-        putback = std::min<size_t>(gptr() - eback(), _pbmax);
+        putback = std::min<std::size_t>(gptr() - eback(), _pbmax);
         std::memmove(_ibuffer + (_pbmax - putback),
                      gptr() - putback,
                      putback );
     }
 
-    size_t readSize = _ioDevice->read(_ibuffer + _pbmax, _ibufferSize - _pbmax);
+    std::size_t readSize = _ioDevice->read(_ibuffer + _pbmax, _ibufferSize - _pbmax);
 
     setg(_ibuffer + _pbmax - putback,    // start of get area
          _ibuffer + _pbmax,              // gptr position
@@ -343,9 +343,9 @@ std::streambuf::int_type IOBuffer::overflow(std::streambuf::int_type ch)
     else if(traits_type::eq_int_type(ch, traits_type::eof()) || ! _oextend)
     {
         // normal blocking overflow case
-        size_t avail    = pptr() - _obuffer;
-        size_t written  = _ioDevice->write(_obuffer, avail);
-        size_t leftover = avail - written;
+        std::size_t avail    = pptr() - _obuffer;
+        std::size_t written  = _ioDevice->write(_obuffer, avail);
+        std::size_t leftover = avail - written;
 
         if(leftover > 0)
             traits_type::move(_obuffer, _obuffer + written, leftover);
@@ -357,7 +357,7 @@ std::streambuf::int_type IOBuffer::overflow(std::streambuf::int_type ch)
     {
         // if the buffer area is extensible and overflow is not called by
         // sync/flush we copy the output buffer to a larger one
-        size_t bufsize = _obufferSize + (_obufferSize / 2);
+        std::size_t bufsize = _obufferSize + (_obufferSize / 2);
         char* buf = new char[ bufsize ];
         traits_type::copy(buf, _obuffer, _obufferSize);
         std::swap(_obuffer, buf);

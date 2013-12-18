@@ -35,17 +35,14 @@
 #include <Pt/Http/Reply.h>
 #include <Pt/Net/TcpServer.h>
 #include <Pt/Net/TcpSocket.h>
-
-#ifdef PT_HTTP_WITH_SSL
 #include <Pt/Ssl/StreamBuffer.h>
-#endif
-
 #include <Pt/System/Selectable.h>
 #include <Pt/System/IOStream.h>
 #include <Pt/System/IOBuffer.h>
 #include <Pt/System/Timer.h>
 #include <Pt/Connectable.h>
 #include <Pt/Delegate.h>
+
 #include <string>
 #include <sstream>
 #include <cstddef>

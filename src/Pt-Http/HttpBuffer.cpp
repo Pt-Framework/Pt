@@ -285,8 +285,8 @@ void HttpBuffer::import(std::streamsize n)
         n = 0;
 
     // Move unread bytes and putback to front
-    size_t putback  = MaxPutback;
-    size_t leftover = 0;
+    std::size_t putback  = MaxPutback;
+    std::size_t leftover = 0;
     
     if( this->gptr() ) 
     {

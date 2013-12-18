@@ -431,7 +431,7 @@ const Endpoint& UdpSocketImpl::remoteEndpoint() const
 }
 
 
-size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     log_debug("begin read on fd:" << _ioh.fd);
 
@@ -447,7 +447,7 @@ size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
             log_debug("read:" << ret << " bytes");
             
             _peerAddr.impl()->init(addr, addrlen);
-            return static_cast<size_t>(ret);
+            return static_cast<std::size_t>(ret);
         }
 
         if(errno == EAGAIN || errno == EWOULDBLOCK)
@@ -462,7 +462,7 @@ size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, size_t n,
 }
 
 
-size_t UdpSocketImpl::read( char* buffer, size_t count, bool& eof )
+std::size_t UdpSocketImpl::read( char* buffer, std::size_t count, bool& eof )
 {
     ssize_t ret = 0;
 
@@ -497,7 +497,7 @@ size_t UdpSocketImpl::read( char* buffer, size_t count, bool& eof )
 }
 
 
-size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, size_t n)
+std::size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
 {
     ssize_t ret = 0;
 
@@ -507,7 +507,7 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
         ret = ::sendto( this->fd(), buffer, n, 0, (sockaddr*)&_sendaddr, _sendaddrLen);
 
     if (ret > 0)
-        return static_cast<size_t>(ret);
+        return static_cast<std::size_t>(ret);
 
     if (ret == 0 || errno == ECONNRESET || errno == EPIPE)
         throw System::IOError("lost connection to peer");
@@ -518,7 +518,7 @@ size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, si
 }
 
 
-size_t UdpSocketImpl::write( const char* buffer, size_t count )
+std::size_t UdpSocketImpl::write( const char* buffer, std::size_t count )
 {
     ssize_t ret = 0;
 

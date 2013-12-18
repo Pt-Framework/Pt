@@ -175,7 +175,7 @@ FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir
 }
 
 
-size_t FileDeviceImpl::size()
+std::size_t FileDeviceImpl::size()
 {
     DWORD sz = GetFileSize(handle(), NULL);
     if(sz == INVALID_FILE_SIZE)
@@ -185,10 +185,10 @@ size_t FileDeviceImpl::size()
 }
 
 
-size_t FileDeviceImpl::peek(char* buffer, size_t count)
+std::size_t FileDeviceImpl::peek(char* buffer, std::size_t count)
 {
     bool eof;
-    size_t ret = this->read(buffer, count, eof);
+    std::size_t ret = this->read(buffer, count, eof);
     if(ret > 0)
         this->seek(-((off_type)ret), std::ios::cur);
 
@@ -214,7 +214,7 @@ void FileDeviceImpl::cancel(EventLoop& loop)
 }
 
 
-void FileDeviceImpl::setTimeout(size_t)
+void FileDeviceImpl::setTimeout(std::size_t)
 {
     // wince file systems never block...
 }
@@ -231,19 +231,19 @@ bool FileDeviceImpl::runWrite(EventLoop& loop)
 }
 
 
-size_t FileDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t FileDeviceImpl::beginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     return this->read(buffer, n, eof);
 }
 
 
-size_t FileDeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t FileDeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     return 0;
 }
 
 
-size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof)
+std::size_t FileDeviceImpl::read(char* buffer, std::size_t count, bool& eof)
 {
     DWORD readBytes = 0;
     if( FALSE == ReadFile(handle(), (void*)buffer, count, &readBytes, &_readOv) )
@@ -266,19 +266,19 @@ size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof)
 }
 
 
-size_t FileDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t FileDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     return this->write(buffer, n);
 }
 
 
-size_t FileDeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t FileDeviceImpl::endWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     return 0;
 }
 
 
-size_t FileDeviceImpl::write(const char* buffer, size_t count)
+std::size_t FileDeviceImpl::write(const char* buffer, std::size_t count)
 {
     DWORD writtenBytes = 0;
 

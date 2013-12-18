@@ -33,7 +33,7 @@ const Pt::Char MaxUtf16 = 0x0010FFFF;
 
 namespace Pt {
 
-Utf32BECodec::Utf32BECodec(size_t ref)
+Utf32BECodec::Utf32BECodec(std::size_t ref)
 : Pt::TextCodec<Char, char>(ref)
 {}
 
@@ -93,8 +93,8 @@ Utf32BECodec::result Utf32BECodec::do_out(MBState& s, const Char* fromBegin,
 
 int Utf32BECodec::do_length(MBState& s, const char* fromBegin, const char* fromEnd, std::size_t max) const
 {
-    size_t n = (fromEnd - fromBegin);
-    size_t count = std::min(max, n/4);
+    std::size_t n = (fromEnd - fromBegin);
+    std::size_t count = std::min(max, n/4);
 
     return static_cast<int>(count);
 }
@@ -118,7 +118,7 @@ int Utf32BECodec::do_encoding() const throw()
 
 
 
-Utf32LECodec::Utf32LECodec(size_t ref)
+Utf32LECodec::Utf32LECodec(std::size_t ref)
 : Pt::TextCodec<Char, char>(ref)
 {}
 
@@ -180,8 +180,8 @@ Utf32LECodec::result Utf32LECodec::do_out(MBState& s, const Char* fromBegin,
 
 int Utf32LECodec::do_length(MBState& s, const char* fromBegin, const char* fromEnd, std::size_t max) const
 {
-    size_t n = (fromEnd - fromBegin);
-    size_t count = std::min(max, n/4);
+    std::size_t n = (fromEnd - fromBegin);
+    std::size_t count = std::min(max, n/4);
 
     return static_cast<int>(count);
 }

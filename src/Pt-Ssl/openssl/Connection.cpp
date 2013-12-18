@@ -105,7 +105,7 @@ Connection::~Connection()
 //void Connection::setCiphers(const std::vector<SSLCipherInfo>& ciphers)
 //{
 //    std::string str;
-//    for(size_t i = 0; i < ciphers.size(); ++i) {
+//    for(std::size_t i = 0; i < ciphers.size(); ++i) {
 //        if(!str.empty()) str += ":";
 //        str += ciphers[i].name;
 //    }
@@ -317,7 +317,7 @@ bool Connection::isClosed() const
 }
 
 
-std::streamsize Connection::write(const char* buf, size_t n)
+std::streamsize Connection::write(const char* buf, std::size_t n)
 {
     std::streambuf* sb = _ios->rdbuf();
     if( ! sb)
@@ -339,7 +339,7 @@ std::streamsize Connection::write(const char* buf, size_t n)
 }
 
 
-std::streamsize Connection::read(char* buf, size_t n, std::streamsize maxImport)
+std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxImport)
 {
     std::streambuf* sb = _ios->rdbuf();
     if( ! sb)

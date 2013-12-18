@@ -158,7 +158,7 @@ namespace Unit {
                 @param args Arguments to invoke the method
                 @param argCount Number of arguments
             */
-            void runTest( const std::string& name, const SerializationInfo* args = 0, size_t argCount = 0);
+            void runTest( const std::string& name, const SerializationInfo* args = 0, std::size_t argCount = 0);
 
             void runAll();
 

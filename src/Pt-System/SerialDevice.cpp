@@ -83,31 +83,31 @@ void SerialDevice::open( const char* file, std::ios::openmode mode)
 }
 
 
-void SerialDevice::onSetTimeout(size_t timeout)
+void SerialDevice::onSetTimeout(std::size_t timeout)
 {
     _impl->setTimeout(timeout);
 }
 
 
-size_t SerialDevice::onBeginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t SerialDevice::onBeginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     return _impl->beginRead(loop, buffer, n, eof);
 }
 
 
-size_t SerialDevice::onEndRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t SerialDevice::onEndRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     return _impl->endRead(loop, buffer, n, eof);
 }
 
 
-size_t SerialDevice::onBeginWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t SerialDevice::onBeginWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     return _impl->beginWrite(loop, buffer, n);
 }
 
 
-size_t SerialDevice::onEndWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t SerialDevice::onEndWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     return _impl->endWrite(loop, buffer, n);
 }
@@ -184,13 +184,13 @@ void SerialDevice::onClose()
 }
 
 
-size_t SerialDevice::onRead(char* buffer, size_t count, bool& eof)
+std::size_t SerialDevice::onRead(char* buffer, std::size_t count, bool& eof)
 {
     return _impl->read( buffer, count, eof );
 }
 
 
-size_t SerialDevice::onWrite(const char* buffer, size_t count)
+std::size_t SerialDevice::onWrite(const char* buffer, std::size_t count)
 {
     return _impl->write( buffer, count );
 }

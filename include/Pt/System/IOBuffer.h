@@ -44,9 +44,9 @@ class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
                              , public Connectable
 {
     public:
-        explicit IOBuffer(size_t bufferSize = 8192, bool extend = false);
+        explicit IOBuffer(std::size_t bufferSize = 8192, bool extend = false);
 
-        explicit IOBuffer(IODevice& ioDevice, size_t bufferSize = 8192, bool extend = false);
+        explicit IOBuffer(IODevice& ioDevice, std::size_t bufferSize = 8192, bool extend = false);
 
         ~IOBuffer();
 
@@ -72,14 +72,14 @@ class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
         //! @internal
         void onRead(IODevice& dev);
 
-        size_t endRead();
+        std::size_t endRead();
 
         void beginWrite();
 
         //! @internal
         void onWrite(IODevice& dev);
 
-        size_t endWrite();
+        std::size_t endWrite();
 
         bool isReading() const;
         
@@ -87,7 +87,7 @@ class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
 
     protected:
         //! @internal
-        void init(size_t bufferSize, bool extend);
+        void init(std::size_t bufferSize, bool extend);
 
         virtual std::streamsize showmanyc();
 
@@ -109,7 +109,7 @@ class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
         Signal<IOBuffer&> _inputReady;
         Signal<IOBuffer&> _outputReady;
         IODevice*    _ioDevice;
-        size_t       _ibufferSize;
+        std::size_t       _ibufferSize;
         char*        _ibuffer;
         std::size_t  _obufferSize;
         char*        _obuffer;

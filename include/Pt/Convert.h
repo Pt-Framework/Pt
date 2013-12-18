@@ -933,7 +933,7 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
     {
         // fractional part, ignore 0 digits after dot
         unsigned short fractDigits = 0;
-        size_t maxDigits = std::numeric_limits<unsigned short>::max() - std::numeric_limits<T>::digits10;
+        std::size_t maxDigits = std::numeric_limits<unsigned short>::max() - std::numeric_limits<T>::digits10;
         while(it != end && *it == zero)
         {
             if( fractDigits > maxDigits )

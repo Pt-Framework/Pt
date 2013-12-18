@@ -79,7 +79,7 @@ void EndpointImpl::clear()
 }
 
 
-void EndpointImpl::init(const sockaddr* addr, size_t addrlen)
+void EndpointImpl::init(const sockaddr* addr, std::size_t addrlen)
 {  
     clear();
 

@@ -177,7 +177,7 @@ class PT_SYSTEM_API TimerQueue
 
         void removeTimer(Timer& timer);
 
-        size_t processTimers();
+        std::size_t processTimers();
 
     private:
         TimerMap _timers;

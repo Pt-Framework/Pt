@@ -26,9 +26,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <iostream>
-#include <fstream>
-#include <math.h>
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlSerializer.h>
 #include <Pt/Xml/XmlDeserializer.h>
@@ -36,6 +33,9 @@
 #include <Pt/Main.h>
 #include <Pt/System/Clock.h>
 #include <Pt/Convert.h>
+#include <iostream>
+#include <fstream>
+#include <math.h>
 
 namespace
 {

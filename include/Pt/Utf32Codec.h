@@ -42,7 +42,7 @@ namespace Pt {
 class PT_API Utf32BECodec : public TextCodec<Char, char> 
 {
     public:
-        explicit Utf32BECodec(size_t ref = 0);
+        explicit Utf32BECodec(std::size_t ref = 0);
 
         //! @brief Destructor.
         virtual ~Utf32BECodec();
@@ -81,7 +81,7 @@ class PT_API Utf32BECodec : public TextCodec<Char, char>
 class PT_API Utf32LECodec : public TextCodec<Char, char> 
 {
     public:
-        explicit Utf32LECodec(size_t ref = 0);
+        explicit Utf32LECodec(std::size_t ref = 0);
 
         //! @brief Destructor.
         virtual ~Utf32LECodec();

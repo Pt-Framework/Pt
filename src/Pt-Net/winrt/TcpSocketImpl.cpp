@@ -222,8 +222,8 @@ void TcpSocketImpl::remoteEndpoint(Endpoint& ep) const
 }
 
 
-size_t TcpSocketImpl::beginRead(System::EventLoop& loop, 
-                                char* buffer, size_t bufSize, 
+std::size_t TcpSocketImpl::beginRead(System::EventLoop& loop, 
+                                char* buffer, std::size_t bufSize, 
                                 bool& eof)
 {
     log_debug("beginRead " << bufSize);
@@ -234,7 +234,7 @@ size_t TcpSocketImpl::beginRead(System::EventLoop& loop,
         _reader->InputStreamOptions = InputStreamOptions::Partial;
     }
 
-    size_t dataToRead = _reader->UnconsumedBufferLength;
+    std::size_t dataToRead = _reader->UnconsumedBufferLength;
     dataToRead = std::min(dataToRead, bufSize);
     
     if(dataToRead > 0)
@@ -268,8 +268,8 @@ bool TcpSocketImpl::runRead(System::EventLoop& loop)
 }
 
 
-size_t TcpSocketImpl::endRead(System::EventLoop& loop, 
-                              char* buffer, size_t bufSize, 
+std::size_t TcpSocketImpl::endRead(System::EventLoop& loop, 
+                              char* buffer, std::size_t bufSize, 
                               bool& eof)
 {
     log_debug("endRead");
@@ -282,7 +282,7 @@ size_t TcpSocketImpl::endRead(System::EventLoop& loop,
         throw System::IOError("read failed");
     }
 
-    size_t dataToRead = _loadOp->GetResults();
+    std::size_t dataToRead = _loadOp->GetResults();
     _loadOp = nullptr;
 
     if(dataToRead == 0)
@@ -302,15 +302,15 @@ size_t TcpSocketImpl::endRead(System::EventLoop& loop,
 }
 
 
-size_t TcpSocketImpl::read(char* buffer, size_t count, bool& eof)
+std::size_t TcpSocketImpl::read(char* buffer, std::size_t count, bool& eof)
 {
     throw System::IOError("blocking I/O not supported");
     return 0;
 }
 
 
-size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, 
-                                 const char* buffer, size_t bufSize)
+std::size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, 
+                                 const char* buffer, std::size_t bufSize)
 {
     log_debug("beginWrite " << bufSize);
 
@@ -342,7 +342,7 @@ bool TcpSocketImpl::runWrite(System::EventLoop& loop)
 }
 
 
-size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size_t n)
+std::size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
 {
     log_debug("endWrite");
 
@@ -354,7 +354,7 @@ size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
         throw System::IOError("read failed");
     }
 
-    const size_t written = _storeOp->GetResults();
+    const std::size_t written = _storeOp->GetResults();
     assert(_storeCount == written);
 
     _storeOp = nullptr;
@@ -362,7 +362,7 @@ size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, size
 }
 
 
-size_t TcpSocketImpl::write(const char* buffer, size_t count)
+std::size_t TcpSocketImpl::write(const char* buffer, std::size_t count)
 {
     throw System::IOError("blocking I/O not supported");
     return 0;

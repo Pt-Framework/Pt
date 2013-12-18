@@ -139,7 +139,7 @@ class PT_XML_API XmlFormatter : public Formatter
         
         // inherit docs
         void onAddBinary(const char* name, const char* type,
-                         const char* value, size_t length, const char* id);
+                         const char* value, std::size_t length, const char* id);
         
         // inherit docs
         void onAddReference(const char* name, const char* value);

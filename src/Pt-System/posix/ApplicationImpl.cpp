@@ -67,7 +67,7 @@ void processSignal(Pt::System::IODevice& device)
 {
     try
     {
-        size_t n = device.endRead();
+        std::size_t n = device.endRead();
 
         int sigNo = 0;
         char* it = _signalBuffer;

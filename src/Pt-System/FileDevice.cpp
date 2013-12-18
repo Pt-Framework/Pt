@@ -152,7 +152,7 @@ void FileDevice::onCancel()
 }
 
 
-void FileDevice::onSetTimeout(size_t timeout)
+void FileDevice::onSetTimeout(std::size_t timeout)
 {
     _impl->setTimeout(timeout);
 }
@@ -163,31 +163,31 @@ bool FileDevice::onSeekable() const
     return true; 
 }
 
-size_t FileDevice::onBeginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t FileDevice::onBeginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     return _impl->beginRead(loop, buffer, n, eof);
 }
 
 
-size_t FileDevice::onEndRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t FileDevice::onEndRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     return _impl->endRead(loop, buffer, n, eof);
 }
 
 
-size_t FileDevice::onBeginWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t FileDevice::onBeginWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     return _impl->beginWrite(loop, buffer, n);
 }
 
 
-size_t FileDevice::onEndWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t FileDevice::onEndWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     return _impl->endWrite(loop, buffer, n );
 }
 
 
-size_t FileDevice::size() const
+std::size_t FileDevice::size() const
 {
     return _impl->size();
 }
@@ -202,20 +202,20 @@ FileDevice::pos_type FileDevice::onSeek(off_type offset, std::ios::seekdir sd)
 }
 
 
-size_t FileDevice::onRead( char* buffer, size_t count, bool& eof )
+std::size_t FileDevice::onRead( char* buffer, std::size_t count, bool& eof )
 {
-    size_t ret = _impl->read( buffer, count, eof );
+    std::size_t ret = _impl->read( buffer, count, eof );
     return ret;
 }
 
 
-size_t FileDevice::onWrite(const char* buffer, size_t count)
+std::size_t FileDevice::onWrite(const char* buffer, std::size_t count)
 {
     return _impl->write(buffer, count);
 }
 
 
-size_t FileDevice::onPeek(char* buffer, size_t count)
+std::size_t FileDevice::onPeek(char* buffer, std::size_t count)
 {
     return _impl->peek(buffer, count);
 }

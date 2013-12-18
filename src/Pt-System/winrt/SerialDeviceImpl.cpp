@@ -75,51 +75,51 @@ bool SerialDeviceImpl::runWrite(EventLoop& loop)
 }
 
 
-size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof) 
+std::size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof) 
 {
     eof = true; 
     return 0;
 }
 
 
-size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     eof = true;
     return 0;
 }
 
 
-size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
+std::size_t SerialDeviceImpl::read( char* buffer, std::size_t count, bool& eof )
 {
     eof = true;
     return 0;
 }
 
 
-size_t SerialDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t SerialDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     return n;
 }
 
 
-size_t SerialDeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t SerialDeviceImpl::endWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     return n;
 }   
 
 
-size_t SerialDeviceImpl::write(const char* buffer, size_t n)
+std::size_t SerialDeviceImpl::write(const char* buffer, std::size_t n)
 {
     return n;
 }
 
 
-void SerialDeviceImpl::setTimeout( size_t msec )
+void SerialDeviceImpl::setTimeout( std::size_t msec )
 {
 }
 
 
-size_t SerialDeviceImpl::timeout() const
+std::size_t SerialDeviceImpl::timeout() const
 {
     return 0;
 }

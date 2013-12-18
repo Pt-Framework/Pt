@@ -54,7 +54,7 @@ CertificateStoreImpl::~CertificateStoreImpl()
 }
 
 
-void CertificateStoreImpl::loadPkcs12(const char* data, size_t len, const char* passwd)
+void CertificateStoreImpl::loadPkcs12(const char* data, std::size_t len, const char* passwd)
 {
     EVP_PKEY* pkey = NULL;
     X509* x509 = NULL;
@@ -145,7 +145,7 @@ const Certificate* CertificateStoreImpl::findCertificate(const std::string& subj
 //        //   i2d_PUBKEY_bio
 //        //   i2d_PrivateKey_bio
 //        
-//        void fromPem(const char* data, size_t len)
+//        void fromPem(const char* data, std::size_t len)
 //        {
 //            BioAutoPtr in( BIO_new_mem_buf( (void*) data, len ) );
 //

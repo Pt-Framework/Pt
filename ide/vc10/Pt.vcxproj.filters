@@ -100,6 +100,9 @@
     <Filter Include="Pt-Hmi\Sources\winrt">
       <UniqueIdentifier>{0190cd64-c6e5-4b5d-ab0e-7d4e1a17e9c7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Ssl\nossl">
+      <UniqueIdentifier>{afaca7e1-6477-4f4e-b837-ce1cf9a958d1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1308,6 +1311,18 @@
     <ClInclude Include="..\..\include\Pt\Pack.h">
       <Filter>Pt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\nossl\CertificateImpl.h">
+      <Filter>Pt-Ssl\nossl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\nossl\CertificateStoreImpl.h">
+      <Filter>Pt-Ssl\nossl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\nossl\Connection.h">
+      <Filter>Pt-Ssl\nossl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ssl\nossl\ContextImpl.h">
+      <Filter>Pt-Ssl\nossl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2462,6 +2477,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.cpp">
       <Filter>Pt-Hmi\Sources\winrt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\nossl\CertificateStoreImpl.cpp">
+      <Filter>Pt-Ssl\nossl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\nossl\Connection.cpp">
+      <Filter>Pt-Ssl\nossl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ssl\nossl\ContextImpl.cpp">
+      <Filter>Pt-Ssl\nossl</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

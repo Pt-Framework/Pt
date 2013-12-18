@@ -192,7 +192,7 @@ FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir
 }
 
 
-size_t FileDeviceImpl::size()
+std::size_t FileDeviceImpl::size()
 {
     if(_stream)
         _stream->Size;
@@ -201,26 +201,26 @@ size_t FileDeviceImpl::size()
 }
 
 
-size_t FileDeviceImpl::peek(char* buffer, size_t count)
+std::size_t FileDeviceImpl::peek(char* buffer, std::size_t count)
 {
     return 0;
 }
 
 
-void FileDeviceImpl::setTimeout(size_t)
+void FileDeviceImpl::setTimeout(std::size_t)
 {
     // blocking I/O is not supported
 }
 
 
-size_t FileDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t bufSize, bool& eof)
+std::size_t FileDeviceImpl::beginRead(EventLoop& loop, char* buffer, std::size_t bufSize, bool& eof)
 {
     if( ! _reader )
     {
         _reader = ref new DataReader(_stream);
     }
 
-    const size_t avail = _reader->UnconsumedBufferLength;
+    const std::size_t avail = _reader->UnconsumedBufferLength;
     if(avail > 0)
     {
         //TODO: use ReadBytes
@@ -256,9 +256,9 @@ bool FileDeviceImpl::runRead(EventLoop& loop)
 }
 
 
-size_t FileDeviceImpl::endRead(EventLoop& loop, char* buffer, size_t bufSize, bool& eof)
+std::size_t FileDeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t bufSize, bool& eof)
 {
-    const size_t avail = _loadOp->GetResults();
+    const std::size_t avail = _loadOp->GetResults();
     _loadOp = nullptr;
 
     //TODO: use ReadBytes 
@@ -272,14 +272,14 @@ size_t FileDeviceImpl::endRead(EventLoop& loop, char* buffer, size_t bufSize, bo
 }
 
 
-size_t FileDeviceImpl::read(char* buffer, size_t count, bool& eof)
+std::size_t FileDeviceImpl::read(char* buffer, std::size_t count, bool& eof)
 {
     throw IOError("blocking I/O not supported");
     return 0;
 }
 
 
-size_t FileDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t bufSize)
+std::size_t FileDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, std::size_t bufSize)
 {
     if( ! _writer )
     {
@@ -316,7 +316,7 @@ bool FileDeviceImpl::runWrite(EventLoop& loop)
 }
 
 
-size_t FileDeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t FileDeviceImpl::endWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     _storeOp->GetResults();
 
@@ -325,7 +325,7 @@ size_t FileDeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
 }
 
 
-size_t FileDeviceImpl::write(const char* buffer, size_t count)
+std::size_t FileDeviceImpl::write(const char* buffer, std::size_t count)
 {
     throw IOError("blocking I/O not supported");
     return 0;

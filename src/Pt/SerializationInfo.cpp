@@ -551,7 +551,7 @@ void SerializationInfo::setName(const char* name)
 }
 
 
-void SerializationInfo::setName(const char* name, size_t len)
+void SerializationInfo::setName(const char* name, std::size_t len)
 {
     copyRefStr2(_Name, _flags, NAME_REF_BIT, name, len);
 }
@@ -577,7 +577,7 @@ void SerializationInfo::setTypeName(const char* type)
 }
 
 
-void SerializationInfo::setTypeName(const char* type, size_t len)
+void SerializationInfo::setTypeName(const char* type, std::size_t len)
 {
     copyRefStr2(_TypeName, _flags, TYPENAME_REF_BIT, type, len);
 }
@@ -602,7 +602,7 @@ void SerializationInfo::setId(const char* id)
 }
 
 
-void SerializationInfo::setId(const char* id, size_t len)
+void SerializationInfo::setId(const char* id, std::size_t len)
 {
     copyRefStr2(_id, _flags, ID_REF_BIT, id, len);
 }
@@ -690,7 +690,7 @@ void SerializationInfo::setReference(const void* ref)
 
 
 // called during deserialization, when a reference id was parsed
-void SerializationInfo::setReference(const char* id, size_t idlen)
+void SerializationInfo::setReference(const char* id, std::size_t idlen)
 {
     if(_type != Reference)
     {
@@ -863,7 +863,7 @@ void SerializationInfo::getString(std::string& s, const TextCodec<Pt::Char, char
             MBState state;
             std::codecvt_base::result r;
             const Pt::Char* from = _value.ustr.str;
-            size_t size = _value.ustr.length;
+            std::size_t size = _value.ustr.length;
             s.clear();
 
             do 
@@ -1024,7 +1024,7 @@ void SerializationInfo::getString(Pt::String& s) const
 }
 
 
-void SerializationInfo::setString(const char* value, size_t size, const TextCodec<Pt::Char, char>& codec)
+void SerializationInfo::setString(const char* value, std::size_t size, const TextCodec<Pt::Char, char>& codec)
 {
     if( _type == Context )
         return;
@@ -1059,8 +1059,8 @@ void SerializationInfo::setString(const char* value, size_t size, const TextCode
     } 
     while (r == std::codecvt_base::partial);
 
-    size_t len = s.length();
-    size_t vsize = len + 1;
+    std::size_t len = s.length();
+    std::size_t vsize = len + 1;
     _value.ustr.str = new Pt::Char[vsize];
     _value.ustr.length = len;
     std::char_traits<Pt::Char>::copy(_value.ustr.str, s.c_str(), vsize);
@@ -1122,7 +1122,7 @@ void SerializationInfo::setString(const std::string& s)
 }
 
 
-void SerializationInfo::setString(const Pt::Char* value, size_t len)
+void SerializationInfo::setString(const Pt::Char* value, std::size_t len)
 {
     if( _type == Context )
         return;
@@ -1134,7 +1134,7 @@ void SerializationInfo::setString(const Pt::Char* value, size_t len)
         _isCompound = false;
     }
 
-    size_t size = len + 1;
+    std::size_t size = len + 1;
     _value.ustr.str = new Pt::Char[size];
     _value.ustr.length = len;
     std::char_traits<Pt::Char>::copy(_value.ustr.str, value, size);
@@ -1742,7 +1742,7 @@ void SerializationInfo::finishLoad() const
 }
 
 
-SerializationInfo& SerializationInfo::addMember(const char* name, size_t len)
+SerializationInfo& SerializationInfo::addMember(const char* name, std::size_t len)
 {
     if( _type == Context )
     {

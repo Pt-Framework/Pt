@@ -135,8 +135,8 @@ void MessageHeader::add(const char* key, const char* value)
 
     char* p = eptr();
 
-    size_t lk = strlen(key);     // length of key
-    size_t lv = strlen(value);   // length of value
+    std::size_t lk = strlen(key);     // length of key
+    std::size_t lv = strlen(value);   // length of value
 
     if (p - _rawdata + lk + lv + 2 > MaxHeaderSize)
         throw HttpError("message header too big");
@@ -265,7 +265,7 @@ MessageBuffer::int_type MessageBuffer::overflow(int_type ch)
     }
     else
     {
-        size_t bufsize = _bufferSize + BufferSize;
+        std::size_t bufsize = _bufferSize + BufferSize;
         char* buf = new char[ bufsize ];
         traits_type::copy(buf, _buffer, _bufferSize);
         std::swap(_buffer, buf);

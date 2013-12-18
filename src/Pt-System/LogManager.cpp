@@ -223,8 +223,8 @@ LogTarget& LogManager::target(const std::string& name)
     // parse the target name dot syntax
     // ad-hoc parsing code. We might want to replace this with a real
     // parser if it gets more complicated, like allowing wildcards etc
-    size_t begin = 0;
-    size_t end = 0;
+    std::size_t begin = 0;
+    std::size_t end = 0;
     std::string targetName;
     std::string token;
     while(end != std::string::npos)
@@ -374,7 +374,7 @@ void LogManager::setChannel(LogTarget& t, const std::string& url)
     else
     {
         // use the url schema to create a new channel
-        size_t colon = url.find(':');
+        std::size_t colon = url.find(':');
         if(colon == std::string::npos)
         {
             throw  std::invalid_argument("Invalid channel url");

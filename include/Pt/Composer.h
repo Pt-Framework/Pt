@@ -31,6 +31,7 @@
 #include <Pt/Api.h>
 #include <Pt/SerializationInfo.h>
 #include <Pt/SerializationContext.h>
+#include <cstddef>
 
 namespace Pt {
 
@@ -67,7 +68,7 @@ class Composer
 
             This is only supported by formats that save typename information.
         */
-        void setTypeName(const char* type, size_t len)
+        void setTypeName(const char* type, std::size_t len)
         { onSetTypeName(type, len); }
 
         /** @brief Sets the reference id of the type to compose.
@@ -81,7 +82,7 @@ class Composer
 
             This is only supported by formats that support references.
         */
-        void setId(const char* id, size_t len)
+        void setId(const char* id, std::size_t len)
         { onSetId(id, len); }
 
         /** @brief Composes a string value.
@@ -91,12 +92,12 @@ class Composer
 
         /** @brief Composes a string value.
         */
-        void setString(const Pt::Char* value, size_t len)
+        void setString(const Pt::Char* value, std::size_t len)
         { onSetString(value, len); }
 
         /** @brief Composes a binary value.
         */
-        void setBinary(const char* data, size_t length)
+        void setBinary(const char* data, std::size_t length)
         { onSetBinary(data, length); }
 
         /** @brief Composes a char value.
@@ -137,7 +138,7 @@ class Composer
         
         /** @brief Composes a reference.
         */
-        void setReference(const char* id, size_t len)
+        void setReference(const char* id, std::size_t len)
         { onSetReference(id, len); }
 
         /** @brief Begins composition of a struct member.
@@ -147,7 +148,7 @@ class Composer
         
         /** @brief Begins composition of a struct member.
         */
-        Composer* beginMember(const char* name, size_t len)
+        Composer* beginMember(const char* name, std::size_t len)
         { return onBeginMember(name, len); }
 
         /** @brief Begins composition of a sequence member.
@@ -182,15 +183,15 @@ class Composer
         : _parent(0)
         {}
 
-        virtual void onSetTypeName(const char* type, size_t len)
+        virtual void onSetTypeName(const char* type, std::size_t len)
         {}
 
-        virtual void onSetId(const char* id, size_t len) = 0;
+        virtual void onSetId(const char* id, std::size_t len) = 0;
 
-        virtual void onSetString(const Pt::Char* value, size_t len)
+        virtual void onSetString(const Pt::Char* value, std::size_t len)
         { throw SerializationError("unexpected string value"); }
 
-        virtual void onSetBinary(const char* data, size_t length)
+        virtual void onSetBinary(const char* data, std::size_t length)
         { throw SerializationError("unexpected binary value"); }
 
         virtual void onSetChar(const Pt::Char& ch)
@@ -208,10 +209,10 @@ class Composer
         virtual void onSetFloat(long double value)
         { throw SerializationError("unexpected float value"); }
 
-        virtual void onSetReference(const char* id, size_t len)
+        virtual void onSetReference(const char* id, std::size_t len)
         { throw SerializationError("unexpected reference"); }
 
-        virtual Composer* onBeginMember(const char* name, size_t len)
+        virtual Composer* onBeginMember(const char* name, std::size_t len)
         { throw SerializationError("unexpected struct"); }
 
         virtual Composer* onBeginElement()
@@ -259,22 +260,22 @@ class BasicComposer : public Composer
         }
 
     protected:
-        void onSetId(const char* id, size_t len)
+        void onSetId(const char* id, std::size_t len)
         {
             _current->setId(id, len);
         }
 
-        void onSetTypeName(const char* type, size_t len)
+        void onSetTypeName(const char* type, std::size_t len)
         {
             _current->setTypeName(type, len);
         }
 
-        void onSetString(const Pt::Char* value, size_t len)
+        void onSetString(const Pt::Char* value, std::size_t len)
         {
             _current->setString(value, len);
         }
 
-        void onSetBinary(const char* data, size_t length)
+        void onSetBinary(const char* data, std::size_t length)
         {
             _current->setBinary(data, length);
         }
@@ -304,12 +305,12 @@ class BasicComposer : public Composer
             _current->setDouble(value);
         }
 
-        void onSetReference(const char* id, size_t len)
+        void onSetReference(const char* id, std::size_t len)
         {
            _current->setReference(id, len);
         }
 
-        Composer* onBeginMember(const char* name, size_t len)
+        Composer* onBeginMember(const char* name, std::size_t len)
         {
             SerializationInfo& child = _current->addMember(name, len);
             _current = &child;

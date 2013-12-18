@@ -200,11 +200,11 @@ void TimerQueue::removeTimer( Timer& timer )
 }
 
 
-size_t TimerQueue::processTimers()
+std::size_t TimerQueue::processTimers()
 {
     log_trace("TimerQueue::processTimers");
 
-    size_t lowestTimeout = EventLoop::WaitInfinite;
+    std::size_t lowestTimeout = EventLoop::WaitInfinite;
 
     if( _timers.empty() )
     {

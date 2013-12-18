@@ -28,10 +28,12 @@
 
 #include "ClientImpl.h"
 #include "Parser.h"
+
 #include <Pt/Http/Client.h>
 #include <Pt/Http/HttpError.h>
 #include <Pt/System/IOError.h>
 #include <Pt/System/Logger.h>
+
 #include <cassert>
 
 log_define("Pt.Http.Client")
@@ -49,20 +51,11 @@ ClientImpl::ClientImpl()
 {
 }
 
-#ifdef PT_HTTP_WITH_SSL
 
 void ClientImpl::setSecure(Ssl::Context& ctx)
 {
     _conn.setSecure(ctx);
 }
-
-#else
-
-void ClientImpl::setSecure(Ssl::Context& )
-{
-}
-
-#endif
 
 
 void ClientImpl::send(bool finished)

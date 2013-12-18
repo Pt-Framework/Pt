@@ -367,6 +367,10 @@
     <ClInclude Include="..\..\src\Pt-Ssl\applessl\CertificateStoreImpl.h" />
     <ClInclude Include="..\..\src\Pt-Ssl\applessl\Connection.h" />
     <ClInclude Include="..\..\src\Pt-Ssl\applessl\ContextImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Ssl\nossl\CertificateImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Ssl\nossl\CertificateStoreImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Ssl\nossl\Connection.h" />
+    <ClInclude Include="..\..\src\Pt-Ssl\nossl\ContextImpl.h" />
     <ClInclude Include="..\..\src\Pt-Ssl\openssl\CertificateImpl.h" />
     <ClInclude Include="..\..\src\Pt-Ssl\openssl\CertificateStoreImpl.h" />
     <ClInclude Include="..\..\src\Pt-Ssl\openssl\Connection.h" />
@@ -620,6 +624,9 @@
     <ClCompile Include="..\..\src\Pt-Ssl\Certificate.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\CertificateStore.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\Context.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ssl\nossl\CertificateStoreImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ssl\nossl\Connection.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ssl\nossl\ContextImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\openssl\CertificateStoreImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\openssl\Connection.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\openssl\ContextImpl.cpp" />

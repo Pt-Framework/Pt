@@ -58,7 +58,7 @@ class BasicComposer< std::vector<T> > : public Composer
             _type = &type;
         }
 
-        virtual void onSetId(const char* id, size_t len)
+        virtual void onSetId(const char* id, std::size_t len)
         { }
 
         virtual Pt::Composer* onBeginElement()

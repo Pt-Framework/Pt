@@ -202,7 +202,7 @@ IOResult& SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
     _readResult.attach(buffer, n);
     _readResult.allocSymbianBuffer(n);
     
-    if ((size_t)_readResult._tempBuffer.MaxSize() != n)
+    if ((std::size_t)_readResult._tempBuffer.MaxSize() != n)
     {
         throw IOError("Could not allocate native Symbian buffer with the requested size. Try 8/16 byte aligned sizes.", PT_SOURCEINFO);                                                
     }
@@ -219,7 +219,7 @@ IOResult& SerialDeviceImpl::beginRead(char* buffer, size_t n, bool& eof)
     return _readResult;
 }
 
-size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
+std::size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
 {
     if (_readResult._status.Int() == KErrNone || 
         _readResult._status.Int() == KErrEof)
@@ -238,7 +238,7 @@ size_t SerialDeviceImpl::endRead(IOResult& result, bool& eof)
     return 0;
 }
 
-size_t SerialDeviceImpl::read(char* buffer, size_t count, bool& eof)
+std::size_t SerialDeviceImpl::read(char* buffer, std::size_t count, bool& eof)
 {
     if (_buff)
     {
@@ -251,7 +251,7 @@ size_t SerialDeviceImpl::read(char* buffer, size_t count, bool& eof)
     _tempBuffer.Set((TUint8*)_buff, 0, count);
     _tempBuffer.Zero();
     
-    if ((size_t)_tempBuffer.MaxSize() != count)
+    if ((std::size_t)_tempBuffer.MaxSize() != count)
     {
         throw IOError("Could not allocate native Symbian buffer with the requested size. Try 8/16 byte aligned sizes.", PT_SOURCEINFO);                                                
     }
@@ -284,26 +284,26 @@ size_t SerialDeviceImpl::read(char* buffer, size_t count, bool& eof)
     for (int j = 0; j < _tempBuffer.Size(); j++)
         dst[j] = _tempBuffer[j];  
     
-    size_t result = (size_t)_tempBuffer.Size();
+    std::size_t result = (std::size_t)_tempBuffer.Size();
     
     return result;
 }
 
-IOResult& SerialDeviceImpl::beginWrite(const char* buffer, size_t n)
+IOResult& SerialDeviceImpl::beginWrite(const char* buffer, std::size_t n)
 {
     // TODO: Implement me
     throw std::logic_error("Writing to the port is currently not supported." + PT_SOURCEINFO);                
     return _writeResult;
 }
 
-size_t SerialDeviceImpl::endWrite(IOResult& result)
+std::size_t SerialDeviceImpl::endWrite(IOResult& result)
 {
     // TODO: Implement me
     throw std::logic_error("Writing to the port is currently not supported." + PT_SOURCEINFO);                
     return 0;
 }
 
-size_t SerialDeviceImpl::write( const char* buffer, size_t count )
+std::size_t SerialDeviceImpl::write( const char* buffer, std::size_t count )
 {
     // TODO: Implement me
     throw std::logic_error("Writing to the port is currently not supported." + PT_SOURCEINFO);                
@@ -382,12 +382,12 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
     return _flowControl;
 }
 
-void SerialDeviceImpl::setTimeout( size_t msec )
+void SerialDeviceImpl::setTimeout( std::size_t msec )
 {
     _timeOut = msec;    
 }
 
-size_t SerialDeviceImpl::timeout() const
+std::size_t SerialDeviceImpl::timeout() const
 {
     return _timeOut;
 }

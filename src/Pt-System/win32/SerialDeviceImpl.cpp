@@ -71,7 +71,7 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios::openmode mode)
 
     HANDLE h = CreateFile( port.c_str() , openFlags, 0, NULL, OPEN_EXISTING, 0, NULL);
 
-    size_t err = GetLastError();
+    std::size_t err = GetLastError();
 
     if( h == 0  || h == INVALID_HANDLE_VALUE )
         throw AccessFailed(port_);
@@ -180,7 +180,7 @@ void SerialDeviceImpl::run()
 }
 
 
-size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof) 
+std::size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof) 
 {
     DWORD len = 0;
     if( ! ReadFile( handle(), buffer, n, &len, 0 ) )
@@ -206,7 +206,7 @@ size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool
 }
 
 
-size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+std::size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     DWORD mask = 0;
     GetCommMask(handle(), &mask);
@@ -217,7 +217,7 @@ size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, size_t n, bool& 
 }
 
 
-size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
+std::size_t SerialDeviceImpl::read( char* buffer, std::size_t count, bool& eof )
 {
     DWORD length = 0;
 
@@ -246,7 +246,7 @@ size_t SerialDeviceImpl::read( char* buffer, size_t count, bool& eof )
 }
 
 
-size_t SerialDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t SerialDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     DWORD len = 0;
     if( ! WriteFile( handle(), buffer, n, &len, 0 ) )
@@ -273,7 +273,7 @@ size_t SerialDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, size_t 
 }
 
 
-size_t SerialDeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
+std::size_t SerialDeviceImpl::endWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     DWORD mask = 0;
     GetCommMask(handle(), &mask);
@@ -284,7 +284,7 @@ size_t SerialDeviceImpl::endWrite(EventLoop& loop, const char* buffer, size_t n)
 }   
 
 
-size_t SerialDeviceImpl::write( const char* buffer, size_t count )
+std::size_t SerialDeviceImpl::write( const char* buffer, std::size_t count )
 {
     DWORD length = 0;
 
@@ -314,7 +314,7 @@ size_t SerialDeviceImpl::write( const char* buffer, size_t count )
 }
 
 
-void SerialDeviceImpl::setTimeout( size_t msec )
+void SerialDeviceImpl::setTimeout( std::size_t msec )
 {
     COMMTIMEOUTS comTimeOut;
     comTimeOut.ReadIntervalTimeout          = MAXDWORD;
@@ -328,7 +328,7 @@ void SerialDeviceImpl::setTimeout( size_t msec )
 }
 
 
-size_t SerialDeviceImpl::timeout() const
+std::size_t SerialDeviceImpl::timeout() const
 {
     COMMTIMEOUTS comTimeOut;
     GetCommTimeouts( handle(), &comTimeOut );

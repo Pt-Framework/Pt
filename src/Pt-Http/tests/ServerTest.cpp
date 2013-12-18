@@ -44,11 +44,9 @@
 #include <string>
 #include <fstream>
 
-#ifdef PT_HTTP_WITH_SSL
 #include <Pt/Ssl/Context.h>
 #include <Pt/Ssl/CertificateStore.h>
 #include "../../Pt-Ssl/tests/PemData.h"
-#endif
 
 class EchoQueryResponder : public Pt::Http::Responder
 {
@@ -329,7 +327,6 @@ class ServerTest : public Pt::Unit::TestSuite
             client.beginReceive();
         }
 
-#ifdef PT_HTTP_WITH_SSL
         void NotFoundHttps()
         {
             Pt::Net::Endpoint ep("127.0.0.1", 8001);
@@ -416,7 +413,6 @@ class ServerTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( servCA );
             ctx.addCACertificate(*servCA);
         }
-#endif
 
         void BasicAuthentication()
         {

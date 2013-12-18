@@ -94,7 +94,7 @@ const uint8_t firstByteMark[7] = {
     0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC
 };
 
-Utf8Codec::Utf8Codec(size_t ref)
+Utf8Codec::Utf8Codec(std::size_t ref)
 : Pt::TextCodec<Char, char>(ref)
 {}
 
@@ -178,7 +178,7 @@ Utf8Codec::result Utf8Codec::do_out(MBState& s, const Pt::Char* fromBegin, const
     fromNext  = fromBegin;
     toNext = toBegin;
     
-    size_t bytesToWrite;
+    std::size_t bytesToWrite;
 
     while(fromNext < fromEnd) 
     {
@@ -235,7 +235,7 @@ Utf8Codec::result Utf8Codec::do_out(MBState& s, const Pt::Char* fromBegin, const
     return retstat;
 }
 
-int Utf8Codec::do_length(MBState& s, const char* fromBegin, const char* fromEnd, size_t max) const
+int Utf8Codec::do_length(MBState& s, const char* fromBegin, const char* fromEnd, std::size_t max) const
 {
     int last_octet_count = 0;
     std::size_t char_count = 0;
