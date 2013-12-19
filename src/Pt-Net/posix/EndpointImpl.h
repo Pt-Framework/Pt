@@ -30,12 +30,11 @@
 #define PT_NET_ENDPOINTIMPL_H
 
 #include <Pt/Net/Api.h>
+#include <Pt/WinVer.h>
 #include <string>
 #include <cassert>
 
 #if defined(WIN32) || defined(_WIN32)
-    #include "Pt/WinVer.h"
-
     #ifndef WIN32_LEAN_AND_MEAN
     #define WIN32_LEAN_AND_MEAN
     #endif

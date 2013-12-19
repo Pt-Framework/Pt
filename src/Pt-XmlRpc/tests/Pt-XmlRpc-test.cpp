@@ -38,6 +38,7 @@
 #include "Pt/System/MainLoop.h"
 #include "Pt/System/Clock.h"
 #include "Pt/System/Logger.h"
+#include <memory>
 
 namespace Pt {
 
@@ -197,6 +198,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         void setUp()
         {
             _loop = new Pt::System::MainLoop();
+            std::auto_ptr<Pt::System::MainLoop> loopPtr(_loop);
 
             _exitTimer.setActive(*_loop);
             _exitTimer.start(10000);
@@ -205,6 +207,8 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 
             Pt::Net::Endpoint ep("127.0.0.1", 8001);
             _server = new Pt::Http::Server(*_loop, ep);
+
+            loopPtr.release();
         }
 
         void tearDown()

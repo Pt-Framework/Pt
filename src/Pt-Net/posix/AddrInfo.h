@@ -29,14 +29,13 @@
 #ifndef PT_NET_ADDRINFO_H
 #define PT_NET_ADDRINFO_H
 
+#include <Pt/WinVer.h>
 #include <Pt/NonCopyable.h>
 #include <string>
 #include <iterator>
 #include <cassert>
 
 #if defined(WIN32) || defined(_WIN32)
-    #include "Pt/WinVer.h"
-
     #ifndef WIN32_LEAN_AND_MEAN
     #define WIN32_LEAN_AND_MEAN
     #endif
