@@ -1175,8 +1175,6 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
     putInt(oit, header.versionMinor());
     os.write("\r\n", 2);
 
-    //TODO: query params
-
     MessageHeader::ConstIterator it;
     for (it = header.begin(); it != header.end(); ++it)
     {
@@ -1239,8 +1237,6 @@ void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
     os << ' ';
     os << reply.statusText();
     os.write("\r\n", 2);
-
-    //TODO: query params
 
     MessageHeader::ConstIterator it;
     for(it = header.begin(); it != header.end(); ++it)
