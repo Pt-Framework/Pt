@@ -35,4 +35,4 @@ Library png :  png.c
                uncompr.c
                zutil.c ;
 
-MakeLocate libpng : $(PT_OUTPUT_TARGET) ;
+MakeLocate png : $(PT_OUTPUT_TARGET) ;

@@ -4,15 +4,6 @@ SubDir PT_TOP ;
 # Compiler and linker settings
 #############################################################################
 
-if $(WITH_DEBUG) 
-{ 
-    CONFIG ?= debug ; 
-}
-else 
-{ 
-    CONFIG ?= release ; 
-}
-
 if --nlog in $(ARGV)
 {
     CCFLAGS += [ FDefines NLOG ] ;

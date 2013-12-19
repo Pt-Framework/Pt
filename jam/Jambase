@@ -43,6 +43,7 @@ if configure in $(ARGV)
     if --debug in $(ARGV)
     {
         WITH_DEBUG = yes ;
+        CONFIG ?= debug ;
     }
 
     EchoOption --debug : "Debug Build" : $(WITH_DEBUG:E="no") ;
@@ -50,6 +51,7 @@ if configure in $(ARGV)
     if --optimize in $(ARGV)
     {
         WITH_OPTIM = yes ;
+        CONFIG ?= release ; 
     }
 
     EchoOption --optimize : "Optimized Build" : $(WITH_OPTIM:E="no") ;
