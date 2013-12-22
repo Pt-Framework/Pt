@@ -67,7 +67,7 @@ class DirectoryIteratorImpl
     private:
         unsigned int _refs;
         FileInfo _finfo;
-        std::string _path;
+        //std::string _path;
         std::size_t _pathlen;
         DIR* _handle;
         ::dirent* _current;

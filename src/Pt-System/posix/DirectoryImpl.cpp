@@ -46,20 +46,22 @@ namespace System {
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
 : _refs(1)
-, _path(path)
+, _pathlen(0)
 , _handle(0)
 , _current(0)
 {
+	_finfo.path() = path;
     init( path.c_str() );
 }
 
 
 DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
 : _refs(1)
-, _path(path)
+, _pathlen(0)
 , _handle(0)
 , _current(0)
 {
+	_finfo.path() = path;
     init(path);
 }
 
@@ -80,37 +82,17 @@ void DirectoryIteratorImpl::init(const char* path)
         throw AccessFailed(path);
     }
 
+	std::string& path = _finfo.path();
+
     // append a trailing slash if not empty, so we can add the
     // directory entry name easily
-    if( ! _path.empty() && _path[_path.size() - 1] != '/')
-        _path += '/';
+    if( ! path.empty() && path[path.size() - 1] != '/')
+        path += '/';
 
-    _pathlen = _path.size();
+    _pathlen = path.size();
 
     this->advance();
 }
-
-
-/*const std::string& DirectoryIteratorImpl::path() const
-{
-    if(_dirty)
-    {
-        // replace substring after last slash with the new file-name or
-        // append the file-name if we have a trailing slash. Ctor makes
-        // sure we have a trailing slash.
-        std::string::size_type idx = _path.rfind('/');
-        if(idx != std::string::npos && ++idx < _path.size() )
-        {
-            _path.replace(idx, _path.size(), _current->d_name);
-        }
-        else
-        {
-            _path += _current->d_name;
-        }
-    }
-
-    return _path;
-}*/
 
 
 bool DirectoryIteratorImpl::advance()
@@ -120,11 +102,13 @@ bool DirectoryIteratorImpl::advance()
 
     if(_current)
     {
-        _path.erase(_pathlen);
-        _path += _current->d_name;
+		std::string& path = _finfo.path();
+
+        path.erase(_pathlen);
+        path += _current->d_name;
 
         struct stat st;
-        stat(_path.c_str(), &st);
+        stat(path.c_str(), &st);
         FileStatus::Type type = FileInfoImpl::getType(st);
         
         _finfo.init(type, st.st_size);
