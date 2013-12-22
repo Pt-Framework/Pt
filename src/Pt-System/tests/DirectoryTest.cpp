@@ -27,7 +27,6 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/System/Directory.h"
-#include "Pt/System/File.h"
 #include "Pt/System/FileInfo.h"
 #include <algorithm>
 #include <iostream>

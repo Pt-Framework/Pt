@@ -29,7 +29,7 @@
 #include "Pt/Cma/IPrefs.h"
 #include "Pt/Cma/IUnknown.h"
 #include "Pt/Cma/TypeId.h"
-#include "Pt/System/File.h"
+#include "Pt/System/FileInfo.h"
 #include "Pt/SourceInfo.h"
 #include <stdexcept>
 

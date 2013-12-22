@@ -387,9 +387,6 @@
     <ClInclude Include="..\..\include\Pt\System\EventSource.h">
       <Filter>Pt-System</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\System\File.h">
-      <Filter>Pt-System</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\System\FileDevice.h">
       <Filter>Pt-System</Filter>
     </ClInclude>
@@ -1675,9 +1672,6 @@
       <Filter>Pt-System</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\EventSource.cpp">
-      <Filter>Pt-System</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-System\File.cpp">
       <Filter>Pt-System</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\FileChannel.cpp">

@@ -34,7 +34,7 @@
 #include <Pt/Db/Connection.h>
 #include <Pt/Db/Transaction.h>
 #include <Pt/Db/Result.h>
-#include <Pt/System/File.h>
+#include <Pt/System/FileInfo.h>
 #include <Pt/System/Thread.h>
 
 #include <fstream>

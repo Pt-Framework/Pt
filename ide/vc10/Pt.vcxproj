@@ -218,7 +218,6 @@
     <ClInclude Include="..\..\include\Pt\System\EventLoop.h" />
     <ClInclude Include="..\..\include\Pt\System\EventSink.h" />
     <ClInclude Include="..\..\include\Pt\System\EventSource.h" />
-    <ClInclude Include="..\..\include\Pt\System\File.h" />
     <ClInclude Include="..\..\include\Pt\System\FileDevice.h" />
     <ClInclude Include="..\..\include\Pt\System\FileInfo.h" />
     <ClInclude Include="..\..\include\Pt\System\IOBuffer.h" />
@@ -645,7 +644,6 @@
     <ClCompile Include="..\..\src\Pt-System\EventLoop.cpp" />
     <ClCompile Include="..\..\src\Pt-System\EventSink.cpp" />
     <ClCompile Include="..\..\src\Pt-System\EventSource.cpp" />
-    <ClCompile Include="..\..\src\Pt-System\File.cpp" />
     <ClCompile Include="..\..\src\Pt-System\FileChannel.cpp" />
     <ClCompile Include="..\..\src\Pt-System\FileDevice.cpp" />
     <ClCompile Include="..\..\src\Pt-System\FileInfo.cpp" />

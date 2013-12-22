@@ -28,7 +28,7 @@
 
 #include "FileChannel.h"
 #include <Pt/System/Uri.h>
-#include <Pt/System/File.h>
+#include <Pt/System/FileInfo.h>
 #include <sstream>
 #include <cctype>
 

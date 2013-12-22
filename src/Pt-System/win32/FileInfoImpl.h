@@ -72,7 +72,7 @@ class FileInfoImpl
                 throw AccessFailed(path);
         }
 
-        static FileStatus::Type getType(const std::string& path)
+        static FileInfo::Type getType(const std::string& path)
         {
             std::basic_string<TCHAR> tpath;
             win32::fromMultiByte(path, tpath);
@@ -81,26 +81,26 @@ class FileInfoImpl
             if(attr == 0xffffffff)
             {
                 if( 0 != strstr(path.c_str(), ".sys") )
-                    return FileStatus::File;
+                    return FileInfo::File;
 
-                return FileStatus::Invalid;
+                return FileInfo::Invalid;
             }
 
             if(attr & FILE_ATTRIBUTE_DIRECTORY)
-                return FileStatus::Directory;
+                return FileInfo::Directory;
 
-            return FileStatus::File;
+            return FileInfo::File;
         }
 
-        static FileStatus::Type getType(DWORD attr)
+        static FileInfo::Type getType(DWORD attr)
         {
             if(attr == 0xffffffff)
-                return FileStatus::Invalid;
+                return FileInfo::Invalid;
 
             if(attr & FILE_ATTRIBUTE_DIRECTORY)
-                return FileStatus::Directory;
+                return FileInfo::Directory;
 
-            return FileStatus::File;
+            return FileInfo::File;
         }
 
         static std::size_t size(const std::string& path)

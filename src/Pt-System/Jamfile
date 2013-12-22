@@ -15,7 +15,6 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           EventSource.cpp
                           EventSink.cpp
                           EventLoop.cpp
-                          File.cpp
                           FileDevice.cpp
                           FileInfo.cpp
                           IOBuffer.cpp

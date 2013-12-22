@@ -30,7 +30,7 @@
 //#include "DllLoggerTest.h"
 
 #include "Pt/System/Logger.h"
-#include "Pt/System/File.h"
+#include "Pt/System/FileInfo.h"
 #include "Pt/System/Clock.h"
 #include <Pt/System/IOError.h>
 #include "Pt/Unit/Assertion.h"
