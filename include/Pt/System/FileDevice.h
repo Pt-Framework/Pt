@@ -64,8 +64,6 @@ class PT_SYSTEM_API FileDevice : public IODevice
         const char* path() const
         { return _path.c_str(); }
 
-        std::size_t size() const;
-
         Signal<FileDevice&>& opened()
         { return _opened; }
 

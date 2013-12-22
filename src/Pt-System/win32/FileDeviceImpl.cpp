@@ -175,16 +175,6 @@ FileDeviceImpl::pos_type FileDeviceImpl::seek(off_type offset, std::ios::seekdir
 }
 
 
-std::size_t FileDeviceImpl::size()
-{
-    DWORD sz = GetFileSize(handle(), NULL);
-    if(sz == INVALID_FILE_SIZE)
-        throw IOError( PT_ERROR_MSG("Could not get file size") );
-
-    return sz;
-}
-
-
 std::size_t FileDeviceImpl::peek(char* buffer, std::size_t count)
 {
     bool eof;

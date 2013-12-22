@@ -53,8 +53,6 @@ class FileDeviceImpl : public IODeviceImpl
 
         void resize(off_type size);
 
-        size_t size();
-
         size_t peek(char* buffer, size_t count);
 };
 

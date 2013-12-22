@@ -57,8 +57,6 @@ class FileDeviceImpl  : public OverlappedIODeviceImpl
 
         pos_type seek( off_type offset, std::ios::seekdir sd );
 
-        size_t size();
-
         size_t peek( char* buffer, size_t count );
 
 #ifdef _WIN32_WCE

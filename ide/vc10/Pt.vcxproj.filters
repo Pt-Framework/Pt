@@ -1320,6 +1320,9 @@
     <ClInclude Include="..\..\src\Pt-Ssl\nossl\ContextImpl.h">
       <Filter>Pt-Ssl\nossl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\NumericCast.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

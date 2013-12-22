@@ -187,12 +187,6 @@ std::size_t FileDevice::onEndWrite(EventLoop& loop, const char* buffer, std::siz
 }
 
 
-std::size_t FileDevice::size() const
-{
-    return _impl->size();
-}
-
-
 FileDevice::pos_type FileDevice::onSeek(off_type offset, std::ios::seekdir sd)
 {
     if( _opening || this->isReading() || this->isWriting() )

@@ -156,6 +156,7 @@ union varint_t
     long l;
     unsigned long ul;
     std::size_t s;
+	Pt::uint64_t u64;
 };
 
 } // namespace Pt

@@ -158,17 +158,6 @@ void FileDeviceImpl::resize(off_type size)
 }
 
 
-std::size_t FileDeviceImpl::size()
-{
-    struct stat buff;
-    int ret = fstat(fd(), &buff);
-    if(ret != 0)
-        throw IOError( PT_ERROR_MSG("fstat failed") );
-
-    return buff.st_size;
-}
-
-
 std::size_t FileDeviceImpl::peek(char* buffer, std::size_t count)
 {
     bool eof;

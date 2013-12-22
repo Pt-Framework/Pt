@@ -103,7 +103,7 @@ class FileInfoImpl
             return FileInfo::File;
         }
 
-        static std::size_t size(const std::string& path)
+        static Pt::uint64_t size(const std::string& path)
         {
             WIN32_FIND_DATA data;
             std::basic_string<TCHAR> tpath;
@@ -118,10 +118,10 @@ class FileInfoImpl
             LARGE_INTEGER li;
             li.HighPart = data.nFileSizeHigh;
             li.LowPart = data.nFileSizeLow;
-            return static_cast<std::size_t>(li.QuadPart);
+            return static_cast<Pt::uint64_t>(li.QuadPart);
         }
 
-        static void resize(const std::string& path, std::size_t newSize)
+        static void resize(const std::string& path, Pt::uint64_t newSize)
         {
             std::basic_string<TCHAR> tpath;
             win32::fromMultiByte(path, tpath);
