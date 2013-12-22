@@ -82,14 +82,14 @@ void DirectoryIteratorImpl::init(const char* path)
         throw AccessFailed(path);
     }
 
-	std::string& path = _finfo.path();
+	std::string& strpath = _finfo.path();
 
     // append a trailing slash if not empty, so we can add the
     // directory entry name easily
-    if( ! path.empty() && path[path.size() - 1] != '/')
-        path += '/';
+    if( ! strpath.empty() && strpath[strpath.size() - 1] != '/')
+        strpath += '/';
 
-    _pathlen = path.size();
+    _pathlen = strpath.size();
 
     this->advance();
 }
@@ -106,12 +106,6 @@ bool DirectoryIteratorImpl::advance()
 
         path.erase(_pathlen);
         path += _current->d_name;
-
-        struct stat st;
-        stat(path.c_str(), &st);
-        FileStatus::Type type = FileInfoImpl::getType(st);
-        
-        _finfo.init(type, st.st_size);
     }
 
     return _current != 0;

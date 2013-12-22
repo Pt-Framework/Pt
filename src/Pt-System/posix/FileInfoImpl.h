@@ -61,38 +61,38 @@ class FileInfoImpl
             }
         }
 
-        static FileStatus::Type getType(const std::string& path)
+        static FileInfo::Type getType(const std::string& path)
         {
             struct stat st;
             if( 0 != ::stat(path.c_str(), &st) )
             {
-                return FileStatus::Invalid;
+                return FileInfo::Invalid;
             }
 
             if( S_ISREG(st.st_mode) )
             {
-                return FileStatus::File;
+                return FileInfo::File;
             }
             else if( S_ISDIR(st.st_mode) ) 
             {
-                return FileStatus::Directory;
+                return FileInfo::Directory;
             }
 
-            return FileStatus::File;
+            return FileInfo::File;
         }
 
-        static FileStatus::Type getType(const struct stat& st)
+        static FileInfo::Type getType(const struct stat& st)
         {
             if( S_ISREG(st.st_mode) )
             {
-                return FileStatus::File;
+                return FileInfo::File;
             }
             else if( S_ISDIR(st.st_mode) ) 
             {
-                return FileStatus::Directory;
+                return FileInfo::Directory;
             }
 
-            return FileStatus::File;
+            return FileInfo::File;
         }
 
         static std::size_t size(const std::string& path)
