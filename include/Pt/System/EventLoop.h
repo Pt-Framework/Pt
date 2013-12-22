@@ -108,9 +108,6 @@ class PT_SYSTEM_API EventLoop : public Connectable
         virtual void onQueueEvent(const Event& ev) = 0;
 
         //! @internal EventSink interface
-        virtual void onProcessEvents() = 0;
-
-        //! @internal EventSink interface
         virtual void onWake() = 0;
 
         //! @internal A timer is attached

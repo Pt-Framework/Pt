@@ -224,10 +224,6 @@ void ApplicationImpl::onQueueEvent(const Pt::Event& ev)
     _eventQueue.pushEvent(ev); 
 }
 
-void ApplicationImpl::onProcessEvents()
-{ 
-    _eventQueue.processEvents( this->event() );
-}
 
 void ApplicationImpl::onWake()
 { 

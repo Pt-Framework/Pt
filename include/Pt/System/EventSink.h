@@ -55,20 +55,12 @@ class PT_SYSTEM_API EventSink : private NonCopyable
 
         void wake();
 
-        /** @brief Processes all events which are currently in the event queue
-            @todo TODO: deprecated, do not use!
-        */
-        void processEvents()
-        { this->onProcessEvents(); }
-
     protected:
         virtual void onCommitEvent(const Event& ev) = 0;
 
         virtual void onQueueEvent(const Event& ev) = 0;
 
         virtual void onWake() = 0;
-
-        virtual void onProcessEvents() = 0;
 
     private:
         void onConnect(EventSource& source);

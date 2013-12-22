@@ -392,9 +392,6 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             }
             catch (const std::exception&)
             {
-                //PT_UNIT_ASSERT_MSG(false, std::string("unexpected exception ") + typeid(e).name() + ": " + e.what());
-                //Boolean();
-                _loop->processEvents();
                 return;
             }
 
