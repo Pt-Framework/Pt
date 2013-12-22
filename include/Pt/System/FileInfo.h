@@ -187,7 +187,7 @@ class PT_SYSTEM_API FileInfo
         static const char* updir();
 
     public:
-        std::string& init()
+        std::string& path()
 		{ return _path; }
     
     private:

@@ -90,7 +90,7 @@ bool DirectoryIteratorImpl::advance()
         return false;
     }
 
-    _finfo.init() = win32::toMultiByte( _current.cFileName );
+    _finfo.path() = win32::toMultiByte( _current.cFileName );
     return true;
 }
 
