@@ -1,5 +1,5 @@
 /* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2013 Marc Boris Dürner
+ * Copyright (C) 2013 Marc Boris DÃ¼rner
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -160,6 +160,8 @@ public:
 		return _dpi;
 	}
 
+	void processEvents();
+	
 protected:
     virtual void onAttachSelectable(System::Selectable&);
 
@@ -176,8 +178,6 @@ protected:
     virtual void onCommitEvent(const Pt::Event& event);
 
     virtual void onQueueEvent(const Pt::Event& event);
-
-    virtual void onProcessEvents();
 
     virtual void onWake();
 

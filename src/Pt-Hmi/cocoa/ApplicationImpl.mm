@@ -1,5 +1,5 @@
 /* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2013 Marc Boris Dürner
+ * Copyright (C) 2013 Marc Boris DÃ¼rner
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -234,7 +234,7 @@ void ApplicationImpl::waitNext()
 }
     
 
-void ApplicationImpl::onProcessEvents()
+void ApplicationImpl::processEvents()
 { 
     
     NSEvent* event = nil;
@@ -272,7 +272,7 @@ void ApplicationImpl::onProcessEvents()
     //
     // process Pt events
     //
-    bool isActive = _eventQueue.processEvents( this->event() );
+    bool isActive = _eventQueue.processEvents( this->eventReceived() );
     
     //
     // handle loop exit

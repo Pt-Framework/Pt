@@ -1,5 +1,5 @@
 /* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2013 Marc Boris Dürner
+ * Copyright (C) 2013 Marc Boris DÃ¼rner
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -72,7 +72,7 @@ void GfxOutputDeviceImpl::create()
 	[_window setAcceptsMouseMovedEvents:YES];
     [_window setInitialFirstResponder: _view];
 	[_window setContentView: _view];
-	[_window setDelegate: _view];
+
     
     
 	[_window makeKeyAndOrderFront:_window];
@@ -277,10 +277,12 @@ void GfxOutputDeviceImpl::writeWindowSizeAndPos(bool firstShow)
 				
                 if( parent == 0)
                 {
-                    centerWindowTo(&[[NSScreen mainScreen] frame]);
+				    NSRect rect = [[NSScreen mainScreen] frame];
+                    centerWindowTo(&rect);
                 }
                 else
                 {
+				    
                     GfxOutputDeviceImpl* parentImpl = 0;
                     
                     for(size_t i = 0; i < parent->outputDevices().size(); ++i)
@@ -296,13 +298,19 @@ void GfxOutputDeviceImpl::writeWindowSizeAndPos(bool firstShow)
                             break;
                     }
                 
-                    centerWindowTo(&[parentImpl->window() frame]);
+				     NSRect rect = [parentImpl->window() frame];
+				
+                    centerWindowTo(&rect);
                 }
             }
                 break;
                 
             case WindowStartPositionType::CenterScreen:
-                centerWindowTo(&[[NSScreen mainScreen] frame]);
+			{
+			NSRect rect = [[NSScreen mainScreen] frame];
+                centerWindowTo(&rect);
+                    }
+			
                 break;
         }
     }

@@ -2,6 +2,7 @@
 #define Pt_Hmi_Device_H
 
 #include <Pt/System/Selectable.h>
+#include <Pt/Connectable.h>
 #include <Pt/Hmi/Api.h>
 
 namespace Pt{
@@ -30,6 +31,14 @@ protected:
 	{
 	}
 
+	virtual void onAttach(Pt::System::EventLoop& loop)
+	{
+	}
+	
+	virtual void onDetach(Pt::System::EventLoop& loop)
+	{
+	}
+	
     virtual bool onRun()
 	{
 		return true;

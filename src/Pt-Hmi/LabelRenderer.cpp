@@ -39,7 +39,7 @@ void LabelRenderer::render(Pt::Hmi::Model* m)
 		localPainter.setFont(model->Font.get());
 		
 		Pt::Gfx::Pen			pen(1,model->ForeColor.get());
-		Pt::Gfx::FontMetrics	metric = localPainter.fontMetrics(Pt::String(model->Caption.get()));
+		Pt::Gfx::FontMetrics	metric = localPainter.fontMetrics(Pt::String(model->Caption.get().c_str()));
 		
 		model->Size = Pt::Gfx::SizeF(model->toUnit(Pt::Gfx::Size(metric.width(), metric.height())));
 		
@@ -47,7 +47,7 @@ void LabelRenderer::render(Pt::Hmi::Model* m)
 		Pt::Gfx::Point	pos(0, size.height() - metric.descent());
 
 		localPainter.setPen(pen);
-		localPainter.drawText(pos,Pt::String(model->Caption.get()));
+		localPainter.drawText(pos,Pt::String(model->Caption.get().c_str()));
 	}
 	else
 	{		
@@ -58,7 +58,7 @@ void LabelRenderer::render(Pt::Hmi::Model* m)
 			case Pt::Hmi::TextAlignType::MidleCenter:
 			{
 				Pt::Gfx::Pen			pen(1,model->ForeColor.get());
-				Pt::Gfx::FontMetrics	metric = localPainter.fontMetrics(Pt::String(model->Caption.get()));
+				Pt::Gfx::FontMetrics	metric = localPainter.fontMetrics(Pt::String(model->Caption.get().c_str()));
 				Pt::Gfx::SizeF			textSize = Pt::Gfx::SizeF(model->toUnit(Pt::Gfx::Size(metric.width(), metric.height())));
 				
 				const double widthHalf		= model->Size.get().width()/2.0;				
@@ -72,7 +72,7 @@ void LabelRenderer::render(Pt::Hmi::Model* m)
 				localPainter.setFont(model->Font.get());
 				localPainter.setPen(pen);
 
-				localPainter.drawText(model->fromUnit(pos),Pt::String(model->Caption.get()));		
+				localPainter.drawText(model->fromUnit(pos),Pt::String(model->Caption.get().c_str()));		
 			}
 			break;
 		}
