@@ -43,6 +43,364 @@
 
 namespace Pt {
 
+template <bool signedX, bool signedY>
+struct LessThanMin
+{
+    template <class X, class Y>
+    static bool check(X x, Y y_min)
+    { return x < y_min; }
+};
+
+
+template <>
+struct LessThanMin<false, true>
+{
+    template <class X, class Y>
+    static bool check(X, Y)
+    { return false; }
+};
+
+
+template <>
+struct LessThanMin<true, false>
+{
+    template <class X, class Y>
+    static bool check(X x, Y)
+    { return x < 0; }
+};
+
+
+template <bool signedX, bool signedY>
+struct GreaterThanMax
+{
+    // both signed or both unsigned
+    template <class X, class Y>
+    static bool check(X x, Y ymax)
+    { return x > ymax; }
+};
+
+
+template <>
+struct GreaterThanMax<false, true>
+{
+    // x is unsigned, y is signed
+    template <class X, class Y>
+    static bool check(X x, Y ymax)
+    { 
+        return x > static_cast<X>(ymax);
+    }
+};
+
+
+template <>
+struct GreaterThanMax<true, false>
+{
+    // x is signed, y is unsigned
+    template <class X, class Y>
+    static bool check(X x, Y ymax)
+    { 
+        return x > 0 && static_cast<Y>(x) > ymax;
+    }
+};
+
+
+/** @brief Checked numeric conversion.
+
+    @ingroup CoreTypes
+*/
+template<typename R, typename T>
+inline T narrow(T from)
+{
+    typedef std::numeric_limits<Source> SourceTraits;
+    typedef std::numeric_limits<R> ResultTraits;
+
+    const bool sourceIsSigned = SourceTraits::is_signed;
+    const bool resultIsSigned = ResultTraits::is_signed;
+    const bool sameSign = sourceIsSigned == resultIsSigned;
+
+    if (LessThanMin<sourceIsSigned, resultIsSigned>::check( from, ResultTraits::min() )
+     || GreaterThanMax<sourceIsSigned, resultIsSigned>::check( from, ResultTraits::max() ) )
+    {
+        throw ConversionError("numeric conversion failed");
+    }
+    
+    return static_cast<R>(from);
+}
+
+
+/** @brief Convert to string.
+
+    @ingroup CoreTypes
+*/
+template <typename T, typename C, typename Tr, typename A>
+void toString(std::basic_string<C, Tr, A>& to, const T& from)
+{
+    std::basic_stringstream<C, Tr> ss;
+    if( ! (ss << from && ss >> to) )
+        throw ConversionError("string conversion failed");
+}
+
+/** @brief Convert to string.
+
+    @ingroup CoreTypes
+*/
+template <typename S, typename T>
+S toString(const T& t)
+{
+    S str;
+    toString(str, t);
+    return str;
+}
+
+
+template <typename C, typename Tr, typename A>
+void toString(std::basic_string<C, Tr, A>& str, signed char value)
+{
+    str.clear();
+    putInt(std::back_inserter(str), value);
+}
+
+
+template <typename C, typename Tr, typename A>
+void toString(std::basic_string<C, Tr, A>& str, unsigned char value)
+{
+    str.clear();
+    putInt(std::back_inserter(str), value);
+}
+
+
+template <typename C, typename Tr, typename A>
+void toString(std::basic_string<C, Tr, A>& str, short value)
+{
+    str.clear();
+    putInt(std::back_inserter(str), value);
+}
+
+
+template <typename C, typename Tr, typename A>
+void toString(std::basic_string<C, Tr, A>& str, unsigned short value)
+{
+    str.clear();
+    putInt(std::back_inserter(str), value);
+}
+
+
+template <typename C, typename Tr, typename A>
+void toString(std::basic_string<C, Tr, A>& str, int value)
+{
+    str.clear();
+    putInt(std::back_inserter(str), value);
+}
+
+
+template <typename C, typename Tr, typename A>
+void toString(std::basic_string<C, Tr, A>& str, unsigned int value)
+{
+    str.clear();
+    putInt(std::back_inserter(str), value);
+}
+
+
+template <typename C, typename Tr, typename A>
+void toString(std::basic_string<C, Tr, A>& str, long value)
+{
+    str.clear();
+    putInt(std::back_inserter(str), value);
+}
+
+
+template <typename C, typename Tr, typename A>
+void toString(std::basic_string<C, Tr, A>& str, unsigned long value)
+{
+    str.clear();
+    putInt(std::back_inserter(str), value);
+}
+
+
+template <typename C, typename Tr, typename A>
+void toString(std::basic_string<C, Tr, A>& str, long long value)
+{
+    str.clear();
+    putInt(std::back_inserter(str), value);
+}
+
+
+template <typename C, typename Tr, typename A>
+void toString(std::basic_string<C, Tr, A>& str, unsigned long long value)
+{
+    str.clear();
+    putInt(std::back_inserter(str), value);
+}
+
+
+template <typename C, typename Tr, typename A>
+void toString(std::basic_string<C, Tr, A>& str, float value)
+{
+    str.clear();
+    putFloat(std::back_inserter(str), value);
+}
+
+
+template <typename C, typename Tr, typename A>
+void toString(std::basic_string<C, Tr, A>& str, double value)
+{
+    str.clear();
+    putFloat(std::back_inserter(str), value);
+}
+
+
+template <typename C, typename Tr, typename A>
+void toString(std::basic_string<C, Tr, A>& str, long double value)
+{
+    str.clear();
+    putFloat(std::back_inserter(str), value);
+}
+
+
+/** @brief Convert from string.
+
+    @ingroup CoreTypes
+*/
+template <typename T, typename C, typename Tr, typename A>
+void stringTo(T& to, const std::basic_string<C, Tr, A>& from)
+{
+    std::basic_stringstream<C, Tr> ss;
+    if( ! (ss << from && ss >> to) )
+        throw ConversionError("string conversion failed");
+}
+
+/** @brief Convert to string.
+
+    @ingroup CoreTypes
+*/
+template <typename T, typename S>
+T stringTo(const S& str)
+{
+    T value = T();
+    stringTo(value, str);
+    return value;
+}
+
+
+template <typename T, typename C, typename Tr, typename A>
+void stringToInt(T& to, const std::basic_string<C, Tr, A>& str)
+{
+    bool ok = false;
+    std::basic_string<C, Tr, A>::const_iterator it = getInt( str.begin(), str.end(), ok, to );
+
+    if (ok)
+        it = getWhitespace(it, str.end(), NumberFormat<C>());
+
+    if( it != str.end() || ! ok )
+        throw ConversionError("string conversion failed");
+}
+
+
+template <typename T, typename C, typename Tr, typename A>
+void stringToFloat(T& to, const std::basic_string<C, Tr, A>& str)
+{
+    bool ok = false;
+    std::basic_string<C, Tr, A>::const_iterator it = getFloat( str.begin(), str.end(), ok, to );
+
+    if (ok)
+        it = getWhitespace(it, str.end(), NumberFormat<C>());
+
+    if( it != str.end() || ! ok )
+        throw ConversionError("string conversion failed");
+}
+
+
+template <typename C, typename Tr, typename A>
+void stringTo(signed char& to, const std::basic_string<C, Tr, A>& str)
+{
+    stringToInt(to, str);
+}
+
+
+template <typename C, typename Tr, typename A>
+void stringTo(unsigned char& to, const std::basic_string<C, Tr, A>& str)
+{
+    stringToInt(to, str);
+}
+
+
+template <typename C, typename Tr, typename A>
+void stringTo(short& to, const std::basic_string<C, Tr, A>& str)
+{
+    stringToInt(to, str);
+}
+
+
+template <typename C, typename Tr, typename A>
+void stringTo(unsigned short& to, const std::basic_string<C, Tr, A>& str)
+{
+    stringToInt(to, str);
+}
+
+
+template <typename C, typename Tr, typename A>
+void stringTo(int& to, const std::basic_string<C, Tr, A>& str)
+{
+    stringToInt(to, str);
+}
+
+
+template <typename C, typename Tr, typename A>
+void stringTo(unsigned int& to, const std::basic_string<C, Tr, A>& str)
+{
+    stringToInt(to, str);
+}
+
+
+template <typename C, typename Tr, typename A>
+void stringTo(long& to, const std::basic_string<C, Tr, A>& str)
+{
+    stringToInt(to, str);
+}
+
+
+template <typename C, typename Tr, typename A>
+void stringTo(unsigned long& to, const std::basic_string<C, Tr, A>& str)
+{
+    stringToInt(to, str);
+}
+
+
+template <typename C, typename Tr, typename A>
+void stringTo(long long& to, const std::basic_string<C, Tr, A>& str)
+{
+    stringToInt(to, str);
+}
+
+
+template <typename C, typename Tr, typename A>
+void stringTo(unsigned long long& to, const std::basic_string<C, Tr, A>& str)
+{
+    stringToInt(to, str);
+}
+
+
+template <typename C, typename Tr, typename A>
+void stringTo(float& to, const std::basic_string<C, Tr, A>& str)
+{
+    stringToFloat(to, str);
+}
+
+
+template <typename C, typename Tr, typename A>
+void stringTo(double& to, const std::basic_string<C, Tr, A>& str)
+{
+    stringToFloat(to, str);
+}
+
+
+template <typename C, typename Tr, typename A>
+void stringTo(long double& to, const std::basic_string<C, Tr, A>& str)
+{
+    stringToFloat(to, str);
+}
+
+
 //
 // Conversions to or from Pt::String
 //
@@ -194,6 +552,7 @@ OutIterT putFloat(OutIterT it, T d, const FormatT& fmt, int precision);
  */
 template <typename OutIterT, typename T>
 OutIterT putFloat(OutIterT it, T d);
+
 
 /** @brief Parses an integer value in a given format.
 
