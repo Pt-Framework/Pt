@@ -134,77 +134,77 @@ void convert(String& str, char value)
 void convert(String& str, unsigned char value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
 void convert(String& str, signed char value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
 void convert(Pt::String& str, short value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
 void convert(Pt::String& str, unsigned short value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
 void convert(Pt::String& str, int value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
 void convert(Pt::String& str, unsigned int value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
 void convert(Pt::String& str, long value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
 void convert(Pt::String& str, unsigned long value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
 void convert(String& str, float value)
 {
     str.clear();
-    putFloat(std::back_inserter(str), value);
+    formatFloat(std::back_inserter(str), value);
 }
 
 
 void convert(String& str, double value)
 {
     str.clear();
-    putFloat(std::back_inserter(str), value);
+    formatFloat(std::back_inserter(str), value);
 }
 
 
 void convert(String& str, long double value)
 {
     str.clear();
-    putFloat(std::back_inserter(str), value);
+    formatFloat(std::back_inserter(str), value);
 }
 
 //
@@ -233,7 +233,7 @@ void convert(char& c, const String& str)
 void convert(unsigned char& n, const String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n);
+    Pt::String::const_iterator r = parseInt( str.begin(), str.end(), ok, n);
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -246,7 +246,7 @@ void convert(unsigned char& n, const String& str)
 void convert(signed char& n, const String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n);
+    Pt::String::const_iterator r = parseInt( str.begin(), str.end(), ok, n);
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -259,7 +259,7 @@ void convert(signed char& n, const String& str)
 void convert(short& n, const Pt::String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+    Pt::String::const_iterator r = parseInt( str.begin(), str.end(), ok, n );
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -272,7 +272,7 @@ void convert(short& n, const Pt::String& str)
 void convert(unsigned short& n, const Pt::String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+    Pt::String::const_iterator r = parseInt( str.begin(), str.end(), ok, n );
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -285,7 +285,7 @@ void convert(unsigned short& n, const Pt::String& str)
 void convert(int& n, const Pt::String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+    Pt::String::const_iterator r = parseInt( str.begin(), str.end(), ok, n );
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -298,7 +298,7 @@ void convert(int& n, const Pt::String& str)
 void convert(unsigned int& n, const Pt::String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+    Pt::String::const_iterator r = parseInt( str.begin(), str.end(), ok, n );
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -311,7 +311,7 @@ void convert(unsigned int& n, const Pt::String& str)
 void convert(long& n, const Pt::String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+    Pt::String::const_iterator r = parseInt( str.begin(), str.end(), ok, n );
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -324,7 +324,7 @@ void convert(long& n, const Pt::String& str)
 void convert(unsigned long& n, const Pt::String& str)
 {
     bool ok = false;
-    Pt::String::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+    Pt::String::const_iterator r = parseInt( str.begin(), str.end(), ok, n );
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -337,7 +337,7 @@ void convert(unsigned long& n, const Pt::String& str)
 void convert(float& n, const String& str)
 {
     bool ok = false;
-    String::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
+    String::const_iterator r = parseFloat(str.begin(), str.end(), ok, n);
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -350,7 +350,7 @@ void convert(float& n, const String& str)
 void convert(double& n, const String& str)
 {
     bool ok = false;
-    String::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
+    String::const_iterator r = parseFloat(str.begin(), str.end(), ok, n);
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -363,7 +363,7 @@ void convert(double& n, const String& str)
 void convert(long double& n, const String& str)
 {
     bool ok = false;
-    String::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
+    String::const_iterator r = parseFloat(str.begin(), str.end(), ok, n);
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -381,7 +381,7 @@ void convert(int& n, const Pt::Char* str)
     bool ok = false;
     nullterm_array_iterator<Pt::Char> it(str);
     nullterm_array_iterator<Pt::Char> end;
-    it = getInt( it, end, ok, n );
+    it = parseInt( it, end, ok, n );
 
     if (ok)
         skipWhitespace(it, end);
@@ -418,77 +418,77 @@ void convert(std::string& str, char value)
 void convert(std::string& str, signed char value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, unsigned char value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, short value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, unsigned short value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, int value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, unsigned int value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, long value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, unsigned long value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, float value)
 {
     str.clear();
-    putFloat(std::back_inserter(str), value);
+    formatFloat(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, double value)
 {
     str.clear();
-    putFloat(std::back_inserter(str), value);
+    formatFloat(std::back_inserter(str), value);
 }
 
 
 void convert(std::string& str, long double value)
 {
     str.clear();
-    putFloat(std::back_inserter(str), value);
+    formatFloat(std::back_inserter(str), value);
 }
 
 //
@@ -519,7 +519,7 @@ void convert(char& c, const std::string& str)
 void convert(signed char& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+    std::string::const_iterator r = parseInt( str.begin(), str.end(), ok, n );
 
     if( r != str.end() || ! ok )
         throwConversionError("signed char", "std::string");
@@ -529,7 +529,7 @@ void convert(signed char& n, const std::string& str)
 void convert(unsigned char& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+    std::string::const_iterator r = parseInt( str.begin(), str.end(), ok, n );
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -542,7 +542,7 @@ void convert(unsigned char& n, const std::string& str)
 void convert(short& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+    std::string::const_iterator r = parseInt( str.begin(), str.end(), ok, n );
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -555,7 +555,7 @@ void convert(short& n, const std::string& str)
 void convert(unsigned short& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+    std::string::const_iterator r = parseInt( str.begin(), str.end(), ok, n );
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -568,7 +568,7 @@ void convert(unsigned short& n, const std::string& str)
 void convert(int& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+    std::string::const_iterator r = parseInt( str.begin(), str.end(), ok, n );
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -581,7 +581,7 @@ void convert(int& n, const std::string& str)
 void convert(unsigned int& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+    std::string::const_iterator r = parseInt( str.begin(), str.end(), ok, n );
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -594,7 +594,7 @@ void convert(unsigned int& n, const std::string& str)
 void convert(long& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+    std::string::const_iterator r = parseInt( str.begin(), str.end(), ok, n );
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -607,7 +607,7 @@ void convert(long& n, const std::string& str)
 void convert(unsigned long& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getInt( str.begin(), str.end(), ok, n );
+    std::string::const_iterator r = parseInt( str.begin(), str.end(), ok, n );
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -620,7 +620,7 @@ void convert(unsigned long& n, const std::string& str)
 void convert(float& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
+    std::string::const_iterator r = parseFloat(str.begin(), str.end(), ok, n);
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -633,7 +633,7 @@ void convert(float& n, const std::string& str)
 void convert(double& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
+    std::string::const_iterator r = parseFloat(str.begin(), str.end(), ok, n);
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -646,7 +646,7 @@ void convert(double& n, const std::string& str)
 void convert(long double& n, const std::string& str)
 {
     bool ok = false;
-    std::string::const_iterator r = getFloat(str.begin(), str.end(), ok, n);
+    std::string::const_iterator r = parseFloat(str.begin(), str.end(), ok, n);
 
     if (ok)
         skipWhitespace(r, str.end());
@@ -664,7 +664,7 @@ void convert(int& n, const char* str)
     bool ok = false;
     nullterm_array_iterator<char> it(str);
     nullterm_array_iterator<char> end;
-    it = getInt( it, end, ok, n );
+    it = parseInt( it, end, ok, n );
 
     if (ok)
         skipWhitespace(it, end);

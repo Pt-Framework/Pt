@@ -157,7 +157,7 @@ template <typename C, typename Tr, typename A>
 void toString(std::basic_string<C, Tr, A>& str, signed char value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
@@ -165,7 +165,7 @@ template <typename C, typename Tr, typename A>
 void toString(std::basic_string<C, Tr, A>& str, unsigned char value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
@@ -173,7 +173,7 @@ template <typename C, typename Tr, typename A>
 void toString(std::basic_string<C, Tr, A>& str, short value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
@@ -181,7 +181,7 @@ template <typename C, typename Tr, typename A>
 void toString(std::basic_string<C, Tr, A>& str, unsigned short value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
@@ -189,7 +189,7 @@ template <typename C, typename Tr, typename A>
 void toString(std::basic_string<C, Tr, A>& str, int value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
@@ -197,7 +197,7 @@ template <typename C, typename Tr, typename A>
 void toString(std::basic_string<C, Tr, A>& str, unsigned int value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
@@ -205,7 +205,7 @@ template <typename C, typename Tr, typename A>
 void toString(std::basic_string<C, Tr, A>& str, long value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
@@ -213,7 +213,7 @@ template <typename C, typename Tr, typename A>
 void toString(std::basic_string<C, Tr, A>& str, unsigned long value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
@@ -221,7 +221,7 @@ template <typename C, typename Tr, typename A>
 void toString(std::basic_string<C, Tr, A>& str, long long value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
@@ -229,7 +229,7 @@ template <typename C, typename Tr, typename A>
 void toString(std::basic_string<C, Tr, A>& str, unsigned long long value)
 {
     str.clear();
-    putInt(std::back_inserter(str), value);
+    formatInt(std::back_inserter(str), value);
 }
 
 
@@ -237,7 +237,7 @@ template <typename C, typename Tr, typename A>
 void toString(std::basic_string<C, Tr, A>& str, float value)
 {
     str.clear();
-    putFloat(std::back_inserter(str), value);
+    formatFloat(std::back_inserter(str), value);
 }
 
 
@@ -245,7 +245,7 @@ template <typename C, typename Tr, typename A>
 void toString(std::basic_string<C, Tr, A>& str, double value)
 {
     str.clear();
-    putFloat(std::back_inserter(str), value);
+    formatFloat(std::back_inserter(str), value);
 }
 
 
@@ -253,7 +253,7 @@ template <typename C, typename Tr, typename A>
 void toString(std::basic_string<C, Tr, A>& str, long double value)
 {
     str.clear();
-    putFloat(std::back_inserter(str), value);
+    formatFloat(std::back_inserter(str), value);
 }
 
 
@@ -286,7 +286,7 @@ template <typename T, typename C, typename Tr, typename A>
 void stringToInt(T& to, const std::basic_string<C, Tr, A>& str)
 {
     bool ok = false;
-    std::basic_string<C, Tr, A>::const_iterator it = getInt( str.begin(), str.end(), ok, to );
+    std::basic_string<C, Tr, A>::const_iterator it = parseInt( str.begin(), str.end(), ok, to );
 
     if (ok)
         it = getWhitespace(it, str.end(), NumberFormat<C>());
@@ -300,7 +300,7 @@ template <typename T, typename C, typename Tr, typename A>
 void stringToFloat(T& to, const std::basic_string<C, Tr, A>& str)
 {
     bool ok = false;
-    std::basic_string<C, Tr, A>::const_iterator it = getFloat( str.begin(), str.end(), ok, to );
+    std::basic_string<C, Tr, A>::const_iterator it = parseFloat( str.begin(), str.end(), ok, to );
 
     if (ok)
         it = getWhitespace(it, str.end(), NumberFormat<C>());
@@ -525,33 +525,34 @@ T convert(const S& from)
     return value;
 }
 
+
 /** @brief Formats an integer in a given format.
 
     @ingroup CoreTypes
  */
 template <typename OutIterT, typename T, typename FormatT>
-inline OutIterT putInt(OutIterT it, T i, const FormatT& fmt);
+inline OutIterT formatInt(OutIterT it, T i, const FormatT& fmt);
 
 /** @brief Formats an integer in a decimal format.
 
     @ingroup CoreTypes
  */
 template <typename OutIterT, typename T>
-inline OutIterT putInt(OutIterT it, T i);
+inline OutIterT formatInt(OutIterT it, T i);
 
 /** @brief Formats a floating point value in a given format.
 
     @ingroup CoreTypes
  */
 template <typename OutIterT, typename T, typename FormatT>
-OutIterT putFloat(OutIterT it, T d, const FormatT& fmt, int precision);
+OutIterT formatFloat(OutIterT it, T d, const FormatT& fmt, int precision);
 
 /** @brief Formats a floating point value in default format.
 
     @ingroup CoreTypes
  */
 template <typename OutIterT, typename T>
-OutIterT putFloat(OutIterT it, T d);
+OutIterT formatFloat(OutIterT it, T d);
 
 
 /** @brief Parses an integer value in a given format.
@@ -559,28 +560,92 @@ OutIterT putFloat(OutIterT it, T d);
     @ingroup CoreTypes
  */
 template <typename InIterT, typename T, typename FormatT>
-InIterT getInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt);
+InIterT parseInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt);
+
+/** @brief Parses an integer value in a given format.
+
+    @ingroup CoreTypes
+ */
+template <typename InIterT, typename T, typename FormatT>
+InIterT parseInt(InIterT it, InIterT end, T& n, const FormatT& fmt)
+{
+    bool ok = false;
+
+    InIterT it = parseInt(it, end, ok, n, fmt);
+    if( ! ok )
+        throw ConversionError("conversion failed");
+    
+    return it;
+}
 
 /** @brief Parses an integer value in decimal format.
 
     @ingroup CoreTypes
  */
 template <typename InIterT, typename T>
-InIterT getInt(InIterT it, InIterT end, bool& ok, T& n);
+InIterT parseInt(InIterT it, InIterT end, bool& ok, T& n);
+
+/** @brief Parses an integer value in decimal format.
+
+    @ingroup CoreTypes
+ */
+template <typename InIterT, typename T>
+InIterT parseInt(InIterT it, InIterT end, T& n)
+{
+    bool ok = false;
+
+    InIterT it = parseInt(it, end, ok, n);
+    if( ! ok )
+        throw ConversionError("conversion failed");
+    
+    return it;
+}
 
 /** @brief Parses a floating point value in a given format.
 
     @ingroup CoreTypes
  */
 template <typename InIterT, typename T, typename FormatT>
-InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt);
+InIterT parseFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt);
+
+/** @brief Parses a floating point value in a given format.
+
+    @ingroup CoreTypes
+ */
+template <typename InIterT, typename T, typename FormatT>
+InIterT parseFloat(InIterT it, InIterT end, T& n, const FormatT& fmt)
+{
+    bool ok = false;
+
+    InIterT parseFloat(it, end, ok, n, fmt);
+    if( ! ok )
+        throw ConversionError("conversion failed");
+    
+    return it;
+}
 
 /** @brief Parses a floating point value.
 
     @ingroup CoreTypes
  */
 template <typename InIterT, typename T>
-InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n);
+InIterT parseFloat(InIterT it, InIterT end, bool& ok, T& n);
+
+/** @brief Parses a floating point value.
+
+    @ingroup CoreTypes
+ */
+template <typename InIterT, typename T>
+InIterT parseFloat(InIterT it, InIterT end, T& n)
+{
+    bool ok = false;
+
+    InIterT parseFloat(it, end, ok, n);
+    if( ! ok )
+        throw ConversionError("conversion failed");
+    
+    return it;
+}
 
 
 template <typename CharType>
@@ -934,7 +999,7 @@ inline CharT* formatInt(CharT* buf, std::size_t buflen, T i, const BinaryFormat<
    
 
 template <typename OutIterT, typename T, typename FormatT>
-inline OutIterT putInt(OutIterT it, T i, const FormatT& fmt)
+inline OutIterT formatInt(OutIterT it, T i, const FormatT& fmt)
 {
     // large enough even for binary and a sign
     const std::size_t buflen = (sizeof(T) * 8) + 1;
@@ -950,10 +1015,10 @@ inline OutIterT putInt(OutIterT it, T i, const FormatT& fmt)
 
 
 template <typename OutIterT, typename T>
-inline OutIterT putInt(OutIterT it, T i)
+inline OutIterT formatInt(OutIterT it, T i)
 {
     DecimalFormat<char> fmt;
-    return putInt(it, i, fmt);
+    return formatInt(it, i, fmt);
 }
 
 
@@ -1023,7 +1088,7 @@ inline int formatFloat(CharT* fraction, int fractSize, int& intpart, int& exp, T
 
 
 template <typename OutIterT, typename T, typename FormatT>
-inline OutIterT putFloat(OutIterT it, T d, const FormatT& fmt, int precision)
+inline OutIterT formatFloat(OutIterT it, T d, const FormatT& fmt, int precision)
 {
     typedef typename FormatT::CharT CharT;
     CharT zero = fmt.toChar(0);
@@ -1100,11 +1165,11 @@ inline OutIterT putFloat(OutIterT it, T d, const FormatT& fmt, int precision)
 
 
 template <typename OutIterT, typename T>
-inline OutIterT putFloat(OutIterT it, T d)
+inline OutIterT formatFloat(OutIterT it, T d)
 {
     const int precision = std::numeric_limits<T>::digits10;
     FloatFormat<char> fmt;
-    return putFloat(it, d, fmt, precision);
+    return formatFloat(it, d, fmt, precision);
 }
 
 
@@ -1138,7 +1203,7 @@ InIterT getSign(InIterT it, InIterT end, bool& pos, const FormatT& fmt)
 
 
 template <typename InIterT, typename T, typename FormatT>
-InIterT getInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
+InIterT parseInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 {
     typedef typename IntTraits<T>::Unsigned UnsignedInt;
     typedef typename IntTraits<T>::Signed SignedInt;
@@ -1201,15 +1266,15 @@ InIterT getInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 
 
 template <typename InIterT, typename T>
-InIterT getInt(InIterT it, InIterT end, bool& ok, T& n)
+InIterT parseInt(InIterT it, InIterT end, bool& ok, T& n)
 {
     typedef typename std::iterator_traits<InIterT>::value_type CharType;    
-    return getInt(it, end, ok, n, DecimalFormat<CharType>() );
+    return parseInt(it, end, ok, n, DecimalFormat<CharType>() );
 }
 
 
 template <typename InIterT, typename T, typename FormatT>
-InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
+InIterT parseFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 {
     typedef typename FormatT::CharT CharT;
     CharT zero = fmt.toChar(0);
@@ -1334,7 +1399,7 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
             return it;
 
         long exp = 0;
-        it = getInt(it, end, ok, exp, fmt);
+        it = parseInt(it, end, ok, exp, fmt);
         if( ! ok )
             return it;
             
@@ -1350,10 +1415,10 @@ InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 
 
 template <typename InIterT, typename T>
-InIterT getFloat(InIterT it, InIterT end, bool& ok, T& n)
+InIterT parseFloat(InIterT it, InIterT end, bool& ok, T& n)
 {
     typedef typename std::iterator_traits<InIterT>::value_type CharType;
-    return getFloat( it, end, ok, n, FloatFormat<CharType>() );
+    return parseFloat( it, end, ok, n, FloatFormat<CharType>() );
 }
 
 } // namespace Pt

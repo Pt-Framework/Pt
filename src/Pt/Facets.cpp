@@ -647,13 +647,13 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            it = Pt::getInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            it = Pt::getInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            it = Pt::getInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
 
@@ -677,13 +677,13 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            it = Pt::getInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            it = Pt::getInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            it = Pt::getInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
 
@@ -707,13 +707,13 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            it = Pt::getInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            it = Pt::getInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            it = Pt::getInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
 
@@ -737,13 +737,13 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            it = Pt::getInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            it = Pt::getInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            it = Pt::getInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
 
@@ -767,13 +767,13 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            it = Pt::getInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            it = Pt::getInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            it = Pt::getInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
 
@@ -797,13 +797,13 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
     switch(stream.flags() & ios_base::basefield) 
     {
         case ios_base::oct:
-            it = Pt::getInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::OctalFormat<Pt::Char>());
             break;
         case ios_base::hex:
-            it = Pt::getInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::HexFormat<Pt::Char>());
             break;
         default:
-            it = Pt::getInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
+            it = Pt::parseInt(it, end, ok, val, Pt::DecimalFormat<Pt::Char>());
             break;
     }
 
@@ -839,7 +839,7 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
     // accept scientific and fixed format. The respective maniuplators 
     // are for input only
     bool ok = false;
-    it = Pt::getFloat(it, end, ok, val);
+    it = Pt::parseFloat(it, end, ok, val);
 
     if( ok )
         state = ios_base::goodbit;
@@ -861,7 +861,7 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
     // accept scientific and fixed format. The respective maniuplators 
     // are for input only
     bool ok = false;
-    it = Pt::getFloat(it, end, ok, val);
+    it = Pt::parseFloat(it, end, ok, val);
 
     if( ok )
         state = ios_base::goodbit;
@@ -882,7 +882,7 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
     // accept scientific and fixed format. The respective maniuplators 
     // are for input only
     bool ok = false;
-    it = Pt::getFloat(it, end, ok, val);
+    it = Pt::parseFloat(it, end, ok, val);
 
     if( ok )
         state = ios_base::goodbit;
@@ -902,7 +902,7 @@ num_get< Pt::Char, istreambuf_iterator<Pt::Char> >::do_get(iter_type it, iter_ty
 {
     std::size_t addr = 0;
     bool ok = false;
-    Pt::getInt(it, end, ok, addr, Pt::HexFormat<Pt::Char>());
+    Pt::parseInt(it, end, ok, addr, Pt::HexFormat<Pt::Char>());
 
     if( ok )
     {

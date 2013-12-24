@@ -222,7 +222,7 @@ void Formatter::onAddInt64(const char* name, Pt::int64_t value, const char* id)
     Pt::Char _buf[_bufsize];
         
     array_appender<Pt::Char> it(_buf, _bufsize);
-    it = putInt(it, value);
+    it = formatInt(it, value);
 
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
     _os->write(XMLRPC_INT, sizeof(XMLRPC_INT)/sizeof(Char));
@@ -256,7 +256,7 @@ void Formatter::onAddUInt64(const char* name, Pt::uint64_t value, const char* id
     Pt::Char _buf[_bufsize];
 
     array_appender<Pt::Char> it(_buf, _bufsize);
-    it = putInt(it, value);
+    it = formatInt(it, value);
 
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
     _os->write(XMLRPC_INT, sizeof(XMLRPC_INT)/sizeof(Char));
@@ -279,7 +279,7 @@ void Formatter::onAddDouble(const char* name, double value, const char* id)
     Pt::Char _buf[_bufsize];
 
     array_appender<Pt::Char> it(_buf, _bufsize);
-    it = putFloat(it, value);
+    it = formatFloat(it, value);
 
     _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
 
@@ -754,7 +754,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
                 Pt::int32_t number = 0;
                 bool ok = false;
-                getInt( chars.content().begin(), chars.content().end(), ok, number );
+                parseInt( chars.content().begin(), chars.content().end(), ok, number );
 
                 if( ! ok )
                     throwSerializationError();
@@ -780,7 +780,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
                 double number = 0.0;
                 bool ok = false;
-                getFloat( chars.content().begin(), chars.content().end(), ok, number );
+                parseFloat( chars.content().begin(), chars.content().end(), ok, number );
 
                 if( ! ok )
                     throwSerializationError();

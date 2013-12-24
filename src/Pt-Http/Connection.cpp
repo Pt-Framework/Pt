@@ -1170,9 +1170,9 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
     os << request.method() << ' ';
     os << request.url() << '?' << request.qparams();
     os.write(" HTTP/", 6);
-    putInt(oit, header.versionMajor());
+    formatInt(oit, header.versionMajor());
     os << '.';
-    putInt(oit, header.versionMinor());
+    formatInt(oit, header.versionMinor());
     os.write("\r\n", 2);
 
     MessageHeader::ConstIterator it;
@@ -1188,7 +1188,7 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
     else
     {
         os.write("Content-Length: ", 16);
-        putInt( oit, request.buffer().size() );
+        formatInt( oit, request.buffer().size() );
         os.write("\r\n", 2);
     }
 
@@ -1229,11 +1229,11 @@ void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
 
     std::ostream_iterator<char> oit (os);
     os.write("HTTP/", 5);
-    putInt(oit, header.versionMajor());
+    formatInt(oit, header.versionMajor());
     os << '.';
-    putInt(oit, header.versionMinor()); 
+    formatInt(oit, header.versionMinor()); 
     os << ' ';
-    putInt(oit, reply.statusCode());
+    formatInt(oit, reply.statusCode());
     os << ' ';
     os << reply.statusText();
     os.write("\r\n", 2);
@@ -1256,7 +1256,7 @@ void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
     else
     {
         os.write("Content-Length: ", 16);
-        putInt( oit, _reply->buffer().size() ); 
+        formatInt( oit, _reply->buffer().size() ); 
         os.write("\r\n", 2);
     }
 
