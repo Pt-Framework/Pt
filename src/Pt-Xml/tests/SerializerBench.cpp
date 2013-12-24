@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
             for (unsigned n = 0; n < C.get(); ++n)
             {
                 obj.intValue = n;
-                obj.stringValue = Pt::convert<std::string>(n);
+                Pt::formatInt(std::back_inserter(obj.stringValue), n);
                 obj.doubleValue = sqrt(static_cast<double>(n));
                 v.push_back(obj);
             }

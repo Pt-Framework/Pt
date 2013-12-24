@@ -28,6 +28,7 @@
  */
 #include "Pt/Gfx/Pen.h"
 #include "Pt/Gfx/ARgbImage.h"
+#include "Pt/StringStream.h"
 #include "Pt/Convert.h"
 
 namespace Pt {

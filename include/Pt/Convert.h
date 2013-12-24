@@ -25,15 +25,13 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef Pt_Convert_h
 #define Pt_Convert_h
 
 #include <Pt/Api.h>
-#include <Pt/String.h>
 #include <Pt/ConversionError.h>
 #include <Pt/TypeTraits.h>
-#include <Pt/StringStream.h>
-#include <sstream>
 #include <string>
 #include <limits>
 #include <iterator>
@@ -109,17 +107,16 @@ struct GreaterThanMax<true, false>
     @ingroup CoreTypes
 */
 template<typename R, typename T>
-inline T narrow(T from)
+inline R narrow(T from)
 {
-    typedef std::numeric_limits<Source> SourceTraits;
+    typedef std::numeric_limits<T> SourceTraits;
     typedef std::numeric_limits<R> ResultTraits;
 
-    const bool sourceIsSigned = SourceTraits::is_signed;
-    const bool resultIsSigned = ResultTraits::is_signed;
-    const bool sameSign = sourceIsSigned == resultIsSigned;
+    const bool fromSigned = SourceTraits::is_signed;
+    const bool toSigned = ResultTraits::is_signed;
 
-    if (LessThanMin<sourceIsSigned, resultIsSigned>::check( from, ResultTraits::min() )
-     || GreaterThanMax<sourceIsSigned, resultIsSigned>::check( from, ResultTraits::max() ) )
+    if( LessThanMin<fromSigned, toSigned>::check( from, ResultTraits::min() )
+     || GreaterThanMax<fromSigned, toSigned>::check( from, ResultTraits::max() ) )
     {
         throw ConversionError("numeric conversion failed");
     }
@@ -128,429 +125,32 @@ inline T narrow(T from)
 }
 
 
-/** @brief Convert to string.
-
-    @ingroup CoreTypes
-*/
-template <typename T, typename C, typename Tr, typename A>
-void toString(std::basic_string<C, Tr, A>& to, const T& from)
-{
-    std::basic_stringstream<C, Tr> ss;
-    if( ! (ss << from && ss >> to) )
-        throw ConversionError("string conversion failed");
-}
-
-/** @brief Convert to string.
-
-    @ingroup CoreTypes
-*/
-template <typename S, typename T>
-S toString(const T& t)
-{
-    S str;
-    toString(str, t);
-    return str;
-}
-
-
-template <typename C, typename Tr, typename A>
-void toString(std::basic_string<C, Tr, A>& str, signed char value)
-{
-    str.clear();
-    formatInt(std::back_inserter(str), value);
-}
-
-
-template <typename C, typename Tr, typename A>
-void toString(std::basic_string<C, Tr, A>& str, unsigned char value)
-{
-    str.clear();
-    formatInt(std::back_inserter(str), value);
-}
-
-
-template <typename C, typename Tr, typename A>
-void toString(std::basic_string<C, Tr, A>& str, short value)
-{
-    str.clear();
-    formatInt(std::back_inserter(str), value);
-}
-
-
-template <typename C, typename Tr, typename A>
-void toString(std::basic_string<C, Tr, A>& str, unsigned short value)
-{
-    str.clear();
-    formatInt(std::back_inserter(str), value);
-}
-
-
-template <typename C, typename Tr, typename A>
-void toString(std::basic_string<C, Tr, A>& str, int value)
-{
-    str.clear();
-    formatInt(std::back_inserter(str), value);
-}
-
-
-template <typename C, typename Tr, typename A>
-void toString(std::basic_string<C, Tr, A>& str, unsigned int value)
-{
-    str.clear();
-    formatInt(std::back_inserter(str), value);
-}
-
-
-template <typename C, typename Tr, typename A>
-void toString(std::basic_string<C, Tr, A>& str, long value)
-{
-    str.clear();
-    formatInt(std::back_inserter(str), value);
-}
-
-
-template <typename C, typename Tr, typename A>
-void toString(std::basic_string<C, Tr, A>& str, unsigned long value)
-{
-    str.clear();
-    formatInt(std::back_inserter(str), value);
-}
-
-
-template <typename C, typename Tr, typename A>
-void toString(std::basic_string<C, Tr, A>& str, long long value)
-{
-    str.clear();
-    formatInt(std::back_inserter(str), value);
-}
-
-
-template <typename C, typename Tr, typename A>
-void toString(std::basic_string<C, Tr, A>& str, unsigned long long value)
-{
-    str.clear();
-    formatInt(std::back_inserter(str), value);
-}
-
-
-template <typename C, typename Tr, typename A>
-void toString(std::basic_string<C, Tr, A>& str, float value)
-{
-    str.clear();
-    formatFloat(std::back_inserter(str), value);
-}
-
-
-template <typename C, typename Tr, typename A>
-void toString(std::basic_string<C, Tr, A>& str, double value)
-{
-    str.clear();
-    formatFloat(std::back_inserter(str), value);
-}
-
-
-template <typename C, typename Tr, typename A>
-void toString(std::basic_string<C, Tr, A>& str, long double value)
-{
-    str.clear();
-    formatFloat(std::back_inserter(str), value);
-}
-
-
-/** @brief Convert from string.
-
-    @ingroup CoreTypes
-*/
-template <typename T, typename C, typename Tr, typename A>
-void stringTo(T& to, const std::basic_string<C, Tr, A>& from)
-{
-    std::basic_stringstream<C, Tr> ss;
-    if( ! (ss << from && ss >> to) )
-        throw ConversionError("string conversion failed");
-}
-
-/** @brief Convert to string.
-
-    @ingroup CoreTypes
-*/
-template <typename T, typename S>
-T stringTo(const S& str)
-{
-    T value = T();
-    stringTo(value, str);
-    return value;
-}
-
-
-template <typename T, typename C, typename Tr, typename A>
-void stringToInt(T& to, const std::basic_string<C, Tr, A>& str)
-{
-    bool ok = false;
-    std::basic_string<C, Tr, A>::const_iterator it = parseInt( str.begin(), str.end(), ok, to );
-
-    if (ok)
-        it = getWhitespace(it, str.end(), NumberFormat<C>());
-
-    if( it != str.end() || ! ok )
-        throw ConversionError("string conversion failed");
-}
-
-
-template <typename T, typename C, typename Tr, typename A>
-void stringToFloat(T& to, const std::basic_string<C, Tr, A>& str)
-{
-    bool ok = false;
-    std::basic_string<C, Tr, A>::const_iterator it = parseFloat( str.begin(), str.end(), ok, to );
-
-    if (ok)
-        it = getWhitespace(it, str.end(), NumberFormat<C>());
-
-    if( it != str.end() || ! ok )
-        throw ConversionError("string conversion failed");
-}
-
-
-template <typename C, typename Tr, typename A>
-void stringTo(signed char& to, const std::basic_string<C, Tr, A>& str)
-{
-    stringToInt(to, str);
-}
-
-
-template <typename C, typename Tr, typename A>
-void stringTo(unsigned char& to, const std::basic_string<C, Tr, A>& str)
-{
-    stringToInt(to, str);
-}
-
-
-template <typename C, typename Tr, typename A>
-void stringTo(short& to, const std::basic_string<C, Tr, A>& str)
-{
-    stringToInt(to, str);
-}
-
-
-template <typename C, typename Tr, typename A>
-void stringTo(unsigned short& to, const std::basic_string<C, Tr, A>& str)
-{
-    stringToInt(to, str);
-}
-
-
-template <typename C, typename Tr, typename A>
-void stringTo(int& to, const std::basic_string<C, Tr, A>& str)
-{
-    stringToInt(to, str);
-}
-
-
-template <typename C, typename Tr, typename A>
-void stringTo(unsigned int& to, const std::basic_string<C, Tr, A>& str)
-{
-    stringToInt(to, str);
-}
-
-
-template <typename C, typename Tr, typename A>
-void stringTo(long& to, const std::basic_string<C, Tr, A>& str)
-{
-    stringToInt(to, str);
-}
-
-
-template <typename C, typename Tr, typename A>
-void stringTo(unsigned long& to, const std::basic_string<C, Tr, A>& str)
-{
-    stringToInt(to, str);
-}
-
-
-template <typename C, typename Tr, typename A>
-void stringTo(long long& to, const std::basic_string<C, Tr, A>& str)
-{
-    stringToInt(to, str);
-}
-
-
-template <typename C, typename Tr, typename A>
-void stringTo(unsigned long long& to, const std::basic_string<C, Tr, A>& str)
-{
-    stringToInt(to, str);
-}
-
-
-template <typename C, typename Tr, typename A>
-void stringTo(float& to, const std::basic_string<C, Tr, A>& str)
-{
-    stringToFloat(to, str);
-}
-
-
-template <typename C, typename Tr, typename A>
-void stringTo(double& to, const std::basic_string<C, Tr, A>& str)
-{
-    stringToFloat(to, str);
-}
-
-
-template <typename C, typename Tr, typename A>
-void stringTo(long double& to, const std::basic_string<C, Tr, A>& str)
-{
-    stringToFloat(to, str);
-}
-
-
-//
-// Conversions to or from Pt::String
-//
-
-PT_API void convert(String& s, bool value);
-PT_API void convert(String& s, char value);
-PT_API void convert(String& s, unsigned char value);
-PT_API void convert(String& s, signed char value);
-PT_API void convert(String& s, short value);
-PT_API void convert(String& s, unsigned short value);
-PT_API void convert(String& s, int value);
-PT_API void convert(String& s, unsigned int value);
-PT_API void convert(String& s, long value);
-PT_API void convert(String& s, unsigned long value);
-PT_API void convert(String& s, float value);
-PT_API void convert(String& s, double value);
-PT_API void convert(String& s, long double value);
-PT_API void convert(String& s, const std::string& value);
-
-PT_API void convert(bool& n, const String& str);
-PT_API void convert(char& n, const String& str);
-PT_API void convert(unsigned char& n, const String& str);
-PT_API void convert(signed char& n, const String& str);
-PT_API void convert(short& n, const String& str);
-PT_API void convert(unsigned short& n, const String& str);
-PT_API void convert(int& n, const String& str);
-PT_API void convert(unsigned int& n, const String& str);
-PT_API void convert(long& n, const String& str);
-PT_API void convert(unsigned long& n, const String& str);
-PT_API void convert(float& n, const String& str);
-PT_API void convert(double& n, const String& str);
-PT_API void convert(long double& n, const String& str);
-
-PT_API void convert(int& n, const Pt::Char* str);
-
-PT_API void convert(std::string& s, bool value);
-PT_API void convert(std::string& s, char value);
-PT_API void convert(std::string& s, signed char value);
-PT_API void convert(std::string& s, unsigned char value);
-PT_API void convert(std::string& s, short value);
-PT_API void convert(std::string& s, unsigned short value);
-PT_API void convert(std::string& s, int value);
-PT_API void convert(std::string& s, unsigned int value);
-PT_API void convert(std::string& s, long value);
-PT_API void convert(std::string& s, unsigned long value);
-PT_API void convert(std::string& s, float value);
-PT_API void convert(std::string& s, double value);
-PT_API void convert(std::string& s, long double value);
-PT_API void convert(std::string& s, const String& str);
-
-PT_API void convert(bool& n, const std::string& str);
-PT_API void convert(char& n, const std::string& str);
-PT_API void convert(signed char& n, const std::string& str);
-PT_API void convert(unsigned char& n, const std::string& str);
-PT_API void convert(short& n, const std::string& str);
-PT_API void convert(unsigned short& n, const std::string& str);
-PT_API void convert(int& n, const std::string& str);
-PT_API void convert(unsigned int& n, const std::string& str);
-PT_API void convert(long& n, const std::string& str);
-PT_API void convert(unsigned long& n, const std::string& str);
-PT_API void convert(float& n, const std::string& str);
-PT_API void convert(double& n, const std::string& str);
-PT_API void convert(long double& n, const std::string& str);
-
-PT_API void convert(int& n, const char* str);
-
-/** @brief Convert to string.
-
-    @ingroup CoreTypes
-*/
-template <typename T>
-inline void convert(std::string& to, const T& from)
-{
-    std::stringstream ss;
-    if( ! (ss << from && ss >> to) )
-        throw ConversionError("conversion failed");
-}
-
-/** @brief Convert from string.
-
-    @ingroup CoreTypes
-*/
-template <typename T>
-inline void convert(T& to, const std::string& from)
-{
-    std::stringstream ss;
-    if( ! (ss << from && ss >> to) )
-        throw ConversionError("conversion failed");
-}
-
-/** @brief Convert between two types.
-
-    @ingroup CoreTypes
-*/
-template<typename T>
-void convert(T& to, const T& from)
-{
-    to = from;
-}
-
-/** @brief Convert between two types.
-
-    @ingroup CoreTypes
-*/
-template<typename T, typename S>
-void convert(T& to, const S& from)
-{
-    StringStream ss;
-    if( ! (ss << from && ss >> to) )
-        throw ConversionError("conversion failed");
-}
-
-/** @brief Convert between two types.
-
-    @ingroup CoreTypes
-*/
-template<typename T, typename S>
-T convert(const S& from)
-{
-    T value = T();
-    convert(value, from);
-    return value;
-}
-
-
 /** @brief Formats an integer in a given format.
 
     @ingroup CoreTypes
- */
+*/
 template <typename OutIterT, typename T, typename FormatT>
 inline OutIterT formatInt(OutIterT it, T i, const FormatT& fmt);
 
 /** @brief Formats an integer in a decimal format.
 
     @ingroup CoreTypes
- */
+*/
 template <typename OutIterT, typename T>
 inline OutIterT formatInt(OutIterT it, T i);
+
 
 /** @brief Formats a floating point value in a given format.
 
     @ingroup CoreTypes
- */
+*/
 template <typename OutIterT, typename T, typename FormatT>
 OutIterT formatFloat(OutIterT it, T d, const FormatT& fmt, int precision);
 
 /** @brief Formats a floating point value in default format.
 
     @ingroup CoreTypes
- */
+*/
 template <typename OutIterT, typename T>
 OutIterT formatFloat(OutIterT it, T d);
 
@@ -558,93 +158,94 @@ OutIterT formatFloat(OutIterT it, T d);
 /** @brief Parses an integer value in a given format.
 
     @ingroup CoreTypes
- */
+*/
 template <typename InIterT, typename T, typename FormatT>
 InIterT parseInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt);
 
 /** @brief Parses an integer value in a given format.
 
     @ingroup CoreTypes
- */
+*/
 template <typename InIterT, typename T, typename FormatT>
 InIterT parseInt(InIterT it, InIterT end, T& n, const FormatT& fmt)
 {
     bool ok = false;
 
-    InIterT it = parseInt(it, end, ok, n, fmt);
+    InIterT r = parseInt(it, end, ok, n, fmt);
     if( ! ok )
         throw ConversionError("conversion failed");
     
-    return it;
+    return r;
 }
 
 /** @brief Parses an integer value in decimal format.
 
     @ingroup CoreTypes
- */
+*/
 template <typename InIterT, typename T>
 InIterT parseInt(InIterT it, InIterT end, bool& ok, T& n);
 
 /** @brief Parses an integer value in decimal format.
 
     @ingroup CoreTypes
- */
+*/
 template <typename InIterT, typename T>
 InIterT parseInt(InIterT it, InIterT end, T& n)
 {
     bool ok = false;
 
-    InIterT it = parseInt(it, end, ok, n);
+    InIterT r = parseInt(it, end, ok, n);
     if( ! ok )
         throw ConversionError("conversion failed");
     
-    return it;
+    return r;
 }
+
 
 /** @brief Parses a floating point value in a given format.
 
     @ingroup CoreTypes
- */
+*/
 template <typename InIterT, typename T, typename FormatT>
 InIterT parseFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt);
 
 /** @brief Parses a floating point value in a given format.
 
     @ingroup CoreTypes
- */
+*/
 template <typename InIterT, typename T, typename FormatT>
 InIterT parseFloat(InIterT it, InIterT end, T& n, const FormatT& fmt)
 {
     bool ok = false;
 
-    InIterT parseFloat(it, end, ok, n, fmt);
+    InIterT r = parseFloat(it, end, ok, n, fmt);
     if( ! ok )
         throw ConversionError("conversion failed");
     
-    return it;
+    return r;
 }
 
 /** @brief Parses a floating point value.
 
     @ingroup CoreTypes
- */
+*/
 template <typename InIterT, typename T>
 InIterT parseFloat(InIterT it, InIterT end, bool& ok, T& n);
 
 /** @brief Parses a floating point value.
 
     @ingroup CoreTypes
- */
+*/
 template <typename InIterT, typename T>
 InIterT parseFloat(InIterT it, InIterT end, T& n)
 {
     bool ok = false;
 
-    InIterT parseFloat(it, end, ok, n);
+    InIterT r = parseFloat(it, end, ok, n);
     if( ! ok )
         throw ConversionError("conversion failed");
     
-    return it;
+    return r;
 }
 
 

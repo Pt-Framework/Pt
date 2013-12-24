@@ -108,7 +108,7 @@ void XmlFormatter::onAddString(const char* name, const char* type,
 void XmlFormatter::onAddBinary(const char* name, const char* type,
                                const char* value, std::size_t length, const char* id)
 {
-    convert(_value, std::string(value, length));
+    _value.assign(value, length);
     this->addValue(name, type, _value.c_str(), id);
 }
 
@@ -116,7 +116,7 @@ void XmlFormatter::onAddBinary(const char* name, const char* type,
 void XmlFormatter::onAddBool(const char* name, bool value,
                              const char* id)
 {
-    convert(_value, value);
+    _value = value ? "true" : "false";
     this->addValue(name, "bool", _value.c_str(), id);
 }
 
@@ -132,52 +132,56 @@ void XmlFormatter::onAddChar(const char* name, const Pt::Char& value,
 
 void XmlFormatter::onAddInt8(const char* name, Pt::int8_t value, const char* id)
 {
-	this->onAddInt64(name, value, id);
+    this->onAddInt64(name, value, id);
 }
 
 
 void XmlFormatter::onAddInt16(const char* name, Pt::int16_t value, const char* id)
 {
-	this->onAddInt64(name, value, id);
+    this->onAddInt64(name, value, id);
 }    
 
 
 void XmlFormatter::onAddInt32(const char* name, Pt::int32_t value, const char* id)
 {
-	this->onAddInt64(name, value, id);
+    this->onAddInt64(name, value, id);
 }
 
 
 void XmlFormatter::onAddInt64(const char* name, Pt::int64_t value,
                               const char* id)
 {
-    convert(_value, value);
+    _value.clear();
+    formatInt( std::back_inserter(_value), value );
+
     this->addValue(name, "int", _value.c_str(), id);
 }
 
 
 void XmlFormatter::onAddUInt8(const char* name, Pt::uint8_t value, const char* id)
 {
-	this->onAddUInt64(name, value, id);
+    this->onAddUInt64(name, value, id);
 }
 
 
 void XmlFormatter::onAddUInt16(const char* name, Pt::uint16_t value, const char* id)
 {
-	this->onAddUInt64(name, value, id);
+    this->onAddUInt64(name, value, id);
 }    
 
 
 void XmlFormatter::onAddUInt32(const char* name, Pt::uint32_t value, const char* id)
 {
-	this->onAddUInt64(name, value, id);
+    this->onAddUInt64(name, value, id);
 }
 
 
 void XmlFormatter::onAddUInt64(const char* name, Pt::uint64_t value,
                                const char* id)
 {
-    convert(_value, value);
+    _value.clear();
+    formatInt( std::back_inserter(_value), value );
+    
     this->addValue(name, "unsigned", _value.c_str(), id);
 }
 
@@ -185,7 +189,9 @@ void XmlFormatter::onAddUInt64(const char* name, Pt::uint64_t value,
 void XmlFormatter::onAddFloat(const char* name, float value,
                               const char* id)
 {
-    convert(_value, value);
+    _value.clear();
+    formatFloat( std::back_inserter(_value), value );
+
     this->addValue(name, "float", _value.c_str(), id);
 }
 
@@ -193,7 +199,9 @@ void XmlFormatter::onAddFloat(const char* name, float value,
 void XmlFormatter::onAddDouble(const char* name, double value,
                               const char* id)
 {
-    convert(_value, value);
+    _value.clear();
+    formatFloat( std::back_inserter(_value), value );
+    
     this->addValue(name, "double", _value.c_str(), id);
 }
 
@@ -201,7 +209,9 @@ void XmlFormatter::onAddDouble(const char* name, double value,
 void XmlFormatter::onAddLongDouble(const char* name, long double value,
                                    const char* id)
 {
-    convert(_value, value);
+    _value.clear();
+    formatFloat( std::back_inserter(_value), value );
+    
     this->addValue(name, "long double", _value.c_str(), id);
 }
 
@@ -505,44 +515,56 @@ void XmlFormatter::OnMemberBegin(const Node& node)
 
 void setValue(Pt::Composer& composer, const Pt::String& value, int valueType)
 {
-  switch(valueType)
-  {
-      case Bool:
-	        if(value == L"yes" || value == L"YES" ||
-	           value == L"on" || value == L"ON" ||
-	           value == L"true" || value == L"TRUE" )
-	        {
-	            composer.setBool(true);
-	        }
-	        else if(value == L"no" || value == L"NO" ||
-	                value == L"off" || value == L"OFF" ||
-	                value == L"false" || value == L"FALSE" )
-	        {
-	            composer.setBool(false);
-	        }
-          else
-              throw SerializationError("invalid bool");
+    switch(valueType)
+    {
+        case Bool:
+            if(value == L"yes" || value == L"YES" ||
+                value == L"on" || value == L"ON" ||
+                value == L"true" || value == L"TRUE" )
+            {
+                composer.setBool(true);
+            }
+            else if(value == L"no" || value == L"NO" ||
+                    value == L"off" || value == L"OFF" ||
+                    value == L"false" || value == L"FALSE" )
+            {
+                composer.setBool(false);
+            }
+            else
+                throw SerializationError("invalid bool");
 
-          break;
+            break;
 
-      case Int:
-          composer.setInt( convert<Pt::int32_t>(value) );
-          break;
+        case Int:
+        {
+            Pt::int32_t i = 0;
+            parseInt(value.begin(), value.end(), i);
+            composer.setInt(i);
+            break;
+        }
 
-      case Unsigned:
-          composer.setUInt( convert<Pt::uint32_t>(value) );
-          break;
+        case Unsigned:
+        {
+            Pt::uint32_t u = 0;
+            parseInt(value.begin(), value.end(), u);
+            composer.setUInt(u);
+            break;
+        } 
       
-      case Float:
-      case Double:
-          composer.setFloat( convert<double>(value) );
-          break;
-      
-      default:
-      case String:
-          composer.setString(value);
-          break;
-  }
+        case Float:
+        case Double:
+        {
+            double d = 0;
+            parseFloat(value.begin(), value.end(), d);
+            composer.setFloat(d);
+            break;
+        }
+
+        default:
+        case String:
+            composer.setString(value);
+            break;
+    }
 }
 
 

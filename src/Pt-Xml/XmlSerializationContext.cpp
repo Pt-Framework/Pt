@@ -194,7 +194,8 @@ const char* XmlSerializationContext::onGetId(const void* p)
         if( _idmap.find(p) == _idmap.end() )
             throw SerializationError("stray reference");
 
-        _refmap[p] = convert<std::string>( _idmap[p] );
+        _refmap[p].clear();
+        formatInt( std::back_inserter(_refmap[p]), _idmap[p] );
     }
 
     return _refmap[p].c_str();
@@ -217,7 +218,9 @@ const char* XmlSerializationContext::onMakeId(const void* p)
     }
 
     // referenced, return id
-    _refmap[p] = convert<std::string>( _idmap[p] );
+    _refmap[p].clear();
+    formatInt( std::back_inserter(_refmap[p]), _idmap[p] );
+
     _idmap.erase(p);
     return _refmap[p].c_str();
 }

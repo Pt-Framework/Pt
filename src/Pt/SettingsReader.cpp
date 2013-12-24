@@ -146,44 +146,48 @@ void SettingsReader::leaveMember()
 
 void SettingsReader::pushValue()
 {
-	if(_token == L"yes" || _token == L"YES" ||
-	   _token == L"on" || _token == L"ON" ||
-	   _token == L"true" || _token == L"TRUE" )
-	{
-	    _current->setBool(true);
-	}
-	else if(_token == L"no" || _token == L"NO" ||
-	        _token == L"off" || _token == L"OFF" ||
-	        _token == L"false" || _token == L"FALSE" )
-	{
-	    _current->setBool(false);
-	}
-	else
-	{
-		unsigned dot = 0;
-		unsigned digits = 0;
-		Pt::String::const_iterator it;
-		for( it = _token.begin(); it != _token.end(); ++it )
-		{
-			if(*it == '.')
-				dot++;
-			else if(Pt::isdigit(*it))
-				digits++;
-		}
+    if(_token == L"yes" || _token == L"YES" ||
+       _token == L"on" || _token == L"ON" ||
+       _token == L"true" || _token == L"TRUE" )
+    {
+        _current->setBool(true);
+    }
+    else if(_token == L"no" || _token == L"NO" ||
+            _token == L"off" || _token == L"OFF" ||
+            _token == L"false" || _token == L"FALSE" )
+    {
+        _current->setBool(false);
+    }
+    else
+    {
+        unsigned dot = 0;
+        unsigned digits = 0;
+        Pt::String::const_iterator it;
+        for( it = _token.begin(); it != _token.end(); ++it )
+        {
+            if(*it == '.')
+                dot++;
+            else if(Pt::isdigit(*it))
+                digits++;
+        }
 
-		if(dot == 1 && digits >= 1 && (_token.length() - 1) == digits )
-		{
-			_current->setDouble( convert<double>(_token) );
-		}
-		else if(_token.length() == digits && digits >= 1)
-		{
-			_current->setInt32( convert<Pt::int32_t>(_token) );
-		}
-		else
-		{
-      throw SettingsError("invalid entry value", line());
-		}
-	}
+        if(dot == 1 && digits >= 1 && (_token.length() - 1) == digits )
+        {
+            double d = 0;
+            Pt::parseFloat(_token.begin(), _token.end(), d);
+            _current->setDouble(d);
+        }
+        else if(_token.length() == digits && digits >= 1)
+        {
+            Pt::int32_t i = 0;
+            Pt::parseInt(_token.begin(), _token.end(), i);
+            _current->setInt32(i);
+        }
+        else
+        {
+            throw SettingsError("invalid entry value", line());
+        }
+    }
 
     _token.clear();
 }

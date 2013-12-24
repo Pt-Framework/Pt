@@ -343,7 +343,7 @@ void Responder::formatError(std::ostream& os, int rc, const char* msg)
     _ts.write(XMLRPC_NAME_END, sizeof(XMLRPC_NAME_END)/sizeof(Char));
     _ts.write( XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char) );
     _ts.write( XMLRPC_INT, sizeof(XMLRPC_INT)/sizeof(Char) );
-    _ts << Pt::convert<Pt::String>(rc);
+    _ts << rc;
     _ts.write(XMLRPC_INT_END, sizeof(XMLRPC_INT_END)/sizeof(Char));
     _ts.write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
     _ts.write(XMLRPC_MEMBER_END, sizeof(XMLRPC_MEMBER_END)/sizeof(Char));

@@ -6,7 +6,6 @@ SubDirObjects $(PT_OUTPUT_OBJECT) Pt ;
 SharedLibrary Pt : Atomicity.cpp
                    Connection.cpp
                    Connectable.cpp
-                   Convert.cpp
                    ConversionError.cpp
                    Date.cpp
                    DateTime.cpp

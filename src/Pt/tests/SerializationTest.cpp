@@ -321,23 +321,23 @@ void SerializationTest::Benchmark1()
         input.seekg(std::ios::beg);
 
         std::getline(input, num, Pt::Char(' '));
-        convert(v, num);
+        Pt::parseInt(num.begin(), num.end(), v);
         si.addElement().setInt32(v);
 
         std::getline(input, num, Pt::Char(' '));
-        convert(v, num);
+        Pt::parseInt(num.begin(), num.end(), v);
         si.addElement().setInt32(v);
 
         std::getline(input, num, Pt::Char(' '));
-        convert(v, num);
+        Pt::parseInt(num.begin(), num.end(), v);
         si.addElement().setInt32(v);
 
         std::getline(input, num, Pt::Char(' '));
-        convert(v, num);
+        Pt::parseInt(num.begin(), num.end(), v);
         si.addElement().setInt32(v);
 
         std::getline(input, num, Pt::Char(' '));
-        convert(v, num);
+        Pt::parseInt(num.begin(), num.end(), v);
         si.addElement().setInt32(v);
 
         si >>= vec;
@@ -380,31 +380,31 @@ void SerializationTest::Benchmark2()
         input.seekg(std::ios::beg);
 
         std::getline(input, num, Pt::Char(' '));
-        convert(v, num);
+        Pt::parseInt(num.begin(), num.end(), v);
         deser = deser->beginMember(name);
         deser->setInt(v);
         deser = deser->finish();
 
         std::getline(input, num, Pt::Char(' '));
-        convert(v, num);
+        Pt::parseInt(num.begin(), num.end(), v);
         deser = deser->beginMember(name);
         deser->setInt(v);
         deser = deser->finish();
 
         std::getline(input, num, Pt::Char(' '));
-        convert(v, num);
+        Pt::parseInt(num.begin(), num.end(), v);
         deser = deser->beginMember(name);
         deser->setInt(v);
         deser = deser->finish();
 
         std::getline(input, num, Pt::Char(' '));
-        convert(v, num);
+        Pt::parseInt(num.begin(), num.end(), v);
         deser = deser->beginMember(name);
         deser->setInt(v);
         deser = deser->finish();
 
         std::getline(input, num, Pt::Char(' '));
-        convert(v, num);
+        Pt::parseInt(num.begin(), num.end(), v);
         deser = deser->beginMember(name);
         deser->setInt(v);
         deser = deser->finish();
@@ -444,31 +444,31 @@ void SerializationTest::Benchmark3()
         input.seekg(std::ios::beg);
 
         std::getline(input, num, Pt::Char(' '));
-        convert(v, num);
+        Pt::parseInt(num.begin(), num.end(), v);
         composer = composer->beginElement();
         composer->setInt(v);
         composer = composer->finish();
 
         std::getline(input, num, Pt::Char(' '));
-        convert(v, num);
+        Pt::parseInt(num.begin(), num.end(), v);
         composer = composer->beginElement();
         composer->setInt(v);
         composer = composer->finish();
 
         std::getline(input, num, Pt::Char(' '));
-        convert(v, num);
+        Pt::parseInt(num.begin(), num.end(), v);
         composer = composer->beginElement();
         composer->setInt(v);
         composer = composer->finish();
 
         std::getline(input, num, Pt::Char(' '));
-        convert(v, num);
+        Pt::parseInt(num.begin(), num.end(), v);
         composer = composer->beginElement();
         composer->setInt(v);
         composer = composer->finish();
 
         std::getline(input, num, Pt::Char(' '));
-        convert(v, num);
+        Pt::parseInt(num.begin(), num.end(), v);
         composer = composer->beginElement();
         composer->setInt(v);
         composer = composer->finish();

@@ -45,7 +45,7 @@ Pt::String toStr(const Pt::SerializationInfo& si)
         case Pt::SerializationInfo::Boolean:
             bool b;
             si.getBool(b);
-            Pt::convert(s, b);
+            s = b ? "true" : "false" ;
             break;
     
         case Pt::SerializationInfo::Char:
@@ -62,7 +62,7 @@ Pt::String toStr(const Pt::SerializationInfo& si)
         case Pt::SerializationInfo::Int64:
             Pt::int64_t i;
             si.getInt64(i);
-            Pt::convert(s, i);
+            Pt::formatInt(std::back_inserter(s), i);
             break;
     
         case Pt::SerializationInfo::UInt8:
@@ -71,7 +71,7 @@ Pt::String toStr(const Pt::SerializationInfo& si)
         case Pt::SerializationInfo::UInt64:
             Pt::uint64_t u;
             si.getUInt64(u);
-            Pt::convert(s, u);
+            Pt::formatInt(std::back_inserter(s), u);
             break;
     
         case Pt::SerializationInfo::Float:
@@ -79,7 +79,7 @@ Pt::String toStr(const Pt::SerializationInfo& si)
         case Pt::SerializationInfo::LongDouble:
             long double d;
             si.getLongDouble(d);
-            Pt::convert(s, d);
+            Pt::formatFloat(std::back_inserter(s), d);
             break;
         
         default:
