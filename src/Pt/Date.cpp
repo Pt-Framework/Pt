@@ -53,44 +53,17 @@ void greg2jul(unsigned& jd, int y, int m, int d)
 
 void jul2greg(unsigned jd, int& y, int& m, int& d)
 {
-  register int l,n,i,j;
-  l=jd+68569;
-  n=(4*l)/146097;
-  l=l-(146097*n+3)/4;
-  i=(4000*(l+1))/1461001;
-  l=l-(1461*i)/4+31;
-  j=(80*l)/2447;
-  d=l-(2447*j)/80;
-  l=j/11;
-  m=j+2-(12*l);
-  y=100*(n-49)+i+l;
-}
-
-
-void operator>>=(const SerializationInfo& si, Date& date)
-{
-    int year = 0;
-    unsigned month = 0, day = 0;
-
-    if( si.compose(date) )
-        return;
-
-    si.getMember("year") >>=  year;
-    si.getMember("month") >>= month;
-    si.getMember("day") >>=  day;
-    date.set(year, month, day);
-}
-
-
-void operator<<=(SerializationInfo& si, const Date& date)
-{
-    if( si.decompose(date) )
-        return;
-
-    si.addMember( Pt::LiteralPtr<char>("year") ) <<= static_cast<int32_t>( date.year() );
-    si.addMember( Pt::LiteralPtr<char>("month") ) <<= static_cast<uint16_t>( date.month() );
-    si.addMember( Pt::LiteralPtr<char>("day") ) <<= static_cast<uint16_t>( date.day() );
-    si.setTypeName( Pt::LiteralPtr<char>("Pt::Date") );
+    register int l, n, i, j;
+    l = jd + 68569;
+    n = (4*l) / 146097;
+    l = l - (146097*n+3) / 4;
+    i = (4000 * (l+1)) / 1461001;
+    l = l - (1461*i) / 4+31;
+    j = (80*l) / 2447;
+    d = l - (2447*j) / 80;
+    l = j / 11;
+    m = j + 2 - (12*l);
+    y = 100 * (n-49) + i + l;
 }
 
 
@@ -174,35 +147,48 @@ void dateToString(std::basic_string<CharT>& str, const Date& date)
 }
 
 
-void convert(std::string& str, const Date& date)
+std::string Date::toIsoString() const
 {
-    dateToString(str, date);
+    std::string str;
+    dateToString(str, *this);
+    return str;
 }
 
 
-void convert(Date& date, const std::string& s)
+Date Date::fromIsoString(const std::string& s)
 {
-    if (s.size() < 10 || s.at(4) != '-' || s.at(7) != '-')
+    if( s.size() < 10 || s.at(4) != '-' || s.at(7) != '-' )
         throw ConversionError("Illegal date format");
 
     const char* d = s.data();
-    date= Date(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8));
+    return Date(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8));
 }
 
 
-void convert(String& str, const Date& date)
+void operator>>=(const SerializationInfo& si, Date& date)
 {
-    dateToString(str, date);
+    int year = 0;
+    unsigned month = 0, day = 0;
+
+    if( si.compose(date) )
+        return;
+
+    si.getMember("year") >>=  year;
+    si.getMember("month") >>= month;
+    si.getMember("day") >>=  day;
+    date.set(year, month, day);
 }
 
 
-void convert(Date& date, const String& s)
+void operator<<=(SerializationInfo& si, const Date& date)
 {
-    if (s.size() < 10 || s.at(4) != '-' || s.at(7) != '-')
-        throw ConversionError("Illegal date format");
+    if( si.decompose(date) )
+        return;
 
-    const Char* d = s.data();
-    date= Date(getNumber4(d), getNumber2(d + 5), getNumber2(d + 8));
+    si.addMember( Pt::LiteralPtr<char>("year") ) <<= static_cast<int32_t>( date.year() );
+    si.addMember( Pt::LiteralPtr<char>("month") ) <<= static_cast<uint16_t>( date.month() );
+    si.addMember( Pt::LiteralPtr<char>("day") ) <<= static_cast<uint16_t>( date.day() );
+    si.setTypeName( Pt::LiteralPtr<char>("Pt::Date") );
 }
 
 } // namespace Pt

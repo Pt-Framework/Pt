@@ -355,13 +355,13 @@ PT_API void operator >>=(const SerializationInfo& si, Date& date);
 
 PT_API void operator <<=(SerializationInfo& si, const Date& date);
 
-PT_API void convert(std::string& str, const Date& date);
+//PT_API void convert(std::string& str, const Date& date);
 
-PT_API void convert(Date& date, const std::string& s);
+//PT_API void convert(Date& date, const std::string& s);
 
-PT_API void convert(String& str, const Date& date);
+//PT_API void convert(String& str, const Date& date);
 
-PT_API void convert(Date& date, const String& s);
+//PT_API void convert(Date& date, const String& s);
 
 
 inline void Date::get(int& y, unsigned& m, unsigned& d) const
@@ -453,22 +453,6 @@ inline bool Date::isValid(int, int m, int d)
     }
 
     return true;
-}
-
-
-inline std::string Date::toIsoString() const
-{
-    std::string str;
-    convert(str, *this);
-    return str;
-}
-
-
-inline Date Date::fromIsoString(const std::string& s)
-{
-    Date date;
-    convert(date, s);
-    return date;
 }
 
 } // namespace Pt
