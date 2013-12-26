@@ -755,7 +755,6 @@
     <ClCompile Include="..\..\src\Pt\Connectable.cpp" />
     <ClCompile Include="..\..\src\Pt\Connection.cpp" />
     <ClCompile Include="..\..\src\Pt\ConversionError.cpp" />
-    <ClCompile Include="..\..\src\Pt\Convert.cpp" />
     <ClCompile Include="..\..\src\Pt\Date.cpp" />
     <ClCompile Include="..\..\src\Pt\DateTime.cpp" />
     <ClCompile Include="..\..\src\Pt\Deserializer.cpp" />

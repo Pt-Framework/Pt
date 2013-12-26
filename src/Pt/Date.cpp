@@ -147,15 +147,15 @@ void dateToString(std::basic_string<CharT>& str, const Date& date)
 }
 
 
-std::string Date::toIsoString() const
+std::string dateToString(const Date& date)
 {
     std::string str;
-    dateToString(str, *this);
+    dateToString(str, date);
     return str;
 }
 
 
-Date Date::fromIsoString(const std::string& s)
+Date dateFromString(const std::string& s)
 {
     if( s.size() < 10 || s.at(4) != '-' || s.at(7) != '-' )
         throw ConversionError("Illegal date format");

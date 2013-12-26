@@ -36,6 +36,12 @@
 
 namespace Pt {
 
+//! @internal
+PT_API std::string dateTimeToString(const DateTime& dt);
+
+//! @internal
+PT_API DateTime dateTimeFromString(const std::string& s);
+
 /** @brief Combined %Date and %Time value.
 
     @ingroup DateTime
@@ -59,24 +65,6 @@ class DateTime
         { }
 
         DateTime& operator=(const DateTime& dateTime);
-
-        /** @brief Creates a DateTime object relative to the Unix epoch.
-
-            The DateTime will be relative to the unix-epoch (Jan 1st 1970)
-            by the milli-seconds specified by \a msecsSinceEpoch. The
-            construction does not take care of any time zones. I.e. the
-            milliseconds will be treated as if they were in the same time
-            zone as the reference (January 1st 1970). Thus specifying a
-            "time-zoned" millisecond value will lead to a "time-zoned"
-            DateTime. And accordingly a "GMT" millisecond value will lead
-            to a "GMT" DateTime.
-        */
-        //static inline DateTime fromMSecsSinceEpoch(const Pt::int64_t msecsSinceEpoch)
-        //{
-        //    static const DateTime dt(1970, 1, 1);
-        //    Timespan ts(msecsSinceEpoch*1000);
-        //    return dt + ts;
-        //}
 
         void set(int year, unsigned month, unsigned day,
                  unsigned hour = 0, unsigned min = 0, unsigned sec = 0, unsigned msec = 0);
@@ -137,12 +125,11 @@ class DateTime
         unsigned msec() const
         { return time().msec(); }
 
-        std::string toIsoString() const;
+        std::string toIsoString() const
+        { return dateTimeToString(*this); }
 
-        static DateTime fromIsoString(const std::string& s);
-
-        static bool isValid(int year, unsigned month, unsigned day,
-                            unsigned hour, unsigned minute, unsigned second, unsigned msec);
+        static DateTime fromIsoString(const std::string& s)
+        { return dateTimeFromString(s); }
 
         /** @brief Assignment by sum operator
         */
@@ -188,6 +175,9 @@ class DateTime
             return *this;
         }
 
+        static bool isValid(int year, unsigned month, unsigned day,
+                            unsigned hour, unsigned minute, unsigned second, unsigned msec);
+
     private:
         DateTime(unsigned jd)
         : _date(jd)
@@ -197,6 +187,12 @@ class DateTime
         Date _date;
         Time _time;
 };
+
+
+PT_API void operator >>=(const SerializationInfo& si, DateTime& dt);
+
+
+PT_API void operator <<=(SerializationInfo& si, const DateTime& dt);
 
 
 inline DateTime operator+(const DateTime& dt, const Timespan& ts)
@@ -266,35 +262,6 @@ inline bool operator==(const DateTime& a, const DateTime& b)
 inline bool operator!=(const DateTime& a, const DateTime& b)
 {
     return a.date() != b.date() || a.time() != b.time();
-}
-
-
-PT_API void operator >>=(const SerializationInfo& si, DateTime& dt);
-
-PT_API void operator <<=(SerializationInfo& si, const DateTime& dt);
-
-PT_API void convert(DateTime& dt, const std::string& s);
-
-PT_API void convert(std::string& str, const DateTime& dt);
-
-PT_API void convert(DateTime& dt, const String& s);
-
-PT_API void convert(String& str, const DateTime& dt);
-
-
-inline DateTime DateTime::fromIsoString(const std::string& s)
-{
-    DateTime dt;
-    convert(dt, s);
-    return dt;
-}
-
-
-inline std::string DateTime::toIsoString() const
-{
-    std::string str;
-    convert(str, *this);
-    return str;
 }
 
 

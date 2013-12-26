@@ -58,6 +58,12 @@ class PT_API InvalidTime : public std::runtime_error
         {}
 };
 
+//! @internal
+PT_API std::string timeToString(const Time& t);
+
+//! @internal
+PT_API Time timeFromString(const std::string& s);
+
 /** @brief %Time expressed in hours, minutes, seconds and milliseconds
     @ingroup DateTime
 */
@@ -94,6 +100,11 @@ class Time
         {
             set(h, m, s, ms);
         }
+
+        /** @brief Assignment operator
+        */
+        Time& operator=(const Time& other)
+        { _msecs=other._msecs; return *this; }
 
         /** \brief Returns the hour-part of the Time.
         */
@@ -204,10 +215,19 @@ class Time
             return MSecsPerDay - (_msecs - t._msecs);
         }
 
-        /** @brief Assignment operator
+        /** \brief Returns the time in ISO-format (hh:mm:ss.hhh)
         */
-        Time& operator=(const Time& other)
-        { _msecs=other._msecs; return *this; }
+        std::string toIsoString() const
+        { return timeToString(*this); }
+
+        /** \brief Convert from an ISO time string
+
+            Interprets the passed string as a time-string in ISO-format
+            (hh:mm:ss.hhh) and returns a Time-object. If the string is not
+            in ISO-format, InvalidTime is thrown.
+        */
+        static Time fromIsoString(const std::string& s)
+        { return timeFromString(s); }
 
         /** @brief Assignment by sum operator
         */
@@ -229,18 +249,6 @@ class Time
             return *this;
         }
 
-        /** \brief Returns the time in ISO-format (hh:mm:ss.hhh)
-        */
-        std::string toIsoString() const;
-
-        /** \brief Convert from an ISO time string
-
-            Interprets the passed string as a time-string in ISO-format
-            (hh:mm:ss.hhh) and returns a Time-object. If the string is not
-            in ISO-format, InvalidTime is thrown.
-        */
-        static Time fromIsoString(const std::string& s);
-
         /** \brief Returns true if values are a valid time
         */
         static bool isValid(unsigned h, unsigned m, unsigned s, unsigned ms)
@@ -252,6 +260,12 @@ class Time
         //! @internal
         Pt::uint32_t _msecs;
 };
+
+
+PT_API void operator >>=(const SerializationInfo& si, Time& time);
+
+
+PT_API void operator <<=(SerializationInfo& si, const Time& time);
 
 
 /** @brief Equal comparison operator
@@ -298,33 +312,6 @@ inline Time operator-(const Time& time, const Timespan& ts)
 */
 inline Timespan operator-(const Time& a, const Time& b)
 { return Timespan( b.msecsUntil(a) * 1000 ); }
-
-
-PT_API void operator >>=(const SerializationInfo& si, Time& time);
-
-PT_API void operator <<=(SerializationInfo& si, const Time& time);
-
-PT_API void convert(std::string& str, const Pt::Time& time);
-
-PT_API void convert(Pt::Time& time, const std::string& str);
-
-PT_API void convert(String& str, const Time& time);
-
-PT_API void convert(Time& time, const String& str);
-
-inline std::string Time::toIsoString() const
-{
-    std::string str;
-    convert(str, *this);
-    return str;
-}
-
-inline Time Time::fromIsoString(const std::string& s)
-{
-    Time time;
-    convert(time, s);
-    return time;
-}
 
 }
 

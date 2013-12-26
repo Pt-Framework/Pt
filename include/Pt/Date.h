@@ -57,6 +57,12 @@ class PT_API InvalidDate : public std::runtime_error
 };
 
 //! @internal
+PT_API std::string dateToString(const Date& date);
+
+//! @internal
+PT_API Date dateFromString(const std::string& s);
+
+//! @internal
 PT_API void greg2jul(unsigned& jd, int y, int m, int d);
 
 //! @internal
@@ -187,6 +193,11 @@ class Date
         : _julian(julianDays)
         {}
 
+        /** @brief Assignment operator
+        */
+        Date& operator=(const Date& date)
+        { _julian = date._julian; return *this; }
+
         /** @brief Sets the Date to a julian day
         */
         void setJulian(unsigned d)
@@ -239,10 +250,27 @@ class Date
         */
         bool isLeapYear() const;
 
-        /** @brief Assignment operator
+        /** \brief Returns the date in ISO-format
+
+            Converts the date in ISO-format (yyyy-mm-dd).
+
+            \return Date as iso formated string.
         */
-        Date& operator=(const Date& date)
-        { _julian = date._julian; return *this; }
+        std::string toIsoString() const
+        { return dateToString(*this); }
+
+        /** \brief Interprets a string as a date-string in ISO-format
+
+            Interprets a string as a date-string in ISO-format (yyyy-mm-dd) and
+            returns a Date-object. When the string is not in ISO-format, an
+            exception is thrown.
+
+            \param s Iso formated date string.
+            \return Date result
+            \throw IllegalArgument
+        */
+        static Date fromIsoString(const std::string& s)
+        { return dateFromString(s); }
 
         /** @brief Add days to the date
         */
@@ -264,26 +292,6 @@ class Date
         Date& operator--()
         { _julian--; return *this; }
 
-        /** \brief Returns the date in ISO-format
-
-            Converts the date in ISO-format (yyyy-mm-dd).
-
-            \return Date as iso formated string.
-        */
-        std::string toIsoString() const;
-
-        /** \brief Interprets a string as a date-string in ISO-format
-
-            Interprets a string as a date-string in ISO-format (yyyy-mm-dd) and
-            returns a Date-object. When the string is not in ISO-format, an
-            exception is thrown.
-
-            \param s Iso formated date string.
-            \return Date result
-            \throw IllegalArgument
-        */
-        static Date fromIsoString(const std::string& s);
-
         /** \brief Returns true if values describe a valid date
         */
         static bool isValid(int y, int m, int d);
@@ -296,6 +304,13 @@ class Date
         //! @internal
         unsigned _julian;
 };
+
+
+PT_API void operator >>=(const SerializationInfo& si, Date& date);
+
+
+PT_API void operator <<=(SerializationInfo& si, const Date& date);
+
 
 /** @brief Returns true if the dates are equal.
 
@@ -350,18 +365,6 @@ inline Date operator+(int days, const Date& d)
 
 inline int operator-(const Date& a, const Date& b)
 { return a.julian() - b.julian(); }
-
-PT_API void operator >>=(const SerializationInfo& si, Date& date);
-
-PT_API void operator <<=(SerializationInfo& si, const Date& date);
-
-//PT_API void convert(std::string& str, const Date& date);
-
-//PT_API void convert(Date& date, const std::string& s);
-
-//PT_API void convert(String& str, const Date& date);
-
-//PT_API void convert(Date& date, const String& s);
 
 
 inline void Date::get(int& y, unsigned& m, unsigned& d) const

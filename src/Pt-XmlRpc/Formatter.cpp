@@ -754,7 +754,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
                 Pt::int32_t number = 0;
                 bool ok = false;
-                parseInt( chars.content().begin(), chars.content().end(), ok, number );
+                parseInt( chars.content().begin(), chars.content().end(), number, ok);
 
                 if( ! ok )
                     throwSerializationError();
@@ -780,7 +780,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
                 double number = 0.0;
                 bool ok = false;
-                parseFloat( chars.content().begin(), chars.content().end(), ok, number );
+                parseFloat( chars.content().begin(), chars.content().end(), number, ok);
 
                 if( ! ok )
                     throwSerializationError();

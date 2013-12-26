@@ -176,12 +176,15 @@ void dateTimeToString(std::basic_string<CharT>& str, const DateTime& dt)
 }
 
 
-void convert(std::string& str, const DateTime& dt)
+std::string dateTimeToString(const DateTime& dt)
 {
+    std::string str;
     dateTimeToString(str, dt);
+    return str;
 }
 
-void convert(DateTime& dt, const std::string& s)
+
+DateTime dateTimeFromString(const std::string& s)
 {
     if (s.size() < 23
         || s.at(4) != '-'
@@ -194,41 +197,13 @@ void convert(DateTime& dt, const std::string& s)
 
     const char* d = s.data();
 
-    dt= DateTime( getNumber4(d),
-                  getNumber2(d + 5),
-                  getNumber2(d + 8),
-                  getNumber2(d + 11),
-                  getNumber2(d + 14),
-                  getNumber2(d + 17),
-                  getNumber3(d + 20) );
-}
-
-
-void convert(String& str, const DateTime& dt)
-{
-    dateTimeToString(str, dt);
-}
-
-void convert(DateTime& dt, const String& s)
-{
-    if (s.size() < 23
-        || s.at(4) != '-'
-        || s.at(7) != '-'
-        || s.at(10) != ' '
-        || s.at(13) != ':'
-        || s.at(16) != ':'
-        || s.at(19) != '.')
-        throw ConversionError("Invalid DateTime format");
-
-    const Char* d = s.data();
-
-    dt= DateTime( getNumber4(d),
-                  getNumber2(d + 5),
-                  getNumber2(d + 8),
-                  getNumber2(d + 11),
-                  getNumber2(d + 14),
-                  getNumber2(d + 17),
-                  getNumber3(d + 20) );
+    return DateTime( getNumber4(d),
+                     getNumber2(d + 5),
+                     getNumber2(d + 8),
+                     getNumber2(d + 11),
+                     getNumber2(d + 14),
+                     getNumber2(d + 17),
+                     getNumber3(d + 20) );
 }
 
 } // namespace Pt

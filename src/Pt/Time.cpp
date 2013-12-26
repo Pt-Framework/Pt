@@ -139,13 +139,14 @@ void timeToString(std::basic_string<CharT>& str, const Time& time)
 }
 
 
-void convert(std::string& str, const Time& time)
+std::string timeToString(const Time& time)
 {
+    std::string str;
     timeToString(str, time);
+    return str;
 }
 
-
-void convert(Time& time, const std::string& s)
+Time timeFromString(const std::string& s)
 {
     unsigned hour = 0, min = 0, sec = 0, msec = 0;
 
@@ -158,30 +159,7 @@ void convert(Time& time, const std::string& s)
 	sec = getNumber2(d + 6);
 	msec = getNumber3(d + 9);
 
-	time.set(hour, min, sec, msec);
-}
-
-
-void convert(Pt::String& str, const Time& time)
-{
-    timeToString(str, time);
-}
-
-
-void convert(Time& time, const Pt::String& s)
-{
-    unsigned hour = 0, min = 0, sec = 0, msec = 0;
-
-    if( s.size() < 11 || s.at(2) != ':' || s.at(5) != ':' || s.at(8) != '.')
-        throw ConversionError("invalid time");
-
-	const Char* d = s.data();
-	hour = getNumber2(d);
-	min = getNumber2(d + 3);
-	sec = getNumber2(d + 6);
-	msec = getNumber3(d + 9);
-
-	time.set(hour, min, sec, msec);
+	return Time(hour, min, sec, msec);
 }
 
 } // namespace Pt

@@ -160,7 +160,7 @@ OutIterT formatFloat(OutIterT it, T d);
     @ingroup CoreTypes
 */
 template <typename InIterT, typename T, typename FormatT>
-InIterT parseInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt);
+InIterT parseInt(InIterT it, InIterT end, T& n, const FormatT& fmt, bool& ok);
 
 /** @brief Parses an integer value in a given format.
 
@@ -171,7 +171,7 @@ InIterT parseInt(InIterT it, InIterT end, T& n, const FormatT& fmt)
 {
     bool ok = false;
 
-    InIterT r = parseInt(it, end, ok, n, fmt);
+    InIterT r = parseInt(it, end, n, fmt, ok);
     if( ! ok )
         throw ConversionError("conversion failed");
     
@@ -183,7 +183,7 @@ InIterT parseInt(InIterT it, InIterT end, T& n, const FormatT& fmt)
     @ingroup CoreTypes
 */
 template <typename InIterT, typename T>
-InIterT parseInt(InIterT it, InIterT end, bool& ok, T& n);
+InIterT parseInt(InIterT it, InIterT end, T& n, bool& ok);
 
 /** @brief Parses an integer value in decimal format.
 
@@ -194,7 +194,7 @@ InIterT parseInt(InIterT it, InIterT end, T& n)
 {
     bool ok = false;
 
-    InIterT r = parseInt(it, end, ok, n);
+    InIterT r = parseInt(it, end, n, ok);
     if( ! ok )
         throw ConversionError("conversion failed");
     
@@ -207,7 +207,7 @@ InIterT parseInt(InIterT it, InIterT end, T& n)
     @ingroup CoreTypes
 */
 template <typename InIterT, typename T, typename FormatT>
-InIterT parseFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt);
+InIterT parseFloat(InIterT it, InIterT end, T& n, const FormatT& fmt, bool& ok);
 
 /** @brief Parses a floating point value in a given format.
 
@@ -218,7 +218,7 @@ InIterT parseFloat(InIterT it, InIterT end, T& n, const FormatT& fmt)
 {
     bool ok = false;
 
-    InIterT r = parseFloat(it, end, ok, n, fmt);
+    InIterT r = parseFloat(it, end, n, fmt, ok);
     if( ! ok )
         throw ConversionError("conversion failed");
     
@@ -230,7 +230,7 @@ InIterT parseFloat(InIterT it, InIterT end, T& n, const FormatT& fmt)
     @ingroup CoreTypes
 */
 template <typename InIterT, typename T>
-InIterT parseFloat(InIterT it, InIterT end, bool& ok, T& n);
+InIterT parseFloat(InIterT it, InIterT end, T& n, bool& ok);
 
 /** @brief Parses a floating point value.
 
@@ -241,7 +241,7 @@ InIterT parseFloat(InIterT it, InIterT end, T& n)
 {
     bool ok = false;
 
-    InIterT r = parseFloat(it, end, ok, n);
+    InIterT r = parseFloat(it, end, n, ok);
     if( ! ok )
         throw ConversionError("conversion failed");
     
@@ -804,7 +804,7 @@ InIterT getSign(InIterT it, InIterT end, bool& pos, const FormatT& fmt)
 
 
 template <typename InIterT, typename T, typename FormatT>
-InIterT parseInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
+InIterT parseInt(InIterT it, InIterT end, T& n, const FormatT& fmt, bool& ok)
 {
     typedef typename IntTraits<T>::Unsigned UnsignedInt;
     typedef typename IntTraits<T>::Signed SignedInt;
@@ -867,15 +867,15 @@ InIterT parseInt(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 
 
 template <typename InIterT, typename T>
-InIterT parseInt(InIterT it, InIterT end, bool& ok, T& n)
+InIterT parseInt(InIterT it, InIterT end, T& n, bool& ok)
 {
     typedef typename std::iterator_traits<InIterT>::value_type CharType;    
-    return parseInt(it, end, ok, n, DecimalFormat<CharType>() );
+    return parseInt(it, end, n, DecimalFormat<CharType>(), ok );
 }
 
 
 template <typename InIterT, typename T, typename FormatT>
-InIterT parseFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
+InIterT parseFloat(InIterT it, InIterT end, T& n, const FormatT& fmt, bool& ok)
 {
     typedef typename FormatT::CharT CharT;
     CharT zero = fmt.toChar(0);
@@ -1000,7 +1000,7 @@ InIterT parseFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
             return it;
 
         long exp = 0;
-        it = parseInt(it, end, ok, exp, fmt);
+        it = parseInt(it, end, exp, fmt, ok);
         if( ! ok )
             return it;
             
@@ -1016,10 +1016,10 @@ InIterT parseFloat(InIterT it, InIterT end, bool& ok, T& n, const FormatT& fmt)
 
 
 template <typename InIterT, typename T>
-InIterT parseFloat(InIterT it, InIterT end, bool& ok, T& n)
+InIterT parseFloat(InIterT it, InIterT end, T& n, bool& ok)
 {
     typedef typename std::iterator_traits<InIterT>::value_type CharType;
-    return parseFloat( it, end, ok, n, FloatFormat<CharType>() );
+    return parseFloat( it, end, n, FloatFormat<CharType>(), ok);
 }
 
 } // namespace Pt

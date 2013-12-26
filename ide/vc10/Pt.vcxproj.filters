@@ -1506,9 +1506,6 @@
     <ClCompile Include="..\..\src\Pt\ConversionError.cpp">
       <Filter>Pt</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt\Convert.cpp">
-      <Filter>Pt</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt\Date.cpp">
       <Filter>Pt</Filter>
     </ClCompile>
