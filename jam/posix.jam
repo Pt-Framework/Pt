@@ -61,11 +61,18 @@ rule ConfigurePThread
 
 rule ConfigureUnixSockets
 {
+    # QNX can link programs without -lsocket, but needs it for libraries
+
     WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
                                         "#include <sys/socket.h>"
                                         "int main() { return socket(0,0,0); }"
                                       : ""
-                                      : "-lc" ] ;
+                                      : "-lsocket" ] ;
+                                      
+    if $(WITH_UNIX_SOCKETS)
+    {
+        UNIX_SOCKET_LIBS += -lsocket ;
+    }
 
     if ! $(WITH_UNIX_SOCKETS)
     {
@@ -73,12 +80,7 @@ rule ConfigureUnixSockets
                                             "#include <sys/socket.h>"
                                             "int main() { return socket(0,0,0); }"
                                           : ""
-                                          : -lsocket ] ;
-
-        if $(WITH_UNIX_SOCKETS)
-        {
-            UNIX_SOCKET_LIBS += -lsocket ;
-        }
+                                          : -lc ] ;
     }
 
     EchoOption WITH_UNIX_SOCKETS : "Unix sockets..." ;
