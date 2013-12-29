@@ -205,7 +205,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _exitTimer.timeout() += Pt::slot(*this, &PtXmlRpcTest::failTest);
             _exitTimer.timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
 
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Any(8001);
             _server = new Pt::Http::Server(*_loop, ep);
 
             loopPtr.release();
@@ -229,7 +229,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server->addServlet(servlet);
 
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
             Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
@@ -268,7 +268,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server->addServlet(servlet);
 
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
             Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
@@ -314,7 +314,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server->addServlet(servlet);
 
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
             Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
@@ -351,7 +351,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server->addServlet(servlet);
 
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
             Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
@@ -381,7 +381,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         void ConnectError()
         {
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8002);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8002);
             client.setTarget(ep, "/calc");
             
             Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
@@ -425,7 +425,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server->addServlet(servlet);
 
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
             Pt::XmlRpc::RemoteProcedure<bool, bool, bool> multiply(client, "multiply");
@@ -467,7 +467,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server->addServlet(servlet);
 
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
             Pt::XmlRpc::RemoteProcedure<int, int, int> multiply(client, "multiply");
@@ -512,7 +512,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server->addServlet(servlet);
 
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
             Pt::XmlRpc::RemoteProcedure<double, double, double> multiply(client, "multiply");
@@ -549,7 +549,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server->addServlet(servlet);
 
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/foo");
 
             Pt::XmlRpc::RemoteProcedure<std::string, std::string> echo(client, "echoString");
@@ -586,7 +586,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server->addServlet(servlet);
 
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
             Pt::XmlRpc::RemoteProcedure<std::string, std::string, std::string> multiply(client, "multiply");
@@ -624,7 +624,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server->addServlet(servlet);
 
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
             Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > multiply(client, "multiply");
@@ -678,7 +678,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server->addServlet(mapurl);
 
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
             Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > proc(client, "mergeVector");
@@ -743,7 +743,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server->addServlet(servlet);
 
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
             Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > multiply(client, "multiply");
@@ -776,7 +776,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server->addServlet(servlet);
 
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
             Pt::XmlRpc::RemoteProcedure< Color, Color, Color > multiply(client, "multiply");
@@ -829,7 +829,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server->addServlet(servlet);
 
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/test");
             
             Pt::XmlRpc::RemoteProcedure<IntSet, IntSet, int> multiply(client, "multiplyset");
@@ -879,7 +879,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server->addServlet(servlet);
 
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/test");
             
             Pt::XmlRpc::RemoteProcedure<IntMultiset, IntMultiset, int> multiply(client, "multiplyset");
@@ -929,7 +929,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server->addServlet(servlet);
 
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/test");
             
             Pt::XmlRpc::RemoteProcedure<IntMap, IntMap, int> multiply(client, "multiplymap");
@@ -984,7 +984,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server->addServlet(servlet);
 
             Pt::XmlRpc::HttpClient client(*_loop);
-            Pt::Net::Endpoint ep("127.0.0.1", 8001);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/test");
             
             Pt::XmlRpc::RemoteProcedure<IntMultimap, IntMultimap, int> multiply(client, "multiplymultimap");
