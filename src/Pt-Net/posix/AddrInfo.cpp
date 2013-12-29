@@ -30,8 +30,11 @@
 #include "EndpointImpl.h"
 #include <Pt/Net/Endpoint.h>
 #include <Pt/System/IOError.h>
+#include <Pt/System/Logger.h>
 #include <string>
 #include <cstring>
+
+log_define("Pt.Net.AddrInfo")
 
 namespace Pt {
 
@@ -73,6 +76,9 @@ void AddrInfo::resolve(const Endpoint& ep, bool passive)
 
     struct addrinfo hints;
     std::memset(&hints, 0, sizeof(hints));
+    
+    // ai_socktype set to 0 does not work for QNX NTO
+    hints.ai_socktype = SOCK_STREAM;
 
     if( passive )
         hints.ai_flags |= AI_PASSIVE;
@@ -80,8 +86,12 @@ void AddrInfo::resolve(const Endpoint& ep, bool passive)
     _host = impl->host();
     _service = impl->service();
 
-    if( 0 != ::getaddrinfo(_host.c_str(), _service.c_str(), &hints, &_gainfo) )
+    int error = ::getaddrinfo(_host.c_str(), _service.c_str(), &hints, &_gainfo);
+    if(error)
+    {
+        log_error( "getaddrinfo: " << gai_strerror(error) );
         throw System::AccessFailed(_host + ':' + _service);
+    }
 
     _ai = _gainfo;
 }
