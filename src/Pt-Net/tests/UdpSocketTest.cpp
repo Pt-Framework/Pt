@@ -85,17 +85,15 @@ class UdpSocketTest : public Pt::Unit::TestSuite
 
         void Unicast()
         {
-            Pt::Net::Endpoint ep("127.0.0.1", 8000);
-
             _receiver->setActive(*_loop);
             _receiver->bound() += Pt::slot(*this, &UdpSocketTest::onUnicastBind);
             _receiver->inputReady() += Pt::slot(*this, &UdpSocketTest::onUnicastInput);
-            _receiver->beginBind(ep);
+            _receiver->beginBind( Pt::Net::Endpoint::ip4Any(8000) );
 
             _sender->setActive(*_loop);
             _sender->connected() += Pt::slot(*this, &UdpSocketTest::onUnicastConnect);
             _sender->outputReady() += Pt::slot(*this, &UdpSocketTest::onUnicastOutput);
-            _sender->beginConnect(ep);
+            _sender->beginConnect( Pt::Net::Endpoint::ip4Loopback(8000) );
 
             _loop->run();
 

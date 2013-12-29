@@ -267,7 +267,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void NonBlockingWithLoop()
         {
-            Pt::Net::Endpoint ep("127.0.0.1", 9000);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Any(9000);
 
             Pt::Net::TcpServer server(ep);
             {
@@ -284,7 +284,8 @@ class TcpSocketTest : public Pt::Unit::TestSuite
                 client.connected() += Pt::slot(*this, &TcpSocketTest::onConnectAndBeginWrite);
                 client.outputReady() += Pt::slot(*this, &TcpSocketTest::onOutput);
                 client.setActive(*_loop);
-                client.beginConnect(ep);
+                
+                client.beginConnect( Pt::Net::Endpoint::ip4Loopback(9000) );
 
                 _loop->run();
 
