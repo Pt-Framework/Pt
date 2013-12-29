@@ -201,7 +201,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             std::auto_ptr<Pt::System::MainLoop> loopPtr(_loop);
 
             _exitTimer.setActive(*_loop);
-            _exitTimer.start(10000);
+            _exitTimer.start(20000);
             _exitTimer.timeout() += Pt::slot(*this, &PtXmlRpcTest::failTest);
             _exitTimer.timeout() += Pt::slot(*_loop, &Pt::System::MainLoop::exit);
 
