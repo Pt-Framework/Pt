@@ -188,9 +188,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
 
         void CloseOnAccept()
         {
-            Pt::Net::Endpoint ep("127.0.0.1", 9000);
-
-            Pt::Net::TcpServer server(ep);
+            Pt::Net::TcpServer server( Pt::Net::Endpoint::ip4Any(9000) );
             server.connectionPending() += Pt::slot(*this, &TcpSocketTest::onAcceptAndClose);
             server.setActive(*_loop);
             server.beginAccept();
@@ -201,7 +199,7 @@ class TcpSocketTest : public Pt::Unit::TestSuite
             _client->connected() += Pt::slot(*this, &TcpSocketTest::onConnectAndBeginRead);
             _client->inputReady() += Pt::slot(*this, &TcpSocketTest::onInputExpectEof);
             _client->setActive(*_loop);
-            _client->beginConnect(ep);
+            _client->beginConnect( Pt::Net::Endpoint::ip4Loopback(9000) );
 
             PT_UNIT_ASSERT( ! _client->isEof() );
             _loop->run();
