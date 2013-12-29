@@ -291,7 +291,7 @@ class ImagePainterTest : public Pt::Unit::TestSuite
 
             _imagePainter.setFont( Font("Vera", 12, Font::NormalStyle, 340 ) );
             FontMetrics metrics  = _imagePainter.fontMetrics( text );
-            PT_UNIT_ASSERT( metrics.ascent() == 12 );
+            PT_UNIT_ASSERT( metrics.ascent() >= 11 && metrics.ascent() <= 13 );
             PT_UNIT_ASSERT( metrics.descent() == 3 );
             PT_UNIT_ASSERT( metrics.width() >= 80 && metrics.width() <= 100 );
             PT_UNIT_ASSERT( metrics.height() >= 10 && metrics.height() <= 18 );
@@ -299,13 +299,13 @@ class ImagePainterTest : public Pt::Unit::TestSuite
             _imagePainter.setFont( Font("Vera", 14, Font::NormalStyle, 340 ) );
             metrics  = _imagePainter.fontMetrics( text );
             PT_UNIT_ASSERT( metrics.ascent() == 13 );
-            PT_UNIT_ASSERT( metrics.descent() == 4 );
+            PT_UNIT_ASSERT( metrics.descent() >= 3 && metrics.descent() <= 5 );
             PT_UNIT_ASSERT( metrics.width() >= 90 && metrics.width() <= 120 );
             PT_UNIT_ASSERT( metrics.height() >= 12 && metrics.height() <= 20 );
 
             _imagePainter.setFont( Font("Vera", 12, Font::NormalStyle, 340 ) );
             metrics  = _imagePainter.fontMetrics( text );
-            PT_UNIT_ASSERT( metrics.ascent() == 12 );
+            PT_UNIT_ASSERT( metrics.ascent() >= 11 && metrics.ascent() <= 13);
             PT_UNIT_ASSERT( metrics.descent() == 3 );
             PT_UNIT_ASSERT( metrics.width() >= 80 && metrics.width() <= 100 );
             PT_UNIT_ASSERT( metrics.height() >= 10 && metrics.height() <= 18 );
