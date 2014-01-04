@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include <Pt/Hmi/Application.h>
+#include <Pt/Main.h>
 
 int main(int argc, char* args[])
 {	

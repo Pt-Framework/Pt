@@ -31,15 +31,46 @@
 using namespace Windows::UI::Core;
 
 namespace Pt {
-
 namespace Hmi {
+
+void FrameworkView::Initialize(Windows::ApplicationModel::Core::CoreApplicationView^ applicationView )
+{
+
+}
+
+void FrameworkView::Uninitialize()
+{
+}
+
+void FrameworkView::Run()
+{
+	//Obtain hat pointer to the window
+	_dispatcher = CoreWindow::GetForCurrentThread()->Dispatcher;
+	
+	//Loop until application closes
+	while( _impl->waitNext())
+		break;
+}
+
+void FrameworkView::SetWindow( Windows::UI::Core::CoreWindow^ window )
+{
+	_window = window;
+}
+
+void FrameworkView::Load( Platform::String^ entryPoint ) 
+{
+
+}
 
 
 ApplicationImpl::ApplicationImpl()
 : Pt::System::EventLoop()
 , _isClosed(false)
 , _dpi(96.0)
+, _frameworkView( ref new FrameworkView())
 {
+	_frameworkView->setApplicationImpl((long long) this);
+
 	getScreeResolution(_screenWidth, _screenHeight);
 
 	_width  = _screenWidth * unitSizeInch()*_dpi;
@@ -98,13 +129,10 @@ void ApplicationImpl::onDetachTimer(System::Timer& timer )
     _timerQueue.removeTimer(timer); 
 }
 
-
-
 void ApplicationImpl::onAttachSelectable(System::Selectable& s)
 { 
 	_selector.attach(s); 
 }
-
 
 void ApplicationImpl::onDetachSelectable(System::Selectable& s)
 { 
@@ -155,40 +183,15 @@ void ApplicationImpl::onQueueEvent(const Pt::Event& ev)
 
 void ApplicationImpl::onProcessEvents()
 { 
-    _eventQueue.processEvents( this->event() );
+    _eventQueue.processEvents( this->eventReceived() );
 }
 
 
 void ApplicationImpl::onWake()
 {
-	_dispatcher->RunAsync( Windows::UI::Core::CoreDispatcherPriority::Normal, 
-						   ref new Windows::UI::Core::DispatchedHandler([](){}) );
+	_frameworkView->dispatcher()->RunAsync( Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([](){}) );
 
 }
-
-
-void ApplicationImpl::Run()
-{
-	//Obtain hat pointer to the window
-	_dispatcher = CoreWindow::GetForCurrentThread()->Dispatcher;
-	
-	//Loop until application closes
-	while( waitNext() )
-		break;
-}
-
-
-void ApplicationImpl::SetWindow( Windows::UI::Core::CoreWindow^ window )
-{
-	//Hook our PointerPressed event
-	//window->PointerPressed += ref new
-	//	TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &App::PointerPressed);
-	
-	//Hook our Closed event
-	/*window->Closed +=
-		ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &ApplicationImpl::Closed);*/
-}
-
 
 void ApplicationImpl::Closed(CoreWindow^ Sender, CoreWindowEventArgs^ Args)
 {
@@ -198,7 +201,7 @@ void ApplicationImpl::Closed(CoreWindow^ Sender, CoreWindowEventArgs^ Args)
 
 void ApplicationImpl::onRun()
 {
-    CoreApplication::Run( ref new AppSource(this) );
+    Windows::ApplicationModel::Core::CoreApplication::Run( ref new AppSource((long long)this) );
 }
 
 
@@ -223,10 +226,10 @@ bool ApplicationImpl::waitNext()
     }
 
 	// TODO: use timeout
-	_dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
+	_frameworkView->dispatcher()->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
 		
 	// returns false when Application::exit was called
-	return _eventQueue.processEvents( this->event() );
+	return _eventQueue.processEvents( this->eventReceived() );
 }
 
 
@@ -283,11 +286,11 @@ void ApplicationImpl::nextEvent()
 
 void ApplicationImpl::getScreeResolution(int& horizontal, int& vertical)
 {
-   const HWND hDesktop = GetDesktopWindow();
+/*   const HWND hDesktop = GetDesktopWindow();
    RECT desktop;   
    GetWindowRect(hDesktop, &desktop);
    horizontal = desktop.right;
-   vertical = desktop.bottom;
+   vertical = desktop.bottom;*/
 }
 
 }}

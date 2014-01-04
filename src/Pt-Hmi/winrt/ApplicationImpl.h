@@ -38,29 +38,55 @@
 #include <windows.h>
 
 namespace Pt {
-
 namespace Hmi {
 
+class ApplicationImpl;
+
+ref class FrameworkView : public Windows::ApplicationModel::Core::IFrameworkView
+{
+public:	
+	virtual void Initialize(Windows::ApplicationModel::Core::CoreApplicationView^ applicationView );
+
+    virtual void Uninitialize();
+
+    virtual void SetWindow( Windows::UI::Core::CoreWindow^ window );
+
+    virtual void Run();
+
+    virtual void Load( Platform::String^ entryPoint ) ;
+
+	Windows::UI::Core::CoreDispatcher^ dispatcher()
+	{
+		return _dispatcher;
+	}
+		
+
+	void setApplicationImpl( long long  ptr)
+	{
+		_impl = (ApplicationImpl*)ptr;
+	}
+private:
+	Windows::UI::Core::CoreWindow^ _window;
+	Windows::UI::Core::CoreDispatcher^ _dispatcher;
+	ApplicationImpl* _impl;
+
+};
+
 class ApplicationImpl : public Pt::System::EventLoop
-                      , public IFrameworkView
 {
     public:
         ApplicationImpl();
 
         virtual ~ApplicationImpl();
+	
+        void Closed(Windows::UI::Core::CoreWindow^ Sender, Windows::UI::Core::CoreWindowEventArgs^ Args);
 
-		virtual void Initialize(Windows::ApplicationModel::Core::CoreApplicationView^ applicationView );
+		Windows::ApplicationModel::Core::IFrameworkView^ frameworkView()
+		{
+			return _frameworkView;
+		}
 
-        virtual void Uninitialize();
-
-        virtual void SetWindow( Windows::UI::Core::CoreWindow^ window );
-
-        virtual void Run();
-
-        virtual void Load( Platform::String^ entryPoint ) 
-        {}
-
-        void Closed(CoreWindow^ Sender, CoreWindowEventArgs^ Args);
+		bool waitNext();
 
 	public:
         void nextEvent();
@@ -123,7 +149,7 @@ class ApplicationImpl : public Pt::System::EventLoop
         virtual void onDetachTimer(System::Timer& timer);
 
     protected:
-        bool waitNext();
+        
 
     private:
         void getScreeResolution(int& horizontal, int& vertical);
@@ -151,24 +177,24 @@ class ApplicationImpl : public Pt::System::EventLoop
         System::TimerQueue _timerQueue;
         System::EventQueue _eventQueue;
         std::vector<System::Selectable*> _avail;
-        Selector _selector;
-		Windows::UI::Core::Dispatcher^ _dispatcher;
+        System::Selector _selector;
 		bool _isClosed;
         Pt::Signal<const Pt::Event&>* _event;
+		FrameworkView^ _frameworkView;
 };
 
 
-ref class AppSource sealed : IFrameworkViewSource
+ref class AppSource sealed : Windows::ApplicationModel::Core::IFrameworkViewSource
 {
     public:
-	    AppSource(ApplicationImpl* impl)
-        : _impl(impl)
+	    AppSource(long long impl)
+        : _impl((ApplicationImpl*)impl)
         {}
 
 	    //Basic method that returns to us an instance of our user defined App class.
 	    virtual Windows::ApplicationModel::Core::IFrameworkView^ CreateView()
 	    {
-		    return _impl;
+		    return _impl->frameworkView();
 	    }
 
     private:

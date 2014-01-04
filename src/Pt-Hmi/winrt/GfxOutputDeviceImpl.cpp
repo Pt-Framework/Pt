@@ -91,34 +91,7 @@ void GfxOutputDeviceImpl::onClosed()
 
 void GfxOutputDeviceImpl::onSize()
 {			
-	if(!_model->Enable.get())
-	{
-		setWindowSizeAndPos(false);
-		setWindowProperties();
-		return;
-	}
 
-	switch(wParam)
-	{
-		case SIZE_MAXHIDE:
-		case SIZE_MAXSHOW:
-			return;
-		break;
-
-		case SIZE_MAXIMIZED:
-			_model->WindowState = WindowStateType::Maximazed;							
-		break;
-
-		case SIZE_MINIMIZED:
-			_model->WindowState = WindowStateType::Minimized;			
-		break;
- 
-		case SIZE_RESTORED:
-			_model->WindowState = WindowStateType::Normal;
-		break;
-	}
-
-	getWindowSize();
 }
 
 void GfxOutputDeviceImpl::onMouse()
