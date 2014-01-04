@@ -35,8 +35,4 @@ SharedLibrary Pt : Atomicity.cpp
 MakeLocate Pt : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt : $(PT_INSTALL_LIBDIR) ;
 
-#Main itest : itest.mm ;
-#Main_AddLibraries itest : -framework UIKit -framework Foundation -framework CoreGraphics ;
-
 SubInclude PT_TOP src Pt tests ;
-

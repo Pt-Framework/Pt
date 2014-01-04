@@ -7,10 +7,6 @@ LinkSharedLibraries Pt-XmlRpc-test : Pt-XmlRpc Pt-Http Pt-Net Pt-System Pt-Unit 
 MakeLocate Pt-XmlRpc-test : $(PT_OUTPUT_TARGET) ;
 RunUnitTest Pt-XmlRpc-test : $(PT_OUTPUT_TEST) ;
 
-#Main google-weather-demo : google-weather-demo.cpp ;
-#LinkSharedLibraries google-weather-demo : Pt-Xml Pt-Http Pt-Net Pt-System Pt ;
-#MakeLocate google-weather-demo : $(PT_OUTPUT_TARGET) ;
-
 Main RpcBenchClient : RpcBenchClient.cpp ;
 LinkSharedLibraries RpcBenchClient : Pt-XmlRpc Pt-Xml Pt-Http Pt-Net Pt-System Pt ;
 MakeLocate RpcBenchClient : $(PT_OUTPUT_TARGET) ;
@@ -18,7 +14,3 @@ MakeLocate RpcBenchClient : $(PT_OUTPUT_TARGET) ;
 Main RpcBenchServer : RpcBenchServer.cpp ;
 LinkSharedLibraries RpcBenchServer : Pt-XmlRpc Pt-Xml Pt-Http Pt-Net Pt-System Pt ;
 MakeLocate RpcBenchServer : $(PT_OUTPUT_TARGET) ;
-
-#Main el-demo : el-demo.cpp ;
-#LinkSharedLibraries el-demo : Pt-Xml Pt-Http Pt-Net Pt-System Pt ;
-#MakeLocate el-demo : $(PT_OUTPUT_TARGET) ;

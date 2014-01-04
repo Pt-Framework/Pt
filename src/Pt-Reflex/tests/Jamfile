@@ -1,4 +1,0 @@
-SubDir PT_TOP src Pt-Reflex tests ;
-SubDirHdrs $(PT_TOP)/include ;
-SubDirHdrs $(PT_TOP)/src/Pt-Reflex ;
-SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Reflex ;

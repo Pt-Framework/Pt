@@ -33,12 +33,6 @@ PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Net ] : $(PT_INSTALL_INCLUDES:BS) ;
 
-SubDir PT_TOP include Pt Reflex ;
-PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Reflex ] ;
-PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
-PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
-InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Reflex ] : $(PT_INSTALL_INCLUDES:BS) ;
-
 SubDir PT_TOP include Pt Ssl ;
 PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Ssl ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
@@ -69,28 +63,18 @@ PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Unit ] : $(PT_INSTALL_INCLUDES:BS) ;
 
-SubDir PT_TOP include Pt Db ;
-PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Db ] ;
-PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
-PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
-InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Db ] : $(PT_INSTALL_INCLUDES:BS) ;
-
 #############################################################################
 # Pt Build Targets
 #############################################################################
 
 SubInclude PT_TOP src Pt ;
-SubInclude PT_TOP src Pt-Reflex ;
 SubInclude PT_TOP src Pt-Unit ;
 SubInclude PT_TOP src Pt-Xml ;
-SubInclude PT_TOP src Pt-Gfx ;
 
 if $(SYS)
 {
     SubInclude PT_TOP src Pt-System ;
     SubInclude PT_TOP src Pt-Net ;
-    SubInclude PT_TOP src Pt-Cma ;
-    SubInclude PT_TOP src Pt-Db ;
     SubInclude PT_TOP src Pt-Http ;
     SubInclude PT_TOP src Pt-XmlRpc ;
     SubInclude PT_TOP src Pt-Ssl ;
@@ -98,15 +82,5 @@ if $(SYS)
     if $(WITH_OPENSSL)
     {
         SubInclude PT_TOP src openssl ;
-    }
-    
-    if $(GUI)
-    {
-        #SubInclude PT_TOP src Pt-Gui ;
-    }
-
-	if $(WITH_HMI) = yes
-    {
-        SubInclude PT_TOP src Pt-Hmi ;
     }
 }
