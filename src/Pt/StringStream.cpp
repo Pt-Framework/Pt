@@ -30,66 +30,66 @@
 
 namespace Pt {
 
-StringBuffer::StringBuffer(std::ios::openmode mode)
-: std::basic_stringbuf<Pt::Char>(mode)
-{
-}
-
-StringBuffer::StringBuffer(const Pt::String& str, std::ios::openmode mode)
-: std::basic_stringbuf<Pt::Char>(str, mode)
-{
-}
-
-} // namespace Pt
-
-
-namespace std {
-
-basic_istringstream<Pt::Char>::basic_istringstream(ios_base::openmode mode)
-: basic_istream<Pt::Char>(0)
-, _buffer(mode)
-{
-    init(&_buffer);
-}
-
-
-basic_istringstream<Pt::Char>::basic_istringstream(const Pt::String& str, std::ios_base::openmode mode)
-: basic_istream<Pt::Char>(0)
-, _buffer(str, mode)
-{
-    init(&_buffer);
-}
-
-
-basic_ostringstream<Pt::Char>::basic_ostringstream(ios_base::openmode mode)
-: basic_ostream<Pt::Char>(0)
-, _buffer(mode)
-{
-    init(&_buffer);
-}
-
-
-basic_ostringstream<Pt::Char>::basic_ostringstream(const Pt::String& str, std::ios_base::openmode mode)
-: basic_ostream<Pt::Char>(0)
-, _buffer(str, mode)
-{
-    init(&_buffer);
-}
-
-
-basic_stringstream<Pt::Char>::basic_stringstream(ios_base::openmode mode)
-: basic_iostream<Pt::Char>(0)
-, _buffer(mode)
-{
-    init(&_buffer);
-}
-
-
-basic_stringstream<Pt::Char>::basic_stringstream(const Pt::String& str, std::ios_base::openmode mode)
-: basic_iostream<Pt::Char>(0)
-, _buffer(str, mode)
-{
-    init(&_buffer);
-}
+//StringBuffer::StringBuffer(std::ios::openmode mode)
+//: std::basic_stringbuf<Pt::Char>(mode)
+//{
+//}
+//
+//StringBuffer::StringBuffer(const Pt::String& str, std::ios::openmode mode)
+//: std::basic_stringbuf<Pt::Char>(str, mode)
+//{
+//}
+//
+//} // namespace Pt
+//
+//
+//namespace std {
+//
+//basic_istringstream<Pt::Char>::basic_istringstream(ios_base::openmode mode)
+//: basic_istream<Pt::Char>(0)
+//, _buffer(mode)
+//{
+//    init(&_buffer);
+//}
+//
+//
+//basic_istringstream<Pt::Char>::basic_istringstream(const Pt::String& str, std::ios_base::openmode mode)
+//: basic_istream<Pt::Char>(0)
+//, _buffer(str, mode)
+//{
+//    init(&_buffer);
+//}
+//
+//
+//basic_ostringstream<Pt::Char>::basic_ostringstream(ios_base::openmode mode)
+//: basic_ostream<Pt::Char>(0)
+//, _buffer(mode)
+//{
+//    init(&_buffer);
+//}
+//
+//
+//basic_ostringstream<Pt::Char>::basic_ostringstream(const Pt::String& str, std::ios_base::openmode mode)
+//: basic_ostream<Pt::Char>(0)
+//, _buffer(str, mode)
+//{
+//    init(&_buffer);
+//}
+//
+//
+//basic_stringstream<Pt::Char>::basic_stringstream(ios_base::openmode mode)
+//: basic_iostream<Pt::Char>(0)
+//, _buffer(mode)
+//{
+//    init(&_buffer);
+//}
+//
+//
+//basic_stringstream<Pt::Char>::basic_stringstream(const Pt::String& str, std::ios_base::openmode mode)
+//: basic_iostream<Pt::Char>(0)
+//, _buffer(str, mode)
+//{
+//    init(&_buffer);
+//}
 
 } // namespace std

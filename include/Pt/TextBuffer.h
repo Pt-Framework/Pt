@@ -473,20 +473,22 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         std::basic_ios<extern_type>* _target;
 };
 
-/** @brief Converts 8-bit character sequences to unicode.
-*/
-class PT_API TextBuffer : public BasicTextBuffer<Pt::Char, char>
-{
-    public:
-        typedef TextCodec<Pt::Char, char> Codec;
+typedef BasicTextBuffer<Pt::Char, char> TextBuffer;
 
-    public:
-        /** @brief Constructs a new TextBuffer
-        */
-        explicit TextBuffer(std::ios& buffer, Codec* codec = 0);
-
-        explicit TextBuffer(Codec* codec = 0);
-};
+///** @brief Converts 8-bit character sequences to unicode.
+//*/
+//class PT_API TextBuffer : public BasicTextBuffer<Pt::Char, char>
+//{
+//    public:
+//        typedef TextCodec<Pt::Char, char> Codec;
+//
+//    public:
+//        /** @brief Constructs a new TextBuffer
+//        */
+//        explicit TextBuffer(std::ios& buffer, Codec* codec = 0);
+//
+//        explicit TextBuffer(Codec* codec = 0);
+//};
 
 } // namespace Pt
 

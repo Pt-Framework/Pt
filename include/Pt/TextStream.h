@@ -354,80 +354,84 @@ class BasicTextStream : public BasicIOStream<CharT>
         BasicTextBuffer<intern_type, extern_type> _tbuffer;
 };
 
-
-/** @brief Text Input Stream for Character conversion
-
-    @ingroup Unicode
-*/
-class PT_API TextIStream : public BasicTextIStream<Char, char>
-{
-    public:
-        typedef TextCodec<Pt::Char, char> Codec;
-
-    public:
-        /** @brief Constructor
-
-            The stream will read bytes from \a is and use the codec \a codec
-            for character conversion. The codec will be destroyed by the
-            buffer of this stream if the codec was constructed with a
-            refcount of 0.
-        */
-        TextIStream(std::istream& is, Codec* codec);
-
-        explicit TextIStream(Codec* codec);
-
-        ~TextIStream();
-};
+typedef BasicTextIStream<Char, char>  TextIStream;
+typedef BasicTextOStream<Char, char>  TextOStream;
+typedef BasicTextStream<Char, char> TextStream;
 
 
-/** @brief Text Output Stream for Character conversion
-
-    @ingroup Unicode
-*/
-class PT_API TextOStream : public BasicTextOStream<Char, char>
-{
-    public:
-        typedef TextCodec<Pt::Char, char> Codec;
-
-    public:
-        /** @brief Constructor
-
-            The stream will write bytes to \a os and use the codec \a codec
-            for character conversion. The codec will be destroyed by the
-            buffer of this stream if the codec was constructed with a
-            refcount of 0.
-        */
-        TextOStream(std::ostream& os, Codec* codec);
-
-        explicit TextOStream(Codec* codec);
-
-        ~TextOStream();
-};
-
-
-/** @brief Text Stream for Character conversion
-
-    @ingroup Unicode
-*/
-class PT_API TextStream : public BasicTextStream<Char, char>
-{
-    public:
-        typedef TextCodec<Pt::Char, char> Codec;
-
-    public:
-        /** @brief Constructor
-
-            The stream will write or write bytes to \a ios and use the codec
-            \a codec for character conversion. The codec will be destroyed
-            by the buffer of this stream if the codec was constructed with a
-            refcount of 0.
-        */
-        TextStream(std::iostream& ios, Codec* codec);
-
-        explicit TextStream(Codec* codec);
-
-        ~TextStream();
-};
+///** @brief Text Input Stream for Character conversion
+//
+//    @ingroup Unicode
+//*/
+//class PT_API TextIStream : public BasicTextIStream<Char, char>
+//{
+//    public:
+//        typedef TextCodec<Pt::Char, char> Codec;
+//
+//    public:
+//        /** @brief Constructor
+//
+//            The stream will read bytes from \a is and use the codec \a codec
+//            for character conversion. The codec will be destroyed by the
+//            buffer of this stream if the codec was constructed with a
+//            refcount of 0.
+//        */
+//        TextIStream(std::istream& is, Codec* codec);
+//
+//        explicit TextIStream(Codec* codec);
+//
+//        ~TextIStream();
+//};
+//
+//
+///** @brief Text Output Stream for Character conversion
+//
+//    @ingroup Unicode
+//*/
+//class PT_API TextOStream : public BasicTextOStream<Char, char>
+//{
+//    public:
+//        typedef TextCodec<Pt::Char, char> Codec;
+//
+//    public:
+//        /** @brief Constructor
+//
+//            The stream will write bytes to \a os and use the codec \a codec
+//            for character conversion. The codec will be destroyed by the
+//            buffer of this stream if the codec was constructed with a
+//            refcount of 0.
+//        */
+//        TextOStream(std::ostream& os, Codec* codec);
+//
+//        explicit TextOStream(Codec* codec);
+//
+//        ~TextOStream();
+//};
+//
+//
+///** @brief Text Stream for Character conversion
+//
+//    @ingroup Unicode
+//*/
+//class PT_API TextStream : public BasicTextStream<Char, char>
+//{
+//    public:
+//        typedef TextCodec<Pt::Char, char> Codec;
+//
+//    public:
+//        /** @brief Constructor
+//
+//            The stream will write or write bytes to \a ios and use the codec
+//            \a codec for character conversion. The codec will be destroyed
+//            by the buffer of this stream if the codec was constructed with a
+//            refcount of 0.
+//        */
+//        TextStream(std::iostream& ios, Codec* codec);
+//
+//        explicit TextStream(Codec* codec);
+//
+//        ~TextStream();
+//};
 
 } // namespace Pt
 

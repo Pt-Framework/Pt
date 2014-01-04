@@ -30,45 +30,45 @@
 
 namespace Pt {
 
-TextIStream::TextIStream(std::istream& is, Codec* codec)
-: BasicTextIStream<Char, char>(is, codec)
-{ }
-
-
-TextIStream::TextIStream(Codec* codec)
-: BasicTextIStream<Char, char>(codec)
-{ }
-
-
-TextIStream::~TextIStream()
-{ }
-
-
-TextOStream::TextOStream(std::ostream& os, Codec* codec)
-: BasicTextOStream<Char, char>(os, codec)
-{ }
-
-
-TextOStream::TextOStream(Codec* codec)
-: BasicTextOStream<Char, char>(codec)
-{ }
-
-
-TextOStream::~TextOStream()
-{ }
-
-
-TextStream::TextStream(std::iostream& ios, Codec* codec)
-: BasicTextStream<Char, char>(ios, codec)
-{ }
-
-
-TextStream::TextStream(Codec* codec)
-: BasicTextStream<Char, char>(codec)
-{ }
-
-
-TextStream::~TextStream()
-{ }
+//TextIStream::TextIStream(std::istream& is, Codec* codec)
+//: BasicTextIStream<Char, char>(is, codec)
+//{ }
+//
+//
+//TextIStream::TextIStream(Codec* codec)
+//: BasicTextIStream<Char, char>(codec)
+//{ }
+//
+//
+//TextIStream::~TextIStream()
+//{ }
+//
+//
+//TextOStream::TextOStream(std::ostream& os, Codec* codec)
+//: BasicTextOStream<Char, char>(os, codec)
+//{ }
+//
+//
+//TextOStream::TextOStream(Codec* codec)
+//: BasicTextOStream<Char, char>(codec)
+//{ }
+//
+//
+//TextOStream::~TextOStream()
+//{ }
+//
+//
+//TextStream::TextStream(std::iostream& ios, Codec* codec)
+//: BasicTextStream<Char, char>(ios, codec)
+//{ }
+//
+//
+//TextStream::TextStream(Codec* codec)
+//: BasicTextStream<Char, char>(codec)
+//{ }
+//
+//
+//TextStream::~TextStream()
+//{ }
 
 } // namespace Pt

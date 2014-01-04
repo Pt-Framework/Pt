@@ -30,12 +30,17 @@
 #define Pt_StreamBuffer_h
 
 #include <Pt/Api.h>
+#include <Pt/String.h>
 #include <streambuf>
 #include <cstddef>
 
 #if defined(_MSC_VER) && defined(_WIN32_WCE) 
     // alternatively compile with /FORCE:multiple
     template class PT_EXPORT std::basic_streambuf<char>; 
+#endif
+
+#if defined(_MSC_VER)
+	template class PT_EXPORT std::basic_streambuf<Pt::Char>;
 #endif
 
 namespace Pt {
