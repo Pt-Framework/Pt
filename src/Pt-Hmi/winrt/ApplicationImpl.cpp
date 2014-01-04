@@ -49,7 +49,7 @@ void FrameworkView::Run()
 	
 	//Loop until application closes
 	while( _impl->waitNext())
-		break;
+		;
 }
 
 void FrameworkView::SetWindow( Windows::UI::Core::CoreWindow^ window )
@@ -189,6 +189,9 @@ void ApplicationImpl::onProcessEvents()
 
 void ApplicationImpl::onWake()
 {
+	if (_frameworkView->dispatcher() == nullptr)
+		return;
+
 	_frameworkView->dispatcher()->RunAsync( Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([](){}) );
 
 }
@@ -201,7 +204,9 @@ void ApplicationImpl::Closed(CoreWindow^ Sender, CoreWindowEventArgs^ Args)
 
 void ApplicationImpl::onRun()
 {
-    Windows::ApplicationModel::Core::CoreApplication::Run( ref new AppSource((long long)this) );
+    auto appSource = ref new AppSource((long long)this); 
+
+    Windows::ApplicationModel::Core::CoreApplication::Run(appSource);
 }
 
 
