@@ -35,6 +35,7 @@
 #include <Pt/System/EventLoop.h>
 #include <string>
 #include <cstddef>
+#include <vector>
 
 namespace Pt {
 

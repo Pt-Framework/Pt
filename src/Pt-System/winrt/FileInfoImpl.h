@@ -91,18 +91,18 @@ class FileInfoImpl
             return FileInfo::File;
         }
 
-        static FileStatus::Type getType(DWORD attr)
+        static FileInfo::Type getType(DWORD attr)
         {
             if(attr == 0xffffffff)
-                return FileStatus::Invalid;
+                return FileInfo::Invalid;
 
             if(attr & FILE_ATTRIBUTE_DIRECTORY)
-                return FileStatus::Directory;
+                return FileInfo::Directory;
 
-            return FileStatus::File;
+            return FileInfo::File;
         }
 
-        static std::size_t size(const std::string& path)
+        static Pt::uint64_t size(const std::string& path)
         {
             std::wstring wpath;
             win32::fromMultiByte(path, wpath);
@@ -119,10 +119,10 @@ class FileInfoImpl
             LARGE_INTEGER li;
             li.HighPart = info.nFileSizeHigh;
             li.LowPart = info.nFileSizeLow;
-            return static_cast<std::size_t>(li.QuadPart);
+            return static_cast<Pt::uint64_t>(li.QuadPart);
         }
 
-        static void resize(const std::string& path, std::size_t newSize)
+        static void resize(const std::string& path, Pt::uint64_t newSize)
         {
             std::wstring wpath;
             win32::fromMultiByte(path, wpath);

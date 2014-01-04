@@ -61,13 +61,13 @@ class PipeIODevice : public IODevice
 
         void onSetTimeout(size_t timeout);
 
-        size_t onBeginRead(char* buffer, size_t n, bool& eof);
+        size_t onBeginRead(EventLoop&, char* buffer, size_t n, bool& eof);
 
-        size_t onEndRead(char* buffer, size_t n, bool& eof);
+        size_t onEndRead(EventLoop&, char* buffer, size_t n, bool& eof);
 
-        size_t onBeginWrite(const char* buffer, size_t n);
+        size_t onBeginWrite(EventLoop&, const char* buffer, size_t n);
 
-        size_t onEndWrite(const char* buffer, size_t n);
+        size_t onEndWrite(EventLoop&, const char* buffer, size_t n);
 
         virtual void onClose();
 

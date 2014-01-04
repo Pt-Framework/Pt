@@ -65,7 +65,7 @@ class SerialDeviceImpl
         
         SerialDevice::FlowControl flowControl() const;
         
-        bool setSignal(SerialDevice::SerialLine signal);
+        bool setSignal(SerialDevice::Signal signal);
         
         bool runRead(EventLoop&);
 

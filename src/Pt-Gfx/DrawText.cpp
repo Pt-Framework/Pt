@@ -35,6 +35,7 @@
 #include <Pt/System/Clock.h>
 #include "Pt/String.h"
 #include <cmath>
+#include <algorithm>
 
 namespace Pt {
 namespace Gfx {

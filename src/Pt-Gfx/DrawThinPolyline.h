@@ -24,6 +24,7 @@
 
 #include "DrawPolyline.h"
 #include "Pt/Gfx/ClipLine.h"
+#include <algorithm>
 
 namespace Pt {
 namespace Gfx {

@@ -34,6 +34,7 @@
 #include <Pt/System/SystemError.h>
 #include <Pt/System/IOError.h>
 #include <Pt/System/Logger.h>
+#include <algorithm>
 #include <cassert>
 
 using namespace Platform;

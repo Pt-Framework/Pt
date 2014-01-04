@@ -28,6 +28,7 @@
 
 #include "../win32/win32.h"
 #include "ApplicationImpl.h"
+#include <Pt/System/IOError.h>
 
 using namespace Platform;
 using namespace Windows::Storage;

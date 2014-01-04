@@ -170,7 +170,7 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
 }
 
 
-bool SerialDeviceImpl::setSignal(SerialDevice::SerialLine signal)
+bool SerialDeviceImpl::setSignal(SerialDevice::Signal signal)
 {
     return false;
 }

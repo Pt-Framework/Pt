@@ -27,6 +27,7 @@
  */
 #include "PipeImpl.h"
 #include <cstring>
+#include <algorithm>
 
 namespace Pt {
 
@@ -71,10 +72,10 @@ void PipeIODevice::onClose()
 
 void PipeIODevice::onCancel()
 {
-    if( this->reading() )
+    if( this->isReading() )
         _pipe->cancelRead();
 
-    if( this->writing() )
+    if( this->isWriting() )
         _pipe->cancelWrite();
 
     IODevice::onCancel();
@@ -83,16 +84,16 @@ void PipeIODevice::onCancel()
 
 bool PipeIODevice::onRun()
 {
-    if( this->reading() )
+    if( this->isReading() )
     {
-        if( ravail() || eof() || _pipe->readAvail() )
+        if( ravail() || isEof() || _pipe->readAvail() )
         {
             inputReady().send(*this);
             return true;
         }
     }
 
-    if( this->writing() )
+    if( this->isWriting() )
     {
         if( wavail() || _pipe->writeAvail() )
         {
@@ -105,18 +106,18 @@ bool PipeIODevice::onRun()
 }
 
 
-std::size_t PipeIODevice::onBeginRead(char* buffer, std::size_t n, bool& eof)
+std::size_t PipeIODevice::onBeginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
     if(_mode != Read)
     {
         throw IOError("I/O device not readable");
     }
 
-    return _pipe->beginRead(*parent(), buffer, n, eof);
+    return _pipe->beginRead(loop, buffer, n, eof);
 }
 
 
-std::size_t PipeIODevice::onEndRead(char* buffer, std::size_t n, bool& eof)
+std::size_t PipeIODevice::onEndRead(EventLoop&, char* buffer, std::size_t n, bool& eof)
 {
     return _pipe->endRead(buffer, n, eof);
 }
@@ -129,18 +130,18 @@ std::size_t PipeIODevice::onRead(char* buffer, std::size_t count, bool& eof)
 }
 
 
-std::size_t PipeIODevice::onBeginWrite(const char* buffer, std::size_t n)
+std::size_t PipeIODevice::onBeginWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
     if(_mode != Write)
     {
         throw IOError("I/O device not writable");
     }
 
-    return _pipe->beginWrite(*parent(), buffer, n);
+    return _pipe->beginWrite(loop, buffer, n);
 }
 
 
-std::size_t PipeIODevice::onEndWrite(const char* buffer, std::size_t n)
+std::size_t PipeIODevice::onEndWrite(EventLoop&, const char* buffer, std::size_t n)
 {
     return _pipe->endWrite(buffer, n);
 }

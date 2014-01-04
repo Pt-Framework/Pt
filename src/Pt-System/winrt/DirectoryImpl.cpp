@@ -96,14 +96,7 @@ bool DirectoryIteratorImpl::advance()
         return false;
     }
 
-    FileStatus::Type type = FileInfoImpl::getType(_current.dwFileAttributes);
-
-    LARGE_INTEGER li;
-    li.HighPart = _current.nFileSizeHigh;
-    li.LowPart = _current.nFileSizeLow;
-    std::size_t size = static_cast<std::size_t>(li.QuadPart);
-
-    _finfo.init(type, size) = win32::toMultiByte( _current.cFileName );
+    _finfo.path() = win32::toMultiByte( _current.cFileName );
     return true;
 }
 

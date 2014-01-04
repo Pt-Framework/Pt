@@ -34,6 +34,7 @@
 #include <Pt/System/Logger.h>
 #include <Pt/System/IOError.h>
 #include <limits>
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 

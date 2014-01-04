@@ -33,6 +33,7 @@
 #include <Pt/Net/Endpoint.h>
 #include <Pt/System/EventLoop.h>
 #include <string>
+#include <vector>
 
 namespace Pt {
 

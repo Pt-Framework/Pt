@@ -39,7 +39,7 @@ Selector::Selector()
 {
     _wakeEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
     if( _wakeEvent == NULL )
-        throw SystemError( PT_ERROR_MSG("CreateEvent failed") );
+        throw SystemError("CreateEvent failed");
 
     _handles.push_back( _wakeEvent );
 }
