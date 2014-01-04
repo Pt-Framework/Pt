@@ -1,0 +1,18 @@
+SubDir PT_TOP src Pt-Http tests ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirHdrs $(PT_TOP)/src/Pt-Http ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Http ;
+
+if $(WITH_SSL)
+{
+    SubDirC++Flags [ FDefines PT_HTTP_WITH_SSL ] ;
+}
+
+Main Pt-Http-test : Pt-Http-test.cpp
+                    ServerTest.cpp
+                    ParserTest.cpp
+                    ;
+
+LinkSharedLibraries Pt-Http-test : Pt Pt-Http Pt-Net Pt-Ssl Pt-System Pt-Unit ;
+MakeLocate Pt-Http-test : $(PT_OUTPUT_TARGET) ;
+RunUnitTest Pt-Http-test : $(PT_OUTPUT_TEST) ;

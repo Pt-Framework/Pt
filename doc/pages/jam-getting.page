@@ -1,0 +1,35 @@
+/** \page jam-getting Getting Jam
+
+The Jam distribution provides a self-contained jam based build system. It can
+be included and distributed with your project's source files, so you are not
+required to install any other tools on your build build host(s), besides the
+native toolchain (compiler, linker etc.). You can download the files here: 
+https://pt-framework.svn.sourceforge.net/svnroot/pt-framework/trunk
+
+The Jam distribution contains the following files, which should be placed in
+your projects root directory as provided:
+
+@verbatim
+- [jam]
+    - Jambase
+    - ... (jam implementation files)
+- Jambase
+- jam.sh
+- jam.bat
+- jam.exe
+@endverbatim
+
+The file Jambase in the project root references the files in the jam support
+directory and both are also referred to as the Jambase. The jam support 
+directory includes the implementation details of the jam-based build system and
+the jam sources used for bootstrapping the build tool. 
+
+Two scripts come with the jam distribution that simplify boostrapping the
+build process. One script named jam.sh runs on posix compatible build 
+hosts, the other one named jam.bat runs on windows based build hosts.
+These scripts bootstrap and run the jam executable, so that jam executables
+do not have to be included for all possible build hosts, but rather built
+on demand. A precompiled version for windows hosts is distributed with
+the scripts named jam.exe.
+
+*/

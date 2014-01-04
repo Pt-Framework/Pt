@@ -1,0 +1,85 @@
+rule ConfigureVisualC
+{
+    if ! $(VISUALC_CONFIGURED)
+    {
+        VISUALC_CONFIGURED = 1 ;
+    
+        if $(VISUALC) 
+        {
+            VISUALC = $(VISUALC:J=" ") ;
+        } 
+        else
+        {
+            VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VCExpress\\12.0\\Setup\\VC\\" : "ProductDir" ] ;
+            VISUALC ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\12.0\\Setup\\VC\\" : "ProductDir"  ] ;
+            VISUALC ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\12.0\\Setup\\VC\\" : "ProductDir" ] ;
+
+            VISUALC = $(VISUALC:P) ;
+            VISUALC = $(VISUALC:P) ;
+        }
+        
+        if ! $(VISUALC)
+        {
+            Exit "VISUALC not found" ;
+        }
+
+		CCFLAGS  += /FS ;
+		C++FLAGS += /FS ;
+    
+        VISUALC_PATH = $(VISUALC)\\Common7\\IDE ;
+        Echo "Checking for Visual Studio..." $(VISUALC) ;
+        Configure VISUALC_PATH ;
+    }
+}
+
+
+rule ConfigurePlatformSDK
+{
+    if ! $(PLATFORMSDK_CONFIGURED)
+    {
+        PLATFORMSDK_CONFIGURED = 1 ;
+
+        PLATFORMSDK ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots\\" : "KitsRoot81" ] ;
+    
+        if ! $(PLATFORMSDK)
+        {
+            Exit "PLATFORMSDK not found" ;
+        }
+    
+        Echo "Checking for Platform SDK..." $(PLATFORMSDK) ;
+
+        STDHDRS  += \""$(PLATFORMSDK)include\\um\"" ;
+		STDHDRS  += \""$(PLATFORMSDK)include\\shared\"" ;
+        CCFLAGS  += /DWIN32 ;
+        C++FLAGS += /DWIN32 ;
+
+		C++FLAGS += /AI \""$(PLATFORMSDK)References\\CommonConfiguration\\Neutral\"" ;
+		C++FLAGS += /AI \""$(VISUALC)\\VC\\VCPackages\"" ;
+
+        if $(TARGET_OSPLAT:L) = "x86_64"
+        {
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)lib\\winv6.3\\um\\x64\"" ;
+        }
+        else if $(TARGET_OSPLAT:L) = "x86"
+        {
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)lib\\winv6.3\\um\\x86\"" ;
+        }
+        else if $(TARGET_OSPLAT:L) = "arm"
+        {
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)lib\\winv6.3\\um\\arm\"" ;
+        }
+
+        Configure STDHDRS ;
+        Configure CCFLAGS ;
+        Configure C++FLAGS ;
+        Configure LINKFLAGS ;
+    }
+}
+
+
+rule ConfigureMt
+{
+}
+
+Load vc.jam ;
+

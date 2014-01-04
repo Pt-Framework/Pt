@@ -1,0 +1,585 @@
+##########################################################################
+# Basic Configuration Rules
+##########################################################################
+
+YES ?= "yes" ;
+NO ?= "no" ;
+
+# windows batch and posix shell
+STDERR_TO_STDOUT = " 2>&1" ; 
+
+TONULL = " 2>/dev/null 1>/dev/null" ;
+if $(OS:L) = "nt"
+{
+    TONULL = " 2>NUL 1>NUL" ;
+}
+
+CONFIGURE_LOG = $(JAMRULES:S=.log) ;
+CONFIGURED_VARIABLES = ;
+
+rule Configure
+{
+    local _found ;
+    for local _v in $(CONFIGURED_VARIABLES)
+    {
+        if $(_v) = $(1)
+        {
+            _found = 1 ;
+        }
+    }
+
+    if ! $(_found)
+    {
+        CONFIGURED_VARIABLES += $(1) ;
+    }
+}
+
+rule ConfigureClean
+{
+    local _jamrules = $(JAMRULES:R=$(1)) ;
+
+    TryCommand "rm -f "$(JAMRULES) ;
+    TryCommand "del /f/q "$(JAMRULES) ;
+
+    TryCommand "rm -f "$(CONFIGURE_LOG) ;
+    TryCommand "del /f/q "$(CONFIGURE_LOG) ;
+}
+
+rule ConfigureLog
+{
+    for local _line in $(1)
+    {
+        WriteFile $(CONFIGURE_LOG) : $(_line) ;
+    }
+}
+
+rule ConfigureLoad
+{
+    local _config = $(1) ;
+
+    if $(_config)
+    {
+        # TODO: check timestamp of cached Jamrules against Jamconfigure
+
+        if [ CHECK_IF_FILE $(JAMRULES).$(_config) ] 
+        {
+            include Jamrules.$(_config) ;
+            TryCommand $(CP) $(JAMRULES).$(_config) Jamrules ;
+            Exit "Using " $(JAMRULES).$(_config) : 0 ;
+        }
+    }
+}
+
+rule ConfigureSave
+{
+    local _config = $(1) ;
+
+    if $(_config)
+    {
+        TryCommand "rm -f "$(JAMRULES).$(_config) ;
+        TryCommand "del /f/q "$(JAMRULES).$(_config) ;
+
+        ConfigureWrite $(JAMRULES).$(_config) ;
+    }
+}
+
+rule ConfigureWrite
+{
+    local _file = $(1) ;
+
+    for local _var in $(CONFIGURED_VARIABLES)
+    {
+        local _value ;
+        for _v in $($(_var))
+        {
+            local _valtmp ;
+            _valtmp = [ Replace $(_v) "\\\\" "\\\\" ] ;
+            _valtmp = [ Replace $(_valtmp) "\"" "\\\"" ] ;
+            _value += "\"$(_valtmp)\"" ;
+        }
+    
+        WriteFile $(_file) : $(_var)" ?= "$(_value:J=" ")" ;" ;
+    }
+
+    # Toolset specific variables and rules
+    WriteFile $(_file) : "" ;
+    WriteFile $(_file) : "Load $(TOOLSET:L).jam ;" ;
+}
+
+
+rule ConfigureExit
+{
+    ConfigureWrite $(JAMRULES) ;
+    Exit "Configuration successful." : 0 ;
+}
+
+rule SubTree
+{
+    #
+    # SubConfigure TOP d1 [ d2 [ d3 [ d4 ] ] ] : SUB_TOP
+    #
+
+    if $(<[1]) = $(>[1]) 
+    {
+        Exit SubConfigure can not use parent root variable ;
+    }
+
+    if ! $($(<[1]))
+    {
+        EXIT Top level of source tree has not been set with $(<[1]) ;
+    }
+
+    # path to subtree Jamconfigure and Jamrules
+    local _subdir = [ FDirName $($(<[1])) $(<[2-]) ] ;
+    local _subrules = [ FDirName $(_subdir) $(JAMRULES) ] ;    
+
+    #ConfigureClean $(_subdir) ;
+    #
+    #local config_vars = $(CONFIGURED_VARIABLES) ;
+    #CONFIGURED_VARIABLES = ;
+
+    # set subconfigure root variable
+    $(2) = $(_subdir) ;
+
+    include [ FDirName $(_subdir) Jamconfigure ] ;
+
+    #for local _var in $(CONFIGURED_VARIABLES)
+    #{
+    #    local _value ;
+    #    for _v in $($(_var))
+    #    {
+    #        local _valtmp ;
+    #        _valtmp = [ Replace $(_v) "\\\\" "\\\\" ] ;
+    #        _valtmp = [ Replace $(_valtmp) "\"" "\\\"" ] ;
+    #        _value += "\"$(_valtmp)\"" ;
+    #    }
+    # 
+    #     WriteFile $(_subrules) : $(_var)" ?= "$(_value:J=" ")" ;" ;
+    #}
+
+    #CONFIGURED_VARIABLES = $(config_vars) ;
+}
+
+rule SubDir
+{
+    local _r _s ;
+
+    #
+    # SubDir TOP
+    #
+    # This introduces a Jamconfigure that is part of a project tree 
+    # rooted at $(TOP). This allows the Jamconfigure of a project to be
+    # used as a sub project.
+    #
+
+    #
+    # Set root variable to current subdir
+    #
+    if ! $($(<[1]))
+    {
+        if ! $(<[1])
+        {
+            EXIT SubDir syntax error ;
+        }
+
+        $(<[1]) = [ FSubDir $(<[2-]) ] ;
+    }
+}
+
+rule TryCommand
+{
+    local _cmd  = $(1) $(STDERR_TO_STDOUT) ; #$(TONULL) ;
+    ConfigureLog $(_cmd:J=" ") ;
+
+    local _result = [ EXEC $(_cmd:J=" ") ] ;
+    ConfigureLog $(_result[2-]) ;
+
+    if $(_result[1]) = 0
+    {
+        return $(YES) ;
+    }
+}
+
+###############################################################################
+# Configure remove files command
+###############################################################################
+
+rule ConfigureRm
+{
+    RM = ;
+    WriteFile check.in : "delete me" ;
+
+    if ! $(RM) && [ TryCommand "rm -f check.in"   ]
+    {
+        RM = "rm -f"  ;
+    }
+
+    if ! $(RM) && [ TryCommand "del /f/q check.in"  ]
+    {
+        RM = "del /f/q" ;
+    }
+
+    TryCommand $(RM) "check.in" ;
+
+    if ! $(RM)
+    {
+        Exit "Checking for remove file... FAILED!" ;
+    }
+
+    Configure RM : $(RM) ;
+    EchoOption RM : "Remove file" ;
+}
+
+###############################################################################
+# Configure move command
+###############################################################################
+
+rule ConfigureMv
+{
+    MV = ;
+    WriteFile check.in : "delete me" ;
+
+    if ! $(MV) && [ TryCommand "move /y check.in check.out"   ]
+    {
+        MV = "move /y"  ;
+    }
+
+    if ! $(MV) && [ TryCommand "mv -f check.in check.out"  ]
+    {
+        MV = "mv -f" ;
+    }
+
+    TryCommand $(RM) "check.in" "check.out" ;
+
+    if ! $(MV)
+    {
+        Exit "Checking for file move... FAILED!" ;
+    }
+
+    Configure MV : $(MV) ;
+    EchoOption MV : "Move file" ;
+}
+
+###############################################################################
+# Configure copy command
+###############################################################################
+
+rule ConfigureCp
+{
+    CP = ;
+    WriteFile check.in : "delete me" ;
+
+    if ! $(CP) && [ TryCommand "copy check.in check.out"   ]
+    {
+        CP = "copy"  ;
+    }
+
+    if ! $(CP) && [ TryCommand "cp -f check.in check.out"  ]
+    {
+        CP = "cp -f" ;
+    }
+
+    TryCommand $(RM) "check.in" "check.out" ;
+
+    if ! $(CP)
+    {
+        Exit "Checking for file copy... FAILED!" ;
+    }
+
+    Configure CP : $(CP) ;
+    EchoOption CP : "Copy file" ;
+}
+
+###############################################################################
+# Configure creation and removal of directories
+###############################################################################
+
+rule ConfigureMkDir
+{
+    MKDIR = ;
+    RMDIR = ;
+
+    if ! $(MKDIR) && [ TryCommand "mkdir check_dir" ]
+    {
+        MKDIR = "mkdir" ;
+    }
+    
+    if ! $(RMDIR) && [ TryCommand "rmdir /s/q check_dir" ]
+    {
+        RMDIR = "rmdir /s/q" ;
+    }
+
+    if ! $(RMDIR) && [ TryCommand "rmdir check_dir" ]
+    {
+        RMDIR = "rmdir" ;
+    }
+
+    if ! $(RMDIR) && [ TryCommand "rm -rf check_dir" ]
+    {
+        RMDIR = "rm -rf" ;
+    }
+
+    if ! $(MKDIR)
+    {
+        Exit "Checking for mkdir... FAILED!" ;
+    }
+
+    if ! $(RMDIR)
+    {
+        Exit "Checking for rmdir... FAILED!" ;
+    }
+
+    Configure MKDIR : $(MKDIR) ;
+    EchoOption MKDIR : "Make dir" ;
+
+    Configure RMDIR : $(RMDIR) ;
+    EchoOption RMDIR : "Remove dir" ;
+}
+
+###############################################################################
+# Configure file access rights commands
+###############################################################################
+
+rule ConfigureChMod
+{
+    CHMOD = ;
+    WriteFile check.in : "delete me" ;
+
+    if ! $(CHMOD) && [ TryCommand "chmod 777 check.in" ]
+    {
+        CHMOD = chmod ;
+        CHGRP = chgrp ;
+        CHOWN = chown ;
+
+        Configure CHMOD ;
+        Configure CHGRP ;
+        Configure CHOWN ;
+
+        EchoOption CHMOD : "Change mode" ;
+        EchoOption CHGRP : "Change group") ;
+        EchoOption CHOWN : "Change owner" ;
+
+        EXEMODE ?= 711 ;
+        Configure EXEMODE ;
+        EchoOption EXEMODE : "Executable mode" ;
+
+        FILEMODE ?= 644 ;
+        Configure FILEMODE ;
+        EchoOption FILEMODE : "File mode" ;
+    }
+
+    TryCommand $(RM) "check.in" ;
+}
+
+###############################################################################
+# Configure file link command
+###############################################################################
+
+rule ConfigureLn
+{
+    LN = ;
+    WriteFile check.in : "delete me" ;
+
+    if ! $(LN) && [ TryCommand "ln check.in check.out" ]
+    {
+        LN = "ln" ;
+    }
+
+    TryCommand $(RM) "check.in" "check.out" ;
+ 
+    if ! $(LN)
+    {
+        EchoOption LN : "File link" : "not supported" ;
+    }
+    else
+    {
+        Configure LN : $(LN) ;
+        EchoOption LN : "Link file" ;
+    }
+}
+
+###############################################################################
+# Configure path separator and relative path symbols
+###############################################################################
+
+rule ConfigureDotSlash
+{
+    DOT = ;
+    if ! $(DOT) && [ TryCommand "cd ." ]
+    {
+        DOT = "." ;
+    }
+
+    if ! $(DOT)
+    {
+        Exit "Checking for directory dot... FAILED!" ;
+    }
+
+    DOTDOT = ;
+    if ! $(DOTDOT) && [ TryCommand "cd .." ]
+    {
+        DOTDOT = ".." ;
+    }
+
+    if ! $(DOTDOT)
+    {
+        Exit "Checking for directory dotdot... FAILED!" ;
+    }
+    
+    SLASH = ;   
+    if ! $(SLASH) && [ TryCommand "cd .\\" ]
+    {
+        SLASH = "\\" ;
+    }
+
+    if ! $(SLASH) &&  [ TryCommand "cd ./" ]
+    {
+        SLASH = "/" ;
+
+    }
+
+    if ! $(SLASH) 
+    {
+        Exit "Checking for directory separator... FAILED!" ;
+    }
+
+    Configure DOT : $(DOT) ;
+    EchoOption DOT : "Directory dot" ;
+
+    Configure DOTDOT : $(DOTDOT) ;
+    EchoOption DOTDOT : "Directory dotdot" ;
+
+    Configure SLASH : $(SLASH) ;
+    EchoOption SLASH : "Directory separator" ;
+}
+
+
+rule ConfigureTarget
+{
+    TARGET_OS ?= $(OS:L) ;
+    EchoOption TARGET_OS : "Target OS"  ;
+    Configure TARGET_OS ;
+    Load $(TARGET_OS:L).jam ;
+
+    TARGET_OSPLAT ?= $(OSPLAT:L) ;
+    EchoOption TARGET_OSPLAT : "Target Platform" ;
+    Configure TARGET_OSPLAT ;
+
+    EchoOption SUFOBJ : "Object suffix" ;
+    Configure SUFOBJ ;
+
+    EchoOption SUFEXE : "Executable suffix" ;
+    Configure SUFEXE ;
+
+    EchoOption PRELIB : "Library prefix") ;
+    Configure PRELIB ;
+
+    EchoOption SUFLIB : "Library suffix" ;
+    Configure SUFLIB ;
+
+    EchoOption SUFDLL : "Sshared library suffix" ;
+    Configure SUFDLL ;
+}
+
+
+rule ConfigureToolset
+{
+    if ! $(TOOLSET)
+    {
+        Exit "Checking for toolset... FAILED! (Please set the TOOLSET variable)" ;
+    }
+
+    EchoOption TOOLSET : "Toolset" ;
+    Configure TOOLSET : $(TOOLSET) ;
+    Load $(TOOLSET:L).jam ;
+}
+
+
+rule ConfigureCc
+{
+    if ! $(CC_CONFIGURED)
+    {
+        CheckCc ;
+
+        EchoOption AS : "Assember" : $(AS:BS) ;
+        EchoOption AR : "Archiver" : $(AR:BS) ;
+        EchoOption CC : "C compiler" : $(CC:BS) ;
+        EchoOption LINK : "Linker" : $(LINK:BS) ;
+        EchoOption RANLIB : "Ranlib tool" : $(RANLIB:BS) ;
+
+        EchoOption OPTIM : "Optimisation" ;
+        EchoOption WARN : "Warning Level" ;
+        EchoOption CCFLAGS : "C Flags" ;
+        EchoOption STDHDRS : "Standard Headers" ;
+        EchoOption LINKFLAGS : "Link Flags" ;
+        EchoOption MAIN_LINKFLAGS : "Main Link Flags" ;
+        EchoOption DLL_LINKFLAGS : "Dll Link Flags" ;
+
+        CC_CONFIGURED = 1 ;
+    }
+}
+
+
+rule ConfigureC++
+{
+    if ! $(C++_CONFIGURED)
+    {
+        CheckC++ ;
+
+        EchoOption C++ : "C++ compiler" : $(C++:BS) ;
+        EchoOption LINK++ : "C++ Linker" : $(LINK++:BS) ;
+
+        EchoOption C++FLAGS : "C++ Flags" ;
+        EchoOption C++LINKFLAGS : "C++ Link Flags" ;
+
+        local _r = [ CheckBuildC++ "#include <iostream>"
+                                    "int main() { std::cout << 42; return 0; }" ] ;
+        if ! $(_r)
+        {
+            Exit "ERROR: configured C++ compiler does not work" ;
+        }
+
+        C++_CONFIGURED = 1 ;
+    }
+}
+
+
+rule CheckBuildCc
+{
+    ConfigureLog "\n[ CheckBuildCc ]" ;
+
+    local _src = $(1) ;
+    ConfigureLog $(_src) ;
+
+    local _line ;
+    for _line in $(_src)
+    {
+        WriteFile check.cpp : $(_line) ;
+    }
+
+    local _r = [ TryBuildCc check.cpp : $(2) : $(3) : $(4) : $(5) ] ;
+
+    TryCommand $(RM) check.cpp ;
+    return $(_r) ;
+}
+
+
+rule CheckBuildC++
+{
+    ConfigureLog "\n[ CheckBuildC++ ]" ;
+    
+    local _src = $(1) ;
+    ConfigureLog $(_src) ;
+
+    local _line ;
+    for _line in $(_src)
+    {
+        WriteFile check.cpp : $(_line) ;
+    }
+
+    local _r = [ TryBuildC++ check.cpp : $(2) : $(3) : $(4) : $(5) ] ;
+
+    TryCommand $(RM) check.cpp ;
+    return $(_r) ;
+}
+

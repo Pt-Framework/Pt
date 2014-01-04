@@ -1,0 +1,20 @@
+SubDir PT_TOP src Pt-Unit ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirC++Flags [ FDefines PT_UNIT_API_EXPORT ] ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Unit ;
+
+PT_UNIT_SOURCES = Application.cpp
+                  Assertion.cpp
+                  RegisterTest.cpp
+                  Reporter.cpp
+                  Test.cpp
+                  TestCase.cpp
+                  TestContext.cpp
+                  TestProtocol.cpp
+                  TestSuite.cpp
+                 ;
+
+SharedLibrary Pt-Unit : $(PT_UNIT_SOURCES) ;
+LinkSharedLibraries Pt-Unit : Pt ;
+MakeLocate Pt-Unit : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-Unit : $(PT_INSTALL_LIBDIR) ;

@@ -1,0 +1,267 @@
+##############################################################################
+# Configuration rules
+##############################################################################
+
+rule TryBuild
+{
+    local _cc = $(1) ;
+    local _src = $(2) ;
+    local _cflags = $(3) ;
+    local _l = $(4) ;
+    local _L = $(5) ;
+    local _out = a.out ;
+    local _cmd ;
+
+    if $(4)
+    {
+        _cmd = $(_cc) $(LINKFLAGS) -o $(_out) $(_cflags) -I$(STDHDRS) -L$(5) $(_src) $(4) ;
+    }
+    else
+    {
+        _cmd = $(_cc) -c -o $(_out) $(_cflags) -I$(STDHDRS) $(_src) ;
+    }
+
+    local _r = [ TryCommand $(_cmd) ] ;
+
+    TryCommand $(RM) $(_out) ;
+    return $(_r) ;
+}
+
+
+rule TryBuildCc
+{
+    local _cflags = $(CCFLAGS) $(2) ;
+    return [ TryBuild $(CC) : $(1) : $(2) : $(3) : $(4) ] ;
+}
+
+
+rule TryBuildC++
+{
+    local _cflags = $(C++FLAGS) $(2) ;
+    return [ TryBuild $(C++) : $(1) : $(2) : $(3) : $(4) ] ;
+}
+
+
+rule CheckCc
+{
+    TOOLSET_ROOT ?= "" ;
+    AS           ?= $(TOOLSET_ROOT)as ;
+    CC           ?= $(TOOLSET_ROOT)clang ;
+    RANLIB       ?= $(TOOLSET_ROOT)ranlib ;
+    AR           ?= $(TOOLSET_ROOT)ar ru ;
+    LINK         ?= $(CC) ;
+
+    Configure AS ;
+    Configure AR ;
+    Configure CC ;
+    Configure LINK ;
+    Configure RANLIB ;
+
+    if $(TARGET_OS:L) = macosx
+    {
+        DLL_LINKFLAGS = -dynamiclib ;
+    }
+    else if $(TARGET_OS:L) = nt
+    {
+        DLL_LINKFLAGS = -shared ;
+        LINKFLAGS  += "-Wl,--enable-runtime-pseudo-reloc"  ;
+        GCC_START_GROUP = "-Wl,--start-group" ;
+        GCC_END_GROUP = "-Wl,--end-group" ;
+        RPATH_LINKFLAGS = "-Wl,-rpath-link" ;
+    }
+    else
+    {
+        # linker flag -E: export global symbols from the executable
+        MAIN_LINKFLAGS = "-Wl,-E" ;
+        DLL_LINKFLAGS = -shared ;
+        GCC_START_GROUP = "-Wl,--start-group" ;
+        GCC_END_GROUP = "-Wl,--end-group" ;
+        RPATH_LINKFLAGS = "-Wl,-rpath-link" ;
+    }
+
+    if $(WITH_GCC_FLAG_VISIBILITY)
+    {
+        CCFLAGS    += -fvisibility=hidden ;
+        LINKFLAGS  += -fvisibility=hidden ;
+    }
+
+    # only use -fPIC for non-X86 CPUs
+    if $(TARGET_OSPLAT:U) != X86
+    {
+        CCFLAGS += -fPIC ;
+    }
+
+    if $(WITH_DEBUG)
+    {
+        CCFLAGS += -DDEBUG -g ;
+    }
+    else
+    {
+        CCFLAGS += -DNDEBUG ;
+    }
+
+    if $(WITH_OPTIM)
+    {
+        OPTIM ?= -O2 ;
+    }
+    else 
+    {
+        OPTIM ?= -O0 ;
+    }
+
+    WARN ?= -Wall ;
+
+    Configure CCFLAGS ;
+    Configure WARN ;
+    Configure OPTIM ;
+    Configure LINKFLAGS ;
+    Configure DLL_LINKFLAGS ;
+    Configure MAIN_LINKFLAGS ;
+    Configure RPATH_LINKFLAGS ;
+    Configure GCC_START_GROUP ;
+    Configure GCC_END_GROUP ;
+}
+
+
+rule CheckC++
+{
+    ConfigureCc ;
+
+    TOOLSET_ROOT ?= "" ;
+
+    C++ ?= $(TOOLSET_ROOT)clang++ ;
+    Configure C++ ;
+
+    LINK++ = $(C++) ;
+    Configure LINK++ ;
+
+    #if $(WITH_GCC_FLAG_VISIBILITY)
+    #{
+    #    C++FLAGS += -fvisibility-inlines-hidden ;
+    #    LINKFLAGS += -fvisibility-inlines-hidden ;
+    #}
+
+    # only use -fPIC for non-X86 CPUs
+    if $(TARGET_OSPLAT:U) != X86
+    {
+        C++FLAGS += -fPIC ;
+    }
+
+    if $(WITH_DEBUG)
+    {
+        C++FLAGS += -DDEBUG -g ;
+    }
+    else
+    {
+        C++FLAGS += -DNDEBUG ;
+    }
+
+    Configure C++FLAGS ;
+}
+
+##############################################################################
+# Build rules
+##############################################################################
+
+rule FDefines
+{ return -D$(<) ; }
+
+
+rule FIncludes
+{ return -I$(<) ; }
+
+
+rule Main-LinkSharedLibraries
+{
+    local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+    local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
+
+    if $(3)
+    {
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
+        SHLIBS on $(_target) += $(_libs) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
+}
+
+
+rule SharedLibrary-Build
+{
+    SharedLibraryFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
+    Objects $(>) ;
+
+    # Add library name decorations <lib><name><.so>
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+
+    LINKFLAGS on $(_target) += $(LINKFLAGS) $(DLL_LINKFLAGS) ;
+
+    if $(INSTALL_PATH) # macosx feature
+    {
+        LINKFLAGS on $(_target) += -install_name $(_target:D=$(INSTALL_PATH)) ;
+    }
+
+    switch $(>:S)
+    {
+        case .C :   LINK on $(_target) = $(C++) ;
+        case .cc :  LINK on $(_target) = $(C++) ;
+        case .cpp : LINK on $(_target) = $(C++) ;
+        case * :    LINK on $(_target) = $(CC) ;
+    }
+}
+
+
+rule SharedLibrary-LinkSharedLibraries
+{
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+    local _deps = $(PRELIB)$(>)$(SUFDLL) ;
+
+    if $(3)
+    {
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(_deps) ;
+        SHLIBS on $(_target) += $(PRELIB)$(>:S=$(SUFDLL)) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+
+        # Add all shared libraries required by this shared library in a
+        # variable called RPATHLIBS so that their paths can be added as
+        # rpath-link option to the linker command later
+        if $(RPATH_LINKFLAGS)
+        {
+            for local _d in $(_deps)
+            {
+                local _found = false ;
+    
+                for _r in $(RPATHLIBS)
+                {
+                    if $(_r) = $(_d)
+                    {
+                        _found = true ;
+                    }
+                }
+    
+                # only add if not added previously
+                if $(_found) = false
+                {
+                    RPATHLIBS += $(_d)  ;
+                }
+            }
+        }
+    }
+}
+
+##############################################################################
+# Build actions
+##############################################################################
+
+actions Link bind NEEDLIBS SHLIBS RPATHLIBS
+{
+  $(LINK) $(LINKFLAGS) $(RPATH_LINKFLAGS)$(SPACE)$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) $(GCC_START_GROUP) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(GCC_END_GROUP) 
+}
+

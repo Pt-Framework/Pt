@@ -1,0 +1,140 @@
+
+rule ConfigureDl
+{
+    WITH_DL = [ CheckBuildC++ "#include <dlfcn.h>"
+                              "int main() { dlopen(0,0); return 0; }"
+                            : ""
+                            : -lc ] ;
+
+    if ! $(WITH_DL)
+    {
+        WITH_DL = [ CheckBuildC++ "#include <dlfcn.h>"
+                                  "int main() { dlopen(0,0); return 0; }"
+                                : ""
+                                : -ldl ] ;
+
+        if $(WITH_DL)
+        {
+            DL_LIBS += -ldl ;
+        }
+    }
+
+    EchoOption WITH_DL : "Dl library" ;
+    Configure WITH_DL ;
+
+    if $(WITH_DL)
+    {
+        EchoOption DL_LIBS : "Dl lib flags" ;
+        Configure DL_LIBS ;
+    }
+}
+
+rule ConfigurePThread
+{
+    WITH_PTHREADS = [ CheckBuildC++ "#include <pthread.h>"
+                                    "int main() { pthread_t id; void* p; pthread_join(id, &p); return 0; }"
+                                  : ""
+                                  : -lc ] ;
+
+    if ! $(WITH_PTHREADS)
+    {
+        WITH_PTHREADS = [ CheckBuildC++ "#include <pthread.h>"
+                                        "int main() { pthread_t id; void* p; pthread_join(id, &p); return 0; }"
+                                      : ""
+                                      : -lpthread ] ;
+
+        if $(WITH_PTHREADS)
+        {
+            PTHREAD_LIBS += -lpthread ;
+        }
+    }
+
+    EchoOption WITH_PTHREADS : "Pthreads library" ;
+    Configure WITH_PTHREADS ;
+
+    if $(WITH_PTHREADS)
+    {
+        EchoOption PTHREAD_LIBS : "Pthread lib flags"  ;
+        Configure PTHREAD_LIBS ;
+    }
+}
+
+rule ConfigureUnixSockets
+{
+    # QNX can link programs without -lsocket, but needs it for libraries
+
+    WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
+                                        "#include <sys/socket.h>"
+                                        "int main() { return socket(0,0,0); }"
+                                      : ""
+                                      : "-lsocket" ] ;
+                                      
+    if $(WITH_UNIX_SOCKETS)
+    {
+        UNIX_SOCKET_LIBS += -lsocket ;
+    }
+
+    if ! $(WITH_UNIX_SOCKETS)
+    {
+        WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
+                                            "#include <sys/socket.h>"
+                                            "int main() { return socket(0,0,0); }"
+                                          : ""
+                                          : -lc ] ;
+    }
+
+    EchoOption WITH_UNIX_SOCKETS : "Unix sockets..." ;
+    Configure WITH_UNIX_SOCKETS ;
+
+    if $(WITH_UNIX_SOCKETS)
+    {
+        EchoOption UNIX_SOCKET_LIBS : "Unix socket lib flags" ;
+        Configure UNIX_SOCKET_LIBS ;
+    }
+}
+
+rule ConfigureNsl
+{
+    WITH_NSL = [ CheckBuildC++ "#include <netdb.h>"
+                               "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
+                              : ""
+                              : "-lc" ] ;
+
+    if ! $(WITH_NSL)
+    {
+        # check for nsl library
+        WITH_NSL = [ CheckBuildC++ "#include <netdb.h>"
+                                   "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
+                                   : ""
+                                   : -lnsl ] ;
+
+        if $(WITH_NSL)
+        {
+            NSL_LIBS += -lnsl ;
+        }
+    }
+    
+    if ! $(WITH_NSL)
+    {
+        # check for nsl library
+        WITH_NSL = [ CheckBuildC++ "#include <netdb.h>"
+                                   "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
+                                   : ""
+                                   : -lsocket ] ;
+
+        if $(WITH_NSL)
+        {
+            NSL_LIBS += -lsocket ;
+        }
+    }
+
+    EchoOption WITH_NSL : "Nsl library" ;
+    Configure WITH_NSL ;
+
+    if $(WITH_NSL)
+    {
+        EchoOption NSL_LIBS : "Nsl lib flags" ;
+        Configure NSL_LIBS ;
+    }
+}
+

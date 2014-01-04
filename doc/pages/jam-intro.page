@@ -1,0 +1,56 @@
+/** \page jam-intro Introduction to Jam
+
+Jam is a software build tool that makes building simple things simple and 
+building complicated things manageable. It has been developed by 
+<a href="mailto:seiwald@perforce.com">Christopher Seiwald</a> at
+<a href="http://www.perforce.com">Perforce</a> and then improved by various
+people over time. It is freely available as C source and is widely used to
+build commercial and academic software. Jam is a very good solution for 
+conventional C/C++ compile-and-link builds.
+
+Jam is somewhat comparable to Make, but it is a lot simpler to use than Make,
+it is far more powerful and easy to master. It already works on a large 
+variety of platforms (Unix, Windows, Linux, MacOS, BeOS, etc.), it is trivial
+to port, and its design is sufficiently clear to allow any average programmer
+to extend it with advanced features at will. It also is a self-contained tool
+and does not require installation of any scripting languages or libraries. 
+In fact, a Jam based build process can be bootstrapped only with a C compiler
+in the path.
+
+Most importantly, Jam understands C/C++ dependencies, there is no need to
+declare header or object files. The built-in Jam rules handle header file 
+dependencies and object files both automatically and on-the-fly. Before any
+targets are updated, Jam gathers complete dependency information for C/C++ 
+source files.
+
+<b>All this allows Jam to:</b>
+
+- build projects with complex directory hierarchies is still simple 
+
+- build large projects spread across many directories in a single pass
+
+- know the full dependency graph and can do parallel builds safely with the ‘-j’ flag
+
+- Use the same build scripts work for all platforms, compilers and toolsets
+
+- Scan source files for \#include statements and computes header dependencies automatically, and do so fast
+
+- A configuration step can test and detect platform capabilities
+
+- Build as much as possible, instead of halting on the first build error
+
+- Avoid building targets if targets on which they depend fail to build
+
+- Lets you define your own build rules, actions, and functions very easily, unlike the ALGOL-like syntax of Makefiles
+
+- Unintrusive, clean and no hard dependencies besides the C compiler
+
+- Highly portable, Jam runs on UNIX, Windows, Linux, Mac OS X, etc...
+
+- Jam is fully customizable, and easy to extend
+
+- Jam has a tiny footprint, and is a lot faster than Make at building large projects (independent of target build times, of course)
+
+- Jam is free and can be incorporated into commercial products without licensing restrictions
+
+*/

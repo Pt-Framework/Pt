@@ -1,0 +1,30 @@
+SubDir PT_TOP src Pt-Xml ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirC++Flags [ FDefines PT_XML_API_EXPORT ] ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Xml ;
+
+PT_XML_SOURCES = AttributeModel.cpp
+                 AttributeListModel.cpp
+                 ContentModel.cpp
+                 ContentParticle.cpp
+                 DocType.cpp
+                 DocTypeDefinition.cpp
+                 DocTypeValidator.cpp
+                 ElementModel.cpp
+                 Entity.cpp
+                 InputSource.cpp
+                 NamespaceContext.cpp
+                 StartElement.cpp
+                 XmlError.cpp
+                 XmlFormatter.cpp
+                 XmlReader.cpp
+                 XmlSerializationContext.cpp
+                 XmlWriter.cpp
+                 ;
+
+SharedLibrary Pt-Xml : $(PT_XML_SOURCES) ;
+LinkSharedLibraries Pt-Xml :  Pt Pt-System ;
+MakeLocate Pt-Xml : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-Xml : $(PT_INSTALL_LIBDIR) ;
+
+SubInclude PT_TOP src Pt-Xml tests ;

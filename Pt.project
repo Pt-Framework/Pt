@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="Pt" InternalType="">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00020001N0010Configured0000000000000001N0005Debug000000000000]]>
+    </Plugin>
+  </Plugins>
+  <Description/>
+  <Dependencies/>
+  <VirtualDirectory Name="Pt-Ssl">
+    <File Name="include/Pt/Ssl/Api.h"/>
+    <File Name="include/Pt/Ssl/Context.h"/>
+    <File Name="include/Pt/Ssl/SslError.h"/>
+    <File Name="include/Pt/Ssl/StreamBuffer.h"/>
+    <File Name="src/Pt-Ssl/Context.cpp"/>
+    <File Name="src/Pt-Ssl/Jamfile"/>
+    <File Name="src/Pt-Ssl/SslError.cpp"/>
+    <File Name="src/Pt-Ssl/StreamBuffer.cpp"/>
+    <VirtualDirectory Name="tests">
+      <File Name="src/Pt-Ssl/tests/ContextTest.cpp"/>
+      <File Name="src/Pt-Ssl/tests/IOBufferTest.cpp"/>
+      <File Name="src/Pt-Ssl/tests/PemData.h"/>
+      <File Name="src/Pt-Ssl/tests/Pt-Ssl-test.cpp"/>
+      <File Name="src/Pt-Ssl/tests/StreamBufferTest.cpp"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="applessl">
+      <File Name="src/Pt-Ssl/applessl/CertificateImpl.h"/>
+      <File Name="src/Pt-Ssl/applessl/Connection.cpp"/>
+      <File Name="src/Pt-Ssl/applessl/Connection.h"/>
+      <File Name="src/Pt-Ssl/applessl/ContextImpl.cpp"/>
+      <File Name="src/Pt-Ssl/applessl/ContextImpl.h"/>
+      <File Name="src/Pt-Ssl/applessl/CertificateStoreImpl.cpp"/>
+      <File Name="src/Pt-Ssl/applessl/CertificateStoreImpl.h"/>
+    </VirtualDirectory>
+    <File Name="include/Pt/Ssl/Certificate.h"/>
+    <File Name="src/Pt-Ssl/Certificate.cpp"/>
+    <VirtualDirectory Name="openssl">
+      <File Name="src/Pt-Ssl/openssl/CertificateImpl.h"/>
+      <File Name="src/Pt-Ssl/openssl/Connection.cpp"/>
+      <File Name="src/Pt-Ssl/openssl/Connection.h"/>
+      <File Name="src/Pt-Ssl/openssl/ContextImpl.cpp"/>
+      <File Name="src/Pt-Ssl/openssl/ContextImpl.h"/>
+      <File Name="src/Pt-Ssl/openssl/OpenSsl.h"/>
+      <File Name="src/Pt-Ssl/openssl/CertificateStoreImpl.cpp"/>
+      <File Name="src/Pt-Ssl/openssl/CertificateStoreImpl.h"/>
+    </VirtualDirectory>
+    <File Name="include/Pt/Ssl/CertificateStore.h"/>
+    <File Name="include/Pt/Ssl/IOStream.h"/>
+    <File Name="src/Pt-Ssl/CertificateStore.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Pt">
+    <File Name="include/Pt/Allocator.h"/>
+    <File Name="include/Pt/Any.h"/>
+    <File Name="include/Pt/Api.h"/>
+    <File Name="include/Pt/Arg.h"/>
+    <File Name="include/Pt/Atomicity.h"/>
+    <File Name="include/Pt/Base64Codec.h"/>
+    <File Name="include/Pt/Byteorder.h"/>
+    <File Name="include/Pt/Callable.h"/>
+    <File Name="include/Pt/Callable.tpp"/>
+    <File Name="include/Pt/Composer.h"/>
+    <File Name="include/Pt/Connectable.h"/>
+    <File Name="include/Pt/Connection.h"/>
+    <File Name="include/Pt/ConstMethod.h"/>
+    <File Name="include/Pt/ConstMethod.tpp"/>
+    <File Name="include/Pt/ConversionError.h"/>
+    <File Name="include/Pt/Convert.h"/>
+    <File Name="include/Pt/Date.h"/>
+    <File Name="include/Pt/DateTime.h"/>
+    <File Name="include/Pt/Decomposer.h"/>
+    <File Name="include/Pt/Delegate.h"/>
+    <File Name="include/Pt/Delegate.tpp"/>
+    <File Name="include/Pt/Deserializer.h"/>
+    <File Name="include/Pt/Event.h"/>
+    <File Name="include/Pt/Facets.h"/>
+    <File Name="include/Pt/FixupInfo.h"/>
+    <File Name="include/Pt/Formatter.h"/>
+    <File Name="include/Pt/Function.h"/>
+    <File Name="include/Pt/Function.tpp"/>
+    <File Name="include/Pt/Invokable.h"/>
+    <File Name="include/Pt/Invokable.tpp"/>
+    <File Name="include/Pt/IOStream.h"/>
+    <File Name="include/Pt/LiteralPtr.h"/>
+    <File Name="include/Pt/Locale.h"/>
+    <File Name="include/Pt/Main.h"/>
+    <File Name="include/Pt/Math.h"/>
+    <File Name="include/Pt/Method.h"/>
+    <File Name="include/Pt/Method.tpp"/>
+    <File Name="include/Pt/NonCopyable.h"/>
+    <File Name="include/Pt/Pack1.h"/>
+    <File Name="include/Pt/PackPop.h"/>
+    <File Name="include/Pt/PageAllocator.h"/>
+    <File Name="include/Pt/PoolAllocator.h"/>
+    <File Name="include/Pt/RefCounted.h"/>
+    <File Name="include/Pt/Regex.h"/>
+    <File Name="include/Pt/SerializationContext.h"/>
+    <File Name="include/Pt/SerializationError.h"/>
+    <File Name="include/Pt/SerializationInfo.h"/>
+    <File Name="include/Pt/SerializationSurrogate.h"/>
+    <File Name="include/Pt/Serializer.h"/>
+    <File Name="include/Pt/Settings.h"/>
+    <File Name="include/Pt/Signal.h"/>
+    <File Name="include/Pt/Signal.tpp"/>
+    <File Name="include/Pt/Singleton.h"/>
+    <File Name="include/Pt/Slot.h"/>
+    <File Name="include/Pt/Slot.tpp"/>
+    <File Name="include/Pt/SmartPtr.h"/>
+    <File Name="include/Pt/SourceInfo.h"/>
+    <File Name="include/Pt/StreamBuffer.h"/>
+    <File Name="include/Pt/String.h"/>
+    <File Name="include/Pt/String.tpp"/>
+    <File Name="include/Pt/StringStream.h"/>
+    <File Name="include/Pt/TextBuffer.h"/>
+    <File Name="include/Pt/TextCodec.h"/>
+    <File Name="include/Pt/TextStream.h"/>
+    <File Name="include/Pt/Time.h"/>
+    <File Name="include/Pt/Timespan.h"/>
+    <File Name="include/Pt/TypeInfo.h"/>
+    <File Name="include/Pt/Types.h"/>
+    <File Name="include/Pt/TypeTraits.h"/>
+    <File Name="include/Pt/Utf8Codec.h"/>
+    <File Name="include/Pt/Utf16Codec.h"/>
+    <File Name="include/Pt/Utf32Codec.h"/>
+    <File Name="include/Pt/Void.h"/>
+    <File Name="include/Pt/WinVer.h"/>
+    <File Name="src/Pt/Atomicity.cpp"/>
+    <File Name="src/Pt/Atomicity.cw.x86.cpp"/>
+    <File Name="src/Pt/Atomicity.gcc.arm.cpp"/>
+    <File Name="src/Pt/Atomicity.gcc.avr32.cpp"/>
+    <File Name="src/Pt/Atomicity.gcc.mips.cpp"/>
+    <File Name="src/Pt/Atomicity.gcc.ppc.cpp"/>
+    <File Name="src/Pt/Atomicity.gcc.sparc.cpp"/>
+    <File Name="src/Pt/Atomicity.gcc.x86_64.cpp"/>
+    <File Name="src/Pt/Atomicity.gcc.x86.cpp"/>
+    <File Name="src/Pt/Atomicity.generic.cpp"/>
+    <File Name="src/Pt/Atomicity.pthread.cpp"/>
+    <File Name="src/Pt/Atomicity.sun.cpp"/>
+    <File Name="src/Pt/Atomicity.windows.cpp"/>
+    <File Name="src/Pt/Connectable.cpp"/>
+    <File Name="src/Pt/Connection.cpp"/>
+    <File Name="src/Pt/ConversionError.cpp"/>
+    <File Name="src/Pt/Convert.cpp"/>
+    <File Name="src/Pt/Date.cpp"/>
+    <File Name="src/Pt/DateTime.cpp"/>
+    <File Name="src/Pt/Deserializer.cpp"/>
+    <File Name="src/Pt/Facets.cpp"/>
+    <File Name="src/Pt/itest.mm" Flags="1"/>
+    <File Name="src/Pt/Jamfile"/>
+    <File Name="src/Pt/PageAllocator.cpp"/>
+    <File Name="src/Pt/PoolAllocator.cpp"/>
+    <File Name="src/Pt/Regex.cpp"/>
+    <File Name="src/Pt/regexp.cpp"/>
+    <File Name="src/Pt/regexp.h"/>
+    <File Name="src/Pt/SerializationContext.cpp"/>
+    <File Name="src/Pt/SerializationError.cpp"/>
+    <File Name="src/Pt/SerializationInfo.cpp"/>
+    <File Name="src/Pt/Serializer.cpp"/>
+    <File Name="src/Pt/Settings.cpp"/>
+    <File Name="src/Pt/SettingsReader.cpp"/>
+    <File Name="src/Pt/SettingsReader.h"/>
+    <File Name="src/Pt/SettingsWriter.cpp"/>
+    <File Name="src/Pt/SettingsWriter.h"/>
+    <File Name="src/Pt/Signal.cpp"/>
+    <File Name="src/Pt/String.cpp"/>
+    <File Name="src/Pt/StringStream.cpp"/>
+    <File Name="src/Pt/TextBuffer.cpp"/>
+    <File Name="src/Pt/TextStream.cpp"/>
+    <File Name="src/Pt/Time.cpp"/>
+    <File Name="src/Pt/Unicode.h"/>
+    <File Name="src/Pt/UnicodeTable.cpp"/>
+    <File Name="src/Pt/Utf8Codec.cpp"/>
+    <File Name="src/Pt/Utf16Codec.cpp"/>
+    <File Name="src/Pt/Utf32Codec.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Pt-Net">
+    <File Name="include/Pt/Net/AddressInUse.h"/>
+    <File Name="include/Pt/Net/Api.h"/>
+    <File Name="include/Pt/Net/Endpoint.h"/>
+    <File Name="include/Pt/Net/TcpServer.h"/>
+    <File Name="include/Pt/Net/TcpSocket.h"/>
+    <File Name="include/Pt/Net/UdpSocket.h"/>
+    <File Name="src/Pt-Net/AddressInUse.cpp"/>
+    <File Name="src/Pt-Net/Endpoint.cpp"/>
+    <File Name="src/Pt-Net/Jamfile"/>
+    <File Name="src/Pt-Net/TcpServer.cpp"/>
+    <File Name="src/Pt-Net/TcpSocket.cpp"/>
+    <File Name="src/Pt-Net/UdpSocket.cpp"/>
+  </VirtualDirectory>
+  <Settings Type="Dynamic Library">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Configured" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g" C_Options="-g" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" UseDifferentPCHFlags="no" PCHFlags="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="" IntermediateDirectory="./Debug" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="yes">
+        <RebuildCommand/>
+        <CleanCommand>./jam.sh -q clean</CleanCommand>
+        <BuildCommand>./jam.sh -q -j2</BuildCommand>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory>$(WorkspacePath)</WorkingDirectory>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+  <VirtualDirectory Name="Pt-System">
+    <File Name="include/Pt/System/Api.h"/>
+    <File Name="include/Pt/System/Application.h"/>
+    <File Name="include/Pt/System/Clock.h"/>
+    <File Name="include/Pt/System/Condition.h"/>
+    <File Name="include/Pt/System/Directory.h"/>
+    <File Name="include/Pt/System/EventLoop.h"/>
+    <File Name="include/Pt/System/EventSink.h"/>
+    <File Name="include/Pt/System/EventSource.h"/>
+    <File Name="include/Pt/System/File.h"/>
+    <File Name="include/Pt/System/FileDevice.h"/>
+    <File Name="include/Pt/System/FileInfo.h"/>
+    <File Name="include/Pt/System/IOBuffer.h"/>
+    <File Name="include/Pt/System/IODevice.h"/>
+    <File Name="include/Pt/System/IOError.h"/>
+    <File Name="include/Pt/System/IOStream.h"/>
+    <File Name="include/Pt/System/Library.h"/>
+    <File Name="include/Pt/System/LogChannel.h"/>
+    <File Name="include/Pt/System/Logger.h"/>
+    <File Name="include/Pt/System/LogLevel.h"/>
+    <File Name="include/Pt/System/LogRecord.h"/>
+    <File Name="include/Pt/System/LogTarget.h"/>
+    <File Name="include/Pt/System/MainLoop.h"/>
+    <File Name="include/Pt/System/Mutex.h"/>
+    <File Name="include/Pt/System/Pipe.h"/>
+    <File Name="include/Pt/System/Plugin.h"/>
+    <File Name="include/Pt/System/Process.h"/>
+    <File Name="include/Pt/System/Queue.h"/>
+    <File Name="include/Pt/System/Selectable.h"/>
+    <File Name="include/Pt/System/Semaphore.h"/>
+    <File Name="include/Pt/System/SerialDevice.h"/>
+    <File Name="include/Pt/System/SystemError.h"/>
+    <File Name="include/Pt/System/Thread.h"/>
+    <File Name="include/Pt/System/Timer.h"/>
+    <File Name="include/Pt/System/Uri.h"/>
+    <File Name="src/Pt-System/Application.cpp"/>
+    <File Name="src/Pt-System/Clock.cpp"/>
+    <File Name="src/Pt-System/Condition.cpp"/>
+    <File Name="src/Pt-System/ConsoleChannel.cpp"/>
+    <File Name="src/Pt-System/ConsoleChannel.h"/>
+    <File Name="src/Pt-System/Directory.cpp"/>
+    <File Name="src/Pt-System/EventLoop.cpp"/>
+    <File Name="src/Pt-System/EventSink.cpp"/>
+    <File Name="src/Pt-System/EventSource.cpp"/>
+    <File Name="src/Pt-System/File.cpp"/>
+    <File Name="src/Pt-System/FileChannel.cpp"/>
+    <File Name="src/Pt-System/FileChannel.h"/>
+    <File Name="src/Pt-System/FileDevice.cpp"/>
+    <File Name="src/Pt-System/FileInfo.cpp"/>
+    <File Name="src/Pt-System/IOBuffer.cpp"/>
+    <File Name="src/Pt-System/IODevice.cpp"/>
+    <File Name="src/Pt-System/IOError.cpp"/>
+    <File Name="src/Pt-System/Jamfile"/>
+    <File Name="src/Pt-System/Library.cpp"/>
+    <File Name="src/Pt-System/Logger.cpp"/>
+    <File Name="src/Pt-System/LogManager.cpp"/>
+    <File Name="src/Pt-System/LogManager.h"/>
+    <File Name="src/Pt-System/LogTarget.cpp"/>
+    <File Name="src/Pt-System/MainLoop.cpp"/>
+    <File Name="src/Pt-System/Mutex.cpp"/>
+    <File Name="src/Pt-System/Pipe.cpp"/>
+    <File Name="src/Pt-System/Plugin.cpp"/>
+    <File Name="src/Pt-System/Process.cpp"/>
+    <File Name="src/Pt-System/Selectable.cpp"/>
+    <File Name="src/Pt-System/SelectableList.h"/>
+    <File Name="src/Pt-System/Semaphore.cpp"/>
+    <File Name="src/Pt-System/SerialChannel.cpp"/>
+    <File Name="src/Pt-System/SerialChannel.h"/>
+    <File Name="src/Pt-System/SerialDevice.cpp"/>
+    <File Name="src/Pt-System/SystemError.cpp"/>
+    <File Name="src/Pt-System/Thread.cpp"/>
+    <File Name="src/Pt-System/Timer.cpp"/>
+    <File Name="src/Pt-System/Uri.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Pt-Http">
+    <File Name="include/Pt/Http/Api.h"/>
+    <File Name="include/Pt/Http/Authenticator.h"/>
+    <File Name="include/Pt/Http/Authorizer.h"/>
+    <File Name="include/Pt/Http/Client.h"/>
+    <File Name="include/Pt/Http/Credentials.h"/>
+    <File Name="include/Pt/Http/HttpError.h"/>
+    <File Name="include/Pt/Http/Message.h"/>
+    <File Name="include/Pt/Http/Reply.h"/>
+    <File Name="include/Pt/Http/Request.h"/>
+    <File Name="include/Pt/Http/Responder.h"/>
+    <File Name="include/Pt/Http/Server.h"/>
+    <File Name="include/Pt/Http/Service.h"/>
+    <File Name="include/Pt/Http/Servlet.h"/>
+    <File Name="src/Pt-Http/Authenticator.cpp"/>
+    <File Name="src/Pt-Http/Authorizer.cpp"/>
+    <File Name="src/Pt-Http/Client.cpp"/>
+    <File Name="src/Pt-Http/ClientImpl.cpp"/>
+    <File Name="src/Pt-Http/ClientImpl.h"/>
+    <File Name="src/Pt-Http/Connection.cpp"/>
+    <File Name="src/Pt-Http/Connection.h"/>
+    <File Name="src/Pt-Http/HttpBuffer.cpp"/>
+    <File Name="src/Pt-Http/HttpBuffer.h"/>
+    <File Name="src/Pt-Http/HttpError.cpp"/>
+    <File Name="src/Pt-Http/Jamfile"/>
+    <File Name="src/Pt-Http/Message.cpp"/>
+    <File Name="src/Pt-Http/Parser.cpp"/>
+    <File Name="src/Pt-Http/Parser.h"/>
+    <File Name="src/Pt-Http/Reply.cpp"/>
+    <File Name="src/Pt-Http/Request.cpp"/>
+    <File Name="src/Pt-Http/Responder.cpp"/>
+    <File Name="src/Pt-Http/Server.cpp"/>
+    <File Name="src/Pt-Http/ServerImpl.cpp"/>
+    <File Name="src/Pt-Http/ServerImpl.h"/>
+    <File Name="src/Pt-Http/Service.cpp"/>
+    <File Name="src/Pt-Http/Servlet.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Pt-Xml">
+    <File Name="src/Pt-Xml/AttributeListModel.cpp"/>
+    <File Name="src/Pt-Xml/AttributeListModel.h"/>
+    <File Name="src/Pt-Xml/AttributeModel.cpp"/>
+    <File Name="src/Pt-Xml/AttributeModel.h"/>
+    <File Name="src/Pt-Xml/ContentModel.cpp"/>
+    <File Name="src/Pt-Xml/ContentModel.h"/>
+    <File Name="src/Pt-Xml/ContentParticle.cpp"/>
+    <File Name="src/Pt-Xml/ContentParticle.h"/>
+    <File Name="src/Pt-Xml/DocType.cpp"/>
+    <File Name="src/Pt-Xml/DocTypeDefinition.cpp"/>
+    <File Name="src/Pt-Xml/DocTypeValidator.cpp"/>
+    <File Name="src/Pt-Xml/ElementModel.cpp"/>
+    <File Name="src/Pt-Xml/ElementModel.h"/>
+    <File Name="src/Pt-Xml/Entity.cpp"/>
+    <File Name="src/Pt-Xml/InputSource.cpp"/>
+    <File Name="src/Pt-Xml/InputStack.h"/>
+    <File Name="src/Pt-Xml/Jamfile"/>
+    <File Name="src/Pt-Xml/NamespaceContext.cpp"/>
+    <File Name="src/Pt-Xml/NamespaceContext.h"/>
+    <File Name="src/Pt-Xml/QNameStack.h"/>
+    <File Name="src/Pt-Xml/StartElement.cpp"/>
+    <File Name="src/Pt-Xml/XmlError.cpp"/>
+    <File Name="src/Pt-Xml/XmlFormatter.cpp"/>
+    <File Name="src/Pt-Xml/XmlReader.cpp"/>
+    <File Name="src/Pt-Xml/XmlSerializationContext.cpp"/>
+    <File Name="src/Pt-Xml/XmlWriter.cpp"/>
+    <File Name="include/Pt/Xml/Api.h"/>
+    <File Name="include/Pt/Xml/ByteorderMark.h"/>
+    <File Name="include/Pt/Xml/Characters.h"/>
+    <File Name="include/Pt/Xml/Comment.h"/>
+    <File Name="include/Pt/Xml/DocType.h"/>
+    <File Name="include/Pt/Xml/DocTypeDefinition.h"/>
+    <File Name="include/Pt/Xml/DocTypeValidator.h"/>
+    <File Name="include/Pt/Xml/EndDocument.h"/>
+    <File Name="include/Pt/Xml/EndElement.h"/>
+    <File Name="include/Pt/Xml/Entity.h"/>
+    <File Name="include/Pt/Xml/InputSource.h"/>
+    <File Name="include/Pt/Xml/Namespace.h"/>
+    <File Name="include/Pt/Xml/Node.h"/>
+    <File Name="include/Pt/Xml/Notation.h"/>
+    <File Name="include/Pt/Xml/ProcessingInstruction.h"/>
+    <File Name="include/Pt/Xml/QName.h"/>
+    <File Name="include/Pt/Xml/StartDocument.h"/>
+    <File Name="include/Pt/Xml/StartElement.h"/>
+    <File Name="include/Pt/Xml/XmlDeclaration.h"/>
+    <File Name="include/Pt/Xml/XmlDeserializer.h"/>
+    <File Name="include/Pt/Xml/XmlError.h"/>
+    <File Name="include/Pt/Xml/XmlFormatter.h"/>
+    <File Name="include/Pt/Xml/XmlReader.h"/>
+    <File Name="include/Pt/Xml/XmlResolver.h"/>
+    <File Name="include/Pt/Xml/XmlSerializationContext.h"/>
+    <File Name="include/Pt/Xml/XmlSerializer.h"/>
+    <File Name="include/Pt/Xml/XmlWriter.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Pt-XmlRpc">
+    <File Name="include/Pt/XmlRpc/ActiveProcedure.h"/>
+    <File Name="include/Pt/XmlRpc/Api.h"/>
+    <File Name="include/Pt/XmlRpc/BasicProcedure.h"/>
+    <File Name="include/Pt/XmlRpc/Client.h"/>
+    <File Name="include/Pt/XmlRpc/Fault.h"/>
+    <File Name="include/Pt/XmlRpc/Formatter.h"/>
+    <File Name="include/Pt/XmlRpc/HttpClient.h"/>
+    <File Name="include/Pt/XmlRpc/HttpService.h"/>
+    <File Name="include/Pt/XmlRpc/RemoteProcedure.h"/>
+    <File Name="include/Pt/XmlRpc/RemoteProcedure.tpp"/>
+    <File Name="include/Pt/XmlRpc/Responder.h"/>
+    <File Name="include/Pt/XmlRpc/ServiceDefinition.h"/>
+    <File Name="include/Pt/XmlRpc/ServiceProcedure.h"/>
+    <File Name="src/Pt-XmlRpc/Client.cpp"/>
+    <File Name="src/Pt-XmlRpc/Fault.cpp"/>
+    <File Name="src/Pt-XmlRpc/Formatter.cpp"/>
+    <File Name="src/Pt-XmlRpc/HttpClient.cpp"/>
+    <File Name="src/Pt-XmlRpc/HttpResponder.cpp"/>
+    <File Name="src/Pt-XmlRpc/HttpResponder.h"/>
+    <File Name="src/Pt-XmlRpc/HttpService.cpp"/>
+    <File Name="src/Pt-XmlRpc/Jamfile"/>
+    <File Name="src/Pt-XmlRpc/RemoteProcedure.cpp"/>
+    <File Name="src/Pt-XmlRpc/Responder.cpp"/>
+    <File Name="src/Pt-XmlRpc/ServiceDefinition.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Pt-Unit">
+    <File Name="src/Pt-Unit/Application.cpp"/>
+    <File Name="src/Pt-Unit/Assertion.cpp"/>
+    <File Name="src/Pt-Unit/Jamfile"/>
+    <File Name="src/Pt-Unit/RegisterTest.cpp"/>
+    <File Name="src/Pt-Unit/Reporter.cpp"/>
+    <File Name="src/Pt-Unit/Test.cpp"/>
+    <File Name="src/Pt-Unit/TestCase.cpp"/>
+    <File Name="src/Pt-Unit/TestContext.cpp"/>
+    <File Name="src/Pt-Unit/TestProtocol.cpp"/>
+    <File Name="src/Pt-Unit/TestSuite.cpp"/>
+    <File Name="src/Pt-Unit/TextProtocol.cpp"/>
+    <File Name="src/Pt-Unit/TextProtocolTest.cpp"/>
+    <File Name="include/Pt/Unit/Api.h"/>
+    <File Name="include/Pt/Unit/Application.h"/>
+    <File Name="include/Pt/Unit/Assertion.h"/>
+    <File Name="include/Pt/Unit/RegisterTest.h"/>
+    <File Name="include/Pt/Unit/Reporter.h"/>
+    <File Name="include/Pt/Unit/Test.h"/>
+    <File Name="include/Pt/Unit/TestCase.h"/>
+    <File Name="include/Pt/Unit/TestContext.h"/>
+    <File Name="include/Pt/Unit/TestFixture.h"/>
+    <File Name="include/Pt/Unit/TestMain.h"/>
+    <File Name="include/Pt/Unit/TestMethod.h"/>
+    <File Name="include/Pt/Unit/TestProtocol.h"/>
+    <File Name="include/Pt/Unit/TestSuite.h"/>
+    <File Name="include/Pt/Unit/TextProtocol.h"/>
+  </VirtualDirectory>
+</CodeLite_Project>

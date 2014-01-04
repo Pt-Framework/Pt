@@ -1,0 +1,87 @@
+Load gcc.jam ;
+
+##############################################################################
+# Compiler flags and tools
+##############################################################################
+GCCVERSION ?= 3.3.5 ;
+BYTEORDER ?= LE ;
+
+# Redefine toolset for cross compilation
+if $(OS:L) = nt 
+{
+    AR = nto$(TARGET_OSPLAT)-ar.exe ru ;
+    RANLIB = nto$(TARGET_OSPLAT)-ranlib.exe ;
+}
+
+C++ = QCC ;
+CC = qcc ;
+LINK = $(C++) ;
+LINK++ = $(C++) ;
+
+CCFLAGS += -D_FILE_OFFSET_BITS=64 -D__QNX__ ;
+
+if $(GCCVERSION) = 3.3.5
+{
+	CCFLAGS += -fPIC ;
+}
+
+C++FLAGS += $(CCFLAGS) -lang-c++ -fexceptions ;
+LINKFLAGS = -lang-c++ ; #-Wl,-Bsymbolic ;
+
+# need to explicitly link to math library
+LINKLIBS = -lm ;
+
+# ARM, PPC and MIPS exist for BE as well as for LE, the compiler wants the
+# byteorder to be specified. SH4 and X86 both are little endian CPUs, but
+# only for x86 qcc doesn't want the endianess to be specified
+if $(TARGET_OSPLAT:L) = x86
+{
+    if $(GCCVERSION) = 2.95.3
+    {
+        CCFLAGS += -Vgcc_nto$(TARGET_OSPLAT:L) ;
+        C++FLAGS += -Vgcc_nto$(TARGET_OSPLAT:L) ;
+        LINKFLAGS += -Vgcc_nto$(TARGET_OSPLAT:L) ;
+    }
+    else
+    {
+        CCFLAGS += -V$(GCCVERSION),gcc_nto$(TARGET_OSPLAT:L) ;
+        C++FLAGS += -V$(GCCVERSION),gcc_nto$(TARGET_OSPLAT:L) ;
+        LINKFLAGS += -V$(GCCVERSION),gcc_nto$(TARGET_OSPLAT:L) ;
+    }
+}
+else
+{
+    if $(GCCVERSION) = 2.95.3
+    {
+        CCFLAGS += -Vgcc_nto$(TARGET_OSPLAT:L)$(BYTEORDER:L) ;
+        C++FLAGS += -Vgcc_nto$(TARGET_OSPLAT:L)$(BYTEORDER:L) ;
+        LINKFLAGS += -Vgcc_nto$(TARGET_OSPLAT:L)$(BYTEORDER:L) ;
+    }
+    else
+    {
+        CCFLAGS += -V$(GCCVERSION),gcc_nto$(TARGET_OSPLAT:L)$(BYTEORDER:L) ;
+        C++FLAGS  += -V$(GCCVERSION),gcc_nto$(TARGET_OSPLAT:L)$(BYTEORDER:L) ;
+        LINKFLAGS += -V$(GCCVERSION),gcc_nto$(TARGET_OSPLAT:L)$(BYTEORDER:L) ;
+    }
+}   
+
+#rule SharedLibraryImpl
+#{
+#    # Add library name decorations <lib><name><.so>
+#    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+#    
+#    # Add grist to file names
+#    local _objects = [ FGristFiles $(>:S=$(SUFOBJ)) ] ;
+#    
+#    
+#    C++FLAGS on $(_objects) = $(C++FLAGS) -shared ;
+#    CCFLAGS on $(_objects) =  $(CCFLAGS) -shared ;
+#    
+#    LINKFLAGS on $(_target) += $(LINKFLAGS) -shared ;
+#
+#}
+
+#actions Link bind NEEDLIBS SHLIBS RPATHLIBS
+#{
+#    $(LINK) $(LINKFLAGS)  -Wl,-rpath-link$(SPACE)$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) -Wl,--start-group -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(NETLIBS) $(GUILIBS) -Wl,--end-group
+#}

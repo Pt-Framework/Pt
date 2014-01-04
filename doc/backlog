@@ -1,0 +1,79 @@
+#
+# The following format is used for TASKs and ITEMS:
+#
+# ITEM P<N> S<N> "Item's description"
+#     TASK "Task's description"
+#     TASK "Task's description"
+#
+# P<N> - <N> is the priority from 1 (lowest) to 10 (highest)
+# S<N> - <N> is the size as Fibonacci number 1 (easiest), 2, 3, 5, 8 or 13 (most difficult)
+#
+# Use P0 and/or S99 if the priority and/or the size has/have not yet decided
+#
+
+ITEM P10 S3 "Any class is copy-on-write"
+
+ITEM P10 S8 "A SubImage class for PlanarImage is exists"
+
+ITEM P10 S5 "Object reflection API is documented"
+    TASK "Write Documentation"
+    TASK "Write test case"
+
+ITEM P5 S8 "The Db module has a dynamic driver API"
+    TASK "Review Pt::Plugin API"
+
+ITEM P10 S5 "Event based Application class is implemented"
+    TASK "Review code"
+    TASK "Write Documentation"
+    TASK "Write test case"
+
+ITEM P8 S13 "The image-related algorithms are improved"
+    TASK "Write blockScaleTo<BasicImage<T>, size_t newWidth, size_t newHeight)"
+    TASK "Write iterator based algorithm assign"
+    TASK "Write iterator based algorithm blockScale"
+    TASK "Write iterator based algorithm brighten/darken (using uniform scalling, division, addition, substraction, etc.)"
+
+ITEM P5 S8 "New color models and algorithms are implemented"
+    TASK "Implement void blend(ColorT& dst, const& src, char alphaMask)"
+    TASK "Implement YUV color model"
+    TASK "Implement HSV color model"
+    TASK "Implement CMY color model"
+    TASK "Implement CMYK color model"
+
+ITEM P4 S13 "The Image class has a block iterator"
+    TASK "Write BlockIterator"
+    TASK "Write BlockIterator based algorithm for scale"
+
+ITEM P1 S8 "Byteorder API has ASM optimisation"
+    TASK "Look at ffmpeg code"
+    TASK "Optimize swab16() using standard ASM and if possible SIMD"
+    TASK "Optimize swab32() using standard ASM and if possible SIMD"
+    TASK "Optimize swab64() using standard ASM and if possible SIMD"
+
+ITEM P1 S5 "A base class for thread-safe refcounting exists"
+    TASK "Make Shared.h use AtomicInt"
+    TASK "Write Documentation"
+    TASK "Write test case"
+
+ITEM P0 S13 "Header files can be installed with jam"
+    TASK "Write InstallHeaders rule"
+    TASK "Write INstallAllHaders rule"
+
+ITEM P0 S13 "The Db module has a sqlite driver"
+
+ITEM P0 S13 "The Db module has a postgres driver"
+
+ITEM P0 S13 "The Db module has a mysql driver"
+
+ITEM P0 S13 "The Db module has a oracle driver"
+
+ITEM P0 S13 "The Db module has a odbc driver"
+
+ITEM P0 S13 "X11 handles key-codes"
+
+ITEM P0 S99 "The image class (version 2) supports padding and different pixel data models"
+    TASK "Review memory layouts of image formats (planar/packed, channel variations, bit depths, paddings)"
+    TASK "Implement proper tagging and class structure to cover those many formats"
+
+ITEM P0 S99 "Support for precompiled headers was added"
+

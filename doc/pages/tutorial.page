@@ -1,0 +1,125 @@
+/** \page tutorial Jam Tutorial
+
+@section JamTutorialJambase Adding Jam Support
+
+This tutorial will show you how to create a project with a self-contained
+jam based build system. Therefore, you do not have to install anything on
+the build host, but include all the necessary files with your project. We
+start with an empty directroy, from now on referred to as the project root,
+in which we place all sources, headers and the files required for building
+with jam. The first thing to do is to add a Jambase and the other required
+support files to your project. You can get them here: 
+https://pt-framework.svn.sourceforge.net/svnroot/pt-framework/trunk
+
+Your project directory should now contain the following files:
+
+@verbatim
+- [jam]
+    - Jambase
+    - ... (jam implementation files)
+- Jambase
+- jam.sh
+- jam.exe
+- jam.bat
+@endverbatim
+
+The file Jambase in the project root references the files in the jam support
+directory and both are also referred to as the Jambase. The jam support 
+directory includes the implementation details of the jam-based build system and
+the jam sources used for bootstrapping the build tool. To provide a completely 
+self-contained build system, we also have to make the jam tool available.
+For Windows hosts, we can place a precompiled jam binary in the project root
+named jam.exe. For Unix hosts we add a simple wrapper shell script named 
+jam.sh. This script bootstraps and runs the jam program on unix systems, 
+so we don't have to include all possible jam binaries with our project, but
+rather build them on demand.
+
+All examples in this tutorial will use the script jam.sh, when commands are
+shown. If you want to take this tutorial on a Windows build host, simply
+run jam.bat instead of jam.sh, with the exact same arguments. Unless noted
+otherwise, the jam tool is run from the project root directory.
+
+@section JamTutorialBuildPrograms Building Programs
+
+Let us use jam now to build a simple hello world program. To do so we need
+to add three project specific files named Jamconfigure, Jamrules and Jamfile.
+After adding these three files (empty for now), your project directory should
+now contain the following files:
+
+@verbatim
+- [jam]
+    - Jambase
+    - ... (jam implementation files)
+- Jambase
+- jam.sh
+- jam.bat
+- jam.exe
+- Jamconfigure
+- Jamrules
+- Jamfile
+@endverbatim
+
+Before a project can be built, it needs to be configured, so the build host 
+properties are determined, the toolset is detected etc. The input for this
+'configure' step is the file named Jamconfigure. Add the following lines
+to that file:
+
+@code
+# configure basic C compiler
+ConfigureCc ;
+
+# configure basic C++ compiler
+ConfigureC++ ;
+@endcode
+
+So far, we only need to configure basic C and C++ support. This allows us to
+build programs, static libraries and shared libraries using standard C and 
+C++. You should be able to run the configure step now sucessfully with this
+command:
+
+@verbatim
+./jam.sh configure
+@endverbatim
+
+The script jam.sh must have the executable bit set. If this is not the case
+you can add it by executing chmod +x jam.sh. Remember, that you need to run
+jam.exe instead of jam.sh on windows systems.
+
+After the build configuration, we can build targets such as our hello world
+program. The build targets are defined in the file called Jamfile in the
+project root, which is picked up by jam during the build step. Add the 
+following lines to your Jamfile:
+
+@code
+SubDir MY_TOP ;
+Main hello : main.cpp ;
+@endcode
+
+This Jamfile uses the Main rule to build program named 'hello' from the source
+file main.cpp. The SubDir rule defines the so-called root variable, which 
+stands for the project root directory. You can think of this for now simply 
+as the path to your project root directory. The SubDir rule also sets the
+directory context for the following statements, until the next SubDir call.
+Thus, main.cpp will be looked for in the project root. If you run jam now, a
+program will be built named 'hello' on Unix or 'hello.exe' on windows, 
+respectively. 
+
+@verbatim
+./jam.sh -q
+@endverbatim
+
+The command line parameter -q will stop the build on the first error. If 
+you leave it out, the build step will continue, and skip the targets that
+fail to build.
+
+@section JamTutorialClean Cleaning the Build
+
+Jam can not only build programs, but also delete all previously built targets
+from your project directory. To do so you need to execute jam with the clean 
+target:
+
+@verbatim
+  ./jam.sh clean
+@endverbatim
+
+*/

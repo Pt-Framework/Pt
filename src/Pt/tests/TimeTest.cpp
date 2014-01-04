@@ -1,0 +1,118 @@
+/*
+ * Copyright (C) 2006 by Tommi Maekitalo
+ * Copyright (C) 2006 by Marc Boris Duerner
+ * Copyright (C) 2006 by Stefan Bueder
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+#undef PT_API_EXPORT
+
+#include "Pt/Time.h"
+#include "Pt/Unit/Assertion.h"
+#include "Pt/Unit/TestSuite.h"
+#include "Pt/Unit/RegisterTest.h"
+
+#include <string>
+#include <iostream>
+
+
+class TimeTest : public Pt::Unit::TestSuite
+{
+public:
+    TimeTest()
+    : Pt::Unit::TestSuite("TimeTest")
+    {
+        Pt::Unit::TestSuite::registerMethod("testAssign", *this, &TimeTest::testAssign);
+        Pt::Unit::TestSuite::registerMethod("testOperators", *this, &TimeTest::testOperators);
+        Pt::Unit::TestSuite::registerMethod("testIsoConvert", *this, &TimeTest::testIsoConvert);
+    }
+
+protected:
+    void testAssign();
+    void testOperators();
+    void testIsoConvert();
+};
+
+Pt::Unit::RegisterTest<TimeTest> register_TimeTest;
+
+
+void TimeTest::testAssign()
+{
+    Pt::Time time(12, 45, 23, 956);
+    PT_UNIT_ASSERT( time.hour() == 12 );
+    PT_UNIT_ASSERT( time.minute() == 45 );
+    PT_UNIT_ASSERT( time.second() == 23 );
+    PT_UNIT_ASSERT( time.msec() == 956 );
+
+    time.set(23, 59, 59, 999);
+    PT_UNIT_ASSERT( time.hour()   == 23 );
+    PT_UNIT_ASSERT( time.minute() == 59 );
+    PT_UNIT_ASSERT( time.second() == 59 );
+    PT_UNIT_ASSERT( time.msec()   == 999 );
+}
+
+void TimeTest::testOperators()
+{
+    Pt::Time time(20, 30, 50, 200);
+    Pt::Timespan timespan(100, 80*1000);
+    time += timespan;
+    PT_UNIT_ASSERT( time.hour()   == 20 );
+    PT_UNIT_ASSERT( time.minute() == 32 );
+    PT_UNIT_ASSERT( time.second() == 30 );
+    PT_UNIT_ASSERT( time.msec()   == 280 );
+
+    time -= timespan;
+    PT_UNIT_ASSERT( time.hour()   == 20 );
+    PT_UNIT_ASSERT( time.minute() == 30 );
+    PT_UNIT_ASSERT( time.second() == 50 );
+    PT_UNIT_ASSERT( time.msec()   == 200 );
+
+    timespan = Pt::Timespan(-100, -80*1000);
+    time -= timespan;
+    PT_UNIT_ASSERT( time.hour()   == 20 );
+    PT_UNIT_ASSERT( time.minute() == 32 );
+    PT_UNIT_ASSERT( time.second() == 30 );
+    PT_UNIT_ASSERT( time.msec()   == 280 );
+
+    time += timespan;
+    PT_UNIT_ASSERT( time.hour()   == 20 );
+    PT_UNIT_ASSERT( time.minute() == 30 );
+    PT_UNIT_ASSERT( time.second() == 50 );
+    PT_UNIT_ASSERT( time.msec()   == 200 );
+}
+
+void TimeTest::testIsoConvert()
+{
+    Pt::Time time(12, 45, 23, 956);
+    std::string isoString = time.toIsoString();
+    PT_UNIT_ASSERT( isoString == "12:45:23.956" );
+
+    time = Pt::Time::fromIsoString("23:59:59.999");
+    PT_UNIT_ASSERT( time.hour()   == 23 );
+    PT_UNIT_ASSERT( time.minute() == 59 );
+    PT_UNIT_ASSERT( time.second() == 59 );
+    PT_UNIT_ASSERT( time.msec()   == 999 );
+}
+

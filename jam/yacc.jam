@@ -1,0 +1,41 @@
+# Yacc source.c : source.y ;        .y -> .c
+
+YACC        ?= ;
+YACCFILES   ?= ;
+YACCFLAGS   ?= ;
+
+rule Yacc
+{
+    local _h ;
+
+    _h = $(<:BS=.h) ;
+
+    # Some places don't have a yacc.
+
+    MakeLocate $(<) $(_h) : $(LOCATE_SOURCE) ;
+
+    if $(YACC)
+    {
+        DEPENDS $(<) $(_h) : $(>) ;
+        Yacc1 $(<) $(_h) : $(>) ;
+        YaccMv $(<) $(_h) : $(>) ;
+        Clean clean : $(<) $(_h) ;
+    }
+
+    # make sure someone includes $(_h) else it will be
+    # a deadly independent target
+
+    INCLUDES $(<) : $(_h) ;
+}
+
+actions Yacc1
+{
+    $(YACC) $(YACCFLAGS) $(>)
+}
+
+actions YaccMv
+{
+    $(MV) $(YACCFILES).c $(<[1])
+    $(MV) $(YACCFILES).h $(<[2])
+}
+

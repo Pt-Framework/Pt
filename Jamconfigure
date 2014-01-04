@@ -1,0 +1,320 @@
+SubDir PT_TOP ;
+
+#############################################################################
+# Compiler and linker settings
+#############################################################################
+
+if --nlog in $(ARGV)
+{
+    CCFLAGS += [ FDefines NLOG ] ;
+    C++FLAGS += [ FDefines NLOG ] ;
+}
+
+# configure basic C compiler
+ConfigureCc ;
+
+# configure basic C++ compiler
+ConfigureC++ ;
+
+#############################################################################
+# Output directories used by MakeLocate and SubDirObjects
+#############################################################################
+PT_OUTPUT_TARGET ?= [ FDirName $(PT_TOP) build $(CONFIG) ] ;
+EchoOption PT_OUTPUT_TARGET : "Pt Binary Output Dir" ;
+Configure PT_OUTPUT_TARGET ;
+
+PT_OUTPUT_OBJECT ?= [ FDirName $(PT_TOP) tmp $(CONFIG) ] ;
+EchoOption PT_OUTPUT_OBJECT : "Pt Object Output Dir" ;
+Configure PT_OUTPUT_OBJECT ;
+
+PT_OUTPUT_TEST ?= $(PT_OUTPUT_TARGET) ;
+EchoOption PT_OUTPUT_TEST : "Pt Testing Output Dir" ;
+Configure PT_OUTPUT_TEST ;
+
+#############################################################################
+# Installation directories
+#############################################################################
+PT_INSTALL_DIR ?= [ FDirName $(PT_TOP) deploy $(CONFIG) ] ;
+
+PT_INSTALL_BINDIR ?= [ FDirName $(PT_INSTALL_DIR) bin ] ; 
+EchoOption PT_INSTALL_BINDIR : "Pt Binary Install Dir" ;
+Configure PT_INSTALL_BINDIR ;
+
+PT_INSTALL_INCLUDEDIR ?= [ FDirName $(PT_INSTALL_DIR) include ] ; 
+EchoOption PT_INSTALL_INCLUDEDIR : "Pt Include Install Dir" ;
+Configure PT_INSTALL_INCLUDEDIR ;
+
+PT_INSTALL_LIBDIR ?= [ FDirName $(PT_INSTALL_DIR) lib ] ;
+EchoOption PT_INSTALL_LIBDIR : "Pt Library Install Dir" ; 
+Configure PT_INSTALL_LIBDIR ;
+
+#############################################################################
+# System libraries and includes
+#############################################################################
+if $(TARGET_OS:L) = winrt
+{
+    SYS = winrt ;
+}
+
+if ! $(SYS)
+{
+    WITH_WIN32 = [ CheckBuildC++ "#include <windows.h>"
+                                 "int main() { return 0; }" ] ;
+    if $(WITH_WIN32)
+    {
+        Load win32.jam ;
+    
+        ConfigurePsapi ;
+    
+        if $(WITH_PSAPI)
+        {
+            SYSLIBS += $(PSAPI_LIBS) ;
+        }
+    
+        ConfigureWsa ;
+    
+        if ! $(WITH_WSA)
+        {
+            Exit "ERROR: WSA is required." ;
+        }
+    
+        NETLIBS = $(WSA_LIBS) ;
+        SYS = win32 ;
+    }
+}
+
+if ! $(SYS)
+{
+    Load posix.jam ;
+
+    ConfigureDl ;
+
+    if ! $(WITH_DL)
+    {
+        Exit "ERROR: dl is required." ;
+    }
+
+    ConfigurePThread ;
+
+    if ! $(WITH_PTHREADS)
+    {
+        Exit "ERROR: pthread is required." ;
+    }
+
+    SYSLIBS = $(DL_LIBS) $(PTHREAD_LIBS) ;
+
+    ConfigureUnixSockets ;
+
+    if ! $(WITH_UNIX_SOCKETS)
+    {
+        Exit "ERROR: unix sockets are required." ;
+    }
+
+    ConfigureNsl ;
+    
+    if ! $(WITH_NSL)
+    {
+        Exit "ERROR: nsl is required." ;
+    }  
+
+    NETLIBS = $(UNIX_SOCKET_LIBS) $(NSL_LIBS) ;
+    SYS = posix ;
+}
+
+if $(TARGET_OS) = "aix"
+{
+    LINKLIBS += $(SYSLIBS) ;
+}
+
+EchoOption SYS : "Using subsystem" ;
+Configure SYS ;
+
+Configure SYSLIBS ;
+EchoOption SYSLIBS : "System lib flags" ;
+
+Configure NETLIBS ;
+EchoOption NETLIBS : "Network lib flags" ;
+
+#############################################################################
+# SSL libraries and includes
+#############################################################################
+
+if --with-openssl in $(ARGV)
+{   
+    include [ FDirName src openssl Jamconfigure ] ;
+
+    WITH_OPENSSL = "yes" ;
+    Configure WITH_OPENSSL ;
+
+    WITH_SSL = yes ;
+    PT_SSL_IMPL = "openssl" ;
+    SSL_INCLUDES = [ FDirName $(PT_TOP) src openssl include ] ;
+}
+
+if ! $(WITH_SSL)
+{
+    WITH_SSL = [ CheckBuildC++ "#include <Security/Security.h>"
+                               "int main() {"
+                               "SSLContextRef context;"
+                               "SSLNewContext(false, &context);"
+                               "return 0; }"
+                               : ""
+                               : "-framework Foundation" "-framework Security" ] ;
+
+    if $(WITH_SSL)
+    {
+        PT_SSL_IMPL = "applessl" ;
+        SSL_LINKLIBS = "-framework Foundation" "-framework Security" ;
+    }
+}
+
+if ! $(WITH_SSL)
+{
+    WITH_SSL = [ CheckBuildC++ "#include <openssl/ssl.h>"
+                               "int main() {"
+                               "SSL_library_init();"
+                                "return 0; }"
+                               : [ FIncludes $(SSL_INCLUDES) ]
+                               : -lssl -lcrypto ] ;
+
+    if $(WITH_SSL)
+    {
+        PT_SSL_IMPL = "openssl" ;
+        SSL_LINKLIBS = -lssl -lcrypto ;
+    }
+}
+
+if ! $(WITH_SSL)
+{
+    PT_SSL_IMPL = "nossl" ;
+}
+
+Configure WITH_SSL ;
+EchoOption WITH_SSL : "SSL support" : $(WITH_SSL:E="no")  ;
+
+Configure PT_SSL_IMPL ;
+EchoOption PT_SSL_IMPL : "SSL implementation" ;
+
+EchoOption --with-openssl : "Builtin OpenSSL library" : $(WITH_OPENSSL:E="no") ;
+
+Configure SSL_INCLUDES ;
+EchoOption SSL_INCLUDES : "SSL includes" ;
+
+Configure SSL_LINKLIBS ;
+EchoOption SSL_LINKLIBS : "SSL libs" ;
+
+
+#############################################################################
+# Gfx libraries and includes
+#############################################################################
+
+Load freetype.jam ;
+
+ConfigureFreetype ;
+    
+if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
+{
+    FREETYPE_INCLUDES = [ FDirName $(PT_TOP) src Pt-Gfx freetype include ] ;
+    FREETYPE_LINKFLAGS = "" ;
+
+    Configure FREETYPE_INCLUDES ;
+    EchoOption FREETYPE_INCLUDES : "Builtin freetype library" ;
+}
+
+
+#############################################################################
+# GUI libraries and includes
+#############################################################################
+
+if ! $(GUI) || GUI = "gdi"
+{
+    Load winui.jam ;
+
+    ConfigureWinUI ;
+    ConfigureGdi ;
+
+    if $(WITH_GDI) && $(WITH_WINUI)
+    {
+        GUI = gdi ;
+        GUILIBS = $(GDI_LIBS) $(WINUI_LIBS) ;
+    }
+}
+
+if ! $(GUI) || GUI = "cocoa"
+{
+    WITH_GUI = [ CheckBuildC++ "#include <CoreFoundation/CFRunLoop.h>"
+                               "int main() {"
+                               "CFRunLoopRef l = CFRunLoopGetMain();"
+                               "return 0; }"
+                             : ""
+                             : -framework AppKit -framework Foundation ] ;
+
+    if $(WITH_GUI)
+    {
+        GUI = cocoa ;
+        GUILIBS = -framework AppKit -framework Foundation ;
+    }
+
+    # iOS aspen:
+    #GUI     ?= uikit ;
+    #GUILIBS = -framework UIKit -framework Foundation -framework CoreGraphics ;
+}
+
+if ! $(GUI)  || GUI = "x11"
+{
+    Load x11.jam ;
+
+    ConfigureX11 ;
+    if $(X11_LIBS)
+    {
+        ConfigureXExt ;
+        ConfigureXft ;
+
+        if $(X11_INCLUDES) && $(X11_LIBS) && $(XEXT_LIBS) && $(XFT_INCLUDES) && $(XFT_LIBS)
+        {
+            GUI = x11 ;
+            GUILIBS += $(X11_LIBS) $(XEXT_LIBS) $(XFT_LIBS) ;
+        }
+    }
+}
+
+if $(GUI:L) = "photon"
+{
+    GUI     ?= photon ;
+    GUILIBS = -lphrender -lph ;
+}
+
+if $(GUI:L) = "symbian-eikon"
+{
+    GUI = symbian-eikon ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\apparc.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\cone.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\eikcore.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\avkon.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\commonengine.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\estor.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\hlplch.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bafl.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\charconv.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\ws32.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\fbscli.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\bitgdi.dso ;
+    GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\gdi.dso ;
+}
+
+Configure GUI ;
+EchoOption GUI : "Graphics UI" ;
+
+if $(GUI)
+{
+    Configure GUILIBS ;
+    EchoOption GUILIBS : "Graphics UI lib flags" ;
+}
+
+
+if --with-hmi in $(ARGV)
+{
+	WITH_HMI = yes ;
+    Configure WITH_HMI ;
+    EchoOption WITH_HMI : "HMI module" ;
+}

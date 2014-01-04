@@ -1,0 +1,44 @@
+SubDir PT_TOP src Pt-Db ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirC++Flags [ FDefines PT_DB_API_EXPORT ] ;
+SubDirCcFlags  [ FDefines PT_DB_API_EXPORT ] ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Db ;
+
+if $(TARGET_OS:L) = symbian
+{
+    SubDirCcFlags [ FDefines __REMOVE_PLATSEC_DIAGNOSTIC_STRINGS__ ] ;
+}
+
+# BUG: if a C source file comes first, jam links a C library
+PT_DB_SOURCES = [ FDirName sqlite SQLConnection.cpp ]
+                [ FDirName sqlite sqlite3.c ]
+                [ FDirName sqlite Connector.cpp ]
+                [ FDirName sqlite Cursor.cpp ]
+                [ FDirName sqlite Error.cpp ]
+                [ FDirName sqlite SQLStatement.cpp ]
+                [ FDirName sqlite StmtRow.cpp ]
+                [ FDirName sqlite StmtValue.cpp ]
+                Connection.cpp
+                Exception.cpp
+                Result.cpp
+                ResultImpl.cpp
+                Row.cpp
+                RowImpl.cpp
+                Statement.cpp
+                ValueImpl.cpp
+                ;
+
+SharedLibrary Pt-Db : $(PT_DB_SOURCES) ;
+LinkSharedLibraries Pt-Db : Pt Pt-System ;
+MakeLocate Pt-Db : $(PT_OUTPUT_TARGET) ;
+
+PT_DB_TESTS = ResultImplTest.cpp
+              RowImplTest.cpp
+              SqliteTest.cpp
+              ValueImplTest.cpp
+              ;
+Main  Pt-Db-test : Pt-Db-test.cpp $(PT_DB_TESTS) ;
+LinkSharedLibraries Pt-Db-test : Pt-Db Pt-Unit Pt-System Pt ;
+MakeLocate Pt-Db-test : $(PT_OUTPUT_TARGET) ;
+RunUnitTest Pt-Db-test : $(PT_OUTPUT_TEST) ;
+

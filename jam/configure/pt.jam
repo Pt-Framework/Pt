@@ -1,0 +1,59 @@
+
+rule ConfigurePt
+{
+    EchoOption PT_INCLUDES : "Pt includes" ;
+    EchoOption PT_LIBDIR : "Pt library dir" ;
+
+    PT_LINKLIBS = Pt.lib ;
+    PT_UNIT_LINKLIBS = Pt-Unit.lib ;
+    PT_SYSTEM_LINKLIBS = Pt-System.lib ;
+    PT_NET_LINKLIBS = Pt-Net.lib ;
+    
+    PT_LINKFLAGS = "/LIBPATH:"$(PT_LIBDIR) ;
+
+    WITH_PT = [ CheckBuildC++ "#include <Pt/Date.h>"
+                              "int main() { Pt::Date dt(0,0,0); return 0; }"
+                            : [ FIncludes $(PT_INCLUDES) ]
+                            : $(PT_LINKLIBS)
+                            : $(PT_LIBDIR) ] ;
+
+    if ! $(WITH_PT)
+    {
+        PT_LINKLIBS += -lPt ;
+        PT_UNIT_LINKLIBS = -lPt-Unit ;
+        PT_SYSTEM_LINKLIBS = -lPt-System ;
+        PT_NET_LINKLIBS = -lPt-Net ;
+        
+        PT_LINKFLAGS = "-L"$(PT_LIBDIR) ;
+
+        WITH_PT = [ CheckBuildC++ "#include <Pt/Date.h>"
+                                  "int main() { Pt::Date dt(0,0,0); return 0; }"
+                                : [ FIncludes $(PT_INCLUDES) ]
+                                : $(PT_LINKLIBS)
+                                : $(PT_LIBDIR) ] ;
+    }
+
+    EchoOption WITH_PT : "Pt library" ;
+    Configure WITH_PT ;
+
+    if $(WITH_PT)
+    {   
+        Configure PT_INCLUDES ;
+        Configure PT_LIBDIR ;
+
+        EchoOption PT_LINKLIBS : "Pt link libraries" ;
+        Configure PT_LINKLIBS ;
+
+        EchoOption PT_UNIT_LINKLIBS : "Pt Unit link libraries" ;
+        Configure PT_UNIT_LINKLIBS ;
+
+        EchoOption PT_SYSTEM_LINKLIBS : "Pt System link libraries" ;
+        Configure PT_SYSTEM_LINKLIBS ;
+
+        EchoOption PT_NET_LINKLIBS : "Pt Net link libraries" ;
+        Configure PT_NET_LINKLIBS ;
+
+        EchoOption PT_LINKFLAGS : "Pt link flags" ;
+        Configure PT_LINKFLAGS ;
+    }
+}

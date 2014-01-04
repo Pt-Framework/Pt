@@ -1,0 +1,42 @@
+SubDir PT_TOP src Pt ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirC++Flags [ FDefines PT_API_EXPORT ] ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt ;
+
+SharedLibrary Pt : Atomicity.cpp
+                   Connection.cpp
+                   Connectable.cpp
+                   ConversionError.cpp
+                   Date.cpp
+                   DateTime.cpp
+                   Deserializer.cpp
+                   PageAllocator.cpp
+                   PoolAllocator.cpp
+                   Regex.cpp
+                   regexp.cpp
+                   SerializationError.cpp
+                   SerializationInfo.cpp
+                   Serializer.cpp
+                   SerializationContext.cpp
+                   Settings.cpp
+                   SettingsReader.cpp
+                   SettingsWriter.cpp
+                   Signal.cpp
+                   String.cpp
+                   StringStream.cpp
+                   TextBuffer.cpp
+                   TextStream.cpp
+                   Time.cpp
+                   Utf8Codec.cpp
+				   Utf16Codec.cpp
+				   Utf32Codec.cpp
+                   ;
+
+MakeLocate Pt : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt : $(PT_INSTALL_LIBDIR) ;
+
+#Main itest : itest.mm ;
+#Main_AddLibraries itest : -framework UIKit -framework Foundation -framework CoreGraphics ;
+
+SubInclude PT_TOP src Pt tests ;
+

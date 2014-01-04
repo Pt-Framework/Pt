@@ -1,0 +1,21 @@
+# Lex source.c : source.l ;     .l -> .c
+
+LEX ?= ;
+
+rule Lex
+{
+    LexMv $(<) : $(>) ;
+    DEPENDS $(<) : $(>) ;
+    MakeLocate $(<) : $(LOCATE_SOURCE) ;
+    Clean clean : $(<) ;
+}
+
+actions Lex
+{
+    $(LEX) $(>)
+}
+
+actions LexMv
+{
+    $(MV) lex.yy.c $(<)
+}

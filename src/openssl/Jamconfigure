@@ -1,0 +1,50 @@
+#############################################################################
+# OpenSSL libraries and includes
+#############################################################################
+
+# find matching openssl configuration file first for SYS, then for TARGET_OS
+local opensslconf_target = [ FDirName $(PT_TOP) src openssl opensslconf-$(SYS:L)-$(TARGET_OSPLAT:L).h ] ;
+if ! [ CHECK_IF_FILE $(opensslconf_target) ]
+{
+    opensslconf_target = [ FDirName $(PT_TOP) src openssl opensslconf-$(TARGET_OS:L)-$(TARGET_OSPLAT:L).h ] ;
+        
+    if ! [ CHECK_IF_FILE $(opensslconf_target) ]
+    {
+        Exit "ERROR: Could not configure builtin OpenSSL for" $(TARGET_OS:L) $(TARGET_OSPLAT:L) ;
+    }
+}
+
+# copy crypto/opensslconf.h file
+local opensslconf = [ FDirName $(PT_TOP) src openssl crypto opensslconf.h ] ;
+local r = [ TryCommand $(CP) $(opensslconf_target) $(opensslconf) ] ;
+if ! $(r)
+{
+    Exit "ERROR: Could not copy opensslconf.h." ;
+}
+
+# copy openssl/opensslconf.h file
+opensslconf = [ FDirName $(PT_TOP) src openssl include openssl opensslconf.h ] ;
+r = [ TryCommand $(CP) $(opensslconf_target) $(opensslconf) ] ;
+if ! $(r)
+{
+    Exit "ERROR: Could not copy opensslconf.h." ;
+}
+
+OPENSSL_CFLAGS += [ FDefines L_ENDIAN ] ;
+
+switch $(TARGET_OS:L)
+{
+    case wince : OPENSSL_CFLAGS += [ FDefines WIN32_LEAN_AND_MEAN ] ;
+
+    case nt : OPENSSL_CFLAGS += [ FDefines WIN32_LEAN_AND_MEAN ] ;
+
+    case linux : OPENSSL_CFLAGS += [ FDefines TERMIO ] ;
+                 OPENSSL_CFLAGS += [ FDefines _REENTRANT ] ;
+
+    case macosx : OPENSSL_CFLAGS += [ FDefines _REENTRANT ] ;
+
+    case * : Exit "ERROR: Target not supported by builtin OpenSSL." ;
+}
+
+Configure OPENSSL_CFLAGS ;
+EchoOption OPENSSL_CFLAGS : "OpenSSL CFLAGS" ;

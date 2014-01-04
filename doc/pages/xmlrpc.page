@@ -1,0 +1,504 @@
+/** \page xmlrpc XML-RPC Communication
+
+@section xmlrpc_Intro Introduction
+
+The XML-RPC module (Pt::XmlRpc) of the Pt framework provides a client API to
+call remote procedures and a server API to implement remote procedures.
+Blocking and non-blocking APIs exist in either case. The XML-RPC module builds
+on top of the HTTP module (Pt::Http) and uses the HTTP client and server 
+implementation thereof. Custom data-types can be used in XML-RPC procedures
+if they are serializable using Pt's serialization API.
+
+
+@section xmlrpc_Service Implementation of XML-RPC services
+
+The XML-RPC server side API is implemented as a service for Pt's HTTP server.
+Regular C++ functions or methods can be registered as XML-RPC remote procedures
+with a Pt::XmlRpc::Service. XML-RPC requests are processed and dispatched to
+the respective procedure by the service. Note that the registered function or
+method will potentially be called from one of the HTTP server threads.
+
+
+@subsection xmlrpc_Service_1 Adding service procedures to a XML-RPC service
+
+The following example shows a typical XML-RPC service, where member functions
+are registered as XML-RPC procedures:
+
+@code
+class CalculatorService : public Pt::XmlRpc::ServiceDefinition
+{
+  public:
+    CalculatorService()
+    {
+      registerProcedure("add", *this, &CalculatorService::add);
+      registerProcedure("sub", *this, &CalculatorService::sub);
+      registerProcedure("multiply", *this, &CalculatorService::multiply);
+      registerProcedure("div", *this, &CalculatorService::div);
+    }
+
+    int add(int a, int b)
+    { return a+b; }
+
+    int sub(int a, int b)
+    { return a-b; }
+
+    int multiply(int a, int b)
+    { return a*b; }
+
+    int div(int a, int b)
+    { return a/b; }
+};
+@endcode
+
+The service needs to inherit Pt::XmlRpc::ServiceDefinition and register the XML-RPC
+procedures in the constructor. The string passed to registerProcedure() is
+the name of the procedure and all XML-RPC requests with this 'methodName' 
+XML tag will be dispatched to that method.
+
+
+@subsection xmlrpc_Client_2 Non-Blocking XML-RPC service procedures
+
+Since the server has only a limited number of worker threads, the XML-RPC
+procedures should not block, for example to perform long I/O operations,
+otherwise the performance of the HTTP server will degrade.
+Instead, the asynchronous API allows using a Pt::System::EventLoop from
+within a XML-RPC procedure, as shown in the next example:
+
+@code
+class AsyncEcho : public Pt::XmlRpc::ActiveProcedure<std::string, std::string>
+                , public Pt::Connectable
+{
+  public:   
+    AsyncEcho(Pt::XmlRpc::Responder& responder)
+    : Pt::XmlRpc::ActiveProcedure<std::string, std::string>(responder)
+    {
+      _timer.timeout() += Pt::slot(*this, &AsyncEcho::onTimeout);
+    }
+
+  protected:
+    virtual void onInvoke(System::EventLoop& loop, const std::string& msg)
+    {
+      _r = msg;
+
+      _timer.setActive( loop );
+      _timer.start(1000);         
+    }
+
+    virtual const std::string& onResult()
+    {
+      return _r;
+    }
+
+    void onTimeout()
+    {
+      _timer.stop();
+      _timer.detach();
+      this->setReady();
+    }
+
+    private:
+      std::string _r;
+      Pt::System::Timer _timer;
+};
+@endcode 
+
+The class AsyncEcho is an example of such an asynchronous call and it needs to
+derive from the Pt::XmlRpc::ActiveProcedure class template. The template
+parameters describe the signature of the XML-RPC procedure. The first
+parameter is the return type and the following parameters are the argument
+types. In this case, the XML-RPC procedure returns a std::string and takes one
+argument, also a std::string, when invoked. 
+
+Two virtual functions have to be implemented. When the procedure is executed,
+onInvoke() will be called with arguments, as defined by the template parameters
+of ActiveProcedure. In the example, we use the event loop to start a timer.
+This is also the event loop of the server thread from which the procedure was
+invoked. When the timer runs out, ActiveProcedure::setReady() is called in
+the timer callback, to notify the XML-RPC service that the asynchronous call
+has finished. Finally, onResult() will be called to obtain the return value. 
+
+The next example shows how the service procedure is registered:
+
+@code
+class MyService : public Pt::XmlRpc::ServiceDefinition
+{
+  public:
+    MyService()
+    {
+      registerActiveProcedure("async", *this, &CalculatorService::async);
+    }
+
+    AsyncEcho* asyncEcho(Pt::XmlRpc::Responder& responder)
+    {
+      return new AsyncEcho(proc);
+    }
+};
+@endcode
+
+A member function is registered as an asynchronous XML-RPC procedure in the
+constructor of the service, but here the registered member function is only a
+factory method for an asynchronous XML-RPC call. 
+
+
+@subsection xmlrpc_Service_2 Using User-Defined Types in XML-RPC procedures
+
+The Pt framework already provides serialization support for builtin types and
+the types provided by the C++ standard library, like std::string or std::vector.
+To use custom types as arguments or return types in remote procedures, the 
+serialization operator must be implemented.
+
+@code
+struct Address
+{
+  std::string country;
+  std::string city;
+  std::string street;
+  int code;
+};
+
+void operator>>=(const Pt::SerializationInfo& si, Address& address);
+void operator<<=(Pt::SerializationInfo& si, const Address& address);
+
+class MyService : public Pt::xmlrpc::ServiceDefinition
+{
+  public:
+    MyService()
+    {
+      registerProcedure("getPosition", *this, &MyService::getPosition);
+    }
+
+    Address getPosition();
+};
+@endcode
+
+@code
+void operator>>=(const Pt::SerializationInfo& si, Address& address)
+{
+  si.getMember("year")   >>= address.country;
+  si.getMember("city")   >>= address.city;
+  si.getMember("street") >>= address.street;
+  si.getMember("code")   >>= address.code;
+}
+
+void operator<<=(Pt::SerializationInfo& si, const Address& address)
+{
+  si.addMember("country") <<= address.country;
+  si.addMember("city")    <<= address.city;
+  si.addMember("street")  <<= address.street;
+  si.addMember("code")    <<= address.code;
+  si.setTypeName("Address");
+}
+@endcode
+
+The XML-RPC service shown above returns a custom type named 'Address' from
+its procedure named 'getPosition'. The two serialization operators are
+implemented, so the framework knows how to serialize and deserialize this
+custom type. The two operators can be used for the implementation of the
+remote procedures on the server side and to call the remote procedure on the
+client side.
+
+
+@subsection xmlrpc_Service_3 Adding XML-RPC services to a HTTP Server
+
+Once the XML-RPC service is implemented, it can be run within an instance
+of Pt's HTTP server. The incoming requests are mapped by the service name
+to the XML-RPC service and then processed and dispatched in the service to
+the registered procedures.
+
+
+@code
+int main(int argc, char** argv)
+{
+    Pt::System::MainLoop loop;
+
+    Pt::Http::Server server(loop, "127.0.0.1", 7002);
+    
+    CalculatorService service;
+
+    Pt::XmlRpc::HttpService httpService(service);
+    Pt::Http::MapUrl servlet("/calculator", httpService);
+    server.addServlet(servlet);
+
+    loop.run();
+};
+@endcode
+
+The code above constructs a HTTP server instance and adds an XML-RPC service
+with the name '/calculator'. HTTP services are not directly added to a HTTP server,
+but as part of a servlet. The servlet of type Pt::Http::MapUrl instructs the
+server to route all requests for the URL '/calculator' to the CalculatorService.
+The server requires an event loop to run, in this case a program main loop.
+
+
+@section xmlrpc_Client Implementation of a XML-RPC clients
+
+The XML-RPC client API is implemented as function objects using Pt's HTTP
+client. Calling a remote procedure with the blocking API looks similar to
+calling local functions, the non-blocking API uses Pt's signals and slots.
+
+@subsection xmlrpc_Client_1 Blocking calls to a XML-RPC service
+
+The following example uses the blocking API to call a remote procedure,
+which expects two integer values as arguments and returns an interger value.
+
+@code
+int main(int argc, char** argv)
+{
+  try
+  {
+    Pt::XmlRpc::HttpClient client("127.0.0.1", 7002, "/calculator");
+
+    Pt::XmlRpc::RemoteProcedure<int, int, int> multiply(client, "multiply");
+    int r = multiply(6, 7);
+
+    std::cout << "Result: " << r << std::endl;
+    return 0;
+  }
+  catch(std::exception& ex) // might be Pt::XmlRpc::Fault
+  {
+    std::cerr << "Error: " << ex.what() << std::endl;
+  }
+
+  return 1
+};
+@endcode
+
+A HTTP client has to be constructed first, with the name of the XML-RPC service
+to be accessed. The HTTP client maintains a connection to the server and can
+be used for multiple remote procedure calls to the same XML-RPC service. A
+function object of type Pt::XmlRpc::RemoteProcedure is constructed then and
+the template parameters describe the signature of the remote procedure. The 
+first template parameter is the return value and the following ones are the 
+arguments. The actual call might throw an exception, especially one of type 
+Pt::XmlRpc::Fault, if an error occurs in the XML-RPC layer.
+
+
+@subsection xmlrpc_Client_2 Non-Blocking calls to a XML-RPC procedures
+
+A non-blocking API also exists, to make XML-RPC calls concurrently to other
+code. A remote procedure call is started using the same function objects like
+for the blocking calls and a signal gives notification when the remote call 
+is ready to return a value. No additional threads are started to accomplish
+this, but I/O is dispatched through an event loop. Note that this is the
+preferred way of calling XML-RPC remote procedures, because even if no code
+is run concurrently, the calls can be cancelled.
+
+
+@code
+void onResult(const Pt::XmlRpc::Result<int>& r)
+{
+  try
+  {
+    std::cout << "Result: " << r.get() << std::endl;
+  }
+  catch(const std::exception& ex) // might be Pt::XmlRpc::Fault
+  {
+    std::cerr << "Error: " << ex.what() << std::endl;
+  }
+}
+
+int main(int argc, char** argv)
+{
+  try
+  {
+    Pt::System::MainLoop loop;
+    Pt::XmlRpc::HttpClient client(loop, "127.0.0.1", 7002, "/calculator");
+
+    Pt::XmlRpc::RemoteProcedure<int, int, int> multiply(client, "multiply");
+    multiply.finished += Pt::slot(&onResult);
+    multiply.begin(6, 7);
+
+    loop.run();
+  }
+  catch(const std::exception& ex)
+  {
+    std::cerr << "Error: " << ex.what() << std::endl;
+    return 1;
+  }
+
+  return 0;
+};
+@endcode
+
+The example above shows how the signal named 'finished' is connected to the
+slot 'onResult', which is called when the return value was received. The
+remote call is then only started calling begin() and all processing starts
+when the event loop is run. Once the remote procedure call returns, the result
+is passed to the slot in form of a Pt::XmlRpc::Result object. To retrieve the
+actual return value, get() must be called on this object, which might also 
+throw an exception, if an error occured. The exception should be handled in 
+the slot, if it is allowed to propagate, the event loop will be stopped and
+the program ends.
+
+
+@section xmlrpc_Protocol Protocol Details
+
+XML-RPC is a Remote Procedure Calling protocol that works over the network.
+
+An XML-RPC message is an HTTP-POST request. The body of the request is in
+XML. A procedure executes on the server and the value it returns is also
+formatted in XML.
+
+Procedure parameters can be scalars, numbers, strings, dates, etc.; and
+can also be complex record and list structures.
+
+<b>Firewalls:</b> The goal of this protocol is to lay a compatible
+foundation across different environments, no new power is provided beyond
+the capabilities of the CGI interface. Firewall software can watch for POSTs
+whose Content-Type is text/xml.
+
+<b>Discoverability:</b> We wanted a clean, extensible format that's very
+simple. It should be possible for an HTML coder to be able to look at a
+file containing an XML-RPC procedure call, understand what it's doing, and
+be able to modify it and have it work on the first or second try.
+
+<b>Easy to implement:</b> We also wanted it to be an easy to implement
+protocol that could quickly be adapted to run in other environments or
+on other operating systems.
+
+
+@subsection xmlrpc_Request_Example Request Example
+
+Here's an example of an XML-RPC request:
+
+@verbatim
+POST /calculator HTTP/1.0
+User-Agent: Frontier/5.1.2 (WinNT)
+Host: betty.userland.com
+Content-Type: text/xml
+Content-length: 181
+
+<?xml version="1.0"?>
+<methodCall>
+  <methodName>multiply</methodName>
+  <params>
+    <param> <value><int>6</int></value> </param>
+    <param> <value><int>7</int></value> </param>
+  </params>
+</methodCall>
+@endverbatim
+
+The format of the URI in the first line of the header is not specified. For
+example, it could be empty, a single slash, if the server is only handling
+XML-RPC calls. However, if the server is handling a mix of incoming HTTP
+requests, we allow the URI to help route the request to the code that handles
+XML-RPC requests. In the example, the URI is /calculator, telling the server to
+route the request to the "calculator" service.
+
+The payload is in XML, a single \<methodCall\> structure.
+
+The \<methodCall\> must contain a \<methodName\> sub-item, a string, containing
+the name of the method to be called. The string may only contain identifier
+characters, upper and lower-case A-Z, the numeric characters, 0-9, underscore,
+dot, colon and slash. It's entirely up to the server to decide how to interpret
+the characters in a methodName.
+
+For example, the methodName could be the name of a file containing a script
+that executes on an incoming request. It could be the name of a cell in a
+database table. Or it could be a path to a file contained within a hierarchy
+of folders and files.
+
+If the procedure call has parameters, the \<methodCall\> must contain a
+<params\> sub-item. The \<params\> sub-item can contain any number of
+\<param\>s, each of which has a \<value\>.
+
+
+@subsection xmlrpc_Response_Example Response Example
+
+Here's an example of an XML-RPC response:
+
+@verbatim
+HTTP/1.1 200 OK
+Connection: close
+Content-Length: 158
+Content-Type: text/xml
+Date: Fri, 17 Jul 2008 19:55:08 GMT
+Server: UserLand Frontier/5.1.2-WinNT
+
+<?xml version="1.0"?>
+<methodResponse>
+  <params>
+    <param>
+      <value><int>42</int></value>
+    </param>
+  </params>
+</methodResponse>
+@endverbatim
+
+Unless there's a lower-level error, always return 200 OK.
+
+The Content-Type is text/xml. Content-Length must be present and correct.
+
+The body of the response is a single XML structure, a \<methodResponse\>,
+which can contain a single \<params\> which contains a single \<param\> which
+contains a single \<value\>.
+
+
+@subsection xmlrpc_Fault_Example Fault Example
+
+Here's an example of an XML-RPC fault response:
+
+@verbatim
+HTTP/1.1 200 OK
+Connection: close
+Content-Length: 426
+Content-Type: text/xml
+Date: Fri, 17 Jul 1998 19:55:02 GMT
+Server: UserLand Frontier/5.1.2-WinNT
+
+<?xml version="1.0"?>
+<methodResponse>
+  <fault>
+    <value>
+      <struct>
+        <member>
+          <name>faultCode</name>
+          <value><int>4</int></value>
+        </member>
+        <member>
+          <name>faultString</name>
+          <value><string>Too many parameters.</string></value>
+        </member>
+      </struct>
+    </value>
+  </fault>
+</methodResponse>
+@endverbatim
+
+The \<methodResponse\> could also contain a \<fault\> which contains a
+\<value\> which is a \<struct\> containing two elements, one named
+\<faultCode\>, an \<int\> and one named \<faultString\>, a \<string\>.
+
+A \<methodResponse\> can not contain both a \<fault\> and a \<params\>.
+
+
+@section xmlrpc_Copyright Copyright and Disclaimer
+
+This document contains parts of the original XML-RPC specification
+(http://www.xmlrpc.com), which is published under the following license:
+
+Copyright 1998-2003 UserLand Software. All Rights Reserved.
+
+This document and translations of it may be copied and furnished to others,
+and derivative works that comment on or otherwise explain it or assist in
+its implementation may be prepared, copied, published and distributed, in
+whole or in part, without restriction of any kind, provided that the above
+copyright notice and these paragraphs are included on all such copies and
+derivative works.
+
+This document may not be modified in any way, such as by removing the
+copyright notice or references to UserLand or other organizations. Further,
+while these copyright restrictions apply to the written XML-RPC specification,
+no claim of ownership is made by UserLand to the protocol it describes. Any
+party may, for commercial or non-commercial purposes, implement this protocol
+without royalty or license fee to UserLand. The limited permissions granted
+herein are perpetual and will not be revoked by UserLand or its successors
+or assigns.
+
+This document and the information contained herein is provided on an "AS IS"
+basis and USERLAND DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT
+NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION HEREIN WILL NOT
+INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR
+A PARTICULAR PURPOSE.
+
+*/

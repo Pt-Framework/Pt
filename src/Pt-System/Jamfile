@@ -1,0 +1,50 @@
+SubDir PT_TOP src Pt-System ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirHdrs $(PT_TOP)/src/Pt-System/$(SYS:L) ;
+SubDirC++Flags [ FDefines PT_SYSTEM_API_EXPORT ] ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-System ;
+
+PT_SYSTEM_IMPL_SUBDIR = [ FDirName $(PT_TOP) src Pt-System $(SYS:L) ] ;
+PT_SYSTEM_IMPL += [ GLOB $(PT_SYSTEM_IMPL_SUBDIR) : *.cpp  ] ;
+
+SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
+                          Application.cpp
+                          Clock.cpp
+                          Condition.cpp
+                          Directory.cpp
+                          EventSource.cpp
+                          EventSink.cpp
+                          EventLoop.cpp
+                          FileDevice.cpp
+                          FileInfo.cpp
+                          IOBuffer.cpp
+                          IODevice.cpp
+                          IOError.cpp
+                          Library.cpp
+                          Logger.cpp
+                          LogManager.cpp
+                          LogTarget.cpp
+                          MainLoop.cpp
+                          Mutex.cpp
+                          Pipe.cpp
+                          Process.cpp
+                          Selectable.cpp
+                          SerialDevice.cpp
+                          Semaphore.cpp
+                          SystemError.cpp
+                          Thread.cpp
+                          Timer.cpp
+                          Uri.cpp
+                          ConsoleChannel.cpp
+                          FileChannel.cpp
+                          SerialChannel.cpp
+                          ;
+
+LinkSharedLibraries Pt-System : Pt ;
+
+LinkLibs Pt-System : $(SYSLIBS) ;
+
+MakeLocate Pt-System : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-System : $(PT_INSTALL_LIBDIR) ;
+
+SubInclude PT_TOP src Pt-System tests ;

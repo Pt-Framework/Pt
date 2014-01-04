@@ -1,0 +1,21 @@
+SubDir PT_TOP src Pt-Hmi Desktop ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirC++Flags [ FDefines PT_HMI_DESKTOP_EXPORTS ] ;
+SubDirCcFlags [ FDefines PT_HMI_DESKTOP_EXPORTS ] ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Hmi-Desktop ;
+
+SharedLibrary Pt-Hmi-Desktop : 
+					   Window.cpp
+					   Dialog.cpp
+					   Widget.cpp
+					   Panel.cpp
+					   Label.cpp
+					   Button.cpp
+						;
+
+LinkSharedLibraries Pt-Hmi-Desktop : Pt Pt-System Pt-Gfx  Pt-Hmi ;
+LinkLibs Pt-Hmi-Desktop : $(GUILIBS) ;
+MakeLocate Pt-Hmi-Desktop : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-Hmi-Desktop : $(PT_INSTALL_LIBDIR) ;
+
+SubInclude PT_TOP src Pt-Hmi Desktop tests ;

@@ -1,0 +1,40 @@
+##############################################################################
+# Platform specific prefixes and suffixes
+##############################################################################
+
+SUFOBJ ?= .obj ;
+PRELIB ?= "" ;
+SUFLIB ?= .lib ;
+SUFEXE ?= .exe ;
+SUFDLL ?= .dll ;
+SUFDBG ?= "" ;
+
+##############################################################################
+# Default toolkit
+##############################################################################
+
+if $(VS120COMNTOOLS)
+{
+    TOOLSET ?= vc12 ;
+}
+
+if $(VS110COMNTOOLS)
+{
+    TOOLSET ?= vc11 ;
+}
+
+if $(VS100COMNTOOLS)
+{
+    TOOLSET ?= vc10 ;
+}
+
+if $(VS90COMNTOOLS)
+{
+    TOOLSET ?= vc9 ;
+}
+
+if $(VS80COMNTOOLS)
+{
+    TOOLSET ?= vc8 ;
+}
+

@@ -1,0 +1,106 @@
+rule ConfigureVisualC
+{
+    if ! $(VISUALC_CONFIGURED)
+    {
+        VISUALC_CONFIGURED = 1 ;
+    
+        if $(VISUALC) 
+        {
+            VISUALC = $(VISUALC:J=" ") ;
+        } 
+        else
+        {
+            if $(PROCESSOR_ARCHITECTURE:L) = "amd64"
+            {
+                VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\8.0\\" : "InstallDir" ] ;
+            }
+            else # PROCESSOR_ARCHITECTURE = "x86"
+            {
+                VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\8.0\\" : "InstallDir" ] ;
+            }
+        
+            VISUALC = $(VISUALC:P) ;
+            VISUALC = $(VISUALC:P) ;
+            VISUALC = $(VISUALC:P) ;
+        }
+        
+        if ! $(VISUALC)
+        {
+            Exit "VISUALC not found" ;
+        }
+    
+        VISUALC_PATH = $(VISUALC)\\Common7\\IDE ;
+        Echo "Checking for Visual Studio..." $(VISUALC) ;
+        Configure VISUALC_PATH ;
+    }
+}
+
+
+rule ConfigurePlatformSDK
+{
+    if ! $(PLATFORMSDK_CONFIGURED)
+    {
+        PLATFORMSDK_CONFIGURED = 1 ;
+   
+        if $(TARGET_OS:L) = "nt"
+        {
+            PLATFORMSDK ?= $(VISUALC)\\vc\\PlatformSDK ;
+        }
+        else if $(TARGET_OS:L) = "wince"
+        {
+            PLATFORMSDK ?= $(VISUALC)\\smartdevices\\sdk\\pocketpc2003 ;
+        }
+
+        Echo "Checking for Platform SDK..." $(PLATFORMSDK) ;
+
+        if $(TARGET_OS:L) = "nt"
+        {
+            STDHDRS += \""$(PLATFORMSDK)\\include\"" ;
+            CCFLAGS += /DWIN32 ;
+            C++FLAGS += /DWIN32 ;
+
+            if $(TARGET_OSPLAT:L) = "x86_64"
+            {
+                LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\lib\\AMD64\"" ;
+            }
+            else if $(TARGET_OSPLAT:L) = "x86"
+            {
+                LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\lib\"" ;
+            }
+        }
+        else if $(TARGET_OS:L) = "wince"
+        {
+            STDHDRS += \""$(PLATFORMSDK)\\include\"" ;
+            CCFLAGS += /D _WIN32_WCE=0x420 /D WINCE /D UNDER_CE /D WIN32_PLATFORM_PSPC /D _CONSOLE /D _UNICODE /D UNICODE ;
+            C++FLAGS += /D _WIN32_WCE=0x420 /D WINCE /D UNDER_CE /D WIN32_PLATFORM_PSPC /D _CONSOLE /D _UNICODE /D UNICODE ;
+            LINKLIBS += coredll.lib ;
+
+            if $(TARGET_OSPLAT:L) = "arm"
+            {
+                CCFLAGS += /D ARM /D _ARM_ /QRarch4 ;
+                C++FLAGS += /D ARM /D _ARM_ /QRarch4 ;
+                LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)\\Lib\\armv4\"" ;
+                LINKFLAGS += /NODEFAULTLIB:oldnames.lib /subsystem:windowsce,4.20 /ERRORREPORT:PROMPT /ARMPADCODE /machine:ARM ;
+            }
+        }
+
+        Configure STDHDRS ;
+        Configure LINKFLAGS ;
+        Configure CCFLAGS ;
+        Configure C++FLAGS ;
+    }
+}
+
+
+rule ConfigureMt
+{
+    if $(TARGET_OS:L) = "nt"
+    {
+        MT = $(VISUALC)\\vc\\bin\\mt -nologo ;
+        Configure MT ;
+        Echo "Checking for mt..." $(MT:BS) ;
+    }
+}
+
+Load vc.jam ;
+

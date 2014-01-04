@@ -1,0 +1,237 @@
+##############################################################################
+# Configuration rules
+##############################################################################
+
+rule TryBuild
+{
+    local _cc = $(1) ;
+    local _src = $(2) ;
+    local _cflags = $(3) ;
+    local _l = $(4) ;
+    local _L = $(5) ;
+    local _out = a.out ;
+    local _cmd ;
+
+    TryCommand $(RM) $(_out) ;
+
+    if $(4)
+    {
+        _cmd = $(_cc) $(LINKFLAGS) -o $(_out) $(_cflags) -I$(STDHDRS) -L$(5) $(_src) $(4) ;
+    }
+    else
+    {
+        _cmd = $(_cc) -c -o $(_out) $(_cflags) -I$(STDHDRS) $(_src) ;
+    }
+
+    local _r = [ TryCommand $(_cmd) ] ;
+
+    TryCommand $(RM) $(_out) ;
+    return $(_r) ;
+}
+
+
+rule TryBuildCc
+{
+    local _cflags = $(CCFLAGS) $(2) ;
+    return [ TryBuild $(CC) : $(1) : $(2) : $(3) : $(4) ] ;
+}
+
+
+rule TryBuildC++
+{
+    local _cflags = $(C++FLAGS) $(2) ;
+    return [ TryBuild $(C++) : $(1) : $(2) : $(3) : $(4) ] ;
+}
+
+
+rule CheckCc
+{  
+        AS     ?= as ;
+        CC     ?= cc ;
+        RANLIB ?= ranlib ;
+        AR     ?= ar ru ;
+        LINK   ?= $(CC) ;
+    
+        Configure AS ;
+        Configure AR ;
+        Configure CC ;
+        Configure LINK ;
+        Configure RANLIB ;
+    
+        if $(WITH_DEBUG)
+        {
+            CCFLAGS += -DEBUG -g ;
+        }
+        else
+        {
+            CCFLAGS += -DNDEBUG ;
+        }
+
+        if $(WITH_OPTIM)
+        {
+            OPTIM ?= -fast ;
+        }
+
+        WARN ?= +w  -erroff=doubunder -errtags=yes ; # , hidef,hidevf -errtags=yes ;
+
+        CCFLAGS += -mt -lpthread -D_POSIX_C_SOURCE=199506L -D__EXTENSIONS__ ;
+        LINKFLAGS += -mt -lpthread ;
+
+        if $(TARGET_OSPLAT) = sparc9
+        {
+            CCFLAGS += -xtarget=ultra -xarch=v9 ;
+            LINKFLAGS += -xtarget=ultra -xarch=v9 ;
+        }
+
+        Configure CCFLAGS ;
+        Configure OPTIM ;
+        Configure WARN ;
+        Configure LINKFLAGS ;
+    }
+}
+
+
+rule CheckC++
+{
+    ConfigureCc ;
+
+    CC++ ?= CC ;
+    Configure C++ ;
+
+    LINK++ = $(C++) ;
+    Configure LINK++ ;
+
+    C++FLAGS += -mt -lpthread -D_POSIX_C_SOURCE=199506L -D__EXTENSIONS__ ;
+
+    if $(TARGET_OSPLAT) = sparc9
+    {
+        C++FLAGS += -xtarget=ultra -xarch=v9 ;
+    }
+
+    if $(WITH_DEBUG)
+    {
+        C++FLAGS += -DEBUG -g ;
+    }
+    else
+    {
+        C++FLAGS += -DNDEBUG ;
+    }
+
+    Configure C++FLAGS ;
+    Configure C++LINKFLAGS ;
+
+    LIBSTDC++ ?= roguewave ;
+    
+    if $(LIBSTDC++) = stlport4
+    {
+        LIBSTDC++ = stlport4 ;
+        C++FLAGS += -library=stlport4 ;
+        C++LINKFLAGS += -library=stlport4 ;
+    }
+    else if $(LIBSTDC++) != roguewave
+    {
+        Exit "Please specify LIBSTDC++ (roguewave, stlport4)." ;
+    }
+
+    Configure LIBSTDC++ ;
+}
+
+##############################################################################
+# Build Rules
+##############################################################################
+rule FDefines
+{ return -D$(<) ; }
+
+
+rule FIncludes
+{ return -I$(<) ; }
+
+
+#rule Main-Build
+#{
+#    MainFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
+#    Objects $(>) ;
+#
+#    # Add executable name decoration
+#    local _target = $(<:S=$(SUFEXE)) ;
+#
+#    switch $(>:S)
+#    {
+#        case .C :   LINK on $(_target) = $(C++) ;
+#                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+#        case .cc :  LINK on $(_target) = $(C++) ;
+#                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+#        case .cpp : LINK on $(_target) = $(C++) ;
+#                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+#        case * :    LINK on $(_target) = $(CC) ;
+#    }
+#}
+
+
+rule Main-LinkSharedLibraries
+{
+    local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+    local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
+
+    if $(3)
+    {
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(PRELIB)$(>:S=$(SUFDLL)) ;
+        SHLIBS on $(_target) += $(_libs) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
+}
+
+
+rule SharedLibrary-Build
+{
+    SharedLibraryFromObjects $(<) : $(>:GBS=$(SUFOBJ)) ; # FIX was only S
+    Objects $(>) ;
+
+    # Add library name decorations <lib><name><.so>
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+
+    switch $(>:S)
+    {
+        case .C :   LINK on $(_target) = $(C++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case .cc :  LINK on $(_target) = $(C++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case .cpp : LINK on $(_target) = $(C++) ;
+                    LINKFLAGS on $(_target) += $(C++LINKFLAGS) ;
+        case * :    LINK on $(_target) = $(CC) ;
+                    LINKFLAGS on $(_target) += $(LINKFLAGS) ;
+    }
+
+    LINKFLAGS on $(_target) += -G ;
+}
+
+
+rule SharedLibrary-LinkSharedLibraries
+{
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+    local _libs = $(PRELIB)$(>)$(SUFDLL) ;
+
+    if $(3)
+    {
+        LINKLIBS on $(_target) += $(LINKLIBS) -L$(3) -l$(2) ;
+    }
+    else
+    {
+        Depends $(_target) : $(_libs) ;
+        SHLIBS on $(_target) += $(_libs) ;
+        LINKSHLIBS on $(_target) += $(>:S=$(SUFDLL)) ;
+    }
+}
+
+##############################################################################
+# Build Actions
+##############################################################################
+actions Link bind NEEDLIBS SHLIBS
+{
+    $(LINK) -o $(<) $(LINKFLAGS) -L$(SHLIBS:P) $(UNDEFS) $(>) -l$(LINKSHLIBS:B) $(NEEDLIBS) $(LINKLIBS) 
+}
+

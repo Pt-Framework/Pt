@@ -1,0 +1,46 @@
+/** \page faq Frequently Asked Questions
+
+\htmlonly
+
+    <div class="contents">
+        <h3>Can I write closed source applications using Pt?</h3>
+        <p>
+            Yes, you can. Pt is distributed under the LGPL with two license
+            exceptions that also allow static linking and incorporation of
+            inline code from the Pt header files (i.e. C++ class templates).
+        </p>
+
+        <h3>Why is Pt licensed under the LGPL with exceptions?</h3>
+        <p>
+            The LGPL requires that users must be able to replace the LGPL
+            code with a modified version. This is impossible for C++ code,
+            where large parts consist of inline functions and templates. This
+            requirement renders the LGPL equivalent to the GPL.
+        </p>
+        <p>
+            It also complicates static linking, because the object files of
+            the program that links against a static version of the library
+            would have to be made available, so the user can relink the
+            application.
+        </p>
+        <p>
+            The special exception permits convenient use of the library in
+            proprietary and non-GPL open source applications.
+        </p>
+
+        <h3>May I use Code from Platinum directly?</h3>
+        <p>
+            Yes you may. We understand, that in some situations, it is
+            desirable to directly import some of the classes into a project,
+            instead of linking against the framwork provided as it is.
+            We do not mind if you do this, but can not give you the
+            same support as for the framework. Still, we would very much
+            like to hear from you! There are several projects that include 
+            code from the framwork directly.
+        </p>
+
+    </div>
+
+\endhtmlonly
+
+*/

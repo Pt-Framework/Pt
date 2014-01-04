@@ -1,0 +1,77 @@
+-------------------------------------------------------------------------------
+
+All *-with-password.p12 files' PKCS12-export/import-passwords are 123
+
+All *_chain-with-private-key.pem files' PEM-pass-phrase are 123
+
+-------------------------------------------------------------------------------
+
+openssl req -config ./openssl.cnf -newkey rsa:2048 -nodes -keyform PEM -keyout ca.key -x509 -days 36500 -extensions certauth -outform PEM -out ca.cer
+openssl pkcs12 -export -inkey ca.key -in ca.cer -out ca.p12
+openssl pkcs12 -export -inkey ca.key -in ca.cer -out ca-with-password.p12
+openssl pkcs12 -in ca.p12 -out ca.pem -clcerts -nokeys
+openssl x509 -in ca.pem -inform PEM -out ca.der -outform DER
+
+openssl genrsa -out server.key 2048
+openssl req -config ./openssl.cnf -new -key server.key -out server.req
+openssl x509 -req -in server.req -CA ca.cer -CAkey ca.key -set_serial 100 -extfile openssl.cnf -extensions server -days 36400 -outform PEM -out server.cer
+openssl pkcs12 -export -inkey server.key -in server.cer -out server.p12
+openssl pkcs12 -export -inkey server.key -in server.cer -out server-with-password.p12
+openssl pkcs12 -in server.p12 -out server.pem -clcerts -nokeys
+openssl x509 -in server.pem -inform PEM -out server.der -outform DER
+
+openssl genrsa -out client.key 2048
+openssl req -config ./openssl.cnf -new -key client.key -out client.req
+openssl x509 -req -in client.req -CA ca.cer -CAkey ca.key -set_serial 101 -extfile openssl.cnf -extensions client -days 36400 -outform PEM -out client.cer
+openssl pkcs12 -export -inkey client.key -in client.cer -out client.p12
+openssl pkcs12 -export -inkey client.key -in client.cer -out client-with-password.p12
+openssl pkcs12 -in client.p12 -out client.pem -clcerts -nokeys
+openssl x509 -in client.pem -inform PEM -out client.der -outform DER
+
+-------------------------------------------------------------------------------
+
+openssl req -config ./openssl_multi.cnf -newkey rsa:2048 -nodes -keyform PEM -keyout root_ca.key -x509 -days 36500 -extensions certauth -outform PEM -out root_ca.cer
+openssl pkcs12 -export -inkey root_ca.key -in root_ca.cer -out root_ca.p12
+openssl pkcs12 -in root_ca.p12 -out root_ca.pem -clcerts -nokeys
+openssl x509 -in root_ca.pem -inform PEM -out root_ca.der -outform DER
+
+openssl genrsa -out ca_1.key 2048
+openssl req -config ./openssl_multi.cnf -new -key ca_1.key -out ca_1.req
+openssl x509 -req -in ca_1.req -CA root_ca.cer -CAkey root_ca.key -set_serial 100 -extfile openssl_multi.cnf -extensions ca_1 -days 36400 -outform PEM -out ca_1.cer
+openssl pkcs12 -export -inkey ca_1.key -in ca_1.cer -out ca_1.p12
+openssl pkcs12 -in ca_1.p12 -out ca_1.pem -clcerts -nokeys
+openssl x509 -in ca_1.pem -inform PEM -out ca_1.der -outform DER
+
+openssl genrsa -out ca_2.key 2048
+openssl req -config ./openssl_multi.cnf -new -key ca_2.key -out ca_2.req
+openssl x509 -req -in ca_2.req -CA ca_1.cer -CAkey ca_1.key -set_serial 100 -extfile openssl_multi.cnf -extensions ca_2 -days 36400 -outform PEM -out ca_2.cer
+openssl pkcs12 -export -inkey ca_2.key -in ca_2.cer -out ca_2.p12
+openssl pkcs12 -in ca_2.p12 -out ca_2.pem -clcerts -nokeys
+openssl x509 -in ca_2.pem -inform PEM -out ca_2.der -outform DER
+
+cat root_ca.cer ca_1.cer ca_2.cer > ca_chain.cer
+
+openssl genrsa -out server.key 2048
+openssl req -config ./openssl_multi.cnf -new -key server.key -out server.req
+openssl x509 -req -in server.req -CA ca_2.cer -CAkey ca_2.key -set_serial 100 -extfile openssl_multi.cnf -extensions server -days 36400 -outform PEM -out server.cer
+openssl pkcs12 -export -inkey server.key -in server.cer -chain -CAfile ca_chain.cer -out server_chain-with-password.p12
+openssl pkcs12 -in server_chain-with-password.p12 -out server.pem -clcerts -nokeys
+openssl pkcs12 -in server_chain-with-password.p12 -out server_chain.pem -nokeys
+openssl pkcs12 -in server_chain-with-password.p12 -out server_chain-with-private-key.pem
+openssl x509 -in server.pem -inform PEM -out server.der -outform DER
+
+openssl genrsa -out client.key 2048
+openssl req -config ./openssl_multi.cnf -new -key client.key -out client.req
+openssl x509 -req -in client.req -CA ca_2.cer -CAkey ca_2.key -set_serial 100 -extfile openssl_multi.cnf -extensions client -days 36400 -outform PEM -out client.cer
+openssl pkcs12 -export -inkey client.key -in client.cer -chain -CAfile ca_chain.cer -out client_chain-with-password.p12
+openssl pkcs12 -in client_chain-with-password.p12 -out client.pem -clcerts -nokeys
+openssl pkcs12 -in client_chain-with-password.p12 -out client_chain.pem -nokeys
+openssl pkcs12 -in client_chain-with-password.p12 -out client_chain-with-private-key.pem
+openssl x509 -in client.pem -inform PEM -out client.der -outform DER
+
+-------------------------------------------------------------------------------
+
+openssl x509 -text -in file_name.pem
+openssl pkcs12 -info -in file_name.p12
+
+-------------------------------------------------------------------------------
