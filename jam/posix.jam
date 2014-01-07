@@ -55,7 +55,7 @@ rule ConfigurePThread
                                         "int main() { pthread_t id; void* p; pthread_join(id, &p); return 0; }"
                                       : "-I/opt/lsb/include/"
                                       : "-lpthread"
-                                      : "-L/opt/lsb/lib/" ] ;
+                                      : "/opt/lsb/lib/" ] ;
 
         if $(WITH_PTHREADS)
         {
