@@ -55,11 +55,15 @@ rule ConfigurePThread
                                         "int main() { pthread_t id; void* p; pthread_join(id, &p); return 0; }"
                                       : "-I/opt/lsb/include/"
                                       : "-lpthread"
-                                      : "/opt/lsb/lib/" ] ;
+                                      : "-L/opt/lsb/lib/" ] ;
 
         if $(WITH_PTHREADS)
         {
+            PTHREAD_INCLUDES = "/opt/lsb/include/" ;
             PTHREAD_LIBS += -lpthread ;
+
+            Configure PTHREAD_INCLUDES ;
+            EchoOption PTHREAD_INCLUDES : "System LSB-compliant pthread library" ;
         }
     }
 
