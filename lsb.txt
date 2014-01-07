@@ -1,0 +1,1 @@
+./jam.sh configure -sTOOLSET_ROOT=/opt/lsb/bin/ --debug --with-openssl

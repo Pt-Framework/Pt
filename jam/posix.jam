@@ -49,6 +49,20 @@ rule ConfigurePThread
         }
     }
 
+    if ! $(WITH_PTHREADS)
+    {
+        WITH_PTHREADS = [ CheckBuildC++ "#include <pthread.h>"
+                                        "int main() { pthread_t id; void* p; pthread_join(id, &p); return 0; }"
+                                      : "-I/opt/lsb/include/"
+                                      : "-lpthread"
+                                      : "/opt/lsb/lib/" ] ;
+
+        if $(WITH_PTHREADS)
+        {
+            PTHREAD_LIBS += -lpthread ;
+        }
+    }
+
     EchoOption WITH_PTHREADS : "Pthreads library" ;
     Configure WITH_PTHREADS ;
 
