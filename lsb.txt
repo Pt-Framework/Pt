@@ -1,1 +1,1 @@
-./jam.sh configure -sCC=/opt/lsb/bin/lsbcc -sC++=/opt/lsb/bin/lsbc++ ---debug --with-openssl
+./jam.sh configure -sCC=/opt/lsb/bin/lsbcc -sC++=/opt/lsb/bin/lsbc++ ---debug
