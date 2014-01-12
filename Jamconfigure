@@ -101,7 +101,7 @@ if ! $(SYS)
         Exit "ERROR: pthread is required." ;
     }
 
-    SYSLIBS = $(DL_LIBS) $(PTHREAD_LIBS) ;
+    SYSLIBS += $(DL_LIBS) $(PTHREAD_LIBS) ;
 
     ConfigureUnixSockets ;
 
