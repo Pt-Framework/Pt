@@ -52,6 +52,10 @@
     #define _POSIX_VDISABLE _PC_VDISABLE
 #endif
 
+#if defined(__LSB_VERSION__) && ! defined(CRTSCTS)
+    #define CRTSCTS 020000000000
+#endif
+
 namespace Pt {
 
 namespace System {
