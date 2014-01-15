@@ -477,7 +477,7 @@ rule ConfigureTarget
     EchoOption SUFLIB : "Library suffix" ;
     Configure SUFLIB ;
 
-    EchoOption SUFDLL : "Sshared library suffix" ;
+    EchoOption SUFDLL : "Shared library suffix" ;
     Configure SUFDLL ;
 }
 
@@ -582,4 +582,3 @@ rule CheckBuildC++
     TryCommand $(RM) check.cpp ;
     return $(_r) ;
 }
-

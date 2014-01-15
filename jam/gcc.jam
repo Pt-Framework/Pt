@@ -94,7 +94,7 @@ rule TryBuildC++
 }
 
 
-rule CheckCc
+rule Gcc-CheckCc
 {
     TOOLSET_ROOT ?= "" ;
     AS           ?= $(TOOLSET_ROOT)as ;
@@ -176,7 +176,7 @@ rule CheckCc
 }
 
 
-rule CheckC++
+rule Gcc-CheckC++
 {
     ConfigureCc ;
 
@@ -212,6 +212,19 @@ rule CheckC++
     Configure C++FLAGS ;
 }
 
+
+rule CheckCc
+{
+    Gcc-CheckCc ;
+}
+
+
+rule CheckC++
+{
+    Gcc-CheckC++ ;
+}
+
+
 ##############################################################################
 # Build rules
 ##############################################################################
@@ -244,7 +257,7 @@ rule FIncludes
 #}
 
 
-rule Main-LinkSharedLibraries
+rule Gcc-Main-LinkSharedLibraries
 {
     local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
     local _libs = $(PRELIB)$(>:S=$(SUFDLL)) ;
@@ -287,7 +300,7 @@ rule SharedLibrary-Build
 }
 
 
-rule SharedLibrary-LinkSharedLibraries
+rule Gcc-SharedLibrary-LinkSharedLibraries
 {
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
     local _deps = $(PRELIB)$(>)$(SUFDLL) ;
@@ -329,6 +342,19 @@ rule SharedLibrary-LinkSharedLibraries
     }
 }
 
+
+rule Main-LinkSharedLibraries
+{
+    Gcc-Main-LinkSharedLibraries $(1) : $(2) : $(3) ;
+}
+
+
+rule SharedLibrary-LinkSharedLibraries
+{
+    Gcc-SharedLibrary-LinkSharedLibraries $(1) : $(2) : $(3) ;
+}
+
+
 ##############################################################################
 # Build actions
 ##############################################################################
@@ -337,4 +363,3 @@ actions Link bind NEEDLIBS SHLIBS RPATHLIBS
 {
     $(LINK) $(LINKFLAGS) $(RPATH_LINKFLAGS),$(RPATHLIBS:P) -L$(SHLIBS:P) $(WARN) -o $(<) $(UNDEFS) $(>) $(GCC_START_GROUP) -l$(LINKSHLIBS:B) $(LINKLIBS) $(NEEDLIBS) $(GCC_END_GROUP)
 }
-
