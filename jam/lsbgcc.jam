@@ -2,8 +2,8 @@ Load gcc.jam ;
 
 rule CheckCc
 {
-    TOOLSET_ROOT ?= "" ;
-    CC ?= $(TOOLSET_ROOT)lsbcc ;
+    LSB_ROOT ?= "" ;
+    CC ?= $(LSB_ROOT)lsbcc ;
 
     Gcc-CheckCc ;
 }
@@ -11,8 +11,8 @@ rule CheckCc
 
 rule CheckC++
 {
-    TOOLSET_ROOT ?= "" ;
-    C++ ?= $(TOOLSET_ROOT)lsbc++ ;
+    LSB_ROOT ?= "" ;
+    C++ ?= $(LSB_ROOT)lsbc++ ;
 
     Gcc-CheckC++ ;
 }
@@ -23,7 +23,7 @@ rule Main-LinkSharedLibraries
     Gcc-Main-LinkSharedLibraries $(1) : $(2) : $(3) ;
 
     local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
-    LINKLIBS on $(_target) += --lsb-shared-libs=$(2) ;
+    LINKFLAGS on $(_target) += --lsb-shared-libs=$(2) ;
 }
 
 
@@ -32,5 +32,5 @@ rule SharedLibrary-LinkSharedLibraries
     Gcc-SharedLibrary-LinkSharedLibraries $(1) : $(2) : $(3) ;
 
     local _target = $(PRELIB)$(<)$(SUFDLL) ;
-    LINKLIBS on $(_target) += --lsb-shared-libs=$(2) ;
+    LINKFLAGS on $(_target) += --lsb-shared-libs=$(2) ;
 }
