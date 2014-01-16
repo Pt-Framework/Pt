@@ -309,7 +309,7 @@ void Connection::receiveReply(Reply& reply)
         _replyParser.parse(ch);
     }
 
-    if( ! _parser.end() || _parser.fail() )
+    if( ! _replyParser.end() || _replyParser.fail() )
     {
         log_info("invalid HTTP reply");
         throw HttpError("invalid HTTP message");

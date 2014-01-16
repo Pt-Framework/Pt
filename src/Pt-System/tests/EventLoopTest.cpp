@@ -30,6 +30,7 @@
 #include "Pt/System/Clock.h"
 #include "Pt/Timespan.h"
 #include "Pt/Allocator.h"
+#include "Pt/PoolAllocator.h"
 #include <new>
 
 #include "Pt/System/Selectable.h"
@@ -237,38 +238,37 @@ class EventLoopTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_THROW( el.commitEvent( E1() ), std::bad_alloc );
         }
 
-        // Pt::System::MainLoop* _loop;
+         Pt::System::MainLoop* _loop;
 
-        // void LoopBenchmark()
-        // {
-        //     Pt::System::MainLoop el;
-        //     connect(el.timeout, el, &Pt::System::MainLoop::exit);
-        //     el.setIdleTimeout(500);
+         void LoopBenchmark()
+         {
+             Pt::PoolAllocator allocator(64, 8, 4096);
+             Pt::System::MainLoop loop(allocator);
 
-        //     el.event.subscribe( slot(*this, &MainLoopTest::onBenchmarkEvent) );
+             loop.eventReceived().connect( slot(*this, &EventLoopTest::onBenchmarkEvent) );
 
-        //     _loop = &el;
-        //     el.commitEvent( E1() );
+             _loop = &loop;
+             loop.commitEvent( E1() );
 
-        //     Pt::System::Clock clock;
-        //     clock.start();
-        //     el.run();
-        //     Pt::Timespan elapsed = clock.stop();
+             Pt::System::Clock clock;
+             clock.start();
+             loop.run();
+             Pt::Timespan elapsed = clock.stop();
 
-        //     std::cerr << "\n#### LoopTime: " << ( 5000000/elapsed.toMSecs() ) * 1000 << " ev/s" << std::endl;
-        //     std::exit(1);
-        // }
+             std::cerr << "\n#### LoopTime: " << ( 500000/elapsed.toMSecs() ) * 1000 << " ev/s" << std::endl;
+             //std::exit(1);
+         }
 
-        // void onBenchmarkEvent(const E1&)
-        // {
-        //     if(++_cnt > 5000000)
-        //     {
-        //         _loop->exit();
-        //         return;
-        //     }
+         void onBenchmarkEvent(const E1&)
+         {
+             if(++_cnt > 500000)
+             {
+                 _loop->exit();
+                 return;
+             }
 
-        //     _loop->commitEvent( E1() );
-        // }
+             _loop->commitEvent( E1() );
+         }
 
         private:
             int _cnt;

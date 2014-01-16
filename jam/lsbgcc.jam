@@ -1,0 +1,36 @@
+Load gcc.jam ;
+
+rule CheckCc
+{
+    LSB_ROOT ?= "" ;
+    CC ?= $(LSB_ROOT)lsbcc ;
+
+    Gcc-CheckCc ;
+}
+
+
+rule CheckC++
+{
+    LSB_ROOT ?= "" ;
+    C++ ?= $(LSB_ROOT)lsbc++ ;
+
+    Gcc-CheckC++ ;
+}
+
+
+rule Main-LinkSharedLibraries
+{
+    Gcc-Main-LinkSharedLibraries $(1) : $(2) : $(3) ;
+
+    local _target = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+    LINKFLAGS on $(_target) += --lsb-shared-libs=$(2) ;
+}
+
+
+rule SharedLibrary-LinkSharedLibraries
+{
+    Gcc-SharedLibrary-LinkSharedLibraries $(1) : $(2) : $(3) ;
+
+    local _target = $(PRELIB)$(<)$(SUFDLL) ;
+    LINKFLAGS on $(_target) += --lsb-shared-libs=$(2) ;
+}

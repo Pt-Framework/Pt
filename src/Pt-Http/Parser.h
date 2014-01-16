@@ -148,6 +148,7 @@ class PT_HTTP_API HeaderParser
 
         bool end() const    { return state == &HeaderParser::state_end
                                 || state == &HeaderParser::state_error; }
+
         bool fail() const   { return state == &HeaderParser::state_error; }
 
         void reset(bool client)
