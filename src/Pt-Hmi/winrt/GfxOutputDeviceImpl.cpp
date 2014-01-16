@@ -481,13 +481,13 @@ void GfxOutputDeviceImpl::output()
 {
 	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
 
-	_rgb88Image.resize(_model->PaintBuffer.width(), _model->PaintBuffer.height());
+	_rgb88Image.resize(_model->PaintSurface.width(), _model->PaintSurface.height());
 
-	for( size_t x = 0; x < _model->PaintBuffer.width(); ++x)
+	for( size_t x = 0; x < _model->PaintSurface.width(); ++x)
 	{
-		for(size_t y = 0; y < _model->PaintBuffer.height(); ++y)
+		for(size_t y = 0; y < _model->PaintSurface.height(); ++y)
 		{
-			const Pt::Gfx::ARgbColor& pixel = _model->PaintBuffer.pixel(x,y);
+			const Pt::Gfx::ARgbColor& pixel = _model->PaintSurface.pixel(x,y);
 
 			Pt::Gfx::Rgb888Color color((Pt::uint8_t) pixel.red(), (Pt::uint8_t) pixel.green(), (Pt::uint8_t) pixel.blue());
 			_rgb88Image.setColor(x,y,color);

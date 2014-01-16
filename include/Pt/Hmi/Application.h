@@ -5,6 +5,7 @@
 #include <Pt/System/Application.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/Singleton.h>
 
 namespace Pt {
@@ -32,6 +33,7 @@ public:
 
 	Pt::Gfx::Point fromUnit(const Pt::Gfx::PointF& value);
 	Pt::Gfx::Size fromUnit(const Pt::Gfx::SizeF& value);
+	Pt::Gfx::Rect fromUnit(const Pt::Gfx::RectF& value);
 	int fromUnit(double value);
 
 	double unitSizeInch() const;

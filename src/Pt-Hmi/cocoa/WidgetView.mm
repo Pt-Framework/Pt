@@ -86,8 +86,8 @@
         return;
     
     //Create a raw buffer to hold pixel data which we will fill algorithmically
-    NSInteger width =  _outDevice->model()->PaintBuffer.width();
-    NSInteger height = _outDevice->model()->PaintBuffer.height();
+    NSInteger width =  _outDevice->model()->PaintSurface.width();
+    NSInteger height = _outDevice->model()->PaintSurface.height();
 
     NSInteger dataLength = width * height * 4;
     UInt8 *data = (UInt8*)malloc(dataLength * sizeof(UInt8));
@@ -98,7 +98,7 @@
         for (int i=0; i<width; i++)
         {
             
-            const Pt::Gfx::ARgbColor& pixel = _outDevice->model()->PaintBuffer.pixel(i,j);
+            const Pt::Gfx::ARgbColor& pixel = _outDevice->model()->PaintSurface.pixel(i,j);
                                        
             int index = 4*(i+j*width);
             

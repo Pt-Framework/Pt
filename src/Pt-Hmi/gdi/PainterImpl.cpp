@@ -36,6 +36,7 @@
 #include "Pt/Gfx/FontMetrics.h"
 #include "Pt/Gfx/Rgb888Color.h"
 #include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/Application.h>
 #include <iostream>
 #include <algorithm>
 
@@ -63,7 +64,7 @@ void PainterImpl::ensureActivePainter() const
     }
 }
 
-void PainterImpl::drawText( const Gfx::Point& to, const Pt::String& text, const Gfx::ARgbColor* outline )
+void PainterImpl::drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline )
 {
     drawText(to, text);
 }
@@ -363,8 +364,10 @@ Gfx::FontMetrics PainterImpl::fontMetrics(Pt::String text) const
     _text.clear();
 	text.toUtf16( std::back_inserter(_text) );
     GetTextExtentPoint32W(_surface->deviceContext(), _text.c_str(), _text.length(), &textSize);
+	Pt::Gfx::Size size(textSize.cx, textSize.cy);
+	Pt::Gfx::SizeF sizeF = Application::instance().toUnit(size);
 
-    return Gfx::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, textSize.cx, textSize.cy);
+    return Gfx::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, (int)sizeF.width(), (int)sizeF.height());
 }
 
 
@@ -435,9 +438,10 @@ int PainterImpl::depth() const
 }
 
 
-void PainterImpl::drawPixel(const Pt::Gfx::Point& to)
+void PainterImpl::drawPixel(const Pt::Gfx::PointF& toF)
 {
     ensureActivePainter();
+	Pt::Gfx::Point to = Application::instance().fromUnit(toF);
 
     Gfx::Rgb888Color col;
     assign( col, _pen.color() );
@@ -449,9 +453,12 @@ void PainterImpl::drawPixel(const Pt::Gfx::Point& to)
 }
 
 
-void PainterImpl::drawLine(const Pt::Gfx::Point& from, const  Pt::Gfx::Point& to)
+void PainterImpl::drawLine(const Pt::Gfx::PointF& fromF, const  Pt::Gfx::PointF& toF)
 {
     ensureActivePainter();
+
+	Pt::Gfx::Point from = Application::instance().fromUnit(fromF);
+	Pt::Gfx::Point to = Application::instance().fromUnit(toF);
 
     if (_pen.size() == 0) {
         return; // Draw nothing if the pen size is 0.
@@ -467,9 +474,11 @@ void PainterImpl::drawLine(const Pt::Gfx::Point& from, const  Pt::Gfx::Point& to
 }
 
 
-void PainterImpl::drawText(const Pt::Gfx::Point& to, const Pt::String& text)
+void PainterImpl::drawText(const Pt::Gfx::PointF& toF, const Pt::String& text)
 {
     ensureActivePainter();
+
+	Pt::Gfx::Point to = Application::instance().fromUnit(toF);
 
     //_textStream.clear();
     //_stringStream.str("");
@@ -490,9 +499,11 @@ void PainterImpl::drawText(const Pt::Gfx::Point& to, const Pt::String& text)
 }
 
 
-void PainterImpl::fillRect(const Pt::Gfx::Rect& rect)
+void PainterImpl::fillRect(const Pt::Gfx::RectF& rectF)
 {
     ensureActivePainter();
+
+	Pt::Gfx::Rect rect = Application::instance().fromUnit(rectF);
 
     RECT rectangle;
     const Pt::Gfx::Point topLeft     = rect.topLeft();
@@ -504,14 +515,16 @@ void PainterImpl::fillRect(const Pt::Gfx::Rect& rect)
 }
 
 
-void PainterImpl::drawRect(const Pt::Gfx::Rect& rect)
+void PainterImpl::drawRect(const Pt::Gfx::RectF& rectF)
 {
     ensureActivePainter();
+
+	Pt::Gfx::Rect rect = Application::instance().fromUnit(rectF);
 
     if (rect.size().width() == 1 && rect.size().height() == 1) {
         // Windows does not paint outline rectangles with a size of 1,1. For compatibility
         // to other windowing systems we draw a pixel (1|1) instead.
-        drawPixel(rect.topLeft());
+        drawPixel(rectF.topLeft());
         return;
     }
 
@@ -527,9 +540,12 @@ void PainterImpl::drawRect(const Pt::Gfx::Rect& rect)
 }
 
 
-void PainterImpl::drawEllipse(const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size)
+void PainterImpl::drawEllipse(const Pt::Gfx::PointF& topLeftF, const Pt::Gfx::SizeF& sizeF)
 {
     ensureActivePainter();
+
+	Pt::Gfx::Point topLeft = Application::instance().fromUnit(topLeftF);
+	Pt::Gfx::Size size = Application::instance().fromUnit(sizeF);
 
     // Temporarily select the empty brush to only draw the outline.
     HBRUSH originalBrush = (HBRUSH)SelectObject(_surface->deviceContext(), GetStockObject(NULL_BRUSH));
@@ -546,9 +562,12 @@ void PainterImpl::drawEllipse(const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size
 }
 
 
-void PainterImpl::fillEllipse(const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size)
+void PainterImpl::fillEllipse(const Pt::Gfx::PointF& topLeftF, const Pt::Gfx::SizeF& sizeF)
 {
     ensureActivePainter();
+
+	Pt::Gfx::Point topLeft = Application::instance().fromUnit(topLeftF);
+	Pt::Gfx::Size size = Application::instance().fromUnit(sizeF);
 
     // Temporarily select the empty pen to only draw the filling.
     HPEN originalPen = (HPEN)SelectObject(_surface->deviceContext(), GetStockObject(NULL_PEN));
@@ -565,7 +584,7 @@ void PainterImpl::fillEllipse(const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size
 }
 
 
-void PainterImpl::drawPolyline(const Pt::Gfx::Point* points, const size_t pointCount)
+void PainterImpl::drawPolyline(const Pt::Gfx::PointF* points, const size_t pointCount)
 {
     if (_pen.size() == 0)
        return;
@@ -576,8 +595,9 @@ void PainterImpl::drawPolyline(const Pt::Gfx::Point* points, const size_t pointC
 
     for (size_t i = 0; i < pointCount; i++)
     {
-        winPoints[i].x = points[i].x();
-        winPoints[i].y = points[i].y();
+		Pt::Gfx::Point p = Application::instance().fromUnit(points[i]);
+        winPoints[i].x = p.x();
+        winPoints[i].y = p.y();
     }
 
     Polyline( _surface->deviceContext(), &(winPoints[0]), pointCount );
@@ -598,7 +618,7 @@ void PainterImpl::drawPolyline(const Pt::Gfx::Point* points, const size_t pointC
 }
 
 
-void PainterImpl::fillPolygon(const Pt::Gfx::Point* points, const size_t pointCount)
+void PainterImpl::fillPolygon(const Pt::Gfx::PointF* points, const size_t pointCount)
 {
     ensureActivePainter();
 
@@ -608,9 +628,11 @@ void PainterImpl::fillPolygon(const Pt::Gfx::Point* points, const size_t pointCo
 
     std::vector<POINT> winPoints(pointCount);
 
-    for (size_t i = 0; i < pointCount; i++) {
-        winPoints[i].x = points[i].x();
-        winPoints[i].y = points[i].y();
+     for (size_t i = 0; i < pointCount; i++)
+    {
+		Pt::Gfx::Point p = Application::instance().fromUnit(points[i]);
+        winPoints[i].x = p.x();
+        winPoints[i].y = p.y();
     }
 
     Polygon(_surface->deviceContext(), &(winPoints[0]), pointCount);
@@ -621,10 +643,11 @@ void PainterImpl::fillPolygon(const Pt::Gfx::Point* points, const size_t pointCo
 }
 
 
-void PainterImpl::drawSurface(const Pt::Gfx::Point& to, PaintSurface& surface, const  Pt::Gfx::Region& pixmapRegion)
+void PainterImpl::drawSurface(const Pt::Gfx::PointF& toF, PaintSurface& surface, const  Pt::Gfx::Region& pixmapRegion)
 {
     ensureActivePainter();
 
+	Pt::Gfx::Point to = Application::instance().fromUnit(toF);
 
     // Copy contents from the source bitmap to the destination (=new) bitmap.
     BitBlt(
@@ -638,10 +661,10 @@ void PainterImpl::drawSurface(const Pt::Gfx::Point& to, PaintSurface& surface, c
 
 }
 
-void PainterImpl::drawSurface(const Pt::Gfx::Point& to, PaintSurface& surface)
+void PainterImpl::drawSurface(const Pt::Gfx::PointF& toF, PaintSurface& surface)
 {
     ensureActivePainter();
-
+	Pt::Gfx::Point to = Application::instance().fromUnit(toF);
 
     // Copy contents from the source bitmap to the destination (=new) bitmap.
     BitBlt(
@@ -654,17 +677,20 @@ void PainterImpl::drawSurface(const Pt::Gfx::Point& to, PaintSurface& surface)
     );
 }
 
-void PainterImpl::drawImage(const Pt::Gfx::Point& to, const Gfx::ARgbImage& image)
+void PainterImpl::drawImage(const Pt::Gfx::PointF& toF, const Gfx::ARgbImage& image)
 {
     ensureActivePainter();
+
+	Pt::Gfx::Point to = Application::instance().fromUnit(toF);
 
     this->drawImage( to.x(), to.y(), image.begin(), image.end(), image.width(), image.height() );
 }
 
 
-void PainterImpl::drawImage(const Pt::Gfx::Point& to, const Gfx::ARgbImage& image, const  Pt::Gfx::Region& imageRegion)
+void PainterImpl::drawImage(const Pt::Gfx::PointF& toF, const Gfx::ARgbImage& image, const  Pt::Gfx::Region& imageRegion)
 {
     ensureActivePainter();
+		Pt::Gfx::Point to = Application::instance().fromUnit(toF);
 
     Gfx::ARgbSubImage subImage(const_cast<Gfx::ARgbImage&>( image ), imageRegion);
     this->drawImage( to.x(), to.y(), subImage.begin(), subImage.end(), subImage.width(), subImage.height() );

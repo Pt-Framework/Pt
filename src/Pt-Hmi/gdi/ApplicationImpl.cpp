@@ -302,6 +302,12 @@ Pt::Gfx::Size ApplicationImpl::fromUnit(const Pt::Gfx::SizeF& value)
 	return Pt::Gfx::Size(width,height);
 }
 
+Pt::Gfx::Rect ApplicationImpl::fromUnit(const Pt::Gfx::RectF& value)
+{
+	Pt::Gfx::Rect rect(Pt::Gfx::Point(value.x(), value.y()), Pt::Gfx::Size(value.width(), value.height()));
+	return rect;
+}
+
 double ApplicationImpl::unitSizeInch() const
 {
 	return 1.0/96.0;

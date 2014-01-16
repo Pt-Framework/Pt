@@ -53,6 +53,11 @@ Pt::Gfx::Size Application::fromUnit(const Pt::Gfx::SizeF& value)
 	return _impl->fromUnit(value);
 }
 
+Pt::Gfx::Rect Application::fromUnit(const Pt::Gfx::RectF& value)
+{
+	return _impl->fromUnit(value);
+}
+
 double Application::unitSizeInch() const
 {
 	return _impl->unitSizeInch();

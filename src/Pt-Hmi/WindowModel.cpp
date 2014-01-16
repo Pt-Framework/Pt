@@ -25,8 +25,8 @@ WindowModel::WindowModel()
 , DefinePropertyInitMacro(FocuseMoveKey, "\t")
 {
 	Visible.set(false);
-	Position = toUnit(Pt::Gfx::Point(20,20));
-	Size = toUnit(Pt::Gfx::Size(200,200));
+	Position = Pt::Gfx::PointF(20,20);
+	Size = Pt::Gfx::SizeF(200,200);
 	Focused.set(true);
 }
 

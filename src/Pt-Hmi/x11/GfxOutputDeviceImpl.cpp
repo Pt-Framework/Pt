@@ -108,7 +108,7 @@ void GfxOutputDeviceImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
 	{
 		for( size_t x = 0; x < image.width(); ++x)
 		{
-			const Pt::Gfx::ARgbColor& pixel = _model->PaintBuffer.pixel(x,y);
+			const Pt::Gfx::ARgbColor& pixel = _model->PaintSurface.pixel(x,y);
 
 			XGCValues gcv;
 
@@ -139,7 +139,7 @@ void GfxOutputDeviceImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
 
 		for( size_t x = 0; x < image.width(); ++x)
 		{
-			const Pt::Gfx::ARgbColor& pixel = _model->PaintBuffer.pixel(x,y);
+			const Pt::Gfx::ARgbColor& pixel = _model->PaintSurface.pixel(x,y);
 			const int pixelOffset = lineOffset +(x* pixelSize);				
 			pixelToScreen((char*)&_pixelBuffer[pixelOffset], pixel);					
 		}
@@ -558,7 +558,7 @@ void GfxOutputDeviceImpl::onPaint(XEvent& xev)
 {
 	if( _model != 0)
 	{
-		drawIndependentImage(_model->PaintBuffer);
+		drawIndependentImage(_model->PaintSurface);
 	}
 }
 
@@ -780,7 +780,7 @@ void GfxOutputDeviceImpl::updateDrawBuffer()
     
 	size_t pixelSize = (depth == 16) ? 2 : 4;	
 
-	size_t currentSize = _model->PaintBuffer.width() * _model->PaintBuffer.height() * pixelSize;
+	size_t currentSize = _model->PaintSurface.width() * _model->PaintSurface.height() * pixelSize;
 
 	if(_pixelBuffer.size() < currentSize)
 		_pixelBuffer.resize(currentSize);
@@ -837,7 +837,7 @@ void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
 	
 	writeWindowProperties();
 
-	drawIndependentImage(_model->PaintBuffer);
+	drawIndependentImage(_model->PaintSurface);
 	redraw();
 	std::cout<<"INFO: GFX output done!"<<std::endl;
 }

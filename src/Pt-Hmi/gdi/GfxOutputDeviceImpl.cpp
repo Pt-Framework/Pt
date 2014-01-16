@@ -401,7 +401,7 @@ void GfxOutputDeviceImpl::onPaint()
 	PAINTSTRUCT ps;
     HDC windowContext = BeginPaint(_hwnd, &ps);
 	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
-	HDC bitmapDeviceConText = _model->PaintBuffer.impl()->deviceContext();
+	HDC bitmapDeviceConText = _model->PaintSurface.impl()->deviceContext();
     BitBlt(windowContext, 0, 0, size.width(), size.height(), bitmapDeviceConText, 0, 0, SRCCOPY);	
 	EndPaint(_hwnd, &ps);	
 }

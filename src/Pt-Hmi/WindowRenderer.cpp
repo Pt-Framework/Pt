@@ -49,13 +49,13 @@ void WindowRenderer::render(Pt::Hmi::Model* m)
 	if( model == 0)
 		throw std::logic_error("ERROR: WindowController expect a GFxModel");
 
-	Pt::Gfx::Size size = model->fromUnit(model->Size.get());
+	Pt::Gfx::SizeF size = model->Size.get();
 
-	Pt::Gfx::Rect rect(Pt::Gfx::Point(0,0), size);
+	Pt::Gfx::RectF rect(Pt::Gfx::PointF(0,0), size);
 	
 	Pt::Gfx::Brush brush(model->BackColor.get());
 	
-	Pt::Hmi::Painter localPainter(model->PaintBuffer);
+	Pt::Hmi::Painter localPainter(model->PaintSurface);
 
 	localPainter.setBrush(brush);
 	localPainter.fillRect(rect);

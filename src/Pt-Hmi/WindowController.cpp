@@ -136,7 +136,7 @@ void WindowController::onSizeChanged(const void* sender, const PropertyBase& pro
 {
 	GfxModel* m = gfxModel();
 	
-	m->PaintBuffer.resize(m->Size.get());	
+	m->PaintSurface.resize(m->Size.get());	
 	
 	if(m->Visible.get())
 		invalidate();

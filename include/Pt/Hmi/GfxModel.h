@@ -98,7 +98,7 @@ public:
 	Property<bool>					AcceptFocus;
     Property<bool>					HighLight;
 	Property<std::string>			FocusedActionKey;
-	PaintSurface					PaintBuffer;
+	PaintSurface					PaintSurface;
 
 public:
 	virtual ~GfxModel();

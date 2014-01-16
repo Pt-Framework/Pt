@@ -42,7 +42,7 @@ namespace Hmi {
 class PaintSurfaceImpl;
 class PaintSurface;
 
-class PainterImpl : public Gfx::Painter
+class PainterImpl
 {
     public:
         PainterImpl(PaintSurfaceImpl* surface);
@@ -69,33 +69,33 @@ class PainterImpl : public Gfx::Painter
 
         int depth() const;
 
-        void drawPixel(const Pt::Gfx::Point& to);
+        void drawPixel(const Pt::Gfx::PointF& to);
 
-        void drawLine(const Pt::Gfx::Point& from, const Pt::Gfx::Point& to);
+        void drawLine(const Pt::Gfx::PointF& from, const Pt::Gfx::PointF& to);
 
-		void drawText( const Gfx::Point& to, const Pt::String& text, const Gfx::ARgbColor* outline );
+		void drawText( const Pt::Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline );
 
-        void drawText(const Pt::Gfx::Point& to, const Pt::String& Text);
+        void drawText(const Pt::Gfx::PointF& to, const Pt::String& Text);
 
-        void drawRect(const Pt::Gfx::Rect& rectangle);
+        void drawRect(const Pt::Gfx::RectF& rectangle);
 
-        void fillRect(const Pt::Gfx::Rect& rectangle);
+        void fillRect(const Pt::Gfx::RectF& rectangle);
 
-        void drawEllipse(const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size);
+        void drawEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size);
 
-        void fillEllipse(const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size);
+        void fillEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size);
 
-        void drawPolyline(const Pt::Gfx::Point* points, const size_t pointCount);
+        void drawPolyline(const Pt::Gfx::PointF* points, const size_t pointCount);
 
-        void fillPolygon(const Pt::Gfx::Point* points, const size_t pointCount);
+        void fillPolygon(const Pt::Gfx::PointF* points, const size_t pointCount);
 
-        void drawSurface(const Pt::Gfx::Point& to, PaintSurface& pm, const Pt::Gfx::Region& pmRegion);
+        void drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm, const Pt::Gfx::Region& pmRegion);
 
-        void drawSurface(const Pt::Gfx::Point& to, PaintSurface& pm);
+        void drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm);
 		
-        void drawImage(const Pt::Gfx::Point& to, const Gfx::ARgbImage& image);
+        void drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image);
 
-        void drawImage(const Pt::Gfx::Point& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion);
+        void drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion);
 
         template <typename Iterator>
         void drawImage(size_t x, size_t y, Iterator begin, Iterator end, size_t width, size_t height)

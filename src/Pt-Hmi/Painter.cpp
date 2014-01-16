@@ -85,72 +85,72 @@ int Painter::depth() const
 	return _impl->depth();
 }
 
-void Painter::drawPixel(const Pt::Gfx::Point& to)
+void Painter::drawPixel(const Pt::Gfx::PointF& to)
 {
 	_impl->drawPixel(to);
 }
 
-void Painter::drawLine(const Pt::Gfx::Point& from, const Pt::Gfx::Point& to)
+void Painter::drawLine(const Pt::Gfx::PointF& from, const Pt::Gfx::PointF& to)
 {
 	_impl->drawLine(from,to);
 }
 
-void Painter::drawText( const Gfx::Point& to, const Pt::String& text, const Gfx::ARgbColor* outline )
+void Painter::drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline )
 {
 	_impl->drawText( to,text, outline);
 }
 
-void Painter::drawText(const Pt::Gfx::Point& to, const Pt::String& Text)
+void Painter::drawText(const Pt::Gfx::PointF& to, const Pt::String& Text)
 {
 	_impl->drawText(to, Text);
 }
 
-void Painter::drawRect(const Pt::Gfx::Rect& rectangle)
+void Painter::drawRect(const Pt::Gfx::RectF& rectangle)
 {
 	_impl->drawRect(rectangle);
 }
 
-void Painter::fillRect(const Pt::Gfx::Rect& rectangle)
+void Painter::fillRect(const Pt::Gfx::RectF& rectangle)
 {
 	_impl->fillRect(rectangle);
 }
 
-void Painter::drawEllipse(const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size)
+void Painter::drawEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size)
 {
 	_impl->drawEllipse(topLeft, size);
 }
 
-void Painter::fillEllipse(const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size)
+void Painter::fillEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size)
 {
 	_impl->fillEllipse(topLeft, size);
 }
 
-void Painter::drawPolyline(const Pt::Gfx::Point* points, const size_t pointCount)
+void Painter::drawPolyline(const Pt::Gfx::PointF* points, const size_t pointCount)
 {
 	_impl->drawPolyline(points, pointCount);
 }
 
-void Painter::fillPolygon(const Pt::Gfx::Point* points, const size_t pointCount)
+void Painter::fillPolygon(const Pt::Gfx::PointF* points, const size_t pointCount)
 {
 	_impl->fillPolygon(points, pointCount);
 }
 
-void Painter::drawSurface(const Pt::Gfx::Point& to, PaintSurface& pm, const Pt::Gfx::Region& pmRegion)
+void Painter::drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm, const Pt::Gfx::Region& pmRegion)
 {
 	_impl->drawSurface(to, pm, pmRegion);
 }
 
-void Painter::drawSurface(const Pt::Gfx::Point& to, PaintSurface& pm)
+void Painter::drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm)
 {
 	_impl->drawSurface(to, pm);
 }	
 	
-void Painter::drawImage(const Pt::Gfx::Point& to, const Gfx::ARgbImage& image)
+void Painter::drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image)
 {
 	_impl->drawImage(to, image);
 }
 
-void Painter::drawImage(const Pt::Gfx::Point& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion)
+void Painter::drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion)
 {
 	_impl->drawImage(to, image, imageRegion);
 }

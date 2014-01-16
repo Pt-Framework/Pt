@@ -43,12 +43,12 @@ void ButtonRenderer::render(Pt::Hmi::Model* m)
 	if( ctrl== 0)
 		return;
 
-	Pt::Hmi::Painter localPainter(model->PaintBuffer);
-    Pt::Gfx::Size size = model->fromUnit(model->Size.get());
+	Pt::Hmi::Painter localPainter(model->PaintSurface);
+    Pt::Gfx::SizeF size = model->Size.get();
        
 	if(model->Armed.get() || model->Focused.get())
 	{
-		Pt::Gfx::Size size = model->fromUnit(model->Size.get());
+		Pt::Gfx::SizeF size = model->Size.get();
 		size.addHeight(-5);
 		size.addWidth(-5);
 
@@ -57,7 +57,7 @@ void ButtonRenderer::render(Pt::Hmi::Model* m)
 		Pt::Gfx::Pen pen(1, armedColor, Pt::Gfx::Pen::DashStyle);
 		
 		localPainter.setPen(pen);		
-		Pt::Gfx::Rect rect(Pt::Gfx::Point(2,2), size);
+		Pt::Gfx::RectF rect(Pt::Gfx::PointF(2,2), size);
 		localPainter.drawRect(rect);		
 	}		
 }

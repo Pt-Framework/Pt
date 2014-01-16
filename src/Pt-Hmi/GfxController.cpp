@@ -127,15 +127,14 @@ void GfxController::render()
 	}
 
 	//Bit-Blit my childs	
-	Pt::Hmi::Painter localPainter(m->PaintBuffer);
+	Pt::Hmi::Painter localPainter(m->PaintSurface);
 
 	for( size_t i = 0; i < children().size(); ++i)
 	{
 		GfxController* child = dynamic_cast<GfxController*> (children()[i]);				
 
 		GfxModel* childModel = (GfxModel*) child->model();
-		Pt::Gfx::Point pos  = childModel->fromUnit(childModel->Position.get());
-		localPainter.drawSurface(pos,childModel->PaintBuffer);
+		localPainter.drawSurface(childModel->Position.get(),childModel->PaintSurface);
 	}
 }
 

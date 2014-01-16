@@ -78,7 +78,7 @@ class ApplicationImpl : public Pt::System::EventLoop
 		int fromUnit(double value);
 		Pt::Gfx::Point fromUnit(const Pt::Gfx::PointF& value);
 		Pt::Gfx::Size fromUnit(const Pt::Gfx::SizeF& value);
-
+		Pt::Gfx::Rect fromUnit(const Pt::Gfx::RectF& value);
 		double unitSizeInch() const;
 		double unitSizeMm() const;
 

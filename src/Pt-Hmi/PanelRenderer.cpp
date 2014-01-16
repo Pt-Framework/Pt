@@ -40,20 +40,18 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 	if(model->BorderRoundEdge.get())
 		corner = 2;
     
-	int border =  model->fromUnit(model->BorderWidth.get());	
-	Pt::Gfx::Size   size = model->fromUnit(model->Size.get());
+	double border =  model->BorderWidth.get();	
 	Pt::Gfx::SizeF  clientSize(model->Size.get().width() - model->BorderWidth.get()/2, model->Size.get().height() - model->BorderWidth.get()/2);	
-	Pt::Gfx::Size   rectSize = model->fromUnit(clientSize);
-	Pt::Gfx::Rect   clientRect(Pt::Gfx::Point( model->BorderWidth.get()/2, model->BorderWidth.get()/2), rectSize);
+	Pt::Gfx::RectF  clientRect(Pt::Gfx::PointF( model->BorderWidth.get()/2, model->BorderWidth.get()/2), clientSize);
 	
-	Pt::Hmi::Painter localPainter(model->PaintBuffer);
+	Pt::Hmi::Painter localPainter(model->PaintSurface);
 						
 	switch(model->BorderStyle.get())
 	{
 		case BorderStyleType::Single:
 		{			
-			std::vector<Pt::Gfx::Point> points1(5);
-			std::vector<Pt::Gfx::Point> points2(5);
+			std::vector<Pt::Gfx::PointF> points1(5);
+			std::vector<Pt::Gfx::PointF> points2(5);
 
 			//P0
 			points1[0].setX(corner);
@@ -107,8 +105,8 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 			
 		case BorderStyleType::Widget:
 		{			
-			std::vector<Pt::Gfx::Point> points1(5);
-			std::vector<Pt::Gfx::Point> points2(5);
+			std::vector<Pt::Gfx::PointF> points1(5);
+			std::vector<Pt::Gfx::PointF> points2(5);
 
 			//P0
 			points1[0].setX(corner);
@@ -166,8 +164,8 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 		break;
 		case BorderStyleType::Border3D:
 		{
-			std::vector<Pt::Gfx::Point> points1(3);
-			std::vector<Pt::Gfx::Point> points2(3);
+			std::vector<Pt::Gfx::PointF> points1(3);
+			std::vector<Pt::Gfx::PointF> points2(3);
 
 			points1[0].setX(0);
 			points1[0].setY(clientRect.height());

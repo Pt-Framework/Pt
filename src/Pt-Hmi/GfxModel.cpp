@@ -26,7 +26,7 @@ GfxModel::GfxModel()
 , DefinePropertyInitMacro(AcceptFocus,true)
 , DefinePropertyInitMacro(HighLight, false)
 , DefinePropertyInitMacro(FocusedActionKey," ")
-, PaintBuffer(Pt::Gfx::SizeF(800,600))
+, PaintSurface(Pt::Gfx::SizeF(800,600))
 {
 	Position = toUnit(Pt::Gfx::Point(0,0));
 	Focused.PropertyChanged += Pt::slot(*this, &GfxModel::onFocusChanged);
