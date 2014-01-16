@@ -46,7 +46,7 @@ public:
 	GfxOutputDeviceImpl();
 	virtual ~GfxOutputDeviceImpl();
 	void output(Pt::Hmi::Model* model);
-	Pt::Gfx::Painter* nativePainter();
+
 	inline HWND hwnd()
 	{
 		return _hwnd;
@@ -71,7 +71,6 @@ protected:
 	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
 	void create();
 	void destroy();
-	void output();
 	void centerWindowTo(HWND parent);
 
 private:
@@ -81,7 +80,6 @@ private:
 	bool					_ignoreEvent;
 	KeyEvent				_keyEvent;
 	PointingEvent			_pointerEvent;
-	Pt::Gfx::Rgb888Image	_rgb88Image;
 };
 
 }}

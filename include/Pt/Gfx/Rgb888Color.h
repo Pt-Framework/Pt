@@ -211,9 +211,9 @@ namespace Pt {
             // 76543210765432107654321076543210
             // 00000000RRRRRRRRGGGGGGGGBBBBBBBB
             //                 CCCCCCCCCCCCCCCC
-            const uint32_t val = ( uint32_t(from.red  () & 0xFF00) <<  8 ) |
-                                   uint32_t(from.green() & 0xFF00)         |
-                                 ( uint32_t(from.blue ()         ) >>  8 );
+            const uint32_t val = ( uint32_t(from.red  () & 0xFF) <<  16 ) |
+                                 ( uint32_t(from.green() & 0xFF) <<   8)  |
+                                 ( uint32_t(from.blue () & 0xFF)  );
             to.setValue(val);
         }
 

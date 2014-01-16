@@ -262,7 +262,7 @@ bool ApplicationImpl::waitNext()
 
     bool isActive = true;
     if( _selector.waitForWake(timeout) )
-        isActive = _eventQueue.processEvents( this->event() );
+        isActive = _eventQueue.processEvents( this->eventReceived() );
 
     return isActive;
 }
@@ -289,7 +289,7 @@ Pt::Gfx::Point ApplicationImpl::fromUnit(const Pt::Gfx::PointF& value)
 	double factorY = _screenHeight / _height;
 	int x = (int) ( value.x() * factorX); 
 	int y = (int) ( value.y() * factorY);
-	
+
 	return Pt::Gfx::Point(x,y);
 }
 
@@ -299,13 +299,12 @@ Pt::Gfx::Size ApplicationImpl::fromUnit(const Pt::Gfx::SizeF& value)
 	double factorY = _screenHeight / _height;
 	int width = (int) ( value.width() * factorX); 
 	int height = (int) ( value.height() * factorY);
-	
 	return Pt::Gfx::Size(width,height);
 }
 
 double ApplicationImpl::unitSizeInch() const
 {
-	return 1.0/72.0;
+	return 1.0/96.0;
 }
 
 double ApplicationImpl::unitSizeMm() const

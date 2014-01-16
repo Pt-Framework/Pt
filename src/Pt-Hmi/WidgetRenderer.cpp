@@ -29,14 +29,15 @@ void WidgetRenderer::render(Pt::Hmi::Model* model)
 	if( wmodel->Size.get().width() < 0 ||  wmodel->Size.get().height() < 0)
 		return;
 
-	Pt::Gfx::Size size = wmodel->fromUnit(wmodel->Size.get());
+	Pt::Gfx::SizeF size = wmodel->Size.get();
+	Pt::Gfx::SizeF bufferSize = wmodel->PaintBuffer.size();
 
-	if(wmodel->PaintBuffer.width() != size.width() ||wmodel->PaintBuffer.height() != size.height())
-		wmodel->PaintBuffer.resize(size.width(), size.height());
+	if(bufferSize.width() != size.width() ||bufferSize.height() != size.height())
+		wmodel->PaintBuffer.resize(size);
 
 	Pt::Gfx::ARgbImage& backImage = wmodel->BackgroundImage.get();
-	Pt::Gfx::ImagePainter	localPainter(wmodel->PaintBuffer);
-	Pt::Gfx::Rect			rect(Pt::Gfx::Point(0,0), size);
+	Pt::Hmi::Painter	localPainter(wmodel->PaintBuffer);
+	Pt::Gfx::Rect		rect(Pt::Gfx::Point(0,0), wmodel->fromUnit(size));
 
 	if(wmodel->HighLight.get())
 	{       
@@ -68,9 +69,9 @@ void WidgetRenderer::render(Pt::Hmi::Model* model)
 			
 			case ImageLayoutType::Tile:
 			{
-				for( size_t x = 0; x < wmodel->PaintBuffer.width();  x += backImage.width())
+				for( size_t x = 0; x < wmodel->PaintBuffer.size().width();  x += backImage.width())
 				{
-					for( size_t y = 0; y < wmodel->PaintBuffer.height();  y += backImage.height())
+					for( size_t y = 0; y < wmodel->PaintBuffer.size().height();  y += backImage.height())
 					{
 							localPainter.drawImage(Pt::Gfx::Point(x,y), backImage);
 					}
@@ -88,15 +89,20 @@ void WidgetRenderer::render(Pt::Hmi::Model* model)
 			
 			case ImageLayoutType::Strech:
 			{
-				Pt::Gfx::blockScale(backImage.begin(), backImage.width(), backImage.height(), wmodel->PaintBuffer.begin(),  wmodel->PaintBuffer.width(),  wmodel->PaintBuffer.height());
+				Pt::Gfx::ARgbImage strech(wmodel->PaintBuffer.size().width(),wmodel->PaintBuffer.size().height() );
+
+				Pt::Gfx::blockScale(backImage.begin(), backImage.width(), backImage.height(), strech.begin(),  wmodel->PaintBuffer.size().width(),  wmodel->PaintBuffer.size().height());
+				localPainter.drawImage(Pt::Gfx::Point(0,0), strech);
 			}
 			break;
 
 			case ImageLayoutType::Zoom:
 			{
-				double factor = wmodel->PaintBuffer.width()/(double)backImage.width();
+				Pt::Gfx::ARgbImage strech(wmodel->PaintBuffer.size().width(),wmodel->PaintBuffer.size().height() );
+				double factor = wmodel->PaintBuffer.size().width()/(double)backImage.width();
 
-				Pt::Gfx::blockScale(backImage.begin(), backImage.width(), backImage.height(), wmodel->PaintBuffer.begin(),  wmodel->PaintBuffer.width(), (Pt::size_t)(backImage.height()*factor));
+				Pt::Gfx::blockScale(backImage.begin(), backImage.width(), backImage.height(),strech.begin(),  strech.width(), (Pt::size_t)(backImage.height()*factor));
+				localPainter.drawImage(Pt::Gfx::Point(0,0), strech);
 			}
 			break;
 		}

@@ -42,11 +42,11 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
     
 	int border =  model->fromUnit(model->BorderWidth.get());	
 	Pt::Gfx::Size   size = model->fromUnit(model->Size.get());
-	Pt::Gfx::SizeF  clientSize(model->Size.get().width() - (model->BorderWidth.get()), model->Size.get().height() - (model->BorderWidth.get()));	
+	Pt::Gfx::SizeF  clientSize(model->Size.get().width() - model->BorderWidth.get()/2, model->Size.get().height() - model->BorderWidth.get()/2);	
 	Pt::Gfx::Size   rectSize = model->fromUnit(clientSize);
-	Pt::Gfx::Rect   clientRect(Pt::Gfx::Point(border/2,border/2), rectSize);
+	Pt::Gfx::Rect   clientRect(Pt::Gfx::Point( model->BorderWidth.get()/2, model->BorderWidth.get()/2), rectSize);
 	
-	Pt::Gfx::ImagePainter localPainter(model->PaintBuffer);
+	Pt::Hmi::Painter localPainter(model->PaintBuffer);
 						
 	switch(model->BorderStyle.get())
 	{
@@ -152,16 +152,15 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 			points2[4].setY(clientRect.height());
 
 
-
-                Pt::Gfx::Pen pen(border, Pt::Gfx::ARgbColor(0,178,178,178));
-				localPainter.setPen(pen);
+            Pt::Gfx::Pen pen(border, Pt::Gfx::ARgbColor(0,178,178,178));
+			localPainter.setPen(pen);
 				
-				localPainter.drawPolyline(&points2[0], points2.size());
+			localPainter.drawPolyline(&points2[0], points2.size());
                 
-				Pt::Gfx::Pen pen2(border, Pt::Gfx::ARgbColor(0,178,178,178));
-				localPainter.setPen(pen2);
+			Pt::Gfx::Pen pen2(border, Pt::Gfx::ARgbColor(0,178,178,178));
+			localPainter.setPen(pen2);
                 
-				localPainter.drawPolyline(&points1[0], points1.size());
+			localPainter.drawPolyline(&points1[0], points1.size());
             
 		}
 		break;
@@ -190,15 +189,15 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 			points2[2].setY(clientRect.height());
 
 		
-				Pt::Gfx::Pen pen(border, Pt::Gfx::ARgbColor(0,255,255,255));
-				localPainter.setPen(pen);
+			Pt::Gfx::Pen pen(border, Pt::Gfx::ARgbColor(0,255,255,255));
+			localPainter.setPen(pen);
 				
-				localPainter.drawPolyline(&points1[0], points1.size());
+			localPainter.drawPolyline(&points1[0], points1.size());
 								
-				Pt::Gfx::Pen pen2(border, Pt::Gfx::ARgbColor(0,0,0,0));
-				localPainter.setPen(pen2);
+			Pt::Gfx::Pen pen2(border, Pt::Gfx::ARgbColor(0,0,0,0));
+			localPainter.setPen(pen2);
 
-				localPainter.drawPolyline(&points2[0], points2.size());
+			localPainter.drawPolyline(&points2[0], points2.size());
 			
 		}
 		break;
@@ -207,7 +206,7 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 			Pt::Gfx::Pen pen1(border, model->ForeColor.get());
 			localPainter.setPen(pen1);				
 			localPainter.drawRect(clientRect);
-
+			
 			Pt::Gfx::Pen pen2(1, Pt::Gfx::ARgbColor(0,255,255,255));
 			localPainter.setPen(pen2);				
 			localPainter.drawRect(clientRect);

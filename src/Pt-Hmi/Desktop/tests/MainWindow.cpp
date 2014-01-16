@@ -33,6 +33,7 @@
 #include <Pt/Hmi/LabelModel.h>
 #include <Pt/Hmi/ButtonModel.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/ImageReader.h>
 #include "DemoImage.h"
 #include "AtesionIcon.h"
@@ -83,6 +84,7 @@ void MainWindow::init()
 	windowModel().WindowStartPostion.set(WindowStartPositionType::CenterScreen);
 	windowController().ClosedAction += Pt::slot(*this, &MainWindow::onClosedByWindow);
 
+	
 	//Panel
 	_mainPanel.setSize(Pt::Gfx::SizeF(700,480));
 	_mainPanel.setPosition(Pt::Gfx::PointF(40,40));

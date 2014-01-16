@@ -141,9 +141,7 @@ void Controller::output()
 		_children[i]->output();
 
 	for( size_t i = 0; i < _outputDevices.size(); ++i)
-	{
 		_outputDevices[i]->output(model());
-	}	 
 }
 	
 }}

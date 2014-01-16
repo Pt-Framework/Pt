@@ -8,7 +8,7 @@ namespace Hmi{
 
 GfxModel::GfxModel()
 : DefinePropertyInitMacro(Visible,true)
-, DefinePropertyInitMacro(Font,Pt::Gfx::Font("",12))
+, DefinePropertyInitMacro(Font,Pt::Gfx::Font("Sans Serif",12))
 , DefinePropertyInitMacro(Position, Pt::Gfx::PointF(0,0))
 , DefinePropertyInitMacro(Size, Pt::Gfx::SizeF(10,10))
 , DefinePropertyInitMacro(BackColor,Pt::Gfx::ARgbColor(237,237,237))
@@ -26,6 +26,7 @@ GfxModel::GfxModel()
 , DefinePropertyInitMacro(AcceptFocus,true)
 , DefinePropertyInitMacro(HighLight, false)
 , DefinePropertyInitMacro(FocusedActionKey," ")
+, PaintBuffer(Pt::Gfx::SizeF(800,600))
 {
 	Position = toUnit(Pt::Gfx::Point(0,0));
 	Focused.PropertyChanged += Pt::slot(*this, &GfxModel::onFocusChanged);

@@ -64,20 +64,8 @@
     <Filter Include="Pt-Hmi\Headers">
       <UniqueIdentifier>{a848afb3-7755-4f06-b0e0-c2af313f8e28}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\Sources">
-      <UniqueIdentifier>{9caf809f-604a-4640-9e8d-9e9ee98e7dcf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Hmi\Sources\gdi">
-      <UniqueIdentifier>{947e0ceb-dc3d-4f25-b8ff-f29aad8e7be3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Hmi\Headers\Desktop">
       <UniqueIdentifier>{2e90b4ef-c978-4c42-b9ce-616fefa610a5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Hmi\Sources\Desktop">
-      <UniqueIdentifier>{5ff8bfb5-2d51-4efa-908a-342da391ef75}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Hmi\Sources\Desktop\tests">
-      <UniqueIdentifier>{c5aaf993-ddc9-4694-a792-2c183ef2e94c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Pt-Ssl\openssl">
       <UniqueIdentifier>{11dcb2bb-4b1d-4c1a-8aee-a6699ce93550}</UniqueIdentifier>
@@ -85,23 +73,35 @@
     <Filter Include="Pt-Ssl\applessl">
       <UniqueIdentifier>{08f68a06-945e-42cc-afe5-466486bf8c71}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\Sources\cocoa">
-      <UniqueIdentifier>{2b77b6e8-aec1-4d99-9506-f20e6b81d876}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Hmi\Sources\x11">
-      <UniqueIdentifier>{54475eb3-ab9c-4ce4-a5c2-c96fc66beace}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Gfx">
       <UniqueIdentifier>{d718cd0c-9159-4360-92c4-28003d7ede2c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Pt-Gfx\tests">
       <UniqueIdentifier>{8f9be891-3492-48bf-ac55-a48600e684bb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\Sources\winrt">
-      <UniqueIdentifier>{0190cd64-c6e5-4b5d-ab0e-7d4e1a17e9c7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Ssl\nossl">
       <UniqueIdentifier>{afaca7e1-6477-4f4e-b837-ce1cf9a958d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\Sources">
+      <UniqueIdentifier>{9caf809f-604a-4640-9e8d-9e9ee98e7dcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\Sources\gdi">
+      <UniqueIdentifier>{947e0ceb-dc3d-4f25-b8ff-f29aad8e7be3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\Sources\Desktop">
+      <UniqueIdentifier>{5ff8bfb5-2d51-4efa-908a-342da391ef75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\Sources\Desktop\tests">
+      <UniqueIdentifier>{c5aaf993-ddc9-4694-a792-2c183ef2e94c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\Sources\cocoa">
+      <UniqueIdentifier>{2b77b6e8-aec1-4d99-9506-f20e6b81d876}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\Sources\x11">
+      <UniqueIdentifier>{54475eb3-ab9c-4ce4-a5c2-c96fc66beace}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\Sources\x11\winrt">
+      <UniqueIdentifier>{0190cd64-c6e5-4b5d-ab0e-7d4e1a17e9c7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1297,13 +1297,13 @@
       <Filter>Pt-Net\win32</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.h">
-      <Filter>Pt-Hmi\Sources\winrt</Filter>
+      <Filter>Pt-Hmi\Sources\x11\winrt</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\CursorImpl.h">
-      <Filter>Pt-Hmi\Sources\winrt</Filter>
+      <Filter>Pt-Hmi\Sources\x11\winrt</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.h">
-      <Filter>Pt-Hmi\Sources\winrt</Filter>
+      <Filter>Pt-Hmi\Sources\x11\winrt</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Pack.h">
       <Filter>Pt</Filter>
@@ -1322,6 +1322,18 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\NumericCast.h">
       <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.h">
+      <Filter>Pt-Hmi\Sources\gdi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\PainterImpl.h">
+      <Filter>Pt-Hmi\Sources\gdi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
+      <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2464,13 +2476,13 @@
       <Filter>Pt-Net\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.cpp">
-      <Filter>Pt-Hmi\Sources\winrt</Filter>
+      <Filter>Pt-Hmi\Sources\x11\winrt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\CursorImpl.cpp">
-      <Filter>Pt-Hmi\Sources\winrt</Filter>
+      <Filter>Pt-Hmi\Sources\x11\winrt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.cpp">
-      <Filter>Pt-Hmi\Sources\winrt</Filter>
+      <Filter>Pt-Hmi\Sources\x11\winrt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\nossl\CertificateStoreImpl.cpp">
       <Filter>Pt-Ssl\nossl</Filter>
@@ -2480,6 +2492,18 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\nossl\ContextImpl.cpp">
       <Filter>Pt-Ssl\nossl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.cpp">
+      <Filter>Pt-Hmi\Sources\gdi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\gdi\PainterImpl.cpp">
+      <Filter>Pt-Hmi\Sources\gdi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

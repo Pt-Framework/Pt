@@ -127,7 +127,7 @@ void GfxController::render()
 	}
 
 	//Bit-Blit my childs	
-	Pt::Gfx::ImagePainter localPainter(m->PaintBuffer);
+	Pt::Hmi::Painter localPainter(m->PaintBuffer);
 
 	for( size_t i = 0; i < children().size(); ++i)
 	{
@@ -135,10 +135,9 @@ void GfxController::render()
 
 		GfxModel* childModel = (GfxModel*) child->model();
 		Pt::Gfx::Point pos  = childModel->fromUnit(childModel->Position.get());
-		localPainter.drawImage(pos,childModel->PaintBuffer);
+		localPainter.drawSurface(pos,childModel->PaintBuffer);
 	}
 }
-
 
 bool GfxController::onMoveFocusPrev()
 {

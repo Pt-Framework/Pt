@@ -34,6 +34,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/WindowController.h>
+#include "PaintSurfaceImpl.h"
 
 namespace Pt{
 namespace Hmi{
@@ -394,43 +395,16 @@ void GfxOutputDeviceImpl::onMove()
 
 void GfxOutputDeviceImpl::onPaint()
 {   		
+	if(_model == 0)
+		return;
 
-	if( _rgb88Image.width() > 0 && _rgb88Image.height() > 0)
-		drawIndependentImage(0, 0, (char*)_rgb88Image.data(), _rgb88Image.width(), _rgb88Image.height());
+	PAINTSTRUCT ps;
+    HDC windowContext = BeginPaint(_hwnd, &ps);
+	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
+	HDC bitmapDeviceConText = _model->PaintBuffer.impl()->deviceContext();
+    BitBlt(windowContext, 0, 0, size.width(), size.height(), bitmapDeviceConText, 0, 0, SRCCOPY);	
+	EndPaint(_hwnd, &ps);	
 }
-
-void GfxOutputDeviceImpl::drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height)
-{
-    PAINTSTRUCT ps;
-    HDC hdc = BeginPaint(_hwnd, &ps);
-
-    BITMAPINFO bitmapInfo;
-    ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
-
-    bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER); // Size of this struct.
-    bitmapInfo.bmiHeader.biWidth       = width;             // Bitmap width.
-    bitmapInfo.bmiHeader.biHeight      = -(ssize_t)height;  // Bitmap height. Negative value = top-down image.
-    bitmapInfo.bmiHeader.biPlanes      = 1;                 // Always 1.
-    bitmapInfo.bmiHeader.biBitCount    = 32;                // We internally use a 32-bit bitmap.
-    bitmapInfo.bmiHeader.biCompression = BI_RGB;            // Uncompressed (top-down) RGB bitmap.
-    bitmapInfo.bmiHeader.biSizeImage   = 0;                 // 0 = automatic for BI_RGB-images.
-    bitmapInfo.bmiHeader.biClrUsed     = 0;                 // 0 = No color table.
-    bitmapInfo.bmiHeader.biClrImportant= 0;                 // 0 = No color table.
-
-    VOID* imageBits;
-    HBITMAP bitmap = CreateDIBSection(hdc, &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
-
-    memcpy(imageBits, data, width * height * 4);
-
-    HDC bitmapDeviceConText = CreateCompatibleDC(NULL);
-    SelectObject(bitmapDeviceConText, bitmap);	
-    BOOL ret = BitBlt(hdc, x, y, width, height, bitmapDeviceConText, 0, 0, SRCCOPY);
-
-    DeleteDC(bitmapDeviceConText);
-    DeleteObject(bitmap);
-	EndPaint(_hwnd, &ps);
-}
-
 
 void GfxOutputDeviceImpl::setWindowIcon()
 {
@@ -605,31 +579,8 @@ void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
 
 	setWindowSizeAndPos(firstShow);
 	setWindowProperties();	
-	setWindowIcon();
-	output();
-	InvalidateRect(_hwnd, 0, FALSE);
+	setWindowIcon();	
+	InvalidateRect(_hwnd, NULL, TRUE);
 }
 
-void GfxOutputDeviceImpl::output()
-{
-	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
-
-	_rgb88Image.resize(_model->PaintBuffer.width(), _model->PaintBuffer.height());
-
-	for( size_t x = 0; x < _model->PaintBuffer.width(); ++x)
-	{
-		for(size_t y = 0; y < _model->PaintBuffer.height(); ++y)
-		{
-			const Pt::Gfx::ARgbColor& pixel = _model->PaintBuffer.pixel(x,y);
-
-			Pt::Gfx::Rgb888Color color((Pt::uint8_t) pixel.red(), (Pt::uint8_t) pixel.green(), (Pt::uint8_t) pixel.blue());
-			_rgb88Image.setColor(x,y,color);
-		}
-	}
-}
-
-Pt::Gfx::Painter* GfxOutputDeviceImpl::nativePainter()
-{
-	return _nativePainter;
-}
 }}

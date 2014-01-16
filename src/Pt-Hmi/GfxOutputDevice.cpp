@@ -45,11 +45,6 @@ GfxOutputDeviceImpl* GfxOutputDevice::impl()
 	return _impl;
 }
 
-Pt::Gfx::Painter* GfxOutputDevice::nativePainter()
-{
-	return _impl->nativePainter();
-}
-
 void GfxOutputDevice::output(Pt::Hmi::Model* model)
 {	
 	_impl->output(model);

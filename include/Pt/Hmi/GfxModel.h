@@ -40,6 +40,7 @@
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Hmi/PaintSurface.h>
 
 namespace Pt{
 namespace Hmi{
@@ -89,7 +90,6 @@ public:
 	Property<ImageLayoutType::Type>	BackgroundImageLayout;
 	Property<int>					Opacity;
 	Property<Pt::Gfx::ARgbColor>	TransparancyKey;
-	Pt::Gfx::ARgbImage				PaintBuffer;
 	Property<PointingEvent>			Pointer2DStatus;	
 	Property<KeyEvent>				KeyStatus;	
 	Property<Cursor>                CursorT;
@@ -98,6 +98,7 @@ public:
 	Property<bool>					AcceptFocus;
     Property<bool>					HighLight;
 	Property<std::string>			FocusedActionKey;
+	PaintSurface					PaintBuffer;
 
 public:
 	virtual ~GfxModel();
@@ -114,7 +115,6 @@ public:
 	Pt::Gfx::Size fromUnit(const Pt::Gfx::SizeF& value);
 	double unitSizeInch() const;
 	double unitSizeMm() const;
-
 
 private:
 	void onFocusChanged(const void* sender, const PropertyBase& prop);

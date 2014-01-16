@@ -34,7 +34,7 @@ void LabelRenderer::render(Pt::Hmi::Model* m)
 			
 	if(model->AutoSize.get())
 	{
-		Pt::Gfx::ImagePainter localPainter(model->PaintBuffer);				
+		Pt::Hmi::Painter localPainter(model->PaintBuffer);				
 
 		localPainter.setFont(model->Font.get());
 		
@@ -51,28 +51,28 @@ void LabelRenderer::render(Pt::Hmi::Model* m)
 	}
 	else
 	{		
-		Pt::Gfx::ImagePainter localPainter(model->PaintBuffer);
+		Pt::Hmi::Painter localPainter(model->PaintBuffer);
 
 		switch(model->TextAlign.get())
 		{
 			case Pt::Hmi::TextAlignType::MidleCenter:
 			{
-				Pt::Gfx::Pen			pen(1,model->ForeColor.get());
+				Pt::Gfx::Pen	pen(1,model->ForeColor.get());
+				Pt::Gfx::Size	widgetSize =  model->fromUnit(model->Size.get());
+				localPainter.setFont(model->Font.get());
 				Pt::Gfx::FontMetrics	metric = localPainter.fontMetrics(Pt::String(model->Caption.get().c_str()));
-				Pt::Gfx::SizeF			textSize = Pt::Gfx::SizeF(model->toUnit(Pt::Gfx::Size(metric.width(), metric.height())));
 				
-				const double widthHalf		= model->Size.get().width()/2.0;				
-				const double heightHalf		= model->Size.get().height()/2.0;				
-				const double textWidthHalf	= textSize.width()/2.0;	
-				const double textHeightHalf	= textSize.height()/2.0;	
-				
-				Pt::Gfx::PointF pos(widthHalf - textWidthHalf, heightHalf - textHeightHalf);							
-				pos.addY(metric.height() - metric.descent()+1);
+				const int widthHalf		 = model->Size.get().width()/2;				
+				const int heightHalf	 = model->Size.get().height()/2;				
+				const int textWidthHalf	 = metric.width()/2;	
+				const int textHeightHalf = metric.height()/2;	
+								
 
+				Pt::Gfx::Point pos(widthHalf - textWidthHalf, (heightHalf - textHeightHalf) +  (metric.height()  - metric.descent()));							
 				localPainter.setFont(model->Font.get());
 				localPainter.setPen(pen);
 
-				localPainter.drawText(model->fromUnit(pos),Pt::String(model->Caption.get().c_str()));		
+				localPainter.drawText(pos,Pt::String(model->Caption.get().c_str()));		
 			}
 			break;
 		}

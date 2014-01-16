@@ -1,6 +1,7 @@
 #include <Pt/Hmi/Desktop/Widget.h>
 #include <Pt/Hmi/GfxController.h>
 #include <Pt/Hmi/GfxModel.h>
+#include <algorithm>
 
 namespace Pt{
 namespace Hmi{

@@ -45,8 +45,7 @@ public:
 
 	virtual void output(Pt::Hmi::Model* model);
 
-	Pt::Gfx::Painter* nativePainter();
-	
+
 	GfxOutputDeviceImpl* impl();
 		
 protected:
@@ -57,9 +56,7 @@ protected:
     virtual bool onRun()
 	{
 		return true;
-	}
-
-	
+	}	
 	
 private:
 	GfxOutputDeviceImpl* _impl;

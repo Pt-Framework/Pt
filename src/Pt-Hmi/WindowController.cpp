@@ -83,7 +83,6 @@ void WindowController::invalidate()
 	output();
 }
 
-
 void WindowController::onKeyInput(const KeyEvent& ev)
 { 
 	WindowModel* m = (WindowModel*)gfxModel();
@@ -137,9 +136,7 @@ void WindowController::onSizeChanged(const void* sender, const PropertyBase& pro
 {
 	GfxModel* m = gfxModel();
 	
-	Pt::Gfx::Size size = m->fromUnit(m->Size.get());
-
-	m->PaintBuffer.resize(size.width(), size.height());	
+	m->PaintBuffer.resize(m->Size.get());	
 	
 	if(m->Visible.get())
 		invalidate();

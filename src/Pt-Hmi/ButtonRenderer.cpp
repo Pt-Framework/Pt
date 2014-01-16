@@ -43,7 +43,7 @@ void ButtonRenderer::render(Pt::Hmi::Model* m)
 	if( ctrl== 0)
 		return;
 
-	Pt::Gfx::ImagePainter localPainter(model->PaintBuffer);
+	Pt::Hmi::Painter localPainter(model->PaintBuffer);
     Pt::Gfx::Size size = model->fromUnit(model->Size.get());
        
 	if(model->Armed.get() || model->Focused.get())
