@@ -42,10 +42,16 @@ namespace Net {
 class PT_NET_API AddressInUse : public System::AccessFailed
 {
     public:
+        /** @brief Contruct with endpoint string.
+        */
         AddressInUse(const std::string& endpoint);
 
+        /** @brief Contruct with endpoint string.
+        */
         AddressInUse(const char* endpoint);
 
+        /** @brief Destructor.
+        */
         ~AddressInUse() throw()
         {}
 };

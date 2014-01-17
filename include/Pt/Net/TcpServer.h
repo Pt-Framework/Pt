@@ -43,23 +43,43 @@ namespace Net {
 class PT_NET_API TcpServerOptions
 {
     public:
-        TcpServerOptions(int backlog = 5);
+        /** @brief Construct with accept backlog size.
+        */
+        explicit TcpServerOptions(int backlog = 5);
 
+        /** @brief Copy constructor.
+        */
         TcpServerOptions(const TcpServerOptions& opts);
 
+        /** @brief Destructor.
+        */
         ~TcpServerOptions();
 
+        /** @brief Assignment operator.
+        */
         TcpServerOptions& operator=(const TcpServerOptions& opts);
 
+        /** @brief Returns the max time for data to arrive.
+
+            Returns -1, if the option was not set
+        */
         int acceptDeferred() const
         { return _deferAccept; }
-                
+        
+        /** @brief Defer accept until data arrives.
+
+            Wait for at most @a n seconds for data to arrive.
+        */  
         void setDeferAccept(int n)
         { _deferAccept = n; }
 
+        /** @brief Returns the accept backlog size.
+        */
         int backlog() const
         { return _backlog; }
 
+        /** @brief Sets the accept backlog size.
+        */
         void setBacklog(int backlog)
         { _backlog = backlog; }
 
@@ -79,28 +99,48 @@ class TcpServerImpl;
 class PT_NET_API TcpServer : public System::Selectable
 {
     public:
+        /** @brief Default Constructor.
+        */
         TcpServer();
 
+        /** @brief Construct with event loop.
+        */
         explicit TcpServer(System::EventLoop& loop);
         
         /** @brief Creates a server socket and listens on an address
         */
         explicit TcpServer(const Endpoint& ep);
 
+        /** @brief Destructor.
+        */
         ~TcpServer();
 
+        /** @brief Listen at local endpoint.
+        */
         void listen(const Endpoint& ep);
         
+        /** @brief Listen at local endpoint.
+        */
         void listen(const Endpoint& ep, const TcpServerOptions& options);
 
+        /** @brief Begin accepting a connection.
+        */
         void beginAccept();
         
+        /** @brief Close the server and stop listening and accepting.
+        */
         void close();
 
+        /** @brief Notifies that a connection was accepted.
+            
+            This signal is send when the %TcpServer is monitored
+            in an EventLoop and a connection was accepted.
+        */
         Signal<TcpServer&>& connectionPending()
         { return _connectionPending; }
 
-        //! @brief Returns the parent event loop in which operations are running
+        /** @brief Returns the parent event loop.
+        */
         System::EventLoop* loop() const
         { return _loop; }
 
@@ -113,12 +153,16 @@ class PT_NET_API TcpServer : public System::Selectable
         { return *_impl; }
 
     protected:
+        // inherit doc
         virtual void onAttach(System::EventLoop& loop);
 
+        // inherit doc
         virtual void onDetach(System::EventLoop& loop);
 
+        // inherit doc
         virtual void onCancel();
         
+        // inherit doc
         virtual bool onRun();
 
     private:
