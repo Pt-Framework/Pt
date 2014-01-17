@@ -7,15 +7,35 @@ EXEC_GEN_RPM='/opt/lsb/bin/makelsbpkg'
 INST_INC='/opt/lsbpt/include/'
 INST_LIB='/opt/lsbpt/lib/'
 
-# Go up to the parent directory
-cd ..
+# Get the output directory
+# Modified from http://www.shelldorado.com/goodcoding/cmdargs.html
+OUTDIR=
+while [ $# -gt 0 ]
+do
+    case "$1" in
+        -o) OUTDIR="$2";
+            shift;;
+        -*) echo >&2 "usage: $0 [-o output_directory]"
+            exit 1;;
+         *) break;;
+    esac
+    shift
+done
+if [[ "x$OUTDIR" == 'x' ]]; then
+    OUTDIR='package'
+fi
+
+# Go up to the parent directory as needed
+if [[ `pwd` == *package ]]; then
+    cd ..
+fi
 
 # Determine the installation directory under ('deploy') and the additional package name
 ADDPN=''
 SSDIR='release'
 RSDIR='deploy/release/'
 DEBUG=`cat Jamrules | grep build/debug`
-if [[ $DEBUG != 'x' ]]; then
+if [[ "x$DEBUG" != 'x' ]]; then
     SSDIR='debug'
     RSDIR='deploy/debug/'
     ADDPN='-debug'
@@ -25,7 +45,8 @@ fi
 ARCH=`cat Jamrules | grep TARGET_OSPLAT | awk '{print $3}' | awk -F'"' '{print $2}'`
 
 # Invoke the install command
-./jam.sh install
+mkdir -p $RSDIR
+./jam.sh install -sPT_INSTALL_LIBDIR=$RSDIR/lib -sPT_INSTALL_INCLUDEDIR=$RSDIR/include
 
 # Ensure all shared libraries have executable permission
 cd $RSDIR
@@ -74,7 +95,11 @@ $EXEC_GEN_RPM                           \
     --summary     "$SDEV"               \
     --description "$DESC"
 
-mv *.rpm ../../package
+if [[ $OUTDIR == /* ]]; then
+    mv *.rpm $OUTDIR
+else
+    mv *.rpm ../../$OUTDIR
+fi
 
 # Clean-ups
 cd ..
