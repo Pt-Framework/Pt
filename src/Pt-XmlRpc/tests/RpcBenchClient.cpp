@@ -51,13 +51,12 @@
 class BenchClient
 {
   public:
-    explicit BenchClient(unsigned short port)
+    explicit BenchClient(const Pt::Net::Endpoint& ep)
       : client(),
         echo(client, "echo"),
         thread()
     {  
         thread.init( Pt::callable(*this, &BenchClient::exec) );
-        Pt::Net::Endpoint ep("", port);
         client.setTarget(ep, "/myservice");
     }
 
@@ -148,14 +147,19 @@ int main(int argc, char* argv[])
     std::cout << "call " << BenchClient::numRequests() << " requests with " 
               << threads.get() << " threads\n\n"
                  "options:\n"
-                 "   -l ip      set ip address of server (default: localhost)\n"
+                 "   -i ip      set ip address of server (default: IP4 loopback)\n"
                  "   -p number  set port number of server (default: 7002)\n"
                  "   -t number  set number of threads (default: 4)\n"
                  "   -n number  set number of requests (default: 10000)\n"
               << std::endl;
 
+    Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback( port.get() );
+    
+    if( ip.isSet() )
+        ep = Pt::Net::Endpoint( ip.get(), port.get() );
+
     while (clients.size() < threads.get())
-      clients.push_back(new BenchClient(port.get()));
+      clients.push_back( new BenchClient(ep) );
 
     Pt::System::Clock cl;
     cl.start();
