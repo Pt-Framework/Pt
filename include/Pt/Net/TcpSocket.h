@@ -48,12 +48,16 @@ namespace Net {
 class PT_NET_API TcpSocketOptions
 {
     public:
+        //! @brief Default Constructor.
         TcpSocketOptions();
 
+        //! @brief Copy Constructor.
         TcpSocketOptions(const TcpSocketOptions& opts);
 
+        //! @brief Destructor.
         ~TcpSocketOptions();
 
+        //! @brief Assignment operator.
         TcpSocketOptions& operator=(const TcpSocketOptions& opts);
 
     private:
