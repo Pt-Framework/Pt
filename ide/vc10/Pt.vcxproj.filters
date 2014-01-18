@@ -1335,6 +1335,12 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.h">
+      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.h">
+      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1467,6 +1473,12 @@
     </None>
     <None Include="..\..\include\Pt\Gfx\PlanarImage.tpp">
       <Filter>Pt-Gfx</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.mm">
+      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.mm">
+      <Filter>Pt-Hmi\Sources\cocoa</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

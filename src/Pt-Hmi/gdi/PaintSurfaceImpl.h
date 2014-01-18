@@ -22,9 +22,6 @@ public:
 
 	Pt::Gfx::ARgbImage toImage();
 	
-	Pt::Hmi::Painter& painter();
-	void setPainter(Pt::Hmi::Painter& p);
-	
 	void resize(const Pt::Gfx::SizeF& size);	
 	const Pt::Gfx::SizeF& size() const;
 

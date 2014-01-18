@@ -164,6 +164,9 @@ class PainterImpl
 
     private:
         static DWORD toGdiPenStyle( const Pt::Gfx::Pen& pen );
+
+	private:
+		PaintSurfaceImpl* _surface;
 };
 
 }}

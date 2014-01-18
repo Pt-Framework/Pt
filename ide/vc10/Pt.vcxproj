@@ -338,6 +338,8 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\GfxOutputDeviceImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WidgetView.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\Desktop\tests\AtesionIcon.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\Desktop\tests\DemoImage.h" />
@@ -441,6 +443,8 @@
     <None Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\GfxOutputDeviceImpl.mm" />
+    <None Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.mm" />
+    <None Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\WidgetView.mm" />
     <None Include="..\..\src\Pt-Hmi\Desktop\Jamfile" />
     <None Include="..\..\src\Pt-Hmi\Desktop\tests\Jamfile" />
