@@ -20,9 +20,8 @@
 #ifndef Pt_Hmi_cocoa_PixmapImpl_h
 #define Pt_Hmi_cocoa_PixmapImpl_h
 
-#include <Pt/Gui/Api.h>
-#include <Pt/Gui/Painter.h>
 #include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/ArgbImage.h>
 
 #ifdef __OBJC__
     #import <AppKit/NSImage.h>

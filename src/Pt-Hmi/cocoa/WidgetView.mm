@@ -86,12 +86,12 @@
         return;
     
     //Create a raw buffer to hold pixel data which we will fill algorithmically
-    NSInteger width =  _outDevice->model()->PaintSurface.width();
-    NSInteger height = _outDevice->model()->PaintSurface.height();
+    NSInteger width =  _outDevice->model()->PaintSurface.size().width();
+    NSInteger height = _outDevice->model()->PaintSurface.size().height();
 
     NSInteger dataLength = width * height * 4;
     UInt8 *data = (UInt8*)malloc(dataLength * sizeof(UInt8));
-    
+    /*
     //Fill pixel buffer with color data
     for (int j=0; j<height; j++)
     {
@@ -109,7 +109,7 @@
             data[++index]=255;
             
         }
-    }
+    }*/
     
     // Create a CGImage with the pixel data
     CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data, dataLength, NULL);

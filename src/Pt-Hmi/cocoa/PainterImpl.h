@@ -82,6 +82,9 @@ class PainterImpl
         virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
 
         virtual void drawText(const Gfx::PointF& to, const Pt::String& text);
+    
+    void drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline );
+    
 
         virtual void drawRect(const Gfx::RectF& rect);
 
@@ -103,10 +106,19 @@ class PainterImpl
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::ARgbImage& image, const Gfx::Region& imageRegion);
 
+        int depth()
+        {
+            return 0;
+        }
+    void addFontName(const std::string& fontName)
+    {
+    }
+    
 	protected:
         Gfx::Pen _pen;
         Gfx::Brush _brush;
-        Gfx::Font  _font;  
+        Gfx::Font  _font;
+        PaintSurfaceImpl* _surface;
 };
 
 }}

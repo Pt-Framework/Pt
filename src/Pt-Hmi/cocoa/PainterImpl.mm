@@ -39,13 +39,6 @@ PainterImpl::~PainterImpl()
 {
 }
 
-
-void PainterImpl::begin()
-{
-}
-
-
-
 void PainterImpl::setPen(const Gfx::Pen& pen)
 {
     _pen = pen;
@@ -120,8 +113,12 @@ void PainterImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
 
 }
-
-
+    
+void PainterImpl::drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline )
+{
+        
+}
+    
 void PainterImpl::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
 {
 
@@ -151,7 +148,7 @@ void PainterImpl::fillPolygon(const Gfx::PointF* points, const size_t pointCount
 
 }
 
-void PainterImpl::drawSurface(const Gfx::PointF& to, Surface& pm)
+void PainterImpl::drawSurface(const Gfx::PointF& to, PaintSurface& pm)
 {
 
 }
@@ -163,7 +160,7 @@ void PainterImpl::drawSurface(const Gfx::PointF& to, PaintSurface& pm, const Gfx
 
 void PainterImpl::drawImage(const Gfx::PointF& to, const Gfx::ARgbImage& image)
 {
-    this->drawImage( to.x(), to.y(), image.begin(), image.end(), image.width(), image.height() );
+
 }
 
 

@@ -139,6 +139,11 @@ public:
 		return Pt::Gfx::Size((int)value.width(), (int)value.height()); 
 	}
 
+    Pt::Gfx::Rect fromUnit(const Pt::Gfx::RectF& value)
+	{
+		return Pt::Gfx::Rect(Pt::Gfx::Point((int)value.x(), (int)value.y()), Pt::Gfx::Size((int)value.width(), (int)value.height()));
+	}
+    
 	double unitSizeInch() const
 	{
 		return 1/96.0;
