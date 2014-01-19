@@ -88,7 +88,7 @@ SubInclude PT_TOP src Pt ;
 SubInclude PT_TOP src Pt-Reflex ;
 SubInclude PT_TOP src Pt-Unit ;
 SubInclude PT_TOP src Pt-Xml ;
-SubInclude PT_TOP src Pt-Gfx ;
+#SubInclude PT_TOP src Pt-Gfx ;
 
 if $(SYS)
 {
@@ -115,3 +115,53 @@ if $(SYS)
         SubInclude PT_TOP src Pt-Hmi ;
     }
 }
+
+
+rule LsbPackage
+{
+    local _target = $(<:S=.rpm) ;
+
+    Depends $(_target) : install ;
+    Depends lsbpkg : $(_target) ;
+
+    LsbPackage1 $(_target) ;
+}
+
+
+rule LsbPackageLibs
+{
+    local _target = $(<:S=.rpm) ;
+
+    Depends $(_target) : rpm-tmp$(2)/$(PRELIB)$(3:S=$(SUFDLL)) ;
+    Depends rpm-tmp$(2)/$(PRELIB)$(3:S=$(SUFDLL)) : rpm-tmp$(2) ;
+
+    MkDir rpm-tmp$(2) ;
+
+   # File rpm-tmp$(2)/$(PRELIB)$(3:S=$(SUFDLL)) : $(PRELIB)$(3:S=$(SUFDLL)) ;
+  #  Bulk rpm-tmp$(2) : $(PRELIB)$(3:S=$(SUFDLL)) ;
+
+    LSBPKG_DIRS on $(_target) += $(2) ;
+    LSBPKG_SOURCE on $(_target) += $(3) ;
+}
+
+
+actions LsbPackage1
+{
+    PACKAGE_ROOTDIR=rpm-tmp
+    PACKAGE_INCLUDEDIR=$PACKAGE_ROOTDIR/opt/Pt-1.0.0/include
+    PACKAGE_LIBDIR=$PACKAGE_ROOTDIR/opt/Pt-1.0.0/lib
+
+    mkdir -p $PACKAGE_LIBDIR
+
+    mv $(PT_INSTALL_LIBDIR)/* $PACKAGE_LIBDIR
+
+    chmod a+x $PACKAGE_LIBDIR/*
+
+    /opt/lsb/bin/fakeroot /opt/lsb/bin/makelsbpkg $(<:B) $PACKAGE_ROOTDIR  --license 'extended LGPL' --version 1.0.0 --release 1 --group 'C++ Framework' --package 'Pt Development Team' --vendor 'Pt Development Team' --summary 'Pt C++ Framework' --description 'Pt Description'
+
+    rm -rf $PACKAGE_ROOTDIR
+}
+
+
+#LsbPackage Pt ;
+#LsbPackageLibs Pt : /opt/Pt-1.0.0/lib : Pt Pt-System ;

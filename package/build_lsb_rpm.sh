@@ -55,23 +55,24 @@ V3=`cat include/Pt/Api.h | grep PT_VERSION_REVISION | awk '{print $3}'`
 VERSION="$V1.$V2.$V3"
 
 # Invoke the install command
+rm -rf $RSDIR
 mkdir -p $RSDIR
 ./jam.sh install -sPT_INSTALL_LIBDIR=$RSDIR/lib -sPT_INSTALL_INCLUDEDIR=$RSDIR/include
+
+cd $RSDIR
 
 # Prepare the package directory structure
 INST_INC='/opt/Pt-'$VERSION'/include/'
 INST_LIB='/opt/Pt-'$VERSION'/lib/'
 
-chmod a+x $RSDIR/lib/*
+chmod a+x lib/*
 
-TMP_BIN=$RSDIR/tmpb
-TMP_DEV=$RSDIR/tmpd
+TMP_BIN=tmpb
+TMP_DEV=tmpd
 
-rm -rvf $TMP_BIN
 mkdir -p $TMP_BIN$INST_LIB
 mv lib/* $TMP_BIN$INST_LIB
 
-rm -rvf $TMP_DEV
 mkdir -p $TMP_DEV$INST_INC
 mv include/* $TMP_DEV$INST_INC
 
@@ -80,12 +81,10 @@ SBIN='Platinum (Pt) C++ Framework Binary Package'
 SDEV='Platinum (Pt) C++ Framework Development Package'
 DESC=$'Platinum (Pt) is a comprehensive C++ framework, which allows developers to\nwrite high-performance applications for many platforms with only one codebase.\nIt provides a large amount of features and is still very easy to use. It\nintergrates well into existing toolkits and frameworks.'
 
-rm -f *.rpm
-
 $EXEC_FK_ROOT $EXEC_GEN_RPM             \
     pt-1.0.0$ADDPN-$ARCH $TMP_BIN       \
     --verbose                           \
-    --license     'extended LGPL'                \
+    --license     'extended LGPL'       \
     --version     "$VERSION"            \
     --release     "$RELEASE"            \
     --group       'C++ Framework'       \
@@ -97,7 +96,7 @@ $EXEC_FK_ROOT $EXEC_GEN_RPM             \
 $EXEC_FK_ROOT $EXEC_GEN_RPM             \
     pt-1.0.0$ADDPN-devel-$ARCH $TMP_DEV \
     --verbose                           \
-    --license     'extended LGPL'                \
+    --license     'extended LGPL'       \
     --version     "$VERSION"            \
     --release     "$RELEASE"            \
     --group       'C++ Framework'       \
@@ -106,12 +105,10 @@ $EXEC_FK_ROOT $EXEC_GEN_RPM             \
     --summary     "$SDEV"               \
     --description "$DESC"
 
+cd -
+
 # Move RPM packages to output directoy
-if [[ $OUTDIR == /* ]]; then
-    mv *.rpm $OUTDIR
-else
-    mv *.rpm ../../$OUTDIR
-fi
+mv $RSDIR/*.rpm $OUTDIR
 
 # Clean up
-rm -rvf $RSDIR
+rm -rf $RSDIR
