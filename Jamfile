@@ -120,48 +120,61 @@ if $(SYS)
 rule LsbPackage
 {
     local _target = $(<:S=.rpm) ;
+    local _package_root_dir = $(<)-rpm ;
 
-    Depends $(_target) : install ;
     Depends lsbpkg : $(_target) ;
-
+    
+    # TODO: clean RPM package
+    # Clean clean : $(_target);
+    
+    LSB_PACKAGE_ROOT_DIR on $(_target) = $(_package_root_dir) ;
+    LSB_PACKAGE_FLAGS on $(_target) = $(2) ;
     LsbPackage1 $(_target) ;
 }
 
 
-rule LsbPackageLibs
+rule LsbPackageAdd
 {
     local _target = $(<:S=.rpm) ;
-
-    Depends $(_target) : rpm-tmp$(2)/$(PRELIB)$(3:S=$(SUFDLL)) ;
-    Depends rpm-tmp$(2)/$(PRELIB)$(3:S=$(SUFDLL)) : rpm-tmp$(2) ;
-
-    MkDir rpm-tmp$(2) ;
-
-   # File rpm-tmp$(2)/$(PRELIB)$(3:S=$(SUFDLL)) : $(PRELIB)$(3:S=$(SUFDLL)) ;
-  #  Bulk rpm-tmp$(2) : $(PRELIB)$(3:S=$(SUFDLL)) ;
-
-    LSBPKG_DIRS on $(_target) += $(2) ;
-    LSBPKG_SOURCE on $(_target) += $(3) ;
+    local _package_root_dir = $(<)-rpm ;
+    
+    local _package_dir = [ FDirName $(_package_root_dir) $(2) ] ;
+    MkDir $(_package_dir) ;
+    
+    for local _file in $(3)
+    {
+        Depends $(_target) : $(_file:R=$(_package_dir)) ;
+        Depends $(_file:R=$(_package_dir)) : $(_package_dir) ;
+        
+        Install $(_file:R=$(_package_dir)) : $(_file) ;
+        
+        Clean clean : $(_file:R=$(_package_dir)) ;
+        Echo Clean lsbpkg-clean $(_file:R=$(_package_dir)) ;
+    }
 }
 
 
 actions LsbPackage1
 {
-    PACKAGE_ROOTDIR=rpm-tmp
-    PACKAGE_INCLUDEDIR=$PACKAGE_ROOTDIR/opt/Pt-1.0.0/include
-    PACKAGE_LIBDIR=$PACKAGE_ROOTDIR/opt/Pt-1.0.0/lib
+    /opt/lsb/bin/fakeroot /opt/lsb/bin/makelsbpkg $(<:B) $(LSB_PACKAGE_ROOT_DIR) $(LSB_PACKAGE_FLAGS)
 
-    mkdir -p $PACKAGE_LIBDIR
-
-    mv $(PT_INSTALL_LIBDIR)/* $PACKAGE_LIBDIR
-
-    chmod a+x $PACKAGE_LIBDIR/*
-
-    /opt/lsb/bin/fakeroot /opt/lsb/bin/makelsbpkg $(<:B) $PACKAGE_ROOTDIR  --license 'extended LGPL' --version 1.0.0 --release 1 --group 'C++ Framework' --package 'Pt Development Team' --vendor 'Pt Development Team' --summary 'Pt C++ Framework' --description 'Pt Description'
-
-    rm -rf $PACKAGE_ROOTDIR
+    rm -rf $(LSB_PACKAGE_ROOT_DIR)
 }
 
 
-#LsbPackage Pt ;
-#LsbPackageLibs Pt : /opt/Pt-1.0.0/lib : Pt Pt-System ;
+LsbPackage Pt : --license 'extended LGPL' 
+                --version 1.0.0 --release 1 
+                --group 'C++ Framework' 
+                --package 'Pt Development Team' 
+                --vendor 'Pt Development Team' 
+                --summary 'Pt C++ Framework' 
+                --description 'Pt Description' ;
+
+LsbPackageAdd Pt : opt/Pt-1.0.0/lib : $(PRELIB)Pt$(SUFDLL) 
+                                      $(PRELIB)Pt-System$(SUFDLL) 
+                                      $(PRELIB)Pt-Net$(SUFDLL) 
+                                      $(PRELIB)Pt-Http$(SUFDLL) 
+                                      $(PRELIB)Pt-Unit$(SUFDLL) 
+                                      $(PRELIB)Pt-Ssl$(SUFDLL) 
+                                      $(PRELIB)Pt-Xml$(SUFDLL) 
+                                      $(PRELIB)Pt-XmlRpc$(SUFDLL) ;
