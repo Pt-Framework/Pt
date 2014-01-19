@@ -167,7 +167,7 @@ class PT_SYSTEM_API IODevice : public Selectable
         /** @brief Notifies about available data
 
             This signal is send when the IODevice is monitored
-            in a Selector or EventLoop and data becomes available.
+            in an EventLoop and data becomes available.
         */
         Signal<IODevice&>& inputReady()
         { return _inputReady; }
@@ -175,7 +175,7 @@ class PT_SYSTEM_API IODevice : public Selectable
         /** @brief Notifies when data can be written
 
             This signal is send when the IODevice is monitored
-            in a Selector or EventLoop and the device is ready
+            in an EventLoop and the device is ready
             to write data.
         */
         Signal<IODevice&>& outputReady()
@@ -205,7 +205,6 @@ class PT_SYSTEM_API IODevice : public Selectable
         std::size_t wavail() const
         { return _wavail; }
 
-        //! @internal
         EventLoop* loop() const
          { return _loop; }
 

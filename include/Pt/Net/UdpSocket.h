@@ -44,23 +44,39 @@ namespace Net {
 class PT_NET_API UdpSocketOptions
 {
     public:
+        /** @brief Default constructor.
+        */
         UdpSocketOptions();
 
+        /** @brief Copy constructor.
+        */
         UdpSocketOptions(const UdpSocketOptions& opts);
 
+        /** @brief Destructor.
+        */
         ~UdpSocketOptions();
 
+        /** @brief Assignment operator.
+        */
         UdpSocketOptions& operator=(const UdpSocketOptions& opts);
                 
+        /** @brief Returns true if UDP broadcast is enabled.
+        */
         bool isBroadcast() const
         { return (_flags & Broadcast) != 0; }
-                
+        
+        /** @brief enables UDP broadcast.
+        */
         void setBroadcast()
         { _flags |= Broadcast; }
 
+        /** @brief Returns the hop limit.
+        */
         int hopLimit() const
         { return _hoplimit; }
 
+        /** @brief Sets the hop limit.
+        */
         void setHopLimit(int n)
         { _hoplimit = n; }
 
@@ -84,52 +100,126 @@ class PT_NET_API UdpSocketOptions
 class PT_NET_API UdpSocket : public System::IODevice
 {
     public:
+        /** @brief Default constructor.
+        */
         UdpSocket();
 
+        /** @brief Construct with event loop.
+        */
         explicit UdpSocket(System::EventLoop& loop);
 
+        /** @brief Destructor.
+        */
         ~UdpSocket();
+        
+        /** @brief Bind to local endpoint.
 
+            @throw System::AccessFailed if the host is not reachable
+        */
         void bind(const Endpoint& ep);
 
+        /** @brief Bind to local endpoint.
+
+            @throw System::AccessFailed if the host is not reachable
+        */
         void bind(const Endpoint& ep, const UdpSocketOptions& o);
 
+        /** @brief Begin bind to local endpoint.
+
+            @throw System::AccessFailed if the host is not reachable
+        */
         bool beginBind(const Endpoint& ep);
 
+        /** @brief Begin bind to local endpoint.
+
+            @throw System::AccessFailed if the host is not reachable
+        */
         bool beginBind(const Endpoint& ep, const UdpSocketOptions& o);
 
+        /** @brief end bind to local endpoint.
+
+            @throw System::AccessFailed if the host is not reachable
+        */
         void endBind();
 
+        /** @brief Notifies that the socket was bound.
+            
+            This signal is send when the %UdpSocket is monitored
+            in an EventLoop and was bound to a local endpoint.
+        */
         Signal<UdpSocket&>& bound()
         { return _bound; }
 
+        /** @brief Returns true if bound.
+        */
         bool isBound() const;
 
+        /** @brief Connect to an endpoint.
+            
+            @throw System::AccessFailed if the host is not reachable
+        */
         void connect(const Endpoint& ep);
 
+        /** @brief Connect to an endpoint.
+            
+            @throw System::AccessFailed if the host is not reachable
+        */
         void connect(const Endpoint& ep, const UdpSocketOptions& o);
 
+        /** @brief Set target endpoint.
+            
+            @throw System::AccessFailed if the host is not reachable
+        */
         void setTarget(const Endpoint& ep);
 
+        /** @brief Set target endpoint.
+            
+            @throw System::AccessFailed if the host is not reachable
+        */
         void setTarget(const Endpoint& ep, const UdpSocketOptions& o);
 
+        /** @brief Begin connect to an endpoint.
+            
+            @throw System::AccessFailed if the host is not reachable
+        */
         bool beginConnect(const Endpoint& ep);
 
+        /** @brief Begin connect to an endpoint.
+            
+            @throw System::AccessFailed if the host is not reachable
+        */
         bool beginConnect(const Endpoint& ep, const UdpSocketOptions& o);
 
+        /** @brief End connect to an endpoint.
+            
+            @throw System::AccessFailed if the host is not reachable
+        */
         void endConnect();
 
+        /** @brief Notifies that the socket was connected.
+            
+            This signal is send when the %UdpSocket is monitored
+            in an EventLoop and a connection was established.
+        */
         Signal<UdpSocket&>& connected()
         { return _connected; }
 
+        /** @brief Returns true if connected.
+        */
         bool isConnected() const;
 
+        /** @brief Joins a multicast group.
+        */
         void joinMulticastGroup(const std::string& ipaddr);
 
         //void dropMulticastGroup(const std::string& ipaddr);
 
+        /** @brief Gets the local endpoint.
+        */
         void localEndpoint(Endpoint& ep) const;
 
+        /** @brief Gets the remote endpoint.
+        */
         const Endpoint& remoteEndpoint() const;
 
     protected:

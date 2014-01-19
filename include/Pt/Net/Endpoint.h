@@ -46,30 +46,56 @@ class EndpointImpl;
 class PT_NET_API Endpoint
 {
     public:
+        /** @brief Default contructor.
+        */
         Endpoint();
 
+        /** @brief Contruct from hostname and port number.
+        */
         Endpoint(const std::string& host, unsigned short port);
 
+        /** @brief Contruct from hostname and port number.
+        */
         Endpoint(const char* host, unsigned short port);
 
+        /** @brief Copy contructor.
+        */
         Endpoint(const Endpoint& src);
 
+        /** @brief Destructor.
+        */
         ~Endpoint();
 
+        /** @brief Assignment operator.
+        */
         Endpoint& operator=(const Endpoint& src);
 
+        /** @brief Clears the endpoint.
+        */
         void clear();
 
+        /** @brief Returns the endpoint a s a string.
+        */
         std::string toString() const;
 
+        /** @brief Constructs the special IP4 any address.
+        */
         static Endpoint ip4Any(unsigned short port);
 
+        /** @brief Constructs the special IP4 loopback address.
+        */
         static Endpoint ip4Loopback(unsigned short port);
 
+        /** @brief Constructs the special IP4 broadcast address.
+        */
         static Endpoint ip4Broadcast(unsigned short port);
 
+        /** @brief Constructs the special IP6 any address.
+        */
         static Endpoint ip6Any(unsigned short port);
 
+        /** @brief Constructs the special  IP6 loopback address.
+        */
         static Endpoint ip6Loopback(unsigned short port);
 
         //! @internal

@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
     std::cout << "rpc echo server running on port " << port.get() << "\n"
                  "using " << threads.get() << " thread(s)\n\n"
                  "options:\n\n"
-                 "   -i ip      set listen address (default: all interfaces)\n"
+                 "   -i ip      set listen address (default: IP4 any)\n"
                  "   -p number  set listen port (default: 7002)\n"
                  "   -t number  set number of server threads (default: 4)\n"
               << std::endl;
@@ -155,7 +155,11 @@ int main(int argc, char* argv[])
     Pt::Http::Server server(loop);
     server.setMaxThreads( threads.get() );
 
-    Pt::Net::Endpoint ep(ip.get(), port.get());
+    Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Any( port.get() );
+    
+    if( ip.isSet() )
+        ep = Pt::Net::Endpoint( ip.get(), port.get() );
+
     server.listen(ep);
     
     EchoService service;

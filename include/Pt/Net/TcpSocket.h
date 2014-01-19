@@ -48,12 +48,16 @@ namespace Net {
 class PT_NET_API TcpSocketOptions
 {
     public:
+        //! @brief Default Constructor.
         TcpSocketOptions();
 
+        //! @brief Copy Constructor.
         TcpSocketOptions(const TcpSocketOptions& opts);
 
+        //! @brief Destructor.
         ~TcpSocketOptions();
 
+        //! @brief Assignment operator.
         TcpSocketOptions& operator=(const TcpSocketOptions& opts);
 
     private:
@@ -82,7 +86,7 @@ class PT_NET_API TcpSocket : public System::IODevice
         /** @brief Connects to a host.
             
             @throw System::AccessFailed if the host is not reachable
-         */
+        */
         explicit TcpSocket(const Endpoint& ep);
 
         //! @brief Destructor.
@@ -97,25 +101,52 @@ class PT_NET_API TcpSocket : public System::IODevice
         /** @brief Connect to a host.
             
             @throw System::AccessFailed if the host is not reachable
-         */
+        */
         void connect(const Endpoint& ep);
         
+        /** @brief Connect to a host.
+            
+            @throw System::AccessFailed if the host is not reachable
+        */
         void connect(const Endpoint& ep, const TcpSocketOptions& o);
 
+        /** @brief Begin connecting to a host.
+            
+            @throw System::AccessFailed if the host is not reachable
+        */
         void beginConnect(const Endpoint& ep);
 
+        /** @brief Begin connecting to a host.
+            
+            @throw System::AccessFailed if the host is not reachable
+        */
         void beginConnect(const Endpoint& ep, const TcpSocketOptions& o);
 
+        /** @brief Ends connecting to a host.
+            
+            @throw System::AccessFailed if the host is not reachable
+        */
         void endConnect();
 
+        /** @brief Notifies that the socket was connected.
+            
+            This signal is send when the %TcpSocket is monitored
+            in an EventLoop and a connection was established.
+        */
         Signal<TcpSocket&>& connected()
         { return _connected; }
 
+        /** @brief Returns true if connected.
+        */
         bool isConnected() const
         { return _isConnected; }
 
+        /** @brief Gets the local endpoint.
+        */
         void localEndpoint(Endpoint& ep) const;
 
+        /** @brief Gets the remote endpoint.
+        */
         void remoteEndpoint(Endpoint& ep) const;
 
     protected:
