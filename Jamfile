@@ -161,13 +161,28 @@ actions LsbPackage1
 }
 
 
+LsbPackage Pt-devel : --license 'extended LGPL' 
+                      --version 1.0.0 --release 1 
+                      --group 'C++ Framework' 
+                      --package 'Pt Development Team' 
+                      --vendor 'Pt Development Team' 
+                      --summary 'Pt C++ Framework' 
+                      --description 'None.' ;
+
+LSB_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt ] ;
+LsbPackageAdd Pt-devel : opt/Pt-1.0.0  : [ GLOB $(LSB_INCLUDES_SUBDIR) : *.h  ] ;
+
+LSB_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt System ] ;
+LsbPackageAdd Pt-devel : opt/Pt-1.0.0  : [ GLOB $(LSB_INCLUDES_SUBDIR) : *.h  ] ;
+
+
 LsbPackage Pt : --license 'extended LGPL' 
                 --version 1.0.0 --release 1 
                 --group 'C++ Framework' 
                 --package 'Pt Development Team' 
                 --vendor 'Pt Development Team' 
                 --summary 'Pt C++ Framework' 
-                --description 'Pt Description' ;
+                --description 'None.' ;
 
 LsbPackageAdd Pt : opt/Pt-1.0.0/lib : $(PRELIB)Pt$(SUFDLL) 
                                       $(PRELIB)Pt-System$(SUFDLL) 
