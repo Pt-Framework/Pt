@@ -149,7 +149,6 @@ rule LsbPackageAdd
         Install $(_file:R=$(_package_dir)) : $(_file) ;
         
         Clean clean : $(_file:R=$(_package_dir)) ;
-        Echo Clean lsbpkg-clean $(_file:R=$(_package_dir)) ;
     }
 }
 
