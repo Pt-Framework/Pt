@@ -37,15 +37,14 @@
 
 namespace Pt {
 
-//! Various constants for Pi
-static const double Pi      = 3.14159265358979323846;  // pi
-static const double PiDouble    = 6.28318530717958647692;  // 2*pi
-static const double PiHalf = 1.57079632679489661923;  // pi/2
-static const double PiQuart = 0.78539816339744830961;  // pi/4
-static const double Pi180  = 0.01745329251994329576;  // pi/180
-static const double PiSqr  = 9.86960440108935861883449099987615114f; //pi^2
+static const double Pi      = 3.14159265358979323846;
+static const double PiDouble    = 6.28318530717958647692;
+static const double PiHalf = 1.57079632679489661923;
+static const double PiQuart = 0.78539816339744830961;
+static const double Pi180  = 0.01745329251994329576;
+static const double PiSqr  = 9.86960440108935861883449099987615114f;
 
-/** @brief Fast sine calculation, not as precise as sin(theta)
+/** @brief Fast, less precise sine calculation.
  
     theta is required in rad [0, 2*Pi]
     
@@ -81,7 +80,7 @@ T fastSin(const T& theta)
     return y;
 }
 
-/** @brief Fast cosine calculation, not as precise as cos(theta)
+/** @brief Fast, less precise cosine calculation.
     
     theta is required in rad [0, 2*Pi]
     

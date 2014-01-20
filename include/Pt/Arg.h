@@ -155,7 +155,7 @@ class ArgBaseT<std::string> : public ArgBase
     Options are removed from the option-list, so programs can easily check
     after all options are extracted, if there are parameters left.
 
-    example:
+    Example:
     \code
       int main(int argc, char* argv[])
       {
@@ -164,6 +164,16 @@ class ArgBaseT<std::string> : public ArgBase
       }
     \endcode
 
+   A specialization exists for boolean parameters. Programs often need some switches,
+   which are switched on or off. Users just enter a option without parameter.
+   Boolean parameters can be grouped, so -abc is processed like -a -b -b.
+
+   Example:
+   \code
+   Pt::Arg<bool> debug(argc, argv, 'd');
+   if (debug)
+     std::cout << "debug-mode is set" << std::endl;
+   \endcode
  */
 template <typename T>
 class Arg : public ArgBaseT<T>
@@ -313,70 +323,15 @@ class Arg : public ArgBaseT<T>
         }
 };
 
-/** @brief Read and extract commandline parameters.
 
- Specialization for boolean parameters. Programs often need some switches,
- which are switched on or off. Users just enter a option without parameter.
-
- example:
- \code
- Pt::Arg<bool> debug(argc, argv, 'd');
- if (debug)
-   std::cout << "debug-mode is set" << std::endl;
- \endcode
- */
 template <>
 class Arg<bool> : public ArgBase
 {
     public:
-        /**@brief Construct with initial value.
-        */
         Arg(bool def = false)
         : m_value(def)
         { }
 
-        /** @brief Extracts a bool-option.
-
-            As a special case options can be grouped. The parameter is
-            recognized also in a argument, which starts with a '-' and
-            contains somewhere the given character.
-
-            example:
-            \code
-            Pt::Arg<bool> debug(argc, argv, 'd');
-            Pt::Arg<bool> ignore(argc, argv, 'i');
-            \endcode
-
-            Arguments debug and ignore are both set when the program is called
-            with:
-            \code
-            prog -id
-
-            prog -i -d
-            \endcode
-
-            Options can also switched off with a following '-' like this:
-            \code
-            prog -d-
-            \endcode
-
-            In the program use:
-            \code
-            Arg<bool> debug(argc, argv, 'd');
-            if (debug.isSet())
-            {
-              if (debug)
-                std::cout << "you entered -d" << std::endl;
-              else
-                std::cout << "you entered -d-" << std::endl;
-            }
-            else
-              std::cout << "no -d option given" << std::endl;
-            \endcode
-
-            This is useful, if a program defaults to some enabled feature,
-            which can be disabled.
-        */
         Arg(int& argc, char* argv[], char ch, bool def = false)
         : m_value(def)
         {
@@ -389,8 +344,6 @@ class Arg<bool> : public ArgBase
             m_isset = set(argc, argv, str);
         }
 
-        /** @brief Extract short option.
-        */
         bool set(int& argc, char* argv[], char ch)
         {
             // don't extract value, when already found
@@ -446,20 +399,6 @@ class Arg<bool> : public ArgBase
             return false;
         }
 
-        /** @brief Extract long-option.
-
-            The option-parameter is defined with a string. This can extract
-            long-options like:
-            \code
-              prog --debug
-            \endcode
-
-            with
-            \code
-              Arg<bool> debug(argc, argv, "--debug");
-            \endcode
-
-        */
         bool set(int& argc, char* argv[], const char* str)
         {
             // don't extract value, when already found
@@ -480,13 +419,9 @@ class Arg<bool> : public ArgBase
             return false;
         }
 
-        /** @brief Returns true, if options is set.
-        */
         bool get() const
         { return m_value; }
 
-        /** @brief Convertable to bool.
-        */
         operator bool() const
         { return m_value; }
 

@@ -51,6 +51,8 @@
 
 namespace Pt {
 
+/** @brief Input stream.
+*/
 template <typename CharT, typename TraitsT = std::char_traits<CharT> >
 class BasicIStream : public std::basic_istream<CharT, TraitsT>
 {
@@ -64,6 +66,7 @@ class BasicIStream : public std::basic_istream<CharT, TraitsT>
     public:
         explicit BasicIStream(BasicStreamBuffer<CharT>* sb = 0);
         
+        //! @brief Destructor.
         ~BasicIStream()
         {}
 
@@ -89,6 +92,8 @@ class BasicIStream : public std::basic_istream<CharT, TraitsT>
 };
 
 
+/** @brief Output stream.
+*/
 template <typename CharT, typename TraitsT = std::char_traits<CharT> >
 class BasicOStream : public std::basic_ostream<CharT, TraitsT>
 {
@@ -102,6 +107,7 @@ class BasicOStream : public std::basic_ostream<CharT, TraitsT>
     public:
         explicit BasicOStream(BasicStreamBuffer<CharT>* sb = 0);
 
+        //! @brief Destructor.
         ~BasicOStream()
         {}
 
@@ -121,6 +127,8 @@ class BasicOStream : public std::basic_ostream<CharT, TraitsT>
 };
 
 
+/** @brief Input/Output stream.
+*/
 template <typename CharT, typename TraitsT = std::char_traits<CharT> >
 class BasicIOStream : public std::basic_iostream<CharT, TraitsT>
 {
@@ -134,6 +142,7 @@ class BasicIOStream : public std::basic_iostream<CharT, TraitsT>
     public:
         explicit BasicIOStream(BasicStreamBuffer<CharT>* sb = 0);
 
+        //! @brief Destructor.
         ~BasicIOStream()
         {}
 

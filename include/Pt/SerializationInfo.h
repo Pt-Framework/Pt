@@ -51,8 +51,6 @@ namespace Pt {
 class SerializationContext;
 class Formatter;
 
-
-
 /** @brief Represents arbitrary types during serialization.
 
     @ingroup Serialization
@@ -60,6 +58,9 @@ class Formatter;
 class PT_API SerializationInfo
 {
     public:
+        class Iterator;
+        class ConstIterator;
+
         enum Type {
             Void       = 0,
             Context    = 1,
@@ -84,9 +85,6 @@ class PT_API SerializationInfo
             Dict       = 20,
             DictElement= 21
         };
-
-        class Iterator;
-        class ConstIterator;
 
     public:
         SerializationInfo()
@@ -117,6 +115,8 @@ class PT_API SerializationInfo
         , _flags(0)
         { }
 
+        /** @brief Destructor.
+        */
         ~SerializationInfo();
 
     public:
@@ -355,12 +355,20 @@ class PT_API SerializationInfo
         void setSibling(SerializationInfo* si)
         { _next = si; }
 
+        /** @brief Returns an iterator to the begin of child elements.
+        */
         Iterator begin();
-
+        
+        /** @brief Returns an iterator to the end of child elements.
+        */
         Iterator end();
 
+        /** @brief Returns an iterator to the begin of child elements.
+        */
         ConstIterator begin() const;
 
+        /** @brief Returns an iterator to the end of child elements.
+        */
         ConstIterator end() const;
 
         /** @brief Serialization of weak pointers
@@ -524,7 +532,8 @@ inline bool SerializationInfo::decompose(const T& type)
     return true;
 }
 
-
+/** @brief %Iterator for child elements.
+*/
 class SerializationInfo::Iterator
 {
     public:
@@ -568,7 +577,8 @@ class SerializationInfo::Iterator
         SerializationInfo* _si;
 };
 
-
+/** @brief Const iterator for child elements.
+*/
 class SerializationInfo::ConstIterator
 {
     public:
@@ -625,6 +635,10 @@ inline SerializationInfo::ConstIterator SerializationInfo::end() const
 }
 
 
+/** @brief Saves referencable types.
+
+    @ingroup Serialization
+*/
 class SaveInfo
 {
     public:
@@ -667,7 +681,6 @@ inline SaveInfo operator <<(SerializationInfo& si, const Save&)
     return SaveInfo(si);
 }
 
-
 template <typename T>
 inline void operator <<=(SaveInfo info, const T& type)
 {
@@ -675,6 +688,11 @@ inline void operator <<=(SaveInfo info, const T& type)
 }
 
 
+/** @brief Saves referencable types.
+
+    @related SaveInfo
+    @ingroup Serialization
+*/
 template <typename T>
 inline void save(SaveInfo& si, const T& type)
 {
@@ -684,7 +702,10 @@ inline void save(SaveInfo& si, const T& type)
     }
 }
 
+/** @brief Loads referencable types.
 
+    @ingroup Serialization
+*/
 class LoadInfo
 {
     public:
@@ -732,7 +753,11 @@ inline void operator >>=(const LoadInfo& li, T& type)
     load(li, type);
 }
 
+/** @brief Loads referencable types.
 
+    @related LoadInfo
+    @ingroup Serialization
+*/
 template <typename T>
 inline void load(const LoadInfo& li, T& type)
 {
@@ -740,13 +765,20 @@ inline void load(const LoadInfo& li, T& type)
 }
 
 
+/** @brief Deserializes a pointer reference.
+
+    @related SerializationInfo
+*/
 template <typename T>
 inline void operator >>=(const SerializationInfo& si, T*& ptr)
 {
     si.loadPointer(ptr);
 }
 
+/** @brief Serializes a pointer reference.
 
+    @related SerializationInfo
+*/
 template <typename T>
 inline void operator <<=(SerializationInfo& si, const T* ptr)
 {
@@ -755,7 +787,7 @@ inline void operator <<=(SerializationInfo& si, const T* ptr)
 
 /** @brief Deserializes a bool
 
-    @ingroup Serialization
+    @related SerializationInfo
 */
 inline void operator >>=(const SerializationInfo& si, bool& n)
 {
@@ -764,7 +796,7 @@ inline void operator >>=(const SerializationInfo& si, bool& n)
 
 /** @brief Serializes a bool
 
-    @ingroup Serialization
+    @related SerializationInfo
 */
 inline void operator <<=(SerializationInfo& si, bool n)
 {
@@ -869,7 +901,7 @@ inline void operator <<=(SerializationInfo& si, Pt::uint64_t n)
 
 /** @brief Deserializes a float value.
 
-    @ingroup Serialization
+    @related SerializationInfo
 */
 inline void operator >>=(const SerializationInfo& si, float& n)
 {
@@ -878,7 +910,7 @@ inline void operator >>=(const SerializationInfo& si, float& n)
 
 /** @brief Serializes a float value.
 
-    @ingroup Serialization
+    @related SerializationInfo
 */
 inline void operator <<=(SerializationInfo& si, float n)
 {
@@ -919,7 +951,7 @@ inline void operator <<=(SerializationInfo& si, const char* str)
 
 /** @brief Deserializes a std::string
 
-    @ingroup Serialization
+    @related SerializationInfo
 */
 inline void operator >>=(const SerializationInfo& si, std::string& str)
 {
@@ -928,7 +960,7 @@ inline void operator >>=(const SerializationInfo& si, std::string& str)
 
 /** @brief Serializes a std::string
 
-    @ingroup Serialization
+    @related SerializationInfo
 */
 inline void operator <<=(SerializationInfo& si, const std::string& str)
 {
@@ -949,7 +981,7 @@ inline void operator <<=(SerializationInfo& si, const Pt::String& str)
 
 /** @brief Deserializes a std::vector
 
-    @ingroup Serialization
+    @related SerializationInfo
 */
 template <typename T, typename A>
 inline void operator >>=(const SerializationInfo& si, std::vector<T, A>& vec)
@@ -968,7 +1000,7 @@ inline void operator >>=(const SerializationInfo& si, std::vector<T, A>& vec)
 
 /** @brief Serializes a std::vector
 
-    @ingroup Serialization
+    @related SerializationInfo
 */
 template <typename T, typename A>
 inline void operator <<=(SerializationInfo& si, const std::vector<T, A>& vec)
@@ -986,7 +1018,7 @@ inline void operator <<=(SerializationInfo& si, const std::vector<T, A>& vec)
 
 /** @brief Deserializes a std::list
 
-    @ingroup Serialization
+    @related SerializationInfo
 */
 template <typename T, typename A>
 inline void operator >>=(const SerializationInfo& si, std::list<T, A>& list)
@@ -1001,7 +1033,7 @@ inline void operator >>=(const SerializationInfo& si, std::list<T, A>& list)
 
 /** @brief Serializes a std::list
 
-    @ingroup Serialization
+    @related SerializationInfo
 */
 template <typename T, typename A>
 inline void operator <<=(SerializationInfo& si, const std::list<T, A>& list)
@@ -1019,7 +1051,7 @@ inline void operator <<=(SerializationInfo& si, const std::list<T, A>& list)
 
 /** @brief Deserializes a std::deque
 
-    @ingroup Serialization
+    @related SerializationInfo
 */
 template <typename T, typename A>
 inline void operator >>=(const SerializationInfo& si, std::deque<T, A>& deque)
@@ -1035,7 +1067,7 @@ inline void operator >>=(const SerializationInfo& si, std::deque<T, A>& deque)
 
 /** @brief Serializes a std::deque
 
-    @ingroup Serialization
+    @related SerializationInfo
 */
 template <typename T, typename A>
 inline void operator <<=(SerializationInfo& si, const std::deque<T, A>& deque)
@@ -1058,7 +1090,7 @@ inline void operator <<=(SerializationInfo& si, const std::deque<T, A>& deque)
     possible, due to some of std::set's constraints. However you may
     overload this operator for your type.
 
-    @ingroup Serialization
+    @related SerializationInfo
 */
 template <typename T, typename C, typename A>
 inline void operator >>=(const SerializationInfo& si, std::set<T, C, A>& set)
@@ -1084,7 +1116,7 @@ inline void operator >>=(const SerializationInfo& si, std::set<T, C, A>& set)
 
 /** @brief Serializes a std::set
 
-    @ingroup Serialization
+    @related SerializationInfo
 */
 template <typename T, typename C, typename A>
 inline void operator <<=(SerializationInfo& si, const std::set<T, C, A>& set)

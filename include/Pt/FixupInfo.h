@@ -35,6 +35,10 @@
 
 namespace Pt {
 
+/** @brief Fixup of references during serialization.
+
+    @ingroup Serialization
+*/
 class FixupInfo
 {
     public:
@@ -44,27 +48,34 @@ class FixupInfo
                                      unsigned m);
 
     public:
+        //! @brief Construct from referenced type.
         FixupInfo(void* target, const std::type_info& targetType, unsigned mid)
         : _target(target)
         , _type(&targetType)
         , _mid(mid)
         {}
 
+        //! @brief Destructor.
         ~FixupInfo()
         {}
 
+        //! @brief Returns a pointer to the refernced type.
         void* target() const
         { return _target; }
 
+        //! @brief Returns the referenced type.
         const std::type_info& targetType() const
         { return *_type; }
 
+        //! @brief Returns the member ID.
         unsigned memberId() const
         { return _mid; }
 
+        //! @brief Returns true if null.
         bool isNull() const
         { return _target == 0; }
 
+        //! @brief Returns a pointer to the refernced type.
         template <typename T>
         T* getTarget() const
         {
@@ -115,7 +126,11 @@ struct FixupThunk
     }
 };
 
+/** @brief Fixup references during serialization.
 
+    @related FixupInfo
+    @ingroup Serialization
+*/
 template <typename T>
 inline void fixup(const FixupInfo& fixup, T*& fixme)
 {
@@ -127,7 +142,11 @@ inline void fixup(const FixupInfo& fixup, T*& fixme)
     }
 }
 
+/** @brief Fixup references during serialization.
 
+    @related FixupInfo
+    @ingroup Serialization
+*/
 template <typename T>
 inline void fixup(const FixupInfo& fixup, T& fixme)
 {

@@ -40,10 +40,7 @@ namespace std {
 template <typename T>
 struct __numpunct_cache;
 
-/** @brief Numpunct localization facet
 
-    @ingroup Unicode
-*/
 template <>
 class PT_API numpunct<Pt::Char> : public locale::facet {
     public:
@@ -85,10 +82,7 @@ class PT_API numpunct<Pt::Char> : public locale::facet {
         virtual string_type do_falsename() const;
 };
 
-/** @brief Numput localization facet
 
-    @ingroup Unicode
-*/
 template <>
 class PT_API num_put< Pt::Char, 
                       ostreambuf_iterator<Pt::Char> > : public locale::facet 
@@ -160,10 +154,7 @@ class PT_API num_put< Pt::Char,
         virtual iter_type do_put(iter_type s, ios_base& f, char_type fill,  const void*) const;
 };
 
-/** @brief Numget localization facet
 
-    @ingroup Unicode
-*/
 template<>
 class PT_API num_get< Pt::Char, 
                       istreambuf_iterator<Pt::Char> > : public locale::facet
@@ -239,21 +230,13 @@ class PT_API num_get< Pt::Char,
         virtual iter_type do_get(iter_type, iter_type, ios_base&, ios_base::iostate&, void*&) const;
 };
 
+
 #if (defined _MSC_VER || defined __QNX__ || defined __xlC__)
-
-    /** @brief Ctype localization facet
-        @ingroup Unicode
-    */
-    template <>
-    class PT_API ctype< Pt::Char > : public ctype_base {
-
+  template <>
+  class PT_API ctype< Pt::Char > : public ctype_base {
 #else
-    /** @brief Ctype localization facet
-        @ingroup Unicode
-    */
-    template <>
-    class PT_API ctype<Pt::Char> : public ctype_base, public locale::facet {
-
+  template <>
+  class PT_API ctype<Pt::Char> : public ctype_base, public locale::facet {
 #endif
 
     public:
@@ -337,24 +320,13 @@ class PT_API num_get< Pt::Char,
                                         char dfault, char* dest) const;
 };
 
+
 #if (defined _MSC_VER || defined __QNX__)
-
-template<>
-/** @brief Codecvt localization facet
-
-    @ingroup Unicode
-*/
-class PT_API codecvt<Pt::Char, char, Pt::MBState> : public codecvt_base {
-
+  template<>
+  class PT_API codecvt<Pt::Char, char, Pt::MBState> : public codecvt_base {
 #else
-
-/** @brief Codecvt localization facet
-
-    @ingroup Unicode
-*/
-template<>
-class PT_API codecvt<Pt::Char, char, Pt::MBState> : public codecvt_base, public locale::facet {
-
+  template<>
+  class PT_API codecvt<Pt::Char, char, Pt::MBState> : public codecvt_base, public locale::facet {
 #endif
 
     public:
@@ -440,15 +412,11 @@ class PT_API codecvt<Pt::Char, char, Pt::MBState> : public codecvt_base, public 
 };
 
 #if (defined _MSC_VER || defined __QNX__)
-
-template<>
-class PT_API codecvt<char, char, Pt::MBState> : public codecvt_base {
-
+  template<>
+  class PT_API codecvt<char, char, Pt::MBState> : public codecvt_base {
 #else
-
-template<>
-class PT_API codecvt<char, char, Pt::MBState> : public codecvt_base, public locale::facet {
-
+  template<>
+  class PT_API codecvt<char, char, Pt::MBState> : public codecvt_base, public locale::facet {
 #endif
 
     public:

@@ -35,22 +35,26 @@
 
 namespace Pt {
 
-/** @brief Atomic integers to be used with atomicity functions.
-
-    A variable of this type must not be accessed directly, but used the 
-    provided atomicity functions atomicSet() and atomicGet().
+/** @class Pt::atomic_t Atomicity.h "Pt/Atomicity.h"
+    @brief Atomic integers to be used with atomicity functions.
 
     @ingroup CoreTypes
 */
+
+/** @fn Pt::atomic_t::atomic_t(int v = 0) 
+    @memberof Pt::atomic_t
+    @public
+    @brief Construct with initial value.
+*/
+
 union PT_API atomic_t
 {
-    int     i;   // 32 bit in both 32 bit and 64 bit platforms
-    long    l;   // 32 bit in 32 bit platform and 64 bit in 64 bit platform
-    int32_t i32; // Always 32-bit in any platform
-    int64_t i64; // Always 64-bit in any platform
-    void*   p;   // should follow the system word size (and hence will be 128 bit in a hypothetical 128 bit platform ;)
+    int     i;
+    long    l;
+    int32_t i32;
+    int64_t i64;
+    void*   p;
 #ifdef __cplusplus
-    //! @brief Construct with initial value.
     explicit atomic_t(int v = 0);
 #endif
 };
@@ -59,6 +63,7 @@ union PT_API atomic_t
 
     Returns the value after employing a memory fence (before the get).
 
+    @related atomic_t
     @ingroup CoreTypes
 */
 PT_API int atomicGet(volatile atomic_t& val);
@@ -67,6 +72,7 @@ PT_API int atomicGet(volatile atomic_t& val);
 
     Sets the value and employs a memory fence (after the set).
 
+    @related atomic_t
     @ingroup CoreTypes
 */
 PT_API void atomicSet(volatile atomic_t& val, int n);
@@ -75,6 +81,7 @@ PT_API void atomicSet(volatile atomic_t& val, int n);
 
     Returns the resulting incremented value.
 
+    @related atomic_t
     @ingroup CoreTypes
 */
 PT_API int atomicIncrement(volatile atomic_t& val);
@@ -83,6 +90,7 @@ PT_API int atomicIncrement(volatile atomic_t& val);
 
     Returns the resulting decremented value.
 
+    @related atomic_t
     @ingroup CoreTypes
   */
 PT_API int atomicDecrement(volatile atomic_t& val);
@@ -91,6 +99,7 @@ PT_API int atomicDecrement(volatile atomic_t& val);
 
     Sets \a val to \a exch and returns the initial value of \a val.
 
+    @related atomic_t
     @ingroup CoreTypes
 */
 PT_API int atomicExchange(volatile atomic_t& val, int exch);
@@ -100,14 +109,16 @@ PT_API int atomicExchange(volatile atomic_t& val, int exch);
     If \a val is equal to \a comp, \a val is replaced by \a exch. The initial
     value of of \a val is returned.
 
+    @related atomic_t
     @ingroup CoreTypes
 */
 PT_API int atomicCompareExchange(volatile atomic_t& val, int exch, int comp);
 
 /** @brief Performs atomic addition of two values.
 
-     Returns the initial value of the addend.
+    Returns the initial value of the addend.
 
+    @related atomic_t
     @ingroup CoreTypes
 */
 PT_API int atomicExchangeAdd(volatile atomic_t& val, int add);
@@ -116,6 +127,7 @@ PT_API int atomicExchangeAdd(volatile atomic_t& val, int add);
 
     Sets \a val to \a exch and returns the initial value of \a val.
 
+    @related atomic_t
     @ingroup CoreTypes
 */
 PT_API void* atomicExchange(void* volatile& val, void* exch);
@@ -125,6 +137,7 @@ PT_API void* atomicExchange(void* volatile& val, void* exch);
     If \a val is equal to \a comp, \a val is replaced by \a exch. The initial
     value of \a ptr is returned.
 
+    @related atomic_t
     @ingroup CoreTypes
 */
 PT_API void* atomicCompareExchange(void* volatile& val, void* exch, void* comp);

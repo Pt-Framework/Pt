@@ -138,7 +138,10 @@ class Timespan
         Pt::int64_t _span;
 };
 
+/** @brief Equal comparison operator.
 
+    @related Timespan
+*/
 inline bool operator ==(const Timespan& a, const Timespan& b)
 { return a.toUSecs() == b.toUSecs(); }
 

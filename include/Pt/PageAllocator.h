@@ -75,6 +75,7 @@ class PT_API PageAllocator : public Pt::Allocator
     public:
         PageAllocator(std::size_t size = MinChunkSize);
 
+        //! @brief Destructor.
         ~PageAllocator();
 
         void* allocate( std::size_t size );

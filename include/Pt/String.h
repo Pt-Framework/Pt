@@ -124,7 +124,7 @@ PT_API std::ctype_base::mask ctypeMask(const Char& ch);
 
 /** @brief Checks whether @a ch is a alphabetic character.
 
-    @ingroup Unicode
+    @related Pt::Char
 */
 inline int isalpha(const Char& ch)
 {
@@ -133,7 +133,7 @@ inline int isalpha(const Char& ch)
 
 /** @brief Checks whether @a ch is a alphanumeric character.
 
-    @ingroup Unicode
+    @related Pt::Char
 */
 inline int isalnum(const Char& ch)
 {
@@ -142,7 +142,7 @@ inline int isalnum(const Char& ch)
 
 /** @brief Checks whether @a ch is a punctuation character.
 
-    @ingroup Unicode
+    @related Pt::Char
 */
 inline int ispunct(const Char& ch)
 {
@@ -151,7 +151,7 @@ inline int ispunct(const Char& ch)
 
 /** @brief Checks whether @a ch is a control character.
 
-    @ingroup Unicode
+    @related Pt::Char
 */
 inline int iscntrl(const Char& ch)
 {
@@ -160,7 +160,7 @@ inline int iscntrl(const Char& ch)
 
 /** @brief Checks whether @a ch is a decimal digit.
 
-    @ingroup Unicode
+    @related Pt::Char
 */
 inline int isdigit(const Pt::Char& ch)
 {
@@ -169,7 +169,7 @@ inline int isdigit(const Pt::Char& ch)
 
 /** @brief Checks whether @a ch is a hexadecimal digit.
 
-    @ingroup Unicode
+    @related Pt::Char
 */
 inline int isxdigit(const Char& ch)
 {
@@ -178,7 +178,7 @@ inline int isxdigit(const Char& ch)
 
 /** @brief Checks whether @a ch is a graphical character.
 
-    @ingroup Unicode
+    @related Pt::Char
 */
 inline int isgraph(const Char& ch)
 {
@@ -187,7 +187,7 @@ inline int isgraph(const Char& ch)
 
 /** @brief Checks whether @a ch is lower case.
 
-    @ingroup Unicode
+    @related Pt::Char
 */
 inline int islower(const Pt::Char& ch)
 {
@@ -196,7 +196,7 @@ inline int islower(const Pt::Char& ch)
 
 /** @brief Checks whether @a ch is upper case.
 
-    @ingroup Unicode
+    @related Pt::Char
 */
 inline int isupper(const Char& ch)
 {
@@ -205,7 +205,7 @@ inline int isupper(const Char& ch)
 
 /** @brief Checks whether @a ch is a printable character.
 
-    @ingroup Unicode
+    @related Pt::Char
 */
 inline int isprint(const Char& ch)
 {
@@ -214,7 +214,7 @@ inline int isprint(const Char& ch)
 
 /** @brief Checks whether @a ch is a whitespace character.
 
-    @ingroup Unicode
+    @related Pt::Char
 */
 inline int isspace(const Char& ch)
 {
@@ -223,19 +223,17 @@ inline int isspace(const Char& ch)
 
 /** @brief Convert a character to lower case.
 
-    @ingroup Unicode
+    @related Pt::Char
 */
 PT_API Pt::Char tolower(const Pt::Char& ch);
 
 /** @brief Convert a character to upper case.
 
-    @ingroup Unicode
+    @related Pt::Char
 */
 PT_API Pt::Char toupper(const Pt::Char& ch);
 
 
-/** @internal @brief Multi-byte conversion state.
-*/
 struct MBState
 {
     MBState()
@@ -253,8 +251,6 @@ struct MBState
 
 namespace std {
 
-/** @internal @brief Character traits for the basic string specialization
-*/
 template<>
 struct char_traits<Pt::Char>
 {
@@ -361,10 +357,6 @@ struct char_traits<Pt::Char>
     }
 };
 
-/** @brief Unicode capable strings.
-
-    @ingroup Unicode
-*/
 template <>
 class PT_API basic_string<Pt::Char> 
 {
@@ -982,16 +974,39 @@ inline bool operator>=(const basic_string<Pt::Char>& a, const char* b)
 inline bool operator>=(const char* b, const basic_string<Pt::Char>& a)
 { return a.compare(b) <= 0; }
 
-// operator <<
 PT_API ostream& operator<< (ostream& out, const basic_string<Pt::Char>& str);
 
 } // namespace std
 
 namespace Pt {
 
-/** @brief Unicode capable strings
+/** @class Pt::String String.h "Pt/String.h"
+    @brief Unicode capable strings.
+
+    This class is a specialization of the std::basic_string template for
+    the unicode character type Pt::Char.
+
     @ingroup Unicode
 */
+
+/** @fn Pt::String::String( const allocator_type& a = allocator_type()); 
+    @memberof Pt::String
+    @public
+    @brief Default Constructor.
+*/
+
+/** @fn Pt::String::String(const String& s); 
+    @memberof Pt::String
+    @public
+    @brief Dopy Constructor.
+*/
+
+/** @fn Pt::String::~String() 
+    @memberof Pt::String
+    @public
+    @brief Destructor.
+*/
+
 typedef std::basic_string<Pt::Char> String;
 
 }

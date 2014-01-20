@@ -64,7 +64,8 @@ PT_API std::string timeToString(const Time& t);
 //! @internal
 PT_API Time timeFromString(const std::string& s);
 
-/** @brief %Time expressed in hours, minutes, seconds and milliseconds
+/** @brief %Time expressed in hours, minutes, seconds and milliseconds.
+
     @ingroup DateTime
 */
 class Time
@@ -268,47 +269,65 @@ PT_API void operator >>=(const SerializationInfo& si, Time& time);
 PT_API void operator <<=(SerializationInfo& si, const Time& time);
 
 
-/** @brief Equal comparison operator
+/** @brief Equal comparison operator.
+
+    @related Time
 */
 inline bool operator==(const Time& a, const Time& b)
 { return a.toMSecs() == b.toMSecs(); }
 
-/** @brief Inequal comparison operator
+/** @brief Inequal comparison operator.
+
+    @related Time
 */
 inline bool operator!=(const Time& a, const Time& b)
 { return a.toMSecs() != b.toMSecs(); }
 
-/** @brief Less-than comparison operator
+/** @brief Less-than comparison operator.
+
+    @related Time
 */
 inline bool operator<(const Time& a, const Time& b)
 { return a.toMSecs() < b.toMSecs(); }
 
-/** @brief Less-than-or-equal comparison operator
+/** @brief Less-than-or-equal comparison operator.
+
+    @related Time
 */
 inline bool operator<=(const Time& a, const Time& b)
 { return a.toMSecs() <= b.toMSecs(); }
 
-/** @brief Greater-than comparison operator
+/** @brief Greater-than comparison operator.
+
+    @related Time
 */
 inline bool operator>(const Time& a, const Time& b)
 { return a.toMSecs() > b.toMSecs(); }
 
-/** @brief Greater-than-or-equal comparison operator
+/** @brief Greater-than-or-equal comparison operator.
+
+    @related Time
 */
 inline bool operator>=(const Time& a, const Time& b)
 { return a.toMSecs() >= b.toMSecs(); }
 
-/** @brief Addition operator
+/** @brief Addition operator.
+
+    @related Time
 */
 inline Time operator+(const Time& time, const Timespan& ts)
 { return time.addMSecs( ts.toMSecs() ); }
 
-/** @brief Substraction operator
+/** @brief Substraction operator.
+
+    @related Time
 */
 inline Time operator-(const Time& time, const Timespan& ts)
 { return time.addMSecs( -ts.toMSecs() ); }
 
-/** @brief Substraction operator
+/** @brief Substraction operator.
+
+    @related Time
 */
 inline Timespan operator-(const Time& a, const Time& b)
 { return Timespan( b.msecsUntil(a) * 1000 ); }

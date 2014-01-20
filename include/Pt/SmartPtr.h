@@ -38,18 +38,15 @@
 
 namespace Pt {
 
-/**
-    \param T The managed object type
-*/
-template <typename T>
-/** \brief Reference linking.
+/** @brief Reference linking policy for SmartPtr.
 
     Reference linking means that no counter is required to keep track of
     the smart pointer objects, but all smart pointers form a linked
-    list. When the list becomes empty the raw pointer si deleted. This
+    list. When the list becomes empty the raw pointer is deleted. This
     Model has the advantage that it does not need to allocate memory,
     but is prone to circular dependencies.
 */
+template <typename T>
 class RefLinked
 {
     private:
@@ -95,18 +92,15 @@ class RefLinked
         }
 };
 
-
-/**
-    \param T The managed object type
-*/
-template <typename T>
-/** \brief Intrusive reference counting.
+/* Intrusive reference counting for SmartPtr.
 
     Intrusive reference couting means that the reference count is part of the
     managed heap object. Linking and unlinking will only increase and decrease this
     counter, but not delete it. The managed object needs to implement the functions
     release() and addRef() and must delete itself if the counter reaches zero.
 */
+
+template <typename T>
 class InternalRefCounted
 {
     protected:
@@ -127,17 +121,14 @@ class InternalRefCounted
 };
 
 
-/**
-    \param T The managed object type
-*/
-template <typename T>
-/** \brief Non-intrusive reference counting.
+/** @brief Non-intrusive reference counting for SmartPtr.
 
     Non-intrusive reference couting means that the reference count is not part of the
     managed heap object but part of the policy. Linking and unlinking will increase and
     decrease the policies counter and delete the managed object if it reaches zero. A
     small amount of memory needs to be allocated for the counter variable.
 */
+template <typename T>
 class ExternalRefCounted
 {
     public:
@@ -185,6 +176,7 @@ class ExternalRefCounted
         unsigned* _count;
 };
 
+
 template <typename T>
 class ExternalAtomicRefCounted
 {
@@ -230,21 +222,20 @@ class ExternalAtomicRefCounted
         volatile atomic_t* rc;
 };
 
-/**
-    \param T The managed object type
-*/
-template <typename T>
-/** \brief deleter policy for smart pointer
+/** \brief Deleter policy for SmartPtr.
 
     The DeletePolicy implements the method, which instructs the SmartPtr to free the
     object which it helds by deleting it.
 */
+
+template <typename T>
 class DeletePolicy
 {
     protected:
         static void destroy(T* ptr)
         { delete ptr; }
 };
+
 
 template <typename T>
 class FreeDestroyPolicy
@@ -253,6 +244,7 @@ class FreeDestroyPolicy
         void destroy(T* ptr)
         { free(ptr); }
 };
+
 
 template <typename ObjectType>
 class ArrayDestroyPolicy
@@ -273,8 +265,6 @@ struct AutoPtrRef {
 };
 
 
-template<typename T,
-          typename Destroy = DeletePolicy<T> >
 /** @brief Policy based Auto pointer.
 
     The DestroyPolicy implements the method for destroying the object once
@@ -286,6 +276,8 @@ template<typename T,
     \param T Contained type.
     \param DestroyPolicy policy, to destroy the object.
 */
+template<typename T,
+         typename Destroy = DeletePolicy<T> >
 class AutoPtr : public Destroy
 {
     private:
@@ -386,6 +378,8 @@ class AutoPtr : public Destroy
 };
 
 /** \brief Equality comparison operator.
+
+    @related AutoPtr
 */
 template <typename T, typename D, typename T2, typename D2>
 bool operator==(const AutoPtr<T, D>& a, const AutoPtr<T2, D2>& b)
@@ -398,6 +392,8 @@ bool operator==(const AutoPtr<T, D>& a, const T2* b)
 
 
 /** \brief Equality comparison operator.
+
+    @related AutoPtr
 */
 template <typename T, typename D, typename T2, typename D2>
 bool operator!=(const AutoPtr<T, D>& a, const AutoPtr<T2, D2>& b)
@@ -409,7 +405,9 @@ bool operator!=(const AutoPtr<T, D>& a, const T2* b)
 { return a.get() != b; }
 
 
-/** \brief Less-than comparison operator
+/** \brief Less-than comparison operator.
+
+    @related AutoPtr
 */
 template <typename T, typename D, typename T2, typename D2>
 bool operator<(const AutoPtr<T, D>& a, const AutoPtr<T2, D2>& b)
@@ -421,11 +419,6 @@ bool operator<(const AutoPtr<T, D>& a, const T2* b)
 { return a.get() < b; }
 
 
-
-
-template <typename T,
-          typename OwnershipPolicy = ExternalRefCounted<T>,
-          typename DestroyPolicy = DeletePolicy<T> >
 /** @brief Policy based smart pointer.
 
     The SmartPtr implements a model that determines how the contained
@@ -443,6 +436,9 @@ template <typename T,
     \param Model Model for linking/unlinking.
     \param DestroyPolicy policy, to destroy the object.
 */
+template <typename T,
+          typename OwnershipPolicy = ExternalRefCounted<T>,
+          typename DestroyPolicy = DeletePolicy<T> >
 class SmartPtr : public OwnershipPolicy,
                  public DestroyPolicy
 {

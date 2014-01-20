@@ -55,15 +55,21 @@
 #define PT_STRINGIFY(x) #x
 #define PT_TOSTRING(x) PT_STRINGIFY(x)
 
-/** @brief Builds a source info string literal
+/** @brief Builds a source info string literal.
+    
+    @related SourceInfo
 */
 #define PT_SOURCEINFO_STR __FILE__ ":" PT_TOSTRING(__LINE__)
 
-/** @brief Builds a string literal containing an error message and source information
+/** @brief Builds a string literal containing an error message and source information.
+
+    @related SourceInfo
 */
 #define PT_ERROR_MSG(msg) __FILE__ ":" PT_TOSTRING(__LINE__) ": " #msg
 
-/** @brief Construct a Pt::SourceInfo object
+/** @brief Construct a Pt::SourceInfo object.
+
+    @related SourceInfo
 */
 #define PT_SOURCEINFO Pt::SourceInfo(__FILE__, PT_TOSTRING(__LINE__), PT_FUNCTION)
 
@@ -123,22 +129,37 @@ class SourceInfo
         const char* _func;
 };
 
+/** @brief Concatenates a string with a %SourceInfo
 
+    @related SourceInfo
+*/
 inline std::string operator+(const std::string& what, const SourceInfo& info)
 {
     return std::string( info.file() ) + ':' + info.line() + ": " += what;
 }
 
+/** @brief Concatenates a string with a %SourceInfo
+
+    @related SourceInfo
+*/
 inline std::string operator+(const char* what, const SourceInfo& info)
 {
     return std::string( info.file() ) + ':' + info.line() + ": " += what;
 }
 
+/** @brief Concatenates a string with a %SourceInfo
+
+    @related SourceInfo
+*/
 inline std::string operator+( const SourceInfo& info, const std::string& what)
 {
     return std::string( info.file() ) + ':' + info.line() + ": " += what;
 }
 
+/** @brief Concatenates a string with a %SourceInfo
+
+    @related SourceInfo
+*/
 inline std::string operator+(const SourceInfo& info, const char* what)
 {
     return std::string( info.file() ) + ':' + info.line() + ": " += what;

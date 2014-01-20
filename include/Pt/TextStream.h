@@ -354,8 +354,25 @@ class BasicTextStream : public BasicIOStream<CharT>
         BasicTextBuffer<intern_type, extern_type> _tbuffer;
 };
 
+/** @class Pt::TextIStream TextStream.h "Pt/TextStream.h"
+    @brief Text input stream for unicode character conversion.
+
+    @ingroup Unicode
+*/
 typedef BasicTextIStream<Char, char>  TextIStream;
+
+/** @class Pt::TextOStream TextStream.h "Pt/TextStream.h"
+    @brief Text output stream for unicode character conversion.
+
+    @ingroup Unicode
+*/
 typedef BasicTextOStream<Char, char>  TextOStream;
+
+/** @class Pt::TextStream TextStream.h "Pt/TextStream.h"
+    @brief Text stream for unicode character conversion.
+
+    @ingroup Unicode
+*/
 typedef BasicTextStream<Char, char> TextStream;
 
 

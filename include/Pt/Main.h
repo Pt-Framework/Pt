@@ -47,7 +47,7 @@ int main(int, char**);
 
 int main(int, char**);
 
-/** @brief A wmain function for wince that calls a regular main function
+/*  A wmain function for wince that calls a regular main function
 
     Include this header in your main.cpp so it can be compiled with visual
     studio for Windows CE, which has only unicode support. This function

@@ -35,7 +35,7 @@
 
 namespace Pt {
 
-/** @brief %Settings Format Error
+/** @brief %Settings Format Error.
 */
 class PT_API SettingsError : public SerializationError
 {
@@ -57,12 +57,12 @@ class PT_API SettingsError : public SerializationError
         std::size_t _line;
 };
 
-/** @brief Store application settings
+/** @brief Store application settings.
 */
 class PT_API Settings : private SerializationInfo
 {
     public:
-        /** @brief Modifiable Settings Entry
+        /** @brief Modifiable settings entry.
         */
         class Entry
         {
@@ -205,7 +205,7 @@ class PT_API Settings : private SerializationInfo
                 SerializationInfo* _si;
         };
 
-        /** @brief Constant Settings Entry
+        /** @brief Constant settings entry.
         */
         class ConstEntry
         {

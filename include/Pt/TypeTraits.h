@@ -61,8 +61,7 @@ struct TypeTraits : public TypeTraitsBase<T>
     static const unsigned int isReference = 0;
 };
 
-/** @brief Type-traits for for const value types
-*/
+
 template <typename T>
 struct TypeTraits<const T> : public TypeTraitsBase<T>
 {
@@ -71,8 +70,7 @@ struct TypeTraits<const T> : public TypeTraitsBase<T>
     static const unsigned int isReference = 0;
 };
 
-/** @brief Type-traits for for non-const reference types
-*/
+
 template <typename T>
 struct TypeTraits<T&> : public TypeTraitsBase<T>
 {
@@ -81,8 +79,7 @@ struct TypeTraits<T&> : public TypeTraitsBase<T>
     static const unsigned int isReference = 1;
 };
 
-/** @brief Type-traits for for const reference types
-*/
+
 template <typename T>
 struct TypeTraits<const T&> : public TypeTraitsBase<T>
 {
@@ -91,8 +88,7 @@ struct TypeTraits<const T&> : public TypeTraitsBase<T>
     static const unsigned int isReference = 1;
 };
 
-/** @brief Type-traits for for non-const pointer types
-*/
+
 template <typename T>
 struct TypeTraits<T*> : public TypeTraitsBase<T>
 {
@@ -101,8 +97,7 @@ struct TypeTraits<T*> : public TypeTraitsBase<T>
     static const unsigned int isReference = 0;
 };
 
-/** @brief Type-traits for for const pointer types
-*/
+
 template <typename T>
 struct TypeTraits<const T*> : public TypeTraitsBase<T>
 {
@@ -111,8 +106,7 @@ struct TypeTraits<const T*> : public TypeTraitsBase<T>
     static const unsigned int isReference = 0;
 };
 
-/** @brief Type-traits for for fixed-size array types
-*/
+
 template <typename T, std::size_t N>
 struct TypeTraits<T[N]> : public TypeTraitsBase<T>
 {
@@ -121,8 +115,7 @@ struct TypeTraits<T[N]> : public TypeTraitsBase<T>
     static const unsigned int isReference = 0;
 };
 
-/** @brief Type-traits for for void
-*/
+
 template <>
 struct TypeTraits<void>
 {
