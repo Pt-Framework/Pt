@@ -9,8 +9,8 @@ if $(PTHREAD_INCLUDES)
 # General values and settings
 #############################################################################
 
-# include rules and actions to build unit tests
 Load unittest.jam ;
+Load lsbpkg.jam ;
 
 # set default directory to build objects and targets
 # ALL_LOCATE_OBJECTS ?= [ FDirName $(PT_TOP) output ] ;
@@ -88,7 +88,7 @@ SubInclude PT_TOP src Pt ;
 SubInclude PT_TOP src Pt-Reflex ;
 SubInclude PT_TOP src Pt-Unit ;
 SubInclude PT_TOP src Pt-Xml ;
-#SubInclude PT_TOP src Pt-Gfx ;
+SubInclude PT_TOP src Pt-Gfx ;
 
 if $(SYS)
 {
@@ -116,64 +116,36 @@ if $(SYS)
     }
 }
 
+#############################################################################
+# LSB packages
+#############################################################################
 
-rule LsbPackage
-{
-    local _target = $(<:S=.rpm) ;
-    local _package_root_dir = $(<)-rpm ;
+PT_LSB_PACKAGE_ROOTDIR = [ FDirName opt Pt-1.0.0 ] ;
+PT_LSB_PACKAGE_LIBDIR = [ FDirName $(PT_LSB_PACKAGE_ROOTDIR) lib ] ;
 
-    Depends lsbpkg : $(_target) ;
-    
-    # TODO: clean RPM package
-    # Clean clean : $(_target);
-    
-    LSB_PACKAGE_ROOT_DIR on $(_target) = $(_package_root_dir) ;
-    LSB_PACKAGE_FLAGS on $(_target) = $(2) ;
-    LsbPackage1 $(_target) ;
-}
-
-
-rule LsbPackageAdd
-{
-    local _target = $(<:S=.rpm) ;
-    local _package_root_dir = $(<)-rpm ;
-    
-    local _package_dir = [ FDirName $(_package_root_dir) $(2) ] ;
-    MkDir $(_package_dir) ;
-    
-    for local _file in $(3)
-    {
-        Depends $(_target) : $(_file:R=$(_package_dir)) ;
-        Depends $(_file:R=$(_package_dir)) : $(_package_dir) ;
-        
-        Install $(_file:R=$(_package_dir)) : $(_file) ;
-        
-        Clean clean : $(_file:R=$(_package_dir)) ;
-    }
-}
-
-
-actions LsbPackage1
-{
-    /opt/lsb/bin/fakeroot /opt/lsb/bin/makelsbpkg $(<:B) $(LSB_PACKAGE_ROOT_DIR) $(LSB_PACKAGE_FLAGS)
-
-    rm -rf $(LSB_PACKAGE_ROOT_DIR)
-}
-
+PT_LSB_PACKAGE_DESCRIPTION = Platinum (Pt) is a comprehensive C++ framework, 
+                             which allows developers to write high-performance
+                             applications for many platforms with only one
+                             codebase. ;
 
 LsbPackage Pt-devel : --license 'extended LGPL' 
                       --version 1.0.0 --release 1 
                       --group 'C++ Framework' 
                       --package 'Pt Development Team' 
                       --vendor 'Pt Development Team' 
-                      --summary 'Pt C++ Framework' 
-                      --description 'None.' ;
+                      --summary 'Platinum (Pt) C++ Framework Development Package' 
+                      --description '$(PT_LSB_PACKAGE_DESCRIPTION:J=" ")' ;
 
-LSB_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt ] ;
-LsbPackageAdd Pt-devel : opt/Pt-1.0.0  : [ GLOB $(LSB_INCLUDES_SUBDIR) : *.h  ] ;
-
-LSB_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt System ] ;
-LsbPackageAdd Pt-devel : opt/Pt-1.0.0  : [ GLOB $(LSB_INCLUDES_SUBDIR) : *.h  ] ;
+PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt ] ;
+PT_INCLUDES_SUBDIRS += [ FDirName $(PT_TOP) include Pt System ] ;
+PT_INCLUDES_SUBDIRS += [ FDirName $(PT_TOP) include Pt Net ] ;
+PT_INCLUDES_SUBDIRS += [ FDirName $(PT_TOP) include Pt Ssl ] ;
+PT_INCLUDES_SUBDIRS += [ FDirName $(PT_TOP) include Pt Http ] ;
+PT_INCLUDES_SUBDIRS += [ FDirName $(PT_TOP) include Pt Unit ] ;
+PT_INCLUDES_SUBDIRS += [ FDirName $(PT_TOP) include Pt Xml ] ;
+PT_INCLUDES_SUBDIRS += [ FDirName $(PT_TOP) include Pt XmlRpc ] ;
+LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR) : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h  ] ;
+LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR) : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.tpp  ] ;
 
 
 LsbPackage Pt : --license 'extended LGPL' 
@@ -181,14 +153,14 @@ LsbPackage Pt : --license 'extended LGPL'
                 --group 'C++ Framework' 
                 --package 'Pt Development Team' 
                 --vendor 'Pt Development Team' 
-                --summary 'Pt C++ Framework' 
-                --description 'None.' ;
+                --summary 'Platinum (Pt) C++ Framework Runtime Libraries' 
+                --description '$(PT_LSB_PACKAGE_DESCRIPTION:J=" ")' ;
 
-LsbPackageAdd Pt : opt/Pt-1.0.0/lib : $(PRELIB)Pt$(SUFDLL) 
-                                      $(PRELIB)Pt-System$(SUFDLL) 
-                                      $(PRELIB)Pt-Net$(SUFDLL) 
-                                      $(PRELIB)Pt-Http$(SUFDLL) 
-                                      $(PRELIB)Pt-Unit$(SUFDLL) 
-                                      $(PRELIB)Pt-Ssl$(SUFDLL) 
-                                      $(PRELIB)Pt-Xml$(SUFDLL) 
-                                      $(PRELIB)Pt-XmlRpc$(SUFDLL) ;
+LsbPackageAdd Pt : $(PT_LSB_PACKAGE_LIBDIR) : $(PRELIB)Pt$(SUFDLL) 
+                                              $(PRELIB)Pt-System$(SUFDLL) 
+                                              $(PRELIB)Pt-Net$(SUFDLL) 
+                                              $(PRELIB)Pt-Ssl$(SUFDLL) 
+                                              $(PRELIB)Pt-Http$(SUFDLL) 
+                                              $(PRELIB)Pt-Unit$(SUFDLL) 
+                                              $(PRELIB)Pt-Xml$(SUFDLL) 
+                                              $(PRELIB)Pt-XmlRpc$(SUFDLL) ;
