@@ -1,0 +1,44 @@
+LSB_ROOT ?= "" ;
+
+rule LsbPackage
+{
+    local _target = $(<:S=.rpm) ;
+    local _package_root_dir = $(<)-rpm ;
+
+    Depends lsbpkg : $(_target) ;
+    
+    # We do not know the exact RPM package name
+    Clean clean : $(<:S=*.rpm) ;
+
+    LSB_PACKAGE_ROOT_DIR on $(_target) = $(_package_root_dir) ;
+    LSB_PACKAGE_FLAGS on $(_target) = $(2) ;
+    LsbPackage1 $(_target) ;
+}
+
+
+rule LsbPackageAdd
+{
+    local _target = $(<:S=.rpm) ;
+    local _package_root_dir = $(<)-rpm ;
+    
+    local _package_dir = [ FDirName $(_package_root_dir) $(2) ] ;
+    MkDir $(_package_dir) ;
+    
+    for local _file in $(3)
+    {
+        Depends $(_target) : $(_file:D=$(_package_dir)) ;
+        Depends $(_file:D=$(_package_dir)) : $(_package_dir) ;
+        
+        Install $(_file:D=$(_package_dir)) : $(_file) ;
+        
+        Clean clean : $(_file:R=$(_package_dir)) ;
+    }
+}
+
+
+actions LsbPackage1
+{
+    $(LSB_ROOT)fakeroot $(LSB_ROOT)makelsbpkg $(<:B) $(LSB_PACKAGE_ROOT_DIR) $(LSB_PACKAGE_FLAGS)
+
+    rm -rf $(LSB_PACKAGE_ROOT_DIR)
+}

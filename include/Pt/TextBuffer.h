@@ -473,6 +473,11 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         std::basic_ios<extern_type>* _target;
 };
 
+/** @class Pt::TextBuffer TextBuffer.h "Pt/TextBuffer.h"
+    @brief Converts character sequences with different encodings.
+
+    @ingroup Unicode
+*/
 typedef BasicTextBuffer<Pt::Char, char> TextBuffer;
 
 ///** @brief Converts 8-bit character sequences to unicode.

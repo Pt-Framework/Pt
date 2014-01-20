@@ -62,6 +62,10 @@ class TypeInfo
         const std::type_info* m_ti;
 };
 
+/** @brief Equal comparison operator.
+
+    @related TypeInfo
+*/
 inline bool operator==(const TypeInfo& lhs, const TypeInfo& rhs)
 { return (lhs.get() == rhs.get()) != 0; }
 

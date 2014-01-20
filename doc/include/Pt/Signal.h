@@ -91,13 +91,15 @@ class SignalSlot : public BasicSlot<R, ARGUMENTS>
 };
 
 /** @brief  Connects a %Signal to a slot.
-    @ingroup sigslot
+
+    @related Signal
 */
 template <typename R, typename ARGS>
 Connection operator+=(Signal<ARGS>& signal, const BasicSlot<R, ARGS>& slot);
 
 /** @brief  Disconnects a %Signal fro a slot.
-    @ingroup sigslot
+
+    @related Signal
 */
 template <typename R, typename ARGS>
 void operator-=(Signal<ARGS>& signal, const BasicSlot<R, ARGS>& slot);

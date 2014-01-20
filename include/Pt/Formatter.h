@@ -45,6 +45,7 @@ class Composer;
 class Formatter
 {
     public:
+        //! @brief Destructor.
         virtual ~Formatter()
         { }
 

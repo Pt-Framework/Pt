@@ -50,6 +50,8 @@ class PT_API SerializationContext : public SerializationInfo
     public:
         SerializationContext();
 
+        /** @brief Destructor.
+        */
         virtual ~SerializationContext();
 
         inline void enableReferencing(bool enabled)

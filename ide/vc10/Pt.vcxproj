@@ -168,7 +168,6 @@
     <ClInclude Include="..\..\include\Pt\Net\TcpSocket.h" />
     <ClInclude Include="..\..\include\Pt\Net\UdpSocket.h" />
     <ClInclude Include="..\..\include\Pt\NonCopyable.h" />
-    <ClInclude Include="..\..\include\Pt\NumericCast.h" />
     <ClInclude Include="..\..\include\Pt\Pack.h" />
     <ClInclude Include="..\..\include\Pt\PackPop.h" />
     <ClInclude Include="..\..\include\Pt\PageAllocator.h" />

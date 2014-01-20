@@ -38,7 +38,7 @@
 
 //namespace Pt {
 
-///** @brief Unicode string stream buffer.
+//* @brief Unicode string stream buffer.
 //
 //    @ingroup Unicode
 //*/
@@ -150,19 +150,22 @@
 
 namespace Pt {
 
-/** @brief Unicode string stream.
+/** @class Pt::StringStream StringStream.h "Pt/StringStream.h"
+    @brief Unicode string stream.
 
     @ingroup Unicode
 */
 typedef std::basic_stringstream<Pt::Char> StringStream;
 
-/** @brief Unicode string stream.
+/** @class Pt::IStringStream StringStream.h "Pt/StringStream.h"
+    @brief Unicode string input stream.
 
     @ingroup Unicode
 */
 typedef std::basic_istringstream<Pt::Char> IStringStream;
 
-/** @brief Unicode string stream.
+/** @class Pt::OStringStream StringStream.h "Pt/StringStream.h"
+    @brief Unicode string output stream.
 
     @ingroup Unicode
 */

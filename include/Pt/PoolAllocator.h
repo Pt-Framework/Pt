@@ -124,6 +124,7 @@ class PT_API MemoryPool : public NonCopyable
     public:
         MemoryPool(std::size_t elemSize, std::size_t maxPageSize = 8192);
 
+        //! @brief Destructor.
         ~MemoryPool();
         
         void* allocate()

@@ -45,6 +45,8 @@
 
 namespace Pt {
 
+/** @brief Buffer for input and output streams.
+*/
 template <typename CharT, typename TraitsT = std::char_traits<CharT> >
 class BasicStreamBuffer : public std::basic_streambuf<CharT, TraitsT>
 {

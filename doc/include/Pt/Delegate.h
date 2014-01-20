@@ -92,7 +92,8 @@ class DelegateSlot : public BasicSlot<R, ARGUMENTS>
 };
 
 /** @brief Connect a %Delegate to a slot.
-    @ingroup sigslot
+
+    @related Delegate
 */
 template <typename R, typename ARGS>
 Connection operator+=(Delegate<R, ARGS>& delegate, const BasicSlot<R, ARGS>& slot);

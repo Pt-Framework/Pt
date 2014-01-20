@@ -474,11 +474,11 @@ struct AnyCast<T*>
 /** @brief Get contained value
 
     This function is used to get the contained value from an %Any. It is
-    not possible to get a float out of an %Any if the contained value is
+    not possible to get a float out of an %Any, if the contained value is
     an int, but the typeid's must match. It is, however, possible to
     get a const reference to the contained type.
 
-    @param any Any to read to
+    @related Any
     @return contained value
     @throw std::bad_cast on type mismatch
 */
