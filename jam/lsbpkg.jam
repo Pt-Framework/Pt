@@ -26,10 +26,10 @@ rule LsbPackageAdd
     
     for local _file in $(3)
     {
-        Depends $(_target) : $(_file:R=$(_package_dir)) ;
-        Depends $(_file:R=$(_package_dir)) : $(_package_dir) ;
+        Depends $(_target) : $(_file:D=$(_package_dir)) ;
+        Depends $(_file:D=$(_package_dir)) : $(_package_dir) ;
         
-        Install $(_file:R=$(_package_dir)) : $(_file) ;
+        Install $(_file:D=$(_package_dir)) : $(_file) ;
         
         Clean clean : $(_file:R=$(_package_dir)) ;
     }

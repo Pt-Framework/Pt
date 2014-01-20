@@ -137,15 +137,28 @@ LsbPackage Pt-devel : --license 'extended LGPL'
                       --description '$(PT_LSB_PACKAGE_DESCRIPTION:J=" ")' ;
 
 PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt ] ;
-PT_INCLUDES_SUBDIRS += [ FDirName $(PT_TOP) include Pt System ] ;
-PT_INCLUDES_SUBDIRS += [ FDirName $(PT_TOP) include Pt Net ] ;
-PT_INCLUDES_SUBDIRS += [ FDirName $(PT_TOP) include Pt Ssl ] ;
-PT_INCLUDES_SUBDIRS += [ FDirName $(PT_TOP) include Pt Http ] ;
-PT_INCLUDES_SUBDIRS += [ FDirName $(PT_TOP) include Pt Unit ] ;
-PT_INCLUDES_SUBDIRS += [ FDirName $(PT_TOP) include Pt Xml ] ;
-PT_INCLUDES_SUBDIRS += [ FDirName $(PT_TOP) include Pt XmlRpc ] ;
-LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR) : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h  ] ;
-LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR) : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.tpp  ] ;
+LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h *.tpp  ] ;
+
+PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt System ] ;
+LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/System : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h *.tpp ] ;
+
+PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt Net ] ;
+LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/Net : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h *.tpp ] ;
+
+PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt Ssl ] ;
+LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/Ssl : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h *.tpp ] ;
+
+PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt Http ] ;
+LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/Http : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h *.tpp ] ;
+
+PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt Unit ] ;
+LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/Unit : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h *.tpp ] ;
+
+PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt Xml ] ;
+LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/Xml : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h *.tpp ] ;
+
+PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt XmlRpc ] ;
+LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/XmlRpc : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h *.tpp ] ;
 
 
 LsbPackage Pt : --license 'extended LGPL' 
