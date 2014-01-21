@@ -57,6 +57,8 @@ class EndDocument : public Node
 };
 
 /** @brief Casts a generic node to a EndDocument node.
+
+    @related EndDocument
 */
 inline EndDocument* toEndDocument(Node* node)
 {
@@ -64,6 +66,8 @@ inline EndDocument* toEndDocument(Node* node)
 }
 
 /** @brief Casts a generic node to a EndDocument node.
+
+    @related EndDocument
 */
 inline const EndDocument* toEndDocument(const Node* node)
 {
@@ -71,6 +75,8 @@ inline const EndDocument* toEndDocument(const Node* node)
 }
 
 /** @brief Casts a generic node to a EndDocument node.
+
+    @related EndDocument
 */
 inline EndDocument& toEndDocument(Node& node)
 {
@@ -78,6 +84,8 @@ inline EndDocument& toEndDocument(Node& node)
 }
 
 /** @brief Casts a generic node to a EndDocument node.
+
+    @related EndDocument
 */
 inline const EndDocument& toEndDocument(const Node& node)
 {

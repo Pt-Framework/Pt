@@ -85,6 +85,8 @@ class Comment : public Node
 };
 
 /** @brief Casts a generic node to a Comment node.
+
+    @related Comment
 */
 inline Comment* toComment(Node* node)
 {
@@ -92,6 +94,8 @@ inline Comment* toComment(Node* node)
 }
 
 /** @brief Casts a generic node to a Comment node.
+
+    @related Comment
 */
 inline const Comment* toComment(const Node* node)
 {
@@ -99,6 +103,8 @@ inline const Comment* toComment(const Node* node)
 }
 
 /** @brief Casts a generic node to a Comment node.
+
+    @related Comment
 */
 inline Comment& toComment(Node& node)
 {
@@ -106,6 +112,8 @@ inline Comment& toComment(Node& node)
 }
 
 /** @brief Casts a generic node to a Comment node.
+
+    @related Comment
 */
 inline const Comment& toComment(const Node& node)
 {

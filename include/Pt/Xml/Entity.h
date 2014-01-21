@@ -187,6 +187,8 @@ class EntityReference : public Node
 };
 
 /** @brief Casts a generic node to an EntityReference node.
+
+    @related EntityReference
 */
 inline EntityReference* toEntityReference(Node* node)
 {
@@ -194,6 +196,8 @@ inline EntityReference* toEntityReference(Node* node)
 }
 
 /** @brief Casts a generic node to an EntityReference node.
+
+    @related EntityReference
 */
 inline const EntityReference* toEntityReference(const Node* node)
 {
@@ -201,6 +205,8 @@ inline const EntityReference* toEntityReference(const Node* node)
 }
 
 /** @brief Casts a generic node to an EntityReference node.
+
+    @related EntityReference
 */
 inline EntityReference& toEntityReference(Node& node)
 {
@@ -208,6 +214,8 @@ inline EntityReference& toEntityReference(Node& node)
 }
 
 /** @brief Casts a generic node to an EntityReference node.
+
+    @related EntityReference
 */
 inline const EntityReference& toEntityReference(const Node& node)
 {

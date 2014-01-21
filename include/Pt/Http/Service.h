@@ -41,11 +41,17 @@ namespace Http {
 
 class Request;
 
+/** @brief HTTP service.
+*/
 class PT_HTTP_API Service : private NonCopyable
 {
     public:
+        /** @brief Default Constructor.
+        */
         Service();
 
+        /** @brief Destructor.
+        */
         virtual ~Service();
 
         Responder* getResponder(const Request&);
@@ -69,14 +75,19 @@ class PT_HTTP_API Service : private NonCopyable
         Pt::varint_t _r2;
 };
 
-
+/** @brief Basic HTTP service implementation.
+*/
 template <typename R, typename Alloc = Allocator>
 class BasicService : public Service
 {
     public:
+        /** @brief Default Constructor.
+        */
         BasicService()
         { }
 
+        /** @brief Destructor.
+        */
         ~BasicService()
         { }
 

@@ -42,10 +42,16 @@ namespace System {
 class PT_SYSTEM_API SystemError : public std::runtime_error
 {
     public:
+        /** @brief Construct with error message.
+        */
         explicit SystemError(const std::string& what);
 
+        /** @brief Construct with error message.
+        */
         explicit SystemError(const char* what);
 
+        /** @brief Destructor.
+        */
         ~SystemError() throw()
         {}
 };

@@ -119,6 +119,8 @@ class QName
 };
 
 /** @brief Returns true if equal.
+
+    @related QName
 */
 inline bool operator ==(const QName& a, const QName& b)
 {
@@ -126,6 +128,8 @@ inline bool operator ==(const QName& a, const QName& b)
 }
 
 /** @brief Returns true if not equal.
+
+    @related QName
 */
 inline bool operator !=(const QName& a, const QName& b)
 {
@@ -133,6 +137,8 @@ inline bool operator !=(const QName& a, const QName& b)
 }
 
 /** @brief Returns true if less.
+
+    @related QName
 */
 inline bool operator<(const QName& a, const QName& b)
 {

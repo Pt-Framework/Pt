@@ -38,6 +38,8 @@ namespace Pt {
 
 namespace Http {
 
+/** @brief HTTP reply message.
+*/
 class PT_HTTP_API Reply : public Message
 {
     friend class Connection;
@@ -73,9 +75,11 @@ class PT_HTTP_API Reply : public Message
             _statusText = txt;
         }
 
+        //! @brief Returns the HTTP status code.
         unsigned statusCode() const
         { return _statusCode; }
 
+        //! @brief Returns the HTTP status text.
         const std::string& statusText() const
         { return _statusText; }
 

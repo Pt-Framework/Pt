@@ -43,6 +43,8 @@ class Reply;
 class Server;
 class Service;
 
+/** @brief %Servlet for HTTP services.
+*/
 class PT_HTTP_API Servlet : private NonCopyable
 {
     // @internal
@@ -88,7 +90,8 @@ class PT_HTTP_API Servlet : private NonCopyable
         Authorizer* _auth;
 };
 
-
+/** @brief Maps requests to a service by URL.
+*/
 class PT_HTTP_API MapUrl : public Servlet
 {
     public:
@@ -109,7 +112,8 @@ class PT_HTTP_API MapUrl : public Servlet
         std::string _url;
 };
 
-
+/** @brief Maps any request to a service.
+*/
 class PT_HTTP_API MapAny : public Servlet
 {
     public:

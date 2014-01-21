@@ -49,16 +49,16 @@ namespace System {
 */
 class PT_SYSTEM_API FileInfo
 {
-	public:
+    public:
         //! @brief File-node type
         enum Type
         {
-            Invalid = 0,
-            Directory = 1,
-            File = 2
+            Invalid = 0,   //!< Invalid file type
+            Directory = 1, //!< Directory
+            File = 2       //!< Regular file
         };
 
-	public:
+    public:
         //! @brief Default constructor
         FileInfo()
         {}
@@ -88,11 +88,11 @@ class PT_SYSTEM_API FileInfo
 
         //! @brief Returns the file size.
         Pt::uint64_t size() const
-		{ return FileInfo::size(_path); }
+        { return FileInfo::size(_path); }
 
-		//! @brief Returns the file type.
-		Type type() const
-		{ return FileInfo::type(_path); }
+        //! @brief Returns the file type.
+        Type type() const
+        { return FileInfo::type(_path); }
 
         //! @brief Returns the name including an exension
         std::string name() const
@@ -111,18 +111,18 @@ class PT_SYSTEM_API FileInfo
 
         //! @brief Returns the file name without the exension
         std::string baseName()
-		{ return FileInfo::baseName(_path); }
+        { return FileInfo::baseName(_path); }
 
     public:
         //! @brief Returns the type of file at \a path
         static Type type(const std::string& path);
 
-		static Type type(const char* path);
+        static Type type(const char* path);
 
         //! @brief Returns the size of the file in bytes
         static Pt::uint64_t size(const std::string& path);
 
-		static Pt::uint64_t size(const char* path);
+        static Pt::uint64_t size(const char* path);
 
         //! @brief Returns true if a file or directory exists at \a path
         static bool exists(const std::string& path)
@@ -134,47 +134,47 @@ class PT_SYSTEM_API FileInfo
         //! @brief Returns the name including an exension
         static std::string name(const std::string& path);
 
-		static std::string name(const char* path);
+        static std::string name(const char* path);
 
         //! @brief Returns the parent directory path
         static std::string dirName(const std::string& path);
 
-		static std::string dirName(const char* path);
+        static std::string dirName(const char* path);
 
         //! @brief Returns the file name without the exension
         static std::string baseName(const std::string& path);
 
-		static std::string baseName(const char* path);
+        static std::string baseName(const char* path);
 
         //! @brief Returns the file name extension or an empty string if not present
         static std::string extension(const std::string& path);
 
-		static std::string extension(const char* path);
+        static std::string extension(const char* path);
 
         //! @brief Creates a new file.
         static void createFile(const std::string& path);
 
-		static void createFile(const char* path);
+        static void createFile(const char* path);
 
         //! @brief Creates a new directory.
         static void createDirectory(const std::string& path);
 
-		static void createDirectory(const char* path);
+        static void createDirectory(const char* path);
 
         //! @brief Resizes a file.
         static void resize(const std::string& path, Pt::uint64_t n);
 
-		static void resize(const char* path, Pt::uint64_t n);
+        static void resize(const char* path, Pt::uint64_t n);
 
         //! @brief Removes a file or directory.
         static void remove(const std::string& path);
 
-		static void remove(const char* path);
+        static void remove(const char* path);
 
         //! @brief Moves a file or directory.
         static void move(const std::string& path, const std::string& to);
 
-		static void move(const char* path, const char* to);
+        static void move(const char* path, const char* to);
 
     public:
         //! @brief Returns the string representing the separator in path names
@@ -188,7 +188,7 @@ class PT_SYSTEM_API FileInfo
 
     public:
         std::string& path()
-		{ return _path; }
+        { return _path; }
     
     private:
         std::string _path;

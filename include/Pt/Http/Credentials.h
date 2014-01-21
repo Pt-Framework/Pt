@@ -37,9 +37,13 @@ namespace Pt {
 
 namespace Http {
 
+/** @brief Credentials for authorization and authentication.
+*/
 class Credential
 {
     public:
+        /** @brief Default Constructor.
+        */
         Credential()
         {}
 

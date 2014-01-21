@@ -40,12 +40,12 @@ namespace System {
 */
 enum LogLevel {
     None = 0,
-    Fatal = 100,
-    Error = 200,
-    Warn  = 300,
-    Info  = 400,
-    Debug = 500,
-    Trace = 600
+    Fatal = 100, //!< Only fatal messages
+    Error = 200, //!< Errors and more severe messages
+    Warn  = 300, //!< Warnings and more severe messagess
+    Info  = 400, //!< Infos and more severe messages
+    Debug = 500, //!< Debug logs and more severe messagess
+    Trace = 600  //!< Traces and more severe messages
 };
 
 } // namespace System

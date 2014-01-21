@@ -40,26 +40,44 @@ namespace System {
 
 class EventSource;
 
+/** @brief Receiver for events.
+*/
 class PT_SYSTEM_API EventSink : private NonCopyable
 {
     friend class EventSource;
 
     public:
+        /** @brief Default Constructor.
+        */
         EventSink();
 
+        /** @brief Destructor.
+        */
         virtual ~EventSink();
 
+        /** @brief Queues an event and triggers event processing.
+        */
         void commitEvent(const Event& ev);
 
+        /** @brief Only queues an event.
+        */
         void queueEvent(const Event& ev);
 
+        /** @brief Triggers event processing.
+        */
         void wake();
 
     protected:
+        /** @brief Queues an event and triggers event processing.
+        */
         virtual void onCommitEvent(const Event& ev) = 0;
 
+        /** @brief Only queues an event.
+        */
         virtual void onQueueEvent(const Event& ev) = 0;
 
+        /** @brief Triggers event processing.
+        */
         virtual void onWake() = 0;
 
     private:

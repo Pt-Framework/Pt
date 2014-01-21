@@ -133,7 +133,7 @@ class PT_SYSTEM_API EventLoop : public Connectable
         Signal<const Event&> _event;
 };
 
-//! @ internal
+//! @internal
 class PT_SYSTEM_API EventQueue
 {
     public:
@@ -160,7 +160,7 @@ class PT_SYSTEM_API EventQueue
         bool _exited;
 };
 
-//! @ internal
+//! @internal
 class PT_SYSTEM_API TimerQueue
 {
     typedef std::multimap<Timespan, Timer*> TimerMap;

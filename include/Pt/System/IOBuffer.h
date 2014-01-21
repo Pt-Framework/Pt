@@ -44,10 +44,14 @@ class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
                              , public Connectable
 {
     public:
+        /** @brief Construct with buffer size.
+        */
         explicit IOBuffer(std::size_t bufferSize = 8192, bool extend = false);
 
         explicit IOBuffer(IODevice& ioDevice, std::size_t bufferSize = 8192, bool extend = false);
 
+        /** @brief Destructor.
+        */
         ~IOBuffer();
 
         IODevice* device()

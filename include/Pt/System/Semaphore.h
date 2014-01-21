@@ -36,6 +36,8 @@ namespace Pt {
 
 namespace System {
 
+/** @brief %Semaphore synchronization object.
+*/
 class PT_SYSTEM_API Semaphore : private NonCopyable
 {
     friend class SemaphoreImpl;

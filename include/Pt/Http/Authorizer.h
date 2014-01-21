@@ -44,9 +44,13 @@ namespace Http {
 class Request;
 class Reply;
 
+/** @brief HTTP authorization operation.
+*/
 class PT_HTTP_API Authorization : private Pt::NonCopyable
 {
     public:
+        /** @brief Destructor.
+        */
         virtual ~Authorization();
 
         void beginAuthorize(const Request& req, Reply& reply);
@@ -68,7 +72,8 @@ class PT_HTTP_API Authorization : private Pt::NonCopyable
         Signal<Authorization&> _finished;
 };
 
-
+/** @brief %Server side authorization.
+*/
 class PT_HTTP_API Authorizer : private Pt::NonCopyable
 {
     public:
@@ -76,6 +81,8 @@ class PT_HTTP_API Authorizer : private Pt::NonCopyable
 
         Authorizer(const char* realm);
 
+        /** @brief Destructor.
+        */
         virtual ~Authorizer();
        
         const std::string& realm() const;
@@ -96,7 +103,8 @@ class PT_HTTP_API Authorizer : private Pt::NonCopyable
         std::string _realm;
 };
 
-
+/** @brief %Server side basic HTTP authorization.
+*/
 class PT_HTTP_API BasicAuthorizer : public Authorizer
 {
     public:
@@ -104,6 +112,8 @@ class PT_HTTP_API BasicAuthorizer : public Authorizer
 
         BasicAuthorizer(const char* realm);
 
+        /** @brief Destructor.
+        */
         ~BasicAuthorizer();
 
     protected:
@@ -113,6 +123,8 @@ class PT_HTTP_API BasicAuthorizer : public Authorizer
 };
 
 
+/** @brief %Server side basic HTTP authorization.
+*/
 class PT_HTTP_API BasicUserListAuthorizer : public BasicAuthorizer
 {
     public:
@@ -120,6 +132,8 @@ class PT_HTTP_API BasicUserListAuthorizer : public BasicAuthorizer
 
         BasicUserListAuthorizer(const char* realm);
 
+        /** @brief Destructor.
+        */
         ~BasicUserListAuthorizer();
 
         void setUser(const Credential& cred);

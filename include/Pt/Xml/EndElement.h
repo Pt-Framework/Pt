@@ -97,6 +97,8 @@ class EndElement : public Node
 };
 
 /** @brief Casts a generic node to an EndElement node.
+
+    @related EndElement
 */
 inline EndElement* toEndElement(Node* node)
 {
@@ -104,6 +106,8 @@ inline EndElement* toEndElement(Node* node)
 }
 
 /** @brief Casts a generic node to an EndElement node.
+
+    @related EndElement
 */
 inline const EndElement* toEndElement(const Node* node)
 {
@@ -111,6 +115,8 @@ inline const EndElement* toEndElement(const Node* node)
 }
 
 /** @brief Casts a generic node to an EndElement node.
+
+    @related EndElement
 */
 inline EndElement& toEndElement(Node& node)
 {
@@ -118,6 +124,8 @@ inline EndElement& toEndElement(Node& node)
 }
 
 /** @brief Casts a generic node to an EndElement node.
+
+    @related EndElement
 */
 inline const EndElement& toEndElement(const Node& node)
 {

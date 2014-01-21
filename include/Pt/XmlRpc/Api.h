@@ -43,7 +43,7 @@
 namespace Pt {
 
 /** @namespace Pt::XmlRpc
-    @brief XML RPC services and clients
+    @brief XML RPC services and clients.
 */
 namespace XmlRpc {
 

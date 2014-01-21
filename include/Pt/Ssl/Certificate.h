@@ -39,7 +39,7 @@ namespace Ssl {
 
 class CertificateImpl;
     
-/** @brief X509 certificate
+/** @brief X509 certificate.
 */
 class PT_SSL_API Certificate : private NonCopyable
 {

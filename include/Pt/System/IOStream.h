@@ -38,6 +38,8 @@ namespace Pt {
 
 namespace System {
 
+/** @brief Input stream for I/O devices.
+*/
 class IStream : public BasicIStream<char>
 {
     public:
@@ -45,6 +47,7 @@ class IStream : public BasicIStream<char>
         
         explicit IStream(IODevice& device, std::size_t bufferSize = 8192, bool extend = false);
         
+        //! @brief Destructor.
         ~IStream()
         {}
 
@@ -70,7 +73,8 @@ class IStream : public BasicIStream<char>
         IOBuffer _buffer;
 };
 
-
+/** @brief Output stream for I/O devices.
+*/
 class OStream : public BasicOStream<char>
 {
     public:
@@ -78,6 +82,7 @@ class OStream : public BasicOStream<char>
 
         explicit OStream(IODevice& device, std::size_t bufferSize = 8192, bool extend = false);
 
+        //! @brief Destructor.
         ~OStream()
         {}
 
@@ -103,7 +108,8 @@ class OStream : public BasicOStream<char>
         IOBuffer _buffer;
 };
 
-
+/** @brief Input/Output stream for I/O devices.
+*/
 class IOStream : public BasicIOStream<char>
 {
     public:
@@ -111,6 +117,7 @@ class IOStream : public BasicIOStream<char>
 
         explicit IOStream(IODevice& device, std::size_t bufferSize = 8192, bool extend = false);
 
+        //! @brief Destructor.
         ~IOStream()
         {}
 

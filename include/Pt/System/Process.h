@@ -41,7 +41,7 @@ namespace Pt {
 
 namespace System {
 
-/** @brief Indicates program failure.
+/** @brief Indicates process failure.
 
     This exception is thrown, when a process does not terminate
     normally in wait().

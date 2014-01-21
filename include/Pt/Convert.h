@@ -139,6 +139,13 @@ inline OutIterT formatInt(OutIterT it, T i, const FormatT& fmt);
 template <typename OutIterT, typename T>
 inline OutIterT formatInt(OutIterT it, T i);
 
+/** @brief Formats an integer in a given format.
+
+    @ingroup CoreTypes
+ */
+template <typename CharT, typename T, typename FormatT>
+inline CharT* formatInt(CharT* buf, std::size_t buflen, T si, const FormatT& fmt);
+
 
 /** @brief Formats a floating point value in a given format.
 
@@ -538,10 +545,7 @@ inline unsigned long long getAbs(unsigned long long i, bool& isNeg)
     return i;
 }
 
-/** @brief Formats an integer in a given format.
 
-    @ingroup CoreTypes
- */
 template <typename CharT, typename T, typename FormatT>
 inline CharT* formatInt(CharT* buf, std::size_t buflen, T si, const FormatT& fmt)
 {

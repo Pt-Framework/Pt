@@ -58,8 +58,12 @@ class PT_SYSTEM_API EventSource : private NonCopyable
     friend class EventSink;
 
     public:
+        /** @brief Default Constructor.
+        */
         EventSource();
 
+        /** @brief Destructor.
+        */
         ~EventSource();
 
         void send(const Pt::Event& ev);

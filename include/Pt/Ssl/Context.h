@@ -51,28 +51,28 @@ static struct PT_SSL_API SSLInit
 //! @brief Open mode for ssl I/O.
 enum OpenMode
 {
-    Connect = 1,
-    Accept = 2
+    Connect = 1, //!< Connect to server
+    Accept = 2   //!< Accept client
 };
 
 //! @brief Communication protocol.
 enum Protocol 
 {
-    SSLv2,
-    SSLv3or2,
-    SSLv3,
-    TLSv1
+    SSLv2,    //!< SSL version 2
+    SSLv3or2, //!< SSL version 2 or 3
+    SSLv3,    //!< SSL version 3
+    TLSv1     //!< TLS version 1
 };
 
 //! @brief Verification mode.
 enum VerifyMode
 {
-    NoVerify = 0,
-    TryVerify = 1,
-    AlwaysVerify = 2
+    NoVerify = 0,    //!< No verification
+    TryVerify = 1,   //!< Verify if certificate is presented
+    AlwaysVerify = 2 //!< Require tp present certificate
 };
 
-//! @brief Context for SSL connections.
+//! @brief %Context for SSL connections.
 class PT_SSL_API Context : public NonCopyable
 {
     public:
