@@ -134,6 +134,8 @@ class Characters : public Node
 };
 
 /** @brief Casts a generic node to a Characters node.
+
+    @related Characters
 */
 inline Characters* toCharacters(Node* node)
 {
@@ -141,6 +143,8 @@ inline Characters* toCharacters(Node* node)
 }
 
 /** @brief Casts a generic node to a Characters node.
+
+    @related Characters
 */
 inline const Characters* toCharacters(const Node* node)
 {
@@ -148,6 +152,8 @@ inline const Characters* toCharacters(const Node* node)
 }
 
 /** @brief Casts a generic node to a Characters node.
+
+    @related Characters
 */
 inline Characters& toCharacters(Node& node)
 {
@@ -155,6 +161,8 @@ inline Characters& toCharacters(Node& node)
 }
 
 /** @brief Casts a generic node to a Characters node.
+
+    @related Characters
 */
 inline const Characters& toCharacters(const Node& node)
 {

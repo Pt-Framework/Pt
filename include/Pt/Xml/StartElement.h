@@ -132,21 +132,21 @@ class PT_XML_API AttributeList : private NonCopyable
         */
         Attribute& append(const QName& name, const Namespace& ns);
 
-		/** @brief Gets the value of an attribute.
+        /** @brief Gets the value of an attribute.
 
             The value of the attribute with the local name @a localName is
             returned. If no attribute by that name is present, an
             exception of type XmlError is thrown.
         */
-		const Pt::String& get(const String& localName) const;
+        const Pt::String& get(const String& localName) const;
 
-		/** @brief Gets the value of an attribute.
+        /** @brief Gets the value of an attribute.
 
             The value of the attribute with the local name @a localName is
             returned. If no attribute by that name is present, an
             exception of type XmlError is thrown.
         */
-		const Pt::String& get(const Char* localName) const;
+        const Pt::String& get(const Char* localName) const;
 
         /** @brief Gets the value of an attribute.
 
@@ -382,6 +382,8 @@ class StartElement : public Node
 };
 
 /** @brief Casts a generic node to a %StartElement node.
+
+    @related StartElement
 */
 inline StartElement* toStartElement(Node* node)
 {
@@ -389,6 +391,8 @@ inline StartElement* toStartElement(Node* node)
 }
 
 /** @brief Casts a generic node to a %StartElement node.
+
+    @related StartElement
 */
 inline const StartElement* toStartElement(const Node* node)
 {
@@ -396,6 +400,8 @@ inline const StartElement* toStartElement(const Node* node)
 }
 
 /** @brief Casts a generic node to a %StartElement node.
+
+    @related StartElement
 */
 inline StartElement& toStartElement(Node& node)
 {
@@ -403,6 +409,8 @@ inline StartElement& toStartElement(Node& node)
 }
 
 /** @brief Casts a generic node to a %StartElement node.
+
+    @related StartElement
 */
 inline const StartElement& toStartElement(const Node& node)
 {

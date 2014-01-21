@@ -38,38 +38,64 @@ namespace Pt {
 
 namespace System {
 
+/** @brief I/O error.
+*/
 class PT_SYSTEM_API IOError : public std::ios::failure
 {
     public:
+        /** @brief Construct with error message.
+        */
         explicit IOError(const std::string& what);
 
+        /** @brief Construct with error message.
+        */
         explicit IOError(const char* what);
 
+        /** @brief Destructor.
+        */
         ~IOError() throw()
         {}
 };
 
+/** @brief I/O operation in progress.
+*/
 class PT_SYSTEM_API IOPending : public IOError
 {
     public:
+        /** @brief Construct with error message.
+        */
         explicit IOPending(const std::string& what);
 
+        /** @brief Construct with error message.
+        */
         explicit IOPending(const char* what);
 
+        /** @brief Destructor.
+        */
         ~IOPending() throw()
         {}
 };
 
+/** @brief Failed to access a resource.
+*/
 class PT_SYSTEM_API AccessFailed : public IOError
 {
     public:
+        /** @brief Construct with resource string.
+        */
         explicit AccessFailed(const char* resource);
 
+        /** @brief Construct with resource string.
+        */
         explicit AccessFailed(const std::string& resource);
 
+        /** @brief Destructor.
+        */
         ~AccessFailed() throw()
         {}
 
+        /** @brief Returns the ID of the inaccessible resource.
+        */
         const std::string& resource() const
         { return _resource; }
 

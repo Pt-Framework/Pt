@@ -65,6 +65,8 @@ class PT_HTTP_API Client : public Connectable
 
         Client(System::EventLoop& loop, const Net::Endpoint& ep);
 
+        /** @brief Destructor.
+        */
         ~Client();
 
         System::EventLoop* loop() const;

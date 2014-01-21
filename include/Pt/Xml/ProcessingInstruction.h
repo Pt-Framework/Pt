@@ -101,6 +101,8 @@ class ProcessingInstruction : public Node
 };
 
 /** @brief Casts a generic node to a %ProcessingInstruction node.
+
+    @related ProcessingInstruction
 */
 inline ProcessingInstruction* toProcessingInstruction(Node* node)
 {
@@ -108,6 +110,8 @@ inline ProcessingInstruction* toProcessingInstruction(Node* node)
 }
 
 /** @brief Casts a generic node to a %ProcessingInstruction node.
+
+    @related ProcessingInstruction
 */
 inline const ProcessingInstruction* toProcessingInstruction(const Node* node)
 {
@@ -115,6 +119,8 @@ inline const ProcessingInstruction* toProcessingInstruction(const Node* node)
 }
 
 /** @brief Casts a generic node to a %ProcessingInstruction node.
+
+    @related ProcessingInstruction
 */
 inline ProcessingInstruction& toProcessingInstruction(Node& node)
 {
@@ -122,6 +128,8 @@ inline ProcessingInstruction& toProcessingInstruction(Node& node)
 }
 
 /** @brief Casts a generic node to a %ProcessingInstruction node.
+
+    @related ProcessingInstruction
 */
 inline const ProcessingInstruction& toProcessingInstruction(const Node& node)
 {

@@ -43,11 +43,15 @@ class Request;
 class Reply;
 class Service;
 
+/** @brief HTTP service responder.
+*/
 class PT_HTTP_API Responder
 {
     public:
         explicit Responder(Service& s);
 
+        /** @brief Destructor.
+        */
         virtual ~Responder();
 
         Service& service()

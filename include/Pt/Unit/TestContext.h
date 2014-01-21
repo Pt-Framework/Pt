@@ -36,28 +36,42 @@ namespace Pt {
 
 namespace Unit {
 
-    class Test;
-    class TestFixture;
+class Test;
+class TestFixture;
 
-    class PT_UNIT_API TestContext
-    {
-        public:
-            virtual ~TestContext();
+/** @brief Context in which test are run.
 
-            std::string testName() const;
+    @ingroup unittest
+*/
+class PT_UNIT_API TestContext
+{
+    public:
+        /** @brief Destructor.
+        */
+        virtual ~TestContext();
 
-            void run();
+        /** @brief Returns the name of the test.
+        */
+        std::string testName() const;
 
-        protected:
-            TestContext(TestFixture& fixture, Test& test);
+        /** @brief Runs the test.
+        */
+        void run();
 
-            virtual void exec() = 0;
+    protected:
+        /** @brief Construct from fixture and test to run.
+        */
+        TestContext(TestFixture& fixture, Test& test);
 
-        private:
-            TestFixture& _fixture;
-            Test& _test;
-            bool _setUp;
-    };
+        /** @brief Executes the test.
+        */
+        virtual void exec() = 0;
+
+    private:
+        TestFixture& _fixture;
+        Test& _test;
+        bool _setUp;
+};
 
 } // namespace Unit
 

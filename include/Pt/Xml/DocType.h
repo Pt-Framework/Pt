@@ -113,6 +113,8 @@ class PT_XML_API DocType : public Node
 };
 
 /** @brief Casts a generic node to a DocType node.
+
+    @related DocType
 */
 inline DocType* toDocType(Node* node)
 {
@@ -120,6 +122,8 @@ inline DocType* toDocType(Node* node)
 }
 
 /** @brief Casts a generic node to a DocType node.
+
+    @related DocType
 */
 inline const DocType* toDocType(const Node* node)
 {
@@ -127,6 +131,8 @@ inline const DocType* toDocType(const Node* node)
 }
 
 /** @brief Casts a generic node to a DocType node.
+
+    @related DocType
 */
 inline DocType& toDocType(Node& node)
 {
@@ -134,6 +140,8 @@ inline DocType& toDocType(Node& node)
 }
 
 /** @brief Casts a generic node to a DocType node.
+
+    @related DocType
 */
 inline const DocType& toDocType(const Node& node)
 {
@@ -184,6 +192,8 @@ class PT_XML_API EndDocType : public Node
 };
 
 /** @brief Casts a generic node to a EndDocType node.
+
+    @related EndDocType
 */
 inline EndDocType* toEndDocType(Node* node)
 {
@@ -191,6 +201,8 @@ inline EndDocType* toEndDocType(Node* node)
 }
 
 /** @brief Casts a generic node to a EndDocType node.
+
+    @related EndDocType
 */
 inline const EndDocType* toEndDocType(const Node* node)
 {
@@ -198,6 +210,8 @@ inline const EndDocType* toEndDocType(const Node* node)
 }
 
 /** @brief Casts a generic node to a EndDocType node.
+
+    @related EndDocType
 */
 inline EndDocType& toEndDocType(Node& node)
 {
@@ -205,6 +219,8 @@ inline EndDocType& toEndDocType(Node& node)
 }
 
 /** @brief Casts a generic node to a EndDocType node.
+
+    @related EndDocType
 */
 inline const EndDocType& toEndDocType(const Node& node)
 {

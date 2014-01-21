@@ -43,6 +43,8 @@ namespace Http {
 
 class Connection;
 
+/** @brief HTTP message header.
+*/
 class PT_HTTP_API MessageHeader : private Pt::NonCopyable
 {
     public:
@@ -199,7 +201,8 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         unsigned _httpVersionMinor;
 };
 
-
+/** @brief HTTP message progress.
+*/
 class MessageProgress
 {
     private:
@@ -213,6 +216,8 @@ class MessageProgress
         };
 
     public:
+        /** @brief Default Constructor.
+        */
         MessageProgress()
         : _result(InProgress)
         {}
@@ -288,7 +293,8 @@ class MessageBuffer : public std::streambuf
         std::size_t _bufferSize;
 };
 
-
+/** @brief HTTP message with header and body.
+*/
 class PT_HTTP_API Message
 {
     friend class Connection;
@@ -299,12 +305,15 @@ class PT_HTTP_API Message
         Connection& connection()
         { return *_conn; }
 
+        //! @brief Returns the header of the message.
         MessageHeader& header()
         { return _header; }
 
+        //! @brief Returns the header of the message.
         const MessageHeader& header() const
         { return _header; }
 
+        //! @brief Returns the body of the message.
         std::iostream& body()
         { return _ios; }
 

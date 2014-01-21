@@ -68,10 +68,10 @@ class PT_SYSTEM_API Thread : protected NonCopyable
         //! @brief Status of a thread
         enum State
         {
-            Ready    = 0, //!< Thread was not started yet
-            Running  = 1, //!< Thread was started
-            Joined   = 2, //!< Thread was joined
-            Detached = 3  //!< Thread was detached
+            Ready    = 0, //!< Not started yet
+            Running  = 1, //!< Thread is running
+            Joined   = 2, //!< Joined with parent thread
+            Detached = 3  //!< Detached from parent thread
         };
 
     public:

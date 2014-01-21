@@ -37,6 +37,7 @@ namespace Pt {
 
 namespace System {
 
+//! @internal @brief To be released in a later version.
 class PT_SYSTEM_API InvalidUri : public std::runtime_error
 {
     public:
@@ -52,6 +53,7 @@ class PT_SYSTEM_API InvalidUri : public std::runtime_error
         std::string _uri;
 };
 
+//! @internal @brief To be released in a later version.
 class PT_SYSTEM_API Uri
 {
     public:

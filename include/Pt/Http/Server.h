@@ -57,12 +57,16 @@ class PT_HTTP_API Server : public Connectable
                          , private NonCopyable
 {
     public:
+        /** @brief Default Constructor.
+        */
         Server();
 
         explicit Server(System::EventLoop& loop);
 
         Server(System::EventLoop& loop, const Net::Endpoint& ep);
 
+        /** @brief Destructor.
+        */
         ~Server();
 
         System::EventLoop* loop();

@@ -87,7 +87,7 @@ class PT_SYSTEM_API Mutex : private NonCopyable
         { return *_impl;  }
 };
 
-/** @brief MutexLock class for Mutex.
+/** @brief %MutexLock class for Mutex.
 
     The %MutexLock class adds functionality for scoped
     locking. In the constructor of a  MutexLock, the mutex is locked
@@ -316,7 +316,8 @@ class PT_SYSTEM_API ReadWriteMutex : private NonCopyable
         class ReadWriteMutexImpl* _impl;
 };
 
-
+/** @brief Reader lock object for read-write mutexes.
+*/
 class ReadLock : private NonCopyable
 {
     public:
@@ -360,7 +361,8 @@ class ReadLock : private NonCopyable
         bool _locked;
 };
 
-
+/** @brief Writer lock object for read-write mutexes.
+*/
 class WriteLock : private NonCopyable
 {
     public:
@@ -468,7 +470,8 @@ class SpinMutex : private NonCopyable
         volatile Pt::atomic_t _count;
 };
 
-
+/** @brief Lock object for spin mutexes.
+*/
 class SpinLock : private NonCopyable
 {
     public:

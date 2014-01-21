@@ -345,7 +345,10 @@ class LogMessage : protected Pt::NonCopyable
         bool _enabled;
 };
 
-//! @brief Manipulator to end and send a log-message
+/** @brief Manipulator to end and send a log-message
+
+    @related LogMessage
+*/
 inline LogMessage& endlog(LogMessage& msg)
 {
     msg.log();

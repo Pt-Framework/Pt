@@ -43,12 +43,16 @@ namespace System {
 class PT_SYSTEM_API FileDevice : public IODevice 
 {
     public:
+        /** @brief Default Constructor.
+        */
         FileDevice();
 
         FileDevice(const std::string& path, std::ios::openmode mode);
 
         FileDevice(const char* path, std::ios::openmode mode);
 
+        /** @brief Destructor.
+        */
         ~FileDevice();
 
         void open(const std::string& path, std::ios::openmode mode);

@@ -42,6 +42,8 @@ namespace Http {
 class Request;
 class Reply;
 
+/** @brief HTTP authentication for clients.
+*/
 class Authentication
 {
     public:
@@ -56,6 +58,8 @@ class Authentication
         : _name(name) 
         {}
 
+        /** @brief Destructor.
+        */
         virtual ~Authentication()
         {}
 
@@ -69,6 +73,8 @@ class Authentication
 };
 
 
+/** @brief Basic HTTP authentication for clients.
+*/
 class PT_HTTP_API BasicAuthentication : public Authentication
 {
     public:
@@ -76,13 +82,16 @@ class PT_HTTP_API BasicAuthentication : public Authentication
         : Authentication("basic")
         {}
 
+        /** @brief Destructor.
+        */
         virtual ~BasicAuthentication()
         {}
 
         virtual bool authenticate(Credentials& credentials, Request& request, const Reply& reply) const;
 };
 
-
+/** @brief %Client side authentication.
+*/
 class PT_HTTP_API Authenticator : private NonCopyable
 {
     public:
@@ -91,6 +100,8 @@ class PT_HTTP_API Authenticator : private NonCopyable
     public:
         Authenticator();
 
+        /** @brief Destructor.
+        */
         ~Authenticator();
 
         void addAuthentication(const Authentication& auth);

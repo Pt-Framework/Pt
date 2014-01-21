@@ -39,7 +39,8 @@ namespace System {
 class EventLoop;
 class SelectableList;
 
-//! @brief Dispatches operations through an event loop
+/** @brief Dispatches operations through an event loop.
+*/
 class PT_SYSTEM_API Selectable : protected NonCopyable
 {
     friend class SelectableList;

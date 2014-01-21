@@ -41,38 +41,57 @@ namespace Pt {
 
 namespace System {
 
+/** @brief ID for plugin exports.
+*/
 class PluginId 
 {
     public:
+        /** @brief Construct with type info of plugin interface.
+        */
         PluginId(const std::type_info& iface)
         : _iface(&iface)
         { }
 
+        /** @brief Destructor.
+        */
         virtual ~PluginId()
         { }
 
+        /** @brief Returns the type of the plugin interface.
+        */
         const std::type_info& iface() const
         { return *_iface; }
 
+        /** @brief Returns the plugin feature string.
+        */
         virtual const char* feature() const = 0;
 
+        /** @brief Returns the plugin info string.
+        */
         virtual const char* info() const = 0;
 
     private:
         const std::type_info* _iface;
 };
 
-
+/** @brief Interface for plugins.
+*/
 template <typename Iface>
 class Plugin : public PluginId 
 {
     public:
+        /** @brief Default Constructor.
+        */
         Plugin()
         : PluginId( typeid(Iface) )
         { }
 
+        /** @brief Creates an instance.
+        */
         virtual Iface* create() = 0;
 
+        /** @brief Destroys an instance.
+        */
         virtual void destroy(Iface* instance) = 0;
 };
 
@@ -117,7 +136,8 @@ class BasicPlugin : public Plugin<Iface> {
         std::string _info;
 };
 
-
+/** @brief Manages loaded plugins.
+*/
 template < typename IfaceT, typename PluginT = Plugin<IfaceT> >
 class PluginManager
 {
@@ -154,10 +174,14 @@ class PluginManager
         };
 
     public:
+        /** @brief Default Constructor.
+        */
         PluginManager()
         : _iface( typeid(IfaceT) )
         { }
 
+        /** @brief Destructor.
+        */
         ~PluginManager();
 
         void loadPlugin(const std::string& sym, const std::string& path);

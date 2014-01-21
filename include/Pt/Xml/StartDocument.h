@@ -77,6 +77,8 @@ class StartDocument : public Node
 };
 
 /** @brief Casts a generic node to a %StartDocument node.
+
+    @related StartDocument
 */
 inline StartDocument* toStartDocument(Node* node)
 {
@@ -84,6 +86,8 @@ inline StartDocument* toStartDocument(Node* node)
 }
 
 /** @brief Casts a generic node to a %StartDocument node.
+
+    @related StartDocument
 */
 inline const StartDocument* toStartDocument(const Node* node)
 {
@@ -91,6 +95,8 @@ inline const StartDocument* toStartDocument(const Node* node)
 }
 
 /** @brief Casts a generic node to a %StartDocument node.
+
+    @related StartDocument
 */
 inline StartDocument& toStartDocument(Node& node)
 {
@@ -98,6 +104,8 @@ inline StartDocument& toStartDocument(Node& node)
 }
 
 /** @brief Casts a generic node to a %StartDocument node.
+
+    @related StartDocument
 */
 inline const StartDocument& toStartDocument(const Node& node)
 {

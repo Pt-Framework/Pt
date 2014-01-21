@@ -38,6 +38,8 @@ namespace Pt {
 
 namespace Http {
 
+/** @brief HTTP request message.
+*/
 class PT_HTTP_API Request : public Message
 {
     friend class Connection;
@@ -61,6 +63,7 @@ class PT_HTTP_API Request : public Message
         , _method("GET")
         { }
 
+        //! @brief Returns the HTTP request URL.
         const std::string& url() const
         { return _url; }
 
@@ -70,6 +73,7 @@ class PT_HTTP_API Request : public Message
         void setUrl(const char* u)
         { _url = u; }
 
+        //! @brief Returns the HTTP request method.
         const std::string& method() const
         { return _method; }
         
@@ -79,6 +83,7 @@ class PT_HTTP_API Request : public Message
         void setMethod(const char* m)
         { _method = m; }
 
+        //! @brief Returns the HTTP request URL query.
         const std::string& qparams() const
         { return _qparams; }
 
