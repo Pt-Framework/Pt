@@ -47,13 +47,24 @@ class Reply;
 class Authentication
 {
     public:
+        //! @brief Credentials for realms.
         typedef std::map<std::string, Credential> Credentials;
 
     public:
+        /** @brief Construct with type name.
+
+            The @a name is the type name of the authentication 
+            method, such as "basic".
+        */
         Authentication(const std::string& name)
         : _name(name) 
         {}
 
+        /** @brief Construct with type name.
+
+            The @a name is the type name of the authentication 
+            method, such as "basic".
+        */
         Authentication(const char* name)
         : _name(name) 
         {}
@@ -63,21 +74,29 @@ class Authentication
         virtual ~Authentication()
         {}
 
+        /** @brief Returns the type name of the authentication.
+        */
         const std::string& name() const
         { return _name; }
 
+        /** @brief Authenticate a request in response to a reply.
+
+            Authenticates the @a request using the @a credentials in response
+            to the corresponding @a reply.
+        */
         virtual bool authenticate(Credentials& credentials, Request& request, const Reply& reply) const = 0;
 
     private:
         std::string _name;
 };
 
-
 /** @brief Basic HTTP authentication for clients.
 */
 class PT_HTTP_API BasicAuthentication : public Authentication
 {
     public:
+        /** @brief Default Constructor.
+        */
         BasicAuthentication()
         : Authentication("basic")
         {}
@@ -87,6 +106,7 @@ class PT_HTTP_API BasicAuthentication : public Authentication
         virtual ~BasicAuthentication()
         {}
 
+        // inheric docs
         virtual bool authenticate(Credentials& credentials, Request& request, const Reply& reply) const;
 };
 
@@ -95,19 +115,28 @@ class PT_HTTP_API BasicAuthentication : public Authentication
 class PT_HTTP_API Authenticator : private NonCopyable
 {
     public:
+        //! @brief Credentials for realms.
         typedef std::map<std::string, Credential> Credentials;
 
     public:
+        /** @brief Default Constructor.
+        */
         Authenticator();
 
         /** @brief Destructor.
         */
         ~Authenticator();
 
+        /** @brief Adds an authentication method.
+        */
         void addAuthentication(const Authentication& auth);
         
+        /** @brief Set credential for a realm.
+        */
         void setCredential(const std::string& realm, const Credential& cred);
-        
+
+        /** @brief Authenticate a request in response to a reply.
+        */
         bool authenticate(Request& request, const Reply& reply);
 
     private:

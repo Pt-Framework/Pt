@@ -45,30 +45,38 @@ class PT_HTTP_API Reply : public Message
     friend class Connection;
 
     public:
+        /** @brief HTTP reply status code.
+        */
         enum StatusCode
         {
-            Continue = 100,
-            OK = 200,
-            MultipleChoices = 300,
-            BadRequest = 400,
-            Unauthorized = 401,
-            RequestEntityTooLarge = 413,
-            InternalServerError = 500
+            Continue = 100,              //!< Continue
+            OK = 200,                    //!< OK
+            MultipleChoices = 300,       //!< Multiple choices for request
+            BadRequest = 400,            //!< Bad request received
+            Unauthorized = 401,          //!< Unauthorized access
+            RequestEntityTooLarge = 413, //!< %Request entity too large
+            InternalServerError = 500    //!< Internal server error occured
         };
 
     public:
+        /** @brief Construct with connection.
+        */
         explicit Reply(Http::Connection& conn)
         : Message(conn)
         , _statusCode(200)
         , _statusText("OK")
         { }
         
+        /** @brief Sets the HTTP status.
+        */
         void setStatus(unsigned code, const std::string& txt)
         {
             _statusCode = code;
             _statusText = txt;
         }
 
+        /** @brief Sets the HTTP status.
+        */
         void setStatus(unsigned code, const char* txt)
         {
             _statusCode = code;
@@ -83,28 +91,39 @@ class PT_HTTP_API Reply : public Message
         const std::string& statusText() const
         { return _statusText; }
 
+        //! @internal
         void receive();
 
+        //! @internal
         void beginReceive();
 
+        //! @internal
         MessageProgress endReceive();
 
+        //! @internal
         void beginSend(bool finish = true);
 
+        //! @internal
         MessageProgress endSend();
 
+        //! @internal
         Signal<Reply&>& inputReceived()
         { return _inputReceived; }
 
+        //! @internal
         Signal<Reply&>& outputSent()
         { return _outputSent; }
 
+        /** @brief Clears all content.
+        */
         void clear();
 
     protected:
+        //! @internal
         void onInput()
         { _inputReceived.send(*this); }
 
+        //! @internal
         void onOutput()
         { _outputSent.send(*this); }
 

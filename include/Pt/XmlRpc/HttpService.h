@@ -40,8 +40,8 @@ namespace XmlRpc {
 
 /** @brief HTTP service for XML-RPC.
 
-    The %HttpService makes procedures registered in a XML-RPC Service
-    available for HTTP. Use the HttpClient to run a RemoteProcedure accessing
+    The %HttpService makes the procedures registered in a XML-RPC ServiceDefinition
+    available as a HTTP service. Use the HttpClient to run a RemoteProcedure accessing
     this service.
 */
 class PT_XMLRPC_API HttpService : public Http::Service

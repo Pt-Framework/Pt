@@ -154,8 +154,10 @@ class PT_XMLRPC_API Responder : private NonCopyable
         void setFault(int rc, const char* msg);
 
     private:
+        //! @internal
         void formatError(std::ostream& os, int rc, const char* msg);
 
+        //! @internal
         bool advance(const Pt::Xml::Node& node);
 
     private:

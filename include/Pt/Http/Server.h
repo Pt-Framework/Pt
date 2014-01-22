@@ -61,50 +61,91 @@ class PT_HTTP_API Server : public Connectable
         */
         Server();
 
+        /** @brief Construct with event loop.
+        */
         explicit Server(System::EventLoop& loop);
 
+        /** @brief Construct with event loop and listen endpoint.
+        */
         Server(System::EventLoop& loop, const Net::Endpoint& ep);
 
         /** @brief Destructor.
         */
         ~Server();
 
+        /** @brief Returns the used event loop.
+        */
         System::EventLoop* loop();
 
+        /** @brief Sets the event loop to use.
+        */
         void setActive(System::EventLoop& loop);
 
+        /** @brief Returns the timeout in msecs.
+        */
         std::size_t timeout() const;
 
+        /** @brief Sets the timeout in msecs.
+        */
         void setTimeout(std::size_t ms);
 
+        /** @brief Enables to use HTTPS.
+        */
         void setSecure(Ssl::Context& ctx);
-
+        
+        /** @brief Returns the maximum number of server threads.
+        */
         std::size_t maxThreads() const;
 
+        /** @brief Sets the maximum number of server threads.
+        */
         void setMaxThreads(std::size_t m);
 
+        /** @brief Returns the keepalive timeout in msecs.
+        */
         std::size_t keepAliveTimeout() const;
 
+        /** @brief Sets the keepalive timeout in msecs.
+        */
         void setKeepAliveTimeout(std::size_t ms);
 
+        /** @brief Returns the maximum size of a request in bytes.
+        */
         std::size_t maxRequestSize() const;
 
+        /** @brief Sets the maximum size of a request in bytes.
+        */
         void setMaxRequestSize(std::size_t maxSize);
 
+        /** @brief Start listening on endpoint.
+        */
         void listen(const Net::Endpoint& ep);
 
+        /** @brief Start listening on endpoint.
+        */
         void listen(const Net::Endpoint& ep, const Net::TcpServerOptions& opts);
 
+        /** @brief Cancel all operations.
+        */
         void cancel();
 
+        /** @brief Adds a servlet.
+        */
         void addServlet(Servlet& servlet);
 
+        /** @brief Removes a servlet.
+        */
         void removeServlet(Servlet& servlet);
 
+        /** @brief Set shutdown flag on servlet.
+        */
         void shutdownServlet(Servlet& servlet, bool shutdown);
 
+        /** @brief Returns true if servlet is shut down.
+        */
         bool isServletIdle(Servlet& servlet);
 
+        //! @internal
         Servlet* getServlet(const Request& request);
 
     private:

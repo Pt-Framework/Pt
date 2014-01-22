@@ -54,8 +54,12 @@ class PT_HTTP_API Service : private NonCopyable
         */
         virtual ~Service();
 
+        /** @brief Creates a responder to handle request received by a server.
+        */
         Responder* getResponder(const Request&);
         
+        /** @brief Destroys a responder created by a server.
+        */
         void releaseResponder(Responder*);
 
     protected:
@@ -68,8 +72,8 @@ class PT_HTTP_API Service : private NonCopyable
         virtual void onReleaseResponder(Responder*) = 0;
 
     private:
-        // for service specific options, e.g. max request size need to be set
-        // in Service ctor so it can be used concurrently by server threads
+        // service specific options need to be set in Service ctor so it can
+        // be used concurrently by server threads without locking
         Pt::varint_t _r0;
         Pt::varint_t _r1;
         Pt::varint_t _r2;

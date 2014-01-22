@@ -53,19 +53,33 @@ class PT_HTTP_API Authorization : private Pt::NonCopyable
         */
         virtual ~Authorization();
 
+        /** @brief Begin authorization for a reply.
+        */
         void beginAuthorize(const Request& req, Reply& reply);
 
+        /** @brief End authorization for a reply.
+        */
         bool endAuthorize();
 
+        /** @brief Notifies that authorization is finished.
+        */
         Signal<Authorization&>& finished();
 
     protected:
+        /** @brief Default constructor.
+        */
         Authorization();
 
+        /** @brief Set authorization to ready state.
+        */
         void setReady();
 
+        /** @brief Begin authorization for a reply.
+        */
         virtual void onBeginAuthorize(const Request& req, Reply& reply) = 0;
 
+        /** @brief End authorization for a reply.
+        */
         virtual bool onEndAuthorize() = 0;
 
     private:
@@ -77,25 +91,41 @@ class PT_HTTP_API Authorization : private Pt::NonCopyable
 class PT_HTTP_API Authorizer : private Pt::NonCopyable
 {
     public:
+        /** @brief Construct for a realm.
+        */
         Authorizer(const std::string& realm);
 
+        /** @brief Construct for a realm.
+        */
         Authorizer(const char* realm);
 
         /** @brief Destructor.
         */
         virtual ~Authorizer();
        
+       /** @brief Returns the realm.
+        */
         const std::string& realm() const;
 
+        /** @brief Begin authorization for a reply.
+        */
         Authorization* beginAuthorize(const Request& req, Reply& reply, bool& granted);
 
+        /** @brief End authorization.
+        */
         bool endAuthorization(Authorization* auth);
 
+        /** @brief Cancel a running authorization.
+        */
         void cancelAuthorization(Authorization* auth);
 
     protected:
+        /** @brief Begin authorization for a reply.
+        */
         virtual Authorization* onBeginAuthorize(const Request& req, Reply& reply, bool& granted) = 0;
 
+        /** @brief Release authorization operation.
+        */
         virtual void onReleaseAuthorization(Authorization* auth) = 0;
 
     private:
@@ -108,8 +138,12 @@ class PT_HTTP_API Authorizer : private Pt::NonCopyable
 class PT_HTTP_API BasicAuthorizer : public Authorizer
 {
     public:
+        /** @brief Construct for a realm.
+        */
         BasicAuthorizer(const std::string& realm);
-
+        
+        /** @brief Construct for a realm.
+        */
         BasicAuthorizer(const char* realm);
 
         /** @brief Destructor.
@@ -128,20 +162,32 @@ class PT_HTTP_API BasicAuthorizer : public Authorizer
 class PT_HTTP_API BasicUserListAuthorizer : public BasicAuthorizer
 {
     public:
+        /** @brief Construct for a realm.
+        */
         BasicUserListAuthorizer(const std::string& realm);
 
+        /** @brief Construct for a realm.
+        */
         BasicUserListAuthorizer(const char* realm);
 
         /** @brief Destructor.
         */
         ~BasicUserListAuthorizer();
 
+        /** @brief Set user credential.
+        */
         void setUser(const Credential& cred);
 
+        /** @brief Remove user from list.
+        */
         void removeUser(const std::string& user);
 
+        /** @brief Remove user from list.
+        */
         void removeUser(const char* user);
 
+        /** @brief Clears all content.
+        */
         void clear();
 
     protected:

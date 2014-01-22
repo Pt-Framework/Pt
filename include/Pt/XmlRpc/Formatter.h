@@ -57,7 +57,7 @@ class PT_XMLRPC_API Formatter : public Pt::Formatter
 
         void attach(std::basic_ostream<Char>& os);
 
-        /** @internal @brief onParse() onParseSome() should be implemented 
+        /** @internal @todo onParse() onParseSome() should be implemented 
             instead of this method.
         */
         bool advance(const Pt::Xml::Node& node);

@@ -50,16 +50,16 @@ class PT_XMLRPC_API Fault : public std::exception
         */
         enum ErrorCodes 
         {
-            ParseError                  = -32700,
-            UnsupportedEncoding         = -32701,
-            InvalidCharacterForEncoding = -32702,
-            InvalidXmlRpc               = -32600,
-            MethodNotFound              = -32601,
-            InvalidMethodParameters     = -32602,
-            InternalXmlRpcError         = -32603,
-            ApplicationError            = -32500,
-            SystemError                 = -32400,
-            TransportError              = -32300
+            ParseError                  = -32700, //!< XML parse error
+            UnsupportedEncoding         = -32701, //!< Encoding not supported
+            InvalidCharacterForEncoding = -32702, //!< Encoding failure
+            InvalidXmlRpc               = -32600, //!< Invalid XML-RPC
+            MethodNotFound              = -32601, //!< Method not found in service
+            InvalidMethodParameters     = -32602, //!< Invalid method parameters
+            InternalXmlRpcError         = -32603, //!< Internal error
+            ApplicationError            = -32500, //!< Application error
+            SystemError                 = -32400, //!< System error
+            TransportError              = -32300  //!< Transport error
         };
 
         /** @brief Construct with message and error code.
@@ -118,14 +118,14 @@ class PT_XMLRPC_API Fault : public std::exception
         int _rc;
 };
 
-
+//! @internal
 inline void operator >>=(const Pt::SerializationInfo& si, Fault& fault)
 {
     si.getMember("faultCode") >>= fault._rc;
     si.getMember("faultString").getString( fault._msg );
 }
 
-
+//! @internal
 inline void operator <<=(Pt::SerializationInfo& si, const Fault& fault)
 {
     si.addMember("faultCode") <<= static_cast<Pt::int32_t>( fault.rc() );

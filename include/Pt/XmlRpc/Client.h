@@ -188,6 +188,7 @@ class PT_XMLRPC_API Client : private NonCopyable
         void setError(bool f = true);
 
     private:
+        //! @internal
         bool advance(const Xml::Node& node);
 
     private:

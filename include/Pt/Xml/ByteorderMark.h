@@ -44,17 +44,17 @@ class ByteorderMark
         */
         enum Endianess
         {
-            None = 0,
-            BigEndian = 1,
-            LittleEndian = 2
+            None = 0,        //!< No endianess.
+            BigEndian = 1,   //!< Big endian.
+            LittleEndian = 2 //!< Little endian.
         };
 
         /** @brief Text encoding type.
         */
         enum Encoding
         {
-            Generic = 0,
-            Unicode = 1
+            Generic = 0, //!< Generic encoding.
+            Unicode = 1  //!< Unicode encoding.
         };
 
     public:

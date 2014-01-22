@@ -60,10 +60,10 @@ class PT_API Connectable
         */
         virtual ~Connectable();
 
-        //! @brief Closes all connections.
+        //! @internal
         void disconnectAll();
 
-        /** @brief Registers a %Connection with the %Connectable.
+        /** @internal @brief Registers a %Connection with the %Connectable.
 
             This function is called when a new Connection involving
             this object is opened. The default implementation adds
@@ -73,7 +73,7 @@ class PT_API Connectable
         */
         virtual void onConnectionOpen(const Connection& c);
 
-        /** @brief Unregisters a Connection from the %Connectable.
+        /** @internal @brief Unregisters a Connection from the %Connectable.
 
             This function is called when a new Connection involving
             this object is closed. The default implementation removes
@@ -104,12 +104,12 @@ class PT_API Connectable
         */
         Connectable& operator=(const Connectable& rhs);
 
-        /** @brief Returns a list of all current connections.
+        /** @internal @brief Returns a list of all current connections.
         */
         const std::list<Connection>& connections() const
         { return _connections; }
 
-        /** @brief Returns a list of all current connections.
+        /** @internal @brief Returns a list of all current connections.
         */
         std::list<Connection>& connections()
         { return _connections; }

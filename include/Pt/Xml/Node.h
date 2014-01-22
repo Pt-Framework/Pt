@@ -52,24 +52,24 @@ class Node
     public:
         enum Type 
         {
-            Unknown = 0,               //!< Unknown Node type
-            DocType = 1,               //!< Start of a DocType Declaration
-            EndDocType = 2,            //!< Document Type Definition
-            StartDocument = 3,         //!< Xml declaration
-            EndDocument = 4,           //!< End of the document
-            StartElement = 5,          //!< Start element aka opening tag
-            EndElement = 6,            //!< End element aka closing tag
-            Characters = 7,            //!< Parsed content of a tag's body
-            Comment = 8,               //!< Comment
-            ProcessingInstruction = 9, //!< Processing instruction
-            EntityReference = 10,      //!< Unresolved entity reference
+            Unknown = 0,
+            DocType = 1,
+            EndDocType = 2,
+            StartDocument = 3,
+            EndDocument = 4,
+            StartElement = 5,
+            EndElement = 6,
+            Characters = 7,
+            Comment = 8,
+            ProcessingInstruction = 9,
+            EntityReference = 10
         };
 
         //! @brief Destructor.
         virtual ~Node()
         {}
 
-        /** @brief Returns the type of the Node.
+        /** @brief Returns the type of the node.
         */
         Type type() const
         { return _type; }

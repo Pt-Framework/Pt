@@ -33,6 +33,10 @@ class ActiveProcedure : public ServiceProcedure
         */
         ActiveProcedure(Responder& resp);
 
+        /** @brief Destructor.
+        */
+        ~ActiveProcedure();
+
     protected:
         // inherit doc
         virtual IComposer** onBeginArgs();
