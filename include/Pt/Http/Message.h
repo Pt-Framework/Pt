@@ -48,28 +48,42 @@ class Connection;
 class PT_HTTP_API MessageHeader : private Pt::NonCopyable
 {
     public:
+        /** @brief %Field of a HTTP header.
+        */
         class Field
         {
             public:
+                /** @brief Default constructor.
+                */
                 Field()
                 : _name(0)
                 , _value(0)
                 {}
 
+                /** @brief Construct with field name and value.
+                */
                 Field(const char* f, const char* s)
                 : _name(f)
                 , _value(s)
                 {}
 
+                /** @brief Returns the field name.
+                */
                 const char* name() const
                 { return _name; }
 
+                 /** @brief Sets the field name.
+                */
                 void setName(const char* name)
                 { _name = name; }
 
+                /** @brief Returns the field value.
+                */
                 const char* value() const
                 { return _value; }
 
+                /** @brief Sets the field name.
+                */
                 void setValue(const char* value)
                 { _value = value; }
 
@@ -78,32 +92,44 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
                 const char* _value;
         };
 
+        /** @brief HTTP header field iterator.
+        */
         class ConstIterator
         {
             friend class MessageHeader;
 
             public:
+                /** @brief Default constructor.
+                */
                 ConstIterator()
                 { }
-
+                 //! @internal
                 explicit ConstIterator(const char* p)
                 : current(p, p)
                 {
                     fixup();
                 }
 
+                /** @brief Equal comparison.
+                */
                 bool operator== (const ConstIterator& it) const
                 { return current.name() == it.current.name(); }
 
+                /** @brief Inequal comparison.
+                */
                 bool operator!= (const ConstIterator& it) const
                 { return current.name() != it.current.name(); }
 
+                /** @brief Advance the iterator.
+                */
                 ConstIterator& operator++()
                 {
                     moveForward();
                     return *this;
                 }
 
+                /** @brief Advance the iterator.
+                */
                 ConstIterator operator++(int)
                 {
                     ConstIterator ret = *this;
@@ -111,13 +137,18 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
                     return ret;
                 }
 
+                /** @brief Returns the header field.
+                */
                 const Field& operator*() const   
                 { return current; }
                 
+                /** @brief Returns the header field.
+                */
                 const Field* operator->() const  
                 { return &current; }
 
             private:
+                //! @internal
                 void fixup()
                 {
                     if( *current.name() )
@@ -131,6 +162,7 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
                     }
                 }
 
+                //! @internal
                 void moveForward()
                 {
                     current.setName( current.value() + std::strlen(current.value()) + 1 );
@@ -142,54 +174,89 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         };
 
     public:
+        /** @brief Default constructor.
+        */
         MessageHeader();
 
+        /** @brief Denstructor.
+        */
         ~MessageHeader();
 
+        /** @brief Clears all content.
+        */
         void clear();
 
+        /** @brief Sets a header field.
+        */
         void set(const char* key, const char* value);
 
+        /** @brief Adds a header field.
+        */
         void add(const char* key, const char* value);
 
+        /** @brief Removes a header field.
+        */
         void remove(const char* key);
 
+        /** @brief Returns a field value.
+        */
         const char* get(const char* key) const;
 
+        /** @brief Returns true if the field is present.
+        */
         bool has(const char* key) const
         { return get(key) != 0; }
 
+        /** @brief Returns true if the field is set to the value.
+        */
         bool isSet(const char* key, const char* value) const;
 
+        /** @brief Returns the begin of the header fields.
+        */
         ConstIterator begin() const
         { return ConstIterator(_rawdata); }
 
+        /** @brief Returns the end of the header fields.
+        */
         ConstIterator end() const
         { return ConstIterator(); }
 
+        /** @brief Returns the major HTTP version number.
+        */
         unsigned versionMajor() const
         { return _httpVersionMajor; }
 
+        /** @brief Returns the minor HTTP version number.
+        */
         unsigned versionMinor() const
         { return _httpVersionMinor; }
 
+        /** @brief Sets the HTTP version number.
+        */
         void setVersion(unsigned major, unsigned minor)
         {
             _httpVersionMajor = major;
             _httpVersionMinor = minor;
         }
 
+        /** @brief Returns true if chunked encoding is set.
+        */
         bool isChunked() const;
 
+        /** @brief Returns the content length.
+        */
         std::size_t contentLength() const;
 
+        /** @brief Returns true if keepalive is set.
+        */
         bool isKeepAlive() const;
 
-        /// Returns a properly formatted current time-string, as needed in http.
-        /// The buffer must have at least 30 bytes.
+        // Returns a properly formatted current time-string, as needed in http.
+        // The buffer must have at least 30 bytes.
         static char* htdateCurrent(char* buffer);
 
     private:
+        //! @internal
         char* eptr() 
         { return _rawdata + _endOffset; }
 
@@ -206,6 +273,7 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
 class MessageProgress
 {
     private:
+        //! @internal
         enum Result
         {
             InProgress = 1,
@@ -222,30 +290,41 @@ class MessageProgress
         : _result(InProgress)
         {}
 
+        /** @brief Returns true if the header was processed.
+        */
         bool header() const
         { return (_result & Header) == Header; }
 
+        /** @brief Returns true if the body was processed.
+        */
         bool body() const
         { return (_result & Body) == Body; }
 
         bool trailer() const
         { return (_result & Trailer) == Trailer; }
 
+        /** @brief Returns true if message is complete.
+        */
         bool finished() const
         { return (_result & Finished) == Finished; }
 
+        //! @internal
         void setFinished()
         { _result |= Finished ; }
 
+        //! @internal
         void setHeader()
         { _result |= Header; }
         
+        //! @internal
         void setBody()
         { _result |= Body; }
 
+        //! @internal
         void setTrailer()
         { _result |= Trailer; }
 
+        //! @internal
         unsigned long mask() const
         { return _result; }
 
@@ -259,10 +338,10 @@ class MessageProgress
 class MessageBuffer : public std::streambuf
 {
     public:
-        // @brief Constructs an empty buffer.
+        //! @brief Constructs an empty buffer.
         MessageBuffer();
 
-        // @brief Destructor.
+        //! @brief Destructor.
         ~MessageBuffer();
        
         //! @brief Discards the buffered data.
@@ -300,6 +379,7 @@ class PT_HTTP_API Message
     friend class Connection;
 
     public:
+        //! @brief Constructs with connection to use.
         explicit Message(Http::Connection& conn);
 
         Connection& connection()
@@ -317,30 +397,39 @@ class PT_HTTP_API Message
         std::iostream& body()
         { return _ios; }
 
+        //! @internal
         bool isSending() const
         { return _isSending; }
 
+        //! @internal
         bool isReceiving() const
         { return _isReceiving; }
 
+        //! @internal
         bool isFinished() const
         { return _finished; }
 
+        //! @brief Discards the message body.
         void discard();
    
+        //! @internal
         MessageBuffer& buffer()
         { return _buf; }
 
     protected:
+        //! @internal
         void setBuffer(std::streambuf& sb)
         { _ios.rdbuf(&sb); }
 
+        //! @internal
         void setSending(bool b)
         { _isSending = b; }
         
+        //! @internal
         void setReceiving(bool b)
         { _isReceiving = b; }
         
+        //! @internal
         void setFinished(bool b)
         { _finished = b; }
 

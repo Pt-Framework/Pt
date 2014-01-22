@@ -45,18 +45,24 @@ class PT_HTTP_API Request : public Message
     friend class Connection;
 
     public:
+        /** @brief Construct with connection.
+        */
         explicit Request(Http::Connection& conn)
         : Message(conn)
         , _url()
         , _method("GET")
         { }
 
+        /** @brief Construct with connection and URL.
+        */
         Request( Http::Connection& conn, const std::string& url)
         : Message(conn)
         , _url(url)
         , _method("GET")
         { }
 
+        /** @brief Construct with connection and URL.
+        */
         Request( Http::Connection& conn, const char* url)
         : Message(conn)
         , _url(url)
@@ -67,9 +73,13 @@ class PT_HTTP_API Request : public Message
         const std::string& url() const
         { return _url; }
 
+        /** @brief Sets the request URL.
+        */
         void setUrl(const std::string& u)
         { _url = u; }
 
+        /** @brief Sets the request URL.
+        */
         void setUrl(const char* u)
         { _url = u; }
 
@@ -77,9 +87,13 @@ class PT_HTTP_API Request : public Message
         const std::string& method() const
         { return _method; }
         
+        /** @brief Sets the request method.
+        */
         void setMethod(const std::string& m)
         { _method = m; }
 
+        /** @brief Sets the request method.
+        */
         void setMethod(const char* m)
         { _method = m; }
 
@@ -87,34 +101,49 @@ class PT_HTTP_API Request : public Message
         const std::string& qparams() const
         { return _qparams; }
 
+        /** @brief Sets the URL query string.
+        */
         void setQParams(const std::string& p)
         { _qparams = p; }
 
+        /** @brief Sets the URL query string.
+        */
         void setQParams(const char* p)
         { _qparams = p; }
 
+        //! @internal
         void beginReceive();
 
+        //! @internal
         MessageProgress endReceive();
 
+        //! @internal
         void send(bool finish = true);
 
+        //! @internal
         void beginSend(bool finish = true);
 
+        //! @internal
         MessageProgress endSend();
 
+        //! @internal
         Signal<Request&>& inputReceived()
         { return _inputReceived; }
 
+        //! @internal
         Signal<Request&>& outputSent()
         { return _outputSent; }
 
+        /** @brief Clears all content.
+        */
         void clear();
 
     protected:
+        //! @internal
         void onInput()
         { _inputReceived.send(*this); }
 
+        //! @internal
         void onOutput()
         { _outputSent.send(*this); }
 

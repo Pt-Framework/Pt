@@ -103,7 +103,12 @@ class Attribute
 class PT_XML_API AttributeList : private NonCopyable
 {
     public:
+        /** @brief %Attribute list iterator.
+        */
         typedef Attribute* Iterator;
+
+        /** @brief %Attribute list const iterator.
+        */
         typedef const Attribute* ConstIterator;
 
     public:

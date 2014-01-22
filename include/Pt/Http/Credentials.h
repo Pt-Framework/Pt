@@ -47,37 +47,53 @@ class Credential
         Credential()
         {}
 
+        /** @brief Construct with user and password.
+        */
         Credential(const std::string& user, const std::string& passwd)
         : _user(user)
         , _passwd(passwd)
         {}
 
+        /** @brief Construct with user and password.
+        */
         Credential(const char* user, const char* passwd)
         : _user(user)
         , _passwd(passwd)
         {}
 
+        /** @brief Set user and password.
+        */
         void set(const std::string& user, const std::string& passwd)
         {
             _user = user;
             _passwd = passwd;
         }
 
+        /** @brief Set user and password.
+        */
         void set(const char* user, const char* passwd)
         {
             _user = user;
             _passwd = passwd;
         }
 
+        /** @brief Returns the user name.
+        */
         std::string& user()
         { return _user; }
         
+        /** @brief Returns the user name.
+        */
         const std::string& user() const
         { return _user; }
 
+        /** @brief Returns the password.
+        */
         std::string& password()
         { return _passwd; }
         
+        /** @brief Returns the password.
+        */
         const std::string& password() const
         { return _passwd; }
 

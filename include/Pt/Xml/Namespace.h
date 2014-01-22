@@ -96,7 +96,7 @@ class Namespace
 };
 
 
-/** @brief A list of namespaces, mapped or umapped to a prefix.
+/* A list of namespaces, mapped or umapped to a prefix.
 */
 class NamespaceMapping
 {

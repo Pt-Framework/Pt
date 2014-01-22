@@ -44,6 +44,10 @@ class Server;
 class Service;
 
 /** @brief %Servlet for HTTP services.
+    
+    Servlets are used by the HttpServer to map incoming requests to services
+    and to authorize request. Therefore servlets combine a service with a
+    authorizer and mapping rule. Servlets can be added to a %HttpServer.
 */
 class PT_HTTP_API Servlet : private NonCopyable
 {
@@ -51,24 +55,42 @@ class PT_HTTP_API Servlet : private NonCopyable
     friend class Server;
 
     public:
+        /** @brief Construct with service.
+        */
         Servlet(Service& s);
 
+        /** @brief Construct with service and authorizer.
+        */
         Servlet(Service& s, Authorizer& a);
 
+        /** @brief Destructor.
+        */
         virtual ~Servlet();
 
+        /** @brief Set shutdown flag.
+        */
         void setShutdown(bool shutdown = true);
 
+        /** @brief Returns true if not in use.
+        */
         bool isIdle();
 
+        /** @brief Detach from server.
+        */
         void detach();
 
+        /** @brief Returns true if request is mapped to the service.
+        */
         bool isMapped(const Request& request) const
         { return this->onRequest(request); }
 
+        /** @brief Returns the service to map requests to.
+        */
         Service* service()
         { return _service; }
 
+        /** @brief Returns the authorizer.
+        */
         Authorizer* authorizer()
         { return _auth; }
 
@@ -95,11 +117,15 @@ class PT_HTTP_API Servlet : private NonCopyable
 class PT_HTTP_API MapUrl : public Servlet
 {
     public:
+        /** @brief Construct with url to map to a service.
+        */
         MapUrl(const std::string& url, Service& s)
         : Servlet(s)
         , _url(url)
         {}
 
+        /** @brief Construct with url to map to a service.
+        */
         MapUrl(const std::string& url, Service& s, Authorizer& a)
         : Servlet(s, a)
         , _url(url)
@@ -117,10 +143,14 @@ class PT_HTTP_API MapUrl : public Servlet
 class PT_HTTP_API MapAny : public Servlet
 {
     public:
+        /** @brief Construct with service.
+        */
         MapAny(Service& s)
         : Servlet(s)
         {}
 
+        /** @brief Construct with service and authorizer.
+        */
         MapAny(Service& s, Authorizer& a)
         : Servlet(s, a)
         {}

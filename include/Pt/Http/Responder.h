@@ -48,33 +48,55 @@ class Service;
 class PT_HTTP_API Responder
 {
     public:
+        /** @brief Construct with service.
+        */
         explicit Responder(Service& s);
 
         /** @brief Destructor.
         */
         virtual ~Responder();
 
+        /** @brief Returns the service for which to respond.
+        */
         Service& service()
         { return _service; }
 
+        /** @brief Returns the service for which to respond.
+        */
         const Service& service() const
         { return _service; }
 
+        /** @brief Called when the request header was received.
+        */
         void beginRequest(Request& request, Reply& reply, System::EventLoop& loop);
         
+        /** @brief Called when request body data was received.
+        */
         void readRequest(Request& request, Reply& reply, System::EventLoop& loop);
 
+        /** @brief Called when request is complete.
+        */
         void beginReply(const Request& request, Reply& reply, System::EventLoop& loop);
 
+        /** @brief Write responding reply.
+        */
         void writeReply(const Request& request, Reply& reply, System::EventLoop& loop);
 
     protected:
+        /** @brief Called when the request header was received.
+        */
         virtual void onBeginRequest(Request& request, Reply& reply, System::EventLoop& loop) = 0;
         
+        /** @brief Called when request body data was received.
+        */
         virtual void onReadRequest(Request& request, Reply& reply, System::EventLoop& loop) = 0;
 
+        /** @brief Called when request is complete.
+        */
         virtual void onBeginReply(const Request& request, Reply& reply, System::EventLoop& loop) = 0;
 
+        /** @brief Write responding reply.
+        */
         virtual void onWriteReply(const Request& request, Reply& reply, System::EventLoop& loop) = 0;
 
     private:

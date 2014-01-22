@@ -57,60 +57,96 @@ class PT_HTTP_API Client : public Connectable
                          , private NonCopyable
 {
     public:
+        /** @brief Default Constructor.
+        */
         Client();
         
+        /** @brief Construct with host to connect to.
+        */
         explicit Client(const Net::Endpoint& ep);
 
+        /** @brief Construct with event loop.
+        */
         explicit Client(System::EventLoop& loop);
 
+        /** @brief Construct with loop and host to connect to.
+        */
         Client(System::EventLoop& loop, const Net::Endpoint& ep);
 
         /** @brief Destructor.
         */
         ~Client();
 
+        /** @brief Returns the used event loop.
+        */
         System::EventLoop* loop() const;
 
+        /** @brief Sets the event loop to use.
+        */
         void setActive(System::EventLoop& loop);
 
         /** @brief Set timeout for I/O operations.
         */
         void setTimeout(std::size_t timeout);
 
+        /** @brief Enable to use HTTPS.
+        */
         void setSecure(Ssl::Context& ctx);
 
         /** @brief Set host to connect to.
         */
         void setHost(const Net::Endpoint& ep);
 
+        /** @brief Set host to connect to.
+        */
         void setHost(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts);
 
+        /** @brief Returns the host to connect to.
+        */
         const Net::Endpoint& host() const;
 
+        /** @brief Returns the request to send.
+        */
         Request& request();
 
+        /** @brief Returns the request to send.
+        */
         const Request& request() const;
 
+        /** @brief Returns the received reply.
+        */
         Reply& reply();
 
+        /** @brief Returns the received reply.
+        */
         const Reply& reply() const;
 
+        /** @brief Begin sending the request.
+        */
         void beginSend(bool finished = true);
 
+        /** @brief End sending the request.
+        */
         MessageProgress endSend();
 
         /** @brief Signals that a part of the request was sent.
         */
         Signal<Client&>& requestSent();
 
+        /** @brief Begin receiving the reply.
+        */
         void beginReceive();
 
+        /** @brief End receiving the reply.
+        */
         MessageProgress endReceive();
 
         /** @brief Signals that a part of the reply was received.
         */
         Signal<Client&>& replyReceived();
 
+        /** @brief Cancel all operations.
+        */
         void cancel();
 
         /** @brief Blocks until request is sent.
@@ -122,11 +158,14 @@ class PT_HTTP_API Client : public Connectable
         std::istream& receive();
 
     protected:
+        //! @internal
         void onRequestSent(Request& r);
-
+        
+        //! @internal
         void onReplyReceived(Reply& r);
 
     private:
+        //! @internal
         void init();
 
     private:
