@@ -404,7 +404,13 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
             sockaddr_in* sa = (sockaddr_in*)(it->ai_addr);
             memcpy( &req.imr_multiaddr, &sa->sin_addr, sizeof(struct in_addr) );
 
-            req.imr_interface.s_addr = htonl(INADDR_ANY);
+            //if(_isBound)
+            //{
+            //    const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_servaddr);
+            //    memcpy(&req.imr_interface, &sa->sin_addr, sizeof(in_addr));
+            //}
+            //else
+              req.imr_interface.s_addr = htonl(INADDR_ANY);
 
             if (::setsockopt(_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) == 0)
             {

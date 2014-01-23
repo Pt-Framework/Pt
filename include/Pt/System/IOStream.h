@@ -43,29 +43,45 @@ namespace System {
 class IStream : public BasicIStream<char>
 {
     public:
+        /** @brief Construct with buffer size.
+        */
         explicit IStream(std::size_t bufferSize = 8192, bool extend = false);
         
+        /** @brief Construct with I/O device.
+        */
         explicit IStream(IODevice& device, std::size_t bufferSize = 8192, bool extend = false);
         
         //! @brief Destructor.
         ~IStream()
         {}
 
+        /** @brief Returns the stream buffer.
+        */
         IOBuffer& ioBuffer()
         { return _buffer; }
         
+        /** @brief Returns the I/O device.
+        */
         IODevice* device()
         { return _buffer.device(); }
         
+        /** @brief Attach to I/O device.
+        */
         void attach(IODevice& dev)
         { _buffer.attach(dev); }
 
+        /** @brief Detach from I/O device.
+        */
         void detach()
         { _buffer.detach(); }
 
+        /** @brief Discards the buffer.
+        */
         void discard()
         { _buffer.discard(); }
 
+        /** @brief Discards and detaches.
+        */
         void reset()
         { _buffer.reset(); }
 
@@ -78,29 +94,45 @@ class IStream : public BasicIStream<char>
 class OStream : public BasicOStream<char>
 {
     public:
+        /** @brief Construct with buffer size.
+        */
         explicit OStream(std::size_t bufferSize = 8192, bool extend = false);
 
+        /** @brief Construct with I/O device.
+        */
         explicit OStream(IODevice& device, std::size_t bufferSize = 8192, bool extend = false);
 
         //! @brief Destructor.
         ~OStream()
         {}
 
+        /** @brief Returns the stream buffer.
+        */
         IOBuffer& ioBuffer()
         { return _buffer; }
 
+        /** @brief Returns the I/O device.
+        */
         IODevice* device()
         { return _buffer.device(); }
 
+        /** @brief Attach to I/O device.
+        */
         void attach(IODevice& dev)
         { _buffer.attach(dev); }
 
+        /** @brief Detach from I/O device.
+        */
         void detach()
         { _buffer.detach(); }
 
+        /** @brief Discards the buffer.
+        */
         void discard()
         { _buffer.discard(); }
 
+        /** @brief Discards and detaches.
+        */
         void reset()
         { _buffer.reset(); }
     
@@ -113,29 +145,45 @@ class OStream : public BasicOStream<char>
 class IOStream : public BasicIOStream<char>
 {
     public:
+        /** @brief Construct with buffer size.
+        */
         explicit IOStream(std::size_t bufferSize = 8192, bool extend = false);
 
+        /** @brief Construct with I/O device.
+        */
         explicit IOStream(IODevice& device, std::size_t bufferSize = 8192, bool extend = false);
 
         //! @brief Destructor.
         ~IOStream()
         {}
 
+        /** @brief Returns the stream buffer.
+        */
         IOBuffer& ioBuffer()
         { return _buffer; }
 
+        /** @brief Returns the I/O device.
+        */
         IODevice* device()
         { return _buffer.device(); }
 
+        /** @brief Attach to I/O device.
+        */
         void attach(IODevice& dev)
         { _buffer.attach(dev); }
 
+        /** @brief Detach from I/O device.
+        */
         void detach()
         { _buffer.detach(); }
 
+        /** @brief Discards the buffer.
+        */
         void discard()
         { _buffer.discard(); }
 
+        /** @brief Discards and detaches.
+        */
         void reset()
         { _buffer.reset(); }
     

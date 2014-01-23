@@ -41,12 +41,14 @@ namespace System {
 /** @brief Notifies clients in constant intervals
 
     Timers can be used to be notified if a time interval expires. It
-    usually works with an event loop, where the Timer
+    usually works with an event loop, where the %Timer
     needs to be registered. Timers send the timeout signal
     in given intervals, to which the interested clients connect. The
     interval can be changed at any time and timers
     can switch between an active and inactive state.
+
     The following code calls the function onTimer every second:
+
     @code
     void onTimer()
     {
@@ -72,56 +74,61 @@ class PT_SYSTEM_API Timer
     class Sentry;
 
     public:
-        /** @brief Default constructor
+        /** @brief Default constructor.
 
             Constructs an inactive timer.
         */
         Timer();
 
-        /** @brief Destructor
+        /** @brief Destructor.
 
             The destructor sends the destroyed signal.
         */
         ~Timer();
 
+        //! @internal
         EventLoop* parent()
         { return _loop; }
 
+        /** @brief Returns the used event loop.
+        */
         EventLoop* loop()
         { return _loop; }
 
+        /** @brief Sets the used event loop.
+        */
         void setActive(EventLoop& loop);
 
+        /** @brief Detach from used event loop.
+        */
         void detach();
 
-        /** @brief Returs true if timer was started
+        /** @brief Returs true if timer was started.
         */
         bool isStarted() const;
 
-        /** @brief Returns the current timer interval
-
-            Returns the current interval of the timer in milliseconds.
+        /** @brief Returns the current timer interval in milliseconds.
         */
         std::size_t interval() const;
 
-        /** @brief Starts the timer
+        /** @brief Starts the timer.
 
             Start a timer from the moment this method is called. The
-            Timer needs to be registered with an event loop,
+            %Timer needs to be registered with an event loop,
             otherwise the timeout signal will not be sent.
 
-            @param interval Timeout interval in milliseconds
+            @param interval %Timeout interval in milliseconds
         */
         void start(std::size_t interval);
 
-        /** @brief Stops the timer
+        /** @brief Stops the timer.
 
-            If the Timer is registered with an event loop,
+            If the %Timer is registered with an event loop,
             the timout signal will not be sent anymore.
         */
         void stop();
 
-        /** @brief Update the timer
+        /** @internal @brief Update the timer.
 
             This method is supposed to be called by the
             event loop. If the interval timeout is passed the Timer
@@ -130,6 +137,7 @@ class PT_SYSTEM_API Timer
         */
         bool update();
 
+        //! @internal
         bool update(const Timespan& now);
 
         /** @brief Notifies about interval timeouts
@@ -139,6 +147,7 @@ class PT_SYSTEM_API Timer
         Signal<>& timeout()
         { return _timeout; }
 
+        //! @internal
         const Timespan& finished() const
         { return _finished; }
 

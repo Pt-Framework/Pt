@@ -61,28 +61,29 @@ class PT_SYSTEM_API Pipe : public NonCopyable
         */
         explicit Pipe();
 
-        /** @brief Destructor
+        /** @brief Destructor.
 
             Destroys the pipe and closes the internal IODevices.
         */
         ~Pipe();
 
-        /** @brief Endpoint of the pipe to read from
-
-            @return An IODevice used to read from the pipe
+        /** @brief Endpoint of the pipe to read from.
         */
         IODevice& out();
 
+        /** @brief Endpoint of the pipe to read from.
+        */
         const IODevice& out() const;
 
-        /** @brief Endpoint of the pipe to write to
-
-            @return An IODevice used to write to the pipe
+        /** @brief Endpoint of the pipe to write to.
         */
         IODevice& in();
 
+        /** @brief Endpoint of the pipe to write to.
+        */
         const IODevice& in() const;
 
+        //! @internal
         PipeImpl* impl()
         { return _impl; }
 };

@@ -40,11 +40,11 @@ namespace System {
 
 /** @brief Serial device
 
-    This class implements access to a serial port as a %IODevice. A
+    This class implements access to a serial port as an %IODevice. A
     %SerialDevice can be opened by passing a system dependent path
     and an open mode. Then serial port attributes can be set before
     read or write operations are performed. The following example
-    opens a COM port on windows, sets serial device attrubutes for
+    opens a COM port on windows, sets serial device attributes for
     a serial mouse and toggles the flow control to cause the device
     to send a PNP string which will be read subsequently:
 
@@ -76,6 +76,8 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         Pt::uint32_t _r0;
 
    public:
+        /** @brief Baud rates.
+        */
         enum BaudRate
         {
             BaudRate0       = 0,
@@ -101,6 +103,8 @@ class PT_SYSTEM_API SerialDevice : public IODevice
             #endif
         };
 
+        /** @brief Parity values.
+        */
         enum Parity
         {
             ParityEven,
@@ -108,6 +112,8 @@ class PT_SYSTEM_API SerialDevice : public IODevice
             ParityNone
         };
 
+        /** @brief Flow control values.
+        */
         enum FlowControl
         {
             FlowControlHard,
@@ -115,6 +121,8 @@ class PT_SYSTEM_API SerialDevice : public IODevice
             FlowControlBoth
         };
 
+        /** @brief Stop bits values.
+        */
         enum StopBits
         {
             OneStopBit,
@@ -122,6 +130,8 @@ class PT_SYSTEM_API SerialDevice : public IODevice
             TwoStopBits
         };
 
+        /** @brief Signal values.
+        */
         enum Signal
         {
             ClearBreak,
@@ -190,26 +200,37 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         bool setSignal(Signal signal);
 
     protected:
+        // inherit docs
         void onClose();
 
+        // inherit docs
         void onSetTimeout(std::size_t timeout);
 
+        // inherit docs
         std::size_t onBeginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof);
 
+        // inherit docs
         std::size_t onEndRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof);
 
+        // inherit docs
         std::size_t onBeginWrite(EventLoop& loop, const char* buffer, std::size_t n);
 
+        // inherit docs
         std::size_t onEndWrite(EventLoop& loop, const char* buffer, std::size_t n);
 
+        // inherit docs
         std::size_t onRead(char* buffer, std::size_t count, bool& eof);
 
+        // inherit docs
         std::size_t onWrite(const char* buffer, std::size_t count);
 
+        // inherit docs
         void onSync() const;
 
+        // inherit docs
         void onCancel();
 
+        // inherit docs
         bool onRun();
 };
 

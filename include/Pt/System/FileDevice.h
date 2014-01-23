@@ -38,7 +38,9 @@ namespace Pt {
 
 namespace System {
 
-/** @brief Read and write files.
+/** @brief Read and write to files.
+
+    @ingroup FileSystem
 */
 class PT_SYSTEM_API FileDevice : public IODevice 
 {
@@ -47,60 +49,94 @@ class PT_SYSTEM_API FileDevice : public IODevice
         */
         FileDevice();
 
+        /** @brief Construct with path to file.
+        */
         FileDevice(const std::string& path, std::ios::openmode mode);
 
+        /** @brief Construct with path to file.
+        */
         FileDevice(const char* path, std::ios::openmode mode);
 
         /** @brief Destructor.
         */
         ~FileDevice();
 
+        /** @brief Opens the file.
+        */
         void open(const std::string& path, std::ios::openmode mode);
 
+        /** @brief Opens the file.
+        */
         void open(const char* path, std::ios::openmode mode);
 
+        /** @brief Begin opening the file.
+        */
         void beginOpen(const std::string& path, std::ios::openmode mode);
 
+        /** @brief Begin opening the file.
+        */
         void beginOpen(const char* path, std::ios::openmode mode);
 
+        /** @brief End opening the file.
+        */
         void endOpen();
 
+        /** @brief Returns the path of the opened the file.
+        */
         const char* path() const
         { return _path.c_str(); }
 
+        /** @brief Notifies that the file was opened.
+        */
         Signal<FileDevice&>& opened()
         { return _opened; }
 
+        /** @brief Returns true if file is open.
+        */
         bool isOpen() const
         { return _isOpen; }
 
     protected:
+        // inherit docs
         std::size_t onBeginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof);
 
+        // inherit docs
         std::size_t onEndRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof);
 
+        // inherit docs
         std::size_t onBeginWrite(EventLoop& loop, const char* buffer, std::size_t n);
 
+        // inherit docs
         std::size_t onEndWrite(EventLoop& loop, const char* buffer, std::size_t n);
 
+        // inherit docs
         void onClose();
 
+        // inherit docs
         void onCancel();
 
+        // inherit docs
         void onSetTimeout(std::size_t timeout);
 
+        // inherit docs
         bool onSeekable() const;
 
+        // inherit docs
         pos_type onSeek(off_type offset, std::ios::seekdir sd);
 
+        // inherit docs
         std::size_t onRead(char* buffer, std::size_t count, bool& eof);
 
+        // inherit docs
         std::size_t onWrite(const char* buffer, std::size_t count);
 
+        // inherit docs
         std::size_t onPeek(char* buffer, std::size_t count);
 
+        // inherit docs
         void onSync() const;
 
+        // inherit docs
         virtual bool onRun();
 
     private:

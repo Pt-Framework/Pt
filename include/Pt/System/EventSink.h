@@ -81,8 +81,13 @@ class PT_SYSTEM_API EventSink : private NonCopyable
         virtual void onWake() = 0;
 
     private:
+        //! @internal
         void onConnect(EventSource& source);
+
+        //! @internal
         void onDisconnect(EventSource& source);
+
+        //! @internal
         void onUnsubscribe(EventSource& source);
 
     private:

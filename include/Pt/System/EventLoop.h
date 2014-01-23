@@ -50,6 +50,24 @@ class Selectable;
 class Selector;
 
 /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
+
+    The %EventLoop can be used as the central entity of a thread or process to
+    dispatch application events and wait on multiple Selectables, IODevices or
+    Timers for activity.
+
+    Events can be added to the internal event queue, even from other threads
+    using the method commitEvent() or queueEvent(). The
+    first method will add the event to the internal queue and wake the
+    event loop, the latter allows queing multiple events and it is up to
+    the caller to wake the event loop by calling wake() when all
+    events are added. When the event loop processes its event, the signal
+    eventReceived is send for each processed event. Events are processed in 
+    the order they were added.
+
+    To start the %MainLoop the method run() must be executed. It blocks
+    until the event loop is stopped. To stop the loop, exit()
+    can be called. The delivery of the events occurs inside the thread that
+    started the execution of the event loop.
 */
 class PT_SYSTEM_API EventLoop : public Connectable
                               , public EventSink
@@ -58,22 +76,27 @@ class PT_SYSTEM_API EventLoop : public Connectable
     friend class Timer;
 
     public:
+        /** @internal Indicates to wait forever.
+        */
         static const std::size_t WaitInfinite = static_cast<const std::size_t>(-1);
+
+        /** @internal Maximum wait interval in milliseconds.
+        */
         static const std::size_t WaitMax = WaitInfinite - 1;
 
-        /** @brief Destructs the EventLoop.
+        /** @brief Destructor.
         */
         virtual ~EventLoop();
 
-        /** @brief Starts the event loop.
+        /** @brief Starts the loop.
         */
         void run();
 
-        /** @brief Stops the %EventLoop.
+        /** @brief Stops the loop.
         */
         void exit();
 
-        /** @brief Reports all events
+        /** @brief Reports all events.
         */
         Signal<const Event&>& eventReceived()
         { return _event; }
@@ -88,7 +111,7 @@ class PT_SYSTEM_API EventLoop : public Connectable
         void setReady(Selectable& s)
         { this->onReady(s); }
 
-        //! @ internal
+        //! @internal
         virtual Selector& selector() = 0;
 
     protected:

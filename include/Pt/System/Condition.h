@@ -38,17 +38,7 @@ namespace Pt {
 
 namespace System {
 
-    /** @brief This class is used to control concurrent access.
-
-        The Condition class is used to control concurrent access in a queued
-        manner. The Condition class supports two types of signalling events,
-        manual reset and automatic reset.
-        Manual resets cause all blocked callers to be released. This can be
-        understood as some kind of broadcast to signal all blocked callers at
-        once. Manual resets are triggered by a call to signal().
-        Automatic resets cause only a single blocked caller to be released.
-        So this can be seen as some kind of wait queue where only the topmost
-        is signaled. Automatic resets are signaled by a call to broadcast().
+    /** @brief %Signal and wait synchronisation promitive.
      */
     class PT_SYSTEM_API Condition : private NonCopyable
     {
@@ -59,16 +49,18 @@ namespace System {
             //! @brief Destructor.
             ~Condition();
 
+            void wait(Mutex& mtx);
+
             /** @brief Wait until condition becomes signaled.
 
                 Causes the caller to be suspended until the condition will be
                 signaled. The given mutex will be unlocked before the caller
                 is suspended.
             */
-            void wait( Mutex& mtx);
-
-            void wait( MutexLock& m)
+            void wait(MutexLock& m)
             { this->wait( m.mutex() ); }
+
+            bool wait(Mutex& mtx, unsigned int ms);
 
             /** @brief Wait until condition becomes signalled.
 
@@ -77,8 +69,6 @@ namespace System {
                 is suspended. The suspension takes at maximum ms milliseconds.
                 Returns true if successful, false if a timeout occurred.
             */
-            bool wait( Mutex& mtx, unsigned int ms);
-
             bool wait( MutexLock& m, unsigned int ms)
             { return this->wait( m.mutex(), ms ); }
 

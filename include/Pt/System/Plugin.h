@@ -96,15 +96,16 @@ class Plugin : public PluginId
 };
 
 
-/** @brief A plugin class that supports transparent, named object construction.
+/** @brief A plugin implementation.
     
-    In the plugin shared object global BasicPlugins have to be arranged
-    in a null teminated array with C linkage. The PluginManager can be
-    set up to resolve the symbol of this array and use the plugins.
+    In the plugin library, shared object global %BasicPlugins have to be
+    arranged in a null teminated array with C linkage. The PluginManager
+    can be set up to resolve the symbol of this array and use the plugins.
 
     @code
     static Pt::BasicPlugin<SomeClass, MyIface> plugin0("some-feature");
     static Pt::BasicPlugin<OtherClass, MyIface> plugin1("other-feature");
+    
     extern "C" { \
         PT_API Pt::PluginId* PluginList[] = { &plugin0, &plugin1, 0 }; \
     }
@@ -113,21 +114,27 @@ class Plugin : public PluginId
 template <typename Class, typename Iface>
 class BasicPlugin : public Plugin<Iface> {
     public:
+        /** @brief Constructs with feature string and info.
+        */
         BasicPlugin(const std::string& feature, const std::string& info = std::string())
         : Plugin<Iface>()
         , _feature(feature)
         , _info(info)
         { }
 
+        // inherit docs
         Iface* create()
         { return new Class; }
 
+        // inherit docs
         void destroy(Iface* instance)
         { delete instance; }
 
+        // inherit docs
         virtual const char* feature() const
         { return _feature.c_str(); }
 
+        // inherit docs
         virtual const char* info() const
         { return _info.c_str(); }
 
@@ -145,31 +152,42 @@ class PluginManager
         typedef typename std::multimap< std::string, PluginT* > PluginMap;
         typedef typename std::multimap< IfaceT*, PluginT* > InstanceMap;
 
+        /** @brief %Iterator for loaded plugins.
+        */
         class Iterator
         {
             public:
+                /** @brief Default Constructor.
+                */
                 Iterator()
                 {}
 
+                //! @internal
                 Iterator(typename PluginMap::const_iterator it)
                 : _it( it)
                 {}
 
+                //! @brief Advances the iterator
                 Iterator& operator++()
                 { ++_it; return *this; }
     
+                //! @brief Access iterator value
                 const PluginId& operator*() const
                 { return *(_it->second); }
 
+                //! @brief Access iterator value
                 const PluginId* operator->() const
                 { return _it->second; }
 
+                //! @brief Comparison operator.
                 bool operator==(const Iterator& it) const
                 { return _it == it._it; }
 
+                //! @brief Comparison operator.
                 bool operator!=(const Iterator& it) const
                 { return _it != it._it; }
 
+                //! @internal
                 typename PluginMap::const_iterator _it;
         };
 
@@ -184,42 +202,60 @@ class PluginManager
         */
         ~PluginManager();
 
+        /** @brief Loads plugins from a library.
+        */
         void loadPlugin(const std::string& sym, const std::string& path);
 
+        /** @brief Registers a plugin.
+        */
         void registerPlugin(PluginT& plugin);
 
+        /** @brief Unregisters a plugin.
+        */
         void unregisterPlugin(PluginT& plugin);
 
+        /** @brief Creates an instance by name.
+        */
         IfaceT* create(const std::string& feature);
 
+        /** @brief Creates an instance.
+        */
         IfaceT* create(const Iterator& feature);
 
+        /** @brief Destroys an instance.
+        */
         void destroy(IfaceT* inst);
 
+        /** @brief Begin of loaded plugins.
+        */
         Iterator begin() const
         { return Iterator( _plugins.begin() ); }
-            
+           
+        /** @brief End of loaded plugins.
+        */
         Iterator end() const
         { return Iterator( _plugins.end() ); }
 
     protected:
+        //! @internal
         PluginMap& plugins()
         { return _plugins; }
 
+        //! @internal
         InstanceMap& instances()
         { return _instances; }
 
     private:
-        /// A string representation of the interface id
+        //! @internal
         const std::type_info& _iface;
 
-        /// A list of all loaded libraries
+       //! @internal A list of all loaded libraries
         std::list<Library> _libs;
 
-        /// A map of a feature string and the Plugin* which handles it.
+        //! @internal A map of a feature string and the Plugin* which handles it.
         PluginMap _plugins;
 
-        /// A map of the created Iface* and the Plugin* it was created by.
+        //! @internal A map of the created Iface* and the Plugin* it was created by.
         InstanceMap _instances;
 };
 
