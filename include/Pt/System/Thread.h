@@ -43,7 +43,7 @@ class EventLoop;
 
 /** @brief Platform independent threads
 
-    This is a thread base class, which is flexible, but hard to use. Try
+    This is a thread base class, which is flexible, but harder to use. Try
     to use either an AttachedThread or a DetachedThread instead.
 
     A %Thread represents a separate thread of control within the program.
@@ -52,14 +52,13 @@ class EventLoop;
     multitasking operating system. Each thread gets its own stack, which
     size is determinated by the operating system.
 
-    The execution of a thread starts either by calling the start() which
+    The execution of a thread starts either by calling start() which
     calls the thread entry object passed to the constructor. Threads can
     either be joined, so you can wait for them, or be detached, so they
-    run indepentently. A thread can be forced to terminate by calling
-    terminate(), however, doing so is dangerous and discouraged.
+    run indepentently.
 
-    Thread also provides a platform independent sleep function. A thread
-    can give up CPU time either by calling Thread::yield() or sleep() to
+    %Thread also provides a platform independent sleep function. A thread
+    can give up CPU time either by calling yield() or sleep() to
     stop for a specified period of time.
 */
 class PT_SYSTEM_API Thread : protected NonCopyable
@@ -221,7 +220,7 @@ class AttachedThread : public Thread
         /** @brief Constructs a thread with a thread entry
 
             Constructs a thread object to execute the %Callable \a cb.
-            The Thread is not started on construction, but when start()
+            The thread is not started on construction, but when start()
             is called.
         */
         explicit AttachedThread(const Callable<void>& cb)
@@ -231,7 +230,7 @@ class AttachedThread : public Thread
         /** @brief Constructs a thread with an event loop
 
             Constructs a thread object to run the event loop \a loop in
-            a separate thread. The Thread is not started on construction,
+            a separate thread. The thread is not started on construction,
             but when start() is called.
         */
         explicit AttachedThread(EventLoop& loop)

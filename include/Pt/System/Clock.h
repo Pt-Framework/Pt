@@ -38,45 +38,45 @@ namespace Pt {
 
 namespace System {
 
-/** @brief Measures time intervals
+/** @brief Measures time intervals.
 
-    The clock class can be used like a stop-watch by calling Clock::start()
-    and Clock::stop(). The latter method returns the elapsed time.
+    The %Clock class can be used like a stop-watch by calling start() and
+    stop(). The latter method returns the elapsed time.
 */
 class PT_SYSTEM_API Clock : private NonCopyable
 {
     public:
-        /** @brief Constructs a Clock
+        /** @brief Constructs a Clock.
         */
         Clock();
 
-        /** @brief Destructor
+        /** @brief Destructor.
         */
         ~Clock();
 
-        /** @brief Start the clock
+        /** @brief Start the clock.
         */
         void start();
 
-        /** @brief Stop the clock
+        /** @brief Stop the clock.
 
-            Returns the elapsed time since start was called.
+            Returns the elapsed time since start() was called.
         */
         Timespan stop();
 
-        /** @brief Returns the system time
+        /** @brief Returns the system time.
         */
         static DateTime getSystemTime();
 
-        /** @brief Returns the current local time
+        /** @brief Returns the current local time.
         */
         static DateTime getLocalTime();
 
-        /** @brief Returns the timespan since a fixed point in the past
+        /** @brief Returns the timespan since a fixed point in the past.
 
-            The getSystemTicks function retrieves the system ticks, in milliseconds.
-            The system time is the time elapsed since i.e. the system was started, or
-            the unix epoch or some other fixed point in the past.
+            This function retrieves the system ticks, which is the passed time
+            since a fixed point in the past e.g. the system was started,
+            or the unix epoch or some other fixed point in the past.
         */
         static Timespan getSystemTicks();
 

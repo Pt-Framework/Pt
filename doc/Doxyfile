@@ -1311,14 +1311,15 @@ INCLUDE_FILE_PATTERNS  =
 # undefined via #undef or recursively expanded use the := operator 
 # instead of the = operator.
 
-PREDEFINED             = PT_API= USHRT_MAX=0xffff UINT_MAX=0xffffffffUL ULONG_MAX=18446744073709551615ULL
+PREDEFINED             = PT_API= PT_SYSTEM_API= PT_SSL_API= USHRT_MAX=0xffff \
+                         UINT_MAX=0xffffffffUL ULONG_MAX=18446744073709551615ULL
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then 
 # this tag can be used to specify a list of macro names that should be expanded. 
 # The macro definition that is found in the sources will be used. 
 # Use the PREDEFINED tag if you want to use a different macro definition.
 
-EXPAND_AS_DEFINED      = PT_API
+EXPAND_AS_DEFINED      = PT_API PT_SYSTEM_API PT_SSL_API
 
 # If the SKIP_FUNCTION_MACROS tag is set to YES (the default) then 
 # doxygen's preprocessor will remove all function-like macros that are alone 

@@ -44,8 +44,6 @@ namespace Ssl {
 class PT_SSL_API CertificateStore
 {
     public:
-        /** @brief Iterator to a certificate in the store.
-        */
         class ConstIterator;
 
     public:
@@ -96,25 +94,35 @@ class PT_SSL_API CertificateStore
         class CertificateStoreImpl* _impl;
 };
 
+/** @brief Iterator to a certificate in the store.
+*/
 class PT_SSL_API CertificateStore::ConstIterator
 {
     public:
+        //! @brief Default constructor.
         ConstIterator();
 
+        //! @brief Copy constructor.
         ConstIterator(const ConstIterator& other);
 
         explicit ConstIterator(Certificate* const* cert);
 
+        //! @brief Assignment operator.
         ConstIterator& operator=(const ConstIterator& other);
 
+        //! @brief Advance iterator position.
         ConstIterator& operator++();
 
+        //! @brief Access value.
         const Certificate& operator*() const;
 
+        //! @brief Access value.
         const Certificate* operator->() const;
 
+        //! @brief Comparison operator.
         bool operator!=(const ConstIterator& other) const;
 
+        //! @brief Comparison operator.
         bool operator==(const ConstIterator& other) const;
 
     private:

@@ -44,8 +44,12 @@ class Symbol;
 class PT_SYSTEM_API SymbolNotFound : public SystemError
 {
     public:
+        /** @brief Construct with symbol.
+        */
         SymbolNotFound(const std::string& sym);
 
+        /** @brief Construct with symbol.
+        */
         SymbolNotFound(const char* sym);
 
         //! @brief Destructor
@@ -60,7 +64,7 @@ class PT_SYSTEM_API SymbolNotFound : public SystemError
         std::string _symbol;
 };
 
-/** @brief Shared library loader
+/** @brief Shared library loader.
 
     This class can be used to dynamically load shared libraries and
     resolve symbols from it. The example below shows how to retrieve
@@ -84,19 +88,30 @@ class PT_SYSTEM_API Library
 
         /** @brief Loads a shared library.
 
-             If a file could not be found at the given path, the path will be extended
-             by the platform-specific shared library extension first and then also by the
-             shared library prefix. If still no file can be found an exception is thrown.
-
-             The library is loaded immediately.
+             If a file could not be found at the given path, the path will be
+             extended by the platform-specific shared library extension first
+             and then also by the shared library prefix. If still no file can
+             be found an exception of type AccessFailed is thrown.
+             Otherwise, the library is loaded immediately.
         */
         explicit Library(const std::string& path);
 
-        //! @brief Loads a shared library.
+        /** @brief Loads a shared library.
+
+             If a file could not be found at the given path, the path will be
+             extended by the platform-specific shared library extension first
+             and then also by the shared library prefix. If still no file can
+             be found an exception of type AccessFailed is thrown.
+             Otherwise, the library is loaded immediately.
+        */
         explicit Library(const char* path);
 
+        /** @brief Copy constructor.
+        */
         Library(const Library& other);
 
+        /** @brief Assignment operator.
+        */
         Library& operator=(const Library& other);
 
         /** @brief The destructor unloads the shared library from memory.
@@ -105,14 +120,24 @@ class PT_SYSTEM_API Library
 
         /** @brief Loads a shared library.
 
-             If a file could not be found at the given path, the path will be extended
-             by the platform-specific shared library extension first and then also by the
-             shared library prefix. If still no file can be found an exception is thrown.
+             If a file could not be found at the given path, the path will be
+             extended by the platform-specific shared library extension first
+             and then also by the shared library prefix. If still no file can
+             be found an exception of type AccessFailed is thrown.
+             Otherwise, the library is loaded immediately.
              Calling this method twice might close the previously loaded library.
         */
         Library& open(const std::string& path);
 
-        //! @brief Loads a shared library.
+        /** @brief Loads a shared library.
+
+             If a file could not be found at the given path, the path will be
+             extended by the platform-specific shared library extension first
+             and then also by the shared library prefix. If still no file can
+             be found an exception of type AccessFailed is thrown.
+             Otherwise, the library is loaded immediately.
+             Calling this method twice might close the previously loaded library.
+        */
         Library& open(const char* path);
 
         //! @brief Closes the shared library.
@@ -144,7 +169,7 @@ class PT_SYSTEM_API Library
         bool operator!() const;
 
         /** @brief Returns the path to the shared library image
-         */
+        */
         const std::string& path() const;
 
         /** @brief Returns the extension for shared libraries
@@ -160,6 +185,7 @@ class PT_SYSTEM_API Library
         static std::string prefix();
 
     protected:
+        //! @internal
         void detach();
 
     private:
@@ -175,20 +201,30 @@ class PT_SYSTEM_API Library
 class Symbol
 {
     public:
+        /** @brief Default constructor.
+        */
         Symbol()
         : _sym(0)
         { }
 
+        /** @brief Construct with library and symbol address.
+        */
         Symbol(const Library& lib, void* sym)
         : _lib(lib), _sym(sym)
         { }
 
+        /** @brief Returns the symbol address
+        */
         void* sym() const
         { return _sym; }
 
+        /** @brief Returns the library where the symbol was resolved
+        */
         const Library& library() const
         { return _lib; }
 
+        /** @brief Returns the symbol address
+        */
         operator void*() const
         { return _sym; }
 

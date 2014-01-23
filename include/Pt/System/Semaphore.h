@@ -55,7 +55,7 @@ class PT_SYSTEM_API Semaphore : private NonCopyable
         //! @brief Non-blocking wait
         bool tryWait();
 
-        //! @brief Signal the semaphore
+        //! @brief %Signal the semaphore
         Semaphore& post();
 
     private:

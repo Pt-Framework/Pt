@@ -41,86 +41,105 @@ namespace System {
 
 class ApplicationImpl;
 
-/**
- * \brief The %Application class provides an event loop for console applications
- * without a GUI.
- *
- * This class is used by non-GUI applications to provide the applications's event
- * loop. There should be only exactly one instance of Application (or one of its
- * subclasses) per application. This is not ensured, though.
- *
- * Application contains the main event loop, where event sources can be registered
- * and events from those sources are dispatched to listeners, that were registered
- * to the event loop. Events may for example be operating system events (timer, file
- * system changes).
- *
- * The application and therefore the event loop is started with a call to run() and
- * can be exited with a call to exit(). After calling exit() the application should
- * terminate.
- *
- * The event loop can be access by calling eventLoop(). Events can be committed by
- * calling EventLoop::commitEvent(). Long running operations can call
- * EventLoop::processEvents() to keep the application responsive.
- *
- * There are convenience methods available for easier access to functionality of
- * the underlying event loop. commitEvent() delegates to EventLoop::commitEvent(),
- * queueEvent() delegates to EventLoop::delegateEvent() and processEvents() delegates
- * to EventLoop::processEvents() without making it necessary to first obtain the
- * event loop manually.
- */
+/** @brief Console applications without a GUI.
+ 
+    This class is used by non-GUI applications to provide the central event
+    loop, handle C signals and process command line arguments. There can be
+    only one instance per application.
+    The application and therefore the event loop is started with a call to
+    run() and can be exited with a call to exit(). The event loop can be
+    obtained by calling loop(). Command line arguments can be parsed as Arg
+    and static methods exist to set environment variables.
+
+ 
+*/
 class PT_SYSTEM_API Application : public Pt::Connectable
 {
     public:
+        /** @brief Construct with command line arguments.
+        */
         explicit Application(int argc = 0, char** argv = 0);
 
+        /** @brief Construct with custom event loop.
+        */
         explicit Application(EventLoop* loop, int argc = 0, char** argv = 0);
 
+        /** @brief Destructor.
+        */
         ~Application();
 
+        /** @brief Returns an instance to the application.
+        */
         static Application& instance();
 
+        /** @brief Returns the event loop.
+        */
         EventLoop& loop()
         { return *_loop; }
 
+        /** @brief Starts the contained event loop.
+        */
         void run()
         { _loop->run(); }
 
+        /** @brief Exits from the contained event loop.
+        */
         void exit()
         { _loop->exit(); }
 
+        /** @brief Ignores a system signal.
+        */
         bool ignoreSystemSignal(int sig);
 
+        /** @brief Catch a system signal.
+        */
         bool catchSystemSignal(int sig);
 
+        /** @brief Raise a system signal.
+        */
         bool raiseSystemSignal(int sig);
 
+        /** @brief Notifies when a system signal was caught.
+        */
         Signal<int>& systemSignal()
         { return _systemSignal; }
 
+        /** @brief Number of command line arguments.
+        */
         int argc() const
         { return _argc; }
 
+        /** @brief Command line arguments.
+        */
         char** argv() const
         { return _argv; }
 
+        /** @brief Returns the value of a long option.
+        */
         template <typename T>
         Arg<T> getArg(const char* name)
         {
             return Arg<T>(_argc, _argv, name);
         }
 
+        /** @brief Returns the value of a long option.
+        */
         template <typename T>
         Arg<T> getArg(const char* name, const T& def)
         {
             return Arg<T>(_argc, _argv, name, def);
         }
 
+        /** @brief Returns the value of a short option.
+        */
         template <typename T>
         Arg<T> getArg(const char name)
         {
             return Arg<T>(_argc, _argv, name);
         }
 
+        /** @brief Returns the value of a short option.
+        */
         template <typename T>
         Arg<T> getArg(const char name, const T& def)
         {
@@ -149,20 +168,20 @@ class PT_SYSTEM_API Application : public Pt::Connectable
         */
         static std::string tmpdir();
 
-        //! Set environment variable
-        /**
+        /** @brief Set environment variable.
+
             @throw SystemError
         */
         static void setEnvVar(const std::string& name, const std::string& value);
 
-        //! Unset environment variable
-        /**
+        /** @brief Unset environment variable.
+
             @throw SystemError
         */
         static void unsetEnvVar(const std::string& name);
 
-        //! Get environment variable
-        /**
+        /** @brief Get environment variable.
+
             @throw SystemError
         */
         static std::string getEnvVar(const std::string& name);
@@ -174,6 +193,7 @@ class PT_SYSTEM_API Application : public Pt::Connectable
         { return *_impl; }
 
     protected:
+        //! @internal
         void init(EventLoop& loop);
 
     private:

@@ -51,14 +51,14 @@ namespace System {
 class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
 {
     protected:
-        /** @brief Default constructor
+        /** @brief Default constructor.
         */
         LogChannel()
         : _refs(0)
         {}
 
     public:
-        /** @brief Destructor
+        /** @brief Destructor.
         */
         virtual ~LogChannel()
         {}
@@ -69,10 +69,12 @@ class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
         std::size_t unref()
         { return --_refs; }
 
+        /** @brief Returns the URL used to open the channel.
+        */
         const std::string& url() const
         { return _url; }
 
-        /** @brief Open the channel from URL
+        /** @brief Open the channel from URL.
 
             The URL is specific to the channel and may contain attributes
             to open it correctly.
@@ -83,7 +85,7 @@ class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
           this->onOpen(urlstr); 
         }
 
-        /** @brief Closes the channel
+        /** @brief Closes the channel.
         */
         void close()
         { 
@@ -91,7 +93,7 @@ class PT_SYSTEM_API LogChannel : protected Pt::NonCopyable
             _url.clear();
         }
 
-        /** @brief Writes data to the channel
+        /** @brief Writes data to the channel.
         */
         void write(const std::string& message)
         { this->onWrite( message.data(), message.size() ); }

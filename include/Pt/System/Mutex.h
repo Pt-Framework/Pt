@@ -70,6 +70,11 @@ class PT_SYSTEM_API Mutex : private NonCopyable
         */
         void lock();
 
+        /** @brief Tries to lock the mutex.
+
+            If the mutex is currently locked by another thread, false is
+            returned, otherwise the lock is acquired.
+        */
         bool tryLock();
 
         //! @brief Unlocks the mutex.
@@ -142,7 +147,9 @@ class MutexLock : private NonCopyable
             if(_isLocked)
                 _mutex.unlockNoThrow();
         }
-
+        
+        /** @brief Lock the mutex.
+        */
         void lock()
         {
             if(!_isLocked)
@@ -244,7 +251,7 @@ class RecursiveLock : private NonCopyable
             }
         }
 
-        //! @brief Unlock so that the destructor does not unlock
+        //! @brief Unlocks the mutex.
         void unlock()
         {
             if(_isLocked)
@@ -269,23 +276,30 @@ class RecursiveLock : private NonCopyable
 
 /** @brief Synchronisation device similar to a POSIX rwlock
 
-    A %ReadWriteMutex allows multiple concurrent readers or one exclusive writer to
-    access a resource.
+    A %ReadWriteMutex allows multiple concurrent readers or one exclusive
+    writer to access a resource.
 */
 class PT_SYSTEM_API ReadWriteMutex : private NonCopyable
 {
     public:
-        //! @brief Creates the Reader/Writer lock.
+        //! @brief Constructor.
         ReadWriteMutex();
 
-        //! @brief Destroys the Reader/Writer lock.
+        //! @brief Destructor.
         ~ReadWriteMutex();
 
-        void readLock();
         /** @brief Acquires a read lock.
 
             If another thread currently holds a write lock, this method
             waits until the write lock is released.
+        */
+        void readLock();
+        
+        /** @brief Tries to acquire a read lock.
+
+            Immediately returns true if successful, or false if one or more
+            other threads currently hold locks. The result is undefined if
+            the same thread already holds a read or write lock.
         */
         bool tryReadLock();
 
@@ -321,6 +335,13 @@ class PT_SYSTEM_API ReadWriteMutex : private NonCopyable
 class ReadLock : private NonCopyable
 {
     public:
+        /** @brief Construct to guard a %ReadWriteMutex
+
+            Constructs a %ReadLock object and locks the enclosing
+            read-write mutex if \a doLock is true. If \a isLocked is true,
+            the %ReadLock will only unlock the given mutex in the
+            destructor, but not lock it in the constructor.
+        */
         ReadLock(ReadWriteMutex& m, bool doLock = true, bool isLocked = false)
         : _mutex(m)
         , _locked(isLocked)
@@ -329,12 +350,14 @@ class ReadLock : private NonCopyable
                 this->lock();
         }
 
+        //! @brief Unlocks the mutex unless %unlock() was called
         ~ReadLock()
         {
             if(_locked)
                 _mutex.unlockNoThrow();
         }
 
+        //! @brief Locks the mutex.
         void lock()
         {
             if( ! _locked )
@@ -343,7 +366,8 @@ class ReadLock : private NonCopyable
                 _locked = true;
             }
         }
-
+        
+        //! @brief Unlocks the mutex.
         void unlock()
         {
             if( _locked)
@@ -353,6 +377,7 @@ class ReadLock : private NonCopyable
             }
         }
 
+        //! @brief Returns the guarded the mutex object
         ReadWriteMutex& mutex()
         { return _mutex; }
 
@@ -366,6 +391,13 @@ class ReadLock : private NonCopyable
 class WriteLock : private NonCopyable
 {
     public:
+        /** @brief Construct to guard a %ReadWriteMutex
+
+            Constructs a %WriteLock object and locks the enclosing
+            read-write mutex if \a doLock is true. If \a isLocked is true,
+            the %WriteLock will only unlock the given mutex in the
+            destructor, but not lock it in the constructor.
+        */
         WriteLock(ReadWriteMutex& m, bool doLock = true, bool isLocked = false)
         : _mutex(m)
         , _locked(isLocked)
@@ -374,12 +406,14 @@ class WriteLock : private NonCopyable
                 this->lock();
         }
 
+        //! @brief Unlocks the mutex unless %unlock() was called
         ~WriteLock()
         {
             if(_locked)
                 _mutex.unlockNoThrow();
         }
 
+        //! @brief Locks the mutex.
         void lock()
         {
             if( ! _locked )
@@ -389,6 +423,7 @@ class WriteLock : private NonCopyable
             }
         }
 
+        //! @brief Unlocks the mutex.
         void unlock()
         {
             if( _locked)
@@ -398,6 +433,7 @@ class WriteLock : private NonCopyable
             }
         }
 
+        //! @brief Returns the guarded the mutex object
         ReadWriteMutex& mutex()
         { return _mutex; }
 
@@ -409,14 +445,14 @@ class WriteLock : private NonCopyable
 
 /** @brief Spinmutex class.
 
-   The most lightweight synchronisation object is the Spinlock. It is
-   usually implemented with a status variable that can be set to Locked
-   and Unlocked and atomic operations to change and inspect the status.
-   When Spinlock::lock is called, the status is changed to Locked.
-   Subsequent calls of Spinlock::lock from other threads will block until
-   the first thread has called Spinlock::unlock and the state of
-   the Spinlock has changed to Unlocked. Note that Spinlocks are not recursive.
-   When a Spinlock::lock blocks a busy-wait happens, therefore a Spinlock is only
+   The most lightweight synchronisation object is the %SpinMutex. It is
+   usually implemented with a status variable that can be set to locked
+   and unlocked and atomic operations to change and inspect the status.
+   When lock() is called, the status is changed to Locked.
+   Subsequent calls of lock() from other threads will block until
+   the first thread has called unlock() and the state of
+   the Spinlock has changed to Unlocked. Note that SpinMutexes are not recursive.
+   When a lock() blocks a busy-wait happens, therefore a %SpinMutex is only
    usable in cases where resources need to be locked for a very short time, but in
    these cases a higher performance can be achieved.
 */
@@ -432,8 +468,7 @@ class SpinMutex : private NonCopyable
         ~SpinMutex()
         {}
 
-
-        /** @brief Lock.
+        /** @brief Lock the mutex.
 
             Locks the Spinlock. If the Spinlock is currently locked
             by another thread, the calling thread suspends until no
@@ -450,12 +485,17 @@ class SpinMutex : private NonCopyable
             }
         }
 
+        /** @brief Tries to acquire a lock.
+
+            Immediately returns true if successful, or false if one or more
+            other threads currently hold locks.
+        */
         bool tryLock()
         {
            return ! atomicCompareExchange(_count, 1, 0);
         }
 
-        //! @brief Unlocks the Spinlock.
+        //! @brief Unlocks the mutex.
         void unlock()
         {
             // set unlocked
@@ -475,6 +515,13 @@ class SpinMutex : private NonCopyable
 class SpinLock : private NonCopyable
 {
     public:
+        /** @brief Construct to guard a %SpinMutex
+
+            Constructs a %SpinLock object and locks the enclosing
+            spin mutex if \a doLock is true. If \a isLocked is true,
+            the %SpinLock will only unlock the given mutex in the
+            destructor, but not lock it in the constructor.
+        */
         SpinLock(SpinMutex& m, bool doLock = true, bool isLocked = false)
         : _mutex(m)
         , _locked(isLocked)
@@ -483,12 +530,14 @@ class SpinLock : private NonCopyable
                 this->lock();
         }
 
+        //! @brief Unlocks the mutex unless %unlock() was called
         ~SpinLock()
         {
             if(_locked)
                 this->unlock();
         }
 
+        //! @brief Locks the mutex.
         void lock()
         {
             if( ! _locked )
@@ -498,6 +547,7 @@ class SpinLock : private NonCopyable
             }
         }
 
+        //! @brief Unlocks the mutex.
         void unlock()
         {
             if( _locked)

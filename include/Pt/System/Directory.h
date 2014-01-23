@@ -40,17 +40,17 @@ namespace System {
 
 /** @brief Iterates over entries of a directory.
 
-    A %DirectoryIterator is created by the Directory class and
-    can be used as follows:
+    A %DirectoryIterator is created with a path to a directory or default
+    constructed to serve as the iterator to end. It satisfies the requirements
+    for a forward iterator.
 
     \code
-    Directory::iterator it("/usr");
-    Directory::iterator end;
+    DirectoryIterator it("/usr");
+    DirectoryIterator end;
 
-    while(it != end)
+    for( ; it != end; ++it)
     {
-        std::cout << "name : " << *it << std::endl;
-        ++it;
+        std::cout << "name : " << it->name() << std::endl;
     }
     \endcode
 
@@ -59,51 +59,51 @@ namespace System {
 class PT_SYSTEM_API DirectoryIterator
 {
     public:
-        typedef std::string value_type;
+        typedef FileInfo value_type;
         typedef std::ptrdiff_t difference_type;
         typedef std::forward_iterator_tag iterator_category;
-        typedef const std::string* pointer;
-        typedef const std::string& reference;
+        typedef const FileInfo* pointer;
+        typedef const FileInfo& reference;
 
     public:
-        //! @brief Default constructor
+        //! @brief Default constructor.
         DirectoryIterator()
         : _impl(0)
         { }
 
-        //! @brief Constructs an iterator pointing at the file given by @a path
+        //! @brief Constructs with directory path.
         explicit DirectoryIterator(const std::string& path);
 
-        //! @brief Constructs an iterator pointing at the file given by @a path
+        //! @brief Constructs with directory path.
         explicit DirectoryIterator(const char* path);
 
-        //! @brief Constructs an iterator pointing at @a fi
+        //! @brief Constructs with directory.
         explicit DirectoryIterator(const FileInfo& fi);
 
-        //! @brief Copy constructor
+        //! @brief Copy constructor.
         DirectoryIterator(const DirectoryIterator& it);
 
-        //! @brief Destructor
+        //! @brief Destructor.
         ~DirectoryIterator();
 
-        //! @brief Advances the iterator to the next file
+        //! @brief Advances the iterator to the next file.
         DirectoryIterator& operator++();
 
-        //! @brief Assignment operator
+        //! @brief Assignment operator.
         DirectoryIterator& operator=(const DirectoryIterator& it);
 
-        //! @brief Equality comparison
+        //! @brief Equality comparison.
         bool operator==(const DirectoryIterator& it) const
         { return _impl == it._impl; }
 
-        //! @brief Inequality comparison
+        //! @brief Inequality comparison.
         bool operator!=(const DirectoryIterator& it) const
         { return _impl != it._impl; }
 
-        //! @brief Returns the name of the file the iterator points at
+        //! @brief Returns the file the iterator points at.
         const FileInfo& operator*() const;
 
-        //! @brief Returns the name of the file the iterator points at
+        //! @brief Returns the file the iterator points at.
         const FileInfo* operator->() const;
 
     private:

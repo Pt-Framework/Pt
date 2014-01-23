@@ -38,13 +38,6 @@ namespace System {
 
 /** @brief Thread-safe event loop supporting I/O multiplexing and Timers.
 
-    An %MainLoop can be used to monitor a set of Selectables and Timers
-    and react to activity on them. The wait call can be performed with
-    a timeout and the respective timeout signal is sent if it occurs.
-    Clients can be notified about Timer and Selectable activity by
-    connecting to the appropriate signals of the Timer and Selectable
-    classes.
-
     The following example uses a %MainLoop to wait on acitvity on
     a Timer, which is set to time-out after 1000 msecs.
 
@@ -56,53 +49,31 @@ namespace System {
     {
         using Pt::System;
 
-        Timer timer;
-        timer.start(1000);
-        connect(timer.timeout, ontimer);
-
         MainLoop loop;
-        loop.addTimer(timer);
-        loop.run();
 
+        Timer timer;
+        timer.setActive(loop);
+        timer.start(1000);
+        timer.timeout() += Pt::slot(onTimer);
+
+        loop.run();
         return 0;
     }
     @endcode
-
-    The MainLoop can be used as the central entity of a thread or
-    process to dispatch application events and wait on multiple IODevices or
-    Timers for activity.
-
-    Events can be added to the internal event queue, even from other threads
-    using the method MainLoop::commitEvent or MainLoop::queueEvent. The
-    first method will add the event to the internal queue and wake the
-    event loop, the latter allows queing multiple events and it is up to
-    the caller to wake the event loop by calling MainLoop::wake when all
-    events are added. When the event loop processes its event, the signal
-    "event" is send for each processed event. Events are processes in the
-    order they were added.
-
-    To start the %MainLoop the method MainLoop::run must be executed. It blocks
-    until the event loop is stopped. To stop the %MainLoop, MainLoop::exit
-    must be called. The delivery of the events occurs inside the thread that
-    started the execution of the event loop.
-
-    %IODevices and %Timers can be added to an %MainLoop just as to Selector.
-    In fact a %Selector is used internally to implement the %MainLoop.
-
-    Since the %MainLoop is a Runnable, it can be easily assigned to a Thread
-    to give it its own event loop.
 */   
 class PT_SYSTEM_API MainLoop : public EventLoop
 {
     public:
-        /** @brief Constructs the MainLoop
+        /** @brief Default Constructor
         */
         MainLoop();
 
+        /** @brief Construct with allocator.
+        */
         MainLoop(Allocator& a);
 
-        /** @brief Destructs the MainLoop
-          */
+        /** @brief Destructor
+        */
         virtual ~MainLoop();
 
         //! @internal

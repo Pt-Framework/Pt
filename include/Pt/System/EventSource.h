@@ -46,12 +46,10 @@ class EventSink;
 
 /** @brief Sends Events to receivers in other threads
 
-    The Signal class is not thread-safe and can only be used for
-    intra-thread communication. To pass Events between different threads
-    use an %EventSource instead. Thread-safety only refers to the usage
-    of the %EventSource itself (connection, disconnecting...) and not the
-    slot.
-    Construction and destruction must always occur in isolation.
+    The Signal class is not thread-safe and can only be used for intra-thread
+    communication. To pass Events between different threads use an
+    %EventSource instead, which synchronizes sending of events and connecting
+    and disconnecting sinks appropriately.
 */
 class PT_SYSTEM_API EventSource : private NonCopyable
 {
@@ -66,18 +64,28 @@ class PT_SYSTEM_API EventSource : private NonCopyable
         */
         ~EventSource();
 
+        /** @brief Send the event to all connected sinks.
+        */
         void send(const Pt::Event& ev);
 
+        /** @brief Connect to an EventSink.
+        */
         void connect(EventSink& sink);
 
+        /** @brief Disonnect from an EventSink.
+        */
         void disconnect(EventSink& sink);
 
+        /** @brief Send events of a certain type to the sink.
+        */
         template <typename EventT>
         void subscribe(EventSink& sink)
         {
             subscribe( sink, typeid(EventT) );
         }
 
+        /** @brief Do not send events of a certain type to the sink anymore.
+        */
         template <typename EventT>
         void unsubscribe(EventSink& sink)
         {
@@ -85,10 +93,13 @@ class PT_SYSTEM_API EventSource : private NonCopyable
         }
 
     private:
+        //! @internal
         bool tryDisconnect(EventSink& sink);
 
+        //! @internal
         void subscribe(EventSink& sink, const std::type_info& ti);
 
+        //! @internal
         void unsubscribe(EventSink& sink, const std::type_info& ti);
 
     private:

@@ -38,7 +38,7 @@ namespace Pt {
 
 namespace System {
 
-/** @brief Stream buffer for I/O devices.
+/** @brief Implements std::streambuf for I/O devices.
 */
 class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
                              , public Connectable
@@ -48,36 +48,58 @@ class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
         */
         explicit IOBuffer(std::size_t bufferSize = 8192, bool extend = false);
 
+        /** @brief Construct with I/O device.
+        */
         explicit IOBuffer(IODevice& ioDevice, std::size_t bufferSize = 8192, bool extend = false);
 
         /** @brief Destructor.
         */
         ~IOBuffer();
 
+        /** @brief Returns the I/O device.
+        */
         IODevice* device()
         { return _ioDevice; }
 
+        /** @brief Notifies when input was read.
+        */
         Signal<IOBuffer&>& inputReady()
         { return _inputReady; }
 
+        /** @brief Notifies when a part of the buffer was written.
+        */
         Signal<IOBuffer&>& outputReady()
         { return _outputReady; }
 
+        /** @brief Attach to I/O device.
+        */
         void attach(IODevice& ioDevice);
 
+        /** @brief Detach from I/O device.
+        */
         void detach();
         
+        /** @brief Discards and detaches.
+        */
         void reset();
 
+        /** @brief Discards the buffer.
+        */
         void discard();
         
+        /** @brief Begins to read from the I/O device into the buffer.
+        */
         void beginRead();
 
         //! @internal
         void onRead(IODevice& dev);
 
+        /** @brief Ends to read.
+        */
         std::size_t endRead();
 
+        /** @brief Begins to write buffered data to the I/O device.
+        */
         void beginWrite();
 
         //! @internal
@@ -85,28 +107,40 @@ class PT_SYSTEM_API IOBuffer : public BasicStreamBuffer<char>
 
         std::size_t endWrite();
 
+        /** @brief Returns true if a read operation is running.
+        */
         bool isReading() const;
         
+        /** @brief Returns true if a write operation is running.
+        */
         bool isWriting() const;
 
     protected:
         //! @internal
         void init(std::size_t bufferSize, bool extend);
 
+        // inherit docs
         virtual std::streamsize showmanyc();
 
+        // inherit docs
         virtual std::streamsize showfull();
 
+        // inherit docs
         virtual int sync();
 
+        // inherit docs
         virtual int_type underflow();
 
+        // inherit docs
         virtual int_type overflow(int_type ch);
 
+        // inherit docs
         virtual pos_type seekoff(off_type offset, std::ios::seekdir sd, std::ios::openmode mode);
 
+        // inherit docs
         virtual pos_type seekpos(pos_type p, std::ios::openmode mode );
 
+        // inherit docs
         virtual int_type pbackfail(int_type c);
 
     private:
