@@ -38,7 +38,7 @@ namespace Pt {
 
 /** @brief Base class for all event types.
 
-    Specific Event objects, subclass from Event and implement the onClone(),
+    Specific event objects, subclass from %Event and implement the onClone(),
     onDestroy() and onTypeInfo() methods. The first two are used to copy event
     objects for example in an EventLoop and the latter one is used to dispatch
     events by type.

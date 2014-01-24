@@ -79,6 +79,7 @@ namespace Unit {
                                , public TestFixture
     {
         private:
+            //! @internal
             class PT_UNIT_API Context : public TestContext
             {
                 public:

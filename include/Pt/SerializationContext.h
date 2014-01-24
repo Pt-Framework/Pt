@@ -48,27 +48,34 @@ class SerializationContextImpl;
 class PT_API SerializationContext : public SerializationInfo
 {
     public:
+        //! @brief Default Constructor.
         SerializationContext();
 
         /** @brief Destructor.
         */
         virtual ~SerializationContext();
 
+        //! @brief Enables recording of references.
         inline void enableReferencing(bool enabled)
         { _refsEnabled = enabled; }
 
+        //! @brief Returns true if references are recorded.
         inline bool isReferencing() const
         { return _refsEnabled; }
 
+        //! @brief Gets a %SerializationInfo object from the pool.
         SerializationInfo* get();
 
+        //! @brief Pushes a %SerializationInfo object back on the pool.
         void push(SerializationInfo* si);
 
+        //! @brief Register a serialization surrogate function pair.
         template <typename T>
         void registerSurrogate( const std::string& typeName,
                                 void (*compose)(const Pt::SerializationInfo& si, T& type),
                                 void (*decompose)(Pt::SerializationInfo& si, const T& type) );
 
+        //! @brief Register a serialization surrogate function pair.
         template <typename T>
         void registerSurrogate( const char* typeName,
                                 void (*compose)(const Pt::SerializationInfo& si, T& type),

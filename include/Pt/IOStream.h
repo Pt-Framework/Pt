@@ -64,23 +64,26 @@ class BasicIStream : public std::basic_istream<CharT, TraitsT>
         typedef typename TraitsT::off_type off_type;
 
     public:
+        //! @brief Constructor.
         explicit BasicIStream(BasicStreamBuffer<CharT>* sb = 0);
         
         //! @brief Destructor.
         ~BasicIStream()
         {}
 
-        //! @brief Peeks bytes in the stream buffer.
-        /**
+        /** @brief Peeks bytes in the stream buffer.
+        
             The number of bytes that can be peeked depends on the current
             stream buffer get area and maybe less than requested,
             similar to istream::readsome().
         */
         std::streamsize peeksome(CharT* buffer, std::streamsize n);
 
+        //! @brief Returns the buffer.
         BasicStreamBuffer<CharT>* buffer()
         { return _buffer; }
 
+        //! @brief Sets the buffer.
         void setBuffer(BasicStreamBuffer<CharT>* sb)
         { 
             _buffer = sb; 
@@ -105,17 +108,22 @@ class BasicOStream : public std::basic_ostream<CharT, TraitsT>
         typedef typename TraitsT::off_type off_type;
 
     public:
+        //! @brief Constructor.
         explicit BasicOStream(BasicStreamBuffer<CharT>* sb = 0);
 
         //! @brief Destructor.
         ~BasicOStream()
         {}
 
+        /** @brief Write as much data as fits in buffer
+        */
         std::streamsize writesome(CharT* buffer, std::streamsize n);
     
+        //! @brief Returns the buffer.
         BasicStreamBuffer<CharT>* buffer()
         { return _buffer; }
 
+        //! @brief Sets the buffer.
         void setBuffer(BasicStreamBuffer<CharT>* sb)
         { 
             _buffer = sb; 
@@ -140,25 +148,30 @@ class BasicIOStream : public std::basic_iostream<CharT, TraitsT>
         typedef typename TraitsT::off_type off_type;
 
     public:
+        //! @brief Constructor.
         explicit BasicIOStream(BasicStreamBuffer<CharT>* sb = 0);
 
         //! @brief Destructor.
         ~BasicIOStream()
         {}
 
-        //! @brief Peeks bytes in the stream buffer.
-        /**
+        /** @brief Peeks bytes in the stream buffer.
+        
             The number of bytes that can be peeked depends on the current
             stream buffer get area and maybe less than requested,
             similar to istream::readsome().
         */
         std::streamsize peeksome(CharT* buffer, std::streamsize n);
     
+        /** @brief Write as much data as fits in buffer
+        */
         std::streamsize writesome(CharT* buffer, std::streamsize n);
     
+        //! @brief Returns the buffer.
         BasicStreamBuffer<CharT>* buffer()
         { return _buffer; }
 
+        //! @brief Sets the buffer.
         void setBuffer(BasicStreamBuffer<CharT>* sb)
         { 
             _buffer = sb; 

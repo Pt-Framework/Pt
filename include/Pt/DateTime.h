@@ -49,9 +49,13 @@ PT_API DateTime dateTimeFromString(const std::string& s);
 class DateTime
 {
     public:
+        /** @brief Default Constructor.
+        */
         DateTime()
         { }
 
+        /** @brief Construct to date and time.
+        */
         DateTime(int y, unsigned mon, unsigned d,
                  unsigned h = 0, unsigned min = 0, 
                  unsigned s = 0, unsigned ms = 0)
@@ -59,34 +63,54 @@ class DateTime
         , _time(h, min, s, ms)
         { }
 
+        /** @brief Copy Constructor.
+        */
         DateTime(const DateTime& dateTime)
         : _date( dateTime.date() )
         , _time( dateTime.time() )
         { }
 
+        /** @brief Assignment operator.
+        */
         DateTime& operator=(const DateTime& dateTime);
 
+        /** @brief Sets the date and time.
+        */
         void set(int year, unsigned month, unsigned day,
                  unsigned hour = 0, unsigned min = 0, unsigned sec = 0, unsigned msec = 0);
 
+        /** @brief Gets the date and time.
+        */
         void get(int& year, unsigned& month, unsigned& day,
                  unsigned& hour, unsigned& min, unsigned& sec, unsigned& msec) const;
 
+        /** @brief Gets the date.
+        */
         const Date& date() const
         { return _date; }
 
+        /** @brief Gets the date.
+        */
         Date& date()
         { return _date; }
 
+        /** @brief Sets the date.
+        */
         DateTime& setDate(const Date& dt)
         { _date = dt; return *this; }
 
+        /** @brief Gets the time.
+        */
         const Time& time() const
         { return _time; }
 
+        /** @brief Gets the time.
+        */
         Time& time()
         { return _time; }
 
+        /** @brief Sets the time.
+        */
         DateTime& setTime(const Time& t)
         { _time = t; return *this; }
 
@@ -125,9 +149,13 @@ class DateTime
         unsigned msec() const
         { return time().msec(); }
 
+        /** \brief Returns the date and time in ISO-format
+        */
         std::string toIsoString() const
         { return dateTimeToString(*this); }
 
+        /** \brief Interprets a string as a date and time in ISO-format
+        */
         static DateTime fromIsoString(const std::string& s)
         { return dateTimeFromString(s); }
 
@@ -175,10 +203,12 @@ class DateTime
             return *this;
         }
 
+        //! @brief Returns true if values are a valid date and time 
         static bool isValid(int year, unsigned month, unsigned day,
                             unsigned hour, unsigned minute, unsigned second, unsigned msec);
 
     private:
+        //! @internal
         DateTime(unsigned jd)
         : _date(jd)
         {}
@@ -189,12 +219,22 @@ class DateTime
 };
 
 
+/** @brief Deserialize a %DateTime.
+
+    @related DateTime
+*/
 PT_API void operator >>=(const SerializationInfo& si, DateTime& dt);
 
+/** @brief Serialize a %DateTime.
 
+    @related DateTime
+*/
 PT_API void operator <<=(SerializationInfo& si, const DateTime& dt);
 
+/** @brief Add a timespan.
 
+    @related DateTime
+*/
 inline DateTime operator+(const DateTime& dt, const Timespan& ts)
 {
     DateTime tmp = dt;
@@ -202,7 +242,10 @@ inline DateTime operator+(const DateTime& dt, const Timespan& ts)
     return tmp;
 }
 
+/** @brief Subtract two DateTimes.
 
+    @related DateTime
+*/
 inline Timespan operator-(const DateTime& first, const DateTime& second)
 {
     Pt::int64_t dayDiff      = Pt::int64_t( first.date().julian() ) -
@@ -216,7 +259,10 @@ inline Timespan operator-(const DateTime& first, const DateTime& second)
     return Timespan(result);
 }
 
+/** @brief Subtract a timespan.
 
+    @related DateTime
+*/
 inline DateTime operator-(const DateTime& dt, const Timespan& ts)
 {
     DateTime tmp = dt;
@@ -224,7 +270,10 @@ inline DateTime operator-(const DateTime& dt, const Timespan& ts)
     return tmp;
 }
 
+/** @brief Less-than comparison operator.
 
+    @related DateTime
+*/
 inline bool operator< (const DateTime& a, const DateTime& b)
 {
     return a.date() < b.date()
@@ -232,6 +281,10 @@ inline bool operator< (const DateTime& a, const DateTime& b)
           && a.time() < b.time());
 }
 
+/** @brief Less-than-equal comparison operator.
+
+    @related DateTime
+*/
 inline bool operator<= (const DateTime& a, const DateTime& b)
 {
     return a.date() < b.date()
@@ -239,6 +292,10 @@ inline bool operator<= (const DateTime& a, const DateTime& b)
           && a.time() <= b.time());
 }
 
+/** @brief Greater-than comparison operator.
+
+    @related DateTime
+*/
 inline bool operator> (const DateTime& a, const DateTime& b)
 {
     return a.date() > b.date()
@@ -246,6 +303,10 @@ inline bool operator> (const DateTime& a, const DateTime& b)
           && a.time() > b.time());
 }
 
+/** @brief Greater-than-equal comparison operator.
+
+    @related DateTime
+*/
 inline bool operator>= (const DateTime& a, const DateTime& b)
 {
     return a.date() > b.date()
@@ -253,12 +314,19 @@ inline bool operator>= (const DateTime& a, const DateTime& b)
           && a.time() >= b.time());
 }
 
+/** @brief Returns true if equal.
 
+    @related DateTime
+*/
 inline bool operator==(const DateTime& a, const DateTime& b)
 {
     return a.date() == b.date() && a.time() == b.time();
 }
 
+/** @brief Returns true if not equal.
+
+    @related DateTime
+*/
 inline bool operator!=(const DateTime& a, const DateTime& b)
 {
     return a.date() != b.date() || a.time() != b.time();

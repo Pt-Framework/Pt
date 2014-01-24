@@ -50,6 +50,7 @@ class PT_API MemoryPool : public NonCopyable
     static const Record RecordSize = sizeof(Record);
     static const Record InvalidIndex = std::size_t(-1);
 
+    //! @internal
     class Block
     {
             Record* block;
@@ -122,11 +123,13 @@ class PT_API MemoryPool : public NonCopyable
     };
 
     public:
+        //! @brief Construct with element size and maximum page size.
         MemoryPool(std::size_t elemSize, std::size_t maxPageSize = 8192);
 
         //! @brief Destructor.
         ~MemoryPool();
         
+        //! @brief Allocates memory.
         void* allocate()
         {
             if( _freelist.empty() )
@@ -148,6 +151,7 @@ class PT_API MemoryPool : public NonCopyable
             return retval;
         }
         
+        //! @brief deallocates memory.
         void deallocate(void* ptr)
         {
             if( ! ptr )
@@ -186,10 +190,13 @@ class PT_API PoolAllocator : public Allocator
                            , protected NonCopyable
 {
     public:
+        //! @brief Constructor.
         PoolAllocator(std::size_t maxElemSize, std::size_t step = 16, std::size_t maxPagesize = 8192);
         
+        //! @brief Destructor.
         ~PoolAllocator();
 
+        // inherit docs
         void* allocate(std::size_t size)
         {
             if (size > _maxObjectSize || 0 == size)
@@ -204,6 +211,7 @@ class PT_API PoolAllocator : public Allocator
             return pool->allocate();
         }
         
+        // inherit docs
         void deallocate(void* p, std::size_t size)
         {
             if (size > _maxObjectSize || NULL == p)

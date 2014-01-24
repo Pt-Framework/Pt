@@ -72,6 +72,8 @@ namespace Unit {
             */
             virtual ~Application();
 
+            /** @brief Returns the instance.
+            */
             static Application& instance();
 
             /** @brief Find a test by name

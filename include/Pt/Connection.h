@@ -90,28 +90,38 @@ class ConnectionData
 class PT_API Connection
 {
     public:
+        //! @brief Default Constructor.
         Connection();
 
+        //! @brief Construct with sender and slot.
         Connection(Connectable& sender, Slot* slot);
 
+        //! @brief Copy Constructor.
         Connection(const Connection& connection);
 
+        //! @brief Destructor.
         ~Connection();
 
+        //! @brief Returns true if not closed.
         bool isValid() const
         { return _data && _data->isValid(); }
 
+        //! @brief Returns the sender.
         const Connectable* sender() const
         { return _data ? _data->sender() : 0; }
 
+        //! @brief Returns the slot.
         const Slot* slot() const
         { return _data ? _data->slot() : 0; }
 
+        //! @brief Returns true if closed.
         bool operator!() const
         { return this->isValid() == false; }
 
+        //! @brief Closes the connection.
         void close();
 
+        //! @brief Assignment operator.
         Connection& operator=(const Connection& connection);
 
         //! @internal @brief Only for std::list::remove.

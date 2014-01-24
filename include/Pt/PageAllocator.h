@@ -45,6 +45,7 @@ class PT_API PageAllocator : public Pt::Allocator
                            , protected NonCopyable
 {
     public:
+        //! @internal
         class Page
         {              
             public:
@@ -73,16 +74,20 @@ class PT_API PageAllocator : public Pt::Allocator
         enum { MinChunkSize = 4096 };
 
     public:
+        //! @brief Construct with minimum chunk size.
         PageAllocator(std::size_t size = MinChunkSize);
 
         //! @brief Destructor.
         ~PageAllocator();
 
+        // inherit docs
         void* allocate( std::size_t size );
 
+        // inherit docs
         void deallocate( void* p, std::size_t size );
 
     private:
+        //! @internal
         void expandStorage( std::size_t size );
 
     private:

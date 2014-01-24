@@ -189,15 +189,18 @@ class UdpSocketTest : public Pt::Unit::TestSuite
 
         void Multicast()
         {
-            Pt::Net::Endpoint ep("224.0.1.1", 8000);
-
             _receiver->setActive(*_loop);
             _receiver->bound() += Pt::slot(*this, &UdpSocketTest::onMulticastBind);
             _receiver->inputReady() += Pt::slot(*this, &UdpSocketTest::onMulticastInput);
-            _receiver->beginBind( Pt::Net::Endpoint::ip4Any(8000) );
 
+            //Pt::Net::Endpoint ep2("127.0.0.1", 8000);
+            //Pt::Net::Endpoint ep2("149.236.138.158", 8000);
+            Pt::Net::Endpoint ep2 = Pt::Net::Endpoint::ip4Any(8000);
+            _receiver->beginBind(ep2);
+
+            Pt::Net::Endpoint epMCast("224.0.1.1", 8000);
             _sender->setActive(*_loop);
-            _sender->setTarget(ep);
+            _sender->setTarget(epMCast);
             _sender->outputReady() += Pt::slot(*this, &UdpSocketTest::onMulticastOutput);
             
             _loop->run();

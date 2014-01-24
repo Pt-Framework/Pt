@@ -137,7 +137,7 @@ namespace Pt {
     inline int8_t swab(int8_t value)
     { return value; }
 
-    /** @brief Stub function for byteorder conversiong.
+    /** @brief Stub function for byteorder conversion.
 
         @ingroup CoreTypes
     */

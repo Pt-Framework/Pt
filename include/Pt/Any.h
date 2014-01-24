@@ -207,7 +207,15 @@ class Any
             _value = new(static_cast<void*>(_data)) BasicRefValue<T>(type);
         }
 
-        explicit Any(void* type, const std::type_info& ti)
+        /** @brief Construct with reference.
+
+            Constructs the %Any from a pointer to an arbitrary type. The
+            constructed %Any will not make a copy, but only keep a shallow
+            pointer. It is the resposibility of the caller to make sure
+            the type pointed to exists longer than the created %Any. The 
+            type information @a ti must match the type pointed to by @a type.
+        */
+        Any(void* type, const std::type_info& ti)
         : _value(0)
         {
             // storage is always large enough for RefValue
@@ -291,6 +299,7 @@ class Any
         */
         Any& swap(Any& other);
 
+        //! @brief Returns true if %Any contains a weak reference.
         inline bool isRef() const
         { return _value && _value->isRef(); }
 

@@ -74,6 +74,8 @@ namespace Unit {
             */
             virtual void run() = 0;
 
+            /** @brief Returns the name of the test
+            */
             const std::string& name() const;
 
             /** @brief Reports the start of a test
@@ -117,10 +119,16 @@ namespace Unit {
             */
             void reportMessage(const std::string& msg);
 
+            /** @brief Sets the parent test
+            */
             void setParent(Test* test);
 
+            /** @brief Returns the parent test
+            */
             Test* parent();
 
+            /** @brief Returns the parent test
+            */
             const Test* parent() const;
 
             /** @brief Add reporter for test events
@@ -131,6 +139,8 @@ namespace Unit {
             */
             void attachReporter(Reporter& r);
 
+            /** @brief Removes a reporter
+            */
             void detachReporter(Reporter& r);
 
         protected:

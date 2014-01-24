@@ -42,6 +42,7 @@ namespace Pt {
 class FixupInfo
 {
     public:
+        //! @internal
         typedef void (*FixupHandler)(void* fixme,
                                      void* target,
                                      const std::type_info& targetType,
@@ -101,7 +102,7 @@ class FixupInfo
         unsigned _mid;
 };
 
-
+//! @internal
 template <typename T>
 struct FixupThunk
 {

@@ -35,34 +35,35 @@ namespace Pt {
 
 namespace Unit {
 
-    template <class TestT>
-    /** @brief Registers tests to an application
+/** @brief Registers tests to an application
 
-        Tests can be registered easily with the RegisterTest<> class
-        template to an Unit::Application at program initialisation.
-        A typical example looks like this:
+    Tests can be registered easily with the RegisterTest<> class
+    template to an Unit::Application at program initialisation.
+    A typical example looks like this:
 
-        @code
-            class MyTest : public Unit::TestCase
-            { ... };
+    @code
+        class MyTest : public Unit::TestCase
+        { ... };
 
-            RegisterTest<MyTest> _registerMyTest;
-        @endcode
+        RegisterTest<MyTest> _registerMyTest;
+    @endcode
 
-        The constructor of the RegisterTest class template will
-        register an instance of its template parameter to the
-        application.
+    The constructor of the RegisterTest class template will
+    register an instance of its template parameter to the
+    application.
 
-        @ingroup unittest
-    */
-    struct RegisterTest
+    @ingroup unittest
+*/
+template <class TestT>
+struct RegisterTest
+{
+    //! @brief Constructor.
+    RegisterTest()
     {
-        RegisterTest()
-        {
-            static TestT test;
-            Application::tests().push_back(&test);
-        }
-    };
+        static TestT test;
+        Application::tests().push_back(&test);
+    }
+};
 
 } // namespace Unit
 

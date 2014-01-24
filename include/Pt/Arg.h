@@ -35,6 +35,7 @@
 
 namespace Pt {
 
+//! @internal
 class ArgBase
 {
     public:
@@ -49,6 +50,7 @@ class ArgBase
     protected:
         bool m_isset;
 
+        //! @internal
         static void removeArg(int& argc, char* argv[], int pos, int n)
         {
           for ( ; pos < argc - n; ++pos)
@@ -59,7 +61,7 @@ class ArgBase
         }
 };
 
-
+//! @internal
 template <typename T>
 class ArgBaseT : public ArgBase
 {
@@ -68,6 +70,7 @@ class ArgBaseT : public ArgBase
         : m_value(def)
         { }
 
+        //! @internal
         bool extract(const char* str, int& argc, char* argv[], int i, int n)
         {
             std::istringstream s(str);
@@ -91,7 +94,7 @@ class ArgBaseT : public ArgBase
        T m_value;
 };
 
-
+//! @internal
 template <>
 class ArgBaseT<const char*> : public ArgBase
 {
@@ -100,6 +103,7 @@ class ArgBaseT<const char*> : public ArgBase
         : m_value(def)
         { }
 
+        //! @internal
         bool extract(const char* str, int& argc, char* argv[], int i, int n)
         {
             m_value = str;
@@ -109,7 +113,7 @@ class ArgBaseT<const char*> : public ArgBase
         }
 
     public:
-        //! @brief Returns the extracted value.
+        //! @internal
         const char* get() const
         { return m_value; }
 
@@ -117,7 +121,7 @@ class ArgBaseT<const char*> : public ArgBase
         const char* m_value;
 };
 
-
+//! @internal
 template <>
 class ArgBaseT<std::string> : public ArgBase
 {
@@ -126,6 +130,7 @@ class ArgBaseT<std::string> : public ArgBase
         : m_value(def)
         { }
 
+        //! @internal
         bool extract(const char* str, int& argc, char* argv[], int i, int n)
         {
             m_value = str;
@@ -135,7 +140,7 @@ class ArgBaseT<std::string> : public ArgBase
         }
 
     public:
-        //! @brief Returns the extracted value.
+        //! @internal
         const std::string& get() const
         { return m_value; }
 
@@ -221,6 +226,8 @@ class Arg : public ArgBaseT<T>
             this->m_isset = set(argc, argv, str);
         }
 
+        /** @brief Extracts the next parameter.
+        */
         Arg(int& argc, char* argv[])
         : ArgBaseT<T>(T())
         {
@@ -323,7 +330,7 @@ class Arg : public ArgBaseT<T>
         }
 };
 
-
+//! @internal
 template <>
 class Arg<bool> : public ArgBase
 {
@@ -429,9 +436,12 @@ class Arg<bool> : public ArgBase
         bool m_value;
 };
 
+/** @brief Write %Arg to an std::ostream.
 
+    @related Arg
+*/
 template <typename T>
-std::ostream& operator<<(std::ostream& out, const ArgBaseT<T>& arg)
+inline std::ostream& operator<<(std::ostream& out, const Arg<T>& arg)
 {
   return out << arg.get();
 }
