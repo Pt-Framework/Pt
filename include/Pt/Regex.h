@@ -48,8 +48,10 @@ class RegexSMatch;
 class PT_API InvalidRegex : public std::runtime_error
 {
     public:
+        //! @brief Construct with message.
         InvalidRegex(const char* msg);
 
+        //! @brief Destructor.
         ~InvalidRegex() throw()
         {}
 };
@@ -65,16 +67,22 @@ class PT_API InvalidRegex : public std::runtime_error
 class PT_API Regex
 {
     public:
+        //! @brief Default Constructor.
         Regex();
 
+        //! @brief Construct from regex string.
         explicit Regex(const Pt::Char* ex);
 
+        //! @brief Construct from regex string.
         explicit Regex(const Pt::String& ex);
 
+        //! @brief Copy constructor.
         Regex(const Regex& other);
 
+        //! @brief Destructor.
         ~Regex();
 
+        //! @brief Assignment operator.
         Regex& operator=(const Regex& other);
 
         /** @brief Matches the regular experession to a string.
@@ -85,10 +93,18 @@ class PT_API Regex
         */
         bool match(const Pt::String& str, RegexSMatch& sm) const;
 
+        //! @brief Returns true if string matches.
         bool match(const Pt::String& str) const;
 
+        /** @brief Matches the regular experession to a string.
+
+            The result @ sm holds pointers into the original string that was
+            matched and therefore should not be used after the original string
+            was destroyed.
+        */
         bool match(const Char* str, RegexSMatch& sm) const;
 
+        //! @brief Returns true if string matches.
         bool match(const Char* str) const;
 
     private:
@@ -105,26 +121,39 @@ class PT_API RegexSMatch
     friend class Regex;
 
     public:
+        //! @brief Default Constructor.
         RegexSMatch();
 
+        //! @brief Copy constructor.
         RegexSMatch(const RegexSMatch& other);
 
+        //! @brief Destructor.
         ~RegexSMatch();
 
+        //! @brief Assignment operator.
         RegexSMatch& operator=(const RegexSMatch& other);
 
+        //! @brief Returns true if no match.
         bool empty() const;
 
         /** @brief Returns the number of matches.
         */
         std::size_t size() const;
 
+        /** @brief Returns the max number of matches the implementation allows.
+        */
         std::size_t maxSize() const;
 
+        /** @brief Returns the position of the nth match.
+        */
         std::size_t position(std::size_t n = 0) const;
 
+        /** @brief Returns the size of the nth match.
+        */
         std::size_t length(std::size_t n = 0) const;
 
+        /** @brief Returns the nth match.
+        */
         Pt::String str(std::size_t n = 0) const;
 
         /** @brief Formats a string according to a format specifier.

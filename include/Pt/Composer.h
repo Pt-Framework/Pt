@@ -166,6 +166,11 @@ class Composer
         Composer* beginDictElement()
         { return onBeginDictElement(); }
 
+        /** @brief Begins composition of a dict key.
+        */
+        Composer* beginDictKey()
+        { return onBeginDictKey(); }
+
         /** @brief Begins composition of a dict value.
         */
         Composer* beginDictValue()
@@ -183,50 +188,71 @@ class Composer
         : _parent(0)
         {}
 
+        //! @brief Set type name.
         virtual void onSetTypeName(const char* type, std::size_t len)
         {}
 
+        //! @brief Set reference ID.
         virtual void onSetId(const char* id, std::size_t len) = 0;
 
+        //! @brief Compose a string value.
         virtual void onSetString(const Pt::Char* value, std::size_t len)
         { throw SerializationError("unexpected string value"); }
 
+        //! @brief Compose a binary value.
         virtual void onSetBinary(const char* data, std::size_t length)
         { throw SerializationError("unexpected binary value"); }
 
+        //! @brief Compose a character value.
         virtual void onSetChar(const Pt::Char& ch)
         { throw SerializationError("unexpected char value"); }
 
+        //! @brief Compose a bool value.
         virtual void onSetBool(bool value)
         { throw SerializationError("unexpected bool value"); }
 
+        //! @brief Compose a integer value.
         virtual void onSetInt(Pt::int64_t value)
         { throw SerializationError("unexpected integer value"); }
         
+        //! @brief Compose a unsigned integer value.
         virtual void onSetUInt(Pt::uint64_t value)
         { throw SerializationError("unexpected unsigned value"); }
 
+        //! @brief Compose a floating point value.
         virtual void onSetFloat(long double value)
         { throw SerializationError("unexpected float value"); }
 
+        //! @brief Compose a reference.
         virtual void onSetReference(const char* id, std::size_t len)
         { throw SerializationError("unexpected reference"); }
 
+        //! @brief Begin composition os a struct member.
         virtual Composer* onBeginMember(const char* name, std::size_t len)
         { throw SerializationError("unexpected struct"); }
 
+        /** @brief Begins composition of a sequence member.
+        */
         virtual Composer* onBeginElement()
         { throw SerializationError("unexpected sequence"); }
 
+        /** @brief Begins composition of a dict key.
+        */
         virtual Composer* onBeginDictElement()
         { throw SerializationError("unexpected dict"); }
 
+        /** @brief Begins composition of a dict key.
+        */
         virtual Composer* onBeginDictKey()
         { throw SerializationError("unexpected dict"); }
 
+        /** @brief Begins composition of a dict value.
+        */
         virtual Composer* onBeginDictValue()
         { throw SerializationError("unexpected dict"); }
 
+        /** @brief Finishes composition of a struct or sequence member.
+        */
         virtual Composer* onFinish()
         { return _parent; }
 
@@ -242,12 +268,14 @@ template <typename T>
 class BasicComposer : public Composer
 {
     public:
+        //! @brief Construct with context.
         BasicComposer(SerializationContext* context = 0)
         : _type(0)
         , _si(context)
         , _current(&_si)
         { }
 
+        //! @brief Begin composing a type.
         void begin(T& type)
         {
             if(_type)
@@ -260,11 +288,13 @@ class BasicComposer : public Composer
         }
 
     protected:
+        // inherit docs
         void onSetId(const char* id, std::size_t len)
         {
             _current->setId(id, len);
         }
 
+        // inherit docs
         void onSetTypeName(const char* type, std::size_t len)
         {
             _current->setTypeName(type, len);
@@ -275,41 +305,49 @@ class BasicComposer : public Composer
             _current->setString(value, len);
         }
 
+        // inherit docs
         void onSetBinary(const char* data, std::size_t length)
         {
             _current->setBinary(data, length);
         }
 
+        // inherit docs
         void onSetChar(const Pt::Char& ch)
         {
             _current->setChar(ch);
         }
 
+        // inherit docs
         void onSetBool(bool value)
         {
             _current->setBool(value);
         }
 
+        // inherit docs
         void onSetInt(Pt::int64_t value)
         {
             _current->setInt64(value);
         }
 
+        // inherit docs
         void onSetUInt(Pt::uint64_t value)
         {
             _current->setUInt64(value);
         }
 
+        // inherit docs
         void onSetFloat(long double value)
         {
             _current->setDouble(value);
         }
 
+        // inherit docs
         void onSetReference(const char* id, std::size_t len)
         {
            _current->setReference(id, len);
         }
 
+        // inherit docs
         Composer* onBeginMember(const char* name, std::size_t len)
         {
             SerializationInfo& child = _current->addMember(name, len);
@@ -317,6 +355,7 @@ class BasicComposer : public Composer
             return this;
         }
 
+        // inherit docs
         Composer* onBeginElement()
         {
             SerializationInfo& child = _current->addElement();
@@ -324,6 +363,7 @@ class BasicComposer : public Composer
             return this;
         }
 
+        // inherit docs
         Composer* onBeginDictElement()
         {
             SerializationInfo& child = _current->addDictElement();
@@ -331,6 +371,7 @@ class BasicComposer : public Composer
             return this;
         }
 
+        // inherit docs
         Composer* onBeginDictKey()
         {
             SerializationInfo& child = _current->addDictKey();
@@ -338,6 +379,7 @@ class BasicComposer : public Composer
             return this;
         }
 
+        // inherit docs
         Composer* onBeginDictValue()
         {
             SerializationInfo& child = _current->addDictValue();
@@ -345,6 +387,7 @@ class BasicComposer : public Composer
             return this;
         }
 
+        // inherit docs
         Composer* onFinish()
         {
             if( ! _current->parent() )

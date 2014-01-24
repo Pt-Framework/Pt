@@ -40,6 +40,7 @@ namespace Unit {
 class TestFixture
 {
     public:
+        //! @brief Destructor.
         virtual ~TestFixture()
         {}
 

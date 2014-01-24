@@ -44,18 +44,32 @@ namespace Pt {
 class PT_API Deserializer : private NonCopyable
 {
     public:
+        /** @brief Default constructor.
+        */
         Deserializer();
 
+        /** @brief Destructor.
+        */
         virtual ~Deserializer();
 
+        /** @brief Returns the used context.
+        */
         SerializationContext* context();
 
+        /** @brief Clears and resets the context.
+        */
         void reset(SerializationContext* context);
 
+        /** @brief Returns the used formatter to use.
+        */
         Formatter* formatter();
 
+        /** @brief Sets the formatter.
+        */
         void setFormatter(Formatter& formatter);
 
+        /** @brief Clears all content.
+        */
         void clear();
 
         /** @brief Starts parsing of an object.

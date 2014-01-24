@@ -43,20 +43,17 @@ class PT_UNIT_API TextProtocol : public Pt::Unit::TestProtocol
 {
     public:
 
-        /**
-         * Constructor.
-         *
-         * @param path initializes the component test protocol file name
-         */
+        /** @brief Construct with test protocol file name
+        */
         TextProtocol(const std::string& path)
         : _path(path)
         {
         }
 
-        /**
-         * Loads and parses the component test protocol file, then runs the tests on the specified suite.
-         *
-         * @param suite the test suite to run the tests on
+        /** @brief Runs the test
+            
+            Loads and parses the component test protocol file, then runs the
+            tests in the %TestSuite @a suite.
          */
         virtual void run(Pt::Unit::TestSuite& suite);
 

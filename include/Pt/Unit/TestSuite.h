@@ -43,7 +43,7 @@ namespace Unit {
 
     /** @brief Protocol and data driven testing
 
-        The TestSuite is used to implement protocol and data driven tests.
+        The %TestSuite is used to implement protocol and data driven tests.
         It inherits its ability to register methods and properties from
         %Reflectable. The implementor is supposed to write and register the
         required test methods on construction.
@@ -77,6 +77,7 @@ namespace Unit {
                                 , public TestFixture
     {
         private:
+            //! @internal
             class PT_UNIT_API Context : public TestContext
             {
                 public:
@@ -114,13 +115,13 @@ namespace Unit {
             */
             explicit TestSuite(const std::string& name, TestProtocol& protocol = TestSuite::defaultProtocol);
 
+            //! @brief Destructor
             ~TestSuite();
 
-            //! @brief TODO: rename setParameter
+            //! @brief Sets a test parameter
             virtual void setParameter(const std::string& name, const Pt::SerializationInfo& value);
 
             /** @brief Sets the protocol.
-                @param protocol Protocol for the test
             */
             void setProtocol(TestProtocol* protocol);
 
@@ -160,6 +161,7 @@ namespace Unit {
             */
             void runTest( const std::string& name, const SerializationInfo* args = 0, std::size_t argCount = 0);
 
+            //! @brief Runs all tests
             void runAll();
 
         protected:

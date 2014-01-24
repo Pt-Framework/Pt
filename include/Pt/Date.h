@@ -305,10 +305,16 @@ class Date
         unsigned _julian;
 };
 
+/** @brief Deserialize a date.
 
+    @related Date
+*/
 PT_API void operator >>=(const SerializationInfo& si, Date& date);
 
+/** @brief Serialize a date.
 
+    @related Date
+*/
 PT_API void operator <<=(SerializationInfo& si, const Date& date);
 
 
@@ -354,15 +360,24 @@ inline bool operator>(const Date& a, const Date& b)
 inline bool operator>=(const Date& a, const Date& b) 
 { return a.julian() >= b.julian(); }
 
+/** @brief Add days to a date.
 
+    @related Date
+*/
 inline Date operator+(const Date& d, int days)
 { return Date(d.julian() + days); }
 
+/** @brief Add days to a date.
 
+    @related Date
+*/
 inline Date operator+(int days, const Date& d)
 { return Date(days + d.julian()); }
 
+/** @brief Subtract two dates.
 
+    @related Date
+*/
 inline int operator-(const Date& a, const Date& b)
 { return a.julian() - b.julian(); }
 

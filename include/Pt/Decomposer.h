@@ -43,29 +43,42 @@ namespace Pt {
 class Decomposer
 {
     public:
+        //! @brief Destructor
         virtual ~Decomposer()
         {}
 
+        //! @brief Sets the parent
         void setParent(Decomposer* parent)
         { _parent = parent; }
 
+        //! @brief Returns the parent
         Decomposer* parent() const
         { return _parent; }
 
+        /** @brief Format the type completely
+        */
         void format(Formatter& formatter)
         { onFormat(formatter); }
 
+        /** @brief Begin formatting the type
+        */
         void beginFormat(Formatter& formatter)
         { onBeginFormat(formatter); }
 
+        /** @brief Advance formatting the type
+        */
         Decomposer* advanceFormat(Formatter& formatter)
         { return onAdvanceFormat(formatter); }
 
     protected:
+        /** @brief Default constructor.
+        */
         Decomposer()
         : _parent(0)
         {}
 
+        /** @brief Format the type completely
+        */
         virtual void onFormat(Formatter& formatter)
         {
             onBeginFormat(formatter);
@@ -74,8 +87,12 @@ class Decomposer
                 ;
         }
 
+        /** @brief Begin formatting the type
+        */
         virtual void onBeginFormat(Formatter& formatter) = 0;
 
+        /** @brief Advance formatting the type
+        */
         virtual Decomposer* onAdvanceFormat(Formatter& formatter) = 0;
 
     private:
@@ -90,12 +107,16 @@ template <typename T>
 class BasicDecomposer : public Decomposer
 {
     public:
+        /** @brief Construct with context.
+        */
         BasicDecomposer(SerializationContext* context = 0)
         : _type(0)
         , _si(context)
         , _current(0)
         { }
 
+        /** @brief Begin decomposing a type.
+        */
         void begin(const T& type, const char* name)
         {
             if(_type)
@@ -115,12 +136,15 @@ class BasicDecomposer : public Decomposer
             }
         }
 
+    protected:
+        // inherit docs
         void onFormat(Formatter& formatter)
         {
             _si << Pt::save() <<= *_type;
             _si.format(formatter);
         }
 
+        // inherit docs
         void onBeginFormat(Formatter& formatter)
         {
             _si << Pt::save() <<= *_type;
@@ -129,6 +153,7 @@ class BasicDecomposer : public Decomposer
             _it = _si.beginFormat(formatter);
         }
 
+        // inherit docs
         Decomposer* onAdvanceFormat(Formatter& formatter)
         {
             if( _it == _current->end() )

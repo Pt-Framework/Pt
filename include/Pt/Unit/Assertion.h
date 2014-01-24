@@ -72,6 +72,8 @@ namespace Unit {
             */
             Assertion(const std::string& what, const SourceInfo& si);
 
+            /** @brief Information where assertion failed.
+            */
             const Pt::SourceInfo& sourceInfo() const;
 
             const char* what() const  { return _what.c_str(); }

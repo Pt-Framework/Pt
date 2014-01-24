@@ -142,7 +142,7 @@
 /** @defgroup Serialization
 
     Data structures and types can be serialized to text or binary formats using
-    Pt's serialization. This is used within the framework to load and store
+    %Pt's serialization. This is used within the framework to load and store
     data or to implement remote procedure calls. It is extensible to work with
     all kinds of types, including STL containers, PODs (plain old data types),
     buitlin language types or custom data types. The framework separates the 

@@ -50,20 +50,13 @@ class Formatter
         { }
 
         /** @brief Formats a string value.
-
-            Serialization:
-                Surrogate: calls addString with typename set to actual object, like Pt::DateTime
-                Formatter: can be set up to format string values differently, depending on typename
-
-            Deserialization:
-                Parser: can be set up to to report special types as string
-                Surrogate: builds actual object like Pt::DateTime from string, in which
-                           case the typename is not string, but the format specific one
         */
         void addString(const std::string& name, const std::string& type,
                        const Pt::String& value, const std::string& id)
         { onAddString(name.c_str(), type.c_str(), value.c_str(), id.c_str()); }
 
+        /** @brief Formats a string value.
+        */
         void addString(const char* name, const char* type,
                        const Pt::Char* value, const char* id)
         { onAddString(name, type, value, id); }
@@ -74,6 +67,8 @@ class Formatter
                        const char* value, std::size_t length, const std::string& id)
         { onAddBinary(name.c_str(), type.c_str(), value, length, id.c_str()); }
 
+        /** @brief Formats a binary value.
+        */
         void addBinary(const char* name, const char* type,
                        const char* value, std::size_t length, const char* id)
         { onAddBinary(name, type, value, length, id); }
@@ -84,6 +79,8 @@ class Formatter
                      const std::string& id)
         { onAddBool(name.c_str(), value, id.c_str()); }
 
+        /** @brief Formats a boolean value.
+        */
         void addBool(const char* name, bool value,
                      const char* id)
         { onAddBool(name, value, id); }
@@ -94,6 +91,8 @@ class Formatter
                      const std::string& id)
         { onAddChar(name.c_str(), value, id.c_str()); }
 
+        /** @brief Formats a character value.
+        */
         void addChar(const char* name, const Pt::Char& value,
                      const char* id)
         { onAddChar(name, value, id); }
@@ -104,6 +103,8 @@ class Formatter
                      const std::string& id)
         { onAddInt8(name.c_str(), value, id.c_str()); }
 
+        /** @brief Formats a 8-bit signed integer value.
+        */
         void addInt8(const char* name, Pt::int8_t value,
                      const char* id)
         { onAddInt8(name, value, id); }
@@ -114,6 +115,8 @@ class Formatter
                       const std::string& id)
         { onAddInt16(name.c_str(), value, id.c_str()); }
 
+        /** @brief Formats a 16-bit signed integer value.
+        */
         void addInt16(const char* name, Pt::int16_t value,
                       const char* id)
         { onAddInt16(name, value, id); }
@@ -124,6 +127,8 @@ class Formatter
                       const std::string& id)
         { onAddInt32(name.c_str(), value, id.c_str()); }
 
+        /** @brief Formats a 32-bit signed integer value.
+        */
         void addInt32(const char* name, Pt::int32_t value,
                       const char* id)
         { onAddInt32(name, value, id); }
@@ -134,6 +139,8 @@ class Formatter
                       const std::string& id)
         { onAddInt64(name.c_str(), value, id.c_str()); }
 
+        /** @brief Formats a 64-bit signed integer value.
+        */
         void addInt64(const char* name, Pt::int64_t value,
                       const char* id)
         { onAddInt64(name, value, id); }
@@ -144,6 +151,8 @@ class Formatter
                       const std::string& id)
         { onAddUInt8(name.c_str(), value, id.c_str()); }
 
+        /** @brief Formats a 8-bit unsigned integer value.
+        */
         void addUInt8(const char* name, Pt::uint8_t value,
                       const char* id)
         { onAddUInt8(name, value, id); }
@@ -154,6 +163,8 @@ class Formatter
                        const std::string& id)
         { onAddUInt16(name.c_str(), value, id.c_str()); }
 
+        /** @brief Formats a 16-bit unsigned integer value.
+        */
         void addUInt16(const char* name, Pt::uint16_t value,
                        const char* id)
         { onAddUInt16(name, value, id); }
@@ -164,6 +175,8 @@ class Formatter
                        const std::string& id)
         { onAddUInt32(name.c_str(), value, id.c_str()); }
 
+        /** @brief Formats a 32-bit unsigned integer value.
+        */
         void addUInt32(const char* name, Pt::uint32_t value,
                        const char* id)
         { onAddUInt32(name, value, id); }
@@ -174,6 +187,8 @@ class Formatter
                        const std::string& id)
         { onAddUInt64(name.c_str(), value, id.c_str()); }
 
+        /** @brief Formats a 64-bit unsigned integer value.
+        */
         void addUInt64(const char* name, Pt::uint64_t value,
                        const char* id)
         { onAddUInt64(name, value, id); }
@@ -184,6 +199,8 @@ class Formatter
                       const std::string& id)
         { onAddFloat(name.c_str(), value, id.c_str()); }
 
+        /** @brief Formats a float value.
+        */
         void addFloat(const char* name, float value,
                       const char* id)
         { onAddFloat(name, value, id); }
@@ -194,6 +211,8 @@ class Formatter
                        const std::string& id)
         { onAddDouble(name.c_str(), value, id.c_str()); }
 
+        /** @brief Formats a double value.
+        */
         void addDouble(const char* name, double value,
                        const char* id)
         { onAddDouble(name, value, id); }
@@ -204,6 +223,8 @@ class Formatter
                            const std::string& id)
         { onAddLongDouble(name.c_str(), value, id.c_str()); }
 
+        /** @brief Formats a long double value.
+        */
         void addLongDouble(const char* name, long double value,
                            const char* id)
         { onAddLongDouble(name, value, id); }
@@ -213,6 +234,8 @@ class Formatter
         void addReference(const std::string& name, const std::string& refId)
         { onAddReference(name.c_str(), refId.c_str()); }
 
+        /** @brief Formats a reference.
+        */
         void addReference(const char* name, const char* refId)
         { onAddReference(name, refId); }
 
@@ -222,6 +245,8 @@ class Formatter
                          const std::string& id)
         { onBeginStruct(name.c_str(), type.c_str(), id.c_str()); }
 
+        /** @brief Formats the begin of a struct.
+        */
         void beginStruct(const char* name, const char* type,
                          const char* id)
         { onBeginStruct(name, type, id); }
@@ -231,6 +256,8 @@ class Formatter
         void beginMember(const std::string& name)
         { onBeginMember(name.c_str()); }
 
+        /** @brief Formats the begin of a struct member.
+        */
         void beginMember(const char* name)
         { onBeginMember(name); }
 
@@ -250,6 +277,8 @@ class Formatter
                            const std::string& id)
         { onBeginSequence(name.c_str(), type.c_str(), id.c_str()); }
 
+        /** @brief Formats the begin of an array.
+        */
         void beginSequence(const char* name, const char* type,
                            const char* id)
         { onBeginSequence(name, type, id); }
@@ -275,13 +304,19 @@ class Formatter
                            const std::string& id)
         { onBeginDict(name.c_str(), type.c_str(), id.c_str()); }
 
+        /** @brief Formats the begin of a dict.
+        */
         void beginDict(const char* name, const char* type,
                            const char* id)
         { onBeginDict(name, type, id); }
 
+        /** @brief Formats the begin of a dict element.
+        */
         void beginDictElement()
         { onBeginDictElement(); }
 
+        /** @brief Formats the end of a dict element.
+        */
         void finishDictElement()
         { onFinishDictElement(); }
 
@@ -324,93 +359,157 @@ class Formatter
         { onParse(); }
 
     protected:
+        /** @brief Formats a string value.
+        */
         virtual void onAddString(const char* name, const char* type,
                                  const Pt::Char* value, const char* id) = 0;
 
+        /** @brief Formats a binary value.
+        */
         virtual void onAddBinary(const char* name, const char* type,
                                  const char* value, std::size_t length, const char* id) = 0;
 
+        /** @brief Formats a bool value.
+        */
         virtual void onAddBool(const char* name, bool value,
                                const char* id) = 0;
 
+        /** @brief Formats a character value.
+        */
         virtual void onAddChar(const char* name, const Pt::Char& value,
                                const char* id) = 0;
 
+        /** @brief Formats a 8-bit integer.
+        */
         virtual void onAddInt8(const char* name, Pt::int8_t value,
                                const char* id) = 0;
 
+        /** @brief Formats a 16-bit integer.
+        */
         virtual void onAddInt16(const char* name, Pt::int16_t value,
                                 const char* id) = 0;
 
+        /** @brief Formats a 32-bit integer.
+        */
         virtual void onAddInt32(const char* name, Pt::int32_t value,
                                 const char* id) = 0;
 
+        /** @brief Formats a 64-bit integer.
+        */
         virtual void onAddInt64(const char* name, Pt::int64_t value,
                                 const char* id) = 0;
 
+        /** @brief Formats a 8-bit unsigned integer.
+        */
         virtual void onAddUInt8(const char* name, Pt::uint8_t value,
                                 const char* id) = 0;
 
+        /** @brief Formats a 16-bit unsigned integer.
+        */
         virtual void onAddUInt16(const char* name, Pt::uint16_t value,
                                  const char* id) = 0;
 
+        /** @brief Formats a 32-bit unsigned integer.
+        */
         virtual void onAddUInt32(const char* name, Pt::uint32_t value,
                                  const char* id) = 0;
 
+        /** @brief Formats a 64-bit unsigned integer.
+        */
         virtual void onAddUInt64(const char* name, Pt::uint64_t value,
                                  const char* id) = 0;
 
+        /** @brief Formats a float value.
+        */
         virtual void onAddFloat(const char* name, float value,
                                 const char* id) = 0;
 
+        /** @brief Formats a double value.
+        */
         virtual void onAddDouble(const char* name, double value,
                                  const char* id) = 0;
 
+        /** @brief Formats a long double value.
+        */
         virtual void onAddLongDouble(const char* name, long double value,
                                      const char* id) = 0;
 
+        /** @brief Formats a reference.
+        */
         virtual void onAddReference(const char* name, const char* refId) = 0;
 
+        /** @brief Formats the begin of a struct.
+        */
         virtual void onBeginStruct(const char* name, const char* type,
                                    const char* id) = 0;
 
+        /** @brief Formats the begin of a struct member.
+        */
         virtual void onBeginMember(const char* name) = 0;
 
+        /** @brief Formats the end of a struct member.
+        */
         virtual void onFinishMember() = 0;
 
+        /** @brief Formats the end of a struct.
+        */
         virtual void onFinishStruct() = 0;
 
+        /** @brief Formats the begin of a sequence.
+        */
         virtual void onBeginSequence(const char* name, const char* type,
                                      const char* id) = 0;
 
+        /** @brief Formats the begin of a sequence element.
+        */
         virtual void onBeginElement() = 0;
 
+        /** @brief Formats the end of a sequence element.
+        */
         virtual void onFinishElement() = 0;
 
+        /** @brief Formats the end of a sequence.
+        */
         virtual void onFinishSequence() = 0;
 
+        /** @brief Formats the begin of a dict.
+        */
         virtual void onBeginDict(const char* name, const char* type,
                                  const char* id)
         { onBeginSequence(name, type, id); }
 
+        /** @brief Formats the begin of a dict element.
+        */
         virtual void onBeginDictElement()
         { onBeginSequence("", "", ""); }
 
+        /** @brief Formats the begin of a dict key.
+        */
         virtual void onBeginDictKey()
         { onBeginElement(); }
 
+        /** @brief Formats the end of a dict key.
+        */
         virtual void onFinishDictKey()
         { onFinishElement(); }
 
+        /** @brief Formats the begin of a dict value.
+        */
         virtual void onBeginDictValue()
         {  onBeginElement();  }
 
+        /** @brief Formats the end of a dict value.
+        */
         virtual void onFinishDictValue()
         { onFinishElement(); }
 
+        /** @brief Formats the end of a dict element.
+        */
         virtual void onFinishDictElement()
         { onFinishSequence(); }
 
+        /** @brief Formats the end of a dict.
+        */
         virtual void onFinishDict()
         { onFinishSequence(); }
 
@@ -425,6 +524,8 @@ class Formatter
         virtual void onParse() = 0;
 
     protected:
+        /** @brief Default constructor.
+        */
         Formatter()
         {}
 };

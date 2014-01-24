@@ -39,10 +39,14 @@ template <typename T>
 class LiteralPtr
 {
     public:
+        /** @brief Construct from literal
+        */
         explicit LiteralPtr(const T* str)
         : _str(str)
         {}
 
+        /** @brief Returns the value
+        */
         const T* get() const
         { return _str; }
 
