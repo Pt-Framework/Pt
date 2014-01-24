@@ -126,6 +126,11 @@ class PT_NET_API UdpSocket : public System::IODevice
 
         /** @brief Begin bind to local endpoint.
 
+            Begins binding to the Endpoint @a ep. The %UdpSocket must be
+            attached to a event loop with setActive(). Once the binding has
+            completed, the signal bound() will be sent. In response, the
+            method endBind() has to be called to finish the bind operation.
+
             @throw System::AccessFailed if the host is not reachable
         */
         bool beginBind(const Endpoint& ep);

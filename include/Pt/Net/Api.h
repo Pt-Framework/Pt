@@ -45,6 +45,10 @@ namespace Pt {
 
 /** @namespace Pt::Net
     @brief Network and Socket Programming.
+
+    The networking module contains TCP and UDP client and server sockets,
+    with support for the IP4 and IP6 protocols. For UDP, unicast, broadcast
+    and multicast operation can be performed.
 */
 namespace Net {
 
