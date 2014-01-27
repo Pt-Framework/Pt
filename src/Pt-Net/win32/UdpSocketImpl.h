@@ -66,6 +66,8 @@ class UdpSocketImpl
 
         void bind(const Endpoint& addrinfo, const UdpSocketOptions& o);
 
+        void bindMulticast(const Endpoint& e, const UdpSocketOptions& opts);
+
         bool beginConnect(System::EventLoop& loop, const Endpoint& addrinfo, const UdpSocketOptions& o);
 
         bool runConnect(System::EventLoop& loop);
@@ -124,6 +126,7 @@ class UdpSocketImpl
         SOCKET           _fd;
         bool             _isConnected;
         bool             _isBound;
+        bool             _isBoundInterface;
         Endpoint         _peerAddr;
         sockaddr_storage _sendAddr;
         mutable sockaddr_storage _servaddr;

@@ -115,6 +115,14 @@ void UdpSocket::bind(const Endpoint& ep, const UdpSocketOptions& opts)
 }
 
 
+//void UdpSocket::bindMulticast(const Endpoint& ep)
+//{
+//    UdpSocketOptions opts;
+//    _impl->bindMulticast(ep, opts);
+//    this->setEof(false);
+//}
+
+
 bool UdpSocket::beginBind(const Endpoint& ep)
 {
     UdpSocketOptions opts;

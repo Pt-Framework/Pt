@@ -124,6 +124,8 @@ class PT_NET_API UdpSocket : public System::IODevice
         */
         void bind(const Endpoint& ep, const UdpSocketOptions& o);
 
+        //void bindMulticast(const Endpoint& e);
+
         /** @brief Begin bind to local endpoint.
 
             Begins binding to the Endpoint @a ep. The %UdpSocket must be
@@ -140,6 +142,8 @@ class PT_NET_API UdpSocket : public System::IODevice
             @throw System::AccessFailed if the host is not reachable
         */
         bool beginBind(const Endpoint& ep, const UdpSocketOptions& o);
+
+        //bool beginBindMulticast(const Endpoint& iface, const UdpSocketOptions& o);
 
         /** @brief end bind to local endpoint.
 
