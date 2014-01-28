@@ -37,6 +37,7 @@ namespace Pt {
 
 class SerializationInfo;
 
+//! @internal
 class SerializationSurrogate
 {
     public:
@@ -59,7 +60,7 @@ class SerializationSurrogate
         std::string _typeName;
 };
 
-
+//! @internal
 template <typename T>
 class BasicSerializationSurrogate : public SerializationSurrogate
 {

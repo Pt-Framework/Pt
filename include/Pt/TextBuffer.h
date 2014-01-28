@@ -57,15 +57,14 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         typedef MBState state_type;
 
     public:
-        /** @brief Creates a BasicTextBuffer using the given stream buffer and codec.
+        /** @brief Construct with external device and codec.
 
-            The given stream buffer @a target is used as external device,
-            buffered by this Text buffer and all input from and output to
-            the external device is converted using the codec @a codec.
+            The given stream buffer @a target is used as external device.
+            All input from and output to the external device is converted
+            using the codec @a codec.
 
-            Note: The Codec object which is passed as pointer will be
-            managed by this class and also be deleted by this class
-            on destruction.
+            The codec object which is passed as pointer will be managed by
+            this class and deleted if its reference count reaches 0.
         */
         explicit BasicTextBuffer(std::basic_ios<extern_type>& target, CodecType* codec = 0)
         : _ebufsize(0)
@@ -76,7 +75,15 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             this->setg(0, 0, 0);
             this->setp(0, 0);
         }
+        
+        /** @brief Construct with codec.
 
+            All input from and output to the external device is converted
+            using the codec @a codec.
+
+            The codec object which is passed as pointer will be managed by
+            this class and deleted if its reference count reaches 0.
+        */
         explicit BasicTextBuffer(CodecType* codec = 0)
         : _ebufsize(0)
         , _codec(codec)
@@ -86,7 +93,9 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             this->setg(0, 0, 0);
             this->setp(0, 0);
         }
-
+        
+        /** @brief Destructor.
+        */
         ~BasicTextBuffer() throw()
         {
             // if _codecRefs is greater than 0, the codec might have been
@@ -97,13 +106,15 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
                 delete _codec;
         }
 
+        /** @brief Returns the used codec or a nullptr.
+        */
         CodecType* codec()
         { return _codec; }
 
         /** @brief Sets the text codec.
-        
-            The caller must ensure that the codec does not run out of scope
-            before the text buffer is destructed. 
+            
+            The codec object which is passed as pointer will be managed by
+            this class and deleted if its reference count reaches 0.
         */
         void setCodec(CodecType* codec)
         {           
@@ -116,11 +127,15 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             _codecRefs = codec ? codec->refs() : 0;
         }
 
+        /** @brief Attach to external device.
+        */
         void attach(std::basic_ios<extern_type>& target)
         {
             _target = &target;
         }
-
+        
+        /** @brief Detach from external device.
+        */
         void detach()
         {
             _target = 0;
@@ -148,6 +163,8 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             attach(target);
         }
 
+        /** @brief Discards the buffer.
+        */
         void discard()
         {
             _ebufsize = 0;
@@ -157,6 +174,8 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             _state = state_type();
         }
 
+        /** @brief Import data from the external device.
+        */
         void import(std::streamsize size = 0)
         {
             if( this->pptr() )
@@ -209,6 +228,8 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
                 throw ConversionError("character encoding");
         }
 
+        /** @brief Import data from a buffer.
+        */
         std::streamsize import(const extern_type* buf, std::streamsize size)
         {
             if( this->pptr() )
@@ -244,6 +265,8 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             return size;
         }
 
+        /** @brief Terminate the character sequence.
+        */
         int terminate()
         {
             if( this->pptr() )
@@ -386,6 +409,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         }
 
     private:
+        //! @internal
         CodecResult decode()
         {
             const extern_type* fromBegin = _ebuf;
@@ -429,12 +453,14 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             return r;
         }
 
+        //! @internal
         template <typename T>
         void copyChars(T* s1, const T* s2, std::size_t n)
         {
             std::char_traits<T>::copy(s1, s2, n);
         }
 
+        //! @internal
         template <typename A, typename B>
         void copyChars(A* s1, const B* s2, std::size_t n)
         {
@@ -446,6 +472,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             }
         }
 
+        //! @internal
         template <typename A>
         void copyChars(A* s1, const Char* s2, std::size_t n)
         {
@@ -475,6 +502,13 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
 
 /** @class Pt::TextBuffer TextBuffer.h "Pt/TextBuffer.h"
     @brief Converts character sequences with different encodings.
+
+    This class is a typedef of the BasicTextBuffer template for
+    the unicode character type Pt::Char:
+
+    @code
+    typedef BasicTextBuffer<Pt::Char, char> TextBuffer;
+    @endcode
 
     @ingroup Unicode
 */

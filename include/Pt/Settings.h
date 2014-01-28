@@ -81,6 +81,8 @@ class PT_API Settings : private SerializationInfo
                     return *this;
                 }
 
+                /** @brief Gets the value.
+                */
                 template <typename T>
                 bool get(T& value) const
                 {
@@ -91,6 +93,8 @@ class PT_API Settings : private SerializationInfo
                     return true;
                 }
 
+                /** @brief Sets the value.
+                */
                 template <typename T>
                 void set(const T& value)
                 {
@@ -101,6 +105,8 @@ class PT_API Settings : private SerializationInfo
                     }
                 }
 
+                /** @brief Adds a sub entry.
+                */
                 Entry add(const std::string& name)
                 {
                     if( ! _si )
@@ -110,6 +116,8 @@ class PT_API Settings : private SerializationInfo
                     return Entry(&si);
                 }
 
+                /** @brief Adds a sub entry.
+                */
                 Entry add(const char* name)
                 {
                     if( ! _si )
@@ -119,18 +127,24 @@ class PT_API Settings : private SerializationInfo
                     return Entry(&si);
                 }
 
+                /** @brief Removes a sub entry.
+                */
                 void remove(const std::string& name)
                 {
                     if( _si )
                         _si->removeMember(name);
                 }
                 
+                /** @brief Removes a sub entry.
+                */
                 void remove(const char* name)
                 {
                     if( _si )
                         _si->removeMember(name);
                 }
 
+                /** @brief Begin of sub entries.
+                */
                 Entry begin() const
                 {
                     if( ! _si )
@@ -144,11 +158,15 @@ class PT_API Settings : private SerializationInfo
                     return Entry(&si);
                 }
 
+                /** @brief End of sub entries.
+                */
                 Entry end() const
                 {
                     return Entry();
                 }
 
+                /** @brief Returns a sub entry.
+                */
                 Entry entry(const std::string& name) const
                 {
                     if( ! _si )
@@ -158,6 +176,8 @@ class PT_API Settings : private SerializationInfo
                     return Entry(si);
                 }
                 
+                /** @brief Returns a sub entry.
+                */
                 Entry entry(const char* name) const
                 {
                     if( ! _si )
@@ -167,37 +187,55 @@ class PT_API Settings : private SerializationInfo
                     return Entry(si);
                 }
                 
+                /** @brief Returns a sub entry.
+                */
                 Entry operator[] (const std::string& name) const
                 {
                     return this->entry(name);
                 }
 
+                /** @brief Returns a sub entry.
+                */
                 Entry operator[] (const char* name) const
                 {
                     return this->entry(name);
                 }
 
+                /** @brief Returns the entry name.
+                */
                 const char* name() const
                 { return _si->name(); }
 
+                /** @brief Allows using the entry like an iterator.
+                */
                 Entry& operator*()
                 { return *this; }
 
+                /** @brief Allows using the entry like an iterator.
+                */
                 Entry* operator->()
                 { return this; }
 
+                /** @brief Allows using the entry like an iterator.
+                */
                 Entry& operator++()
                 {
                     _si = _si->sibling();
                     return *this;
                 }
 
+                /** @brief Allows using the entry like an iterator.
+                */
                 bool operator!=(const Entry& other) const
                 { return _si != other._si; }
 
+                /** @brief Allows using the entry like an iterator.
+                */
                 bool operator==(const Entry& other) const
                 { return _si == other._si; }
 
+                /** @brief Returns true if entry is invalid.
+                */
                 bool operator!() const
                 { return _si == 0; }
 
@@ -214,6 +252,8 @@ class PT_API Settings : private SerializationInfo
                 : _si(si)
                 {}
 
+                /** @brief Gets the value.
+                */
                 template <typename T>
                 bool get(T& value) const
                 {
@@ -224,6 +264,8 @@ class PT_API Settings : private SerializationInfo
                     return true;
                 }
 
+                /** @brief Begin of sub entries.
+                */
                 ConstEntry begin() const
                 {
                     if( ! _si )
@@ -237,11 +279,15 @@ class PT_API Settings : private SerializationInfo
                     return ConstEntry(&si);
                 }
 
+                /** @brief End of sub entries.
+                */
                 ConstEntry end() const
                 {
                     return ConstEntry();
                 }
 
+                /** @brief Returns a sub entry.
+                */
                 ConstEntry entry(const std::string& name) const
                 {
                     if( ! _si )
@@ -251,6 +297,8 @@ class PT_API Settings : private SerializationInfo
                     return ConstEntry(si);
                 }
 
+                /** @brief Returns a sub entry.
+                */
                 ConstEntry entry(const char* name) const
                 {
                     if( ! _si )
@@ -260,37 +308,55 @@ class PT_API Settings : private SerializationInfo
                     return ConstEntry(si);
                 }
 
+                /** @brief Returns a sub entry.
+                */
                 ConstEntry operator[] (const std::string& name) const
                 {
                     return this->entry(name);
                 }
 
+                /** @brief Returns a sub entry.
+                */
                 ConstEntry operator[] (const char* name) const
                 {
                     return this->entry(name);
                 }
 
+                /** @brief Returns the entry name.
+                */
                 const char* name() const
                 { return _si->name(); }
 
+                /** @brief Allows using the entry like an iterator.
+                */
                 const ConstEntry& operator*() const
                 { return *this; }
 
+                /** @brief Allows using the entry like an iterator.
+                */
                 const ConstEntry* operator->() const
                 { return this; }
 
+                /** @brief Allows using the entry like an iterator.
+                */
                 ConstEntry& operator++()
                 {
                     _si = _si->sibling();
                     return *this;
                 }
 
+                /** @brief Allows using the entry like an iterator.
+                */
                 bool operator!=(const ConstEntry& other) const
                 { return _si != other._si; }
 
+                /** @brief Allows using the entry like an iterator.
+                */
                 bool operator==(const ConstEntry& other) const
                 { return _si == other._si; }
 
+                /** @brief Returns true if entry is invalid.
+                */
                 bool operator!() const
                 { return _si == 0; }
 
@@ -299,67 +365,101 @@ class PT_API Settings : private SerializationInfo
         };
 
     public:
+        /** @brief Default constructor.
+        */
         Settings();
 
+        /** @brief Begin of entries.
+        */
         ConstEntry begin() const
         { return root().begin(); }
 
+        /** @brief End of entries.
+        */
         ConstEntry end() const
         { return root().end(); }
 
+        /** @brief Returns the root entry.
+        */
         ConstEntry root() const
         { return ConstEntry(this); }
 
+        /** @brief Begin of entries.
+        */
         Entry begin()
         { return root().begin(); }
 
+        /** @brief End of entries.
+        */
         Entry end()
         { return root().end(); }
 
+        /** @brief Returns the root entry.
+        */
         Entry root()
         { return Entry(this); }
 
+        /** @brief Loads settings from a input stream.
+        */
         void load( std::basic_istream<Pt::Char>& is );
 
+        /** @brief Saves settings to a output stream.
+        */
         void save( std::basic_ostream<Pt::Char>& os ) const;
 
+        /** @brief Returns a top level entry.
+        */
         ConstEntry entry(const std::string& name) const
         {
             return root().entry(name);
         }
 
+        /** @brief Returns a top level entry.
+        */
         ConstEntry entry(const char* name) const
         {
             return root().entry(name);
         }
 
+        /** @brief Returns a top level entry.
+        */
         ConstEntry operator[] (const std::string& name) const
         {
             return this->entry(name);
         }
 
+        /** @brief Returns a top level entry.
+        */
         ConstEntry operator[] (const char* name) const
         {
             return this->entry(name);
         }
 
+        /** @brief Returns a top level entry.
+        */
         Entry entry(const std::string& name)
         {
             SerializationInfo* si = this->findMember(name);
             return Entry(si);
         }
 
+        /** @brief Returns a top level entry.
+        */
         Entry entry(const char* name)
         {
             SerializationInfo* si = this->findMember(name);
             return Entry(si);
         }
 
+        /** @brief Returns a top level entry.
+        */
         Entry operator[] (const std::string& name)
         {
             return this->entry(name);
         }
 
+        /** @brief Returns a top level entry.
+        */
         Entry operator[] (const char* name)
         {
             return this->entry(name);

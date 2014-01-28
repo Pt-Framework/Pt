@@ -33,9 +33,9 @@
 
 namespace Pt {
 
-/** @brief Protects derived classes from being copied
+/** @brief Protects derived classes from being copied.
   
-    The NonCopyable class has a private copy constructor and assignment
+    The %NonCopyable class has a private copy constructor and assignment
     operator, therefore derived classes cannot be copied. This class
     is meant to be used as a base class as shown in the code example
     below.
@@ -47,28 +47,28 @@ namespace Pt {
     };
     @endcode
   
-    Trying to copy a NonCopyable object will cause a compile-time error.
+    Trying to copy a %NonCopyable object will cause a compile-time error.
 
     @ingroup CoreTypes
 */
 class NonCopyable {
     public:
-        /** @brief Default constructor
+        /** @brief Default constructor.
         */
         NonCopyable()
         { }
 
-        /** @brief Destructor
+        /** @brief Destructor.
         */
         ~NonCopyable()
         { }
 
     private:
-        /** @brief Declared as private to prevent usage of copy constructor
+        /** @brief No copy constructor
         */
         NonCopyable(const NonCopyable&);
 
-        /**  @brief Declared as private to prevent usage of assignment operator
+        /** @brief No assignment operator
         */
         NonCopyable& operator=(const NonCopyable&);
 };

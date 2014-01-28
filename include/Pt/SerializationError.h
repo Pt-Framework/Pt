@@ -45,10 +45,12 @@ namespace Pt {
 class PT_API SerializationError : public std::runtime_error
 {
     public:
-        /** @brief Construct with message and source-info
+        /** @brief Construct with message.
         */
         SerializationError(const std::string& msg);
 
+        /** @brief Construct with message.
+        */
         SerializationError(const char* msg);
 
         //! @brief Destructor

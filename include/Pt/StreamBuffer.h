@@ -58,9 +58,13 @@ class BasicStreamBuffer : public std::basic_streambuf<CharT, TraitsT>
         typedef typename TraitsT::off_type off_type;
 
     public:
+        /** @brief Destructor.
+        */
         ~BasicStreamBuffer()
         { }
 
+        /** @brief Peek data in stream.
+        */
         std::streamsize speekn(CharT* buffer, std::streamsize size)
         {
             if(size <= 0)
@@ -92,6 +96,8 @@ class BasicStreamBuffer : public std::basic_streambuf<CharT, TraitsT>
             return size;
         }
 
+        /** @brief Returns the number of characters buffered for output.
+        */
         std::streamsize out_avail()
         {
             if( this->pptr() )
@@ -101,9 +107,13 @@ class BasicStreamBuffer : public std::basic_streambuf<CharT, TraitsT>
         }
 
     protected:
+        /** @brief Default Constructor.
+        */
         BasicStreamBuffer()
         { }
 
+        /** @brief Returns the number of characters buffered for output.
+        */
         virtual std::streamsize showfull()
         { return 0; }
 };

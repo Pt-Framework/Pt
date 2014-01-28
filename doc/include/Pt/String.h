@@ -1,32 +1,3 @@
-/*
- * Copyright (C) 2004-2007 Marc Boris Duerner
- * Copyright (C) 2011 Tommi Maekitalo
- * 
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * 
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
 #ifndef PT_STRING_H
 #define PT_STRING_H
 
@@ -42,323 +13,14 @@
 
 namespace Pt {
 
-/** @brief Unicode character type.
- 
-    @ingroup Unicode
- */
-class Char
-{
-    public:
-        //! @brief Default Constructor.
-        Char()
-        : _value(0)
-        {}
-
-        //! @brief Construct from char.
-        Char(char ch)
-        : _value( (unsigned char)ch )
-        {}
-
-        //! @brief Construct from int.
-        Char(int val)
-        : _value( (unsigned)(val) )
-        {}
-
-        //! @brief Construct from unsigned 32-bit integer.
-        Char(uint32_t val)
-        : _value(val)
-        {}
-
-        //! @brief Returns the unicode value.
-        uint32_t value() const
-        { return _value; }
-        
-        //! @brief Returns the unicode value.
-        operator uint32_t() const
-        { return _value; }
-
-        //! @brief Assignment operator.
-        Char& operator=(const Char& ch)
-        { 
-            _value = ch._value; 
-            return *this; 
-        }
-
-        /** @brief Narrows the character to 8-bit.
-         
-            The default character \a def is returned if the unicode value
-            is too large to be narrowed to char i.e. greater than 255. 
-        */
-        char narrow(char def = '?') const
-        {
-            return _value > 0xff ? def : static_cast<char>(_value);
-        }
-
-    private:
-        Pt::uint32_t _value;
-};
-
-//inline bool operator ==(const Char& a, const Char& b)
-//{ return a.value() == b.value(); }
-
-//inline bool operator !=(const Char& a, const Char& b)
-//{ return a.value() != b.value(); }
-
-//inline bool operator >(const Char& a, const Char& b)
-//{ return a.value() > b.value(); }
-
-//nline bool operator >=(const Char& a, const Char& b)
-//{ return a.value() >= b.value(); }
-
-//inline bool operator <(const Char& a, const Char& b)
-//{ return a.value() < b.value(); }
-
-//inline bool operator <=(const Char& a, const Char& b)
-//{ return a.value() <= b.value(); }
-
-//inline Pt::uint32_t operator -(const Char& a, const Char& b)
-//{ return a.value() - b.value(); }
-
-//! @internal @brief Returns the ctype mask for the \a ch.
-PT_API std::ctype_base::mask ctypeMask(const Char& ch);
-
-/** @brief Checks whether @a ch is a alphabetic character.
-
-    @related Pt::Char
-*/
-inline int isalpha(const Char& ch)
-{
-    return ctypeMask(ch) & std::ctype_base::alpha;
-}
-
-/** @brief Checks whether @a ch is a alphanumeric character.
-
-    @related Pt::Char
-*/
-inline int isalnum(const Char& ch)
-{
-    return ctypeMask(ch) & std::ctype_base::alnum;
-}
-
-/** @brief Checks whether @a ch is a punctuation character.
-
-    @related Pt::Char
-*/
-inline int ispunct(const Char& ch)
-{
-    return ctypeMask(ch) & std::ctype_base::punct;
-}
-
-/** @brief Checks whether @a ch is a control character.
-
-    @related Pt::Char
-*/
-inline int iscntrl(const Char& ch)
-{
-    return ctypeMask(ch) & std::ctype_base::cntrl;
-}
-
-/** @brief Checks whether @a ch is a decimal digit.
-
-    @related Pt::Char
-*/
-inline int isdigit(const Pt::Char& ch)
-{
-    return ctypeMask(ch) & std::ctype_base::digit;
-}
-
-/** @brief Checks whether @a ch is a hexadecimal digit.
-
-    @related Pt::Char
-*/
-inline int isxdigit(const Char& ch)
-{
-    return ctypeMask(ch) & std::ctype_base::xdigit;
-}
-
-/** @brief Checks whether @a ch is a graphical character.
-
-    @related Pt::Char
-*/
-inline int isgraph(const Char& ch)
-{
-    return ctypeMask(ch) & std::ctype_base::graph;
-}
-
-/** @brief Checks whether @a ch is lower case.
-
-    @related Pt::Char
-*/
-inline int islower(const Pt::Char& ch)
-{
-    return ctypeMask(ch) & std::ctype_base::lower;
-}
-
-/** @brief Checks whether @a ch is upper case.
-
-    @related Pt::Char
-*/
-inline int isupper(const Char& ch)
-{
-    return ctypeMask(ch) & std::ctype_base::upper;
-}
-
-/** @brief Checks whether @a ch is a printable character.
-
-    @related Pt::Char
-*/
-inline int isprint(const Char& ch)
-{
-    return ctypeMask(ch) & std::ctype_base::print;
-}
-
-/** @brief Checks whether @a ch is a whitespace character.
-
-    @related Pt::Char
-*/
-inline int isspace(const Char& ch)
-{
-    return ctypeMask(ch) & std::ctype_base::space;
-}
-
-/** @brief Convert a character to lower case.
-
-    @related Pt::Char
-*/
-PT_API Pt::Char tolower(const Pt::Char& ch);
-
-/** @brief Convert a character to upper case.
-
-    @related Pt::Char
-*/
-PT_API Pt::Char toupper(const Pt::Char& ch);
-
-
-struct MBState
-{
-    MBState()
-    : n(0)
-    {}
-
-    int n;
-    union {
-        Pt::uint32_t wchars[4];
-        char mbytes[16];
-    } value;
-};
-
-} // namespace Pt
-
-namespace std {
-
-template<>
-struct char_traits<Pt::Char>
-{
-    typedef Pt::Char char_type;
-    typedef Pt::uint32_t int_type;
-    typedef streamoff off_type;
-    typedef streampos pos_type;
-    typedef Pt::MBState state_type;
-
-    inline static void assign(char_type& c1, const char_type& c2)
-    {
-        c1 = c2;
-    }
-
-    inline static bool eq(const char_type& c1, const char_type& c2)
-    {
-        return c1 == c2;
-    }
-
-    inline static bool lt(const char_type& c1, const char_type& c2)
-    {
-        return c1 < c2;
-    }
-
-    inline static int compare(const char_type* s1, const char_type* s2, std::size_t n)
-    {
-        while(n-- > 0)
-        {
-            if( ! eq(*s1, *s2) )
-                return lt(*s1, *s2) ? -1 : +1;
-
-            ++s1;
-            ++s2;
-        }
-
-        return 0;
-    }
-
-    inline static std::size_t length(const char_type* s)
-    {
-        const Pt::Char term(0);
-        
-        std::size_t n = 0;
-        while( ! eq(s[n], term) )
-            ++n;
-
-        return n;
-    }
-
-    inline static const char_type* find(const char_type* s, std::size_t n, const char_type& a)
-    {
-        while(n-- > 0) 
-        {
-            if (*s == a)
-                return s;
-
-            ++s;
-        }
-
-        return 0;
-    }
-
-    inline static char_type* move(char_type* s1, const char_type* s2, std::size_t n)
-    {
-        return (Pt::Char*) std::memmove(s1, s2, n * sizeof(Pt::Char));
-    }
-
-    inline static char_type* copy(char_type* s1, const char_type* s2, std::size_t n)
-    {
-        return (Pt::Char*) std::memcpy(s1, s2, n * sizeof(Pt::Char));
-    }
-
-    inline static char_type* assign(char_type* s, std::size_t n, char_type a)
-    {
-        while(n-- > 0)
-            *(s++) = a;
-
-        return s;
-    }
-
-    inline static char_type to_char_type(const int_type& c)
-    {
-        return char_type(c);
-    }
-
-    inline static int_type to_int_type(const char_type& c)
-    {
-        return c.value();
-    }
-
-    inline static bool eq_int_type(const int_type& c1, const int_type& c2)
-    {
-        return c1 == c2;
-    }
-
-    inline static int_type eof()
-    {
-        return Pt::uint32_t(-1);
-    }
-
-    inline static int_type not_eof(const int_type& c)
-    {
-        return eq_int_type(c, eof()) ? 0 : c;
-    }
-};
-
-/** @internal 
-    @brief Unicode capable basic_string.
+//
+// Note copy from Pt/String.h and replace
+// String -> String
+// basic_string<Char>     -> String
+// basic_string           -> String
+//
+
+/** @brief Unicode capable basic_string.
 
     This class is a specialization of the std::basic_string template for
     the unicode character type Pt::Char:
@@ -376,8 +38,7 @@ struct char_traits<Pt::Char>
 
     @ingroup Unicode
 */
-template <>
-class PT_API basic_string<Pt::Char> 
+class String 
 {
     public:
         typedef Pt::Char value_type;
@@ -410,58 +71,58 @@ class PT_API basic_string<Pt::Char>
     public:
         /** @brief Default Constructor.
         */
-        explicit basic_string( const allocator_type& a = allocator_type());
+        explicit String( const allocator_type& a = allocator_type());
 
         /** @brief Constructor.
         */
-        basic_string(const Pt::Char* str, const allocator_type& a = allocator_type());
+        String(const Pt::Char* str, const allocator_type& a = allocator_type());
         
         /** @brief Constructor.
         */
-        basic_string(const Pt::Char* str, size_type n, const allocator_type& a = allocator_type());
+        String(const Pt::Char* str, size_type n, const allocator_type& a = allocator_type());
         
         /** @brief Constructor.
         */
-        basic_string(const wchar_t* str, const allocator_type& a = allocator_type());
+        String(const wchar_t* str, const allocator_type& a = allocator_type());
 
         /** @brief Constructor.
         */
-        basic_string(const wchar_t* str, size_type n, const allocator_type& a = allocator_type());
+        String(const wchar_t* str, size_type n, const allocator_type& a = allocator_type());
 
         /** @brief Constructor.
         */
-        basic_string(const char* str, const allocator_type& a = allocator_type());
+        String(const char* str, const allocator_type& a = allocator_type());
+
+        /**  @brief Constructor.
+        */
+        String(const char* str, size_type n, const allocator_type& a = allocator_type());
 
         /** @brief Constructor.
         */
-        basic_string(const char* str, size_type n, const allocator_type& a = allocator_type());
-
-        /** @brief Constructor.
-        */
-        basic_string(size_type n, Pt::Char c, const allocator_type& a = allocator_type());
+        String(size_type n, Pt::Char c, const allocator_type& a = allocator_type());
 
         /** @brief Copy Constructor.
         */
-        basic_string(const basic_string& str);
+        String(const String& str);
+
+        /**  @brief Constructor.
+        */
+        String(const String& str, const allocator_type& a);
+
+      /** @brief Constructor.
+      */
+        String(const String& str, size_type pos, size_type n = npos, const allocator_type& a = allocator_type());
 
         /** @brief Constructor.
         */
-        basic_string(const basic_string& str, const allocator_type& a);
-
-        /** @brief Constructor.
-        */
-        basic_string(const basic_string& str, size_type pos, size_type n = npos, const allocator_type& a = allocator_type());
-
-        /** @brief Constructor.
-        */
-        basic_string(const Pt::Char* begin, const Pt::Char* end, const allocator_type& a = allocator_type());
+        String(const Pt::Char* begin, const Pt::Char* end, const allocator_type& a = allocator_type());
 
         template <typename InputIterator>
-        basic_string(InputIterator begin, InputIterator end, const allocator_type& a = allocator_type());
+        String(InputIterator begin, InputIterator end, const allocator_type& a = allocator_type());
 
         /** @brief Destructor.
         */
-        ~basic_string();
+        ~String();
 
     public:
         /** @brief Returns an iterator to the begin of the string.
@@ -668,52 +329,52 @@ class PT_API basic_string<Pt::Char>
         */
         basic_string& append(const Pt::Char* begin, const Pt::Char* end);
 
-        basic_string& insert(size_type pos, const Pt::Char* str);
+        String& insert(size_type pos, const Pt::Char* str);
 
-        basic_string& insert(size_type pos, const Pt::Char* str, size_type n);
+        String& insert(size_type pos, const Pt::Char* str, size_type n);
 
-        basic_string& insert(size_type pos, size_type n, Pt::Char ch);
+        String& insert(size_type pos, size_type n, Pt::Char ch);
 
-        basic_string& insert(size_type pos, const basic_string& str);
+        String& insert(size_type pos, const String& str);
 
-        basic_string& insert(size_type pos, const basic_string& str, size_type pos2, size_type n);
+        String& insert(size_type pos, const String& str, size_type pos2, size_type n);
 
-        basic_string& insert(iterator p, Pt::Char ch);
+        String& insert(iterator p, Pt::Char ch);
 
-        basic_string& insert(iterator p, size_type n, Pt::Char ch);
+        String& insert(iterator p, size_type n, Pt::Char ch);
 
         // unimplemented
         //template <typename InputIterator>
-        //basic_string& insert(iterator p, InputIterator first, InputIterator last);
+        //String& insert(iterator p, InputIterator first, InputIterator last);
 
         void clear()
         { setLength(0); }
 
-        basic_string& erase(size_type pos = 0, size_type n = npos);
+        String& erase(size_type pos = 0, size_type n = npos);
 
         iterator erase(iterator pos);
 
         iterator erase(iterator first, iterator last);
 
-        basic_string& replace(size_type pos, size_type n, const Pt::Char* str);
+        String& replace(size_type pos, size_type n, const Pt::Char* str);
 
-        basic_string& replace(size_type pos, size_type n, const Pt::Char* str, size_type n2);
+        String& replace(size_type pos, size_type n, const Pt::Char* str, size_type n2);
 
-        basic_string& replace(size_type pos, size_type n, size_type n2, Pt::Char ch);
+        String& replace(size_type pos, size_type n, size_type n2, Pt::Char ch);
 
-        basic_string& replace(size_type pos, size_type n, const basic_string& str);
+        String& replace(size_type pos, size_type n, const String& str);
 
-        basic_string& replace(size_type pos, size_type n, const basic_string& str, size_type pos2, size_type n2);
+        String& replace(size_type pos, size_type n, const String& str, size_type pos2, size_type n2);
 
-        basic_string& replace(iterator i1, iterator i2, const Pt::Char* str);
+        String& replace(iterator i1, iterator i2, const Pt::Char* str);
 
-        basic_string& replace(iterator i1, iterator i2, const Pt::Char* str, size_type n);
+        String& replace(iterator i1, iterator i2, const Pt::Char* str, size_type n);
 
-        basic_string& replace(iterator i1, iterator i2, size_type n, Pt::Char ch);
+        String& replace(iterator i1, iterator i2, size_type n, Pt::Char ch);
 
-        basic_string& replace(iterator i1, iterator i2, const basic_string& str);
+        String& replace(iterator i1, iterator i2, const String& str);
 
-        int compare(const basic_string& str) const;
+        int compare(const String& str) const;
 
         int compare(const Pt::Char* str) const;
 
@@ -727,15 +388,15 @@ class PT_API basic_string<Pt::Char>
 
         int compare(const char* str, size_type n) const;
 
-        int compare(size_type pos, size_type n, const basic_string& str) const;
+        int compare(size_type pos, size_type n, const String& str) const;
 
-        int compare(size_type pos, size_type n, const basic_string& str, size_type pos2, size_type n2) const;
+        int compare(size_type pos, size_type n, const String& str, size_type pos2, size_type n2) const;
 
         int compare(size_type pos, size_type n, const Pt::Char* str) const;
 
         int compare(size_type pos, size_type n, const Pt::Char* str, size_type n2) const;
 
-        size_type find(const basic_string& str, size_type pos = 0) const;
+        size_type find(const String& str, size_type pos = 0) const;
 
         size_type find(const Pt::Char* str, size_type pos, size_type n) const;
 
@@ -743,7 +404,7 @@ class PT_API basic_string<Pt::Char>
 
         size_type find(Pt::Char ch, size_type pos = 0) const;
 
-        size_type rfind(const basic_string& str, size_type pos = npos) const;
+        size_type rfind(const String& str, size_type pos = npos) const;
 
         size_type rfind(const Pt::Char* str, size_type pos, size_type n) const;
 
@@ -751,7 +412,7 @@ class PT_API basic_string<Pt::Char>
 
         size_type rfind(Pt::Char ch, size_type pos = npos) const;
 
-        size_type find_first_of(const basic_string& str, size_type pos = 0) const
+        size_type find_first_of(const String& str, size_type pos = 0) const
         { return this->find_first_of( str.data(), pos, str.size() ); }
 
         size_type find_first_of(const Pt::Char* s, size_type pos, size_type n) const;
@@ -762,7 +423,7 @@ class PT_API basic_string<Pt::Char>
         size_type find_first_of(const Pt::Char ch, size_type pos = 0) const
         { return this->find(ch, pos); }
 
-        size_type find_last_of(const basic_string& str, size_type pos = npos) const
+        size_type find_last_of(const String& str, size_type pos = npos) const
         { return this->find_last_of( str.data(), pos, str.size() ); }
 
         size_type find_last_of(const Pt::Char* s, size_type pos, size_type n) const;
@@ -773,7 +434,7 @@ class PT_API basic_string<Pt::Char>
         size_type find_last_of(const Pt::Char ch, size_type pos = npos) const
         { return this->rfind(ch, pos); }
 
-        size_type find_first_not_of(const basic_string& str, size_type pos = 0) const
+        size_type find_first_not_of(const String& str, size_type pos = 0) const
         { return this->find_first_not_of( str.data(), pos, str.size() ); }
 
         size_type find_first_not_of(const Pt::Char* s, size_type pos, size_type n) const;
@@ -783,7 +444,7 @@ class PT_API basic_string<Pt::Char>
 
         size_type find_first_not_of(const Pt::Char ch, size_type pos = 0) const;
 
-        size_type find_last_not_of(const basic_string& str, size_type pos = npos) const
+        size_type find_last_not_of(const String& str, size_type pos = npos) const
         { return this->find_last_not_of( str.data(), pos, str.size() ); }
 
         size_type find_last_not_of(const Pt::Char* tok, size_type pos, size_type n) const;
@@ -796,30 +457,30 @@ class PT_API basic_string<Pt::Char>
     public:
         std::string narrow(char dfault = '?') const;
 
-        static basic_string widen(const char* str);
+        static String widen(const char* str);
 
-        static basic_string widen(const std::string& str);
+        static String widen(const std::string& str);
 
         template <typename OutIterT>
         OutIterT toUtf16(OutIterT to) const;
 
         template <typename InIterT>
-        static basic_string fromUtf16(InIterT from, InIterT fromEnd);
+        static String fromUtf16(InIterT from, InIterT fromEnd);
 
     public:
-        basic_string& operator=(const basic_string& str)
+        String& operator=(const String& str)
         { return this->assign(str); }
 
-        basic_string& operator=(const wchar_t* str)
+        String& operator=(const wchar_t* str)
         { return this->assign(str); }
 
-        basic_string& operator=(const char* str)
+        String& operator=(const char* str)
         { return this->assign(str); }
 
-        basic_string& operator=(const Pt::Char* str)
+        String& operator=(const Pt::Char* str)
         { return this->assign(str); }
 
-        basic_string& operator=(Pt::Char ch)
+        String& operator=(Pt::Char ch)
         {
             // no privreserve(1), short string capacity is large enough
 
@@ -829,13 +490,13 @@ class PT_API basic_string<Pt::Char>
             return *this;
         }
 
-        basic_string& operator+=(const basic_string& str)
+        String& operator+=(const String& str)
         { return this->append(str); }
 
-        basic_string& operator+=(const Pt::Char* str)
+        String& operator+=(const Pt::Char* str)
         { return this->append(str); }
 
-        basic_string& operator+=(Pt::Char c);
+        String& operator+=(Pt::Char c);
 
     private:
         struct Ptr
@@ -951,373 +612,361 @@ class PT_API basic_string<Pt::Char>
 
 /** @brief Swaps two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline void swap(basic_string<Pt::Char>& a, basic_string<Pt::Char>& b)
+inline void swap(String& a, String& b)
 { a.swap(b); }
 
 // operator +
 
 /** @brief Concatenates two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline basic_string<Pt::Char> operator+(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
-{ basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
+inline String operator+(const String& a, const String& b)
+{ String temp; temp += a; temp += b; return temp; }
 
 /** @brief Concatenates two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline basic_string<Pt::Char> operator+(const basic_string<Pt::Char>& a, const Pt::Char* b)
-{ basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
+inline String operator+(const String& a, const Pt::Char* b)
+{ String temp; temp += a; temp += b; return temp; }
 
 /** @brief Concatenates two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline basic_string<Pt::Char> operator+(const Pt::Char* a, const basic_string<Pt::Char>& b)
-{ basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
+inline String operator+(const Pt::Char* a, const String& b)
+{ String temp; temp += a; temp += b; return temp; }
 
 /** @brief Concatenates two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline basic_string<Pt::Char> operator+(const basic_string<Pt::Char>& a, Pt::Char b)
-{ basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
+inline String operator+(const String& a, Pt::Char b)
+{ String temp; temp += a; temp += b; return temp; }
 
 /** @brief Concatenates two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline basic_string<Pt::Char> operator+(Pt::Char a, const basic_string<Pt::Char>& b)
-{ basic_string<Pt::Char> temp; temp += a; temp += b; return temp; }
+inline String operator+(Pt::Char a, const String& b)
+{ String temp; temp += a; temp += b; return temp; }
 
 // operator ==
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator==(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+inline bool operator==(const String& a, const String& b)
 { return a.compare(b) == 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator==(const Pt::Char* a, const basic_string<Pt::Char>& b)
+inline bool operator==(const Pt::Char* a, const String& b)
 { return b.compare(a) == 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator==(const basic_string<Pt::Char>& a, const Pt::Char* b)
+inline bool operator==(const String& a, const Pt::Char* b)
 { return a.compare(b) == 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator==(const basic_string<Pt::Char>& a, const wchar_t* b)
+inline bool operator==(const String& a, const wchar_t* b)
 { return a.compare(b) == 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator==(const wchar_t* b, const basic_string<Pt::Char>& a)
+inline bool operator==(const wchar_t* b, const String& a)
 { return a.compare(b) == 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator==(const basic_string<Pt::Char>& a, const char* b)
+inline bool operator==(const String& a, const char* b)
 { return a.compare(b) == 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator==(const char* b, const basic_string<Pt::Char>& a)
+inline bool operator==(const char* b, const String& a)
 { return a.compare(b) == 0; }
 
 // operator !=
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator!=(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+inline bool operator!=(const String& a, const String& b)
 { return a.compare(b) != 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator!=(const Pt::Char* a, const basic_string<Pt::Char>& b)
+inline bool operator!=(const Pt::Char* a, const String& b)
 { return b.compare(a) != 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator!=(const basic_string<Pt::Char>& a, const Pt::Char* b)
+inline bool operator!=(const String& a, const Pt::Char* b)
 { return a.compare(b) != 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator!=(const basic_string<Pt::Char>& a, const wchar_t* b)
+inline bool operator!=(const String& a, const wchar_t* b)
 { return a.compare(b) != 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator!=(const wchar_t* b, const basic_string<Pt::Char>& a)
+inline bool operator!=(const wchar_t* b, const String& a)
 { return a.compare(b) != 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator!=(const basic_string<Pt::Char>& a, const char* b)
+inline bool operator!=(const String& a, const char* b)
 { return a.compare(b) != 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator!=(const char* b, const basic_string<Pt::Char>& a)
+inline bool operator!=(const char* b, const String& a)
 { return a.compare(b) != 0; }
 
 // operator <
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator<(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+inline bool operator<(const String& a, const String& b)
 { return a.compare(b) < 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator<(const Pt::Char* a, const basic_string<Pt::Char>& b)
+inline bool operator<(const Pt::Char* a, const String& b)
 { return b.compare(a) > 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator<(const basic_string<Pt::Char>& a, const Pt::Char* b)
+inline bool operator<(const String& a, const Pt::Char* b)
 { return a.compare(b) < 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator<(const basic_string<Pt::Char>& a, const wchar_t* b)
+inline bool operator<(const String& a, const wchar_t* b)
 { return a.compare(b) < 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator<(const wchar_t* b, const basic_string<Pt::Char>& a)
+inline bool operator<(const wchar_t* b, const String& a)
 { return a.compare(b) > 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator<(const basic_string<Pt::Char>& a, const char* b)
+inline bool operator<(const String& a, const char* b)
 { return a.compare(b) < 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator<(const char* b, const basic_string<Pt::Char>& a)
+inline bool operator<(const char* b, const String& a)
 { return a.compare(b) > 0; }
 
 // operator <=
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator<=(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+inline bool operator<=(const String& a, const String& b)
 { return a.compare(b) <= 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator<=(const Pt::Char* a, const basic_string<Pt::Char>& b)
+inline bool operator<=(const Pt::Char* a, const String& b)
 { return b.compare(a) >= 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator<=(const basic_string<Pt::Char>& a, const Pt::Char* b)
+inline bool operator<=(const String& a, const Pt::Char* b)
 { return a.compare(b) <= 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator<=(const basic_string<Pt::Char>& a, const wchar_t* b)
+inline bool operator<=(const String& a, const wchar_t* b)
 { return a.compare(b) <= 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator<=(const wchar_t* b, const basic_string<Pt::Char>& a)
+inline bool operator<=(const wchar_t* b, const String& a)
 { return a.compare(b) >= 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator<=(const basic_string<Pt::Char>& a, const char* b)
+inline bool operator<=(const String& a, const char* b)
 { return a.compare(b) <= 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator<=(const char* b, const basic_string<Pt::Char>& a)
+inline bool operator<=(const char* b, const String& a)
 { return a.compare(b) >= 0; }
 
 // operator >
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator>(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+inline bool operator>(const String& a, const String& b)
 { return a.compare(b) > 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator>(const Pt::Char* a, const basic_string<Pt::Char>& b)
+inline bool operator>(const Pt::Char* a, const String& b)
 { return b.compare(a) < 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator>(const basic_string<Pt::Char>& a, const Pt::Char* b)
+inline bool operator>(const String& a, const Pt::Char* b)
 { return a.compare(b) > 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator>(const basic_string<Pt::Char>& a, const wchar_t* b)
+inline bool operator>(const String& a, const wchar_t* b)
 { return a.compare(b) > 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator>(const wchar_t* b, const basic_string<Pt::Char>& a)
+inline bool operator>(const wchar_t* b, const String& a)
 { return a.compare(b) < 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator>(const basic_string<Pt::Char>& a, const char* b)
+inline bool operator>(const String& a, const char* b)
 { return a.compare(b) > 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator>(const char* b, const basic_string<Pt::Char>& a)
+inline bool operator>(const char* b, const String& a)
 { return a.compare(b) < 0; }
 
 // operator >=
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator>=(const basic_string<Pt::Char>& a, const basic_string<Pt::Char>& b)
+inline bool operator>=(const String& a, const String& b)
 { return a.compare(b) >= 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator>=(const Pt::Char* a, const basic_string<Pt::Char>& b)
+inline bool operator>=(const Pt::Char* a, const String& b)
 { return b.compare(a) <= 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator>=(const basic_string<Pt::Char>& a, const Pt::Char* b)
+inline bool operator>=(const String& a, const Pt::Char* b)
 { return a.compare(b) >= 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator>=(const basic_string<Pt::Char>& a, const wchar_t* b)
+inline bool operator>=(const String& a, const wchar_t* b)
 { return a.compare(b) >= 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator>=(const wchar_t* b, const basic_string<Pt::Char>& a)
+inline bool operator>=(const wchar_t* b, const String& a)
 { return a.compare(b) <= 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator>=(const basic_string<Pt::Char>& a, const char* b)
+inline bool operator>=(const String& a, const char* b)
 { return a.compare(b) >= 0; }
 
 /** @brief Compares two strings.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-inline bool operator>=(const char* b, const basic_string<Pt::Char>& a)
+inline bool operator>=(const char* b, const String& a)
 { return a.compare(b) <= 0; }
 
 /** @brief Stream insertion operator.
 
-    @related std::basic_string<Pt::Char>
+    @related String
 */
-PT_API ostream& operator<< (ostream& out, const basic_string<Pt::Char>& str);
+PT_API ostream& operator<< (ostream& out, const String& str);
 
-} // namespace std
+} // namespace Pt
 
-namespace Pt {
-
-typedef std::basic_string<Pt::Char> String;
-
-}
-
-#ifdef PT_WITH_STD_LOCALE
-#include <Pt/Facets.h>
-#endif
-
-// Include the implementation header
-#include <Pt/String.tpp>
 
 #endif

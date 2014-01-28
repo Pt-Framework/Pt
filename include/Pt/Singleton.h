@@ -33,73 +33,73 @@
 
 namespace Pt {
 
-    /** @brief %Singleton class template
+/** @brief %Singleton class template
 
-        @param T Type of the singleton
-        @param A Allocator for type T
+    @param T Type of the singleton
+    @param A Allocator for type T
 
-        The Singleton class template can be used to easily implement the Singleton
-        design pattern. It can either be used directly or as a base class. An
-        allocator can be used to control how the singleton instance will be
-        allocated.
+    The %Singleton class template can be used to easily implement the
+    %Singleton design pattern. It can either be used directly or as a
+    base class.
 
-        The follwing example shows how to use the singleton as a base class:
-        @code
-              class MySingleton : public Singleton<MySingleton>
-              {
-                   friend class Singleton<MySingleton>;
+    The follwing example shows how to use the singleton as a base class:
+    @code
+          class MySingleton : public Singleton<MySingleton>
+          {
+                friend class Singleton<MySingleton>;
 
-                   // ...
-               };
-        @endcode
+                // ...
+            };
+    @endcode
 
-       @ingroup CoreTypes
-     */
-    template <typename T>
-    class Singleton : public NonCopyable
-    {
-        public:
-            /** @brief Returns the instance of the singleton type
+    @ingroup CoreTypes
+*/
+template <typename T>
+class Singleton : public NonCopyable
+{
+    public:
+        /** @brief Returns the instance of the singleton type
 
-                    When called for the first time, the singleton instance will be
-                    created with the specified alloctaor. All subsequent calls wikk
-                    return a reference to the previously created instance.
+                When called for the first time, the singleton instance will
+                be created with the specified alloctaor. All subsequent calls
+                will return a reference to the previously created instance.
 
-                @return The singleton instance
-             */
-            static T& instance()
+            @return The singleton instance
+          */
+        static T& instance()
+        {
+            if( !_instance )
             {
-                if( !_instance )
-                {
-                    _instance = create();
-                }
-
-                return *_instance;
+                _instance = create();
             }
 
-        protected:
-            /**  @brief Constructor
-             */
-            Singleton()
-            { }
+            return *_instance;
+        }
 
-            /**  @brief Destructor
-             */
-            ~Singleton()
-            { }
+    protected:
+        /** @brief Constructor
+          */
+        Singleton()
+        { }
 
-            static T* create()
-            {
-                static T inst;
-                return &inst;
-            }
+        /** @brief Destructor
+          */
+        ~Singleton()
+        { }
 
-        private:
-            static T* _instance;
-    };
+        //! @internal
+        static T* create()
+        {
+            static T inst;
+            return &inst;
+        }
 
-    template <typename T>
-    T* Singleton<T>::_instance = 0;
+    private:
+        static T* _instance;
+};
+
+template <typename T>
+T* Singleton<T>::_instance = 0;
 
 } // namespace Pt
 

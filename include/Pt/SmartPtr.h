@@ -54,12 +54,13 @@ class RefLinked
         mutable const RefLinked* next;
 
     protected:
+        //! @brief Default constructor.
         RefLinked()
         : prev(0),
           next(0)
           { }
 
-        //! \brief Unlink a smart pointer from a managed object
+        //! @brief Unlink a smart pointer from a managed object
         bool unlink(T* object)
         {
             bool ret = false;
@@ -79,7 +80,7 @@ class RefLinked
             return ret;
         }
 
-        //! \brief Link a smart pointer to a managed object
+        //! @brief Link a smart pointer to a managed object
         void link(const RefLinked& ptr, T* object)
         {
             if (object)
@@ -92,19 +93,21 @@ class RefLinked
         }
 };
 
-/* Intrusive reference counting for SmartPtr.
+/** @internal @brief Intrusive reference counting for SmartPtr.
 
     Intrusive reference couting means that the reference count is part of the
     managed heap object. Linking and unlinking will only increase and decrease this
     counter, but not delete it. The managed object needs to implement the functions
     release() and addRef() and must delete itself if the counter reaches zero.
+
+    @todo naming conflict with RefCounted
 */
 
 template <typename T>
 class InternalRefCounted
 {
     protected:
-        //! \brief unlink a smart pointer from a managed object
+        //! @brief unlink a smart pointer from a managed object
         bool unlink(T* object)
         {
             if (object)
@@ -112,7 +115,7 @@ class InternalRefCounted
             return false;
         }
 
-        //! \brief link a smart pointer to a managed object
+        //! @brief link a smart pointer to a managed object
         void link(const InternalRefCounted& ptr, T* object)
         {
             if (object)
@@ -132,15 +135,17 @@ template <typename T>
 class ExternalRefCounted
 {
     public:
+        //! @brief Returns the refcount.
         int refs() const
         { return _count ? *_count : 0; }
 
     protected:
+        //! @brief Default constructor.
         ExternalRefCounted()
         : _count(0)
         { }
 
-        //! \brief unlink a smart pointer from a managed object
+        //! @brief unlink a smart pointer from a managed object
         bool unlink(T* object)
         {
             if ( _count && --*_count <= 0)
@@ -154,7 +159,7 @@ class ExternalRefCounted
                 return false;
         }
 
-        //! \brief link a smart pointer to a managed object
+        //! @brief link a smart pointer to a managed object
         void link(const ExternalRefCounted& ptr, T* object)
         {
             if(object)
@@ -222,10 +227,13 @@ class ExternalAtomicRefCounted
         volatile atomic_t* rc;
 };
 
-/** \brief Deleter policy for SmartPtr.
+/** @brief Deleter policy for SmartPtr.
 
     The DeletePolicy implements the method, which instructs the SmartPtr to free the
     object which it helds by deleting it.
+
+    @internal
+    @todo rename this class: DestroyByDelete
 */
 
 template <typename T>
@@ -255,7 +263,6 @@ class ArrayDestroyPolicy
 };
 
 
-// auxiliary type to enable copies and assignments (now global)
 template<typename T>
 struct AutoPtrRef {
     T* ptr;
@@ -267,48 +274,48 @@ struct AutoPtrRef {
 
 /** @brief Policy based Auto pointer.
 
-    The DestroyPolicy implements the method for destroying the object once
-    the auto pointer runs out of scope. By default, the object is destroyed
-    by deleting it, but this can be overridden by implementing a different
-    DestroyPolicy. The DestroyPolicy needs to implement a method
+    The %DestroyPolicy implements the method for destroying the managed 
+    object once the auto pointer runs out of scope. By default, the object
+    is destroyed by deleting it, but this can be overridden by using a
+    different DestroyPolicy. The DestroyPolicy needs to implement a method
     destroy(T*), which releases the underlying pointer.
 
-    \param T Contained type.
-    \param DestroyPolicy policy, to destroy the object.
+    \param T Managed type.
+    \param DestroyPolicy Destroys the managed type.
 */
 template<typename T,
          typename Destroy = DeletePolicy<T> >
 class AutoPtr : public Destroy
 {
     private:
-        T* ap;    // refers to the actual owned object (if any)
+        T* ap;
 
     public:
         typedef T element_type;
 
-        // constructor
+        //! @brief Default constructor.
         explicit AutoPtr(T* ptr = 0)
         : ap(ptr)
         { }
 
-        // copy constructors (with implicit conversion)
-        // - note: nonconstant parameter
+        //! @brief Copy constructor.
         AutoPtr (AutoPtr& rhs)
           : ap(rhs.release()) {
         }
 
+        //! @brief Copy constructor.
         template<class Y>
         AutoPtr (AutoPtr<Y>& rhs)
           : ap(rhs.release()) {
         }
 
-        // assignments (with implicit conversion)
-        // - note: nonconstant parameter
+        //! @brief Assignment operator.
         AutoPtr& operator= (AutoPtr& rhs) {
             reset(rhs.release());
             return *this;
         }
 
+        //! @brief Assignment operator.
         template<class Y>
         AutoPtr& operator= (AutoPtr<Y>& rhs)
         {
@@ -316,26 +323,33 @@ class AutoPtr : public Destroy
             return *this;
         }
 
-        // destructor
+        //! @brief Destructor.
         ~AutoPtr()
         { this->destroy(ap); }
 
-        // value access
+        //! @brief Access value.
         T* get() const {
             return ap;
         }
+
+        //! @brief Access value.
         T& operator*() const {
             return *ap;
         }
+
+        //! @brief Access value.
         T* operator->() const {
             return ap;
         }
+
+        //! @brief Returns true if nullptr.
         bool operator!() const {
             return ap == 0;
         }
+        
         /** @brief Bool conversion operator
 
-            An AutoPtr can be implicitly converted to bool. True is returned
+            An %AutoPtr can be implicitly converted to bool. True is returned
             when the raw pointer is not null, false if it is null
 
             @return false if the raw pointer is null.
@@ -343,41 +357,48 @@ class AutoPtr : public Destroy
         operator bool () const
         { return ap != 0; }
 
-        // release ownership
-        T* release() {
+        //! @brief Release ownership.
+        T* release() 
+        {
             T* tmp(ap);
             ap = 0;
             return tmp;
         }
 
-        // reset value
-        void reset (T* ptr=0) {
+        //! @brief Reset value.
+        void reset (T* ptr = 0) 
+        {
             if (ap != ptr) {
                 this->destroy(ap);
                 ap = ptr;
             }
         }
 
-        /* special conversions with auxiliary type to enable copies and assignments
-          */
+        //! @brief Copy constructor.
         AutoPtr(AutoPtrRef<T> rhs) throw()
           : ap(rhs.ptr) {
         }
-        AutoPtr& operator= (AutoPtrRef<T> rhs) throw() {  // new
+        
+        //! @brief Assignment operator.
+        AutoPtr& operator= (AutoPtrRef<T> rhs) throw() {
               reset(rhs.ptr);
               return *this;
         }
+        
+        //! @brief Conversion operator used for assignments.
         template<class Y>
         operator AutoPtrRef<Y>() throw() {
             return AutoPtrRef<Y>(release());
         }
+        
+        //! @brief Conversion operator used for assignments.
         template<class Y>
         operator AutoPtr<Y>() throw() {
             return AutoPtr<Y>(release());
         }
 };
 
-/** \brief Equality comparison operator.
+/** @brief Equality comparison operator.
 
     @related AutoPtr
 */
@@ -385,13 +406,16 @@ template <typename T, typename D, typename T2, typename D2>
 bool operator==(const AutoPtr<T, D>& a, const AutoPtr<T2, D2>& b)
 { return a.get() == b.get(); }
 
+/** @brief Equality comparison operator.
 
+    @related AutoPtr
+*/
 template <typename T, typename D, typename T2>
 bool operator==(const AutoPtr<T, D>& a, const T2* b)
 { return a.get() == b; }
 
 
-/** \brief Equality comparison operator.
+/** @brief Equality comparison operator.
 
     @related AutoPtr
 */
@@ -399,13 +423,16 @@ template <typename T, typename D, typename T2, typename D2>
 bool operator!=(const AutoPtr<T, D>& a, const AutoPtr<T2, D2>& b)
 { return a.get() != b.get(); }
 
+/** @brief Equality comparison operator.
 
+    @related AutoPtr
+*/
 template <typename T, typename D, typename T2>
 bool operator!=(const AutoPtr<T, D>& a, const T2* b)
 { return a.get() != b; }
 
 
-/** \brief Less-than comparison operator.
+/** @brief Less-than comparison operator.
 
     @related AutoPtr
 */
@@ -413,7 +440,10 @@ template <typename T, typename D, typename T2, typename D2>
 bool operator<(const AutoPtr<T, D>& a, const AutoPtr<T2, D2>& b)
 { return a.v() < b.get(); }
 
+/** @brief Less-than comparison operator.
 
+    @related AutoPtr
+*/
 template <typename T, typename D, typename T2>
 bool operator<(const AutoPtr<T, D>& a, const T2* b)
 { return a.get() < b; }
@@ -421,20 +451,20 @@ bool operator<(const AutoPtr<T, D>& a, const T2* b)
 
 /** @brief Policy based smart pointer.
 
-    The SmartPtr implements a model that determines how the contained
-    raw pointer is managed. The default model is RefCounted, which uses a
-    non-intrusive reference counting mechanism.
-    A model-policy needs to implement two functions called link() and unlink() to
-    manage a raw pointer.
+    The %SmartPtr implements a OwnershipPolicy that determines how the
+    contained raw pointer is managed. The default is reference counting,
+    which uses a non-intrusive reference counting mechanism. A OwnershipPolicy
+    needs to implement two functions called link() and unlink() to manage a
+    raw pointer.
     The DestroyPolicy implements the method for destroying the object once
     the smart pointer detects, that the object needs to be freed. By default
     the object is destroyed by deleting it, but this can be overridden by
-    implementing a different DestroyPolicy. The DestroyPolicy needs to
+    using a different DestroyPolicy. The DestroyPolicy needs to
     implement a method destroy(T*), which releases the underlying pointer.
 
     \param T Contained type.
-    \param Model Model for linking/unlinking.
-    \param DestroyPolicy policy, to destroy the object.
+    \param OwnershipPolicy Manages ownership.
+    \param DestroyPolicy Destroys the object.
 */
 template <typename T,
           typename OwnershipPolicy = ExternalRefCounted<T>,
@@ -443,11 +473,11 @@ class SmartPtr : public OwnershipPolicy,
                  public DestroyPolicy
 {
     private:
-        //! \brief The raw pointer
+        //! @brief The raw pointer
         T* object;
 
     public:
-        /** \brief Default Constructor.
+        /** @brief Default Constructor.
 
             The contained pointer is set to null in the default constructor.
         */
@@ -455,33 +485,19 @@ class SmartPtr : public OwnershipPolicy,
         : object(0)
         {}
 
-        /** \brief Constructs from a pointer to manage.
-
-            The behaviour depends on the Model. When the default model is
-            used both SmartPtr will manage the heap object.
-
-            \param ptr The raw pointer
+        /** @brief Constructs from a pointer to manage.
         */
         SmartPtr(T* ptr)
         : object(ptr)
         { this->link(*this, ptr); }
 
-        /** \brief Copy constructor.
-
-            The behaviour depends on the Model. When the default model is
-            used both SmartPtr will reference the same heap object.
-
-            \param ptr The other SmartPtr
+        /** @brief Copy constructor.
         */
         SmartPtr(const SmartPtr& ptr)
         : object(ptr.object)
         { this->link(ptr, ptr.object); }
 
-        /** \brief Destructor.
-
-            The behaviour depends on the Model. When the default model is
-            used the managed raw pointer will be deleted when the last
-            SmartPtr goes out of scope.
+        /** @brief Destructor.
         */
         ~SmartPtr()
         { 
@@ -489,14 +505,7 @@ class SmartPtr : public OwnershipPolicy,
                 this->destroy(object); 
         }
 
-        /** \brief Assign from another SmartPtr.
-
-            The behaviour depends on the Model. When the default model is
-            used both SmartPtr will reference the same heap object. Nothing
-            will happen on self assignment.
-
-            \param ptr The other SmartPtr
-            \return self reference
+        /** @brief Assign from another SmartPtr.
         */
         SmartPtr& operator=(const SmartPtr& ptr)
         {
@@ -514,67 +523,38 @@ class SmartPtr : public OwnershipPolicy,
             return *this;
         }
 
-        /** \brief Returns a pointer to the heap object
-
-            Return a copy of the pointer that this object owns. The
-            SmartPtr still manages the memory.
-
-            \return Pointer to the heap object
+        /** @brief Access value.
         */
         T* operator->() const { return object; }
 
-        /** \brief Returns a reference to the heap object
-
-            If this SmartPtr is null this function will crash.
-
-            \return Reference to the heap object
+        /** @brief Access value.
         */
         T& operator*() const
         { return *object; }
 
-        /** \brief Negate operator
-
-            This operator matches the behavious of raw pointers. True will be
-            returned if the raw pointer is null.
-
-            \return true if the raw pointer is null.
+        /** @brief Returns true if the raw pointer is null.
         */
         bool operator! () const
         { return object == 0; }
 
-        /** \brief Bool conversion operator
-
-            A SmartPtr can be implicitly converted to bool. True is returned
-            when the raw pointer is not null, false if it is null
-
-            \return false if the raw pointer is null.
+        /** @brief Returns true if the raw pointer is not null.
         */
         operator bool () const
         { return object != 0; }
 
-        /** \brief Returns a pointer to the heap object
-
-            Return a copy of the pointer that this object owns. The
-            SmartPtr still manages the memory.
-
-            \return Pointer to the heap object
+        /** @brief Get non-owning pointer.
         */
         T* get()
         { return object; }
 
-        /** \brief Returns a pointer to the heap object
-
-            Return a copy of the pointer that this object owns. The
-            SmartPtr still manages the memory.
-
-            \return Pointer to the heap object
+        /** @brief Get non-owning pointer.
         */
         const T* get() const
         { return object; }
 };
 
 
-/** \brief Equality comparison operator
+/** @brief Equality comparison operator
 
     @related SmartPtr
 */
@@ -582,13 +562,16 @@ template <typename T, class O, typename D, typename T2, typename O2, typename D2
 bool operator==(const SmartPtr<T, O, D>& a, const SmartPtr<T2, O2, D2>& b)
 { return a.get() == b.get(); }
 
+/** @brief Equality comparison operator
 
+    @related SmartPtr
+*/
 template <typename T, typename O, typename D, typename T2>
 bool operator==(const SmartPtr<T, O, D>& a, const T2* b)
 { return a.get() == b; }
 
 
-/** \brief Equality comparison operator.
+/** @brief Equality comparison operator.
 
     @related SmartPtr
 */
@@ -596,13 +579,16 @@ template <typename T, typename O, typename D, typename T2, typename O2, typename
 bool operator!=(const SmartPtr<T, O, D>& a, const SmartPtr<T2, O2, D2>& b)
 { return a.get() != b.get(); }
 
+/** @brief Equality comparison operator.
 
+    @related SmartPtr
+*/
 template <typename T, typename O, typename D, typename T2>
 bool operator!=(const SmartPtr<T, O, D>& a, const T2* b)
 { return a.get() != b; }
 
 
-/** \brief Less-than comparison operator
+/** @brief Less-than comparison operator
 
     @related SmartPtr
 */
@@ -610,12 +596,19 @@ template <typename T, typename O, typename D, typename T2, typename O2, typename
 bool operator<(const SmartPtr<T, O, D>& a, const SmartPtr<T2, O2, D2>& b)
 { return a.get() < b.get(); }
 
+/** @brief Less-than comparison operator
 
+    @related SmartPtr
+*/
 template <typename T, typename O, typename D, typename T2>
 bool operator<(const SmartPtr<T, O, D>& a, const T2* b)
 { return a.get() < b; }
 
 
+/** @brief Custom fixup for deserialization.
+
+    @related SmartPtr
+*/
 template <typename T, typename M, typename D >
 void fixup(const Pt::FixupInfo& fixup, SmartPtr<T, M, D>& fixme)
 {
@@ -630,7 +623,10 @@ void fixup(const Pt::FixupInfo& fixup, SmartPtr<T, M, D>& fixme)
     }
 }
 
+/** @brief Custom loading for deserialization.
 
+    @related SmartPtr
+*/
 template <typename T, typename M, typename D >
 void load(const LoadInfo& li, SmartPtr<T, M, D>& sp)
 {
@@ -644,7 +640,10 @@ void load(const LoadInfo& li, SmartPtr<T, M, D>& sp)
     }
 }
 
+/** @brief Deserialize a smart pointer.
 
+    @related SmartPtr
+*/
 template <typename T, typename M>
 void operator >>=(const Pt::SerializationInfo& si, SmartPtr<T, M>& sp)
 {
@@ -652,7 +651,10 @@ void operator >>=(const Pt::SerializationInfo& si, SmartPtr<T, M>& sp)
     si >>= *sp;
 }
 
+/** @brief Custom saving for serialization.
 
+    @related SmartPtr
+*/
 template <typename T, typename M, typename D >
 void save(Pt::SaveInfo& si, const SmartPtr<T, M, D>& sp)
 {
@@ -662,7 +664,10 @@ void save(Pt::SaveInfo& si, const SmartPtr<T, M, D>& sp)
     }
 }
 
+/** @brief Serialize a smart pointer.
 
+    @related SmartPtr
+*/
 template <typename T, typename M, typename D >
 void operator <<=(Pt::SerializationInfo& si, const SmartPtr<T, M, D>& sp)
 {

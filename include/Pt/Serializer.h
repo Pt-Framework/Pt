@@ -45,18 +45,32 @@ namespace Pt {
 class PT_API Serializer
 {
     public:
+        /** @brief Default constructor.
+        */
         Serializer();
 
+        /** @brief Destructor.
+        */
         virtual ~Serializer();
 
+        /** @brief Returns the used context.
+        */
         SerializationContext* context();
 
+        /** @brief Clears the serializer and sets a new context.
+        */
         void reset(SerializationContext* context);
 
+        /** @brief Returns the used formatter.
+        */
         Formatter* formatter();
 
+        /** @brief Returns formatter to use.
+        */
         void setFormatter(Formatter& formatter);
 
+        /** @brief Clears all content.
+        */
         void clear();
 
         /** @brief Begins serialization of an object
@@ -90,7 +104,7 @@ class PT_API Serializer
             }
         }
 
-        /** @brief Advances formatting the object sset.
+        /** @brief Advances formatting of the object set.
 
             Returns true if the objects passed to begin() were completely
             formatted, otherwise false is returned, in which case only a
