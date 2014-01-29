@@ -39,20 +39,42 @@ namespace Pt {
 
 /** @brief Converts character sequences with different encodings.
 
+    This stream buffer encodes and decodes an external character sequence
+    using a codec. Writing to the stream buffer will convert the written
+    characters to the external character types in the external encoding.
+    Reading from the stream buffer will convert from the the encoding of
+    external characters.
+
     @ingroup Unicode
 */
 template <typename CharT, typename ByteT>
 class BasicTextBuffer : public BasicStreamBuffer<CharT>
 {
     public:
+        //! @brief External character type
         typedef ByteT extern_type;
+        
+        //! @brief Internal character type
         typedef CharT intern_type;
+
+        //! @brief Internal character type
         typedef CharT char_type;
+
+        //! @brief Internal character traits
         typedef typename std::char_traits<CharT> traits_type;
+
+        //! @brief Integer type
         typedef typename traits_type::int_type int_type;
+
+        //! @brief Stream position type
         typedef typename traits_type::pos_type pos_type;
+
+        //! @brief Stream offset type
         typedef typename traits_type::off_type off_type;
+
+        //! @brief Codec type
         typedef TextCodec<char_type, extern_type> CodecType;
+
         typedef typename CodecType::result CodecResult;
         typedef MBState state_type;
 
@@ -61,10 +83,9 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
 
             The given stream buffer @a target is used as external device.
             All input from and output to the external device is converted
-            using the codec @a codec.
-
-            The codec object which is passed as pointer will be managed by
-            this class and deleted if its reference count reaches 0.
+            using the codec @a codec. The codec object which is passed as a
+            pointer will be managed by this class and deleted if its reference
+            count reaches 0.
         */
         explicit BasicTextBuffer(std::basic_ios<extern_type>& target, CodecType* codec = 0)
         : _ebufsize(0)
@@ -127,14 +148,14 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             _codecRefs = codec ? codec->refs() : 0;
         }
 
-        /** @brief Attach to external device.
+        /** @brief Attach to external target.
         */
         void attach(std::basic_ios<extern_type>& target)
         {
             _target = &target;
         }
         
-        /** @brief Detach from external device.
+        /** @brief Detach from external target.
         */
         void detach()
         {
@@ -154,8 +175,8 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
 
         /** @brief Resets the buffer and target.
 
-            The buffer is discarded and the buffer is attached to the new
-            target. The codec is kept, if one was set previously. 
+            Attaches to the new target and discards the buffer. The codec is
+            kept, if one was set previously. 
         */
         void reset(std::basic_ios<extern_type>& target)
         {

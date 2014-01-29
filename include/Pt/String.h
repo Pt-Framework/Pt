@@ -668,157 +668,287 @@ class PT_API basic_string<Pt::Char>
         */
         basic_string& append(const Pt::Char* begin, const Pt::Char* end);
 
+        /** @brief Insert into string.
+        */
         basic_string& insert(size_type pos, const Pt::Char* str);
 
+        /** @brief Insert into string.
+        */
         basic_string& insert(size_type pos, const Pt::Char* str, size_type n);
 
+        /** @brief Insert into string.
+        */
         basic_string& insert(size_type pos, size_type n, Pt::Char ch);
 
+        /** @brief Insert into string.
+        */
         basic_string& insert(size_type pos, const basic_string& str);
 
+        /** @brief Insert into string.
+        */
         basic_string& insert(size_type pos, const basic_string& str, size_type pos2, size_type n);
 
+        /** @brief Insert into string.
+        */
         basic_string& insert(iterator p, Pt::Char ch);
 
+        /** @brief Insert into string.
+        */
         basic_string& insert(iterator p, size_type n, Pt::Char ch);
 
         // unimplemented
         //template <typename InputIterator>
         //basic_string& insert(iterator p, InputIterator first, InputIterator last);
 
+        /** @brief Clears the string.
+        */
         void clear()
         { setLength(0); }
 
+        /** @brief Erase characters from the string.
+        */
         basic_string& erase(size_type pos = 0, size_type n = npos);
 
+        /** @brief Erase characters from the string.
+        */
         iterator erase(iterator pos);
 
+        /** @brief Erase characters from the string.
+        */
         iterator erase(iterator first, iterator last);
 
+        /** @brief Replace portion of the string.
+        */
         basic_string& replace(size_type pos, size_type n, const Pt::Char* str);
-
+        
+        /** @brief Replace portion of the string.
+        */
         basic_string& replace(size_type pos, size_type n, const Pt::Char* str, size_type n2);
 
+        /** @brief Replace portion of the string.
+        */
         basic_string& replace(size_type pos, size_type n, size_type n2, Pt::Char ch);
 
+        /** @brief Replace portion of the string.
+        */
         basic_string& replace(size_type pos, size_type n, const basic_string& str);
 
+        /** @brief Replace portion of the string.
+        */
         basic_string& replace(size_type pos, size_type n, const basic_string& str, size_type pos2, size_type n2);
 
+        /** @brief Replace portion of the string.
+        */
         basic_string& replace(iterator i1, iterator i2, const Pt::Char* str);
 
+        /** @brief Replace portion of the string.
+        */
         basic_string& replace(iterator i1, iterator i2, const Pt::Char* str, size_type n);
 
+        /** @brief Replace portion of the string.
+        */
         basic_string& replace(iterator i1, iterator i2, size_type n, Pt::Char ch);
 
+        /** @brief Replace portion of the string.
+        */
         basic_string& replace(iterator i1, iterator i2, const basic_string& str);
 
+        /** @brief Compare strings.
+        */
         int compare(const basic_string& str) const;
 
+        /** @brief Compare strings.
+        */
         int compare(const Pt::Char* str) const;
 
+        /** @brief Compare strings.
+        */
         int compare(const Pt::Char* str, size_type n) const;
 
+        /** @brief Compare strings.
+        */
         int compare(const wchar_t* str) const;
 
+        /** @brief Compare strings.
+        */
         int compare(const wchar_t* str, size_type n) const;
 
+        /** @brief Compare strings.
+        */
         int compare(const char* str) const;
 
+        /** @brief Compare strings.
+        */
         int compare(const char* str, size_type n) const;
 
+        /** @brief Compare strings.
+        */
         int compare(size_type pos, size_type n, const basic_string& str) const;
 
+        /** @brief Compare strings.
+        */
         int compare(size_type pos, size_type n, const basic_string& str, size_type pos2, size_type n2) const;
 
+        /** @brief Compare strings.
+        */
         int compare(size_type pos, size_type n, const Pt::Char* str) const;
 
+        /** @brief Compare strings.
+        */
         int compare(size_type pos, size_type n, const Pt::Char* str, size_type n2) const;
 
+        /** @brief Find content in the string.
+        */
         size_type find(const basic_string& str, size_type pos = 0) const;
 
+        /** @brief Find content in the string.
+        */
         size_type find(const Pt::Char* str, size_type pos, size_type n) const;
 
+        /** @brief Find content in the string.
+        */
         size_type find(const Pt::Char* str, size_type pos = 0) const;
 
+        /** @brief Find content in the string.
+        */
         size_type find(Pt::Char ch, size_type pos = 0) const;
 
+        /** @brief Find content in the string.
+        */
         size_type rfind(const basic_string& str, size_type pos = npos) const;
 
+        /** @brief Find content in the string.
+        */
         size_type rfind(const Pt::Char* str, size_type pos, size_type n) const;
 
+        /** @brief Find content in the string.
+        */
         size_type rfind(const Pt::Char* str, size_type pos = npos) const;
 
+        /** @brief Find content in the string.
+        */
         size_type rfind(Pt::Char ch, size_type pos = npos) const;
 
+        /** @brief Find content in the string.
+        */
         size_type find_first_of(const basic_string& str, size_type pos = 0) const
         { return this->find_first_of( str.data(), pos, str.size() ); }
 
+        /** @brief Find content in the string.
+        */
         size_type find_first_of(const Pt::Char* s, size_type pos, size_type n) const;
 
+        /** @brief Find content in the string.
+        */
         size_type find_first_of(const Pt::Char* str, size_type pos = 0) const
         { return this->find_first_of( str, pos, traits_type::length(str) ); }
 
+        /** @brief Find content in the string.
+        */
         size_type find_first_of(const Pt::Char ch, size_type pos = 0) const
         { return this->find(ch, pos); }
 
+        /** @brief Find content in the string.
+        */
         size_type find_last_of(const basic_string& str, size_type pos = npos) const
         { return this->find_last_of( str.data(), pos, str.size() ); }
 
+        /** @brief Find content in the string.
+        */
         size_type find_last_of(const Pt::Char* s, size_type pos, size_type n) const;
 
+        /** @brief Find content in the string.
+        */
         size_type find_last_of(const Pt::Char* str, size_type pos = npos) const
         { return this->find_last_of( str, pos, traits_type::length(str) ); }
 
+        /** @brief Find content in the string.
+        */
         size_type find_last_of(const Pt::Char ch, size_type pos = npos) const
         { return this->rfind(ch, pos); }
 
+        /** @brief Find content in the string.
+        */
         size_type find_first_not_of(const basic_string& str, size_type pos = 0) const
         { return this->find_first_not_of( str.data(), pos, str.size() ); }
 
+        /** @brief Find content in the string.
+        */
         size_type find_first_not_of(const Pt::Char* s, size_type pos, size_type n) const;
 
+        /** @brief Find content in the string.
+        */
         size_type find_first_not_of(const Pt::Char* str, size_type pos = 0) const
         { return this->find_first_not_of( str, pos, traits_type::length(str) ); }
 
+        /** @brief Find content in the string.
+        */
         size_type find_first_not_of(const Pt::Char ch, size_type pos = 0) const;
 
+        /** @brief Find content in the string.
+        */
         size_type find_last_not_of(const basic_string& str, size_type pos = npos) const
         { return this->find_last_not_of( str.data(), pos, str.size() ); }
 
+        /** @brief Find content in the string.
+        */
         size_type find_last_not_of(const Pt::Char* tok, size_type pos, size_type n) const;
 
+        /** @brief Find content in the string.
+        */
         size_type find_last_not_of(const Pt::Char* str, size_type pos = npos) const
         { return this->find_last_not_of( str, pos, traits_type::length(str) ); }
 
+        /** @brief Find content in the string.
+        */
         size_type find_last_not_of(Pt::Char ch, size_type pos = npos) const;
 
     public:
+        /** @brief Narrow string to 8-bit.
+        */
         std::string narrow(char dfault = '?') const;
 
+        /** @brief Widen 8-bit string.
+        */
         static basic_string widen(const char* str);
 
+        /** @brief Widen 8-bit string.
+        */
         static basic_string widen(const std::string& str);
 
+        /** @brief Convert to UTF-16.
+        */
         template <typename OutIterT>
         OutIterT toUtf16(OutIterT to) const;
 
+        /** @brief Convert from UTF-16.
+        */
         template <typename InIterT>
         static basic_string fromUtf16(InIterT from, InIterT fromEnd);
 
     public:
+        /** @brief Assignment operator.
+        */
         basic_string& operator=(const basic_string& str)
         { return this->assign(str); }
 
+        /** @brief Assignment operator.
+        */
         basic_string& operator=(const wchar_t* str)
         { return this->assign(str); }
 
+        /** @brief Assignment operator.
+        */
         basic_string& operator=(const char* str)
         { return this->assign(str); }
 
+        /** @brief Assignment operator.
+        */
         basic_string& operator=(const Pt::Char* str)
         { return this->assign(str); }
 
+        /** @brief Assignment operator.
+        */
         basic_string& operator=(Pt::Char ch)
         {
             // no privreserve(1), short string capacity is large enough
@@ -829,12 +959,18 @@ class PT_API basic_string<Pt::Char>
             return *this;
         }
 
+        /** @brief Append a string.
+        */
         basic_string& operator+=(const basic_string& str)
         { return this->append(str); }
 
+        /** @brief Append a string.
+        */
         basic_string& operator+=(const Pt::Char* str)
         { return this->append(str); }
 
+        /** @brief Append a character.
+        */
         basic_string& operator+=(Pt::Char c);
 
     private:

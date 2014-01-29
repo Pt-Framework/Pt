@@ -34,40 +34,27 @@
 
 namespace Pt {
 
-/** @brief Converts between character encodings.
-
-    @ingroup Unicode
-*/
-template <typename I, typename E>
-class TextCodec : public std::codecvt<I, E, Pt::MBState>
-{
+//! @cond HIDDEN_DOCS
+template <typename CharT, typename ByteT>
+class TextCodec : public std::codecvt<CharT, ByteT, Pt::MBState>
+{   
     public:
-        typedef I InternT;
-        typedef E ExternT;
-    
-    public:
-        /** @brief Constructs with reference count.
-        
-            If @a ref is 0 the stream, stream buffer or locale deletes the
-            facet.
-         */
         TextCodec(std::size_t ref = 0)
-        : std::codecvt<InternT, ExternT, MBState>(ref)
+        : std::codecvt<CharT, ByteT, MBState>(ref)
         , _refs(ref)
         {}
 
     public:
-        //! Desctructor
         virtual ~TextCodec()
         {}
 
-        //! @internal
         std::size_t refs() const
         { return _refs; }
 
     private:
         std::size_t _refs;
 };
+//! @endcond
 
 }
 

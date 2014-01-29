@@ -42,19 +42,27 @@ namespace Pt {
 class TypeInfo
 {
     public:
+        /** @brief Construct a void type info.
+        */
         TypeInfo()
         : m_ti(0)
         {
             m_ti = &typeid(Void);
         }
 
+        /** @brief Construct from type info.
+        */
         TypeInfo(const std::type_info& ti)
         : m_ti(&ti)
         { }
 
+        /** @brief Returns the type info.
+        */
         const std::type_info& get() const
         { return *m_ti; }
 
+        /** @brief Determines order of %TypeInfo instances.
+        */
         bool before(const TypeInfo& rhs) const
         { return m_ti->before(*rhs.m_ti) != 0; }
         
@@ -62,25 +70,45 @@ class TypeInfo
         const std::type_info* m_ti;
 };
 
-/** @brief Equal comparison operator.
+/** @brief Equal comparison.
 
     @related TypeInfo
 */
 inline bool operator==(const TypeInfo& lhs, const TypeInfo& rhs)
 { return (lhs.get() == rhs.get()) != 0; }
 
+/** @brief Inequal comparison.
+
+    @related TypeInfo
+*/
 inline bool operator!=(const TypeInfo& lhs, const TypeInfo& rhs)
 { return !(lhs == rhs); }
 
+/** @brief Less-than comparison.
+
+    @related TypeInfo
+*/
 inline bool operator<(const TypeInfo& lhs, const TypeInfo& rhs)
 { return lhs.before(rhs); }
 
+/** @brief Greater-than comparison.
+
+    @related TypeInfo
+*/
 inline bool operator>(const TypeInfo& lhs, const TypeInfo& rhs)
 { return rhs < lhs; }
 
+/** @brief Less-than or equal comparison.
+
+    @related TypeInfo
+*/
 inline bool operator<=(const TypeInfo& lhs, const TypeInfo& rhs)
 { return !(lhs > rhs); }
 
+/** @brief Greater-than or equal comparison.
+
+    @related TypeInfo
+*/
 inline bool operator>=(const TypeInfo& lhs, const TypeInfo& rhs)
 { return !(lhs < rhs); }
 

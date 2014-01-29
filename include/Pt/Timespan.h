@@ -35,7 +35,7 @@
 
 namespace Pt {
 
-/** @brief  Represents time spans up to microsecond resolution.
+/** @brief Represents time spans in microsecond resolution.
 
     @ingroup DateTime
 */
@@ -49,50 +49,60 @@ class Timespan
         static const Pt::int64_t Days         =   24 * Timespan::Hours;
 
     public:
-        //! @brief Creates a zero Timespan.
+        //! @brief Constructs a zero %Timespan.
         Timespan()
         : _span(0)
         {}
 
-        //! @brief Creates a Timespan.
+        //! @brief Constructs a %Timespan.
         explicit Timespan(Pt::int64_t microseconds)
         : _span(microseconds)
         { }
 
-        /** @brief Creates a Timespan.
-            Useful for creating a Timespan from a POSIX timeval struct.
+        /** @brief Constructs a %Timespan.
+            
+            Useful for assigning from a POSIX timeval struct.
         */
         Timespan(long secs, long microsecs)
         : _span(Pt::int64_t(secs)*Seconds + microsecs)
         { }
 
-        //! @brief Creates a Timespan.
+        //! @brief Constructs a %Timespan.
         Timespan(int days, int hours, int minutes, int secs, int microseconds);
 
-        //! @brief Creates a Timespan from another one.
+        //! @brief Copy Constructor.
         Timespan(const Timespan& timespan);
 
-        //! @brief Destroys the Timespan.
+        //! @brief Destructor.
         ~Timespan()
         {}
 
         //! @brief Assignment operator.
         Timespan& operator=(const Timespan& timespan);
 
-        //! @brief Assigns a new span.
+        //! @brief Sets the time span.
         Timespan& set(int days, int hours, int minutes, int seconds, int microseconds);
 
-        /** @brief Assigns a new span.
+        /** @brief Sets the time span.
+            
             Useful for assigning from a POSIX timeval struct.
         */
         Timespan& set(long seconds, long microseconds);
 
+        /** @brief Returns true if null.
+        */
         bool isNull() const;
 
+        /** @brief Sets to null.
+        */
         void setNull();
 
+        /** @brief Assignment by sum operator.
+        */
         Timespan& operator+=(const Timespan& d);
 
+        /** @brief Assignment by difference operator
+        */
         Timespan& operator-=(const Timespan& d);
 
         //! @brief Returns the number of days.
@@ -145,31 +155,53 @@ class Timespan
 inline bool operator ==(const Timespan& a, const Timespan& b)
 { return a.toUSecs() == b.toUSecs(); }
 
+/** @brief Inequal comparison operator.
 
+    @related Timespan
+*/
 inline bool operator !=(const Timespan& a, const Timespan& b)
 { return a.toUSecs() != b.toUSecs(); }
 
 
+/** @brief Greater-than comparison operator.
+
+    @related Timespan
+*/
 inline bool operator >(const Timespan& a, const Timespan& b)
 { return a.toUSecs() > b.toUSecs(); }
 
+/** @brief Greater-than-or-equal comparison operator.
 
+    @related Timespan
+*/
 inline bool operator >=(const Timespan& a, const Timespan& b)
 { return a.toUSecs() >= b.toUSecs(); }
 
+/** @brief Less-than comparison operator.
 
+    @related Timespan
+*/
 inline bool operator <(const Timespan& a, const Timespan& b)
 { return a.toUSecs() < b.toUSecs(); }
 
+/** @brief Less-than-or-equal comparison operator.
 
+    @related Timespan
+*/
 inline bool operator <=(const Timespan& a, const Timespan& b)
 { return a.toUSecs() <= b.toUSecs(); }
 
+/** @brief Addition operator.
 
+    @related Timespan
+*/
 inline Timespan operator +(const Timespan& a, const Timespan& b)
 { return Timespan(a.toUSecs() + b.toUSecs()); }
 
+/** @brief Substraction operator.
 
+    @related Timespan
+*/
 inline Timespan operator -(const Timespan& a, const Timespan& b)
 { return Timespan(a.toUSecs() - b.toUSecs()); }
 

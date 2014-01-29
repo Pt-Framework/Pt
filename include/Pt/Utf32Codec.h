@@ -42,17 +42,18 @@ namespace Pt {
 class PT_API Utf32BECodec : public TextCodec<Char, char> 
 {
     public:
+        //! @brief Constructor.
         explicit Utf32BECodec(std::size_t ref = 0);
 
         //! @brief Destructor.
         virtual ~Utf32BECodec();
 
-        //! @brief Decodes UTF-16 to UTF-32.
+        // inheritdoc
         virtual result do_in(MBState& s, 
                              const char* from, const char* fromEnd, const char*& fromNext,
                              Char* to, Char* toEnd, Char*& toNext) const ;
         
-        //! @brief Encodes UTF-32 to UTF-16.
+        // inheritdoc
         virtual result do_out(MBState& s, const Char* fromBegin,
                               const Char* fromEnd, const Char*& fromNext,
                               char* toBegin, char* toEnd, char*& toNext) const;
@@ -81,17 +82,18 @@ class PT_API Utf32BECodec : public TextCodec<Char, char>
 class PT_API Utf32LECodec : public TextCodec<Char, char> 
 {
     public:
+        //! @brief Constructor.
         explicit Utf32LECodec(std::size_t ref = 0);
 
         //! @brief Destructor.
         virtual ~Utf32LECodec();
 
-        //! @brief Decodes UTF-16 to UTF-32.
+        // inheritdoc
         virtual result do_in(MBState& s, 
                              const char* from, const char* fromEnd, const char*& fromNext,
                              Char* to, Char* toEnd, Char*& toNext) const ;
         
-        //! @brief Encodes UTF-32 to UTF-16.
+        // inheritdoc
         virtual result do_out(MBState& s, const Char* fromBegin,
                               const Char* fromEnd, const Char*& fromNext,
                               char* toBegin, char* toEnd, char*& toNext) const;

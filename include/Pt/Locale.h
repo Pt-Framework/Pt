@@ -59,9 +59,9 @@ template <typename I, typename E, typename S>
 class codecvt : public std::codecvt_base
 {
     public:
-        typedef I InternT;
-        typedef E ExternT;
-        typedef S StateT; 
+        typedef I intern_type;
+        typedef E extern_type;
+        typedef S state_type; 
     
     public: 
         codecvt(std::size_t ref = 0)
@@ -70,28 +70,28 @@ class codecvt : public std::codecvt_base
         virtual ~codecvt()
         { }
         
-        codecvt_base::result out(StateT& state, 
-                                 const InternT* from,
-                                 const InternT* from_end, 
-                                 const InternT*& from_next,
-                                 ExternT* to, 
-                                 ExternT* to_end, 
-                                 ExternT*& to_next) const
+        codecvt_base::result out(state_type& state, 
+                                 const intern_type* from,
+                                 const intern_type* from_end, 
+                                 const intern_type*& from_next,
+                                 extern_type* to, 
+                                 extern_type* to_end, 
+                                 extern_type*& to_next) const
         { return this->do_out(state, from, from_end, from_next, to, to_end, to_next); }
 
-        codecvt_base::result unshift(StateT& state, 
-                                     ExternT* to, 
-                                     ExternT* to_end,
-                                     ExternT*& to_next) const
+        codecvt_base::result unshift(state_type& state, 
+                                     extern_type* to, 
+                                     extern_type* to_end,
+                                     extern_type*& to_next) const
         { return this->do_unshift(state, to, to_end, to_next); }
 
-        codecvt_base::result in(StateT& state, 
-                                const ExternT* from,
-                                const ExternT* from_end, 
-                                const ExternT*& from_next,
-                                InternT* to, 
-                                InternT* to_end, 
-                                InternT*& to_next) const
+        codecvt_base::result in(state_type& state, 
+                                const extern_type* from,
+                                const extern_type* from_end, 
+                                const extern_type*& from_next,
+                                intern_type* to, 
+                                intern_type* to_end, 
+                                intern_type*& to_next) const
         { return this->do_in(state, from, from_end, from_next, to, to_end, to_next); }
 
         int encoding() const
@@ -100,33 +100,33 @@ class codecvt : public std::codecvt_base
         bool always_noconv() const
         { return this->do_always_noconv(); }
 
-        int length(StateT& state, const ExternT* from,
-                   const ExternT* end, std::size_t max) const
+        int length(state_type& state, const extern_type* from,
+                   const extern_type* end, std::size_t max) const
         { return this->do_length(state, from, end, max); }
 
         int max_length() const
         { return this->do_max_length(); }
     
     protected:
-        virtual result do_in(StateT& s, const ExternT* fromBegin,
-                             const ExternT* fromEnd, const ExternT*& fromNext,
-                             InternT* toBegin, InternT* toEnd, InternT*& toNext) const = 0;
+        virtual result do_in(state_type& s, const extern_type* fromBegin,
+                             const extern_type* fromEnd, const extern_type*& fromNext,
+                             intern_type* toBegin, intern_type* toEnd, intern_type*& toNext) const = 0;
 
-        virtual result do_out(StateT& s, const InternT* fromBegin,
-                              const InternT* fromEnd, const InternT*& fromNext,
-                              ExternT* toBegin, ExternT* toEnd, ExternT*& toNext) const = 0;
+        virtual result do_out(state_type& s, const intern_type* fromBegin,
+                              const intern_type* fromEnd, const intern_type*& fromNext,
+                              extern_type* toBegin, extern_type* toEnd, extern_type*& toNext) const = 0;
 
         virtual bool do_always_noconv() const = 0;
 
-        virtual int do_length(StateT& s, const ExternT* fromBegin, 
-                              const ExternT* fromEnd, std::size_t max) const = 0;
+        virtual int do_length(state_type& s, const extern_type* fromBegin, 
+                              const extern_type* fromEnd, std::size_t max) const = 0;
 
         virtual int do_max_length() const = 0;
 
-        virtual std::codecvt_base::result do_unshift(StateT&, 
-                                                     ExternT*, 
-                                                     ExternT*, 
-                                                     ExternT*&) const = 0;
+        virtual std::codecvt_base::result do_unshift(state_type&, 
+                                                     extern_type*, 
+                                                     extern_type*, 
+                                                     extern_type*&) const = 0;
 
         virtual int do_encoding() const = 0;
 };

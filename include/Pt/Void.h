@@ -33,9 +33,9 @@
 
 namespace Pt {
 
-/** @brief %Void type
+/** @brief %Void type.
 
-    The Void type is used as marker type for template specialisations,
+    The %Void type is used as marker type for template specialisations,
     where void is not enough to indicate an unused template parameter.
 
     @ingroup CoreTypes

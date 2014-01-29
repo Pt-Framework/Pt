@@ -45,14 +45,7 @@ struct TypeTraitsBase
     typedef const T* ConstPointer;
 };
 
-/** @brief Type-traits for for non-const value types.
-
-    Compile time type information (CTTI) is implemented in Pt by the
-    means of TypeTraits. A number of specialisations allows
-    compile type branching in gerneric code depending on the type.
-
-    @ingroup CoreTypes
-*/
+//! @cond HIDDEN_DOCS
 template <typename T>
 struct TypeTraits : public TypeTraitsBase<T>
 {
@@ -60,7 +53,7 @@ struct TypeTraits : public TypeTraitsBase<T>
     static const unsigned int isPointer = 0;
     static const unsigned int isReference = 0;
 };
-
+//! @endcond
 
 template <typename T>
 struct TypeTraits<const T> : public TypeTraitsBase<T>

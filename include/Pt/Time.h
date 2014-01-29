@@ -86,15 +86,22 @@ class Time
         static const uint32_t MSecsPerSecond   = 1000;
 
     public:
-        /** \brief Creates a Time set to zero.
+        /** @brief Construct a %Time set to zero.
         */
         Time()
         : _msecs(0)
         {}
 
-        /** \brief Creates a Time from given values.
+        /** @brief Construct from time values.
 
-            InvalidTime is thrown if one or more of the values are out of range
+            Construct the time to a hour, minute, second and milli-second.
+
+            @param h Hours
+            @param m Minutes
+            @param s Seconds
+            @param ms Milliseconds
+
+            @throws InvalidTime One or more of the values are out of range.
         */
         inline Time(unsigned h, unsigned m, unsigned s = 0, unsigned ms = 0)
         : _msecs(0)
@@ -107,44 +114,54 @@ class Time
         Time& operator=(const Time& other)
         { _msecs=other._msecs; return *this; }
 
-        /** \brief Returns the hour-part of the Time.
+        /** @brief Returns the hour-part.
         */
         unsigned hour() const
         {
             return _msecs / MSecsPerHour;
         }
 
-        /** \brief Returns the minute-part of the Time.
+        /** @brief Returns the minute-part.
         */
         unsigned minute() const
         {
             return (_msecs % MSecsPerHour) / MSecsPerMinute;
         }
 
-        /** \brief Returns the second-part of the Time.
+        /** @brief Returns the second-part.
         */
         unsigned second() const
         {
             return (_msecs / 1000) % SecondsPerMinute;
         }
 
-        /** \brief Returns the millisecond-part of the Time.
+        /** @brief Returns the millisecond-part.
         */
         unsigned msec() const
         {
             return _msecs % 1000;
         }
 
+        /** @brief Converts to milliseconds.
+        */
         inline uint32_t toMSecs() const
         { return _msecs; }
 
+        /** @brief Sets to total milliseconds.
+        */
         void setTotalMSecs(uint32_t msecs)
         { _msecs = msecs; }
 
-        /** \brief Sets the time.
+        /** @brief Sets the time.
 
             Sets the time to a new hour, minute, second, milli-second.
-            InvalidTime is thrown if one or more of the values are out of range
+
+            @param h Hours
+            @param m Minutes
+            @param s Seconds
+            @param ms Milliseconds
+
+            @throws InvalidTime One or more of the values are out of range.
         */
         void set(unsigned h, unsigned m, unsigned s, unsigned ms = 0)
         {
@@ -156,7 +173,7 @@ class Time
             _msecs = (h * SecondsPerHour + m * SecondsPerMinute + s) * 1000 + ms;
         }
 
-        /** @brief Get the time values
+        /** @brief Get the time values.
 
             Gets the hour, minute, second and millisecond parts of the time.
         */
@@ -168,7 +185,7 @@ class Time
             ms = msec();
         }
 
-        /** @brief Adds seconds to the time
+        /** @brief Adds seconds to the time.
 
             This method does not change the time, but returns the time
             with the seconds added.
@@ -178,7 +195,7 @@ class Time
             return addMSecs(secs * 1000);
         }
 
-        /** @brief Determines seconds until another time
+        /** @brief Determines seconds until another time.
         */
         int secsUntil(const Time &t) const
         {
@@ -206,7 +223,7 @@ class Time
             return t;
         }
 
-        /** @brief Determines milliseconds until another time
+        /** @brief Calculates the milliseconds until another time.
         */
         Pt::int64_t msecsUntil(const Time &t) const
         {
@@ -216,12 +233,12 @@ class Time
             return MSecsPerDay - (_msecs - t._msecs);
         }
 
-        /** \brief Returns the time in ISO-format (hh:mm:ss.hhh)
+        /** @brief Returns the time in ISO-format (hh:mm:ss.hhh).
         */
         std::string toIsoString() const
         { return timeToString(*this); }
 
-        /** \brief Convert from an ISO time string
+        /** @brief Convert from an ISO time string.
 
             Interprets the passed string as a time-string in ISO-format
             (hh:mm:ss.hhh) and returns a Time-object. If the string is not
@@ -230,7 +247,7 @@ class Time
         static Time fromIsoString(const std::string& s)
         { return timeFromString(s); }
 
-        /** @brief Assignment by sum operator
+        /** @brief Assignment by sum operator.
         */
         Time& operator+=(const Timespan& ts)
         {
@@ -250,7 +267,7 @@ class Time
             return *this;
         }
 
-        /** \brief Returns true if values are a valid time
+        /** @brief Returns true if values are a valid time
         */
         static bool isValid(unsigned h, unsigned m, unsigned s, unsigned ms)
         {
@@ -258,16 +275,21 @@ class Time
         }
 
     private:
-        //! @internal
         Pt::uint32_t _msecs;
 };
 
 
+/** @brief Deserialize a %Time.
+
+    @related Time
+*/
 PT_API void operator >>=(const SerializationInfo& si, Time& time);
 
+/** @brief Serialize a %Time.
 
+    @related Time
+*/
 PT_API void operator <<=(SerializationInfo& si, const Time& time);
-
 
 /** @brief Equal comparison operator.
 
@@ -332,6 +354,6 @@ inline Time operator-(const Time& time, const Timespan& ts)
 inline Timespan operator-(const Time& a, const Time& b)
 { return Timespan( b.msecsUntil(a) * 1000 ); }
 
-}
+} // namespace Pt
 
 #endif // PT_TIME_H

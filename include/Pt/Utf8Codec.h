@@ -36,40 +36,32 @@
 
 namespace Pt {
 
-/** @brief This Codec class is able to convert from UTF-8 to UTF-32 and from UTF-32 to UTF-8.
+/** @brief Convert between unicode and UTF-8.
     
-    The method do_in() converts an array of char containing UTF-8-encoded data into an array
-    of Pt::Char which is UTF-32-encoded, which means that the data is a direct readable
-    32-bit representation of the character.
-    
-    The method do_out() converts an array of Pt::Char objects (UTF-32/Unicode) into an
-    array of char which contains the same sequence of characters in UTF-8-encoding.
+    The %Utf8Codec is used by the text streams and buffers to convert to
+    and from external encodings. Since it implements the std::codecvt facet
+    interface, it can be used as this type of facet on all systems which
+    support facets and the std::locale.
 
     @ingroup Unicode
 */
 class PT_API Utf8Codec : public TextCodec<Char, char> 
 {
     public:
-        /**
-            * @brief Constructs a new Utf8Codec object which converts UTF-8 to UTF-32 and UTF-32 to UTF-8.
-            *
-            * The internal type is Pt::Char and external type is $char$
-            *
-            * @param ref This optional parameter is passed to std::codecvt. When ref == 0 the locale takes
-            * care of deleting the facet. If ref == 1 the locale does not destroy the facet. Default value is 0.
-            */
+        /** @brief Constructor.
+        */
         explicit Utf8Codec(std::size_t ref = 0);
 
         //! @brief Destructor.
         virtual ~Utf8Codec()
         {}
 
-        //! @brief Decodes UTF-8 to UTF-32.
+        // inheritdoc
         virtual result do_in(MBState& s, const char* fromBegin,
                                          const char* fromEnd, const char*& fromNext,
                                          Char* toBegin, Char* toEnd, Char*& toNext) const;
 
-        //! @brief Encodes UTF-32 to UTF-8.
+        // inheritdoc
         virtual result do_out(MBState& s, const Char* fromBegin,
                                           const Char* fromEnd, const Char*& fromNext,
                                           char* toBegin, char* toEnd, char*& toNext) const;
@@ -89,13 +81,17 @@ class PT_API Utf8Codec : public TextCodec<Char, char>
         // inheritdoc
         int do_encoding() const throw();
 
+        //! @brief Deocde to a unicode string.
         static String decode(const char* data, std::size_t size);
         
+        //! @brief Deocde to a unicode string.
         static String decode(const std::string& data)
         { return decode(data.data(), data.size()); }
 
+        //! @brief Encode to a UTF-8 string.
         static std::string encode(const Char* data, std::size_t size);
         
+        //! @brief Encode to a UTF-8 string.
         static std::string encode(const String& data)
         { return encode(data.data(), data.size()); }
 };
