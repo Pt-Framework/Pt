@@ -53,6 +53,7 @@ UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 , _fd(INVALID_SOCKET)
 , _isConnected(false)
 , _isBound(false)
+, _isBoundInterface(false)
 , _hopLimit(DefaultHopLimit)
 , _eventFlags(FD_CLOSE)
 , _timeout(Pt::System::EventLoop::WaitInfinite)
@@ -98,6 +99,7 @@ void UdpSocketImpl::close()
     _fd = INVALID_SOCKET;
     _isConnected = false;
     _isBound = false;
+    _isBoundInterface = false;
 
     _hopLimit = DefaultHopLimit;
 }
@@ -181,6 +183,91 @@ void UdpSocketImpl::bind(const Endpoint& e, const UdpSocketOptions& opts)
         {
             _isBound = true;
             std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
+            return;
+        }
+
+        addrInUse = WSAGetLastError() == WSAEADDRINUSE;
+
+        if( ! _isConnected )
+            this->close();
+    }
+
+    if(addrInUse)
+        throw AddressInUse( e.toString() );
+    else
+        throw System::AccessFailed( ai.host() );
+}
+
+
+void UdpSocketImpl::bindMulticast(const Endpoint& e, const UdpSocketOptions& opts)
+{
+    log_debug( "bind multicast socket to " << e.toString() );
+
+    AddrInfo ai;
+    ai.resolve(e, true);
+
+    BOOL reuseAddr = TRUE;
+    bool addrInUse = false;
+
+    for (AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
+    {
+        if( _isConnected )
+        {
+            if(it->ai_family != _sendAddr.ss_family)
+                continue;
+        }
+        else if( _isBound )
+        {
+            this->close();
+        }
+
+        if( _fd == INVALID_SOCKET )
+            _fd = WSASocket(it->ai_family, SOCK_DGRAM, 0, NULL, 0, 0);
+
+        if( _fd == INVALID_SOCKET )
+            continue;
+
+        if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&reuseAddr, sizeof(reuseAddr)) < 0)
+        {
+            this->close();
+            throw System::SystemError("setsockopt");
+        }
+
+#if defined(IPV6_V6ONLY)
+        const int on = 1;
+
+        if( it->ai_family == AF_INET6 )
+        {
+            if( ::setsockopt(_fd, IPPROTO_IPV6, IPV6_V6ONLY, (const char*) &on, sizeof(on)) < 0 )
+            {
+                this->close();
+                throw System::SystemError("setsockopt IPV6_V6ONLY failed");
+            }
+        }
+#endif
+
+        sockaddr_storage ifss;
+        socklen_t addrlen = static_cast<socklen_t>(it->ai_addrlen);
+        memcpy(&ifss, it->ai_addr, addrlen);
+
+        if(it->ai_family == AF_INET)
+        {
+            reinterpret_cast<sockaddr_in*>(&ifss)->sin_addr.s_addr = htonl(INADDR_ANY);
+        }
+        else if(it->ai_family == AF_INET6)
+        {
+            reinterpret_cast<sockaddr_in6*>(&ifss)->sin6_addr = in6addr_any;
+        }
+        else
+        {
+            continue;
+        }
+
+        if( ::bind(_fd, (sockaddr*)&ifss, addrlen) == 0 )
+        {
+            _isBound = true;
+            _isBoundInterface = true;
+            std::memmove(&_servaddr, it->ai_addr, addrlen);
             return;
         }
 
@@ -404,12 +491,12 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
             sockaddr_in* sa = (sockaddr_in*)(it->ai_addr);
             memcpy( &req.imr_multiaddr, &sa->sin_addr, sizeof(struct in_addr) );
 
-            //if(_isBound)
-            //{
-            //    const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_servaddr);
-            //    memcpy(&req.imr_interface, &sa->sin_addr, sizeof(in_addr));
-            //}
-            //else
+            if(_isBoundInterface)
+            {
+                const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_servaddr);
+                memcpy(&req.imr_interface, &sa->sin_addr, sizeof(in_addr));
+            }
+            else
               req.imr_interface.s_addr = htonl(INADDR_ANY);
 
             if (::setsockopt(_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) == 0)

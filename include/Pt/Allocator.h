@@ -32,7 +32,7 @@
 
 namespace Pt {
 
-/** @brief Allocator interface.
+/** @brief %Allocator interface.
 
     @ingroup Allocator
 */

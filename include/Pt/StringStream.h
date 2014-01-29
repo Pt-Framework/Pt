@@ -153,6 +153,13 @@ namespace Pt {
 /** @class Pt::StringStream StringStream.h "Pt/StringStream.h"
     @brief Unicode string stream.
 
+    This class is a typedef of the std::basic_stringstream template for
+    the unicode character type Pt::Char:
+
+    @code
+    typedef std::basic_stringstream<Pt::Char> StringStream;
+    @endcode
+
     @ingroup Unicode
 */
 typedef std::basic_stringstream<Pt::Char> StringStream;
@@ -160,12 +167,26 @@ typedef std::basic_stringstream<Pt::Char> StringStream;
 /** @class Pt::IStringStream StringStream.h "Pt/StringStream.h"
     @brief Unicode string input stream.
 
+    This class is a typedef of the std::ibasic_stringstream template for
+    the unicode character type Pt::Char:
+
+    @code
+    typedef std::basic_istringstream<Pt::Char> StringStream;
+    @endcode
+
     @ingroup Unicode
 */
 typedef std::basic_istringstream<Pt::Char> IStringStream;
 
 /** @class Pt::OStringStream StringStream.h "Pt/StringStream.h"
     @brief Unicode string output stream.
+
+    This class is a typedef of the std::basic_ostringstream template for
+    the unicode character type Pt::Char:
+
+    @code
+    typedef std::basic_ostringstream<Pt::Char> StringStream;
+    @endcode
 
     @ingroup Unicode
 */

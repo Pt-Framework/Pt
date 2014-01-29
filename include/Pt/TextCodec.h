@@ -34,48 +34,17 @@
 
 namespace Pt {
 
-/** @brief Generic %TextCodec base class for specific codecs.
- 
-    This class contains default implementations for the methods do_unshift(), do_encoding()
-    and do_always_noconv() so sub-classes do not have to implement this default behaviour.
- 
-    Codecs are used to convert one Text-encoding into another Text-encoding. The internal
-    and external data type can be specified using the template parameter 'I' (internal) and
-    'E' (external).
- 
-    When used on a platform which supports locales and facets the conversion may use
-    locale-specific conversion of the Text.
- 
-    This class derives from facet std::codecvt. Further documentation can be found there.
- 
-    @param I The character type associated with the internal code set.
-    @param E The character type associated with the external code set.
- 
-    @ingroup Unicode
-*/
-template <typename I, typename E>
-class TextCodec : public std::codecvt<I, E, Pt::MBState>
-{
+//! @cond HIDDEN_DOCS
+template <typename CharT, typename ByteT>
+class TextCodec : public std::codecvt<CharT, ByteT, Pt::MBState>
+{   
     public:
-        typedef I InternT;
-        typedef E ExternT;
-    
-    public:
-        /**
-         * @brief Constructs a new TextCodec object.
-         *
-         * The internal and external type are specified by the template parameters of the class.
-         *
-         * @param ref This parameter is passed to std::codecvt. When ref == 0 the locale takes care
-         * of deleting the facet. If ref == 1 the locale does not destroy the facet.
-         */
         TextCodec(std::size_t ref = 0)
-        : std::codecvt<InternT, ExternT, MBState>(ref)
+        : std::codecvt<CharT, ByteT, MBState>(ref)
         , _refs(ref)
         {}
 
     public:
-        //! Empty desctructor
         virtual ~TextCodec()
         {}
 
@@ -85,6 +54,7 @@ class TextCodec : public std::codecvt<I, E, Pt::MBState>
     private:
         std::size_t _refs;
 };
+//! @endcond
 
 }
 
