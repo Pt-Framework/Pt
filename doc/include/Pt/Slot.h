@@ -40,9 +40,6 @@ template < typename R, typename ARGUMENTS>
 class BasicSlot : public Slot
 {
     public:
-        //! @brief Clone this object with new
-        virtual Slot* clone() const = 0;
-
         //! @brief Returns a pointer to the contained callable
         virtual const void* callable() const = 0;
 

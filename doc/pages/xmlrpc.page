@@ -14,15 +14,16 @@ if they are serializable using Pt's serialization API.
 
 The XML-RPC server side API is implemented as a service for Pt's HTTP server.
 Regular C++ functions or methods can be registered as XML-RPC remote procedures
-with a Pt::XmlRpc::Service. XML-RPC requests are processed and dispatched to
-the respective procedure by the service. Note that the registered function or
+with a Pt::XmlRpc::ServiceDefinition for use with an Pt::XmlRpc::Service such as
+the HttpService. The XML-RPC requests are processed and dispatched to the
+respective procedure by the service. Note, that the registered function or
 method will potentially be called from one of the HTTP server threads.
 
 
 @subsection xmlrpc_Service_1 Adding service procedures to a XML-RPC service
 
-The following example shows a typical XML-RPC service, where member functions
-are registered as XML-RPC procedures:
+The following example shows a typical XML-RPC service definition, where member
+functions are registered as XML-RPC procedures:
 
 @code
 class CalculatorService : public Pt::XmlRpc::ServiceDefinition
@@ -50,7 +51,7 @@ class CalculatorService : public Pt::XmlRpc::ServiceDefinition
 };
 @endcode
 
-The service needs to inherit Pt::XmlRpc::ServiceDefinition and register the XML-RPC
+One needs to inherit Pt::XmlRpc::ServiceDefinition and register the XML-RPC
 procedures in the constructor. The string passed to registerProcedure() is
 the name of the procedure and all XML-RPC requests with this 'methodName' 
 XML tag will be dispatched to that method.
@@ -117,7 +118,7 @@ invoked. When the timer runs out, ActiveProcedure::setReady() is called in
 the timer callback, to notify the XML-RPC service that the asynchronous call
 has finished. Finally, onResult() will be called to obtain the return value. 
 
-The next example shows how the service procedure is registered:
+The next example shows how the asynchronous service procedure is registered:
 
 @code
 class MyService : public Pt::XmlRpc::ServiceDefinition
@@ -125,7 +126,7 @@ class MyService : public Pt::XmlRpc::ServiceDefinition
   public:
     MyService()
     {
-      registerActiveProcedure("async", *this, &CalculatorService::async);
+      registerActiveProcedure("asyncEcho", *this, &MyService::asyncEcho);
     }
 
     AsyncEcho* asyncEcho(Pt::XmlRpc::Responder& responder)
@@ -136,8 +137,8 @@ class MyService : public Pt::XmlRpc::ServiceDefinition
 @endcode
 
 A member function is registered as an asynchronous XML-RPC procedure in the
-constructor of the service, but here the registered member function is only a
-factory method for an asynchronous XML-RPC call. 
+constructor of the service definition, but in this case it is only a factory
+method for an asynchronous XML-RPC call. 
 
 
 @subsection xmlrpc_Service_2 Using User-Defined Types in XML-RPC procedures
