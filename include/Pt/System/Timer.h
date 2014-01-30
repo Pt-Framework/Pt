@@ -57,7 +57,7 @@ namespace System {
 
     int main()
     {
-        Pt::System::EventLoop loop;
+        Pt::System::MainLoop loop;
   
         Pt::System::Timer timer;
         timer.timeout() += Pt::slot(onTimer);

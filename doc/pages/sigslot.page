@@ -19,11 +19,11 @@ simple but real example might look like this:
 @code
 int main()
 {
-    Pt::System::Timer timer;
-    timer.start(1000);
-
     Pt::System::Application app;
-    app.add(timer);
+    
+    Pt::System::Timer timer;
+    timer.setActive( app.loop() );
+    timer.start(1000);
     timer.timeout() += Pt::slot(app, &Pt::System::Application::exit);
 
     return app.run();
@@ -31,8 +31,8 @@ int main()
 @endcode
 
 This program will simply exit, when the timer expires after 1000 ms. The
-Application object is the callee and the member function Application::exit
-serves as a slot. The Timer is the caller, which has a signal called timeout.
+application object is the callee and the member function Application::exit
+serves as a slot. The timer is the caller, which has a signal called timeout.
 
 
 @section sigslot_Signals Signals
@@ -52,9 +52,9 @@ Pt::Signal<int, int> sig2; // Signal with two arguments
 
 @subsection sigslot_ConnectingSignals Connecting Signals
 
-A signal can be connected to a slot if the signatures are compatible. The
-function named slot is overloaded for various types of callable entities,
-like functions or member functions, and serves to construct the actual slot.
+A signal can be connected to a slot if the signatures are compatible. Slots
+can be constructed with the Pt::slot() function wich is overloaded for various
+types of callable entities, most notably functions or member functions.
 Slots are lightweight proxy-objects and one example is Pt::MethodSlot, which
 describes a member function slot. This way, signals can be connected to any
 callable entity. The signal's += operator allows to connect a signal to a
@@ -76,9 +76,9 @@ void slot()
 
 int main()
 {
-    Pt::Signal<> signal;
-    Callee calee;
+    Callee callee;
 
+    Pt::Signal<> signal;
     signal += Pt::slot(slot);
     signal += Pt::slot(callee, &Callee::slot);
 
@@ -92,7 +92,7 @@ is connected to both slots. Signals can only be connected to objects that
 derive from Pt::Connectable, to ensure that all connections are closed when
 the object runs out of scope and no dangling connections are left.
 
-The += operator, to connect a signal with a slot, returns a Connection object,
+The += operator, to connect a signal with a slot, returns a connection object,
 which can be used to disconnect signals from slots manually. The following
 code illustrates this:
 
@@ -103,11 +103,11 @@ void slot()
 int main()
 {
     Pt::Signal<> signal;
-    Connection c = signal += slot(slot);
-    c.valid() // returns true
+    Connection c = signal += Pt::slot(slot);
+    c.isValid() // returns true
 
     c.close();
-    c.valid() // returns false now
+    c.isValid() // returns false
 
     return 0;
 }
@@ -115,7 +115,7 @@ int main()
 
 A connection is reference counted and can not be duplicated as such, but always
 refers to the same shared connection data. If one peer of a connection is
-destroyed or Connection::close is called, the connection becomes invalid.
+destroyed or the connection is closed manually, the connection becomes invalid.
 
 
 @subsection sigslot_SendingSignals Sending Signals
@@ -126,7 +126,7 @@ arguments, if any.
 
 @code
 void tellAge(int age)
-{ std::cout << "I am " << age << " years old\n; }
+{ std::cout << "I am " << age << " years old\n"; }
 
 int main ()
 {
@@ -200,7 +200,7 @@ int main()
     try
     {
         Pt::Delegate<int> delegate;
-        connection conection = delegate += Pt::slot(slot);
+        Pt::Connection connection = delegate += Pt::slot(slot);
 
         int i = delegate.call(); // i is 5 now
 
