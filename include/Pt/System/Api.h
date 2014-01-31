@@ -59,10 +59,10 @@
 /** @defgroup FileSystem File System Access
     
     The Pt::System library provides facilities to identify, create, rename,
-    move or remove files and directories. The Directory class can be seen
-    as a container for file system entries. The DirectoryIterator can be used
+    move or remove files and directories. The DirectoryIterator can be used
     to traverse through the entries in a Directory. It can be used with the
-    iterator based algorithms in the C++ standard library.
+    iterator based algorithms in the C++ standard library. The FileDevice
+    is an implementation of the IODevice to read and write to files. 
 
 */
 

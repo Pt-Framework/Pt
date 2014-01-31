@@ -121,9 +121,10 @@
 
 /** @defgroup DateTime Dates and Times
 
-    The Pt core module contains some simple types to represent times and
+    The %Pt core module contains some simple types to represent times and
     dates. They can be used for comparison, sorting and in calculations
-    including other dates, times and timespans.
+    including other dates, times and timespans. The types are serializable
+    and conversion to ISO string formats are supported as well.
 */
 
 /** @defgroup Unicode Text Processing
