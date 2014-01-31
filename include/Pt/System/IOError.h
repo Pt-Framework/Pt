@@ -77,6 +77,8 @@ class PT_SYSTEM_API IOPending : public IOError
 };
 
 /** @brief Failed to access a resource.
+
+    @ingroup FileSystem
 */
 class PT_SYSTEM_API AccessFailed : public IOError
 {
