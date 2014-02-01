@@ -44,6 +44,8 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
 
 log_define("Pt.Net.UdpSocket");
 
@@ -328,37 +330,58 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
     AddrInfo ai;
     ai.resolve(ep, true);
 
+	struct ifreq ifr[20];
+
+	struct ifconf ifc;
+	ifc.ifc_buf = (char*) ifr;
+	ifc.ifc_len = sizeof(ifr);
+
+	ioctl(this->fd(), SIOCGIFCONF, &ifc);
+	int num = ifc.ifc_len / sizeof(ifreq);
+
     for(AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
         if(it->ai_family == AF_INET)
         {
-            ip_mreq req;
+			for(int n = 0; n < num; ++n)
+			{
+				ip_mreq req;
+		        
+				sockaddr_in* sa = (sockaddr_in*)(it->ai_addr);
+		        std::memcpy( &req.imr_multiaddr, &sa->sin_addr, sizeof(struct in_addr) );
 
-            sockaddr_in* sa = (sockaddr_in*)(it->ai_addr);
-            std::memcpy( &req.imr_multiaddr, &sa->sin_addr, sizeof(struct in_addr) );
+		        //req.imr_interface.s_addr = htonl(INADDR_ANY);
+				sockaddr_in* addr = (sockaddr_in*) &ifr[n].ifr_addr;
+				memcpy( &req.imr_interface, &addr->sin_addr, sizeof(struct in_addr));
 
-            req.imr_interface.s_addr = htonl(INADDR_ANY);
-
-            if (::setsockopt(this->fd(), IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) == 0)
-            {
-                return; // success
+		        if(::setsockopt(this->fd(), IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) != 0)
+		        {
+		            throw System::IOError("setsockopt failed");
+				}
             }
+
+			return;
         }
         else if(it->ai_family == AF_INET6)
         {
-            ipv6_mreq req;
-            sockaddr_in6* sa = (sockaddr_in6*)(it->ai_addr);
-            std::memcpy( &req.ipv6mr_multiaddr, &sa->sin6_addr, sizeof(struct in6_addr) );
+			for(int n = 0; n < num; ++n)
+			{
+		        ipv6_mreq req;
+		        sockaddr_in6* sa = (sockaddr_in6*)(it->ai_addr);
+		        std::memcpy( &req.ipv6mr_multiaddr, &sa->sin6_addr, sizeof(struct in6_addr) );
 
-            req.ipv6mr_interface = 0;
+				// req.ipv6mr_interface = 0;
+		        req.ipv6mr_interface = n;
 
-            if (::setsockopt(this->fd(), IPPROTO_IPV6, IPV6_JOIN_GROUP, (char*)&req, sizeof(ipv6_mreq)) == 0)
-            {
-                return; // success
-            }
+		        if(::setsockopt(this->fd(), IPPROTO_IPV6, IPV6_JOIN_GROUP, (char*)&req, sizeof(ipv6_mreq)) != 0)
+		        {
+		            throw System::IOError("setsockopt failed");
+		        }
+			}
+			
+			return;
         }
     }
-
 
     throw System::IOError("multicast group join failed");
 }
