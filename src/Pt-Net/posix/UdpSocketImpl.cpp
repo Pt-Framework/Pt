@@ -322,18 +322,19 @@ bool UdpSocketImpl::isBound() const
 
 void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 {
+    log_debug( "joining multicast group " << ipaddr );
+
     if( this->fd() < 0 )
         return;
 
-    Endpoint ep(ipaddr, 0);
-
     AddrInfo ai;
+    Endpoint ep(ipaddr, 0);
     ai.resolve(ep, true);
 
 	struct ifreq ifr[20];
 
 	struct ifconf ifc;
-	ifc.ifc_buf = (char*) ifr;
+	ifc.ifc_buf = reinterpret_cast<char*>(ifr);
 	ifc.ifc_len = sizeof(ifr);
 
 	ioctl(this->fd(), SIOCGIFCONF, &ifc);
@@ -360,6 +361,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 				}
             }
 
+            log_debug( "joined IP4 multicast group: " << ipaddr );
 			return;
         }
         else if(it->ai_family == AF_INET6)
@@ -367,7 +369,8 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 			for(int n = 0; n < num; ++n)
 			{
 		        ipv6_mreq req;
-		        sockaddr_in6* sa = (sockaddr_in6*)(it->ai_addr);
+
+                sockaddr_in6* sa = (sockaddr_in6*)(it->ai_addr);
 		        std::memcpy( &req.ipv6mr_multiaddr, &sa->sin6_addr, sizeof(struct in6_addr) );
 
 				// req.ipv6mr_interface = 0;
@@ -379,6 +382,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 		        }
 			}
 			
+            log_debug( "joined IP6 multicast group: " << ipaddr );
 			return;
         }
     }
