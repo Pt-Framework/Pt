@@ -45,7 +45,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <net/if.h>
-#include <sys/ioctl.h>
 
 log_define("Pt.Net.UdpSocket");
 
@@ -320,6 +319,7 @@ bool UdpSocketImpl::isBound() const
 }
 
 
+
 void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 {
     log_debug( "joining multicast group " << ipaddr );
@@ -330,30 +330,27 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
     AddrInfo ai;
     Endpoint ep(ipaddr, 0);
     ai.resolve(ep, true);
-
-	struct ifreq ifr[20];
-
-	struct ifconf ifc;
-	ifc.ifc_buf = reinterpret_cast<char*>(ifr);
-	ifc.ifc_len = sizeof(ifr);
-
-	ioctl(this->fd(), SIOCGIFCONF, &ifc);
-	int num = ifc.ifc_len / sizeof(ifreq);
+    
+    InterfaceInfo ifInfo;
 
     for(AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
         if(it->ai_family == AF_INET)
         {
-			for(int n = 0; n < num; ++n)
+            struct ifaddrs* adapter =  ifInfo.adapters();
+			for( ; adapter != 0; adapter = adapter->ifa_next) 
 			{
+                if(adapter->ifa_addr->sa_family != it->ai_family)
+                    continue;
+                
 				ip_mreq req;
 		        
 				sockaddr_in* sa = (sockaddr_in*)(it->ai_addr);
 		        std::memcpy( &req.imr_multiaddr, &sa->sin_addr, sizeof(struct in_addr) );
 
 		        //req.imr_interface.s_addr = htonl(INADDR_ANY);
-				sockaddr_in* addr = (sockaddr_in*) &ifr[n].ifr_addr;
-				memcpy( &req.imr_interface, &addr->sin_addr, sizeof(struct in_addr));
+				sockaddr_in* addr = (sockaddr_in*) adapter->ifa_addr;
+				std::memcpy( &req.imr_interface, &addr->sin_addr, sizeof(struct in_addr));
 
 		        if(::setsockopt(this->fd(), IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) != 0)
 		        {
@@ -366,15 +363,19 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
         }
         else if(it->ai_family == AF_INET6)
         {
-			for(int n = 0; n < num; ++n)
+            struct ifaddrs* adapter =  ifInfo.adapters();
+			for( ; adapter != 0; adapter = adapter->ifa_next) 
 			{
+                if(adapter->ifa_addr->sa_family != it->ai_family)
+                    continue;
+
 		        ipv6_mreq req;
 
                 sockaddr_in6* sa = (sockaddr_in6*)(it->ai_addr);
 		        std::memcpy( &req.ipv6mr_multiaddr, &sa->sin6_addr, sizeof(struct in6_addr) );
 
 				// req.ipv6mr_interface = 0;
-		        req.ipv6mr_interface = n;
+		        req.ipv6mr_interface = if_nametoindex(adapter->ifa_name);
 
 		        if(::setsockopt(this->fd(), IPPROTO_IPV6, IPV6_JOIN_GROUP, (char*)&req, sizeof(ipv6_mreq)) != 0)
 		        {

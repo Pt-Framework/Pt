@@ -38,12 +38,30 @@
 #include <sys/select.h> // is this still needed?
 #include <sys/time.h>
 #include <unistd.h>
+#include <ifaddrs.h>
 
 namespace Pt {
 
 namespace Net {
 
 class UdpSocket;
+
+struct InterfaceInfo
+{
+    InterfaceInfo()
+    : _adapters(0)
+    {
+        getifaddrs(&_adapters);
+    }
+    
+    ~InterfaceInfo()
+    { freeifaddrs(_adapters); }
+    
+    ifaddrs* adapters()
+    { return _adapters; }
+    
+    struct ifaddrs* _adapters;
+};
 
 class UdpSocketImpl : public System::IODeviceImpl
 {
