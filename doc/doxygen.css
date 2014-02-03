@@ -123,6 +123,15 @@ DIV.nav {
 	line-height: 140%;
 }
 
+/* group link in class page subtitle */
+DIV.ingroups A {
+    font-size: 18px;
+}
+
+/* template declaration in detailed description */
+DIV.textblock h3 {
+    display: none;
+}
 
 /* class and namespace navigation */
 
