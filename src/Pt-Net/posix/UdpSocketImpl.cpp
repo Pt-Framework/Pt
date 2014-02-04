@@ -55,7 +55,7 @@ namespace Net {
 InterfaceInfo2::InterfaceInfo2(int sock)
 : _sock(sock)
 {
-    memset(_ifr, 0, sizeof(_ifr));
+    std::memset(_ifr, 0, sizeof(_ifr));
 
     _ifc.ifc_len = sizeof(_ifr);
     _ifc.ifc_req = _ifr;
