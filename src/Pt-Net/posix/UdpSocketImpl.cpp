@@ -370,7 +370,37 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
     {
         if(it->ai_family == AF_INET)
         {
-            struct ifaddrs* adapter =  ifInfo.adapters();
+            struct if_nameindex* ifaces = if_nameindex();
+            
+            for(struct if_nameindex* iface = ifaces ; iface->if_name; ++iface)
+            {
+                struct ifreq ifr;
+                memset(&ifr, 0, sizeof(ifr));
+                std::strncpy(ifr.ifr_name, iface->if_name, IFNAMSIZ);
+                ioctl( this->fd(), SIOCGIFADDR, &ifr);
+                
+                if(ifr.ifr_addr.sa_family != it->ai_family)
+                    continue;
+                    
+                ip_mreq req;
+                sockaddr_in* sa = (sockaddr_in*)(it->ai_addr);
+                std::memcpy( &req.imr_multiaddr, &sa->sin_addr, sizeof(struct in_addr) );
+
+                sockaddr_in* addr = ((sockaddr_in*)&ifr.ifr_addr);
+                std::memcpy( &req.imr_interface, &addr->sin_addr, sizeof(struct in_addr));
+
+                if(::setsockopt(this->fd(), IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) != 0)
+                {
+                    //std::clog << "failed " << inet_ntoa(addr->sin_addr) << std::endl;
+                    throw System::IOError("setsockopt failed");
+                }
+                
+                //std::clog << "joined " << inet_ntoa(addr->sin_addr) << std::endl;
+            }
+            
+            if_freenameindex(ifaces);
+            
+            /*struct ifaddrs* adapter =  ifInfo.adapters();
             for( ; adapter != 0; adapter = adapter->ifa_next) 
             {
                 if(adapter->ifa_addr->sa_family != it->ai_family)
@@ -389,7 +419,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
                 {
                     throw System::IOError("setsockopt failed");
                 }
-            }
+            }*/
 
             log_debug( "joined IP4 multicast group: " << ipaddr );
             return;
