@@ -375,7 +375,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
             for(struct if_nameindex* iface = ifaces ; iface->if_name; ++iface)
             {
                 struct ifreq ifr;
-                memset(&ifr, 0, sizeof(ifr));
+                std::memset(&ifr, 0, sizeof(ifr));
                 std::strncpy(ifr.ifr_name, iface->if_name, IFNAMSIZ);
                 ioctl( this->fd(), SIOCGIFADDR, &ifr);
                 
