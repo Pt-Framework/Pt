@@ -37,20 +37,53 @@
 #include <Pt/System/IOError.h>
 #include <Pt/System/Logger.h>
 #include <cerrno>
-#include <stdio.h>
-#include <errno.h>
 #include <cstring>
 #include <cassert>
-#include <fcntl.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <net/if.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 log_define("Pt.Net.UdpSocket");
 
 namespace Pt {
 
 namespace Net {
+
+InterfaceInfo2::InterfaceInfo2(int sock)
+: _sock(sock)
+{
+    memset(_ifr, 0, sizeof(_ifr));
+
+    _ifc.ifc_len = sizeof(_ifr);
+    _ifc.ifc_req = _ifr;
+
+    if( ioctl(_sock, SIOCGIFCONF, &_ifc) == -1)
+    {
+        throw System::SystemError("ioctl SIOCGIFCONF failed");
+    }
+}
+
+InterfaceInfo2::~InterfaceInfo2()
+{
+}
+
+
+
+
+InterfaceInfo3::InterfaceInfo3(int)
+{
+    getifaddrs(&_adapters);
+}
+
+
+InterfaceInfo3::~InterfaceInfo3()
+{
+    freeifaddrs(_adapters);
+}
+
 
 UdpSocketImpl::UdpSocketImpl(UdpSocket& socket)
 : System::IODeviceImpl(socket)
@@ -338,53 +371,53 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
         if(it->ai_family == AF_INET)
         {
             struct ifaddrs* adapter =  ifInfo.adapters();
-			for( ; adapter != 0; adapter = adapter->ifa_next) 
-			{
+            for( ; adapter != 0; adapter = adapter->ifa_next) 
+            {
                 if(adapter->ifa_addr->sa_family != it->ai_family)
                     continue;
                 
-				ip_mreq req;
-		        
-				sockaddr_in* sa = (sockaddr_in*)(it->ai_addr);
-		        std::memcpy( &req.imr_multiaddr, &sa->sin_addr, sizeof(struct in_addr) );
+                ip_mreq req;
+                
+                sockaddr_in* sa = (sockaddr_in*)(it->ai_addr);
+                std::memcpy( &req.imr_multiaddr, &sa->sin_addr, sizeof(struct in_addr) );
 
-		        //req.imr_interface.s_addr = htonl(INADDR_ANY);
-				sockaddr_in* addr = (sockaddr_in*) adapter->ifa_addr;
-				std::memcpy( &req.imr_interface, &addr->sin_addr, sizeof(struct in_addr));
+                //req.imr_interface.s_addr = htonl(INADDR_ANY);
+                sockaddr_in* addr = (sockaddr_in*) adapter->ifa_addr;
+                std::memcpy( &req.imr_interface, &addr->sin_addr, sizeof(struct in_addr));
 
-		        if(::setsockopt(this->fd(), IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) != 0)
-		        {
-		            throw System::IOError("setsockopt failed");
-				}
+                if(::setsockopt(this->fd(), IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) != 0)
+                {
+                    throw System::IOError("setsockopt failed");
+                }
             }
 
             log_debug( "joined IP4 multicast group: " << ipaddr );
-			return;
+            return;
         }
         else if(it->ai_family == AF_INET6)
         {
             struct ifaddrs* adapter =  ifInfo.adapters();
-			for( ; adapter != 0; adapter = adapter->ifa_next) 
-			{
+            for( ; adapter != 0; adapter = adapter->ifa_next) 
+            {
                 if(adapter->ifa_addr->sa_family != it->ai_family)
                     continue;
 
-		        ipv6_mreq req;
+                ipv6_mreq req;
 
                 sockaddr_in6* sa = (sockaddr_in6*)(it->ai_addr);
-		        std::memcpy( &req.ipv6mr_multiaddr, &sa->sin6_addr, sizeof(struct in6_addr) );
+                std::memcpy( &req.ipv6mr_multiaddr, &sa->sin6_addr, sizeof(struct in6_addr) );
 
-				// req.ipv6mr_interface = 0;
-		        req.ipv6mr_interface = if_nametoindex(adapter->ifa_name);
+                // req.ipv6mr_interface = 0;
+                req.ipv6mr_interface = if_nametoindex(adapter->ifa_name);
 
-		        if(::setsockopt(this->fd(), IPPROTO_IPV6, IPV6_JOIN_GROUP, (char*)&req, sizeof(ipv6_mreq)) != 0)
-		        {
-		            throw System::IOError("setsockopt failed");
-		        }
-			}
-			
+                if(::setsockopt(this->fd(), IPPROTO_IPV6, IPV6_JOIN_GROUP, (char*)&req, sizeof(ipv6_mreq)) != 0)
+                {
+                    throw System::IOError("setsockopt failed");
+                }
+            }
+            
             log_debug( "joined IP6 multicast group: " << ipaddr );
-			return;
+            return;
         }
     }
 
