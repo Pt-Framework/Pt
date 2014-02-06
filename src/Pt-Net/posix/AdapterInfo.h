@@ -35,6 +35,8 @@
 //#define PT_NET_WITH_IFCONF
 //#define PT_NET_WITH_GETIFADDRS
 
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <sys/ioctl.h> 
 #include <net/if.h>
 

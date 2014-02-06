@@ -358,10 +358,8 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
                 // ignore setsockopt errors, not all adapters will work.
                 // We might throw if we could not join with at least one adapter
                 int ret = ::setsockopt( this->fd(), IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq) );
-                if( ret != 0)
+                if( ret == 0)
                     joined++;
-                
-                //std::clog << "joined " << inet_ntoa(addr->sin_addr) << std::endl;
             }
 
             if(joined == 0)
@@ -387,7 +385,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
                 // ignore setsockopt errors, not all adapters will work.
                 // We might throw if we could not join with at least one adapter
                 int ret = ::setsockopt( this->fd(), IPPROTO_IPV6, IPV6_JOIN_GROUP, (char*)&req, sizeof(ipv6_mreq) );
-                if( ret != 0)
+                if( ret == 0)
                     joined++;
             }
 
