@@ -29,7 +29,7 @@
 #ifndef PT_NET_ADAPTERINFO_H
 #define PT_NET_ADAPTERINFO_H
 
-#include <Pt/Net/api.h>
+#include <Pt/Net/Api.h>
 
 // currently unused:
 //#define PT_NET_WITH_IFCONF
