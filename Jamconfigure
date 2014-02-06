@@ -117,8 +117,6 @@ if ! $(SYS)
         Exit "ERROR: nsl is required." ;
     }
 
-    ConfigureGetIfAddrs ;
-
     NETLIBS = $(UNIX_SOCKET_LIBS) $(NSL_LIBS) ;
     SYS = posix ;
 }
