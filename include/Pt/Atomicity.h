@@ -61,7 +61,9 @@ union PT_API atomic_t
 
 /** @brief Atomically get a value.
 
-    Returns the value after employing a memory fence (before the get).
+    Returns the value and employs a memory fence after the get. Acquire
+    semantics prevent memory reordering with any read or write operation
+    which follows it in program order.
 
     @related atomic_t
     @ingroup CoreTypes
@@ -70,7 +72,9 @@ PT_API int atomicGet(volatile atomic_t& val);
 
 /** @brief Atomically set a value.
 
-    Sets the value and employs a memory fence (after the set).
+    Sets the value and employs a memory fence before the set. Release
+    semantics prevent memory reordering with any read or write operation
+    which precedes it in program order.
 
     @related atomic_t
     @ingroup CoreTypes
