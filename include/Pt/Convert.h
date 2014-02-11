@@ -104,7 +104,7 @@ struct GreaterThanMax<true, false>
 
 /** @brief Checked numeric conversion.
 
-    @ingroup CoreTypes
+    @ingroup Utilities
 */
 template<typename R, typename T>
 inline R narrow(T from)
@@ -127,21 +127,21 @@ inline R narrow(T from)
 
 /** @brief Formats an integer in a given format.
 
-    @ingroup CoreTypes
+    @ingroup Utilities
 */
 template <typename OutIterT, typename T, typename FormatT>
 inline OutIterT formatInt(OutIterT it, T i, const FormatT& fmt);
 
 /** @brief Formats an integer in a decimal format.
 
-    @ingroup CoreTypes
+    @ingroup Utilities
 */
 template <typename OutIterT, typename T>
 inline OutIterT formatInt(OutIterT it, T i);
 
 /** @brief Formats an integer in a given format.
 
-    @ingroup CoreTypes
+    @ingroup Utilities
  */
 template <typename CharT, typename T, typename FormatT>
 inline CharT* formatInt(CharT* buf, std::size_t buflen, T si, const FormatT& fmt);
@@ -149,14 +149,14 @@ inline CharT* formatInt(CharT* buf, std::size_t buflen, T si, const FormatT& fmt
 
 /** @brief Formats a floating point value in a given format.
 
-    @ingroup CoreTypes
+    @ingroup Utilities
 */
 template <typename OutIterT, typename T, typename FormatT>
 OutIterT formatFloat(OutIterT it, T d, const FormatT& fmt, int precision);
 
 /** @brief Formats a floating point value in default format.
 
-    @ingroup CoreTypes
+    @ingroup Utilities
 */
 template <typename OutIterT, typename T>
 OutIterT formatFloat(OutIterT it, T d);
@@ -164,14 +164,14 @@ OutIterT formatFloat(OutIterT it, T d);
 
 /** @brief Parses an integer value in a given format.
 
-    @ingroup CoreTypes
+    @ingroup Utilities
 */
 template <typename InIterT, typename T, typename FormatT>
 InIterT parseInt(InIterT it, InIterT end, T& n, const FormatT& fmt, bool& ok);
 
 /** @brief Parses an integer value in a given format.
 
-    @ingroup CoreTypes
+    @ingroup Utilities
 */
 template <typename InIterT, typename T, typename FormatT>
 InIterT parseInt(InIterT it, InIterT end, T& n, const FormatT& fmt)
@@ -187,14 +187,14 @@ InIterT parseInt(InIterT it, InIterT end, T& n, const FormatT& fmt)
 
 /** @brief Parses an integer value in decimal format.
 
-    @ingroup CoreTypes
+    @ingroup Utilities
 */
 template <typename InIterT, typename T>
 InIterT parseInt(InIterT it, InIterT end, T& n, bool& ok);
 
 /** @brief Parses an integer value in decimal format.
 
-    @ingroup CoreTypes
+    @ingroup Utilities
 */
 template <typename InIterT, typename T>
 InIterT parseInt(InIterT it, InIterT end, T& n)
@@ -211,14 +211,14 @@ InIterT parseInt(InIterT it, InIterT end, T& n)
 
 /** @brief Parses a floating point value in a given format.
 
-    @ingroup CoreTypes
+    @ingroup Utilities
 */
 template <typename InIterT, typename T, typename FormatT>
 InIterT parseFloat(InIterT it, InIterT end, T& n, const FormatT& fmt, bool& ok);
 
 /** @brief Parses a floating point value in a given format.
 
-    @ingroup CoreTypes
+    @ingroup Utilities
 */
 template <typename InIterT, typename T, typename FormatT>
 InIterT parseFloat(InIterT it, InIterT end, T& n, const FormatT& fmt)
@@ -234,14 +234,14 @@ InIterT parseFloat(InIterT it, InIterT end, T& n, const FormatT& fmt)
 
 /** @brief Parses a floating point value.
 
-    @ingroup CoreTypes
+    @ingroup Utilities
 */
 template <typename InIterT, typename T>
 InIterT parseFloat(InIterT it, InIterT end, T& n, bool& ok);
 
 /** @brief Parses a floating point value.
 
-    @ingroup CoreTypes
+    @ingroup Utilities
 */
 template <typename InIterT, typename T>
 InIterT parseFloat(InIterT it, InIterT end, T& n)

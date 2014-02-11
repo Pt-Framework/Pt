@@ -44,7 +44,7 @@ PT_API DateTime dateTimeFromString(const std::string& s);
 
 /** @brief Combined %Date and %Time value.
 
-    @ingroup DateTime
+    @ingroup BasicTypes
 */
 class DateTime
 {

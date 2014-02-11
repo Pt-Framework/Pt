@@ -93,7 +93,7 @@ namespace Pt {
         std::cout << si.where() << std::endl;
     @endcode
 
-    @ingroup CoreTypes
+    @ingroup Utilities
 */
 class SourceInfo 
 {

@@ -1,6 +1,10 @@
-/** \page coretypes Core Types
+/** \page utilities Utilities
 
-@section CoreTypes_ByteOrder Converting Byte Orders
+@section utilities_StringConv String Conversions
+
+@section utilities_NumConv Numeric Conversions
+
+@section utilities_ByteOrder Byte Order Conversion
 
 The byteorder conversion API consists of two sets of functions. The Pt::swab
 function is able to swap the byteorder of a type by bytewise copying as shown

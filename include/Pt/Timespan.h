@@ -37,7 +37,7 @@ namespace Pt {
 
 /** @brief Represents time spans in microsecond resolution.
 
-    @ingroup DateTime
+    @ingroup BasicTypes
 */
 class Timespan
 {

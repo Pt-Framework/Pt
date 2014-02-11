@@ -130,72 +130,54 @@ namespace Pt {
     }
 #endif
 
-    /** @brief Stub function for byteorder conversion.
-
-        @ingroup CoreTypes
-    */
     inline int8_t swab(int8_t value)
     { return value; }
 
-    /** @brief Stub function for byteorder conversion.
-
-        @ingroup CoreTypes
-    */
     inline uint8_t swab(uint8_t value)
     { return value; }
 
-    /** @brief Swaps the byteorder of an int16_t.
-        
-        @ingroup CoreTypes
-     */
     inline int16_t swab(int16_t value)
     { return swab16(value); }
 
-    /** @brief Swaps the byteorder of a uint16_t.
-        
-        @ingroup CoreTypes
-     */
     inline uint16_t swab(uint16_t value)
     { return swab16(value); }
 
     /** @brief Swaps the byteorder of an int32_t.
-        
-        @ingroup CoreTypes
+
+        @ingroup Utilities
      */
     inline int32_t swab(int32_t value)
     { return swab32(value); }
 
     /** @brief Swaps the byteorder of a uint32_t.
-        
-        @ingroup CoreTypes
+
+        @ingroup Utilities
     */
     inline uint32_t swab(uint32_t value)
     { return swab32(value); }
 
 #ifdef PT_WITH_INT64
-    /** @brief Swaps the byteorder of an int64_t.
-        
-        @ingroup CoreTypes
-    */
     inline int64_t swab(int64_t value)
     { return swab64(value); }
 
-    /** @brief Swaps the byteorder of a uint64t.
-        
-        @ingroup CoreTypes
-    */
     inline uint64_t swab(uint64_t value)
     { return swab64(value); }
 #endif
 
-    //! @brief Returns true, if the cpu is big-endian (high-byte first).
+    /** @brief Returns true, if the cpu is big-endian (high-byte first).
+
+        @ingroup Utilities
+    */
     inline bool isBigEndian()
     {
         const int i = 1;
         return *reinterpret_cast<const int8_t*>(&i) == 0;
     }
 
-    //! @brief Returns true, if the cpu is little-endian (low-byte first).
+    /** @brief Returns true, if the cpu is little-endian (low-byte first).
+
+        @ingroup Utilities
+    */
     inline bool isLittleEndian()
     {
         const int i = 1;
@@ -209,7 +191,7 @@ namespace Pt {
         and so does this function. Overloading swab can remove this restriction and
         may improve performance for custom types.
        
-        @ingroup CoreTypes
+        @ingroup Utilities
      */
     template <typename T>
     inline T hostToLe(const T& value)
@@ -228,7 +210,7 @@ namespace Pt {
         and so does this function. Overloading swab can remove this restriction and
         may improve performance for custom types.
 
-        @ingroup CoreTypes
+        @ingroup Utilities
      */
     template <typename T>
     inline T leToHost(const T& value)
@@ -247,7 +229,7 @@ namespace Pt {
         and so does this function. Overloading swab can remove this restriction and
         may improve performance for custom types.
        
-        @ingroup CoreTypes
+        @ingroup Utilities
      */
     template <typename T>
     inline T hostToBe(const T& value)
@@ -266,7 +248,7 @@ namespace Pt {
         and so does this function. Overloading swab can remove this restriction and
         may improve performance for custom types.
 
-        @ingroup CoreTypes
+        @ingroup Utilities
      */
     template <typename T>
     inline T beToHost(const T& value)

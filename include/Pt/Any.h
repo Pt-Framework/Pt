@@ -50,7 +50,7 @@ namespace Pt {
     float f = any_cast<float>( a ) // throws std::bad_cast
     @endcode
 
-    @ingroup CoreTypes
+    @ingroup BasicTypes
 */
 class Any
 {

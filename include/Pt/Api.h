@@ -109,22 +109,42 @@
     created and destroyed at the same time. 
 */
 
-/** @defgroup CoreTypes Core Types
+/** @defgroup Concurrency Concurrency
 
-    The framework provides a number of basic types like fixed-size integers
-    or a type named Any to contain values of different types. There is also
-    functionality for type conversions and to swap or adjust byteorders. The
-    type traits are useful for generic programming to query information about
-    a type at compile time to adapt it or specialize for it. A wrapper for
-    std::type_info makes it easier to store and compare type information.
+    Describe atomics. 
 */
 
-/** @defgroup DateTime Dates and Times
+/** @defgroup BasicTypes Basic Types
 
-    The %Pt core module contains some simple types to represent times and
-    dates. They can be used for comparison, sorting and in calculations
-    including other dates, times and timespans. The types are serializable
-    and conversion to ISO string formats are supported as well.
+    The %Pt framework provides a number of fixed-size, signed and unsigned 
+    integers ranging from 8-bit to 64-bit widths. They are typedefs for
+    builtin plain data types such as int or long. For example, Pt::uint8_t
+    is a typedef for an unsigned 8 bits wide integer type and Pt::int32_t
+    is a typedef for a signed 32 bits wide integer.
+
+    The classes that represent dates and times, namely Pt::Date, Pt::Time,
+    Pt::DateTime and Pt::Timespan, can be used for comparison, sorting or
+    calculating dates, times and timespans. These types are serializable and
+    conversion to ISO string formats are supported as well.
+
+    A type named Pt::Any is able to contain almost any other type. This is useful
+    in situations where type erarure is required, for example to store 
+    completely unrelated types in a list or vector.
+*/
+
+/** @defgroup Utilities Utilities
+    
+    The conversion utilities of the Platinum core library include functions to 
+    @link utilities_ByteOrder convert byte orders@endlink, to
+    @link utilities_StringConv convert from and to strings@endlink, and to
+    perform checked @link utilities_NumConv numeric conversions@endlink.
+
+    Two types are useful to get type information Pt::TypeTraits and
+    Pt::TypeInfo. TypeTraits are used for generic programming, for example
+    to deduce the pointer type in templated code, or to branch differently
+    for const and non-const types. The TypeInfo class is a wrapper for
+    std::type_info, which makes it easier to store and compare type information.
+    The std::type_info is normally not copyable and comparable.
 */
 
 /** @defgroup Unicode Text Processing
