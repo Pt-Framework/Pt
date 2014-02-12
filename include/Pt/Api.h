@@ -134,17 +134,23 @@
 
 /** @defgroup Utilities Utilities
     
-    The conversion utilities of the Platinum core library include functions to 
-    @link utilities_ByteOrder convert byte orders@endlink, to
-    @link utilities_StringConv convert from and to strings@endlink, and to
-    perform checked @link utilities_NumConv numeric conversions@endlink.
+    Basic application support is provided by the Pt::Arg class and the
+    Pt::Settings class. The first one is a convenient way to parse and 
+    process program options and the latter one allows to load and store
+    application settings in files or other places.
+
+    The conversion utilities of the Platinum core library include functions
+    for @link utilities_ByteOrder byte order conversion@endlink,
+    @link utilities_StringConv string conversion@endlink, and
+    @link utilities_NumConv numeric conversions@endlink.
 
     Two types are useful to get type information Pt::TypeTraits and
     Pt::TypeInfo. TypeTraits are used for generic programming, for example
     to deduce the pointer type in templated code, or to branch differently
     for const and non-const types. The TypeInfo class is a wrapper for
     std::type_info, which makes it easier to store and compare type information.
-    The std::type_info is normally not copyable and comparable.
+    The std::type_info is normally not copyable and comparable. Pt::SourceInfo
+    is used to store information about a location in the source code.
 */
 
 /** @defgroup Unicode Text Processing
