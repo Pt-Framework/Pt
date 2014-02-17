@@ -13,6 +13,7 @@ following example:
 @code
 #include <Pt/Convert.h>
 #incldue <iterator>
+#inlcude <iostream>
 
 std::ostream_iterator<char> it(std::cout);
 Pt::formatInt(it, 42);
@@ -24,9 +25,9 @@ Pt::parseInt(buf, bufend, n);
 @endcode
 
 A format object can be passed as an additional argument to specify the aspects
-of localisation, for example how characters are converted or what characters
-to use for the plus and minus signs. The overloads which do not use a format
-object use decimal format. A few format objects are already provided by the
+of localisation, for example, how characters are converted or which characters
+are used for the plus and minus signs. The overloads, which do not use a format
+object, use decimal format. A few format objects are already provided by the
 %Pt library, named Pt::DecimalFormat, Pt::OctalFormat, Pt::HexFormat or 
 Pt::BinaryFormat. They work for ASCII compatible encodings like Latin-1 or the
 unicode encodings. Besides localization, they also define the base for the
@@ -36,6 +37,7 @@ parsed and formatted:
 @code
 #include <Pt/Convert.h>
 #incldue <iterator>
+#include <iostream>
 
 Pt::HexFormat<char> fmt;
 
@@ -51,12 +53,13 @@ Pt::parseInt(buf, bufend, n, fmt);
 Floating point numbers can be formatted and parsed in a similar way like
 integers, but the format object needs to provide more information than the
 format object used for integers. The library provides Pt::FloatFormat, which
-is also used for the overloads which do not require a format object. For
-formatting, the precision can additionally be set:
+is also used for the overloads that do not take a format object as an
+argument. For formatting, the precision can additionally be set:
 
 @code
 #include <Pt/Convert.h>
 #incldue <iterator>
+#inlcude <iostream>
 
 Pt::FloatFormat<char> fmt;
 
@@ -79,6 +82,31 @@ input is not treated as an error.
 
 @section utilities_NumConv Numeric Conversions
 
+Numeric assignments can lead to loss of data, if the operation narrows the
+data type to a smaller one. For example, numeric conversion from int to short
+can be an error, if the assigned value exceeds the maximum or minimum value
+possible for shorts. The narrow() function can be used instead of normal
+assignment, to protect against this. In case of an error, an exception
+of type Pt::ConversionError is thrown.
+
+@code
+#include <Pt/Convert.h>
+#include <limits>
+#include <iostream>
+
+long l = ...;
+short s = 0;
+
+try
+{
+    s = Pt::narrow<short>(l);
+}
+catch(const Pt::ConversionError& e)
+{
+    std::cerr << "numeric value is out of range: " << l << std::endl;
+}
+@endcode
+
 @section utilities_ByteOrder Byte Order Conversion
 
 The byteorder conversion API consists of two sets of functions. The Pt::swab()
@@ -86,7 +114,7 @@ function is able to swap the byteorder of a type by bytewise copying as shown
 in the following example:
 
 @code
-#inlcude <Pt/Byteorder.h>
+#include <Pt/Byteorder.h>
 
 Pt::uint32_t value = ...;
 Pt::uint32_t swapped = Pt::swab(value);
@@ -105,10 +133,14 @@ For example the function beToHost() converts from big-endian to the host byte
 order:
 
 @code
-#inlcude <Pt/Byteorder.h>
+#include <Pt/Byteorder.h>
 
 Pt::uint32_t beVal = ...;
 Pt::uint32_t value = Pt::beToHost(beVal);
 @endcode
+
+@section utilities_Any The Any Class
+
+@copydetails Pt::Any
 
 */

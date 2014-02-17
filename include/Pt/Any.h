@@ -38,17 +38,25 @@ namespace Pt {
 
 /** @brief Contains an arbitrary type.
 
-    %Any can contain any other type that is default- and copy constructible.
-    When a value is assigned to an %Any a copy is made, just like when a type
-    is inserted in a standard C++ container. The contained type can be accessed
-    via Pt::any_cast<>. It is only possible to get the contained value if the
-    type matches.
+    %Pt::Any can contain any other type, which is default- and copy constructible.
+    When a value is assigned to an %Any, a copy is made, just like when a type
+    is inserted in a standard C++ container. %Anys can be assigned to another
+    %Any, which will also copy the contained value. The contained type can be
+    accessed via any_cast(). It is only possible to get the contained value,
+    if the type matches.
 
     @code
-    Any a = 5;
+    #include <Pt/Any.h>
+
+    Pt::Any a = 5;
     int i = any_cast<int>( a );    // i is 5 now
     float f = any_cast<float>( a ) // throws std::bad_cast
     @endcode
+
+    The %any_cast() to value and reference types will throw a std::bad_cast
+    exception, if the type is not correct. Using a pointer type as the
+    template argument for %any_cast() will not throw an exception, but return
+    a null pointer if the requested type does not match.
 
     @ingroup BasicTypes
 */
