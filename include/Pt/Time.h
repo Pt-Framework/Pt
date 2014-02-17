@@ -45,7 +45,7 @@ class SerializationInfo;
     This exception is thrown, when a invalid values are used for a time,
     such as a value greater than 23 for the hour. 
 
-    @ingroup DateTime
+    @ingroup BasicTypes
 */
 class PT_API InvalidTime : public std::runtime_error
 {
@@ -66,7 +66,7 @@ PT_API Time timeFromString(const std::string& s);
 
 /** @brief %Time expressed in hours, minutes, seconds and milliseconds.
 
-    @ingroup DateTime
+    @ingroup BasicTypes
 */
 class Time
 {

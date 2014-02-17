@@ -12,7 +12,7 @@ namespace Pt {
     is a reference or is a pointer. This is useful for template programming,
     where code can branch differently depending on the type traits.
 
-    @ingroup CoreTypes
+    @ingroup Utilities
 */
 template <typename T>
 struct TypeTraits

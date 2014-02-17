@@ -52,7 +52,7 @@ namespace Pt {
             };
     @endcode
 
-    @ingroup CoreTypes
+    @ingroup Utilities
 */
 template <typename T>
 class Singleton : public NonCopyable

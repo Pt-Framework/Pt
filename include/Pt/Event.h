@@ -43,7 +43,7 @@ namespace Pt {
     objects for example in an EventLoop and the latter one is used to dispatch
     events by type.
 
-    @ingroup CoreTypes
+    @ingroup BasicTypes
  */
 class Event
 {

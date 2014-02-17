@@ -38,7 +38,7 @@ namespace Pt {
 /** @class Pt::atomic_t Atomicity.h "Pt/Atomicity.h"
     @brief Atomic integers to be used with atomicity functions.
 
-    @ingroup CoreTypes
+    @ingroup Concurrency
 */
 
 /** @fn Pt::atomic_t::atomic_t(int v = 0) 
@@ -61,19 +61,23 @@ union PT_API atomic_t
 
 /** @brief Atomically get a value.
 
-    Returns the value after employing a memory fence (before the get).
+    Returns the value and employs a memory fence after the get. Acquire
+    semantics prevent memory reordering with any read or write operation
+    which follows it in program order.
 
     @related atomic_t
-    @ingroup CoreTypes
+    @ingroup Concurrency
 */
 PT_API int atomicGet(volatile atomic_t& val);
 
 /** @brief Atomically set a value.
 
-    Sets the value and employs a memory fence (after the set).
+    Sets the value and employs a memory fence before the set. Release
+    semantics prevent memory reordering with any read or write operation
+    which precedes it in program order.
 
     @related atomic_t
-    @ingroup CoreTypes
+    @ingroup Concurrency
 */
 PT_API void atomicSet(volatile atomic_t& val, int n);
 
@@ -82,7 +86,7 @@ PT_API void atomicSet(volatile atomic_t& val, int n);
     Returns the resulting incremented value.
 
     @related atomic_t
-    @ingroup CoreTypes
+    @ingroup Concurrency
 */
 PT_API int atomicIncrement(volatile atomic_t& val);
 
@@ -91,7 +95,7 @@ PT_API int atomicIncrement(volatile atomic_t& val);
     Returns the resulting decremented value.
 
     @related atomic_t
-    @ingroup CoreTypes
+    @ingroup Concurrency
   */
 PT_API int atomicDecrement(volatile atomic_t& val);
 
@@ -100,7 +104,7 @@ PT_API int atomicDecrement(volatile atomic_t& val);
     Sets \a val to \a exch and returns the initial value of \a val.
 
     @related atomic_t
-    @ingroup CoreTypes
+    @ingroup Concurrency
 */
 PT_API int atomicExchange(volatile atomic_t& val, int exch);
 
@@ -110,7 +114,7 @@ PT_API int atomicExchange(volatile atomic_t& val, int exch);
     value of of \a val is returned.
 
     @related atomic_t
-    @ingroup CoreTypes
+    @ingroup Concurrency
 */
 PT_API int atomicCompareExchange(volatile atomic_t& val, int exch, int comp);
 
@@ -119,7 +123,7 @@ PT_API int atomicCompareExchange(volatile atomic_t& val, int exch, int comp);
     Returns the initial value of the addend.
 
     @related atomic_t
-    @ingroup CoreTypes
+    @ingroup Concurrency
 */
 PT_API int atomicExchangeAdd(volatile atomic_t& val, int add);
 
@@ -128,7 +132,7 @@ PT_API int atomicExchangeAdd(volatile atomic_t& val, int add);
     Sets \a val to \a exch and returns the initial value of \a val.
 
     @related atomic_t
-    @ingroup CoreTypes
+    @ingroup Concurrency
 */
 PT_API void* atomicExchange(void* volatile& val, void* exch);
 
@@ -138,7 +142,7 @@ PT_API void* atomicExchange(void* volatile& val, void* exch);
     value of \a ptr is returned.
 
     @related atomic_t
-    @ingroup CoreTypes
+    @ingroup Concurrency
 */
 PT_API void* atomicCompareExchange(void* volatile& val, void* exch, void* comp);
 

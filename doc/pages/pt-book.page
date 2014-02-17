@@ -1,0 +1,17 @@
+/** \page pt_contents The Platinum C++ Framework
+
+@section pt_core Core Library
+
+@ref utilities
+
+@ref sigslot
+
+@ref textstreams
+
+@section pt_system System Programming
+
+@ref logging
+
+@ref plugins
+
+*/

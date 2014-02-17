@@ -39,6 +39,8 @@ namespace Pt {
     This exception is thrown, when conversions between types fail. For
     example, converting a string to an integer can fail if the string does
     not represent a number. 
+
+    @ingroup Utilities
 */
 class PT_API ConversionError : public std::runtime_error
 {

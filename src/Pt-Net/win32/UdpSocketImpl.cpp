@@ -36,6 +36,7 @@
 #include <Pt/System/SystemError.h>
 #include <Pt/System/IOError.h>
 #include <Pt/System/Logger.h>
+#include <vector>
 #include <limits>
 #include <cstring>
 #include <cassert>
@@ -477,13 +478,36 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
     if( _fd == INVALID_SOCKET )
         return;
 
-    Endpoint ep(ipaddr, 0);
-
     AddrInfo ai;
+    Endpoint ep(ipaddr, 0);
     ai.resolve(ep, true);
+
+    ULONG gaaFlags = GAA_FLAG_SKIP_FRIENDLY_NAME | 
+                     GAA_FLAG_SKIP_DNS_SERVER | 
+                     GAA_FLAG_SKIP_MULTICAST | 
+                     GAA_FLAG_SKIP_UNICAST;
+
+    std::vector<char> gaaBuffer;
 
     for(AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
+        // determine required length for output buffer
+        ULONG len = 0;
+        ULONG ret = GetAdaptersAddresses(it->ai_family, gaaFlags, NULL, 0, &len);
+        if( ret != ERROR_BUFFER_OVERFLOW)
+        {
+            throw System::IOError("GetAdaptersAddresses failed");
+        }
+
+        // get adapter information
+        gaaBuffer.resize(len);
+        IP_ADAPTER_ADDRESSES* adapters = reinterpret_cast<IP_ADAPTER_ADDRESSES*>( &gaaBuffer[0] );
+        ret = GetAdaptersAddresses(it->ai_family, gaaFlags, NULL, adapters, &len);
+        if( ret != ERROR_SUCCESS)
+        {
+            throw System::IOError("GetAdaptersAddresses failed");
+        }
+
         if(it->ai_family == AF_INET)
         {
             ip_mreq req;
@@ -491,33 +515,40 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
             sockaddr_in* sa = (sockaddr_in*)(it->ai_addr);
             memcpy( &req.imr_multiaddr, &sa->sin_addr, sizeof(struct in_addr) );
 
-            if(_isBoundInterface)
+            for(IP_ADAPTER_ADDRESSES* adapter = adapters; adapter != 0; adapter = adapter->Next)
             {
-                const sockaddr_in* sa = reinterpret_cast<const sockaddr_in*>(&_servaddr);
-                memcpy(&req.imr_interface, &sa->sin_addr, sizeof(in_addr));
-            }
-            else
-              req.imr_interface.s_addr = htonl(INADDR_ANY);
+                // req.imr_interface.s_addr = htonl(INADDR_ANY);
+                req.imr_interface.s_addr = htonl(adapter->IfIndex);
 
-            if (::setsockopt(_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) == 0)
-            {
-                log_debug( "joined multicast group ip4 " << ipaddr );
-                return; // success
+                if (::setsockopt(_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) != 0)
+                {
+                    throw System::IOError("setsockopt failed");
+                }
             }
+
+            log_debug( "joined IP4 multicast group: " << ipaddr );
+            return;
         }
         else if(it->ai_family == AF_INET6)
         {
             ipv6_mreq req;
+            
             sockaddr_in6* sa = (sockaddr_in6*)(it->ai_addr);
             memcpy( &req.ipv6mr_multiaddr, &sa->sin6_addr, sizeof(struct in6_addr) );
 
-            req.ipv6mr_interface = 0;
-
-            if (::setsockopt(_fd, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, (char*)&req, sizeof(ipv6_mreq)) == 0)
+            for(IP_ADAPTER_ADDRESSES* adapter = adapters; adapter != 0; adapter = adapter->Next)
             {
-                log_debug( "joined multicast group ip6 " << ipaddr );
-                return; // success
+                // req.ipv6mr_interface = 0;
+                req.ipv6mr_interface = adapter->Ipv6IfIndex;
+                
+                if (::setsockopt(_fd, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, (char*)&req, sizeof(ipv6_mreq)) == 0)
+                {
+                    throw System::IOError("setsockopt failed");
+                }
             }
+
+            log_debug( "joined IP6 multicast group: " << ipaddr );
+            return;
         }
     }
 

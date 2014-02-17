@@ -43,7 +43,7 @@ class SerializationInfo;
     This exception is thrown, when a invalid values are used for a date,
     such as a value greater than twelve for the month. 
 
-    @ingroup DateTime
+    @ingroup BasicTypes
 */
 class PT_API InvalidDate : public std::runtime_error
 {
@@ -70,7 +70,7 @@ PT_API void jul2greg(unsigned jd, int& y, int& m, int& d);
 
 /** @brief %Date expressed in year, month, and day.
 
-    @ingroup DateTime
+    @ingroup BasicTypes
 */
 class Date
 {

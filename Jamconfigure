@@ -49,8 +49,31 @@ EchoOption PT_INSTALL_LIBDIR : "Pt Library Install Dir" ;
 Configure PT_INSTALL_LIBDIR ;
 
 #############################################################################
+# Atomic operations
+#############################################################################
+
+if ! $(WITH_ATOMICS)
+{
+    WITH_ATOMICS = [ CheckBuildC++ "int main() {"
+                                   "int n = 0, m = 0;"
+                                   "__atomic_load(&n, &m, __ATOMIC_SEQ_CST);"
+                                   "return 0; }"
+                                 : ""
+                                 : "" ] ;
+
+    if $(WITH_ATOMICS)
+    {
+        PT_ATOMICS_DEFINES = PT_ATOMICS_GNU_BUILTIN ;
+
+        Configure PT_ATOMICS_DEFINES ;
+        EchoOption PT_ATOMICS_DEFINES : "Atomicity support" ;
+    }
+}
+
+#############################################################################
 # System libraries and includes
 #############################################################################
+
 if $(TARGET_OS:L) = winrt
 {
     SYS = winrt ;
@@ -115,7 +138,7 @@ if ! $(SYS)
     if ! $(WITH_NSL)
     {
         Exit "ERROR: nsl is required." ;
-    }  
+    }
 
     NETLIBS = $(UNIX_SOCKET_LIBS) $(NSL_LIBS) ;
     SYS = posix ;

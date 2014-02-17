@@ -26,10 +26,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
 #include "UdpSocketImpl.h"
 #include "MainLoopImpl.h"
 #include "AddrInfo.h"
+#include "AdapterInfo.h"
 #include "EndpointImpl.h"
 #include <Pt/Net/AddressInUse.h>
 #include <Pt/Net/UdpSocket.h>
@@ -37,13 +37,14 @@
 #include <Pt/System/IOError.h>
 #include <Pt/System/Logger.h>
 #include <cerrno>
-#include <stdio.h>
-#include <errno.h>
 #include <cstring>
 #include <cassert>
-#include <fcntl.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 log_define("Pt.Net.UdpSocket");
 
@@ -318,47 +319,83 @@ bool UdpSocketImpl::isBound() const
 }
 
 
+
 void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 {
+    log_debug( "joining multicast group " << ipaddr );
+
     if( this->fd() < 0 )
         return;
 
-    Endpoint ep(ipaddr, 0);
-
     AddrInfo ai;
+    Endpoint ep(ipaddr, 0);
     ai.resolve(ep, true);
+    
+    AdapterInfo adapters( this->fd() );
 
     for(AddrInfo::const_iterator it = ai.begin(); it != ai.end(); ++it)
     {
         if(it->ai_family == AF_INET)
         {
-            ip_mreq req;
-
-            sockaddr_in* sa = (sockaddr_in*)(it->ai_addr);
-            std::memcpy( &req.imr_multiaddr, &sa->sin_addr, sizeof(struct in_addr) );
-
-            req.imr_interface.s_addr = htonl(INADDR_ANY);
-
-            if (::setsockopt(this->fd(), IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq)) == 0)
+            unsigned joined = 0;
+            
+            AdapterInfo::Iterator adapter;
+            for(adapter = adapters.begin(); adapter != adapters.end(); ++adapter)
             {
-                return; // success
+                sockaddr* adapterAddress = adapter.addr();
+                
+                if(adapterAddress->sa_family != it->ai_family)
+                    continue;
+                    
+                ip_mreq req;
+                
+                sockaddr_in* groupAddress = (sockaddr_in*)(it->ai_addr);
+                std::memcpy( &req.imr_multiaddr, &groupAddress->sin_addr, sizeof(struct in_addr) );
+
+                sockaddr_in* adapterIp4Address = reinterpret_cast<sockaddr_in*>(adapterAddress);
+                std::memcpy( &req.imr_interface, &adapterIp4Address->sin_addr, sizeof(struct in_addr));
+
+                // ignore setsockopt errors, not all adapters will work.
+                // We might throw if we could not join with at least one adapter
+                int ret = ::setsockopt( this->fd(), IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&req, sizeof(ip_mreq) );
+                if( ret == 0)
+                    joined++;
             }
+
+            if(joined == 0)
+                throw System::IOError("setsockopt failed");
+
+            log_debug( "joined IP4 multicast group: " << ipaddr );
+            return;
         }
         else if(it->ai_family == AF_INET6)
         {
-            ipv6_mreq req;
-            sockaddr_in6* sa = (sockaddr_in6*)(it->ai_addr);
-            std::memcpy( &req.ipv6mr_multiaddr, &sa->sin6_addr, sizeof(struct in6_addr) );
-
-            req.ipv6mr_interface = 0;
-
-            if (::setsockopt(this->fd(), IPPROTO_IPV6, IPV6_JOIN_GROUP, (char*)&req, sizeof(ipv6_mreq)) == 0)
+            unsigned joined = 0;
+            
+            AdapterInfo::Iterator adapter;
+            for(adapter = adapters.begin(); adapter != adapters.end(); ++adapter) 
             {
-                return; // success
+                ipv6_mreq req;
+
+                sockaddr_in6* sa = (sockaddr_in6*)(it->ai_addr);
+                std::memcpy( &req.ipv6mr_multiaddr, &sa->sin6_addr, sizeof(struct in6_addr) );
+
+                req.ipv6mr_interface = adapter.index();
+
+                // ignore setsockopt errors, not all adapters will work.
+                // We might throw if we could not join with at least one adapter
+                int ret = ::setsockopt( this->fd(), IPPROTO_IPV6, IPV6_JOIN_GROUP, (char*)&req, sizeof(ipv6_mreq) );
+                if( ret == 0)
+                    joined++;
             }
+
+            if(joined == 0)
+                throw System::IOError("setsockopt failed");
+            
+            log_debug( "joined IP6 multicast group: " << ipaddr );
+            return;
         }
     }
-
 
     throw System::IOError("multicast group join failed");
 }

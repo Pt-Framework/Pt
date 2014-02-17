@@ -36,6 +36,8 @@
 namespace Pt {
 
 /** @brief %Settings Format Error.
+
+    @ingroup Utilities
 */
 class PT_API SettingsError : public SerializationError
 {
@@ -58,6 +60,8 @@ class PT_API SettingsError : public SerializationError
 };
 
 /** @brief Store application settings.
+
+    @ingroup Utilities
 */
 class PT_API Settings : private SerializationInfo
 {

@@ -11,17 +11,17 @@ High  peformance can only be achieved if formatting of log records is avoided
 for disabled log statements. The costs boil down to an atomic integer
 comparison, and a branch. Further, logging can be disabled at compile time
 with via the preprocessor, in which case no instruction at all will be
-generated.
+generated.\n\n
 
 - \b Thread-safety \n
 It is obvious that any modern library needs to be thread-safe. However, 
 great care needs to be taken that synchronization overhead does not affect
-performance.
+performance.\n\n
 
 - \b Easy \b Formatting \n
 In order to minimize the impact of a logging framework on the size of the 
 source code, logging statements should be easy to write. This library allows
-to format log records with stream output operator just like for std::ostream.
+to format log records with stream output operator just like for std::ostream.\n\n
 
 - \b Configuration \n
 The logging system should be configurable by both, API calls and configuration
@@ -29,12 +29,12 @@ files. It must provide fine grained control in which parts of the application
 logging is enabled. It must be possible route the log records to different 
 logs, for example the console or log files. The format of the records in
 the log should be configurable, and only contain the required information,
-which leads to smaller logs and a higher performance.
+which leads to smaller logs and a higher performance.\n\n
 
 - \b Usable \b during \b static \b initialization \b and \b deinitialization \n
 For example, logging statements may be executed indirectly when global objects
 are constructed or destructed. This should result in a static initialization
-fiasco.
+fiasco.\n\n
 
 - \b Portability
 This library is extremly portable and has minimal dependencies. It requires 

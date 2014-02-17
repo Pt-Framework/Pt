@@ -138,3 +138,14 @@ rule ConfigureNsl
     }
 }
 
+
+rule ConfigureGetIfAddrs
+{
+    WITH_GETIFADDRS = [ CheckBuildC++ "#include <ifaddrs.h>"
+                        "int main() { struct ifaddrs* ifa; getifaddrs(&ifa); return 0; }"
+                        : ""
+                        : "" ] ;
+
+    EchoOption WITH_GETIFADDRS : "getifaddrs" ;
+    Configure WITH_GETIFADDRS ;
+}

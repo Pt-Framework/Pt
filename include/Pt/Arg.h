@@ -179,6 +179,8 @@ class ArgBaseT<std::string> : public ArgBase
    if (debug)
      std::cout << "debug-mode is set" << std::endl;
    \endcode
+
+   @ingroup Utilities
  */
 template <typename T>
 class Arg : public ArgBaseT<T>

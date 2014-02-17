@@ -30,14 +30,11 @@
 #define PT_NET_UdpSocketImpl_H
 
 #include "IODeviceImpl.h"
-#include "Pt/Net/Api.h"
-#include "Pt/Net/UdpSocket.h"
+#include <Pt/Net/Api.h>
+#include <Pt/Net/UdpSocket.h>
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/select.h> // is this still needed?
-#include <sys/time.h>
-#include <unistd.h>
 
 namespace Pt {
 
