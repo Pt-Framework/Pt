@@ -27,12 +27,10 @@
  */
 #include "Pt/Atomicity.h"
 
-//#if defined(PT_ATOMICS_GNU_BUILTIN)
-//    #include "Atomicity.pthread.cpp"
-//
-//#elif
+#if defined(PT_ATOMICS_GNU_BUILTIN)
+    #include "Atomicity.gcc.builtin.cpp"
 
-#if defined(PT_ATOMICITY_GCC_ARM)
+#elif defined(PT_ATOMICITY_GCC_ARM)
     #include "Atomicity.gcc.arm.cpp"
 
 #elif defined(PT_ATOMICITY_GCC_MIPS)

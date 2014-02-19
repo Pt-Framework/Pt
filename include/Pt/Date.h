@@ -70,6 +70,33 @@ PT_API void jul2greg(unsigned jd, int& y, int& m, int& d);
 
 /** @brief %Date expressed in year, month, and day.
 
+    %Pt::Date is an easy way to handle calendar dates. It can be constructed
+    from the days, month and year components or from an ISO string using
+    fromIsoString(). The date components can be accessed with day(), month()
+    and year(). Once a Date object is created, calendar information can be
+    accessed, for example with dayOfYear(), dayOfWeek() or isLeapYear(). 
+    Dates can be compared and a %Date is considered less if it is earlier than
+    another %Date. It is also possible to add or subtract days from a %Date,
+    which yields a new date or modifies it. Dates can be subtracted, which
+    yields the number of days between them, as shown in the next example:
+
+    @code
+    #include <Pt/Date.h>
+    #include <iostream>
+
+    int daysUntilChristmas(const std::string& todayStr)
+    {
+        Pt::Date today = Pt::Date::fromIsoString(todayStr);
+        Pt::Date xmas(today.year(), 12, 24);
+
+        return xmas - today;
+    }
+    @endcode
+
+    Pt::InvalidDate is thrown, if a date could not be constructed, for example
+    if one of the date components is out of range. To avoid an exception,
+    date components can be validated with isValid().
+    
     @ingroup BasicTypes
 */
 class Date

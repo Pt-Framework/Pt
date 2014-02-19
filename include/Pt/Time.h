@@ -66,6 +66,32 @@ PT_API Time timeFromString(const std::string& s);
 
 /** @brief %Time expressed in hours, minutes, seconds and milliseconds.
 
+    A %Pt::Time object contains a wall-clock time in hours, minutes, seconds
+    amd milliseconds. It can be constructed either from the numeric time
+    values or from a string in ISO format using fromIsoString(). The separate
+    time values can be accessed with hour(), minute(), second() and msec().
+    Times can be compared and a %Time is considered less, if it is earlier
+    than another %Time. Subtracting a time from another yields a Pt::Timespan
+    as the result. Pt::Timespans can also be added or subtracted from a %Time,
+    yielding a new %Time or modifying it, as shown in the following example:
+
+    @code
+    #include <Pt/Date.h>
+    #include <iostream>
+
+    Pt::Timespan untilMidnight(const std::string& timeStr)
+    {
+        Pt::Date now = Pt::Time::fromIsoString(timeStr);
+        Pt::Date midnight(0 ,0, 0);
+
+        return midnight - now;
+    }
+    @endcode
+
+    Pt::InvalidTime is thrown, if a time could not be constructed, for example
+    if one of the time values is out of range. To avoid an exception,
+    time values can be validated with isValid().
+
     @ingroup BasicTypes
 */
 class Time

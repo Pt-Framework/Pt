@@ -44,6 +44,16 @@ PT_API DateTime dateTimeFromString(const std::string& s);
 
 /** @brief Combined %Date and %Time value.
 
+    %Pt::DateTime combines a Pt::Date and a Pt::Time object into one instance.
+    It can either be constructed from the corrsponding numeric values or a 
+    string in ISO format. The date and time parts can be accessed with date()
+    and time(). When two DateTimes are compared, one is considered less, if
+    its date is earlier or if the time is earlier in case of equal dates.
+    A %Pt::Timespan can be added or subtracted from a %DateTime and this is
+    also the result when two DateTimes are subtracted. To avoid the exceptions
+    thrown by the underlying time and date, isValid() can be used
+    to check numeric date and time values.
+
     @ingroup BasicTypes
 */
 class DateTime

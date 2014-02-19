@@ -138,9 +138,4 @@ order:
 Pt::uint32_t beVal = ...;
 Pt::uint32_t value = Pt::beToHost(beVal);
 @endcode
-
-@section utilities_Any The Any Class
-
-@copydetails Pt::Any
-
 */
