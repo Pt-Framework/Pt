@@ -116,20 +116,21 @@
 
 /** @defgroup BasicTypes Basic Types
 
-    The %Pt framework provides a number of fixed-size, signed and unsigned 
-    integers ranging from 8-bit to 64-bit widths. They are typedefs for
-    builtin plain data types such as int or long. For example, Pt::uint8_t
-    is a typedef for an unsigned 8 bits wide integer type and Pt::int32_t
-    is a typedef for a signed 32 bits wide integer.
+    The %Pt framework defines a number of signed and unsigned,
+    @link basictypes_FixedInt fixed-size integer types@endlink. These
+    are typedefs of fundamental integer types and the actual type depends
+    on the platform. 
 
-    The classes that represent dates and times, namely Pt::Date, Pt::Time,
-    Pt::DateTime and Pt::Timespan, can be used for comparison, sorting or
+    The classes that represent dates and times, namely
+    @link basictypes_DateTime Pt::Date, Pt::Time, Pt::DateTime and
+    Pt::Timespan@endlink, can be used for comparison, sorting or
     calculating dates, times and timespans. These types are serializable and
     conversion to ISO string formats are supported as well.
 
-    A type named Pt::Any is able to contain almost any other type. This is useful
-    in situations where type erarure is required, for example to store 
-    completely unrelated types in a list or vector.
+    The @link basictypes_Any Pt::Any@endlink is able to contain any other
+    copyable type. This is useful in situations where type erasure is
+    required, for example, to store completely unrelated types in a list
+    or vector.
 */
 
 /** @defgroup Utilities Utilities

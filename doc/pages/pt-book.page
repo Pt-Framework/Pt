@@ -2,11 +2,35 @@
 
 @section pt_core Core Library
 
-@ref utilities
+<ul>
+    <li> @ref basictypes </li>
+    <ul>
+        <li> @ref basictypes_FixedInt </li>
+        <li> @ref basictypes_DateTime </li>
+        <li> @ref basictypes_Any </li>
+    </ul>
 
-@ref sigslot
+    <li> @ref utilities </li>
+    <ul>
+        <li> @ref utilities_StringConv </li>
+        <li> @ref utilities_NumConv </li>
+        <li> @ref utilities_ByteOrder </li>
+    </ul>
 
-@ref textstreams
+    <li> @ref sigslot </li>
+    <ul>
+        <li> @ref sigslot_Signals </li>
+        <li> @ref sigslot_Delegates </li>
+    </ul>
+    
+    <li> @ref textstreams </li>
+    <ul>
+        <li> @ref text_Characters </li>
+        <li> @ref text_TextStreams </li>
+        <li> @ref text_Base64 </li>
+    </ul>
+
+</ul>
 
 @section pt_system System Programming
 

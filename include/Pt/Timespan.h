@@ -37,6 +37,26 @@ namespace Pt {
 
 /** @brief Represents time spans in microsecond resolution.
 
+    %Time intervals can be represented by %Pt::Timespan objects with
+    microsecond accuracy. It is often the result of the calculations involving
+    Pt::Date, Pt::Time ot Pt::DateTime. A %Pt::Timespan can be constructed from
+    the number of microseconds and then be converted to other time units with
+    toHours(), toSeconds(), toMSecs() and toUSecs(). When two %Pt::Timespans
+    are compared, the shorter one is considered less. Addition and subtraction
+    is supported as shown in the next example:
+
+    @code
+    #include <Pt/Timespan.h>
+    #include <iostream>
+
+    Pt::Timespan ts1(10000);
+    Pt::Timespan ts2(1000);
+
+    Pt::Timespan d = ts2 - ts1;
+
+    std::cout << "The difference is " << d.toSecs() << " secs" << std::endl;
+    @endcode
+
     @ingroup BasicTypes
 */
 class Timespan
