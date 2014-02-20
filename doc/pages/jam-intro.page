@@ -21,7 +21,7 @@ Most importantly, Jam understands C/C++ dependencies, there is no need to
 declare header or object files. The built-in Jam rules handle header file 
 dependencies and object files both automatically and on-the-fly. Before any
 targets are updated, Jam gathers complete dependency information for C/C++ 
-source files.
+source files.\n\n
 
 <b>All this allows Jam to:</b>
 

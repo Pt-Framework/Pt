@@ -148,39 +148,45 @@ class ArgBaseT<std::string> : public ArgBase
         std::string m_value;
 };
 
-/** @brief Read and extract commandline parameters.
+/** @brief Read and extract command-line options.
 
-    Programs usually need some parameters. Usually they start with a '-'
-    followed by a single character and optionally a value.
-    Arg<T> extracts these and other parameters.
+    Arg objects can be used to process command line options passed to the
+    main function of the program. A syntax for short-named and long-named
+    options is supported. Short-named options start with a single hypen ('-')
+    followed by a single character and optionally a value. Long-named options
+    start with two hyphens followed by string and optionally a value.
 
-    This default class processes paramters with a value, which defines
-    a input-extractor-operator operator>> (istream&, T&).
-
-    Options are removed from the option-list, so programs can easily check
-    after all options are extracted, if there are parameters left.
-
-    Example:
-    \code
-      int main(int argc, char* argv[])
-      {
+    The template parameter of the Arg class is the argument value type, which
+    must be streamable, i.e. the operator >> (std::istream&, T&) must be defined
+    for the type T. When an Arg is constructed, the operator will be used to
+    extract the value from the command-line string. the next example
+    demonstrates this:
+   
+    @code
+    int main(int argc, char* argv[])
+    {
         Pt::Arg<int> option_n(argc, argv, 'n', 0);
         std::cout << "value for -n: " << option_n << endl;
-      }
-    \endcode
+    }
+    @endcode
 
-   A specialization exists for boolean parameters. Programs often need some switches,
-   which are switched on or off. Users just enter a option without parameter.
-   Boolean parameters can be grouped, so -abc is processed like -a -b -b.
+    Options are removed from the option-list, so programs can easily check,
+    if there are parameters left, after all options were extracted.
+    A specialization exists for boolean parameters. This implements a switch,
+    which is on, if the option is present and off, if it is missing. The option
+    consists, in this case, only of a command line flag without a value. Boolean
+    parameters can also be grouped, so -abc is processed like -a -b -b.
 
-   Example:
-   \code
-   Pt::Arg<bool> debug(argc, argv, 'd');
-   if (debug)
-     std::cout << "debug-mode is set" << std::endl;
-   \endcode
+    @code
+    Pt::Arg<bool> debug(argc, argv, "debug");
+    if (debug)
+        std::cout << "debug-mode is set" << std::endl;
+    @endcode
 
-   @ingroup Utilities
+    The example shown above not only shows a boolean parameter, but also how
+    long-named options are handled, in this case "--debug".
+
+    @ingroup Utilities
  */
 template <typename T>
 class Arg : public ArgBaseT<T>

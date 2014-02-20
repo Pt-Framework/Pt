@@ -12,11 +12,11 @@
        and <A href="#VARS">variables</A> 
        defined in Jambase for use in Jamfiles.
 
-<H2>
+<H1>
 <A NAME="RULES">
 Jambase Rules
 </A>
-</H2>
+</H1>
 <P>
        <B>As</B> <I>obj.o</I> : <I>source.s</I> ;
 
@@ -374,9 +374,9 @@ Jambase Rules
 <P> 
 
 <A NAME="PSEUDOTARGETS">
-<H2>
+<H1>
 Jambase Pseudotargets
-</H2>
+</H1>
 </A>
 
 <P>
@@ -424,9 +424,9 @@ depend on "exe", "lib", "obj", "files", and "shell".
 <P> 
 
 <A NAME="VARS">
-<H2>
+<H1>
 Jambase Variables 
-</H2> 
+</H1> 
 
 </A>
 <P>

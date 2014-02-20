@@ -2,7 +2,7 @@
 
 \htmlonly
 
-<DT> <P> <H2> Lexical Features </H2> <DD>
+<DT> <H1> Lexical Features </H1> <DD>
 
     <B>Jam</b> has a interpreted, procedural language with a few
     select features to effect program construction.  Statements in
@@ -31,7 +31,7 @@
     and generally must be quoted with double quotes (") to be used
     as arbitrary tokens, such as variable or target names.
 
-<DT> <P> <H2> Datatype </H2> <DD>
+<DT> <P> <H1> Datatype </H1> <DD>
 
     <P>
 
@@ -40,7 +40,7 @@
     the Jambase or included files, as the result of variable expansion
     of those tokens, or as the return value from a rule invocation.
 
-<DT> <P> <H2> Rules </H2> <DD>
+<DT> <P> <H1> Rules </H1> <DD>
 
     <P>
 
@@ -57,7 +57,7 @@
     value can be expanded in a list by enclosing the rule invocation
     with <tt>[</tt> and <tt>]</tt>.
 
-<DT> <P> <H2> Updating Actions </H2> <DD>
+<DT> <P> <H1> Updating Actions </H1> <DD>
 
     <P>
 
@@ -76,7 +76,7 @@
     See <A HREF="#binding"> Binding</A> above.
 
 
-<DT> <P> <H2> Statements </H2> <DD>
+<DT> <P> <H1> Statements </H1> <DD>
 
     <P>
 
@@ -347,7 +347,7 @@
     </DL></TABLE>
 
 
-<DT> <P> <H2> Variables </H2> <DD>
+<DT> <P> <H1> Variables </H1> <DD>
 
     <P>
 
@@ -414,7 +414,7 @@
     actions can reference <b>jam</b> variables with &#36;(<I>variable</I>).
 
 <A NAME="varexp">
-<DT> <P> <H2> Variable Expansion </H2> 
+<DT> <P> <H1> Variable Expansion </H1> 
 </A> <DD>
 
     <P>
@@ -561,7 +561,7 @@
     and NT, &#36;(var:P) and &#36;(var:D) are the same.
 
 
-<DT> <P> <H2> Built-in Rules </H2> <DD>
+<DT> <P> <H1> Built-in Rules </H1> <DD>
 
     <P>
     <B>Jam</b> has twelve built-in rules, all of which are pure
@@ -740,7 +740,7 @@
 
     </DL></TABLE>
 
-<DT> <P> <H2> Built-in Variables </H2> <DD>
+<DT> <P> <H1> Built-in Variables </H1> <DD>
 
     <P>
 

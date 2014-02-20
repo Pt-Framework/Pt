@@ -3,7 +3,7 @@
 \htmlonly
 
 <A NAME="jam_usage">
-<DT><P><H2>Usage</H2><DD>
+<DT><P><H1>Usage</H1><DD>
 </A>
 
 <PRE>
@@ -18,7 +18,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 </PRE>
 
 <A NAME="jam_description">
-<DT> <P> <H2> Description </H2> <DD>
+<DT> <P> <H1> Description </H1> <DD>
 </A>
     <P>
 
@@ -46,7 +46,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 <P>
 
 <A NAME="jam_options">
-<DT> <P> <H2> Command Line Options </H2> <DD>
+<DT> <P> <H1> Command Line Options </H1> <DD>
 </A>
 
     <P>
@@ -129,11 +129,10 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     </TABLE>
 
 <A NAME="jam_required_files">
-<DT> <P> <H2> Required Files </H2> <DD>
+<DT> <P> <H1> Required Files </H1> <DD>
 </A>
 
-<P>
-<DT> <P> <H3> The Jambase </H3> <DD>
+<DT> <H3> The Jambase </H3> <DD>
 <P>
     The Jambase defines rules and variables which support standard software
     build operations, like compiling, linking, etc. When <B>jam</B> is
@@ -154,7 +153,6 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     and contains a set of project-specific rule and variable definitions. The
     first Jamfile normally causes the Jamrules file to be read, when it calls
     the SubDir rule. 
-<P>
 
 <DT> <P> <H3> Jam Executable Wrappers </H3> <DD>
 <P>
@@ -168,7 +166,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 <P>
 
 <A NAME="jam_build_layout">
-<DT> <P> <H2> Build Process Layout </H2> <DD>
+<DT> <P> <H1> Build Process Layout </H1> <DD>
 </A>
 <P>
     The build process usually consists of several steps, such as:
@@ -225,7 +223,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 <P>
 
 <A NAME="jam_execution">
-<DT> <P> <H2> Program Execution </H2> <DD>
+<DT> <P> <H1> Program Execution </H1> <DD>
 </A>
     <P>
 
@@ -365,7 +363,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 
 
 <A NAME="jam_build_scripts">
-<DT> <P> <H2>Jam Build Scripts</H2>  <DD>
+<DT> <P> <H1>Jam Build Scripts</H1>  <DD>
 </A>
 
 <P>
@@ -556,7 +554,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
 <P>
 
 <A NAME="jam_diagnostics">
-<DT> <P> <H2> Diagnostics </H2>  <DD>
+<DT> <P> <H1> Diagnostics </H1>  <DD>
 </A>
 
     <P>
@@ -617,7 +615,7 @@ jam [ -a ] [ -g ] [ -n ] [ -q ] [ -v ]
     </DL></TABLE>
 
 <A NAME="jam_bugs">
-<DT> <P> <H2> Bugs, Limitations </H2> <DD>
+<DT> <P> <H1> Bugs, Limitations </H1> <DD>
 </A>
 
     <P>
