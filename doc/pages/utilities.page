@@ -42,10 +42,10 @@ parsed and formatted:
 Pt::HexFormat<char> fmt;
 
 std::ostream_iterator<char> it(std::cout);
-Pt::formatInt(it, 42, fmt);
+Pt::formatInt(it, 0x42, fmt);
 
-const char* buf = "42";
-const char* bufend = buf + 2;
+const char* buf = "0x42";
+const char* bufend = buf + 4;
 int n = 0;
 Pt::parseInt(buf, bufend, n, fmt);
 @endcode
@@ -109,7 +109,7 @@ catch(const Pt::ConversionError& e)
 
 @section utilities_ByteOrder Byte Order Conversion
 
-The byteorder conversion API consists of two sets of functions. The Pt::swab()
+The byteorder conversion API consists of two sets of functions. The swab()
 function is able to swap the byteorder of a type by bytewise copying as shown
 in the following example:
 
@@ -138,4 +138,9 @@ order:
 Pt::uint32_t beVal = ...;
 Pt::uint32_t value = Pt::beToHost(beVal);
 @endcode
+
+@section utilities_Arg Command Line Arguments
+
+@copydetails Pt::Arg
+
 */

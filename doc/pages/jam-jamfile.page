@@ -2,7 +2,7 @@
 
 \htmlonly
 
-<A NAME="jam_overview"><H2>Overview</H2></A>
+<A NAME="jam_overview"><H1>Overview</H1></A>
 <P>
     This document describes how to use the various Jambase rules from a 
     functional point of view. You can see the summary of available Jambase
@@ -11,7 +11,7 @@
     rule definition itself in the Jambase.
 </P>
 
-<A NAME="jam_building"><H2>Build Configuration</H2></A>
+<A NAME="jam_building"><H1>Build Configuration</H1></A>
 <P>
     The build configuration rules can only be used in the Jamconfigure script
     and perform the necessary tests to determine whether all dependencies
@@ -136,7 +136,7 @@
     of the more high-level configuration rules will be used.
 <P>
 
-<A NAME="jam_building"><H2>Building Executables and Libraries</H2></A>
+<A NAME="jam_building"><H1>Building Executables and Libraries</H1></A>
 <P>
     The rules to build targets can only be used in the Jamfiles and the
     Jamrules script. All build options that were configured are available
@@ -660,7 +660,7 @@
               cc -o xprog xprog.o libxutil.a -lXext -lX11
 </PRE>
 
-<A NAME="jam_compiling"><H2>Compiling</H2></A>
+<A NAME="jam_compiling"><H1>Compiling</H1></A>
 
        Compiling of source files occurs normally as  a  byproduct
        of  the Main or Library rules, which call the rules 
@@ -1040,7 +1040,7 @@
     as the default &#36;(HDRS). All objects will be generated in
     &#36;(TOP)/objs.
 
-<A NAME="jam_headers"><H2>Header File Processing</H2></A>
+<A NAME="jam_headers"><H1>Header File Processing</H1></A>
 
        One of the functions of the Object rule is set up 
        scanning of source
@@ -1155,7 +1155,7 @@
        yield desirable results.
 <P>
 
-<A NAME="jam_files"><H2>Copying Files</H2></A>
+<A NAME="jam_files"><H1>Copying Files</H1></A>
 
 <H4>
    File Rule
@@ -1255,7 +1255,7 @@
 </CENTER>
 <P>
 
-<A NAME="jam_install"><H2>Installing Files</H2></A>
+<A NAME="jam_install"><H1>Installing Files</H1></A>
 
 <H4> MakeInstall Rule </H4>
 <P>
@@ -1365,7 +1365,7 @@ The Install* rules are:
        to take effect.
 <P>
 
-<A NAME="jam_misc"><H2>Miscellaneous Rules</H2></A>
+<A NAME="jam_misc"><H1>Miscellaneous Rules</H1></A>
 
 <H4>
 Clean Rule

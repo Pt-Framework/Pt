@@ -15,7 +15,7 @@ For example, Pt::uint8_t is a typedef for an unsigned 8 bits wide integer type
 and Pt::int32_t is a typedef for a signed 32 bits wide integer. The following
 table shows all available fixed-size integer types:
 
-<table style="width:600px; margin-left:20px">
+<table style="width:600px; margin:20px; padding:6px; background-color: #eff0f0;">
     <tr>
         <td><b>int8_t</b></td>
         <td>signed 8 bit integer</td>

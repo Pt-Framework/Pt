@@ -23,8 +23,8 @@ H1 {
     /* text-align: center; */
     font-size: 26px;
     font-weight: normal;
-    margin-top: 24px;
-    margin-bottom: 10px;
+    margin-top: 26px;
+    margin-bottom: 8px;
 }
 H1 A {
     color: #000000;
@@ -39,43 +39,43 @@ H1 SMALL A {
     font-weight: normal;
 }
 H2 {
-	font-size: 26px;
+	font-size: 20px;
     color: #000000;
     font-weight: normal;
-    margin-top: 24px;
-    margin-bottom: 10px;
+    margin-top: 22px;
+    margin-bottom: 6px;
 }
 H2 A {
-	font-size: 26px;
+	font-size: 20px;
     color: #000000;
     font-weight: normal;
-    margin-top: 24px;
-    margin-bottom: 10px;
+    margin-top: 22px;
+    margin-bottom: 6px;
 }
 H3 
 {
 	font-size: 14px;
     color: #000000;
     margin-top: 20px;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 H3 A 
 {
     color: #000000;
     margin-top: 20px;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 H4
 {
     color: #000000;
     margin-top: 16px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 H4 A 
 {
     color: #000000;
     margin-top: 16px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 H5
 {
@@ -104,8 +104,11 @@ A:hover {
 a:visited {
     color: #2d378c;
 }
-p {
-    margin-top: 4px;
+p 
+{
+	margin: 0;
+    padding-top: 5px;
+    padding-bottom: 5px;
     line-height: 20px;
 }
 dt {
@@ -113,6 +116,14 @@ dt {
 }
 
 /* Doxygen styles */
+
+H2.groupheader {
+	font-size: 24px;
+    color: #000000;
+    font-weight: normal;
+    margin-top: 24px;
+    margin-bottom: 8px;
+}
 
 DIV.header DIV.summary {
     display: none;
@@ -311,7 +322,8 @@ DL.el { margin-left: -1cm }
 }
 PRE.fragment {
 	/* border: 1px solid #CBCCCC; */
-	/* background-color: #eff0f0; */
+	background-color: #eff0f0;
+	border-radius: 7px;
 	/*margin-top: 4px;*/
 	/*margin-bottom: 4px;*/
 	margin-left: 2px;
@@ -322,10 +334,11 @@ PRE.fragment {
 	padding-bottom: 4px;
 }
 div.fragment {
-    /* background-color: #FBFCFD; */
+    background-color: #eff0f0;
+    border-radius: 7px;
     /* border: 1px solid #C4CFE5; */
     margin: 16px 8px 16px 2px;
-    padding: 4px 6px;
+    padding: 6px 6px;
 }
 div.line {
     font-family: monospace,fixed;
@@ -550,7 +563,7 @@ TH.dirtab { background: #e8eef2;
 
 #container .contents    {
 	clear: both;
-    text-align: left;
+    text-align: justify;
     padding-top: 0px;
 }
 
@@ -683,6 +696,7 @@ div.contents hr {
     font-weight: normal;
     font-style: italic;
     padding-left: 14px;
+    text-align: left;
 }
 .sidebar-note-title {
     font-size: 14px;
@@ -747,7 +761,7 @@ div.contents hr {
 
 
 .infobox {
-    padding-left: 10px;
+    padding: 10px;
     text-align:left;
 }
 .infobox-header {

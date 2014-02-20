@@ -148,7 +148,16 @@ the slots will be called one after another.
 
 A Pt::Delegate is an alternative sender type to the Pt::Signal and differs
 from it in two ways. Firstly, delegates forward the return value of the slot
-and secondly, delegates can only be connected to one slot at a time.
+and secondly, delegates can only be connected to one slot at a time. The
+template parameter list determines the signature, whereby the first template
+parameter is the return type.
+
+@code
+Pt::Delegate<int> del0;           // Delegate only returns int
+Pt::Delegate<int, int> del1;      // Delegate with one argument
+Pt::Delegate<int, int, int> del2; // Delegate with two arguments
+@endcode
+
 
 @subsection sigslot_ConnectingDelegates Connecting Delegates
 
