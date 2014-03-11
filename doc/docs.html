@@ -1,13 +1,35 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-  <meta content="text/html; charset=ISO-8859-1"
- http-equiv="content-type">
-  <title>Online Reference Documentation</title>
-  <meta content="Pt Reference Manual" name="description">
-  <meta content="The Pt Development Team" name="author">
-  <link rel="stylesheet" href="htdocs/doxygen.css" type="text/css">
+    <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+    <title>Online Reference Documentation</title>
+    <meta content="Pt Reference Manual" name="description">
+    <meta content="The Pt Development Team" name="author">
+    <link rel="stylesheet" href="htdocs/doxygen.css" type="text/css">
+
+    <style type="text/css"> 
+        .docs-header {
+        	text-align: left;
+            padding: 5px 25px 5px 25px;
+            color: #000000;
+            font-size:  15px;
+            border-color: #CCCCCC;
+            border-style: solid;
+            border-width: 0 0 3px;
+        } 
+        
+        .docs-body ul {
+            padding: 5px 25px 5px 25px;
+            list-style-type: none;
+        }
+
+        .docs-body a {
+            text-decoration: none;
+        }
+    </style>
+
 </head>
+
 <body style="margin:0px;">
 
 <div id="container">
@@ -52,7 +74,7 @@
 		<div class="header-menu-entry-sep"></div>
 
 		<div class="header-menu-entry"> 
-            <a id="header-menu-link" href="features.html">Features</a> </div>
+            <a id="header-menu-link" href="features-design.html">Features</a> </div>
 			
 		<div class="header-menu-entry-sep"></div>
 
@@ -70,13 +92,18 @@
             <a id="header-menu-link" href="community.html">Community</a> </div>
 	</div>
 
-    </div>
+</div>
 
-<div class="header-submenu">  
+<div class="header-submenu" style="padding-left: 146px;">  
     <div class="header-submenu-term"><img src="htdocs/sub_left.png" width="4" height="20" /></div>
 	
 	<div class="header-submenu-entry-sep"></div>
 	
+    <div class="header-submenu-entry">
+        <a id="header-submenu-link" href="docs.html">Main</a></div>
+		
+	<div class="header-submenu-entry-sep"></div>
+
     <div class="header-submenu-entry">
         <a id="header-submenu-link" href="htdocs/classes.html">Classes</a></div>
 		
@@ -89,12 +116,7 @@
 		
     <div class="header-submenu-entry">
         <a id="header-submenu-link" href="htdocs/modules.html">Modules</a></div>
-		
-	<div class="header-submenu-entry-sep"></div>
-		
-    <div class="header-submenu-entry">
-        <a id="header-submenu-link" href="htdocs/pages.html">Related Pages</a></div>
-		
+				
 	<div class="header-submenu-entry-sep"></div>
 		
     <div class="header-submenu-term"><img src="htdocs/sub_right.png" width="4" height="20" /></div>
@@ -108,11 +130,80 @@
 
     <table cellpadding="2" cellspacing="0" border="0" width="100%">
         <tr>
+            <th class="docs-header">Genral Information</th>
+            <th class="docs-header">Getting Started</th>
+            <th class="docs-header">Jam Build Tool</th>
+        </tr>
+        <tr>
+            <td valign="top" class="docs-body">
+                <ul>
+                    <!--<li><a href="about.html">Goals and Approach</a></li>-->
+                    <li><a href="features-platforms.html" >Supported Platforms</a></li>
+                    <li><a href="features-license.html">License</a></li>
+                    <li><a href="https://lists.sourceforge.net/lists/listinfo/pt-framework-general">Mailing List</a></li>
+                    <li><a href="htdocs/faq.html">Frequently Asked Questions</a></li>
+                    <li><a href="htdocs/pt_contents.html">The Pt Book</a></li>
+                </ul>
+            </td>
+            <td valign="top" class="docs-body">
+                <ul>
+                    <li><a href="htdocs/requirements.html">Requirements</a></li>
+                    <li><a href="htdocs/installing.html">Installing from Source</a></li>
+                    <li><a href="htdocs/tutorial.html">Tutorial <i style="font-size: 10px;">(In Progress)</i></a></li>
+                    <!--<li><a>Example Programs <i style="font-size: 10px;">(Coming Soon)</i></a></li>-->
+                    <!--<li><a href="htdocs/reading.html">Contributing</a></li>-->
+                    <li><a href="htdocs/reading.html">Recommended Reading</a></li>
+                </ul>
+            </td>
+            <td valign="top" class="docs-body">
+                <ul>
+                    <li><a href="htdocs/jam-intro.html">Introduction</a></li>
+                    <li><a href="htdocs/jam-getting.html">Getting Jam</a></li>
+                    <li><a href="htdocs/jam-usage.html">Basic Usage</a></li>
+                    <li><a href="htdocs/jam-language.html">Language Features</a></li>
+                    <li><a href="htdocs/jam-jamfile.html">Using the Jambase</a></li>
+                    <li><a href="htdocs/jam-jambase.html">Jambase Reference</a></li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <th class="docs-header">Concepts</th>
+            <th class="docs-header">Tools</th>
+        </tr>
+        <tr>
+            <td valign="top" class="docs-body">
+            <ul>
+                <li><a href="htdocs/basictypes.html">Basic Types</a></li>
+                <li><a href="htdocs/utilities.html">Utilities</a></li>
+                <li><a href="htdocs/sigslot.html">Signals and Delegates</a></li>
+                <li><a href="htdocs/logging.html">Logging</a></li>
+                <li><a href="htdocs/unittest.html">Unit Testing</a></li>
+                <li><a href="htdocs/textstreams.html">Text Processing</a></li>
+                <li><a href="htdocs/plugins.html">Plugins</a></li>
+                <li><a href="htdocs/ssl.html">Secure Communication</a></li>
+                <li><a href="htdocs/xmlrpc.html">XML-RPC Communication</a></li>
+            </ul>
+            </td>
+            <td valign="top" class="docs-body">
+                <ul>
+                    <li><a href="http://www.perforce.com/jam/jam.html">Perforce Jam</a></li>
+                    <li><a href="http://www.doxygen.org">Doxygen</a></li>
+                    <li><a href="http://subversion.tigris.org/">Subversion</a></li>
+                    <li><a href="http://gcc.gnu.org/">GNU Toolset</a></li>
+                    <li><a href="http://www.mingw.org/">GNU for Win32</a></li>
+                </ul>
+            </td>
+        </tr>
+    </table>
+
+<!--
+    <table cellpadding="2" cellspacing="0" border="0" width="100%">
+        <tr>
           <td style="width:33%; vertical-align:top;">
             <div class="docs-groupbox-header">General Information</div>
             <div class="docs-groupbox-body">
               <ul>
-                <!--<li><a href="about.html">Goals and Approach</a></li>-->
+                <!--<li><a href="about.html">Goals and Approach</a></li>- ->
                 <li><a href="htdocs/platforms.html" >Supported Platforms</a></li>
                 <li><a href="htdocs/license.html">License</a></li>
                 <li><a href="https://lists.sourceforge.net/lists/listinfo/pt-framework-general">Mailing List</a></li>
@@ -128,8 +219,8 @@
                 <li><a href="htdocs/requirements.html">Requirements</a></li>
                 <li><a href="htdocs/installing.html">Installing from Source</a></li>
                 <li><a href="htdocs/tutorial.html">Tutorial <i style="font-size: 10px;">(In Progress)</i></a></li>
-                <!--<li><a>Example Programs <i style="font-size: 10px;">(Coming Soon)</i></a></li>-->
-                <!--<li><a href="htdocs/reading.html">Contributing</a></li>-->
+                <!--<li><a>Example Programs <i style="font-size: 10px;">(Coming Soon)</i></a></li>- ->
+                <!--<li><a href="htdocs/reading.html">Contributing</a></li>- ->
                 <li><a href="htdocs/reading.html">Recommended Reading</a></li>
               </ul>
             </div>
@@ -195,6 +286,7 @@
         </tr>
     </table>
 
+-->
 </div>
 
 <div class="clear">&nbsp;</div>

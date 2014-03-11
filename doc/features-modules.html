@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+    <title>Features and Benefits</title>
+    <meta content="Pt Reference Manual" name="description">
+    <meta content="The Pt Development Team" name="author">
+    <link rel="stylesheet" href="htdocs/doxygen.css" type="text/css">
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="header">
+     <table id="logo">
+        <tr>
+            <td>
+                <a href="index.html"><img src="htdocs/platinum-logo.gif" border="0"/></a>
+            </td>
+            <td>
+                <h3>The Power in your Hands</h3>
+            </td>
+        </tr>
+    </table>
+
+    <div class="search">
+        <form action="http://search.freefind.com/find.html" method="get" accept-charset="utf-8" target="_self">
+          <p style="margin: 0; padding-top:2px; padding-bottom:2px;"><b>Search Site:</b></p>
+          <p style="margin: 0; padding:0;">
+            <input type="hidden" name="si" value="43943317">
+            <input type="hidden" name="pid" value="r">
+            <input type="hidden" name="n" value="0">
+            <input type="hidden" name="_charset_" value="">
+            <input type="hidden" name="bcd" value="&#247;">
+            <input style="background-color: #FFFFFF;
+                          border: 1px solid #ffffff;
+                          font-size: 12px;
+                          width: 160px"
+                   type="text" name="query" value="Search...">
+          </p>
+
+        </form>
+    </div>
+
+    <div class="header-menu">
+	
+		<div class="header-menu-entry"> 
+            <a id="header-menu-link" href="index.html">About</a> </div>
+
+		<div class="header-menu-entry-sep"></div>
+
+		<div class="header-menu-entry"> 
+            <a id="header-menu-link" href="features.html">Features</a> </div>
+			
+		<div class="header-menu-entry-sep"></div>
+
+		<div class="header-menu-entry"> 
+            <a id="header-menu-link" href="docs.html">Documentation</a> </div>
+			
+		<div class="header-menu-entry-sep"></div>
+			
+		<div class="header-menu-entry"> 
+            <a id="header-menu-link" href="downloads.html">Download</a> </div>
+			
+		<div class="header-menu-entry-sep"></div>
+			
+		<div class="header-menu-entry"> 
+            <a id="header-menu-link" href="community.html">Community</a> </div>
+	</div>
+
+</div>
+
+<div class="header-submenu" style="padding-left: 63px;">  
+    <div class="header-submenu-term"><img src="htdocs/sub_left.png" width="4" height="20" /></div>
+	
+	<div class="header-submenu-entry-sep"></div>
+	
+    <div class="header-submenu-entry">
+        <a id="header-submenu-link" href="features-design.html">Design Philosophy</a></div>
+		
+	<div class="header-submenu-entry-sep"></div>
+		
+    <div class="header-submenu-entry">
+        <a id="header-submenu-link" href="features-platforms.html">Platforms</a></div>
+		
+	<div class="header-submenu-entry-sep"></div>
+		
+    <div class="header-submenu-entry">
+        <a id="header-submenu-link" href="features-modules.html">Modules</a></div>
+		
+	<div class="header-submenu-entry-sep"></div>
+		
+    <div class="header-submenu-entry">
+        <a id="header-submenu-link" href="features-license.html">License</a></div>
+        		
+	<div class="header-submenu-entry-sep"></div>
+		
+    <div class="header-submenu-term"><img src="htdocs/sub_right.png" width="4" height="20" /></div>
+</div>
+
+<div class="contents">
+
+    <h1>Module Overview</h1>
+
+    <p>
+        Platinum is highly modular and every module builds to a separate libray.
+        Library modules can depend on other modules and form a hierarchy. The
+        core module is relatively small and the extentions make up for the
+        most part of the library. This allows the programmer to select only
+        the parts of the framework, which are neccessary for an application.
+    </p>
+
+    <div>
+        <div class="infobox" style="float:left; width:47%">
+            <div class="infobox-header" >
+                Core Features
+            </div>
+            <div class="infobox-body" style="background:url(htdocs/pt-core.png) no-repeat left 14px">
+                Allocators, signals and delegates,
+                dates and times, serialization, text processing, unicode
+                support, regular expressions, smart pointers, settings
+                files, atomics.
+            </div>
+        </div>
+
+        <div class="infobox" style="float:right; width:47%">
+            <div class="infobox-header" >
+                System Programming
+            </div>
+            <div class="infobox-body" style="background:url(htdocs/pt-system.png) no-repeat left 14px">
+                Event loops, system clocks, file system access, concurrency,
+                asnchronous I/O streams, shared libraries, plugins, logging, 
+                pipes, file I/O, serial I/O, timers, multi-processing.
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="infobox" style="float:left; width:47%">
+            <div class="infobox-header" >
+                Network Programming
+            </div>
+            <div class="infobox-body" style="background:url(htdocs/pt-net.png) no-repeat left 14px">
+                Asynchronous TCP clients and servers, asynchronous UDP
+                clients and servers, support for IP4, IP6 and other address
+                families.
+            </div>
+        </div>
+
+        <div class="infobox" style="float:right; width:47%">
+            <div class="infobox-header" >
+                Http Client and Server
+            </div>
+            <div class="infobox-body" style="background:url(htdocs/pt-http.png) no-repeat left 14px">
+                An embeddable, asynchronous, multi-threaded HTTP server,
+                An asynchronous HTTP client, authentication and authorization,
+                Access to request and reply headers.
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="infobox" style="float:left; width:47%">
+            <div class="infobox-header" >
+                Secure Transport
+            </div>
+            <div class="infobox-body" style="background:url(htdocs/pt-ssl.png) no-repeat left 14px">
+                Asynchronous SSL/TLS I/O streams, management of keys and
+                certificates, native SSL/TLS or OpenSSL based implementation
+                available.
+            </div>
+        </div>
+
+        <div class="infobox" style="float:right; width:47%">
+            <div class="infobox-header" >
+                XML Processing
+            </div>
+            <div class="infobox-body" style="background:url(htdocs/pt-xml.png) no-repeat left 14px">
+                Stream-based, incremental XML parser and writer, XML
+                1.0/1.1 compliant including support for XML namespaces
+                and DTD validation.
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="infobox" style="float:left; width:47%">
+            <div class="infobox-header" >
+                Unit Testing
+            </div>
+            <div class="infobox-body" style="background:url(htdocs/pt-unit.png) no-repeat left 14px">
+                Data-driven and protocol-driven unit testing is possible, 
+                integrates into the build process, Configurable output
+                format for test.
+            </div>
+        </div>
+
+        <div class="infobox" style="float:right; width:47%">
+            <div class="infobox-header" >
+                XML-RPC Web Services
+            </div>
+            <div class="infobox-body" style="background:url(htdocs/pt-xmlrpc.png) no-repeat left 14px">
+                Asnychronous XML-RPC web services and clients, embeddable
+                into applications, support for custom data types, using 
+                Pt's serialization and HTTP support.
+            </div>
+        </div>
+    </div>
+<!--
+    </div>
+-->
+</div>
+
+<div class="clear">&nbsp;</div>
+
+<div id="footer">
+	<div style="float:left;">Copyright &copy; 2003-2014 The Pt Development Team</div>
+</div>
+
+</div>
+
+</body>
+
+</html>
