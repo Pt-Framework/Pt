@@ -70,7 +70,7 @@ class PT_XMLRPC_API ServiceDefinition : private NonCopyable
             of an ActiveProcedure created with default new. The Responder
             needs to be passed to the constructed %ActiveProcedure.
         */
-        template <typename A, class C>
+        template <typename A>
         void registerActiveProcedure(const std::string& name, A* (*func)(Responder&) );
 
         /** @brief Registers a member function as an asynchronous procedure.
