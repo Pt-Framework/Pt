@@ -768,7 +768,7 @@ MessageProgress Connection::endReceiveRequest()
     MessageProgress progress;
 
     if(_onTimeout)
-        throw HttpError("timeout");
+        throw System::IOError("timeout");
    
     if(_state == SslAcceptWrite)
     {
@@ -895,7 +895,10 @@ MessageProgress Connection::endReceiveReply()
     MessageProgress progress;
 
     if(_onTimeout)
-        throw HttpError("timeout");
+    {
+        // normal I/O timeout or keep-alive timeout
+        throw System::IOError("timeout");
+    }
 
     if(_state == RequestOutputPending)
     {

@@ -1,0 +1,97 @@
+/** \page http HTTP Clients and Servers
+
+@section http_client HTTP Clients
+
+@subsection http_client_send Requests and Replies
+
+The class Pt::Http::Client can be used to establish a connection to an
+HTTP server and then send requests and receive replies. Synchronous and
+asynchronous operation is supported, however the latter is recommended.
+The following example demonstrates the asynchronous client API:
+
+@code
+void onReplyReceived(Pt::Http::Client& client);
+
+int main()
+{
+    Pt::System::MainLoop loop;
+
+    Pt::Net::Endpoint ep("www.google.de", 80);
+    Pt::Http::Client client(loop, ep);
+    
+    client.request().setUrl("/index.html");
+    
+    client.replyReceived() += Pt::slot(*this, &onReplyReceived);
+    client.beginReceive();
+
+    loop.run();
+}
+@endcode
+
+An event loop is required for asynchronous operation and can be passed to
+the client's constructor, or set later by calling setActive().
+There is no explicit connect method, because connections are established when
+required i.e. before the request is sent to the server, if the client is not
+currently connected. The target endpoint can be passed to the constructor,
+or set using @link Pt::Http::Client::setHost() setHost()@endlink.
+The member function request() returns a Pt::Http::Request object, which
+represents the HTTP request data to be sent to the server, including header
+and payload. It has to be initialized, before beginReceive() is called to
+start the asynchronous HTTP communication. The keep-alive header can be set,
+to request a persistent connection, which can be reused for the next request,
+if the server permits it. The signal replyReceived() is sent, when reply data
+is received from the server and ready to be processed. The next example shows
+a slot that prints the reply data to the standard output:
+
+@code
+void onReplyReceived(Pt::Http::Client& client)
+{
+    Pt::Http::MessageProgress progress = client.endReceive();
+
+    Pt::Http::Reply& reply = client.reply();
+
+    if( progress.header() )
+    {
+        std::cout << reply.statusCode() << ' ' << reply.statusText() << std::endl;
+    }
+
+    if( progress.body() )
+    {
+        while ( reply.body().rdbuf()->in_avail() )
+            std::cout << reply.body().get();
+    }
+
+    if( progress.finished() )
+    {
+        client.loop()->exit();
+        return;
+    }
+
+    client.beginReceive();
+}
+@endcode
+
+The asynchronous operation is ended by calling @link Pt::Http::Client::endReceive()
+endReceive()@endlink, which returns a Pt::Http::MessageProgress object. 
+It's member function finished() indicates, whether the reply was completely
+received. Sending a request and receiving a reply might require more than
+one operation. If the reply was not finished, beginReceive() has to be
+called again. It is possible that progress was made, but neither header
+nor body are available yet. In case of short messages, however, the HTTP
+header and the complete body are normally received at the same time. In
+that case, the functions header(), body() and finished() all return true
+and the operation has completed.
+If the header or body was received, the member function reply() can be used
+to get a Pt::Http::Reply object, which represents the received HTTP reply.
+The body of the HTTP reply can be read from an std::istream, which is obtained
+by calling @link Pt::Http::Reply::body() body()@endlink. 
+
+@subsection http_client_pipelining Request Pipelining
+
+@subsection http_client_chunked Chunked Encoding
+
+@subsection http_client_ssl Secure Connections
+
+@section http_server HTTP Servers and Services
+
+*/

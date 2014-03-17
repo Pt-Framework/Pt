@@ -39,4 +39,17 @@
 
 @ref plugins
 
+@section pt_http HTTP Clients and Servers
+
+<ul>
+    <li> @ref http_client </li>
+    <ul>
+        <li> @ref http_client_send </li>
+        <li> @ref http_client_pipelining </li>
+        <li> @ref http_client_chunked </li>
+        <li> @ref http_client_ssl </li>
+    </ul>
+    
+    <li> @ref http_server </li>
+</ul>
 */
