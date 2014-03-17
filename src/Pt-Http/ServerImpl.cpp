@@ -160,6 +160,8 @@ void Acceptor::onRequestReceived(Request& req)
     }
     catch(const System::IOError& e)
     {
+        // this also catches keep-alive timeouts
+
         log_warn("EXCEPTION: " << e.what());
         _finished.send(*this);
     }
