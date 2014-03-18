@@ -1,8 +1,7 @@
-/** \page http HTTP Clients and Servers
+/** 
+@page http_client HTTP Clients
 
-@section http_client HTTP Clients
-
-@subsection http_client_send Requests and Replies
+@section http_client_send Requests and Replies
 
 The class Pt::Http::Client can be used to establish a connection to an
 HTTP server and then send requests and receive replies. Synchronous and
@@ -16,7 +15,7 @@ int main()
 {
     Pt::System::MainLoop loop;
 
-    Pt::Net::Endpoint ep("www.google.de", 80);
+    Pt::Net::Endpoint ep("www.google.com", 80);
     Pt::Http::Client client(loop, ep);
     
     client.request().setUrl("/index.html");
@@ -36,12 +35,14 @@ currently connected. The target endpoint can be passed to the constructor,
 or set using @link Pt::Http::Client::setHost() setHost()@endlink.
 The member function request() returns a Pt::Http::Request object, which
 represents the HTTP request data to be sent to the server, including header
-and payload. It has to be initialized, before beginReceive() is called to
-start the asynchronous HTTP communication. The keep-alive header can be set,
-to request a persistent connection, which can be reused for the next request,
-if the server permits it. The signal replyReceived() is sent, when reply data
-is received from the server and ready to be processed. The next example shows
-a slot that prints the reply data to the standard output:
+and payload. It has to be initialized, before beginReceive() is called, to
+start the asynchronous HTTP communication. This usually involves setting
+the resource URI, HTTP method, query parameters or special header fields.
+The keep-alive header can be set, to request a persistent connection, which
+can be reused for the next request, if the server permits it. The signal
+replyReceived() is sent, when reply data is received from the server and
+ready to be processed. The next example shows the slot that prints the reply
+data to the standard output:
 
 @code
 void onReplyReceived(Pt::Http::Client& client)
@@ -86,12 +87,239 @@ to get a Pt::Http::Reply object, which represents the received HTTP reply.
 The body of the HTTP reply can be read from an std::istream, which is obtained
 by calling @link Pt::Http::Reply::body() body()@endlink. 
 
-@subsection http_client_pipelining Request Pipelining
 
-@subsection http_client_chunked Chunked Encoding
+@section http_client_pipelining Request Pipelining
 
-@subsection http_client_ssl Secure Connections
+In order to pipeline HTTP requests, the client has to send multiple requests
+before receiving the replies. Therefore, the program must not only be notified
+when the reply was received, but also when the request was send to the server.
+More requests can then be sent, before starting to receive the replies. The
+following example demonstrates this:
 
-@section http_server HTTP Servers and Services
+@code
+void onRequestSent(Pt::Http::Client& client);
+void onReplyReceived(Pt::Http::Client& client);
+
+int main()
+{
+    Pt::System::MainLoop loop;
+
+    Pt::Net::Endpoint ep("animal-pics", 80);
+    Pt::Http::Client client(loop, ep);
+    
+    client.request().setUrl("/cat.png");
+    
+    client.requestSent() += Pt::slot(*this, &onRequestSent);
+    client.replyReceived() += Pt::slot(*this, &onReplyReceived);
+    client.beginSend();
+
+    loop.run();
+}
+@endcode
+
+The client is set up for the initial request and the signal requestSent()
+is to connected to a slot, which is called when the request progressed.
+The asynchronous HTTP communication is then started with beginSend().
+The next code block shows the code for the slot, which sends another request
+and then starts receiving the replies:
+
+@code
+void onRequestSent(Pt::Http::Client& client)
+{
+    Pt::Http::MessageProgress progress = client.endSend();
+    
+    if( ! progress.finished() )
+    {
+        client.beginSend();
+        return;
+    }
+
+    if( client.request().url() == "/cat.png" )
+    {
+        client.request().setUrl("/dog.png");
+        client.beginSend();
+        return;
+    }
+
+    client.beginReceive();
+}
+@endcode
+
+The asynchronous operation is ended by calling @link Pt::Http::Client::endSend()
+endSend()@endlink, which returns a Pt::Http::MessageProgress object. It is 
+possible that only a part of the request was sent and is not finished yet,
+in which case beginSend() is called again. If the request for the first
+resource has completed, the client is initialized to request the second
+resource asynchronously. At some point, the second request will be completely
+sent and beginReceive() is called to start receiving the replies. The slot
+connected to replyReceived() should be prepared to handle two replies, as 
+shown in the next example:
+
+@code
+void onReplyReceived(Pt::Http::Client& client)
+{
+    Pt::Http::MessageProgress progress = client.endReceive();
+
+    Pt::Http::Reply& reply = client.reply();
+
+    if( progress.header() )
+    {
+        std::cout << reply.url() << ": " << reply.statusText() << std::endl;
+    }
+
+    if( progress.body() )
+    {
+        processImage( reply.body() );
+    }
+
+    if( progress.finished() && reply.url() == "/dog.png")
+    {
+        client.loop()->exit();
+        return;
+    }
+
+    client.beginReceive();
+}
+@endcode
+
+The program only exits, when the second reply was finished, otherwise
+beginReceive() is called repeatedly to advance the asynchronous operations
+to receive the replies.
+
+
+@section http_client_chunked Chunked Encoding
+
+To send the request body in chunked-encoding, the client has to be able to
+continue a send operation with the next chunk of data. The beginSend()
+method accepts a flag which indicates, if the request is complete or if another
+chunk needs to be written. The next example shows how a chunked request is
+started:
+
+@code
+void onRequestSent(Pt::Http::Client& client);
+void onReplyReceived(Pt::Http::Client& client);
+
+int main()
+{
+    Pt::System::MainLoop loop;
+
+    Pt::Net::Endpoint ep("chunks.pool", 80);
+    Pt::Http::Client client(loop, ep);
+    
+    client.request().setMethod("POST");
+    client.request().setUrl("/chunks");
+    client.request().body() << "CHUNKS:";
+
+    client.requestSent() += Pt::slot(*this, &onRequestSent);
+    client.replyReceived() += Pt::slot(*this, &onReplyReceived);
+    client.beginSend(false);
+
+    loop.run();
+}
+@endcode
+
+The client is prepared for a POST request with the first chunk of data in
+the body of the request. The important detail is that beginSend() is called
+with the completion flag set to false. When progress has been made, the slot
+connected to requestSent() will be called, which starts sending the next chunk:
+
+@code
+bool hasChunks();
+void writeNextChunk(std::ostream& os);
+
+void onChunkedSent(Pt::Http::Client& client)
+{
+    Pt::Http::MessageProgress progress = client.endSend();
+    
+    if( ! progress.finished() )
+    {
+        client.beginSend(false);
+        return;
+    }
+
+    if( hasChunks() )
+    {
+        writeNextChunk( client.request().body() );
+        client.beginSend(false);
+        return;
+    }
+
+    client.beginReceive();
+}
+@endcode
+
+The Pt::Http::MessageProgress object returned by @link Pt::Http::Client::endSend()
+endSend()@endlink only indicates, whether a chunk has finished, not the
+whole request. Only a part of the chunk might have been sent, in which case
+beginSend() is called again to finish the chunk. If a chunk was sent
+completely, the code of the slot will check if more chunks have to be written
+and start sending them. If no more chunks have to be sent, the client starts
+receiving the reply, which will also finish the chunked request correctly.
+If pipelining of multiple chunked requests is desired, beginSend() should
+be called with the completion flag set to true, which terminates the request
+body appropriately.
+
+
+@section http_client_ssl Secure Connections
+
+Opening a secure HTTPS connection is fairly simple. HTTPS is built upon the
+Pt::Ssl module and all one has to do is to assign a Pt::Ssl::Context to the
+client as shown here:
+
+@code
+Pt::Http::Client client;
+
+Pt::Ssl::Context& ctx = ...;
+client.setSecure(ctx);
+@endcode
+
+After @link Pt::Http::Client::setSecure() setSecure()@endlink has been called,
+the client will open secure connections. Further usage of the HTTP client API is
+exactly the same as in case of normal HTTP.
+
+
+@section http_client_auth Authentication
+
+A HTTP server might reply with the status code 401 and a WWW-Authenticate
+header, indicating that authentication is required for the requested resource.
+The client has to repeat the request with appropriate authentication headers.
+The Pt::Http::Authenticator supports user authentication for HTTP clients,
+as shown in this example:
+
+@code
+Pt::Http::Authenticator auth;
+
+Pt::Http::Credential cred("john", "12345")
+auth.setCredentials("some-realm", cred);
+@endcode
+
+The user credentials have to be added for the realm in which they are valid.
+The credentials can be used by all authorization methods. Basic authorization
+is available by default, but other Pt::Http::Authentication methods can be
+added using addAuthentication(). The following example demonstrates how requests are authenticated:
+
+@code
+void checkUnauthorized(Pt::Http::Client& client)
+{
+    bool isAuth = true;
+
+    if( client.reply().statusCode() == Pt::Http::Reply::Unauthorized)
+    {
+        isAuth = auth.authenticate(client.request(), client.reply());
+    }
+
+    return isAuth;
+}
+@endcode
+
+The @link Pt::Http::Authenticator::authenticate() authenticate()@endlink
+function is able to authorize a request in response to a reply, which contains
+the WWW-Authenticate header. In this example, the previously rejected request
+is amended, so it can be sent again. If the request could not be authenticated,
+for example, because no credentials are available, authenticate() will return
+false to indicate failure.
+
+
+@page http_server HTTP Servers and Services
 
 */
