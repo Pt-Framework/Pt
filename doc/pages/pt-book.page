@@ -48,8 +48,8 @@
         <li> @ref http_client_pipelining </li>
         <li> @ref http_client_chunked </li>
         <li> @ref http_client_ssl </li>
+        <li> @ref http_client_auth </li>
     </ul>
-    
-    <li> @ref http_server </li>
+
 </ul>
 */
