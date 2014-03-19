@@ -51,5 +51,10 @@
         <li> @ref http_client_auth </li>
     </ul>
 
+    <li> @ref http_server </li>
+    <ul>
+        <li> @ref http_server_service </li>
+    </ul>
+
 </ul>
 */
