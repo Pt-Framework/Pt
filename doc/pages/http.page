@@ -380,4 +380,123 @@ completion flag set to true. Generally, the reply can be sent at any stage
 in the process, in which case no other methods of the responder will be
 called and the remaining request is ignored.
 
+Specific responders are used by services to reply to a request. All services
+have to implement the Pt::Http::Service interface, which basically serves as a
+factory for responders. The next example shows how the HelloResponder is used
+by the HelloService:
+
+@code
+class HelloService : public Pt::Http::Service
+{
+    public:
+        HelloService()
+        { }
+
+    protected:
+        virtual Pt::Http::Responder* onGetResponder(const Pt::Http::Request& req)
+        {
+            return new HelloResponder(*this);
+        }
+ 
+        virtual void onReleaseResponder(Pt::Http::Responder* r)
+        {
+            delete r;
+        }
+};
+@endcode
+
+Two factory methods have to be implemented, firstly 
+@link Pt::Http::Service::onGetResponder() onGetResponder()@endlink
+to create a responder to handle the incoming request and secondly
+@link Pt::Http::Service::onReleaseResponder() onReleaseResponder()@endlink
+to release the responder, after the reply was sent. For simple cases, like
+this example, the Pt::Http::BasicService template can be used:
+
+@code
+typedef Pt::Http::BasicService<HelloResponder> HelloService;
+@endcode
+
+The template uses an allocator to create and destroy responders. If no
+allocator is specified, new/delete will be used just like in the previous
+example. However, the service interface is usually employed to create
+responders depending on the request headers. It is also possible to optimize
+the creation of responders, for example, responders could be cached or created
+and released in a specific way.
+
+@section http_server_servlet Servlets and Request Dispatch
+
+A servlet determines, which requests are dispatched to a service. It
+combines a service with a mapping rule and can be added to a Pt::Http::Server.
+Services can be shared by multiple servlets, for example to make the same
+resources available under different names. The easiest servlet is
+Pt::Http::MapUrl, which maps requests for a specific URL to a service:
+
+@code
+int main()
+{
+    Pt::System::MainLoop loop;
+        
+    Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Any(80);
+    Pt::Http::Server server(loop, ep);
+        
+    HelloService helloService;
+        
+    Pt::Http::MapUrl mapHello("/hello", helloService);
+    server.addServlet(mapHello);
+        
+    loop.run();
+}
+@endcode
+
+The server is set up to listen on port 80. Since all operations in the server
+are asynchronous, an event loop is required as well. The HelloService from
+the previous examples is packaged in a MapUrl servlet, which maps all requests
+for the resource URL "/hello". Finally, the servlet is added to the server.
+
+To understand how custom servlets can be implemented, it is worthwhile to look
+at the implementation of the MapUrl servlet. All servlets have to implement
+the Pt::Http::Servlet interface, as shown in the following example:
+
+@code
+class MapUrl : public Pt::Http::Servlet
+{
+    public:
+        MapUrl(const std::string& url, Service& s)
+        : Pt::Http::Servlet(s)
+        , _url(url)
+        {}
+
+    protected:
+        virtual bool onRequest(const Request& request) const
+        {
+            return _url == request.url(); 
+        }
+
+    private:
+        std::string _url;
+};
+@endcode
+
+The virtual function @link Pt::Http::Servlet::onRequest() onRequest()@endlink
+has to be implemented. It returns true if the request is to be dispatched to
+the service and false if not. In this case the request URL is compared to the
+mapping URL.
+
+@section http_server_ssl Secure Connections
+
+The server can be set up to only accept secure connections, which is called
+the HTTPS protocol. HTTPS is built upon the Pt::Ssl module and all one has to
+do, is to assign a Pt::Ssl::Context to the server as shown here:
+
+@code
+Pt::Http::Server server;
+
+Pt::Ssl::Context& ctx = ...;
+server.setSecure(ctx);
+@endcode
+
+After @link Pt::Http::Server::setSecure() setSecure()@endlink has been called,
+the server will only accept secure connections. Further usage of the HTTP
+server API is exactly the same as in case of normal HTTP.
+
 */

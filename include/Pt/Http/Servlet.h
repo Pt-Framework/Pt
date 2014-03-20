@@ -46,7 +46,7 @@ class Service;
 /** @brief %Servlet for HTTP services.
     
     Servlets are used by the HttpServer to map incoming requests to services
-    and to authorize request. Therefore servlets combine a service with a
+    and to authorize requests. Therefore servlets combine a service with a
     authorizer and mapping rule. Servlets can be added to a %HttpServer.
 */
 class PT_HTTP_API Servlet : private NonCopyable

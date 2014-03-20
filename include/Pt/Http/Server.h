@@ -137,11 +137,11 @@ class PT_HTTP_API Server : public Connectable
         */
         void removeServlet(Servlet& servlet);
 
-        /** @brief Set shutdown flag on servlet.
+        /** @internal @brief Set shutdown flag on servlet.
         */
         void shutdownServlet(Servlet& servlet, bool shutdown);
 
-        /** @brief Returns true if servlet is shut down.
+        /** @internal @brief Returns true if servlet is shut down.
         */
         bool isServletIdle(Servlet& servlet);
 
