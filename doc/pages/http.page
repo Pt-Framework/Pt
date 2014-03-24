@@ -280,11 +280,11 @@ exactly the same as in case of normal HTTP.
 
 @section http_client_auth Authentication
 
-A HTTP server might reply with the status code 401 and a WWW-Authenticate
-header, indicating that authentication is required for the requested resource.
-The client has to repeat the request with appropriate authentication headers.
-The Pt::Http::Authenticator supports user authentication for HTTP clients,
-as shown in this example:
+A HTTP server might respond with a "401 Authorization Required" reply with a
+WWW-Authenticate header, indicating that authentication is required for the
+requested resource. The client has then to repeat the request with appropriate
+credentials in the authentication headers of the request. The Pt::Http::Authenticator
+supports user authentication for HTTP clients:
 
 @code
 Pt::Http::Authenticator auth;
@@ -293,31 +293,25 @@ Pt::Http::Credential cred("john", "12345")
 auth.setCredentials("some-realm", cred);
 @endcode
 
-The user credentials have to be added for the realm in which they are valid.
-The credentials can be used by all authorization methods. Basic authorization
-is available by default, but other Pt::Http::Authentication methods can be
-added using addAuthentication(). The following example demonstrates how requests are authenticated:
+First, the user credentials have to be added for the realm in which they are
+valid. The credentials can be used by all authentication methods. Basic
+authentication is supported by default, but other Pt::Http::Authentication
+methods can be added using addAuthentication(). The following example
+demonstrates how the request is prepared for resubmission:
 
 @code
-void checkUnauthorized(Pt::Http::Client& client)
-{
-    bool isAuth = true;
+// the client just received a "401 Authorization Required"
+Pt::Http::Client& client = ...;
 
-    if( client.reply().statusCode() == Pt::Http::Reply::Unauthorized)
-    {
-        isAuth = auth.authenticate(client.request(), client.reply());
-    }
-
-    return isAuth;
-}
+bool isAuth = auth.authenticate(client.request(), client.reply());
 @endcode
 
 The @link Pt::Http::Authenticator::authenticate() authenticate()@endlink
-function is able to authorize a request in response to a reply, which contains
-the WWW-Authenticate header. In this example, the previously rejected request
-is amended, so it can be sent again. If the request could not be authenticated,
-for example, because no credentials are available, authenticate() will return
-false to indicate failure.
+function processes the initial reply, in which the server requested the
+client to authenticate itself. The previously rejected request is complemented,
+so it can be sent again. If authentication is not possible, for example,
+because no credentials are available, authenticate() will return false to
+indicate failure.
 
 
 @page http_server HTTP Servers and Services
@@ -498,5 +492,70 @@ server.setSecure(ctx);
 After @link Pt::Http::Server::setSecure() setSecure()@endlink has been called,
 the server will only accept secure connections. Further usage of the HTTP
 server API is exactly the same as in case of normal HTTP.
+
+
+@section http_server_auth Authorization
+
+The server might request the user agent to authenticate itself, to determine
+whether it is authorized to access a resource. A Pt::Http::Authenticator is
+used on the server side, to ensure that only authorized users access a resource.
+It serves as a base class for all kinds of authorization schemes, most notably
+for the Pt::Http::BasicAuthorizer, which implements the basic authentication
+scheme. It needs to be subclassed further, as shown in the following example:
+
+@code
+class AccessAuthorizer : public BasicAuthorizer
+{
+    public:
+        AccessAuthorizer(const std::string& realm)
+        : BasicAuthorizer(realm)
+        {}
+
+    protected:
+        virtual Authorization* onAuthorizeCredentials(const Credential& cred, bool& granted)
+        {
+            // returns true if username and password are correct
+            granted = checkCredentials( cred.user(), cred.password() );
+            return 0;
+        }
+
+        virtual void onReleaseAuthorization(Authorization* auth)
+        {}
+};
+@endcode
+
+Two virtual functions need to be implemented. First, @link
+Pt::Http::BasicAuthorizer::onAuthorizeCredentials() onAuthorizeCredentials()@endlink
+is called whenever user credentials have to be checked. In this example, it
+can immediately be determined, whether access can be granted, so a nullptr is
+returned and the boolean flag is set to the result of the check. 
+The authorization can also be performed asynchronously, in which case a pointer
+to a Pt::Http::Authorization object has to be returned. It is the purpose of 
+@link Pt::Http::BasicAuthorizer::onReleaseAuthorization() onReleaseAuthorization()@endlink 
+to release this object, when the operation has completed.
+
+An authorizer can be assigned to a servlet, when the servlet is constructed.
+It is possible to use the same authorizer for multiple servlets, to have it
+shared. The next example shows how a servlet is constructed to use an
+authorizer:
+
+@code
+int main()
+{
+    Pt::System::MainLoop loop;
+
+    AccessAuthorizer auth("some-realm");
+        
+    Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Any(80);
+    Pt::Http::Server server(loop, ep);
+        
+    HelloService helloService;
+        
+    Pt::Http::MapUrl mapHello("/hello", helloService, auth);
+    server.addServlet(mapHello);
+        
+    loop.run();
+}
+@endcode
 
 */

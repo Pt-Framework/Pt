@@ -56,6 +56,7 @@
         <li> @ref http_server_service </li>
         <li> @ref http_server_servlet </li>
         <li> @ref http_server_ssl </li>
+        <li> @ref http_server_auth </li>
     </ul>
 
 </ul>

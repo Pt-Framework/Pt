@@ -153,6 +153,8 @@ class PT_HTTP_API BasicAuthorizer : public Authorizer
     protected:
         virtual Authorization* onBeginAuthorize(const Request& req, Reply& reply, bool& granted);
 
+        /** @brief Begin authorization using client credentials.
+        */
         virtual Authorization* onAuthorizeCredentials(const Credential& cred, bool& granted) = 0;
 };
 
