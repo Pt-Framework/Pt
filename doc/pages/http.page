@@ -1,7 +1,7 @@
 /** 
 @page http_client HTTP Clients
 
-@section http_client_send Requests and Replies
+@section http_client_send Making HTTP Requests
 
 The class Pt::Http::Client can be used to establish a connection to an
 HTTP server and then send requests and receive replies. Synchronous and
@@ -280,11 +280,11 @@ exactly the same as in case of normal HTTP.
 
 @section http_client_auth Authentication
 
-A HTTP server might reply with the status code 401 and a WWW-Authenticate
-header, indicating that authentication is required for the requested resource.
-The client has to repeat the request with appropriate authentication headers.
-The Pt::Http::Authenticator supports user authentication for HTTP clients,
-as shown in this example:
+A HTTP server might respond with a "401 Authorization Required" reply with a
+WWW-Authenticate header, indicating that authentication is required for the
+requested resource. The client has then to repeat the request with appropriate
+credentials in the authentication headers of the request. The Pt::Http::Authenticator
+supports user authentication for HTTP clients:
 
 @code
 Pt::Http::Authenticator auth;
@@ -293,33 +293,269 @@ Pt::Http::Credential cred("john", "12345")
 auth.setCredentials("some-realm", cred);
 @endcode
 
-The user credentials have to be added for the realm in which they are valid.
-The credentials can be used by all authorization methods. Basic authorization
-is available by default, but other Pt::Http::Authentication methods can be
-added using addAuthentication(). The following example demonstrates how requests are authenticated:
+First, the user credentials have to be added for the realm in which they are
+valid. The credentials can be used by all authentication methods. Basic
+authentication is supported by default, but other Pt::Http::Authentication
+methods can be added using addAuthentication(). The following example
+demonstrates how the request is prepared for resubmission:
 
 @code
-void checkUnauthorized(Pt::Http::Client& client)
-{
-    bool isAuth = true;
+// the client just received a "401 Authorization Required"
+Pt::Http::Client& client = ...;
 
-    if( client.reply().statusCode() == Pt::Http::Reply::Unauthorized)
-    {
-        isAuth = auth.authenticate(client.request(), client.reply());
-    }
-
-    return isAuth;
-}
+bool isAuth = auth.authenticate(client.request(), client.reply());
 @endcode
 
 The @link Pt::Http::Authenticator::authenticate() authenticate()@endlink
-function is able to authorize a request in response to a reply, which contains
-the WWW-Authenticate header. In this example, the previously rejected request
-is amended, so it can be sent again. If the request could not be authenticated,
-for example, because no credentials are available, authenticate() will return
-false to indicate failure.
+function processes the initial reply, in which the server requested the
+client to authenticate itself. The previously rejected request is complemented,
+so it can be sent again. If authentication is not possible, for example,
+because no credentials are available, authenticate() will return false to
+indicate failure.
 
 
 @page http_server HTTP Servers and Services
+
+@section http_server_service Implementing Services
+
+The HTTP server dispatches incoming requests to services. It is the task
+of the service to process the request and build a reply. The service will
+do so by assigning a responder to the request to respond with a reply. The
+following example shows a simple responder, which always replies with the
+string "Hello World!":
+
+@code
+class HelloResponder : public Pt::Http::Responder
+{
+    public:
+        HelloResponder(Pt::Http::Service& s)
+        : Pt::Http::Responder(s)
+        {}
+
+        virtual void onBeginRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        {}
+
+        virtual void onReadRequest(Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        {}
+
+        virtual void onBeginReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        {
+            reply.body() << "Hello World!";
+            reply.beginSend(true); 
+        }
+
+        virtual void onWriteReply(const Pt::Http::Request& request, Pt::Http::Reply& reply, Pt::System::EventLoop& loop)
+        { }
+};
+@endcode
+
+Every responder has to be derived from the Pt::Http::Responder base class
+and four methods have to be implemented. These methods are called in the
+order in which the request and reply have to be handled. First, @link
+Pt::Http::Responder::onBeginRequest() onBeginRequest()@endlink is called,
+when the HTTP header was received. Responders might inspect the header fields
+to prepare the reply. Then, @link Pt::Http::Responder::onReadRequest() 
+onReadRequest()@endlink is called, if the request contained a body. Note,
+that this method might be called multiple times, each time with the next
+chunk of the body. Once the request was completely read, @link 
+Pt::Http::Responder::onBeginReply() onBeginReply()@endlink is called, in which
+the reply is build. The @link Pt::Http::Reply::beginSend() beginSend()@endlink
+method accepts a completion flag which indicates, whether more data has to be
+sent. This allows to write large replies in chunked-encoding, which means, that
+the body of the reply is written in several chunks. 
+If @link Pt::Http::Reply::beginSend() beginSend()@endlink is called with the
+completion flag set to true, the reply is considered to be finished. Only, if
+@link Pt::Http::Reply::beginSend() beginSend()@endlink is called with the
+completion flag set to false, @link Pt::Http::Responder::onWriteReply()
+onWriteReply()@endlink will be called, when the server is ready to send the
+next chunk of body data. Eventually, the responder should finish the reply
+by calling @link Pt::Http::Reply::beginSend() beginSend()@endlink with the
+completion flag set to true. Generally, the reply can be sent at any stage
+in the process, in which case no other methods of the responder will be
+called and the remaining request is ignored.
+
+Specific responders are used by services to reply to a request. All services
+have to implement the Pt::Http::Service interface, which basically serves as a
+factory for responders. The next example shows how the HelloResponder is used
+by the HelloService:
+
+@code
+class HelloService : public Pt::Http::Service
+{
+    public:
+        HelloService()
+        { }
+
+    protected:
+        virtual Pt::Http::Responder* onGetResponder(const Pt::Http::Request& req)
+        {
+            return new HelloResponder(*this);
+        }
+ 
+        virtual void onReleaseResponder(Pt::Http::Responder* r)
+        {
+            delete r;
+        }
+};
+@endcode
+
+Two factory methods have to be implemented, firstly 
+@link Pt::Http::Service::onGetResponder() onGetResponder()@endlink
+to create a responder to handle the incoming request and secondly
+@link Pt::Http::Service::onReleaseResponder() onReleaseResponder()@endlink
+to release the responder, after the reply was sent. For simple cases, like
+this example, the Pt::Http::BasicService template can be used:
+
+@code
+typedef Pt::Http::BasicService<HelloResponder> HelloService;
+@endcode
+
+The template uses an allocator to create and destroy responders. If no
+allocator is specified, new/delete will be used just like in the previous
+example. However, the service interface is usually employed to create
+responders depending on the request headers. It is also possible to optimize
+the creation of responders, for example, responders could be cached or created
+and released in a specific way.
+
+@section http_server_servlet Servlets and Request Dispatch
+
+A servlet determines, which requests are dispatched to a service. It
+combines a service with a mapping rule and can be added to a Pt::Http::Server.
+Services can be shared by multiple servlets, for example to make the same
+resources available under different names. The easiest servlet is
+Pt::Http::MapUrl, which maps requests for a specific URL to a service:
+
+@code
+int main()
+{
+    Pt::System::MainLoop loop;
+        
+    Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Any(80);
+    Pt::Http::Server server(loop, ep);
+        
+    HelloService helloService;
+        
+    Pt::Http::MapUrl mapHello("/hello", helloService);
+    server.addServlet(mapHello);
+        
+    loop.run();
+}
+@endcode
+
+The server is set up to listen on port 80. Since all operations in the server
+are asynchronous, an event loop is required as well. The HelloService from
+the previous examples is packaged in a MapUrl servlet, which maps all requests
+for the resource URL "/hello". Finally, the servlet is added to the server.
+
+To understand how custom servlets can be implemented, it is worthwhile to look
+at the implementation of the MapUrl servlet. All servlets have to implement
+the Pt::Http::Servlet interface, as shown in the following example:
+
+@code
+class MapUrl : public Pt::Http::Servlet
+{
+    public:
+        MapUrl(const std::string& url, Service& s)
+        : Pt::Http::Servlet(s)
+        , _url(url)
+        {}
+
+    protected:
+        virtual bool onRequest(const Request& request) const
+        {
+            return _url == request.url(); 
+        }
+
+    private:
+        std::string _url;
+};
+@endcode
+
+The virtual function @link Pt::Http::Servlet::onRequest() onRequest()@endlink
+has to be implemented. It returns true if the request is to be dispatched to
+the service and false if not. In this case the request URL is compared to the
+mapping URL.
+
+@section http_server_ssl Secure Connections
+
+The server can be set up to only accept secure connections, which is called
+the HTTPS protocol. HTTPS is built upon the Pt::Ssl module and all one has to
+do, is to assign a Pt::Ssl::Context to the server as shown here:
+
+@code
+Pt::Http::Server server;
+
+Pt::Ssl::Context& ctx = ...;
+server.setSecure(ctx);
+@endcode
+
+After @link Pt::Http::Server::setSecure() setSecure()@endlink has been called,
+the server will only accept secure connections. Further usage of the HTTP
+server API is exactly the same as in case of normal HTTP.
+
+
+@section http_server_auth Authorization
+
+The server might request the user agent to authenticate itself, to determine
+whether it is authorized to access a resource. A Pt::Http::Authenticator is
+used on the server side, to ensure that only authorized users access a resource.
+It serves as a base class for all kinds of authorization schemes, most notably
+for the Pt::Http::BasicAuthorizer, which implements the basic authentication
+scheme. It needs to be subclassed further, as shown in the following example:
+
+@code
+class AccessAuthorizer : public BasicAuthorizer
+{
+    public:
+        AccessAuthorizer(const std::string& realm)
+        : BasicAuthorizer(realm)
+        {}
+
+    protected:
+        virtual Authorization* onAuthorizeCredentials(const Credential& cred, bool& granted)
+        {
+            // returns true if username and password are correct
+            granted = checkCredentials( cred.user(), cred.password() );
+            return 0;
+        }
+
+        virtual void onReleaseAuthorization(Authorization* auth)
+        {}
+};
+@endcode
+
+Two virtual functions need to be implemented. First, @link
+Pt::Http::BasicAuthorizer::onAuthorizeCredentials() onAuthorizeCredentials()@endlink
+is called whenever user credentials have to be checked. In this example, it
+can immediately be determined, whether access can be granted, so a nullptr is
+returned and the boolean flag is set to the result of the check. 
+The authorization can also be performed asynchronously, in which case a pointer
+to a Pt::Http::Authorization object has to be returned. It is the purpose of 
+@link Pt::Http::BasicAuthorizer::onReleaseAuthorization() onReleaseAuthorization()@endlink 
+to release this object, when the operation has completed.
+
+An authorizer can be assigned to a servlet, when the servlet is constructed.
+It is possible to use the same authorizer for multiple servlets, to have it
+shared. The next example shows how a servlet is constructed to use an
+authorizer:
+
+@code
+int main()
+{
+    Pt::System::MainLoop loop;
+
+    AccessAuthorizer auth("some-realm");
+        
+    Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Any(80);
+    Pt::Http::Server server(loop, ep);
+        
+    HelloService helloService;
+        
+    Pt::Http::MapUrl mapHello("/hello", helloService, auth);
+    server.addServlet(mapHello);
+        
+    loop.run();
+}
+@endcode
 
 */

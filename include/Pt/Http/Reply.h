@@ -100,7 +100,7 @@ class PT_HTTP_API Reply : public Message
         //! @internal
         MessageProgress endReceive();
 
-        //! @internal
+        //! @brief Begin sending the reply.
         void beginSend(bool finish = true);
 
         //! @internal
