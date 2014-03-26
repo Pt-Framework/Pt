@@ -143,4 +143,8 @@ Pt::uint32_t value = Pt::beToHost(beVal);
 
 @copydetails Pt::Arg
 
+@section utilities_Settings Application Settings
+
+@copydetails Pt::Settings
+
 */

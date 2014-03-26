@@ -16,6 +16,7 @@
         <li> @ref utilities_NumConv </li>
         <li> @ref utilities_ByteOrder </li>
         <li> @ref utilities_Arg </li>
+        <li> @ref utilities_Settings </li>
     </ul>
 
     <li> @ref sigslot </li>
