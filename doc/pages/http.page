@@ -314,7 +314,7 @@ because no credentials are available, authenticate() will return false to
 indicate failure.
 
 
-@page http_server HTTP Servers and Services
+@page http_server HTTP Server and Services
 
 @section http_server_service Implementing Services
 
@@ -351,28 +351,30 @@ class HelloResponder : public Pt::Http::Responder
 
 Every responder has to be derived from the Pt::Http::Responder base class
 and four methods have to be implemented. These methods are called in the
-order in which the request and reply have to be handled. First, @link
-Pt::Http::Responder::onBeginRequest() onBeginRequest()@endlink is called,
-when the HTTP header was received. Responders might inspect the header fields
-to prepare the reply. Then, @link Pt::Http::Responder::onReadRequest() 
-onReadRequest()@endlink is called, if the request contained a body. Note,
-that this method might be called multiple times, each time with the next
-chunk of the body. Once the request was completely read, @link 
-Pt::Http::Responder::onBeginReply() onBeginReply()@endlink is called, in which
-the reply is build. The @link Pt::Http::Reply::beginSend() beginSend()@endlink
-method accepts a completion flag which indicates, whether more data has to be
-sent. This allows to write large replies in chunked-encoding, which means, that
-the body of the reply is written in several chunks. 
-If @link Pt::Http::Reply::beginSend() beginSend()@endlink is called with the
-completion flag set to true, the reply is considered to be finished. Only, if
+order, in which the request and reply have to be handled.
+First, @link Pt::Http::Responder::onBeginRequest() onBeginRequest()@endlink
+is called, after the HTTP header of the request has been received. Responders
+might inspect the header fields to prepare the reply. 
+If the request contains a body, @link Pt::Http::Responder::onReadRequest() 
+onReadRequest()@endlink will called next. Note, that this method might be
+called multiple times, each time with the next chunk of the body. 
+Once the request has been read completely, @link Pt::Http::Responder::onBeginReply()
+onBeginReply()@endlink is called, in which the reply should be started. The
+@link Pt::Http::Reply::beginSend() beginSend()@endlink method accepts a
+completion flag which indicates, whether more data has to be sent. If
 @link Pt::Http::Reply::beginSend() beginSend()@endlink is called with the
+completion flag set to true, the reply is considered to be finished and the
+responder is released. 
+If @link Pt::Http::Reply::beginSend() beginSend()@endlink is called with the
 completion flag set to false, @link Pt::Http::Responder::onWriteReply()
 onWriteReply()@endlink will be called, when the server is ready to send the
-next chunk of body data. Eventually, the responder should finish the reply
-by calling @link Pt::Http::Reply::beginSend() beginSend()@endlink with the
-completion flag set to true. Generally, the reply can be sent at any stage
-in the process, in which case no other methods of the responder will be
-called and the remaining request is ignored.
+next chunk of body data. This allows to write large replies in chunked-encoding,
+which means, that the body of the reply is written in several chunks. 
+Eventually, the responder should finish the reply by calling @link
+Pt::Http::Reply::beginSend() beginSend()@endlink with the completion flag
+set to true. Generally, the reply can be sent at any stage in the process,
+in which case no other methods of the responder will be called and the
+remaining request is ignored.
 
 Specific responders are used by services to reply to a request. All services
 have to implement the Pt::Http::Service interface, which basically serves as a

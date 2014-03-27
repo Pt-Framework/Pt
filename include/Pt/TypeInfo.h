@@ -37,6 +37,20 @@ namespace Pt {
 
 /** @brief Extended API for std::type_info.
 
+    The normal std::type_info class is not copyable, so only raw pointers can
+    be stored in containers such as std::vector. The %TypeInfo class addresses
+    this problem, by wrapping std::type_info into a type with value semantics.
+    It also adds comparison operators, like less-than comparison, which allow to
+    use it as the key for assoziative containers:
+
+    @code
+    // OK, TypeInfo is copyable
+    std::vector<Pt::TypeInfo> typeVector;
+
+    // OK, TypeInfo is less-than comparable
+    std::map<Pt::TypeInfo, std::string> typeMap;
+    @endcode
+
     @ingroup Utilities
 */
 class TypeInfo
