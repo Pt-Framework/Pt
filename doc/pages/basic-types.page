@@ -57,4 +57,12 @@ table shows all available fixed-size integer types:
 
 @copydetails Pt::Any
 
+@section basictypes_SourceInfo Source Information
+
+@copydetails Pt::SourceInfo
+
+@section basictypes_TypeInfo Type Information
+
+@copydetails Pt::TypeInfo
+
 */

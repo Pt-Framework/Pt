@@ -2,13 +2,13 @@
 
 @section utilities_StringConv String Conversions
 
-A set of functions offers fast conversions between strings and numbers. The
-overloaded functions Pt::parseInt() and Pt::formatInt() convert between strings
-and integers, and Pt::parseFloat() and Pt::formatFloat() convert between
-strings and floats. The functions work with iterators as input or output
-instead of string objects, so they can work even with simple buffers or streams
-using the stream iterators from the C++ standard library, as shown in the 
-following example:
+The framework includes functions for fast conversion between strings and numbers. 
+The overloaded functions @link Pt::parseInt() parseInt()@endlink and @link 
+Pt::formatInt() formatInt()@endlink convert between strings and integers, and 
+@link Pt::parseFloat() parseFloat() @endlink and @link Pt::formatFloat() 
+formatFloat()@endlink convert between strings and floats. The functions work
+with iterators as input or output instead of string objects, so they can be
+used with simple buffers or even streams, as shown in the following example:
 
 @code
 #include <Pt/Convert.h>
@@ -24,15 +24,30 @@ int n = 0;
 Pt::parseInt(buf, bufend, n);
 @endcode
 
-A format object can be passed as an additional argument to specify the aspects
-of localisation, for example, how characters are converted or which characters
-are used for the plus and minus signs. The overloads, which do not use a format
-object, use decimal format. A few format objects are already provided by the
-%Pt library, named Pt::DecimalFormat, Pt::OctalFormat, Pt::HexFormat or 
-Pt::BinaryFormat. They work for ASCII compatible encodings like Latin-1 or the
-unicode encodings. Besides localization, they also define the base for the
-numeric conversion. The next example shows how integers in hex format can be
-parsed and formatted:
+A stream iterator is used to format a number directly to std::cout and then a
+number is parsed from a raw character buffer. Floating point numbers can be
+formatted and parsed in a similar way like integers:
+
+@code
+#include <Pt/Convert.h>
+#incldue <iterator>
+#inlcude <iostream>
+
+std::ostream_iterator<char> it(std::cout);
+Pt::formatFloat(it, 42.123);
+
+const char* buf = "42.123";
+const char* bufend = buf + 6;
+int f = 0;
+Pt::parseFloat(buf, bufend, f);
+@endcode
+
+By default, decimal format will be used when numbers are parsed and formatted,
+but overloads exist that accept an additional format object. A few format
+objects are already provided by the framwork, named Pt::DecimalFormat,
+Pt::OctalFormat, Pt::HexFormat or Pt::BinaryFormat, which allow numeric
+conversion in a different base. The next example shows how integers in hex
+format can be parsed and formatted:
 
 @code
 #include <Pt/Convert.h>
@@ -48,29 +63,6 @@ const char* buf = "0x42";
 const char* bufend = buf + 4;
 int n = 0;
 Pt::parseInt(buf, bufend, n, fmt);
-@endcode
-
-Floating point numbers can be formatted and parsed in a similar way like
-integers, but the format object needs to provide more information than the
-format object used for integers. The library provides Pt::FloatFormat, which
-is also used for the overloads that do not take a format object as an
-argument. For formatting, the precision can additionally be set:
-
-@code
-#include <Pt/Convert.h>
-#incldue <iterator>
-#inlcude <iostream>
-
-Pt::FloatFormat<char> fmt;
-
-std::ostream_iterator<char> it(std::cout);
-int precision = 5;
-Pt::formatFloat(it, 42.123, fmt, precision);
-
-const char* buf = "42.123";
-const char* bufend = buf + 6;
-int f = 0;
-Pt::parseFloat(buf, bufend, f);
 @endcode
 
 All parse functions used so far throw an exception of type Pt::ConversionError,

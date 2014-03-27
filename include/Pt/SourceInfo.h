@@ -75,30 +75,32 @@
 
 namespace Pt {
 
-/** @brief Source code info class
+/** @brief Source code info class.
 
-    This class is used to store information about a location in the source 
-    code. The PT_SOURCEINFO macro can be used to construct a Pt::SourceInfo
-    object conveniently.
+    The %SourceInfo class is used to store information about a location in
+    the source code. This includes the file name, the line number and the
+    name of the function. The PT_SOURCEINFO macro can be used to construct
+    a %SourceInfo object conveniently, based on compiler macros such as
+    %__FILE__ or %__LINE__.
 
     @code
-        Pt::SourceInfo si(PT_SOURCEINFO);
+    Pt::SourceInfo si(PT_SOURCEINFO);
 
-        // print file, line and function
-        std::cout << si.file() << std::endl;
-        std::cout << si.line() << std::endl;
-        std::cout << si.func() << std::endl;
-
-        // print combined string
-        std::cout << si.where() << std::endl;
+    // print file, line and function
+    std::cout << si.file() << std::endl;
+    std::cout << si.line() << std::endl;
+    std::cout << si.func() << std::endl;
     @endcode
+
+    Note, that the %SourceInfo will contain the file and line information
+    of the location where the PT_SOURCEINFO macro is used.
 
     @ingroup Utilities
 */
 class SourceInfo 
 {
     public:
-        /** @brief Constructor
+        /** @brief Constructor.
 
             Do not use the constructor directly, but the PT_SOURCEINFO
             macro to take advantage of compiler specific macros to
@@ -108,17 +110,17 @@ class SourceInfo
         : _file(f), _line(ln), _func(fn)
         { }
 
-        /**  @brief Returns the filename
+        /**  @brief Returns the filename.
         */
         inline const char* file() const
         { return _file; }
 
-        /** @brief Returns the line number
+        /** @brief Returns the line number.
         */
         inline const char* line() const
         { return _line; }
 
-        /** @brief Returns the function signature
+        /** @brief Returns the function signature.
         */
         inline const char* func() const
         { return _func; }

@@ -8,6 +8,8 @@
         <li> @ref basictypes_FixedInt </li>
         <li> @ref basictypes_DateTime </li>
         <li> @ref basictypes_Any </li>
+        <li> @ref basictypes_SourceInfo </li>
+        <li> @ref basictypes_TypeInfo </li>
     </ul>
 
     <li> @ref utilities </li>
