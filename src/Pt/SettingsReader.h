@@ -223,9 +223,15 @@ class SettingsReader
             }
 
             virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
-            {
-                reader.beginSection();
-                return OnSection::instance();
+            {                
+                if( reader.depth() == 0)
+                {
+                    reader.beginSection();
+                    return OnSection::instance();
+                }
+
+                reader.enterMember();
+                return OnCurly::instance();
             }
 
             virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
@@ -312,6 +318,24 @@ class SettingsReader
                 return BeginTypedValue::instance();
             }
 
+            virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
+            {
+                if(reader.depth() == 0)
+                    this->syntaxError(reader.line());
+
+                reader.pushTypeName();
+                reader.enterMember();
+                return OnCurly::instance();
+            }
+
+            virtual State* onCloseSquareBrace(Pt::Char c, SettingsReader& reader)
+            {
+                reader.pushValue();
+                reader.leaveMember();
+                reader.leaveMember();
+                return OnCloseCurly::instance();
+            }
+
             virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
                 if(reader.depth() == 0)
@@ -383,6 +407,12 @@ class SettingsReader
             virtual State* onQuote(Pt::Char c, SettingsReader& reader)
             {
                 return OnQuotedValue::instance();
+            }
+
+            virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
+            {
+                reader.enterMember();
+                return OnCurly::instance();
             }
 
             virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
@@ -506,6 +536,13 @@ class SettingsReader
                 return BeginStatement::instance();
             }
 
+            virtual State* onCloseSquareBrace(Pt::Char c, SettingsReader& reader)
+            {
+                reader.leaveMember();
+                reader.leaveMember();
+                return OnCloseCurly::instance();
+            }
+
             virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
                 reader.leaveMember();
@@ -549,6 +586,7 @@ class SettingsReader
             virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
             {
                 reader.leaveMember();
+
                 reader.beginSection();
                 return OnSection::instance();
             }
@@ -561,7 +599,8 @@ class SettingsReader
                 }
         };
 
-
+        // TODO: rvalues should only be numbers or qouted strings or bool
+        //       literals, not alphanumeric names
         class OnRValue : public State
         {
             virtual State* onSpace(Pt::Char c, SettingsReader& reader)
@@ -660,6 +699,18 @@ class SettingsReader
                 return this;
             }
 
+            virtual State* onOpenSquareBrace(Pt::Char c, SettingsReader& reader)
+            {
+                reader.enterMember();
+                return OnCurly::instance();
+            }
+
+            virtual State* onCloseSquareBrace(Pt::Char c, SettingsReader& reader)
+            {
+                reader.leaveMember();
+                return OnCloseCurly::instance();
+            }
+
             virtual State* onOpenCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
                 reader.enterMember();
@@ -703,6 +754,12 @@ class SettingsReader
             {
                 reader.beginSection();
                 return OnSection::instance();
+            }
+
+            virtual State* onCloseSquareBrace(Pt::Char c, SettingsReader& reader)
+            {
+                reader.leaveMember();
+                return this;
             }
 
             virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)

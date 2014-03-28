@@ -102,7 +102,7 @@ class PT_API SettingsError : public SerializationError
     b = 3.14
     c = "Hello World!"
     d = true
-    e = { 1, 2, 3 }
+    e = [ 1, 2, 3 ]
     f = { red = 255, green = 0, blue = 0 }
     @endcode
 
@@ -119,7 +119,7 @@ class PT_API SettingsError : public SerializationError
     settings.load(tis);
 
     int a = 0;
-    bool ok = settings.entry("a").get(a);
+    bool ok = settings["a"].get(a);
 
     float b = 0;
     ok = settings.entry("b").get(b);
@@ -139,6 +139,7 @@ class PT_API SettingsError : public SerializationError
 
     The @link Pt::Settings::entry() entry()@endlink method or alternatively,
     the index operator can be used, to access entries and subentries by name.
+    If a subentry does not exist, an empty entry object will be returned.
     Values can be retrieved with the @link Pt::Settings::ConstEntry::get()
     get()@endlink method, which returns false, if the value does not exist.
     The data type, which is stored in the settings must be serializable i.e.
@@ -146,6 +147,8 @@ class PT_API SettingsError : public SerializationError
     serialization operators for STL containers, so these work out of the box.
     The @link Pt::Settings::Entry::set() set()@endlink function can be used
     to set an entry to a new value, before the modified settings are saved.
+    New subentries can be added using the @link Pt::Settings::addEntry()
+    addEntry()@endlink function.
 
     Settings can be split into sections, to improve the readability of the
     file, using the following syntax:
@@ -556,6 +559,20 @@ class PT_API Settings : private SerializationInfo
         {
             SerializationInfo* si = this->findMember(name);
             return Entry(si);
+        }
+
+        /** @brief Adds a top level entry.
+        */
+        Entry addEntry(const char* name)
+        {
+            return root().add(name);
+        }
+
+        /** @brief Adds a top level entry.
+        */
+        Entry addEntry(const std::string& name)
+        {
+            return root().add(name);
         }
 
         /** @brief Returns a top level entry.
