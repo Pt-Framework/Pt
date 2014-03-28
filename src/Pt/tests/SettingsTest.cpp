@@ -61,6 +61,7 @@ class SettingsTest : public Pt::Unit::TestSuite
 
             Pt::Unit::TestSuite::registerMethod( "Section", *this, &SettingsTest::Section );
             Pt::Unit::TestSuite::registerMethod( "ArrayOfArrays", *this, &SettingsTest::ArrayOfArrays );
+            Pt::Unit::TestSuite::registerMethod( "ArrayWithBrackets", *this, &SettingsTest::ArrayWithBrackets );
             Pt::Unit::TestSuite::registerMethod( "LoadSaveSerializable", *this, &SettingsTest::LoadSaveSerializable );
             Pt::Unit::TestSuite::registerMethod( "Entry", *this, &SettingsTest::Entry );
             Pt::Unit::TestSuite::registerMethod( "ConstEntry", *this, &SettingsTest::ConstEntry );
@@ -81,6 +82,7 @@ class SettingsTest : public Pt::Unit::TestSuite
         void ComplexTypeNamedQoutedValues();
         void Section();
         void ArrayOfArrays();
+        void ArrayWithBrackets();
         void LoadSaveSerializable();
         void Entry();
         void ConstEntry();
@@ -223,6 +225,29 @@ void SettingsTest::ArrayOfArrays()
     PT_UNIT_ASSERT(2 == vecOfVecs.size() );
 }
 
+void SettingsTest::ArrayWithBrackets()
+{
+    std::stringstream ss;
+    ss << "a=[array[1,2,3],array[4,5,6]]\n";
+    ss << "b = [ [ 1 , 2 , 3 ] , [ 4 , 5 , int(6) ] ]\n";
+    ss << "c = [ \"dog\", \"cat\", \"mouse\" ]\n";
+    Pt::TextIStream ts(ss, new Pt::Utf8Codec);
+
+    Pt::Settings settings;
+    settings.load(ts);
+
+    std::vector< std::vector<int> > vecOfVecs;
+    std::vector<Pt::String> vecOfStr;
+    
+    settings.entry("a").get(vecOfVecs);
+    PT_UNIT_ASSERT(2 == vecOfVecs.size() );
+
+    settings.entry("b").get(vecOfVecs);
+    PT_UNIT_ASSERT(2 == vecOfVecs.size() );
+    
+    settings.entry("c").get(vecOfStr);
+    PT_UNIT_ASSERT(3 == vecOfStr.size() );
+}
 
 void SettingsTest::SimpleValue()
 {
