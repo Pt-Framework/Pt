@@ -98,7 +98,7 @@
 
 /** @defgroup Allocator Allocators
 
-    The Allocator interface can be used to optimize or customize allocation
+    The Pt::Allocator interface can be used to optimize or customize allocation
     strategies. Two allocators are provided, which can be approached by the
     Allocator interface, a pool based allocator and a page based allocator.
     A pool based allocator is beneficial in all cases where many small objects
@@ -117,33 +117,31 @@
 /** @defgroup BasicTypes Basic Types
 
     The %Pt framework defines a number of signed and unsigned,
-    @link basictypes_FixedInt fixed-size integer types@endlink. These
+    @link basictypes_FixedInt fixed-size integer@endlink types. These
     are typedefs of fundamental integer types and the actual type depends
     on the platform. 
 
-    The classes that represent dates and times, namely
-    @link basictypes_DateTime Pt::Date, Pt::Time, Pt::DateTime and
-    Pt::Timespan@endlink, can be used for comparison, sorting or
-    calculating dates, times and timespans. These types are serializable and
-    conversion to ISO string formats are supported as well.
+    The classes that represent @link basictypes_DateTime dates and times@endlink,
+    namely Pt::Date, Pt::Time, Pt::DateTime and Pt::Timespan, can be used for
+    comparison, sorting or calculating dates, times and timespans. These types
+    are serializable and conversion to ISO string format is supported as well.
 
-    The @link basictypes_Any Pt::Any@endlink is able to contain any other
-    copyable type. This is useful in situations where type erasure is
-    required, for example, to store completely unrelated types in a list
-    or vector.
+    The class Pt::Any is able to contain any other copyable type. This is
+    useful in situations where type erasure is required, for example, to store
+    completely unrelated types in a list or vector.
 */
 
 /** @defgroup Utilities Utilities
     
+    The conversion utilities of the Platinum core library include functions
+    to convert @link utilities_ByteOrder byte orders@endlink, to format and
+    parse @link utilities_StringConv numbers@endlink, and to perform checked
+    @link utilities_NumConv numeric conversions@endlink.
+
     Basic application support is provided by the Pt::Arg class and the
     Pt::Settings class. The first one is a convenient way to parse and 
     process program options and the latter one allows to load and store
     application settings in files or other places.
-
-    The conversion utilities of the Platinum core library include functions
-    for @link utilities_ByteOrder byte order conversion@endlink,
-    @link utilities_StringConv string conversion@endlink, and
-    @link utilities_NumConv numeric conversions@endlink.
 
     Two types are useful to get type information Pt::TypeTraits and
     Pt::TypeInfo. TypeTraits are used for generic programming, for example

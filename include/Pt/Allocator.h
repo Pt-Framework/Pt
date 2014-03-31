@@ -34,6 +34,48 @@ namespace Pt {
 
 /** @brief %Allocator interface.
 
+    Allocators allow a program to use different methods of allocating and
+    deallocating raw memory. The default implementation will simply use new
+    and delete. Custom allocators are implemented by overriding the two 
+    methods @link Pt::Allocator::allocate() allocate()@endlink and 
+    @link Pt::Allocator::deallocate() deallocate()@endlink of the Pt::Allocator
+    base class. The following example tracks the amount of allocated memory:
+
+    @code
+    class CheckedAllocator : public Pt::Allocator
+    {
+        public:
+            CheckedAllocator()
+            : _allocated(0)
+            {}
+            
+            virtual void* allocate(std::size_t size)
+            {
+                void* p = Pt::Allocator::allocate(size);
+                _allocated += size;
+                return p; 
+            }
+
+            virtual void deallocate(void* p, std::size_t size)
+            {
+                Pt::Allocator::deallocate(p, size);
+                _allocated -= size;
+            }
+
+            std:size_t allocated() const
+            { return _allocated; }
+
+        private:
+            std::size_t _allocated;
+    };
+    @endcode
+
+    This interface differs from std::allocator used for STL containers,
+    because it allows to allocate memory of different sizes through the same
+    interface. The std::allocator is meant to allocate and also construct
+    objects of the same size. It is however possible, to implement a
+    std::allocator using the raw memory allocators described here.
+
     @ingroup Allocator
 */
 class Allocator
