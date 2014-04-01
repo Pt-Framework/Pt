@@ -1,5 +1,7 @@
 /** \page utilities Utilities
 
+@copydetails Utilities
+
 @section utilities_StringConv String Conversions
 
 The framework includes functions for fast conversion between strings and numbers. 
@@ -138,5 +140,13 @@ Pt::uint32_t value = Pt::beToHost(beVal);
 @section utilities_Settings Application Settings
 
 @copydetails Pt::Settings
+
+@section utilities_SourceInfo Source Information
+
+@copydetails Pt::SourceInfo
+
+@section utilities_TypeInfo Type Information
+
+@copydetails Pt::TypeInfo
 
 */

@@ -1,10 +1,6 @@
+/** \page basictypes Basic Types
 
-/*
-TODO: remove group docs from docs.html and only make it accessible from the 
-      Modules tab.
-*/
-/** 
-\page basictypes Basic Types
+@copydetails BasicTypes
 
 @section basictypes_FixedInt Fixed Size Integers
 
@@ -52,17 +48,8 @@ table shows all available fixed-size integer types:
 
 @copydetails Pt::DateTime
 
-
 @section basictypes_Any The Any Class
 
 @copydetails Pt::Any
-
-@section basictypes_SourceInfo Source Information
-
-@copydetails Pt::SourceInfo
-
-@section basictypes_TypeInfo Type Information
-
-@copydetails Pt::TypeInfo
 
 */

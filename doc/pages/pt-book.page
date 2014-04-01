@@ -8,8 +8,13 @@
         <li> @ref basictypes_FixedInt </li>
         <li> @ref basictypes_DateTime </li>
         <li> @ref basictypes_Any </li>
-        <li> @ref basictypes_SourceInfo </li>
-        <li> @ref basictypes_TypeInfo </li>
+    </ul>
+
+    <li> @ref allocators </li>
+    <ul>
+        <li> @ref allocators_Interface </li>
+        <li> @ref allocators_Pool </li>
+        <li> @ref allocators_Page </li>
     </ul>
 
     <li> @ref utilities </li>
@@ -19,6 +24,8 @@
         <li> @ref utilities_ByteOrder </li>
         <li> @ref utilities_Arg </li>
         <li> @ref utilities_Settings </li>
+        <li> @ref utilities_SourceInfo </li>
+        <li> @ref utilities_TypeInfo </li>
     </ul>
 
     <li> @ref sigslot </li>

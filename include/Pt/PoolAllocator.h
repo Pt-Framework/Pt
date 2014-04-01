@@ -42,6 +42,9 @@ namespace Pt {
 
 /** @brief Memory pool for objects of the same size.
 
+    If the size of the memory to be allocated is uniform, a MemoryPool can
+    also be used directly.
+
     @ingroup Allocator
 */
 class PT_API MemoryPool : public NonCopyable
@@ -184,6 +187,27 @@ class PT_API MemoryPool : public NonCopyable
 
 /** @brief Pool based allocator.
 
+    This type of allocator uses uses pools to allocate memory. Each pool
+    consists of blocks of equally sized records, which can be used for allocations
+    up to a this size. When memory is allocated, a record from the pool
+    handling the requested size is returned. When memory is deallocated, the
+    record is returned to the corresponding pool. This method of allocation
+    is effective, because larger blocks of memory are allocated and then
+    reused in the form of many smaller records. An advantage of this kind
+    of allocator, compared to free list based allocators, is that it is able
+    to release completely unused blocks. 
+
+    When a PoolAllocator is constructed, the maximum size for allocations
+    has to be specified. The reason for this is that this type of allocator is
+    ineffective for large sizes. Therefore, memory which is larger than this
+    limit will be allocated using the new operator instead of the memory pools.
+    Optionally, the alignment and the maximum block size can be set. The record
+    sizes of the pools will be multiples of the alignment. So if the alignment
+    is 8, the first pool will have records of size 8, the second pool records
+    of size 16 and so forth, until the maximum size is reached. The maximum
+    block size controls how many records are added to a pool, each time it is
+    depleted, because records are maintained in blocks.
+    
     @ingroup Allocator
 */
 class PT_API PoolAllocator : public Allocator 
@@ -191,7 +215,7 @@ class PT_API PoolAllocator : public Allocator
 {
     public:
         //! @brief Constructor.
-        PoolAllocator(std::size_t maxElemSize, std::size_t step = 16, std::size_t maxPagesize = 8192);
+        PoolAllocator(std::size_t maxSize, std::size_t align = 16, std::size_t maxBlock = 8192);
         
         //! @brief Destructor.
         ~PoolAllocator();
