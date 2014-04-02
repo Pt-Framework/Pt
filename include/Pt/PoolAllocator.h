@@ -42,8 +42,27 @@ namespace Pt {
 
 /** @brief Memory pool for objects of the same size.
 
-    If the size of the memory to be allocated is uniform, a MemoryPool can
-    also be used directly.
+    If memory of uniform sizes has to be allocated, a @link Pt::MemoryPool
+    MemoryPool @endlink can be used directly, rather than indirectly as part
+    of the @link Pt::PoolAllocator PoolAllocator@endlink. This can be faster,
+    because the PoolAllocator has to look up the pool for the requested
+    size of memory each time it allocates and deallocates. To construct a 
+    MemoryPool, the size of the records, i.e. the size of memory it can
+    allocate, has to be specified.
+
+    @code
+    Pt::MemoryPool pool( sizeof(float), 4096 );
+
+    void* p = pool.allocate();
+    float* f = new (p) float(3.1415);
+
+    pool.deallocate(f);
+    @endcode
+
+    Optionally, the maximum size of the blocks in the pool can be controlled.
+    In the example shown above, the pool can only allocate memory of the size
+    required for a float. Each time the pool itself requires more memory,
+    it will allocate a new block of 4096 bytes.
 
     @ingroup Allocator
 */
@@ -187,26 +206,38 @@ class PT_API MemoryPool : public NonCopyable
 
 /** @brief Pool based allocator.
 
-    This type of allocator uses uses pools to allocate memory. Each pool
-    consists of blocks of equally sized records, which can be used for allocations
-    up to a this size. When memory is allocated, a record from the pool
-    handling the requested size is returned. When memory is deallocated, the
-    record is returned to the corresponding pool. This method of allocation
-    is effective, because larger blocks of memory are allocated and then
-    reused in the form of many smaller records. An advantage of this kind
-    of allocator, compared to free list based allocators, is that it is able
-    to release completely unused blocks. 
+    The @link Pt::PoolAllocator PoolAllocator@endlink uses uses pools to
+    allocate memory. Each pool consists of blocks of equally sized records,
+    which can be used for allocations up to the size of a record. When memory
+    is allocated, a record from the pool handling the requested size is
+    returned. When memory is deallocated, the record is returned to the
+    corresponding pool. This method of allocation is effective, because
+    larger blocks of memory are allocated and then reused in the form of
+    many smaller records. An advantage of this kind of allocator, compared
+    to free list based allocators, is that it is able to release completely 
+    unused blocks.
 
-    When a PoolAllocator is constructed, the maximum size for allocations
-    has to be specified. The reason for this is that this type of allocator is
-    ineffective for large sizes. Therefore, memory which is larger than this
-    limit will be allocated using the new operator instead of the memory pools.
-    Optionally, the alignment and the maximum block size can be set. The record
-    sizes of the pools will be multiples of the alignment. So if the alignment
-    is 8, the first pool will have records of size 8, the second pool records
-    of size 16 and so forth, until the maximum size is reached. The maximum
-    block size controls how many records are added to a pool, each time it is
-    depleted, because records are maintained in blocks.
+    @code
+    // Contruct with max. record size, alignment and block size
+    Pt::PoolAllocator allocator(32, 8, 4096);
+
+    // will use a record from the pools
+    void* p1 = allocator.allocate( sizeof(float) );
+
+    // too large, will use operator new
+    void* p2 = allocator.allocate( 64 );
+    @endcode
+
+    When a PoolAllocator is constructed, the maximum size for records has
+    to be specified. The reason for this is that this type of allocator is
+    ineffective for large allocations. Therefore, memory which is larger than
+    this limit will be allocated using the new operator instead of a record in
+    the memory pools. Optionally, the alignment and the maximum block size can
+    be set. The record sizes of the pools will be multiples of the alignment.
+    So if the alignment is 8, the first pool will have records of size 8, the
+    second pool records of size 16 and so forth, until the maximum size is
+    reached. The maximum block size controls how many records are added to a
+    pool, each time it is depleted, because records are maintained in blocks.
     
     @ingroup Allocator
 */
@@ -214,7 +245,7 @@ class PT_API PoolAllocator : public Allocator
                            , protected NonCopyable
 {
     public:
-        //! @brief Constructor.
+        //! @brief Contruct with maximum record size, alignment and block size.
         PoolAllocator(std::size_t maxSize, std::size_t align = 16, std::size_t maxBlock = 8192);
         
         //! @brief Destructor.

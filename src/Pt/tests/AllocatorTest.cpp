@@ -203,26 +203,32 @@ void AllocatorTest::PageAllocator()
 {
     Pt::PageAllocator alloc;
 
-    Pt::uint32_t* array[1000];
+    Pt::uint32_t* pointers[1000];
 
-    for (Pt::uint32_t i = 0; i < 1000; i++)
+    for(unsigned i = 0; i < 1000; i++)
     {
-        array[i] = (Pt::uint32_t*) alloc.allocate( sizeof(Pt::uint32_t) );
+        pointers[i] = (Pt::uint32_t*) alloc.allocate( sizeof(Pt::uint32_t) );
     }
 
-    for (Pt::uint32_t i = 0; i < 500; i++)
+    for(unsigned i = 0; i < 1000; i++)
     {
-        alloc.deallocate( array[i], sizeof(Pt::uint32_t) );
+        alloc.deallocate( pointers[i], sizeof(Pt::uint32_t) );
     }
 
-    for (Pt::uint32_t i = 0; i < 500; i++)
+    alloc.clear();
+
+    for(unsigned i = 0; i < 4000; i++)
     {
-        array[i] = (Pt::uint32_t*) alloc.allocate( sizeof(Pt::uint32_t) );
+        void* p = alloc.allocate( sizeof(Pt::uint32_t) );
+        alloc.deallocate(p, sizeof(Pt::uint32_t));
     }
 
-    for (Pt::uint32_t i = 0; i < 1000; i++)
+    alloc.clear();
+
+    for(unsigned i = 0; i < 4000; i++)
     {
-        alloc.deallocate( array[i], sizeof(Pt::uint32_t) );
+        void* p = alloc.allocate( sizeof(Pt::uint32_t) );
+        alloc.deallocate(p, sizeof(Pt::uint32_t));
     }
 }
 
