@@ -1,12 +1,87 @@
 
 namespace Pt {
 
-/** @brief Connects to one slot and handle return value.
+/** @brief Delegates an action to a slot.
 
-    Delegates can only be connected to one slot, but have the advantage
-    that they return the return value of the connected slot when called.
-    There are partial specializations of this class template for up to 
-    ten arguments.
+    The Pt::Delegate is an alternative to the Pt::Signal and differs from it
+    in two ways. Firstly, delegates forward the return value of the slot and
+    secondly, delegates can only be connected to one slot at a time. The same
+    types of slots can be used for signals and delegates. The template
+    parameter list of the Delegate determines its signature, where the first
+    parameter represents the return type:
+
+    @code
+    Pt::Delegate<int> del0;           // Delegate only returns int
+    Pt::Delegate<int, int> del1;      // Delegate with one argument
+    Pt::Delegate<int, int, int> del2; // Delegate with two arguments
+    @endcode
+
+    The syntax for connecting delegates is identical to how signals are connected
+    to slots. However, since a delegate forwards the return value of its slot, not
+    only the arguments passed to the slot must be compatible, but also the return
+    value. Furthermore, when an already connected delegate is connected again,
+    the current connection will be closed and the delegate is connected to its
+    new target.
+
+    @code
+    int slotA()
+    { return 5; }
+
+    int slotB()
+    { return 6; }
+
+    int main()
+    {
+        Pt::Delegate<int> delegate;
+        delegate += Pt::slot(slotA);
+        delegate += Pt::slot(slotB); // disconnects from slotA
+
+        return 0;
+    }
+    @endcode
+
+    The example above constructs a delegate which can be connected to any slot
+    that returns an int. It is first connected to a slot of the function slotA.
+    When it is connected for the second time to a slot of the function slotB,
+    the old connection will be closed and only slotB is called when the delegate
+    is called.
+
+    There are two possibilities how a delegate can call its slot. The member
+    function @link Pt::Delegate::call() call()@endlink will return the return
+    value of the slot. If the delegate is not connected to a slot, an exception
+    is thrown. The second method is through @link Pt::Delegate::invoke()
+    invoke()@endlink, where the return value is ignored, but if the delegate
+    is not connected, no exception will be thrown.
+
+    @code
+    int slot()
+    { return 5; }
+
+    int main()
+    {
+        try
+        {
+            Pt::Delegate<int> delegate;
+            Pt::Connection connection = delegate += Pt::slot(slot);
+
+            int i = delegate.call(); // i is 5 now
+
+            connection.close();
+            delegate.invoke() // does not throw
+            delegate.call();  // will throw because not connected
+        }
+        catch(const std::logic_error& ex)
+        {
+            std::cerr << "could not call delegate" << std::endl;
+        }
+
+        return 0;
+    }
+    @endcode
+
+    The program above connects a delegate to a slot and then calls it. After the
+    connection was closed, the delegate is invoked, which has no effect. Finally,
+    when the delegate is called again, an exception is thrown and catched.
 
     \ingroup sigslot
 */

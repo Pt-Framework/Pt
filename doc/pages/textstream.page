@@ -1,34 +1,59 @@
-/** \page textstreams Text Processing
+/** \page text Text Processing
 
-@section text_Characters Character Types and Encodings
+@copydetails Unicode
+
+@section text_Encodings Character Encodings
 
 One of the most common standards for character encoding is the ASCII-standard.
 Each character is encoded using 7 bits of a byte, so 128 different characters
 can be adressed. Reading and writing ASCII characters is straight forward,
-because each character is stored in exactly one byte. No encoding or decoding
-is necesseray, to write or read an ASCII text. All bytes can directly be read,
-stored to memory and then used. The draw-back of ASCII, of course, is the
-small character set of only 128 characters. There are a lot more characters
-than that in the languages all around the world.
+because each character is stored in exactly one byte. The builtin C++ type @b char
+can be used to represent ASCII characters. The draw-back of ASCII, of course,
+is the small character set of only 128 characters. There are a lot more
+characters than that in the languages all around the world.
 
 This problem was addressed by the Unicode standard, which was created to make
 every known character of the world available in a single character table. Each
 character has a defined position in the table, a so-called code point. The
 unicode table contains 0x10FFFF entries at the moment, so a 32 bit type is
-required to represent an unencoded unicode character. Therefore, the unicode
-character type Pt::Char is a 32-bit type. For example, Pt::Char is used by 
-Pt::String or Pt::StringStream.
+required to represent a raw unicode character. 
 
 The UTF-8 encoding was introduced to store unicode characters in byte
 sequences, which are compatible to classic null-terminated C strings. One
 unicode character is encoded into a byte sequence of 1 or more bytes.
 Further, the characters are encoded such that a character in 7-bit-ASCII
 has the exact same value as in UTF-8, so any valid ASCII text is valid UTF-8
-encoded text. Besides UTF-8 encoding, a many more encodings have been
-developed, for example for Base64, UTF-16 or Latin-1.
+encoded text. This demonstrates the difference between encodings and character
+types. ASCII and UTF-8 can both be represented by sequences of the character
+type @b char, but their values are interpreted according to the encoding.
+Besides UTF-8 encoding, a many more encodings have been developed, for example
+Latin-1, UTF-16 or in the broadest sense Base64.
 
+@section text_Characters Characters and Strings
 
-@section text_TextStreams Text Input and Output Streams
+@copydetails Pt::Char
+
+@copydetails Pt::String
+
+Since a specialization of std::char_traits is also provided, the C++ iostreams
+can be instantiated for %Pt::Char, including the string streams. Three typedefs
+provide shorter names for the unicode capable string streams:
+
+@code
+typedef std::basic_istringstream<Pt::Char> IStringStream;
+
+typedef std::basic_ostringstream<Pt::Char> OStringStream;
+
+typedef std::basic_stringstream<Pt::Char> StringStream;
+@endcode
+
+The insertion and extraction opertors (<< and >>) for iostreams require certain
+localization factes to be present in the std::locale. %Pt will install
+specializations of std::num_put, std::num_get, std::numpunct and std::ctype
+for %Pt::Char. This means that all other facilities that use localization
+facets will also work.
+
+@section text_TextStreams Text Streams and Codecs
 
 Text streams can be used to convert text between different encodings and
 character types. The text streams are derived from the I/O streams provided
@@ -54,7 +79,7 @@ types and may also be of the same type. The internal character type is used
 as the character type of the standard C++ stream base class.
 Besides the three class templates, there are typedefs for the most common
 case in %Pt, where the internal character type is Pt::Char and the external
-character type is of type char:
+character type is of type @b char:
 
 @code
 typedef BasicTextIStream<Char, char> TextIStream;
@@ -69,11 +94,16 @@ input stream works with another std::basic_istream to read the encoded input.
 A text output stream needs another std::basic_ostream to write the encoded
 output. This underlying stream uses the external character type. For example,
 the TextIStream, which uses char as the external character type, can operate
-on any std::istream.
+on any std::istream. 
 
-A text codec is used by a text stream to perform the actual translation. One
-example is the Pt::Utf8Codec. The following example shows how to read UTF-8 
-encoded text:
+@copydetails Pt::TextCodec
+
+A text stream can be constructed with an underlying stream and a %TextCodec,
+but both can also be set or reset later. If no codec is set, the stream will
+directly assign characters, instead of converting them. If no target stream is
+set, the text stream will always be EOF. The following example demonstrates
+how a string stream is used as the input for a text stream, which uses a
+Pt::Utf8Codec to decode UTF-8 encoded text:
 
 @code
 std::istringstream iss("UTF-8 encoded text");
@@ -83,11 +113,10 @@ Pt::TextIStream tis(iss, new Pt::Utf8Codec());
 std::getline(tis, s);
 @endcode
 
-A string stream is used as the input for the text stream, which uses a text
-codec to convert from UTF-8 to the raw unicode character type. The std::getline
-function will read all input into a Pt::String. Of course, all extraction 
-operators can also be used, for example, to directly read numbers from the 
-stream. The next example shows how to encode text to an UTF-8 byte sequence:
+The std::getline function will read all input into a Pt::String. Of course,
+the extraction operator can also be used, for example, to directly read
+numbers from the stream. The next example shows how to encode text to an UTF-8
+byte sequence:
 
 @code
 std::ostringstream oss;
@@ -98,29 +127,13 @@ tos << s;
 tos.terminate();
 @endcode
 
-The string stream serves as the output of the text stream, which uses the
-same type of codec like the input text stream before. This time, the codec
-is used to convert from the raw unicode character type to UTF-8. When all
-data has been written to the output text stream, terminate needs to be called
-to finish off the output byte sequence. This is especially important for
-encodings with shift states. All insertion operators can be used for text
-output streams e.g. to format numbers. 
+The string stream serves as the output of the text stream, which uses a
+Pt::Utf8codec to encode text to UTF-8. The insertion operator can be used,
+for strings or to format numbers. When all data has been written to the text
+stream, terminate needs to be called to finish off the output byte sequence.
+This is especially important for encodings with shift states.
 
-The examples so far create the text codec on the heap with the new operator
-and the stream manages the lifetime of the codec. This can be avoided by
-passing a value different from 0 to the codecs constructor, in which case
-the codec must exist at least as long as the stream that uses it: 
-
-@code
-Pt::Utf8Codec codec(1);
-Pt::TextOStream tos(oss, codec);
-@endcode
-
-Codecs are stateless, which means that one codec can be used with multiple
-text streams. On systems that provide the std::locale facilities, a text
-codes can be used as a std::codecvt facet.
-
-@section text_Base64 The Base-64 Encoding Scheme
+@section text_Base64 Base-64 Encoding
 
 The Base64 encoding scheme is not a character encoding in the classical sense,
 but works very similar to other types of encodings. The framework provides

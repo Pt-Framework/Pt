@@ -37,11 +37,6 @@
 namespace Pt {
 
 /** @brief Convert between unicode and UTF-8.
-    
-    The %Utf8Codec is used by the text streams and buffers to convert to
-    and from external encodings. Since it implements the std::codecvt facet
-    interface, it can be used as this type of facet on all systems which
-    support facets and the std::locale.
 
     @ingroup Unicode
 */

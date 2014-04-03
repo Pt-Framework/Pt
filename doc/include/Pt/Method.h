@@ -83,15 +83,17 @@ class MethodSlot : public BasicSlot<R, ARGUMENTS>
 
 
 /** @brief Returns a %Method object for the given object/method pair.
-
     @related Method
+    @related Callable
 */
 template <class R, class BaseT, class ClassT, typename ARGS>
 Method<R,ClassT, ARGS> callable( ClassT & obj, R (BaseT::*ptr)(ARGS));
 
 
 /** @brief Returns a slot object for the given object/member pair.
+    
     @related MethodSlot
+    @related Slot
 */
 template <class R, class BaseT, class ClassT, typename ARGS>
 MethodSlot<R, ClassT, ARGS> slot( ClassT& obj, R (BaseT::*memFunc)(ARGS) );

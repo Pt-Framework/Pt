@@ -86,6 +86,7 @@ class ConstMethodSlot : public BasicSlot<R, ARGUMENTS>
 
 /** @brief Returns a %ConstMethod object for the given object/method pair.
     @related ConstMethod
+    @related Callable
 */
 template <class R, class BaseT, class C, typename ARGS>
 ConstMethod<R, C, ARGS> callable( C & obj, R (BaseT::*ptr)(ARGS) const );
@@ -93,6 +94,7 @@ ConstMethod<R, C, ARGS> callable( C & obj, R (BaseT::*ptr)(ARGS) const );
 
 /** @brief Returns a slot object for the given object/member pair.
     @related ConstMethodSlot
+    @related Slot
 */
 template <class R, class BaseT, class C, typename ARGS>
 ConstMethodSlot<R, C, ARGS> slot( C & obj, R (BaseT::*memFunc)(ARGS) const );

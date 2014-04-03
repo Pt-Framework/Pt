@@ -22,19 +22,20 @@ namespace Pt {
 
 /** @brief Unicode capable basic_string.
 
-    This class is a specialization of the std::basic_string template for
-    the unicode character type Pt::Char:
+    This class Pt::String is not yet another unicode string class, but it
+    is a specialization of the std::basic_string template for the unicode
+    character type Pt::Char:
 
     @code
-    typedef std::basic_string String;
+    typedef std::basic_string<Pt::Char> String;
     @endcode
 
-    It offers the functionality of the std::basic_string template with
-    additional methods to make it easier to work with other character types.
-    For example, the relational operators are also overloaded for char and
-    wchar_t. The documentation focuses on the features, which are not already
-    provided by the std::basic_string template. Please also refer to a
-    standard c++ manual for a complete overview.
+    It offers all the functionality of the std::basic_string template. This has
+    the advantage, that all generic algorithms that work with std::basic_string
+    should also work with Pt::String. Please refer to a standard c++ manual for
+    a complete overview.
+    Additional methods make it easier to work with other character types. For
+    example, the relational operators are also overloaded for char and wchar_t.  
 
     @ingroup Unicode
 */

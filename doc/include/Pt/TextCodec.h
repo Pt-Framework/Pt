@@ -9,10 +9,29 @@ namespace Pt {
 
 /** @brief Converts between character encodings.
 
-    The %TextCodec is used by the text streams and buffers to convert to
-    and from external encodings. Since it implements the std::codecvt facet
-    interface, it can be used as this type of facet on all systems which
-    support facets and the std::locale.
+    A Pt::TextCodec is used by the text streams and buffers for coding and
+    encoding external byte sequences, hence the name codec. It implements
+    the std::codecvt facet interface, however not all systems provide the
+    std::locale facilities.
+    Codecs are stateless, which means that one codec can be used with multiple
+    text streams. A %TextCodec is constructed with a reference counter that
+    indicates whether the stream manages the lifetime of the codec. If that
+    value is 0, as it is the case if the %TextCodec is default constructed,
+    the text stream will delete the codec. 
+    
+    @code
+    Pt::TextOStream tos(new Pt::Utf8Codec);
+    @endcode
+    
+    Therefore, a default constructed %TextCodec has to be cretaed with new,
+    as it is the rule for all localization facets. This can be avoided by
+    passing a value different from 0 to the codecs constructor, in which
+    case the codec must exist at least as long as the stream that uses it:
+
+    @code
+    Pt::Utf8Codec codec(1);
+    Pt::TextOStream tos(codec);
+    @endcode
 
     @ingroup Unicode
 */
