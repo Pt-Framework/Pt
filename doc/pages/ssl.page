@@ -1,5 +1,7 @@
 /** \page ssl Secure Communication
 
+@copydetails Pt::Ssl
+
 @section ssl_CertStore Certificate Management
 
 SSL/TLS communication usually requires certificates and keys, i.e. for server

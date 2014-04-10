@@ -103,6 +103,7 @@ class FunctionSlot : public BasicSlot<R, ARGUMENTS>
 
 /** @brief Returns a %Function wrapper for the given free/static function.
     @related Function
+    @related Callable
 */
 template <typename R, typename ARGS>
 Function<R, ARGS> callable( R (*func)(ARGS) );
@@ -110,6 +111,7 @@ Function<R, ARGS> callable( R (*func)(ARGS) );
 
 /** @brief Returns a slot object for the given free/static function.
     @related FunctionSlot
+    @related Slot
 */
 template <typename R, typename ARGS>
 FunctionSlot<R, ARGS> slot( R (*func)(ARGS) );

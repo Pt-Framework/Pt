@@ -44,6 +44,23 @@ namespace Pt {
 
 /** @brief Unicode character type.
  
+    The unicode character type Pt::Char can directly represent a unicode code
+    point. It is used as the character type for Pt::String or Pt::StringStream.
+    Characters can be classified or transformed using a set of functions
+    similar to what can be found in the cctype header of the standard library:
+
+    @code
+    Pt::Char ch = 'a';
+    
+    // check character category
+    assert( isalpha(ch) );
+    assert( islower(ch) );
+
+    // convert to upper case
+    Pt::Char ch2 = toupper(ch);
+    assert( isupper(ch) );
+    @endcode
+
     @ingroup Unicode
  */
 class Char
@@ -358,23 +375,6 @@ struct char_traits<Pt::Char>
 };
 
 /** @internal 
-    @brief Unicode capable basic_string.
-
-    This class is a specialization of the std::basic_string template for
-    the unicode character type Pt::Char:
-
-    @code
-    typedef std::basic_string String;
-    @endcode
-
-    It offers the functionality of the std::basic_string template with
-    additional methods to make it easier to work with other character types.
-    For example, the relational operators are also overloaded for char and
-    wchar_t. The documentation focuses on the features, which are not already
-    provided by the std::basic_string template. Please also refer to a
-    standard c++ manual for a complete overview.
-
-    @ingroup Unicode
 */
 template <>
 class PT_API basic_string<Pt::Char> 

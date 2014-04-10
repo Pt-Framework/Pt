@@ -1,5 +1,7 @@
 /** \page unittest Unit Testing
 
+@copydetails Pt::Unit
+
 @section unittest_SimpleTests A Simple Test Case
 
 The TestCase class can be used to implement simple unit test. This is simply

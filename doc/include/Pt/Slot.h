@@ -9,6 +9,13 @@ namespace Pt {
 class Connection;
 
 /** @brief Endpoint of a signal/slot connection
+
+    Slots can be constructed with the @link Pt::Slot slot()@endlink function,
+    which is overloaded for various types of callable entities, most notably
+    functions or member functions. Slots are lightweight proxy-objects and one
+    example is the Pt::MethodSlot, which allows to use a member function as a
+    slot. 
+
     @ingroup sigslot
 */
 class Slot

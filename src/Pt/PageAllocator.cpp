@@ -48,6 +48,12 @@ PageAllocator::Page::~Page()
 }
 
 
+void PageAllocator::Page::clear()
+{
+    _bytesAlreadyAllocated = 0;
+}
+
+
 void* PageAllocator::Page::allocate(std::size_t reqSize)
 {
     void* addr = _mem  + _bytesAlreadyAllocated;
@@ -57,10 +63,10 @@ void* PageAllocator::Page::allocate(std::size_t reqSize)
 }
 
 
-PageAllocator::PageAllocator( std::size_t size )
+PageAllocator::PageAllocator( std::size_t pageSize )
 : _listOfVariableChunk(0)
 {
-    expandStorage(size);
+    expandStorage(pageSize);
 }
 
 
@@ -70,6 +76,25 @@ PageAllocator::~PageAllocator()
     while( memchunk )
     {
         _listOfVariableChunk = memchunk->nextVariableChunk();
+        delete memchunk;
+        memchunk = _listOfVariableChunk;
+    }
+}
+
+
+void PageAllocator::clear()
+{
+    Page* memchunk = _listOfVariableChunk;
+    while( memchunk )
+    {
+        Page* next = memchunk->nextVariableChunk();
+        if( ! next )
+        {
+            memchunk->clear();
+            break;
+        }
+
+        _listOfVariableChunk = next;
         delete memchunk;
         memchunk = _listOfVariableChunk;
     }

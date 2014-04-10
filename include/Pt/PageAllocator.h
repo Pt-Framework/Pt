@@ -39,6 +39,31 @@ namespace Pt {
 
 /** @brief Page based allocator.
 
+    The @link Pt::PageAllocator PageAllocator@endlink is useful, when many
+    chunks of memory have to be allocated, which can be released later at the
+    same time. This allows the PageAllocator to allocate memory consecutively
+    on pages and simply release all pages together at the end.  Therefore,
+    @link Pt::PageAllocator::deallocate() deallocate()@endlink will not do
+    anything, but memory will only eventually be released, when @link 
+    Pt::PageAllocator::clear() clear()@endlink is called or the PageAllocator
+    is destructed. The next example illustrates this:
+
+    @code
+    Pt::PageAllocator allocator;
+
+    for(std::size_t n = 1; n < 16; ++n)
+    {
+        void* p = allocator.allocate(n);
+
+        // do something with p
+
+        allocator.deallocate(p, n);
+    }
+
+    // release all allocated memory altogether
+    allocator.clear();
+    @endcode
+
     @ingroup Allocator
 */
 class PT_API PageAllocator : public Pt::Allocator
@@ -52,6 +77,8 @@ class PT_API PageAllocator : public Pt::Allocator
                 Page(Page* nextChunk, std::size_t chunkSize);
 
                 ~Page();
+
+                void clear();
 
                 void* allocate(std::size_t reqSize);
 
@@ -74,11 +101,14 @@ class PT_API PageAllocator : public Pt::Allocator
         enum { MinChunkSize = 4096 };
 
     public:
-        //! @brief Construct with minimum chunk size.
-        PageAllocator(std::size_t size = MinChunkSize);
+        //! @brief Construct with minimum page size.
+        PageAllocator(std::size_t pageSize = MinChunkSize);
 
         //! @brief Destructor.
         ~PageAllocator();
+
+        //! @brief Releases all memory.
+        void clear();
 
         // inherit docs
         void* allocate( std::size_t size );
