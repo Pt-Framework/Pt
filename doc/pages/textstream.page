@@ -133,6 +133,10 @@ for strings or to format numbers. When all data has been written to the text
 stream, terminate needs to be called to finish off the output byte sequence.
 This is especially important for encodings with shift states.
 
+@section text_Regex Regular Expressions
+
+@copydetails Pt::Regex
+
 @section text_Base64 Base-64 Encoding
 
 The Base64 encoding scheme is not a character encoding in the classical sense,
