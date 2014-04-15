@@ -9,7 +9,7 @@ start with an empty directroy, from now on referred to as the project root,
 in which we place all sources, headers and the files required for building
 with jam. The first thing to do is to add a Jambase and the other required
 support files to your project. You can get them here: 
-https://pt-framework.svn.sourceforge.net/svnroot/pt-framework/trunk
+http://svn.code.sf.net/p/pt-framework/svn/trunk/
 
 Your project directory should now contain the following files:
 
@@ -19,7 +19,6 @@ Your project directory should now contain the following files:
     - ... (jam implementation files)
 - Jambase
 - jam.sh
-- jam.exe
 - jam.bat
 @endverbatim
 
@@ -28,11 +27,11 @@ directory and both are also referred to as the Jambase. The jam support
 directory includes the implementation details of the jam-based build system and
 the jam sources used for bootstrapping the build tool. To provide a completely 
 self-contained build system, we also have to make the jam tool available.
-For Windows hosts, we can place a precompiled jam binary in the project root
-named jam.exe. For Unix hosts we add a simple wrapper shell script named 
-jam.sh. This script bootstraps and runs the jam program on unix systems, 
-so we don't have to include all possible jam binaries with our project, but
-rather build them on demand.
+For Windows hosts, there is a precompiled jam binary in the jam directory
+named jam.exe, which is called from jam.bat. For Unix hosts we add a simple
+wrapper shell script named jam.sh. This script bootstraps and runs the jam
+program on unix systems, so we don't have to include all possible jam binaries
+with our project, but rather build them on demand.
 
 All examples in this tutorial will use the script jam.sh, when commands are
 shown. If you want to take this tutorial on a Windows build host, simply
@@ -53,7 +52,6 @@ now contain the following files:
 - Jambase
 - jam.sh
 - jam.bat
-- jam.exe
 - Jamconfigure
 - Jamrules
 - Jamfile
@@ -65,6 +63,8 @@ properties are determined, the toolset is detected etc. The input for this
 to that file:
 
 @code
+SubDir MY_TOP ;
+
 # configure basic C compiler
 ConfigureCc ;
 
@@ -72,6 +72,11 @@ ConfigureCc ;
 ConfigureC++ ;
 @endcode
 
+The SubDir rule defines the so-called root variable, which stands for the
+project root directory. You can think of this for now simply as the path
+to your project root directory. The SubDir rule also sets the directory
+context for the following statements, until the next SubDir call. It will
+be more useful when another project is included as a sub tree.
 So far, we only need to configure basic C and C++ support. This allows us to
 build programs, static libraries and shared libraries using standard C and 
 C++. You should be able to run the configure step now sucessfully with this
@@ -96,12 +101,10 @@ Main hello : main.cpp ;
 @endcode
 
 This Jamfile uses the Main rule to build program named 'hello' from the source
-file main.cpp. The SubDir rule defines the so-called root variable, which 
-stands for the project root directory. You can think of this for now simply 
-as the path to your project root directory. The SubDir rule also sets the
-directory context for the following statements, until the next SubDir call.
-Thus, main.cpp will be looked for in the project root. If you run jam now, a
-program will be built named 'hello' on Unix or 'hello.exe' on windows, 
+file main.cpp. The SubDir rule defines the root variable and sets the directory
+context for the following statements, just like it was done in the Jamconfigure
+file. Thus, main.cpp will be looked for in the project root. If you run jam
+now, a program will be built named 'hello' on Unix or 'hello.exe' on windows, 
 respectively. 
 
 @verbatim

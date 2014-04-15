@@ -4,7 +4,7 @@ The Jam distribution provides a self-contained jam based build system. It can
 be included and distributed with your project's source files, so you are not
 required to install any other tools on your build build host(s), besides the
 native toolchain (compiler, linker etc.). You can download the files here: 
-https://pt-framework.svn.sourceforge.net/svnroot/pt-framework/trunk
+http://svn.code.sf.net/p/pt-framework/svn/trunk/
 
 The Jam distribution contains the following files, which should be placed in
 your projects root directory as provided:
@@ -16,7 +16,6 @@ your projects root directory as provided:
 - Jambase
 - jam.sh
 - jam.bat
-- jam.exe
 @endverbatim
 
 The file Jambase in the project root references the files in the jam support
