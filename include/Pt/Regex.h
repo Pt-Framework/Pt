@@ -56,11 +56,117 @@ class PT_API InvalidRegex : public std::runtime_error
         {}
 };
 
-/** @brief Regular Expression for unicode strings.
+/** @brief Regular Expressions for Unicode Strings.
 
-    The regular expression syntax is a subset of the extended POSIX syntax.
-    The following meta characters are supported: . ^ $ < > - [] () | ? + *.
-    Characters are escaped using \.
+    The Pt::Regex class allows to match a string pattern in unicode text. It
+    resembles the std::basic_regex class and can be used to support systems,
+    where std::basic_regex is not available in the standard C++ implementation.
+    The syntax for the match pattern is similar to the extended POSIX syntax.
+    The following table shows the special characters that can be used to write
+    regular expressions:
+    
+    <table style="width:600px; margin:20px; padding:6px; background-color: #eff0f0;">
+        <tr>
+            <td><b>.</b></td>
+            <td>Any character</td>
+        </tr>
+        <tr>
+            <td><b>[ ]</b></td>
+            <td>A character in a given set</td>
+        </tr>
+        <tr>
+            <td><b>[^ ]</b></td>
+            <td>A character not in a given set</td>
+        </tr>
+        <tr>
+            <td><b>^</b></td>
+            <td>Begin of line</td>
+        </tr>
+        <tr>
+            <td><b>$</b></td>
+            <td>End of line</td>
+        </tr>
+        <tr>
+            <td><b>\\&lt;</b></td>
+            <td>Begin of a word</td>
+        </tr>
+        <tr>
+            <td><b>\\&gt;</b></td>
+            <td>End of a word</td>
+        </tr>
+        <tr>
+            <td><b>( )</b></td>
+            <td>A marked subexpression</td>
+        </tr>
+        <tr>
+            <td><b>*</b></td>
+            <td>Matches the preceding element zero or more times</td>
+        </tr>
+        <tr>
+            <td><b>?</b></td>
+            <td>Matches the preceding element zero or one time</td>
+        </tr>
+        <tr>
+            <td><b>+</b></td>
+            <td>Matches the preceding element one or more times</td>
+        </tr>
+        <tr>
+            <td><b>|</b></td>
+            <td>Matches either the expression before or after the operator</td>
+        </tr>
+        <tr>
+            <td><b>\ </b></td>
+            <td>Escapes the next character</td>
+        </tr>
+    </table>
+
+    The regular expression is constructed from a unicode string, either a
+    Pt::String or a null-terminated sequence of unicode characters of type
+    Pt::Char. It can then be used to match it against unicode strings as
+    shown in the next example:
+
+    @code
+    Pt::String expr = L"[hc]ats";
+    Pt::Regex regex(expr);
+
+    Pt::String str1 = L"I like cats!";
+    Pt::String str2 = L"I like hats!";
+    Pt::String str3 = L"I like bats!";
+
+    // this does match
+    bool matched = regex.match(str1);
+
+    // this does also match
+    matched = regex.match(str2);
+
+    // this does not match
+    matched = regex.match(str3);
+    @endcode
+
+    It is also possibe to match a regular expression against a unicode input
+    string and find out what tokens in the string actually matched. The
+    @link Pt::Regex::match() match()@endlink member function has an overload,
+    which fills a Pt::RegexSMatch with the result. Note that the first result
+    at index 0 is always the input string itself. The following example
+    illustrates this:
+
+    @code
+    Pt::String expr = L"([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)";
+    Pt::Regex regex(expr);
+
+    Pt::String str = L"My IP address is 192.168.0.77";
+
+    Pt::RegexSMatch smatch;
+    bool matched = regex.match(str, smatch);
+    if(matched)
+    {
+        std::cout << "IP: " << smatch.str(1).narrow() << std::endl;
+    }
+    else
+    {
+        std::cout << "No IP in " << smatch.str(0).narrow() << std::endl;
+    }
+    @endcode
 
     @ingroup Unicode
 */
@@ -87,7 +193,7 @@ class PT_API Regex
 
         /** @brief Matches the regular experession to a string.
 
-            The result @ sm holds pointers into the original string that was
+            The result @a sm holds pointers into the original string that was
             matched and therefore should not be used after the original string
             was destroyed.
         */

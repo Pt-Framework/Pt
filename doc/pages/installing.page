@@ -100,7 +100,7 @@ more than one version of visual studio is installed. The following example
 selects the Visual Studio 2008 compiler:
 
 @code
-./jam.bat configure -sTOOLSET=vc9
+jam.bat configure -sTOOLSET=vc9
 @endcode
 
 The build options TARGET_OS and TARGET_OSPLAT need to be set for cross 
@@ -122,7 +122,7 @@ case the TARGET_OS also needs to be set. The following command can be used
 on a windows host to build for QNX on PowerPC CPUs:
 
 @code
-./jam.bat configure -sTARGET_OS=qnxnto -sTARGET_OSPLAT=ppc
+jam.bat configure -sTARGET_OS=qnxnto -sTARGET_OSPLAT=ppc
 @endcode
 
 
@@ -136,7 +136,7 @@ will be resolved automatically and be built first. If jam is invoked without
 any further options, all targets will be built:
 
 @code
-jam.sh
+./jam.sh
 @endcode
 
 To build a specific target of the project simply invoke jam with a target 
@@ -144,7 +144,7 @@ name. The following command will build the target libPt.so and all its
 dependencies:
 
 @code
-jam.sh libPt.so
+./jam.sh libPt.so
 @endcode
 
 To completely rebuild a target and its dependencies, the command line 
@@ -153,7 +153,7 @@ or without a specific target. Thus the following command will rebuild
 the whole project:
 
 @code
-jam.sh -a
+./jam.sh -a
 @endcode
 
 The pseudo-target 'clean' plays a special role in the jam build system. All
@@ -163,7 +163,7 @@ artefacts will be deleted if they exist. Therefore the following command
 will remove all artefacts that were created by a build with default options:
 
 @code
-jam.sh clean
+./jam.sh clean
 @endcode
 
 Finally, two command line options can make the build more convenient. You can
@@ -182,7 +182,7 @@ by default. The following example builds the whole projects and executes
 the unit-test.
 
 @code
-jam.sh test
+./jam.sh test
 @endcode
 
 @section installation Installation
@@ -198,7 +198,7 @@ at configuration time or just before installation. The following command
 will install the files in the '/opt' directory:
 
 @code
-jam.sh -sINSTALL_DIR=/opt/Pt
+jam.sh -sPT_INSTALL_DIR=/opt/Pt
 @endcode
 
 This means that a directory named Pt will be created with three subdirectories
@@ -208,4 +208,3 @@ INSTALL_LIBDIR. Alternatively, you can set the three latter variables to
 separate directories to have full control of the installation.
 
 */
-

@@ -28,6 +28,7 @@
         <li> @ref text_Encodings </li>
         <li> @ref text_Characters </li>
         <li> @ref text_TextStreams </li>
+        <li> @ref text_Regex </li>
         <li> @ref text_Base64 </li>
     </ul>
 
