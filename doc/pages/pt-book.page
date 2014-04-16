@@ -32,6 +32,13 @@
         <li> @ref text_Base64 </li>
     </ul>
 
+    <li> @ref serialization </li>
+    <ul>
+        <li> @ref serialization_ValueTypes </li>
+        <li> @ref serialization_Pointers </li>
+        <li> @ref serialization_Containers </li>
+    </ul>
+
     <li> @ref utilities </li>
     <ul>
         <li> @ref utilities_StringConv </li>
@@ -81,6 +88,15 @@
     <li> @ref ssl_Connection </li>
     <li> @ref ssl_ReadWrite </li>
     <li> @ref ssl_Shutdown </li>
+</ul>
+
+@section pt_xmlrpc XML-RPC Communication
+
+<ul>
+    <li> @ref xmlrpc_Service </li>
+    <li> @ref xmlrpc_AsyncProcedures </li>
+    <li> @ref xmlrpc_Client </li>
+    <li> @ref xmlrpc_Protocol </li>
 </ul>
 
 @section pt_unit Unit Testing

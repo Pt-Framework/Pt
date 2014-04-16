@@ -1285,7 +1285,7 @@ inline void operator >>=(const SerializationInfo& si, std::vector<T, A>& vec)
     for(SerializationInfo::ConstIterator it = si.begin(); it != end; ++it)
     {
         vec.push_back(elem);
-        *it >>= vec.back();
+        *it >> Pt::load() >>= vec.back();
     }
 }
 

@@ -1,18 +1,10 @@
 /** \page xmlrpc XML-RPC Communication
 
-@section xmlrpc_Intro Introduction
+@copydetails Pt::XmlRpc
 
-The XML-RPC module (Pt::XmlRpc) of the Pt framework provides a client API to
-call remote procedures and a server API to implement remote procedures.
-Blocking and non-blocking APIs exist in either case. The XML-RPC module builds
-on top of the HTTP module (Pt::Http) and uses the HTTP client and server 
-implementation thereof. Custom data-types can be used in XML-RPC procedures
-if they are serializable using Pt's serialization API.
+@section xmlrpc_Service XML-RPC Services
 
-
-@section xmlrpc_Service Implementation of XML-RPC services
-
-The XML-RPC server side API is implemented as a service for Pt's HTTP server.
+The XML-RPC server side API is implemented as a service for %Pt's HTTP server.
 Regular C++ functions or methods can be registered as XML-RPC remote procedures
 with a Pt::XmlRpc::ServiceDefinition. The service definition can then be used
 by the the Pt::XmlRpc::HttpService. The XML-RPC requests are processed and
@@ -50,10 +42,11 @@ class CalculatorService : public Pt::XmlRpc::ServiceDefinition
 One needs to inherit Pt::XmlRpc::ServiceDefinition and register the XML-RPC
 procedures in the constructor. The string passed to registerProcedure() is
 the name of the procedure and all XML-RPC requests with this 'methodName' 
-XML tag will be dispatched to that method.
+XML tag will be dispatched to that method. The types used in the signatures
+of the service procedures have to be serializable (see @ref serialization).
 
 Once the XML-RPC service definition is implemented, it can be run within an
-instance of Pt's HTTP server. The incoming requests are mapped by the service
+instance of %Pt's HTTP server. The incoming requests are mapped by the service
 name to the XML-RPC service and then processed and dispatched in the service
 to the registered procedures.
 
@@ -81,6 +74,9 @@ with the name '/calculator'. HTTP services are not directly added to a HTTP serv
 but as part of a servlet. The servlet of type Pt::Http::MapUrl instructs the
 server to route all requests for the URL '/calculator' to the CalculatorService.
 The server requires an event loop to run, in this case a program main loop.
+
+
+@section xmlrpc_AsyncProcedures Asynchronous XML-RPC Service Procedures
 
 Since the server has only a limited number of worker threads, the XML-RPC
 procedures should not block, for example to perform long I/O operations,
@@ -139,9 +135,8 @@ This is also the event loop of the server thread from which the procedure was
 invoked. When the timer runs out, ActiveProcedure::setReady() is called in
 the timer callback, to notify the XML-RPC service that the asynchronous call
 has finished. The service will then wake up and call onResult() to obtain the
-return value. 
-
-The next example shows how the asynchronous service procedure is registered:
+return value. The next example shows how the asynchronous service procedure
+is registered:
 
 @code
 class MyService : public Pt::XmlRpc::ServiceDefinition
@@ -165,7 +160,7 @@ case, because the registered function is a factory for the actual asynchronous
 XML-RPC procedure.
 
 
-@section xmlrpc_Client Implementation of a XML-RPC clients
+@section xmlrpc_Client XML-RPC Clients
 
 The XML-RPC client API is implemented as function objects using Pt's HTTP
 client. Calling a remote procedure with the blocking API looks similar to
@@ -202,7 +197,8 @@ be used for multiple remote procedure calls to the same XML-RPC service. A
 function object of type Pt::XmlRpc::RemoteProcedure is constructed then, where
 the template parameters describe the signature of the remote procedure. The 
 first template parameter is the return value and the following ones are the 
-arguments. The actual call might throw an exception, especially one of type 
+arguments. The types used as the return value and the arguments have to be
+serializable (see @ref serialization). The actual call might throw an exception, especially one of type 
 Pt::XmlRpc::Fault, if an error occurs in the XML-RPC layer.
 
 A non-blocking API also exists, to make XML-RPC calls concurrently to other
@@ -260,64 +256,6 @@ actual return value, get() must be called on this object, which might also
 throw an exception, if an error occured. The exception should be handled in 
 the slot, if it is allowed to propagate, the event loop will be stopped and
 the program ends.
-
-
-@section xmlrpc_UserTypes Using User-Defined Types in XML-RPC procedures
-
-The %Pt framework already provides serialization support for builtin types and
-the types provided by the C++ standard library, like std::string or std::vector.
-To use custom types as arguments or return types in remote procedures, the 
-serialization operator must be implemented.
-
-@code
-struct Address
-{
-  std::string country;
-  std::string city;
-  std::string street;
-  int code;
-};
-
-void operator>>=(const Pt::SerializationInfo& si, Address& address);
-void operator<<=(Pt::SerializationInfo& si, const Address& address);
-
-class MyService : public Pt::xmlrpc::ServiceDefinition
-{
-  public:
-    MyService()
-    {
-      registerProcedure("getPosition", *this, &MyService::getPosition);
-    }
-
-    Address getPosition();
-};
-@endcode
-
-@code
-void operator>>=(const Pt::SerializationInfo& si, Address& address)
-{
-  si.getMember("year")   >>= address.country;
-  si.getMember("city")   >>= address.city;
-  si.getMember("street") >>= address.street;
-  si.getMember("code")   >>= address.code;
-}
-
-void operator<<=(Pt::SerializationInfo& si, const Address& address)
-{
-  si.addMember("country") <<= address.country;
-  si.addMember("city")    <<= address.city;
-  si.addMember("street")  <<= address.street;
-  si.addMember("code")    <<= address.code;
-  si.setTypeName("Address");
-}
-@endcode
-
-The XML-RPC service shown above returns a custom type named 'Address' from
-its procedure named 'getPosition'. The two serialization operators are
-implemented, so the framework knows how to serialize and deserialize this
-custom type. The two operators can be used for the implementation of the
-remote procedures on the server side and to call the remote procedure on the
-client side.
 
 
 @section xmlrpc_Protocol Protocol Details

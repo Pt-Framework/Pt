@@ -169,7 +169,7 @@
     which support standard C++ locales.
 */
 
-/** @defgroup Serialization
+/** @defgroup Serialization Serialization
 
     Data structures and types can be serialized to text or binary formats using
     %Pt's serialization. This is used within the framework to load and store

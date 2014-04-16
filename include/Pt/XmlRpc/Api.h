@@ -44,6 +44,13 @@ namespace Pt {
 
 /** @namespace Pt::XmlRpc
     @brief XML RPC services and clients.
+
+    The XML-RPC module (Pt::XmlRpc) of the %Pt framework provides a client API to
+    call remote procedures and a server API to implement remote procedures.
+    Blocking and non-blocking APIs exist in either case. The XML-RPC module builds
+    on top of the HTTP module (Pt::Http) and uses the HTTP client and server 
+    implementation thereof. Custom data-types can be used in XML-RPC procedures
+    if they are serializable using %Pt's serialization API.
 */
 namespace XmlRpc {
 
