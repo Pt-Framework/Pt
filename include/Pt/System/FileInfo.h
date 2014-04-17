@@ -39,9 +39,55 @@ namespace System {
 
 /** @brief Provides information about a node in the file-system.
 
-    The %FileInfo class provides operations to query information about
-    files and directories in the file system and to add, remove and modify
-    them. All operations are available as non-member functions.
+    The Pt::System::FileInfo class provides operations to query information
+    about files and directories in the file system and to add, remove and
+    modify them. %FileInfo objects can be created with a path, are assignable,
+    comparable and can be used as keys for e.g. std::map. The path must not
+    be valid to successfully construct a %FileInfo object, but it can be
+    checked whether a file exists and what type of file it is, as shown in
+    the following example:
+
+    @code
+    Pt::System::FileInfo fi("/tmp");
+
+    switch( fi.type() )
+    {
+        case Pt::System::FileInfo::Directory:
+            std::cout << "it's a directory" << std::endl;
+            break;
+
+        case Pt::System::FileInfo::File:
+            std::cout << "it's a file" << std::endl;
+            break;
+
+        case Pt::System::FileInfo::Invalid:
+            std::cout << "file does not exist." << std::endl;
+            break;
+    }
+    @endcode
+    
+    All operations are also available as non-member functions, so it
+    is not neccessary to create temporary %FileInfo objects. Only the paths
+    to files or directories are required to perform file system operations.
+    The next example uses the non-member function to move a file:
+
+    @code
+    try
+    {
+        Pt::System::FileInfo::move("/tmp/tmpfile1", "/tmp/tmpfile2");
+    }
+    catch(const Pt::System::AccessError& e)
+    {
+        std::cerr << "failed to move file" << std::endl;
+    }
+    @endcode
+
+    The code shown above will simply move a file to a new location. If the 
+    move operation fails, either because the source file is not present, or
+    a file already exists at the target, an exception of type %AccessError
+    is thrown. This is also the case for all other operations sich as size(),
+    createFile(), createDirectory(), resize() and remove().
+
 
     @ingroup FileSystem
 */

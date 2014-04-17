@@ -58,12 +58,12 @@
 
 /** @defgroup FileSystem File System Access
     
-    The Pt::System library provides facilities to identify, create, rename,
-    move or remove files and directories. The DirectoryIterator can be used
-    to traverse through the entries in a Directory. It can be used with the
-    iterator based algorithms in the C++ standard library. The FileDevice
-    is an implementation of the IODevice to read and write to files. 
-
+    The systems programming library (Pt::System) provides functionality to
+    identify, create, rename, move or remove files and directories. An iterator
+    based API can be used to traverse through the entries in a directory. It
+    can be used with the iterator based algorithms in the C++ standard library.
+    The FileDevice is an implementation of the IODevice to read and write to
+    files. 
 */
 
 namespace Pt {
@@ -73,8 +73,10 @@ namespace Pt {
 
     This module offers support for multithreaded programming, API's for
     file system operations such as traversing through directories and files,
-    creating and handling of subprocesses transparent, synchronous or
-    asynchronous IO, and shared libraries.
+    creating and handling of subprocesses, synchronous or asynchronous IO,
+    logging, shared libraries and plugins. It introduces event loops as the
+    central software interrupt to handle events across thread boundaries,
+    timers and reactive I/O.
 */
 namespace System {
 

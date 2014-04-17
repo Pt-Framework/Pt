@@ -54,9 +54,26 @@
 @section pt_system System Programming
 
 <ul>
+    <li> @ref filesystem </li>
+    <ul>
+        <li> @ref filesystem_FileInfo </li>
+        <li> @ref filesystem_Directory </li>
+    </ul>
+
     <li> @ref concurrency </li>
+
     <li> @ref logging </li>
+    <ul>
+        <li> @ref logging_Approach </li>
+        <li> @ref logging_Configuration </li>
+        <li> @ref logging_Usage </li>
+    </ul>
+
     <li> @ref plugins </li>
+    <ul>
+        <li> @ref plugins_Implementation </li>
+        <li> @ref plugins_LoadingPlugins </li>
+    </ul>
 </ul>
 
 @section pt_http HTTP Clients and Servers

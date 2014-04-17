@@ -1,7 +1,5 @@
 /** \page plugins Plugins
 
-@section plugins_Introduction Introduction
-
 The Platinum plugin API allows to create classes, that implement a common
 interface, from a dynamically loadable library or module. The mechanism is
 non-intrusive and can be used with an existing class hierachy. Plugins can
@@ -10,7 +8,7 @@ created class is opaque to the application that uses the plugin, it only
 needs to know the interface.
 
 
-@section plugins1 Writing Plugins
+@section plugins_Implementation Writing Plugins
 
 Lets assume the classes you want to create from a plugin are derived from an
 interface class called Greeter. The Greeter class has one abstract function
