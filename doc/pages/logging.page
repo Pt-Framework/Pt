@@ -1,6 +1,6 @@
 /** \page logging Logging
 
-@section LoggingApproach Goals and Approach
+@section logging_Approach Goals and Approach
 
 Logging is an important feature of many applications. It can be used for
 debugging during the development process and to trace how a program executes
@@ -41,7 +41,7 @@ This library is extremly portable and has minimal dependencies. It requires
 only standard C++ and a standard C++ library.
 
 
-@section LoggingDesign Design and Implementation
+@section logging_Configuration Logger Configuration
 
 The heart of the logging framwork is a hierarchy of log targets, which have
 a unique string ID. Applications format log records and use logger objects to
@@ -141,7 +141,7 @@ A log record pattern is applied to print the target ID, the time and the
 message text of the records to the logs.
 
 
-@section LoggingCode Adding Logging Support to Programs
+@section logging_Usage Logging From Programs
 
 Macros are provided to make logging more convenient. The easiest way to 
 log is to use the logging macros for a static logger instance. A logger 

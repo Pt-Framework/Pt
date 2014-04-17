@@ -40,19 +40,35 @@ namespace System {
 
 /** @brief Iterates over entries of a directory.
 
-    A %DirectoryIterator is created with a path to a directory or default
+    The Pt::System::DirectoryIterator can be used to iterate over the contents
+    of directories. It is created with from path to a directory or default
     constructed to serve as the iterator to end. It satisfies the requirements
-    for a forward iterator.
+    for a forward iterator. The value type of the iterator is the FileInfo
+    class, over a sequence of which is logically iterated. 
 
-    \code
-    DirectoryIterator it("/usr");
-    DirectoryIterator end;
-
-    for( ; it != end; ++it)
+    @code
+    try
     {
-        std::cout << "name : " << it->name() << std::endl;
+        DirectoryIterator it("/tmp");
+        DirectoryIterator end;
+
+        for( ; it != end; ++it)
+        {
+            std::cout << "name : " << it->name() << std::endl;
+        }
     }
-    \endcode
+    catch(const Pt::System::AccessError& e)
+    {
+        std::cerr << "failed to access directory" << std::endl;
+    }
+    @endcode
+
+    The constructor throws an AccessError exception if the path is not a valid
+    directory. The exception can be avoided by checking the path with @link
+    Pt::System::FileInfo::type() FileInfo::type()@endlink first, to make sure
+    it is valid. The DirectoryIterator can then be advanced to get the FileInfo
+    for the next file in the directory, until the end of the directory contents
+    is reached.
 
     @ingroup FileSystem
 */

@@ -33,8 +33,9 @@ deserialize it. The types of operators (<<= and >>=) indicate that this is
 an assignment operation. Each type has to be composed from or decomposed to
 Pt::SerializationInfo objects, which form a tree representing the object graph.
 It contains all meta information so composition and decomposition can be
-separated from formatting and parsing. The next example shows the definition
-of the serialization operator:
+separated from formatting and parsing. Building up the tree is highly optimized
+and, for example, requires only very few allocations.The next example shows
+the definition of the serialization operator:
 
 @code
 void operator<<=(Pt::SerializationInfo& si, const Address& address)
@@ -164,10 +165,14 @@ Considering the implementations of the serialization operators for std::vector,
 one significant problem becomes apparent. It consumes a lot of memory for
 containers with many elements, because it requires the complete tree of
 SerializationInfo objects representing the container to be in memory. It can
-not work incrementally. 
+not work incrementally.
 
 An alternative to implementing the serialization operators is to specialize
-Pt::BasicComposer and Pt::BasicDecomposer. The following examples show the
+Pt::BasicComposer and Pt::BasicDecomposer. The default implementations use
+the serialization operators and a tree of SerializationInfo objects, which
+is fine for small and medium sized objects. The parsing anfd formatting layers
+interact with these two classes to compose or decompose the actual types and
+this layer can be completely customized. The following examples show the
 specializations for std::vector:
 
 @code
@@ -299,4 +304,10 @@ is called when the end of the vector is reached. A decomposer is returned,
 either for the current vector element, or the parent decomposer, if all
 elements were decomposed.
 
+Both, the BasicComposer and BasicDecomposer may delegate to other composers
+and decomposers, which might or might not be specialized. In the example for
+std::vector, composers and decomposers for the element type are used. Note,
+that this works for a vector of vectors right away. It is usually a good
+compromise to rely on the serialization operators for small or medium sized
+data types, but specialize the coposer and decomposer for container types.
 */
