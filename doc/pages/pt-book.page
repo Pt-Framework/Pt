@@ -58,6 +58,7 @@
     <ul>
         <li> @ref filesystem_FileInfo </li>
         <li> @ref filesystem_Directory </li>
+        <li> @ref filesystem_FileIO </li>
     </ul>
 
     <li> @ref concurrency </li>
