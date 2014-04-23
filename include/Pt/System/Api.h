@@ -66,6 +66,18 @@
     files. 
 */
 
+/** @defgroup Plugins Dynamic Libraries and Plugins
+    
+    Dynamic libraries can be loaded at runtime and symbols can be resolved
+    using the Pt::System::Library class. Additionally, the plugin API provides
+    a more advanced way of creating classes, that implement a common interface,
+    from a dynamically loadable library or module. The mechanism is
+    non-intrusive and can be used with an existing class hierachy. Plugins can
+    be loaded and unloded by client application code. The concrete type of the
+    created class is opaque to the application that uses the plugin, it only
+    needs to know the interface.
+*/
+
 namespace Pt {
 
 /** @namespace Pt::System

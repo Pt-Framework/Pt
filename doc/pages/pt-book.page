@@ -40,6 +40,7 @@
     </ul>
 
     <li> @ref utilities </li>
+
     <ul>
         <li> @ref utilities_StringConv </li>
         <li> @ref utilities_NumConv </li>
@@ -71,7 +72,9 @@
     </ul>
 
     <li> @ref plugins </li>
+
     <ul>
+        <li> @ref plugins_Libraries </li>
         <li> @ref plugins_Implementation </li>
         <li> @ref plugins_LoadingPlugins </li>
     </ul>
@@ -90,6 +93,7 @@
     </ul>
 
     <li> @ref http_server </li>
+
     <ul>
         <li> @ref http_server_service </li>
         <li> @ref http_server_servlet </li>

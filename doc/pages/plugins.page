@@ -1,12 +1,10 @@
-/** \page plugins Plugins
+/** \page plugins Dynamic Libraries and Plugins
 
-The Platinum plugin API allows to create classes, that implement a common
-interface, from a dynamically loadable library or module. The mechanism is
-non-intrusive and can be used with an existing class hierachy. Plugins can
-be loaded and unloded by client application code. The concrete type of the
-created class is opaque to the application that uses the plugin, it only
-needs to know the interface.
+@copydetails Plugins
 
+@section plugins_Libraries Loading Libraries
+
+@copydetails Pt::System::Library
 
 @section plugins_Implementation Writing Plugins
 
