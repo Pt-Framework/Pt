@@ -41,13 +41,13 @@ namespace System {
 /** @brief Iterates over entries of a directory.
 
     The Pt::System::DirectoryIterator can be used to iterate over the contents
-    of directories. It is created with from path to a directory and satisfies
-    the requirements for a forward iterator. The value type of the iterator
-    is the %FileInfo class, over a sequence of which is logically iterated. 
-    Like the stream iterators of the C++ standard library, it changes to a
-    special state when the end of the directory is reached. This state is
-    identical to a default constructed iterator, so instances thereof can
-    serve as the iterator to the end of the directory. 
+    of directories. It is created with a path to a directory and satisfies
+    the requirements for a forward iterator. The iterator successivly reads
+    the contents of the assoziated directory and returns a %FileInfo when
+    dereferenced. Like the stream iterators of the C++ standard library, it
+    changes to a special state when the end of the directory is reached. This
+    state is identical to a default constructed iterator, so instances thereof
+    can serve as the iterator to the end of the directory. 
 
     @code
     try

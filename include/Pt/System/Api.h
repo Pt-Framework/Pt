@@ -62,7 +62,7 @@
     identify, create, rename, move or remove files and directories. An iterator
     based API can be used to traverse through the entries in a directory. It
     can be used with the iterator based algorithms in the C++ standard library.
-    The FileDevice is an implementation of the IODevice to read and write to
+    The FileDevice is an implementation of the IODevice to read and write
     files. 
 */
 
