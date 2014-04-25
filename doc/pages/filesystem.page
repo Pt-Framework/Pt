@@ -10,4 +10,8 @@
 
 @copydetails Pt::System::DirectoryIterator
 
+@section filesystem_FileIO File I/O
+
+@copydetails Pt::System::FileDevice
+
 */

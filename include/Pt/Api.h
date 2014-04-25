@@ -105,7 +105,7 @@
     of small sizes are created. This is for example used to optimize memory
     usage during serialization. The page based allocator simply places data
     consecutively in memory and frees the whole block when its no longer in
-    use. This is useful in situation where chunks of memory or objects are
+    use. This is useful in situations where chunks of memory or objects are
     created and destroyed at the same time. 
 */
 

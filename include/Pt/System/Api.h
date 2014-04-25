@@ -62,8 +62,20 @@
     identify, create, rename, move or remove files and directories. An iterator
     based API can be used to traverse through the entries in a directory. It
     can be used with the iterator based algorithms in the C++ standard library.
-    The FileDevice is an implementation of the IODevice to read and write to
+    The FileDevice is an implementation of the IODevice to read and write
     files. 
+*/
+
+/** @defgroup Plugins Dynamic Libraries and Plugins
+    
+    Dynamic libraries can be loaded at runtime and symbols can be resolved
+    using the Pt::System::Library class. Additionally, the plugin API provides
+    a more advanced way of creating classes, that implement a common interface,
+    from a dynamically loadable library or module. The mechanism is
+    non-intrusive and can be used with an existing class hierachy. Plugins can
+    be loaded and unloded by client application code. The concrete type of the
+    created class is opaque to the application that uses the plugin, it only
+    needs to know the interface.
 */
 
 namespace Pt {

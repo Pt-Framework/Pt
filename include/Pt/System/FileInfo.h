@@ -48,46 +48,48 @@ namespace System {
     the following example:
 
     @code
-    Pt::System::FileInfo fi("/tmp");
-
-    switch( fi.type() )
+    Pt::System::FileInfo fi("/tmp/logout.txt");
+    
+    if( fi.type() == Pt::System::FileInfo::File )
     {
-        case Pt::System::FileInfo::Directory:
-            std::cout << "it's a directory" << std::endl;
-            break;
-
-        case Pt::System::FileInfo::File:
-            std::cout << "it's a file" << std::endl;
-            break;
-
-        case Pt::System::FileInfo::Invalid:
-            std::cout << "file does not exist." << std::endl;
-            break;
+        std::cout << fi.path() << ": " << fi.size() << " bytes." << std::endl;
+    }
+    else
+    {
+        std::cout << fi.path() << " is invalid." << std::endl;
     }
     @endcode
     
     All operations are also available as non-member functions, so it
     is not neccessary to create temporary %FileInfo objects. Only the paths
     to files or directories are required to perform file system operations.
-    The next example uses the non-member function to move a file:
+    The next example illustrates some of the non-member functions for file
+    operations:
 
     @code
     try
     {
+        // create a temporary file
+        Pt::System::FileInfo::createFile("/tmp/tmpfile1");
+
+        // move it to a new location
         Pt::System::FileInfo::move("/tmp/tmpfile1", "/tmp/tmpfile2");
+
+        // remove the file
+        Pt::System::FileInfo::remove("/tmp/tmpfile2");
     }
-    catch(const Pt::System::AccessError& e)
+    catch(const Pt::System::AccessFailed& e)
     {
-        std::cerr << "failed to move file" << std::endl;
+        std::cerr << "file error: " << e.resource() << std::endl;
     }
     @endcode
 
-    The code shown above will simply move a file to a new location. If the 
-    move operation fails, either because the source file is not present, or
-    a file already exists at the target, an exception of type %AccessError
-    is thrown. This is also the case for all other operations sich as size(),
-    createFile(), createDirectory(), resize() and remove().
-
+    The code shown above creates a file, moves it to a new location and
+    finally deletes it. If an operation fails, for example because the file
+    could not be created, an exception of type %AccessFailed is thrown. This
+    is also the case for all other operations such as size(), createFile(),
+    createDirectory(), resize() and remove(). The exception reports the name
+    of the resource that could not be accessed.
 
     @ingroup FileSystem
 */

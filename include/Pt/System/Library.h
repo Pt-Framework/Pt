@@ -66,18 +66,40 @@ class PT_SYSTEM_API SymbolNotFound : public SystemError
 
 /** @brief Shared library loader.
 
-    This class can be used to dynamically load shared libraries and
-    resolve symbols from it. The example below shows how to retrieve
-    the address of the function 'myProcedure' in library 'MyLibrary':
+    The Pt::System::Library class can be used to dynamically load shared
+    libraries and resolve symbols from it. It also provides the static
+    functions @link Pt::System::Library::prefix prefix()@endlink and
+    @link Pt::System::Library::suffix suffix()@endlink, which allow to build
+    library names in a portable way. The next example shows how to load a
+    library with the basename "MyLib" at runtime and how to retrieve the
+    address of the function "myFunction":
 
     @code
-        Library shlib("MyLibrary.dll");
-        void* procAddr = shlib["myProcedure"];
+    typedef int (*MyFunc)();
 
-        typedef int (*MyProcType)();
-        MyProcType proc =(MyProcType)procAddr;
-        int result = proc();
+    Pt::System::Library library("MyLib");
+    
+    Pt::System::Symbol symbol = library.getSymbol("myFunction");
+
+    MyFunc func = reinterpret_cast<MyFunc>(symbol.sym());
+    int result = func();
     @endcode
+
+    The constructor of the %Library class will try to load the library at the
+    given path. If no library could be found, the path is extended by the
+    platform-specific library extension first, and then also by the shared
+    library prefix. If no library could be found at either path, an
+    @link Pt::System::AccessFailed AccessFailed@endlink exception is thrown.
+    The function @link Pt::System::Library::getSymbol getSymbol()@endlink
+    returns a @link Pt::System::Symbol Symbol@endlink object when the library
+    symbol could be resolved or a @link Pt::System::SymbolNotFound
+    SymbolNotFound@endlink exception, if the symbol name could not be found.
+    The actual address of the library symbol is returned by @link
+    Pt::System::Symbol::sym sym()@endlink. Alternatively, the index operator
+    can be used to load symbols, which will return the address of the symbol
+    as a pointer to void or a nullptr on failure. Note, that standard C++
+    does not allow to cast void pointers to function pointers, but nearly
+    all runtimes implement that as an extension.
 */
 class PT_SYSTEM_API Library
 {
