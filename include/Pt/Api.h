@@ -175,7 +175,7 @@
     %Pt's serialization. This is used within the framework to load and store
     data or to implement remote procedure calls. It is extensible to work with
     all kinds of types, including STL containers, PODs (plain old data types),
-    buitlin language types or custom data types. The framework separates the 
+    builtin language types or custom data types. The framework separates the 
     process of composing and decomposing types from the formatting stage,
     resulting in a two-phase serialization process. This also allows to resolve
     and fixup shared pointers or references. 
@@ -184,7 +184,7 @@
     decompose it to a SerializationInfo. The SerializationContext provides
     improved memory management, a mechanism to generate IDs for shared pointers
     and a way to further customize or override serialization for a type.
-    Alternatively, performance can be increased by implementing a Composers
+    Alternatively, performance can be increased by implementing a Composer
     or Decomposer for the type, however it is more complicated to do so.
     
     Various formats are supported by implementing Formatters. Other modules
