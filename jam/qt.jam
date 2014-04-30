@@ -9,8 +9,70 @@
 # Main qtest : qtest.cpp qtest.moc.cpp ;
 #
 
-QT_MOC ?= "moc" ;
+QT_DIR ?= ;
 
+###############################################################################
+# Configure moc
+###############################################################################
+QT_MOC ?= [ FDirName $(QT_DIR) "moc"$(SUFEXE) ] ;
+
+rule ConfigureMoc
+{
+    WITH_QT_MOC = [ CHECK_IF_FILE $(QT_MOC) ] ;
+ 
+    if ! $(WITH_QT_MOC)
+    {
+        EchoOption QT_MOC : "Qt moc" : $(QT_MOC) "not found" ;
+    }
+    else
+    {
+        Configure QT_MOC : $(QT_MOC) ;
+        EchoOption QT_MOC : "Qt moc" ;
+    }
+}
+
+###############################################################################
+# Configure uic
+###############################################################################
+QT_UIC ?= [ FDirName $(QT_DIR) "uic"$(SUFEXE) ] ;
+
+rule ConfigureUic
+{
+    WITH_QT_UIC = [ CHECK_IF_FILE $(QT_UIC) ] ;
+ 
+    if ! $(WITH_QT_UIC)
+    {
+        EchoOption QT_UIC : "Qt uic" : $(QT_UIC) "not found" ;
+    }
+    else
+    {
+        Configure QT_UIC : $(QT_UIC) ;
+        EchoOption QT_UIC : "Qt uic" ;
+    }
+}
+
+###############################################################################
+# Configure Qt
+###############################################################################
+
+rule ConfigureQt
+{
+    WITH_QT = ;
+
+    EchoOption QT_DIR : "Qt directory" ;
+
+    ConfigureMoc ;
+    ConfigureUic ;
+
+    if $(WITH_QT_MOC) && $(WITH_QT_UIC)
+    {
+        WITH_QT = yes ;
+    }
+}
+
+###############################################################################
+# Rules and Actions for moc
+###############################################################################
 rule Moc
 {
 	local _mocFile = [ FGristFiles $(<) ] ;
@@ -29,6 +91,9 @@ actions Moc1
 	$(QT_MOC) $(>) -o $(<)
 }
 
+###############################################################################
+# Rules and Actions for uic
+###############################################################################
 rule Uic
 {
 	local _headerFile = [ FGristFiles $(<) ] ;

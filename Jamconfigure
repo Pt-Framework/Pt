@@ -17,6 +17,19 @@ ConfigureCc ;
 ConfigureC++ ;
 
 #############################################################################
+# Qt support
+#############################################################################
+
+#Load qt.jam ;
+#
+#ConfigureQt ;
+#
+#if ! $(WITH_QT)
+#{
+#    Exit "ERROR: Qt installation is incomplete." ;
+#}
+
+#############################################################################
 # Output directories used by MakeLocate and SubDirObjects
 #############################################################################
 PT_OUTPUT_TARGET ?= [ FDirName $(PT_TOP) build $(CONFIG) ] ;

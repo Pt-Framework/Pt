@@ -18,7 +18,6 @@ MakeLocate SerializerBench : $(PT_OUTPUT_TARGET) ;
 
 #SubDirHdrs $(PT_TOP)/../Qt/4.8.4/include ;
 #
-#QT_MOC = $(PT_TOP)\\..\\Qt\\4.8.4\\bin\\moc ;
 #Load qt.jam ;
 #
 #Moc qtest.moc.cpp : qtest.h ;
