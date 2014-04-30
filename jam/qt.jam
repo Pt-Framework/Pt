@@ -1,0 +1,48 @@
+#
+# Runs the moc on header files containing class definitions to generate a
+# source file that has to be compiled with the other source files.
+#
+# Example usage:
+#
+# Moc qtest.moc.cpp : qtest.h ;
+#
+# Main qtest : qtest.cpp qtest.moc.cpp ;
+#
+
+QT_MOC ?= "moc" ;
+
+rule Moc
+{
+	local _mocFile = [ FGristFiles $(<) ] ;
+	local _header = $(>) ;
+
+	MakeLocate $(_mocFile) : $(LOCATE_SOURCE) ;
+	SEARCH on $(>) = $(SEARCH_SOURCE) ;
+	Depends $(_mocFile) : $(_header) ;
+	Moc1 $(_mocFile) : $(>) ;
+
+	Clean clean : $(_mocFile) ;
+}
+
+actions Moc1
+{
+	$(QT_MOC) $(>) -o $(<)
+}
+
+rule Uic
+{
+	local _headerFile = [ FGristFiles $(<) ] ;
+	local _uicFile = $(>) ;
+
+	MakeLocate $(_headerFile) : $(LOCATE_SOURCE) ;
+	SEARCH on $(>) = $(SEARCH_SOURCE) ;
+	Depends $(_headerFile) : $(_uicFile) ;
+	Uic1 $(_headerFile) : $(>) ;
+
+	Clean clean : $(_headerFile) ;
+}
+
+actions Uic1
+{
+	$(QT_UIC) $(>) -o $(<)
+}

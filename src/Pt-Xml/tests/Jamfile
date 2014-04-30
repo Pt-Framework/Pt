@@ -2,10 +2,7 @@ SubDir PT_TOP src Pt-Xml tests ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Xml ;
 
-#SubDirHdrs $(PT_TOP)/../Qt/4.8.4/include ;
-
-Main Pt-Xml-test : 
-                   XmlSerializerTest.cpp
+Main Pt-Xml-test : XmlSerializerTest.cpp
                    XmlTest.cpp
                    XmlWriterTest.cpp 
                    Pt-Xml-test.cpp ;
@@ -18,7 +15,15 @@ Main SerializerBench : SerializerBench.cpp ;
 LinkSharedLibraries SerializerBench : Pt-Xml Pt-Reflex Pt-System Pt-Unit Pt ;
 MakeLocate SerializerBench : $(PT_OUTPUT_TARGET) ;
 
-#Main qtest : qtest.cpp ;
+
+#SubDirHdrs $(PT_TOP)/../Qt/4.8.4/include ;
+#
+#QT_MOC = $(PT_TOP)\\..\\Qt\\4.8.4\\bin\\moc ;
+#Load qt.jam ;
+#
+#Moc qtest.moc.cpp : qtest.h ;
+#
+#Main qtest : qtest.cpp qtest.moc.cpp ;
 #LinkLibs qtest : QtCore4.lib ;
 #LinkFlags qtest : /LIBPATH:..\\Qt\\4.8.4\\lib ;
 #LinkSharedLibraries qtest : Pt-System  Pt ;

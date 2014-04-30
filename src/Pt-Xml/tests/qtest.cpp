@@ -1,11 +1,19 @@
+#include "qtest.h"
 
 #include <iostream>
 #include <sstream>
 #include <string>
+
 #include <QtCore/QString>
 #include <QtCore/QBuffer>
 #include <QtCore/QXmlStreamReader>
 #include <Pt/System/Clock.h>
+
+void MyObject::go()
+{
+  emit exec();
+}
+
 
 void runTest()
 {
@@ -51,8 +59,13 @@ void runTest()
     std::cerr << "parsed " << n << " nodes in " << ts.toMSecs()  << " msecs." << std::endl;
 }
 
+
 int main(int argc, char* argv[])
 {
+    MyObject mob;
+    QObject::connect(&mob, SIGNAL(exec()), &mob, SLOT(done()));
+    mob.go();
+
     for(unsigned n = 0; n < 10; ++n)
         runTest();
 
