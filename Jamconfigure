@@ -17,19 +17,6 @@ ConfigureCc ;
 ConfigureC++ ;
 
 #############################################################################
-# Qt support
-#############################################################################
-
-#Load qt.jam ;
-#
-#ConfigureQt ;
-#
-#if ! $(WITH_QT)
-#{
-#    Exit "ERROR: Qt installation is incomplete." ;
-#}
-
-#############################################################################
 # Output directories used by MakeLocate and SubDirObjects
 #############################################################################
 PT_OUTPUT_TARGET ?= [ FDirName $(PT_TOP) build $(CONFIG) ] ;
@@ -257,6 +244,35 @@ if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
     EchoOption FREETYPE_INCLUDES : "Builtin freetype library" ;
 }
 
+#############################################################################
+# Qt support
+#############################################################################
+
+if --with-qt5 in $(ARGV)
+{
+	Load qt.jam ;
+
+	ConfigureQt ;
+
+	if ! $(WITH_QT)
+	{
+		Exit "ERROR: Qt installation is incomplete." ;
+	}
+
+	Configure WITH_QT ;
+
+	QT_INCLUDES = $(QT_DIR)/include ;
+	EchoOption QT_INCLUDES : "Qt Includes" ;
+	Configure QT_INCLUDES ;
+
+	QT_LIBS = Qt5Cored.lib Qt5Widgetsd.lib ;
+	EchoOption QT_LIBS : "Qt Link Libraries" ;
+	Configure QT_LIBS ;
+
+	QT_LINKFLAGS = /LIBPATH:$(QT_DIR)\\lib ;
+	EchoOption QT_LINKFLAGS : "Qt Linker Flags" ;
+	Configure QT_LINKFLAGS ;
+}
 
 #############################################################################
 # GUI libraries and includes

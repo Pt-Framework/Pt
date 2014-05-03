@@ -1,0 +1,22 @@
+SubDir PT_TOP src Pt-Qt ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirHdrs $(PT_TOP)/src/Pt-System ;
+SubDirHdrs $(PT_TOP)/src/Pt-Qt/$(SYS:L) ;
+SubDirHdrs $(QT_INCLUDES) ;
+SubDirC++Flags [ FDefines PT_QT_API_EXPORT ] ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Qt ;
+
+Moc ApplicationImpl.moc.cpp : [ FDirName $(SYS:L) ApplicationImpl.h ] ;
+
+SharedLibrary Pt-Qt : ApplicationImpl.moc.cpp
+                      [ FDirName $(SYS:L) ApplicationImpl.cpp ]
+					  Application.cpp
+					  ;
+
+LinkSharedLibraries Pt-Qt : Pt Pt-System  ;
+LinkLibs Pt-Qt : $(QT_LIBS) ;
+LinkFlags Pt-Qt : $(QT_LINKFLAGS) ;
+MakeLocate Pt-Qt : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-Qt : $(PT_INSTALL_LIBDIR) ;
+
+SubInclude PT_TOP src Pt-Qt demo ;

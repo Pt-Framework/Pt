@@ -1,0 +1,10 @@
+SubDir PT_TOP src Pt-Qt demo ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirHdrs $(QT_INCLUDES) ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Qt ;
+
+Main qdemo : qdemo.cpp ;
+LinkSharedLibraries qdemo : Pt Pt-System Pt-Net Pt-Qt ;
+LinkLibs qdemo : $(QT_LIBS) ;
+LinkFlags qdemo : $(QT_LINKFLAGS) ;
+MakeLocate qdemo : $(PT_OUTPUT_TARGET) ;

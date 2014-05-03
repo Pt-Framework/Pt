@@ -157,7 +157,7 @@ void TcpSocket::connect(const Endpoint& addrinfo, const TcpSocketOptions& opts)
 void TcpSocket::beginConnect(const Endpoint& ep)
 {
     TcpSocketOptions opts;
-    return beginConnect(ep, opts);
+    beginConnect(ep, opts);
 }
 
 

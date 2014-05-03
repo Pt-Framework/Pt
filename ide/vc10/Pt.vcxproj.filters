@@ -103,6 +103,15 @@
     <Filter Include="Pt-Hmi\Sources\x11\winrt">
       <UniqueIdentifier>{0190cd64-c6e5-4b5d-ab0e-7d4e1a17e9c7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Qt">
+      <UniqueIdentifier>{c31af57f-7ea5-4c68-a740-78a87a46b63d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Qt\win32">
+      <UniqueIdentifier>{0a7459c6-effd-43f8-8c3b-447ce7d9e494}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Qt\demo">
+      <UniqueIdentifier>{8d34b6d2-4bcc-47a4-a86d-5b4fa4bde4d7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1338,6 +1347,15 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.h">
       <Filter>Pt-Hmi\Sources\cocoa</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Qt\Api.h">
+      <Filter>Pt-Qt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Qt\Application.h">
+      <Filter>Pt-Qt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Qt\win32\ApplicationImpl.h">
+      <Filter>Pt-Qt\win32</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1476,6 +1494,12 @@
     </None>
     <None Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.mm">
       <Filter>Pt-Hmi\Sources\cocoa</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Qt\Jamfile">
+      <Filter>Pt-Qt</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Qt\demo\Jamfile">
+      <Filter>Pt-Qt\demo</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -2513,6 +2537,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp">
       <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Qt\Application.cpp">
+      <Filter>Pt-Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Qt\win32\ApplicationImpl.cpp">
+      <Filter>Pt-Qt\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Qt\demo\qdemo.cpp">
+      <Filter>Pt-Qt\demo</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

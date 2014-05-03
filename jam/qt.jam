@@ -14,7 +14,7 @@ QT_DIR ?= ;
 ###############################################################################
 # Configure moc
 ###############################################################################
-QT_MOC ?= [ FDirName $(QT_DIR) "moc"$(SUFEXE) ] ;
+QT_MOC ?= [ FDirName $(QT_DIR) bin "moc"$(SUFEXE) ] ;
 
 rule ConfigureMoc
 {
@@ -34,7 +34,7 @@ rule ConfigureMoc
 ###############################################################################
 # Configure uic
 ###############################################################################
-QT_UIC ?= [ FDirName $(QT_DIR) "uic"$(SUFEXE) ] ;
+QT_UIC ?= [ FDirName $(QT_DIR) bin "uic"$(SUFEXE) ] ;
 
 rule ConfigureUic
 {
@@ -60,6 +60,7 @@ rule ConfigureQt
     WITH_QT = ;
 
     EchoOption QT_DIR : "Qt directory" ;
+	Configure QT_DIR : $(QT_DIR) ;
 
     ConfigureMoc ;
     ConfigureUic ;

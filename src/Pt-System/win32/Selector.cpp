@@ -201,6 +201,29 @@ DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bo
     return result - WAIT_OBJECT_0;
 }
 
+
+void Selector::runOverlapped()
+{
+    try
+    {
+        for( _current = _devices.first(); _current != 0; )
+        {
+            Selectable* dev = _current;
+            dev->run();
+
+            if(_current == dev)
+            {
+                _current = _current->next();
+            }
+        }
+    }
+    catch (...)
+    {
+        _current = 0;
+        throw;
+    }
+}
+
 }
 
 }

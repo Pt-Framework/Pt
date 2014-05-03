@@ -170,6 +170,14 @@ class PT_SYSTEM_API Selector
 
         bool waitForWake(size_t msecs);
 
+		HANDLE overlappedEvent()
+		{ return _ioEvent; }
+
+		HANDLE wakeEvent()
+		{ return _wakeEvent; }
+
+		void runOverlapped();
+
     protected:
         virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
 

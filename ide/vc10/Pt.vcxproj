@@ -174,6 +174,8 @@
     <ClInclude Include="..\..\include\Pt\PackPop.h" />
     <ClInclude Include="..\..\include\Pt\PageAllocator.h" />
     <ClInclude Include="..\..\include\Pt\PoolAllocator.h" />
+    <ClInclude Include="..\..\include\Pt\Qt\Api.h" />
+    <ClInclude Include="..\..\include\Pt\Qt\Application.h" />
     <ClInclude Include="..\..\include\Pt\RefCounted.h" />
     <ClInclude Include="..\..\include\Pt\Reflex\Api.h" />
     <ClInclude Include="..\..\include\Pt\Reflex\Argument.h" />
@@ -368,6 +370,7 @@
     <ClInclude Include="..\..\src\Pt-Net\win32\TcpServerImpl.h" />
     <ClInclude Include="..\..\src\Pt-Net\win32\TcpSocketImpl.h" />
     <ClInclude Include="..\..\src\Pt-Net\win32\UdpSocketImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Qt\win32\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Ssl\applessl\CertificateImpl.h" />
     <ClInclude Include="..\..\src\Pt-Ssl\applessl\CertificateStoreImpl.h" />
     <ClInclude Include="..\..\src\Pt-Ssl\applessl\Connection.h" />
@@ -453,6 +456,8 @@
     <None Include="..\..\src\Pt-Net\Jamfile" />
     <None Include="..\..\src\Pt-Net\tests\Jamfile" />
     <None Include="..\..\src\Pt-Net\tests\Makefile.am" />
+    <None Include="..\..\src\Pt-Qt\demo\Jamfile" />
+    <None Include="..\..\src\Pt-Qt\Jamfile" />
     <None Include="..\..\src\Pt-Reflex\Jamfile" />
     <None Include="..\..\src\Pt-Reflex\Makefile.am" />
     <None Include="..\..\src\Pt-Ssl\Jamfile" />
@@ -625,6 +630,9 @@
     <ClCompile Include="..\..\src\Pt-Net\win32\TcpServerImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\win32\TcpSocketImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\win32\UdpSocketImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Qt\Application.cpp" />
+    <ClCompile Include="..\..\src\Pt-Qt\demo\qdemo.cpp" />
+    <ClCompile Include="..\..\src\Pt-Qt\win32\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Reflex\GenericType.cpp" />
     <ClCompile Include="..\..\src\Pt-Reflex\tests\ReflectableTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Reflex\Type.cpp" />
@@ -825,7 +833,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Configured|Win32'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <IntDir>$(SolutionDir)</IntDir>
+    <IntDir>..\..\tmp</IntDir>
     <OutDir>$(SolutionDir)</OutDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -836,11 +844,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Configured|Win32'">
-    <NMakeBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -q -j4 -sPT_TOP=$(SolutionDir)..\..\</NMakeBuildCommandLine>
-    <NMakeCleanCommandLine>cd ..\.. &amp;&amp; jam.bat clean -sPT_TOP=$(SolutionDir)..\..\</NMakeCleanCommandLine>
-    <NMakeReBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -qa -j4 -sPT_TOP=$(SolutionDir)..\..\</NMakeReBuildCommandLine>
-    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath>$(SolutionDir)..\..\include</NMakeIncludeSearchPath>
+    <NMakeBuildCommandLine>cd ..\.. &amp;&amp; E:\atesion\Pt\jam.bat -q -j4 -sPT_TOP=$(SolutionDir)..\..\</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>cd ..\.. &amp;&amp; E:\atesion\Pt\jam.bat -qan clean</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>cd ..\.. &amp;&amp; E:\atesion\Pt\jam.bat -qa -j4 -sPT_TOP=$(SolutionDir)..\..\</NMakeReBuildCommandLine>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions); PT_QT_API_EXPORT</NMakePreprocessorDefinitions>
+    <NMakeIncludeSearchPath>$(SolutionDir)..\..\include;$(SolutionDir)..\..\src\Pt-Qt\win32\;$(QTDIR)\include</NMakeIncludeSearchPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
