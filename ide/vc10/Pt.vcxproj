@@ -833,7 +833,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Configured|Win32'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <IntDir>..\..\tmp</IntDir>
+    <IntDir>../../tmp</IntDir>
     <OutDir>$(SolutionDir)</OutDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -844,11 +844,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Configured|Win32'">
-    <NMakeBuildCommandLine>cd ..\.. &amp;&amp; E:\atesion\Pt\jam.bat -q -j4 -sPT_TOP=$(SolutionDir)..\..\</NMakeBuildCommandLine>
-    <NMakeCleanCommandLine>cd ..\.. &amp;&amp; E:\atesion\Pt\jam.bat -qan clean</NMakeCleanCommandLine>
-    <NMakeReBuildCommandLine>cd ..\.. &amp;&amp; E:\atesion\Pt\jam.bat -qa -j4 -sPT_TOP=$(SolutionDir)..\..\</NMakeReBuildCommandLine>
+    <NMakeBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -q -j2 -sPT_TOP=$(SolutionDir)..\..\</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>cd ..\.. &amp;&amp; jam.bat clean</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -qa -j2 -sPT_TOP=$(SolutionDir)..\..\</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions); PT_QT_API_EXPORT</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath>$(SolutionDir)..\..\include;$(SolutionDir)..\..\src\Pt-Qt\win32\;$(QTDIR)\include</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(SolutionDir)..\..\include;$(SolutionDir)..\..\src\Pt-System\win32\;$(SolutionDir)..\..\src\Pt-Qt\win32\;$(QTDIR)\include</NMakeIncludeSearchPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>

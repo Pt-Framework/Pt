@@ -104,6 +104,8 @@ void Selector::enableOverlapped(IOHandle& ioh)
     Selectable* s = ioh.sel;
 
     ioh.setHandle(_ioEvent);
+
+    // move from _selectables to _devices
      _devices.insert(*s);
 }
 
@@ -119,7 +121,31 @@ void Selector::disableOverlapped(IOHandle& ioh)
         _current = _current->next();
     }
 
-     _selectables.insert(*s);
+    // move from _devices to _selectables
+    _selectables.insert(*s);
+}
+
+
+void Selector::runOverlapped()
+{
+    try
+    {
+        for( _current = _devices.first(); _current != 0; )
+        {
+            Selectable* dev = _current;
+            dev->run();
+
+            if(_current == dev)
+            {
+                _current = _current->next();
+            }
+        }
+    }
+    catch (...)
+    {
+        _current = 0;
+        throw;
+    }
 }
 
 
@@ -199,29 +225,6 @@ DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bo
     }
 
     return result - WAIT_OBJECT_0;
-}
-
-
-void Selector::runOverlapped()
-{
-    try
-    {
-        for( _current = _devices.first(); _current != 0; )
-        {
-            Selectable* dev = _current;
-            dev->run();
-
-            if(_current == dev)
-            {
-                _current = _current->next();
-            }
-        }
-    }
-    catch (...)
-    {
-        _current = 0;
-        throw;
-    }
 }
 
 }

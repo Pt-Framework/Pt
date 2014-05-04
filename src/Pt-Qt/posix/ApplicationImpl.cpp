@@ -1,5 +1,4 @@
 /* Copyright (C) 2014 Marc Boris Dürner
- * Copyright (C) 2014 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -41,7 +40,7 @@ ApplicationImpl::ApplicationImpl(int argc, char** argv)
 , _wakeNotifier( _selector.wakeEvent() )
 {
     connect(&_overlappedNotifier, SIGNAL(activated(HANDLE)), this, SLOT(onOverlapped(HANDLE)));
-    connect(&_wakeNotifier, SIGNAL(activated(HANDLE)), this, SLOT(onWake(HANDLE)));
+    connect(&_wakeNotifier, SIGNAL(activated(int)), this, SLOT(onWake(int)));
     connect(&_masterTimer, SIGNAL(timeout()), this, SLOT(processTimers()));
 
     _masterTimer.setSingleShot(true);
@@ -71,8 +70,13 @@ void ApplicationImpl::onOverlapped(HANDLE)
 }
 
 
-void ApplicationImpl::onWake(HANDLE)
+void ApplicationImpl::onWake(int fd)
 {
+    bool isReady = _selector.isWoken();
+
+    if( ! isReady )
+        return;
+
     while( true )
     {
         Pt::System::MutexLock lock(_mutex);

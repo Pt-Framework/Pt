@@ -1,5 +1,5 @@
-/* Copyright (C) 2013 Marc Boris Dürner
- * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2014 Marc Boris Dürner
+ * Copyright (C) 2014 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,110 +23,43 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #ifndef Pt_Qt_ApplicationImpl_h
 #define Pt_Qt_ApplicationImpl_h
 
 #include <win32/Selector.h>
 #include <Pt/Qt/Api.h>
-#include <Pt/Signal.h>
 #include <Pt/System/EventLoop.h>
 #include <QtWidgets/QApplication>
 #include <QtCore/QWinEventNotifier>
 #include <QtCore/QTimer>
 #include <vector>
-#include <Windows.h>
 
 namespace Pt {
+
 namespace Qt {
 
-class ApplicationImpl;
-
-class OverlappedHandler : public QObject 
+class ApplicationImpl : public QApplication
+                      , public System::EventLoop 
 {
-	Q_OBJECT
+    Q_OBJECT
 
-	public:
-		OverlappedHandler(ApplicationImpl* impl = 0)
-		: _impl(impl)
-		{}
-
-		void init(ApplicationImpl* impl)
-		{ 
-			_impl = impl; 
-		}
-
-	public slots:
-		void onReady(HANDLE h);
-
-	private:
-		ApplicationImpl* _impl;
-};
-
-class WakeHandler : public QObject 
-{
-	Q_OBJECT
-
-	public:
-		WakeHandler(ApplicationImpl* impl = 0)
-		: _impl(impl)
-		{}
-
-		void init(ApplicationImpl* impl)
-		{ 
-			_impl = impl; 
-		}
-
-	public slots:
-		void onReady(HANDLE h);
-
-	private:
-		ApplicationImpl* _impl;
-};
-
-class TimerHandler : public QObject 
-{
-	Q_OBJECT
-
-	public:
-		TimerHandler(ApplicationImpl* impl = 0)
-		: _impl(impl)
-		{}
-
-		void init(ApplicationImpl* impl)
-		{ 
-			_impl = impl; 
-		}
-
-	public slots:
-		void onReady();
-
-	private:
-		ApplicationImpl* _impl;
-};
-
-class ApplicationImpl : public Pt::System::EventLoop 
-{
     public:
-        ApplicationImpl(Signal<const Pt::Event&>& eventSignal);
+        ApplicationImpl(int argc, char** argv);
 
         virtual ~ApplicationImpl();
 
         Pt::System::Selector& selector()
-        { 
-			return _selector; 
-		}
+        { return _selector; }
 
-		inline void init(QApplication* qapp)
-		{
-			_qapp = qapp;
-		}
+    public slots:
+        void onOverlapped(HANDLE h);
 
-		void onOverlapped(HANDLE h);
+        void onWake(HANDLE h);
 
-		void onWake(HANDLE h);
-
-		void processTimers();
+        void processTimers();
    
     protected:
         virtual void onAttachSelectable(System::Selectable&);
@@ -141,9 +74,9 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         virtual void onExit();
 
-        virtual void onCommitEvent(const Pt::Event& event);
+        virtual void onCommitEvent(const Pt::Event& ev);
 
-        virtual void onQueueEvent(const Pt::Event& event);
+        virtual void onQueueEvent(const Pt::Event& ev);
 
         virtual void onWake();
 
@@ -152,24 +85,18 @@ class ApplicationImpl : public Pt::System::EventLoop
         virtual void onDetachTimer(System::Timer& timer);
 
     private:
-		Signal<const Pt::Event&>& _event;
-		OverlappedHandler _ovhandler;
-		WakeHandler _wakeHandler;
-		TimerHandler _timerHandler;
-		Pt::System::Selector _selector;
-		QWinEventNotifier _notifier;
-		QWinEventNotifier _notifier2;
-		QTimer _masterTimer;
+        Pt::System::Selector _selector;
+        QWinEventNotifier _overlappedNotifier;
+        QWinEventNotifier _wakeNotifier;
+        QTimer _masterTimer;
         System::Mutex _mutex;
         System::TimerQueue _timerQueue;
         System::EventQueue _eventQueue;
         std::vector<System::Selectable*> _avail;
-		QApplication* _qapp;
 };
 
-}
+} // namespace
 
-}
+} // namespace
 
 #endif
-

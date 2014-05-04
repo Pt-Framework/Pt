@@ -152,7 +152,7 @@ class PT_SYSTEM_API Selector
     public:
         Selector();
         
-        ~Selector();
+        virtual ~Selector();
 
         void wake();
 
@@ -163,6 +163,8 @@ class PT_SYSTEM_API Selector
         void enableOverlapped(IOHandle& s);
 
         void disableOverlapped(IOHandle& s);
+
+        void runOverlapped();
 
         void enable(IOHandle& handle);
 
@@ -175,8 +177,6 @@ class PT_SYSTEM_API Selector
 
 		HANDLE wakeEvent()
 		{ return _wakeEvent; }
-
-		void runOverlapped();
 
     protected:
         virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
