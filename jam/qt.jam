@@ -14,15 +14,29 @@
 ###############################################################################
 rule ConfigureMoc
 {
-    QT_MOC ?= [ FDirName $(QTDIR) bin "moc"$(SUFEXE) ] ;
-    EchoOption QT_MOC : "Qt moc tool" : $(QT_MOC)  ;
+    QT_MOC ?= moc ;
 
-    WITH_QT_MOC = [ CHECK_IF_FILE $(QT_MOC) ] ;
-    if $(WITH_QT_MOC)
+    ConfigureLog "\n[ ConfigureMoc ]" ;
+    
+    local _in = check.h ;
+    local _out = check.moc.cpp ;
+    local _src = "#include <QtCore/QObject>\nclass moctest : public QObject{ Q_OBJECT };\n" ;
+    ConfigureLog $(_src) ;
+
+    WriteFile $(_in) : $(_src) ;
+    local _cmd = $(QT_MOC) $(_in) -o $(_out) ;
+    WITH_QT_MOC = [ TryCommand $(_cmd) ] ;
+
+    if ! $(WITH_QT_MOC)
     {
-        WITH_QT_MOC = yes ;
+        QT_MOC = [ FDirName $(QTDIR) bin $(QT_MOC) ] ;
+        WITH_QT_MOC = [ TryCommand $(_cmd) ] ;
     }
+    
+    TryCommand $(RM) $(_in) ;
+    TryCommand $(RM) $(_out) ;
 
+    EchoOption QT_MOC : "Qt moc tool" : $(QT_MOC) ;
     EchoOption WITH_QT_MOC : "Qt moc support" : $(WITH_QT_MOC:E="no")  ;
  
     if $(WITH_QT_MOC)

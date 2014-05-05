@@ -259,19 +259,28 @@ if --with-qt5 in $(ARGV)
     EchoOption QT_LIBDIR : "Qt Library Directory" ;
     Configure QT_LIBDIR ;
 
-    WITH_QT = [ CheckBuildC++ "#include <QtWidgets/QPushButton>"
-                              "int main() { QPushButton button; return 0; }"
-                             : [ FIncludes $(QT_INCLUDES) ]
-                             : Qt5Cored.lib Qt5Widgetsd.lib Qt5guid.lib
-                             : $(QT_LIBDIR) ] ;
-
-    if $(WITH_QT)
+    #
+    # Windows
+    #
+    if ! $(WITH_QT)
     {
-        QT_CORE_LIBS = Qt5Cored.lib ;
-        QT_WIDGETS_LIBS = Qt5Widgetsd.lib ;
-        QT_LINKFLAGS = /LIBPATH:$(QTDIR)\\lib ;
+        WITH_QT = [ CheckBuildC++ "#include <QtWidgets/QPushButton>"
+                                  "int main() { QPushButton button; return 0; }"
+                                 : [ FIncludes $(QT_INCLUDES) ]
+                                 : Qt5Cored.lib Qt5Widgetsd.lib Qt5Guid.lib
+                                 : $(QT_LIBDIR) ] ;
+
+        if $(WITH_QT)
+        {
+            QT_CORE_LIBS = Qt5Cored.lib ;
+            QT_WIDGETS_LIBS = Qt5Widgetsd.lib ;
+            QT_LINKFLAGS = /LIBPATH:$(QTDIR)\\lib ;
+        }
     }
 
+    #
+    # Unix
+    #
     if ! $(WITH_QT)
     {
         WITH_QT = [ CheckBuildC++ "#include <QtWidgets/QPushButton>"
@@ -287,6 +296,9 @@ if --with-qt5 in $(ARGV)
         }
     }
 
+    #
+    # Linaro
+    #
     if ! $(WITH_QT)
     {
         QT_LIBDIR_PRIVATE = [ FDirName $(TOOLSET_ROOT:D) .. lib ] ;
@@ -302,7 +314,6 @@ if --with-qt5 in $(ARGV)
         {
             QT_CORE_LIBS = -lQt5Core ;
             QT_WIDGETS_LIBS = -lQt5Widgets -lQt5Gui -lGLESv2 -lPVRScopeServices -lIMGegl -lsrv_um -ldrm -ldrm_omap -lwayland-server -lffi ;
-
             QT_LINKFLAGS = -L$(QT_LIBDIR) -L$(QT_LIBDIR_PRIVATE) ;
         }
     }
@@ -332,7 +343,7 @@ if --with-qt5 in $(ARGV)
 
     ConfigureMoc ;
 
-    if ! $(QT_MOC)
+    if ! $(WITH_QT_MOC)
     {
         Exit "ERROR: Qt moc tool not found." ;
     }
