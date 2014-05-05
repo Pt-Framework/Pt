@@ -259,11 +259,11 @@ if --with-qt5 in $(ARGV)
     EchoOption QT_LIBDIR : "Qt Library Directory" ;
     Configure QT_LIBDIR ;
 
-    WITH_QT = [ CheckBuildC++ "#include <QtCore/QtCore>"
-                                  "int main() { QString str; return 0; }"
-                                : [ FIncludes $(QT_INCLUDES) ]
-                                : Qt5Cored.lib 
-                                : $(QT_LIBDIR) ] ;
+    WITH_QT = [ CheckBuildC++ "#include <QtWidgets/QPushButton>"
+                              "int main() { QPushButton button; return 0; }"
+                             : [ FIncludes $(QT_INCLUDES) ]
+                             : Qt5Cored.lib Qt5Widgetsd.lib Qt5guid.lib
+                             : $(QT_LIBDIR) ] ;
 
     if $(WITH_QT)
     {
@@ -274,16 +274,36 @@ if --with-qt5 in $(ARGV)
 
     if ! $(WITH_QT)
     {
-        WITH_QT = [ CheckBuildC++ "#include <QtCore/QtCore>"
-                                      "int main() { QString str; return 0; }"
-                                    : [ FIncludes $(QT_INCLUDES) ]
-                                    : -lQt5Core 
-                                    : $(QT_LIBDIR) ] ;
+        WITH_QT = [ CheckBuildC++ "#include <QtWidgets/QPushButton>"
+                                  "int main() { QPushButton button; return 0; }"
+                                 : [ FIncludes $(QT_INCLUDES) ]
+                                 : -lQt5Core -lQt5Widgets -lQt5Gui
+                                 : $(QT_LIBDIR) ] ;
 
         if $(WITH_QT)
         {
-            QT_LIBS = -lQt5Core -lQt5Widgets ;
-            QT_LINKFLAGS = -L$(QT_LIBDIR) ;
+            QT_CORE_LIBS = -lQt5Core ;
+            QT_WIDGETS_LIBS = -lQt5Widgets -lQt5Gui ;
+        }
+    }
+
+    if ! $(WITH_QT)
+    {
+        QT_LIBDIR_PRIVATE = [ FDirName $(TOOLSET_ROOT:D) .. lib ] ;
+        QT_LIBDIR_PRIVATE += [ FDirName $(TOOLSET_ROOT:D) .. lib arm-linux-gnueabihf ] ;
+
+        WITH_QT = [ CheckBuildC++ "#include <QtWidgets/QPushButton>"
+                                  "int main() { QPushButton button; return 0; }"
+                                 : [ FIncludes $(QT_INCLUDES) ]
+                                 : -lQt5Core -lQt5Widgets -lQt5Gui -lGLESv2 -lPVRScopeServices -lIMGegl -lsrv_um -ldrm -ldrm_omap -lwayland-server -lffi 
+                                 : $(QT_LIBDIR) $(QT_LIBDIR_PRIVATE) ] ;
+
+        if $(WITH_QT)
+        {
+            QT_CORE_LIBS = -lQt5Core ;
+            QT_WIDGETS_LIBS = -lQt5Widgets -lQt5Gui -lGLESv2 -lPVRScopeServices -lIMGegl -lsrv_um -ldrm -ldrm_omap -lwayland-server -lffi ;
+
+            QT_LINKFLAGS = -L$(QT_LIBDIR) -L$(QT_LIBDIR_PRIVATE) ;
         }
     }
 
