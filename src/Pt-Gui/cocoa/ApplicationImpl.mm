@@ -326,6 +326,7 @@ void MainLoop::cancel(System::IOHandle& h)
     _iotable.resize(_iotable.size() -1);
 
     h.ready = 0;
+    h.events = 0;
 }
 
 

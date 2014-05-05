@@ -1,4 +1,5 @@
-/* Copyright (C) 2014 Marc Boris Dürner
+/* 
+ * Copyright (C) 2014 Marc Boris Dürner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,13 +35,11 @@ namespace Pt {
 namespace Qt {
 
 ApplicationImpl::ApplicationImpl(int argc, char** argv)
-: Pt::System::EventLoop()
-, QApplication(argc, argv)
-, _overlappedNotifier( _selector.overlappedEvent() )
-, _wakeNotifier( _selector.wakeEvent() )
+: QApplication(argc, argv)
+, Pt::System::EventLoop()
+, _wakeNotifier( _selector.wakeFd(), QSocketNotifier::Read )
 {
-    connect(&_overlappedNotifier, SIGNAL(activated(HANDLE)), this, SLOT(onOverlapped(HANDLE)));
-    connect(&_wakeNotifier, SIGNAL(activated(int)), this, SLOT(onWake(int)));
+    connect(&_wakeNotifier, SIGNAL(activated(int)), this, SLOT(onWakeNotify(int)));
     connect(&_masterTimer, SIGNAL(timeout()), this, SLOT(processTimers()));
 
     _masterTimer.setSingleShot(true);
@@ -61,39 +60,6 @@ void ApplicationImpl::onAttachSelectable(System::Selectable& s)
 void ApplicationImpl::onDetachSelectable(System::Selectable& s)
 { 
     _selector.detach(s); 
-}
-
-
-void ApplicationImpl::onOverlapped(HANDLE)
-{
-    _selector.runOverlapped();
-}
-
-
-void ApplicationImpl::onWake(int fd)
-{
-    bool isReady = _selector.isWoken();
-
-    if( ! isReady )
-        return;
-
-    while( true )
-    {
-        Pt::System::MutexLock lock(_mutex);
-
-        if( _avail.empty() )
-            break;
-
-        System::Selectable* s = _avail.back();
-        _avail.pop_back();
-        lock.unlock();
-
-        s->run();
-    }
-
-    bool isActive = _eventQueue.processEvents( this->eventReceived() );
-    if( ! isActive )
-        QApplication::quit();
 }
 
 
@@ -118,7 +84,7 @@ void ApplicationImpl::onReady(System::Selectable& s)
     _avail.push_back(&s);
 
     // this is not neccessary if we can check _avail before the
-    // Qaaplication starts to wait on the handles
+    // QApplication starts to wait on the handles
     _selector.wake();
 }
 
@@ -166,6 +132,33 @@ void ApplicationImpl::onDetachTimer(System::Timer& timer )
 { 
     _timerQueue.removeTimer(timer);
     this->processTimers();
+}
+
+
+void ApplicationImpl::onWakeNotify(int fd)
+{
+    bool isReady = _selector.isWoken();
+
+    if( ! isReady )
+        return;
+
+    while( true )
+    {
+        Pt::System::MutexLock lock(_mutex);
+
+        if( _avail.empty() )
+            break;
+
+        System::Selectable* s = _avail.back();
+        _avail.pop_back();
+        lock.unlock();
+
+        s->run();
+    }
+
+    bool isActive = _eventQueue.processEvents( this->eventReceived() );
+    if( ! isActive )
+        QApplication::quit();
 }
 
 

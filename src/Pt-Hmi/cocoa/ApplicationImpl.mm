@@ -76,7 +76,6 @@ void MainLoopImplOnTimer(CFRunLoopTimerRef timer, void *p)
 void MainLoopImplOnFd(CFFileDescriptorRef f, CFOptionFlags flags, void *p)
 {
     System::IOHandle* h = reinterpret_cast<System::IOHandle*>(p);
-    std::cout<<"IOHandle"<<std::hex<<(long long)h<<std::endl;
 
     if(flags & kCFFileDescriptorReadCallBack)
     {
@@ -335,6 +334,7 @@ void ApplicationImpl::cancel(System::IOHandle& h)
     _iotable.resize(_iotable.size() -1);
 
     h.ready = 0;
+    h.events = 0;
 }
 
 ApplicationImpl::IOEntry& ApplicationImpl::enableIOHandle(System::IOHandle* h)

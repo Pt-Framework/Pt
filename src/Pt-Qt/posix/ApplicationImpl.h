@@ -1,4 +1,5 @@
-/* Copyright (C) 2014 Marc Boris Dürner
+/* 
+ * Copyright (C) 2014 Marc Boris Dürner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,6 +30,7 @@
 #define Pt_Qt_ApplicationImpl_h
 
 #include <posix/Selector.h>
+#include <posix/../SelectableList.h>
 #include <Pt/Qt/Api.h>
 #include <Pt/System/EventLoop.h>
 #include <QtWidgets/QApplication>
@@ -40,17 +42,72 @@ namespace Pt {
 
 namespace Qt {
 
+class IONotifier : public QObject
+{
+    Q_OBJECT
+
+    public:
+        IONotifier(System::IOHandle& h)
+        : _h(&h)
+        , _readNotifier(h.fd, QSocketNotifier::Read)
+        , _writeNotifier(h.fd, QSocketNotifier::Write)
+        { 
+            _readNotifier.setEnabled(false);
+            connect(&_readNotifier, SIGNAL(activated(int)), this, SLOT(onRead(int)));
+
+            _writeNotifier.setEnabled(false);
+            connect(&_writeNotifier, SIGNAL(activated(int)), this, SLOT(onWrite(int)));
+        }
+
+        void enableRead()
+        { _readNotifier.setEnabled(true); }
+
+        void disableRead()
+        { _readNotifier.setEnabled(false); }
+
+        void enableWrite()
+        { _writeNotifier.setEnabled(true); }
+
+        void disableWrite()
+        { _writeNotifier.setEnabled(false); }
+
+    public slots:
+        void onRead(int)
+        {
+            _h->events &= ~System::IOHandle::Read;
+            _h->ready = System::IOHandle::Read;
+
+            System::Selectable* s = _h->sel;
+            s->run();
+        }
+
+        void onWrite(int)
+        {
+            _h->events &= ~System::IOHandle::Write;
+            _h->ready = System::IOHandle::Write;
+
+            System::Selectable* s = _h->sel;
+            s->run();
+        }
+
+    private:
+        System::IOHandle* _h;
+        QSocketNotifier _readNotifier;
+        QSocketNotifier _writeNotifier;
+};
+
+
 class QtSelector : public QObject
                  , public System::Selector
 {
     Q_OBJECT
 
     public:
-        SelectorImpl()
+        QtSelector()
         : _current(0)
         { }
 
-        ~SelectorImpl()
+        ~QtSelector()
         {         
             while( ! _selectables.empty() )
             {
@@ -58,68 +115,101 @@ class QtSelector : public QObject
             }
         }
 
-        void attach(Selectable& s)
+        void attach(System::Selectable& s)
         {
             _selectables.insert(s);
         }
         
-        void detach(Selectable& s)
+        void detach(System::Selectable& s)
         {
-            SelectableList::unlink(s);
+            System::SelectableList::unlink(s);
         }
 
-        void cancel(IOHandle& h)
+        void cancel(System::IOHandle& h)
         {
+            if(h.id == System::IOHandle::InvalidId)
+                return;
+
             IOMap::iterator it = _iomap.find(&h);
             if( it != _iomap.end() )
             {
                 delete it->second;
                 _iomap.erase(it);
             }
+
+            h.id = System::IOHandle::InvalidId;
+            h.ready = 0;
+            h.events = 0;
         }
-
-        void beginRead(IOHandle* h)
+        
+        IONotifier& getNotifier(System::IOHandle* h)
         {
-            QSocketNotifier* notifier = new QSocketSotifier(h->fd, QSocketNotifier::Read);
-            _iomap[h] = notifier;
-
-            // connect to slot which calls run
-        }
-
-        void endRead(IOHandle* h)
-        {
-            IOMap::iterator it = _iomap.find(h);
-            if( it != _iomap.end() )
+            if(h->id == System::IOHandle::InvalidId)
             {
-                delete it->second;
-                _iomap.erase(it);
+                IONotifier* notifier = new IONotifier(*h);
+                _iomap[h] = notifier;
+                h->id = 1;
+                return *notifier;
             }
+
+            return *_iomap[h];
+        }
+        
+        void beginRead(System::IOHandle* h)
+        {
+            IONotifier& notifier = getNotifier(h);
+
+            notifier.enableRead();
+            h->events = System::IOHandle::Read;
         }
 
-        void beginWrite(IOHandle* h)
+        void endRead(System::IOHandle* h)
         {
-            enableSelect(h);
-            FD_SET(h->fd, &_wfds);
+            if(h->events & System::IOHandle::Read)
+            {
+                 IONotifier& notifier = getNotifier(h);
+                 notifier.disableRead();
+            }
+
+            h->ready = 0;
+            h->events &= ~System::IOHandle::Read;
         }
 
-        void endWrite(IOHandle* h)
+        void beginWrite(System::IOHandle* h)
         {
-            FD_CLR( h->fd, &_wfds );
+            IONotifier& notifier = getNotifier(h);
+
+            notifier.enableWrite();
+            h->events = System::IOHandle::Write;
         }
 
-        bool isReadable(IOHandle* h)
+        void endWrite(System::IOHandle* h)
         {
-            return FD_ISSET(h->fd, &_rfdsOut);
+            if(h->events & System::IOHandle::Write)
+            {
+                 IONotifier& notifier = getNotifier(h);
+                 notifier.disableWrite();
+            }
+
+            h->ready = 0;
+            h->events &= ~System::IOHandle::Write;
         }
 
-        bool isWritable(IOHandle* h)
+        bool isReadable(System::IOHandle* h)
         {
-            return FD_ISSET(h->fd, &_wfdsOut);
+            bool isReady = h->ready == System::IOHandle::Read;
+            return isReady;
         }
 
-        bool isError(IOHandle* h)
+        bool isWritable(System::IOHandle* h)
         {
-            return FD_ISSET(h->fd, &_efdsOut);
+            bool isReady = h->ready == System::IOHandle::Write;
+            return isReady;
+        }
+
+        bool isError(System::IOHandle* h)
+        {
+            return false;
         }
 
         void wake()
@@ -128,15 +218,18 @@ class QtSelector : public QObject
         }
 
         bool isWoken()
-        { _wakePipe.isReady(); }
+        { return _wakePipe.isReady(); }
 
-        typedef std::map<IOHandle*, QSocketNotifier*> IOMap;
+        int wakeFd()
+        { return _wakePipe.readFd(); }
+
+        typedef std::map<System::IOHandle*, IONotifier*> IOMap;
 
     private:
-        WakePipe _wakePipe;
-        SelectableList _selectables;
+        System::WakePipe _wakePipe;
+        System::SelectableList _selectables;
         IOMap _iomap;
-        Selectable* _current;
+        System::Selectable* _current;
 };
 
 class ApplicationImpl : public QApplication
@@ -151,13 +244,6 @@ class ApplicationImpl : public QApplication
 
         Pt::System::Selector& selector()
         { return _selector; }
-
-    public slots:
-        void onOverlapped(HANDLE h);
-
-        void onWake(int fd);
-
-        void processTimers();
    
     protected:
         virtual void onAttachSelectable(System::Selectable&);
@@ -182,10 +268,14 @@ class ApplicationImpl : public QApplication
 
         virtual void onDetachTimer(System::Timer& timer);
 
+    public slots:
+        void onWakeNotify(int fd);
+
+        void processTimers();
+
     private:
         QtSelector _selector;
-        QWinEventNotifier _overlappedNotifier;
-        QsocketNotifier _wakeNotifier;
+        QSocketNotifier _wakeNotifier;
         QTimer _masterTimer;
         System::Mutex _mutex;
         System::TimerQueue _timerQueue;
