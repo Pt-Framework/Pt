@@ -34,7 +34,7 @@ namespace Pt {
 
 namespace Qt {
 
-ApplicationImpl::ApplicationImpl(int argc, char** argv)
+ApplicationImpl::ApplicationImpl(int& argc, char** argv)
 : Pt::System::EventLoop()
 , QApplication(argc, argv)
 , _overlappedNotifier( _selector.overlappedEvent() )

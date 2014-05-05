@@ -238,7 +238,7 @@ class ApplicationImpl : public QApplication
     Q_OBJECT
 
     public:
-        ApplicationImpl(int argc, char** argv);
+        ApplicationImpl(int& argc, char** argv);
 
         virtual ~ApplicationImpl();
 

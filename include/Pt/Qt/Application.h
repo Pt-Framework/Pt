@@ -44,7 +44,7 @@ class ApplicationImpl;
 class PT_QT_API Application : public Pt::System::Application
 {
     public:
-        Application(int argc = 0, char** argv = 0);
+        Application(int& argc, char** argv);
         
         virtual ~Application();
 

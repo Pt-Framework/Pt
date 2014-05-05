@@ -35,10 +35,12 @@ namespace Pt {
 
 namespace Qt {
 
-Application::Application(int argc, char** argv)
-: System::Application(0, argc, argv)
+Application::Application(int& argc, char** argv)
+: System::Application(0)
 , _impl(0) 
-{     
+{
+    // pass a copy of argc/argv to QApplication
+
     _impl =  new ApplicationImpl(argc, argv);
     Pt::System::Application::init( *_impl );
 }

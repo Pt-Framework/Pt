@@ -34,7 +34,7 @@ namespace Pt {
 
 namespace Qt {
 
-ApplicationImpl::ApplicationImpl(int argc, char** argv)
+ApplicationImpl::ApplicationImpl(int& argc, char** argv)
 : QApplication(argc, argv)
 , Pt::System::EventLoop()
 , _wakeNotifier( _selector.wakeFd(), QSocketNotifier::Read )
