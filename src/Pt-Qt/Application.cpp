@@ -36,7 +36,7 @@ namespace Pt {
 namespace Qt {
 
 Application::Application(int& argc, char** argv)
-: System::Application(0)
+: System::Application(0, 0, 0)
 , _impl(0) 
 {
     // pass a copy of argc/argv to QApplication

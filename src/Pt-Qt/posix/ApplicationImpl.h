@@ -108,7 +108,7 @@ class QtSelector : public QObject
         { }
 
         ~QtSelector()
-        {         
+        {
             while( ! _selectables.empty() )
             {
                 _selectables.first()->detach();

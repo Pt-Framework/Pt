@@ -32,7 +32,6 @@
 
 #include <Pt/Qt/Api.h>
 #include <Pt/System/Application.h>
-#include <Pt/Singleton.h>
 #include <QtWidgets/QApplication>
 
 namespace Pt {
