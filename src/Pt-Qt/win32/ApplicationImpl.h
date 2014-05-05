@@ -85,7 +85,6 @@ class ApplicationImpl : public QApplication
         virtual void onDetachTimer(System::Timer& timer);
 
     private:
-        Pt::System::Selector _selector;
         QWinEventNotifier _overlappedNotifier;
         QWinEventNotifier _wakeNotifier;
         QTimer _masterTimer;
@@ -93,6 +92,7 @@ class ApplicationImpl : public QApplication
         System::TimerQueue _timerQueue;
         System::EventQueue _eventQueue;
         std::vector<System::Selectable*> _avail;
+        Pt::System::Selector _selector;
 };
 
 } // namespace

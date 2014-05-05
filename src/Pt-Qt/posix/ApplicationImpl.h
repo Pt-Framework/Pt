@@ -274,13 +274,13 @@ class ApplicationImpl : public QApplication
         void processTimers();
 
     private:
-        QtSelector _selector;
         QSocketNotifier _wakeNotifier;
         QTimer _masterTimer;
         System::Mutex _mutex;
         System::TimerQueue _timerQueue;
         System::EventQueue _eventQueue;
         std::vector<System::Selectable*> _avail;
+        QtSelector _selector;
 };
 
 } // namespace
