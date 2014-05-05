@@ -35,9 +35,9 @@
 #include <iostream>
 
 const char request[] = "GET / HTTP/1.1\r\n"
-                      "Host: www.google.de\r\n"
-                      "Connection: close\r\n"
-                      "\r\n";
+                       "Host: www.google.de\r\n"
+                       "Connection: close\r\n"
+                       "\r\n";
 
 char reply[1000];
 
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     socket.beginConnect(ep);
 
     Pt::System::Timer timer;
-    timer.setActive(app.loop());
+    timer.setActive( app.loop() );
     timer.start(5000);
     timer.timeout() += Pt::slot( &onTimer );
     timer.timeout() += Pt::slot( app, &Pt::System::Application::exit );

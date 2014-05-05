@@ -251,31 +251,71 @@ if --with-qt5 in $(ARGV)
 {
     Load qt.jam ;
 
-    ConfigureQt ;
+    QT_INCLUDES ?= [ FDirName $(QTDIR) include ] ;
+    EchoOption QT_INCLUDES : "Qt Include Directory" ;
+    Configure QT_INCLUDES ;
+
+    QT_LIBDIR ?= [ FDirName $(QTDIR) lib ] ;
+    EchoOption QT_LIBDIR : "Qt Library Directory" ;
+    Configure QT_LIBDIR ;
+
+    WITH_QT = [ CheckBuildC++ "#include <QtCore/QtCore>"
+                                  "int main() { QString str; return 0; }"
+                                : [ FIncludes $(QT_INCLUDES) ]
+                                : Qt5Cored.lib 
+                                : $(QT_LIBDIR) ] ;
+
+    if $(WITH_QT)
+    {
+        QT_CORE_LIBS = Qt5Cored.lib ;
+        QT_WIDGETS_LIBS = Qt5Widgetsd.lib ;
+        QT_LINKFLAGS = /LIBPATH:$(QTDIR)\\lib ;
+    }
 
     if ! $(WITH_QT)
     {
-        Exit "ERROR: Qt installation is incomplete." ;
+        WITH_QT = [ CheckBuildC++ "#include <QtCore/QtCore>"
+                                      "int main() { QString str; return 0; }"
+                                    : [ FIncludes $(QT_INCLUDES) ]
+                                    : -lQt5Core 
+                                    : $(QT_LIBDIR) ] ;
+
+        if $(WITH_QT)
+        {
+            QT_LIBS = -lQt5Core -lQt5Widgets ;
+            QT_LINKFLAGS = -L$(QT_LIBDIR) ;
+        }
+    }
+
+    EchoOption WITH_QT : "Qt Support" ;
+    Configure WITH_QT ;
+
+    if $(WITH_QT)
+    {
+        EchoOption QT_CORE_LIBS : "Qt Core Libraries" ;
+        Configure QT_CORE_LIBS ;
+
+        EchoOption QT_WIDGETS_LIBS : "Qt Widgets Libraries" ;
+        Configure QT_WIDGETS_LIBS ;
+
+        EchoOption QT_LINKFLAGS : "Qt Linker Flags" ;
+        Configure QT_LINKFLAGS ;
+
+        QT_LIBS = $(QT_CORE_LIBS) $(QT_WIDGETS_LIBS) ;
+        EchoOption QT_LIBS : "Qt Link Libraries" ;
+        Configure QT_LIBS ;
+    }
+    else
+    {
+        Exit "ERROR: Qt headers and libraries not found." ;
     }
 
     ConfigureMoc ;
 
     if ! $(QT_MOC)
     {
-        Exit "ERROR: Qt installation is incomplete." ;
+        Exit "ERROR: Qt moc tool not found." ;
     }
-
-    QT_INCLUDES = [ FDirName $(QTDIR) include ] ;
-    EchoOption QT_INCLUDES : "Qt Includes" ;
-    Configure QT_INCLUDES ;
-
-    QT_LIBS = Qt5Cored.lib Qt5Widgetsd.lib ;
-    EchoOption QT_LIBS : "Qt Link Libraries" ;
-    Configure QT_LIBS ;
-
-    QT_LINKFLAGS = /LIBPATH:$(QTDIR)\\lib ;
-    EchoOption QT_LINKFLAGS : "Qt Linker Flags" ;
-    Configure QT_LINKFLAGS ;
 }
 
 #############################################################################
