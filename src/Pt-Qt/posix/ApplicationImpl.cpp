@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014 Marc Boris Dürner
+ * Copyright (C) 2014 Marc Boris DÃ¼rner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,6 +33,19 @@
 namespace Pt {
 
 namespace Qt {
+
+IONotifier::IONotifier(System::IOHandle& h)
+: _h(&h)
+, _readNotifier(h.fd, QSocketNotifier::Read)
+, _writeNotifier(h.fd, QSocketNotifier::Write)
+{ 
+    _readNotifier.setEnabled(false);
+    connect(&_readNotifier, SIGNAL(activated(int)), this, SLOT(onRead(int)));
+
+    _writeNotifier.setEnabled(false);
+    connect(&_writeNotifier, SIGNAL(activated(int)), this, SLOT(onWrite(int)));
+}
+
 
 ApplicationImpl::ApplicationImpl(int& argc, char** argv)
 : QApplication(argc, argv)

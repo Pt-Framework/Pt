@@ -244,7 +244,7 @@ if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
 }
 
 #############################################################################
-# Qt support
+# Qt Support
 #############################################################################
 
 if --with-qt5 in $(ARGV)
@@ -293,6 +293,26 @@ if --with-qt5 in $(ARGV)
         {
             QT_CORE_LIBS = -lQt5Core ;
             QT_WIDGETS_LIBS = -lQt5Widgets -lQt5Gui ;
+        }
+    }
+    
+    #
+    # Mac OS-X
+    #
+    if ! $(WITH_QT)
+    {
+        WITH_QT = [ CheckBuildC++ "#include <QtWidgets/QPushButton>"
+                                  "int main() { QPushButton button; return 0; }"
+                                 : [ FIncludes $(QT_INCLUDES) ] -F$(QT_LIBDIR)
+                                 : -framework QtCore -framework QtWidgets 
+                                 : $(QT_LIBDIR) ] ;
+                                 
+        if $(WITH_QT)
+        {
+            C++FLAGS += -F$(QT_LIBDIR) ;
+            QT_CORE_LIBS =  -framework QtCore ;
+            QT_WIDGETS_LIBS = -framework QtWidgets -framework QtGui ;
+            QT_LINKFLAGS = -F$(QT_LIBDIR) ;
         }
     }
 

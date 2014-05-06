@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014 Marc Boris Dürner
+ * Copyright (C) 2014 Marc Boris DÃ¼rner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -47,17 +47,7 @@ class IONotifier : public QObject
     Q_OBJECT
 
     public:
-        IONotifier(System::IOHandle& h)
-        : _h(&h)
-        , _readNotifier(h.fd, QSocketNotifier::Read)
-        , _writeNotifier(h.fd, QSocketNotifier::Write)
-        { 
-            _readNotifier.setEnabled(false);
-            connect(&_readNotifier, SIGNAL(activated(int)), this, SLOT(onRead(int)));
-
-            _writeNotifier.setEnabled(false);
-            connect(&_writeNotifier, SIGNAL(activated(int)), this, SLOT(onWrite(int)));
-        }
+        IONotifier(System::IOHandle& h);
 
         void enableRead()
         { _readNotifier.setEnabled(true); }
@@ -274,13 +264,13 @@ class ApplicationImpl : public QApplication
         void processTimers();
 
     private:
-        QSocketNotifier _wakeNotifier;
         QTimer _masterTimer;
         System::Mutex _mutex;
         System::TimerQueue _timerQueue;
         System::EventQueue _eventQueue;
         std::vector<System::Selectable*> _avail;
         QtSelector _selector;
+        QSocketNotifier _wakeNotifier;
 };
 
 } // namespace
