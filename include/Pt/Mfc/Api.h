@@ -25,27 +25,27 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_Qt_API_H
-#define PT_Qt_API_H
+#ifndef PT_MFC_API_H
+#define PT_MFC_API_H
 
 #include <Pt/Api.h>
 
-#define PT_QT_VERSION_MAJOR 1
-#define PT_QT_VERSION_MINOR 0
-#define PT_QT_VERSION_REVISION 0 
+#define PT_MFC_VERSION_MAJOR 1
+#define PT_MFC_VERSION_MINOR 0
+#define PT_MFC_VERSION_REVISION 0 
  
-#if defined(PT_QT_API_EXPORT)
-#    define PT_QT_API PT_EXPORT
+#if defined(PT_MFC_API_EXPORT)
+#    define PT_MFC_API PT_EXPORT
 #  else
-#    define PT_QT_API PT_IMPORT
+#    define PT_MFC_API PT_IMPORT
 #  endif
 
 namespace Pt {
 
-/** @namespace Pt::Qt
-    @brief Qt bridge.
+/** @namespace Pt::Mfc
+    @brief MFC bridge.
 */
-namespace Qt {
+namespace Mfc {
 
 }
 }

@@ -1,5 +1,6 @@
-/*
- * Copyright (C) 2005-2007 by Dr. Marc Boris Duerner
+/* 
+ * Copyright (C) 2014 Marc Boris Dürner
+ * Copyright (C) 2014 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,29 +26,13 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_Qt_API_H
-#define PT_Qt_API_H
 
-#include <Pt/Api.h>
+#include "MfcApplication.h"
+#include <Pt/Net/TcpSocket.h>
+#include <Pt/Net/Endpoint.h>
+#include <Pt/System/Timer.h>
+#include <iostream>
 
-#define PT_QT_VERSION_MAJOR 1
-#define PT_QT_VERSION_MINOR 0
-#define PT_QT_VERSION_REVISION 0 
- 
-#if defined(PT_QT_API_EXPORT)
-#    define PT_QT_API PT_EXPORT
-#  else
-#    define PT_QT_API PT_IMPORT
-#  endif
 
-namespace Pt {
+CMfcApplication theApp;
 
-/** @namespace Pt::Qt
-    @brief Qt bridge.
-*/
-namespace Qt {
-
-}
-}
- 
-#endif

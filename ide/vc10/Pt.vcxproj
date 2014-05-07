@@ -163,6 +163,8 @@
     <ClInclude Include="..\..\include\Pt\Main.h" />
     <ClInclude Include="..\..\include\Pt\Math.h" />
     <ClInclude Include="..\..\include\Pt\Method.h" />
+    <ClInclude Include="..\..\include\Pt\Mfc\Api.h" />
+    <ClInclude Include="..\..\include\Pt\Mfc\Application.h" />
     <ClInclude Include="..\..\include\Pt\Net\AddressInUse.h" />
     <ClInclude Include="..\..\include\Pt\Net\Api.h" />
     <ClInclude Include="..\..\include\Pt\Net\Endpoint.h" />
@@ -365,6 +367,8 @@
     <ClInclude Include="..\..\src\Pt-Http\HttpBuffer.h" />
     <ClInclude Include="..\..\src\Pt-Http\Parser.h" />
     <ClInclude Include="..\..\src\Pt-Http\ServerImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Mfc\demo\MfcApplication.h" />
+    <ClInclude Include="..\..\src\Pt-Mfc\demo\Resource.h" />
     <ClInclude Include="..\..\src\Pt-Net\posix\AddrInfo.h" />
     <ClInclude Include="..\..\src\Pt-Net\posix\EndpointImpl.h" />
     <ClInclude Include="..\..\src\Pt-Net\win32\TcpServerImpl.h" />
@@ -453,6 +457,8 @@
     <None Include="..\..\src\Pt-Hmi\Jamfile" />
     <None Include="..\..\src\Pt-Http\Jamfile" />
     <None Include="..\..\src\Pt-Http\tests\Jamfile" />
+    <None Include="..\..\src\Pt-Mfc\demo\Jamfile" />
+    <None Include="..\..\src\Pt-Mfc\Jamfile" />
     <None Include="..\..\src\Pt-Net\Jamfile" />
     <None Include="..\..\src\Pt-Net\tests\Jamfile" />
     <None Include="..\..\src\Pt-Net\tests\Makefile.am" />
@@ -617,6 +623,9 @@
     <ClCompile Include="..\..\src\Pt-Http\tests\ParserTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\tests\Pt-Http-test.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\tests\ServerTest.cpp" />
+    <ClCompile Include="..\..\src\Pt-Mfc\Application.cpp" />
+    <ClCompile Include="..\..\src\Pt-Mfc\demo\MfcApplication.cpp" />
+    <ClCompile Include="..\..\src\Pt-Mfc\demo\mfcdemo.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\AddressInUse.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\Endpoint.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\posix\AddrInfo.cpp" />

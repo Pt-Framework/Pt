@@ -110,6 +110,11 @@ if $(SYS)
         #SubInclude PT_TOP src Pt-Gui ;
     }
 
+    if $(WITH_MFC) = yes
+    {
+        SubInclude PT_TOP src Pt-Mfc ;
+    }
+
     if $(WITH_QT) = yes
     {
         Load qt.jam ;

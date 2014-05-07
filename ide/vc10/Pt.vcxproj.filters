@@ -112,6 +112,12 @@
     <Filter Include="Pt-Qt\demo">
       <UniqueIdentifier>{8d34b6d2-4bcc-47a4-a86d-5b4fa4bde4d7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Mfc">
+      <UniqueIdentifier>{cd3da2a2-d5eb-4db3-850f-adc7bd5fed1b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Mfc\demo">
+      <UniqueIdentifier>{2fb461ac-d392-4589-849e-e3c474ba43c1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1356,6 +1362,18 @@
     <ClInclude Include="..\..\src\Pt-Qt\win32\ApplicationImpl.h">
       <Filter>Pt-Qt\win32</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Mfc\Api.h">
+      <Filter>Pt-Mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Mfc\demo\MfcApplication.h">
+      <Filter>Pt-Mfc\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Mfc\Application.h">
+      <Filter>Pt-Mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Mfc\demo\Resource.h">
+      <Filter>Pt-Mfc\demo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1500,6 +1518,12 @@
     </None>
     <None Include="..\..\src\Pt-Qt\demo\Jamfile">
       <Filter>Pt-Qt\demo</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Mfc\Jamfile">
+      <Filter>Pt-Mfc</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Mfc\demo\Jamfile">
+      <Filter>Pt-Mfc\demo</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -2546,6 +2570,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Qt\demo\qdemo.cpp">
       <Filter>Pt-Qt\demo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Mfc\demo\mfcdemo.cpp">
+      <Filter>Pt-Mfc\demo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Mfc\Application.cpp">
+      <Filter>Pt-Mfc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Mfc\demo\MfcApplication.cpp">
+      <Filter>Pt-Mfc\demo</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
