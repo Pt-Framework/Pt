@@ -91,6 +91,8 @@ public:
 
 	int runMfc();
 
+  bool pumpMessage();
+
     Pt::System::Selector& selector()
     { return *_selector; }
 
@@ -113,7 +115,7 @@ class PT_MFC_API Application : public CWinApp ,public Pt::System::Application
 
     public:
 	
-		virtual int Run();
+    virtual BOOL PumpMessage();
 
     private:
 

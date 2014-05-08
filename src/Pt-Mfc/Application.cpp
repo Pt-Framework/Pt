@@ -159,50 +159,41 @@ void MainLoop::handleWake()
     bool isActive = _eventQueue.processEvents( this->eventReceived() );
 }
 
-int MainLoop::runMfc()
+bool MainLoop::pumpMessage()
 {
-			
-	BOOL bDoingBackgroundProcessing = TRUE;
-	HANDLE handles[] = {  _selector->overlappedEvent(), _selector->wakeEvent()};
 
-	while (bDoingBackgroundProcessing) 
-	{ 
-		DWORD result = MsgWaitForMultipleObjects(2, (HANDLE *)handles, false, INFINITE, QS_ALLEVENTS);
+    HANDLE handles[] = { _selector->overlappedEvent(), 
+                         _selector->wakeEvent() };
 
-		if(result == WAIT_FAILED)
-			throw Pt::System::IOError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
+    DWORD result = ::MsgWaitForMultipleObjectsEx( 
+      2,
+      handles,
+      INFINITE,
+      QS_ALLINPUT,
+      MWMO_INPUTAVAILABLE | MWMO_ALERTABLE );
 
-		switch(result)
-		{
-			case WAIT_OBJECT_0:
-				_selector->runOverlapped();
-			break;
+    if(result == WAIT_FAILED)
+        throw Pt::System::SystemError("MsgWaitForMultipleObjectsEx");
 
-			case WAIT_OBJECT_0 + 1:
-				this->handleWake();
-			break;
-		}
+    switch (result)
+    {
+        case WAIT_OBJECT_0:
+            _selector->runOverlapped();
+            break;
 
-	   MSG msg;
-	   while (::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE)) 
-	   { 
-		  if (!AfxGetApp()->PumpMessage()) 
-		  { 
-			 bDoingBackgroundProcessing = FALSE; 
-			 ::PostQuitMessage(0); 
-			 break; 
-		  } 
-	   } 
-	   // let MFC do its idle processing
-	   LONG lIdle = 0;
-	   while (AfxGetApp()->OnIdle(lIdle++ ))
-		  ;  
-	   // Perform some background processing here 
-	   // using another call to OnIdle
-	   	 
-	}
+        case WAIT_OBJECT_0 + 1:
+            this->handleWake();
+            break;
 
-	return 1;
+        case WAIT_OBJECT_0 + 2: 
+            return false;
+            break;
+
+        case WAIT_IO_COMPLETION:
+            break;
+    }
+
+    return true;
 }
 
 
@@ -215,11 +206,13 @@ Application::~Application()
 {
 }
 
-int Application::Run()
+BOOL Application::PumpMessage()
 {
-	return _loop.runMfc();
-}
+	if( ! _loop.pumpMessage() )
+    return __super::PumpMessage();
 
+  return TRUE;
+}
 
 } // namespace
 
