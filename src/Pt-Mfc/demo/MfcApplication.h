@@ -5,7 +5,7 @@
 #include <Pt/Net/Endpoint.h>
 #include <Pt/System/Timer.h>
 
-class CMfcApplication : public Pt::Mfc::Application
+class CMfcApplication : public Pt::Mfc::WinAppEx
 {
 public:
 	CMfcApplication(void);

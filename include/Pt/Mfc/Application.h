@@ -109,11 +109,27 @@ class MainLoop : public System::EventLoop
 
 };
 
-class PT_MFC_API Application : public CWinApp ,public Pt::System::Application
+class PT_MFC_API WinApp : public CWinApp ,public Pt::System::Application
 {
     public:
-        Application();
-        virtual ~Application();
+        WinApp();
+        virtual ~WinApp();
+
+    public:
+    
+    virtual BOOL PumpMessage();
+
+    private:
+
+        MainLoop _loop;
+};
+
+
+class PT_MFC_API WinAppEx : public CWinApp ,public Pt::System::Application
+{
+    public:
+        WinAppEx();
+        virtual ~WinAppEx();
 
     public:
     

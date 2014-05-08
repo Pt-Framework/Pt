@@ -217,16 +217,33 @@ bool MainLoop::pumpMessage()
 }
 
 
-Application::Application()
+WinApp::WinApp()
 {
 	init(_loop);
 }
 
-Application::~Application()
+WinApp::~WinApp()
 {
 }
 
-BOOL Application::PumpMessage()
+BOOL WinApp::PumpMessage()
+{
+	if( ! _loop.pumpMessage() )
+    return __super::PumpMessage();
+
+  return TRUE;
+}
+
+WinAppEx::WinAppEx()
+{
+	init(_loop);
+}
+
+WinAppEx::~WinAppEx()
+{
+}
+
+BOOL WinAppEx::PumpMessage()
 {
 	if( ! _loop.pumpMessage() )
     return __super::PumpMessage();
