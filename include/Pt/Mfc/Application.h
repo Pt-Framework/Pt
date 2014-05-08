@@ -60,51 +60,53 @@ namespace Mfc {
 
 class MainLoop : public System::EventLoop
 {
-public:
+    public:
 
-	MainLoop();
-	virtual ~MainLoop();
+        MainLoop();
+        virtual ~MainLoop();
 
-    virtual void onAttachSelectable(System::Selectable&);
+        virtual void onAttachSelectable(System::Selectable&);
 
-    virtual void onDetachSelectable(System::Selectable&);
+        virtual void onDetachSelectable(System::Selectable&);
 
-    virtual void onCancel(System::Selectable& s);
+        virtual void onCancel(System::Selectable& s);
 
-    virtual void onReady(System::Selectable& s);
+        virtual void onReady(System::Selectable& s);
 
-    virtual void onRun();
+        virtual void onRun();
 
-    virtual void onExit();
+        virtual void onExit();
 
-    virtual void onCommitEvent(const Pt::Event& ev);
+        virtual void onCommitEvent(const Pt::Event& ev);
 
-    virtual void onQueueEvent(const Pt::Event& ev);
+        virtual void onQueueEvent(const Pt::Event& ev);
 
-    virtual void onWake();
+        virtual void onWake();
 
-    virtual void onAttachTimer(System::Timer& timer);
+        virtual void onAttachTimer(System::Timer& timer);
 
-    virtual void onDetachTimer(System::Timer& timer);
+        virtual void onDetachTimer(System::Timer& timer);
 
-	void processTimers();
+        void processTimers();
 
-	int runMfc();
+        int runMfc();
 
-  bool pumpMessage();
+        bool pumpMessage();
 
-    Pt::System::Selector& selector()
-    { return *_selector; }
+        Pt::System::Selector& selector()
+        { return *_selector; }
 
-private:
+    private:
 
-	void handleWake();
+        void handleWake();
 
         Pt::System::Selector* _selector;
         System::Mutex _mutex;
         System::TimerQueue _timerQueue;
         System::EventQueue _eventQueue;
-        std::vector<System::Selectable*> _avail;		
+        std::vector<System::Selectable*> _avail;  
+        HANDLE  _timer;
+
 };
 
 class PT_MFC_API Application : public CWinApp ,public Pt::System::Application
@@ -114,12 +116,12 @@ class PT_MFC_API Application : public CWinApp ,public Pt::System::Application
         virtual ~Application();
 
     public:
-	
+    
     virtual BOOL PumpMessage();
 
     private:
 
-		MainLoop _loop;
+        MainLoop _loop;
 };
 
 } // namespace

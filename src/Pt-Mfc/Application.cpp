@@ -37,12 +37,17 @@ namespace Mfc {
 
 MainLoop::MainLoop()
 :_selector( new Pt::System::Selector())
+,_timer(NULL)
 {
+  _timer = CreateWaitableTimer(0, FALSE, 0);
+   if ( _timer == NULL )
+     throw Pt::System::SystemError("CreateWaitableTimer failed");
 }
 
 MainLoop::~MainLoop()
 {
 	delete _selector;
+  CloseHandle(_timer);
 }
 
 void MainLoop::onAttachSelectable(System::Selectable& s)
@@ -119,10 +124,16 @@ void MainLoop::processTimers()
 { 
     std::size_t nextTimer = _timerQueue.processTimers();
 
+    LARGE_INTEGER liDueTime;
+
     if(nextTimer != System::EventLoop::WaitInfinite)
     {
-        //_masterTimer.start(nextTimer);
+        liDueTime.QuadPart = nextTimer * 10000;
+        if (!SetWaitableTimer(_timer, &liDueTime, 0, NULL, NULL, 0) )
+          throw Pt::System::SystemError("SetWaitableTimer failed");
     }
+    else
+      CancelWaitableTimer(_timer);
 }
 
 
@@ -157,16 +168,21 @@ void MainLoop::handleWake()
     }
 
     bool isActive = _eventQueue.processEvents( this->eventReceived() );
+    if( ! isActive )
+      ::PostQuitMessage(0);
 }
 
 bool MainLoop::pumpMessage()
 {
-
+    
     HANDLE handles[] = { _selector->overlappedEvent(), 
-                         _selector->wakeEvent() };
+                         _selector->wakeEvent(),
+                         _timer };
+
+    DWORD n = sizeof( handles ) / sizeof (HANDLE);
 
     DWORD result = ::MsgWaitForMultipleObjectsEx( 
-      2,
+      n,
       handles,
       INFINITE,
       QS_ALLINPUT,
@@ -186,6 +202,10 @@ bool MainLoop::pumpMessage()
             break;
 
         case WAIT_OBJECT_0 + 2: 
+            processTimers();
+            break;
+
+        case WAIT_OBJECT_0 + 3: 
             return false;
             break;
 

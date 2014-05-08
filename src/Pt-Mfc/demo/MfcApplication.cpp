@@ -77,8 +77,8 @@ void CMfcApplication::TestPtLoop()
     _socket.beginConnect(ep);
 
 
-//    _timer.setActive( this->loop() );
-//    _timer.start(5000);
-//    _timer.timeout() += Pt::slot( *this, &CMfcApplication::onTimer );
-    //_timer.timeout() += Pt::slot( *this, &Pt::System::Application::exit );
+    _timer.setActive( this->loop() );
+    _timer.start(5000);
+    _timer.timeout() += Pt::slot( *this, &CMfcApplication::onTimer );
+    _timer.timeout() += Pt::slot( *this, &Pt::System::Application::exit );
 }
