@@ -47,6 +47,7 @@
 #define _AFX_ALL_WARNINGS
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
+#include <afxwinappex.h>
 
 #include <vector>
 
@@ -125,10 +126,10 @@ class PT_MFC_API WinApp : public CWinApp ,public Pt::System::Application
 };
 
 
-class PT_MFC_API WinAppEx : public CWinApp ,public Pt::System::Application
+class PT_MFC_API WinAppEx : public CWinAppEx ,public Pt::System::Application
 {
     public:
-        WinAppEx();
+        WinAppEx(BOOL bResourceSmartUpdate = FALSE);
         virtual ~WinAppEx();
 
     public:

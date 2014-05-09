@@ -234,7 +234,8 @@ BOOL WinApp::PumpMessage()
   return TRUE;
 }
 
-WinAppEx::WinAppEx()
+WinAppEx::WinAppEx(BOOL bResourceSmartUpdate)
+: CWinAppEx(bResourceSmartUpdate)
 {
 	init(_loop);
 }
