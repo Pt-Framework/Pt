@@ -32,7 +32,7 @@
 
 #define PT_DB_VERSION_MAJOR 1
 #define PT_DB_VERSION_MINOR 0
-#define PT_DB_VERSION_REVISION 0
+#define PT_DB_VERSION_REVISION 1
 
 #if defined(PT_DB_API_EXPORT)
 #    define PT_DB_API PT_EXPORT
