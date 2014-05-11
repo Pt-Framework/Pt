@@ -131,7 +131,7 @@ if $(SYS)
 # LSB packages
 #############################################################################
 
-PT_LSB_PACKAGE_ROOTDIR = [ FDirName opt Pt-1.0.0 ] ;
+PT_LSB_PACKAGE_ROOTDIR = [ FDirName opt Pt-1.0.1 ] ;
 PT_LSB_PACKAGE_LIBDIR = [ FDirName $(PT_LSB_PACKAGE_ROOTDIR) lib ] ;
 
 PT_LSB_PACKAGE_DESCRIPTION = Platinum (Pt) is a comprehensive C++ framework, 
@@ -140,7 +140,7 @@ PT_LSB_PACKAGE_DESCRIPTION = Platinum (Pt) is a comprehensive C++ framework,
                              codebase. ;
 
 LsbPackage Pt-devel : --license 'extended LGPL' 
-                      --version 1.0.0 --release 1 
+                      --version 1.0.1 --release 1 
                       --group 'C++ Framework' 
                       --package 'Pt Development Team' 
                       --vendor 'Pt Development Team' 
@@ -173,7 +173,7 @@ LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/XmlRpc : [ GLOB $(
 
 
 LsbPackage Pt : --license 'extended LGPL' 
-                --version 1.0.0 --release 1 
+                --version 1.0.1 --release 1 
                 --group 'C++ Framework' 
                 --package 'Pt Development Team' 
                 --vendor 'Pt Development Team' 
