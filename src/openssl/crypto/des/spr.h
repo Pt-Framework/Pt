@@ -56,9 +56,6 @@
  * [including the GNU Public Licence.]
  */
 
-#ifndef HEADER_DES_SPR_H
-#define HEADER_DES_SPR_H
-
 OPENSSL_GLOBAL const DES_LONG DES_SPtrans[8][64]={
 {
 /* nibble 0 */
@@ -205,5 +202,3 @@ OPENSSL_GLOBAL const DES_LONG DES_SPtrans[8][64]={
 0x00000080L, 0x20820000L, 0x00820080L, 0x00000000L,
 0x20000000L, 0x20800080L, 0x00020000L, 0x00820080L,
 }};
-
-#endif

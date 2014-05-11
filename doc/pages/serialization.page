@@ -61,7 +61,7 @@ on the platform. For example, a @b long could be serialized as a 32-bit or a
 64-bit integer type. Finally, the type name is set for the parent node,
 representing the Address object.
 
-The deserialization operator perfroms the same process, just in reverse. The
+The deserialization operator performs the same process, just in reverse. The
 SerializationInfo object passed to it contains the meta information for all
 members. SerializationInfo child nodes can be obtained by name using @link
 Pt::SerializationInfo::getMember getMember()@endlink and members can be
@@ -109,7 +109,7 @@ both forward and backward references.
 
 @section serialization_Containers Serialization of Containers
 
-The framework already impements operators to serialize the containers of the
+The framework already implements operators to serialize the containers of the
 standard C++ library. Container types from other libraries can be serialized
 in a similar fashion. The next example shows the serialization operator for
 std::vector:
@@ -136,8 +136,8 @@ Pt::save() marks the element as a type that is potentially referencable by
 a weak pointer in another object. This improves performance, because the
 serializer only has to consider 'reachable' objects when pointers are also
 serialized. At the end, a type name is set and the type of the parent 
-SerializationInfo note is set to 'sequence'. This is neccessary for allow
-for empty vectors. Deserialization is somewhat similar:
+SerializationInfo note is set to 'sequence'. This is neccessary to allow
+empty vectors. Deserialization is somewhat similar:
 
 @code
 template <typename T, typename A>

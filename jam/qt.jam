@@ -1,0 +1,134 @@
+#
+# Runs the moc on header files containing class definitions to generate a
+# source file that has to be compiled with the other source files.
+#
+# Example usage:
+#
+# Moc qtest.moc.cpp : qtest.h ;
+#
+# Main qtest : qtest.cpp qtest.moc.cpp ;
+#
+
+###############################################################################
+# Configure Meta Object Compiler
+###############################################################################
+rule ConfigureMoc
+{
+    QT_MOC ?= moc ;
+
+    ConfigureLog "\n[ ConfigureMoc ]" ;
+    
+    local _in = check.h ;
+    local _out = check.moc.cpp ;
+    local _src = "#include <QtCore/QObject>\nclass moctest : public QObject{ Q_OBJECT };\n" ;
+    ConfigureLog $(_src) ;
+
+    WriteFile $(_in) : $(_src) ;
+    local _cmd = $(QT_MOC) $(_in) -o $(_out) ;
+    WITH_QT_MOC = [ TryCommand $(_cmd) ] ;
+
+    if ! $(WITH_QT_MOC)
+    {
+        QT_MOC = [ FDirName $(QTDIR) bin $(QT_MOC) ] ;
+        WITH_QT_MOC = [ TryCommand $(_cmd) ] ;
+    }
+    
+    TryCommand $(RM) $(_in) ;
+    TryCommand $(RM) $(_out) ;
+
+    EchoOption QT_MOC : "Qt moc tool" : $(QT_MOC) ;
+    EchoOption WITH_QT_MOC : "Qt moc support" : $(WITH_QT_MOC:E="no")  ;
+ 
+    if $(WITH_QT_MOC)
+    {
+        Configure QT_MOC : $(QT_MOC) ;
+    }
+}
+
+###############################################################################
+# Configure User Interface Compiler
+###############################################################################
+rule ConfigureUic
+{
+    QT_UIC ?= [ FDirName $(QTDIR) bin "uic"$(SUFEXE) ] ;
+    EchoOption QT_UIC : "Qt uic tool" : $(QT_UIC)  ;
+
+    WITH_QT_UIC = [ CHECK_IF_FILE $(QT_UIC) ] ;
+    if $(WITH_QT_UIC)
+    {
+        WITH_QT_UIC = yes ;
+    }
+
+    EchoOption WITH_QT_UIC : "Qt uic support" : $(WITH_QT_UIC:E="no")  ;
+ 
+    if $(WITH_QT_UIC)
+    {
+        Configure QT_UIC : $(QT_UIC) ;
+    }
+}
+
+###############################################################################
+# Configure Qt
+###############################################################################
+rule ConfigureQt
+{
+    EchoOption QTDIR : "Qt directory" ;
+
+    QT_CORE_HEADER = [ FDirName $(QTDIR) include QtCore QtCore ] ;
+
+    WITH_QT = [ CHECK_IF_FILE $(QT_CORE_HEADER) ] ;
+    if $(WITH_QT)
+    {
+        WITH_QT = yes ;
+    }
+    
+    EchoOption WITH_QT : "Qt support" : $(WITH_QT:E="no")  ;
+    Configure WITH_QT : $(WITH_QT) ;
+
+    if $(WITH_QT)
+    {
+        Configure QTDIR : $(QTDIR) ;
+    }
+}
+
+###############################################################################
+# Rules and Actions for moc
+###############################################################################
+rule Moc
+{
+    local _mocFile = [ FGristFiles $(<) ] ;
+    local _header = $(>) ;
+
+    MakeLocate $(_mocFile) : $(LOCATE_SOURCE) ;
+    SEARCH on $(>) = $(SEARCH_SOURCE) ;
+    Depends $(_mocFile) : $(_header) ;
+    Moc1 $(_mocFile) : $(>) ;
+
+    Clean clean : $(_mocFile) ;
+}
+
+actions Moc1
+{
+    $(QT_MOC) $(>) -o $(<)
+}
+
+###############################################################################
+# Rules and Actions for uic
+###############################################################################
+rule Uic
+{
+    local _headerFile = [ FGristFiles $(<) ] ;
+    local _uicFile = $(>) ;
+
+    MakeLocate $(_headerFile) : $(LOCATE_SOURCE) ;
+    SEARCH on $(>) = $(SEARCH_SOURCE) ;
+    Depends $(_headerFile) : $(_uicFile) ;
+    Uic1 $(_headerFile) : $(>) ;
+
+    Clean clean : $(_headerFile) ;
+}
+
+actions Uic1
+{
+    $(QT_UIC) $(>) -o $(<)
+}

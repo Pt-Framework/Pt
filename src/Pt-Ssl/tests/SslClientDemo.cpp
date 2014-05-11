@@ -293,7 +293,7 @@ int main(int argv, const char** argc)
         ctx.setVerifyMode(Pt::Ssl::NoVerify);
         
         SslClient client(app.loop(), ctx);
-        client.setTarget("/index.html", "www.pt-framework.org", 443);
+        client.setTarget("/", "gotofail.com", 443);
         client.requestProgressed() += Pt::slot(onProgress);
         client.beginExecute();
 
