@@ -274,17 +274,35 @@ if --with-qt5 in $(ARGV)
     #
     if ! $(WITH_QT)
     {
+        if $(WITH_DEBUG)
+        {
+            QT_TRY_LIBS = Qt5Cored.lib Qt5Widgetsd.lib Qt5Guid.lib ;
+        }
+        else
+        {
+            QT_TRY_LIBS = Qt5Core.lib Qt5Widgets.lib Qt5Gui.lib ;
+        }
+
         WITH_QT = [ CheckBuildC++ "#include <QtWidgets/QPushButton>"
                                   "int main() { QPushButton button; return 0; }"
                                  : [ FIncludes $(QT_INCLUDES) ]
-                                 : Qt5Cored.lib Qt5Widgetsd.lib Qt5Guid.lib
+                                 : $(QT_TRY_LIBS)
                                  : $(QT_LIBDIR) ] ;
 
         if $(WITH_QT)
         {
-            QT_CORE_LIBS = Qt5Cored.lib ;
-            QT_WIDGETS_LIBS = Qt5Widgetsd.lib ;
-            QT_LINKFLAGS = /LIBPATH:$(QTDIR)\\lib ;
+            if $(WITH_DEBUG)
+            {
+                QT_CORE_LIBS = Qt5Cored.lib ;
+                QT_WIDGETS_LIBS = Qt5Widgetsd.lib ;
+                QT_LINKFLAGS = /LIBPATH:$(QTDIR)\\lib ;
+            }
+            else
+            {
+                QT_CORE_LIBS = Qt5Core.lib ;
+                QT_WIDGETS_LIBS = Qt5Widgets.lib ;
+                QT_LINKFLAGS = /LIBPATH:$(QTDIR)\\lib ;
+            }
         }
     }
 
