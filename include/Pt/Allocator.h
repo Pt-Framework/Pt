@@ -100,7 +100,7 @@ class Allocator
 
         /** @brief Deallocates memory of @a size bytes.
         */
-        virtual void deallocate(void* p, std::size_t size)
+        virtual void deallocate(void* p, std::size_t)
         {
             operator delete(p);
         }
