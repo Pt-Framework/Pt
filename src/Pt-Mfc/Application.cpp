@@ -218,6 +218,8 @@ bool MainLoop::pumpMessage()
 
 
 WinApp::WinApp()
+: CWinApp()
+, Pt::System::Application(0, 0, 0)
 {
 	init(_loop);
 }
@@ -236,6 +238,7 @@ BOOL WinApp::PumpMessage()
 
 WinAppEx::WinAppEx(BOOL bResourceSmartUpdate)
 : CWinAppEx(bResourceSmartUpdate)
+, Pt::System::Application(0, 0, 0)
 {
 	init(_loop);
 }
