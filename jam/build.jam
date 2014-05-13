@@ -1107,7 +1107,7 @@ rule SubTree
     $(2) = $(_s) ;
 
     # do not try to include subtree's Jamrules (see SubDir rule)
-    $(<[1])-included = TRUE ;
+    $(2)-included = TRUE ;
 
     # include Jamfile of the subtree
     include $(JAMFILE:D=$(_s)) ;
