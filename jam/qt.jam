@@ -97,12 +97,12 @@ rule ConfigureQt
 rule Moc
 {
     local _mocFile = [ FGristFiles $(<) ] ;
-    local _header = $(>) ;
+    local _header = [ FGristFiles $(>) ] ;
 
     MakeLocate $(_mocFile) : $(LOCATE_SOURCE) ;
-    SEARCH on $(>) = $(SEARCH_SOURCE) ;
+    SEARCH on $(_header) = $(SEARCH_SOURCE) ;
     Depends $(_mocFile) : $(_header) ;
-    Moc1 $(_mocFile) : $(>) ;
+    Moc1 $(_mocFile) : $(_header) ;
 
     Clean clean : $(_mocFile) ;
 }
@@ -118,12 +118,12 @@ actions Moc1
 rule Uic
 {
     local _headerFile = [ FGristFiles $(<) ] ;
-    local _uicFile = $(>) ;
+    local _uicFile = [ FGristFiles $(>) ] ;
 
     MakeLocate $(_headerFile) : $(LOCATE_SOURCE) ;
-    SEARCH on $(>) = $(SEARCH_SOURCE) ;
+    SEARCH on $(_uicFile) = $(SEARCH_SOURCE) ;
     Depends $(_headerFile) : $(_uicFile) ;
-    Uic1 $(_headerFile) : $(>) ;
+    Uic1 $(_headerFile) : $(_uicFile) ;
 
     Clean clean : $(_headerFile) ;
 }
