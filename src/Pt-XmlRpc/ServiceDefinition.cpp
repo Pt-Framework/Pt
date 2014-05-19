@@ -32,6 +32,31 @@ namespace Pt {
 
 namespace XmlRpc {
 
+ParameterDefinition::ParameterDefinition()
+{ 
+}
+
+
+ParameterDefinition::~ParameterDefinition()
+{
+}
+
+
+ProcedureDefinition::ProcedureDefinition()
+{ 
+}
+
+
+ProcedureDefinition::~ProcedureDefinition()
+{
+}
+
+
+void ProcedureDefinition::addParameter(const std::string& name)
+{
+}
+
+
 ServiceDefinition::ServiceDefinition()
 { 
 }

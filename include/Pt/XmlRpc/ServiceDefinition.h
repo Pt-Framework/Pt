@@ -42,6 +42,41 @@ namespace Pt {
 
 namespace XmlRpc {
 
+class PT_XMLRPC_API ParameterDefinition : private NonCopyable
+{
+    public:
+        ParameterDefinition();
+
+        virtual ~ParameterDefinition();
+
+        virtual ParameterDefinition* parse(Xml::Node& node, const Composer& composer)
+        { return 0; }
+
+    private:
+        ParameterDefinition* _parent;
+        Pt::varint_t _r1;
+        Pt::varint_t _r2;
+};
+
+
+class PT_XMLRPC_API ProcedureDefinition : private NonCopyable
+{
+    public:
+        ProcedureDefinition();
+
+        virtual ~ProcedureDefinition();
+
+        void addParameter(const std::string& name);
+
+        ParameterDefinition* parse(Xml::Node& node, const Composer& composer)
+        { return 0; }
+
+    private:
+        Pt::varint_t _r1;
+        Pt::varint_t _r2;
+};
+
+
 class PT_XMLRPC_API ServiceDefinition : private NonCopyable
 {
     public:
