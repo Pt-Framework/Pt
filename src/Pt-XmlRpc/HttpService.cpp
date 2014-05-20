@@ -61,6 +61,6 @@ void HttpService::onReleaseResponder(Http::Responder* resp)
     delete resp;
 }
 
-}
+} // namespace XmlRpc
 
-}
+} // namespace Pt

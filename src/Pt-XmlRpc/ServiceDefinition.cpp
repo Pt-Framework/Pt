@@ -32,31 +32,6 @@ namespace Pt {
 
 namespace XmlRpc {
 
-ParameterDefinition::ParameterDefinition()
-{ 
-}
-
-
-ParameterDefinition::~ParameterDefinition()
-{
-}
-
-
-ProcedureDefinition::ProcedureDefinition()
-{ 
-}
-
-
-ProcedureDefinition::~ProcedureDefinition()
-{
-}
-
-
-void ProcedureDefinition::addParameter(const std::string& name)
-{
-}
-
-
 ServiceDefinition::ServiceDefinition()
 { 
 }
@@ -111,6 +86,18 @@ void ServiceDefinition::registerProcedure(const std::string& name, ServiceProced
         delete it->second;
         it->second = procDef;
     }
+}
+
+
+System::Mutex& ServiceDefinition::mutex()
+{
+    return _mtx;
+}
+
+
+System::Mutex& ServiceDefinition::mutex() const
+{
+    return _mtx;
 }
 
 } // namespace XmlRpc

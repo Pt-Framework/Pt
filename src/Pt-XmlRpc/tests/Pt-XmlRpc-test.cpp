@@ -28,6 +28,7 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Unit/TestMain.h"
+#include "Pt/XmlRpc/SoapHttpService.h"
 #include "Pt/XmlRpc/HttpService.h"
 #include "Pt/XmlRpc/HttpClient.h"
 #include "Pt/XmlRpc/Fault.h"
@@ -180,6 +181,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             registerMethod("Double", *this, &PtXmlRpcTest::Double);
             registerMethod("String", *this, &PtXmlRpcTest::String);
             registerMethod("EmptyValues", *this, &PtXmlRpcTest::EmptyValues);
+            registerMethod("SoapArray", *this, &PtXmlRpcTest::SoapArray);
             registerMethod("Array", *this, &PtXmlRpcTest::Array);
             registerMethod("ArrayBenchmark", *this, &PtXmlRpcTest::ArrayBenchmark);
             registerMethod("EmptyArray", *this, &PtXmlRpcTest::EmptyArray);
@@ -608,6 +610,31 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT_EQUALS(a, "");
             PT_UNIT_ASSERT_EQUALS(b, "");
             return "4";
+        }
+
+        ////////////////////////////////////////////////////////////
+        // SoapArray
+        //
+        void SoapArray()
+        {
+            Pt::XmlRpc::SoapServiceDefinition serviceDef;
+            serviceDef.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyVector);
+
+            Pt::XmlRpc::ProcedureDefinition* procDef = new Pt::XmlRpc::ProcedureDefinition;
+            
+            Pt::XmlRpc::ArrayParameter* p1 = new Pt::XmlRpc::ArrayParameter( new Pt::XmlRpc::IntegerParameter );
+            procDef->addParameter("a", p1);
+            
+            Pt::XmlRpc::ArrayParameter* p2 = new Pt::XmlRpc::ArrayParameter( new Pt::XmlRpc::IntegerParameter );
+            procDef->addParameter("b", p2);
+            
+            serviceDef.addDefinition("multiply", procDef);
+            
+            Pt::XmlRpc::SoapHttpService httpService(serviceDef);
+            Pt::Http::MapUrl servlet("/calc", httpService);
+            _server->addServlet(servlet);
+
+            _loop->run();
         }
 
         ////////////////////////////////////////////////////////////
