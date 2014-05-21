@@ -38,7 +38,7 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class Responder;
+class ResponderBase;
 
 /** @brief XML-RPC service procedure.
 */
@@ -70,7 +70,7 @@ class ServiceProcedure
     protected:
         /** @brief Constructor.
         */
-        ServiceProcedure(Responder& r)
+        ServiceProcedure(ResponderBase& r)
         : _responder( &r )
         {}
 
@@ -84,7 +84,7 @@ class ServiceProcedure
         virtual Decomposer* onEndCall() = 0;  
 
     private:
-        Responder* _responder;
+        ResponderBase* _responder;
 };
 
 
@@ -94,14 +94,14 @@ class ServiceProcedureDef
         virtual ~ServiceProcedureDef()
         {}
 
-        ServiceProcedure* createProcedure(Responder& r) const
+        ServiceProcedure* createProcedure(ResponderBase& r) const
         { return this->onCreateProcedure(r); }
 
     protected:
         ServiceProcedureDef()
         {}
 
-        virtual ServiceProcedure* onCreateProcedure(Responder& r) const = 0;
+        virtual ServiceProcedure* onCreateProcedure(ResponderBase& r) const = 0;
 };
 
 } // namespace XmlRpc

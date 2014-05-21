@@ -84,6 +84,12 @@ static const Pt::Char XMLRPC_INT_END[]     = { '<', '/', 'i', 'n', 't', '>' };
 static const Pt::Char XMLRPC_STRING_END[]  = { '<', '/', 's', 't', 'r', 'i', 'n', 'g', '>' };
 
 
+static const Pt::Char SOAP_REPLY_BEGIN[]  = { '<', 'E', 'n', 'v', 'e', 'l', 'o', 'p', 'e', '>',
+                                              '<', 'B', 'o', 'd', 'y', '>' };
+
+static const Pt::Char SOAP_REPLY_END[]  = { '<', '/', 'B', 'o', 'd', 'y', '>',
+                                            '<', '/', 'E', 'n', 'v', 'e', 'l', 'o', 'p', 'e', '>' }; 
+
 SoapResponder::SoapResponder(SoapServiceDefinition& service)
 : _serviceDef(&service)
 , _proc(0)
@@ -278,8 +284,12 @@ void SoapResponder::beginResult(std::ostream& os)
     _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
 
     assert(_result);
-    _ts.write(XMLRPC_REPLY_BEGIN, sizeof(XMLRPC_REPLY_BEGIN)/sizeof(Char));
+    _ts.write(SOAP_REPLY_BEGIN, sizeof(SOAP_REPLY_BEGIN)/sizeof(Char));
 
+    const Parameter* param = _procDef->getOutput();
+    assert(param);
+
+    _formatter.setParameter(*param);
     _result->beginFormat(_formatter);
 }
 
@@ -299,7 +309,7 @@ void SoapResponder::finishResult()
 {
     if( ! _isFault )
     {
-        _ts.write(XMLRPC_REPLY_END, sizeof(XMLRPC_REPLY_END)/sizeof(Char));
+        _ts.write(SOAP_REPLY_END, sizeof(SOAP_REPLY_END)/sizeof(Char));
         _ts.flush();
     }
 }
@@ -404,11 +414,11 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
                 if(_proc)
                     _serviceDef->releaseProcedure(_proc);
 
-                _procDef = _serviceDef->getDefinition( se.name().local().narrow() );
+                _procDef = _serviceDef->getPort( se.name().local().narrow() );
                 if( ! _procDef )
                     throw Fault("no such procedure", Pt::XmlRpc::Fault::MethodNotFound);
 
-                _proc = 0; //_serviceDef->getProcedure( se.name().local().narrow(), *this );
+                _proc = _serviceDef->getProcedure( se.name().local().narrow(), *this );
                 if( ! _proc )
                     throw Fault("no such procedure", Pt::XmlRpc::Fault::MethodNotFound);
 
@@ -444,11 +454,11 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
                         throw SerializationError("too many arguments");
                 }
 
-                const ParameterDefinition* paramDef = _procDef->getParameter( se.name().local().narrow() );
-                if( ! paramDef )
+                const Type* paramType = _procDef->getInput( se.name().local().narrow() );
+                if( ! paramType )
                     throw Fault("no such parameter", Pt::XmlRpc::Fault::MethodNotFound);
 
-                _formatter.setDefinition(*paramDef);
+                _formatter.setParameter(*paramType);
                 _formatter.beginParse(**_args);
                 
                 _state = OnParam;
@@ -473,6 +483,7 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
         {
             if(node.type() == Xml::Node::EndElement) // </Body>
             {
+                assert( Xml::toEndElement(node).name().local() == L"Body" );
                 _state = OnBodyEnd;
             }
             
@@ -483,6 +494,7 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
         {
             if(node.type() == Xml::Node::EndElement) // </Envelope>
             {
+                assert( Xml::toEndElement(node).name().local() == L"Envelope" );
                 _state = OnEnvelopeEnd;
             }
             

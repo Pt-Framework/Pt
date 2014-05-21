@@ -49,7 +49,7 @@ class PT_XMLRPC_API ServiceDefinition : private NonCopyable
 
         virtual ~ServiceDefinition();
 
-        ServiceProcedure* getProcedure(const std::string& name, Responder& resp);
+        ServiceProcedure* getProcedure(const std::string& name, ResponderBase& resp);
 
         void releaseProcedure(ServiceProcedure* proc);
 
@@ -285,21 +285,21 @@ class PT_XMLRPC_API ServiceDefinition : private NonCopyable
         }
 
         template <typename A, class C>
-        void registerActiveProcedure(const std::string& name, A* (*fn)(Responder&) )
+        void registerActiveProcedure(const std::string& name, A* (*fn)(ResponderBase&) )
         {
             ServiceProcedureDef* proc = new ActiveProcedureDef<A>( callable(fn) );
             this->registerProcedure(name, proc);
         }
 
         template <typename A, class C>
-        void registerActiveProcedure(const std::string& name, C& obj, A* (C::*method)(Responder&) )
+        void registerActiveProcedure(const std::string& name, C& obj, A* (C::*method)(ResponderBase&) )
         {
             ServiceProcedureDef* proc = new ActiveProcedureDef<A>( callable(obj, method) );
             this->registerProcedure(name, proc);
         }
 
         template <typename A, class C>
-        void registerActiveProcedure(const std::string& name, C& obj, A* (C::*method)(Responder&) const )
+        void registerActiveProcedure(const std::string& name, C& obj, A* (C::*method)(ResponderBase&) const )
         {
             ServiceProcedureDef* proc = new ActiveProcedureDef<A>( callable(obj, method) );
             this->registerProcedure(name, proc);

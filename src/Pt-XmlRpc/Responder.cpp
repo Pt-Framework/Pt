@@ -108,12 +108,6 @@ Responder::~Responder()
 }
 
 
-SerializationContext& Responder::context()
-{ 
-    return _context; 
-}
-
-
 void Responder::cancel()
 {
     this->onCancel();

@@ -48,9 +48,28 @@ namespace XmlRpc {
 class ServiceDefinition;
 class ServiceProcedure;
 
+class ResponderBase : private NonCopyable
+{
+    public:
+        ResponderBase()
+        {}
+
+        virtual ~ResponderBase()
+        {}
+
+        //! @internal
+        SerializationContext& context()
+        { return _context; }
+
+        virtual void endCall() = 0;
+
+    private:
+        SerializationContext _context;
+};
+
 /** @brief Dispatches requests to a service procedure.
 */
-class PT_XMLRPC_API Responder : private NonCopyable
+class PT_XMLRPC_API Responder : public ResponderBase
 {
     public:
         /** @brief Construct with Service.
@@ -61,15 +80,12 @@ class PT_XMLRPC_API Responder : private NonCopyable
         */
         virtual ~Responder();
 
-        //! @internal
-        SerializationContext& context();
-
         /** @brief Cancels the responder.
         */
         void cancel();
 
         //! @internal
-        void endCall();
+        virtual void endCall();
 
     protected:
         /** @brief The service procedure has finished.
@@ -174,7 +190,6 @@ class PT_XMLRPC_API Responder : private NonCopyable
             OnMethodCallEnd
         };
 
-        SerializationContext _context;
         ServiceDefinition* _serviceDef;
         ServiceProcedure* _proc;
         

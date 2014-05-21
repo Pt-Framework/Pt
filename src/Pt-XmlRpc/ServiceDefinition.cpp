@@ -49,7 +49,7 @@ ServiceDefinition::~ServiceDefinition()
 }
 
 
-ServiceProcedure* ServiceDefinition::getProcedure(const std::string& name, Responder& resp)
+ServiceProcedure* ServiceDefinition::getProcedure(const std::string& name, ResponderBase& resp)
 {
     System::MutexLock lock(_mtx);
 

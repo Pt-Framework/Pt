@@ -43,7 +43,8 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class ParameterDefinition;
+class Type;
+class Parameter;
 
 /** @internal @brief Formatter to read and write XML-RPC messages.
 */
@@ -55,7 +56,9 @@ class PT_XMLRPC_API SoapFormatter : public Pt::Formatter
 
         ~SoapFormatter();
 
-        void setDefinition(const ParameterDefinition& p);
+        void setParameter(const Type& p);
+
+        void setParameter(const Parameter& p);
 
         void attach(Xml::XmlReader& reader);
 
@@ -136,32 +139,9 @@ class PT_XMLRPC_API SoapFormatter : public Pt::Formatter
         void onParse();
 
     private:
-        enum State
-        {
-            OnParam,
-            OnValueBegin,
-            OnValueEnd,
-            OnBoolBegin,
-            OnIntBegin,
-            OnDoubleBegin,
-            OnStringBegin,
-            OnScalar,
-            OnScalarEnd,
-            OnStructBegin,
-            OnMemberBegin,
-            OnNameBegin,
-            OnName,
-            OnNameEnd,
-            OnStructEnd,
-            OnArrayBegin,
-            OnDataBegin,
-            OnDataEnd,
-            OnArrayEnd
-        };
-
         Xml::XmlReader* _reader;
-        State _state;
-        const ParameterDefinition* _paramDef;
+        const Type* _paramType;
+        std::vector<const Parameter*> _paramStack;
         Composer* _composer;
         
         std::basic_ostream<Char>* _os;

@@ -127,9 +127,19 @@ class array_appender : public std::iterator<std::output_iterator_tag, T>
 };
 
 
-void throwSerializationError(const char* msg = "invalid XML-RPC parameter")
+void formatValue(std::basic_ostream<Pt::Char>& os, const std::string& name, const Pt::Char* value, std::size_t valueSize)
 {
-    throw Pt::SerializationError(msg);
+    os << '<';
+    for(std::size_t n = 0; n < name.size(); ++n)
+        os << name[n];
+    os << '>';
+    
+    os.write(value, valueSize);
+    
+    os << '<' << '/';
+    for(std::size_t n = 0; n < name.size(); ++n)
+        os << name[n];
+    os << '>';
 }
 
 }
@@ -140,8 +150,7 @@ namespace XmlRpc {
 
 SoapFormatter::SoapFormatter(std::basic_ostream<Char>& os)
 : _reader(0)
-, _state(OnParam)
-, _paramDef(0)
+, _paramType(0)
 , _composer(0)
 , _os(&os)
 { 
@@ -153,9 +162,16 @@ SoapFormatter::~SoapFormatter()
 }
 
 
-void SoapFormatter::setDefinition(const ParameterDefinition& p)
+void SoapFormatter::setParameter(const Type& p)
 {
-    _paramDef = &p;
+    _paramType = &p;
+}
+
+
+void SoapFormatter::setParameter(const Parameter& p)
+{
+    _paramStack.clear();
+    _paramStack.push_back(&p);
 }
 
 
@@ -172,37 +188,48 @@ void SoapFormatter::attach(std::basic_ostream<Char>& os)
 
 
 void SoapFormatter::onAddString(const char* name, const char* type,
-                            const Pt::Char* value, const char* id)
+                                const Pt::Char* value, const char* id)
 {
-    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
-    _os->write(XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char));
+    const std::string& paramName = _paramStack.back()->name();
+
+    *_os << '<';
+    for(std::size_t n = 0; n < paramName.size(); ++n)
+        *_os << paramName[n];
+    *_os << '>';
+    
     Xml::xmlEncode(*_os, value);
-    _os->write(XMLRPC_STRING_END, sizeof(XMLRPC_STRING_END)/sizeof(Char));
-    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
+    
+    *_os << '<' << '/';
+    for(std::size_t n = 0; n < paramName.size(); ++n)
+        *_os << paramName[n];
+    *_os << '>';
 }
 
 
 void SoapFormatter::onAddBool(const char* name, bool value, 
-                          const char* id)
+                              const char* id)
 {
-    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
-
-    _os->write(XMLRPC_BOOLEAN, sizeof(XMLRPC_BOOLEAN)/sizeof(Char));
-    *_os << (value ? Char('1') : Char('0'));
-    _os->write(XMLRPC_BOOLEAN_END, sizeof(XMLRPC_BOOLEAN_END)/sizeof(Char));
-
-    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
+    Char val = value ? Char('1') : Char('0');
+    formatValue(*_os, _paramStack.back()->name(), &val, 1 );
 }
 
 
 void SoapFormatter::onAddChar(const char* name, const Pt::Char& value,
-                          const char* id)
+                              const char* id)
 {
-    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
-    _os->write(XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char));
+    const std::string& paramName = _paramStack.back()->name();
+
+    *_os << '<';
+    for(std::size_t n = 0; n < paramName.size(); ++n)
+        *_os << paramName[n];
+    *_os << '>';
+    
     Xml::xmlEncode(*_os, &value, 1);
-    _os->write(XMLRPC_STRING_END, sizeof(XMLRPC_STRING_END)/sizeof(Char));
-    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
+    
+    *_os << '<' << '/';
+    for(std::size_t n = 0; n < paramName.size(); ++n)
+        *_os << paramName[n];
+    *_os << '>';
 }
 
 
@@ -232,11 +259,7 @@ void SoapFormatter::onAddInt64(const char* name, Pt::int64_t value, const char* 
     array_appender<Pt::Char> it(_buf, _bufsize);
     it = formatInt(it, value);
 
-    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
-    _os->write(XMLRPC_INT, sizeof(XMLRPC_INT)/sizeof(Char));
-    _os->write(_buf, it.getPointer() - _buf);
-    _os->write(XMLRPC_INT_END, sizeof(XMLRPC_INT_END)/sizeof(Char));
-    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
+    formatValue(*_os, _paramStack.back()->name(), _buf, it.getPointer() - _buf );
 }
 
 
@@ -266,22 +289,23 @@ void SoapFormatter::onAddUInt64(const char* name, Pt::uint64_t value, const char
     array_appender<Pt::Char> it(_buf, _bufsize);
     it = formatInt(it, value);
 
-    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
-    _os->write(XMLRPC_INT, sizeof(XMLRPC_INT)/sizeof(Char));
-    _os->write( _buf, it.getPointer() - _buf );
-    _os->write(XMLRPC_INT_END, sizeof(XMLRPC_INT_END)/sizeof(Char));
-    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
+    formatValue(*_os, _paramStack.back()->name(), _buf, it.getPointer() - _buf );
 }
 
 
 void SoapFormatter::onAddFloat(const char* name, float value,const char* id)
 {
-    // spec supports only double precision floats
-    this->onAddDouble(name, value, id);
+    this->onAddLongDouble(name, value, id);
 }
 
 
 void SoapFormatter::onAddDouble(const char* name, double value, const char* id)
+{
+    this->onAddLongDouble(name, value, id);
+}
+
+
+void SoapFormatter::onAddLongDouble(const char* name, long double value,const char* id)
 {
     const unsigned _bufsize = 64;
     Pt::Char _buf[_bufsize];
@@ -289,20 +313,7 @@ void SoapFormatter::onAddDouble(const char* name, double value, const char* id)
     array_appender<Pt::Char> it(_buf, _bufsize);
     it = formatFloat(it, value);
 
-    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
-
-    _os->write(XMLRPC_DOUBLE, sizeof(XMLRPC_DOUBLE)/sizeof(Char));
-    _os->write(_buf, it.getPointer() - _buf);
-    _os->write(XMLRPC_DOUBLE_END, sizeof(XMLRPC_DOUBLE_END)/sizeof(Char));
-
-    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
-}
-
-
-void SoapFormatter::onAddLongDouble(const char* name, long double value,const char* id)
-{
-    // spec supports only double precision floats
-    this->onAddDouble(name, static_cast<double>(value), id);
+    formatValue(*_os, _paramStack.back()->name(), _buf, it.getPointer() - _buf );
 }
 
 
@@ -310,16 +321,7 @@ void SoapFormatter::onAddBinary(const char* name, const char* type,
                             const char* data, std::size_t length, const char* id)
 {
     // TODO: this should be base64 encoded
-
-    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
-    std::string value(data, length);
-
-    throw SerializationError("base64 data not supported");
-    //_writer->writeStartTag(Pt::String::widen(type).c_str());
-    //Xml::xmlEncode(Pt::String::widen(value).c_str());
-    //_writer->writeEndTag(Pt::String::widen(type).c_str());
-
-    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
+    throw SerializationError("binary type not supported");
 }
 
 
@@ -329,68 +331,75 @@ void SoapFormatter::onAddReference(const char* name, const char*value)
 }
 
 
-void SoapFormatter::onBeginSequence(const char*, const char*,
-                                const char*)
+void SoapFormatter::onBeginSequence(const char* name, const char* type, const char*)
 {
-    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
-    _os->write(XMLRPC_ARRAY, sizeof(XMLRPC_ARRAY)/sizeof(Char));
-    _os->write(XMLRPC_DATA, sizeof(XMLRPC_DATA)/sizeof(Char));
+    _str.assign( _paramStack.back()->name().c_str() );
+
+    *_os << '<';
+    Xml::xmlEncode(*_os, _str );
+    *_os << '>';
 }
 
 
 void SoapFormatter::onBeginElement()
 {
+    const Parameter* param = _paramStack.back()->type()->getParameter(0);
+    _paramStack.push_back(param);
 }
 
 
 void SoapFormatter::onFinishElement()
 {
+    _paramStack.pop_back();
 }
 
 
 void SoapFormatter::onFinishSequence()
 {
-    _os->write(XMLRPC_DATA_END, sizeof(XMLRPC_DATA_END)/sizeof(Char));
-    _os->write(XMLRPC_ARRAY_END, sizeof(XMLRPC_ARRAY_END)/sizeof(Char));
-    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
+    _str.assign( _paramStack.back()->name().c_str() );
+
+    *_os << '<' << '/';
+    Xml::xmlEncode(*_os, _str );
+    *_os << '>';
 }
 
 
 void SoapFormatter::onBeginStruct(const char* name, const char* type,
-                             const char* id)
+                                  const char* id)
 {
-    _os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
-    _os->write(XMLRPC_STRUCT, sizeof(XMLRPC_STRUCT)/sizeof(Char));
+    _str.assign( _paramStack.back()->name().c_str() );
+
+    *_os << '<';
+    Xml::xmlEncode(*_os, _str );
+    *_os << '>';
 }
 
 
 void SoapFormatter::onBeginMember(const char* name)
 {
-    _str.assign(name);
-
-    _os->write(XMLRPC_MEMBER, sizeof(XMLRPC_MEMBER)/sizeof(Char));
-    _os->write(XMLRPC_NAME, sizeof(XMLRPC_NAME)/sizeof(Char));
-    Xml::xmlEncode(*_os, _str );
-    _os->write(XMLRPC_NAME_END, sizeof(XMLRPC_NAME_END)/sizeof(Char));
+    const Parameter* param = _paramStack.back()->type()->getParameter(name);
+    _paramStack.push_back(param);
 }
 
 
 void SoapFormatter::onFinishMember()
 {
-    _os->write(XMLRPC_MEMBER_END, sizeof(XMLRPC_MEMBER_END)/sizeof(Char));
+    _paramStack.pop_back();
 }
 
 
 void SoapFormatter::onFinishStruct()
 {
-    _os->write(XMLRPC_STRUCT_END, sizeof(XMLRPC_STRUCT_END)/sizeof(Char));
-    _os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
+    _str.assign( _paramStack.back()->name().c_str() );
+
+    *_os << '<' << '/';
+    Xml::xmlEncode(*_os, _str );
+    *_os << '>';
 }
 
 
 void SoapFormatter::onBeginParse(Composer& composer)
 {
-    _state = OnParam;
     _composer = &composer;
 }
 
@@ -408,9 +417,9 @@ void SoapFormatter::onParse()
 
 bool SoapFormatter::advance(const Pt::Xml::Node& node)
 {
-    _paramDef = _paramDef->parse(node, _composer);
+    _paramType = _paramType->parse(node, _composer);
 
-    if( ! _paramDef )
+    if( ! _paramType )
         return true;
 
     return false;

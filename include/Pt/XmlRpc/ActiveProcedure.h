@@ -40,7 +40,7 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class Responder;
+class ResponderBase;
 
 template < typename R,
            typename A1 = Pt::Void,
@@ -69,7 +69,7 @@ class ActiveProcedure : public ServiceProcedure
         typedef A10 Arg10T;
 
     public:
-        ActiveProcedure(Responder& resp)
+        ActiveProcedure(ResponderBase& resp)
         : ServiceProcedure(resp)
         , _a1(&resp.context())
         , _a2(&resp.context())
@@ -189,7 +189,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
         typedef Void Arg10T;
 
     public:
-        ActiveProcedure(Responder& resp)
+        ActiveProcedure(ResponderBase& resp)
         : ServiceProcedure(resp)
         , _a1(&resp.context())
         , _a2(&resp.context())
@@ -304,7 +304,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
         typedef Void Arg10T;
 
     public:
-        ActiveProcedure(Responder& resp)
+        ActiveProcedure(ResponderBase& resp)
         : ServiceProcedure(resp)
         , _a1(&resp.context())
         , _a2(&resp.context())
@@ -413,7 +413,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6, A7,
         typedef Void Arg10T;
 
     public:
-        ActiveProcedure(Responder& resp)
+        ActiveProcedure(ResponderBase& resp)
         : ServiceProcedure(resp)
         , _a1(&resp.context())
         , _a2(&resp.context())
@@ -517,7 +517,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5, A6,
         typedef Void Arg10T;
 
     public:
-        ActiveProcedure(Responder& resp)
+        ActiveProcedure(ResponderBase& resp)
         : ServiceProcedure(resp)
         , _a1(&resp.context())
         , _a2(&resp.context())
@@ -615,7 +615,7 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5,
         typedef Void Arg10T;
 
     public:
-        ActiveProcedure(Responder& resp)
+        ActiveProcedure(ResponderBase& resp)
         : ServiceProcedure(resp)
         , _a1(&resp.context())
         , _a2(&resp.context())
@@ -708,7 +708,7 @@ class ActiveProcedure<R, A1, A2, A3, A4,
         typedef Void Arg10T;
 
     public:
-        ActiveProcedure(Responder& resp)
+        ActiveProcedure(ResponderBase& resp)
         : ServiceProcedure(resp)
         , _a1(&resp.context())
         , _a2(&resp.context())
@@ -795,7 +795,7 @@ class ActiveProcedure<R, A1, A2, A3,
         typedef Void Arg10T;
 
     public:
-        ActiveProcedure(Responder& resp)
+        ActiveProcedure(ResponderBase& resp)
         : ServiceProcedure(resp)
         , _a1(&resp.context())
         , _a2(&resp.context())
@@ -878,7 +878,7 @@ class ActiveProcedure<R, A1, A2,
         typedef Void Arg10T;
 
     public:
-        ActiveProcedure(Responder& resp)
+        ActiveProcedure(ResponderBase& resp)
         : ServiceProcedure(resp)
         , _a1(&resp.context())
         , _a2(&resp.context())
@@ -954,7 +954,7 @@ class ActiveProcedure<R, A1,
         typedef Pt::Void Arg10T;
 
     public:
-        ActiveProcedure(Responder& resp)
+        ActiveProcedure(ResponderBase& resp)
         : ServiceProcedure(resp)
         , _a1(&resp.context())
         , _r(&resp.context())
@@ -1022,7 +1022,7 @@ class ActiveProcedure<R,
         typedef Pt::Void Arg10T;
 
     public:
-        ActiveProcedure(Responder& resp)
+        ActiveProcedure(ResponderBase& resp)
         : ServiceProcedure(resp)
         , _r( &resp.context() )
         {
@@ -1062,7 +1062,7 @@ template <typename CallT>
 class ActiveProcedureDef : public ServiceProcedureDef
 {
     public:
-        ActiveProcedureDef(const Callable<CallT*, Responder&>& cb)
+        ActiveProcedureDef(const Callable<CallT*, ResponderBase&>& cb)
         : _cb(0)
         {
             _cb = cb.clone();
@@ -1074,7 +1074,7 @@ class ActiveProcedureDef : public ServiceProcedureDef
         }
 
     protected:
-        virtual ServiceProcedure* onCreateProcedure(Responder& resp) const
+        virtual ServiceProcedure* onCreateProcedure(ResponderBase& resp) const
         {
             typedef typename CallT::ReturnT R;
             typedef typename CallT::Arg1T A1;
@@ -1093,7 +1093,7 @@ class ActiveProcedureDef : public ServiceProcedureDef
         }
 
     private:
-        const Callable<CallT*, Responder&>* _cb;
+        const Callable<CallT*, ResponderBase&>* _cb;
 };
 
 } // namespace XmlRpc

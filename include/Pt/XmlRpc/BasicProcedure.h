@@ -41,7 +41,7 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class Responder;
+class ResponderBase;
 
 //
 // BasicProcedure with 10 arguments
@@ -60,7 +60,7 @@ template < typename R,
 class BasicProcedure : public ServiceProcedure
 {
     public:
-        BasicProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>& cb, Responder& resp)
+        BasicProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>& cb, ResponderBase& resp)
         : ServiceProcedure(resp)
         , _cb(0)
         , _a1(&resp.context())
@@ -181,7 +181,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>& cb, Responder& resp)
+        BasicProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>& cb, ResponderBase& resp)
         : ServiceProcedure(resp)
         , _cb(0)
         , _a1(&resp.context())
@@ -296,7 +296,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8>& cb, Responder& resp)
+        BasicProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7, A8>& cb, ResponderBase& resp)
         : ServiceProcedure(resp)
         , _cb(0)
         , _a1(&resp.context())
@@ -405,7 +405,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7>& cb, Responder& resp)
+        BasicProcedure( const Callable<R, A1, A2, A3, A4, A5, A6, A7>& cb, ResponderBase& resp)
         : ServiceProcedure(resp)
         , _cb(0)
         , _a1(&resp.context())
@@ -508,7 +508,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5, A6,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicProcedure( const Callable<R, A1, A2, A3, A4, A5, A6>& cb, Responder& resp)
+        BasicProcedure( const Callable<R, A1, A2, A3, A4, A5, A6>& cb, ResponderBase& resp)
         : ServiceProcedure(resp)
         , _cb(0)
         , _a1(&resp.context())
@@ -605,7 +605,7 @@ class BasicProcedure<R, A1, A2, A3, A4, A5,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicProcedure( const Callable<R, A1, A2, A3, A4, A5>& cb, Responder& resp)
+        BasicProcedure( const Callable<R, A1, A2, A3, A4, A5>& cb, ResponderBase& resp)
         : ServiceProcedure(resp)
         , _cb(0)
         , _a1(&resp.context())
@@ -696,7 +696,7 @@ class BasicProcedure<R, A1, A2, A3, A4,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicProcedure( const Callable<R, A1, A2, A3, A4>& cb, Responder& resp)
+        BasicProcedure( const Callable<R, A1, A2, A3, A4>& cb, ResponderBase& resp)
         : ServiceProcedure(resp)
         , _cb(0)
         , _a1(&resp.context())
@@ -781,7 +781,7 @@ class BasicProcedure<R, A1, A2, A3,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicProcedure( const Callable<R, A1, A2, A3>& cb, Responder& resp )
+        BasicProcedure( const Callable<R, A1, A2, A3>& cb, ResponderBase& resp )
         : ServiceProcedure(resp)
         , _cb(0)
         , _a1(&resp.context())
@@ -860,7 +860,7 @@ class BasicProcedure<R, A1, A2,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicProcedure( const Callable<R, A1, A2>& cb, Responder& resp )
+        BasicProcedure( const Callable<R, A1, A2>& cb, ResponderBase& resp )
         : ServiceProcedure(resp)
         , _cb(0)
         , _a1(&resp.context())
@@ -933,7 +933,7 @@ class BasicProcedure<R, A1,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicProcedure( const Callable<R, A1>& cb, Responder& resp)
+        BasicProcedure( const Callable<R, A1>& cb, ResponderBase& resp)
         : ServiceProcedure(resp)
         , _cb(0)
         , _a1(&resp.context())
@@ -1002,7 +1002,7 @@ class BasicProcedure<R,
                             Pt::Void> : public ServiceProcedure
 {
     public:
-        BasicProcedure(const Callable<R>& cb, Responder& resp)
+        BasicProcedure(const Callable<R>& cb, ResponderBase& resp)
         : ServiceProcedure(resp)
         , _cb(0)
         , _r(&resp.context())
@@ -1072,7 +1072,7 @@ class BasicProcedureDef : public ServiceProcedureDef
         }
 
     protected:
-        virtual ServiceProcedure* onCreateProcedure(Responder& resp) const
+        virtual ServiceProcedure* onCreateProcedure(ResponderBase& resp) const
         { 
             return new BasicProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>( *_cb, resp ); 
         }

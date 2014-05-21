@@ -40,86 +40,200 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class PT_XMLRPC_API ParameterDefinition : private NonCopyable
+class Parameter;
+
+class PT_XMLRPC_API Type : private NonCopyable
 {
     public:
-        ParameterDefinition();
+        Type();
 
-        virtual ~ParameterDefinition();
+        virtual ~Type();
 
-        virtual const ParameterDefinition* parse(const Xml::Node& node, Composer*& composer) const = 0;
-
-        ParameterDefinition* parent() const
+        Type* parent() const
         { return _parent; }
 
-        void setParent(ParameterDefinition* p)
+        void setParent(Type* p)
         { _parent = p; }
 
+        virtual const Type* parse(const Xml::Node& node, Composer*& composer) const = 0;
+
+        virtual const Parameter* getParameter(std::size_t n) const = 0;
+
+        virtual const Parameter* getParameter(const std::string& name) const = 0;
+
     private:
-        ParameterDefinition* _parent;
+        Type* _parent;
 };
 
 
-class PT_XMLRPC_API IntegerParameter : public ParameterDefinition
+class Parameter
 {
     public:
-        IntegerParameter();
+        Parameter()
+        : _type(0)
+        {}
+        
+        Parameter(const std::string& name, Type& t)
+        : _name(name)
+        , _type(&t)
+        { }
 
-        virtual ~IntegerParameter();
+        virtual ~Parameter()
+        {}
 
-        virtual const ParameterDefinition* parse(const Xml::Node& node, Composer*& composer) const;
+        void set(const std::string& name, Type& t)
+        {
+            _name = name;
+            _type = &t;
+        }
+
+        void setParent(Type* p)
+        { 
+            if(_type)
+                _type->setParent(p); 
+        }
+
+        const Type* type() const
+        { return _type; }
+
+        const std::string& name() const
+        { return _name; }
+
+    private:
+        std::string _name;
+        Type* _type;
 };
 
 
-class PT_XMLRPC_API StructParameter : public ParameterDefinition
+class PT_XMLRPC_API IntegerType : public Type
 {
     public:
-        StructParameter();
+        IntegerType();
 
-        virtual ~StructParameter();
+        virtual ~IntegerType();
 
-        void addParameter(const std::string& name, ParameterDefinition* param);
+        virtual const Type* parse(const Xml::Node& node, Composer*& composer) const;
 
-        virtual const ParameterDefinition* parse(const Xml::Node& node, Composer*& composer) const;
+        virtual const Parameter* getParameter(std::size_t n) const
+        { return 0; }
+
+        virtual const Parameter* getParameter(const std::string& name) const
+        { return 0; }
+};
+
+
+class PT_XMLRPC_API StructType : public Type
+{
+    public:
+        StructType();
+
+        virtual ~StructType();
+
+        void addParameter(const std::string& name, Type& param);
+
+        virtual const Type* parse(const Xml::Node& node, Composer*& composer) const;
+
+        virtual const Parameter* getParameter(std::size_t n) const
+        { return 0; }
+
+        virtual const Parameter* getParameter(const std::string& name) const
+        { return 0; }
 
     private:
-        typedef std::map<std::string, ParameterDefinition*> ParameterMap;
+        typedef std::map<std::string, Type*> ParameterMap;
         ParameterMap _params;
 };
 
 
-class PT_XMLRPC_API ArrayParameter : public ParameterDefinition
+class PT_XMLRPC_API ArrayType : public Type
 {
     public:
-        ArrayParameter(ParameterDefinition* elem = 0);
+        ArrayType();
+        
+        ArrayType(const std::string& elemName, Type& elem);
 
-        virtual ~ArrayParameter();
+        virtual ~ArrayType();
 
-        void setElement(ParameterDefinition* param);
+        void setElement(const std::string& elemName, Type& elem);
 
-        virtual const ParameterDefinition* parse(const Xml::Node& node, Composer*& composer) const;
+        virtual const Type* parse(const Xml::Node& node, Composer*& composer) const;
+
+        virtual const Parameter* getParameter(std::size_t n) const
+        { return &_elem; }
+
+        virtual const Parameter* getParameter(const std::string& name) const
+        { return &_elem; }
 
     private:
-        ParameterDefinition* _elem;
+        Parameter _elem;
 };
 
 
-class PT_XMLRPC_API ProcedureDefinition : private NonCopyable
+class PT_XMLRPC_API PortType : private NonCopyable
 {
     public:
-        ProcedureDefinition();
+        PortType();
 
-        virtual ~ProcedureDefinition();
+        virtual ~PortType();
 
-        void addParameter(const std::string& name, ParameterDefinition* param);
+        void setOutput(const std::string& name, Type& param);
 
-        const ParameterDefinition* getParameter(const std::string& name) const;
+        const Parameter* getOutput() const;
 
-        virtual const ParameterDefinition* parse(Xml::Node& node, const std::string& procName);
+        void addInput(const std::string& name, Type& param);
+
+        const Type* getInput(const std::string& name) const;
 
     private:
-        typedef std::map<std::string, ParameterDefinition*> ParameterMap;
+        typedef std::map<std::string, Type*> ParameterMap;
         ParameterMap _params;
+        Parameter _out;
+};
+
+
+template <typename T>
+class BasicParameter : public Type
+{
+    public:
+        BasicParameter()
+        { }
+};
+
+
+template <>
+class BasicParameter<int> : public IntegerType
+{
+    public:
+        BasicParameter()
+        { }
+};
+
+
+template <typename T>
+class BasicParameter< std::vector<T> > : public ArrayType
+{
+    public:
+        BasicParameter()
+        { 
+            setElement(_elem);
+        }
+
+    private:
+        BasicParameter<T> _elem;
+};
+
+
+template <typename R, typename A1, typename A2>
+class BasicProcedureDefinition : public PortType
+{
+    public:
+        BasicProcedureDefinition()
+        {}
+
+    private:
+        BasicParameter<R> _rDef;
+        BasicParameter<A1> _a1Def;
+        BasicParameter<A2> _a2Def;
 };
 
 
@@ -130,12 +244,12 @@ class PT_XMLRPC_API SoapServiceDefinition : public ServiceDefinition
 
         virtual ~SoapServiceDefinition();
 
-        void addDefinition(const std::string& name, ProcedureDefinition* procDef);
+        void addPort(const std::string& name, PortType& p);
 
-        const ProcedureDefinition* getDefinition(const std::string& name) const;
+        const PortType* getPort(const std::string& name) const;
 
     private:
-        typedef std::map<std::string, ProcedureDefinition*> ProcedureDefinitionMap;
+        typedef std::map<std::string, PortType*> ProcedureDefinitionMap;
         ProcedureDefinitionMap _procDefs;
 };
 

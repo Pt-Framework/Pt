@@ -42,7 +42,7 @@ class AsyncEcho : public Pt::XmlRpc::ActiveProcedure<std::string, std::string>
                 , public Pt::Connectable
 {
     public:   
-        AsyncEcho(Pt::XmlRpc::Responder& resp, EchoService& srv)
+        AsyncEcho(Pt::XmlRpc::ResponderBase& resp, EchoService& srv)
         : Pt::XmlRpc::ActiveProcedure<std::string, std::string>(resp)
         , _srv(&srv)
         {
@@ -81,7 +81,7 @@ class AsyncHello : public Pt::XmlRpc::ActiveProcedure<std::string>
                  , public Pt::Connectable
 {
     public:   
-        AsyncHello(Pt::XmlRpc::Responder& resp, const char* helloTxt)
+        AsyncHello(Pt::XmlRpc::ResponderBase& resp, const char* helloTxt)
         : Pt::XmlRpc::ActiveProcedure<std::string>(resp)
         , _hello(helloTxt)
         {
@@ -122,12 +122,12 @@ class EchoService : public Pt::XmlRpc::ServiceDefinition
             return msg;
         }
 
-        AsyncEcho* asyncEcho(Pt::XmlRpc::Responder& r)
+        AsyncEcho* asyncEcho(Pt::XmlRpc::ResponderBase& r)
         {
             return new AsyncEcho(r, *this);
         }
 
-        AsyncHello* asyncHello(Pt::XmlRpc::Responder& r)
+        AsyncHello* asyncHello(Pt::XmlRpc::ResponderBase& r)
         {
             return new AsyncHello(r, "Hello world!");
         }

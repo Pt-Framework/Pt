@@ -35,6 +35,8 @@
 #include "Pt/XmlRpc/RemoteProcedure.h"
 #include "Pt/Http/Server.h"
 #include "Pt/Http/Servlet.h"
+#include "Pt/Http/Request.h" // soap experiments
+#include "Pt/Http/Reply.h" // soap experiments
 #include "Pt/Net/Endpoint.h"
 #include "Pt/System/MainLoop.h"
 #include "Pt/System/Clock.h"
@@ -615,27 +617,83 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         ////////////////////////////////////////////////////////////
         // SoapArray
         //
+
+        class ArrayMultiplyPort : public Pt::XmlRpc::PortType
+        {
+            public:
+                ArrayMultiplyPort()
+                : _intArrayType("number", _intType)
+                {
+                    addInput("a", _intArrayType);
+                    addInput("b", _intArrayType);
+
+                    setOutput("prod", _intArrayType);
+                }
+
+            private:
+                Pt::XmlRpc::IntegerType _intType;
+                Pt::XmlRpc::ArrayType _intArrayType;
+        };
+
         void SoapArray()
         {
             Pt::XmlRpc::SoapServiceDefinition serviceDef;
             serviceDef.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyVector);
 
-            Pt::XmlRpc::ProcedureDefinition* procDef = new Pt::XmlRpc::ProcedureDefinition;
-            
-            Pt::XmlRpc::ArrayParameter* p1 = new Pt::XmlRpc::ArrayParameter( new Pt::XmlRpc::IntegerParameter );
-            procDef->addParameter("a", p1);
-            
-            Pt::XmlRpc::ArrayParameter* p2 = new Pt::XmlRpc::ArrayParameter( new Pt::XmlRpc::IntegerParameter );
-            procDef->addParameter("b", p2);
-            
-            serviceDef.addDefinition("multiply", procDef);
+            ArrayMultiplyPort port;
+            serviceDef.addPort("multiply", port);
             
             Pt::XmlRpc::SoapHttpService httpService(serviceDef);
             Pt::Http::MapUrl servlet("/calc", httpService);
             _server->addServlet(servlet);
 
+            Pt::Http::Client client(*_loop);
+            client.setHost( Pt::Net::Endpoint::ip4Loopback(8001) );
+            client.request().setUrl("/calc");
+            client.request().header().add("SOAPAction", "");
+            client.request().body() << "<Envelope>"
+                                       "  <Body>"
+                                       "    <multiply>"
+                                       "      <a>"
+                                       "        <number>1</number>"
+                                       "        <number>2</number>"
+                                       "      </a>"
+                                       "      <b>"
+                                       "        <number>3</number>"
+                                       "        <number>4</number>"
+                                       "      </b>"
+                                       "    </multiply>"
+                                       "  </Body>"
+                                       "</Envelope>";
+
+            client.replyReceived() += Pt::slot(*this, &PtXmlRpcTest::onSoapArrayFinished);
+            client.beginReceive();
             _loop->run();
         }
+
+        void onSoapArrayFinished(Pt::Http::Client& client)
+        {
+            Pt::Http::MessageProgress progress = client.endReceive();
+            
+            Pt::Http::Reply& reply = client.reply();
+            if( progress.header() )
+            {
+                std::clog << reply.statusCode() << ' ' << reply.statusText() << std::endl;
+            }
+            
+            if( progress.body() )
+            {
+                while ( reply.body().rdbuf()->in_avail() )
+                    std::clog << (char)reply.body().get();
+            }
+            if( progress.finished() )
+            {
+                client.loop()->exit();
+                return;
+            }
+            client.beginReceive();
+        }
+
 
         ////////////////////////////////////////////////////////////
         // Array

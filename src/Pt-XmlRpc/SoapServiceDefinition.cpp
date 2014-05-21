@@ -40,34 +40,34 @@ namespace Pt {
 namespace XmlRpc {
 
 ///////////////////////////////////////////////////////////////////////////////
-// ParameterDefinition
+// Type
 ///////////////////////////////////////////////////////////////////////////////
 
-ParameterDefinition::ParameterDefinition()
+Type::Type()
 : _parent(0)
 { 
 }
 
 
-ParameterDefinition::~ParameterDefinition()
+Type::~Type()
 {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// IntegerParameter
+// IntegerType
 ///////////////////////////////////////////////////////////////////////////////
 
-IntegerParameter::IntegerParameter()
+IntegerType::IntegerType()
 { 
 }
 
 
-IntegerParameter::~IntegerParameter()
+IntegerType::~IntegerType()
 {
 }
 
 
-const ParameterDefinition* IntegerParameter::parse(const Xml::Node& node, Composer*& composer) const
+const Type* IntegerType::parse(const Xml::Node& node, Composer*& composer) const
 {
     const Xml::EndElement* ee = Xml::toEndElement(&node);
     if(ee)
@@ -97,43 +97,28 @@ const ParameterDefinition* IntegerParameter::parse(const Xml::Node& node, Compos
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// StructParameter
+// StructType
 ///////////////////////////////////////////////////////////////////////////////
 
-StructParameter::StructParameter()
+StructType::StructType()
 { 
 }
 
 
-StructParameter::~StructParameter()
+StructType::~StructType()
 {
-    ParameterMap::iterator it;
-    for(it = _params.begin(); it != _params.end(); ++it)
-    {
-        delete it->second;
-    }
+
 }
 
 
-void StructParameter::addParameter(const std::string& name, ParameterDefinition* param)
+void StructType::addParameter(const std::string& name, Type& param)
 {
-    ParameterMap::iterator it = _params.find( name );
-    if( it == _params.end() )
-    {
-        std::pair<const std::string, ParameterDefinition*> p( name, param );
-        _params.insert( p );
-    }
-    else
-    {
-        delete it->second;
-        it->second = param;
-    }
-
-    param->setParent(this);
+    _params[name] = &param;
+    param.setParent(this);
 }
 
 
-const ParameterDefinition* StructParameter::parse(const Xml::Node& node, Composer*& composer) const
+const Type* StructType::parse(const Xml::Node& node, Composer*& composer) const
 {
     const Xml::EndElement* ee = Xml::toEndElement(&node);
     if(ee)
@@ -156,31 +141,35 @@ const ParameterDefinition* StructParameter::parse(const Xml::Node& node, Compose
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// StructParameter
+// StructType
 ///////////////////////////////////////////////////////////////////////////////
 
-ArrayParameter::ArrayParameter(ParameterDefinition* elem)
-: _elem(elem)
+ArrayType::ArrayType()
 { 
-    _elem->setParent(this);
 }
 
 
-ArrayParameter::~ArrayParameter()
+ArrayType::ArrayType(const std::string& name, Type& elem)
+: _elem(name, elem)
+{ 
+    _elem.set(name, elem);
+    _elem.setParent(this);
+}
+
+
+ArrayType::~ArrayType()
 {
-    delete _elem;
 }
 
 
-void ArrayParameter::setElement(ParameterDefinition* param)
+void ArrayType::setElement(const std::string& name, Type& elem)
 {
-    delete _elem;
-    _elem = param;
-    _elem->setParent(this);
+    _elem.set(name, elem);
+    _elem.setParent(this);
 }
 
 
-const ParameterDefinition* ArrayParameter::parse(const Xml::Node& node, Composer*& composer) const
+const Type* ArrayType::parse(const Xml::Node& node, Composer*& composer) const
 {
     const Xml::EndElement* ee = Xml::toEndElement(&node);
     if(ee)
@@ -194,67 +183,43 @@ const ParameterDefinition* ArrayParameter::parse(const Xml::Node& node, Composer
         return this;
 
     composer = composer->beginElement();
-    return _elem;
+    return _elem.type();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// ProcedureDefinition
+// PortType
 ///////////////////////////////////////////////////////////////////////////////
 
-ProcedureDefinition::ProcedureDefinition()
+PortType::PortType()
 { 
 }
 
 
-ProcedureDefinition::~ProcedureDefinition()
+PortType::~PortType()
 {
-    ParameterMap::iterator it;
-    for(it = _params.begin(); it != _params.end(); ++it)
-    {
-        delete it->second;
-    }
+
 }
 
 
-void ProcedureDefinition::addParameter(const std::string& name, ParameterDefinition* param)
+void PortType::setOutput(const std::string& name, Type& type)
 {
-    ParameterMap::iterator it = _params.find( name );
-    if( it == _params.end() )
-    {
-        std::pair<const std::string, ParameterDefinition*> p( name, param );
-        _params.insert( p );
-    }
-    else
-    {
-        delete it->second;
-        it->second = param;
-    }
+    _out.set(name, type);
 }
 
 
-const ParameterDefinition* ProcedureDefinition::parse(Xml::Node& node, const std::string& procName)
-{ 
-    Xml::EndElement* endElem = Xml::toEndElement(&node);
-    if(endElem && endElem->name().local() == procName.c_str())
-    {
-        return 0;
-    }
-
-    Xml::StartElement* startElem = Xml::toStartElement(&node);
-    if(startElem)
-    {
-        ParameterMap::iterator it;
-        it = _params.find( startElem->name().local().narrow() );
-        if(it == _params.end())
-            throw std::runtime_error("invalid parameter");
-        
-        return it->second;
-    }
-
-    return 0; 
+const Parameter* PortType::getOutput() const
+{
+    return &_out;
 }
 
-const ParameterDefinition* ProcedureDefinition::getParameter(const std::string& name) const
+
+void PortType::addInput(const std::string& name, Type& param)
+{
+    _params[name] = &param;
+}
+
+
+const Type* PortType::getInput(const std::string& name) const
 { 
     ParameterMap::const_iterator it;
     it = _params.find(name);
@@ -264,137 +229,6 @@ const ParameterDefinition* ProcedureDefinition::getParameter(const std::string& 
     return it->second;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Position
-///////////////////////////////////////////////////////////////////////////////
-
-struct Position
-{
-    Position()
-    : longitude(0), latitude(0)
-    {}
-    
-    int longitude;
-    int latitude;
-};
-
-
-void operator >>=(const SerializationInfo& si, Position& p)
-{
-    si.getMember("longitude") >>= p.longitude;
-    si.getMember("latitude") >>= p.latitude;
-}
-
-
-void operator <<=(SerializationInfo& si, const Position& p)
-{
-    si.addMember("longitude") <<= p.longitude;
-    si.addMember("latitude") <<= p.latitude;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// testSoap
-///////////////////////////////////////////////////////////////////////////////
-
-void testSoap()
-{
-    ProcedureDefinition proc;
-    
-    StructParameter* p1 = new StructParameter;
-    p1->addParameter("longitude", new IntegerParameter);
-    p1->addParameter("latitude", new IntegerParameter);
-    proc.addParameter("position", p1);
-    
-    ArrayParameter* p2 = new ArrayParameter( new IntegerParameter );
-    proc.addParameter("numbers", p2);
-
-    Position position;
-    BasicComposer<Position> a1;
-    a1.begin(position);
-
-    std::vector<int> numbers;
-    BasicComposer< std::vector<int> > a2;
-    a2.begin(numbers);
-
-    std::stringstream iss;
-    iss << "<myMethod>"
-           "  <position>"
-           "    <longitude>10</longitude>"
-           "    <latitude>20</latitude>"
-           "  </position>"
-           "  <numbers>"
-           "    <number>1</number>"
-           "    <number>2</number>"
-           "    <number>3</number>"
-           "  </numbers>"
-           "</myMethod>";
-
-    Pt::Xml::BinaryInputSource is(iss);
-    Pt::Xml::XmlReader reader(is);
-
-    Pt::Xml::InputIterator it = reader.current();
-
-    for(it = reader.current(); it != reader.end(); ++it)
-    {
-        Xml::StartElement* startElem = Xml::toStartElement(&*it);
-        if(startElem)
-        {
-            if( startElem->name().local() != "myMethod" )
-                throw std::runtime_error("invalid procedure: myMethod" );
-
-            ++it;
-            break;
-        }
-    }
-    
-    Composer* composer = &a1;
-    int paramCount = 0;
-    for(it = reader.current(); it != reader.end(); ++it)
-    {
-        const ParameterDefinition* param = proc.parse(*it, "myMethod");
-        if(param)
-        {
-            ++it;
-
-            for(it = reader.current(); it != reader.end(); ++it)
-            {
-                param = param->parse(*it, composer);
-                if( ! param)
-                {
-                    paramCount++;
-                    composer = &a2;
-                    break;
-                }
-            }
-
-            if(paramCount == 2)
-            {
-                ++it;
-                break;
-            }
-        }
-    }
-
-    for(it = reader.current(); it != reader.end(); ++it)
-    {
-        Xml::EndElement* endElem = Xml::toEndElement(&*it);
-        if(endElem)
-        {
-            if( endElem->name().local() != "myMethod" )
-                throw std::runtime_error("invalid procedure: myMethod");
-            
-            ++it;
-            break;
-        }
-    }
-
-    std::clog << "\n------------" << std::endl;
-    std::clog << "position: " << position.longitude << " " << position.latitude << std::endl;
-    std::clog << "numbers[" << numbers.size() << "]: " ;
-    std::copy ( numbers.begin(), numbers.end(), std::ostream_iterator<int>(std::clog,", ") );
-    std::clog << std::endl;
-    std::clog << "------------" << std::endl;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // SoapServiceDefinition
@@ -407,35 +241,17 @@ SoapServiceDefinition::SoapServiceDefinition()
 
 SoapServiceDefinition::~SoapServiceDefinition()
 {
-    System::MutexLock lock( mutex() );
-
-    ProcedureDefinitionMap::iterator it;
-    for(it = _procDefs.begin(); it != _procDefs.end(); ++it)
-    {
-        delete it->second;
-    }
 }
 
 
-void SoapServiceDefinition::addDefinition(const std::string& name, ProcedureDefinition* procDef)
+void SoapServiceDefinition::addPort(const std::string& name, PortType& procDef)
 {
     System::MutexLock lock( mutex() );
-
-    ProcedureDefinitionMap::iterator it = _procDefs.find( name );
-    if (it == _procDefs.end())
-    {
-        std::pair<const std::string, ProcedureDefinition*> p( name, procDef );
-        _procDefs.insert( p );
-    }
-    else
-    {
-        delete it->second;
-        it->second = procDef;
-    }
+    _procDefs[name] = &procDef;
 }
 
 
-const ProcedureDefinition* SoapServiceDefinition::getDefinition(const std::string& name) const
+const PortType* SoapServiceDefinition::getPort(const std::string& name) const
 {
     System::MutexLock lock( mutex() );
 

@@ -52,7 +52,7 @@ namespace XmlRpc {
 
 /** @brief Dispatches requests to a service procedure.
 */
-class PT_XMLRPC_API SoapResponder : private NonCopyable
+class PT_XMLRPC_API SoapResponder : private ResponderBase
 {
     public:
         /** @brief Construct with Service.
@@ -177,7 +177,7 @@ class PT_XMLRPC_API SoapResponder : private NonCopyable
 
         SerializationContext _context;
         SoapServiceDefinition* _serviceDef;
-        const ProcedureDefinition* _procDef;
+        const PortType* _procDef;
         ServiceProcedure* _proc;
         
         Xml::BinaryInputSource _bin;
