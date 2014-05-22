@@ -28,36 +28,16 @@
 
 #include <Pt/XmlRpc/SoapServiceDefinition.h>
 
-// SOAP includes
-#include <Pt/Xml/StartElement.h>
-#include <Pt/Xml/Characters.h>
-#include <Pt/Xml/EndElement.h>
-#include <Pt/Convert.h>
-#include <iterator>
-
 namespace Pt {
 
 namespace XmlRpc {
-
-///////////////////////////////////////////////////////////////////////////////
-// Type
-///////////////////////////////////////////////////////////////////////////////
-
-Type::Type()
-: _parent(0)
-{ 
-}
-
-
-Type::~Type()
-{
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // IntegerType
 ///////////////////////////////////////////////////////////////////////////////
 
 IntegerType::IntegerType()
+: Type(Type::Int)
 { 
 }
 
@@ -66,41 +46,12 @@ IntegerType::~IntegerType()
 {
 }
 
-
-const Type* IntegerType::parse(const Xml::Node& node, Composer*& composer) const
-{
-    const Xml::EndElement* ee = Xml::toEndElement(&node);
-    if(ee)
-    {
-        composer = composer->finish();
-        return parent();
-    }
-
-    const Xml::StartElement* se = Xml::toStartElement(&node);
-    if(se)
-        return this;
-
-    const Xml::Characters* c = Xml::toCharacters(&node);
-    if(c)
-    {
-        Pt::int32_t number = 0;
-        bool ok = false;
-        parseInt( c->content().begin(), c->content().end(), number, ok);
-
-        if( ! ok )
-            throw std::runtime_error("invalid integer parameter");
-
-        composer->setInt(number);
-    }
-
-    return this; 
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // IntegerType
 ///////////////////////////////////////////////////////////////////////////////
 
 StringType::StringType()
+: Type(Type::String)
 { 
 }
 
@@ -109,34 +60,12 @@ StringType::~StringType()
 {
 }
 
-
-const Type* StringType::parse(const Xml::Node& node, Composer*& composer) const
-{
-    const Xml::EndElement* ee = Xml::toEndElement(&node);
-    if(ee)
-    {
-        composer = composer->finish();
-        return parent();
-    }
-
-    const Xml::StartElement* se = Xml::toStartElement(&node);
-    if(se)
-        return this;
-
-    const Xml::Characters* c = Xml::toCharacters(&node);
-    if(c)
-    {
-        composer->setString( c->content() );
-    }
-
-    return this; 
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // StructType
 ///////////////////////////////////////////////////////////////////////////////
 
 StructType::StructType()
+: Type(Type::Struct)
 { 
 }
 
@@ -147,33 +76,31 @@ StructType::~StructType()
 }
 
 
-void StructType::addParameter(const std::string& name, Type& param)
+void StructType::addParameter(const std::string& name, Type& t)
 {
-    _params[name] = &param;
-    param.setParent(this);
+    _params[name] = &t;
+
+    Parameter param(name, t);
+    _paramList.push_back(param);
 }
 
 
-const Type* StructType::parse(const Xml::Node& node, Composer*& composer) const
-{
-    const Xml::EndElement* ee = Xml::toEndElement(&node);
-    if(ee)
+const Parameter* StructType::getParameter(std::size_t n) const
+{ 
+    return n >= _paramList.size() ? 0 : &_paramList[n]; 
+}
+
+
+const Parameter* StructType::getParameter(const std::string& name) const
+{ 
+    ParameterList::const_iterator it;
+    for(it = _paramList.begin(); it != _paramList.end(); ++it)
     {
-        composer = composer->finish();
-        return parent();
+        if(it->name() == name)
+            return &*it;
     }
-
-    const Xml::StartElement* se = Xml::toStartElement(&node);
-    if( ! se)
-        return this;
-
-    ParameterMap::const_iterator it;
-    it = _params.find( se->name().local().narrow() );
-    if( it == _params.end() )
-        throw std::runtime_error("invalid struct parameter");
-
-    composer = composer->beginMember(it->first);
-    return it->second;
+    
+    return 0; 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -181,15 +108,15 @@ const Type* StructType::parse(const Xml::Node& node, Composer*& composer) const
 ///////////////////////////////////////////////////////////////////////////////
 
 ArrayType::ArrayType()
+: Type(Type::Array)
 { 
 }
 
 
 ArrayType::ArrayType(const std::string& name, Type& elem)
-: _elem(name, elem)
-{ 
-    _elem.set(name, elem);
-    _elem.setParent(this);
+: Type(Type::Array)
+, _elem(name, elem)
+{
 }
 
 
@@ -201,25 +128,18 @@ ArrayType::~ArrayType()
 void ArrayType::setElement(const std::string& name, Type& elem)
 {
     _elem.set(name, elem);
-    _elem.setParent(this);
 }
 
 
-const Type* ArrayType::parse(const Xml::Node& node, Composer*& composer) const
-{
-    const Xml::EndElement* ee = Xml::toEndElement(&node);
-    if(ee)
-    {
-        composer = composer->finish();
-        return parent();
-    }
+const Parameter* ArrayType::getParameter(std::size_t n) const
+{ 
+    return &_elem; 
+}
 
-    const Xml::StartElement* se = Xml::toStartElement(&node);
-    if( ! se)
-        return this;
 
-    composer = composer->beginElement();
-    return _elem.type();
+const Parameter* ArrayType::getParameter(const std::string& name) const
+{ 
+    return &_elem; 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -237,6 +157,26 @@ PortType::~PortType()
 }
 
 
+void PortType::addInput(const std::string& name, Type& t)
+{
+    Parameter param(name, t);
+    _params.push_back(param);
+}
+
+
+const Parameter* PortType::getInput(const std::string& name) const
+{ 
+    ParameterList::const_iterator it;
+    for(it = _params.begin(); it != _params.end(); ++it)
+    {
+        if(it->name() == name)
+            return &*it;
+    }
+    
+    return 0; 
+}
+
+
 void PortType::setOutput(const std::string& name, Type& type)
 {
     _out.set(name, type);
@@ -247,24 +187,6 @@ const Parameter* PortType::getOutput() const
 {
     return &_out;
 }
-
-
-void PortType::addInput(const std::string& name, Type& param)
-{
-    _params[name] = &param;
-}
-
-
-const Type* PortType::getInput(const std::string& name) const
-{ 
-    ParameterMap::const_iterator it;
-    it = _params.find(name);
-    if(it == _params.end())
-        throw std::runtime_error("invalid parameter");
-        
-    return it->second;
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // SoapServiceDefinition

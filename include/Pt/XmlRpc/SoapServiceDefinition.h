@@ -34,6 +34,7 @@
 #include <Pt/NonCopyable.h>
 #include <Pt/Types.h>
 #include <string>
+#include <vector>
 #include <map>
 
 namespace Pt {
@@ -42,27 +43,34 @@ namespace XmlRpc {
 
 class Parameter;
 
-class PT_XMLRPC_API Type : private NonCopyable
+class Type : private NonCopyable
 {
     public:
-        Type();
+        enum TypeId
+        {
+            Array = 1,
+            Struct = 2,
+            Int = 3,
+            String = 4
+        };
+    
+    public:
+        explicit Type(TypeId typeId)
+        : _typeId(typeId)
+        {}
 
-        virtual ~Type();
+        virtual ~Type()
+        {}
 
-        Type* parent() const
-        { return _parent; }
-
-        void setParent(Type* p)
-        { _parent = p; }
-
-        virtual const Type* parse(const Xml::Node& node, Composer*& composer) const = 0;
+        TypeId typeId() const
+        { return _typeId; }
 
         virtual const Parameter* getParameter(std::size_t n) const = 0;
 
         virtual const Parameter* getParameter(const std::string& name) const = 0;
 
     private:
-        Type* _parent;
+        TypeId _typeId;
 };
 
 
@@ -87,12 +95,6 @@ class Parameter
             _type = &t;
         }
 
-        void setParent(Type* p)
-        { 
-            if(_type)
-                _type->setParent(p); 
-        }
-
         const Type* type() const
         { return _type; }
 
@@ -112,8 +114,6 @@ class PT_XMLRPC_API IntegerType : public Type
 
         virtual ~IntegerType();
 
-        virtual const Type* parse(const Xml::Node& node, Composer*& composer) const;
-
         virtual const Parameter* getParameter(std::size_t n) const
         { return 0; }
 
@@ -128,8 +128,6 @@ class PT_XMLRPC_API StringType : public Type
         StringType();
 
         virtual ~StringType();
-
-        virtual const Type* parse(const Xml::Node& node, Composer*& composer) const;
 
         virtual const Parameter* getParameter(std::size_t n) const
         { return 0; }
@@ -148,17 +146,16 @@ class PT_XMLRPC_API StructType : public Type
 
         void addParameter(const std::string& name, Type& param);
 
-        virtual const Type* parse(const Xml::Node& node, Composer*& composer) const;
+        virtual const Parameter* getParameter(std::size_t n) const;
 
-        virtual const Parameter* getParameter(std::size_t n) const
-        { return 0; }
-
-        virtual const Parameter* getParameter(const std::string& name) const
-        { return 0; }
+        virtual const Parameter* getParameter(const std::string& name) const;
 
     private:
         typedef std::map<std::string, Type*> ParameterMap;
         ParameterMap _params;
+
+        typedef std::vector<Parameter> ParameterList;
+        ParameterList _paramList;
 };
 
 
@@ -173,13 +170,9 @@ class PT_XMLRPC_API ArrayType : public Type
 
         void setElement(const std::string& elemName, Type& elem);
 
-        virtual const Type* parse(const Xml::Node& node, Composer*& composer) const;
+        virtual const Parameter* getParameter(std::size_t n) const;
 
-        virtual const Parameter* getParameter(std::size_t n) const
-        { return &_elem; }
-
-        virtual const Parameter* getParameter(const std::string& name) const
-        { return &_elem; }
+        virtual const Parameter* getParameter(const std::string& name) const;
 
     private:
         Parameter _elem;
@@ -193,17 +186,17 @@ class PT_XMLRPC_API PortType : private NonCopyable
 
         virtual ~PortType();
 
+        void addInput(const std::string& name, Type& param);
+
+        const Parameter* getInput(const std::string& name) const;
+
         void setOutput(const std::string& name, Type& param);
 
         const Parameter* getOutput() const;
 
-        void addInput(const std::string& name, Type& param);
-
-        const Type* getInput(const std::string& name) const;
-
     private:
-        typedef std::map<std::string, Type*> ParameterMap;
-        ParameterMap _params;
+        typedef std::vector<Parameter> ParameterList;
+        ParameterList _params;
         Parameter _out;
 };
 

@@ -43,7 +43,6 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class Type;
 class Parameter;
 
 /** @internal @brief Formatter to read and write XML-RPC messages.
@@ -55,8 +54,6 @@ class PT_XMLRPC_API SoapFormatter : public Pt::Formatter
         SoapFormatter(std::basic_ostream<Char>& os);
 
         ~SoapFormatter();
-
-        void setParameter(const Type& p);
 
         void setParameter(const Parameter& p);
 
@@ -140,7 +137,6 @@ class PT_XMLRPC_API SoapFormatter : public Pt::Formatter
 
     private:
         Xml::XmlReader* _reader;
-        const Type* _paramType;
         std::vector<const Parameter*> _paramStack;
         Composer* _composer;
         

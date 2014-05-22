@@ -49,18 +49,7 @@ static const Pt::Char XMLRPC_XMLDECL[] = { '<', '?', 'x', 'm', 'l', ' ',
     'e', 'n', 'c', 'o', 'd', 'i', 'n', 'g', '=', '"', 'U', 'T', 'F', '-', '8', '"', 
     '?', '>' };
 
-static const Pt::Char XMLRPC_REPLY_BEGIN[]  = { '<', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>',
-                                                '<', 'p', 'a', 'r', 'a', 'm', 's', '>',
-                                                '<', 'p', 'a', 'r', 'a', 'm', '>' };
-
-static const Pt::Char XMLRPC_REPLY_END[]  = { '<', '/', 'p', 'a', 'r', 'a', 'm', '>',
-                                              '<', '/', 'p', 'a', 'r', 'a', 'm', 's', '>',
-                                              '<', '/', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>', };
-
 static const Pt::Char XMLRPC_METHODRESPONSE[]  = { '<', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>' };
-static const Pt::Char XMLRPC_METHODCALL[]  = { '<', 'm', 'e', 't', 'h', 'o', 'd', 'C', 'a', 'l', 'l', '>' };
-static const Pt::Char XMLRPC_PARAMS[]  = { '<', 'p', 'a', 'r', 'a', 'm', 's', '>' };
-static const Pt::Char XMLRPC_PARAM[]  = { '<', 'p', 'a', 'r', 'a', 'm', '>' };
 static const Pt::Char XMLRPC_FAULT[]  = { '<', 'f', 'a', 'u', 'l', 't', '>' };
 static const Pt::Char XMLRPC_FAULTCODE[]  = { 'f', 'a', 'u', 'l', 't', 'C', 'o', 'd', 'e' };
 static const Pt::Char XMLRPC_FAULTSTRING[]  = { 'f', 'a', 'u', 'l', 't', 'S', 't', 'r', 'i', 'n', 'g' };
@@ -72,9 +61,6 @@ static const Pt::Char XMLRPC_INT[]     = { '<', 'i', 'n', 't', '>' };
 static const Pt::Char XMLRPC_STRING[]  = { '<', 's', 't', 'r', 'i', 'n', 'g', '>' };
 
 static const Pt::Char XMLRPC_METHODRESPONSE_END[]  = { '<', '/', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>' };
-static const Pt::Char XMLRPC_METHODCALL_END[]  = { '<', '/', 'm', 'e', 't', 'h', 'o', 'd', 'C', 'a', 'l', 'l', '>' };
-static const Pt::Char XMLRPC_PARAMS_END[]  = { '<', '/', 'p', 'a', 'r', 'a', 'm', 's', '>' };
-static const Pt::Char XMLRPC_PARAM_END[]  = { '<', '/', 'p', 'a', 'r', 'a', 'm', '>' };
 static const Pt::Char XMLRPC_FAULT_END[]  = { '<', '/', 'f', 'a', 'u', 'l', 't', '>' };
 static const Pt::Char XMLRPC_STRUCT_END[]  = { '<', '/', 's', 't', 'r', 'u', 'c', 't', '>' };
 static const Pt::Char XMLRPC_MEMBER_END[]  = { '<', '/', 'm', 'e', 'm', 'b', 'e', 'r', '>' };
@@ -116,12 +102,6 @@ SoapResponder::~SoapResponder()
 
     if(_proc)
         _serviceDef->releaseProcedure(_proc);
-}
-
-
-SerializationContext& SoapResponder::context()
-{ 
-    return _context; 
 }
 
 
@@ -458,7 +438,7 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
                         throw SerializationError("too many arguments");
                 }
 
-                const Type* paramType = _procDef->getInput( se.name().local().narrow() );
+                const Parameter* paramType = _procDef->getInput( se.name().local().narrow() );
                 if( ! paramType )
                     throw Fault("no such parameter", Pt::XmlRpc::Fault::MethodNotFound);
 

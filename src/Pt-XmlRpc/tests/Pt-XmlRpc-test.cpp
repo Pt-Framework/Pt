@@ -691,6 +691,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
                 client.loop()->exit();
                 return;
             }
+            
             client.beginReceive();
         }
 

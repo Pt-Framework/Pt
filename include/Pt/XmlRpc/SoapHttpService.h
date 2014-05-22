@@ -63,9 +63,6 @@ class PT_XMLRPC_API SoapResponder : private ResponderBase
         */
         virtual ~SoapResponder();
 
-        //! @internal
-        SerializationContext& context();
-
         /** @brief Cancels the responder.
         */
         void cancel();

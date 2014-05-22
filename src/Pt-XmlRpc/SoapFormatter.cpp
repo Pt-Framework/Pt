@@ -25,18 +25,17 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include <Pt/XmlRpc/Api.h>
+
 #include <Pt/XmlRpc/SoapFormatter.h>
 #include <Pt/XmlRpc/SoapServiceDefinition.h>
 #include <Pt/Xml/XmlWriter.h>
 #include <Pt/Xml/StartElement.h>
 #include <Pt/Xml/EndElement.h>
 #include <Pt/Xml/Characters.h>
-#include <Pt/Convert.h>
 #include <Pt/SerializationError.h>
-#include <limits>
+#include <Pt/Convert.h>
+#include <iterator>
 #include <cassert>
-#include <cmath>
 #include <cstddef>
 
 #define log_define(e)
@@ -44,29 +43,6 @@
 log_define("Pt.XmlRpc.SoapFormatter")
 
 namespace  {
-
-static const Pt::Char XMLRPC_VALUE[]   = { '<', 'v', 'a', 'l', 'u', 'e', '>' };
-static const Pt::Char XMLRPC_INT[]     = { '<', 'i', 'n', 't', '>' };
-static const Pt::Char XMLRPC_DOUBLE[]  = { '<', 'd', 'o', 'u', 'b', 'l', 'e', '>' };
-static const Pt::Char XMLRPC_STRING[]  = { '<', 's', 't', 'r', 'i', 'n', 'g', '>' };
-static const Pt::Char XMLRPC_BOOLEAN[] = { '<', 'b', 'o', 'o', 'l', 'e', 'a', 'n', '>' };
-static const Pt::Char XMLRPC_STRUCT[]  = { '<', 's', 't', 'r', 'u', 'c', 't', '>' };
-static const Pt::Char XMLRPC_MEMBER[]  = { '<', 'm', 'e', 'm', 'b', 'e', 'r', '>' };
-static const Pt::Char XMLRPC_NAME[]    = { '<', 'n', 'a', 'm', 'e', '>' };
-static const Pt::Char XMLRPC_ARRAY[]   = { '<', 'a', 'r', 'r', 'a', 'y', '>' };
-static const Pt::Char XMLRPC_DATA[]    = { '<', 'd', 'a', 't', 'a', '>' };
-
-static const Pt::Char XMLRPC_VALUE_END[]   = { '<', '/', 'v', 'a', 'l', 'u', 'e', '>' };
-static const Pt::Char XMLRPC_INT_END[]     = { '<', '/', 'i', 'n', 't', '>' };
-static const Pt::Char XMLRPC_DOUBLE_END[]  = { '<', '/', 'd', 'o', 'u', 'b', 'l', 'e', '>' };
-static const Pt::Char XMLRPC_STRING_END[]  = { '<', '/', 's', 't', 'r', 'i', 'n', 'g', '>' };
-static const Pt::Char XMLRPC_BOOLEAN_END[] = { '<', '/', 'b', 'o', 'o', 'l', 'e', 'a', 'n', '>' };
-static const Pt::Char XMLRPC_STRUCT_END[]  = { '<', '/', 's', 't', 'r', 'u', 'c', 't', '>' };
-static const Pt::Char XMLRPC_MEMBER_END[]  = { '<', '/', 'm', 'e', 'm', 'b', 'e', 'r', '>' };
-static const Pt::Char XMLRPC_NAME_END[]    = { '<', '/', 'n', 'a', 'm', 'e', '>' };
-static const Pt::Char XMLRPC_ARRAY_END[]   = { '<', '/', 'a', 'r', 'r', 'a', 'y', '>' };
-static const Pt::Char XMLRPC_DATA_END[]    = { '<', '/', 'd', 'a', 't', 'a', '>' };
-
 
 template<typename T>
 class array_appender : public std::iterator<std::output_iterator_tag, T>
@@ -142,7 +118,7 @@ void formatValue(std::basic_ostream<Pt::Char>& os, const std::string& name, cons
     os << '>';
 }
 
-}
+} // namespace
 
 namespace Pt {
 
@@ -150,7 +126,6 @@ namespace XmlRpc {
 
 SoapFormatter::SoapFormatter(std::basic_ostream<Char>& os)
 : _reader(0)
-, _paramType(0)
 , _composer(0)
 , _os(&os)
 { 
@@ -159,12 +134,6 @@ SoapFormatter::SoapFormatter(std::basic_ostream<Char>& os)
 
 SoapFormatter::~SoapFormatter()
 {
-}
-
-
-void SoapFormatter::setParameter(const Type& p)
-{
-    _paramType = &p;
 }
 
 
@@ -217,19 +186,8 @@ void SoapFormatter::onAddBool(const char* name, bool value,
 void SoapFormatter::onAddChar(const char* name, const Pt::Char& value,
                               const char* id)
 {
-    const std::string& paramName = _paramStack.back()->name();
-
-    *_os << '<';
-    for(std::size_t n = 0; n < paramName.size(); ++n)
-        *_os << paramName[n];
-    *_os << '>';
-    
-    Xml::xmlEncode(*_os, &value, 1);
-    
-    *_os << '<' << '/';
-    for(std::size_t n = 0; n < paramName.size(); ++n)
-        *_os << paramName[n];
-    *_os << '>';
+    Pt::Char buf[2] = { value, 0 };
+    onAddString(name, "", buf, id);
 }
 
 
@@ -417,12 +375,53 @@ void SoapFormatter::onParse()
 
 bool SoapFormatter::advance(const Pt::Xml::Node& node)
 {
-    _paramType = _paramType->parse(node, _composer);
+    if(node.type() == Xml::Node::StartElement)
+    {
+        const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-    if( ! _paramType )
-        return true;
+        const Type::TypeId typeId = _paramStack.back()->type()->typeId();
+                
+        if(typeId == Type::Struct)
+        {
+            _composer = _composer->beginMember( se.name().local().narrow() );
+        }
+        else if(typeId == Type::Array)
+        {
+            _composer = _composer->beginElement();
+        }
 
-    return false;
+        const Parameter* child = _paramStack.back()->type()->getParameter( se.name().local().narrow() );
+        if(child)
+            _paramStack.push_back(child);
+    }
+    else if(node.type() == Xml::Node::Characters)
+    {
+        const Xml::Characters& c = static_cast<const Xml::Characters&>(node);
+
+        const Type::TypeId typeId = _paramStack.back()->type()->typeId();
+        if(typeId == Type::Int)
+        {
+            Pt::int64_t number = 0;
+            bool ok = false;
+            parseInt( c.content().begin(), c.content().end(), number, ok);
+
+            if( ! ok )
+                throw SerializationError("invalid integer parameter");
+
+            _composer->setInt(number);
+        }
+        else if(typeId == Type::String)
+        {
+            _composer->setString( c.content() );
+        }
+    }
+    else if(node.type() == Xml::Node::EndElement)
+    {
+        _composer = _composer->finish();
+        _paramStack.pop_back();
+    }
+
+    return _paramStack.size() == 0;
 }
 
 } // namespace Xml
