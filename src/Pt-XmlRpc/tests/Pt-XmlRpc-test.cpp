@@ -622,12 +622,13 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         {
             public:
                 ArrayMultiplyPort()
-                : _intArrayType("number", _intType)
+                : Pt::XmlRpc::PortType("multiply", "multiplyResponse")
+                , _intArrayType(_intType, "number")
                 {
                     addInput("a", _intArrayType);
                     addInput("b", _intArrayType);
 
-                    setOutput("prod", _intArrayType);
+                    setOutput("multiplyResult", _intArrayType);
                 }
 
             private:
@@ -637,12 +638,13 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 
         void SoapArray()
         {
-            Pt::XmlRpc::SoapServiceDefinition serviceDef;
-            serviceDef.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyVector);
-
             ArrayMultiplyPort port;
-            serviceDef.addPort("multiply", port);
             
+            Pt::XmlRpc::SoapServiceDefinition serviceDef;
+            serviceDef.addPort(port);
+            serviceDef.setTargetNamespace("http://tempuri.org/");
+            serviceDef.registerProcedure(port.inputName(), *this, &PtXmlRpcTest::multiplyVector);
+
             Pt::XmlRpc::SoapHttpService httpService(serviceDef);
             Pt::Http::MapUrl servlet("/calc", httpService);
             _server->addServlet(servlet);
@@ -651,9 +653,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             client.setHost( Pt::Net::Endpoint::ip4Loopback(8001) );
             client.request().setUrl("/calc");
             client.request().header().add("SOAPAction", "");
-            client.request().body() << "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope\">"
+            client.request().body() << "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"
                                        "  <soap:Body>"
-                                       "    <multiply xmlns=\"http://calc.org\">"
+                                       "    <multiply xmlns=\"http://tempuri.org/\">"
                                        "      <a>"
                                        "        <number>1</number>"
                                        "        <number>2</number>"
@@ -670,7 +672,48 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             client.beginReceive();
             _loop->run();
         }
+/*
+<soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                 xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                 xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+  <soap12:Body>
+    <GetUsersResponse xmlns="http://tempuri.org/">
+      <GetUsersResult>
+        <string>string</string>
+        <string>string</string>
+      </GetUsersResult>
+    </GetUsersResponse>
+  </soap12:Body>
+</soap12:Envelope>
 
+
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+               xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+               xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <GetUsersResponse xmlns="http://tempuri.org/">
+      <GetUsersResult>
+        <string>string</string>
+        <string>string</string>
+      </GetUsersResult>
+    </GetUsersResponse>
+  </soap:Body>
+</soap:Envelope>
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <ArrayMultiplyResponse xmlns="http://tempuri.org/">
+      <ArrayMultiplyResult>
+        <number>3</number>
+        <number>8</number>
+      </ArrayMultiplyResult>
+    <ArrayMultiplyResponse>
+  </soap:Body>
+</soap:Envelope>
+*/
         void onSoapArrayFinished(Pt::Http::Client& client)
         {
             Pt::Http::MessageProgress progress = client.endReceive();

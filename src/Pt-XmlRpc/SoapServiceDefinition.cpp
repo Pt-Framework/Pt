@@ -113,7 +113,7 @@ ArrayType::ArrayType()
 }
 
 
-ArrayType::ArrayType(const std::string& name, Type& elem)
+ArrayType::ArrayType(Type& elem, const std::string& name)
 : Type(Type::Array)
 , _elem(name, elem)
 {
@@ -146,7 +146,9 @@ const Parameter* ArrayType::getParameter(const std::string& name) const
 // PortType
 ///////////////////////////////////////////////////////////////////////////////
 
-PortType::PortType()
+PortType::PortType(const std::string& inputName, const std::string& outputName)
+: _inputName(inputName)
+, _outputName(outputName)
 { 
 }
 
@@ -202,10 +204,10 @@ SoapServiceDefinition::~SoapServiceDefinition()
 }
 
 
-void SoapServiceDefinition::addPort(const std::string& name, PortType& procDef)
+void SoapServiceDefinition::addPort(PortType& p)
 {
     System::MutexLock lock( mutex() );
-    _procDefs[name] = &procDef;
+    _ports.push_back( &p );
 }
 
 
@@ -213,13 +215,14 @@ const PortType* SoapServiceDefinition::getPort(const std::string& name) const
 {
     System::MutexLock lock( mutex() );
 
-    ProcedureDefinitionMap::const_iterator it = _procDefs.find( name );
-    if( it == _procDefs.end() )
+    PortList::const_iterator it;
+    for(it = _ports.begin(); it != _ports.end(); ++it)
     {
-        return 0;
+        if((*it)->inputName() == name)
+            return *it;
     }
 
-    return it->second;
+    return 0;
 }
 
 } // namespace XmlRpc

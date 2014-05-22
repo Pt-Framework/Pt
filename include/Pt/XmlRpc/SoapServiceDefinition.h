@@ -164,7 +164,7 @@ class PT_XMLRPC_API ArrayType : public Type
     public:
         ArrayType();
         
-        ArrayType(const std::string& elemName, Type& elem);
+        ArrayType(Type& elem, const std::string& elemName);
 
         virtual ~ArrayType();
 
@@ -178,13 +178,18 @@ class PT_XMLRPC_API ArrayType : public Type
         Parameter _elem;
 };
 
-
 class PT_XMLRPC_API PortType : private NonCopyable
 {
     public:
-        PortType();
+        PortType(const std::string& inputName, const std::string& outputName);
 
         virtual ~PortType();
+
+        const std::string& inputName() const
+        { return _inputName; }
+
+        const std::string& outputName() const
+        { return _outputName; }
 
         void addInput(const std::string& name, Type& param);
 
@@ -198,8 +203,38 @@ class PT_XMLRPC_API PortType : private NonCopyable
         typedef std::vector<Parameter> ParameterList;
         ParameterList _params;
         Parameter _out;
+        std::string _inputName;
+        std::string _outputName;
 };
 
+
+class PT_XMLRPC_API SoapServiceDefinition : public ServiceDefinition
+{
+    public:
+        SoapServiceDefinition();
+
+        virtual ~SoapServiceDefinition();
+
+        const std::string& targetNamespace() const
+        { return _targetNamespace; }
+
+        void setTargetNamespace(const std::string& ns)
+        { _targetNamespace = ns; }
+
+        void addPort(PortType& p);
+
+        const PortType* getPort(const std::string& name) const;
+
+    private:
+        std::string _targetNamespace;
+        typedef std::vector<PortType*> PortList;
+        PortList _ports;
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
 class BasicParameter : public Type
@@ -244,23 +279,6 @@ class BasicProcedureDefinition : public PortType
         BasicParameter<R> _rDef;
         BasicParameter<A1> _a1Def;
         BasicParameter<A2> _a2Def;
-};
-
-
-class PT_XMLRPC_API SoapServiceDefinition : public ServiceDefinition
-{
-    public:
-        SoapServiceDefinition();
-
-        virtual ~SoapServiceDefinition();
-
-        void addPort(const std::string& name, PortType& p);
-
-        const PortType* getPort(const std::string& name) const;
-
-    private:
-        typedef std::map<std::string, PortType*> ProcedureDefinitionMap;
-        ProcedureDefinitionMap _procDefs;
 };
 
 } // namespace XmlRpc

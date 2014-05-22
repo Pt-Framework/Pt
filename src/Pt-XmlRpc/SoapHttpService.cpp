@@ -51,7 +51,7 @@ static const Pt::Char SOAP_REPLY_BEGIN[]  = { '<', 's', 'o', 'a', 'p', ':', 'E',
                                                'x', 'm', 'l', 'n', 's', ':', 's', 'o', 'a', 'p', '=',
                                                '"', 'h', 't', 't', 'p', ':', '/', '/', 's', 'c', 'h', 'e', 'm', 'a', 's', '.', 
                                                'x', 'm', 'l', 's', 'o', 'a', 'p', '.', 'o', 'r', 'g', '/', 's', 'o', 'a', 'p', 
-                                               '/', 'e', 'n', 'v', 'e', 'l', 'o', 'p', 'e', '"', '>',
+                                               '/', 'e', 'n', 'v', 'e', 'l', 'o', 'p', 'e', '/', '"', '>',
                                               '<', 's', 'o', 'a', 'p', ':', 'B', 'o', 'd', 'y', '>' };
 
 static const Pt::Char SOAP_REPLY_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'B', 'o', 'd', 'y', '>',
@@ -267,6 +267,10 @@ void SoapResponder::beginResult(std::ostream& os)
     assert(_result);
     _ts.write(SOAP_REPLY_BEGIN, sizeof(SOAP_REPLY_BEGIN)/sizeof(Char));
 
+    Pt::String outName = _procDef->outputName().c_str();
+    Pt::String targetNamespace = _serviceDef->targetNamespace().c_str();
+    _ts << '<' << outName << Pt::String(" xmlns=\"") << targetNamespace << '"' << '>';
+    
     const Parameter* param = _procDef->getOutput();
     assert(param);
 
@@ -290,6 +294,8 @@ void SoapResponder::finishResult()
 {
     if( ! _isFault )
     {
+        Pt::String outName = _procDef->outputName().c_str();
+        _ts << '<' << '/' << outName << '>';
         _ts.write(SOAP_REPLY_END, sizeof(SOAP_REPLY_END)/sizeof(Char));
         _ts.flush();
     }
@@ -385,8 +391,6 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
                 _proc = _serviceDef->getProcedure( se.name().local().narrow(), *this );
                 if( ! _proc )
                     throw Fault("no such procedure", Pt::XmlRpc::Fault::MethodNotFound);
-
-                std::clog << "-> Found Procedure: " << se.name().local().narrow() << std::endl;
 
                 _state = OnMethod;
             }
