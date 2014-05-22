@@ -651,9 +651,9 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             client.setHost( Pt::Net::Endpoint::ip4Loopback(8001) );
             client.request().setUrl("/calc");
             client.request().header().add("SOAPAction", "");
-            client.request().body() << "<Envelope>"
-                                       "  <Body>"
-                                       "    <multiply>"
+            client.request().body() << "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope\">"
+                                       "  <soap:Body>"
+                                       "    <multiply xmlns=\"http://calc.org\">"
                                        "      <a>"
                                        "        <number>1</number>"
                                        "        <number>2</number>"
@@ -663,8 +663,8 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
                                        "        <number>4</number>"
                                        "      </b>"
                                        "    </multiply>"
-                                       "  </Body>"
-                                       "</Envelope>";
+                                       "  </soap:Body>"
+                                       "</soap:Envelope>";
 
             client.replyReceived() += Pt::slot(*this, &PtXmlRpcTest::onSoapArrayFinished);
             client.beginReceive();
@@ -693,7 +693,6 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             }
             client.beginReceive();
         }
-
 
         ////////////////////////////////////////////////////////////
         // Array

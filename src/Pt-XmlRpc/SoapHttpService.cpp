@@ -84,11 +84,15 @@ static const Pt::Char XMLRPC_INT_END[]     = { '<', '/', 'i', 'n', 't', '>' };
 static const Pt::Char XMLRPC_STRING_END[]  = { '<', '/', 's', 't', 'r', 'i', 'n', 'g', '>' };
 
 
-static const Pt::Char SOAP_REPLY_BEGIN[]  = { '<', 'E', 'n', 'v', 'e', 'l', 'o', 'p', 'e', '>',
-                                              '<', 'B', 'o', 'd', 'y', '>' };
+static const Pt::Char SOAP_REPLY_BEGIN[]  = { '<', 's', 'o', 'a', 'p', ':', 'E', 'n', 'v', 'e', 'l', 'o', 'p', 'e', ' ',
+                                               'x', 'm', 'l', 'n', 's', ':', 's', 'o', 'a', 'p', '=',
+                                               '"', 'h', 't', 't', 'p', ':', '/', '/', 's', 'c', 'h', 'e', 'm', 'a', 's', '.', 
+                                               'x', 'm', 'l', 's', 'o', 'a', 'p', '.', 'o', 'r', 'g', '/', 's', 'o', 'a', 'p', 
+                                               '/', 'e', 'n', 'v', 'e', 'l', 'o', 'p', 'e', '"', '>',
+                                              '<', 's', 'o', 'a', 'p', ':', 'B', 'o', 'd', 'y', '>' };
 
-static const Pt::Char SOAP_REPLY_END[]  = { '<', '/', 'B', 'o', 'd', 'y', '>',
-                                            '<', '/', 'E', 'n', 'v', 'e', 'l', 'o', 'p', 'e', '>' }; 
+static const Pt::Char SOAP_REPLY_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'B', 'o', 'd', 'y', '>',
+                                            '<', '/', 's', 'o', 'a', 'p', ':', 'E', 'n', 'v', 'e', 'l', 'o', 'p', 'e', '>' }; 
 
 SoapResponder::SoapResponder(SoapServiceDefinition& service)
 : _serviceDef(&service)
