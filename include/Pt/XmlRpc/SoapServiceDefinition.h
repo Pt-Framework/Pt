@@ -122,6 +122,23 @@ class PT_XMLRPC_API IntegerType : public Type
 };
 
 
+class PT_XMLRPC_API StringType : public Type
+{
+    public:
+        StringType();
+
+        virtual ~StringType();
+
+        virtual const Type* parse(const Xml::Node& node, Composer*& composer) const;
+
+        virtual const Parameter* getParameter(std::size_t n) const
+        { return 0; }
+
+        virtual const Parameter* getParameter(const std::string& name) const
+        { return 0; }
+};
+
+
 class PT_XMLRPC_API StructType : public Type
 {
     public:

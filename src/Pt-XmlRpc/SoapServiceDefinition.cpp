@@ -97,6 +97,42 @@ const Type* IntegerType::parse(const Xml::Node& node, Composer*& composer) const
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// IntegerType
+///////////////////////////////////////////////////////////////////////////////
+
+StringType::StringType()
+{ 
+}
+
+
+StringType::~StringType()
+{
+}
+
+
+const Type* StringType::parse(const Xml::Node& node, Composer*& composer) const
+{
+    const Xml::EndElement* ee = Xml::toEndElement(&node);
+    if(ee)
+    {
+        composer = composer->finish();
+        return parent();
+    }
+
+    const Xml::StartElement* se = Xml::toStartElement(&node);
+    if(se)
+        return this;
+
+    const Xml::Characters* c = Xml::toCharacters(&node);
+    if(c)
+    {
+        composer->setString( c->content() );
+    }
+
+    return this; 
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // StructType
 ///////////////////////////////////////////////////////////////////////////////
 
