@@ -40,35 +40,12 @@
 #include <Pt/Convert.h>
 #include <cassert>
 
-namespace Pt {
-
-namespace XmlRpc {
+namespace {
 
 static const Pt::Char XMLRPC_XMLDECL[] = { '<', '?', 'x', 'm', 'l', ' ', 
     'v', 'e', 'r', 's', 'i', 'o', 'n', '=', '"', '1', '.', '0' , '"', ' ', 
     'e', 'n', 'c', 'o', 'd', 'i', 'n', 'g', '=', '"', 'U', 'T', 'F', '-', '8', '"', 
     '?', '>' };
-
-static const Pt::Char XMLRPC_METHODRESPONSE[]  = { '<', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>' };
-static const Pt::Char XMLRPC_FAULT[]  = { '<', 'f', 'a', 'u', 'l', 't', '>' };
-static const Pt::Char XMLRPC_FAULTCODE[]  = { 'f', 'a', 'u', 'l', 't', 'C', 'o', 'd', 'e' };
-static const Pt::Char XMLRPC_FAULTSTRING[]  = { 'f', 'a', 'u', 'l', 't', 'S', 't', 'r', 'i', 'n', 'g' };
-static const Pt::Char XMLRPC_STRUCT[]  = { '<', 's', 't', 'r', 'u', 'c', 't', '>' };
-static const Pt::Char XMLRPC_MEMBER[]  = { '<', 'm', 'e', 'm', 'b', 'e', 'r', '>' };
-static const Pt::Char XMLRPC_NAME[]    = { '<', 'n', 'a', 'm', 'e', '>' };
-static const Pt::Char XMLRPC_VALUE[]   = { '<', 'v', 'a', 'l', 'u', 'e', '>' };
-static const Pt::Char XMLRPC_INT[]     = { '<', 'i', 'n', 't', '>' };
-static const Pt::Char XMLRPC_STRING[]  = { '<', 's', 't', 'r', 'i', 'n', 'g', '>' };
-
-static const Pt::Char XMLRPC_METHODRESPONSE_END[]  = { '<', '/', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>' };
-static const Pt::Char XMLRPC_FAULT_END[]  = { '<', '/', 'f', 'a', 'u', 'l', 't', '>' };
-static const Pt::Char XMLRPC_STRUCT_END[]  = { '<', '/', 's', 't', 'r', 'u', 'c', 't', '>' };
-static const Pt::Char XMLRPC_MEMBER_END[]  = { '<', '/', 'm', 'e', 'm', 'b', 'e', 'r', '>' };
-static const Pt::Char XMLRPC_NAME_END[]    = { '<', '/', 'n', 'a', 'm', 'e', '>' };
-static const Pt::Char XMLRPC_VALUE_END[]   = { '<', '/', 'v', 'a', 'l', 'u', 'e', '>' };
-static const Pt::Char XMLRPC_INT_END[]     = { '<', '/', 'i', 'n', 't', '>' };
-static const Pt::Char XMLRPC_STRING_END[]  = { '<', '/', 's', 't', 'r', 'i', 'n', 'g', '>' };
-
 
 static const Pt::Char SOAP_REPLY_BEGIN[]  = { '<', 's', 'o', 'a', 'p', ':', 'E', 'n', 'v', 'e', 'l', 'o', 'p', 'e', ' ',
                                                'x', 'm', 'l', 'n', 's', ':', 's', 'o', 'a', 'p', '=',
@@ -79,6 +56,26 @@ static const Pt::Char SOAP_REPLY_BEGIN[]  = { '<', 's', 'o', 'a', 'p', ':', 'E',
 
 static const Pt::Char SOAP_REPLY_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'B', 'o', 'd', 'y', '>',
                                             '<', '/', 's', 'o', 'a', 'p', ':', 'E', 'n', 'v', 'e', 'l', 'o', 'p', 'e', '>' }; 
+
+static const Pt::Char SOAP_FAULT[]  = { '<', 's', 'o', 'a', 'p', ':', 'F', 'a', 'u', 'l', 't',  '>' };
+static const Pt::Char SOAP_FAULT_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'F', 'a', 'u', 'l', 't',  '>' };
+
+static const Pt::Char SOAP_CODE[]  = { '<', 's', 'o', 'a', 'p', ':', 'C', 'o', 'd', 'e', '>' };
+static const Pt::Char SOAP_CODE_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'C', 'o', 'd', 'e', '>' };
+
+static const Pt::Char SOAP_CODE_RECEIVER[]  = { 's', 'o', 'a', 'p', ':', 'R', 'e', 'c', 'e', 'i', 'v', 'e', 'r' };
+
+static const Pt::Char SOAP_VALUE[]  = { '<', 's', 'o', 'a', 'p', ':', 'V', 'a', 'l', 'u', 'e',  '>' };
+static const Pt::Char SOAP_VALUE_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'V', 'a', 'l', 'u', 'e',  '>' };
+
+static const Pt::Char SOAP_REASON[]  = { '<', 's', 'o', 'a', 'p', ':', 'R', 'e', 'a', 's', 'o', 'n', '>' };
+static const Pt::Char SOAP_REASON_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'R', 'e', 'a', 's', 'o', 'n', '>' };
+
+} // namespace
+
+namespace Pt {
+
+namespace XmlRpc {
 
 SoapResponder::SoapResponder(SoapServiceDefinition& service)
 : _serviceDef(&service)
@@ -320,40 +317,23 @@ void SoapResponder::formatError(std::ostream& os, int rc, const char* msg)
     
     _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
 
-    _ts.write( XMLRPC_METHODRESPONSE, sizeof(XMLRPC_METHODRESPONSE)/sizeof(Char) );
-    _ts.write( XMLRPC_FAULT, sizeof(XMLRPC_FAULT)/sizeof(Char) );
-    _ts.write( XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char) );
-    _ts.write( XMLRPC_STRUCT, sizeof(XMLRPC_STRUCT)/sizeof(Char) );
-    
-    _ts.write( XMLRPC_MEMBER, sizeof(XMLRPC_MEMBER)/sizeof(Char) );
-    _ts.write(XMLRPC_NAME, sizeof(XMLRPC_NAME)/sizeof(Char));
-    _ts.write(XMLRPC_FAULTCODE, sizeof(XMLRPC_FAULTCODE)/sizeof(Char));
-    _ts.write(XMLRPC_NAME_END, sizeof(XMLRPC_NAME_END)/sizeof(Char));
-    _ts.write( XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char) );
-    _ts.write( XMLRPC_INT, sizeof(XMLRPC_INT)/sizeof(Char) );
-    _ts << rc;
-    _ts.write(XMLRPC_INT_END, sizeof(XMLRPC_INT_END)/sizeof(Char));
-    _ts.write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
-    _ts.write(XMLRPC_MEMBER_END, sizeof(XMLRPC_MEMBER_END)/sizeof(Char));
+    _ts.write( SOAP_FAULT, sizeof(SOAP_FAULT)/sizeof(Char) );
+    _ts.write( SOAP_CODE, sizeof(SOAP_CODE)/sizeof(Char) );
+    _ts.write( SOAP_VALUE, sizeof(SOAP_VALUE)/sizeof(Char) );
 
-    _ts.write( XMLRPC_MEMBER, sizeof(XMLRPC_MEMBER)/sizeof(Char) );
-    _ts.write(XMLRPC_NAME, sizeof(XMLRPC_NAME)/sizeof(Char));
-    _ts.write(XMLRPC_FAULTSTRING, sizeof(XMLRPC_FAULTSTRING)/sizeof(Char) );
-    _ts.write(XMLRPC_NAME_END, sizeof(XMLRPC_NAME_END)/sizeof(Char) );
-    _ts.write( XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char) );
-    _ts.write( XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char) );
+    _ts.write( SOAP_CODE_RECEIVER, sizeof(SOAP_CODE_RECEIVER)/sizeof(Char) );
 
-    for(const char* str = msg; *str != '\0'; ++str)
+    _ts.write( SOAP_VALUE_END, sizeof(SOAP_VALUE_END)/sizeof(Char) );
+    _ts.write( SOAP_CODE_END, sizeof(SOAP_CODE_END)/sizeof(Char) );
+
+    _ts.write( SOAP_REASON, sizeof(SOAP_REASON)/sizeof(Char) );
+
+     for(const char* str = msg; *str != '\0'; ++str)
         _ts << Char(*str);
 
-    _ts.write(XMLRPC_STRING_END, sizeof(XMLRPC_STRING_END)/sizeof(Char));
-    _ts.write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
-    _ts.write(XMLRPC_MEMBER_END, sizeof(XMLRPC_MEMBER_END)/sizeof(Char));
+    _ts.write( SOAP_REASON_END, sizeof(SOAP_REASON_END)/sizeof(Char) );
+    _ts.write( SOAP_FAULT_END, sizeof(SOAP_FAULT_END)/sizeof(Char) );
 
-    _ts.write(XMLRPC_STRUCT_END, sizeof(XMLRPC_STRUCT_END)/sizeof(Char));
-    _ts.write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
-    _ts.write(XMLRPC_FAULT_END, sizeof(XMLRPC_FAULT_END)/sizeof(Char));
-    _ts.write(XMLRPC_METHODRESPONSE_END, sizeof(XMLRPC_METHODRESPONSE_END)/sizeof(Char));
     _ts.flush();
 }
 
