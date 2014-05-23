@@ -31,21 +31,21 @@ namespace Pt {
 
 namespace XmlRpc {
 
-RemoteCall::RemoteCall(Client& client, const String& name)
+RemoteCall::RemoteCall(ClientBase& client, const String& name)
 : _client(&client)
 , _name(name)
 { 
 }
 
 
-RemoteCall::RemoteCall(Client& client, const std::string& name)
+RemoteCall::RemoteCall(ClientBase& client, const std::string& name)
 : _client(&client)
 , _name( String::widen(name) )
 { 
 }
 
 
-RemoteCall::RemoteCall(Client& client, const char* name)
+RemoteCall::RemoteCall(ClientBase& client, const char* name)
 : _client(&client)
 , _name( String::widen(name) )
 { 

@@ -45,7 +45,7 @@ template <typename R,
 class RemoteProcedure : public RemoteProcedureBase<R>
 {
     public:
-        RemoteProcedure(Client& client, const std::string& name)
+        RemoteProcedure(ClientBase& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
         , _a1( & client.context() )
         , _a2( & client.context() )
@@ -140,7 +140,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
                       Pt::Void> : public RemoteProcedureBase<R>
 {
     public:
-        RemoteProcedure(Client& client, const std::string& name)
+        RemoteProcedure(ClientBase& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
         , _a1( & client.context() )
         , _a2( & client.context() )
@@ -230,7 +230,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
                       Pt::Void> : public RemoteProcedureBase<R>
 {
     public:
-        RemoteProcedure(Client& client, const std::string& name)
+        RemoteProcedure(ClientBase& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
         , _a1( & client.context() )
         , _a2( & client.context() )
@@ -315,7 +315,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7,
                       Pt::Void> : public RemoteProcedureBase<R>
 {
     public:
-        RemoteProcedure(Client& client, const std::string& name)
+        RemoteProcedure(ClientBase& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
         , _a1( & client.context() )
         , _a2( & client.context() )
@@ -395,7 +395,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6,
                       Pt::Void> : public RemoteProcedureBase<R>
 {
     public:
-        RemoteProcedure(Client& client, const std::string& name)
+        RemoteProcedure(ClientBase& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
         , _a1( & client.context() )
         , _a2( & client.context() )
@@ -470,7 +470,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5,
                       Pt::Void> : public RemoteProcedureBase<R>
 {
     public:
-        RemoteProcedure(Client& client, const std::string& name)
+        RemoteProcedure(ClientBase& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
         , _a1( & client.context() )
         , _a2( & client.context() )
@@ -540,7 +540,7 @@ class RemoteProcedure<R, A1, A2, A3, A4,
                       Pt::Void> : public RemoteProcedureBase<R>
 {
     public:
-        RemoteProcedure(Client& client, const std::string& name)
+        RemoteProcedure(ClientBase& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
         , _a1( & client.context() )
         , _a2( & client.context() )
@@ -605,7 +605,7 @@ class RemoteProcedure<R, A1, A2, A3,
                       Pt::Void> : public RemoteProcedureBase<R>
 {
     public:
-        RemoteProcedure(Client& client, const std::string& name)
+        RemoteProcedure(ClientBase& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
         , _a1( & client.context() )
         , _a2( & client.context() )
@@ -665,7 +665,7 @@ class RemoteProcedure<R, A1, A2,
                       Pt::Void> : public RemoteProcedureBase<R>
 {
     public:
-        RemoteProcedure(Client& client, const std::string& name)
+        RemoteProcedure(ClientBase& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
         , _a1( & client.context() )
         , _a2( & client.context() )
@@ -720,7 +720,7 @@ class RemoteProcedure<R, A1,
                       Pt::Void> : public RemoteProcedureBase<R>
 {
     public:
-        RemoteProcedure(Client& client, const std::string& name)
+        RemoteProcedure(ClientBase& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
         , _a1( & client.context() )
         {
@@ -770,7 +770,7 @@ class RemoteProcedure<R,
                       Pt::Void> : public RemoteProcedureBase<R>
 {
     public:
-        RemoteProcedure(Client& client, const std::string& name)
+        RemoteProcedure(ClientBase& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
         { }
 

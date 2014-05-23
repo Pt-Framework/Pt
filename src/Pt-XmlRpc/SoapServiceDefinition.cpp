@@ -179,6 +179,12 @@ const Parameter* PortType::getInput(const std::string& name) const
 }
 
 
+const Parameter* PortType::getInput(std::size_t n) const
+{   
+    return n >= _params.size() ? 0 : &_params[n]; 
+}
+
+
 void PortType::setOutput(const std::string& name, Type& type)
 {
     _out.set(name, type);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2013 by Dr. Marc Boris Duerner
+ * Copyright (C) 2014 by Dr. Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,14 +26,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/XmlRpc/Client.h"
+#include "Pt/XmlRpc/SoapClient.h"
 #include "Pt/XmlRpc/RemoteProcedure.h"
+#include <Pt/XmlRpc/SoapServiceDefinition.h>
 #include "Pt/Xml/XmlWriter.h"
 #include "Pt/Xml/XmlError.h"
 #include "Pt/Xml/StartElement.h"
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"
 #include "Pt/System/Logger.h"
+#include <cassert>
 
 log_define("Pt.XmlRpc.Client")
 
@@ -46,24 +48,32 @@ static const Pt::Char XMLRPC_XMLDECL[] = { '<', '?', 'x', 'm', 'l', ' ',
     'e', 'n', 'c', 'o', 'd', 'i', 'n', 'g', '=', '"', 'U', 'T', 'F', '-', '8', '"', 
     '?', '>' };
 
-//static const Pt::Char XMLRPC_XMLVERSION[]  = { '1', '.', '0', '\0' };
-//static const Pt::Char XMLRPC_XMLENCODING[]  = { 'U', 'T', 'F', '-', '8',  '\0' };
-static const Pt::Char XMLRPC_METHODRESPONSE[]  = { '<', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>' };
-static const Pt::Char XMLRPC_METHODCALL[]  = { '<', 'm', 'e', 't', 'h', 'o', 'd', 'C', 'a', 'l', 'l', '>' };
-static const Pt::Char XMLRPC_METHODNAME[]  = { '<', 'm', 'e', 't', 'h', 'o', 'd', 'N', 'a', 'm', 'e', '>' };
-static const Pt::Char XMLRPC_PARAMS[]  = { '<', 'p', 'a', 'r', 'a', 'm', 's', '>' };
-static const Pt::Char XMLRPC_PARAM[]  = { '<', 'p', 'a', 'r', 'a', 'm', '>' };
-static const Pt::Char XMLRPC_FAULT[]  = { '<', 'f', 'a', 'u', 'l', 't', '>' };
+static const Pt::Char SOAP_BODY_BEGIN[]  = { '<', 's', 'o', 'a', 'p', ':', 'E', 'n', 'v', 'e', 'l', 'o', 'p', 'e', ' ',
+                                               'x', 'm', 'l', 'n', 's', ':', 's', 'o', 'a', 'p', '=',
+                                               '"', 'h', 't', 't', 'p', ':', '/', '/', 's', 'c', 'h', 'e', 'm', 'a', 's', '.', 
+                                               'x', 'm', 'l', 's', 'o', 'a', 'p', '.', 'o', 'r', 'g', '/', 's', 'o', 'a', 'p', 
+                                               '/', 'e', 'n', 'v', 'e', 'l', 'o', 'p', 'e', '/', '"', '>',
+                                              '<', 's', 'o', 'a', 'p', ':', 'B', 'o', 'd', 'y', '>' };
 
-static const Pt::Char XMLRPC_METHODRESPONSE_END[]  = { '<', '/', 'm', 'e', 't', 'h', 'o', 'd', 'R', 'e', 's', 'p', 'o', 'n', 's', 'e', '>' };
-static const Pt::Char XMLRPC_METHODCALL_END[]  = { '<', '/', 'm', 'e', 't', 'h', 'o', 'd', 'C', 'a', 'l', 'l', '>' };
-static const Pt::Char XMLRPC_METHODNAME_END[]  = { '<', '/', 'm', 'e', 't', 'h', 'o', 'd', 'N', 'a', 'm', 'e', '>' };
-static const Pt::Char XMLRPC_PARAMS_END[]  = { '<', '/', 'p', 'a', 'r', 'a', 'm', 's', '>' };
-static const Pt::Char XMLRPC_PARAM_END[]  = { '<', '/', 'p', 'a', 'r', 'a', 'm', '>' };
-static const Pt::Char XMLRPC_FAULT_END[]  = { '<', '/', 'f', 'a', 'u', 'l', 't', '>' };
+static const Pt::Char SOAP_BODY_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'B', 'o', 'd', 'y', '>',
+                                            '<', '/', 's', 'o', 'a', 'p', ':', 'E', 'n', 'v', 'e', 'l', 'o', 'p', 'e', '>' }; 
+
+static const Pt::Char SOAP_FAULT[]  = { '<', 's', 'o', 'a', 'p', ':', 'F', 'a', 'u', 'l', 't',  '>' };
+static const Pt::Char SOAP_FAULT_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'F', 'a', 'u', 'l', 't',  '>' };
+
+static const Pt::Char SOAP_CODE[]  = { '<', 's', 'o', 'a', 'p', ':', 'C', 'o', 'd', 'e', '>' };
+static const Pt::Char SOAP_CODE_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'C', 'o', 'd', 'e', '>' };
+
+static const Pt::Char SOAP_CODE_RECEIVER[]  = { 's', 'o', 'a', 'p', ':', 'R', 'e', 'c', 'e', 'i', 'v', 'e', 'r' };
+
+static const Pt::Char SOAP_VALUE[]  = { '<', 's', 'o', 'a', 'p', ':', 'V', 'a', 'l', 'u', 'e',  '>' };
+static const Pt::Char SOAP_VALUE_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'V', 'a', 'l', 'u', 'e',  '>' };
+
+static const Pt::Char SOAP_REASON[]  = { '<', 's', 'o', 'a', 'p', ':', 'R', 'e', 'a', 's', 'o', 'n', '>' };
+static const Pt::Char SOAP_REASON_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'R', 'e', 'a', 's', 'o', 'n', '>' };
 
 
-Client::Client()
+SoapClient::SoapClient(SoapServiceDefinition& service)
 : _method(0)
 , _utf8(1)
 , _ts( &_utf8 )
@@ -72,26 +82,28 @@ Client::Client()
 , _arg(0)
 , _argn(0)
 , _state(OnBegin)
-, _formatter(_ts)
+, _serviceDef(&service)
+, _port(0)
+, _fmt(_ts)
 , _error(false)
 , _isFault(false)
 {
 }
 
 
-Client::~Client()
+SoapClient::~SoapClient()
 {
     _ts.detach();
 }
 
 
-void Client::beginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
+void SoapClient::beginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
 {
     _method = &method;
     _state = OnBegin;
 
     _reader.reset(_bin);
-    _formatter.beginParse(r);
+    _fmt.beginParse(r);
 
     _argv = argv;
     _argc = argc;
@@ -106,7 +118,7 @@ void Client::beginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsig
 }
 
 
-void Client::endCall()
+void SoapClient::endCall()
 {
     if( _error )
     {
@@ -122,13 +134,13 @@ void Client::endCall()
 }
 
 
-void Client::call(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
+void SoapClient::call(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
 {
     _method = &method;
     _state = OnBegin;
 
     _reader.reset(_bin);
-    _formatter.beginParse(r);
+    _fmt.beginParse(r);
 
     _argv = argv;
     _argc = argc;
@@ -142,7 +154,7 @@ void Client::call(Composer& r, RemoteCall& method, Decomposer** argv, unsigned a
 }
 
 
-void Client::cancel()
+void SoapClient::cancel()
 {
     _ts.detach();
     _ts.discard();
@@ -161,19 +173,19 @@ void Client::cancel()
 }
 
 
-const RemoteCall* Client::activeProcedure() const
+const RemoteCall* SoapClient::activeProcedure() const
 {
     return _method;
 }
 
 
-bool Client::isFailed() const
+bool SoapClient::isFailed() const
 {
     return _error || _isFault;
 }
 
 
-void Client::beginMessage(std::ostream& os)
+void SoapClient::beginMessage(std::ostream& os)
 {
     if( ! _method )
         return;
@@ -185,18 +197,19 @@ void Client::beginMessage(std::ostream& os)
     _ts.attach(os);
     
     _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
-    
-    _ts.write( XMLRPC_METHODCALL, sizeof(XMLRPC_METHODCALL)/sizeof(Char) );
-    
-    _ts.write( XMLRPC_METHODNAME, sizeof(XMLRPC_METHODNAME)/sizeof(Char) );
-    Xml::xmlEncode(_ts, name.c_str(), name.size() );
-    _ts.write(XMLRPC_METHODNAME_END, sizeof(XMLRPC_METHODNAME_END)/sizeof(Char) );
-    
-    _ts.write( XMLRPC_PARAMS, sizeof(XMLRPC_PARAMS)/sizeof(Char) );
+
+    //-->
+    _ts.write(SOAP_BODY_BEGIN, sizeof(SOAP_BODY_BEGIN)/sizeof(Char));
+
+    Pt::String targetNamespace = _serviceDef->targetNamespace().c_str();
+    _port = _serviceDef->getPort( name.narrow() );
+
+    _ts << '<' << name << Pt::String(" xmlns=\"") << targetNamespace << '"' << '>';
+    //<--
 }
 
 
-bool Client::advanceMessage()
+bool SoapClient::advanceMessage()
 {
     unsigned n = 10;
 
@@ -204,21 +217,29 @@ bool Client::advanceMessage()
     {
         if( ! _arg)
         {
-            _ts.write( XMLRPC_PARAM, sizeof(XMLRPC_PARAM)/sizeof(Char) );
-
             _arg = _argv[_argn];
-            _arg->beginFormat(_formatter);
+
+            //-->
+            const Parameter* param = _port->getInput(_argn);
+            
+            assert(param);
+            if( ! param)
+                throw SerializationError("too many parameters"); // check if catched
+
+            _fmt.setParameter(*param);
+            //<--
+            _arg->beginFormat(_fmt);
         }
         
         while( _arg && n > 0)
         {
-            _arg = _arg->advanceFormat(_formatter);
+            _arg = _arg->advanceFormat(_fmt);
             --n;
         }
         
         if( ! _arg )
         {
-            _ts.write(XMLRPC_PARAM_END, sizeof(XMLRPC_PARAM_END)/sizeof(Char) );
+            //--> <--
             ++_argn;
         }
 
@@ -228,22 +249,26 @@ bool Client::advanceMessage()
 }
 
 
-void Client::finishMessage()
+void SoapClient::finishMessage()
 {
-    _ts.write(XMLRPC_PARAMS_END, sizeof(XMLRPC_PARAMS_END)/sizeof(Char) );
-    _ts.write(XMLRPC_METHODCALL_END, sizeof(XMLRPC_METHODCALL_END)/sizeof(Char) );
-    
+    //-->
+    Pt::String targetNamespace = _serviceDef->targetNamespace().c_str();
+    const String& name = _method->name();
+    _ts << '<' << '/' << name << '>';
+    _ts.write(SOAP_BODY_END, sizeof(SOAP_BODY_END)/sizeof(Char) ); 
+    //<--  
+
     _ts.flush();
 }
 
 
-void Client::beginResult(std::istream& is)
+void SoapClient::beginResult(std::istream& is)
 {
     _bin.reset(is);
 }
 
 
-bool Client::parseResult()
+bool SoapClient::parseResult()
 {
     try
     {
@@ -281,7 +306,7 @@ bool Client::parseResult()
 }
 
 
-void Client::setFault(int rc, const char* msg)
+void SoapClient::setFault(int rc, const char* msg)
 {
     _fault.setRc(rc);
     _fault.setText(msg);
@@ -289,13 +314,13 @@ void Client::setFault(int rc, const char* msg)
 }
 
 
-void Client::setError(bool f)
+void SoapClient::setError(bool f)
 {
     _error = f;
 }
 
 
-void Client::finishResult()
+void SoapClient::finishResult()
 {
     if( _method )
     {
@@ -311,7 +336,7 @@ void Client::finishResult()
 }
 
 
-void Client::processResult(std::istream& is)
+void SoapClient::processResult(std::istream& is)
 {
     _bin.reset(is);
 
@@ -349,7 +374,7 @@ void Client::processResult(std::istream& is)
 }
 
 
-bool Client::advance(const Pt::Xml::Node& node)
+bool SoapClient::advance(const Pt::Xml::Node& node)
 {
     switch(_state)
     {
@@ -358,81 +383,56 @@ bool Client::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::StartElement)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name().name() != L"methodResponse" )
-                    throw SerializationError("invalid XML-RPC methodCall");
+                if( se.name().name() != L"Envelope" )
+                    throw SerializationError("invalid SOAP Envelope");
 
-                _state = OnMethodResponseBegin;
+                _state = OnEnvelope;
             }
 
             break;
         }
 
-        case OnMethodResponseBegin:
+        case OnEnvelope:
         {
-            if(node.type() == Xml::Node::StartElement) // <params> or <fault>
+            if(node.type() == Xml::Node::StartElement)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name().name() == "params" )
-                {
-                    _state = OnParamsBegin;
-                    break;
-                }
-
-                else if( se.name().name() == "fault" )
-                {
-                    _fh.begin(_fault);
-                    _formatter.beginParse(_fh);
-                    _state = OnFaultBegin;
-                    break;
-                }
-
-                throw SerializationError("invalid XML-RPC methodCall");
+                if( se.name().name() == L"Body" )
+                    _state = OnBody;
             }
+            
             break;
         }
 
-        case OnFaultBegin:
+        case OnBody:
         {
-            bool finished = _formatter.advance(node); // start with <value>
-            if(finished)
+            if(node.type() == Xml::Node::StartElement)
             {
-                // </fault>
-                _state = OnFaultEnd;
+                _state = OnMethod;
             }
-
             break;
         }
 
-        case OnFaultEnd:
+        case OnMethod:
         {
-            if(node.type() == Xml::Node::EndElement) // </methodResponse>
+            if(node.type() == Xml::Node::EndElement) // end of method tag
             {
-                //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                //if( ee.name() != L"methodResponse" )
-                //    throw SerializationError("invalid XML-RPC methodCall");
-
-                _isFault = true;
-
-                _state = OnFaultResponseEnd;
+                // no return parameter
+                _state = OnMethodEnd;
+                break;
             }
-            break;
-        }
 
-        case OnFaultResponseEnd:
-        {
-            _state = OnFaultResponseEnd;
-            break;
-        }
-
-        case OnParamsBegin:
-        {
-            if(node.type() == Xml::Node::StartElement) // <param>
+            if(node.type() == Xml::Node::StartElement)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-                if( se.name().name() != L"param" )
-                    throw SerializationError("invalid XML-RPC methodCall");
 
+                const Parameter* param = _port->getOutput();
+                if( ! param )
+                    throw Fault("undefined output parameter", Pt::XmlRpc::Fault::MethodNotFound);
+
+                _fmt.setParameter(*param);
                 _state = OnParam;
+                break;
             }
 
             break;
@@ -440,10 +440,9 @@ bool Client::advance(const Pt::Xml::Node& node)
 
         case OnParam:
         {
-            bool finished = _formatter.advance(node); // start with <value>
+            bool finished = _fmt.advance(node);
             if(finished)
             {
-                // </param>
                 _state = OnParamEnd;
             }
 
@@ -452,38 +451,46 @@ bool Client::advance(const Pt::Xml::Node& node)
 
         case OnParamEnd:
         {
-            if(node.type() == Xml::Node::EndElement) // </params>
+            if(node.type() == Xml::Node::EndElement) // end of method tag
             {
-                //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                //if( ee.name() != L"params" )
-                //    throw SerializationError("invalid XML-RPC methodCall");
-
-                _state = OnParamsEnd;
+                assert( Xml::toEndElement(node).name().local().narrow() == _port->outputName() );
+                _state = OnMethodEnd;
+                break;
             }
+
             break;
         }
 
-        case OnParamsEnd:
+        case OnMethodEnd:
         {
-            if(node.type() == Xml::Node::EndElement) // </methodResponse>
+            if(node.type() == Xml::Node::EndElement) // </Body>
             {
-                //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
-                //if( ee.name() != L"methodResponse" )
-                //    throw SerializationError("invalid XML-RPC methodCall");
-
-                _state = OnMethodResponseEnd;
+                assert( Xml::toEndElement(node).name().local() == L"Body" );
+                _state = OnBodyEnd;
             }
+            
             break;
         }
 
-        case OnMethodResponseEnd:
+        case OnBodyEnd:
         {
-            _state = OnMethodResponseEnd;
+            if(node.type() == Xml::Node::EndElement) // </Envelope>
+            {
+                assert( Xml::toEndElement(node).name().local() == L"Envelope" );
+                _state = OnEnvelopeEnd;
+            }
+            
+            break;
+        }
+
+        case OnEnvelopeEnd:
+        {
+            int n = 0;
             break;
         }
     }
 
-    return _state == OnMethodResponseEnd;
+    return _state == OnEnvelopeEnd;
 }
 
 } // namespace XmlRpc

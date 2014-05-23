@@ -12,7 +12,9 @@ PT_XMLRPC_SOURCES = Client.cpp
                     RemoteProcedure.cpp
                     Responder.cpp
                     ServiceDefinition.cpp
+                    SoapClient.cpp
                     SoapFormatter.cpp
+                    SoapHttpClient.cpp
                     SoapHttpService.cpp 
                     SoapServiceDefinition.cpp ;
 

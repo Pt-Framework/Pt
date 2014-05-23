@@ -273,6 +273,8 @@ void SoapResponder::beginResult(std::ostream& os)
     
     const Parameter* param = _procDef->getOutput();
     assert(param);
+    if( ! param)
+        throw SerializationError("no output defined"); // check if catched
 
     _formatter.setParameter(*param);
     _result->beginFormat(_formatter);
@@ -349,7 +351,7 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
     switch(_state)
     {
         case OnBegin:
-        { //std::cerr << "OnBegin" << std::endl;
+        {
             if(node.type() == Xml::Node::StartElement)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
@@ -422,11 +424,11 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
                         throw SerializationError("too many arguments");
                 }
 
-                const Parameter* paramType = _procDef->getInput( se.name().local().narrow() );
-                if( ! paramType )
+                const Parameter* param = _procDef->getInput( se.name().local().narrow() );
+                if( ! param )
                     throw Fault("no such parameter", Pt::XmlRpc::Fault::MethodNotFound);
 
-                _formatter.setParameter(*paramType);
+                _formatter.setParameter(*param);
                 _formatter.beginParse(**_args);
                 
                 _state = OnParam;

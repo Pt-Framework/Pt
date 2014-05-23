@@ -195,6 +195,8 @@ class PT_XMLRPC_API PortType : private NonCopyable
 
         const Parameter* getInput(const std::string& name) const;
 
+        const Parameter* getInput(std::size_t n) const;
+
         void setOutput(const std::string& name, Type& param);
 
         const Parameter* getOutput() const;

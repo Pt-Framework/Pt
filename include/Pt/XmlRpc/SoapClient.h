@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2013 by Dr. Marc Boris Duerner
+ * Copyright (C) 2014 by Dr. Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,21 +26,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_XmlRpc_Client_h
-#define Pt_XmlRpc_Client_h
+#ifndef Pt_XmlRpc_SoapClient_h
+#define Pt_XmlRpc_SoapClient_h
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Fault.h>
 #include <Pt/XmlRpc/Formatter.h>
+#include <Pt/XmlRpc/SoapFormatter.h>
+#include <Pt/XmlRpc/Client.h>
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Composer.h>
 #include <Pt/Decomposer.h>
 #include <Pt/Utf8Codec.h>
 #include <Pt/TextStream.h>
-#include <Pt/NonCopyable.h>
 #include <Pt/Types.h>
-#include <Pt/SerializationContext.h>
 #include <string>
 
 namespace Pt {
@@ -48,61 +48,21 @@ namespace Pt {
 namespace XmlRpc {
 
 class RemoteCall;
-
-class PT_XMLRPC_API ClientBase : private NonCopyable
-{
-    public:
-        /** @brief Constructor.
-        */
-        ClientBase()
-        {}
-
-        /** @brief Destructor.
-        */
-        virtual ~ClientBase()
-        {}
-        
-        //! @internal
-        SerializationContext& context()
-        { return _ctx; }
-
-        //! @internal
-        virtual void beginCall(Composer& r, RemoteCall& call, Decomposer** argv, unsigned argc) = 0;
-
-        //! @internal
-        virtual void endCall() = 0;
-
-        //! @internal
-        virtual void call(Composer& r, RemoteCall& call, Decomposer** argv, unsigned argc) = 0;
-
-        /** @brief Cancels the currently executing procedure.
-        */
-        virtual void cancel() = 0;
-
-        /** @brief The currently executing procedure.
-        */
-        virtual const RemoteCall* activeProcedure() const = 0;
-
-        /** @brief Indicates if the procedure has failed.
-        */
-        virtual bool isFailed() const = 0;
-
-    private:
-        SerializationContext _ctx;
-};
+class PortType;
+class SoapServiceDefinition;
 
 /** @brief A client for remote procedure calls.
 */
-class PT_XMLRPC_API Client : public ClientBase
+class PT_XMLRPC_API SoapClient : public ClientBase
 {
     public:
         /** @brief Constructor.
         */
-        Client();
+        SoapClient(SoapServiceDefinition& service);
 
         /** @brief Destructor.
         */
-        virtual ~Client();
+        virtual ~SoapClient();
 
         //! @internal
         void beginCall(Composer& r, RemoteCall& call, Decomposer** argv, unsigned argc);
@@ -234,18 +194,16 @@ class PT_XMLRPC_API Client : public ClientBase
         enum State
         {
             OnBegin,
-            OnMethodResponseBegin,
-            OnFaultBegin,
-            OnFaultEnd,
-            OnFaultResponseEnd,
-            OnParamsBegin,
+            OnEnvelope,
+            OnBody,
+            OnMethod,
             OnParam,
             OnParamEnd,
-            OnParamsEnd,
-            OnMethodResponseEnd
+            OnMethodEnd,
+            OnBodyEnd,
+            OnEnvelopeEnd,
         };
 
-        
         RemoteCall* _method;
         
         Pt::Utf8Codec _utf8;
@@ -259,7 +217,9 @@ class PT_XMLRPC_API Client : public ClientBase
         Xml::XmlReader _reader;
         State _state;
         
-        Formatter _formatter;
+        SoapServiceDefinition* _serviceDef;
+        const PortType* _port;
+        SoapFormatter _fmt;
         Fault _fault;
         BasicComposer<Fault> _fh;
         bool _error;

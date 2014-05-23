@@ -29,6 +29,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Unit/TestMain.h"
 #include "Pt/XmlRpc/SoapHttpService.h"
+#include "Pt/XmlRpc/SoapHttpClient.h"
 #include "Pt/XmlRpc/HttpService.h"
 #include "Pt/XmlRpc/HttpClient.h"
 #include "Pt/XmlRpc/Fault.h"
@@ -618,124 +619,60 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         // SoapArray
         //
 
-        class ArrayMultiplyPort : public Pt::XmlRpc::PortType
+        class CalcSoapServiceDefinition : public Pt::XmlRpc::SoapServiceDefinition
         {
             public:
-                ArrayMultiplyPort()
-                : Pt::XmlRpc::PortType("multiply", "multiplyResponse")
-                , _intArrayType(_intType, "number")
+                class ArrayMultiplyPort : public Pt::XmlRpc::PortType
                 {
-                    addInput("a", _intArrayType);
-                    addInput("b", _intArrayType);
+                    public:
+                        ArrayMultiplyPort()
+                        : Pt::XmlRpc::PortType("multiply", "multiplyResponse")
+                        , _intArrayType(_intType, "number")
+                        {
+                            addInput("a", _intArrayType);
+                            addInput("b", _intArrayType);
 
-                    setOutput("multiplyResult", _intArrayType);
+                            setOutput("multiplyResult", _intArrayType);
+                        }
+
+                    private:
+                        Pt::XmlRpc::IntegerType _intType;
+                        Pt::XmlRpc::ArrayType _intArrayType;
+                };
+
+                CalcSoapServiceDefinition()
+                {
+                    setTargetNamespace("http://tempuri.org/");
+                    addPort(_port);
                 }
-
+            
             private:
-                Pt::XmlRpc::IntegerType _intType;
-                Pt::XmlRpc::ArrayType _intArrayType;
+                ArrayMultiplyPort _port;
         };
 
         void SoapArray()
         {
-            ArrayMultiplyPort port;
-            
-            Pt::XmlRpc::SoapServiceDefinition serviceDef;
-            serviceDef.addPort(port);
-            serviceDef.setTargetNamespace("http://tempuri.org/");
-            serviceDef.registerProcedure(port.inputName(), *this, &PtXmlRpcTest::multiplyVector);
+            CalcSoapServiceDefinition serviceDef;
+            serviceDef.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyVector);
 
             Pt::XmlRpc::SoapHttpService httpService(serviceDef);
             Pt::Http::MapUrl servlet("/calc", httpService);
             _server->addServlet(servlet);
 
-            Pt::Http::Client client(*_loop);
-            client.setHost( Pt::Net::Endpoint::ip4Loopback(8001) );
-            client.request().setUrl("/calc");
-            client.request().header().add("SOAPAction", "");
-            client.request().body() << "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">"
-                                       "  <soap:Body>"
-                                       "    <multiply xmlns=\"http://tempuri.org/\">"
-                                       "      <a>"
-                                       "        <number>1</number>"
-                                       "        <number>2</number>"
-                                       "      </a>"
-                                       "      <b>"
-                                       "        <number>3</number>"
-                                       "        <number>4</number>"
-                                       "      </b>"
-                                       "    </multiply>"
-                                       "  </soap:Body>"
-                                       "</soap:Envelope>";
+            Pt::XmlRpc::SoapHttpClient client(serviceDef, *_loop);
+            Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
+            client.setTarget(ep, "/calc");
 
-            client.replyReceived() += Pt::slot(*this, &PtXmlRpcTest::onSoapArrayFinished);
-            client.beginReceive();
+            Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > multiply(client, "multiply");
+            multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onArrayFinished);
+
+            std::vector<int> vec;
+            vec.push_back(10);
+            vec.push_back(20);
+
+            multiply.begin(vec, vec);
+            
             _loop->run();
-        }
-/*
-<soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-                 xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-                 xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
-  <soap12:Body>
-    <GetUsersResponse xmlns="http://tempuri.org/">
-      <GetUsersResult>
-        <string>string</string>
-        <string>string</string>
-      </GetUsersResult>
-    </GetUsersResponse>
-  </soap12:Body>
-</soap12:Envelope>
-
-
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-               xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-               xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <GetUsersResponse xmlns="http://tempuri.org/">
-      <GetUsersResult>
-        <string>string</string>
-        <string>string</string>
-      </GetUsersResult>
-    </GetUsersResponse>
-  </soap:Body>
-</soap:Envelope>
-
-
-<?xml version="1.0" encoding="UTF-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
-    <ArrayMultiplyResponse xmlns="http://tempuri.org/">
-      <ArrayMultiplyResult>
-        <number>3</number>
-        <number>8</number>
-      </ArrayMultiplyResult>
-    <ArrayMultiplyResponse>
-  </soap:Body>
-</soap:Envelope>
-*/
-        void onSoapArrayFinished(Pt::Http::Client& client)
-        {
-            Pt::Http::MessageProgress progress = client.endReceive();
-            
-            Pt::Http::Reply& reply = client.reply();
-            if( progress.header() )
-            {
-                std::clog << reply.statusCode() << ' ' << reply.statusText() << std::endl;
-            }
-            
-            if( progress.body() )
-            {
-                while ( reply.body().rdbuf()->in_avail() )
-                    std::clog << (char)reply.body().get();
-            }
-            if( progress.finished() )
-            {
-                client.loop()->exit();
-                return;
-            }
-            
-            client.beginReceive();
         }
 
         ////////////////////////////////////////////////////////////
