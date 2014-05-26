@@ -36,12 +36,10 @@
 #include <Pt/Http/Responder.h>
 #include <Pt/Types.h>
 #include <Pt/XmlRpc/Fault.h>
-#include <Pt/XmlRpc/Formatter.h>
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/SerializationContext.h>
-#include <Pt/Serializer.h>
 #include <Pt/TextStream.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/Types.h>
@@ -174,7 +172,7 @@ class PT_XMLRPC_API SoapResponder : private ResponderBase
 
         SerializationContext _context;
         SoapServiceDefinition* _serviceDef;
-        const PortType* _procDef;
+        const Operation* _op;
         ServiceProcedure* _proc;
         
         Xml::BinaryInputSource _bin;

@@ -33,6 +33,20 @@ namespace Pt {
 namespace XmlRpc {
 
 ///////////////////////////////////////////////////////////////////////////////
+// BooleanType
+///////////////////////////////////////////////////////////////////////////////
+
+BooleanType::BooleanType()
+: Type(Type::Bool)
+{ 
+}
+
+
+BooleanType::~BooleanType()
+{
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // IntegerType
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -47,7 +61,21 @@ IntegerType::~IntegerType()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// IntegerType
+// StringType
+///////////////////////////////////////////////////////////////////////////////
+
+FloatType::FloatType()
+: Type(Type::Float)
+{ 
+}
+
+
+FloatType::~FloatType()
+{
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// StringType
 ///////////////////////////////////////////////////////////////////////////////
 
 StringType::StringType()
@@ -78,8 +106,6 @@ StructType::~StructType()
 
 void StructType::addParameter(const std::string& name, Type& t)
 {
-    _params[name] = &t;
-
     Parameter param(name, t);
     _paramList.push_back(param);
 }
@@ -143,30 +169,30 @@ const Parameter* ArrayType::getParameter(const std::string& name) const
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// PortType
+// Operation
 ///////////////////////////////////////////////////////////////////////////////
 
-PortType::PortType(const std::string& inputName, const std::string& outputName)
+Operation::Operation(const Pt::String& inputName, const Pt::String& outputName)
 : _inputName(inputName)
 , _outputName(outputName)
 { 
 }
 
 
-PortType::~PortType()
+Operation::~Operation()
 {
 
 }
 
 
-void PortType::addInput(const std::string& name, Type& t)
+void Operation::addInput(const std::string& name, Type& t)
 {
     Parameter param(name, t);
     _params.push_back(param);
 }
 
 
-const Parameter* PortType::getInput(const std::string& name) const
+const Parameter* Operation::getInput(const std::string& name) const
 { 
     ParameterList::const_iterator it;
     for(it = _params.begin(); it != _params.end(); ++it)
@@ -179,19 +205,19 @@ const Parameter* PortType::getInput(const std::string& name) const
 }
 
 
-const Parameter* PortType::getInput(std::size_t n) const
+const Parameter* Operation::getInput(std::size_t n) const
 {   
     return n >= _params.size() ? 0 : &_params[n]; 
 }
 
 
-void PortType::setOutput(const std::string& name, Type& type)
+void Operation::setOutput(const std::string& name, Type& type)
 {
     _out.set(name, type);
 }
 
 
-const Parameter* PortType::getOutput() const
+const Parameter* Operation::getOutput() const
 {
     return &_out;
 }
@@ -210,19 +236,19 @@ SoapServiceDefinition::~SoapServiceDefinition()
 }
 
 
-void SoapServiceDefinition::addPort(PortType& p)
+void SoapServiceDefinition::addOperation(Operation& op)
 {
     System::MutexLock lock( mutex() );
-    _ports.push_back( &p );
+    _operations.push_back( &op );
 }
 
 
-const PortType* SoapServiceDefinition::getPort(const std::string& name) const
+const Operation* SoapServiceDefinition::getOperation(const Pt::String& name) const
 {
     System::MutexLock lock( mutex() );
 
-    PortList::const_iterator it;
-    for(it = _ports.begin(); it != _ports.end(); ++it)
+    OperationList::const_iterator it;
+    for(it = _operations.begin(); it != _operations.end(); ++it)
     {
         if((*it)->inputName() == name)
             return *it;

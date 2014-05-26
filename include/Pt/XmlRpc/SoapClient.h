@@ -31,7 +31,6 @@
 
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Fault.h>
-#include <Pt/XmlRpc/Formatter.h>
 #include <Pt/XmlRpc/SoapFormatter.h>
 #include <Pt/XmlRpc/Client.h>
 #include <Pt/Xml/InputSource.h>
@@ -48,7 +47,7 @@ namespace Pt {
 namespace XmlRpc {
 
 class RemoteCall;
-class PortType;
+class Operation;
 class SoapServiceDefinition;
 
 /** @brief A client for remote procedure calls.
@@ -218,7 +217,7 @@ class PT_XMLRPC_API SoapClient : public ClientBase
         State _state;
         
         SoapServiceDefinition* _serviceDef;
-        const PortType* _port;
+        const Operation* _op;
         SoapFormatter _fmt;
         Fault _fault;
         BasicComposer<Fault> _fh;

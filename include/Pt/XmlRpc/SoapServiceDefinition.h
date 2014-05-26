@@ -32,10 +32,10 @@
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/ServiceDefinition.h>
 #include <Pt/NonCopyable.h>
+#include <Pt/String.h>
 #include <Pt/Types.h>
 #include <string>
 #include <vector>
-#include <map>
 
 namespace Pt {
 
@@ -43,6 +43,9 @@ namespace XmlRpc {
 
 class Parameter;
 
+/** @brief XML schema type for WSDLs.
+    @since 1.1.0
+*/
 class Type : private NonCopyable
 {
     public:
@@ -50,8 +53,10 @@ class Type : private NonCopyable
         {
             Array = 1,
             Struct = 2,
-            Int = 3,
-            String = 4
+            Bool = 3,
+            Int = 4,
+            Float = 5,
+            String = 6
         };
     
     public:
@@ -107,12 +112,42 @@ class Parameter
 };
 
 
+class PT_XMLRPC_API BooleanType : public Type
+{
+    public:
+        BooleanType();
+
+        virtual ~BooleanType();
+
+        virtual const Parameter* getParameter(std::size_t n) const
+        { return 0; }
+
+        virtual const Parameter* getParameter(const std::string& name) const
+        { return 0; }
+};
+
+
 class PT_XMLRPC_API IntegerType : public Type
 {
     public:
         IntegerType();
 
         virtual ~IntegerType();
+
+        virtual const Parameter* getParameter(std::size_t n) const
+        { return 0; }
+
+        virtual const Parameter* getParameter(const std::string& name) const
+        { return 0; }
+};
+
+
+class PT_XMLRPC_API FloatType : public Type
+{
+    public:
+        FloatType();
+
+        virtual ~FloatType();
 
         virtual const Parameter* getParameter(std::size_t n) const
         { return 0; }
@@ -151,9 +186,6 @@ class PT_XMLRPC_API StructType : public Type
         virtual const Parameter* getParameter(const std::string& name) const;
 
     private:
-        typedef std::map<std::string, Type*> ParameterMap;
-        ParameterMap _params;
-
         typedef std::vector<Parameter> ParameterList;
         ParameterList _paramList;
 };
@@ -178,17 +210,18 @@ class PT_XMLRPC_API ArrayType : public Type
         Parameter _elem;
 };
 
-class PT_XMLRPC_API PortType : private NonCopyable
+
+class PT_XMLRPC_API Operation : private NonCopyable
 {
     public:
-        PortType(const std::string& inputName, const std::string& outputName);
+        Operation(const Pt::String& inputName, const Pt::String& outputName);
 
-        virtual ~PortType();
+        virtual ~Operation();
 
-        const std::string& inputName() const
+        const Pt::String& inputName() const
         { return _inputName; }
 
-        const std::string& outputName() const
+        const Pt::String& outputName() const
         { return _outputName; }
 
         void addInput(const std::string& name, Type& param);
@@ -205,8 +238,8 @@ class PT_XMLRPC_API PortType : private NonCopyable
         typedef std::vector<Parameter> ParameterList;
         ParameterList _params;
         Parameter _out;
-        std::string _inputName;
-        std::string _outputName;
+        Pt::String _inputName;
+        Pt::String _outputName;
 };
 
 
@@ -223,14 +256,14 @@ class PT_XMLRPC_API SoapServiceDefinition : public ServiceDefinition
         void setTargetNamespace(const std::string& ns)
         { _targetNamespace = ns; }
 
-        void addPort(PortType& p);
+        void addOperation(Operation& op);
 
-        const PortType* getPort(const std::string& name) const;
+        const Operation* getOperation(const Pt::String& name) const;
 
     private:
         std::string _targetNamespace;
-        typedef std::vector<PortType*> PortList;
-        PortList _ports;
+        typedef std::vector<Operation*> OperationList;
+        OperationList _operations;
 };
 
 
@@ -271,7 +304,7 @@ class BasicParameter< std::vector<T> > : public ArrayType
 
 
 template <typename R, typename A1, typename A2>
-class BasicProcedureDefinition : public PortType
+class BasicProcedureDefinition : public Operation
 {
     public:
         BasicProcedureDefinition()

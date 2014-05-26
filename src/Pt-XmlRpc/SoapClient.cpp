@@ -83,7 +83,7 @@ SoapClient::SoapClient(SoapServiceDefinition& service)
 , _argn(0)
 , _state(OnBegin)
 , _serviceDef(&service)
-, _port(0)
+, _op(0)
 , _fmt(_ts)
 , _error(false)
 , _isFault(false)
@@ -202,7 +202,7 @@ void SoapClient::beginMessage(std::ostream& os)
     _ts.write(SOAP_BODY_BEGIN, sizeof(SOAP_BODY_BEGIN)/sizeof(Char));
 
     Pt::String targetNamespace = _serviceDef->targetNamespace().c_str();
-    _port = _serviceDef->getPort( name.narrow() );
+    _op = _serviceDef->getOperation( name );
 
     _ts << '<' << name << Pt::String(" xmlns=\"") << targetNamespace << '"' << '>';
     //<--
@@ -220,7 +220,7 @@ bool SoapClient::advanceMessage()
             _arg = _argv[_argn];
 
             //-->
-            const Parameter* param = _port->getInput(_argn);
+            const Parameter* param = _op->getInput(_argn);
             
             assert(param);
             if( ! param)
@@ -426,7 +426,7 @@ bool SoapClient::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                const Parameter* param = _port->getOutput();
+                const Parameter* param = _op->getOutput();
                 if( ! param )
                     throw Fault("undefined output parameter", Pt::XmlRpc::Fault::MethodNotFound);
 
@@ -453,7 +453,7 @@ bool SoapClient::advance(const Pt::Xml::Node& node)
         {
             if(node.type() == Xml::Node::EndElement) // end of method tag
             {
-                assert( Xml::toEndElement(node).name().local().narrow() == _port->outputName() );
+                assert( Xml::toEndElement(node).name().local() == _op->outputName() );
                 _state = OnMethodEnd;
                 break;
             }

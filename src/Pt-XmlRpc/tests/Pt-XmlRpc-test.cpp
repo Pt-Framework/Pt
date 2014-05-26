@@ -622,11 +622,11 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         class CalcSoapServiceDefinition : public Pt::XmlRpc::SoapServiceDefinition
         {
             public:
-                class ArrayMultiplyPort : public Pt::XmlRpc::PortType
+                class ArrayMultiply : public Pt::XmlRpc::Operation
                 {
                     public:
-                        ArrayMultiplyPort()
-                        : Pt::XmlRpc::PortType("multiply", "multiplyResponse")
+                        ArrayMultiply()
+                        : Pt::XmlRpc::Operation("multiply", "multiplyResponse")
                         , _intArrayType(_intType, "number")
                         {
                             addInput("a", _intArrayType);
@@ -643,11 +643,11 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
                 CalcSoapServiceDefinition()
                 {
                     setTargetNamespace("http://tempuri.org/");
-                    addPort(_port);
+                    addOperation(_arrayMultiply);
                 }
             
             private:
-                ArrayMultiplyPort _port;
+                ArrayMultiply _arrayMultiply;
         };
 
         void SoapArray()

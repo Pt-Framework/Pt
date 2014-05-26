@@ -80,7 +80,7 @@ namespace XmlRpc {
 SoapResponder::SoapResponder(SoapServiceDefinition& service)
 : _serviceDef(&service)
 , _proc(0)
-, _procDef(0)
+, _op(0)
 , _reader(_bin)
 , _args(0)
 , _state(OnBegin)
@@ -267,11 +267,11 @@ void SoapResponder::beginResult(std::ostream& os)
     assert(_result);
     _ts.write(SOAP_REPLY_BEGIN, sizeof(SOAP_REPLY_BEGIN)/sizeof(Char));
 
-    Pt::String outName = _procDef->outputName().c_str();
+    const Pt::String& outName = _op->outputName();
     Pt::String targetNamespace = _serviceDef->targetNamespace().c_str();
     _ts << '<' << outName << Pt::String(" xmlns=\"") << targetNamespace << '"' << '>';
     
-    const Parameter* param = _procDef->getOutput();
+    const Parameter* param = _op->getOutput();
     assert(param);
     if( ! param)
         throw SerializationError("no output defined"); // check if catched
@@ -296,7 +296,7 @@ void SoapResponder::finishResult()
 {
     if( ! _isFault )
     {
-        Pt::String outName = _procDef->outputName().c_str();
+        const Pt::String& outName = _op->outputName();
         _ts << '<' << '/' << outName << '>';
         _ts.write(SOAP_REPLY_END, sizeof(SOAP_REPLY_END)/sizeof(Char));
         _ts.flush();
@@ -386,8 +386,8 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
                 if(_proc)
                     _serviceDef->releaseProcedure(_proc);
 
-                _procDef = _serviceDef->getPort( se.name().local().narrow() );
-                if( ! _procDef )
+                _op = _serviceDef->getOperation( se.name().local() );
+                if( ! _op )
                     throw Fault("no such procedure", Pt::XmlRpc::Fault::MethodNotFound);
 
                 _proc = _serviceDef->getProcedure( se.name().local().narrow(), *this );
@@ -424,7 +424,7 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
                         throw SerializationError("too many arguments");
                 }
 
-                const Parameter* param = _procDef->getInput( se.name().local().narrow() );
+                const Parameter* param = _op->getInput( se.name().local().narrow() );
                 if( ! param )
                     throw Fault("no such parameter", Pt::XmlRpc::Fault::MethodNotFound);
 

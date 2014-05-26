@@ -399,7 +399,21 @@ bool SoapFormatter::advance(const Pt::Xml::Node& node)
         const Xml::Characters& c = static_cast<const Xml::Characters&>(node);
 
         const Type::TypeId typeId = _paramStack.back()->type()->typeId();
-        if(typeId == Type::Int)
+        if(typeId == Type::Bool)
+        {
+                const Pt::String& strval = c.content();
+                bool value = false;
+                
+                if( strval == "1" || strval == "true")
+                    value = true;
+                else if(strval == "0" || strval == "false")
+                    value = false;
+                else
+                    throw SerializationError("invalid boolean parameter");
+
+                _composer->setBool(value);
+        }
+        else if(typeId == Type::Int)
         {
             Pt::int64_t number = 0;
             bool ok = false;
@@ -409,6 +423,17 @@ bool SoapFormatter::advance(const Pt::Xml::Node& node)
                 throw SerializationError("invalid integer parameter");
 
             _composer->setInt(number);
+        }
+        else if(typeId == Type::Float)
+        {
+            double number = 0.0;
+            bool ok = false;
+            parseFloat( c.content().begin(), c.content().end(), number, ok);
+
+            if( ! ok )
+                throw SerializationError("invalid float parameter");
+
+            _composer->setFloat(number);
         }
         else if(typeId == Type::String)
         {
