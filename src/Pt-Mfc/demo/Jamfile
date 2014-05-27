@@ -1,14 +1,11 @@
 SubDir PT_TOP src Pt-Mfc demo ;
 SubDirHdrs $(PT_TOP)/include ;
-
+SubDirHdrs $(MFC_INCLUDES) ;
+SubDirC++Flags [ FDefines _AFXDLL ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Mfc ;
 
-SubDirC++Flags [ FDefines _AFXDLL ] ;
-
-Main mfcdemo : MfcApplication.cpp
-			   mfcdemo.cpp ;
-
+Main mfcdemo : MfcApplication.cpp mfcdemo.cpp ;
 LinkFlags mfcdemo : /SUBSYSTEM:WINDOWS ;
-
+LinkFlags mfcdemo : $(MFC_LINKFLAGS) ;
 LinkSharedLibraries mfcdemo : Pt Pt-System Pt-Net Pt-Mfc ;
 MakeLocate mfcdemo : $(PT_OUTPUT_TARGET) ;

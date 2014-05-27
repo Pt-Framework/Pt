@@ -5,14 +5,14 @@ REM     echo removing deploy dir
 REM     call rmdir /s/q deploy
 REM )
 
-REM call:Build -sCONFIG=nt-vc10-x86-debug --debug --with-openssl --with-mfc --with-qt5 -sTOOLSET=vc10 -sTARGET_OSPLAT=x86
+call:Build -sCONFIG=nt-vc10-x86-debug --debug --with-openssl --with-mfc --with-qt5 -sTOOLSET=vc10 -sTARGET_OSPLAT=x86
 
 if %errorlevel% neq 0 (
     echo build failed
     goto :eof
 ) 
 
-REM call:Build -sCONFIG=nt-vc10-x86-release --debug --with-openssl --with-mfc --with-qt5 --optimize -sTOOLSET=vc10 -sTARGET_OSPLAT=x86
+call:Build -sCONFIG=nt-vc10-x86-release --debug --with-openssl --with-mfc --with-qt5 --optimize -sTOOLSET=vc10 -sTARGET_OSPLAT=x86
 
 if %errorlevel% neq 0 (
     echo build failed

@@ -1,12 +1,14 @@
 SubDir PT_TOP src Pt-Mfc ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirHdrs $(PT_TOP)/src/Pt-System ;
+SubDirHdrs $(MFC_INCLUDES) ;
 SubDirC++Flags [ FDefines PT_MFC_API_EXPORT ] ;
 SubDirC++Flags [ FDefines _AFXDLL ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Mfc ;
 
 SharedLibrary Pt-Mfc : Application.cpp ;
 LinkSharedLibraries Pt-Mfc : Pt Pt-System  ;
+LinkFlags Pt-Mfc : $(MFC_LINKFLAGS) ;
 MakeLocate Pt-Mfc : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-Mfc : $(PT_INSTALL_LIBDIR) ;
 

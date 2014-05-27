@@ -251,6 +251,32 @@ if --with-mfc in $(ARGV)
     WITH_MFC = yes ;
     EchoOption WITH_MFC : "MFC Support" ;
     Configure WITH_MFC ;
+
+    if ! $(VISUALC)
+    {
+        Exit "ERROR: MFC not supported on " $(TOOLSET) ;
+    }
+
+    MFC_INCLUDES = \"$(VISUALC)\\VC\\atlmfc\\include\" ;
+    EchoOption MFC_INCLUDES : "MFC Include Directory" ;
+    Configure MFC_INCLUDES ;
+
+    if $(TARGET_OSPLAT:L) = "x86_64"
+    {
+        MFC_LIBDIR = \"$(VISUALC)\\VC\\atlmfc\\lib\\amd64\" ;
+    }
+    else if $(TARGET_OSPLAT:L) = "x86"
+    {
+        MFC_LIBDIR = \"$(VISUALC)\\VC\\atlmfc\\lib\" ;
+    }
+    else
+    {
+        Exit "ERROR: MFC not supported on " $(TARGET_OSPLAT) ;
+    }
+
+    MFC_LINKFLAGS = /LIBPATH:$(MFC_LIBDIR) ;
+    EchoOption MFC_LINKFLAGS : "MFC Linker Flags" ;
+    Configure MFC_LINKFLAGS ;
 }
 
 #############################################################################
