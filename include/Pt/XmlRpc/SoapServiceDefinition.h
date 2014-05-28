@@ -119,10 +119,10 @@ class PT_XMLRPC_API BooleanType : public Type
 
         virtual ~BooleanType();
 
-        virtual const Parameter* getParameter(std::size_t n) const
+        virtual const Parameter* getParameter(std::size_t) const
         { return 0; }
 
-        virtual const Parameter* getParameter(const std::string& name) const
+        virtual const Parameter* getParameter(const std::string&) const
         { return 0; }
 };
 
@@ -134,10 +134,10 @@ class PT_XMLRPC_API IntegerType : public Type
 
         virtual ~IntegerType();
 
-        virtual const Parameter* getParameter(std::size_t n) const
+        virtual const Parameter* getParameter(std::size_t) const
         { return 0; }
 
-        virtual const Parameter* getParameter(const std::string& name) const
+        virtual const Parameter* getParameter(const std::string&) const
         { return 0; }
 };
 
@@ -149,10 +149,10 @@ class PT_XMLRPC_API FloatType : public Type
 
         virtual ~FloatType();
 
-        virtual const Parameter* getParameter(std::size_t n) const
+        virtual const Parameter* getParameter(std::size_t) const
         { return 0; }
 
-        virtual const Parameter* getParameter(const std::string& name) const
+        virtual const Parameter* getParameter(const std::string&) const
         { return 0; }
 };
 
@@ -164,10 +164,10 @@ class PT_XMLRPC_API StringType : public Type
 
         virtual ~StringType();
 
-        virtual const Parameter* getParameter(std::size_t n) const
+        virtual const Parameter* getParameter(std::size_t) const
         { return 0; }
 
-        virtual const Parameter* getParameter(const std::string& name) const
+        virtual const Parameter* getParameter(const std::string& ) const
         { return 0; }
 };
 

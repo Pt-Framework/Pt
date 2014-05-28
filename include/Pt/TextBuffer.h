@@ -499,7 +499,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         {
             while(n-- > 0)
             {
-                *s1 = s2->value();
+                *s1 = static_cast<A>(s2->value());
                 ++s1;
                 ++s2;
             }
