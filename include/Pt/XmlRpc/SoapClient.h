@@ -52,16 +52,12 @@ class SoapServiceDefinition;
 
 /** @brief A client for remote procedure calls.
 */
-class PT_XMLRPC_API SoapClient : public ClientBase
+class PT_XMLRPC_API SoapClientBase : public ClientBase
 {
     public:
-        /** @brief Constructor.
-        */
-        SoapClient(SoapServiceDefinition& service);
+        SoapClientBase();
 
-        /** @brief Destructor.
-        */
-        virtual ~SoapClient();
+        virtual ~SoapClientBase();
 
         //! @internal
         void beginCall(Composer& r, RemoteCall& call, Decomposer** argv, unsigned argc);
@@ -84,7 +80,38 @@ class PT_XMLRPC_API SoapClient : public ClientBase
         */
         bool isFailed() const;
 
-    protected:       
+    protected:
+        /** @brief Fails the current procedure.
+
+            This method is used by derived Clients before calling finishResult()
+            so that the RemoteProcedure throws a Fault when the result is 
+            processed.
+        */
+        void setError(bool f = true);
+
+        void setFailed(bool f = true);
+
+        /** @brief Parses the XML-RPC result.
+
+            This method is used by derived Clients after the XML-RPC result 
+            has been parsed by parseResult(). The current RemoteProcedure will
+            receive completion notification to process the result.
+        */
+        void setFinished();
+
+        void finishResult()
+        { setFinished(); }
+
+        Decomposer** argv() const
+        { return _argv;}
+
+        unsigned argc() const
+        { return _argc;}
+
+        virtual void onBeginCall(Composer&) = 0;
+
+        virtual void onReset() = 0;
+
         /** @brief An asynchronous remote procedure is invoked.
 
             Derived Clients implement this method to format and send a
@@ -114,6 +141,46 @@ class PT_XMLRPC_API SoapClient : public ClientBase
             the result of the RemoteProcedure is processed.
         */
         virtual void onError() = 0;
+
+        /** @brief A remote procedure has failed.
+
+            Derived Clients implement this method to format to throw exceptions
+            which can not be represented by Fault. This method is called when
+            the result of the RemoteProcedure is processed.
+        */
+        virtual void onFault() = 0;
+
+    private:
+        RemoteCall* _method;
+        Decomposer** _argv;
+        unsigned _argc;
+        Decomposer* _arg;
+        unsigned _argn;
+        bool _error;
+        bool _isFault;
+        Pt::varint_t _r1;
+        Pt::varint_t _r2;
+};
+
+/** @brief A client for remote procedure calls.
+*/
+class PT_XMLRPC_API SoapClient : public SoapClientBase
+{
+    public:
+        /** @brief Constructor.
+        */
+        SoapClient(SoapServiceDefinition& service);
+
+        /** @brief Destructor.
+        */
+        virtual ~SoapClient();
+
+    protected:       
+        virtual void onBeginCall(Composer& r);
+
+        virtual void onReset();
+
+        virtual void onFault();
 
     protected:
         /** @brief Formats the XML-RPC message.
@@ -156,14 +223,6 @@ class PT_XMLRPC_API SoapClient : public ClientBase
 
         /** @brief Parses the XML-RPC result.
 
-            This method is used by derived Clients after the XML-RPC result 
-            has been parsed by parseResult(). The current RemoteProcedure will
-            receive completion notification to process the result.
-        */
-        void finishResult();
-
-        /** @brief Parses the XML-RPC result.
-
             This method is used by derived Clients in in onCall() to parse a
             XML-RPC result from a std::istream.
         */
@@ -176,14 +235,6 @@ class PT_XMLRPC_API SoapClient : public ClientBase
             processed.
         */
         void setFault(int rc, const char* msg);
-
-        /** @brief Fails the current procedure.
-
-            This method is used by derived Clients before calling finishResult()
-            so that the RemoteProcedure throws a Fault when the result is 
-            processed.
-        */
-        void setError(bool f = true);
 
     private:
         //! @internal
@@ -209,14 +260,11 @@ class PT_XMLRPC_API SoapClient : public ClientBase
             OnEnvelopeEnd
         };
 
-        RemoteCall* _method;
-        
-        Pt::Utf8Codec _utf8;
-        TextOStream _ts;
-        Decomposer** _argv;
-        unsigned _argc;
         Decomposer* _arg;
         unsigned _argn;
+
+        Pt::Utf8Codec _utf8;
+        TextOStream _ts;
 
         Xml::BinaryInputSource _bin;
         Xml::XmlReader _reader;
@@ -226,9 +274,7 @@ class PT_XMLRPC_API SoapClient : public ClientBase
         const Operation* _op;
         SoapFormatter _fmt;
         Fault _fault;
-        BasicComposer<Fault> _fh;
-        bool _error;
-        bool _isFault;
+
         Pt::varint_t _r1;
         Pt::varint_t _r2;
 };

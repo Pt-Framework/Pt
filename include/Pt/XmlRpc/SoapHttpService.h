@@ -50,7 +50,55 @@ namespace XmlRpc {
 
 /** @brief Dispatches requests to a service procedure.
 */
-class PT_XMLRPC_API SoapResponder : private ResponderBase
+class PT_XMLRPC_API SoapResponderBase : public ResponderBase
+{
+    public:
+        /** @brief Construct with Service.
+        */
+        SoapResponderBase(ServiceDefinition& serviceDef);
+
+        /** @brief Destructor.
+        */
+        virtual ~SoapResponderBase();
+
+        ServiceProcedure* serviceProcedure() const
+        { return _proc; }
+
+        //! @internal
+        virtual void endCall();
+
+        /** @brief Resets to initial state.
+        */
+        void cancel();
+
+        /** @brief Gets the service procedure.
+        */
+        ServiceProcedure* getProcedure(const std::string& name);
+
+    protected:
+        /** @brief Resets to initial state.
+
+            Derived responders implement this method to reset to an initial state.
+        */
+        virtual void onReset() = 0;
+
+        /** @brief Cancels all operations.
+
+            Derived responders implement this method to cancel all operations.
+        */
+        virtual void onCancel() = 0;
+
+        virtual void onEndCall(ServiceProcedure& proc) = 0;
+
+    private:
+        ServiceDefinition* _serviceDef;
+        ServiceProcedure* _proc;
+};
+
+
+/** @brief Dispatches requests to a service procedure.
+*/
+class PT_XMLRPC_API SoapResponder : public SoapResponderBase
 {
     public:
         /** @brief Construct with Service.
@@ -61,14 +109,12 @@ class PT_XMLRPC_API SoapResponder : private ResponderBase
         */
         virtual ~SoapResponder();
 
-        /** @brief Cancels the responder.
-        */
-        void cancel();
-
-        //! @internal
-        void endCall();
-
     protected:
+        virtual void onEndCall(ServiceProcedure& proc);
+
+        // inheritdoc
+        virtual void onReset();
+        
         /** @brief The service procedure has finished.
 
             Derived responders implement this method to format and send the
@@ -77,12 +123,6 @@ class PT_XMLRPC_API SoapResponder : private ResponderBase
             to format the XML-RPC result.
         */
         virtual void onResult() = 0;
-
-        /** @brief The responder is canceled.
-
-            Derived responders implement this method to cancel all operations.
-        */
-        virtual void onCancel() = 0;
 
         /** @brief The service procedure has failed.
 
@@ -170,10 +210,8 @@ class PT_XMLRPC_API SoapResponder : private ResponderBase
             OnEnvelopeEnd,
         };
 
-        SerializationContext _context;
         SoapServiceDefinition* _serviceDef;
         const Operation* _op;
-        ServiceProcedure* _proc;
         
         Xml::BinaryInputSource _bin;
         Xml::XmlReader _reader;

@@ -77,9 +77,66 @@ namespace Pt {
 
 namespace XmlRpc {
 
-SoapResponder::SoapResponder(SoapServiceDefinition& service)
-: _serviceDef(&service)
+///////////////////////////////////////////////////////////////////////////////
+// SoapResponderBase
+///////////////////////////////////////////////////////////////////////////////
+
+SoapResponderBase::SoapResponderBase(ServiceDefinition& serviceDef)
+: _serviceDef(&serviceDef)
 , _proc(0)
+{
+}
+
+
+SoapResponderBase::~SoapResponderBase()
+{
+    if(_proc)
+        _serviceDef->releaseProcedure(_proc);
+}
+
+
+ServiceProcedure* SoapResponderBase::getProcedure(const std::string& name)
+{
+    if(_proc)
+        _serviceDef->releaseProcedure(_proc);
+
+    _proc = _serviceDef->getProcedure( name, *this );
+    return _proc;
+}
+
+
+void SoapResponderBase::endCall()
+{ 
+    //if( ! _isFault )
+    //{
+    //    assert(proc);
+    //    _result = proc->endCall(); // throws Fault
+    //}
+
+    assert(_proc);
+    this->onEndCall(*_proc);
+}
+
+
+void SoapResponderBase::cancel()
+{
+    this->onCancel();
+    
+    if(_proc)
+        _serviceDef->releaseProcedure(_proc);
+    
+    _proc = 0;
+
+    this->onReset();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// SoapResponder
+///////////////////////////////////////////////////////////////////////////////
+
+SoapResponder::SoapResponder(SoapServiceDefinition& serviceDef)
+: SoapResponderBase(serviceDef)
+, _serviceDef(&serviceDef)
 , _op(0)
 , _reader(_bin)
 , _args(0)
@@ -96,25 +153,15 @@ SoapResponder::SoapResponder(SoapServiceDefinition& service)
 SoapResponder::~SoapResponder()
 {
     _ts.detach();
-
-    if(_proc)
-        _serviceDef->releaseProcedure(_proc);
 }
 
 
-void SoapResponder::cancel()
+void SoapResponder::onReset()
 {
-    this->onCancel();
-
+    _state = OnBegin;
     _ts.detach();
     _ts.discard();
 
-    if(_proc)
-        _serviceDef->releaseProcedure(_proc);
-
-    _state = OnBegin;
-
-    _proc = 0;
     _args = 0;
     _result = 0;
     _isFault = false;
@@ -123,16 +170,9 @@ void SoapResponder::cancel()
 
 void SoapResponder::beginMessage(std::istream& is)
 {
-    _state = OnBegin;
-    _bin.reset(is);
-
-    if(_proc)
-        _serviceDef->releaseProcedure(_proc);
+    cancel();
     
-    _proc = 0;
-    _args = 0;
-    _result = 0;
-    _isFault = false;
+    _bin.reset(is);
 }
 
 
@@ -190,13 +230,13 @@ void SoapResponder::finishMessage(System::EventLoop& loop)
     if( _isFault )
     {
         onError();
-        // onResult();
         return;
     }
 
     try
     {
-        if( ! _proc )
+        ServiceProcedure* proc = serviceProcedure();
+        if( ! proc )
         {
             throw Fault("invalid XML-RPC", 4);
         }
@@ -211,7 +251,7 @@ void SoapResponder::finishMessage(System::EventLoop& loop)
             }
         }
 
-        _proc->beginCall(loop); // throws Fault
+       proc->beginCall(loop); // throws Fault
     }
     catch(const Fault& fault)
     {
@@ -219,19 +259,17 @@ void SoapResponder::finishMessage(System::EventLoop& loop)
         _isFault = true;
 
         onError();
-        // onResult();
     }
 }
 
 
-void SoapResponder::endCall()
+void SoapResponder::onEndCall(ServiceProcedure& proc)
 { 
     try
     {
         if( ! _isFault )
         {
-            assert(_proc);
-            _result = _proc->endCall(); // throws Fault
+            _result = proc.endCall(); // throws Fault
         }
     }
     catch(const Fault& fault)
@@ -239,7 +277,6 @@ void SoapResponder::endCall()
         _fault = fault;
         _isFault = true;
         onError();
-        // onResult();
         return;
     }
 
@@ -259,8 +296,6 @@ void SoapResponder::beginResult(std::ostream& os)
     _ts.clear();
     _ts.discard();
     _ts.attach(os);
-    //_ts.set(os);
-    // _ts.attach(os);
 
     _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
 
@@ -385,16 +420,12 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                // TODO: probably not neccessary to release here...
-                if(_proc)
-                    _serviceDef->releaseProcedure(_proc);
-
                 _op = _serviceDef->getOperation( se.name().local() );
                 if( ! _op )
                     throw Fault("no such procedure", Pt::XmlRpc::Fault::MethodNotFound);
 
-                _proc = _serviceDef->getProcedure( se.name().local().narrow(), *this );
-                if( ! _proc )
+                ServiceProcedure* proc = getProcedure( se.name().local().narrow() );
+                if( ! proc )
                     throw Fault("no such procedure", Pt::XmlRpc::Fault::MethodNotFound);
 
                 _state = OnMethod;
@@ -416,7 +447,7 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
 
                 if( ! _args )
                 {
-                    _args = _proc->beginArgs();
+                    _args = serviceProcedure()->beginArgs();
                     if( ! *_args)
                         throw SerializationError("too many arguments");
                 }

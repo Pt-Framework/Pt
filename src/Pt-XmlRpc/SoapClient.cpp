@@ -72,53 +72,39 @@ static const Pt::Char SOAP_VALUE_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', '
 static const Pt::Char SOAP_REASON[]  = { '<', 's', 'o', 'a', 'p', ':', 'R', 'e', 'a', 's', 'o', 'n', '>' };
 static const Pt::Char SOAP_REASON_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'R', 'e', 'a', 's', 'o', 'n', '>' };
 
+///////////////////////////////////////////////////////////////////////////////
+// SoapClientBase
+///////////////////////////////////////////////////////////////////////////////
 
-SoapClient::SoapClient(SoapServiceDefinition& service)
+SoapClientBase::SoapClientBase()
 : _method(0)
-, _utf8(1)
-, _ts( &_utf8 )
 , _argv(0)
 , _argc(0)
-, _arg(0)
-, _argn(0)
-, _state(OnBegin)
-, _serviceDef(&service)
-, _op(0)
-, _fmt(_ts)
 , _error(false)
 , _isFault(false)
 {
 }
 
 
-SoapClient::~SoapClient()
+SoapClientBase::~SoapClientBase()
 {
-    _ts.detach();
 }
 
 
-void SoapClient::beginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
+void SoapClientBase::beginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
 {
     _method = &method;
-    _state = OnBegin;
-
-    _reader.reset(_bin);
-    _fmt.beginParse(r);
-
     _argv = argv;
     _argc = argc;
-    _arg = 0;
-    _argn = 0;
-
     _error = false;
     _isFault = false;
 
-
+    this->onBeginCall(r);
     this->onInvoke();
 }
 
 
-void SoapClient::endCall()
+void SoapClientBase::endCall()
 {
     if( _error )
     {
@@ -129,68 +115,135 @@ void SoapClient::endCall()
     if( _isFault )
     {
         _isFault = false;
-        throw _fault; 
+        onFault(); 
     }
+
+    _method = 0;
 }
 
 
-void SoapClient::call(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
+void SoapClientBase::call(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
 {
     _method = &method;
-    _state = OnBegin;
-
-    _reader.reset(_bin);
-    _fmt.beginParse(r);
-
     _argv = argv;
     _argc = argc;
-    _arg = 0;
-    _argn = 0;
-
     _error = false;
     _isFault = false;
 
+    this->onBeginCall(r);
     this->onCall();
 }
 
 
-void SoapClient::cancel()
+void SoapClientBase::cancel()
 {
-    _ts.detach();
-    _ts.discard();
+    this->onCancel();
+
+    this->onReset();
 
     _method = 0;
     _argc = 0;
     _argv = 0;
-    _arg = 0;
-    _argn = 0;
-
     _error = false;
     _isFault = false;
-
-
-    this->onCancel();
 }
 
 
-const RemoteCall* SoapClient::activeProcedure() const
+const RemoteCall* SoapClientBase::activeProcedure() const
 {
     return _method;
 }
 
 
-bool SoapClient::isFailed() const
+bool SoapClientBase::isFailed() const
 {
     return _error || _isFault;
 }
 
 
+void SoapClientBase::setError(bool f)
+{
+    _error = f;
+}
+
+
+void SoapClientBase::setFailed(bool f)
+{
+    _isFault = f;
+}
+
+
+void SoapClientBase::setFinished()
+{
+    if( _method )
+    {
+        RemoteCall* method = _method;
+        _method = 0;
+        method->finish();
+    }
+    else if(_error)
+    {
+        _error = false;
+        onError();
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// SoapClient
+///////////////////////////////////////////////////////////////////////////////
+
+SoapClient::SoapClient(SoapServiceDefinition& service)
+: _arg(0)
+, _argn(0)
+, _utf8(1)
+, _ts( &_utf8 )
+, _state(OnBegin)
+, _serviceDef(&service)
+, _op(0)
+, _fmt(_ts)
+{
+}
+
+
+SoapClient::~SoapClient()
+{
+    _ts.detach();
+}
+
+
+void SoapClient::onBeginCall(Composer& r)
+{
+    _arg = 0;
+    _argn = 0;
+    _state = OnBegin;
+    _reader.reset(_bin);
+    _fmt.beginParse(r);
+}
+
+
+void SoapClient::onFault()
+{
+    throw _fault; 
+}
+
+
+void SoapClient::onReset()
+{
+    _arg = 0;
+    _argn = 0;
+    _ts.detach();
+    _ts.discard();
+}
+
+
+
 void SoapClient::beginMessage(std::ostream& os)
 {
-    if( ! _method )
+    const RemoteCall* method = activeProcedure();
+    if( ! method )
         return;
 
-    const String& name = _method->name();
+    const String& name = method->name();
 
     _ts.clear();
     _ts.discard();
@@ -213,11 +266,11 @@ bool SoapClient::advanceMessage()
 {
     unsigned n = 10;
 
-    while(_argn < _argc && n > 0)
+    while(_argn < argc() && n > 0)
     {
         if( ! _arg)
         {
-            _arg = _argv[_argn];
+            _arg = argv()[_argn];
 
             //-->
             const Parameter* param = _op->getInput(_argn);
@@ -245,15 +298,17 @@ bool SoapClient::advanceMessage()
 
     }
     
-    return _argn >= _argc;
+    return _argn >= argc();
 }
 
 
 void SoapClient::finishMessage()
 {
+    const RemoteCall* method = activeProcedure();
+
     //-->
     Pt::String targetNamespace = _serviceDef->targetNamespace().c_str();
-    const String& name = _method->name();
+    const String& name = method->name();
     _ts << '<' << '/' << name << '>';
     _ts.write(SOAP_BODY_END, sizeof(SOAP_BODY_END)/sizeof(Char) ); 
     //<--  
@@ -310,29 +365,8 @@ void SoapClient::setFault(int rc, const char* msg)
 {
     _fault.setRc(rc);
     _fault.setText(msg);
-    _isFault = true;
-}
 
-
-void SoapClient::setError(bool f)
-{
-    _error = f;
-}
-
-
-void SoapClient::finishResult()
-{
-    if( _method )
-    {
-        RemoteCall* method = _method;
-        _method = 0;
-        method->finish();
-    }
-    else if(_error)
-    {
-        _error = false;
-        onError();
-    }
+    setFailed(true);
 }
 
 
@@ -369,7 +403,6 @@ void SoapClient::processResult(std::istream& is)
     }
 
     // _method contains a return value or fault now
-    _method = 0;
     _state = OnBegin;
 }
 
@@ -578,7 +611,7 @@ bool SoapClient::advance(const Pt::Xml::Node& node)
             {
                 assert( Xml::toEndElement(node).name().local() == L"Body" );
                 _state = OnBodyEnd;
-                _isFault = true;
+                setFailed(true);
             }
             
             break;
