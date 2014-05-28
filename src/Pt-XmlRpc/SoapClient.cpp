@@ -406,10 +406,15 @@ bool SoapClient::advance(const Pt::Xml::Node& node)
 
         case OnBody:
         {
-            if(node.type() == Xml::Node::StartElement)
+            const Xml::StartElement* se = Xml::toStartElement(&node);
+            if(se)
             {
-                _state = OnMethod;
+                if( se->name().name() == L"Fault" )
+                    _state = OnFault;
+                else
+                    _state = OnMethod;
             }
+            
             break;
         }
 
@@ -467,6 +472,113 @@ bool SoapClient::advance(const Pt::Xml::Node& node)
             {
                 assert( Xml::toEndElement(node).name().local() == L"Body" );
                 _state = OnBodyEnd;
+            }
+            
+            break;
+        }
+
+        case OnFault:
+        {
+            const Xml::StartElement* se = Xml::toStartElement(&node);
+            if(se)
+            {
+                if( se->name().name() == L"Code" )
+                    _state = OnFaultCode;
+                else if( se->name().name() == L"Reason" )
+                    _state = OnFaultReason;
+            }
+
+            const Xml::EndElement* ee = Xml::toEndElement(&node);
+            if(ee)
+            {
+                if( ee->name().name() == L"Fault" )
+                    _state = OnFaultEnd;
+            }
+            
+            break;
+        }
+
+        case OnFaultCode:
+        {
+            const Xml::StartElement* se = Xml::toStartElement(&node);
+            if(se)
+            {
+                if( se->name().name() == L"Value" )
+                    _state = OnFaultCodeValue;
+            }
+
+            const Xml::EndElement* ee = Xml::toEndElement(&node);
+            if(ee)
+            {
+                if( ee->name().name() == L"Code" )
+                    _state = OnFault;
+            }
+            
+            break;
+        }
+
+        case OnFaultCodeValue:
+        {
+            const Xml::EndElement* ee = Xml::toEndElement(&node);
+            if(ee)
+            {
+                if( ee->name().name() == L"Value" )
+                    _state = OnFaultCode;
+            }
+
+            const Xml::Characters* c = Xml::toCharacters(&node);
+            if(c)
+            {
+                _fault.setRc(0);
+            }
+            
+            break;
+        }
+
+        case OnFaultReason:
+        {
+            const Xml::StartElement* se = Xml::toStartElement(&node);
+            if(se)
+            {
+                if( se->name().name() == L"Text" )
+                    _state = OnFaultReasonText;
+            }
+
+            const Xml::EndElement* ee = Xml::toEndElement(&node);
+            if(ee)
+            {
+                if( ee->name().name() == L"Reason" )
+                    _state = OnFault;
+            }
+            
+            break;
+        }
+
+        case OnFaultReasonText:
+        {
+            const Xml::EndElement* ee = Xml::toEndElement(&node);
+            if(ee)
+            {
+                if( ee->name().name() == L"Text" )
+                    _state = OnFaultReason;
+            }
+
+            const Xml::Characters* c = Xml::toCharacters(&node);
+            if(c)
+            {
+                _fault.setText( c->content().narrow() );
+            }
+            
+            break;
+        }
+
+        case OnFaultEnd:
+        {
+            if(node.type() == Xml::Node::EndElement) // </Body>
+            {
+                assert( Xml::toEndElement(node).name().local() == L"Body" );
+                _state = OnBodyEnd;
+                _isFault = true;
             }
             
             break;

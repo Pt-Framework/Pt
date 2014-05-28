@@ -324,11 +324,13 @@ void SoapResponder::formatError(std::ostream& os, int rc, const char* msg)
     // _ts.attach(os);
     
     _ts.write( XMLRPC_XMLDECL, sizeof(XMLRPC_XMLDECL)/sizeof(Char) );
+    _ts.write( SOAP_REPLY_BEGIN, sizeof(SOAP_REPLY_BEGIN)/sizeof(Char) );
 
     _ts.write( SOAP_FAULT, sizeof(SOAP_FAULT)/sizeof(Char) );
     _ts.write( SOAP_CODE, sizeof(SOAP_CODE)/sizeof(Char) );
     _ts.write( SOAP_VALUE, sizeof(SOAP_VALUE)/sizeof(Char) );
 
+    // TODO: insert fault code
     _ts.write( SOAP_CODE_RECEIVER, sizeof(SOAP_CODE_RECEIVER)/sizeof(Char) );
 
     _ts.write( SOAP_VALUE_END, sizeof(SOAP_VALUE_END)/sizeof(Char) );
@@ -341,6 +343,7 @@ void SoapResponder::formatError(std::ostream& os, int rc, const char* msg)
 
     _ts.write( SOAP_REASON_END, sizeof(SOAP_REASON_END)/sizeof(Char) );
     _ts.write( SOAP_FAULT_END, sizeof(SOAP_FAULT_END)/sizeof(Char) );
+    _ts.write( SOAP_REPLY_END, sizeof(SOAP_REPLY_END)/sizeof(Char) );
 
     _ts.flush();
 }

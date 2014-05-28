@@ -199,8 +199,14 @@ class PT_XMLRPC_API SoapClient : public ClientBase
             OnParam,
             OnParamEnd,
             OnMethodEnd,
+            OnFault,
+            OnFaultCode,
+            OnFaultCodeValue,
+            OnFaultReason,
+            OnFaultReasonText,
+            OnFaultEnd,
             OnBodyEnd,
-            OnEnvelopeEnd,
+            OnEnvelopeEnd
         };
 
         RemoteCall* _method;
