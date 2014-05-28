@@ -152,6 +152,9 @@ void SettingsWriter::writeParent(const SerializationInfo& sd, const std::string&
         }
         else if( it->isStruct() || it->isSequence() )
         {
+            if( separate )
+                *_os << Char(',') << Char(' ');
+
             *_os << Pt::String::widen( prefix ) << Char('.') << Pt::String::widen( it->name() ) << Char(' ') << Char('=') << Char(' ');
 
             if( ! it->isSequence() )
