@@ -619,7 +619,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         // SoapArray
         //
 
-        class CalcSoapServiceDefinition : public Pt::XmlRpc::SoapServiceDefinition
+        class CalcSoapServiceDeclaration: public Pt::XmlRpc::SoapServiceDeclaration
         {
             public:
                 class ArrayMultiply : public Pt::XmlRpc::Operation
@@ -627,7 +627,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
                     public:
                         ArrayMultiply()
                         : Pt::XmlRpc::Operation("multiply", "multiplyResponse")
-                        , _intArrayType(_intType, "number")
+                        , _intArrayType("IntArrayType", _intType, "number")
                         {
                             addInput("a", _intArrayType);
                             addInput("b", _intArrayType);
@@ -640,7 +640,8 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
                         Pt::XmlRpc::ArrayType _intArrayType;
                 };
 
-                CalcSoapServiceDefinition()
+                CalcSoapServiceDeclaration()
+				: Pt::XmlRpc::SoapServiceDeclaration("calc")
                 {
                     setTargetNamespace("http://tempuri.org/");
                     addOperation(_arrayMultiply);
@@ -652,14 +653,16 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
 
         void SoapArray()
         {
-            CalcSoapServiceDefinition serviceDef;
+            CalcSoapServiceDeclaration serviceDecl;
+
+			Pt::XmlRpc::SoapServiceDefinition serviceDef(serviceDecl);
             serviceDef.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyVector);
 
             Pt::XmlRpc::SoapHttpService httpService(serviceDef);
             Pt::Http::MapUrl servlet("/calc", httpService);
             _server->addServlet(servlet);
 
-            Pt::XmlRpc::SoapHttpClient client(serviceDef, *_loop);
+            Pt::XmlRpc::SoapHttpClient client(serviceDecl, *_loop);
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
 

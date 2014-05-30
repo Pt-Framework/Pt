@@ -192,7 +192,7 @@ void SoapClientBase::setFinished()
 // SoapClient
 ///////////////////////////////////////////////////////////////////////////////
 
-SoapClient::SoapClient(SoapServiceDefinition& service)
+SoapClient::SoapClient(SoapServiceDeclaration& service)
 : _arg(0)
 , _argn(0)
 , _utf8(1)

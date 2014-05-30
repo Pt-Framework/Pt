@@ -70,14 +70,77 @@ class Type : private NonCopyable
         TypeId typeId() const
         { return _typeId; }
 
+		virtual bool isSimple() const = 0;
+
         virtual const Parameter* getParameter(std::size_t n) const = 0;
 
         virtual const Parameter* getParameter(const std::string& name) const = 0;
+				
+		virtual const char* name() const = 0;
 
-    private:
-        TypeId _typeId;
+		virtual std::size_t size() const = 0;
+
+	private:
+        TypeId _typeId;	
 };
 
+
+class SimpleType : public Type
+{
+    
+    public:
+        explicit SimpleType(TypeId typeId)
+        : Type(typeId)
+        {			
+		}
+
+        virtual ~SimpleType()
+        {}
+
+		virtual bool isSimple() const
+		{
+			return true;
+		}
+
+        virtual const Parameter* getParameter(std::size_t) const
+        { return 0; }
+
+        virtual const Parameter* getParameter(const std::string&) const
+        { return 0; }
+
+		std::size_t size() const
+		{
+			return 0;
+		}
+};
+
+
+class ComplexType : public Type
+{
+    
+    public:
+        explicit ComplexType(TypeId typeId, const std::string& name)
+        : Type(typeId)	
+		, _name(name)	
+        {			
+		}
+
+        virtual ~ComplexType()
+        {}
+
+		virtual bool isSimple() const
+		{
+			return false;
+		}
+
+		virtual const char* name() const
+		{
+			return _name.c_str();
+		}
+
+	private:	
+		std::string _name;
+};
 
 class Parameter
 {
@@ -112,70 +175,67 @@ class Parameter
 };
 
 
-class PT_XMLRPC_API BooleanType : public Type
+class PT_XMLRPC_API BooleanType : public SimpleType
 {
     public:
         BooleanType();
-
         virtual ~BooleanType();
 
-        virtual const Parameter* getParameter(std::size_t) const
-        { return 0; }
-
-        virtual const Parameter* getParameter(const std::string&) const
-        { return 0; }
+		virtual const char* name() const
+		{
+			return "boolean";
+		}
 };
 
 
-class PT_XMLRPC_API IntegerType : public Type
+class PT_XMLRPC_API IntegerType : public SimpleType
 {
     public:
         IntegerType();
 
-        virtual ~IntegerType();
+        virtual ~IntegerType();  
 
-        virtual const Parameter* getParameter(std::size_t) const
-        { return 0; }
-
-        virtual const Parameter* getParameter(const std::string&) const
-        { return 0; }
+		virtual const char* name() const
+		{
+			return "int";
+		}
 };
 
 
-class PT_XMLRPC_API FloatType : public Type
+class PT_XMLRPC_API FloatType : public SimpleType
 {
     public:
         FloatType();
 
         virtual ~FloatType();
 
-        virtual const Parameter* getParameter(std::size_t) const
-        { return 0; }
+		virtual const char* name() const
+		{
+			return "double";
+		}
 
-        virtual const Parameter* getParameter(const std::string&) const
-        { return 0; }
 };
 
 
-class PT_XMLRPC_API StringType : public Type
+class PT_XMLRPC_API StringType : public SimpleType
 {
     public:
         StringType();
 
         virtual ~StringType();
 
-        virtual const Parameter* getParameter(std::size_t) const
-        { return 0; }
+		virtual const char* name() const
+		{
+			return "string";
+		}
 
-        virtual const Parameter* getParameter(const std::string& ) const
-        { return 0; }
 };
 
 
-class PT_XMLRPC_API StructType : public Type
+class PT_XMLRPC_API StructType : public ComplexType
 {
     public:
-        StructType();
+        StructType(const std::string& name);
 
         virtual ~StructType();
 
@@ -185,18 +245,23 @@ class PT_XMLRPC_API StructType : public Type
 
         virtual const Parameter* getParameter(const std::string& name) const;
 
+		virtual std::size_t size() const
+		{
+			return _paramList.size();
+		}
+
     private:
         typedef std::vector<Parameter> ParameterList;
         ParameterList _paramList;
 };
 
 
-class PT_XMLRPC_API ArrayType : public Type
+class PT_XMLRPC_API ArrayType : public ComplexType
 {
     public:
-        ArrayType();
+        ArrayType(const std::string& name);
         
-        ArrayType(Type& elem, const std::string& elemName);
+        ArrayType(const std::string& name, Type& elem, const std::string& elemName);
 
         virtual ~ArrayType();
 
@@ -206,6 +271,10 @@ class PT_XMLRPC_API ArrayType : public Type
 
         virtual const Parameter* getParameter(const std::string& name) const;
 
+		virtual std::size_t size() const
+		{
+			return 1;
+		}
     private:
         Parameter _elem;
 };
@@ -214,6 +283,8 @@ class PT_XMLRPC_API ArrayType : public Type
 class PT_XMLRPC_API Operation : private NonCopyable
 {
     public:
+		typedef std::vector<Parameter> ParameterList;
+
         Operation(const Pt::String& inputName, const Pt::String& outputName);
 
         virtual ~Operation();
@@ -234,8 +305,12 @@ class PT_XMLRPC_API Operation : private NonCopyable
 
         const Parameter* getOutput() const;
 
+		const ParameterList& parameters() const
+		{
+			return _params;
+		}
+
     private:
-        typedef std::vector<Parameter> ParameterList;
         ParameterList _params;
         Parameter _out;
         Pt::String _inputName;
@@ -243,12 +318,15 @@ class PT_XMLRPC_API Operation : private NonCopyable
 };
 
 
-class PT_XMLRPC_API SoapServiceDefinition : public ServiceDefinition
+class PT_XMLRPC_API SoapServiceDeclaration 
 {
     public:
-        SoapServiceDefinition();
+        SoapServiceDeclaration(const std::string& name);
 
-        virtual ~SoapServiceDefinition();
+        virtual ~SoapServiceDeclaration();
+
+		const std::string& name() const
+		{ return _name; }
 
         const std::string& targetNamespace() const
         { return _targetNamespace; }
@@ -259,13 +337,33 @@ class PT_XMLRPC_API SoapServiceDefinition : public ServiceDefinition
         void addOperation(Operation& op);
 
         const Operation* getOperation(const Pt::String& name) const;
+		
+		void toWsdl( std::ostream& os) const;
+
+	private:
+		static void createComplexTypeList(std::map<std::string,const Type*>& complexTypes, const Type* type);
 
     private:
+		std::string _name;
         std::string _targetNamespace;
         typedef std::vector<Operation*> OperationList;
         OperationList _operations;
 };
 
+
+class PT_XMLRPC_API SoapServiceDefinition : public ServiceDefinition
+{
+    public:
+        SoapServiceDefinition(const SoapServiceDeclaration& decl);
+
+        virtual ~SoapServiceDefinition();
+
+		const SoapServiceDeclaration& declaration() const
+		{ return _decl; }
+
+	private:
+		const SoapServiceDeclaration& _decl;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

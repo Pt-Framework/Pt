@@ -136,7 +136,7 @@ void SoapResponderBase::cancel()
 
 SoapResponder::SoapResponder(SoapServiceDefinition& serviceDef)
 : SoapResponderBase(serviceDef)
-, _serviceDef(&serviceDef)
+, _serviceDecl( &serviceDef.declaration() )
 , _op(0)
 , _reader(_bin)
 , _args(0)
@@ -303,7 +303,7 @@ void SoapResponder::beginResult(std::ostream& os)
     _ts.write(SOAP_REPLY_BEGIN, sizeof(SOAP_REPLY_BEGIN)/sizeof(Char));
 
     const Pt::String& outName = _op->outputName();
-    Pt::String targetNamespace = _serviceDef->targetNamespace().c_str();
+    Pt::String targetNamespace = _serviceDecl->targetNamespace().c_str();
     _ts << '<' << outName << Pt::String(" xmlns=\"") << targetNamespace << '"' << '>';
     
     const Parameter* param = _op->getOutput();
@@ -420,7 +420,7 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                _op = _serviceDef->getOperation( se.name().local() );
+                _op = _serviceDecl->getOperation( se.name().local() );
                 if( ! _op )
                     throw Fault("no such procedure", Pt::XmlRpc::Fault::MethodNotFound);
 
@@ -610,10 +610,44 @@ void SoapHttpResponder::onError()
 }
 
 
+class WsdlResponder : public Pt::Http::Responder
+{
+    public:
+        WsdlResponder(SoapHttpService& httpService, SoapServiceDefinition& serviceDef)
+		: Pt::Http::Responder(httpService)
+		, _serviceDecl( serviceDef.declaration() )
+		{}
+
+        ~WsdlResponder()
+		{}
+
+    protected:
+        // inheritdoc
+        void onBeginRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop)
+		{}
+
+        // inheritdoc
+        void onReadRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop)
+		{}
+
+        // inheritdoc
+        void onBeginReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+		{
+			_serviceDecl.toWsdl( reply.body() );
+			reply.beginSend(true);
+		}
+
+        // inheritdoc
+        void onWriteReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+		{}
+
+	private:
+		const SoapServiceDeclaration& _serviceDecl;
+};
 
 
-SoapHttpService::SoapHttpService(SoapServiceDefinition& rpcService)
-: _rpcService(&rpcService)
+SoapHttpService::SoapHttpService(SoapServiceDefinition& serviceDef)
+: _serviceDef(&serviceDef)
 { 
 }
 
@@ -631,7 +665,12 @@ Http::Responder* SoapHttpService::onGetResponder(const Http::Request& req)
     //if (req.isHeaderValue("Content-Type", "text/xml; charset=UTF-8")) //! ### Temporary fix ###
     //    return new XmlRpcResponder(*this);
 
-    return new SoapHttpResponder(*this, *_rpcService);
+	if(req.qparams() == "wsdl")
+	{
+		return new WsdlResponder(*this, *_serviceDef);
+	}
+
+    return new SoapHttpResponder(*this, *_serviceDef);
 }
 
 

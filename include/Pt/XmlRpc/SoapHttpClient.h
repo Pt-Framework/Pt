@@ -48,11 +48,11 @@ class PT_XMLRPC_API SoapHttpClient : public SoapClient
     public:
         /** @brief Constructor.
         */
-        SoapHttpClient(SoapServiceDefinition& service);
+        SoapHttpClient(SoapServiceDeclaration& service);
 
         /** @brief Construct with EventLoop used for I/O.
         */
-        SoapHttpClient(SoapServiceDefinition& service, System::EventLoop& loop);
+        SoapHttpClient(SoapServiceDeclaration& service, System::EventLoop& loop);
 
         /** @brief Destructor.
         */

@@ -103,7 +103,7 @@ class PT_XMLRPC_API SoapResponder : public SoapResponderBase
     public:
         /** @brief Construct with Service.
         */
-        SoapResponder(SoapServiceDefinition& service);
+        SoapResponder(SoapServiceDefinition& serviceDef);
 
         /** @brief Destructor.
         */
@@ -210,7 +210,7 @@ class PT_XMLRPC_API SoapResponder : public SoapResponderBase
             OnEnvelopeEnd,
         };
 
-        SoapServiceDefinition* _serviceDef;
+        const SoapServiceDeclaration* _serviceDecl;
         const Operation* _op;
         
         Xml::BinaryInputSource _bin;
@@ -271,7 +271,7 @@ class PT_XMLRPC_API SoapHttpService : public Http::Service
     public:
         /** @brief Constructor.
         */
-        SoapHttpService(SoapServiceDefinition& rpcService);
+        SoapHttpService(SoapServiceDefinition& serviceDef);
 
         /** @brief Destructor.
         */
@@ -285,7 +285,7 @@ class PT_XMLRPC_API SoapHttpService : public Http::Service
         virtual void onReleaseResponder(Http::Responder* resp);
 
     private:
-        SoapServiceDefinition* _rpcService;
+        SoapServiceDefinition* _serviceDef;
         Pt::varint_t _r1;
         Pt::varint_t _r2;
 };

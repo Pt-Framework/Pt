@@ -36,14 +36,14 @@ namespace Pt {
 
 namespace XmlRpc {
 
-SoapHttpClient::SoapHttpClient(SoapServiceDefinition& service)
+SoapHttpClient::SoapHttpClient(SoapServiceDeclaration& service)
 : SoapClient(service)
 {
     init();
 }
 
 
-SoapHttpClient::SoapHttpClient(SoapServiceDefinition& service, System::EventLoop& loop)
+SoapHttpClient::SoapHttpClient(SoapServiceDeclaration& service, System::EventLoop& loop)
 : SoapClient(service)
 , _client(loop)
 {

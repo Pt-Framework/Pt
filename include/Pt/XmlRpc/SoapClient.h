@@ -48,7 +48,7 @@ namespace XmlRpc {
 
 class RemoteCall;
 class Operation;
-class SoapServiceDefinition;
+class SoapServiceDeclaration;
 
 /** @brief A client for remote procedure calls.
 */
@@ -169,7 +169,7 @@ class PT_XMLRPC_API SoapClient : public SoapClientBase
     public:
         /** @brief Constructor.
         */
-        SoapClient(SoapServiceDefinition& service);
+        SoapClient(SoapServiceDeclaration& service);
 
         /** @brief Destructor.
         */
@@ -270,7 +270,7 @@ class PT_XMLRPC_API SoapClient : public SoapClientBase
         Xml::XmlReader _reader;
         State _state;
         
-        SoapServiceDefinition* _serviceDef;
+        SoapServiceDeclaration* _serviceDef;
         const Operation* _op;
         SoapFormatter _fmt;
         Fault _fault;
