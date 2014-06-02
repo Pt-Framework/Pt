@@ -627,8 +627,10 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
                     public:
                         ArrayMultiply()
                         : Pt::XmlRpc::Operation("multiply", "multiplyResponse")
-                        , _intArrayType("IntArrayType", _intType, "number")
+                        , _intArrayType("IntArrayType")
                         {
+                            _intArrayType.setElement("number", _intType);
+
                             addInput("a", _intArrayType);
                             addInput("b", _intArrayType);
 
@@ -659,7 +661,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             serviceDef.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyVector);
 
             Pt::XmlRpc::SoapHttpService httpService(serviceDef);
-            Pt::Http::MapUrl servlet("/calc", httpService);
+            Pt::Http::MapUrl servlet("/" + serviceDecl.name(), httpService);
             _server->addServlet(servlet);
 
             Pt::XmlRpc::SoapHttpClient client(serviceDecl, *_loop);
