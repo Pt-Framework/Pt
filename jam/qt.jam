@@ -97,7 +97,7 @@ rule ConfigureQt
 rule Moc
 {
     local _mocFile = [ FGristFiles $(<) ] ;
-    local _header = [ FGristFiles $(>) ] ;
+    local _header = [ FGristFiles  $(>) ] ;
 
     MakeLocate $(_mocFile) : $(LOCATE_SOURCE) ;
     SEARCH on $(_header) = $(SEARCH_SOURCE) ;
@@ -109,7 +109,62 @@ rule Moc
 
 actions Moc1
 {
-    $(QT_MOC) $(>) -o $(<)
+    $(QT_MOC) -I$(QT_INCLUDES) $(>) -o $(<)
+}
+
+###############################################################################
+# Rules and Actions for rcc
+###############################################################################
+
+rule ConfigureRcc
+{
+    QT_RCC ?= rcc ;
+
+    ConfigureLog "\n[ ConfigureRcc ]" ;
+    
+    local _in = check.qrc ;
+    local _out = check.cpp ;
+    local _src = "<RCC></RCC>\n" ;
+    ConfigureLog $(_src) ;
+
+    WriteFile $(_in) : $(_src) ;
+    local _cmd = $(QT_RCC) $(_in) -o $(_out) ;
+    WITH_QT_RCC = [ TryCommand $(_cmd) ] ;
+
+    if ! $(WITH_QT_RCC)
+    {
+        QT_RCC = [ FDirName $(QTDIR) bin $(QT_RCC) ] ;
+        WITH_QT_RCC = [ TryCommand $(_cmd) ] ;
+    }
+    
+    TryCommand $(RM) $(_in) ;
+    TryCommand $(RM) $(_out) ;
+
+    EchoOption QT_RCC : "Qt rcc tool" : $(QT_RCC) ;
+    EchoOption WITH_QT_RCC : "Qt rcc support" : $(WITH_QT_RCC:E="no")  ;
+ 
+    if $(WITH_QT_RCC)
+    {
+        Configure QT_RCC : $(QT_RCC) ;
+    }
+}
+
+rule Rcc
+{
+    local _out = [ FGristFiles $(<) ] ;
+    local _qrc = [ FGristFiles $(>) ] ;
+
+    MakeLocate $(_out) : $(LOCATE_SOURCE) ;
+    SEARCH on $(_qrc) = $(SEARCH_SOURCE) ;
+    Depends $(_out) : $(_qrc) ;
+    Rcc1 $(_out) : $(_qrc) ;
+
+    Clean clean : $(_out) ;
+}
+
+actions Rcc1
+{
+    $(QT_RCC) -o $(<) $(>) 
 }
 
 ###############################################################################
