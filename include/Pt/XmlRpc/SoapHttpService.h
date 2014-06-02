@@ -55,7 +55,7 @@ class PT_XMLRPC_API SoapResponderBase : public ResponderBase
     public:
         /** @brief Construct with Service.
         */
-        SoapResponderBase(ServiceDefinition& serviceDef);
+        explicit SoapResponderBase(ServiceDefinition& serviceDef);
 
         /** @brief Destructor.
         */
@@ -101,9 +101,9 @@ class PT_XMLRPC_API SoapResponderBase : public ResponderBase
 class PT_XMLRPC_API SoapResponder : public SoapResponderBase
 {
     public:
-        /** @brief Construct with Service.
+        /** @brief Construct with Service declaration and definition.
         */
-        SoapResponder(SoapServiceDefinition& serviceDef);
+        SoapResponder(const SoapServiceDeclaration& decl, ServiceDefinition& def);
 
         /** @brief Destructor.
         */
@@ -235,16 +235,16 @@ class PT_XMLRPC_API SoapHttpResponder : public Http::Responder
                                       , public SoapResponder
 {
     public:
-        SoapHttpResponder(SoapHttpService& httpService, SoapServiceDefinition& service);
+        SoapHttpResponder(SoapHttpService& httpService, const SoapServiceDeclaration& decl, ServiceDefinition& def);
 
         ~SoapHttpResponder();
 
     protected:
         // inheritdoc
-        void onBeginRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop);
+        void onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
 
         // inheritdoc
-        void onReadRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop);
+        void onReadRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
 
         // inheritdoc
         void onBeginReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
@@ -273,6 +273,8 @@ class PT_XMLRPC_API SoapHttpService : public Http::Service
         */
         SoapHttpService(SoapServiceDefinition& serviceDef);
 
+        SoapHttpService(const SoapServiceDeclaration& decl, ServiceDefinition& def);
+
         /** @brief Destructor.
         */
         virtual ~SoapHttpService();
@@ -285,7 +287,8 @@ class PT_XMLRPC_API SoapHttpService : public Http::Service
         virtual void onReleaseResponder(Http::Responder* resp);
 
     private:
-        SoapServiceDefinition* _serviceDef;
+        const SoapServiceDeclaration* _serviceDecl;
+        ServiceDefinition* _serviceDef;
         Pt::varint_t _r1;
         Pt::varint_t _r2;
 };

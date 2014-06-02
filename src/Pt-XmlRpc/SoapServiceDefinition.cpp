@@ -246,172 +246,186 @@ void SoapServiceDeclaration::addOperation(Operation& op)
 }
 
 
-void SoapServiceDeclaration::createComplexTypeList(std::map<std::string,const Type*>& complexTypes, const Type* type)
+typedef std::map<std::string, const Type*> ComplexTypesMap;
+
+
+void SoapServiceDeclaration::createComplexTypeList(ComplexTypesMap& complexTypes, const Type* type)
 {
-	typedef std::map<std::string,const Type*>::iterator ComplexTypesIt;
-	ComplexTypesIt it = complexTypes.find(type->name());
-	
-	if( it != complexTypes.end())
-		return;
-		
-	complexTypes[type->name()] = type;
+    ComplexTypesMap::iterator it = complexTypes.find( type->name() );
+    
+    if( it != complexTypes.end())
+        return;
+        
+    complexTypes[type->name()] = type;
 
-	for( size_t i = 0; i < type->size(); ++i)
-	{
-		const Type* elemType = type->getParameter(i)->type();
-		
-		if(elemType->isSimple())
-			continue;
+    for( size_t i = 0; i < type->size(); ++i)
+    {
+        const Type* elemType = type->getParameter(i)->type();
+        
+        if(elemType->isSimple())
+            continue;
 
-		createComplexTypeList(complexTypes, type->getParameter(i)->type());
-	}	
+        createComplexTypeList(complexTypes, type->getParameter(i)->type());
+    }    
 }
 
 void SoapServiceDeclaration::toWsdl( std::ostream& os) const
 {
-	os<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>"<<std::endl;
-	os<<"<wsdl:definitions xmlns:soapenc=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:tns=\""<<  targetNamespace() <<"\" xmlns:soap=\"http://schemas.xmlsoap.org/wsdl/soap/\" xmlns:s=\"http://www.w3.org/2001/XMLSchema\" "
-	  <<"xmlns:http=\"http://schemas.xmlsoap.org/wsdl/http/\" targetNamespace=\""<<  targetNamespace()<<"\" xmlns:wsdl=\"http://schemas.xmlsoap.org/wsdl/\">"<<std::endl;
+    os << "<?xml version=\"1.0\" encoding=\"utf-8\"?>" << std::endl
+       << "<wsdl:definitions xmlns:soapenc=\"http://schemas.xmlsoap.org/soap/encoding/\" " << std::endl
+       << "    xmlns:tns=\"" <<  targetNamespace() << "\" " << std::endl
+       << "    xmlns:soap=\"http://schemas.xmlsoap.org/wsdl/soap/\" " << std::endl
+       << "    xmlns:s=\"http://www.w3.org/2001/XMLSchema\" " << std::endl
+       << "    xmlns:http=\"http://schemas.xmlsoap.org/wsdl/http/\" " << std::endl
+       << "    targetNamespace=\""<<  targetNamespace() << "\" " << std::endl
+       << "    xmlns:wsdl=\"http://schemas.xmlsoap.org/wsdl/\">" << std::endl;
   
-	os<<"<wsdl:types>"<<std::endl;
+    os << "<wsdl:types>" << std::endl;
 
-    os<<"<s:schema elementFormDefault=\"qualified\" targetNamespace=\""<<targetNamespace()<<"\">"<<std::endl;
+    os << "<s:schema elementFormDefault=\"qualified\" targetNamespace=\"" << targetNamespace() << "\">" << std::endl;
 
-	typedef std::map<std::string,const Type*>::iterator ComplexTypesIt;
-	std::map<std::string,const Type*> complexTypes;
-				    
-	//Operations
-	for( size_t i = 0; i < _operations.size(); ++i)
-	{		
-		const Operation* operation = _operations[i];
-		
-			os<<"<s:element name=\""<<operation->inputName().narrow()<<"\">"<<std::endl;
-			os<<"<s:complexType>"<<std::endl;
-				os<<"<s:sequence>"<<std::endl;					
+    ComplexTypesMap complexTypes;
+                    
+    // operations
+    for( size_t i = 0; i < _operations.size(); ++i)
+    {        
+        const Operation* operation = _operations[i];
+        
+        os << "<s:element name=\"" << operation->inputName().narrow() << "\">" << std::endl;
+        os << "<s:complexType>" << std::endl;
+        os << "<s:sequence>" << std::endl;                    
 
-					for(size_t j = 0; j < operation->parameters().size(); ++j)
-					{
-						const Parameter& param = operation->parameters()[j];						
-												
-						if(param.type()->isSimple())
-						{
-							os<<"<s:element minOccurs=\"0\" maxOccurs=\"1\" name=\""<<param.name() <<"\" type=\"s:"<< param.type()->name()<<"\" />"<<std::endl;
-						}
-						else
-						{
-							os<<"<s:element minOccurs=\"0\" maxOccurs=\"1\" name=\""<<param.name() <<"\" type=\"tns:"<< param.type()->name()<<"\" />"<<std::endl;
-							createComplexTypeList(complexTypes, param.type());
-						}
-					}
+        for(size_t j = 0; j < operation->parameters().size(); ++j)
+        {
+            const Parameter& param = operation->parameters()[j];                        
+                                                
+            if(param.type()->isSimple())
+            {
+                os << "<s:element minOccurs=\"0\" maxOccurs=\"1\" name=\""
+                   << param.name() <<"\" type=\"s:" << param.type()->name() << "\" />"<<std::endl;
+            }
+            else
+            {
+                os << "<s:element minOccurs=\"0\" maxOccurs=\"1\" name=\"" 
+                   << param.name() << "\" type=\"tns:" << param.type()->name() << "\" />"<<std::endl;
+                
+                createComplexTypeList(complexTypes, param.type());
+            }
+        }
 
-				 os<<"</s:sequence>"<<std::endl;
-			os<<"</s:complexType>"<<std::endl;
-		os<<"</s:element>"<<std::endl;
+        os << "</s:sequence>" << std::endl;
+        os << "</s:complexType>" << std::endl;
+        os << "</s:element>" << std::endl;
 
+        os << "<s:element name=\"" << operation->outputName().narrow() << "\">"<<std::endl;
+        os << "<s:complexType>" << std::endl;
+        const Parameter* param = operation->getOutput();
 
-		os<<"<s:element name=\""<<operation->outputName().narrow()<<"\">"<<std::endl;
-			os<<"<s:complexType>"<<std::endl;
-				 const Parameter* param = operation->getOutput();
+        if(param != 0)
+        {
+          os<<"<s:sequence>"<<std::endl;                    
 
-				 if(param != 0)
-				 {
-					os<<"<s:sequence>"<<std::endl;					
-
-						if(param->type()->isSimple())
-						{
-							os<<"<s:element minOccurs=\"0\" maxOccurs=\"1\" name=\""<<param->name() <<"\" type=\"s:"<< param->type()->name()<<"\" />"<<std::endl;
-						}
-						else
-						{
-							os<<"<s:element minOccurs=\"0\" maxOccurs=\"1\" name=\""<<param->name() <<"\" type=\"tns:"<< param->type()->name()<<"\" />"<<std::endl;
-							createComplexTypeList(complexTypes, param->type());
-						}
-					}
-
-				 os<<"</s:sequence>"<<std::endl;
-			os<<"</s:complexType>"<<std::endl;
-		os<<"</s:element>"<<std::endl;
-	}
-
-	//ComplexTypes
-	ComplexTypesIt it = complexTypes.begin(); 
-
-	for(; it != complexTypes.end(); ++it)
-	{
-		os<<"<s:complexType name=\""<<it->first <<"\">"<<std::endl;
-        os<<"<s:sequence>"<<std::endl;
-
-		const Type* type = it->second;
-
-		for(std::size_t i = 0; i < type->size(); ++i)
-		{
-			if(type->getParameter(i)->type()->isSimple())
-				os<<"<s:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\""<<type->getParameter(i)->name()<<"\" type=\"s:"<<type->getParameter(i)->type()->name()<< "\" />"<<std::endl;
-			else
-				os<<"<s:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\""<<type->getParameter(i)->name()<<"type=\"tns:"<<type->getParameter(i)->type()->name()<<"\" />"<<std::endl;
-		}
+              if(param->type()->isSimple())
+              {
+                  os <<"<s:element minOccurs=\"0\" maxOccurs=\"1\" name=\"" << param->name() 
+                     << "\" type=\"s:"<< param->type()->name()<<"\" />" << std::endl;
+              }
+              else
+              {
+                  os <<"<s:element minOccurs=\"0\" maxOccurs=\"1\" name=\"" << param->name() 
+                      << "\" type=\"tns:" << param->type()->name() << "\" />" << std::endl;
+                  
+                  createComplexTypeList(complexTypes, param->type());
+              }
+          }
 
         os<<"</s:sequence>"<<std::endl;
-		os<<"</s:complexType>"<<std::endl;
-	}
+        os<<"</s:complexType>"<<std::endl;
+        os<<"</s:element>"<<std::endl;
+    }
+
+    // complex types
+    ComplexTypesMap::iterator it = complexTypes.begin(); 
+
+    for(; it != complexTypes.end(); ++it)
+    {
+        os<<"<s:complexType name=\""<<it->first <<"\">"<<std::endl;
+        os<<"<s:sequence>"<<std::endl;
+
+        const Type* type = it->second;
+
+        for(std::size_t i = 0; i < type->size(); ++i)
+        {
+            if(type->getParameter(i)->type()->isSimple())
+                os << "<s:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\"" << type->getParameter(i)->name()
+                   << "\" type=\"s:"<<type->getParameter(i)->type()->name() << "\" />"<<std::endl;
+            else
+                os << "<s:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\"" << type->getParameter(i)->name()
+                    << "type=\"tns:"<<type->getParameter(i)->type()->name() <<"\" />"<<std::endl;
+        }
+
+        os<<"</s:sequence>"<<std::endl;
+        os<<"</s:complexType>"<<std::endl;
+    }
     os<<"</s:schema>"<<std::endl;
-	os<<"</wsdl:types>"<<std::endl;
+    os<<"</wsdl:types>"<<std::endl;
 
-	//Messages
-	for( size_t i = 0; i < _operations.size(); ++i)
-	{		
-		const Operation* operation = _operations[i];
-		
-		//Request message
-		os<<"<wsdl:message name=\""<<operation->inputName().narrow()<<"\">"<<std::endl;
-			os<<"<wsdl:part name=\"parameters\" element=\"tns:"<< operation->inputName().narrow()<<"\"/>"<<std::endl;
-		os<<"</wsdl:message>"<<std::endl;
+    // messages
+    for( size_t i = 0; i < _operations.size(); ++i)
+    {        
+        const Operation* operation = _operations[i];
+        
+        //Request message
+        os << "<wsdl:message name=\"" << operation->inputName().narrow() << "\">" << std::endl;
+        os << "    <wsdl:part name=\"parameters\" element=\"tns:" << operation->inputName().narrow()<<"\"/>" << std::endl;
+        os << "</wsdl:message>" << std::endl;
 
-		//Responce message
-		os<<"<wsdl:message name=\""<< operation->outputName().narrow()<<"\">"<<std::endl;
-			os<<"<wsdl:part name=\"parameters\" element=\"tns:"<< operation->outputName().narrow()<<"\"/>"<<std::endl;
-		os<<"</wsdl:message>"<<std::endl;
-	}
+        //Responce message
+        os << "<wsdl:message name=\"" << operation->outputName().narrow() << "\">" << std::endl;
+        os << "    <wsdl:part name=\"parameters\" element=\"tns:" << operation->outputName().narrow() << "\"/>" << std::endl;
+        os << "</wsdl:message>" << std::endl;
+    }
 
-	//Ports
-	os<<"<wsdl:portType name=\"" << _name <<"\">"<<std::endl;
-		
-	for( size_t i = 0; i < _operations.size(); ++i)
-	{		
-		const Operation* operation = _operations[i];
-		
-		os<<"<wsdl:operation name=\""<<operation->inputName().narrow()<<"\">"<<std::endl;
-			os<<"<wsdl:input message=\"tns:"<<operation->inputName().narrow()<<"\" />"<<std::endl;
-			os<<"<wsdl:output message=\"tns:"<<operation->outputName().narrow()<<"\" />"<<std::endl;			
-		os<<"</wsdl:operation>"<<std::endl;
-	}
-	os<<"</wsdl:portType>"<<std::endl;
+    // ports
+    os << "<wsdl:portType name=\"" << _name << "\">" << std::endl;
+        
+    for( size_t i = 0; i < _operations.size(); ++i)
+    {        
+        const Operation* operation = _operations[i];
+        
+        os << "<wsdl:operation name=\"" << operation->inputName().narrow() << "\">" << std::endl;
+            os << "<wsdl:input message=\"tns:" << operation->inputName().narrow() << "\" />" << std::endl;
+            os << "<wsdl:output message=\"tns:" << operation->outputName().narrow() << "\" />" << std::endl;            
+        os << "</wsdl:operation>" << std::endl;
+    }
+    os << "</wsdl:portType>" << std::endl;
   
-	os<<"<wsdl:binding name=\"" << _name << "Soap11\" type=\"tns:" << _name << "\">"<<std::endl;
-    os<<"<soap:binding transport=\"http://schemas.xmlsoap.org/soap/http\" />"<<std::endl;
+    os << "<wsdl:binding name=\""  <<  _name  <<  "Soap11\" type=\"tns:"  <<  _name  <<  "\">" << std::endl;
+    os << "<soap:binding transport=\"http://schemas.xmlsoap.org/soap/http\" />" << std::endl;
 
-	for( size_t i = 0; i < _operations.size(); ++i)
-	{		
-		const Operation* operation = _operations[i];
-		
-		  os<<"<wsdl:operation name=\""<<operation->inputName().narrow()<<"\" >"<<std::endl;
-		  os<<"<soap:operation soapAction=\""<<targetNamespace()<< operation->inputName().narrow()<<"\" style=\"document\" />"<<std::endl;
-		  os<<"<wsdl:input>"<<std::endl;
-			os<<"<soap:body use=\"literal\" />"<<std::endl;
-		  os<<"</wsdl:input>"<<std::endl;
-		  os<<"<wsdl:output>"<<std::endl;
-			os<<"<soap:body use=\"literal\" />"<<std::endl;
-		  os<<"</wsdl:output>"<<std::endl;
-		os<<"</wsdl:operation>"<<std::endl;
-	}
-	
-	os<<"</wsdl:binding>"<<std::endl;
+    for( size_t i = 0; i < _operations.size(); ++i)
+    {        
+        const Operation* operation = _operations[i];
+        
+          os << "<wsdl:operation name=\"" << operation->inputName().narrow() << "\" >" << std::endl;
+          os << "<soap:operation soapAction=\"" << targetNamespace() << operation->inputName().narrow() << "\" style=\"document\" />" << std::endl;
+          os << "<wsdl:input>" << std::endl;
+            os << "<soap:body use=\"literal\" />" << std::endl;
+          os << "</wsdl:input>" << std::endl;
+          os << "<wsdl:output>" << std::endl;
+            os << "<soap:body use=\"literal\" />" << std::endl;
+          os << "</wsdl:output>" << std::endl;
+        os << "</wsdl:operation>" << std::endl;
+    }
+    
+    os << "</wsdl:binding>" << std::endl;
 
-	os<<" <wsdl:service name=\""<< _name << "\">"<<std::endl;
-		os<<"<wsdl:port name=\"" << _name << "Soap11\" binding=\"tns:" << _name << "Soap11\">"<<std::endl;
-			os<<"</wsdl:port>"<<std::endl;
-		os<<"</wsdl:service>"<<std::endl;
-	os<<"</wsdl:definitions>"<<std::endl;
+    os << "<wsdl:service name=\"" << _name << "\">" << std::endl;
+    os << "  <wsdl:port name=\"" <<  _name << "Soap11\" binding=\"tns:" << _name << "Soap11\">" << std::endl;
+    os << "  </wsdl:port>" << std::endl;
+    os << "</wsdl:service>" << std::endl;
+    
+    os << "</wsdl:definitions>" << std::endl;
 }
 
 const Operation* SoapServiceDeclaration::getOperation(const Pt::String& name) const

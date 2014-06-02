@@ -641,7 +641,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
                 };
 
                 CalcSoapServiceDeclaration()
-				: Pt::XmlRpc::SoapServiceDeclaration("calc")
+                : Pt::XmlRpc::SoapServiceDeclaration("calc")
                 {
                     setTargetNamespace("http://tempuri.org/");
                     addOperation(_arrayMultiply);
@@ -655,7 +655,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         {
             CalcSoapServiceDeclaration serviceDecl;
 
-			Pt::XmlRpc::SoapServiceDefinition serviceDef(serviceDecl);
+            Pt::XmlRpc::SoapServiceDefinition serviceDef(serviceDecl);
             serviceDef.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyVector);
 
             Pt::XmlRpc::SoapHttpService httpService(serviceDef);

@@ -70,18 +70,18 @@ class Type : private NonCopyable
         TypeId typeId() const
         { return _typeId; }
 
-		virtual bool isSimple() const = 0;
+        virtual bool isSimple() const = 0;
 
         virtual const Parameter* getParameter(std::size_t n) const = 0;
 
         virtual const Parameter* getParameter(const std::string& name) const = 0;
-				
-		virtual const char* name() const = 0;
+                
+        virtual const char* name() const = 0;
 
-		virtual std::size_t size() const = 0;
+        virtual std::size_t size() const = 0;
 
-	private:
-        TypeId _typeId;	
+    private:
+        TypeId _typeId;    
 };
 
 
@@ -91,16 +91,16 @@ class SimpleType : public Type
     public:
         explicit SimpleType(TypeId typeId)
         : Type(typeId)
-        {			
-		}
+        {            
+        }
 
         virtual ~SimpleType()
         {}
 
-		virtual bool isSimple() const
-		{
-			return true;
-		}
+        virtual bool isSimple() const
+        {
+            return true;
+        }
 
         virtual const Parameter* getParameter(std::size_t) const
         { return 0; }
@@ -108,10 +108,10 @@ class SimpleType : public Type
         virtual const Parameter* getParameter(const std::string&) const
         { return 0; }
 
-		std::size_t size() const
-		{
-			return 0;
-		}
+        std::size_t size() const
+        {
+            return 0;
+        }
 };
 
 
@@ -120,26 +120,26 @@ class ComplexType : public Type
     
     public:
         explicit ComplexType(TypeId typeId, const std::string& name)
-        : Type(typeId)	
-		, _name(name)	
-        {			
-		}
+        : Type(typeId)    
+        , _name(name)    
+        {            
+        }
 
         virtual ~ComplexType()
         {}
 
-		virtual bool isSimple() const
-		{
-			return false;
-		}
+        virtual bool isSimple() const
+        {
+            return false;
+        }
 
-		virtual const char* name() const
-		{
-			return _name.c_str();
-		}
+        virtual const char* name() const
+        {
+            return _name.c_str();
+        }
 
-	private:	
-		std::string _name;
+    private:    
+        std::string _name;
 };
 
 class Parameter
@@ -181,10 +181,10 @@ class PT_XMLRPC_API BooleanType : public SimpleType
         BooleanType();
         virtual ~BooleanType();
 
-		virtual const char* name() const
-		{
-			return "boolean";
-		}
+        virtual const char* name() const
+        {
+            return "boolean";
+        }
 };
 
 
@@ -195,10 +195,10 @@ class PT_XMLRPC_API IntegerType : public SimpleType
 
         virtual ~IntegerType();  
 
-		virtual const char* name() const
-		{
-			return "int";
-		}
+        virtual const char* name() const
+        {
+            return "int";
+        }
 };
 
 
@@ -209,10 +209,10 @@ class PT_XMLRPC_API FloatType : public SimpleType
 
         virtual ~FloatType();
 
-		virtual const char* name() const
-		{
-			return "double";
-		}
+        virtual const char* name() const
+        {
+            return "double";
+        }
 
 };
 
@@ -224,10 +224,10 @@ class PT_XMLRPC_API StringType : public SimpleType
 
         virtual ~StringType();
 
-		virtual const char* name() const
-		{
-			return "string";
-		}
+        virtual const char* name() const
+        {
+            return "string";
+        }
 
 };
 
@@ -245,10 +245,10 @@ class PT_XMLRPC_API StructType : public ComplexType
 
         virtual const Parameter* getParameter(const std::string& name) const;
 
-		virtual std::size_t size() const
-		{
-			return _paramList.size();
-		}
+        virtual std::size_t size() const
+        {
+            return _paramList.size();
+        }
 
     private:
         typedef std::vector<Parameter> ParameterList;
@@ -271,10 +271,10 @@ class PT_XMLRPC_API ArrayType : public ComplexType
 
         virtual const Parameter* getParameter(const std::string& name) const;
 
-		virtual std::size_t size() const
-		{
-			return 1;
-		}
+        virtual std::size_t size() const
+        {
+            return 1;
+        }
     private:
         Parameter _elem;
 };
@@ -283,7 +283,7 @@ class PT_XMLRPC_API ArrayType : public ComplexType
 class PT_XMLRPC_API Operation : private NonCopyable
 {
     public:
-		typedef std::vector<Parameter> ParameterList;
+        typedef std::vector<Parameter> ParameterList;
 
         Operation(const Pt::String& inputName, const Pt::String& outputName);
 
@@ -305,10 +305,10 @@ class PT_XMLRPC_API Operation : private NonCopyable
 
         const Parameter* getOutput() const;
 
-		const ParameterList& parameters() const
-		{
-			return _params;
-		}
+        const ParameterList& parameters() const
+        {
+            return _params;
+        }
 
     private:
         ParameterList _params;
@@ -325,8 +325,8 @@ class PT_XMLRPC_API SoapServiceDeclaration
 
         virtual ~SoapServiceDeclaration();
 
-		const std::string& name() const
-		{ return _name; }
+        const std::string& name() const
+        { return _name; }
 
         const std::string& targetNamespace() const
         { return _targetNamespace; }
@@ -337,14 +337,14 @@ class PT_XMLRPC_API SoapServiceDeclaration
         void addOperation(Operation& op);
 
         const Operation* getOperation(const Pt::String& name) const;
-		
-		void toWsdl( std::ostream& os) const;
-
-	private:
-		static void createComplexTypeList(std::map<std::string,const Type*>& complexTypes, const Type* type);
+        
+        void toWsdl( std::ostream& os) const;
 
     private:
-		std::string _name;
+        static void createComplexTypeList(std::map<std::string,const Type*>& complexTypes, const Type* type);
+
+    private:
+        std::string _name;
         std::string _targetNamespace;
         typedef std::vector<Operation*> OperationList;
         OperationList _operations;
@@ -358,11 +358,11 @@ class PT_XMLRPC_API SoapServiceDefinition : public ServiceDefinition
 
         virtual ~SoapServiceDefinition();
 
-		const SoapServiceDeclaration& declaration() const
-		{ return _decl; }
+        const SoapServiceDeclaration& declaration() const
+        { return _decl; }
 
-	private:
-		const SoapServiceDeclaration& _decl;
+    private:
+        const SoapServiceDeclaration& _decl;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -134,9 +134,9 @@ void SoapResponderBase::cancel()
 // SoapResponder
 ///////////////////////////////////////////////////////////////////////////////
 
-SoapResponder::SoapResponder(SoapServiceDefinition& serviceDef)
-: SoapResponderBase(serviceDef)
-, _serviceDecl( &serviceDef.declaration() )
+SoapResponder::SoapResponder(const SoapServiceDeclaration& decl, ServiceDefinition& def)
+: SoapResponderBase(def)
+, _serviceDecl( &decl )
 , _op(0)
 , _reader(_bin)
 , _args(0)
@@ -514,15 +514,16 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
     return _state == OnEnvelopeEnd;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// SoapHttpResponder
+///////////////////////////////////////////////////////////////////////////////
 
-
-SoapHttpResponder::SoapHttpResponder(SoapHttpService& httpService, SoapServiceDefinition& rpcService)
+SoapHttpResponder::SoapHttpResponder(SoapHttpService& httpService, const SoapServiceDeclaration& decl, ServiceDefinition& def)
 : Http::Responder(httpService)
-, XmlRpc::SoapResponder(rpcService)
+, XmlRpc::SoapResponder(decl, def)
 , _reply(0)
 {
 }
-
 
 SoapHttpResponder::~SoapHttpResponder()
 {
@@ -609,46 +610,60 @@ void SoapHttpResponder::onError()
     onResult();
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// WsdlResponder
+///////////////////////////////////////////////////////////////////////////////
 
 class WsdlResponder : public Pt::Http::Responder
 {
     public:
-        WsdlResponder(SoapHttpService& httpService, SoapServiceDefinition& serviceDef)
-		: Pt::Http::Responder(httpService)
-		, _serviceDecl( serviceDef.declaration() )
-		{}
+        WsdlResponder(SoapHttpService& httpService, const SoapServiceDeclaration& serviceDecl)
+        : Pt::Http::Responder(httpService)
+        , _serviceDecl( serviceDecl )
+        {}
 
         ~WsdlResponder()
-		{}
+        {}
 
     protected:
         // inheritdoc
         void onBeginRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop)
-		{}
+        {}
 
         // inheritdoc
         void onReadRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop)
-		{}
+        {}
 
         // inheritdoc
         void onBeginReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
-		{
-			_serviceDecl.toWsdl( reply.body() );
-			reply.beginSend(true);
-		}
+        {
+            _serviceDecl.toWsdl( reply.body() );
+            reply.beginSend(true);
+        }
 
         // inheritdoc
         void onWriteReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
-		{}
+        {}
 
-	private:
-		const SoapServiceDeclaration& _serviceDecl;
+    private:
+        const SoapServiceDeclaration& _serviceDecl;
 };
 
+///////////////////////////////////////////////////////////////////////////////
+// SoapHttpService
+///////////////////////////////////////////////////////////////////////////////
 
 SoapHttpService::SoapHttpService(SoapServiceDefinition& serviceDef)
-: _serviceDef(&serviceDef)
+: _serviceDecl( &serviceDef.declaration() )
+, _serviceDef( &serviceDef )
 { 
+}
+
+
+SoapHttpService::SoapHttpService(const SoapServiceDeclaration& decl, ServiceDefinition& def)
+: _serviceDecl(&decl)
+, _serviceDef(&def)
+{
 }
 
 
@@ -665,12 +680,12 @@ Http::Responder* SoapHttpService::onGetResponder(const Http::Request& req)
     //if (req.isHeaderValue("Content-Type", "text/xml; charset=UTF-8")) //! ### Temporary fix ###
     //    return new XmlRpcResponder(*this);
 
-	if(req.qparams() == "wsdl")
-	{
-		return new WsdlResponder(*this, *_serviceDef);
-	}
+    if(req.qparams() == "wsdl")
+    {
+        return new WsdlResponder(*this, *_serviceDecl);
+    }
 
-    return new SoapHttpResponder(*this, *_serviceDef);
+    return new SoapHttpResponder(*this, *_serviceDecl, *_serviceDef);
 }
 
 
