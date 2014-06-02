@@ -64,7 +64,7 @@ class PT_XMLRPC_API SoapResponderBase : public ResponderBase
         ServiceProcedure* serviceProcedure() const
         { return _proc; }
 
-        //! @internal
+        //! @internal -> beginResult()
         virtual void endCall();
 
         /** @brief Resets to initial state.
@@ -88,6 +88,7 @@ class PT_XMLRPC_API SoapResponderBase : public ResponderBase
         */
         virtual void onCancel() = 0;
 
+        // TODO: pass decomposer ? 
         virtual void onEndCall(ServiceProcedure& proc) = 0;
 
     private:
