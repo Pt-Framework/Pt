@@ -361,7 +361,7 @@ void SoapServiceDeclaration::toWsdl( std::ostream& os) const
                    << "\" type=\"s:"<<type->getParameter(i)->type()->name() << "\" />"<<std::endl;
             else
                 os << "<s:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\"" << type->getParameter(i)->name()
-                    << "type=\"tns:"<<type->getParameter(i)->type()->name() <<"\" />"<<std::endl;
+                    << "\" type=\"tns:"<<type->getParameter(i)->type()->name() <<"\" />"<<std::endl;
         }
 
         os<<"</s:sequence>"<<std::endl;
