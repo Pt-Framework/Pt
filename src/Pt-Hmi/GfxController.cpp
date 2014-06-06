@@ -119,23 +119,34 @@ void GfxController::render()
 	Renderer* re = renderer();	
 	re->render(model());
 
-	//Draw my childs
+	//Render my childs
 	for( size_t i = 0; i < children().size(); ++i)
 	{
 		GfxController* child = dynamic_cast<GfxController*> (children()[i]);
 		child->render();
 	}
+}
 
-	//Bit-Blit my childs	
-	Pt::Hmi::Painter localPainter(m->PaintSurface);
+void GfxController::output()
+{
+	GfxModel* m = (GfxModel*) model();
+
+	if(!m->Visible.get())
+		return;
+
+	//Draw my childs	
+	Pt::Hmi::Painter localPainter(m->paintSurface());
 
 	for( size_t i = 0; i < children().size(); ++i)
 	{
 		GfxController* child = dynamic_cast<GfxController*> (children()[i]);				
+		child->output();
 
 		GfxModel* childModel = (GfxModel*) child->model();
-		localPainter.drawSurface(childModel->Position.get(),childModel->PaintSurface);
+		localPainter.drawSurface(childModel->Position.get(),childModel->paintSurface());
 	}
+
+	Controller::output();
 }
 
 bool GfxController::onMoveFocusPrev()

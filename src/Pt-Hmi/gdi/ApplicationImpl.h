@@ -100,8 +100,6 @@ class ApplicationImpl : public Pt::System::EventLoop
 
     protected:
         static long CALLBACK wndProc(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);
-		static LRESULT CALLBACK mouseProc (int nCode, WPARAM wParam, LPARAM lParam);
-        static LRESULT CALLBACK keyboardProc(int code, WPARAM wParam, LPARAM lParam);
 
 		LRESULT dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);
 

@@ -55,7 +55,7 @@ void WindowRenderer::render(Pt::Hmi::Model* m)
 	
 	Pt::Gfx::Brush brush(model->BackColor.get());
 	
-	Pt::Hmi::Painter localPainter(model->PaintSurface);
+	Pt::Hmi::Painter localPainter(model->paintSurface());
 
 	localPainter.setBrush(brush);
 	localPainter.fillRect(rect);

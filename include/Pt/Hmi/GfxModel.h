@@ -98,7 +98,6 @@ public:
 	Property<bool>					AcceptFocus;
     Property<bool>					HighLight;
 	Property<std::string>			FocusedActionKey;
-	PaintSurface					PaintSurface;
 
 public:
 	virtual ~GfxModel();
@@ -115,6 +114,13 @@ public:
 	Pt::Gfx::Size fromUnit(const Pt::Gfx::SizeF& value);
 	double unitSizeInch() const;
 	double unitSizeMm() const;
+
+	inline PaintSurface& paintSurface()
+	{
+		return _paintSurface;
+	}
+protected:
+	PaintSurface _paintSurface;
 
 private:
 	void onFocusChanged(const void* sender, const PropertyBase& prop);

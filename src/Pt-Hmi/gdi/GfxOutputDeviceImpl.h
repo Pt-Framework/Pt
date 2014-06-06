@@ -63,8 +63,7 @@ protected:
 	virtual void onClosed();
 
 protected:	
-	void getWindowSize();
-	void getWindowPos();
+	void updateModelSizeAndPos();
 	void setWindowSizeAndPos(bool firstShow);
 	void setWindowProperties();	
 	void setWindowIcon();
@@ -77,7 +76,6 @@ private:
 	HWND					_hwnd;
 	Pt::Hmi::WindowModel*	_model;
 	Pt::Gfx::Painter*		_nativePainter;
-	bool					_ignoreEvent;
 	KeyEvent				_keyEvent;
 	PointingEvent			_pointerEvent;
 };

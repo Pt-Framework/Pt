@@ -91,8 +91,6 @@ public:
 	Property<bool>								ShowSysMenu;
 	Property<std::string>						Caption;
 	Property<WindowBorderType::Type>			Border;
-	Property<Pt::Gfx::PointF>					WinPos;
-	Property<Pt::Gfx::SizeF>					WinSize;
 	Property<Pt::Gfx::ARgbImage>				Icon;
 	Property<bool>								Closed;
 	Property<bool>								CanClose;

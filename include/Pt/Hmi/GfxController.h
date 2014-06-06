@@ -46,7 +46,7 @@ public:
 	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot);
 
 	virtual void render();
-	
+	virtual void output();
 	virtual void invalidate();
 	
 		

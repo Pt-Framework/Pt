@@ -21,8 +21,8 @@ Window::Window()
 	_defModel->Caption.set("New Window");
 	_defModel->ShowInTaskbar.set(true);
 	_defModel->Border.set(WindowBorderType::Sizeable);
-	_defModel->WinPos.set(Pt::Gfx::PointF(20,20));
-	_defModel->WinSize.set( Pt::Gfx::SizeF(800,800));
+	_defModel->Position.set(Pt::Gfx::PointF(20,20));
+	_defModel->Size.set( Pt::Gfx::SizeF(800,800));
 
 	_defController->addInputDevice(&_mouseDevice);
 	_defController->addInputDevice(&_keyboardDevice);
@@ -55,22 +55,22 @@ const WindowModel& Window::windowModel() const
 
 void Window::setSize(const Pt::Gfx::SizeF& size)
 {
-	windowModel().WinSize = size;
+	windowModel().Size = size;
 }
 
 const Pt::Gfx::SizeF& Window::size() const
 {
-	return windowModel().WinSize.get();
+	return windowModel().Size.get();
 }
 
 void Window::setPosition(const Pt::Gfx::PointF& position)
 {
-	windowModel().WinPos = position;
+	windowModel().Position = position;
 }
 
 const Pt::Gfx::PointF& Window::position() const
 {
-	return windowModel().WinPos.get();
+	return windowModel().Position.get();
 }
 
 void Window::show()

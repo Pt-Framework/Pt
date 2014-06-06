@@ -107,7 +107,7 @@ void MainWindow::init()
 	_textLabel.setPosition(Pt::Gfx::PointF(20,20));
 	_textLabel.labelModel().ForeColor.set(Pt::Gfx::ARgbColor(255,0,0,0));
 	_mainPanel.addChild(&_textLabel);
-
+	
 	//Toggle button
 	_toggleButton.setToggleButton(true);
 	_toggleButton.setCaption("Toggle Me [CTRL+I]");
@@ -124,7 +124,7 @@ void MainWindow::init()
 	_dialogButton.setSize(Pt::Gfx::SizeF(150,25));
 	_dialogButton.ClickedAction  += Pt::slot(*this, &MainWindow::onShowDialog);
 	_mainPanel.addChild(&_dialogButton);
-
+		
 	//Close button
 	_closeButton.setToggleButton(false);
 	_closeButton.setCaption("Close [CTRL+X]");

@@ -494,8 +494,7 @@ void PainterImpl::drawText(const Pt::Gfx::PointF& toF, const Pt::String& text)
     _text.clear();
 	text.toUtf16( std::back_inserter(_text) );	
 	
-    DrawTextW(_surface->deviceContext(), _text.c_str(), -1, &rectangle, DT_NOCLIP);
-	
+    DrawTextW(_surface->deviceContext(), _text.c_str(), -1, &rectangle, DT_NOCLIP);	
 }
 
 

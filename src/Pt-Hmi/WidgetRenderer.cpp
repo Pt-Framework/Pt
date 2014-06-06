@@ -30,13 +30,13 @@ void WidgetRenderer::render(Pt::Hmi::Model* model)
 		return;
 
 	Pt::Gfx::SizeF size = wmodel->Size.get();
-	Pt::Gfx::SizeF bufferSize = wmodel->PaintSurface.size();
+	Pt::Gfx::SizeF bufferSize = wmodel->paintSurface().size();
 
 	if(bufferSize.width() != size.width() ||bufferSize.height() != size.height())
-		wmodel->PaintSurface.resize(size);
+		wmodel->paintSurface().resize(size);
 
 	Pt::Gfx::ARgbImage& backImage = wmodel->BackgroundImage.get();
-	Pt::Hmi::Painter	localPainter(wmodel->PaintSurface);
+	Pt::Hmi::Painter	localPainter(wmodel->paintSurface());
 	Pt::Gfx::RectF		rect(Pt::Gfx::PointF(0,0),size);
 
 	if(wmodel->HighLight.get())
@@ -69,9 +69,9 @@ void WidgetRenderer::render(Pt::Hmi::Model* model)
 			
 			case ImageLayoutType::Tile:
 			{
-				for( size_t x = 0; x < wmodel->PaintSurface.size().width();  x += backImage.width())
+				for( size_t x = 0; x < wmodel->paintSurface().size().width();  x += backImage.width())
 				{
-					for( size_t y = 0; y < wmodel->PaintSurface.size().height();  y += backImage.height())
+					for( size_t y = 0; y < wmodel->paintSurface().size().height();  y += backImage.height())
 					{
 							localPainter.drawImage(Pt::Gfx::PointF(x,y), backImage);
 					}
@@ -89,17 +89,17 @@ void WidgetRenderer::render(Pt::Hmi::Model* model)
 			
 			case ImageLayoutType::Strech:
 			{
-				Pt::Gfx::ARgbImage strech(wmodel->PaintSurface.size().width(),wmodel->PaintSurface.size().height() );
+				Pt::Gfx::ARgbImage strech(wmodel->paintSurface().size().width(),wmodel->paintSurface().size().height() );
 
-				Pt::Gfx::blockScale(backImage.begin(), backImage.width(), backImage.height(), strech.begin(),  wmodel->PaintSurface.size().width(),  wmodel->PaintSurface.size().height());
+				Pt::Gfx::blockScale(backImage.begin(), backImage.width(), backImage.height(), strech.begin(),  wmodel->paintSurface().size().width(),  wmodel->paintSurface().size().height());
 				localPainter.drawImage(Pt::Gfx::PointF(0,0), strech);
 			}
 			break;
 
 			case ImageLayoutType::Zoom:
 			{
-				Pt::Gfx::ARgbImage strech(wmodel->PaintSurface.size().width(),wmodel->PaintSurface.size().height() );
-				double factor = wmodel->PaintSurface.size().width()/(double)backImage.width();
+				Pt::Gfx::ARgbImage strech(wmodel->paintSurface().size().width(),wmodel->paintSurface().size().height() );
+				double factor = wmodel->paintSurface().size().width()/(double)backImage.width();
 
 				Pt::Gfx::blockScale(backImage.begin(), backImage.width(), backImage.height(),strech.begin(),  strech.width(), (Pt::size_t)(backImage.height()*factor));
 				localPainter.drawImage(Pt::Gfx::PointF(0,0), strech);

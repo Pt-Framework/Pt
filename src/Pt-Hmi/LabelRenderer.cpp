@@ -34,7 +34,7 @@ void LabelRenderer::render(Pt::Hmi::Model* m)
 			
 	if(model->AutoSize.get())
 	{
-		Pt::Hmi::Painter localPainter(model->PaintSurface);				
+		Pt::Hmi::Painter localPainter(model->paintSurface());				
 
 		localPainter.setFont(model->Font.get());
 		
@@ -51,7 +51,7 @@ void LabelRenderer::render(Pt::Hmi::Model* m)
 	}
 	else
 	{		
-		Pt::Hmi::Painter localPainter(model->PaintSurface);
+		Pt::Hmi::Painter localPainter(model->paintSurface());
 
 		switch(model->TextAlign.get())
 		{

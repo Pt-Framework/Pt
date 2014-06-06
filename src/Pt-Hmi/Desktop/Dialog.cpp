@@ -20,8 +20,8 @@ Dialog::Dialog()
 	_defModel->Caption.set("New Dialog");
 	_defModel->ShowInTaskbar.set(true);
 	_defModel->Border.set(WindowBorderType::Dialog);
-	_defModel->WinPos.set(Pt::Gfx::PointF(20,20));
-	_defModel->WinSize.set( Pt::Gfx::SizeF(800,800));
+	_defModel->Position.set(Pt::Gfx::PointF(20,20));
+	_defModel->Size.set( Pt::Gfx::SizeF(800,800));
 	_defModel->ShowMaximizeButton.set(false);
 	_defModel->ShowSysMenu.set(true);
 
@@ -83,23 +83,23 @@ const DialogModel& Dialog::dialogModel() const
 
 void Dialog::setSize(const Pt::Gfx::SizeF& size)
 {
-	dialogModel().WinSize = size;
+	dialogModel().Size = size;
 }
 
 const Pt::Gfx::SizeF& Dialog::size() const
 {
-	return dialogModel().WinSize.get();
+	return dialogModel().Size.get();
 }
 
 
 void Dialog::setPosition(const Pt::Gfx::PointF& position)
 {
-	dialogModel().WinPos = position;
+	dialogModel().Position = position;
 }
 
 const Pt::Gfx::PointF& Dialog::position() const
 {
-	return dialogModel().WinPos.get();
+	return dialogModel().Position.get();
 }
 
 Dialog::~Dialog()

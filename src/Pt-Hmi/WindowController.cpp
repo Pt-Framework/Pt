@@ -136,7 +136,7 @@ void WindowController::onSizeChanged(const void* sender, const PropertyBase& pro
 {
 	GfxModel* m = gfxModel();
 	
-	m->PaintSurface.resize(m->Size.get());	
+	m->paintSurface().resize(m->Size.get());	
 	
 	if(m->Visible.get())
 		invalidate();
@@ -161,7 +161,6 @@ void WindowController::onModelChanged(bool created,const PropertyBase* prop)
 		m->Size.PropertyChanged += Pt::slot(*this, &WindowController::onSizeChanged);					
 		m->Size.PropertyChanged.send(m, m->Size);	
 	}
-		
 }
 
 void WindowController::onClosing(Controller* sender, bool& canClose)

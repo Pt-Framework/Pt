@@ -44,7 +44,7 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 	Pt::Gfx::SizeF  clientSize(model->Size.get().width() - model->BorderWidth.get()/2, model->Size.get().height() - model->BorderWidth.get()/2);	
 	Pt::Gfx::RectF  clientRect(Pt::Gfx::PointF( model->BorderWidth.get()/2, model->BorderWidth.get()/2), clientSize);
 	
-	Pt::Hmi::Painter localPainter(model->PaintSurface);
+	Pt::Hmi::Painter localPainter(model->paintSurface());
 						
 	switch(model->BorderStyle.get())
 	{
