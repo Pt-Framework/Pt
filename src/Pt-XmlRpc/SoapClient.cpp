@@ -80,8 +80,6 @@ SoapClientBase::SoapClientBase()
 : _method(0)
 , _argv(0)
 , _argc(0)
-, _error(false)
-, _isFault(false)
 {
 }
 
@@ -96,29 +94,9 @@ void SoapClientBase::beginCall(Composer& r, RemoteCall& method, Decomposer** arg
     _method = &method;
     _argv = argv;
     _argc = argc;
-    _error = false;
-    _isFault = false;
 
     this->onBeginCall(r);
     this->onInvoke();
-}
-
-
-void SoapClientBase::endCall()
-{
-    if( _error )
-    {
-        _error = false;
-        onError();
-    }
-
-    if( _isFault )
-    {
-        _isFault = false;
-        onFault(); 
-    }
-
-    _method = 0;
 }
 
 
@@ -127,11 +105,16 @@ void SoapClientBase::call(Composer& r, RemoteCall& method, Decomposer** argv, un
     _method = &method;
     _argv = argv;
     _argc = argc;
-    _error = false;
-    _isFault = false;
 
     this->onBeginCall(r);
     this->onCall();
+}
+
+
+void SoapClientBase::endCall()
+{
+    this->onEndCall();
+    _method = 0;
 }
 
 
@@ -139,13 +122,9 @@ void SoapClientBase::cancel()
 {
     this->onCancel();
 
-    this->onReset();
-
     _method = 0;
     _argc = 0;
     _argv = 0;
-    _error = false;
-    _isFault = false;
 }
 
 
@@ -155,36 +134,15 @@ const RemoteCall* SoapClientBase::activeProcedure() const
 }
 
 
-bool SoapClientBase::isFailed() const
+void SoapClientBase::setReady()
 {
-    return _error || _isFault;
-}
+    assert( _method );
 
-
-void SoapClientBase::setError(bool f)
-{
-    _error = f;
-}
-
-
-void SoapClientBase::setFailed(bool f)
-{
-    _isFault = f;
-}
-
-
-void SoapClientBase::setFinished()
-{
     if( _method )
     {
         RemoteCall* method = _method;
         _method = 0;
         method->finish();
-    }
-    else if(_error)
-    {
-        _error = false;
-        onError();
     }
 }
 
@@ -201,6 +159,7 @@ SoapClient::SoapClient(SoapServiceDeclaration& service)
 , _serviceDef(&service)
 , _op(0)
 , _fmt(_ts)
+, _isFault(false)
 {
 }
 
@@ -211,6 +170,22 @@ SoapClient::~SoapClient()
 }
 
 
+void SoapClient::onEndCall()
+{
+    if( _isFault )
+    {
+        _isFault = false;
+        onFault(); 
+    }
+}
+
+
+bool SoapClient::isFailed() const
+{
+    return _isFault;
+}
+
+
 void SoapClient::onBeginCall(Composer& r)
 {
     _arg = 0;
@@ -218,6 +193,8 @@ void SoapClient::onBeginCall(Composer& r)
     _state = OnBegin;
     _reader.reset(_bin);
     _fmt.beginParse(r);
+
+    _isFault = false;
 }
 
 
@@ -227,12 +204,14 @@ void SoapClient::onFault()
 }
 
 
-void SoapClient::onReset()
+void SoapClient::onCancel()
 {
     _arg = 0;
     _argn = 0;
     _ts.detach();
     _ts.discard();
+
+    _isFault = false;
 }
 
 
@@ -365,8 +344,7 @@ void SoapClient::setFault(int rc, const char* msg)
 {
     _fault.setRc(rc);
     _fault.setText(msg);
-
-    setFailed(true);
+    _isFault = true;
 }
 
 
@@ -611,7 +589,7 @@ bool SoapClient::advance(const Pt::Xml::Node& node)
             {
                 assert( Xml::toEndElement(node).name().local() == L"Body" );
                 _state = OnBodyEnd;
-                setFailed(true);
+                _isFault = true;
             }
             
             break;

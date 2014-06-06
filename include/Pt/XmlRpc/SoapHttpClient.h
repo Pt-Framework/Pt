@@ -103,12 +103,20 @@ class PT_XMLRPC_API SoapHttpClient : public SoapClient
         */
         const Net::Endpoint& host() const;
 
-    protected:       
+    protected: 
+        virtual bool isFailed() const;
+
+        // inheritdoc      
+        virtual void onBeginCall(Composer& r);
+
         // inheritdoc
         virtual void onInvoke();
 
         // inheritdoc
         virtual void onCall();
+
+        // inheritdoc
+        virtual void onEndCall();
 
         // inheritdoc
         virtual void onCancel();
@@ -117,6 +125,15 @@ class PT_XMLRPC_API SoapHttpClient : public SoapClient
         virtual void onError();
 
     private:
+        /** @brief Fails the current procedure.
+
+            This method is used by derived Clients before calling finishResult()
+            so that the RemoteProcedure throws a Fault when the result is 
+            processed.
+        */
+        void setError(bool f = true)
+        { _error = f; }
+
         //! @internal
         void init();
 
@@ -128,6 +145,7 @@ class PT_XMLRPC_API SoapHttpClient : public SoapClient
 
     private:
         Http::Client _client;
+        bool _error;
         Pt::varint_t _r1;
         Pt::varint_t _r2;
 };

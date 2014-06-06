@@ -95,26 +95,42 @@ SoapResponderBase::~SoapResponderBase()
 }
 
 
-ServiceProcedure* SoapResponderBase::getProcedure(const std::string& name)
+Pt::Composer** SoapResponderBase::setProcedure(const std::string& name)
 {
     if(_proc)
         _serviceDef->releaseProcedure(_proc);
 
-    _proc = _serviceDef->getProcedure( name, *this );
-    return _proc;
+    _proc =  _serviceDef->getProcedure( name, *this );
+    
+    return _proc ? _proc->beginArgs() : 0;
 }
 
 
-void SoapResponderBase::endCall()
-{ 
-    //if( ! _isFault )
-    //{
-    //    assert(proc);
-    //    _result = proc->endCall(); // throws Fault
-    //}
+void SoapResponderBase::beginCall(System::EventLoop& loop)
+{
+    if( ! _proc )
+    {
+        throw Fault("invalid XML-RPC", 4);
+    }
 
-    assert(_proc);
-    this->onEndCall(*_proc);
+    _proc->beginCall(loop); // throws Fault
+}
+
+
+Pt::Decomposer* SoapResponderBase::endCall()
+{
+    if( ! _proc )
+    {
+        throw Fault("invalid XML-RPC", 4);
+    }
+
+    return _proc->endCall(); // throws Fault
+}
+
+
+void SoapResponderBase::beginResult()
+{ 
+    this->onBeginResult(*_proc);
 }
 
 
@@ -126,8 +142,6 @@ void SoapResponderBase::cancel()
         _serviceDef->releaseProcedure(_proc);
     
     _proc = 0;
-
-    this->onReset();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -156,7 +170,13 @@ SoapResponder::~SoapResponder()
 }
 
 
-void SoapResponder::onReset()
+bool SoapResponder::isFailed() const
+{
+    return  _isFault;
+}
+
+
+void SoapResponder::onCancel()
 {
     _state = OnBegin;
     _ts.detach();
@@ -180,7 +200,7 @@ bool SoapResponder::parseMessage()
 {
     try
     {
-        if(_isFault)
+        if( this->isFailed() )
             return true;
         
         for(;;)
@@ -202,23 +222,19 @@ bool SoapResponder::parseMessage()
     }
     catch(const Xml::XmlError& error)
     {
-        _fault = Fault(error.what(), 1);
-        _isFault = true;
+        setFault(1, error.what() );
     }
     catch(const SerializationError& error)
     {
-        _fault = Fault(error.what(), 2);
-        _isFault = true;
+        setFault(2, error.what() );
     }
     catch(const ConversionError& error)
     {
-        _fault = Fault(error.what(), 3);
-        _isFault = true;
+        setFault(3, error.what() );
     }
     catch(const Fault& fault)
     {
-        _fault = fault;
-        _isFault = true;
+        setFault(fault.rc(), fault.text().c_str() );
     }
 
     return true;
@@ -227,67 +243,60 @@ bool SoapResponder::parseMessage()
 
 void SoapResponder::finishMessage(System::EventLoop& loop)
 {
-    if( _isFault )
+    if( this->isFailed() )
     {
-        onError();
+        onResult();
         return;
     }
 
     try
     {
-        ServiceProcedure* proc = serviceProcedure();
-        if( ! proc )
-        {
-            throw Fault("invalid XML-RPC", 4);
-        }
+        //if( _args )
+        //{
+        //    ++_args;
 
-        if( _args )
-        {
-            ++_args;
+        //    if( * _args )
+        //    {
+        //        throw Fault("invalid XML-RPC, missing arguments", 5);
+        //    }
+        //}
 
-            if( * _args )
-            {
-                throw Fault("invalid XML-RPC, missing arguments", 5);
-            }
-        }
-
-       proc->beginCall(loop); // throws Fault
+        beginCall(loop);
     }
     catch(const Fault& fault)
     {
-        _fault = fault;
-        _isFault = true;
-
-        onError();
+        setFault(fault.rc(), fault.text().c_str() );
+        onResult();
     }
 }
 
 
-void SoapResponder::onEndCall(ServiceProcedure& proc)
-{ 
+void SoapResponder::onBeginResult(ServiceProcedure& proc)
+{    
     try
     {
-        if( ! _isFault )
-        {
-            _result = proc.endCall(); // throws Fault
-        }
+        // we get here only after setReady was called and we call setReady
+        // only if no fault is pending.
+        //if( _isFault )
+        //{
+        //    onError();
+        //    return;
+        //}
+        
+        _result = endCall(); // throws Fault
     }
     catch(const Fault& fault)
     {
-        _fault = fault;
-        _isFault = true;
-        onError();
-        return;
-    }
+        setFault( fault.rc(), fault.text().c_str() );
+    } 
 
-    // TODO: beginResult(Decomposer)
-    this->onResult(); 
+    onResult();
 }
 
 
 void SoapResponder::beginResult(std::ostream& os)
 {
-    if( _isFault )
+    if( this->isFailed() )
     {
         _result = 0;
         formatError(os, _fault.rc(), _fault.what());
@@ -330,7 +339,7 @@ bool SoapResponder::advanceResult()
 
 void SoapResponder::finishResult()
 {
-    if( ! _isFault )
+    if( ! this->isFailed() )
     {
         const Pt::String& outName = _op->outputName();
         _ts << '<' << '/' << outName << '>';
@@ -425,8 +434,8 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
                 if( ! _op )
                     throw Fault("no such procedure", Pt::XmlRpc::Fault::MethodNotFound);
 
-                ServiceProcedure* proc = getProcedure( se.name().local().narrow() );
-                if( ! proc )
+                _args = setProcedure( se.name().local().narrow() );
+                if( ! _args )
                     throw Fault("no such procedure", Pt::XmlRpc::Fault::MethodNotFound);
 
                 _state = OnMethod;
@@ -446,18 +455,8 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                if( ! _args )
-                {
-                    _args = serviceProcedure()->beginArgs();
-                    if( ! *_args)
-                        throw SerializationError("too many arguments");
-                }
-                else
-                {
-                    ++_args;
-                    if( ! *_args)
-                        throw SerializationError("too many arguments");
-                }
+                if( ! *_args)
+                    throw SerializationError("too many arguments");
 
                 const Parameter* param = _op->getInput( se.name().local().narrow() );
                 if( ! param )
@@ -478,6 +477,7 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
             bool finished = _formatter.advance(node);
             if(finished)
             {
+                ++_args;
                 _state = OnMethod;
             }
 
@@ -578,6 +578,9 @@ void SoapHttpResponder::onResult()
     {
         _reply->header().set("Content-Type", "text/xml");
 
+        if( this->isFailed() )
+            _reply->header().set("Connection", "close");
+
         beginResult(_reply->body() );
 
         while( ! advanceResult() )
@@ -597,19 +600,11 @@ void SoapHttpResponder::onResult()
 
 void SoapHttpResponder::onCancel()
 {
+    SoapResponder::onCancel();
+
     // not really possible, since only the HTTP server uses this class
 }
 
-
-void SoapHttpResponder::onError()
-{
-    if(_reply)
-    {
-        _reply->header().set("Connection", "close");
-    }
-
-    onResult();
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // WsdlResponder

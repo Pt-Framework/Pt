@@ -61,7 +61,7 @@ class ResponderBase : private NonCopyable
         SerializationContext& context()
         { return _context; }
 
-        virtual void endCall() = 0;
+        virtual void beginResult() = 0;
 
     private:
         SerializationContext _context;
@@ -85,7 +85,7 @@ class PT_XMLRPC_API Responder : public ResponderBase
         void cancel();
 
         //! @internal
-        virtual void endCall();
+        virtual void beginResult();
 
     protected:
         /** @brief The service procedure has finished.

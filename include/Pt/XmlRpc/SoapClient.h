@@ -76,31 +76,14 @@ class PT_XMLRPC_API SoapClientBase : public ClientBase
         */
         const RemoteCall* activeProcedure() const;
 
-        /** @brief Indicates if the procedure has failed.
-        */
-        bool isFailed() const;
-
     protected:
-        /** @brief Fails the current procedure.
-
-            This method is used by derived Clients before calling finishResult()
-            so that the RemoteProcedure throws a Fault when the result is 
-            processed.
-        */
-        void setError(bool f = true);
-
-        void setFailed(bool f = true);
-
         /** @brief Parses the XML-RPC result.
 
             This method is used by derived Clients after the XML-RPC result 
             has been parsed by parseResult(). The current RemoteProcedure will
             receive completion notification to process the result.
         */
-        void setFinished();
-
-        void finishResult()
-        { setFinished(); }
+        void setReady();
 
         Decomposer** argv() const
         { return _argv;}
@@ -110,7 +93,7 @@ class PT_XMLRPC_API SoapClientBase : public ClientBase
 
         virtual void onBeginCall(Composer&) = 0;
 
-        virtual void onReset() = 0;
+        virtual void onEndCall() = 0;
 
         /** @brief An asynchronous remote procedure is invoked.
 
@@ -134,30 +117,12 @@ class PT_XMLRPC_API SoapClientBase : public ClientBase
         */
         virtual void onCancel() = 0;
 
-        /** @brief A remote procedure has failed.
-
-            Derived Clients implement this method to format to throw exceptions
-            which can not be represented by Fault. This method is called when
-            the result of the RemoteProcedure is processed.
-        */
-        virtual void onError() = 0;
-
-        /** @brief A remote procedure has failed.
-
-            Derived Clients implement this method to format to throw exceptions
-            which can not be represented by Fault. This method is called when
-            the result of the RemoteProcedure is processed.
-        */
-        virtual void onFault() = 0;
-
     private:
         RemoteCall* _method;
         Decomposer** _argv;
         unsigned _argc;
         Decomposer* _arg;
         unsigned _argn;
-        bool _error;
-        bool _isFault;
         Pt::varint_t _r1;
         Pt::varint_t _r2;
 };
@@ -175,11 +140,31 @@ class PT_XMLRPC_API SoapClient : public SoapClientBase
         */
         virtual ~SoapClient();
 
+        /** @brief Indicates if the procedure has failed.
+        */
+        bool isFailed() const;
+
     protected:       
         virtual void onBeginCall(Composer& r);
 
-        virtual void onReset();
+        virtual void onEndCall();
 
+        virtual void onCancel();
+
+        /** @brief A remote procedure has failed.
+
+            Derived Clients implement this method to format to throw exceptions
+            which can not be represented by Fault. This method is called when
+            the result of the RemoteProcedure is processed.
+        */
+        virtual void onError() = 0;
+
+        /** @brief A remote procedure has failed.
+
+            Derived Clients implement this method to format to throw exceptions
+            which can not be represented by Fault. This method is called when
+            the result of the RemoteProcedure is processed.
+        */
         virtual void onFault();
 
     protected:
@@ -274,6 +259,7 @@ class PT_XMLRPC_API SoapClient : public SoapClientBase
         const Operation* _op;
         SoapFormatter _fmt;
         Fault _fault;
+        bool _isFault;
 
         Pt::varint_t _r1;
         Pt::varint_t _r2;

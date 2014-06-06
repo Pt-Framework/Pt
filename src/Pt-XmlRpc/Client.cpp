@@ -34,6 +34,7 @@
 #include "Pt/Xml/Characters.h"
 #include "Pt/Xml/EndElement.h"
 #include "Pt/System/Logger.h"
+#include <cassert>
 
 log_define("Pt.XmlRpc.Client")
 
@@ -297,17 +298,19 @@ void Client::setError(bool f)
 
 void Client::finishResult()
 {
+    assert( _method );
+
     if( _method )
     {
         RemoteCall* method = _method;
         _method = 0;
         method->finish();
     }
-    else if(_error)
-    {
-        _error = false;
-        onError();
-    }
+    //else if(_error)
+    //{
+    //    _error = false;
+    //    onError();
+    //}
 }
 
 

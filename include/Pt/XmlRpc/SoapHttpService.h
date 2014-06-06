@@ -61,35 +61,30 @@ class PT_XMLRPC_API SoapResponderBase : public ResponderBase
         */
         virtual ~SoapResponderBase();
 
-        ServiceProcedure* serviceProcedure() const
-        { return _proc; }
-
-        //! @internal -> beginResult()
-        virtual void endCall();
+        //! @internal called by SericeProcedure
+        virtual void beginResult();
 
         /** @brief Resets to initial state.
         */
         void cancel();
 
+    protected:
         /** @brief Gets the service procedure.
         */
-        ServiceProcedure* getProcedure(const std::string& name);
+        Pt::Composer** setProcedure(const std::string& name);
+
+        void beginCall(System::EventLoop& loop);
+
+        Pt::Decomposer* endCall();
 
     protected:
-        /** @brief Resets to initial state.
-
-            Derived responders implement this method to reset to an initial state.
-        */
-        virtual void onReset() = 0;
-
         /** @brief Cancels all operations.
 
             Derived responders implement this method to cancel all operations.
         */
         virtual void onCancel() = 0;
 
-        // TODO: pass decomposer ? 
-        virtual void onEndCall(ServiceProcedure& proc) = 0;
+        virtual void onBeginResult(ServiceProcedure& proc) = 0;
 
     private:
         ServiceDefinition* _serviceDef;
@@ -111,19 +106,11 @@ class PT_XMLRPC_API SoapResponder : public SoapResponderBase
         virtual ~SoapResponder();
 
     protected:
-        virtual void onEndCall(ServiceProcedure& proc);
+        // inheritdoc
+        virtual void onBeginResult(ServiceProcedure& proc);
 
         // inheritdoc
-        virtual void onReset();
-        
-        /** @brief The service procedure has finished.
-
-            Derived responders implement this method to format and send the
-            XML-RPC result. It is called when the service procedure has
-            finished. Use beginResult(), advanceResult() and finishResult()
-            to format the XML-RPC result.
-        */
-        virtual void onResult() = 0;
+        virtual void onCancel();
 
         /** @brief The service procedure has failed.
 
@@ -132,7 +119,16 @@ class PT_XMLRPC_API SoapResponder : public SoapResponderBase
             failed. Use beginResult(), advanceResult() and finishResult()
             to format the XML-RPC result.
         */
-        virtual void onError() = 0;
+        //virtual void onFault(const Fault& fault);
+
+        /** @brief The service procedure has finished.
+
+            Derived responders implement this method to format and send the
+            XML-RPC result. It is called when the service procedure has
+            finished. Use beginResult(), advanceResult() and finishResult()
+            to format the XML-RPC result.
+        */
+        virtual void onResult() = 0;
 
     protected:
         /** @brief Parses the XML-RPC message.
@@ -190,6 +186,10 @@ class PT_XMLRPC_API SoapResponder : public SoapResponderBase
             be generated instead.
         */
         void setFault(int rc, const char* msg);
+
+        /** @brief Indicates if the procedure has failed.
+        */
+        bool isFailed() const;
 
     private:
         //! @internal
@@ -259,9 +259,6 @@ class PT_XMLRPC_API SoapHttpResponder : public Http::Responder
 
         // inheritdoc
         virtual void onCancel();
-
-        // inheritdoc
-        virtual void onError();
 
     private:
          Http::Reply* _reply;

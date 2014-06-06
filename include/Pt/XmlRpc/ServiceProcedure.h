@@ -53,7 +53,7 @@ class ServiceProcedure
         /** @brief Indicates that the procedure has finished.
         */
         void setReady()
-        { _responder->endCall(); }
+        { _responder->beginResult(); }
 
         //! @internal
         Composer** beginArgs()

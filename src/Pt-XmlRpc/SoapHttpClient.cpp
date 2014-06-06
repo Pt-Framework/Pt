@@ -38,6 +38,7 @@ namespace XmlRpc {
 
 SoapHttpClient::SoapHttpClient(SoapServiceDeclaration& service)
 : SoapClient(service)
+, _error(false)
 {
     init();
 }
@@ -132,6 +133,14 @@ const Net::Endpoint& SoapHttpClient::host() const
 }
 
 
+void SoapHttpClient::onBeginCall(Composer& r)
+{
+    _error = false;
+
+    SoapClient::onBeginCall(r);
+}
+
+
 void SoapHttpClient::onInvoke()
 {
     //--->
@@ -198,8 +207,30 @@ void SoapHttpClient::onCall()
 }
 
 
+void SoapHttpClient::onEndCall()
+{
+    if( _error )
+    {
+        _error = false;
+        onError();
+        return;
+    }
+
+    SoapClient::onEndCall();
+}
+
+
+bool SoapHttpClient::isFailed() const
+{
+    return _error || SoapClient::isFailed();
+}
+
+
 void SoapHttpClient::onCancel()
 {
+    SoapClient::onCancel();
+
+    _error = false;
     _client.cancel();
 }
 
@@ -236,9 +267,9 @@ void SoapHttpClient::onRequest(Http::Client& client)
     }
     catch(const System::IOError&) // HttpError is also an IOError
     {
-        // setError() makes finishResult() call onError() where we throw
+        // setError() makes setFinished() call onError() where we throw
         setError();
-        finishResult();
+        setReady();
     }
 }
 
@@ -273,12 +304,12 @@ void SoapHttpClient::onReply(Http::Client& client)
     {
         // finished signal will call onError()
         setError();
-        finishResult();
+        setReady();
         return;
     }
 
     // send finished signal
-    finishResult();
+    setReady();
 }
 
 } // namespace XmlRpc

@@ -230,7 +230,7 @@ void Responder::finishMessage(System::EventLoop& loop)
 }
 
 
-void Responder::endCall()
+void Responder::beginResult()
 { 
     try
     {
