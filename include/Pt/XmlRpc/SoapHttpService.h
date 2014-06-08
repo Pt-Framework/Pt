@@ -62,7 +62,8 @@ class PT_XMLRPC_API SoapResponderBase : public ResponderBase
         virtual ~SoapResponderBase();
 
         //! @internal called by SericeProcedure
-        virtual void beginResult();
+        virtual void beginResult()
+        { this->onReady(); }
 
         /** @brief Resets to initial state.
         */
@@ -77,6 +78,16 @@ class PT_XMLRPC_API SoapResponderBase : public ResponderBase
 
         Pt::Decomposer* endCall();
 
+        Composer* arg() const
+        {           
+            return *_args; 
+        }
+
+        void nextArg()
+        { 
+            ++_args;
+        }
+
     protected:
         /** @brief Cancels all operations.
 
@@ -84,11 +95,12 @@ class PT_XMLRPC_API SoapResponderBase : public ResponderBase
         */
         virtual void onCancel() = 0;
 
-        virtual void onBeginResult(ServiceProcedure& proc) = 0;
+        virtual void onReady() = 0;
 
     private:
         ServiceDefinition* _serviceDef;
         ServiceProcedure* _proc;
+        Composer** _args;
 };
 
 
@@ -107,7 +119,7 @@ class PT_XMLRPC_API SoapResponder : public SoapResponderBase
 
     protected:
         // inheritdoc
-        virtual void onBeginResult(ServiceProcedure& proc);
+        virtual void onReady();
 
         // inheritdoc
         virtual void onCancel();
@@ -119,7 +131,7 @@ class PT_XMLRPC_API SoapResponder : public SoapResponderBase
             failed. Use beginResult(), advanceResult() and finishResult()
             to format the XML-RPC result.
         */
-        //virtual void onFault(const Fault& fault);
+        virtual void onFault(const Fault& fault) = 0;
 
         /** @brief The service procedure has finished.
 
@@ -163,6 +175,8 @@ class PT_XMLRPC_API SoapResponder : public SoapResponderBase
         */
         void beginResult(std::ostream& os);
 
+        void beginFault(std::ostream& os, const Fault& fault);
+
         /** @brief Formats the XML-RPC message.
 
             This method is used by derived responders in onResult() and onError()
@@ -189,12 +203,9 @@ class PT_XMLRPC_API SoapResponder : public SoapResponderBase
 
         /** @brief Indicates if the procedure has failed.
         */
-        bool isFailed() const;
+        bool isFault() const;
 
     private:
-        //! @internal
-        void formatError(std::ostream& os, int rc, const char* msg);
-
         //! @internal
         bool advance(const Pt::Xml::Node& node);
 
@@ -216,7 +227,7 @@ class PT_XMLRPC_API SoapResponder : public SoapResponderBase
         
         Xml::BinaryInputSource _bin;
         Xml::XmlReader _reader;
-        Composer** _args;
+        Composer* _arg;
         State _state;
         
         Utf8Codec _utf8;
@@ -258,7 +269,12 @@ class PT_XMLRPC_API SoapHttpResponder : public Http::Responder
         virtual void onResult();
 
         // inheritdoc
+        virtual void onFault(const Fault& fault);
+
+        // inheritdoc
         virtual void onCancel();
+
+        void advanceSoapReply(Http::Reply& reply);
 
     private:
          Http::Reply* _reply;

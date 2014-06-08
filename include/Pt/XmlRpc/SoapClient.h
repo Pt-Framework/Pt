@@ -85,15 +85,22 @@ class PT_XMLRPC_API SoapClientBase : public ClientBase
         */
         void setReady();
 
-        Decomposer** argv() const
-        { return _argv;}
+        Decomposer* arg() const
+        { 
+            if(_argsn >= _argc)
+                return 0;
+            
+            return *_args; 
+        }
 
-        unsigned argc() const
-        { return _argc;}
+        // TODO: RemoteProcedure null-terminated decomposer array
+        void nextArg()
+        { 
+            ++_args;
+            ++_argsn;
+        }
 
         virtual void onBeginCall(Composer&) = 0;
-
-        virtual void onEndCall() = 0;
 
         /** @brief An asynchronous remote procedure is invoked.
 
@@ -110,6 +117,8 @@ class PT_XMLRPC_API SoapClientBase : public ClientBase
         */
         virtual void onCall() = 0;
 
+        virtual void onEndCall() = 0;
+
         /** @brief A remote procedure is cancelled.
 
             Derived Clients implement this method to cancel the remote
@@ -119,10 +128,9 @@ class PT_XMLRPC_API SoapClientBase : public ClientBase
 
     private:
         RemoteCall* _method;
-        Decomposer** _argv;
+        Decomposer** _args;
+        unsigned _argsn;
         unsigned _argc;
-        Decomposer* _arg;
-        unsigned _argn;
         Pt::varint_t _r1;
         Pt::varint_t _r2;
 };

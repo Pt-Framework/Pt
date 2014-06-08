@@ -78,7 +78,8 @@ static const Pt::Char SOAP_REASON_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 
 
 SoapClientBase::SoapClientBase()
 : _method(0)
-, _argv(0)
+, _args(0)
+, _argsn(0)
 , _argc(0)
 {
 }
@@ -92,8 +93,10 @@ SoapClientBase::~SoapClientBase()
 void SoapClientBase::beginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
 {
     _method = &method;
-    _argv = argv;
     _argc = argc;
+
+    _args = argv;
+    _argsn = 0;
 
     this->onBeginCall(r);
     this->onInvoke();
@@ -103,8 +106,10 @@ void SoapClientBase::beginCall(Composer& r, RemoteCall& method, Decomposer** arg
 void SoapClientBase::call(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
 {
     _method = &method;
-    _argv = argv;
     _argc = argc;
+
+    _args = argv;
+    _argsn = 0;
 
     this->onBeginCall(r);
     this->onCall();
@@ -124,7 +129,9 @@ void SoapClientBase::cancel()
 
     _method = 0;
     _argc = 0;
-    _argv = 0;
+
+    _args = 0;
+    _argsn = 0;
 }
 
 
@@ -245,14 +252,14 @@ bool SoapClient::advanceMessage()
 {
     unsigned n = 10;
 
-    while(_argn < argc() && n > 0)
+    while(arg() && n > 0)
     {
-        if( ! _arg)
+        if( ! _arg )
         {
-            _arg = argv()[_argn];
+            _arg = arg();
 
             //-->
-            const Parameter* param = _op->getInput(_argn);
+            const Parameter* param = _op->getInput( _argn );
             
             assert(param);
             if( ! param)
@@ -272,12 +279,12 @@ bool SoapClient::advanceMessage()
         if( ! _arg )
         {
             //--> <--
+            nextArg();
             ++_argn;
         }
-
     }
     
-    return _argn >= argc();
+    return ! arg();
 }
 
 
