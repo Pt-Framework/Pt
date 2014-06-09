@@ -40,7 +40,7 @@
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Remoting {
 
 /** @internal Documented externally.
 */
@@ -162,7 +162,7 @@ class RemoteProcedureBase : public RemoteCall
         BasicComposer<R> _r;
 };
 
-} // namespace XmlRpc
+} // namespace Remoting
 
 } // namespace Pt
 

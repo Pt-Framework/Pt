@@ -105,7 +105,7 @@ class BenchClient
     }
 
     Pt::XmlRpc::HttpClient client;
-    Pt::XmlRpc::RemoteProcedure<std::string, std::string> echo;
+    Pt::Remoting::RemoteProcedure<std::string, std::string> echo;
     Pt::System::AttachedThread thread;
 
     static unsigned _numRequests;

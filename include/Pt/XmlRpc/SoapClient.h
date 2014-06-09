@@ -46,98 +46,12 @@ namespace Pt {
 
 namespace XmlRpc {
 
-class RemoteCall;
 class Operation;
 class SoapServiceDeclaration;
 
 /** @brief A client for remote procedure calls.
 */
-class PT_XMLRPC_API SoapClientBase : public ClientBase
-{
-    public:
-        SoapClientBase();
-
-        virtual ~SoapClientBase();
-
-        //! @internal
-        void beginCall(Composer& r, RemoteCall& call, Decomposer** argv, unsigned argc);
-
-        //! @internal
-        void endCall();
-
-        //! @internal
-        void call(Composer& r, RemoteCall& call, Decomposer** argv, unsigned argc);
-
-        /** @brief Cancels the currently executing procedure.
-        */
-        void cancel();
-
-        /** @brief The currently executing procedure.
-        */
-        const RemoteCall* activeProcedure() const;
-
-    protected:
-        /** @brief Parses the XML-RPC result.
-
-            This method is used by derived Clients after the XML-RPC result 
-            has been parsed by parseResult(). The current RemoteProcedure will
-            receive completion notification to process the result.
-        */
-        void setReady();
-
-        Decomposer* arg() const
-        { 
-            if(_argsn >= _argc)
-                return 0;
-            
-            return *_args; 
-        }
-
-        // TODO: RemoteProcedure null-terminated decomposer array
-        void nextArg()
-        { 
-            ++_args;
-            ++_argsn;
-        }
-
-        virtual void onBeginCall(Composer&) = 0;
-
-        /** @brief An asynchronous remote procedure is invoked.
-
-            Derived Clients implement this method to format and send a
-            XML-RPC message to the service.
-        */
-        virtual void onInvoke() = 0;
-
-        /** @brief A synchronous remote procedure is called.
-
-            Derived Clients implement this method to format and send a
-            XML-RPC message to the service and receive and parse the
-            XML-RPC result.
-        */
-        virtual void onCall() = 0;
-
-        virtual void onEndCall() = 0;
-
-        /** @brief A remote procedure is cancelled.
-
-            Derived Clients implement this method to cancel the remote
-            procedure call.
-        */
-        virtual void onCancel() = 0;
-
-    private:
-        RemoteCall* _method;
-        Decomposer** _args;
-        unsigned _argsn;
-        unsigned _argc;
-        Pt::varint_t _r1;
-        Pt::varint_t _r2;
-};
-
-/** @brief A client for remote procedure calls.
-*/
-class PT_XMLRPC_API SoapClient : public SoapClientBase
+class PT_XMLRPC_API SoapClient : public Pt::Remoting::Client
 {
     public:
         /** @brief Constructor.
@@ -153,19 +67,30 @@ class PT_XMLRPC_API SoapClient : public SoapClientBase
         bool isFailed() const;
 
     protected:       
-        virtual void onBeginCall(Composer& r);
+        virtual void onBeginCall(Composer& r, Pt::Remoting::RemoteCall& method, Decomposer** argv, unsigned argc);
 
         virtual void onEndCall();
 
+        virtual void onCall(Composer& r, Pt::Remoting::RemoteCall& method, Decomposer** argv, unsigned argc);
+
         virtual void onCancel();
 
-        /** @brief A remote procedure has failed.
+    protected:
+        /** @brief An asynchronous remote procedure is invoked.
 
-            Derived Clients implement this method to format to throw exceptions
-            which can not be represented by Fault. This method is called when
-            the result of the RemoteProcedure is processed.
+            Derived Clients implement this method to format and send a
+            message to the service.
         */
-        virtual void onError() = 0;
+        virtual void onBeginInvoke() = 0;
+
+        virtual void onEndInvoke() = 0;
+
+        /** @brief A synchronous remote procedure is called.
+
+            Derived Clients implement this method to format and send a
+            message to the service and receive and parse the result.
+        */
+        virtual void onInvoke() = 0;
 
         /** @brief A remote procedure has failed.
 
@@ -253,6 +178,8 @@ class PT_XMLRPC_API SoapClient : public SoapClientBase
             OnEnvelopeEnd
         };
 
+        Decomposer** _argv;
+        unsigned _argc;
         Decomposer* _arg;
         unsigned _argn;
 

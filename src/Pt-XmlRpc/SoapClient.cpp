@@ -73,92 +73,13 @@ static const Pt::Char SOAP_REASON[]  = { '<', 's', 'o', 'a', 'p', ':', 'R', 'e',
 static const Pt::Char SOAP_REASON_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'R', 'e', 'a', 's', 'o', 'n', '>' };
 
 ///////////////////////////////////////////////////////////////////////////////
-// SoapClientBase
-///////////////////////////////////////////////////////////////////////////////
-
-SoapClientBase::SoapClientBase()
-: _method(0)
-, _args(0)
-, _argsn(0)
-, _argc(0)
-{
-}
-
-
-SoapClientBase::~SoapClientBase()
-{
-}
-
-
-void SoapClientBase::beginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
-{
-    _method = &method;
-    _argc = argc;
-
-    _args = argv;
-    _argsn = 0;
-
-    this->onBeginCall(r);
-    this->onInvoke();
-}
-
-
-void SoapClientBase::call(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
-{
-    _method = &method;
-    _argc = argc;
-
-    _args = argv;
-    _argsn = 0;
-
-    this->onBeginCall(r);
-    this->onCall();
-}
-
-
-void SoapClientBase::endCall()
-{
-    this->onEndCall();
-    _method = 0;
-}
-
-
-void SoapClientBase::cancel()
-{
-    this->onCancel();
-
-    _method = 0;
-    _argc = 0;
-
-    _args = 0;
-    _argsn = 0;
-}
-
-
-const RemoteCall* SoapClientBase::activeProcedure() const
-{
-    return _method;
-}
-
-
-void SoapClientBase::setReady()
-{
-    assert( _method );
-
-    if( _method )
-    {
-        RemoteCall* method = _method;
-        _method = 0;
-        method->finish();
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // SoapClient
 ///////////////////////////////////////////////////////////////////////////////
 
 SoapClient::SoapClient(SoapServiceDeclaration& service)
-: _arg(0)
+: _argv(0)
+, _argc(0)
+, _arg(0)
 , _argn(0)
 , _utf8(1)
 , _ts( &_utf8 )
@@ -177,24 +98,17 @@ SoapClient::~SoapClient()
 }
 
 
-void SoapClient::onEndCall()
-{
-    if( _isFault )
-    {
-        _isFault = false;
-        onFault(); 
-    }
-}
-
-
 bool SoapClient::isFailed() const
 {
     return _isFault;
 }
 
 
-void SoapClient::onBeginCall(Composer& r)
+void SoapClient::onBeginCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv, unsigned argc)
 {
+    _argv = argv;
+    _argc = argc;
+
     _arg = 0;
     _argn = 0;
     _state = OnBegin;
@@ -202,6 +116,37 @@ void SoapClient::onBeginCall(Composer& r)
     _fmt.beginParse(r);
 
     _isFault = false;
+
+    this->onBeginInvoke();
+}
+
+
+void SoapClient::onEndCall()
+{
+    if( _isFault )
+    {
+        _isFault = false;
+        onFault(); 
+    }
+
+    this->onEndInvoke();
+}
+
+
+void SoapClient::onCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv, unsigned argc)
+{
+    _argv = argv;
+    _argc = argc;
+
+    _arg = 0;
+    _argn = 0;
+    _state = OnBegin;
+    _reader.reset(_bin);
+    _fmt.beginParse(r);
+
+    _isFault = false;
+
+    this->onInvoke();
 }
 
 
@@ -213,6 +158,9 @@ void SoapClient::onFault()
 
 void SoapClient::onCancel()
 {
+    _argv = 0;
+    _argc = 0;
+
     _arg = 0;
     _argn = 0;
     _ts.detach();
@@ -225,7 +173,7 @@ void SoapClient::onCancel()
 
 void SoapClient::beginMessage(std::ostream& os)
 {
-    const RemoteCall* method = activeProcedure();
+    const Remoting::RemoteCall* method = activeProcedure();
     if( ! method )
         return;
 
@@ -252,11 +200,11 @@ bool SoapClient::advanceMessage()
 {
     unsigned n = 10;
 
-    while(arg() && n > 0)
+    while(_argn < _argc && n > 0)
     {
         if( ! _arg )
         {
-            _arg = arg();
+            _arg = _argv[_argn];
 
             //-->
             const Parameter* param = _op->getInput( _argn );
@@ -279,18 +227,18 @@ bool SoapClient::advanceMessage()
         if( ! _arg )
         {
             //--> <--
-            nextArg();
+            //nextArg();
             ++_argn;
         }
     }
     
-    return ! arg();
+    return _argn >= _argc;
 }
 
 
 void SoapClient::finishMessage()
 {
-    const RemoteCall* method = activeProcedure();
+    const Remoting::RemoteCall* method = activeProcedure();
 
     //-->
     Pt::String targetNamespace = _serviceDef->targetNamespace().c_str();

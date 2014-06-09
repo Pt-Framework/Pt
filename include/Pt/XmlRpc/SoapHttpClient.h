@@ -106,22 +106,24 @@ class PT_XMLRPC_API SoapHttpClient : public SoapClient
     protected: 
         virtual bool isFailed() const;
 
-        // inheritdoc      
-        virtual void onBeginCall(Composer& r);
+        // inheritdoc
+        virtual void onBeginInvoke();
 
         // inheritdoc
         virtual void onInvoke();
 
         // inheritdoc
-        virtual void onCall();
-
-        // inheritdoc
-        virtual void onEndCall();
+        virtual void onEndInvoke();
 
         // inheritdoc
         virtual void onCancel();
 
-        // inheritdoc
+        /** @brief A remote procedure has failed.
+
+            Derived Clients implement this method to format to throw exceptions
+            which can not be represented by Fault. This method is called when
+            the result of the RemoteProcedure is processed.
+        */
         virtual void onError();
 
     private:

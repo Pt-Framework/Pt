@@ -133,16 +133,10 @@ const Net::Endpoint& SoapHttpClient::host() const
 }
 
 
-void SoapHttpClient::onBeginCall(Composer& r)
+void SoapHttpClient::onBeginInvoke()
 {
     _error = false;
 
-    SoapClient::onBeginCall(r);
-}
-
-
-void SoapHttpClient::onInvoke()
-{
     //--->
     // prepare HTTP request
     _client.request().clear();
@@ -170,8 +164,10 @@ void SoapHttpClient::onInvoke()
 }
 
 
-void SoapHttpClient::onCall()
+void SoapHttpClient::onInvoke()
 {
+    _error = false;
+
     //--->
     // prepare HTTP request
     _client.request().clear();
@@ -207,7 +203,7 @@ void SoapHttpClient::onCall()
 }
 
 
-void SoapHttpClient::onEndCall()
+void SoapHttpClient::onEndInvoke()
 {
     if( _error )
     {
@@ -215,8 +211,6 @@ void SoapHttpClient::onEndCall()
         onError();
         return;
     }
-
-    SoapClient::onEndCall();
 }
 
 

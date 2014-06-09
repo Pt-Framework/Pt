@@ -48,26 +48,34 @@ namespace Pt {
 
 namespace XmlRpc {
 
+namespace Remoting {
+
 /** @brief Dispatches requests to a service procedure.
 */
-class PT_XMLRPC_API SoapResponderBase : public ResponderBase
+class PT_XMLRPC_API Responder : public ResponderBase
 {
     public:
         /** @brief Construct with Service.
         */
-        explicit SoapResponderBase(ServiceDefinition& serviceDef);
+        explicit Responder(ServiceDefinition& serviceDef);
 
         /** @brief Destructor.
         */
-        virtual ~SoapResponderBase();
+        virtual ~Responder();
 
         //! @internal called by SericeProcedure
+        // TODO: rename setReady
         virtual void beginResult()
         { this->onReady(); }
 
         /** @brief Resets to initial state.
         */
         void cancel();
+
+        /** @brief The currently executing procedure.
+        */
+        const ServiceProcedure* activeProcedure() const
+        { return _proc; }
 
     protected:
         /** @brief Gets the service procedure.
@@ -78,15 +86,15 @@ class PT_XMLRPC_API SoapResponderBase : public ResponderBase
 
         Pt::Decomposer* endCall();
 
-        Composer* arg() const
-        {           
-            return *_args; 
-        }
+        //Composer* arg() const
+        //{           
+        //    return *_args; 
+        //}
 
-        void nextArg()
-        { 
-            ++_args;
-        }
+        //void nextArg()
+        //{ 
+        //    ++_args;
+        //}
 
     protected:
         /** @brief Cancels all operations.
@@ -100,13 +108,14 @@ class PT_XMLRPC_API SoapResponderBase : public ResponderBase
     private:
         ServiceDefinition* _serviceDef;
         ServiceProcedure* _proc;
-        Composer** _args;
+        //Composer** _args;
 };
 
+} // namespace Remoting
 
 /** @brief Dispatches requests to a service procedure.
 */
-class PT_XMLRPC_API SoapResponder : public SoapResponderBase
+class PT_XMLRPC_API SoapResponder : public Remoting::Responder
 {
     public:
         /** @brief Construct with Service declaration and definition.
@@ -227,7 +236,7 @@ class PT_XMLRPC_API SoapResponder : public SoapResponderBase
         
         Xml::BinaryInputSource _bin;
         Xml::XmlReader _reader;
-        Composer* _arg;
+        Composer** _args;
         State _state;
         
         Utf8Codec _utf8;

@@ -77,55 +77,57 @@ namespace Pt {
 
 namespace XmlRpc {
 
+namespace Remoting {
+
 ///////////////////////////////////////////////////////////////////////////////
 // SoapResponderBase
 ///////////////////////////////////////////////////////////////////////////////
 
-SoapResponderBase::SoapResponderBase(ServiceDefinition& serviceDef)
+Responder::Responder(ServiceDefinition& serviceDef)
 : _serviceDef(&serviceDef)
 , _proc(0)
-, _args(0)
+//, _args(0)
 {
 }
 
 
-SoapResponderBase::~SoapResponderBase()
+Responder::~Responder()
 {
     if(_proc)
         _serviceDef->releaseProcedure(_proc);
 }
 
 
-Pt::Composer** SoapResponderBase::setProcedure(const std::string& name)
+Pt::Composer** Responder::setProcedure(const std::string& name)
 {
     if(_proc)
         _serviceDef->releaseProcedure(_proc);
 
     _proc = _serviceDef->getProcedure( name, *this );
 
-    _args = _proc ? _proc->beginArgs() : 0;
+   Composer** args = _proc ? _proc->beginArgs() : 0;
    
-    return _args;
+    return args;
 }
 
 
-void SoapResponderBase::beginCall(System::EventLoop& loop)
+void Responder::beginCall(System::EventLoop& loop)
 {
     if( ! _proc )
     {
         throw Fault("invalid XML-RPC", 4);
     }
 
-    if( _args && *_args )
-    {
-        throw Fault("expected more arguments", 5);
-    }
+    //if( _args && *_args )
+    //{
+    //    throw Fault("expected more arguments", 5);
+    //}
 
     _proc->beginCall(loop); // throws Fault
 }
 
 
-Pt::Decomposer* SoapResponderBase::endCall()
+Pt::Decomposer* Responder::endCall()
 {
     if( ! _proc )
     {
@@ -136,7 +138,7 @@ Pt::Decomposer* SoapResponderBase::endCall()
 }
 
 
-void SoapResponderBase::cancel()
+void Responder::cancel()
 {
     this->onCancel();
     
@@ -144,19 +146,21 @@ void SoapResponderBase::cancel()
         _serviceDef->releaseProcedure(_proc);
     
     _proc = 0;
-    _args = 0;
+    //_args = 0;
 }
+
+} // namespace Remoting
 
 ///////////////////////////////////////////////////////////////////////////////
 // SoapResponder
 ///////////////////////////////////////////////////////////////////////////////
 
 SoapResponder::SoapResponder(const SoapServiceDeclaration& decl, ServiceDefinition& def)
-: SoapResponderBase(def)
+: Remoting::Responder(def)
 , _serviceDecl( &decl )
 , _op(0)
 , _reader(_bin)
-, _arg(0)
+, _args(0)
 , _state(OnBegin)
 , _utf8(1)
 , _ts(&_utf8)
@@ -185,7 +189,7 @@ void SoapResponder::onCancel()
     _ts.detach();
     _ts.discard();
 
-    _arg = 0;
+    _args = 0;
     _result = 0;
     _isFault = false;
 }
@@ -254,6 +258,11 @@ void SoapResponder::finishMessage(System::EventLoop& loop)
 
     try
     {
+        if( _args && *_args )
+        {
+            throw Fault("expected more arguments", 5);
+        }
+
         beginCall(loop);
     }
     catch(const Fault& fault)
@@ -421,7 +430,8 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
                 if( ! _op )
                     throw Fault("no such procedure", Pt::XmlRpc::Fault::MethodNotFound);
 
-                if( ! setProcedure( se.name().local().narrow() ) )
+                _args = setProcedure( se.name().local().narrow() );
+                if( ! _args )
                     throw Fault("no such procedure", Pt::XmlRpc::Fault::MethodNotFound);
 
                 _state = OnMethod;
@@ -441,9 +451,7 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                _arg = arg();
-
-                if( ! _arg )
+                if( ! *_args )
                     throw SerializationError("too many arguments");
 
                 const Parameter* param = _op->getInput( se.name().local().narrow() );
@@ -451,7 +459,7 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
                     throw Fault("no such parameter", Pt::XmlRpc::Fault::MethodNotFound);
 
                 _formatter.setParameter(*param);
-                _formatter.beginParse(*_arg);
+                _formatter.beginParse(**_args);
                 
                 _state = OnParam;
                 break;
@@ -465,7 +473,7 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
             bool finished = _formatter.advance(node);
             if(finished)
             {
-                nextArg();
+                ++_args;
                 _state = OnMethod;
             }
 

@@ -237,14 +237,14 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
-            Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
+            Pt::Remoting::RemoteProcedure<bool> multiply(client, "multiply");
             multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onNotFound);
             multiply.begin();
 
             _loop->run();
         }
 
-        void onNotFound(const Pt::XmlRpc::Result<bool>& result)
+        void onNotFound(const Pt::Remoting::Result<bool>& result)
         {
             try
             {
@@ -276,14 +276,14 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
-            Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
+            Pt::Remoting::RemoteProcedure<bool> multiply(client, "multiply");
             multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onFault);
             multiply.begin();
 
             _loop->run();
         }
 
-        void onFault(const Pt::XmlRpc::Result<bool>& result)
+        void onFault(const Pt::Remoting::Result<bool>& result)
         {
             try
             {
@@ -322,7 +322,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
-            Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
+            Pt::Remoting::RemoteProcedure<bool> multiply(client, "multiply");
             multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onNothingFinished);
 
             multiply.begin();
@@ -330,7 +330,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onNothingFinished(const Pt::XmlRpc::Result<bool>& r)
+        void onNothingFinished(const Pt::Remoting::Result<bool>& r)
         {
             PT_UNIT_ASSERT_EQUALS(r.get(), false);
 
@@ -359,7 +359,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
-            Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
+            Pt::Remoting::RemoteProcedure<bool> multiply(client, "multiply");
             multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onExceptionCallback);
 
             multiply.begin();
@@ -373,7 +373,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server = 0;
         }
 
-        void onExceptionCallback(const Pt::XmlRpc::Result<bool>& r)
+        void onExceptionCallback(const Pt::Remoting::Result<bool>& r)
         {
             ++_count;
             _loop->exit();
@@ -389,7 +389,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8002);
             client.setTarget(ep, "/calc");
             
-            Pt::XmlRpc::RemoteProcedure<bool> multiply(client, "multiply");
+            Pt::Remoting::RemoteProcedure<bool> multiply(client, "multiply");
             multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onConnectErrorCallback);
             try
             {
@@ -410,7 +410,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             }
         }
 
-        void onConnectErrorCallback(const Pt::XmlRpc::Result<bool>& r)
+        void onConnectErrorCallback(const Pt::Remoting::Result<bool>& r)
         {
             _loop->exit();
             PT_UNIT_ASSERT_THROW(r.get(), std::exception);
@@ -433,7 +433,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
-            Pt::XmlRpc::RemoteProcedure<bool, bool, bool> multiply(client, "multiply");
+            Pt::Remoting::RemoteProcedure<bool, bool, bool> multiply(client, "multiply");
             multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onBooleanFinished );
 
             multiply.begin(true, true);
@@ -441,7 +441,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onBooleanFinished(const Pt::XmlRpc::Result<bool>& r)
+        void onBooleanFinished(const Pt::Remoting::Result<bool>& r)
         {
             PT_UNIT_ASSERT_EQUALS(r.get(), true);
 
@@ -459,7 +459,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         // Integer
         //
 
-        Pt::XmlRpc::RemoteProcedure<int, int, int>* _multiply;
+        Pt::Remoting::RemoteProcedure<int, int, int>* _multiply;
 
         void Integer()
         {
@@ -475,7 +475,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
-            Pt::XmlRpc::RemoteProcedure<int, int, int> multiply(client, "multiply");
+            Pt::Remoting::RemoteProcedure<int, int, int> multiply(client, "multiply");
             multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onIntegerFinished );
 
             multiply.begin(2, 3);
@@ -487,7 +487,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server = 0;
         }
 
-        void onIntegerFinished(const Pt::XmlRpc::Result<int>& r)
+        void onIntegerFinished(const Pt::Remoting::Result<int>& r)
         {
             static int ttt = 0;
             PT_UNIT_ASSERT_EQUALS(r.get(), 6);
@@ -520,7 +520,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
-            Pt::XmlRpc::RemoteProcedure<double, double, double> multiply(client, "multiply");
+            Pt::Remoting::RemoteProcedure<double, double, double> multiply(client, "multiply");
             multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onDoubleFinished );
 
             multiply.begin(2.0, 3.0);
@@ -528,7 +528,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onDoubleFinished(const Pt::XmlRpc::Result<double>& r)
+        void onDoubleFinished(const Pt::Remoting::Result<double>& r)
         {
             PT_UNIT_ASSERT_EQUALS(r.get(), 6.0);
 
@@ -557,7 +557,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/foo");
 
-            Pt::XmlRpc::RemoteProcedure<std::string, std::string> echo(client, "echoString");
+            Pt::Remoting::RemoteProcedure<std::string, std::string> echo(client, "echoString");
             echo.finished() += Pt::slot(*this, &PtXmlRpcTest::onStringEchoFinished);
 
             echo.begin("Hello'\"&<> foo?");
@@ -565,7 +565,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onStringEchoFinished(const Pt::XmlRpc::Result<std::string>& r)
+        void onStringEchoFinished(const Pt::Remoting::Result<std::string>& r)
         {
             PT_UNIT_ASSERT_EQUALS(r.get(), "Hello'\"&<> foo?");
 
@@ -594,7 +594,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
-            Pt::XmlRpc::RemoteProcedure<std::string, std::string, std::string> multiply(client, "multiply");
+            Pt::Remoting::RemoteProcedure<std::string, std::string, std::string> multiply(client, "multiply");
             multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onEmptyFinished );
 
             multiply.begin("", "");
@@ -602,7 +602,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onEmptyFinished(const Pt::XmlRpc::Result<std::string>& r)
+        void onEmptyFinished(const Pt::Remoting::Result<std::string>& r)
         {
             PT_UNIT_ASSERT_EQUALS(r.get(), "4");
             _loop->exit();
@@ -668,7 +668,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
 
-            Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > multiply(client, "multiply");
+            Pt::Remoting::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > multiply(client, "multiply");
             multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onArrayFinished);
 
             std::vector<int> vec;
@@ -697,7 +697,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
-            Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > multiply(client, "multiply");
+            Pt::Remoting::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > multiply(client, "multiply");
             multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onArrayFinished);
 
             std::vector<int> vec;
@@ -721,7 +721,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             return r;
         }
 
-        void onArrayFinished(const Pt::XmlRpc::Result<std::vector<int> >& r)
+        void onArrayFinished(const Pt::Remoting::Result<std::vector<int> >& r)
         {
             PT_UNIT_ASSERT_EQUALS(r.get().size(), 2);
             PT_UNIT_ASSERT_EQUALS(r.get().at(0), 100);
@@ -733,7 +733,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         ////////////////////////////////////////////////////////////
         // ArrayBenchmark
         //
-        Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> >* benchmarkProc;
+        Pt::Remoting::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> >* benchmarkProc;
         std::vector<int> benchmarkVec;
         std::vector<int> benchmarkResult;
 
@@ -751,7 +751,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
-            Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > proc(client, "mergeVector");
+            Pt::Remoting::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > proc(client, "mergeVector");
             proc.finished() += Pt::slot(*this, &PtXmlRpcTest::onArrayBenchmarkFinished);
 
             benchmarkProc = &proc;
@@ -774,7 +774,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _server = 0;
         }
 
-        void onArrayBenchmarkFinished(const Pt::XmlRpc::Result<std::vector<int> >& r)
+        void onArrayBenchmarkFinished(const Pt::Remoting::Result<std::vector<int> >& r)
         {
             //PT_UNIT_ASSERT_EQUALS(r.get().size(), 8);
 
@@ -816,7 +816,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
-            Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > multiply(client, "multiply");
+            Pt::Remoting::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > multiply(client, "multiply");
             multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onEmptyArrayFinished);
 
             std::vector<int> vec;
@@ -825,7 +825,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onEmptyArrayFinished(const Pt::XmlRpc::Result<std::vector<int> >& r)
+        void onEmptyArrayFinished(const Pt::Remoting::Result<std::vector<int> >& r)
         {
             PT_UNIT_ASSERT_EQUALS(r.get().size(), 0);
 
@@ -849,7 +849,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
             
-            Pt::XmlRpc::RemoteProcedure< Color, Color, Color > multiply(client, "multiply");
+            Pt::Remoting::RemoteProcedure< Color, Color, Color > multiply(client, "multiply");
             multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onStuctFinished);
 
             Color a;
@@ -867,7 +867,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onStuctFinished(const Pt::XmlRpc::Result<Color>& color)
+        void onStuctFinished(const Pt::Remoting::Result<Color>& color)
         {
             PT_UNIT_ASSERT_EQUALS(color.get().red, 6);
             PT_UNIT_ASSERT_EQUALS(color.get().green, 12);
@@ -902,7 +902,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/test");
             
-            Pt::XmlRpc::RemoteProcedure<IntSet, IntSet, int> multiply(client, "multiplyset");
+            Pt::Remoting::RemoteProcedure<IntSet, IntSet, int> multiply(client, "multiplyset");
             multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onSetFinished);
 
             IntSet myset;
@@ -916,7 +916,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onSetFinished(const Pt::XmlRpc::Result<IntSet>& result)
+        void onSetFinished(const Pt::Remoting::Result<IntSet>& result)
         {
             const IntSet& v = result.get();
             PT_UNIT_ASSERT_EQUALS(v.size(), 3);
@@ -952,7 +952,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/test");
             
-            Pt::XmlRpc::RemoteProcedure<IntMultiset, IntMultiset, int> multiply(client, "multiplyset");
+            Pt::Remoting::RemoteProcedure<IntMultiset, IntMultiset, int> multiply(client, "multiplyset");
             multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onMultisetFinished);
 
             IntMultiset myset;
@@ -966,7 +966,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onMultisetFinished(const Pt::XmlRpc::Result<IntMultiset>& result)
+        void onMultisetFinished(const Pt::Remoting::Result<IntMultiset>& result)
         {
             const IntMultiset& v = result.get();
             PT_UNIT_ASSERT_EQUALS(v.size(), 4);
@@ -1002,7 +1002,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/test");
             
-            Pt::XmlRpc::RemoteProcedure<IntMap, IntMap, int> multiply(client, "multiplymap");
+            Pt::Remoting::RemoteProcedure<IntMap, IntMap, int> multiply(client, "multiplymap");
             multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onMultiplyMapFinished);
 
             IntMap mymap;
@@ -1015,7 +1015,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onMultiplyMapFinished(const Pt::XmlRpc::Result<IntMap>& result)
+        void onMultiplyMapFinished(const Pt::Remoting::Result<IntMap>& result)
         {
             const IntMap& v = result.get();
             PT_UNIT_ASSERT_EQUALS(v.size(), 3);
@@ -1057,7 +1057,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/test");
             
-            Pt::XmlRpc::RemoteProcedure<IntMultimap, IntMultimap, int> multiply(client, "multiplymultimap");
+            Pt::Remoting::RemoteProcedure<IntMultimap, IntMultimap, int> multiply(client, "multiplymultimap");
             multiply.finished() += Pt::slot(*this, &PtXmlRpcTest::onMultiplyMultimapFinished);
 
             IntMultimap mymap;
@@ -1071,7 +1071,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             _loop->run();
         }
 
-        void onMultiplyMultimapFinished(const Pt::XmlRpc::Result<IntMultimap>& result)
+        void onMultiplyMultimapFinished(const Pt::Remoting::Result<IntMultimap>& result)
         {
             const IntMultimap& v = result.get();
             PT_UNIT_ASSERT_EQUALS(v.size(), 4);

@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Remoting {
 
 template <typename R,
           typename A1 = Pt::Void,
@@ -795,7 +795,7 @@ class RemoteProcedure<R,
         }
 };
 
-} // namespace XmlRpc
+} // namespace Remoting
 
 } // namespace Pt
 

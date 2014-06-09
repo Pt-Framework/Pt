@@ -40,6 +40,83 @@ log_define("Pt.XmlRpc.Client")
 
 namespace Pt {
 
+namespace Remoting {
+
+///////////////////////////////////////////////////////////////////////////////
+// Client
+///////////////////////////////////////////////////////////////////////////////
+
+Client::Client()
+: _method(0)
+//, _args(0)
+//, _argsn(0)
+//, _argc(0)
+{
+}
+
+
+Client::~Client()
+{
+}
+
+
+void Client::beginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
+{
+    _method = &method;
+    //_argc = argc;
+
+    //_args = argv;
+    //_argsn = 0;
+
+    this->onBeginCall(r, method, argv, argc);
+}
+
+
+void Client::call(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
+{
+    _method = &method;
+    //_argc = argc;
+
+    //_args = argv;
+    //_argsn = 0;
+
+    this->onCall(r, method, argv, argc);
+}
+
+
+void Client::endCall()
+{
+    this->onEndCall();
+    _method = 0;
+}
+
+
+void Client::cancel()
+{
+    this->onCancel();
+
+    _method = 0;
+    //_argc = 0;
+
+    //_args = 0;
+    //_argsn = 0;
+}
+
+
+void Client::setReady()
+{
+    assert( _method );
+
+    if( _method )
+    {
+        RemoteCall* method = _method;
+        _method = 0;
+        method->finish();
+    }
+}
+
+} // namespace Remoting
+
 namespace XmlRpc {
 
 static const Pt::Char XMLRPC_XMLDECL[] = { '<', '?', 'x', 'm', 'l', ' ', 
@@ -86,7 +163,7 @@ Client::~Client()
 }
 
 
-void Client::beginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
+void Client::beginCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv, unsigned argc)
 {
     _method = &method;
     _state = OnBegin;
@@ -123,7 +200,7 @@ void Client::endCall()
 }
 
 
-void Client::call(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
+void Client::call(Composer& r, Remoting::RemoteCall& method, Decomposer** argv, unsigned argc)
 {
     _method = &method;
     _state = OnBegin;
@@ -162,7 +239,7 @@ void Client::cancel()
 }
 
 
-const RemoteCall* Client::activeProcedure() const
+const Remoting::RemoteCall* Client::activeProcedure() const
 {
     return _method;
 }
@@ -302,7 +379,7 @@ void Client::finishResult()
 
     if( _method )
     {
-        RemoteCall* method = _method;
+        Remoting::RemoteCall* method = _method;
         _method = 0;
         method->finish();
     }

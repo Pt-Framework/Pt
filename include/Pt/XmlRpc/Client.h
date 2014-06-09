@@ -45,7 +45,7 @@
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Remoting {
 
 class RemoteCall;
 
@@ -91,17 +91,14 @@ class PT_XMLRPC_API ClientBase : private NonCopyable
         SerializationContext _ctx;
 };
 
+
 /** @brief A client for remote procedure calls.
 */
 class PT_XMLRPC_API Client : public ClientBase
 {
     public:
-        /** @brief Constructor.
-        */
         Client();
 
-        /** @brief Destructor.
-        */
         virtual ~Client();
 
         //! @internal
@@ -119,7 +116,88 @@ class PT_XMLRPC_API Client : public ClientBase
 
         /** @brief The currently executing procedure.
         */
-        const RemoteCall* activeProcedure() const;
+        const RemoteCall* activeProcedure() const
+        { return _method; }
+
+    protected:
+        /** @brief Parses the XML-RPC result.
+
+            This method is used by derived Clients after the XML-RPC result 
+            has been parsed by parseResult(). The current RemoteProcedure will
+            receive completion notification to process the result.
+        */
+        void setReady();
+
+        //Decomposer* arg() const
+        //{ 
+        //    if(_argsn >= _argc)
+        //        return 0;
+        //    
+        //    return *_args; 
+        //}
+
+        //// TODO: RemoteProcedure null-terminated decomposer array
+        //void nextArg()
+        //{ 
+        //    ++_args;
+        //    ++_argsn;
+        //}
+
+        virtual void onBeginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc) = 0;
+
+        virtual void onEndCall() = 0;
+
+        virtual void onCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc) = 0;
+
+        /** @brief A remote procedure is cancelled.
+
+            Derived Clients implement this method to cancel the remote
+            procedure call.
+        */
+        virtual void onCancel() = 0;
+
+    private:
+        RemoteCall* _method;
+        //Decomposer** _args;
+        //unsigned _argsn;
+        //unsigned _argc;
+        Pt::varint_t _r1;
+        Pt::varint_t _r2;
+};
+
+} // namespace Remoting
+
+namespace XmlRpc {
+
+/** @brief A client for remote procedure calls.
+*/
+class PT_XMLRPC_API Client : public Pt::Remoting::ClientBase
+{
+    public:
+        /** @brief Constructor.
+        */
+        Client();
+
+        /** @brief Destructor.
+        */
+        virtual ~Client();
+
+        //! @internal
+        void beginCall(Composer& r, Pt::Remoting::RemoteCall& call, Decomposer** argv, unsigned argc);
+
+        //! @internal
+        void endCall();
+
+        //! @internal
+        void call(Composer& r, Pt::Remoting::RemoteCall& call, Decomposer** argv, unsigned argc);
+
+        /** @brief Cancels the currently executing procedure.
+        */
+        void cancel();
+
+        /** @brief The currently executing procedure.
+        */
+        const Pt::Remoting::RemoteCall* activeProcedure() const;
 
         /** @brief Indicates if the procedure has failed.
         */
@@ -246,7 +324,7 @@ class PT_XMLRPC_API Client : public ClientBase
         };
 
         
-        RemoteCall* _method;
+        Pt::Remoting::RemoteCall* _method;
         
         Pt::Utf8Codec _utf8;
         TextOStream _ts;

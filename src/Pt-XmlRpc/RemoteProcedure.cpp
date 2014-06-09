@@ -29,7 +29,7 @@
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Remoting {
 
 RemoteCall::RemoteCall(ClientBase& client, const String& name)
 : _client(&client)
@@ -64,6 +64,6 @@ void RemoteCall::cancel()
         _client->cancel();
 }
 
-} // namespace XmlRpc
+} // namespace Remoting
 
 } // namespace Pt
