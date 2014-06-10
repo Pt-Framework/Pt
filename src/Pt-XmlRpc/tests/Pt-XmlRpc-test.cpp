@@ -30,6 +30,7 @@
 #include "Pt/Unit/TestMain.h"
 #include "Pt/Soap/HttpService.h"
 #include "Pt/Soap/HttpClient.h"
+#include "Pt/Soap/ServiceDeclaration.h"
 #include "Pt/XmlRpc/HttpService.h"
 #include "Pt/XmlRpc/HttpClient.h"
 #include "Pt/XmlRpc/Fault.h"
@@ -657,10 +658,10 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         {
             CalcSoapServiceDeclaration serviceDecl;
 
-            Pt::Soap::ServiceDefinition serviceDef(serviceDecl);
+            Pt::Remoting::ServiceDefinition serviceDef;
             serviceDef.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyVector);
 
-            Pt::Soap::HttpService httpService(serviceDef);
+            Pt::Soap::HttpService httpService(serviceDecl, serviceDef);
             Pt::Http::MapUrl servlet("/" + serviceDecl.name(), httpService);
             _server->addServlet(servlet);
 

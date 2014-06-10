@@ -219,7 +219,10 @@
     <ClInclude Include="..\..\include\Pt\Soap\Fault.h" />
     <ClInclude Include="..\..\include\Pt\Soap\Formatter.h" />
     <ClInclude Include="..\..\include\Pt\Soap\HttpClient.h" />
+    <ClInclude Include="..\..\include\Pt\Soap\HttpResponder.h" />
     <ClInclude Include="..\..\include\Pt\Soap\HttpService.h" />
+    <ClInclude Include="..\..\include\Pt\Soap\Responder.h" />
+    <ClInclude Include="..\..\include\Pt\Soap\ServiceDeclaration.h" />
     <ClInclude Include="..\..\include\Pt\Soap\ServiceDefinition.h" />
     <ClInclude Include="..\..\include\Pt\SourceInfo.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\Api.h" />
@@ -668,7 +671,10 @@
     <ClCompile Include="..\..\src\Pt-Soap\Fault.cpp" />
     <ClCompile Include="..\..\src\Pt-Soap\Formatter.cpp" />
     <ClCompile Include="..\..\src\Pt-Soap\HttpClient.cpp" />
+    <ClCompile Include="..\..\src\Pt-Soap\HttpResponder.cpp" />
     <ClCompile Include="..\..\src\Pt-Soap\HttpService.cpp" />
+    <ClCompile Include="..\..\src\Pt-Soap\Responder.cpp" />
+    <ClCompile Include="..\..\src\Pt-Soap\ServiceDeclaration.cpp" />
     <ClCompile Include="..\..\src\Pt-Soap\ServiceDefinition.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\applessl\CertificateStoreImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\applessl\Connection.cpp" />

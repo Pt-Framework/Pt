@@ -27,7 +27,7 @@
  */
 
 #include <Pt/Soap/Formatter.h>
-#include <Pt/Soap/ServiceDefinition.h>
+#include <Pt/Soap/ServiceDeclaration.h>
 #include <Pt/Xml/XmlWriter.h>
 #include <Pt/Xml/StartElement.h>
 #include <Pt/Xml/EndElement.h>

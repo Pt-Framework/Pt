@@ -1413,6 +1413,15 @@
     <ClInclude Include="..\..\include\Pt\Soap\ServiceDefinition.h">
       <Filter>Pt-Soap</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\Responder.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\HttpResponder.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\ServiceDeclaration.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2650,6 +2659,15 @@
       <Filter>Pt-Soap</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Soap\ServiceDefinition.cpp">
+      <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Soap\Responder.cpp">
+      <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Soap\HttpResponder.cpp">
+      <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Soap\ServiceDeclaration.cpp">
       <Filter>Pt-Soap</Filter>
     </ClCompile>
   </ItemGroup>

@@ -26,50 +26,62 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Soap_HttpService_h
-#define Pt_Soap_HttpService_h
+#ifndef Pt_Soap_HttpResponder_h
+#define Pt_Soap_HttpResponder_h
 
 #include <Pt/Soap/Api.h>
+#include <Pt/Soap/Responder.h>
 #include <Pt/Remoting/ServiceDefinition.h>
-#include <Pt/Http/Service.h>
-#include <Pt/Types.h>
+#include <Pt/Http/Responder.h>
+#include <Pt/System/EventLoop.h>
 
 namespace Pt {
 
 namespace Soap {
 
+class Fault;
+class HttpService;
 class ServiceDeclaration;
-class ServiceDefinition;
 
-class PT_SOAP_API HttpService : public Http::Service
+class PT_SOAP_API HttpResponder : public Http::Responder
+                                , public Responder
 {
     public:
-        /** @brief Constructor.
-        */
-        HttpService(ServiceDefinition& serviceDef);
+        HttpResponder(HttpService& httpService, const ServiceDeclaration& decl, Remoting::ServiceDefinition& def);
 
-        HttpService(const ServiceDeclaration& decl, Remoting::ServiceDefinition& def);
-
-        /** @brief Destructor.
-        */
-        virtual ~HttpService();
+        ~HttpResponder();
 
     protected:
         // inheritdoc
-        virtual Http::Responder* onGetResponder(const Http::Request&);
+        void onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
 
         // inheritdoc
-        virtual void onReleaseResponder(Http::Responder* resp);
+        void onReadRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
+
+        // inheritdoc
+        void onBeginReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
+
+        // inheritdoc
+        void onWriteReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
+
+    protected:
+        // inheritdoc
+        virtual void onResult();
+
+        // inheritdoc
+        virtual void onFault(const Fault& fault);
+
+        // inheritdoc
+        virtual void onCancel();
+
+        void advanceSoapReply(Http::Reply& reply);
 
     private:
-        const ServiceDeclaration* _serviceDecl;
-        Remoting::ServiceDefinition* _serviceDef;
-        Pt::varint_t _r1;
-        Pt::varint_t _r2;
+         Http::Reply* _reply;
 };
 
 } // namespace Soap
 
 } // namespace Pt
 
-#endif // Pt_Soap_SoapHttpService_h
+#endif // Pt_Soap_HttpResponder_h

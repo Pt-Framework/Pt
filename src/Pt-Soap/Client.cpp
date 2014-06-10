@@ -27,7 +27,7 @@
  */
 
 #include <Pt/Soap/Client.h>
-#include <Pt/Soap/ServiceDefinition.h>
+#include <Pt/Soap/ServiceDeclaration.h>
 #include <Pt/Remoting/RemoteProcedure.h>
 #include <Pt/Xml/XmlWriter.h>
 #include <Pt/Xml/XmlError.h>

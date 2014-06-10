@@ -7,7 +7,10 @@ PT_SOAP_SOURCES = Fault.cpp
                   Client.cpp
                   Formatter.cpp
                   HttpClient.cpp
-                  HttpService.cpp 
+                  HttpResponder.cpp
+                  HttpService.cpp
+                  Responder.cpp
+                  ServiceDeclaration.cpp
                   ServiceDefinition.cpp ;
 
 SharedLibrary Pt-Soap : $(PT_SOAP_SOURCES) ;
