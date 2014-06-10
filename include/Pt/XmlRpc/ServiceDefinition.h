@@ -40,7 +40,7 @@
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Remoting {
 
 class PT_XMLRPC_API ServiceDefinition : private NonCopyable
 {
@@ -49,7 +49,7 @@ class PT_XMLRPC_API ServiceDefinition : private NonCopyable
 
         virtual ~ServiceDefinition();
 
-        ServiceProcedure* getProcedure(const std::string& name, ResponderBase& resp);
+        ServiceProcedure* getProcedure(const std::string& name, Responder& resp);
 
         void releaseProcedure(ServiceProcedure* proc);
 
@@ -285,21 +285,21 @@ class PT_XMLRPC_API ServiceDefinition : private NonCopyable
         }
 
         template <typename A, class C>
-        void registerActiveProcedure(const std::string& name, A* (*fn)(ResponderBase&) )
+        void registerActiveProcedure(const std::string& name, A* (*fn)(Responder&) )
         {
             ServiceProcedureDef* proc = new ActiveProcedureDef<A>( callable(fn) );
             this->registerProcedure(name, proc);
         }
 
         template <typename A, class C>
-        void registerActiveProcedure(const std::string& name, C& obj, A* (C::*method)(ResponderBase&) )
+        void registerActiveProcedure(const std::string& name, C& obj, A* (C::*method)(Responder&) )
         {
             ServiceProcedureDef* proc = new ActiveProcedureDef<A>( callable(obj, method) );
             this->registerProcedure(name, proc);
         }
 
         template <typename A, class C>
-        void registerActiveProcedure(const std::string& name, C& obj, A* (C::*method)(ResponderBase&) const )
+        void registerActiveProcedure(const std::string& name, C& obj, A* (C::*method)(Responder&) const )
         {
             ServiceProcedureDef* proc = new ActiveProcedureDef<A>( callable(obj, method) );
             this->registerProcedure(name, proc);
@@ -320,7 +320,7 @@ class PT_XMLRPC_API ServiceDefinition : private NonCopyable
         Pt::varint_t _r2;
 };
 
-} // namespace XmlRpc
+} // namespace Remoting
 
 } // namespace Pt
 

@@ -37,7 +37,7 @@
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Remoting {
 
 /** @brief XML-RPC fault exception.
 */
@@ -131,6 +131,12 @@ inline void operator <<=(Pt::SerializationInfo& si, const Fault& fault)
     si.addMember("faultCode") <<= static_cast<Pt::int32_t>( fault.rc() );
     si.addMember("faultString").setString( fault.text() );
 }
+
+} // namespace Remoting
+
+namespace XmlRpc {
+  
+    typedef Remoting::Fault Fault;
 
 } // namespace XmlRpc
 

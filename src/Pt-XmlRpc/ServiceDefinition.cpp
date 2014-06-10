@@ -30,7 +30,7 @@
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Remoting {
 
 ServiceDefinition::ServiceDefinition()
 { 
@@ -49,7 +49,7 @@ ServiceDefinition::~ServiceDefinition()
 }
 
 
-ServiceProcedure* ServiceDefinition::getProcedure(const std::string& name, ResponderBase& resp)
+ServiceProcedure* ServiceDefinition::getProcedure(const std::string& name, Responder& resp)
 {
     System::MutexLock lock(_mtx);
 
@@ -100,6 +100,6 @@ System::Mutex& ServiceDefinition::mutex() const
     return _mtx;
 }
 
-} // namespace XmlRpc
+} // namespace Remoting
 
 } // namespace Pt

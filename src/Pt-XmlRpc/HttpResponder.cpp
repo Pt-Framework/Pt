@@ -39,7 +39,7 @@ namespace Pt {
 
 namespace XmlRpc {
 
-HttpResponder::HttpResponder(HttpService& httpService, ServiceDefinition& rpcService)
+HttpResponder::HttpResponder(HttpService& httpService, Remoting::ServiceDefinition& rpcService)
 : Http::Responder(httpService)
 , XmlRpc::Responder(rpcService)
 , _reply(0)
@@ -77,6 +77,12 @@ void HttpResponder::onBeginReply(const Http::Request& request, Http::Reply& repl
 
 void HttpResponder::onWriteReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
+    advanceReply(reply);
+}
+
+
+void HttpResponder::advanceReply(Http::Reply& reply)
+{
     while( ! advanceResult() )
     {
         if(reply.buffer().size() > 8192)
@@ -98,38 +104,31 @@ void HttpResponder::onResult()
     if( _reply )
     {
         _reply->header().set("Content-Type", "text/xml");
-
         beginResult(_reply->body() );
+        advanceReply(*_reply);
+    }
+}
 
-        while( ! advanceResult() )
-        {
-            if(_reply->buffer().size() > 8192)
-            {
-                _reply->beginSend(false);
-                return;
-            }
-        }
 
-        finishResult();
-        _reply->beginSend(true);
+void HttpResponder::onFault(const Fault& fault)
+{
+    assert(_reply);
+
+    if(_reply)
+    {
+        _reply->header().set("Content-Type", "text/xml");
+        _reply->header().set("Connection", "close");
+        beginFault(_reply->body(), fault );
+        advanceReply(*_reply);
     }
 }
 
 
 void HttpResponder::onCancel()
 {
+    XmlRpc::Responder::onCancel();
+
     // not really possible, since only the HTTP server uses this class
-}
-
-
-void HttpResponder::onError()
-{
-    if(_reply)
-    {
-        _reply->header().set("Connection", "close");
-    }
-
-    onResult();
 }
 
 } // namespace XmlRpc

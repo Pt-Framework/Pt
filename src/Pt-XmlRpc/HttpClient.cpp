@@ -66,6 +66,7 @@ namespace Pt {
 namespace XmlRpc {
 
 HttpClient::HttpClient()
+: _error(false)
 {
     init();
 }
@@ -73,6 +74,7 @@ HttpClient::HttpClient()
 
 HttpClient::HttpClient(const Net::Endpoint& ep, 
                        const std::string& url)
+: _error(false)
 {
     init();
     setTarget(ep, url);
@@ -81,6 +83,7 @@ HttpClient::HttpClient(const Net::Endpoint& ep,
 
 HttpClient::HttpClient(System::EventLoop& loop)
 : _client(loop)
+, _error(false)
 {
     init();
 }
@@ -89,6 +92,7 @@ HttpClient::HttpClient(System::EventLoop& loop)
 HttpClient::HttpClient(System::EventLoop& loop, const Net::Endpoint& ep,
                        const std::string& url)
 : _client(loop)
+, _error(false)
 {
     init();
     setTarget(ep, url);
@@ -176,8 +180,10 @@ const Net::Endpoint& HttpClient::host() const
 }
 
 
-void HttpClient::onInvoke()
+void HttpClient::onBeginInvoke()
 {
+    _error = false;
+
     // prepare HTTP request
     _client.request().clear();
     _client.request().header().set("Content-Type", "text/xml");
@@ -202,8 +208,10 @@ void HttpClient::onInvoke()
 }
 
 
-void HttpClient::onCall()
+void HttpClient::onInvoke()
 {
+    _error = false;
+
     // prepare HTTP request
     _client.request().clear();
     _client.request().header().set("Content-Type", "text/xml");
@@ -236,15 +244,28 @@ void HttpClient::onCall()
 }
 
 
-void HttpClient::onCancel()
+void HttpClient::onEndInvoke()
 {
-    _client.cancel();
+    if( _error )
+    {
+        _error = false;
+        throw;
+    }
 }
 
 
-void HttpClient::onError()
+bool HttpClient::isFailed() const
 {
-    throw;
+    return _error || Client::isFailed();
+}
+
+
+void HttpClient::onCancel()
+{
+    Client::onCancel();
+
+    _error = false;
+    _client.cancel();
 }
 
 
@@ -274,9 +295,9 @@ void HttpClient::onRequest(Http::Client& client)
     }
     catch(const System::IOError&) // HttpError is also an IOError
     {
-        // setError() makes finishResult() call onError() where we throw
+        // defer throw until onEndInvoke() is called
         setError();
-        finishResult();
+        setReady();
     }
 }
 
@@ -311,14 +332,14 @@ void HttpClient::onReply(Http::Client& client)
     }
     catch(const System::IOError&) // HttpError is also an IOError
     {
-        // finished signal will call onError()
+        // defer throw until onEndInvoke() is called
         setError();
-        finishResult();
+        setReady();
         return;
     }
 
     // send finished signal
-    finishResult();
+    setReady();
 }
 
 } // namespace XmlRpc

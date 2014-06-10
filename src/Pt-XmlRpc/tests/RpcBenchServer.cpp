@@ -38,12 +38,12 @@
 
 class EchoService;
 
-class AsyncEcho : public Pt::XmlRpc::ActiveProcedure<std::string, std::string>
+class AsyncEcho : public Pt::Remoting::ActiveProcedure<std::string, std::string>
                 , public Pt::Connectable
 {
     public:   
-        AsyncEcho(Pt::XmlRpc::ResponderBase& resp, EchoService& srv)
-        : Pt::XmlRpc::ActiveProcedure<std::string, std::string>(resp)
+        AsyncEcho(Pt::Remoting::Responder& resp, EchoService& srv)
+        : Pt::Remoting::ActiveProcedure<std::string, std::string>(resp)
         , _srv(&srv)
         {
             _timer.timeout() += Pt::slot(*this, &AsyncEcho::onTimeout);
@@ -77,12 +77,12 @@ class AsyncEcho : public Pt::XmlRpc::ActiveProcedure<std::string, std::string>
 };
 
 
-class AsyncHello : public Pt::XmlRpc::ActiveProcedure<std::string>
+class AsyncHello : public Pt::Remoting::ActiveProcedure<std::string>
                  , public Pt::Connectable
 {
     public:   
-        AsyncHello(Pt::XmlRpc::ResponderBase& resp, const char* helloTxt)
-        : Pt::XmlRpc::ActiveProcedure<std::string>(resp)
+        AsyncHello(Pt::Remoting::Responder& resp, const char* helloTxt)
+        : Pt::Remoting::ActiveProcedure<std::string>(resp)
         , _hello(helloTxt)
         {
             _timer.timeout() += Pt::slot(*this, &AsyncHello::setReady);
@@ -106,7 +106,7 @@ class AsyncHello : public Pt::XmlRpc::ActiveProcedure<std::string>
 };
 
 
-class EchoService : public Pt::XmlRpc::ServiceDefinition
+class EchoService : public Pt::Remoting::ServiceDefinition
 {
     public:
         EchoService()
@@ -122,12 +122,12 @@ class EchoService : public Pt::XmlRpc::ServiceDefinition
             return msg;
         }
 
-        AsyncEcho* asyncEcho(Pt::XmlRpc::ResponderBase& r)
+        AsyncEcho* asyncEcho(Pt::Remoting::Responder& r)
         {
             return new AsyncEcho(r, *this);
         }
 
-        AsyncHello* asyncHello(Pt::XmlRpc::ResponderBase& r)
+        AsyncHello* asyncHello(Pt::Remoting::Responder& r)
         {
             return new AsyncHello(r, "Hello world!");
         }

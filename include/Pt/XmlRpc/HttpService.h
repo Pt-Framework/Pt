@@ -49,7 +49,7 @@ class PT_XMLRPC_API HttpService : public Http::Service
     public:
         /** @brief Constructs with RPC service.
         */
-        HttpService(XmlRpc::ServiceDefinition& rpcService);
+        HttpService(Remoting::ServiceDefinition& rpcService);
 
         /** @brief Destructor.
         */
@@ -63,7 +63,7 @@ class PT_XMLRPC_API HttpService : public Http::Service
         virtual void onReleaseResponder(Http::Responder* resp);
 
     private:
-        XmlRpc::ServiceDefinition* _rpcService;
+        Remoting::ServiceDefinition* _rpcService;
         Pt::varint_t _r1;
         Pt::varint_t _r2;
 };

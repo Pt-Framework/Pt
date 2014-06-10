@@ -33,7 +33,7 @@ namespace Pt {
 
 namespace XmlRpc {
 
-HttpService::HttpService(XmlRpc::ServiceDefinition& rpcService)
+HttpService::HttpService(Remoting::ServiceDefinition& rpcService)
 : _rpcService(&rpcService)
 { 
 }

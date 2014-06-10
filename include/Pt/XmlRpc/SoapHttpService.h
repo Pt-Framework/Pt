@@ -48,71 +48,6 @@ namespace Pt {
 
 namespace XmlRpc {
 
-namespace Remoting {
-
-/** @brief Dispatches requests to a service procedure.
-*/
-class PT_XMLRPC_API Responder : public ResponderBase
-{
-    public:
-        /** @brief Construct with Service.
-        */
-        explicit Responder(ServiceDefinition& serviceDef);
-
-        /** @brief Destructor.
-        */
-        virtual ~Responder();
-
-        //! @internal called by SericeProcedure
-        // TODO: rename setReady
-        virtual void beginResult()
-        { this->onReady(); }
-
-        /** @brief Resets to initial state.
-        */
-        void cancel();
-
-        /** @brief The currently executing procedure.
-        */
-        const ServiceProcedure* activeProcedure() const
-        { return _proc; }
-
-    protected:
-        /** @brief Gets the service procedure.
-        */
-        Pt::Composer** setProcedure(const std::string& name);
-
-        void beginCall(System::EventLoop& loop);
-
-        Pt::Decomposer* endCall();
-
-        //Composer* arg() const
-        //{           
-        //    return *_args; 
-        //}
-
-        //void nextArg()
-        //{ 
-        //    ++_args;
-        //}
-
-    protected:
-        /** @brief Cancels all operations.
-
-            Derived responders implement this method to cancel all operations.
-        */
-        virtual void onCancel() = 0;
-
-        virtual void onReady() = 0;
-
-    private:
-        ServiceDefinition* _serviceDef;
-        ServiceProcedure* _proc;
-        //Composer** _args;
-};
-
-} // namespace Remoting
-
 /** @brief Dispatches requests to a service procedure.
 */
 class PT_XMLRPC_API SoapResponder : public Remoting::Responder
@@ -120,11 +55,15 @@ class PT_XMLRPC_API SoapResponder : public Remoting::Responder
     public:
         /** @brief Construct with Service declaration and definition.
         */
-        SoapResponder(const SoapServiceDeclaration& decl, ServiceDefinition& def);
+        SoapResponder(const SoapServiceDeclaration& decl, Remoting::ServiceDefinition& def);
 
         /** @brief Destructor.
         */
         virtual ~SoapResponder();
+
+        /** @brief Indicates if the procedure has failed.
+        */
+        bool isFailed() const;
 
     protected:
         // inheritdoc
@@ -210,10 +149,6 @@ class PT_XMLRPC_API SoapResponder : public Remoting::Responder
         */
         void setFault(int rc, const char* msg);
 
-        /** @brief Indicates if the procedure has failed.
-        */
-        bool isFault() const;
-
     private:
         //! @internal
         bool advance(const Pt::Xml::Node& node);
@@ -256,7 +191,7 @@ class PT_XMLRPC_API SoapHttpResponder : public Http::Responder
                                       , public SoapResponder
 {
     public:
-        SoapHttpResponder(SoapHttpService& httpService, const SoapServiceDeclaration& decl, ServiceDefinition& def);
+        SoapHttpResponder(SoapHttpService& httpService, const SoapServiceDeclaration& decl, Remoting::ServiceDefinition& def);
 
         ~SoapHttpResponder();
 
@@ -296,7 +231,7 @@ class PT_XMLRPC_API SoapHttpService : public Http::Service
         */
         SoapHttpService(SoapServiceDefinition& serviceDef);
 
-        SoapHttpService(const SoapServiceDeclaration& decl, ServiceDefinition& def);
+        SoapHttpService(const SoapServiceDeclaration& decl, Remoting::ServiceDefinition& def);
 
         /** @brief Destructor.
         */
@@ -311,7 +246,7 @@ class PT_XMLRPC_API SoapHttpService : public Http::Service
 
     private:
         const SoapServiceDeclaration* _serviceDecl;
-        ServiceDefinition* _serviceDef;
+        Remoting::ServiceDefinition* _serviceDef;
         Pt::varint_t _r1;
         Pt::varint_t _r2;
 };

@@ -118,14 +118,6 @@ class PT_XMLRPC_API SoapHttpClient : public SoapClient
         // inheritdoc
         virtual void onCancel();
 
-        /** @brief A remote procedure has failed.
-
-            Derived Clients implement this method to format to throw exceptions
-            which can not be represented by Fault. This method is called when
-            the result of the RemoteProcedure is processed.
-        */
-        virtual void onError();
-
     private:
         /** @brief Fails the current procedure.
 

@@ -47,15 +47,15 @@ namespace Remoting {
 class PT_XMLRPC_API RemoteCall
 {
     public:
-        RemoteCall(ClientBase& client, const String& name);
+        RemoteCall(Client& client, const String& name);
 
-        RemoteCall(ClientBase& client, const std::string& name);
+        RemoteCall(Client& client, const std::string& name);
 
-        RemoteCall(ClientBase& client, const char* name);
+        RemoteCall(Client& client, const char* name);
 
         virtual ~RemoteCall();
 
-        ClientBase& client()
+        Client& client()
         { return *_client; }
 
         const String& name() const
@@ -73,7 +73,7 @@ class PT_XMLRPC_API RemoteCall
         virtual void onFinished() = 0;
 
     private:
-        ClientBase* _client;
+        Client* _client;
         String _name;
 };
 
@@ -85,7 +85,7 @@ class Result
     public:
         /** @brief Constructor.
         */
-        explicit Result(ClientBase& client)
+        explicit Result(Client& client)
         : _client(client)
         { }
 
@@ -117,7 +117,7 @@ class Result
         }
 
     private:
-        ClientBase& _client;
+        Client& _client;
         R _result;
 };
 
@@ -127,7 +127,7 @@ template <typename R>
 class RemoteProcedureBase : public RemoteCall
 {
     public:
-        RemoteProcedureBase(ClientBase& client, const std::string& name)
+        RemoteProcedureBase(Client& client, const std::string& name)
         : RemoteCall(client, name)
         , _result(client)
         , _r( & client.context() )

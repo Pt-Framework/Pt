@@ -92,14 +92,6 @@ class PT_XMLRPC_API SoapClient : public Pt::Remoting::Client
         */
         virtual void onInvoke() = 0;
 
-        /** @brief A remote procedure has failed.
-
-            Derived Clients implement this method to format to throw exceptions
-            which can not be represented by Fault. This method is called when
-            the result of the RemoteProcedure is processed.
-        */
-        virtual void onFault();
-
     protected:
         /** @brief Formats the XML-RPC message.
 

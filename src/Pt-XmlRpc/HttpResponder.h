@@ -43,7 +43,7 @@ class PT_XMLRPC_API HttpResponder : public Http::Responder
                                   , public Responder
 {
     public:
-        HttpResponder(HttpService& httpService, ServiceDefinition& rpcService);
+        HttpResponder(HttpService& httpService, Remoting::ServiceDefinition& rpcService);
 
         ~HttpResponder();
 
@@ -65,10 +65,13 @@ class PT_XMLRPC_API HttpResponder : public Http::Responder
         virtual void onResult();
 
         // inheritdoc
-        virtual void onCancel();
+        virtual void onFault(const Fault& fault);
 
         // inheritdoc
-        virtual void onError();
+        virtual void onCancel();
+
+    private:
+        void advanceReply(Http::Reply& reply);
 
     private:
          Http::Reply* _reply;

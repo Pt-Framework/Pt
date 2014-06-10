@@ -47,6 +47,7 @@ SoapHttpClient::SoapHttpClient(SoapServiceDeclaration& service)
 SoapHttpClient::SoapHttpClient(SoapServiceDeclaration& service, System::EventLoop& loop)
 : SoapClient(service)
 , _client(loop)
+, _error(false)
 {
     init();
 }
@@ -208,8 +209,7 @@ void SoapHttpClient::onEndInvoke()
     if( _error )
     {
         _error = false;
-        onError();
-        return;
+        throw;
     }
 }
 
@@ -226,12 +226,6 @@ void SoapHttpClient::onCancel()
 
     _error = false;
     _client.cancel();
-}
-
-
-void SoapHttpClient::onError()
-{
-    throw;
 }
 
 
@@ -261,7 +255,7 @@ void SoapHttpClient::onRequest(Http::Client& client)
     }
     catch(const System::IOError&) // HttpError is also an IOError
     {
-        // setError() makes setFinished() call onError() where we throw
+        // defer throw until onEndInvoke() is called
         setError();
         setReady();
     }
@@ -296,7 +290,7 @@ void SoapHttpClient::onReply(Http::Client& client)
     }
     catch(const System::IOError&) // HttpError is also an IOError
     {
-        // finished signal will call onError()
+        // defer throw until onEndInvoke() is called
         setError();
         setReady();
         return;

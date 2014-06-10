@@ -42,15 +42,8 @@ namespace Pt {
 
 namespace Remoting {
 
-///////////////////////////////////////////////////////////////////////////////
-// Client
-///////////////////////////////////////////////////////////////////////////////
-
 Client::Client()
 : _method(0)
-//, _args(0)
-//, _argsn(0)
-//, _argc(0)
 {
 }
 
@@ -63,10 +56,6 @@ Client::~Client()
 void Client::beginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
 {
     _method = &method;
-    //_argc = argc;
-
-    //_args = argv;
-    //_argsn = 0;
 
     this->onBeginCall(r, method, argv, argc);
 }
@@ -75,10 +64,6 @@ void Client::beginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsig
 void Client::call(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
 {
     _method = &method;
-    //_argc = argc;
-
-    //_args = argv;
-    //_argsn = 0;
 
     this->onCall(r, method, argv, argc);
 }
@@ -96,10 +81,6 @@ void Client::cancel()
     this->onCancel();
 
     _method = 0;
-    //_argc = 0;
-
-    //_args = 0;
-    //_argsn = 0;
 }
 
 
@@ -142,16 +123,14 @@ static const Pt::Char XMLRPC_FAULT_END[]  = { '<', '/', 'f', 'a', 'u', 'l', 't',
 
 
 Client::Client()
-: _method(0)
-, _utf8(1)
-, _ts( &_utf8 )
-, _argv(0)
+: _argv(0)
 , _argc(0)
 , _arg(0)
 , _argn(0)
+, _utf8(1)
+, _ts( &_utf8 )
 , _state(OnBegin)
 , _formatter(_ts)
-, _error(false)
 , _isFault(false)
 {
 }
@@ -163,100 +142,81 @@ Client::~Client()
 }
 
 
-void Client::beginCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv, unsigned argc)
+bool Client::isFailed() const
 {
-    _method = &method;
+    return _isFault;
+}
+
+
+void Client::onBeginCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv, unsigned argc)
+{
+    _argv = argv;
+    _argc = argc;
+    _arg = 0;
+    _argn = 0;
+    
     _state = OnBegin;
 
     _reader.reset(_bin);
     _formatter.beginParse(r);
 
+    _isFault = false;
+
+    this->onBeginInvoke();
+}
+
+
+void Client::onEndCall()
+{
+    if( isFailed() )
+    {
+        _isFault = false;
+        throw _fault; 
+    }
+
+    this->onEndInvoke();
+}
+
+
+void Client::onCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv, unsigned argc)
+{
     _argv = argv;
     _argc = argc;
     _arg = 0;
     _argn = 0;
 
-    _error = false;
-    _isFault = false;
+    _state = OnBegin;
 
+    _reader.reset(_bin);
+    _formatter.beginParse(r);
+
+    _isFault = false;
 
     this->onInvoke();
 }
 
 
-void Client::endCall()
+void Client::onCancel()
 {
-    if( _error )
-    {
-        _error = false;
-        onError();
-    }
-
-    if( _isFault )
-    {
-        _isFault = false;
-        throw _fault; 
-    }
-}
-
-
-void Client::call(Composer& r, Remoting::RemoteCall& method, Decomposer** argv, unsigned argc)
-{
-    _method = &method;
-    _state = OnBegin;
-
-    _reader.reset(_bin);
-    _formatter.beginParse(r);
-
-    _argv = argv;
-    _argc = argc;
-    _arg = 0;
-    _argn = 0;
-
-    _error = false;
-    _isFault = false;
-
-    this->onCall();
-}
-
-
-void Client::cancel()
-{
-    _ts.detach();
-    _ts.discard();
-
-    _method = 0;
     _argc = 0;
     _argv = 0;
     _arg = 0;
     _argn = 0;
 
-    _error = false;
+    _ts.detach();
+    _ts.discard();
+
     _isFault = false;
-
-
-    this->onCancel();
-}
-
-
-const Remoting::RemoteCall* Client::activeProcedure() const
-{
-    return _method;
-}
-
-
-bool Client::isFailed() const
-{
-    return _error || _isFault;
 }
 
 
 void Client::beginMessage(std::ostream& os)
 {
-    if( ! _method )
+    const Remoting::RemoteCall* method = activeProcedure();
+    if( ! method )
         return;
 
-    const String& name = _method->name();
+    const String& name = method->name();
 
     _ts.clear();
     _ts.discard();
@@ -367,30 +327,6 @@ void Client::setFault(int rc, const char* msg)
 }
 
 
-void Client::setError(bool f)
-{
-    _error = f;
-}
-
-
-void Client::finishResult()
-{
-    assert( _method );
-
-    if( _method )
-    {
-        Remoting::RemoteCall* method = _method;
-        _method = 0;
-        method->finish();
-    }
-    //else if(_error)
-    //{
-    //    _error = false;
-    //    onError();
-    //}
-}
-
-
 void Client::processResult(std::istream& is)
 {
     _bin.reset(is);
@@ -424,7 +360,6 @@ void Client::processResult(std::istream& is)
     }
 
     // _method contains a return value or fault now
-    _method = 0;
     _state = OnBegin;
 }
 

@@ -77,85 +77,11 @@ namespace Pt {
 
 namespace XmlRpc {
 
-namespace Remoting {
-
-///////////////////////////////////////////////////////////////////////////////
-// SoapResponderBase
-///////////////////////////////////////////////////////////////////////////////
-
-Responder::Responder(ServiceDefinition& serviceDef)
-: _serviceDef(&serviceDef)
-, _proc(0)
-//, _args(0)
-{
-}
-
-
-Responder::~Responder()
-{
-    if(_proc)
-        _serviceDef->releaseProcedure(_proc);
-}
-
-
-Pt::Composer** Responder::setProcedure(const std::string& name)
-{
-    if(_proc)
-        _serviceDef->releaseProcedure(_proc);
-
-    _proc = _serviceDef->getProcedure( name, *this );
-
-   Composer** args = _proc ? _proc->beginArgs() : 0;
-   
-    return args;
-}
-
-
-void Responder::beginCall(System::EventLoop& loop)
-{
-    if( ! _proc )
-    {
-        throw Fault("invalid XML-RPC", 4);
-    }
-
-    //if( _args && *_args )
-    //{
-    //    throw Fault("expected more arguments", 5);
-    //}
-
-    _proc->beginCall(loop); // throws Fault
-}
-
-
-Pt::Decomposer* Responder::endCall()
-{
-    if( ! _proc )
-    {
-        throw Fault("invalid XML-RPC", 4);
-    }
-
-    return _proc->endCall(); // throws Fault
-}
-
-
-void Responder::cancel()
-{
-    this->onCancel();
-    
-    if(_proc)
-        _serviceDef->releaseProcedure(_proc);
-    
-    _proc = 0;
-    //_args = 0;
-}
-
-} // namespace Remoting
-
 ///////////////////////////////////////////////////////////////////////////////
 // SoapResponder
 ///////////////////////////////////////////////////////////////////////////////
 
-SoapResponder::SoapResponder(const SoapServiceDeclaration& decl, ServiceDefinition& def)
+SoapResponder::SoapResponder(const SoapServiceDeclaration& decl, Remoting::ServiceDefinition& def)
 : Remoting::Responder(def)
 , _serviceDecl( &decl )
 , _op(0)
@@ -177,7 +103,7 @@ SoapResponder::~SoapResponder()
 }
 
 
-bool SoapResponder::isFault() const
+bool SoapResponder::isFailed() const
 {
     return  _isFault;
 }
@@ -207,7 +133,7 @@ bool SoapResponder::parseMessage()
 {
     try
     {
-        if( this->isFault() )
+        if( this->isFailed() )
             return true;
         
         for(;;)
@@ -250,7 +176,7 @@ bool SoapResponder::parseMessage()
 
 void SoapResponder::finishMessage(System::EventLoop& loop)
 {
-    if( this->isFault() )
+    if( this->isFailed() )
     {
         onFault(_fault);
         return;
@@ -277,14 +203,6 @@ void SoapResponder::onReady()
 {    
     try
     {
-        // we get here only after setReady was called and we call setReady
-        // only if no fault is pending.
-        //if( _isFault )
-        //{
-        //    onError();
-        //    return;
-        //}
-        
         _result = endCall(); // throws Fault
         onResult();
     }
@@ -372,7 +290,7 @@ bool SoapResponder::advanceResult()
 
 void SoapResponder::finishResult()
 {
-    if( ! this->isFault() )
+    if( ! this->isFailed() )
     {
         const Pt::String& outName = _op->outputName();
         _ts << '<' << '/' << outName << '>';
@@ -515,7 +433,7 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
 // SoapHttpResponder
 ///////////////////////////////////////////////////////////////////////////////
 
-SoapHttpResponder::SoapHttpResponder(SoapHttpService& httpService, const SoapServiceDeclaration& decl, ServiceDefinition& def)
+SoapHttpResponder::SoapHttpResponder(SoapHttpService& httpService, const SoapServiceDeclaration& decl, Remoting::ServiceDefinition& def)
 : Http::Responder(httpService)
 , XmlRpc::SoapResponder(decl, def)
 , _reply(0)
@@ -657,7 +575,7 @@ SoapHttpService::SoapHttpService(SoapServiceDefinition& serviceDef)
 }
 
 
-SoapHttpService::SoapHttpService(const SoapServiceDeclaration& decl, ServiceDefinition& def)
+SoapHttpService::SoapHttpService(const SoapServiceDeclaration& decl, Remoting::ServiceDefinition& def)
 : _serviceDecl(&decl)
 , _serviceDef(&def)
 {

@@ -113,19 +113,30 @@ class PT_XMLRPC_API HttpClient : public Client
         const Net::Endpoint& host() const;
 
     protected:       
+        virtual bool isFailed() const;
+
+        // inheritdoc
+        virtual void onBeginInvoke();
+
         // inheritdoc
         virtual void onInvoke();
 
         // inheritdoc
-        virtual void onCall();
+        virtual void onEndInvoke();
 
         // inheritdoc
         virtual void onCancel();
 
-        // inheritdoc
-        virtual void onError();
-
     private:
+        /** @brief Fails the current procedure.
+
+            This method is used by derived Clients before calling finishResult()
+            so that the RemoteProcedure throws a Fault when the result is 
+            processed.
+        */
+        void setError(bool f = true)
+        { _error = f; }
+
         //! @internal
         void init();
 
@@ -137,6 +148,7 @@ class PT_XMLRPC_API HttpClient : public Client
 
     private:
         Http::Client _client;
+        bool _error;
         Pt::varint_t _r1;
         Pt::varint_t _r2;
 };

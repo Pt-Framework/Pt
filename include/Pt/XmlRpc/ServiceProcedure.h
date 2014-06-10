@@ -36,9 +36,9 @@
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Remoting {
 
-class ResponderBase;
+class Responder;
 
 /** @brief XML-RPC service procedure.
 */
@@ -53,7 +53,7 @@ class ServiceProcedure
         /** @brief Indicates that the procedure has finished.
         */
         void setReady()
-        { _responder->beginResult(); }
+        { _responder->setReady(); }
 
         //! @internal
         Composer** beginArgs()
@@ -70,7 +70,7 @@ class ServiceProcedure
     protected:
         /** @brief Constructor.
         */
-        ServiceProcedure(ResponderBase& r)
+        ServiceProcedure(Responder& r)
         : _responder( &r )
         {}
 
@@ -84,7 +84,7 @@ class ServiceProcedure
         virtual Decomposer* onEndCall() = 0;  
 
     private:
-        ResponderBase* _responder;
+        Responder* _responder;
 };
 
 
@@ -94,17 +94,17 @@ class ServiceProcedureDef
         virtual ~ServiceProcedureDef()
         {}
 
-        ServiceProcedure* createProcedure(ResponderBase& r) const
+        ServiceProcedure* createProcedure(Responder& r) const
         { return this->onCreateProcedure(r); }
 
     protected:
         ServiceProcedureDef()
         {}
 
-        virtual ServiceProcedure* onCreateProcedure(ResponderBase& r) const = 0;
+        virtual ServiceProcedure* onCreateProcedure(Responder& r) const = 0;
 };
 
-} // namespace XmlRpc
+} // namespace Remoting
 
 } // namespace Pt
 

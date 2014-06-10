@@ -351,7 +351,7 @@ class PT_XMLRPC_API SoapServiceDeclaration
 };
 
 
-class PT_XMLRPC_API SoapServiceDefinition : public ServiceDefinition
+class PT_XMLRPC_API SoapServiceDefinition : public Remoting::ServiceDefinition
 {
     public:
         SoapServiceDefinition(const SoapServiceDeclaration& decl);

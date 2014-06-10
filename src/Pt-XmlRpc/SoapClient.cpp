@@ -108,10 +108,11 @@ void SoapClient::onBeginCall(Composer& r, Remoting::RemoteCall& method, Decompos
 {
     _argv = argv;
     _argc = argc;
-
     _arg = 0;
     _argn = 0;
+    
     _state = OnBegin;
+   
     _reader.reset(_bin);
     _fmt.beginParse(r);
 
@@ -126,7 +127,7 @@ void SoapClient::onEndCall()
     if( _isFault )
     {
         _isFault = false;
-        onFault(); 
+        throw _fault; 
     }
 
     this->onEndInvoke();
@@ -137,10 +138,11 @@ void SoapClient::onCall(Composer& r, Remoting::RemoteCall& method, Decomposer** 
 {
     _argv = argv;
     _argc = argc;
-
     _arg = 0;
     _argn = 0;
+    
     _state = OnBegin;
+    
     _reader.reset(_bin);
     _fmt.beginParse(r);
 
@@ -150,19 +152,13 @@ void SoapClient::onCall(Composer& r, Remoting::RemoteCall& method, Decomposer** 
 }
 
 
-void SoapClient::onFault()
-{
-    throw _fault; 
-}
-
-
 void SoapClient::onCancel()
 {
     _argv = 0;
     _argc = 0;
-
     _arg = 0;
     _argn = 0;
+    
     _ts.detach();
     _ts.discard();
 

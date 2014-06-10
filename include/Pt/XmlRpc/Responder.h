@@ -43,51 +43,59 @@
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Remoting {
 
 class ServiceDefinition;
 class ServiceProcedure;
 
-class ResponderBase : private NonCopyable
-{
-    public:
-        ResponderBase()
-        {}
-
-        virtual ~ResponderBase()
-        {}
-
-        //! @internal
-        SerializationContext& context()
-        { return _context; }
-
-        virtual void beginResult() = 0;
-
-    private:
-        SerializationContext _context;
-};
-
 /** @brief Dispatches requests to a service procedure.
 */
-class PT_XMLRPC_API Responder : public ResponderBase
+class PT_XMLRPC_API Responder : private NonCopyable
 {
     public:
         /** @brief Construct with Service.
         */
-        Responder(ServiceDefinition& service);
+        explicit Responder(ServiceDefinition& serviceDef);
 
         /** @brief Destructor.
         */
         virtual ~Responder();
 
-        /** @brief Cancels the responder.
+        //! @internal
+        SerializationContext& context()
+        { return _context; }
+
+        //! @internal
+        void setReady()
+        { this->onReady(); }
+
+        /** @brief Resets to initial state.
         */
         void cancel();
 
-        //! @internal
-        virtual void beginResult();
+        /** @brief The currently executing procedure.
+        */
+        const ServiceProcedure* activeProcedure() const
+        { return _proc; }
+
+        virtual bool isFailed() const = 0;
 
     protected:
+        /** @brief Gets the service procedure.
+        */
+        Pt::Composer** setProcedure(const std::string& name);
+
+        void beginCall(System::EventLoop& loop);
+
+        Pt::Decomposer* endCall();
+
+    protected:
+        /** @brief Cancels all operations.
+
+            Derived responders implement this method to cancel all operations.
+        */
+        virtual void onCancel() = 0;
+
         /** @brief The service procedure has finished.
 
             Derived responders implement this method to format and send the
@@ -95,13 +103,41 @@ class PT_XMLRPC_API Responder : public ResponderBase
             finished. Use beginResult(), advanceResult() and finishResult()
             to format the XML-RPC result.
         */
-        virtual void onResult() = 0;
+        virtual void onReady() = 0;
 
-        /** @brief The responder is canceled.
+    private:
+        SerializationContext _context;
+        ServiceDefinition* _serviceDef;
+        ServiceProcedure* _proc;
+};
 
-            Derived responders implement this method to cancel all operations.
+} // namespace Remoting
+
+namespace XmlRpc {
+
+/** @brief Dispatches requests to a service procedure.
+*/
+class PT_XMLRPC_API Responder : public Remoting::Responder
+{
+    public:
+        /** @brief Construct with Service.
         */
-        virtual void onCancel() = 0;
+        Responder(Remoting::ServiceDefinition& service);
+
+        /** @brief Destructor.
+        */
+        virtual ~Responder();
+
+        /** @brief Indicates if the procedure has failed.
+        */
+        bool isFailed() const;
+
+    protected:
+        // inheritdoc
+        virtual void onReady();
+
+        // inheritdoc
+        virtual void onCancel();
 
         /** @brief The service procedure has failed.
 
@@ -110,7 +146,16 @@ class PT_XMLRPC_API Responder : public ResponderBase
             failed. Use beginResult(), advanceResult() and finishResult()
             to format the XML-RPC result.
         */
-        virtual void onError() = 0;
+        virtual void onFault(const Fault& fault) = 0;
+
+        /** @brief The service procedure has finished.
+
+            Derived responders implement this method to format and send the
+            XML-RPC result. It is called when the service procedure has
+            finished. Use beginResult(), advanceResult() and finishResult()
+            to format the XML-RPC result.
+        */
+        virtual void onResult() = 0;
 
     protected:
         /** @brief Parses the XML-RPC message.
@@ -145,6 +190,8 @@ class PT_XMLRPC_API Responder : public ResponderBase
         */
         void beginResult(std::ostream& os);
 
+        void beginFault(std::ostream& os, const Fault& fault);
+
         /** @brief Formats the XML-RPC message.
 
             This method is used by derived responders in onResult() and onError()
@@ -171,9 +218,6 @@ class PT_XMLRPC_API Responder : public ResponderBase
 
     private:
         //! @internal
-        void formatError(std::ostream& os, int rc, const char* msg);
-
-        //! @internal
         bool advance(const Pt::Xml::Node& node);
 
     private:
@@ -189,10 +233,7 @@ class PT_XMLRPC_API Responder : public ResponderBase
             OnParamsEnd,
             OnMethodCallEnd
         };
-
-        ServiceDefinition* _serviceDef;
-        ServiceProcedure* _proc;
-        
+       
         Xml::BinaryInputSource _bin;
         Xml::XmlReader _reader;
         Composer** _args;

@@ -29,7 +29,7 @@
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Remoting {
 
 Fault::Fault(const std::string& msg, int rc)
 : _msg(msg)

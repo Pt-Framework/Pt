@@ -49,57 +49,18 @@ namespace Remoting {
 
 class RemoteCall;
 
-class PT_XMLRPC_API ClientBase : private NonCopyable
-{
-    public:
-        /** @brief Constructor.
-        */
-        ClientBase()
-        {}
-
-        /** @brief Destructor.
-        */
-        virtual ~ClientBase()
-        {}
-        
-        //! @internal
-        SerializationContext& context()
-        { return _ctx; }
-
-        //! @internal
-        virtual void beginCall(Composer& r, RemoteCall& call, Decomposer** argv, unsigned argc) = 0;
-
-        //! @internal
-        virtual void endCall() = 0;
-
-        //! @internal
-        virtual void call(Composer& r, RemoteCall& call, Decomposer** argv, unsigned argc) = 0;
-
-        /** @brief Cancels the currently executing procedure.
-        */
-        virtual void cancel() = 0;
-
-        /** @brief The currently executing procedure.
-        */
-        virtual const RemoteCall* activeProcedure() const = 0;
-
-        /** @brief Indicates if the procedure has failed.
-        */
-        virtual bool isFailed() const = 0;
-
-    private:
-        SerializationContext _ctx;
-};
-
-
 /** @brief A client for remote procedure calls.
 */
-class PT_XMLRPC_API Client : public ClientBase
+class PT_XMLRPC_API Client : private NonCopyable
 {
     public:
         Client();
 
         virtual ~Client();
+
+        //! @internal
+        SerializationContext& context()
+        { return _ctx; }
 
         //! @internal
         void beginCall(Composer& r, RemoteCall& call, Decomposer** argv, unsigned argc);
@@ -119,6 +80,10 @@ class PT_XMLRPC_API Client : public ClientBase
         const RemoteCall* activeProcedure() const
         { return _method; }
 
+        /** @brief Indicates if the procedure has failed.
+        */
+        virtual bool isFailed() const = 0;
+
     protected:
         /** @brief Parses the XML-RPC result.
 
@@ -127,21 +92,6 @@ class PT_XMLRPC_API Client : public ClientBase
             receive completion notification to process the result.
         */
         void setReady();
-
-        //Decomposer* arg() const
-        //{ 
-        //    if(_argsn >= _argc)
-        //        return 0;
-        //    
-        //    return *_args; 
-        //}
-
-        //// TODO: RemoteProcedure null-terminated decomposer array
-        //void nextArg()
-        //{ 
-        //    ++_args;
-        //    ++_argsn;
-        //}
 
         virtual void onBeginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc) = 0;
 
@@ -157,10 +107,8 @@ class PT_XMLRPC_API Client : public ClientBase
         virtual void onCancel() = 0;
 
     private:
+        SerializationContext _ctx;
         RemoteCall* _method;
-        //Decomposer** _args;
-        //unsigned _argsn;
-        //unsigned _argc;
         Pt::varint_t _r1;
         Pt::varint_t _r2;
 };
@@ -171,7 +119,7 @@ namespace XmlRpc {
 
 /** @brief A client for remote procedure calls.
 */
-class PT_XMLRPC_API Client : public Pt::Remoting::ClientBase
+class PT_XMLRPC_API Client : public Pt::Remoting::Client
 {
     public:
         /** @brief Constructor.
@@ -182,57 +130,34 @@ class PT_XMLRPC_API Client : public Pt::Remoting::ClientBase
         */
         virtual ~Client();
 
-        //! @internal
-        void beginCall(Composer& r, Pt::Remoting::RemoteCall& call, Decomposer** argv, unsigned argc);
-
-        //! @internal
-        void endCall();
-
-        //! @internal
-        void call(Composer& r, Pt::Remoting::RemoteCall& call, Decomposer** argv, unsigned argc);
-
-        /** @brief Cancels the currently executing procedure.
-        */
-        void cancel();
-
-        /** @brief The currently executing procedure.
-        */
-        const Pt::Remoting::RemoteCall* activeProcedure() const;
-
         /** @brief Indicates if the procedure has failed.
         */
         bool isFailed() const;
 
-    protected:       
+    protected:
+        virtual void onBeginCall(Composer& r, Pt::Remoting::RemoteCall& method, Decomposer** argv, unsigned argc);
+
+        virtual void onEndCall();
+
+        virtual void onCall(Composer& r, Pt::Remoting::RemoteCall& method, Decomposer** argv, unsigned argc);
+
+        virtual void onCancel();
+
         /** @brief An asynchronous remote procedure is invoked.
 
             Derived Clients implement this method to format and send a
-            XML-RPC message to the service.
+            message to the service.
         */
-        virtual void onInvoke() = 0;
+        virtual void onBeginInvoke() = 0;
+
+        virtual void onEndInvoke() = 0;
 
         /** @brief A synchronous remote procedure is called.
 
             Derived Clients implement this method to format and send a
-            XML-RPC message to the service and receive and parse the
-            XML-RPC result.
+            message to the service and receive and parse the result.
         */
-        virtual void onCall() = 0;
-
-        /** @brief A remote procedure is cancelled.
-
-            Derived Clients implement this method to cancel the remote
-            procedure call.
-        */
-        virtual void onCancel() = 0;
-
-        /** @brief A remote procedure has failed.
-
-            Derived Clients implement this method to format to throw exceptions
-            which can not be represented by Fault. This method is called when
-            the result of the RemoteProcedure is processed.
-        */
-        virtual void onError() = 0;
+        virtual void onInvoke() = 0;
 
     protected:
         /** @brief Formats the XML-RPC message.
@@ -279,7 +204,7 @@ class PT_XMLRPC_API Client : public Pt::Remoting::ClientBase
             has been parsed by parseResult(). The current RemoteProcedure will
             receive completion notification to process the result.
         */
-        void finishResult();
+        //void finishResult();
 
         /** @brief Parses the XML-RPC result.
 
@@ -295,14 +220,6 @@ class PT_XMLRPC_API Client : public Pt::Remoting::ClientBase
             processed.
         */
         void setFault(int rc, const char* msg);
-
-        /** @brief Fails the current procedure.
-
-            This method is used by derived Clients before calling finishResult()
-            so that the RemoteProcedure throws a Fault when the result is 
-            processed.
-        */
-        void setError(bool f = true);
 
     private:
         //! @internal
@@ -323,16 +240,14 @@ class PT_XMLRPC_API Client : public Pt::Remoting::ClientBase
             OnMethodResponseEnd
         };
 
-        
-        Pt::Remoting::RemoteCall* _method;
-        
-        Pt::Utf8Codec _utf8;
-        TextOStream _ts;
         Decomposer** _argv;
         unsigned _argc;
         Decomposer* _arg;
         unsigned _argn;
 
+        Pt::Utf8Codec _utf8;
+        TextOStream _ts;
+        
         Xml::BinaryInputSource _bin;
         Xml::XmlReader _reader;
         State _state;
@@ -340,7 +255,6 @@ class PT_XMLRPC_API Client : public Pt::Remoting::ClientBase
         Formatter _formatter;
         Fault _fault;
         BasicComposer<Fault> _fh;
-        bool _error;
         bool _isFault;
         Pt::varint_t _r1;
         Pt::varint_t _r2;
