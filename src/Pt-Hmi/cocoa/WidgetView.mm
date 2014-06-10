@@ -86,8 +86,8 @@
         return;
     
     //Create a raw buffer to hold pixel data which we will fill algorithmically
-    NSInteger width =  _outDevice->model()->PaintSurface.size().width();
-    NSInteger height = _outDevice->model()->PaintSurface.size().height();
+    NSInteger width =  _outDevice->model()->paintSurface().size().width();
+    NSInteger height = _outDevice->model()->paintSurface().size().height();
 
     NSInteger dataLength = width * height * 4;
     UInt8 *data = (UInt8*)malloc(dataLength * sizeof(UInt8));

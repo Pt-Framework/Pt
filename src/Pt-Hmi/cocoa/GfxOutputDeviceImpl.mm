@@ -253,12 +253,12 @@ void GfxOutputDeviceImpl::centerWindowTo(NSRect* parentRect)
     int horizontal = parentRect->size.width/2 +parentRect->origin.x;
     int vertical = screenHeight - (parentRect->size.height/2 + parentRect->origin.y);
     
-    Pt::Gfx::Size mySize  = _model->fromUnit(_model->WinSize.get());
+    Pt::Gfx::Size mySize  = _model->fromUnit(_model->Size.get());
         
     int posX = horizontal - (mySize.width()/2);
     int posY = vertical - (mySize.height()/2);
         
-    _model->WinPos.set(_model->toUnit(Pt::Gfx::Point( posX,posY)));
+    _model->Position.set(_model->toUnit(Pt::Gfx::Point( posX,posY)));
 }
     
 void GfxOutputDeviceImpl::writeWindowSizeAndPos(bool firstShow)
@@ -335,12 +335,12 @@ void GfxOutputDeviceImpl::writeWindowSizeAndPos(bool firstShow)
     NSRect windowRect =  [_window frame];
     
     //Position
-    windowRect.origin.x = _model->WinPos.get().x();
-    windowRect.origin.y = screenHeight - (_model->WinPos.get().y() + _model->WinSize.get().height());
+    windowRect.origin.x = _model->Position.get().x();
+    windowRect.origin.y = screenHeight - (_model->Position.get().y() + _model->Size.get().height());
     
     //Size
-    windowRect.size.width = _model->WinSize.get().width();
-    windowRect.size.height = _model->WinSize.get().height();
+    windowRect.size.width = _model->Size.get().width();
+    windowRect.size.height = _model->Size.get().height();
     [_window setFrame:windowRect display:YES animate:NO];
     
 }
@@ -424,10 +424,10 @@ void GfxOutputDeviceImpl::onPosition()
     NSRect windowRect = [_window frame];
     Pt::Gfx::PointF pos(windowRect.origin.x,screenHeight - (windowRect.origin.y + windowRect.size.height));
     
-    if( pos.x()  == _model->WinPos.get().x() && pos.y()  == _model->WinPos.get().y())
+    if( pos.x()  == _model->Position.get().x() && pos.y()  == _model->Position.get().y())
         return;
     
-    _model->WinPos =pos;
+    _model->Position =pos;
     
     //View
     NSRect viewRect = [_view frame];    
@@ -446,8 +446,8 @@ void GfxOutputDeviceImpl::onPositionAndSize()
     
     //Window
     NSRect windowRect = [_window frame];
-    _model->WinPos = Pt::Gfx::PointF(windowRect.origin.x,screenHeight - (windowRect.origin.y + windowRect.size.height));
-    _model->WinSize = Pt::Gfx::SizeF(windowRect.size.width,windowRect.size.height);
+    _model->Position = Pt::Gfx::PointF(windowRect.origin.x,screenHeight - (windowRect.origin.y + windowRect.size.height));
+    _model->Size = Pt::Gfx::SizeF(windowRect.size.width,windowRect.size.height);
     
     //View
     NSRect viewRect = [_view frame];
