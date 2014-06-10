@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2013 by Marc Duerner
+ * Copyright (C) 2012-2014 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,11 +26,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_XmlRpc_SoapHttpClient_h
-#define Pt_XmlRpc_SoapHttpClient_h
+#ifndef Pt_Soap_HttpClient_h
+#define Pt_Soap_HttpClient_h
 
 #include <Pt/Soap/Api.h>
-#include <Pt/Soap/SoapClient.h>
+#include <Pt/Soap/Client.h>
 #include <Pt/Http/Client.h>
 #include <Pt/Connectable.h>
 #include <Pt/Types.h>
@@ -42,21 +42,21 @@ namespace Soap {
 
 /** @brief A client for SOAP via HTTP.
 */
-class PT_SOAP_API SoapHttpClient : public SoapClient
-                                   , public Connectable
+class PT_SOAP_API HttpClient : public Client
+                             , public Connectable
 {
     public:
         /** @brief Constructor.
         */
-        SoapHttpClient(SoapServiceDeclaration& service);
+        HttpClient(ServiceDeclaration& service);
 
         /** @brief Construct with EventLoop used for I/O.
         */
-        SoapHttpClient(SoapServiceDeclaration& service, System::EventLoop& loop);
+        HttpClient(ServiceDeclaration& service, System::EventLoop& loop);
 
         /** @brief Destructor.
         */
-        virtual ~SoapHttpClient();
+        virtual ~HttpClient();
 
         /** @brief Sets the EventLoop to use for I/O.
         */

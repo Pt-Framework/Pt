@@ -1398,6 +1398,21 @@
     <ClInclude Include="..\..\include\Pt\Soap\Fault.h">
       <Filter>Pt-Soap</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\Client.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\Formatter.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\HttpClient.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\HttpService.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Soap\ServiceDefinition.h">
+      <Filter>Pt-Soap</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2620,6 +2635,21 @@
       <Filter>Pt-Remoting</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Soap\Fault.cpp">
+      <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Soap\Client.cpp">
+      <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Soap\Formatter.cpp">
+      <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Soap\HttpClient.cpp">
+      <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Soap\HttpService.cpp">
+      <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Soap\ServiceDefinition.cpp">
       <Filter>Pt-Soap</Filter>
     </ClCompile>
   </ItemGroup>

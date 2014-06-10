@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Soap/SoapHttpService.h>
+#include <Pt/Soap/HttpService.h>
 #include <Pt/Soap/Fault.h>
 #include <Pt/Xml/XmlError.h>
 #include <Pt/Xml/StartElement.h>
@@ -77,10 +77,10 @@ namespace Pt {
 namespace Soap {
 
 ///////////////////////////////////////////////////////////////////////////////
-// SoapResponder
+// Responder
 ///////////////////////////////////////////////////////////////////////////////
 
-SoapResponder::SoapResponder(const SoapServiceDeclaration& decl, Remoting::ServiceDefinition& def)
+Responder::Responder(const ServiceDeclaration& decl, Remoting::ServiceDefinition& def)
 : Remoting::Responder(def)
 , _serviceDecl( &decl )
 , _op(0)
@@ -97,19 +97,19 @@ SoapResponder::SoapResponder(const SoapServiceDeclaration& decl, Remoting::Servi
 }
 
 
-SoapResponder::~SoapResponder()
+Responder::~Responder()
 {
     _ts.detach();
 }
 
 
-bool SoapResponder::isFailed() const
+bool Responder::isFailed() const
 {
     return  _isFault;
 }
 
 
-void SoapResponder::onCancel()
+void Responder::onCancel()
 {
     _state = OnBegin;
     _ts.detach();
@@ -121,7 +121,7 @@ void SoapResponder::onCancel()
 }
 
 
-void SoapResponder::beginMessage(std::istream& is)
+void Responder::beginMessage(std::istream& is)
 {
     cancel();
     
@@ -129,7 +129,7 @@ void SoapResponder::beginMessage(std::istream& is)
 }
 
 
-bool SoapResponder::parseMessage()
+bool Responder::parseMessage()
 {
     try
     {
@@ -174,7 +174,7 @@ bool SoapResponder::parseMessage()
 }
 
 
-void SoapResponder::finishMessage(System::EventLoop& loop)
+void Responder::finishMessage(System::EventLoop& loop)
 {
     if( this->isFailed() )
     {
@@ -204,7 +204,7 @@ void SoapResponder::finishMessage(System::EventLoop& loop)
 }
 
 
-void SoapResponder::onReady()
+void Responder::onReady()
 {    
     try
     {
@@ -224,7 +224,7 @@ void SoapResponder::onReady()
 }
 
 
-void SoapResponder::beginResult(std::ostream& os)
+void Responder::beginResult(std::ostream& os)
 {
     _ts.clear();
     _ts.discard();
@@ -249,7 +249,7 @@ void SoapResponder::beginResult(std::ostream& os)
 }
 
 
-void SoapResponder::beginFault(std::ostream& os, const Fault& fault)
+void Responder::beginFault(std::ostream& os, const Fault& fault)
 {
     int rc = fault.rc();
     const char* msg = fault.what();
@@ -287,7 +287,7 @@ void SoapResponder::beginFault(std::ostream& os, const Fault& fault)
 }
 
 
-bool SoapResponder::advanceResult()
+bool Responder::advanceResult()
 {
     for(unsigned n = 0; _result && n < 10; ++n)
     {
@@ -298,7 +298,7 @@ bool SoapResponder::advanceResult()
 }
 
 
-void SoapResponder::finishResult()
+void Responder::finishResult()
 {
     if( ! this->isFailed() )
     {
@@ -310,14 +310,14 @@ void SoapResponder::finishResult()
 }
 
 
-void SoapResponder::setFault(int rc, const char* msg)
+void Responder::setFault(int rc, const char* msg)
 {
     _fault = Fault(msg, rc);
     _isFault = true;
 }
 
 
-bool SoapResponder::advance(const Pt::Xml::Node& node)
+bool Responder::advance(const Pt::Xml::Node& node)
 {
     switch(_state)
     {
@@ -442,20 +442,20 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
 // SoapHttpResponder
 ///////////////////////////////////////////////////////////////////////////////
 
-SoapHttpResponder::SoapHttpResponder(SoapHttpService& httpService, const SoapServiceDeclaration& decl, Remoting::ServiceDefinition& def)
+HttpResponder::HttpResponder(HttpService& httpService, const ServiceDeclaration& decl, Remoting::ServiceDefinition& def)
 : Http::Responder(httpService)
-, SoapResponder(decl, def)
+, Soap::Responder(decl, def)
 , _reply(0)
 {
 }
 
-SoapHttpResponder::~SoapHttpResponder()
+HttpResponder::~HttpResponder()
 {
 }
 
 
 // pass only ReplyHeader and body stream
-void SoapHttpResponder::onBeginRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop)
+void HttpResponder::onBeginRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop)
 {
     _reply = 0;
     
@@ -464,26 +464,26 @@ void SoapHttpResponder::onBeginRequest(Http::Request& request, Pt::Http::Reply& 
 
 
 // pass only ReplyHeader and body stream
-void SoapHttpResponder::onReadRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop)
+void HttpResponder::onReadRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop)
 {
     parseMessage();
 }
 
 
-void SoapHttpResponder::onBeginReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+void HttpResponder::onBeginReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
     _reply = &reply;
     finishMessage(loop);
 }
 
 
-void SoapHttpResponder::onWriteReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
+void HttpResponder::onWriteReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
     advanceSoapReply(reply);
 }
 
 
-void SoapHttpResponder::advanceSoapReply(Http::Reply& reply)
+void HttpResponder::advanceSoapReply(Http::Reply& reply)
 {
     while( ! advanceResult() )
     {
@@ -499,7 +499,7 @@ void SoapHttpResponder::advanceSoapReply(Http::Reply& reply)
 }
 
 
-void SoapHttpResponder::onResult()
+void HttpResponder::onResult()
 {
     assert(_reply);
 
@@ -512,7 +512,7 @@ void SoapHttpResponder::onResult()
 }
 
 
-void SoapHttpResponder::onFault(const Fault& fault)
+void HttpResponder::onFault(const Fault& fault)
 {
     assert(_reply);
 
@@ -526,9 +526,9 @@ void SoapHttpResponder::onFault(const Fault& fault)
 }
 
 
-void SoapHttpResponder::onCancel()
+void HttpResponder::onCancel()
 {
-    SoapResponder::onCancel();
+    Soap::Responder::onCancel();
 
     // not really possible, since only the HTTP server uses this class
 }
@@ -541,7 +541,7 @@ void SoapHttpResponder::onCancel()
 class WsdlResponder : public Pt::Http::Responder
 {
     public:
-        WsdlResponder(SoapHttpService& httpService, const SoapServiceDeclaration& serviceDecl)
+        WsdlResponder(HttpService& httpService, const ServiceDeclaration& serviceDecl)
         : Pt::Http::Responder(httpService)
         , _serviceDecl( serviceDecl )
         {}
@@ -570,33 +570,33 @@ class WsdlResponder : public Pt::Http::Responder
         {}
 
     private:
-        const SoapServiceDeclaration& _serviceDecl;
+        const ServiceDeclaration& _serviceDecl;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // SoapHttpService
 ///////////////////////////////////////////////////////////////////////////////
 
-SoapHttpService::SoapHttpService(SoapServiceDefinition& serviceDef)
+HttpService::HttpService(ServiceDefinition& serviceDef)
 : _serviceDecl( &serviceDef.declaration() )
 , _serviceDef( &serviceDef )
 { 
 }
 
 
-SoapHttpService::SoapHttpService(const SoapServiceDeclaration& decl, Remoting::ServiceDefinition& def)
+HttpService::HttpService(const ServiceDeclaration& decl, Remoting::ServiceDefinition& def)
 : _serviceDecl(&decl)
 , _serviceDef(&def)
 {
 }
 
 
-SoapHttpService::~SoapHttpService()
+HttpService::~HttpService()
 {
 }
 
 
-Http::Responder* SoapHttpService::onGetResponder(const Http::Request& req)
+Http::Responder* HttpService::onGetResponder(const Http::Request& req)
 {
     //if (req.isHeaderValue("Content-Type", "text/xml"))
     //    return new XmlRpcResponder(*this);
@@ -609,11 +609,11 @@ Http::Responder* SoapHttpService::onGetResponder(const Http::Request& req)
         return new WsdlResponder(*this, *_serviceDecl);
     }
 
-    return new SoapHttpResponder(*this, *_serviceDecl, *_serviceDef);
+    return new HttpResponder(*this, *_serviceDecl, *_serviceDef);
 }
 
 
-void SoapHttpService::onReleaseResponder(Http::Responder* resp)
+void HttpService::onReleaseResponder(Http::Responder* resp)
 {
     delete resp;
 }

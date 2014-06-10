@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Soap_SoapServiceDefinition_h
-#define Pt_Soap_SoapServiceDefinition_h
+#ifndef Pt_Soap_ServiceDefinition_h
+#define Pt_Soap_ServiceDefinition_h
 
 #include <Pt/Soap/Api.h>
 #include <Pt/Remoting/ServiceDefinition.h>
@@ -318,12 +318,12 @@ class PT_SOAP_API Operation : private NonCopyable
 };
 
 
-class PT_SOAP_API SoapServiceDeclaration 
+class PT_SOAP_API ServiceDeclaration 
 {
     public:
-        SoapServiceDeclaration(const std::string& name);
+        ServiceDeclaration(const std::string& name);
 
-        virtual ~SoapServiceDeclaration();
+        virtual ~ServiceDeclaration();
 
         const std::string& name() const
         { return _name; }
@@ -351,18 +351,18 @@ class PT_SOAP_API SoapServiceDeclaration
 };
 
 
-class PT_SOAP_API SoapServiceDefinition : public Remoting::ServiceDefinition
+class PT_SOAP_API ServiceDefinition : public Remoting::ServiceDefinition
 {
     public:
-        SoapServiceDefinition(const SoapServiceDeclaration& decl);
+        ServiceDefinition(const ServiceDeclaration& decl);
 
-        virtual ~SoapServiceDefinition();
+        virtual ~ServiceDefinition();
 
-        const SoapServiceDeclaration& declaration() const
+        const ServiceDeclaration& declaration() const
         { return _decl; }
 
     private:
-        const SoapServiceDeclaration& _decl;
+        const ServiceDeclaration& _decl;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -418,4 +418,4 @@ class BasicProcedureDefinition : public Operation
 
 } // namespace Pt
 
-#endif // Pt_Soap_SoapServiceDefinition_h
+#endif // Pt_Soap_ServiceDefinition_h

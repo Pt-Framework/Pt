@@ -26,12 +26,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Soap_SoapClient_h
-#define Pt_Soap_SoapClient_h
+#ifndef Pt_Soap_Client_h
+#define Pt_Soap_Client_h
 
 #include <Pt/Soap/Api.h>
 #include <Pt/Soap/Fault.h>
-#include <Pt/Soap/SoapFormatter.h>
+#include <Pt/Soap/Formatter.h>
 #include <Pt/Remoting/Client.h>
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlReader.h>
@@ -47,20 +47,20 @@ namespace Pt {
 namespace Soap {
 
 class Operation;
-class SoapServiceDeclaration;
+class ServiceDeclaration;
 
 /** @brief A client for remote procedure calls.
 */
-class PT_SOAP_API SoapClient : public Pt::Remoting::Client
+class PT_SOAP_API Client : public Pt::Remoting::Client
 {
     public:
         /** @brief Constructor.
         */
-        SoapClient(SoapServiceDeclaration& service);
+        Client(ServiceDeclaration& service);
 
         /** @brief Destructor.
         */
-        virtual ~SoapClient();
+        virtual ~Client();
 
         /** @brief Indicates if the procedure has failed.
         */
@@ -182,9 +182,9 @@ class PT_SOAP_API SoapClient : public Pt::Remoting::Client
         Xml::XmlReader _reader;
         State _state;
         
-        SoapServiceDeclaration* _serviceDef;
+        ServiceDeclaration* _serviceDef;
         const Operation* _op;
-        SoapFormatter _fmt;
+        Formatter _fmt;
         Fault _fault;
         bool _isFault;
 

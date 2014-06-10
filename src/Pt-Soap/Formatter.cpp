@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Soap/SoapFormatter.h>
-#include <Pt/Soap/SoapServiceDefinition.h>
+#include <Pt/Soap/Formatter.h>
+#include <Pt/Soap/ServiceDefinition.h>
 #include <Pt/Xml/XmlWriter.h>
 #include <Pt/Xml/StartElement.h>
 #include <Pt/Xml/EndElement.h>
@@ -40,7 +40,7 @@
 
 #define log_define(e)
 #define log_debug(e)
-log_define("Pt.Soap.SoapFormatter")
+log_define("Pt.Soap.Formatter")
 
 namespace  {
 
@@ -124,7 +124,7 @@ namespace Pt {
 
 namespace Soap {
 
-SoapFormatter::SoapFormatter(std::basic_ostream<Char>& os)
+Formatter::Formatter(std::basic_ostream<Char>& os)
 : _reader(0)
 , _composer(0)
 , _os(&os)
@@ -132,31 +132,31 @@ SoapFormatter::SoapFormatter(std::basic_ostream<Char>& os)
 }
 
 
-SoapFormatter::~SoapFormatter()
+Formatter::~Formatter()
 {
 }
 
 
-void SoapFormatter::setParameter(const Parameter& p)
+void Formatter::setParameter(const Parameter& p)
 {
     _paramStack.clear();
     _paramStack.push_back(&p);
 }
 
 
-void SoapFormatter::attach(Xml::XmlReader& reader)
+void Formatter::attach(Xml::XmlReader& reader)
 { 
     _reader = &reader; 
 }
 
 
-void SoapFormatter::attach(std::basic_ostream<Char>& os)
+void Formatter::attach(std::basic_ostream<Char>& os)
 { 
     _os = &os; 
 }
 
 
-void SoapFormatter::onAddString(const char* name, const char* type,
+void Formatter::onAddString(const char* name, const char* type,
                                 const Pt::Char* value, const char* id)
 {
     const std::string& paramName = _paramStack.back()->name();
@@ -175,7 +175,7 @@ void SoapFormatter::onAddString(const char* name, const char* type,
 }
 
 
-void SoapFormatter::onAddBool(const char* name, bool value, 
+void Formatter::onAddBool(const char* name, bool value, 
                               const char* id)
 {
     Char val = value ? Char('1') : Char('0');
@@ -183,7 +183,7 @@ void SoapFormatter::onAddBool(const char* name, bool value,
 }
 
 
-void SoapFormatter::onAddChar(const char* name, const Pt::Char& value,
+void Formatter::onAddChar(const char* name, const Pt::Char& value,
                               const char* id)
 {
     Pt::Char buf[2] = { value, 0 };
@@ -191,25 +191,25 @@ void SoapFormatter::onAddChar(const char* name, const Pt::Char& value,
 }
 
 
-void SoapFormatter::onAddInt8(const char* name, Pt::int8_t value, const char* id)
+void Formatter::onAddInt8(const char* name, Pt::int8_t value, const char* id)
 {
 	this->onAddInt64(name, value, id);
 }
 
 
-void SoapFormatter::onAddInt16(const char* name, Pt::int16_t value, const char* id)
+void Formatter::onAddInt16(const char* name, Pt::int16_t value, const char* id)
 {
 	this->onAddInt64(name, value, id);
 }    
 
 
-void SoapFormatter::onAddInt32(const char* name, Pt::int32_t value, const char* id)
+void Formatter::onAddInt32(const char* name, Pt::int32_t value, const char* id)
 {
 	this->onAddInt64(name, value, id);
 }
 
 
-void SoapFormatter::onAddInt64(const char* name, Pt::int64_t value, const char* id)
+void Formatter::onAddInt64(const char* name, Pt::int64_t value, const char* id)
 {    
     const unsigned _bufsize = 64;
     Pt::Char _buf[_bufsize];
@@ -221,25 +221,25 @@ void SoapFormatter::onAddInt64(const char* name, Pt::int64_t value, const char* 
 }
 
 
-void SoapFormatter::onAddUInt8(const char* name, Pt::uint8_t value, const char* id)
+void Formatter::onAddUInt8(const char* name, Pt::uint8_t value, const char* id)
 {
 	this->onAddUInt64(name, value, id);
 }
 
 
-void SoapFormatter::onAddUInt16(const char* name, Pt::uint16_t value, const char* id)
+void Formatter::onAddUInt16(const char* name, Pt::uint16_t value, const char* id)
 {
 	this->onAddUInt64(name, value, id);
 }    
 
 
-void SoapFormatter::onAddUInt32(const char* name, Pt::uint32_t value, const char* id)
+void Formatter::onAddUInt32(const char* name, Pt::uint32_t value, const char* id)
 {
 	this->onAddUInt64(name, value, id);
 }
 
 
-void SoapFormatter::onAddUInt64(const char* name, Pt::uint64_t value, const char* id)
+void Formatter::onAddUInt64(const char* name, Pt::uint64_t value, const char* id)
 {    
     const unsigned _bufsize = 64;
     Pt::Char _buf[_bufsize];
@@ -251,19 +251,19 @@ void SoapFormatter::onAddUInt64(const char* name, Pt::uint64_t value, const char
 }
 
 
-void SoapFormatter::onAddFloat(const char* name, float value,const char* id)
+void Formatter::onAddFloat(const char* name, float value,const char* id)
 {
     this->onAddLongDouble(name, value, id);
 }
 
 
-void SoapFormatter::onAddDouble(const char* name, double value, const char* id)
+void Formatter::onAddDouble(const char* name, double value, const char* id)
 {
     this->onAddLongDouble(name, value, id);
 }
 
 
-void SoapFormatter::onAddLongDouble(const char* name, long double value,const char* id)
+void Formatter::onAddLongDouble(const char* name, long double value,const char* id)
 {
     const unsigned _bufsize = 64;
     Pt::Char _buf[_bufsize];
@@ -275,7 +275,7 @@ void SoapFormatter::onAddLongDouble(const char* name, long double value,const ch
 }
 
 
-void SoapFormatter::onAddBinary(const char* name, const char* type,
+void Formatter::onAddBinary(const char* name, const char* type,
                             const char* data, std::size_t length, const char* id)
 {
     // TODO: this should be base64 encoded
@@ -283,13 +283,13 @@ void SoapFormatter::onAddBinary(const char* name, const char* type,
 }
 
 
-void SoapFormatter::onAddReference(const char* name, const char*value)
+void Formatter::onAddReference(const char* name, const char*value)
 {
     throw SerializationError("references not supported");
 }
 
 
-void SoapFormatter::onBeginSequence(const char* name, const char* type, const char*)
+void Formatter::onBeginSequence(const char* name, const char* type, const char*)
 {
     _str.assign( _paramStack.back()->name().c_str() );
 
@@ -299,20 +299,20 @@ void SoapFormatter::onBeginSequence(const char* name, const char* type, const ch
 }
 
 
-void SoapFormatter::onBeginElement()
+void Formatter::onBeginElement()
 {
     const Parameter* param = _paramStack.back()->type()->getParameter(0);
     _paramStack.push_back(param);
 }
 
 
-void SoapFormatter::onFinishElement()
+void Formatter::onFinishElement()
 {
     _paramStack.pop_back();
 }
 
 
-void SoapFormatter::onFinishSequence()
+void Formatter::onFinishSequence()
 {
     _str.assign( _paramStack.back()->name().c_str() );
 
@@ -322,7 +322,7 @@ void SoapFormatter::onFinishSequence()
 }
 
 
-void SoapFormatter::onBeginStruct(const char* name, const char* type,
+void Formatter::onBeginStruct(const char* name, const char* type,
                                   const char* id)
 {
     _str.assign( _paramStack.back()->name().c_str() );
@@ -333,20 +333,20 @@ void SoapFormatter::onBeginStruct(const char* name, const char* type,
 }
 
 
-void SoapFormatter::onBeginMember(const char* name)
+void Formatter::onBeginMember(const char* name)
 {
     const Parameter* param = _paramStack.back()->type()->getParameter(name);
     _paramStack.push_back(param);
 }
 
 
-void SoapFormatter::onFinishMember()
+void Formatter::onFinishMember()
 {
     _paramStack.pop_back();
 }
 
 
-void SoapFormatter::onFinishStruct()
+void Formatter::onFinishStruct()
 {
     _str.assign( _paramStack.back()->name().c_str() );
 
@@ -356,24 +356,24 @@ void SoapFormatter::onFinishStruct()
 }
 
 
-void SoapFormatter::onBeginParse(Composer& composer)
+void Formatter::onBeginParse(Composer& composer)
 {
     _composer = &composer;
 }
 
 
-bool SoapFormatter::onParseSome()
+bool Formatter::onParseSome()
 { 
     return false; 
 }
 
 
-void SoapFormatter::onParse()
+void Formatter::onParse()
 {
 }
 
 
-bool SoapFormatter::advance(const Pt::Xml::Node& node)
+bool Formatter::advance(const Pt::Xml::Node& node)
 {
     if(node.type() == Xml::Node::StartElement)
     {

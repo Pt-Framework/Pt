@@ -4,11 +4,11 @@ SubDirC++Flags [ FDefines PT_SOAP_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Soap ;
 
 PT_SOAP_SOURCES = Fault.cpp
-                  SoapClient.cpp
-                  SoapFormatter.cpp
-                  SoapHttpClient.cpp
-                  SoapHttpService.cpp 
-                  SoapServiceDefinition.cpp ;
+                  Client.cpp
+                  Formatter.cpp
+                  HttpClient.cpp
+                  HttpService.cpp 
+                  ServiceDefinition.cpp ;
 
 SharedLibrary Pt-Soap : $(PT_SOAP_SOURCES) ;
 LinkSharedLibraries Pt-Soap :  Pt-Xml Pt-Http Pt-Net Pt-Remoting Pt-System Pt ;

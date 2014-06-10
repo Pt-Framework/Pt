@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Soap/SoapServiceDefinition.h>
+#include <Pt/Soap/ServiceDefinition.h>
 
 namespace Pt {
 
@@ -228,18 +228,18 @@ const Parameter* Operation::getOutput() const
 // SoapServiceDefinition
 ///////////////////////////////////////////////////////////////////////////////
 
-SoapServiceDeclaration::SoapServiceDeclaration(const std::string& name)
+ServiceDeclaration::ServiceDeclaration(const std::string& name)
 : _name(name)
 { 
 }
 
 
-SoapServiceDeclaration::~SoapServiceDeclaration()
+ServiceDeclaration::~ServiceDeclaration()
 {
 }
 
 
-void SoapServiceDeclaration::addOperation(Operation& op)
+void ServiceDeclaration::addOperation(Operation& op)
 {
     //System::MutexLock lock( mutex() );
     _operations.push_back( &op );
@@ -249,7 +249,7 @@ void SoapServiceDeclaration::addOperation(Operation& op)
 typedef std::map<std::string, const Type*> ComplexTypesMap;
 
 
-void SoapServiceDeclaration::createComplexTypeList(ComplexTypesMap& complexTypes, const Type* type)
+void ServiceDeclaration::createComplexTypeList(ComplexTypesMap& complexTypes, const Type* type)
 {
     ComplexTypesMap::iterator it = complexTypes.find( type->name() );
     
@@ -269,7 +269,7 @@ void SoapServiceDeclaration::createComplexTypeList(ComplexTypesMap& complexTypes
     }    
 }
 
-void SoapServiceDeclaration::toWsdl( std::ostream& os) const
+void ServiceDeclaration::toWsdl( std::ostream& os) const
 {
     os << "<?xml version=\"1.0\" encoding=\"utf-8\"?>" << std::endl
        << "<wsdl:definitions xmlns:soapenc=\"http://schemas.xmlsoap.org/soap/encoding/\" " << std::endl
@@ -428,7 +428,7 @@ void SoapServiceDeclaration::toWsdl( std::ostream& os) const
     os << "</wsdl:definitions>" << std::endl;
 }
 
-const Operation* SoapServiceDeclaration::getOperation(const Pt::String& name) const
+const Operation* ServiceDeclaration::getOperation(const Pt::String& name) const
 {
     //System::MutexLock lock( mutex() );
 
@@ -446,13 +446,13 @@ const Operation* SoapServiceDeclaration::getOperation(const Pt::String& name) co
 // SoapServiceDefinition
 ///////////////////////////////////////////////////////////////////////////////
 
-SoapServiceDefinition::SoapServiceDefinition(const SoapServiceDeclaration& decl)
+ServiceDefinition::ServiceDefinition(const ServiceDeclaration& decl)
 : _decl(decl)
 { 
 }
 
 
-SoapServiceDefinition::~SoapServiceDefinition()
+ServiceDefinition::~ServiceDefinition()
 {
 }
 

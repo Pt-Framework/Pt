@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2013 by Marc Dürner
+ * Copyright (C) 2012-2014 by Marc Dürner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Soap/SoapHttpClient.h>
+#include <Pt/Soap/HttpClient.h>
 #include <Pt/Soap/Fault.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
@@ -36,16 +36,16 @@ namespace Pt {
 
 namespace Soap {
 
-SoapHttpClient::SoapHttpClient(SoapServiceDeclaration& service)
-: SoapClient(service)
+HttpClient::HttpClient(ServiceDeclaration& service)
+: Client(service)
 , _error(false)
 {
     init();
 }
 
 
-SoapHttpClient::SoapHttpClient(SoapServiceDeclaration& service, System::EventLoop& loop)
-: SoapClient(service)
+HttpClient::HttpClient(ServiceDeclaration& service, System::EventLoop& loop)
+: Client(service)
 , _client(loop)
 , _error(false)
 {
@@ -53,50 +53,50 @@ SoapHttpClient::SoapHttpClient(SoapServiceDeclaration& service, System::EventLoo
 }
 
 
-SoapHttpClient::~SoapHttpClient()
+HttpClient::~HttpClient()
 {
 }
 
 
-void SoapHttpClient::init()
+void HttpClient::init()
 {
-    _client.requestSent() += Pt::slot(*this, &SoapHttpClient::onRequest);
-    _client.replyReceived() += Pt::slot( *this, &SoapHttpClient::onReply);
+    _client.requestSent() += Pt::slot(*this, &HttpClient::onRequest);
+    _client.replyReceived() += Pt::slot( *this, &HttpClient::onReply);
 }
 
 
-void SoapHttpClient::setActive(System::EventLoop& loop)
+void HttpClient::setActive(System::EventLoop& loop)
 {
     _client.setActive(loop);
 }
 
 
-System::EventLoop* SoapHttpClient::loop() const
+System::EventLoop* HttpClient::loop() const
 {
     return _client.loop();
 }
 
 
-void SoapHttpClient::setSecure(Ssl::Context& ctx)
+void HttpClient::setSecure(Ssl::Context& ctx)
 {
     _client.setSecure(ctx);
 }
 
 
-void SoapHttpClient::setTimeout(std::size_t timeout)
+void HttpClient::setTimeout(std::size_t timeout)
 {
     _client.setTimeout(timeout);
 }
 
 
-void SoapHttpClient::setTarget(const Net::Endpoint& ep, const std::string& url)
+void HttpClient::setTarget(const Net::Endpoint& ep, const std::string& url)
 {
     _client.setHost(ep);
     _client.request().setUrl(url);
 }
 
 
-void SoapHttpClient::setTarget(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts,
+void HttpClient::setTarget(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts,
                            const std::string& url)
 {
     _client.setHost(ep, opts);
@@ -104,37 +104,37 @@ void SoapHttpClient::setTarget(const Net::Endpoint& ep, const Net::TcpSocketOpti
 }
 
 
-void SoapHttpClient::setHost(const Net::Endpoint& ep)
+void HttpClient::setHost(const Net::Endpoint& ep)
 {
     _client.setHost(ep);
 }
 
 
-void SoapHttpClient::setHost(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts)
+void HttpClient::setHost(const Net::Endpoint& ep, const Net::TcpSocketOptions& opts)
 {
     _client.setHost(ep, opts);
 }
 
 
-void SoapHttpClient::setServiceUrl(const std::string& url)
+void HttpClient::setServiceUrl(const std::string& url)
 {
     _client.request().setUrl(url);
 }
 
 
-void SoapHttpClient::setServiceUrl(const char* url)
+void HttpClient::setServiceUrl(const char* url)
 {
     _client.request().setUrl(url);
 }
 
 
-const Net::Endpoint& SoapHttpClient::host() const
+const Net::Endpoint& HttpClient::host() const
 {
     return _client.host();
 }
 
 
-void SoapHttpClient::onBeginInvoke()
+void HttpClient::onBeginInvoke()
 {
     _error = false;
 
@@ -165,7 +165,7 @@ void SoapHttpClient::onBeginInvoke()
 }
 
 
-void SoapHttpClient::onInvoke()
+void HttpClient::onInvoke()
 {
     _error = false;
 
@@ -196,7 +196,7 @@ void SoapHttpClient::onInvoke()
     std::istream& is = _client.receive();
 
     // parse XML-RPC reply
-    SoapClient::processResult(is);
+    Client::processResult(is);
 
     // discard remaining data
     std::streamsize all = std::numeric_limits<std::streamsize>::max();
@@ -204,7 +204,7 @@ void SoapHttpClient::onInvoke()
 }
 
 
-void SoapHttpClient::onEndInvoke()
+void HttpClient::onEndInvoke()
 {
     if( _error )
     {
@@ -214,22 +214,22 @@ void SoapHttpClient::onEndInvoke()
 }
 
 
-bool SoapHttpClient::isFailed() const
+bool HttpClient::isFailed() const
 {
-    return _error || SoapClient::isFailed();
+    return _error || Soap::Client::isFailed();
 }
 
 
-void SoapHttpClient::onCancel()
+void HttpClient::onCancel()
 {
-    SoapClient::onCancel();
+    Soap::Client::onCancel();
 
     _error = false;
     _client.cancel();
 }
 
 
-void SoapHttpClient::onRequest(Http::Client& client)
+void HttpClient::onRequest(Http::Client& client)
 {
     try
     {
@@ -262,7 +262,7 @@ void SoapHttpClient::onRequest(Http::Client& client)
 }
 
 
-void SoapHttpClient::onReply(Http::Client& client)
+void HttpClient::onReply(Http::Client& client)
 {
     try
     {

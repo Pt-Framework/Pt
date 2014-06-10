@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2013 by Dr. Marc Boris Duerner
+ * Copyright (C) 2009-2014 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -102,7 +102,7 @@ inline void operator <<=(Pt::SerializationInfo& si, const Fault& fault)
     si.addMember("faultString").setString( fault.what() );
 }
 
-} // namespace XmlRpc
+} // namespace Soap
 
 } // namespace Pt
 

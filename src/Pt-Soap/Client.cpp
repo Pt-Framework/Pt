@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Soap/SoapClient.h>
-#include <Pt/Soap/SoapServiceDefinition.h>
+#include <Pt/Soap/Client.h>
+#include <Pt/Soap/ServiceDefinition.h>
 #include <Pt/Remoting/RemoteProcedure.h>
 #include <Pt/Xml/XmlWriter.h>
 #include <Pt/Xml/XmlError.h>
@@ -72,11 +72,8 @@ static const Pt::Char SOAP_VALUE_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', '
 static const Pt::Char SOAP_REASON[]  = { '<', 's', 'o', 'a', 'p', ':', 'R', 'e', 'a', 's', 'o', 'n', '>' };
 static const Pt::Char SOAP_REASON_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'R', 'e', 'a', 's', 'o', 'n', '>' };
 
-///////////////////////////////////////////////////////////////////////////////
-// SoapClient
-///////////////////////////////////////////////////////////////////////////////
 
-SoapClient::SoapClient(SoapServiceDeclaration& service)
+Client::Client(ServiceDeclaration& service)
 : _argv(0)
 , _argc(0)
 , _arg(0)
@@ -93,19 +90,19 @@ SoapClient::SoapClient(SoapServiceDeclaration& service)
 }
 
 
-SoapClient::~SoapClient()
+Client::~Client()
 {
     _ts.detach();
 }
 
 
-bool SoapClient::isFailed() const
+bool Client::isFailed() const
 {
     return _isFault;
 }
 
 
-void SoapClient::onBeginCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv, unsigned argc)
+void Client::onBeginCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv, unsigned argc)
 {
     _argv = argv;
     _argc = argc;
@@ -123,7 +120,7 @@ void SoapClient::onBeginCall(Composer& r, Remoting::RemoteCall& method, Decompos
 }
 
 
-void SoapClient::onEndCall()
+void Client::onEndCall()
 {
     if( _isFault )
     {
@@ -135,7 +132,7 @@ void SoapClient::onEndCall()
 }
 
 
-void SoapClient::onCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv, unsigned argc)
+void Client::onCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv, unsigned argc)
 {
     _argv = argv;
     _argc = argc;
@@ -153,7 +150,7 @@ void SoapClient::onCall(Composer& r, Remoting::RemoteCall& method, Decomposer** 
 }
 
 
-void SoapClient::onCancel()
+void Client::onCancel()
 {
     _argv = 0;
     _argc = 0;
@@ -168,7 +165,7 @@ void SoapClient::onCancel()
 
 
 
-void SoapClient::beginMessage(std::ostream& os)
+void Client::beginMessage(std::ostream& os)
 {
     const Remoting::RemoteCall* method = activeProcedure();
     if( ! method )
@@ -193,7 +190,7 @@ void SoapClient::beginMessage(std::ostream& os)
 }
 
 
-bool SoapClient::advanceMessage()
+bool Client::advanceMessage()
 {
     unsigned n = 10;
 
@@ -233,7 +230,7 @@ bool SoapClient::advanceMessage()
 }
 
 
-void SoapClient::finishMessage()
+void Client::finishMessage()
 {
     const Remoting::RemoteCall* method = activeProcedure();
 
@@ -248,13 +245,13 @@ void SoapClient::finishMessage()
 }
 
 
-void SoapClient::beginResult(std::istream& is)
+void Client::beginResult(std::istream& is)
 {
     _bin.reset(is);
 }
 
 
-bool SoapClient::parseResult()
+bool Client::parseResult()
 {
     try
     {
@@ -292,14 +289,14 @@ bool SoapClient::parseResult()
 }
 
 
-void SoapClient::setFault(int rc, const char* msg)
+void Client::setFault(int rc, const char* msg)
 {
     _fault = Fault(msg, rc);
     _isFault = true;
 }
 
 
-void SoapClient::processResult(std::istream& is)
+void Client::processResult(std::istream& is)
 {
     _bin.reset(is);
 
@@ -336,7 +333,7 @@ void SoapClient::processResult(std::istream& is)
 }
 
 
-bool SoapClient::advance(const Pt::Xml::Node& node)
+bool Client::advance(const Pt::Xml::Node& node)
 {
     switch(_state)
     {

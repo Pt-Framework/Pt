@@ -30,12 +30,11 @@
 #define Pt_Soap_SoapHttpService_h
 
 #include <Pt/Soap/Api.h>
-#include <Pt/Soap/SoapServiceDefinition.h>
-#include <Pt/Soap/SoapFormatter.h>
+#include <Pt/Soap/ServiceDefinition.h>
+#include <Pt/Soap/Formatter.h>
 #include <Pt/Soap/Fault.h>
 #include <Pt/Http/Service.h>
 #include <Pt/Http/Responder.h>
-#include <Pt/Types.h>
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/System/EventLoop.h>
@@ -50,16 +49,16 @@ namespace Soap {
 
 /** @brief Dispatches requests to a service procedure.
 */
-class PT_SOAP_API SoapResponder : public Remoting::Responder
+class PT_SOAP_API Responder : public Remoting::Responder
 {
     public:
         /** @brief Construct with Service declaration and definition.
         */
-        SoapResponder(const SoapServiceDeclaration& decl, Remoting::ServiceDefinition& def);
+        Responder(const ServiceDeclaration& decl, Remoting::ServiceDefinition& def);
 
         /** @brief Destructor.
         */
-        virtual ~SoapResponder();
+        virtual ~Responder();
 
         /** @brief Indicates if the procedure has failed.
         */
@@ -166,7 +165,7 @@ class PT_SOAP_API SoapResponder : public Remoting::Responder
             OnEnvelopeEnd,
         };
 
-        const SoapServiceDeclaration* _serviceDecl;
+        const ServiceDeclaration* _serviceDecl;
         const Operation* _op;
         
         Xml::BinaryInputSource _bin;
@@ -178,22 +177,22 @@ class PT_SOAP_API SoapResponder : public Remoting::Responder
         TextOStream _ts;
         Decomposer* _result;
         
-        SoapFormatter _formatter;
+        Formatter _formatter;
         Fault _fault;
         bool _isFault;
         Pt::varint_t _r1;
         Pt::varint_t _r2;
 };
 
-class SoapHttpService;
+class HttpService;
 
-class PT_SOAP_API SoapHttpResponder : public Http::Responder
-                                      , public SoapResponder
+class PT_SOAP_API HttpResponder : public Http::Responder
+                                , public Responder
 {
     public:
-        SoapHttpResponder(SoapHttpService& httpService, const SoapServiceDeclaration& decl, Remoting::ServiceDefinition& def);
+        HttpResponder(HttpService& httpService, const ServiceDeclaration& decl, Remoting::ServiceDefinition& def);
 
-        ~SoapHttpResponder();
+        ~HttpResponder();
 
     protected:
         // inheritdoc
@@ -224,18 +223,18 @@ class PT_SOAP_API SoapHttpResponder : public Http::Responder
          Http::Reply* _reply;
 };
 
-class PT_SOAP_API SoapHttpService : public Http::Service
+class PT_SOAP_API HttpService : public Http::Service
 {
     public:
         /** @brief Constructor.
         */
-        SoapHttpService(SoapServiceDefinition& serviceDef);
+        HttpService(ServiceDefinition& serviceDef);
 
-        SoapHttpService(const SoapServiceDeclaration& decl, Remoting::ServiceDefinition& def);
+        HttpService(const ServiceDeclaration& decl, Remoting::ServiceDefinition& def);
 
         /** @brief Destructor.
         */
-        virtual ~SoapHttpService();
+        virtual ~HttpService();
 
     protected:
         // inheritdoc
@@ -245,7 +244,7 @@ class PT_SOAP_API SoapHttpService : public Http::Service
         virtual void onReleaseResponder(Http::Responder* resp);
 
     private:
-        const SoapServiceDeclaration* _serviceDecl;
+        const ServiceDeclaration* _serviceDecl;
         Remoting::ServiceDefinition* _serviceDef;
         Pt::varint_t _r1;
         Pt::varint_t _r2;

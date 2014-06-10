@@ -28,8 +28,8 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Unit/TestMain.h"
-#include "Pt/Soap/SoapHttpService.h"
-#include "Pt/Soap/SoapHttpClient.h"
+#include "Pt/Soap/HttpService.h"
+#include "Pt/Soap/HttpClient.h"
 #include "Pt/XmlRpc/HttpService.h"
 #include "Pt/XmlRpc/HttpClient.h"
 #include "Pt/XmlRpc/Fault.h"
@@ -619,7 +619,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         // SoapArray
         //
 
-        class CalcSoapServiceDeclaration: public Pt::Soap::SoapServiceDeclaration
+        class CalcSoapServiceDeclaration: public Pt::Soap::ServiceDeclaration
         {
             public:
                 class ArrayMultiply : public Pt::Soap::Operation
@@ -643,7 +643,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
                 };
 
                 CalcSoapServiceDeclaration()
-                : Pt::Soap::SoapServiceDeclaration("calc")
+                : Pt::Soap::ServiceDeclaration("calc")
                 {
                     setTargetNamespace("http://tempuri.org/");
                     addOperation(_arrayMultiply);
@@ -657,14 +657,14 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         {
             CalcSoapServiceDeclaration serviceDecl;
 
-            Pt::Soap::SoapServiceDefinition serviceDef(serviceDecl);
+            Pt::Soap::ServiceDefinition serviceDef(serviceDecl);
             serviceDef.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyVector);
 
-            Pt::Soap::SoapHttpService httpService(serviceDef);
+            Pt::Soap::HttpService httpService(serviceDef);
             Pt::Http::MapUrl servlet("/" + serviceDecl.name(), httpService);
             _server->addServlet(servlet);
 
-            Pt::Soap::SoapHttpClient client(serviceDecl, *_loop);
+            Pt::Soap::HttpClient client(serviceDecl, *_loop);
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
 

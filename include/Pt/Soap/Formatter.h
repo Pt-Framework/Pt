@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_XmlRpc_SoapFormatter_h
-#define Pt_XmlRpc_SoapFormatter_h
+#ifndef Pt_Soap_Formatter_h
+#define Pt_Soap_Formatter_h
 
 #include <Pt/Soap/Api.h>
 #include <Pt/Xml/XmlReader.h>
@@ -47,13 +47,13 @@ class Parameter;
 
 /** @internal @brief Formatter to read and write XML-RPC messages.
 */
-class PT_SOAP_API SoapFormatter : public Pt::Formatter
-                                  , private NonCopyable
+class PT_SOAP_API Formatter : public Pt::Formatter
+                            , private NonCopyable
 {
     public:
-        SoapFormatter(std::basic_ostream<Char>& os);
+        Formatter(std::basic_ostream<Char>& os);
 
-        ~SoapFormatter();
+        ~Formatter();
 
         void setParameter(const Parameter& p);
 
