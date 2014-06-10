@@ -32,86 +32,14 @@
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Fault.h>
 #include <Pt/XmlRpc/Formatter.h>
+#include <Pt/Remoting/Responder.h>
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlReader.h>
-#include <Pt/System/EventLoop.h>
-#include <Pt/SerializationContext.h>
-#include <Pt/Serializer.h>
 #include <Pt/TextStream.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/Types.h>
 
 namespace Pt {
-
-namespace Remoting {
-
-class ServiceDefinition;
-class ServiceProcedure;
-
-/** @brief Dispatches requests to a service procedure.
-*/
-class PT_XMLRPC_API Responder : private NonCopyable
-{
-    public:
-        /** @brief Construct with Service.
-        */
-        explicit Responder(ServiceDefinition& serviceDef);
-
-        /** @brief Destructor.
-        */
-        virtual ~Responder();
-
-        //! @internal
-        SerializationContext& context()
-        { return _context; }
-
-        //! @internal
-        void setReady()
-        { this->onReady(); }
-
-        /** @brief Resets to initial state.
-        */
-        void cancel();
-
-        /** @brief The currently executing procedure.
-        */
-        const ServiceProcedure* activeProcedure() const
-        { return _proc; }
-
-        virtual bool isFailed() const = 0;
-
-    protected:
-        /** @brief Gets the service procedure.
-        */
-        Pt::Composer** setProcedure(const std::string& name);
-
-        void beginCall(System::EventLoop& loop);
-
-        Pt::Decomposer* endCall();
-
-    protected:
-        /** @brief Cancels all operations.
-
-            Derived responders implement this method to cancel all operations.
-        */
-        virtual void onCancel() = 0;
-
-        /** @brief The service procedure has finished.
-
-            Derived responders implement this method to format and send the
-            XML-RPC result. It is called when the service procedure has
-            finished. Use beginResult(), advanceResult() and finishResult()
-            to format the XML-RPC result.
-        */
-        virtual void onReady() = 0;
-
-    private:
-        SerializationContext _context;
-        ServiceDefinition* _serviceDef;
-        ServiceProcedure* _proc;
-};
-
-} // namespace Remoting
 
 namespace XmlRpc {
 

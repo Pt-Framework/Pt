@@ -26,77 +26,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/XmlRpc/Client.h"
-#include "Pt/XmlRpc/RemoteProcedure.h"
-#include "Pt/Xml/XmlWriter.h"
-#include "Pt/Xml/XmlError.h"
-#include "Pt/Xml/StartElement.h"
-#include "Pt/Xml/Characters.h"
-#include "Pt/Xml/EndElement.h"
-#include "Pt/System/Logger.h"
+#include <Pt/XmlRpc/Client.h>
+#include <Pt/Remoting/RemoteProcedure.h>
+#include <Pt/Xml/XmlWriter.h>
+#include <Pt/Xml/XmlError.h>
+#include <Pt/Xml/StartElement.h>
+#include <Pt/Xml/Characters.h>
+#include <Pt/Xml/EndElement.h>
+#include <Pt/System/Logger.h>
 #include <cassert>
 
 log_define("Pt.XmlRpc.Client")
 
 namespace Pt {
-
-namespace Remoting {
-
-Client::Client()
-: _method(0)
-{
-}
-
-
-Client::~Client()
-{
-}
-
-
-void Client::beginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
-{
-    _method = &method;
-
-    this->onBeginCall(r, method, argv, argc);
-}
-
-
-void Client::call(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
-{
-    _method = &method;
-
-    this->onCall(r, method, argv, argc);
-}
-
-
-void Client::endCall()
-{
-    this->onEndCall();
-    _method = 0;
-}
-
-
-void Client::cancel()
-{
-    this->onCancel();
-
-    _method = 0;
-}
-
-
-void Client::setReady()
-{
-    assert( _method );
-
-    if( _method )
-    {
-        RemoteCall* method = _method;
-        _method = 0;
-        method->finish();
-    }
-}
-
-} // namespace Remoting
 
 namespace XmlRpc {
 
@@ -131,6 +73,7 @@ Client::Client()
 , _ts( &_utf8 )
 , _state(OnBegin)
 , _formatter(_ts)
+, _fault("", 0)
 , _isFault(false)
 {
 }
@@ -321,8 +264,7 @@ bool Client::parseResult()
 
 void Client::setFault(int rc, const char* msg)
 {
-    _fault.setRc(rc);
-    _fault.setText(msg);
+    _fault = Fault(msg, rc);
     _isFault = true;
 }
 

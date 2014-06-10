@@ -33,7 +33,7 @@
 #include "Pt/XmlRpc/HttpService.h"
 #include "Pt/XmlRpc/HttpClient.h"
 #include "Pt/XmlRpc/Fault.h"
-#include "Pt/XmlRpc/RemoteProcedure.h"
+#include "Pt/Remoting/RemoteProcedure.h"
 #include "Pt/Http/Server.h"
 #include "Pt/Http/Servlet.h"
 #include "Pt/Http/Request.h" // soap experiments
@@ -293,7 +293,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             catch (const Pt::XmlRpc::Fault& e)
             {
                 PT_UNIT_ASSERT_EQUALS(e.rc(), 7);
-                PT_UNIT_ASSERT_EQUALS(e.text(), "test fault message");
+                PT_UNIT_ASSERT_EQUALS( std::string(e.what()), "test fault message");
             }
 
             _loop->exit();

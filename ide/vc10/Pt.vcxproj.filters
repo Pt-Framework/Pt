@@ -118,6 +118,9 @@
     <Filter Include="Pt-Mfc\demo">
       <UniqueIdentifier>{2fb461ac-d392-4589-849e-e3c474ba43c1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Remoting">
+      <UniqueIdentifier>{0210a32b-e35e-43d6-ba7f-baf3c4e530b1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -780,9 +783,6 @@
     <ClInclude Include="..\..\include\Pt\XmlRpc\HttpClient.h">
       <Filter>Pt-XmlRpc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\XmlRpc\RemoteProcedure.h">
-      <Filter>Pt-XmlRpc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\XmlRpc\Responder.h">
       <Filter>Pt-XmlRpc</Filter>
     </ClInclude>
@@ -795,22 +795,10 @@
     <ClInclude Include="..\..\include\Pt\Utf32Codec.h">
       <Filter>Pt</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\XmlRpc\ServiceProcedure.h">
-      <Filter>Pt-XmlRpc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\XmlRpc\HttpService.h">
       <Filter>Pt-XmlRpc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\XmlRpc\ActiveProcedure.h">
-      <Filter>Pt-XmlRpc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\XmlRpc\BasicProcedure.h">
-      <Filter>Pt-XmlRpc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-XmlRpc\HttpResponder.h">
-      <Filter>Pt-XmlRpc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\XmlRpc\ServiceDefinition.h">
       <Filter>Pt-XmlRpc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Api.h">
@@ -1389,6 +1377,33 @@
     <ClInclude Include="..\..\include\Pt\XmlRpc\SoapHttpClient.h">
       <Filter>Pt-XmlRpc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\ActiveProcedure.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\Api.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\BasicProcedure.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\Client.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\RemoteProcedure.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\Responder.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\ServiceDefinition.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\ServiceProcedure.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Remoting\Fault.h">
+      <Filter>Pt-Remoting</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1477,9 +1492,6 @@
     <None Include="..\..\src\Pt-Xml\tests\Jamfile">
       <Filter>Pt-Xml\tests</Filter>
     </None>
-    <None Include="..\..\include\Pt\XmlRpc\RemoteProcedure.tpp">
-      <Filter>Pt-XmlRpc</Filter>
-    </None>
     <None Include="..\..\src\Pt-XmlRpc\Jamfile">
       <Filter>Pt-XmlRpc</Filter>
     </None>
@@ -1539,6 +1551,12 @@
     </None>
     <None Include="..\..\src\Pt-Mfc\demo\Jamfile">
       <Filter>Pt-Mfc\demo</Filter>
+    </None>
+    <None Include="..\..\include\Pt\Remoting\RemoteProcedure.tpp">
+      <Filter>Pt-Remoting</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Remoting\Jamfile">
+      <Filter>Pt-Remoting</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -2154,12 +2172,6 @@
     <ClCompile Include="..\..\src\Pt-XmlRpc\HttpService.cpp">
       <Filter>Pt-XmlRpc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-XmlRpc\RemoteProcedure.cpp">
-      <Filter>Pt-XmlRpc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-XmlRpc\ServiceDefinition.cpp">
-      <Filter>Pt-XmlRpc</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp">
       <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
@@ -2609,6 +2621,21 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\SoapHttpClient.cpp">
       <Filter>Pt-XmlRpc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Remoting\Client.cpp">
+      <Filter>Pt-Remoting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Remoting\RemoteProcedure.cpp">
+      <Filter>Pt-Remoting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Remoting\Responder.cpp">
+      <Filter>Pt-Remoting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Remoting\ServiceDefinition.cpp">
+      <Filter>Pt-Remoting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Remoting\Fault.cpp">
+      <Filter>Pt-Remoting</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

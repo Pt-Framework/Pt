@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2013 by Marc Duerner
+ * Copyright (C) 209-2014 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,11 +26,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_XMLRPC_ACTIVEPROCEDURE_H
-#define PT_XMLRPC_ACTIVEPROCEDURE_H
+#ifndef PT_REMOTING_ACTIVEPROCEDURE_H
+#define PT_REMOTING_ACTIVEPROCEDURE_H
 
-#include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/ServiceProcedure.h>
+#include <Pt/Remoting/Api.h>
+#include <Pt/Remoting/ServiceProcedure.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/Decomposer.h>
 #include <Pt/Composer.h>
@@ -1100,4 +1100,4 @@ class ActiveProcedureDef : public ServiceProcedureDef
 
 } // namespace Pt
 
-#endif // PT_XMLRPC_ACTIVEPROCEDURE_H
+#endif // PT_REMOTING_ACTIVEPROCEDURE_H

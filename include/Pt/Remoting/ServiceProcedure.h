@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2013 by Marc Duerner
+ * Copyright (C) 2009-2014 by Marc Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,10 +26,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_XMLRPC_SERVICEPROCEDURE_H
-#define PT_XMLRPC_SERVICEPROCEDURE_H
+#ifndef PT_REMOTING_SERVICEPROCEDURE_H
+#define PT_REMOTING_SERVICEPROCEDURE_H
 
-#include <Pt/XmlRpc/Api.h>
+#include <Pt/Remoting/Api.h>
+#include <Pt/Remoting/Responder.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/Decomposer.h>
 #include <Pt/Composer.h>
@@ -37,8 +38,6 @@
 namespace Pt {
 
 namespace Remoting {
-
-class Responder;
 
 /** @brief XML-RPC service procedure.
 */
@@ -108,7 +107,7 @@ class ServiceProcedureDef
 
 } // namespace Pt
 
-#endif // PT_XMLRPC_SERVICEPROCEDURE_H
+#endif // PT_REMOTING_SERVICEPROCEDURE_H
 
-#include <Pt/XmlRpc/BasicProcedure.h>
-#include <Pt/XmlRpc/ActiveProcedure.h>
+#include <Pt/Remoting/BasicProcedure.h>
+#include <Pt/Remoting/ActiveProcedure.h>

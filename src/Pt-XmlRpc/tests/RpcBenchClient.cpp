@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/XmlRpc/RemoteProcedure.h>
+#include <Pt/Remoting/RemoteProcedure.h>
 #include <Pt/XmlRpc/HttpClient.h>
 #include <Pt/Net/Endpoint.h>
 #include <Pt/System/Application.h>

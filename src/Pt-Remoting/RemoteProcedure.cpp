@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Dr. Marc Boris Duerner
+ * Copyright (C) 2013-2014 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,50 +26,45 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_XmlRpc_HttpService_h
-#define Pt_XmlRpc_HttpService_h
-
-#include <Pt/XmlRpc/Api.h>
-#include <Pt/Remoting/ServiceDefinition.h>
-#include <Pt/Http/Service.h>
-#include <Pt/Types.h>
+#include <Pt/Remoting/RemoteProcedure.h>
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Remoting {
 
-/** @brief HTTP service for XML-RPC.
+RemoteCall::RemoteCall(Client& client, const String& name)
+: _client(&client)
+, _name(name)
+{ 
+}
 
-    The %HttpService makes the procedures registered in a XML-RPC ServiceDefinition
-    available as a HTTP service. Use the HttpClient to run a RemoteProcedure accessing
-    this service.
-*/
-class PT_XMLRPC_API HttpService : public Http::Service
+
+RemoteCall::RemoteCall(Client& client, const std::string& name)
+: _client(&client)
+, _name( String::widen(name) )
+{ 
+}
+
+
+RemoteCall::RemoteCall(Client& client, const char* name)
+: _client(&client)
+, _name( String::widen(name) )
+{ 
+}
+
+
+RemoteCall::~RemoteCall()
+{ 
+    cancel(); 
+}
+
+
+void RemoteCall::cancel()
 {
-    public:
-        /** @brief Constructs with RPC service.
-        */
-        HttpService(Remoting::ServiceDefinition& rpcService);
+    if( _client->activeProcedure() == this )
+        _client->cancel();
+}
 
-        /** @brief Destructor.
-        */
-        virtual ~HttpService();
-
-    protected:
-        // inheritdoc
-        virtual Http::Responder* onGetResponder(const Http::Request&);
-
-        // inheritdoc
-        virtual void onReleaseResponder(Http::Responder* resp);
-
-    private:
-        Remoting::ServiceDefinition* _rpcService;
-        Pt::varint_t _r1;
-        Pt::varint_t _r2;
-};
-
-} // namespace XmlRpc
+} // namespace Remoting
 
 } // namespace Pt
-
-#endif // Pt_XmlRpc_HttpService_h

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2009 by Dr. Marc Boris Duerner
- * 
+ * Copyright (C) 2009-2014 by Dr. Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,50 +26,80 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_XmlRpc_HttpService_h
-#define Pt_XmlRpc_HttpService_h
-
-#include <Pt/XmlRpc/Api.h>
 #include <Pt/Remoting/ServiceDefinition.h>
-#include <Pt/Http/Service.h>
-#include <Pt/Types.h>
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Remoting {
 
-/** @brief HTTP service for XML-RPC.
+ServiceDefinition::ServiceDefinition()
+{ 
+}
 
-    The %HttpService makes the procedures registered in a XML-RPC ServiceDefinition
-    available as a HTTP service. Use the HttpClient to run a RemoteProcedure accessing
-    this service.
-*/
-class PT_XMLRPC_API HttpService : public Http::Service
+
+ServiceDefinition::~ServiceDefinition()
 {
-    public:
-        /** @brief Constructs with RPC service.
-        */
-        HttpService(Remoting::ServiceDefinition& rpcService);
+    System::MutexLock lock(_mtx);
 
-        /** @brief Destructor.
-        */
-        virtual ~HttpService();
+    ProcedureMap::iterator it;
+    for(it = _procedures.begin(); it != _procedures.end(); ++it)
+    {
+        delete it->second;
+    }
+}
 
-    protected:
-        // inheritdoc
-        virtual Http::Responder* onGetResponder(const Http::Request&);
 
-        // inheritdoc
-        virtual void onReleaseResponder(Http::Responder* resp);
+ServiceProcedure* ServiceDefinition::getProcedure(const std::string& name, Responder& resp)
+{
+    System::MutexLock lock(_mtx);
 
-    private:
-        Remoting::ServiceDefinition* _rpcService;
-        Pt::varint_t _r1;
-        Pt::varint_t _r2;
-};
+    ServiceProcedure* proc = 0;
 
-} // namespace XmlRpc
+    ProcedureMap::iterator it = _procedures.find( name );
+    if( it != _procedures.end() )
+    {
+        proc = it->second->createProcedure(resp);
+    }
+
+    return proc;
+}
+
+
+void ServiceDefinition::releaseProcedure(ServiceProcedure* proc)
+{
+    delete proc;
+}
+
+
+void ServiceDefinition::registerProcedure(const std::string& name, ServiceProcedureDef* procDef)
+{
+    System::MutexLock lock(_mtx);
+
+    ProcedureMap::iterator it = _procedures.find( name );
+    if (it == _procedures.end())
+    {
+        std::pair<const std::string, ServiceProcedureDef*> p( name, procDef );
+        _procedures.insert( p );
+    }
+    else
+    {
+        delete it->second;
+        it->second = procDef;
+    }
+}
+
+
+System::Mutex& ServiceDefinition::mutex()
+{
+    return _mtx;
+}
+
+
+System::Mutex& ServiceDefinition::mutex() const
+{
+    return _mtx;
+}
+
+} // namespace Remoting
 
 } // namespace Pt
-
-#endif // Pt_XmlRpc_HttpService_h

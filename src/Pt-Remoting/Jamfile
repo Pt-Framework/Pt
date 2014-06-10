@@ -1,0 +1,15 @@
+SubDir PT_TOP src Pt-Remoting ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirC++Flags [ FDefines PT_REMOTING_API_EXPORT ] ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Remoting ;
+
+PT_REMOTING_SOURCES = Client.cpp
+                      Fault.cpp
+                      RemoteProcedure.cpp
+                      Responder.cpp
+                      ServiceDefinition.cpp ;
+
+SharedLibrary Pt-Remoting : $(PT_REMOTING_SOURCES) ;
+LinkSharedLibraries Pt-Remoting : Pt-System Pt ;
+MakeLocate Pt-Remoting : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-Remoting : $(PT_INSTALL_LIBDIR) ;

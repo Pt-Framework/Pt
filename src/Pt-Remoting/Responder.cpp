@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2009 by Dr. Marc Boris Duerner
- * 
+ * Copyright (C) 2009-2014 by Dr. Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -26,50 +26,83 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_XmlRpc_HttpService_h
-#define Pt_XmlRpc_HttpService_h
-
-#include <Pt/XmlRpc/Api.h>
+#include <Pt/Remoting/Responder.h>
 #include <Pt/Remoting/ServiceDefinition.h>
-#include <Pt/Http/Service.h>
-#include <Pt/Types.h>
+#include <Pt/Remoting/Fault.h>
+#include <Pt/System/Logger.h>
+#include <cassert>
+
+log_define("Pt.Remoting.Responder")
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Remoting {
 
-/** @brief HTTP service for XML-RPC.
-
-    The %HttpService makes the procedures registered in a XML-RPC ServiceDefinition
-    available as a HTTP service. Use the HttpClient to run a RemoteProcedure accessing
-    this service.
-*/
-class PT_XMLRPC_API HttpService : public Http::Service
+Responder::Responder(ServiceDefinition& serviceDef)
+: _serviceDef(&serviceDef)
+, _proc(0)
 {
-    public:
-        /** @brief Constructs with RPC service.
-        */
-        HttpService(Remoting::ServiceDefinition& rpcService);
+}
 
-        /** @brief Destructor.
-        */
-        virtual ~HttpService();
 
-    protected:
-        // inheritdoc
-        virtual Http::Responder* onGetResponder(const Http::Request&);
+Responder::~Responder()
+{
+    if(_proc)
+        _serviceDef->releaseProcedure(_proc);
+}
 
-        // inheritdoc
-        virtual void onReleaseResponder(Http::Responder* resp);
 
-    private:
-        Remoting::ServiceDefinition* _rpcService;
-        Pt::varint_t _r1;
-        Pt::varint_t _r2;
-};
+Pt::Composer** Responder::setProcedure(const std::string& name)
+{
+    if(_proc)
+        _serviceDef->releaseProcedure(_proc);
 
-} // namespace XmlRpc
+    _proc = _serviceDef->getProcedure( name, *this );
+
+   Composer** args = _proc ? _proc->beginArgs() : 0;
+   
+    return args;
+}
+
+
+void Responder::beginCall(System::EventLoop& loop)
+{
+    if( ! _proc )
+    {
+        throw Fault("invalid XML-RPC");
+    }
+
+    //if( _args && *_args )
+    //{
+    //    throw Fault("expected more arguments", 5);
+    //}
+
+    _proc->beginCall(loop); // throws Fault
+}
+
+
+Pt::Decomposer* Responder::endCall()
+{
+    if( ! _proc )
+    {
+        throw Fault("invalid XML-RPC");
+    }
+
+    return _proc->endCall(); // throws Fault
+}
+
+
+void Responder::cancel()
+{
+    this->onCancel();
+    
+    if(_proc)
+        _serviceDef->releaseProcedure(_proc);
+    
+    _proc = 0;
+    //_args = 0;
+}
+
+} // namespace Remoting
 
 } // namespace Pt
-
-#endif // Pt_XmlRpc_HttpService_h

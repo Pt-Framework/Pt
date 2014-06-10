@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Dr. Marc Boris Duerner
+ * Copyright (C) 2009-2014 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,50 +26,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_XmlRpc_HttpService_h
-#define Pt_XmlRpc_HttpService_h
-
-#include <Pt/XmlRpc/Api.h>
-#include <Pt/Remoting/ServiceDefinition.h>
-#include <Pt/Http/Service.h>
-#include <Pt/Types.h>
+#include <Pt/Remoting/Fault.h>
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Remoting {
 
-/** @brief HTTP service for XML-RPC.
-
-    The %HttpService makes the procedures registered in a XML-RPC ServiceDefinition
-    available as a HTTP service. Use the HttpClient to run a RemoteProcedure accessing
-    this service.
-*/
-class PT_XMLRPC_API HttpService : public Http::Service
+Fault::Fault(const std::string& msg)
+: std::runtime_error(msg)
 {
-    public:
-        /** @brief Constructs with RPC service.
-        */
-        HttpService(Remoting::ServiceDefinition& rpcService);
+}
 
-        /** @brief Destructor.
-        */
-        virtual ~HttpService();
 
-    protected:
-        // inheritdoc
-        virtual Http::Responder* onGetResponder(const Http::Request&);
+Fault::Fault(const char* msg)
+: std::runtime_error(msg)
+{
+}
 
-        // inheritdoc
-        virtual void onReleaseResponder(Http::Responder* resp);
 
-    private:
-        Remoting::ServiceDefinition* _rpcService;
-        Pt::varint_t _r1;
-        Pt::varint_t _r2;
-};
+Fault::~Fault() throw()
+{
+}
 
-} // namespace XmlRpc
+} // namespace Remoting
 
 } // namespace Pt
-
-#endif // Pt_XmlRpc_HttpService_h

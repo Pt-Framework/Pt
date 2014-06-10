@@ -62,6 +62,12 @@ PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Xml ] : $(PT_INSTALL_INCLUDES:BS) ;
 
+SubDir PT_TOP include Pt Remoting ;
+PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Remoting ] ;
+PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
+PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
+InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt XmlRpc ] : $(PT_INSTALL_INCLUDES:BS) ;
+
 SubDir PT_TOP include Pt XmlRpc ;
 PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt XmlRpc ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
@@ -109,6 +115,7 @@ if $(SYS)
     SubInclude PT_TOP src Pt-Cma ;
     SubInclude PT_TOP src Pt-Db ;
     SubInclude PT_TOP src Pt-Http ;
+    SubInclude PT_TOP src Pt-Remoting ;
     SubInclude PT_TOP src Pt-XmlRpc ;
     SubInclude PT_TOP src Pt-Ssl ;
 
@@ -180,6 +187,9 @@ LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/Unit : [ GLOB $(PT
 PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt Xml ] ;
 LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/Xml : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h *.tpp ] ;
 
+PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt Remoting ] ;
+LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/Remoting : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h *.tpp ] ;
+
 PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt XmlRpc ] ;
 LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/XmlRpc : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h *.tpp ] ;
 
@@ -198,5 +208,6 @@ LsbPackageAdd Pt : $(PT_LSB_PACKAGE_LIBDIR) : $(PRELIB)Pt$(SUFDLL)
                                               $(PRELIB)Pt-Ssl$(SUFDLL) 
                                               $(PRELIB)Pt-Http$(SUFDLL) 
                                               $(PRELIB)Pt-Unit$(SUFDLL) 
-                                              $(PRELIB)Pt-Xml$(SUFDLL) 
+                                              $(PRELIB)Pt-Xml$(SUFDLL)
+                                              $(PRELIB)Pt-Remoting$(SUFDLL)
                                               $(PRELIB)Pt-XmlRpc$(SUFDLL) ;

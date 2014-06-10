@@ -25,20 +25,21 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include <Pt/XmlRpc/Fault.h>
 
 namespace Pt {
 
-namespace Remoting {
+namespace XmlRpc {
 
 Fault::Fault(const std::string& msg, int rc)
-: _msg(msg)
+: Remoting::Fault(msg)
 , _rc(rc)
 { }
 
 
 Fault::Fault(const char* msg, int rc)
-: _msg(msg)
+: Remoting::Fault(msg)
 , _rc(rc)
 {
 }

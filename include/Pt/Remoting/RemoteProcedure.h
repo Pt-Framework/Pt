@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Dr. Marc Boris Duerner
+ * Copyright (C) 2009-2014 by Dr. Marc Boris Duerner
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,14 +26,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_XmlRpc_RemoteProcedure_h
-#define Pt_XmlRpc_RemoteProcedure_h
+#ifndef Pt_Remoting_RemoteProcedure_h
+#define Pt_Remoting_RemoteProcedure_h
 
-#include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/Client.h>
+#include <Pt/Remoting/Api.h>
+#include <Pt/Remoting/Client.h>
 #include <Pt/SerializationContext.h>
-#include <Pt/Deserializer.h>
-#include <Pt/Serializer.h>
 #include <Pt/Signal.h>
 #include <Pt/String.h>
 #include <string>
@@ -44,7 +42,7 @@ namespace Remoting {
 
 /** @internal Documented externally.
 */
-class PT_XMLRPC_API RemoteCall
+class PT_REMOTING_API RemoteCall
 {
     public:
         RemoteCall(Client& client, const String& name);
@@ -166,6 +164,6 @@ class RemoteProcedureBase : public RemoteCall
 
 } // namespace Pt
 
-#include <Pt/XmlRpc/RemoteProcedure.tpp>
+#include <Pt/Remoting/RemoteProcedure.tpp>
 
-#endif // Pt_XmlRpc_RemoteProcedure_h
+#endif // Pt_Remoting_RemoteProcedure_h

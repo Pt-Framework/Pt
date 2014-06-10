@@ -30,7 +30,7 @@
 #define Pt_XmlRpc_SoapServiceDefinition_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/ServiceDefinition.h>
+#include <Pt/Remoting/ServiceDefinition.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/String.h>
 #include <Pt/Types.h>

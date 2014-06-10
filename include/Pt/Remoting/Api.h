@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2013 by Dr. Marc Boris Duerner
- * 
+ * Copyright (C) 2009-2014 by Dr. Marc Boris Duerner
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -25,45 +25,30 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include <Pt/XmlRpc/RemoteProcedure.h>
+#ifndef PT_REMOTING_API_H
+#define PT_REMOTING_API_H
+
+#include <Pt/Api.h>
+
+#define PT_REMOTING_VERSION_MAJOR 1
+#define PT_REMOTING_VERSION_MINOR 0
+#define PT_REMOTING_VERSION_REVISION 1
+
+#if defined(PT_REMOTING_API_EXPORT)
+#    define PT_REMOTING_API PT_EXPORT
+#  else
+#    define PT_REMOTING_API PT_IMPORT
+#  endif
 
 namespace Pt {
 
+/** @namespace Pt::Remoting
+    @brief Remote services and clients.
+*/
 namespace Remoting {
-
-RemoteCall::RemoteCall(Client& client, const String& name)
-: _client(&client)
-, _name(name)
-{ 
-}
-
-
-RemoteCall::RemoteCall(Client& client, const std::string& name)
-: _client(&client)
-, _name( String::widen(name) )
-{ 
-}
-
-
-RemoteCall::RemoteCall(Client& client, const char* name)
-: _client(&client)
-, _name( String::widen(name) )
-{ 
-}
-
-
-RemoteCall::~RemoteCall()
-{ 
-    cancel(); 
-}
-
-
-void RemoteCall::cancel()
-{
-    if( _client->activeProcedure() == this )
-        _client->cancel();
-}
 
 } // namespace Remoting
 
 } // namespace Pt
+
+#endif

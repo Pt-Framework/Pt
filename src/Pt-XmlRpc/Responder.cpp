@@ -28,7 +28,7 @@
 
 #include <Pt/XmlRpc/Responder.h>
 #include <Pt/XmlRpc/Fault.h>
-#include <Pt/XmlRpc/ServiceDefinition.h>
+#include <Pt/Remoting/ServiceDefinition.h>
 #include <Pt/Xml/XmlError.h>
 #include <Pt/Xml/StartElement.h>
 #include <Pt/Xml/Characters.h>
@@ -41,80 +41,6 @@
 log_define("Pt.XmlRpc.Responder")
 
 namespace Pt {
-
-namespace Remoting {
-
-///////////////////////////////////////////////////////////////////////////////
-// SoapResponderBase
-///////////////////////////////////////////////////////////////////////////////
-
-Responder::Responder(Remoting::ServiceDefinition& serviceDef)
-: _serviceDef(&serviceDef)
-, _proc(0)
-//, _args(0)
-{
-}
-
-
-Responder::~Responder()
-{
-    if(_proc)
-        _serviceDef->releaseProcedure(_proc);
-}
-
-
-Pt::Composer** Responder::setProcedure(const std::string& name)
-{
-    if(_proc)
-        _serviceDef->releaseProcedure(_proc);
-
-    _proc = _serviceDef->getProcedure( name, *this );
-
-   Composer** args = _proc ? _proc->beginArgs() : 0;
-   
-    return args;
-}
-
-
-void Responder::beginCall(System::EventLoop& loop)
-{
-    if( ! _proc )
-    {
-        throw Fault("invalid XML-RPC", 4);
-    }
-
-    //if( _args && *_args )
-    //{
-    //    throw Fault("expected more arguments", 5);
-    //}
-
-    _proc->beginCall(loop); // throws Fault
-}
-
-
-Pt::Decomposer* Responder::endCall()
-{
-    if( ! _proc )
-    {
-        throw Fault("invalid XML-RPC", 4);
-    }
-
-    return _proc->endCall(); // throws Fault
-}
-
-
-void Responder::cancel()
-{
-    this->onCancel();
-    
-    if(_proc)
-        _serviceDef->releaseProcedure(_proc);
-    
-    _proc = 0;
-    //_args = 0;
-}
-
-} // namespace Remoting
 
 namespace XmlRpc {
 
@@ -167,6 +93,7 @@ Responder::Responder(Remoting::ServiceDefinition& def)
 , _ts(&_utf8)
 , _result(0)
 , _formatter(_ts)
+, _fault("", 0)
 , _isFault(false)
 {
 }
@@ -242,7 +169,7 @@ bool Responder::parseMessage()
     }
     catch(const Fault& fault)
     {
-        setFault(fault.rc(), fault.text().c_str() );
+        setFault(fault.rc(), fault.what() );
     }
 
     return true;
@@ -261,16 +188,21 @@ void Responder::finishMessage(System::EventLoop& loop)
     {
         if( _args && *_args )
         {
-            throw Fault("expected more arguments", 5);
+            throw Fault("expected more arguments", Fault::InvalidMethodParameters);
         }
 
         beginCall(loop);
     }
     catch(const Fault& fault)
     {
-        setFault(fault.rc(), fault.text().c_str() );
+        setFault(fault.rc(), fault.what() );
         onFault(_fault);
     }
+    catch(const Remoting::Fault& fault)
+    {
+        setFault( Fault::InternalXmlRpcError, fault.what() );
+        onFault(_fault);
+    } 
 }
 
 
@@ -283,7 +215,12 @@ void Responder::onReady()
     }
     catch(const Fault& fault)
     {
-        setFault( fault.rc(), fault.text().c_str() );
+        setFault( fault.rc(), fault.what() );
+        onFault(_fault);
+    } 
+    catch(const Remoting::Fault& fault)
+    {
+        setFault( Fault::InternalXmlRpcError, fault.what() );
         onFault(_fault);
     } 
 }
@@ -307,7 +244,7 @@ void Responder::beginResult(std::ostream& os)
 void Responder::beginFault(std::ostream& os, const Fault& fault)
 {
     int rc = fault.rc();
-    const char* msg = fault.text().c_str();
+    const char* msg = fault.what();
 
     // text stream might still have bytes in text buffer
     _ts.flush();
@@ -380,8 +317,7 @@ void Responder::finishResult()
 
 void Responder::setFault(int rc, const char* msg)
 {
-    _fault.setRc(rc);
-    _fault.setText(msg);
+    _fault = Fault(msg, rc);
     _isFault = true;
 }
 

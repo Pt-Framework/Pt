@@ -28,7 +28,6 @@
 
 #include <Pt/XmlRpc/SoapHttpService.h>
 #include <Pt/XmlRpc/Fault.h>
-#include <Pt/XmlRpc/ServiceDefinition.h>
 #include <Pt/Xml/XmlError.h>
 #include <Pt/Xml/StartElement.h>
 #include <Pt/Xml/Characters.h>
@@ -92,6 +91,7 @@ SoapResponder::SoapResponder(const SoapServiceDeclaration& decl, Remoting::Servi
 , _ts(&_utf8)
 , _result(0)
 , _formatter(_ts)
+, _fault("", 0)
 , _isFault(false)
 {
 }
@@ -167,7 +167,7 @@ bool SoapResponder::parseMessage()
     }
     catch(const Fault& fault)
     {
-        setFault(fault.rc(), fault.text().c_str() );
+        setFault(fault.rc(), fault.what() );
     }
 
     return true;
@@ -193,7 +193,12 @@ void SoapResponder::finishMessage(System::EventLoop& loop)
     }
     catch(const Fault& fault)
     {
-        setFault(fault.rc(), fault.text().c_str() );
+        setFault(fault.rc(), fault.what() );
+        onFault(_fault);
+    }
+    catch(const Remoting::Fault& fault)
+    {
+        setFault( Fault::InternalXmlRpcError, fault.what() );
         onFault(_fault);
     }
 }
@@ -208,9 +213,14 @@ void SoapResponder::onReady()
     }
     catch(const Fault& fault)
     {
-        setFault( fault.rc(), fault.text().c_str() );
+        setFault( fault.rc(), fault.what() );
         onFault(_fault);
     } 
+    catch(const Remoting::Fault& fault)
+    {
+        setFault( Fault::InternalXmlRpcError, fault.what() );
+        onFault(_fault);
+    }
 }
 
 
@@ -242,7 +252,7 @@ void SoapResponder::beginResult(std::ostream& os)
 void SoapResponder::beginFault(std::ostream& os, const Fault& fault)
 {
     int rc = fault.rc();
-    const char* msg = fault.text().c_str();
+    const char* msg = fault.what();
 
     // text stream might still have bytes in text buffer
     _ts.flush();
@@ -302,8 +312,7 @@ void SoapResponder::finishResult()
 
 void SoapResponder::setFault(int rc, const char* msg)
 {
-    _fault.setRc(rc);
-    _fault.setText(msg);
+    _fault = Fault(msg, rc);
     _isFault = true;
 }
 

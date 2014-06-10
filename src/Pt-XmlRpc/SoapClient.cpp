@@ -26,15 +26,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Pt/XmlRpc/SoapClient.h"
-#include "Pt/XmlRpc/RemoteProcedure.h"
+#include <Pt/XmlRpc/SoapClient.h>
 #include <Pt/XmlRpc/SoapServiceDefinition.h>
-#include "Pt/Xml/XmlWriter.h"
-#include "Pt/Xml/XmlError.h"
-#include "Pt/Xml/StartElement.h"
-#include "Pt/Xml/Characters.h"
-#include "Pt/Xml/EndElement.h"
-#include "Pt/System/Logger.h"
+#include <Pt/Remoting/RemoteProcedure.h>
+#include <Pt/Xml/XmlWriter.h>
+#include <Pt/Xml/XmlError.h>
+#include <Pt/Xml/StartElement.h>
+#include <Pt/Xml/Characters.h>
+#include <Pt/Xml/EndElement.h>
+#include <Pt/System/Logger.h>
 #include <cassert>
 
 log_define("Pt.XmlRpc.Client")
@@ -87,6 +87,7 @@ SoapClient::SoapClient(SoapServiceDeclaration& service)
 , _serviceDef(&service)
 , _op(0)
 , _fmt(_ts)
+, _fault("", 0)
 , _isFault(false)
 {
 }
@@ -293,8 +294,7 @@ bool SoapClient::parseResult()
 
 void SoapClient::setFault(int rc, const char* msg)
 {
-    _fault.setRc(rc);
-    _fault.setText(msg);
+    _fault = Fault(msg, rc);
     _isFault = true;
 }
 
@@ -491,7 +491,7 @@ bool SoapClient::advance(const Pt::Xml::Node& node)
             const Xml::Characters* c = Xml::toCharacters(&node);
             if(c)
             {
-                _fault.setRc(0);
+                _fault = Fault(_fault.what(), 0);
             }
             
             break;
@@ -528,7 +528,7 @@ bool SoapClient::advance(const Pt::Xml::Node& node)
             const Xml::Characters* c = Xml::toCharacters(&node);
             if(c)
             {
-                _fault.setText( c->content().narrow() );
+                _fault = Fault( c->content().narrow(), _fault.rc() );
             }
             
             break;

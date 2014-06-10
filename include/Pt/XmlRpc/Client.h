@@ -32,6 +32,7 @@
 #include <Pt/XmlRpc/Api.h>
 #include <Pt/XmlRpc/Fault.h>
 #include <Pt/XmlRpc/Formatter.h>
+#include <Pt/Remoting/Client.h>
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Composer.h>
@@ -40,80 +41,9 @@
 #include <Pt/TextStream.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/Types.h>
-#include <Pt/SerializationContext.h>
 #include <string>
 
 namespace Pt {
-
-namespace Remoting {
-
-class RemoteCall;
-
-/** @brief A client for remote procedure calls.
-*/
-class PT_XMLRPC_API Client : private NonCopyable
-{
-    public:
-        Client();
-
-        virtual ~Client();
-
-        //! @internal
-        SerializationContext& context()
-        { return _ctx; }
-
-        //! @internal
-        void beginCall(Composer& r, RemoteCall& call, Decomposer** argv, unsigned argc);
-
-        //! @internal
-        void endCall();
-
-        //! @internal
-        void call(Composer& r, RemoteCall& call, Decomposer** argv, unsigned argc);
-
-        /** @brief Cancels the currently executing procedure.
-        */
-        void cancel();
-
-        /** @brief The currently executing procedure.
-        */
-        const RemoteCall* activeProcedure() const
-        { return _method; }
-
-        /** @brief Indicates if the procedure has failed.
-        */
-        virtual bool isFailed() const = 0;
-
-    protected:
-        /** @brief Parses the XML-RPC result.
-
-            This method is used by derived Clients after the XML-RPC result 
-            has been parsed by parseResult(). The current RemoteProcedure will
-            receive completion notification to process the result.
-        */
-        void setReady();
-
-        virtual void onBeginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc) = 0;
-
-        virtual void onEndCall() = 0;
-
-        virtual void onCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc) = 0;
-
-        /** @brief A remote procedure is cancelled.
-
-            Derived Clients implement this method to cancel the remote
-            procedure call.
-        */
-        virtual void onCancel() = 0;
-
-    private:
-        SerializationContext _ctx;
-        RemoteCall* _method;
-        Pt::varint_t _r1;
-        Pt::varint_t _r2;
-};
-
-} // namespace Remoting
 
 namespace XmlRpc {
 

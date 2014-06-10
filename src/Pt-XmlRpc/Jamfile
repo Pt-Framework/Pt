@@ -9,9 +9,7 @@ PT_XMLRPC_SOURCES = Client.cpp
                     HttpClient.cpp
                     HttpResponder.cpp
                     HttpService.cpp
-                    RemoteProcedure.cpp
                     Responder.cpp
-                    ServiceDefinition.cpp
                     SoapClient.cpp
                     SoapFormatter.cpp
                     SoapHttpClient.cpp
@@ -19,7 +17,7 @@ PT_XMLRPC_SOURCES = Client.cpp
                     SoapServiceDefinition.cpp ;
 
 SharedLibrary Pt-XmlRpc : $(PT_XMLRPC_SOURCES) ;
-LinkSharedLibraries Pt-XmlRpc :  Pt-Xml Pt-Http Pt-Net Pt-System Pt ;
+LinkSharedLibraries Pt-XmlRpc :  Pt-Xml Pt-Http Pt-Net Pt-Remoting Pt-System Pt ;
 MakeLocate Pt-XmlRpc : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-XmlRpc : $(PT_INSTALL_LIBDIR) ;
 

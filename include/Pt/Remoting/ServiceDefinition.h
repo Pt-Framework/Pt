@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 by Dr. Marc Boris Duerner
+ * Copyright (C) 2009-2014 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,12 +26,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_XmlRpc_ServiceDefinition_h
-#define Pt_XmlRpc_ServiceDefinition_h
+#ifndef Pt_Remoting_ServiceDefinition_h
+#define Pt_Remoting_ServiceDefinition_h
 
-#include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/Responder.h>
-#include <Pt/XmlRpc/ServiceProcedure.h>
+#include <Pt/Remoting/Api.h>
+#include <Pt/Remoting/ServiceProcedure.h>
 #include <Pt/System/Mutex.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/Types.h>
@@ -42,7 +41,9 @@ namespace Pt {
 
 namespace Remoting {
 
-class PT_XMLRPC_API ServiceDefinition : private NonCopyable
+class Responder;
+
+class PT_REMOTING_API ServiceDefinition : private NonCopyable
 {
     public:
         ServiceDefinition();
@@ -324,4 +325,4 @@ class PT_XMLRPC_API ServiceDefinition : private NonCopyable
 
 } // namespace Pt
 
-#endif // Pt_XmlRpc_ServiceDefinition_h
+#endif // Pt_Remoting_ServiceDefinition_h

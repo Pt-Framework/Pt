@@ -30,18 +30,17 @@
 #define Pt_XmlRpc_Fault_h
 
 #include <Pt/XmlRpc/Api.h>
-#include <Pt/Utf8Codec.h>
+#include <Pt/Remoting/Fault.h>
 #include <Pt/SerializationInfo.h>
-#include <stdexcept>
 #include <string>
 
 namespace Pt {
 
-namespace Remoting {
+namespace XmlRpc {
 
 /** @brief XML-RPC fault exception.
 */
-class PT_XMLRPC_API Fault : public std::exception
+class PT_XMLRPC_API Fault : public Remoting::Fault
 {
     friend void operator >>=(const Pt::SerializationInfo&, Fault&);
 
@@ -70,73 +69,38 @@ class PT_XMLRPC_API Fault : public std::exception
         */
         Fault(const char* msg, int rc);
 
-        /** @brief Constructor.
-        */
-        Fault()
-        : _rc(0)
-        { }
-
         /** @brief Destructor.
         */
         ~Fault() throw()
         { }
-
-        /** @brief Clears all content.
-        */
-        void clear()
-        {
-            _rc = 0;
-            _msg.clear();
-        }
 
         /** @brief Returns the error code.
         */
         int rc() const
         { return _rc; }
 
-        /** @brief Sets the error code.
-        */
-        void setRc(int rc)
-        { _rc = rc; }
-
-        /** @brief Sets the error message.
-        */
-        void setText(const std::string& msg)
-        { _msg = msg; }
-
-        /** @brief Resturns the error message.
-        */
-        const std::string& text() const
-        { return _msg; }
-
-        // inheritdoc
-        const char* what() const throw()
-        { return _msg.c_str(); }
-
     private:
-        std::string _msg;
         int _rc;
 };
 
 //! @internal
 inline void operator >>=(const Pt::SerializationInfo& si, Fault& fault)
 {
-    si.getMember("faultCode") >>= fault._rc;
-    si.getMember("faultString").getString( fault._msg );
+    int rc = 0;
+    std::string msg;
+
+    si.getMember("faultCode") >>= rc;
+    si.getMember("faultString").getString(msg );
+    
+    fault = Fault(msg, rc);
 }
 
 //! @internal
 inline void operator <<=(Pt::SerializationInfo& si, const Fault& fault)
 {
     si.addMember("faultCode") <<= static_cast<Pt::int32_t>( fault.rc() );
-    si.addMember("faultString").setString( fault.text() );
+    si.addMember("faultString").setString( fault.what() );
 }
-
-} // namespace Remoting
-
-namespace XmlRpc {
-  
-    typedef Remoting::Fault Fault;
 
 } // namespace XmlRpc
 
