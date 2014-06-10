@@ -28,8 +28,8 @@
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Unit/TestMain.h"
-#include "Pt/XmlRpc/SoapHttpService.h"
-#include "Pt/XmlRpc/SoapHttpClient.h"
+#include "Pt/Soap/SoapHttpService.h"
+#include "Pt/Soap/SoapHttpClient.h"
 #include "Pt/XmlRpc/HttpService.h"
 #include "Pt/XmlRpc/HttpClient.h"
 #include "Pt/XmlRpc/Fault.h"
@@ -619,14 +619,14 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         // SoapArray
         //
 
-        class CalcSoapServiceDeclaration: public Pt::XmlRpc::SoapServiceDeclaration
+        class CalcSoapServiceDeclaration: public Pt::Soap::SoapServiceDeclaration
         {
             public:
-                class ArrayMultiply : public Pt::XmlRpc::Operation
+                class ArrayMultiply : public Pt::Soap::Operation
                 {
                     public:
                         ArrayMultiply()
-                        : Pt::XmlRpc::Operation("multiply", "multiplyResponse")
+                        : Pt::Soap::Operation("multiply", "multiplyResponse")
                         , _intArrayType("IntArrayType")
                         {
                             _intArrayType.setElement("number", _intType);
@@ -638,12 +638,12 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
                         }
 
                     private:
-                        Pt::XmlRpc::IntegerType _intType;
-                        Pt::XmlRpc::ArrayType _intArrayType;
+                        Pt::Soap::IntegerType _intType;
+                        Pt::Soap::ArrayType _intArrayType;
                 };
 
                 CalcSoapServiceDeclaration()
-                : Pt::XmlRpc::SoapServiceDeclaration("calc")
+                : Pt::Soap::SoapServiceDeclaration("calc")
                 {
                     setTargetNamespace("http://tempuri.org/");
                     addOperation(_arrayMultiply);
@@ -657,14 +657,14 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
         {
             CalcSoapServiceDeclaration serviceDecl;
 
-            Pt::XmlRpc::SoapServiceDefinition serviceDef(serviceDecl);
+            Pt::Soap::SoapServiceDefinition serviceDef(serviceDecl);
             serviceDef.registerProcedure("multiply", *this, &PtXmlRpcTest::multiplyVector);
 
-            Pt::XmlRpc::SoapHttpService httpService(serviceDef);
+            Pt::Soap::SoapHttpService httpService(serviceDef);
             Pt::Http::MapUrl servlet("/" + serviceDecl.name(), httpService);
             _server->addServlet(servlet);
 
-            Pt::XmlRpc::SoapHttpClient client(serviceDecl, *_loop);
+            Pt::Soap::SoapHttpClient client(serviceDecl, *_loop);
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
 

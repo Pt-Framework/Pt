@@ -26,13 +26,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_XmlRpc_SoapClient_h
-#define Pt_XmlRpc_SoapClient_h
+#ifndef Pt_Soap_SoapClient_h
+#define Pt_Soap_SoapClient_h
 
-#include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/Fault.h>
-#include <Pt/XmlRpc/SoapFormatter.h>
-#include <Pt/XmlRpc/Client.h>
+#include <Pt/Soap/Api.h>
+#include <Pt/Soap/Fault.h>
+#include <Pt/Soap/SoapFormatter.h>
+#include <Pt/Remoting/Client.h>
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Composer.h>
@@ -44,14 +44,14 @@
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Soap {
 
 class Operation;
 class SoapServiceDeclaration;
 
 /** @brief A client for remote procedure calls.
 */
-class PT_XMLRPC_API SoapClient : public Pt::Remoting::Client
+class PT_SOAP_API SoapClient : public Pt::Remoting::Client
 {
     public:
         /** @brief Constructor.
@@ -192,8 +192,8 @@ class PT_XMLRPC_API SoapClient : public Pt::Remoting::Client
         Pt::varint_t _r2;
 };
 
-} // namespace XmlRpc
+} // namespace Soap
 
 } // namespace Pt
 
-#endif // Pt_XmlRpc_Client_h
+#endif // Pt_Soap_Client_h

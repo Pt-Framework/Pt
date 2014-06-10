@@ -29,7 +29,7 @@
 #ifndef Pt_XmlRpc_SoapFormatter_h
 #define Pt_XmlRpc_SoapFormatter_h
 
-#include <Pt/XmlRpc/Api.h>
+#include <Pt/Soap/Api.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/Composer.h>
 #include <Pt/Formatter.h>
@@ -41,13 +41,13 @@
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Soap {
 
 class Parameter;
 
 /** @internal @brief Formatter to read and write XML-RPC messages.
 */
-class PT_XMLRPC_API SoapFormatter : public Pt::Formatter
+class PT_SOAP_API SoapFormatter : public Pt::Formatter
                                   , private NonCopyable
 {
     public:
@@ -147,8 +147,8 @@ class PT_XMLRPC_API SoapFormatter : public Pt::Formatter
         Pt::varint_t _r2;
 };
 
-} // namespace XmlRpc
+} // namespace Soap
 
 } // namespace Pt
 
-#endif // Pt_XmlRpc_Formatter_h
+#endif // Pt_Soap_Formatter_h

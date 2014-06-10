@@ -29,8 +29,8 @@
 #ifndef Pt_XmlRpc_SoapHttpClient_h
 #define Pt_XmlRpc_SoapHttpClient_h
 
-#include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/SoapClient.h>
+#include <Pt/Soap/Api.h>
+#include <Pt/Soap/SoapClient.h>
 #include <Pt/Http/Client.h>
 #include <Pt/Connectable.h>
 #include <Pt/Types.h>
@@ -38,11 +38,11 @@
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Soap {
 
 /** @brief A client for SOAP via HTTP.
 */
-class PT_XMLRPC_API SoapHttpClient : public SoapClient
+class PT_SOAP_API SoapHttpClient : public SoapClient
                                    , public Connectable
 {
     public:
@@ -144,8 +144,8 @@ class PT_XMLRPC_API SoapHttpClient : public SoapClient
         Pt::varint_t _r2;
 };
 
-} // namespace XmlRpc
+} // namespace Soap
 
 } // namespace Pt
 
-#endif // Pt_XmlRpc_HttpClient_h
+#endif // Pt_Soap_HttpClient_h

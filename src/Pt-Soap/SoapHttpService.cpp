@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/XmlRpc/SoapHttpService.h>
-#include <Pt/XmlRpc/Fault.h>
+#include <Pt/Soap/SoapHttpService.h>
+#include <Pt/Soap/Fault.h>
 #include <Pt/Xml/XmlError.h>
 #include <Pt/Xml/StartElement.h>
 #include <Pt/Xml/Characters.h>
@@ -74,7 +74,7 @@ static const Pt::Char SOAP_REASON_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Soap {
 
 ///////////////////////////////////////////////////////////////////////////////
 // SoapResponder
@@ -355,11 +355,11 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
 
                 _op = _serviceDecl->getOperation( se.name().local() );
                 if( ! _op )
-                    throw Fault("no such procedure", Pt::XmlRpc::Fault::MethodNotFound);
+                    throw Fault("no such procedure", Fault::MethodNotFound);
 
                 _args = setProcedure( se.name().local().narrow() );
                 if( ! _args )
-                    throw Fault("no such procedure", Pt::XmlRpc::Fault::MethodNotFound);
+                    throw Fault("no such procedure", Fault::MethodNotFound);
 
                 _state = OnMethod;
             }
@@ -383,7 +383,7 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
 
                 const Parameter* param = _op->getInput( se.name().local().narrow() );
                 if( ! param )
-                    throw Fault("no such parameter", Pt::XmlRpc::Fault::MethodNotFound);
+                    throw Fault("no such parameter", Fault::MethodNotFound);
 
                 _formatter.setParameter(*param);
                 _formatter.beginParse(**_args);
@@ -444,7 +444,7 @@ bool SoapResponder::advance(const Pt::Xml::Node& node)
 
 SoapHttpResponder::SoapHttpResponder(SoapHttpService& httpService, const SoapServiceDeclaration& decl, Remoting::ServiceDefinition& def)
 : Http::Responder(httpService)
-, XmlRpc::SoapResponder(decl, def)
+, SoapResponder(decl, def)
 , _reply(0)
 {
 }
@@ -618,6 +618,6 @@ void SoapHttpService::onReleaseResponder(Http::Responder* resp)
     delete resp;
 }
 
-} // namespace XmlRpc
+} // namespace Soap
 
 } // namespace Pt

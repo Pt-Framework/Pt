@@ -74,6 +74,12 @@ PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt XmlRpc ] : $(PT_INSTALL_INCLUDES:BS) ;
 
+SubDir PT_TOP include Pt Soap ;
+PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Soap ] ;
+PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
+PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
+InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt XmlRpc ] : $(PT_INSTALL_INCLUDES:BS) ;
+
 SubDir PT_TOP include Pt Unit ;
 PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Unit ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
@@ -117,6 +123,7 @@ if $(SYS)
     SubInclude PT_TOP src Pt-Http ;
     SubInclude PT_TOP src Pt-Remoting ;
     SubInclude PT_TOP src Pt-XmlRpc ;
+    SubInclude PT_TOP src Pt-Soap ;
     SubInclude PT_TOP src Pt-Ssl ;
 
     if $(WITH_OPENSSL)
@@ -190,6 +197,9 @@ LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/Xml : [ GLOB $(PT_
 PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt Remoting ] ;
 LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/Remoting : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h *.tpp ] ;
 
+PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt Soap ] ;
+LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/Soap : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h *.tpp ] ;
+
 PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt XmlRpc ] ;
 LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/XmlRpc : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h *.tpp ] ;
 
@@ -210,4 +220,5 @@ LsbPackageAdd Pt : $(PT_LSB_PACKAGE_LIBDIR) : $(PRELIB)Pt$(SUFDLL)
                                               $(PRELIB)Pt-Unit$(SUFDLL) 
                                               $(PRELIB)Pt-Xml$(SUFDLL)
                                               $(PRELIB)Pt-Remoting$(SUFDLL)
+                                              $(PRELIB)Pt-Soap$(SUFDLL)
                                               $(PRELIB)Pt-XmlRpc$(SUFDLL) ;

@@ -26,10 +26,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_XmlRpc_SoapServiceDefinition_h
-#define Pt_XmlRpc_SoapServiceDefinition_h
+#ifndef Pt_Soap_SoapServiceDefinition_h
+#define Pt_Soap_SoapServiceDefinition_h
 
-#include <Pt/XmlRpc/Api.h>
+#include <Pt/Soap/Api.h>
 #include <Pt/Remoting/ServiceDefinition.h>
 #include <Pt/NonCopyable.h>
 #include <Pt/String.h>
@@ -39,7 +39,7 @@
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Soap {
 
 class Parameter;
 
@@ -175,7 +175,7 @@ class Parameter
 };
 
 
-class PT_XMLRPC_API BooleanType : public SimpleType
+class PT_SOAP_API BooleanType : public SimpleType
 {
     public:
         BooleanType();
@@ -188,7 +188,7 @@ class PT_XMLRPC_API BooleanType : public SimpleType
 };
 
 
-class PT_XMLRPC_API IntegerType : public SimpleType
+class PT_SOAP_API IntegerType : public SimpleType
 {
     public:
         IntegerType();
@@ -202,7 +202,7 @@ class PT_XMLRPC_API IntegerType : public SimpleType
 };
 
 
-class PT_XMLRPC_API FloatType : public SimpleType
+class PT_SOAP_API FloatType : public SimpleType
 {
     public:
         FloatType();
@@ -217,7 +217,7 @@ class PT_XMLRPC_API FloatType : public SimpleType
 };
 
 
-class PT_XMLRPC_API StringType : public SimpleType
+class PT_SOAP_API StringType : public SimpleType
 {
     public:
         StringType();
@@ -232,7 +232,7 @@ class PT_XMLRPC_API StringType : public SimpleType
 };
 
 
-class PT_XMLRPC_API StructType : public ComplexType
+class PT_SOAP_API StructType : public ComplexType
 {
     public:
         StructType(const std::string& name);
@@ -256,7 +256,7 @@ class PT_XMLRPC_API StructType : public ComplexType
 };
 
 
-class PT_XMLRPC_API ArrayType : public ComplexType
+class PT_SOAP_API ArrayType : public ComplexType
 {
     public:
         ArrayType(const std::string& name);
@@ -280,7 +280,7 @@ class PT_XMLRPC_API ArrayType : public ComplexType
 };
 
 
-class PT_XMLRPC_API Operation : private NonCopyable
+class PT_SOAP_API Operation : private NonCopyable
 {
     public:
         typedef std::vector<Parameter> ParameterList;
@@ -318,7 +318,7 @@ class PT_XMLRPC_API Operation : private NonCopyable
 };
 
 
-class PT_XMLRPC_API SoapServiceDeclaration 
+class PT_SOAP_API SoapServiceDeclaration 
 {
     public:
         SoapServiceDeclaration(const std::string& name);
@@ -351,7 +351,7 @@ class PT_XMLRPC_API SoapServiceDeclaration
 };
 
 
-class PT_XMLRPC_API SoapServiceDefinition : public Remoting::ServiceDefinition
+class PT_SOAP_API SoapServiceDefinition : public Remoting::ServiceDefinition
 {
     public:
         SoapServiceDefinition(const SoapServiceDeclaration& decl);
@@ -414,8 +414,8 @@ class BasicProcedureDefinition : public Operation
         BasicParameter<A2> _a2Def;
 };
 
-} // namespace XmlRpc
+} // namespace Soap
 
 } // namespace Pt
 
-#endif // Pt_XmlRpc_SoapServiceDefinition_h
+#endif // Pt_Soap_SoapServiceDefinition_h

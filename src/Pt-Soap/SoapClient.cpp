@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/XmlRpc/SoapClient.h>
-#include <Pt/XmlRpc/SoapServiceDefinition.h>
+#include <Pt/Soap/SoapClient.h>
+#include <Pt/Soap/SoapServiceDefinition.h>
 #include <Pt/Remoting/RemoteProcedure.h>
 #include <Pt/Xml/XmlWriter.h>
 #include <Pt/Xml/XmlError.h>
@@ -37,11 +37,11 @@
 #include <Pt/System/Logger.h>
 #include <cassert>
 
-log_define("Pt.XmlRpc.Client")
+log_define("Pt.Soap.Client")
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Soap {
 
 static const Pt::Char XMLRPC_XMLDECL[] = { '<', '?', 'x', 'm', 'l', ' ', 
     'v', 'e', 'r', 's', 'i', 'o', 'n', '=', '"', '1', '.', '0' , '"', ' ', 
@@ -395,7 +395,7 @@ bool SoapClient::advance(const Pt::Xml::Node& node)
 
                 const Parameter* param = _op->getOutput();
                 if( ! param )
-                    throw Fault("undefined output parameter", Pt::XmlRpc::Fault::MethodNotFound);
+                    throw Fault("undefined output parameter", Fault::MethodNotFound);
 
                 _fmt.setParameter(*param);
                 _state = OnParam;
@@ -567,6 +567,6 @@ bool SoapClient::advance(const Pt::Xml::Node& node)
     return _state == OnEnvelopeEnd;
 }
 
-} // namespace XmlRpc
+} // namespace Soap
 
 } // namespace Pt

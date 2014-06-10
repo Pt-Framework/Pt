@@ -26,16 +26,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_XmlRpc_SoapHttpService_h
-#define Pt_XmlRpc_SoapHttpService_h
+#ifndef Pt_Soap_SoapHttpService_h
+#define Pt_Soap_SoapHttpService_h
 
-#include <Pt/XmlRpc/Api.h>
-#include <Pt/XmlRpc/SoapServiceDefinition.h>
-#include <Pt/XmlRpc/SoapFormatter.h>
+#include <Pt/Soap/Api.h>
+#include <Pt/Soap/SoapServiceDefinition.h>
+#include <Pt/Soap/SoapFormatter.h>
+#include <Pt/Soap/Fault.h>
 #include <Pt/Http/Service.h>
 #include <Pt/Http/Responder.h>
 #include <Pt/Types.h>
-#include <Pt/XmlRpc/Fault.h>
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlReader.h>
 #include <Pt/System/EventLoop.h>
@@ -46,11 +46,11 @@
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Soap {
 
 /** @brief Dispatches requests to a service procedure.
 */
-class PT_XMLRPC_API SoapResponder : public Remoting::Responder
+class PT_SOAP_API SoapResponder : public Remoting::Responder
 {
     public:
         /** @brief Construct with Service declaration and definition.
@@ -187,7 +187,7 @@ class PT_XMLRPC_API SoapResponder : public Remoting::Responder
 
 class SoapHttpService;
 
-class PT_XMLRPC_API SoapHttpResponder : public Http::Responder
+class PT_SOAP_API SoapHttpResponder : public Http::Responder
                                       , public SoapResponder
 {
     public:
@@ -224,7 +224,7 @@ class PT_XMLRPC_API SoapHttpResponder : public Http::Responder
          Http::Reply* _reply;
 };
 
-class PT_XMLRPC_API SoapHttpService : public Http::Service
+class PT_SOAP_API SoapHttpService : public Http::Service
 {
     public:
         /** @brief Constructor.
@@ -251,8 +251,8 @@ class PT_XMLRPC_API SoapHttpService : public Http::Service
         Pt::varint_t _r2;
 };
 
-} // namespace XmlRpc
+} // namespace Soap
 
 } // namespace Pt
 
-#endif // Pt_XmlRpc_SoapHttpService_h
+#endif // Pt_Soap_SoapHttpService_h

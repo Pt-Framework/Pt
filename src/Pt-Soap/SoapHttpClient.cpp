@@ -26,15 +26,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/XmlRpc/SoapHttpClient.h>
-#include <Pt/XmlRpc/Fault.h>
+#include <Pt/Soap/SoapHttpClient.h>
+#include <Pt/Soap/Fault.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
 #include <Pt/Http/HttpError.h>
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Soap {
 
 SoapHttpClient::SoapHttpClient(SoapServiceDeclaration& service)
 : SoapClient(service)
@@ -300,6 +300,6 @@ void SoapHttpClient::onReply(Http::Client& client)
     setReady();
 }
 
-} // namespace XmlRpc
+} // namespace Soap
 
 } // namespace Pt

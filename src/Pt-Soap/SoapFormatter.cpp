@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/XmlRpc/SoapFormatter.h>
-#include <Pt/XmlRpc/SoapServiceDefinition.h>
+#include <Pt/Soap/SoapFormatter.h>
+#include <Pt/Soap/SoapServiceDefinition.h>
 #include <Pt/Xml/XmlWriter.h>
 #include <Pt/Xml/StartElement.h>
 #include <Pt/Xml/EndElement.h>
@@ -40,7 +40,7 @@
 
 #define log_define(e)
 #define log_debug(e)
-log_define("Pt.XmlRpc.SoapFormatter")
+log_define("Pt.Soap.SoapFormatter")
 
 namespace  {
 
@@ -122,7 +122,7 @@ void formatValue(std::basic_ostream<Pt::Char>& os, const std::string& name, cons
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Soap {
 
 SoapFormatter::SoapFormatter(std::basic_ostream<Char>& os)
 : _reader(0)
@@ -449,6 +449,6 @@ bool SoapFormatter::advance(const Pt::Xml::Node& node)
     return _paramStack.size() == 0;
 }
 
-} // namespace Xml
+} // namespace Soap
 
 } // namespace Pt

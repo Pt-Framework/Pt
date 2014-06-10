@@ -1,0 +1,18 @@
+SubDir PT_TOP src Pt-Soap ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirC++Flags [ FDefines PT_SOAP_API_EXPORT ] ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Soap ;
+
+PT_SOAP_SOURCES = Fault.cpp
+                  SoapClient.cpp
+                  SoapFormatter.cpp
+                  SoapHttpClient.cpp
+                  SoapHttpService.cpp 
+                  SoapServiceDefinition.cpp ;
+
+SharedLibrary Pt-Soap : $(PT_SOAP_SOURCES) ;
+LinkSharedLibraries Pt-Soap :  Pt-Xml Pt-Http Pt-Net Pt-Remoting Pt-System Pt ;
+MakeLocate Pt-Soap : $(PT_OUTPUT_TARGET) ;
+MakeInstall Pt-Soap : $(PT_INSTALL_LIBDIR) ;
+
+#SubInclude PT_TOP src Pt-XmlRpc tests ;

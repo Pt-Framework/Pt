@@ -214,6 +214,8 @@
     <ClInclude Include="..\..\include\Pt\Singleton.h" />
     <ClInclude Include="..\..\include\Pt\Slot.h" />
     <ClInclude Include="..\..\include\Pt\SmartPtr.h" />
+    <ClInclude Include="..\..\include\Pt\Soap\Api.h" />
+    <ClInclude Include="..\..\include\Pt\Soap\Fault.h" />
     <ClInclude Include="..\..\include\Pt\SourceInfo.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\Api.h" />
     <ClInclude Include="..\..\include\Pt\Ssl\Certificate.h" />
@@ -292,11 +294,6 @@
     <ClInclude Include="..\..\include\Pt\XmlRpc\HttpClient.h" />
     <ClInclude Include="..\..\include\Pt\XmlRpc\HttpService.h" />
     <ClInclude Include="..\..\include\Pt\XmlRpc\Responder.h" />
-    <ClInclude Include="..\..\include\Pt\XmlRpc\SoapClient.h" />
-    <ClInclude Include="..\..\include\Pt\XmlRpc\SoapFormatter.h" />
-    <ClInclude Include="..\..\include\Pt\XmlRpc\SoapHttpClient.h" />
-    <ClInclude Include="..\..\include\Pt\XmlRpc\SoapHttpService.h" />
-    <ClInclude Include="..\..\include\Pt\XmlRpc\SoapServiceDefinition.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Api.h" />
     <ClInclude Include="..\..\include\Pt\Xml\ByteorderMark.h" />
     <ClInclude Include="..\..\include\Pt\Xml\Characters.h" />
@@ -476,6 +473,7 @@
     <None Include="..\..\src\Pt-Reflex\Jamfile" />
     <None Include="..\..\src\Pt-Reflex\Makefile.am" />
     <None Include="..\..\src\Pt-Remoting\Jamfile" />
+    <None Include="..\..\src\Pt-Soap\Jamfile" />
     <None Include="..\..\src\Pt-Ssl\Jamfile" />
     <None Include="..\..\src\Pt-Ssl\tests\Jamfile" />
     <None Include="..\..\src\Pt-System\Jamfile" />
@@ -661,6 +659,7 @@
     <ClCompile Include="..\..\src\Pt-Remoting\RemoteProcedure.cpp" />
     <ClCompile Include="..\..\src\Pt-Remoting\Responder.cpp" />
     <ClCompile Include="..\..\src\Pt-Remoting\ServiceDefinition.cpp" />
+    <ClCompile Include="..\..\src\Pt-Soap\Fault.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\applessl\CertificateStoreImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\applessl\Connection.cpp" />
     <ClCompile Include="..\..\src\Pt-Ssl\applessl\ContextImpl.cpp" />
@@ -756,11 +755,6 @@
     <ClCompile Include="..\..\src\Pt-XmlRpc\HttpResponder.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\HttpService.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\Responder.cpp" />
-    <ClCompile Include="..\..\src\Pt-XmlRpc\SoapClient.cpp" />
-    <ClCompile Include="..\..\src\Pt-XmlRpc\SoapFormatter.cpp" />
-    <ClCompile Include="..\..\src\Pt-XmlRpc\SoapHttpClient.cpp" />
-    <ClCompile Include="..\..\src\Pt-XmlRpc\SoapHttpService.cpp" />
-    <ClCompile Include="..\..\src\Pt-XmlRpc\SoapServiceDefinition.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\tests\Pt-XmlRpc-test.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\tests\RpcBenchClient.cpp" />
     <ClCompile Include="..\..\src\Pt-XmlRpc\tests\RpcBenchServer.cpp" />

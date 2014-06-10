@@ -26,11 +26,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/XmlRpc/SoapServiceDefinition.h>
+#include <Pt/Soap/SoapServiceDefinition.h>
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Soap {
 
 ///////////////////////////////////////////////////////////////////////////////
 // BooleanType
@@ -456,6 +456,6 @@ SoapServiceDefinition::~SoapServiceDefinition()
 {
 }
 
-} // namespace XmlRpc
+} // namespace Soap
 
 } // namespace Pt
