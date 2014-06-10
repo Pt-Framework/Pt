@@ -47,8 +47,12 @@ class RemoteCall;
 class PT_REMOTING_API Client : private NonCopyable
 {
     public:
+        /** @brief Constructor.
+        */
         Client();
 
+        /** @brief Destructor.
+        */
         virtual ~Client();
 
         //! @internal
@@ -92,7 +96,7 @@ class PT_REMOTING_API Client : private NonCopyable
 
         virtual void onCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc) = 0;
 
-        /** @brief A remote procedure is cancelled.
+        /** @brief Cancels the remote procedure call.
 
             Derived Clients implement this method to cancel the remote
             procedure call.

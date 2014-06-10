@@ -77,12 +77,16 @@ class PT_REMOTING_API Responder : private NonCopyable
         virtual bool isFailed() const = 0;
 
     protected:
-        /** @brief Gets the service procedure.
+        /** @brief Sets the service procedure.
         */
         Pt::Composer** setProcedure(const std::string& name);
 
+        /** @brief Begins the service procedure call.
+        */
         void beginCall(System::EventLoop& loop);
 
+        /** @brief Ends the service procedure call.
+        */
         Pt::Decomposer* endCall();
 
     protected:
