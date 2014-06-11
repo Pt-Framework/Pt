@@ -27,6 +27,7 @@
  */
 
 #include "MainLoopImpl.h"
+#include <Pt/WxWidgets/MainLoop.h>
 
 namespace Pt {
 
