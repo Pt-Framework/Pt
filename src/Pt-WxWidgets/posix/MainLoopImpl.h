@@ -31,7 +31,10 @@
 
 #include <posix/Selector.h>
 #include <posix/../SelectableList.h>
+#include <Pt/System/EventLoop.h>
+#include <Pt/System/Mutex.h>
 #include <wx/evtloop.h>
+#include <wx/timer.h>
 #include <vector>
 
 namespace Pt {
@@ -137,12 +140,16 @@ class Selector : public System::Selector
         {
             //bool isReady = h->ready == System::IOHandle::Read;
             //return isReady;
+
+            return false; // dummy
         }
 
         bool isWritable(System::IOHandle* h)
         {
             //bool isReady = h->ready == System::IOHandle::Write;
             //return isReady;
+
+            return false; // dummy
         }
 
         bool isError(System::IOHandle* h)
@@ -170,7 +177,7 @@ class Selector : public System::Selector
         System::Selectable* _current;
 };
 
-class MainLoopImpl 
+class MainLoopImpl : public wxTimer
 {
     public:
         MainLoopImpl(wxEventLoopBase& wxLoop);
@@ -203,11 +210,13 @@ class MainLoopImpl
         virtual void detachTimer(System::Timer& timer);
 
     protected:
+        virtual void Notify();
+
         void processTimers();
 
     private:
         wxEventLoopBase& _wxLoop;
-        //QTimer _masterTimer;
+        wxTimer _masterTimer;
         System::Mutex _mutex;
         System::TimerQueue _timerQueue;
         System::EventQueue _eventQueue;
