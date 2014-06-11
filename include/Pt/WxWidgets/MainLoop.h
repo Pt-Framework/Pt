@@ -67,6 +67,9 @@ class PT_QT_API MainLoop : public Pt::System::EventLoop
         virtual void onAttachTimer(System::Timer& timer);
 
         virtual void onDetachTimer(System::Timer& timer);
+
+    private:
+        class MainLoopImpl* _impl;
 };
 
 } // namespace
