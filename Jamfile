@@ -66,7 +66,7 @@ SubDir PT_TOP include Pt Remoting ;
 PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Remoting ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
-InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt XmlRpc ] : $(PT_INSTALL_INCLUDES:BS) ;
+InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Remoting ] : $(PT_INSTALL_INCLUDES:BS) ;
 
 SubDir PT_TOP include Pt XmlRpc ;
 PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt XmlRpc ] ;
@@ -78,7 +78,7 @@ SubDir PT_TOP include Pt Soap ;
 PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Soap ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
-InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt XmlRpc ] : $(PT_INSTALL_INCLUDES:BS) ;
+InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Soap ] : $(PT_INSTALL_INCLUDES:BS) ;
 
 SubDir PT_TOP include Pt Unit ;
 PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Unit ] ;
