@@ -97,7 +97,7 @@ void MainLoop::onQueueEvent(const Pt::Event& ev)
 
 void MainLoop::onWake()
 {
-    _impl->wake()
+    _impl->wake();
 }
 
 
