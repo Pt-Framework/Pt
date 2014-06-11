@@ -141,6 +141,11 @@ if $(SYS)
         SubInclude PT_TOP src Pt-Mfc ;
     }
 
+    if $(WITH_WXWIDGETS) = yes
+    {
+        SubInclude PT_TOP src Pt-WxWidgets ;
+    }
+
     if $(WITH_QT) = yes
     {
         Load qt.jam ;

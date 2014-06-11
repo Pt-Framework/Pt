@@ -286,6 +286,10 @@ if --with-mfc in $(ARGV)
 
 if --with-wxwidgets in $(ARGV)
 {
+    WITH_WXWIDGETS = yes ;
+    EchoOption WITH_WXWIDGETS : "Wx Widgets Support" ;
+    Configure WITH_WXWIDGETS ;
+
     WXCONFIG ?= wxconfig ;
     EchoOption WXCONFIG : "Using wxconfig tool" ;
 
