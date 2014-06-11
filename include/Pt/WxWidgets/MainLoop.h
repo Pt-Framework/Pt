@@ -38,7 +38,7 @@ namespace Pt {
 
 namespace WxWidgets {
 
-class PT_QT_API MainLoop : public Pt::System::EventLoop
+class PT_WXWIDGETS_API MainLoop : public Pt::System::EventLoop
 {
     public:
         MainLoop(wxEventLoopBase& wxLoop);
