@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_WxWidgets_ApplicationImpl_h
-#define Pt_WxWidgets_ApplicationImpl_h
+#ifndef Pt_WxWidgets_MainLoopImpl_h
+#define Pt_WxWidgets_MainLoopImpl_h
 
 #include <posix/Selector.h>
 #include <posix/../SelectableList.h>

@@ -32,7 +32,7 @@
 
 namespace Pt {
 
-namespace Qt {
+namespace WxWidgets {
 
 //IONotifier::IONotifier(System::IOHandle& h)
 //: _h(&h)
