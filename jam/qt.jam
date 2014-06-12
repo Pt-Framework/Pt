@@ -30,6 +30,7 @@ rule ConfigureMoc
     if ! $(WITH_QT_MOC)
     {
         QT_MOC = [ FDirName $(QTDIR) bin $(QT_MOC) ] ;
+		local _cmd = $(QT_MOC) $(_in) -o $(_out) ;
         WITH_QT_MOC = [ TryCommand $(_cmd) ] ;
     }
     
@@ -134,6 +135,7 @@ rule ConfigureRcc
     if ! $(WITH_QT_RCC)
     {
         QT_RCC = [ FDirName $(QTDIR) bin $(QT_RCC) ] ;
+		local _cmd = $(QT_RCC) $(_in) -o $(_out) ;
         WITH_QT_RCC = [ TryCommand $(_cmd) ] ;
     }
     
