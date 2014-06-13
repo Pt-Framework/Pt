@@ -41,11 +41,45 @@ namespace Pt {
 
 namespace WxWidgets {
 
+class IOSource : public wxEventLoopSourceHandler
+{
+    public:
+        IOSource(System::IOHandle& h)
+        : _h(&h)
+        { }
+
+        void OnReadWaiting()
+        {
+            _h->events &= ~System::IOHandle::Read;
+            _h->ready = System::IOHandle::Read;
+
+            System::Selectable* s = _h->sel;
+            s->run();
+        }
+
+        void OnWriteWaiting()
+        {
+            _h->events &= ~System::IOHandle::Write;
+            _h->ready = System::IOHandle::Write;
+
+            System::Selectable* s = _h->sel;
+            s->run();
+        }
+
+        void OnExceptionWaiting()
+        {}
+
+    private:
+        System::IOHandle* _h;
+};
+
+
 class Selector : public System::Selector
 {
     public:
-        Selector()
-        : _current(0)
+        Selector(wxEventLoopBase& wxLoop)
+        : _wxLoop(wxLoop)
+        , _current(0)
         { }
 
         ~Selector()
@@ -83,25 +117,27 @@ class Selector : public System::Selector
             //h.events = 0;
         }
         
-        //IONotifier& getNotifier(System::IOHandle* h)
-        //{
-        //    if(h->id == System::IOHandle::InvalidId)
-        //    {
-        //        IONotifier* notifier = new IONotifier(*h);
-        //        _iomap[h] = notifier;
-        //        h->id = 1;
-        //        return *notifier;
-        //    }
+        IOSource& getNotifier(System::IOHandle* h)
+        {
+            if(h->id == System::IOHandle::InvalidId)
+            {
+                IOSource* source = new IOSource(*h);
+                _iomap[h] = source;
+                h->id = 1;
+                return *source;
+            }
 
-        //    return *_iomap[h];
-        //}
+            return *_iomap[h];
+        }
 
         void beginRead(System::IOHandle* h)
         {
-            //IONotifier& notifier = getNotifier(h);
+            IOSource& ioSource = getNotifier(h);
 
             //notifier.enableRead();
-            //h->events = System::IOHandle::Read;
+            wxEventLoopSource* source = AddSourceForFD(h->fd, &ioSource, wxEVENT_SOURCE_INPUT);
+
+            h->events = System::IOHandle::Read;
         }
 
         void endRead(System::IOHandle* h)
@@ -168,12 +204,13 @@ class Selector : public System::Selector
         int wakeFd()
         { return _wakePipe.readFd(); }
 
-        //typedef std::map<System::IOHandle*, IONotifier*> IOMap;
+        typedef std::map<System::IOHandle*, IOSource*> IOMap;
 
     private:
+        wxEventLoopBase& _wxLoop;
         System::WakePipe _wakePipe;
         System::SelectableList _selectables;
-        //IOMap _iomap;
+        IOMap _iomap;
         System::Selectable* _current;
 };
 
