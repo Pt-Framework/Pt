@@ -325,49 +325,34 @@ if --with-qt5 in $(ARGV)
 {
     Load qt.jam ;
 
-    QT_INCLUDES ?= [ FDirName $(QTDIR) include ] ;
-    EchoOption QT_INCLUDES : "Qt Include Directory" ;
-    Configure QT_INCLUDES ;
+    if $(QTDIR)
+    {
+      QT_INCLUDES ?= [ FDirName $(QTDIR) include ] ;
+      EchoOption QT_INCLUDES : "Qt Include Directory" ;
+      Configure QT_INCLUDES ;
 
-    QT_LIBDIR ?= [ FDirName $(QTDIR) lib ] ;
-    EchoOption QT_LIBDIR : "Qt Library Directory" ;
-    Configure QT_LIBDIR ;
+      QT_LIBDIR ?= [ FDirName $(QTDIR) lib ] ;
+      EchoOption QT_LIBDIR : "Qt Library Directory" ;
+      Configure QT_LIBDIR ;
+    }
 
     #
     # Windows
     #
     if ! $(WITH_QT)
     {
+        QT_LINKFLAGS = /LIBPATH:$(QT_LIBDIR) ;
+
         if $(WITH_DEBUG)
         {
-            QT_TRY_LIBS = Qt5Cored.lib Qt5Widgetsd.lib Qt5Guid.lib ;
+            QT_LIBS = Qt5Cored.lib Qt5Widgetsd.lib ;
         }
         else
         {
-            QT_TRY_LIBS = Qt5Core.lib Qt5Widgets.lib Qt5Gui.lib ;
+            QT_LIBS = Qt5Core.lib Qt5Widgets.lib ;
         }
 
-        WITH_QT = [ CheckBuildC++ "#include <QtWidgets/QPushButton>"
-                                  "int main() { QPushButton button; return 0; }"
-                                 : [ FIncludes $(QT_INCLUDES) ]
-                                 : $(QT_TRY_LIBS)
-                                 : $(QT_LIBDIR) ] ;
-
-        if $(WITH_QT)
-        {
-            if $(WITH_DEBUG)
-            {
-                QT_CORE_LIBS = Qt5Cored.lib ;
-                QT_WIDGETS_LIBS = Qt5Widgetsd.lib ;
-                QT_LINKFLAGS = /LIBPATH:$(QTDIR)\\lib ;
-            }
-            else
-            {
-                QT_CORE_LIBS = Qt5Core.lib ;
-                QT_WIDGETS_LIBS = Qt5Widgets.lib ;
-                QT_LINKFLAGS = /LIBPATH:$(QTDIR)\\lib ;
-            }
-        }
+        ConfigureQt ;
     }
 
     #
@@ -375,17 +360,14 @@ if --with-qt5 in $(ARGV)
     #
     if ! $(WITH_QT)
     {
-        WITH_QT = [ CheckBuildC++ "#include <QtWidgets/QPushButton>"
-                                  "int main() { QPushButton button; return 0; }"
-                                 : [ FIncludes $(QT_INCLUDES) ]
-                                 : -lQt5Core -lQt5Widgets -lQt5Gui
-                                 : $(QT_LIBDIR) ] ;
+        QT_LIBS = -lQt5Core -lQt5Widgets ;
 
-        if $(WITH_QT)
+        if $(QT_LIBDIR)
         {
-            QT_CORE_LIBS = -lQt5Core ;
-            QT_WIDGETS_LIBS = -lQt5Widgets -lQt5Gui ;
+          QT_LINKFLAGS = -L$(QT_LIBDIR) ;
         }
+
+        ConfigureQt ;
     }
     
     #
@@ -393,19 +375,11 @@ if --with-qt5 in $(ARGV)
     #
     if ! $(WITH_QT)
     {
-        WITH_QT = [ CheckBuildC++ "#include <QtWidgets/QPushButton>"
-                                  "int main() { QPushButton button; return 0; }"
-                                 : [ FIncludes $(QT_INCLUDES) ] -F$(QT_LIBDIR)
-                                 : -framework QtCore -framework QtWidgets 
-                                 : $(QT_LIBDIR) ] ;
-                                 
-        if $(WITH_QT)
-        {
-            C++FLAGS += -F$(QT_LIBDIR) ;
-            QT_CORE_LIBS =  -framework QtCore ;
-            QT_WIDGETS_LIBS = -framework QtWidgets -framework QtGui ;
-            QT_LINKFLAGS = -F$(QT_LIBDIR) ;
-        }
+        C++FLAGS += -F$(QT_LIBDIR) ;
+        QT_LIBS = -framework QtCore -framework QtWidgets ;
+        QT_LINKFLAGS = -F$(QT_LIBDIR) ;
+
+        ConfigureQt ;   
     }
 
     #
@@ -413,43 +387,23 @@ if --with-qt5 in $(ARGV)
     #
     if ! $(WITH_QT)
     {
-        QT_LIBDIR_PRIVATE = [ FDirName $(TOOLSET_ROOT:D) .. lib ] ;
-        QT_LIBDIR_PRIVATE += [ FDirName $(TOOLSET_ROOT:D) .. lib arm-linux-gnueabihf ] ;
+      QT_INCLUDES = [ FDirName $(QTDIR) include ] ;
+      QT_LIBDIR = [ FDirName $(QTDIR) lib ] ;
+      QT_LIBS = -lQt5Core -lQt5Widgets -lQt5Gui -lQt5Qml -lQt5Network -lQt5Quick
+                -lGLESv2 -lPVRScopeServices -lIMGegl -lsrv_um -ldrm 
+                -ldrm_omap -lwayland-server -lffi -lEGL ;
+      QT_LINKFLAGS = -L$(QT_LIBDIR) ;
 
-        WITH_QT = [ CheckBuildC++ "#include <QtWidgets/QPushButton>"
-                                  "int main() { QPushButton button; return 0; }"
-                                 : [ FIncludes $(QT_INCLUDES) ]
-                                 : -lQt5Core -lQt5Widgets -lQt5Gui -lGLESv2 -lPVRScopeServices -lIMGegl -lsrv_um -ldrm -ldrm_omap -lwayland-server -lffi 
-                                 : $(QT_LIBDIR) $(QT_LIBDIR_PRIVATE) ] ;
-
-        if $(WITH_QT)
-        {
-            QT_CORE_LIBS = -lQt5Core ;
-            QT_WIDGETS_LIBS = -lQt5Widgets -lQt5Gui -lGLESv2 -lPVRScopeServices -lIMGegl -lsrv_um -ldrm -ldrm_omap -lwayland-server -lffi ;
-            QT_LINKFLAGS = -L$(QT_LIBDIR) -L$(QT_LIBDIR_PRIVATE) ;
-        }
+      ConfigureQt ;
     }
 
-    EchoOption WITH_QT : "Qt Support" ;
-    Configure WITH_QT ;
-
-    if $(WITH_QT)
+    if ! $(WITH_QT)
     {
-        EchoOption QT_CORE_LIBS : "Qt Core Libraries" ;
-        Configure QT_CORE_LIBS ;
-
-        EchoOption QT_WIDGETS_LIBS : "Qt Widgets Libraries" ;
-        Configure QT_WIDGETS_LIBS ;
-
+        EchoOption WITH_QT : "Qt Support" ;
+        EchoOption QT_INCLUDES : "Qt Include Directory" ;
+        EchoOption QT_LIBDIR : "Qt Library Directory" ;
         EchoOption QT_LINKFLAGS : "Qt Linker Flags" ;
-        Configure QT_LINKFLAGS ;
-
-        QT_LIBS = $(QT_CORE_LIBS) $(QT_WIDGETS_LIBS) ;
         EchoOption QT_LIBS : "Qt Link Libraries" ;
-        Configure QT_LIBS ;
-    }
-    else
-    {
         Exit "ERROR: Qt headers and libraries not found." ;
     }
 

@@ -97,6 +97,13 @@ rule TryBuildC++
 rule Gcc-CheckCc
 {
     TOOLSET_ROOT ?= "" ;
+    
+    if $(TOOLSET_ROOT) && $(OS:L) = nt
+    {
+      TOOLSET_ROOT = $(TOOLSET_ROOT:J=" ") ;
+      TOOLSET_ROOT = \"$(TOOLSET_ROOT)\" ;
+    }
+
     AS           ?= $(TOOLSET_ROOT)as ;
     CC           ?= $(TOOLSET_ROOT)gcc ;
     RANLIB       ?= $(TOOLSET_ROOT)ranlib ;
@@ -179,8 +186,6 @@ rule Gcc-CheckCc
 rule Gcc-CheckC++
 {
     ConfigureCc ;
-
-    TOOLSET_ROOT ?= "" ;
 
     C++ ?= $(TOOLSET_ROOT)g++ ;
     Configure C++ ;
