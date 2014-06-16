@@ -370,7 +370,7 @@ if --with-qt5 in $(ARGV)
     #
     if ! $(WITH_QT)
     {
-        C++FLAGS += -F$(QT_LIBDIR) ;
+        #C++FLAGS += -F$(QT_LIBDIR) ;
         QT_LIBS = -framework QtCore -framework QtWidgets ;
         QT_LINKFLAGS = -F$(QT_LIBDIR) ;
 
