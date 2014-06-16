@@ -328,12 +328,7 @@ if --with-qt5 in $(ARGV)
     if $(QTDIR)
     {
       QT_INCLUDES ?= [ FDirName $(QTDIR) include ] ;
-      EchoOption QT_INCLUDES : "Qt Include Directory" ;
-      Configure QT_INCLUDES ;
-
       QT_LIBDIR ?= [ FDirName $(QTDIR) lib ] ;
-      EchoOption QT_LIBDIR : "Qt Library Directory" ;
-      Configure QT_LIBDIR ;
     }
 
     #
