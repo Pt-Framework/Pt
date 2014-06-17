@@ -48,8 +48,11 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   DialogController.cpp
 					   DialogModel.cpp
 					   DialogRenderer.cpp										   
-					   PaintSurface.cpp
-					   Painter.cpp
+					   NativePaintSurface.cpp
+					   NativePainter.cpp
+					   ImagePaintSurface.cpp
+					   ImagePainter.cpp
+		
 						;
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx  ;

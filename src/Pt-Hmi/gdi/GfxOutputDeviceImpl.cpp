@@ -25,6 +25,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include "GfxOutputDeviceImpl.h"
 #include <Pt/Hmi/GfxOutputDevice.h>
+#include <Pt/Hmi/NativePaintSurface.h>
+#include <Pt/Hmi/ImagePaintSurface.h>
 #include "ApplicationImpl.h"
 #include <Windows.h>
 #include <WindowsX.h>
@@ -43,6 +45,7 @@ GfxOutputDeviceImpl::GfxOutputDeviceImpl()
 : _hwnd(0)
 , _model(0)
 , _nativePainter(0)
+, _ignoreSizePositionEvent(false)
 {	
 	Pt::Hmi::Application* app = (Pt::Hmi::Application*) &Pt::Hmi::Application::instance();	
 	app->impl()->WindowEvent += Pt::slot(*this, &GfxOutputDeviceImpl::onWindowEvent);
@@ -208,6 +211,8 @@ void GfxOutputDeviceImpl::onClosed()
 
 void GfxOutputDeviceImpl::onSize(WPARAM wParam, LPARAM lParam)
 {
+	if(_ignoreSizePositionEvent)
+		return;
 
 	switch(wParam)
 	{
@@ -275,6 +280,8 @@ void GfxOutputDeviceImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam
 
 void GfxOutputDeviceImpl::setWindowSizeAndPos(bool firstShow)
 {
+	_ignoreSizePositionEvent = true;
+	
 	RECT  info;
 	GetWindowRect(_hwnd, &info);
 
@@ -335,6 +342,8 @@ void GfxOutputDeviceImpl::setWindowSizeAndPos(bool firstShow)
 			break;
 		}
 	}
+
+	_ignoreSizePositionEvent = false;
 }
 
 void GfxOutputDeviceImpl::centerWindowTo(HWND parent)
@@ -370,10 +379,11 @@ void GfxOutputDeviceImpl::updateModelSizeAndPos()
 		_model->Size = _model->toUnit(winSize);
 }
 
-
-
 void GfxOutputDeviceImpl::onMove()
 {
+	if(_ignoreSizePositionEvent)
+		return;
+
 	if(!_model->Enable.get())
 	{
 		setWindowSizeAndPos(false);
@@ -392,9 +402,20 @@ void GfxOutputDeviceImpl::onPaint()
 	PAINTSTRUCT ps;
     HDC windowContext = BeginPaint(_hwnd, &ps);
 	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
-	HDC bitmapDeviceConText = _model->paintSurface().impl()->deviceContext();
-    BitBlt(windowContext, 0, 0, size.width(), size.height(), bitmapDeviceConText, 0, 0, SRCCOPY);	
-	EndPaint(_hwnd, &ps);	
+	Pt::Hmi::PaintSurface* surface = _model->paintSurface();
+	Pt::Hmi::NativePaintSurface* nativePaintSurface = dynamic_cast<Pt::Hmi::NativePaintSurface*>(surface);
+	Pt::Hmi::ImagePaintSurface* imagePaintSurface = dynamic_cast<Pt::Hmi::ImagePaintSurface*>(surface);
+
+	if(nativePaintSurface != 0)
+	{
+		HDC bitmapDeviceConText = nativePaintSurface->impl()->deviceContext();
+		BitBlt(windowContext, 0, 0, size.width(), size.height(), bitmapDeviceConText, 0, 0, SRCCOPY);	
+		EndPaint(_hwnd, &ps);	
+	}
+	else if(imagePaintSurface != 0)
+	{
+		//TODO: draw image
+	}
 }
 
 void GfxOutputDeviceImpl::setWindowIcon()
@@ -410,19 +431,19 @@ void GfxOutputDeviceImpl::setWindowIcon()
 	{
 		const size_t offsetLine = y * (_model->Icon.get().width()*planes);
 
-		for(size_t x = 0; x <_model->Icon.get().width(); ++x)
+		for(size_t x = 0; x < _model->Icon.get().width(); ++x)
 		{
 			const size_t index  = offsetLine + (x*planes);
 
 			const Pt::Gfx::ARgbColor& pix =  _model->Icon.get().pixel(x,y);
 				
-			bitmapBuffer[index]     = pix.blue();	
-			bitmapBuffer[index + 1] = pix.green();
-			bitmapBuffer[index + 2] = pix.red();
-
-			bitmapBuffer[index + 3] = pix.alpha();
+			bitmapBuffer[index]     = static_cast<unsigned char>(pix.blue());	
+			bitmapBuffer[index + 1] = static_cast<unsigned char>(pix.green());
+			bitmapBuffer[index + 2] = static_cast<unsigned char>(pix.red());
+			bitmapBuffer[index + 3] = static_cast<unsigned char>(pix.alpha());
 		}		
 	}
+
 	HICON icon = ::CreateIcon(GetModuleHandle(NULL), _model->Icon.get().width(), _model->Icon.get().height(), 4, 8, 0, (BYTE*)&bitmapBuffer[0]);
 	SetClassLong(_hwnd, GCL_HICON, (LONG)icon); 	
 }
@@ -516,6 +537,9 @@ void GfxOutputDeviceImpl::setWindowProperties()
 
 	long styleVisible = GetWindowLong(_hwnd, GWL_STYLE);  
 
+
+	SetWindowLong(_hwnd, GWL_STYLE, style);  
+
 	bool visible = ((styleVisible & WS_VISIBLE) == WS_VISIBLE);
 
 	if(!_model->Visible.get() && visible)
@@ -523,8 +547,6 @@ void GfxOutputDeviceImpl::setWindowProperties()
 	
 	if( !visible && _model->Visible.get())
 		ShowWindow(_hwnd, SW_SHOW);		
-
-	SetWindowLong(_hwnd, GWL_STYLE, style);  
 }
 
 void GfxOutputDeviceImpl::destroy()
@@ -572,8 +594,7 @@ void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
 	setWindowSizeAndPos(firstShow);
 	setWindowProperties();	
 	setWindowIcon();	
-	InvalidateRect(_hwnd, NULL, TRUE);
-
+	InvalidateRect(_hwnd, NULL, FALSE);
 }
 
 }}

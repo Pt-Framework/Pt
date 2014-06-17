@@ -2,33 +2,30 @@
 #define Pt_Hmi_PaintSurface_h
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/ARgbImage.h>
 
 namespace Pt{
 namespace Hmi{
 
-class PaintSurfaceImpl;
+class Painter;
 
 class PT_HMI_API PaintSurface
 {
 public:		
-	PaintSurface(const Pt::Gfx::SizeF& size);
-	virtual ~PaintSurface();
-
-	Pt::Gfx::ARgbImage toImage();
-	
-	void resize(const Pt::Gfx::SizeF& size);	
-	const Pt::Gfx::SizeF& size() const;
-	
-	inline PaintSurfaceImpl* impl()
+	PaintSurface()
 	{
-		return _impl;
+	}
+	
+	virtual ~PaintSurface()
+	{
 	}
 
-private:
-	PaintSurfaceImpl* _impl;
+	virtual Pt::Gfx::ARgbImage toImage() const = 0;
+	virtual void resize(const Pt::Gfx::SizeF& size)= 0;	
+	virtual Pt::Gfx::SizeF size() const = 0;
+	virtual Pt::Hmi::Painter& painter() = 0;
+
 };
 
 }}

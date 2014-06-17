@@ -136,7 +136,7 @@ void WindowController::onSizeChanged(const void* sender, const PropertyBase& pro
 {
 	GfxModel* m = gfxModel();
 	
-	m->paintSurface().resize(m->Size.get());	
+	m->paintSurface()->resize(m->Size.get());	
 	
 	if(m->Visible.get())
 		invalidate();
@@ -204,7 +204,7 @@ void WindowController::close()
         m->Closed = true;
         
         //Let the system window to close its self.
-        invalidate();
+		output();
     }
 }
 }}

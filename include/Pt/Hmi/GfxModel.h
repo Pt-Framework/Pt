@@ -73,11 +73,18 @@ namespace TextAlignType
 	};
 }
 
+
+namespace PainterType
+{
+	enum Type
+	{
+		Native,
+		Image
+	};
+}
+
 class PT_HMI_API GfxModel : public Model
 {
-protected:
-	GfxModel();
-
 public:
 	Property<bool>					Visible;
 	Property<Pt::Gfx::Font>			Font;
@@ -98,6 +105,7 @@ public:
 	Property<bool>					AcceptFocus;
     Property<bool>					HighLight;
 	Property<std::string>			FocusedActionKey;
+	Property<PainterType::Type>     PainterSurfaceType;
 
 public:
 	virtual ~GfxModel();
@@ -105,7 +113,6 @@ public:
 	void move(const Pt::Gfx::SizeF& size);	
     bool contains(const Pt::Gfx::PointF& p);
 
-	//Unit handling
 	double toUnit(int v);
 	Pt::Gfx::PointF toUnit(const Pt::Gfx::Point& value);
 	Pt::Gfx::SizeF toUnit(const Pt::Gfx::Size& value);
@@ -114,16 +121,30 @@ public:
 	Pt::Gfx::Size fromUnit(const Pt::Gfx::SizeF& value);
 	double unitSizeInch() const;
 	double unitSizeMm() const;
-
-	inline PaintSurface& paintSurface()
+	
+	inline PaintSurface* paintSurface()
 	{
 		return _paintSurface;
 	}
+
 protected:
-	PaintSurface _paintSurface;
+	GfxModel();
+
+
+	inline void setPaintSurface( PaintSurface* surface)
+	{
+		if(_paintSurface != 0)
+			delete _paintSurface;
+		
+		_paintSurface = surface;
+	}
+
+protected:
+	PaintSurface* _paintSurface;
 
 private:
 	void onFocusChanged(const void* sender, const PropertyBase& prop);
+	void onPainterTypeChanged(const void* sender, const PropertyBase& prop);
 };
 
 }}

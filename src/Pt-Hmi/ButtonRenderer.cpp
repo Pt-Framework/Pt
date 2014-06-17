@@ -2,6 +2,7 @@
 #include <Pt/Hmi/ButtonRenderer.h>
 #include <Pt/Hmi/ButtonModel.h>
 #include <Pt/Hmi/GfxController.h>
+#include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/ImagePainter.h>
 
@@ -43,7 +44,7 @@ void ButtonRenderer::render(Pt::Hmi::Model* m)
 	if( ctrl== 0)
 		return;
 
-	Pt::Hmi::Painter localPainter(model->paintSurface());
+	Pt::Hmi::Painter& localPainter = model->paintSurface()->painter();
     Pt::Gfx::SizeF size = model->Size.get();
        
 	if(model->Armed.get() || model->Focused.get())

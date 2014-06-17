@@ -30,6 +30,7 @@
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/WindowController.h>
 #include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Hmi/Painter.h>
 
 namespace Pt{
 namespace Hmi{
@@ -133,9 +134,8 @@ void GfxController::output()
 
 	if(!m->Visible.get())
 		return;
-
-	//Draw my childs	
-	Pt::Hmi::Painter localPainter(m->paintSurface());
+	
+	Pt::Hmi::Painter& localPainter = m->paintSurface()->painter();
 
 	for( size_t i = 0; i < children().size(); ++i)
 	{
@@ -143,7 +143,7 @@ void GfxController::output()
 		child->output();
 
 		GfxModel* childModel = (GfxModel*) child->model();
-		localPainter.drawSurface(childModel->Position.get(),childModel->paintSurface());
+		localPainter.drawSurface(childModel->Position.get(),*childModel->paintSurface());
 	}
 
 	Controller::output();

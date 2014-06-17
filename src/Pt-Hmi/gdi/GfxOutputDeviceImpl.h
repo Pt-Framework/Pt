@@ -78,6 +78,7 @@ private:
 	Pt::Gfx::Painter*		_nativePainter;
 	KeyEvent				_keyEvent;
 	PointingEvent			_pointerEvent;
+	bool					_ignoreSizePositionEvent;
 };
 
 }}

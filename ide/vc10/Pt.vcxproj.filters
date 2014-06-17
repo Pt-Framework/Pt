@@ -1335,9 +1335,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PainterImpl.h">
       <Filter>Pt-Hmi\Sources\gdi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.h">
       <Filter>Pt-Hmi\Sources\cocoa</Filter>
     </ClInclude>
@@ -1421,6 +1418,21 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Soap\ServiceDeclaration.h">
       <Filter>Pt-Soap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ImagePaintSurface.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\NativePaintSurface.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ImagePainter.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\NativePainter.h">
+      <Filter>Pt-Hmi\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
+      <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2598,17 +2610,11 @@
     <ClCompile Include="..\..\src\Pt-Ssl\nossl\ContextImpl.cpp">
       <Filter>Pt-Ssl\nossl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.cpp">
       <Filter>Pt-Hmi\Sources\gdi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PainterImpl.cpp">
       <Filter>Pt-Hmi\Sources\gdi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Qt\Application.cpp">
       <Filter>Pt-Qt</Filter>
@@ -2669,6 +2675,18 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Soap\ServiceDeclaration.cpp">
       <Filter>Pt-Soap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\NativePainter.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\NativePaintSurface.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ImagePainter.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ImagePaintSurface.cpp">
+      <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

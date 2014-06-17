@@ -1,6 +1,8 @@
 #include <Pt/Hmi/GfxModel.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Controller.h>
+#include <Pt/Hmi/NativePaintSurface.h>
+#include <Pt/Hmi/ImagePaintSurface.h>
 #include <Pt/Slot.h>
 
 namespace Pt{
@@ -26,15 +28,32 @@ GfxModel::GfxModel()
 , DefinePropertyInitMacro(AcceptFocus,true)
 , DefinePropertyInitMacro(HighLight, false)
 , DefinePropertyInitMacro(FocusedActionKey," ")
-, _paintSurface(Pt::Gfx::SizeF(800,600))
+, DefinePropertyInitMacro(PainterSurfaceType, PainterType::Native)
+, _paintSurface(new NativePaintSurface(Pt::Gfx::SizeF(800,600)))
 {
 	Position = toUnit(Pt::Gfx::Point(0,0));
 	Focused.PropertyChanged += Pt::slot(*this, &GfxModel::onFocusChanged);
+	PainterSurfaceType.PropertyChanged += Pt::slot(*this, &GfxModel::onPainterTypeChanged);
 }
 
 GfxModel::~GfxModel()
 {
+	if(_paintSurface != 0)
+			delete _paintSurface;
+}
 
+void GfxModel::onPainterTypeChanged(const void* sender, const PropertyBase& prop)
+{
+	switch(PainterSurfaceType.get())
+	{
+		case PainterType::Native:
+			setPaintSurface( new NativePaintSurface(Size.get()));
+		break;
+		
+		case PainterType::Image:
+			setPaintSurface( new ImagePaintSurface(Size.get())); 
+		break;
+	}
 }
 
 void GfxModel::onFocusChanged(const void* sender, const PropertyBase& prop)

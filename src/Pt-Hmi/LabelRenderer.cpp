@@ -1,5 +1,6 @@
 #include <Pt/Hmi/LabelRenderer.h>
 #include <Pt/Hmi/LabelModel.h>
+#include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/Pen.h>
@@ -20,8 +21,6 @@ LabelRenderer::~LabelRenderer()
 
 void LabelRenderer::render(Pt::Hmi::Model* m)
 {
-	PanelRenderer::render(m);
-
 	LabelModel* model = dynamic_cast<LabelModel*>(m);	
 	
 	if(model == 0)
@@ -30,28 +29,32 @@ void LabelRenderer::render(Pt::Hmi::Model* m)
 	if(!model->Visible.get())
 		return;	
 
-	GfxController* controller = dynamic_cast<GfxController*>(m->controller());
+	GfxController* controller = dynamic_cast<GfxController*>(m->controller());	
+	Pt::Hmi::Painter& localPainter = model->paintSurface()->painter();	
 			
 	if(model->AutoSize.get())
-	{
-		Pt::Hmi::Painter localPainter(model->paintSurface());				
+	{		
+		//Calculate the current and adjust the size
+		localPainter.setFont(model->Font.get());
+		Pt::Gfx::FontMetrics metric = localPainter.fontMetrics(Pt::String(model->Caption.get().c_str()));
+		Pt::Gfx::SizeF currentSize = Pt::Gfx::SizeF(model->toUnit(Pt::Gfx::Size(metric.width(), metric.height())));
+		model->Size.set(currentSize);
+
+		//Render the panel	
+		PanelRenderer::render(model);
+
+		//Render the label
+		Pt::Gfx::PointF	pos(0, currentSize.height()  - metric.ascent() - metric.descent());
+		Pt::Gfx::Pen	pen(1, model->ForeColor.get());
 
 		localPainter.setFont(model->Font.get());
-		
-		Pt::Gfx::Pen			pen(1,model->ForeColor.get());
-		Pt::Gfx::FontMetrics	metric = localPainter.fontMetrics(Pt::String(model->Caption.get().c_str()));
-		
-		model->Size = Pt::Gfx::SizeF(model->toUnit(Pt::Gfx::Size(metric.width(), metric.height())));
-		
-		Pt::Gfx::SizeF	size = model->Size.get();
-		Pt::Gfx::PointF	pos(0, size.height() - metric.descent());
 
 		localPainter.setPen(pen);
 		localPainter.drawText(pos,Pt::String(model->Caption.get().c_str()));
 	}
 	else
 	{		
-		Pt::Hmi::Painter localPainter(model->paintSurface());
+		PanelRenderer::render(model);
 
 		switch(model->TextAlign.get())
 		{
@@ -59,15 +62,15 @@ void LabelRenderer::render(Pt::Hmi::Model* m)
 			{
 				Pt::Gfx::Pen	pen(1,model->ForeColor.get());
 				Pt::Gfx::SizeF	widgetSize =  model->Size.get();
+				
 				localPainter.setFont(model->Font.get());
 				Pt::Gfx::FontMetrics	metric = localPainter.fontMetrics(Pt::String(model->Caption.get().c_str()));
 				
-				const double widthHalf		 = model->Size.get().width()/2;				
-				const double heightHalf	 = model->Size.get().height()/2;				
-				const double textWidthHalf	 = metric.width()/2;	
+				const double widthHalf		= model->Size.get().width()/2;				
+				const double heightHalf		= model->Size.get().height()/2;				
+				const double textWidthHalf	= metric.width()/2;	
 				const double textHeightHalf = metric.height()/2;	
 								
-
 				Pt::Gfx::PointF pos(widthHalf - textWidthHalf, (heightHalf - textHeightHalf) +  (metric.height()  - metric.descent()));							
 				localPainter.setFont(model->Font.get());
 				localPainter.setPen(pen);

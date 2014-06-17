@@ -152,8 +152,6 @@ class PainterImpl
         void updatePen();
         void updateFont();
         void updateBrush();
-
-        void ensureActivePainter() const;
     protected:
         PaintSurfaceImpl*  _surface;
         Gfx::Pen   _pen;

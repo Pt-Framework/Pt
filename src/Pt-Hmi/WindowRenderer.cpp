@@ -27,9 +27,8 @@
  */
 #include <Pt/Hmi/WindowRenderer.h>
 #include <Pt/Hmi/WindowModel.h>
-#include <Pt/Gfx/Painter.h>
+#include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/ImagePainter.h> 
 
 namespace Pt{
 namespace Hmi{
@@ -55,7 +54,7 @@ void WindowRenderer::render(Pt::Hmi::Model* m)
 	
 	Pt::Gfx::Brush brush(model->BackColor.get());
 	
-	Pt::Hmi::Painter localPainter(model->paintSurface());
+	Pt::Hmi::Painter& localPainter = model->paintSurface()->painter();
 
 	localPainter.setBrush(brush);
 	localPainter.fillRect(rect);

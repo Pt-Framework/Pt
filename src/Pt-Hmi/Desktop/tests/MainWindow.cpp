@@ -99,13 +99,14 @@ void MainWindow::init()
 	}
 
 	_mainPanel.panelModel().BackgroundImageLayout = Pt::Hmi::ImageLayoutType::Strech;
-	addChild(&_mainPanel);
 
 	//Text
 	_textLabel.setAutoSize(true);
+	_textLabel.setSize(Pt::Gfx::SizeF(500,30));
 	_textLabel.setCaption("This is a Platinum C++ Human Mashine Interface demo");
 	_textLabel.setPosition(Pt::Gfx::PointF(20,20));
 	_textLabel.labelModel().ForeColor.set(Pt::Gfx::ARgbColor(255,0,0,0));
+	//_textLabel.labelModel().PainterSurfaceType = Pt::Hmi::PainterType::Image;
 	_mainPanel.addChild(&_textLabel);
 	
 	//Toggle button
@@ -132,7 +133,9 @@ void MainWindow::init()
 	_closeButton.setPosition(Pt::Gfx::PointF(590,525));
 	_closeButton.setSize(Pt::Gfx::SizeF(150,25));
 	_closeButton.ClickedAction += Pt::slot(*this, &MainWindow::onClosed);
+	
 	addChild(&_closeButton);
+	addChild(&_mainPanel);
 }
 
 void MainWindow::onShowDialog()
