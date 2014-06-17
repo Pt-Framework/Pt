@@ -1,8 +1,7 @@
 ###############################################################################
-# Configure Qt
+# Configure Pt
 ###############################################################################
-
-rule CheckBuildQt
+rule CheckBuildPt
 {  
     local _src = $(1) ;
     local _includes = $(2) ;
@@ -10,275 +9,89 @@ rule CheckBuildQt
     local _linkLibs = $(4) ;
     local _linkFlags = $(5) ;
 
-    WITH_QT = [ CheckBuildC++ $(_src)
+    WITH_PT = [ CheckBuildC++ $(_src) 
                              : [ FIncludes $(_includes) ] $(_cflags)
                              : $(_linkLibs) $(_linkFlags) ] ;
 
-    if $(WITH_QT)
+    if $(WITH_PT)
     {
-        EchoOption WITH_QT : "Qt Support" ;
-        Configure WITH_QT ;
+        EchoOption WITH_PT : "Pt Support" ;
+        Configure WITH_PT ;
 
-        QT_INCLUDES = $(_includes) ;
-        EchoOption QT_INCLUDES : "Qt Include Directory" ;
-        Configure QT_INCLUDES ;
+        PT_INCLUDES = $(_includes) ;
+        EchoOption PT_INCLUDES : "Pt Include Directory" ;
+        Configure PT_INCLUDES ;
 
-        QT_C++FLAGS = $(_cflags) ;
-        EchoOption QT_C++FLAGS : "Qt C++ Flags" ;
-        Configure QT_C++FLAGS ;
+        PT_C++FLAGS = $(_cflags) ;
+        EchoOption PT_C++FLAGS : "Pt C++ Flags" ;
+        Configure PT_C++FLAGS ;
 
-        QT_LINKLIBS = $(_linkLibs) ;
-        EchoOption QT_LINKLIBS : "Qt Link Libraries" ;
-        Configure QT_LINKLIBS ;
+        PT_LINKFLAGS = $(_linkFlags) ;
+        EchoOption PT_LINKFLAGS : "Pt Linker Flags" ;
+        Configure PT_LINKFLAGS ;
 
-        QT_LINKFLAGS = $(_linkFlags) ;
-        EchoOption QT_LINKFLAGS : "Qt Linker Flags" ;
-        Configure QT_LINKFLAGS ;
+        PT_LINKLIBS = $(_linkLibs) ;
+        EchoOption PT_LINKLIBS : "Pt Link Libraries" ;
+        Configure PT_LINKLIBS ;
     }
 
-    return $(WITH_QT) ;
+    return $(WITH_PT) ;
 }
 
-rule ConfigureQt
+rule ConfigurePt
 {  
-    local qtlibs ;
+    local _libs = $(1) ;
 
-    for local _l in $(1)
+    if $(PTDIR)
     {
-        switch $(_l)
-        {
-            case core       : qtlibs += Qt5Core ;
-            case concurrent : qtlibs += Qt5Concurrent ;
-            case network    : qtlibs += Qt5Network ;
-            case widgets    : qtlibs += Qt5Widgets ;
-            case gui        : qtlibs += Qt5Gui ;
-            case qml        : qtlibs += Qt5Qml ;
-            case quick      : qtlibs += Qt5Quick ;
-        }
-    }
-    
-    if $(QTDIR)
-    {
-      QT_INCLUDES ?= [ FDirName $(QTDIR) include ] ;
-      QT_LIBDIR ?= [ FDirName $(QTDIR) lib ] ;
+      PT_INCLUDES ?= [ FDirName $(PTDIR) include ] ;
+      PT_LIBDIR ?= [ FDirName $(PTDIR) lib ] ;
     }
 
     #
     # Windows
     #
-    if ! $(WITH_QT)
+    if ! $(WITH_PT)
     {
-        QT_TRY_C++FLAGS = ;
-        QT_TRY_LINKLIBS = $(qtlibs:S=.lib) ;
-        QT_TRY_LINKFLAGS = /LIBPATH:$(QT_LIBDIR) ;
-        
-        if $(WITH_DEBUG)
-        {   
-            QT_TRY_LINKLIBS = $(qtlibs:S=d.lib) ;
-        }
+        PT_TRY_C++FLAGS = ;
+        PT_TRY_LINKFLAGS = /LIBPATH:$(PT_LIBDIR) ;
 
-        CheckBuildQt "#include <QtCore/QString>"
-                     "int main() { QString button; return 0; }" 
-                    : $(QT_INCLUDES) 
-                    : $(QT_TRY_C++FLAGS)
-                    : $(QT_TRY_LINKLIBS) 
-                    : $(QT_TRY_LINKFLAGS) ;
+        CheckBuildPt "#include <Pt/String.h>"
+                     "int main() { Pt::String str; return 0; }" 
+                    : $(PT_INCLUDES) 
+                    : $(PT_TRY_C++FLAGS)
+                    : Pt.lib 
+                    : $(PT_TRY_LINKFLAGS) ;
+
+        if $(WITH_PT)
+        {
+            PT_LINKLIBS = $(_libs:S=.lib) ;
+            EchoOption PT_LINKLIBS : "Pt Link Libraries" ;
+        }
     }
 
     #
     # Unix
     #
-    if ! $(WITH_QT)
+    if ! $(WITH_PT)
     {
-        QT_TRY_C++FLAGS = ;
-        QT_TRY_LINKLIBS = -l$(qtlibs) ;
-        QT_TRY_LINKFLAGS = -L$(QT_LIBDIR) ;
+        PT_TRY_C++FLAGS = ;
+        PT_TRY_LINKLIBS = -l$(_libs) ;
+        PT_TRY_LINKFLAGS = -L$(PT_LIBDIR) ;
         
-        CheckBuildQt "#include <QtCore/QString>"
-                     "int main() { QString button; return 0; }" 
-                    : $(QT_INCLUDES) 
-                    : $(QT_TRY_C++FLAGS)
-                    : $(QT_TRY_LINKLIBS) 
-                    : $(QT_TRY_LINKFLAGS) ;
-    }
-    
-    #
-    # Mac OS-X
-    #
-    if ! $(WITH_QT)
-    {
-        QT_TRY_C++FLAGS = -F$(QT_LIBDIR) ; # TODO: works like -I
-        QT_TRY_LINKLIBS = "-framework "$(qtlibs) ;
-        QT_TRY_LINKFLAGS = -F$(QT_LIBDIR) ;
-        
-        CheckBuildQt "#include <QtCore/QString>"
-                     "int main() { QString button; return 0; }" 
-                    : $(QT_INCLUDES) 
-                    : $(QT_TRY_C++FLAGS)
-                    : $(QT_TRY_LINKLIBS) 
-                    : $(QT_TRY_LINKFLAGS) ;
+        CheckBuildPt "#include <Pt/String.h>"
+                     "int main() { Pt::String str; return 0; }" 
+                    : $(PT_INCLUDES) 
+                    : $(PT_TRY_C++FLAGS)
+                    : -lPt
+                    : $(PT_TRY_LINKFLAGS) ;
+
+        if $(WITH_PT)
+        {
+            PT_LINKLIBS = -l$(_libs) ;
+            EchoOption PT_LINKLIBS : "Pt Link Libraries" ;
+        }
     }
 
-    return $(WITH_QT) ;
-}
-
-
-###############################################################################
-# Configure Meta Object Compiler
-#
-# Runs the moc on header files containing class definitions to generate a
-# source file that has to be compiled with the other source files.
-#
-# Example usage:
-#
-# Moc qtest.moc.cpp : qtest.h ;
-#
-# Main qtest : qtest.cpp qtest.moc.cpp ;
-#
-###############################################################################
-rule ConfigureMoc
-{
-    QT_MOC ?= moc ;
-
-    ConfigureLog "\n[ ConfigureMoc ]" ;
-    
-    local _in = check.h ;
-    local _out = check.moc.cpp ;
-    local _src = "#include <QtCore/QObject>\nclass moctest : public QObject{ Q_OBJECT };\n" ;
-    ConfigureLog $(_src) ;
-
-    WriteFile $(_in) : $(_src) ;
-    local _cmd = $(QT_MOC) $(_in) -o $(_out) ;
-    WITH_QT_MOC = [ TryCommand $(_cmd) ] ;
-
-    if ! $(WITH_QT_MOC)
-    {
-        QT_MOC = [ FDirName $(QTDIR) bin $(QT_MOC) ] ;
-        local _cmd = $(QT_MOC) $(_in) -o $(_out) ;
-        WITH_QT_MOC = [ TryCommand $(_cmd) ] ;
-    }
-    
-    TryCommand $(RM) $(_in) ;
-    TryCommand $(RM) $(_out) ;
-
-    EchoOption QT_MOC : "Qt moc tool" : $(QT_MOC) ;
-    EchoOption WITH_QT_MOC : "Qt moc support" : $(WITH_QT_MOC:E="no")  ;
- 
-    if $(WITH_QT_MOC)
-    {
-        Configure QT_MOC : $(QT_MOC) ;
-    }
-}
-
-rule Moc
-{
-    local _mocFile = [ FGristFiles $(<) ] ;
-    local _header = [ FGristFiles  $(>) ] ;
-
-    MakeLocate $(_mocFile) : $(LOCATE_SOURCE) ;
-    SEARCH on $(_header) = $(SEARCH_SOURCE) ;
-    Depends $(_mocFile) : $(_header) ;
-    Moc1 $(_mocFile) : $(_header) ;
-
-    Clean clean : $(_mocFile) ;
-}
-
-actions Moc1
-{
-    $(QT_MOC) -I$(QT_INCLUDES) $(>) -o $(<)
-}
-
-###############################################################################
-# Rules and Actions for rcc
-###############################################################################
-rule ConfigureRcc
-{
-    QT_RCC ?= rcc ;
-
-    ConfigureLog "\n[ ConfigureRcc ]" ;
-    
-    local _in = check.qrc ;
-    local _out = check.cpp ;
-    local _src = "<RCC></RCC>\n" ;
-    ConfigureLog $(_src) ;
-
-    WriteFile $(_in) : $(_src) ;
-    local _cmd = $(QT_RCC) $(_in) -o $(_out) ;
-    WITH_QT_RCC = [ TryCommand $(_cmd) ] ;
-
-    if ! $(WITH_QT_RCC)
-    {
-        QT_RCC = [ FDirName $(QTDIR) bin $(QT_RCC) ] ;
-    local _cmd = $(QT_RCC) $(_in) -o $(_out) ;
-        WITH_QT_RCC = [ TryCommand $(_cmd) ] ;
-    }
-    
-    TryCommand $(RM) $(_in) ;
-    TryCommand $(RM) $(_out) ;
-
-    EchoOption QT_RCC : "Qt rcc tool" : $(QT_RCC) ;
-    EchoOption WITH_QT_RCC : "Qt rcc support" : $(WITH_QT_RCC:E="no")  ;
- 
-    if $(WITH_QT_RCC)
-    {
-        Configure QT_RCC : $(QT_RCC) ;
-    }
-}
-
-rule Rcc
-{
-    local _out = [ FGristFiles $(<) ] ;
-    local _qrc = [ FGristFiles $(>) ] ;
-
-    MakeLocate $(_out) : $(LOCATE_SOURCE) ;
-    SEARCH on $(_qrc) = $(SEARCH_SOURCE) ;
-    Depends $(_out) : $(_qrc) ;
-    Rcc1 $(_out) : $(_qrc) ;
-
-    Clean clean : $(_out) ;
-}
-
-actions Rcc1
-{
-    $(QT_RCC) -o $(<) $(>) 
-}
-
-###############################################################################
-# Configure User Interface Compiler
-###############################################################################
-rule ConfigureUic
-{
-    QT_UIC ?= [ FDirName $(QTDIR) bin "uic"$(SUFEXE) ] ;
-    EchoOption QT_UIC : "Qt uic tool" : $(QT_UIC)  ;
-
-    WITH_QT_UIC = [ CHECK_IF_FILE $(QT_UIC) ] ;
-    if $(WITH_QT_UIC)
-    {
-        WITH_QT_UIC = yes ;
-    }
-
-    EchoOption WITH_QT_UIC : "Qt uic support" : $(WITH_QT_UIC:E="no")  ;
- 
-    if $(WITH_QT_UIC)
-    {
-        Configure QT_UIC : $(QT_UIC) ;
-    }
-}
-
-rule Uic
-{
-    local _headerFile = [ FGristFiles $(<) ] ;
-    local _uicFile = [ FGristFiles $(>) ] ;
-
-    MakeLocate $(_headerFile) : $(LOCATE_SOURCE) ;
-    SEARCH on $(_uicFile) = $(SEARCH_SOURCE) ;
-    Depends $(_headerFile) : $(_uicFile) ;
-    Uic1 $(_headerFile) : $(_uicFile) ;
-
-    Clean clean : $(_headerFile) ;
-}
-
-actions Uic1
-{
-    $(QT_UIC) $(>) -o $(<)
+    return $(WITH_PT) ;
 }
