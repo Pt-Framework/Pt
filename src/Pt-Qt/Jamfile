@@ -14,7 +14,7 @@ SharedLibrary Pt-Qt : ApplicationImpl.moc.cpp
 					  ;
 
 LinkSharedLibraries Pt-Qt : Pt Pt-System  ;
-LinkLibs Pt-Qt : $(QT_LIBS) ;
+LinkLibs Pt-Qt : $(QT_LINKLIBS) ;
 LinkFlags Pt-Qt : $(QT_LINKFLAGS) ;
 MakeLocate Pt-Qt : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-Qt : $(PT_INSTALL_LIBDIR) ;

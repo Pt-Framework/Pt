@@ -1,29 +1,127 @@
 ###############################################################################
 # Configure Qt
 ###############################################################################
+
+rule CheckBuildQt
+{  
+    local _src = $(1) ;
+    local _includes = $(2) ;
+    local _cflags = $(3) ;
+    local _linkLibs = $(4) ;
+    local _linkFlags = $(5) ;
+
+    WITH_QT = [ CheckBuildC++ $(_src)
+                             : [ FIncludes $(_includes) ] $(_cflags)
+                             : $(_linkLibs) $(_linkFlags) ] ;
+
+    if $(WITH_QT)
+    {
+        EchoOption WITH_QT : "Qt Support" ;
+        Configure WITH_QT ;
+
+        QT_INCLUDES = $(_includes) ;
+        EchoOption QT_INCLUDES : "Qt Include Directory" ;
+        Configure QT_INCLUDES ;
+
+        QT_C++FLAGS = $(_cflags) ;
+        EchoOption QT_C++FLAGS : "Qt C++ Flags" ;
+        Configure QT_C++FLAGS ;
+
+        QT_LINKLIBS = $(_linkLibs) ;
+        EchoOption QT_LINKLIBS : "Qt Link Libraries" ;
+        Configure QT_LINKLIBS ;
+
+        QT_LINKFLAGS = $(_linkFlags) ;
+        EchoOption QT_LINKFLAGS : "Qt Linker Flags" ;
+        Configure QT_LINKFLAGS ;
+    }
+
+    return $(WITH_QT) ;
+}
+
 rule ConfigureQt
 {  
-  WITH_QT = [ CheckBuildC++ "#include <QtWidgets/QPushButton>"
-                            "int main() { QPushButton button; return 0; }"
-                            : [ FIncludes $(QT_INCLUDES) ]
-                            : $(QT_LIBS)
-                            : $(QT_LIBDIR) ] ;
+    local qtlibs ;
 
-  if $(WITH_QT)
-  {
-    EchoOption WITH_QT : "Qt Support" ;
-    EchoOption QT_INCLUDES : "Qt Include Directory" ;
-    EchoOption QT_LIBDIR : "Qt Library Directory" ;
-    EchoOption QT_LINKFLAGS : "Qt Linker Flags" ;
-    EchoOption QT_LIBS : "Qt Link Libraries" ;
+    for local _l in $(1)
+    {
+        switch $(_l)
+        {
+            case core       : qtlibs += Qt5Core ;
+            case concurrent : qtlibs += Qt5Concurrent ;
+            case network    : qtlibs += Qt5Network ;
+            case widgets    : qtlibs += Qt5Widgets ;
+            case gui        : qtlibs += Qt5Gui ;
+            case qml        : qtlibs += Qt5Qml ;
+            case quick      : qtlibs += Qt5Quick ;
+        }
+    }
+    
+    if $(QTDIR)
+    {
+      QT_INCLUDES ?= [ FDirName $(QTDIR) include ] ;
+      QT_LIBDIR ?= [ FDirName $(QTDIR) lib ] ;
+    }
 
-    Configure WITH_QT ;
-    Configure QT_INCLUDES ;
-    Configure QT_LIBDIR ;
-    Configure QT_LINKFLAGS ;
-    Configure QT_LIBS ;
-  }
+    #
+    # Windows
+    #
+    if ! $(WITH_QT)
+    {
+        QT_TRY_C++FLAGS = ;
+        QT_TRY_LINKLIBS = $(qtlibs:S=.lib) ;
+        QT_TRY_LINKFLAGS = /LIBPATH:$(QT_LIBDIR) ;
+        
+        if $(WITH_DEBUG)
+        {   
+            QT_TRY_LINKLIBS = $(qtlibs:S=d.lib) ;
+        }
+
+        CheckBuildQt "#include <QtCore/QString>"
+                     "int main() { QString button; return 0; }" 
+                    : $(QT_INCLUDES) 
+                    : $(QT_TRY_C++FLAGS)
+                    : $(QT_TRY_LINKLIBS) 
+                    : $(QT_TRY_LINKFLAGS) ;
+    }
+
+    #
+    # Unix
+    #
+    if ! $(WITH_QT)
+    {
+        QT_TRY_C++FLAGS = ;
+        QT_TRY_LINKLIBS = -l$(qtlibs) ;
+        QT_TRY_LINKFLAGS = -L$(QT_LIBDIR) ;
+        
+        CheckBuildQt "#include <QtCore/QString>"
+                     "int main() { QString button; return 0; }" 
+                    : $(QT_INCLUDES) 
+                    : $(QT_TRY_C++FLAGS)
+                    : $(QT_TRY_LINKLIBS) 
+                    : $(QT_TRY_LINKFLAGS) ;
+    }
+    
+    #
+    # Mac OS-X
+    #
+    if ! $(WITH_QT)
+    {
+        QT_TRY_C++FLAGS = -F$(QT_LIBDIR) ; # TODO: works like -I
+        QT_TRY_LINKLIBS = "-framework "$(qtlibs) ;
+        QT_TRY_LINKFLAGS = -F$(QT_LIBDIR) ;
+        
+        CheckBuildQt "#include <QtCore/QString>"
+                     "int main() { QString button; return 0; }" 
+                    : $(QT_INCLUDES) 
+                    : $(QT_TRY_C++FLAGS)
+                    : $(QT_TRY_LINKLIBS) 
+                    : $(QT_TRY_LINKFLAGS) ;
+    }
+
+    return $(WITH_QT) ;
 }
+
 
 ###############################################################################
 # Configure Meta Object Compiler

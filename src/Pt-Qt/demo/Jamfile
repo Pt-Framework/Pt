@@ -5,6 +5,6 @@ SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Qt ;
 
 Main qdemo : qdemo.cpp ;
 LinkSharedLibraries qdemo : Pt Pt-System Pt-Net Pt-Qt ;
-LinkLibs qdemo : $(QT_LIBS) ;
+LinkLibs qdemo : $(QT_LINKLIBS) ;
 LinkFlags qdemo : $(QT_LINKFLAGS) ;
 MakeLocate qdemo : $(PT_OUTPUT_TARGET) ;

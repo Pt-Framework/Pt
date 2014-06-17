@@ -325,80 +325,35 @@ if --with-qt5 in $(ARGV)
 {
     Load qt.jam ;
 
-    if $(QTDIR)
-    {
-      QT_INCLUDES ?= [ FDirName $(QTDIR) include ] ;
-      QT_LIBDIR ?= [ FDirName $(QTDIR) lib ] ;
-    }
-
-    #
-    # Windows
-    #
-    if ! $(WITH_QT)
-    {
-        QT_LINKFLAGS = /LIBPATH:$(QT_LIBDIR) ;
-
-        if $(WITH_DEBUG)
-        {
-            QT_LIBS = Qt5Cored.lib Qt5Widgetsd.lib ;
-        }
-        else
-        {
-            QT_LIBS = Qt5Core.lib Qt5Widgets.lib ;
-        }
-
-        ConfigureQt ;
-    }
-
-    #
-    # Unix
-    #
-    if ! $(WITH_QT)
-    {
-        QT_LIBS = -lQt5Core -lQt5Widgets ;
-
-        if $(QT_LIBDIR)
-        {
-          QT_LINKFLAGS = -L$(QT_LIBDIR) ;
-        }
-
-        ConfigureQt ;
-    }
-    
-    #
-    # Mac OS-X
-    #
-    if ! $(WITH_QT)
-    {
-        C++FLAGS += -F$(QT_LIBDIR) ; # TODO: works like -I
-        QT_LIBS = -framework QtCore -framework QtWidgets ;
-        QT_LINKFLAGS = -F$(QT_LIBDIR) ;
-
-        ConfigureQt ;   
-    }
+    ConfigureQt core widgets ;
 
     #
     # Linaro
     #
     if ! $(WITH_QT)
     {
-      QT_INCLUDES = [ FDirName $(QTDIR) include ] ;
-      QT_LIBDIR = [ FDirName $(QTDIR) lib ] ;
-      QT_LIBS = -lQt5Core -lQt5Widgets -lQt5Gui -lQt5Qml -lQt5Network -lQt5Quick
-                -lGLESv2 -lPVRScopeServices -lIMGegl -lsrv_um -ldrm 
-                -ldrm_omap -lwayland-server -lffi -lEGL ;
-      QT_LINKFLAGS = -L$(QT_LIBDIR) ;
-
-      ConfigureQt ;
+        QT_INCLUDES ?= [ FDirName $(QTDIR) include ] ;
+        QT_LIBDIR ?= [ FDirName $(QTDIR) lib ] ;
+        QT_TRY_C++FLAGS = ;
+        QT_TRY_LINKLIBS = -lQt5Core -lQt5Widgets -lQt5Gui
+                          -lGLESv2 -lPVRScopeServices -lIMGegl -lsrv_um -ldrm 
+                          -ldrm_omap -lwayland-server -lffi -lEGL ;
+        QT_TRY_LINKFLAGS = -L$(QT_LIBDIR) ;
+        
+        CheckBuildQt "#include <QtCore/QString>"
+                     "int main() { QString button; return 0; }"
+                    : $(QT_INCLUDES) 
+                    : $(QT_TRY_C++FLAGS)
+                    : $(QT_TRY_LINKLIBS) 
+                    : $(QT_TRY_LINKFLAGS) ;
     }
 
     if ! $(WITH_QT)
     {
         EchoOption WITH_QT : "Qt Support" ;
+        EchoOption QTDIR : "Qt Directory" ;
         EchoOption QT_INCLUDES : "Qt Include Directory" ;
         EchoOption QT_LIBDIR : "Qt Library Directory" ;
-        EchoOption QT_LINKFLAGS : "Qt Linker Flags" ;
-        EchoOption QT_LIBS : "Qt Link Libraries" ;
         Exit "ERROR: Qt headers and libraries not found." ;
     }
 
