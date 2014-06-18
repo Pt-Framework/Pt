@@ -122,9 +122,8 @@ rule ConfigureQt
     return $(WITH_QT) ;
 }
 
-
 ###############################################################################
-# Configure Meta Object Compiler
+# Rules and Actions for the Qt Meta Object Compiler
 #
 # Runs the moc on header files containing class definitions to generate a
 # source file that has to be compiled with the other source files.
@@ -189,7 +188,7 @@ actions Moc1
 }
 
 ###############################################################################
-# Rules and Actions for rcc
+# Rules and Actions for the Qt Resource Compiler
 ###############################################################################
 rule ConfigureRcc
 {
@@ -209,7 +208,7 @@ rule ConfigureRcc
     if ! $(WITH_QT_RCC)
     {
         QT_RCC = [ FDirName $(QTDIR) bin $(QT_RCC) ] ;
-    local _cmd = $(QT_RCC) $(_in) -o $(_out) ;
+        local _cmd = $(QT_RCC) $(_in) -o $(_out) ;
         WITH_QT_RCC = [ TryCommand $(_cmd) ] ;
     }
     
@@ -244,19 +243,34 @@ actions Rcc1
 }
 
 ###############################################################################
-# Configure User Interface Compiler
+# Rules and Actions for the User Interface Compiler
 ###############################################################################
 rule ConfigureUic
 {
-    QT_UIC ?= [ FDirName $(QTDIR) bin "uic"$(SUFEXE) ] ;
-    EchoOption QT_UIC : "Qt uic tool" : $(QT_UIC)  ;
+    QT_UIC ?= uic ;
 
-    WITH_QT_UIC = [ CHECK_IF_FILE $(QT_UIC) ] ;
-    if $(WITH_QT_UIC)
+    ConfigureLog "\n[ ConfigureUic ]" ;
+    
+    local _in = check.ui ;
+    local _out = check.cpp ;
+    local _src = "<ui version="4.0"></ui>\n" ;
+    ConfigureLog $(_src) ;
+
+    WriteFile $(_in) : $(_src) ;
+    local _cmd = $(QT_UIC) $(_in) -o $(_out) ;
+    WITH_QT_UIC = [ TryCommand $(_cmd) ] ;
+
+    if ! $(WITH_QT_UIC)
     {
-        WITH_QT_UIC = yes ;
+        QT_UIC = [ FDirName $(QTDIR) bin $(QT_UIC) ] ;
+        local _cmd = $(QT_UIC) $(_in) -o $(_out) ;
+        WITH_QT_UIC = [ TryCommand $(_cmd) ] ;
     }
+    
+    TryCommand $(RM) $(_in) ;
+    TryCommand $(RM) $(_out) ;
 
+    EchoOption QT_UIC : "Qt uic tool" : $(QT_UIC) ;
     EchoOption WITH_QT_UIC : "Qt uic support" : $(WITH_QT_UIC:E="no")  ;
  
     if $(WITH_QT_UIC)
@@ -267,15 +281,15 @@ rule ConfigureUic
 
 rule Uic
 {
-    local _headerFile = [ FGristFiles $(<) ] ;
-    local _uicFile = [ FGristFiles $(>) ] ;
+    local _out = [ FGristFiles $(<) ] ;
+    local _ui = [ FGristFiles $(>) ] ;
 
-    MakeLocate $(_headerFile) : $(LOCATE_SOURCE) ;
-    SEARCH on $(_uicFile) = $(SEARCH_SOURCE) ;
-    Depends $(_headerFile) : $(_uicFile) ;
-    Uic1 $(_headerFile) : $(_uicFile) ;
+    MakeLocate $(_out) : $(LOCATE_SOURCE) ;
+    SEARCH on $(_ui) = $(SEARCH_SOURCE) ;
+    Depends $(_out) : $(_ui) ;
+    Uic1 $(_out) : $(_ui) ;
 
-    Clean clean : $(_headerFile) ;
+    Clean clean : $(_out) ;
 }
 
 actions Uic1
