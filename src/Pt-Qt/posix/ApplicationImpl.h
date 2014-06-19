@@ -64,6 +64,8 @@ class IONotifier : public QObject
     public slots:
         void onRead(int)
         {
+            disableRead();
+
             _h->events &= ~System::IOHandle::Read;
             _h->ready = System::IOHandle::Read;
 
@@ -73,6 +75,8 @@ class IONotifier : public QObject
 
         void onWrite(int)
         {
+            disableWrite();
+
             _h->events &= ~System::IOHandle::Write;
             _h->ready = System::IOHandle::Write;
 

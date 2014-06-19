@@ -77,6 +77,8 @@ void MainLoopImplOnFd(CFFileDescriptorRef f, CFOptionFlags flags, void *p)
 {
     System::IOHandle* h = reinterpret_cast<System::IOHandle*>(p);
 
+    // call back is one-shot, so we do not have to disable it here
+
     if(flags & kCFFileDescriptorReadCallBack)
     {
         h->events &= ~System::IOHandle::Read;
@@ -378,6 +380,7 @@ void ApplicationImpl::beginRead(System::IOHandle* h)
 
 void ApplicationImpl::endRead(System::IOHandle* h)
 {
+    // disable if callback wasn't called
     if(h->events & System::IOHandle::Read)
     {
         CFFileDescriptorRef fdref = _iotable[h->id].fd;
@@ -398,6 +401,7 @@ void ApplicationImpl::beginWrite(System::IOHandle* h)
 
 void ApplicationImpl::endWrite(System::IOHandle* h)
 {
+    // disable if callback wasn't called
     if(h->events & System::IOHandle::Write)
     {
         CFFileDescriptorRef fdref = _iotable[h->id].fd;

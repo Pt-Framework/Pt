@@ -41,15 +41,25 @@ namespace Pt {
 
 namespace WxWidgets {
 
-class IOSource : public wxEventLoopSourceHandler
+class IOHandler : public wxEventLoopSourceHandler
 {
     public:
-        IOSource(System::IOHandle& h)
+        IOHandler(System::IOHandle& h)
         : _h(&h)
+        , _readSource(0)
+        , _writeSource(0)
         { }
+
+        ~IOHandler
+        {
+            delete _readSource;
+            delete _writeSource;
+        }
 
         void OnReadWaiting()
         {
+            setReadSource(0);
+
             _h->events &= ~System::IOHandle::Read;
             _h->ready = System::IOHandle::Read;
 
@@ -59,6 +69,8 @@ class IOSource : public wxEventLoopSourceHandler
 
         void OnWriteWaiting()
         {
+            setWriteSource(0);
+
             _h->events &= ~System::IOHandle::Write;
             _h->ready = System::IOHandle::Write;
 
@@ -69,8 +81,22 @@ class IOSource : public wxEventLoopSourceHandler
         void OnExceptionWaiting()
         {}
 
+        void setReadSource(wxEventLoopSource* source)
+        { 
+            delete _readSource;
+            _readSource = source; 
+        }
+
+        void setWriteSource(wxEventLoopSource* source)
+        { 
+            delete _writeSource;
+            _writeSource = source; 
+        }
+
     private:
         System::IOHandle* _h;
+        wxEventLoopSource* _readSource;
+        wxEventLoopSource* _writeSource;
 };
 
 
@@ -102,29 +128,29 @@ class Selector : public System::Selector
 
         void cancel(System::IOHandle& h)
         {
-            //if(h.id == System::IOHandle::InvalidId)
-            //    return;
+            if(h.id == System::IOHandle::InvalidId)
+                return;
 
-            //IOMap::iterator it = _iomap.find(&h);
-            //if( it != _iomap.end() )
-            //{
-            //    delete it->second;
-            //    _iomap.erase(it);
-            //}
+            IOMap::iterator it = _iomap.find(&h);
+            if( it != _iomap.end() )
+            {
+                delete it->second;
+                _iomap.erase(it);
+            }
 
-            //h.id = System::IOHandle::InvalidId;
-            //h.ready = 0;
-            //h.events = 0;
+            h.id = System::IOHandle::InvalidId;
+            h.ready = 0;
+            h.events = 0;
         }
         
-        IOSource& getNotifier(System::IOHandle* h)
+        IOHandler& getHandler(System::IOHandle* h)
         {
             if(h->id == System::IOHandle::InvalidId)
             {
-                IOSource* source = new IOSource(*h);
-                _iomap[h] = source;
+                IOHandler* handler = new IOHandler(*h);
+                _iomap[h] = handler;
                 h->id = 1;
-                return *source;
+                return *handler;
             }
 
             return *_iomap[h];
@@ -132,60 +158,58 @@ class Selector : public System::Selector
 
         void beginRead(System::IOHandle* h)
         {
-            IOSource& ioSource = getNotifier(h);
+            IOHandler& handler = getHandler(h);
 
-            //notifier.enableRead();
             wxEventLoopSource* source = AddSourceForFD(h->fd, &ioSource, wxEVENT_SOURCE_INPUT);
+            handler.setReadSource(source);
 
             h->events = System::IOHandle::Read;
         }
 
         void endRead(System::IOHandle* h)
         {
-            //if(h->events & System::IOHandle::Read)
-            //{
-            //     IONotifier& notifier = getNotifier(h);
-            //     notifier.disableRead();
-            //}
+            if(h->events & System::IOHandle::Read)
+            {
+                 IOHandler& handler = getHandler(h);
+                 handler.setReadSource(0);
+            }
 
-            //h->ready = 0;
-            //h->events &= ~System::IOHandle::Read;
+            h->ready = 0;
+            h->events &= ~System::IOHandle::Read;
         }
 
         void beginWrite(System::IOHandle* h)
         {
-            //IONotifier& notifier = getNotifier(h);
+            IOHandler& handler = getHandler(h);
 
-            //notifier.enableWrite();
-            //h->events = System::IOHandle::Write;
+            wxEventLoopSource* source = AddSourceForFD(h->fd, &ioSource, wxEVENT_SOURCE_OUTPUT);
+            handler.setWriteSource(source);
+
+            h->events = System::IOHandle::Write;
         }
 
         void endWrite(System::IOHandle* h)
         {
-            //if(h->events & System::IOHandle::Write)
-            //{
-            //     IONotifier& notifier = getNotifier(h);
-            //     notifier.disableWrite();
-            //}
+            if(h->events & System::IOHandle::Write)
+            {
+                 IOHandler& handler = getHandler(h);
+                 handler.setWriteSource(0);
+            }
 
-            //h->ready = 0;
-            //h->events &= ~System::IOHandle::Write;
+            h->ready = 0;
+            h->events &= ~System::IOHandle::Write;
         }
 
         bool isReadable(System::IOHandle* h)
         {
-            //bool isReady = h->ready == System::IOHandle::Read;
-            //return isReady;
-
-            return false; // dummy
+            bool isReady = h->ready == System::IOHandle::Read;
+            return isReady;
         }
 
         bool isWritable(System::IOHandle* h)
         {
-            //bool isReady = h->ready == System::IOHandle::Write;
-            //return isReady;
-
-            return false; // dummy
+            bool isReady = h->ready == System::IOHandle::Write;
+            return isReady;
         }
 
         bool isError(System::IOHandle* h)
@@ -204,7 +228,7 @@ class Selector : public System::Selector
         int wakeFd()
         { return _wakePipe.readFd(); }
 
-        typedef std::map<System::IOHandle*, IOSource*> IOMap;
+        typedef std::map<System::IOHandle*, IOHandler*> IOMap;
 
     private:
         wxEventLoopBase& _wxLoop;
