@@ -169,6 +169,7 @@
     <ClInclude Include="..\..\include\Pt\Method.h" />
     <ClInclude Include="..\..\include\Pt\Mfc\Api.h" />
     <ClInclude Include="..\..\include\Pt\Mfc\Application.h" />
+    <ClInclude Include="..\..\include\Pt\Mfc\MainLoop.h" />
     <ClInclude Include="..\..\include\Pt\Net\AddressInUse.h" />
     <ClInclude Include="..\..\include\Pt\Net\Api.h" />
     <ClInclude Include="..\..\include\Pt\Net\Endpoint.h" />
@@ -648,6 +649,7 @@
     <ClCompile Include="..\..\src\Pt-Mfc\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-Mfc\demo\MfcApplication.cpp" />
     <ClCompile Include="..\..\src\Pt-Mfc\demo\mfcdemo.cpp" />
+    <ClCompile Include="..\..\src\Pt-Mfc\MainLoop.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\AddressInUse.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\Endpoint.cpp" />
     <ClCompile Include="..\..\src\Pt-Net\posix\AddrInfo.cpp" />

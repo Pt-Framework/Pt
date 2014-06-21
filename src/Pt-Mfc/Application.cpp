@@ -1,4 +1,5 @@
-/* Copyright (C) 2014 Marc Boris Dürner
+/* 
+ * Copyright (C) 2014 Marc Boris Dürner
  * Copyright (C) 2014 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
@@ -26,233 +27,65 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#ifndef _SECURE_ATL
+#define _SECURE_ATL 1
+#endif
+
+#ifndef _ATL_CSTRING_EXPLICIT_CONSTRUCTORS
+#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS
+#endif
+
+#ifndef _AFX_ALL_WARNINGS
+#define _AFX_ALL_WARNINGS
+#endif
+
 #include <Pt/Mfc/Application.h>
-#include <Pt/System/IOError.h>
-#include <Pt/System/Selectable.h>
-#include <Pt/System/SystemError.h>
-#include <win32/Selector.h>
 
 namespace Pt {
+
 namespace Mfc {
-
-MainLoop::MainLoop()
-:_selector( new Pt::System::Selector())
-,_timer(NULL)
-{
-  _timer = CreateWaitableTimer(0, FALSE, 0);
-   if ( _timer == NULL )
-     throw Pt::System::SystemError("CreateWaitableTimer failed");
-}
-
-MainLoop::~MainLoop()
-{
-	delete _selector;
-  CloseHandle(_timer);
-}
-
-void MainLoop::onAttachSelectable(System::Selectable& s)
-{ 
-    _selector->attach(s); 
-}
-
-
-void MainLoop::onDetachSelectable(System::Selectable& s)
-{ 
-    _selector->detach(s); 
-}
-
-void MainLoop::onCancel(System::Selectable& s)
-{
-    Pt::System::MutexLock lock(_mutex);
-
-    std::vector<System::Selectable*>::iterator it = _avail.begin();
-    while(it != _avail.end())
-    {
-        if(*it == &s)
-            it = _avail.erase(it);
-        else
-            ++it;
-    }
-}
-
-
-void MainLoop::onReady(System::Selectable& s)
-{
-    Pt::System::MutexLock lock(_mutex);
-    _avail.push_back(&s);
-
-    // this is not neccessary if we can check _avail before the
-    // Qaaplication starts to wait on the handles
-    _selector->wake();
-}
-
-
-void MainLoop::onCommitEvent(const Pt::Event& ev)
-{ 
-    _eventQueue.pushEvent(ev);
-    _selector->wake();
-}
-
-
-void MainLoop::onQueueEvent(const Pt::Event& ev)
-{ 
-    _eventQueue.pushEvent(ev); 
-}
-
-
-void MainLoop::onWake()
-{
-    _selector->wake();
-}
-
-
-void MainLoop::onAttachTimer(System::Timer& timer)
-{ 
-    _timerQueue.addTimer(timer); 
-    this->processTimers();
-}
-
-
-void MainLoop::onDetachTimer(System::Timer& timer )
-{ 
-    _timerQueue.removeTimer(timer);
-    this->processTimers();
-}
-
-
-void MainLoop::processTimers()
-{ 
-    std::size_t nextTimer = _timerQueue.processTimers();
-
-    LARGE_INTEGER liDueTime;
-
-    if(nextTimer != System::EventLoop::WaitInfinite)
-    {
-        liDueTime.QuadPart = nextTimer * 10000;
-        if (!SetWaitableTimer(_timer, &liDueTime, 0, NULL, NULL, 0) )
-          throw Pt::System::SystemError("SetWaitableTimer failed");
-    }
-    else
-      CancelWaitableTimer(_timer);
-}
-
-
-void MainLoop::onRun()
-{
-    
-}
-
-
-void MainLoop::onExit()
-{
-    _eventQueue.exit();
-    wake();
-}
-
-
-
-void MainLoop::handleWake()
-{
-    while( true )
-    {
-        Pt::System::MutexLock lock(_mutex);
-
-        if( _avail.empty() )
-            break;
-
-        System::Selectable* s = _avail.back();
-        _avail.pop_back();
-        lock.unlock();
-
-        s->run();
-    }
-
-    bool isActive = _eventQueue.processEvents( this->eventReceived() );
-    if( ! isActive )
-      ::PostQuitMessage(0);
-}
-
-bool MainLoop::pumpMessage()
-{
-    
-    HANDLE handles[] = { _selector->overlappedEvent(), 
-                         _selector->wakeEvent(),
-                         _timer };
-
-    DWORD n = sizeof( handles ) / sizeof (HANDLE);
-
-    DWORD result = ::MsgWaitForMultipleObjectsEx( 
-      n,
-      handles,
-      INFINITE,
-      QS_ALLINPUT,
-      MWMO_INPUTAVAILABLE | MWMO_ALERTABLE );
-
-    if(result == WAIT_FAILED)
-        throw Pt::System::SystemError("MsgWaitForMultipleObjectsEx");
-
-    switch (result)
-    {
-        case WAIT_OBJECT_0:
-            _selector->runOverlapped();
-            break;
-
-        case WAIT_OBJECT_0 + 1:
-            this->handleWake();
-            break;
-
-        case WAIT_OBJECT_0 + 2: 
-            processTimers();
-            break;
-
-        case WAIT_OBJECT_0 + 3: 
-            return false;
-            break;
-
-        case WAIT_IO_COMPLETION:
-            break;
-    }
-
-    return true;
-}
-
 
 WinApp::WinApp()
 : CWinApp()
 , Pt::System::Application(0, 0, 0)
 {
-	init(_loop);
+    init(_loop);
 }
+
 
 WinApp::~WinApp()
 {
 }
 
+
 BOOL WinApp::PumpMessage()
 {
-	if( ! _loop.pumpMessage() )
-    return __super::PumpMessage();
+    if( _loop.pumpMessage() )
+        return __super::PumpMessage();
 
-  return TRUE;
+    return TRUE;
 }
+
 
 WinAppEx::WinAppEx(BOOL bResourceSmartUpdate)
 : CWinAppEx(bResourceSmartUpdate)
 , Pt::System::Application(0, 0, 0)
 {
-	init(_loop);
+    init(_loop);
 }
+
 
 WinAppEx::~WinAppEx()
 {
 }
 
+
 BOOL WinAppEx::PumpMessage()
 {
-	if( ! _loop.pumpMessage() )
-    return __super::PumpMessage();
+    if( _loop.pumpMessage() )
+        return __super::PumpMessage();
 
-  return TRUE;
+    return TRUE;
 }
 
 } // namespace

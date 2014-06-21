@@ -1434,6 +1434,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Mfc\MainLoop.h">
+      <Filter>Pt-Mfc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2687,6 +2690,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\ImagePaintSurface.cpp">
       <Filter>Pt-Hmi\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Mfc\MainLoop.cpp">
+      <Filter>Pt-Mfc</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

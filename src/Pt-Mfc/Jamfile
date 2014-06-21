@@ -6,7 +6,8 @@ SubDirC++Flags [ FDefines PT_MFC_API_EXPORT ] ;
 SubDirC++Flags [ FDefines _AFXDLL ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Mfc ;
 
-SharedLibrary Pt-Mfc : Application.cpp ;
+SharedLibrary Pt-Mfc : Application.cpp 
+                       MainLoop.cpp ;
 LinkSharedLibraries Pt-Mfc : Pt Pt-System  ;
 LinkFlags Pt-Mfc : $(MFC_LINKFLAGS) ;
 MakeLocate Pt-Mfc : $(PT_OUTPUT_TARGET) ;

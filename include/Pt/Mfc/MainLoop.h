@@ -27,52 +27,68 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Pt_Mfc_Application_h
-#define Pt_Mfc_Application_h
+#ifndef Pt_Mfc_MainLoop_h
+#define Pt_Mfc_MainLoop_h
 
 #include <Pt/Mfc/Api.h>
+#include <Pt/System/EventLoop.h>
 #include <Pt/WinVer.h>
+#include <vector>
 
-#include <afxwin.h>
-#include <afxext.h>
-#include <afxwinappex.h>
-
-#include <Pt/Mfc/MainLoop.h>
-#include <Pt/System/Application.h>
+#include <WinDef.h>
 
 namespace Pt {
 
 namespace Mfc {
 
-class PT_MFC_API WinApp : public CWinApp 
-                        , public Pt::System::Application
+class MainLoop : public System::EventLoop
 {
     public:
-        WinApp();
+        MainLoop();
 
-        virtual ~WinApp();
+        virtual ~MainLoop();
 
-    public:
-        virtual BOOL PumpMessage();
+        virtual void onAttachSelectable(System::Selectable&);
+
+        virtual void onDetachSelectable(System::Selectable&);
+
+        virtual void onCancel(System::Selectable& s);
+
+        virtual void onReady(System::Selectable& s);
+
+        virtual void onRun();
+
+        virtual void onExit();
+
+        virtual void onCommitEvent(const Pt::Event& ev);
+
+        virtual void onQueueEvent(const Pt::Event& ev);
+
+        virtual void onWake();
+
+        virtual void onAttachTimer(System::Timer& timer);
+
+        virtual void onDetachTimer(System::Timer& timer);
+
+        Pt::System::Selector& selector()
+        { return *_selector; }
+
+        /** @brief Waits for next message.
+        */
+        bool pumpMessage();
 
     private:
-        MainLoop _loop;
-};
+        void processTimers();
 
-
-class PT_MFC_API WinAppEx : public CWinAppEx
-                          , public Pt::System::Application
-{
-    public:
-        WinAppEx(BOOL bResourceSmartUpdate = FALSE);
-        
-        virtual ~WinAppEx();
-
-    public:
-        virtual BOOL PumpMessage();
-
+        void handleWake();
+    
     private:
-        MainLoop _loop;
+        Pt::System::Selector* _selector;
+        System::Mutex _mutex;
+        System::TimerQueue _timerQueue;
+        System::EventQueue _eventQueue;
+        std::vector<System::Selectable*> _avail;  
+        HANDLE _timer;
 };
 
 } // namespace
