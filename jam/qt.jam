@@ -67,22 +67,20 @@ rule ConfigureQt
     # Windows
     #
     if ! $(WITH_QT)
-    {
-        QT_TRY_C++FLAGS = ;
-        QT_TRY_LINKLIBS = $(qtlibs:S=.lib) ;
-        QT_TRY_LINKFLAGS = /LIBPATH:$(QT_LIBDIR) ;
+    {       
+        QT_SUFLIB = .lib ;
         
         if $(WITH_DEBUG)
         {   
-            QT_TRY_LINKLIBS = $(qtlibs:S=d.lib) ;
+            QT_SUFLIB = d.lib ;
         }
 
         CheckBuildQt "#include <QtCore/QString>"
                      "int main() { QString button; return 0; }" 
                     : $(QT_INCLUDES) 
-                    : $(QT_TRY_C++FLAGS)
-                    : $(QT_TRY_LINKLIBS) 
-                    : $(QT_TRY_LINKFLAGS) ;
+                    : $(QT_C++FLAGS)
+                    : $(QT_LINKLIBS) $(qtlibs:S=$(QT_SUFLIB)) 
+                    : $(QT_LINKFLAGS) /LIBPATH:$(QT_LIBDIR) ;
     }
 
     #
@@ -90,16 +88,12 @@ rule ConfigureQt
     #
     if ! $(WITH_QT)
     {
-        QT_TRY_C++FLAGS = ;
-        QT_TRY_LINKLIBS = -l$(qtlibs) ;
-        QT_TRY_LINKFLAGS = -L$(QT_LIBDIR) ;
-        
         CheckBuildQt "#include <QtCore/QString>"
                      "int main() { QString button; return 0; }" 
                     : $(QT_INCLUDES) 
-                    : $(QT_TRY_C++FLAGS)
-                    : $(QT_TRY_LINKLIBS) 
-                    : $(QT_TRY_LINKFLAGS) ;
+                    : $(QT_C++FLAGS)
+                    : $(QT_LINKLIBS) -l$(qtlibs) 
+                    : $(QT_LINKFLAGS) -L$(QT_LIBDIR) ;
     }
     
     #
@@ -107,16 +101,12 @@ rule ConfigureQt
     #
     if ! $(WITH_QT)
     {
-        QT_TRY_C++FLAGS = -F$(QT_LIBDIR) ; # TODO: works like -I
-        QT_TRY_LINKLIBS = "-framework "$(qtlibs) ;
-        QT_TRY_LINKFLAGS = -F$(QT_LIBDIR) ;
-        
         CheckBuildQt "#include <QtCore/QString>"
                      "int main() { QString button; return 0; }" 
                     : $(QT_INCLUDES) 
-                    : $(QT_TRY_C++FLAGS)
-                    : $(QT_TRY_LINKLIBS) 
-                    : $(QT_TRY_LINKFLAGS) ;
+                    : $(QT_C++FLAGS) -F$(QT_LIBDIR)
+                    : $(QT_LINKLIBS) "-framework "$(qtlibs)
+                    : $(QT_LINKFLAGS) -F$(QT_LIBDIR) ;
     }
 
     return $(WITH_QT) ;

@@ -325,27 +325,17 @@ if --with-qt5 in $(ARGV)
 {
     Load qt.jam ;
 
-    ConfigureQt core widgets ;
+    ConfigureQt core widgets gui ;
 
     #
     # Linaro
     #
     if ! $(WITH_QT)
     {
-        QT_INCLUDES ?= [ FDirName $(QTDIR) include ] ;
-        QT_LIBDIR ?= [ FDirName $(QTDIR) lib ] ;
-        QT_TRY_C++FLAGS = ;
-        QT_TRY_LINKLIBS = -lQt5Core -lQt5Widgets -lQt5Gui
-                          -lGLESv2 -lPVRScopeServices -lIMGegl -lsrv_um -ldrm 
-                          -ldrm_omap -lwayland-server -lffi -lEGL ;
-        QT_TRY_LINKFLAGS = -L$(QT_LIBDIR) ;
-        
-        CheckBuildQt "#include <QtCore/QString>"
-                     "int main() { QString button; return 0; }"
-                    : $(QT_INCLUDES) 
-                    : $(QT_TRY_C++FLAGS)
-                    : $(QT_TRY_LINKLIBS) 
-                    : $(QT_TRY_LINKFLAGS) ;
+        QT_LINKLIBS = -lGLESv2 -lPVRScopeServices -lIMGegl -lsrv_um -ldrm -ldrm_omap -lwayland-server -lffi -lEGL ;
+        #QT_LINKLIBS += -lQt5Core -lQt5Widgets -lQt5Gui ;
+
+        ConfigureQt core widgets gui ;
     }
 
     if ! $(WITH_QT)
