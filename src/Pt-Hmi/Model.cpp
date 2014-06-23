@@ -36,7 +36,7 @@ Model::Model()
 , DefinePropertyInitMacro(Tag,0)
 , _ctrl(0)
 { 
-
+	registerProperty(Enable);
 }
 
 Model::~Model()
@@ -44,9 +44,10 @@ Model::~Model()
 
 }
 
-void Model::registerProperty(PropertyBase* prop)
+void Model::registerProperty(PropertyBase& prop)
 {
-    std::pair<std::string,PropertyBase*> pair(prop->name(), prop);
+	prop.setParent(this);
+    std::pair<std::string,PropertyBase*> pair(prop.name(), &prop);
     _properties.insert(pair);
 }
     

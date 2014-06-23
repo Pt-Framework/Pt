@@ -30,15 +30,13 @@
 #include <Pt/Signal.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Point.h>
+#include <Pt/Hmi/WidgetController.h>
+#include <Pt/Hmi/ButtonController.h>
+#include <Pt/Hmi/ButtonModel.h>
+#include <Pt/Hmi/ButtonRenderer.h>
 
 namespace Pt{
-namespace Hmi{
-
-class ButtonController;
-class ButtonModel;
-class ButtonRenderer;
-class Controller;
-    
+namespace Hmi{  
 namespace Desktop{
 
 class PT_HMI_DESKTOP_API Button : public Widget 
@@ -67,6 +65,7 @@ public:
 
 	ButtonModel& buttonModel();
 	ButtonController& buttonController();
+	void setButtonController(Pt::Hmi::ButtonController& ctrl);
 
 public:    
     Pt::Signal<>	 ClickedAction;
@@ -75,16 +74,22 @@ public:
 protected:
     virtual void onClicked();
     virtual void onChecked(bool state);
-	virtual void setController(Pt::Hmi::GfxController& ctrl);
+
+protected:
+	virtual WidgetController& widgetController()
+	{
+		return *_currentController;
+	}
     
 private:
     void handleOnClicked(Controller* sender);
     void handleOnChecked(Controller* sender, bool state);
     
 private:
-	Pt::Hmi::ButtonController* _defController;
-	Pt::Hmi::ButtonModel*      _defModel;
-	Pt::Hmi::ButtonRenderer*   _defRenderer;
+	Pt::Hmi::ButtonModel      _defModel;
+	Pt::Hmi::ButtonRenderer   _defRenderer;
+	Pt::Hmi::ButtonController _defController;
+	Pt::Hmi::ButtonController* _currentController;
 };
  
 }}}

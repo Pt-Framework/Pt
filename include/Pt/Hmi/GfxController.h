@@ -35,11 +35,13 @@ namespace Pt{
 namespace Hmi{
 
 class GfxModel;
+class Renderer;
+class PaintSurface;
 
 class PT_HMI_API GfxController  : public Controller
 {
 public:
-	GfxController();
+	GfxController(GfxModel& model, Renderer& renderer);
 	virtual ~GfxController();
 
 	Pt::Gfx::PointF toClient(const Pt::Gfx::PointF& globalPoint);
@@ -48,12 +50,11 @@ public:
 	virtual void render();
 	virtual void output();
 	virtual void invalidate();
+			
+	GfxModel& gfxModel();
+	const GfxModel& gfxModel() const;
 	
-		
-	GfxModel* gfxModel();
-	const GfxModel* gfxModel() const;
-	
-	Pt::Signal<GfxController&> Render;
+	Pt::Signal<GfxController&, PaintSurface&> Render;
 	Pt::Signal<GfxController&> Output;
 
 protected:
@@ -65,6 +66,8 @@ private:
 	bool focusPrevChild(int index);
 	int getFocusedChild() const;
 
+private:
+	Renderer& _renderer;
 };
 
 }}

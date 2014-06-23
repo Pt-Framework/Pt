@@ -17,5 +17,3 @@ LinkSharedLibraries Pt-Hmi-Desktop : Pt Pt-System Pt-Gfx  Pt-Hmi ;
 LinkLibs Pt-Hmi-Desktop : $(GUILIBS) ;
 MakeLocate Pt-Hmi-Desktop : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-Hmi-Desktop : $(PT_INSTALL_LIBDIR) ;
-
-SubInclude PT_TOP src Pt-Hmi Desktop tests ;

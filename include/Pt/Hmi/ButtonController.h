@@ -37,11 +37,12 @@ namespace Pt{
 namespace Hmi{
 
 class PointingEvent;
+class ButtonRenderer;
 
 class PT_HMI_API ButtonController  : public LabelController
 {
 public:
-	ButtonController();
+	ButtonController(ButtonModel& model, ButtonRenderer& renderer);
 	virtual ~ButtonController();
 
 	Signal<Controller*> PressedAction;
@@ -49,11 +50,20 @@ public:
 
 	Signal<Controller*, bool> CheckedAction;
 
+	ButtonModel& buttonModel()
+	{
+		return static_cast<ButtonModel&>(model());
+	}
+
+	const ButtonModel& buttonModel() const 
+	{
+		return static_cast<const ButtonModel&>(model());
+	}
+
 protected:
 	virtual void onPressedAction();
 	virtual void onDoublePressedAction();
 	virtual void onCheckedAction(bool checked);
-
 	virtual void onModelChanged(bool created, const PropertyBase* prop);
 
 private:
@@ -67,7 +77,6 @@ private:
 	bool _timeout;
 	int _pressCounter;
 	Pt::System::Timer _doublePressTimer;
-	ButtonModel* _myModel;
 };
 
 }}

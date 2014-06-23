@@ -27,14 +27,12 @@
 #define Pt_Hmi_Desktop_Label_H
 
 #include <Pt/Hmi/Desktop/Widget.h>
+#include <Pt/Hmi/LabelController.h>
+#include <Pt/Hmi/LabelModel.h>
+#include <Pt/Hmi/LabelRenderer.h>
 
 namespace Pt{
 namespace Hmi{
-
-class LabelController;
-class LabelModel;
-class LabelRenderer;
-
 namespace Desktop{
 
 class PT_HMI_DESKTOP_API Label : public Widget 
@@ -56,15 +54,24 @@ public:
 	bool isAutoSize() const;
 
 	Pt::Hmi::LabelController& labelController();
+	void setLabelController(Pt::Hmi::LabelController& controller);
 	Pt::Hmi::LabelModel& labelModel();
+
 
 	const Pt::Hmi::LabelController& labelController() const;
 	const Pt::Hmi::LabelModel& labelModel() const;
 
+protected:
+	virtual WidgetController& widgetController()
+	{
+		return *_currController;
+	}
+
 private:
-	Pt::Hmi::LabelController* _defController;
-	Pt::Hmi::LabelModel*	  _defModel;
-	Pt::Hmi::LabelRenderer*	  _defRenderer;
+	Pt::Hmi::LabelModel		  _defModel;
+	Pt::Hmi::LabelRenderer	  _defRenderer;
+	Pt::Hmi::LabelController  _defController;
+	Pt::Hmi::LabelController* _currController;
 };
  
 }}}

@@ -18,17 +18,15 @@ Widget::~Widget()
 }
 
 void Widget::show()
-{
-	GfxModel* m = dynamic_cast<GfxModel*>(controller().model());	
-	m->Visible = true;
-	controller().invalidate();
+{	
+	widgetController().widgetModel().Visible = true;
+	widgetController().invalidate();
 }
 
 void Widget::hide()
 {
-	GfxModel* m = dynamic_cast<GfxModel*>(controller().model());
-	m->Visible = false;
-	controller().invalidate();	
+	widgetController().widgetModel().Visible = false;
+	widgetController().invalidate();
 }
 
 void Widget::addChild(Widget* w)
@@ -37,11 +35,11 @@ void Widget::addChild(Widget* w)
 	
 	if( it != _children.end())
 	{
-		std::logic_error("ERROR: Child allready exists.");
+		throw std::logic_error("ERROR: Child allready exists.");
 		return;
 	}
 
-	this->controller().addChild(&w->controller());
+	widgetController().addChild(&w->widgetController());
 	
 	_children.push_back(w); 
 	w->setParent(this);

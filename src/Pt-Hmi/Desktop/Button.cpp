@@ -34,22 +34,20 @@ namespace Hmi{
 namespace Desktop{
 
 Button::Button()
-: _defController( new ButtonController())
-, _defModel( new ButtonModel())
-, _defRenderer( new ButtonRenderer())
+: _defModel()
+, _defRenderer()
+, _defController(_defModel, _defRenderer)
 {
-	_defController->setModel(_defModel);
-	_defController->setRenderer(_defRenderer);	
-	_defModel->ForeColor.set(Pt::Gfx::ARgbColor(0,0,0));
-	_defModel->BorderWidth.set(1);
-	_defModel->BorderStyle.set(BorderStyleType::Widget);
+	_defModel.ForeColor.set(Pt::Gfx::ARgbColor(0,0,0));
+	_defModel.BorderWidth.set(1);
+	_defModel.BorderStyle.set(BorderStyleType::Widget);
 
-	setController(*_defController);
+	setButtonController(_defController);
 }
 
-void Button::setController(Pt::Hmi::GfxController& controller)
+void Button::setButtonController(Pt::Hmi::ButtonController& controller)
 {
-	Widget::setController(controller);
+	_currentController = &controller;
     buttonController().PressedAction += Pt::slot(*this, &Button::handleOnClicked);
     buttonController().CheckedAction += Pt::slot(*this, &Button::handleOnChecked);
 }
@@ -129,29 +127,26 @@ const std::string& Button::actionKey() const
 
 const ButtonModel& Button::buttonModel() const
 {
-	return *((ButtonModel*) buttonController().model());
+	return _currentController->buttonModel();
 }
 
 const ButtonController& Button::buttonController() const
 {
-	return *((ButtonController*)&controller());
+	return *_currentController;
 }
 
 ButtonModel& Button::buttonModel()
 {
-	return *((ButtonModel*) buttonController().model());
+	return _currentController->buttonModel();
 }
 
 ButtonController& Button::buttonController()
 {
-	return *((ButtonController*)&controller());
+	return *_currentController;
 }
 
 Button::~Button()
 {
-	delete _defController;
-	delete _defModel;
-	delete _defRenderer;
 }
  
 }}}

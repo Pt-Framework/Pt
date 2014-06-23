@@ -31,11 +31,16 @@
 #include <Pt/Hmi/WindowController.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/GfxModel.h>
+#include <Pt/Hmi/Renderer.h>
+#include <Pt/Hmi/PaintSurface.h>
 
 namespace Pt{
 namespace Hmi{
 
-GfxController::GfxController()
+GfxController::GfxController(GfxModel& model, Renderer& renderer)
+: Controller(model)
+, _renderer(renderer)
 {
 }
 
@@ -47,46 +52,40 @@ GfxController::~GfxController()
 Pt::Gfx::PointF GfxController::toClient(const Pt::Gfx::PointF& globalPoint)
 {
 	GfxController* par = dynamic_cast<GfxController*>(Controller::widgetParent());	
-	GfxModel* m = gfxModel();	
+	GfxModel& m = gfxModel();	
 
 	if( par == 0)
 		return Pt::Gfx::PointF(globalPoint.x(), globalPoint.y());
 
 	Pt::Gfx::PointF parPoint = par->toClient(globalPoint);
-	return Pt::Gfx::PointF(parPoint.x() - m->Position.get().x(), parPoint.y() - m->Position.get().y());
+	return Pt::Gfx::PointF(parPoint.x() - m.Position.get().x(), parPoint.y() - m.Position.get().y());
 }
 
 Pt::Gfx::PointF GfxController::fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot)
 {
-	const GfxController* par = dynamic_cast<const GfxController*>(Controller::widgetParent());
-	const GfxModel* m = gfxModel();
+	const GfxController* par = dynamic_cast<const GfxController*>(Controller::widgetParent());	
 
 	double x = localPoint.x();
 	double y = localPoint.y();
 
 	while(par != 0)
 	{
-		m = par->gfxModel();
+		const GfxModel& m = gfxModel();
 		par = dynamic_cast<const GfxController*>(par->widgetParent());
 		
 		if(!(toRoot && par == 0))
 		{
-			x += m->Position.get().x();
-			y += m->Position.get().y();
+			x += m.Position.get().x();
+			y += m.Position.get().y();
 		}
 	}
 	
 	return Pt::Gfx::PointF(x,y);
 }
 
-const GfxModel* GfxController::gfxModel() const
+const GfxModel& GfxController::gfxModel() const
 {
-	const GfxModel* m = dynamic_cast<const GfxModel*>(model());
-
-	if( m == 0)
-		throw std::logic_error("GfXmOdel"); 
-
-	return m;
+	return static_cast<const GfxModel&>(model());
 }
 
 void GfxController::invalidate()
@@ -98,28 +97,22 @@ void GfxController::invalidate()
 }
 
 
-GfxModel* GfxController::gfxModel()
+GfxModel& GfxController::gfxModel()
 {
-	GfxModel* m = dynamic_cast<GfxModel*>(model());
-
-	if( m == 0)
-		throw std::logic_error("ERROR: GfxModel expected."); 
-
-	return m;
+	return static_cast<GfxModel&>(model());
 }
-
 
 void GfxController::render()
 {
-	GfxModel* m = (GfxModel*) model();
-
-	if(!m->Visible.get())
-		return;
+	if(!gfxModel().Visible.get())
+		return;	
+		
 
 	//Draw me
-	Renderer* re = renderer();	
-	re->render(model());
-	Render.send(*this);
+	_renderer.render(&model());
+
+	//Let the user to render 
+	Render.send(*this, *gfxModel().paintSurface());
 
 	//Render my childs
 	for( size_t i = 0; i < children().size(); ++i)
@@ -131,22 +124,18 @@ void GfxController::render()
 
 void GfxController::output()
 {
-	GfxModel* m = (GfxModel*) model();
-
-	if(!m->Visible.get())
+	if(!gfxModel().Visible.get())
 		return;
 	
-	Output.send(*this);
-
-	Pt::Hmi::Painter& localPainter = m->paintSurface()->painter();
+	Pt::Hmi::Painter& localPainter = gfxModel().paintSurface()->painter();
 
 	for( size_t i = 0; i < children().size(); ++i)
 	{
 		GfxController* child = dynamic_cast<GfxController*> (children()[i]);				
 		child->output();
 
-		GfxModel* childModel = (GfxModel*) child->model();
-		localPainter.drawSurface(childModel->Position.get(),*childModel->paintSurface());
+		GfxModel& childModel = child->gfxModel();
+		localPainter.drawSurface(childModel.Position.get(),*childModel.paintSurface());
 	}
 
 	Controller::output();
@@ -161,16 +150,16 @@ bool GfxController::onMoveFocusPrev()
 
 	if( index != -1)
 	{
-		Controller* child = children()[index];
-		GfxModel* model = (GfxModel*)child->model();	
+		GfxController* child = dynamic_cast<GfxController*> (children()[index]);
+		GfxModel& model =child->gfxModel();	
 		
-		if(!model->AcceptFocus.get())
+		if(!model.AcceptFocus.get())
 		{
 			if(child->moveFocusPrev())
 				return true;
 		}
 
-		model->Focused = false;
+		model.Focused = false;
 		return focusPrevChild(index);
 	}
 	
@@ -183,18 +172,18 @@ bool GfxController::focusPrevChild(int index)
 	
 	for( ; index >= 0; --index)
 	{
-		Controller* child = children()[index];
-		GfxModel* model = (GfxModel*)child->model();		
+		GfxController* child = dynamic_cast<GfxController*> (children()[index]);
+		GfxModel& model = child->gfxModel();		
 
-		if(model->AcceptFocus.get())
+		if(model.AcceptFocus.get())
 		{
-			model->Focused = true;
+			model.Focused = true;
 			return true;
 		}
 
 		if(child->moveFocusPrev())
 		{
-			model->Focused = true;
+			model.Focused = true;
 			return true;
 		}
 	}
@@ -210,18 +199,18 @@ bool GfxController::focusNextChild(int index)
 	
 	for( ; index < (int)children().size(); ++index)
 	{
-		Controller* child = children()[index];
-		GfxModel* model = (GfxModel*)child->model();
+		GfxController* child = dynamic_cast<GfxController*> (children()[index]);
+		GfxModel& model = child->gfxModel();
 		
-		if(model->AcceptFocus.get())
+		if(model.AcceptFocus.get())
 		{
-			model->Focused = true;
+			model.Focused = true;
 			return true;
 		}
 
 		if(child->moveFocusNext())
 		{
-			model->Focused = true;
+			model.Focused = true;
 			return true;
 		}
 	}
@@ -237,9 +226,9 @@ int GfxController::getFocusedChild() const
 	for( ; i < (int)children().size(); ++i)
 	{
 		const GfxController* child = (GfxController*)children()[i];
-		const GfxModel* model = (const GfxModel*)child->model();
+		const GfxModel& model = child->gfxModel();
 
-		if(model->Focused.get())
+		if(model.Focused.get())
 			return i;		
 	}		
 
@@ -253,19 +242,19 @@ bool GfxController::onMoveFocusNext()
 
 	const int index = getFocusedChild();
 
-	if( index != -1)
-	{
-		Controller* child = children()[index];
-		GfxModel* model = (GfxModel*)child->model();	
+	if( index == -1)
+		return focusNextChild(index);
+	
+	GfxController* child = (GfxController*)children()[index];
+	GfxModel& model = child->gfxModel();	
 		
-		if(!model->AcceptFocus.get())
-		{
-			if(child->moveFocusNext())
-				return true;
-		}
-
-		model->Focused = false;
+	if(!model.AcceptFocus.get())
+	{
+		if(child->moveFocusNext())
+			return true;
 	}
+
+	model.Focused = false;
 
 	return focusNextChild(index);
 }

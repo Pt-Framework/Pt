@@ -7,21 +7,26 @@
 namespace Pt {
 namespace Hmi {
 
-#define DefinePropertyInitMacro(prop,value) prop(#prop,me(),value)
-#define DefinePropertyDefaultMacro(prop) prop(#prop,me())
+#define DefinePropertyInitMacro(prop,value) prop(#prop,value)
+#define DefinePropertyDefaultMacro(prop) prop(#prop)
 
 class Model;
     
 class PT_HMI_API PropertyBase
 {
 public:
-	PropertyBase(const char* name, Model* parent);
+	PropertyBase(const char* name);
     
     inline const Model* parent() const
     {
         return _parent;
     }
     
+	inline void setParent(Model* model)
+    {
+        _parent = model;
+    }
+
     inline Model* parent()
     {
         return _parent;

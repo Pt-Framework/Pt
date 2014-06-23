@@ -31,7 +31,7 @@ public:
 	Cursor();
 	virtual ~Cursor();
 
-	void setCursor(Cursors::Type c, WindowController* parent);
+	void setCursor(Cursors::Type c);
 	Cursors::Type getCursor() const;
 
 private:

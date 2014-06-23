@@ -13,13 +13,13 @@ template<typename T>
 class  Property  : public PropertyBase
 {
 public:
-    Property(const char* name, Model* parent)
-	: PropertyBase(name, parent)
+    Property(const char* name)
+	: PropertyBase(name)
 	{
 	}
 
-	Property(const char* name, Model* parent, const T& value)
-	: PropertyBase(name, parent)
+	Property(const char* name, const T& value)
+	: PropertyBase(name)
 	, _value(value)
 	{
 	}

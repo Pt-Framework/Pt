@@ -30,11 +30,12 @@
 #include <Pt/Hmi/GfxOutputDevice.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Hmi/DialogModel.h>
+#include <Pt/Hmi/DialogRenderer.h>
 
 namespace Pt{
 namespace Hmi{
 
-DialogController::DialogController(GfxModel* m, Renderer* r, GfxOutputDevice* out )
+DialogController::DialogController(DialogModel& m, DialogRenderer& r, GfxOutputDevice* out )
 : WindowController(m, r, out)
 {				
 }
@@ -52,27 +53,25 @@ void DialogController::onClosed(Controller* sender)
 void DialogController::doModal(WindowController* parent)
 {	
 	bool		 parentTopMost = false;
-	WindowModel* parentModel   = (WindowModel*)parent->model();
-    WindowController* parentController = (WindowController*)parentModel->controller();
-	WindowModel* myModel	   = (WindowModel*)model();
+	WindowModel& parentModel   = parent->windowModel();
 
 	_closed  = false;
 	
 	//Set my parent window.
 	setWindowParent(parent);
 	 
-    myModel->Closed.set(false);
-    myModel->Visible.set(true);
+    dialogModel().Closed.set(false);
+    dialogModel().Visible.set(true);
 
 	//Setup the parent as disabled and TopMost = false.
-	parentTopMost = parentModel->TopMost.get();
-	parentModel->Enable = false;	
-	parentModel->TopMost = false;
-    parentController->output(); //Notify the parent.
+	parentTopMost = parentModel.TopMost.get();
+	parentModel.Enable = false;	
+	parentModel.TopMost = false;
+    parent->output(); //Notify the parent.
 
 	//Setup the dialog as aenabled and top most.	
-	myModel->Enable = true;
-	myModel->TopMost = true;
+	dialogModel().Enable = true;
+	dialogModel().TopMost = true;
 
 	//Invalidate the dialog
 	invalidate();
@@ -82,8 +81,8 @@ void DialogController::doModal(WindowController* parent)
 		Application::instance().nextEvent();
 
 	//Restore the parent state.
-	parentModel->Enable = true;
-	parentModel->TopMost = parentTopMost;
+	parentModel.Enable = true;
+	parentModel.TopMost = parentTopMost;
 }
 
 }}

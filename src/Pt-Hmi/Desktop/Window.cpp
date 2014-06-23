@@ -3,54 +3,64 @@
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/WindowRenderer.h>
 #include <Pt/Hmi/Application.h>
+#include <algorithm>
 
 namespace Pt{
 namespace Hmi{
 namespace Desktop{
 
 Window::Window()
-: _defController(new WindowController())
-, _defModel( new WindowModel())
-, _defRenderer(new WindowRenderer())
+: _defController(_defModel, _defRenderer)
+, _currController(0)
 {		
 	
 	Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
 
 	_gfxOutputDevice.start(app.loop());
 
-	_defModel->Caption.set("New Window");
-	_defModel->ShowInTaskbar.set(true);
-	_defModel->Border.set(WindowBorderType::Sizeable);
-	_defModel->Position.set(Pt::Gfx::PointF(20,20));
-	_defModel->Size.set( Pt::Gfx::SizeF(800,800));
+	_defModel.Caption.set("New Window");
+	_defModel.ShowInTaskbar.set(true);
+	_defModel.Border.set(WindowBorderType::Sizeable);
+	_defModel.Position.set(Pt::Gfx::PointF(20,20));
+	_defModel.Size.set( Pt::Gfx::SizeF(800,800));
 
-	_defController->addInputDevice(&_mouseDevice);
-	_defController->addInputDevice(&_keyboardDevice);
-	_defController->addOutputDevice(&_gfxOutputDevice);
-	_defController->setRenderer(_defRenderer);
-	_defController->setModel(_defModel);
+	_defController.addInputDevice(&_mouseDevice);
+	_defController.addInputDevice(&_keyboardDevice);
+	_defController.addOutputDevice(&_gfxOutputDevice);
 
-	setController(*_defController);
+	setWindowController(_defController);
 }
+
+void Window::setWindowController(WindowController& controller)
+{
+	_currController = &controller;
+}
+
 
 WindowController& Window::windowController()
 {
-	return *((WindowController*)&controller());
+	return *_currController;
+}
+
+void Window::addChild(Widget* w)
+{
+
+	windowController().addChild(&w->widgetController());		
 }
 
 WindowModel& Window::windowModel()
 {
-	return *((WindowModel*)windowController().model());
+	return _currController->windowModel();
 }
 
 const WindowController& Window::windowController() const
 {
-	return *((WindowController*)&controller());
+	return *_currController;
 }
 
 const WindowModel& Window::windowModel() const
 {
-	return *((WindowModel*)windowController().model());
+	return _currController->windowModel();
 }
 
 void Window::setSize(const Pt::Gfx::SizeF& size)
@@ -75,28 +85,18 @@ const Pt::Gfx::PointF& Window::position() const
 
 void Window::show()
 {
-	Pt::Hmi::WindowModel* m = (Pt::Hmi::WindowModel*) controller().model();
-	m->Closed.set(false);
-	Widget::show();
+	windowModel().Closed.set(false);
+	windowModel().Visible = true;
+	windowController().invalidate();
 }
 
 void Window::close()
 {
-	Pt::Hmi::WindowController* ctrl = (Pt::Hmi::WindowController*) &controller();
-	ctrl->close();
+	windowController().close();
 }
 
 Window::~Window()
 {
-	if(_defController != 0)
-		delete _defController;
-
-
-	if(_defRenderer != 0)
-		delete _defRenderer;
-
-	if( _defModel != 0)
-		delete _defModel;	
 }
 		
 }}}

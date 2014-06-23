@@ -4,6 +4,7 @@
 #include <Pt/Hmi/NativePaintSurface.h>
 #include <Pt/Hmi/ImagePaintSurface.h>
 #include <Pt/Slot.h>
+#include <Pt/Hmi/GfxController.h>
 
 namespace Pt{
 namespace Hmi{
@@ -31,9 +32,32 @@ GfxModel::GfxModel()
 , DefinePropertyInitMacro(PainterSurfaceType, PainterType::Native)
 , _paintSurface(new NativePaintSurface(Pt::Gfx::SizeF(800,600)))
 {
-	Position = toUnit(Pt::Gfx::Point(0,0));
+	Position.set(Pt::Gfx::PointF(0,0));
+
+	registerProperty(Visible);
+	registerProperty(Font);
+	registerProperty(Position);
+	registerProperty(Size);
+	registerProperty(BackColor);
+	registerProperty(BackColorHightLight);
+	registerProperty(ForeColor);
+	registerProperty(BackgroundImage);
+	registerProperty(BackgroundImageLayout);
+	registerProperty(Opacity);
+	registerProperty(TransparancyKey);
+	registerProperty(Pointer2DStatus);
+	registerProperty(KeyStatus);
+	registerProperty(CursorT);
+	registerProperty(TextAlign);
+	registerProperty(Focused);
+	registerProperty(AcceptFocus);
+	registerProperty(HighLight);
+	registerProperty(FocusedActionKey);
+	registerProperty(PainterSurfaceType);
+
 	Focused.PropertyChanged += Pt::slot(*this, &GfxModel::onFocusChanged);
 	PainterSurfaceType.PropertyChanged += Pt::slot(*this, &GfxModel::onPainterTypeChanged);
+
 }
 
 GfxModel::~GfxModel()
@@ -61,34 +85,38 @@ void GfxModel::onFocusChanged(const void* sender, const PropertyBase& prop)
 	if(Focused.get())
 	{//True
 		Pt::Hmi::Controller* ctrl = this->controller();
-		Pt::Hmi::Controller* par = ctrl->widgetParent();
+		Pt::Hmi::GfxController* par = (Pt::Hmi::GfxController*) ctrl->widgetParent();
 	
 		if( par != 0)
 		{
-			GfxModel* parMod = (GfxModel*) par->model();
+			GfxModel& parMod = par->gfxModel();
 			
 			//All parents set to true.
-			parMod->Focused.set(true);
-			parMod->Focused.PropertyChanged.send(parMod, parMod->Focused);
+			parMod.Focused.set(true);
+			parMod.Focused.PropertyChanged.send(&parMod, parMod.Focused);
 
 			//All sibling set to false. Only me let it true
 			for( size_t i = 0; i < par->children().size(); i++)
 			{
-				GfxModel* childModel = (GfxModel*) par->children()[i]->model();
+				GfxController* childCtrl = (GfxController*) par->children()[i];
+
+				GfxModel& childModel = childCtrl->gfxModel();
 				
-				if(childModel != this)
-					childModel->Focused = false;
+				if(&childModel != this)
+					childModel.Focused = false;
 			}
 		}
 	}
 	else
 	{//False  
-		Pt::Hmi::Controller* ctrl = this->controller();
+		Pt::Hmi::GfxController* ctrl = (Pt::Hmi::GfxController*) this->controller();
 		for( size_t i = 0; i < ctrl->children().size(); ++i)
 		{//All childs set to false
-			GfxModel* m = (GfxModel*) ctrl->children()[i]->model();
-			m->Focused.set(false);						
-			m->Focused.PropertyChanged.send(m, m->Focused);
+
+			Pt::Hmi::GfxController* childCtrl = (Pt::Hmi::GfxController*) ctrl->children()[i];
+			GfxModel& m = childCtrl->gfxModel();
+			m.Focused.set(false);						
+			m.Focused.PropertyChanged.send(&m, m.Focused);
 		}
 	}
 }

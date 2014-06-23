@@ -8,37 +8,39 @@ namespace Hmi{
 namespace Desktop{
 
 Panel::Panel()
-: _defController( new PanelController())
-, _defModel( new PanelModel())
-, _defRenderer( new PanelRenderer())
+: _defController(_defModel,_defRenderer )
+, _currController(0)
 {
-	_defController->setModel(_defModel);
-	_defController->setRenderer(_defRenderer);	
-	_defModel->ForeColor.set(Pt::Gfx::ARgbColor(160,160,160));
-	_defModel->BorderWidth.set(1);
-	_defModel->BorderStyle.set(BorderStyleType::Widget);
+	_defModel.ForeColor.set(Pt::Gfx::ARgbColor(160,160,160));
+	_defModel.BorderWidth.set(1);
+	_defModel.BorderStyle.set(BorderStyleType::Widget);
 
-	setController(*_defController);
+	setPanelController(_defController);
+}
+
+void Panel::setPanelController(Pt::Hmi::PanelController& ctrl)
+{
+	_currController = &ctrl;
 }
 
 Pt::Hmi::PanelController& Panel::panelController()
 {
-	return *((Pt::Hmi::PanelController*) &controller());
+	return *_currController;
 }
 
 Pt::Hmi::PanelModel& Panel::panelModel()
 {
-	return *((Pt::Hmi::PanelModel*)panelController().model());
+	return _currController->panelModel();
 }
 
 const Pt::Hmi::PanelController&	Panel::panelController() const
 {
-	return *((Pt::Hmi::PanelController*) &controller());
+	return *_currController;
 }
 
 const Pt::Hmi::PanelModel& Panel::panelModel() const
 {
-	return *((Pt::Hmi::PanelModel*)panelController().model());
+	return _currController->panelModel();
 }
 
 void Panel::setSize(const Pt::Gfx::SizeF& size)
@@ -63,9 +65,6 @@ const Pt::Gfx::PointF& Panel::position() const
 
 Panel::~Panel()
 {
-	delete _defController;
-	delete _defModel;
-	delete _defRenderer;
 }
  
 }}}

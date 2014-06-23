@@ -46,11 +46,7 @@ class PT_HMI_API Model : public Pt::Connectable
 protected:
 	Model();
 	virtual ~Model();
-
-	Model* me()
-	{
-		return this;
-	}
+    void registerProperty(PropertyBase& prop);
 
 private:
 	Controller* _ctrl;
@@ -61,12 +57,11 @@ public:
 	Property<void*>			Tag;  
 	Pt::Signal<const PropertyBase*>	Changed;
 
+public:
 	const Controller* controller() const;
 	Controller* controller();
 	void setController( Controller* ctrl);
-    
-    void registerProperty(PropertyBase* prop);
-    
+       
     std::map<std::string, PropertyBase*>& properties()
     {
         return _properties;

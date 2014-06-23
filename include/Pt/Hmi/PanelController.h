@@ -3,17 +3,30 @@
 
 #include <Pt/Hmi/WidgetController.h>
 #include <Pt/Hmi/PointingEvent.h>
+#include <Pt/Hmi/PanelModel.h>
 
 namespace Pt{
 namespace Hmi{
 
+class PanelRenderer;
 
 class PT_HMI_API PanelController  : public WidgetController
 {
 public:
-	PanelController();
+
+	PanelController(PanelModel& model, PanelRenderer& renderer);
 	virtual ~PanelController();	
 	
+	const PanelModel& panelModel() const 
+	{
+		return static_cast<const PanelModel&>(model());
+	}
+
+	PanelModel& panelModel()
+	{
+		return static_cast<PanelModel&>(model());
+	}
+
 protected:
 	virtual void onPointerInput(const PointingEvent& ev);
 

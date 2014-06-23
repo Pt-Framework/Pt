@@ -41,6 +41,8 @@ DialogModel::DialogModel()
 {
 	ShowInTaskbar.set(false);
 	ShowSysMenu.set(true);
+
+	registerProperty(Result);
 }
 
 DialogModel::~DialogModel()

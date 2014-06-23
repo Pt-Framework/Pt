@@ -29,21 +29,17 @@
 #include <Pt/Hmi/WidgetController.h>
 #include <Pt/Hmi/GfxOutputDevice.h>
 #include <Pt/Hmi/WindowModel.h>
+#include <Pt/Hmi/WindowRenderer.h>
 
 #include <iostream>
 
 namespace Pt{
 namespace Hmi{
 
-WindowController::WindowController(GfxModel* m, Renderer* r,  GfxOutputDevice* out, PointingDevice* in1, InputDevice* in2)
-:_windowParent(0)
+WindowController::WindowController(WindowModel& m, WindowRenderer& r,  GfxOutputDevice* out, PointingDevice* in1, InputDevice* in2)
+: GfxController(m, r)
+, _windowParent(0)
 {	
-	if( m != 0)
-		Controller::setModel(m);
-
-	if( r != 0)
-		Controller::setRenderer(r);
-
 	if( out != 0)
 		Controller::addOutputDevice(out);
 
@@ -55,6 +51,8 @@ WindowController::WindowController(GfxModel* m, Renderer* r,  GfxOutputDevice* o
 
 	ClosedAction += Pt::slot(*this, &WindowController::onClosed);
 	ClosingAction += Pt::slot(*this, &WindowController::onClosing);
+
+	windowModel().Size.PropertyChanged += Pt::slot(*this, &WindowController::onSizeChanged);
 }
 
 WindowController::~WindowController()
@@ -85,30 +83,30 @@ void WindowController::invalidate()
 
 void WindowController::onKeyInput(const KeyEvent& ev)
 { 
-	WindowModel* m = (WindowModel*)gfxModel();
+	WindowModel& m = windowModel();
 
-	if(!m->Enable.get())
+	if(!m.Enable.get())
 		return;
 
-	m->KeyStatus = ev;
+	m.KeyStatus = ev;
 
-	if(ev.toUTF8String() == m->FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && !ev.shift())
+	if(ev.toUTF8String() == m.FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && !ev.shift())
 	{
-		if( m->Focused.get())
+		if( m.Focused.get())
 		{
 			if(!moveFocusNext())
-				m->Focused = true;
+				m.Focused = true;
 
 			invalidate();
 		}
 	}
 
-	if(ev.toUTF8String() ==  m->FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && ev.shift())
+	if(ev.toUTF8String() ==  m.FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && ev.shift())
 	{
-		if( m->Focused.get())
+		if( m.Focused.get())
 		{
 			if(!moveFocusPrev())
-				m->Focused = true;
+				m.Focused = true;
 
 			invalidate();
 		}
@@ -120,13 +118,13 @@ void WindowController::onKeyInput(const KeyEvent& ev)
 
 void WindowController::onPointerInput(const PointingEvent& ev)
 {
-	GfxModel* m = gfxModel();
+	WindowModel& m = windowModel();
 
-	if(!m->Enable.get())
+	if(!m.Enable.get())
 		return;
 	
-	m->Pointer2DStatus = ev;
-	m->CursorT.get().setCursor(Pt::Hmi::Cursors::Default, this);
+	m.Pointer2DStatus = ev;
+	m.CursorT.get().setCursor(Pt::Hmi::Cursors::Default);
 
 	for( size_t i = 0; i < children().size(); ++i)
 		children()[i]->notifyPointerInput(ev);	
@@ -134,66 +132,42 @@ void WindowController::onPointerInput(const PointingEvent& ev)
 
 void WindowController::onSizeChanged(const void* sender, const PropertyBase& prop)
 {
-	GfxModel* m = gfxModel();
+	GfxModel& m = windowModel();
 	
-	m->paintSurface()->resize(m->Size.get());	
+	m.paintSurface()->resize(m.Size.get());	
 	
-	if(m->Visible.get())
+	if(m.Visible.get())
 		invalidate();
 }
 
-GfxModel* WindowController::gfxModel()
-{
-	GfxModel* m = dynamic_cast<GfxModel*>(model());
-
-	if( m == 0)
-		throw std::logic_error("ERROR: WindowController expect a GFXModel!");
-
-	return m;
-}
 
 void WindowController::onModelChanged(bool created,const PropertyBase* prop)
 {
 	if( created)
 	{
-		GfxModel* m = gfxModel();
+		GfxModel& m = windowModel();
 
-		m->Size.PropertyChanged += Pt::slot(*this, &WindowController::onSizeChanged);					
-		m->Size.PropertyChanged.send(m, m->Size);	
+		m.Size.PropertyChanged += Pt::slot(*this, &WindowController::onSizeChanged);					
+		m.Size.PropertyChanged.send(&m, m.Size);	
 	}
 }
 
 void WindowController::onClosing(Controller* sender, bool& canClose)
-{
-	WindowModel* m = dynamic_cast<WindowModel*>(model());
-
-	if( m == 0)
-		return;
-	
-	if(!m->Enable.get())
+{	
+	if(!windowModel().Enable.get())
 		return;
 
-	canClose = m->CanClose.get();
+	canClose = windowModel().CanClose.get();
 }
 
 void WindowController::onClosed(Controller* sender)
 {
-	WindowModel* m = dynamic_cast<WindowModel*>(model());
-
-	if( m == 0)
-		return;
-
-    if(!m->Closed.get())
-        m->Closed = true;
+    if(!windowModel().Closed.get())
+        windowModel().Closed = true;
 }
 
 void WindowController::close()
 {
-	WindowModel* m = dynamic_cast<WindowModel*>(model());
-	
-	if( m == 0)
-		return;
-    
     //Can close??
     bool canClose = false;
     ClosingAction.send(this, canClose);
@@ -201,7 +175,7 @@ void WindowController::close()
     if(canClose)
     {
         //Set the closed flag
-        m->Closed = true;
+        windowModel().Closed = true;
         
         //Let the system window to close its self.
 		output();

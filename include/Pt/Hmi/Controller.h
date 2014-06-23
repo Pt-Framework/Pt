@@ -40,42 +40,22 @@
 namespace Pt{
 namespace Hmi{
 
-class WindowController;
-
 class PT_HMI_API Controller  : public Pt::Connectable
 {
 protected:
-	Controller(Controller* widgetParent = 0);
-	WindowController* getWindow();
+	Controller(Model& model);
 
 public:
 	virtual ~Controller();
 	
-	void setModel(Model* model);
-
-	inline Model* model() 
+	inline Model& model() 
 	{
 		return _model;
 	}
 
-	inline const Model* model() const 
+	inline const Model& model() const 
 	{
 		return _model;
-	}
-	
-	inline void setRenderer(Renderer* r)
-	{
-		_renderer = r;
-	}
-
-	inline Renderer* renderer()
-	{
-		return _renderer;
-	}
-
-	inline const Renderer* renderer() const 
-	{
-		return _renderer;
 	}
 
 	void addInputDevice(InputDevice* device);
@@ -197,10 +177,9 @@ private:
 private:
 	std::vector<InputDevice*>	_inputDevices;
 	std::vector<OutputDevice*>	_outputDevices;
-	Model*						_model;
-	Renderer*					_renderer;
 	std::vector<Controller*>    _children;
 	Controller*					_parent;
+	Model&						_model;
 };
 
 }}

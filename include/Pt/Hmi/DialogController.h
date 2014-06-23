@@ -27,7 +27,7 @@
 #define Pt_Hmi_Controller_Dialog_H
 
 #include <Pt/Hmi/WindowController.h>
-#include <Pt/Hmi/GfxModel.h>
+#include <Pt/Hmi/DialogModel.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/System/Semaphore.h>
 #include <Pt/System/MainLoop.h>
@@ -36,14 +36,25 @@ namespace Pt{
 namespace Hmi{
 
 class GfxOutputDevice;
+class DialogRenderer;
 
 class PT_HMI_API DialogController  : public WindowController
 {
 public:
-	DialogController(GfxModel* m = 0, Renderer* r = 0, GfxOutputDevice* out = 0);
+	DialogController(DialogModel& m, DialogRenderer& r, GfxOutputDevice* out = 0);
 	virtual ~DialogController();	
 
 	void doModal(WindowController* parent);
+
+	DialogModel& dialogModel()
+	{
+		return static_cast<DialogModel&>(model());
+	}
+
+	const DialogModel& dialogModel() const
+	{
+		return static_cast<const DialogModel&>(model());
+	}
 
 protected:
 	virtual void onClosed(Controller* sender);

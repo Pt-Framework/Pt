@@ -74,8 +74,7 @@ void Dialog1::init()
 
 void Dialog1::onClosedByButton()
 {
-	DialogModel* m = (DialogModel*) controller().model();
-	m->Closed = true;
+	dialogController().dialogModel().Closed = true;
 }
 
 void Dialog1::onShowNextDialog()

@@ -34,6 +34,9 @@
 
 namespace Pt{
 namespace Hmi{
+
+class PaintSurface;
+
 namespace Demo{
 
 class MainWindow : public Pt::Hmi::Desktop::Window
@@ -54,7 +57,7 @@ private:
 	void onGreen();
 	void onBlue();
 	void onPointerChanged(const void*, const PropertyBase& prop);
-	void onRender(GfxController& controller);
+	void onRender(GfxController& controller, PaintSurface& surface);
 
 private:
 	Pt::Hmi::Desktop::Button _closeButton;

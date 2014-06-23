@@ -15,9 +15,9 @@ Cursor::~Cursor()
 	delete _impl;
 }
 
-void Cursor::setCursor(Cursors::Type c, WindowController* parent)
+void Cursor::setCursor(Cursors::Type c)
 {
-	_impl->setCursor(c, parent);
+	_impl->setCursor(c, 0);
 }
 
 Cursors::Type Cursor::getCursor() const

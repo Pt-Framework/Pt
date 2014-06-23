@@ -18,6 +18,12 @@ ButtonModel::ButtonModel()
 	TextAlign.set(Pt::Hmi::TextAlignType::MidleCenter);
 	AcceptFocus.set(true);
 	BorderRoundEdge.set(true);
+
+	registerProperty(ButtonState);
+	registerProperty(ActionKey);
+	registerProperty(Armed);
+	registerProperty(ButtonType);
+	registerProperty(DoublePressTimeInMs);
 }
 
 ButtonModel::~ButtonModel()

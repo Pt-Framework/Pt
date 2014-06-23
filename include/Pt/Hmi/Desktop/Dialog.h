@@ -6,17 +6,16 @@
 #include <Pt/Hmi/MouseDevice.h>
 #include <Pt/Hmi/KeyboardDevice.h>
 #include <Pt/Hmi/GfxOutputDevice.h>
+#include <Pt/Hmi/DialogController.h>
+#include <Pt/Hmi/DialogModel.h>
+#include <Pt/Hmi/DialogRenderer.h>
+#include <Pt/Hmi/WidgetController.h>
 
 namespace Pt{
 namespace Hmi{
-
-class DialogController;
-class DialogModel;
-class DialogRenderer;
-
 namespace Desktop{
 
-class PT_HMI_DESKTOP_API Dialog : public Widget
+class PT_HMI_DESKTOP_API Dialog : public Window
 {
 public:
 	Dialog();
@@ -29,6 +28,8 @@ public:
 	virtual void setResult(DialogResultType::Type r);
 
 	DialogController& dialogController();
+	void setDialogController(DialogController& controller);
+
 	DialogModel& dialogModel();
 
 	const DialogController& dialogController() const;
@@ -41,12 +42,15 @@ public:
 	virtual const Pt::Gfx::PointF& position() const;
 
 protected:
-	virtual void show(WindowController* parent); 
+	virtual void show(WindowController& parent); 
 
 private:
-	Pt::Hmi::DialogController*	_defController;
-	Pt::Hmi::DialogModel*		_defModel;
-	Pt::Hmi::DialogRenderer*	_defRenderer;
+	Pt::Hmi::DialogModel		_defModel;
+	Pt::Hmi::DialogRenderer 	_defRenderer;
+
+	Pt::Hmi::DialogController	_defController;
+	Pt::Hmi::DialogController*	_currController;
+
 	Pt::Hmi::MouseDevice        _mouseDevice;
 	Pt::Hmi::KeyboardDevice     _keyboardDevice;
 	Pt::Hmi::GfxOutputDevice    _gfxOutputDevice;

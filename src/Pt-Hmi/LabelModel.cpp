@@ -8,6 +8,8 @@ LabelModel::LabelModel()
 {
 	Caption.set("Label");
 	ForeColor.set(Pt::Gfx::ARgbColor(0,0,0,0));
+
+	registerProperty(AutoSize);
 }
 
 LabelModel::~LabelModel()

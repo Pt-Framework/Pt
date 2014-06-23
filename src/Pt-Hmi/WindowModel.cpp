@@ -23,9 +23,26 @@ WindowModel::WindowModel()
 , DefinePropertyInitMacro(FocuseMoveKey, "\t")
 {
 	Visible.set(false);
-	Position = Pt::Gfx::PointF(20,20);
-	Size = Pt::Gfx::SizeF(200,200);
+	Position.set(Pt::Gfx::PointF(20,20));
+	Size.set(Pt::Gfx::SizeF(200,200));
 	Focused.set(true);
+
+	registerProperty(MinimumSize);
+	registerProperty(MaximumSize);
+	registerProperty(WindowStartPostion);
+	registerProperty(WindowState);
+	registerProperty(ShowInTaskbar);
+	registerProperty(ShowTitle);
+	registerProperty(ShowMinimizeButton);
+	registerProperty(ShowMaximizeButton);
+	registerProperty(ShowSysMenu);
+	registerProperty(Caption);
+	registerProperty(Border);
+	registerProperty(Icon);
+	registerProperty(Closed);
+	registerProperty(CanClose);
+	registerProperty(TopMost);
+	registerProperty(FocuseMoveKey);
 }
 
 WindowModel::~WindowModel()

@@ -6,12 +6,10 @@
 #include <Pt/Connectable.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
+#include <Pt/Hmi/WidgetController.h>
 
 namespace Pt{
 namespace Hmi{
-
-class GfxController;
-
 namespace Desktop{
 
 class PT_HMI_DESKTOP_API Widget : public Pt::Connectable
@@ -31,17 +29,7 @@ public:
 	void addChild(Widget* w);
 	void removeChild(Widget* w);
 
-	inline Pt::Hmi::GfxController& controller()
-	{
-		return  *_controller;
-	}
 	
-	inline const Pt::Hmi::GfxController& controller() const
-	{
-		return  *_controller;
-	}
-
-
 	inline const Widget* parent() const 
 	{
 		return _parent;
@@ -67,21 +55,17 @@ public:
 
     virtual void setPosition(const Pt::Gfx::PointF& position) = 0;
 	virtual const Pt::Gfx::PointF& position() const = 0;
+	virtual WidgetController& widgetController() = 0;
 
-protected:
-    
-	virtual void setController(Pt::Hmi::GfxController& controller)
-	{
-		_controller = &controller;
-	}
-    
+protected:    
 	inline void setParent(Widget* p)
 	{
 		_parent = p;
 	}
+	
+
 
 private:
-	GfxController* _controller;
 	std::vector<Widget*> _children;
 	Widget* _parent;
 };

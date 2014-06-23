@@ -6,6 +6,7 @@ namespace Hmi{
 WidgetModel::WidgetModel()
 : DefinePropertyInitMacro(Caption,"")
 {
+	registerProperty(Caption);
 }
 
 WidgetModel::~WidgetModel()

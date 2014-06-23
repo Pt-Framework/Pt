@@ -28,6 +28,7 @@
 
 #include <Pt/Hmi/ButtonController.h>
 #include <Pt/Hmi/ButtonModel.h>
+#include <Pt/Hmi/ButtonRenderer.h>
 #include <Pt/Hmi/PointingDevice.h>
 #include <Pt/Hmi/Application.h>
 
@@ -37,14 +38,15 @@ namespace Hmi{
 class PointingDevice;
 class GfxOutput;
 
-ButtonController::ButtonController()
-:_pressed(false)
+ButtonController::ButtonController(ButtonModel& model, ButtonRenderer& renderer)
+: LabelController(model, renderer)
+, _pressed(false)
 , _timeout(false)
-, _myModel(0)
 , _pressCounter(0)
 {
 	_doublePressTimer.timeout() += Pt::slot(*this, &ButtonController::onDoublePressedTimeout);
 	_doublePressTimer.setActive(Pt::Hmi::Application::instance().loop());
+	buttonModel().ButtonState.PropertyChanged += Pt::slot(*this,&ButtonController::onButtonStateChanged);
 }
 
 ButtonController::~ButtonController()
@@ -70,7 +72,7 @@ void ButtonController::onPressedAction()
 	_pressCounter++;
 	
 	if(_pressCounter == 1)
-		_doublePressTimer.start(_myModel->DoublePressTimeInMs.get());
+		_doublePressTimer.start(buttonModel().DoublePressTimeInMs.get());
 
 	if( _pressCounter == 2)	
 	{
@@ -90,19 +92,16 @@ void ButtonController::onModelChanged(bool created, const PropertyBase* prop)
 	LabelController::onModelChanged(created, prop);
 
 	if( created)
-	{
-		_myModel = dynamic_cast<ButtonModel*>(gfxModel());
-		_myModel->ButtonState.PropertyChanged += Pt::slot(*this, &ButtonController::onButtonStateChanged);
-	}
+		buttonModel().ButtonState.PropertyChanged += Pt::slot(*this, &ButtonController::onButtonStateChanged);
 }
 
 void ButtonController::onButtonStateChanged(const void* sender, const PropertyBase& prop)
 {
-	switch( _myModel->ButtonType.get())
+	switch( buttonModel().ButtonType.get())
 	{
 		case Pt::Hmi::ButtonType::Press:
 		
-			switch( _myModel->ButtonState.get())
+			switch( buttonModel().ButtonState.get())
 			{
 				case Pt::Hmi::DeviceButton::Pressed:
 					_pressed = true;
@@ -119,50 +118,48 @@ void ButtonController::onButtonStateChanged(const void* sender, const PropertyBa
 		break;
 
 		case Pt::Hmi::ButtonType::Toggle:
-			onCheckedAction(_myModel->ButtonState.get() == Pt::Hmi::DeviceButton::Pressed);
+			onCheckedAction(buttonModel().ButtonState.get() == Pt::Hmi::DeviceButton::Pressed);
 		break;
 	}
 }
 
 void ButtonController::onKeyInput(const KeyEvent& ev)
 {	
-	if( _myModel == 0)
-		return;
 	
-	if(!_myModel->Enable.get())
+	if(!buttonModel().Enable.get())
 	{
 		LabelController::onKeyInput(ev);
 		return;
 	}
 
-	if(!_myModel->Visible.get())
+	if(!buttonModel().Visible.get())
 	{
 		LabelController::onKeyInput(ev);
 		return;
 	}
 	bool genOutput = false;
 
-	switch(_myModel->ButtonType.get())
+	switch(buttonModel().ButtonType.get())
 	{
 		case ButtonType::Press:
 		{
-			if(ev.toUTF8String() == _myModel->FocusedActionKey.get() && _myModel->Focused.get())	
+			if(ev.toUTF8String() == buttonModel().FocusedActionKey.get() && buttonModel().Focused.get())	
 			{
-				_myModel->ButtonState = (ev.state() == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;
+				buttonModel().ButtonState = (ev.state() == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;
 				genOutput = true;
 			}
-			else if(ev.shortCutKey() == _myModel->ActionKey.get())
+			else if(ev.shortCutKey() == buttonModel().ActionKey.get())
 			{
-				_myModel->ButtonState = (ev.state() == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;				
-				_myModel->Focused = false;
-				_myModel->Focused = true;
+				buttonModel().ButtonState = (ev.state() == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;				
+				buttonModel().Focused = false;
+				buttonModel().Focused = true;
 				genOutput = true;
 			}
 			else
 			{
-				if(_myModel->ButtonState.get() != DeviceButton::Released)
+				if(buttonModel().ButtonState.get() != DeviceButton::Released)
 				{
-					_myModel->ButtonState = DeviceButton::Released;
+					buttonModel().ButtonState = DeviceButton::Released;
 					genOutput = true;
 				}
 			}
@@ -171,25 +168,25 @@ void ButtonController::onKeyInput(const KeyEvent& ev)
 
 		case ButtonType::Toggle:
 		{
-			if(ev.toUTF8String() == _myModel->FocusedActionKey.get() && _myModel->Focused.get())		
+			if(ev.toUTF8String() == buttonModel().FocusedActionKey.get() && buttonModel().Focused.get())		
 			{
 				if((ev.state() == KeyEvent::KeyDown))
 				{
-					if(_myModel->ButtonState.get() == DeviceButton::Pressed)
-						_myModel->ButtonState = DeviceButton::Released;
+					if(buttonModel().ButtonState.get() == DeviceButton::Pressed)
+						buttonModel().ButtonState = DeviceButton::Released;
 					else
-						_myModel->ButtonState = DeviceButton::Pressed;
+						buttonModel().ButtonState = DeviceButton::Pressed;
 
 					genOutput = true;
 				}
 			}
-			else if(ev.shortCutKey() == _myModel->ActionKey.get())
+			else if(ev.shortCutKey() == buttonModel().ActionKey.get())
 			{			
 				if((ev.state() == KeyEvent::KeyDown))
 				{
-					_myModel->ButtonState = (_myModel->ButtonState.get() == DeviceButton::Pressed) ? DeviceButton::Released : DeviceButton::Pressed;											
-					_myModel->Focused = false;
-					_myModel->Focused = true;
+					buttonModel().ButtonState = (buttonModel().ButtonState.get() == DeviceButton::Pressed) ? DeviceButton::Released : DeviceButton::Pressed;											
+					buttonModel().Focused = false;
+					buttonModel().Focused = true;
 					genOutput = true;
 				}
 			}
@@ -205,36 +202,33 @@ void ButtonController::onKeyInput(const KeyEvent& ev)
 
 void ButtonController::onPointerInput(const PointingEvent& ev)
 {	
-	if( _myModel == 0)
-		return;
-
-    
+	
 	Pt::Gfx::PointF point = toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
 
-	if(!_myModel->Enable.get())
+	if(!buttonModel().Enable.get())
 	{
 		LabelController::onPointerInput(ev);
 		return;
 	}
 
-	if(!_myModel->Visible.get())
+	if(!buttonModel().Visible.get())
 	{
 		LabelController::onPointerInput(ev);
 		return;
 	}
 
-	if(!_myModel->contains(point))
+	if(!buttonModel().contains(point))
 	{
-		_myModel->Armed = false;
+		buttonModel().Armed = false;
 		LabelController::onPointerInput(ev);
 		return;
 	}
 
 	bool genOutput = false;
 
-	if(!_myModel->Armed.get())
+	if(!buttonModel().Armed.get())
 	{
-		_myModel->Armed = true;
+		buttonModel().Armed = true;
 		genOutput = true;
 	}
 
@@ -244,15 +238,15 @@ void ButtonController::onPointerInput(const PointingEvent& ev)
 		return;
 	}	
 
-	switch(_myModel->ButtonType.get())
+	switch(buttonModel().ButtonType.get())
 	{
 		case ButtonType::Press:
 		{
-			if(!_myModel->Focused.get())
+			if(!buttonModel().Focused.get())
 			{
 				genOutput = true;						
-				_myModel->Focused = false;
-				_myModel->Focused = true;					
+				buttonModel().Focused = false;
+				buttonModel().Focused = true;					
 			}
 
 			switch(ev.buttons()[0].state())
@@ -260,10 +254,10 @@ void ButtonController::onPointerInput(const PointingEvent& ev)
 				case DeviceButton::Pressed:
 				{		
 
-					if(_myModel->ButtonState.get() != DeviceButton::Pressed)
+					if(buttonModel().ButtonState.get() != DeviceButton::Pressed)
 					{
 						genOutput = true;						
-						_myModel->ButtonState = DeviceButton::Pressed;
+						buttonModel().ButtonState = DeviceButton::Pressed;
 					}
 				}
 				break;
@@ -271,9 +265,9 @@ void ButtonController::onPointerInput(const PointingEvent& ev)
 				case DeviceButton::Released:			
 				{
 
-					if(_myModel->ButtonState.get() != DeviceButton::Released)
+					if(buttonModel().ButtonState.get() != DeviceButton::Released)
 					{
-						_myModel->ButtonState = DeviceButton::Released;						
+						buttonModel().ButtonState = DeviceButton::Released;						
 						genOutput = true;
 					}
 				}
@@ -284,20 +278,20 @@ void ButtonController::onPointerInput(const PointingEvent& ev)
 
 		case ButtonType::Toggle:
 		{
-			if(!_myModel->Focused.get())	
+			if(!buttonModel().Focused.get())	
 			{
-				_myModel->Focused = false;
-				_myModel->Focused = true;
+				buttonModel().Focused = false;
+				buttonModel().Focused = true;
 				genOutput = true;
 			}
 
 			if(ev.buttons()[0].state() == DeviceButton::Pressed )
 			{
 				genOutput = true;
-				if(_myModel->ButtonState.get() == DeviceButton::Pressed)
-					_myModel->ButtonState = DeviceButton::Released;
+				if(buttonModel().ButtonState.get() == DeviceButton::Pressed)
+					buttonModel().ButtonState = DeviceButton::Released;
 				else
-					_myModel->ButtonState = DeviceButton::Pressed;
+					buttonModel().ButtonState = DeviceButton::Pressed;
 			}
 		}				
 		break;

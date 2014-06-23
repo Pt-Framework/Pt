@@ -9,6 +9,9 @@ PanelModel::PanelModel()
 , DefinePropertyInitMacro(BorderRoundEdge,false)
 {
 	AcceptFocus.set(false);
+	registerProperty(BorderStyle);
+	registerProperty(BorderWidth);
+	registerProperty(BorderRoundEdge);
 }
 
 PanelModel::~PanelModel()

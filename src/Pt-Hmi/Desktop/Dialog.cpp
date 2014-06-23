@@ -9,46 +9,45 @@ namespace Hmi{
 namespace Desktop{
 
 Dialog::Dialog()
-: _defController(new DialogController())
-, _defModel( new DialogModel())
-, _defRenderer(new DialogRenderer())
+: _defController(_defModel, _defRenderer)
 {
 	Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
 
 	_gfxOutputDevice.start(app.loop());
 
-	_defModel->Caption.set("New Dialog");
-	_defModel->ShowInTaskbar.set(true);
-	_defModel->Border.set(WindowBorderType::Dialog);
-	_defModel->Position.set(Pt::Gfx::PointF(20,20));
-	_defModel->Size.set( Pt::Gfx::SizeF(800,800));
-	_defModel->ShowMaximizeButton.set(false);
-	_defModel->ShowSysMenu.set(true);
+	_defModel.Caption.set("New Dialog");
+	_defModel.ShowInTaskbar.set(true);
+	_defModel.Border.set(WindowBorderType::Dialog);
+	_defModel.Position.set(Pt::Gfx::PointF(20,20));
+	_defModel.Size.set( Pt::Gfx::SizeF(800,800));
+	_defModel.ShowMaximizeButton.set(false);
+	_defModel.ShowSysMenu.set(true);
 
-	_defController->addInputDevice(&_mouseDevice);
-	_defController->addInputDevice(&_keyboardDevice);
-	_defController->addOutputDevice(&_gfxOutputDevice);
-	_defController->setRenderer(_defRenderer);
-	_defController->setModel(_defModel);
+	_defController.addInputDevice(&_mouseDevice);
+	_defController.addInputDevice(&_keyboardDevice);
+	_defController.addOutputDevice(&_gfxOutputDevice);
+	setDialogController(_defController);
+}
 
-	setController(*_defController);
+void Dialog::setDialogController(DialogController& controller)
+{
+	_currController = & controller;
+	Window::setWindowController(controller);
 }
 
 void Dialog::show(Dialog* parent)
 {
-	show((WindowController*) &parent->controller());
+	show(parent->dialogController());
 }
 
 void Dialog::show(Window* parent)
 {
-	show((WindowController*) &parent->controller());
+	show(parent->windowController());
 }
 
-void Dialog::show(WindowController* parent)
+void Dialog::show(WindowController& parent)
 {
-	DialogController* myController = (DialogController*) &controller();
-	
-	myController->doModal(parent);	
+	dialogController().doModal(&parent);	
 }
 
 Pt::Hmi::DialogResultType::Type Dialog::result() const
@@ -63,22 +62,22 @@ void Dialog::setResult(DialogResultType::Type r)
 
 DialogController& Dialog::dialogController()
 {
-	return *((DialogController*) & controller());
+	return *_currController;
 }
 
 DialogModel& Dialog::dialogModel()
 {
-	return *((DialogModel*)dialogController().model());
+	return _currController->dialogModel();
 }
 
 const DialogController& Dialog::dialogController() const
 {
-	return *((DialogController*) & controller());
+	return *_currController;
 }
 
 const DialogModel& Dialog::dialogModel() const
 {
-	return *((DialogModel*)dialogController().model());
+	return _currController->dialogModel();
 }
 
 void Dialog::setSize(const Pt::Gfx::SizeF& size)
@@ -104,9 +103,7 @@ const Pt::Gfx::PointF& Dialog::position() const
 
 Dialog::~Dialog()
 {
-	delete _defController;
-	delete _defModel;
-	delete _defRenderer;
+
 }
 
 }}}

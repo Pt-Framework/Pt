@@ -33,7 +33,9 @@
 #include <Pt/Hmi/ButtonModel.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Gfx/ImageReader.h>
+#include <Pt/Gfx/ARgbColor.h>
 #include "AtesionIcon.h"
 #include <sstream>
 
@@ -80,7 +82,8 @@ void MainWindow::init()
 	
 	setPosition(Pt::Gfx::PointF(200,200));
 	setSize(Pt::Gfx::SizeF(800,615));
-	windowModel().Caption.set("This is a Platinum C++ Human Mashine Interface demo  ");
+	windowModel().Caption.set("This is a Platinum C++ Human Mashine Interface Scribble  ");
+	windowModel().BackColor.set(Pt::Gfx::ARgbColor(0,255,255,255));
     windowModel().WindowState.set(WindowStateType::Normal);
 	windowModel().WindowStartPostion.set(WindowStartPositionType::CenterScreen);
 	windowController().ClosedAction += Pt::slot(*this, &MainWindow::onClosedByWindow);
@@ -182,14 +185,14 @@ void MainWindow::onPointerChanged(const void* sender, const PropertyBase& prop)
 }
 
 
-void MainWindow::onRender(GfxController& controller)
+void MainWindow::onRender(GfxController& controller, PaintSurface& surface)
 {
 	if(_points.size() == 0)
 		return;
 
-	Pt::Hmi::Painter& painter = windowModel().paintSurface()->painter();
+	Pt::Hmi::Painter& painter = surface.painter();
 
-	painter.setPen(Pt::Gfx::Pen(1, _color));
+	painter.setPen(Pt::Gfx::Pen(5, _color));
 	painter.drawPolyline(&_points[0], _points.size());
 }
 }}}

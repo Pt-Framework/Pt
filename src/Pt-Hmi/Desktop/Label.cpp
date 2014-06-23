@@ -8,36 +8,38 @@ namespace Hmi{
 namespace Desktop{
 
 Label::Label()
-: _defController( new LabelController())
-, _defModel( new LabelModel())
-, _defRenderer( new LabelRenderer())
+: _defController(_defModel, _defRenderer)
+, _currController(0)
 {
-	_defController->setModel(_defModel);
-	_defController->setRenderer(_defRenderer);	
-	_defModel->ForeColor.set(Pt::Gfx::ARgbColor(0,0,0));
-	_defModel->BorderWidth.set(1);
-	_defModel->BorderStyle.set(BorderStyleType::NoBorder);
-	setController(*_defController);
+	_defModel.ForeColor.set(Pt::Gfx::ARgbColor(0,0,0));
+	_defModel.BorderWidth.set(1);
+	_defModel.BorderStyle.set(BorderStyleType::NoBorder);
+	setLabelController(_defController);	
+}
+
+void Label::setLabelController(Pt::Hmi::LabelController& controller)
+{
+	_currController = &controller;
 }
 
 const Pt::Hmi::LabelController& Label::labelController() const
 {
-	return *((Pt::Hmi::LabelController*) &controller());
+	return *_currController;
 }
 
 const Pt::Hmi::LabelModel& Label::labelModel() const 
 {
-	return *((Pt::Hmi::LabelModel*) labelController().model());
+	return _currController->labelModel();
 }
 
 Pt::Hmi::LabelController& Label::labelController()
 {
-	return *((Pt::Hmi::LabelController*) &controller());
+	return *_currController;
 }
 
 Pt::Hmi::LabelModel& Label::labelModel()
 {
-	return *((Pt::Hmi::LabelModel*) labelController().model());
+	return _currController->labelModel();
 }
 
 void Label::setCaption(const std::string& caption)
@@ -82,9 +84,6 @@ bool Label::isAutoSize() const
 
 Label::~Label()
 {
-	delete _defController;
-	delete _defModel;
-	delete _defRenderer;
 }
  
 }}}

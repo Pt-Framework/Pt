@@ -30,6 +30,7 @@
 
 #include <Pt/Hmi/GfxController.h>
 #include <Pt/Hmi/GfxModel.h>
+#include <Pt/Hmi/WindowModel.h>
 
 namespace Pt{
 namespace Hmi{
@@ -37,16 +38,28 @@ namespace Hmi{
 class WidgetController;
 class PointingDevice;
 class GfxOutputDevice;
+class WindowRenderer;
 
 class PT_HMI_API WindowController  : public GfxController
 {
 public:
-	WindowController(GfxModel* m = 0, Renderer* r = 0, GfxOutputDevice* out = 0, PointingDevice* in1 = 0, InputDevice* in2 = 0);
+	WindowController(WindowModel& m, WindowRenderer& r, GfxOutputDevice* out = 0, PointingDevice* in1 = 0, InputDevice* in2 = 0);
 	virtual ~WindowController();
 
 	WidgetController* mainWidget();
 	const WidgetController* mainWidget() const;
 	
+
+	WindowModel& windowModel()
+	{
+		return static_cast<WindowModel&>(model());
+	}
+
+	const WindowModel& windowModel() const 
+	{
+		return static_cast<const WindowModel&>(model());
+	}
+
 	void invalidate();	
 	void close();
 
@@ -77,7 +90,6 @@ protected:
 	
 	void onSizeChanged(const void* sender, const PropertyBase& prop);
 	
-	GfxModel* gfxModel();
 	WindowController*  _windowParent;
 };
 
