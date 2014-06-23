@@ -214,7 +214,13 @@ const Reply& Client::reply() const
 
 void Client::cancel()
 {
-    _impl->cancel();
+    _impl->close();
+}
+
+
+void Client::close()
+{
+    _impl->close();
 }
 
 

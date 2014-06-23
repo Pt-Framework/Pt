@@ -1197,7 +1197,7 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
 
     if( ! header.has("Connection") )
     {
-        os.write("Connection: keep-alive\r\n", 24);
+        os.write("Connection: close\r\n", 19);
     }
 
     if( ! header.has("Date"))

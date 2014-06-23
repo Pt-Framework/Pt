@@ -79,6 +79,10 @@ class PT_XMLRPC_API HttpClient : public Client
         */
         void setSecure(Ssl::Context& ctx);
 
+        /** @brief Enables HTTP keep-alive.
+        */
+        void setKeepAlive();
+
         /** @brief Sets timeout for I/O operations.
         */
         void setTimeout(std::size_t timeout);
@@ -111,6 +115,10 @@ class PT_XMLRPC_API HttpClient : public Client
         /** @brief Returns target host.
         */
         const Net::Endpoint& host() const;
+
+        /** @brief Closes the connection.
+        */
+        void close();
 
     protected:       
         virtual bool isFailed() const;

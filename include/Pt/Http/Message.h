@@ -247,9 +247,13 @@ class PT_HTTP_API MessageHeader : private Pt::NonCopyable
         */
         std::size_t contentLength() const;
 
-        /** @brief Returns true if keepalive is set.
+        /** @brief Returns true if HTTP keep-alive is set.
         */
         bool isKeepAlive() const;
+
+        /** @brief Sets the HTTP keep-alive header.
+        */
+        void setKeepAlive();
 
         // Returns a properly formatted current time-string, as needed in http.
         // The buffer must have at least 30 bytes.

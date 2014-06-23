@@ -60,6 +60,9 @@ HttpClient::~HttpClient()
 
 void HttpClient::init()
 {
+    _client.request().header().set("Content-Type", "text/xml");
+    _client.request().setMethod("POST");
+
     _client.requestSent() += Pt::slot(*this, &HttpClient::onRequest);
     _client.replyReceived() += Pt::slot( *this, &HttpClient::onReply);
 }
@@ -80,6 +83,13 @@ System::EventLoop* HttpClient::loop() const
 void HttpClient::setSecure(Ssl::Context& ctx)
 {
     _client.setSecure(ctx);
+}
+
+
+void HttpClient::setKeepAlive()
+{
+    Pt::Http::MessageHeader& header = _client.request().header();
+    header.set("Connection", "keep-alive");
 }
 
 
@@ -134,20 +144,26 @@ const Net::Endpoint& HttpClient::host() const
 }
 
 
+void HttpClient::close()
+{
+    // TODO: this could be part of the Remoting::Client interface
+
+    cancel();
+}
+
+
 void HttpClient::onBeginInvoke()
 {
     _error = false;
+    _client.request().discard();
 
     //--->
     // prepare HTTP request
-    _client.request().clear();
-    _client.request().header().set("Content-Type", "text/xml");
-    _client.request().setMethod("POST");
     _client.request().header().set("SOAPAction", ""); // TODO: use targetNamespace/MethodName
-    std::ostream& os = _client.request().body();
     //---<
     
     // format XML-RPC request
+    std::ostream& os = _client.request().body();
     beginMessage(os);
 
     while( ! advanceMessage() )
@@ -168,17 +184,15 @@ void HttpClient::onBeginInvoke()
 void HttpClient::onInvoke()
 {
     _error = false;
+    _client.request().discard();
 
     //--->
     // prepare HTTP request
-    _client.request().clear();
-    _client.request().header().set("Content-Type", "text/xml");
-    _client.request().setMethod("POST");
     _client.request().header().set("SOAPAction", ""); // TODO: use targetNamespace/MethodName
-    std::ostream& os = _client.request().body();
     //---<
 
     // format XML-RPC request
+    std::ostream& os = _client.request().body();
     beginMessage(os);
     
     while( ! advanceMessage() )

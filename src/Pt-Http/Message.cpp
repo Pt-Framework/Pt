@@ -213,6 +213,12 @@ bool MessageHeader::isKeepAlive() const
 }
 
 
+void MessageHeader::setKeepAlive()
+{
+    set("Connection", "keep-alive");
+}
+
+
 char* MessageHeader::htdateCurrent(char* buffer)
 {
     int year = 0;
