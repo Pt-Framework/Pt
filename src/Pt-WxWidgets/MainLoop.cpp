@@ -47,6 +47,12 @@ MainLoop::~MainLoop()
 }
 
 
+Pt::System::Selector& MainLoop::selector()
+{
+    return _impl->selector();
+}
+
+
 void MainLoop::onAttachSelectable(System::Selectable& s)
 { 
     _impl->attachSelectable(s);

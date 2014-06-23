@@ -1,5 +1,5 @@
-/* Copyright (C) 2014 Marc Boris Dürner
- * Copyright (C) 2014 Laurentiu-Gheorghe Crisan
+/* 
+ * Copyright (C) 2014 Marc Boris Dürner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,70 +29,30 @@
 #ifndef Pt_Qt_ApplicationImpl_h
 #define Pt_Qt_ApplicationImpl_h
 
-#include <win32/Selector.h>
 #include <Pt/Qt/Api.h>
-#include <Pt/System/EventLoop.h>
+#include <Pt/Qt/MainLoop.h>
 #include <QtWidgets/QApplication>
-#include <QtCore/QWinEventNotifier>
-#include <QtCore/QTimer>
-#include <vector>
 
 namespace Pt {
 
 namespace Qt {
 
-class ApplicationImpl : public QApplication
-                      , public System::EventLoop 
+class ApplicationImpl 
 {
-    Q_OBJECT
-
     public:
         ApplicationImpl(int& argc, char** argv);
 
         virtual ~ApplicationImpl();
 
-        Pt::System::Selector& selector()
-        { return _selector; }
+        System::EventLoop& loop()
+        { return _loop; }
 
-    public slots:
-        void onOverlapped(HANDLE h);
-
-        void onWake(HANDLE h);
-
-        void processTimers();
-   
-    protected:
-        virtual void onAttachSelectable(System::Selectable&);
-
-        virtual void onDetachSelectable(System::Selectable&);
-
-        virtual void onCancel(System::Selectable& s);
-
-        virtual void onReady(System::Selectable& s);
-
-        virtual void onRun();
-
-        virtual void onExit();
-
-        virtual void onCommitEvent(const Pt::Event& ev);
-
-        virtual void onQueueEvent(const Pt::Event& ev);
-
-        virtual void onWake();
-
-        virtual void onAttachTimer(System::Timer& timer);
-
-        virtual void onDetachTimer(System::Timer& timer);
+        QApplication& qApplication()
+        { return _app; }
 
     private:
-        Pt::System::Selector _selector;
-        QWinEventNotifier _overlappedNotifier;
-        QWinEventNotifier _wakeNotifier;
-        QTimer _masterTimer;
-        System::Mutex _mutex;
-        System::TimerQueue _timerQueue;
-        System::EventQueue _eventQueue;
-        std::vector<System::Selectable*> _avail;
+        QApplication _app;
+        MainLoop _loop;
 };
 
 } // namespace

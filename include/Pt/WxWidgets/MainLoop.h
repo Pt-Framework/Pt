@@ -45,6 +45,9 @@ class PT_WXWIDGETS_API MainLoop : public Pt::System::EventLoop
         
         virtual ~MainLoop();
 
+        //! @internal
+        Pt::System::Selector& selector();
+
     protected:
         virtual void onAttachSelectable(System::Selectable&);
 

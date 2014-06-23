@@ -6,13 +6,15 @@ SubDirHdrs $(QT_INCLUDES) ;
 SubDirC++Flags [ FDefines PT_QT_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Qt ;
 
-Moc ApplicationImpl.moc.cpp : [ FDirName $(SYS:L) ApplicationImpl.h ] ;
+Moc MainLoopImpl.moc.cpp : [ FDirName $(SYS:L) MainLoopImpl.h ] ;
 
-SharedLibrary Pt-Qt : ApplicationImpl.moc.cpp
-                      [ FDirName $(SYS:L) ApplicationImpl.cpp ]
-					  Application.cpp
-					  ;
+PT_QT_IMPL_DIR = [ FDirName $(PT_TOP) src Pt-Qt $(SYS:L) ] ;
+PT_QT_SOURCES += [ GLOB $(PT_QT_IMPL_DIR) : *.cpp  ] ;
+PT_QT_SOURCES += MainLoopImpl.moc.cpp
+                 Application.cpp
+                 MainLoop.cpp ;
 
+SharedLibrary Pt-Qt : $(PT_QT_SOURCES) ;
 LinkSharedLibraries Pt-Qt : Pt Pt-System  ;
 LinkLibs Pt-Qt : $(QT_LINKLIBS) ;
 LinkFlags Pt-Qt : $(QT_LINKFLAGS) ;

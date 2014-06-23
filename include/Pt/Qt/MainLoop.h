@@ -26,48 +26,56 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "ApplicationImpl.h"
-#include <Pt/Qt/Application.h>
+#ifndef Pt_Qt_MainLoop_h
+#define Pt_Qt_MainLoop_h
+
+#include <Pt/Qt/Api.h>
 #include <Pt/System/EventLoop.h>
+#include <QtCore/QCoreApplication>
 
 namespace Pt {
 
 namespace Qt {
 
-Application::Application(int& argc, char** argv)
-: System::Application(0, 0, 0)
-, _impl(0) 
+class PT_QT_API MainLoop : public Pt::System::EventLoop
 {
-    // pass a copy of argc/argv to QApplication
+    public:
+        MainLoop(QCoreApplication& app);
+        
+        virtual ~MainLoop();
+        
+        //! @internal
+        Pt::System::Selector& selector();
+   
+    protected:
+        virtual void onAttachSelectable(System::Selectable&);
 
-    _impl =  new ApplicationImpl(argc, argv);
-    Pt::System::Application::init( _impl->loop() );
-}
+        virtual void onDetachSelectable(System::Selectable&);
 
+        virtual void onCancel(System::Selectable& s);
 
-Application::~Application()
-{
-    delete _impl;
-}
+        virtual void onReady(System::Selectable& s);
 
+        virtual void onRun();
 
-Application& Application::instance()
-{
-    return static_cast<Application&>( System::Application::instance() );
-}
+        virtual void onExit();
 
+        virtual void onCommitEvent(const Pt::Event& ev);
 
-ApplicationImpl* Application::impl()
-{
-    return _impl;
-}
+        virtual void onQueueEvent(const Pt::Event& ev);
 
+        virtual void onWake();
 
-QApplication& Application::qApplication()
-{
-    return _impl->qApplication();
-}
+        virtual void onAttachTimer(System::Timer& timer);
+
+        virtual void onDetachTimer(System::Timer& timer);
+
+    private:     
+        class MainLoopImpl* _impl; 
+};
 
 } // namespace
 
 } // namespace
+
+#endif

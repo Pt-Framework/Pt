@@ -183,6 +183,7 @@
     <ClInclude Include="..\..\include\Pt\PoolAllocator.h" />
     <ClInclude Include="..\..\include\Pt\Qt\Api.h" />
     <ClInclude Include="..\..\include\Pt\Qt\Application.h" />
+    <ClInclude Include="..\..\include\Pt\Qt\MainLoop.h" />
     <ClInclude Include="..\..\include\Pt\RefCounted.h" />
     <ClInclude Include="..\..\include\Pt\Reflex\Api.h" />
     <ClInclude Include="..\..\include\Pt\Reflex\Argument.h" />
@@ -396,6 +397,7 @@
     <ClInclude Include="..\..\src\Pt-Net\win32\TcpSocketImpl.h" />
     <ClInclude Include="..\..\src\Pt-Net\win32\UdpSocketImpl.h" />
     <ClInclude Include="..\..\src\Pt-Qt\win32\ApplicationImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Qt\win32\MainLoopImpl.h" />
     <ClInclude Include="..\..\src\Pt-Ssl\applessl\CertificateImpl.h" />
     <ClInclude Include="..\..\src\Pt-Ssl\applessl\CertificateStoreImpl.h" />
     <ClInclude Include="..\..\src\Pt-Ssl\applessl\Connection.h" />
@@ -670,7 +672,9 @@
     <ClCompile Include="..\..\src\Pt-Net\win32\UdpSocketImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Qt\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-Qt\demo\qdemo.cpp" />
+    <ClCompile Include="..\..\src\Pt-Qt\MainLoop.cpp" />
     <ClCompile Include="..\..\src\Pt-Qt\win32\ApplicationImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Qt\win32\MainLoopImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Reflex\GenericType.cpp" />
     <ClCompile Include="..\..\src\Pt-Reflex\tests\ReflectableTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Reflex\Type.cpp" />

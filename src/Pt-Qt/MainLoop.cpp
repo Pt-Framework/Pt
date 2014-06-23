@@ -26,46 +26,96 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "ApplicationImpl.h"
-#include <Pt/Qt/Application.h>
-#include <Pt/System/EventLoop.h>
+#include "MainLoopImpl.h"
+#include <Pt/Qt/MainLoop.h>
 
 namespace Pt {
 
 namespace Qt {
 
-Application::Application(int& argc, char** argv)
-: System::Application(0, 0, 0)
+MainLoop::MainLoop(QCoreApplication& app)
+: System::EventLoop()
 , _impl(0) 
 {
-    // pass a copy of argc/argv to QApplication
-
-    _impl =  new ApplicationImpl(argc, argv);
-    Pt::System::Application::init( _impl->loop() );
+    _impl = new MainLoopImpl(app, this->eventReceived());
 }
 
 
-Application::~Application()
+MainLoop::~MainLoop()
 {
     delete _impl;
 }
 
 
-Application& Application::instance()
+Pt::System::Selector& MainLoop::selector()
 {
-    return static_cast<Application&>( System::Application::instance() );
+    return _impl->selector();
 }
 
 
-ApplicationImpl* Application::impl()
-{
-    return _impl;
+void MainLoop::onAttachSelectable(System::Selectable& s)
+{ 
+    _impl->attachSelectable(s);
 }
 
 
-QApplication& Application::qApplication()
+void MainLoop::onDetachSelectable(System::Selectable& s)
+{ 
+    _impl->detachSelectable(s);
+}
+
+
+void MainLoop::onCancel(System::Selectable& s)
 {
-    return _impl->qApplication();
+    _impl->cancel( s);
+}
+
+
+void MainLoop::onReady(System::Selectable& s)
+{
+    _impl->ready(s);
+}
+
+
+void MainLoop::onRun()
+{
+    _impl->run();
+}
+
+
+void MainLoop::onExit()
+{
+    _impl->exit();
+}
+
+
+void MainLoop::onCommitEvent(const Pt::Event& ev)
+{ 
+    _impl->commitEvent(ev);
+}
+
+
+void MainLoop::onQueueEvent(const Pt::Event& ev)
+{ 
+    _impl->queueEvent(ev);
+}
+
+
+void MainLoop::onWake()
+{
+    _impl->wake();
+}
+
+
+void MainLoop::onAttachTimer(System::Timer& timer)
+{ 
+    _impl->attachTimer(timer);
+}
+
+
+void MainLoop::onDetachTimer(System::Timer& timer )
+{ 
+    _impl->detachTimer(timer);
 }
 
 } // namespace

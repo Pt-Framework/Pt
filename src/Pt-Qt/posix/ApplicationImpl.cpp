@@ -27,162 +27,20 @@
  */
 
 #include "ApplicationImpl.h"
-#include <Pt/System/IOError.h>
-#include <Pt/System/Selectable.h>
 
 namespace Pt {
 
 namespace Qt {
 
-IONotifier::IONotifier(System::IOHandle& h)
-: _h(&h)
-, _readNotifier(h.fd, QSocketNotifier::Read)
-, _writeNotifier(h.fd, QSocketNotifier::Write)
-{ 
-    _readNotifier.setEnabled(false);
-    connect(&_readNotifier, SIGNAL(activated(int)), this, SLOT(onRead(int)));
-
-    _writeNotifier.setEnabled(false);
-    connect(&_writeNotifier, SIGNAL(activated(int)), this, SLOT(onWrite(int)));
-}
-
-
 ApplicationImpl::ApplicationImpl(int& argc, char** argv)
-: QApplication(argc, argv)
-, Pt::System::EventLoop()
-, _wakeNotifier( _selector.wakeFd(), QSocketNotifier::Read )
+: _app(argc, argv)
+, _loop(_app)
 {
-    connect(&_wakeNotifier, SIGNAL(activated(int)), this, SLOT(onWakeNotify(int)));
-    connect(&_masterTimer, SIGNAL(timeout()), this, SLOT(processTimers()));
-
-    _masterTimer.setSingleShot(true);
 }
 
 
 ApplicationImpl::~ApplicationImpl()
 {
-}
-
-
-void ApplicationImpl::onAttachSelectable(System::Selectable& s)
-{ 
-    _selector.attach(s); 
-}
-
-
-void ApplicationImpl::onDetachSelectable(System::Selectable& s)
-{ 
-    _selector.detach(s); 
-}
-
-
-void ApplicationImpl::onCancel(System::Selectable& s)
-{
-    Pt::System::MutexLock lock(_mutex);
-
-    std::vector<System::Selectable*>::iterator it = _avail.begin();
-    while(it != _avail.end())
-    {
-        if(*it == &s)
-            it = _avail.erase(it);
-        else
-            ++it;
-    }
-}
-
-
-void ApplicationImpl::onReady(System::Selectable& s)
-{
-    Pt::System::MutexLock lock(_mutex);
-    _avail.push_back(&s);
-
-    // this is not neccessary if we can check _avail before the
-    // QApplication starts to wait on the handles
-    _selector.wake();
-}
-
-
-void ApplicationImpl::onRun()
-{
-    QApplication::exec();
-}
-
-
-void ApplicationImpl::onExit()
-{
-    _eventQueue.exit();
-    wake();
-}
-
-
-void ApplicationImpl::onCommitEvent(const Pt::Event& ev)
-{ 
-    _eventQueue.pushEvent(ev);
-    _selector.wake();
-}
-
-
-void ApplicationImpl::onQueueEvent(const Pt::Event& ev)
-{ 
-    _eventQueue.pushEvent(ev); 
-}
-
-
-void ApplicationImpl::onWake()
-{
-    _selector.wake();
-}
-
-
-void ApplicationImpl::onAttachTimer(System::Timer& timer)
-{ 
-    _timerQueue.addTimer(timer); 
-    this->processTimers();
-}
-
-
-void ApplicationImpl::onDetachTimer(System::Timer& timer )
-{ 
-    _timerQueue.removeTimer(timer);
-    this->processTimers();
-}
-
-
-void ApplicationImpl::onWakeNotify(int fd)
-{
-    bool isReady = _selector.isWoken();
-
-    if( ! isReady )
-        return;
-
-    while( true )
-    {
-        Pt::System::MutexLock lock(_mutex);
-
-        if( _avail.empty() )
-            break;
-
-        System::Selectable* s = _avail.back();
-        _avail.pop_back();
-        lock.unlock();
-
-        s->run();
-    }
-
-    bool isActive = _eventQueue.processEvents( this->eventReceived() );
-    if( ! isActive )
-        QApplication::quit();
-}
-
-
-void ApplicationImpl::processTimers()
-{ 
-    std::size_t nextTimer = _timerQueue.processTimers();
-
-    if(nextTimer != System::EventLoop::WaitInfinite)
-    {
-        _masterTimer.start(nextTimer);
-    }
 }
 
 } // namespace

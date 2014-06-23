@@ -1,5 +1,5 @@
-/* 
- * Copyright (C) 2014 Marc Boris DÃ¼rner
+/* Copyright (C) 2014 Marc Boris Dürner
+ * Copyright (C) 2014 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,13 +32,19 @@
 
 namespace Pt {
 
-namespace WxWidgets {
+namespace Qt {
 
-MainLoopImpl::MainLoopImpl(wxEventLoopBase& wxLoop)
-: _wxLoop(wxLoop)
+MainLoopImpl::MainLoopImpl(QCoreApplication& app, Signal<const Pt::Event&>& ev)
+: _app(app)
+, _event(ev)
+, _overlappedNotifier( _selector.overlappedEvent() )
+, _wakeNotifier( _selector.wakeEvent() )
 {
-    // TODO:
-    // monitor _selector.wakeFd() -> onWakeNotify
+    connect(&_overlappedNotifier, SIGNAL(activated(HANDLE)), this, SLOT(onOverlapped(HANDLE)));
+    connect(&_wakeNotifier, SIGNAL(activated(HANDLE)), this, SLOT(onWake(HANDLE)));
+    connect(&_masterTimer, SIGNAL(timeout()), this, SLOT(processTimers()));
+
+    _masterTimer.setSingleShot(true);
 }
 
 
@@ -80,14 +86,14 @@ void MainLoopImpl::ready(System::Selectable& s)
     _avail.push_back(&s);
 
     // this is not neccessary if we can check _avail before the
-    // wxEventLoop starts to wait on the handles
+    // QApplication starts to wait on the handles
     _selector.wake();
 }
 
 
 void MainLoopImpl::run()
 {
-    //QApplication::exec();
+    _app.exec();
 }
 
 
@@ -131,35 +137,31 @@ void MainLoopImpl::detachTimer(System::Timer& timer )
 }
 
 
-//void MainLoopImpl::onWakeNotify(int fd)
-//{
-//    bool isReady = _selector.isWoken();
-//
-//    if( ! isReady )
-//        return;
-//
-//    while( true )
-//    {
-//        Pt::System::MutexLock lock(_mutex);
-//
-//        if( _avail.empty() )
-//            break;
-//
-//        System::Selectable* s = _avail.back();
-//        _avail.pop_back();
-//        lock.unlock();
-//
-//        s->run();
-//    }
-//
-//    bool isActive = _eventQueue.processEvents( this->eventReceived() );
-//    if( ! isActive )
-//        QApplication::quit();
-//}
-
-void MainLoopImpl::Notify()
+void MainLoopImpl::onOverlapped(HANDLE)
 {
-    processTimers();
+    _selector.runOverlapped();
+}
+
+
+void MainLoopImpl::onWake(HANDLE)
+{
+    while( true )
+    {
+        Pt::System::MutexLock lock(_mutex);
+
+        if( _avail.empty() )
+            break;
+
+        System::Selectable* s = _avail.back();
+        _avail.pop_back();
+        lock.unlock();
+
+        s->run();
+    }
+
+    bool isActive = _eventQueue.processEvents( _event );
+    if( ! isActive )
+        _app.quit();
 }
 
 
@@ -169,12 +171,7 @@ void MainLoopImpl::processTimers()
 
     if(nextTimer != System::EventLoop::WaitInfinite)
     {
-        unsigned maxInt = std::numeric_limits<int>::max();
-        
-        int interval = nextTimer > maxInt ? maxInt 
-                                          : static_cast<int>(nextTimer);
-        
-        _masterTimer.StartOnce(interval);
+        _masterTimer.start(nextTimer);
     }
 }
 
