@@ -61,3 +61,5 @@ MakeLocate Pt-Hmi : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-Hmi : $(PT_INSTALL_LIBDIR) ;
 
 SubInclude PT_TOP src Pt-Hmi Desktop ;
+SubInclude PT_TOP src Pt-Hmi Demo Widget ;
+SubInclude PT_TOP src Pt-Hmi Demo Scribble ;

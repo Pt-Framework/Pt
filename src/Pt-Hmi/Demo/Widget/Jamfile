@@ -1,0 +1,15 @@
+SubDir PT_TOP src Pt-Hmi Demo Widget ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Hmi-Widget ;
+
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Hmi-Widget ;
+
+Main Pt-Hmi-Widget : Main.cpp
+				     MainWindow.cpp
+				     Dialog1.cpp
+				     Dialog2.cpp	
+				    ;
+
+LinkSharedLibraries Pt-Hmi-Widget : Pt Pt-System Pt-Gfx Pt-Net Pt-Hmi Pt-Hmi-Desktop  ;
+
+MakeLocate Pt-Hmi-Widget : $(PT_OUTPUT_TARGET) ;

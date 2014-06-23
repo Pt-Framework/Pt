@@ -1,5 +1,4 @@
-/* Copyright (C) 2013 Marc Boris Duerner 
- * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,49 +22,37 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-#ifndef Pt_Hmi_GfxController_H
-#define Pt_Hmi_GfxController_H
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
+#ifndef Pt_Hmi_Demo_Dialog1_h
+#define Pt_Hmi_Demo_Dialog1_h
 
-#include <Pt/Hmi/Controller.h>
-#include <Pt/Gfx/Painter.h>
+#include <Pt/Hmi/Desktop/Dialog.h>
+#include <Pt/Hmi/Desktop/Button.h>
 
 namespace Pt{
 namespace Hmi{
+namespace Demo{
+namespace Widget{
 
-class GfxModel;
-
-class PT_HMI_API GfxController  : public Controller
+class Dialog1 : public Pt::Hmi::Desktop::Dialog
 {
 public:
-	GfxController();
-	virtual ~GfxController();
-
-	Pt::Gfx::PointF toClient(const Pt::Gfx::PointF& globalPoint);
-	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot);
-
-	virtual void render();
-	virtual void output();
-	virtual void invalidate();
-	
-		
-	GfxModel* gfxModel();
-	const GfxModel* gfxModel() const;
-	
-	Pt::Signal<GfxController&> Render;
-	Pt::Signal<GfxController&> Output;
+	Dialog1();
+	virtual ~Dialog1();
 
 protected:
-	bool onMoveFocusNext();
-	bool onMoveFocusPrev();	
-	
+	virtual void init();
+
 private:
-	bool focusNextChild(int index);
-	bool focusPrevChild(int index);
-	int getFocusedChild() const;
+	void onClosedByButton();
+	void onShowNextDialog();
 
-};
+private:
+	Pt::Hmi::Desktop::Button _closeButton;
+	Pt::Hmi::Desktop::Button _newDialog;
+	bool _clicked;
+}; 
 
-}}
+}}}}
+
 #endif

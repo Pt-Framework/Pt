@@ -91,9 +91,6 @@
     <Filter Include="Pt-Hmi\Sources\Desktop">
       <UniqueIdentifier>{5ff8bfb5-2d51-4efa-908a-342da391ef75}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\Sources\Desktop\tests">
-      <UniqueIdentifier>{c5aaf993-ddc9-4694-a792-2c183ef2e94c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Hmi\Sources\cocoa">
       <UniqueIdentifier>{2b77b6e8-aec1-4d99-9506-f20e6b81d876}</UniqueIdentifier>
     </Filter>
@@ -123,6 +120,15 @@
     </Filter>
     <Filter Include="Pt-Soap">
       <UniqueIdentifier>{73e4d538-542a-4e9f-a26c-977f7cfc6e49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\Sources\Demo">
+      <UniqueIdentifier>{4dbd9367-f6cd-4e33-b664-181985cda5bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\Sources\Demo\Widget">
+      <UniqueIdentifier>{68bb16de-08be-4c27-89b4-e0e221a37985}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\Sources\Demo\Scribble">
+      <UniqueIdentifier>{c8eedc7c-276c-4430-bf43-98f83e9fe051}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1047,15 +1053,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Desktop\Dialog.h">
       <Filter>Pt-Hmi\Headers\Desktop</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\Desktop\tests\Dialog1.h">
-      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\Desktop\tests\Dialog2.h">
-      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\Desktop\tests\MainWindow.h">
-      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.h">
       <Filter>Pt-Hmi\Sources\cocoa</Filter>
     </ClInclude>
@@ -1287,12 +1284,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Yv12Image.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\Desktop\tests\DemoImage.h">
-      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\Desktop\tests\AtesionIcon.h">
-      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Net\posix\EndpointImpl.h">
       <Filter>Pt-Net\win32</Filter>
     </ClInclude>
@@ -1434,8 +1425,26 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
       <Filter>Pt-Hmi\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Mfc\MainLoop.h">
-      <Filter>Pt-Mfc</Filter>
+    <ClInclude Include="..\..\src\Pt-Hmi\Demo\Widget\AtesionIcon.h">
+      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\Demo\Widget\DemoImage.h">
+      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\Demo\Widget\Dialog1.h">
+      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\Demo\Widget\Dialog2.h">
+      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\Demo\Widget\MainWindow.h">
+      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\Demo\Scribble\AtesionIcon.h">
+      <Filter>Pt-Hmi\Sources\Demo\Scribble</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\Demo\Scribble\MainWindow.h">
+      <Filter>Pt-Hmi\Sources\Demo\Scribble</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1537,9 +1546,6 @@
     <None Include="..\..\src\Pt-Hmi\Desktop\Jamfile">
       <Filter>Pt-Hmi\Sources\Desktop</Filter>
     </None>
-    <None Include="..\..\src\Pt-Hmi\Desktop\tests\Jamfile">
-      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
-    </None>
     <None Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.mm">
       <Filter>Pt-Hmi\Sources\cocoa</Filter>
     </None>
@@ -1593,6 +1599,12 @@
     </None>
     <None Include="..\..\src\Pt-Soap\Jamfile">
       <Filter>Pt-Soap</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Hmi\Demo\Widget\Jamfile">
+      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Hmi\Demo\Scribble\Jamfile">
+      <Filter>Pt-Hmi\Sources\Demo\Scribble</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -2331,9 +2343,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Controller.cpp">
       <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\tests\Pt-Hmi-demo.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\GfxController.cpp">
       <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
@@ -2420,15 +2429,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Dialog.cpp">
       <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\tests\Dialog1.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\tests\Dialog2.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\tests\MainWindow.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\ApplicationImpl.cpp">
       <Filter>Pt-Hmi\Sources\x11</Filter>
@@ -2691,8 +2691,23 @@
     <ClCompile Include="..\..\src\Pt-Hmi\ImagePaintSurface.cpp">
       <Filter>Pt-Hmi\Sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Mfc\MainLoop.cpp">
-      <Filter>Pt-Mfc</Filter>
+    <ClCompile Include="..\..\src\Pt-Hmi\Demo\Widget\Dialog1.cpp">
+      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Demo\Widget\Dialog2.cpp">
+      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Demo\Widget\MainWindow.cpp">
+      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Demo\Scribble\MainWindow.cpp">
+      <Filter>Pt-Hmi\Sources\Demo\Scribble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Demo\Widget\Main.cpp">
+      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Demo\Scribble\Main.cpp">
+      <Filter>Pt-Hmi\Sources\Demo\Scribble</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

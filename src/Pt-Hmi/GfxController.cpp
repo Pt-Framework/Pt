@@ -119,6 +119,7 @@ void GfxController::render()
 	//Draw me
 	Renderer* re = renderer();	
 	re->render(model());
+	Render.send(*this);
 
 	//Render my childs
 	for( size_t i = 0; i < children().size(); ++i)
@@ -135,6 +136,8 @@ void GfxController::output()
 	if(!m->Visible.get())
 		return;
 	
+	Output.send(*this);
+
 	Pt::Hmi::Painter& localPainter = m->paintSurface()->painter();
 
 	for( size_t i = 0; i < children().size(); ++i)

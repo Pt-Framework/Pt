@@ -1,5 +1,4 @@
-/* Copyright (C) 2013 Marc Boris Duerner 
- * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,49 +22,50 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-#ifndef Pt_Hmi_GfxController_H
-#define Pt_Hmi_GfxController_H
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
+#ifndef Pt_Hmi_Demo_MainWindow_h
+#define Pt_Hmi_Demo_MainWindow_h
 
-#include <Pt/Hmi/Controller.h>
-#include <Pt/Gfx/Painter.h>
+#include <Pt/Hmi/Desktop/Window.h>
+#include <Pt/Hmi/Desktop/Button.h>
+#include <Pt/Hmi/Desktop/Panel.h>
+#include <Pt/Hmi/Desktop/Label.h>
+#include <Pt/Gfx/ARgbColor.h>
 
 namespace Pt{
 namespace Hmi{
+namespace Demo{
 
-class GfxModel;
-
-class PT_HMI_API GfxController  : public Controller
+class MainWindow : public Pt::Hmi::Desktop::Window
 {
 public:
-	GfxController();
-	virtual ~GfxController();
-
-	Pt::Gfx::PointF toClient(const Pt::Gfx::PointF& globalPoint);
-	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot);
-
-	virtual void render();
-	virtual void output();
-	virtual void invalidate();
-	
-		
-	GfxModel* gfxModel();
-	const GfxModel* gfxModel() const;
-	
-	Pt::Signal<GfxController&> Render;
-	Pt::Signal<GfxController&> Output;
+	MainWindow();
+	virtual ~MainWindow();
 
 protected:
-	bool onMoveFocusNext();
-	bool onMoveFocusPrev();	
-	
+	virtual void init();
+
 private:
-	bool focusNextChild(int index);
-	bool focusPrevChild(int index);
-	int getFocusedChild() const;
+	void onClosed();
+	void onClosedByWindow(Pt::Hmi::Controller* ctrl);
 
-};
+private:
+	void onRed();
+	void onGreen();
+	void onBlue();
+	void onPointerChanged(const void*, const PropertyBase& prop);
+	void onRender(GfxController& controller);
 
-}}
+private:
+	Pt::Hmi::Desktop::Button _closeButton;
+	Pt::Hmi::Desktop::Button _redButton;
+	Pt::Hmi::Desktop::Button _greenButton;
+	Pt::Hmi::Desktop::Button _blueButton;
+	Pt::Gfx::ARgbColor _color;
+	bool _painting;
+	std::vector<Pt::Gfx::PointF> _points;
+}; 
+
+}}}
+
 #endif
