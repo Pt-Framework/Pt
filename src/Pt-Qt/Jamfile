@@ -4,6 +4,7 @@ SubDirHdrs $(PT_TOP)/src/Pt-System ;
 SubDirHdrs $(PT_TOP)/src/Pt-Qt/$(SYS:L) ;
 SubDirHdrs $(QT_INCLUDES) ;
 SubDirC++Flags [ FDefines PT_QT_API_EXPORT ] ;
+SubDirC++Flags $(QT_C++FLAGS) ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Qt ;
 
 Moc MainLoopImpl.moc.cpp : [ FDirName $(SYS:L) MainLoopImpl.h ] ;

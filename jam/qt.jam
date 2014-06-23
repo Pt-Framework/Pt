@@ -42,21 +42,23 @@ rule CheckBuildQt
 rule ConfigureQt
 {  
     local qtlibs ;
+    local qt5libs ;
 
     for local _l in $(1)
     {
         switch $(_l)
         {
-            case core       : qtlibs += Qt5Core ;
+            case core       : qtlibs += Qt5Core ; qt5libs += QtCore ;
             case concurrent : qtlibs += Qt5Concurrent ;
             case network    : qtlibs += Qt5Network ;
-            case widgets    : qtlibs += Qt5Widgets ;
-            case gui        : qtlibs += Qt5Gui ;
+            case widgets    : qtlibs += Qt5Widgets ; qt5libs += QtWidgets ;
+            case gui        : qtlibs += Qt5Gui ; qt5libs += QtGui ;
             case qml        : qtlibs += Qt5Qml ;
             case quick      : qtlibs += Qt5Quick ;
         }
     }
-    
+
+
     if $(QTDIR)
     {
       QT_INCLUDES ?= [ FDirName $(QTDIR) include ] ;
@@ -105,7 +107,7 @@ rule ConfigureQt
                      "int main() { QString button; return 0; }" 
                     : $(QT_INCLUDES) 
                     : $(QT_C++FLAGS) -F$(QT_LIBDIR)
-                    : $(QT_LINKLIBS) "-framework "$(qtlibs)
+                    : $(QT_LINKLIBS) "-framework "$(qt5libs)
                     : $(QT_LINKFLAGS) -F$(QT_LIBDIR) ;
     }
 

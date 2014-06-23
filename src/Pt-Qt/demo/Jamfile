@@ -2,6 +2,7 @@ SubDir PT_TOP src Pt-Qt demo ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirHdrs $(QT_INCLUDES) ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Qt ;
+SubDirC++Flags $(QT_C++FLAGS) ;
 
 Main qdemo : qdemo.cpp ;
 LinkSharedLibraries qdemo : Pt Pt-System Pt-Net Pt-Qt ;
