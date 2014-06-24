@@ -51,7 +51,7 @@ class IOHandler : public wxEventLoopSourceHandler
         , _writeSource(0)
         { }
 
-        ~IOHandler
+        ~IOHandler()
         {
             delete _readSource;
             delete _writeSource;
@@ -161,7 +161,7 @@ class Selector : public System::Selector
         {
             IOHandler& handler = getHandler(h);
 
-            wxEventLoopSource* source = AddSourceForFD(h->fd, &ioSource, wxEVENT_SOURCE_INPUT);
+            wxEventLoopSource* source = AddSourceForFD(h->fd, &handler, wxEVENT_SOURCE_INPUT);
             handler.setReadSource(source);
 
             h->events = System::IOHandle::Read;
@@ -183,7 +183,7 @@ class Selector : public System::Selector
         {
             IOHandler& handler = getHandler(h);
 
-            wxEventLoopSource* source = AddSourceForFD(h->fd, &ioSource, wxEVENT_SOURCE_OUTPUT);
+            wxEventLoopSource* source = AddSourceForFD(h->fd, &handler, wxEVENT_SOURCE_OUTPUT);
             handler.setWriteSource(source);
 
             h->events = System::IOHandle::Write;
@@ -277,14 +277,12 @@ class MainLoopImpl : public wxTimer
         void processTimers();
 
     private:
-        wxEventLoopBase& _wxLoop;
         wxTimer _masterTimer;
         System::Mutex _mutex;
         System::TimerQueue _timerQueue;
         System::EventQueue _eventQueue;
         std::vector<System::Selectable*> _avail;
         Selector _selector;
-        //QSocketNotifier _wakeNotifier;
 };
 
 } // namespace

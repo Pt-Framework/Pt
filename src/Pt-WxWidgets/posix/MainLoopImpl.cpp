@@ -35,7 +35,7 @@ namespace Pt {
 namespace WxWidgets {
 
 MainLoopImpl::MainLoopImpl(wxEventLoopBase& wxLoop)
-: _wxLoop(wxLoop)
+: _selector(wxLoop)
 {
     // TODO:
     // monitor _selector.wakeFd() -> onWakeNotify
