@@ -34,6 +34,7 @@
 #include <Pt/System/EventLoop.h>
 #include <Pt/System/Mutex.h>
 #include <wx/evtloop.h>
+#include <wx/evtloopsrc.h>
 #include <wx/timer.h>
 #include <vector>
 
