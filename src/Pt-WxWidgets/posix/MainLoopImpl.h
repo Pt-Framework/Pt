@@ -161,7 +161,7 @@ class Selector : public System::Selector
         {
             IOHandler& handler = getHandler(h);
 
-            wxEventLoopSource* source = AddSourceForFD(h->fd, &handler, wxEVENT_SOURCE_INPUT);
+            wxEventLoopSource* source = _wxLoop.AddSourceForFD(h->fd, &handler, wxEVENT_SOURCE_INPUT);
             handler.setReadSource(source);
 
             h->events = System::IOHandle::Read;
@@ -183,7 +183,7 @@ class Selector : public System::Selector
         {
             IOHandler& handler = getHandler(h);
 
-            wxEventLoopSource* source = AddSourceForFD(h->fd, &handler, wxEVENT_SOURCE_OUTPUT);
+            wxEventLoopSource* source = _wxLoop.AddSourceForFD(h->fd, &handler, wxEVENT_SOURCE_OUTPUT);
             handler.setWriteSource(source);
 
             h->events = System::IOHandle::Write;
