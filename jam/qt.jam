@@ -48,13 +48,13 @@ rule ConfigureQt
     {
         switch $(_l)
         {
-            case core       : qtlibs += Qt5Core ; qt5libs += QtCore ;
-            case concurrent : qtlibs += Qt5Concurrent ;
-            case network    : qtlibs += Qt5Network ;
-            case widgets    : qtlibs += Qt5Widgets ; qt5libs += QtWidgets ;
-            case gui        : qtlibs += Qt5Gui ; qt5libs += QtGui ;
-            case qml        : qtlibs += Qt5Qml ;
-            case quick      : qtlibs += Qt5Quick ;
+            case core       : qtlibs += Qt5Core ;       qt5libs += QtCore ;
+            case concurrent : qtlibs += Qt5Concurrent ; qt5libs += QtConcurrent ;
+            case network    : qtlibs += Qt5Network ;    qt5libs += QtNetwork ;
+            case widgets    : qtlibs += Qt5Widgets ;    qt5libs += QtWidgets ;
+            case gui        : qtlibs += Qt5Gui ;        qt5libs += QtGui ;
+            case qml        : qtlibs += Qt5Qml ;        qt5libs += QtQml ;
+            case quick      : qtlibs += Qt5Quick ;      qt5libs += QtQuick ;
         }
     }
 
