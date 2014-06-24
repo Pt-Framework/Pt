@@ -290,7 +290,7 @@ if --with-wxwidgets in $(ARGV)
     EchoOption WITH_WXWIDGETS : "Wx Widgets Support" ;
     Configure WITH_WXWIDGETS ;
 
-    WXCONFIG ?= wxconfig ;
+    WXCONFIG ?= wx-config ;
     EchoOption WXCONFIG : "Using wxconfig tool" ;
 
     WXCONFIG_CXXFLAGS = $(WXCONFIG) --cxxflags ;
