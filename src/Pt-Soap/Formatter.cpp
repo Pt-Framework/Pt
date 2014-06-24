@@ -125,7 +125,8 @@ namespace Pt {
 namespace Soap {
 
 Formatter::Formatter(std::basic_ostream<Char>& os)
-: _reader(0)
+: _state(OnBegin)
+, _reader(0)
 , _composer(0)
 , _os(&os)
 { 
@@ -358,6 +359,7 @@ void Formatter::onFinishStruct()
 
 void Formatter::onBeginParse(Composer& composer)
 {
+    _state = OnBegin;
     _composer = &composer;
 }
 
@@ -393,6 +395,8 @@ bool Formatter::advance(const Pt::Xml::Node& node)
         const Parameter* child = _paramStack.back()->type()->getParameter( se.name().local().narrow() );
         if(child)
             _paramStack.push_back(child);
+
+        _state = OnStartElement;
     }
     else if(node.type() == Xml::Node::Characters)
     {
@@ -439,11 +443,19 @@ bool Formatter::advance(const Pt::Xml::Node& node)
         {
             _composer->setString( c.content() );
         }
+
+        _state = OnCharacters;
     }
     else if(node.type() == Xml::Node::EndElement)
     {
+        // handle empty string values
+        if(_state == OnStartElement)
+            _composer->setString( Pt::String() );
+
         _composer = _composer->finish();
         _paramStack.pop_back();
+
+        _state = OnEndElement;
     }
 
     return _paramStack.size() == 0;

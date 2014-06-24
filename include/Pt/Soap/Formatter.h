@@ -136,6 +136,15 @@ class PT_SOAP_API Formatter : public Pt::Formatter
         void onParse();
 
     private:
+        enum State
+        {
+            OnBegin,
+            OnStartElement,
+            OnCharacters,
+            OnEndElement
+        };
+
+        State _state;
         Xml::XmlReader* _reader;
         std::vector<const Parameter*> _paramStack;
         Composer* _composer;
