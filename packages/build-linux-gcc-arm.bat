@@ -1,47 +1,27 @@
 @ECHO OFF
 
-if exist deploy\nt-vc10-x86-debug (
-    echo removing nt-vc10-x86-debug
-    call rmdir /s/q nt-vc10-x86-debug
+if exist deploy\linux-gcc-arm-debug (
+    echo removing linux-gcc-arm-debug
+    call rmdir /s/q deploy\linux-gcc-arm-debug
 )
 
-call:Build -sCONFIG=nt-vc10-x86-debug --debug --with-openssl --with-mfc --with-qt5 -sTOOLSET=vc10 -sTARGET_OSPLAT=x86
+call:Build -sCONFIG=linux-gcc-arm-debug --debug -sTARGET_OS=linux -sTARGET_OSPLAT=arm ^
+-sTOOLSET=gcc -sTOOLSET_ROOT="%LINARO_ARM_GNUABIHF_2013_11_R1%\bin\arm-linux-gnueabihf-" ^
+--with-openssl --with-qt5 -sQTDIR=C:\Projekte\Extern\Qt\5.2.1\linux-arm-gnuabihf
 
 if %errorlevel% neq 0 (
     echo build failed
     goto :eof
 ) 
 
-if exist deploy\nt-vc10-x86-release (
-    echo removing nt-vc10-x86-release
-    call rmdir /s/q nt-vc10-x86-release
+if exist deploy\linux-gcc-arm-release (
+    echo removing linux-gcc-arm-release
+    call rmdir /s/q deploy\linux-gcc-arm-release
 )
 
-call:Build -sCONFIG=nt-vc10-x86-release --debug --with-openssl --with-mfc --with-qt5 --optimize -sTOOLSET=vc10 -sTARGET_OSPLAT=x86
-
-if %errorlevel% neq 0 (
-    echo build failed
-    goto :eof
-) 
-
-if exist deploy\nt-vc10-x86_64-debug (
-    echo removing nt-vc10-x86_64-debug
-    call rmdir /s/q nt-vc10-x86_64-debug
-)
-
-call:Build -sCONFIG=nt-vc10-x86_64-debug --debug --with-openssl --with-mfc -sTOOLSET=vc10 -sTARGET_OSPLAT=x86_64
-
-if %errorlevel% neq 0 (
-    echo build failed
-    goto :eof
-) 
-
-if exist deploy\nt-vc10-x86_64-release (
-    echo removing nt-vc10-x86_64-release
-    call rmdir /s/q nt-vc10-x86_64-release
-)
-
-call:Build -sCONFIG=nt-vc10-x86_64-release --debug --with-openssl --with-mfc --optimize -sTOOLSET=vc10 -sTARGET_OSPLAT=x86_64
+call:Build -sCONFIG=linux-gcc-arm-release --debug --optimize -sTARGET_OS=linux -sTARGET_OSPLAT=arm ^
+-sTOOLSET=gcc -sTOOLSET_ROOT="%LINARO_ARM_GNUABIHF_2013_11_R1%\bin\arm-linux-gnueabihf-" ^
+--with-openssl --with-qt5 -sQTDIR=C:\Projekte\Extern\Qt\5.2.1\linux-arm-gnuabihf
 
 if %errorlevel% neq 0 (
     echo build failed

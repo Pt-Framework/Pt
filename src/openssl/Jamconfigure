@@ -4,6 +4,7 @@
 
 # find matching openssl configuration file first for SYS, then for TARGET_OS
 local opensslconf_target = [ FDirName $(PT_TOP) src openssl opensslconf-$(SYS:L)-$(TARGET_OSPLAT:L).h ] ;
+Echo $(opensslconf_target) ;
 if ! [ CHECK_IF_FILE $(opensslconf_target) ]
 {
     opensslconf_target = [ FDirName $(PT_TOP) src openssl opensslconf-$(TARGET_OS:L)-$(TARGET_OSPLAT:L).h ] ;
