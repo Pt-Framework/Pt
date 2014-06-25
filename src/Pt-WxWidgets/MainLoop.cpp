@@ -37,7 +37,7 @@ MainLoop::MainLoop(wxEventLoopBase& wxLoop)
 : System::EventLoop()
 , _impl(0) 
 {
-    _impl = new MainLoopImpl(wxLoop);
+    _impl = new MainLoopImpl(wxLoop, this->eventReceived());
 }
 
 
