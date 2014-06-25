@@ -161,7 +161,7 @@ void MainLoopImpl::onWake()
 
     bool isActive = _eventQueue.processEvents(_event);
     if( ! isActive )
-        QApplication::quit();
+        _selector.wxLoop().Exit();
 }
 
 

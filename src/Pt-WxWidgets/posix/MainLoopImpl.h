@@ -229,6 +229,9 @@ class Selector : public System::Selector
         int wakeFd()
         { return _wakePipe.readFd(); }
 
+        wxEventLoopBase& wxLoop()
+        { return _wxLoop; }
+
         typedef std::map<System::IOHandle*, IOHandler*> IOMap;
 
     private:

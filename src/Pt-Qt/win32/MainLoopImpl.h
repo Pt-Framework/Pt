@@ -84,14 +84,16 @@ class MainLoopImpl : public QObject
     private:
         QCoreApplication& _app;
         Signal<const Event&>& _event;
-        Pt::System::Selector _selector;
-        QWinEventNotifier _overlappedNotifier;
-        QWinEventNotifier _wakeNotifier;
-        QTimer _masterTimer;
         System::Mutex _mutex;
         System::TimerQueue _timerQueue;
         System::EventQueue _eventQueue;
         std::vector<System::Selectable*> _avail;
+        Pt::System::Selector _selector;
+        QWinEventNotifier _overlappedNotifier;
+        QWinEventNotifier _wakeNotifier;
+        QTimer _masterTimer;
+
+        
 };
 
 } // namespace
