@@ -240,6 +240,7 @@ class Selector : public System::Selector
 };
 
 class MainLoopImpl : public wxEventLoopSourceHandler
+                   , public wxEvtHandler
 {
     public:
         MainLoopImpl(wxEventLoopBase& wxLoop);
