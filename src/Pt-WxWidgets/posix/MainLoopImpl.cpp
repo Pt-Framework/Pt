@@ -40,7 +40,7 @@ MainLoopImpl::MainLoopImpl(wxEventLoopBase& wxLoop)
 {
     _wakeSource = wxLoop.AddSourceForFD(_selector.wakeFd(), this, wxEVENT_SOURCE_INPUT);
 
-    _masterTimer.SetOwner(handler);
+    _masterTimer.SetOwner(this);
 
     this->Connect( _masterTimer.GetId(), wxEVT_TIMER, 
                    wxTimerEventHandler(MainLoopImpl::onMasterTimer), NULL, this );
