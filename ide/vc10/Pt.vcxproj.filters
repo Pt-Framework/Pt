@@ -1446,12 +1446,14 @@
     <ClInclude Include="..\..\src\Pt-Hmi\Demo\Scribble\MainWindow.h">
       <Filter>Pt-Hmi\Sources\Demo\Scribble</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Mfc\MainLoop.h" />
     <ClInclude Include="..\..\include\Pt\Qt\MainLoop.h">
       <Filter>Pt-Qt</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Qt\win32\MainLoopImpl.h">
       <Filter>Pt-Qt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Mfc\MainLoop.h">
+      <Filter>Pt-Mfc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2716,12 +2718,14 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Demo\Scribble\Main.cpp">
       <Filter>Pt-Hmi\Sources\Demo\Scribble</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Mfc\MainLoop.cpp" />
     <ClCompile Include="..\..\src\Pt-Qt\MainLoop.cpp">
       <Filter>Pt-Qt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Qt\win32\MainLoopImpl.cpp">
       <Filter>Pt-Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Mfc\MainLoop.cpp">
+      <Filter>Pt-Mfc</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
