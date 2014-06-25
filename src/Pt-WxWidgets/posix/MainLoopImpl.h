@@ -243,7 +243,7 @@ class MainLoopImpl : public wxEventLoopSourceHandler
                    , public wxEvtHandler
 {
     public:
-        MainLoopImpl(wxEventLoopBase& wxLoop);
+        MainLoopImpl(wxEventLoopBase& wxLoop, Signal<const Pt::Event&>& ev);
 
         virtual ~MainLoopImpl();
 
@@ -291,6 +291,7 @@ class MainLoopImpl : public wxEventLoopSourceHandler
 
     private:
         System::Mutex _mutex;
+        Signal<const Event&>& _event;
         wxTimer _masterTimer;
         wxEventLoopSource* _wakeSource;
         System::TimerQueue _timerQueue;

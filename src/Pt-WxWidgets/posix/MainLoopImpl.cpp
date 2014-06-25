@@ -34,8 +34,9 @@ namespace Pt {
 
 namespace WxWidgets {
 
-MainLoopImpl::MainLoopImpl(wxEventLoopBase& wxLoop)
-: _wakeSource(0)
+MainLoopImpl::MainLoopImpl(wxEventLoopBase& wxLoop, Signal<const Pt::Event&>& ev)
+: _event(ev)
+, _wakeSource(0)
 , _selector(wxLoop)
 {
     _wakeSource = wxLoop.AddSourceForFD(_selector.wakeFd(), this, wxEVENT_SOURCE_INPUT);
@@ -158,7 +159,7 @@ void MainLoopImpl::onWake()
         s->run();
     }
 
-    bool isActive = _eventQueue.processEvents( this->eventReceived() );
+    bool isActive = _eventQueue.processEvents(_event);
     if( ! isActive )
         QApplication::quit();
 }
