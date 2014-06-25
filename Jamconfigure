@@ -294,7 +294,7 @@ if --with-wxwidgets in $(ARGV)
     EchoOption WXCONFIG : "Using wxconfig tool" ;
 
     WXCONFIG_CXXFLAGS = $(WXCONFIG) --cxxflags ;
-    WXCONFIG_LIBS = $(WXCONFIG) --libs ;
+    WXCONFIG_LIBS = $(WXCONFIG) --libs all ;
 
     WXCONFIG_RESULT = [ EXEC $(WXCONFIG_CXXFLAGS:J=" ") ] ;
     if $(WXCONFIG_RESULT[1]) != 0
