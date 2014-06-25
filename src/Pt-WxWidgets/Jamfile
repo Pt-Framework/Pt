@@ -15,3 +15,5 @@ LinkSharedLibraries Pt-WxWidgets : Pt Pt-System  ;
 LinkFlags Pt-WxWidgets : $(WX_LINKFLAGS) ;
 MakeLocate Pt-WxWidgets : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-WxWidgets : $(PT_INSTALL_LIBDIR) ;
+
+SubInclude PT_TOP src Pt-WxWidgets demo ;
