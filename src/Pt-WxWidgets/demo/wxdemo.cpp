@@ -95,20 +95,20 @@ class DemoApp : public wxApp
 
             _loop = new Pt::WxWidgets::MainLoop(*wxLoop);
 
-            _timer.setActive( app.loop() );
+            _timer.setActive(*_loop);
             _timer.start(5000);
             _timer.timeout() += Pt::slot( &onTimer );
 
             _socket.connected() += Pt::slot( &onConnect );
             _socket.inputReady() += Pt::slot( &onInput );
             _socket.outputReady() += Pt::slot( &onOutput );
-            _socket.setActive( app.loop() );
+            _socket.setActive(*_loop);
 
             Pt::Net::Endpoint ep("www.google.de", 80);
             _socket.beginConnect(ep);
         }
 
-        virtual int OnExit();
+        virtual int OnExit()
         { return 0; }
 
     private:
