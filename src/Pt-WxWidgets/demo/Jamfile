@@ -5,5 +5,5 @@ SubDirC++Flags $(WX_C++FLAGS) ;
 
 Main wxdemo : wxdemo.cpp ;
 LinkSharedLibraries wxdemo : Pt Pt-System Pt-Net Pt-WxWidgets ;
-LinkFlags wxdemo : $(WX_LINKFLAGS) ;
+LinkLibs wxdemo : $(WX_LINKLIBS) ;
 MakeLocate wxdemo : $(PT_OUTPUT_TARGET) ;

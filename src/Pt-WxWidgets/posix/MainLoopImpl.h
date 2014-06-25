@@ -277,7 +277,6 @@ class MainLoopImpl : public wxTimer
         void processTimers();
 
     private:
-        wxTimer _masterTimer;
         System::Mutex _mutex;
         System::TimerQueue _timerQueue;
         System::EventQueue _eventQueue;

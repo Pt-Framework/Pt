@@ -312,9 +312,9 @@ if --with-wxwidgets in $(ARGV)
         Exit "ERROR:" $(WXCONFIG) "does not work" ;
     }
     
-    WX_LINKFLAGS = $(WXCONFIG_RESULT[2-]) ;
-    EchoOption WX_LINKFLAGS : "wx Widgets link flags" ;
-    Configure WX_LINKFLAGS ;
+    WX_LINKLIBS = $(WXCONFIG_RESULT[2-]) ;
+    EchoOption WX_LINKLIBS : "wx Widgets link flags" ;
+    Configure WX_LINKLIBS ;
 }
 
 #############################################################################

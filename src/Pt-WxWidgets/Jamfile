@@ -12,7 +12,7 @@ SharedLibrary Pt-WxWidgets : $(PT_WXWIDGETS_SOURCES)
                              MainLoop.cpp ;
 
 LinkSharedLibraries Pt-WxWidgets : Pt Pt-System  ;
-LinkFlags Pt-WxWidgets : $(WX_LINKFLAGS) ;
+LinkLibs Pt-WxWidgets : $(WX_LINKLIBS) ;
 MakeLocate Pt-WxWidgets : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-WxWidgets : $(PT_INSTALL_LIBDIR) ;
 

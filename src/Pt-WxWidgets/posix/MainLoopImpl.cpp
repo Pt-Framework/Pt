@@ -174,7 +174,7 @@ void MainLoopImpl::processTimers()
         int interval = nextTimer > maxInt ? maxInt 
                                           : static_cast<int>(nextTimer);
         
-        _masterTimer.StartOnce(interval);
+        wxTimer::StartOnce(interval);
     }
 }
 

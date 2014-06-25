@@ -84,14 +84,13 @@ class DemoApp : public wxApp
             delete _loop;
         }
 
-        virtual bool OnInit()
+        virtual void OnLaunched()
         {
-            if( ! wxApp::OnInit() )
-                return false;
+            wxApp::OnLaunched();
     
             wxEventLoopBase* wxLoop = this->GetMainLoop();
             if( ! wxLoop)
-                return false;
+                throw std::logic_error("GetMainLoop");
 
             _loop = new Pt::WxWidgets::MainLoop(*wxLoop);
 
