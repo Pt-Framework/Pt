@@ -239,7 +239,7 @@ class Selector : public System::Selector
         System::Selectable* _current;
 };
 
-class MainLoopImpl , public wxEventLoopSourceHandler
+class MainLoopImpl : public wxEventLoopSourceHandler
 {
     public:
         MainLoopImpl(wxEventLoopBase& wxLoop);
