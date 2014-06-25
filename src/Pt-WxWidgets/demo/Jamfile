@@ -1,0 +1,9 @@
+SubDir PT_TOP src Pt-WxWidgets demo ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-WxWidgets ;
+SubDirC++Flags $(WX_C++FLAGS) ;
+
+Main wxdemo : wxdemo.cpp ;
+LinkSharedLibraries wxdemo : Pt Pt-System Pt-Net Pt-WxWidgets ;
+LinkFlags wxdemo : $(WX_LINKFLAGS) ;
+MakeLocate wxdemo : $(PT_OUTPUT_TARGET) ;
