@@ -239,7 +239,7 @@ class Selector : public System::Selector
         System::Selectable* _current;
 };
 
-class MainLoopImpl : public wxTimer
+class MainLoopImpl , public wxEventLoopSourceHandler
 {
     public:
         MainLoopImpl(wxEventLoopBase& wxLoop);
@@ -272,12 +272,26 @@ class MainLoopImpl : public wxTimer
         virtual void detachTimer(System::Timer& timer);
 
     protected:
-        virtual void Notify();
+        void OnReadWaiting()
+        { onWake(); }
+
+        void OnWriteWaiting()
+        {}
+
+        void OnExceptionWaiting()
+        {}
+
+        void onMasterTimer(wxTimerEvent& )
+        { processTimers(); }
+
+        void onWake();
 
         void processTimers();
 
     private:
         System::Mutex _mutex;
+        wxTimer _masterTimer;
+        wxEventLoopSource* _wakeSource;
         System::TimerQueue _timerQueue;
         System::EventQueue _eventQueue;
         std::vector<System::Selectable*> _avail;

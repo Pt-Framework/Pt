@@ -35,15 +35,21 @@ namespace Pt {
 namespace WxWidgets {
 
 MainLoopImpl::MainLoopImpl(wxEventLoopBase& wxLoop)
-: _selector(wxLoop)
+: _wakeSource(0)
+, _selector(wxLoop)
 {
-    // TODO:
-    // monitor _selector.wakeFd() -> onWakeNotify
+    _wakeSource = _wxLoop.AddSourceForFD(_selector.wakeFd(), this, wxEVENT_SOURCE_INPUT);
+
+    _masterTimer.SetOwner(this);
+
+    this->Connect( _masterTimer.GetId(), wxEVT_TIMER, 
+                   wxTimerEventHandler(MainLoopImpl::onMasterTimer), NULL, this );
 }
 
 
 MainLoopImpl::~MainLoopImpl()
 {
+    delete _wakeSource;
 }
 
 
@@ -131,35 +137,30 @@ void MainLoopImpl::detachTimer(System::Timer& timer )
 }
 
 
-//void MainLoopImpl::onWakeNotify(int fd)
-//{
-//    bool isReady = _selector.isWoken();
-//
-//    if( ! isReady )
-//        return;
-//
-//    while( true )
-//    {
-//        Pt::System::MutexLock lock(_mutex);
-//
-//        if( _avail.empty() )
-//            break;
-//
-//        System::Selectable* s = _avail.back();
-//        _avail.pop_back();
-//        lock.unlock();
-//
-//        s->run();
-//    }
-//
-//    bool isActive = _eventQueue.processEvents( this->eventReceived() );
-//    if( ! isActive )
-//        QApplication::quit();
-//}
-
-void MainLoopImpl::Notify()
+void MainLoopImpl::onWake()
 {
-    processTimers();
+    bool isReady = _selector.isWoken();
+
+    if( ! isReady )
+        return;
+
+    while( true )
+    {
+        Pt::System::MutexLock lock(_mutex);
+
+        if( _avail.empty() )
+            break;
+
+        System::Selectable* s = _avail.back();
+        _avail.pop_back();
+        lock.unlock();
+
+        s->run();
+    }
+
+    bool isActive = _eventQueue.processEvents( this->eventReceived() );
+    if( ! isActive )
+        QApplication::quit();
 }
 
 
@@ -174,7 +175,7 @@ void MainLoopImpl::processTimers()
         int interval = nextTimer > maxInt ? maxInt 
                                           : static_cast<int>(nextTimer);
         
-        wxTimer::StartOnce(interval);
+        _masterTimer.StartOnce(interval);
     }
 }
 
