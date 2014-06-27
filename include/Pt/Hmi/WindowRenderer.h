@@ -25,11 +25,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Hmi_Renderer_Window_H
-#define Pt_Hmi_Renderer_Window_H
+#ifndef Pt_Hmi_WindowRenderer_H
+#define Pt_Hmi_WindowRenderer_H
 
 #include <Pt/Hmi/Renderer.h>
-#include <Pt/Hmi/Model.h>
+#include <Pt/Hmi/GfxModel.h>
 
 namespace Pt{
 namespace Hmi{
@@ -40,7 +40,7 @@ public:
 	WindowRenderer();
 	virtual ~WindowRenderer();
 	
-	virtual void render(Pt::Hmi::Model* model);
+	virtual void render(Pt::Hmi::GfxModel* model);
 
 private:	
 

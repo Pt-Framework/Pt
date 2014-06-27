@@ -174,6 +174,7 @@ private:
 	{
 		onModelChanged(false,prop);
 	}
+
 private:
 	std::vector<InputDevice*>	_inputDevices;
 	std::vector<OutputDevice*>	_outputDevices;

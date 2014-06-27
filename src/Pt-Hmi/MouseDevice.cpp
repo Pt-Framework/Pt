@@ -31,7 +31,6 @@ namespace Hmi{
 
 MouseDevice::MouseDevice()
 {
-
 	Application::instance().pointerEvent() += Pt::slot(*this, &MouseDevice::handleMouseEvent);
 }
 

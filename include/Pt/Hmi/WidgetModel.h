@@ -11,17 +11,17 @@ namespace Pt{
 namespace Hmi{
 
     
-    namespace BorderStyleType
+namespace BorderStyleType
+{
+    enum Type
     {
-        enum Type
-        {
-            NoBorder,
-            Single,
-            Border3D,
-            Sizeable,
-            Widget,
-        };
-    }
+        NoBorder,
+        Single,
+        Border3D,
+        Sizeable,
+        Widget,
+    };
+}
     
 class PT_HMI_API WidgetModel : public GfxModel
 {
@@ -31,6 +31,10 @@ public:
 
 public:
 	Property<std::string> Caption;		
+	Property<bool>		  UseMnemonic;	
+
+public:
+	std::string getMnemonicKey() const;
 };
 
 }}

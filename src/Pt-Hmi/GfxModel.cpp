@@ -51,13 +51,12 @@ GfxModel::GfxModel()
 	registerProperty(TextAlign);
 	registerProperty(Focused);
 	registerProperty(AcceptFocus);
-	registerProperty(HighLight);
+	registerProperty(HighLight);	
 	registerProperty(FocusedActionKey);
 	registerProperty(PainterSurfaceType);
 
 	Focused.PropertyChanged += Pt::slot(*this, &GfxModel::onFocusChanged);
 	PainterSurfaceType.PropertyChanged += Pt::slot(*this, &GfxModel::onPainterTypeChanged);
-
 }
 
 GfxModel::~GfxModel()

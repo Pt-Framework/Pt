@@ -19,29 +19,24 @@ PanelRenderer::~PanelRenderer()
 {
 }
 
-void PanelRenderer::render(Pt::Hmi::Model* m)
+void PanelRenderer::render(Pt::Hmi::GfxModel* m)
 {	
 	WidgetRenderer::render(m);
 
 	PanelModel* model = dynamic_cast<PanelModel*>(m);
 
 	if(model == 0)
-		throw std::logic_error("PanelRenderer: PanleModel expected");
+		throw std::logic_error("PanelRenderer::render() => PanelModel expected");
 
 	if(!model->Visible.get())
 		return;
 
-	WidgetController* ctrl = dynamic_cast<WidgetController*>(model->controller());
-		
-	if( ctrl == 0)
-		return;
-	
 	int corner = 0;
 
 	if(model->BorderRoundEdge.get())
 		corner = 2;
     
-	double border =  model->BorderWidth.get();	
+	size_t border =  (size_t) model->BorderWidth.get();	
 	Pt::Gfx::SizeF  clientSize(model->Size.get().width() - model->BorderWidth.get()/2, model->Size.get().height() - model->BorderWidth.get()/2);	
 	Pt::Gfx::RectF  clientRect(Pt::Gfx::PointF( model->BorderWidth.get()/2, model->BorderWidth.get()/2), clientSize);
 	
@@ -163,6 +158,7 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
             
 		}
 		break;
+
 		case BorderStyleType::Border3D:
 		{
 			std::vector<Pt::Gfx::PointF> points1(3);
@@ -196,10 +192,10 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 			Pt::Gfx::Pen pen2(border, Pt::Gfx::ARgbColor(0,0,0,0));
 			localPainter.setPen(pen2);
 
-			localPainter.drawPolyline(&points2[0], points2.size());
-			
+			localPainter.drawPolyline(&points2[0], points2.size());			
 		}
 		break;
+
 		case BorderStyleType::Sizeable:
 		{
 			Pt::Gfx::Pen pen1(border, model->ForeColor.get());
@@ -211,11 +207,10 @@ void PanelRenderer::render(Pt::Hmi::Model* m)
 			localPainter.drawRect(clientRect);
 		}
 		break;
-		default:
-		break;
-			
-	}	
 
+		default:
+		break;			
+	}	
 }
 
 }}

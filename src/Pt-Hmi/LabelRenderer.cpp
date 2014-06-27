@@ -19,17 +19,16 @@ LabelRenderer::~LabelRenderer()
 {
 }
 
-void LabelRenderer::render(Pt::Hmi::Model* m)
+void LabelRenderer::render(Pt::Hmi::GfxModel* m)
 {
 	LabelModel* model = dynamic_cast<LabelModel*>(m);	
 	
 	if(model == 0)
-		return;	
+		throw std::logic_error("LabelRenderer: LabelModel expected");
 	
 	if(!model->Visible.get())
 		return;	
 
-	GfxController* controller = dynamic_cast<GfxController*>(m->controller());	
 	Pt::Hmi::Painter& localPainter = model->paintSurface()->painter();	
 			
 	if(model->AutoSize.get())

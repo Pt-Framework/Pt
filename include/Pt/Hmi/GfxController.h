@@ -38,7 +38,7 @@ class GfxModel;
 class Renderer;
 class PaintSurface;
 
-class PT_HMI_API GfxController  : public Controller
+class PT_HMI_API GfxController : public Controller
 {
 public:
 	GfxController(GfxModel& model, Renderer& renderer);
@@ -57,14 +57,35 @@ public:
 	Pt::Signal<GfxController&, PaintSurface&> Render;
 	Pt::Signal<GfxController&> Output;
 
+	inline const GfxController* GfxController::parent() const
+	{
+		return dynamic_cast<const GfxController*>(Controller::widgetParent());
+	}
+
+	inline GfxController* GfxController::parent()
+	{
+		return dynamic_cast<GfxController*>(Controller::widgetParent());
+	}
+
 protected:
 	bool onMoveFocusNext();
 	bool onMoveFocusPrev();	
-	
+		
+
 private:
 	bool focusNextChild(int index);
 	bool focusPrevChild(int index);
 	int getFocusedChild() const;
+
+	inline GfxController* childAt(size_t index)
+	{
+		return dynamic_cast<GfxController*> (children()[index]);
+	}
+
+	inline const GfxController* childAt(size_t index) const
+	{
+		return dynamic_cast<const GfxController*> (children()[index]);
+	}
 
 private:
 	Renderer& _renderer;

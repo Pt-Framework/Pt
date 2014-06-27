@@ -17,41 +17,36 @@ WidgetRenderer::~WidgetRenderer()
 }
 
 
-void WidgetRenderer::render(Pt::Hmi::Model* model)
+void WidgetRenderer::render(Pt::Hmi::GfxModel* model)
 {
-	WidgetModel* wmodel = dynamic_cast<WidgetModel*>(model);
-	
-	if( wmodel == 0)
-		throw std::logic_error("WidgetRenderer: WidgetModel expected");
-
-	if(!wmodel->Visible.get())
+	if(!model->Visible.get())
 		return;
 
-	if( wmodel->Size.get().width() < 0 ||  wmodel->Size.get().height() < 0)
+	if( model->Size.get().width() < 0 ||  model->Size.get().height() < 0)
 		return;
 
-	Pt::Gfx::SizeF size = wmodel->Size.get();
-	Pt::Gfx::SizeF bufferSize = wmodel->paintSurface()->size();
+	Pt::Gfx::SizeF size = model->Size.get();
+	Pt::Gfx::SizeF bufferSize = model->paintSurface()->size();
 
 	if(bufferSize.width() != size.width() ||bufferSize.height() != size.height())
-		wmodel->paintSurface()->resize(size);
+		model->paintSurface()->resize(size);
 
-	Pt::Gfx::ARgbImage& backImage = wmodel->BackgroundImage.get();
-	Pt::Hmi::Painter&	localPainter = wmodel->paintSurface()->painter();
+	Pt::Gfx::ARgbImage& backImage = model->BackgroundImage.get();
+	Pt::Hmi::Painter&	localPainter = model->paintSurface()->painter();
 	Pt::Gfx::RectF		rect(Pt::Gfx::PointF(0,0),size);
 	
-	localPainter.setFont(wmodel->Font.get());
+	localPainter.setFont(model->Font.get());
 
-	if(wmodel->HighLight.get())
+	if(model->HighLight.get())
 	{       
-		Pt::Gfx::Brush	brush(wmodel->BackColorHightLight.get());
+		Pt::Gfx::Brush	brush(model->BackColorHightLight.get());
         
 		localPainter.setBrush(brush);
 		localPainter.fillRect(rect);
 	}
 	else
 	{
-		Pt::Gfx::Brush	brush(wmodel->BackColor.get());
+		Pt::Gfx::Brush	brush(model->BackColor.get());
 	
 		localPainter.setBrush(brush);
     
@@ -60,9 +55,8 @@ void WidgetRenderer::render(Pt::Hmi::Model* model)
 
 	if( backImage.width() != 0 && backImage.height() != 0)
 	{
-		switch(wmodel->BackgroundImageLayout.get())
-		{
-				
+		switch(model->BackgroundImageLayout.get())
+		{				
 			case ImageLayoutType::NoLayout:
 			{
 				localPainter.drawImage(Pt::Gfx::PointF(0,0), backImage);
@@ -71,12 +65,10 @@ void WidgetRenderer::render(Pt::Hmi::Model* model)
 			
 			case ImageLayoutType::Tile:
 			{
-				for( size_t x = 0; x < wmodel->paintSurface()->size().width();  x += backImage.width())
+				for( size_t x = 0; x < model->paintSurface()->size().width();  x += backImage.width())
 				{
-					for( size_t y = 0; y < wmodel->paintSurface()->size().height();  y += backImage.height())
-					{
-							localPainter.drawImage(Pt::Gfx::PointF(x,y), backImage);
-					}
+					for( size_t y = 0; y < model->paintSurface()->size().height();  y += backImage.height())
+						localPainter.drawImage(Pt::Gfx::PointF(x,y), backImage);
 				}
 			}
 			break;
@@ -91,17 +83,17 @@ void WidgetRenderer::render(Pt::Hmi::Model* model)
 			
 			case ImageLayoutType::Strech:
 			{
-				Pt::Gfx::ARgbImage strech(wmodel->paintSurface()->size().width(),wmodel->paintSurface()->size().height() );
+				Pt::Gfx::ARgbImage strech(model->paintSurface()->size().width(),model->paintSurface()->size().height() );
 
-				Pt::Gfx::blockScale(backImage.begin(), backImage.width(), backImage.height(), strech.begin(),  wmodel->paintSurface()->size().width(),  wmodel->paintSurface()->size().height());
+				Pt::Gfx::blockScale(backImage.begin(), backImage.width(), backImage.height(), strech.begin(),  model->paintSurface()->size().width(),  model->paintSurface()->size().height());
 				localPainter.drawImage(Pt::Gfx::PointF(0,0), strech);
 			}
 			break;
 
 			case ImageLayoutType::Zoom:
 			{
-				Pt::Gfx::ARgbImage strech(wmodel->paintSurface()->size().width(),wmodel->paintSurface()->size().height() );
-				double factor = wmodel->paintSurface()->size().width()/(double)backImage.width();
+				Pt::Gfx::ARgbImage strech(model->paintSurface()->size().width(),model->paintSurface()->size().height() );
+				double factor = model->paintSurface()->size().width()/(double)backImage.width();
 
 				Pt::Gfx::blockScale(backImage.begin(), backImage.width(), backImage.height(),strech.begin(),  strech.width(), (Pt::size_t)(backImage.height()*factor));
 				localPainter.drawImage(Pt::Gfx::PointF(0,0), strech);

@@ -29,7 +29,7 @@
 #define Pt_Hmi_Renderer_Base_H
 
 #include <Pt/Gfx/Painter.h>
-#include <Pt/Hmi/Model.h>
+#include <Pt/Hmi/GfxModel.h>
 #include <Pt/Hmi/Api.h>
 
 namespace Pt{
@@ -41,7 +41,7 @@ public:
 	virtual ~Renderer()
 	{ }
 
-	virtual void render(Pt::Hmi::Model* model) = 0;
+	virtual void render(Pt::Hmi::GfxModel* model) = 0;
 
 protected:
 	Renderer()

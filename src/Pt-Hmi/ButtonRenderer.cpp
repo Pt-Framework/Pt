@@ -17,9 +17,12 @@ ButtonRenderer::~ButtonRenderer()
 {
 }
 
-void ButtonRenderer::render(Pt::Hmi::Model* m)
+void ButtonRenderer::render(Pt::Hmi::GfxModel* m)
 {	
 	ButtonModel* model = dynamic_cast<ButtonModel*>(m);
+
+	if(model == 0)
+		throw std::logic_error("ButtonRenderer: expect ButtonModel");
 
 	if(!model->Visible.get())
 		return;	
@@ -37,11 +40,6 @@ void ButtonRenderer::render(Pt::Hmi::Model* m)
 	LabelRenderer::render(m);
 	
 	if(model->ButtonState.get() == DeviceButton::Pressed)
-		return;
-
-	GfxController* ctrl = dynamic_cast<GfxController*>(model->controller());
-	
-	if( ctrl== 0)
 		return;
 
 	Pt::Hmi::Painter& localPainter = model->paintSurface()->painter();

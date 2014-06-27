@@ -51,19 +51,18 @@ GfxController::~GfxController()
 
 Pt::Gfx::PointF GfxController::toClient(const Pt::Gfx::PointF& globalPoint)
 {
-	GfxController* par = dynamic_cast<GfxController*>(Controller::widgetParent());	
 	GfxModel& m = gfxModel();	
 
-	if( par == 0)
+	if( parent() == 0)
 		return Pt::Gfx::PointF(globalPoint.x(), globalPoint.y());
 
-	Pt::Gfx::PointF parPoint = par->toClient(globalPoint);
+	Pt::Gfx::PointF parPoint = parent()->toClient(globalPoint);
 	return Pt::Gfx::PointF(parPoint.x() - m.Position.get().x(), parPoint.y() - m.Position.get().y());
 }
 
 Pt::Gfx::PointF GfxController::fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot)
 {
-	const GfxController* par = dynamic_cast<const GfxController*>(Controller::widgetParent());	
+	const GfxController* par = parent();	
 
 	double x = localPoint.x();
 	double y = localPoint.y();
@@ -71,7 +70,7 @@ Pt::Gfx::PointF GfxController::fromClient(const Pt::Gfx::PointF& localPoint, boo
 	while(par != 0)
 	{
 		const GfxModel& m = gfxModel();
-		par = dynamic_cast<const GfxController*>(par->widgetParent());
+		par = parent()->parent();
 		
 		if(!(toRoot && par == 0))
 		{
@@ -90,7 +89,7 @@ const GfxModel& GfxController::gfxModel() const
 
 void GfxController::invalidate()
 {
-	GfxController* par = dynamic_cast<GfxController*>(widgetParent());
+	GfxController* par = parent();
 	
 	if( par != 0)
 		par->invalidate();
@@ -107,9 +106,8 @@ void GfxController::render()
 	if(!gfxModel().Visible.get())
 		return;	
 		
-
 	//Draw me
-	_renderer.render(&model());
+	_renderer.render(&gfxModel());
 
 	//Let the user to render 
 	Render.send(*this, *gfxModel().paintSurface());
@@ -117,7 +115,7 @@ void GfxController::render()
 	//Render my childs
 	for( size_t i = 0; i < children().size(); ++i)
 	{
-		GfxController* child = dynamic_cast<GfxController*> (children()[i]);
+		GfxController* child = childAt(i);
 		child->render();
 	}
 }
@@ -131,7 +129,7 @@ void GfxController::output()
 
 	for( size_t i = 0; i < children().size(); ++i)
 	{
-		GfxController* child = dynamic_cast<GfxController*> (children()[i]);				
+		GfxController* child = childAt(i);			
 		child->output();
 
 		GfxModel& childModel = child->gfxModel();
@@ -150,8 +148,8 @@ bool GfxController::onMoveFocusPrev()
 
 	if( index != -1)
 	{
-		GfxController* child = dynamic_cast<GfxController*> (children()[index]);
-		GfxModel& model =child->gfxModel();	
+		GfxController* child = childAt(index);
+		GfxModel& model = child->gfxModel();	
 		
 		if(!model.AcceptFocus.get())
 		{
@@ -172,7 +170,7 @@ bool GfxController::focusPrevChild(int index)
 	
 	for( ; index >= 0; --index)
 	{
-		GfxController* child = dynamic_cast<GfxController*> (children()[index]);
+		GfxController* child = childAt(index);
 		GfxModel& model = child->gfxModel();		
 
 		if(model.AcceptFocus.get())
@@ -199,7 +197,7 @@ bool GfxController::focusNextChild(int index)
 	
 	for( ; index < (int)children().size(); ++index)
 	{
-		GfxController* child = dynamic_cast<GfxController*> (children()[index]);
+		GfxController* child = childAt(index);
 		GfxModel& model = child->gfxModel();
 		
 		if(model.AcceptFocus.get())
@@ -225,7 +223,7 @@ int GfxController::getFocusedChild() const
 	
 	for( ; i < (int)children().size(); ++i)
 	{
-		const GfxController* child = (GfxController*)children()[i];
+		const GfxController* child = childAt(i);
 		const GfxModel& model = child->gfxModel();
 
 		if(model.Focused.get())
@@ -245,7 +243,7 @@ bool GfxController::onMoveFocusNext()
 	if( index == -1)
 		return focusNextChild(index);
 	
-	GfxController* child = (GfxController*)children()[index];
+	GfxController* child = childAt(index);
 	GfxModel& model = child->gfxModel();	
 		
 	if(!model.AcceptFocus.get())

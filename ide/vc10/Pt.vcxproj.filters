@@ -97,9 +97,6 @@
     <Filter Include="Pt-Hmi\Sources\x11">
       <UniqueIdentifier>{54475eb3-ab9c-4ce4-a5c2-c96fc66beace}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\Sources\x11\winrt">
-      <UniqueIdentifier>{0190cd64-c6e5-4b5d-ab0e-7d4e1a17e9c7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Qt">
       <UniqueIdentifier>{c31af57f-7ea5-4c68-a740-78a87a46b63d}</UniqueIdentifier>
     </Filter>
@@ -129,6 +126,9 @@
     </Filter>
     <Filter Include="Pt-Hmi\Sources\Demo\Scribble">
       <UniqueIdentifier>{c8eedc7c-276c-4430-bf43-98f83e9fe051}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\Sources\winrt">
+      <UniqueIdentifier>{0190cd64-c6e5-4b5d-ab0e-7d4e1a17e9c7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1294,13 +1294,13 @@
       <Filter>Pt-Net\win32</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.h">
-      <Filter>Pt-Hmi\Sources\x11\winrt</Filter>
+      <Filter>Pt-Hmi\Sources\winrt</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\CursorImpl.h">
-      <Filter>Pt-Hmi\Sources\x11\winrt</Filter>
+      <Filter>Pt-Hmi\Sources\winrt</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.h">
-      <Filter>Pt-Hmi\Sources\x11\winrt</Filter>
+      <Filter>Pt-Hmi\Sources\winrt</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Pack.h">
       <Filter>Pt</Filter>
@@ -2605,13 +2605,13 @@
       <Filter>Pt-Net\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.cpp">
-      <Filter>Pt-Hmi\Sources\x11\winrt</Filter>
+      <Filter>Pt-Hmi\Sources\winrt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\CursorImpl.cpp">
-      <Filter>Pt-Hmi\Sources\x11\winrt</Filter>
+      <Filter>Pt-Hmi\Sources\winrt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.cpp">
-      <Filter>Pt-Hmi\Sources\x11\winrt</Filter>
+      <Filter>Pt-Hmi\Sources\winrt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\nossl\CertificateStoreImpl.cpp">
       <Filter>Pt-Ssl\nossl</Filter>

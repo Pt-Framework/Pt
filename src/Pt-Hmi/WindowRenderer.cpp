@@ -41,13 +41,8 @@ WindowRenderer::~WindowRenderer()
 {
 }
 
-void WindowRenderer::render(Pt::Hmi::Model* m)
+void WindowRenderer::render(Pt::Hmi::GfxModel* model)
 {
-	GfxModel* model = dynamic_cast<GfxModel*>(m);
-
-	if( model == 0)
-		throw std::logic_error("ERROR: WindowController expect a GFxModel");
-
 	Pt::Gfx::SizeF size = model->Size.get();
 
 	Pt::Gfx::RectF rect(Pt::Gfx::PointF(0,0), size);

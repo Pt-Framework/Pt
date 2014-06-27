@@ -47,12 +47,12 @@ ButtonController::ButtonController(ButtonModel& model, ButtonRenderer& renderer)
 	_doublePressTimer.timeout() += Pt::slot(*this, &ButtonController::onDoublePressedTimeout);
 	_doublePressTimer.setActive(Pt::Hmi::Application::instance().loop());
 	buttonModel().ButtonState.PropertyChanged += Pt::slot(*this,&ButtonController::onButtonStateChanged);
+	bindMnemonicToWidget(this);
 }
 
 ButtonController::~ButtonController()
 {
 }
-
 
 void ButtonController::onDoublePressedTimeout()
 {
@@ -79,6 +79,42 @@ void ButtonController::onPressedAction()
 		_pressCounter = 0;
 		onDoublePressedAction();
 	}
+}
+
+void ButtonController::onMnemonic()
+{
+	if(!buttonModel().Enable.get())
+	{
+		LabelController::onMnemonic();
+		return;
+	}
+
+	if(!buttonModel().Visible.get())
+	{
+		LabelController::onMnemonic();
+		return;
+	}
+
+	switch(buttonModel().ButtonType.get())
+	{
+		case ButtonType::Press:
+		{
+			onPressedAction();
+		}
+		break;
+
+		case ButtonType::Toggle:
+		{
+			if(buttonModel().ButtonState.get() == DeviceButton::Pressed)
+				buttonModel().ButtonState = DeviceButton::Released;
+			else
+				buttonModel().ButtonState = DeviceButton::Pressed;
+		}			
+		break;
+	}
+	
+	LabelController::onMnemonic();		
+	invalidate();	
 }
 
 void ButtonController::onDoublePressedAction()

@@ -17,7 +17,10 @@ public:
 	LabelModel();
 	virtual ~LabelModel();
 
-	Property<bool> AutoSize;		
+	Property<bool> AutoSize;	
+
+public:
+	
 };
 
 }}

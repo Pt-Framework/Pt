@@ -25,7 +25,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 #include <Pt/Hmi/WidgetController.h>
 #include <Pt/Hmi/PointingDevice.h>
 #include <Pt/Hmi/KeyboardDevice.h>
@@ -46,19 +45,23 @@ Controller::~Controller()
 { 
 }
 
-
 void Controller::addInputDevice(InputDevice* device)
 {
+   //Pointer category
 	PointingDevice* pointerDev = dynamic_cast<PointingDevice*>(device);
-	
+		
 	if( pointerDev != 0)
 		pointerDev->Event += Pt::slot(*this, &Controller::devicePointerInput);
 
+	//Keyboard category
 	KeyboardDevice* keyboardDevice  = dynamic_cast<KeyboardDevice*>(device);
 
 	if(keyboardDevice != 0)
 		keyboardDevice->Event += Pt::slot(*this, &Controller::deviceKeyInput);
 		
+	//Other ToDo:
+
+	//Register device
 	_inputDevices.push_back(device);
 }
 
@@ -66,11 +69,11 @@ void Controller::removeInputDevice(InputDevice* device)
 {
 	for(size_t i = 0; i < _inputDevices.size(); ++i)
 	{
-		if(_inputDevices[i] == device)
-		{
-			_inputDevices.erase(_inputDevices.begin() + i);
-			return;
-		}
+		if(_inputDevices[i] != device)
+			continue;
+		
+		_inputDevices.erase(_inputDevices.begin() + i);
+		return;
 	}
 }
 
@@ -83,11 +86,11 @@ void Controller::removeOutputDevice(OutputDevice* device)
 {
 	for(size_t i = 0; i < _outputDevices.size(); ++i)
 	{
-		if(_outputDevices[i] == device)
-		{
-			_outputDevices.erase(_outputDevices.begin() + i);
-			return;
-		}
+		if(_outputDevices[i] != device)
+			continue;
+		
+		_outputDevices.erase(_outputDevices.begin() + i);
+		return;
 	}
 }
 
@@ -101,12 +104,12 @@ void Controller::removeChild(Controller* base)
 {
 	for(size_t i = 0; i < _children.size(); ++i)
 	{
-		if(_children[i] == base)
-		{
-			_children.erase(_children.begin() + i);
-			base->setWidgetParent(0);
-			return;
-		}
+		if(_children[i] != base)
+			continue;
+		
+		_children.erase(_children.begin() + i);
+		base->setWidgetParent(0);
+		return;
 	}			
 }	
 

@@ -65,7 +65,7 @@ protected:
 	virtual void onDoublePressedAction();
 	virtual void onCheckedAction(bool checked);
 	virtual void onModelChanged(bool created, const PropertyBase* prop);
-
+	virtual void onMnemonic();
 private:
 	virtual void onPointerInput(const PointingEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);

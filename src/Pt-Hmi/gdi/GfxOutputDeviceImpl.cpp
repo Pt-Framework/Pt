@@ -68,8 +68,6 @@ void GfxOutputDeviceImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 	if(!_model->Enable.get())
 		return;
 
-	if((lparam & 0xFFF) != 1)
-		return;//Repeat count
 
 	BYTE keyboardState[256];
 
@@ -77,29 +75,41 @@ void GfxOutputDeviceImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 
 	if(msg == WM_KEYDOWN)
 		_keyEvent.setState(KeyEvent::KeyDown);
-	else
+	else if(msg == WM_KEYUP)
 		_keyEvent.setState(KeyEvent::KeyUp);			
-			
-	_keyEvent.setAlt( (lparam & 0x20000000) != 0); 
 	
-	keyboardState[VK_CONTROL] = 0;
-	keyboardState[VK_LCONTROL] = 0;
-	keyboardState[VK_RCONTROL] = 0;
-
-	if(wparam == 16 )
-	{//Shift key
-		_keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);
+	if(msg == WM_SYSCOMMAND)
+	{
+		_keyEvent.setState(KeyEvent::KeyUp);
+		_keyEvent.setAlt(wparam == SC_KEYMENU);
+		_keyEvent.setShift(false);
+		_keyEvent.setCtrl(false);
+		_keyEvent.setUnicode(lparam);
 	}
-	else if(wparam == 17 )
-	{//Controll key
-		_keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
-	}
+	else
+	{
+		if((lparam & 0xFFF) != 1)
+			return;//Repeat count
 
-	Pt::uint32_t scanCode = ((lparam >> 16) & 0xFF);			
-	Pt::uint32_t ucode = 0;			
+		keyboardState[VK_CONTROL] = 0;
+		keyboardState[VK_LCONTROL] = 0;
+		keyboardState[VK_RCONTROL] = 0;
+
+		if(wparam == 16 )
+		{//Shift key
+			_keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);
+		}
+		else if(wparam == 17 )
+		{//Controll key
+			_keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
+		}
+
+		Pt::uint32_t scanCode = ((lparam >> 16) & 0xFF);			
+		Pt::uint32_t ucode = 0;			
 		
-	ToUnicode( wparam, scanCode , (BYTE*)keyboardState, (LPWSTR)&ucode, 4, 0);	
-	_keyEvent.setUnicode(ucode);
+		ToUnicode( wparam, scanCode , (BYTE*)keyboardState, (LPWSTR)&ucode, 4, 0);	
+		_keyEvent.setUnicode(ucode);
+	}
 
 	Controller* ctrl = _model->controller();
 	Application::instance().keyDeviceEvent().send(ctrl, _keyEvent);
@@ -131,8 +141,12 @@ void GfxOutputDeviceImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned
 		}
 		break;
 
+		case WM_SYSCOMMAND:
+			onKey(message, wparam, lparam);
+		break;
+
 		case WM_KEYDOWN:
-		case WM_KEYUP:
+		case WM_KEYUP:		
 		{
 			onKey(message, wparam, lparam);
 			handled = true;

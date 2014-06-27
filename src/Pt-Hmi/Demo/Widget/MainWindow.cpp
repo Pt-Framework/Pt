@@ -104,9 +104,10 @@ void MainWindow::init()
 	//Text
 	_textLabel.setAutoSize(true);
 	_textLabel.setSize(Pt::Gfx::SizeF(500,30));
-	_textLabel.setCaption("This is a Platinum C++ Human Mashine Interface demo");
+	_textLabel.setCaption("&This is a Platinum C++ Human Mashine Interface demo");
 	_textLabel.setPosition(Pt::Gfx::PointF(20,20));
 	_textLabel.labelModel().ForeColor.set(Pt::Gfx::ARgbColor(255,0,0,0));
+	_textLabel.labelModel().UseMnemonic.set(true);	
 	//_textLabel.labelModel().PainterSurfaceType = Pt::Hmi::PainterType::Image;
 	_mainPanel.addChild(&_textLabel);
 	
@@ -116,15 +117,18 @@ void MainWindow::init()
 	_toggleButton.setActionKey("C//i");
 	_toggleButton.setPosition(Pt::Gfx::PointF(20,60));
 	_toggleButton.setSize(Pt::Gfx::SizeF(150,25));
+	_textLabel.labelController().bindMnemonicToWidget(&_toggleButton.buttonController());
 	_mainPanel.addChild(&_toggleButton);
 
 	//Dialog button
 	_dialogButton.setToggleButton(false);
-	_dialogButton.setCaption("Dialog [CTRL+D]");
+	_dialogButton.setCaption("&Dialog [CTRL+D]");
 	_dialogButton.setActionKey("C//d");
 	_dialogButton.setPosition(Pt::Gfx::PointF(20,100));
 	_dialogButton.setSize(Pt::Gfx::SizeF(150,25));
+	_dialogButton.buttonModel().UseMnemonic.set(false);
 	_dialogButton.ClickedAction  += Pt::slot(*this, &MainWindow::onShowDialog);
+	
 	_mainPanel.addChild(&_dialogButton);
 		
 	//Close button

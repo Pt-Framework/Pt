@@ -27,9 +27,15 @@ public:
 		return static_cast<WidgetModel&>( model());
 	}
 
+	void bindMnemonicToWidget(WidgetController* widget);
+
 public:
 	virtual void onPointerInput(const PointingEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);
+	virtual void onMnemonic();
+
+private:
+	WidgetController* _mnemonicWidget;
 };
 
 }}
