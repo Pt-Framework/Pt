@@ -87,7 +87,6 @@ class Type : private NonCopyable
 
 class SimpleType : public Type
 {
-    
     public:
         explicit SimpleType(TypeId typeId)
         : Type(typeId)
@@ -117,7 +116,6 @@ class SimpleType : public Type
 
 class ComplexType : public Type
 {
-    
     public:
         explicit ComplexType(TypeId typeId, const std::string& name)
         : Type(typeId)    
@@ -142,6 +140,7 @@ class ComplexType : public Type
         std::string _name;
 };
 
+
 class Parameter
 {
     public:
@@ -149,7 +148,7 @@ class Parameter
         : _type(0)
         {}
         
-        Parameter(const std::string& name, Type& t)
+        Parameter(const std::string& name, const Type& t)
         : _name(name)
         , _type(&t)
         { }
@@ -157,7 +156,7 @@ class Parameter
         virtual ~Parameter()
         {}
 
-        void set(const std::string& name, Type& t)
+        void set(const std::string& name, const Type& t)
         {
             _name = name;
             _type = &t;
@@ -171,7 +170,7 @@ class Parameter
 
     private:
         std::string _name;
-        Type* _type;
+        const Type* _type;
 };
 
 
@@ -179,6 +178,7 @@ class PT_SOAP_API BooleanType : public SimpleType
 {
     public:
         BooleanType();
+
         virtual ~BooleanType();
 
         virtual const char* name() const
@@ -213,7 +213,6 @@ class PT_SOAP_API FloatType : public SimpleType
         {
             return "double";
         }
-
 };
 
 
@@ -228,7 +227,6 @@ class PT_SOAP_API StringType : public SimpleType
         {
             return "string";
         }
-
 };
 
 
@@ -239,7 +237,7 @@ class PT_SOAP_API StructType : public ComplexType
 
         virtual ~StructType();
 
-        void addParameter(const std::string& name, Type& param);
+        void addParameter(const std::string& name, const Type& param);
 
         virtual const Parameter* getParameter(std::size_t n) const;
 
@@ -261,11 +259,11 @@ class PT_SOAP_API ArrayType : public ComplexType
     public:
         ArrayType(const std::string& name);
         
-        ArrayType(const std::string& name, Type& elem, const std::string& elemName);
+        ArrayType(const std::string& name, const Type& elem, const std::string& elemName);
 
         virtual ~ArrayType();
 
-        void setElement(const std::string& elemName, Type& elem);
+        void setElement(const std::string& elemName, const Type& elem);
 
         virtual const Parameter* getParameter(std::size_t n) const;
 
@@ -275,6 +273,7 @@ class PT_SOAP_API ArrayType : public ComplexType
         {
             return 1;
         }
+
     private:
         Parameter _elem;
 };
@@ -338,7 +337,16 @@ class PT_SOAP_API ServiceDeclaration
 
         const Operation* getOperation(const Pt::String& name) const;
         
-        void toWsdl( std::ostream& os) const;
+        void toWsdl(std::ostream& os) const;
+
+    public:
+        static const BooleanType& boolType();
+        
+        static const IntegerType& intType();
+        
+        static const FloatType& floatType();
+        
+        static const StringType& stringType();
 
     private:
         static void createComplexTypeList(std::map<std::string,const Type*>& complexTypes, const Type* type);

@@ -106,7 +106,7 @@ StructType::~StructType()
 }
 
 
-void StructType::addParameter(const std::string& name, Type& t)
+void StructType::addParameter(const std::string& name, const Type& t)
 {
     Parameter param(name, t);
     _paramList.push_back(param);
@@ -141,7 +141,7 @@ ArrayType::ArrayType(const std::string& name)
 }
 
 
-ArrayType::ArrayType(const std::string& name, Type& elem, const std::string& elemName)
+ArrayType::ArrayType(const std::string& name, const Type& elem, const std::string& elemName)
 : ComplexType(Type::Array, name)
 , _elem(elemName, elem)
 {
@@ -153,7 +153,7 @@ ArrayType::~ArrayType()
 }
 
 
-void ArrayType::setElement(const std::string& name, Type& elem)
+void ArrayType::setElement(const std::string& name, const Type& elem)
 {
     _elem.set(name, elem);
 }
@@ -427,6 +427,47 @@ void ServiceDeclaration::toWsdl( std::ostream& os) const
     
     os << "</wsdl:definitions>" << std::endl;
 }
+
+
+struct ServiceDeclarationStaticInit
+{
+    ServiceDeclarationStaticInit()
+    {
+        ServiceDeclaration::boolType();
+        ServiceDeclaration::intType();
+        ServiceDeclaration::floatType();
+        ServiceDeclaration::stringType();
+    }
+};
+
+
+const BooleanType& ServiceDeclaration::boolType()
+{
+    static const BooleanType type;
+    return type;
+}
+
+
+const IntegerType& ServiceDeclaration::intType()
+{
+    static const IntegerType type;
+    return type;
+}
+
+
+const FloatType& ServiceDeclaration::floatType()
+{
+    static const FloatType type;
+    return type;
+}
+
+
+const StringType& ServiceDeclaration::stringType()
+{
+    static const StringType type;
+    return type;
+}
+
 
 const Operation* ServiceDeclaration::getOperation(const Pt::String& name) const
 {

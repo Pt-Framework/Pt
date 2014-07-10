@@ -630,7 +630,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
                         : Pt::Soap::Operation("multiply", "multiplyResponse")
                         , _intArrayType("IntArrayType")
                         {
-                            _intArrayType.setElement("number", _intType);
+                            _intArrayType.setElement("number", intType());
 
                             addInput("a", _intArrayType);
                             addInput("b", _intArrayType);
@@ -639,7 +639,6 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
                         }
 
                     private:
-                        Pt::Soap::IntegerType _intType;
                         Pt::Soap::ArrayType _intArrayType;
                 };
 
