@@ -128,6 +128,13 @@ std::string FileInfo::baseName(const std::string& path)
     {
         sepPos = 0;
     }
+	else
+	{
+		sepPos++;
+	}
+	
+	if( sepPos >= path.size() )
+		return std::string();
 
     std::string::size_type extPos = path.rfind('.');
 
