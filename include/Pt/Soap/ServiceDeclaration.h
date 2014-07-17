@@ -279,6 +279,18 @@ class PT_SOAP_API ArrayType : public ComplexType
 };
 
 
+const BooleanType& boolType();
+
+
+const IntegerType& intType();
+
+
+const FloatType& floatType();
+
+
+const StringType& stringType();
+
+
 class PT_SOAP_API Operation : private NonCopyable
 {
     public:
@@ -294,13 +306,13 @@ class PT_SOAP_API Operation : private NonCopyable
         const Pt::String& outputName() const
         { return _outputName; }
 
-        void addInput(const std::string& name, Type& param);
+        void addInput(const std::string& name, const Type& param);
 
         const Parameter* getInput(const std::string& name) const;
 
         const Parameter* getInput(std::size_t n) const;
 
-        void setOutput(const std::string& name, Type& param);
+        void setOutput(const std::string& name, const Type& param);
 
         const Parameter* getOutput() const;
 
@@ -340,12 +352,16 @@ class PT_SOAP_API ServiceDeclaration
         void toWsdl(std::ostream& os) const;
 
     public:
+        // deprecated
         static const BooleanType& boolType();
         
+        // deprecated
         static const IntegerType& intType();
         
+        // deprecated
         static const FloatType& floatType();
         
+        // deprecated
         static const StringType& stringType();
 
     private:

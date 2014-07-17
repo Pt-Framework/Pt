@@ -32,6 +32,46 @@ namespace Pt {
 
 namespace Soap {
 
+struct ServiceDeclarationStaticInit
+{
+    ServiceDeclarationStaticInit()
+    {
+        boolType();
+        intType();
+        floatType();
+        stringType();
+    }
+};
+
+
+const BooleanType& boolType()
+{
+    static const BooleanType type;
+    return type;
+}
+
+
+const IntegerType& intType()
+{
+    static const IntegerType type;
+    return type;
+}
+
+
+const FloatType& floatType()
+{
+    static const FloatType type;
+    return type;
+}
+
+
+const StringType& stringType()
+{
+    static const StringType type;
+    return type;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // BooleanType
 ///////////////////////////////////////////////////////////////////////////////
@@ -187,7 +227,7 @@ Operation::~Operation()
 }
 
 
-void Operation::addInput(const std::string& name, Type& t)
+void Operation::addInput(const std::string& name, const Type& t)
 {
     Parameter param(name, t);
     _params.push_back(param);
@@ -213,7 +253,7 @@ const Parameter* Operation::getInput(std::size_t n) const
 }
 
 
-void Operation::setOutput(const std::string& name, Type& type)
+void Operation::setOutput(const std::string& name, const Type& type)
 {
     _out.set(name, type);
 }
@@ -429,43 +469,27 @@ void ServiceDeclaration::toWsdl( std::ostream& os) const
 }
 
 
-struct ServiceDeclarationStaticInit
-{
-    ServiceDeclarationStaticInit()
-    {
-        ServiceDeclaration::boolType();
-        ServiceDeclaration::intType();
-        ServiceDeclaration::floatType();
-        ServiceDeclaration::stringType();
-    }
-};
-
-
 const BooleanType& ServiceDeclaration::boolType()
 {
-    static const BooleanType type;
-    return type;
+    return Pt::Soap::boolType();
 }
 
 
 const IntegerType& ServiceDeclaration::intType()
 {
-    static const IntegerType type;
-    return type;
+    return Pt::Soap::intType();
 }
 
 
 const FloatType& ServiceDeclaration::floatType()
 {
-    static const FloatType type;
-    return type;
+    return Pt::Soap::floatType();
 }
 
 
 const StringType& ServiceDeclaration::stringType()
 {
-    static const StringType type;
-    return type;
+    return Pt::Soap::stringType();
 }
 
 
