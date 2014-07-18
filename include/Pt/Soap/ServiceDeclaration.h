@@ -56,7 +56,8 @@ class Type : private NonCopyable
             Bool = 3,
             Int = 4,
             Float = 5,
-            String = 6
+            String = 6,
+            Base64 = 7
         };
     
     public:
@@ -230,6 +231,20 @@ class PT_SOAP_API StringType : public SimpleType
 };
 
 
+class PT_SOAP_API Base64Type : public SimpleType
+{
+    public:
+        Base64Type();
+
+        virtual ~Base64Type();
+
+        virtual const char* name() const
+        {
+            return "base64Binary";
+        }
+};
+
+
 class PT_SOAP_API StructType : public ComplexType
 {
     public:
@@ -279,16 +294,19 @@ class PT_SOAP_API ArrayType : public ComplexType
 };
 
 
-const BooleanType& boolType();
+PT_SOAP_API const BooleanType& boolType();
 
 
-const IntegerType& intType();
+PT_SOAP_API const IntegerType& intType();
 
 
-const FloatType& floatType();
+PT_SOAP_API const FloatType& floatType();
 
 
-const StringType& stringType();
+PT_SOAP_API const StringType& stringType();
+
+
+PT_SOAP_API const Base64Type& base64Type();
 
 
 class PT_SOAP_API Operation : private NonCopyable

@@ -33,6 +33,7 @@
 #include <Pt/Xml/EndElement.h>
 #include <Pt/Xml/Characters.h>
 #include <Pt/SerializationError.h>
+#include <Pt/Base64Codec.h>
 #include <Pt/Convert.h>
 #include <iterator>
 #include <cassert>
@@ -158,7 +159,7 @@ void Formatter::attach(std::basic_ostream<Char>& os)
 
 
 void Formatter::onAddString(const char* name, const char* type,
-                                const Pt::Char* value, const char* id)
+                            const Pt::Char* value, const char* id)
 {
     const std::string& paramName = _paramStack.back()->name();
 
@@ -279,8 +280,25 @@ void Formatter::onAddLongDouble(const char* name, long double value,const char* 
 void Formatter::onAddBinary(const char* name, const char* type,
                             const char* data, std::size_t length, const char* id)
 {
-    // TODO: this should be base64 encoded
-    throw SerializationError("binary type not supported");
+  std::vector<char> to( 2 * length );
+            
+  Pt::MBState state;
+  const char* nextFrom = 0;
+  char* nextTo = 0;
+  Pt::Base64Codec::result r;
+
+  Pt::Base64Codec b64;
+  r = b64.out(state, 
+              data, data+length, nextFrom, 
+              &to[0], &to[0] + to.size(), nextTo);
+            
+  if(r != Pt::Base64Codec::ok)
+    throw SerializationError("base64 decoding");
+
+  b64.unshift(state, nextTo, &to[0] + to.size(), nextTo);
+
+  Pt::String value(&to[0], nextTo - &to[0]);
+  formatValue(*_os, _paramStack.back()->name(), value.c_str(), value.size() );
 }
 
 
@@ -442,6 +460,26 @@ bool Formatter::advance(const Pt::Xml::Node& node)
         else if(typeId == Type::String)
         {
             _composer->setString( c.content() );
+        }
+        else if(typeId == Type::Base64)
+        {
+            std::string from = c.content().narrow();
+            std::vector<char> to( from.size() );
+            
+            Pt::MBState state;
+            const char* nextFrom = 0;
+            char* nextTo = 0;
+            Pt::Base64Codec::result r;
+
+            Pt::Base64Codec b64;
+            r = b64.in(state, 
+                       from.c_str(), from.c_str() + from.size(), nextFrom, 
+                       &to[0], &to[0] + to.size(), nextTo);
+            
+            if(r != Pt::Base64Codec::ok)
+              throw SerializationError("base64 decoding");
+
+            _composer->setBinary( &to[0], nextTo - &to[0] );
         }
 
         _state = OnCharacters;
