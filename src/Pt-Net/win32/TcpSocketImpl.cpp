@@ -324,28 +324,6 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop, bool& isConnected)
 }
 
 
-bool TcpSocketImpl::runRead(System::EventLoop& loop)
-{
-    WSANETWORKEVENTS events;
-
-    if( WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR )
-        throw System::SystemError("WSAEnumNetworkEvents failed");
-
-    if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
-    {
-        _fdClose = true;
-        return true;
-    }
-
-    if( (events.lNetworkEvents & FD_READ) == FD_READ )
-    {
-        return true;
-    }
-
-    return false;
-}
-
-
 bool TcpSocketImpl::runWrite(System::EventLoop& loop)
 {
     WSANETWORKEVENTS events;
@@ -420,6 +398,12 @@ std::size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, std:
 
     if(_fdClose)
     {
+        // FD_CLOSE can be posted at the same time as FD_READ, in which case
+        // all remaining data needs to be read forom the socket
+        int len = ::recv(_fd, buffer, n, 0);
+        if(len > 0)
+            return len;
+
         log_debug("EOF because of previous FD_CLOSE");
         eof = true;
         return 0;
@@ -442,6 +426,28 @@ std::size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, std:
 }
 
 
+bool TcpSocketImpl::runRead(System::EventLoop& loop)
+{
+    WSANETWORKEVENTS events;
+
+    if( WSAEnumNetworkEvents(_fd, NULL, &events) == SOCKET_ERROR )
+        throw System::SystemError("WSAEnumNetworkEvents failed");
+
+    if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
+    {
+        _fdClose = true;
+        return true;
+    }
+
+    if( (events.lNetworkEvents & FD_READ) == FD_READ )
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
 std::size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, std::size_t, bool& eof)
 {
     log_debug(_fd << " endRead");
@@ -449,7 +455,7 @@ std::size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, std::s
 
     int len = ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);
 
-    if( len == 0)
+    if(len == 0)
     {
         eof = true;
     }
