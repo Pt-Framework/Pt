@@ -66,7 +66,7 @@ static const Pt::Char SOAP_VALUE_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', '
 static const Pt::Char SOAP_REASON[]  = { '<', 's', 'o', 'a', 'p', ':', 'R', 'e', 'a', 's', 'o', 'n', '>' };
 static const Pt::Char SOAP_REASON_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'R', 'e', 'a', 's', 'o', 'n', '>' };
 
-static const Pt::Char SOAP_TEXT[]  = { '<', 's', 'o', 'a', 'p', ':', 'T', 'e', 'x', '1', '>' };
+static const Pt::Char SOAP_TEXT[]  = { '<', 's', 'o', 'a', 'p', ':', 'T', 'e', 'x', 't', '>' };
 static const Pt::Char SOAP_TEXT_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'T', 'e', 'x', 't', '>' };
 
 } // namespace

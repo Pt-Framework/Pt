@@ -185,6 +185,9 @@ void Client::beginMessage(std::ostream& os)
     Pt::String targetNamespace = _serviceDef->targetNamespace().c_str();
     _op = _serviceDef->getOperation( name );
 
+    if( ! _op )
+      throw SerializationError("no such operation");
+
     _ts << '<' << name << Pt::String(" xmlns=\"") << targetNamespace << '"' << '>';
     //<--
 }

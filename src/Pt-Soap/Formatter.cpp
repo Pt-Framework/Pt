@@ -321,13 +321,19 @@ void Formatter::onBeginSequence(const char* name, const char* type, const char*)
 void Formatter::onBeginElement()
 {
     const Parameter* param = _paramStack.back()->type()->getParameter(0);
+    if( ! param )
+        throw SerializationError("invalid sequence type");
+
     _paramStack.push_back(param);
 }
 
 
 void Formatter::onFinishElement()
-{
+{   
     _paramStack.pop_back();
+
+    if( _paramStack.empty() )
+        throw SerializationError("invalid sequence type");
 }
 
 
@@ -355,6 +361,9 @@ void Formatter::onBeginStruct(const char* name, const char* type,
 void Formatter::onBeginMember(const char* name)
 {
     const Parameter* param = _paramStack.back()->type()->getParameter(name);
+    if( ! param )
+        throw SerializationError("invalid sequence type");
+
     _paramStack.push_back(param);
 }
 
@@ -362,6 +371,9 @@ void Formatter::onBeginMember(const char* name)
 void Formatter::onFinishMember()
 {
     _paramStack.pop_back();
+
+    if( _paramStack.empty() )
+      throw SerializationError("invalid struct type");
 }
 
 
@@ -411,9 +423,10 @@ bool Formatter::advance(const Pt::Xml::Node& node)
         }
 
         const Parameter* child = _paramStack.back()->type()->getParameter( se.name().local().narrow() );
-        if(child)
-            _paramStack.push_back(child);
-
+        if( ! child)
+            throw SerializationError("invalid comound type");
+        
+        _paramStack.push_back(child);
         _state = OnStartElement;
     }
     else if(node.type() == Xml::Node::Characters)
@@ -491,6 +504,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
             _composer->setString( Pt::String() );
 
         _composer = _composer->finish();
+
         _paramStack.pop_back();
 
         _state = OnEndElement;
