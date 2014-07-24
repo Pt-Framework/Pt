@@ -66,6 +66,9 @@ static const Pt::Char SOAP_VALUE_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', '
 static const Pt::Char SOAP_REASON[]  = { '<', 's', 'o', 'a', 'p', ':', 'R', 'e', 'a', 's', 'o', 'n', '>' };
 static const Pt::Char SOAP_REASON_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'R', 'e', 'a', 's', 'o', 'n', '>' };
 
+static const Pt::Char SOAP_TEXT[]  = { '<', 's', 'o', 'a', 'p', ':', 'T', 'e', 'x', '1', '>' };
+static const Pt::Char SOAP_TEXT_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 'T', 'e', 'x', 't', '>' };
+
 } // namespace
 
 namespace Pt {
@@ -267,10 +270,12 @@ void Responder::beginFault(std::ostream& os, const Fault& fault)
     _ts.write( SOAP_CODE_END, sizeof(SOAP_CODE_END)/sizeof(Char) );
 
     _ts.write( SOAP_REASON, sizeof(SOAP_REASON)/sizeof(Char) );
+    _ts.write( SOAP_TEXT, sizeof(SOAP_TEXT)/sizeof(Char) );
 
      for(const char* str = msg; *str != '\0'; ++str)
         _ts << Char(*str);
 
+    _ts.write( SOAP_TEXT_END, sizeof(SOAP_TEXT_END)/sizeof(Char) );
     _ts.write( SOAP_REASON_END, sizeof(SOAP_REASON_END)/sizeof(Char) );
     _ts.write( SOAP_FAULT_END, sizeof(SOAP_FAULT_END)/sizeof(Char) );
     _ts.write( SOAP_REPLY_END, sizeof(SOAP_REPLY_END)/sizeof(Char) );

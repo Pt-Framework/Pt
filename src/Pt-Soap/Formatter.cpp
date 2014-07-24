@@ -477,7 +477,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
                        &to[0], &to[0] + to.size(), nextTo);
             
             if(r != Pt::Base64Codec::ok)
-              throw SerializationError("base64 decoding");
+              throw SerializationError("invalid base64 decoding");
 
             _composer->setBinary( &to[0], nextTo - &to[0] );
         }
