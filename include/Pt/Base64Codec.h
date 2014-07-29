@@ -218,7 +218,22 @@ inline Base64Codec::result Base64Codec::do_out(Pt::MBState& state,
             third  = fromNext++;
             break;
 
-        default:
+        default:           
+            if(fromEnd - fromNext == 1)
+            {
+                state.value.mbytes[0] = *fromNext++;
+                state.n = 1;
+                return std::codecvt_base::partial;
+            }
+
+            if(fromEnd - fromNext == 2)
+            {
+                state.value.mbytes[0] = *fromNext++;
+                state.value.mbytes[1] = *fromNext++;
+                state.n = 2;
+                return std::codecvt_base::partial;
+            }
+            
             first  = fromNext++;
             second = fromNext++;
             third  = fromNext++;
@@ -227,10 +242,10 @@ inline Base64Codec::result Base64Codec::do_out(Pt::MBState& state,
 
     while (true)
     {
-        *toNext++   = toBase64( (*first >> 2) & 0x3f );
-        *(toNext++) = toBase64( ((*first << 4) + ((*second) >> 4)) & 0x3f );
-        *(toNext++) = toBase64( ((*second << 2) + ((*third) >> 6)) & 0x3f );
-        *(toNext++) = toBase64( *third & 0x3f );
+        *toNext++   = toBase64(  (uint8_t(*first) >> 2) & 0x3f );
+        *(toNext++) = toBase64( ((uint8_t(*first) << 4) + (uint8_t(*second) >> 4)) & 0x3f );
+        *(toNext++) = toBase64( ((uint8_t(*second) << 2) + (uint8_t(*third) >> 6)) & 0x3f );
+        *(toNext++) = toBase64(   uint8_t(*third) & 0x3f );
 
         if(toEnd - toNext < 4)
         {
@@ -283,15 +298,15 @@ inline Base64Codec::result Base64Codec::do_unshift(MBState& state,
     switch(state.n)
     {
         case 2:
-            *toNext++   = toBase64( (state.value.mbytes[0] >> 2) & 0x3f );
-            *(toNext++) = toBase64( ((state.value.mbytes[0] << 4) + ((state.value.mbytes[1]) >> 4)) & 0x3f );
-            *(toNext++) = toBase64( (state.value.mbytes[1] << 2) &  0x3f );
+            *toNext++   = toBase64( (uint8_t(state.value.mbytes[0]) >> 2) & 0x3f );
+            *(toNext++) = toBase64( ((uint8_t(state.value.mbytes[0]) << 4) + (uint8_t(state.value.mbytes[1]) >> 4)) & 0x3f );
+            *(toNext++) = toBase64( (uint8_t(state.value.mbytes[1]) << 2) &  0x3f );
             *(toNext++) = '=';
             break;
 
         case 1:
-            *toNext++   = toBase64( (state.value.mbytes[0] >> 2) & 0x3f );
-            *(toNext++) = toBase64( (state.value.mbytes[0] << 4) & 0x3f );
+            *toNext++   = toBase64( (uint8_t(state.value.mbytes[0]) >> 2) & 0x3f );
+            *(toNext++) = toBase64( (uint8_t(state.value.mbytes[0]) << 4) & 0x3f );
             *(toNext++) = '=';
             *(toNext++) = '=';
             break;
