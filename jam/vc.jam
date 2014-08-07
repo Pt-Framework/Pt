@@ -139,9 +139,14 @@ rule CheckCc
     Configure STDHDRS ;
     Configure LINKFLAGS ;
 
-    if $(WITH_DEBUG)
+    if $(WITH_DEBUG) && $(WITH_OPTIM)
     {
-        CCFLAGS   += /MDd /D "DEBUG" /D "_DEBUG" /Zi ;
+        CCFLAGS += /MD /D "NDEBUG" /Zi ;
+        LINKFLAGS += /DEBUG ;
+    }
+    else if $(WITH_DEBUG)
+    {
+        CCFLAGS += /MDd /D "DEBUG" /D "_DEBUG" /Zi ;
         LINKFLAGS += /DEBUG ;
     }
     else 
@@ -188,9 +193,13 @@ rule CheckC++
 
     C++FLAGS += /EHsc /fp:precise /GR /TP /FD ;
 
-    if $(WITH_DEBUG)
+    if $(WITH_DEBUG) && $(WITH_OPTIM)
     {
-        C++FLAGS  += /MDd /D "DEBUG" /D "_DEBUG" /Zi ;
+        C++FLAGS += /MD /D "NDEBUG" /Zi ;
+    }
+    else if $(WITH_DEBUG)
+    {
+        C++FLAGS += /MDd /D "DEBUG" /D "_DEBUG" /Zi ;
     }
     else
     {
