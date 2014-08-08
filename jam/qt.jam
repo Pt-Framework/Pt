@@ -39,6 +39,89 @@ rule CheckBuildQt
     return $(WITH_QT) ;
 }
 
+
+rule QtLibName
+{
+    local qtlibs ;
+
+    for local _l in $(1)
+    {
+        switch $(_l)
+        {
+            case core       : qtlibs += QtCore ;
+            case concurrent : qtlibs += QtConcurrent ;
+            case network    : qtlibs += QtNetwork ;
+            case widgets    : qtlibs += QtWidgets ;
+            case gui        : qtlibs += QtGui ;
+            case qml        : qtlibs += QtQml ;
+            case quick      : qtlibs += QtQuick ;
+        }
+    }
+
+    return $(qtlibs) ;
+}
+
+
+rule Qt5LibName
+{
+    local qtlibs ;
+
+    for local _l in $(1)
+    {
+        switch $(_l)
+        {
+            case core       : qtlibs += Qt5Core ;
+            case concurrent : qtlibs += Qt5Concurrent ;
+            case network    : qtlibs += Qt5Network ;
+            case widgets    : qtlibs += Qt5Widgets ;
+            case gui        : qtlibs += Qt5Gui ;
+            case qml        : qtlibs += Qt5Qml ;
+            case quick      : qtlibs += Qt5Quick ;
+        }
+    }
+    
+    return $(qtlibs) ;
+}
+
+
+rule QtLinkLibs_Windows
+{       
+    if $(WITH_DEBUG)
+    {   
+        return $(<:S="d.lib") ;
+    }
+    else
+    {
+        return $(<:S=".lib") ;
+    }
+}
+
+
+rule QtLinkLibs_Unix
+{       
+    return -l$(<) ;
+}
+
+
+rule QtLinkLibs_MacOSX
+{
+    return "-framework "$(<) ;
+}
+
+
+rule QtLinkLibs
+{
+    local qtlibs ;
+
+    for local _l in $(<)
+    {
+        qtlibs += [ $(QT_LIBNAME_RULE) $(_l) ] ;
+    }
+
+    return [ $(QT_LINKLIBS_RULE) $(qtlibs) ] ;
+}
+
+
 rule ConfigureQt
 {  
     local qtlibs ;
@@ -46,18 +129,9 @@ rule ConfigureQt
 
     for local _l in $(1)
     {
-        switch $(_l)
-        {
-            case core       : qtlibs += Qt5Core ;       qt5libs += QtCore ;
-            case concurrent : qtlibs += Qt5Concurrent ; qt5libs += QtConcurrent ;
-            case network    : qtlibs += Qt5Network ;    qt5libs += QtNetwork ;
-            case widgets    : qtlibs += Qt5Widgets ;    qt5libs += QtWidgets ;
-            case gui        : qtlibs += Qt5Gui ;        qt5libs += QtGui ;
-            case qml        : qtlibs += Qt5Qml ;        qt5libs += QtQml ;
-            case quick      : qtlibs += Qt5Quick ;      qt5libs += QtQuick ;
-        }
+        qt5libs += [ Qt5LibName $(_l) ] ;
+        qtlibs += [ QtLibName $(_l) ] ;
     }
-
 
     if $(QTDIR)
     {
@@ -81,8 +155,14 @@ rule ConfigureQt
                      "int main() { QString button; return 0; }" 
                     : $(QT_INCLUDES) 
                     : $(QT_C++FLAGS)
-                    : $(QT_LINKLIBS) $(qtlibs:S=$(QT_SUFLIB)) 
+                    : $(QT_LINKLIBS) $(qt5libs:S=$(QT_SUFLIB)) 
                     : $(QT_LINKFLAGS) /LIBPATH:$(QT_LIBDIR) ;
+
+        if $(WITH_QT)
+        {
+            QT_LIBNAME_RULE = Qt5LibName ;
+            QT_LINKLIBS_RULE = QtLinkLibs_Windows ;
+        }
     }
 
     #
@@ -94,8 +174,14 @@ rule ConfigureQt
                      "int main() { QString button; return 0; }" 
                     : $(QT_INCLUDES) 
                     : $(QT_C++FLAGS)
-                    : $(QT_LINKLIBS) -l$(qtlibs) 
+                    : $(QT_LINKLIBS) -l$(qt5libs) 
                     : $(QT_LINKFLAGS) -L$(QT_LIBDIR) ;
+
+        if $(WITH_QT)
+        {
+            QT_LIBNAME_RULE = Qt5LibName ;
+            QT_LINKLIBS_RULE = QtLinkLibs_Unix ;
+        }
     }
     
     #
@@ -107,8 +193,14 @@ rule ConfigureQt
                      "int main() { QString button; return 0; }" 
                     : $(QT_INCLUDES) 
                     : $(QT_C++FLAGS) -F$(QT_LIBDIR)
-                    : $(QT_LINKLIBS) "-framework "$(qt5libs)
+                    : $(QT_LINKLIBS) "-framework "$(qtlibs)
                     : $(QT_LINKFLAGS) -F$(QT_LIBDIR) ;
+
+        if $(WITH_QT)
+        {
+            QT_LIBNAME_RULE = QtLibName ;
+            QT_LINKLIBS_RULE = QtLinkLibs_MaxOSX ;
+        }
     }
 
     return $(WITH_QT) ;
