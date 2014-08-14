@@ -32,6 +32,7 @@
 #include <Pt/Remoting/Api.h>
 #include <Pt/Remoting/Client.h>
 #include <Pt/SerializationContext.h>
+#include <Pt/NonCopyable.h>
 #include <Pt/Signal.h>
 #include <Pt/String.h>
 #include <string>
@@ -42,7 +43,7 @@ namespace Remoting {
 
 /** @internal Documented externally.
 */
-class PT_REMOTING_API RemoteCall
+class PT_REMOTING_API RemoteCall : private Pt::NonCopyable
 {
     public:
         RemoteCall(Client& client, const String& name);
@@ -128,8 +129,15 @@ class RemoteProcedureBase : public RemoteCall
         RemoteProcedureBase(Client& client, const std::string& name)
         : RemoteCall(client, name)
         , _result(client)
-        , _r( & client.context() )
-        { }
+        , _r(0)
+        { 
+          _r = new (_mem) BasicComposer<R>( &client.context() );
+        }
+
+        ~RemoteProcedureBase()
+        {
+            _r->~BasicComposer<R>();
+        }
 
         Result<R>& result()
         { 
@@ -150,14 +158,21 @@ class RemoteProcedureBase : public RemoteCall
 
         BasicComposer<R>& beginResult()
         {
-            _r.begin( result().value() );
-            return _r;
+            _r->begin( result().value() );
+            return *_r;
+        }
+
+        void resetResult()
+        {
+            _r->~BasicComposer<R>();
+            _r = new (_mem) BasicComposer<R>( &client().context() );
         }
 
     private:
         Signal< const Result<R>& > _finished;
         Result<R> _result;
-        BasicComposer<R> _r;
+        char _mem[ sizeof(BasicComposer<R>) ];
+        BasicComposer<R>* _r;
 };
 
 } // namespace Remoting

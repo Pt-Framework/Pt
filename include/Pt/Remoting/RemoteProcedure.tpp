@@ -669,17 +669,40 @@ class RemoteProcedure<R, A1, A2,
     public:
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
-        , _a1( & client.context() )
-        , _a2( & client.context() )
+        , _a1(0)
+        , _a2(0)
         { 
-            _args[0] = &_a1;
-            _args[1] = &_a2;
+            _a1 = new (_a1mem) BasicDecomposer<A1>( &client.context() );
+            _a2 = new (_a2mem) BasicDecomposer<A2>( &client.context() );
+
+            _args[0] = _a1;
+            _args[1] = _a2;
+        }
+
+        ~RemoteProcedure()
+        {
+            _a1->~BasicDecomposer<A1>();
+            _a2->~BasicDecomposer<A2>();
+        }
+
+        void reset()
+        {
+            resetResult();
+
+            _a1->~BasicDecomposer<A1>();
+            _a1 = new (_a1mem) BasicDecomposer<A1>( &client().context() );
+            
+            _a2->~BasicDecomposer<A2>();
+            _a2 = new (_a2mem) BasicDecomposer<A2>( &client().context() );
+            
+            _args[0] = _a1;
+            _args[1] = _a2;
         }
 
         void begin(const A1& a1, const A2& a2)
         {
-            _a1.begin(a1, "");
-            _a2.begin(a2, "");
+            _a1->begin(a1, "");
+            _a2->begin(a2, "");
 
             BasicComposer<R>& r = this->beginResult();
 
@@ -688,8 +711,8 @@ class RemoteProcedure<R, A1, A2,
 
         const R& call(const A1& a1, const A2& a2)
         {
-            _a1.begin(a1, "");
-            _a2.begin(a2, "");
+            _a1->begin(a1, "");
+            _a2->begin(a2, "");
             BasicComposer<R>& r = this->beginResult();
 
             this->client().call(r, *this, _args, 2);
@@ -702,8 +725,10 @@ class RemoteProcedure<R, A1, A2,
         }
 
     private:
-        BasicDecomposer<A1> _a1;
-        BasicDecomposer<A2> _a2;
+        char _a1mem[ sizeof(BasicDecomposer<A1>) ];
+        char _a2mem[ sizeof(BasicDecomposer<A2>) ];
+        BasicDecomposer<A1>* _a1;
+        BasicDecomposer<A2>* _a2;
         Decomposer* _args[2]; 
 };
 
@@ -724,14 +749,29 @@ class RemoteProcedure<R, A1,
     public:
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
-        , _a1( & client.context() )
+        , _a1(0)
         {
-            _args[0] = &_a1; 
+            _a1 = new (_a1mem) BasicDecomposer<A1>( &client.context() );
+            _args[0] = _a1;
+        }
+
+        ~RemoteProcedure()
+        {
+            _a1->~BasicDecomposer<A1>();
+        }
+
+        void reset()
+        {
+            resetResult();
+
+            _a1->~BasicDecomposer<A1>();
+            _a1 = new (_a1mem) BasicDecomposer<A1>( &client().context() );
+            _args[0] = _a1;
         }
 
         void begin(const A1& a1)
         {
-            _a1.begin(a1, "");
+            _a1->begin(a1, "");
 
             BasicComposer<R>& r = this->beginResult();
 
@@ -740,7 +780,7 @@ class RemoteProcedure<R, A1,
 
         const R& call(const A1& a1)
         {
-            _a1.begin(a1, "");
+            _a1->begin(a1, "");
             BasicComposer<R>& r = this->beginResult();
 
             this->client().call(r, *this, _args, 1);
@@ -753,7 +793,8 @@ class RemoteProcedure<R, A1,
         }
 
     private:
-        BasicDecomposer<A1> _a1;
+        char _a1mem[ sizeof(BasicDecomposer<A1>) ];
+        BasicDecomposer<A1>* _a1;
         Decomposer* _args[1]; 
 };
 
@@ -775,6 +816,11 @@ class RemoteProcedure<R,
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
         { }
+
+        void reset()
+        {
+            resetResult();
+        }
 
         void begin()
         {
