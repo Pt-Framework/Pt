@@ -498,7 +498,6 @@
     <None Include="..\..\src\Pt-System\tests\Jamfile" />
     <None Include="..\..\src\Pt-System\tests\Makefile.am" />
     <None Include="..\..\src\Pt-Unit\Jamfile" />
-    <None Include="..\..\src\Pt-Unit\Makefile.am" />
     <None Include="..\..\src\Pt-XmlRpc\Jamfile" />
     <None Include="..\..\src\Pt-XmlRpc\tests\Jamfile" />
     <None Include="..\..\src\Pt-Xml\Jamfile" />
