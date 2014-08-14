@@ -166,6 +166,7 @@ class TestSelectable : public Pt::System::Selectable
 
 
 class EventLoopTest : public Pt::Unit::TestSuite
+                    , public Pt::Connectable
 {
     public:
         EventLoopTest()

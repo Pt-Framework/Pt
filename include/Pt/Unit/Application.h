@@ -61,7 +61,7 @@ namespace Unit {
 
         @ingroup unittest
     */
-    class PT_UNIT_API Application : public Test
+    class PT_UNIT_API Application : private Test
     {
         public:
             /** @brief Default Constructor
@@ -135,9 +135,6 @@ namespace Unit {
 
         private:
             static Application* _app;
-
-            /** @brief Number of errors that occured during a run
-            */
             unsigned _errors;
     };
 

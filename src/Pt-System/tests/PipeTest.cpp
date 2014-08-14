@@ -38,6 +38,7 @@
 #include <cstddef>
 
 class PipeTest : public Pt::Unit::TestSuite
+               , public Pt::Connectable
 {
     public:
         PipeTest()

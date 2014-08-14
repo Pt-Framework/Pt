@@ -25,12 +25,42 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "Pt/Unit/Reporter.h"
+#include "Pt/Unit/Test.h"
 #include <iostream>
 
 namespace Pt {
 
 namespace Unit {
+
+Reporter::~Reporter()
+{
+    while( ! _attachedTests.empty() )
+    {
+        _attachedTests.back()->detachReporter(*this);
+    }
+}
+
+
+void Reporter::attachTest(Test& test)
+{
+    _attachedTests.push_back(&test);
+}
+
+
+void Reporter::detachTest(Test& test)
+{
+    std::vector<Test*>::iterator it = _attachedTests.begin();
+    while( it != _attachedTests.end() )
+    {
+        if(&test == *it)
+            it = _attachedTests.erase(it);
+        else
+          ++it;
+    }
+}
+
 
 BriefReporter::BriefReporter(std::ostream* out)
 : _out(out)

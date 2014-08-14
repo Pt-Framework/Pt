@@ -21,10 +21,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 #ifndef PT_UNIT_TESTPROTOCOL_H
 #define PT_UNIT_TESTPROTOCOL_H
 
@@ -32,48 +33,45 @@
 #include <Pt/Unit/Test.h>
 #include <Pt/Unit/Assertion.h>
 
-
 namespace Pt {
 
 namespace Unit {
-    class Args;
-    class TestSuite;
 
-    /** @brief Protocol for test suites
+class TestSuite;
 
-        This is the base class for protocols that can be used to run a test
-        suite. The default implementation will simply run each registered
-        test of the test suite without passing it any data. Implementors
-        need to override the method TestProtocol::run.
+/** @brief Protocol for test suites
 
-        @ingroup unittest
-    */
-    class PT_UNIT_API TestProtocol
-    {
-        public:
-            /** @brief Destructor
-            */
-            virtual ~TestProtocol()
-            {}
+    This is the base class for protocols that can be used to run a test
+    suite. The default implementation will simply run each registered
+    test of the test suite without passing it any data. Implementors
+    need to override the method TestProtocol::run.
 
-            /** @brief Executes the protocol
+    @ingroup unittest
+*/
+class PT_UNIT_API TestProtocol
+{
+    public:
+        /** @brief Destructor
+        */
+        virtual ~TestProtocol()
+        {}
 
-                This method can be overriden to specify a custom protocol
-                for a test suite. The default implementation will simply
-                call each registered method of the test suite. Implementors
-                will most likely call TestSuite::runTest to resolve a test
-                method by name and pass it required arguments.
+        /** @brief Executes the protocol
 
-                @param test The test suite to apply the protocol
-            */
-            virtual void run(TestSuite& test);
-    };
+            This method can be overriden to specify a custom protocol
+            for a test suite. The default implementation will simply
+            call each registered method of the test suite. Implementors
+            will most likely call TestSuite::runTest to resolve a test
+            method by name and pass it required arguments.
 
-
+            @param test The test suite to apply the protocol
+        */
+        virtual void run(TestSuite& test);
+};
 
 } // namespace Unit
 
 } // namespace Pt
 
-#endif // for header
+#endif // PT_UNIT_TESTPROTOCOL_H
 

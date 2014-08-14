@@ -34,6 +34,7 @@
 #include <sstream>
 
 class TimerTest : public Pt::Unit::TestSuite
+                , public Pt::Connectable
 {
     public:
         TimerTest()

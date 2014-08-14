@@ -68,6 +68,7 @@ class Callee : public Pt::Connectable
 }
 
 class DelegateTest : public Pt::Unit::TestSuite
+                   , public Pt::Connectable
 {
     public:
         DelegateTest()

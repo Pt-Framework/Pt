@@ -59,7 +59,7 @@ TestContext::~TestContext()
 }
 
 
-std::string TestContext::testName() const
+const std::string& TestContext::testName() const
 {
     return _test.name();
 }
@@ -87,6 +87,12 @@ void TestContext::run()
     {
         _test.reportError(*this);
     }
+}
+
+
+void TestContext::exec()
+{
+    _test.run();
 }
 
 }

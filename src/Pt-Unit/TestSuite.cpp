@@ -52,11 +52,6 @@ TestSuite::~TestSuite()
 }
 
 
-void TestSuite::setParameter(const std::string&, const Pt::SerializationInfo&)
-{
-}
-
-
 void TestSuite::setProtocol(TestProtocol* protocol)
 {
     _protocol = protocol;
@@ -79,9 +74,9 @@ void TestSuite::run()
 }
 
 
-void TestSuite::runTest( const std::string& name, const SerializationInfo* si, std::size_t argCount )
+void TestSuite::runTest( const std::string& name, const SerializationInfo* si, std::size_t argCount)
 {
-    TestMethod* test = this->findTest(name);
+    TestMethod* test = this->findTestMethod(name);
     if(!test)
         throw std::runtime_error("No such test");
 
@@ -103,7 +98,7 @@ void TestSuite::runAll()
 }
 
 
-TestMethod* TestSuite::findTest(const std::string& name)
+TestMethod* TestSuite::findTestMethod(const std::string& name)
 {
     std::multimap<std::string, TestMethod*>::iterator it = _tests.find(name);
     if( it== _tests.end() )

@@ -39,7 +39,9 @@ class ExceptionTest : public Pt::Unit::TestCase
     public:
         ExceptionTest()
         : TestCase("ExceptionTest")
-        {}
+        {
+        
+        }
 
         void test()
         {

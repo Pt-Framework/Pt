@@ -31,6 +31,8 @@
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Test.h>
 #include <Pt/SerializationInfo.h>
+#include <Pt/Void.h>
+#include <Pt/Method.h>
 #include <stdexcept>
 #include <cstddef>
 
@@ -43,15 +45,28 @@ namespace Unit {
         public:
             TestMethod(const std::string& name)
             : Pt::Unit::Test(name)
+            , _args(0)
+            , _argCount(0)
             {}
 
             virtual ~TestMethod()
             {}
 
-            virtual void run()
-            {}
+            void setArgs(const SerializationInfo* si, std::size_t argCount)
+            {
+                _args = si;
+                _argCount = argCount;
+            }
 
-            virtual void exec(const SerializationInfo* si, std::size_t argCount) = 0;
+            const SerializationInfo* args() const
+            { return _args; }
+
+            std::size_t argCount() const
+            { return _argCount; }
+
+        private:
+            const SerializationInfo* _args;
+            std::size_t _argCount;
     };
 
 
@@ -77,8 +92,11 @@ namespace Unit {
             , TestMethod(name)
             {}
 
-            void exec(const SerializationInfo* args, std::size_t argCount)
+            void run()
             {
+                const SerializationInfo* args = this->args();
+                std::size_t argCount = this->argCount();
+
                 if(argCount != 8)
                     throw std::invalid_argument("invalid number of arguments");
 
@@ -138,8 +156,11 @@ namespace Unit {
             , TestMethod(name)
             {}
 
-            void exec(const SerializationInfo* args, std::size_t argCount)
+            void run()
             {
+                const SerializationInfo* args = this->args();
+                std::size_t argCount = this->argCount();
+
                 if(argCount != 5)
                     throw std::invalid_argument("invalid number of arguments");
 
@@ -189,8 +210,11 @@ namespace Unit {
             , TestMethod(name)
             {}
 
-            void exec(const SerializationInfo* args, std::size_t argCount)
+            void run()
             {
+                const SerializationInfo* args = this->args();
+                std::size_t argCount = this->argCount();
+
                 if(argCount != 4)
                     throw std::invalid_argument("invalid number of arguments");
 
@@ -236,8 +260,11 @@ namespace Unit {
             , TestMethod(name)
             {}
 
-            void exec(const SerializationInfo* args, std::size_t argCount)
+            void run()
             {
+                const SerializationInfo* args = this->args();
+                std::size_t argCount = this->argCount();
+
                 if(argCount != 3)
                     throw std::invalid_argument("invalid number of arguments");
 
@@ -279,8 +306,11 @@ namespace Unit {
             , TestMethod(name)
             {}
 
-            void exec(const SerializationInfo* args, std::size_t argCount)
+            void run()
             {
+                const SerializationInfo* args = this->args();
+                std::size_t argCount = this->argCount();
+
                 if(argCount != 2)
                     throw std::invalid_argument("invalid number of arguments");
 
@@ -318,8 +348,11 @@ namespace Unit {
             , TestMethod(name)
             {}
 
-            void exec(const SerializationInfo* args, std::size_t argCount)
+            void run()
             {
+                const SerializationInfo* args = this->args();
+                std::size_t argCount = this->argCount();
+
                 if(argCount != 1)
                     throw std::invalid_argument("invalid number of arguments");
 
@@ -352,7 +385,7 @@ namespace Unit {
             , TestMethod(name)
             {}
 
-            void exec(const SerializationInfo* si, std::size_t argCount)
+            void run()
             {
                 Pt::Method<void, C>::call();
             }

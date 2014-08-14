@@ -162,6 +162,7 @@ void operator <<=(Pt::SerializationInfo& si, const Color& color)
 
 
 class PtXmlRpcTest : public Pt::Unit::TestSuite
+                   , public Pt::Connectable
 {
     private:
         Pt::System::Timer _exitTimer;

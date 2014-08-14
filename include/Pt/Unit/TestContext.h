@@ -46,26 +46,24 @@ class TestFixture;
 class PT_UNIT_API TestContext
 {
     public:
+        /** @brief Construct from fixture and test to run.
+        */
+        TestContext(TestFixture& fixture, Test& test);
+
         /** @brief Destructor.
         */
         virtual ~TestContext();
 
         /** @brief Returns the name of the test.
         */
-        std::string testName() const;
+        const std::string& testName() const;
 
         /** @brief Runs the test.
         */
         void run();
 
     protected:
-        /** @brief Construct from fixture and test to run.
-        */
-        TestContext(TestFixture& fixture, Test& test);
-
-        /** @brief Executes the test.
-        */
-        virtual void exec() = 0;
+        virtual void exec();
 
     private:
         TestFixture& _fixture;

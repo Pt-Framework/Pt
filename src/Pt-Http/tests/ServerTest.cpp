@@ -134,6 +134,7 @@ typedef Pt::Http::BasicService<ChunkedResponder> ChunkedService;
 
 
 class ServerTest : public Pt::Unit::TestSuite
+                 , public Pt::Connectable
 {
     public:
         ServerTest()
