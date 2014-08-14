@@ -122,10 +122,15 @@ void Client::onBeginCall(Composer& r, Remoting::RemoteCall& method, Decomposer**
 
 void Client::onEndCall()
 {
-    if( _isFault )
+    if( isFailed() )
     {
         _isFault = false;
         throw _fault; 
+    } 
+
+    if(_state != OnEnvelopeEnd)
+    {
+        setFault(Fault::InvalidXmlRpc, "invalid SOAP reply");
     }
 
     this->onEndInvoke();
@@ -147,6 +152,11 @@ void Client::onCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv
     _isFault = false;
 
     this->onInvoke();
+
+    if(_state != OnEnvelopeEnd)
+    {
+        throw Fault("invalid SOAP reply", Fault::InvalidXmlRpc);
+    }
 }
 
 

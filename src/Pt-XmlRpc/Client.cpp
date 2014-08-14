@@ -117,6 +117,11 @@ void Client::onEndCall()
         throw _fault; 
     }
 
+    if(_state != OnMethodResponseEnd)
+    {
+        setFault(Fault::InvalidXmlRpc, "invalid XML-RPC reply");
+    }
+
     this->onEndInvoke();
 }
 
@@ -136,6 +141,11 @@ void Client::onCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv
     _isFault = false;
 
     this->onInvoke();
+
+    if(_state != OnMethodResponseEnd)
+    {
+        throw Fault("invalid XML-RPC reply", Fault::InvalidXmlRpc);
+    }
 }
 
 
