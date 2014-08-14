@@ -687,13 +687,13 @@ class RemoteProcedure<R, A1, A2,
 
         void reset()
         {
-            resetResult();
+            this->resetResult();
 
             _a1->~BasicDecomposer<A1>();
-            _a1 = new (_a1mem) BasicDecomposer<A1>( &client().context() );
+            _a1 = new (_a1mem) BasicDecomposer<A1>( &this->client().context() );
             
             _a2->~BasicDecomposer<A2>();
-            _a2 = new (_a2mem) BasicDecomposer<A2>( &client().context() );
+            _a2 = new (_a2mem) BasicDecomposer<A2>( &this->client().context() );
             
             _args[0] = _a1;
             _args[1] = _a2;
@@ -762,10 +762,10 @@ class RemoteProcedure<R, A1,
 
         void reset()
         {
-            resetResult();
+            this->resetResult();
 
             _a1->~BasicDecomposer<A1>();
-            _a1 = new (_a1mem) BasicDecomposer<A1>( &client().context() );
+            _a1 = new (_a1mem) BasicDecomposer<A1>( &this->client().context() );
             _args[0] = _a1;
         }
 
@@ -819,7 +819,7 @@ class RemoteProcedure<R,
 
         void reset()
         {
-            resetResult();
+            this->resetResult();
         }
 
         void begin()
