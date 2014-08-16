@@ -40,6 +40,56 @@ namespace Pt {
 
 namespace System {
 
+class PathImpl
+{
+    public:
+        PathImpl()
+        {
+        }
+
+        PathImpl(const PathImpl& p)
+        {
+        }
+
+        PathImpl(const char* s)
+        {
+            win32::fromUtf8(s, _path);
+        }
+
+        PathImpl& operator=(const PathImpl& p)
+        {
+            return *this;
+        }
+
+        PathImpl& operator=(const char* s)
+        {
+            win32::fromUtf8(s, _path);
+            return *this;
+        }
+
+        PathImpl& operator+=(const char* p)
+        {
+            std::wstring str;
+            win32::fromUtf8(p, str);
+            _path += str;
+            return *this;
+        }
+
+        std::string str() const
+        {
+            return win32::toUtf8( _path.c_str() );
+        }
+
+        std::string toLocal() const
+        {
+            return win32::toMultiByte( _path.c_str() );
+        }
+
+    private:
+        std::wstring _path;
+};
+
+
 class FileInfoImpl
 {
     public:

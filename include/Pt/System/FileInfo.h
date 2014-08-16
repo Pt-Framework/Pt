@@ -37,6 +37,51 @@ namespace Pt {
 
 namespace System {
 
+/** @brief Represents a path in the file-system.
+*/
+class PT_SYSTEM_API Path
+{
+    public:
+        /** @brief Default constructor.
+        */
+        Path();
+
+        /** @brief Copy constructor.
+        */
+        Path(const Path& p);
+
+        /** @brief Construct from a string.
+        */
+        explicit Path(const char* s);
+
+        /** @brief Assignment operator.
+        */
+        Path& operator=(const Path& p);
+
+        /** @brief Assigns a string.
+        */
+        Path& operator=(const char* p);
+
+        /** @brief Appends a string.
+        */
+        Path& operator+=(const char* p);
+
+        /** @brief Destructor.
+        */
+        ~Path();
+
+        /** @brief Returns the path name as a string.
+        */
+        std::string str() const;
+
+        /** @brief Returns the path in local encoding.
+        */
+        std::string toLocal() const;
+
+    private:
+        class PathImpl* _impl;
+};
+
 /** @brief Provides information about a node in the file-system.
 
     The Pt::System::FileInfo class provides operations to query information

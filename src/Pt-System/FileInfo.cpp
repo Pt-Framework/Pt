@@ -35,6 +35,63 @@ namespace Pt {
 
 namespace System {
 
+Path::Path()
+{
+    _impl = new PathImpl();
+}
+
+
+Path::Path(const Path& p)
+{
+    _impl = new PathImpl(*p._impl);
+}
+
+
+Path::Path(const char* s)
+{
+    _impl = new PathImpl(s);
+}
+
+
+Path::~Path()
+{
+    delete _impl;
+}
+
+
+Path& Path::operator=(const Path& p)
+{
+    *_impl = *p._impl;
+    return *this;
+}
+
+
+Path& Path::operator=(const char* s)
+{
+    *_impl = s;
+    return *this;
+}
+
+
+Path& Path::operator+=(const char* p)
+{
+    *_impl += p;
+    return *this;
+}
+
+
+std::string Path::str() const
+{
+    return _impl->str();
+}
+
+
+std::string Path::toLocal() const
+{
+    return _impl->toLocal();
+}
+
+
 FileInfo::FileInfo(const std::string& path)
 : _path(path)
 {

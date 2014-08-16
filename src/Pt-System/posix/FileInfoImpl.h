@@ -41,6 +41,53 @@ namespace Pt {
 
 namespace System {
 
+class PathImpl
+{
+    public:
+        PathImpl()
+        {
+        }
+
+        PathImpl(const PathImpl& p)
+        {
+        }
+
+        PathImpl(const char* s)
+        : _path(s)
+        {
+        }
+
+        PathImpl& operator=(const PathImpl& p)
+        {
+            return *this;
+        }
+
+        PathImpl& operator=(const char* s)
+        {
+            _path = s;
+            return *this;
+        }
+
+        PathImpl& operator+=(const char* p)
+        {
+            _path += p;
+            return *this;
+        }
+
+        const std::string& str() const
+        {
+            return _path;
+        }
+
+        const std::string& toLocal() const
+        {
+            return _path;
+        }
+
+    private:
+        std::string _path;
+};
+
 class FileInfoImpl
 {
     public:

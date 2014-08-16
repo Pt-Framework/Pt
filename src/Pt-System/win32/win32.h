@@ -15,6 +15,34 @@ namespace System {
 
 namespace win32 {
 
+inline void fromUtf8(const char* from, std::wstring& to)
+{
+    int length = MultiByteToWideChar(CP_UTF8, 0, from, -1, NULL, 0);
+
+    std::vector<wchar_t> wbuf(length);
+    length = MultiByteToWideChar(CP_UTF8, 0, from, -1, &wbuf[0], length);
+    if(length == 0)
+    {
+        throw std::runtime_error("MultiByteToWideChar");
+    }
+
+    to.assign(&wbuf[0], length-1);
+}
+
+
+inline std::string toUtf8(const wchar_t* from)
+{
+    int length = WideCharToMultiByte(CP_UTF8, 0, from, -1, NULL, 0, NULL, NULL);
+
+    std::vector<char> str(length);
+    int ret = WideCharToMultiByte(CP_UTF8, 0, from, -1, &str[0], length, NULL, NULL);
+    if(ret == 0)
+        throw std::runtime_error("WideCharToMultiByte");
+
+    return std::string(&str[0], length-1);
+}
+
+
 inline std::string toMultiByte(const wchar_t* from)
 {
     int length = WideCharToMultiByte(CP_ACP, 0, from, -1, NULL, 0, NULL, NULL);
