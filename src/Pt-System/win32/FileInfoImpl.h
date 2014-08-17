@@ -32,6 +32,7 @@
 #include <Pt/System/IOError.h>
 #include <Pt/System/SystemError.h>
 #include <string>
+#include <iterator>
 #include <cstring>
 #include <cstddef>
 #include <windows.h>
@@ -44,38 +45,48 @@ class PathImpl
 {
     public:
         PathImpl()
-        {
-        }
-
-        PathImpl(const PathImpl& p)
-        {
-        }
+        { }
 
         PathImpl(const char* s)
         {
             win32::fromUtf8(s, _path);
         }
 
-        PathImpl& operator=(const PathImpl& p)
-        {
-            return *this;
-        }
-
-        PathImpl& operator=(const char* s)
+        PathImpl& assign(const char* s)
         {
             win32::fromUtf8(s, _path);
             return *this;
         }
 
-        PathImpl& operator+=(const char* p)
+        PathImpl& assign(const Pt::String& s)
+        {
+            _path.clear();
+            s.toUtf16( std::back_inserter(_path) );
+            return *this;
+        }
+
+        PathImpl& append(const char* s)
         {
             std::wstring str;
-            win32::fromUtf8(p, str);
+            win32::fromUtf8(s, str);
             _path += str;
             return *this;
         }
 
-        std::string str() const
+        PathImpl& append(const Pt::String& s)
+        {
+            std::wstring str;
+            s.toUtf16( std::back_inserter(str) );
+            _path += str;
+            return *this;
+        }
+
+        Pt::String toString() const
+        {
+            return Pt::String::fromUtf16( _path.begin(), _path.end() );
+        }
+
+        std::string toUtf8() const
         {
             return win32::toUtf8( _path.c_str() );
         }

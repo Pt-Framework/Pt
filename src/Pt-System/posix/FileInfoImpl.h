@@ -28,6 +28,7 @@
 
 #include <Pt/System/FileInfo.h>
 #include <Pt/System/IOError.h>
+#include <Pt/Utf8Codec.h>
 #include <string>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -41,40 +42,60 @@ namespace Pt {
 
 namespace System {
 
+/*
+#include <langinfo.h>
+char *charset = nl_langinfo(CODESET);
+
+if "C" or empty check next of:
+LC_ALL -> LC_TYPE -> LANG
+
+parse codeset from
+lang.codeset@bbb
+
+match codeset against list, if empty match lang against list
+*/
+
 class PathImpl
 {
     public:
         PathImpl()
-        {
-        }
-
-        PathImpl(const PathImpl& p)
-        {
-        }
+        { }
 
         PathImpl(const char* s)
         : _path(s)
         {
         }
 
-        PathImpl& operator=(const PathImpl& p)
-        {
-            return *this;
-        }
-
-        PathImpl& operator=(const char* s)
+        PathImpl& assign(const char* s)
         {
             _path = s;
             return *this;
         }
 
-        PathImpl& operator+=(const char* p)
+        PathImpl& assign(const Pt::String& s)
         {
-            _path += p;
+            _path = Pt::Utf8Codec::encode(s);
             return *this;
         }
 
-        const std::string& str() const
+        PathImpl& append(const char* s)
+        {
+            _path += s;
+            return *this;
+        }
+
+        PathImpl& append(const Pt::String& s)
+        {
+            _path += Pt::Utf8Codec::encode(s);
+            return *this;
+        }
+
+        Pt::String toString() const
+        {
+            return Pt::Utf8Codec::decode(_path);
+        }
+
+        std::string toUtf8() const
         {
             return _path;
         }
@@ -87,6 +108,7 @@ class PathImpl
     private:
         std::string _path;
 };
+
 
 class FileInfoImpl
 {

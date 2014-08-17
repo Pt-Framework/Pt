@@ -49,7 +49,15 @@ Path::Path(const Path& p)
 
 Path::Path(const char* s)
 {
-    _impl = new PathImpl(s);
+    _impl = new PathImpl();
+    _impl->assign(s);
+}
+
+
+Path::Path(const Pt::String& s)
+{
+    _impl = new PathImpl();
+    _impl->assign(s);
 }
 
 
@@ -68,21 +76,59 @@ Path& Path::operator=(const Path& p)
 
 Path& Path::operator=(const char* s)
 {
-    *_impl = s;
+    _impl->assign(s);
     return *this;
 }
 
 
-Path& Path::operator+=(const char* p)
+Path& Path::operator=(const Pt::String& s)
 {
-    *_impl += p;
+    _impl->assign(s);
     return *this;
 }
 
 
-std::string Path::str() const
+Path& Path::operator+=(const char* s)
 {
-    return _impl->str();
+    _impl->append(s);
+    return *this;
+}
+
+
+Path& Path::operator+=(const Pt::String& s)
+{
+    _impl->append(s);
+    return *this;
+}
+
+
+Path& Path::operator/=(const char* s)
+{
+    const char* sep = FileInfo::sep();
+    _impl->append(sep);
+    _impl->append(s);
+    return *this;
+}
+
+
+Path& Path::operator/=(const Pt::String& s)
+{
+    const char* sep = FileInfo::sep();
+    _impl->append(sep);
+    _impl->append(s);
+    return *this;
+}
+
+
+Pt::String Path::toString() const
+{
+    return _impl->toString();
+}
+
+
+std::string Path::toUtf8() const
+{
+    return _impl->toUtf8();
 }
 
 
@@ -90,6 +136,8 @@ std::string Path::toLocal() const
 {
     return _impl->toLocal();
 }
+
+
 
 
 FileInfo::FileInfo(const std::string& path)

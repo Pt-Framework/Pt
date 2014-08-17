@@ -30,6 +30,7 @@
 #define Pt_System_FileInfo_h
 
 #include <Pt/System/Api.h>
+#include <Pt/String.h>
 #include <Pt/Types.h>
 #include <string>
 
@@ -50,31 +51,53 @@ class PT_SYSTEM_API Path
         */
         Path(const Path& p);
 
-        /** @brief Construct from a string.
+        /** @brief Construct from a path name in UTF8-encoding.
         */
         explicit Path(const char* s);
+
+        /** @brief Construct from a path name.
+        */
+        explicit Path(const Pt::String& s);
 
         /** @brief Assignment operator.
         */
         Path& operator=(const Path& p);
 
-        /** @brief Assigns a string.
+        /** @brief Assigns a path name in UTF8-encoding.
         */
-        Path& operator=(const char* p);
+        Path& operator=(const char* s);
 
-        /** @brief Appends a string.
+        /** @brief Assigns a path name.
+        */
+        Path& operator=(const Pt::String& s);
+
+        /** @brief Appends a path name in UTF8-encoding.
         */
         Path& operator+=(const char* p);
+
+        /** @brief Appends a path name.
+        */
+        Path& operator+=(const Pt::String& s);
+
+        /** @brief Concatenates a path name.
+        */
+        Path& operator/=(const Pt::String& s);
+
+        /** @brief Concatenates a path name in UTF8-encoding.
+        */
+        Path& operator/=(const char* p);
 
         /** @brief Destructor.
         */
         ~Path();
 
-        /** @brief Returns the path name as a string.
-        */
-        std::string str() const;
+        Pt::String toString() const;
 
-        /** @brief Returns the path in local encoding.
+        /** @brief Returns the path name in UTF-8 encoding.
+        */
+        std::string toUtf8() const;
+
+        /** @brief Returns the path name in local encoding.
         */
         std::string toLocal() const;
 
