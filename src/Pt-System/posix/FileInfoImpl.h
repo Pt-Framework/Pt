@@ -42,62 +42,134 @@ namespace Pt {
 
 namespace System {
 
+static TextCodec<Pt::Char, char>* getSystemCodec()
+{
 /*
-#include <langinfo.h>
-char *charset = nl_langinfo(CODESET);
+    #include <langinfo.h>
+    char *charset = nl_langinfo(CODESET);
 
-if "C" or empty check next of:
-LC_ALL -> LC_TYPE -> LANG
+    if "C" or empty check next of:
+    LC_ALL -> LC_TYPE -> LANG
 
-parse codeset from
-lang.codeset@bbb
+    parse codeset from
+    lang.codeset@bbb
 
-match codeset against list, if empty match lang against list
+    match codeset against list, if empty match lang against list
 */
+
+    return 0;
+}
+
+
+static TextCodec<Pt::Char, char>* systemCodec()
+{
+    static TextCodec<Pt::Char, char>* _systemCodec = getSystemCodec();
+    return _systemCodec;
+}
+
+
+static struct InitSystemCodec
+{
+    InitSystemCodec()
+    { systemCodec(); }
+} _initSystemCodec ;
+
+
+
+inline void toLocalPath(const Pt::Char* from, std::size_t size, std::string& local)
+{
+    TextCodec<Pt::Char, char>* codec = systemCodec();
+    
+    if( ! codec )
+    {
+        local = Utf8Codec::encode(from, size);
+        return;
+    }
+
+    char to[16];
+    char* toEnd = to + 16;
+    const Pt::Char* fromEnd = from + size;
+    MBState state;
+    std::codecvt_base::result r;
+
+    do 
+    {
+        char* toNext = to;
+        r = codec->out(state, from, fromEnd, from, to, toEnd, toNext);
+
+        if( r == std::codecvt_base::error )
+        {
+            local.assign(size, '?');
+            return;
+        }
+        
+        local.append(to, toNext);
+    } 
+    while (r == std::codecvt_base::partial);
+}
+
+
+inline void fromLocalPath(const char* from, std::size_t size, Pt::String& ustr)
+{
+    TextCodec<Pt::Char, char>* codec = systemCodec();
+    if( ! codec )
+    {
+        ustr = Utf8Codec::decode(from, size);
+        return;
+    }
+
+    Pt::Char to[16];
+    Pt::Char* toEnd = to + 16;
+    const char* fromEnd = from + size;
+    MBState state;
+    std::codecvt_base::result r;
+
+    do 
+    {
+        Pt::Char* toNext = to;
+        r = codec->in(state, from, fromEnd, from, to, toEnd, toNext);
+
+        if (r == std::codecvt_base::error)
+        {
+            ustr = Pt::String::widen(from);
+            return;
+        }
+
+        ustr.append(to, toNext);
+    } 
+    while (r == std::codecvt_base::partial);
+}
+
 
 class PathImpl
 {
     public:
         PathImpl()
         { }
-
-        PathImpl(const char* s)
-        : _path(s)
-        {
-        }
-
-        PathImpl& assign(const char* s)
-        {
-            _path = s;
-            return *this;
-        }
+        
+        void clear()
+        { _path.clear(); }
 
         PathImpl& assign(const Pt::String& s)
         {
-            _path = Pt::Utf8Codec::encode(s);
-            return *this;
-        }
-
-        PathImpl& append(const char* s)
-        {
-            _path += s;
+            _path.clear();
+            toLocalPath(s.c_str(), s.size(), _path);
             return *this;
         }
 
         PathImpl& append(const Pt::String& s)
         {
-            _path += Pt::Utf8Codec::encode(s);
+            std::string str;
+            toLocalPath(s.c_str(), s.size(), str);
+            _path += str;
             return *this;
         }
 
         Pt::String toString() const
         {
-            return Pt::Utf8Codec::decode(_path);
-        }
-
-        std::string toUtf8() const
-        {
-            return _path;
+            Pt::String str;
+            fromLocalPath(_path.c_str(), _path.size(), str);
+            return str;
         }
 
         const std::string& toLocal() const
