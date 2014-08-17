@@ -47,29 +47,13 @@ class PathImpl
         PathImpl()
         { }
 
-        PathImpl(const char* s)
-        {
-            win32::fromUtf8(s, _path);
-        }
-
-        PathImpl& assign(const char* s)
-        {
-            win32::fromUtf8(s, _path);
-            return *this;
-        }
+        void clear()
+        { _path.clear(); }
 
         PathImpl& assign(const Pt::String& s)
         {
             _path.clear();
             s.toUtf16( std::back_inserter(_path) );
-            return *this;
-        }
-
-        PathImpl& append(const char* s)
-        {
-            std::wstring str;
-            win32::fromUtf8(s, str);
-            _path += str;
             return *this;
         }
 
@@ -84,11 +68,6 @@ class PathImpl
         Pt::String toString() const
         {
             return Pt::String::fromUtf16( _path.begin(), _path.end() );
-        }
-
-        std::string toUtf8() const
-        {
-            return win32::toUtf8( _path.c_str() );
         }
 
         std::string toLocal() const
