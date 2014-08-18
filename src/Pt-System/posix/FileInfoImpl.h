@@ -75,7 +75,6 @@ static struct InitSystemCodec
 } _initSystemCodec ;
 
 
-
 inline void toLocalPath(const Pt::Char* from, std::size_t size, std::string& local)
 {
     TextCodec<Pt::Char, char>* codec = systemCodec();
@@ -86,8 +85,8 @@ inline void toLocalPath(const Pt::Char* from, std::size_t size, std::string& loc
         return;
     }
 
-    char to[16];
-    char* toEnd = to + 16;
+    char to[32];
+    char* toEnd = to + 32;
     const Pt::Char* fromEnd = from + size;
     MBState state;
     std::codecvt_base::result r;
@@ -99,7 +98,7 @@ inline void toLocalPath(const Pt::Char* from, std::size_t size, std::string& loc
 
         if( r == std::codecvt_base::error )
         {
-            local.assign(size, '?');
+            local.append(5, '?');
             return;
         }
         
@@ -118,8 +117,8 @@ inline void fromLocalPath(const char* from, std::size_t size, Pt::String& ustr)
         return;
     }
 
-    Pt::Char to[16];
-    Pt::Char* toEnd = to + 16;
+    Pt::Char to[32];
+    Pt::Char* toEnd = to + 32;
     const char* fromEnd = from + size;
     MBState state;
     std::codecvt_base::result r;
@@ -131,7 +130,7 @@ inline void fromLocalPath(const char* from, std::size_t size, Pt::String& ustr)
 
         if (r == std::codecvt_base::error)
         {
-            ustr = Pt::String::widen(from);
+            ustr.append(5, '?');
             return;
         }
 
@@ -150,19 +149,42 @@ class PathImpl
         void clear()
         { _path.clear(); }
 
-        PathImpl& assign(const Pt::String& s)
+        PathImpl& append(const Pt::String& s)
         {
-            _path.clear();
             toLocalPath(s.c_str(), s.size(), _path);
             return *this;
         }
 
-        PathImpl& append(const Pt::String& s)
+        PathImpl& append(const Pt::Char* s, std::size_t n)
         {
-            std::string str;
-            toLocalPath(s.c_str(), s.size(), str);
-            _path += str;
+            toLocalPath(s, n, _path);
             return *this;
+        }
+
+        void append(const char* from, std::size_t size)
+        {
+            Pt::Utf8Codec codec;
+
+            Pt::Char to[32];
+            Pt::Char* toEnd = to + 32;
+            const char* fromEnd = from + size;
+            MBState state;
+            std::codecvt_base::result r;
+
+            do 
+            {
+                Pt::Char* toNext = to;
+                r = codec.in(state, from, fromEnd, from, to, toEnd, toNext);
+
+                if (r == std::codecvt_base::error)
+                {
+                    this->append( Pt::String(5, '?') );
+                    return;
+                }
+
+                this->append(to, toNext - to);
+            } 
+            while(r == std::codecvt_base::partial);
         }
 
         Pt::String toString() const

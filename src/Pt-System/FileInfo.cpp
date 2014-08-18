@@ -28,12 +28,14 @@
 
 #include "FileInfoImpl.h"
 #include <Pt/System/FileInfo.h>
+#include <Pt/Utf8Codec.h>
 #include <stddef.h>
 #include <stdio.h>
 
 namespace Pt {
 
 namespace System {
+
 
 Path::Path()
 {
@@ -50,7 +52,7 @@ Path::Path(const Path& p)
 Path::Path(const Pt::String& s)
 {
     _impl = new PathImpl();
-    _impl->assign(s);
+    _impl->append(s);
 }
 
 
@@ -69,7 +71,8 @@ Path& Path::operator=(const Path& p)
 
 Path& Path::operator=(const Pt::String& s)
 {
-    _impl->assign(s);
+    _impl->clear();
+    _impl->append(s);
     return *this;
 }
 
