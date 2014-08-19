@@ -79,11 +79,9 @@ inline void toLocalPath(const Pt::Char* from, std::size_t size, std::string& loc
 {
     TextCodec<Pt::Char, char>* codec = systemCodec();
     
+    Utf8Codec utf8Codec;
     if( ! codec )
-    {
-        local = Utf8Codec::encode(from, size);
-        return;
-    }
+        codec = &utf8Codec;;
 
     char to[32];
     char* toEnd = to + 32;
@@ -97,25 +95,21 @@ inline void toLocalPath(const Pt::Char* from, std::size_t size, std::string& loc
         r = codec->out(state, from, fromEnd, from, to, toEnd, toNext);
 
         if( r == std::codecvt_base::error )
-        {
             local.append(5, '?');
-            return;
-        }
-        
-        local.append(to, toNext);
+        else
+            local.append(to, toNext);
     } 
-    while (r == std::codecvt_base::partial);
+    while(r == std::codecvt_base::partial);
 }
 
 
 inline void fromLocalPath(const char* from, std::size_t size, Pt::String& ustr)
 {
     TextCodec<Pt::Char, char>* codec = systemCodec();
+    
+    Utf8Codec utf8Codec;
     if( ! codec )
-    {
-        ustr = Utf8Codec::decode(from, size);
-        return;
-    }
+        codec = &utf8Codec;;
 
     Pt::Char to[32];
     Pt::Char* toEnd = to + 32;
@@ -129,14 +123,11 @@ inline void fromLocalPath(const char* from, std::size_t size, Pt::String& ustr)
         r = codec->in(state, from, fromEnd, from, to, toEnd, toNext);
 
         if (r == std::codecvt_base::error)
-        {
             ustr.append(5, '?');
-            return;
-        }
-
-        ustr.append(to, toNext);
+        else
+            ustr.append(to, toNext);
     } 
-    while (r == std::codecvt_base::partial);
+    while(r == std::codecvt_base::partial);
 }
 
 
@@ -149,42 +140,25 @@ class PathImpl
         void clear()
         { _path.clear(); }
 
-        PathImpl& append(const Pt::String& s)
+        void append(const Pt::String& s)
         {
             toLocalPath(s.c_str(), s.size(), _path);
-            return *this;
         }
 
-        PathImpl& append(const Pt::Char* s, std::size_t n)
+        void append(const Pt::Char* s, std::size_t n)
         {
             toLocalPath(s, n, _path);
-            return *this;
         }
 
-        void append(const char* from, std::size_t size)
+        bool append(const char* from, std::size_t size)
         {
-            Pt::Utf8Codec codec;
-
-            Pt::Char to[32];
-            Pt::Char* toEnd = to + 32;
-            const char* fromEnd = from + size;
-            MBState state;
-            std::codecvt_base::result r;
-
-            do 
+            TextCodec<Pt::Char, char>* codec = systemCodec();
+            if( ! codec )
             {
-                Pt::Char* toNext = to;
-                r = codec.in(state, from, fromEnd, from, to, toEnd, toNext);
+                _path.assign(from, size);
+            }
 
-                if (r == std::codecvt_base::error)
-                {
-                    this->append( Pt::String(5, '?') );
-                    return;
-                }
-
-                this->append(to, toNext - to);
-            } 
-            while(r == std::codecvt_base::partial);
+            return ! codec;
         }
 
         Pt::String toString() const

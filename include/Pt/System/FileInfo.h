@@ -81,6 +81,10 @@ class PT_SYSTEM_API Path
         */
         Path& append(const Pt::String& s);
 
+        /** @brief Appends a path name.
+        */
+        Path& append(const char* from, std::size_t size);
+
         /** @brief Destructor.
         */
         ~Path();

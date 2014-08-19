@@ -51,42 +51,19 @@ class PathImpl
         void clear()
         { _path.clear(); }
 
-        PathImpl& append(const Pt::String& s)
+        void append(const Pt::String& s)
         {
             s.toUtf16( std::back_inserter(_path) );
-            return *this;
         }
 
-        PathImpl& append(const Pt::Char* s, std::size_t n)
+        void append(const Pt::Char* s, std::size_t n)
         {
             Pt::String(s, n).toUtf16( std::back_inserter(_path) );
-            return *this;
         }
 
-        void append(const char* from, std::size_t size)
+        bool append(const char* from, std::size_t size)
         {
-            Pt::Utf8Codec codec;
-
-            Pt::Char to[32];
-            Pt::Char* toEnd = to + 32;
-            const char* fromEnd = from + size;
-            MBState state;
-            std::codecvt_base::result r;
-
-            do 
-            {
-                Pt::Char* toNext = to;
-                r = codec.in(state, from, fromEnd, from, to, toEnd, toNext);
-
-                if (r == std::codecvt_base::error)
-                {
-                    this->append( Pt::String(5, '?') );
-                    return;
-                }
-
-                this->append(to, toNext - to);
-            } 
-            while(r == std::codecvt_base::partial);
+            return false;
         }
 
         Pt::String toString() const

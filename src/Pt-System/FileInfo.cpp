@@ -93,6 +93,37 @@ Path& Path::append(const Pt::String& s)
 }
 
 
+Path& Path::append(const char* from, std::size_t size)
+{
+    if( _impl->append(from, size) )
+    {
+        return *this;
+    }
+
+    Pt::Char to[32];
+    Pt::Char* toEnd = to + 32;
+    const char* fromEnd = from + size;
+    
+    MBState state;
+    std::codecvt_base::result r;
+    Pt::Utf8Codec codec;
+
+    do 
+    {
+        Pt::Char* toNext = to;
+        r = codec.in(state, from, fromEnd, from, to, toEnd, toNext);
+
+        if (r == std::codecvt_base::error)
+            _impl->append( Pt::String(5, '?') );
+        else
+            _impl->append(to, toNext - to);
+    } 
+    while(r == std::codecvt_base::partial);
+
+    return *this;
+}
+
+
 Pt::String Path::toString() const
 {
     return _impl->toString();
