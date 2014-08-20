@@ -102,7 +102,7 @@ void SettingsWriter::write(const SerializationInfo& si)
         if( it->isScalar() )
         {
             value = toStr(*it);
-            this->writeEntry( it->name(), value, it->typeName() );
+            this->writeEntry( it->name(), value, *it );
             *_os << std::endl;
         }
         else if( it->isStruct() || it->isSequence() )
@@ -147,7 +147,7 @@ void SettingsWriter::writeParent(const SerializationInfo& sd, const std::string&
              if( ! prefix.empty() )
                 *_os << Pt::String::widen( prefix ) << '.';
 
-            this->writeEntry( name, value, it->typeName() );
+            this->writeEntry( name, value, *it );
 
             if(! name.empty() )
                 *_os << std::endl;
@@ -189,7 +189,7 @@ void SettingsWriter::writeChild(const SerializationInfo& sd)
         if( it->isScalar() )
         {
             value = toStr(*it);
-            this->writeEntry( it->name(), value, it->typeName() );
+            this->writeEntry( it->name(), value, *it );
         }
         else if( it->isStruct() || it->isSequence() )
         {
@@ -222,16 +222,21 @@ void writeEscapedValue(std::basic_ostream<Pt::Char>& os, const Pt::String& value
 }
 
 
-void SettingsWriter::writeEntry(const std::string& name, const Pt::String& value, const std::string& type)
+void SettingsWriter::writeEntry(const std::string& name, const Pt::String& value, const SerializationInfo& si)
 {
+    std::string type = si.typeName();
+
     if( type.empty() )
     {
         if( name.empty() == false)
             *_os << Pt::String::widen(name) << Char('=');
 
-        *_os  << Char('\"');
+        if(si.type() == SerializationInfo::Str)
+            *_os  << Char('\"');
         writeEscapedValue(*_os, value);
-        *_os << Char('\"');
+
+        if(si.type() == SerializationInfo::Str)
+            *_os << Char('\"');
 
         return;
     }
