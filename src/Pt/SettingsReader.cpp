@@ -171,13 +171,13 @@ void SettingsReader::pushValue()
                 digits++;
         }
 
-        if(dot == 1 && digits >= 1 && (_token.length() - 1) == digits )
+        if(dot == 1 && digits >= 1)
         {
             double d = 0;
             Pt::parseFloat(_token.begin(), _token.end(), d);
             _current->setDouble(d);
         }
-        else if(_token.length() == digits && digits >= 1)
+        else if(digits >= 1)
         {
             Pt::int32_t i = 0;
             Pt::parseInt(_token.begin(), _token.end(), i);
