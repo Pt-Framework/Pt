@@ -263,6 +263,7 @@
     <ClInclude Include="..\..\include\Pt\System\LogTarget.h" />
     <ClInclude Include="..\..\include\Pt\System\MainLoop.h" />
     <ClInclude Include="..\..\include\Pt\System\Mutex.h" />
+    <ClInclude Include="..\..\include\Pt\System\Path.h" />
     <ClInclude Include="..\..\include\Pt\System\Pipe.h" />
     <ClInclude Include="..\..\include\Pt\System\Plugin.h" />
     <ClInclude Include="..\..\include\Pt\System\Process.h" />
@@ -427,6 +428,7 @@
     <ClInclude Include="..\..\src\Pt-System\win32\LibraryImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\MainLoopImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\MutexImpl.h" />
+    <ClInclude Include="..\..\src\Pt-System\win32\PathImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\PipeImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\ProcessImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\Selector.h" />
@@ -730,6 +732,7 @@
     <ClCompile Include="..\..\src\Pt-System\LogTarget.cpp" />
     <ClCompile Include="..\..\src\Pt-System\MainLoop.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Mutex.cpp" />
+    <ClCompile Include="..\..\src\Pt-System\Path.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Pipe.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Process.cpp" />
     <ClCompile Include="..\..\src\Pt-System\Selectable.cpp" />

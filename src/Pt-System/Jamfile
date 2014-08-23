@@ -26,6 +26,7 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           LogTarget.cpp
                           MainLoop.cpp
                           Mutex.cpp
+                          Path.cpp
                           Pipe.cpp
                           Process.cpp
                           Selectable.cpp

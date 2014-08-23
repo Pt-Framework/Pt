@@ -1,0 +1,182 @@
+/*
+ * Copyright (C) 2006-2014 Marc Boris Duerner
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * As a special exception, you may use this file as part of a free
+ * software library without restriction. Specifically, if other files
+ * instantiate templates or use macros or inline functions from this
+ * file, or you compile this file and link it with other files to
+ * produce an executable, this file does not by itself cause the
+ * resulting executable to be covered by the GNU General Public
+ * License. This exception does not however invalidate any other
+ * reasons why the executable file might be covered by the GNU Library
+ * General Public License.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+#include <Pt/Utf8Codec.h>
+#include <Pt/String.h>
+#include <string>
+
+namespace Pt {
+
+namespace System {
+
+static TextCodec<Pt::Char, char>* getSystemCodec()
+{
+/*
+    #include <langinfo.h>
+    char *charset = nl_langinfo(CODESET);
+
+    if "C" or empty check next of:
+    LC_ALL -> LC_TYPE -> LANG
+
+    parse codeset from
+    lang.codeset@bbb
+
+    match codeset against list, if empty match lang against list
+*/
+
+    return 0;
+}
+
+
+static TextCodec<Pt::Char, char>* systemCodec()
+{
+    static TextCodec<Pt::Char, char>* _systemCodec = getSystemCodec();
+    return _systemCodec;
+}
+
+
+static struct InitSystemCodec
+{
+    InitSystemCodec()
+    { systemCodec(); }
+} _initSystemCodec ;
+
+
+inline void toLocalPath(const Pt::Char* from, std::size_t size, std::string& local)
+{
+    TextCodec<Pt::Char, char>* codec = systemCodec();
+    
+    Utf8Codec utf8Codec;
+    if( ! codec )
+        codec = &utf8Codec;;
+
+    char to[32];
+    char* toEnd = to + 32;
+    const Pt::Char* fromEnd = from + size;
+    MBState state;
+    std::codecvt_base::result r;
+
+    do 
+    {
+        char* toNext = to;
+        r = codec->out(state, from, fromEnd, from, to, toEnd, toNext);
+
+        if( r == std::codecvt_base::error )
+            local.append(5, '?');
+        else
+            local.append(to, toNext);
+    } 
+    while(r == std::codecvt_base::partial);
+}
+
+
+inline void fromLocalPath(const char* from, std::size_t size, Pt::String& ustr)
+{
+    TextCodec<Pt::Char, char>* codec = systemCodec();
+    
+    Utf8Codec utf8Codec;
+    if( ! codec )
+        codec = &utf8Codec;;
+
+    Pt::Char to[32];
+    Pt::Char* toEnd = to + 32;
+    const char* fromEnd = from + size;
+    MBState state;
+    std::codecvt_base::result r;
+
+    do 
+    {
+        Pt::Char* toNext = to;
+        r = codec->in(state, from, fromEnd, from, to, toEnd, toNext);
+
+        if (r == std::codecvt_base::error)
+            ustr.append(5, '?');
+        else
+            ustr.append(to, toNext);
+    } 
+    while(r == std::codecvt_base::partial);
+}
+
+
+class PathImpl
+{
+    public:
+        PathImpl()
+        { }
+        
+        void clear()
+        { _path.clear(); }
+
+        void append(const PathImpl& p)
+        {
+            _path += p._path;
+        }
+
+        void append(const Pt::Char* s, std::size_t n)
+        {
+            toLocalPath(s, n, _path);
+        }
+
+        bool append(const char* from, std::size_t size)
+        {
+            TextCodec<Pt::Char, char>* codec = systemCodec();
+            if( ! codec )
+            {
+                _path.assign(from, size);
+            }
+
+            return ! codec;
+        }
+
+        void appendSlash()
+        {
+            _path += '/';
+        }
+
+        Pt::String toString() const
+        {
+            Pt::String str;
+            fromLocalPath(_path.c_str(), _path.size(), str);
+            return str;
+        }
+
+        const std::string& toLocal() const
+        {
+            return _path;
+        }
+
+        static const char* slash() 
+        { return "/"; }
+
+    private:
+        std::string _path;
+};
+
+} // namespace System
+
+} // namespace Pt

@@ -31,7 +31,6 @@
 #include <Pt/System/FileInfo.h>
 #include <Pt/System/IOError.h>
 #include <Pt/System/SystemError.h>
-#include <Pt/Utf8Codec.h>
 #include <string>
 #include <iterator>
 #include <cstring>
@@ -41,45 +40,6 @@
 namespace Pt {
 
 namespace System {
-
-class PathImpl
-{
-    public:
-        PathImpl()
-        { }
-
-        void clear()
-        { _path.clear(); }
-
-        void append(const Pt::String& s)
-        {
-            s.toUtf16( std::back_inserter(_path) );
-        }
-
-        void append(const Pt::Char* s, std::size_t n)
-        {
-            Pt::String(s, n).toUtf16( std::back_inserter(_path) );
-        }
-
-        bool append(const char* from, std::size_t size)
-        {
-            return false;
-        }
-
-        Pt::String toString() const
-        {
-            return Pt::String::fromUtf16( _path.begin(), _path.end() );
-        }
-
-        std::string toLocal() const
-        {
-            return win32::toMultiByte( _path.c_str() );
-        }
-
-    private:
-        std::wstring _path;
-};
-
 
 class FileInfoImpl
 {

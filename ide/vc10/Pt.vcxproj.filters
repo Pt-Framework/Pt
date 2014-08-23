@@ -1452,6 +1452,12 @@
     <ClInclude Include="..\..\include\Pt\Mfc\MainLoop.h">
       <Filter>Pt-Mfc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-System\win32\PathImpl.h">
+      <Filter>Pt-System\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\System\Path.h">
+      <Filter>Pt-System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2717,6 +2723,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Mfc\MainLoop.cpp">
       <Filter>Pt-Mfc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\Path.cpp">
+      <Filter>Pt-System</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
