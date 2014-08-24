@@ -153,7 +153,7 @@ class PathImpl
             TextCodec<Pt::Char, char>* codec = systemCodec();
             if( ! codec )
             {
-                _path.assign(s, n);
+                _path.append(s, n);
             }
 
             return ! codec;
