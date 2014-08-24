@@ -100,7 +100,7 @@ std::string FileInfo::name(const char* path)
 std::string FileInfo::dirName(const std::string& path)
 {
     // Find last slash. This separates the file name from the path.
-    std::string::size_type pos = path.find_last_of( FileInfoImpl::sep() );
+    std::string::size_type pos = path.rfind( FileInfoImpl::sep() );
 
     // If there is no separator, the file is relative to the current 
     // directory. So an empty path is returned.

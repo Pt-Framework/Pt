@@ -44,24 +44,83 @@ class PathImpl
         void clear()
         { _path.clear(); }
 
-        void append(const PathImpl& p)
+        bool empty() const
+        { return _path.empty(); }
+
+        std::size_t size() const
+        { return _path.size(); }
+
+        void concat(const PathImpl& p)
         {
             _path += p._path;
         }
 
-        void append(const Pt::Char* s, std::size_t n)
+        void concat(const Pt::Char* s, std::size_t n)
         {
             Pt::String(s, n).toUtf16( std::back_inserter(_path) );
         }
 
-        bool append(const char* from, std::size_t size)
+        bool concat(const char*, std::size_t)
         {
+            // no direct assign from UTF-8 possible
             return false;
         }
 
-        void appendSlash()
+        void appendSlash(const PathImpl& p)
         {
-            _path += '\\';
+            if( ! empty() &&
+                ! p.empty() &&
+                _path.back() != dirsep() &&
+                p._path.front() != dirsep())
+            { 
+                _path += dirsep();
+            }
+        }
+
+        void appendSlash(const Pt::Char* s, std::size_t n)
+        {
+            if( ! empty() &&
+                n > 0 &&
+                _path.back() != dirsep() &&
+                s[0] != dirsep())
+            { 
+                _path += dirsep();
+            }
+        }
+
+        void appendSlash(const char* s, std::size_t n)
+        {
+            if( ! empty() &&
+                n > 0 &&
+                _path.back() != dirsep() &&
+                s[0] != dirsep())
+            { 
+                _path += dirsep();
+            }
+        }
+
+        typedef std::wstring::size_type size_type;
+
+        static size_type npos()
+        {
+            return std::wstring::npos;
+        }
+
+        size_type rfind(char ch) const
+        {
+            return _path.rfind(ch);
+        }
+
+        Pt::String substr(size_type pos, size_type n)
+        {
+            std::wstring::iterator from = _path.begin() + pos;
+            Pt::String tmp = Pt::String::fromUtf16(from, from + n);
+            return tmp;
+        }
+
+        int compare(const PathImpl& p) const
+        {
+            return _path.compare(p._path);
         }
 
         Pt::String toString() const
@@ -74,8 +133,11 @@ class PathImpl
             return win32::toMultiByte( _path.c_str() );
         }
 
-        static const char* slash() 
-        { return "\\"; }
+        static char dirsep() 
+        { return '\\'; }
+
+        static char extsep() 
+        { return '.'; }
 
     private:
         std::wstring _path;

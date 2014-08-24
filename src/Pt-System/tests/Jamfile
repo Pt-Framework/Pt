@@ -6,6 +6,7 @@ PT_SYSTEM_TESTS = ApplicationTest.cpp
                   DirectoryTest.cpp
                   EventLoopTest.cpp
                   LoggerTest.cpp
+                  PathTest.cpp
                   PipeTest.cpp
                   ProcessTest.cpp
                   SerialDeviceTest.cpp

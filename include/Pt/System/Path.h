@@ -59,15 +59,19 @@ class PT_SYSTEM_API Path
         */
         explicit Path(const char* s);
 
+        /** @brief Construct from an UTF-8 encoded path name.
+        */
+        explicit Path(const char* s, std::size_t n);
+
         /** @brief Destructor.
         */
         ~Path();
 
         // Assignments
 
-        /** @brief Assignment operator.
+        /** @brief Assigns a path name.
         */
-        Path& operator=(const Path& p);
+        Path& assign(const Path& p);
 
         /** @brief Assigns a path name.
         */
@@ -76,6 +80,15 @@ class PT_SYSTEM_API Path
         /** @brief Assigns an UTF-8 encoded path name.
         */
         Path& assign(const char* s);
+
+        /** @brief Assigns an UTF-8 encoded path name.
+        */
+        Path& assign(const char* s, std::size_t n);
+
+        /** @brief Assignment operator.
+        */
+        Path& operator=(const Path& p)
+        { return assign(p); }
 
         /** @brief Assigns a path name.
         */
@@ -99,11 +112,11 @@ class PT_SYSTEM_API Path
 
         /** @brief Appends an UTF-8 encoded path name.
         */
-        Path& append(const char* from);
+        Path& append(const char* s);
 
         /** @brief Appends an UTF-8 encoded path name.
         */
-        Path& append(const char* from, std::size_t size);
+        Path& append(const char* s, std::size_t n);
 
         /** @brief Appends a path name.
         */
@@ -124,28 +137,106 @@ class PT_SYSTEM_API Path
 
         /** @brief Concatenates a path name.
         */
+        Path& concat(const Path& p);
+
+        /** @brief Concatenates a path name.
+        */
         Path& concat(const Pt::String& s);
 
         /** @brief Concatenates a path name.
         */
+        Path& concat(const char* s);
+
+        /** @brief Appends an UTF-8 encoded path name.
+        */
+        Path& concat(const char* s, std::size_t n);
+
+        /** @brief Concatenates a path name.
+        */
+        Path& operator+=(const Path& p)
+        { return concat(p); }
+        
+        /** @brief Concatenates a path name.
+        */
         Path& operator+=(const Pt::String& s)
         { return concat(s); }
-        
+
+        /** @brief Concatenates a path name.
+        */
+        Path& operator+=(const char* s)
+        { return concat(s); }
+
         // Modifiers
 
         void clear();
-        
+
+        // Query
+
+        bool empty() const;
+
+        Pt::String fileName() const;
+
+        Pt::String dirName() const;
+
+        Pt::String baseName() const;
+
+        Pt::String extension() const;
+
+        // Comparison
+
+        int compare(const Path& p) const;
+
         // Conversion
 
+        /** @brief Returns the path name.
+        */
         Pt::String toString() const;
 
         /** @brief Returns the path name in local encoding.
         */
         std::string toLocal() const;
 
+        static Pt::Char dirsep();
+
     private:
         class PathImpl* _impl;
 };
+
+/** @brief Compares two paths.
+
+    @related Path
+*/
+inline Path operator/(const Path& a, const Path& b)
+{ 
+    return Path(a) /= b;
+}
+
+/** @brief Compares two paths.
+
+    @related Path
+*/
+inline bool operator==(const Path& a, const Path& b)
+{ 
+    return a.compare(b) == 0; 
+}
+
+/** @brief Compares two paths.
+
+    @related Path
+*/
+inline bool operator!=(const Path& a, const Path& b)
+{ 
+    return a.compare(b) != 0; 
+}
+
+/** @brief Compares two paths.
+
+    @related Path
+*/
+inline bool operator<(const Path& a, const Path& b)
+{ 
+    return a.compare(b) < 0;
+}
 
 } // namespace System
 

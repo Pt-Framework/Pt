@@ -2727,5 +2727,8 @@
     <ClCompile Include="..\..\src\Pt-System\Path.cpp">
       <Filter>Pt-System</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Pt-System\tests\PathTest.cpp">
+      <Filter>Pt-System\tests</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

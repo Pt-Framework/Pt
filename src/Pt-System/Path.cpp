@@ -50,15 +50,22 @@ Path::Path(const Path& p)
 Path::Path(const Pt::String& s)
 {
     _impl = new PathImpl();
-    _impl->append( s.c_str(), s.size() );
+    _impl->concat( s.c_str(), s.size() );
 }
 
 
 Path::Path(const char* s)
 {
-    std::size_t size = std::strlen(s);
+    std::size_t n = std::strlen(s);
     _impl = new PathImpl();
-    _impl->append(s, size);
+    _impl->concat(s, n);
+}
+
+
+Path::Path(const char* s, std::size_t n)
+{
+    _impl = new PathImpl();
+    _impl->concat(s, n);
 }
 
 
@@ -68,7 +75,7 @@ Path::~Path()
 }
 
 
-Path& Path::operator=(const Path& p)
+Path& Path::assign(const Path& p)
 {
     *_impl = *p._impl;
     return *this;
@@ -78,56 +85,92 @@ Path& Path::operator=(const Path& p)
 Path& Path::assign(const Pt::String& s)
 {
     _impl->clear();
-    _impl->append( s.c_str(), s.size() );
+    _impl->concat( s.c_str(), s.size() );
     return *this;
 }
 
 
 Path& Path::assign(const char* s)
 {
-    std::size_t size = std::strlen(s);
+    std::size_t n = std::strlen(s);
+    assign(s, n);
+    return *this;
+}
+
+
+Path& Path::assign(const char* s, std::size_t n)
+{
     _impl->clear();
-    _impl->append(s, size);
+    concat(s, n);
     return *this;
 }
 
 
 Path& Path::append(const Path& p)
 {
-    _impl->appendSlash();
-    _impl->append(*p._impl);
+    _impl->appendSlash(*p._impl);
+    _impl->concat(*p._impl);
     return *this;
 }
 
 
 Path& Path::append(const Pt::String& s)
 {
-    _impl->appendSlash();
-    _impl->append( s.c_str(), s.size() );
+    _impl->appendSlash( s.c_str(), s.size() );
+    _impl->concat( s.c_str(), s.size() );
     return *this;
 }
 
 
-Path& Path::append(const char* from)
+Path& Path::append(const char* s)
 {
-    std::size_t size = std::strlen(from);
-    append(from, size);
+    std::size_t n = std::strlen(s);
+    append(s, n);
     return *this;
 }
 
 
-Path& Path::append(const char* from, std::size_t size)
+Path& Path::append(const char* s, std::size_t n)
 {
-    _impl->appendSlash();
+    _impl->appendSlash(s, n);
+    concat(s, n);
+    return *this;
+}
 
-    if( _impl->append(from, size) )
+
+Path& Path::concat(const Path& p)
+{
+    _impl->concat(*p._impl);
+    return *this;
+}
+
+
+Path& Path::concat(const Pt::String& s)
+{
+    _impl->concat( s.c_str(), s.size() );
+    return *this;
+}
+
+
+Path& Path::concat(const char* s)
+{
+    std::size_t size = std::strlen(s);
+    concat(s, size);
+    return *this;
+}
+
+
+Path& Path::concat(const char* s, std::size_t n)
+{
+    if( _impl->concat(s, n) )
     {
         return *this;
     }
 
     Pt::Char to[32];
     Pt::Char* toEnd = to + 32;
-    const char* fromEnd = from + size;
+    const char* from  = s;
+    const char* fromEnd = s + n;
     
     MBState state;
     std::codecvt_base::result r;
@@ -139,9 +182,9 @@ Path& Path::append(const char* from, std::size_t size)
         r = codec.in(state, from, fromEnd, from, to, toEnd, toNext);
 
         if (r == std::codecvt_base::error)
-            _impl->append("?????", 5);
+            _impl->concat("?????", 5);
         else
-            _impl->append(to, toNext - to);
+            _impl->concat(to, toNext - to);
     } 
     while(r == std::codecvt_base::partial);
 
@@ -149,16 +192,79 @@ Path& Path::append(const char* from, std::size_t size)
 }
 
 
-Path& Path::concat(const Pt::String& s)
-{
-    _impl->append( s.c_str(), s.size() );
-    return *this;
-}
-
-
 void Path::clear()
 {
     _impl->clear();
+}
+
+
+bool Path::empty() const
+{
+    return _impl->empty();
+}
+
+
+Pt::String Path::fileName() const
+{
+    PathImpl::size_type pos = _impl->rfind( _impl->dirsep() );
+    if(pos == PathImpl::npos())
+        return toString();
+
+    std::size_t len = _impl->size();
+    if( ++pos < len )
+        return _impl->substr(pos, len - pos);
+
+    return Pt::String();
+}
+
+
+Pt::String Path::dirName() const
+{
+    PathImpl::size_type pos = _impl->rfind( _impl->dirsep() );
+    if (pos != PathImpl::npos())
+        return _impl->substr(0, pos + 1);
+
+    return Pt::String();
+}
+
+
+Pt::String Path::baseName() const
+{
+    Pt::String file = fileName();
+
+    Pt::String::size_type extPos = file.rfind('.');
+    if(extPos != Pt::String::npos)
+    {
+        file.erase(extPos);
+    }
+
+    return file;
+}
+
+
+Pt::String Path::extension() const
+{
+    Pt::String s;
+
+    PathImpl::size_type sepPos = _impl->rfind( _impl->dirsep() );
+    if(sepPos == PathImpl::npos())
+        sepPos = 0;
+
+    PathImpl::size_type extPos = _impl->rfind( _impl->extsep() );
+
+    std::size_t len = _impl->size();
+    if(extPos != PathImpl::npos() && sepPos < extPos && ++extPos < len )
+    {
+        s = _impl->substr(extPos, len - extPos);
+    }
+
+    return s;
+}
+
+
+int Path::compare(const Path& p) const
+{
+    return _impl->compare(*p._impl);
 }
 
 
@@ -171,6 +277,11 @@ Pt::String Path::toString() const
 std::string Path::toLocal() const
 {
     return _impl->toLocal();
+}
+
+Pt::Char Path::dirsep()
+{
+    return PathImpl::dirsep();
 }
 
 } // namespace System

@@ -744,6 +744,7 @@
     <ClCompile Include="..\..\src\Pt-System\tests\DirectoryTest.cpp" />
     <ClCompile Include="..\..\src\Pt-System\tests\EventLoopTest.cpp" />
     <ClCompile Include="..\..\src\Pt-System\tests\LoggerTest.cpp" />
+    <ClCompile Include="..\..\src\Pt-System\tests\PathTest.cpp" />
     <ClCompile Include="..\..\src\Pt-System\tests\PipeTest.cpp" />
     <ClCompile Include="..\..\src\Pt-System\tests\ProcessTest.cpp" />
     <ClCompile Include="..\..\src\Pt-System\tests\ProcessTestChild.cpp" />
