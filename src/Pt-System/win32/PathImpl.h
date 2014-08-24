@@ -70,8 +70,8 @@ class PathImpl
         {
             if( ! empty() &&
                 ! p.empty() &&
-                _path.back() != dirsep() &&
-                p._path.front() != dirsep())
+                _path[_path.size()-1] != dirsep() &&
+                p._path[0] != dirsep())
             { 
                 _path += dirsep();
             }
@@ -81,7 +81,7 @@ class PathImpl
         {
             if( ! empty() &&
                 n > 0 &&
-                _path.back() != dirsep() &&
+                _path[_path.size()-1] != dirsep() &&
                 s[0] != dirsep())
             { 
                 _path += dirsep();
@@ -92,7 +92,7 @@ class PathImpl
         {
             if( ! empty() &&
                 n > 0 &&
-                _path.back() != dirsep() &&
+                _path[_path.size()-1] != dirsep() &&
                 s[0] != dirsep())
             { 
                 _path += dirsep();
