@@ -30,6 +30,7 @@
 #include <Pt/Cma/ComponentLibrary.h>
 #include <Pt/Cma/IUnknown.h>
 #include <Pt/Cma/IComponentBuilder.h>
+#include <Pt/System/Path.h>
 #include <list>
 #include <string>
 
@@ -84,7 +85,7 @@ class PT_CMA_API ComponentFactory
         *
         * @param file A File object referencing the library in the file system.
         */
-        void loadLibrary(const std::string& file);
+        void loadLibrary(const System::Path& file);
 
         /**
         * @brief Unloads the given library.
@@ -96,7 +97,7 @@ class PT_CMA_API ComponentFactory
         *
         * @param file A File object referencing the library in the file system.
         */
-        bool unload(const std::string& file);
+        bool unload(const System::Path& file);
 
         /**
         * @brief Unloads all libraries which were loaded before.
@@ -146,7 +147,7 @@ class PT_CMA_API ComponentFactory
         * the component is tried to be loaded; otherwise no configuration is loaded.
         * @return An IUnknown pointer to the interfaces of the component.
         */
-        IUnknown* loadComponent(const std::string& file, bool loadConfig = true);
+        IUnknown* loadComponent(const System::Path& file, bool loadConfig = true);
 
         /**
         * @brief Returns true if the given library already was loaded.
@@ -157,7 +158,7 @@ class PT_CMA_API ComponentFactory
         * @param file A File object referencing the library in the file system.
         * @return true if the library was already loaded by this factory; false otherwise.
         */
-        bool isLoaded(const std::string& file);
+        bool isLoaded(const System::Path& file);
 
     private:
         /**
@@ -170,7 +171,7 @@ class PT_CMA_API ComponentFactory
         * @return Pointer to the corresponding ComponentLibrary object of the library
         * which was loaded.
         */
-        ComponentLibrary* _loadLibrary(const std::string& file);
+        ComponentLibrary* _loadLibrary(const System::Path& file);
 
         /**
         * @brief Returns a pointer to the ComponentLibrary object for the given library
@@ -183,7 +184,7 @@ class PT_CMA_API ComponentFactory
         * @return A pointer to the corresponding ComponentLibrary for the given library
         * file; or 0 if the library was not yet loaded.
         */
-        ComponentLibrary* library(const std::string& file);
+        ComponentLibrary* library(const System::Path& file);
 
         /**
         * @brief Loads the configuration for the given component.

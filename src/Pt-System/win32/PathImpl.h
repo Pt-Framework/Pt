@@ -139,6 +139,12 @@ class PathImpl
         static char extsep() 
         { return '.'; }
 
+        const wchar_t* c_str() const
+        { return _path.c_str(); }
+
+        void assign(const wchar_t* p)
+        { _path = p; }
+
     private:
         std::wstring _path;
 };

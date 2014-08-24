@@ -28,6 +28,8 @@
 
 #include "DirectoryImpl.h"
 #include <Pt/System/Directory.h>
+#include <Pt/System/FileInfo.h>
+#include <Pt/System/Path.h>
 #include <Pt/System/IOError.h>
 #include <cassert>
 
@@ -35,13 +37,7 @@ namespace Pt {
 
 namespace System {
 
-DirectoryIterator::DirectoryIterator(const std::string& path)
-{
-    _impl = new DirectoryIteratorImpl( path );
-}
-
-
-DirectoryIterator::DirectoryIterator(const char* path)
+DirectoryIterator::DirectoryIterator(const Path& path)
 {
     _impl = new DirectoryIteratorImpl( path );
 }
@@ -118,96 +114,6 @@ const FileInfo* DirectoryIterator::operator->() const
 {
     return &_impl->get();
 }
-
-
-//Directory::Directory()
-//: _impl(0)
-//{
-//}
-//
-//
-//Directory::Directory(const std::string& path)
-//: _path(path)
-//, _impl(0)
-//{
-//    if( ! Directory::exists(_path) )
-//        throw AccessFailed(_path);
-//}
-//
-//
-//Directory::Directory(const char* path)
-//: _path(path)
-//, _impl(0)
-//{
-//    if( ! Directory::exists(_path) )
-//        throw AccessFailed(_path);
-//}
-//
-//
-//Directory::Directory(const FileInfo& fi)
-//: _path( fi.path() )
-//, _impl(0)
-//{
-//    if( ! fi.isDirectory() )
-//        throw AccessFailed(fi.path());
-//}
-//
-//
-//Directory::Directory(const Directory& dir)
-//: _path(dir._path)
-//{
-//}
-//
-//
-//Directory::~Directory()
-//{
-//    assert(_impl == 0);
-//    // delete impl
-//}
-//
-//
-//Directory& Directory::operator=(const Directory& dir)
-//{
-//    _path = dir._path;
-//    return *this;
-//}
-//
-//
-//Directory::Iterator Directory::begin() const
-//{
-//    return DirectoryIterator( path() );
-//}
-//
-//
-//Directory::Iterator Directory::end() const
-//{
-//    return DirectoryIterator();
-//}
-//
-//
-//void Directory::remove()
-//{
-//    FileInfo::remove( path() );
-//}
-//
-//
-//void Directory::move(const std::string& to)
-//{
-//    FileInfo::move(path(), to);
-//    _path = to;
-//}
-//
-//Directory Directory::create(const std::string& path)
-//{
-//    FileInfo::createDirectory(path);
-//    return Directory(path);
-//}
-//
-//
-//bool Directory::exists(const std::string& path)
-//{
-//    return FileInfo::getType(path) == FileInfo::Directory;
-//}
 
 } // namespace System
 

@@ -31,6 +31,7 @@
 
 #include <Pt/System/Api.h>
 #include <Pt/System/SystemError.h>
+#include <Pt/System/Path.h>
 #include <string>
 
 namespace Pt {
@@ -116,17 +117,7 @@ class PT_SYSTEM_API Library
              be found an exception of type AccessFailed is thrown.
              Otherwise, the library is loaded immediately.
         */
-        explicit Library(const std::string& path);
-
-        /** @brief Loads a shared library.
-
-             If a file could not be found at the given path, the path will be
-             extended by the platform-specific shared library extension first
-             and then also by the shared library prefix. If still no file can
-             be found an exception of type AccessFailed is thrown.
-             Otherwise, the library is loaded immediately.
-        */
-        explicit Library(const char* path);
+        explicit Library(const Path& path);
 
         /** @brief Copy constructor.
         */
@@ -149,18 +140,7 @@ class PT_SYSTEM_API Library
              Otherwise, the library is loaded immediately.
              Calling this method twice might close the previously loaded library.
         */
-        Library& open(const std::string& path);
-
-        /** @brief Loads a shared library.
-
-             If a file could not be found at the given path, the path will be
-             extended by the platform-specific shared library extension first
-             and then also by the shared library prefix. If still no file can
-             be found an exception of type AccessFailed is thrown.
-             Otherwise, the library is loaded immediately.
-             Calling this method twice might close the previously loaded library.
-        */
-        Library& open(const char* path);
+        Library& open(const Path& path);
 
         //! @brief Closes the shared library.
         void close();
@@ -192,19 +172,19 @@ class PT_SYSTEM_API Library
 
         /** @brief Returns the path to the shared library image
         */
-        const std::string& path() const;
+        const Path& path() const;
 
         /** @brief Returns the extension for shared libraries
 
             Returns ".so" on Linux, ".dll" on Windows.
         */
-        static std::string suffix();
+        static const char* suffix();
 
         /**  @brief Returns the prefix for shared libraries
 
              Returns "lib" on Linux, "" on Windows 
         */
-        static std::string prefix();
+        static const char* prefix();
 
     protected:
         //! @internal
@@ -215,7 +195,7 @@ class PT_SYSTEM_API Library
         class LibraryImpl* _impl;
 
         //! @internal
-        std::string _path;
+        System::Path _path;
 };
 
 /** @brief Symbol resolved from a shared library

@@ -30,13 +30,14 @@
 #define PT_SYSTEM_DIRECTORY_H
 
 #include <Pt/System/Api.h>
-#include <Pt/System/FileInfo.h>
-#include <string>
 #include <iterator>
 
 namespace Pt {
 
 namespace System {
+
+class Path;
+class FileInfo;
 
 /** @brief Iterates over entries of a directory.
 
@@ -91,10 +92,7 @@ class PT_SYSTEM_API DirectoryIterator
         { }
 
         //! @brief Constructs with directory path.
-        explicit DirectoryIterator(const std::string& path);
-
-        //! @brief Constructs with directory path.
-        explicit DirectoryIterator(const char* path);
+        explicit DirectoryIterator(const Path& path);
 
         //! @brief Constructs with directory.
         explicit DirectoryIterator(const FileInfo& fi);

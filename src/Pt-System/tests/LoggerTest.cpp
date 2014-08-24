@@ -72,12 +72,13 @@ class LoggerTest : public Pt::Unit::TestSuite
         {
             for(int n = 0; n < 10; ++n)
             {
-                std::string path("LoggerTest.log");
+                Pt::System::Path path("LoggerTest.log");
                 if(n > 0)
                 {
+                    path += ".";
                     std::ostringstream ss;
-                    ss << '.' << n;
-                    path += ss.str();
+                    ss << n;
+                    path += ss.str().c_str();
                 }
 
                 if( Pt::System::FileInfo::exists(path) )
@@ -267,9 +268,9 @@ class LoggerTest : public Pt::Unit::TestSuite
 
             Pt::System::LogTarget::get("LoggerTest.FileChannel").setChannel("console://");
 
-            PT_UNIT_ASSERT( Pt::System::FileInfo::exists("LoggerTest.log") );
-            PT_UNIT_ASSERT( Pt::System::FileInfo::exists("LoggerTest.log.1") );
-            PT_UNIT_ASSERT( Pt::System::FileInfo::exists("LoggerTest.log.2") );
+            PT_UNIT_ASSERT( Pt::System::FileInfo::exists( Pt::System::Path("LoggerTest.log") ) );
+            PT_UNIT_ASSERT( Pt::System::FileInfo::exists( Pt::System::Path("LoggerTest.log.1") ) );
+            PT_UNIT_ASSERT( Pt::System::FileInfo::exists( Pt::System::Path("LoggerTest.log.2") ) );
         }
 
         void SerialChannel()

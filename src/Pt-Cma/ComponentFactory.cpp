@@ -30,6 +30,7 @@
 #include "Pt/Cma/IUnknown.h"
 #include "Pt/Cma/TypeId.h"
 #include "Pt/System/FileInfo.h"
+#include "Pt/System/Path.h"
 #include "Pt/SourceInfo.h"
 #include <stdexcept>
 
@@ -47,13 +48,13 @@ ComponentFactory::~ComponentFactory()
 }
 
 
-void ComponentFactory::loadLibrary(const std::string& file)
+void ComponentFactory::loadLibrary(const System::Path& file)
 {
     this->_loadLibrary(file);
 }
 
 
-bool ComponentFactory::unload(const std::string& path)
+bool ComponentFactory::unload(const System::Path& path)
 {
     // do not do this. libraries with relative paths will never be unloaded
     //std::string path = System::Library::find(file);
@@ -133,7 +134,7 @@ IUnknown* ComponentFactory::createComponent(const std::string& componentTypeName
 }
 
 
-IUnknown* ComponentFactory::loadComponent(const std::string& file, bool loadConfig)
+IUnknown* ComponentFactory::loadComponent(const System::Path& file, bool loadConfig)
 {
     ComponentLibrary* lib = this->library(file);
     if (lib == 0)
@@ -159,13 +160,13 @@ IUnknown* ComponentFactory::loadComponent(const std::string& file, bool loadConf
 }
 
 
-bool ComponentFactory::isLoaded(const std::string& file)
+bool ComponentFactory::isLoaded(const System::Path& file)
 {
     return this->library(file) != 0;
 }
 
 
-ComponentLibrary* ComponentFactory::_loadLibrary(const std::string& file)
+ComponentLibrary* ComponentFactory::_loadLibrary(const System::Path& file)
 {
     ComponentLibrary* lib = this->library(file);
     if(lib)
@@ -187,7 +188,7 @@ ComponentLibrary* ComponentFactory::_loadLibrary(const std::string& file)
 }
 
 
-ComponentLibrary* ComponentFactory::library(const std::string& path)
+ComponentLibrary* ComponentFactory::library(const System::Path& path)
 {
     // don't do this, relative paths will never be found
     //std::string path = System::Library::find(file);
@@ -222,12 +223,13 @@ void ComponentFactory::loadConfiguration(const ComponentLibrary& library, IUnkno
     // TODO Later we want to support not only .properties files for component
     // based configuration storage.
 
-    std::string configFile = System::FileInfo::dirName( library.path() )
-                             + std::string( builder.typeId().name() )
-                             + ".properties";
+    System::Path configFile;
+    configFile = library.path().dirName();
+    configFile /= builder.typeId().name();
+    configFile += ".properties";
 
     // Load configuration if config file exists.
-    if( System::FileInfo::exists( configFile.c_str() ) )
+    if( System::FileInfo::exists(configFile) )
     {
         prefs->loadPrefs(configFile);
     }

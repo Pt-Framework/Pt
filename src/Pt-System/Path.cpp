@@ -58,14 +58,14 @@ Path::Path(const char* s)
 {
     std::size_t n = std::strlen(s);
     _impl = new PathImpl();
-    _impl->concat(s, n);
+    concat(s, n);
 }
 
 
 Path::Path(const char* s, std::size_t n)
 {
     _impl = new PathImpl();
-    _impl->concat(s, n);
+    concat(s, n);
 }
 
 

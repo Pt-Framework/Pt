@@ -29,6 +29,7 @@
 #include <Pt/Cma/Api.h>
 #include <Pt/Cma/IComponentBuilder.h>
 #include <Pt/System/Library.h>
+#include <Pt/System/Path.h>
 #include <map>
 #include <string>
 #include <cstddef>
@@ -49,7 +50,7 @@ class PT_EXPORT ComponentLibrary : protected Pt::System::Library
           * Constructor
           * @param file the name of the dynamic library
           */
-        ComponentLibrary(const std::string& file);
+        ComponentLibrary(const System::Path& file);
 
         /**
           * Test whether this library is used (referenced) or not.
@@ -79,7 +80,7 @@ class PT_EXPORT ComponentLibrary : protected Pt::System::Library
           * Get the library file.
           * @return the library file.
           */
-        const std::string& path() const;
+        const System::Path& path() const;
 
     protected:
         BuilderMap _builders;

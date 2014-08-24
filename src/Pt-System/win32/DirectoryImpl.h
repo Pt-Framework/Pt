@@ -20,13 +20,13 @@
 #include <Pt/WinVer.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/FileInfo.h>
-#include <string>
-#include <cstddef>
 #include <windows.h>
 
 namespace Pt {
 
 namespace System {
+
+class Path;
 
 class DirectoryIteratorImpl 
 {
@@ -36,9 +36,7 @@ class DirectoryIteratorImpl
         , _findHandle(INVALID_HANDLE_VALUE)
         { }
 
-        DirectoryIteratorImpl(const std::string& path);
-
-        DirectoryIteratorImpl(const char* path);
+        DirectoryIteratorImpl(const Path& path);
 
         ~DirectoryIteratorImpl();
 
@@ -54,45 +52,14 @@ class DirectoryIteratorImpl
         { return _finfo; }
 
     private:
-        void init(const char* path, std::size_t pathlen);
+        void init(const Path& path);
 
     private:
         unsigned int _refs;
         FileInfo _finfo;
         HANDLE _findHandle;
-        WIN32_FIND_DATA _current;
+        WIN32_FIND_DATAW _current;
 };
-
-
-//class DirectoryImpl
-//{
-//    public:
-//        static void chdir(const std::string& path);
-//
-//        static std::string cwd();
-//
-//        static std::string tmpdir();
-//
-//        static std::string curdir()
-//        {
-//            return ".";
-//        }
-//
-//        static std::string updir()
-//        {
-//            return "..";
-//        }
-//
-//        static std::string rootdir()
-//        {
-//            return "c:\\";
-//        }
-//
-//        static std::string sep()
-//        {
-//            return "\\";
-//        }
-//};
 
 } // namespace System
 

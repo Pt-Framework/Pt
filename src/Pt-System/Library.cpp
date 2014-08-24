@@ -28,7 +28,7 @@
 
 #include "LibraryImpl.h"
 #include <Pt/System/Library.h>
-#include <Pt/System/FileInfo.h>
+#include <Pt/System/Path.h>
 #include <Pt/System/IOError.h>
 #include <memory>
 
@@ -55,17 +55,7 @@ Library::Library()
 }
 
 
-Library::Library(const std::string& path)
-: _impl(0)
-{
-    std::auto_ptr<LibraryImpl> impl( new LibraryImpl() );
-    _impl = impl.get();
-    open(path);
-    impl.release();
-}
-
-
-Library::Library(const char* path)
+Library::Library(const Path& path)
 : _impl(0)
 {
     std::auto_ptr<LibraryImpl> impl( new LibraryImpl() );
@@ -123,17 +113,11 @@ void Library::detach()
 }
 
 
-Library& Library::open(const std::string& libname)
-{
-    return open( libname.c_str() );
-}
-
-
-Library& Library::open(const char* libname)
+Library& Library::open(const Path& libname)
 {
     this->detach();
     
-    std::string path = libname;
+    Path path = libname;
 
     try
     {
@@ -156,17 +140,11 @@ Library& Library::open(const char* libname)
     catch(const AccessFailed&)
     { }
 
-    std::string::size_type idx = path.rfind( FileInfo::sep() );
-    if(idx == std::string::npos)
-    {
-        idx = 0;
-    }
-    else if( ++idx == path.length() )
-    {
-        throw AccessFailed(path);
-    }
+    Pt::String fileName = path.fileName();
+    path = path.dirName();
+    path += prefix();
+    path += fileName;
 
-    path.insert( idx, prefix() );
     //log_debug("search for library \"" << path << '"');
     _impl->open(path);
     _path = path;
@@ -213,19 +191,19 @@ bool Library::operator!() const
 }
 
 
-const std::string& Library::path() const
+const Path& Library::path() const
 {
     return _path;
 }
 
 
-std::string Library::suffix()
+const char* Library::suffix()
 {
     return LibraryImpl::suffix();
 }
 
 
-std::string Library::prefix()
+const char* Library::prefix()
 {
     return LibraryImpl::prefix();
 }

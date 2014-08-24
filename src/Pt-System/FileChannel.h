@@ -39,6 +39,8 @@ namespace Pt {
 
 namespace System {
 
+class Path;
+
 class FileChannel : public LogChannel
 {
     public:
@@ -55,7 +57,7 @@ class FileChannel : public LogChannel
 
         void rotate();
 
-        std::string makePath(std::size_t n);
+        Path makePath(std::size_t n);
 
     private:
         std::ofstream _fs;

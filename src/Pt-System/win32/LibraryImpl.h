@@ -22,12 +22,13 @@
 #include "Pt/WinVer.h"
 #include "Pt/System/Api.h"
 #include "Pt/System/SystemError.h"
-#include "win32.h"
 #include <windows.h>
 
 namespace Pt {
 
 namespace System {
+
+class Path;
 
 class LibraryImpl
 {
@@ -37,7 +38,7 @@ class LibraryImpl
         , _handle(0)
         { }
 
-        LibraryImpl(const std::string& path)
+        LibraryImpl(const Path& path)
         : _refs(1)
         , _handle(0)
         {
@@ -65,7 +66,7 @@ class LibraryImpl
             return --_refs;
         }
 
-        void open(const std::string& path);
+        void open(const Path& path);
 
         void close();
 
@@ -74,12 +75,12 @@ class LibraryImpl
         bool failed()
         { return _handle == 0; }
 
-        static std::string suffix()
+        static const char* suffix()
         {
             return ".dll";
         }
 
-        static std::string prefix()
+        static const char* prefix()
         {
             return "";
         }

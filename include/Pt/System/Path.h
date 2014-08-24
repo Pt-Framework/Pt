@@ -38,6 +38,8 @@ namespace Pt {
 
 namespace System {
 
+class PathImpl;
+
 /** @brief Represents a path in the file-system.
 */
 class PT_SYSTEM_API Path
@@ -198,8 +200,14 @@ class PT_SYSTEM_API Path
 
         static Pt::Char dirsep();
 
+        const PathImpl* impl() const
+        { return _impl; }
+
+        PathImpl* impl()
+        { return _impl; }
+
     private:
-        class PathImpl* _impl;
+        PathImpl* _impl;
 };
 
 /** @brief Compares two paths.

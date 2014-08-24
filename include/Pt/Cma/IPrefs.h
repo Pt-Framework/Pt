@@ -33,14 +33,18 @@
 
 namespace Pt {
 
+namespace System {
+    class Path;
+}
+
 namespace Cma {
 
     class IPrefs : public IUnknown
     {
         public:
-            virtual void loadPrefs(const std::string& file) = 0;
+            virtual void loadPrefs(const System::Path& file) = 0;
 
-            virtual void savePrefs(const std::string& file) = 0;
+            virtual void savePrefs(const System::Path& file) = 0;
 
             static TypeId typeId()
             {

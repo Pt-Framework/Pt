@@ -32,7 +32,7 @@ namespace Pt {
 
 namespace Cma {
 
-ComponentLibrary::ComponentLibrary(const std::string& file)
+ComponentLibrary::ComponentLibrary(const System::Path& file)
 : Library(file)
 {
     IComponentBuilder** builderList = (IComponentBuilder**) this->resolve("Ptv_ComponentList");
@@ -92,7 +92,7 @@ std::size_t ComponentLibrary::size() const
     return _builders.size();
 }
 
-const std::string& ComponentLibrary::path() const
+const System::Path& ComponentLibrary::path() const
 {
     return Library::path();
 }

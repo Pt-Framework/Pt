@@ -30,6 +30,7 @@
 #define Pt_System_FileInfo_h
 
 #include <Pt/System/Api.h>
+#include <Pt/System/Path.h>
 #include <Pt/String.h>
 #include <Pt/Types.h>
 #include <string>
@@ -112,7 +113,11 @@ class PT_SYSTEM_API FileInfo
 
         /** @brief Constructs from the path.
         */
-        explicit FileInfo(const std::string& path);
+        explicit FileInfo(const Path& path);
+
+        /** @brief Constructs from the path.
+        */
+        explicit FileInfo(const Pt::String& path);
 
         /** @brief Constructs from the path.
         */
@@ -130,7 +135,7 @@ class PT_SYSTEM_API FileInfo
             This method may return a relative path, or a fully qualified one
             depending on how this object was constructed.
         */
-        const std::string& path() const
+        const Path& path() const
         { return _path; }
 
         //! @brief Returns the file size.
@@ -141,117 +146,39 @@ class PT_SYSTEM_API FileInfo
         Type type() const
         { return FileInfo::type(_path); }
 
-        //! @brief Returns the name including an exension
-        std::string name() const
-        { return FileInfo::name(_path); }
-
-        /** @brief Returns the parent directory path
-
-            This method might return an empty string if the node was created
-            without a complete path. If the directory is located in the root
-            directory of a unix file system, a slash ("/") is returned. A
-            returned directory path always ends with a trailing path separator
-            character. (A backslash in Windows and a slash in Unix, for example.)
-        */
-        std::string dirName() const
-        { return FileInfo::dirName(_path); }
-
-        //! @brief Returns the file name without the exension
-        std::string baseName()
-        { return FileInfo::baseName(_path); }
-
     public:
-        //! @brief Returns the type of file at the \a path
-        static Type type(const std::string& path);
+        //! @brief Returns the type of file at the \a path.
+        static Type type(const Path& path);
 
-        //! @brief Returns the type of file at the \a path
-        static Type type(const char* path);
+        //! @brief Returns the size of the file in bytes.
+        static Pt::uint64_t size(const Path& path);
 
-        //! @brief Returns the size of the file in bytes
-        static Pt::uint64_t size(const std::string& path);
-
-        //! @brief Returns the size of the file in bytes
-        static Pt::uint64_t size(const char* path);
-
-        //! @brief Returns true if a file or directory exists at the \a path
-        static bool exists(const std::string& path)
+        //! @brief Returns true if a file or directory exists at the \a path.
+        static bool exists(const Path& path)
         { return type(path) != Invalid; }
 
-        //! @brief Returns true if a file or directory exists at the \a path
-        static bool exists(const char* path)
-        { return type(path) != Invalid; }
-
-        //! @brief Returns the name including an exension
-        static std::string name(const std::string& path);
-
-        //! @brief Returns the name including an exension
-        static std::string name(const char* path);
-
-        //! @brief Returns the parent directory path
-        static std::string dirName(const std::string& path);
-
-        //! @brief Returns the parent directory path
-        static std::string dirName(const char* path);
-
-        //! @brief Returns the file name without the exension
-        static std::string baseName(const std::string& path);
-
-        //! @brief Returns the file name without the exension
-        static std::string baseName(const char* path);
-
-        //! @brief Returns the file name extension or an empty string if not present
-        static std::string extension(const std::string& path);
-
-        //! @brief Returns the file name extension or an empty string if not present
-        static std::string extension(const char* path);
-
         //! @brief Creates a new file.
-        static void createFile(const std::string& path);
-
-        //! @brief Creates a new file.
-        static void createFile(const char* path);
+        static void createFile(const Path& path);
 
         //! @brief Creates a new directory.
-        static void createDirectory(const std::string& path);
-
-        //! @brief Creates a new directory.
-        static void createDirectory(const char* path);
+        static void createDirectory(const Path& path);
 
         //! @brief Resizes a file.
-        static void resize(const std::string& path, Pt::uint64_t n);
-
-        //! @brief Resizes a file.
-        static void resize(const char* path, Pt::uint64_t n);
+        static void resize(const Path& path, Pt::uint64_t n);
 
         //! @brief Removes a file or directory.
-        static void remove(const std::string& path);
-
-        //! @brief Removes a file or directory.
-        static void remove(const char* path);
+        static void remove(const Path& path);
 
         //! @brief Moves a file or directory.
-        static void move(const std::string& path, const std::string& to);
-
-        //! @brief Moves a file or directory.
-        static void move(const char* path, const char* to);
-
-    public:
-        //! @brief Returns the string representing the separator in path names
-        static const char* sep();
-
-        //! @brief Returns the string representing the current directory in path names
-        static const char* curdir();
-
-        //! @brief Returns the string representing the parent directory in path names
-        static const char* updir();
+        static void move(const Path& path, const Path& to);
 
     public:
         //! @internal
-        std::string& path()
+        Path& path()
         { return _path; }
     
     private:
-        std::string _path;
+        Path _path;
 };
 
 

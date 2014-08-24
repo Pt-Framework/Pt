@@ -29,6 +29,7 @@
 #include "FileChannel.h"
 #include <Pt/System/Uri.h>
 #include <Pt/System/FileInfo.h>
+#include <Pt/System/Path.h>
 #include <sstream>
 #include <cctype>
 
@@ -157,14 +158,14 @@ void FileChannel::rotate()
 
     if(_numBackup > 0)
     {
-        std::string to = makePath(_numBackup);
+        Path to = makePath(_numBackup);
 
         if( Pt::System::FileInfo::exists(to) ) 
             Pt::System::FileInfo::remove(to);
 
         for(std::size_t n = _numBackup; n > 0 ; --n)
         {
-            std::string from = makePath(n-1);
+            Path from = makePath(n-1);
             
             if( Pt::System::FileInfo::exists(from) ) 
                 Pt::System::FileInfo::move(from, to);
@@ -178,14 +179,14 @@ void FileChannel::rotate()
 }
 
 
-std::string FileChannel::makePath(std::size_t n)
+Path FileChannel::makePath(std::size_t n)
 {
     if(n == 0)
-        return _file;
+        return Path( _file.c_str() );
 
     std::ostringstream oss;
     oss << _file << '.' << n;
-    return oss.str();
+    return Path( oss.str().c_str() );
 }
 
 } // namespace System

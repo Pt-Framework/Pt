@@ -24,31 +24,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "LibraryImpl.h"
+#include "PathImpl.h"
 #include "win32.h"
 #include "Pt/System/IOError.h"
+#include "Pt/System/Path.h"
 
 namespace Pt {
 
 namespace System {
 
-void LibraryImpl::open(const std::string& path)
+void LibraryImpl::open(const Path& path)
 {
     if(_handle != 0)
         return;
 
 #ifdef __cplusplus_winrt
-    std::wstring wpath;
-    win32::fromMultiByte(path, wpath);
-    _handle = ::LoadPackagedLibrary( wpath.c_str(), 0 );
+    _handle = ::LoadPackagedLibrary( path.impl()->c_str(), 0 );
 #else
-    std::basic_string<TCHAR> tpath;
-    win32::fromMultiByte(path, tpath);
-    _handle = ::LoadLibrary( tpath.c_str() );
+    _handle = ::LoadLibraryW( path.impl()->c_str() );
 #endif
 
     if(_handle == 0)
     {
-        throw AccessFailed(path);
+        throw AccessFailed( path.toString().narrow() ); // TODO: convert to UTF-8
     }
 }
 
@@ -65,9 +63,7 @@ void* LibraryImpl::resolve(const char* symbol) const
     if(_handle == 0)
         return 0;
 
-    std::basic_string<TCHAR> tsymbol;
-    win32::fromMultiByte(symbol, tsymbol);
-    return (void*) ( ::GetProcAddress( _handle, tsymbol.c_str() ) );
+    return (void*) ( ::GetProcAddress(_handle, symbol) );
 }
 
 } // namespace System
