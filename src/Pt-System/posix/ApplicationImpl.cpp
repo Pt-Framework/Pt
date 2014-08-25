@@ -203,7 +203,6 @@ std::string ApplicationImpl::cwd()
 std::string ApplicationImpl::tmpdir()
 {
     const char* tmpdir = getenv("TEMP");
-
     if(tmpdir)
     {
         return tmpdir;
@@ -215,8 +214,7 @@ std::string ApplicationImpl::tmpdir()
         return tmpdir;
     }
 
-    return FileInfo::type("/tmp") == FileInfo::Directory ? "/tmp" 
-                                                           : FileInfo::curdir();
+    return "/tmp";
 }
         
 std::string ApplicationImpl::rootdir()

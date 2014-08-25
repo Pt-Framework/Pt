@@ -26,8 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
  
-#include "Pt/System/Api.h"
-#include "Pt/System/FileInfo.h"
+#include <Pt/System/Api.h>
+#include <Pt/System/FileInfo.h>
 #include <string>
 #include <dirent.h>
 
@@ -44,9 +44,7 @@ class DirectoryIteratorImpl
         , _current(0)
         { }
 
-        DirectoryIteratorImpl(const std::string& path);
-        
-        DirectoryIteratorImpl(const char* path);
+        DirectoryIteratorImpl(const Path& path);
 
         ~DirectoryIteratorImpl();
 
@@ -67,48 +65,10 @@ class DirectoryIteratorImpl
     private:
         unsigned int _refs;
         FileInfo _finfo;
-        //std::string _path;
-        std::size_t _pathlen;
+        //std::size_t _pathlen;
         DIR* _handle;
         ::dirent* _current;
 };
-
-
-//class DirectoryImpl
-//{
-//    public:
-//        static void create(const std::string& path);
-//
-//        static void remove(const std::string& path);
-//
-//        static void move(const std::string& oldName, const std::string& newName);
-//
-//        static void chdir(const std::string& path);
-//
-//        static std::string cwd();
-//
-//        static std::string curdir()
-//        {
-//            return ".";
-//        }
-//
-//        static std::string updir()
-//        {
-//            return "..";
-//        }
-//
-//        static std::string rootdir()
-//        {
-//            return "/";
-//        }
-//
-//        static std::string tmpdir();
-//
-//        static std::string sep()
-//        {
-//            return "/";
-//        }
-//};
 
 } // namespace System
 

@@ -44,25 +44,14 @@ namespace Pt {
 
 namespace System {
 
-DirectoryIteratorImpl::DirectoryIteratorImpl(const std::string& path)
+DirectoryIteratorImpl::DirectoryIteratorImpl(const Path& path)
 : _refs(1)
-, _pathlen(0)
+//, _pathlen(0)
 , _handle(0)
 , _current(0)
 {
-	_finfo.path() = path;
-    init( path.c_str() );
-}
-
-
-DirectoryIteratorImpl::DirectoryIteratorImpl(const char* path)
-: _refs(1)
-, _pathlen(0)
-, _handle(0)
-, _current(0)
-{
-	_finfo.path() = path;
-    init(path);
+    _finfo.path() = path;
+    init( path.impl()->c_str() );
 }
 
 
@@ -82,14 +71,14 @@ void DirectoryIteratorImpl::init(const char* path)
         throw AccessFailed(path);
     }
 
-	std::string& strpath = _finfo.path();
+    //std::string& strpath = _finfo.path();
 
-    // append a trailing slash if not empty, so we can add the
-    // directory entry name easily
-    if( ! strpath.empty() && strpath[strpath.size() - 1] != '/')
-        strpath += '/';
+    //// append a trailing slash if not empty, so we can add the
+    //// directory entry name easily
+    //if( ! strpath.empty() && strpath[strpath.size() - 1] != '/')
+    //    strpath += '/';
 
-    _pathlen = strpath.size();
+    //_pathlen = strpath.size();
 
     this->advance();
 }
@@ -102,88 +91,16 @@ bool DirectoryIteratorImpl::advance()
 
     if(_current)
     {
-		std::string& path = _finfo.path();
+        _finfo.path().impl()->set(_current->d_name);
 
-        path.erase(_pathlen);
-        path += _current->d_name;
+        //std::string& path = _finfo.path();
+
+        //path.erase(_pathlen);
+        //path += _current->d_name;
     }
 
     return _current != 0;
 }
-
-
-//void DirectoryImpl::create(const std::string& path)
-//{
-//    if( -1 == ::mkdir(path.c_str(), 0777) )
-//    {
-//        throw AccessFailed(path);
-//    }
-//}
-//
-//
-//void DirectoryImpl::remove(const std::string& path)
-//{
-//    if( -1 == ::rmdir(path.c_str()) )
-//    {
-//        throw AccessFailed(path);
-//    }
-//}
-//
-//
-//void DirectoryImpl::move(const std::string& oldName, const std::string& newName)
-//{
-//    if (0 != ::rename(oldName.c_str(), newName.c_str()))
-//    {
-//        throw AccessFailed(oldName);
-//    }
-//}
-//
-//
-//void DirectoryImpl::chdir(const std::string& path)
-//{
-//    if( FileInfoImpl::getType( path.c_str() ) != FileInfo::Directory )
-//        throw AccessFailed(path);
-//
-//    if( -1 == ::chdir(path.c_str()) )
-//    {
-//        throw SystemError("chdir");
-//    }
-//}
-//
-//
-//std::string DirectoryImpl::cwd()
-//{
-//    const long size = pathconf(".", _PC_PATH_MAX);
-//    if(size == -1)
-//        throw SystemError( PT_ERROR_MSG("pathconf() failed for .") );
-//
-//    std::vector<char> buffer(size);
-//    if( ! getcwd(&buffer[0], size) )
-//    {
-//        throw SystemError( PT_ERROR_MSG("getcwd() failed") );
-//    }
-//
-//    return std::string( &buffer[0] );
-//}
-//
-//
-//std::string DirectoryImpl::tmpdir()
-//{
-//    const char* tmpdir = getenv("TEMP");
-//
-//    if(tmpdir)
-//    {
-//        return tmpdir;
-//    }
-//
-//    tmpdir = getenv("TMP");
-//    if(tmpdir)
-//    {
-//        return tmpdir;
-//    }
-//
-//    return FileInfoImpl::getType("/tmp") == FileInfo::Directory ? "/tmp" : curdir();
-//}
 
 } // namespace System
 

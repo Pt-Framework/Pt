@@ -234,6 +234,12 @@ class PathImpl
         static char extsep() 
         { return '.'; }
 
+        const char* c_str() const
+        { return _path.c_str(); }
+
+        void set(const char* s)
+        { _path = s; }
+
     private:
         std::string _path;
 };

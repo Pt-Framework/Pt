@@ -26,7 +26,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "PathImpl.h"
 #include <Pt/System/FileInfo.h>
+#include <Pt/System/Path.h>
 #include <Pt/System/IOError.h>
 #include <string>
 #include <sys/types.h>
@@ -44,27 +46,27 @@ namespace System {
 class FileInfoImpl
 {
     public:
-        static void createFile(const std::string& path)
+        static void createFile(const Path& path)
         {
-            int fd = open(path.c_str(), O_RDWR|O_EXCL|O_CREAT, 0777);
+            int fd = open(path.impl()->c_str(), O_RDWR|O_EXCL|O_CREAT, 0777);
             if( fd < 0 )
-                throw AccessFailed(path);
+                throw AccessFailed(path.impl()->c_str());
 
             ::close(fd);
         }
 
-        static void createDirectory(const std::string& path)
+        static void createDirectory(const Path& path)
         {
-            if( -1 == ::mkdir(path.c_str(), 0777) )
+            if( -1 == ::mkdir(path.impl()->c_str(), 0777) )
             {
-                throw AccessFailed(path);
+                throw AccessFailed(path.impl()->c_str());
             }
         }
 
-        static FileInfo::Type getType(const std::string& path)
+        static FileInfo::Type getType(const Path& path)
         {
             struct stat st;
-            if( 0 != ::stat(path.c_str(), &st) )
+            if( 0 != ::stat(path.impl()->c_str(), &st) )
             {
                 return FileInfo::Invalid;
             }
@@ -95,58 +97,43 @@ class FileInfoImpl
             return FileInfo::File;
         }
 
-        static std::size_t size(const std::string& path)
+        static std::size_t size(const Path& path)
         {
             struct stat buff;
 
-            if( 0 != stat(path.c_str(), &buff) )
+            if( 0 != stat(path.impl()->c_str(), &buff) )
             {
-                throw AccessFailed(path);
+                throw AccessFailed(path.impl()->c_str());
             }
 
             return buff.st_size;
         }
 
-        static void resize(const std::string& path, std::size_t newSize)
+        static void resize(const Path& path, std::size_t newSize)
         {
             int ret = 0;
             do
             {
-                ret = truncate(path.c_str(), newSize);
+                ret = truncate(path.impl()->c_str(), newSize);
             }
             while ( ret == EINTR );
 
             if(ret != 0)
-                throw AccessFailed(path);
+                throw AccessFailed(path.impl()->c_str());
         }
 
-        static void remove(const std::string& path)
+        static void remove(const Path& path)
         {
-            if( 0 != ::remove(path.c_str()) )
-                throw AccessFailed(path);
+            if( 0 != ::remove(path.impl()->c_str()) )
+                throw AccessFailed(path.impl()->c_str());
         }
 
-        static void move(const std::string& path, const std::string& to)
+        static void move(const Path& path, const Path& to)
         {
-            if (0 != ::rename(path.c_str(), to.c_str()))
+            if (0 != ::rename(path.impl()->c_str(), to.impl()->c_str()))
             {
-                throw AccessFailed(path);
+                throw AccessFailed(path.impl()->c_str());
             }
-        }
-        
-        static const char* curdir()
-        {
-            return ".";
-        }
-
-        static const char* updir()
-        {
-            return "..";
-        }
-
-        static const char* sep()
-        {
-            return "/";
         }
 };
 

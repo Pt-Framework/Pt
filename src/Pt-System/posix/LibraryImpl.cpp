@@ -25,13 +25,15 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "LibraryImpl.h"
+#include "PathImpl.h"
 
 namespace Pt {
 
 namespace System {
 
-void LibraryImpl::open(const std::string& path)
+void LibraryImpl::open(const Path& path)
 {
     if(_handle)
         return;
@@ -42,10 +44,10 @@ void LibraryImpl::open(const std::string& path)
     */
     int flags = RTLD_NOW | RTLD_GLOBAL;
 
-    _handle = ::dlopen(path.c_str(), flags);
+    _handle = ::dlopen(path.impl()->c_str(), flags);
     if( !_handle )
     {
-        throw AccessFailed(path);
+        throw AccessFailed(path.impl()->c_str());
     }
 }
 
