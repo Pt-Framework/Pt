@@ -121,7 +121,7 @@ class PathTest : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT( path.dirName().empty() );
 
             std::string dir("abc");
-            dir += Pt::System::Path::dirsep();
+            dir += Pt::System::Path::dirsep().narrow();
 
             path = "abc";
             path /= "xyz.txt";

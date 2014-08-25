@@ -198,7 +198,15 @@ class PT_SYSTEM_API Path
         */
         std::string toLocal() const;
 
-        static Pt::Char dirsep();
+        // Others
+
+        static Pt::String dirsep();
+
+        static Pt::String curdir();
+
+        static Pt::String updir();
+
+        // Implementation
 
         const PathImpl* impl() const
         { return _impl; }

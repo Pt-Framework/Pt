@@ -279,9 +279,22 @@ std::string Path::toLocal() const
     return _impl->toLocal();
 }
 
-Pt::Char Path::dirsep()
+
+Pt::String Path::dirsep()
 {
-    return PathImpl::dirsep();
+    return Pt::String(1, PathImpl::dirsep());
+}
+
+
+Pt::String Path::curdir()
+{
+    return ".";
+}
+
+
+Pt::String Path::updir()
+{
+    return "..";
 }
 
 } // namespace System
