@@ -98,7 +98,7 @@ void SettingsTest::Entry()
     PT_UNIT_ASSERT( settings.root().begin() == settings.root().end() );
 
     Pt::Date date(2001, 11, 15);
-    settings.root().add("myEntry").set(date);
+    settings.root().addEntry("myEntry").set(date);
     PT_UNIT_ASSERT( settings.begin() != settings.end() );
     PT_UNIT_ASSERT( settings.root().begin() != settings.root().end() );
 
@@ -116,33 +116,33 @@ void SettingsTest::Entry()
     PT_UNIT_ASSERT( entry.get(n) );
     PT_UNIT_ASSERT( n == 42 );
 
-    settings.root().remove("myEntry");
+    settings.root().removeEntry("myEntry");
     PT_UNIT_ASSERT( settings.begin() == settings.end() );
     PT_UNIT_ASSERT( settings.root().begin() == settings.root().end() );
 
-    settings.root().add("aaa");
-    settings.root().add("bbb");
-    settings.root().add("ccc");
+    settings.root().addEntry("aaa");
+    settings.root().addEntry("bbb");
+    settings.root().addEntry("ccc");
     PT_UNIT_ASSERT( settings.entry("aaa") != settings.end() );
     PT_UNIT_ASSERT( settings.entry("bbb") != settings.end() );
     PT_UNIT_ASSERT( settings.entry("ccc") != settings.end() );
 
-    settings.root().remove("ccc");
-    settings.root().remove("bbb");
-    settings.root().remove("aaa");
+    settings.root().removeEntry("ccc");
+    settings.root().removeEntry("bbb");
+    settings.root().removeEntry("aaa");
     PT_UNIT_ASSERT( settings.begin() == settings.end() );
     PT_UNIT_ASSERT( settings.root().begin() == settings.root().end() );
 
-    settings.root().add("aaa");
-    settings.root().add("bbb");
-    settings.root().add("ccc");
+    settings.root().addEntry("aaa");
+    settings.root().addEntry("bbb");
+    settings.root().addEntry("ccc");
     PT_UNIT_ASSERT( settings.entry("aaa") != settings.end() );
     PT_UNIT_ASSERT( settings.entry("bbb") != settings.end() );
     PT_UNIT_ASSERT( settings.entry("ccc") != settings.end() );
 
-    settings.root().remove("aaa");
-    settings.root().remove("bbb");
-    settings.root().remove("ccc");
+    settings.root().removeEntry("aaa");
+    settings.root().removeEntry("bbb");
+    settings.root().removeEntry("ccc");
     PT_UNIT_ASSERT( settings.begin() == settings.end() );
     PT_UNIT_ASSERT( settings.root().begin() == settings.root().end() );
 }
@@ -155,7 +155,7 @@ void SettingsTest::ConstEntry()
     PT_UNIT_ASSERT( settings.begin() == settings.end() );
     PT_UNIT_ASSERT( settings.root().begin() == settings.root().end() );
 
-    s.root().add("number").set(42);
+    s.root().addEntry("number").set(42);
     PT_UNIT_ASSERT( settings.begin() != settings.end() );
     PT_UNIT_ASSERT( settings.root().begin() != settings.root().end() );
 
@@ -171,7 +171,7 @@ void SettingsTest::LoadSaveSerializable()
 {
     Pt::Date date(2001, 11, 15);
     Pt::Settings settings;
-    settings.root().add("myDate").set(date);
+    settings.root().addEntry("myDate").set(date);
 
     std::ostringstream ss;
     Pt::TextOStream ts(ss, new Pt::Utf8Codec);

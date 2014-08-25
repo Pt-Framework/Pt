@@ -217,7 +217,7 @@ class PT_API Settings : private SerializationInfo
 
                 /** @brief Adds a sub entry.
                 */
-                Entry add(const std::string& name)
+                Entry addEntry(const std::string& name)
                 {
                     if( ! _si )
                         return Entry();
@@ -228,7 +228,7 @@ class PT_API Settings : private SerializationInfo
 
                 /** @brief Adds a sub entry.
                 */
-                Entry add(const char* name)
+                Entry addEntry(const char* name)
                 {
                     if( ! _si )
                         return Entry();
@@ -239,7 +239,7 @@ class PT_API Settings : private SerializationInfo
 
                 /** @brief Removes a sub entry.
                 */
-                void remove(const std::string& name)
+                void removeEntry(const std::string& name)
                 {
                     if( _si )
                         _si->removeMember(name);
@@ -247,7 +247,7 @@ class PT_API Settings : private SerializationInfo
                 
                 /** @brief Removes a sub entry.
                 */
-                void remove(const char* name)
+                void removeEntry(const char* name)
                 {
                     if( _si )
                         _si->removeMember(name);
@@ -294,6 +294,34 @@ class PT_API Settings : private SerializationInfo
                         return this->end();
 
                     SerializationInfo* si = _si->findMember(name);
+                    return Entry(si);
+                }
+
+                /** @brief Returns a sub entry.
+                */
+                Entry makeEntry(const char* name)
+                {
+                    if( ! _si )
+                        return this->end();
+
+                    SerializationInfo* si = _si->findMember(name);
+                    if( ! si )
+                        si = &_si->addMember(name);
+                    
+                    return Entry(si);
+                }
+
+                /** @brief Returns a sub entry.
+                */
+                Entry makeEntry(const std::string& name)
+                {
+                    if( ! _si )
+                        return this->end();
+
+                    SerializationInfo* si = _si->findMember(name);
+                    if( ! si )
+                        si = &_si->addMember(name);
+                    
                     return Entry(si);
                 }
                 
@@ -565,14 +593,42 @@ class PT_API Settings : private SerializationInfo
         */
         Entry addEntry(const char* name)
         {
-            return root().add(name);
+            return root().addEntry(name);
         }
 
         /** @brief Adds a top level entry.
         */
         Entry addEntry(const std::string& name)
         {
-            return root().add(name);
+            return root().addEntry(name);
+        }
+
+        /** @brief Makes a top level entry.
+        */
+        Entry makeEntry(const char* name)
+        {
+            return root().makeEntry(name);
+        }
+
+        /** @brief Makes a top level entry.
+        */
+        Entry makeEntry(const std::string& name)
+        {
+            return root().makeEntry(name);
+        }
+
+        /** @brief Removes a top level entry.
+        */
+        void removeEntry(const char* name)
+        {
+            root().removeEntry(name);
+        }
+
+        /** @brief Removes a top level entry.
+        */
+        void removeEntry(const std::string& name)
+        {
+            root().removeEntry(name);
         }
 
         /** @brief Returns a top level entry.
