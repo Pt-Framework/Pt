@@ -46,8 +46,6 @@ class RemoteCall;
 */
 class PT_REMOTING_API Client : private NonCopyable
 {
-    friend class RemoteCall;
-
     public:
         /** @brief Constructor.
         */
@@ -69,6 +67,9 @@ class PT_REMOTING_API Client : private NonCopyable
 
         //! @internal
         void call(Composer& r, RemoteCall& call, Decomposer** argv, unsigned argc);
+        
+        //! @internal
+        void cancelCall();
 
         /** @brief The currently executing procedure.
         */
@@ -104,10 +105,6 @@ class PT_REMOTING_API Client : private NonCopyable
             procedure call.
         */
         virtual void onCancel() = 0;
-
-    protected:
-        //! @internal
-        void onDetachProcedure(RemoteCall& method);
 
     private:
         SerializationContext _ctx;

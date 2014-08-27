@@ -45,8 +45,6 @@ namespace Remoting {
 */
 class PT_REMOTING_API RemoteCall : private Pt::NonCopyable
 {
-    friend class Client;
-
     public:
         RemoteCall(Client& client, const String& name);
 
@@ -67,12 +65,12 @@ class PT_REMOTING_API RemoteCall : private Pt::NonCopyable
 
         void cancel();
 
+        void setReady();
+
+        void endCall();
+
     protected:
-        void finish();
-
-        void reset();
-
-        virtual void onFinished() = 0;
+        virtual void onReady() = 0;
 
         virtual void onReset() = 0;
 
@@ -89,9 +87,12 @@ class Result
     public:
         /** @brief Constructor.
         */
-        explicit Result(Client& client)
-        : _client(client)
+        explicit Result(RemoteCall* call = 0)
+        : _call(call)
         { }
+
+        void init(RemoteCall* call)
+        { _call = call; }
 
         /** @brief Indicates if the procedure has failed.
 
@@ -99,7 +100,7 @@ class Result
         */
         bool isFailed() const
         {
-            return _client.isFailed();
+            return _call->isFailed();
         }
 
         /** @brief The return value.
@@ -116,12 +117,12 @@ class Result
         */
         const R& get() const
         {
-            _client.endCall();
+            _call->endCall();
             return _result;
         }
 
     private:
-        Client& _client;
+        RemoteCall* _call;
         R _result;
 };
 
@@ -133,9 +134,10 @@ class RemoteProcedureBase : public RemoteCall
     public:
         RemoteProcedureBase(Client& client, const std::string& name)
         : RemoteCall(client, name)
-        , _result(client)
+        , _result(0)
         , _r(0)
         { 
+          _result.init(this);
           _r = new (_mem) BasicComposer<R>( &client.context() );
         }
 
@@ -158,7 +160,7 @@ class RemoteProcedureBase : public RemoteCall
         { return _finished; }
 
     protected:
-        void onFinished()
+        void onReady()
         { _finished.send(_result); }
 
         BasicComposer<R>& beginResult()
@@ -178,6 +180,41 @@ class RemoteProcedureBase : public RemoteCall
         Result<R> _result;
         char _mem[ sizeof(BasicComposer<R>) ];
         BasicComposer<R>* _r;
+};
+
+
+template <typename A>
+class RemoteArgument : private Pt::NonCopyable
+{
+    public:
+        RemoteArgument(SerializationContext* ctx)
+        : _decomposer(0)
+        {
+            _decomposer = new (_mem) BasicDecomposer<A>(ctx);
+        }
+
+        ~RemoteArgument()
+        {
+            _decomposer->~BasicDecomposer<A>();
+        }
+
+        void begin(const A& a, const char* name)
+        {
+            _decomposer->begin(a, name);
+        }
+
+        void reset(SerializationContext* ctx)
+        {
+            _decomposer->~BasicDecomposer<A>();
+            _decomposer = new (_mem) BasicDecomposer<A>(ctx);
+        }
+
+        BasicDecomposer<A>* decomposer()
+        { return _decomposer; }
+
+    private:
+        char _mem[ sizeof(BasicDecomposer<A>) ];
+        BasicDecomposer<A>* _decomposer;
 };
 
 } // namespace Remoting

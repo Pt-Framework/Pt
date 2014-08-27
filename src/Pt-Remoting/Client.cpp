@@ -51,7 +51,6 @@ Client::~Client()
 void Client::beginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
 {
     _method = &method;
-
     this->onBeginCall(r, method, argv, argc);
 }
 
@@ -59,10 +58,7 @@ void Client::beginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsig
 void Client::call(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
 {
     _method = &method;
-
     this->onCall(r, method, argv, argc);
-
-    method.reset();
     _method = 0;
 }
 
@@ -70,20 +66,21 @@ void Client::call(Composer& r, RemoteCall& method, Decomposer** argv, unsigned a
 void Client::endCall()
 {
     this->onEndCall();
-    
-    if(_method)
-        _method->reset();
-    
+    _method = 0;
+}
+
+
+void Client::cancelCall()
+{
+    this->onCancel();
     _method = 0;
 }
 
 
 void Client::cancel()
 {
-    this->onCancel();
-
     if(_method)
-        _method->reset();
+        _method->cancel();
 
     _method = 0;
 }
@@ -94,19 +91,8 @@ void Client::setReady()
     assert( _method );
 
     if( _method )
-        _method->finish();
+        _method->setReady();
 }
-
-
-void Client::onDetachProcedure(RemoteCall& method)
-{
-    if(_method == &method)
-    {
-        this->onCancel();
-        _method = 0;
-    }
-}
-
 
 } // namespace Remoting
 

@@ -55,8 +55,10 @@ RemoteCall::RemoteCall(Client& client, const char* name)
 
 RemoteCall::~RemoteCall()
 { 
-    if(_client)
-        _client->onDetachProcedure(*this);
+    if( _client->activeProcedure() == this )
+    {
+        _client->cancelCall();
+    }
 }
 
 
@@ -64,20 +66,25 @@ void RemoteCall::cancel()
 {
     if( _client->activeProcedure() == this )
     {
-        _client->cancel();
+        _client->cancelCall();
+        this->onReset(); 
     }
 }
 
 
-void RemoteCall::finish()
+void RemoteCall::setReady()
 { 
-    this->onFinished();
+    this->onReady();
 }
 
 
-void RemoteCall::reset()
-{ 
-    this->onReset(); 
+void RemoteCall::endCall()
+{
+    if( _client->activeProcedure() == this )
+    {
+        _client->endCall();
+        this->onReset(); 
+    }
 }
 
 } // namespace Remoting
