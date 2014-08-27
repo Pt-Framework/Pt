@@ -62,8 +62,8 @@ IOBuffer::IOBuffer(IODevice& ioDevice, std::size_t bufferSize, bool extend)
 
 IOBuffer::~IOBuffer()
 {
-    delete _ibuffer;
-    delete _obuffer;
+    delete [] _ibuffer;
+    delete [] _obuffer;
 }
 
 
