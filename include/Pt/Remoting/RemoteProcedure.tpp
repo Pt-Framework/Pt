@@ -685,20 +685,6 @@ class RemoteProcedure<R, A1, A2,
             _a2->~BasicDecomposer<A2>();
         }
 
-        void reset()
-        {
-            this->resetResult();
-
-            _a1->~BasicDecomposer<A1>();
-            _a1 = new (_a1mem) BasicDecomposer<A1>( &this->client().context() );
-            
-            _a2->~BasicDecomposer<A2>();
-            _a2 = new (_a2mem) BasicDecomposer<A2>( &this->client().context() );
-            
-            _args[0] = _a1;
-            _args[1] = _a2;
-        }
-
         void begin(const A1& a1, const A2& a2)
         {
             _a1->begin(a1, "");
@@ -722,6 +708,21 @@ class RemoteProcedure<R, A1, A2,
         const R& operator()(const A1& a1, const A2& a2)
         {
             return this->call(a1, a2);
+        }
+
+    protected:
+        void onReset()
+        {
+            this->resetResult();
+
+            _a1->~BasicDecomposer<A1>();
+            _a1 = new (_a1mem) BasicDecomposer<A1>( &this->client().context() );
+            
+            _a2->~BasicDecomposer<A2>();
+            _a2 = new (_a2mem) BasicDecomposer<A2>( &this->client().context() );
+            
+            _args[0] = _a1;
+            _args[1] = _a2;
         }
 
     private:
@@ -760,15 +761,6 @@ class RemoteProcedure<R, A1,
             _a1->~BasicDecomposer<A1>();
         }
 
-        void reset()
-        {
-            this->resetResult();
-
-            _a1->~BasicDecomposer<A1>();
-            _a1 = new (_a1mem) BasicDecomposer<A1>( &this->client().context() );
-            _args[0] = _a1;
-        }
-
         void begin(const A1& a1)
         {
             _a1->begin(a1, "");
@@ -790,6 +782,16 @@ class RemoteProcedure<R, A1,
         const R& operator()(const A1& a1)
         {
             return this->call(a1);
+        }
+
+    protected:
+        void onReset()
+        {
+            this->resetResult();
+
+            _a1->~BasicDecomposer<A1>();
+            _a1 = new (_a1mem) BasicDecomposer<A1>( &this->client().context() );
+            _args[0] = _a1;
         }
 
     private:
@@ -817,11 +819,6 @@ class RemoteProcedure<R,
         : RemoteProcedureBase<R>(client, name)
         { }
 
-        void reset()
-        {
-            this->resetResult();
-        }
-
         void begin()
         {
             BasicComposer<R>& r = this->beginResult();
@@ -840,6 +837,12 @@ class RemoteProcedure<R,
         const R& operator()()
         {
             return this->call();
+        }
+
+    protected:
+        void onReset()
+        {
+            this->resetResult();
         }
 };
 

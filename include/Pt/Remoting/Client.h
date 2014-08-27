@@ -46,6 +46,8 @@ class RemoteCall;
 */
 class PT_REMOTING_API Client : private NonCopyable
 {
+    friend class RemoteCall;
+
     public:
         /** @brief Constructor.
         */
@@ -68,10 +70,6 @@ class PT_REMOTING_API Client : private NonCopyable
         //! @internal
         void call(Composer& r, RemoteCall& call, Decomposer** argv, unsigned argc);
 
-        /** @brief Cancels the currently executing procedure.
-        */
-        void cancel();
-
         /** @brief The currently executing procedure.
         */
         const RemoteCall* activeProcedure() const
@@ -80,6 +78,10 @@ class PT_REMOTING_API Client : private NonCopyable
         /** @brief Indicates if the procedure has failed.
         */
         virtual bool isFailed() const = 0;
+
+        /** @brief Cancels the currently executing procedure.
+        */
+        void cancel();
 
     protected:
         /** @brief Parses the XML-RPC result.
@@ -102,6 +104,10 @@ class PT_REMOTING_API Client : private NonCopyable
             procedure call.
         */
         virtual void onCancel() = 0;
+
+    protected:
+        //! @internal
+        void onDetachProcedure(RemoteCall& method);
 
     private:
         SerializationContext _ctx;

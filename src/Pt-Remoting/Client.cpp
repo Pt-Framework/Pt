@@ -61,12 +61,19 @@ void Client::call(Composer& r, RemoteCall& method, Decomposer** argv, unsigned a
     _method = &method;
 
     this->onCall(r, method, argv, argc);
+
+    method.reset();
+    _method = 0;
 }
 
 
 void Client::endCall()
 {
     this->onEndCall();
+    
+    if(_method)
+        _method->reset();
+    
     _method = 0;
 }
 
@@ -74,6 +81,9 @@ void Client::endCall()
 void Client::cancel()
 {
     this->onCancel();
+
+    if(_method)
+        _method->reset();
 
     _method = 0;
 }
@@ -84,12 +94,19 @@ void Client::setReady()
     assert( _method );
 
     if( _method )
+        _method->finish();
+}
+
+
+void Client::onDetachProcedure(RemoteCall& method)
+{
+    if(_method == &method)
     {
-        RemoteCall* method = _method;
+        this->onCancel();
         _method = 0;
-        method->finish();
     }
 }
+
 
 } // namespace Remoting
 

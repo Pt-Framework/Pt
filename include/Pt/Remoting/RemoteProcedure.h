@@ -45,6 +45,8 @@ namespace Remoting {
 */
 class PT_REMOTING_API RemoteCall : private Pt::NonCopyable
 {
+    friend class Client;
+
     public:
         RemoteCall(Client& client, const String& name);
 
@@ -65,11 +67,14 @@ class PT_REMOTING_API RemoteCall : private Pt::NonCopyable
 
         void cancel();
 
-        void finish()
-        { this->onFinished(); }
-
     protected:
+        void finish();
+
+        void reset();
+
         virtual void onFinished() = 0;
+
+        virtual void onReset() = 0;
 
     private:
         Client* _client;
