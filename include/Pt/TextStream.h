@@ -85,8 +85,8 @@ class BasicTextIStream : public BasicIStream<CharT>
         BasicTextIStream(StreamType& is, CodecType* codec)
         : BasicIStream<intern_type>(0)
         , _tbuffer( is, codec )
-        {
-            this->init(&_tbuffer);
+        { 
+            this->setBuffer(&_tbuffer); 
         }
 
         /** @brief Construct with codec.
@@ -97,8 +97,8 @@ class BasicTextIStream : public BasicIStream<CharT>
         explicit BasicTextIStream(CodecType* codec)
         : BasicIStream<intern_type>(0)
         , _tbuffer(codec )
-        {
-            this->init(&_tbuffer);
+        { 
+            this->setBuffer(&_tbuffer); 
         }
 
         /** @brief Destructor.
@@ -231,7 +231,9 @@ class BasicTextOStream : public BasicOStream<CharT>
         BasicTextOStream(StreamType& os, CodecType* codec)
         : BasicOStream<intern_type>(0)
         , _tbuffer( os , codec )
-        { this->init(&_tbuffer); }
+        { 
+            this->setBuffer(&_tbuffer); 
+        }
 
         /** @brief Construct with codec.
 
@@ -241,7 +243,9 @@ class BasicTextOStream : public BasicOStream<CharT>
         explicit BasicTextOStream(CodecType* codec)
         : BasicOStream<intern_type>(0)
         , _tbuffer( codec )
-        { this->init(&_tbuffer); }
+        { 
+            this->setBuffer(&_tbuffer); 
+        }
 
         /** @brief Destructor.
         */
@@ -373,7 +377,9 @@ class BasicTextStream : public BasicIOStream<CharT>
         BasicTextStream(StreamType& ios, CodecType* codec)
         : BasicIOStream<intern_type>(0)
         , _tbuffer( ios, codec)
-        { this->init(&_tbuffer); }
+        { 
+            this->setBuffer(&_tbuffer); 
+        }
 
         /** @brief Construct with codec.
 
@@ -383,7 +389,9 @@ class BasicTextStream : public BasicIOStream<CharT>
         explicit BasicTextStream(CodecType* codec)
         : BasicIOStream<intern_type>(0)
         , _tbuffer(codec)
-        { this->init(&_tbuffer); }
+        { 
+            this->setBuffer(&_tbuffer); 
+        }
 
         /** @brief Destructor.
         */
