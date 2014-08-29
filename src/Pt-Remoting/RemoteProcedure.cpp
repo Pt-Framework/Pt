@@ -82,8 +82,8 @@ void RemoteCall::endCall()
 {
     if( _client->activeProcedure() == this )
     {
-        _client->endCall();
-        this->onReset(); 
+        this->onReset();
+        _client->endCall(); // throws
     }
 }
 

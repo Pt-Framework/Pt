@@ -128,12 +128,12 @@ void Client::onEndCall()
         throw _fault; 
     } 
 
+    this->onEndInvoke();
+
     if(_state != OnEnvelopeEnd)
     {
         setFault(Fault::InvalidXmlRpc, "invalid SOAP reply");
     }
-
-    this->onEndInvoke();
 }
 
 
@@ -152,6 +152,13 @@ void Client::onCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv
     _isFault = false;
 
     this->onInvoke();
+
+    // this is not neccessary if we directly throw from processResult
+    if( isFailed() )
+    {
+        _isFault = false;
+        throw _fault; 
+    }
 
     if(_state != OnEnvelopeEnd)
     {
@@ -340,9 +347,6 @@ void Client::processResult(std::istream& is)
     {
         setFault(Fault::InvalidMethodParameters, error.what());
     }
-
-    // _method contains a return value or fault now
-    _state = OnBegin;
 }
 
 

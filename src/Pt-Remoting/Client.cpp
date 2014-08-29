@@ -57,11 +57,17 @@ void Client::beginCall(Composer& r, RemoteCall& method, Decomposer** argv, unsig
 
 void Client::call(Composer& r, RemoteCall& method, Decomposer** argv, unsigned argc)
 {
-    _method = &method;
-    this->onCall(r, method, argv, argc);
-    _method = 0;
-
-    // TODO: check if onReset is called on RemoteCall
+    try
+    {
+        _method = &method;
+        this->onCall(r, method, argv, argc);
+        _method = 0;
+    }
+    catch(...)
+    {
+        _method = 0;
+        throw;
+    }
 }
 
 
