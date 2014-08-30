@@ -609,45 +609,50 @@ class RemoteProcedure<R, A1, A2, A3,
     public:
         RemoteProcedure(Client& client, const std::string& name)
         : RemoteProcedureBase<R>(client, name)
-        , _a1(0)
-        , _a2(0)
-        , _a3(0)
+        , _a1( &client.context() )
+        , _a2( &client.context() )
+        , _a3( &client.context() )
         { 
-            _a1 = new (_a1mem) BasicDecomposer<A1>( &client.context() );
-            _a2 = new (_a2mem) BasicDecomposer<A2>( &client.context() );
-            _a3 = new (_a3mem) BasicDecomposer<A3>( &client.context() );
-
-            _args[0] = _a1;
-            _args[1] = _a2;
-            _args[2] = _a3;
-        }
-
-        ~RemoteProcedure()
-        {
-            _a1->~BasicDecomposer<A1>();
-            _a2->~BasicDecomposer<A2>();
-            _a3->~BasicDecomposer<A3>();
+            _args[0] = _a1.decomposer();
+            _args[1] = _a2.decomposer();
+            _args[2] = _a3.decomposer();
         }
 
         void begin(const A1& a1, const A2& a2, const A3& a3)
         {
-            _a1.begin(a1, "");
-            _a2.begin(a2, "");
-            _a3.begin(a3, "");
+            try
+            {
+                _a1.begin(a1, "");
+                _a2.begin(a2, "");
+                _a3.begin(a3, "");
+                BasicComposer<R>& r = this->beginResult();
 
-            BasicComposer<R>& r = this->beginResult();
-
-            this->client().beginCall(r, *this, _args, 3);
+                this->client().beginCall(r, *this, _args, 3);
+            }
+            catch(...)
+            {
+                this->onReset();
+                throw;
+            }
         }
 
         const R& call(const A1& a1, const A2& a2, const A3& a3)
         {
-            _a1.begin(a1, "");
-            _a2.begin(a2, "");
-            _a3.begin(a3, "");
-            BasicComposer<R>& r = this->beginResult();
+            try
+            {
+                _a1.begin(a1, "");
+                _a2.begin(a2, "");
+                _a3.begin(a3, "");
+                BasicComposer<R>& r = this->beginResult();
 
-            this->client().call(r, *this, _args, 3);
+                this->client().call(r, *this, _args, 3);
+                this->onReset();
+            }
+            catch(...)
+            {
+                this->onReset();
+                throw;
+            }
             return this->result().value();
         }
 
@@ -661,23 +666,15 @@ class RemoteProcedure<R, A1, A2, A3,
         {
             this->resetResult();
 
-            _a1->~BasicDecomposer<A1>();
-            _a1 = new (_a1mem) BasicDecomposer<A1>( &this->client().context() );
-            
-            _a2->~BasicDecomposer<A2>();
-            _a2 = new (_a2mem) BasicDecomposer<A2>( &this->client().context() );
-
-            _a3->~BasicDecomposer<A3>();
-            _a3 = new (_a3mem) BasicDecomposer<A3>( &this->client().context() );
+            _a1.reset( &this->client().context() );
+            _a2.reset( &this->client().context() );
+            _a3.reset( &this->client().context() );
         }
 
     private:
-        char _a1mem[ sizeof(BasicDecomposer<A1>) ];
-        char _a2mem[ sizeof(BasicDecomposer<A2>) ];
-        char _a3mem[ sizeof(BasicDecomposer<A3>) ];
-        BasicDecomposer<A1>* _a1;
-        BasicDecomposer<A2>* _a2;
-        BasicDecomposer<A3>* _a3;
+        RemoteArgument<A1> _a1;
+        RemoteArgument<A2> _a2;
+        RemoteArgument<A2> _a3;
         Decomposer* _args[3]; 
 };
 
@@ -707,20 +704,37 @@ class RemoteProcedure<R, A1, A2,
 
         void begin(const A1& a1, const A2& a2)
         {
-            _a1.begin(a1, "");
-            _a2.begin(a2, "");
-            BasicComposer<R>& r = this->beginResult();
+            try
+            {
+                _a1.begin(a1, "");
+                _a2.begin(a2, "");
+                BasicComposer<R>& r = this->beginResult();
 
-            this->client().beginCall(r, *this, _args, 2);
+                this->client().beginCall(r, *this, _args, 2);
+            }
+            catch(...)
+            {
+                this->onReset();
+                throw;
+            }
         }
 
         const R& call(const A1& a1, const A2& a2)
         {
-            _a1.begin(a1, "");
-            _a2.begin(a2, "");
-            BasicComposer<R>& r = this->beginResult();
+            try
+            {
+                _a1.begin(a1, "");
+                _a2.begin(a2, "");
+                BasicComposer<R>& r = this->beginResult();
 
-            this->client().call(r, *this, _args, 2);
+                this->client().call(r, *this, _args, 2);
+                this->onReset();
+            }
+            catch(...)
+            {
+                this->onReset();
+                throw;
+            }
             return this->result().value();
         }
 
@@ -772,6 +786,7 @@ class RemoteProcedure<R, A1,
             {
                 _a1.begin(a1, "");
                 BasicComposer<R>& r = this->beginResult();
+                
                 this->client().beginCall(r, *this, _args, 1);
             }
             catch(...)
@@ -787,7 +802,8 @@ class RemoteProcedure<R, A1,
             {
                 _a1.begin(a1, "");
                 BasicComposer<R>& r = this->beginResult();
-                this->client().call(r, *this, _args, 1); // throw
+                
+                this->client().call(r, *this, _args, 1);
                 this->onReset();
             }
             catch(...)
@@ -837,16 +853,34 @@ class RemoteProcedure<R,
 
         void begin()
         {
-            BasicComposer<R>& r = this->beginResult();
-
-            this->client().beginCall(r, *this, 0, 0);
+            try
+            {
+                BasicComposer<R>& r = this->beginResult();
+                
+                this->client().beginCall(r, *this, 0, 0);
+            }
+            catch(...)
+            {
+                this->onReset();
+                throw;
+            }
         }
 
         const R& call()
         {
-            BasicComposer<R>& r = this->beginResult();
-
-            this->client().call(r, *this, 0, 0);
+            try
+            {
+                BasicComposer<R>& r = this->beginResult();
+                
+                this->client().call(r, *this, 0, 0);
+                this->onReset();
+            }
+            catch(...)
+            {
+                this->onReset();
+                throw;
+            }
+            
             return this->result().value();
         }
 
