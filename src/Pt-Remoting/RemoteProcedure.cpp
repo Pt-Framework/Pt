@@ -67,7 +67,9 @@ void RemoteCall::cancel()
     if( _client->activeProcedure() == this )
     {
         _client->cancelCall();
-        this->onReset(); 
+
+        this->onReset();
+        this->onClear();
     }
 }
 
