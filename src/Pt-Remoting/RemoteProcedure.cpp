@@ -83,7 +83,16 @@ void RemoteCall::endCall()
     if( _client->activeProcedure() == this )
     {
         this->onReset();
-        _client->endCall(); // throws
+
+        try
+        {
+            _client->endCall();
+        }
+        catch(...)
+        {
+            this->onClear();
+            throw;
+        }
     }
 }
 

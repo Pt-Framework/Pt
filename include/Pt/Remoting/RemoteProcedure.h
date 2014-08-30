@@ -74,6 +74,8 @@ class PT_REMOTING_API RemoteCall : private Pt::NonCopyable
 
         virtual void onReset() = 0;
 
+        virtual void onClear() = 0;
+
     private:
         Client* _client;
         String _name;
@@ -89,7 +91,15 @@ class Result
         */
         explicit Result(RemoteCall* call = 0)
         : _call(call)
-        { }
+        , _result(0)
+        { 
+            _result = new (_mem) R;
+        }
+
+        ~Result()
+        {
+            _result->~R();
+        }
 
         void init(RemoteCall* call)
         { _call = call; }
@@ -106,7 +116,7 @@ class Result
         /** @brief The return value.
         */
         R& value()
-        { return _result; }
+        { return *_result; }
 
         /** @brief Ends a remote procedure call.
 
@@ -118,12 +128,19 @@ class Result
         const R& get() const
         {
             _call->endCall();
-            return _result;
+            return *_result;
+        }
+
+        void clear()
+        {
+            _result->~R();
+            _result = new (_mem) R;
         }
 
     private:
         RemoteCall* _call;
-        R _result;
+        char _mem[ sizeof(R) ];
+        R* _result;
 };
 
 /** @internal Documented externally.
@@ -173,6 +190,11 @@ class RemoteProcedureBase : public RemoteCall
         {
             _r->~BasicComposer<R>();
             _r = new (_mem) BasicComposer<R>( &client().context() );
+        }
+
+        virtual void onClear()
+        {
+            _result.clear();
         }
 
     private:
