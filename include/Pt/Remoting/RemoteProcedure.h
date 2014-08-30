@@ -84,7 +84,7 @@ class PT_REMOTING_API RemoteCall : private Pt::NonCopyable
 /** @brief %Result of a remote procedure call.
 */
 template <typename R>
-class Result
+class Result : private Pt::NonCopyable
 {
     public:
         /** @brief Constructor.
