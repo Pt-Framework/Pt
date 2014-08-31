@@ -172,7 +172,12 @@ class BasicDecomposer : public Decomposer
                         _it = _current->end();
                 }
 
-                return _current != 0 ? this : parent();
+                if(_current != 0 )
+                    return this;
+
+                _si.clear();
+                _type = 0;
+                return parent();
             }
 
             SerializationInfo::Iterator it = _it->beginFormat(formatter);

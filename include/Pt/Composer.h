@@ -393,6 +393,8 @@ class BasicComposer : public Composer
             if( ! _current->parent() )
             {
                 *_current >> Pt::load() >>= *_type;
+                _si.clear();
+                _type = 0;
                 return parent();
             }
 
