@@ -115,6 +115,9 @@ class BasicDecomposer : public Decomposer
         , _current(0)
         { }
 
+        // TODO: pass instance name to format()/onFormat() and 
+        //                             beginFormat()/onBeginFormat()
+
         /** @brief Begin decomposing a type.
         */
         void begin(const T& type, const char* name)

@@ -1022,6 +1022,9 @@ class RemoteProcedure<R, A1,
         {
             try
             {
+                // TODO: pass instance name to format()/onFormat() and 
+                //                             beginFormat()/onBeginFormat()
+
                 _a1.begin(a1, "");
                 
                 BasicComposer<R>& r = this->beginResult();
