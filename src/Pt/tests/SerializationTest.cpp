@@ -32,14 +32,15 @@
 #include "Pt/Time.h"
 #include "Pt/DateTime.h"
 #include "Pt/Convert.h"
+#include "Pt/Utf8Codec.h"
 #include "Pt/SerializationContext.h"
 #include "Pt/SerializationInfo.h"
+#include "Pt/StringStream.h"
 #include "Pt/Deserializer.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/System/Clock.h"
-#include "Pt/StringStream.h"
 #include <string>
 #include <iostream>
 #include <cstddef>
@@ -279,6 +280,7 @@ class SerializationTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "Binary", *this, &SerializationTest::Binary );
             Pt::Unit::TestSuite::registerMethod( "BuiltInTypesTest", *this, &SerializationTest::BuiltInTypesTest );
             Pt::Unit::TestSuite::registerMethod( "String8", *this, &SerializationTest::String8 );
+            Pt::Unit::TestSuite::registerMethod( "StringWithCodec", *this, &SerializationTest::StringWithCodec );
             Pt::Unit::TestSuite::registerMethod( "StdVectorTest", *this, &SerializationTest::StdVectorTest );
             Pt::Unit::TestSuite::registerMethod( "DateTest", *this, &SerializationTest::DateTest );
             Pt::Unit::TestSuite::registerMethod( "TimeTest", *this, &SerializationTest::TimeTest );
@@ -291,6 +293,7 @@ class SerializationTest : public Pt::Unit::TestSuite
         void Binary();
         void BuiltInTypesTest();
         void String8();
+        void StringWithCodec();
         void StdVectorTest();
         void DateTest();
         void TimeTest();
@@ -611,6 +614,21 @@ void SerializationTest::String8()
 
     std::string str2;
     si >>= str2;
+    PT_UNIT_ASSERT(str2 == str);
+}
+
+
+void SerializationTest::StringWithCodec()
+{
+    Pt::Utf8Codec codec;
+
+    Pt::SerializationInfo si;
+    std::string str = "Hello World!";
+    si.setString(str, codec);
+    PT_UNIT_ASSERT(si.isScalar());
+
+    std::string str2;
+    si.getString(str2, codec);
     PT_UNIT_ASSERT(str2 == str);
 }
 

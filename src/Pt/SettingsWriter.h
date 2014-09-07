@@ -54,7 +54,7 @@ class SettingsWriter
 
         void writeChild(const SerializationInfo& node);
 
-        void writeEntry(const std::string& name, const Pt::String& value, const std::string& type);
+        void writeEntry(const std::string& name, const Pt::String& value, const SerializationInfo& si);
 
         void writeSection(const Pt::String& prefix);
 
