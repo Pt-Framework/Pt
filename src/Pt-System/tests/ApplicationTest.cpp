@@ -41,6 +41,7 @@
 #endif
 
 class ApplicationTest : public Pt::Unit::TestSuite
+                      , public Pt::Connectable
 {
     public:
         ApplicationTest()
