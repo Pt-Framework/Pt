@@ -52,6 +52,24 @@ class Context;
 namespace Http {
 
 /** @brief An HTTP client.
+
+    A connection will be persistent (keep-alive), if the request headers
+    contains the keep-alive header fields. A persistent connection is needed
+    for HTTP request pipelining. Once all requests have been made, the client
+    should be closed, otherwise it may run into the servers keep-alive
+    timeout, if the client is used again later.
+
+    @code
+        Pt::Http::Client client;
+        client.request().header().setKeepAlive();
+
+        // use client for multiple requests
+        ...
+
+        // close the persistent connection
+        client.close();
+
+    @endcode
 */
 class PT_HTTP_API Client : public Connectable
                          , private NonCopyable
@@ -145,9 +163,12 @@ class PT_HTTP_API Client : public Connectable
         */
         Signal<Client&>& replyReceived();
 
-        /** @brief Cancel all operations.
-        */
+        // TODO: remove in later version
         void cancel();
+
+        /** @brief Closes the connection and cancels all operations.
+        */
+        void close();
 
         /** @brief Blocks until request is sent.
         */
