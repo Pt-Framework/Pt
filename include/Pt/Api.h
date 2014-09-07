@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2004-2011 Marc Boris Duerner 
- * Copyright (C) 2006 by Aloysius Indrayanto
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,8 +25,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Api_h
-#define Pt_Api_h
 
 #if defined(_MSC_VER)
     //http://support.microsoft.com/support/kb/articles/Q134/9/80.asp
@@ -95,6 +92,9 @@
     // disable locking of iostreams on xlC
     #define __NOLOCK_ON_OUTPUT
 #endif
+
+#ifndef Pt_Api_h
+#define Pt_Api_h
 
 /** @defgroup Allocator Allocators
 
@@ -270,4 +270,3 @@ namespace Pt {
 */
 
 #endif
-

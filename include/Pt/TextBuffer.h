@@ -347,8 +347,15 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         // inheritdoc
         virtual std::streamsize showmanyc()
         {
-            return _target && _target->rdbuf() ? _target->rdbuf()->in_avail() 
-                                               : -1;
+            //return _target && _target->rdbuf() ? _target->rdbuf()->in_avail() 
+            //                                   : -1;
+
+            // Return 0, because we can not predict how many characters
+            // can be decoded from the available external byte sequence.
+            // Also, if we returned a number > 0, the next call to underflow()
+            // must exactly read this number of bytes without blocking.
+
+            return _target && _target->rdbuf() ? 0 : -1;
         }
 
         // inheritdoc
@@ -499,7 +506,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         {
             while(n-- > 0)
             {
-                *s1 = s2->value();
+                *s1 = static_cast<A>(s2->value());
                 ++s1;
                 ++s2;
             }

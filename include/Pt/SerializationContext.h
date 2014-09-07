@@ -152,10 +152,10 @@ class PT_API SerializationContext : public SerializationInfo
     private:
         void registerSurrogate(const std::type_info& ti, SerializationSurrogate* surrogate);
 
-        SerializationContext(const SerializationContext& si)
+        SerializationContext(const SerializationContext& )
         {}
 
-        SerializationContext& operator=(const SerializationContext& si)
+        SerializationContext& operator=(const SerializationContext& )
         { return *this; }
 
     private:

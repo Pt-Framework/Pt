@@ -189,46 +189,46 @@ class Composer
         {}
 
         //! @brief Set type name.
-        virtual void onSetTypeName(const char* type, std::size_t len)
+        virtual void onSetTypeName(const char*, std::size_t)
         {}
 
         //! @brief Set reference ID.
         virtual void onSetId(const char* id, std::size_t len) = 0;
 
         //! @brief Compose a string value.
-        virtual void onSetString(const Pt::Char* value, std::size_t len)
+        virtual void onSetString(const Pt::Char*, std::size_t)
         { throw SerializationError("unexpected string value"); }
 
         //! @brief Compose a binary value.
-        virtual void onSetBinary(const char* data, std::size_t length)
+        virtual void onSetBinary(const char*, std::size_t)
         { throw SerializationError("unexpected binary value"); }
 
         //! @brief Compose a character value.
-        virtual void onSetChar(const Pt::Char& ch)
+        virtual void onSetChar(const Pt::Char&)
         { throw SerializationError("unexpected char value"); }
 
         //! @brief Compose a bool value.
-        virtual void onSetBool(bool value)
+        virtual void onSetBool(bool)
         { throw SerializationError("unexpected bool value"); }
 
         //! @brief Compose a integer value.
-        virtual void onSetInt(Pt::int64_t value)
+        virtual void onSetInt(Pt::int64_t)
         { throw SerializationError("unexpected integer value"); }
         
         //! @brief Compose a unsigned integer value.
-        virtual void onSetUInt(Pt::uint64_t value)
+        virtual void onSetUInt(Pt::uint64_t)
         { throw SerializationError("unexpected unsigned value"); }
 
         //! @brief Compose a floating point value.
-        virtual void onSetFloat(long double value)
+        virtual void onSetFloat(long double)
         { throw SerializationError("unexpected float value"); }
 
         //! @brief Compose a reference.
-        virtual void onSetReference(const char* id, std::size_t len)
+        virtual void onSetReference(const char*, std::size_t)
         { throw SerializationError("unexpected reference"); }
 
         //! @brief Begin composition os a struct member.
-        virtual Composer* onBeginMember(const char* name, std::size_t len)
+        virtual Composer* onBeginMember(const char*, std::size_t)
         { throw SerializationError("unexpected struct"); }
 
         /** @brief Begins composition of a sequence member.
@@ -338,7 +338,7 @@ class BasicComposer : public Composer
         // inherit docs
         void onSetFloat(long double value)
         {
-            _current->setDouble(value);
+            _current->setLongDouble(value);
         }
 
         // inherit docs
@@ -393,6 +393,8 @@ class BasicComposer : public Composer
             if( ! _current->parent() )
             {
                 *_current >> Pt::load() >>= *_type;
+                _si.clear();
+                _type = 0;
                 return parent();
             }
 

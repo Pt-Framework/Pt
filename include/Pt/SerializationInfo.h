@@ -618,10 +618,10 @@ class PT_API SerializationInfo
         SerializationInfo& addChild();
 
     private:
-        SerializationInfo(const SerializationInfo& si)
+        SerializationInfo(const SerializationInfo&)
         {}
 
-        SerializationInfo& operator=(const SerializationInfo& si)
+        SerializationInfo& operator=(const SerializationInfo&)
         { return *this; }
 
     private:
