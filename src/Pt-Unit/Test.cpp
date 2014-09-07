@@ -31,10 +31,34 @@ namespace Pt {
 
 namespace Unit {
 
+Test::~Test()
+{ 
+    while( ! _reporter.empty() )
+    {
+        detachReporter( *_reporter.back() );
+    }
+}
+
+
+void Test::attachReporter(Reporter& r)
+{
+    _reporter.push_back(&r);
+    r.attachTest(*this);
+}
+
+
+void Test::detachReporter(Reporter& r)
+{
+    _reporter.remove(&r);
+    r.detachTest(*this);
+}
+
+
 const std::string& Test::name() const
 {
     return _name;
 }
+
 
 void Test::reportStart(const TestContext& ctx)
 {
@@ -142,19 +166,6 @@ Test* Test::parent()
 const Test* Test::parent() const
 {
     return _parent;
-}
-
-
-void Test::attachReporter(Reporter& r)
-{
-    r.destroyed += Pt::slot(*this, &Test::detachReporter);
-    _reporter.push_back(&r);
-}
-
-
-void Test::detachReporter(Reporter& r)
-{
-    _reporter.remove(&r);
 }
 
 }
