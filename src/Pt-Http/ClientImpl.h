@@ -124,7 +124,7 @@ class ClientImpl : public Connectable
         const Reply& reply() const
         { return _reply; }
 
-        void cancel();
+        void close();
 
         State state() const
         { return _hstate; }

@@ -23,7 +23,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef Pt_Http_Connection_h
@@ -56,81 +56,79 @@ namespace Http {
 class Reply;
 class Request;
 
-class Socket : public Net::TcpSocket
-{
-    public:
-        Socket()
-        : _output(false)
-        , _input(false)
-        {}
-
-        void setInputPipelined()
-        { 
-            _input = true;
-
-            System::EventLoop* loop = this->loop();
-            if( ! loop )
-                throw std::logic_error("socket not active");
-            
-            loop->setReady(*this); 
-        }
-
-        void setOutputPipelined()
-        { 
-            _output = true;
-            
-            System::EventLoop* loop = this->loop();
-            if( ! loop )
-                throw std::logic_error("socket not active");
-            
-            loop->setReady(*this);  
-        }
-
-        Signal<>& outputPipelined()
-        { return _outputPipelined; }
-
-        Signal<>& inputPipelined()
-        { return _inputPipelined; }
-
-    protected:
-        virtual void onCancel()
-        {
-            _output = false;
-            _input = false;
-            Net::TcpSocket::onCancel();
-        }
-        
-        virtual bool onRun()
-        { 
-            if(_output)
-            {
-                _output = false;
-                _outputPipelined.send();
-                return true;
-            }
-            
-            if(_input)
-            {
-                _input = false;
-                _inputPipelined.send();
-                return true;
-            }
-
-            return Net::TcpSocket::onRun(); 
-        }
-
-    private:
-        bool _output;
-        bool _input;
-        Signal<> _outputPipelined;
-        Signal<> _inputPipelined;
-};
+//class Socket : public Net::TcpSocket
+//{
+//    public:
+//        Socket()
+//        : _output(false)
+//        , _input(false)
+//        {}
+//
+//        void setInputReady()
+//        { 
+//            _input = true;
+//
+//            System::EventLoop* loop = this->loop();
+//            if( ! loop )
+//                throw std::logic_error("socket not active");
+//            
+//            loop->setReady(*this); 
+//        }
+//
+//        void setOutputReady()
+//        { 
+//            _output = true;
+//            
+//            System::EventLoop* loop = this->loop();
+//            if( ! loop )
+//                throw std::logic_error("socket not active");
+//            
+//            loop->setReady(*this);  
+//        }
+//
+//        Signal<>& outputPipelined()
+//        { return _outputPipelined; }
+//
+//        Signal<>& inputPipelined()
+//        { return _inputPipelined; }
+//
+//    protected:
+//        virtual void onCancel()
+//        {
+//            _output = false;
+//            _input = false;
+//            Net::TcpSocket::onCancel();
+//        }
+//        
+//        virtual bool onRun()
+//        { 
+//            if(_output)
+//            {
+//                _output = false;
+//                _outputPipelined.send();
+//                return true;
+//            }
+//            
+//            if(_input)
+//            {
+//                _input = false;
+//                _inputPipelined.send();
+//                return true;
+//            }
+//
+//            return Net::TcpSocket::onRun(); 
+//        }
+//
+//    private:
+//        bool _output;
+//        bool _input;
+//        Signal<> _outputPipelined;
+//        Signal<> _inputPipelined;
+//};
 
 class Connection : public Connectable
+                 , public System::Selectable
 {
-    friend class Request;
-    friend class Reply;
-
     class ParseEvent : public HeaderParser::MessageHeaderEvent
     {
             Request* _request;
@@ -192,7 +190,7 @@ class Connection : public Connectable
 
         void setSecure(Ssl::Context& ctx);
 
-        void setActive(System::EventLoop& loop);
+        //void setActive(System::EventLoop& loop);
 
         System::EventLoop* loop() const
         { return _socket.loop(); }
@@ -212,9 +210,6 @@ class Connection : public Connectable
         bool isConnected() const
         { return _socket.isConnected(); }
 
-        void cancel();
-
-    protected:
         void sendRequest(Request& r);
 
         void receiveReply(Reply& r);
@@ -238,6 +233,7 @@ class Connection : public Connectable
         std::streambuf& buffer()
         { return _httpbuf; }
 
+    protected:
         void onConnect(Net::TcpSocket& socket);
 
         void onOutput();
@@ -261,7 +257,20 @@ class Connection : public Connectable
         bool inputAvailable();
 
         bool outputAvailable();
-      
+
+        void setInputReady();
+
+        void setOutputReady();
+        
+        virtual bool onRun();
+
+        virtual void onCancel();
+
+        virtual void onAttach(System::EventLoop& loop);
+
+        virtual void onDetach(System::EventLoop& loop);
+
+    private:
         void writeRequestHeader(std::ostream& os, Request& request);
 
         void writeReplyHeader(std::ostream& os, Reply& reply);
@@ -277,18 +286,21 @@ class Connection : public Connectable
         Reply* _reply;
 
         System::Timer _timer;
-        Socket _socket;
+        Net::TcpSocket _socket;
         System::IOBuffer _sockbuf;
         std::iostream _sockios;
         Net::Endpoint _addrInfo;
         Net::TcpSocketOptions _tcpOptions;
 
-        bool _ssl;
-        Ssl::Context* _ctx;
+        bool _ssl; // TODO: remove, same as _ctx != 0
+        Ssl::Context* _ctx; 
         Ssl::StreamBuffer _sslbuf;
 
         HttpBuffer _httpbuf;
         std::ostream _os; // TODO: remove, only needed to write hex values
+
+        bool _inputPipelined;
+        bool _outputPipelined;
 
         std::size_t _timeout;
         std::size_t _keepaliveTimeout;

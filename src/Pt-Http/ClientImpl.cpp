@@ -205,8 +205,6 @@ void ClientImpl::beginReceive()
     if(_hstate == OnRequest)
     {
         log_debug("begin sending cached request");
-
-        ///_req.finish();
         _hstate = OnRequestEnd;
     }
 
@@ -279,7 +277,7 @@ MessageProgress ClientImpl::endReceive()
 }
 
 
-void ClientImpl::cancel()
+void ClientImpl::close()
 {
     _conn.cancel();
     _hstate = Idle;

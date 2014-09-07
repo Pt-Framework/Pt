@@ -83,6 +83,8 @@ Connection::Connection()
 , _sslbuf()
 , _httpbuf()
 , _os(&_sockbuf)
+, _outputPipelined(false)
+, _inputPipelined(false)
 , _timeout(WaitInfinite)
 , _keepaliveTimeout(WaitInfinite)
 , _maxReadSize( NoRequestSizeLimit )
@@ -94,8 +96,8 @@ Connection::Connection()
 , _onTimeout(false)
 {
     _socket.connected() += slot(*this, &Connection::onConnect);
-    _socket.outputPipelined() += slot(*this, &Connection::onOutput);
-    _socket.inputPipelined() += slot(*this, &Connection::onInput);
+    //_socket.outputPipelined() += slot(*this, &Connection::onOutput);
+    //_socket.inputPipelined() += slot(*this, &Connection::onInput);
 
     _sockbuf.attach(_socket);
     _sockbuf.outputReady() += slot(*this, &Connection::onHttpOutput);
@@ -174,14 +176,14 @@ void Connection::setSecure(Ssl::Context& ctx)
 }
 
 
-void Connection::setActive(System::EventLoop& loop)
-{
-    _socket.setActive(loop);
-    _timer.setActive(loop);
-}
+//void Connection::setActive(System::EventLoop& loop)
+//{
+//    _socket.setActive(loop);
+//    _timer.setActive(loop);
+//}
 
 
-void Connection::cancel()
+void Connection::onCancel()
 {
     log_debug("cancelling connection");
     _timer.stop();
@@ -193,6 +195,8 @@ void Connection::cancel()
     _reply = 0;
     _request = 0;
     _state = NotConnected;
+    _outputPipelined = false;
+    _inputPipelined = false;
     _chunked = false;
     _keepAlive = false;
     _onTimeout = false;
@@ -451,7 +455,7 @@ void Connection::beginSendRequest(Request& request)
         // until we begin receiving the next reply from the server.
         //
         // TODO: beginWrite() if over 8K data to send
-        _socket.setOutputPipelined();
+        setOutputReady();
         return;
     }
 
@@ -579,7 +583,7 @@ void Connection::beginSendReply(Reply& reply)
         {
             // signal that output was sent, so the reply data can be pipelined
             // until we begin receiving the next request from the client
-            _socket.setOutputPipelined(); 
+            setOutputReady(); 
         }
         else
             beginWrite();
@@ -1071,13 +1075,13 @@ void Connection::beginRead()
 
         if(_sslbuf.in_avail() > 0)
         {
-            _socket.setInputPipelined();
+            setInputReady();
             return;
         }
     }
 
     if( _sockbuf.in_avail() )
-        _socket.setInputPipelined();
+        setInputReady();
     else
         _sockbuf.beginRead();
 }
@@ -1155,11 +1159,66 @@ bool Connection::outputAvailable()
 {
     if(_ssl)
     {
-        // TODO: implement Ssl::StreamBuffer::out_avail...
         _sslbuf.pubsync();
     }
 
     return _sockbuf.out_avail() > 0;
+}
+
+
+void Connection::setInputReady()
+{ 
+    _inputPipelined = true;
+
+    System::EventLoop* loop = this->loop();
+    if( ! loop )
+        throw std::logic_error("socket not active");
+            
+    loop->setReady(*this); 
+}
+
+
+void Connection::setOutputReady()
+{ 
+    _outputPipelined = true;
+            
+    System::EventLoop* loop = this->loop();
+    if( ! loop )
+        throw std::logic_error("socket not active");
+            
+    loop->setReady(*this);  
+}
+
+   
+bool Connection::onRun()
+{ 
+    if(_outputPipelined)
+    {
+        _outputPipelined = false;
+        this->onOutput();
+        return true;
+    }
+            
+    if(_inputPipelined)
+    {
+        _inputPipelined = false;
+        this->onInput();
+        return true;
+    }
+
+    return false; 
+}
+
+
+void Connection::onAttach(System::EventLoop& loop)
+{
+    _socket.setActive(loop);
+    _timer.setActive(loop);
+}
+
+
+void Connection::onDetach(System::EventLoop& loop)
+{ 
 }
 
 
@@ -1197,7 +1256,7 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
 
     if( ! header.has("Connection") )
     {
-        os.write("Connection: keep-alive\r\n", 24);
+        os.write("Connection: close\r\n", 19);
     }
 
     if( ! header.has("Date"))

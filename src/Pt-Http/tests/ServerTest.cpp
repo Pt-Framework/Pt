@@ -134,6 +134,7 @@ typedef Pt::Http::BasicService<ChunkedResponder> ChunkedService;
 
 
 class ServerTest : public Pt::Unit::TestSuite
+                 , public Pt::Connectable
 {
     public:
         ServerTest()
@@ -229,6 +230,7 @@ class ServerTest : public Pt::Unit::TestSuite
             client.setHost(ep);
             client.requestSent() += Pt::slot(*this, &ServerTest::onPipelinedSent);
             client.replyReceived() += Pt::slot(*this, &ServerTest::onPipelinedReceived);
+            client.request().header().setKeepAlive();
             client.request().setUrl("/test");
             client.request().header().set("foo", "bar");
             PT_UNIT_ASSERT(client.request().header().has("foo") );
