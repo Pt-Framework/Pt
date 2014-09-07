@@ -50,7 +50,7 @@ class IOStream : public BasicIOStream<char>
         : BasicIOStream<char>(0)
         , _sb(bufferSize)
         {
-            init(&_sb);
+            setBuffer(&_sb);
         }
 
         /** @brief Constructs an open SSL stream. 
@@ -59,7 +59,7 @@ class IOStream : public BasicIOStream<char>
         : BasicIOStream<char>(0)
         , _sb(ctx, ios, mode, bufferSize)
         {
-            init(&_sb);        
+            setBuffer(&_sb);        
         }
 
         /** @brief Destructor. 
