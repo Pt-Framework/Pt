@@ -194,7 +194,7 @@ void HttpClient::close()
 
 void HttpClient::onInvoke()
 {
-    client.request().discard();
+    _client.request().discard();
     std::ostream& os = _client.request().body();
 
     // format XML-RPC request
@@ -217,7 +217,7 @@ void HttpClient::onInvoke()
 
 void HttpClient::onCall()
 {
-    client.request().discard();
+    _client.request().discard();
     std::ostream& os = _client.request().body();
 
     // format XML-RPC request
