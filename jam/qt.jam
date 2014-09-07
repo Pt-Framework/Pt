@@ -1,3 +1,213 @@
+###############################################################################
+# Configure Qt
+###############################################################################
+
+rule CheckBuildQt
+{  
+    local _src = $(1) ;
+    local _includes = $(2) ;
+    local _cflags = $(3) ;
+    local _linkLibs = $(4) ;
+    local _linkFlags = $(5) ;
+
+    WITH_QT = [ CheckBuildC++ $(_src)
+                             : [ FIncludes $(_includes) ] $(_cflags)
+                             : $(_linkLibs) $(_linkFlags) ] ;
+
+    if $(WITH_QT)
+    {
+        EchoOption WITH_QT : "Qt Support" ;
+        Configure WITH_QT ;
+
+        QT_INCLUDES = $(_includes) ;
+        EchoOption QT_INCLUDES : "Qt Include Directory" ;
+        Configure QT_INCLUDES ;
+
+        QT_C++FLAGS = $(_cflags) ;
+        EchoOption QT_C++FLAGS : "Qt C++ Flags" ;
+        Configure QT_C++FLAGS ;
+
+        QT_LINKLIBS = $(_linkLibs) ;
+        EchoOption QT_LINKLIBS : "Qt Link Libraries" ;
+        Configure QT_LINKLIBS ;
+
+        QT_LINKFLAGS = $(_linkFlags) ;
+        EchoOption QT_LINKFLAGS : "Qt Linker Flags" ;
+        Configure QT_LINKFLAGS ;
+    }
+
+    return $(WITH_QT) ;
+}
+
+
+rule QtLibName
+{
+    local qtlibs ;
+
+    for local _l in $(1)
+    {
+        switch $(_l)
+        {
+            case core       : qtlibs += QtCore ;
+            case concurrent : qtlibs += QtConcurrent ;
+            case network    : qtlibs += QtNetwork ;
+            case widgets    : qtlibs += QtWidgets ;
+            case gui        : qtlibs += QtGui ;
+            case qml        : qtlibs += QtQml ;
+            case quick      : qtlibs += QtQuick ;
+        }
+    }
+
+    return $(qtlibs) ;
+}
+
+
+rule Qt5LibName
+{
+    local qtlibs ;
+
+    for local _l in $(1)
+    {
+        switch $(_l)
+        {
+            case core       : qtlibs += Qt5Core ;
+            case concurrent : qtlibs += Qt5Concurrent ;
+            case network    : qtlibs += Qt5Network ;
+            case widgets    : qtlibs += Qt5Widgets ;
+            case gui        : qtlibs += Qt5Gui ;
+            case qml        : qtlibs += Qt5Qml ;
+            case quick      : qtlibs += Qt5Quick ;
+        }
+    }
+    
+    return $(qtlibs) ;
+}
+
+
+rule QtLinkLibs_Windows
+{       
+    if $(WITH_DEBUG)
+    {   
+        return $(<:S="d.lib") ;
+    }
+    else
+    {
+        return $(<:S=".lib") ;
+    }
+}
+
+
+rule QtLinkLibs_Unix
+{       
+    return -l$(<) ;
+}
+
+
+rule QtLinkLibs_MacOSX
+{
+    return "-framework "$(<) ;
+}
+
+
+rule QtLinkLibs
+{
+    local qtlibs ;
+
+    for local _l in $(<)
+    {
+        qtlibs += [ $(QT_LIBNAME_RULE) $(_l) ] ;
+    }
+
+    return [ $(QT_LINKLIBS_RULE) $(qtlibs) ] ;
+}
+
+
+rule ConfigureQt
+{  
+    local qtlibs ;
+    local qt5libs ;
+
+    for local _l in $(1)
+    {
+        qt5libs += [ Qt5LibName $(_l) ] ;
+        qtlibs += [ QtLibName $(_l) ] ;
+    }
+
+    if $(QTDIR)
+    {
+      QT_INCLUDES ?= [ FDirName $(QTDIR) include ] ;
+      QT_LIBDIR ?= [ FDirName $(QTDIR) lib ] ;
+    }
+
+    #
+    # Windows
+    #
+    if ! $(WITH_QT)
+    {       
+        QT_SUFLIB = .lib ;
+        
+        if $(WITH_DEBUG)
+        {   
+            QT_SUFLIB = d.lib ;
+        }
+
+        CheckBuildQt "#include <QtCore/QString>"
+                     "int main() { QString button; return 0; }" 
+                    : $(QT_INCLUDES) 
+                    : $(QT_C++FLAGS)
+                    : $(QT_LINKLIBS) $(qt5libs:S=$(QT_SUFLIB)) 
+                    : $(QT_LINKFLAGS) /LIBPATH:$(QT_LIBDIR) ;
+
+        if $(WITH_QT)
+        {
+            QT_LIBNAME_RULE = Qt5LibName ;
+            QT_LINKLIBS_RULE = QtLinkLibs_Windows ;
+        }
+    }
+
+    #
+    # Unix
+    #
+    if ! $(WITH_QT)
+    {
+        CheckBuildQt "#include <QtCore/QString>"
+                     "int main() { QString button; return 0; }" 
+                    : $(QT_INCLUDES) 
+                    : $(QT_C++FLAGS)
+                    : $(QT_LINKLIBS) -l$(qt5libs) 
+                    : $(QT_LINKFLAGS) -L$(QT_LIBDIR) ;
+
+        if $(WITH_QT)
+        {
+            QT_LIBNAME_RULE = Qt5LibName ;
+            QT_LINKLIBS_RULE = QtLinkLibs_Unix ;
+        }
+    }
+    
+    #
+    # Mac OS-X
+    #
+    if ! $(WITH_QT)
+    {
+        CheckBuildQt "#include <QtCore/QString>"
+                     "int main() { QString button; return 0; }" 
+                    : $(QT_INCLUDES) 
+                    : $(QT_C++FLAGS) -F$(QT_LIBDIR)
+                    : $(QT_LINKLIBS) "-framework "$(qtlibs)
+                    : $(QT_LINKFLAGS) -F$(QT_LIBDIR) ;
+
+        if $(WITH_QT)
+        {
+            QT_LIBNAME_RULE = QtLibName ;
+            QT_LINKLIBS_RULE = QtLinkLibs_MaxOSX ;
+        }
+    }
+
+    return $(WITH_QT) ;
+}
+
+###############################################################################
+# Rules and Actions for the Qt Meta Object Compiler
 #
 # Runs the moc on header files containing class definitions to generate a
 # source file that has to be compiled with the other source files.
@@ -8,9 +218,6 @@
 #
 # Main qtest : qtest.cpp qtest.moc.cpp ;
 #
-
-###############################################################################
-# Configure Meta Object Compiler
 ###############################################################################
 rule ConfigureMoc
 {
@@ -30,6 +237,7 @@ rule ConfigureMoc
     if ! $(WITH_QT_MOC)
     {
         QT_MOC = [ FDirName $(QTDIR) bin $(QT_MOC) ] ;
+        local _cmd = $(QT_MOC) $(_in) -o $(_out) ;
         WITH_QT_MOC = [ TryCommand $(_cmd) ] ;
     }
     
@@ -45,20 +253,108 @@ rule ConfigureMoc
     }
 }
 
+rule Moc
+{
+    local _mocFile = [ FGristFiles $(<) ] ;
+    local _header = [ FGristFiles  $(>) ] ;
+
+    MakeLocate $(_mocFile) : $(LOCATE_SOURCE) ;
+    SEARCH on $(_header) = $(SEARCH_SOURCE) ;
+    Depends $(_mocFile) : $(_header) ;
+    Moc1 $(_mocFile) : $(_header) ;
+
+    Clean clean : $(_mocFile) ;
+}
+
+actions Moc1
+{
+    $(QT_MOC) -I$(QT_INCLUDES) $(>) -o $(<)
+}
+
 ###############################################################################
-# Configure User Interface Compiler
+# Rules and Actions for the Qt Resource Compiler
+###############################################################################
+rule ConfigureRcc
+{
+    QT_RCC ?= rcc ;
+
+    ConfigureLog "\n[ ConfigureRcc ]" ;
+    
+    local _in = check.qrc ;
+    local _out = check.cpp ;
+    local _src = "<RCC></RCC>\n" ;
+    ConfigureLog $(_src) ;
+
+    WriteFile $(_in) : $(_src) ;
+    local _cmd = $(QT_RCC) $(_in) -o $(_out) ;
+    WITH_QT_RCC = [ TryCommand $(_cmd) ] ;
+
+    if ! $(WITH_QT_RCC)
+    {
+        QT_RCC = [ FDirName $(QTDIR) bin $(QT_RCC) ] ;
+        local _cmd = $(QT_RCC) $(_in) -o $(_out) ;
+        WITH_QT_RCC = [ TryCommand $(_cmd) ] ;
+    }
+    
+    TryCommand $(RM) $(_in) ;
+    TryCommand $(RM) $(_out) ;
+
+    EchoOption QT_RCC : "Qt rcc tool" : $(QT_RCC) ;
+    EchoOption WITH_QT_RCC : "Qt rcc support" : $(WITH_QT_RCC:E="no")  ;
+ 
+    if $(WITH_QT_RCC)
+    {
+        Configure QT_RCC : $(QT_RCC) ;
+    }
+}
+
+rule Rcc
+{
+    local _out = [ FGristFiles $(<) ] ;
+    local _qrc = [ FGristFiles $(>) ] ;
+
+    MakeLocate $(_out) : $(LOCATE_SOURCE) ;
+    SEARCH on $(_qrc) = $(SEARCH_SOURCE) ;
+    Depends $(_out) : $(_qrc) ;
+    Rcc1 $(_out) : $(_qrc) ;
+
+    Clean clean : $(_out) ;
+}
+
+actions Rcc1
+{
+    $(QT_RCC) -o $(<) $(>) 
+}
+
+###############################################################################
+# Rules and Actions for the User Interface Compiler
 ###############################################################################
 rule ConfigureUic
 {
-    QT_UIC ?= [ FDirName $(QTDIR) bin "uic"$(SUFEXE) ] ;
-    EchoOption QT_UIC : "Qt uic tool" : $(QT_UIC)  ;
+    QT_UIC ?= uic ;
 
-    WITH_QT_UIC = [ CHECK_IF_FILE $(QT_UIC) ] ;
-    if $(WITH_QT_UIC)
+    ConfigureLog "\n[ ConfigureUic ]" ;
+    
+    local _in = check.ui ;
+    local _out = check.cpp ;
+    local _src = "<ui version="4.0"></ui>\n" ;
+    ConfigureLog $(_src) ;
+
+    WriteFile $(_in) : $(_src) ;
+    local _cmd = $(QT_UIC) $(_in) -o $(_out) ;
+    WITH_QT_UIC = [ TryCommand $(_cmd) ] ;
+
+    if ! $(WITH_QT_UIC)
     {
-        WITH_QT_UIC = yes ;
+        QT_UIC = [ FDirName $(QTDIR) bin $(QT_UIC) ] ;
+        local _cmd = $(QT_UIC) $(_in) -o $(_out) ;
+        WITH_QT_UIC = [ TryCommand $(_cmd) ] ;
     }
+    
+    TryCommand $(RM) $(_in) ;
+    TryCommand $(RM) $(_out) ;
 
+    EchoOption QT_UIC : "Qt uic tool" : $(QT_UIC) ;
     EchoOption WITH_QT_UIC : "Qt uic support" : $(WITH_QT_UIC:E="no")  ;
  
     if $(WITH_QT_UIC)
@@ -67,65 +363,17 @@ rule ConfigureUic
     }
 }
 
-###############################################################################
-# Configure Qt
-###############################################################################
-rule ConfigureQt
-{
-    EchoOption QTDIR : "Qt directory" ;
-
-    QT_CORE_HEADER = [ FDirName $(QTDIR) include QtCore QtCore ] ;
-
-    WITH_QT = [ CHECK_IF_FILE $(QT_CORE_HEADER) ] ;
-    if $(WITH_QT)
-    {
-        WITH_QT = yes ;
-    }
-    
-    EchoOption WITH_QT : "Qt support" : $(WITH_QT:E="no")  ;
-    Configure WITH_QT : $(WITH_QT) ;
-
-    if $(WITH_QT)
-    {
-        Configure QTDIR : $(QTDIR) ;
-    }
-}
-
-###############################################################################
-# Rules and Actions for moc
-###############################################################################
-rule Moc
-{
-    local _mocFile = [ FGristFiles $(<) ] ;
-    local _header = $(>) ;
-
-    MakeLocate $(_mocFile) : $(LOCATE_SOURCE) ;
-    SEARCH on $(>) = $(SEARCH_SOURCE) ;
-    Depends $(_mocFile) : $(_header) ;
-    Moc1 $(_mocFile) : $(>) ;
-
-    Clean clean : $(_mocFile) ;
-}
-
-actions Moc1
-{
-    $(QT_MOC) $(>) -o $(<)
-}
-
-###############################################################################
-# Rules and Actions for uic
-###############################################################################
 rule Uic
 {
-    local _headerFile = [ FGristFiles $(<) ] ;
-    local _uicFile = $(>) ;
+    local _out = [ FGristFiles $(<) ] ;
+    local _ui = [ FGristFiles $(>) ] ;
 
-    MakeLocate $(_headerFile) : $(LOCATE_SOURCE) ;
-    SEARCH on $(>) = $(SEARCH_SOURCE) ;
-    Depends $(_headerFile) : $(_uicFile) ;
-    Uic1 $(_headerFile) : $(>) ;
+    MakeLocate $(_out) : $(LOCATE_SOURCE) ;
+    SEARCH on $(_ui) = $(SEARCH_SOURCE) ;
+    Depends $(_out) : $(_ui) ;
+    Uic1 $(_out) : $(_ui) ;
 
-    Clean clean : $(_headerFile) ;
+    Clean clean : $(_out) ;
 }
 
 actions Uic1

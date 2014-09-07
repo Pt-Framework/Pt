@@ -1,0 +1,120 @@
+###############################################################################
+# Configure Pt
+###############################################################################
+rule CheckBuildPt
+{  
+    local _src = $(1) ;
+    local _includes = $(2) ;
+    local _cflags = $(3) ;
+    local _linkLibs = $(4) ;
+    local _linkFlags = $(5) ;
+
+    WITH_PT = [ CheckBuildC++ $(_src) 
+                             : [ FIncludes $(_includes) ] $(_cflags)
+                             : $(_linkLibs) $(_linkFlags) ] ;
+
+    if $(WITH_PT)
+    {
+        EchoOption WITH_PT : "Pt Support" ;
+        Configure WITH_PT ;
+
+        PT_INCLUDES = $(_includes) ;
+        EchoOption PT_INCLUDES : "Pt Include Directory" ;
+        Configure PT_INCLUDES ;
+
+        PT_C++FLAGS = $(_cflags) ;
+        EchoOption PT_C++FLAGS : "Pt C++ Flags" ;
+        Configure PT_C++FLAGS ;
+
+        PT_LINKFLAGS = $(_linkFlags) ;
+        EchoOption PT_LINKFLAGS : "Pt Linker Flags" ;
+        Configure PT_LINKFLAGS ;
+
+        PT_LINKLIBS = $(_linkLibs) ;
+        EchoOption PT_LINKLIBS : "Pt Link Libraries" ;
+        Configure PT_LINKLIBS ;
+    }
+
+    return $(WITH_PT) ;
+}
+
+
+rule PtLinkLibs_Windows
+{       
+    return $(<:S=".lib") ;
+}
+
+
+rule PtLinkLibs_Unix
+{       
+    return -l$(<) ;
+}
+
+
+rule PtLinkLibs
+{
+    return [ $(PT_LINKLIBS_RULE) $(<) ] ;
+}
+
+
+rule ConfigurePt
+{  
+    local _libs = $(1) ;
+
+    if $(PTDIR)
+    {
+      PT_INCLUDES ?= [ FDirName $(PTDIR) include ] ;
+      PT_LIBDIR ?= [ FDirName $(PTDIR) lib ] ;
+    }
+
+    #
+    # Windows
+    #
+    if ! $(WITH_PT)
+    {
+        PT_TRY_C++FLAGS = ;
+        PT_TRY_LINKFLAGS = /LIBPATH:$(PT_LIBDIR) ;
+
+        CheckBuildPt "#include <Pt/String.h>"
+                     "int main() { Pt::String str; return 0; }" 
+                    : $(PT_INCLUDES) 
+                    : $(PT_TRY_C++FLAGS)
+                    : Pt.lib 
+                    : $(PT_TRY_LINKFLAGS) ;
+
+        if $(WITH_PT)
+        {
+            PT_LINKLIBS = $(_libs:S=.lib) ;
+            EchoOption PT_LINKLIBS : "Pt Link Libraries" ;
+
+            PT_LINKLIBS_RULE = PtLinkLibs_Windows ;
+        }
+    }
+
+    #
+    # Unix
+    #
+    if ! $(WITH_PT)
+    {
+        PT_TRY_C++FLAGS = ;
+        PT_TRY_LINKLIBS = -l$(_libs) ;
+        PT_TRY_LINKFLAGS = -L$(PT_LIBDIR) ;
+        
+        CheckBuildPt "#include <Pt/String.h>"
+                     "int main() { Pt::String str; return 0; }" 
+                    : $(PT_INCLUDES) 
+                    : $(PT_TRY_C++FLAGS)
+                    : -lPt
+                    : $(PT_TRY_LINKFLAGS) ;
+
+        if $(WITH_PT)
+        {
+            PT_LINKLIBS = -l$(_libs) ;
+            EchoOption PT_LINKLIBS : "Pt Link Libraries" ;
+
+            PT_LINKLIBS_RULE = PtLinkLibs_Unix ;
+        }
+    }
+
+    return $(WITH_PT) ;
+}
