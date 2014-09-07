@@ -320,6 +320,7 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop, bool& isConnected)
         {
             log_debug("connected successfully");
             loop.selector().endWrite( &_ioh );
+            isConnected = true;
             return true;
         }
 

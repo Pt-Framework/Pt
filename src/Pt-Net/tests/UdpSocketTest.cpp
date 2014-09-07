@@ -35,6 +35,7 @@
 #include <string>
 
 class UdpSocketTest : public Pt::Unit::TestSuite
+                    , public Pt::Connectable
 {
     public:
         UdpSocketTest()

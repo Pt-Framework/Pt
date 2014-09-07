@@ -40,6 +40,7 @@
 #include <cstring>
 
 class TcpSocketTest : public Pt::Unit::TestSuite
+                    , public Pt::Connectable
 {
     public:
         TcpSocketTest()
