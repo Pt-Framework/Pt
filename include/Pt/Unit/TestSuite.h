@@ -84,23 +84,17 @@ namespace Unit {
                     Context(TestFixture& fixture, TestMethod& test, const SerializationInfo* args, std::size_t argCount)
                     : TestContext(fixture, test)
                     , _test(test)
-                    , _args(args)
-                    , _argCount(argCount)
-                    {}
+                    {
+                       test.setArgs(args, argCount);
+                    }
 
                     virtual ~Context()
-                    {}
-
-                protected:
-                    virtual void exec()
                     {
-                        _test.exec(_args, _argCount);
+                        _test.setArgs(0, 0);
                     }
 
                 private:
                     TestMethod& _test;
-                    const SerializationInfo* _args;
-                    std::size_t _argCount;
             };
 
         public:
@@ -117,9 +111,6 @@ namespace Unit {
 
             //! @brief Destructor
             ~TestSuite();
-
-            //! @brief Sets a test parameter
-            virtual void setParameter(const std::string& name, const Pt::SerializationInfo& value);
 
             /** @brief Sets the protocol.
             */
@@ -210,7 +201,7 @@ namespace Unit {
         private:
             void registerTest(TestMethod* test);
 
-            TestMethod* findTest(const std::string& name);
+            TestMethod* findTestMethod(const std::string& name);
 
             /** @brief The assoziated test protocol
             */

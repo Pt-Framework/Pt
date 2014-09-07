@@ -35,18 +35,18 @@
 #include <Pt/Unit/Application.h>
 #include <fstream>
 
-// TODO: move to application class later
-namespace TestMain
-{
-    static int argc = 0;
-    static char** argv = 0;
-}
+//// TODO: move to application class later
+//namespace TestMain
+//{
+//    static int argc = 0;
+//    static char** argv = 0;
+//}
 
 
 int main(int argc, char** argv)
 {
-    TestMain::argc = argc;
-    TestMain::argv = argv;
+    //TestMain::argc = argc;
+    //TestMain::argv = argv;
     Pt::Unit::Application app;
 
     Pt::Arg<bool> help(argc, argv, 'h');

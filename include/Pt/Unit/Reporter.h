@@ -25,20 +25,23 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_UNIT_REPORTER_H
 #define PT_UNIT_REPORTER_H
 
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/TestContext.h>
-#include <Pt/Signal.h>
 #include <Pt/NonCopyable.h>
+#include <vector>
 #include <iosfwd>
 #include <stdexcept>
 
 namespace Pt {
 
 namespace Unit {
+
+class Test;
 
 /** @brief %Test event reporter
 
@@ -51,11 +54,12 @@ namespace Unit {
 */
 class PT_UNIT_API Reporter : protected NonCopyable
 {
+    friend class Test;
+
     public:
         /** @brief Destructor
         */
-        virtual ~Reporter()
-        { destroyed.send(*this);}
+        virtual ~Reporter();
 
         /** @brief Start notification
 
@@ -122,13 +126,18 @@ class PT_UNIT_API Reporter : protected NonCopyable
         */
         virtual void reportError(const TestContext& test) = 0;
 
-        Signal<Reporter&> destroyed;
-
     protected:
         /** @brief Constructs a reporter
         */
         Reporter()
         {}
+
+        void attachTest(Test& test);
+
+        void detachTest(Test& test);
+
+    private:
+        std::vector<Test*> _attachedTests;
 };
 
 

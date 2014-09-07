@@ -25,15 +25,16 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_UNIT_TEST_H
 #define PT_UNIT_TEST_H
 
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Reporter.h>
 #include <Pt/Unit/Assertion.h>
-#include <Pt/Connectable.h>
 #include <Pt/NonCopyable.h>
 #include <string>
+#include <list>
 
 namespace Pt {
 
@@ -50,14 +51,12 @@ namespace Unit {
 
         @ingroup unittest
     */
-    class PT_UNIT_API Test : public Connectable,
-                             protected NonCopyable
+    class PT_UNIT_API Test : protected NonCopyable
     {
         public:
             /** @brief Destructor
             */
-            virtual ~Test()
-            { }
+            virtual ~Test();
 
             /** @brief Runs the test
 
@@ -132,10 +131,6 @@ namespace Unit {
             const Test* parent() const;
 
             /** @brief Add reporter for test events
-
-                Adds the reporter \a r to report test events. The caller 
-                owns the reporter and must make sure it lives as long as 
-                the test.
             */
             void attachReporter(Reporter& r);
 
