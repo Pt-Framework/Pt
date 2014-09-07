@@ -324,9 +324,6 @@
     <ClInclude Include="..\..\src\Pt-System\win32\FileDeviceImpl.h">
       <Filter>Pt-System\win32</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-System\win32\FileImpl.h">
-      <Filter>Pt-System\win32</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-System\win32\FileInfoImpl.h">
       <Filter>Pt-System\win32</Filter>
     </ClInclude>
@@ -1372,9 +1369,6 @@
     <None Include="..\..\src\Pt-Unit\Jamfile">
       <Filter>Pt-Unit</Filter>
     </None>
-    <None Include="..\..\src\Pt-Unit\Makefile.am">
-      <Filter>Pt-Unit</Filter>
-    </None>
     <None Include="..\..\src\Pt-Net\Jamfile">
       <Filter>Pt-Net</Filter>
     </None>
@@ -1744,9 +1738,6 @@
       <Filter>Pt-System\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\win32\FileDeviceImpl.cpp">
-      <Filter>Pt-System\win32</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-System\win32\FileImpl.cpp">
       <Filter>Pt-System\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\win32\IODeviceImpl.cpp">

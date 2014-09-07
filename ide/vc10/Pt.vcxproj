@@ -386,7 +386,6 @@
     <ClInclude Include="..\..\src\Pt-System\win32\ConditionImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\DirectoryImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\FileDeviceImpl.h" />
-    <ClInclude Include="..\..\src\Pt-System\win32\FileImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\FileInfoImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\IODeviceImpl.h" />
     <ClInclude Include="..\..\src\Pt-System\win32\LibraryImpl.h" />
@@ -453,7 +452,6 @@
     <None Include="..\..\src\Pt-System\tests\Jamfile" />
     <None Include="..\..\src\Pt-System\tests\Makefile.am" />
     <None Include="..\..\src\Pt-Unit\Jamfile" />
-    <None Include="..\..\src\Pt-Unit\Makefile.am" />
     <None Include="..\..\src\Pt-XmlRpc\Jamfile" />
     <None Include="..\..\src\Pt-XmlRpc\tests\Jamfile" />
     <None Include="..\..\src\Pt-Xml\Jamfile" />
@@ -683,7 +681,6 @@
     <ClCompile Include="..\..\src\Pt-System\win32\ConditionImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-System\win32\DirectoryImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-System\win32\FileDeviceImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-System\win32\FileImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-System\win32\IODeviceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-System\win32\LibraryImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-System\win32\MainLoopImpl.cpp" />

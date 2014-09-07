@@ -157,6 +157,7 @@ void operator <<=(Pt::SerializationInfo& si, const Color& color)
 
 
 class PtXmlRpcTest : public Pt::Unit::TestSuite
+                   , public Pt::Connectable
 {
     private:
         Pt::System::Timer _exitTimer;
@@ -680,6 +681,7 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::XmlRpc::HttpClient client(*_loop);
             Pt::Net::Endpoint ep = Pt::Net::Endpoint::ip4Loopback(8001);
             client.setTarget(ep, "/calc");
+            client.setKeepAlive();
             
             Pt::XmlRpc::RemoteProcedure< std::vector<int>, std::vector<int>, std::vector<int> > proc(client, "mergeVector");
             proc.finished() += Pt::slot(*this, &PtXmlRpcTest::onArrayBenchmarkFinished);
@@ -696,6 +698,8 @@ class PtXmlRpcTest : public Pt::Unit::TestSuite
             Pt::System::Clock clock;
             clock.start();
             _loop->run();
+
+            client.close();
             Pt::Timespan ts = clock.stop();
             std::cerr << "Time   : " << ts.toUSecs() <<  std::endl;
             std::cerr << "Req/Sec: " << ((1000.0/ts.toUSecs())*1000000) <<  std::endl;

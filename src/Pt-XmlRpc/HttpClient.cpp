@@ -102,6 +102,9 @@ HttpClient::~HttpClient()
 
 void HttpClient::init()
 {
+    _client.request().header().set("Content-Type", "text/xml");
+    _client.request().setMethod("POST");
+
     _client.requestSent() += Pt::slot(*this, &HttpClient::onRequest);
     _client.replyReceived() += Pt::slot( *this, &HttpClient::onReply);
 }
@@ -122,6 +125,13 @@ System::EventLoop* HttpClient::loop() const
 void HttpClient::setSecure(Ssl::Context& ctx)
 {
     _client.setSecure(ctx);
+}
+
+
+void HttpClient::setKeepAlive()
+{
+    Pt::Http::MessageHeader& header = _client.request().header();
+    header.set("Connection", "keep-alive");
 }
 
 
@@ -176,12 +186,15 @@ const Net::Endpoint& HttpClient::host() const
 }
 
 
+void HttpClient::close()
+{
+    cancel();
+}
+
+
 void HttpClient::onInvoke()
 {
-    // prepare HTTP request
-    _client.request().clear();
-    _client.request().header().set("Content-Type", "text/xml");
-    _client.request().setMethod("POST");
+    client.request().discard();
     std::ostream& os = _client.request().body();
 
     // format XML-RPC request
@@ -204,10 +217,7 @@ void HttpClient::onInvoke()
 
 void HttpClient::onCall()
 {
-    // prepare HTTP request
-    _client.request().clear();
-    _client.request().header().set("Content-Type", "text/xml");
-    _client.request().setMethod("POST");
+    client.request().discard();
     std::ostream& os = _client.request().body();
 
     // format XML-RPC request
@@ -238,7 +248,7 @@ void HttpClient::onCall()
 
 void HttpClient::onCancel()
 {
-    _client.cancel();
+    _client.close();
 }
 
 
