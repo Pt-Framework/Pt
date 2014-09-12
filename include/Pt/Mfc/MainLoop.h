@@ -41,7 +41,7 @@ namespace Pt {
 
 namespace Mfc {
 
-class MainLoop : public System::EventLoop
+class PT_MFC_API MainLoop : public System::EventLoop
 {
     public:
         MainLoop();
