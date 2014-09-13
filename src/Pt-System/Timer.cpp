@@ -114,6 +114,27 @@ std::size_t Timer::interval() const
 }
 
 
+void Timer::setActive(EventLoop& loop)
+{
+    if(_loop)
+        throw std::logic_error("timer already active");
+
+    loop.onAttachTimer(*this);
+    _loop = &loop;
+}
+
+
+void Timer::detach()
+{
+    if(_loop)
+    {
+        _loop->onDetachTimer(*this);
+    }
+
+    _loop = 0;
+}
+
+
 void Timer::start(std::size_t interval)
 {
     if( isStarted() )
@@ -141,7 +162,7 @@ void Timer::start(std::size_t interval)
     assert(_finished.toUSecs() > 0);
     
     if(_loop)
-        _loop->onAttachTimer(*this);
+        _loop->onEnableTimer(*this);
 }
 
 
@@ -150,7 +171,7 @@ void Timer::stop()
     _finished.setNull();
 
     if(_loop)
-        _loop->onDetachTimer(*this);
+        _loop->onCancelTimer(*this);
 }
 
 
@@ -207,27 +228,6 @@ bool Timer::update(const Timespan& now)
 
     log_debug("Timer::update returns: " << hasElapsed);
     return hasElapsed;
-}
-
-
-void Timer::setActive(EventLoop& loop)
-{
-    if(_loop)
-        throw std::logic_error("timer already active");
-
-    loop.onAttachTimer(*this);
-    _loop = &loop;
-}
-
-
-void Timer::detach()
-{
-    if(_loop)
-    {
-        _loop->onDetachTimer(*this);
-    }
-
-    _loop = 0;
 }
 
 } // namespace System

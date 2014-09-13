@@ -117,6 +117,8 @@ bool MainLoopImpl::waitNext()
         s->run();
     }
 
+    // TODO: what if a ready selectable adds a timer with a shorter timeout?
+
     bool isActive = true;
     if( _selector.waitForWake(timeout) )
         isActive = _eventQueue.processEvents(*_event);

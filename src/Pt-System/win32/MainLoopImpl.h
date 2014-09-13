@@ -60,6 +60,12 @@ class PT_SYSTEM_API MainLoopImpl
         void detach(Timer& timer)
         { _timerQueue.removeTimer(timer); }
 
+        void enable(Timer& timer)
+        { _timerQueue.enableTimer(timer); }
+
+        void cancel(Timer& timer)
+        { _timerQueue.cancelTimer(timer); }
+
         void attach(Selectable& s)
         { _selector.attach(s); }
 

@@ -168,10 +168,10 @@ TimerQueue::TimerQueue()
 
 TimerQueue::~TimerQueue()
 {
-    while( _timers.size() )
+    while( ! _allTimers.empty() )
     {
-       Timer* timer = _timers.begin()->second;
-        timer->detach();
+       Timer* timer = *( _allTimers.begin() );
+       timer->detach();
     }
 }
 
@@ -183,10 +183,29 @@ void TimerQueue::addTimer(Timer& timer)
         TimerMap::value_type elem(timer.finished(), &timer);
         _timers.insert(elem);
     }
+
+    _allTimers.insert(&timer);
 }
 
 
 void TimerQueue::removeTimer( Timer& timer )
+{
+    cancelTimer(timer);
+    _allTimers.erase(&timer);
+}
+
+
+void TimerQueue::enableTimer( Timer& timer )
+{
+    if( timer.isStarted() )
+    {
+        TimerMap::value_type elem(timer.finished(), &timer);
+        _timers.insert(elem);
+    }
+}
+
+
+void TimerQueue::cancelTimer( Timer& timer )
 {
     std::multimap<Timespan, Timer*>::iterator it;
     for(it = _timers.begin(); it != _timers.end(); ++it)

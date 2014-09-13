@@ -40,6 +40,7 @@
 #include <Pt/System/EventSink.h>
 #include <map>
 #include <deque>
+#include <set>
 
 namespace Pt {
 
@@ -151,6 +152,12 @@ class PT_SYSTEM_API EventLoop : public Connectable
         //! @internal Mark the selectable as not ready
         virtual void onCancel(Selectable&) = 0;
 
+        //! @internal
+        virtual void onEnableTimer(Timer&) = 0;
+
+        //! @internal
+        virtual void onCancelTimer(Timer&) = 0;
+
     private:
         Signal<> _exited;
         Signal<const Event&> _event;
@@ -197,10 +204,15 @@ class PT_SYSTEM_API TimerQueue
 
         void removeTimer(Timer& timer);
 
+        void enableTimer(Timer& timer);
+
+        void cancelTimer(Timer& timer);
+
         std::size_t processTimers();
 
     private:
         TimerMap _timers;
+        std::set<Timer*> _allTimers;
 };
 
 } // namespace System
