@@ -105,10 +105,6 @@ class PT_SYSTEM_API MainLoop : public EventLoop
     
         virtual void onDetachTimer(Timer& timer);
 
-        virtual void onEnableTimer(Timer&);
-
-        virtual void onCancelTimer(Timer&);
-
     private:
         class MainLoopImpl* _impl;
 };

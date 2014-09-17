@@ -83,7 +83,7 @@ class Timer::Sentry
 Timer::Timer()
 : _sentry(0)
 , _loop(0)
-, _interval(0)
+, _interval(EventLoop::WaitInfinite)
 , _finished(0)
 , _reserved(0)
 { }
@@ -104,7 +104,7 @@ Timer::~Timer()
 
 bool Timer::isStarted() const
 {
-    return ! _finished.isNull();
+    return _interval != EventLoop::WaitInfinite;
 }
 
 
@@ -114,32 +114,8 @@ std::size_t Timer::interval() const
 }
 
 
-void Timer::setActive(EventLoop& loop)
-{
-    if(_loop)
-        throw std::logic_error("timer already active");
-
-    loop.onAttachTimer(*this);
-    _loop = &loop;
-}
-
-
-void Timer::detach()
-{
-    if(_loop)
-    {
-        _loop->onDetachTimer(*this);
-    }
-
-    _loop = 0;
-}
-
-
 void Timer::start(std::size_t interval)
 {
-    if( isStarted() )
-        this->stop();
-
     _interval = interval;
     log_debug("Timer started, interval: " << _interval);
     
@@ -160,24 +136,27 @@ void Timer::start(std::size_t interval)
     }
 
     assert(_finished.toUSecs() > 0);
-    
-    if(_loop)
-        _loop->onEnableTimer(*this);
+
+	if(_loop != 0)
+	{
+		_loop->onDetachTimer(*this);
+		_loop->onAttachTimer(*this);
+	}
 }
 
 
 void Timer::stop()
 {
-    _finished.setNull();
+	Pt::int64_t maxTime = std::numeric_limits<Pt::int64_t>::max();
+    _finished = Timespan(maxTime);
 
-    if(_loop)
-        _loop->onCancelTimer(*this);
+	_interval = EventLoop::WaitInfinite;
 }
 
 
 bool Timer::update()
 {
-    if(isStarted() == false)
+    if( ! isStarted() )
         return false;
 
     Timespan now = Clock::getSystemTicks();
@@ -189,7 +168,7 @@ bool Timer::update(const Timespan& now)
 {
     log_trace("Timer::update " << now.toUSecs() << " usecs");
 
-    if(isStarted() == false)
+    if( ! isStarted() )
         return false;
 
     bool hasElapsed = now >= _finished;
@@ -216,8 +195,8 @@ bool Timer::update(const Timespan& now)
         }
 
         assert(_finished.toUSecs() > 0);
-
-        timeout().send();
+		
+		timeout().send();
 
         if( ! sentry )
         {
@@ -228,6 +207,27 @@ bool Timer::update(const Timespan& now)
 
     log_debug("Timer::update returns: " << hasElapsed);
     return hasElapsed;
+}
+
+
+void Timer::setActive(EventLoop& loop)
+{
+    if(_loop)
+        throw std::logic_error("timer already active");
+
+    loop.onAttachTimer(*this);
+    _loop = &loop;
+}
+
+
+void Timer::detach()
+{
+    if(_loop)
+    {
+        _loop->onDetachTimer(*this);
+    }
+
+    _loop = 0;
 }
 
 } // namespace System

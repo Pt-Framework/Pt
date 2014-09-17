@@ -100,12 +100,6 @@ class MainLoopImpl
         void detach( Timer& timer )
         { _timerQueue.removeTimer(timer); }
 
-        void enable(Timer& timer)
-        { _timerQueue.enableTimer(timer); }
-
-        void cancel(Timer& timer)
-        { _timerQueue.cancelTimer(timer); }
-
         bool waitNext();
 
     private:

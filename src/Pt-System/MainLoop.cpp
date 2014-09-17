@@ -132,18 +132,6 @@ void MainLoop::onDetachTimer( Timer& timer )
     _impl->detach(timer);
 }
 
-
-void MainLoop::onEnableTimer(Timer& timer)
-{
-    _impl->enable(timer);
-}
-
-
-void MainLoop::onCancelTimer(Timer& timer)
-{
-    _impl->cancel(timer);
-}
-
 } // namespace System
 
 } // namespace Pt
