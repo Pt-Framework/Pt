@@ -84,7 +84,7 @@ Timer::Timer()
 : _sentry(0)
 , _loop(0)
 , _interval(EventLoop::WaitInfinite)
-, _finished(0)
+, _finished(std::numeric_limits<Pt::int64_t>::max())
 , _reserved(0)
 { }
 
