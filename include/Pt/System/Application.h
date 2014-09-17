@@ -147,18 +147,22 @@ class PT_SYSTEM_API Application : public Pt::Connectable
         }
 
     public:
+		// TODO: use Path class
         //! @brief Changes the current directory
         static void chdir(const std::string& path);
 
+		// TODO: use Path class
         //! @brief Returns the current directory
         static std::string cwd();
 
+		// TODO: use Path class
         /** @brief Returns the system root path
 
             Returns "/" (root) on Linux, "c:\" on Windows
         */
         static std::string rootdir();
 
+		// TODO: use Path class
         /** @brief Returns the systems tmp directory.
 
             The environment variables TEMP and TMP are checked first. If not set,

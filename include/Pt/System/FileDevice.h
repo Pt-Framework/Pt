@@ -133,6 +133,7 @@ class PT_SYSTEM_API FileDevice : public IODevice
         */
         FileDevice();
 
+		// TODO: use Path class
         /** @brief Construct with path to file.
         */
         FileDevice(const std::string& path, std::ios::openmode mode);
@@ -145,6 +146,7 @@ class PT_SYSTEM_API FileDevice : public IODevice
         */
         ~FileDevice();
 
+		// TODO: use Path class
         /** @brief Opens the file.
         */
         void open(const std::string& path, std::ios::openmode mode);

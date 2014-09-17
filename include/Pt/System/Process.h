@@ -74,6 +74,7 @@ class ProcessInfo
             ToStdOut = 3  //!< Combine stderr with stdout, only valid for stderr
         };
 
+		// TODO: use Path class, explicit
         /** @brief Construct with command to execute.
         */
         ProcessInfo(const std::string& command);
@@ -182,6 +183,8 @@ class PT_SYSTEM_API Process : private NonCopyable
         };
 
     public:
+		// TODO: use Path class ???
+
         /** @brief Constructs with a command including its arguments.
         */
         explicit Process(const std::string& command);

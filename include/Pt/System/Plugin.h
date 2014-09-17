@@ -202,6 +202,7 @@ class PluginManager
         */
         ~PluginManager();
 
+		// TODO: use Path class
         /** @brief Loads plugins from a library.
         */
         void loadPlugin(const std::string& sym, const std::string& path);
