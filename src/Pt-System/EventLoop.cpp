@@ -178,8 +178,8 @@ TimerQueue::~TimerQueue()
 
 void TimerQueue::addTimer(Timer& timer)
 {
-        TimerMap::value_type elem(timer.finished(), &timer);
-        _timers.insert(elem);
+    TimerMap::value_type elem(timer.finished(), &timer);
+    _timers.insert(elem);
 }
 
 
@@ -220,7 +220,7 @@ std::size_t TimerQueue::processTimers()
         log_trace("get front of timer queue");
         timer = _timers.begin()->second;
 
-        if( now < timer->finished() )
+        if( now < timer->finished() ) // not expired or stopped
         {
             Pt::int64_t remaining = (timer->finished() - now).toUSecs();
             
