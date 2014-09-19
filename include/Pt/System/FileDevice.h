@@ -61,12 +61,13 @@ namespace System {
         {
             Pt::System::MainLoop loop;
     
-            Pt::System::FileDevice fd;
-            fd.setActive(loop);
-            fd.opened() += Pt::slot( &onOpen );
-            fd.outputReady() += Pt::slot( &onOutput );
+            Pt::System::FileDevice file;
+            file.setActive(loop);
+            file.opened() += Pt::slot( &onOpen );
+            file.outputReady() += Pt::slot( &onOutput );
 
-            fd.beginOpen("tmpfile.txt", std::ios::out);
+            Pt::System::Path path = "tmpfile.txt";
+            file.beginOpen(path, std::ios::out);
 
             loop.run();
             return 0;
@@ -88,10 +89,10 @@ namespace System {
     slot shown in the next example:
 
     @code
-    void onOpen(Pt::System::FileDevice& fd)
+    void onOpen(Pt::System::FileDevice& file)
     {
-        fd.endOpen();
-        fd.beginWrite("Hello world!", 12);
+        file.endOpen();
+        file.beginWrite("Hello world!", 12);
     }
     @endcode
 
@@ -104,9 +105,9 @@ namespace System {
     handle output:
 
     @code
-    void onOutput(Pt::System::IODevice& dev)
+    void onOutput(Pt::System::IODevice& device)
     {
-        std::size_t n = dev.endWrite();
+        std::size_t n = device.endWrite();
         std::cout << "wrote: " << n << "bytes." << std::endl;
     }
     @endcode
@@ -133,44 +134,25 @@ class PT_SYSTEM_API FileDevice : public IODevice
         */
         FileDevice();
 
-		// TODO: use Path class
         /** @brief Construct with path to file.
         */
-        FileDevice(const std::string& path, std::ios::openmode mode);
-
-        /** @brief Construct with path to file.
-        */
-        FileDevice(const char* path, std::ios::openmode mode);
+        FileDevice(const Path& path, std::ios::openmode mode);
 
         /** @brief Destructor.
         */
         ~FileDevice();
 
-		// TODO: use Path class
         /** @brief Opens the file.
         */
-        void open(const std::string& path, std::ios::openmode mode);
-
-        /** @brief Opens the file.
-        */
-        void open(const char* path, std::ios::openmode mode);
+        void open(const Path& path, std::ios::openmode mode);
 
         /** @brief Begin opening the file.
         */
-        void beginOpen(const std::string& path, std::ios::openmode mode);
-
-        /** @brief Begin opening the file.
-        */
-        void beginOpen(const char* path, std::ios::openmode mode);
+        void beginOpen(const Path& path, std::ios::openmode mode);
 
         /** @brief End opening the file.
         */
         void endOpen();
-
-        /** @brief Returns the path of the opened the file.
-        */
-        const char* path() const
-        { return _path.c_str(); }
 
         /** @brief Notifies that the file was opened.
         */
@@ -227,7 +209,6 @@ class PT_SYSTEM_API FileDevice : public IODevice
 
     private:
         class FileDeviceImpl* _impl;
-        std::string _path;
         Signal<FileDevice&> _opened;
         bool _opening;
         bool _isOpen;

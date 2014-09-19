@@ -53,8 +53,9 @@ class FileInfo;
     @code
     try
     {
-        DirectoryIterator it("/tmp");
-        DirectoryIterator end;
+        Pt::System::Path path = "/tmp";
+        Pt::System::DirectoryIterator it(path);
+        Pt::System::DirectoryIterator end;
 
         for( ; it != end; ++it)
         {

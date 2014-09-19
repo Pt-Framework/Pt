@@ -78,7 +78,8 @@ class PT_SYSTEM_API SymbolNotFound : public SystemError
     @code
     typedef int (*MyFunc)();
 
-    Pt::System::Library library("MyLib");
+    Pt::System::Path libPath = "MyLib";
+    Pt::System::Library library(libPath);
     
     Pt::System::Symbol symbol = library.getSymbol("myFunction");
 

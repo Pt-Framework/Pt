@@ -26,9 +26,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../win32/win32.h"
 #include "FileDeviceImpl.h"
 #include "MainLoopImpl.h"
+#include "PathImpl.h"
+#include <Pt/System/Path.h>
 #include "Pt/System/IODevice.h"
 #include "Pt/System/SystemError.h"
 #include "Pt/System/IOError.h"
@@ -96,20 +97,17 @@ void FileDeviceImpl::cancel(EventLoop& loop)
 }
 
 
-void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
+void FileDeviceImpl::open(const Path& path, std::ios::openmode mode)
 {   
     throw IOError("blocking I/O not supported");
 }
 
 
-bool FileDeviceImpl::beginOpen(EventLoop& loop, const char* path, std::ios::openmode mode)
+bool FileDeviceImpl::beginOpen(EventLoop& loop, const Path& path, std::ios::openmode mode)
 {
-    std::wstring wpath;
-    win32::fromMultiByte(path, wpath);
+    String^ str = ref new String( path.impl()->c_str() );
 
-    String^ sPath = ref new String(wpath.c_str());
-
-    _getFileOp = StorageFile::GetFileFromPathAsync(sPath);
+    _getFileOp = StorageFile::GetFileFromPathAsync(str);
 
     _getFileOp->Completed = ref new AsyncOperationCompletedHandler<StorageFile^>
     (

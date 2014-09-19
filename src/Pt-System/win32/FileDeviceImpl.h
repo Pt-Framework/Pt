@@ -47,9 +47,9 @@ class FileDeviceImpl  : public OverlappedIODeviceImpl
 
         ~FileDeviceImpl();
 
-        void open( const char* path, std::ios::openmode mode);
+        void open(const Path& path, std::ios::openmode mode);
 
-        bool beginOpen(EventLoop& loop, const char* path, std::ios::openmode mode);
+        bool beginOpen(EventLoop& loop, const Path& path, std::ios::openmode mode);
 
         bool runOpen(EventLoop& loop);
 

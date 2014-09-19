@@ -26,12 +26,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "win32.h"
+
 #include "FileDeviceImpl.h"
 #include "MainLoopImpl.h"
-#include "Pt/System/IODevice.h"
-#include "Pt/System/SystemError.h"
-#include "Pt/System/IOError.h"
+#include "PathImpl.h"
+#include <Pt/System/Path.h>
+#include <Pt/System/IODevice.h>
+#include <Pt/System/SystemError.h>
+#include <Pt/System/IOError.h>
 #include <cassert>
 
 namespace Pt {
@@ -67,7 +69,7 @@ FileDeviceImpl::~FileDeviceImpl()
 }
 
 
-void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
+void FileDeviceImpl::open( const Path& path, std::ios::openmode mode)
 {
     _readOv.Offset = 0;
     _readOv.OffsetHigh = 0;
@@ -98,12 +100,10 @@ void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
     flags |= FILE_FLAG_OVERLAPPED;
 #endif
 
-    std::basic_string<TCHAR> tpath;
-    win32::fromMultiByte(path, tpath);
-    HANDLE h = ::CreateFile(tpath.c_str(), access, share, NULL, create, flags, NULL);
+    HANDLE h = ::CreateFileW(path.impl()->c_str(), access, share, NULL, create, flags, NULL);
 
     if(h == INVALID_HANDLE_VALUE)
-        throw AccessFailed(path);
+        throw AccessFailed( path.toLocal() );
 
     this->setHandle(h);
 
@@ -120,7 +120,7 @@ void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
 }
 
 
-bool FileDeviceImpl::beginOpen(EventLoop& loop, const char* path, std::ios::openmode mode)
+bool FileDeviceImpl::beginOpen(EventLoop& loop, const Path& path, std::ios::openmode mode)
 {
     this->open(path, mode);
     return true;

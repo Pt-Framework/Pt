@@ -25,8 +25,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "Pt/System/IODevice.h"
+
 #include "FileDeviceImpl.h"
+#include "PathImpl.h"
+#include <Pt/System/Path.h>
+#include <Pt/System/IODevice.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <limits.h>
@@ -47,7 +50,7 @@ FileDeviceImpl::~FileDeviceImpl()
 { }
 
 
-void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
+void FileDeviceImpl::open(const Path& path, std::ios::openmode mode)
 {
     int flags = O_RDONLY;
 
@@ -68,10 +71,10 @@ void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
     if(mode & std::ios::trunc)
         flags |= O_TRUNC;
 
-    int fd = ::open(path, flags, 0644);
+    int fd = ::open(path.impl()->c_str(), flags, 0644);
     if(fd == -1)
     {
-        throw AccessFailed(path);
+        throw AccessFailed(path.toLocal());
     }
 
     IODeviceImpl::open(fd, false);
@@ -87,7 +90,7 @@ void FileDeviceImpl::open( const char* path, std::ios::openmode mode)
 }
 
 
-bool FileDeviceImpl::beginOpen(EventLoop& loop, const char* path, std::ios::openmode mode)
+bool FileDeviceImpl::beginOpen(EventLoop& loop, const Path& path, std::ios::openmode mode)
 {
     this->open(path, mode);
     return true;

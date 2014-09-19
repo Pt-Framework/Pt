@@ -28,6 +28,7 @@
 
 #include "FileDeviceImpl.h"
 #include <Pt/System/FileDevice.h>
+#include <Pt/System/Path.h>
 #include <Pt/System/EventLoop.h>
 
 namespace Pt {
@@ -42,24 +43,34 @@ FileDevice::FileDevice()
 }
 
 
-FileDevice::FileDevice(const std::string& path, std::ios::openmode mode)
+FileDevice::FileDevice(const Path& path, std::ios::openmode mode)
 : _opening(false)
 , _isOpen(false)
 {
     _impl = new FileDeviceImpl(*this);
 
-    this->open( path, mode);
+    this->open(path, mode);
 }
 
 
-FileDevice::FileDevice(const char* path, std::ios::openmode mode)
-: _opening(false)
-, _isOpen(false)
-{
-    _impl = new FileDeviceImpl(*this);
-
-    this->open( path, mode);
-}
+//FileDevice::FileDevice(const std::string& path, std::ios::openmode mode)
+//: _opening(false)
+//, _isOpen(false)
+//{
+//    _impl = new FileDeviceImpl(*this);
+//
+//    this->open( path, mode);
+//}
+//
+//
+//FileDevice::FileDevice(const char* path, std::ios::openmode mode)
+//: _opening(false)
+//, _isOpen(false)
+//{
+//    _impl = new FileDeviceImpl(*this);
+//
+//    this->open( path, mode);
+//}
 
 
 FileDevice::~FileDevice()
@@ -75,28 +86,15 @@ FileDevice::~FileDevice()
 }
 
 
-void FileDevice::open(const std::string& path, std::ios::openmode mode)
-{
-    open( path.c_str(), mode );
-}
-
-
-void FileDevice::open(const char* path, std::ios::openmode mode)
+void FileDevice::open(const Path& path, std::ios::openmode mode)
 {
     this->close();
 
     _impl->open(path, mode);
-    _path = path;
 }
 
 
-void FileDevice::beginOpen(const std::string& path, std::ios::openmode mode)
-{
-    beginOpen( path.c_str(), mode );
-}
-
-
-void FileDevice::beginOpen(const char* path, std::ios::openmode mode)
+void FileDevice::beginOpen(const Path& path, std::ios::openmode mode)
 {
     EventLoop* loop = this->loop();
     if( ! loop )
