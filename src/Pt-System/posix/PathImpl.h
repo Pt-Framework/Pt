@@ -175,7 +175,7 @@ class PathImpl
             if( ! empty() &&
                 n > 0 &&
                 _path[_path.size()-1] != dirsep() &&
-                s[0] != dirsep())
+                s[0] != Char(dirsep()) )
             { 
                 _path += dirsep();
             }
