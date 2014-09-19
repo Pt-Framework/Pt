@@ -130,6 +130,8 @@ bool MainLoopImpl::waitNext()
         selectable->run();
     }
 
+    // TODO: what if a ready selectable adds a timer with a shorter timeout?
+
     log_debug("waiting for events");
     if( _selector.waitForWake(msecs) )
         isActive = _eventQueue.processEvents(*_event);

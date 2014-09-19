@@ -44,6 +44,7 @@ class TimerTest : public Pt::Unit::TestSuite
         , _count(0)
         {
             this->registerMethod("Timeout", *this, &TimerTest::Timeout);
+			this->registerMethod("StopTimer", *this, &TimerTest::StopTimer);			
             this->registerMethod("RemoveOnTimeout", *this, &TimerTest::RemoveOnTimeout);
             this->registerMethod("RemoveAddOnTimeout", *this, &TimerTest::RemoveAddOnTimeout);
             this->registerMethod("DestroyOnTimeout", *this, &TimerTest::DestroyOnTimeout);
@@ -68,6 +69,21 @@ class TimerTest : public Pt::Unit::TestSuite
             delete _timer;
             _timer = 0;
         }
+
+		void StopTimer()
+		{            
+			Pt::System::Timer timer;
+			Pt::System::MainLoop loop;
+			Pt::System::Timer timer2;
+
+			timer.setActive(loop);
+			timer.start(400);
+			timer.stop();
+
+			timer2.setActive(loop);
+			timer2.start(400);
+			timer2.stop();
+		}
 
         void Timeout()
         {
