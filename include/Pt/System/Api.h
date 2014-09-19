@@ -113,6 +113,7 @@ namespace System {
     class MainLoop;
     class Mutex;
     class OStream;
+    class Path;
     class Pipe;
     class PluginId;
     class Process;

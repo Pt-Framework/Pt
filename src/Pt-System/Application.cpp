@@ -116,25 +116,25 @@ bool Application::raiseSystemSignal(int sig)
 }
 
 
-void Application::chdir(const std::string& path)
+void Application::chdir(const Path& path)
 {
     ApplicationImpl::chdir(path);
 }
 
 
-std::string Application::cwd()
+Path Application::cwd()
 {
     return ApplicationImpl::cwd();
 }
 
 
-std::string Application::rootdir()
+Path Application::rootdir()
 {
     return ApplicationImpl::rootdir();
 }
 
 
-std::string Application::tmpdir()
+Path Application::tmpdir()
 {
     return ApplicationImpl::tmpdir();
 }

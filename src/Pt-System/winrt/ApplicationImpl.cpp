@@ -26,8 +26,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../win32/win32.h"
 #include "ApplicationImpl.h"
+#include "PathImpl.h"
+#include <Pt/System/Path.h>
 #include <Pt/System/IOError.h>
 
 using namespace Platform;
@@ -70,33 +71,41 @@ bool ApplicationImpl::raiseSystemSignal(int sig)
 }
 
 
-void ApplicationImpl::chdir(const std::string& path)
+void ApplicationImpl::chdir(const Path& path)
 {
-    throw AccessFailed("chdir not supported");
+    throw AccessFailed("chdir failed");
 }
 
 
-std::string ApplicationImpl::cwd()
+Path ApplicationImpl::cwd()
 {
-    // Windows.Storage
+    Path path;
 
     // might want RoamingFolder?
-    String^ path = ApplicationData::Current->LocalFolder->Path;
-    return win32::toMultiByte( path->Data() );
-}
-
-
-std::string ApplicationImpl::tmpdir()
-{
+    
     // Windows.Storage
-    String^ path = ApplicationData::Current->TemporaryFolder->Path;
-    return win32::toMultiByte( path->Data() );
+    String^ str = ApplicationData::Current->LocalFolder->Path;
+    path.impl()->assign( str->Data() );
+    return path;
 }
 
 
-std::string ApplicationImpl::rootdir()
+Path ApplicationImpl::tmpdir()
 {
-    return "c:\\";
+    Path path;
+
+    // Windows.Storage
+    String^ str = ApplicationData::Current->TemporaryFolder->Path;
+    path.impl()->assign( str->Data() );
+    return path;
+}
+
+
+Path ApplicationImpl::rootdir()
+{
+    Path path;
+    path.impl()->assign(L"c:\\");
+    return path;
 }
 
 

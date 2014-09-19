@@ -1,9 +1,10 @@
 #ifndef PT_SYSTEM_APPLICATION_IMPL_H
 #define PT_SYSTEM_APPLICATION_IMPL_H
 
-#include "Pt/WinVer.h"
-#include "Pt/System/Api.h"
-#include <Pt/System/Process.h>
+#include "PathImpl.h"
+#include <Pt/WinVer.h>
+#include <Pt/System/Api.h>
+#include <Pt/System/Path.h>
 #include <Pt/System/IOError.h>
 #include <Pt/System/SystemError.h>
 #include <string>
@@ -30,7 +31,7 @@ class ApplicationImpl
 
         bool raiseSystemSignal(int sig);
 
-        static void chdir(const std::string& path)
+        static void chdir(const Path& path)
         {
         #ifdef _WIN32_WCE
 
@@ -38,41 +39,68 @@ class ApplicationImpl
 
         #else
 
-            if( FALSE == ::SetCurrentDirectory( path.c_str() ) )
+            if( FALSE == ::SetCurrentDirectoryW( path.impl()->c_str() ) )
                 throw SystemError("SetCurrentDirectory");
 
         #endif
         }
 
-        static std::string cwd()
+        static Path cwd()
         {
+            
         #ifdef _WIN32_WCE
 
             throw AccessFailed("cwd failed");
 
         #else
 
-            char path[MAX_PATH+2];
-            DWORD len = ::GetCurrentDirectory(MAX_PATH+2, path);
-            return std::string(path, len);
+            Path path;
+
+            const std::size_t wbuflen = MAX_PATH + 2;
+            wchar_t wpath[wbuflen];
+            DWORD len = ::GetCurrentDirectoryW(wbuflen, wpath);
+
+            if(len > 0 && len < wbuflen)
+                path.impl()->assign(wpath);
+            
+            return path;
 
         #endif
         }
 
-        static std::string tmpdir()
+        static Path tmpdir()
         {
-            std::string tmpDir = getEnvVar("TEMP");
-            if(tmpDir.length() == 0)
+            Path path;
+
+            const std::size_t wbuflen = MAX_PATH + 1;
+            wchar_t wbuf[wbuflen];
+            
+            DWORD len = ::GetEnvironmentVariableW(L"TEMP", wbuf, wbuflen);
+            if( len != 0 && len < wbuflen )
             {
-                tmpDir = getEnvVar("TMP");
+                path.impl()->assign(wbuf);
+            }
+            else
+            {
+                len = ::GetEnvironmentVariableW(L"TMP", wbuf, wbuflen);
+                if( len != 0 && len < wbuflen )
+                {
+                    path.impl()->assign(wbuf);
+                }
+                else
+                {
+                    path.assign( path.curdir() );
+                }
             }
 
-            return tmpDir;
+            return path;
         }
 
-        static std::string rootdir()
+        static Path rootdir()
         {
-            return "c:\\";
+            Path path;
+            path.impl()->assign(L"c:\\");
+            return path;
         }
 
         static unsigned long usedMemory();

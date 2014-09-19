@@ -28,10 +28,11 @@
 
 #include "ApplicationImpl.h"
 #include "PipeImpl.h"
-#include "Pt/System/Pipe.h"
-#include "Pt/System/Application.h"
-#include "Pt/System/SystemError.h"
-#include "Pt/System/FileInfo.h"
+#include "PathImpl.h"
+#include <Pt/System/Pipe.h>
+#include <Pt/System/Path.h>
+#include <Pt/System/Application.h>
+#include <Pt/System/SystemError.h>
 #include <vector>
 #include <string.h>
 #include <stdlib.h>
@@ -175,51 +176,62 @@ bool ApplicationImpl::raiseSystemSignal(int sig)
 }
 
 
-void ApplicationImpl::chdir(const std::string& path)
+void ApplicationImpl::chdir(const Path& path)
 {
-    if( -1 == ::chdir(path.c_str()) )
+    if( -1 == ::chdir( path.impl()->c_str() ) )
     {
         throw SystemError("chdir");
     }
 }
 
 
-std::string ApplicationImpl::cwd()
+Path ApplicationImpl::cwd()
 {
+    Path path;
+
     const long size = pathconf(".", _PC_PATH_MAX);
     if(size == -1)
         throw SystemError( PT_ERROR_MSG("pathconf() failed for .") );
 
     std::vector<char> buffer(size);
     if( ! getcwd(&buffer[0], size) )
-    {
         throw SystemError("getcwd");
-    }
 
-    return std::string( &buffer[0] );
+    
+    path.impl()->set( &buffer[0] );
+    return path;
 }
 
 
-std::string ApplicationImpl::tmpdir()
+Path ApplicationImpl::tmpdir()
 {
-    const char* tmpdir = getenv("TEMP");
-    if(tmpdir)
+    Path path;
+    const char* tmp = "/tmp";
+
+    const char* value = getenv("TEMP");
+    if(value)
     {
-        return tmpdir;
+        tmp = value;
+    }
+    else
+    {
+        value = getenv("TMP");
+        if(value)
+        {
+            tmp = value;
+        }
     }
 
-    tmpdir = getenv("TMP");
-    if(tmpdir)
-    {
-        return tmpdir;
-    }
-
-    return "/tmp";
+    path.impl()->set(tmp);
+    return path;
 }
-        
-std::string ApplicationImpl::rootdir()
+
+
+Path ApplicationImpl::rootdir()
 {
-    return "/";
+    Path path;
+    path.impl()->set("/");
+    return path;
 }
 
 

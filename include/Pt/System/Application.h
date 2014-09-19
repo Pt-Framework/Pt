@@ -147,30 +147,25 @@ class PT_SYSTEM_API Application : public Pt::Connectable
         }
 
     public:
-		// TODO: use Path class
         //! @brief Changes the current directory
-        static void chdir(const std::string& path);
+        static void chdir(const Path& path);
 
-		// TODO: use Path class
         //! @brief Returns the current directory
-        static std::string cwd();
+        static Path cwd();
 
-		// TODO: use Path class
         /** @brief Returns the system root path
 
             Returns "/" (root) on Linux, "c:\" on Windows
         */
-        static std::string rootdir();
+        static Path rootdir();
 
-		// TODO: use Path class
         /** @brief Returns the systems tmp directory.
 
-            The environment variables TEMP and TMP are checked first. If not set,
-            "/tmp" is returned if it exists. If none of the environment variables
-            are set and the default system tmp directory does not exist, the 
-            current directory is returned.
+            Returns the value of the environment variable named TEMP or TMP.
+            If neither one is set, "/tmp" is returned on POSIX systems or a
+            path to the current directory.
         */
-        static std::string tmpdir();
+        static Path tmpdir();
 
         /** @brief Set environment variable.
 

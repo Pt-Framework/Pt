@@ -51,13 +51,13 @@ class ApplicationImpl
 
         bool raiseSystemSignal(int sig);
 
-        static void chdir(const std::string& path);
+        static void chdir(const Path& path);
 
-        static std::string cwd();
+        static Path cwd();
 
-        static std::string tmpdir();
+        static Path tmpdir();
         
-        static std::string rootdir();
+        static Path rootdir();
 
         static void setEnvVar(const std::string& name, const std::string& value);
 

@@ -29,8 +29,8 @@
 #ifndef PT_SYSTEM_APPLICATION_IMPL_H
 #define PT_SYSTEM_APPLICATION_IMPL_H
 
-#include "Pt/WinVer.h"
-#include "Pt/System/Api.h"
+#include <Pt/WinVer.h>
+#include <Pt/System/Api.h>
 #include <string>
 
 namespace Pt {
@@ -54,13 +54,13 @@ class ApplicationImpl
 
         bool raiseSystemSignal(int sig);
 
-        static void chdir(const std::string& path);
+        static void chdir(const Path& path);
 
-        static std::string cwd();
+        static Path cwd();
 
-        static std::string tmpdir();
+        static Path tmpdir();
         
-        static std::string rootdir();
+        static Path rootdir();
 
         static unsigned long usedMemory();
 
