@@ -28,7 +28,7 @@
 
 #include "ApplicationImpl.h"
 #include <Pt/System/Application.h>
-#include <Pt/Event.h>
+#include <Pt/System/Path.h>
 #include <stdexcept>
 
 namespace {
