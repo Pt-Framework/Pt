@@ -51,9 +51,9 @@ namespace System {
     example:
 
     @code
-    void onOpen(Pt::System::FileDevice& fd);
+    void onOpen(Pt::System::FileDevice& file);
 
-    void onOutput(Pt::System::IODevice& dev);
+    void onOutput(Pt::System::IODevice& device);
 
     int main(int argc, char** argv)
     {

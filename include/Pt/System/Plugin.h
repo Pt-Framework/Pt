@@ -202,10 +202,9 @@ class PluginManager
         */
         ~PluginManager();
 
-		// TODO: use Path class
         /** @brief Loads plugins from a library.
         */
-        void loadPlugin(const std::string& sym, const std::string& path);
+        void loadPlugin(const std::string& sym, const Path& path);
 
         /** @brief Registers a plugin.
         */
@@ -274,7 +273,7 @@ PluginManager<IfaceT, PluginT>::~PluginManager()
 
 
 template <class IfaceT, typename PluginT >
-void PluginManager<IfaceT, PluginT>::loadPlugin(const std::string& sym, const std::string& path)
+void PluginManager<IfaceT, PluginT>::loadPlugin(const std::string& sym, const Path& path)
 {
     Library shlib(path);
 

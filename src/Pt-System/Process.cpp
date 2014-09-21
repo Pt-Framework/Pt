@@ -39,10 +39,10 @@ ProcessFailed::ProcessFailed()
 }
 
 
-Process::Process(const std::string& command)
-{
-    _impl = new ProcessImpl( ProcessInfo(command) );
-}
+//Process::Process(const std::string& command)
+//{
+//    _impl = new ProcessImpl( ProcessInfo(command) );
+//}
 
 
 Process::Process(const ProcessInfo& procInfo)

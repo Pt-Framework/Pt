@@ -187,7 +187,7 @@ class PT_SYSTEM_API Process : private NonCopyable
 
         /** @brief Constructs with a command including its arguments.
         */
-        explicit Process(const std::string& command);
+        //explicit Process(const std::string& command);
 
         //! @brief Constructs with a process parameters.
         explicit Process(const ProcessInfo& procInfo);

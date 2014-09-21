@@ -131,6 +131,9 @@ class PT_SYSTEM_API Logger : protected Pt::NonCopyable
         static void initTargets()
         { init("log.properties"); }
 
+        // TODO: init with Settings::ConstEntry, so a section in the
+        //       application settings can be used. 
+
         /** @brief Initialize logging targets with a settings
 
             All targets listed in the given settings are created and

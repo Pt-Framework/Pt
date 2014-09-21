@@ -167,6 +167,7 @@ void ProcessImpl::start()
 
     std::basic_string<TCHAR> tcmd;
     win32::fromMultiByte( _procInfo.command(), tcmd );
+
     for( unsigned i = 0; i < _procInfo.argCount(); i++)
     {
         std::basic_string<TCHAR> targ;
@@ -190,6 +191,7 @@ void ProcessImpl::start()
 
     std::basic_string<TCHAR> tcmd;
     win32::fromMultiByte( _procInfo.command(), tcmd );
+    
     std::basic_string<TCHAR> targs;
     win32::fromMultiByte( args, targs );
 
