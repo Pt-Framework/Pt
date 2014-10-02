@@ -1,16 +1,15 @@
-#ifndef Pt_Hmi_Desktop_Panel_H
-#define Pt_Hmi_Desktop_Panel_H
+#ifndef Pt_Forms_Panel_H
+#define Pt_Forms_Panel_H
 
-#include <Pt/Hmi/Desktop/Widget.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Hmi/PanelController.h>
 #include <Pt/Hmi/PanelModel.h>
 #include <Pt/Hmi/PanelRenderer.h>
 
-namespace Pt{
-namespace Hmi{
-namespace Desktop{
+namespace Pt {
+namespace Forms {
 
-class PT_HMI_DESKTOP_API Panel : public Widget 
+class PT_FORMS_API Panel : public Widget 
 {
 public:
 	Panel();
@@ -31,7 +30,7 @@ public:
 
 protected:
 
-	virtual WidgetController& widgetController()
+	virtual Hmi::WidgetController& widgetController()
 	{
 		return *_currController;
 	}
@@ -43,5 +42,5 @@ private:
 	Pt::Hmi::PanelController*	_currController;
 };
  
-}}}
+}}
 #endif

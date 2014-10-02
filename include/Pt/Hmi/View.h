@@ -25,70 +25,40 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Hmi_GfxController_H
-#define Pt_Hmi_GfxController_H
+#ifndef Pt_Hmi_View_H
+#define Pt_Hmi_View_H
 
-#include <Pt/Hmi/Controller.h>
+#include <Pt/Hmi/Model.h>
+#include <Pt/Hmi/OutputDevice.h>
 #include <Pt/Gfx/Painter.h>
 
 namespace Pt{
 namespace Hmi{
 
-class GfxModel;
-class Renderer;
-class PaintSurface;
+class ViewImpl;
 
-class PT_HMI_API GfxController : public Controller
+class PT_HMI_API View : public OutputDevice
 {
 public:
-	GfxController(GfxModel& model, Renderer& renderer);
-	virtual ~GfxController();
+	View();
+	virtual ~View();	
 
-	Pt::Gfx::PointF toClient(const Pt::Gfx::PointF& globalPoint);
-	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot);
+	virtual void output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model);
 
-	virtual void render();
-	virtual void output();
-	virtual void invalidate();
-			
-	GfxModel& gfxModel();
-	const GfxModel& gfxModel() const;
-	
-	Pt::Signal<GfxController&, PaintSurface&> Render;
-	Pt::Signal<GfxController&> Output;
-
-	inline const GfxController* GfxController::parent() const
-	{
-		return dynamic_cast<const GfxController*>(Controller::widgetParent());
-	}
-
-	inline GfxController* GfxController::parent()
-	{
-		return dynamic_cast<GfxController*>(Controller::widgetParent());
-	}
-
+	ViewImpl* impl();
+		
 protected:
-	bool onMoveFocusNext();
-	bool onMoveFocusPrev();	
-	void onFocusChanged(const Property<bool>& prop);
-
-private:
-	bool focusNextChild(int index);
-	bool focusPrevChild(int index);
-	int getFocusedChild() const;
-
-	inline GfxController* childAt(size_t index)
+    virtual void onCancel()
 	{
-		return dynamic_cast<GfxController*> (children()[index]);
 	}
 
-	inline const GfxController* childAt(size_t index) const
+    virtual bool onRun()
 	{
-		return dynamic_cast<const GfxController*> (children()[index]);
-	}
-
+		return true;
+	}	
+	
 private:
-	Renderer& _renderer;
+	ViewImpl* _impl;
 };
 
 }}

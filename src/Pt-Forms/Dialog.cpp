@@ -1,33 +1,32 @@
-#include <Pt/Hmi/Desktop/Dialog.h>
+#include <Pt/Forms/Dialog.h>
 #include <Pt/Hmi/DialogController.h>
 #include <Pt/Hmi/DialogModel.h>
 #include <Pt/Hmi/DialogRenderer.h>
 #include <Pt/Hmi/Application.h>
 
-namespace Pt{
-namespace Hmi{
-namespace Desktop{
+namespace Pt {
+namespace Forms {
 
 Dialog::Dialog()
 : _defController(_defModel, _defRenderer)
 {
 	Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
 
-	_gfxOutputDevice.start(app.loop());
+	_View.start(app.loop());
 
 	_defModel.Caption.set("New Dialog");
 	_defModel.ShowInTaskbar.set(true);
-	_defModel.Border.set(WindowBorderType::Dialog);
+	_defModel.Border.set(Hmi::WindowBorderType::Dialog);
 	_defModel.Position.set(Pt::Gfx::PointF(20,20));
 	_defModel.Size.set( Pt::Gfx::SizeF(800,800));
 	_defModel.ShowMaximizeButton.set(false);
 	_defModel.ShowSysMenu.set(true);
 
-	_defController.addOutputDevice(&_gfxOutputDevice);
+	_defController.addOutputDevice(&_View);
 	setDialogController(_defController);
 }
 
-void Dialog::setDialogController(DialogController& controller)
+void Dialog::setDialogController(Hmi::DialogController& controller)
 {
 	_currController = & controller;
 	Window::setWindowController(controller);
@@ -43,7 +42,7 @@ void Dialog::show(Window* parent)
 	show(parent->windowController());
 }
 
-void Dialog::show(WindowController& parent)
+void Dialog::show(Hmi::WindowController& parent)
 {
 	dialogController().doModal(&parent);	
 }
@@ -53,27 +52,27 @@ Pt::Hmi::DialogResultType::Type Dialog::result() const
 	return dialogModel().Result.get();
 }
 
-void Dialog::setResult(DialogResultType::Type r)
+void Dialog::setResult(Hmi::DialogResultType::Type r)
 {
 	dialogModel().Result = r;
 }
 
-DialogController& Dialog::dialogController()
+Hmi::DialogController& Dialog::dialogController()
 {
 	return *_currController;
 }
 
-DialogModel& Dialog::dialogModel()
+Hmi::DialogModel& Dialog::dialogModel()
 {
 	return _currController->dialogModel();
 }
 
-const DialogController& Dialog::dialogController() const
+const Hmi::DialogController& Dialog::dialogController() const
 {
 	return *_currController;
 }
 
-const DialogModel& Dialog::dialogModel() const
+const Hmi::DialogModel& Dialog::dialogModel() const
 {
 	return _currController->dialogModel();
 }
@@ -87,7 +86,6 @@ const Pt::Gfx::SizeF& Dialog::size() const
 {
 	return dialogModel().Size.get();
 }
-
 
 void Dialog::setPosition(const Pt::Gfx::PointF& position)
 {
@@ -104,4 +102,4 @@ Dialog::~Dialog()
 
 }
 
-}}}
+}}

@@ -1,0 +1,13 @@
+SubDir PT_TOP src Pt-Forms demo Widget ;
+SubDirHdrs $(PT_TOP)/include ;
+
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Forms-Widget ;
+
+Main Pt-Forms-Widget : Main.cpp
+				       MainWindow.cpp
+				       Dialog1.cpp
+				       Dialog2.cpp ;
+
+LinkSharedLibraries Pt-Forms-Widget : Pt Pt-System Pt-Gfx Pt-Net Pt-Hmi Pt-Forms ;
+
+MakeLocate Pt-Forms-Widget : $(PT_OUTPUT_TARGET) ;

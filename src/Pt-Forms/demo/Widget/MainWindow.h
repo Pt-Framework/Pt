@@ -23,34 +23,39 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
-#ifndef Pt_Hmi_Demo_Dialog1_h
-#define Pt_Hmi_Demo_Dialog1_h
+#ifndef Pt_Hmi_Demo_MainWindow_h
+#define Pt_Hmi_Demo_MainWindow_h
 
-#include <Pt/Hmi/Desktop/Dialog.h>
-#include <Pt/Hmi/Desktop/Button.h>
+#include <Pt/Forms/Window.h>
+#include <Pt/Forms/Button.h>
+#include <Pt/Forms/Panel.h>
+#include <Pt/Forms/Label.h>
 
 namespace Pt{
-namespace Hmi{
+namespace Forms{
 namespace Demo{
 namespace Widget{
 
-class Dialog1 : public Pt::Hmi::Desktop::Dialog
+class MainWindow : public Pt::Forms::Window
 {
 public:
-	Dialog1();
-	virtual ~Dialog1();
+	MainWindow();
+	virtual ~MainWindow();
 
 protected:
 	virtual void init();
 
 private:
-	void onClosedByButton();
-	void onShowNextDialog();
+	void onClosed();
+	void onClosedByWindow(Pt::Hmi::Controller* ctrl);
+	void onShowDialog();
 
 private:
-	Pt::Hmi::Desktop::Button _closeButton;
-	Pt::Hmi::Desktop::Button _newDialog;
-	bool _clicked;
+    Pt::Forms::Panel  _mainPanel;
+	Pt::Forms::Button _closeButton;
+	Pt::Forms::Button _toggleButton;
+	Pt::Forms::Button _dialogButton;
+	Pt::Forms::Label  _textLabel;	
 }; 
 
 }}}}

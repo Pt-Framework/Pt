@@ -1,18 +1,17 @@
-#ifndef Pt_Hmi_Desktop_Window_H
-#define Pt_Hmi_Desktop_Window_H
+#ifndef Pt_Forms_Window_H
+#define Pt_Forms_Window_H
 
-#include <Pt/Hmi/Desktop/Api.h>
-#include <Pt/Hmi/Desktop/Widget.h>
-#include <Pt/Hmi/GfxOutputDevice.h>
+#include <Pt/Forms/Api.h>
+#include <Pt/Forms/Widget.h>
+#include <Pt/Hmi/View.h>
 #include <Pt/Hmi/WindowController.h>
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/WindowRenderer.h>
 
-namespace Pt{
-namespace Hmi{
-namespace Desktop{
+namespace Pt {
+namespace Forms {
 
-class PT_HMI_DESKTOP_API Window : public Pt::Connectable
+class PT_FORMS_API Window : public Pt::Connectable
 {
 public:
 	Window();
@@ -21,13 +20,13 @@ public:
 	virtual void show();
 	void close();	
 
-	WindowController& windowController();
-	WindowModel& windowModel();
+	Hmi::WindowController& windowController();
+	Hmi::WindowModel& windowModel();
 
-	void setWindowController(WindowController& controller);
+	void setWindowController(Hmi::WindowController& controller);
 
-	const WindowController& windowController() const;
-	const WindowModel& windowModel() const;
+	const Hmi::WindowController& windowController() const;
+	const Hmi::WindowModel& windowModel() const;
 
 		
 	virtual void setSize(const Pt::Gfx::SizeF& size);
@@ -47,9 +46,9 @@ private:
 	Pt::Hmi::WindowRenderer		_defRenderer;
 	Pt::Hmi::WindowController	_defController;
 	Pt::Hmi::WindowController*	_currController;	
-	Pt::Hmi::GfxOutputDevice    _gfxOutputDevice;
+	Pt::Hmi::View    _View;
 };
  
-}}}
+}}
 
 #endif

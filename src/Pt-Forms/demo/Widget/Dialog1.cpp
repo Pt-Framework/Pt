@@ -32,7 +32,7 @@
 #include "Dialog2.h"
 
 namespace Pt{
-namespace Hmi{
+namespace Forms{
 namespace Demo{
 namespace Widget{
 
@@ -52,7 +52,7 @@ void Dialog1::init()
 	setSize(Pt::Gfx::SizeF(700,500));
 	setPosition(Pt::Gfx::PointF(400,400));
 	dialogModel().Caption.set("This is a sample modal dialog 1");
-	dialogModel().WindowStartPostion.set(WindowStartPositionType::CenterParent);
+	dialogModel().WindowStartPostion.set(Hmi::WindowStartPositionType::CenterParent);
 
 	//New dialog button 
 	_newDialog.setPosition(Pt::Gfx::PointF(400,300));

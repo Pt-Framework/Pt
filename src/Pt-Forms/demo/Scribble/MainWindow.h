@@ -26,17 +26,19 @@
 #ifndef Pt_Hmi_Demo_MainWindow_h
 #define Pt_Hmi_Demo_MainWindow_h
 
-#include <Pt/Hmi/Desktop/Window.h>
-#include <Pt/Hmi/Desktop/Button.h>
-#include <Pt/Hmi/Desktop/Panel.h>
-#include <Pt/Hmi/Desktop/Label.h>
+#include <Pt/Forms/Window.h>
+#include <Pt/Forms/Button.h>
+#include <Pt/Forms/Panel.h>
+#include <Pt/Forms/Label.h>
+#include <Pt/Gfx/ARgbColor.h>
 
-namespace Pt{
-namespace Hmi{
-namespace Demo{
-namespace Widget{
+class PaintSurface;
 
-class MainWindow : public Pt::Hmi::Desktop::Window
+namespace Pt {
+namespace Forms {
+namespace Demo {
+
+class MainWindow : public Pt::Forms::Window
 {
 public:
 	MainWindow();
@@ -48,16 +50,24 @@ protected:
 private:
 	void onClosed();
 	void onClosedByWindow(Pt::Hmi::Controller* ctrl);
-	void onShowDialog();
 
 private:
-    Pt::Hmi::Desktop::Panel  _mainPanel;
-	Pt::Hmi::Desktop::Button _closeButton;
-	Pt::Hmi::Desktop::Button _toggleButton;
-	Pt::Hmi::Desktop::Button _dialogButton;
-	Pt::Hmi::Desktop::Label  _textLabel;	
+	void onRed();
+	void onGreen();
+	void onBlue();
+	void onPointerChanged(const Hmi::Property<Hmi::PointingEvent>& prop);
+	void onRender(Hmi::WidgetController& controller, Hmi::PaintSurface& surface);
+
+private:
+	Pt::Forms::Button _closeButton;
+	Pt::Forms::Button _redButton;
+	Pt::Forms::Button _greenButton;
+	Pt::Forms::Button _blueButton;
+	Pt::Gfx::ARgbColor _color;
+	bool _painting;
+	std::vector<Pt::Gfx::PointF> _points;
 }; 
 
-}}}}
+}}}
 
 #endif

@@ -27,23 +27,22 @@
 #ifndef Pt_Hmi_WidgetRenderer_H
 #define Pt_Hmi_WidgetRenderer_H
 
-#include <Pt/Hmi/Renderer.h>
-#include <Pt/Hmi/GfxModel.h>
+#include <Pt/Hmi/Api.h>
 
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API WidgetRenderer : public Renderer
+class WidgetModel;
+
+class PT_HMI_API WidgetRenderer
 {
 public:
 	WidgetRenderer();
 	virtual ~WidgetRenderer();
 
-	virtual void render(Pt::Hmi::GfxModel* model);
-private:	
+	virtual void render(Pt::Hmi::WidgetModel* model);
 
 };
-
 
 }}
 

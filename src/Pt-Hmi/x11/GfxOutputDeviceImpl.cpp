@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include "GfxOutputDeviceImpl.h"
+#include "ViewImpl.h"
 #include "ApplicationImpl.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Rgb888Color.h>
@@ -36,7 +36,7 @@
 #include <Pt/Hmi/PanelModel.h>
 #include <Pt/Hmi/WidgetController.h>
 #include <Pt/Hmi/PointingDevice.h>
-#include <Pt/Hmi/GfxOutputDevice.h>
+#include <Pt/Hmi/View.h>
 #include <Pt/Hmi/WindowController.h>
 #include <iostream>
 #include <sstream>
@@ -55,7 +55,7 @@ enum
 	_NET_WM_STATE_TOGGLE =2
 };
 
-GfxOutputDeviceImpl::GfxOutputDeviceImpl()
+ViewImpl::ViewImpl()
 : _ignoreSizeEvent(false)
 , _model(0)
 , _window(0)
@@ -70,12 +70,12 @@ GfxOutputDeviceImpl::GfxOutputDeviceImpl()
     AtomWindowClosed = XInternAtom(_display, "WM_DELETE_WINDOW", false);
     AtomWMProtocols  = XInternAtom(_display, "WM_PROTOCOLS",     false);
 
-	Application::instance().impl()->WindowEvent += Pt::slot(*this, &GfxOutputDeviceImpl::onWindowEvent);
+	Application::instance().impl()->WindowEvent += Pt::slot(*this, &ViewImpl::onWindowEvent);
 	create();
 }
 
 
-void GfxOutputDeviceImpl::pixelToScreen(char* data, const Pt::Gfx::ARgbColor& pixel)
+void ViewImpl::pixelToScreen(char* data, const Pt::Gfx::ARgbColor& pixel)
 {
     unsigned int screen = DefaultScreen(_display);
 	const int depth = XDefaultDepth(_display, screen);
@@ -101,7 +101,7 @@ void GfxOutputDeviceImpl::pixelToScreen(char* data, const Pt::Gfx::ARgbColor& pi
 
 //Direct draw
 #if 0
-void GfxOutputDeviceImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
+void ViewImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
 {    
 
 	for(size_t y = 0; y < image.height(); ++y)
@@ -124,7 +124,7 @@ void GfxOutputDeviceImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
 #endif
 
 //Buffered draw
-void GfxOutputDeviceImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
+void ViewImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
 {    
 
 	updateDrawBuffer();
@@ -158,7 +158,7 @@ void GfxOutputDeviceImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
 	XDestroyImage(ximage);	
 }
 
-void GfxOutputDeviceImpl::onClientMessage(XEvent& xev)
+void ViewImpl::onClientMessage(XEvent& xev)
 {
 	if( _model == 0)
 		return;
@@ -176,7 +176,7 @@ void GfxOutputDeviceImpl::onClientMessage(XEvent& xev)
 	}	
 }
 
-void GfxOutputDeviceImpl::onMotionNotify(XEvent& xev)
+void ViewImpl::onMotionNotify(XEvent& xev)
 {
     int x = xev.xmotion.x;
     int y = xev.xmotion.y;
@@ -188,7 +188,7 @@ void GfxOutputDeviceImpl::onMotionNotify(XEvent& xev)
 }
 
 
-void GfxOutputDeviceImpl::onMouseButtonPress(XEvent& xev)
+void ViewImpl::onMouseButtonPress(XEvent& xev)
 {
     int x = xev.xbutton.x;
     int y = xev.xbutton.y;
@@ -219,7 +219,7 @@ void GfxOutputDeviceImpl::onMouseButtonPress(XEvent& xev)
 }
 
 
-void GfxOutputDeviceImpl::onMouseButtonRelease(XEvent& xev)
+void ViewImpl::onMouseButtonRelease(XEvent& xev)
 {
     int  x = xev.xbutton.x;
     int  y = xev.xbutton.y;
@@ -250,7 +250,7 @@ void GfxOutputDeviceImpl::onMouseButtonRelease(XEvent& xev)
 	_mouseEvent.setY(pos.y());
 }
 
-void GfxOutputDeviceImpl::redraw()
+void ViewImpl::redraw()
 {
     XEvent exppp;
     memset(&exppp, 0, sizeof(exppp));
@@ -261,7 +261,7 @@ void GfxOutputDeviceImpl::redraw()
     XFlush(_display);
 }
 
-void GfxOutputDeviceImpl::readClientSizeAndPos(Pt::Gfx::SizeF& size, Pt::Gfx::PointF& pos)
+void ViewImpl::readClientSizeAndPos(Pt::Gfx::SizeF& size, Pt::Gfx::PointF& pos)
 {
 	if(_window == 0)
 		return;
@@ -274,7 +274,7 @@ void GfxOutputDeviceImpl::readClientSizeAndPos(Pt::Gfx::SizeF& size, Pt::Gfx::Po
 
 }
 
-void GfxOutputDeviceImpl::writeWindowSizeAndPos()
+void ViewImpl::writeWindowSizeAndPos()
 {	
 	Pt::Gfx::Point posGlobal = _model->fromUnit(_model->WinPos.get());
 	Pt::Gfx::Point posLocal = _model->fromUnit(_model->Position.get());
@@ -287,7 +287,7 @@ void GfxOutputDeviceImpl::writeWindowSizeAndPos()
 }
 
 
-void GfxOutputDeviceImpl::onConfigureNotify( XEvent& xev)
+void ViewImpl::onConfigureNotify( XEvent& xev)
 {
 	if(!_model->Enable.get())
 	{
@@ -341,7 +341,7 @@ void GfxOutputDeviceImpl::onConfigureNotify( XEvent& xev)
 	_model->Size = clientSize;
 }
 
-void GfxOutputDeviceImpl::onKeyEvent(XEvent& xev)
+void ViewImpl::onKeyEvent(XEvent& xev)
 {
 	if(KeyRelease == xev.xkey.type)
         	_keyEvent.setState(KeyEvent::KeyUp);
@@ -387,7 +387,7 @@ void GfxOutputDeviceImpl::onKeyEvent(XEvent& xev)
 	Application::instance().keyDeviceEvent().send(_model->controller(), _keyEvent);
 }
 
-void GfxOutputDeviceImpl::onWindowEvent(XEvent& ev)
+void ViewImpl::onWindowEvent(XEvent& ev)
 {
 	
 	if(ev.xany.window != _window)
@@ -457,7 +457,7 @@ void GfxOutputDeviceImpl::onWindowEvent(XEvent& ev)
 }
 
 
-void GfxOutputDeviceImpl::create()
+void ViewImpl::create()
 {
    // Display and Screen are inited in Application
     unsigned int screen = DefaultScreen(_display);
@@ -512,7 +512,7 @@ void GfxOutputDeviceImpl::create()
     XSync(_display, false);
 }
 
-void GfxOutputDeviceImpl::destroy()
+void ViewImpl::destroy()
 {
 	if(_window != 0)
 	{
@@ -526,12 +526,12 @@ void GfxOutputDeviceImpl::destroy()
 	}
 }
 
-GfxOutputDeviceImpl::~GfxOutputDeviceImpl()
+ViewImpl::~ViewImpl()
 {
 	destroy();
 }
 
-void GfxOutputDeviceImpl::show()
+void ViewImpl::show()
 {
 	
     XMapWindow(_display, _window);
@@ -539,7 +539,7 @@ void GfxOutputDeviceImpl::show()
     _visible = 	true;
 }
 
-void GfxOutputDeviceImpl::hide()
+void ViewImpl::hide()
 {
 	Display* display = Application::instance().impl()->display();
     XUnmapWindow(display, _window);
@@ -548,13 +548,13 @@ void GfxOutputDeviceImpl::hide()
 }
 
 
-void GfxOutputDeviceImpl::bringWindowToTop()
+void ViewImpl::bringWindowToTop()
 {
 	XRaiseWindow(_display, _window);
 	XSetInputFocus(_display, _window, RevertToNone, CurrentTime);
 }
 
-void GfxOutputDeviceImpl::onPaint(XEvent& xev)
+void ViewImpl::onPaint(XEvent& xev)
 {
 	if( _model != 0)
 	{
@@ -562,7 +562,7 @@ void GfxOutputDeviceImpl::onPaint(XEvent& xev)
 	}
 }
 
-void GfxOutputDeviceImpl::writeWindowProperties()
+void ViewImpl::writeWindowProperties()
 {
 
 	XSizeHints sizeHints;
@@ -670,7 +670,7 @@ void GfxOutputDeviceImpl::writeWindowProperties()
 
 }
     
-bool GfxOutputDeviceImpl::isWindowMinimized()
+bool ViewImpl::isWindowMinimized()
 {
     Atom actual_type;
     int actual_format;
@@ -695,7 +695,7 @@ bool GfxOutputDeviceImpl::isWindowMinimized()
     return 0;
 }
     
-bool GfxOutputDeviceImpl::isWindowMaximazed()
+bool ViewImpl::isWindowMaximazed()
 {
         Atom actual_type;
         int actual_format;
@@ -722,7 +722,7 @@ bool GfxOutputDeviceImpl::isWindowMaximazed()
 }
     
 
-void GfxOutputDeviceImpl::minimizeWindow()
+void ViewImpl::minimizeWindow()
 {
     XClientMessageEvent ev;
     unsigned int screen = DefaultScreen(_display);
@@ -737,7 +737,7 @@ void GfxOutputDeviceImpl::minimizeWindow()
 	
 }
 
-void GfxOutputDeviceImpl::restoreWindow()
+void ViewImpl::restoreWindow()
 {
     XClientMessageEvent ev;
     unsigned int screen = DefaultScreen(_display);
@@ -751,7 +751,7 @@ void GfxOutputDeviceImpl::restoreWindow()
 	XSendEvent(_display, RootWindow(_display, screen), False, SubstructureRedirectMask|SubstructureNotifyMask,(XEvent *)&ev);	
 }
 
-void GfxOutputDeviceImpl::maximizeWindow()
+void ViewImpl::maximizeWindow()
 {
 	XEvent xev;
 
@@ -772,7 +772,7 @@ void GfxOutputDeviceImpl::maximizeWindow()
 	XRaiseWindow(_display,_window);
 }
 
-void GfxOutputDeviceImpl::updateDrawBuffer()
+void ViewImpl::updateDrawBuffer()
 {
 	unsigned int sreen  = DefaultScreen(_display);
 
@@ -787,7 +787,7 @@ void GfxOutputDeviceImpl::updateDrawBuffer()
 
 }
 
-void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
+void ViewImpl::output(Pt::Hmi::Model* model)
 {
 	_model = dynamic_cast<WindowModel*>(model);
 

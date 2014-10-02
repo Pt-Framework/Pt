@@ -4,8 +4,8 @@
 
 int main(int argc, char* args[])
 {	
-	Pt::Hmi::Application		application;
-	Pt::Hmi::Demo::MainWindow	mainWindow;
+	Pt::Hmi::Application				application;
+	Pt::Forms::Demo::Widget::MainWindow	mainWindow;
 	
 	mainWindow.show();
 

@@ -23,8 +23,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include "GfxOutputDeviceImpl.h"
-#include <Pt/Hmi/GfxOutputDevice.h>
+#include "ViewImpl.h"
+#include <Pt/Hmi/View.h>
 #include <Pt/Hmi/NativePaintSurface.h>
 #include <Pt/Hmi/ImagePaintSurface.h>
 #include "ApplicationImpl.h"
@@ -41,19 +41,19 @@
 namespace Pt{
 namespace Hmi{
 
-GfxOutputDeviceImpl::GfxOutputDeviceImpl()
+ViewImpl::ViewImpl()
 : _hwnd(0)
 , _model(0)
 , _nativePainter(0)
 , _ignoreSizePositionEvent(false)
 {	
 	Pt::Hmi::Application* app = (Pt::Hmi::Application*) &Pt::Hmi::Application::instance();	
-	app->impl()->WindowEvent += Pt::slot(*this, &GfxOutputDeviceImpl::onWindowEvent);
+	app->impl()->WindowEvent += Pt::slot(*this, &ViewImpl::onWindowEvent);
 	_pointerEvent.buttons().resize(3);	
 	create();
 }
 
-void GfxOutputDeviceImpl::create()
+void ViewImpl::create()
 {
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
@@ -63,7 +63,7 @@ void GfxOutputDeviceImpl::create()
 	UpdateWindow(_hwnd);	
 }
 
-void GfxOutputDeviceImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
+void ViewImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 {
 	if(!_model->Enabled.get())
 		return;
@@ -115,7 +115,7 @@ void GfxOutputDeviceImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 	Application::instance().systemEvent().send(_keyEvent);
 }
 
-void GfxOutputDeviceImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wparam, long lparam, bool& handled)
+void ViewImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wparam, long lparam, bool& handled)
 {
 	if(_hwnd != wnd)
 		return;
@@ -201,12 +201,12 @@ void GfxOutputDeviceImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned
 	}
 }
 
-GfxOutputDeviceImpl::~GfxOutputDeviceImpl()
+ViewImpl::~ViewImpl()
 {
     DestroyWindow(_hwnd);
 }
 
-bool GfxOutputDeviceImpl::onClosing()
+bool ViewImpl::onClosing()
 {
 	if(!_model->Enabled.get())
 		return false;
@@ -216,12 +216,12 @@ bool GfxOutputDeviceImpl::onClosing()
 	return canClose;
 }
 
-void GfxOutputDeviceImpl::onClosed()
+void ViewImpl::onClosed()
 {
 	_controller->ClosedAction.send(_controller);
 }
 
-void GfxOutputDeviceImpl::onSize(WPARAM wParam, LPARAM lParam)
+void ViewImpl::onSize(WPARAM wParam, LPARAM lParam)
 {
 	if(_ignoreSizePositionEvent)
 		return;
@@ -249,7 +249,7 @@ void GfxOutputDeviceImpl::onSize(WPARAM wParam, LPARAM lParam)
 
 }
 
-void GfxOutputDeviceImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
+void ViewImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 {	
 	int xPos = GET_X_LPARAM(lparam); 
 	int yPos = GET_Y_LPARAM(lparam); 
@@ -290,7 +290,7 @@ void GfxOutputDeviceImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam
 	Application::instance().systemEvent().send(_pointerEvent);
 }
 
-void GfxOutputDeviceImpl::setWindowSizeAndPos(bool firstShow)
+void ViewImpl::setWindowSizeAndPos(bool firstShow)
 {
 	_ignoreSizePositionEvent = true;
 	
@@ -328,16 +328,16 @@ void GfxOutputDeviceImpl::setWindowSizeAndPos(bool firstShow)
 				}
 				else
 				{
-					GfxOutputDeviceImpl* parentImpl = 0;
+					ViewImpl* parentImpl = 0;
 
 					for(size_t i = 0; i < parent->outputDevices().size(); ++i)
 					{	
-						GfxOutputDevice* parentDevice = dynamic_cast<GfxOutputDevice*>(parent->outputDevices()[i]);
+						View* parentDevice = dynamic_cast<View*>(parent->outputDevices()[i]);
 
 						if( parentDevice == 0)
 							continue;
 
-						parentImpl = dynamic_cast<GfxOutputDeviceImpl*>(parentDevice->impl());
+						parentImpl = dynamic_cast<ViewImpl*>(parentDevice->impl());
 						
 						if( parentImpl != 0)
 							break;
@@ -357,7 +357,7 @@ void GfxOutputDeviceImpl::setWindowSizeAndPos(bool firstShow)
 	_ignoreSizePositionEvent = false;
 }
 
-void GfxOutputDeviceImpl::centerWindowTo(HWND parent)
+void ViewImpl::centerWindowTo(HWND parent)
 {
 	RECT parentRect;   
 	GetWindowRect(parent, &parentRect);
@@ -373,7 +373,7 @@ void GfxOutputDeviceImpl::centerWindowTo(HWND parent)
 	SetWindowPos(_hwnd,0, posX, posY, size.width(), size.height(), SWP_DRAWFRAME);
 }
 
-void GfxOutputDeviceImpl::updateModelSizeAndPos()
+void ViewImpl::updateModelSizeAndPos()
 {
 	RECT  info;
 	GetWindowRect(_hwnd, &info);
@@ -390,7 +390,7 @@ void GfxOutputDeviceImpl::updateModelSizeAndPos()
 		_model->Size = _model->toUnit(winSize);
 }
 
-void GfxOutputDeviceImpl::onMove()
+void ViewImpl::onMove()
 {
 	if(_ignoreSizePositionEvent)
 		return;
@@ -405,7 +405,7 @@ void GfxOutputDeviceImpl::onMove()
 	updateModelSizeAndPos();
 }
 
-void GfxOutputDeviceImpl::onPaint()
+void ViewImpl::onPaint()
 {   		
 	if(_model == 0)
 		return;
@@ -429,7 +429,7 @@ void GfxOutputDeviceImpl::onPaint()
 	}
 }
 
-void GfxOutputDeviceImpl::setWindowIcon()
+void ViewImpl::setWindowIcon()
 {
 	if( _model->Icon.get().width() == 0 ||  _model->Icon.get().height() == 0)
 		return;
@@ -459,7 +459,7 @@ void GfxOutputDeviceImpl::setWindowIcon()
 	SetClassLong(_hwnd, GCL_HICON, (LONG)icon); 	
 }
 
-void GfxOutputDeviceImpl::setWindowProperties()
+void ViewImpl::setWindowProperties()
 {
 	SetWindowText(_hwnd, _model->Caption.get().c_str());
 
@@ -560,7 +560,7 @@ void GfxOutputDeviceImpl::setWindowProperties()
 		ShowWindow(_hwnd, SW_SHOW);		
 }
 
-void GfxOutputDeviceImpl::destroy()
+void ViewImpl::destroy()
 {
 	if( _hwnd == 0)
 		return;
@@ -569,7 +569,7 @@ void GfxOutputDeviceImpl::destroy()
 	_hwnd = 0;
 }
 
-void GfxOutputDeviceImpl::output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model)
+void ViewImpl::output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model)
 {
 	bool firstShow =  (_model == 0);
 	_model = dynamic_cast<WindowModel*>(model);

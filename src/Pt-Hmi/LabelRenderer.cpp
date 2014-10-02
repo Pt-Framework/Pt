@@ -1,12 +1,12 @@
 #include <Pt/Hmi/LabelRenderer.h>
 #include <Pt/Hmi/LabelModel.h>
 #include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/WidgetController.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Rect.h>
-#include <Pt/Hmi/GfxController.h>
 
 namespace Pt{
 namespace Hmi{
@@ -19,7 +19,7 @@ LabelRenderer::~LabelRenderer()
 {
 }
 
-void LabelRenderer::render(Pt::Hmi::GfxModel* m)
+void LabelRenderer::render(Pt::Hmi::WidgetModel* m)
 {
 	LabelModel* model = dynamic_cast<LabelModel*>(m);	
 	

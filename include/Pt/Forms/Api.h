@@ -23,16 +23,16 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_Desktop_Api_H
-#define Pt_Hmi_Desktop_Api_H
+#ifndef Pt_Forms_Api_H
+#define Pt_Forms_Api_H
 
 #include <Pt/Api.h>
 
 
-#if defined(PT_HMI_DESKTOP_EXPORTS)
-#    define PT_HMI_DESKTOP_API PT_EXPORT
+#if defined(PT_FORMS_EXPORTS)
+#    define PT_FORMS_API PT_EXPORT
 #  else
-#    define PT_HMI_DESKTOP_API PT_IMPORT
+#    define PT_FORMS_API PT_IMPORT
 #  endif
 
 #endif

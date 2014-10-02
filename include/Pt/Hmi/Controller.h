@@ -31,7 +31,6 @@
 #include <Pt/Connectable.h>
 #include <Pt/Hmi/OutputDevice.h>
 #include <Pt/Hmi/Model.h>
-#include <Pt/Hmi/Renderer.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/PointingEvent.h>
 #include <Pt/Hmi/KeyEvent.h>

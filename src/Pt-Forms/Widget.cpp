@@ -1,11 +1,10 @@
-#include <Pt/Hmi/Desktop/Widget.h>
-#include <Pt/Hmi/GfxController.h>
-#include <Pt/Hmi/GfxModel.h>
+#include <Pt/Forms/Widget.h>
+#include <Pt/Hmi/WidgetController.h>
+#include <Pt/Hmi/WidgetModel.h>
 #include <algorithm>
 
-namespace Pt{
-namespace Hmi{
-namespace Desktop{
+namespace Pt {
+namespace Forms {
 
 Widget::Widget(Widget* parent)
 : _parent(parent)
@@ -50,4 +49,4 @@ void Widget::removeChild(Widget* w)
 }
 
 
-}}}
+}}

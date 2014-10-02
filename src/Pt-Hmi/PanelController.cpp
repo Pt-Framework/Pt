@@ -1,5 +1,5 @@
 #include <Pt/Hmi/PanelController.h>
-#include <Pt/Hmi/GfxModel.h>
+#include <Pt/Hmi/WidgetModel.h>
 #include <Pt/Hmi/PanelModel.h>
 #include <Pt/Hmi/WindowController.h>
 #include <Pt/Hmi/PanelRenderer.h>
@@ -40,7 +40,7 @@ void PanelController::handleResize(const PointingEvent& ev)
 
 void PanelController::recalcPosAndSize(const Pt::Gfx::PointF& p, ResizeDirection dir)
 {
-	GfxModel& model = gfxModel();
+	WidgetModel& model = widgetModel();
 
 	double width  = model.Size.get().width();
 	double height = model.Size.get().height();

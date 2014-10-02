@@ -23,8 +23,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_GfxOutputDeviceImpl_H
-#define Pt_Hmi_GfxOutputDeviceImpl_H
+#ifndef Pt_Hmi_ViewImpl_H
+#define Pt_Hmi_ViewImpl_H
 
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/Painter.h>
@@ -39,11 +39,11 @@
 namespace Pt{
 namespace Hmi{
 
-class GfxOutputDeviceImpl : public Pt::Connectable
+class ViewImpl : public Pt::Connectable
 {
 public:
-	GfxOutputDeviceImpl();
-	virtual ~GfxOutputDeviceImpl();
+	ViewImpl();
+	virtual ~ViewImpl();
 
 	void output(Pt::Hmi::Model* model);
 

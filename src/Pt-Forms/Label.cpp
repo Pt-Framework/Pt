@@ -1,11 +1,10 @@
-#include <Pt/Hmi/Desktop/Label.h>
+#include <Pt/Forms/Label.h>
 #include <Pt/Hmi/LabelController.h>
 #include <Pt/Hmi/LabelModel.h>
 #include <Pt/Hmi/LabelRenderer.h>
 
-namespace Pt{
-namespace Hmi{
-namespace Desktop{
+namespace Pt {
+namespace Forms {
 
 Label::Label()
 : _defController(_defModel, _defRenderer)
@@ -13,7 +12,7 @@ Label::Label()
 {
 	_defModel.ForeColor.set(Pt::Gfx::ARgbColor(0,0,0));
 	_defModel.BorderWidth.set(1);
-	_defModel.BorderStyle.set(BorderStyleType::NoBorder);
+	_defModel.BorderStyle.set(Hmi::BorderStyleType::NoBorder);
 	setLabelController(_defController);	
 }
 
@@ -86,4 +85,4 @@ Label::~Label()
 {
 }
  
-}}}
+}}

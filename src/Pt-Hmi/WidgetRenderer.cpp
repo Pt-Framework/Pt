@@ -1,5 +1,5 @@
 #include <Pt/Hmi/WidgetRenderer.h>
-#include <Pt/Hmi/Model.h>
+#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/WidgetModel.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/ImageAlgo.h>
@@ -17,7 +17,7 @@ WidgetRenderer::~WidgetRenderer()
 }
 
 
-void WidgetRenderer::render(Pt::Hmi::GfxModel* model)
+void WidgetRenderer::render(Pt::Hmi::WidgetModel* model)
 {
 	if(!model->Visible.get())
 		return;

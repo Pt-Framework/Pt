@@ -155,6 +155,7 @@ if $(SYS)
     if $(WITH_HMI) = yes
     {
         SubInclude PT_TOP src Pt-Hmi ;
+		SubInclude PT_TOP src Pt-Forms ;
     }
 }
 

@@ -1,10 +1,9 @@
 //Generated with Atesion GmbH, BinToHeader tool. Generation time: 11.09.2013 20:10:38
-#ifndef  Pt_Hmi_Desktop_Atesion_Icon_h
-#define  Pt_Hmi_Desktop_Atesion_Icon_h
+#ifndef  Pt_Forms_Atesion_Icon_h
+#define  Pt_Forms_Atesion_Icon_h
 
 namespace Pt{
-namespace Hmi{
-namespace Desktop{
+namespace Forms{
 namespace Atesion{
 
 const unsigned int iconSize = 292;
@@ -26,7 +25,7 @@ const unsigned char icon[] = {
 0x71, 0x01, 0xBC, 0x06, 0x90, 0x02, 0x28, 0x34, 0xE0, 0xFF, 0x7F, 0x00, 0xE8, 0x81, 0x1D, 0x13, 0x7F, 0x9F, 0xB2, 0xB5, 
 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82};
 
-}}}}
+}}}
 
 #endif
 

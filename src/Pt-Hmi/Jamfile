@@ -23,9 +23,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   Application.cpp
 					   Cursor.cpp
 					   PointingEvent.cpp
-					   GfxController.cpp
-					   GfxModel.cpp
-					   GfxOutputDevice.cpp
+					   View.cpp
 					   Device.cpp
 					   KeyEvent.cpp
 					   ButtonModel.cpp
@@ -49,15 +47,9 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   NativePaintSurface.cpp
 					   NativePainter.cpp
 					   ImagePaintSurface.cpp
-					   ImagePainter.cpp
-		
-						;
+					   ImagePainter.cpp	;
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx  ;
 LinkLibs Pt-Hmi : $(GUILIBS) ;
 MakeLocate Pt-Hmi : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-Hmi : $(PT_INSTALL_LIBDIR) ;
-
-SubInclude PT_TOP src Pt-Hmi Desktop ;
-SubInclude PT_TOP src Pt-Hmi Demo Widget ;
-SubInclude PT_TOP src Pt-Hmi Demo Scribble ;

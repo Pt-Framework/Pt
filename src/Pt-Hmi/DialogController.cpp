@@ -26,8 +26,7 @@
 
 #include <Pt/Hmi/DialogController.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/GfxModel.h>
-#include <Pt/Hmi/GfxOutputDevice.h>
+#include <Pt/Hmi/View.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Hmi/DialogModel.h>
 #include <Pt/Hmi/DialogRenderer.h>
@@ -35,7 +34,7 @@
 namespace Pt{
 namespace Hmi{
 
-DialogController::DialogController(DialogModel& m, DialogRenderer& r, GfxOutputDevice* out )
+DialogController::DialogController(DialogModel& m, DialogRenderer& r, View* out )
 : WindowController(m, r, out)
 {				
 }

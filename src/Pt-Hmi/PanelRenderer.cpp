@@ -1,6 +1,6 @@
 #include <Pt/Hmi/PanelRenderer.h>
 #include <Pt/Hmi/PanelModel.h>
-#include <Pt/Hmi/GfxController.h>
+#include <Pt/Hmi/WidgetController.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Rgb888Color.h>
 #include <Pt/Gfx/Rgb888Image.h>
@@ -19,7 +19,7 @@ PanelRenderer::~PanelRenderer()
 {
 }
 
-void PanelRenderer::render(Pt::Hmi::GfxModel* m)
+void PanelRenderer::render(Pt::Hmi::WidgetModel* m)
 {	
 	WidgetRenderer::render(m);
 

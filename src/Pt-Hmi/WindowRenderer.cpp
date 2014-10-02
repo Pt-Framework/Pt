@@ -41,7 +41,7 @@ WindowRenderer::~WindowRenderer()
 {
 }
 
-void WindowRenderer::render(Pt::Hmi::GfxModel* model)
+void WindowRenderer::render(Pt::Hmi::WidgetModel* model)
 {
 	Pt::Gfx::SizeF size = model->Size.get();
 

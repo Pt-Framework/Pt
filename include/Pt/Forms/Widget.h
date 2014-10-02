@@ -1,18 +1,17 @@
-#ifndef Pt_Hmi_Desktop_Widget_H
-#define Pt_Hmi_Desktop_Widget_H
+#ifndef Pt_Forms_Widget_H
+#define Pt_Forms_Widget_H
 
-#include <Pt/Hmi/Desktop/Api.h>
+#include <Pt/Forms/Api.h>
 #include <vector>
 #include <Pt/Connectable.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Hmi/WidgetController.h>
 
-namespace Pt{
-namespace Hmi{
-namespace Desktop{
+namespace Pt {
+namespace Forms {
 
-class PT_HMI_DESKTOP_API Widget : public Pt::Connectable
+class PT_FORMS_API Widget : public Pt::Connectable
 {
 public:
 	Widget(Widget* parent = 0);
@@ -28,7 +27,6 @@ public:
 
 	void addChild(Widget* w);
 	void removeChild(Widget* w);
-
 	
 	inline const Widget* parent() const 
 	{
@@ -55,7 +53,7 @@ public:
 
     virtual void setPosition(const Pt::Gfx::PointF& position) = 0;
 	virtual const Pt::Gfx::PointF& position() const = 0;
-	virtual WidgetController& widgetController() = 0;
+	virtual Hmi::WidgetController& widgetController() = 0;
 
 protected:    
 	inline void setParent(Widget* p)
@@ -70,5 +68,5 @@ private:
 	Widget* _parent;
 };
  
-}}}
+}}
 #endif

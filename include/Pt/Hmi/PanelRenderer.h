@@ -27,11 +27,13 @@
 #ifndef Pt_Hmi_PanelRenderer_H
 #define Pt_Hmi_PanelRenderer_H
 
+#include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/WidgetRenderer.h>
-#include <Pt/Hmi/GfxModel.h>
 
 namespace Pt{
 namespace Hmi{
+
+class WidgetModel;
 
 class PT_HMI_API PanelRenderer : public WidgetRenderer
 {
@@ -39,7 +41,7 @@ public:
 	PanelRenderer();
 	virtual ~PanelRenderer();
 
-	virtual void render(Pt::Hmi::GfxModel* model);
+	virtual void render(WidgetModel* model);
 
 private:	
 

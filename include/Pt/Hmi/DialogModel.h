@@ -27,13 +27,12 @@
 #ifndef Pt_Hmi_Model_Model_h
 #define Pt_Hmi_Model_Model_h
 
-#include <Pt/Hmi/GfxModel.h>
+#include <Pt/Hmi/WindowModel.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Gfx.h>
-#include <Pt/Hmi/WindowModel.h>
 
 namespace Pt{
 namespace Hmi{

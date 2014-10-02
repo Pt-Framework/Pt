@@ -25,13 +25,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Hmi/GfxModel.h>
+#include <Pt/Hmi/DialogModel.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Gfx.h>
-#include <Pt/Hmi/DialogModel.h>
+
 
 namespace Pt{
 namespace Hmi{

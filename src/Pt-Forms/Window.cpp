@@ -1,13 +1,12 @@
-#include <Pt/Hmi/Desktop/Window.h>
+#include <Pt/Forms/Window.h>
 #include <Pt/Hmi/WindowController.h>
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/WindowRenderer.h>
 #include <Pt/Hmi/Application.h>
 #include <algorithm>
 
-namespace Pt{
-namespace Hmi{
-namespace Desktop{
+namespace Pt {
+namespace Forms {
 
 Window::Window()
 : _defController(_defModel, _defRenderer)
@@ -16,25 +15,25 @@ Window::Window()
 	
 	Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
 
-	_gfxOutputDevice.start(app.loop());
+	_View.start(app.loop());
 
 	_defModel.Caption.set("New Window");
 	_defModel.ShowInTaskbar.set(true);
-	_defModel.Border.set(WindowBorderType::Sizeable);
+	_defModel.Border.set(Hmi::WindowBorderType::Sizeable);
 	_defModel.Position.set(Pt::Gfx::PointF(20,20));
 	_defModel.Size.set( Pt::Gfx::SizeF(800,800));
-	_defController.addOutputDevice(&_gfxOutputDevice);
+	_defController.addOutputDevice(&_View);
 
 	setWindowController(_defController);
 }
 
-void Window::setWindowController(WindowController& controller)
+void Window::setWindowController(Hmi::WindowController& controller)
 {
 	_currController = &controller;
 }
 
 
-WindowController& Window::windowController()
+Hmi::WindowController& Window::windowController()
 {
 	return *_currController;
 }
@@ -45,17 +44,17 @@ void Window::addChild(Widget* w)
 	windowController().addChild(&w->widgetController());		
 }
 
-WindowModel& Window::windowModel()
+Hmi::WindowModel& Window::windowModel()
 {
 	return _currController->windowModel();
 }
 
-const WindowController& Window::windowController() const
+const Hmi::WindowController& Window::windowController() const
 {
 	return *_currController;
 }
 
-const WindowModel& Window::windowModel() const
+const Hmi::WindowModel& Window::windowModel() const
 {
 	return _currController->windowModel();
 }
@@ -96,4 +95,4 @@ Window::~Window()
 {
 }
 		
-}}}
+}}

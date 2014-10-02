@@ -28,7 +28,6 @@
 #define Pt_Hmi_ButtonRenderer_H
 
 #include <Pt/Hmi/LabelRenderer.h>
-#include <Pt/Hmi/GfxModel.h>
 
 namespace Pt{
 namespace Hmi{
@@ -39,7 +38,7 @@ public:
 	ButtonRenderer();
 	virtual ~ButtonRenderer();
 
-	virtual void render(Pt::Hmi::GfxModel* model);
+	virtual void render(Pt::Hmi::WidgetModel* model);
 
 private:	
 

@@ -28,22 +28,21 @@
 #ifndef Pt_Hmi_Controller_Window_H
 #define Pt_Hmi_Controller_Window_H
 
-#include <Pt/Hmi/GfxController.h>
-#include <Pt/Hmi/GfxModel.h>
+#include <Pt/Hmi/WidgetController.h>
+#include <Pt/Hmi/WidgetModel.h>
 #include <Pt/Hmi/WindowModel.h>
 
 namespace Pt{
 namespace Hmi{
 
-class WidgetController;
 class PointingDevice;
-class GfxOutputDevice;
+class View;
 class WindowRenderer;
 
-class PT_HMI_API WindowController  : public GfxController
+class PT_HMI_API WindowController  : public WidgetController
 {
 public:
-	WindowController(WindowModel& m, WindowRenderer& r, GfxOutputDevice* out = 0);
+	WindowController(WindowModel& m, WindowRenderer& r, View* out = 0);
 	virtual ~WindowController();
 
 	WidgetController* mainWidget();

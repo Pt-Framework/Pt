@@ -26,7 +26,7 @@
 #ifndef Pt_Hmi_Desktop_Button_H
 #define Pt_Hmi_Desktop_Button_H
 
-#include <Pt/Hmi/Desktop/Widget.h>
+#include <Pt/Forms/Widget.h>
 #include <Pt/Signal.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Point.h>
@@ -36,10 +36,9 @@
 #include <Pt/Hmi/ButtonRenderer.h>
 
 namespace Pt{
-namespace Hmi{  
-namespace Desktop{
+namespace Forms{  
 
-class PT_HMI_DESKTOP_API Button : public Widget 
+class PT_FORMS_API Button : public Widget 
 {
 public:
 	Button();
@@ -60,11 +59,11 @@ public:
 	void setActionKey(const std::string& keyString);
 	const std::string& actionKey() const;
 
-	const ButtonModel& buttonModel() const;
-	const ButtonController& buttonController() const;
+	const Hmi::ButtonModel& buttonModel() const;
+	const Hmi::ButtonController& buttonController() const;
 
-	ButtonModel& buttonModel();
-	ButtonController& buttonController();
+	Hmi::ButtonModel& buttonModel();
+	Hmi::ButtonController& buttonController();
 	void setButtonController(Pt::Hmi::ButtonController& ctrl);
 
 public:    
@@ -76,14 +75,14 @@ protected:
     virtual void onChecked(bool state);
 
 protected:
-	virtual WidgetController& widgetController()
+	virtual Hmi::WidgetController& widgetController()
 	{
 		return *_currentController;
 	}
     
 private:
-    void handleOnClicked(Controller* sender);
-    void handleOnChecked(Controller* sender, bool state);
+    void handleOnClicked(Hmi::Controller* sender);
+    void handleOnChecked(Hmi::Controller* sender, bool state);
     
 private:
 	Pt::Hmi::ButtonModel      _defModel;
@@ -92,5 +91,5 @@ private:
 	Pt::Hmi::ButtonController* _currentController;
 };
  
-}}}
+}}
 #endif

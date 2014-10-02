@@ -1,5 +1,4 @@
-/* Copyright (C) 2013 Marc Boris Duerner 
- * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,31 +22,39 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-#ifndef Pt_Hmi_Renderer_Base_H
-#define Pt_Hmi_Renderer_Base_H
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
+#ifndef Pt_Forms_Dialog2_h
+#define Pt_Forms_Dialog2_h
 
-#include <Pt/Gfx/Painter.h>
-#include <Pt/Hmi/GfxModel.h>
-#include <Pt/Hmi/Api.h>
+#include <Pt/Forms/Dialog.h>
+#include <Pt/Forms/Button.h>
+#include <Pt/Forms/Label.h>
+#include <Pt/Forms/Panel.h>
 
 namespace Pt{
-namespace Hmi{
+namespace Forms{
+namespace Demo{
+namespace Widget{
 
-class PT_HMI_API Renderer
+class Dialog2 : public Pt::Forms::Dialog
 {
 public:
-	virtual ~Renderer()
-	{ }
-
-	virtual void render(Pt::Hmi::GfxModel* model) = 0;
+	Dialog2();
+	virtual ~Dialog2();
 
 protected:
-	Renderer()
-	{ }
+	virtual void init();
+
+private:
+	void onClosedByButton();
+    
+private:
+	Pt::Forms::Button _okButton;
+	Pt::Forms::Button _cancelButton;
+	Pt::Forms::Label  _label;
+	Pt::Forms::Panel  _panel;
 };
 
-}}
+}}}}
 
 #endif

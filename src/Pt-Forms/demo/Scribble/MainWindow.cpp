@@ -40,7 +40,7 @@
 #include <sstream>
 
 namespace Pt{
-namespace Hmi{
+namespace Forms{
 namespace Demo{
 
 MainWindow::MainWindow()
@@ -62,7 +62,7 @@ void MainWindow::init()
 	{
 		std::stringstream memoryStream;
 		
-		memoryStream.write((char*)Pt::Hmi::Desktop::Atesion::icon, Pt::Hmi::Desktop::Atesion::iconSize);	
+		memoryStream.write((char*)Pt::Forms::Atesion::icon, Pt::Forms::Atesion::iconSize);	
 		
 		Pt::Gfx::ARgbImage* im = Pt::Gfx::ImageReader::read(memoryStream);
 		windowModel().Icon = *im;
@@ -84,8 +84,8 @@ void MainWindow::init()
 	setSize(Pt::Gfx::SizeF(800,615));
 	windowModel().Caption.set("This is a Platinum C++ Human Machine Interface Scribble  ");
 	windowModel().BackColor.set(Pt::Gfx::ARgbColor(0,255,255,255));
-    windowModel().WindowState.set(WindowStateType::Normal);
-	windowModel().WindowStartPostion.set(WindowStartPositionType::CenterScreen);
+    windowModel().WindowState.set(Hmi::WindowStateType::Normal);
+	windowModel().WindowStartPostion.set(Hmi::WindowStartPositionType::CenterScreen);
 	windowController().ClosedAction += Pt::slot(*this, &MainWindow::onClosedByWindow);
 	windowModel().Pointer2DStatus.Changed += Pt::slot(*this, &MainWindow::onPointerChanged);
 
@@ -103,7 +103,7 @@ void MainWindow::init()
 	_redButton.setToggleButton(false);
 	_redButton.buttonModel().BackColor = Pt::Gfx::ARgbColor(255,255,0,0);
 	_redButton.setCaption("RED [CTRL+R]");
-	_redButton.setActionKey("C//R");
+	_redButton.setActionKey("C//r");
 	_redButton.setPosition(Pt::Gfx::PointF(10,50));
 	_redButton.setSize(Pt::Gfx::SizeF(150,25));
 	_redButton.ClickedAction += Pt::slot(*this, &MainWindow::onRed);
@@ -113,7 +113,7 @@ void MainWindow::init()
 	_greenButton.setToggleButton(false);
 	_greenButton.buttonModel().BackColor = Pt::Gfx::ARgbColor(255,0,255,0);
 	_greenButton.setCaption("GREEN [CTRL+G]");
-	_greenButton.setActionKey("C//G");
+	_greenButton.setActionKey("C//g");
 	_greenButton.setPosition(Pt::Gfx::PointF(10,100));
 	_greenButton.setSize(Pt::Gfx::SizeF(150,25));
 	_greenButton.ClickedAction += Pt::slot(*this, &MainWindow::onGreen);
@@ -123,7 +123,7 @@ void MainWindow::init()
 	_blueButton.setToggleButton(false);
 	_blueButton.buttonModel().BackColor = Pt::Gfx::ARgbColor(255,0,0,255);
 	_blueButton.setCaption("BLUE [CTRL+B]");
-	_blueButton.setActionKey("C//G");
+	_blueButton.setActionKey("C//b");
 	_blueButton.setPosition(Pt::Gfx::PointF(10,150));
 	_blueButton.setSize(Pt::Gfx::SizeF(150,25));
 	_blueButton.ClickedAction += Pt::slot(*this, &MainWindow::onBlue);
@@ -134,7 +134,7 @@ void MainWindow::init()
 	addChild(&_blueButton);
 }
 
-void MainWindow::onClosedByWindow(Controller* ctrl)
+void MainWindow::onClosedByWindow(Hmi::Controller* ctrl)
 {
 	onClosed();
 }
@@ -159,11 +159,11 @@ void MainWindow::onBlue()
 	_color = Pt::Gfx::ARgbColor(255,0,0,255);
 }
 
-void MainWindow::onPointerChanged(const Property<PointingEvent>& prop)
+void MainWindow::onPointerChanged(const Hmi::Property<Hmi::PointingEvent>& prop)
 {
-	const PointingEvent& pointerEvent = prop.get();
+	const Hmi::PointingEvent& pointerEvent = prop.get();
 
-	if(pointerEvent.buttons()[0].state() == DeviceButton::Pressed && !_painting)
+	if(pointerEvent.buttons()[0].state() == Hmi::DeviceButton::Pressed && !_painting)
 	{
 		_painting = true;
 		_points.clear();
@@ -177,7 +177,7 @@ void MainWindow::onPointerChanged(const Property<PointingEvent>& prop)
 		 windowController().invalidate();
 	}
 
-	if(pointerEvent.buttons()[0].state() == DeviceButton::Released && _painting)
+	if(pointerEvent.buttons()[0].state() == Hmi::DeviceButton::Released && _painting)
 	{
 		_painting = false;
 		return;
@@ -185,7 +185,7 @@ void MainWindow::onPointerChanged(const Property<PointingEvent>& prop)
 }
 
 
-void MainWindow::onRender(GfxController& controller, PaintSurface& surface)
+void MainWindow::onRender(Hmi::WidgetController& controller, Hmi::PaintSurface& surface)
 {
 	if(_points.size() == 0)
 		return;
@@ -195,4 +195,5 @@ void MainWindow::onRender(GfxController& controller, PaintSurface& surface)
 	painter.setPen(Pt::Gfx::Pen(5, _color));
 	painter.drawPolyline(&_points[0], _points.size());
 }
+
 }}}

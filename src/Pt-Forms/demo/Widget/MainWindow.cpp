@@ -40,7 +40,7 @@
 #include <sstream>
 
 namespace Pt{
-namespace Hmi{
+namespace Forms{
 namespace Demo{
 namespace Widget{
 
@@ -60,7 +60,7 @@ void MainWindow::init()
 	{
 		std::stringstream memoryStream;
 		
-		memoryStream.write((char*)Pt::Hmi::Desktop::Atesion::icon, Pt::Hmi::Desktop::Atesion::iconSize);	
+		memoryStream.write((char*)Pt::Forms::Atesion::icon, Pt::Forms::Atesion::iconSize);	
 		
 		Pt::Gfx::ARgbImage* im = Pt::Gfx::ImageReader::read(memoryStream);
 		windowModel().Icon = *im;
@@ -81,8 +81,8 @@ void MainWindow::init()
 	setPosition(Pt::Gfx::PointF(200,200));
 	setSize(Pt::Gfx::SizeF(800,615));
 	windowModel().Caption.set("This is a Platinum C++ Human Machine Interface demo  ");
-    windowModel().WindowState.set(WindowStateType::Normal);
-	windowModel().WindowStartPostion.set(WindowStartPositionType::CenterScreen);
+    windowModel().WindowState.set(Hmi::WindowStateType::Normal);
+	windowModel().WindowStartPostion.set(Hmi::WindowStartPositionType::CenterScreen);
 	windowController().ClosedAction += Pt::slot(*this, &MainWindow::onClosedByWindow);
 
 	
@@ -93,7 +93,7 @@ void MainWindow::init()
 	_mainPanel.panelModel().BorderStyle.set(Pt::Hmi::BorderStyleType::Sizeable);
 	{
 		std::stringstream memoryStream;
-		memoryStream.write((char*)Pt::Hmi::DemoImage::image, Pt::Hmi::DemoImage::imageSize);	
+		memoryStream.write((char*)Pt::Forms::DemoImage::image, Pt::Forms::DemoImage::imageSize);	
 		Pt::Gfx::ARgbImage* im = Pt::Gfx::ImageReader::read(memoryStream);
 		_mainPanel.panelModel().BackgroundImage = *im;
 		delete im;
@@ -104,7 +104,7 @@ void MainWindow::init()
 	//Text
 	_textLabel.setAutoSize(true);
 	_textLabel.setSize(Pt::Gfx::SizeF(500,30));
-	_textLabel.setCaption("&This is a Platinum C++ Human Mashine Interface demo");
+	_textLabel.setCaption("&This is a Platinum C++ Human Machine Interface demo");
 	_textLabel.setPosition(Pt::Gfx::PointF(20,20));
 	_textLabel.labelModel().ForeColor.set(Pt::Gfx::ARgbColor(255,0,0,0));
 	_textLabel.labelModel().UseMnemonic.set(true);	
@@ -149,7 +149,7 @@ void MainWindow::onShowDialog()
 	dialog.show(this);
 }
 
-void MainWindow::onClosedByWindow(Controller* ctrl)
+void MainWindow::onClosedByWindow(Hmi::Controller* ctrl)
 {
 	onClosed();
 }

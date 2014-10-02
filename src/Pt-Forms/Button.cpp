@@ -23,15 +23,14 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include <Pt/Hmi/Desktop/Button.h>
+#include <Pt/Forms/Button.h>
 #include <Pt/Hmi/ButtonController.h>
 #include <Pt/Hmi/ButtonModel.h>
 #include <Pt/Hmi/ButtonRenderer.h>
 #include <Pt/Hmi/Controller.h>
 
 namespace Pt{
-namespace Hmi{
-namespace Desktop{
+namespace Forms{
 
 Button::Button()
 : _defModel()
@@ -40,7 +39,7 @@ Button::Button()
 {
 	_defModel.ForeColor.set(Pt::Gfx::ARgbColor(0,0,0));
 	_defModel.BorderWidth.set(1);
-	_defModel.BorderStyle.set(BorderStyleType::Widget);
+	_defModel.BorderStyle.set(Hmi::BorderStyleType::Widget);
 
 	setButtonController(_defController);
 }
@@ -105,12 +104,12 @@ void Button::onChecked(bool state)
     CheckedAction.send(state);
 }    
 
-void Button::handleOnClicked(Controller* sender)
+void Button::handleOnClicked(Hmi::Controller* sender)
 {
     onClicked();
 }
 
-void Button::handleOnChecked(Controller* sender, bool state)
+void Button::handleOnChecked(Hmi::Controller* sender, bool state)
 {
     onChecked(state);
 }
@@ -125,22 +124,22 @@ const std::string& Button::actionKey() const
 	return buttonModel().ActionKey.get();
 }
 
-const ButtonModel& Button::buttonModel() const
+const Hmi::ButtonModel& Button::buttonModel() const
 {
 	return _currentController->buttonModel();
 }
 
-const ButtonController& Button::buttonController() const
+const Hmi::ButtonController& Button::buttonController() const
 {
 	return *_currentController;
 }
 
-ButtonModel& Button::buttonModel()
+Hmi::ButtonModel& Button::buttonModel()
 {
 	return _currentController->buttonModel();
 }
 
-ButtonController& Button::buttonController()
+Hmi::ButtonController& Button::buttonController()
 {
 	return *_currentController;
 }
@@ -149,4 +148,4 @@ Button::~Button()
 {
 }
  
-}}}
+}}

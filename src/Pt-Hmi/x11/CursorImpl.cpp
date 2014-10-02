@@ -1,9 +1,9 @@
 #include "CursorImpl.h"
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/GfxOutputDevice.h>
+#include <Pt/Hmi/View.h>
 #include <Pt/Hmi/WindowController.h>
-#include "GfxOutputDeviceImpl.h"
+#include "ViewImpl.h"
 #include "ApplicationImpl.h"
 
 namespace Pt{
@@ -60,12 +60,12 @@ void CursorImpl::setCursor(Cursors::Type c, WindowController* parent)
 
 	for(size_t i = 0; i < parent->outputDevices().size(); ++i)
 	{
-		GfxOutputDevice* outDev= dynamic_cast<GfxOutputDevice*>(parent->outputDevices()[i]);
+		View* outDev= dynamic_cast<View*>(parent->outputDevices()[i]);
 
 		if( outDev == 0)
 			continue;
 
-		GfxOutputDeviceImpl* impl = outDev->impl();
+		ViewImpl* impl = outDev->impl();
 		::Window w = impl->window();
 	
 		if( w != 0)

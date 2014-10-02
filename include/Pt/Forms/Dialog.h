@@ -23,22 +23,21 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_Desktop_Dialog_H
-#define Pt_Hmi_Desktop_Dialog_H
+#ifndef Pt_Forms_Dialog_H
+#define Pt_Forms_Dialog_H
 
-#include <Pt/Hmi/Desktop/Window.h>
+#include <Pt/Forms/Window.h>
 #include <Pt/Hmi/DialogModel.h>
-#include <Pt/Hmi/GfxOutputDevice.h>
+#include <Pt/Hmi/View.h>
 #include <Pt/Hmi/DialogController.h>
 #include <Pt/Hmi/DialogModel.h>
 #include <Pt/Hmi/DialogRenderer.h>
 #include <Pt/Hmi/WidgetController.h>
 
-namespace Pt{
-namespace Hmi{
-namespace Desktop{
+namespace Pt {
+namespace Forms {
 
-class PT_HMI_DESKTOP_API Dialog : public Window
+class PT_FORMS_API Dialog : public Window
 {
 public:
 	Dialog();
@@ -47,16 +46,16 @@ public:
 	void show(Window* parent);
 	void show(Dialog* parent);
 
-	virtual DialogResultType::Type result() const;
-	virtual void setResult(DialogResultType::Type r);
+	virtual Hmi::DialogResultType::Type result() const;
+	virtual void setResult(Hmi::DialogResultType::Type r);
 
-	DialogController& dialogController();
-	void setDialogController(DialogController& controller);
+	Hmi::DialogController& dialogController();
+	void setDialogController(Hmi::DialogController& controller);
 
-	DialogModel& dialogModel();
+	Hmi::DialogModel& dialogModel();
 
-	const DialogController& dialogController() const;
-	const DialogModel& dialogModel()const ;
+	const Hmi::DialogController& dialogController() const;
+	const Hmi::DialogModel& dialogModel()const ;
 
 	virtual void setSize(const Pt::Gfx::SizeF& size);
 	virtual const Pt::Gfx::SizeF& size() const;
@@ -65,7 +64,7 @@ public:
 	virtual const Pt::Gfx::PointF& position() const;
 
 protected:
-	virtual void show(WindowController& parent); 
+	virtual void show(Hmi::WindowController& parent); 
 
 private:
 	Pt::Hmi::DialogModel		_defModel;
@@ -74,8 +73,8 @@ private:
 	Pt::Hmi::DialogController	_defController;
 	Pt::Hmi::DialogController*	_currController;
 
-	Pt::Hmi::GfxOutputDevice    _gfxOutputDevice;
+	Pt::Hmi::View    _View;
 };
  
-}}}
+}}
 #endif

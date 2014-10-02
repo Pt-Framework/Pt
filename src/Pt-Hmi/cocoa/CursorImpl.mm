@@ -26,8 +26,8 @@
 #include "CursorImpl.h"
 #include <Pt/Hmi/Controller.h>
 
-#include "GfxOutputDeviceImpl.h"
-#include <Pt/Hmi/GfxOutputDevice.h>
+#include "ViewImpl.h"
+#include <Pt/Hmi/View.h>
 #include <Pt/Hmi/WindowController.h>
 #import <AppKit/NSView.h>
 #import <AppKit/NSCursor.h>

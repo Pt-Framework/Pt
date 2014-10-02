@@ -1,5 +1,4 @@
-/* Copyright (C) 2013 Marc Boris Duerner 
- * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,43 +22,37 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-#ifndef Pt_Hmi_GfxOutputDevice_H
-#define Pt_Hmi_GfxOutputDevice_H
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
+#ifndef Pt_Forms_Demo_Dialog1_h
+#define Pt_Forms_Demo_Dialog1_h
 
-#include <Pt/Hmi/Model.h>
-#include <Pt/Hmi/OutputDevice.h>
-#include <Pt/Gfx/Painter.h>
+#include <Pt/Forms/Dialog.h>
+#include <Pt/Forms/Button.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+namespace Forms {
+namespace Demo {
+namespace Widget {
 
-class GfxOutputDeviceImpl;
-
-class PT_HMI_API GfxOutputDevice : public OutputDevice
+class Dialog1 : public Pt::Forms::Dialog
 {
 public:
-	GfxOutputDevice();
-	virtual ~GfxOutputDevice();	
+	Dialog1();
+	virtual ~Dialog1();
 
-	virtual void output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model);
-
-	GfxOutputDeviceImpl* impl();
-		
 protected:
-    virtual void onCancel()
-	{
-	}
+	virtual void init();
 
-    virtual bool onRun()
-	{
-		return true;
-	}	
-	
 private:
-	GfxOutputDeviceImpl* _impl;
-};
+	void onClosedByButton();
+	void onShowNextDialog();
 
-}}
+private:
+	Pt::Forms::Button _closeButton;
+	Pt::Forms::Button _newDialog;
+	bool _clicked;
+}; 
+
+}}}}
+
 #endif

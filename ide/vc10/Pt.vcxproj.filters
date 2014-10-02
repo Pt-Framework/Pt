@@ -61,12 +61,6 @@
     <Filter Include="Pt-Hmi">
       <UniqueIdentifier>{34a3d100-502f-4817-807c-f4fb1561f509}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\Headers">
-      <UniqueIdentifier>{a848afb3-7755-4f06-b0e0-c2af313f8e28}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Hmi\Headers\Desktop">
-      <UniqueIdentifier>{2e90b4ef-c978-4c42-b9ce-616fefa610a5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Ssl\openssl">
       <UniqueIdentifier>{11dcb2bb-4b1d-4c1a-8aee-a6699ce93550}</UniqueIdentifier>
     </Filter>
@@ -81,21 +75,6 @@
     </Filter>
     <Filter Include="Pt-Ssl\nossl">
       <UniqueIdentifier>{afaca7e1-6477-4f4e-b837-ce1cf9a958d1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Hmi\Sources">
-      <UniqueIdentifier>{9caf809f-604a-4640-9e8d-9e9ee98e7dcf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Hmi\Sources\gdi">
-      <UniqueIdentifier>{947e0ceb-dc3d-4f25-b8ff-f29aad8e7be3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Hmi\Sources\Desktop">
-      <UniqueIdentifier>{5ff8bfb5-2d51-4efa-908a-342da391ef75}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Hmi\Sources\cocoa">
-      <UniqueIdentifier>{2b77b6e8-aec1-4d99-9506-f20e6b81d876}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Hmi\Sources\x11">
-      <UniqueIdentifier>{54475eb3-ab9c-4ce4-a5c2-c96fc66beace}</UniqueIdentifier>
     </Filter>
     <Filter Include="Pt-Qt">
       <UniqueIdentifier>{c31af57f-7ea5-4c68-a740-78a87a46b63d}</UniqueIdentifier>
@@ -118,17 +97,38 @@
     <Filter Include="Pt-Soap">
       <UniqueIdentifier>{73e4d538-542a-4e9f-a26c-977f7cfc6e49}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\Sources\Demo">
+    <Filter Include="Pt-Hmi\cocoa">
+      <UniqueIdentifier>{2b77b6e8-aec1-4d99-9506-f20e6b81d876}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\Demo">
       <UniqueIdentifier>{4dbd9367-f6cd-4e33-b664-181985cda5bd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\Sources\Demo\Widget">
+    <Filter Include="Pt-Hmi\Demo\Widget">
       <UniqueIdentifier>{68bb16de-08be-4c27-89b4-e0e221a37985}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\Sources\Demo\Scribble">
+    <Filter Include="Pt-Hmi\Demo\Scribble">
       <UniqueIdentifier>{c8eedc7c-276c-4430-bf43-98f83e9fe051}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\Sources\winrt">
+    <Filter Include="Pt-Hmi\gdi">
+      <UniqueIdentifier>{947e0ceb-dc3d-4f25-b8ff-f29aad8e7be3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\winrt">
       <UniqueIdentifier>{0190cd64-c6e5-4b5d-ab0e-7d4e1a17e9c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\x11">
+      <UniqueIdentifier>{54475eb3-ab9c-4ce4-a5c2-c96fc66beace}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Forms">
+      <UniqueIdentifier>{c9b2455a-3181-4ba9-bc09-6c90392c0aad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Forms\demo">
+      <UniqueIdentifier>{cc68efba-3d4b-427a-9bbd-72726e1402ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Forms\demo\Scribble">
+      <UniqueIdentifier>{17604a16-d920-4c94-b8fa-27086b929254}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Forms\demo\Widget">
+      <UniqueIdentifier>{5ffb8738-a7de-47a7-921c-c6b942be0aef}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -807,188 +807,11 @@
     <ClInclude Include="..\..\src\Pt-XmlRpc\HttpResponder.h">
       <Filter>Pt-XmlRpc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Api.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Application.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.h">
-      <Filter>Pt-Hmi\Sources\gdi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Controller.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PanelController.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WidgetController.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowController.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Device.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Property.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\DeviceButton.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\DeviceControlDial.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\OutputDevice.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\GfxModel.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Model.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PanelModel.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WidgetModel.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowModel.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PanelRenderer.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WidgetRenderer.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowRenderer.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\Api.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\Button.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\CheckBox.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\ComboBox.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\ContextMenu.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\DockAreaWidget.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\DockWidget.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\FlowLayout.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\GroupBox.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\Label.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\ListBox.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\ListView.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\MenuItem.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\MenuStrip.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\Panel.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\ProgressBar.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\PropertyView.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\RadioButton.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\ScrollBar.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\SplitContainer.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\StatusBar.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\TabControl.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\Table.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\TextBox.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\ToolBar.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\Tree.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\Widget.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\Window.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Renderer.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\GfxController.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h">
-      <Filter>Pt-Hmi\Headers</Filter>
+      <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\CursorImpl.h">
-      <Filter>Pt-Hmi\Sources\gdi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PointingDevice.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PointingEvent.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\LabelController.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\LabelRenderer.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\LabelModel.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ButtonController.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ButtonModel.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ButtonRenderer.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h">
-      <Filter>Pt-Hmi\Headers</Filter>
+      <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Ssl\Certificate.h">
       <Filter>Pt-Ssl</Filter>
@@ -1029,53 +852,32 @@
     <ClInclude Include="..\..\src\Pt-Ssl\tests\Pkcs12Data.h">
       <Filter>Pt-Ssl\tests</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\DialogController.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\DialogModel.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\DialogRenderer.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Desktop\Dialog.h">
-      <Filter>Pt-Hmi\Headers\Desktop</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.h">
-      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+      <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.h">
-      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+      <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WidgetView.h">
-      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+      <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\x11\ApplicationImpl.h">
-      <Filter>Pt-Hmi\Sources\x11</Filter>
+      <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\x11\CursorImpl.h">
-      <Filter>Pt-Hmi\Sources\x11</Filter>
+      <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\x11\KeyHandler.h">
-      <Filter>Pt-Hmi\Sources\x11</Filter>
+      <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\x11\X11Fd.h">
-      <Filter>Pt-Hmi\Sources\x11</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\GfxOutputDevice.h">
-      <Filter>Pt-Hmi\Headers</Filter>
+      <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\GfxOutputDeviceImpl.h">
-      <Filter>Pt-Hmi\Sources\cocoa</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\GfxOutputDeviceImpl.h">
-      <Filter>Pt-Hmi\Sources\gdi</Filter>
+      <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\x11\GfxOutputDeviceImpl.h">
-      <Filter>Pt-Hmi\Sources\x11</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PropertyBase.h">
-      <Filter>Pt-Hmi\Headers</Filter>
+      <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\Dash.h">
       <Filter>Pt-Gfx</Filter>
@@ -1282,13 +1084,13 @@
       <Filter>Pt-Net\win32</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.h">
-      <Filter>Pt-Hmi\Sources\winrt</Filter>
+      <Filter>Pt-Hmi\winrt</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\CursorImpl.h">
-      <Filter>Pt-Hmi\Sources\winrt</Filter>
+      <Filter>Pt-Hmi\winrt</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.h">
-      <Filter>Pt-Hmi\Sources\winrt</Filter>
+      <Filter>Pt-Hmi\winrt</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Pack.h">
       <Filter>Pt</Filter>
@@ -1305,20 +1107,17 @@
     <ClInclude Include="..\..\src\Pt-Ssl\nossl\ContextImpl.h">
       <Filter>Pt-Ssl\nossl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.h">
-      <Filter>Pt-Hmi\Sources\gdi</Filter>
+      <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PainterImpl.h">
-      <Filter>Pt-Hmi\Sources\gdi</Filter>
+      <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.h">
-      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+      <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.h">
-      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+      <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Qt\Api.h">
       <Filter>Pt-Qt</Filter>
@@ -1398,41 +1197,26 @@
     <ClInclude Include="..\..\include\Pt\Soap\ServiceDeclaration.h">
       <Filter>Pt-Soap</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ImagePaintSurface.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\NativePaintSurface.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ImagePainter.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\NativePainter.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
-      <Filter>Pt-Hmi\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\Demo\Widget\AtesionIcon.h">
-      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+      <Filter>Pt-Hmi\Demo\Widget</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\Demo\Widget\DemoImage.h">
-      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+      <Filter>Pt-Hmi\Demo\Widget</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\Demo\Widget\Dialog1.h">
-      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+      <Filter>Pt-Hmi\Demo\Widget</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\Demo\Widget\Dialog2.h">
-      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+      <Filter>Pt-Hmi\Demo\Widget</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\Demo\Widget\MainWindow.h">
-      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+      <Filter>Pt-Hmi\Demo\Widget</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\Demo\Scribble\AtesionIcon.h">
-      <Filter>Pt-Hmi\Sources\Demo\Scribble</Filter>
+      <Filter>Pt-Hmi\Demo\Scribble</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\Demo\Scribble\MainWindow.h">
-      <Filter>Pt-Hmi\Sources\Demo\Scribble</Filter>
+      <Filter>Pt-Hmi\Demo\Scribble</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Qt\MainLoop.h">
       <Filter>Pt-Qt</Filter>
@@ -1449,8 +1233,236 @@
     <ClInclude Include="..\..\include\Pt\System\Path.h">
       <Filter>Pt-System</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Api.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowRenderer.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Application.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ButtonController.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ButtonModel.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ButtonRenderer.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Controller.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Device.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\DeviceButton.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\DeviceControlDial.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\DialogController.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\DialogModel.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\DialogRenderer.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Event.h">
-      <Filter>Pt-Hmi\Headers</Filter>
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ImagePainter.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ImagePaintSurface.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\LabelController.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\LabelModel.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\LabelRenderer.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Model.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\NativePainter.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\NativePaintSurface.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\OutputDevice.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PanelController.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PanelModel.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PanelRenderer.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PointingDevice.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PointingEvent.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Property.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PropertyBase.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowController.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowModel.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\Api.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\Button.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\CheckBox.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\ComboBox.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\ContextMenu.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\Dialog.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\DockAreaWidget.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\DockWidget.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\FlowLayout.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\GroupBox.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\Label.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\ListBox.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\ListView.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\MenuItem.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\MenuStrip.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\Panel.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\ProgressBar.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\PropertyView.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\RadioButton.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\ScrollBar.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\SplitContainer.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\StatusBar.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\TabControl.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\Table.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\TextBox.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\ToolBar.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\Tree.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\Widget.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Forms\Window.h">
+      <Filter>Pt-Forms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Forms\demo\Widget\AtesionIcon.h">
+      <Filter>Pt-Forms\demo\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Forms\demo\Widget\DemoImage.h">
+      <Filter>Pt-Forms\demo\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Forms\demo\Widget\Dialog1.h">
+      <Filter>Pt-Forms\demo\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Forms\demo\Widget\Dialog2.h">
+      <Filter>Pt-Forms\demo\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Forms\demo\Widget\MainWindow.h">
+      <Filter>Pt-Forms\demo\Widget</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Forms\demo\Scribble\AtesionIcon.h">
+      <Filter>Pt-Forms\demo\Scribble</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Forms\demo\Scribble\MainWindow.h">
+      <Filter>Pt-Forms\demo\Scribble</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\View.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WidgetController.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WidgetModel.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WidgetRenderer.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\ViewImpl.h">
+      <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1543,23 +1555,17 @@
     <None Include="..\..\src\Pt-XmlRpc\tests\Jamfile">
       <Filter>Pt-XmlRpc\tests</Filter>
     </None>
-    <None Include="..\..\src\Pt-Hmi\Jamfile">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Hmi\Desktop\Jamfile">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </None>
     <None Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.mm">
-      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+      <Filter>Pt-Hmi\cocoa</Filter>
     </None>
     <None Include="..\..\src\Pt-Hmi\cocoa\WidgetView.mm">
-      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+      <Filter>Pt-Hmi\cocoa</Filter>
     </None>
     <None Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.mm">
-      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+      <Filter>Pt-Hmi\cocoa</Filter>
     </None>
     <None Include="..\..\src\Pt-Hmi\cocoa\GfxOutputDeviceImpl.mm">
-      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+      <Filter>Pt-Hmi\cocoa</Filter>
     </None>
     <None Include="..\..\src\Pt-Gfx\Jamfile">
       <Filter>Pt-Gfx</Filter>
@@ -1577,10 +1583,10 @@
       <Filter>Pt-Gfx</Filter>
     </None>
     <None Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.mm">
-      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+      <Filter>Pt-Hmi\cocoa</Filter>
     </None>
     <None Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.mm">
-      <Filter>Pt-Hmi\Sources\cocoa</Filter>
+      <Filter>Pt-Hmi\cocoa</Filter>
     </None>
     <None Include="..\..\src\Pt-Qt\Jamfile">
       <Filter>Pt-Qt</Filter>
@@ -1604,10 +1610,22 @@
       <Filter>Pt-Soap</Filter>
     </None>
     <None Include="..\..\src\Pt-Hmi\Demo\Widget\Jamfile">
-      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+      <Filter>Pt-Hmi\Demo\Widget</Filter>
     </None>
     <None Include="..\..\src\Pt-Hmi\Demo\Scribble\Jamfile">
-      <Filter>Pt-Hmi\Sources\Demo\Scribble</Filter>
+      <Filter>Pt-Hmi\Demo\Scribble</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Hmi\Jamfile">
+      <Filter>Pt-Hmi</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Forms\Jamfile">
+      <Filter>Pt-Forms</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Forms\demo\Widget\Jamfile">
+      <Filter>Pt-Forms\demo\Widget</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Forms\demo\Scribble\Jamfile">
+      <Filter>Pt-Forms\demo\Scribble</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -2220,164 +2238,11 @@
     <ClCompile Include="..\..\src\Pt-XmlRpc\HttpService.cpp">
       <Filter>Pt-XmlRpc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.cpp">
-      <Filter>Pt-Hmi\Sources\gdi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\GfxModel.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\PanelController.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\PanelModel.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\PanelRenderer.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\WidgetController.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\WidgetModel.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\WidgetRenderer.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\WindowController.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\WindowModel.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\WindowRenderer.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Device.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Button.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\CheckBox.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\ComboBox.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\ContextMenu.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\DockAreaWidget.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\DockWidget.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\FlowLayout.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\GroupBox.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Label.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\ListBox.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\ListView.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\MenuItem.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\MenuStrip.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Panel.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\ProgressBar.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\PropertyView.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\RadioButton.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\ScrollBar.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\SplitContainer.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\StatusBar.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\TabControl.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Table.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\TextBox.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\ToolBar.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Tree.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Widget.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Window.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Controller.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\GfxController.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
+      <Filter>Pt-Hmi\gdi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\CursorImpl.cpp">
-      <Filter>Pt-Hmi\Sources\gdi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\LabelController.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\LabelRenderer.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\PointingEvent.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\LabelModel.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\ButtonController.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\ButtonModel.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\ButtonRenderer.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\KeyEvent.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Model.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
+      <Filter>Pt-Hmi\gdi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\Certificate.cpp">
       <Filter>Pt-Ssl</Filter>
@@ -2412,41 +2277,20 @@
     <ClCompile Include="..\..\src\Pt-Ssl\tests\SslClientDemo.cpp">
       <Filter>Pt-Ssl\tests</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\DialogController.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\DialogModel.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\DialogRenderer.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Desktop\Dialog.cpp">
-      <Filter>Pt-Hmi\Sources\Desktop</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\ApplicationImpl.cpp">
-      <Filter>Pt-Hmi\Sources\x11</Filter>
+      <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\CursorImpl.cpp">
-      <Filter>Pt-Hmi\Sources\x11</Filter>
+      <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\KeyHandler.cpp">
-      <Filter>Pt-Hmi\Sources\x11</Filter>
+      <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\X11Fd.cpp">
-      <Filter>Pt-Hmi\Sources\x11</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\GfxOutputDevice.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\GfxOutputDeviceImpl.cpp">
-      <Filter>Pt-Hmi\Sources\gdi</Filter>
+      <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\GfxOutputDeviceImpl.cpp">
-      <Filter>Pt-Hmi\Sources\x11</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\PropertyBase.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
+      <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\ARgb8888Color.cpp">
       <Filter>Pt-Gfx</Filter>
@@ -2590,13 +2434,13 @@
       <Filter>Pt-Net\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.cpp">
-      <Filter>Pt-Hmi\Sources\winrt</Filter>
+      <Filter>Pt-Hmi\winrt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\CursorImpl.cpp">
-      <Filter>Pt-Hmi\Sources\winrt</Filter>
+      <Filter>Pt-Hmi\winrt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.cpp">
-      <Filter>Pt-Hmi\Sources\winrt</Filter>
+      <Filter>Pt-Hmi\winrt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\nossl\CertificateStoreImpl.cpp">
       <Filter>Pt-Ssl\nossl</Filter>
@@ -2608,10 +2452,10 @@
       <Filter>Pt-Ssl\nossl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.cpp">
-      <Filter>Pt-Hmi\Sources\gdi</Filter>
+      <Filter>Pt-Hmi\gdi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PainterImpl.cpp">
-      <Filter>Pt-Hmi\Sources\gdi</Filter>
+      <Filter>Pt-Hmi\gdi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Qt\Application.cpp">
       <Filter>Pt-Qt</Filter>
@@ -2673,35 +2517,23 @@
     <ClCompile Include="..\..\src\Pt-Soap\ServiceDeclaration.cpp">
       <Filter>Pt-Soap</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\NativePainter.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\NativePaintSurface.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\ImagePainter.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\ImagePaintSurface.cpp">
-      <Filter>Pt-Hmi\Sources</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Demo\Widget\Dialog1.cpp">
-      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+      <Filter>Pt-Hmi\Demo\Widget</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Demo\Widget\Dialog2.cpp">
-      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+      <Filter>Pt-Hmi\Demo\Widget</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Demo\Widget\MainWindow.cpp">
-      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+      <Filter>Pt-Hmi\Demo\Widget</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Demo\Scribble\MainWindow.cpp">
-      <Filter>Pt-Hmi\Sources\Demo\Scribble</Filter>
+      <Filter>Pt-Hmi\Demo\Scribble</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Demo\Widget\Main.cpp">
-      <Filter>Pt-Hmi\Sources\Demo\Widget</Filter>
+      <Filter>Pt-Hmi\Demo\Widget</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Demo\Scribble\Main.cpp">
-      <Filter>Pt-Hmi\Sources\Demo\Scribble</Filter>
+      <Filter>Pt-Hmi\Demo\Scribble</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Qt\MainLoop.cpp">
       <Filter>Pt-Qt</Filter>
@@ -2717,6 +2549,204 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-System\tests\PathTest.cpp">
       <Filter>Pt-System\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\WindowRenderer.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ButtonController.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ButtonModel.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ButtonRenderer.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Controller.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Device.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\DialogController.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\DialogModel.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\DialogRenderer.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ImagePainter.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ImagePaintSurface.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\KeyEvent.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\LabelController.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\LabelModel.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\LabelRenderer.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Model.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\NativePainter.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\NativePaintSurface.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\PanelController.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\PanelModel.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\PanelRenderer.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\PointingEvent.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\PropertyBase.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\WindowController.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\WindowModel.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\Button.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\CheckBox.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\ComboBox.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\ContextMenu.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\Dialog.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\DockAreaWidget.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\DockWidget.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\FlowLayout.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\GroupBox.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\Label.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\ListBox.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\ListView.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\MenuItem.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\MenuStrip.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\Panel.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\ProgressBar.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\PropertyView.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\RadioButton.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\ScrollBar.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\SplitContainer.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\StatusBar.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\TabControl.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\Table.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\TextBox.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\ToolBar.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\Tree.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\Widget.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\Window.cpp">
+      <Filter>Pt-Forms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\demo\Widget\Dialog1.cpp">
+      <Filter>Pt-Forms\demo\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\demo\Widget\Dialog2.cpp">
+      <Filter>Pt-Forms\demo\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\demo\Widget\Main.cpp">
+      <Filter>Pt-Forms\demo\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\demo\Widget\MainWindow.cpp">
+      <Filter>Pt-Forms\demo\Widget</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\demo\Scribble\Main.cpp">
+      <Filter>Pt-Forms\demo\Scribble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Forms\demo\Scribble\MainWindow.cpp">
+      <Filter>Pt-Forms\demo\Scribble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\View.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\WidgetController.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\WidgetModel.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\WidgetRenderer.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\gdi\ViewImpl.cpp">
+      <Filter>Pt-Hmi\gdi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

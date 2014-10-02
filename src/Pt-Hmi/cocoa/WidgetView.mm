@@ -32,7 +32,7 @@
 
 @implementation WidgetView
 
-- (WidgetView*) init : (Pt::Hmi::GfxOutputDeviceImpl*) device
+- (WidgetView*) init : (Pt::Hmi::ViewImpl*) device
 {
     self = [super init];
     _outDevice = device;

@@ -28,13 +28,14 @@
 #ifndef Pt_Hmi_Model_Window_h
 #define Pt_Hmi_Model_Window_h
 
-#include <Pt/Hmi/GfxModel.h>
+#include <Pt/Hmi/PanelModel.h>
+#include <Pt/Hmi/WidgetModel.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Gfx.h>
-#include <Pt/Hmi/PanelModel.h>
+
 
 namespace Pt{
 namespace Hmi{
@@ -74,7 +75,7 @@ namespace WindowStateType
 	};
 }
 
-class PT_HMI_API WindowModel : public GfxModel
+class PT_HMI_API WindowModel : public WidgetModel
 {
 public:
 	WindowModel();

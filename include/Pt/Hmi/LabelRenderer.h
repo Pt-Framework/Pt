@@ -28,7 +28,6 @@
 #define Pt_Hmi_LabelRenderer_H
 
 #include <Pt/Hmi/PanelRenderer.h>
-#include <Pt/Hmi/GfxModel.h>
 
 namespace Pt{
 namespace Hmi{
@@ -39,7 +38,7 @@ public:
 	LabelRenderer();
 	virtual ~LabelRenderer();
 
-	virtual void render(Pt::Hmi::GfxModel* m);
+	virtual void render(Pt::Hmi::WidgetModel* m);
 
 private:	
 

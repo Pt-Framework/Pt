@@ -31,7 +31,7 @@
 #include <Pt/Hmi/ButtonController.h>
 
 namespace Pt{
-namespace Hmi{
+namespace Forms{
 namespace Demo{
 namespace Widget{
 
@@ -50,14 +50,14 @@ void Dialog2::init()
 	setSize(Pt::Gfx::SizeF(450,200));
 	setPosition(Pt::Gfx::PointF(400,400));
 	dialogModel().Caption.set("Pt-Hmi-demo");
-	dialogModel().WindowStartPostion.set(WindowStartPositionType::CenterParent);
+	dialogModel().WindowStartPostion.set(Hmi::WindowStartPositionType::CenterParent);
 	dialogModel().ShowMaximizeButton.set(false);
 	dialogModel().ShowMinimizeButton.set(false);
 	dialogModel().ShowSysMenu.set(false);
 
 	_panel.setPosition(Pt::Gfx::PointF(25,15)); 
 	_panel.setSize(Pt::Gfx::SizeF(385,100));
-	_panel.panelModel().BorderStyle.set(BorderStyleType::Single);
+	_panel.panelModel().BorderStyle.set(Hmi::BorderStyleType::Single);
 	_panel.panelModel().BorderRoundEdge.set(true);
 	addChild(&_panel);
 

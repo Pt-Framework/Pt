@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef Pt_Hmi_GfxOutputDeviceImpl_h
-#define Pt_Hmi_GfxOutputDeviceImpl_h
+#ifndef Pt_Hmi_ViewImpl_h
+#define Pt_Hmi_ViewImpl_h
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -43,11 +43,11 @@
 namespace Pt{
 namespace Hmi{
 
-class GfxOutputDeviceImpl :public Pt::Connectable
+class ViewImpl :public Pt::Connectable
 {
 public:
-    GfxOutputDeviceImpl();
-    virtual ~GfxOutputDeviceImpl();
+    ViewImpl();
+    virtual ~ViewImpl();
 
 	void output(Pt::Hmi::Model* model);
 

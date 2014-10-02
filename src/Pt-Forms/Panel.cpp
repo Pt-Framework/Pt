@@ -1,11 +1,10 @@
-#include <Pt/Hmi/Desktop/Panel.h>
+#include <Pt/Forms/Panel.h>
 #include <Pt/Hmi/PanelController.h>
 #include <Pt/Hmi/PanelModel.h>
 #include <Pt/Hmi/PanelRenderer.h>
 
-namespace Pt{
-namespace Hmi{
-namespace Desktop{
+namespace Pt { 
+namespace Forms {
 
 Panel::Panel()
 : _defController(_defModel,_defRenderer )
@@ -13,7 +12,7 @@ Panel::Panel()
 {
 	_defModel.ForeColor.set(Pt::Gfx::ARgbColor(160,160,160));
 	_defModel.BorderWidth.set(1);
-	_defModel.BorderStyle.set(BorderStyleType::Widget);
+	_defModel.BorderStyle.set(Hmi::BorderStyleType::Widget);
 
 	setPanelController(_defController);
 }
@@ -67,4 +66,4 @@ Panel::~Panel()
 {
 }
  
-}}}
+}}

@@ -1,9 +1,9 @@
 //Generated with Atesion GmbH, BinToHeader tool. Generation time: 11.09.2013 19:32:52
-#ifndef Pt_Hmi_DemoImage_H
-#define Pt_Hmi_DemoImage_H
+#ifndef Pt_Forms_DemoImage_H
+#define Pt_Forms_DemoImage_H
 
 namespace Pt{
-namespace Hmi{
+namespace Forms{
 namespace DemoImage{
 
 const unsigned int imageSize = 439919;

@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Hmi/WindowController.h>
 #include <Pt/Hmi/WidgetController.h>
-#include <Pt/Hmi/GfxOutputDevice.h>
+#include <Pt/Hmi/View.h>
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/WindowRenderer.h>
 #include <Pt/Hmi/Application.h>
@@ -36,8 +36,8 @@
 namespace Pt{
 namespace Hmi{
 
-WindowController::WindowController(WindowModel& m, WindowRenderer& r,  GfxOutputDevice* out)
-: GfxController(m, r)
+WindowController::WindowController(WindowModel& m, WindowRenderer& r,  View* out)
+: WidgetController(m, r)
 , _windowParent(0)
 {	
 	if( out != 0)
@@ -130,7 +130,7 @@ void WindowController::onPointerInput(const PointingEvent& ev)
 
 void WindowController::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 {
-	GfxModel& m = windowModel();
+	WidgetModel& m = windowModel();
 	
 	m.paintSurface()->resize(m.Size.get());	
 	
@@ -142,7 +142,7 @@ void WindowController::onModelChanged(bool created,const Model& model)
 {
 	if( created)
 	{
-		GfxModel& m = windowModel();
+		WidgetModel& m = windowModel();
 
 		m.Size.Changed += Pt::slot(*this, &WindowController::onSizeChanged);					
 		m.Size.Changed.send(m.Size);	

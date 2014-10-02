@@ -1,7 +1,6 @@
-
 #include <Pt/Hmi/ButtonRenderer.h>
 #include <Pt/Hmi/ButtonModel.h>
-#include <Pt/Hmi/GfxController.h>
+#include <Pt/Hmi/WidgetController.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/ImagePainter.h>
@@ -17,7 +16,7 @@ ButtonRenderer::~ButtonRenderer()
 {
 }
 
-void ButtonRenderer::render(Pt::Hmi::GfxModel* m)
+void ButtonRenderer::render(Pt::Hmi::WidgetModel* m)
 {	
 	ButtonModel* model = dynamic_cast<ButtonModel*>(m);
 
