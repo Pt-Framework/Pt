@@ -29,7 +29,6 @@
 #define Pt_Hmi_Controller_H
 
 #include <Pt/Connectable.h>
-#include <Pt/Hmi/InputDevice.h>
 #include <Pt/Hmi/OutputDevice.h>
 #include <Pt/Hmi/Model.h>
 #include <Pt/Hmi/Renderer.h>
@@ -58,18 +57,9 @@ public:
 		return _model;
 	}
 
-	void addInputDevice(InputDevice* device);
-
-	void removeInputDevice(InputDevice* device);
-
 	void addOutputDevice(OutputDevice* device);
 
 	void removeOutputDevice(OutputDevice* device);
-
-	inline const std::vector<InputDevice*>& inputDevices() const
-	{
-		return _inputDevices;
-	}
 
 	inline const std::vector<OutputDevice*>& outputDevices() const
 	{
@@ -102,27 +92,25 @@ public:
 
 	inline void notifyModelChanged(bool created)
 	{
-		onModelChanged(created,0);
+		onModelChanged(created, model());
 	}
 
-	inline void devicePointerInput(Controller* c, const PointingEvent& ev)
+	inline void devicePointerInput(const PointingEvent& ev)
 	{
-		if( this != c)
+		if( this != ev.controller())
 			return;
 
 		onPointerInput(ev);
 	}
-
 
 	inline void notifyPointerInput(const PointingEvent& ev)
 	{
 		onPointerInput(ev);
 	}
 
-	inline void deviceKeyInput(Controller* c, const KeyEvent& ev)
+	inline void deviceKeyInput(const KeyEvent& ev)
 	{
-
-		if( this != c)
+		if( this != ev.controller())
 			return;
 
 		onKeyInput(ev);
@@ -143,8 +131,7 @@ public:
 	{
 		return onMoveFocusPrev();
 	}
-	
-	
+		
 	void output();		
 
 protected:		
@@ -159,7 +146,7 @@ protected:
 		return false;
 	}
 
-	virtual void onModelChanged(bool created, const PropertyBase* prop)
+	virtual void onModelChanged(bool created, const Model& model)
 	{ }
 	
 	virtual void onPointerInput(const PointingEvent& ev)
@@ -170,13 +157,12 @@ protected:
 
 	 
 private:
-	void modelChanged(const PropertyBase* prop)
+	void modelChanged(const Model& model)
 	{
-		onModelChanged(false,prop);
+		onModelChanged(false, model);
 	}
 
 private:
-	std::vector<InputDevice*>	_inputDevices;
 	std::vector<OutputDevice*>	_outputDevices;
 	std::vector<Controller*>    _children;
 	Controller*					_parent;

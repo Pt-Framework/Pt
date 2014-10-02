@@ -32,39 +32,20 @@ namespace Hmi{
 
 Model::Model()
 : _properties()
-, DefinePropertyInitMacro(Enable,true)
-, DefinePropertyInitMacro(Tag,0)
-, _ctrl(0)
+, PT_HMI_INIT_PROPERTY_VALUE(Enabled,true)
 { 
-	registerProperty(Enable);
+	registerProperty(Enabled);
 }
 
 Model::~Model()
-{ 
-
+{
 }
 
 void Model::registerProperty(PropertyBase& prop)
 {
-	prop.setParent(this);
+	prop.setModel(this);
     std::pair<std::string,PropertyBase*> pair(prop.name(), &prop);
     _properties.insert(pair);
-}
-    
-const Controller* Model::controller() const
-{
-	return _ctrl;
-}
-
-Controller* Model::controller()
-{
-	return _ctrl;
-}
-
-void Model::setController( Controller* ctrl)
-{
-	_ctrl = ctrl;
-}
-
+}   
 
 }}

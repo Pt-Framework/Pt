@@ -45,7 +45,7 @@ class GfxOutputDeviceImpl : public Pt::Connectable
 public:
 	GfxOutputDeviceImpl();
 	virtual ~GfxOutputDeviceImpl();
-	void output(Pt::Hmi::Model* model);
+	void output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model);
 
 	inline HWND hwnd()
 	{
@@ -75,6 +75,7 @@ protected:
 private:
 	HWND					_hwnd;
 	Pt::Hmi::WindowModel*	_model;
+	Pt::Hmi::WindowController* _controller;
 	Pt::Gfx::Painter*		_nativePainter;
 	KeyEvent				_keyEvent;
 	PointingEvent			_pointerEvent;

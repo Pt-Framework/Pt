@@ -23,9 +23,6 @@ Window::Window()
 	_defModel.Border.set(WindowBorderType::Sizeable);
 	_defModel.Position.set(Pt::Gfx::PointF(20,20));
 	_defModel.Size.set( Pt::Gfx::SizeF(800,800));
-
-	_defController.addInputDevice(&_mouseDevice);
-	_defController.addInputDevice(&_keyboardDevice);
 	_defController.addOutputDevice(&_gfxOutputDevice);
 
 	setWindowController(_defController);

@@ -1,16 +1,8 @@
 #ifndef Pt_Hmi_Desktop_Window_H
 #define Pt_Hmi_Desktop_Window_H
 
-
-
 #include <Pt/Hmi/Desktop/Api.h>
-
 #include <Pt/Hmi/Desktop/Widget.h>
-
-#include <Pt/Hmi/MouseDevice.h>
-
-
-#include <Pt/Hmi/KeyboardDevice.h>
 #include <Pt/Hmi/GfxOutputDevice.h>
 #include <Pt/Hmi/WindowController.h>
 #include <Pt/Hmi/WindowModel.h>
@@ -54,11 +46,7 @@ private:
 	Pt::Hmi::WindowModel		_defModel;
 	Pt::Hmi::WindowRenderer		_defRenderer;
 	Pt::Hmi::WindowController	_defController;
-
-	Pt::Hmi::WindowController*	_currController;
-	
-	Pt::Hmi::MouseDevice        _mouseDevice;
-	Pt::Hmi::KeyboardDevice     _keyboardDevice;
+	Pt::Hmi::WindowController*	_currController;	
 	Pt::Hmi::GfxOutputDevice    _gfxOutputDevice;
 };
  

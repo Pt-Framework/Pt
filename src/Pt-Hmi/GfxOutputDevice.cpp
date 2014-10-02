@@ -45,9 +45,9 @@ GfxOutputDeviceImpl* GfxOutputDevice::impl()
 	return _impl;
 }
 
-void GfxOutputDevice::output(Pt::Hmi::Model* model)
+void GfxOutputDevice::output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model)
 {	
-	_impl->output(model);
+	_impl->output(controller,model);
 }
 
 }}

@@ -42,43 +42,41 @@ class Controller;
 
 class PT_HMI_API Model : public Pt::Connectable
 {
-
-protected:
-	Model();
-	virtual ~Model();
-    void registerProperty(PropertyBase& prop);
-
-private:
-	Controller* _ctrl;
-    std::map<std::string, PropertyBase*> _properties;
-    
 public:
-	Property<bool>			Enable;
-	Property<void*>			Tag;  
-	Pt::Signal<const PropertyBase*>	Changed;
-
-public:
-	const Controller* controller() const;
-	Controller* controller();
-	void setController( Controller* ctrl);
-       
     std::map<std::string, PropertyBase*>& properties()
     {
         return _properties;
     }
-    
+
     const std::string& name() const
     {
         return _name;
     }
-    
+
     void setName(const std::string& n)
     {
         _name = n;
     }
-    
-private:
+
+public:
+	Property<bool> Enabled;		
+
+	Pt::Signal<const Model&>& changed()
+	{
+		return _changed;
+	}
+
+protected:
+	Model();
+
+	virtual ~Model();
+
+    void registerProperty(PropertyBase& prop);
+
+private:	
+    std::map<std::string, PropertyBase*> _properties;
     std::string _name;
+	Pt::Signal<const Model&> _changed;
 };
 
 }}

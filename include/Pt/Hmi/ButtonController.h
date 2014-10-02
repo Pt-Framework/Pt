@@ -64,12 +64,12 @@ protected:
 	virtual void onPressedAction();
 	virtual void onDoublePressedAction();
 	virtual void onCheckedAction(bool checked);
-	virtual void onModelChanged(bool created, const PropertyBase* prop);
+	virtual void onModelChanged(bool created, const Model& model);
 	virtual void onMnemonic();
 private:
 	virtual void onPointerInput(const PointingEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);
-	void onButtonStateChanged(const void* sender, const PropertyBase& prop);
+	void onButtonStateChanged( const Property<DeviceButton::State>& prop);
 	void onDoublePressedTimeout();
 
 private:	

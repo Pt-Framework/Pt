@@ -3,14 +3,15 @@
 #include <Pt/Utf8Codec.h>
 #include <Pt/String.h>
 #include <sstream>
-
+#include <Pt/Hmi/Controller.h>
 #include <new>
 
 namespace Pt {
 namespace Hmi {
 
-KeyEvent::KeyEvent()
-: _unicode(-1)
+KeyEvent::KeyEvent(Controller* controller)
+: Event(controller)
+, _unicode(-1)
 , _state(KeyNone)
 , _alt(false)
 , _shift(false)
@@ -18,12 +19,6 @@ KeyEvent::KeyEvent()
 {
 }
 
-KeyEvent::KeyEvent(const KeyEvent& copy)
-: _unicode(copy._unicode)
-, _state(copy._state)
-, _alt(copy._alt)
-{
-}
 
 KeyEvent::~KeyEvent()
 {
@@ -72,13 +67,6 @@ std::string KeyEvent::shortCutKey() const
 
 	shortKey += toUTF8String();
 	return shortKey; 			
-}
-
-void KeyEvent::operator=(const KeyEvent& copy)
-{
-	_unicode = copy._unicode;
-	_state = copy._state;
-	_alt = copy._alt;
 }
 
 }}

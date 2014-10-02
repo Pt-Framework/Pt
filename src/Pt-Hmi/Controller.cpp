@@ -26,8 +26,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include <Pt/Hmi/WidgetController.h>
-#include <Pt/Hmi/PointingDevice.h>
-#include <Pt/Hmi/KeyboardDevice.h>
 #include <Pt/Hmi/WindowController.h>
 
 namespace Pt{
@@ -37,44 +35,11 @@ Controller::Controller(Model& model)
 : _model(model)
 , _parent(0)
 { 
-	_model.setController(this);
-	_model.Changed += Pt::slot(*this, &Controller::modelChanged);	
+	_model.changed() += Pt::slot(*this, &Controller::modelChanged);	
 }
 
 Controller::~Controller()
 { 
-}
-
-void Controller::addInputDevice(InputDevice* device)
-{
-   //Pointer category
-	PointingDevice* pointerDev = dynamic_cast<PointingDevice*>(device);
-		
-	if( pointerDev != 0)
-		pointerDev->Event += Pt::slot(*this, &Controller::devicePointerInput);
-
-	//Keyboard category
-	KeyboardDevice* keyboardDevice  = dynamic_cast<KeyboardDevice*>(device);
-
-	if(keyboardDevice != 0)
-		keyboardDevice->Event += Pt::slot(*this, &Controller::deviceKeyInput);
-		
-	//Other ToDo:
-
-	//Register device
-	_inputDevices.push_back(device);
-}
-
-void Controller::removeInputDevice(InputDevice* device)
-{
-	for(size_t i = 0; i < _inputDevices.size(); ++i)
-	{
-		if(_inputDevices[i] != device)
-			continue;
-		
-		_inputDevices.erase(_inputDevices.begin() + i);
-		return;
-	}
 }
 
 void Controller::addOutputDevice(OutputDevice* device)
@@ -116,7 +81,7 @@ void Controller::removeChild(Controller* base)
 void Controller::output()
 {	
 	for( size_t i = 0; i < _outputDevices.size(); ++i)
-		_outputDevices[i]->output(&model());
+		_outputDevices[i]->output(this, &model());
 }
 	
 }}

@@ -43,8 +43,7 @@ public:
 	GfxOutputDevice();
 	virtual ~GfxOutputDevice();	
 
-	virtual void output(Pt::Hmi::Model* model);
-
+	virtual void output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model);
 
 	GfxOutputDeviceImpl* impl();
 		

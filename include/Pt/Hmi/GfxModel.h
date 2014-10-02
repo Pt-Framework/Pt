@@ -143,8 +143,7 @@ protected:
 	PaintSurface* _paintSurface;
 
 private:
-	void onFocusChanged(const void* sender, const PropertyBase& prop);
-	void onPainterTypeChanged(const void* sender, const PropertyBase& prop);
+	void onPainterTypeChanged(const Property<PainterType::Type>& prop);
 };
 
 }}

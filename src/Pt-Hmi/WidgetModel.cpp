@@ -4,8 +4,8 @@ namespace Pt{
 namespace Hmi{
 
 WidgetModel::WidgetModel()
-: DefinePropertyInitMacro(Caption,"")
-, DefinePropertyInitMacro(UseMnemonic,true)
+: PT_HMI_INIT_PROPERTY_VALUE(Caption,"")
+, PT_HMI_INIT_PROPERTY_VALUE(UseMnemonic,true)
 {
 	registerProperty(Caption);
 	registerProperty(UseMnemonic);

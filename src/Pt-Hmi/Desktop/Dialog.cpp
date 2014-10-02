@@ -23,8 +23,6 @@ Dialog::Dialog()
 	_defModel.ShowMaximizeButton.set(false);
 	_defModel.ShowSysMenu.set(true);
 
-	_defController.addInputDevice(&_mouseDevice);
-	_defController.addInputDevice(&_keyboardDevice);
 	_defController.addOutputDevice(&_gfxOutputDevice);
 	setDialogController(_defController);
 }

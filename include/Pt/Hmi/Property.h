@@ -43,16 +43,16 @@ public:
 		_value = value;
 	}
 
-	T& operator=(const T& value)
+	Property<T>& operator=(const T& value)
 	{
 		_value = value;		
-		PropertyChanged.send(parent(), *this);
-         changed();
-		return _value;
+		Changed.send(*this);
+        updateModel();
+		return *this;
 	}
 
 public:	
-	Pt::Signal<const void*, const PropertyBase&> PropertyChanged;
+	Pt::Signal< const Property<T>&> Changed;
 
 private:
 	T _value;

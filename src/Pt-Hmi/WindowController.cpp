@@ -25,34 +25,32 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Hmi/WindowController.h>
-#include <Pt/Hmi/PointingDevice.h>
 #include <Pt/Hmi/WidgetController.h>
 #include <Pt/Hmi/GfxOutputDevice.h>
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/WindowRenderer.h>
+#include <Pt/Hmi/Application.h>
 
 #include <iostream>
 
 namespace Pt{
 namespace Hmi{
 
-WindowController::WindowController(WindowModel& m, WindowRenderer& r,  GfxOutputDevice* out, PointingDevice* in1, InputDevice* in2)
+WindowController::WindowController(WindowModel& m, WindowRenderer& r,  GfxOutputDevice* out)
 : GfxController(m, r)
 , _windowParent(0)
 {	
 	if( out != 0)
 		Controller::addOutputDevice(out);
 
-	if( in1 != 0)
-		Controller::addInputDevice(in1);
-
-	if( in2 != 0)
-		Controller::addInputDevice(in2);
-
 	ClosedAction += Pt::slot(*this, &WindowController::onClosed);
 	ClosingAction += Pt::slot(*this, &WindowController::onClosing);
+	Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
 
-	windowModel().Size.PropertyChanged += Pt::slot(*this, &WindowController::onSizeChanged);
+	app.systemEvent() += Pt::slot(*this, &Controller::devicePointerInput);
+	app.systemEvent() += Pt::slot(*this, &Controller::deviceKeyInput);
+
+	windowModel().Size.Changed += Pt::slot(*this, &WindowController::onSizeChanged);
 }
 
 WindowController::~WindowController()
@@ -85,7 +83,7 @@ void WindowController::onKeyInput(const KeyEvent& ev)
 { 
 	WindowModel& m = windowModel();
 
-	if(!m.Enable.get())
+	if(!m.Enabled.get())
 		return;
 
 	m.KeyStatus = ev;
@@ -120,7 +118,7 @@ void WindowController::onPointerInput(const PointingEvent& ev)
 {
 	WindowModel& m = windowModel();
 
-	if(!m.Enable.get())
+	if(!m.Enabled.get())
 		return;
 	
 	m.Pointer2DStatus = ev;
@@ -130,7 +128,7 @@ void WindowController::onPointerInput(const PointingEvent& ev)
 		children()[i]->notifyPointerInput(ev);	
 }
 
-void WindowController::onSizeChanged(const void* sender, const PropertyBase& prop)
+void WindowController::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 {
 	GfxModel& m = windowModel();
 	
@@ -140,21 +138,20 @@ void WindowController::onSizeChanged(const void* sender, const PropertyBase& pro
 		invalidate();
 }
 
-
-void WindowController::onModelChanged(bool created,const PropertyBase* prop)
+void WindowController::onModelChanged(bool created,const Model& model)
 {
 	if( created)
 	{
 		GfxModel& m = windowModel();
 
-		m.Size.PropertyChanged += Pt::slot(*this, &WindowController::onSizeChanged);					
-		m.Size.PropertyChanged.send(&m, m.Size);	
+		m.Size.Changed += Pt::slot(*this, &WindowController::onSizeChanged);					
+		m.Size.Changed.send(m.Size);	
 	}
 }
 
 void WindowController::onClosing(Controller* sender, bool& canClose)
 {	
-	if(!windowModel().Enable.get())
+	if(!windowModel().Enabled.get())
 		return;
 
 	canClose = windowModel().CanClose.get();

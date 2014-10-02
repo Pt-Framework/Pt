@@ -65,9 +65,8 @@ void GfxOutputDeviceImpl::create()
 
 void GfxOutputDeviceImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 {
-	if(!_model->Enable.get())
+	if(!_model->Enabled.get())
 		return;
-
 
 	BYTE keyboardState[256];
 
@@ -111,8 +110,9 @@ void GfxOutputDeviceImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 		_keyEvent.setUnicode(ucode);
 	}
 
-	Controller* ctrl = _model->controller();
-	Application::instance().keyDeviceEvent().send(ctrl, _keyEvent);
+	_keyEvent.setController(_controller);
+
+	Application::instance().systemEvent().send(_keyEvent);
 }
 
 void GfxOutputDeviceImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wparam, long lparam, bool& handled)
@@ -208,19 +208,17 @@ GfxOutputDeviceImpl::~GfxOutputDeviceImpl()
 
 bool GfxOutputDeviceImpl::onClosing()
 {
-	if(!_model->Enable.get())
+	if(!_model->Enabled.get())
 		return false;
 
 	bool canClose = false;
-	WindowController* controller = (WindowController*)_model->controller();
-	controller->ClosingAction.send(controller,canClose);
+	_controller->ClosingAction.send(_controller,canClose);
 	return canClose;
 }
 
 void GfxOutputDeviceImpl::onClosed()
 {
-	WindowController* controller = (WindowController*)_model->controller();
-	controller->ClosedAction.send(controller);
+	_controller->ClosedAction.send(_controller);
 }
 
 void GfxOutputDeviceImpl::onSize(WPARAM wParam, LPARAM lParam)
@@ -287,9 +285,9 @@ void GfxOutputDeviceImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam
 	_pointerEvent.setX(p.x());
 	_pointerEvent.setY(p.y());	
 
-	Controller* ctrl = _model->controller();
+	_pointerEvent.setController(_controller);	
 
-	Application::instance().pointerEvent().send(ctrl, _pointerEvent);
+	Application::instance().systemEvent().send(_pointerEvent);
 }
 
 void GfxOutputDeviceImpl::setWindowSizeAndPos(bool firstShow)
@@ -321,9 +319,8 @@ void GfxOutputDeviceImpl::setWindowSizeAndPos(bool firstShow)
 			break;
 			
 			case WindowStartPositionType::CenterParent:
-			{
-				WindowController* controller = (WindowController*) _model->controller();
-				WindowController* parent = controller->windowParent();
+			{				
+				WindowController* parent = _controller->windowParent();
 				
 				if( parent == 0)
 				{
@@ -398,7 +395,7 @@ void GfxOutputDeviceImpl::onMove()
 	if(_ignoreSizePositionEvent)
 		return;
 
-	if(!_model->Enable.get())
+	if(!_model->Enabled.get())
 	{
 		setWindowSizeAndPos(false);
 		setWindowProperties();
@@ -572,12 +569,14 @@ void GfxOutputDeviceImpl::destroy()
 	_hwnd = 0;
 }
 
-void GfxOutputDeviceImpl::output(Pt::Hmi::Model* model)
+void GfxOutputDeviceImpl::output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model)
 {
 	bool firstShow =  (_model == 0);
 	_model = dynamic_cast<WindowModel*>(model);
+	_controller = dynamic_cast<WindowController*>(controller);
 
 	assert(_model != 0);
+	assert(_controller != 0);	
 
 	//Check create/destroy
 	if(_model->Closed.get())

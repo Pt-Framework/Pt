@@ -42,12 +42,55 @@ GfxController::GfxController(GfxModel& model, Renderer& renderer)
 : Controller(model)
 , _renderer(renderer)
 {
+	gfxModel().Focused.Changed += Pt::slot(*this, &GfxController::onFocusChanged);
 }
 
 GfxController::~GfxController()
 {
 
 }
+
+void GfxController::onFocusChanged(const Property<bool>& prop)
+{
+	if(gfxModel().Focused.get())
+	{//True
+		Pt::Hmi::Controller* ctrl = this;
+		Pt::Hmi::GfxController* par = (Pt::Hmi::GfxController*) ctrl->widgetParent();
+	
+		if( par != 0)
+		{
+			GfxModel& parMod = par->gfxModel();
+			
+			//All parents set to true.
+			parMod.Focused.set(true);
+			parMod.Focused.Changed.send(parMod.Focused);
+
+			//All sibling set to false. Only me let it true
+			for( size_t i = 0; i < par->children().size(); i++)
+			{
+				GfxController* childCtrl = (GfxController*) par->children()[i];
+
+				GfxModel& childModel = childCtrl->gfxModel();
+				
+				if(&childModel != &gfxModel())
+					childModel.Focused = false;
+			}
+		}
+	}
+	else
+	{//False  
+		Pt::Hmi::GfxController* ctrl = (Pt::Hmi::GfxController*) this;
+		for( size_t i = 0; i < ctrl->children().size(); ++i)
+		{//All childs set to false
+
+			Pt::Hmi::GfxController* childCtrl = (Pt::Hmi::GfxController*) ctrl->children()[i];
+			GfxModel& m = childCtrl->gfxModel();
+			m.Focused.set(false);						
+			m.Focused.Changed.send(m.Focused);
+		}
+	}
+}
+
 
 Pt::Gfx::PointF GfxController::toClient(const Pt::Gfx::PointF& globalPoint)
 {

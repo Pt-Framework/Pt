@@ -27,7 +27,7 @@ void ButtonRenderer::render(Pt::Hmi::GfxModel* m)
 	if(!model->Visible.get())
 		return;	
 	 
-	if(!model->Enable.get())
+	if(!model->Enabled.get())
 	{
 		model->ForeColor.set(Pt::Gfx::ARgbColor(0,100,100,100));
 		LabelRenderer::render(m);

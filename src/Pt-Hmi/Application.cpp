@@ -93,14 +93,9 @@ ApplicationImpl* Application::impl()
 	return _impl;
 }
 
-Pt::Signal<Controller*, const PointingEvent&>& Application::pointerEvent()
+Pt::Signal<const Pt::Event&>& Application::systemEvent()
 {
-	return _impl->pointerEvent();
-}
-
-Pt::Signal<Controller*, const KeyEvent&>& Application::keyDeviceEvent()
-{
-	return _impl->keyDeviceEvent();
+	return _impl->systemEvent();
 }
 
 void Application::nextEvent()

@@ -38,9 +38,9 @@ MouseDevice::~MouseDevice()
 {
 }
 
-void MouseDevice::handleMouseEvent(Controller* source, const PointingEvent& ev)
+void MouseDevice::handleMouseEvent(const PointingEvent& ev)
 {
-	onMouseEvent(source, ev);	
+	onMouseEvent(ev);	
 }
 
 }}

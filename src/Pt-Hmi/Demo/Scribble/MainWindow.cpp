@@ -82,12 +82,12 @@ void MainWindow::init()
 	
 	setPosition(Pt::Gfx::PointF(200,200));
 	setSize(Pt::Gfx::SizeF(800,615));
-	windowModel().Caption.set("This is a Platinum C++ Human Mashine Interface Scribble  ");
+	windowModel().Caption.set("This is a Platinum C++ Human Machine Interface Scribble  ");
 	windowModel().BackColor.set(Pt::Gfx::ARgbColor(0,255,255,255));
     windowModel().WindowState.set(WindowStateType::Normal);
 	windowModel().WindowStartPostion.set(WindowStartPositionType::CenterScreen);
 	windowController().ClosedAction += Pt::slot(*this, &MainWindow::onClosedByWindow);
-	windowModel().Pointer2DStatus.PropertyChanged += Pt::slot(*this, &MainWindow::onPointerChanged);
+	windowModel().Pointer2DStatus.Changed += Pt::slot(*this, &MainWindow::onPointerChanged);
 
 	windowController().Render += Pt::slot(*this, &MainWindow::onRender);
 
@@ -159,10 +159,10 @@ void MainWindow::onBlue()
 	_color = Pt::Gfx::ARgbColor(255,0,0,255);
 }
 
-void MainWindow::onPointerChanged(const void* sender, const PropertyBase& prop)
+void MainWindow::onPointerChanged(const Property<PointingEvent>& prop)
 {
-	Pt::Hmi::PointingEvent& pointerEvent =  windowModel().Pointer2DStatus.get();
-	
+	const PointingEvent& pointerEvent = prop.get();
+
 	if(pointerEvent.buttons()[0].state() == DeviceButton::Pressed && !_painting)
 	{
 		_painting = true;

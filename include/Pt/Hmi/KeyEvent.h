@@ -5,40 +5,28 @@
 #include <Pt/Event.h>
 #include <Pt/Allocator.h>
 #include <Pt/String.h>
+#include <Pt/Hmi/Event.h>
 #include <cstddef>
 #include <string>
 
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API KeyEvent : public Pt::Event
+class PT_HMI_API KeyEvent : public Event
 {
 public:
 
-enum KeyState
-{
-	KeyNone,
-	KeyDown,
-	KeyUp
-};
+	enum KeyState
+	{
+		KeyNone,
+		KeyDown,
+		KeyUp
+	};
 
 public:	
-	KeyEvent();
-	KeyEvent(const KeyEvent& copy);
+	explicit KeyEvent(Controller* controller = 0);
+
 	virtual ~KeyEvent();
-
-	bool operator==(const KeyEvent& cmp)
-	{
-		return false;
-	}
-	
-	bool operator!=(const KeyEvent& cmp)
-	{
-		return true;
-	}
-	
-	void operator=(const KeyEvent& copy);
-
 
 	/**@brief Return the translate key to unicode.
 	* 

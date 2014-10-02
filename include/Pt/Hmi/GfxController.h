@@ -70,7 +70,7 @@ public:
 protected:
 	bool onMoveFocusNext();
 	bool onMoveFocusPrev();	
-		
+	void onFocusChanged(const Property<bool>& prop);
 
 private:
 	bool focusNextChild(int index);

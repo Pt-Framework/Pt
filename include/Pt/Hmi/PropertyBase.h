@@ -4,11 +4,11 @@
 #include <Pt/Signal.h>
 #include <string>
 
+#define PT_HMI_INIT_PROPERTY_VALUE(prop, value) prop(#prop, value)
+#define PT_HMI_INIT_PROPERTY(prop) prop(#prop)
+
 namespace Pt {
 namespace Hmi {
-
-#define DefinePropertyInitMacro(prop,value) prop(#prop,value)
-#define DefinePropertyDefaultMacro(prop) prop(#prop)
 
 class Model;
     
@@ -17,19 +17,19 @@ class PT_HMI_API PropertyBase
 public:
 	PropertyBase(const char* name);
     
-    inline const Model* parent() const
+    inline const Model* model() const
     {
-        return _parent;
+        return _model;
     }
     
-	inline void setParent(Model* model)
+    inline Model* model()
     {
-        _parent = model;
+        return _model;
     }
 
-    inline Model* parent()
+	inline void setModel(Model* model)
     {
-        return _parent;
+        _model = model;
     }
     
     inline const std::string& name() const
@@ -38,10 +38,10 @@ public:
     }
 
 protected:
-    void changed();
+    void updateModel();
     
 private:
-	Model* _parent;
+	Model* _model;
     std::string _name;
 };
 

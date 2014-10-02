@@ -7,6 +7,7 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Singleton.h>
+#include <Pt/Hmi/Event.h>
 
 namespace Pt {
 namespace Hmi {
@@ -44,9 +45,7 @@ public:
 
 	ApplicationImpl* impl();
 
-	//Main application evnts
-	Pt::Signal<Controller*, const PointingEvent&>& pointerEvent();	
-	Pt::Signal<Controller*, const KeyEvent&>& keyDeviceEvent();
+	Pt::Signal<const Pt::Event&>& systemEvent();
 	
 	void nextEvent();
 

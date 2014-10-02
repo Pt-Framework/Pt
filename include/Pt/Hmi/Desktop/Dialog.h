@@ -28,8 +28,6 @@
 
 #include <Pt/Hmi/Desktop/Window.h>
 #include <Pt/Hmi/DialogModel.h>
-#include <Pt/Hmi/MouseDevice.h>
-#include <Pt/Hmi/KeyboardDevice.h>
 #include <Pt/Hmi/GfxOutputDevice.h>
 #include <Pt/Hmi/DialogController.h>
 #include <Pt/Hmi/DialogModel.h>
@@ -76,8 +74,6 @@ private:
 	Pt::Hmi::DialogController	_defController;
 	Pt::Hmi::DialogController*	_currController;
 
-	Pt::Hmi::MouseDevice        _mouseDevice;
-	Pt::Hmi::KeyboardDevice     _keyboardDevice;
 	Pt::Hmi::GfxOutputDevice    _gfxOutputDevice;
 };
  

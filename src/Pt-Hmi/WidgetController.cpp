@@ -1,5 +1,4 @@
 #include <Pt/Hmi/WidgetController.h>
-#include <Pt/Hmi/PointingDevice.h>
 #include <Pt/Hmi/WindowController.h>
 #include <Pt/Hmi/GfxModel.h>
 #include <Pt/Hmi/WidgetModel.h>
@@ -25,7 +24,7 @@ void WidgetController::onKeyInput(const KeyEvent& ev)
 	
 	m.KeyStatus = ev;
 	
-	if(m.UseMnemonic.get() && _mnemonicWidget != 0 && m.Enable.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp)
+	if(m.UseMnemonic.get() && _mnemonicWidget != 0 && m.Enabled.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp)
 	{		
 		std::string mnKey = "";
 

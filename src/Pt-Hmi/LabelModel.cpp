@@ -4,7 +4,7 @@ namespace Pt{
 namespace Hmi{
 
 LabelModel::LabelModel()
-: DefinePropertyInitMacro(AutoSize,true)
+: PT_HMI_INIT_PROPERTY_VALUE(AutoSize,true)
 {
 	Caption.set("Label");
 	ForeColor.set(Pt::Gfx::ARgbColor(0,0,0,0));

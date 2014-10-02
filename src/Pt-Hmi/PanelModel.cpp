@@ -4,9 +4,9 @@ namespace Pt{
 namespace Hmi{
 
 PanelModel::PanelModel()
-: DefinePropertyInitMacro(BorderStyle,BorderStyleType::Single)
-, DefinePropertyInitMacro(BorderWidth,3)
-, DefinePropertyInitMacro(BorderRoundEdge,false)
+: PT_HMI_INIT_PROPERTY_VALUE(BorderStyle,BorderStyleType::Single)
+, PT_HMI_INIT_PROPERTY_VALUE(BorderWidth,3)
+, PT_HMI_INIT_PROPERTY_VALUE(BorderRoundEdge,false)
 {
 	AcceptFocus.set(false);
 	registerProperty(BorderStyle);

@@ -2,33 +2,20 @@
 #define Pt_Hmi_Input_Event2D_h
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Event.h>
-#include <Pt/Allocator.h>
-#include <cstddef>
 #include <Pt/Hmi/DeviceButton.h>
 #include <Pt/Hmi/DeviceControlDial.h>
+#include <Pt/Hmi/Event.h>
 #include <vector>
 
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API PointingEvent : public Pt::Event
+class PT_HMI_API PointingEvent : public Event
 {
-
 public:	
-	PointingEvent();
-	PointingEvent(const PointingEvent& copy);
-	virtual ~PointingEvent();
+	explicit PointingEvent(Controller* controller = 0);	
 
-	bool operator==(const PointingEvent& cmp)
-	{
-		return false;
-	}
-	
-	bool operator!=(const PointingEvent& cmp)
-	{
-		return true;
-	}
+	virtual ~PointingEvent();
 
 	inline void setX(double x)
 	{
@@ -50,12 +37,12 @@ public:
 		return _y;
 	}
 
-	const inline std::vector<DeviceButton>& buttons() const
+	inline const std::vector<DeviceButton>& buttons() const
 	{
 		return _buttons;
 	}
 
-	const inline std::vector<DeviceControlDial>& controlDial() const 
+	inline const std::vector<DeviceControlDial>& controlDial() const 
 	{
 		return _controlDial;
 	}
@@ -68,9 +55,7 @@ public:
 	inline std::vector<DeviceControlDial>& controlDial()
 	{
 		return _controlDial;
-	}
-
-	void operator =(const PointingEvent& copy);
+	}	
 
 protected:
     virtual Pt::Event& onClone(Pt::Allocator& allocator) const;

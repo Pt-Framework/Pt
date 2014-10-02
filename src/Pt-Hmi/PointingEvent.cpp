@@ -1,20 +1,14 @@
 #include <Pt/Hmi/PointingEvent.h>
+#include <Pt/Allocator.h>
 #include <new>
 
 namespace Pt {
 namespace Hmi {
 
-PointingEvent::PointingEvent()
-: _x(0)
+PointingEvent::PointingEvent(Controller* controller)
+: Event(controller)
+, _x(0)
 , _y(0)
-{
-}
-
-PointingEvent::PointingEvent(const PointingEvent& copy)
-: _x(copy._x)
-, _y(copy._y)
-, _buttons(copy._buttons)
-, _controlDial(copy._controlDial)
 {
 }
 
@@ -38,14 +32,6 @@ const std::type_info& PointingEvent::onTypeInfo() const
 {
     static const std::type_info& ti = typeid(PointingEvent);
     return ti;
-}
-
-void PointingEvent::operator=(const PointingEvent& copy)
-{
-	 _x = copy._x;
-	 _y = copy._y;
-	 _buttons = copy._buttons;
-	 _controlDial = copy._controlDial;
 }
 
 }}

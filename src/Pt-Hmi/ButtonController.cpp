@@ -29,7 +29,6 @@
 #include <Pt/Hmi/ButtonController.h>
 #include <Pt/Hmi/ButtonModel.h>
 #include <Pt/Hmi/ButtonRenderer.h>
-#include <Pt/Hmi/PointingDevice.h>
 #include <Pt/Hmi/Application.h>
 
 namespace Pt{
@@ -46,7 +45,7 @@ ButtonController::ButtonController(ButtonModel& model, ButtonRenderer& renderer)
 {
 	_doublePressTimer.timeout() += Pt::slot(*this, &ButtonController::onDoublePressedTimeout);
 	_doublePressTimer.setActive(Pt::Hmi::Application::instance().loop());
-	buttonModel().ButtonState.PropertyChanged += Pt::slot(*this,&ButtonController::onButtonStateChanged);
+	buttonModel().ButtonState.Changed += Pt::slot(*this, &ButtonController::onButtonStateChanged);
 	bindMnemonicToWidget(this);
 }
 
@@ -83,7 +82,7 @@ void ButtonController::onPressedAction()
 
 void ButtonController::onMnemonic()
 {
-	if(!buttonModel().Enable.get())
+	if(!buttonModel().Enabled.get())
 	{
 		LabelController::onMnemonic();
 		return;
@@ -123,15 +122,15 @@ void ButtonController::onDoublePressedAction()
 	_doublePressTimer.stop();
 }
 
-void ButtonController::onModelChanged(bool created, const PropertyBase* prop)
+void ButtonController::onModelChanged(bool created, const Model& model)
 {
-	LabelController::onModelChanged(created, prop);
+	LabelController::onModelChanged(created, model);
 
 	if( created)
-		buttonModel().ButtonState.PropertyChanged += Pt::slot(*this, &ButtonController::onButtonStateChanged);
+		buttonModel().ButtonState.Changed += Pt::slot(*this, &ButtonController::onButtonStateChanged);
 }
 
-void ButtonController::onButtonStateChanged(const void* sender, const PropertyBase& prop)
+void ButtonController::onButtonStateChanged( const Property<DeviceButton::State>& prop )
 {
 	switch( buttonModel().ButtonType.get())
 	{
@@ -162,7 +161,7 @@ void ButtonController::onButtonStateChanged(const void* sender, const PropertyBa
 void ButtonController::onKeyInput(const KeyEvent& ev)
 {	
 	
-	if(!buttonModel().Enable.get())
+	if(!buttonModel().Enabled.get())
 	{
 		LabelController::onKeyInput(ev);
 		return;
@@ -241,7 +240,7 @@ void ButtonController::onPointerInput(const PointingEvent& ev)
 	
 	Pt::Gfx::PointF point = toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
 
-	if(!buttonModel().Enable.get())
+	if(!buttonModel().Enabled.get())
 	{
 		LabelController::onPointerInput(ev);
 		return;

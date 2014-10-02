@@ -88,14 +88,9 @@ class ApplicationImpl : public Pt::System::EventLoop
 		
 		void showConsole(bool show);
 	
-		inline Pt::Signal<Controller*, const PointingEvent&>& pointerEvent()
+		inline Pt::Signal<const Pt::Event&>& systemEvent()
 		{
-			return _pointerEvent;
-		}
-
-		inline Pt::Signal<Controller*, const KeyEvent&>& keyDeviceEvent()
-		{
-			return _keyDeviceEvent;
+			return _systemEvent;
 		}
 
     protected:
@@ -159,15 +154,13 @@ class ApplicationImpl : public Pt::System::EventLoop
 		double _height;
 		double _dpi;
 
-		Pt::Signal<Controller*, const PointingEvent&> _pointerEvent;			
-		Pt::Signal<Controller*, const KeyEvent&> _keyDeviceEvent;
+		Pt::Signal<const Pt::Event&> _systemEvent;			
 
     private:
         System::Mutex _mutex;
         System::TimerQueue _timerQueue;
         System::EventQueue _eventQueue;
-        Pt::Hmi::Selector _selector;
-        Pt::Signal<const Pt::Event&>* _event;
+        Pt::Hmi::Selector _selector;        
         std::vector<System::Selectable*> _avail;
 };
 

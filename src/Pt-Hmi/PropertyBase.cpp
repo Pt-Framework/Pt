@@ -5,18 +5,16 @@ namespace Pt {
 namespace Hmi {
         
 PropertyBase::PropertyBase(const char* name)
-: _parent(0)
+: _model(0)
 , _name(name)
 {
     
 }
     
-    
-void PropertyBase::changed()
+void PropertyBase::updateModel()
 {
-	if(_parent != 0)
-		_parent->Changed.send(this);
-    
+	if(_model != 0)
+		_model->changed().send(*model());
 }
 
 }}

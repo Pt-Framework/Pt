@@ -56,7 +56,7 @@ private:
 	void onRed();
 	void onGreen();
 	void onBlue();
-	void onPointerChanged(const void*, const PropertyBase& prop);
+	void onPointerChanged(const Property<PointingEvent>& prop);
 	void onRender(GfxController& controller, PaintSurface& surface);
 
 private:

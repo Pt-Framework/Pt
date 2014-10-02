@@ -10,26 +10,26 @@ namespace Pt{
 namespace Hmi{
 
 GfxModel::GfxModel()
-: DefinePropertyInitMacro(Visible,true)
-, DefinePropertyInitMacro(Font,Pt::Gfx::Font("Sans Serif",12))
-, DefinePropertyInitMacro(Position, Pt::Gfx::PointF(0,0))
-, DefinePropertyInitMacro(Size, Pt::Gfx::SizeF(10,10))
-, DefinePropertyInitMacro(BackColor,Pt::Gfx::ARgbColor(237,237,237))
-, DefinePropertyInitMacro(BackColorHightLight,Pt::Gfx::ARgbColor(200,200,200))
-, DefinePropertyInitMacro(ForeColor, Pt::Gfx::ARgbColor(70,70,70))
-, DefinePropertyInitMacro(BackgroundImage, Pt::Gfx::ARgbImage(0,0))
-, DefinePropertyInitMacro(BackgroundImageLayout, ImageLayoutType::NoLayout)
-, DefinePropertyInitMacro(Opacity,0)
-, DefinePropertyDefaultMacro(TransparancyKey)
-, DefinePropertyDefaultMacro(Pointer2DStatus)
-, DefinePropertyDefaultMacro(KeyStatus)
-, DefinePropertyDefaultMacro(CursorT)
-, DefinePropertyInitMacro(TextAlign,TextAlignType::MidleCenter)
-, DefinePropertyInitMacro(Focused, false)
-, DefinePropertyInitMacro(AcceptFocus,true)
-, DefinePropertyInitMacro(HighLight, false)
-, DefinePropertyInitMacro(FocusedActionKey," ")
-, DefinePropertyInitMacro(PainterSurfaceType, PainterType::Native)
+: PT_HMI_INIT_PROPERTY_VALUE(Visible,true)
+, PT_HMI_INIT_PROPERTY_VALUE(Font,Pt::Gfx::Font("Sans Serif",12))
+, PT_HMI_INIT_PROPERTY_VALUE(Position, Pt::Gfx::PointF(0,0))
+, PT_HMI_INIT_PROPERTY_VALUE(Size, Pt::Gfx::SizeF(10,10))
+, PT_HMI_INIT_PROPERTY_VALUE(BackColor,Pt::Gfx::ARgbColor(237,237,237))
+, PT_HMI_INIT_PROPERTY_VALUE(BackColorHightLight,Pt::Gfx::ARgbColor(200,200,200))
+, PT_HMI_INIT_PROPERTY_VALUE(ForeColor, Pt::Gfx::ARgbColor(70,70,70))
+, PT_HMI_INIT_PROPERTY_VALUE(BackgroundImage, Pt::Gfx::ARgbImage(0,0))
+, PT_HMI_INIT_PROPERTY_VALUE(BackgroundImageLayout, ImageLayoutType::NoLayout)
+, PT_HMI_INIT_PROPERTY_VALUE(Opacity,0)
+, PT_HMI_INIT_PROPERTY(TransparancyKey)
+, PT_HMI_INIT_PROPERTY(Pointer2DStatus)
+, PT_HMI_INIT_PROPERTY(KeyStatus)
+, PT_HMI_INIT_PROPERTY(CursorT)
+, PT_HMI_INIT_PROPERTY_VALUE(TextAlign,TextAlignType::MidleCenter)
+, PT_HMI_INIT_PROPERTY_VALUE(Focused, false)
+, PT_HMI_INIT_PROPERTY_VALUE(AcceptFocus,true)
+, PT_HMI_INIT_PROPERTY_VALUE(HighLight, false)
+, PT_HMI_INIT_PROPERTY_VALUE(FocusedActionKey," ")
+, PT_HMI_INIT_PROPERTY_VALUE(PainterSurfaceType, PainterType::Native)
 , _paintSurface(new NativePaintSurface(Pt::Gfx::SizeF(800,600)))
 {
 	Position.set(Pt::Gfx::PointF(0,0));
@@ -55,8 +55,7 @@ GfxModel::GfxModel()
 	registerProperty(FocusedActionKey);
 	registerProperty(PainterSurfaceType);
 
-	Focused.PropertyChanged += Pt::slot(*this, &GfxModel::onFocusChanged);
-	PainterSurfaceType.PropertyChanged += Pt::slot(*this, &GfxModel::onPainterTypeChanged);
+	PainterSurfaceType.Changed += Pt::slot(*this, &GfxModel::onPainterTypeChanged);
 }
 
 GfxModel::~GfxModel()
@@ -65,7 +64,7 @@ GfxModel::~GfxModel()
 			delete _paintSurface;
 }
 
-void GfxModel::onPainterTypeChanged(const void* sender, const PropertyBase& prop)
+void GfxModel::onPainterTypeChanged(const Property<PainterType::Type>& prop)
 {
 	switch(PainterSurfaceType.get())
 	{
@@ -76,47 +75,6 @@ void GfxModel::onPainterTypeChanged(const void* sender, const PropertyBase& prop
 		case PainterType::Image:
 			setPaintSurface( new ImagePaintSurface(Size.get())); 
 		break;
-	}
-}
-
-void GfxModel::onFocusChanged(const void* sender, const PropertyBase& prop)
-{
-	if(Focused.get())
-	{//True
-		Pt::Hmi::Controller* ctrl = this->controller();
-		Pt::Hmi::GfxController* par = (Pt::Hmi::GfxController*) ctrl->widgetParent();
-	
-		if( par != 0)
-		{
-			GfxModel& parMod = par->gfxModel();
-			
-			//All parents set to true.
-			parMod.Focused.set(true);
-			parMod.Focused.PropertyChanged.send(&parMod, parMod.Focused);
-
-			//All sibling set to false. Only me let it true
-			for( size_t i = 0; i < par->children().size(); i++)
-			{
-				GfxController* childCtrl = (GfxController*) par->children()[i];
-
-				GfxModel& childModel = childCtrl->gfxModel();
-				
-				if(&childModel != this)
-					childModel.Focused = false;
-			}
-		}
-	}
-	else
-	{//False  
-		Pt::Hmi::GfxController* ctrl = (Pt::Hmi::GfxController*) this->controller();
-		for( size_t i = 0; i < ctrl->children().size(); ++i)
-		{//All childs set to false
-
-			Pt::Hmi::GfxController* childCtrl = (Pt::Hmi::GfxController*) ctrl->children()[i];
-			GfxModel& m = childCtrl->gfxModel();
-			m.Focused.set(false);						
-			m.Focused.PropertyChanged.send(&m, m.Focused);
-		}
 	}
 }
 

@@ -65,12 +65,12 @@ void DialogController::doModal(WindowController* parent)
 
 	//Setup the parent as disabled and TopMost = false.
 	parentTopMost = parentModel.TopMost.get();
-	parentModel.Enable = false;	
+	parentModel.Enabled = false;	
 	parentModel.TopMost = false;
     parent->output(); //Notify the parent.
 
 	//Setup the dialog as aenabled and top most.	
-	dialogModel().Enable = true;
+	dialogModel().Enabled = true;
 	dialogModel().TopMost = true;
 
 	//Invalidate the dialog
@@ -81,7 +81,7 @@ void DialogController::doModal(WindowController* parent)
 		Application::instance().nextEvent();
 
 	//Restore the parent state.
-	parentModel.Enable = true;
+	parentModel.Enabled = true;
 	parentModel.TopMost = parentTopMost;
 }
 

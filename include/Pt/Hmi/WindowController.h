@@ -43,7 +43,7 @@ class WindowRenderer;
 class PT_HMI_API WindowController  : public GfxController
 {
 public:
-	WindowController(WindowModel& m, WindowRenderer& r, GfxOutputDevice* out = 0, PointingDevice* in1 = 0, InputDevice* in2 = 0);
+	WindowController(WindowModel& m, WindowRenderer& r, GfxOutputDevice* out = 0);
 	virtual ~WindowController();
 
 	WidgetController* mainWidget();
@@ -84,11 +84,11 @@ public:
 protected:
 	virtual void onPointerInput(const PointingEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);
-	virtual void onModelChanged(bool created, const PropertyBase* prop);
+	virtual void onModelChanged(bool created, const Model& model);
 	virtual void onClosing(Controller* sender, bool& canClose);
 	virtual void onClosed(Controller* sender);
 	
-	void onSizeChanged(const void* sender, const PropertyBase& prop);
+	void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
 	
 	WindowController*  _windowParent;
 };
