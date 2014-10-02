@@ -1,5 +1,4 @@
-/* Copyright (C) 2013 Marc Boris Duerner 
- * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,65 +22,32 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-#include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/WindowController.h>
-
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+#include <Pt/Hmi/View.h>
+#include <Pt/Hmi/Model.h>
+#include <Pt/Gfx/ARgbImage.h>
+#include "ViewImpl.h"
+ 
 namespace Pt{
 namespace Hmi{
 
-Controller::Controller(Model& model)
-: _model(model)
-, _parent(0)
-{ 
-	_model.changed() += Pt::slot(*this, &Controller::modelChanged);	
-}
-
-Controller::~Controller()
-{ 
-}
-
-void Controller::addOutputDevice(OutputDevice* device)
+View::View()
+: _impl(new ViewImpl())
 {
-	_outputDevices.push_back(device);
 }
 
-void Controller::removeOutputDevice(OutputDevice* device)
+View::~View()
 {
-	for(size_t i = 0; i < _outputDevices.size(); ++i)
-	{
-		if(_outputDevices[i] != device)
-			continue;
-		
-		_outputDevices.erase(_outputDevices.begin() + i);
-		return;
-	}
 }
 
-void Controller::addChild(Controller* base)
+ViewImpl* View::impl()
 {
-	_children.push_back(base);
-	base->setWidgetParent(this);
+	return _impl;
 }
 
-void Controller::removeChild(Controller* base)
-{
-	for(size_t i = 0; i < _children.size(); ++i)
-	{
-		if(_children[i] != base)
-			continue;
-		
-		_children.erase(_children.begin() + i);
-		base->setWidgetParent(0);
-		return;
-	}			
-}	
-
-void Controller::output()
+void View::output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model)
 {	
-	for( size_t i = 0; i < _outputDevices.size(); ++i)
-		_outputDevices[i]->output(this, &model());
+	_impl->output(controller,model);
 }
-	
+
 }}

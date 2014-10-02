@@ -25,7 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Hmi/WindowController.h>
-#include <Pt/Hmi/WidgetController.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/View.h>
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/WindowRenderer.h>
@@ -37,7 +37,7 @@ namespace Pt{
 namespace Hmi{
 
 WindowController::WindowController(WindowModel& m, WindowRenderer& r,  View* out)
-: WidgetController(m, r)
+: Widget(m, r)
 , _windowParent(0)
 {	
 	if( out != 0)
@@ -57,18 +57,18 @@ WindowController::~WindowController()
 {
 }
 
-WidgetController* WindowController::mainWidget()
+Widget* WindowController::mainWidget()
 {
 	if( Controller::children().size() != 0)
-		return dynamic_cast<WidgetController*>( Controller::children()[0]);
+		return dynamic_cast<Widget*>( Controller::children()[0]);
 
 	return 0;
 }
 
-const WidgetController* WindowController::mainWidget() const
+const Widget* WindowController::mainWidget() const
 {
 	if( Controller::children().size() != 0)
-		return dynamic_cast<WidgetController*>( Controller::children()[0]);
+		return dynamic_cast<Widget*>( Controller::children()[0]);
 
 	return 0;
 }

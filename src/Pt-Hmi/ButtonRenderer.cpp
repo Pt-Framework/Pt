@@ -1,6 +1,6 @@
 #include <Pt/Hmi/ButtonRenderer.h>
 #include <Pt/Hmi/ButtonModel.h>
-#include <Pt/Hmi/WidgetController.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/ImagePainter.h>

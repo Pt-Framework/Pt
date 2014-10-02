@@ -56,7 +56,7 @@ private:
 	void onGreen();
 	void onBlue();
 	void onPointerChanged(const Hmi::Property<Hmi::PointingEvent>& prop);
-	void onRender(Hmi::WidgetController& controller, Hmi::PaintSurface& surface);
+	void onRender(Hmi::Widget& controller, Hmi::PaintSurface& surface);
 
 private:
 	Pt::Forms::Button _closeButton;

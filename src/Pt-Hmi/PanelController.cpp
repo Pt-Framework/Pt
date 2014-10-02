@@ -8,7 +8,7 @@ namespace Pt{
 namespace Hmi{
 
 PanelController::PanelController(PanelModel& model, PanelRenderer& renderer)
-: WidgetController(model, renderer)
+: Widget(model, renderer)
 , _resizeDir(No)
 {
 	
@@ -201,7 +201,7 @@ void PanelController::onPointerInput(const PointingEvent& ev)
 	}
 	
 	
-	WidgetController::onPointerInput(ev);			
+	Widget::onPointerInput(ev);			
 }
 
 

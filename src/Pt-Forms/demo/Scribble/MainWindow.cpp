@@ -185,7 +185,7 @@ void MainWindow::onPointerChanged(const Hmi::Property<Hmi::PointingEvent>& prop)
 }
 
 
-void MainWindow::onRender(Hmi::WidgetController& controller, Hmi::PaintSurface& surface)
+void MainWindow::onRender(Hmi::Widget& controller, Hmi::PaintSurface& surface)
 {
 	if(_points.size() == 0)
 		return;

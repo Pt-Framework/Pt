@@ -28,7 +28,7 @@
 #ifndef Pt_Hmi_Controller_Window_H
 #define Pt_Hmi_Controller_Window_H
 
-#include <Pt/Hmi/WidgetController.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/WidgetModel.h>
 #include <Pt/Hmi/WindowModel.h>
 
@@ -39,14 +39,14 @@ class PointingDevice;
 class View;
 class WindowRenderer;
 
-class PT_HMI_API WindowController  : public WidgetController
+class PT_HMI_API WindowController  : public Widget
 {
 public:
 	WindowController(WindowModel& m, WindowRenderer& r, View* out = 0);
 	virtual ~WindowController();
 
-	WidgetController* mainWidget();
-	const WidgetController* mainWidget() const;
+	Widget* mainWidget();
+	const Widget* mainWidget() const;
 	
 
 	WindowModel& windowModel()

@@ -6,7 +6,7 @@
 #include <Pt/Connectable.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
-#include <Pt/Hmi/WidgetController.h>
+#include <Pt/Hmi/Widget.h>
 
 namespace Pt {
 namespace Forms {
@@ -53,7 +53,7 @@ public:
 
     virtual void setPosition(const Pt::Gfx::PointF& position) = 0;
 	virtual const Pt::Gfx::PointF& position() const = 0;
-	virtual Hmi::WidgetController& widgetController() = 0;
+	virtual Hmi::Widget& widgetController() = 0;
 
 protected:    
 	inline void setParent(Widget* p)

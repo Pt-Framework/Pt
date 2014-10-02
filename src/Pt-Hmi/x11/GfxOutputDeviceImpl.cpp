@@ -34,7 +34,7 @@
 #include <Pt/Utf8Codec.h>
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/PanelModel.h>
-#include <Pt/Hmi/WidgetController.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/PointingDevice.h>
 #include <Pt/Hmi/View.h>
 #include <Pt/Hmi/WindowController.h>

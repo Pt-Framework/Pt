@@ -1,5 +1,5 @@
 #include <Pt/Forms/Widget.h>
-#include <Pt/Hmi/WidgetController.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/WidgetModel.h>
 #include <algorithm>
 

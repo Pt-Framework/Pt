@@ -136,7 +136,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Property.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PropertyBase.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\View.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\WidgetController.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WidgetModel.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WidgetRenderer.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowController.h" />
@@ -626,7 +626,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\PointingEvent.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PropertyBase.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\View.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\WidgetController.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WidgetModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WidgetRenderer.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowController.cpp" />

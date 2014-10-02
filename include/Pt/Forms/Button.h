@@ -30,7 +30,7 @@
 #include <Pt/Signal.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Point.h>
-#include <Pt/Hmi/WidgetController.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/ButtonController.h>
 #include <Pt/Hmi/ButtonModel.h>
 #include <Pt/Hmi/ButtonRenderer.h>
@@ -75,7 +75,7 @@ protected:
     virtual void onChecked(bool state);
 
 protected:
-	virtual Hmi::WidgetController& widgetController()
+	virtual Hmi::Widget& widgetController()
 	{
 		return *_currentController;
 	}

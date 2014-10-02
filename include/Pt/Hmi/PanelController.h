@@ -1,7 +1,7 @@
 #ifndef Pt_Hmi_PanelController_H
 #define Pt_Hmi_PanelController_H
 
-#include <Pt/Hmi/WidgetController.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/PointingEvent.h>
 #include <Pt/Hmi/PanelModel.h>
 
@@ -10,7 +10,7 @@ namespace Hmi{
 
 class PanelRenderer;
 
-class PT_HMI_API PanelController  : public WidgetController
+class PT_HMI_API PanelController  : public Widget
 {
 public:
 

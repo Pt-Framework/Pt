@@ -11,11 +11,11 @@ namespace Hmi{
 
 class WidgetModel;
 
-class PT_HMI_API WidgetController  : public Controller
+class PT_HMI_API Widget  : public Controller
 {
 public:
-	WidgetController(WidgetModel& model, WidgetRenderer& renderer);
-	virtual ~WidgetController();		
+	Widget(WidgetModel& model, WidgetRenderer& renderer);
+	virtual ~Widget();		
 
 	const WidgetModel& widgetModel() const; 
 
@@ -25,22 +25,22 @@ public:
 	virtual void output();
 	virtual void invalidate();
 				
-	inline const WidgetController* parent() const
+	inline const Widget* parent() const
 	{
-		return dynamic_cast<const WidgetController*>(Controller::widgetParent());
+		return dynamic_cast<const Widget*>(Controller::widgetParent());
 	}
 
-	inline WidgetController* parent()
+	inline Widget* parent()
 	{
-		return dynamic_cast<WidgetController*>(Controller::widgetParent());
+		return dynamic_cast<Widget*>(Controller::widgetParent());
 	}
 
 	Pt::Gfx::PointF toClient(const Pt::Gfx::PointF& globalPoint);
 	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot);
-	void bindMnemonicToWidget(WidgetController* widget);
+	void bindMnemonicToWidget(Widget* widget);
 
-	Pt::Signal<WidgetController&, PaintSurface&> Render;
-	Pt::Signal<WidgetController&> Output;
+	Pt::Signal<Widget&, PaintSurface&> Render;
+	Pt::Signal<Widget&> Output;
 
 protected:
 	bool onMoveFocusNext();
@@ -52,14 +52,14 @@ private:
 	bool focusPrevChild(int index);
 	int getFocusedChild() const;
 
-	inline WidgetController* childAt(size_t index)
+	inline Widget* childAt(size_t index)
 	{
-		return dynamic_cast<WidgetController*> (children()[index]);
+		return dynamic_cast<Widget*> (children()[index]);
 	}
 
-	inline const WidgetController* childAt(size_t index) const
+	inline const Widget* childAt(size_t index) const
 	{
-		return dynamic_cast<const WidgetController*> (children()[index]);
+		return dynamic_cast<const Widget*> (children()[index]);
 	}
 
 
@@ -69,7 +69,7 @@ public:
 	virtual void onMnemonic();
 
 private:
-	WidgetController* _mnemonicWidget;
+	Widget* _mnemonicWidget;
 	WidgetRenderer& _renderer;
 };
 

@@ -32,7 +32,7 @@
 #include <Pt/Hmi/DialogController.h>
 #include <Pt/Hmi/DialogModel.h>
 #include <Pt/Hmi/DialogRenderer.h>
-#include <Pt/Hmi/WidgetController.h>
+#include <Pt/Hmi/Widget.h>
 
 namespace Pt {
 namespace Forms {

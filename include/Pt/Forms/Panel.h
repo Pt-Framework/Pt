@@ -30,7 +30,7 @@ public:
 
 protected:
 
-	virtual Hmi::WidgetController& widgetController()
+	virtual Hmi::Widget& widgetController()
 	{
 		return *_currController;
 	}

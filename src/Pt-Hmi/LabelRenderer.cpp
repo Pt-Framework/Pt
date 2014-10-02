@@ -1,7 +1,7 @@
 #include <Pt/Hmi/LabelRenderer.h>
 #include <Pt/Hmi/LabelModel.h>
 #include <Pt/Hmi/Painter.h>
-#include <Pt/Hmi/WidgetController.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/Pen.h>
