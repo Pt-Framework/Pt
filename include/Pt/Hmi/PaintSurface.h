@@ -5,8 +5,8 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/ARgbImage.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+namespace Hmi {
 
 class Painter;
 
@@ -25,7 +25,6 @@ public:
 	virtual void resize(const Pt::Gfx::SizeF& size)= 0;	
 	virtual Pt::Gfx::SizeF size() const = 0;
 	virtual Pt::Hmi::Painter& painter() = 0;
-
 };
 
 }}

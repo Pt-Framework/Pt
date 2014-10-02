@@ -131,14 +131,13 @@
     <ClInclude Include="..\..\include\Pt\Hmi\PanelController.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PanelModel.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PanelRenderer.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\PointingDevice.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PointingEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Property.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PropertyBase.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Renderer.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\View.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WidgetModel.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\WidgetRenderer.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowController.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowModel.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowRenderer.h" />
@@ -625,10 +624,10 @@
     <ClCompile Include="..\..\src\Pt-Hmi\PanelRenderer.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PointingEvent.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PropertyBase.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Renderer.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\View.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WidgetModel.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\WidgetRenderer.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowController.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowRenderer.cpp" />

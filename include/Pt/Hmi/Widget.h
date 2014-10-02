@@ -4,7 +4,7 @@
 #include <Pt/Hmi/Controller.h>
 #include <Pt/Hmi/PointingEvent.h>
 #include <Pt/Hmi/WidgetModel.h>
-#include <Pt/Hmi/WidgetRenderer.h>
+#include <Pt/Hmi/Renderer.h>
 
 namespace Pt{
 namespace Hmi{
@@ -14,7 +14,7 @@ class WidgetModel;
 class PT_HMI_API Widget  : public Controller
 {
 public:
-	Widget(WidgetModel& model, WidgetRenderer& renderer);
+	Widget(WidgetModel& model, Renderer& renderer);
 	virtual ~Widget();		
 
 	const WidgetModel& widgetModel() const; 
@@ -70,7 +70,7 @@ public:
 
 private:
 	Widget* _mnemonicWidget;
-	WidgetRenderer& _renderer;
+	Renderer& _renderer;
 };
 
 }}

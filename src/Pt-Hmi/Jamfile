@@ -37,7 +37,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   PanelRenderer.cpp
 					   Widget.cpp
 					   WidgetModel.cpp
-					   WidgetRenderer.cpp
+					   Renderer.cpp
 					   WindowController.cpp
 					   WindowModel.cpp
 					   WindowRenderer.cpp

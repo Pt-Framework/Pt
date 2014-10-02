@@ -21,7 +21,7 @@ PanelRenderer::~PanelRenderer()
 
 void PanelRenderer::render(Pt::Hmi::WidgetModel* m)
 {	
-	WidgetRenderer::render(m);
+	Renderer::render(m);
 
 	PanelModel* model = dynamic_cast<PanelModel*>(m);
 

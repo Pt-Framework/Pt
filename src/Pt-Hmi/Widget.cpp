@@ -1,13 +1,13 @@
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/WindowController.h>
 #include <Pt/Hmi/WidgetModel.h>
-#include <Pt/Hmi/WidgetRenderer.h>
+#include <Pt/Hmi/Renderer.h>
 #include <Pt/Hmi/Painter.h>
 
 namespace Pt{
 namespace Hmi{
 
-Widget::Widget(WidgetModel& model, WidgetRenderer& renderer)
+Widget::Widget(WidgetModel& model, Renderer& renderer)
 : Controller(model)
 , _renderer(renderer)
 , _mnemonicWidget(0)

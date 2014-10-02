@@ -24,8 +24,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Hmi_WidgetRenderer_H
-#define Pt_Hmi_WidgetRenderer_H
+#ifndef Pt_Hmi_Renderer_H
+#define Pt_Hmi_Renderer_H
 
 #include <Pt/Hmi/Api.h>
 
@@ -34,11 +34,11 @@ namespace Hmi{
 
 class WidgetModel;
 
-class PT_HMI_API WidgetRenderer
+class PT_HMI_API Renderer
 {
 public:
-	WidgetRenderer();
-	virtual ~WidgetRenderer();
+	Renderer();
+	virtual ~Renderer();
 
 	virtual void render(Pt::Hmi::WidgetModel* model);
 

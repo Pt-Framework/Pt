@@ -1323,9 +1323,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\PanelRenderer.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PointingDevice.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\PointingEvent.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1455,13 +1452,13 @@
     <ClInclude Include="..\..\include\Pt\Hmi\WidgetModel.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WidgetRenderer.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ViewImpl.h">
       <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Renderer.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2739,13 +2736,13 @@
     <ClCompile Include="..\..\src\Pt-Hmi\WidgetModel.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\WidgetRenderer.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ViewImpl.cpp">
       <Filter>Pt-Hmi\gdi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Renderer.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>

@@ -7,8 +7,8 @@
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/NativePainter.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+namespace Hmi {
 
 class PaintSurfaceImpl;
 

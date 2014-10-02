@@ -1,23 +1,24 @@
-#include <Pt/Hmi/WidgetRenderer.h>
+#include <Pt/Hmi/Renderer.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/WidgetModel.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/ImageAlgo.h>
 #include <Pt/Gfx/Brush.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
 
-WidgetRenderer::WidgetRenderer()
+namespace Hmi {
+
+Renderer::Renderer()
 {
 }
 
-WidgetRenderer::~WidgetRenderer()
+Renderer::~Renderer()
 {
 }
 
 
-void WidgetRenderer::render(Pt::Hmi::WidgetModel* model)
+void Renderer::render(Pt::Hmi::WidgetModel* model)
 {
 	if(!model->Visible.get())
 		return;

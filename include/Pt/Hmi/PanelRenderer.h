@@ -28,14 +28,14 @@
 #define Pt_Hmi_PanelRenderer_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/WidgetRenderer.h>
+#include <Pt/Hmi/Renderer.h>
 
 namespace Pt{
 namespace Hmi{
 
 class WidgetModel;
 
-class PT_HMI_API PanelRenderer : public WidgetRenderer
+class PT_HMI_API PanelRenderer : public Renderer
 {
 public:
 	PanelRenderer();
