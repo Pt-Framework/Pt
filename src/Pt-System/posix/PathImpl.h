@@ -49,6 +49,7 @@ static TextCodec<Pt::Char, char>* getSystemCodec()
     match codeset against list, if empty match lang against list
 */
 
+    // nullptr means UTF-8
     return 0;
 }
 
@@ -138,6 +139,12 @@ class PathImpl
         std::size_t size() const
         { return _path.size(); }
 
+        const char* c_str() const
+        { return _path.c_str(); }
+
+        void assign(const char* s)
+        { _path = s; }
+
         void concat(const PathImpl& p)
         {
             _path += p._path;
@@ -153,6 +160,7 @@ class PathImpl
             TextCodec<Pt::Char, char>* codec = systemCodec();
             if( ! codec )
             {
+                // no codec means local encoding is UTF-8
                 _path.append(s, n);
             }
 
@@ -233,12 +241,6 @@ class PathImpl
 
         static char extsep() 
         { return '.'; }
-
-        const char* c_str() const
-        { return _path.c_str(); }
-
-        void set(const char* s)
-        { _path = s; }
 
     private:
         std::string _path;

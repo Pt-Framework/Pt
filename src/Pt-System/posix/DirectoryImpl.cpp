@@ -91,7 +91,7 @@ bool DirectoryIteratorImpl::advance()
 
     if(_current)
     {
-        _finfo.path().impl()->set(_current->d_name);
+        _finfo.path().impl()->assign(_current->d_name);
 
         //std::string& path = _finfo.path();
 

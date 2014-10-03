@@ -27,6 +27,7 @@
  */
 
 #include "ProcessImpl.h"
+#include "PathImpl.h"
 #include "win32.h"
 
 #ifndef _WIN32_WCE
@@ -88,7 +89,7 @@ void ProcessImpl::start()
 
     _state = Process::Failed;
 
-    STARTUPINFO m_startUp;
+    STARTUPINFOW m_startUp;
 
     ZeroMemory( &m_startUp, sizeof(m_startUp) );
     m_startUp.cb = sizeof(m_startUp);
@@ -165,38 +166,38 @@ void ProcessImpl::start()
 
     m_startUp.dwFlags |= STARTF_USESTDHANDLES;
 
-    std::basic_string<TCHAR> tcmd;
-    win32::fromMultiByte( _procInfo.command(), tcmd );
+    const wchar_t* wprog = _procInfo.command().impl()->c_str();
+    std::size_t wprogSize = _procInfo.command().impl()->size();
 
+    std::vector<wchar_t> wcmd(wprog, wprog + wprogSize);
+
+    std::wstring warg;
     for( unsigned i = 0; i < _procInfo.argCount(); i++)
     {
-        std::basic_string<TCHAR> targ;
-        win32::fromMultiByte( " " + _procInfo.arg(i), targ );
-        tcmd += targ;
+        win32::fromMultiByte(_procInfo.arg(i), warg );
+        
+        wcmd.push_back(L' ');
+        wcmd.insert(wcmd.end(), warg.begin(), warg.end() );
     }
 
-    std::vector<TCHAR> m_buffer( tcmd.begin(), tcmd.end() );
-    m_buffer.push_back(0);
+    wcmd.push_back(0);
 
-    BOOL ret = CreateProcess( NULL, &m_buffer[0], NULL, NULL,
-                              true, 0, NULL, NULL, &m_startUp, &m_pid);
+    BOOL ret = CreateProcessW( NULL, &wcmd[0], NULL, NULL,
+                               true, 0, NULL, NULL, &m_startUp, &m_pid);
 #else
 
-    std::string args;
+    const wchar_t* wcmd = _procInfo.command().impl()->c_str();
+
+    std::wstring wargs, warg;
     for( unsigned i = 0; i < _procInfo.argCount(); i++)
     {
-        if(i != 0) args += ' ';
-        args += _procInfo.arg(i);
+        win32::fromMultiByte( _procInfo.arg(i), warg );
+        if(i != 0) wargs += L' ';
+        wargs += warg;
     }
 
-    std::basic_string<TCHAR> tcmd;
-    win32::fromMultiByte( _procInfo.command(), tcmd );
-    
-    std::basic_string<TCHAR> targs;
-    win32::fromMultiByte( args, targs );
-
-    BOOL ret = CreateProcess( tcmd.c_str(), targs.c_str(), NULL, NULL,
-                              0, 0, NULL, NULL, &m_startUp, &m_pid);
+    BOOL ret = CreateProcessW( wcmd, wargs.c_str(), NULL, NULL,
+                               0, 0, NULL, NULL, &m_startUp, &m_pid);
 #endif
 
     if(ret)

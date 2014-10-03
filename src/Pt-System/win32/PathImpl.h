@@ -50,6 +50,12 @@ class PathImpl
         std::size_t size() const
         { return _path.size(); }
 
+        const wchar_t* c_str() const
+        { return _path.c_str(); }
+
+        void assign(const wchar_t* p)
+        { _path = p; }
+
         void concat(const PathImpl& p)
         {
             _path += p._path;
@@ -138,12 +144,6 @@ class PathImpl
 
         static char extsep() 
         { return '.'; }
-
-        const wchar_t* c_str() const
-        { return _path.c_str(); }
-
-        void assign(const wchar_t* p)
-        { _path = p; }
 
     private:
         std::wstring _path;

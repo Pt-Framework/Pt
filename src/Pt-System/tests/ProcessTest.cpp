@@ -33,9 +33,9 @@
 #include "Pt/Unit/RegisterTest.h"
 
 #ifdef NDEBUG
-std::string processName = "ProcessTestChild";
+const char* processName = "ProcessTestChild";
 #else
-std::string processName = "ProcessTestChild";
+const char* processName = "ProcessTestChild";
 #endif
 
 class ProcessTest : public Pt::Unit::TestSuite
@@ -64,7 +64,8 @@ class ProcessTest : public Pt::Unit::TestSuite
 
 void ProcessTest::RedirectStdout()
 {
-    Pt::System::ProcessInfo procInfo(processName);
+    Pt::System::Path path( processName );
+    Pt::System::ProcessInfo procInfo(path);
     procInfo.addArg( "testString");
 
     procInfo.setStdOutput(Pt::System::ProcessInfo::Redirect);
@@ -88,7 +89,8 @@ void ProcessTest::RedirectStdout()
 
 void ProcessTest::RedirectStderr()
 {
-    Pt::System::ProcessInfo procInfo(processName);
+    Pt::System::Path path( processName );
+    Pt::System::ProcessInfo procInfo(path);
     procInfo.addArg( "-e");
     procInfo.addArg( "testString");
 
@@ -113,7 +115,8 @@ void ProcessTest::RedirectStderr()
 
 void ProcessTest::RedirectStdin()
 {
-    Pt::System::ProcessInfo procInfo(processName);
+    Pt::System::Path path( processName );
+    Pt::System::ProcessInfo procInfo(path);
     procInfo.addArg( "-R");
 
     procInfo.setStdInput(Pt::System::ProcessInfo::Redirect);
@@ -134,7 +137,8 @@ void ProcessTest::RedirectStdin()
 
 void ProcessTest::ProcessAbort()
 {
-    Pt::System::ProcessInfo procInfo(processName);
+    Pt::System::Path path( processName );
+    Pt::System::ProcessInfo procInfo(path);
     procInfo.addArg( "-a");
 
     Pt::System::Process p(procInfo);

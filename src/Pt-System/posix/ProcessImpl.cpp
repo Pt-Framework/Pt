@@ -25,6 +25,7 @@
  */
 
 #include "ProcessImpl.h"
+#include "PathImpl.h"
 #include "PipeImpl.h"
 #include <vector>
 #include <cstdio>
@@ -185,14 +186,16 @@ void ProcessImpl::start()
 
         // exec
 
-        std::vector< std::vector<char> > args;
-
-        const std::string& c = _procInfo.command();
-        std::vector<char> cmd( c.begin(), c.end() );
+        const char* prog = _procInfo.command()->impl().c_str();
+        std::size_t progLen = _procInfo.command()->impl().size();
+        
+        std::vector<char> cmd( prog, prog + progLen );
         cmd.push_back('\0');
+
+        std::vector< std::vector<char> > args;
         args.push_back(cmd);
 
-        for( unsigned i = 0; i < _procInfo.argCount(); i++)
+        for(unsigned i = 0; i < _procInfo.argCount(); i++)
         {
             const std::string& a = _procInfo.arg(i);
             std::vector<char> arg(a.begin(), a.end());
@@ -201,14 +204,14 @@ void ProcessImpl::start()
         }
 
         std::vector<char*> argptrs;
-        for( unsigned n = 0; n < args.size(); n++)
+        for(unsigned n = 0; n < args.size(); n++)
         {
             std::vector<char>& a = args[n];
             argptrs.push_back( &a[0] );
         }
         argptrs.push_back( 0 );
 
-        if( 0 > execvp(argptrs[0], &argptrs[0]))
+        if( 0 > execvp(argptrs[0], &argptrs[0]) )
         {
             std::exit(-1);
         }
@@ -225,13 +228,13 @@ void ProcessImpl::start()
 
         // check for open pipes
 
-        if (_procInfo.isStdInputRedirected())
+        if( _procInfo.isStdInputRedirected() )
             _stdinPipe->out().close();
 
-        if (_procInfo.isStdOutputRedirected())
+        if( _procInfo.isStdOutputRedirected() )
             _stdoutPipe->in().close();
 
-        if (_procInfo.isStdErrorRedirected())
+        if( _procInfo.isStdErrorRedirected() )
             _stderrPipe->in().close();
     }
 }

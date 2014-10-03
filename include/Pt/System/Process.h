@@ -30,6 +30,7 @@
 #define PT_SYSTEM_PROCESS_H
 
 #include <Pt/System/Api.h>
+#include <Pt/System/Path.h>
 #include <Pt/System/IODevice.h>
 #include <Pt/System/SystemError.h>
 #include <Pt/NonCopyable.h>
@@ -74,14 +75,13 @@ class ProcessInfo
             ToStdOut = 3  //!< Combine stderr with stdout, only valid for stderr
         };
 
-		// TODO: use Path class, explicit
         /** @brief Construct with command to execute.
         */
-        ProcessInfo(const std::string& command);
+        explicit ProcessInfo(const Path& command);
 
         /** @brief Command to execute.
         */
-        const std::string& command() const
+        const Path& command() const
         { return _command; }
 
         /** @brief Adds an argument to the list of arguments.
@@ -160,7 +160,7 @@ class ProcessInfo
         { return (_stderrMode & ToStdOut) == ToStdOut; }
 
     private:
-        std::string _command;
+        Path _command;
         std::vector<std::string> _args;
         bool _detach;
         IOMode _stdinMode;
@@ -183,12 +183,6 @@ class PT_SYSTEM_API Process : private NonCopyable
         };
 
     public:
-		// TODO: use Path class ???
-
-        /** @brief Constructs with a command including its arguments.
-        */
-        //explicit Process(const std::string& command);
-
         //! @brief Constructs with a process parameters.
         explicit Process(const ProcessInfo& procInfo);
 
@@ -233,7 +227,7 @@ class PT_SYSTEM_API Process : private NonCopyable
 };
 
 
-inline ProcessInfo::ProcessInfo(const std::string& command)
+inline ProcessInfo::ProcessInfo(const Path& command)
 : _command(command)
 , _detach(false)
 , _stdinMode(Close)

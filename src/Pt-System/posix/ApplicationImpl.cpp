@@ -198,7 +198,7 @@ Path ApplicationImpl::cwd()
         throw SystemError("getcwd");
 
     
-    path.impl()->set( &buffer[0] );
+    path.impl()->assign( &buffer[0] );
     return path;
 }
 
@@ -222,7 +222,7 @@ Path ApplicationImpl::tmpdir()
         }
     }
 
-    path.impl()->set(tmp);
+    path.impl()->assign(tmp);
     return path;
 }
 
@@ -230,7 +230,7 @@ Path ApplicationImpl::tmpdir()
 Path ApplicationImpl::rootdir()
 {
     Path path;
-    path.impl()->set("/");
+    path.impl()->assign("/");
     return path;
 }
 
