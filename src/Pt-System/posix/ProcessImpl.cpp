@@ -186,8 +186,8 @@ void ProcessImpl::start()
 
         // exec
 
-        const char* prog = _procInfo.command()->impl().c_str();
-        std::size_t progLen = _procInfo.command()->impl().size();
+        const char* prog = _procInfo.command().impl()->c_str();
+        std::size_t progLen = _procInfo.command().impl()->size();
         
         std::vector<char> cmd( prog, prog + progLen );
         cmd.push_back('\0');
