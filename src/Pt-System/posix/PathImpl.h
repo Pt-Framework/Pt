@@ -127,6 +127,9 @@ inline void fromLocalPath(const char* from, std::size_t size, Pt::String& ustr)
 class PathImpl
 {
     public:
+        typedef std::string::size_type size_type;
+
+    public:
         PathImpl()
         { }
         
@@ -144,6 +147,35 @@ class PathImpl
 
         void assign(const char* s)
         { _path = s; }
+
+        char front() const
+        { return _path[0]; }
+
+        char back() const
+        { return _path[ _path.size()-1 ]; }
+
+        void push_back(char c)
+        { _path.push_back(c); }
+
+        static size_type npos()
+        { return std::string::npos; }
+
+        size_type rfind(char ch) const
+        {
+            return _path.rfind(ch);
+        }
+
+        Pt::String substr(size_type pos, size_type n)
+        {
+            Pt::String str;
+            fromLocalPath(_path.c_str() + pos, n, str);
+            return str;
+        }
+
+        int compare(const PathImpl& p) const
+        {
+            return _path.compare(p._path);
+        }
 
         void concat(const PathImpl& p)
         {
@@ -165,63 +197,6 @@ class PathImpl
             }
 
             return ! codec;
-        }
-
-        void appendSlash(const PathImpl& p)
-        {
-            if( ! empty() &&
-                ! p.empty() &&
-                _path[_path.size()-1] != dirsep() &&
-                p._path[0] != dirsep())
-            { 
-                _path += dirsep();
-            }
-        }
-
-        void appendSlash(const Pt::Char* s, std::size_t n)
-        {
-            if( ! empty() &&
-                n > 0 &&
-                _path[_path.size()-1] != dirsep() &&
-                s[0] != Char(dirsep()) )
-            { 
-                _path += dirsep();
-            }
-        }
-
-        void appendSlash(const char* s, std::size_t n)
-        {
-            if( ! empty() &&
-                n > 0 &&
-                _path[_path.size()-1] != dirsep() &&
-                s[0] != dirsep())
-            { 
-                _path += dirsep();
-            }
-        }
-
-        typedef std::string::size_type size_type;
-
-        static size_type npos()
-        {
-            return std::string::npos;
-        }
-
-        size_type rfind(char ch) const
-        {
-            return _path.rfind(ch);
-        }
-
-        Pt::String substr(size_type pos, size_type n)
-        {
-            Pt::String str;
-            fromLocalPath(_path.c_str() + pos, n, str);
-            return str;
-        }
-
-        int compare(const PathImpl& p) const
-        {
-            return _path.compare(p._path);
         }
 
         Pt::String toString() const

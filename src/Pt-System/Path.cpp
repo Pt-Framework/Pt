@@ -108,7 +108,13 @@ Path& Path::assign(const char* s, std::size_t n)
 
 Path& Path::append(const Path& p)
 {
-    _impl->appendSlash(*p._impl);
+    if( ! empty() && ! p.empty() &&
+        _impl->back() != _impl->dirsep() &&
+        p._impl->front() != _impl->dirsep() )
+    { 
+        _impl->push_back( _impl->dirsep() );
+    }
+
     _impl->concat(*p._impl);
     return *this;
 }
@@ -116,7 +122,13 @@ Path& Path::append(const Path& p)
 
 Path& Path::append(const Pt::String& s)
 {
-    _impl->appendSlash( s.c_str(), s.size() );
+    if( ! empty() && ! s.empty() &&
+        _impl->back() != _impl->dirsep() &&
+        s[0] != _impl->dirsep() )
+    { 
+        _impl->push_back( _impl->dirsep() );
+    }
+
     _impl->concat( s.c_str(), s.size() );
     return *this;
 }
@@ -132,7 +144,14 @@ Path& Path::append(const char* s)
 
 Path& Path::append(const char* s, std::size_t n)
 {
-    _impl->appendSlash(s, n);
+    if( ! empty() && n > 0 &&
+        _impl->back() != _impl->dirsep() &&
+        s[0] != _impl->dirsep() )
+    { 
+        _impl->push_back( _impl->dirsep() );
+    }
+
+
     concat(s, n);
     return *this;
 }

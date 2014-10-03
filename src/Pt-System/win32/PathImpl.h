@@ -38,6 +38,9 @@ namespace System {
 class PathImpl
 {
     public:
+        typedef std::wstring::size_type size_type;
+
+    public:
         PathImpl()
         { }
 
@@ -56,61 +59,17 @@ class PathImpl
         void assign(const wchar_t* p)
         { _path = p; }
 
-        void concat(const PathImpl& p)
-        {
-            _path += p._path;
-        }
+        wchar_t front() const
+        { return _path[0]; }
 
-        void concat(const Pt::Char* s, std::size_t n)
-        {
-            Pt::String(s, n).toUtf16( std::back_inserter(_path) );
-        }
+        wchar_t back() const
+        { return _path[ _path.size()-1 ]; }
 
-        bool concat(const char*, std::size_t)
-        {
-            // no direct assign from UTF-8 possible
-            return false;
-        }
-
-        void appendSlash(const PathImpl& p)
-        {
-            if( ! empty() &&
-                ! p.empty() &&
-                _path[_path.size()-1] != dirsep() &&
-                p._path[0] != dirsep())
-            { 
-                _path += dirsep();
-            }
-        }
-
-        void appendSlash(const Pt::Char* s, std::size_t n)
-        {
-            if( ! empty() &&
-                n > 0 &&
-                _path[_path.size()-1] != dirsep() &&
-                s[0] != dirsep())
-            { 
-                _path += dirsep();
-            }
-        }
-
-        void appendSlash(const char* s, std::size_t n)
-        {
-            if( ! empty() &&
-                n > 0 &&
-                _path[_path.size()-1] != dirsep() &&
-                s[0] != dirsep())
-            { 
-                _path += dirsep();
-            }
-        }
-
-        typedef std::wstring::size_type size_type;
+        void push_back(wchar_t c)
+        { _path.push_back(c); }
 
         static size_type npos()
-        {
-            return std::wstring::npos;
-        }
+        { return std::wstring::npos; }
 
         size_type rfind(char ch) const
         {
@@ -127,6 +86,22 @@ class PathImpl
         int compare(const PathImpl& p) const
         {
             return _path.compare(p._path);
+        }
+
+        void concat(const PathImpl& p)
+        {
+            _path += p._path;
+        }
+
+        void concat(const Pt::Char* s, std::size_t n)
+        {
+            Pt::String(s, n).toUtf16( std::back_inserter(_path) );
+        }
+
+        bool concat(const char*, std::size_t)
+        {
+            // no direct assign from UTF-8 possible
+            return false;
         }
 
         Pt::String toString() const
