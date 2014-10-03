@@ -30,6 +30,7 @@
 #include <Pt/WinVer.h>
 #include <Pt/String.h>
 #include <string>
+#include <cwchar>
 
 namespace Pt {
 
@@ -40,78 +41,159 @@ class PathImpl
     public:
         typedef std::wstring::size_type size_type;
 
+        static const std::string::size_type nullSize = sizeof(wchar_t) - 1;
+
     public:
         PathImpl()
+        : _path(nullSize, '\0')
         { }
 
         void clear()
-        { _path.clear(); }
+        { 
+            _path.clear(); 
+            _path.assign(nullSize, '\0');
+        }
 
         bool empty() const
-        { return _path.empty(); }
+        { return _path.size() <= nullSize; }
 
         std::size_t size() const
-        { return _path.size(); }
+        { 
+            // null terminator is part of path data
+            return (_path.size() - nullSize) / sizeof(wchar_t); 
+        }
 
         const wchar_t* c_str() const
-        { return _path.c_str(); }
-
-        void assign(const wchar_t* p)
-        { _path = p; }
+        { return reinterpret_cast<const wchar_t*>( _path.c_str() ); }
 
         wchar_t front() const
-        { return _path[0]; }
+        { 
+            return *c_str(); 
+        }
 
         wchar_t back() const
-        { return _path[ _path.size()-1 ]; }
+        {
+            std::size_t n = size() - 1;
+            return *(c_str() + n);
+        }
 
-        void push_back(wchar_t c)
-        { _path.push_back(c); }
+        void assign(const wchar_t* p)
+        { 
+            //_path = p; 
+
+            const char* bytes = reinterpret_cast<const char*>(p);
+            std::size_t bytesLen = std::wcslen(p) * sizeof(wchar_t);
+            _path.assign(bytes, bytesLen);
+
+            // append null terminator part
+            _path.append(nullSize, '\0');
+        }
+
+        void append(const PathImpl& p)
+        {
+            //_path += p._path;
+
+            // remove null terminator part
+            if( ! _path.empty() )
+                _path.resize( _path.size() - nullSize );
+
+            // also appends null terminator part
+            _path += p._path;
+        }
+
+        void append(const Pt::Char* s, std::size_t n)
+        {
+            //Pt::String(s, n).toUtf16( std::back_inserter(_path) );
+
+            // remove null terminator part
+            if( ! _path.empty() )
+                _path.resize( _path.size() - nullSize );
+
+            Pt::String tmp(s, n);
+            std::wstring wpath;
+            tmp.toUtf16( std::back_inserter(wpath) );
+
+            const char* bytes = reinterpret_cast<const char*>( wpath.c_str() );
+            std::size_t bytesLen = wpath.size() * sizeof(wchar_t);
+            _path.append(bytes, bytesLen);
+
+            // append null terminator part
+            _path.append(nullSize, '\0');
+        }
+
+        bool append(const char*, std::size_t)
+        {
+            // no direct assign from UTF-8 possible
+            return false;
+        }
+
+        void push_back(wchar_t p)
+        { 
+            //_path.push_back(c);
+
+            // remove null terminator part
+            if( ! _path.empty() )
+                _path.resize( _path.size() - nullSize );
+            
+            const char* bytes = reinterpret_cast<const char*>(&p);
+            _path.append(bytes, sizeof(wchar_t));
+
+            // append null terminator part
+            _path.append(nullSize, '\0');
+        }
 
         static size_type npos()
-        { return std::wstring::npos; }
+        { return std::string::npos; }
 
-        size_type rfind(char ch) const
+        size_type rfind(wchar_t ch) const
         {
-            return _path.rfind(ch);
+            //return _path.rfind(ch);
+
+            std::size_t n = _path.size() - nullSize;
+
+            while(n != 0)
+            {
+                n -= sizeof(wchar_t);
+
+                const char* c = &_path[n];
+                const wchar_t* w = reinterpret_cast<const wchar_t*>(c); 
+                if(*w == ch)
+                    return n / sizeof(wchar_t);
+            }
+
+            return npos();
         }
 
         Pt::String substr(size_type pos, size_type n)
         {
-            std::wstring::iterator from = _path.begin() + pos;
+            //std::wstring::iterator from = _path.begin() + pos;
+            //Pt::String tmp = Pt::String::fromUtf16(from, from + n);
+            //return tmp;
+
+            const wchar_t* from = c_str() + pos;
             Pt::String tmp = Pt::String::fromUtf16(from, from + n);
             return tmp;
         }
 
         int compare(const PathImpl& p) const
         {
-            return _path.compare(p._path);
-        }
-
-        void concat(const PathImpl& p)
-        {
-            _path += p._path;
-        }
-
-        void concat(const Pt::Char* s, std::size_t n)
-        {
-            Pt::String(s, n).toUtf16( std::back_inserter(_path) );
-        }
-
-        bool concat(const char*, std::size_t)
-        {
-            // no direct assign from UTF-8 possible
-            return false;
+            // return _path.compare(p._path);
+            
+            return std::wcscmp( c_str(), p.c_str() );
         }
 
         Pt::String toString() const
         {
-            return Pt::String::fromUtf16( _path.begin(), _path.end() );
+            //return Pt::String::fromUtf16( _path.begin(), _path.end() );
+
+            const wchar_t* from = c_str();
+            std::size_t n = size();
+            return Pt::String::fromUtf16(from, from + n);
         }
 
         std::string toLocal() const
         {
-            return win32::toMultiByte( _path.c_str() );
+            return win32::toMultiByte( c_str() );
         }
 
         static char dirsep() 
@@ -121,7 +203,7 @@ class PathImpl
         { return '.'; }
 
     private:
-        std::wstring _path;
+        std::string _path;
 };
 
 } // namespace System

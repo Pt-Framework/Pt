@@ -34,7 +34,6 @@ namespace Pt {
 
 namespace System {
 
-
 Path::Path()
 {
     _impl = new PathImpl();
@@ -50,7 +49,7 @@ Path::Path(const Path& p)
 Path::Path(const Pt::String& s)
 {
     _impl = new PathImpl();
-    _impl->concat( s.c_str(), s.size() );
+    _impl->append( s.c_str(), s.size() );
 }
 
 
@@ -85,7 +84,7 @@ Path& Path::assign(const Path& p)
 Path& Path::assign(const Pt::String& s)
 {
     _impl->clear();
-    _impl->concat( s.c_str(), s.size() );
+    _impl->append( s.c_str(), s.size() );
     return *this;
 }
 
@@ -115,7 +114,7 @@ Path& Path::append(const Path& p)
         _impl->push_back( _impl->dirsep() );
     }
 
-    _impl->concat(*p._impl);
+    _impl->append(*p._impl);
     return *this;
 }
 
@@ -129,7 +128,7 @@ Path& Path::append(const Pt::String& s)
         _impl->push_back( _impl->dirsep() );
     }
 
-    _impl->concat( s.c_str(), s.size() );
+    _impl->append( s.c_str(), s.size() );
     return *this;
 }
 
@@ -151,7 +150,6 @@ Path& Path::append(const char* s, std::size_t n)
         _impl->push_back( _impl->dirsep() );
     }
 
-
     concat(s, n);
     return *this;
 }
@@ -159,14 +157,14 @@ Path& Path::append(const char* s, std::size_t n)
 
 Path& Path::concat(const Path& p)
 {
-    _impl->concat(*p._impl);
+    _impl->append(*p._impl);
     return *this;
 }
 
 
 Path& Path::concat(const Pt::String& s)
 {
-    _impl->concat( s.c_str(), s.size() );
+    _impl->append( s.c_str(), s.size() );
     return *this;
 }
 
@@ -181,7 +179,7 @@ Path& Path::concat(const char* s)
 
 Path& Path::concat(const char* s, std::size_t n)
 {
-    if( _impl->concat(s, n) )
+    if( _impl->append(s, n) )
     {
         return *this;
     }
@@ -201,9 +199,9 @@ Path& Path::concat(const char* s, std::size_t n)
         r = codec.in(state, from, fromEnd, from, to, toEnd, toNext);
 
         if (r == std::codecvt_base::error)
-            _impl->concat("?????", 5);
+            _impl->append("?????", 5);
         else
-            _impl->concat(to, toNext - to);
+            _impl->append(to, toNext - to);
     } 
     while(r == std::codecvt_base::partial);
 

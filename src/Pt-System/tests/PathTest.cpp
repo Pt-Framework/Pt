@@ -59,6 +59,7 @@ class PathTest : public Pt::Unit::TestSuite
             std::string pathName("abc");
             pathName += Pt::System::Path::dirsep().narrow();
             pathName += "xyz";
+            std::string lll = path.toString().narrow();
             PT_UNIT_ASSERT_EQUALS( path.toString(), pathName.c_str() );
         }
 

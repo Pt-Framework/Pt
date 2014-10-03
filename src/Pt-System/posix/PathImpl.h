@@ -145,14 +145,36 @@ class PathImpl
         const char* c_str() const
         { return _path.c_str(); }
 
-        void assign(const char* s)
-        { _path = s; }
-
         char front() const
         { return _path[0]; }
 
         char back() const
         { return _path[ _path.size()-1 ]; }
+
+        void assign(const char* s)
+        { _path = s; }
+
+        void append(const PathImpl& p)
+        {
+            _path += p._path;
+        }
+
+        void append(const Pt::Char* s, std::size_t n)
+        {
+            toLocalPath(s, n, _path);
+        }
+
+        bool append(const char* s, std::size_t n)
+        {
+            TextCodec<Pt::Char, char>* codec = systemCodec();
+            if( ! codec )
+            {
+                // no codec means local encoding is UTF-8
+                _path.append(s, n);
+            }
+
+            return ! codec;
+        }
 
         void push_back(char c)
         { _path.push_back(c); }
@@ -175,28 +197,6 @@ class PathImpl
         int compare(const PathImpl& p) const
         {
             return _path.compare(p._path);
-        }
-
-        void concat(const PathImpl& p)
-        {
-            _path += p._path;
-        }
-
-        void concat(const Pt::Char* s, std::size_t n)
-        {
-            toLocalPath(s, n, _path);
-        }
-
-        bool concat(const char* s, std::size_t n)
-        {
-            TextCodec<Pt::Char, char>* codec = systemCodec();
-            if( ! codec )
-            {
-                // no codec means local encoding is UTF-8
-                _path.append(s, n);
-            }
-
-            return ! codec;
         }
 
         Pt::String toString() const

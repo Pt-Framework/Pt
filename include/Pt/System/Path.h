@@ -216,6 +216,7 @@ class PT_SYSTEM_API Path
 
     private:
         PathImpl* _impl;
+        std::string _pathData;
 };
 
 /** @brief Compares two paths.
