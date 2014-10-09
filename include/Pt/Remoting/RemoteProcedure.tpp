@@ -76,16 +76,16 @@ class RemoteProcedure : public RemoteProcedureBase<R>
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
-                _a3.begin(a3, "", client().context());
-                _a4.begin(a4, "", client().context());
-                _a5.begin(a5, "", client().context());
-                _a6.begin(a6, "", client().context());
-                _a7.begin(a7, "", client().context());
-                _a8.begin(a8, "", client().context());
-                _a9.begin(a9, "", client().context());
-                _a10.begin(a10, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
+                _a3.begin(a3, "", this->client().context());
+                _a4.begin(a4, "", this->client().context());
+                _a5.begin(a5, "", this->client().context());
+                _a6.begin(a6, "", this->client().context());
+                _a7.begin(a7, "", this->client().context());
+                _a8.begin(a8, "", this->client().context());
+                _a9.begin(a9, "", this->client().context());
+                _a10.begin(a10, "", this->client().context());
 
                 BasicComposer<R>& r = this->beginResult();
 
@@ -102,16 +102,16 @@ class RemoteProcedure : public RemoteProcedureBase<R>
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
-                _a3.begin(a3, "", client().context());
-                _a4.begin(a4, "", client().context());
-                _a5.begin(a5, "", client().context());
-                _a6.begin(a6, "", client().context());
-                _a7.begin(a7, "", client().context());
-                _a8.begin(a8, "", client().context());
-                _a9.begin(a9, "", client().context());
-                _a10.begin(a10, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
+                _a3.begin(a3, "", this->client().context());
+                _a4.begin(a4, "", this->client().context());
+                _a5.begin(a5, "", this->client().context());
+                _a6.begin(a6, "", this->client().context());
+                _a7.begin(a7, "", this->client().context());
+                _a8.begin(a8, "", this->client().context());
+                _a9.begin(a9, "", this->client().context());
+                _a10.begin(a10, "", this->client().context());
                 BasicComposer<R>& r = this->beginResult();
 
                 this->client().call(r, *this, _args, 10);
@@ -134,7 +134,7 @@ class RemoteProcedure : public RemoteProcedureBase<R>
     protected:
         void onReset()
         {
-            RemoteProcedureBase::onReset();
+            RemoteProcedureBase<R>::onReset();
 
             _a1.clear( &this->client().context() );
             _a2.clear( &this->client().context() );
@@ -204,15 +204,15 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
-                _a3.begin(a3, "", client().context());
-                _a4.begin(a4, "", client().context());
-                _a5.begin(a5, "", client().context());
-                _a6.begin(a6, "", client().context());
-                _a7.begin(a7, "", client().context());
-                _a8.begin(a8, "", client().context());
-                _a9.begin(a9, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
+                _a3.begin(a3, "", this->client().context());
+                _a4.begin(a4, "", this->client().context());
+                _a5.begin(a5, "", this->client().context());
+                _a6.begin(a6, "", this->client().context());
+                _a7.begin(a7, "", this->client().context());
+                _a8.begin(a8, "", this->client().context());
+                _a9.begin(a9, "", this->client().context());
 
                 BasicComposer<R>& r = this->beginResult();
 
@@ -229,15 +229,15 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
-                _a3.begin(a3, "", client().context());
-                _a4.begin(a4, "", client().context());
-                _a5.begin(a5, "", client().context());
-                _a6.begin(a6, "", client().context());
-                _a7.begin(a7, "", client().context());
-                _a8.begin(a8, "", client().context());
-                _a9.begin(a9, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
+                _a3.begin(a3, "", this->client().context());
+                _a4.begin(a4, "", this->client().context());
+                _a5.begin(a5, "", this->client().context());
+                _a6.begin(a6, "", this->client().context());
+                _a7.begin(a7, "", this->client().context());
+                _a8.begin(a8, "", this->client().context());
+                _a9.begin(a9, "", this->client().context());
                 BasicComposer<R>& r = this->beginResult();
 
                 this->client().call(r, *this, _args, 9);
@@ -260,7 +260,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8, A9,
     protected:
         void onReset()
         {
-            RemoteProcedureBase::onReset();
+            RemoteProcedureBase<R>::onReset();
 
             _a1.clear( &this->client().context() );
             _a2.clear( &this->client().context() );
@@ -326,14 +326,14 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
-                _a3.begin(a3, "", client().context());
-                _a4.begin(a4, "", client().context());
-                _a5.begin(a5, "", client().context());
-                _a6.begin(a6, "", client().context());
-                _a7.begin(a7, "", client().context());
-                _a8.begin(a8, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
+                _a3.begin(a3, "", this->client().context());
+                _a4.begin(a4, "", this->client().context());
+                _a5.begin(a5, "", this->client().context());
+                _a6.begin(a6, "", this->client().context());
+                _a7.begin(a7, "", this->client().context());
+                _a8.begin(a8, "", this->client().context());
 
                 BasicComposer<R>& r = this->beginResult();
 
@@ -350,14 +350,14 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
-                _a3.begin(a3, "", client().context());
-                _a4.begin(a4, "", client().context());
-                _a5.begin(a5, "", client().context());
-                _a6.begin(a6, "", client().context());
-                _a7.begin(a7, "", client().context());
-                _a8.begin(a8, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
+                _a3.begin(a3, "", this->client().context());
+                _a4.begin(a4, "", this->client().context());
+                _a5.begin(a5, "", this->client().context());
+                _a6.begin(a6, "", this->client().context());
+                _a7.begin(a7, "", this->client().context());
+                _a8.begin(a8, "", this->client().context());
                 BasicComposer<R>& r = this->beginResult();
 
                 this->client().call(r, *this, _args, 8);
@@ -380,7 +380,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7, A8,
     protected:
         void onReset()
         {
-            RemoteProcedureBase::onReset();
+            RemoteProcedureBase<R>::onReset();
 
             _a1.clear( &this->client().context() );
             _a2.clear( &this->client().context() );
@@ -442,13 +442,13 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7,
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
-                _a3.begin(a3, "", client().context());
-                _a4.begin(a4, "", client().context());
-                _a5.begin(a5, "", client().context());
-                _a6.begin(a6, "", client().context());
-                _a7.begin(a7, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
+                _a3.begin(a3, "", this->client().context());
+                _a4.begin(a4, "", this->client().context());
+                _a5.begin(a5, "", this->client().context());
+                _a6.begin(a6, "", this->client().context());
+                _a7.begin(a7, "", this->client().context());
 
                 BasicComposer<R>& r = this->beginResult();
 
@@ -465,13 +465,13 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7,
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
-                _a3.begin(a3, "", client().context());
-                _a4.begin(a4, "", client().context());
-                _a5.begin(a5, "", client().context());
-                _a6.begin(a6, "", client().context());
-                _a7.begin(a7, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
+                _a3.begin(a3, "", this->client().context());
+                _a4.begin(a4, "", this->client().context());
+                _a5.begin(a5, "", this->client().context());
+                _a6.begin(a6, "", this->client().context());
+                _a7.begin(a7, "", this->client().context());
                 BasicComposer<R>& r = this->beginResult();
 
                 this->client().call(r, *this, _args, 7);
@@ -494,7 +494,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6, A7,
     protected:
         void onReset()
         {
-            RemoteProcedureBase::onReset();
+            RemoteProcedureBase<R>::onReset();
 
             _a1.clear( &this->client().context() );
             _a2.clear( &this->client().context() );
@@ -552,12 +552,12 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6,
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
-                _a3.begin(a3, "", client().context());
-                _a4.begin(a4, "", client().context());
-                _a5.begin(a5, "", client().context());
-                _a6.begin(a6, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
+                _a3.begin(a3, "", this->client().context());
+                _a4.begin(a4, "", this->client().context());
+                _a5.begin(a5, "", this->client().context());
+                _a6.begin(a6, "", this->client().context());
 
                 BasicComposer<R>& r = this->beginResult();
 
@@ -574,12 +574,12 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6,
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
-                _a3.begin(a3, "", client().context());
-                _a4.begin(a4, "", client().context());
-                _a5.begin(a5, "", client().context());
-                _a6.begin(a6, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
+                _a3.begin(a3, "", this->client().context());
+                _a4.begin(a4, "", this->client().context());
+                _a5.begin(a5, "", this->client().context());
+                _a6.begin(a6, "", this->client().context());
                 BasicComposer<R>& r = this->beginResult();
 
                 this->client().call(r, *this, _args, 6);
@@ -602,7 +602,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5, A6,
     protected:
         void onReset()
         {
-            RemoteProcedureBase::onReset();
+            RemoteProcedureBase<R>::onReset();
 
             _a1.clear( &this->client().context() );
             _a2.clear( &this->client().context() );
@@ -656,11 +656,11 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5,
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
-                _a3.begin(a3, "", client().context());
-                _a4.begin(a4, "", client().context());
-                _a5.begin(a5, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
+                _a3.begin(a3, "", this->client().context());
+                _a4.begin(a4, "", this->client().context());
+                _a5.begin(a5, "", this->client().context());
 
                 BasicComposer<R>& r = this->beginResult();
 
@@ -677,11 +677,11 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5,
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
-                _a3.begin(a3, "", client().context());
-                _a4.begin(a4, "", client().context());
-                _a5.begin(a5, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
+                _a3.begin(a3, "", this->client().context());
+                _a4.begin(a4, "", this->client().context());
+                _a5.begin(a5, "", this->client().context());
                 
                 BasicComposer<R>& r = this->beginResult();
 
@@ -705,7 +705,7 @@ class RemoteProcedure<R, A1, A2, A3, A4, A5,
     protected:
         void onReset()
         {
-            RemoteProcedureBase::onReset();
+            RemoteProcedureBase<R>::onReset();
 
             _a1.clear( &this->client().context() );
             _a2.clear( &this->client().context() );
@@ -755,10 +755,10 @@ class RemoteProcedure<R, A1, A2, A3, A4,
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
-                _a3.begin(a3, "", client().context());
-                _a4.begin(a4, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
+                _a3.begin(a3, "", this->client().context());
+                _a4.begin(a4, "", this->client().context());
 
                 BasicComposer<R>& r = this->beginResult();
 
@@ -775,10 +775,10 @@ class RemoteProcedure<R, A1, A2, A3, A4,
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
-                _a3.begin(a3, "", client().context());
-                _a4.begin(a4, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
+                _a3.begin(a3, "", this->client().context());
+                _a4.begin(a4, "", this->client().context());
                 
                 BasicComposer<R>& r = this->beginResult();
 
@@ -801,7 +801,7 @@ class RemoteProcedure<R, A1, A2, A3, A4,
     protected:
         void onReset()
         {
-            RemoteProcedureBase::onReset();
+            RemoteProcedureBase<R>::onReset();
 
             _a1.clear( &this->client().context() );
             _a2.clear( &this->client().context() );
@@ -847,9 +847,9 @@ class RemoteProcedure<R, A1, A2, A3,
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
-                _a3.begin(a3, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
+                _a3.begin(a3, "", this->client().context());
                 
                 BasicComposer<R>& r = this->beginResult();
 
@@ -866,9 +866,9 @@ class RemoteProcedure<R, A1, A2, A3,
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
-                _a3.begin(a3, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
+                _a3.begin(a3, "", this->client().context());
                 
                 BasicComposer<R>& r = this->beginResult();
 
@@ -891,7 +891,7 @@ class RemoteProcedure<R, A1, A2, A3,
     protected:
         void onReset()
         {
-            RemoteProcedureBase::onReset();
+            RemoteProcedureBase<R>::onReset();
 
             _a1.clear( &this->client().context() );
             _a2.clear( &this->client().context() );
@@ -933,8 +933,8 @@ class RemoteProcedure<R, A1, A2,
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
                 
                 BasicComposer<R>& r = this->beginResult();
 
@@ -951,8 +951,8 @@ class RemoteProcedure<R, A1, A2,
         {
             try
             {
-                _a1.begin(a1, "", client().context());
-                _a2.begin(a2, "", client().context());
+                _a1.begin(a1, "", this->client().context());
+                _a2.begin(a2, "", this->client().context());
                 
                 BasicComposer<R>& r = this->beginResult();
 
@@ -975,7 +975,7 @@ class RemoteProcedure<R, A1, A2,
     protected:
         void onReset()
         {
-            RemoteProcedureBase::onReset();
+            RemoteProcedureBase<R>::onReset();
 
             _a1.clear( &this->client().context() );
             _a2.clear( &this->client().context() );
@@ -1016,7 +1016,7 @@ class RemoteProcedure<R, A1,
                 // TODO: pass instance name to format()/onFormat() and 
                 //                             beginFormat()/onBeginFormat()
 
-                _a1.begin(a1, "", client().context());
+                _a1.begin(a1, "", this->client().context());
                 
                 BasicComposer<R>& r = this->beginResult();
                 
@@ -1033,7 +1033,7 @@ class RemoteProcedure<R, A1,
         {
             try
             {
-                _a1.begin(a1, "", client().context());
+                _a1.begin(a1, "", this->client().context());
                 
                 BasicComposer<R>& r = this->beginResult();
                 
@@ -1057,7 +1057,7 @@ class RemoteProcedure<R, A1,
     protected:
         void onReset()
         {
-            RemoteProcedureBase::onReset();
+            RemoteProcedureBase<R>::onReset();
             _a1.clear( &this->client().context() );
         }
 
@@ -1126,7 +1126,7 @@ class RemoteProcedure<R,
     protected:
         void onReset()
         {
-            RemoteProcedureBase::onReset();
+            RemoteProcedureBase<R>::onReset();
         }
 };
 
