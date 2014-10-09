@@ -155,12 +155,12 @@ class RemoteProcedureBase : public RemoteCall
         , _r(0)
         { 
           _result.init(this);
-          _r = new (_mem) BasicComposer<R>( &client.context() );
         }
 
         ~RemoteProcedureBase()
         {
-            _r->~BasicComposer<R>();
+            if(_r)
+                _r->~BasicComposer<R>();
         }
 
         Result<R>& result()
@@ -182,18 +182,29 @@ class RemoteProcedureBase : public RemoteCall
 
         BasicComposer<R>& beginResult()
         {
+            if(_r)
+            {
+                _r->~BasicComposer<R>();
+                _r = 0;
+            }
+
+            _r = new (_mem) BasicComposer<R>( &client().context() );
             _r->begin( result().value() );
             return *_r;
         }
 
-        void resetResult()
+        virtual void onReset()
         {
-            _r->~BasicComposer<R>();
-            _r = new (_mem) BasicComposer<R>( &client().context() );
+            if(_r)
+            {
+                _r->~BasicComposer<R>();
+                _r = 0;
+            }
         }
 
         virtual void onClear()
         {
+            this->onReset();
             _result.clear();
         }
 
@@ -209,30 +220,40 @@ template <typename A>
 class RemoteArgument : private Pt::NonCopyable
 {
     public:
-        RemoteArgument(SerializationContext* ctx)
+        RemoteArgument(SerializationContext* )
         : _decomposer(0)
-        {
-            _decomposer = new (_mem) BasicDecomposer<A>(ctx);
-        }
+        { }
 
         ~RemoteArgument()
         {
-            _decomposer->~BasicDecomposer<A>();
+            if(_decomposer)
+                _decomposer->~BasicDecomposer<A>();
         }
 
-        void begin(const A& a, const char* name)
+        void begin(const A& a, const char* name, SerializationContext& ctx)
         {
+            if(_decomposer)
+            {
+                _decomposer->~BasicDecomposer<A>();
+                _decomposer = 0;
+            }
+
+            _decomposer = new (_mem) BasicDecomposer<A>(&ctx);
             _decomposer->begin(a, name);
         }
 
-        void reset(SerializationContext* ctx)
+        void clear(SerializationContext* )
         {
-            _decomposer->~BasicDecomposer<A>();
-            _decomposer = new (_mem) BasicDecomposer<A>(ctx);
+            if(_decomposer)
+            {
+                _decomposer->~BasicDecomposer<A>();
+                _decomposer = 0;
+            }
         }
 
+        // TODO: return decomposer pointer from begin
         BasicDecomposer<A>* decomposer()
-        { return _decomposer; }
+        { return reinterpret_cast<BasicDecomposer<A>*>(_mem); }
 
     private:
         char _mem[ sizeof(BasicDecomposer<A>) ];

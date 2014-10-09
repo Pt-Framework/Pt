@@ -239,7 +239,7 @@ void HttpClient::onCancel()
     Soap::Client::onCancel();
 
     _error = false;
-    _client.cancel();
+    _client.close();
 }
 
 
