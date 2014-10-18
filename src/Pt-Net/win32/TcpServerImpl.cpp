@@ -41,7 +41,7 @@
 #include <limits>
 //#include <Mswsock.h>
 
-log_define("Pt.System.TcpServer");
+PT_LOG_DEFINE("Pt.System.TcpServer");
 
 namespace Pt {
 
@@ -76,17 +76,17 @@ TcpServerImpl::~TcpServerImpl()
 
 void TcpServerImpl::create(int domain, int type, int protocol)
 {
-    log_debug("create socket");
+    PT_LOG_DEBUG("create socket");
 
     _fd = WSASocket(domain, type, protocol, NULL , 0, 0);
 
     if (_fd == INVALID_SOCKET)
     {
-        log_debug("socket() failed: "<< WSAGetLastError());
+        PT_LOG_DEBUG("socket() failed: "<< WSAGetLastError());
         throw System::SystemError( PT_ERROR_MSG("creating socket failed") );
     }
 
-    log_debug("server socket " << _fd);
+    PT_LOG_DEBUG("server socket " << _fd);
 }
 
 
@@ -95,7 +95,7 @@ void TcpServerImpl::close()
     if (_fd == INVALID_SOCKET)
         return;
 
-    log_debug("close socket " << _fd);
+    PT_LOG_DEBUG("close socket " << _fd);
 
     setEventFlags(0, 0);
 
@@ -110,7 +110,7 @@ void TcpServerImpl::cancel(System::EventLoop& loop)
     if (_fd == INVALID_SOCKET || _ioh.handle() == INVALID_HANDLE_VALUE)
         return;
 
-    log_debug("cancel socket " << _fd);
+    PT_LOG_DEBUG("cancel socket " << _fd);
     setEventFlags(_ioh.handle(), 0);
     loop.selector().disableOverlapped(_ioh);
 }
@@ -126,7 +126,7 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port,
 
 void TcpServerImpl::listen(const Endpoint& ep, const TcpServerOptions& options)
 {
-    log_debug("listen on " << ep.toString());
+    PT_LOG_DEBUG("listen on " << ep.toString());
 
     BOOL reuseAddr = TRUE;
     static const int on = 1;
@@ -147,7 +147,7 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServerOptions& options)
 
         // TODO: use WSA functions
 
-        log_debug("setsockopt SO_REUSEADDR");
+        PT_LOG_DEBUG("setsockopt SO_REUSEADDR");
         if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&reuseAddr, sizeof(reuseAddr)) < 0)
         {
             close();
@@ -159,20 +159,20 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServerOptions& options)
         {
           if (::setsockopt(_fd, IPPROTO_IPV6, IPV6_V6ONLY, (const char*) &on, sizeof(on)) < 0)
           {
-              log_debug("could not set socket option IPV6_V6ONLY, errno=" << errno << ": " << strerror(errno));
+              PT_LOG_DEBUG("could not set socket option IPV6_V6ONLY, errno=" << errno << ": " << strerror(errno));
               close();
               throw System::SystemError("setsockopt IPV6_V6ONLY");
           }
         }
 #endif
     
-        log_debug("bind ");
+        PT_LOG_DEBUG("bind ");
         socklen_t addrlen = static_cast<socklen_t>(it->ai_addrlen);
         
         if( ::bind(_fd, it->ai_addr, addrlen) == 0 )
         {
    
-            log_debug("listen ");
+            PT_LOG_DEBUG("listen ");
     
             if (::listen(_fd, options.backlog()) == SOCKET_ERROR)
             {
@@ -188,7 +188,7 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServerOptions& options)
         }
     }
 
-    log_debug( "error: " << WSAGetLastError() );
+    PT_LOG_DEBUG( "error: " << WSAGetLastError() );
     
     close();
 
@@ -201,12 +201,12 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServerOptions& options)
 
 void TcpServerImpl::beginAccept(System::EventLoop& loop)
 {
-    log_debug("begin accepting " << _fd);
+    PT_LOG_DEBUG("begin accepting " << _fd);
 
     if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
         loop.selector().enableOverlapped(_ioh);
-        log_debug("enabled i/o handle " << _ioh.handle());
+        PT_LOG_DEBUG("enabled i/o handle " << _ioh.handle());
     }
 
     setEventFlags(_ioh.handle(), FD_ACCEPT);
@@ -223,7 +223,7 @@ SOCKET TcpServerImpl::accept()
         DWORD err = WSAGetLastError();
         if(WSAEWOULDBLOCK != err) // WSAEINPROGRESS only for blocking WSA 1.1
         {
-            log_debug("socket error on " << _fd);
+            PT_LOG_DEBUG("socket error on " << _fd);
             throw System::IOError("WSAAccept");
         }
         
@@ -236,19 +236,19 @@ SOCKET TcpServerImpl::accept()
         fd = ::WSAAccept(_fd, NULL, NULL, NULL, 0);
         if(fd == INVALID_SOCKET)
         {
-            log_debug("socket error on " << _fd);
+            PT_LOG_DEBUG("socket error on " << _fd);
             throw System::IOError("WSAAccept");
         }
     }
 
-    log_debug(fd << " accepted ");
+    PT_LOG_DEBUG(fd << " accepted ");
     return fd;
 }
 
 
 bool TcpServerImpl::run(System::EventLoop& loop)
 {
-    log_debug("TcpServerImpl::avail");
+    PT_LOG_DEBUG("TcpServerImpl::avail");
     
     if (_fd == INVALID_SOCKET)
         return false;
@@ -268,7 +268,7 @@ void TcpServerImpl::setEventFlags(HANDLE ev, long events)
 {
     if (WSAEventSelect(_fd, ev, events) == SOCKET_ERROR)
     {
-        log_debug("Set event failed: "<< WSAGetLastError());
+        PT_LOG_DEBUG("Set event failed: "<< WSAGetLastError());
         throw System::SystemError( PT_ERROR_MSG("attach event to server socket failed") );
     }
 }

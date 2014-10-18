@@ -36,7 +36,7 @@
 #include <Pt/System/Logger.h>
 #include <cassert>
 
-log_define("Pt.XmlRpc.Client")
+PT_LOG_DEFINE("Pt.XmlRpc.Client")
 
 namespace Pt {
 

@@ -34,14 +34,14 @@
 #include <stdio.h>
 #include <cstring>
 
-#define log_define(a)
-#define log_trace(a)
-#define log_debug(a)
-#define log_info(a)
-#define log_warn(a)
-#define log_error(a)
+#define PT_LOG_DEFINE(a)
+#define PT_LOG_TRACE(a)
+#define PT_LOG_DEBUG(a)
+#define PT_LOG_INFO(a)
+#define PT_LOG_WARN(a)
+#define PT_LOG_ERROR(a)
 
-log_define("Pt.Http.Message")
+PT_LOG_DEFINE("Pt.Http.Message")
 
 namespace {
 
@@ -120,7 +120,7 @@ void MessageHeader::clear()
 
 void MessageHeader::set(const char* key, const char* value)
 {
-    log_debug("MessageHeader::set(\"" << key << "\", \"" << value << "\", " << replace << ')');
+    PT_LOG_DEBUG("MessageHeader::set(\"" << key << "\", \"" << value << "\", " << replace << ')');
     remove(key);
     add(key, value);
 }
@@ -128,7 +128,7 @@ void MessageHeader::set(const char* key, const char* value)
 
 void MessageHeader::add(const char* key, const char* value)
 { 
-    log_debug("MessageHeader::add(\"" << key << "\", \"" << value << "\", " << replace << ')');
+    PT_LOG_DEBUG("MessageHeader::add(\"" << key << "\", \"" << value << "\", " << replace << ')');
 
     if( ! *key)
         throw std::invalid_argument("header key is NULL");

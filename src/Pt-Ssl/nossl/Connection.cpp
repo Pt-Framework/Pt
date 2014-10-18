@@ -31,7 +31,7 @@
 #include <Pt/System/Logger.h>
 #include <streambuf>
 
-log_define("Pt.Ssl.StreamBuffer")
+PT_LOG_DEFINE("Pt.Ssl.StreamBuffer")
 
 namespace Pt {
 
@@ -57,7 +57,7 @@ const char* Connection::currentCipher() const
 
 bool Connection::writeHandshake()
 {
-    log_trace("Connection::writeHandshake");
+    PT_LOG_TRACE("Connection::writeHandshake");
     throw HandshakeFailed("SSL handshake failed");
 
     return false;
@@ -66,14 +66,14 @@ bool Connection::writeHandshake()
 
 bool Connection::readHandshake()
 {
-    log_trace("Connection::readHandshake");
+    PT_LOG_TRACE("Connection::readHandshake");
     throw HandshakeFailed("SSL handshake failed");
 }
 
 
 bool Connection::shutdown()
 {
-    log_debug("shutdown failed");
+    PT_LOG_DEBUG("shutdown failed");
     throw SslError("shutdown failed");
     
     return false;
@@ -94,14 +94,14 @@ bool Connection::isClosed() const
 
 std::streamsize Connection::write(const char* buf, std::size_t n)
 {
-    log_trace("Connection::write");
+    PT_LOG_TRACE("Connection::write");
     throw SslError("encoding failed");
 }
 
 
 std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxImport)
 {
-    log_trace("Connection::read");
+    PT_LOG_TRACE("Connection::read");
     throw SslError("decoding failed");
 }
 

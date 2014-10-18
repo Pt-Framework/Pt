@@ -52,7 +52,7 @@
 #include <stack>
 #include <cassert>
 
-log_define("Pt.Xml.XmlReader")
+PT_LOG_DEFINE("Pt.Xml.XmlReader")
 
 namespace Pt {
 

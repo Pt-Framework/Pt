@@ -31,8 +31,8 @@
 #include <algorithm>
 #include <string.h>
 
-#define log_debug(e)
-#define log_warn(e)
+#define PT_LOG_DEBUG(e)
+#define PT_LOG_WARN(e)
 
 namespace Pt {
 
@@ -145,7 +145,7 @@ namespace Http {
         }
         else if (ch != ' ' && ch != '\t')
         {
-            log_warn("invalid character " << chartoprint(ch) << " in method");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in method");
             state = &HeaderParser::state_error;
             return;
         }
@@ -165,14 +165,14 @@ namespace Http {
         }
         else if (ch == ' ')
         {
-            log_debug("method=" << token);
+            PT_LOG_DEBUG("method=" << token);
             ev.onMethod(token);
             state = &HeaderParser::state_url0;
             return;
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in method");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in method");
             state = &HeaderParser::state_error;
             return;
         }
@@ -193,7 +193,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in url");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in url");
             state = &HeaderParser::state_error;
             return;
         }
@@ -203,7 +203,7 @@ namespace Http {
     {
         if (ch == '?')
         {
-            log_debug("url=" << token);
+            PT_LOG_DEBUG("url=" << token);
             ev.onUrl(token);
             token.clear();
             token.reserve(32);
@@ -212,7 +212,7 @@ namespace Http {
         }
         else if (ch == ' ' || ch == '\t')
         {
-            log_debug("url=" << token);
+            PT_LOG_DEBUG("url=" << token);
             ev.onUrl(token);
             token.clear();
             token.reserve(32);
@@ -237,7 +237,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in url");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in url");
             state = &HeaderParser::state_error;
             return;
         }
@@ -263,7 +263,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid hex digit " << chartoprint(ch) << " in url");
+            PT_LOG_WARN("invalid hex digit " << chartoprint(ch) << " in url");
             state = &HeaderParser::state_error;
             return;
         }
@@ -273,7 +273,7 @@ namespace Http {
     {
         if (ch == ' ' || ch == '\t')
         {
-            log_debug("queryString=" << token);
+            PT_LOG_DEBUG("queryString=" << token);
             ev.onUrlParam(token);
             token.clear();
             token.reserve(32);
@@ -302,7 +302,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in http protocol field");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in http protocol field");
             state = &HeaderParser::state_error;
             return;
         }
@@ -314,7 +314,7 @@ namespace Http {
         {
             if (token != "HTTP")
             {
-                log_warn("invalid protocol " << token << " in http protocol field");
+                PT_LOG_WARN("invalid protocol " << token << " in http protocol field");
                 state = &HeaderParser::state_error;
                 return;
             }
@@ -331,7 +331,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in http protocol field");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in http protocol field");
             state = &HeaderParser::state_error;
             return;
         }
@@ -350,7 +350,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in http version field");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in http version field");
             state = &HeaderParser::state_error;
             return;
         }
@@ -369,7 +369,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in http version field");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in http version field");
             state = &HeaderParser::state_error;
             return;
         }
@@ -389,7 +389,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in http version field");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in http version field");
             state = &HeaderParser::state_error;
             return;
         }
@@ -409,7 +409,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in http version field");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in http version field");
             state = &HeaderParser::state_error;
             return;
         }
@@ -428,7 +428,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in http request line");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in http request line");
             state = &HeaderParser::state_error;
             return;
         }
@@ -460,7 +460,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in http header");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in http header");
             state = &HeaderParser::state_error;
             return;
         }
@@ -476,7 +476,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in http header");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in http header");
             state = &HeaderParser::state_error;
             return;
         }
@@ -503,7 +503,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in fieldname");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in fieldname");
             state = &HeaderParser::state_error;
             return;
         }
@@ -522,7 +522,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in fieldname");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in fieldname");
             state = &HeaderParser::state_error;
             return;
         }
@@ -581,7 +581,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in fieldbody");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in fieldbody");
             state = &HeaderParser::state_error;
             return;
         }
@@ -619,7 +619,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in fieldbody");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in fieldbody");
             state = &HeaderParser::state_error;
             return;
         }
@@ -635,7 +635,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in fieldbody");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in fieldbody");
             state = &HeaderParser::state_error;
             return;
         }
@@ -656,7 +656,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in http protocol field");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in http protocol field");
             state = &HeaderParser::state_error;
             return;
         }
@@ -668,7 +668,7 @@ namespace Http {
         {
             if (token != "HTTP")
             {
-                log_warn("invalid protocol " << token << " in http protocol field");
+                PT_LOG_WARN("invalid protocol " << token << " in http protocol field");
                 state = &HeaderParser::state_error;
                 return;
             }
@@ -685,7 +685,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in http protocol field");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in http protocol field");
             state = &HeaderParser::state_error;
             return;
         }
@@ -704,7 +704,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in http version field");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in http version field");
             state = &HeaderParser::state_error;
             return;
         }
@@ -723,7 +723,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in http version field");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in http version field");
             state = &HeaderParser::state_error;
             return;
         }
@@ -743,7 +743,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in http version field");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in http version field");
             state = &HeaderParser::state_error;
             return;
         }
@@ -763,7 +763,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in http result");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in http result");
             state = &HeaderParser::state_error;
             return;
         }
@@ -783,7 +783,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in http result");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in http result");
             state = &HeaderParser::state_error;
             return;
         }
@@ -838,7 +838,7 @@ namespace Http {
         }
         else
         {
-            log_warn("invalid character " << chartoprint(ch) << " in requestheader");
+            PT_LOG_WARN("invalid character " << chartoprint(ch) << " in requestheader");
             state = &HeaderParser::state_error;
             return;
         }

@@ -40,7 +40,7 @@
 #include <iterator>
 #include <cassert>
 
-log_define("Pt.Http.Connection")
+PT_LOG_DEFINE("Pt.Http.Connection")
 
 namespace Pt {
 
@@ -116,7 +116,7 @@ Connection::~Connection()
 
 void Connection::accept(Net::TcpServer& tcpServer)
 {
-    log_trace("Connection::accept");    
+    PT_LOG_TRACE("Connection::accept");    
     cancel();
 
     _socket.accept(tcpServer);
@@ -153,7 +153,7 @@ void Connection::setHost(const Net::Endpoint& addrinfo, const Net::TcpSocketOpti
 
 void Connection::setSecure(Ssl::Context& ctx)
 {
-    log_debug("initialize HTTPS connection");
+    PT_LOG_DEBUG("initialize HTTPS connection");
 
     _ctx = &ctx;
 
@@ -185,7 +185,7 @@ void Connection::setSecure(Ssl::Context& ctx)
 
 void Connection::onCancel()
 {
-    log_debug("cancelling connection");
+    PT_LOG_DEBUG("cancelling connection");
     _timer.stop();
     _readSize = 0;
     _readBytes = 0;
@@ -209,35 +209,35 @@ void Connection::onCancel()
 
 void Connection::sendRequest(Request& request)
 {
-    log_debug("Connection::sendRequest");
+    PT_LOG_DEBUG("Connection::sendRequest");
 
     if( ! isConnected() )
     {
-        log_debug("opening new connection to " << _addrInfo.toString());
+        PT_LOG_DEBUG("opening new connection to " << _addrInfo.toString());
         _socket.connect(_addrInfo, _tcpOptions);
 
         if(_ssl)
         {
-            log_debug("SSL connect");
+            PT_LOG_DEBUG("SSL connect");
             _sslbuf.open(*_ctx, _sockios, Ssl::Connect);
 
             for( ; ; )
             {
-                log_debug("writing handshake");
+                PT_LOG_DEBUG("writing handshake");
                 while( _sslbuf.writeHandshake() )
                     ;
 
-                log_debug("syncing buffer");
+                PT_LOG_DEBUG("syncing buffer");
                 _sockios.flush();
 
-                log_debug("reading handshake");
+                PT_LOG_DEBUG("reading handshake");
                 while( _sslbuf.readHandshake() )
                     ;
 
                 if( _sslbuf.isConnected() )
                     break;
 
-                log_debug("continuing handshake");
+                PT_LOG_DEBUG("continuing handshake");
             }
         }
     }
@@ -247,11 +247,11 @@ void Connection::sendRequest(Request& request)
 
     if( request.isFinished() )
     {
-        log_debug("HTTP request finished");
+        PT_LOG_DEBUG("HTTP request finished");
         
         if(_chunked)
         {
-            log_debug("sending last HTTP chunk: "  << mbuf.size() << " bytes");
+            PT_LOG_DEBUG("sending last HTTP chunk: "  << mbuf.size() << " bytes");
             if(mbuf.size() > 0)
             {
                 os << std::hex << mbuf.size() << std::dec << "\r\n";
@@ -265,7 +265,7 @@ void Connection::sendRequest(Request& request)
         else
         {
             writeRequestHeader(os, request);
-            log_debug("writing body: " << mbuf.size() << " bytes");
+            PT_LOG_DEBUG("writing body: " << mbuf.size() << " bytes");
             os.write( mbuf.data(), mbuf.size() );
         }
     }
@@ -273,12 +273,12 @@ void Connection::sendRequest(Request& request)
     {
         if( ! _chunked )
         {
-            log_debug("sending chunked header");
+            PT_LOG_DEBUG("sending chunked header");
             _chunked = true;
             writeRequestHeader(os, request);
         }
 
-        log_debug("sending HTTP chunk: "  << mbuf.size() << " bytes");
+        PT_LOG_DEBUG("sending HTTP chunk: "  << mbuf.size() << " bytes");
 
         if(mbuf.size() > 0)
         {
@@ -290,18 +290,18 @@ void Connection::sendRequest(Request& request)
 
     if(_ssl)
     {
-        log_debug("flushing ssl buffer");
+        PT_LOG_DEBUG("flushing ssl buffer");
         _sslbuf.pubsync();
     }
 
-    log_debug("flushing socket buffer: " << _sockbuf.out_avail());
+    PT_LOG_DEBUG("flushing socket buffer: " << _sockbuf.out_avail());
     _sockbuf.pubsync();
 }
 
 
 void Connection::receiveReply(Reply& reply)
 {
-    log_debug("Connection::receiveReply");
+    PT_LOG_DEBUG("Connection::receiveReply");
     
     char ch = ' ';
     std::istream is( _httpbuf.buffer() );
@@ -315,21 +315,21 @@ void Connection::receiveReply(Reply& reply)
 
     if( ! _replyParser.end() || _replyParser.fail() )
     {
-        log_info("invalid HTTP reply");
+        PT_LOG_INFO("invalid HTTP reply");
         throw HttpError("invalid HTTP message");
     }
 
     _httpbuf.reset();
     _httpbuf.beginBody( reply.header() );
-    log_debug("reply size: " << reply.header().contentLength() << ", chunked: " << reply.header().isChunked());
+    PT_LOG_DEBUG("reply size: " << reply.header().contentLength() << ", chunked: " << reply.header().isChunked());
 
     // stuff whole body into MessageBuffer...
     reply.body() << &_httpbuf;
-    log_debug("reply body finished");
+    PT_LOG_DEBUG("reply body finished");
 
     if( ! _httpbuf.isEnd() )
     {
-        log_info("invalid HTTP reply");
+        PT_LOG_INFO("invalid HTTP reply");
         throw HttpError("invalid HTTP message");
     }
 
@@ -338,7 +338,7 @@ void Connection::receiveReply(Reply& reply)
     bool keepalive = reply.header().isKeepAlive();
     if( ! keepalive )
     {
-        log_debug("closing, no keep alive");
+        PT_LOG_DEBUG("closing, no keep alive");
         cancel();
 
         // TODO: do SSL shutdown here
@@ -348,13 +348,13 @@ void Connection::receiveReply(Reply& reply)
 
 void Connection::beginSendRequest(Request& request)
 {
-    log_trace("Connection::beginSendRequest");
+    PT_LOG_TRACE("Connection::beginSendRequest");
 
     _request = &request;
 
     if( ! isConnected() )
     {
-        log_debug("opening new connection to " << _addrInfo.toString());
+        PT_LOG_DEBUG("opening new connection to " << _addrInfo.toString());
         _timer.start( _timeout );
         _socket.beginConnect(_addrInfo, _tcpOptions);
         return;
@@ -362,7 +362,7 @@ void Connection::beginSendRequest(Request& request)
 
     if(_state == SslHandshake)
     {
-        log_debug("begining SSL handshake");
+        PT_LOG_DEBUG("begining SSL handshake");
         _timer.start( _timeout );
         _sslbuf.open(*_ctx, _sockios, Ssl::Connect);
         _state = SslHandshakeWrite;
@@ -372,7 +372,7 @@ void Connection::beginSendRequest(Request& request)
     {
         if(_sslbuf.writeHandshake() || _sockbuf.out_avail() > 0)
         {
-            log_debug("writing SSL handshake");
+            PT_LOG_DEBUG("writing SSL handshake");
             _sockbuf.beginWrite();
               _state = SslHandshakeWrite;
             return;
@@ -380,7 +380,7 @@ void Connection::beginSendRequest(Request& request)
 
         if( _sslbuf.readHandshake() && _sockbuf.in_avail() <= 0)
         {
-            log_debug("reading SSL handshake");
+            PT_LOG_DEBUG("reading SSL handshake");
             _sockbuf.beginRead();
             _state = SslHandshakeRead;
             return;
@@ -389,7 +389,7 @@ void Connection::beginSendRequest(Request& request)
         if( ! _sslbuf.isConnected() )
             throw HttpError("HTTP I/O error");
 
-        log_debug("Handshake finished");
+        PT_LOG_DEBUG("Handshake finished");
         _timer.stop();
         _state = Connected;
     }
@@ -398,7 +398,7 @@ void Connection::beginSendRequest(Request& request)
     {
         if( _sslbuf.readHandshake() && _sockbuf.in_avail() <= 0)
         {
-            log_debug("reading SSL handshake");
+            PT_LOG_DEBUG("reading SSL handshake");
             _sockbuf.beginRead();
             _state = SslHandshakeRead;
             return;
@@ -406,7 +406,7 @@ void Connection::beginSendRequest(Request& request)
 
         if( _sslbuf.writeHandshake() )
         {
-            log_debug("writing SSL handshake");
+            PT_LOG_DEBUG("writing SSL handshake");
             _sockbuf.beginWrite();
               _state = SslHandshakeWrite;
             return;
@@ -415,7 +415,7 @@ void Connection::beginSendRequest(Request& request)
         if( ! _sslbuf.isConnected() )
             throw HttpError("HTTP I/O error");
             
-        log_debug("Handshake finished");
+        PT_LOG_DEBUG("Handshake finished");
         _timer.stop();
         _state = Connected;
     }
@@ -425,11 +425,11 @@ void Connection::beginSendRequest(Request& request)
 
     if( request.isFinished() )
     {
-        log_debug("HTTP request finished");
+        PT_LOG_DEBUG("HTTP request finished");
         
         if(_chunked)
         {
-            log_debug("sending last HTTP chunk: "  << mbuf.size() << " bytes");
+            PT_LOG_DEBUG("sending last HTTP chunk: "  << mbuf.size() << " bytes");
             if(mbuf.size() > 0)
             {
                 os << std::hex << mbuf.size() << std::dec << "\r\n";
@@ -444,12 +444,12 @@ void Connection::beginSendRequest(Request& request)
         {
             writeRequestHeader(os, request);
             
-            log_debug("writing body: " << mbuf.size() << " bytes");
+            PT_LOG_DEBUG("writing body: " << mbuf.size() << " bytes");
             if(mbuf.size() > 0)
                 os.write( mbuf.data(), mbuf.size() );
         }
 
-        log_debug("pipelining HTTP request");
+        PT_LOG_DEBUG("pipelining HTTP request");
 
         // signal that output was sent, so the request data can be pipelined
         // until we begin receiving the next reply from the server.
@@ -461,12 +461,12 @@ void Connection::beginSendRequest(Request& request)
 
     if( ! _chunked )
     {
-        log_debug("sending chunked header");
+        PT_LOG_DEBUG("sending chunked header");
         _chunked = true;
         writeRequestHeader(os, request);
     }
 
-    log_debug("sending HTTP chunk: "  << mbuf.size() << " bytes");
+    PT_LOG_DEBUG("sending HTTP chunk: "  << mbuf.size() << " bytes");
 
     if(mbuf.size() > 0)
     {
@@ -481,7 +481,7 @@ void Connection::beginSendRequest(Request& request)
 
 MessageProgress Connection::endSendRequest()
 {
-    log_trace("Connection::endSendRequest");
+    PT_LOG_TRACE("Connection::endSendRequest");
     MessageProgress progress;
 
     if(_onTimeout)
@@ -491,7 +491,7 @@ MessageProgress Connection::endSendRequest()
     {
         _timer.stop();
         _socket.endConnect();
-        log_debug("connected to " << _addrInfo.toString());
+        PT_LOG_DEBUG("connected to " << _addrInfo.toString());
 
         if(_ssl)
             _state = SslHandshake;
@@ -503,14 +503,14 @@ MessageProgress Connection::endSendRequest()
 
     if(_state == SslHandshakeWrite)
     {
-        log_debug("wrote SSL handshake");
+        PT_LOG_DEBUG("wrote SSL handshake");
         _sockbuf.endWrite();
         return progress;
     }
 
     if(_state == SslHandshakeRead)
     {
-        log_debug("read SSL handshake");
+        PT_LOG_DEBUG("read SSL handshake");
         _sockbuf.endRead();
         return progress;
     }
@@ -529,7 +529,7 @@ MessageProgress Connection::endSendRequest()
     }
  
     // indicates that the request or chunk was completely written
-    log_debug("request data sent");
+    PT_LOG_DEBUG("request data sent");
     progress.setFinished();
     return progress;
 }
@@ -538,7 +538,7 @@ MessageProgress Connection::endSendRequest()
 // NOTE: maybe add a flag to cause a flush in the future
 void Connection::beginSendReply(Reply& reply)
 {
-    log_trace("Connection::beginSendReply");
+    PT_LOG_TRACE("Connection::beginSendReply");
 
     _reply = &reply;
 
@@ -572,12 +572,12 @@ void Connection::beginSendReply(Reply& reply)
         {          
             writeReplyHeader(os, reply);
 
-            log_debug("writing body: " << mbuf.size() << " bytes");
+            PT_LOG_DEBUG("writing body: " << mbuf.size() << " bytes");
             if(mbuf.size() > 0)
                 os.write( mbuf.data(), mbuf.size() );
         }
 
-        log_debug("begin writing reply");
+        PT_LOG_DEBUG("begin writing reply");
 
         if( _keepAlive )
         {
@@ -593,7 +593,7 @@ void Connection::beginSendReply(Reply& reply)
 
     if( ! _chunked )
     {
-        log_debug("sending chunked header");
+        PT_LOG_DEBUG("sending chunked header");
         _chunked = true;
         writeReplyHeader(os, *_reply);
     }
@@ -613,7 +613,7 @@ void Connection::beginSendReply(Reply& reply)
 
 MessageProgress Connection::endSendReply()
 {
-    log_trace("Connection::endSendReply");
+    PT_LOG_TRACE("Connection::endSendReply");
 
     MessageProgress progress;
     
@@ -634,7 +634,7 @@ MessageProgress Connection::endSendReply()
     // close -> make sure we sent all data
     if( ! _keepAlive && outputAvailable() )
     {
-        log_debug("still data to send");
+        PT_LOG_DEBUG("still data to send");
         return progress;
     }
   
@@ -642,7 +642,7 @@ MessageProgress Connection::endSendReply()
 
     if( ! _reply->isFinished() )
     {
-        log_debug("reply is not finished");
+        PT_LOG_DEBUG("reply is not finished");
 
         // indicates that chunk was completely written
         return progress;
@@ -652,7 +652,7 @@ MessageProgress Connection::endSendReply()
 
     if( ! _keepAlive)
     {
-        log_debug("no keep alive, closing connection");
+        PT_LOG_DEBUG("no keep alive, closing connection");
         cancel();
 
         //TODO: start SSL shutdown here
@@ -665,13 +665,13 @@ MessageProgress Connection::endSendReply()
 
 void Connection::beginReceiveRequest(Request& request)
 {
-    log_trace("Connection::beginReceiveRequest " << _state);
+    PT_LOG_TRACE("Connection::beginReceiveRequest " << _state);
 
     _request = &request;
 
     if(_state == SslNotAccepted)
     {
-        log_debug("beginning SSL handshake");
+        PT_LOG_DEBUG("beginning SSL handshake");
         _timer.start( _timeout );
         _sslbuf.open(*_ctx, _sockios, Ssl::Accept);
         _state = SslAcceptRead;
@@ -681,7 +681,7 @@ void Connection::beginReceiveRequest(Request& request)
     {
         if(_sslbuf.writeHandshake() || _sockbuf.out_avail() > 0)
         {
-            log_debug("writing SSL handshake");
+            PT_LOG_DEBUG("writing SSL handshake");
             _sockbuf.beginWrite();
               _state = SslAcceptWrite;
             return;
@@ -689,7 +689,7 @@ void Connection::beginReceiveRequest(Request& request)
 
         if( _sslbuf.readHandshake() && _sockbuf.in_avail() <= 0)
         {
-            log_debug("reading SSL handshake");
+            PT_LOG_DEBUG("reading SSL handshake");
             _sockbuf.beginRead();
             _state = SslAcceptRead;
             return;
@@ -698,7 +698,7 @@ void Connection::beginReceiveRequest(Request& request)
         if( ! _sslbuf.isConnected() )
             throw HttpError("HTTP I/O error");
 
-        log_debug("Handshake finished");
+        PT_LOG_DEBUG("Handshake finished");
         _timer.stop();
         _state = Accepted;
     }
@@ -707,7 +707,7 @@ void Connection::beginReceiveRequest(Request& request)
     {
         if( _sslbuf.readHandshake() && _sockbuf.in_avail() <= 0)
         {
-            log_debug("reading SSL handshake");
+            PT_LOG_DEBUG("reading SSL handshake");
             _sockbuf.beginRead();
             _state = SslAcceptRead;
             return;
@@ -715,7 +715,7 @@ void Connection::beginReceiveRequest(Request& request)
 
         if( _sslbuf.writeHandshake() )
         {
-            log_debug("writing SSL handshake");
+            PT_LOG_DEBUG("writing SSL handshake");
             _sockbuf.beginWrite();
               _state = SslAcceptWrite;
             return;
@@ -724,7 +724,7 @@ void Connection::beginReceiveRequest(Request& request)
         if( ! _sslbuf.isConnected() )
             throw HttpError("HTTP I/O error");
         
-        log_debug("Handshake finished");
+        PT_LOG_DEBUG("Handshake finished");
         _timer.stop();
         _state = Accepted;
     }
@@ -733,13 +733,13 @@ void Connection::beginReceiveRequest(Request& request)
     // are in the pipeline.
     if( outputAvailable() && ! inputAvailable() )
     {
-        log_debug("sending remaining reply data");
+        PT_LOG_DEBUG("sending remaining reply data");
         beginWrite();
         _state = ReplyOutputPending;
         return;
     }
 
-    log_debug("begin reading request");
+    PT_LOG_DEBUG("begin reading request");
     _parseEvent.init( request );
 
     // NOTE: the http header parser is also not at begin if data from the
@@ -752,12 +752,12 @@ void Connection::beginReceiveRequest(Request& request)
 
         if(_keepAlive)
         {
-            log_debug("use keep alive timeout: " << _keepaliveTimeout);
+            PT_LOG_DEBUG("use keep alive timeout: " << _keepaliveTimeout);
             _timer.start(_keepaliveTimeout);
         }
         else
         {
-            log_debug("use I/O timeout: " << _timeout);
+            PT_LOG_DEBUG("use I/O timeout: " << _timeout);
             _timer.start( _timeout );
         }
     }
@@ -768,7 +768,7 @@ void Connection::beginReceiveRequest(Request& request)
 
 MessageProgress Connection::endReceiveRequest()
 {
-    log_trace("Connection::endReceiveRequest");
+    PT_LOG_TRACE("Connection::endReceiveRequest");
     MessageProgress progress;
 
     if(_onTimeout)
@@ -776,24 +776,24 @@ MessageProgress Connection::endReceiveRequest()
    
     if(_state == SslAcceptWrite)
     {
-        log_debug("wrote SSL handshake");
+        PT_LOG_DEBUG("wrote SSL handshake");
         _sockbuf.endWrite();
         return progress;
     }
 
     if(_state == SslAcceptRead)
     {
-        log_debug("read SSL handshake");
+        PT_LOG_DEBUG("read SSL handshake");
         _sockbuf.endRead();
         return progress;
     }
 
     if(_state == ReplyOutputPending)
     {
-        log_debug("sent remaining reply data");
+        PT_LOG_DEBUG("sent remaining reply data");
         endWrite();
 
-        log_debug("remaining: " << _sockbuf.out_avail());
+        PT_LOG_DEBUG("remaining: " << _sockbuf.out_avail());
         _state = Accepted;
         return progress;
     }
@@ -817,7 +817,7 @@ MessageProgress Connection::endReceiveRequest()
 
         if( _parser.fail() )
         {
-            log_warn("http parser failed");
+            PT_LOG_WARN("http parser failed");
 
             // TODO define exception class
             // TODO: handle any previously pipelined reply
@@ -845,14 +845,14 @@ MessageProgress Connection::endReceiveRequest()
             throw System::IOError("connection lost");
         
         _httpbuf.import();
-        log_debug("bytes available: " << _httpbuf.in_avail());
+        PT_LOG_DEBUG("bytes available: " << _httpbuf.in_avail());
                
         if(_httpbuf.in_avail() > 0)
             progress.setBody();
 
         if( _httpbuf.isEnd() )
         {
-            log_debug("request body finished");
+            PT_LOG_DEBUG("request body finished");
             progress.setFinished();
 
             _timer.stop();
@@ -868,13 +868,13 @@ MessageProgress Connection::endReceiveRequest()
 
 void Connection::beginReceiveReply(Reply& r)
 {
-    log_trace("Connection::beginReceiveReply");
+    PT_LOG_TRACE("Connection::beginReceiveReply");
 
     _reply = &r;
 
     if( outputAvailable() )
     {
-        log_debug("sending remaining request data");
+        PT_LOG_DEBUG("sending remaining request data");
         beginWrite();
         _state = RequestOutputPending;
         return;
@@ -895,7 +895,7 @@ void Connection::beginReceiveReply(Reply& r)
 
 MessageProgress Connection::endReceiveReply()
 {
-    log_trace("Connection::endReceiveReply");
+    PT_LOG_TRACE("Connection::endReceiveReply");
     MessageProgress progress;
 
     if(_onTimeout)
@@ -906,7 +906,7 @@ MessageProgress Connection::endReceiveReply()
 
     if(_state == RequestOutputPending)
     {
-        log_debug("sent remaining request data");
+        PT_LOG_DEBUG("sent remaining request data");
         endWrite();
         _state = Connected;
         return progress;
@@ -914,7 +914,7 @@ MessageProgress Connection::endReceiveReply()
 
     endRead();
 
-    log_debug("input available: " << inputAvailable());
+    PT_LOG_DEBUG("input available: " << inputAvailable());
 
     // TODO: throw if SSL shutdown was received
 
@@ -929,17 +929,17 @@ MessageProgress Connection::endReceiveReply()
 
         if( _replyParser.fail() )
         {
-            log_warn("http parser failed");
+            PT_LOG_WARN("http parser failed");
             throw HttpError("invalid HTTP message"); // TODO define exception class
         }
 
         if( ! _replyParser.end() )
         {
-            log_debug("received part of header");
+            PT_LOG_DEBUG("received part of header");
             return progress;
         }
 
-        log_debug("received header");
+        PT_LOG_DEBUG("received header");
         progress.setHeader();
         _httpbuf.reset();
         _httpbuf.beginBody( _reply->header() );
@@ -953,14 +953,14 @@ MessageProgress Connection::endReceiveReply()
             throw System::IOError("connection lost");
         
         _httpbuf.import();
-        log_debug("bytes available: " << _httpbuf.in_avail());
+        PT_LOG_DEBUG("bytes available: " << _httpbuf.in_avail());
 
         if(_httpbuf.in_avail() > 0)
             progress.setBody();
 
         if( _httpbuf.isEnd() )
         {
-            log_debug("reply body finished");
+            PT_LOG_DEBUG("reply body finished");
             progress.setFinished();
             
             bool keepalive = _reply->header().isKeepAlive();
@@ -973,7 +973,7 @@ MessageProgress Connection::endReceiveReply()
 
             if( ! keepalive )
             {
-                log_debug("closing, no keep alive");
+                PT_LOG_DEBUG("closing, no keep alive");
                 cancel();
 
                 //TODO: start SSL shutdown here
@@ -981,14 +981,14 @@ MessageProgress Connection::endReceiveReply()
         }
     }
 
-    log_debug("reply progress: " << progress.mask());
+    PT_LOG_DEBUG("reply progress: " << progress.mask());
     return progress;
 }
 
 
 void Connection::onConnect(Net::TcpSocket& socket)
 {
-    log_trace("Connection::onConnect");
+    PT_LOG_TRACE("Connection::onConnect");
     if(_request)
         _request->onOutput();
 }
@@ -996,7 +996,7 @@ void Connection::onConnect(Net::TcpSocket& socket)
 
 void Connection::onOutput()
 {
-    log_trace("Connection::onOutput");
+    PT_LOG_TRACE("Connection::onOutput");
 
     if(_request)
     {
@@ -1020,7 +1020,7 @@ void Connection::onOutput()
 
 void Connection::onInput()
 {
-    log_trace("Connection::onInput");
+    PT_LOG_TRACE("Connection::onInput");
 
     if(_request)
     {
@@ -1044,7 +1044,7 @@ void Connection::onInput()
 
 void Connection::onTimeout()
 {
-    log_trace("Connection::onTimeout");
+    PT_LOG_TRACE("Connection::onTimeout");
     _onTimeout = true;
 
     onInput();
@@ -1053,7 +1053,7 @@ void Connection::onTimeout()
 
 void Connection::onHttpInput(System::IOBuffer&)
 {
-    log_trace("Connection::onHttpInput");
+    PT_LOG_TRACE("Connection::onHttpInput");
 
     onInput();
 }
@@ -1061,7 +1061,7 @@ void Connection::onHttpInput(System::IOBuffer&)
 
 void Connection::onHttpOutput(System::IOBuffer&)
 {
-    log_trace("Connection::onHttpOutput");
+    PT_LOG_TRACE("Connection::onHttpOutput");
 
     onOutput();
 }
@@ -1106,7 +1106,7 @@ void Connection::endRead()
 
         if(_readSize > _maxReadSize)
         {
-            log_warn("request too large");
+            PT_LOG_WARN("request too large");
             throw HttpError("request too large");
         }
     }
@@ -1134,15 +1134,15 @@ bool Connection::inputAvailable()
 
 void Connection::beginWrite()
 {
-    log_debug("Connection::beginWrite");
+    PT_LOG_DEBUG("Connection::beginWrite");
 
     if(_ssl)
     {
-        log_debug("flushing ssl buffer");
+        PT_LOG_DEBUG("flushing ssl buffer");
         _sslbuf.pubsync();
     }
 
-    log_debug("begin writing socket buffer: " << _sockbuf.out_avail());
+    PT_LOG_DEBUG("begin writing socket buffer: " << _sockbuf.out_avail());
     _timer.start(_timeout);
     _sockbuf.beginWrite();
 }
@@ -1224,7 +1224,7 @@ void Connection::onDetach(System::EventLoop& loop)
 
 void Connection::writeRequestHeader(std::ostream& os, Request& request)
 {
-    log_debug("writing request header " << request.url());
+    PT_LOG_DEBUG("writing request header " << request.url());
 
     const MessageHeader& header = request.header();
 
@@ -1285,7 +1285,7 @@ void Connection::writeRequestHeader(std::ostream& os, Request& request)
 
 void Connection::writeReplyHeader(std::ostream& os, Reply& reply)
 {
-    log_debug("writing reply header " << reply.statusCode());
+    PT_LOG_DEBUG("writing reply header " << reply.statusCode());
 
     const MessageHeader& header = reply.header();
 

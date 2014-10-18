@@ -34,7 +34,7 @@
 #include <string>
 #include <cstring>
 
-log_define("Pt.Net.AddrInfo")
+PT_LOG_DEFINE("Pt.Net.AddrInfo")
 
 namespace Pt {
 
@@ -89,7 +89,7 @@ void AddrInfo::resolve(const Endpoint& ep, bool passive)
     int error = ::getaddrinfo(_host.c_str(), _service.c_str(), &hints, &_gainfo);
     if(error)
     {
-        log_error( "getaddrinfo: " << gai_strerror(error) );
+        PT_LOG_ERROR( "getaddrinfo: " << gai_strerror(error) );
         throw System::AccessFailed(_host + ':' + _service);
     }
 

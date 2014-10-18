@@ -68,7 +68,7 @@ bool BasicAuthentication::authenticate(Credentials& credentials, Request& reques
     b64 << it->second.user() << ':' << it->second.password();
     b64.terminate();
 
-    //log_debug("set Authorization to " << oss.str());
+    //PT_LOG_DEBUG("set Authorization to " << oss.str());
     request.header().set("Authorization", oss.str().c_str());
     return true; 
 }

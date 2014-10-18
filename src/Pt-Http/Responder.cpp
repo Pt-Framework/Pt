@@ -31,7 +31,7 @@
 #include <Pt/Http/Request.h>
 #include <Pt/System/Logger.h>
 
-log_define("Pt.Http.Server.Responder")
+PT_LOG_DEFINE("Pt.Http.Server.Responder")
 
 namespace Pt {
 

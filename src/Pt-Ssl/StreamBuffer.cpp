@@ -38,7 +38,7 @@
 #include <cassert>
 #include <cstring>
 
-log_define("Pt.Ssl.StreamBuffer")
+PT_LOG_DEFINE("Pt.Ssl.StreamBuffer")
 
 namespace Pt {
 
@@ -171,14 +171,14 @@ bool StreamBuffer::isClosed() const
 
 void StreamBuffer::import(std::streamsize maxImport)
 {
-    log_trace("StreamBuffer::import");
+    PT_LOG_TRACE("StreamBuffer::import");
 
     if( ! _connection )
         return;
 
     if( ! _ibuffer ) 
     {
-        log_debug("setting up get area: " << _ibufferSize);
+        PT_LOG_DEBUG("setting up get area: " << _ibufferSize);
         _ibuffer = new char[_ibufferSize];
     }
 
@@ -187,7 +187,7 @@ void StreamBuffer::import(std::streamsize maxImport)
 
     if( leftover == _ibufferSize - _pbmax)
     {
-        log_debug("get area is full");
+        PT_LOG_DEBUG("get area is full");
         return;
     }
 
@@ -211,11 +211,11 @@ void StreamBuffer::import(std::streamsize maxImport)
     std::size_t used = _pbmax + leftover;
     std::size_t unused = _ibufferSize - used;
 
-    log_debug("get area free space: " << unused);
+    PT_LOG_DEBUG("get area free space: " << unused);
     assert(unused);
 
     std::streamsize readSize = _connection->read(_ibuffer + used, unused, maxImport);
-    log_debug("read " << readSize << " bytes from connection");
+    PT_LOG_DEBUG("read " << readSize << " bytes from connection");
 
     if(readSize > 0)
     {
@@ -263,7 +263,7 @@ int StreamBuffer::sync()
 
 StreamBuffer::int_type StreamBuffer::underflow()
 {
-    log_trace("StreamBuffer::underflow");
+    PT_LOG_TRACE("StreamBuffer::underflow");
 
     if( this->gptr() < this->egptr() )
         return traits_type::to_int_type( *this->gptr() );
@@ -276,13 +276,13 @@ StreamBuffer::int_type StreamBuffer::underflow()
     //{
     //    if( isShutdown() ) 
     //    {
-    //        log_debug("Received shutdown notification");
+    //        PT_LOG_DEBUG("Received shutdown notification");
     //        return traits_type::eof();
     //    }
 
     //    if( traits_type::eof() == _ios->sgetc() )
     //    {
-    //        log_debug("underlying streambuf is EOF");
+    //        PT_LOG_DEBUG("underlying streambuf is EOF");
     //        return traits_type::eof();
     //    }
     //}
@@ -306,7 +306,7 @@ StreamBuffer::int_type StreamBuffer::overflow(int_type ch)
     // No buffer area etablished yet
     if( ! _obuffer ) 
     {
-        log_debug("Allocating _obuffer of size " << _obufferSize);
+        PT_LOG_DEBUG("Allocating _obuffer of size " << _obufferSize);
 
         _obuffer = new char[_obufferSize];
         this->setp(_obuffer, _obuffer + _obufferSize);

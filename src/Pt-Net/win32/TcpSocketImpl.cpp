@@ -40,7 +40,7 @@
 #include <cstring>
 #include <cassert>
 
-log_define("Pt.Net.TcpSocket");
+PT_LOG_DEFINE("Pt.Net.TcpSocket");
 
 namespace Pt {
 
@@ -66,7 +66,7 @@ void TcpSocketImpl::setEventFlags(HANDLE ev, long events)
 {
     if (WSAEventSelect(_fd, ev, events) == SOCKET_ERROR)
     {
-        log_warn( "WSAEventSelect failed: " << WSAGetLastError() );
+        PT_LOG_WARN( "WSAEventSelect failed: " << WSAGetLastError() );
         throw System::SystemError("WSAEventSelect");
     }
 }
@@ -78,14 +78,14 @@ void TcpSocketImpl::cancel(System::EventLoop& loop)
 
     if(_ioh.handle() != INVALID_HANDLE_VALUE)
     {
-        log_debug("cancelling io handle " << _ioh.handle());
+        PT_LOG_DEBUG("cancelling io handle " << _ioh.handle());
         loop.selector().disableOverlapped(_ioh);
     }
 
     _eventFlags = FD_CLOSE;
     if( _fd != INVALID_SOCKET )
     {
-        log_debug("cancelling socket " << _fd);
+        PT_LOG_DEBUG("cancelling socket " << _fd);
         this->setEventFlags(0, 0);
     }
 }
@@ -96,7 +96,7 @@ void TcpSocketImpl::close()
     if( _fd == INVALID_SOCKET )
         return;
 
-    log_debug("close socket " << _fd);
+    PT_LOG_DEBUG("close socket " << _fd);
     ::closesocket(_fd);
     _fd = INVALID_SOCKET;
     _fdClose = false;
@@ -107,13 +107,13 @@ void TcpSocketImpl::close()
 void TcpSocketImpl::accept(TcpServer& server, const TcpSocketOptions&)
 {
     _fd = server.impl().accept();
-    log_debug("accepted " << _fd);
+    PT_LOG_DEBUG("accepted " << _fd);
 }
 
 
 void TcpSocketImpl::connect(const Endpoint& ep, const TcpSocketOptions&)
 {
-    log_debug("connect");
+    PT_LOG_DEBUG("connect");
 
     _addrInfo.resolve( ep );
     _addrInfoPtr = _addrInfo.begin();
@@ -128,21 +128,21 @@ void TcpSocketImpl::connect()
     {
         if(_addrInfoPtr == _addrInfo.end())
         {
-            log_debug("no more address informations");
+            PT_LOG_DEBUG("no more address informations");
             throw System::AccessFailed( _addrInfo.host() );
         }
         
         _fd = WSASocket(_addrInfoPtr->ai_family, SOCK_STREAM, 0, NULL, 0, 0);
         if (_fd < 0)
         {
-            log_debug("failed to create socket for address");
+            PT_LOG_DEBUG("failed to create socket for address");
             continue;
         }
         
         // set socket to blocking mode, may not be meccessary
         u_long argp = 0;
         ::ioctlsocket(_fd, FIONBIO, &argp);
-        log_debug("created socket " << _fd);
+        PT_LOG_DEBUG("created socket " << _fd);
         
         socklen_t addrlen = static_cast<socklen_t>(_addrInfoPtr->ai_addrlen);
 
@@ -161,14 +161,14 @@ void TcpSocketImpl::connect()
 
 bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep, const TcpSocketOptions&)
 {
-    log_debug("begin connect");
+    PT_LOG_DEBUG("begin connect");
 
     _errorPending = false;
 
     if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
         loop.selector().enableOverlapped(_ioh);
-        log_debug("enabled i/o handle " << _ioh.handle());
+        PT_LOG_DEBUG("enabled i/o handle " << _ioh.handle());
     }
     
     _addrInfo.resolve(ep);
@@ -184,7 +184,7 @@ bool TcpSocketImpl::beginConnect()
     {
         if(_addrInfoPtr == _addrInfo.end())
         {
-            log_debug("connect failed to all possible addresses");
+            PT_LOG_DEBUG("connect failed to all possible addresses");
             throw System::AccessFailed( _addrInfo.host() );
         }
 
@@ -192,7 +192,7 @@ bool TcpSocketImpl::beginConnect()
         if (_fd == INVALID_SOCKET)
             continue;
     
-        log_debug("created socket " << _fd);
+        PT_LOG_DEBUG("created socket " << _fd);
 
         // set socket to non-blocking mode
         u_long argp = 1;
@@ -202,7 +202,7 @@ bool TcpSocketImpl::beginConnect()
 
         if( ::connect(_fd, _addrInfoPtr->ai_addr, addrlen) == 0 )
         {
-            log_debug("immediate connect");
+            PT_LOG_DEBUG("immediate connect");
             return true;
         }
     
@@ -211,11 +211,11 @@ bool TcpSocketImpl::beginConnect()
         {
             _eventFlags |= FD_CONNECT;
             setEventFlags(_ioh.handle(), _eventFlags);
-            log_debug("connect in progress");
+            PT_LOG_DEBUG("connect in progress");
             return false;
         }
     
-        log_debug("connect failed, try next address");
+        PT_LOG_DEBUG("connect failed, try next address");
         close();
     }
 }
@@ -223,7 +223,7 @@ bool TcpSocketImpl::beginConnect()
 
 void TcpSocketImpl::endConnect(System::EventLoop& loop)
 {
-    log_debug("endConnect on " << _fd);
+    PT_LOG_DEBUG("endConnect on " << _fd);
 
     // fd is invalid if no address was left to try
     if(_fd != INVALID_SOCKET) 
@@ -235,7 +235,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
     if(_errorPending)
         throw System::AccessFailed(_addrInfo.host() );
 
-    log_info("async connect not yet ready socket=" << _fd);
+    PT_LOG_INFO("async connect not yet ready socket=" << _fd);
 
     _eventFlags |= FD_CONNECT;
     setEventFlags(_ioh.handle(), _eventFlags);
@@ -253,24 +253,24 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
 
         if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
         {
-            log_debug("received close event " << _fd);
+            PT_LOG_DEBUG("received close event " << _fd);
         }
         else if( (events.lNetworkEvents & FD_CONNECT) == FD_CONNECT )
         {
             int s = FD_CONNECT_BIT;
             if(events.iErrorCode[s] == 0)
             {
-                log_debug("connected " << _fd);
+                PT_LOG_DEBUG("connected " << _fd);
                 return;
             }
         }
         else
         {
-            log_debug("received unknown network event " << _fd);
+            PT_LOG_DEBUG("received unknown network event " << _fd);
         }
     }
     
-    log_debug("failed to connect, try next address " << _fd);
+    PT_LOG_DEBUG("failed to connect, try next address " << _fd);
     this->close();
 
     ++_addrInfoPtr;
@@ -287,26 +287,26 @@ bool TcpSocketImpl::runConnect(System::EventLoop& loop, bool& isConnected)
 
     if( (events.lNetworkEvents & FD_CLOSE) == FD_CLOSE )
     {
-        log_debug("received FD_CLOSE for connect");
+        PT_LOG_DEBUG("received FD_CLOSE for connect");
        _errorPending = true;
        return true;
     }
 
     if( (events.lNetworkEvents & FD_CONNECT) != FD_CONNECT )
     {
-        log_debug("network events did not contain FD_CONNECT for connect");
+        PT_LOG_DEBUG("network events did not contain FD_CONNECT for connect");
         return false;
     }
 
     int s = FD_CONNECT_BIT;
     if(events.iErrorCode[s] == 0)
     {
-        log_debug("connect was successful");
+        PT_LOG_DEBUG("connect was successful");
         isConnected = true;
         return true;
     }
 
-    log_debug("closing socket to try next address");
+    PT_LOG_DEBUG("closing socket to try next address");
 
     this->close();
 
@@ -348,7 +348,7 @@ bool TcpSocketImpl::runWrite(System::EventLoop& loop)
 
 bool TcpSocketImpl::wait(std::size_t msecs)
 {
-    log_debug(_fd << " wait " << msecs);
+    PT_LOG_DEBUG(_fd << " wait " << msecs);
 
     DWORD maxTimeout = std::numeric_limits<DWORD>::max() - 1;
             
@@ -394,7 +394,7 @@ void TcpSocketImpl::remoteEndpoint(Endpoint& ep) const
 
 std::size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
-    log_debug(_fd << " beginRead");
+    PT_LOG_DEBUG(_fd << " beginRead");
 
     if(_fdClose)
     {
@@ -404,7 +404,7 @@ std::size_t TcpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, std:
         if(len > 0)
             return len;
 
-        log_debug("EOF because of previous FD_CLOSE");
+        PT_LOG_DEBUG("EOF because of previous FD_CLOSE");
         eof = true;
         return 0;
     }
@@ -450,7 +450,7 @@ bool TcpSocketImpl::runRead(System::EventLoop& loop)
 
 std::size_t TcpSocketImpl::endRead(System::EventLoop& loop, char* buffer, std::size_t, bool& eof)
 {
-    log_debug(_fd << " endRead");
+    PT_LOG_DEBUG(_fd << " endRead");
     _eventFlags &= ~FD_READ;
 
     int len = ::recv(_fd, _receiveBuffer.buf, _receiveBuffer.len, 0);
@@ -514,7 +514,7 @@ std::size_t TcpSocketImpl::read(char* buf, std::size_t n, bool& eof)
 
 std::size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
 {
-    log_debug(_fd << " beginWrite");
+    PT_LOG_DEBUG(_fd << " beginWrite");
 
     if(_ioh.handle() == INVALID_HANDLE_VALUE)
     {
@@ -525,17 +525,17 @@ std::size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffe
     _sendBuffer.buf = const_cast<char*>(buffer);
     _sendBuffer.len = n > maxLen ? maxLen : static_cast<ULONG>(n);
 
-    log_debug("previous FD_CLOSE:" << _fdClose);
+    PT_LOG_DEBUG("previous FD_CLOSE:" << _fdClose);
 
     DWORD numberOfBytesSent = 0;
     int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
 
     if(rc == SOCKET_ERROR)
     {
-        log_debug("socket error on " << _fd);
+        PT_LOG_DEBUG("socket error on " << _fd);
         if(WSAGetLastError() == WSAEWOULDBLOCK)
         {
-            log_debug("WSAEWOULDBLOCK on " << _fd);
+            PT_LOG_DEBUG("WSAEWOULDBLOCK on " << _fd);
             _eventFlags |= FD_WRITE;
             setEventFlags(_ioh.handle(), _eventFlags);
             return 0;
@@ -547,7 +547,7 @@ std::size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffe
         }
     }
 
-    log_debug(_fd << " beginWrite sent " << numberOfBytesSent << " of " << n << " bytes");
+    PT_LOG_DEBUG(_fd << " beginWrite sent " << numberOfBytesSent << " of " << n << " bytes");
 
     return numberOfBytesSent;
 }
@@ -555,7 +555,7 @@ std::size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffe
 
 std::size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
 {
-    log_debug(_fd << " endWrite");
+    PT_LOG_DEBUG(_fd << " endWrite");
 
     _eventFlags &= ~FD_WRITE;
 
@@ -583,7 +583,7 @@ std::size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer,
 
 std::size_t TcpSocketImpl::write(const char* buffer, std::size_t n)
 {
-    log_debug(_fd << " write");
+    PT_LOG_DEBUG(_fd << " write");
 
     fd_set fds;
     FD_ZERO(&fds);

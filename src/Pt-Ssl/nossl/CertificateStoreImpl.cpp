@@ -31,7 +31,7 @@
 #include <Pt/System/Logger.h>
 
 
-log_define("Pt.Ssl.CertificateStore")
+PT_LOG_DEFINE("Pt.Ssl.CertificateStore")
 
 namespace Pt {
 
@@ -49,13 +49,13 @@ CertificateStoreImpl::~CertificateStoreImpl()
 
 void CertificateStoreImpl::loadPkcs12(const char* pkcs12, std::size_t len, const char* passwd)
 {
-    log_debug("loadPkcs12: " << passwd);            
+    PT_LOG_DEBUG("loadPkcs12: " << passwd);            
 }
 
 
 const Certificate* CertificateStoreImpl::findCertificate(const std::string& subject)
 {
-    log_trace("find certificate: " << subject);
+    PT_LOG_TRACE("find certificate: " << subject);
     return 0;
 }
 

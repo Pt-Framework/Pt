@@ -34,7 +34,7 @@
 #include <cstring>
 #include <cassert>
 
-log_define("Pt.Http.HttpBuffer")
+PT_LOG_DEFINE("Pt.Http.HttpBuffer")
 
 namespace {
 
@@ -57,7 +57,7 @@ namespace {
 
   void throwInvalidCharacter(char ch)
   {
-    log_info("invalid character: " << charToPrint(ch));
+    PT_LOG_INFO("invalid character: " << charToPrint(ch));
     throw Pt::Http::HttpError("invalid HTTP message");
   }
 
@@ -90,7 +90,7 @@ void ChunkParser::parse(char ch)
 
 void ChunkParser::onBegin(char ch)
 {
-    log_trace("onBegin, ch=" << charToPrint(ch));
+    PT_LOG_TRACE("onBegin, ch=" << charToPrint(ch));
 
     if (ch >= '0' && ch <= '9')
     {
@@ -113,7 +113,7 @@ void ChunkParser::onBegin(char ch)
 
 void ChunkParser::onSize(char ch)
 {
-    log_trace("onSize, ch=" << charToPrint(ch));
+    PT_LOG_TRACE("onSize, ch=" << charToPrint(ch));
 
     if (ch >= '0' && ch <= '9')
     {
@@ -129,7 +129,7 @@ void ChunkParser::onSize(char ch)
     }
     else
     {
-      log_debug("chunk size=" << _chunkSize);
+      PT_LOG_DEBUG("chunk size=" << _chunkSize);
 
       if (ch == '\r')
       {
@@ -151,7 +151,7 @@ void ChunkParser::onSize(char ch)
 
 void ChunkParser::onEndl(char ch)
 {
-    log_trace("onEndl, ch=" << charToPrint(ch));
+    PT_LOG_TRACE("onEndl, ch=" << charToPrint(ch));
 
     if (ch == '\n')
     {
@@ -166,7 +166,7 @@ void ChunkParser::onEndl(char ch)
 
 void ChunkParser::onExtension(char ch)
 {
-    log_trace("onExtension");
+    PT_LOG_TRACE("onExtension");
 
     if (ch == '\r')
     {
@@ -183,16 +183,16 @@ void ChunkParser::onExtension(char ch)
 
 void ChunkParser::onData(char ch)
 {
-    log_trace("onData, ch=" << charToPrint(ch));
+    PT_LOG_TRACE("onData, ch=" << charToPrint(ch));
 
     if (ch == '\r')
     {
-        log_debug("=> onDataEnd");
+        PT_LOG_DEBUG("=> onDataEnd");
         _state = &ChunkParser::onDataEnd;
     }
     else if (ch == '\n')
     {
-        log_debug("=> onBegin");
+        PT_LOG_DEBUG("=> onBegin");
         _state = &ChunkParser::onBegin;
     }
     else
@@ -201,11 +201,11 @@ void ChunkParser::onData(char ch)
 
 void ChunkParser::onDataEnd(char ch)
 {
-    log_trace("onDataEnd, ch=" << charToPrint(ch));
+    PT_LOG_TRACE("onDataEnd, ch=" << charToPrint(ch));
 
     if (ch == '\n')
     {
-        log_debug("=> onBegin");
+        PT_LOG_DEBUG("=> onBegin");
         _state = &ChunkParser::onBegin;
     }
     else
@@ -214,7 +214,7 @@ void ChunkParser::onDataEnd(char ch)
 
 void ChunkParser::onTrailer(char ch)
 {
-    log_trace("onTrailer, ch=" << charToPrint(ch));
+    PT_LOG_TRACE("onTrailer, ch=" << charToPrint(ch));
 
     // @todo Report trailer fields by adding them to the other header fields.
     //       HttpBuffer and ChunkParser need a reference to a MessageHeader.
@@ -229,7 +229,7 @@ void ChunkParser::onTrailer(char ch)
 
 void ChunkParser::onTrailerData(char ch)
 {
-    log_trace("onTrailerData, ch=" << charToPrint(ch));
+    PT_LOG_TRACE("onTrailerData, ch=" << charToPrint(ch));
 
     // the trailer is actually ignored
     if (ch == '\n')
@@ -243,7 +243,7 @@ const unsigned int HttpBuffer::MaxPutback = 4;
 
 void HttpBuffer::beginBody(const MessageHeader& reply)
 {
-    log_trace("HttpBuffer::beginBody()");
+    PT_LOG_TRACE("HttpBuffer::beginBody()");
     _chunkParser.reset();
 
     setg(0,0,0);
@@ -252,15 +252,15 @@ void HttpBuffer::beginBody(const MessageHeader& reply)
     _contentLength = reply.contentLength();
     _chunked = reply.isChunked();
 
-    log_debug("keep-alive: " << _keepAlive);
-    log_debug("chunked: " << _chunked);
-    log_debug("content-length: " << _contentLength);
+    PT_LOG_DEBUG("keep-alive: " << _keepAlive);
+    PT_LOG_DEBUG("chunked: " << _chunked);
+    PT_LOG_DEBUG("content-length: " << _contentLength);
 }
 
 
 bool HttpBuffer::isEnd() const
 {
-    log_trace("HttpBuffer::isEnd()");
+    PT_LOG_TRACE("HttpBuffer::isEnd()");
     if(_chunked)
         return _chunkParser.end();
 
@@ -270,7 +270,7 @@ bool HttpBuffer::isEnd() const
 
 void HttpBuffer::import(std::streamsize n)
 {
-    log_trace("HttpBuffer::import(" << n << ")");
+    PT_LOG_TRACE("HttpBuffer::import(" << n << ")");
 
     if( ! _sbuf)
         return;
@@ -278,7 +278,7 @@ void HttpBuffer::import(std::streamsize n)
     if(n == 0)
     {
         n = _sbuf->in_avail();
-        log_debug("available: " << n);
+        PT_LOG_DEBUG("available: " << n);
     }
 
     if(n < 0)
@@ -304,7 +304,7 @@ void HttpBuffer::import(std::streamsize n)
 
     if(_chunked && _contentLength == 0)
     {
-        log_debug("getting next chunk");
+        PT_LOG_DEBUG("getting next chunk");
         _contentLength = 0;
         while(n-- && ! _chunkParser.end())
         {
@@ -319,13 +319,13 @@ void HttpBuffer::import(std::streamsize n)
     }
 
     std::streamsize unused = sizeof(_buffer) - (MaxPutback + leftover);
-    log_debug("unused buffer area: " << unused);
+    PT_LOG_DEBUG("unused buffer area: " << unused);
 
     // read no more than unused space in buffer area
     if( n > unused )
         n = unused;
 
-    log_debug("content-length: " << _contentLength);
+    PT_LOG_DEBUG("content-length: " << _contentLength);
 
     // read no more than content length
     if( static_cast<std::size_t>(n) > _contentLength )
@@ -333,11 +333,11 @@ void HttpBuffer::import(std::streamsize n)
 
     if( this->isEnd() )
     {
-        log_trace("received all content -> EOF");
+        PT_LOG_TRACE("received all content -> EOF");
         return;
     }
 
-    log_debug("http buffer refill: " << n);
+    PT_LOG_DEBUG("http buffer refill: " << n);
     if(n == 0)
         return;
 
@@ -348,13 +348,13 @@ void HttpBuffer::import(std::streamsize n)
          _buffer + MaxPutback + n);      // egptr - end of get area
 
     _contentLength -= static_cast<std::size_t>(n);
-    log_debug("remaining content length: " << _contentLength);
+    PT_LOG_DEBUG("remaining content length: " << _contentLength);
 }
 
 
 HttpBuffer::int_type HttpBuffer::underflow()
 { 
-    log_trace("HttpBuffer::underflow()");
+    PT_LOG_TRACE("HttpBuffer::underflow()");
 
     if(this->gptr() < this->egptr())
         return traits_type::to_int_type(*(this->gptr()));

@@ -39,7 +39,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreFoundation/CFDictionary.h>
 
-log_define("Pt.Ssl.StreamBuffer")
+PT_LOG_DEFINE("Pt.Ssl.StreamBuffer")
 
 namespace Pt {
 
@@ -124,7 +124,7 @@ Connection::Connection(Context& ctx, std::ios& ios, OpenMode omode)
     CFArrayRef certs = _ctx->impl()->certificates();
     if(certs)
     {
-        log_debug("using " << CFArrayGetCount(certs) << " certificates");
+        PT_LOG_DEBUG("using " << CFArrayGetCount(certs) << " certificates");
         SSLSetCertificate(_context, certs);
     }
 }
@@ -148,18 +148,18 @@ const char* Connection::currentCipher() const
 
 bool Connection::writeHandshake()
 {
-    log_trace("Connection::writeHandshake");
+    PT_LOG_TRACE("Connection::writeHandshake");
 
     _iocount = 0;
     _isWriting = true;
     OSStatus status = SSLHandshake(_context);
     _isWriting = false;
 
-    log_debug("SSLHandshake returns " << status);
+    PT_LOG_DEBUG("SSLHandshake returns " << status);
 
     if(status == noErr)
     {       
-        log_debug("SSL handshake completed");
+        PT_LOG_DEBUG("SSL handshake completed");
         _connected = true;
     }
     else if(status != errSSLWouldBlock)
@@ -173,7 +173,7 @@ bool Connection::writeHandshake()
 
 bool Connection::readHandshake()
 {
-    log_trace("Connection::readHandshake");
+    PT_LOG_TRACE("Connection::readHandshake");
 
     std::streambuf* sb = _ios->rdbuf();
     if( ! sb)
@@ -185,11 +185,11 @@ bool Connection::readHandshake()
     OSStatus status = SSLHandshake(_context);
     _isReading = false;
 
-    log_debug("SSLHandshake returns " << status);
+    PT_LOG_DEBUG("SSLHandshake returns " << status);
     
     if( status == noErr )
     {
-        log_debug("SSL handshake completed");
+        PT_LOG_DEBUG("SSL handshake completed");
         _connected = true;
         return false;
     }
@@ -200,11 +200,11 @@ bool Connection::readHandshake()
     if(status == errSSLServerAuthCompleted)
 #endif
     {
-        log_debug("authenticating peer");
+        PT_LOG_DEBUG("authenticating peer");
 
         if( _ctx->verifyMode() != NoVerify )
         {
-            log_debug("evaluating trust");
+            PT_LOG_DEBUG("evaluating trust");
             
             SecTrustRef trust = NULL;
             SSLCopyPeerTrust(_context, &trust);
@@ -219,7 +219,7 @@ bool Connection::readHandshake()
                 throw HandshakeFailed("SSL handshake failed");
         
             CFIndex count = SecTrustGetCertificateCount(trust);
-            log_debug("SecTrustEvaluate: " << result << " certs: " << count);
+            PT_LOG_DEBUG("SecTrustEvaluate: " << result << " certs: " << count);
             
             if(trust)
                 CFRelease(trust);
@@ -234,7 +234,7 @@ bool Connection::readHandshake()
                 (result != kSecTrustResultUnspecified) )
                 throw HandshakeFailed("SSL handshake failed");
 
-            log_debug("authentication successful");
+            PT_LOG_DEBUG("authentication successful");
         }
 
         return readHandshake();
@@ -261,18 +261,18 @@ bool Connection::shutdown()
     if( ! _sentShutdown)
     {
         // write shutdown notify
-        log_debug("write shutdown notify");
+        PT_LOG_DEBUG("write shutdown notify");
 
         _isWriting = true;
         OSStatus error = SSLClose(_context);
         _isWriting = false;
 
-        log_debug("SSLClose: " << error);
+        PT_LOG_DEBUG("SSLClose: " << error);
 
         if(error == errSSLWouldBlock)
         {
             // need to read shutdown alert
-            log_debug("want to read shutdown alert");
+            PT_LOG_DEBUG("want to read shutdown alert");
             _sentShutdown = true;
             return false;
         }
@@ -280,7 +280,7 @@ bool Connection::shutdown()
         if(error != noErr)
             throw SslError("shutdown failed");
 
-        log_debug("shutdown complete");
+        PT_LOG_DEBUG("shutdown complete");
         _connected = false;
         _sentShutdown = false;
         _receivedShutdown = false;
@@ -288,7 +288,7 @@ bool Connection::shutdown()
     }
     
     // read shutdown notify
-    log_debug("read shutdown notify");
+    PT_LOG_DEBUG("read shutdown notify");
 
     _maxImport = sb->in_avail();
     _wantRead = false;
@@ -296,7 +296,7 @@ bool Connection::shutdown()
     OSStatus error = SSLClose(_context);
     _isReading = false;
 
-    log_debug("SSLClose: " << error);
+    PT_LOG_DEBUG("SSLClose: " << error);
 
     if(error == errSSLWouldBlock)
     {
@@ -306,7 +306,7 @@ bool Connection::shutdown()
     if(error != noErr)
         throw SslError("shutdown failed");
 
-    log_debug("shutdown complete");
+    PT_LOG_DEBUG("shutdown complete");
     _connected = false;
     _sentShutdown = false;
     _receivedShutdown = false;
@@ -344,7 +344,7 @@ std::streamsize Connection::write(const char* buf, std::size_t n)
 
 std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxImport)
 {
-    log_trace("Connection::read");
+    PT_LOG_TRACE("Connection::read");
 
     std::streambuf* sb = _ios->rdbuf();
     if( ! sb)
@@ -360,7 +360,7 @@ std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxIm
     OSStatus error = SSLRead(_context, buf, n, &processed);
     _isReading = false;
 
-    log_trace("Connection::read: " << error);
+    PT_LOG_TRACE("Connection::read: " << error);
     
     if(error == errSSLClosedGraceful)
     {
@@ -377,12 +377,12 @@ std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxIm
 
 OSStatus Connection::sslRead(void* data, std::size_t* n)
 {    
-    log_trace("Connection::sslRead: wants " << *n << " bytes");
+    PT_LOG_TRACE("Connection::sslRead: wants " << *n << " bytes");
     
     _wantRead = false;
     std::streambuf* sb = _ios->rdbuf();
 
-    log_debug("max input: " << _maxImport);
+    PT_LOG_DEBUG("max input: " << _maxImport);
     if(_isWriting || ! sb || _maxImport <= 0)
     {
         _wantRead = true;
@@ -392,7 +392,7 @@ OSStatus Connection::sslRead(void* data, std::size_t* n)
 
     std::streamsize gsize = std::min( _maxImport, static_cast<std::streamsize>(*n) );
     std::streamsize r = sb->sgetn(reinterpret_cast<char*>(data), gsize);
-    log_debug("read " << r << " bytes from input");
+    PT_LOG_DEBUG("read " << r << " bytes from input");
 
     _maxImport -= r;
 
@@ -409,7 +409,7 @@ OSStatus Connection::sslRead(void* data, std::size_t* n)
         ret = errSSLClosedNoNotify;
     }
     
-    log_debug("sslRead: " << ret);
+    PT_LOG_DEBUG("sslRead: " << ret);
     
     *n = static_cast<std::size_t>(r);
     return ret;
@@ -418,7 +418,7 @@ OSStatus Connection::sslRead(void* data, std::size_t* n)
 
 OSStatus Connection::sslWrite(const void* data, std::size_t* n)
 {           
-    log_trace("Connection::sslWrite: " << *n);
+    PT_LOG_TRACE("Connection::sslWrite: " << *n);
     
     _iocount = 0;
     std::streambuf* sb = _ios->rdbuf();
@@ -430,7 +430,7 @@ OSStatus Connection::sslWrite(const void* data, std::size_t* n)
     }
 
     _iocount = sb->sputn(reinterpret_cast<const char*>(data), *n);
-    log_trace("wrote " << _iocount << " bytes to output");
+    PT_LOG_TRACE("wrote " << _iocount << " bytes to output");
 
     OSStatus ret = noErr;
     if( static_cast<std::size_t>(_iocount) < *n)
@@ -438,7 +438,7 @@ OSStatus Connection::sslWrite(const void* data, std::size_t* n)
         ret = errSSLClosedAbort;
     }
 
-    log_debug("sslWrite: " << ret);
+    PT_LOG_DEBUG("sslWrite: " << ret);
     return ret;
 }
 

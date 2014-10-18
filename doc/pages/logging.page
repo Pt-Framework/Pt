@@ -148,11 +148,11 @@ log is to use the logging macros for a static logger instance. A logger
 instance can be defined for a compilation unit and then logged to:
 
 @code
-log_define("app.module")
+PT_LOG_DEFINE("app.module")
 
 void foobar(int n)
 {
-    log_info("foobar was called with: " << n);
+    PT_LOG_INFO("foobar was called with: " << n);
 }
 @endcode
 
@@ -160,12 +160,12 @@ The advantage of the macros is that they will expand to nothing if NLOG
 is defined, so logging support can be conditionally compiled. Macros exist
 for the various log levels:
 
-- log_fatal()
-- log_error()
-- log_warn()
-- log_info()
-- log_debug()
-- log_trace()
+- PT_LOG_FATAL()
+- PT_LOG_ERROR()
+- PT_LOG_WARN()
+- PT_LOG_INFO()
+- PT_LOG_DEBUG()
+- PT_LOG_TRACE()
 
 The disadvantage of these macros is that they do not allow more than one 
 logger instance per compilation unit and the logger definition can not be 
@@ -176,18 +176,18 @@ global logger instances:
 @code
 #include <Pt/System/Logger.h>
 
-log_define_instance(mullog, "app.calc.multiply")
-log_define_instance(divlog, "app.calc.divide")
+PT_LOG_DEFINE_INSTANCE(mullog, "app.calc.multiply")
+PT_LOG_DEFINE_INSTANCE(divlog, "app.calc.divide")
 
 int multiply(int a, int b)
 {
-    log_info_to(mullog, "multipy " << a << " by " << b)
+    PT_LOG_INFO_TO(mullog, "multipy " << a << " by " << b)
     return a*b;
 }
 
 int divide(int a, int b)
 {
-    log_info_to(divlog, "divide " << a << " by " << b)
+    PT_LOG_INFO_TO(divlog, "divide " << a << " by " << b)
     return a/b;
 }
 @endcode
@@ -196,12 +196,12 @@ Again, these logging statements can be conditionally compiled and the logging
 macros expand to nothing if NLOG is defined. Here is a list of the macros for
 the various log levels:
 
-- log_fatal_to()
-- log_error_to()
-- log_warn_to()
-- log_info_to()
-- log_debug_to()
-- log_trace_to()
+- PT_LOG_FATAL_TO()
+- PT_LOG_ERROR_TO()
+- PT_LOG_WARN_TO()
+- PT_LOG_INFO_TO()
+- PT_LOG_DEBUG_TO()
+- PT_LOG_TRACE_TO()
 
 The alternative to using the macros is to use logger objects directly in the 
 code. To do so, a Logger object must be instanciated, for example as a class

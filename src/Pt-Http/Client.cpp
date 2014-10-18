@@ -32,7 +32,7 @@
 #include <Pt/System/Logger.h>
 #include <memory>
 
-log_define("Pt.Http.Client")
+PT_LOG_DEFINE("Pt.Http.Client")
 
 namespace Pt {
 
@@ -226,7 +226,7 @@ void Client::close()
 
 void Client::onRequestSent(Request& r)
 {
-    log_trace("onRequestSent: " << _impl->state());
+    PT_LOG_TRACE("onRequestSent: " << _impl->state());
 
     if(_impl->state() == ClientImpl::OnRequestEnd)
         _impl->replyReceived().send(*this);
@@ -237,7 +237,7 @@ void Client::onRequestSent(Request& r)
 
 void Client::onReplyReceived(Reply& r)
 {
-    log_trace("onReplyReceived: " << _impl->state());
+    PT_LOG_TRACE("onReplyReceived: " << _impl->state());
 
     _impl->replyReceived().send(*this);
 }

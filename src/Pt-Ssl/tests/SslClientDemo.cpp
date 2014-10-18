@@ -37,7 +37,7 @@
 #include <Pt/System/Logger.h>
 #include <cassert>
 
-log_define("Pt.Ssl.SslClient")
+PT_LOG_DEFINE("Pt.Ssl.SslClient")
 
 class SslClient : public Pt::Connectable
 {
@@ -92,7 +92,7 @@ class SslClient : public Pt::Connectable
     private:
         void beginConnect()
         {
-            log_info("connecting to " << _host << ':' << _port);
+            PT_LOG_INFO("connecting to " << _host << ':' << _port);
 
             Pt::Net::Endpoint ep(_host, _port);
             _tcpSocket.beginConnect(ep);
@@ -105,7 +105,7 @@ class SslClient : public Pt::Connectable
             _tcpSocket.endConnect();
             _ssl.open(*_ctx, _ios, Pt::Ssl::Connect);
 
-            log_info("connected to " << _host << ':' << _port);
+            PT_LOG_INFO("connected to " << _host << ':' << _port);
             _beginExecute = &SslClient::beginHandshake;
             _endExecute = &SslClient::endHandshake;
             return false;
@@ -128,7 +128,7 @@ class SslClient : public Pt::Connectable
             }
                 
             // start sending the request
-            log_info("sending " << _request.size() << " bytes" );
+            PT_LOG_INFO("sending " << _request.size() << " bytes" );
             _ssl.write( _request.c_str(), _request.size() );
             _ssl.flush();
 
@@ -203,12 +203,12 @@ class SslClient : public Pt::Connectable
                 }
                 while(_ssl.sslBuffer().in_avail() > 0);
 
-                log_info( "received " << _reply.size() << " bytes");
+                PT_LOG_INFO( "received " << _reply.size() << " bytes");
             }
 
             if( _ssl.isShutdown() )
             {
-                log_info("received shutdown alert");
+                PT_LOG_INFO("received shutdown alert");
 
                 // start sending the shutdown acknowledge
                 _ssl.shutdown();
@@ -234,7 +234,7 @@ class SslClient : public Pt::Connectable
                 return false;
             }
 
-            log_info("shutdown complete");
+            PT_LOG_INFO("shutdown complete");
             close();
             return true;
         }
@@ -272,7 +272,7 @@ void onProgress(SslClient& client)
     bool finished = client.endExecute();
     if(finished)
     {
-        log_info("reply finished, got " << client.reply().size() << " bytes");
+        PT_LOG_INFO("reply finished, got " << client.reply().size() << " bytes");
         Pt::System::Application::instance().exit();
         return;
     }

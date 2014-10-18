@@ -32,7 +32,7 @@
 #include <Pt/System/Clock.h>
 #include <Pt/System/Logger.h>
 
-log_define("Pt.System.EventLoop")
+PT_LOG_DEFINE("Pt.System.EventLoop")
 
 namespace Pt {
 
@@ -199,25 +199,25 @@ void TimerQueue::removeTimer( Timer& timer )
 
 std::size_t TimerQueue::processTimers()
 {
-    log_trace("TimerQueue::processTimers");
+    PT_LOG_TRACE("TimerQueue::processTimers");
 
     std::size_t lowestTimeout = EventLoop::WaitInfinite;
 
     if( _timers.empty() )
     {
-        log_trace("no timers, returning: " << lowestTimeout);
+        PT_LOG_TRACE("no timers, returning: " << lowestTimeout);
         return lowestTimeout;
     }
 
     Timespan now = Clock::getSystemTicks();
     Timer* timer = _timers.begin()->second;
 
-    log_trace("now: " << now.toMSecs());
-    log_trace("first timer at: " << timer->finished().toMSecs());
+    PT_LOG_TRACE("now: " << now.toMSecs());
+    PT_LOG_TRACE("first timer at: " << timer->finished().toMSecs());
 
     while( ! _timers.empty() )
     {
-        log_trace("get front of timer queue");
+        PT_LOG_TRACE("get front of timer queue");
         timer = _timers.begin()->second;
 
         if( now < timer->finished() ) // not expired or stopped
@@ -231,16 +231,16 @@ std::size_t TimerQueue::processTimers()
             lowestTimeout = (remainingMSecs <= EventLoop::WaitMax) ? static_cast<std::size_t>(remainingMSecs)
                                                                    : EventLoop::WaitMax ;
 
-            log_trace("no more timer expired: " << timer->finished().toMSecs());
+            PT_LOG_TRACE("no more timer expired: " << timer->finished().toMSecs());
             break;
         }
 
-        log_trace("updating expired timer");
+        PT_LOG_TRACE("updating expired timer");
         timer->update(now);
 
         if( ! _timers.empty() )
         {
-            log_trace("resetting timer: " << timer->finished().toMSecs());
+            PT_LOG_TRACE("resetting timer: " << timer->finished().toMSecs());
             timer = _timers.begin()->second;
             _timers.erase( _timers.begin() );
 
@@ -249,7 +249,7 @@ std::size_t TimerQueue::processTimers()
         }
     }
 
-    log_trace("TimerQueue::processTimers returns: " << lowestTimeout);
+    PT_LOG_TRACE("TimerQueue::processTimers returns: " << lowestTimeout);
     return lowestTimeout;
 }
 

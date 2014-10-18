@@ -31,7 +31,7 @@
 #include <Pt/System/Logger.h>
 #include <cassert>
 
-log_define("Pt.Remoting.Client")
+PT_LOG_DEFINE("Pt.Remoting.Client")
 
 namespace Pt {
 

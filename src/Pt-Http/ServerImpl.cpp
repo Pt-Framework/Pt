@@ -39,7 +39,7 @@
 #include <memory>
 #include <cassert>
 
-log_define("Pt.Http.Server")
+PT_LOG_DEFINE("Pt.Http.Server")
 
 namespace Pt {
 
@@ -75,7 +75,7 @@ Acceptor::~Acceptor()
 
 void Acceptor::releaseResponder()
 {
-    log_trace("Acceptor::releaseResponder " << _responder);
+    PT_LOG_TRACE("Acceptor::releaseResponder " << _responder);
     if( _responder )
     {
         assert(_servlet);
@@ -88,7 +88,7 @@ void Acceptor::releaseResponder()
 
 void Acceptor::beginServe(System::EventLoop& loop)
 {  
-    log_trace("Acceptor::beginServe");
+    PT_LOG_TRACE("Acceptor::beginServe");
 
     _conn.setActive(loop);
 
@@ -100,7 +100,7 @@ void Acceptor::beginServe(System::EventLoop& loop)
 
 void Acceptor::onRequestReceived(Request& req)
 {
-    log_trace("Acceptor::onRequestReceived");
+    PT_LOG_TRACE("Acceptor::onRequestReceived");
     
     try
     {
@@ -108,7 +108,7 @@ void Acceptor::onRequestReceived(Request& req)
         
         if( _requestProgress.header() )
         {
-            log_debug("received request header");
+            PT_LOG_DEBUG("received request header");
 
             assert(_servlet == 0);
             _servlet = _server.getServlet(_request);
@@ -122,13 +122,13 @@ void Acceptor::onRequestReceived(Request& req)
             Authorizer* authorizer = _servlet->authorizer();
             if( authorizer )
             {
-                log_debug("authorization required");
+                PT_LOG_DEBUG("authorization required");
 
                 bool granted = false;
                 _auth = authorizer->beginAuthorize(_request, _reply, granted);
                 if(_auth)
                 {
-                    log_debug("authorization started");
+                    PT_LOG_DEBUG("authorization started");
                     _auth->beginAuthorize(_request, _reply);
                     _auth->finished() += Pt::slot(*this, &Acceptor::onAuthorization);
                     return;
@@ -136,7 +136,7 @@ void Acceptor::onRequestReceived(Request& req)
                 
                 if( ! granted )
                 {
-                    log_debug("access immediately denied");
+                    PT_LOG_DEBUG("access immediately denied");
 
                     if( ! _reply.isSending() )
                         _reply.beginSend(true);
@@ -145,7 +145,7 @@ void Acceptor::onRequestReceived(Request& req)
                     return;
                 }
 
-                log_debug("access immediately granted");
+                PT_LOG_DEBUG("access immediately granted");
             }
         }
     
@@ -153,7 +153,7 @@ void Acceptor::onRequestReceived(Request& req)
     }
     catch(const HttpError& e)
     {
-        log_warn("EXCEPTION: " << e.what());
+        PT_LOG_WARN("EXCEPTION: " << e.what());
 
         replyError();
         _finished.send(*this);
@@ -162,7 +162,7 @@ void Acceptor::onRequestReceived(Request& req)
     {
         // this also catches keep-alive timeouts
 
-        log_warn("EXCEPTION: " << e.what());
+        PT_LOG_WARN("EXCEPTION: " << e.what());
         _finished.send(*this);
     }
 }
@@ -170,7 +170,7 @@ void Acceptor::onRequestReceived(Request& req)
 
 void Acceptor::onAuthorization(Authorization& auth)
 {
-    log_trace("Acceptor::onAuthorization");
+    PT_LOG_TRACE("Acceptor::onAuthorization");
 
     try
     {
@@ -179,7 +179,7 @@ void Acceptor::onAuthorization(Authorization& auth)
     
         if( ! granted )
         {
-            log_debug("request not granted");
+            PT_LOG_DEBUG("request not granted");
 
             if( ! _reply.isSending() )
                 _reply.beginSend(true);
@@ -193,14 +193,14 @@ void Acceptor::onAuthorization(Authorization& auth)
     }
     catch(const HttpError& e)
     {
-        log_warn("EXCEPTION: " << e.what());
+        PT_LOG_WARN("EXCEPTION: " << e.what());
 
         replyError();
         _finished.send(*this);
     }
     catch(const System::IOError& e) 
     {
-        log_warn("EXCEPTION: " << e.what());
+        PT_LOG_WARN("EXCEPTION: " << e.what());
         _finished.send(*this);
     }
 }
@@ -208,11 +208,11 @@ void Acceptor::onAuthorization(Authorization& auth)
 
 void Acceptor::onRequest(MessageProgress progress)
 {
-    log_trace("Acceptor::onRequest");
+    PT_LOG_TRACE("Acceptor::onRequest");
 
     if( progress.header() )
     {
-        log_debug("received request header");
+        PT_LOG_DEBUG("received request header");
         assert(_responder == 0);
         _responder = _servlet->service()->getResponder( _request );
             
@@ -221,7 +221,7 @@ void Acceptor::onRequest(MessageProgress progress)
 
         if( _reply.isSending() )
         {
-            log_debug("request interrupted");
+            PT_LOG_DEBUG("request interrupted");
             return;
         }
     }
@@ -230,19 +230,19 @@ void Acceptor::onRequest(MessageProgress progress)
     {     
         if( _responder)
         {
-            log_debug("received request body");
+            PT_LOG_DEBUG("received request body");
             _responder->readRequest(_request, _reply, *_conn.loop());
 
             if( _reply.isSending() )
             {
-                log_debug("request interrupted");
+                PT_LOG_DEBUG("request interrupted");
                 return;
             }
         }
         else
         {
             // no responder means that request was interruped and will be ignored
-            log_debug("ignoring request body");
+            PT_LOG_DEBUG("ignoring request body");
             _request.discard();
         }
     }
@@ -251,14 +251,14 @@ void Acceptor::onRequest(MessageProgress progress)
     {
         if( ! _conn.isConnected() )
         {
-            log_debug("not connected anymore");
+            PT_LOG_DEBUG("not connected anymore");
             _finished.send(*this);
             return;
         }
 
         if(_responder)
         {
-            log_debug("request body finished, begin reply");
+            PT_LOG_DEBUG("request body finished, begin reply");
             _responder->beginReply(_request, _reply, *_conn.loop());
             return;
         }
@@ -267,14 +267,14 @@ void Acceptor::onRequest(MessageProgress progress)
         // read completely. In this case the remaining request will be ignored
     }
 
-    log_debug("read request");
+    PT_LOG_DEBUG("read request");
     _request.beginReceive();
 }
 
 
 void Acceptor::onReplySent(Reply& r)
 {
-    log_trace("Acceptor::onReplySent");
+    PT_LOG_TRACE("Acceptor::onReplySent");
 
     try
     {
@@ -282,7 +282,7 @@ void Acceptor::onReplySent(Reply& r)
 
         if( ! progress.finished() )
         {
-            log_debug("writing more reply data");
+            PT_LOG_DEBUG("writing more reply data");
             bool finished = _reply.isFinished();
             _reply.beginSend(finished);
             return;
@@ -290,7 +290,7 @@ void Acceptor::onReplySent(Reply& r)
 
         if( _reply.isFinished() )
         {
-            log_debug("response finished");
+            PT_LOG_DEBUG("response finished");
 
             releaseResponder();
             _reply.clear();
@@ -298,7 +298,7 @@ void Acceptor::onReplySent(Reply& r)
 
             if( ! _conn.isConnected() )
             {
-                log_debug("not connected anymore");
+                PT_LOG_DEBUG("not connected anymore");
                 _finished.send(*this);
                 return;
             }
@@ -310,12 +310,12 @@ void Acceptor::onReplySent(Reply& r)
         // reply chunks are written while reading request
         if( ! _requestProgress.finished() )
         {
-            log_debug("continuing request");
+            PT_LOG_DEBUG("continuing request");
             _request.beginReceive();
             return;
         }
 
-        log_debug("continuing response");
+        PT_LOG_DEBUG("continuing response");
         _reply.discard();
         assert(_responder);
 
@@ -323,7 +323,7 @@ void Acceptor::onReplySent(Reply& r)
     }
     catch(const System::IOError& e) // TODO: HttpError is also an IOError
     {
-        log_warn("EXCEPTION: " << e.what());
+        PT_LOG_WARN("EXCEPTION: " << e.what());
         _finished.send(*this);
     }
 }
@@ -673,25 +673,25 @@ Servlet* ServerImpl::getServlet(const Request& request)
         if( ! it->servlet()->isMapped(request) )
             continue;
 
-        log_info("serving: " << request.url());
+        PT_LOG_INFO("serving: " << request.url());
         return it->servlet();
     }
 
-    log_warn("not found: " << request.url());
+    PT_LOG_WARN("not found: " << request.url());
     return 0;
 }
 
 
 void ServerImpl::onAccept(Net::TcpServer& server)
 {
-    log_trace("Server::onAccept");
+    PT_LOG_TRACE("Server::onAccept");
 
     // TODO: we should only pass the TcpSocket to the worker thread so that 
     // an Acceptor can be constructed with an event loop there
 
     std::auto_ptr<Acceptor> handler( new Acceptor(*this, server) );
 
-    log_debug("handler timeouts: " << _timeout << ", " << _keepAliveTimeout);
+    PT_LOG_DEBUG("handler timeouts: " << _timeout << ", " << _keepAliveTimeout);
     handler->setTimeout(_timeout);
     handler->setKeepAliveTimeout(_keepAliveTimeout);
     handler->setMaxReadSize(_maxRequestSize);

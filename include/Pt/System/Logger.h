@@ -370,29 +370,22 @@ struct LoggerStaticInit
 } // namespace Pt
 
 //! @internal @brief Log to a logger if the log level permits it.
-#define logger_begin_impl(logger, level)            \
+#define PT_LOGGER_BEGIN_IMPL(logger, level)         \
     if( ! logger.enabled( Pt::System::level ) )     \
         ;                                           \
     else Pt::System::LogMessage(static_cast<Pt::System::Logger&>(logger), Pt::System::level, true)
 
-#define logger_begin_fatal(logger) logger_begin_impl(logger, Fatal)
-#define logger_begin_error(logger) logger_begin_impl(logger, Error)
-#define logger_begin_warn(logger) logger_begin_impl(logger, Warn)
-#define logger_begin_info(logger) logger_begin_impl(logger, Info)
-#define logger_begin_debug(logger) logger_begin_impl(logger, Debug)
-#define logger_begin_trace(logger) logger_begin_impl(logger, Trace)
-
 #ifdef NLOG
-    #define log_init(file)
-    #define log_define_impl(instance, category)
-    #define log_to_impl(instance, level, message)
-    #define logger_log_impl(logger, level, expr)
+    #define PT_LOG_INIT(file)
+    #define PT_LOG_DEFINE_IMPL(instance, category)
+    #define PT_LOG_TO_IMPL(instance, level, message)
+    #define PT_LOGGER_LOG_IMPL(logger, level, expr)
 #else
     //! @brief Initialize the logging library.
-    #define log_init(file) Pt::System::Logger::init(file);
+    #define PT_LOG_INIT(settings) Pt::System::Logger::init(settings);
 
     //! @internal @brief Define a named global logger instance.
-    #define log_define_impl(instance, category)                   \
+    #define PT_LOG_DEFINE_IMPL(instance, category)                \
     inline static Pt::System::Logger& instance()                  \
     {                                                             \
         static Pt::System::Logger instance##_instance(category);  \
@@ -401,33 +394,40 @@ struct LoggerStaticInit
     static const Pt::System::LoggerStaticInit instance##_static_init( &instance );
 
     //! @internal @brief Log to a named global logger instance.
-    #define log_to_impl(instance, level, expr) logger_log_impl(instance(), level, expr)
+    #define PT_LOG_TO_IMPL(instance, level, expr) PT_LOGGER_LOG_IMPL(instance(), level, expr)
 
     //! @internal @brief Log to a logger instance.
-    #define logger_log_impl(logger, level, expr) logger_begin_impl(logger, level) << expr << Pt::System::endlog
+    #define PT_LOGGER_LOG_IMPL(logger, level, expr) PT_LOGGER_BEGIN_IMPL(logger, level) << expr << Pt::System::endlog
 #endif
 
-#define log_define(category) log_define_impl(static_logger, category)
-#define log_fatal(expr) log_to_impl(static_logger, Fatal, expr)
-#define log_error(expr) log_to_impl(static_logger, Error, expr)
-#define log_warn(expr)  log_to_impl(static_logger, Warn, expr)
-#define log_info(expr)  log_to_impl(static_logger, Info, expr)
-#define log_debug(expr) log_to_impl(static_logger, Debug, expr)
-#define log_trace(expr) log_to_impl(static_logger, Trace, expr)
+#define PT_LOG_DEFINE(category) PT_LOG_DEFINE_IMPL(static_logger, category)
+#define PT_LOG_FATAL(expr) PT_LOG_TO_IMPL(static_logger, Fatal, expr)
+#define PT_LOG_ERROR(expr) PT_LOG_TO_IMPL(static_logger, Error, expr)
+#define PT_LOG_WARN(expr)  PT_LOG_TO_IMPL(static_logger, Warn, expr)
+#define PT_LOG_INFO(expr)  PT_LOG_TO_IMPL(static_logger, Info, expr)
+#define PT_LOG_DEBUG(expr) PT_LOG_TO_IMPL(static_logger, Debug, expr)
+#define PT_LOG_TRACE(expr) PT_LOG_TO_IMPL(static_logger, Trace, expr)
 
-#define log_define_instance(instance, category) log_define_impl(instance, category)
-#define log_fatal_to(instance, expr) log_to_impl(instance, Fatal, expr)
-#define log_error_to(instance, expr) log_to_impl(instance, Error, expr)
-#define log_warn_to(instance, expr)  log_to_impl(instance, Warn, expr)
-#define log_info_to(instance, expr)  log_to_impl(instance, Info, expr)
-#define log_debug_to(instance, expr) log_to_impl(instance, Debug, expr)
-#define log_trace_to(instance, expr) log_to_impl(instance, Trace, expr)
+#define PT_LOG_DEFINE_INSTANCE(instance, category) PT_LOG_DEFINE_IMPL(instance, category)
+#define PT_LOG_FATAL_TO(instance, expr) PT_LOG_TO_IMPL(instance, Fatal, expr)
+#define PT_LOG_ERROR_TO(instance, expr) PT_LOG_TO_IMPL(instance, Error, expr)
+#define PT_LOG_WARN_TO(instance, expr)  PT_LOG_TO_IMPL(instance, Warn, expr)
+#define PT_LOG_INFO_TO(instance, expr)  PT_LOG_TO_IMPL(instance, Info, expr)
+#define PT_LOG_DEBUG_TO(instance, expr) PT_LOG_TO_IMPL(instance, Debug, expr)
+#define PT_LOG_TRACE_TO(instance, expr) PT_LOG_TO_IMPL(instance, Trace, expr)
 
-#define logger_log_fatal(logger, expr) logger_log_impl(logger, Fatal, expr)
-#define logger_log_error(logger, expr) logger_log_impl(logger, Error, expr)
-#define logger_log_warn(logger, expr)  logger_log_impl(logger, Warn, expr)
-#define logger_log_info(logger, expr)  logger_log_impl(logger, Info, expr)
-#define logger_log_debug(logger, expr) logger_log_impl(logger, Debug, expr)
-#define logger_log_trace(logger, expr) logger_log_impl(logger, Trace, expr)
+#define PT_LOGGER_LOG_FATAL(logger, expr) PT_LOGGER_LOG_IMPL(logger, Fatal, expr)
+#define PT_LOGGER_LOG_ERROR(logger, expr) PT_LOGGER_LOG_IMPL(logger, Error, expr)
+#define PT_LOGGER_LOG_WARN(logger, expr)  PT_LOGGER_LOG_IMPL(logger, Warn, expr)
+#define PT_LOGGER_LOG_INFO(logger, expr)  PT_LOGGER_LOG_IMPL(logger, Info, expr)
+#define PT_LOGGER_LOG_DEBUG(logger, expr) PT_LOGGER_LOG_IMPL(logger, Debug, expr)
+#define PT_LOGGER_LOG_TRACE(logger, expr) PT_LOGGER_LOG_IMPL(logger, Trace, expr)
+
+#define PT_LOGGER_BEGIN_FATAL(logger) PT_LOGGER_BEGIN_IMPL(logger, Fatal)
+#define PT_LOGGER_BEGIN_ERROR(logger) PT_LOGGER_BEGIN_IMPL(logger, Error)
+#define PT_LOGGER_BEGIN_WARN(logger) PT_LOGGER_BEGIN_IMPL(logger, Warn)
+#define PT_LOGGER_BEGIN_INFO(logger) PT_LOGGER_BEGIN_IMPL(logger, Info)
+#define PT_LOGGER_BEGIN_DEBUG(logger) PT_LOGGER_BEGIN_IMPL(logger, Debug)
+#define PT_LOGGER_BEGIN_TRACE(logger) PT_LOGGER_BEGIN_IMPL(logger, Trace)
 
 #endif // Pt_System_Logger_h

@@ -37,7 +37,7 @@
 #include <Pt/System/Logger.h>
 #include <cassert>
 
-log_define("Pt.Soap.Client")
+PT_LOG_DEFINE("Pt.Soap.Client")
 
 namespace Pt {
 

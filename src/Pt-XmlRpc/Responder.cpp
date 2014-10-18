@@ -38,7 +38,7 @@
 #include <Pt/Convert.h>
 #include <cassert>
 
-log_define("Pt.XmlRpc.Responder")
+PT_LOG_DEFINE("Pt.XmlRpc.Responder")
 
 namespace Pt {
 

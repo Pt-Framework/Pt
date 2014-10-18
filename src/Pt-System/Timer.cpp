@@ -33,7 +33,7 @@
 #include <limits>
 #include <cassert>
 
-log_define("Pt.System.Timer")
+PT_LOG_DEFINE("Pt.System.Timer")
 
 namespace {
 
@@ -117,7 +117,7 @@ std::size_t Timer::interval() const
 void Timer::start(std::size_t interval)
 {
     _interval = interval;
-    log_debug("Timer started, interval: " << _interval);
+    PT_LOG_DEBUG("Timer started, interval: " << _interval);
     
     Timespan now = Clock::getSystemTicks();
     
@@ -126,13 +126,13 @@ void Timer::start(std::size_t interval)
     {
         Pt::int64_t maxTime = std::numeric_limits<Pt::int64_t>::max();
         _finished = Timespan(maxTime);
-        log_debug("timer truncated to: " << _finished.toMSecs());
+        PT_LOG_DEBUG("timer truncated to: " << _finished.toMSecs());
     }
     else
     {
         Timespan remaining( Pt::int64_t(_interval) * 1000 );
         _finished = now + remaining;
-        log_debug("timer set to: " << _finished.toMSecs());
+        PT_LOG_DEBUG("timer set to: " << _finished.toMSecs());
     }
 
     assert(_finished.toUSecs() > 0);
@@ -166,32 +166,32 @@ bool Timer::update()
 
 bool Timer::update(const Timespan& now)
 {
-    log_trace("Timer::update " << now.toUSecs() << " usecs");
+    PT_LOG_TRACE("Timer::update " << now.toUSecs() << " usecs");
 
     if( ! isStarted() )
         return false;
 
     bool hasElapsed = now >= _finished;
-    log_debug("hasElapsed: " << hasElapsed);
+    PT_LOG_DEBUG("hasElapsed: " << hasElapsed);
 
     Timer::Sentry sentry(_sentry);
 
     while( isStarted() && now >= _finished )
     {
-        log_debug("executing timer: " << _finished.toUSecs() << " usecs");
+        PT_LOG_DEBUG("executing timer: " << _finished.toUSecs() << " usecs");
 
         bool overrun = checkInterval(_interval, now);
         if(overrun)
         {
             Pt::int64_t maxTime = std::numeric_limits<Pt::int64_t>::max();
             _finished = Timespan(maxTime);
-            log_debug("timer truncated to: " << _finished.toMSecs());
+            PT_LOG_DEBUG("timer truncated to: " << _finished.toMSecs());
         }
         else
         {
             Timespan remaining( Pt::int64_t(_interval) * 1000 );
             _finished += remaining;
-            log_debug("timer set to: " << _finished.toMSecs());
+            PT_LOG_DEBUG("timer set to: " << _finished.toMSecs());
         }
 
         assert(_finished.toUSecs() > 0);
@@ -200,12 +200,12 @@ bool Timer::update(const Timespan& now)
 
         if( ! sentry )
         {
-            log_debug("timer deleted, returning: " << hasElapsed);
+            PT_LOG_DEBUG("timer deleted, returning: " << hasElapsed);
             return hasElapsed;
         }
     }
 
-    log_debug("Timer::update returns: " << hasElapsed);
+    PT_LOG_DEBUG("Timer::update returns: " << hasElapsed);
     return hasElapsed;
 }
 

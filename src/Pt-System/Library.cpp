@@ -121,7 +121,7 @@ Library& Library::open(const Path& libname)
 
     try
     {
-        //log_debug("search for library \"" << path << '"');
+        //PT_LOG_DEBUG("search for library \"" << path << '"');
         _impl->open(path);
         _path = path;
         return *this;
@@ -132,7 +132,7 @@ Library& Library::open(const Path& libname)
     path += suffix();
     try
     {
-        //log_debug("search for library \"" << path << '"');
+        //PT_LOG_DEBUG("search for library \"" << path << '"');
         _impl->open(path);
         _path = path;
         return *this;
@@ -145,7 +145,7 @@ Library& Library::open(const Path& libname)
     path += prefix();
     path += fileName;
 
-    //log_debug("search for library \"" << path << '"');
+    //PT_LOG_DEBUG("search for library \"" << path << '"');
     _impl->open(path);
     _path = path;
 

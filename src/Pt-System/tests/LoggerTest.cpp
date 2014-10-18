@@ -39,9 +39,9 @@
 #include "Pt/Timespan.h"
 #include <string>
 
-log_define_instance(testlogger, "Pt.testlogger")
+PT_LOG_DEFINE_INSTANCE(testlogger, "Pt.testlogger")
 
-log_define("Pt.System.LoggerTest")
+PT_LOG_DEFINE("Pt.System.LoggerTest")
 
 class LoggerTest : public Pt::Unit::TestSuite
 {
@@ -108,7 +108,7 @@ class LoggerTest : public Pt::Unit::TestSuite
             clock.start();
             for(unsigned n = 0; n < count; n++)
             {
-                logger_log_trace(logger, "Hallo");
+                PT_LOGGER_LOG_TRACE(logger, "Hallo");
             }
 
             Pt::Timespan ts = clock.stop();
@@ -227,7 +227,7 @@ class LoggerTest : public Pt::Unit::TestSuite
         void LogWarn()
         {
             Pt::System::Logger logger("LoggerTest");
-            logger_begin_warn(logger) << "Warn message" << Pt::System::endlog;
+            PT_LOGGER_BEGIN_WARN(logger) << "Warn message" << Pt::System::endlog;
         }
 
         void LogInfo()

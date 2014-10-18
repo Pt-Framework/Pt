@@ -35,7 +35,7 @@
 #include <memory>
 #include <fstream>
 
-log_define("Pt.System")
+PT_LOG_DEFINE("Pt.System")
 
 namespace {
 

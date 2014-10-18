@@ -34,7 +34,7 @@
 #include <Pt/System/Logger.h>
 #include <cstdio>
 
-log_define("Pt.Ssl.Context")
+PT_LOG_DEFINE("Pt.Ssl.Context")
 
 namespace Pt {
 
@@ -95,7 +95,7 @@ void ContextImpl::setVerifyMode(VerifyMode m)
 
 void ContextImpl::assign(const ContextImpl& ctx)
 {
-    log_trace("ContextImpl::assign");
+    PT_LOG_TRACE("ContextImpl::assign");
     setProtocol(ctx._protocol);
     setVerifyMode(ctx._verify);
     

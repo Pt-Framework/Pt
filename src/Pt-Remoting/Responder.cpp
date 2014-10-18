@@ -32,7 +32,7 @@
 #include <Pt/System/Logger.h>
 #include <cassert>
 
-log_define("Pt.Remoting.Responder")
+PT_LOG_DEFINE("Pt.Remoting.Responder")
 
 namespace Pt {
 

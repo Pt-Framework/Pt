@@ -38,9 +38,9 @@
 #include <cmath>
 #include <cstddef>
 
-#define log_define(e)
-#define log_debug(e)
-log_define("Pt.XmlRpc.Formatter")
+#define PT_LOG_DEFINE(e)
+#define PT_LOG_DEBUG(e)
+PT_LOG_DEFINE("Pt.XmlRpc.Formatter")
 
 namespace  {
 
@@ -404,7 +404,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
     {
         case OnParam:
         {
-            log_debug("OnParam");
+            PT_LOG_DEBUG("OnParam");
             if(node.type() == Xml::Node::StartElement) // i4, struct, array...
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
@@ -424,12 +424,12 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnValueBegin:
         {
-            log_debug("OnValueBegin, node type " << node.type());
+            PT_LOG_DEBUG("OnValueBegin, node type " << node.type());
             if(node.type() == Xml::Node::StartElement) // i4, struct, array...
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
 
-                log_debug("-> found type " << se.name().narrow());
+                PT_LOG_DEBUG("-> found type " << se.name().narrow());
                 if( se.name().name() == "struct" )
                 {
                     _state = OnStructBegin;
@@ -490,7 +490,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnValueEnd:
         {
-            log_debug("OnValueEnd, node type " << node.type());
+            PT_LOG_DEBUG("OnValueEnd, node type " << node.type());
 
             if(node.type() == Xml::Node::EndElement)
             {
@@ -498,7 +498,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
                 if( ee.name().name() == "member" )
                 {
-                    log_debug("OnValueEnd member");
+                    PT_LOG_DEBUG("OnValueEnd member");
                     _composer = _composer->finish();
                     if( ! _composer )
                         throwSerializationError("invalid XML-RPC struct");
@@ -507,7 +507,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
                 }
                 else if( ee.name().name() == "data" )
                 {
-                    log_debug("OnValueEnd data");
+                    PT_LOG_DEBUG("OnValueEnd data");
                     _composer = _composer->finish();
                     if( ! _composer )
                         throwSerializationError("invalid XML-RPC array");
@@ -516,7 +516,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
                 }
                 else if( ee.name().name() == "param" )
                 {
-                    log_debug("OnValueEnd data other " << ee.name().narrow());
+                    PT_LOG_DEBUG("OnValueEnd data other " << ee.name().narrow());
                     if( 0 != _composer->finish() )
                         throwSerializationError();
 
@@ -525,7 +525,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
                 }
                 else if( ee.name().name() == "fault" )
                 {
-                    log_debug("OnValueEnd data other " << ee.name().narrow());
+                    PT_LOG_DEBUG("OnValueEnd data other " << ee.name().narrow());
                     if( 0 != _composer->finish() )
                         throwSerializationError("invalid XML-RPC fault");
 
@@ -542,7 +542,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
                 if(se.name().name() == "value")
                 {
-                    log_debug("OnValueEnd data value");
+                    PT_LOG_DEBUG("OnValueEnd data value");
                     _composer = _composer->finish();
 
                     if( ! _composer )
@@ -562,7 +562,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnStructBegin:
         {
-            log_debug("OnStructBegin");
+            PT_LOG_DEBUG("OnStructBegin");
             if(node.type() == Xml::Node::StartElement) // <member>
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
@@ -581,7 +581,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnStructEnd:
         {
-            log_debug("OnStructEnd");
+            PT_LOG_DEBUG("OnStructEnd");
             if(node.type() == Xml::Node::EndElement) // </value>
             {
                 //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
@@ -601,7 +601,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnMemberBegin:
         {
-            log_debug("OnMemberBegin");
+            PT_LOG_DEBUG("OnMemberBegin");
             if(node.type() == Xml::Node::StartElement) // name
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
@@ -621,7 +621,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnNameBegin:
         {
-            log_debug("OnNameBegin");
+            PT_LOG_DEBUG("OnNameBegin");
             if(node.type() == Xml::Node::Characters) // member-name
             {
                 const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
@@ -641,7 +641,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnName:
         {
-            log_debug("OnName");
+            PT_LOG_DEBUG("OnName");
             if(node.type() == Xml::Node::EndElement) // </name>
             {
                 //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
@@ -661,7 +661,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnNameEnd:
         {
-            log_debug("OnNameEnd");
+            PT_LOG_DEBUG("OnNameEnd");
             if(node.type() == Xml::Node::StartElement) // <value>
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
@@ -681,11 +681,11 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnBoolBegin:
         {
-            log_debug("OnBoolBegin ");
+            PT_LOG_DEBUG("OnBoolBegin ");
             if(node.type() == Xml::Node::Characters)
             {
                 const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
-                log_debug("-> found bool " << chars.content().narrow());
+                PT_LOG_DEBUG("-> found bool " << chars.content().narrow());
 
                 bool value = false;
                 const Pt::String& strval = chars.content();
@@ -746,11 +746,11 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnIntBegin:
         {
-            log_debug("OnIntBegin ");
+            PT_LOG_DEBUG("OnIntBegin ");
             if(node.type() == Xml::Node::Characters)
             {
                 const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
-                log_debug("-> found int " << chars.content().narrow());
+                PT_LOG_DEBUG("-> found int " << chars.content().narrow());
 
                 Pt::int32_t number = 0;
                 bool ok = false;
@@ -772,11 +772,11 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnDoubleBegin:
         {
-            log_debug("OnDoubleBegin ");
+            PT_LOG_DEBUG("OnDoubleBegin ");
             if(node.type() == Xml::Node::Characters)
             {
                 const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
-                log_debug("-> found double " << chars.content().narrow());
+                PT_LOG_DEBUG("-> found double " << chars.content().narrow());
 
                 double number = 0.0;
                 bool ok = false;
@@ -786,7 +786,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
                     throwSerializationError();
 
                 _composer->setFloat(number);
-                log_debug("-> parsed double " << number);
+                PT_LOG_DEBUG("-> parsed double " << number);
                 _state = OnScalar;
             }
             else
@@ -799,18 +799,18 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnStringBegin:
         {
-            log_debug("OnStringBegin ");
+            PT_LOG_DEBUG("OnStringBegin ");
             if(node.type() == Xml::Node::Characters)
             {
                 const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
                 _state = OnScalar;
 
-                log_debug("-> found string " << chars.content().narrow());
+                PT_LOG_DEBUG("-> found string " << chars.content().narrow());
                 _composer->setString( chars.content() );
             }
             else if(node.type() == Xml::Node::EndElement) // no content, for example empty strings
             {
-                log_debug("-> found empty value ");
+                PT_LOG_DEBUG("-> found empty value ");
                 _composer->setString( Pt::String() );
                 _state = OnScalarEnd;
             }
@@ -824,7 +824,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnScalar:
         {
-            log_debug("OnScalar");
+            PT_LOG_DEBUG("OnScalar");
             if(node.type() == Xml::Node::EndElement) // </int>, boolean ...
             {
                 _state = OnScalarEnd;
@@ -839,7 +839,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnScalarEnd:
         {
-            log_debug("OnScalarEnd");
+            PT_LOG_DEBUG("OnScalarEnd");
             if(node.type() == Xml::Node::EndElement) // </value>
             {
                 //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
@@ -859,7 +859,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnArrayBegin:
         {
-            log_debug("OnArrayBegin");
+            PT_LOG_DEBUG("OnArrayBegin");
             if(node.type() == Xml::Node::StartElement) // <data>
             {
                 const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
@@ -879,7 +879,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnDataBegin:
         {
-            log_debug("OnDataBegin");
+            PT_LOG_DEBUG("OnDataBegin");
             if(node.type() == Xml::Node::StartElement) // value
             {
                 _composer = _composer->beginElement();
@@ -899,7 +899,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnDataEnd:
         {
-            log_debug("OnDataEnd");
+            PT_LOG_DEBUG("OnDataEnd");
             if(node.type() == Xml::Node::EndElement) // </array>
             {
                 //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);
@@ -919,7 +919,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         case OnArrayEnd:
         {
-            log_debug("OnArrayEnd");
+            PT_LOG_DEBUG("OnArrayEnd");
             if(node.type() == Xml::Node::EndElement) // </value>
             {
                 //const Xml::EndElement& ee = static_cast<const Xml::EndElement&>(node);

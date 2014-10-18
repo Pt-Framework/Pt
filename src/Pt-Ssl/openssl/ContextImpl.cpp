@@ -34,7 +34,7 @@
 #include <Pt/System/Mutex.h>
 #include <Pt/System/Logger.h>
 
-log_define("Pt.Ssl.Context")
+PT_LOG_DEFINE("Pt.Ssl.Context")
 
 namespace Pt {
 
@@ -46,7 +46,7 @@ static Pt::System::Mutex* sslmtx = 0;
 
 void pt_locking_callback_impl(int mode, int type, const char* file,  int line)
 {
-    //log_trace("thread: " << ((mode&CRYPTO_LOCK)?"l":"u") 
+    //PT_LOG_TRACE("thread: " << ((mode&CRYPTO_LOCK)?"l":"u") 
     //                     << ((type&CRYPTO_READ)?"r":"w")
     //                     << ' ' << file << ':' << line );
     
@@ -65,7 +65,7 @@ void SSLInitImpl()
 {
     if(0 == ssl_init_counter++) 
     {
-        log_info("OpenSSL library initialization");
+        PT_LOG_INFO("OpenSSL library initialization");
 
         SSL_library_init();
         SSL_load_error_strings();
@@ -109,7 +109,7 @@ void SSLExitImpl()
 {
     if(0 == --ssl_init_counter) 
     {
-        log_info("OpenSSL library shutdown");
+        PT_LOG_INFO("OpenSSL library shutdown");
         delete [] sslmtx;
         sslmtx = 0;
     }
@@ -416,7 +416,7 @@ void ContextImpl::addCertificate(const Certificate& certificate)
 
 void ContextImpl::addCACertificate(const Certificate& trustedCert)
 {
-    log_trace("adding CA certificate:" << trustedCert.subject());
+    PT_LOG_TRACE("adding CA certificate:" << trustedCert.subject());
     
     _caCerts.reserve(_caCerts.size() + 1);
 
@@ -426,7 +426,7 @@ void ContextImpl::addCACertificate(const Certificate& trustedCert)
     X509_STORE* store = SSL_CTX_get_cert_store(_ctx);
     if( ! store)
     {
-        log_trace("creating new X509 store");
+        PT_LOG_TRACE("creating new X509 store");
         store = X509_STORE_new();
     }
 

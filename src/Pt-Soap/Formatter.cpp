@@ -39,9 +39,9 @@
 #include <cassert>
 #include <cstddef>
 
-#define log_define(e)
-#define log_debug(e)
-log_define("Pt.Soap.Formatter")
+#define PT_LOG_DEFINE(e)
+#define PT_LOG_DEBUG(e)
+PT_LOG_DEFINE("Pt.Soap.Formatter")
 
 namespace  {
 

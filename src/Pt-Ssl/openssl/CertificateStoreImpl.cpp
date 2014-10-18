@@ -34,7 +34,7 @@
 #include <Pt/System/Logger.h>
 #include <Pt/SmartPtr.h>
 
-log_define("Pt.Ssl.CertificateStore")
+PT_LOG_DEFINE("Pt.Ssl.CertificateStore")
 
 namespace Pt {
 

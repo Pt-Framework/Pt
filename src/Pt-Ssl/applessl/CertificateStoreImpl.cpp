@@ -38,7 +38,7 @@
 #import <CoreFoundation/CFDictionary.h>
 #include <CoreFoundation/CFArray.h>
 
-log_define("Pt.Ssl.CertificateStore")
+PT_LOG_DEFINE("Pt.Ssl.CertificateStore")
 
 namespace Pt {
 
@@ -60,7 +60,7 @@ CertificateStoreImpl::~CertificateStoreImpl()
 
 void CertificateStoreImpl::loadPkcs12(const char* pkcs12, std::size_t len, const char* passwd)
 {
-    log_debug("loadPkcs12: " << passwd);
+    PT_LOG_DEBUG("loadPkcs12: " << passwd);
 
     CFDataRef data = CFDataCreate(NULL, reinterpret_cast<const UInt8*>(pkcs12), len);
     if( ! data)
@@ -79,7 +79,7 @@ void CertificateStoreImpl::loadPkcs12(const char* pkcs12, std::size_t len, const
 
     CFArrayRef items = NULL;
     OSStatus securityError = SecPKCS12Import(data, options, &items);
-    log_trace("SecPKCS12Import: " <<  securityError);
+    PT_LOG_TRACE("SecPKCS12Import: " <<  securityError);
 
     CFRelease(password);
     CFRelease(options);
@@ -109,7 +109,7 @@ void CertificateStoreImpl::loadPkcs12(const char* pkcs12, std::size_t len, const
             Certificate* c = new Certificate( new CertificateImpl(identity) );
             _allCerts.push_back(c);
             
-            log_debug("imported identity: " << c->subject());
+            PT_LOG_DEBUG("imported identity: " << c->subject());
         }
 
         CFArrayRef certs = (CFArrayRef) CFDictionaryGetValue(item, kSecImportItemCertChain);
@@ -124,7 +124,7 @@ void CertificateStoreImpl::loadPkcs12(const char* pkcs12, std::size_t len, const
                 Certificate* c = new Certificate( new CertificateImpl(cert) );
                 _allCerts.push_back(c);
 
-                log_debug("imported certificate: " << c->subject());
+                PT_LOG_DEBUG("imported certificate: " << c->subject());
             }
         }
     }
@@ -135,7 +135,7 @@ void CertificateStoreImpl::loadPkcs12(const char* pkcs12, std::size_t len, const
 
 const Certificate* CertificateStoreImpl::findCertificate(const std::string& subject)
 {
-    log_trace("find certificate: " << subject);
+    PT_LOG_TRACE("find certificate: " << subject);
     
     for(std::vector<Certificate*>::const_iterator it = _allCerts.begin(); it != _allCerts.end(); ++it) 
     {

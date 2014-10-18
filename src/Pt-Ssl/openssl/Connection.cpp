@@ -35,7 +35,7 @@
 #include <Pt/System/Logger.h>
 #include <cassert>
 
-log_define("Pt.Ssl.StreamBuffer")
+PT_LOG_DEFINE("Pt.Ssl.StreamBuffer")
 
 namespace Pt {
 
@@ -132,14 +132,14 @@ const char* Connection::currentCipher() const
 
 bool Connection::writeHandshake()
 {
-    log_trace("Connection::writeHandshake");
+    PT_LOG_TRACE("Connection::writeHandshake");
 
     std::streambuf* sb = _ios->rdbuf();
     if( ! sb)
         return false;
 
     int ret = SSL_do_handshake(_ssl);
-    log_debug("SSL_do_handshake returns " << ret);
+    PT_LOG_DEBUG("SSL_do_handshake returns " << ret);
 
     if(ret <= 0)
     {
@@ -150,7 +150,7 @@ bool Connection::writeHandshake()
             {
                 char buf[255];
                 ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
-                log_warn("handshake failed: " << buf);
+                PT_LOG_WARN("handshake failed: " << buf);
             }
             
             throw HandshakeFailed("SSL handshake failed");
@@ -166,7 +166,7 @@ bool Connection::writeHandshake()
     {
         char buff[1000];
         const int n = BIO_read(_out, buff, sizeof(buff));
-        log_debug("wrote " << n << " bytes to output");
+        PT_LOG_DEBUG("wrote " << n << " bytes to output");
 
         if(n <= 0)
             throw SslError("BIO_read");
@@ -181,7 +181,7 @@ bool Connection::writeHandshake()
 
 bool Connection::readHandshake()
 {
-    log_trace("Connection::readHandshake");
+    PT_LOG_TRACE("Connection::readHandshake");
 
     std::streambuf* sb = _ios->rdbuf();
     if( ! sb)
@@ -201,11 +201,11 @@ bool Connection::readHandshake()
         if(written <= 0 || written != n)
             throw SslError("BIO_write");
 
-        log_debug("read " << n << " bytes from input");
+        PT_LOG_DEBUG("read " << n << " bytes from input");
     }
 
     int ret = SSL_do_handshake(_ssl);
-    log_debug("SSL_do_handshake returns " << ret);
+    PT_LOG_DEBUG("SSL_do_handshake returns " << ret);
 
     if( ret <= 0 )
     {
@@ -216,7 +216,7 @@ bool Connection::readHandshake()
             {
                 char buf[255];
                 ERR_error_string_n(ERR_get_error(), buf, sizeof(buf));
-                log_warn("handshake failed: " << buf);
+                PT_LOG_WARN("handshake failed: " << buf);
             }
 
             throw HandshakeFailed("SSL handshake failed");
@@ -234,7 +234,7 @@ bool Connection::readHandshake()
 
 bool Connection::shutdown()
 {
-    log_debug("Connection::shutdown");
+    PT_LOG_DEBUG("Connection::shutdown");
 
     if( ! _connected )
         return true;
@@ -244,17 +244,17 @@ bool Connection::shutdown()
         return false;
 
     int state = SSL_get_shutdown(_ssl);
-    log_debug("SSL_get_shutdown() = " << state);
+    PT_LOG_DEBUG("SSL_get_shutdown() = " << state);
 
     bool shutdownSent = (SSL_SENT_SHUTDOWN & state) == SSL_SENT_SHUTDOWN;
 
     if( ! shutdownSent )
     {
         // write shutdown notify
-        log_debug("write shutdown notify");
+        PT_LOG_DEBUG("write shutdown notify");
 
         int r = SSL_shutdown(_ssl);
-        log_debug("SSL_shutdown() = " << r);
+        PT_LOG_DEBUG("SSL_shutdown() = " << r);
 
         char buf[1000];
         const int n = BIO_read(_out, buf, sizeof(buf));
@@ -262,11 +262,11 @@ bool Connection::shutdown()
             throw SslError("BIO_read");
 
         sb->sputn(buf, n);
-        log_debug("wrote " << n << " bytes to output");
+        PT_LOG_DEBUG("wrote " << n << " bytes to output");
 
         if(r == 1)
         {
-            log_debug("shutdown complete");
+            PT_LOG_DEBUG("shutdown complete");
             SSL_clear(_ssl);
             _connected = false;
             return true;
@@ -274,25 +274,25 @@ bool Connection::shutdown()
     }
 
     // read shutdown notify
-    log_debug("read shutdown notify");
+    PT_LOG_DEBUG("read shutdown notify");
 
     BUF_MEM* bm = 0;
     BIO_get_mem_ptr(_in, &bm);
 
     std::streamsize avail = sb->in_avail();
     std::streamsize refill = std::min(static_cast<std::streamsize>(bm->max - bm->length), avail);
-    log_debug("refill " << refill << " bytes");
+    PT_LOG_DEBUG("refill " << refill << " bytes");
         
     std::streamsize gcount = sb->sgetn(bm->data + bm->length, refill);
     bm->length += static_cast<int>( gcount );
-    log_debug("got " << gcount << " bytes from input stream");
+    PT_LOG_DEBUG("got " << gcount << " bytes from input stream");
 
     int r = SSL_shutdown(_ssl);
-    log_debug("SSL_shutdown() = " << r);
+    PT_LOG_DEBUG("SSL_shutdown() = " << r);
 
     if(r == 1)
     {
-        log_debug("shutdown complete");
+        PT_LOG_DEBUG("shutdown complete");
         SSL_clear(_ssl);
         _connected = false;
         return true;
@@ -305,7 +305,7 @@ bool Connection::shutdown()
 bool Connection::isShutdown() const
 {
     int state = SSL_get_shutdown(_ssl);
-    log_debug("SSL_get_shutdown() = " << state);
+    PT_LOG_DEBUG("SSL_get_shutdown() = " << state);
     
     return state != 0;
 }
@@ -324,14 +324,14 @@ std::streamsize Connection::write(const char* buf, std::size_t n)
         return 0;
 
     std::streamsize written = SSL_write(_ssl, buf, n);
-    log_debug("encrypted " << written << " bytes");
+    PT_LOG_DEBUG("encrypted " << written << " bytes");
 
     BUF_MEM* bm = 0;
     BIO_get_mem_ptr(_out, &bm);
     if(bm->length > 0)
     {
         sb->sputn(bm->data, bm->length);
-        log_debug("wrote " << bm->length << " bytes to output");
+        PT_LOG_DEBUG("wrote " << bm->length << " bytes to output");
         bm->length = 0;
     }
 
@@ -352,8 +352,8 @@ std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxIm
     {
         // even if we could not refill the BIO, we might still get data from the SSL
         const int readSize = SSL_read(_ssl, buf, n);
-        log_debug("Read " << readSize << " bytes from _ssl");
-        log_debug("SSL_get_shutdown() = " << SSL_get_shutdown(_ssl));
+        PT_LOG_DEBUG("Read " << readSize << " bytes from _ssl");
+        PT_LOG_DEBUG("SSL_get_shutdown() = " << SSL_get_shutdown(_ssl));
 
         if(readSize > 0)
         {           
@@ -365,16 +365,16 @@ std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxIm
         // happens when the peer has send the shutdown alert
         if(sslerr == SSL_ERROR_ZERO_RETURN)
         {
-            log_debug("SSL_ERROR_ZERO_RETURN");
+            PT_LOG_DEBUG("SSL_ERROR_ZERO_RETURN");
             return 0;
         }
 
         if(sslerr != SSL_ERROR_WANT_READ)
         {
-            log_debug("ssl error occured");
+            PT_LOG_DEBUG("ssl error occured");
             while( sslerr = ERR_get_error() ) 
             {
-                log_debug("ERR_error_string = " << ERR_error_string(sslerr, 0));
+                PT_LOG_DEBUG("ERR_error_string = " << ERR_error_string(sslerr, 0));
             }
             
             throw SslError("SSL_read");
@@ -391,14 +391,14 @@ std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxIm
             continue;
 
         const std::streamsize refill = std::min(static_cast<std::streamsize>(bm->max - bm->length), maxImport);
-        log_debug("get " << refill << " bytes from _ios");
+        PT_LOG_DEBUG("get " << refill << " bytes from _ios");
         
         std::streamsize gcount = sb->sgetn(bm->data + bm->length, refill);
         if(gcount <= 0)
             return 0;
 
         bm->length += static_cast<int>( gcount );
-        log_debug("Wrote " << gcount << " bytes from _ios to _in BUF_MEM");
+        PT_LOG_DEBUG("Wrote " << gcount << " bytes from _ios to _in BUF_MEM");
 
         maxImport -= gcount;
     }

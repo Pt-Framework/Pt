@@ -41,7 +41,7 @@
 #include <cstring>
 #include <cassert>
 
-log_define("Pt.Net.UdpSocket");
+PT_LOG_DEFINE("Pt.Net.UdpSocket");
 
 namespace Pt {
 
@@ -108,7 +108,7 @@ void UdpSocketImpl::close()
 
 bool UdpSocketImpl::beginBind(System::EventLoop& loop, const Endpoint& ai, const UdpSocketOptions& o)
 {
-    log_debug( "begin binding socket to " << ai.toString() );
+    PT_LOG_DEBUG( "begin binding socket to " << ai.toString() );
 
     this->bind(ai, o);
     return true;
@@ -123,13 +123,13 @@ bool UdpSocketImpl::runBind(System::EventLoop& loop)
 
 void UdpSocketImpl::endBind(System::EventLoop& loop)
 {
-    log_debug( "end bind" );
+    PT_LOG_DEBUG( "end bind" );
 }
 
 
 void UdpSocketImpl::bind(const Endpoint& e, const UdpSocketOptions& opts)
 {
-    log_debug( "bind socket to " << e.toString() );
+    PT_LOG_DEBUG( "bind socket to " << e.toString() );
 
     AddrInfo ai;
     ai.resolve(e, true);
@@ -202,7 +202,7 @@ void UdpSocketImpl::bind(const Endpoint& e, const UdpSocketOptions& opts)
 
 void UdpSocketImpl::bindMulticast(const Endpoint& e, const UdpSocketOptions& opts)
 {
-    log_debug( "bind multicast socket to " << e.toString() );
+    PT_LOG_DEBUG( "bind multicast socket to " << e.toString() );
 
     AddrInfo ai;
     ai.resolve(e, true);
@@ -287,7 +287,7 @@ void UdpSocketImpl::bindMulticast(const Endpoint& e, const UdpSocketOptions& opt
 
 bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ai, const UdpSocketOptions& o)
 {
-    log_debug( "begin connecting socket to " << ai.toString() );
+    PT_LOG_DEBUG( "begin connecting socket to " << ai.toString() );
 
     this->connect(ai, o);
     return true;
@@ -473,7 +473,7 @@ void UdpSocketImpl::setHopLimit(unsigned int n)
 
 void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 {
-    log_debug( "joining multicast group " << ipaddr );
+    PT_LOG_DEBUG( "joining multicast group " << ipaddr );
 
     if( _fd == INVALID_SOCKET )
         return;
@@ -526,7 +526,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
                 }
             }
 
-            log_debug( "joined IP4 multicast group: " << ipaddr );
+            PT_LOG_DEBUG( "joined IP4 multicast group: " << ipaddr );
             return;
         }
         else if(it->ai_family == AF_INET6)
@@ -547,7 +547,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
                 }
             }
 
-            log_debug( "joined IP6 multicast group: " << ipaddr );
+            PT_LOG_DEBUG( "joined IP6 multicast group: " << ipaddr );
             return;
         }
     }
