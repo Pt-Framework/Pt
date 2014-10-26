@@ -290,7 +290,7 @@ void SerializationInfo::endFormat(Formatter& formatter)
 }
 
 
-void SerializationInfo::format(Formatter& formatter)
+void SerializationInfo::format(Formatter& formatter) const
 {
     switch(_type)
     {
@@ -388,8 +388,8 @@ void SerializationInfo::format(Formatter& formatter)
         {
             formatter.beginStruct( _Name, this->typeName(), this->id() );
 
-            SerializationInfo::Iterator it;
-            SerializationInfo::Iterator end = this->end();
+            SerializationInfo::ConstIterator it;
+            SerializationInfo::ConstIterator end = this->end();
             for(it = this->begin(); it != end; ++it)
             {
                 formatter.beginMember( it->name() );
@@ -405,13 +405,13 @@ void SerializationInfo::format(Formatter& formatter)
         {
             formatter.beginDict( _Name, this->typeName(), this->id() );
 
-            SerializationInfo::Iterator it;
-            SerializationInfo::Iterator end = this->end();
+            SerializationInfo::ConstIterator it;
+            SerializationInfo::ConstIterator end = this->end();
             for(it = this->begin(); it != end; ++it)
             {
                 formatter.beginDictElement();
 
-                SerializationInfo::Iterator kv = it->begin();
+                SerializationInfo::ConstIterator kv = it->begin();
                 if( kv != it->end() )
                 {
                     formatter.beginDictKey();
@@ -437,8 +437,8 @@ void SerializationInfo::format(Formatter& formatter)
         {
             formatter.beginSequence( _Name, this->typeName(), this->id() );
 
-            SerializationInfo::Iterator it;
-            SerializationInfo::Iterator end = this->end();
+            SerializationInfo::ConstIterator it;
+            SerializationInfo::ConstIterator end = this->end();
             for(it = this->begin(); it != end; ++it)
             {
                 formatter.beginElement();
