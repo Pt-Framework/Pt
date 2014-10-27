@@ -122,17 +122,19 @@ void Client::onBeginCall(Composer& r, Remoting::RemoteCall& method, Decomposer**
 
 void Client::onEndCall()
 {
-    if( isFailed() )
+    // only check for Fault execptions
+    if( _isFault )
     {
         _isFault = false;
         throw _fault; 
     } 
 
+    // might also throw e.g. IOError
     this->onEndInvoke();
 
     if(_state != OnEnvelopeEnd)
     {
-        setFault(Fault::InvalidXmlRpc, "invalid SOAP reply");
+        throw Fault("invalid SOAP reply", Fault::InvalidXmlRpc);
     }
 }
 
@@ -154,7 +156,7 @@ void Client::onCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv
     this->onInvoke();
 
     // this is not neccessary if we directly throw from processResult
-    if( isFailed() )
+    if( _isFault )
     {
         _isFault = false;
         throw _fault; 
