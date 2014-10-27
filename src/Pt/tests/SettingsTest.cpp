@@ -66,11 +66,11 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "Entry", *this, &SettingsTest::Entry );
             Pt::Unit::TestSuite::registerMethod( "ConstEntry", *this, &SettingsTest::ConstEntry );
 
-			//Pt::Unit::TestSuite::registerMethod( "Writer", *this, &SettingsTest::Writer );
+            //Pt::Unit::TestSuite::registerMethod( "Writer", *this, &SettingsTest::Writer );
         }
 
     protected:
-		void Writer();
+        void Writer();
         void Comment();
         void SimpleValue();
         void SimpleTypedValue();
@@ -96,25 +96,26 @@ Pt::Unit::RegisterTest<SettingsTest> register_SettingsTest;
 
 void SettingsTest::Writer()
 {
-	Pt::Settings settings;
+    Pt::Settings settings;
 
-	std::vector<int> vec;
-	vec.push_back(1);
-	vec.push_back(2);
+    std::vector<int> vec;
+    vec.push_back(1);
+    vec.push_back(2);
 
-	std::vector< std::vector<int> > vecvec;
-	vecvec.push_back(vec);
-	vecvec.push_back(vec);
+    std::vector< std::vector<int> > vecvec;
+    vecvec.push_back(vec);
+    vecvec.push_back(vec);
 
-	settings.makeEntry("s").set("abc");
-	settings.makeEntry("i").set( int(1));
+    settings.makeEntry("s").set("abc");
+    settings.makeEntry("b").set(true);
+    settings.makeEntry("i").set( int(1));
     settings.makeEntry("u").set( unsigned(1) );
     settings.makeEntry("f").set( float(1) );
-	settings.makeEntry("b").set(vec);
-	settings.makeEntry("c").set(vecvec);
-	settings.makeEntry("d").makeEntry("d1").set(vec);
+    settings.makeEntry("a").set(vec);
+    settings.makeEntry("c").set(vecvec);
+    settings.makeEntry("d").makeEntry("d1").set(vec);
     settings.makeEntry("d").makeEntry("d2").set(Pt::Date(2001, 11, 15));
-	settings.makeEntry("d").makeEntry("d3").set(vec);
+    settings.makeEntry("d").makeEntry("d3").set(vec);
     settings.makeEntry("d").makeEntry("d4").set(vecvec);
     settings.makeEntry("d").makeEntry("d5").set(4);
 
@@ -126,11 +127,11 @@ void SettingsTest::Writer()
     std::ostringstream ss;
     Pt::TextOStream ts(ss, new Pt::Utf8Codec);
     settings.save(ts);
-	ts.terminate();
-	ts.flush();
+    ts.terminate();
+    ts.flush();
 
-	std::clog << "\n\n"
-		      << ss.str();
+    std::clog << "\n\n"
+              << ss.str();
 }
 
 

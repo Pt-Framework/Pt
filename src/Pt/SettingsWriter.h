@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
+ * Copyright (C) 2005-2014 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,7 +32,6 @@
 #include <Pt/Api.h>
 #include <Pt/String.h>
 #include <Pt/Formatter.h>
-#include <Pt/SerializationInfo.h>
 #include <Pt/NonCopyable.h>
 #include <vector>
 #include <iostream>
@@ -113,45 +112,18 @@ class SettingsFormatter : public Pt::Formatter
 
     protected:
         void onBeginParse(Composer&)
-		{}
+        {}
 
         bool onParseSome()
-		{ return false; }
+        { return false; }
 
         void onParse()
-		{}
+        {}
 
     private:
         std::basic_ostream<Char>* _os;
         std::vector<unsigned> _stack;
         int _state;
-};
-
-class SettingsWriter
-{
-    public:
-        SettingsWriter( std::basic_ostream<Pt::Char>& os)
-        : _os(&os)
-        , _indent(0)
-        { }
-
-        ~SettingsWriter()
-        {}
-
-        void write(const SerializationInfo& si);
-
-    protected:
-        void writeParent(const SerializationInfo& sd, const std::string& prefix);
-
-        void writeChild(const SerializationInfo& node);
-
-        void writeEntry(const std::string& name, const Pt::String& value, const SerializationInfo& si);
-
-        void writeSection(const Pt::String& prefix);
-
-    private:
-        std::basic_ostream<Pt::Char>* _os;
-        size_t _indent;
 };
 
 } // namespace Pt

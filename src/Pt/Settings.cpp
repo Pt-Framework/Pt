@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2005-2010 by Dr. Marc Boris Duerner
- * Copyright (C) 2005 Stephan Beal
+ * Copyright (C) 2005-2014 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -52,8 +51,14 @@ void Settings::load(std::basic_istream<Pt::Char>& is)
 
 void Settings::save(std::basic_ostream<Pt::Char>& os ) const
 {
-    SettingsWriter writer(os);
-    writer.write(*this);
+    SettingsFormatter formatter(os);
+
+    const SerializationInfo& si = *this;
+    SerializationInfo::ConstIterator it;
+    for(it = si.begin(); it != si.end(); ++it)
+    {
+        it->format(formatter);
+    }
 }
 
 } // namespace Pt

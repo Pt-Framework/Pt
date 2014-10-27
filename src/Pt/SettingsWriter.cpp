@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
+ * Copyright (C) 2005-2014 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,66 +28,12 @@
 
 #include "SettingsWriter.h"
 #include <Pt/Convert.h>
+#include <Pt/SerializationInfo.h>
 
 namespace {
 
-// TODO: use a formatter
-Pt::String toStr(const Pt::SerializationInfo& si)
-{
-    Pt::String s;
-
-    switch( si.type() )
-    {
-        case Pt::SerializationInfo::Str:
-            si.getString(s);
-            break;
-        
-        case Pt::SerializationInfo::Boolean:
-            bool b;
-            si.getBool(b);
-            s = b ? "true" : "false" ;
-            break;
-    
-        case Pt::SerializationInfo::Char:
-        {
-            Pt::Char c;
-            si.getChar(c);
-            s += c;
-            break;
-        }
-    
-        case Pt::SerializationInfo::Int8:
-        case Pt::SerializationInfo::Int16:
-        case Pt::SerializationInfo::Int32:
-        case Pt::SerializationInfo::Int64:
-            Pt::int64_t i;
-            si.getInt64(i);
-            Pt::formatInt(std::back_inserter(s), i);
-            break;
-    
-        case Pt::SerializationInfo::UInt8:
-        case Pt::SerializationInfo::UInt16:
-        case Pt::SerializationInfo::UInt32:
-        case Pt::SerializationInfo::UInt64:
-            Pt::uint64_t u;
-            si.getUInt64(u);
-            Pt::formatInt(std::back_inserter(s), u);
-            break;
-    
-        case Pt::SerializationInfo::Float:
-        case Pt::SerializationInfo::Double:
-        case Pt::SerializationInfo::LongDouble:
-            long double d;
-            si.getLongDouble(d);
-            Pt::formatFloat(std::back_inserter(s), d);
-            break;
-        
-        default:
-            throw std::logic_error("conversion to string failed");
-    }
-
-    return s;
-}
+static const Pt::Char PT_SETTINGS_TRUE[]  = { 't', 'r', 'u', 'e' };
+static const Pt::Char PT_SETTINGS_FALSE[] = { 'f', 'a', 'l', 's', 'e' };
 
 template<typename T>
 class array_appender : public std::iterator<std::output_iterator_tag, T>
@@ -200,26 +146,29 @@ void SettingsFormatter::onAddString(const char* name, const char* type,
 
 
 void SettingsFormatter::onAddBool(const char* name, bool value, 
-                          const char* id)
+                                  const char* id)
 {
-    //_os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
+    formatName(*_os, name);
 
-    //_os->write(XMLRPC_BOOLEAN, sizeof(XMLRPC_BOOLEAN)/sizeof(Char));
-    //*_os << (value ? Char('1') : Char('0'));
-    //_os->write(XMLRPC_BOOLEAN_END, sizeof(XMLRPC_BOOLEAN_END)/sizeof(Char));
+    if( value)
+        _os->write(PT_SETTINGS_TRUE, sizeof(PT_SETTINGS_TRUE)/sizeof(Char));
+    else
+        _os->write(PT_SETTINGS_FALSE, sizeof(PT_SETTINGS_FALSE)/sizeof(Char));
 
-    //_os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
+    if( _stack.empty() )
+        *_os<< std::endl << std::endl;
 }
 
 
 void SettingsFormatter::onAddChar(const char* name, const Pt::Char& value,
-                          const char* id)
+                                  const char* id)
 {
-    //_os->write(XMLRPC_VALUE, sizeof(XMLRPC_VALUE)/sizeof(Char));
-    //_os->write(XMLRPC_STRING, sizeof(XMLRPC_STRING)/sizeof(Char));
-    //Xml::xmlEncode(*_os, &value, 1);
-    //_os->write(XMLRPC_STRING_END, sizeof(XMLRPC_STRING_END)/sizeof(Char));
-    //_os->write(XMLRPC_VALUE_END, sizeof(XMLRPC_VALUE_END)/sizeof(Char));
+    formatName(*_os, name);
+
+    *_os << Char('"') << value << Char('"');
+    
+    if( _stack.empty() )
+        *_os<< std::endl << std::endl;
 }
 
 
@@ -449,181 +398,6 @@ void SettingsFormatter::onFinishStruct()
         *_os  << std::endl << std::endl; 
 
     _state = _stack.empty() ? 0 : ']';
-}
-
-
-//
-// SettingsWriter
-//
-
-void SettingsWriter::write(const SerializationInfo& si)
-{    
-    SettingsFormatter formatter(*_os);
-
-    SerializationInfo::ConstIterator it;
-    for(it = si.begin(); it != si.end(); ++it)
-    {
-        it->format(formatter);
-    }
-
-    //Pt::String value;
-    //SerializationInfo::ConstIterator it;
-    //for(it = si.begin(); it != si.end(); ++it)
-    //{
-    //    if( it->isScalar() )
-    //    {
-    //        value = toStr(*it);
-    //        this->writeEntry( it->name(), value, *it );
-    //        *_os << std::endl;
-    //    }
-    //    else if( it->isStruct() || it->isSequence() )
-    //    {
-    //        // Array types may have no instance-names
-    //        if( it->findMember("") )
-    //        {
-    //            *_os << Pt::String::widen( it->name() ) << Char(' ') << Char('=') << Char(' ');
-    //            *_os << Char('{') << Char(' ');
-    //            this->writeParent( *it, "");
-    //            *_os << Char(' ');
-    //            if(it->begin() != it->end() && ! it->begin()->isScalar() )
-    //                *_os << std::endl;
-    //            *_os << Char('}') << std::endl << std::endl;
-    //            continue;
-    //        }
-
-    //        //this->writeSection( subdata->name() );
-    //        this->writeParent( *it, it->name() );
-    //    }
-    //}
-}
-
-
-void SettingsWriter::writeParent(const SerializationInfo& sd, const std::string& prefix)
-{
-    Pt::String value;
-    bool separate = false;
-
-    SerializationInfo::ConstIterator it;
-    for(it = sd.begin(); it != sd.end(); ++it)
-    {
-        if( it->isScalar() )
-        {
-            std::string name = it->name();
-
-            // only comma separate array members (which have no name)
-            if( separate && name.empty() )
-                *_os << Char(',') << Char(' ');
-
-             value = toStr(*it);
-             if( ! prefix.empty() )
-                *_os << Pt::String::widen( prefix ) << '.';
-
-            this->writeEntry( name, value, *it );
-
-            if(! name.empty() )
-                *_os << std::endl;
-        }
-        else if( it->isStruct() || it->isSequence() )
-        {
-            if( separate )
-                *_os << Char(',');
-            
-            *_os << std::endl << String("  ");
-
-            if( it->name()[0] != '\0' )
-                *_os << Pt::String::widen( prefix ) << Char('.') << Pt::String::widen( it->name() ) << Char(' ') << Char('=') << Char(' ');
-
-            if( ! it->isSequence() )
-                *_os << Pt::String::widen( it->typeName() );
-                
-            *_os << Char('{') << Char(' ');
-            this->writeChild(*it);
-            *_os << Char(' ') << Char('}');
-        }
-
-        separate = true;
-    }
-}
-
-
-void SettingsWriter::writeChild(const SerializationInfo& sd)
-{
-    Pt::String value;
-    bool separate = false;
-
-    SerializationInfo::ConstIterator it;
-    for(it = sd.begin(); it != sd.end(); ++it)
-    {
-        if(separate)
-            *_os << Char(',') << Char(' ');
-
-        if( it->isScalar() )
-        {
-            value = toStr(*it);
-            this->writeEntry( it->name(), value, *it );
-        }
-        else if( it->isStruct() || it->isSequence() )
-        {
-            if( it->name()[0] != '\0' && ! sd.isSequence() )
-                *_os << Pt::String::widen( it->name() ) << Char(' ') << Char('=') << Char(' ');
-
-            *_os << Pt::String::widen( it->typeName() ) << Char('{') << Char(' ') ;
-            this->writeChild(*it);
-            *_os << Char(' ') << Char('}');
-        }
-
-        separate = true;
-    }
-}
-
-
-void writeEscapedValue(std::basic_ostream<Pt::Char>& os, const Pt::String& value)
-{
-    for(size_t n = 0; n < value.size(); ++n)
-    {
-        switch( value[n].value() )
-        {
-            case '\\':
-                os << Pt::Char('\\');
-
-            default:
-                os << value[n];
-        }
-    }
-}
-
-
-void SettingsWriter::writeEntry(const std::string& name, const Pt::String& value, const SerializationInfo& si)
-{
-    std::string type = si.typeName();
-
-    if( type.empty() )
-    {
-        if( name.empty() == false)
-            *_os << Pt::String::widen(name) << Char('=');
-
-        if(si.type() == SerializationInfo::Str)
-            *_os  << Char('\"');
-        writeEscapedValue(*_os, value);
-
-        if(si.type() == SerializationInfo::Str)
-            *_os << Char('\"');
-
-        return;
-    }
-
-    if( name.empty() == false)
-        *_os << Pt::String::widen(name) << Char(' ') << Char('=') << Char(' ');
-
-    *_os << Pt::String::widen(type) << Char('(') << Char('\"');
-    writeEscapedValue(*_os, value);
-    *_os << Char('\"') << Char(')');
-}
-
-
-void SettingsWriter::writeSection(const Pt::String& prefix)
-{
-    *_os << Char('[') << prefix << Char(']') << std::endl;
 }
 
 } // namespace Pt
