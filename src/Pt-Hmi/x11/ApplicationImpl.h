@@ -34,6 +34,7 @@
 #include <Pt/System/MainLoop.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/Hmi/Controller.h>
 #include <Pt/Singleton.h>
 #include <Pt/Event.h>
@@ -63,6 +64,7 @@ public:
 		int fromUnit(double value);
 		Pt::Gfx::Point fromUnit(const Pt::Gfx::PointF& value);
 		Pt::Gfx::Size fromUnit(const Pt::Gfx::SizeF& value);
+		Pt::Gfx::Rect fromUnit(const Pt::Gfx::RectF& value);
 
 		double unitSizeInch() const;
 		double unitSizeMm() const;
@@ -73,14 +75,9 @@ public:
 		
 		void showConsole(bool show);
 	
-		inline Pt::Signal<Controller*, const PointingEvent&>& pointerEvent()
+		inline Pt::Signal<const Pt::Event&>& systemEvent()
 		{
-			return _pointerEvent;
-		}
-
-		inline Pt::Signal<Controller*, const KeyEvent&>& keyDeviceEvent()
-		{
-			return _keyDeviceEvent;
+			return _systemEvent;
 		}
 
 		void nextEvent();
@@ -89,8 +86,7 @@ private:
     Display* _display;
     X11Fd	_xfd;
 
-	Pt::Signal<Controller*, const PointingEvent&> _pointerEvent;			
-	Pt::Signal<Controller*, const KeyEvent&> _keyDeviceEvent;
+		Pt::Signal<const Pt::Event&> _systemEvent;				
 	double _dpi;
 };
 

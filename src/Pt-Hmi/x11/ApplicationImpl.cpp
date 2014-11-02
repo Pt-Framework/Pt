@@ -113,6 +113,13 @@ double ApplicationImpl::resolutionDPI() const
 	return _dpi;
 }
 		
+
+Pt::Gfx::Rect ApplicationImpl::fromUnit(const Pt::Gfx::RectF& value)
+{
+	Pt::Gfx::Rect rect(Pt::Gfx::Point(value.x(), value.y()), Pt::Gfx::Size(value.width(), value.height()));
+	return rect;
+}
+  			
 void ApplicationImpl::showConsole(bool show)
 {
 }

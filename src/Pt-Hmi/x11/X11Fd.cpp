@@ -30,8 +30,9 @@
 #include <X11/Xft/Xft.h>
 #endif
 #include "ApplicationImpl.h"
-#include "Pt/Hmi/Application.h"
-#include "Pt/SourceInfo.h"
+#include <Pt/Hmi/Application.h>
+#include <Pt/SourceInfo.h>
+
 #include <stdexcept>
 #include <vector>
 
@@ -41,6 +42,7 @@ namespace Hmi {
 X11Fd::X11Fd(Display* display)
 : _display(display)
 , _ioh(*this)
+, _loop(0)
 {
     _ioh.fd = XConnectionNumber( _display );
 }
@@ -69,5 +71,17 @@ bool X11Fd::onRun()
 
     return true;
 }
+
+void X11Fd::onAttach(System::EventLoop& loop)
+{ 
+    _loop = &loop;
+}
+
+
+void X11Fd::onDetach(System::EventLoop& loop)
+{ 
+    _loop = 0; 
+}
+
 
 }}

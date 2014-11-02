@@ -51,11 +51,11 @@ public:
     ~X11Fd();
 
     void begin()
-    {
-        if( ! this->isActive() )
-            throw std::logic_error("not implemented"); 
+    {      
+      if( ! _loop )
+        throw std::logic_error("I/O device not active");
 
-        Pt::System::Selector& selector = this->parent()->selector();
+        Pt::System::Selector& selector = _loop->selector();
         selector.beginRead(&_ioh);
     }
 
@@ -76,11 +76,17 @@ protected:
 
     virtual void onCancel()
     { throw std::logic_error("not implemented"); }
+    
+
+    void onAttach(System::EventLoop& loop);
+
+    void onDetach(System::EventLoop& loop);    
 
 private:
     Display* _display;
     XEvent _xev;
     Pt::System::IOHandle _ioh;
+    Pt::System::EventLoop* _loop;
 };
 
 }}

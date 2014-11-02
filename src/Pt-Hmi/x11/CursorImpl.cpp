@@ -3,7 +3,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/View.h>
 #include <Pt/Hmi/WindowController.h>
-#include "ViewImpl.h"
+//#include "ViewImpl.h"
 #include "ApplicationImpl.h"
 
 namespace Pt{
@@ -64,7 +64,7 @@ void CursorImpl::setCursor(Cursors::Type c, WindowController* parent)
 
 		if( outDev == 0)
 			continue;
-
+/*
 		ViewImpl* impl = outDev->impl();
 		::Window w = impl->window();
 	
@@ -72,7 +72,7 @@ void CursorImpl::setCursor(Cursors::Type c, WindowController* parent)
 		{
 			XUndefineCursor(display,w);
 			XDefineCursor(display, w,	_cursorId);	
-		}
+		}*/
 	}
 
 
