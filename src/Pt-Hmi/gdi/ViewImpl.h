@@ -75,8 +75,7 @@ protected:
 private:
 	HWND					_hwnd;
 	Pt::Hmi::WindowModel*	_model;
-	Pt::Hmi::WindowController* _controller;
-	Pt::Gfx::Painter*		_nativePainter;
+	Pt::Hmi::WindowController* _controller;	
 	KeyEvent				_keyEvent;
 	PointingEvent			_pointerEvent;
 	bool					_ignoreSizePositionEvent;

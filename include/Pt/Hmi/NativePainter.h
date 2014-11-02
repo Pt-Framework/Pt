@@ -34,6 +34,8 @@ class PaintSurface;
 class PT_HMI_API NativePainter : public Pt::Hmi::Painter
 {
 public:
+    NativePainter();
+
     NativePainter(NativePaintSurface& surface);
 
     virtual ~NativePainter();
@@ -87,6 +89,8 @@ public:
     virtual void drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion);      
 
     virtual void addFontName(const std::string& fontName);
+
+    void setSurface(NativePaintSurface& surface);
 
 private:
 	PainterImpl* _impl;

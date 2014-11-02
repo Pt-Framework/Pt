@@ -40,6 +40,7 @@
 #include <Pt/Hmi/PointingEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <vector>
+#include <Pt/Hmi/NativePainter.h>
 
 namespace Pt{
 namespace Hmi{
@@ -51,12 +52,6 @@ public:
     virtual ~ViewImpl();
 
 	void output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model);
-
-	Pt::Hmi::Painter* nativePainter()
-	{
-	  //Todo;
-		return 0;
-	}
 
 	Window window()
 	{
@@ -74,7 +69,7 @@ private:
 	void onKeyEvent(XEvent& ev);
 
 private:
-	void drawIndependentImage(const Pt::Gfx::ARgbImage& image);
+	void drawSurface(Pt::Hmi::PaintSurface& surface);
 	void bringWindowToTop();
 	void create();
 	void destroy();
@@ -83,14 +78,13 @@ private:
 	void writeWindowSizeAndPos();
 	void writeWindowProperties();
 	void redraw();
-	void readClientSizeAndPos(Pt::Gfx::SizeF& size, Pt::Gfx::PointF& pos);
-	void pixelToScreen(char* data, const Pt::Gfx::ARgbColor& pixel);
+    void pixelToScreen(char* data, const Pt::Gfx::ARgbColor& pixel);
 	void updateDrawBuffer();
 	void maximizeWindow();
 	void minimizeWindow();
 	void restoreWindow();
-  bool isWindowMinimized();
-  bool isWindowMaximazed();
+    bool isWindowMinimized();
+    bool isWindowMaximazed();
     
 private:
   Atom AtomAppWake;
@@ -110,6 +104,10 @@ private:
 	unsigned int			_windowBorderWidth;
 	bool 					_visible;
 	std::vector<char> 		_pixelBuffer;
+    int _x;
+    int _y;
+    int _width;
+    int _height;
 };
 
 }}

@@ -44,7 +44,6 @@ namespace Hmi{
 ViewImpl::ViewImpl()
 : _hwnd(0)
 , _model(0)
-, _nativePainter(0)
 , _ignoreSizePositionEvent(false)
 {	
 	Pt::Hmi::Application* app = (Pt::Hmi::Application*) &Pt::Hmi::Application::instance();	

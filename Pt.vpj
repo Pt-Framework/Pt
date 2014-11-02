@@ -16,7 +16,8 @@
                 CaptureOutputWith="ProcessBuffer"
                 SaveOption="SaveWorkspaceFiles"
                 NoVSBUILD="1"
-                RunFromDir="%rp">
+                RunFromDir="%rp"
+                ClearProcessBuffer="1">
                 <Exec CmdLine="%(JAMCMD) -q"/>
             </Target>
             <Target
@@ -42,7 +43,8 @@
                 SaveOption="SaveNone"
                 BuildFirst="1"
                 CaptureOutputWith="ProcessBuffer"
-                RunFromDir="%rw">
+                RunFromDir="%rw"
+                ClearProcessBuffer="1">
                 <Exec CmdLine='"%o"'/>
             </Target>
         </Menu>
@@ -62,7 +64,8 @@
                 MenuCaption="&amp;Build"
                 CaptureOutputWith="ProcessBuffer"
                 SaveOption="SaveWorkspaceFiles"
-                RunFromDir="%rp">
+                RunFromDir="%rp"
+                ClearProcessBuffer="1">
                 <Exec CmdLine="%(JAMCMD) -q -sCONFIG=release"/>
             </Target>
             <Target
@@ -88,7 +91,8 @@
                 SaveOption="SaveNone"
                 BuildFirst="1"
                 CaptureOutputWith="ProcessBuffer"
-                RunFromDir="%rw">
+                RunFromDir="%rw"
+                ClearProcessBuffer="1">
                 <Exec CmdLine='"%o"'/>
             </Target>
         </Menu>

@@ -86,15 +86,15 @@ void PaintSurfaceImpl::resize(const Pt::Gfx::SizeF& size)
     _oldBrush = (HBRUSH) GetCurrentObject(_deviceContext, OBJ_BRUSH);
     _oldFont  = (HFONT) GetCurrentObject(_deviceContext, OBJ_FONT);
 
-	//Delete the context and bitmap
+    //Delete the context and bitmap
     DeleteDC(_deviceContext);
-	DeleteObject(_bitmapHandle);
+    DeleteObject(_bitmapHandle);
 
-	//Create a new context and bitmap
-	HDC screenDC = CreateDC(_T("DISPLAY"), NULL, NULL, NULL);
-	_deviceContext = CreateCompatibleDC(screenDC);
-	_bitmapHandle = CreateCompatibleBitmap(screenDC, nsize.width(), nsize.height());
-	DeleteDC(screenDC);
+    //Create a new context and bitmap
+    HDC screenDC = CreateDC(_T("DISPLAY"), NULL, NULL, NULL);
+    _deviceContext = CreateCompatibleDC(screenDC);
+    _bitmapHandle = CreateCompatibleBitmap(screenDC, nsize.width(), nsize.height());
+    DeleteDC(screenDC);
 
 	//Restore the old settings
 	SelectObject(_deviceContext, _bitmapHandle);

@@ -30,6 +30,7 @@ NativePainter::NativePainter(NativePaintSurface& surface)
 {	
 }
 
+
 NativePainter::~NativePainter()
 {
 	delete _impl;
@@ -168,6 +169,11 @@ void NativePainter::drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& i
 void NativePainter::addFontName(const std::string& fontName)
 {
 	_impl->addFontName(fontName);
+}
+
+void NativePainter::setSurface(NativePaintSurface& surface)
+{    
+    _impl->setSurface(surface);
 }
 
 }}

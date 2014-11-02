@@ -28,19 +28,19 @@
 #include "PaintSurfaceImpl.h"
 #include "PainterImpl.h"
 #include <Pt/Hmi/Application.h>
+#include "ApplicationImpl.h"
 
 namespace Pt{
 namespace Hmi{
 
 PaintSurfaceImpl::PaintSurfaceImpl(const Pt::Gfx::SizeF& size)
 {
-	Pt::Gfx::Size nsize = Application::instance().fromUnit(_size);
-	//Todo:
+    create(size);    
 }
 
 PaintSurfaceImpl::~PaintSurfaceImpl()
 {
-	//Todo:
+    destroy();
 }
 
 Pt::Gfx::ARgbImage PaintSurfaceImpl::toImage()
@@ -50,10 +50,28 @@ Pt::Gfx::ARgbImage PaintSurfaceImpl::toImage()
 	Pt::Gfx::ARgbImage	image(size.width(), size.height());
 	return image;
 }
-	
-void PaintSurfaceImpl::resize(const Pt::Gfx::SizeF& size)
+
+void PaintSurfaceImpl::create(const Pt::Gfx::SizeF& size)
 {
-	//Todo:
+    Pt::Gfx::Size nsize = Application::instance().fromUnit(size);
+
+    Display* display = Application::instance().impl()->display();
+    unsigned int depth = DefaultDepth( display, DefaultScreen(display) );
+    _drawable = XCreatePixmap(display, XDefaultRootWindow(display), nsize.width(), nsize.height(), depth);
+    XSync(display, false);
+    _size = size;    
+}
+
+void PaintSurfaceImpl::destroy()
+{
+    Display* display = Application::instance().impl()->display();
+    XFreePixmap(display, _drawable);
+}
+
+void PaintSurfaceImpl::resize(const Pt::Gfx::SizeF& size)
+{ 
+   destroy();
+   create(size);
 }
 
 }}

@@ -33,6 +33,9 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/ARgbImage.h>
+#include <X11/X.h>
+#include <X11/Xlib.h>
+
 
 namespace Pt{
 namespace Hmi{
@@ -41,22 +44,31 @@ class PainterImpl;
 
 class PaintSurfaceImpl
 {
-public:		
+public:
 	PaintSurfaceImpl(const Pt::Gfx::SizeF& size);
 	virtual ~PaintSurfaceImpl();
 
 	Pt::Gfx::ARgbImage toImage();
 	
-	void resize(const Pt::Gfx::SizeF& size);	
+	void resize(const Pt::Gfx::SizeF& size);
 
 	inline const Pt::Gfx::SizeF& size() const
 	{
 		return _size;
 	}
 
+    inline ::Drawable drawable()
+    {
+       return _drawable;
+    }
+
+private:
+    void create(const Pt::Gfx::SizeF& size);
+    void destroy();
 
 private:
     Gfx::SizeF    _size;
+    ::Drawable _drawable;
 };
 
 }}

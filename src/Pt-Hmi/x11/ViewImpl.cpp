@@ -45,6 +45,9 @@
 #include <ctype.h>
 #include <assert.h>
 
+#include <Pt/Hmi/NativePaintSurface.h>
+#include "PaintSurfaceImpl.h"
+
 namespace Pt{
 namespace Hmi{
 
@@ -60,6 +63,10 @@ ViewImpl::ViewImpl()
 , _model(0)
 , _window(0)
 , _visible(false)
+, _x(0)
+, _y(0)
+, _width(0)
+, _height(0)
 {
 	_mouseEvent.buttons().resize(3);
 	_display = Application::instance().impl()->display();
@@ -99,63 +106,16 @@ void ViewImpl::pixelToScreen(char* data, const Pt::Gfx::ARgbColor& pixel)
 	}
 }
 
-//Direct draw
-#if 0
-void ViewImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
+void ViewImpl::drawSurface(Pt::Hmi::PaintSurface& surface)
 {    
+    NativePaintSurface* nativeSurface = (NativePaintSurface*) &surface;
 
-	for(size_t y = 0; y < image.height(); ++y)
-	{
-		for( size_t x = 0; x < image.width(); ++x)
-		{
-			const Pt::Gfx::ARgbColor& pixel = _model->PaintSurface.pixel(x,y);
+    ::Drawable from = nativeSurface->impl()->drawable();
+    Pt::Gfx::Size size = _model->fromUnit(surface.size());
 
-			XGCValues gcv;
+    XCopyArea( _display, from, _window, _brushGc, 0, 0, size.width(), size.height(), 0, 0);
 
-			pixelToScreen((char*)&gcv.foreground, pixel);		
-			
-			XChangeGC (_display, _brushGc, GCForeground, &gcv);
-			XDrawPoint(_display, _window, _brushGc, x,y);
-		}
-	}
-
-  XSync(_display, false);
-}
-#endif
-
-//Buffered draw
-void ViewImpl::drawIndependentImage(const Pt::Gfx::ARgbImage& image)
-{    
-//Todo:
-	updateDrawBuffer();
-	unsigned int sreen  = DefaultScreen(_display);
-	int depth = XDefaultDepth(_display, sreen);
-
-	int pixelSize = depth == 16 ? 2 : 4;	
-
-	for(size_t y = 0; y < image.height(); ++y)
-	{
-		const int lineOffset = y *(image.width()*pixelSize);
-
-		for( size_t x = 0; x < image.width(); ++x)
-		{
-//			const Pt::Gfx::ARgbColor& pixel = _model->paintSurface()->pixel(x,y);
-//			const int pixelOffset = lineOffset +(x* pixelSize);				
-//			pixelToScreen((char*)&_pixelBuffer[pixelOffset], pixel);					
-		}
-	}
-
-
-	Visual* visual = XDefaultVisual(_display, sreen);
-
-	XImage* ximage = XCreateImage(_display, visual, depth, ZPixmap, 0, NULL, image.width(), image.height(), 8, 0);
-	ximage->data = (char*)&(_pixelBuffer[0]);
-	
-	XPutImage(_display,_window, _brushGc, ximage, 0, 0, 0,0, image.width(), image.height());
-	
-	XSync(_display, false);
-	ximage->data = NULL;
-	XDestroyImage(ximage);	
+    XSync(_display, false);
 }
 
 void ViewImpl::onClientMessage(XEvent& xev)
@@ -247,7 +207,7 @@ void ViewImpl::onMouseButtonRelease(XEvent& xev)
 
 	_mouseEvent.setX(pos.x());
 	_mouseEvent.setY(pos.y());
-		Application::instance().systemEvent().send(_mouseEvent);
+	Application::instance().systemEvent().send(_mouseEvent);
 }
 
 void ViewImpl::redraw()
@@ -261,30 +221,20 @@ void ViewImpl::redraw()
     XFlush(_display);
 }
 
-void ViewImpl::readClientSizeAndPos(Pt::Gfx::SizeF& size, Pt::Gfx::PointF& pos)
-{
-	if(_window == 0)
-		return;
-
-	XWindowAttributes xwa;
-	XGetWindowAttributes(_display, _window, &xwa);
-
-	size = _model->toUnit(Pt::Gfx::Size(xwa.width, xwa.height));
-	pos = _model->toUnit(Pt::Gfx::Point(xwa.x, xwa.y));
-
-}
-
 void ViewImpl::writeWindowSizeAndPos()
-{	
-	Pt::Gfx::Point posLocal = _model->fromUnit(_model->Position.get());
+{
+	Pt::Gfx::Point pos = _model->fromUnit(_model->Position.get());
+	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
 
-	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());	
-	int x = posLocal.x();
-	int y = posLocal.y();
-
-	XMoveResizeWindow(_display, _window,  x, y, size.width(), size.height());			
+    if( _x != pos.x() || _y != pos.y() || _width != size.width() || _height != size.height())
+    {
+        XMoveResizeWindow(_display, _window,  pos.x(), pos.y(), size.width(), size.height());
+        _x = pos.x();
+        _y = pos.y();
+        _width = size.width();
+        _height = size.height();
+    }
 }
-
 
 void ViewImpl::onConfigureNotify( XEvent& xev)
 {
@@ -293,13 +243,6 @@ void ViewImpl::onConfigureNotify( XEvent& xev)
 		writeWindowSizeAndPos();
 		return;
 	}
-	
-	if(_ignoreSizeEvent)
-	{
-		_ignoreSizeEvent = false;
-		return;
-	}
-		
     
     if(isWindowMinimized())
     {
@@ -317,24 +260,22 @@ void ViewImpl::onConfigureNotify( XEvent& xev)
             _model->WindowState = WindowStateType::Normal;
     }
 
-	XWindowAttributes xwa;
-	Window child;
-	int    x = 0;
-    int    y = 0;
 
-	XGetWindowAttributes(_display, _window, &xwa);
+    if( _x != xev.xconfigure.x || _y != xev.xconfigure.y)
+    {
+        _x = xev.xconfigure.x;
+        _y = xev.xconfigure.y;
 
-	Window root = DefaultRootWindow(_display);
+        _model->Position =  _model->toUnit(Pt::Gfx::Point(_x, _y));
+    }
 
-  	XTranslateCoordinates(_display,_window, root, xwa.x, xwa.y, &x, &y,&child);
-
-	Pt::Gfx::SizeF clientSize;
-	Pt::Gfx::PointF clientPos;
-
-	readClientSizeAndPos(clientSize, clientPos);
-
-	_model->Position = clientPos;
-	_model->Size = clientSize;
+    if(_width != xev.xconfigure.width || _height != xev.xconfigure.height)
+    {
+        _width = xev.xconfigure.width;
+        _height = xev.xconfigure.height;
+        
+        _model->Size = _model->toUnit(Pt::Gfx::Size(_width, _height));    
+    }
 }
 
 void ViewImpl::onKeyEvent(XEvent& xev)
@@ -360,16 +301,17 @@ void ViewImpl::onKeyEvent(XEvent& xev)
 
         	case XK_Alt_L: 
 		case XK_Alt_R:
-			_keyEvent.setAlt(_keyEvent.state() == KeyEvent::KeyDown);			
-		break;
+			_keyEvent.setAlt(_keyEvent.state() == KeyEvent::KeyDown);
+        break;
 
 		case XK_Shift_L :
 		case XK_Shift_R :
 			_keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);
 		break;
+
 		default:
 		{
-	    	}
+	    }
 		break;
 	}		
 		
@@ -405,7 +347,7 @@ void ViewImpl::onWindowEvent(XEvent& ev)
 			onMotionNotify(ev);
 		break;
 
-        case ButtonPress:     		
+        case ButtonPress:
 			onMouseButtonPress(ev);     
 		break;
 
@@ -414,7 +356,7 @@ void ViewImpl::onWindowEvent(XEvent& ev)
 		break;
 
         case Expose:         
-			onPaint(ev);          		
+			onPaint(ev);
 		break;
 
         case NoExpose: 
@@ -431,9 +373,9 @@ void ViewImpl::onWindowEvent(XEvent& ev)
         }
 		break;
 
-        case KeyPress:        		
+        case KeyPress:
         case KeyRelease:  
-			onKeyEvent(ev);        		
+			onKeyEvent(ev);
 		break;
 	
 		case FocusOut:
@@ -455,6 +397,7 @@ void ViewImpl::onWindowEvent(XEvent& ev)
 
 void ViewImpl::create()
 {
+
    // Display and Screen are inited in Application
     unsigned int screen = DefaultScreen(_display);
 
@@ -504,7 +447,7 @@ void ViewImpl::create()
 
     _brushGc = XCreateGC( _display, _window,0, 0);
 
-   XSetWMProtocols(_display, _window, &AtomWindowClosed, 1);
+    XSetWMProtocols(_display, _window, &AtomWindowClosed, 1);
     XSync(_display, false);
 }
 
@@ -552,17 +495,13 @@ void ViewImpl::bringWindowToTop()
 
 void ViewImpl::onPaint(XEvent& xev)
 {
-	if( _model != 0)
-	{
-		//drawIndependentImage(_model->paintSurface());
-		//TODO:
-	}
+    if( _model != 0  && _window != 0)
+        drawSurface(*_model->paintSurface());
 }
 
 void ViewImpl::writeWindowProperties()
 {
-
-	XSizeHints sizeHints;
+    XSizeHints sizeHints;
 	long suppliedReturn = 0;
 
     XGetWMNormalHints(_display,_window, &sizeHints, &suppliedReturn);
@@ -815,29 +754,13 @@ void ViewImpl::output(Pt::Hmi::Controller* controller,Pt::Hmi::Model* model)
     //TODO: Center parent handling
     
 	//Initial size and position
-	Pt::Gfx::SizeF clientSize;
-	Pt::Gfx::PointF pos;
 
-	readClientSizeAndPos(clientSize, pos);
-
-	if( clientSize.width() != _model->Size.get().width() ||  clientSize.height() != _model->Size.get().height())
-	{
-		_model->Position = pos;
-		_model->Size = clientSize;
-
-		_ignoreSizeEvent = true;
-		writeWindowSizeAndPos();	
-		return;
-	}
-
-	_ignoreSizeEvent = true;
 	writeWindowSizeAndPos();
 	
 	writeWindowProperties();
 
-//	drawIndependentImage(_model->PaintSurface);
+    drawSurface(*_model->paintSurface());
 	redraw();
-	std::cout<<"INFO: GFX output done!"<<std::endl;
 }
 
 }}

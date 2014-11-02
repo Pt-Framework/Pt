@@ -32,11 +32,25 @@
 #include <Pt/Gfx/Rgb565Image.h>
 #include <Pt/Gfx/Rgb555Color.h>
 #include <Pt/Gfx/Region.h>
+#include <Pt/Hmi/Application.h>
+
+#include <X11/X.h>
+#include <X11/X.h>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <X11/Xutil.h>
+#include <X11/keysym.h>
+#include <X11/cursorfont.h>
+
+struct _XftFont;
+struct _XftDraw;
+
 
 namespace Pt {
 namespace Hmi {
 
 class PaintSurfaceImpl;
+class NativePaintSurface;
 class PaintSurface;
 
 class PainterImpl
@@ -95,67 +109,70 @@ class PainterImpl
         void drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion);
 
         template <typename Iterator>
-        void drawImage(size_t x, size_t y, Iterator begin, Iterator end, size_t width, size_t height)
+        void drawImage(double xx, double yy, Iterator begin, Iterator end, double widthF, double heightF)
         {
-            if (width == 0 || height == 0) {
-                return; // Don't draw empty images.
-            }
+            Pt::Gfx::Point to = Application::instance().fromUnit(Pt::Gfx::PointF(xx,yy));
+            int x = to.x();
+            int y = to.y();
 
-            // Try to convert our generic image format (ARgbImage) to an image format that is compatible
-            // with the current device settings. If this is not possible, convert it to a 32-bit
-            // device-independent image that windows has to convert to the current device settings
-            // when we bit-blit it.
-            switch (depth()) {
+            Pt::Gfx::Size size =  Application::instance().fromUnit(Pt::Gfx::SizeF(widthF,heightF));
+
+            int width = size.width();
+            int height = size.height();
+
+
+            switch( this->depth() ) {
                 case 32:
-                case 24: {
-                    Gfx::Rgb888Image rgb32Image(width, height);
-                    assign(begin, end, rgb32Image.begin());
-                    drawCompatibleImage(x, y, depth(), (char*)rgb32Image.data(), rgb32Image.width(), rgb32Image.height());
+                case 24:
+                {
+                    Gfx::Rgb888Image rgb24Image( width, height );
+                    assign( begin, end, rgb24Image.begin() );
+                    this->drawImage( x, y, (char*)rgb24Image.data(), rgb24Image.width(), rgb24Image.height() );
                     break;
                 }
 
-                case 16: {
-                    Gfx::Rgb565Image rgb16Image(width, height);
-                    assign(begin, end, rgb16Image.begin());
-                    drawCompatibleImage(x, y, 16, (char*)rgb16Image.data(), rgb16Image.width(), rgb16Image.height());
+                case 16:
+                {
+                    Gfx::Rgb565Image rgb16Image( width, height );
+                    assign( begin, end, rgb16Image.begin() );
+                    this->drawImage( x, y, (char*)rgb16Image.data(), rgb16Image.width(), rgb16Image.height() );
+                    break;
+                }
+                case 15:
+                {
+                    Gfx::Rgb555Image rgb15Image( width, height );
+                    assign( begin, end, rgb15Image.begin() );
+                    this->drawImage( x, y, (char*)rgb15Image.data(), rgb15Image.width(), rgb15Image.height() );
                     break;
                 }
 
-
-                case 15: {
-                    Gfx::Rgb555Image rgb16Image(width, height);
-                    assign(begin, end, rgb16Image.begin());
-                    drawCompatibleImage(x, y, 16, (char*)rgb16Image.data(), rgb16Image.width(), rgb16Image.height());
+                default:
                     break;
-                }
-
-                default: { // Below 16 bit or anything inbetween
-                    Gfx::Rgb888Image rgb32Image(width, height);
-                    assign(begin, end, rgb32Image.begin());
-                    drawIndependentImage(x, y, (char*)rgb32Image.data(), rgb32Image.width(), rgb32Image.height());
-                    break;
-                }
             }
         }
 
-        void addFontName(const std::string& fontName);
+        void addFontName(const std::string& fontName);        
+        void setSurface(NativePaintSurface& surface);
 
     protected:
-        void drawCompatibleImage(size_t x, size_t y, size_t depth, const char* data, size_t width, size_t height);
-        void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
-
         std::string determinePlatformDefaultFontName();
+        void drawImage(size_t toX, size_t toY, const char* data, size_t width, size_t height);
+        long toXColor(const Gfx::ARgbColor& color);
+        ::Drawable drawable();
+        void create();
+        void destroy();
 
-        void updatePen();
-        void updateFont();
-        void updateBrush();
+
     protected:
         PaintSurfaceImpl*  _surface;
-        Gfx::Pen   _pen;
+        Gfx::Pen _pen;
         Gfx::Brush _brush;
         Gfx::Font  _font;
-        mutable std::wstring _text;
-        std::list<std::string> _fontNamesList;
+        GC _penGc;
+        GC _brushGc;
+        _XftDraw* _xftDraw;
+        _XftFont* _xftFont;
+        std::list<std::string> _fontList;
 
     private:
 };

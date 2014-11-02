@@ -19,7 +19,7 @@ public:
 	virtual ~NativePaintSurface();
 
 	virtual Pt::Gfx::ARgbImage toImage() const;
-	virtual void resize(const Pt::Gfx::SizeF& size);	
+	virtual void resize(const Pt::Gfx::SizeF& size);
 	virtual Pt::Gfx::SizeF size() const;
 
 	virtual Pt::Hmi::Painter& painter()
