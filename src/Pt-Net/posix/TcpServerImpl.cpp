@@ -43,7 +43,7 @@
 #include <unistd.h>
 #include <netinet/tcp.h>
 
-log_define("Pt.Net.TcpServer")
+PT_LOG_DEFINE("Pt.Net.TcpServer")
 
 namespace Pt {
 
@@ -60,11 +60,11 @@ TcpServerImpl::TcpServerImpl(TcpServer& server)
 
 void TcpServerImpl::create(int domain, int type, int protocol)
 {
-    log_debug("create socket");
+    PT_LOG_DEBUG("create socket");
     
     if(_ioh.fd != -1)
     {
-        log_debug("closing socket " << _ioh.fd);
+        PT_LOG_DEBUG("closing socket " << _ioh.fd);
         ::close(_ioh.fd);
     }
     
@@ -85,7 +85,7 @@ void TcpServerImpl::close()
     if (_ioh.fd < 0)
       return;
 
-    log_debug("close socket " << _ioh.fd);
+    PT_LOG_DEBUG("close socket " << _ioh.fd);
 
     ::close(_ioh.fd);
     _ioh.fd = -1;
@@ -112,7 +112,7 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServerOptions& options)
             continue;
         }
 
-        log_debug("setsockopt SO_REUSEADDR");
+        PT_LOG_DEBUG("setsockopt SO_REUSEADDR");
         if (::setsockopt(this->fd(), SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
         {
             close();
@@ -124,7 +124,7 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServerOptions& options)
         {
           if (::setsockopt(this->fd(), IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) < 0)
           {
-              log_debug("could not set socket option IPV6_V6ONLY, errno=" << errno <<
+              PT_LOG_DEBUG("could not set socket option IPV6_V6ONLY, errno=" << errno <<
                         ": " << std::strerror(errno));
               close();
               throw System::SystemError("setsockopt IPV6_V6ONLY");
@@ -132,7 +132,7 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServerOptions& options)
         }
 #endif
 
-        log_debug("bind " << _ioh.fd);
+        PT_LOG_DEBUG("bind " << _ioh.fd);
         if (::bind(this->fd(), it->ai_addr, it->ai_addrlen) == 0)
         {
             int flags = ::fcntl(_ioh.fd , F_GETFL);
@@ -155,7 +155,7 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServerOptions& options)
             // save our information
             std::memmove(&_servaddr, it->ai_addr, it->ai_addrlen);
 
-            log_debug("listen " << this->fd());
+            PT_LOG_DEBUG("listen " << this->fd());
             if( ::listen(this->fd(), options.backlog()) < 0 )
             {
                 close();
@@ -171,7 +171,7 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServerOptions& options)
             {
                 int deferSecs = options.acceptDeferred();
 
-                log_debug("set TCP_DEFER_ACCEPT to " << deferSecs);
+                PT_LOG_DEBUG("set TCP_DEFER_ACCEPT to " << deferSecs);
 
                 if( ::setsockopt(this->fd(), SOL_TCP, TCP_DEFER_ACCEPT, &deferSecs, sizeof(deferSecs)) < 0)
                 {
@@ -181,7 +181,7 @@ void TcpServerImpl::listen(const Endpoint& ep, const TcpServerOptions& options)
             }
 #endif
 
-            log_debug("successfully listening " << this->fd());
+            PT_LOG_DEBUG("successfully listening " << this->fd());
             return;
         }
     }
@@ -198,7 +198,7 @@ void TcpServerImpl::listen(const std::string& ipaddr,  unsigned short int port,
                            const TcpServerOptions& options)
 {
 
-    log_debug("listen on " << ipaddr << " port " << port);
+    PT_LOG_DEBUG("listen on " << ipaddr << " port " << port);
 
     Endpoint ep(ipaddr, port);
     listen(ep, options); 
@@ -210,35 +210,35 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
     if( this->fd() < 0 )
         return;
 
-    log_debug("begin accept " << this->fd());
+    PT_LOG_DEBUG("begin accept " << this->fd());
 
     sockaddr_storage peeraddr;
     socklen_t peeraddr_len = sizeof(peeraddr);
     int fd = ::accept(this->fd(), reinterpret_cast <struct sockaddr*>(&peeraddr), &peeraddr_len);
-    log_debug("accepted: " << fd);
+    PT_LOG_DEBUG("accepted: " << fd);
 
     if(fd != -1)
     {
         _acceptedFd = fd;
-        log_debug("immediate accept " << this->fd());
+        PT_LOG_DEBUG("immediate accept " << this->fd());
         loop.setReady(_server);
         return;
     }
 
     if(errno != EAGAIN && errno != EINPROGRESS) // EWOULDBLOCK
     {
-        log_debug("accept failed " << this->fd());
+        PT_LOG_DEBUG("accept failed " << this->fd());
         throw System::IOError("accept");
     }
 
-    log_debug("wait for accept " << this->fd());
+    PT_LOG_DEBUG("wait for accept " << this->fd());
     loop.selector().beginRead( &_ioh );
 }
 
 
 int TcpServerImpl::accept(const TcpSocketOptions& o)
 {
-    log_debug( "accept " << this->fd() );
+    PT_LOG_DEBUG( "accept " << this->fd() );
 
     // connection immediately accepted in beginAccept
     if(_acceptedFd != -1)
@@ -251,7 +251,7 @@ int TcpServerImpl::accept(const TcpSocketOptions& o)
     // in case beginAccept was called previously
     if( _server.loop() )
     {
-         log_debug("end accept " << this->fd());
+         PT_LOG_DEBUG("end accept " << this->fd());
         _server.loop()->selector().endRead( &_ioh );
     }
 
@@ -270,7 +270,7 @@ int TcpServerImpl::accept(const TcpSocketOptions& o)
 
         if(errno != EAGAIN && errno != EINPROGRESS)
         {
-            log_debug("accept failed " << this->fd());
+            PT_LOG_DEBUG("accept failed " << this->fd());
             throw System::IOError("accept");
         }
         

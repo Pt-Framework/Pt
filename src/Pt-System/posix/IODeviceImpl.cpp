@@ -34,7 +34,7 @@
 #include <cerrno>
 #include <cassert>
 
-log_define("Pt.System.IODevice")
+PT_LOG_DEFINE("Pt.System.IODevice")
 
 namespace Pt {
 
@@ -67,7 +67,7 @@ bool IODeviceImpl::isOpen() const
 
 void IODeviceImpl::open(int fd, bool inherit)
 {
-    log_debug("opening fd:" << fd);
+    PT_LOG_DEBUG("opening fd:" << fd);
 
     // TODO: we do not need to enable the i/o handle now, but defer it
     // until we call impl().beginRead or impl().beginWrite on the i/o handle.
@@ -119,7 +119,7 @@ void IODeviceImpl::close()
                 throw IOError( PT_ERROR_MSG("close failed") );
         }
 
-        log_debug("closed fd:" << fd);
+        PT_LOG_DEBUG("closed fd:" << fd);
     }
 }
 
@@ -132,28 +132,28 @@ void IODeviceImpl::cancel(EventLoop& loop)
     if( this->isOpen() )
     {
         loop.selector().cancel(_ioh);
-        log_debug("cancelling fd:" << _ioh.fd);
+        PT_LOG_DEBUG("cancelling fd:" << _ioh.fd);
     }
 }
 
 
 std::size_t IODeviceImpl::beginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
-    log_debug("begin read on fd:" << _ioh.fd);
+    PT_LOG_DEBUG("begin read on fd:" << _ioh.fd);
     
     for(;;)
     {
         ssize_t ret = ::read( _ioh.fd, (void*)buffer, n);
         if (ret > 0)
         {
-            log_debug("read:" << ret << " bytes");
+            PT_LOG_DEBUG("read:" << ret << " bytes");
             return static_cast<std::size_t>(ret);
         }
 
         if(ret == 0 || errno == ECONNRESET)
         {
             eof = true;
-            log_debug("read: EOF");
+            PT_LOG_DEBUG("read: EOF");
             return 0;
         }
 
@@ -171,7 +171,7 @@ std::size_t IODeviceImpl::beginRead(EventLoop& loop, char* buffer, std::size_t n
 
 std::size_t IODeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
-    log_debug("end read on fd:" << _ioh.fd);
+    PT_LOG_DEBUG("end read on fd:" << _ioh.fd);
 
     loop.selector().endRead( &_ioh );
 
@@ -198,7 +198,7 @@ std::size_t IODeviceImpl::read( char* buffer, std::size_t count, bool& eof )
         if(ret == 0 || errno == ECONNRESET)
         {
             eof = true;
-            log_debug("read: EOF");
+            PT_LOG_DEBUG("read: EOF");
             return 0;
         }
 
@@ -218,21 +218,21 @@ std::size_t IODeviceImpl::read( char* buffer, std::size_t count, bool& eof )
         }
     }
 
-    log_debug("read: " << ret << " bytes");
+    PT_LOG_DEBUG("read: " << ret << " bytes");
     return ret;
 }
 
 
 std::size_t IODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
-    log_debug("begin write on fd:" << _ioh.fd);
+    PT_LOG_DEBUG("begin write on fd:" << _ioh.fd);
 
     for(;;)
     {
         ssize_t ret = ::write(_ioh.fd, (const void*)buffer, n);
         if (ret > 0)
         {
-            log_debug("wrote:" << ret << " bytes");
+            PT_LOG_DEBUG("wrote:" << ret << " bytes");
             return static_cast<std::size_t>(ret);
         }
 
@@ -253,7 +253,7 @@ std::size_t IODeviceImpl::beginWrite(EventLoop& loop, const char* buffer, std::s
 
 std::size_t IODeviceImpl::endWrite(EventLoop& loop, const char* buffer, std::size_t n)
 {
-    log_debug("end write on fd:" << _ioh.fd);
+    PT_LOG_DEBUG("end write on fd:" << _ioh.fd);
 
     loop.selector().endWrite( &_ioh );
 
@@ -296,7 +296,7 @@ std::size_t IODeviceImpl::write( const char* buffer, std::size_t count )
         }
     }
 
-    log_debug("wrote: " << ret << " bytes");
+    PT_LOG_DEBUG("wrote: " << ret << " bytes");
     return ret;
 }
 
@@ -338,7 +338,7 @@ bool IODeviceImpl::runRead(EventLoop& loop)
     if( ! this->isOpen() )
         return false;
 
-    log_debug("run read on fd:" << _ioh.fd);
+    PT_LOG_DEBUG("run read on fd:" << _ioh.fd);
 
     Selector& selector = loop.selector();
 
@@ -358,7 +358,7 @@ bool IODeviceImpl::runWrite(EventLoop& loop)
     if( ! this->isOpen() )
         return false;
 
-    log_debug("run write on fd:" << _ioh.fd);
+    PT_LOG_DEBUG("run write on fd:" << _ioh.fd);
 
     Selector& selector = loop.selector();
 

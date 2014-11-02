@@ -70,13 +70,13 @@ namespace sqlite {
     {
         if (_stmt)
         {
-            //log_debug("sqlite3_finalize(" << stmt << ')');
+            //PT_LOG_DEBUG("sqlite3_finalize(" << stmt << ')');
             ::sqlite3_finalize(_stmt);
         }
 
         if (_stmtInUse && _stmtInUse != _stmt)
         {
-            //log_debug("sqlite3_finalize(" << _stmtInUse << ')');
+            //PT_LOG_DEBUG("sqlite3_finalize(" << _stmtInUse << ')');
             ::sqlite3_finalize(_stmtInUse);
         }
     }
@@ -92,7 +92,7 @@ namespace sqlite {
 
             // prepare statement
             const char* tzTail;
-            //log_debug("sqlite3_prepare(" << _conn->getSqlite3() << ", \"" << _query
+            //PT_LOG_DEBUG("sqlite3_prepare(" << _conn->getSqlite3() << ", \"" << _query
             //  << "\", " << &_stmt << ", " << &tzTail << ')');
             
             int n = static_cast<int>( _query.size() );
@@ -103,16 +103,16 @@ namespace sqlite {
                 Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
             }
 
-            //log_debug("sqlite3_stmt = " << _stmt);
+            //PT_LOG_DEBUG("sqlite3_stmt = " << _stmt);
 
             if (_stmtInUse)
             {
                 // get bindings from _stmtInUse
-                //log_debug("sqlite3_transfer_bindings(" << _stmtInUse << ", " << _stmt << ')');
+                //PT_LOG_DEBUG("sqlite3_transfer_bindings(" << _stmtInUse << ", " << _stmt << ')');
                 ret = ::sqlite3_transfer_bindings(_stmtInUse, _stmt);
                 if (ret != SQLITE_OK)
                 {
-                    //log_debug("sqlite3_finalize(" << _stmt << ')');
+                    //PT_LOG_DEBUG("sqlite3_finalize(" << _stmt << ')');
                     ::sqlite3_finalize(_stmt);
                     _stmt = 0;
                         Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
@@ -138,7 +138,7 @@ namespace sqlite {
         else
         {
             // we have already a new statement-handle - destroy the old one
-            //log_debug("sqlite3_finalize(" << stmt_ << ')');
+            //PT_LOG_DEBUG("sqlite3_finalize(" << stmt_ << ')');
             ::sqlite3_finalize(stmt);
 
             if (_stmtInUse == stmt)
@@ -152,11 +152,11 @@ namespace sqlite {
     {
         sqlite3_stmt* stmt = getBindStmt();
 
-        //log_debug("sqlite3_bind_parameter_index(" << _stmt << ", :" << col  << ')');
+        //PT_LOG_DEBUG("sqlite3_bind_parameter_index(" << _stmt << ", :" << col  << ')');
         int idx = ::sqlite3_bind_parameter_index(stmt, (':' + col).c_str());
         //if (idx == 0)
         //{
-        //  log_warn("hostvariable :" << col << " not found");
+        //  PT_LOG_WARN("hostvariable :" << col << " not found");
         //}
         return idx;
     }
@@ -167,7 +167,7 @@ namespace sqlite {
         {
             if (_needReset)
             {
-                //log_debug("sqlite3_reset(" << _stmt << ')');
+                //PT_LOG_DEBUG("sqlite3_reset(" << _stmt << ')');
                 int ret = ::sqlite3_reset(_stmt);
                 if(ret != SQLITE_OK)
                 {
@@ -208,7 +208,7 @@ namespace sqlite {
         {
             reset();
 
-            //log_debug("sqlite3_bind_null(" << stmt << ", " << idx << ')');
+            //PT_LOG_DEBUG("sqlite3_bind_null(" << stmt << ", " << idx << ')');
             int ret = ::sqlite3_bind_null(stmt, idx);
             if(ret != SQLITE_OK)
             {
@@ -231,7 +231,7 @@ namespace sqlite {
         {
             reset();
 
-            //log_debug("sqlite3_bind_int(" << stmt << ", " << idx << ')');
+            //PT_LOG_DEBUG("sqlite3_bind_int(" << stmt << ", " << idx << ')');
             int ret = ::sqlite3_bind_int(stmt, idx, data);
             if(ret != SQLITE_OK)
             {
@@ -244,7 +244,7 @@ namespace sqlite {
     {
         if (data > static_cast<unsigned>(std::numeric_limits<int>::max()))
         {
-            //log_warn("possible loss of precision while converting large unsigned " << data
+            //PT_LOG_WARN("possible loss of precision while converting large unsigned " << data
             //  << " to double");
             setDouble(col, static_cast<double>(data));
         }
@@ -268,7 +268,7 @@ namespace sqlite {
         {
             reset();
 
-            //log_debug("sqlite3_bind_double(" << stmt << ", " << idx << ')');
+            //PT_LOG_DEBUG("sqlite3_bind_double(" << stmt << ", " << idx << ')');
             int ret = ::sqlite3_bind_double(stmt, idx, data);
             if(ret != SQLITE_OK)
             {
@@ -286,7 +286,7 @@ namespace sqlite {
         {
             reset();
 
-            //log_debug("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
+            //PT_LOG_DEBUG("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
             //<< ", 1, SQLITE_TRANSIENT)");
             int ret = ::sqlite3_bind_text(stmt, idx, &data, 1, SQLITE_TRANSIENT);
             if(ret != SQLITE_OK)
@@ -305,7 +305,7 @@ namespace sqlite {
         {
             reset();
 
-            //log_debug("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
+            //PT_LOG_DEBUG("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
             //<< ", " << data.size() << ", SQLITE_TRANSIENT)");
 
             int n = static_cast<int>( data.size() );
@@ -328,7 +328,7 @@ namespace sqlite {
         {
             reset();
 
-            //log_debug("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
+            //PT_LOG_DEBUG("sqlite3_bind_text(" << stmt << ", " << idx << ", " << data
             //<< ", " << data.size() << ", SQLITE_TRANSIENT)");
             
             int n = static_cast<int>( data.size() );
@@ -362,7 +362,7 @@ namespace sqlite {
         reset();
         _needReset = true;
 
-        //log_debug("sqlite3_step(" << stmt << ')');
+        //PT_LOG_DEBUG("sqlite3_step(" << stmt << ')');
         int ret = sqlite3_step(_stmt);
         if (ret != SQLITE_DONE)
         {
@@ -384,19 +384,19 @@ namespace sqlite {
 
         do
         {
-            //log_debug("sqlite3_step(" << _stmt << ')');
+            //PT_LOG_DEBUG("sqlite3_step(" << _stmt << ')');
             ret = sqlite3_step(_stmt);
 
             if (ret == SQLITE_ROW)
             {
-                //log_debug("sqlite3_column_count(" << _stmt << ')');
+                //PT_LOG_DEBUG("sqlite3_column_count(" << _stmt << ')');
                 int count = ::sqlite3_column_count(_stmt);
                 RowImpl* row = new RowImpl();
                 r->add(Row(row));
 
                 for (int i = 0; i < count; ++i)
                 {
-                    //log_debug("sqlite3_column_text(" << _stmt << ", " << i << ')');
+                    //PT_LOG_DEBUG("sqlite3_column_text(" << _stmt << ", " << i << ')');
                     int bytes = ::sqlite3_column_bytes(_stmt, i);
                     const unsigned char* txt = sqlite3_column_text(_stmt, i);
                     Value v;
@@ -422,19 +422,19 @@ namespace sqlite {
         reset();
         _needReset = true;
 
-        //log_debug("sqlite3_step(" << _stmt << ')');
+        //PT_LOG_DEBUG("sqlite3_step(" << _stmt << ')');
         int ret = sqlite3_step(_stmt);
 
         if (ret == SQLITE_ROW)
         {
-            //log_debug("sqlite3_column_count(" << _stmt << ')');
+            //PT_LOG_DEBUG("sqlite3_column_count(" << _stmt << ')');
             int count = ::sqlite3_column_count(_stmt);
             RowImpl* r = new RowImpl();
             Row row(r);
 
             for (int i = 0; i < count; ++i)
             {
-                //log_debug("sqlite3_column_text(" << _stmt << ", " << i << ')');
+                //PT_LOG_DEBUG("sqlite3_column_text(" << _stmt << ", " << i << ')');
                 const unsigned char* txt = sqlite3_column_text(_stmt, i);
                 Value v;
 
@@ -460,11 +460,11 @@ namespace sqlite {
         reset();
         _needReset = true;
 
-        //log_debug("sqlite3_step(" << _stmt << ')');
+        //PT_LOG_DEBUG("sqlite3_step(" << _stmt << ')');
         int ret = sqlite3_step(_stmt);
         if (ret == SQLITE_ROW)
         {
-            //log_debug("sqlite3_column_count(" << _stmt << ')');
+            //PT_LOG_DEBUG("sqlite3_column_count(" << _stmt << ')');
             int count = ::sqlite3_column_count(_stmt);
 
             if (count == 0)
@@ -472,7 +472,7 @@ namespace sqlite {
                 throw std::logic_error("Invalid query" + PT_SOURCEINFO);
             }
 
-            //log_debug("sqlite3_column_text(" << _stmt << ", 0)");
+            //PT_LOG_DEBUG("sqlite3_column_text(" << _stmt << ", 0)");
             Value v;
             int bytes = ::sqlite3_column_bytes(_stmt, 0);
             const void* blob = ::sqlite3_column_blob(_stmt, 0);

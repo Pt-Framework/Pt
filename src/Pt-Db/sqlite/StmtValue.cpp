@@ -41,7 +41,7 @@ namespace sqlite {
 
     bool StmtValue::isNull() const
     {
-        //log_debug("sqlite3_column_type(" << getStmt() << ", " << iCol << ')');
+        //PT_LOG_DEBUG("sqlite3_column_type(" << getStmt() << ", " << iCol << ')');
         return ::sqlite3_column_type(getStmt(), _iCol) == SQLITE_NULL;
     }
 
@@ -52,13 +52,13 @@ namespace sqlite {
 
     int StmtValue::getInt() const
     {
-        //log_debug("sqlite3_column_int(" << getStmt() << ", " << iCol << ')');
+        //PT_LOG_DEBUG("sqlite3_column_int(" << getStmt() << ", " << iCol << ')');
         return ::sqlite3_column_int(getStmt(), _iCol);
     }
 
     unsigned StmtValue::getUnsigned() const
     {
-        //log_debug("possible loss of data in conversion from int to unsigned");
+        //PT_LOG_DEBUG("possible loss of data in conversion from int to unsigned");
         return static_cast<unsigned>(getInt());
     }
 
@@ -69,22 +69,22 @@ namespace sqlite {
 
     double StmtValue::getDouble() const
     {
-        //log_debug("sqlite3_column_double(" << getStmt() << ", " << iCol << ')');
+        //PT_LOG_DEBUG("sqlite3_column_double(" << getStmt() << ", " << iCol << ')');
         return ::sqlite3_column_double(getStmt(), _iCol);
     }
 
     char StmtValue::getChar() const
     {
-        //log_debug("sqlite3_column_text(" << getStmt() << ", " << iCol << ')');
+        //PT_LOG_DEBUG("sqlite3_column_text(" << getStmt() << ", " << iCol << ')');
         const unsigned char* ret = ::sqlite3_column_text(getStmt(), _iCol);
         return static_cast<char>(*ret);
     }
 
     void StmtValue::getString(std::string& stringdata) const
     {
-        //log_debug("sqlite3_column_bytes(" << getStmt() << ", " << iCol << ')');
+        //PT_LOG_DEBUG("sqlite3_column_bytes(" << getStmt() << ", " << iCol << ')');
         int bytes = ::sqlite3_column_bytes(getStmt(), _iCol);
-        //log_debug("sqlite3_column_text(" << getStmt() << ", " << iCol << ')');
+        //PT_LOG_DEBUG("sqlite3_column_text(" << getStmt() << ", " << iCol << ')');
         const unsigned char* ret = ::sqlite3_column_text(getStmt(), _iCol);
         stringdata = std::string(reinterpret_cast<const char*>(ret), bytes);
     }

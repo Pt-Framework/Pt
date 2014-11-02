@@ -42,7 +42,7 @@ using namespace Windows::Storage::Streams;
 using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
 
-log_define("Pt.System.UdpSocket");
+PT_LOG_DEFINE("Pt.System.UdpSocket");
 
 namespace Pt {
 
@@ -140,7 +140,7 @@ bool UdpSocketImpl::beginBind(System::EventLoop& loop,
                               const Endpoint& ep, 
                               const UdpSocketOptions& o)
 {
-    log_debug( "begin binding socket to " << ep.toString() );
+    PT_LOG_DEBUG( "begin binding socket to " << ep.toString() );
 
     const std::string& host = ep.impl()->host();
     std::wstring whost(host.begin(), host.end());
@@ -185,7 +185,7 @@ void UdpSocketImpl::endBind(System::EventLoop& loop)
 {
     // the application reacts to the connect signal by calling endConnect
 
-    log_debug("ending bind");
+    PT_LOG_DEBUG("ending bind");
     
     if( ! _bindOp )
         return;
@@ -219,7 +219,7 @@ void UdpSocketImpl::bind(const Endpoint& ep, const UdpSocketOptions&)
 
 bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep, const UdpSocketOptions&)
 {
-    log_debug( "begin connecting socket to " << ep.toString() );
+    PT_LOG_DEBUG( "begin connecting socket to " << ep.toString() );
 
     const std::string& host = ep.impl()->host();
     std::wstring whost(host.begin(), host.end());
@@ -261,7 +261,7 @@ void UdpSocketImpl::endConnect(System::EventLoop& loop)
 {
     // the application reacts to the connect signal by calling endConnect
 
-    log_debug("ending connect");
+    PT_LOG_DEBUG("ending connect");
     
     if( ! _connectOp )
         return;
@@ -446,7 +446,7 @@ std::size_t UdpSocketImpl::read(char* buffer, std::size_t count, bool& eof)
 std::size_t UdpSocketImpl::beginWrite(System::EventLoop& loop, 
                                  const char* buffer, std::size_t bufSize)
 {
-    log_debug("beginWrite " << bufSize);
+    PT_LOG_DEBUG("beginWrite " << bufSize);
 
     // no writer means neither connect nor setTarget was called
     if( ! _writer )
@@ -503,7 +503,7 @@ bool UdpSocketImpl::runWrite(System::EventLoop& loop)
 
 std::size_t UdpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
 {
-    log_debug("endWrite");
+    PT_LOG_DEBUG("endWrite");
 
     const std::size_t written = _storeOp->GetResults();
 

@@ -46,7 +46,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-log_define("Pt.Net.UdpSocket");
+PT_LOG_DEFINE("Pt.Net.UdpSocket");
 
 namespace Pt {
 
@@ -83,7 +83,7 @@ void UdpSocketImpl::close()
 
 bool UdpSocketImpl::beginBind(System::EventLoop& loop, const Endpoint& ep, const UdpSocketOptions& o)
 {
-    log_debug( "begin binding socket to " << ep.toString() );
+    PT_LOG_DEBUG( "begin binding socket to " << ep.toString() );
 
     this->bind(ep, o);
     return true;
@@ -181,7 +181,7 @@ void UdpSocketImpl::bind(const Endpoint& ep, const UdpSocketOptions& opts)
 
 bool UdpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep, const UdpSocketOptions& o)
 {
-    log_debug( "begin connecting socket to " << ep.toString() );
+    PT_LOG_DEBUG( "begin connecting socket to " << ep.toString() );
 
     this->connect(ep, o);
     return true;
@@ -322,7 +322,7 @@ bool UdpSocketImpl::isBound() const
 
 void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
 {
-    log_debug( "joining multicast group " << ipaddr );
+    PT_LOG_DEBUG( "joining multicast group " << ipaddr );
 
     if( this->fd() < 0 )
         return;
@@ -365,7 +365,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
             if(joined == 0)
                 throw System::IOError("setsockopt failed");
 
-            log_debug( "joined IP4 multicast group: " << ipaddr );
+            PT_LOG_DEBUG( "joined IP4 multicast group: " << ipaddr );
             return;
         }
         else if(it->ai_family == AF_INET6)
@@ -392,7 +392,7 @@ void UdpSocketImpl::joinMulticastGroup(const std::string& ipaddr)
             if(joined == 0)
                 throw System::IOError("setsockopt failed");
             
-            log_debug( "joined IP6 multicast group: " << ipaddr );
+            PT_LOG_DEBUG( "joined IP6 multicast group: " << ipaddr );
             return;
         }
     }
@@ -470,7 +470,7 @@ const Endpoint& UdpSocketImpl::remoteEndpoint() const
 
 std::size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, std::size_t n, bool& eof)
 {
-    log_debug("begin read on fd:" << _ioh.fd);
+    PT_LOG_DEBUG("begin read on fd:" << _ioh.fd);
 
     sockaddr_storage peerAddr;
     socklen_t addrlen = sizeof(peerAddr);
@@ -481,7 +481,7 @@ std::size_t UdpSocketImpl::beginRead(System::EventLoop& loop, char* buffer, std:
         ssize_t ret = ::recvfrom( this->fd(), buffer, n, 0, addr, &addrlen );
         if (ret > 0)
         {
-            log_debug("read:" << ret << " bytes");
+            PT_LOG_DEBUG("read:" << ret << " bytes");
             
             _peerAddr.impl()->init(addr, addrlen);
             return static_cast<std::size_t>(ret);

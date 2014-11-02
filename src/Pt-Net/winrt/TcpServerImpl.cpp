@@ -39,7 +39,7 @@ using namespace Windows::Foundation;
 using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
 
-log_define("Pt.System.TcpServer");
+PT_LOG_DEFINE("Pt.System.TcpServer");
 
 namespace Pt {
 
@@ -125,7 +125,7 @@ void TcpServerImpl::listen(const std::string& ipaddr, unsigned short int port,
 
 void TcpServerImpl::listen(const Endpoint& ep, const TcpServerOptions& options)
 {
-    log_debug("listen on " << ep.toString());
+    PT_LOG_DEBUG("listen on " << ep.toString());
 
     // TODO: handle error from async handler, i.e. when port is already in use
 
@@ -182,7 +182,7 @@ void TcpServerImpl::onConnectionReceived(StreamSocketListener^ listener,
 
 void TcpServerImpl::beginAccept(System::EventLoop& loop)
 {
-    log_debug("beginAccept");
+    PT_LOG_DEBUG("beginAccept");
     
     System::MutexLock lock(_mtx);
 
@@ -200,7 +200,7 @@ void TcpServerImpl::beginAccept(System::EventLoop& loop)
 
 bool TcpServerImpl::run(System::EventLoop& loop)
 {
-    log_debug("TcpServerImpl::avail");
+    PT_LOG_DEBUG("TcpServerImpl::avail");
     
     System::MutexLock lock(_mtx);
     return ! _backlog.empty();

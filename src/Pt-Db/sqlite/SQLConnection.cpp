@@ -162,7 +162,7 @@ namespace sqlite {
     {
         char* errmsg;
 
-        //log_debug("sqlite_exec(" << Db << ", \"" << query << "\", 0, 0, " << &errmsg << ')');
+        //PT_LOG_DEBUG("sqlite_exec(" << Db << ", \"" << query << "\", 0, 0, " << &errmsg << ')');
 
         int ret = ::sqlite3_exec(_Db, query.c_str(), 0, 0, &errmsg);
         if(ret != SQLITE_OK)
@@ -170,7 +170,7 @@ namespace sqlite {
             Pt::Db::sqlite::Error(ret, PT_SOURCEINFO);
         }
         
-        //log_debug("sqlite_exec ret=" << ret);
+        //PT_LOG_DEBUG("sqlite_exec ret=" << ret);
         
         return ::sqlite3_changes(_Db);
     }
@@ -192,7 +192,7 @@ namespace sqlite {
 
     Pt::Db::Statement Connection::prepare(const std::string& query)
     {
-        //log_debug("prepare(\"" << query << "\")");
+        //PT_LOG_DEBUG("prepare(\"" << query << "\")");
         return Pt::Db::Statement( new Pt::Db::sqlite::Statement(this, query) );
     }
 

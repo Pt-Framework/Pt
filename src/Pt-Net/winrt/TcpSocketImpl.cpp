@@ -43,7 +43,7 @@ using namespace Windows::Storage::Streams;
 using namespace Windows::Networking;
 using namespace Windows::Networking::Sockets;
 
-log_define("Pt.Net.TcpSocket");
+PT_LOG_DEFINE("Pt.Net.TcpSocket");
 
 namespace Pt {
 
@@ -110,13 +110,13 @@ void TcpSocketImpl::accept(TcpServer& server, const TcpSocketOptions&)
 
     _socket = server.impl().accept();
     _isConnected = true;
-    log_debug("accepted socket");
+    PT_LOG_DEBUG("accepted socket");
 }
 
 
 void TcpSocketImpl::connect(const Endpoint& ep, const TcpSocketOptions&)
 {
-    log_debug( "connecting socket to " << ep.toString() );
+    PT_LOG_DEBUG( "connecting socket to " << ep.toString() );
     assert( ! _isConnected );
 
     throw System::IOError("blocking I/O not supported");
@@ -126,7 +126,7 @@ void TcpSocketImpl::connect(const Endpoint& ep, const TcpSocketOptions&)
 bool TcpSocketImpl::beginConnect(System::EventLoop& loop, const Endpoint& ep, const TcpSocketOptions&)
 {
     assert( ! _isConnected );
-    log_debug( "begin connecting socket to " << ep.toString() );
+    PT_LOG_DEBUG( "begin connecting socket to " << ep.toString() );
 
     _ep = ep;
 
@@ -175,7 +175,7 @@ void TcpSocketImpl::endConnect(System::EventLoop& loop)
 {
     // the application reacts to the connect signal by calling endConnect
 
-    log_debug( "ending connect to "  << _ep.toString() );
+    PT_LOG_DEBUG( "ending connect to "  << _ep.toString() );
     
     if( ! _connectOp )
         return;
@@ -227,7 +227,7 @@ std::size_t TcpSocketImpl::beginRead(System::EventLoop& loop,
                                 char* buffer, std::size_t bufSize, 
                                 bool& eof)
 {
-    log_debug("beginRead " << bufSize);
+    PT_LOG_DEBUG("beginRead " << bufSize);
 
     if( ! _reader )
     {
@@ -273,7 +273,7 @@ std::size_t TcpSocketImpl::endRead(System::EventLoop& loop,
                               char* buffer, std::size_t bufSize, 
                               bool& eof)
 {
-    log_debug("endRead");
+    PT_LOG_DEBUG("endRead");
 
     if( ! _loadOp )
         return 0;
@@ -313,7 +313,7 @@ std::size_t TcpSocketImpl::read(char* buffer, std::size_t count, bool& eof)
 std::size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, 
                                  const char* buffer, std::size_t bufSize)
 {
-    log_debug("beginWrite " << bufSize);
+    PT_LOG_DEBUG("beginWrite " << bufSize);
 
     if( ! _writer )
         _writer = ref new DataWriter(_socket->OutputStream);
@@ -345,7 +345,7 @@ bool TcpSocketImpl::runWrite(System::EventLoop& loop)
 
 std::size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer, std::size_t n)
 {
-    log_debug("endWrite");
+    PT_LOG_DEBUG("endWrite");
 
     if( ! _storeOp )
         return 0;

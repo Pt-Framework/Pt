@@ -29,7 +29,7 @@
 #include "MainLoopImpl.h"
 #include <Pt/System/Logger.h>
 
-log_define("Pt.System.MainLoop")
+PT_LOG_DEFINE("Pt.System.MainLoop")
 
 namespace Pt {
 
@@ -107,12 +107,12 @@ bool MainLoopImpl::processEvents()
 
 bool MainLoopImpl::waitNext()
 {
-    log_trace("MainLoopImpl::waitNext");
+    PT_LOG_TRACE("MainLoopImpl::waitNext");
 
     bool isActive = true;
     std::size_t msecs = _timerQueue.processTimers();
 
-    log_debug("next timer expires in: " << msecs << " msecs");
+    PT_LOG_DEBUG("next timer expires in: " << msecs << " msecs");
 
     while(true)
     {
@@ -126,17 +126,17 @@ bool MainLoopImpl::waitNext()
 
         msecs = 0;
 
-        log_debug("running selectable");
+        PT_LOG_DEBUG("running selectable");
         selectable->run();
     }
 
     // TODO: what if a ready selectable adds a timer with a shorter timeout?
 
-    log_debug("waiting for events");
+    PT_LOG_DEBUG("waiting for events");
     if( _selector.waitForWake(msecs) )
         isActive = _eventQueue.processEvents(*_event);
 
-    log_trace("returning activity: " << isActive);
+    PT_LOG_TRACE("returning activity: " << isActive);
     return isActive;
 }
 

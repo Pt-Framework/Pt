@@ -118,7 +118,7 @@ namespace Db {
 
   Connection connect(const std::string& url)
   {
-    //log_debug("connect(\"" << url << "\")");
+    //PT_LOG_DEBUG("connect(\"" << url << "\")");
 
     std::string::size_type n = url.find(':');
 
@@ -160,7 +160,7 @@ namespace Db {
     throw std::logic_error("No DB driver found for " + driverName + PT_SOURCEINFO);
 
     /*std::string libraryUrl = url.substr(n + 1);
-    //log_debug("driver \"" << driverName << "\" url=\"" << libraryUrl << '"');
+    //PT_LOG_DEBUG("driver \"" << driverName << "\" url=\"" << libraryUrl << '"');
 
     // lookup library-manager
     LibraryManager libraryManager;
@@ -180,7 +180,7 @@ namespace Db {
 
   Connection connectCached(const std::string& url)
   {
-    log_debug("connectCached(\"" << url << "\")");
+    PT_LOG_DEBUG("connectCached(\"" << url << "\")");
     return connectionPool.connect(url);
   }
 
