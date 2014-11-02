@@ -113,6 +113,7 @@ void ViewImpl::drawSurface(Pt::Hmi::PaintSurface& surface)
     ::Drawable from = nativeSurface->impl()->drawable();
     Pt::Gfx::Size size = _model->fromUnit(surface.size());
 
+
     XCopyArea( _display, from, _window, _brushGc, 0, 0, size.width(), size.height(), 0, 0);
 
     XSync(_display, false);
@@ -142,6 +143,7 @@ void ViewImpl::onMotionNotify(XEvent& xev)
 	Pt::Gfx::PointF pos = _model->toUnit(Pt::Gfx::Point(x,y));
 	_mouseEvent.setX(pos.x());
 	_mouseEvent.setY(pos.y());
+    _mouseEvent.setController(_controller);
 
 	Application::instance().systemEvent().send(_mouseEvent);
 }
@@ -174,6 +176,7 @@ void ViewImpl::onMouseButtonPress(XEvent& xev)
 
 	_mouseEvent.setX(pos.x());
 	_mouseEvent.setY(pos.y());
+    _mouseEvent.setController(_controller);
 	Application::instance().systemEvent().send(_mouseEvent);
 }
 
@@ -207,6 +210,7 @@ void ViewImpl::onMouseButtonRelease(XEvent& xev)
 
 	_mouseEvent.setX(pos.x());
 	_mouseEvent.setY(pos.y());
+    _mouseEvent.setController(_controller);
 	Application::instance().systemEvent().send(_mouseEvent);
 }
 
@@ -322,6 +326,7 @@ void ViewImpl::onKeyEvent(XEvent& xev)
 	else
 		_keyEvent.setUnicode(sym & 0xFF);
 		
+    _keyEvent.setController(_controller);
 	Application::instance().systemEvent().send(_keyEvent);
 }
 

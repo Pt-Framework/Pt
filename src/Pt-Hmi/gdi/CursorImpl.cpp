@@ -41,7 +41,7 @@ CursorImpl::~CursorImpl()
 {
 }
 
-void CursorImpl::setCursor(Cursors::Type c, WindowController* parent)
+void CursorImpl::setCursor(Cursors::Type c)
 {
 	_type = c;
 	HINSTANCE hin = NULL; //System Instance
@@ -73,7 +73,7 @@ void CursorImpl::setCursor(Cursors::Type c, WindowController* parent)
 		break;		
 		
 		case Cursors::SizeWE:
-			_cursor = LoadCursor(hin, IDC_SIZEWE);
+              cursor = LoadCursor(hin, IDC_SIZEWE);
 		break;
 	}
 

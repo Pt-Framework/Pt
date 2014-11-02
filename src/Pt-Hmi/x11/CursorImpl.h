@@ -22,7 +22,7 @@ public:
 	CursorImpl();
 	virtual ~CursorImpl();
 
-	void setCursor(Cursors::Type c, WindowController* parent);
+	void setCursor(Cursors::Type c);
 	Cursors::Type getCursor() const;
 
 private:

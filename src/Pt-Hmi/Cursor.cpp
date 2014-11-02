@@ -17,7 +17,7 @@ Cursor::~Cursor()
 
 void Cursor::setCursor(Cursors::Type c)
 {
-	_impl->setCursor(c, 0);
+	_impl->setCursor(c);
 }
 
 Cursors::Type Cursor::getCursor() const
