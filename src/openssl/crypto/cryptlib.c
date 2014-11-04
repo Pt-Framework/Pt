@@ -767,6 +767,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason,
 	return(TRUE);
 	}
 #endif
+
 //#if defined(_WIN32) && !defined(__CYGWIN__)
 //#include <tchar.h>
 #include <signal.h>
@@ -787,7 +788,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason,
 //  DWORD len;
 //  WCHAR *name;
 //  static union { void *p; int (*f)(void); } _OPENSSL_isservice = { NULL };
-
+//
 //    if (_OPENSSL_isservice.p == NULL) {
 //	HANDLE h = GetModuleHandle(NULL);
 //	if (h != NULL)
@@ -795,25 +796,25 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason,
 //	if (_OPENSSL_isservice.p == NULL)
 //	    _OPENSSL_isservice.p = (void *)-1;
 //    }
-
+//
 //    if (_OPENSSL_isservice.p != (void *)-1)
 //	return (*_OPENSSL_isservice.f)();
-
+//
 //    (void)GetDesktopWindow(); /* return value is ignored */
-
+//
 //    h = GetProcessWindowStation();
 //    if (h==NULL) return -1;
-
+//
 //    if (GetUserObjectInformationW (h,UOI_NAME,NULL,0,&len) ||
 //	GetLastError() != ERROR_INSUFFICIENT_BUFFER)
 //	return -1;
-
+//
 //    if (len>512) return -1;		/* paranoia */
 //    len++,len&=~1;			/* paranoia */
 //    name=(WCHAR *)alloca(len+sizeof(WCHAR));
 //    if (!GetUserObjectInformationW (h,UOI_NAME,name,len,&len))
 //	return -1;
-
+//
 //    len++,len&=~1;			/* paranoia */
 //    name[len/sizeof(WCHAR)]=L'\0';	/* paranoia */
 //#if 1
@@ -830,14 +831,14 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason,
 //#else
 //int OPENSSL_isservice(void) { return 0; }
 //#endif
-
+//
 //void OPENSSL_showfatal (const char *fmta,...)
 //{ va_list ap;
 //  TCHAR buf[256];
 //  const TCHAR *fmt;
 //#ifdef STD_ERROR_HANDLE	/* what a dirty trick! */
 //  HANDLE h;
-
+//
 //    if ((h=GetStdHandle(STD_ERROR_HANDLE)) != NULL &&
 //	GetFileType(h)!=FILE_TYPE_UNKNOWN)
 //    {	/* must be console application */
@@ -847,17 +848,17 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason,
 //	return;
 //    }
 //#endif
-
+//
 //    if (sizeof(TCHAR)==sizeof(char))
 //	fmt=(const TCHAR *)fmta;
 //    else do
 //    { int    keepgoing;
 //      size_t len_0=strlen(fmta)+1,i;
 //      WCHAR *fmtw;
-
+//
 //	fmtw = (WCHAR *)alloca(len_0*sizeof(WCHAR));
 //	if (fmtw == NULL) { fmt=(const TCHAR *)L"no stack?"; break; }
-
+//
 //#ifndef OPENSSL_NO_MULTIBYTE
 //	if (!MultiByteToWideChar(CP_ACP,0,fmta,len_0,fmtw,len_0))
 //#endif
@@ -880,12 +881,12 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason,
 //	}
 //	fmt = (const TCHAR *)fmtw;
 //    } while (0);
-
+//
 //    va_start (ap,fmta);
 //    _vsntprintf (buf,sizeof(buf)/sizeof(TCHAR)-1,fmt,ap);
 //    buf [sizeof(buf)/sizeof(TCHAR)-1] = _T('\0');
 //    va_end (ap);
-
+//
 //#if defined(_WIN32_WINNT) && _WIN32_WINNT>=0x0333
 //    /* this -------------v--- guards NT-specific calls */
 //    if (check_winnt() && OPENSSL_isservice() > 0)
