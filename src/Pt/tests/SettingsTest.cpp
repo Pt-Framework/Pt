@@ -43,6 +43,7 @@ class SettingsTest : public Pt::Unit::TestSuite
         SettingsTest()
         : Pt::Unit::TestSuite("SettingsTest")
         {
+            Pt::Unit::TestSuite::registerMethod( "EscapeString", *this, &SettingsTest::EscapeString );
             Pt::Unit::TestSuite::registerMethod( "Comment", *this, &SettingsTest::Comment );
 
             Pt::Unit::TestSuite::registerMethod( "SimpleValue", *this, &SettingsTest::SimpleValue );
@@ -70,6 +71,7 @@ class SettingsTest : public Pt::Unit::TestSuite
         }
 
     protected:
+        void EscapeString();
         void Writer();
         void Comment();
         void SimpleValue();
@@ -93,6 +95,26 @@ class SettingsTest : public Pt::Unit::TestSuite
 
 Pt::Unit::RegisterTest<SettingsTest> register_SettingsTest;
 
+
+void SettingsTest::EscapeString()
+{
+    Pt::String str = "h\"\\h";
+    Pt::Settings settings;
+    settings.root().addEntry("str").set(str);
+
+    std::stringstream ss;
+    Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+    settings.save(tos);
+    tos.flush();
+
+    Pt::Settings settings2;
+    Pt::TextIStream tis(ss, new Pt::Utf8Codec);
+    settings2.load(tis);
+
+    Pt::String str2;
+    settings2.entry("str").get(str2);
+    PT_UNIT_ASSERT( str2 == str );
+}
 
 void SettingsTest::Writer()
 {

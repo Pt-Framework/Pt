@@ -67,8 +67,8 @@ class array_appender : public std::iterator<std::output_iterator_tag, T>
             return *this;
         }
 
-    T* getPointer()
-    { return _ptr; }
+        T* getPointer()
+        { return _ptr; }
 
         array_appender<T>& operator++()
         {
@@ -138,7 +138,17 @@ void SettingsFormatter::onAddString(const char* name, const char* type,
 {
     formatName(*_os, name);
 
-    *_os << Char('"') << value << Char('"');
+    *_os << Char('"');
+
+    for(const Pt::Char* ch = value; *ch != 0; ++ch)
+    {   
+      if(*ch == '"' || *ch == '\\')
+        *_os << Pt::Char('\\');
+
+      *_os << *ch;
+    }
+
+    *_os << Char('"');
     
     if( _stack.empty() )
         *_os<< std::endl << std::endl;
