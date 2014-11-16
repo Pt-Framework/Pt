@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2013 by Dr. Marc Boris Duerner
+ * Copyright (C) 2005-2014 by Dr. Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,36 +31,99 @@
 
 #include <Pt/Api.h>
 #include <Pt/String.h>
-#include <Pt/SerializationInfo.h>
+#include <Pt/Formatter.h>
+#include <Pt/NonCopyable.h>
+#include <vector>
 #include <iostream>
 
 namespace Pt {
 
-class SettingsWriter
+class SettingsFormatter : public Pt::Formatter
+                         , private NonCopyable
 {
     public:
-        SettingsWriter( std::basic_ostream<Pt::Char>& os)
-        : _os(&os)
-        , _indent(0)
-        { }
+        SettingsFormatter(std::basic_ostream<Char>& os);
 
-        ~SettingsWriter()
-        {}
+        ~SettingsFormatter();
 
-        void write(const SerializationInfo& si);
+        void attach(std::basic_ostream<Char>& os);
 
     protected:
-        void writeParent(const SerializationInfo& sd, const std::string& prefix);
+        void onAddString(const char* name, const char* type,
+                         const Pt::Char* value, const char* id);
 
-        void writeChild(const SerializationInfo& node);
+        void onAddBool(const char* name, bool value, 
+                       const char* id);
 
-        void writeEntry(const std::string& name, const Pt::String& value, const SerializationInfo& si);
+        void onAddChar(const char* name, const Pt::Char& value,
+                       const char* id);
 
-        void writeSection(const Pt::String& prefix);
+        void onAddInt8(const char* name, Pt::int8_t value,
+                       const char* id);
+        
+        void onAddInt16(const char* name, Pt::int16_t value,
+                        const char* id);
+        
+        void onAddInt32(const char* name, Pt::int32_t value,
+                        const char* id);
+        
+        void onAddInt64(const char* name, Pt::int64_t value,
+                        const char* id);
+
+        void onAddUInt8(const char* name, Pt::uint8_t value, const char* id);
+        
+        void onAddUInt16(const char* name, Pt::uint16_t value,  const char* id);
+        
+        void onAddUInt32(const char* name, Pt::uint32_t value, const char* id);
+        
+        void onAddUInt64(const char* name, Pt::uint64_t value, const char* id);
+
+        void onAddFloat(const char* name, float value, 
+                        const char* id);
+
+        void onAddDouble(const char* name, double value, 
+                         const char* id);
+
+        void onAddLongDouble(const char* name, long double value, 
+                             const char* id);
+
+        void onAddBinary(const char* name, const char* type,
+                         const char* value, std::size_t length, const char* id);
+
+        void onAddReference(const char* name, const char* id);
+
+        void onBeginSequence(const char* name, const char* type,
+                             const char* id);
+
+        virtual void onBeginElement();
+
+        virtual void onFinishElement();
+
+        void onFinishSequence();
+
+        void onBeginStruct(const char* name, const char* type,
+                           const char* id);
+
+        void onBeginMember(const char* name);
+
+        void onFinishMember();
+
+        void onFinishStruct();
+
+    protected:
+        void onBeginParse(Composer&)
+        {}
+
+        bool onParseSome()
+        { return false; }
+
+        void onParse()
+        {}
 
     private:
-        std::basic_ostream<Pt::Char>* _os;
-        size_t _indent;
+        std::basic_ostream<Char>* _os;
+        std::vector<unsigned> _stack;
+        int _state;
 };
 
 } // namespace Pt

@@ -591,7 +591,7 @@ class PT_API SerializationInfo
 
         /** @brief Format complete value or all members.
         */
-        void format(Formatter& formatter);
+        void format(Formatter& formatter) const;
 
     protected:
         //! @internal

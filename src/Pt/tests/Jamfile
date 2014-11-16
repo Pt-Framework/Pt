@@ -26,7 +26,8 @@ Main Pt-test : Pt-test.cpp
                TimeTest.cpp
                TimespanTest.cpp
                TypesTest.cpp
-               TypeTraitsTest.cpp ;
+               TypeTraitsTest.cpp 
+			   ;
 
 LinkSharedLibraries Pt-test : Pt-System Pt-Unit Pt ;
 MakeLocate Pt-test : $(PT_OUTPUT_TARGET) ;

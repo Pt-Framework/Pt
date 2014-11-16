@@ -43,6 +43,7 @@ class SettingsTest : public Pt::Unit::TestSuite
         SettingsTest()
         : Pt::Unit::TestSuite("SettingsTest")
         {
+            Pt::Unit::TestSuite::registerMethod( "EscapeString", *this, &SettingsTest::EscapeString );
             Pt::Unit::TestSuite::registerMethod( "Comment", *this, &SettingsTest::Comment );
 
             Pt::Unit::TestSuite::registerMethod( "SimpleValue", *this, &SettingsTest::SimpleValue );
@@ -65,9 +66,13 @@ class SettingsTest : public Pt::Unit::TestSuite
             Pt::Unit::TestSuite::registerMethod( "LoadSaveSerializable", *this, &SettingsTest::LoadSaveSerializable );
             Pt::Unit::TestSuite::registerMethod( "Entry", *this, &SettingsTest::Entry );
             Pt::Unit::TestSuite::registerMethod( "ConstEntry", *this, &SettingsTest::ConstEntry );
+
+            //Pt::Unit::TestSuite::registerMethod( "Writer", *this, &SettingsTest::Writer );
         }
 
     protected:
+        void EscapeString();
+        void Writer();
         void Comment();
         void SimpleValue();
         void SimpleTypedValue();
@@ -89,6 +94,67 @@ class SettingsTest : public Pt::Unit::TestSuite
 };
 
 Pt::Unit::RegisterTest<SettingsTest> register_SettingsTest;
+
+
+void SettingsTest::EscapeString()
+{
+    Pt::String str = "h\"\\h";
+    Pt::Settings settings;
+    settings.root().add("str").set(str);
+
+    std::stringstream ss;
+    Pt::TextOStream tos(ss, new Pt::Utf8Codec);
+    settings.save(tos);
+    tos.flush();
+
+    Pt::Settings settings2;
+    Pt::TextIStream tis(ss, new Pt::Utf8Codec);
+    settings2.load(tis);
+
+    Pt::String str2;
+    settings2.entry("str").get(str2);
+    PT_UNIT_ASSERT( str2 == str );
+}
+
+void SettingsTest::Writer()
+{
+    Pt::Settings settings;
+
+    std::vector<int> vec;
+    vec.push_back(1);
+    vec.push_back(2);
+
+    std::vector< std::vector<int> > vecvec;
+    vecvec.push_back(vec);
+    vecvec.push_back(vec);
+
+    settings.root().add("s").set("abc");
+    settings.root().add("b").set(true);
+    settings.root().add("i").set( int(1));
+    settings.root().add("u").set( unsigned(1) );
+    settings.root().add("f").set( float(1) );
+    settings.root().add("a").set(vec);
+    settings.root().add("c").set(vecvec);
+    settings.root().add("d").add("d1").set(vec);
+    settings["d"].add("d2").set(Pt::Date(2001, 11, 15));
+    settings["d"].add("d3").set(vec);
+    settings["d"].add("d4").set(vecvec);
+    settings["d"].add("d5").set(4);
+
+    std::vector<Pt::Date> dates;
+    dates.push_back( Pt::Date(2001, 11, 15) );
+    dates.push_back( Pt::Date(2001, 11, 16) );
+    settings.root().add("e").set(dates);
+
+    std::ostringstream ss;
+    Pt::TextOStream ts(ss, new Pt::Utf8Codec);
+    settings.save(ts);
+    ts.terminate();
+    ts.flush();
+
+    std::clog << "\n\n"
+              << ss.str();
+}
 
 
 void SettingsTest::Entry()
