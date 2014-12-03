@@ -423,6 +423,8 @@ void XmlFormatter::OnBegin(const Node& node)
                 _composer->setId( nodeId->value().narrow() );
             }
 
+            _valueType = Void;
+
             AttributeList::ConstIterator type = se.attributes().find( Pt::String("type"));
             if( type == se.attributes().end() )
             {
@@ -628,6 +630,8 @@ void XmlFormatter::beginXmlMember(const Xml::StartElement& se)
     {
         _composer->setId( nodeId->value().narrow() );
     }
+
+    _valueType = Void;
 
     AttributeList::ConstIterator type = se.attributes().find(Pt::String("type"));
     if( type != se.attributes().end() )
