@@ -500,7 +500,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
     else if(node.type() == Xml::Node::EndElement)
     {
         // handle empty string values
-        if(_state == OnStartElement)
+        if(_state == OnStartElement || _state == OnBegin)
             _composer->setString( Pt::String() );
 
         _composer = _composer->finish();
