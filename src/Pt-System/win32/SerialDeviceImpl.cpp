@@ -341,6 +341,7 @@ SerialDeviceImpl::SerialDeviceImpl(SerialDevice& device)
 : OverlappedIODeviceImpl(device)
 , _device(device)
 , _waitHandle(INVALID_HANDLE_VALUE)
+, _eventMask(0)
 {
     _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
     if( _waitHandle == NULL )
@@ -385,21 +386,21 @@ void SerialDeviceImpl::open( const std::string& port_, std::ios::openmode mode)
 
     try
     {
-        if( ! GetCommState( h, &_orgCommState ) )
+        if( ! GetCommState(h, &_orgCommState) )
             throw IOError("GetCommState");
 
         // Do not use timeouts, return read data immediately.
         COMMTIMEOUTS comTimeOut;
-        comTimeOut.ReadIntervalTimeout          = 0;
+        comTimeOut.ReadIntervalTimeout          = MAXDWORD;
         comTimeOut.ReadTotalTimeoutMultiplier   = 0;
-        comTimeOut.ReadTotalTimeoutConstant     = 100;
+        comTimeOut.ReadTotalTimeoutConstant     = 0;
         comTimeOut.WriteTotalTimeoutMultiplier  = 0;
-        comTimeOut.WriteTotalTimeoutConstant    = 100;
+        comTimeOut.WriteTotalTimeoutConstant    = 0;
 
-        if( !SetCommTimeouts( h, &comTimeOut ) )
+        if( ! SetCommTimeouts(h, &comTimeOut) )
             throw IOError("SetCommTimeouts");
 
-        SetCommMask( h, 0 );
+        SetCommMask(h, 0);
     }
     catch( ... )
     {
@@ -427,6 +428,134 @@ void SerialDeviceImpl::cancel(EventLoop& loop)
     ::PurgeComm(handle(), PURGE_RXABORT | PURGE_TXABORT| PURGE_TXCLEAR | PURGE_RXCLEAR);
 
     OverlappedIODeviceImpl::cancel(loop);
+}
+
+
+size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof)
+{
+    if(_readOv.hEvent == NULL)
+    {
+        loop.selector().enableOverlapped(_ioh);
+        _readOv.hEvent = _ioh.handle();
+        _writeOv.hEvent = _ioh.handle();
+    }
+
+	COMSTAT stat;
+	::ClearCommError(handle(), NULL, &stat);
+	
+	if(stat.cbInQue == 0)
+	{
+		SetCommMask(handle(), EV_RXCHAR);
+	
+		_eventMask = 0;
+		BOOL ret = ::WaitCommEvent(handle(), &_eventMask, &_readOv);
+		if(ret == FALSE)
+		{
+			DWORD err = GetLastError();
+			if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
+			{
+				eof = true;
+				return 0;
+			}
+			else if( err == ERROR_IO_PENDING )
+			{
+				return 0;
+			}
+
+			loop.selector().disableOverlapped(_ioh);
+			_readOv.hEvent = NULL;
+			_writeOv.hEvent = NULL;
+
+			throw IOError("read failed");
+		}
+
+		ClearCommError(handle(), NULL, &stat);
+	}
+   
+    DWORD bufsize = n > stat.cbInQue ? stat.cbInQue 
+	                                 : static_cast<DWORD>(n);
+
+	DWORD readBytes = 0;
+	if( FALSE == ReadFile(handle(), (void*)buffer, bufsize, &readBytes, &_readOv) )
+	{
+		DWORD err = GetLastError();
+		if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
+		{
+			eof = true;
+			return 0;
+		}
+
+		loop.selector().disableOverlapped(_ioh);
+		_readOv.hEvent = NULL;
+		_writeOv.hEvent = NULL;
+
+		throw IOError("read failed");
+	}
+		
+	return readBytes;
+}
+
+
+std::size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
+{
+    DWORD readBytes = 0;
+    if( FALSE == GetOverlappedResult(handle(), &_readOv, &readBytes, TRUE) )
+    {
+        DWORD err = GetLastError();
+        if( ERROR_BROKEN_PIPE == err )
+        {
+            eof = true;
+        }
+        else
+        {
+            throw IOError("read failed");
+        }
+    }
+
+	COMSTAT stat;
+	ClearCommError(handle(), NULL, &stat);
+	assert(stat.cbInQue > 0);
+
+    DWORD bufsize = n > stat.cbInQue ? stat.cbInQue 
+	                                 : static_cast<DWORD>(n);
+
+	readBytes = 0;
+    if( FALSE == ReadFile(handle(), (void*)buffer, bufsize, &readBytes, &_readOv) )
+    {
+        DWORD err = GetLastError();
+        if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
+        {
+            eof = true;
+            return 0;
+        }
+
+		loop.selector().disableOverlapped(_ioh);
+		_readOv.hEvent = NULL;
+		_writeOv.hEvent = NULL;
+
+        throw IOError("read failed");
+    }
+
+    return readBytes;
+}
+
+
+bool SerialDeviceImpl::runRead(EventLoop& loop)
+{  
+	if( HasOverlappedIoCompleted(&_readOv) )
+    {
+		COMSTAT stat;
+		ClearCommError(handle(), NULL, &stat);
+		if(stat.cbInQue > 0)
+			return true;
+
+		// TODO:
+		// sometimes he overlapped handle is signalled,
+		// but no data is available, so keep waiting
+		::WaitCommEvent(handle(), &_eventMask, &_readOv);
+    }
+
+    return false;
 }
 
 #endif // normal WIN32

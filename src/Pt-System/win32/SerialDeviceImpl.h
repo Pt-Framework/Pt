@@ -51,6 +51,12 @@ class SerialDeviceImpl : public OverlappedIODeviceImpl
 
         void cancel(EventLoop& loop);
 
+		virtual size_t beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
+
+		virtual size_t endRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
+
+		virtual bool runRead(EventLoop& loop);
+
         void setBaudRate( unsigned rate );
         
         unsigned baudRate() const;
@@ -119,6 +125,7 @@ class SerialDeviceImpl : public OverlappedIODeviceImpl
         HANDLE _waitHandle;
         OVERLAPPED _readOv;
         OVERLAPPED _writeOv;
+		DWORD _eventMask;
         DCB _orgCommState;
 #endif
 };

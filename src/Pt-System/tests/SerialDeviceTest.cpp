@@ -27,6 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/System/SerialDevice.h"
+#include "Pt/System/MainLoop.h"
 #include "Pt/System/Thread.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
@@ -37,13 +38,51 @@
 
 
 class SerialDeviceTest : public Pt::Unit::TestSuite
+                       , public Pt::Connectable
 {
+	Pt::uint16_t _rbuf[4096];
+
     public:
         SerialDeviceTest()
         : Pt::Unit::TestSuite("SerialDeviceTest")
         {
-            //Pt::Unit::TestSuite::registerMethod( "ReadPnp", *this, &SerialDeviceTest::ReadPnp );
+            Pt::Unit::TestSuite::registerMethod( "ReadAsync", *this, &SerialDeviceTest::ReadAsync );
         }
+
+		void ReadAsync()
+		{
+			try
+			{
+				Pt::System::MainLoop loop;
+
+				Pt::System::SerialDevice serdev( "COM1", std::ios_base::in );
+				//serdev.setBaudRate(Pt::System::SerialDevice::BaudRate115200);
+				//serdev.setCharSize(8);
+				serdev.setActive(loop);
+				//serdev.setParity(Pt::System::SerialDevice::ParityNone);
+				//serdev.setStopBits(Pt::System::SerialDevice::OneStopBit);
+				serdev.beginRead((char*)_rbuf, sizeof(_rbuf));
+				serdev.inputReady() += Pt::slot(*this, &SerialDeviceTest::onRead);
+
+				loop.run();
+			} 
+			catch(const std::exception& ex)
+			{
+				std::string s = ex.what();
+			}
+		}
+
+		void onRead(Pt::System::IODevice& iodev)
+		{
+			std::size_t n = iodev.endRead();
+			bool eof = iodev.isEof();
+			std::clog << "READ: " << n << " EOF: " << eof << std::endl;
+
+			if(n == 0)
+				std::clog << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+
+			iodev.beginRead((char*)_rbuf, sizeof(_rbuf));
+		}
 
 		void testRTS()
 		{
