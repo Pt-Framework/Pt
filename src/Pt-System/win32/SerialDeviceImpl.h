@@ -57,6 +57,8 @@ class SerialDeviceImpl : public OverlappedIODeviceImpl
 
 		virtual bool runRead(EventLoop& loop);
 
+        size_t read( char* buffer, size_t count, bool& eof );
+
         void setBaudRate( unsigned rate );
         
         unsigned baudRate() const;

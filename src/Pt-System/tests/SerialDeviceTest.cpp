@@ -55,13 +55,14 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
 			{
 				Pt::System::MainLoop loop;
 
-				Pt::System::SerialDevice serdev( "COM1", std::ios_base::in );
+				Pt::System::SerialDevice serdev( "COM3", std::ios_base::in );
 				//serdev.setBaudRate(Pt::System::SerialDevice::BaudRate115200);
 				//serdev.setCharSize(8);
-				serdev.setActive(loop);
-				//serdev.setParity(Pt::System::SerialDevice::ParityNone);
+                //serdev.setParity(Pt::System::SerialDevice::ParityNone);
 				//serdev.setStopBits(Pt::System::SerialDevice::OneStopBit);
-				serdev.beginRead((char*)_rbuf, sizeof(_rbuf));
+				
+                serdev.setActive(loop);
+                serdev.beginRead((char*)_rbuf, sizeof(_rbuf));
 				serdev.inputReady() += Pt::slot(*this, &SerialDeviceTest::onRead);
 
 				loop.run();

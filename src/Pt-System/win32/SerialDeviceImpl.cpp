@@ -440,43 +440,8 @@ size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool
         _writeOv.hEvent = _ioh.handle();
     }
 
-	COMSTAT stat;
-	::ClearCommError(handle(), NULL, &stat);
-	
-	if(stat.cbInQue == 0)
-	{
-		SetCommMask(handle(), EV_RXCHAR);
-	
-		_eventMask = 0;
-		BOOL ret = ::WaitCommEvent(handle(), &_eventMask, &_readOv);
-		if(ret == FALSE)
-		{
-			DWORD err = GetLastError();
-			if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
-			{
-				eof = true;
-				return 0;
-			}
-			else if( err == ERROR_IO_PENDING )
-			{
-				return 0;
-			}
-
-			loop.selector().disableOverlapped(_ioh);
-			_readOv.hEvent = NULL;
-			_writeOv.hEvent = NULL;
-
-			throw IOError("read failed");
-		}
-
-		ClearCommError(handle(), NULL, &stat);
-	}
-   
-    DWORD bufsize = n > stat.cbInQue ? stat.cbInQue 
-	                                 : static_cast<DWORD>(n);
-
 	DWORD readBytes = 0;
-	if( FALSE == ReadFile(handle(), (void*)buffer, bufsize, &readBytes, &_readOv) )
+	if( FALSE == ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv) )
 	{
 		DWORD err = GetLastError();
 		if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
@@ -491,8 +456,35 @@ size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool
 
 		throw IOError("read failed");
 	}
+
+	if(readBytes > 0)
+        return readBytes;
+
+	SetCommMask(handle(), EV_RXCHAR);
+	
+	_eventMask = 0;
+	BOOL ret = ::WaitCommEvent(handle(), &_eventMask, &_readOv);
+	if(ret == FALSE)
+	{
+		DWORD err = GetLastError();
+		if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
+		{
+			eof = true;
+			return 0;
+		}
+		else if( err == ERROR_IO_PENDING )
+		{
+			return 0;
+		}
+
+		loop.selector().disableOverlapped(_ioh);
+		_readOv.hEvent = NULL;
+		_writeOv.hEvent = NULL;
+
+		throw IOError("read failed");
+	}
 		
-	return readBytes;
+	return 0;
 }
 
 
@@ -512,15 +504,8 @@ std::size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t
         }
     }
 
-	COMSTAT stat;
-	ClearCommError(handle(), NULL, &stat);
-	assert(stat.cbInQue > 0);
-
-    DWORD bufsize = n > stat.cbInQue ? stat.cbInQue 
-	                                 : static_cast<DWORD>(n);
-
 	readBytes = 0;
-    if( FALSE == ReadFile(handle(), (void*)buffer, bufsize, &readBytes, &_readOv) )
+    if( FALSE == ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv) )
     {
         DWORD err = GetLastError();
         if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
@@ -556,6 +541,69 @@ bool SerialDeviceImpl::runRead(EventLoop& loop)
     }
 
     return false;
+}
+
+
+std::size_t SerialDeviceImpl::read(char* buffer, std::size_t n, bool& eof)
+{
+    OVERLAPPED ov;
+    ov.hEvent = _waitHandle;
+    ov.Offset = 0;
+    ov.OffsetHigh = 0;
+    
+    DWORD bufsize = n > std::numeric_limits<DWORD>::max() ? std::numeric_limits<DWORD>::max()
+                                                          : static_cast<DWORD>(n);
+
+    for(;;)
+    {
+	    DWORD readBytes = 0;
+	    if( FALSE == ReadFile(handle(), (void*)buffer, bufsize, &readBytes, &ov) )
+	    {
+		    DWORD err = GetLastError();
+		    if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
+		    {
+			    eof = true;
+			    return 0;
+		    }
+
+		    throw IOError("read failed");
+	    }
+
+	    if(readBytes > 0)
+            return readBytes;
+
+	    SetCommMask(handle(), EV_RXCHAR);
+	
+	    _eventMask = 0;
+	    BOOL ret = ::WaitCommEvent(handle(), &_eventMask, &ov);
+	    if(ret == FALSE)
+	    {
+		    DWORD err = GetLastError();
+		    if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
+		    {
+			    eof = true;
+			    return 0;
+		    }
+		    else if( err != ERROR_IO_PENDING )
+		    {
+		        throw IOError("read failed");
+            }
+	    }
+
+        DWORD result = WaitForSingleObject(ov.hEvent, _timeout);
+
+        if(result != WAIT_OBJECT_0)
+        {
+            throw IOError("ReadFile timeout");
+        }
+    
+        if(FALSE == GetOverlappedResult(handle(), &ov, &readBytes, TRUE) )
+        {
+            throw IOError("GetOverlappedResult failed");
+        }
+    }
+
+    return 0;
 }
 
 #endif // normal WIN32
