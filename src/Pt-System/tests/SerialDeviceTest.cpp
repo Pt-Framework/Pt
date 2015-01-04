@@ -46,7 +46,7 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
         SerialDeviceTest()
         : Pt::Unit::TestSuite("SerialDeviceTest")
         {
-            Pt::Unit::TestSuite::registerMethod( "ReadAsync", *this, &SerialDeviceTest::ReadAsync );
+            //Pt::Unit::TestSuite::registerMethod( "ReadAsync", *this, &SerialDeviceTest::ReadAsync );
         }
 
 		void ReadAsync()
