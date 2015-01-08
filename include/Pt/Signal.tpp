@@ -610,7 +610,7 @@ class Signal<A1,A2,Void,Void,Void,Void,Void,Void,Void,Void> : public SignalBase
 
         void disconnect()
         {
-            this->disconnectSlot(); 
+            this->disconnectSlots(); 
         }
 
         template <typename R>
