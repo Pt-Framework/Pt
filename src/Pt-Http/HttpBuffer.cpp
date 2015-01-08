@@ -345,7 +345,7 @@ void HttpBuffer::import(std::streamsize n)
 
     setg(_buffer + MaxPutback - putback, // eback - start of get area
          _buffer + MaxPutback,           // gptr - current position
-         _buffer + MaxPutback + n);      // egptr - end of get area
+         _buffer + MaxPutback + leftover + n);      // egptr - end of get area
 
     _contentLength -= static_cast<std::size_t>(n);
     PT_LOG_DEBUG("remaining content length: " << _contentLength);
