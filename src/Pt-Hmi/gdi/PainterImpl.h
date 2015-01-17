@@ -41,6 +41,7 @@ namespace Hmi {
 
 class PaintSurfaceImpl;
 class PaintSurface;
+class NativePaintSurface;
 
 class PainterImpl
 {
@@ -142,6 +143,9 @@ class PainterImpl
         }
 
         void addFontName(const std::string& fontName);
+
+		void setSurface(NativePaintSurface& surface);
+
     protected:
         void drawCompatibleImage(size_t x, size_t y, size_t depth, const char* data, size_t width, size_t height);
         void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);

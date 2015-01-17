@@ -73,7 +73,7 @@ void CursorImpl::setCursor(Cursors::Type c)
 		break;		
 		
 		case Cursors::SizeWE:
-              cursor = LoadCursor(hin, IDC_SIZEWE);
+			_cursor = LoadCursor(hin, IDC_SIZEWE);
 		break;
 	}
 

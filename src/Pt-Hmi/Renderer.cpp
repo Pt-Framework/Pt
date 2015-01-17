@@ -76,8 +76,8 @@ void Renderer::render(Pt::Hmi::WidgetModel* model)
 
 			case ImageLayoutType::Center:
 			{
-				int x = size.width()/2  - backImage.width()/2;
-				int y = size.height()/2  - backImage.height()/2;
+				double x = size.width()/2  - backImage.width()/2;
+				double y = size.height()/2  - backImage.height()/2;
 				localPainter.drawImage(Pt::Gfx::PointF(x,y), backImage);
 			}
 			break;

@@ -644,5 +644,14 @@ void PainterImpl::drawCompatibleImage(size_t x, size_t y, size_t depth, const ch
     DeleteObject(bitmap);
 }
 
+
+void PainterImpl::setSurface(NativePaintSurface& surface)
+{
+	_surface = surface.impl();
+	updateBrush();
+	updateFont();
+	updatePen();	
+}
+
 }}
 

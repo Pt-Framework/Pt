@@ -100,15 +100,6 @@
     <Filter Include="Pt-Hmi\cocoa">
       <UniqueIdentifier>{2b77b6e8-aec1-4d99-9506-f20e6b81d876}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\Demo">
-      <UniqueIdentifier>{4dbd9367-f6cd-4e33-b664-181985cda5bd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Hmi\Demo\Widget">
-      <UniqueIdentifier>{68bb16de-08be-4c27-89b4-e0e221a37985}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Hmi\Demo\Scribble">
-      <UniqueIdentifier>{c8eedc7c-276c-4430-bf43-98f83e9fe051}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Hmi\gdi">
       <UniqueIdentifier>{947e0ceb-dc3d-4f25-b8ff-f29aad8e7be3}</UniqueIdentifier>
     </Filter>
@@ -876,9 +867,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\GfxOutputDeviceImpl.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\x11\GfxOutputDeviceImpl.h">
-      <Filter>Pt-Hmi\x11</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\Dash.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
@@ -1197,27 +1185,6 @@
     <ClInclude Include="..\..\include\Pt\Soap\ServiceDeclaration.h">
       <Filter>Pt-Soap</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\Demo\Widget\AtesionIcon.h">
-      <Filter>Pt-Hmi\Demo\Widget</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\Demo\Widget\DemoImage.h">
-      <Filter>Pt-Hmi\Demo\Widget</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\Demo\Widget\Dialog1.h">
-      <Filter>Pt-Hmi\Demo\Widget</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\Demo\Widget\Dialog2.h">
-      <Filter>Pt-Hmi\Demo\Widget</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\Demo\Widget\MainWindow.h">
-      <Filter>Pt-Hmi\Demo\Widget</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\Demo\Scribble\AtesionIcon.h">
-      <Filter>Pt-Hmi\Demo\Scribble</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\Demo\Scribble\MainWindow.h">
-      <Filter>Pt-Hmi\Demo\Scribble</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Qt\MainLoop.h">
       <Filter>Pt-Qt</Filter>
     </ClInclude>
@@ -1461,6 +1428,15 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Renderer.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\PainterImpl.h">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\PaintSurfaceImpl.h">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\ViewImpl.h">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1605,12 +1581,6 @@
     </None>
     <None Include="..\..\src\Pt-Soap\Jamfile">
       <Filter>Pt-Soap</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Hmi\Demo\Widget\Jamfile">
-      <Filter>Pt-Hmi\Demo\Widget</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Hmi\Demo\Scribble\Jamfile">
-      <Filter>Pt-Hmi\Demo\Scribble</Filter>
     </None>
     <None Include="..\..\src\Pt-Hmi\Jamfile">
       <Filter>Pt-Hmi</Filter>
@@ -2286,9 +2256,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\x11\X11Fd.cpp">
       <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\x11\GfxOutputDeviceImpl.cpp">
-      <Filter>Pt-Hmi\x11</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\ARgb8888Color.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
@@ -2514,24 +2481,6 @@
     <ClCompile Include="..\..\src\Pt-Soap\ServiceDeclaration.cpp">
       <Filter>Pt-Soap</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Demo\Widget\Dialog1.cpp">
-      <Filter>Pt-Hmi\Demo\Widget</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Demo\Widget\Dialog2.cpp">
-      <Filter>Pt-Hmi\Demo\Widget</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Demo\Widget\MainWindow.cpp">
-      <Filter>Pt-Hmi\Demo\Widget</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Demo\Scribble\MainWindow.cpp">
-      <Filter>Pt-Hmi\Demo\Scribble</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Demo\Widget\Main.cpp">
-      <Filter>Pt-Hmi\Demo\Widget</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Demo\Scribble\Main.cpp">
-      <Filter>Pt-Hmi\Demo\Scribble</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Qt\MainLoop.cpp">
       <Filter>Pt-Qt</Filter>
     </ClCompile>
@@ -2744,6 +2693,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Renderer.cpp">
       <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\PainterImpl.cpp">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\PaintSurfaceImpl.cpp">
+      <Filter>Pt-Hmi\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\ViewImpl.cpp">
+      <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
