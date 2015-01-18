@@ -75,8 +75,8 @@ protected:
 
 private:	
     std::map<std::string, PropertyBase*> _properties;
-    std::string _name;
-	Pt::Signal<const Model&> _changed;
+    std::string							 _name;
+	Pt::Signal<const Model&>			 _changed;
 };
 
 }}

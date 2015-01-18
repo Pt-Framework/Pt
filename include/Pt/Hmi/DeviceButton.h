@@ -16,7 +16,6 @@ public:
 		Pressed
 	};
 
-
 	DeviceButton()
 	: _state(Released)
 	{

@@ -53,7 +53,7 @@ namespace Hmi{
 
 enum
 {
-	_NET_WM_STATE_REMOVE =0,
+	_NET_WM_STATE_REMOVE = 0,
 	_NET_WM_STATE_ADD = 1,
 	_NET_WM_STATE_TOGGLE =2
 };
@@ -93,7 +93,6 @@ void ViewImpl::pixelToScreen(char* data, const Pt::Gfx::ARgbColor& pixel)
 			data[2] = (char) pixel.red();
 			data[1] = (char) pixel.green();
 			data[0] = (char) pixel.blue();
-
 		break;
 
 		case 16:
@@ -113,7 +112,6 @@ void ViewImpl::drawSurface(Pt::Hmi::PaintSurface& surface)
     ::Drawable from = nativeSurface->impl()->drawable();
     Pt::Gfx::Size size = _model->fromUnit(surface.size());
 
-
     XCopyArea( _display, from, _window, _brushGc, 0, 0, size.width(), size.height(), 0, 0);
 
     XSync(_display, false);
@@ -124,9 +122,8 @@ void ViewImpl::onClientMessage(XEvent& xev)
 	if( _model == 0)
 		return;
 
-  if(xev.xclient.message_type == AtomWMProtocols) 
- 	{		
-	
+	if(xev.xclient.message_type == AtomWMProtocols) 
+ 	{			
 		bool canClose = false;
 
 		_controller->ClosingAction.send(_controller, canClose);
@@ -186,7 +183,6 @@ void ViewImpl::onMouseButtonRelease(XEvent& xev)
     int  x = xev.xbutton.x;
     int  y = xev.xbutton.y;
     
-
     switch(xev.xbutton.button) 
 	{
         case Button1: 
@@ -285,7 +281,7 @@ void ViewImpl::onConfigureNotify( XEvent& xev)
 void ViewImpl::onKeyEvent(XEvent& xev)
 {
 	if(KeyRelease == xev.xkey.type)
-        	_keyEvent.setState(KeyEvent::KeyUp);
+		_keyEvent.setState(KeyEvent::KeyUp);
 	else
 		_keyEvent.setState(KeyEvent::KeyDown);
     
@@ -294,16 +290,14 @@ void ViewImpl::onKeyEvent(XEvent& xev)
 	
 	sym = *(XGetKeyboardMapping(_display, xev.xkey.keycode,1,&vcode));
 
-
 	switch(sym ) 
 	{
-        	case XK_Control_L: 
+		case XK_Control_L: 
 		case XK_Control_R: 
 			_keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
-
 		break;
 
-        	case XK_Alt_L: 
+		case XK_Alt_L: 
 		case XK_Alt_R:
 			_keyEvent.setAlt(_keyEvent.state() == KeyEvent::KeyDown);
         break;
@@ -319,7 +313,7 @@ void ViewImpl::onKeyEvent(XEvent& xev)
 		break;
 	}		
 		
-	unsigned int ucode = KeyHandler::keySymToUtf(sym);
+	const unsigned int ucode = KeyHandler::keySymToUtf(sym);
 
 	if( ucode != 0)
 		_keyEvent.setUnicode(ucode);
@@ -331,8 +325,7 @@ void ViewImpl::onKeyEvent(XEvent& xev)
 }
 
 void ViewImpl::onWindowEvent(XEvent& ev)
-{
-	
+{	
 	if(ev.xany.window != _window)
 		return;
         
@@ -387,22 +380,21 @@ void ViewImpl::onWindowEvent(XEvent& ev)
 			if(_model->TopMost.get())
 				bringWindowToTop();
 		break;
+
         case EnterNotify:    
 		break;
 
-        case LeaveNotify:
-			
+        case LeaveNotify:			
 		break;
 
         default:
-            break;
+		break;
     }
 }
 
 
 void ViewImpl::create()
 {
-
    // Display and Screen are inited in Application
     unsigned int screen = DefaultScreen(_display);
 
@@ -476,8 +468,7 @@ ViewImpl::~ViewImpl()
 }
 
 void ViewImpl::show()
-{
-	
+{	
     XMapWindow(_display, _window);
     XSync(_display, false);
     _visible = 	true;
@@ -490,7 +481,6 @@ void ViewImpl::hide()
     XSync(display, false);
     _visible = 	false;
 }
-
 
 void ViewImpl::bringWindowToTop()
 {
@@ -599,8 +589,6 @@ void ViewImpl::writeWindowProperties()
 		break;
 	}
 
-
-
 	//TODO: show in taskbar
 	if(_model->ShowInTaskbar.get())
 	{
@@ -608,7 +596,6 @@ void ViewImpl::writeWindowProperties()
 	else
 	{
 	}
-
 }
     
 bool ViewImpl::isWindowMinimized()
@@ -632,34 +619,34 @@ bool ViewImpl::isWindowMinimized()
             return true;
         }
     }
+
     XFree(atoms);
     return 0;
 }
     
 bool ViewImpl::isWindowMaximazed()
 {
-        Atom actual_type;
-        int actual_format;
-        unsigned long i, num_items, bytes_after;
-        Atom* atoms;
-       	Atom requestAtom = XInternAtom(_display,"_NET_WM_STATE",False);
-		Atom compareAtom = XInternAtom(_display,"_NET_WM_STATE_MAXIMIZED_HORZ",False);
+    Atom actual_type;
+    int actual_format;
+    unsigned long i, num_items, bytes_after;
+    Atom* atoms;
+    Atom requestAtom = XInternAtom(_display,"_NET_WM_STATE",False);
+	Atom compareAtom = XInternAtom(_display,"_NET_WM_STATE_MAXIMIZED_HORZ",False);
 
-
-        atoms=NULL;
+    atoms=NULL;
         
-        XGetWindowProperty(_display, _window,requestAtom, 0, 1024, False, XA_ATOM, &actual_type, &actual_format, &num_items, &bytes_after, (unsigned char**)&atoms);
+    XGetWindowProperty(_display, _window,requestAtom, 0, 1024, False, XA_ATOM, &actual_type, &actual_format, &num_items, &bytes_after, (unsigned char**)&atoms);
         
-        for(i=0; i<num_items; ++i)
+    for(i=0; i<num_items; ++i)
+    {
+        if(atoms[i]==compareAtom)
         {
-            if(atoms[i]==compareAtom)
-            {
-                XFree(atoms);
-                return true;
-            }
+            XFree(atoms);
+            return true;
         }
-        XFree(atoms);
-        return 0;
+    }
+    XFree(atoms);
+    return 0;
 }
     
 
@@ -674,8 +661,7 @@ void ViewImpl::minimizeWindow()
     ev.format = 32;
     ev.data.l[0] = IconicState;
     
-	XSendEvent(_display, RootWindow(_display, screen), False, SubstructureRedirectMask|SubstructureNotifyMask,(XEvent *)&ev);
-	
+	XSendEvent(_display, RootWindow(_display, screen), False, SubstructureRedirectMask|SubstructureNotifyMask,(XEvent *)&ev);	
 }
 
 void ViewImpl::restoreWindow()
@@ -707,7 +693,6 @@ void ViewImpl::maximizeWindow()
 	xev.xclient.data.l[1]	 = XInternAtom(_display,"_NET_WM_STATE_MAXIMIZED_VERT",False);
 	xev.xclient.data.l[2]	 = XInternAtom(_display,"_NET_WM_STATE_MAXIMIZED_HORZ",False);
 
-
 	XSendEvent(_display,DefaultRootWindow(_display),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);
 
 	XRaiseWindow(_display,_window);
@@ -725,7 +710,6 @@ void ViewImpl::updateDrawBuffer()
 
 	if(_pixelBuffer.size() < currentSize)
 		_pixelBuffer.resize(currentSize);
-
 }
 
 void ViewImpl::output(Pt::Hmi::Controller* controller,Pt::Hmi::Model* model)
