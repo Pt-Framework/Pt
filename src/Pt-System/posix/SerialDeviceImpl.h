@@ -62,12 +62,18 @@ class SerialDeviceImpl : public IODeviceImpl
         void setFlowControl( SerialDevice::FlowControl flowControl );
 
         SerialDevice::FlowControl flowControl() const;
-        
+
+        void setRts(bool on);
+
+        bool isCts() const;
+
+        void setDtr(bool on);
+
+        bool isDsr() const;
+
+        void setBreak(bool on);
+
         bool setSignal(SerialDevice::Signal signal);
-
-        //void setTimeout( size_t msec );
-
-        //size_t timeout() const;
 
         void sync() const;
 

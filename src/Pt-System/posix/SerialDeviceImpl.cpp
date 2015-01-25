@@ -37,11 +37,9 @@
 
 #include <sys/ioctl.h>
 
-/*
- * #if defined(__QNX__)
+#if defined(__QNX__)
 #define CRTSCTS (IHFLOW | OHFLOW)
 #endif
-*/
 
 #if defined(_THR_UNIXWARE) || defined(__hpux) || defined(_AIX)
 #include <sys/termiox.h>
@@ -390,12 +388,7 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
     if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
         throw IOError( PT_ERROR_MSG("tcgetattr failed") );
 
-    #if defined(linux) || defined(_AIX) || defined(__APPLE__) || defined(sun)
-        ios.c_cflag &= ~CRTSCTS;
-    #else
-        ios.c_cflag &= ~IHFLOW; // INPUT hardware control
-        ios.c_cflag &= ~OHFLOW; // OUTPUT hardware control
-    #endif
+    ios.c_cflag &= ~CRTSCTS;
     ios.c_iflag &= ~(IXON | IXANY | IXOFF);
 
     switch(flowControl)
@@ -406,17 +399,13 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
             ios.c_cc[VSTOP]  = CTRL_S ;
             break;
 
-        case SerialDevice::FlowControlBoth:
-            ios.c_iflag |= (IXON | IXANY | IXOFF);
         case SerialDevice::FlowControlHard:
-            #if defined(linux) || defined(_AIX) || defined(__APPLE__) || defined(sun)
-               ios.c_cflag |= CRTSCTS;
-            #else
-               ios.c_cflag |= IHFLOW; // INPUT hardware control
-               ios.c_cflag |= OHFLOW; // OUTPUT hardware control
-            #endif
+            ios.c_cflag |= CRTSCTS;
             ios.c_cc[VSTART] = _POSIX_VDISABLE;
             ios.c_cc[VSTOP] = _POSIX_VDISABLE;
+            break;
+
+        case SerialDevice::FlowControlNone:
             break;
     }
 
@@ -424,35 +413,53 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
     _flowControl = flowControl;
 }
 
-/*void SerialDeviceImpl::setTimeout( std::size_t msec )
-{
-    struct termios ios;
-
-    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
-        throw IOError( PT_ERROR_MSG("tcgetattr failed") );
-
-    ios.c_cc[VTIME]  = ( msec / 100 ) ;
-
-    tcsetattr(IODeviceImpl::fd(), TCSANOW, &ios);
-
-}*/
-
-/*std::size_t SerialDeviceImpl::timeout() const
-{
-    struct termios ios;
-
-    if( ::tcgetattr(IODeviceImpl::fd(), &ios) == -1 )
-        throw IOError( PT_ERROR_MSG("tcgetattr failed") );
-
-    return ios.c_cc[VTIME] * 100 ;
-}*/
 
 SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 {
     return _flowControl;
 }
 
-bool SerialDeviceImpl::setSignal(SerialDevice::Signal signal)
+
+void SerialDeviceImpl::setRts(bool on)
+{
+    int value = TIOCM_RTS;
+    unsigned long cmd = on ? TIOCMBIS : TIOCMBIC;
+    ioctl(IODeviceImpl::fd(), cmd, &value);
+}
+
+
+bool SerialDeviceImpl::isCts() const
+{
+	int flags = 0;
+	ioctl(IODeviceImpl::fd(), TIOCMGET, &flags);
+    return flags & TIOCM_CTS;
+}
+
+	
+void SerialDeviceImpl::setDtr(bool on)
+{
+    int value = TIOCM_DTR;
+    unsigned long cmd = on ? TIOCMBIS : TIOCMBIC;
+    ioctl(IODeviceImpl::fd(), cmd, &value);
+}
+
+
+bool SerialDeviceImpl::isDsr() const
+{
+	int flags = 0;
+	ioctl(IODeviceImpl::fd(), TIOCMGET, &flags);
+    return flags & TIOCM_DSR;
+}
+
+
+void SerialDeviceImpl::setBreak(bool on)
+{	
+    unsigned long cmd = on ? TIOCSBRK : TIOCCBRK;
+    ioctl(IODeviceImpl::fd(), cmd, 0);	  
+}
+
+
+/*bool SerialDeviceImpl::setSignal(SerialDevice::Signal signal)
 {
 	struct termios ios;
 
@@ -510,7 +517,7 @@ bool SerialDeviceImpl::setSignal(SerialDevice::Signal signal)
 
     return false;
 }
-
+*/
 void SerialDeviceImpl::sync() const
 {
     ::tcflush(IODeviceImpl::fd(), TCIFLUSH);

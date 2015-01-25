@@ -45,10 +45,11 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
     public:
         SerialDeviceTest()
         : Pt::Unit::TestSuite("SerialDeviceTest")
+        , _port("/dev/ttyUSB0")
         {
             //Pt::Unit::TestSuite::registerMethod( "ReadAsync", *this, &SerialDeviceTest::ReadAsync );
 			//Pt::Unit::TestSuite::registerMethod( "testRTS", *this, &SerialDeviceTest::testRTS );			
-			//Pt::Unit::TestSuite::registerMethod( "testDTR", *this, &SerialDeviceTest::testDTR );			
+			Pt::Unit::TestSuite::registerMethod( "testDTR", *this, &SerialDeviceTest::testDTR );			
 			//Pt::Unit::TestSuite::registerMethod( "testBreak", *this, &SerialDeviceTest::testBreak );			
         }
 
@@ -92,8 +93,8 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
 		{
 			try {
 				std::cout << "running" << std::endl;
-				std::string port("COM5");
-				Pt::System::SerialDevice serdev( port, std::ios_base::in| std::ios_base::out );				
+
+				Pt::System::SerialDevice serdev( _port, std::ios_base::in| std::ios_base::out );				
 
 				for(;;)
 				{ 
@@ -119,8 +120,7 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
 		{
 			try {
 				std::cout << "running" << std::endl;
-				std::string port("COM5");
-				Pt::System::SerialDevice serdev( port, std::ios_base::in| std::ios_base::out );
+				Pt::System::SerialDevice serdev( _port, std::ios_base::in| std::ios_base::out );
 				
 				for(;;)
 				{ 
@@ -146,9 +146,9 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
 		{
 			try {
 				std::cout << "running" << std::endl;
-				std::string port("COM5");
-				Pt::System::SerialDevice serdev( port, std::ios_base::in| std::ios_base::out );
+				Pt::System::SerialDevice serdev( _port, std::ios_base::in| std::ios_base::out );
 
+                serdev.setFlowControl(Pt::System::SerialDevice::FlowControlNone);
 				for(;;)
 				{ 
 					serdev.setBreak(true);
@@ -173,6 +173,7 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
 
     protected:
         void ReadPnp();
+        std::string _port;
 };
 
 Pt::Unit::RegisterTest<SerialDeviceTest> register_SerialDeviceTest;
