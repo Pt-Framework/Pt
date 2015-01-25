@@ -2,17 +2,18 @@ SubDir PT_TOP src Pt-System tests ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-System ;
 
-PT_SYSTEM_TESTS = #ApplicationTest.cpp
-                  #DirectoryTest.cpp
-                  #EventLoopTest.cpp
-                  #LoggerTest.cpp
-                  #PathTest.cpp
-                  #PipeTest.cpp
-                  #ProcessTest.cpp
+PT_SYSTEM_TESTS = 
+			      ApplicationTest.cpp
+                  DirectoryTest.cpp
+                  EventLoopTest.cpp
+                  LoggerTest.cpp
+                  PathTest.cpp
+                  PipeTest.cpp
+                  ProcessTest.cpp
                   SerialDeviceTest.cpp
-                  #ThreadTest.cpp
-                  #TimerTest.cpp
-                  #UriTest.cpp
+                  ThreadTest.cpp
+                  TimerTest.cpp
+                  UriTest.cpp
                   ;
 
 Main Pt-System-test : Pt-System-test.cpp $(PT_SYSTEM_TESTS) ;
