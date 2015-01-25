@@ -172,11 +172,20 @@ SerialDevice::FlowControl SerialDevice::flowControl() const
     return _impl->flowControl();
 }
 
-bool SerialDevice::setSignal(Signal signal)
+void SerialDevice::setRts(bool on)
 {
-    return _impl->setSignal(signal);
+	_impl->setRts(on);
+}
+		
+void SerialDevice::setDtr(bool on)
+{
+	_impl->setDtr(on);
 }
 
+void SerialDevice::setBreak(bool on)
+{	
+	_impl->setBreak(on);
+}
 
 void SerialDevice::onClose()
 {

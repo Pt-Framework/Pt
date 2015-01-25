@@ -118,7 +118,7 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         {
             FlowControlHard,
             FlowControlSoft,
-            FlowControlBoth
+			FlowControlNone
         };
 
         /** @brief Stop bits values.
@@ -134,14 +134,9 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         */
         enum Signal
         {
-            ClearBreak,
-            ClearDtr,
-            ClearRts,
-            SetBreak,
-            SetDtr,
-            SetRts,
-            SetXOff,
-            SetXOn,
+            Break,
+			Cts,
+			Dsr,
         };
 
         //! Default constructor.
@@ -196,8 +191,13 @@ class PT_SYSTEM_API SerialDevice : public IODevice
         //! @brief Gets the current flow control kind
         FlowControl flowControl() const;
 
-        //! @brief Triggers a signal.
-        bool setSignal(Signal signal);
+        //! @brief
+        void setRts(bool on);
+		
+		void setDtr(bool on);
+
+		void setBreak(bool on);
+
 
     protected:
         // inherit docs

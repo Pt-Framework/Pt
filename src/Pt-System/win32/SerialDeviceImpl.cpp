@@ -755,37 +755,22 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
     return SerialDevice::ParityEven;
 }
 
-bool SerialDeviceImpl::setSignal(SerialDevice::Signal signal)
+void SerialDeviceImpl::setRts(bool on)
 {
-    switch(signal)
-    {
-        case SerialDevice::ClearBreak:
-            return EscapeCommFunction(handle(), CLRBREAK) > 0;
-        break;
-        case SerialDevice::ClearDtr:
-            return EscapeCommFunction(handle(), CLRDTR) > 0;
-        break;
-        case SerialDevice::ClearRts:
-            return EscapeCommFunction(handle(), CLRRTS) > 0;
-        break;
-        case SerialDevice::SetBreak:
-            return EscapeCommFunction(handle(), SETBREAK) > 0;
-        break;
-        case SerialDevice::SetDtr:
-            return EscapeCommFunction(handle(), SETDTR) > 0;
-        break;
-        case SerialDevice::SetRts:
-            return EscapeCommFunction(handle(), SETRTS) > 0;
-        break;
-        case SerialDevice::SetXOff:
-            return EscapeCommFunction(handle(), SETXOFF) > 0;
-        break;
-        case SerialDevice::SetXOn:
-            return EscapeCommFunction(handle(), SETXON) > 0;
-        break;
-    }
+	DWORD flag = on ? SETRTS : CLRRTS;	
+	EscapeCommFunction(handle(), flag);
+}
 
-    return false;
+void SerialDeviceImpl::setDtr(bool on)
+{
+	DWORD flag = on ? SETDTR : CLRDTR;	
+	EscapeCommFunction(handle(), flag);
+}
+
+void SerialDeviceImpl::setBreak(bool on)
+{
+	DWORD flag = on ? SETBREAK : CLRBREAK;	
+	EscapeCommFunction(handle(), flag);
 }
 
 void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
@@ -809,12 +794,17 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
             commState.fRtsControl = RTS_CONTROL_DISABLE;
         break;
 
-        case SerialDevice::FlowControlBoth:
-            commState.fInX = commState.fOutX = 1;
         case SerialDevice::FlowControlHard:
+			commState.fInX = commState.fOutX = 1;
             commState.fOutxCtsFlow = 1;
             commState.fRtsControl = RTS_CONTROL_HANDSHAKE;
         break;
+
+		case SerialDevice::FlowControlNone:
+		    commState.fRtsControl = RTS_CONTROL_DISABLE;
+			commState.fOutxCtsFlow = 0;
+			commState.fInX = commState.fOutX = 0;
+		break;
     }
 
     writeCommState( commState );
@@ -827,11 +817,6 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 
     readCommState( commState );
 
-    //Check for both.
-    if( commState.fInX == commState.fOutX && commState.fOutX == 1 &&
-        commState.fOutxCtsFlow == 1 && commState.fRtsControl == RTS_CONTROL_HANDSHAKE )
-        return SerialDevice::FlowControlBoth;
-
     //Check for hardware flow control.
     if( commState.fOutxCtsFlow == 1 && commState.fRtsControl == RTS_CONTROL_HANDSHAKE )
         return  SerialDevice::FlowControlHard;
@@ -840,9 +825,8 @@ SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
     if( commState.fInX == commState.fOutX && commState.fInX == 1 )
        return SerialDevice::FlowControlSoft;
 
-    throw std::runtime_error( "Unknown flow control" + PT_SOURCEINFO );
 
-    return SerialDevice::FlowControlBoth;
+    return SerialDevice::FlowControlNone;
 }
 
 }//namespace System

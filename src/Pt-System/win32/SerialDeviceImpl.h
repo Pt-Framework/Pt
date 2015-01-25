@@ -79,7 +79,11 @@ class SerialDeviceImpl : public OverlappedIODeviceImpl
         
         SerialDevice::FlowControl flowControl() const;
         
-        bool setSignal(SerialDevice::Signal signal);
+		void setRts(bool on);
+
+		void setDtr(bool on);
+
+		void setBreak(bool on);
         
 #ifdef _WIN32_WCE
         bool runRead(EventLoop&);
