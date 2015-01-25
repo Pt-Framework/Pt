@@ -84,6 +84,8 @@ class SerialDeviceImpl : public OverlappedIODeviceImpl
 		void setDtr(bool on);
 
 		void setBreak(bool on);
+		
+		void sendBreak(int duration);
 
 		bool isCts() const;
 

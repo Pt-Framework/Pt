@@ -48,10 +48,10 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
 		, _port("COM5")
         {
             //Pt::Unit::TestSuite::registerMethod( "ReadAsync", *this, &SerialDeviceTest::ReadAsync );
-			//Pt::Unit::TestSuite::registerMethod( "testRTS", *this, &SerialDeviceTest::testRTS );			
+			Pt::Unit::TestSuite::registerMethod( "testRTS", *this, &SerialDeviceTest::testRTS );			
 			//Pt::Unit::TestSuite::registerMethod( "testDTR", *this, &SerialDeviceTest::testDTR );			
 			//Pt::Unit::TestSuite::registerMethod( "testBreak", *this, &SerialDeviceTest::testBreak );			
-			Pt::Unit::TestSuite::registerMethod( "testDSR", *this, &SerialDeviceTest::testDSR );			
+			//Pt::Unit::TestSuite::registerMethod( "testDSR", *this, &SerialDeviceTest::testDSR );			
 			//Pt::Unit::TestSuite::registerMethod( "testCTS", *this, &SerialDeviceTest::testCTS );			
 
         }
@@ -62,7 +62,7 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
 			{
 				Pt::System::MainLoop loop;
 
-				Pt::System::SerialDevice serdev( "COM1", std::ios_base::in );
+				Pt::System::SerialDevice serdev( _port, std::ios_base::in );
 				serdev.setBaudRate(Pt::System::SerialDevice::BaudRate115200);
 				serdev.setCharSize(8);
                 serdev.setParity(Pt::System::SerialDevice::ParityNone);
@@ -199,9 +199,8 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
 		void testCTS()
 		{
 			try {
-				std::cout << "running" << std::endl;
-				std::string port("COM5");
-				Pt::System::SerialDevice serdev( port, std::ios_base::in| std::ios_base::out );
+				std::cout << "running" << std::endl;				
+				Pt::System::SerialDevice serdev( _port, std::ios_base::in| std::ios_base::out );
 
 				for(;;)
 				{ 

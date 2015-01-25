@@ -197,6 +197,10 @@ bool SerialDevice::isDsr() const
 	return _impl->isDsr();
 }
 
+void SerialDevice::sendBreak(int duration)
+{
+	_impl->sendBreak(duration);
+}
 
 void SerialDevice::onClose()
 {

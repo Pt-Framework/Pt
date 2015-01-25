@@ -773,6 +773,14 @@ void SerialDeviceImpl::setBreak(bool on)
 	EscapeCommFunction(handle(), flag);
 }
 
+void SerialDeviceImpl::sendBreak(int duration)
+{
+	duration = duration == 0 ? 300 : duration;
+	setBreak(true);
+	::Sleep(duration);
+	setBreak(false);
+}
+
 bool SerialDeviceImpl::isCts() const
 {
 	DWORD flags = 0;

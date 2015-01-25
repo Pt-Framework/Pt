@@ -189,6 +189,8 @@ class PT_SYSTEM_API SerialDevice : public IODevice
 		void setDtr(bool on);
 
 		void setBreak(bool on);		
+		
+		void sendBreak(int duration = 0);
 
 		bool isCts() const;
 
