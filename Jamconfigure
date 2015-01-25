@@ -398,6 +398,7 @@ if ! $(GUI)  || GUI = "x11"
     Load x11.jam ;
 
     ConfigureX11 ;
+    
     if $(X11_LIBS)
     {
         ConfigureXExt ;
