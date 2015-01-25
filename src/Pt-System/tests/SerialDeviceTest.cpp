@@ -52,7 +52,7 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
 			//Pt::Unit::TestSuite::registerMethod( "testDTR", *this, &SerialDeviceTest::testDTR );			
 			//Pt::Unit::TestSuite::registerMethod( "testBreak", *this, &SerialDeviceTest::testBreak );			
 			Pt::Unit::TestSuite::registerMethod( "testDSR", *this, &SerialDeviceTest::testDSR );			
-			//Pt::Unit::TestSuite::registerMethod( "testDTR", *this, &SerialDeviceTest::testDTR );			
+			//Pt::Unit::TestSuite::registerMethod( "testCTS", *this, &SerialDeviceTest::testCTS );			
 
         }
 
