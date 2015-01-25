@@ -130,14 +130,6 @@ class PT_SYSTEM_API SerialDevice : public IODevice
             TwoStopBits
         };
 
-        /** @brief Signal values.
-        */
-        enum Signal
-        {
-            Break,
-			Cts,
-			Dsr,
-        };
 
         //! Default constructor.
         SerialDevice();
@@ -196,8 +188,11 @@ class PT_SYSTEM_API SerialDevice : public IODevice
 		
 		void setDtr(bool on);
 
-		void setBreak(bool on);
+		void setBreak(bool on);		
 
+		bool isCts() const;
+
+		bool isDsr() const;
 
     protected:
         // inherit docs

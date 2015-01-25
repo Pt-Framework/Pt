@@ -773,6 +773,21 @@ void SerialDeviceImpl::setBreak(bool on)
 	EscapeCommFunction(handle(), flag);
 }
 
+bool SerialDeviceImpl::isCts() const
+{
+	DWORD flags = 0;
+	GetCommModemStatus( handle() , &flags);
+	return ((flags & MS_CTS_ON) == MS_CTS_ON);
+}
+
+bool SerialDeviceImpl::isDsr() const
+{
+	DWORD flags = 0;
+	GetCommModemStatus( handle() , &flags);
+	return ((flags & MS_DSR_ON) == MS_DSR_ON);	
+}
+
+
 void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 {
     static const int ASCII_XON  = 0x11;

@@ -84,7 +84,11 @@ class SerialDeviceImpl : public OverlappedIODeviceImpl
 		void setDtr(bool on);
 
 		void setBreak(bool on);
-        
+
+		bool isCts() const;
+
+		bool isDsr() const;
+		        
 #ifdef _WIN32_WCE
         bool runRead(EventLoop&);
 

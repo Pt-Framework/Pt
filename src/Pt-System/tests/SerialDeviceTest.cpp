@@ -45,12 +45,15 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
     public:
         SerialDeviceTest()
         : Pt::Unit::TestSuite("SerialDeviceTest")
-        , _port("/dev/ttyUSB0")
+		, _port("COM5")
         {
             //Pt::Unit::TestSuite::registerMethod( "ReadAsync", *this, &SerialDeviceTest::ReadAsync );
 			//Pt::Unit::TestSuite::registerMethod( "testRTS", *this, &SerialDeviceTest::testRTS );			
-			Pt::Unit::TestSuite::registerMethod( "testDTR", *this, &SerialDeviceTest::testDTR );			
+			//Pt::Unit::TestSuite::registerMethod( "testDTR", *this, &SerialDeviceTest::testDTR );			
 			//Pt::Unit::TestSuite::registerMethod( "testBreak", *this, &SerialDeviceTest::testBreak );			
+			Pt::Unit::TestSuite::registerMethod( "testDSR", *this, &SerialDeviceTest::testDSR );			
+			//Pt::Unit::TestSuite::registerMethod( "testDTR", *this, &SerialDeviceTest::testDTR );			
+
         }
 
 		void ReadAsync()
@@ -93,7 +96,6 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
 		{
 			try {
 				std::cout << "running" << std::endl;
-
 				Pt::System::SerialDevice serdev( _port, std::ios_base::in| std::ios_base::out );				
 
 				for(;;)
@@ -148,7 +150,6 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
 				std::cout << "running" << std::endl;
 				Pt::System::SerialDevice serdev( _port, std::ios_base::in| std::ios_base::out );
 
-                serdev.setFlowControl(Pt::System::SerialDevice::FlowControlNone);
 				for(;;)
 				{ 
 					serdev.setBreak(true);
@@ -170,10 +171,58 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
 		}
 	
 
+	
+		void testDSR()
+		{
+			try {
+				std::cout << "running" << std::endl;
+				Pt::System::SerialDevice serdev( _port, std::ios_base::in| std::ios_base::out );
+
+				for(;;)
+				{ 
+
+					Pt::System::Thread::sleep(1);
+					std::cout << serdev.isDsr() << '.' << std::flush;
+				}
+			}
+			catch(const Pt::System::AccessFailed&)
+			{
+				std::cerr << "No device found" <<  std::endl;
+				// do not fail in case no device is connected.
+			}
+
+			std::exit(0);
+		}
+	
+
+		
+		void testCTS()
+		{
+			try {
+				std::cout << "running" << std::endl;
+				std::string port("COM5");
+				Pt::System::SerialDevice serdev( port, std::ios_base::in| std::ios_base::out );
+
+				for(;;)
+				{ 
+
+					Pt::System::Thread::sleep(1);
+					std::cout << serdev.isCts() << '.' << std::flush;
+				}
+			}
+			catch(const Pt::System::AccessFailed&)
+			{
+				std::cerr << "No device found" <<  std::endl;
+				// do not fail in case no device is connected.
+			}
+
+			std::exit(0);
+		}
+	
 
     protected:
         void ReadPnp();
-        std::string _port;
+		std::string _port;
 };
 
 Pt::Unit::RegisterTest<SerialDeviceTest> register_SerialDeviceTest;

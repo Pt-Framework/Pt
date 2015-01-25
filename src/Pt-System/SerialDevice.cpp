@@ -187,6 +187,17 @@ void SerialDevice::setBreak(bool on)
 	_impl->setBreak(on);
 }
 
+bool SerialDevice::isCts() const
+{
+	return _impl->isCts();
+}
+
+bool SerialDevice::isDsr() const
+{
+	return _impl->isDsr();
+}
+
+
 void SerialDevice::onClose()
 {
     _impl->close();
