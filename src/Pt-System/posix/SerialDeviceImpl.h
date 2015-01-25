@@ -73,7 +73,7 @@ class SerialDeviceImpl : public IODeviceImpl
 
         void setBreak(bool on);
 
-        bool setSignal(SerialDevice::Signal signal);
+        void sendBreak(int duration);
 
         void sync() const;
 

@@ -459,6 +459,12 @@ void SerialDeviceImpl::setBreak(bool on)
 }
 
 
+void SerialDeviceImpl::sendBreak(int duration)
+{	
+    tcsendbreak(IODeviceImpl::fd(), duration);	  
+}
+
+
 /*bool SerialDeviceImpl::setSignal(SerialDevice::Signal signal)
 {
 	struct termios ios;
