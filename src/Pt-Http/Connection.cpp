@@ -489,6 +489,9 @@ MessageProgress Connection::endSendRequest()
     if(_onTimeout)
         throw System::IOError("timeout");
 
+    if(_isFailed)
+        throw System::IOError("I/O Error");
+
     if(_state == NotConnected)
     {
         _timer.stop();
@@ -621,10 +624,10 @@ MessageProgress Connection::endSendReply()
     
     if(_onTimeout)
         throw System::IOError("timeout");
-        
+
     if(_isFailed)
         throw System::IOError("I/O Error");
-
+        
     if( ! _reply->isFinished() || ! _keepAlive)
     {
         endWrite();
@@ -778,6 +781,9 @@ MessageProgress Connection::endReceiveRequest()
 
     if(_onTimeout)
         throw System::IOError("timeout");
+
+    if(_isFailed)
+        throw System::IOError("I/O Error");
    
     if(_state == SslAcceptWrite)
     {
@@ -908,6 +914,9 @@ MessageProgress Connection::endReceiveReply()
         // normal I/O timeout or keep-alive timeout
         throw System::IOError("timeout");
     }
+
+    if(_isFailed)
+        throw System::IOError("I/O Error");
 
     if(_state == RequestOutputPending)
     {
@@ -1150,8 +1159,9 @@ void Connection::beginWrite()
         }
 
         PT_LOG_DEBUG("begin writing socket buffer: " << _sockbuf.out_avail());
-        _timer.start(_timeout);
+        
         _sockbuf.beginWrite();
+        _timer.start(_timeout);
     } 
     catch(System::IOError& e)
     {
