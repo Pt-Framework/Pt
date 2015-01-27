@@ -329,6 +329,7 @@ class Connection : public Connectable
         bool _chunked;
         bool _keepAlive;
         bool _onTimeout;
+        bool _isFailed;
 };
 
 } // namespace Http

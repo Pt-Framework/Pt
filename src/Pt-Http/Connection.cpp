@@ -94,6 +94,7 @@ Connection::Connection()
 , _chunked(false)
 , _keepAlive(false)
 , _onTimeout(false)
+, _isFailed(false)
 {
     _socket.connected() += slot(*this, &Connection::onConnect);
     //_socket.outputPipelined() += slot(*this, &Connection::onOutput);
@@ -200,6 +201,7 @@ void Connection::onCancel()
     _chunked = false;
     _keepAlive = false;
     _onTimeout = false;
+    _isFailed = false;
     _parser.reset(false);
     _replyParser.reset(true);
     _httpbuf.reset();
@@ -620,6 +622,9 @@ MessageProgress Connection::endSendReply()
     if(_onTimeout)
         throw System::IOError("timeout");
         
+    if(_isFailed)
+        throw System::IOError("I/O Error");
+
     if( ! _reply->isFinished() || ! _keepAlive)
     {
         endWrite();
@@ -1136,15 +1141,24 @@ void Connection::beginWrite()
 {
     PT_LOG_DEBUG("Connection::beginWrite");
 
-    if(_ssl)
+    try
     {
-        PT_LOG_DEBUG("flushing ssl buffer");
-        _sslbuf.pubsync();
-    }
+        if(_ssl)
+        {
+            PT_LOG_DEBUG("flushing ssl buffer");
+            _sslbuf.pubsync();
+        }
 
-    PT_LOG_DEBUG("begin writing socket buffer: " << _sockbuf.out_avail());
-    _timer.start(_timeout);
-    _sockbuf.beginWrite();
+        PT_LOG_DEBUG("begin writing socket buffer: " << _sockbuf.out_avail());
+        _timer.start(_timeout);
+        _sockbuf.beginWrite();
+    } 
+    catch(System::IOError& e)
+    {
+        PT_LOG_DEBUG("deferred I/O error");
+        _isFailed = true;
+        setOutputReady();
+    }
 }
 
 
