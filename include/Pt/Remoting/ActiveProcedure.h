@@ -889,6 +889,18 @@ class ActiveProcedure<R, A1, A2,
             _args[2] = 0;
         }
 
+        A1& a1()
+        { return _v1; }
+
+        const A1& a1() const
+        { return _v1; }
+
+        A2& a2()
+        { return _v2; }
+
+        const A2& a2() const
+        { return _v2; }
+
     protected:
         Composer** onBeginArgs()
         {
