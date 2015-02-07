@@ -151,6 +151,12 @@ void Timer::stop()
     _finished = Timespan(maxTime);
 
 	_interval = EventLoop::WaitInfinite;
+
+	if(_loop != 0)
+	{
+		_loop->onDetachTimer(*this);
+		_loop->onAttachTimer(*this);
+	}
 }
 
 
