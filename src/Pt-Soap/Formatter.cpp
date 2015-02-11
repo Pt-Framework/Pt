@@ -292,7 +292,7 @@ void Formatter::onAddBinary(const char* name, const char* type,
               data, data+length, nextFrom, 
               &to[0], &to[0] + to.size(), nextTo);
             
-  if(r != Pt::Base64Codec::ok)
+  if(r == Pt::Base64Codec::error)
     throw SerializationError("base64 decoding");
 
   b64.unshift(state, nextTo, &to[0] + to.size(), nextTo);
