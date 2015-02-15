@@ -207,6 +207,25 @@ InIterT parseInt(InIterT it, InIterT end, T& n)
     
     return r;
 }
+    
+/** @brief Parses an integer value in decimal format.
+     
+    @ingroup Utilities
+*/
+template <typename InIter, typename T>
+T parseInt(InIter it, InIter end)
+{
+    T n = T();
+    bool ok = false;
+    
+    InIter r = parseInt(it, end, n, ok);
+    if( ! ok || r != end )
+        throw ConversionError("conversion failed");
+
+    return n;
+}
+    
+
 
 
 /** @brief Parses a floating point value in a given format.
