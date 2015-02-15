@@ -41,7 +41,7 @@ public:
 	CursorImpl();
 	virtual ~CursorImpl();
 
-	void setCursor(Cursors::Type c, Controller* ctrl);
+	void setCursor(Cursors::Type c);
 	Cursors::Type getCursor() const;
 
 private:

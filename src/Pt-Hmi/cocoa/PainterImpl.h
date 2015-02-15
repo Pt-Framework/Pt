@@ -51,6 +51,7 @@ namespace Hmi {
 
 class PaintSurfaceImpl;
 class PaintSurface;
+class NativePaintSurface;
 
 class PainterImpl
 {
@@ -83,8 +84,7 @@ class PainterImpl
 
         virtual void drawText(const Gfx::PointF& to, const Pt::String& text);
     
-    void drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline );
-    
+        void drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline );
 
         virtual void drawRect(const Gfx::RectF& rect);
 
@@ -110,15 +110,19 @@ class PainterImpl
         {
             return 0;
         }
-    void addFontName(const std::string& fontName)
-    {
-    }
+    
+        void setSurface(NativePaintSurface& s);
+
+    
+        void addFontName(const std::string& fontName)
+        {
+        }
     
 	protected:
-        Gfx::Pen _pen;
-        Gfx::Brush _brush;
-        Gfx::Font  _font;
-        PaintSurfaceImpl* _surface;
+        Gfx::Pen            _pen;
+        Gfx::Brush          _brush;
+        Gfx::Font           _font;
+        PaintSurfaceImpl*   _surface;
 };
 
 }}

@@ -25,20 +25,38 @@ namespace Hmi {
 PaintSurfaceImpl::PaintSurfaceImpl(const Pt::Gfx::SizeF& size)
 : _size(size)
 {
-    _image = [[NSImage alloc] initWithSize:NSMakeSize(_size.width(),  _size.height())];
+    create();
 }
 
 
 PaintSurfaceImpl::~PaintSurfaceImpl()
 {
-    [_image release];
+    destroy();
 }
-
+    
+void PaintSurfaceImpl::destroy()
+{
+    CGContextRelease(_context);
+}
+    
+void PaintSurfaceImpl::create()
+{
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    
+    _context = CGBitmapContextCreate(0, _size.width(), _size.height(), 8, 0, colorSpace, kCGImageAlphaPremultipliedLast);
+    
+    CGContextTranslateCTM(_context, 0, _size.height() );
+    CGContextScaleCTM(_context, 1, -1);
+    
+    CGColorSpaceRelease(colorSpace);
+}
+    
 void PaintSurfaceImpl::resize(const Pt::Gfx::SizeF& size)
 {
 	_size = size;
-	[_image release];
-	_image = [[NSImage alloc] initWithSize:NSMakeSize(_size.width(),  _size.height())];
+    
+    destroy();
+    create();
 }
 
 

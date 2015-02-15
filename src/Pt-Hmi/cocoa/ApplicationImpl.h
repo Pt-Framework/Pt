@@ -94,14 +94,9 @@ public:
 		return *this; 
 	}
    
-	inline Pt::Signal<Controller*, const PointingEvent&>& pointerEvent()
+    inline Pt::Signal<const Pt::Event&>& systemEvent()
 	{
-		return _pointerEvent;
-	}
-    
-	inline Pt::Signal<Controller*, const KeyEvent&>& keyDeviceEvent()
-	{
-		return _keyDeviceEvent;
+		return _systemEvent;
 	}
 
 	inline void showConsole(bool show = true)
@@ -214,8 +209,7 @@ private:
     IOEntry& enableIOHandle(System::IOHandle* h);
 
 private:
-    Pt::Signal<Controller*, const PointingEvent&> _pointerEvent;
-    Pt::Signal<Controller*, const KeyEvent&> _keyDeviceEvent;
+    Pt::Signal<const Pt::Event&> _systemEvent;
     System::Mutex _mutex;
     System::SelectableList _selectables;
     std::vector<IOEntry> _iotable;

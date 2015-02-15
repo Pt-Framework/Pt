@@ -44,7 +44,7 @@ CursorImpl::~CursorImpl()
 {    
 }
         
-void CursorImpl::setCursor(Cursors::Type type, Controller* parent)
+void CursorImpl::setCursor(Cursors::Type type)
 {
     if(_type == type)
         return;

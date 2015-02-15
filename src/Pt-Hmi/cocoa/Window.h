@@ -18,16 +18,16 @@
  ***************************************************************************/
 
 #include <Pt/Hmi/Api.h>
-#include "GfxOutputDeviceImpl.h"
+#include "ViewImpl.h"
 #import <AppKit/NSWindow.h>
 #include <Pt/Hmi/KeyEvent.h>
 
 @interface Window : NSWindow
 {
-    Pt::Hmi::GfxOutputDeviceImpl* _outDevice;
+    Pt::Hmi::ViewImpl* _outDevice;
     
 }
     
-- (void) setDevice:  (Pt::Hmi::GfxOutputDeviceImpl*) device ;
+- (void) setDevice:  (Pt::Hmi::ViewImpl*) device ;
 
 @end

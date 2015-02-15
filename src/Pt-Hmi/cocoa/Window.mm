@@ -23,7 +23,7 @@
 
 @implementation Window
 
-- (void) setDevice : (Pt::Hmi::GfxOutputDeviceImpl*) device
+- (void) setDevice : (Pt::Hmi::ViewImpl*) device
 {
     _outDevice = device;
 }

@@ -29,6 +29,9 @@
 #import <AppKit/NSApplication.h>
 #import <AppKit/NSEvent.h>
 #import <AppKit/NSTrackingArea.h>
+#include <Pt/Hmi/NativePaintSurface.h>
+#include "PaintSurfaceImpl.h"
+#include <CoreGraphics/CoreGraphics.h>
 
 @implementation WidgetView
 
@@ -85,43 +88,19 @@
     if(_outDevice->model() == nil)
         return;
     
-    //Create a raw buffer to hold pixel data which we will fill algorithmically
-    NSInteger width =  _outDevice->model()->paintSurface().size().width();
-    NSInteger height = _outDevice->model()->paintSurface().size().height();
-
-    NSInteger dataLength = width * height * 4;
-    UInt8 *data = (UInt8*)malloc(dataLength * sizeof(UInt8));
-    /*
-    //Fill pixel buffer with color data
-    for (int j=0; j<height; j++)
-    {
-        for (int i=0; i<width; i++)
-        {
-            
-            const Pt::Gfx::ARgbColor& pixel = _outDevice->model()->PaintSurface.pixel(i,j);
-                                       
-            int index = 4*(i+j*width);
-            
-            data[index]  = pixel.red();
-                                       
-            data[++index]=pixel.green();
-            data[++index]=pixel.blue();
-            data[++index]=255;
-            
-        }
-    }*/
+    Pt::Hmi::NativePaintSurface* surface = dynamic_cast<Pt::Hmi::NativePaintSurface*>(_outDevice->model()->paintSurface());
     
-    // Create a CGImage with the pixel data
-    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data, dataLength, NULL);
-    CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
-    CGImageRef image = CGImageCreate(width, height, 8, 32, width * 4, colorspace, kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedLast, provider, NULL, true, kCGRenderingIntentDefault);
-
-    CGContextDrawImage((CGContext*)[[NSGraphicsContext currentContext] graphicsPort],rect,image);
+    Pt::Hmi::PaintSurfaceImpl* impl = surface->impl();
+    CGContextRef context = impl->context();
     
-    //Clean up
-    CGColorSpaceRelease(colorspace);
-    CGDataProviderRelease(provider);
-    free(data);
+    CGImageRef image =  CGBitmapContextCreateImage(context);
+    
+    CGContextRef currentContext = ( CGContextRef ) [[NSGraphicsContext currentContext] graphicsPort];
+
+    CGContextDrawImage(currentContext,rect,image);
+    
+    CGImageRelease(image);
+
 }
 
 - (void)setFrameOrigin:(NSPoint)origin

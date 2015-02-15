@@ -22,7 +22,7 @@
 
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/ArgbImage.h>
-
+#include <CoreGraphics/CGBitmapContext.h>
 #ifdef __OBJC__
     #import <AppKit/NSImage.h>
     #import <AppKit/NSColor.h>
@@ -45,14 +45,19 @@ class PaintSurfaceImpl
         inline const Gfx::SizeF& size() const
         { return _size; }
 
-        inline NSImage* image() const
-        { return _image; }
+        inline CGContextRef context() const
+        { return _context; }
 
 		Pt::Gfx::ARgbImage toImage();
 
     private:
+        void create();
+    
+        void destroy();
+    
+    private:
         Pt::Gfx::SizeF _size;
-        NSImage* _image;
+        CGContextRef _context;
 };
 
 }}
