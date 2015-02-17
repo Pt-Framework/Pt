@@ -171,7 +171,12 @@ void MainLoopImpl::processTimers()
 
     if(nextTimer != System::EventLoop::WaitInfinite)
     {
-        _masterTimer.start(nextTimer);
+        unsigned maxInt = std::numeric_limits<int>::max();
+        
+        int interval = nextTimer > maxInt ? maxInt 
+                                          : static_cast<int>(nextTimer);
+
+        _masterTimer.start(interval);
     }
 }
 

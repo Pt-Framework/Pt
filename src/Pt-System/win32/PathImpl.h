@@ -145,11 +145,14 @@ class PathImpl
         static size_type npos()
         { return std::string::npos; }
 
-        size_type rfind(wchar_t ch) const
+        size_type rfind(wchar_t ch, size_type pos = npos()) const
         {
             //return _path.rfind(ch);
 
             std::size_t n = _path.size() - nullSize;
+
+            if( pos != npos() )
+                n = (pos + 1) * sizeof(wchar_t);
 
             while(n != 0)
             {

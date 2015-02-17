@@ -53,6 +53,8 @@ class PT_SYSTEM_API Path
         */
         Path(const Path& p);
 
+        // TODO: explicit? Path p = "x"; not allowed?
+
         /** @brief Construct from a path name.
         */
         explicit Path(const Pt::String& s);
@@ -176,6 +178,7 @@ class PT_SYSTEM_API Path
 
         bool empty() const;
 
+        // TODO: return Path objects
         Pt::String fileName() const;
 
         Pt::String dirName() const;
@@ -224,6 +227,16 @@ class PT_SYSTEM_API Path
     @related Path
 */
 inline Path operator/(const Path& a, const Path& b)
+{ 
+    return Path(a) /= b;
+}
+
+inline Path operator/(const Path& a, const Pt::String& b)
+{ 
+    return Path(a) /= b;
+}
+
+inline Path operator/(const Path& a, const char* b)
 { 
     return Path(a) /= b;
 }

@@ -135,7 +135,16 @@ class PathTest : public Pt::Unit::TestSuite
             path = "abc";
             path /= "xyz";
             PT_UNIT_ASSERT_EQUALS( path.dirName(), dir.c_str() );
+         
+            path = "abc";
+            path /= "def";
+            path /= "ghi";
+            path = path.dirName();
+            PT_UNIT_ASSERT_EQUALS( path.dirName(), dir.c_str() );
             
+            path = Pt::System::Path::dirsep();
+            PT_UNIT_ASSERT( path.dirName().empty() );
+
             path = "abc.txt";
             PT_UNIT_ASSERT( path.dirName().empty() );
 

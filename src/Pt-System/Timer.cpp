@@ -39,9 +39,9 @@ namespace {
 
 inline bool checkInterval(std::size_t interval, const Pt::Timespan& now)
 {
-    Pt::int64_t maxInterval = Pt::Timespan::maxMSecs();
-    maxInterval -= now.toMSecs();
-    return interval > static_cast<Pt::uint64_t>(maxInterval);
+    Pt::int64_t maxRemaining = Pt::Timespan::maxMSecs();
+    maxRemaining -= now.toMSecs();
+    return interval > static_cast<Pt::uint64_t>(maxRemaining);
 }
 
 }
@@ -137,26 +137,26 @@ void Timer::start(std::size_t interval)
 
     assert(_finished.toUSecs() > 0);
 
-	if(_loop != 0)
-	{
-		_loop->onDetachTimer(*this);
-		_loop->onAttachTimer(*this);
-	}
+    if(_loop != 0)
+    {
+        _loop->onDetachTimer(*this);
+        _loop->onAttachTimer(*this);
+    }
 }
 
 
 void Timer::stop()
 {
-	Pt::int64_t maxTime = std::numeric_limits<Pt::int64_t>::max();
+    Pt::int64_t maxTime = std::numeric_limits<Pt::int64_t>::max();
     _finished = Timespan(maxTime);
 
-	_interval = EventLoop::WaitInfinite;
+    _interval = EventLoop::WaitInfinite;
 
-	if(_loop != 0)
-	{
-		_loop->onDetachTimer(*this);
-		_loop->onAttachTimer(*this);
-	}
+    if(_loop != 0)
+    {
+        _loop->onDetachTimer(*this);
+        _loop->onAttachTimer(*this);
+    }
 }
 
 
@@ -201,8 +201,8 @@ bool Timer::update(const Timespan& now)
         }
 
         assert(_finished.toUSecs() > 0);
-		
-		timeout().send();
+
+        timeout().send();
 
         if( ! sentry )
         {

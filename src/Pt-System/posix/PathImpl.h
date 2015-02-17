@@ -182,9 +182,9 @@ class PathImpl
         static size_type npos()
         { return std::string::npos; }
 
-        size_type rfind(char ch) const
+        size_type rfind(char ch, size_type pos = npos()) const
         {
-            return _path.rfind(ch);
+            return _path.rfind(ch, pos);
         }
 
         Pt::String substr(size_type pos, size_type n)

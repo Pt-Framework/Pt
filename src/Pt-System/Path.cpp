@@ -237,7 +237,17 @@ Pt::String Path::fileName() const
 
 Pt::String Path::dirName() const
 {
-    PathImpl::size_type pos = _impl->rfind( _impl->dirsep() );
+    if( _impl->empty() || (_impl->size() == 1 && _impl->back() == _impl->dirsep()) )
+        return Pt::String();
+
+    PathImpl::size_type off = PathImpl::npos();
+
+    if( _impl->back() == _impl->dirsep() )
+    {
+        off = _impl->size() - 2;
+    }
+
+    PathImpl::size_type pos = _impl->rfind( _impl->dirsep(), off );
     if (pos != PathImpl::npos())
         return _impl->substr(0, pos + 1);
 

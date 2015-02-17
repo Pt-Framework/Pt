@@ -209,18 +209,21 @@ std::size_t TimerQueue::processTimers()
         return lowestTimeout;
     }
 
-    Timespan now = Clock::getSystemTicks();
-    Timer* timer = _timers.begin()->second;
-
-    PT_LOG_TRACE("now: " << now.toMSecs());
-    PT_LOG_TRACE("first timer at: " << timer->finished().toMSecs());
-
     while( ! _timers.empty() )
     {
-        PT_LOG_TRACE("get front of timer queue");
-        timer = _timers.begin()->second;
+        Timer* timer = _timers.begin()->second;
+        PT_LOG_TRACE("next timer at: " << timer->finished().toMSecs());
 
-        if( now < timer->finished() ) // not expired or stopped
+        if( ! timer->isStarted() ) // stopped
+        {
+            lowestTimeout = EventLoop::WaitInfinite;
+            break;
+        }
+
+        Timespan now = Clock::getSystemTicks();
+        PT_LOG_TRACE("now: " << now.toMSecs());
+
+        if( now < timer->finished() ) // not expired
         {
             Pt::int64_t remaining = (timer->finished() - now).toUSecs();
             
