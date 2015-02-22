@@ -36,6 +36,59 @@ namespace Pt {
 
 namespace Hmi {
 
+InputDevice::InputDevice(const char* deviceName)
+: _ioh(*this)
+, _loop(0)
+{
+    _ioh.fd = ::open(deviceName, O_RDONLY|O_NONBLOCK);
+	if( _ioh.fd < 0 )
+		throw Pt::System::AccessFailed(deviceName);
+}
+
+
+InputDevice::~InputDevice()
+{
+    try
+    {
+        this->close();
+    }
+    catch(...)
+    {}
+}
+
+
+bool InputDevice::onRun()
+{
+	struct input_event ev[64];
+	int bytes = ::read(_ioh.fd, ev, sizeof(struct input_event) * 64);
+    
+	if( bytes < (int) sizeof(struct input_event) )
+    {
+        return false;
+    }
+
+    for( unsigned i = 0; i < bytes / sizeof(input_event); i++ )
+    {
+			Application::instance().impl()->windowEvent().send(events[i]);
+    }
+
+    return true;
+}
+
+
+void InputDevice::onAttach(System::EventLoop& loop)
+{ 
+    _loop = &loop;
+}
+
+
+void InputDevice::onDetach(System::EventLoop& loop)
+{ 
+    _loop = 0; 
+}
+
+
+
 ViewImpl::ViewImpl()
 : _fd(-1)
 , _buffer(0)
@@ -82,6 +135,7 @@ ViewImpl::ViewImpl()
     unsigned _pitch = _screenInfo.xres * _screenInfo.bits_per_pixel / 8;
     _bufferSize     = _pitch * _screenInfo.yres;
     _buffer         =  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);
+	Application::instance().impl()->windowEvent() += Pt::slot(
 }
 
 ViewImpl::~ViewImpl()
@@ -93,6 +147,33 @@ ViewImpl::~ViewImpl()
         close(_fd);
 }
 
+
+void ViewImpl::onWindowEvent(struct input_event& ev)
+{
+    switch (ev.type)
+    {
+		case EV_KEY:
+		{
+			if(ev.value == EV_PRESSED)
+				_keyEvent.setState(KeyEvent::KeyDown);
+			else
+				_keyEvent.setState(KeyEvent::KeyUp);
+    
+			if( ev.code == KEY_TAB)
+				_keyEvent.setUnicode('\t');
+
+			if( ev.code == KEY_SPACE)
+				_keyEvent.setUnicode(' ');			
+		}
+		break;
+	}
+		
+    _keyEvent.setController(_controller);
+	std::clog<<"Key event = " << (char) _keyEvent.toUTF8String() <<std::endl;
+	Application::instance().systemEvent().send(_keyEvent);
+	
+		
+}
 
 void ViewImpl::output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model)
 {

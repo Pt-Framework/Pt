@@ -108,10 +108,18 @@ class ApplicationImpl : public Pt::System::MainLoop
 			return _systemEvent;
 		}
 
+		inline Pt::Signal<const struct input_event&>& windowEvent()
+		{
+			return _windowEvent;
+		}
+
 		void nextEvent();
+		
 
 	protected:
 		Pt::Signal<const Pt::Event&> _systemEvent;
+		Pt::Signal<const struct input_event&> _windowEvent;
+		InputDevice _inputDevice;
 };
 
 } // namespace
