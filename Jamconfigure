@@ -412,6 +412,21 @@ if ! $(GUI)  || GUI = "x11"
     }
 }
 
+if ! $(GUI) || GUI = "linux-fb"
+{
+    WITH_GUI = [ CheckBuildC++ "#include <linux/fb.h>"
+                               "int main() {"
+                               "struct fb_var_screeninfo si;"
+                               "return 0; }"
+                             : ""
+                             : "" ] ;
+
+    if $(WITH_GUI)
+    {
+        GUI = linux-fb ;
+    }
+}
+
 if $(GUI:L) = "photon"
 {
     GUI     ?= photon ;
