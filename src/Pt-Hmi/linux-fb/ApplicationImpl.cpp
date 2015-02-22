@@ -37,7 +37,7 @@ ApplicationImpl::ApplicationImpl()
 {
    _inputDevice.setActive(*this);
    _inputDevice.begin();
-//   _inputDevice.flush();
+   _inputDevice.flush();
 
 }
 

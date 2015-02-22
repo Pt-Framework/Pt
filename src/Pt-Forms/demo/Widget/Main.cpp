@@ -4,12 +4,19 @@
 
 int main(int argc, char* args[])
 {	
-	Pt::Hmi::Application	application;
-	Pt::Forms::Demo::Widget::MainWindow	mainWindow;
+	try
+	{
+		Pt::Hmi::Application	application;
+		Pt::Forms::Demo::Widget::MainWindow	mainWindow;
 	
-	mainWindow.show();
+		mainWindow.show();
 
-	application.showConsole();
-    application.run();
+		application.showConsole();
+		application.run();
+	}
+	catch(const std::exception& ex)
+	{
+		std::clog << "ERROR: " << ex.what() << std::endl;
+	}
 }
 

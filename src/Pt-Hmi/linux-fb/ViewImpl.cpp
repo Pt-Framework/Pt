@@ -33,6 +33,18 @@
 #include <Pt/Hmi/WindowModel.h>
 #include "ApplicationImpl.h"
 #include <Pt/Hmi/Application.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <fcntl.h>
+#include <getopt.h>
+#include <linux/types.h>
+#include <linux/kd.h>
+#include <linux/keyboard.h>
+#include <sys/ioctl.h>
+#include <string.h>
+#include <errno.h>
+#include "KeyHandler.h"
 
 namespace Pt {
 
@@ -104,7 +116,7 @@ void ViewImpl::onInputEvent(const struct input_event& ev)
 {
 	if( _controller == 0)
 		return;
-	
+
     switch (ev.type)
     {
 		case EV_KEY:
@@ -116,6 +128,7 @@ void ViewImpl::onInputEvent(const struct input_event& ev)
 			else
 				return;
     
+			std::clog<<" Code = " << (int) ev.code << std::endl;
 			switch(ev.code)
 			{
 				case KEY_RIGHTALT:
@@ -135,12 +148,20 @@ void ViewImpl::onInputEvent(const struct input_event& ev)
 
 				default: //ToDO translate Key
 				{
-	
+					struct kbentry ke;
+					ke.kb_table = 0;	/* plain map is always present */
+					ke.kb_index = ev.code;
+
+					int ret = ioctl(dup(0), KDGKBENT, (unsigned long)&ke);
+					
+					const unsigned int ucode = (int)(unsigned char) ke.kb_value;
+					_keyEvent.setUnicode(ucode);					
+										
 				}
 				break;
 				
 			}
-		
+					
 		    _keyEvent.setController(_controller);
 			
 			Application::instance().systemEvent().send(_keyEvent);

@@ -156,6 +156,7 @@ void MainWindow::onClosedByWindow(Hmi::Controller* ctrl)
 
 void MainWindow::onClosed()
 {
+	std::clog<<"Closed"<<std::endl;
 	Pt::Hmi::Application::instance().exit();
 }
 
