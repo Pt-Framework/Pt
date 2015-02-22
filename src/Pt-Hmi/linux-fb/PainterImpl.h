@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_HMI_IMAGEPAINTER_H
-#define PT_HMI_IMAGEPAINTER_H
+#ifndef PT_HMI_PAINTERIMPL_H
+#define PT_HMI_PAINTERIMPL_H
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/PaintSurface.h>
@@ -29,14 +29,14 @@
 namespace Pt {
 namespace Hmi {
 
-class ImagePaintSurface;
+class PaintSurface;
 
-class PT_HMI_API ImagePainter : public Pt::Hmi::Painter
+class PainterImpl
 {
 public:
-    ImagePainter(ImagePaintSurface& surface);
+    PainterImpl(PaintSurfaceImpl& surface);
 
-    virtual ~ImagePainter();
+    virtual ~PainterImpl();
    
 	virtual void setPen(const Gfx::Pen& pen);
 
@@ -88,12 +88,6 @@ public:
 
     virtual void addFontName(const std::string& fontName);
 
-private:
-	Pt::Gfx::Point fromUnit(const Pt::Gfx::PointF& value);
-    Pt::Gfx::Size fromUnit(const Pt::Gfx::SizeF& value);
-	Pt::Gfx::Rect fromUnit(const Pt::Gfx::RectF& value);
-
-	void fromUnit(const Pt::Gfx::PointF* points, size_t count, std::vector<Pt::Gfx::Point>& out);
 private:
 	Pt::Gfx::ImagePainter _painter;
 };

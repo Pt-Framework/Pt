@@ -17,161 +17,151 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include <Pt/Api.h>
-#include <Pt/Hmi/NativePainter.h>
-#include <Pt/Hmi/NativePaintSurface.h>
+#include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/PaintSurface.h>
 #include "PainterImpl.h"
 #include "PaintSurfaceImpl.h"
 
 namespace Pt {
 namespace Hmi {
 
-NativePainter::NativePainter(NativePaintSurface& surface)
+Painter::Painter(PaintSurface& surface)
 : _impl(new PainterImpl(surface.impl()))
 {	
 }
 
 
-NativePainter::~NativePainter()
+Painter::~Painter()
 {
 	delete _impl;
 }
 
-void NativePainter::setPen(const Gfx::Pen& pen)
+void Painter::setPen(const Gfx::Pen& pen)
 {
 	_impl->setPen(pen);
 }
 
-const Gfx::Pen& NativePainter::pen() const
+const Gfx::Pen& Painter::pen() const
 {
 	return _impl->pen();
 }
 
-void NativePainter::setBrush(const Gfx::Brush& brush)
+void Painter::setBrush(const Gfx::Brush& brush)
 {
 	_impl->setBrush(brush);
 }
 
-const Gfx::Brush& NativePainter::brush() const
+const Gfx::Brush& Painter::brush() const
 {
 	return _impl->brush();
 }
 
-void NativePainter::setFont(const Gfx::Font& font)
+void Painter::setFont(const Gfx::Font& font)
 {
 	_impl->setFont(font);
 }
 
-const Gfx::Font& NativePainter::font() const
+const Gfx::Font& Painter::font() const
 {
 	return _impl->font();
 }
 
-Gfx::FontMetrics NativePainter::fontMetrics() const
+Gfx::FontMetrics Painter::fontMetrics() const
 {
 	return _impl->fontMetrics();
 }
 
-Gfx::FontMetrics NativePainter::fontMetrics(Pt::String Text) const
+Gfx::FontMetrics Painter::fontMetrics(Pt::String Text) const
 {
 	return _impl->fontMetrics(Text);
 }
 
-const std::list<std::string>& NativePainter::fontFamilyNames()
+const std::list<std::string>& Painter::fontFamilyNames()
 {
 	return _impl->fontFamilyNames();
 }
 
-int NativePainter::depth() const
+int Painter::depth() const
 {
 	return _impl->depth();
 }
 
-void NativePainter::drawPixel(const Pt::Gfx::PointF& to)
+void Painter::drawPixel(const Pt::Gfx::PointF& to)
 {
 	_impl->drawPixel(to);
 }
 
-void NativePainter::drawLine(const Pt::Gfx::PointF& from, const Pt::Gfx::PointF& to)
+void Painter::drawLine(const Pt::Gfx::PointF& from, const Pt::Gfx::PointF& to)
 {
 	_impl->drawLine(from,to);
 }
 
-void NativePainter::drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline )
+void Painter::drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline )
 {
 	_impl->drawText( to,text, outline);
 }
 
-void NativePainter::drawText(const Pt::Gfx::PointF& to, const Pt::String& Text)
+void Painter::drawText(const Pt::Gfx::PointF& to, const Pt::String& Text)
 {
 	_impl->drawText(to, Text);
 }
 
-void NativePainter::drawRect(const Pt::Gfx::RectF& rectangle)
+void Painter::drawRect(const Pt::Gfx::RectF& rectangle)
 {
 	_impl->drawRect(rectangle);
 }
 
-void NativePainter::fillRect(const Pt::Gfx::RectF& rectangle)
+void Painter::fillRect(const Pt::Gfx::RectF& rectangle)
 {
 	_impl->fillRect(rectangle);
 }
 
-void NativePainter::drawEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size)
+void Painter::drawEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size)
 {
 	_impl->drawEllipse(topLeft, size);
 }
 
-void NativePainter::fillEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size)
+void Painter::fillEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size)
 {
 	_impl->fillEllipse(topLeft, size);
 }
 
-void NativePainter::drawPolyline(const Pt::Gfx::PointF* points, const size_t pointCount)
+void Painter::drawPolyline(const Pt::Gfx::PointF* points, const size_t pointCount)
 {
 	_impl->drawPolyline(points, pointCount);
 }
 
-void NativePainter::fillPolygon(const Pt::Gfx::PointF* points, const size_t pointCount)
+void Painter::fillPolygon(const Pt::Gfx::PointF* points, const size_t pointCount)
 {
 	_impl->fillPolygon(points, pointCount);
 }
 
-void NativePainter::drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm, const Pt::Gfx::Region& pmRegion)
+void Painter::drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm, const Pt::Gfx::Region& pmRegion)
 {
-	NativePaintSurface* surface = dynamic_cast<NativePaintSurface*>(&pm);
-	
-	if( surface != 0)
-		_impl->drawSurface(to, pm, pmRegion);
-	else
-		drawImage(to, pm.toImage(), pmRegion);
+	_impl->drawSurface(to, pm, pmRegion);
 }
 
-void NativePainter::drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm)
+void Painter::drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm)
 {
-	NativePaintSurface* surface = dynamic_cast<NativePaintSurface*>(&pm);
-	
-	if( surface != 0)
-		_impl->drawSurface(to, pm);
-	else
-		drawImage(to, pm.toImage());
+	_impl->drawSurface(to, pm);
 }	
 	
-void NativePainter::drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image)
+void Painter::drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image)
 {
 	_impl->drawImage(to, image);
 }
 
-void NativePainter::drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion)
+void Painter::drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion)
 {
 	_impl->drawImage(to, image, imageRegion);
 }
 
-void NativePainter::addFontName(const std::string& fontName)
+void Painter::addFontName(const std::string& fontName)
 {
 	_impl->addFontName(fontName);
 }
 
-void NativePainter::setSurface(NativePaintSurface& surface)
+void Painter::setSurface(PaintSurface& surface)
 {    
     _impl->setSurface(surface);
 }

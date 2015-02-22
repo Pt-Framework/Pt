@@ -47,7 +47,7 @@ DrawWideDashPolyline::DrawWideDashPolyline()
 DrawWideDashPolyline::~DrawWideDashPolyline()
 { }
 
-void DrawWideDashPolyline::draw( ARgbImage& image, const Pen& pen, const  Gfx::Point* pPts, size_t npt )
+void DrawWideDashPolyline::draw( ARgbImage& image, const Pen& pen, const  Gfx::PointF* pPts, size_t npt )
 {
     int	      x1, y1, x2, y2;
     int	      dashNum;					// Absolute number of dash, starts with 0

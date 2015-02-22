@@ -21,74 +21,77 @@
 #define PT_HMI_PAINTER_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/PaintSurface.h>
-
-#include <Pt/Gfx/Painter.h>
+#include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/Painter.h>
 
 namespace Pt {
 namespace Hmi {
 
-class PT_HMI_API Painter
+class PainterImpl;
+class PaintSurface;
+
+class PT_HMI_API Painter : public Pt::Gfx::Painter
 {
 public:
-    virtual ~Painter()
-	{
-	}
+	Painter(PaintSurface& surface);
 
-    virtual void setPen(const Gfx::Pen& pen) = 0;
+    virtual ~Painter();
 
-    virtual const Gfx::Pen& pen() const= 0;
+    virtual void setPen(const Gfx::Pen& pen);
 
-    virtual void setBrush(const Gfx::Brush& brush)= 0;
+    virtual const Gfx::Pen& pen() const;
 
-    virtual const Gfx::Brush& brush() const= 0;
+    virtual void setBrush(const Gfx::Brush& brush);
 
-    virtual void setFont(const Gfx::Font& font)= 0;
+    virtual const Gfx::Brush& brush() const;
 
-    virtual const Gfx::Font& font() const= 0;
+    virtual void setFont(const Gfx::Font& font);
 
-    virtual Gfx::FontMetrics fontMetrics() const= 0;
+    virtual const Gfx::Font& font() const;
 
-    virtual Gfx::FontMetrics fontMetrics(Pt::String Text) const= 0;
+    virtual Gfx::FontMetrics fontMetrics() const;
 
-    virtual const std::list<std::string>& fontFamilyNames()= 0;
+    virtual Gfx::FontMetrics fontMetrics(Pt::String Text) const;
 
-    virtual int depth() const= 0;
+    virtual const std::list<std::string>& fontFamilyNames();
 
-    virtual void drawPixel(const Pt::Gfx::PointF& to)= 0;
+    virtual int depth() const;
 
-    virtual void drawLine(const Pt::Gfx::PointF& from, const Pt::Gfx::PointF& to)= 0;
+    virtual void drawPixel(const Pt::Gfx::PointF& to);
 
-	virtual void drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline )= 0;
+    virtual void drawLine(const Pt::Gfx::PointF& from, const Pt::Gfx::PointF& to);
 
-    virtual void drawText(const Pt::Gfx::PointF& to, const Pt::String& Text)= 0;
+	virtual void drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline );
 
-    virtual void drawRect(const Pt::Gfx::RectF& rectangle)= 0;
+    virtual void drawText(const Pt::Gfx::PointF& to, const Pt::String& Text);
 
-    virtual void fillRect(const Pt::Gfx::RectF& rectangle)= 0;
+    virtual void drawRect(const Pt::Gfx::RectF& rectangle);
 
-    virtual void drawEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size)= 0;
+    virtual void fillRect(const Pt::Gfx::RectF& rectangle);
 
-    virtual void fillEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size)= 0;
+    virtual void drawEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size);
 
-    virtual void drawPolyline(const Pt::Gfx::PointF* points, const size_t pointCount)= 0;
+    virtual void fillEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size);
 
-    virtual void fillPolygon(const Pt::Gfx::PointF* points, const size_t pointCount)= 0;
+    virtual void drawPolyline(const Pt::Gfx::PointF* points, const size_t pointCount);
 
-    virtual void drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm, const Pt::Gfx::Region& pmRegion)= 0;
+    virtual void fillPolygon(const Pt::Gfx::PointF* points, const size_t pointCount);
 
-    virtual void drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm)= 0;
+    virtual void drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm, const Pt::Gfx::Region& pmRegion);
+
+    virtual void drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm);
 		
-    virtual void drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image)= 0;
+    virtual void drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image);
 
-    virtual void drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion)= 0;    
+    virtual void drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion);      
 
-    virtual void addFontName(const std::string& fontName)= 0;
+    virtual void addFontName(const std::string& fontName);
 
-protected:
-	Painter()
-	{ }
+    void setSurface(PaintSurface& surface);
+
+private:
+	PainterImpl* _impl;
 };
 
 }}

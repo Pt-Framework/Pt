@@ -45,7 +45,16 @@ ViewImpl::ViewImpl()
 {
     _mouseEvent.buttons().resize(3);
     
-	//Window position tracking timer (Workaround until find a solution to obtain the window position change event
+	/* ToDO: Window position tracking timer. Use this:
+
+		NSWindowDidBecomeMainNotification 
+		NSWindowDidResignMainNotification 
+		NSWindowDidMoveNotification 
+		NSWindowDidResizeNotification
+
+		in create().
+	*/
+
     _timer.setActive(Application::instance().loop());
     _timer.timeout() += Pt::slot(*this, &ViewImpl::onPosition);
 
@@ -70,9 +79,7 @@ void ViewImpl::create()
 	[_window setReleasedWhenClosed: NO];
 	[_window setAcceptsMouseMovedEvents:YES];
     [_window setInitialFirstResponder: _view];
-	[_window setContentView: _view];
-
-    
+	[_window setContentView: _view];    
     
 	[_window makeKeyAndOrderFront:_window];
 	[_view setHidden:NO];

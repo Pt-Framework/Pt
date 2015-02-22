@@ -89,7 +89,7 @@ class DrawText
             @param text The text to draw
             @param background The background color of the font
         */
-        void draw( ARgbImage& image, const ARgbColor& color, const Gfx::Point& pos, const String& text, const ARgbColor* background = 0 );
+        void draw( ARgbImage& image, const ARgbColor& color, const Gfx::PointF& pos, const String& text, const ARgbColor* background = 0 );
 
     private:
         void drawGlyph( ARgbImage& image, const ARgbColor& color, int xpos, int ypos, int bmPitch, int height, int width, const unsigned char* buffer )

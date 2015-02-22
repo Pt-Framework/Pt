@@ -59,8 +59,8 @@ class ClipPolygon
 
             @see ClipPolygon::clip
         */
-        void operator() (std::vector<Pt::Gfx::Point>& in,
-                         const Pt::Gfx::Rect& clippingArea )
+        void operator() (std::vector<Pt::Gfx::PointF>& in,
+                         const Pt::Gfx::RectF& clippingArea )
         { this-> clip(in, clippingArea); }
 
         /** @brief Perform clipping
@@ -73,23 +73,23 @@ class ClipPolygon
             @param clippingArea Rectangle to clip against
 
         */
-        void clip( std::vector<Pt::Gfx::Point>& in,
-                   const Pt::Gfx::Rect& clippingArea );
+        void clip( std::vector<Pt::Gfx::PointF>& in,
+                   const Pt::Gfx::RectF& clippingArea );
 
     private:
         enum Orientation{Left, Right, Top, Bottom} ;
 
-        void clipEdge( const std::vector<Pt::Gfx::Point>& in,
-                       std::vector<Pt::Gfx::Point>& out,
-                       Pt::Gfx::Point edgePoint0, Pt::Gfx::Point edgePoint1);
+        void clipEdge( const std::vector<Pt::Gfx::PointF>& in,
+                       std::vector<Pt::Gfx::PointF>& out,
+                       Pt::Gfx::PointF edgePoint0, Pt::Gfx::PointF edgePoint1);
 
-        Pt::Gfx::Point intersect( const Pt::Gfx::Point& from,
-                                   const Pt::Gfx::Point& to,
-                                   const Pt::Gfx::Point& edge0,
-                                   Pt::Gfx::Point& edge1 );
+        Pt::Gfx::PointF intersect( const Pt::Gfx::PointF& from,
+                                   const Pt::Gfx::PointF& to,
+                                   const Pt::Gfx::PointF& edge0,
+                                   Pt::Gfx::PointF& edge1 );
 
-        bool inside( const Pt::Gfx::Point& p, const Pt::Gfx::Point& edge0,
-                     Pt::Gfx::Point& edge1 );
+        bool inside( const Pt::Gfx::PointF& p, const Pt::Gfx::PointF& edge0,
+                     Pt::Gfx::PointF& edge1 );
 };
 
 }

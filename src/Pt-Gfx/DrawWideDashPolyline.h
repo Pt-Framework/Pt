@@ -33,7 +33,7 @@ class DrawWideDashPolyline : public DrawWidePolyline
         DrawWideDashPolyline();
         ~DrawWideDashPolyline();
 
-        virtual void draw( ARgbImage& image, const Pen& pen, const  Gfx::Point* points, size_t pointCount );
+        virtual void draw( ARgbImage& image, const Pen& pen, const  Gfx::PointF* points, size_t pointCount );
 
     private:
         void dashSegment( ARgbImage& image, const Pen& pen, int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace, unsigned int* dash );

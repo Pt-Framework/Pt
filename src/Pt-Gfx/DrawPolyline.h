@@ -64,7 +64,7 @@ class DrawPolyline
             @param from Begin of the line
             @param end End of the line
         */
-        virtual void draw( ARgbImage& image, const Pen& pen, const  Gfx::Point* points, size_t pointCount ) = 0;
+        virtual void draw( ARgbImage& image, const Pen& pen, const  Gfx::PointF* points, size_t pointCount ) = 0;
 
         inline void setOutput( Stroke& d )
         { _stroke = &d; }

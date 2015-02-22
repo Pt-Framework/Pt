@@ -49,7 +49,7 @@ class DrawThickEllipse : public DrawEllipse
 
             @see DrawEllipse::draw
         */
-        virtual void draw( ARgbImage& image, const Pen& pen, const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size);
+        virtual void draw( ARgbImage& image, const Pen& pen, const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size);
 
     private:
         class EllipseSpan
@@ -72,7 +72,7 @@ class DrawThickEllipse : public DrawEllipse
 
         };
 
-        void fillEllipse(  const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size );
+        void fillEllipse(  const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size );
         void outputSpan( int x, int y, unsigned len );
 
         std::vector<EllipseSpan> _spans;

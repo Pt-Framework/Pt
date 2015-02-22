@@ -45,22 +45,22 @@ class DrawWideSolidPolyline : public DrawWidePolyline
 
             @see DrawLine::draw
         */
-        void draw( ARgbImage& image, const Pen& pen, const  Gfx::Point* points, size_t pointCount );
+        void draw( ARgbImage& image, const Pen& pen, const  Gfx::PointF* points, size_t pointCount );
 
 
     private:
         void drawDashSegment( ARgbImage& image, const Pen& pen,
-                                    Pt::Gfx::Point from, Pt::Gfx::Point to,
+                                    Pt::Gfx::PointF from, Pt::Gfx::PointF to,
                                     bool projectLeft, bool projectRight,
                                     LineFace* leftFace, LineFace* rightFace );
 
         void drawSegment(ARgbImage& image, const Pen& pen,
-                         Pt::Gfx::Point from, Pt::Gfx::Point to,
+                         Pt::Gfx::PointF from, Pt::Gfx::PointF to,
                          bool projectLeft, bool projectRight,
                          LineFace* leftFace, LineFace* rightFace);
 
-        void drawLine( ARgbImage& image, const Pen& pen, const  Gfx::Point* points, size_t pointCount );
-        void drawDashLine( ARgbImage& image, const Pen& pen, const  Gfx::Point* points, size_t pointCount );
+        void drawLine( ARgbImage& image, const Pen& pen, const  Gfx::PointF* points, size_t pointCount );
+        void drawDashLine( ARgbImage& image, const Pen& pen, const  Gfx::PointF* points, size_t pointCount );
 
 
 

@@ -121,6 +121,9 @@
     <Filter Include="Pt-Forms\demo\Widget">
       <UniqueIdentifier>{5ffb8738-a7de-47a7-921c-c6b942be0aef}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Hmi\linux-fb">
+      <UniqueIdentifier>{de9f056a-5dd9-4906-a742-a76566615868}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -864,9 +867,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\x11\X11Fd.h">
       <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\GfxOutputDeviceImpl.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\Dash.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
@@ -1245,12 +1245,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Event.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ImagePainter.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ImagePaintSurface.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1266,19 +1260,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Model.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\NativePainter.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\NativePaintSurface.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\OutputDevice.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\PanelController.h">
@@ -1437,6 +1419,27 @@
     <ClInclude Include="..\..\src\Pt-Hmi\x11\ViewImpl.h">
       <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ViewImpl.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\CursorImpl.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1537,9 +1540,6 @@
     <None Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.mm">
       <Filter>Pt-Hmi\cocoa</Filter>
     </None>
-    <None Include="..\..\src\Pt-Hmi\cocoa\GfxOutputDeviceImpl.mm">
-      <Filter>Pt-Hmi\cocoa</Filter>
-    </None>
     <None Include="..\..\src\Pt-Gfx\Jamfile">
       <Filter>Pt-Gfx</Filter>
     </None>
@@ -1593,6 +1593,9 @@
     </None>
     <None Include="..\..\src\Pt-Forms\demo\Scribble\Jamfile">
       <Filter>Pt-Forms\demo\Scribble</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Hmi\cocoa\ViewImpl.mm">
+      <Filter>Pt-Hmi\cocoa</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -2529,12 +2532,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\DialogRenderer.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\ImagePainter.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\ImagePaintSurface.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\KeyEvent.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
@@ -2548,12 +2545,6 @@
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Model.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\NativePainter.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\NativePaintSurface.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\PanelController.cpp">
@@ -2702,6 +2693,24 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\ViewImpl.cpp">
       <Filter>Pt-Hmi\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\CursorImpl.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

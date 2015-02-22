@@ -47,7 +47,7 @@ class DrawThinEllipse : public DrawEllipse
 
             @see DrawEllipse::draw
         */
-        virtual void draw( ARgbImage& image, const Pen& pen, const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size);
+        virtual void draw( ARgbImage& image, const Pen& pen, const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size);
 
     private:
         inline void outputPixel( ARgbImage& image, const Pen& pen, int x, int y )

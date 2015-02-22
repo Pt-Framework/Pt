@@ -57,7 +57,7 @@ class DrawEllipse
             @param topLeft Top-left point of the ellipse
             @param size Size of the ellipse
         */
-        virtual void draw( ARgbImage& image, const Pen& pen, const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size) = 0;
+        virtual void draw( ARgbImage& image, const Pen& pen, const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size) = 0;
 };
 
 }//namespace Gfx

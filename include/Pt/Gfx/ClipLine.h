@@ -60,7 +60,7 @@ class ClipLine
             @param ymin Minimum y to clip against
             @param ymax Maximum y to clip against
         */
-        bool clip( Gfx::Point& from, Gfx::Point& to,
+        bool clip( Gfx::PointF& from, Gfx::PointF& to,
                    Pt::ssize_t xmin, Pt::ssize_t xmax,
                    Pt::ssize_t ymin, Pt::ssize_t ymax )
         { return this->operator()(from, to, xmin, xmax, ymin, ymax); }
@@ -69,7 +69,7 @@ class ClipLine
 
             @see ClipLine::clip
         */
-        bool operator()( Gfx::Point& from, Gfx::Point& to,
+        bool operator()( Gfx::PointF& from, Gfx::PointF& to,
                          Pt::ssize_t xmin, Pt::ssize_t xmax,
                          Pt::ssize_t ymin, Pt::ssize_t ymax )
         {

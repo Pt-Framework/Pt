@@ -60,10 +60,10 @@ class DrawWidePolyline : public DrawPolyline
         int roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, bool *leftEdge );
 
         //miLineArcI
-        int lineArcI( const Pen& pen, int xorg, int yorg, std::vector<Pt::Gfx::Point>& points, std::vector<size_t>& widths);
+        int lineArcI( const Pen& pen, int xorg, int yorg, std::vector<Pt::Gfx::PointF>& points, std::vector<size_t>& widths);
 
         //miLineArcD
-        int lineArcD( const Pen & pen, double xorg, double yorg, std::vector<Pt::Gfx::Point>& points, std::vector<size_t>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2);
+        int lineArcD( const Pen & pen, double xorg, double yorg, std::vector<Pt::Gfx::PointF>& points, std::vector<size_t>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2);
 
         //miRoundJoinFace
         int roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftEdge );

@@ -354,7 +354,7 @@ void DrawWidePolyline::roundJoinClip (LineFace *pLeft, LineFace *pRight, LineEdg
 
 void DrawWidePolyline::lineArc( ARgbImage& image, const Pen& pen, LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt)
 {
-    std::vector<Pt::Gfx::Point>    points;
+    std::vector<Pt::Gfx::PointF>    points;
     std::vector<size_t>             widths;
 
     int      xorgi = 0;
@@ -423,9 +423,9 @@ void DrawWidePolyline::lineArc( ARgbImage& image, const Pen& pen, LineFace *left
         _stroke->stroke( image, pen, points[i].x(), points[i].y(), widths[i] );
 }
 
-int DrawWidePolyline::lineArcI (const Pen& pen, int xorg, int yorg, std::vector<Pt::Gfx::Point>& points, std::vector<size_t>& widths)
+int DrawWidePolyline::lineArcI (const Pen& pen, int xorg, int yorg, std::vector<Pt::Gfx::PointF>& points, std::vector<size_t>& widths)
 {
-    Pt::Gfx::Point *tpts, *bpts;
+    Pt::Gfx::PointF *tpts, *bpts;
     size_t* twids, *bwids;
     int x, y, e, ex;
     int slw;
@@ -494,9 +494,9 @@ int DrawWidePolyline::lineArcI (const Pen& pen, int xorg, int yorg, std::vector<
    round joins, respectively (it respectively yields a half-disk or a pie
    wedge).  Floating point coordinates are used.  Returns number of spans
    in the Spans.  The clipping edges may be modified. */
-int DrawWidePolyline::lineArcD( const Pen & pen, double xorg, double yorg, std::vector<Pt::Gfx::Point>& points, std::vector<size_t>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2)
+int DrawWidePolyline::lineArcD( const Pen & pen, double xorg, double yorg, std::vector<Pt::Gfx::PointF>& points, std::vector<size_t>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2)
 {
-    Pt::Gfx::Point *pts;
+    Pt::Gfx::PointF *pts;
     size_t *wids;
     double radius, x0, y0, el, er, yk, xlk, xrk, k;
     int xbase, ybase, y, boty, xl, xr, xcl, xcr;

@@ -48,7 +48,7 @@ DrawThinPolyline::DrawThinPolyline()
 DrawThinPolyline::~DrawThinPolyline()
 { }
 
-void DrawThinPolyline::draw( ARgbImage& image, const Pen& pen, const Gfx::Point* points,  size_t pointCount )
+void DrawThinPolyline::draw( ARgbImage& image, const Pen& pen, const Gfx::PointF* points,  size_t pointCount )
 {
     switch( pen.style() )
     {
@@ -67,12 +67,12 @@ void DrawThinPolyline::draw( ARgbImage& image, const Pen& pen, const Gfx::Point*
 }
 
 
-void DrawThinPolyline::drawDash( ARgbImage& image, const Pen& pen, const Gfx::Point* points,  size_t pointCount)
+void DrawThinPolyline::drawDash( ARgbImage& image, const Pen& pen, const Gfx::PointF* points,  size_t pointCount)
 {
     if (points <= 0)
         return;
 
-    const Gfx::Point* ppt = points;
+    const Gfx::PointF* ppt = points;
     int xstart, ystart;
     int x1, x2, y1, y2;
 
@@ -178,8 +178,8 @@ void DrawThinPolyline::drawDash( ARgbImage& image, const Pen& pen, const Gfx::Po
 // Endpoint semantics are used.
 void DrawThinPolyline::bresenhamDasheLineSegment(ARgbImage& image, const Pen& pen, int *pdashNum, int *pdashIndex, const unsigned int *pDash, int numInDashList, int *pdashOffset, bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len)
 {
-    std::vector<Gfx::Point>  ptInit_bg;
-    Gfx::Point *pptLast_fg,  *pptLast_bg = 0;
+    std::vector<Gfx::PointF>  ptInit_bg;
+    Gfx::PointF *pptLast_fg,  *pptLast_bg = 0;
     std::vector<unsigned int>  widthInit_bg;
     unsigned int *pwidthLast_fg, *pwidthLast_bg = 0;
     int		x, y;
@@ -193,12 +193,12 @@ void DrawThinPolyline::bresenhamDasheLineSegment(ARgbImage& image, const Pen& pe
     int numSpans_fg, numSpans_bg = 0;
     int ycurr_fg, ycurr_bg = 0;
 
-    Gfx::Point *ppt_fg, *ppt_bg = 0;
+    Gfx::PointF *ppt_fg, *ppt_bg = 0;
     unsigned int *pwidth_fg, *pwidth_bg = 0;
     bool firstspan_fg, firstspan_bg = false;
 
     // Set up work arrays
-    std::vector<Gfx::Point> ptInit_fg(len);
+    std::vector<Gfx::PointF> ptInit_fg(len);
     std::vector<unsigned int> widthInit_fg(len);
 
     pptLast_fg = &ptInit_fg[len - 1];
@@ -377,7 +377,7 @@ void DrawThinPolyline::bresenhamDasheLineSegment(ARgbImage& image, const Pen& pe
 
         if (numSpans_fg > 0)
         { // Have a foreground dash to paint.
-            Gfx::Point *pptStart_fg;
+            Gfx::PointF *pptStart_fg;
             unsigned int *pwidthStart_fg;
 
             if (signdy >= 0)
@@ -407,7 +407,7 @@ void DrawThinPolyline::bresenhamDasheLineSegment(ARgbImage& image, const Pen& pe
         if (isDoubleDash && numSpans_bg > 0)
         {// Have a background dash to paint.
 
-            Gfx::Point *pptStart_bg;
+            Gfx::PointF *pptStart_bg;
             unsigned int *pwidthStart_bg;
 
             if (signdy >= 0)
@@ -450,9 +450,9 @@ void DrawThinPolyline::bresenhamDasheLineSegment(ARgbImage& image, const Pen& pe
     *pdashOffset = (int)(pDash[dashIndex]) - dashRemaining;
 }
 
-void DrawThinPolyline::drawSolid( ARgbImage& image, const Pen& pen, const Gfx::Point* points,  size_t pointCount)
+void DrawThinPolyline::drawSolid( ARgbImage& image, const Pen& pen, const Gfx::PointF* points,  size_t pointCount)
 {
-    const Gfx::Point *ppt;
+    const Gfx::PointF *ppt;
 
     int xstart;
     int ystart;
@@ -569,17 +569,17 @@ void DrawThinPolyline::bresenhamLineSegment(ARgbImage& image, const Pen& pen, in
     if (len == 0)
         return;
 
-    std::vector<Gfx::Point> ptInit(len);
+    std::vector<Gfx::PointF> ptInit(len);
     std::vector<unsigned int> widthInit(len);
 
-    Gfx::Point* pptLast     = &ptInit[len - 1];
+    Gfx::PointF* pptLast     = &ptInit[len - 1];
     unsigned int *pwidthLast = &widthInit[len - 1];
 
     int x, y;
     int e3;
     int numSpans = 0;
     int ycurr = 0;
-    Gfx::Point  *ppt = pptLast;
+    Gfx::PointF  *ppt = pptLast;
     unsigned int *pwidth = pwidthLast;
     bool firstspan = true;
 
@@ -633,8 +633,8 @@ void DrawThinPolyline::bresenhamLineSegment(ARgbImage& image, const Pen& pen, in
     {
         if (signdy < 0)
         {// Spans are offset, so shift downward.
-            Gfx::Point *ppt_src	 = pptLast - (numSpans - 1);
-            Gfx::Point *ppt_dst	 = &ptInit[0];
+            Gfx::PointF *ppt_src	 = pptLast - (numSpans - 1);
+            Gfx::PointF *ppt_dst	 = &ptInit[0];
             unsigned int *pwidth_src = pwidthLast - (numSpans - 1);
             unsigned int *pwidth_dst = &widthInit[0];
 

@@ -44,16 +44,16 @@ class DrawThinPolyline : public DrawPolyline
 
             @see DrawLine::draw
         */
-        void draw( ARgbImage& image, const Pen& pen, const  Gfx::Point* points, size_t pointCount );
+        void draw( ARgbImage& image, const Pen& pen, const  Gfx::PointF* points, size_t pointCount );
 
     private:
         void bresenhamLineSegment(ARgbImage& image, const Pen& pen, int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len);
         void bresenhamDasheLineSegment(ARgbImage& image, const Pen& pen, int *pdashNum, int *pdashIndex, const unsigned int *pDash, int numInDashList, int *pdashOffset, bool isDoubleDash, int signdx, int signdy,
                                        int axis, int x1, int y1, int e, int e1, int e2, int len);
 
-        void drawLine( ARgbImage& image, const Pen& pen, const Gfx::Point& from, const Gfx::Point& to );
-        void drawSolid( ARgbImage& image, const Pen& pen, const Gfx::Point* points,  size_t pointCount );
-        void drawDash( ARgbImage& image, const Pen& pen, const Gfx::Point* points,  size_t pointCount);
+        void drawLine( ARgbImage& image, const Pen& pen, const Gfx::PointF& from, const Gfx::PointF& to );
+        void drawSolid( ARgbImage& image, const Pen& pen, const Gfx::PointF* points,  size_t pointCount );
+        void drawDash( ARgbImage& image, const Pen& pen, const Gfx::PointF* points,  size_t pointCount);
 
         inline void outputSpan(ARgbImage& image, const Pen& pen, size_t x, size_t y, size_t length )
         {
@@ -77,7 +77,7 @@ class DrawThinPolyline : public DrawPolyline
             }
         }
 
-        inline void addPoint(int xx, int yy, Gfx::Point** ppt, unsigned int** pwidth, int& numSpans, int& ycurr, bool& firstspan, int signdy)
+        inline void addPoint(int xx, int yy, Gfx::PointF** ppt, unsigned int** pwidth, int& numSpans, int& ycurr, bool& firstspan, int signdy)
         {
             if (!firstspan && yy == ycurr)
             {

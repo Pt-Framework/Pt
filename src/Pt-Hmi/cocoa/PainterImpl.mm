@@ -225,8 +225,7 @@ void PainterImpl::drawText( const Gfx::PointF& to, const Pt::String& text, const
 }
     
 void PainterImpl::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
-{
-    
+{    
     CGContextMoveToPoint(_surface->context(), points[0].x(), points[0].y());
     
     for( size_t i = 1; i < pointCount; ++i)

@@ -93,7 +93,6 @@ public:
 	Property<bool>					AcceptFocus;
     Property<bool>					HighLight;
 	Property<std::string>			FocusedActionKey;
-	Property<PainterType::Type>     PainterSurfaceType;
 	Property<std::string>			Caption;		
 	Property<bool>					UseMnemonic;	
 
@@ -126,9 +125,6 @@ protected:
 
 protected:
 	PaintSurface* _paintSurface;
-
-private:
-	void onPainterTypeChanged(const Property<PainterType::Type>& prop);
 
 public:
 	std::string getMnemonicKey() const;

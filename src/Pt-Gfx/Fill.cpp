@@ -42,7 +42,7 @@ namespace Pt {
 namespace Gfx {
 
 void FillTexture::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                        const Gfx::Point& origin,
+                        const Gfx::PointF& origin,
                         ssize_t xpos, ssize_t ypos, size_t length )
 {
     const Pt::Gfx::ARgbImage& texture = brush.texture();
@@ -50,10 +50,10 @@ void FillTexture::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
     while(length)
     {
         // x position in the texture to copy from
-        const size_t textureXPos = ( xpos - origin.x() ) % texture.width();
+        const size_t textureXPos = (int)( xpos - origin.x() ) % texture.width();
 
         // determine the scanline of the texture to copy from
-        const size_t textureYPos = ( ypos-origin.y() ) % texture.height();
+        const size_t textureYPos = (int) ( ypos-origin.y() ) % texture.height();
 
         // number of pixels to copy from texture
         const size_t fillLength = std::min( length, texture.width() - textureXPos );
@@ -74,7 +74,7 @@ void FillTexture::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
 
 
 void FillSolid::fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                      const Gfx::Point& origin,
+                      const Gfx::PointF& origin,
                       ssize_t xpos, ssize_t ypos, size_t length )
 {
     const Pt::Gfx::ARgbImage& texture = brush.texture();

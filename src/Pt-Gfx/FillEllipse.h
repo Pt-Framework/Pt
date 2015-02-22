@@ -70,11 +70,11 @@ class FillEllipse
             @param topLeft Top-left point of the ellipse
             @param size Size of the ellipse
         */
-        void draw( ARgbImage& image, const Brush& brush, const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size );
+        void draw( ARgbImage& image, const Brush& brush, const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size );
 
     private:
         Fill* _fill;
-        void outputSpan( ARgbImage& image, const Brush& brush, const Pt::Gfx::Point& topLeft, int x, int y, int width );
+        void outputSpan( ARgbImage& image, const Brush& brush, const Pt::Gfx::PointF& topLeft, int x, int y, int width );
 };
 
 }

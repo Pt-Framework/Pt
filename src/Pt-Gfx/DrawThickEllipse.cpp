@@ -45,7 +45,7 @@ void DrawThickEllipse::outputSpan( int x, int y, unsigned len )
 
 }
 
-void DrawThickEllipse::fillEllipse(  const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size )
+void DrawThickEllipse::fillEllipse(  const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size )
 {
      /* e(x,y) = b^2*x^2 + a^2*y^2 - a^2*b^2 */
     const int       a      = size.width() /2;
@@ -114,7 +114,7 @@ void DrawThickEllipse::fillEllipse(  const Pt::Gfx::Point& topLeft, const Pt::Gf
         outputSpan(xc-a, yc, 2*a );
 }
 
-void DrawThickEllipse::draw( ARgbImage& image, const Pen& pen, const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size )
+void DrawThickEllipse::draw( ARgbImage& image, const Pen& pen, const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size )
 {
 //    _outterEllispe.clear();
 //    _innerEllispe.clear();

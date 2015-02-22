@@ -58,7 +58,7 @@ class PT_GFX_API Fill
             @param length number of pixels to fill
         */
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                            const Gfx::Point& origin,
+                            const Gfx::PointF& origin,
                             ssize_t xpos, ssize_t ypos, size_t length ) = 0;
 
 
@@ -80,7 +80,7 @@ class PT_GFX_API FillTexture : public Fill
             to this function.
         */
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                           const Gfx::Point& origin,
+                           const Gfx::PointF& origin,
                            ssize_t xpos, ssize_t ypos, size_t length );
 };
 
@@ -97,7 +97,7 @@ class PT_GFX_API FillSolid : public Fill
         /** @sa Fill::fill
         */
         virtual void fill( Pt::Gfx::ARgbImage& image, const Brush& brush,
-                           const Gfx::Point& origin,
+                           const Gfx::PointF& origin,
                            ssize_t xpos, ssize_t ypos, size_t length );
 };
 

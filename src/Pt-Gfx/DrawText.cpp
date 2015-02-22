@@ -185,7 +185,7 @@ FontMetrics DrawText::fontMetrics( const String& text )
 }
 
 
-void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Gfx::Point& pos, const String& text, const ARgbColor* backGround )
+void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Gfx::PointF& pos, const String& text, const ARgbColor* backGround )
 {
     FT_Vector            glyphPos;
     FT_Vector            delta;
@@ -210,8 +210,8 @@ void DrawText::draw( ARgbImage& image, const ARgbColor& color, const Gfx::Point&
 
     FTC_Manager_LookupFace( _manager, faceId(), &face );
 
-    glyphPos.x = pos.x() << 16;
-    glyphPos.y = pos.y() << 16;
+    glyphPos.x = (int) pos.x() << 16;
+    glyphPos.y = (int) pos.y() << 16;
 
     for( String::const_iterator it = text.begin(); it != text.end(); ++it )
     {

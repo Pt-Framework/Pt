@@ -3,7 +3,6 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/ImagePainter.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Gfx/Painter.h>
@@ -11,11 +10,11 @@
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API ImagePaintSurface : public PaintSurface
+class PaintSurfaceImpl
 {
 public:		
-	ImagePaintSurface(const Pt::Gfx::SizeF& size);
-	virtual ~ImagePaintSurface();
+	PaintSurfaceImpl(const Pt::Gfx::SizeF& size);
+	virtual ~PaintSurfaceImpl();
 
 	virtual Pt::Gfx::ARgbImage toImage() const
 	{
@@ -37,7 +36,7 @@ public:
 
 private:
 	Pt::Gfx::ARgbImage _image;
-	ImagePainter _painter;
+	Hmi::Painter _painter;
 };
 
 }}

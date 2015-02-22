@@ -47,7 +47,7 @@ FillEllipse::~FillEllipse()
 { }
 
 
-void FillEllipse::outputSpan( ARgbImage& image, const Brush& brush, const Pt::Gfx::Point& topLeft, int x, int y, int width )
+void FillEllipse::outputSpan( ARgbImage& image, const Brush& brush, const Pt::Gfx::PointF& topLeft, int x, int y, int width )
 {
     const int imageWidth = static_cast<int>( image.width() );
     const int imageHeight = static_cast<int>( image.height() );
@@ -66,7 +66,7 @@ void FillEllipse::outputSpan( ARgbImage& image, const Brush& brush, const Pt::Gf
 }
 
 
-void FillEllipse::draw( ARgbImage& image, const Brush& brush, const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size )
+void FillEllipse::draw( ARgbImage& image, const Brush& brush, const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size )
 {
 
     if( size.width() == 0 || size.height() == 0 )
@@ -79,10 +79,10 @@ void FillEllipse::draw( ARgbImage& image, const Brush& brush, const Pt::Gfx::Poi
     int errorx = 1;
     int errory = 1;
 
-    if( size.width()%2 != 0 )
+    if( (int)size.width()%2 != 0 )
         errorx  =  0;
 
-    if( size.height()%2 != 0)
+    if( (int) size.height()%2 != 0)
         errory  = 0;
 
     const int       a      = size.width() /2;

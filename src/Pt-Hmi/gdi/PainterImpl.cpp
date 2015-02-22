@@ -37,7 +37,7 @@
 #include "Pt/Gfx/Rgb888Color.h"
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/NativePaintSurface.h>
+#include <Pt/Hmi/PaintSurface.h>
 #include <iostream>
 #include <algorithm>
 
@@ -66,9 +66,7 @@ void PainterImpl::drawText( const Gfx::PointF& to, const Pt::String& text, const
 void PainterImpl::setPen(const Gfx::Pen& pen)
 {
     if (pen == _pen) 
-	{
         return;
-    }
 
     _pen = pen;
     updatePen();
@@ -171,10 +169,11 @@ void PainterImpl::updateBrush()
             break;
         }
 
-        case Gfx::Brush::TextureFill: {
+        case Gfx::Brush::TextureFill: 
+		{
             const Gfx::ARgbImage& texture = _brush.texture();
 
-            if (!texture.empty())
+            if (texture.empty())
             {
                 // Convert our generic format to a 32 bit image format which Windows can understand.
                 Gfx::Rgb888Image rgb32Image(_brush.texture().width(), _brush.texture().height());
@@ -212,14 +211,13 @@ void PainterImpl::updateBrush()
             {
                 // Use the empty brush for empty textures.
                 newBrushHandle = (HBRUSH)GetStockObject(NULL_BRUSH);
-            }
-
-            break;
+            }            
         }
+		break;
 
         default:
             // TODO Throw runtime exception in case we do not check for every possible value of Brush::FillStyle?
-            return;
+	    return;
     }
 
     HBRUSH oldBrushHandle = (HBRUSH)SelectObject(_surface->deviceContext(), newBrushHandle);
@@ -236,9 +234,7 @@ const Gfx::Brush& PainterImpl::brush() const
 void PainterImpl::setFont(const Gfx::Font& font)
 {
     if (font == _font) 
-	{
         return;
-    }
 
     _font = font;
     updateFont();
@@ -256,12 +252,12 @@ void PainterImpl::updateFont()
         case Gfx::Font::NormalStyle:
         case Gfx::Font::ItalicStyle:
             fontWeight = FW_NORMAL;
-            break;
+        break;
 
         case Gfx::Font::BoldStyle:
         case Gfx::Font::BoldItalicStyle:
             fontWeight = FW_BOLD;
-            break;
+        break;
     }
 
     BYTE italic = (_font.fontStyle() == Gfx::Font::ItalicStyle || _font.fontStyle() == Gfx::Font::BoldItalicStyle);
@@ -552,33 +548,23 @@ void PainterImpl::fillPolygon(const Pt::Gfx::PointF* points, const size_t pointC
 
 void PainterImpl::drawSurface(const Pt::Gfx::PointF& toF, PaintSurface& surface, const  Pt::Gfx::Region& pixmapRegion)
 {
-	NativePaintSurface* nativeSurface = dynamic_cast<NativePaintSurface*>(&surface);
 
 	Pt::Gfx::Point to = Application::instance().fromUnit(toF);
 
     // Copy contents from the source bitmap to the destination (=new) bitmap.
-    BitBlt(
-        _surface->deviceContext(),
-        to.x(),    to.y(),
-        pixmapRegion.width(), pixmapRegion.height(),
-        nativeSurface->impl()->deviceContext(),
-        pixmapRegion.x(), pixmapRegion.y(),
-        SRCCOPY
-    );
+    BitBlt( _surface->deviceContext(), to.x(), to.y(), pixmapRegion.width(), pixmapRegion.height(),
+            surface.impl()->deviceContext(), pixmapRegion.x(), pixmapRegion.y(), SRCCOPY );
 
 }
 
 void PainterImpl::drawSurface(const Pt::Gfx::PointF& toF, PaintSurface& surface)
 {
-	NativePaintSurface* nativeSurface = dynamic_cast<NativePaintSurface*>(&surface);
-	
-	if(nativeSurface == 0)
-		throw std::exception();
 
 	Pt::Gfx::Point to = Application::instance().fromUnit(toF);
 	Pt::Gfx::Size size = Application::instance().fromUnit(surface.size());
 
-    BitBlt( _surface->deviceContext(), to.x(), to.y(), size.width(), size.height(), nativeSurface->impl()->deviceContext(),  0, 0, SRCCOPY);
+    BitBlt( _surface->deviceContext(), to.x(), to.y(), size.width(), size.height(), surface.impl()->deviceContext(),  
+	        0, 0, SRCCOPY);
 }
 
 void PainterImpl::drawImage(const Pt::Gfx::PointF& toF, const Gfx::ARgbImage& image)
@@ -630,7 +616,8 @@ void PainterImpl::drawCompatibleImage(size_t x, size_t y, size_t depth, const ch
 {
     HBITMAP bitmap = CreateBitmap(width, height, 1, depth, (VOID*)data);
 
-    if (bitmap == NULL) {
+    if (bitmap == NULL) 
+	{
         drawIndependentImage(x, y, data, width, height);
         return;
     }
@@ -645,7 +632,7 @@ void PainterImpl::drawCompatibleImage(size_t x, size_t y, size_t depth, const ch
 }
 
 
-void PainterImpl::setSurface(NativePaintSurface& surface)
+void PainterImpl::setSurface(PaintSurface& surface)
 {
 	_surface = surface.impl();
 	updateBrush();

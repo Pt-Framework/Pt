@@ -198,43 +198,44 @@ const std::list<std::string>& ImagePainter::fontFamilyNames()
     return empty;
 }
 
-void ImagePainter::drawPixel(const  Gfx::Point& to)
+void ImagePainter::drawPixel(const  Gfx::PointF& to)
 {
     _image.pixel( to.x(), to.y()) = _pen.color();
 }
 
-void ImagePainter::drawLine(const Gfx::Point& from, const  Gfx::Point& to)
+void ImagePainter::drawLine(const Gfx::PointF& from, const  Gfx::PointF& to)
 {
     if( _pen.size()  == 0 )
         return;
 
-    const Pt::Gfx::Point points[] = { from, to };
+    const Pt::Gfx::PointF points[] = { from ,  to  };
+
     _drawPolyline->draw(_image, _pen, points, 2);
 }
 
-void ImagePainter::drawText( const Gfx::Point& to, const String& text, const Pt::Gfx::ARgbColor* outline )
+void ImagePainter::drawText( const Gfx::PointF& to, const String& text, const Pt::Gfx::ARgbColor* outline )
 {
-    _drawText->draw( _image, _pen.color(),  to, text, outline );
+    _drawText->draw( _image, _pen.color(), to , text, outline );
 }
 
-void ImagePainter::drawRect(const  Gfx::Rect& rect)
+void ImagePainter::drawRect(const  Gfx::RectF& rect)
 {
     
     this->drawLine(rect.topLeft(), rect.topRight() );
 
-    this->drawLine(Pt::Gfx::Point( rect.topRight().x(), rect.topRight().y()),
-                   Pt::Gfx::Point( rect.bottomRight().x(), rect.bottomRight().y()) );
+    this->drawLine(Pt::Gfx::PointF( rect.topRight().x(), rect.topRight().y()),
+                   Pt::Gfx::PointF( rect.bottomRight().x(), rect.bottomRight().y()) );
 
-    this->drawLine(Pt::Gfx::Point( rect.bottomRight().x(), rect.bottomRight().y() ),
-                   Pt::Gfx::Point( rect.bottomLeft().x(), rect.bottomLeft().y() ) );
+    this->drawLine(Pt::Gfx::PointF( rect.bottomRight().x(), rect.bottomRight().y() ),
+                   Pt::Gfx::PointF( rect.bottomLeft().x(), rect.bottomLeft().y() ) );
 
-    this->drawLine(Pt::Gfx::Point( rect.bottomLeft().x(), rect.bottomLeft().y() ),
+    this->drawLine(Pt::Gfx::PointF( rect.bottomLeft().x(), rect.bottomLeft().y() ),
                    rect.topLeft() );
 }
 
-void ImagePainter::fillRect(const  Gfx::Rect& rect)
+void ImagePainter::fillRect(const  Gfx::RectF& rect)
 {
-    std::vector<Pt::Gfx::Point> points(4);
+    std::vector<Pt::Gfx::PointF> points(4);
     points[0] = rect.topLeft();
     points[1] = rect.topRight();
     points[2] = rect.bottomRight();
@@ -242,30 +243,30 @@ void ImagePainter::fillRect(const  Gfx::Rect& rect)
     this->fillPolygon( &points[0], points.size() );
 }
 
-void ImagePainter::drawEllipse( const  Gfx::Point& topLeft, const  Gfx::Size& size )
+void ImagePainter::drawEllipse( const  Gfx::PointF& topLeft, const  Gfx::SizeF& size )
 {
-    _drawEllipse->draw( _image, _pen, topLeft, size );
+    _drawEllipse->draw( _image, _pen,  topLeft , size );
 }
 
-void ImagePainter::fillEllipse( const  Gfx::Point& topLeft, const  Gfx::Size& size )
+void ImagePainter::fillEllipse( const  Gfx::PointF& topLeft, const  Gfx::SizeF& size )
 {
     _fillEllipse->draw( _image, _brush, topLeft, size );
 }
 
-void ImagePainter::drawPolyline( const  Gfx::Point* points, const size_t pointCount )
+void ImagePainter::drawPolyline( const  Gfx::PointF* points, const size_t pointCount )
 {
     if( _pen.size()  == 0 )
-        return;
-
+        return;	
+	
     _drawPolyline->draw( _image, _pen, points, pointCount );
 }
 
-void ImagePainter::fillPolygon( const  Gfx::Point* points, const size_t pointCount )
+void ImagePainter::fillPolygon( const  Gfx::PointF* points, const size_t pointCount )
 {
     _fillPolygon->draw( _image, _brush, points, pointCount );
 }
 
-void ImagePainter::drawImage( const  Gfx::Point& to, const ARgbImage& image )
+void ImagePainter::drawImage( const  Gfx::PointF& to, const ARgbImage& image )
 {
     Pt::ssize_t startX =  to.x();
     Pt::ssize_t stopX =  to.x() + image.width();
@@ -307,7 +308,7 @@ void ImagePainter::drawImage( const  Gfx::Point& to, const ARgbImage& image )
     }
 }
 
-void ImagePainter::drawImage( const  Gfx::Point& to, const ARgbImage& image, const Region& imageRegion )
+void ImagePainter::drawImage( const  Gfx::PointF& to, const ARgbImage& image, const Region& imageRegion )
 {
 }
 

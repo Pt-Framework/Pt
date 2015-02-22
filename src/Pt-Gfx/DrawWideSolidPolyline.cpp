@@ -43,7 +43,7 @@ DrawWideSolidPolyline::DrawWideSolidPolyline()
 DrawWideSolidPolyline::~DrawWideSolidPolyline()
 { }
 
-void DrawWideSolidPolyline::draw( ARgbImage& image, const Pen& pen,const Point* pPts, size_t npt)
+void DrawWideSolidPolyline::draw( ARgbImage& image, const Pen& pen,const PointF* pPts, size_t npt)
 {
     int		   x1, y1, x2, y2;
     bool	   projectLeft, projectRight;
@@ -92,7 +92,7 @@ void DrawWideSolidPolyline::draw( ARgbImage& image, const Pen& pen,const Point* 
                 projectRight = true;
 
             // Draw segment (pixel=1), returning faces.
-            drawSegment( image, pen, Point(x1, y1), Point(x2, y2), projectLeft, projectRight, &leftFace, &rightFace );
+            drawSegment( image, pen, PointF(x1, y1), PointF(x2, y2), projectLeft, projectRight, &leftFace, &rightFace );
 
             if (first)
             { //First line segment, draw round cap if needed.
@@ -134,7 +134,7 @@ void DrawWideSolidPolyline::draw( ARgbImage& image, const Pen& pen,const Point* 
     {
         projectLeft = (pen.capStyle() == Pen::ProjectingCap );
 
-        drawSegment( image, pen, Point(x2, y2), Point(x2, y2), projectLeft, projectRight, &leftFace, &rightFace );
+        drawSegment( image, pen, PointF(x2, y2), PointF(x2, y2), projectLeft, projectRight, &leftFace, &rightFace );
 
         if( pen.capStyle() == Pen::RoundCap || pen.capStyle() == Pen::TriangularCap)
         {
@@ -148,7 +148,7 @@ void DrawWideSolidPolyline::draw( ARgbImage& image, const Pen& pen,const Point* 
     }
 }
 
-void DrawWideSolidPolyline::drawSegment( ARgbImage& image, const Pen& pen, Point from, Point to, bool projectLeft, bool projectRight,
+void DrawWideSolidPolyline::drawSegment( ARgbImage& image, const Pen& pen, PointF from, PointF to, bool projectLeft, bool projectRight,
                                          LineFace* leftFace, LineFace* rightFace)
 {
     double	 l, L, r;

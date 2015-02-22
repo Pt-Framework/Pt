@@ -111,38 +111,38 @@ class PT_GFX_API ImagePainter : public Painter
         virtual const std::list<std::string>& fontFamilyNames();
 
         //!@see Pt::Gfx::Painter
-        virtual void drawPixel(const  Gfx::Point& to);
+        virtual void drawPixel(const  Gfx::PointF& to);
 
         //!@see Pt::Gfx::Painter
-        virtual void drawLine(const  Gfx::Point& from, const  Gfx::Point& to);
+        virtual void drawLine(const  Gfx::PointF& from, const  Gfx::PointF& to);
 
         //!@see Pt::Gfx::Painter
-        virtual void drawText(const  Gfx::Point& to, const Pt::String& text,
+        virtual void drawText(const  Gfx::PointF& to, const Pt::String& text,
                               const Pt::Gfx::ARgbColor* outline = 0 );
 
         //!@see Pt::Gfx::Painter
-        virtual void drawRect(const  Gfx::Rect& rect);
+        virtual void drawRect(const  Gfx::RectF& rect);
 
         //!@see Pt::Gfx::Painter
-        virtual void fillRect(const  Gfx::Rect& rect);
+        virtual void fillRect(const  Gfx::RectF& rect);
 
         //!@see Pt::Gfx::Painter
-        virtual void drawEllipse(const  Gfx::Point& topLeft, const  Gfx::Size& size);
+        virtual void drawEllipse(const  Gfx::PointF& topLeft, const  Gfx::SizeF& size);
 
         //!@see Pt::Gfx::Painter
-        virtual void fillEllipse(const  Gfx::Point& topLeft, const  Gfx::Size& size);
+        virtual void fillEllipse(const  Gfx::PointF& topLeft, const  Gfx::SizeF& size);
 
         //!@see Pt::Gfx::Painter
-        virtual void drawPolyline(const  Gfx::Point* points, const size_t pointCount);
+        virtual void drawPolyline(const  Gfx::PointF* points, const size_t pointCount);
 
         //!@see Pt::Gfx::Painter
-        virtual void fillPolygon(const  Gfx::Point* points, const size_t pointCount);
+        virtual void fillPolygon(const  Gfx::PointF* points, const size_t pointCount);
 
         //!@see Pt::Gfx::Painter
-        virtual void drawImage(const  Gfx::Point& to, const ARgbImage& image);
+        virtual void drawImage(const  Gfx::PointF& to, const ARgbImage& image);
 
         //!@see Pt::Gfx::Painter
-        virtual void drawImage(const  Gfx::Point& to, const ARgbImage& image,
+        virtual void drawImage(const  Gfx::PointF& to, const ARgbImage& image,
                                const  Region& imageRegion);
 
     private:

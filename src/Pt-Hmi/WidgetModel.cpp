@@ -1,6 +1,5 @@
 #include <Pt/Hmi/WidgetModel.h>
-#include <Pt/Hmi/NativePaintSurface.h>
-#include <Pt/Hmi/ImagePaintSurface.h>
+#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Application.h>
 
 namespace Pt{
@@ -26,10 +25,9 @@ WidgetModel::WidgetModel()
 , PT_HMI_INIT_PROPERTY_VALUE(AcceptFocus,true)
 , PT_HMI_INIT_PROPERTY_VALUE(HighLight, false)
 , PT_HMI_INIT_PROPERTY_VALUE(FocusedActionKey," ")
-, PT_HMI_INIT_PROPERTY_VALUE(PainterSurfaceType, PainterType::Native)
 , PT_HMI_INIT_PROPERTY_VALUE(Caption,"")
 , PT_HMI_INIT_PROPERTY_VALUE(UseMnemonic,true)
-, _paintSurface(new NativePaintSurface(Pt::Gfx::SizeF(800,600)))
+, _paintSurface(new PaintSurface(Pt::Gfx::SizeF(800,600)))
 {
 	registerProperty(Caption);
 	registerProperty(UseMnemonic);
@@ -54,20 +52,6 @@ std::string WidgetModel::getMnemonicKey() const
 	return mnemonic;	
 }
 
-
-void WidgetModel::onPainterTypeChanged(const Property<PainterType::Type>& prop)
-{
-	switch(PainterSurfaceType.get())
-	{
-		case PainterType::Native:
-			setPaintSurface( new NativePaintSurface(Size.get()));
-		break;
-		
-		case PainterType::Image:
-			setPaintSurface( new ImagePaintSurface(Size.get())); 
-		break;
-	}
-}
 
 void WidgetModel::move(const Pt::Gfx::SizeF& size)		
 {

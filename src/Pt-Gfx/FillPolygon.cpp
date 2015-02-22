@@ -43,14 +43,14 @@ FillPolygon::FillPolygon()
 { }
 
 
-void FillPolygon::draw( ARgbImage& image, const Brush& brush, const Gfx::Point* points_, size_t pointCount )
+void FillPolygon::draw( ARgbImage& image, const Brush& brush, const Gfx::PointF* points_, size_t pointCount )
 {
-    std::vector<Gfx::Point> points( pointCount );
-    std::memcpy( &points[0], points_ , sizeof( Gfx::Point) * pointCount );
+    std::vector<Gfx::PointF> points( pointCount );
+    std::memcpy( &points[0], points_ , sizeof( Gfx::PointF) * pointCount );
 
     // find unclipped origin coordinates
     //
-    Gfx::Point origin( std::numeric_limits<Pt::ssize_t>::max(), std::numeric_limits<Pt::ssize_t>::max() );
+    Gfx::PointF origin( std::numeric_limits<Pt::ssize_t>::max(), std::numeric_limits<Pt::ssize_t>::max() );
     //Pt::ssize_t xorig = ;
     //Pt::ssize_t yorig = std::numeric_limits<Pt::ssize_t>::max();
     for(size_t n = 0; n < points.size(); ++n)
@@ -59,7 +59,7 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, const Gfx::Point* 
         origin.setY( std::min( origin.y(), points[n].y() ) );
     }
 
-    _clipper(points, Pt::Gfx::Rect( Pt::Gfx::Point(0,0), Pt::Gfx::Size( image.width(), image.height() )) );
+    _clipper(points, Pt::Gfx::RectF( Pt::Gfx::PointF(0,0), Pt::Gfx::SizeF( image.width(), image.height() )) );
 
     if( points.end() != points.begin() )
         points.push_back( points[0] );
@@ -77,8 +77,8 @@ void FillPolygon::draw( ARgbImage& image, const Brush& brush, const Gfx::Point* 
     // Fill the global edge table. Two points yield an edge.
     //
     Edge edge;
-    Pt::Gfx::Point* bottom = 0;
-    Pt::Gfx::Point* top = 0;
+    Pt::Gfx::PointF* bottom = 0;
+    Pt::Gfx::PointF* top = 0;
 
     for( size_t i = 1; i < points.size(); ++i )
     {

@@ -208,20 +208,21 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
         {
             case Gfx::Pen::FlatCap:
                 capStyle = CapButt;
-                break;
+            break;
 
             case Gfx::Pen::RoundCap:
                 capStyle = CapRound;
-                break;
+            break;
 
             case Gfx::Pen::TriangularCap:
-                break;
+            break;
 
             case Gfx::Pen::ProjectingCap:
-                break;
+            break;
 
             case Gfx::Pen::ButtCap:
-                break;
+				capStyle  = CapButt;
+			break;
         }
 
         Display* display = Application::instance().impl()->display();

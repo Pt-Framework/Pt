@@ -39,7 +39,7 @@ DrawThinEllipse::DrawThinEllipse()
 DrawThinEllipse::~DrawThinEllipse()
 { }
 
-void DrawThinEllipse::draw( ARgbImage& image, const Pen& pen, const Pt::Gfx::Point& topLeft, const Pt::Gfx::Size& size )
+void DrawThinEllipse::draw( ARgbImage& image, const Pen& pen, const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size )
 {
     if( size.width() == 0 || size.height() == 0 )
         return;
@@ -50,10 +50,10 @@ void DrawThinEllipse::draw( ARgbImage& image, const Pen& pen, const Pt::Gfx::Poi
     int errorx = 1;
     int errory = 1;
 
-    if( size.width()%2 != 0 )
+    if( (int)size.width()%2 != 0 )
         errorx  =  0;
 
-    if( size.height()%2 != 0)
+    if( (int)size.height()%2 != 0)
         errory  = 0;
 
     int  a      = size.width()/2;

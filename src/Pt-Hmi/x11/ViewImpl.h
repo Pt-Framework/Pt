@@ -86,19 +86,19 @@ private:
     bool isWindowMaximazed();
     
 private:
-  Atom AtomAppWake;
-  Atom AtomWindowResize;
-  Atom AtomWindowMove;
-  Atom AtomWindowClosed;
-  Atom AtomWMProtocols;
+	  Atom AtomAppWake;
+	  Atom AtomWindowResize;
+	  Atom AtomWindowMove;
+	  Atom AtomWindowClosed;
+	  Atom AtomWMProtocols;
 
 	bool					_ignoreSizeEvent;
-	Pt::Hmi::WindowModel* 	_model;
+	Pt::Hmi::WindowModel* 		_model;
 	Pt::Hmi::WindowController* 	_controller;
 	Pt::Hmi::PointingEvent 	_mouseEvent;
 	Pt::Hmi::KeyEvent      	_keyEvent;
-  Window  				_window;
-  GC 						_brushGc;
+	Window  				_window;
+	GC 						_brushGc;
 	Display* 				_display;
 	unsigned int			_windowBorderWidth;
 	bool 					_visible;

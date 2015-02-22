@@ -39,7 +39,7 @@ namespace Gfx{
 ClipPolygon::ClipPolygon()
 { }
 
-void ClipPolygon::clip( std::vector<Pt::Gfx::Point>& in, const Pt::Gfx::Rect& clippingArea )
+void ClipPolygon::clip( std::vector<Pt::Gfx::PointF>& in, const Pt::Gfx::RectF& clippingArea )
 {
     if( clippingArea.isNull())
     {
@@ -47,7 +47,7 @@ void ClipPolygon::clip( std::vector<Pt::Gfx::Point>& in, const Pt::Gfx::Rect& cl
         return;
     }
 
-    std::vector<Pt::Gfx::Point> buffer;
+    std::vector<Pt::Gfx::PointF> buffer;
 
     clipEdge( in, buffer, clippingArea.topLeft(), clippingArea.bottomLeft() );
 
@@ -62,15 +62,15 @@ void ClipPolygon::clip( std::vector<Pt::Gfx::Point>& in, const Pt::Gfx::Rect& cl
 }
 
 
-void ClipPolygon::clipEdge( const std::vector<Pt::Gfx::Point>& in, std::vector<Pt::Gfx::Point>& out,
-                 Pt::Gfx::Point edgePoint0, Pt::Gfx::Point edgePoint1)
+void ClipPolygon::clipEdge( const std::vector<Pt::Gfx::PointF>& in, std::vector<Pt::Gfx::PointF>& out,
+                 Pt::Gfx::PointF edgePoint0, Pt::Gfx::PointF edgePoint1)
 {
     if( in.empty() )
         return;
 
-    Pt::Gfx::Point p;
-    Pt::Gfx::Point i;
-    Pt::Gfx::Point s = in[ in.size() - 1 ];
+    Pt::Gfx::PointF p;
+    Pt::Gfx::PointF i;
+    Pt::Gfx::PointF s = in[ in.size() - 1 ];
 
     for( size_t j = 0; j < in.size(); ++j )
     {
@@ -101,9 +101,9 @@ void ClipPolygon::clipEdge( const std::vector<Pt::Gfx::Point>& in, std::vector<P
 }
 
 
-Pt::Gfx::Point ClipPolygon::intersect( const Pt::Gfx::Point& from, const Pt::Gfx::Point& to, const Pt::Gfx::Point& edge0, Pt::Gfx::Point& edge1 )
+Pt::Gfx::PointF ClipPolygon::intersect( const Pt::Gfx::PointF& from, const Pt::Gfx::PointF& to, const Pt::Gfx::PointF& edge0, Pt::Gfx::PointF& edge1 )
 {
-    Pt::Gfx::Point p;
+    Pt::Gfx::PointF p;
 
     if( edge0.y() == edge1.y() )
     {
@@ -121,7 +121,7 @@ Pt::Gfx::Point ClipPolygon::intersect( const Pt::Gfx::Point& from, const Pt::Gfx
 }
 
 
-bool ClipPolygon::inside( const Pt::Gfx::Point& p, const Pt::Gfx::Point& edge0, Pt::Gfx::Point& edge1 )
+bool ClipPolygon::inside( const Pt::Gfx::PointF& p, const Pt::Gfx::PointF& edge0, Pt::Gfx::PointF& edge1 )
 {
 /*  TODO: is very performant but at time has a logic bug :).
       return ( ( (  edge0.x() == edge1.x() ) && ( edge0.y() < edge1.y()  ) && ( p.x() > edge0.x() ) ) ||
