@@ -116,7 +116,7 @@ void ViewImpl::onInputEvent(const struct input_event& ev)
 			else
 				return;
     
-			switch(e.code)
+			switch(ev.code)
 			{
 				case KEY_RIGHTALT:
 				case KEY_LEFTALT:
@@ -135,7 +135,7 @@ void ViewImpl::onInputEvent(const struct input_event& ev)
 
 				default: //ToDO translate Key
 				{
-					const unsigned int ucode = KeyHandler::keySymToUtf(sym);	
+	
 				}
 				break;
 				
