@@ -29,14 +29,8 @@ public:
 		return _image; 
 	}
 
-	Pt::Hmi::Painter& painter()
-	{
-		return _painter;
-	}
-
 private:
-	Pt::Gfx::ARgbImage _image;
-	Hmi::Painter _painter;
+	Pt::Gfx::ARgbImage _image;	
 };
 
 }}

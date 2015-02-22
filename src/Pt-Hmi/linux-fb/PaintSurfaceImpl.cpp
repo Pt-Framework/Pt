@@ -6,7 +6,6 @@ namespace Hmi{
 
 PaintSurfaceImpl::PaintSurfaceImpl(const Pt::Gfx::SizeF& size)
 : _image(100,100)
-, _painter(*this)
 {
 	resize(size);
 }

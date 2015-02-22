@@ -26,8 +26,8 @@
 namespace Pt {
 namespace Hmi {
 
-PainterImpl::PainterImpl(PaintSurfaceImpl& surface)
-: _painter(surface.image())
+PainterImpl::PainterImpl(PaintSurfaceImpl* surface)
+: _painter(surface->image())
 {	
 }
 
@@ -160,6 +160,11 @@ void PainterImpl::drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& ima
 void PainterImpl::addFontName(const std::string& fontName)
 {
 	
+}
+
+void PainterImpl::setSurface(PaintSurface& s)
+{
+
 }
 
 	

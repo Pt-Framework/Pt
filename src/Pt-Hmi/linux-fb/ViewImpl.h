@@ -36,6 +36,8 @@ namespace Hmi {
 
 class WindowController;
 class WindowModel;
+class Controller;
+class Model;
 
 class ViewImpl
 {

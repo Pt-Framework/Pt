@@ -34,7 +34,7 @@ class PaintSurface;
 class PainterImpl
 {
 public:
-    PainterImpl(PaintSurfaceImpl& surface);
+    PainterImpl(PaintSurfaceImpl* surface);
 
     virtual ~PainterImpl();
    
@@ -88,6 +88,8 @@ public:
 
     virtual void addFontName(const std::string& fontName);
 
+	void setSurface(PaintSurface& s);
+	
 private:
 	Pt::Gfx::ImagePainter _painter;
 };

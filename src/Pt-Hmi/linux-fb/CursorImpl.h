@@ -20,8 +20,7 @@ public:
 	Cursors::Type getCursor() const;
 
 private:
-	Cursors::Type _type;
-	::Cursor _cursorId;
+	Cursors::Type _type;	
 };
 
 }}

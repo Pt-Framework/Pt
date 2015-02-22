@@ -27,6 +27,7 @@
  */
 
 #include "ViewImpl.h"
+#include "PaintSurfaceImpl.h"
 #include <Pt/Hmi/WindowController.h>
 #include <Pt/Hmi/Model.h>
 #include <Pt/Hmi/WindowModel.h>

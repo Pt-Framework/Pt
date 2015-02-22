@@ -45,6 +45,10 @@ class ApplicationImpl : public Pt::System::MainLoop
 
         ~ApplicationImpl();
 
+	void showConsole(bool t)
+	{
+	}
+
 		Pt::Gfx::PointF toUnit(const Pt::Gfx::Point& value)
 		{
 			return Pt::Gfx::PointF(value.x(), value.y());
@@ -98,6 +102,16 @@ class ApplicationImpl : public Pt::System::MainLoop
 		{
 			return 0;
 		}
+
+		inline Pt::Signal<const Pt::Event&>& systemEvent()
+		{
+			return _systemEvent;
+		}
+
+		void nextEvent();
+
+	protected:
+		Pt::Signal<const Pt::Event&> _systemEvent;
 };
 
 } // namespace

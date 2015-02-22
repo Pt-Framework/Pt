@@ -30,7 +30,7 @@
 
 namespace Pt {
 
-namespace Gui {
+namespace Hmi {
 
 ApplicationImpl::ApplicationImpl()
 {
@@ -39,6 +39,11 @@ ApplicationImpl::ApplicationImpl()
 
 ApplicationImpl::~ApplicationImpl()
 {
+}
+
+void ApplicationImpl::nextEvent()
+{
+	MainLoop::waitNext();
 }
 
 } // namespace Gui
