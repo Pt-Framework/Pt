@@ -31,6 +31,8 @@
 #include <Pt/Hmi/WindowController.h>
 #include <Pt/Hmi/Model.h>
 #include <Pt/Hmi/WindowModel.h>
+#include "ApplicationImpl.h"
+#include <Pt/Hmi/Application.h>
 
 namespace Pt {
 
@@ -40,6 +42,7 @@ ViewImpl::ViewImpl()
 : _fd(-1)
 , _buffer(0)
 , _bufferSize(0)
+, _controller(0)
 {
     // Open the frame buffer device
     _fd = open ("/dev/fb0", O_RDWR);
@@ -83,7 +86,7 @@ ViewImpl::ViewImpl()
     _bufferSize     = _pitch * _screenInfo.yres;
     _buffer         =  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);
 	
-	Application::instance().impl()->inputEvent() += Pt::slot(*this, ViewImpl::onInputEvent);
+	Application::instance().impl()->inputEvent() += Pt::slot(*this, &ViewImpl::onInputEvent);
 }
 
 
@@ -97,30 +100,53 @@ ViewImpl::~ViewImpl()
 }
 
 
-void ViewImpl::onInputEvent(struct input_event& ev)
+void ViewImpl::onInputEvent(const struct input_event& ev)
 {
+	if( _controller == 0)
+		return;
+	
     switch (ev.type)
     {
 		case EV_KEY:
 		{
-			if(ev.value == EV_PRESSED)
+			if(ev.value == 1)
 				_keyEvent.setState(KeyEvent::KeyDown);
-			else
+			else if(ev.value == 0)
 				_keyEvent.setState(KeyEvent::KeyUp);
+			else
+				return;
     
-			if( ev.code == KEY_TAB)
-				_keyEvent.setUnicode('\t');
+			switch(e.code)
+			{
+				case KEY_RIGHTALT:
+				case KEY_LEFTALT:
+					_keyEvent.setAlt(_keyEvent.state() == KeyEvent::KeyDown);
+				break;	
+		
+				case KEY_LEFTCTRL:
+				case KEY_RIGHTCTRL:
+					_keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
+				break;
 
-			if( ev.code == KEY_SPACE)
-				_keyEvent.setUnicode(' ');			
+				case KEY_LEFTSHIFT:
+				case KEY_RIGHTSHIFT:
+					_keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);  
+				break;  
+
+				default: //ToDO translate Key
+				{
+					const unsigned int ucode = KeyHandler::keySymToUtf(sym);	
+				}
+				break;
+				
+			}
+		
+		    _keyEvent.setController(_controller);
+			
+			Application::instance().systemEvent().send(_keyEvent);
 		}
 		break;
-	}
-		
-    _keyEvent.setController(_controller);
-	std::clog<<"Key event = " << (char) _keyEvent.toUTF8String() <<std::endl;
-	
-	Application::instance().systemEvent().send(_keyEvent);
+	}		
 }
 
 

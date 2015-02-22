@@ -33,12 +33,11 @@ namespace Pt {
 namespace Hmi {
 
 ApplicationImpl::ApplicationImpl()
-: _inputDevice("/dev/input/event0")
+: _inputDevice("/dev/input/event1")
 {
-    _inputDevice.setActive(*this);
-    _inputDevice.begin();
-
-    _inputDevice.flush();
+   _inputDevice.setActive(*this);
+   _inputDevice.begin();
+//   _inputDevice.flush();
 
 }
 

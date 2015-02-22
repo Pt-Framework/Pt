@@ -27,6 +27,9 @@
  */
 
 #include "InputDevice.h"
+#include <linux/input.h>
+#include <Pt/Hmi/Application.h>
+#include "ApplicationImpl.h"
 
 namespace Pt {
 
@@ -56,6 +59,7 @@ InputDevice::~InputDevice()
 bool InputDevice::onRun()
 {
 	struct input_event ev[64];
+
 	int bytes = ::read(_ioh.fd, ev, sizeof(struct input_event) * 64);
     
 	if( bytes < (int) sizeof(struct input_event) )
@@ -65,7 +69,7 @@ bool InputDevice::onRun()
 
     for( unsigned i = 0; i < bytes / sizeof(input_event); i++ )
     {
-			Application::instance().impl()->inputEvent().send(events[i]);
+		Application::instance().impl()->inputEvent().send(ev[i]);
     }
 
     return true;

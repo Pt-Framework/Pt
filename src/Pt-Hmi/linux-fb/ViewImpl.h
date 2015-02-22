@@ -29,6 +29,11 @@ Free Software Foundation, Inc.,
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <Pt/Hmi/PointingEvent.h>
+#include <Pt/Hmi/KeyEvent.h>
+#include <Pt/Connectable.h>
+#include <linux/input.h>
+
 
 namespace Pt {
 
@@ -94,7 +99,7 @@ class ViewImpl  :public Pt::Connectable
 		{ return (char*)_buffer; }
 			
 	protected:
-		void onInputEvent(struct input_event& ev);
+		void onInputEvent(const struct input_event& ev);
 
 	private:    
 		int _fd;
