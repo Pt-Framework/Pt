@@ -1440,6 +1440,12 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ViewImpl.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2710,6 +2716,12 @@
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\CursorImpl.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ViewImpl.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
   </ItemGroup>

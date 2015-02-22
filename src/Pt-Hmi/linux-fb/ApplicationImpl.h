@@ -29,6 +29,7 @@
 #ifndef Pt_Hmi_ApplicationImpl_h
 #define Pt_Hmi_ApplicationImpl_h
 
+#include "InputDevice.h"
 #include <Pt/System/MainLoop.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
@@ -45,9 +46,9 @@ class ApplicationImpl : public Pt::System::MainLoop
 
         ~ApplicationImpl();
 
-	void showConsole(bool t)
-	{
-	}
+		void showConsole(bool t)
+		{
+		}
 
 		Pt::Gfx::PointF toUnit(const Pt::Gfx::Point& value)
 		{
@@ -103,22 +104,21 @@ class ApplicationImpl : public Pt::System::MainLoop
 			return 0;
 		}
 
-		inline Pt::Signal<const Pt::Event&>& systemEvent()
+		Pt::Signal<const Pt::Event&>& systemEvent()
 		{
 			return _systemEvent;
 		}
 
-		inline Pt::Signal<const struct input_event&>& windowEvent()
+		Pt::Signal<const struct input_event&>& inputEvent()
 		{
-			return _windowEvent;
+			return _inputEvent;
 		}
 
 		void nextEvent();
 		
-
 	protected:
 		Pt::Signal<const Pt::Event&> _systemEvent;
-		Pt::Signal<const struct input_event&> _windowEvent;
+		Pt::Signal<const struct input_event&> _inputEvent;
 		InputDevice _inputDevice;
 };
 

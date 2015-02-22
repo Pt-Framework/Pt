@@ -39,50 +39,6 @@ class WindowModel;
 class Controller;
 class Model;
 
-class InputDevice : public System::Selectable
-{
-public:
-    InputDevice(const char* deviceName);
-
-    ~InputDevice();
-
-    void begin()
-    {      
-      if( ! _loop )
-        throw std::logic_error("I/O device not active");
-
-        Pt::System::Selector& selector = _loop->selector();
-        selector.beginRead(&_ioh);
-    }
-
-    void close()
-    { 
-        if(_ioh.fd != -1)
-        {
-            ::close(_ioh.fd); 
-            _ioh.fd = -1;
-        }
-    }
-
-    void flush()
-    { this->onRun(); }
-    
-protected:
-    virtual bool onRun();
-
-    virtual void onCancel()
-    { throw std::logic_error("not implemented"); }
-    
-
-    void onAttach(System::EventLoop& loop);
-
-    void onDetach(System::EventLoop& loop);    
-
-private:
-    Pt::System::IOHandle _ioh;
-    Pt::System::EventLoop* _loop;
-};
-
 class ViewImpl  :public Pt::Connectable
 {
 	public:
@@ -138,7 +94,8 @@ class ViewImpl  :public Pt::Connectable
 		{ return (char*)_buffer; }
 			
 	protected:
-		void onWindowEvent(struct input_event& ev);
+		void onInputEvent(struct input_event& ev);
+
 	private:    
 		int _fd;
 		fb_var_screeninfo _screenInfo;
@@ -151,8 +108,8 @@ class ViewImpl  :public Pt::Connectable
 		Pt::Hmi::KeyEvent      	_keyEvent;
 };
 
-}
+} // namespace
 
-}
+} // namespace
 
 #endif

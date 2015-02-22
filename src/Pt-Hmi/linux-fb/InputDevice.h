@@ -1,11 +1,11 @@
-/*
- * Copyright (C) 2006 Marc Boris Duerner
- * 
+/* Copyright (C) 2013 Marc Boris Duerner
+ * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,45 +15,77 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "ApplicationImpl.h"
+#ifndef Pt_Hmi_InputDevice_h
+#define Pt_Hmi_InputDevice_h
+
+#include "posix/Selector.h"
+
+#include <Pt/Hmi/Api.h>
+#include <Pt/System/Selectable.h>
+#include <Pt/System/MainLoop.h>
+
+#include <unistd.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-ApplicationImpl::ApplicationImpl()
-: _inputDevice("/dev/input/event0")
+class InputDevice : public System::Selectable
 {
-    _inputDevice.setActive(*this);
-    _inputDevice.begin();
+	public:
+		InputDevice(const char* deviceName);
 
-    _inputDevice.flush();
+		~InputDevice();
 
-}
+		void begin()
+		{      
+		  if( ! _loop )
+			throw std::logic_error("input device not active");
 
+			Pt::System::Selector& selector = _loop->selector();
+			selector.beginRead(&_ioh);
+		}
 
-ApplicationImpl::~ApplicationImpl()
-{
-}
+		void close()
+		{ 
+			if(_ioh.fd != -1)
+			{
+				::close(_ioh.fd); 
+				_ioh.fd = -1;
+			}
+		}
 
+		void flush()
+		{ this->onRun(); }
 
-void ApplicationImpl::nextEvent()
-{
-	MainLoop::waitNext();
-}
+	protected:
+		virtual bool onRun();
+
+		virtual void onCancel()
+		{ throw std::logic_error("not implemented"); }
+    
+		void onAttach(System::EventLoop& loop);
+
+		void onDetach(System::EventLoop& loop);    
+
+	private:
+		Pt::System::IOHandle _ioh;
+		Pt::System::EventLoop* _loop;
+};
 
 } // namespace
 
 } // namespace
 
+#endif

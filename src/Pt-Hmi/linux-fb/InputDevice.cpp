@@ -1,11 +1,11 @@
-/*
- * Copyright (C) 2006 Marc Boris Duerner
- * 
+/* Copyright (C) 2013 Marc Boris Duerner
+ * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,45 +15,74 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "ApplicationImpl.h"
+#include "InputDevice.h"
 
 namespace Pt {
 
 namespace Hmi {
 
-ApplicationImpl::ApplicationImpl()
-: _inputDevice("/dev/input/event0")
+InputDevice::InputDevice(const char* deviceName)
+: _ioh(*this)
+, _loop(0)
 {
-    _inputDevice.setActive(*this);
-    _inputDevice.begin();
-
-    _inputDevice.flush();
-
+    _ioh.fd = ::open(deviceName, O_RDONLY|O_NONBLOCK);
+	if( _ioh.fd < 0 )
+		throw Pt::System::AccessFailed(deviceName);
 }
 
 
-ApplicationImpl::~ApplicationImpl()
+InputDevice::~InputDevice()
 {
+    try
+    {
+        this->close();
+    }
+    catch(...)
+    {}
 }
 
 
-void ApplicationImpl::nextEvent()
+bool InputDevice::onRun()
 {
-	MainLoop::waitNext();
+	struct input_event ev[64];
+	int bytes = ::read(_ioh.fd, ev, sizeof(struct input_event) * 64);
+    
+	if( bytes < (int) sizeof(struct input_event) )
+    {
+        return false;
+    }
+
+    for( unsigned i = 0; i < bytes / sizeof(input_event); i++ )
+    {
+			Application::instance().impl()->inputEvent().send(events[i]);
+    }
+
+    return true;
+}
+
+
+void InputDevice::onAttach(System::EventLoop& loop)
+{ 
+    _loop = &loop;
+}
+
+
+void InputDevice::onDetach(System::EventLoop& loop)
+{ 
+    _loop = 0; 
 }
 
 } // namespace
 
 } // namespace
-
