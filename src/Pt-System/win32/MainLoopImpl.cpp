@@ -105,19 +105,17 @@ bool MainLoopImpl::waitNext()
     while( true )
     {
         Pt::System::MutexLock lock(_mutex);
-
         if( _avail.empty() )
             break;
 
         timeout = 0;
+        
         Selectable* s = _avail.back();
         _avail.pop_back();
         lock.unlock();
 
         s->run();
     }
-
-    // TODO: what if a ready selectable adds a timer with a shorter timeout?
 
     bool isActive = true;
     if( _selector.waitForWake(timeout) )

@@ -58,7 +58,7 @@ class PT_SYSTEM_API MainLoopImpl
 
         void queueEvent(const Event& event);
 
-        bool processEvents();
+        //bool processEvents();
 
         void attach(Timer& timer);
 

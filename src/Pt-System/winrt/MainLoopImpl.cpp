@@ -130,11 +130,11 @@ void MainLoopImpl::queueEvent(const Event& event)
 }
 
 
-bool MainLoopImpl::processEvents()
-{ 
-    //TODO: should this also check selectables?
-    return _eventQueue.processEvents(*_event);
-}
+//bool MainLoopImpl::processEvents()
+//{ 
+//    //TODO: should this also check selectables?
+//    return _eventQueue.processEvents(*_event);
+//}
 
 
 // TODO: rename runNext, wait for next activity and run it

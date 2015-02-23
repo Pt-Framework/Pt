@@ -98,11 +98,11 @@ void MainLoopImpl::queueEvent(const Event& event)
 }
 
 
-bool MainLoopImpl::processEvents()
-{ 
-    //TODO: should this also check selectables?
-    return _eventQueue.processEvents(*_event);
-}
+//bool MainLoopImpl::processEvents()
+//{ 
+//    //TODO: should this also check selectables?
+//    return _eventQueue.processEvents(*_event);
+//}
 
 
 bool MainLoopImpl::waitNext()
@@ -111,26 +111,24 @@ bool MainLoopImpl::waitNext()
 
     bool isActive = true;
     std::size_t msecs = _timerQueue.processTimers();
-
     PT_LOG_DEBUG("next timer expires in: " << msecs << " msecs");
 
+    // check all selectables that did not require waiting
     while(true)
     {
         MutexLock lock(_mutex);
         if( _avail.empty() )
             break;
 
+        msecs = 0;
+
         Selectable* selectable = _avail.back();
         _avail.pop_back();
         lock.unlock();
 
-        msecs = 0;
-
         PT_LOG_DEBUG("running selectable");
         selectable->run();
     }
-
-    // TODO: what if a ready selectable adds a timer with a shorter timeout?
 
     PT_LOG_DEBUG("waiting for events");
     if( _selector.waitForWake(msecs) )

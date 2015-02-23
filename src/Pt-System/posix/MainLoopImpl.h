@@ -25,6 +25,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef PT_SYSTEM_POSIX_MAINLOOPIMPL_H
 #define PT_SYSTEM_POSIX_MAINLOOPIMPL_H
 
@@ -92,7 +93,7 @@ class MainLoopImpl
 
         void queueEvent(const Event& event);
 
-        bool processEvents();
+        //bool processEvents();
 
         void attach(Timer& timer)
         { _timerQueue.addTimer(timer); }
