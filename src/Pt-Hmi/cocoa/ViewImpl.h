@@ -60,7 +60,6 @@ public:
 	virtual ~ViewImpl();
 
     void output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model);
-	Pt::Gfx::Painter* nativePainter();
     
     inline WindowModel* model()
     {
@@ -99,7 +98,6 @@ private:
 	NSView*					_view;
 	Pt::Hmi::WindowModel*	_model;
     Pt::Hmi::WindowController* _controller;
-	Pt::Gfx::Painter*		_nativePainter;
     Pt::Hmi::PointingEvent 	_mouseEvent;
 	Pt::Hmi::KeyEvent      	_keyEvent;
     Pt::System::Timer       _timer;

@@ -410,10 +410,6 @@ bool ViewImpl::onCanClose()
     return canClose;
 }
 
-Pt::Gfx::Painter* ViewImpl::nativePainter()
-{
-	return _nativePainter;
-}
     
 void ViewImpl::output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model)
 {

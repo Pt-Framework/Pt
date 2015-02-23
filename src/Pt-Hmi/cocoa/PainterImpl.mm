@@ -21,7 +21,6 @@
 #include "PainterImpl.h"
 #include "PaintSurfaceImpl.h"
 #include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/NativePaintSurface.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <iostream>
@@ -128,7 +127,7 @@ const Gfx::Pen& PainterImpl::pen() const
     return _pen;
 }
 
-void PainterImpl::setSurface(NativePaintSurface& s)
+void PainterImpl::setSurface(PaintSurface& s)
 {
     _surface = s.impl();
     setPen(_pen);
@@ -266,9 +265,8 @@ void PainterImpl::fillPolygon(const Gfx::PointF* points, const size_t pointCount
 
 void PainterImpl::drawSurface(const Gfx::PointF& to, PaintSurface& pm)
 {
-    Pt::Hmi::NativePaintSurface* surface = dynamic_cast<Pt::Hmi::NativePaintSurface*>(&pm);
     
-    Pt::Hmi::PaintSurfaceImpl* impl = surface->impl();
+    Pt::Hmi::PaintSurfaceImpl* impl = pm.impl();
     CGContextRef context = impl->context();
     
     CGImageRef image =  CGBitmapContextCreateImage(context);
@@ -282,9 +280,7 @@ void PainterImpl::drawSurface(const Gfx::PointF& to, PaintSurface& pm)
 
 void PainterImpl::drawSurface(const Gfx::PointF& to, PaintSurface& pm, const Gfx::Region& pmRegion)
 {
-    Pt::Hmi::NativePaintSurface* surface = dynamic_cast<Pt::Hmi::NativePaintSurface*>(&pm);
-    
-    Pt::Hmi::PaintSurfaceImpl* impl = surface->impl();
+    Pt::Hmi::PaintSurfaceImpl* impl = pm.impl();
     CGContextRef context = impl->context();
     
     CGImageRef image =  CGBitmapContextCreateImage(context);

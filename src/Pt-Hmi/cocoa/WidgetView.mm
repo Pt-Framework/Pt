@@ -29,7 +29,7 @@
 #import <AppKit/NSApplication.h>
 #import <AppKit/NSEvent.h>
 #import <AppKit/NSTrackingArea.h>
-#include <Pt/Hmi/NativePaintSurface.h>
+#include <Pt/Hmi/PaintSurface.h>
 #include "PaintSurfaceImpl.h"
 #include <CoreGraphics/CoreGraphics.h>
 
@@ -88,7 +88,7 @@
     if(_outDevice->model() == nil)
         return;
     
-    Pt::Hmi::NativePaintSurface* surface = dynamic_cast<Pt::Hmi::NativePaintSurface*>(_outDevice->model()->paintSurface());
+    Pt::Hmi::PaintSurface* surface = _outDevice->model()->paintSurface();
     
     Pt::Hmi::PaintSurfaceImpl* impl = surface->impl();
     CGContextRef context = impl->context();

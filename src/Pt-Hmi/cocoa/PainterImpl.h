@@ -51,7 +51,6 @@ namespace Hmi {
 
 class PaintSurfaceImpl;
 class PaintSurface;
-class NativePaintSurface;
 
 class PainterImpl
 {
@@ -111,7 +110,7 @@ class PainterImpl
             return 0;
         }
     
-        void setSurface(NativePaintSurface& s);
+        void setSurface(PaintSurface& s);
 
     
         void addFontName(const std::string& fontName)
