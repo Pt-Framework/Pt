@@ -28,6 +28,10 @@
 
 #include "FileInfoImpl.h"
 #include <Pt/System/FileInfo.h>
+#include <Pt/System/Directory.h>
+#include <Pt/System/Logger.h>
+
+PT_LOG_DEFINE("Pt.System.FileInfo")
 
 namespace Pt {
 
@@ -77,7 +81,27 @@ void FileInfo::createFile(const Path& path)
 
 void FileInfo::createDirectory(const Path& path)
 {
+    PT_LOG_DEBUG("created: " << path.toLocal());
     FileInfoImpl::createDirectory(path);
+}
+
+
+void FileInfo::createDirectories(const Path& path)
+{   
+    if( path.empty() )
+      return;
+
+    Pt::System::Path subDir( path.dirName() );
+
+    if( ! subDir.empty() )
+    {
+      createDirectories(subDir);
+    }
+    
+    if( ! Pt::System::FileInfo::exists(path) )
+    {
+      createDirectory(path);
+    }
 }
 
 
@@ -90,6 +114,38 @@ void FileInfo::resize(const Path& path, Pt::uint64_t n)
 void FileInfo::remove(const Path& path)
 {
     FileInfoImpl::remove(path);
+}
+
+
+void FileInfo::removeAll(const Pt::System::Path& path)
+{
+    Pt::System::DirectoryIterator end;
+
+    for(Pt::System::DirectoryIterator it(path); it != end; ++it)
+    {
+        Pt::String fileName = it->path().fileName();
+      
+        if(fileName.empty() || fileName == "." || fileName == "..")
+            continue;
+
+        Pt::System::Path subPath = path / it->path();
+
+        Pt::System::FileInfo::Type fileType = FileInfo::type(subPath);
+
+        if(fileType == Pt::System::FileInfo::Directory)
+        {
+            FileInfo::removeAll(subPath);
+            continue;
+        }
+      
+        if( fileType == Pt::System::FileInfo::File)
+        {
+            Pt::System::FileInfo::remove(subPath);
+            PT_LOG_DEBUG("removed: " << subPath.toLocal());
+        }
+    }
+
+    Pt::System::FileInfo::remove(path);
 }
 
 

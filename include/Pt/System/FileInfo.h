@@ -163,11 +163,17 @@ class PT_SYSTEM_API FileInfo
         //! @brief Creates a new directory.
         static void createDirectory(const Path& path);
 
+        //! @brief Creates a new directory.
+        static void createDirectories(const Path& path);
+
         //! @brief Resizes a file.
         static void resize(const Path& path, Pt::uint64_t n);
 
         //! @brief Removes a file or directory.
         static void remove(const Path& path);
+
+        //! @brief Removes all content in a directory.
+        static void removeAll(const Pt::System::Path& path);
 
         //! @brief Moves a file or directory.
         static void move(const Path& path, const Path& to);
