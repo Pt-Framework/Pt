@@ -708,6 +708,7 @@ class SettingsReader
             virtual State* onCloseSquareBrace(Pt::Char c, SettingsReader& reader)
             {
                 reader.leaveMember();
+                reader.leaveEmptyCompound();
                 return OnCloseCurly::instance();
             }
 
@@ -720,6 +721,7 @@ class SettingsReader
             virtual State* onCloseCurlyBrace(Pt::Char c, SettingsReader& reader)
             {
                 reader.leaveMember();
+                reader.leaveEmptyCompound();
                 return OnCloseCurly::instance();
             }
 
@@ -919,6 +921,8 @@ class SettingsReader
         { return _line; }
 
         void enterMember();
+
+        void leaveEmptyCompound();
 
         void leaveMember();
 

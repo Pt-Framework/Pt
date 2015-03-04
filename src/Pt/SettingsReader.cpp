@@ -124,6 +124,25 @@ void SettingsReader::enterMember()
 }
 
 
+void SettingsReader::leaveEmptyCompound()
+{
+    if(0 == _current->parent() )
+        throw SettingsError("too many closing braces", _line);
+
+    _current->removeMember("");
+    _current = _current->parent();
+    --_depth;
+
+    if(_depth == 1 && _isDotted)
+    {
+        // leaving a dotted entry
+        _current = _current->parent();
+        _isDotted = false;
+        --_depth;
+    }
+}
+
+
 void SettingsReader::leaveMember()
 {
     //std::cerr << "@" << std::endl;
