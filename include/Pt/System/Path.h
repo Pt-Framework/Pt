@@ -107,32 +107,46 @@ class PT_SYSTEM_API Path
         // Appends
 
         /** @brief Appends a path name.
+
+            A directory separator is added if this path is not empty.
         */
         Path& append(const Path& p);
 
         /** @brief Appends a path name.
+
+            A directory separator is added if this path is not empty.
         */
         Path& append(const Pt::String& s);
 
         /** @brief Appends an UTF-8 encoded path name.
+
+            A directory separator is added if this path is not empty.
         */
         Path& append(const char* s);
 
         /** @brief Appends an UTF-8 encoded path name.
+
+            A directory separator is added if this path is not empty.
         */
         Path& append(const char* s, std::size_t n);
 
         /** @brief Appends a path name.
+
+            A directory separator is added if this path is not empty.
         */
         Path& operator/=(const Path& p)
         { return append(p); }
 
         /** @brief Appends a path name.
+
+            A directory separator is added if this path is not empty.
         */
         Path& operator/=(const Pt::String& s)
         { return append(s); }
 
         /** @brief Appends an UTF-8 encoded path name.
+
+            A directory separator is added if this path is not empty.
         */
         Path& operator/=(const char* s)
         { return append(s); }
@@ -140,18 +154,26 @@ class PT_SYSTEM_API Path
         // Concatenation
 
         /** @brief Concatenates a path name.
+
+            The two paths are directly joined and no separator is added.
         */
         Path& concat(const Path& p);
 
         /** @brief Concatenates a path name.
+
+            The two paths are directly joined and no separator is added.
         */
         Path& concat(const Pt::String& s);
 
         /** @brief Concatenates a path name.
+
+            The two paths are directly joined and no separator is added.
         */
         Path& concat(const char* s);
 
         /** @brief Appends an UTF-8 encoded path name.
+
+            The two paths are directly joined and no separator is added.
         */
         Path& concat(const char* s, std::size_t n);
 
@@ -161,34 +183,53 @@ class PT_SYSTEM_API Path
         { return concat(p); }
         
         /** @brief Concatenates a path name.
+
+            The two paths are directly joined and no separator is added.
         */
         Path& operator+=(const Pt::String& s)
         { return concat(s); }
 
         /** @brief Concatenates a path name.
+
+            The two paths are directly joined and no separator is added.
         */
         Path& operator+=(const char* s)
         { return concat(s); }
 
         // Modifiers
 
+        /** @brief Clears the path.
+        */
         void clear();
 
         // Query
 
+        /** @brief Returns true if path is empty.
+        */
         bool empty() const;
 
         // TODO: return Path objects
+        
+        /** @brief Returns the file name without the directroy part.
+        */
         Pt::String fileName() const;
 
+        /** @brief Returns the directory part.
+        */
         Pt::String dirName() const;
 
+        /** @brief Returns the file name without directory and extension.
+        */
         Pt::String baseName() const;
 
+        /** @brief Returns the file name extension.
+        */
         Pt::String extension() const;
 
         // Comparison
 
+        /** @brief Compares two paths (with strcmp semantics).
+        */
         int compare(const Path& p) const;
 
         // Conversion
@@ -203,10 +244,16 @@ class PT_SYSTEM_API Path
 
         // Others
 
+        /** @brief Returns the directory separator string.
+        */
         static Pt::String dirsep();
 
+        /** @brief Returns the current directory string.
+        */
         static Pt::String curdir();
 
+        /** @brief Returns the parent directory string.
+        */
         static Pt::String updir();
 
         // Implementation
@@ -222,7 +269,7 @@ class PT_SYSTEM_API Path
         std::string _pathData;
 };
 
-/** @brief Compares two paths.
+/** @brief Appends a paths to another.
 
     @related Path
 */
@@ -231,11 +278,19 @@ inline Path operator/(const Path& a, const Path& b)
     return Path(a) /= b;
 }
 
+/** @brief Appends a paths to another.
+
+    @related Path
+*/
 inline Path operator/(const Path& a, const Pt::String& b)
 { 
     return Path(a) /= b;
 }
 
+/** @brief Appends a paths to another.
+
+    @related Path
+*/
 inline Path operator/(const Path& a, const char* b)
 { 
     return Path(a) /= b;

@@ -26,6 +26,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "MainLoopImpl.h"
+#include <Pt/System/Logger.h>
+
+PT_LOG_DEFINE("Pt.System.MainLoop")
 
 namespace Pt {
 
@@ -97,30 +100,51 @@ void MainLoopImpl::queueEvent(const Event& event)
 }
 
 
+// TODO: rename runNext
 bool MainLoopImpl::waitNext()
 {
+    PT_LOG_TRACE("MainLoopImpl::waitNext");
+
     std::size_t timeout = _timerQueue.processTimers();
 
-    // check all selectables that did not require waiting
+    // check all selectables that did not require waiting, but
+    // for fairness reasons check only as many selectables as
+    // were ready in the first place.
+
+    PT_LOG_DEBUG("next timer expires in: " << timeout << " msecs");
+
+    std::size_t n = 0;
     while( true )
     {
         Pt::System::MutexLock lock(_mutex);
+        
         if( _avail.empty() )
             break;
 
+        if(n == 0)
+            n = _avail.size();
+
         timeout = 0;
         
-        Selectable* s = _avail.back();
+        Selectable* selectable = _avail.back();
         _avail.pop_back();
+        --n;
+
         lock.unlock();
 
-        s->run();
+        PT_LOG_DEBUG("running selectable");
+        selectable->run();
+
+        if(n == 0)
+            break;
     }
 
+    PT_LOG_DEBUG("waiting for events");
     bool isActive = true;
     if( _selector.waitForWake(timeout) )
         isActive = _eventQueue.processEvents(*_event);
 
+    PT_LOG_TRACE("returning activity: " << isActive);
     return isActive;
 }
 

@@ -105,33 +105,48 @@ void MainLoopImpl::queueEvent(const Event& event)
 //}
 
 
+// TODO: rename runNext
 bool MainLoopImpl::waitNext()
 {
     PT_LOG_TRACE("MainLoopImpl::waitNext");
 
-    bool isActive = true;
-    std::size_t msecs = _timerQueue.processTimers();
-    PT_LOG_DEBUG("next timer expires in: " << msecs << " msecs");
+    std::size_t timeout = _timerQueue.processTimers();
 
-    // check all selectables that did not require waiting
-    while(true)
+    // check all selectables that did not require waiting, but
+    // for fairness reasons check only as many selectables as
+    // were ready in the first place.
+
+    PT_LOG_DEBUG("next timer expires in: " << timeout << " msecs");
+
+    std::size_t n = 0;
+    while( true )
     {
         MutexLock lock(_mutex);
+        
         if( _avail.empty() )
             break;
 
-        msecs = 0;
+        if(n == 0)
+            n = _avail.size();
+
+        timeout = 0;
 
         Selectable* selectable = _avail.back();
         _avail.pop_back();
+        --n;
+
         lock.unlock();
 
         PT_LOG_DEBUG("running selectable");
         selectable->run();
+
+        if(n == 0)
+            break;
     }
 
     PT_LOG_DEBUG("waiting for events");
-    if( _selector.waitForWake(msecs) )
+    bool isActive = true;
+    if( _selector.waitForWake(timeout) )
         isActive = _eventQueue.processEvents(*_event);
 
     PT_LOG_TRACE("returning activity: " << isActive);
