@@ -146,7 +146,7 @@ rule ConfigureQt
     {       
         QT_SUFLIB = .lib ;
         
-        if $(WITH_DEBUG)
+        if ! $(WITH_OPTIM)
         {   
             QT_SUFLIB = d.lib ;
         }
