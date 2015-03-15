@@ -1,5 +1,5 @@
-#ifndef Pt_Hmi_PanelController_H
-#define Pt_Hmi_PanelController_H
+#ifndef Pt_Hmi_Panel_H
+#define Pt_Hmi_Panel_H
 
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/PointingEvent.h>
@@ -8,14 +8,14 @@
 namespace Pt{
 namespace Hmi{
 
-class PanelRenderer;
+class PanelView;
 
-class PT_HMI_API PanelController  : public Widget
+class PT_HMI_API Panel  : public Widget
 {
 public:
 
-	PanelController(PanelModel& model, PanelRenderer& renderer);
-	virtual ~PanelController();	
+	Panel(PanelModel& model, PanelView& view);
+	virtual ~Panel();	
 	
 	const PanelModel& panelModel() const 
 	{

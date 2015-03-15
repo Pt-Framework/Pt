@@ -1,25 +1,25 @@
-#include <Pt/Hmi/PanelController.h>
+#include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/WidgetModel.h>
 #include <Pt/Hmi/PanelModel.h>
-#include <Pt/Hmi/WindowController.h>
-#include <Pt/Hmi/PanelRenderer.h>
+#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/PanelView.h>
 
 namespace Pt{
 namespace Hmi{
 
-PanelController::PanelController(PanelModel& model, PanelRenderer& renderer)
-: Widget(model, renderer)
+Panel::Panel(PanelModel& model, PanelView& view)
+: Widget(model, view)
 , _resizeDir(No)
 {
 	
 }
 
-PanelController::~PanelController()
+Panel::~Panel()
 {
 }
 
 
-void PanelController::handleResize(const PointingEvent& ev)
+void Panel::handleResize(const PointingEvent& ev)
 {
 	const std::vector<DeviceButton>& but = ev.buttons();
 
@@ -38,7 +38,7 @@ void PanelController::handleResize(const PointingEvent& ev)
 	recalcPosAndSize(pos, _resizeDir);
 }
 
-void PanelController::recalcPosAndSize(const Pt::Gfx::PointF& p, ResizeDirection dir)
+void Panel::recalcPosAndSize(const Pt::Gfx::PointF& p, ResizeDirection dir)
 {
 	WidgetModel& model = widgetModel();
 
@@ -118,11 +118,11 @@ void PanelController::recalcPosAndSize(const Pt::Gfx::PointF& p, ResizeDirection
 	model.Size = Pt::Gfx::SizeF(width,height);
 	model.Position = Pt::Gfx::PointF(posX, posY);
 	_lastSizePoint = p;
-	invalidate();	
+	output();	
 }
 
 
-void PanelController::onPointerInput(const PointingEvent& ev)
+void Panel::onPointerInput(const PointingEvent& ev)
 {
 	Pt::Gfx::PointF p =  toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
 

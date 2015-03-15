@@ -25,10 +25,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
 #include "MainWindow.h"
 #include "Dialog1.h"
-#include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/WindowModel.h>
-#include <Pt/Hmi/ButtonController.h>
-#include <Pt/Hmi/PanelController.h>
+#include <Pt/Hmi/Button.h>
+#include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/PanelModel.h>
 #include <Pt/Hmi/LabelModel.h>
 #include <Pt/Hmi/ButtonModel.h>
@@ -83,7 +83,7 @@ void MainWindow::init()
 	windowModel().Caption.set("This is a Platinum C++ Human Machine Interface demo  ");
     windowModel().WindowState.set(Hmi::WindowStateType::Normal);
 	windowModel().WindowStartPostion.set(Hmi::WindowStartPositionType::CenterScreen);
-	windowController().ClosedAction += Pt::slot(*this, &MainWindow::onClosedByWindow);
+	window().ClosedAction += Pt::slot(*this, &MainWindow::onClosedByWindow);
 
 	
 	//Panel
@@ -117,7 +117,7 @@ void MainWindow::init()
 	_toggleButton.setActionKey("C//i");
 	_toggleButton.setPosition(Pt::Gfx::PointF(20,60));
 	_toggleButton.setSize(Pt::Gfx::SizeF(150,25));
-	_textLabel.labelController().bindMnemonicToWidget(&_toggleButton.buttonController());
+	_textLabel.label().bindMnemonicToWidget(&_toggleButton.button());
 	_mainPanel.addChild(&_toggleButton);
 
 	//Dialog button

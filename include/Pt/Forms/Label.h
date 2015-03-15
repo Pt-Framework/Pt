@@ -27,9 +27,9 @@
 #define Pt_Forms_Label_H
 
 #include <Pt/Forms/Widget.h>
-#include <Pt/Hmi/LabelController.h>
+#include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/LabelModel.h>
-#include <Pt/Hmi/LabelRenderer.h>
+#include <Pt/Hmi/LabelView.h>
 
 namespace Pt {
 namespace Forms {
@@ -52,12 +52,12 @@ public:
 	void setAutoSize(bool autoSize=true);
 	bool isAutoSize() const;
 
-	Pt::Hmi::LabelController& labelController();
-	void setLabelController(Pt::Hmi::LabelController& controller);
+	Pt::Hmi::Label& label();
+	void setLabel(Pt::Hmi::Label& controller);
 	Pt::Hmi::LabelModel& labelModel();
 
 
-	const Pt::Hmi::LabelController& labelController() const;
+	const Pt::Hmi::Label& label() const;
 	const Pt::Hmi::LabelModel& labelModel() const;
 
 protected:
@@ -68,9 +68,9 @@ protected:
 
 private:
 	Pt::Hmi::LabelModel		  _defModel;
-	Pt::Hmi::LabelRenderer	  _defRenderer;
-	Pt::Hmi::LabelController  _defController;
-	Pt::Hmi::LabelController* _currController;
+	Pt::Hmi::LabelView	    _defView;
+	Pt::Hmi::Label  _defController;
+	Pt::Hmi::Label* _currController;
 };
  
 }}

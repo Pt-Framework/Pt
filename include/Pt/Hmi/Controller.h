@@ -29,7 +29,7 @@
 #define Pt_Hmi_Controller_H
 
 #include <Pt/Connectable.h>
-#include <Pt/Hmi/OutputDevice.h>
+#include <Pt/Hmi/Output.h>
 #include <Pt/Hmi/Model.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/PointingEvent.h>
@@ -56,11 +56,11 @@ public:
 		return _model;
 	}
 
-	void addOutputDevice(OutputDevice* device);
+	void addOutput(Output* device);
 
-	void removeOutputDevice(OutputDevice* device);
+	void removeOutput(Output* device);
 
-	inline const std::vector<OutputDevice*>& outputDevices() const
+	inline const std::vector<Output*>& outputDevices() const
 	{
 		return _outputDevices;
 	}
@@ -131,9 +131,10 @@ public:
 		return onMoveFocusPrev();
 	}
 		
-	void output();		
+	void invalidate();
 
 protected:		
+	void output();		
 
 	virtual bool onMoveFocusNext()
 	{
@@ -162,7 +163,7 @@ private:
 	}
 
 private:
-	std::vector<OutputDevice*>	_outputDevices;
+	std::vector<Output*>	_outputDevices;
 	std::vector<Controller*>    _children;
 	Controller*					_parent;
 	Model&						_model;

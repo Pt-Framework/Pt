@@ -33,7 +33,7 @@
 namespace Pt{
 namespace Hmi{
 
-class WindowController;
+class Window;
 
 class CursorImpl
 {

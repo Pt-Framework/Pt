@@ -24,10 +24,10 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
 #include "MainWindow.h"
-#include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/WindowModel.h>
-#include <Pt/Hmi/ButtonController.h>
-#include <Pt/Hmi/PanelController.h>
+#include <Pt/Hmi/Button.h>
+#include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/PanelModel.h>
 #include <Pt/Hmi/LabelModel.h>
 #include <Pt/Hmi/ButtonModel.h>
@@ -86,10 +86,10 @@ void MainWindow::init()
 	windowModel().BackColor.set(Pt::Gfx::ARgbColor(0,255,255,255));
     windowModel().WindowState.set(Hmi::WindowStateType::Normal);
 	windowModel().WindowStartPostion.set(Hmi::WindowStartPositionType::CenterScreen);
-	windowController().ClosedAction += Pt::slot(*this, &MainWindow::onClosedByWindow);
+	window().ClosedAction += Pt::slot(*this, &MainWindow::onClosedByWindow);
 	windowModel().Pointer2DStatus.Changed += Pt::slot(*this, &MainWindow::onPointerChanged);
 
-	windowController().Render += Pt::slot(*this, &MainWindow::onRender);
+	window().Render += Pt::slot(*this, &MainWindow::onRender);
 
 	//Close button
 	_closeButton.setToggleButton(false);
@@ -174,7 +174,7 @@ void MainWindow::onPointerChanged(const Hmi::Property<Hmi::PointingEvent>& prop)
 	if(_painting)
 	{
 		_points.push_back(Pt::Gfx::PointF(pointerEvent.x(), pointerEvent.y())); 
-		 windowController().invalidate();
+		 window().invalidate();
 	}
 
 	if(pointerEvent.buttons()[0].state() == Hmi::DeviceButton::Released && _painting)

@@ -1,4 +1,4 @@
-#include <Pt/Hmi/LabelRenderer.h>
+#include <Pt/Hmi/LabelView.h>
 #include <Pt/Hmi/LabelModel.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/Widget.h>
@@ -11,15 +11,15 @@
 namespace Pt{
 namespace Hmi{
 
-LabelRenderer::LabelRenderer()
+LabelView::LabelView()
 {
 }
 
-LabelRenderer::~LabelRenderer()
+LabelView::~LabelView()
 {
 }
 
-void LabelRenderer::render(Pt::Hmi::WidgetModel* m)
+void LabelView::render(Pt::Hmi::Model* m)
 {
 	LabelModel* model = dynamic_cast<LabelModel*>(m);	
 	
@@ -29,7 +29,7 @@ void LabelRenderer::render(Pt::Hmi::WidgetModel* m)
 	if(!model->Visible.get())
 		return;	
 
-	Pt::Hmi::Painter& localPainter = model->paintSurface()->painter();	
+	Pt::Hmi::Painter& localPainter = paintSurface().painter();	
 			
 	if(model->AutoSize.get())
 	{		
@@ -40,7 +40,7 @@ void LabelRenderer::render(Pt::Hmi::WidgetModel* m)
 		model->Size.set(currentSize);
 
 		//Render the panel	
-		PanelRenderer::render(model);
+		PanelView::render(model);
 
 		//Render the label
 		Pt::Gfx::PointF	pos(0, currentSize.height()  - metric.ascent() - metric.descent());
@@ -53,7 +53,7 @@ void LabelRenderer::render(Pt::Hmi::WidgetModel* m)
 	}
 	else
 	{		
-		PanelRenderer::render(model);
+		PanelView::render(model);
 
 		switch(model->TextAlign.get())
 		{

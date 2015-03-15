@@ -31,7 +31,7 @@
 #include <Pt/Gfx/Rgb888Image.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/WindowModel.h>
-#include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/Window.h>
 
 namespace Pt{
 namespace Hmi{
@@ -78,14 +78,14 @@ bool ViewImpl::onClosing()
 		return false;
 
 	bool canClose = false;
-	WindowController* controller = (WindowController*)_model->controller();
+	Window* controller = (Window*)_model->controller();
 	controller->ClosingAction.send(controller,canClose);
 	return canClose;
 }
 
 void ViewImpl::onClosed()
 {
-	WindowController* controller = (WindowController*)_model->controller();
+	Window* controller = (Window*)_model->controller();
 	controller->ClosedAction.send(controller);
 }
 
@@ -155,8 +155,8 @@ void ViewImpl::setWindowSizeAndPos(bool firstShow)
 			
 		case WindowStartPositionType::CenterParent:
 		{
-			WindowController* controller = (WindowController*) _model->controller();
-			WindowController* parent = controller->windowParent();
+			Window* controller = (Window*) _model->controller();
+			Window* parent = controller->windowParent();
 				
 			if( parent == 0)
 			{

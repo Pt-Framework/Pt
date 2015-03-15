@@ -31,9 +31,9 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/ButtonController.h>
+#include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/ButtonModel.h>
-#include <Pt/Hmi/ButtonRenderer.h>
+#include <Pt/Hmi/ButtonView.h>
 
 namespace Pt{
 namespace Forms{  
@@ -60,11 +60,11 @@ public:
 	const std::string& actionKey() const;
 
 	const Hmi::ButtonModel& buttonModel() const;
-	const Hmi::ButtonController& buttonController() const;
+	const Hmi::Button& button() const;
 
 	Hmi::ButtonModel& buttonModel();
-	Hmi::ButtonController& buttonController();
-	void setButtonController(Pt::Hmi::ButtonController& ctrl);
+	Hmi::Button& button();
+	void setButton(Pt::Hmi::Button& ctrl);
 
 public:    
     Pt::Signal<>	 ClickedAction;
@@ -86,9 +86,9 @@ private:
     
 private:
 	Pt::Hmi::ButtonModel      _defModel;
-	Pt::Hmi::ButtonRenderer   _defRenderer;
-	Pt::Hmi::ButtonController _defController;
-	Pt::Hmi::ButtonController* _currentController;
+	Pt::Hmi::ButtonView   _defView;
+	Pt::Hmi::Button _defController;
+	Pt::Hmi::Button* _currentController;
 };
  
 }}

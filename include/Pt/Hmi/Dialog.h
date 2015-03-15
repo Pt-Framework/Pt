@@ -1,5 +1,4 @@
-/* Copyright (C) 2013 Marc Boris Duerner 
- * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,60 +22,45 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-#ifndef Pt_Hmi_ButtonController_H
-#define Pt_Hmi_ButtonController_H
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
+#ifndef Pt_Hmi_Dialog_H
+#define Pt_Hmi_Dialog_H
 
-#include <Pt/Hmi/LabelController.h>
-#include <Pt/Hmi/ButtonModel.h>
+#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/DialogModel.h>
 #include <Pt/Gfx/ImagePainter.h>
-#include <Pt/System/Timer.h>
+#include <Pt/System/Semaphore.h>
+#include <Pt/System/MainLoop.h>
 
 namespace Pt{
 namespace Hmi{
 
-class PointingEvent;
-class ButtonRenderer;
+class View;
 
-class PT_HMI_API ButtonController  : public LabelController
+class PT_HMI_API Dialog  : public Window
 {
 public:
-	ButtonController(ButtonModel& model, ButtonRenderer& renderer);
-	virtual ~ButtonController();
+	Dialog(DialogModel& m, WindowView& view);
+	virtual ~Dialog();	
 
-	Signal<Controller*> PressedAction;
-	Signal<Controller*> DoublePressedAction;
+	void doModal(Window* parent);
 
-	Signal<Controller*, bool> CheckedAction;
-
-	ButtonModel& buttonModel()
+	DialogModel& dialogModel()
 	{
-		return static_cast<ButtonModel&>(model());
+		return static_cast<DialogModel&>(model());
 	}
 
-	const ButtonModel& buttonModel() const 
+	const DialogModel& dialogModel() const
 	{
-		return static_cast<const ButtonModel&>(model());
+		return static_cast<const DialogModel&>(model());
 	}
 
 protected:
-	virtual void onPressedAction();
-	virtual void onDoublePressedAction();
-	virtual void onCheckedAction(bool checked);
-	virtual void onModelChanged(bool created, const Model& model);
-	virtual void onMnemonic();
-private:
-	virtual void onPointerInput(const PointingEvent& ev);
-	virtual void onKeyInput(const KeyEvent& ev);
-	void onButtonStateChanged( const Property<DeviceButton::State>& prop);
-	void onDoublePressedTimeout();
+	virtual void onClosed(Controller* sender);
 
-private:	
-	bool _pressed;
-	bool _timeout;
-	int _pressCounter;
-	Pt::System::Timer _doublePressTimer;
+protected:
+	Pt::System::MainLoop _done;	
+	bool _closed;
 };
 
 }}

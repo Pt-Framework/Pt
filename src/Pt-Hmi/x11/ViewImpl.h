@@ -94,7 +94,7 @@ private:
 
 	bool					_ignoreSizeEvent;
 	Pt::Hmi::WindowModel* 		_model;
-	Pt::Hmi::WindowController* 	_controller;
+	Pt::Hmi::Window* 	_controller;
 	Pt::Hmi::PointingEvent 	_mouseEvent;
 	Pt::Hmi::KeyEvent      	_keyEvent;
 	Window  				_window;

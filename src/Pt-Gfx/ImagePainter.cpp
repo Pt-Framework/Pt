@@ -292,7 +292,6 @@ void ImagePainter::drawImage( const  Gfx::PointF& to, const ARgbImage& image )
     if( static_cast<size_t>(startY) > _image.height())
         startY = _image.height();
 
-
     if( stopY < 0)
         stopY = 0;
     

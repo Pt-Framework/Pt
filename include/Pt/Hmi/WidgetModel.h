@@ -107,24 +107,7 @@ public:
 	Pt::Gfx::Point fromUnit(const Pt::Gfx::PointF& value);
 	Pt::Gfx::Size fromUnit(const Pt::Gfx::SizeF& value);
 	double unitSizeInch() const;
-	double unitSizeMm() const;
-	
-	inline PaintSurface* paintSurface()
-	{
-		return _paintSurface;
-	}
-
-protected:	
-	inline void setPaintSurface( PaintSurface* surface)
-	{
-		if(_paintSurface != 0)
-			delete _paintSurface;
-		
-		_paintSurface = surface;
-	}
-
-protected:
-	PaintSurface* _paintSurface;
+	double unitSizeMm() const;	
 
 public:
 	std::string getMnemonicKey() const;

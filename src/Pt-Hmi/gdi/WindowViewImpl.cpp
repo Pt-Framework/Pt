@@ -23,10 +23,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include "ViewImpl.h"
-#include <Pt/Hmi/View.h>
-#include <Pt/Hmi/NativePaintSurface.h>
-#include <Pt/Hmi/ImagePaintSurface.h>
+#include "WindowViewImpl.h"
+#include <Pt/Hmi/WindowView.h>
 #include "ApplicationImpl.h"
 #include <Windows.h>
 #include <WindowsX.h>
@@ -35,24 +33,24 @@
 #include <Pt/Gfx/Rgb888Image.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/WindowModel.h>
-#include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/Window.h>
 #include "PaintSurfaceImpl.h"
 
 namespace Pt{
 namespace Hmi{
 
-ViewImpl::ViewImpl()
+WindowViewImpl::WindowViewImpl()
 : _hwnd(0)
 , _model(0)
 , _ignoreSizePositionEvent(false)
 {	
 	Pt::Hmi::Application* app = (Pt::Hmi::Application*) &Pt::Hmi::Application::instance();	
-	app->impl()->WindowEvent += Pt::slot(*this, &ViewImpl::onWindowEvent);
+	app->impl()->WindowEvent += Pt::slot(*this, &WindowViewImpl::onWindowEvent);
 	_pointerEvent.buttons().resize(3);	
 	create();
 }
 
-void ViewImpl::create()
+void WindowViewImpl::create()
 {
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
@@ -62,7 +60,7 @@ void ViewImpl::create()
 	UpdateWindow(_hwnd);	
 }
 
-void ViewImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
+void WindowViewImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 {
 	if(!_model->Enabled.get())
 		return;
@@ -109,12 +107,10 @@ void ViewImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 		_keyEvent.setUnicode(ucode);
 	}
 
-	_keyEvent.setController(_controller);
-
 	Application::instance().systemEvent().send(_keyEvent);
 }
 
-void ViewImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wparam, long lparam, bool& handled)
+void WindowViewImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wparam, long lparam, bool& handled)
 {
 	if(_hwnd != wnd)
 		return;
@@ -200,12 +196,12 @@ void ViewImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wparam
 	}
 }
 
-ViewImpl::~ViewImpl()
+WindowViewImpl::~WindowViewImpl()
 {
     DestroyWindow(_hwnd);
 }
 
-bool ViewImpl::onClosing()
+bool WindowViewImpl::onClosing()
 {
 	if(!_model->Enabled.get())
 		return false;
@@ -215,12 +211,12 @@ bool ViewImpl::onClosing()
 	return canClose;
 }
 
-void ViewImpl::onClosed()
+void WindowViewImpl::onClosed()
 {
 	_controller->ClosedAction.send(_controller);
 }
 
-void ViewImpl::onSize(WPARAM wParam, LPARAM lParam)
+void WindowViewImpl::onSize(WPARAM wParam, LPARAM lParam)
 {
 	if(_ignoreSizePositionEvent)
 		return;
@@ -248,7 +244,7 @@ void ViewImpl::onSize(WPARAM wParam, LPARAM lParam)
 
 }
 
-void ViewImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
+void WindowViewImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 {	
 	int xPos = GET_X_LPARAM(lparam); 
 	int yPos = GET_Y_LPARAM(lparam); 
@@ -282,14 +278,12 @@ void ViewImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
   
 	 Pt::Gfx::PointF p = _model->toUnit(Pt::Gfx::Point(xPos, yPos));
 	_pointerEvent.setX(p.x());
-	_pointerEvent.setY(p.y());	
-
-	_pointerEvent.setController(_controller);	
+	_pointerEvent.setY(p.y());			
 
 	Application::instance().systemEvent().send(_pointerEvent);
 }
 
-void ViewImpl::setWindowSizeAndPos(bool firstShow)
+void WindowViewImpl::setWindowSizeAndPos(bool firstShow)
 {
 	_ignoreSizePositionEvent = true;
 	
@@ -319,7 +313,7 @@ void ViewImpl::setWindowSizeAndPos(bool firstShow)
 			
 			case WindowStartPositionType::CenterParent:
 			{				
-				WindowController* parent = _controller->windowParent();
+				Window* parent = _controller->windowParent();
 				
 				if( parent == 0)
 				{
@@ -327,16 +321,16 @@ void ViewImpl::setWindowSizeAndPos(bool firstShow)
 				}
 				else
 				{
-					ViewImpl* parentImpl = 0;
+					WindowViewImpl* parentImpl = 0;
 
 					for(size_t i = 0; i < parent->outputDevices().size(); ++i)
 					{	
-						View* parentDevice = dynamic_cast<View*>(parent->outputDevices()[i]);
+						WindowView* parentDevice = dynamic_cast<WindowView*>(parent->outputDevices()[i]);
 
 						if( parentDevice == 0)
 							continue;
 
-						parentImpl = dynamic_cast<ViewImpl*>(parentDevice->impl());
+						parentImpl = dynamic_cast<WindowViewImpl*>(parentDevice->impl());
 						
 						if( parentImpl != 0)
 							break;
@@ -356,7 +350,7 @@ void ViewImpl::setWindowSizeAndPos(bool firstShow)
 	_ignoreSizePositionEvent = false;
 }
 
-void ViewImpl::centerWindowTo(HWND parent)
+void WindowViewImpl::centerWindowTo(HWND parent)
 {
 	RECT parentRect;   
 	GetWindowRect(parent, &parentRect);
@@ -372,7 +366,7 @@ void ViewImpl::centerWindowTo(HWND parent)
 	SetWindowPos(_hwnd,0, posX, posY, size.width(), size.height(), SWP_DRAWFRAME);
 }
 
-void ViewImpl::updateModelSizeAndPos()
+void WindowViewImpl::updateModelSizeAndPos()
 {
 	RECT  info;
 	GetWindowRect(_hwnd, &info);
@@ -389,7 +383,7 @@ void ViewImpl::updateModelSizeAndPos()
 		_model->Size = _model->toUnit(winSize);
 }
 
-void ViewImpl::onMove()
+void WindowViewImpl::onMove()
 {
 	if(_ignoreSizePositionEvent)
 		return;
@@ -404,31 +398,22 @@ void ViewImpl::onMove()
 	updateModelSizeAndPos();
 }
 
-void ViewImpl::onPaint()
+void WindowViewImpl::onPaint()
 {   		
 	if(_model == 0)
 		return;
 
 	PAINTSTRUCT ps;
-    HDC windowContext = BeginPaint(_hwnd, &ps);
+	HDC windowContext = BeginPaint(_hwnd, &ps);
 	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
-	Pt::Hmi::PaintSurface* surface = _model->paintSurface();
-	Pt::Hmi::NativePaintSurface* nativePaintSurface = dynamic_cast<Pt::Hmi::NativePaintSurface*>(surface);
-	Pt::Hmi::ImagePaintSurface* imagePaintSurface = dynamic_cast<Pt::Hmi::ImagePaintSurface*>(surface);
+	Pt::Hmi::PaintSurface& surface = _controller->widgetView().paintSurface();
 
-	if(nativePaintSurface != 0)
-	{
-		HDC bitmapDeviceConText = nativePaintSurface->impl()->deviceContext();
-		BitBlt(windowContext, 0, 0, size.width(), size.height(), bitmapDeviceConText, 0, 0, SRCCOPY);	
-		EndPaint(_hwnd, &ps);	
-	}
-	else if(imagePaintSurface != 0)
-	{
-		//TODO: draw image
-	}
+	HDC bitmapDeviceConText = surface.impl()->deviceContext();
+	BitBlt(windowContext, 0, 0, size.width(), size.height(), bitmapDeviceConText, 0, 0, SRCCOPY);	
+	EndPaint(_hwnd, &ps);	
 }
 
-void ViewImpl::setWindowIcon()
+void WindowViewImpl::setWindowIcon()
 {
 	if( _model->Icon.get().width() == 0 ||  _model->Icon.get().height() == 0)
 		return;
@@ -458,7 +443,7 @@ void ViewImpl::setWindowIcon()
 	SetClassLong(_hwnd, GCL_HICON, (LONG)icon); 	
 }
 
-void ViewImpl::setWindowProperties()
+void WindowViewImpl::setWindowProperties()
 {
 	SetWindowText(_hwnd, _model->Caption.get().c_str());
 
@@ -559,7 +544,7 @@ void ViewImpl::setWindowProperties()
 		ShowWindow(_hwnd, SW_SHOW);		
 }
 
-void ViewImpl::destroy()
+void WindowViewImpl::destroy()
 {
 	if( _hwnd == 0)
 		return;
@@ -568,15 +553,13 @@ void ViewImpl::destroy()
 	_hwnd = 0;
 }
 
-void ViewImpl::output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model)
+void WindowViewImpl::output(Pt::Hmi::Model* model)
 {
 	bool firstShow =  (_model == 0);
 	_model = dynamic_cast<WindowModel*>(model);
-	_controller = dynamic_cast<WindowController*>(controller);
 
 	assert(_model != 0);
-	assert(_controller != 0);	
-
+		
 	//Check create/destroy
 	if(_model->Closed.get())
 	{

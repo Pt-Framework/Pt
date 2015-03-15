@@ -27,7 +27,7 @@
 #define Pt_Hmi_ViewImpl_H
 
 #include <Pt/Hmi/Model.h>
-#include <Pt/Hmi/OutputDevice.h>
+#include <Pt/Hmi/Output.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/Painter.h>
@@ -97,7 +97,7 @@ private:
 	NSWindow*				_window;
 	NSView*					_view;
 	Pt::Hmi::WindowModel*	_model;
-    Pt::Hmi::WindowController* _controller;
+    Pt::Hmi::Window* _controller;
     Pt::Hmi::PointingEvent 	_mouseEvent;
 	Pt::Hmi::KeyEvent      	_keyEvent;
     Pt::System::Timer       _timer;

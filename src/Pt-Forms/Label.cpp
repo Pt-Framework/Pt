@@ -1,27 +1,24 @@
 #include <Pt/Forms/Label.h>
-#include <Pt/Hmi/LabelController.h>
-#include <Pt/Hmi/LabelModel.h>
-#include <Pt/Hmi/LabelRenderer.h>
 
 namespace Pt {
 namespace Forms {
 
 Label::Label()
-: _defController(_defModel, _defRenderer)
+: _defController(_defModel, _defView)
 , _currController(0)
 {
 	_defModel.ForeColor.set(Pt::Gfx::ARgbColor(0,0,0));
 	_defModel.BorderWidth.set(1);
 	_defModel.BorderStyle.set(Hmi::BorderStyleType::NoBorder);
-	setLabelController(_defController);	
+	setLabel(_defController);	
 }
 
-void Label::setLabelController(Pt::Hmi::LabelController& controller)
+void Label::setLabel(Pt::Hmi::Label& controller)
 {
 	_currController = &controller;
 }
 
-const Pt::Hmi::LabelController& Label::labelController() const
+const Pt::Hmi::Label& Label::label() const
 {
 	return *_currController;
 }
@@ -31,7 +28,7 @@ const Pt::Hmi::LabelModel& Label::labelModel() const
 	return _currController->labelModel();
 }
 
-Pt::Hmi::LabelController& Label::labelController()
+Pt::Hmi::Label& Label::label()
 {
 	return *_currController;
 }

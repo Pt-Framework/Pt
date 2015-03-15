@@ -33,9 +33,10 @@
 namespace Pt{
 namespace Hmi{
 
-PaintSurfaceImpl::PaintSurfaceImpl(const Pt::Gfx::SizeF& size)
+PaintSurfaceImpl::PaintSurfaceImpl()
 : _deviceContext(0)
 {
+	_size = Pt::Gfx::SizeF(10,10);
 	Pt::Gfx::Size nsize = Application::instance().fromUnit(_size);
 
 	HDC screenDC = CreateDC(_T("DISPLAY"), NULL, NULL, NULL);
@@ -44,11 +45,11 @@ PaintSurfaceImpl::PaintSurfaceImpl(const Pt::Gfx::SizeF& size)
     
 	DeleteDC(screenDC);
 
-    _oldPen   = (HPEN)  GetCurrentObject(_deviceContext, OBJ_PEN);
-    _oldBrush = (HBRUSH) GetCurrentObject(_deviceContext, OBJ_BRUSH);
-    _oldFont  = (HFONT) GetCurrentObject(_deviceContext, OBJ_FONT);
+   _oldPen   = (HPEN)  GetCurrentObject(_deviceContext, OBJ_PEN);
+   _oldBrush = (HBRUSH) GetCurrentObject(_deviceContext, OBJ_BRUSH);
+   _oldFont  = (HFONT) GetCurrentObject(_deviceContext, OBJ_FONT);
 
-    SelectObject(_deviceContext, _bitmapHandle);
+  SelectObject(_deviceContext, _bitmapHandle);
 	SetBkMode(_deviceContext, TRANSPARENT);
 }
 
@@ -82,13 +83,13 @@ void PaintSurfaceImpl::resize(const Pt::Gfx::SizeF& size)
 
 	//Save the old settings
 	COLORREF textColor = GetTextColor(_deviceContext);
-    _oldPen   = (HPEN)  GetCurrentObject(_deviceContext, OBJ_PEN);
-    _oldBrush = (HBRUSH) GetCurrentObject(_deviceContext, OBJ_BRUSH);
-    _oldFont  = (HFONT) GetCurrentObject(_deviceContext, OBJ_FONT);
+  _oldPen   = (HPEN)  GetCurrentObject(_deviceContext, OBJ_PEN);
+  _oldBrush = (HBRUSH) GetCurrentObject(_deviceContext, OBJ_BRUSH);
+  _oldFont  = (HFONT) GetCurrentObject(_deviceContext, OBJ_FONT);
 
-    //Delete the context and bitmap
-    DeleteDC(_deviceContext);
-    DeleteObject(_bitmapHandle);
+  //Delete the context and bitmap
+  DeleteDC(_deviceContext);
+	DeleteObject(_bitmapHandle);
 
     //Create a new context and bitmap
     HDC screenDC = CreateDC(_T("DISPLAY"), NULL, NULL, NULL);

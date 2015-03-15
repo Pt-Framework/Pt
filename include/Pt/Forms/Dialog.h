@@ -28,10 +28,9 @@
 
 #include <Pt/Forms/Window.h>
 #include <Pt/Hmi/DialogModel.h>
-#include <Pt/Hmi/View.h>
-#include <Pt/Hmi/DialogController.h>
+#include <Pt/Hmi/WindowView.h>
+#include <Pt/Hmi/Dialog.h>
 #include <Pt/Hmi/DialogModel.h>
-#include <Pt/Hmi/DialogRenderer.h>
 #include <Pt/Hmi/Widget.h>
 
 namespace Pt {
@@ -49,12 +48,12 @@ public:
 	virtual Hmi::DialogResultType::Type result() const;
 	virtual void setResult(Hmi::DialogResultType::Type r);
 
-	Hmi::DialogController& dialogController();
-	void setDialogController(Hmi::DialogController& controller);
+	Hmi::Dialog& dialog();
+	void setDialog(Hmi::Dialog& controller);
 
 	Hmi::DialogModel& dialogModel();
 
-	const Hmi::DialogController& dialogController() const;
+	const Hmi::Dialog& dialog() const;
 	const Hmi::DialogModel& dialogModel()const ;
 
 	virtual void setSize(const Pt::Gfx::SizeF& size);
@@ -64,16 +63,13 @@ public:
 	virtual const Pt::Gfx::PointF& position() const;
 
 protected:
-	virtual void show(Hmi::WindowController& parent); 
+	virtual void show(Hmi::Window& parent); 
 
 private:
 	Pt::Hmi::DialogModel		_defModel;
-	Pt::Hmi::DialogRenderer 	_defRenderer;
-
-	Pt::Hmi::DialogController	_defController;
-	Pt::Hmi::DialogController*	_currController;
-
-	Pt::Hmi::View    _View;
+	Pt::Hmi::WindowView 	  _defView;
+	Pt::Hmi::Dialog	_defController;
+	Pt::Hmi::Dialog*	_currController;
 };
  
 }}

@@ -26,9 +26,9 @@
 #include "Dialog2.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/DialogModel.h>
-#include <Pt/Hmi/DialogController.h>
+#include <Pt/Hmi/Dialog.h>
 #include <Pt/Hmi/ButtonModel.h>
-#include <Pt/Hmi/ButtonController.h>
+#include <Pt/Hmi/Button.h>
 
 namespace Pt{
 namespace Forms{
@@ -85,7 +85,7 @@ void Dialog2::init()
     
 void Dialog2::onClosedByButton()
 {
-	dialogController().close();
+	dialog().close();
 }
 
 }}}}

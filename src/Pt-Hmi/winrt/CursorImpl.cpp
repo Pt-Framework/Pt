@@ -28,7 +28,7 @@
 #include <Windows.h>
 #include <Pt/Hmi/Application.h>
 #include "ApplicationImpl.h"
-#include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/Window.h>
 
 namespace Pt{
 namespace Hmi{
@@ -41,7 +41,7 @@ CursorImpl::~CursorImpl()
 {
 }
 
-void CursorImpl::setCursor(Cursors::Type c, WindowController* parent)
+void CursorImpl::setCursor(Cursors::Type c, Window* parent)
 {
 	_type = c;
 	/*

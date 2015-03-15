@@ -14,7 +14,7 @@ class PaintSurfaceImpl;
 class PT_HMI_API PaintSurface
 {
 public:		
-	PaintSurface(const Pt::Gfx::SizeF& size);
+	PaintSurface();
 	virtual ~PaintSurface();
 
 	virtual Pt::Gfx::ARgbImage toImage() const;

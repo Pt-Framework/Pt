@@ -24,31 +24,25 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Forms/Button.h>
-#include <Pt/Hmi/ButtonController.h>
-#include <Pt/Hmi/ButtonModel.h>
-#include <Pt/Hmi/ButtonRenderer.h>
-#include <Pt/Hmi/Controller.h>
 
 namespace Pt{
 namespace Forms{
 
 Button::Button()
-: _defModel()
-, _defRenderer()
-, _defController(_defModel, _defRenderer)
+: _defController(_defModel, _defView)
 {
 	_defModel.ForeColor.set(Pt::Gfx::ARgbColor(0,0,0));
 	_defModel.BorderWidth.set(1);
 	_defModel.BorderStyle.set(Hmi::BorderStyleType::Widget);
 
-	setButtonController(_defController);
+	setButton(_defController);
 }
 
-void Button::setButtonController(Pt::Hmi::ButtonController& controller)
+void Button::setButton(Pt::Hmi::Button& controller)
 {
 	_currentController = &controller;
-    buttonController().PressedAction += Pt::slot(*this, &Button::handleOnClicked);
-    buttonController().CheckedAction += Pt::slot(*this, &Button::handleOnChecked);
+    button().PressedAction += Pt::slot(*this, &Button::handleOnClicked);
+    button().CheckedAction += Pt::slot(*this, &Button::handleOnChecked);
 }
 
 void Button::setToggleButton(bool toggle)
@@ -129,7 +123,7 @@ const Hmi::ButtonModel& Button::buttonModel() const
 	return _currentController->buttonModel();
 }
 
-const Hmi::ButtonController& Button::buttonController() const
+const Hmi::Button& Button::button() const
 {
 	return *_currentController;
 }
@@ -139,7 +133,7 @@ Hmi::ButtonModel& Button::buttonModel()
 	return _currentController->buttonModel();
 }
 
-Hmi::ButtonController& Button::buttonController()
+Hmi::Button& Button::button()
 {
 	return *_currentController;
 }

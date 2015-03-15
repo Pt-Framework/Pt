@@ -44,7 +44,7 @@ class PainterImpl;
 class PaintSurfaceImpl
 {
 public:		
-	PaintSurfaceImpl(const Pt::Gfx::SizeF& size);
+	PaintSurfaceImpl();
 	virtual ~PaintSurfaceImpl();
 
 	Pt::Gfx::ARgbImage toImage();

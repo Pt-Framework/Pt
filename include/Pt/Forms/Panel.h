@@ -2,9 +2,9 @@
 #define Pt_Forms_Panel_H
 
 #include <Pt/Forms/Widget.h>
-#include <Pt/Hmi/PanelController.h>
+#include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/PanelModel.h>
-#include <Pt/Hmi/PanelRenderer.h>
+#include <Pt/Hmi/PanelView.h>
 
 namespace Pt {
 namespace Forms {
@@ -21,11 +21,11 @@ public:
     virtual void setPosition(const Pt::Gfx::PointF& position);
 	virtual const Pt::Gfx::PointF& position() const;
 	
-	Pt::Hmi::PanelController&	panelController();
+	Pt::Hmi::Panel&	panel();
 	Pt::Hmi::PanelModel&		panelModel();
-	void setPanelController(Pt::Hmi::PanelController& ctrl);
+	void setPanel(Pt::Hmi::Panel& ctrl);
 
-	const Pt::Hmi::PanelController&	panelController() const;
+	const Pt::Hmi::Panel&	panel() const;
 	const Pt::Hmi::PanelModel&		panelModel() const;
 
 protected:
@@ -36,10 +36,10 @@ protected:
 	}
 
 private:
-	Pt::Hmi::PanelModel			_defModel;
-	Pt::Hmi::PanelRenderer		_defRenderer;
-	Pt::Hmi::PanelController	_defController;
-	Pt::Hmi::PanelController*	_currController;
+	Pt::Hmi::PanelModel		_defModel;
+	Pt::Hmi::PanelView		_defView;
+	Pt::Hmi::Panel				_defController;
+	Pt::Hmi::Panel*	_currController;
 };
  
 }}

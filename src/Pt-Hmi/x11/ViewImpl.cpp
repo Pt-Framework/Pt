@@ -37,7 +37,7 @@
 #include <Pt/Hmi/Widget.h>
 
 #include <Pt/Hmi/View.h>
-#include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/Window.h>
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -715,7 +715,7 @@ void ViewImpl::updateDrawBuffer()
 void ViewImpl::output(Pt::Hmi::Controller* controller,Pt::Hmi::Model* model)
 {
 	_model = dynamic_cast<WindowModel*>(model);
-  _controller = dynamic_cast<WindowController*>(controller);
+  _controller = dynamic_cast<Window*>(controller);
 
 	//Handle open/close
 	if(_model->Closed.get())

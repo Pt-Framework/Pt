@@ -2,7 +2,7 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/View.h>
-#include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/Window.h>
 #include "ViewImpl.h"
 #include "ApplicationImpl.h"
 

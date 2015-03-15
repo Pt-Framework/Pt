@@ -4,7 +4,7 @@
 #include <Pt/Hmi/Controller.h>
 #include <Pt/Hmi/PointingEvent.h>
 #include <Pt/Hmi/WidgetModel.h>
-#include <Pt/Hmi/Renderer.h>
+#include <Pt/Hmi/WidgetView.h>
 
 namespace Pt{
 namespace Hmi{
@@ -14,16 +14,24 @@ class WidgetModel;
 class PT_HMI_API Widget  : public Controller
 {
 public:
-	Widget(WidgetModel& model, Renderer& renderer);
+	Widget(WidgetModel& model, WidgetView& view);
 	virtual ~Widget();		
 
 	const WidgetModel& widgetModel() const; 
 
 	WidgetModel& widgetModel();
 
-	virtual void render();
-	virtual void output();
-	virtual void invalidate();
+	const WidgetView& widgetView() const
+	{
+		return _view;
+	}
+
+	WidgetView& widgetView()
+	{
+		return _view;
+	}
+	
+	void invalidate();	
 				
 	inline const Widget* parent() const
 	{
@@ -43,6 +51,7 @@ public:
 	Pt::Signal<Widget&> Output;
 
 protected:
+	virtual void output();	
 	bool onMoveFocusNext();
 	bool onMoveFocusPrev();	
 	void onFocusChanged(const Property<bool>& prop);	
@@ -70,7 +79,7 @@ public:
 
 private:
 	Widget* _mnemonicWidget;
-	Renderer& _renderer;
+	WidgetView& _view;
 };
 
 }}

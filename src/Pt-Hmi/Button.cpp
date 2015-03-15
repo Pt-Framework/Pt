@@ -26,9 +26,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <Pt/Hmi/ButtonController.h>
-#include <Pt/Hmi/ButtonModel.h>
-#include <Pt/Hmi/ButtonRenderer.h>
+#include <Pt/Hmi/Button.h>
+#include <Pt/Hmi/ButtonView.h>
 #include <Pt/Hmi/Application.h>
 
 namespace Pt{
@@ -37,35 +36,35 @@ namespace Hmi{
 class PointingDevice;
 class GfxOutput;
 
-ButtonController::ButtonController(ButtonModel& model, ButtonRenderer& renderer)
-: LabelController(model, renderer)
+Button::Button(ButtonModel& model, ButtonView& view)
+: Label(model, view)
 , _pressed(false)
 , _timeout(false)
 , _pressCounter(0)
 {
-	_doublePressTimer.timeout() += Pt::slot(*this, &ButtonController::onDoublePressedTimeout);
+	_doublePressTimer.timeout() += Pt::slot(*this, &Button::onDoublePressedTimeout);
 	_doublePressTimer.setActive(Pt::Hmi::Application::instance().loop());
-	buttonModel().ButtonState.Changed += Pt::slot(*this, &ButtonController::onButtonStateChanged);
+	buttonModel().ButtonState.Changed += Pt::slot(*this, &Button::onButtonStateChanged);
 	bindMnemonicToWidget(this);
 }
 
-ButtonController::~ButtonController()
+Button::~Button()
 {
 }
 
-void ButtonController::onDoublePressedTimeout()
+void Button::onDoublePressedTimeout()
 {
 	_timeout = true;
 	_pressCounter = 0;
 	_doublePressTimer.stop();
 }
 
-void ButtonController::onCheckedAction(bool state)
+void Button::onCheckedAction(bool state)
 {
 	CheckedAction.send(this, state);
 }
 
-void ButtonController::onPressedAction()
+void Button::onPressedAction()
 {
 	PressedAction.send(this);
 	_pressCounter++;
@@ -80,17 +79,17 @@ void ButtonController::onPressedAction()
 	}
 }
 
-void ButtonController::onMnemonic()
+void Button::onMnemonic()
 {
 	if(!buttonModel().Enabled.get())
 	{
-		LabelController::onMnemonic();
+		Label::onMnemonic();
 		return;
 	}
 
 	if(!buttonModel().Visible.get())
 	{
-		LabelController::onMnemonic();
+		Label::onMnemonic();
 		return;
 	}
 
@@ -112,25 +111,25 @@ void ButtonController::onMnemonic()
 		break;
 	}
 	
-	LabelController::onMnemonic();		
+	Label::onMnemonic();		
 	invalidate();	
 }
 
-void ButtonController::onDoublePressedAction()
+void Button::onDoublePressedAction()
 {
 	DoublePressedAction.send(this);
 	_doublePressTimer.stop();
 }
 
-void ButtonController::onModelChanged(bool created, const Model& model)
+void Button::onModelChanged(bool created, const Model& model)
 {
-	LabelController::onModelChanged(created, model);
+	Label::onModelChanged(created, model);
 
 	if( created)
-		buttonModel().ButtonState.Changed += Pt::slot(*this, &ButtonController::onButtonStateChanged);
+		buttonModel().ButtonState.Changed += Pt::slot(*this, &Button::onButtonStateChanged);
 }
 
-void ButtonController::onButtonStateChanged( const Property<DeviceButton::State>& prop )
+void Button::onButtonStateChanged( const Property<DeviceButton::State>& prop )
 {
 	switch( buttonModel().ButtonType.get())
 	{
@@ -158,18 +157,18 @@ void ButtonController::onButtonStateChanged( const Property<DeviceButton::State>
 	}
 }
 
-void ButtonController::onKeyInput(const KeyEvent& ev)
+void Button::onKeyInput(const KeyEvent& ev)
 {	
 	
 	if(!buttonModel().Enabled.get())
 	{
-		LabelController::onKeyInput(ev);
+		Label::onKeyInput(ev);
 		return;
 	}
 
 	if(!buttonModel().Visible.get())
 	{
-		LabelController::onKeyInput(ev);
+		Label::onKeyInput(ev);
 		return;
 	}
 	bool genOutput = false;
@@ -229,33 +228,33 @@ void ButtonController::onKeyInput(const KeyEvent& ev)
 		break;
 	}
 	
-	LabelController::onKeyInput(ev);
+	Label::onKeyInput(ev);
 	
 	if(genOutput)
 		invalidate();
 }
 
-void ButtonController::onPointerInput(const PointingEvent& ev)
+void Button::onPointerInput(const PointingEvent& ev)
 {	
 	
 	Pt::Gfx::PointF point = toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
 
 	if(!buttonModel().Enabled.get())
 	{
-		LabelController::onPointerInput(ev);
+		Label::onPointerInput(ev);
 		return;
 	}
 
 	if(!buttonModel().Visible.get())
 	{
-		LabelController::onPointerInput(ev);
+		Label::onPointerInput(ev);
 		return;
 	}
 
 	if(!buttonModel().contains(point))
 	{
 		buttonModel().Armed = false;
-		LabelController::onPointerInput(ev);
+		Label::onPointerInput(ev);
 		return;
 	}
 
@@ -269,7 +268,7 @@ void ButtonController::onPointerInput(const PointingEvent& ev)
 
 	if( ev.buttons().size() == 0)
 	{
-		LabelController::onPointerInput(ev);
+		Label::onPointerInput(ev);
 		return;
 	}	
 
@@ -332,7 +331,7 @@ void ButtonController::onPointerInput(const PointingEvent& ev)
 		break;
 	}
 
-	LabelController::onPointerInput(ev);
+	Label::onPointerInput(ev);
 	
 	if(genOutput)
 		invalidate();

@@ -26,9 +26,9 @@
 
 #include "Dialog1.h"
 #include <Pt/Hmi/DialogModel.h>
-#include <Pt/Hmi/DialogController.h>
+#include <Pt/Hmi/Dialog.h>
 #include <Pt/Hmi/ButtonModel.h>
-#include <Pt/Hmi/ButtonController.h>
+#include <Pt/Hmi/Button.h>
 #include "Dialog2.h"
 
 namespace Pt{
@@ -74,7 +74,7 @@ void Dialog1::init()
 
 void Dialog1::onClosedByButton()
 {
-	dialogController().dialogModel().Closed = true;
+	dialog().dialogModel().Closed = true;
 }
 
 void Dialog1::onShowNextDialog()

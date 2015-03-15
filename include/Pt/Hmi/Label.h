@@ -1,20 +1,20 @@
-#ifndef Pt_Hmi_LabelController_H
-#define Pt_Hmi_LabelController_H
+#ifndef Pt_Hmi_Label_H
+#define Pt_Hmi_Label_H
 
-#include <Pt/Hmi/PanelController.h>
+#include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/PointingEvent.h>
 #include <Pt/Hmi/LabelModel.h>
 
 namespace Pt{
 namespace Hmi{
 
-class LabelRenderer;
+class LabelView;
 
-class PT_HMI_API LabelController  : public PanelController
+class PT_HMI_API Label  : public Panel
 {
 public:
-	LabelController(LabelModel& model, LabelRenderer& renderer);
-	virtual ~LabelController();	
+	Label(LabelModel& model, LabelView& view);
+	virtual ~Label();	
 	
 	const LabelModel& labelModel() const	
 	{

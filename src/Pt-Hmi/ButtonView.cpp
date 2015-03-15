@@ -1,4 +1,4 @@
-#include <Pt/Hmi/ButtonRenderer.h>
+#include <Pt/Hmi/ButtonView.h>
 #include <Pt/Hmi/ButtonModel.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Painter.h>
@@ -8,15 +8,15 @@
 namespace Pt{
 namespace Hmi{
 
-ButtonRenderer::ButtonRenderer()
+ButtonView::ButtonView()
 {
 }
 
-ButtonRenderer::~ButtonRenderer()
+ButtonView::~ButtonView()
 {
 }
 
-void ButtonRenderer::render(Pt::Hmi::WidgetModel* m)
+void ButtonView::render(Pt::Hmi::Model* m)
 {	
 	ButtonModel* model = dynamic_cast<ButtonModel*>(m);
 
@@ -29,19 +29,19 @@ void ButtonRenderer::render(Pt::Hmi::WidgetModel* m)
 	if(!model->Enabled.get())
 	{
 		model->ForeColor.set(Pt::Gfx::ARgbColor(0,100,100,100));
-		LabelRenderer::render(m);
+		LabelView::render(m);
 		return;
 	}			
 
 	model->ForeColor.set(Pt::Gfx::ARgbColor(0,0,0,0));
 	model->HighLight.set(model->ButtonState.get() == DeviceButton::Pressed);
 
-	LabelRenderer::render(m);
+	LabelView::render(m);
 	
 	if(model->ButtonState.get() == DeviceButton::Pressed)
 		return;
 
-	Pt::Hmi::Painter& localPainter = model->paintSurface()->painter();
+	Pt::Hmi::Painter& localPainter = paintSurface().painter();
     Pt::Gfx::SizeF size = model->Size.get();
        
 	if(model->Armed.get() || model->Focused.get())

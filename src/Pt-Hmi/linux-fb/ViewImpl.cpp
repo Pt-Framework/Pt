@@ -28,7 +28,7 @@
 
 #include "ViewImpl.h"
 #include "PaintSurfaceImpl.h"
-#include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Model.h>
 #include <Pt/Hmi/WindowModel.h>
 #include "ApplicationImpl.h"
@@ -236,7 +236,7 @@ void ViewImpl::onInputEvent(const struct input_event& ev)
 
 void ViewImpl::output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model)
 {
-	_controller = (WindowController*) controller;
+	_controller = (Window*) controller;
 	_model = (WindowModel*) model;
 
 	PaintSurfaceImpl* surface = _model->paintSurface()->impl();

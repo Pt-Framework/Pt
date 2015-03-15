@@ -1,4 +1,4 @@
-#include <Pt/Hmi/PanelRenderer.h>
+#include <Pt/Hmi/PanelView.h>
 #include <Pt/Hmi/PanelModel.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Painter.h>
@@ -11,17 +11,17 @@
 namespace Pt{
 namespace Hmi{
 
-PanelRenderer::PanelRenderer()
+PanelView::PanelView()
 {
 }
 
-PanelRenderer::~PanelRenderer()
+PanelView::~PanelView()
 {
 }
 
-void PanelRenderer::render(Pt::Hmi::WidgetModel* m)
+void PanelView::render(Pt::Hmi::Model* m)
 {	
-	Renderer::render(m);
+	WidgetView::render(m);
 
 	PanelModel* model = dynamic_cast<PanelModel*>(m);
 
@@ -40,7 +40,7 @@ void PanelRenderer::render(Pt::Hmi::WidgetModel* m)
 	Pt::Gfx::SizeF  clientSize(model->Size.get().width() - model->BorderWidth.get()/2, model->Size.get().height() - model->BorderWidth.get()/2);	
 	Pt::Gfx::RectF  clientRect(Pt::Gfx::PointF( model->BorderWidth.get()/2, model->BorderWidth.get()/2), clientSize);
 	
-	Pt::Hmi::Painter& localPainter = model->paintSurface()->painter();
+	Pt::Hmi::Painter& localPainter = paintSurface().painter();
 						
 	switch(model->BorderStyle.get())
 	{

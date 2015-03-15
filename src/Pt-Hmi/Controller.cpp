@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/Window.h>
 
 namespace Pt{
 namespace Hmi{
@@ -42,12 +42,12 @@ Controller::~Controller()
 { 
 }
 
-void Controller::addOutputDevice(OutputDevice* device)
+void Controller::addOutput(Output* device)
 {
 	_outputDevices.push_back(device);
 }
 
-void Controller::removeOutputDevice(OutputDevice* device)
+void Controller::removeOutput(Output* device)
 {
 	for(size_t i = 0; i < _outputDevices.size(); ++i)
 	{
@@ -81,7 +81,7 @@ void Controller::removeChild(Controller* base)
 void Controller::output()
 {	
 	for( size_t i = 0; i < _outputDevices.size(); ++i)
-		_outputDevices[i]->output(this, &model());
+		_outputDevices[i]->output(&model());
 }
 	
 }}

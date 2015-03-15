@@ -36,14 +36,13 @@ namespace Pt{
 namespace Hmi{
 
 class PointingDevice;
-class View;
-class WindowRenderer;
+class WindowView;
 
-class PT_HMI_API WindowController  : public Widget
+class PT_HMI_API Window  : public Widget
 {
 public:
-	WindowController(WindowModel& m, WindowRenderer& r, View* out = 0);
-	virtual ~WindowController();
+	Window(WindowModel& m, WindowView& view);
+	virtual ~Window();
 
 	Widget* mainWidget();
 	const Widget* mainWidget() const;
@@ -59,20 +58,19 @@ public:
 		return static_cast<const WindowModel&>(model());
 	}
 
-	void invalidate();	
 	void close();
 
-	inline void setWindowParent(WindowController* parent)
+	inline void setWindowParent(Window* parent)
 	{
 		_windowParent = parent;		
 	}
 
-	inline const WindowController* windowParent() const
+	inline const Window* windowParent() const
 	{
 		return _windowParent;
 	}
 
-	inline WindowController* windowParent()
+	inline Window* windowParent()
 	{
 		return _windowParent;
 	}
@@ -85,11 +83,11 @@ protected:
 	virtual void onKeyInput(const KeyEvent& ev);
 	virtual void onModelChanged(bool created, const Model& model);
 	virtual void onClosing(Controller* sender, bool& canClose);
-	virtual void onClosed(Controller* sender);
-	
+	virtual void onClosed(Controller* sender);	
+
 	void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
 	
-	WindowController*  _windowParent;
+	Window*  _windowParent;
 };
 
 }}

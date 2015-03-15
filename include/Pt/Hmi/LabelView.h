@@ -1,5 +1,4 @@
-/* Copyright (C) 2013 Marc Boris Duerner 
- * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,41 +24,27 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Hmi_View_H
-#define Pt_Hmi_View_H
+#ifndef Pt_Hmi_LabelView_H
+#define Pt_Hmi_LabelView_H
 
-#include <Pt/Hmi/Model.h>
-#include <Pt/Hmi/OutputDevice.h>
-#include <Pt/Gfx/Painter.h>
+#include <Pt/Hmi/PanelView.h>
 
 namespace Pt{
 namespace Hmi{
 
-class ViewImpl;
-
-class PT_HMI_API View : public OutputDevice
+class PT_HMI_API LabelView : public PanelView
 {
 public:
-	View();
-	virtual ~View();	
+	LabelView();
+	virtual ~LabelView();
 
-	virtual void output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model);
+	virtual void render(Pt::Hmi::Model* m);
 
-	ViewImpl* impl();
-		
-protected:
-    virtual void onCancel()
-	{
-	}
+private:	
 
-    virtual bool onRun()
-	{
-		return true;
-	}	
-	
-private:
-	ViewImpl* _impl;
 };
 
+
 }}
+
 #endif

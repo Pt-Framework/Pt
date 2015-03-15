@@ -1,15 +1,15 @@
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/WidgetModel.h>
-#include <Pt/Hmi/Renderer.h>
+#include <Pt/Hmi/WidgetView.h>
 #include <Pt/Hmi/Painter.h>
 
 namespace Pt{
 namespace Hmi{
 
-Widget::Widget(WidgetModel& model, Renderer& renderer)
+Widget::Widget(WidgetModel& model, WidgetView& view)
 : Controller(model)
-, _renderer(renderer)
+, _view(view)
 , _mnemonicWidget(0)
 {
 	widgetModel().Focused.Changed += Pt::slot(*this, &Widget::onFocusChanged);
@@ -100,37 +100,10 @@ const WidgetModel& Widget::widgetModel() const
 	return static_cast<const WidgetModel&>(model());
 }
 
-void Widget::invalidate()
-{
-	Widget* par = parent();
-	
-	if( par != 0)
-		par->invalidate();
-}
-
 
 WidgetModel& Widget::widgetModel()
 {
 	return static_cast<WidgetModel&>(model());
-}
-
-void Widget::render()
-{
-	if(!widgetModel().Visible.get())
-		return;	
-		
-	//Draw me
-	_renderer.render(&widgetModel());
-
-	//Let the user to render 
-	Render.send(*this, *widgetModel().paintSurface());
-
-	//Render my childs
-	for( size_t i = 0; i < children().size(); ++i)
-	{
-		Widget* child = childAt(i);
-		child->render();
-	}
 }
 
 void Widget::output()
@@ -138,18 +111,30 @@ void Widget::output()
 	if(!widgetModel().Visible.get())
 		return;
 	
-	Pt::Hmi::Painter& localPainter = widgetModel().paintSurface()->painter();
+	widgetView().render(&widgetModel());
+
+	Pt::Hmi::Painter& localPainter = widgetView().paintSurface().painter();
 
 	for( size_t i = 0; i < children().size(); ++i)
 	{
-		Widget* child = childAt(i);			
-		child->output();
+		Widget&				child = *childAt(i);			
+		WidgetView&		childView = child.widgetView();
+		WidgetModel&	childModel = child.widgetModel();
 
-		WidgetModel& childModel = child->widgetModel();
-		localPainter.drawSurface(childModel.Position.get(),*childModel.paintSurface());
+		child.output();
+
+		localPainter.drawSurface(childModel.Position.get(), childView.paintSurface());
 	}
 
-	Controller::output();
+	widgetView().output(&widgetModel());
+}
+
+void Widget::invalidate()
+{
+	if( parent() == 0)
+		output();
+	else
+		parent()->invalidate();		
 }
 
 bool Widget::onMoveFocusPrev()

@@ -22,7 +22,7 @@ namespace Cursors
 }
 
 class CursorImpl;
-class WindowController;
+class Window;
 
 class PT_HMI_API Cursor
 {

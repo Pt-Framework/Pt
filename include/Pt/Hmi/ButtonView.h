@@ -22,47 +22,29 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
-#ifndef Pt_Hmi_Controller_Dialog_H
-#define Pt_Hmi_Controller_Dialog_H
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+#ifndef Pt_Hmi_ButtonRenderer_H
+#define Pt_Hmi_ButtonRenderer_H
 
-#include <Pt/Hmi/WindowController.h>
-#include <Pt/Hmi/DialogModel.h>
-#include <Pt/Gfx/ImagePainter.h>
-#include <Pt/System/Semaphore.h>
-#include <Pt/System/MainLoop.h>
+#include <Pt/Hmi/LabelView.h>
 
 namespace Pt{
 namespace Hmi{
 
-class View;
-class DialogRenderer;
-
-class PT_HMI_API DialogController  : public WindowController
+class PT_HMI_API ButtonView : public LabelView
 {
 public:
-	DialogController(DialogModel& m, DialogRenderer& r, View* out = 0);
-	virtual ~DialogController();	
+	ButtonView();
+	virtual ~ButtonView();
 
-	void doModal(WindowController* parent);
+	virtual void render(Pt::Hmi::Model* model);
 
-	DialogModel& dialogModel()
-	{
-		return static_cast<DialogModel&>(model());
-	}
+private:	
 
-	const DialogModel& dialogModel() const
-	{
-		return static_cast<const DialogModel&>(model());
-	}
-
-protected:
-	virtual void onClosed(Controller* sender);
-
-protected:
-	Pt::System::MainLoop _done;	
-	bool _closed;
 };
 
+
 }}
+
 #endif

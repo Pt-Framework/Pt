@@ -4,8 +4,8 @@
 namespace Pt{
 namespace Hmi{
 
-PaintSurface::PaintSurface(const Pt::Gfx::SizeF& size)
-: _impl( new PaintSurfaceImpl(size))
+PaintSurface::PaintSurface()
+: _impl( new PaintSurfaceImpl())
 , _painter(*this)
 {
 

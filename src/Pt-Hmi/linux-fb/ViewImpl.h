@@ -39,7 +39,7 @@ namespace Pt {
 
 namespace Hmi {
 
-class WindowController;
+class Window;
 class WindowModel;
 class Controller;
 class Model;
@@ -68,7 +68,7 @@ class ViewImpl  :public Pt::Connectable
                     assign( begin, end, rgbImage.begin() );
                     this->copyImageData( toX, toY, (char*)rgbImage.data(), rgbImage.width(), rgbImage.height() );                    
                 }
-				break;
+								break;
 
                 case 16:
                 {
@@ -77,7 +77,7 @@ class ViewImpl  :public Pt::Connectable
                     imageData = (char*)( rgbImage.data() );
                     this->copyImageData( toX, toY, (char*)rgbImage.data(), rgbImage.width(), rgbImage.height() );                    
                 }
-				break;
+								break;
 
                 default:
                     imageData = 0;
@@ -107,7 +107,7 @@ class ViewImpl  :public Pt::Connectable
 		fb_fix_screeninfo _fixedInfo;
 		void* _buffer;
 		Pt::size_t _bufferSize;
-		WindowController* _controller;
+		Window* _controller;
 		WindowModel* _model;
 		Pt::Hmi::PointingEvent 	_mouseEvent;
 		Pt::Hmi::KeyEvent      	_keyEvent;

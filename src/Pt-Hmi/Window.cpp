@@ -24,48 +24,39 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/View.h>
+#include <Pt/Hmi/WindowView.h>
 #include <Pt/Hmi/WindowModel.h>
-#include <Pt/Hmi/WindowRenderer.h>
 #include <Pt/Hmi/Application.h>
-
+#include <Pt/Hmi/WidgetView.h>
 #include <iostream>
 
 namespace Pt{
 namespace Hmi{
 
-WindowController::WindowController(WindowModel& m, WindowRenderer& r,  View* out)
-: Widget(m, r)
+Window::Window(WindowModel& m, WindowView& view)
+: Widget(m, view)
 , _windowParent(0)
 {	
-	if( out != 0)
-		Controller::addOutputDevice(out);
+	view.setController(*this);
+	Controller::addOutput(&view);
 
-	ClosedAction += Pt::slot(*this, &WindowController::onClosed);
-	ClosingAction += Pt::slot(*this, &WindowController::onClosing);
+	ClosedAction += Pt::slot(*this, &Window::onClosed);
+	ClosingAction += Pt::slot(*this, &Window::onClosing);
 	Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
 
 	app.systemEvent() += Pt::slot(*this, &Controller::devicePointerInput);
 	app.systemEvent() += Pt::slot(*this, &Controller::deviceKeyInput);
 
-	windowModel().Size.Changed += Pt::slot(*this, &WindowController::onSizeChanged);
+	windowModel().Size.Changed += Pt::slot(*this, &Window::onSizeChanged);		
 }
 
-WindowController::~WindowController()
+Window::~Window()
 {
 }
 
-Widget* WindowController::mainWidget()
-{
-	if( Controller::children().size() != 0)
-		return dynamic_cast<Widget*>( Controller::children()[0]);
-
-	return 0;
-}
-
-const Widget* WindowController::mainWidget() const
+Widget* Window::mainWidget()
 {
 	if( Controller::children().size() != 0)
 		return dynamic_cast<Widget*>( Controller::children()[0]);
@@ -73,13 +64,16 @@ const Widget* WindowController::mainWidget() const
 	return 0;
 }
 
-void WindowController::invalidate()
+const Widget* Window::mainWidget() const
 {
-	render();
-	output();
+	if( Controller::children().size() != 0)
+		return dynamic_cast<Widget*>( Controller::children()[0]);
+
+	return 0;
 }
 
-void WindowController::onKeyInput(const KeyEvent& ev)
+
+void Window::onKeyInput(const KeyEvent& ev)
 { 
 	WindowModel& m = windowModel();
 
@@ -95,7 +89,7 @@ void WindowController::onKeyInput(const KeyEvent& ev)
 			if(!moveFocusNext())
 				m.Focused = true;
 
-			invalidate();
+			output();
 		}
 	}
 
@@ -106,7 +100,7 @@ void WindowController::onKeyInput(const KeyEvent& ev)
 			if(!moveFocusPrev())
 				m.Focused = true;
 
-			invalidate();
+			output();
 		}
 	}
 
@@ -114,7 +108,7 @@ void WindowController::onKeyInput(const KeyEvent& ev)
 		children()[i]->notifyKeyInput(ev);
 }
 
-void WindowController::onPointerInput(const PointingEvent& ev)
+void Window::onPointerInput(const PointingEvent& ev)
 {
 	WindowModel& m = windowModel();
 
@@ -128,28 +122,29 @@ void WindowController::onPointerInput(const PointingEvent& ev)
 		children()[i]->notifyPointerInput(ev);	
 }
 
-void WindowController::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
+void Window::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 {
 	WidgetModel& m = windowModel();
+	WidgetView& view = widgetView();
 	
-	m.paintSurface()->resize(m.Size.get());	
+	view.paintSurface().resize(m.Size.get());	
 	
 	if(m.Visible.get())
-		invalidate();
+		output();
 }
 
-void WindowController::onModelChanged(bool created,const Model& model)
+void Window::onModelChanged(bool created,const Model& model)
 {
 	if( created)
 	{
 		WidgetModel& m = windowModel();
 
-		m.Size.Changed += Pt::slot(*this, &WindowController::onSizeChanged);					
+		m.Size.Changed += Pt::slot(*this, &Window::onSizeChanged);					
 		m.Size.Changed.send(m.Size);	
 	}
 }
 
-void WindowController::onClosing(Controller* sender, bool& canClose)
+void Window::onClosing(Controller* sender, bool& canClose)
 {	
 	if(!windowModel().Enabled.get())
 		return;
@@ -157,13 +152,13 @@ void WindowController::onClosing(Controller* sender, bool& canClose)
 	canClose = windowModel().CanClose.get();
 }
 
-void WindowController::onClosed(Controller* sender)
+void Window::onClosed(Controller* sender)
 {
     if(!windowModel().Closed.get())
         windowModel().Closed = true;
 }
 
-void WindowController::close()
+void Window::close()
 {
     //Can close??
     bool canClose = false;
@@ -171,11 +166,12 @@ void WindowController::close()
     
     if(canClose)
     {
-        //Set the closed flag
-        windowModel().Closed = true;
+      //Set the closed flag
+      windowModel().Closed = true;
         
-        //Let the system window to close its self.
-		output();
+      //Let the system window to close its self.
+			output();
     }
 }
+
 }}

@@ -24,32 +24,30 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
 
-#include <Pt/Hmi/DialogController.h>
+#include <Pt/Hmi/Dialog.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/View.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Hmi/DialogModel.h>
-#include <Pt/Hmi/DialogRenderer.h>
 
 namespace Pt{
 namespace Hmi{
 
-DialogController::DialogController(DialogModel& m, DialogRenderer& r, View* out )
-: WindowController(m, r, out)
+Dialog::Dialog(DialogModel& m, WindowView& view )
+: Window(m,view)
 {				
 }
 
-DialogController::~DialogController()
+Dialog::~Dialog()
 {
 }
 
-void DialogController::onClosed(Controller* sender)
+void Dialog::onClosed(Controller* sender)
 {
-    WindowController::onClosed(sender);
+    Window::onClosed(sender);
 	_closed = true;
 }
 
-void DialogController::doModal(WindowController* parent)
+void Dialog::doModal(Window* parent)
 {	
 	bool		 parentTopMost = false;
 	WindowModel& parentModel   = parent->windowModel();
@@ -66,14 +64,14 @@ void DialogController::doModal(WindowController* parent)
 	parentTopMost = parentModel.TopMost.get();
 	parentModel.Enabled = false;	
 	parentModel.TopMost = false;
-    parent->output(); //Notify the parent.
+  parent->invalidate(); //Notify the parent.
 
 	//Setup the dialog as aenabled and top most.	
 	dialogModel().Enabled = true;
 	dialogModel().TopMost = true;
 
 	//Invalidate the dialog
-	invalidate();
+	output();
 	
 	//Wait of termination of the dialog.
 	while(!_closed)

@@ -28,7 +28,7 @@
 
 #include "ViewImpl.h"
 #include <Pt/Hmi/View.h>
-#include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/Window.h>
 #import <AppKit/NSView.h>
 #import <AppKit/NSCursor.h>
 #import <AppKit/NSLayoutConstraint.h>

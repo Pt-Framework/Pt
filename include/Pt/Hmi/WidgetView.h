@@ -1,4 +1,5 @@
-/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2013 Marc Boris Duerner 
+ * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,26 +25,38 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Hmi_Renderer_H
-#define Pt_Hmi_Renderer_H
+#ifndef Pt_Hmi_WidgetView_H
+#define Pt_Hmi_WidgetView_H
 
-#include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Model.h>
+#include <Pt/Hmi/Output.h>
+#include <Pt/Gfx/Painter.h>
+#include <Pt/Hmi/PaintSurface.h>
 
 namespace Pt{
 namespace Hmi{
 
-class WidgetModel;
 
-class PT_HMI_API Renderer
+class PT_HMI_API WidgetView : public Output
 {
 public:
-	Renderer();
-	virtual ~Renderer();
+	WidgetView();	
+	virtual ~WidgetView();	
+	
+	virtual void render(Pt::Hmi::Model* model);
+	virtual void output(Pt::Hmi::Model* model);	
+	
+	inline PaintSurface& paintSurface()
+	{
+		return _paintSurface;
+	}
 
-	virtual void render(Pt::Hmi::WidgetModel* model);
+protected:
+	PaintSurface _paintSurface;
+
+private:
 
 };
 
 }}
-
 #endif

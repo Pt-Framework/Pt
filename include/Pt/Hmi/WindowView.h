@@ -1,4 +1,5 @@
-/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2013 Marc Boris Duerner 
+ * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,27 +25,34 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Hmi_LabelRenderer_H
-#define Pt_Hmi_LabelRenderer_H
+#ifndef Pt_Hmi_View_H
+#define Pt_Hmi_View_H
 
-#include <Pt/Hmi/PanelRenderer.h>
+#include <Pt/Hmi/Model.h>
+#include <Pt/Hmi/WidgetView.h>
+#include <Pt/Gfx/Painter.h>
 
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API LabelRenderer : public PanelRenderer
+class WindowViewImpl;
+class Window;
+
+class PT_HMI_API WindowView : public WidgetView
 {
 public:
-	LabelRenderer();
-	virtual ~LabelRenderer();
+	WindowView();	
+	virtual ~WindowView();	
+	
+	void setController(Pt::Hmi::Window& controller);
 
-	virtual void render(Pt::Hmi::WidgetModel* m);
+	virtual void output(Pt::Hmi::Model* model);
 
-private:	
-
+	WindowViewImpl* impl();		
+	
+private:
+	WindowViewImpl* _impl;
 };
 
-
 }}
-
 #endif

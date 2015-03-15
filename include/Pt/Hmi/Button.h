@@ -1,4 +1,5 @@
-/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2013 Marc Boris Duerner 
+ * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,30 +25,59 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Hmi_PanelRenderer_H
-#define Pt_Hmi_PanelRenderer_H
+#ifndef Pt_Hmi_Button_H
+#define Pt_Hmi_Button_H
 
-#include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Renderer.h>
+#include <Pt/Hmi/Label.h>
+#include <Pt/Hmi/ButtonModel.h>
+#include <Pt/Gfx/ImagePainter.h>
+#include <Pt/System/Timer.h>
 
 namespace Pt{
 namespace Hmi{
 
-class WidgetModel;
+class PointingEvent;
+class ButtonView;
 
-class PT_HMI_API PanelRenderer : public Renderer
+class PT_HMI_API Button  : public Label
 {
 public:
-	PanelRenderer();
-	virtual ~PanelRenderer();
+	Button(ButtonModel& model, ButtonView& view);
+	virtual ~Button();
 
-	virtual void render(WidgetModel* model);
+	Signal<Controller*> PressedAction;
+	Signal<Controller*> DoublePressedAction;
+
+	Signal<Controller*, bool> CheckedAction;
+
+	ButtonModel& buttonModel()
+	{
+		return static_cast<ButtonModel&>(model());
+	}
+
+	const ButtonModel& buttonModel() const 
+	{
+		return static_cast<const ButtonModel&>(model());
+	}
+
+protected:
+	virtual void onPressedAction();
+	virtual void onDoublePressedAction();
+	virtual void onCheckedAction(bool checked);
+	virtual void onModelChanged(bool created, const Model& model);
+	virtual void onMnemonic();
+private:
+	virtual void onPointerInput(const PointingEvent& ev);
+	virtual void onKeyInput(const KeyEvent& ev);
+	void onButtonStateChanged( const Property<DeviceButton::State>& prop);
+	void onDoublePressedTimeout();
 
 private:	
-
+	bool _pressed;
+	bool _timeout;
+	int _pressCounter;
+	Pt::System::Timer _doublePressTimer;
 };
 
-
 }}
-
 #endif

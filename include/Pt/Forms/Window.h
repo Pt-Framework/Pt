@@ -3,10 +3,9 @@
 
 #include <Pt/Forms/Api.h>
 #include <Pt/Forms/Widget.h>
-#include <Pt/Hmi/View.h>
-#include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/WindowModel.h>
-#include <Pt/Hmi/WindowRenderer.h>
+#include <Pt/Hmi/WindowView.h>
 
 namespace Pt {
 namespace Forms {
@@ -20,12 +19,12 @@ public:
 	virtual void show();
 	void close();	
 
-	Hmi::WindowController& windowController();
+	Hmi::Window& window();
 	Hmi::WindowModel& windowModel();
 
-	void setWindowController(Hmi::WindowController& controller);
+	void setWindow(Hmi::Window& controller);
 
-	const Hmi::WindowController& windowController() const;
+	const Hmi::Window& window() const;
 	const Hmi::WindowModel& windowModel() const;
 
 		
@@ -42,11 +41,10 @@ public:
 	Pt::Signal<> CanClose;
 	
 private:	
-	Pt::Hmi::WindowModel		_defModel;
-	Pt::Hmi::WindowRenderer		_defRenderer;
-	Pt::Hmi::WindowController	_defController;
-	Pt::Hmi::WindowController*	_currController;	
-	Pt::Hmi::View    _View;
+	Pt::Hmi::WindowModel	_defModel;
+	Pt::Hmi::WindowView		_defView;
+	Pt::Hmi::Window			  _defController;
+	Pt::Hmi::Window*	_currController;		
 };
  
 }}

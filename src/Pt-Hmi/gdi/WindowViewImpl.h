@@ -29,9 +29,10 @@
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Hmi/Model.h>
-#include <Pt/Hmi/OutputDevice.h>
+#include <Pt/Hmi/Output.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/WindowModel.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/PointingEvent.h>
 #include <Windows.h>
@@ -40,12 +41,20 @@
 namespace Pt{
 namespace Hmi{
 
-class ViewImpl : public Pt::Connectable
+class WindowViewImpl : public Pt::Connectable
 {
 public:
-	ViewImpl();
-	virtual ~ViewImpl();
-	void output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model);
+	WindowViewImpl();
+	virtual ~WindowViewImpl();
+	
+	void setController(Pt::Hmi::Window& controller)
+	{
+		_controller = &controller;
+		_keyEvent.setController(_controller);
+		_pointerEvent.setController(_controller);
+	}
+
+	void output(Pt::Hmi::Model* model);
 
 	inline HWND hwnd()
 	{
@@ -75,7 +84,7 @@ protected:
 private:
 	HWND					_hwnd;
 	Pt::Hmi::WindowModel*	_model;
-	Pt::Hmi::WindowController* _controller;	
+	Pt::Hmi::Window* _controller;	
 	KeyEvent				_keyEvent;
 	PointingEvent			_pointerEvent;
 	bool					_ignoreSizePositionEvent;

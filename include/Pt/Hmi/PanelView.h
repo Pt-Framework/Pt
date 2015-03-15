@@ -24,21 +24,24 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Hmi_ButtonRenderer_H
-#define Pt_Hmi_ButtonRenderer_H
+#ifndef Pt_Hmi_PanelRenderer_H
+#define Pt_Hmi_PanelRenderer_H
 
-#include <Pt/Hmi/LabelRenderer.h>
+#include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/WidgetView.h>
 
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API ButtonRenderer : public LabelRenderer
+class WidgetModel;
+
+class PT_HMI_API PanelView : public WidgetView
 {
 public:
-	ButtonRenderer();
-	virtual ~ButtonRenderer();
+	PanelView();
+	virtual ~PanelView();
 
-	virtual void render(Pt::Hmi::WidgetModel* model);
+	virtual void render(Model* model);
 
 private:	
 

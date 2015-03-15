@@ -23,17 +23,24 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include <Pt/Hmi/DialogRenderer.h>
+#ifndef Pt_Hmi_DialogView_H
+#define Pt_Hmi_DialogView_H
+
+#include <Pt/Hmi/Model.h>
 
 namespace Pt{
 namespace Hmi{
 
-DialogRenderer::DialogRenderer()
+class PT_HMI_API DialogView : public WindowView
 {
-}
+public:
+	DialogView();
+	virtual ~DialogView();
 
-DialogRenderer::~DialogRenderer()
-{
-}
+private:	
+
+};
 
 }}
+
+#endif

@@ -23,25 +23,37 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_Renderer_Dialog_H
-#define Pt_Hmi_Renderer_Dialog_H
-
-#include <Pt/Hmi/WindowRenderer.h>
+#include <Pt/Hmi/WindowView.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Model.h>
-
+#include <Pt/Gfx/ARgbImage.h>
+#include "WindowViewImpl.h"
+ 
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API DialogRenderer : public WindowRenderer
+WindowView::WindowView()
+: _impl(new WindowViewImpl())
 {
-public:
-	DialogRenderer();
-	virtual ~DialogRenderer();
+}
 
-private:	
+WindowView::~WindowView()
+{
+}
 
-};
+WindowViewImpl* WindowView::impl()
+{
+	return _impl;
+}
+
+void WindowView::setController(Pt::Hmi::Window& controller)
+{
+	_impl->setController(controller);
+}
+
+void WindowView::output( Pt::Hmi::Model* model)
+{			
+	_impl->output( model);
+}
 
 }}
-
-#endif

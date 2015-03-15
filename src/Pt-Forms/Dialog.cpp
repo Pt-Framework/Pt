@@ -1,19 +1,14 @@
 #include <Pt/Forms/Dialog.h>
-#include <Pt/Hmi/DialogController.h>
-#include <Pt/Hmi/DialogModel.h>
-#include <Pt/Hmi/DialogRenderer.h>
 #include <Pt/Hmi/Application.h>
 
 namespace Pt {
 namespace Forms {
 
 Dialog::Dialog()
-: _defController(_defModel, _defRenderer)
+: _defController(_defModel, _defView)
 {
 	Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
-
-	_View.start(app.loop());
-
+	
 	_defModel.Caption.set("New Dialog");
 	_defModel.ShowInTaskbar.set(true);
 	_defModel.Border.set(Hmi::WindowBorderType::Dialog);
@@ -22,29 +17,29 @@ Dialog::Dialog()
 	_defModel.ShowMaximizeButton.set(false);
 	_defModel.ShowSysMenu.set(true);
 
-	_defController.addOutputDevice(&_View);
-	setDialogController(_defController);
+	_defController.addOutput(&_defView);
+	setDialog(_defController);
 }
 
-void Dialog::setDialogController(Hmi::DialogController& controller)
+void Dialog::setDialog(Hmi::Dialog& controller)
 {
 	_currController = & controller;
-	Window::setWindowController(controller);
+	Window::setWindow(controller);
 }
 
 void Dialog::show(Dialog* parent)
 {
-	show(parent->dialogController());
+	show(parent->dialog());
 }
 
 void Dialog::show(Window* parent)
 {
-	show(parent->windowController());
+	show(parent->window());
 }
 
-void Dialog::show(Hmi::WindowController& parent)
+void Dialog::show(Hmi::Window& parent)
 {
-	dialogController().doModal(&parent);	
+	dialog().doModal(&parent);	
 }
 
 Pt::Hmi::DialogResultType::Type Dialog::result() const
@@ -57,7 +52,7 @@ void Dialog::setResult(Hmi::DialogResultType::Type r)
 	dialogModel().Result = r;
 }
 
-Hmi::DialogController& Dialog::dialogController()
+Hmi::Dialog& Dialog::dialog()
 {
 	return *_currController;
 }
@@ -67,7 +62,7 @@ Hmi::DialogModel& Dialog::dialogModel()
 	return _currController->dialogModel();
 }
 
-const Hmi::DialogController& Dialog::dialogController() const
+const Hmi::Dialog& Dialog::dialog() const
 {
 	return *_currController;
 }

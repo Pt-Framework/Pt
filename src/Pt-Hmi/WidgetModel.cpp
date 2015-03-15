@@ -27,7 +27,6 @@ WidgetModel::WidgetModel()
 , PT_HMI_INIT_PROPERTY_VALUE(FocusedActionKey," ")
 , PT_HMI_INIT_PROPERTY_VALUE(Caption,"")
 , PT_HMI_INIT_PROPERTY_VALUE(UseMnemonic,true)
-, _paintSurface(new PaintSurface(Pt::Gfx::SizeF(800,600)))
 {
 	registerProperty(Caption);
 	registerProperty(UseMnemonic);

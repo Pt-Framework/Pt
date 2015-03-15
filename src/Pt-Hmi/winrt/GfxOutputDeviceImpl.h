@@ -29,7 +29,7 @@
 #include <Pt/Gfx/Gfx.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Hmi/Model.h>
-#include <Pt/Hmi/OutputDevice.h>
+#include <Pt/Hmi/Output.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/KeyEvent.h>

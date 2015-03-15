@@ -18,34 +18,39 @@ PT_HMI_IMPL += [ GLOB $(PT_HMI_SUBDIR) : *.mm  ] ;
 
 SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   PropertyBase.cpp
-                       Model.cpp
-					   Controller.cpp
 					   Application.cpp
 					   Cursor.cpp
-					   PointingEvent.cpp
-					   View.cpp
-					   Device.cpp
+					   PaintSurface.cpp
+					   Painter.cpp 
+					   PointingEvent.cpp					   
 					   KeyEvent.cpp
+                       
+					   Controller.cpp
+					   Model.cpp						   		   					   					   
+
+					   Button.cpp
 					   ButtonModel.cpp
-					   ButtonRenderer.cpp
-					   ButtonController.cpp
-					   LabelController.cpp
+					   ButtonView.cpp
+					   
+					   Label.cpp
 					   LabelModel.cpp
-					   LabelRenderer.cpp
-					   PanelController.cpp
+					   LabelView.cpp
+
+					   Panel.cpp
 					   PanelModel.cpp
-					   PanelRenderer.cpp
+					   PanelView.cpp
+
 					   Widget.cpp
 					   WidgetModel.cpp
-					   Renderer.cpp
-					   WindowController.cpp
+					   WidgetView.cpp
+
+					   Window.cpp
 					   WindowModel.cpp
-					   WindowRenderer.cpp
-					   DialogController.cpp
-					   DialogModel.cpp
-					   DialogRenderer.cpp										   
-					   PaintSurface.cpp
-					   Painter.cpp ;
+					   WindowView.cpp
+
+					   Dialog.cpp
+					   DialogModel.cpp					   					   
+					   ;
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx  ;
 LinkLibs Pt-Hmi : $(GUILIBS) ;

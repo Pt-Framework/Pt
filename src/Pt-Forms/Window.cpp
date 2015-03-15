@@ -1,7 +1,6 @@
 #include <Pt/Forms/Window.h>
-#include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/WindowModel.h>
-#include <Pt/Hmi/WindowRenderer.h>
 #include <Pt/Hmi/Application.h>
 #include <algorithm>
 
@@ -9,31 +8,29 @@ namespace Pt {
 namespace Forms {
 
 Window::Window()
-: _defController(_defModel, _defRenderer)
+: _defController(_defModel, _defView)
 , _currController(0)
 {		
 	
-	Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
-
-	_View.start(app.loop());
+	Pt::Hmi::Application& app = Pt::Hmi::Application::instance();	
 
 	_defModel.Caption.set("New Window");
 	_defModel.ShowInTaskbar.set(true);
 	_defModel.Border.set(Hmi::WindowBorderType::Sizeable);
 	_defModel.Position.set(Pt::Gfx::PointF(20,20));
 	_defModel.Size.set( Pt::Gfx::SizeF(800,800));
-	_defController.addOutputDevice(&_View);
+	_defController.addOutput(&_defView);
 
-	setWindowController(_defController);
+	setWindow(_defController);
 }
 
-void Window::setWindowController(Hmi::WindowController& controller)
+void Window::setWindow(Hmi::Window& controller)
 {
 	_currController = &controller;
 }
 
 
-Hmi::WindowController& Window::windowController()
+Hmi::Window& Window::window()
 {
 	return *_currController;
 }
@@ -41,7 +38,7 @@ Hmi::WindowController& Window::windowController()
 void Window::addChild(Widget* w)
 {
 
-	windowController().addChild(&w->widgetController());		
+	window().addChild(&w->widgetController());		
 }
 
 Hmi::WindowModel& Window::windowModel()
@@ -49,7 +46,7 @@ Hmi::WindowModel& Window::windowModel()
 	return _currController->windowModel();
 }
 
-const Hmi::WindowController& Window::windowController() const
+const Hmi::Window& Window::window() const
 {
 	return *_currController;
 }
@@ -83,12 +80,12 @@ void Window::show()
 {
 	windowModel().Closed.set(false);
 	windowModel().Visible = true;
-	windowController().invalidate();
+	window().invalidate();
 }
 
 void Window::close()
 {
-	windowController().close();
+	window().close();
 }
 
 Window::~Window()

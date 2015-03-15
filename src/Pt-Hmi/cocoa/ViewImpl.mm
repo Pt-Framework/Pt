@@ -30,7 +30,7 @@
 #include <Pt/Gfx/Rgb888Color.h>
 #include <Pt/Gfx/Rgb888Image.h>
 #include <Pt/Hmi/WindowModel.h>
-#include <Pt/Hmi/WindowController.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/View.h>
 #include "WidgetView.h"
 #include "Window.h"
@@ -230,7 +230,7 @@ void ViewImpl::writeWindowSizeAndPos(bool firstShow)
                 
             case WindowStartPositionType::CenterParent:
             {
-                WindowController* parent = _controller->windowParent();
+                Window* parent = _controller->windowParent();
 				
                 if( parent == 0)
                 {
@@ -415,7 +415,7 @@ void ViewImpl::output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model)
 {
         bool firstShow = (_model == 0);
         _model = dynamic_cast<WindowModel*>(model);
-        _controller = dynamic_cast<WindowController*>(controller);
+        _controller = dynamic_cast<Window*>(controller);
         
         _mouseEvent.setController(_controller);
         _keyEvent.setController(_controller);

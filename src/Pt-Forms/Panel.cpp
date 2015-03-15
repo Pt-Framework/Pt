@@ -1,28 +1,25 @@
 #include <Pt/Forms/Panel.h>
-#include <Pt/Hmi/PanelController.h>
-#include <Pt/Hmi/PanelModel.h>
-#include <Pt/Hmi/PanelRenderer.h>
 
 namespace Pt { 
 namespace Forms {
 
 Panel::Panel()
-: _defController(_defModel,_defRenderer )
+: _defController(_defModel,_defView )
 , _currController(0)
 {
 	_defModel.ForeColor.set(Pt::Gfx::ARgbColor(160,160,160));
 	_defModel.BorderWidth.set(1);
 	_defModel.BorderStyle.set(Hmi::BorderStyleType::Widget);
 
-	setPanelController(_defController);
+	setPanel(_defController);
 }
 
-void Panel::setPanelController(Pt::Hmi::PanelController& ctrl)
+void Panel::setPanel(Pt::Hmi::Panel& ctrl)
 {
 	_currController = &ctrl;
 }
 
-Pt::Hmi::PanelController& Panel::panelController()
+Pt::Hmi::Panel& Panel::panel()
 {
 	return *_currController;
 }
@@ -32,7 +29,7 @@ Pt::Hmi::PanelModel& Panel::panelModel()
 	return _currController->panelModel();
 }
 
-const Pt::Hmi::PanelController&	Panel::panelController() const
+const Pt::Hmi::Panel&	Panel::panel() const
 {
 	return *_currController;
 }
