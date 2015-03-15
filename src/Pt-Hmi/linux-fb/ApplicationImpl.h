@@ -120,6 +120,7 @@ class ApplicationImpl : public Pt::System::MainLoop
 		Pt::Signal<const Pt::Event&> _systemEvent;
 		Pt::Signal<const struct input_event&> _inputEvent;
 		InputDevice _inputDevice;
+        InputDevice _inputDevice2;
 };
 
 } // namespace

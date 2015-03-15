@@ -116,6 +116,8 @@ void ViewImpl::onInputEvent(const struct input_event& ev)
 {
 	if( _controller == 0)
 		return;
+    
+    std::clog << ev.type << " "<< ev.value << " " << ev.code << std::endl;
 
     switch (ev.type)
     {
@@ -127,46 +129,107 @@ void ViewImpl::onInputEvent(const struct input_event& ev)
 				_keyEvent.setState(KeyEvent::KeyUp);
 			else
 				return;
-    
-			std::clog<<" Code = " << (int) ev.code << std::endl;
-			switch(ev.code)
+			
+            switch(ev.code)
 			{
 				case KEY_RIGHTALT:
 				case KEY_LEFTALT:
 					_keyEvent.setAlt(_keyEvent.state() == KeyEvent::KeyDown);
-				break;	
+                    break;	
 		
 				case KEY_LEFTCTRL:
 				case KEY_RIGHTCTRL:
 					_keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
-				break;
+                    break;
 
 				case KEY_LEFTSHIFT:
 				case KEY_RIGHTSHIFT:
 					_keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);  
-				break;  
+                    break;  
 
-				default: //ToDO translate Key
+				default:
 				{
 					struct kbentry ke;
-					ke.kb_table = 0;	/* plain map is always present */
+					ke.kb_table = 0;
 					ke.kb_index = ev.code;
 
-					int ret = ioctl(dup(0), KDGKBENT, (unsigned long)&ke);
+					::ioctl(STDIN_FILENO, KDGKBENT, (unsigned long)&ke);
 					
-					const unsigned int ucode = (int)(unsigned char) ke.kb_value;
-					_keyEvent.setUnicode(ucode);					
-										
+                    unsigned unicode = 0;
+                    unsigned typ = KTYP(ke.kb_value);
+                    unsigned value = KVAL(ke.kb_value);
+                    
+                    if(typ == KT_LETTER|| typ == KT_LATIN)
+                    {
+                        unicode = value;
+                    }
+                    else if(typ == KT_PAD && value < 10)
+                    {
+                        unicode = 0x30 + value;
+                    }
+                    else
+                        return;
+
+					_keyEvent.setUnicode(unicode);
+                    
+                     std::clog << "    " << std::hex << unicode 
+                               << " ktyp: " << KTYP(ke.kb_value) 
+                               << " kval: " << KVAL(ke.kb_value) << std::endl;
+                    break;
 				}
-				break;
-				
 			}
 					
 		    _keyEvent.setController(_controller);
-			
 			Application::instance().systemEvent().send(_keyEvent);
+            break;
 		}
-		break;
+
+        case EV_REL:
+        {
+            if(ev.code == REL_X)
+            {
+                std::clog << "moved X: " << ev.value <<std::endl;
+                _mouseEvent.addX( static_cast<double>(ev.value) );
+            }
+            else if(ev.code == REL_Y)
+            {
+                std::clog << "moved Y: " << ev.value <<std::endl;
+                _mouseEvent.addX( static_cast<double>(ev.value) );
+            }
+                
+		    _mouseEvent.setController(_controller);
+			Application::instance().systemEvent().send(_mouseEvent);
+            break;
+        }
+
+        case EV_ABS:
+        {
+            switch(ev.code)
+            {
+                case ABS_MT_SLOT:
+                
+                case ABS_MT_TRACKING_ID:
+                
+                case ABS_X:
+                case ABS_MT_POSITION_X:
+                    _mouseEvent.setX( static_cast<double>(ev.value) );
+                    break;
+                    
+                case ABS_Y:
+                case ABS_MT_POSITION_Y:
+                    _mouseEvent.setY( static_cast<double>(ev.value) );
+                    break;
+                    
+                case ABS_PRESSURE:
+                case ABS_MT_PRESSURE:                  
+                default:
+                    break;
+            }
+		    
+            _mouseEvent.setController(_controller);
+			Application::instance().systemEvent().send(_mouseEvent);
+            break;
+        }
 	}		
 }
 
@@ -187,6 +250,7 @@ void ViewImpl::output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model)
 void ViewImpl::copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight)
 {
 	char* buffer = frameBuffer();
+	toX  = (width()  - fromWidth) ;
 
 	size_t pixelSize = depth() / 8;
 	unsigned bufferOffset = toX + ( toY * width() );

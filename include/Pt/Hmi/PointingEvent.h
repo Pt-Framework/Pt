@@ -27,6 +27,16 @@ public:
 		_y = y;
 	}
 
+	inline void addX(double x)
+	{
+		_x += x;
+	}
+	
+	inline void addY(double y)
+	{
+		_y += y;
+	}
+
 	inline double x() const
 	{
 		return _x;
