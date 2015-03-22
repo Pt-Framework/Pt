@@ -27,16 +27,15 @@
 #include <Pt/Hmi/Dialog.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/ImagePainter.h>
-#include <Pt/Hmi/DialogModel.h>
 
 namespace Pt{
 namespace Hmi{
 
-Dialog::Dialog(DialogModel* model)
-: Window(model)
-, _dialogModel(model)
-{				
-
+Dialog::Dialog()
+: PT_HMI_INIT_PROPERTY_VALUE(Result, DialogResultType::Undefined)
+{
+	ShowInTaskbar.set(false);
+	ShowSysMenu.set(true);
 }
 
 Dialog::~Dialog()
@@ -46,34 +45,30 @@ Dialog::~Dialog()
 void Dialog::doModal(Window* parent)
 {	
 	bool		 parentTopMost = false;
-	WindowModel* parentModel   = parent->windowModel();
-
-	//Set my parent window.
-	setWindowParent(parent);
-	 
-	_dialogModel->Closed.set(false);
-  _dialogModel->Visible.set(true);
+	
+	Closed.set(false);
+  Visible.set(true);
 
 	//Setup the parent as disabled and TopMost = false.
-	parentTopMost = parentModel->TopMost.get();
-	parentModel->Enabled = false;	
-	parentModel->TopMost = false;
+	parentTopMost = parent->TopMost.get();
+	parent->Enabled = false;	
+	parent->TopMost = false;
   parent->invalidate(); //Notify the parent.
 
 	//Setup the dialog as aenabled and top most.	
-	_dialogModel->Enabled = true;
-	_dialogModel->TopMost = true;
+	Enabled = true;
+	TopMost = true;
 
 	//Invalidate the dialog
 	invalidate();
 	
 	//Wait of termination of the dialog.
-	while(!_dialogModel->Closed.get())
+	while(!Closed.get())
 		Application::instance().nextEvent();
 
 	//Restore the parent state.
-	parentModel->Enabled = true;
-	parentModel->TopMost = parentTopMost;
+	parent->Enabled = true;
+	parent->TopMost = parentTopMost;
 	parent->invalidate();
 	
 }

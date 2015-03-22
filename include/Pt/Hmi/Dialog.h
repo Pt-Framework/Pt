@@ -31,29 +31,30 @@
 namespace Pt{
 namespace Hmi{
 
-class DialogModel;
+namespace DialogResultType
+{
+	enum Type
+	{
+    Undefined = 0,
+    OK = 1,
+    Cancel = 2,
+    Abort = 3,
+    Retry = 4,
+    Ignore = 5,
+    Yes = 6,
+    No = 7
+	};
+}
 
 class PT_HMI_API Dialog  : public Window
 {
 public:
-	Dialog(DialogModel* model);
+	Dialog();
 	virtual ~Dialog();	
 
 	void doModal(Window* parent);
 
-	DialogModel* dialogModel()
-	{
-		return _dialogModel;
-	}
-
-	const DialogModel* dialogModel() const
-	{
-		return _dialogModel;
-	}
-
-
-protected:	
-	DialogModel* _dialogModel;
+	Property<DialogResultType::Type>	Result;		
 };
 
 }}

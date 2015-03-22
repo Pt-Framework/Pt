@@ -30,10 +30,6 @@
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/Panel.h>
-#include <Pt/Hmi/DialogModel.h>
-#include <Pt/Hmi/ButtonModel.h>
-#include <Pt/Hmi/LabelModel.h>
-#include <Pt/Hmi/PanelModel.h>
 
 namespace Pt{
 namespace Hmi{
@@ -42,7 +38,7 @@ namespace Demo{
 class Dialog2 : public Pt::Hmi::Dialog
 {
 public:
-	Dialog2(DialogModel* model);
+	Dialog2();
 	virtual ~Dialog2();
 
 protected:
@@ -52,17 +48,9 @@ private:
 	void onClosedByButton();
     
 private:
-	Pt::Hmi::DialogModel* _model;
-	Pt::Hmi::ButtonModel _okButtonModel;
 	Pt::Hmi::Button _okButton;
-
-	Pt::Hmi::ButtonModel _cancelButtonModel;
-	Pt::Hmi::Button _cancelButton;
-	
-	Pt::Hmi::LabelModel  _labelModel;
+	Pt::Hmi::Button _cancelButton;	
 	Pt::Hmi::Label  _label;
-
-	Pt::Hmi::PanelModel  _panelModel;
 	Pt::Hmi::Panel  _panel;
 };
 

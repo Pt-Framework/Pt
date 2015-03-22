@@ -47,7 +47,6 @@ public:
 	{
 		_value = value;		
 		Changed.send(*this);
-        updateModel();
 		return *this;
 	}
 

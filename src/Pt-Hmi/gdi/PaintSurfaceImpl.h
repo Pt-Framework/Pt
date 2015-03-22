@@ -28,12 +28,10 @@
 #ifndef Pt_Hmi_PaintSurfaceImpl_h
 #define Pt_Hmi_PaintSurfaceImpl_h
 
-#include <Pt/Hmi/WidgetModel.h>
 #include <Pt/Hmi/Property.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/ARgbImage.h>
-
 #include <Windows.h>
 
 namespace Pt{
@@ -67,7 +65,7 @@ private:
     HBITMAP       _bitmapHandle;            
     HPEN		  _oldPen;
     HBRUSH		  _oldBrush;
-	HFONT	      _oldFont;
+	  HFONT	      _oldFont;
 };
 
 }}

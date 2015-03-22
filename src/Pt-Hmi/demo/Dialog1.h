@@ -27,9 +27,7 @@
 #define Pt_Forms_Demo_Dialog1_h
 
 #include <Pt/Hmi/Dialog.h>
-#include <Pt/Hmi/DialogModel.h>
 #include <Pt/Hmi/Button.h>
-#include <Pt/Hmi/ButtonModel.h>
 
 namespace Pt {
 namespace Hmi {
@@ -38,7 +36,7 @@ namespace Demo {
 class Dialog1 : public Pt::Hmi::Dialog
 {
 public:
-	Dialog1(DialogModel* model);
+	Dialog1();
 	virtual ~Dialog1();
 
 protected:
@@ -49,12 +47,7 @@ private:
 	void onShowNextDialog();
 
 private:
-	Pt::Hmi::DialogModel* _model;
-	Pt::Hmi::DialogModel _dialog2model;
-	Pt::Hmi::ButtonModel _closeButtonModel;
-	Pt::Hmi::Button _closeButton;
-	
-	Pt::Hmi::ButtonModel _newDialogModel;
+	Pt::Hmi::Button _closeButton;	
 	Pt::Hmi::Button _newDialog;
 	bool _clicked;
 }; 

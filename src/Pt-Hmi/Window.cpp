@@ -28,7 +28,6 @@
 
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/Application.h>
 #include "WindowImpl.h"
 #include <Pt/Hmi/PositionEvent.h>
@@ -37,16 +36,33 @@
 namespace Pt{
 namespace Hmi{
 
-Window::Window(WindowModel* model)
-: Widget(model)
-, _windowParent(0)
-, _windowModel(model)
-, _impl(new WindowImpl(model, &paintSurface() ) )
-{						 
+Window::Window()
+: _impl(new WindowImpl(this, &paintSurface() ) )
+, PT_HMI_INIT_PROPERTY_VALUE(MinimumSize,Pt::Gfx::SizeF(0,0))
+, PT_HMI_INIT_PROPERTY_VALUE(MaximumSize,Pt::Gfx::SizeF(65535,65535))
+, PT_HMI_INIT_PROPERTY_VALUE(WindowStartPostion, WindowStartPositionType::Manual)
+, PT_HMI_INIT_PROPERTY_VALUE(WindowState, WindowStateType::Normal)
+, PT_HMI_INIT_PROPERTY_VALUE(ShowInTaskbar,true)
+, PT_HMI_INIT_PROPERTY_VALUE(ShowTitle,true)
+, PT_HMI_INIT_PROPERTY_VALUE(ShowMinimizeButton,true)
+, PT_HMI_INIT_PROPERTY_VALUE(ShowMaximizeButton,true)
+, PT_HMI_INIT_PROPERTY_VALUE(ShowSysMenu,true)	
+, PT_HMI_INIT_PROPERTY_VALUE(Caption,"")
+, PT_HMI_INIT_PROPERTY_VALUE(Border,WindowBorderType::Sizeable)
+, PT_HMI_INIT_PROPERTY_VALUE(Icon, Pt::Gfx::ARgbImage(0,0))
+, PT_HMI_INIT_PROPERTY_VALUE(Closed,false)
+, PT_HMI_INIT_PROPERTY_VALUE(CanClose,true)
+, PT_HMI_INIT_PROPERTY_VALUE(TopMost, false)
+, PT_HMI_INIT_PROPERTY_VALUE(FocuseMoveKey, "\t")
+{
+	Visible.set(false);
+	Position.set(Pt::Gfx::PointF(20,20));
+	Size.set(Pt::Gfx::SizeF(200,200));
+	Focused.set(true);
 		
-	_windowModel->Size.Changed += Pt::slot(*this, &Window::onSizeChanged);					
-	_windowModel->Size.Changed.send(_windowModel->Size);	
-	_windowModel->Closed.Changed += Pt::slot(*this, &Window::onClosed);
+	Size.Changed += Pt::slot(*this, &Window::onSizeChanged);					
+	Size.Changed.send(Size);	
+	Closed.Changed += Pt::slot(*this, &Window::onClosed);
 
 	_impl->windowEvent() += Pt::slot(*this, &Widget::pointerInput);
 	_impl->windowEvent() += Pt::slot(*this, &Widget::keyInput);	
@@ -65,12 +81,11 @@ bool Window::focusNextChild(int index)
 	for( ; index < (int)children().size(); ++index)
 	{
 		Widget* child = children()[index];
-		WidgetModel* model = child->widgetModel();
 		
-		if(!model->AcceptFocus.get())
+		if(!child->AcceptFocus.get())
 			continue;
 
-		model->Focused = true;
+		child->Focused = true;
 		return true;
 	}
 
@@ -80,28 +95,28 @@ bool Window::focusNextChild(int index)
 
 void Window::onKeyInput(const KeyEvent& ev)
 { 
-	if(!_windowModel->Enabled.get())
+	if(!Enabled.get())
 		return;
 
-	_windowModel->KeyStatus = ev;
+	KeyStatus = ev;
 
-	if(ev.toUTF8String() == _windowModel->FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && !ev.shift())
+	if(ev.toUTF8String() == FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && !ev.shift())
 	{
-		if( _windowModel->Focused.get())
+		if( Focused.get())
 		{
 			if(!moveFocusNext())
-				_windowModel->Focused = true;
+				Focused = true;
 
 			render();
 		}
 	}
 
-	if(ev.toUTF8String() ==  _windowModel->FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && ev.shift())
+	if(ev.toUTF8String() ==  FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && ev.shift())
 	{
-		if( _windowModel->Focused.get())
+		if( Focused.get())
 		{
 			if(!moveFocusPrev())
-				_windowModel->Focused = true;
+				Focused = true;
 
 			render();
 		}
@@ -113,11 +128,11 @@ void Window::onKeyInput(const KeyEvent& ev)
 
 void Window::onPointerInput(const PointingEvent& ev)
 {
-	if(!_windowModel->Enabled.get())
+	if(!Enabled.get())
 		return;
 	
-	_windowModel->Pointer2DStatus = ev;
-	_windowModel->CursorT.get().setCursor(Pt::Hmi::Cursors::Default);
+	Pointer2DStatus = ev;
+	CursorT.get().setCursor(Pt::Hmi::Cursors::Default);
 
 	for( size_t i = 0; i < children().size(); ++i)
 		children()[i]->pointerInput(ev);	
@@ -135,15 +150,14 @@ bool Window::moveFocusNext()
 		return focusNextChild(index);
 	
 	Widget* child = children()[index];
-	WidgetModel* childModel = child->widgetModel();	
 		
-	if(!childModel->AcceptFocus.get())
+	if(!child->AcceptFocus.get())
 	{
-		child->widgetModel()->Focused = true;
+		child->Focused = true;
 		return true;
 	}
 
-	_windowModel->Focused = false;
+	Focused = false;
 
 	return focusNextChild(index);
 }
@@ -167,9 +181,9 @@ const Widget* Window::mainWidget() const
 
 void Window::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 {
-	paintSurface().resize(_windowModel->Size.get());	
+	paintSurface().resize(Size.get());	
 	
-	if(_windowModel->Visible.get())
+	if(Visible.get())
 		render();
 }
 
@@ -181,13 +195,13 @@ void Window::onClosed(const Property<bool> & closed)
 
 bool Window::close()
 {
-	if(!_windowModel->CanClose.get())
+	if(!CanClose.get())
 		return false;
     
   //Set the closed flag
-	if(!_windowModel->Closed.get())
+	if(!Closed.get())
 	{
-		_windowModel->Closed.set(true);
+		Closed.set(true);
         
 		//Let the system window to close its self.
 		render();
@@ -199,23 +213,23 @@ bool Window::close()
 
 void Window::resizeEvent(const ResizeEvent& ev)
 {
-	const Pt::Gfx::SizeF& curSize = _windowModel->Size.get();
+	const Pt::Gfx::SizeF& curSize = Size.get();
 
 	if( curSize == ev.size() ) 
 		return;
 
-	_windowModel->Size = ev.size();
+	Size = ev.size();
 }
 
 
 void Window::positionEvent(const PositionEvent& ev)
 {
-	const Pt::Gfx::PointF& curPos = _windowModel->Position.get();
+	const Pt::Gfx::PointF& curPos = Position.get();
 
 	if( curPos == ev.position() ) 
 		return;
 
-	_windowModel->Position = ev.position();
+	Position = ev.position();
 }
 
 

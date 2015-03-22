@@ -37,14 +37,7 @@ namespace Pt{
 namespace Hmi{
 namespace Demo{
 
-MainWindow::MainWindow(WindowModel* model)
-: Pt::Hmi::Window(model)
-, _model(model)
-, _mainPanel(&_mainPanelModel)
-, _closeButton(&_closeButtonModel)
-, _toggleButton(&_toggleButtonModel)
-, _dialogButton(&_dialogButtonModel)
-, _textLabel(&_textLabelModel)
+MainWindow::MainWindow()
 {
 	init();
 }
@@ -62,14 +55,14 @@ void MainWindow::init()
 		memoryStream.write((char*)Pt::Forms::Atesion::icon, Pt::Forms::Atesion::iconSize);	
 		
 		Pt::Gfx::ARgbImage* im = Pt::Gfx::ImageReader::read(memoryStream);
-		_model->Icon = *im;
+		Icon = *im;
 		delete im;
 		//Generate Alpha channel
-		for(size_t y = 0;  y < _model->Icon.get().height(); ++y)
+		for(size_t y = 0;  y < Icon.get().height(); ++y)
 		{
-			for(size_t x = 0;  x < _model->Icon.get().width(); ++x)
+			for(size_t x = 0;  x < Icon.get().width(); ++x)
 			{
-				Pt::Gfx::ARgbColor& pix =  _model->Icon.get().pixel(x,y);
+				Pt::Gfx::ARgbColor& pix =  Icon.get().pixel(x,y);
 				
 				if( pix.blue() == 255 && pix.red() == 255 && pix.green() == 255)
 					pix.setAlpha(0);
@@ -77,66 +70,66 @@ void MainWindow::init()
 		}			
 	}
 	
-	_model->Position.set(Pt::Gfx::PointF(200,200));
-	_model->Size.set(Pt::Gfx::SizeF(800,615));
-	_model->Caption.set("This is a Platinum C++ Human Machine Interface demo  ");
-  _model->WindowState.set(Hmi::WindowStateType::Normal);
-	_model->WindowStartPostion.set(Hmi::WindowStartPositionType::CenterScreen);
-	_model->Closed.Changed += Pt::slot(*this, &MainWindow::onClosedByWindow);
+	Position.set(Pt::Gfx::PointF(200,200));
+	Size.set(Pt::Gfx::SizeF(800,615));
+	Caption.set("This is a Platinum C++ Human Machine Interface demo  ");
+  WindowState.set(Hmi::WindowStateType::Normal);
+	WindowStartPostion.set(Hmi::WindowStartPositionType::CenterScreen);
+	Closed.Changed += Pt::slot(*this, &MainWindow::onClosedByWindow);
 
 	
 	//Panel
-	_mainPanelModel.Size.set(Pt::Gfx::SizeF(700,480));
-	_mainPanelModel.Position.set(Pt::Gfx::PointF(40,40));
-	_mainPanelModel.BorderWidth.set(3);	
-	_mainPanelModel.BorderStyle.set(Pt::Hmi::BorderStyleType::Sizeable);
+	_mainPanel.Size.set(Pt::Gfx::SizeF(700,480));
+	_mainPanel.Position.set(Pt::Gfx::PointF(40,40));
+	_mainPanel.BorderWidth.set(3);	
+	_mainPanel.BorderStyle.set(Pt::Hmi::BorderStyleType::Sizeable);
 	{
 		std::stringstream memoryStream;
 		memoryStream.write((char*)Pt::Forms::DemoImage::image, Pt::Forms::DemoImage::imageSize);	
 		Pt::Gfx::ARgbImage* im = Pt::Gfx::ImageReader::read(memoryStream);
-		_mainPanelModel.BackgroundImage = *im;
+		_mainPanel.BackgroundImage = *im;
 		delete im;
 	}
 
-	_mainPanelModel.BackgroundImageLayout = Pt::Hmi::ImageLayoutType::Strech;
+	_mainPanel.BackgroundImageLayout = Pt::Hmi::ImageLayoutType::Strech;
 
 	//Text
-	_textLabelModel.AutoSize.set(true);
-	_textLabelModel.Size.set(Pt::Gfx::SizeF(500,30));
-	_textLabelModel.Caption.set("&This is a Platinum C++");
-	_textLabelModel.Position.set(Pt::Gfx::PointF(20,20));
-	_textLabelModel.ForeColor.set(Pt::Gfx::ARgbColor(255,0,0,0));
-	_textLabelModel.UseMnemonic.set(true);	
+	_textLabel.AutoSize.set(true);
+	_textLabel.Size.set(Pt::Gfx::SizeF(500,30));
+	_textLabel.Caption.set("&This is a Platinum C++");
+	_textLabel.Position.set(Pt::Gfx::PointF(20,20));
+	_textLabel.ForeColor.set(Pt::Gfx::ARgbColor(255,0,0,0));
+	_textLabel.UseMnemonic.set(true);	
 	//_textLabel.labelModel().PainterSurfaceType = Pt::Hmi::PainterType::Image;
 	_mainPanel.addChild(&_textLabel);
 	
 	//Toggle button
-	_toggleButtonModel.ButtonType.set(Hmi::ButtonType::Toggle);
-	_toggleButtonModel.Caption.set("Toggle Me [CTRL+I]");
-	_toggleButtonModel.ActionKey.set("C//i");
-	_toggleButtonModel.Position.set(Pt::Gfx::PointF(20,60));
-	_toggleButtonModel.Size.set(Pt::Gfx::SizeF(150,25));
+	_toggleButton.ButtonType.set(Hmi::ButtonType::Toggle);
+	_toggleButton.Caption.set("Toggle Me [CTRL+I]");
+	_toggleButton.ActionKey.set("C//i");
+	_toggleButton.Position.set(Pt::Gfx::PointF(20,60));
+	_toggleButton.Size.set(Pt::Gfx::SizeF(150,25));
 	_textLabel.bindMnemonicToWidget(&_toggleButton);
 	_mainPanel.addChild(&_toggleButton);
 
 	//Dialog button
-	_dialogButtonModel.ButtonType.set(Hmi::ButtonType::Press);
-	_dialogButtonModel.Caption.set("&Dialog [CTRL+D]");
-	_dialogButtonModel.ActionKey.set("C//d");
-	_dialogButtonModel.Position.set(Pt::Gfx::PointF(20,100));
-	_dialogButtonModel.Size.set(Pt::Gfx::SizeF(150,25));
-	_dialogButtonModel.UseMnemonic.set(false);
-	_dialogButtonModel.Clicked  += Pt::slot(*this, &MainWindow::onShowDialog);
+	_dialogButton.ButtonType.set(Hmi::ButtonType::Press);
+	_dialogButton.Caption.set("&Dialog [CTRL+D]");
+	_dialogButton.ActionKey.set("C//d");
+	_dialogButton.Position.set(Pt::Gfx::PointF(20,100));
+	_dialogButton.Size.set(Pt::Gfx::SizeF(150,25));
+	_dialogButton.UseMnemonic.set(false);
+	_dialogButton.Clicked  += Pt::slot(*this, &MainWindow::onShowDialog);
 	
 	_mainPanel.addChild(&_dialogButton);
 		
 	//Close button
-	_closeButtonModel.ButtonType.set(Hmi::ButtonType::Press);
-	_closeButtonModel.Caption.set("Close [CTRL+X]");
-	_closeButtonModel.ActionKey.set("C//x");
-	_closeButtonModel.Position.set(Pt::Gfx::PointF(590,525));
-	_closeButtonModel.Size.set(Pt::Gfx::SizeF(150,25));
-	_closeButtonModel.Clicked += Pt::slot(*this, &MainWindow::onClosed);
+	_closeButton.ButtonType.set(Hmi::ButtonType::Press);
+	_closeButton.Caption.set("Close [CTRL+X]");
+	_closeButton.ActionKey.set("C//x");
+	_closeButton.Position.set(Pt::Gfx::PointF(590,525));
+	_closeButton.Size.set(Pt::Gfx::SizeF(150,25));
+	_closeButton.Clicked += Pt::slot(*this, &MainWindow::onClosed);
 	
 	addChild(&_closeButton);
 	addChild(&_mainPanel);
@@ -144,13 +137,13 @@ void MainWindow::init()
 
 void MainWindow::onShowDialog()
 {
-	Dialog1 dialog(&_dialog1model);
+	Dialog1 dialog;
 	dialog.doModal(this);
 }
 
 void MainWindow::show()
 {
-	_model->Visible = true;
+	Visible = true;
 	invalidate();
 }
 

@@ -31,13 +31,7 @@ namespace Hmi{
 namespace Demo{
 
 
-Dialog2::Dialog2(DialogModel* model)
-: Dialog(model)
-, _okButton(&_okButtonModel)
-, _cancelButton(&_cancelButtonModel)
-, _label(&_labelModel)
-, _panel(&_panelModel)
-, _model(model)
+Dialog2::Dialog2()
 {
 	init();
 }
@@ -49,39 +43,39 @@ Dialog2::~Dialog2()
 void Dialog2::init()
 {
 	//Dialog
-	_model->Size.set(Pt::Gfx::SizeF(450,200));
-	_model->Position.set(Pt::Gfx::PointF(400,400));
-	_model->Caption.set("Pt-Hmi-demo");
-	_model->WindowStartPostion.set(Hmi::WindowStartPositionType::CenterParent);
-	_model->ShowMaximizeButton.set(false);
-	_model->ShowMinimizeButton.set(false);
-	_model->ShowSysMenu.set(false);
+	Size.set(Pt::Gfx::SizeF(450,200));
+	Position.set(Pt::Gfx::PointF(400,400));
+	Caption.set("Pt-Hmi-demo");
+	WindowStartPostion.set(Hmi::WindowStartPositionType::CenterParent);
+	ShowMaximizeButton.set(false);
+	ShowMinimizeButton.set(false);
+	ShowSysMenu.set(false);
 
-	_panelModel.Position.set(Pt::Gfx::PointF(25,15)); 
-	_panelModel.Size.set(Pt::Gfx::SizeF(385,100));
-	_panelModel.BorderStyle.set(Hmi::BorderStyleType::Single);
-	_panelModel.BorderRoundEdge.set(true);
+	_panel.Position.set(Pt::Gfx::PointF(25,15)); 
+	_panel.Size.set(Pt::Gfx::SizeF(385,100));
+	_panel.BorderStyle.set(Hmi::BorderStyleType::Single);
+	_panel.BorderRoundEdge.set(true);
 	addChild(&_panel);
 
 	//Label
-		_labelModel.Position.set(Pt::Gfx::PointF(50,40));
-	_labelModel.AutoSize.set(true);
-	_labelModel.Caption.set("Do you want to close me?");
+	_label.Position.set(Pt::Gfx::PointF(50,40));
+	_label.AutoSize.set(true);
+	_label.Caption.set("Do you want to close me?");
 	_panel.addChild(&_label);
 
 	//OK Button
-	_okButtonModel.Position.set(Pt::Gfx::PointF(200,125));
-	_okButtonModel.Size.set(Pt::Gfx::SizeF(100,23));
-	_okButtonModel.Caption.set("OK");
-	_okButtonModel.ActionKey.set("C//x");
-	_okButtonModel.Clicked += Pt::slot(*this,&Dialog2::onClosedByButton);
+	_okButton.Position.set(Pt::Gfx::PointF(200,125));
+	_okButton.Size.set(Pt::Gfx::SizeF(100,23));
+	_okButton.Caption.set("OK");
+	_okButton.ActionKey.set("C//x");
+	_okButton.Clicked += Pt::slot(*this,&Dialog2::onClosedByButton);
 	addChild(&_okButton);
 
 	//Cancel button
-	_cancelButtonModel.Position.set(Pt::Gfx::PointF(310,125));
-	_cancelButtonModel.Size.set(Pt::Gfx::SizeF(100,23));
-	_cancelButtonModel.Caption.set("Cancel");
-	_cancelButtonModel.Clicked += Pt::slot(*this,&Dialog2::onClosedByButton);
+	_cancelButton.Position.set(Pt::Gfx::PointF(310,125));
+	_cancelButton.Size.set(Pt::Gfx::SizeF(100,23));
+	_cancelButton.Caption.set("Cancel");
+	_cancelButton.Clicked += Pt::slot(*this,&Dialog2::onClosedByButton);
 	addChild(&_cancelButton);
 }
     

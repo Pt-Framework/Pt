@@ -35,24 +35,31 @@ namespace Pt{
 namespace Hmi{
 
 class PointingEvent;
-class ButtonModel;
+
+namespace ButtonType
+{
+	enum Type
+	{
+		Press,
+		Toggle
+	};
+}
 
 
 class PT_HMI_API Button  : public Label
 {
 public:
-	Button(ButtonModel* model);
+	Button();
 	virtual ~Button();
 
-	ButtonModel* buttonModel()
-	{
-		return _buttonModel;
-	}
-
-	const ButtonModel* buttonModel() const 
-	{
-		return _buttonModel;
-	}
+	Property<DeviceButton::State> ButtonState;	
+	Property<std::string>         ActionKey;		
+	Property<bool>								Armed;		
+	Property<ButtonType::Type>    ButtonType;	
+	Property<int>									DoublePressTimeInMs; 
+	Signal<bool>									Checked;	
+	Signal<>											Clicked;	
+	Signal<>											DoubleClicked;	
 
 protected:
 	virtual void onPressedAction();
@@ -69,7 +76,6 @@ private:
 	bool _timeout;
 	int _pressCounter;
 	Pt::System::Timer _doublePressTimer;
-	ButtonModel* _buttonModel;
 };
 
 }}

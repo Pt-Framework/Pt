@@ -5,10 +5,11 @@
 namespace Pt{
 namespace Hmi{
 
-Panel::Panel(PanelModel* model)
-: Widget(model)
-, _resizeDir(No)
-, _panelModel(model)
+Panel::Panel()
+: _resizeDir(No)
+, PT_HMI_INIT_PROPERTY_VALUE(BorderStyle,BorderStyleType::Single)
+, PT_HMI_INIT_PROPERTY_VALUE(BorderWidth,3)
+, PT_HMI_INIT_PROPERTY_VALUE(BorderRoundEdge,false)
 {
 }
 
@@ -17,7 +18,16 @@ Panel::~Panel()
 {
 }
 
+/*
+Pt::Gfx::SizeF Panel::clientSize() const
+{
+	Pt::Gfx::SizeF cs;
 
+	cs.setWidth(Size.get().width() - BorderWidth.get());
+	cs.setHeight(Size.get().height() - BorderWidth.get());
+	return cs;
+}
+*/
 void Panel::handleResize(const PointingEvent& ev)
 {
 	const std::vector<DeviceButton>& but = ev.buttons();
@@ -39,10 +49,10 @@ void Panel::handleResize(const PointingEvent& ev)
 
 void Panel::recalcPosAndSize(const Pt::Gfx::PointF& p, ResizeDirection dir)
 {
-	double width  = _panelModel->Size.get().width();
-	double height = _panelModel->Size.get().height();
-	double posX   = _panelModel->Position.get().x();
-	double posY   = _panelModel->Position.get().y();
+	double width  = Size.get().width();
+	double height = Size.get().height();
+	double posX   = Position.get().x();
+	double posY   = Position.get().y();
 	double deltaX =  (p.x() - _lastSizePoint.x());
 	double deltaY =  (p.y() - _lastSizePoint.y());
 
@@ -112,78 +122,77 @@ void Panel::recalcPosAndSize(const Pt::Gfx::PointF& p, ResizeDirection dir)
         break;
 	}
 
-	_panelModel->Size = Pt::Gfx::SizeF(width,height);
-	_panelModel->Position = Pt::Gfx::PointF(posX, posY);
+	Size = Pt::Gfx::SizeF(width,height);
+	Position = Pt::Gfx::PointF(posX, posY);
 	_lastSizePoint = p;
 	render();	
 }
 
-
 void Panel::onPointerInput(const PointingEvent& ev)
 {
 	Pt::Gfx::PointF p =  toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
-	Pt::Gfx::SizeF size = _panelModel->Size.get();
+	Pt::Gfx::SizeF size = Size.get();
 	
-	double sizeR = size.width() -  _panelModel->BorderWidth.get();
-	double sizeB = size.height() - _panelModel->BorderWidth.get();
+	double sizeR = size.width() -  BorderWidth.get();
+	double sizeB = size.height() - BorderWidth.get();
 			
-	switch(_panelModel->BorderStyle.get())
+	switch(BorderStyle.get())
 	{
 		case BorderStyleType::Sizeable:
 		{
-			if( _panelModel->contains(p))
+			if( contains(p) )
 			{
-				if(p.x() < _panelModel->BorderWidth.get() && p.y() <  _panelModel->BorderWidth.get())
+				if(p.x() < BorderWidth.get() && p.y() <  BorderWidth.get())
 				{//Corner NW
-					_panelModel->CursorT.get().setCursor(Cursors::SizeNS);
+					CursorT.get().setCursor(Cursors::SizeNS);
 					_resizeDir = NorthWest;
 				}	
-				else if(p.x() > sizeR && p.y() <  _panelModel->BorderWidth.get())
+				else if(p.x() > sizeR && p.y() <  BorderWidth.get())
 				{//corner NE
-					_panelModel->CursorT.get().setCursor(Cursors::SizeNS);
+					CursorT.get().setCursor(Cursors::SizeNS);
 					_resizeDir= NorthEast;
 				}
-				else if(p.x() < _panelModel->BorderWidth.get() &&  p.y() > sizeB )
+				else if(p.x() < BorderWidth.get() &&  p.y() > sizeB )
 				{//corner SW
-					_panelModel->CursorT.get().setCursor(Cursors::SizeWE);
+					CursorT.get().setCursor(Cursors::SizeWE);
 					_resizeDir = SouthWest;
 				}
 				else if(p.x() > sizeR &&  p.y() > sizeB )
 				{//corner SE
-					_panelModel->CursorT.get().setCursor(Cursors::SizeWE);
+					CursorT.get().setCursor(Cursors::SizeWE);
 					_resizeDir = SouthEast;
 				}
 				else
 				{
-					if( p.x() < _panelModel->BorderWidth.get())				
+					if( p.x() < BorderWidth.get())				
 					{//West
-						_panelModel->CursorT.get().setCursor(Cursors::SizeWE);
+						CursorT.get().setCursor(Cursors::SizeWE);
 						_resizeDir = West;
 					}
 					else if(p.x() >= sizeR)
 					{//East
-						_panelModel->CursorT.get().setCursor(Cursors::SizeWE);
+						CursorT.get().setCursor(Cursors::SizeWE);
 						_resizeDir = East;
 					}
-					else if( p.y() < _panelModel->BorderWidth.get())
+					else if( p.y() < BorderWidth.get())
 					{//North
-						_panelModel->CursorT.get().setCursor(Cursors::SizeNS);
+						CursorT.get().setCursor(Cursors::SizeNS);
 						_resizeDir = North;
 					}
 					else if(p.y() >sizeB)
 					{//South
-						_panelModel->CursorT.get().setCursor(Cursors::SizeNS);
+						CursorT.get().setCursor(Cursors::SizeNS);
 						_resizeDir = South;
 					}
 					else
 					{
-						_panelModel->CursorT.get().setCursor(Cursors::Default);
+						CursorT.get().setCursor(Cursors::Default);
 					}
 				}
 			}
       else
       {
-          _panelModel->CursorT.get().setCursor(Cursors::Default);
+          CursorT.get().setCursor(Cursors::Default);
       }
 			handleResize(ev);
 		}
@@ -203,21 +212,21 @@ void Panel::onRender()
 {	
 	Widget::onRender();
 
-	if(!_panelModel->Visible.get())
+	if(!Visible.get())
 		return;
 
 	int corner = 0;
 
-	if(_panelModel->BorderRoundEdge.get())
+	if(BorderRoundEdge.get())
 		corner = 2;
     
-	size_t border =  (size_t) _panelModel->BorderWidth.get();	
-	Pt::Gfx::SizeF  clientSize(_panelModel->Size.get().width() - _panelModel->BorderWidth.get()/2, _panelModel->Size.get().height() - _panelModel->BorderWidth.get()/2);	
-	Pt::Gfx::RectF  clientRect(Pt::Gfx::PointF( _panelModel->BorderWidth.get()/2, _panelModel->BorderWidth.get()/2), clientSize);
+	size_t border =  (size_t) BorderWidth.get();	
+	Pt::Gfx::SizeF  clientSize(Size.get().width() - BorderWidth.get()/2, Size.get().height() - BorderWidth.get()/2);	
+	Pt::Gfx::RectF  clientRect(Pt::Gfx::PointF( BorderWidth.get()/2, BorderWidth.get()/2), clientSize);
 	
 	Pt::Hmi::Painter& localPainter = paintSurface().painter();
 						
-	switch(_panelModel->BorderStyle.get())
+	switch(BorderStyle.get())
 	{
 		case BorderStyleType::Single:
 		{			
@@ -373,7 +382,7 @@ void Panel::onRender()
 
 		case BorderStyleType::Sizeable:
 		{
-			Pt::Gfx::Pen pen1(border, _panelModel->ForeColor.get());
+			Pt::Gfx::Pen pen1(border, ForeColor.get());
 			localPainter.setPen(pen1);				
 			localPainter.drawRect(clientRect);
 			

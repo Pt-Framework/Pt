@@ -26,8 +26,9 @@
 #ifndef Pt_Hmi_WindowImpl_H
 #define Pt_Hmi_WindowImpl_H
 
+#include <Pt/Connectable.h>
+#include <Pt/Signal.h>
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/PointingEvent.h>
 #include <Pt/Hmi/PositionEvent.h>
@@ -36,13 +37,16 @@
 #include <Windows.h>
 #include <map>
 
+
 namespace Pt{
 namespace Hmi{
+
+class Application;
 
 class WindowImpl : public Pt::Connectable
 {
 public:
-	WindowImpl(WindowModel* model, PaintSurface* surface);
+	WindowImpl(Window* window, PaintSurface* surface);
 
 	virtual ~WindowImpl();
 	
@@ -52,12 +56,6 @@ public:
 	{
 		return _windowEvent;
 	} 
-
-	void init(WindowModel* model, PaintSurface* surface)
-	{
-		_model = model;
-		_surface = surface;
-	}
 
 protected:
 	void onWindowEvent(HWND wnd, unsigned int msg, WPARAM wparam, LPARAM lparam, bool& handled);
@@ -81,13 +79,14 @@ protected:
 	void centerWindowTo(HWND parent);
 
 private:	
+	Pt::Hmi::Application* _app; 
 	Pt::Signal<const Pt::Event&>	_windowEvent;
 	KeyEvent											_keyEvent;
 	PointingEvent									_pointerEvent;
 	ResizeEvent										_resizeEvent;
 	PositionEvent									_positionEvent;
 	bool													_ignoreSizePositionEvent;
-	WindowModel*									_model;
+	Window*												_window;
 	Pt::Hmi::PaintSurface*				_surface;
 	HWND													_hwnd;
 };

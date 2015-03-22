@@ -31,24 +31,21 @@
 #include <Pt/Gfx/Rgb888Color.h>
 #include <Pt/Gfx/Rgb888Image.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/Window.h>
 #include "PaintSurfaceImpl.h"
 
 namespace Pt{
 namespace Hmi{
 
-WindowImpl::WindowImpl(WindowModel* model, PaintSurface* surface)
+WindowImpl::WindowImpl(Window* window, PaintSurface* surface)
 : _hwnd(0)
 , _ignoreSizePositionEvent(false)
-, _model(0)
-, _surface(0)
+, _window(window)
+, _surface(surface)
 {	
 
-	init(model, surface);
-
-	Pt::Hmi::Application* app = (Pt::Hmi::Application*) &Pt::Hmi::Application::instance();	
-	app->impl()->WindowEvent += Pt::slot(*this, &WindowImpl::onWindowEvent);
+	_app= (Pt::Hmi::Application*) &Pt::Hmi::Application::instance();	
+	_app->impl()->WindowEvent += Pt::slot(*this, &WindowImpl::onWindowEvent);
 	_pointerEvent.buttons().resize(3);	
 
 	create();
@@ -66,7 +63,7 @@ void WindowImpl::create()
 
 void WindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 {
-	if(!_model->Enabled.get())
+	if(!_window->Enabled.get())
 		return;
 
 	BYTE keyboardState[256];
@@ -186,7 +183,7 @@ void WindowImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wpar
 		break;
 		case WM_KILLFOCUS:
 		{
-			if(_model->TopMost.get())
+			if(_window->TopMost.get())
 			{
 				BringWindowToTop(_hwnd);
 				handled = true;
@@ -203,11 +200,11 @@ WindowImpl::~WindowImpl()
 
 bool WindowImpl::onClosing()
 {
-	if(!_model->CanClose.get())
+	if(!_window->CanClose.get())
 		return false;
     
   //Set the closed flag
-  _model->Closed = true;
+  _window->Closed = true;
         
 	return true;
 }
@@ -225,15 +222,15 @@ void WindowImpl::onSize(WPARAM wParam, LPARAM lParam)
 		break;
 
 		case SIZE_MAXIMIZED:
-			_model->WindowState = WindowStateType::Maximazed;							
+			_window->WindowState = WindowStateType::Maximazed;							
 		break;
 
 		case SIZE_MINIMIZED:
-			_model->WindowState = WindowStateType::Minimized;			
+			_window->WindowState = WindowStateType::Minimized;			
 		break;
  
 		case SIZE_RESTORED:
-			_model->WindowState = WindowStateType::Normal;
+			_window->WindowState = WindowStateType::Normal;
 			updateModelSizeAndPos();
 		break;
 	}
@@ -272,7 +269,7 @@ void WindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 		break;		
 	}
   
-	 Pt::Gfx::PointF p = _model->toUnit(Pt::Gfx::Point(xPos, yPos));
+	 Pt::Gfx::PointF p = _app->toUnit(Pt::Gfx::Point(xPos, yPos));
 	_pointerEvent.setX(p.x());
 	_pointerEvent.setY(p.y());			
 
@@ -289,20 +286,20 @@ void WindowImpl::setWindowSizeAndPos(bool firstShow)
 	Pt::Gfx::Size winSize = Pt::Gfx::Size(info.right - info.left, info.bottom - info.top);
 	Pt::Gfx::Point winPos = Pt::Gfx::Point(info.left, info.right);
 	
-	Pt::Gfx::Point pos = _model->fromUnit(_model->Position.get());
-	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
+	Pt::Gfx::Point pos = _app->fromUnit(_window->Position.get());
+	Pt::Gfx::Size size = _app->fromUnit(_window->Size.get());
 
 	if( winSize != size ||  pos != winPos) 
 		SetWindowPos(_hwnd,0, pos.x(), pos.y(), size.width(), size.height(), 0);	
 	
 	if(firstShow)
 	{
-		switch(_model->WindowStartPostion.get())
+		switch(_window->WindowStartPostion.get())
 		{
 			case WindowStartPositionType::Manual:
 			{
-				Pt::Gfx::Point pos = _model->fromUnit(_model->Position.get());
-				Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
+				Pt::Gfx::Point pos = _app->fromUnit(_window->Position.get());
+				Pt::Gfx::Size size = _app->fromUnit(_window->Size.get());
 				SetWindowPos(_hwnd,0, pos.x(), pos.y(), size.width(), size.height(), 0);
 			}
 			break;
@@ -353,13 +350,13 @@ void WindowImpl::centerWindowTo(HWND parent)
 	GetWindowRect(parent, &parentRect);
 	int horizontal = parentRect.left + ((parentRect.right - parentRect.left )/2);
 	int vertical = parentRect.top + (parentRect.bottom - parentRect.top)/2;
-	Pt::Gfx::Size mySize  = _model->fromUnit(_model->Size.get());
+	Pt::Gfx::Size mySize  = _app->fromUnit(_window->Size.get());
 
 	int posX = horizontal - (mySize.width()/2);
 	int posY = vertical - (mySize.height()/2);
 				
-	_model->Position.set(_model->toUnit(Pt::Gfx::Point( posX,posY)));
-	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
+	_window->Position.set(_app->toUnit(Pt::Gfx::Point( posX,posY)));
+	Pt::Gfx::Size size = _app->fromUnit(_window->Size.get());
 	SetWindowPos(_hwnd,0, posX, posY, size.width(), size.height(), SWP_DRAWFRAME);
 }
 
@@ -382,7 +379,7 @@ void WindowImpl::onMove()
 	if(_ignoreSizePositionEvent)
 		return;
 
-	if(!_model->Enabled.get())
+	if(!_window->Enabled.get())
 	{
 		setWindowSizeAndPos(false);
 		setWindowProperties();
@@ -396,7 +393,7 @@ void WindowImpl::onPaint()
 {   		
 	PAINTSTRUCT ps;
 	HDC windowContext = BeginPaint(_hwnd, &ps);
-	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
+	Pt::Gfx::Size size = _app->fromUnit(_window->Size.get());
 	
 	HDC bitmapDeviceConText = _surface->impl()->deviceContext();
 	BitBlt(windowContext, 0, 0, size.width(), size.height(), bitmapDeviceConText, 0, 0, SRCCOPY);	
@@ -405,22 +402,22 @@ void WindowImpl::onPaint()
 
 void WindowImpl::setWindowIcon()
 {
-	if( _model->Icon.get().width() == 0 ||  _model->Icon.get().height() == 0)
+	if( _window->Icon.get().width() == 0 ||  _window->Icon.get().height() == 0)
 		return;
 
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 	const size_t planes = 4;
-	std::vector<Pt::uint8_t> bitmapBuffer(_model->Icon.get().width() * _model->Icon.get().height() *planes);
+	std::vector<Pt::uint8_t> bitmapBuffer(_window->Icon.get().width() * _window->Icon.get().height() *planes);
 		
-	for(size_t y = 0; y < _model->Icon.get().height(); ++y)
+	for(size_t y = 0; y < _window->Icon.get().height(); ++y)
 	{
-		const size_t offsetLine = y * (_model->Icon.get().width()*planes);
+		const size_t offsetLine = y * (_window->Icon.get().width()*planes);
 
-		for(size_t x = 0; x < _model->Icon.get().width(); ++x)
+		for(size_t x = 0; x < _window->Icon.get().width(); ++x)
 		{
 			const size_t index  = offsetLine + (x*planes);
 
-			const Pt::Gfx::ARgbColor& pix =  _model->Icon.get().pixel(x,y);
+			const Pt::Gfx::ARgbColor& pix =  _window->Icon.get().pixel(x,y);
 				
 			bitmapBuffer[index]     = static_cast<unsigned char>(pix.blue());	
 			bitmapBuffer[index + 1] = static_cast<unsigned char>(pix.green());
@@ -429,39 +426,39 @@ void WindowImpl::setWindowIcon()
 		}		
 	}
 
-	HICON icon = ::CreateIcon(GetModuleHandle(NULL), _model->Icon.get().width(), _model->Icon.get().height(), 4, 8, 0, (BYTE*)&bitmapBuffer[0]);
+	HICON icon = ::CreateIcon(GetModuleHandle(NULL), _window->Icon.get().width(), _window->Icon.get().height(), 4, 8, 0, (BYTE*)&bitmapBuffer[0]);
 	SetClassLong(_hwnd, GCL_HICON, (LONG)icon); 	
 }
 
 void WindowImpl::setWindowProperties()
 {
-	SetWindowText(_hwnd, _model->Caption.get().c_str());
+	SetWindowText(_hwnd, _window->Caption.get().c_str());
 
 	long style = 0;
 	long exStyle = 0;
 	
 	//Visibility
-	if(_model->Visible.get())
+	if(_window->Visible.get())
 		style |= WS_VISIBLE;
 	
 	//Title	
-	if( _model->ShowTitle.get())
+	if( _window->ShowTitle.get())
 		style |= WS_CAPTION;
 
 	//Minimize button
-	if( _model->ShowMinimizeButton.get())
+	if( _window->ShowMinimizeButton.get())
 		style |= WS_MINIMIZEBOX;
 
 	//Maximize button
-	if( _model->ShowMaximizeButton.get())
+	if( _window->ShowMaximizeButton.get())
 		style |= WS_MAXIMIZEBOX;
 		
 	//System menu
-	if( _model->ShowSysMenu.get())
+	if( _window->ShowSysMenu.get())
 		style |= WS_SYSMENU;
 		
 	//Windows state
-	switch(_model->WindowState.get())
+	switch(_window->WindowState.get())
 	{
 		case Pt::Hmi::WindowStateType::Normal:			
 		break;
@@ -476,7 +473,7 @@ void WindowImpl::setWindowProperties()
 	}
 	
 	//Window border behaviour
-	switch( _model->Border.get())
+	switch( _window->Border.get())
 	{
 		case Pt::Hmi::WindowBorderType::NoBorder:			
 		break;
@@ -510,7 +507,7 @@ void WindowImpl::setWindowProperties()
 	}
 
 	//Show in taskbar
-	if(_model->ShowInTaskbar.get())
+	if(_window->ShowInTaskbar.get())
 	{
 		exStyle |= WS_EX_APPWINDOW;  
 		SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle); 
@@ -527,10 +524,10 @@ void WindowImpl::setWindowProperties()
 
 	bool visible = ((styleVisible & WS_VISIBLE) == WS_VISIBLE);
 
-	if(!_model->Visible.get() && visible)
+	if(!_window->Visible.get() && visible)
 		ShowWindow(_hwnd, SW_HIDE);
 	
-	if( !visible && _model->Visible.get())
+	if( !visible && _window->Visible.get())
 		ShowWindow(_hwnd, SW_SHOW);		
 }
 
@@ -549,7 +546,7 @@ void WindowImpl::render()
  bool firstShow = (_hwnd == 0);
 
 	//Check create/destroy
-	if(_model->Closed.get())
+	if(_window->Closed.get())
 	{
 		
 		if(_hwnd != 0)
@@ -561,13 +558,13 @@ void WindowImpl::render()
 	{
 		if(_hwnd == 0)
 		{
-			if(_model->Visible.get())
+			if(_window->Visible.get())
 			{
 				create();
 			}
 			else
 			{
-				_model = 0;
+				_window = 0;
 				return;
 			}
 		}

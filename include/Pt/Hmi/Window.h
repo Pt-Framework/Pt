@@ -29,7 +29,6 @@
 #define Pt_Hmi_Controller_Window_H
 
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/WindowModel.h>
 
 namespace Pt{
 namespace Hmi{
@@ -38,48 +37,73 @@ class WindowImpl;
 class ResizeEvent;
 class PositionEvent;
 
+namespace WindowStartPositionType
+{
+	enum Type
+	{
+		Manual,
+		CenterScreen,
+		CenterParent,
+	};
+}
+
+namespace WindowBorderType
+{
+	enum Type
+	{
+        NoBorder,
+		Fixed,
+		Sizeable,
+		Tool,
+		ToolSizeable,
+		Dialog,
+		DialogSizeable
+	};
+}
+
+
+namespace WindowStateType
+{
+	enum Type
+	{
+		Normal,
+		Minimized,
+		Maximazed,
+	};
+}
+
 
 class PT_HMI_API Window  : public Widget
 {
 public:	
-	Window(WindowModel* model);
+	Window();
 	
 	virtual ~Window();
 
+	Property<Pt::Gfx::SizeF>					MinimumSize;
+	Property<Pt::Gfx::SizeF>					MaximumSize;
+	Property<WindowStartPositionType::Type>		WindowStartPostion;
+	Property<WindowStateType::Type>				WindowState;	
+	Property<bool>								ShowInTaskbar;
+	Property<bool>								ShowTitle;
+	Property<bool>								ShowMinimizeButton;
+	Property<bool>								ShowMaximizeButton;
+	Property<bool>								ShowSysMenu;
+	Property<std::string>						Caption;
+	Property<WindowBorderType::Type>			Border;
+	Property<Pt::Gfx::ARgbImage>				Icon;
+	Property<bool>								Closed;
+	Property<bool>								CanClose;
+	Property<bool>								TopMost;
+	Property<std::string>				  FocuseMoveKey;
+
+public:
 	Widget* mainWidget();
 
 	const Widget* mainWidget() const;	
 
-	WindowModel* windowModel()
-	{
-		return _windowModel;
-	}
-
-	const WindowModel* windowModel() const 
-	{
-		return _windowModel;
-	}
-
 	bool close();
 
-	void resize(const Pt::Gfx::SizeF& size);
-
-	void setPosition(const Pt::Gfx::PointF& pos);
-
-	inline void setWindowParent(Window* parent)
-	{
-		_windowParent = parent;		
-	}
-
-	inline const Window* windowParent() const
-	{
-		return _windowParent;
-	}
-
-	inline Window* windowParent()
-	{
-		return _windowParent;
-	}
 
 protected:
 	virtual void onPointerInput(const PointingEvent& ev);
@@ -109,9 +133,7 @@ private:
 	void onClosed(const Property<bool> & closed);
 
 private:
-	Window*				_windowParent;
-	WindowModel*	_windowModel;
-	WindowImpl*		_impl;
+	WindowImpl*		_impl;	
 };
 
 }}

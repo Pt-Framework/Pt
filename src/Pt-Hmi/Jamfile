@@ -22,25 +22,12 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   Cursor.cpp
 					   PaintSurface.cpp
 					   Painter.cpp                        
-					   Model.cpp						   		   					   					   
-
-					   Button.cpp
-					   ButtonModel.cpp					   
-					   
-					   Label.cpp
-					   LabelModel.cpp					   
-
-					   Panel.cpp
-					   PanelModel.cpp					   
-
-					   Widget.cpp
-					   WidgetModel.cpp					   
-
-					   Window.cpp
-					   WindowModel.cpp
-
-					   Dialog.cpp
-					   DialogModel.cpp					   					   
+					   Button.cpp					   			   					   
+					   Label.cpp					   
+					   Panel.cpp					   
+					   Widget.cpp					   
+					   Window.cpp					   
+					   Dialog.cpp					   
 					   ;
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx  ;

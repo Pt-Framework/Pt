@@ -1,21 +1,37 @@
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/WidgetModel.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Brush.h>
 
 namespace Pt{
 namespace Hmi{
 
-Widget::Widget(WidgetModel* model)
+Widget::Widget()
 : _mnemonicWidget(0)
-, _widgetModel(0)
+, PT_HMI_INIT_PROPERTY_VALUE(Enabled,true)
+, PT_HMI_INIT_PROPERTY_VALUE(Visible,true)
+, PT_HMI_INIT_PROPERTY_VALUE(Font,Pt::Gfx::Font("Sans Serif",12))
+, PT_HMI_INIT_PROPERTY_VALUE(Position, Pt::Gfx::PointF(0,0))
+, PT_HMI_INIT_PROPERTY_VALUE(Size, Pt::Gfx::SizeF(10,10))
+, PT_HMI_INIT_PROPERTY_VALUE(BackColor,Pt::Gfx::ARgbColor(237,237,237))
+, PT_HMI_INIT_PROPERTY_VALUE(BackColorHightLight,Pt::Gfx::ARgbColor(200,200,200))
+, PT_HMI_INIT_PROPERTY_VALUE(ForeColor, Pt::Gfx::ARgbColor(70,70,70))
+, PT_HMI_INIT_PROPERTY_VALUE(BackgroundImage, Pt::Gfx::ARgbImage(0,0))
+, PT_HMI_INIT_PROPERTY_VALUE(BackgroundImageLayout, ImageLayoutType::NoLayout)
+, PT_HMI_INIT_PROPERTY_VALUE(Opacity,0)
+, PT_HMI_INIT_PROPERTY(Pointer2DStatus)
+, PT_HMI_INIT_PROPERTY(KeyStatus)
+, PT_HMI_INIT_PROPERTY(CursorT)
+, PT_HMI_INIT_PROPERTY_VALUE(TextAlign,TextAlignType::MidleCenter)
+, PT_HMI_INIT_PROPERTY_VALUE(Focused, false)
+, PT_HMI_INIT_PROPERTY_VALUE(AcceptFocus,true)
+, PT_HMI_INIT_PROPERTY_VALUE(HighLight, false)
+, PT_HMI_INIT_PROPERTY_VALUE(FocusedActionKey," ")
+, PT_HMI_INIT_PROPERTY_VALUE(Caption,"")
+, PT_HMI_INIT_PROPERTY_VALUE(UseMnemonic,true)
+, _parent(0)
 {
-	if( _widgetModel != 0 )
-		_widgetModel->Focused.Changed -= Pt::slot( *this, &Widget::onFocusChanged );	
-
-	_widgetModel = model; 
-	_widgetModel->Focused.Changed += Pt::slot( *this, &Widget::onFocusChanged );
+	Focused.Changed += Pt::slot( *this, &Widget::onFocusChanged );
 }
 
 
@@ -47,24 +63,19 @@ void Widget::removeChild(Widget* child)
 
 void Widget::onFocusChanged( const Property<bool>& prop )
 {
-	if(_widgetModel->Focused.get())
+	if(Focused.get())
 	{//True
 		if( _parent != 0)
 		{
-			WidgetModel* parentModel = _parent->widgetModel();
-			
 			//All parents set to true.
-			parentModel->Focused.set(true);
-			parentModel->Focused.Changed.send(parentModel->Focused);
+			_parent->Focused.set(true);
+			_parent->Focused.Changed.send(_parent->Focused);
 
 			//All sibling set to false. Only me let it true
 			for( size_t i = 0; i < _parent->children().size(); i++)
 			{
 				Widget* child = _parent->children()[i];
-				WidgetModel* childModel = child->widgetModel();
-				
-				if(childModel != _widgetModel)
-					childModel->Focused = false;
+				child->Focused = false;
 			}
 		}
 	}
@@ -76,10 +87,8 @@ void Widget::onFocusChanged( const Property<bool>& prop )
 		{//All childs set to false
 
 			Widget* child = widget.children()[i];
-			WidgetModel* childModed = child->widgetModel();
-
-			childModed->Focused.set(false);						
-			childModed->Focused.Changed.send(childModed->Focused);
+			child->Focused.set(false);						
+			child->Focused.Changed.send(child->Focused);
 		}
 	}
 }
@@ -91,7 +100,7 @@ Pt::Gfx::PointF Widget::toClient( const Pt::Gfx::PointF& globalPoint )
 		return Pt::Gfx::PointF( globalPoint.x(), globalPoint.y() );
 
 	Pt::Gfx::PointF parPoint = _parent->toClient( globalPoint );
-	return Pt::Gfx::PointF( parPoint.x() - _widgetModel->Position.get().x(), parPoint.y() - _widgetModel->Position.get().y() );
+	return Pt::Gfx::PointF( parPoint.x() - Position.get().x(), parPoint.y() - Position.get().y() );
 }
 
 
@@ -99,18 +108,18 @@ Pt::Gfx::PointF Widget::fromClient( const Pt::Gfx::PointF& localPoint, bool toRo
 {
 	double x = localPoint.x();
 	double y = localPoint.y();
-	const Widget* parent = _parent;
+	const Widget* widget = _parent;
 
-	while( parent != 0 )
-	{
-		parent = parent->parent();
-		const WidgetModel* model = parent->widgetModel();		
-		
-		if(!(toRoot && parent == 0))
+	while( widget != 0 )
+	{		
+		widget = widget->parent();
+
+		if(!(toRoot && widget == 0))
 		{
-			x += model->Position.get().x();
-			y += model->Position.get().y();
+			x += widget->Position.get().x();
+			y += widget->Position.get().y();
 		}
+
 	}
 	
 	return Pt::Gfx::PointF(x,y);
@@ -119,7 +128,7 @@ Pt::Gfx::PointF Widget::fromClient( const Pt::Gfx::PointF& localPoint, bool toRo
 
 void Widget::render()
 {
-	if( !_widgetModel->Visible.get() )
+	if( !Visible.get() )
 		return;
 	
 	onRender();
@@ -129,11 +138,9 @@ void Widget::render()
 	for( size_t i = 0; i < children().size(); ++i)
 	{
 		Widget*				child = _children[i];			
-		WidgetModel*	childModel = child->widgetModel();
-
 		child->render();
 
-		localPainter.drawSurface(childModel->Position.get(), child->paintSurface());
+		localPainter.drawSurface(child->Position.get(), child->paintSurface());
 	}	
 }
 
@@ -151,20 +158,37 @@ void Widget::onInvalidate()
 }
 
 
+
+std::string Widget::getMnemonicKey() const
+{
+	std::string mnemonic = "";
+
+	int index = Caption.get().find('&');
+	
+	if( index < 0 || ((index + 1)> Caption.get().size()))
+		return mnemonic;
+
+
+	mnemonic = "A//";	
+	mnemonic+= std::tolower(Caption.get()[index + 1]);
+	return mnemonic;	
+}
+
+
 void Widget::onKeyInput(const KeyEvent& ev)
 { 
-	_widgetModel->KeyStatus = ev;
+	KeyStatus = ev;
 	
-	if(_widgetModel->UseMnemonic.get() && _mnemonicWidget != 0 && _widgetModel->Enabled.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp)
+	if(UseMnemonic.get() && _mnemonicWidget != 0 && Enabled.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp)
 	{		
 		std::string mnKey = "";
 
-		if(_widgetModel->KeyStatus.get().alt())
+		if( KeyStatus.get().alt())
 			mnKey = "A//";
 			
-		mnKey += _widgetModel->KeyStatus.get().toUTF8String();
+		mnKey += KeyStatus.get().toUTF8String();
 
-		 if(_widgetModel->getMnemonicKey() == mnKey)
+		 if(getMnemonicKey() == mnKey)
 			_mnemonicWidget->onMnemonic();			
 	}
 
@@ -175,7 +199,7 @@ void Widget::onKeyInput(const KeyEvent& ev)
 
 void Widget::onPointerInput(const PointingEvent& ev)
 {
-	_widgetModel->Pointer2DStatus = ev;
+	Pointer2DStatus = ev;
 
 	for( size_t i = 0; i < children().size(); ++i)
 		_children[i]->pointerInput(ev);
@@ -188,41 +212,41 @@ void Widget::bindMnemonicToWidget(Widget* widget)
 
 void Widget::onMnemonic()
 {
-	if(_widgetModel->Focused.get() != true)
-		_widgetModel->Focused = true;
+	if(Focused.get() != true)
+		Focused = true;
 }
 
 void Widget::onRender()
 {		
-	if(!_widgetModel->Visible.get())
+	if(!Visible.get())
 		return;
 
-	if( _widgetModel->Size.get().width() < 0 ||  _widgetModel->Size.get().height() < 0)
+	if( Size.get().width() < 0 ||  Size.get().height() < 0)
 		return;
 
-	Pt::Gfx::SizeF size = _widgetModel->Size.get();
+	Pt::Gfx::SizeF size = Size.get();
 	Pt::Gfx::SizeF bufferSize = _paintSurface.size();
 
 	//ToDo: move this check to surface resize.
 	if(bufferSize.width() != size.width() ||bufferSize.height() != size.height())
 		_paintSurface.resize(size);
 
-	Pt::Gfx::ARgbImage& backImage = _widgetModel->BackgroundImage.get();
+	Pt::Gfx::ARgbImage& backImage = BackgroundImage.get();
 	Pt::Hmi::Painter&	localPainter = _paintSurface.painter();
 	Pt::Gfx::RectF		rect(Pt::Gfx::PointF(0,0),size);
 	
-	localPainter.setFont(_widgetModel->Font.get());
+	localPainter.setFont(Font.get());
 
-	if(_widgetModel->HighLight.get())
+	if(HighLight.get())
 	{       
-		Pt::Gfx::Brush	brush(_widgetModel->BackColorHightLight.get());
+		Pt::Gfx::Brush	brush(BackColorHightLight.get());
         
 		localPainter.setBrush(brush);
 		localPainter.fillRect(rect);
 	}
 	else
 	{
-		Pt::Gfx::Brush	brush(_widgetModel->BackColor.get());
+		Pt::Gfx::Brush	brush(BackColor.get());
 	
 		localPainter.setBrush(brush);
     
@@ -231,7 +255,7 @@ void Widget::onRender()
 
 	if( backImage.width() != 0 && backImage.height() != 0)
 	{
-		switch( _widgetModel->BackgroundImageLayout.get())
+		switch( BackgroundImageLayout.get())
 		{				
 			case ImageLayoutType::NoLayout:
 			{
@@ -287,13 +311,26 @@ int Widget::getFocusedChild() const
 	for( ; i < (int)children().size(); ++i)
 	{
 		const Widget* child = children()[i];
-		const WidgetModel* model = child->widgetModel();
-
-		if(model->Focused.get())
+		if(child->Focused.get())
 			return i;		
 	}		
 
 	return -1;
 }
+
+
+bool Widget::contains(const Pt::Gfx::PointF& p)
+{
+	double x1, x2, y1, y2;
+	
+	x1 = 0;
+	x2 = x1  + Size.get().width();
+
+	y1 = 0;
+	y2 = y1  + Size.get().height();
+	
+	return ((p.x() >= x1) && (p.x() < x2) && (p.y() >= y1) && (p.y() < y2));
+}
+
 
 }} //namespace

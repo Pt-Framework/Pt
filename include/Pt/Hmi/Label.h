@@ -6,29 +6,18 @@
 namespace Pt{
 namespace Hmi{
 
-class LabelModel;
 
 class PT_HMI_API Label  : public Panel
 {
 public:
-	Label(LabelModel* model);
+	Label();
 	virtual ~Label();	
-	
-	const LabelModel* labelModel() const	
-	{
-		return _labelModel;
-	}
 
-	LabelModel* labelModel()
-	{
-		return _labelModel;
-	}
+public:
+	Property<bool> AutoSize;	
 
 protected:
 	virtual void onRender();
-
-private:
-	LabelModel* _labelModel;
 };
 
 }}

@@ -28,13 +28,8 @@
 
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Button.h>
-#include <Pt/Hmi/DialogModel.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Label.h>
-#include <Pt/Hmi/WindowModel.h>
-#include <Pt/Hmi/ButtonModel.h>
-#include <Pt/Hmi/PanelModel.h>
-#include <Pt/Hmi/LabelModel.h>
 #include <Pt/Hmi/Property.h>
 
 namespace Pt{
@@ -44,7 +39,7 @@ namespace Demo{
 class MainWindow : public Pt::Hmi::Window
 {
 public:
-	MainWindow(Pt::Hmi::WindowModel* model);
+	MainWindow();
 	virtual ~MainWindow();
 
 	void show();
@@ -58,23 +53,10 @@ private:
 	void onShowDialog();
 
 private:
-	Pt::Hmi::DialogModel _dialog1model;
-
-	Pt::Hmi::WindowModel* _model;
-  
-	Pt::Hmi::PanelModel  _mainPanelModel;
 	Pt::Hmi::Panel  _mainPanel;	
-
-	Pt::Hmi::ButtonModel _closeButtonModel;
 	Pt::Hmi::Button _closeButton;
-
-	Pt::Hmi::ButtonModel _toggleButtonModel;
 	Pt::Hmi::Button _toggleButton;
-
-	Pt::Hmi::ButtonModel _dialogButtonModel;
 	Pt::Hmi::Button _dialogButton;
-
-	Pt::Hmi::LabelModel  _textLabelModel;	
 	Pt::Hmi::Label  _textLabel;	
 }; 
 

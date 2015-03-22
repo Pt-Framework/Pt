@@ -31,12 +31,8 @@ namespace Pt{
 namespace Hmi{
 namespace Demo{
 
-Dialog1::Dialog1(DialogModel* model)
-: Dialog(model)
-, _clicked(false)
-, _model(model)
-, _closeButton(&_closeButtonModel)
-, _newDialog(&_newDialogModel)
+Dialog1::Dialog1()
+: _clicked(false)
 {
 	init();
 }
@@ -48,26 +44,25 @@ Dialog1::~Dialog1()
 void Dialog1::init()
 {
 	//Dialog
-	_model->Size.set(Pt::Gfx::SizeF(700,500));
-	_model->Position.set(Pt::Gfx::PointF(400,400));
-	_model->Caption.set("This is a sample modal dialog 1");
-	_model->WindowStartPostion.set(Hmi::WindowStartPositionType::CenterParent);
+	Size.set(Pt::Gfx::SizeF(700,500));
+	Position.set(Pt::Gfx::PointF(400,400));
+	Caption.set("This is a sample modal dialog 1");
+	WindowStartPostion.set(Hmi::WindowStartPositionType::CenterParent);
 
 	//New dialog button 
-	_newDialogModel.Position.set(Pt::Gfx::PointF(400,300));
-	_newDialogModel.Size.set(Pt::Gfx::SizeF(200,25));
-	_newDialogModel.Caption.set("New Dialog [CTRL+F]");
-	_newDialogModel.ActionKey.set("C//f");
-
-	_newDialogModel.Clicked += Pt::slot(*this,&Dialog1::onShowNextDialog);
+	_newDialog.Position.set(Pt::Gfx::PointF(400,300));
+	_newDialog.Size.set(Pt::Gfx::SizeF(200,25));
+	_newDialog.Caption.set("New Dialog [CTRL+F]");
+	_newDialog.ActionKey.set("C//f");
+	_newDialog.Clicked += Pt::slot(*this,&Dialog1::onShowNextDialog);
 	addChild(&_newDialog);
 
 	//Close Button
-	_closeButtonModel.Position.set(Pt::Gfx::PointF(400,360));
-	_closeButtonModel.Size.set(Pt::Gfx::SizeF(200,25));
-	_closeButtonModel.ActionKey.set("C//x");
-	_closeButtonModel.Caption.set("Close [CTRL+X]");
-	_closeButtonModel.Clicked +=  Pt::slot(*this,&Dialog1::onClosedByButton);
+	_closeButton.Position.set(Pt::Gfx::PointF(400,360));
+	_closeButton.Size.set(Pt::Gfx::SizeF(200,25));
+	_closeButton.ActionKey.set("C//x");
+	_closeButton.Caption.set("Close [CTRL+X]");
+	_closeButton.Clicked +=  Pt::slot(*this,&Dialog1::onClosedByButton);
 	addChild(&_closeButton);
 }
 
@@ -78,7 +73,7 @@ void Dialog1::onClosedByButton()
 
 void Dialog1::onShowNextDialog()
 {
-	Dialog2 dialog(&_dialog2model);
+	Dialog2 dialog;
 	dialog.doModal(this);		
 }
 	
