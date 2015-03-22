@@ -68,7 +68,7 @@ void Dialog1::init()
 
 void Dialog1::onClosedByButton()
 {
-	close();
+	Closed = true;		
 }
 
 void Dialog1::onShowNextDialog()

@@ -80,9 +80,9 @@ public:
 	
 	virtual ~Window();
 
-	Property<Pt::Gfx::SizeF>					MinimumSize;
-	Property<Pt::Gfx::SizeF>					MaximumSize;
-	Property<WindowStartPositionType::Type>		WindowStartPostion;
+	Property<Pt::Gfx::SizeF>							MinimumSize;
+	Property<Pt::Gfx::SizeF>								MaximumSize;
+	Property<WindowStartPositionType::Type>	WindowStartPostion;
 	Property<WindowStateType::Type>				WindowState;	
 	Property<bool>								ShowInTaskbar;
 	Property<bool>								ShowTitle;
@@ -99,11 +99,8 @@ public:
 
 public:
 	Widget* mainWidget();
-
 	const Widget* mainWidget() const;	
-
-	bool close();
-
+	bool close();	
 
 protected:
 	virtual void onPointerInput(const PointingEvent& ev);

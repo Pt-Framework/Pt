@@ -44,7 +44,7 @@ Dialog::~Dialog()
 
 void Dialog::doModal(Window* parent)
 {	
-	bool		 parentTopMost = false;
+	bool parentTopMost = false;
 	
 	Closed.set(false);
   Visible.set(true);
@@ -69,8 +69,7 @@ void Dialog::doModal(Window* parent)
 	//Restore the parent state.
 	parent->Enabled = true;
 	parent->TopMost = parentTopMost;
-	parent->invalidate();
-	
+	parent->invalidate();	
 }
 
 }}

@@ -53,6 +53,10 @@ WindowImpl::WindowImpl(Window* window, PaintSurface* surface)
 
 void WindowImpl::create()
 {
+	if( _hwnd != 0)
+		throw std::logic_error("hwnd already created");
+
+
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
 	_hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, GetDesktopWindow(), NULL, hInstance, NULL );
@@ -545,7 +549,7 @@ void WindowImpl::render()
 
  bool firstShow = (_hwnd == 0);
 
-	//Check create/destroy
+	//ToDo: create/destroy visible hide
 	if(_window->Closed.get())
 	{
 		
@@ -559,7 +563,7 @@ void WindowImpl::render()
 		if(_hwnd == 0)
 		{
 			if(_window->Visible.get())
-			{
+			{			  
 				create();
 			}
 			else

@@ -108,7 +108,7 @@ void MainWindow::init()
 	_toggleButton.Caption.set("Toggle Me [CTRL+I]");
 	_toggleButton.ActionKey.set("C//i");
 	_toggleButton.Position.set(Pt::Gfx::PointF(20,60));
-	_toggleButton.Size.set(Pt::Gfx::SizeF(150,25));
+	_toggleButton.Size.set(Pt::Gfx::SizeF(150,25));	
 	_textLabel.bindMnemonicToWidget(&_toggleButton);
 	_mainPanel.addChild(&_toggleButton);
 
@@ -117,7 +117,7 @@ void MainWindow::init()
 	_dialogButton.Caption.set("&Dialog [CTRL+D]");
 	_dialogButton.ActionKey.set("C//d");
 	_dialogButton.Position.set(Pt::Gfx::PointF(20,100));
-	_dialogButton.Size.set(Pt::Gfx::SizeF(150,25));
+	_dialogButton.Size.set(Pt::Gfx::SizeF(150,25));	
 	_dialogButton.UseMnemonic.set(false);
 	_dialogButton.Clicked  += Pt::slot(*this, &MainWindow::onShowDialog);
 	
@@ -138,7 +138,7 @@ void MainWindow::init()
 void MainWindow::onShowDialog()
 {
 	Dialog1 dialog;
-	dialog.doModal(this);
+	dialog.doModal(this);		
 }
 
 void MainWindow::show()
