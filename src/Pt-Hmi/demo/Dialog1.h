@@ -1,5 +1,4 @@
-/* Copyright (C) 2013 Marc Boris Duerner 
- * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,59 +22,43 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-#ifndef Pt_Hmi_Button_H
-#define Pt_Hmi_Button_H
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
+#ifndef Pt_Forms_Demo_Dialog1_h
+#define Pt_Forms_Demo_Dialog1_h
 
-#include <Pt/Hmi/Label.h>
-#include <Pt/System/Timer.h>
+#include <Pt/Hmi/Dialog.h>
+#include <Pt/Hmi/DialogModel.h>
+#include <Pt/Hmi/Button.h>
+#include <Pt/Hmi/ButtonModel.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+namespace Hmi {
+namespace Demo {
 
-class PointingEvent;
-class ButtonModel;
-
-
-class PT_HMI_API Button  : public Label
+class Dialog1 : public Pt::Hmi::Dialog
 {
 public:
-	Button(ButtonModel* model);
-	virtual ~Button();
-
-	Signal<Button*> PressedAction;
-	Signal<Button*> DoublePressedAction;
-	Signal<Button*, bool> CheckedAction;
-
-	ButtonModel* buttonModel()
-	{
-		return _buttonModel;
-	}
-
-	const ButtonModel* buttonModel() const 
-	{
-		return _buttonModel;
-	}
+	Dialog1(DialogModel* model);
+	virtual ~Dialog1();
 
 protected:
-	virtual void onPressedAction();
-	virtual void onDoublePressedAction();
-	virtual void onCheckedAction(bool checked);
-	virtual void onMnemonic();
-	virtual void onPointerInput(const PointingEvent& ev);
-	virtual void onKeyInput(const KeyEvent& ev);
-	virtual void onButtonStateChanged( const Property<DeviceButton::State>& prop);
-	virtual void onDoublePressedTimeout();
-	virtual void onRender();
+	virtual void init();
 
-private:	
-	bool _pressed;
-	bool _timeout;
-	int _pressCounter;
-	Pt::System::Timer _doublePressTimer;
-	ButtonModel* _buttonModel;
-};
+private:
+	void onClosedByButton(Button* button);
+	void onShowNextDialog(Button* button);
 
-}}
+private:
+	Pt::Hmi::DialogModel* _model;
+	Pt::Hmi::DialogModel _dialog2model;
+	Pt::Hmi::ButtonModel _closeButtonModel;
+	Pt::Hmi::Button _closeButton;
+	
+	Pt::Hmi::ButtonModel _newDialogModel;
+	Pt::Hmi::Button _newDialog;
+	bool _clicked;
+}; 
+
+}}}
+
 #endif

@@ -1,5 +1,4 @@
-/* Copyright (C) 2013 Marc Boris Duerner 
- * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,59 +22,50 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-#ifndef Pt_Hmi_Button_H
-#define Pt_Hmi_Button_H
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
+#ifndef Pt_Forms_Dialog2_h
+#define Pt_Forms_Dialog2_h
 
+#include <Pt/Hmi/Dialog.h>
+#include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Label.h>
-#include <Pt/System/Timer.h>
+#include <Pt/Hmi/Panel.h>
+#include <Pt/Hmi/DialogModel.h>
+#include <Pt/Hmi/ButtonModel.h>
+#include <Pt/Hmi/LabelModel.h>
+#include <Pt/Hmi/PanelModel.h>
 
 namespace Pt{
 namespace Hmi{
+namespace Demo{
 
-class PointingEvent;
-class ButtonModel;
-
-
-class PT_HMI_API Button  : public Label
+class Dialog2 : public Pt::Hmi::Dialog
 {
 public:
-	Button(ButtonModel* model);
-	virtual ~Button();
-
-	Signal<Button*> PressedAction;
-	Signal<Button*> DoublePressedAction;
-	Signal<Button*, bool> CheckedAction;
-
-	ButtonModel* buttonModel()
-	{
-		return _buttonModel;
-	}
-
-	const ButtonModel* buttonModel() const 
-	{
-		return _buttonModel;
-	}
+	Dialog2(DialogModel* model);
+	virtual ~Dialog2();
 
 protected:
-	virtual void onPressedAction();
-	virtual void onDoublePressedAction();
-	virtual void onCheckedAction(bool checked);
-	virtual void onMnemonic();
-	virtual void onPointerInput(const PointingEvent& ev);
-	virtual void onKeyInput(const KeyEvent& ev);
-	virtual void onButtonStateChanged( const Property<DeviceButton::State>& prop);
-	virtual void onDoublePressedTimeout();
-	virtual void onRender();
+	virtual void init();
 
-private:	
-	bool _pressed;
-	bool _timeout;
-	int _pressCounter;
-	Pt::System::Timer _doublePressTimer;
-	ButtonModel* _buttonModel;
+private:
+	void onClosedByButton(Button* button);
+    
+private:
+	Pt::Hmi::DialogModel* _model;
+	Pt::Hmi::ButtonModel _okButtonModel;
+	Pt::Hmi::Button _okButton;
+
+	Pt::Hmi::ButtonModel _cancelButtonModel;
+	Pt::Hmi::Button _cancelButton;
+	
+	Pt::Hmi::LabelModel  _labelModel;
+	Pt::Hmi::Label  _label;
+
+	Pt::Hmi::PanelModel  _panelModel;
+	Pt::Hmi::Panel  _panel;
 };
 
-}}
+}}}
+
 #endif

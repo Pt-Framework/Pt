@@ -8,27 +8,27 @@
 namespace Pt{
 namespace Hmi{
 
-class PanelView;
 
 class PT_HMI_API Panel  : public Widget
 {
 public:
 
-	Panel(PanelModel& model, PanelView& view);
+	Panel(PanelModel* model);
 	virtual ~Panel();	
 	
-	const PanelModel& panelModel() const 
+	const PanelModel* panelModel() const 
 	{
-		return static_cast<const PanelModel&>(model());
+		return _panelModel;
 	}
 
-	PanelModel& panelModel()
+	PanelModel* panelModel()
 	{
-		return static_cast<PanelModel&>(model());
+		return _panelModel;
 	}
 
 protected:
 	virtual void onPointerInput(const PointingEvent& ev);
+	virtual void onRender();
 
 private:
 	enum ResizeDirection
@@ -51,6 +51,7 @@ private:
 private:
 	Pt::Gfx::PointF _lastSizePoint;
 	ResizeDirection _resizeDir;
+	PanelModel*     _panelModel;
 };
 
 }}

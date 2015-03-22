@@ -24,58 +24,63 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
 
-#include <Pt/Hmi/Dialog.h>
-#include <Pt/Hmi/Application.h>
-#include <Pt/Gfx/ImagePainter.h>
-#include <Pt/Hmi/DialogModel.h>
+#include "Dialog1.h"
+#include "Dialog2.h"
 
 namespace Pt{
 namespace Hmi{
+namespace Demo{
 
-Dialog::Dialog(DialogModel* model)
-: Window(model)
-, _dialogModel(model)
-{				
-
+Dialog1::Dialog1(DialogModel* model)
+: Dialog(model)
+, _clicked(false)
+, _model(model)
+, _closeButton(&_closeButtonModel)
+, _newDialog(&_newDialogModel)
+{
+	init();
 }
 
-Dialog::~Dialog()
+Dialog1::~Dialog1()
 {
 }
 
-void Dialog::doModal(Window* parent)
-{	
-	bool		 parentTopMost = false;
-	WindowModel* parentModel   = parent->windowModel();
+void Dialog1::init()
+{
+	//Dialog
+	_model->Size.set(Pt::Gfx::SizeF(700,500));
+	_model->Position.set(Pt::Gfx::PointF(400,400));
+	_model->Caption.set("This is a sample modal dialog 1");
+	_model->WindowStartPostion.set(Hmi::WindowStartPositionType::CenterParent);
 
-	//Set my parent window.
-	setWindowParent(parent);
-	 
-	_dialogModel->Closed.set(false);
-  _dialogModel->Visible.set(true);
+	//New dialog button 
+	_newDialogModel.Position.set(Pt::Gfx::PointF(400,300));
+	_newDialogModel.Size.set(Pt::Gfx::SizeF(200,25));
+	_newDialogModel.Caption.set("New Dialog [CTRL+F]");
+	_newDialogModel.ActionKey.set("C//f");
 
-	//Setup the parent as disabled and TopMost = false.
-	parentTopMost = parentModel->TopMost.get();
-	parentModel->Enabled = false;	
-	parentModel->TopMost = false;
-  parent->invalidate(); //Notify the parent.
+	_newDialog.PressedAction += Pt::slot(*this,&Dialog1::onShowNextDialog);
+	addChild(&_newDialog);
 
-	//Setup the dialog as aenabled and top most.	
-	_dialogModel->Enabled = true;
-	_dialogModel->TopMost = true;
-
-	//Invalidate the dialog
-	invalidate();
-	
-	//Wait of termination of the dialog.
-	while(!_dialogModel->Closed.get())
-		Application::instance().nextEvent();
-
-	//Restore the parent state.
-	parentModel->Enabled = true;
-	parentModel->TopMost = parentTopMost;
-	parent->invalidate();
-	
+	//Close Button
+	_closeButtonModel.Position.set(Pt::Gfx::PointF(400,360));
+	_closeButtonModel.Size.set(Pt::Gfx::SizeF(200,25));
+	_closeButtonModel.ActionKey.set("C//x");
+	_closeButtonModel.Caption.set("Close [CTRL+X]");
+	_closeButton.PressedAction +=  Pt::slot(*this,&Dialog1::onClosedByButton);
+	addChild(&_closeButton);
 }
 
-}}
+void Dialog1::onClosedByButton(Button* button)
+{
+	close();
+}
+
+void Dialog1::onShowNextDialog(Button* button)
+{
+	Dialog2 dialog(&_dialog2model);
+	dialog.doModal(this);		
+}
+	
+}}}
+

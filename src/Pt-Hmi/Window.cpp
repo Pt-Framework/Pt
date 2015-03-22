@@ -24,154 +24,205 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+
+
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/WindowView.h>
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/WidgetView.h>
-#include <iostream>
+#include "WindowViewImpl.h"
+#include <Pt/Hmi/PositionEvent.h>
+#include <Pt/Gfx/Size.h>
 
 namespace Pt{
 namespace Hmi{
 
-Window::Window(WindowModel& m, WindowView& view)
-: Widget(m, view)
+Window::Window(WindowModel* model)
+: Widget(model)
 , _windowParent(0)
-{	
-	view.setController(*this);
-	Controller::addOutput(&view);
+, _windowModel(model)
+, _impl(new WindowViewImpl(model, &paintSurface() ) )
+{						 
+		
+	_windowModel->Size.Changed += Pt::slot(*this, &Window::onSizeChanged);					
+	_windowModel->Size.Changed.send(_windowModel->Size);	
+	_windowModel->Closed.Changed += Pt::slot(*this, &Window::onClosed);
 
-	ClosedAction += Pt::slot(*this, &Window::onClosed);
-	ClosingAction += Pt::slot(*this, &Window::onClosing);
-	Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
-
-	app.systemEvent() += Pt::slot(*this, &Controller::devicePointerInput);
-	app.systemEvent() += Pt::slot(*this, &Controller::deviceKeyInput);
-
-	windowModel().Size.Changed += Pt::slot(*this, &Window::onSizeChanged);		
+	_impl->windowEvent() += Pt::slot(*this, &Widget::pointerInput);
+	_impl->windowEvent() += Pt::slot(*this, &Widget::keyInput);	
+	_impl->windowEvent() += Pt::slot(*this, &Window::resizeEvent);
+	_impl->windowEvent() += Pt::slot(*this, &Window::positionEvent);	
 }
 
 Window::~Window()
 {
 }
 
-Widget* Window::mainWidget()
+bool Window::focusNextChild(int index)
 {
-	if( Controller::children().size() != 0)
-		return dynamic_cast<Widget*>( Controller::children()[0]);
+	index++;
+	
+	for( ; index < (int)children().size(); ++index)
+	{
+		Widget* child = children()[index];
+		WidgetModel* model = child->widgetModel();
+		
+		if(!model->AcceptFocus.get())
+			continue;
 
-	return 0;
-}
+		model->Focused = true;
+		return true;
+	}
 
-const Widget* Window::mainWidget() const
-{
-	if( Controller::children().size() != 0)
-		return dynamic_cast<Widget*>( Controller::children()[0]);
-
-	return 0;
+	return false;
 }
 
 
 void Window::onKeyInput(const KeyEvent& ev)
 { 
-	WindowModel& m = windowModel();
-
-	if(!m.Enabled.get())
+	if(!_windowModel->Enabled.get())
 		return;
 
-	m.KeyStatus = ev;
+	_windowModel->KeyStatus = ev;
 
-	if(ev.toUTF8String() == m.FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && !ev.shift())
+	if(ev.toUTF8String() == _windowModel->FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && !ev.shift())
 	{
-		if( m.Focused.get())
+		if( _windowModel->Focused.get())
 		{
 			if(!moveFocusNext())
-				m.Focused = true;
+				_windowModel->Focused = true;
 
-			output();
+			render();
 		}
 	}
 
-	if(ev.toUTF8String() ==  m.FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && ev.shift())
+	if(ev.toUTF8String() ==  _windowModel->FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && ev.shift())
 	{
-		if( m.Focused.get())
+		if( _windowModel->Focused.get())
 		{
 			if(!moveFocusPrev())
-				m.Focused = true;
+				_windowModel->Focused = true;
 
-			output();
+			render();
 		}
 	}
 
 	for( size_t i = 0; i < children().size(); ++i)
-		children()[i]->notifyKeyInput(ev);
+		children()[i]->keyInput(ev);
 }
 
 void Window::onPointerInput(const PointingEvent& ev)
 {
-	WindowModel& m = windowModel();
-
-	if(!m.Enabled.get())
+	if(!_windowModel->Enabled.get())
 		return;
 	
-	m.Pointer2DStatus = ev;
-	m.CursorT.get().setCursor(Pt::Hmi::Cursors::Default);
+	_windowModel->Pointer2DStatus = ev;
+	_windowModel->CursorT.get().setCursor(Pt::Hmi::Cursors::Default);
 
 	for( size_t i = 0; i < children().size(); ++i)
-		children()[i]->notifyPointerInput(ev);	
+		children()[i]->pointerInput(ev);	
 }
+
+
+bool Window::moveFocusNext()
+{
+	if(children().size() == 0)
+		return false;
+
+	const int index = getFocusedChild();
+
+	if( index == -1)
+		return focusNextChild(index);
+	
+	Widget* child = children()[index];
+	WidgetModel* childModel = child->widgetModel();	
+		
+	if(!childModel->AcceptFocus.get())
+	{
+		child->widgetModel()->Focused = true;
+		return true;
+	}
+
+	_windowModel->Focused = false;
+
+	return focusNextChild(index);
+}
+
+Widget* Window::mainWidget()
+{
+	if(children().size() != 0)
+		return children()[0];
+
+	return 0;
+}
+
+const Widget* Window::mainWidget() const
+{	
+	if(children().size() != 0)
+		return children()[0];
+
+	return 0;
+}
+
 
 void Window::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 {
-	WidgetModel& m = windowModel();
-	WidgetView& view = widgetView();
+	paintSurface().resize(_windowModel->Size.get());	
 	
-	view.paintSurface().resize(m.Size.get());	
-	
-	if(m.Visible.get())
-		output();
+	if(_windowModel->Visible.get())
+		render();
 }
 
-void Window::onModelChanged(bool created,const Model& model)
-{
-	if( created)
-	{
-		WidgetModel& m = windowModel();
 
-		m.Size.Changed += Pt::slot(*this, &Window::onSizeChanged);					
-		m.Size.Changed.send(m.Size);	
-	}
-}
-
-void Window::onClosing(Controller* sender, bool& canClose)
+void Window::onClosed(const Property<bool> & closed)
 {	
-	if(!windowModel().Enabled.get())
+	close();
+}
+
+bool Window::close()
+{
+	if(!_windowModel->CanClose.get())
+		return false;
+    
+  //Set the closed flag
+	if(!_windowModel->Closed.get())
+	{
+		_windowModel->Closed.set(true);
+        
+		//Let the system window to close its self.
+		render();
+	}
+
+	return true;
+}
+
+
+void Window::resizeEvent(const ResizeEvent& ev)
+{
+	const Pt::Gfx::SizeF& curSize = _windowModel->Size.get();
+
+	if( curSize == ev.size() ) 
 		return;
 
-	canClose = windowModel().CanClose.get();
+	_windowModel->Size = ev.size();
 }
 
-void Window::onClosed(Controller* sender)
+
+void Window::positionEvent(const PositionEvent& ev)
 {
-    if(!windowModel().Closed.get())
-        windowModel().Closed = true;
+	const Pt::Gfx::PointF& curPos = _windowModel->Position.get();
+
+	if( curPos == ev.position() ) 
+		return;
+
+	_windowModel->Position = ev.position();
 }
 
-void Window::close()
+
+void Window::onInvalidate()
 {
-    //Can close??
-    bool canClose = false;
-    ClosingAction.send(this, canClose);
-    
-    if(canClose)
-    {
-      //Set the closed flag
-      windowModel().Closed = true;
-        
-      //Let the system window to close its self.
-			output();
-    }
+	render();
+	_impl->render();
 }
 
 }}

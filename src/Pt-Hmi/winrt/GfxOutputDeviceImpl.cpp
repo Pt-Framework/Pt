@@ -77,10 +77,8 @@ bool ViewImpl::onClosing()
 	if(!_model->Enable.get())
 		return false;
 
-	bool canClose = false;
-	Window* controller = (Window*)_model->controller();
-	controller->ClosingAction.send(controller,canClose);
-	return canClose;
+	
+	return _controller->close();
 }
 
 void ViewImpl::onClosed()
@@ -139,10 +137,12 @@ void ViewImpl::onMouse()
 
 void ViewImpl::setWindowSizeAndPos(bool firstShow)
 {
+	WindowModel* model = _controller->windowModel();
+
 	if(!firstShow)
 	{
-		Pt::Gfx::Point pos = _model->fromUnit(_model->WinPos.get());
-		Pt::Gfx::Size size = _model->fromUnit(_model->WinSize.get());
+		Pt::Gfx::Point pos = _controller->windowModel()->fromUnit(_controller->windowModel()->WinPos.get());
+		Pt::Gfx::Size size = _controller->windowModel()->fromUnit(_controller->windowModel()->WinSize.get());
 		//SetWindowPos(_hwnd,0, pos.x(), pos.y(), size.width(), size.height(), 0);	
 		return;
 	}

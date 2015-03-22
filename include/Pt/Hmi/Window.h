@@ -29,36 +29,41 @@
 #define Pt_Hmi_Controller_Window_H
 
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/WidgetModel.h>
 #include <Pt/Hmi/WindowModel.h>
 
 namespace Pt{
 namespace Hmi{
 
-class PointingDevice;
-class WindowView;
+class WindowViewImpl;
+class ResizeEvent;
+class PositionEvent;
+
 
 class PT_HMI_API Window  : public Widget
 {
-public:
-	Window(WindowModel& m, WindowView& view);
+public:	
+	Window(WindowModel* model);
+	
 	virtual ~Window();
 
 	Widget* mainWidget();
-	const Widget* mainWidget() const;
-	
 
-	WindowModel& windowModel()
+	const Widget* mainWidget() const;	
+
+	WindowModel* windowModel()
 	{
-		return static_cast<WindowModel&>(model());
+		return _windowModel;
 	}
 
-	const WindowModel& windowModel() const 
+	const WindowModel* windowModel() const 
 	{
-		return static_cast<const WindowModel&>(model());
+		return _windowModel;
 	}
 
-	void close();
+	bool close();
+
+	void resize(const Pt::Gfx::SizeF& size);
+	void setPosition(const Pt::Gfx::PointF& pos);
 
 	inline void setWindowParent(Window* parent)
 	{
@@ -75,19 +80,37 @@ public:
 		return _windowParent;
 	}
 
-	Pt::Signal<Controller*>		ClosedAction;
-	Pt::Signal<Controller*,bool&>   ClosingAction;
-
 protected:
 	virtual void onPointerInput(const PointingEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);
-	virtual void onModelChanged(bool created, const Model& model);
-	virtual void onClosing(Controller* sender, bool& canClose);
-	virtual void onClosed(Controller* sender);	
-
-	void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
+	virtual void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
+	virtual void onInvalidate();
 	
-	Window*  _windowParent;
+protected:
+	bool focusNextChild(int index);
+	
+	int getFocusedChild() const
+	{
+		return 0;
+	}
+
+  bool moveFocusNext();
+	
+	bool moveFocusPrev()
+	{
+		return true;
+	}	
+
+	void resizeEvent(const ResizeEvent& ev);
+	void positionEvent(const PositionEvent& ev);
+
+private:
+	void onClosed(const Property<bool> & closed);
+
+private:
+	Window*										_windowParent;
+	WindowModel*							_windowModel;
+	WindowViewImpl*						_impl;
 };
 
 }}

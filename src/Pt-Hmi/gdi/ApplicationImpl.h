@@ -32,7 +32,6 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/System/EventLoop.h>
-#include <Pt/Hmi/Controller.h>
 #include "win32/Selector.h"
 #include <vector>
 #include <windows.h>

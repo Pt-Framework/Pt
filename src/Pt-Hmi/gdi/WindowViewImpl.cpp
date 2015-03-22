@@ -24,7 +24,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include "WindowViewImpl.h"
-#include <Pt/Hmi/WindowView.h>
 #include "ApplicationImpl.h"
 #include <Windows.h>
 #include <WindowsX.h>
@@ -39,14 +38,19 @@
 namespace Pt{
 namespace Hmi{
 
-WindowViewImpl::WindowViewImpl()
+WindowViewImpl::WindowViewImpl(WindowModel* model, PaintSurface* surface)
 : _hwnd(0)
-, _model(0)
 , _ignoreSizePositionEvent(false)
+, _model(0)
+, _surface(0)
 {	
+
+	init(model, surface);
+
 	Pt::Hmi::Application* app = (Pt::Hmi::Application*) &Pt::Hmi::Application::instance();	
 	app->impl()->WindowEvent += Pt::slot(*this, &WindowViewImpl::onWindowEvent);
 	_pointerEvent.buttons().resize(3);	
+
 	create();
 }
 
@@ -54,8 +58,8 @@ void WindowViewImpl::create()
 {
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
-    _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, GetDesktopWindow(), NULL, hInstance, NULL );
-    BringWindowToTop(_hwnd);
+	_hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, GetDesktopWindow(), NULL, hInstance, NULL );
+  BringWindowToTop(_hwnd);
 	ShowWindow(_hwnd, SW_HIDE);    
 	UpdateWindow(_hwnd);	
 }
@@ -107,16 +111,13 @@ void WindowViewImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 		_keyEvent.setUnicode(ucode);
 	}
 
-	Application::instance().systemEvent().send(_keyEvent);
+	_windowEvent.send(_keyEvent);
 }
 
 void WindowViewImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wparam, long lparam, bool& handled)
 {
 	if(_hwnd != wnd)
-		return;
-	
-	if(_model == 0)
-		return;
+		return;	
 
 	switch(message)
 	{
@@ -170,8 +171,7 @@ void WindowViewImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int 
 		break;
 
 		case WM_DESTROY:
-		{
-			onClosed();
+		{			
 			handled = true;
 		}
 		break;
@@ -203,17 +203,13 @@ WindowViewImpl::~WindowViewImpl()
 
 bool WindowViewImpl::onClosing()
 {
-	if(!_model->Enabled.get())
+	if(!_model->CanClose.get())
 		return false;
-
-	bool canClose = false;
-	_controller->ClosingAction.send(_controller,canClose);
-	return canClose;
-}
-
-void WindowViewImpl::onClosed()
-{
-	_controller->ClosedAction.send(_controller);
+    
+  //Set the closed flag
+  _model->Closed = true;
+        
+	return true;
 }
 
 void WindowViewImpl::onSize(WPARAM wParam, LPARAM lParam)
@@ -280,7 +276,7 @@ void WindowViewImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 	_pointerEvent.setX(p.x());
 	_pointerEvent.setY(p.y());			
 
-	Application::instance().systemEvent().send(_pointerEvent);
+	_windowEvent.send(_pointerEvent);
 }
 
 void WindowViewImpl::setWindowSizeAndPos(bool firstShow)
@@ -310,7 +306,7 @@ void WindowViewImpl::setWindowSizeAndPos(bool firstShow)
 				SetWindowPos(_hwnd,0, pos.x(), pos.y(), size.width(), size.height(), 0);
 			}
 			break;
-			
+/*			
 			case WindowStartPositionType::CenterParent:
 			{				
 				Window* parent = _controller->windowParent();
@@ -340,7 +336,7 @@ void WindowViewImpl::setWindowSizeAndPos(bool firstShow)
 				}
 			}
 			break;
-
+			*/
 			case WindowStartPositionType::CenterScreen:
 				centerWindowTo(GetDesktopWindow());
 			break;
@@ -352,6 +348,7 @@ void WindowViewImpl::setWindowSizeAndPos(bool firstShow)
 
 void WindowViewImpl::centerWindowTo(HWND parent)
 {
+
 	RECT parentRect;   
 	GetWindowRect(parent, &parentRect);
 	int horizontal = parentRect.left + ((parentRect.right - parentRect.left )/2);
@@ -370,17 +367,14 @@ void WindowViewImpl::updateModelSizeAndPos()
 {
 	RECT  info;
 	GetWindowRect(_hwnd, &info);
-	Pt::Gfx::Size winSize(info.right - info.left, info.bottom - info.top);
-	Pt::Gfx::Point winPos(info.left, info.right);
+	Pt::Gfx::SizeF winSize(info.right - info.left, info.bottom - info.top);
+	Pt::Gfx::PointF winPos(info.left, info.right);
 
-	Pt::Gfx::Size curSize = _model->fromUnit(_model->Size.get());
-	Pt::Gfx::Point curPos = _model->fromUnit(_model->Position.get());
+	_positionEvent.setPosition(winPos);
+	_resizeEvent.setSize(winSize);
 
-	if( winPos != curPos) 
-		_model->Position = _model->toUnit(winPos);
-
-	if( winSize != curSize) 
-		_model->Size = _model->toUnit(winSize);
+	_windowEvent.send(_positionEvent);
+	_windowEvent.send(_resizeEvent);
 }
 
 void WindowViewImpl::onMove()
@@ -400,15 +394,11 @@ void WindowViewImpl::onMove()
 
 void WindowViewImpl::onPaint()
 {   		
-	if(_model == 0)
-		return;
-
 	PAINTSTRUCT ps;
 	HDC windowContext = BeginPaint(_hwnd, &ps);
 	Pt::Gfx::Size size = _model->fromUnit(_model->Size.get());
-	Pt::Hmi::PaintSurface& surface = _controller->widgetView().paintSurface();
-
-	HDC bitmapDeviceConText = surface.impl()->deviceContext();
+	
+	HDC bitmapDeviceConText = _surface->impl()->deviceContext();
 	BitBlt(windowContext, 0, 0, size.width(), size.height(), bitmapDeviceConText, 0, 0, SRCCOPY);	
 	EndPaint(_hwnd, &ps);	
 }
@@ -422,7 +412,7 @@ void WindowViewImpl::setWindowIcon()
 	const size_t planes = 4;
 	std::vector<Pt::uint8_t> bitmapBuffer(_model->Icon.get().width() * _model->Icon.get().height() *planes);
 		
-	for(size_t y = 0; y <_model->Icon.get().height(); ++y)
+	for(size_t y = 0; y < _model->Icon.get().height(); ++y)
 	{
 		const size_t offsetLine = y * (_model->Icon.get().width()*planes);
 
@@ -553,13 +543,11 @@ void WindowViewImpl::destroy()
 	_hwnd = 0;
 }
 
-void WindowViewImpl::output(Pt::Hmi::Model* model)
-{
-	bool firstShow =  (_model == 0);
-	_model = dynamic_cast<WindowModel*>(model);
+void WindowViewImpl::render()
+{	
 
-	assert(_model != 0);
-		
+ bool firstShow = (_hwnd == 0);
+
 	//Check create/destroy
 	if(_model->Closed.get())
 	{
@@ -567,7 +555,6 @@ void WindowViewImpl::output(Pt::Hmi::Model* model)
 		if(_hwnd != 0)
 			destroy();
 
-		_model = 0;
 		return;
 	}
 	else

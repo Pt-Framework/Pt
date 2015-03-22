@@ -1,5 +1,5 @@
-#ifndef Pt_Hmi_Input_Event2D_h
-#define Pt_Hmi_Input_Event2D_h
+#ifndef Pt_Hmi_PointingEvent_h
+#define Pt_Hmi_PointingEvent_h
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/DeviceButton.h>
@@ -10,12 +10,16 @@
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API PointingEvent : public Event
+class PT_HMI_API PointingEvent : public Pt::BasicEvent<PointingEvent>
 {
 public:	
-	explicit PointingEvent(Controller* controller = 0);	
+	explicit PointingEvent()
+	{
+	}
 
-	virtual ~PointingEvent();
+	virtual ~PointingEvent()
+	{
+	}
 
 	inline void setX(double x)
 	{
@@ -66,11 +70,6 @@ public:
 	{
 		return _controlDial;
 	}	
-
-protected:
-    virtual Pt::Event& onClone(Pt::Allocator& allocator) const;
-    virtual void onDestroy(Pt::Allocator& allocator);
-    virtual const std::type_info& onTypeInfo() const;
 
 private:
 	double _x;

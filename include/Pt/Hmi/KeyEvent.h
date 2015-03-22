@@ -1,18 +1,20 @@
 #ifndef Pt_Hmi_KeyEvent_h
 #define Pt_Hmi_KeyEvent_h
 
+#include <Pt/Types.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Event.h>
-#include <Pt/Allocator.h>
 #include <Pt/String.h>
-#include <Pt/Hmi/Event.h>
-#include <cstddef>
 #include <string>
+#include <Pt/TextStream.h>
+#include <Pt/Utf8Codec.h>
+#include <Pt/String.h>
+#include <sstream>
 
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API KeyEvent : public Event
+class PT_HMI_API KeyEvent : public Pt::BasicEvent<KeyEvent>
 {
 public:
 
@@ -24,9 +26,13 @@ public:
 	};
 
 public:	
-	explicit KeyEvent(Controller* controller = 0);
+	KeyEvent()
+	{
+	}
 
-	virtual ~KeyEvent();
+	virtual ~KeyEvent()
+	{
+	}
 
 	/**@brief Return the translate key to unicode.
 	* 
@@ -81,24 +87,36 @@ public:
 		return _ctrl;
 	}
 
-	/**@brief Return the translate key to unicode UTF8 encoding.
-	* 
-	* @return The translate key to unicode UTF8 encoding,*/
 
-	std::string toUTF8String() const;
+	std::string toUTF8String() const
+	{
+		Pt::Char unicodeChar(_unicode); 
+		std::stringstream ss;		
+		Pt::TextStream stream(ss, new Pt::Utf8Codec());
+		stream<<unicodeChar;
+		stream.terminate();
+		return ss.str();
+	}
 
-	/**@brief Return the translate key to UTF8 encoding short cut command.
-	* 
-	* @return The translate key to UTF8 encoding short cut command.*/
-	std::string shortCutKey() const;
+	std::string shortCutKey() const
+	{
+		std::string shortKey = "";
+		
+		if( _ctrl)
+			shortKey += "C//";
 
-protected:
-    virtual Pt::Event& onClone(Pt::Allocator& allocator) const;
-    virtual void onDestroy(Pt::Allocator& allocator);
-    virtual const std::type_info& onTypeInfo() const;
+		if( _alt)
+			shortKey += "A//";
+
+		if(_shift)
+			shortKey += "S//";  
+
+		shortKey += toUTF8String();
+		return shortKey; 			
+	}
 
 private:
-    Pt::Char _unicode;
+   Pt::Char _unicode;
 	bool _alt;
 	bool _shift;
 	bool _ctrl;

@@ -1,291 +1,184 @@
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/WidgetModel.h>
-#include <Pt/Hmi/WidgetView.h>
 #include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/Brush.h>
 
 namespace Pt{
 namespace Hmi{
 
-Widget::Widget(WidgetModel& model, WidgetView& view)
-: Controller(model)
-, _view(view)
-, _mnemonicWidget(0)
+Widget::Widget(WidgetModel* model)
+: _mnemonicWidget(0)
+, _widgetModel(0)
 {
-	widgetModel().Focused.Changed += Pt::slot(*this, &Widget::onFocusChanged);
+	if( _widgetModel != 0 )
+		_widgetModel->Focused.Changed -= Pt::slot( *this, &Widget::onFocusChanged );	
+
+	_widgetModel = model; 
+	_widgetModel->Focused.Changed += Pt::slot( *this, &Widget::onFocusChanged );
 }
+
 
 Widget::~Widget()
 {
-
 }
 
-void Widget::onFocusChanged(const Property<bool>& prop)
+
+void Widget::addChild(Widget* child)
 {
-	if(widgetModel().Focused.get())
+	_children.push_back(child);
+	child->setParent(this);
+}
+
+
+void Widget::removeChild(Widget* child)
+{
+	for(size_t i = 0; i < _children.size(); ++i)
+	{
+		if(_children[i] != child)
+			continue;
+		
+		_children.erase(_children.begin() + i);
+		child->setParent(0);
+		return;
+	}			
+}	
+
+
+void Widget::onFocusChanged( const Property<bool>& prop )
+{
+	if(_widgetModel->Focused.get())
 	{//True
-		Pt::Hmi::Controller* ctrl = this;
-		Pt::Hmi::Widget* par = (Pt::Hmi::Widget*) ctrl->widgetParent();
-	
-		if( par != 0)
+		if( _parent != 0)
 		{
-			WidgetModel& parMod = par->widgetModel();
+			WidgetModel* parentModel = _parent->widgetModel();
 			
 			//All parents set to true.
-			parMod.Focused.set(true);
-			parMod.Focused.Changed.send(parMod.Focused);
+			parentModel->Focused.set(true);
+			parentModel->Focused.Changed.send(parentModel->Focused);
 
 			//All sibling set to false. Only me let it true
-			for( size_t i = 0; i < par->children().size(); i++)
+			for( size_t i = 0; i < _parent->children().size(); i++)
 			{
-				Widget* childCtrl = (Widget*) par->children()[i];
-				WidgetModel& childModel = childCtrl->widgetModel();
+				Widget* child = _parent->children()[i];
+				WidgetModel* childModel = child->widgetModel();
 				
-				if(&childModel != &widgetModel())
-					childModel.Focused = false;
+				if(childModel != _widgetModel)
+					childModel->Focused = false;
 			}
 		}
 	}
 	else
 	{//False  
-		Pt::Hmi::Widget* ctrl = (Pt::Hmi::Widget*) this;
-		for( size_t i = 0; i < ctrl->children().size(); ++i)
+		Pt::Hmi::Widget& widget = *this;
+
+		for( size_t i = 0; i < widget.children().size(); ++i)
 		{//All childs set to false
 
-			Widget* childCtrl = (Pt::Hmi::Widget*) ctrl->children()[i];
-			WidgetModel& m = childCtrl->widgetModel();
+			Widget* child = widget.children()[i];
+			WidgetModel* childModed = child->widgetModel();
 
-			m.Focused.set(false);						
-			m.Focused.Changed.send(m.Focused);
+			childModed->Focused.set(false);						
+			childModed->Focused.Changed.send(childModed->Focused);
 		}
 	}
 }
 
 
-Pt::Gfx::PointF Widget::toClient(const Pt::Gfx::PointF& globalPoint)
+Pt::Gfx::PointF Widget::toClient( const Pt::Gfx::PointF& globalPoint )
 {
-	WidgetModel& m = widgetModel();	
+	if( _parent == 0 )
+		return Pt::Gfx::PointF( globalPoint.x(), globalPoint.y() );
 
-	if( parent() == 0)
-		return Pt::Gfx::PointF(globalPoint.x(), globalPoint.y());
-
-	Pt::Gfx::PointF parPoint = parent()->toClient(globalPoint);
-	return Pt::Gfx::PointF(parPoint.x() - m.Position.get().x(), parPoint.y() - m.Position.get().y());
+	Pt::Gfx::PointF parPoint = _parent->toClient( globalPoint );
+	return Pt::Gfx::PointF( parPoint.x() - _widgetModel->Position.get().x(), parPoint.y() - _widgetModel->Position.get().y() );
 }
 
-Pt::Gfx::PointF Widget::fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot)
-{
-	const Widget* par = parent();	
 
+Pt::Gfx::PointF Widget::fromClient( const Pt::Gfx::PointF& localPoint, bool toRoot )
+{
 	double x = localPoint.x();
 	double y = localPoint.y();
+	const Widget* parent = _parent;
 
-	while(par != 0)
+	while( parent != 0 )
 	{
-		const WidgetModel& m = widgetModel();
-		par = parent()->parent();
+		parent = parent->parent();
+		const WidgetModel* model = parent->widgetModel();		
 		
-		if(!(toRoot && par == 0))
+		if(!(toRoot && parent == 0))
 		{
-			x += m.Position.get().x();
-			y += m.Position.get().y();
+			x += model->Position.get().x();
+			y += model->Position.get().y();
 		}
 	}
 	
 	return Pt::Gfx::PointF(x,y);
 }
 
-const WidgetModel& Widget::widgetModel() const
-{
-	return static_cast<const WidgetModel&>(model());
-}
 
-
-WidgetModel& Widget::widgetModel()
+void Widget::render()
 {
-	return static_cast<WidgetModel&>(model());
-}
-
-void Widget::output()
-{
-	if(!widgetModel().Visible.get())
+	if( !_widgetModel->Visible.get() )
 		return;
 	
-	widgetView().render(&widgetModel());
+	onRender();
 
-	Pt::Hmi::Painter& localPainter = widgetView().paintSurface().painter();
+	Pt::Hmi::Painter& localPainter = _paintSurface.painter();
 
 	for( size_t i = 0; i < children().size(); ++i)
 	{
-		Widget&				child = *childAt(i);			
-		WidgetView&		childView = child.widgetView();
-		WidgetModel&	childModel = child.widgetModel();
+		Widget*				child = _children[i];			
+		WidgetModel*	childModel = child->widgetModel();
 
-		child.output();
+		child->render();
 
-		localPainter.drawSurface(childModel.Position.get(), childView.paintSurface());
-	}
-
-	widgetView().output(&widgetModel());
+		localPainter.drawSurface(childModel->Position.get(), child->paintSurface());
+	}	
 }
+
 
 void Widget::invalidate()
 {
-	if( parent() == 0)
-		output();
-	else
-		parent()->invalidate();		
+	onInvalidate();
 }
 
-bool Widget::onMoveFocusPrev()
+
+void Widget::onInvalidate()
 {
-	if(children().size() == 0)
-		return false;
-
-	int index = getFocusedChild();
-
-	if( index != -1)
-	{
-		Widget* child = childAt(index);
-		WidgetModel& model = child->widgetModel();	
-		
-		if(!model.AcceptFocus.get())
-		{
-			if(child->moveFocusPrev())
-				return true;
-		}
-
-		model.Focused = false;
-		return focusPrevChild(index);
-	}
-	
-	return focusPrevChild(children().size());
+	if( parent() )
+		parent()->onInvalidate();		
 }
 
-bool Widget::focusPrevChild(int index)
-{
-	index--;
-	
-	for( ; index >= 0; --index)
-	{
-		Widget* child = childAt(index);
-		WidgetModel& model = child->widgetModel();		
-
-		if(model.AcceptFocus.get())
-		{
-			model.Focused = true;
-			return true;
-		}
-
-		if(child->moveFocusPrev())
-		{
-			model.Focused = true;
-			return true;
-		}
-	}
-
-	return false;
-}
-
-
-
-bool Widget::focusNextChild(int index)
-{
-	index++;
-	
-	for( ; index < (int)children().size(); ++index)
-	{
-		Widget* child = childAt(index);
-		WidgetModel& model = child->widgetModel();
-		
-		if(model.AcceptFocus.get())
-		{
-			model.Focused = true;
-			return true;
-		}
-
-		if(child->moveFocusNext())
-		{
-			model.Focused = true;
-			return true;
-		}
-	}
-
-	return false;
-}
-
-
-int Widget::getFocusedChild() const
-{
-	int i = 0;
-	
-	for( ; i < (int)children().size(); ++i)
-	{
-		const Widget* child = childAt(i);
-		const WidgetModel& model = child->widgetModel();
-
-		if(model.Focused.get())
-			return i;		
-	}		
-
-	return -1;
-}
-
-bool Widget::onMoveFocusNext()
-{
-	if(children().size() == 0)
-		return false;
-
-	const int index = getFocusedChild();
-
-	if( index == -1)
-		return focusNextChild(index);
-	
-	Widget* child = childAt(index);
-	WidgetModel& model = child->widgetModel();	
-		
-	if(!model.AcceptFocus.get())
-	{
-		if(child->moveFocusNext())
-			return true;
-	}
-
-	model.Focused = false;
-
-	return focusNextChild(index);
-}
 
 void Widget::onKeyInput(const KeyEvent& ev)
 { 
-	WidgetModel& m = widgetModel();
+	_widgetModel->KeyStatus = ev;
 	
-	m.KeyStatus = ev;
-	
-	if(m.UseMnemonic.get() && _mnemonicWidget != 0 && m.Enabled.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp)
+	if(_widgetModel->UseMnemonic.get() && _mnemonicWidget != 0 && _widgetModel->Enabled.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp)
 	{		
 		std::string mnKey = "";
 
-		if(m.KeyStatus.get().alt())
+		if(_widgetModel->KeyStatus.get().alt())
 			mnKey = "A//";
 			
-		mnKey += m.KeyStatus.get().toUTF8String();
+		mnKey += _widgetModel->KeyStatus.get().toUTF8String();
 
-		 if(m.getMnemonicKey() == mnKey)
+		 if(_widgetModel->getMnemonicKey() == mnKey)
 			_mnemonicWidget->onMnemonic();			
 	}
 
 	for( size_t i = 0; i < children().size(); ++i)
-		children()[i]->notifyKeyInput(ev);
+		children()[i]->keyInput(ev);
 }
+
 
 void Widget::onPointerInput(const PointingEvent& ev)
 {
-	WidgetModel& m = widgetModel();
-	
-	m.Pointer2DStatus = ev;
+	_widgetModel->Pointer2DStatus = ev;
 
 	for( size_t i = 0; i < children().size(); ++i)
-		children()[i]->notifyPointerInput(ev);
+		_children[i]->pointerInput(ev);
 }
 
 void Widget::bindMnemonicToWidget(Widget* widget)
@@ -295,8 +188,112 @@ void Widget::bindMnemonicToWidget(Widget* widget)
 
 void Widget::onMnemonic()
 {
-	if(widgetModel().Focused.get() != true)
-		widgetModel().Focused = true;
+	if(_widgetModel->Focused.get() != true)
+		_widgetModel->Focused = true;
 }
 
-}}
+void Widget::onRender()
+{		
+	if(!_widgetModel->Visible.get())
+		return;
+
+	if( _widgetModel->Size.get().width() < 0 ||  _widgetModel->Size.get().height() < 0)
+		return;
+
+	Pt::Gfx::SizeF size = _widgetModel->Size.get();
+	Pt::Gfx::SizeF bufferSize = _paintSurface.size();
+
+	//ToDo: move this check to surface resize.
+	if(bufferSize.width() != size.width() ||bufferSize.height() != size.height())
+		_paintSurface.resize(size);
+
+	Pt::Gfx::ARgbImage& backImage = _widgetModel->BackgroundImage.get();
+	Pt::Hmi::Painter&	localPainter = _paintSurface.painter();
+	Pt::Gfx::RectF		rect(Pt::Gfx::PointF(0,0),size);
+	
+	localPainter.setFont(_widgetModel->Font.get());
+
+	if(_widgetModel->HighLight.get())
+	{       
+		Pt::Gfx::Brush	brush(_widgetModel->BackColorHightLight.get());
+        
+		localPainter.setBrush(brush);
+		localPainter.fillRect(rect);
+	}
+	else
+	{
+		Pt::Gfx::Brush	brush(_widgetModel->BackColor.get());
+	
+		localPainter.setBrush(brush);
+    
+		localPainter.fillRect(rect);
+	}
+
+	if( backImage.width() != 0 && backImage.height() != 0)
+	{
+		switch( _widgetModel->BackgroundImageLayout.get())
+		{				
+			case ImageLayoutType::NoLayout:
+			{
+				localPainter.drawImage(Pt::Gfx::PointF(0,0), backImage);
+			}
+			break;
+			
+			case ImageLayoutType::Tile:
+			{
+				for( size_t x = 0; x < _paintSurface.size().width();  x += backImage.width())
+				{
+					for( size_t y = 0; y < _paintSurface.size().height();  y += backImage.height())
+						localPainter.drawImage(Pt::Gfx::PointF(x,y), backImage);
+				}
+			}
+			break;
+
+			case ImageLayoutType::Center:
+			{
+				double x = size.width()/2  - backImage.width()/2;
+				double y = size.height()/2  - backImage.height()/2;
+				localPainter.drawImage(Pt::Gfx::PointF(x,y), backImage);
+			}
+			break;
+			
+			case ImageLayoutType::Strech:
+			{
+				Pt::Gfx::ARgbImage strech(_paintSurface.size().width(), _paintSurface.size().height() );
+
+				Pt::Gfx::blockScale(backImage.begin(), backImage.width(), backImage.height(), strech.begin(), _paintSurface.size().width(),  _paintSurface.size().height());
+				localPainter.drawImage(Pt::Gfx::PointF(0,0), strech);
+			}
+			break;
+
+			case ImageLayoutType::Zoom:
+			{
+				Pt::Gfx::ARgbImage strech(_paintSurface.size().width(), _paintSurface.size().height() );
+				double factor = _paintSurface.size().width()/(double)backImage.width();
+
+				Pt::Gfx::blockScale(backImage.begin(), backImage.width(), backImage.height(),strech.begin(),  strech.width(), (Pt::size_t)(backImage.height()*factor));
+				localPainter.drawImage(Pt::Gfx::PointF(0,0), strech);
+			}
+			break;
+		}
+	}	
+}
+
+
+int Widget::getFocusedChild() const
+{
+	int i = 0;
+	
+	for( ; i < (int)children().size(); ++i)
+	{
+		const Widget* child = children()[i];
+		const WidgetModel* model = child->widgetModel();
+
+		if(model->Focused.get())
+			return i;		
+	}		
+
+	return -1;
+}
+
+}} //namespace

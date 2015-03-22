@@ -26,15 +26,14 @@
 #ifndef Pt_Hmi_ViewImpl_H
 #define Pt_Hmi_ViewImpl_H
 
-#include <Pt/Gfx/Gfx.h>
-#include <Pt/Gfx/Painter.h>
-#include <Pt/Hmi/Model.h>
 #include <Pt/Hmi/Output.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/WindowModel.h>
-#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/PointingEvent.h>
+#include <Pt/Hmi/PositionEvent.h>
+#include <Pt/Hmi/ResizeEvent.h>
+#include <Pt/Hmi/PaintSurface.h>
 #include <Windows.h>
 #include <map>
 
@@ -44,32 +43,33 @@ namespace Hmi{
 class WindowViewImpl : public Pt::Connectable
 {
 public:
-	WindowViewImpl();
+	WindowViewImpl(WindowModel* model, PaintSurface* surface);
+
 	virtual ~WindowViewImpl();
 	
-	void setController(Pt::Hmi::Window& controller)
-	{
-		_controller = &controller;
-		_keyEvent.setController(_controller);
-		_pointerEvent.setController(_controller);
-	}
+	void render();
 
-	void output(Pt::Hmi::Model* model);
-
-	inline HWND hwnd()
+	Pt::Signal<const Pt::Event&>& windowEvent()
 	{
-		return _hwnd;
+		return _windowEvent;
+	} 
+
+	void init(WindowModel* model, PaintSurface* surface)
+	{
+		_model = model;
+		_surface = surface;
 	}
 
 protected:
 	void onWindowEvent(HWND wnd, unsigned int msg, WPARAM wparam, LPARAM lparam, bool& handled);
-	virtual void onPaint();
-	virtual void onSize(WPARAM wparam, LPARAM lparam);
-	virtual void onMouse(unsigned int msg,  WPARAM wparam, LPARAM lparam);
-	virtual void onKey(unsigned int ms, WPARAM wparam, LPARAM lparam);
-	virtual void onMove();
-	virtual bool onClosing();
-	virtual void onClosed();
+
+protected:
+	void onPaint();
+	void onSize(WPARAM wparam, LPARAM lparam);
+	void onMouse(unsigned int msg,  WPARAM wparam, LPARAM lparam);
+	void onKey(unsigned int ms, WPARAM wparam, LPARAM lparam);
+	void onMove();
+	bool onClosing();	
 
 protected:	
 	void updateModelSizeAndPos();
@@ -82,12 +82,15 @@ protected:
 	void centerWindowTo(HWND parent);
 
 private:
-	HWND					_hwnd;
-	Pt::Hmi::WindowModel*	_model;
-	Pt::Hmi::Window* _controller;	
-	KeyEvent				_keyEvent;
+	HWND							_hwnd;
+	KeyEvent					_keyEvent;
 	PointingEvent			_pointerEvent;
-	bool					_ignoreSizePositionEvent;
+	ResizeEvent				_resizeEvent;
+	PositionEvent     _positionEvent;
+	bool							_ignoreSizePositionEvent;
+	WindowModel*					_model;
+	Pt::Hmi::PaintSurface* _surface;
+	Pt::Signal<const Pt::Event&> _windowEvent;
 };
 
 }}

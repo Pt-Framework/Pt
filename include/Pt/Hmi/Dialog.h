@@ -27,40 +27,33 @@
 #define Pt_Hmi_Dialog_H
 
 #include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/DialogModel.h>
-#include <Pt/Gfx/ImagePainter.h>
-#include <Pt/System/Semaphore.h>
-#include <Pt/System/MainLoop.h>
 
 namespace Pt{
 namespace Hmi{
 
-class View;
+class DialogModel;
 
 class PT_HMI_API Dialog  : public Window
 {
 public:
-	Dialog(DialogModel& m, WindowView& view);
+	Dialog(DialogModel* model);
 	virtual ~Dialog();	
 
 	void doModal(Window* parent);
 
-	DialogModel& dialogModel()
+	DialogModel* dialogModel()
 	{
-		return static_cast<DialogModel&>(model());
+		return _dialogModel;
 	}
 
-	const DialogModel& dialogModel() const
+	const DialogModel* dialogModel() const
 	{
-		return static_cast<const DialogModel&>(model());
+		return _dialogModel;
 	}
 
-protected:
-	virtual void onClosed(Controller* sender);
 
-protected:
-	Pt::System::MainLoop _done;	
-	bool _closed;
+protected:	
+	DialogModel* _dialogModel;
 };
 
 }}

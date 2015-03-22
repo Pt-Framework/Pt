@@ -1,85 +1,102 @@
 #ifndef Pt_Hmi_Controller_Widget_H
 #define Pt_Hmi_Controller_Widget_H
 
-#include <Pt/Hmi/Controller.h>
 #include <Pt/Hmi/PointingEvent.h>
 #include <Pt/Hmi/WidgetModel.h>
-#include <Pt/Hmi/WidgetView.h>
+#include <Pt/Connectable.h>
 
 namespace Pt{
 namespace Hmi{
 
 class WidgetModel;
 
-class PT_HMI_API Widget  : public Controller
+class PT_HMI_API Widget : public Pt::Connectable
 {
 public:
-	Widget(WidgetModel& model, WidgetView& view);
+	Widget(WidgetModel* model);
+	
 	virtual ~Widget();		
 
-	const WidgetModel& widgetModel() const; 
-
-	WidgetModel& widgetModel();
-
-	const WidgetView& widgetView() const
+	const WidgetModel* widgetModel() const
 	{
-		return _view;
+		return _widgetModel;
 	}
 
-	WidgetView& widgetView()
+	WidgetModel* widgetModel()
 	{
-		return _view;
+		return _widgetModel;
 	}
-	
-	void invalidate();	
+		
 				
+	void addChild(Widget* child);
+
+	void removeChild(Widget* child);
+
+	const std::vector<Widget*>& children() const
+	{
+		return _children;
+	}
+
 	inline const Widget* parent() const
 	{
-		return dynamic_cast<const Widget*>(Controller::widgetParent());
+		return _parent;
 	}
 
 	inline Widget* parent()
 	{
-		return dynamic_cast<Widget*>(Controller::widgetParent());
+		return _parent;
 	}
+
+	inline void setParent(Widget* parent)
+	{
+		_parent = parent;
+	}
+
+	void bindMnemonicToWidget(Widget* widget);
+
+	inline PaintSurface& paintSurface()
+	{
+		return _paintSurface;
+	}
+
+	void pointerInput(const PointingEvent& ev)
+	{
+		onPointerInput(ev);
+	}
+
+	void keyInput(const KeyEvent& ev)
+	{
+		onKeyInput(ev);
+	}
+
+	void mnemonic()
+	{
+		onMnemonic();
+	}
+
+	void invalidate();	
+
+	void render();
 
 	Pt::Gfx::PointF toClient(const Pt::Gfx::PointF& globalPoint);
 	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot);
-	void bindMnemonicToWidget(Widget* widget);
 
-	Pt::Signal<Widget&, PaintSurface&> Render;
-	Pt::Signal<Widget&> Output;
-
-protected:
-	virtual void output();	
-	bool onMoveFocusNext();
-	bool onMoveFocusPrev();	
-	void onFocusChanged(const Property<bool>& prop);	
-
-private:
-	bool focusNextChild(int index);
-	bool focusPrevChild(int index);
-	int getFocusedChild() const;
-
-	inline Widget* childAt(size_t index)
-	{
-		return dynamic_cast<Widget*> (children()[index]);
-	}
-
-	inline const Widget* childAt(size_t index) const
-	{
-		return dynamic_cast<const Widget*> (children()[index]);
-	}
-
-
-public:
+protected:		
+	virtual void onFocusChanged(const Property<bool>& prop);	
 	virtual void onPointerInput(const PointingEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);
 	virtual void onMnemonic();
+	virtual void onRender();
+	virtual void onInvalidate();
+
+	int getFocusedChild() const;
 
 private:
-	Widget* _mnemonicWidget;
-	WidgetView& _view;
+	Widget*								_mnemonicWidget;	
+	PaintSurface					_paintSurface;
+	std::vector<Widget*>  _children;
+	Widget*								_parent;
+	WidgetModel*  				_widgetModel;	
 };
 
 }}

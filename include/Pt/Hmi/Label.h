@@ -2,29 +2,33 @@
 #define Pt_Hmi_Label_H
 
 #include <Pt/Hmi/Panel.h>
-#include <Pt/Hmi/PointingEvent.h>
-#include <Pt/Hmi/LabelModel.h>
 
 namespace Pt{
 namespace Hmi{
 
-class LabelView;
+class LabelModel;
 
 class PT_HMI_API Label  : public Panel
 {
 public:
-	Label(LabelModel& model, LabelView& view);
+	Label(LabelModel* model);
 	virtual ~Label();	
 	
-	const LabelModel& labelModel() const	
+	const LabelModel* labelModel() const	
 	{
-		return static_cast<const LabelModel&>(model());
+		return _labelModel;
 	}
 
-	LabelModel& labelModel()
+	LabelModel* labelModel()
 	{
-		return static_cast<LabelModel&>(model());
+		return _labelModel;
 	}
+
+protected:
+	virtual void onRender();
+
+private:
+	LabelModel* _labelModel;
 };
 
 }}

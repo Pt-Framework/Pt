@@ -25,7 +25,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include <Pt/Hmi/Model.h>
-#include <Pt/Hmi/Controller.h>
 
 namespace Pt{
 namespace Hmi{

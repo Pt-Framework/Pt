@@ -52,12 +52,6 @@
     <Filter Include="Pt-Xml\tests">
       <UniqueIdentifier>{8bc815a8-812a-45b2-a7fd-ddb98788ac3a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-XmlRpc">
-      <UniqueIdentifier>{7e2aa4fc-ec38-41cb-bdeb-a9d84c96394a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-XmlRpc\tests">
-      <UniqueIdentifier>{f6833083-cbf2-4eca-9fae-4aeb9ad165e5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Hmi">
       <UniqueIdentifier>{34a3d100-502f-4817-807c-f4fb1561f509}</UniqueIdentifier>
     </Filter>
@@ -109,20 +103,17 @@
     <Filter Include="Pt-Hmi\x11">
       <UniqueIdentifier>{54475eb3-ab9c-4ce4-a5c2-c96fc66beace}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Forms">
-      <UniqueIdentifier>{c9b2455a-3181-4ba9-bc09-6c90392c0aad}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Forms\demo">
-      <UniqueIdentifier>{cc68efba-3d4b-427a-9bbd-72726e1402ac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Forms\demo\Scribble">
-      <UniqueIdentifier>{17604a16-d920-4c94-b8fa-27086b929254}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Forms\demo\Widget">
-      <UniqueIdentifier>{5ffb8738-a7de-47a7-921c-c6b942be0aef}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Hmi\linux-fb">
       <UniqueIdentifier>{de9f056a-5dd9-4906-a742-a76566615868}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\Pt-XmlRpc">
+      <UniqueIdentifier>{7e2aa4fc-ec38-41cb-bdeb-a9d84c96394a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\Pt-XmlRpc\tests">
+      <UniqueIdentifier>{f6833083-cbf2-4eca-9fae-4aeb9ad165e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pt-Hmi\demo">
+      <UniqueIdentifier>{2b33e20f-914f-45cc-b538-ce9a73e2c5e0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -769,22 +760,22 @@
       <Filter>Pt-Xml</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\XmlRpc\Api.h">
-      <Filter>Pt-XmlRpc</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\XmlRpc\Client.h">
-      <Filter>Pt-XmlRpc</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\XmlRpc\Fault.h">
-      <Filter>Pt-XmlRpc</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\XmlRpc\Formatter.h">
-      <Filter>Pt-XmlRpc</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\XmlRpc\HttpClient.h">
-      <Filter>Pt-XmlRpc</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\XmlRpc\Responder.h">
-      <Filter>Pt-XmlRpc</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Utf16Codec.h">
       <Filter>Pt</Filter>
@@ -796,10 +787,10 @@
       <Filter>Pt</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\XmlRpc\HttpService.h">
-      <Filter>Pt-XmlRpc</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-XmlRpc\HttpResponder.h">
-      <Filter>Pt-XmlRpc</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.h">
       <Filter>Pt-Hmi\gdi</Filter>
@@ -1224,9 +1215,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\DialogModel.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Event.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1250,114 +1238,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\WindowModel.h">
       <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\Api.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\Button.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\CheckBox.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\ComboBox.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\ContextMenu.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\Dialog.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\DockAreaWidget.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\DockWidget.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\FlowLayout.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\GroupBox.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\Label.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\ListBox.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\ListView.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\MenuItem.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\MenuStrip.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\Panel.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\ProgressBar.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\PropertyView.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\RadioButton.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\ScrollBar.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\SplitContainer.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\StatusBar.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\TabControl.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\Table.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\TextBox.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\ToolBar.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\Tree.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\Widget.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Forms\Window.h">
-      <Filter>Pt-Forms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Forms\demo\Widget\AtesionIcon.h">
-      <Filter>Pt-Forms\demo\Widget</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Forms\demo\Widget\DemoImage.h">
-      <Filter>Pt-Forms\demo\Widget</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Forms\demo\Widget\Dialog1.h">
-      <Filter>Pt-Forms\demo\Widget</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Forms\demo\Widget\Dialog2.h">
-      <Filter>Pt-Forms\demo\Widget</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Forms\demo\Widget\MainWindow.h">
-      <Filter>Pt-Forms\demo\Widget</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Forms\demo\Scribble\AtesionIcon.h">
-      <Filter>Pt-Forms\demo\Scribble</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Forms\demo\Scribble\MainWindow.h">
-      <Filter>Pt-Forms\demo\Scribble</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\WidgetModel.h">
       <Filter>Pt-Hmi</Filter>
@@ -1410,29 +1290,35 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Output.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WidgetView.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowView.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\WindowViewImpl.h">
       <Filter>Pt-Hmi\gdi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ButtonView.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\LabelView.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PanelView.h">
-      <Filter>Pt-Hmi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Dialog.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h">
       <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PositionEvent.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\demo\AtesionIcon.h">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\demo\DemoImage.h">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\demo\Dialog1.h">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\demo\Dialog2.h">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\demo\MainWindow.h">
+      <Filter>Pt-Hmi\demo</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1520,10 +1406,10 @@
       <Filter>Pt-Xml\tests</Filter>
     </None>
     <None Include="..\..\src\Pt-XmlRpc\Jamfile">
-      <Filter>Pt-XmlRpc</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc</Filter>
     </None>
     <None Include="..\..\src\Pt-XmlRpc\tests\Jamfile">
-      <Filter>Pt-XmlRpc\tests</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc\tests</Filter>
     </None>
     <None Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.mm">
       <Filter>Pt-Hmi\cocoa</Filter>
@@ -1579,17 +1465,11 @@
     <None Include="..\..\src\Pt-Hmi\Jamfile">
       <Filter>Pt-Hmi</Filter>
     </None>
-    <None Include="..\..\src\Pt-Forms\Jamfile">
-      <Filter>Pt-Forms</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Forms\demo\Widget\Jamfile">
-      <Filter>Pt-Forms\demo\Widget</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Forms\demo\Scribble\Jamfile">
-      <Filter>Pt-Forms\demo\Scribble</Filter>
-    </None>
     <None Include="..\..\src\Pt-Hmi\cocoa\ViewImpl.mm">
       <Filter>Pt-Hmi\cocoa</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Hmi\demo\Jamfile">
+      <Filter>Pt-Hmi\demo</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -2167,28 +2047,28 @@
       <Filter>Pt-Xml</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\Client.cpp">
-      <Filter>Pt-XmlRpc</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\Fault.cpp">
-      <Filter>Pt-XmlRpc</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\Formatter.cpp">
-      <Filter>Pt-XmlRpc</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\HttpClient.cpp">
-      <Filter>Pt-XmlRpc</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\Responder.cpp">
-      <Filter>Pt-XmlRpc</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\tests\Pt-XmlRpc-test.cpp">
-      <Filter>Pt-XmlRpc\tests</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\tests\RpcBenchClient.cpp">
-      <Filter>Pt-XmlRpc\tests</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\tests\RpcBenchServer.cpp">
-      <Filter>Pt-XmlRpc\tests</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt\Utf16Codec.cpp">
       <Filter>Pt</Filter>
@@ -2197,10 +2077,10 @@
       <Filter>Pt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\HttpResponder.cpp">
-      <Filter>Pt-XmlRpc</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-XmlRpc\HttpService.cpp">
-      <Filter>Pt-XmlRpc</Filter>
+      <Filter>Pt-Hmi\Pt-XmlRpc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.cpp">
       <Filter>Pt-Hmi\gdi</Filter>
@@ -2508,9 +2388,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\DialogModel.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\KeyEvent.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\LabelModel.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
@@ -2520,116 +2397,11 @@
     <ClCompile Include="..\..\src\Pt-Hmi\PanelModel.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\PointingEvent.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\PropertyBase.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\WindowModel.cpp">
       <Filter>Pt-Hmi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\Button.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\CheckBox.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\ComboBox.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\ContextMenu.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\Dialog.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\DockAreaWidget.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\DockWidget.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\FlowLayout.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\GroupBox.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\Label.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\ListBox.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\ListView.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\MenuItem.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\MenuStrip.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\Panel.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\ProgressBar.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\PropertyView.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\RadioButton.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\ScrollBar.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\SplitContainer.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\StatusBar.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\TabControl.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\Table.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\TextBox.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\ToolBar.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\Tree.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\Widget.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\Window.cpp">
-      <Filter>Pt-Forms</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\demo\Widget\Dialog1.cpp">
-      <Filter>Pt-Forms\demo\Widget</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\demo\Widget\Dialog2.cpp">
-      <Filter>Pt-Forms\demo\Widget</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\demo\Widget\Main.cpp">
-      <Filter>Pt-Forms\demo\Widget</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\demo\Widget\MainWindow.cpp">
-      <Filter>Pt-Forms\demo\Widget</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\demo\Scribble\Main.cpp">
-      <Filter>Pt-Forms\demo\Scribble</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Forms\demo\Scribble\MainWindow.cpp">
-      <Filter>Pt-Forms\demo\Scribble</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\WidgetModel.cpp">
       <Filter>Pt-Hmi</Filter>
@@ -2685,23 +2457,20 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Panel.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\WidgetView.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\WindowView.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\WindowViewImpl.cpp">
       <Filter>Pt-Hmi\gdi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\ButtonView.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\..\src\Pt-Hmi\demo\Dialog1.cpp">
+      <Filter>Pt-Hmi\demo</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\LabelView.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\..\src\Pt-Hmi\demo\Dialog2.cpp">
+      <Filter>Pt-Hmi\demo</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\PanelView.cpp">
-      <Filter>Pt-Hmi</Filter>
+    <ClCompile Include="..\..\src\Pt-Hmi\demo\Main.cpp">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\demo\MainWindow.cpp">
+      <Filter>Pt-Hmi\demo</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

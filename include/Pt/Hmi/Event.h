@@ -7,33 +7,33 @@
 namespace Pt{
 namespace Hmi{
 
-class Controller;
+class Window;
 
 class PT_HMI_API Event : public Pt::Event
 {
 public:	
-	Event(Controller* controller)
+	Event(Window* controller)
 	: _controller(controller)
 	{
 	}	
 
-	inline void setController(Controller* controller)
+	inline void setController(Window* controller)
 	{
 		_controller = controller;
 	}
 
-	inline Controller* controller()
+	inline Window* controller()
 	{
 		return _controller;
 	}
 
-	inline const  Controller* controller() const
+	inline const  Window* controller() const
 	{
 		return _controller;
 	}
 		
 private:
-	Controller* _controller;	
+	Window* _controller;	
 };
 
 }}

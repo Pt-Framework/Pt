@@ -1,7 +1,6 @@
 #include "ApplicationImpl.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/System/MainLoop.h>
-#include <Pt/Hmi/Controller.h>
 #include <Pt/Hmi/PointingEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
 

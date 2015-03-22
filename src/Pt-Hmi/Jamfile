@@ -21,32 +21,23 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   Application.cpp
 					   Cursor.cpp
 					   PaintSurface.cpp
-					   Painter.cpp 
-					   PointingEvent.cpp					   
-					   KeyEvent.cpp
-                       
-					   Controller.cpp
+					   Painter.cpp                        
 					   Model.cpp						   		   					   					   
 
 					   Button.cpp
-					   ButtonModel.cpp
-					   ButtonView.cpp
+					   ButtonModel.cpp					   
 					   
 					   Label.cpp
-					   LabelModel.cpp
-					   LabelView.cpp
+					   LabelModel.cpp					   
 
 					   Panel.cpp
-					   PanelModel.cpp
-					   PanelView.cpp
+					   PanelModel.cpp					   
 
 					   Widget.cpp
-					   WidgetModel.cpp
-					   WidgetView.cpp
+					   WidgetModel.cpp					   
 
 					   Window.cpp
 					   WindowModel.cpp
-					   WindowView.cpp
 
 					   Dialog.cpp
 					   DialogModel.cpp					   					   
@@ -56,3 +47,4 @@ LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx  ;
 LinkLibs Pt-Hmi : $(GUILIBS) ;
 MakeLocate Pt-Hmi : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-Hmi : $(PT_INSTALL_LIBDIR) ;
+ SubInclude PT_TOP src Pt-Hmi demo ;		
