@@ -131,8 +131,6 @@ public:
 	Property<Pt::Gfx::ARgbImage>		BackgroundImage;
 	Property<ImageLayoutType::Type>	BackgroundImageLayout;
 	Property<int>										Opacity;
-	Property<PointingEvent>					Pointer2DStatus;	
-	Property<KeyEvent>							KeyStatus;	
 	Property<Cursor>                CursorT;
 	Property<TextAlignType::Type>		TextAlign;
 	Property<bool>									Focused; 
@@ -141,7 +139,7 @@ public:
 	Property<std::string>						FocusedActionKey;
 	Property<std::string>						Caption;		
 	Property<bool>									UseMnemonic;	
-
+	
 protected:
 	virtual void onPointerInput(const PointingEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);

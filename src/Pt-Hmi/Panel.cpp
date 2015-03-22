@@ -18,16 +18,6 @@ Panel::~Panel()
 {
 }
 
-/*
-Pt::Gfx::SizeF Panel::clientSize() const
-{
-	Pt::Gfx::SizeF cs;
-
-	cs.setWidth(Size.get().width() - BorderWidth.get());
-	cs.setHeight(Size.get().height() - BorderWidth.get());
-	return cs;
-}
-*/
 void Panel::handleResize(const PointingEvent& ev)
 {
 	const std::vector<DeviceButton>& but = ev.buttons();

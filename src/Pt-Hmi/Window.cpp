@@ -98,8 +98,6 @@ void Window::onKeyInput(const KeyEvent& ev)
 	if(!Enabled.get())
 		return;
 
-	KeyStatus = ev;
-
 	if(ev.toUTF8String() == FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && !ev.shift())
 	{
 		if( Focused.get())
@@ -131,7 +129,6 @@ void Window::onPointerInput(const PointingEvent& ev)
 	if(!Enabled.get())
 		return;
 	
-	Pointer2DStatus = ev;
 	CursorT.get().setCursor(Pt::Hmi::Cursors::Default);
 
 	for( size_t i = 0; i < children().size(); ++i)

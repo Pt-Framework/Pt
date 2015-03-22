@@ -19,8 +19,6 @@ Widget::Widget()
 , PT_HMI_INIT_PROPERTY_VALUE(BackgroundImage, Pt::Gfx::ARgbImage(0,0))
 , PT_HMI_INIT_PROPERTY_VALUE(BackgroundImageLayout, ImageLayoutType::NoLayout)
 , PT_HMI_INIT_PROPERTY_VALUE(Opacity,0)
-, PT_HMI_INIT_PROPERTY(Pointer2DStatus)
-, PT_HMI_INIT_PROPERTY(KeyStatus)
 , PT_HMI_INIT_PROPERTY(CursorT)
 , PT_HMI_INIT_PROPERTY_VALUE(TextAlign,TextAlignType::MidleCenter)
 , PT_HMI_INIT_PROPERTY_VALUE(Focused, false)
@@ -177,16 +175,15 @@ std::string Widget::getMnemonicKey() const
 
 void Widget::onKeyInput(const KeyEvent& ev)
 { 
-	KeyStatus = ev;
 	
 	if(UseMnemonic.get() && _mnemonicWidget != 0 && Enabled.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp)
 	{		
 		std::string mnKey = "";
 
-		if( KeyStatus.get().alt())
+		if( ev.alt())
 			mnKey = "A//";
 			
-		mnKey += KeyStatus.get().toUTF8String();
+		mnKey += ev.toUTF8String();
 
 		 if(getMnemonicKey() == mnKey)
 			_mnemonicWidget->onMnemonic();			
@@ -199,7 +196,6 @@ void Widget::onKeyInput(const KeyEvent& ev)
 
 void Widget::onPointerInput(const PointingEvent& ev)
 {
-	Pointer2DStatus = ev;
 
 	for( size_t i = 0; i < children().size(); ++i)
 		_children[i]->pointerInput(ev);

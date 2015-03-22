@@ -39,7 +39,6 @@ private:
 private:
 	void recalcPosAndSize(const Pt::Gfx::PointF& p, ResizeDirection dir);	
 	void handleResize(const PointingEvent& ev);	
-//	Pt::Gfx::Size clientSize() const	
 
 private:
 	Pt::Gfx::PointF _lastSizePoint;
