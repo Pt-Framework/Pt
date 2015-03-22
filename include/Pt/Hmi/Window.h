@@ -34,7 +34,7 @@
 namespace Pt{
 namespace Hmi{
 
-class WindowViewImpl;
+class WindowImpl;
 class ResizeEvent;
 class PositionEvent;
 
@@ -63,6 +63,7 @@ public:
 	bool close();
 
 	void resize(const Pt::Gfx::SizeF& size);
+
 	void setPosition(const Pt::Gfx::PointF& pos);
 
 	inline void setWindowParent(Window* parent)
@@ -108,9 +109,9 @@ private:
 	void onClosed(const Property<bool> & closed);
 
 private:
-	Window*										_windowParent;
-	WindowModel*							_windowModel;
-	WindowViewImpl*						_impl;
+	Window*				_windowParent;
+	WindowModel*	_windowModel;
+	WindowImpl*		_impl;
 };
 
 }}

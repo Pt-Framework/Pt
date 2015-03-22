@@ -43,6 +43,7 @@ Button::Button(ButtonModel* model)
 , _pressCounter(0)
 , _buttonModel(model)
 {
+	_buttonModel->BorderStyle.set(Hmi::BorderStyleType::Single);
 	_doublePressTimer.timeout() += Pt::slot(*this, &Button::onDoublePressedTimeout);
 	_doublePressTimer.setActive(Pt::Hmi::Application::instance().loop());
 	_buttonModel->ButtonState.Changed += Pt::slot(*this, &Button::onButtonStateChanged);
@@ -60,14 +61,9 @@ void Button::onDoublePressedTimeout()
 	_doublePressTimer.stop();
 }
 
-void Button::onCheckedAction(bool state)
-{
-	CheckedAction.send(this, state);
-}
-
 void Button::onPressedAction()
 {
-	PressedAction.send(this);
+	_buttonModel->Clicked.send();
 	_pressCounter++;
 	
 	if(_pressCounter == 1)
@@ -76,7 +72,7 @@ void Button::onPressedAction()
 	if( _pressCounter == 2)	
 	{
 		_pressCounter = 0;
-		onDoublePressedAction();
+		_buttonModel->DoubleClicked.send();
 	}
 }
 
@@ -118,7 +114,7 @@ void Button::onMnemonic()
 
 void Button::onDoublePressedAction()
 {
-	DoublePressedAction.send(this);
+	_buttonModel->DoubleClicked.send();
 	_doublePressTimer.stop();
 }
 
@@ -145,7 +141,7 @@ void Button::onButtonStateChanged( const Property<DeviceButton::State>& prop )
 		break;
 
 		case Pt::Hmi::ButtonType::Toggle:
-			onCheckedAction(_buttonModel->ButtonState.get() == Pt::Hmi::DeviceButton::Pressed);
+			_buttonModel->Checked.send((_buttonModel->ButtonState.get() == Pt::Hmi::DeviceButton::Pressed));
 		break;
 	}
 }

@@ -23,10 +23,9 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_ViewImpl_H
-#define Pt_Hmi_ViewImpl_H
+#ifndef Pt_Hmi_WindowImpl_H
+#define Pt_Hmi_WindowImpl_H
 
-#include <Pt/Hmi/Output.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/KeyEvent.h>
@@ -40,12 +39,12 @@
 namespace Pt{
 namespace Hmi{
 
-class WindowViewImpl : public Pt::Connectable
+class WindowImpl : public Pt::Connectable
 {
 public:
-	WindowViewImpl(WindowModel* model, PaintSurface* surface);
+	WindowImpl(WindowModel* model, PaintSurface* surface);
 
-	virtual ~WindowViewImpl();
+	virtual ~WindowImpl();
 	
 	void render();
 
@@ -81,16 +80,16 @@ protected:
 	void destroy();
 	void centerWindowTo(HWND parent);
 
-private:
-	HWND							_hwnd;
-	KeyEvent					_keyEvent;
-	PointingEvent			_pointerEvent;
-	ResizeEvent				_resizeEvent;
-	PositionEvent     _positionEvent;
-	bool							_ignoreSizePositionEvent;
-	WindowModel*					_model;
-	Pt::Hmi::PaintSurface* _surface;
-	Pt::Signal<const Pt::Event&> _windowEvent;
+private:	
+	Pt::Signal<const Pt::Event&>	_windowEvent;
+	KeyEvent											_keyEvent;
+	PointingEvent									_pointerEvent;
+	ResizeEvent										_resizeEvent;
+	PositionEvent									_positionEvent;
+	bool													_ignoreSizePositionEvent;
+	WindowModel*									_model;
+	Pt::Hmi::PaintSurface*				_surface;
+	HWND													_hwnd;
 };
 
 }}

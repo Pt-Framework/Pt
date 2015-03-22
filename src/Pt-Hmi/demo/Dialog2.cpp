@@ -64,7 +64,7 @@ void Dialog2::init()
 	addChild(&_panel);
 
 	//Label
-	_labelModel.Position.set(Pt::Gfx::PointF(50,40));
+		_labelModel.Position.set(Pt::Gfx::PointF(50,40));
 	_labelModel.AutoSize.set(true);
 	_labelModel.Caption.set("Do you want to close me?");
 	_panel.addChild(&_label);
@@ -74,18 +74,18 @@ void Dialog2::init()
 	_okButtonModel.Size.set(Pt::Gfx::SizeF(100,23));
 	_okButtonModel.Caption.set("OK");
 	_okButtonModel.ActionKey.set("C//x");
-	_okButton.PressedAction += Pt::slot(*this,&Dialog2::onClosedByButton);
+	_okButtonModel.Clicked += Pt::slot(*this,&Dialog2::onClosedByButton);
 	addChild(&_okButton);
 
 	//Cancel button
 	_cancelButtonModel.Position.set(Pt::Gfx::PointF(310,125));
 	_cancelButtonModel.Size.set(Pt::Gfx::SizeF(100,23));
 	_cancelButtonModel.Caption.set("Cancel");
-	_cancelButton.PressedAction += Pt::slot(*this,&Dialog2::onClosedByButton);
+	_cancelButtonModel.Clicked += Pt::slot(*this,&Dialog2::onClosedByButton);
 	addChild(&_cancelButton);
 }
     
-void Dialog2::onClosedByButton(Button* button)
+void Dialog2::onClosedByButton()
 {
 	close();
 }

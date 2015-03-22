@@ -30,7 +30,7 @@
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/WindowModel.h>
 #include <Pt/Hmi/Application.h>
-#include "WindowViewImpl.h"
+#include "WindowImpl.h"
 #include <Pt/Hmi/PositionEvent.h>
 #include <Pt/Gfx/Size.h>
 
@@ -41,7 +41,7 @@ Window::Window(WindowModel* model)
 : Widget(model)
 , _windowParent(0)
 , _windowModel(model)
-, _impl(new WindowViewImpl(model, &paintSurface() ) )
+, _impl(new WindowImpl(model, &paintSurface() ) )
 {						 
 		
 	_windowModel->Size.Changed += Pt::slot(*this, &Window::onSizeChanged);					

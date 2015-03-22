@@ -30,9 +30,12 @@ public:
 
 	Property<DeviceButton::State> ButtonState;	
 	Property<std::string>         ActionKey;		
-	Property<bool>								Armed;	
+	Property<bool>								Armed;		
 	Property<ButtonType::Type>    ButtonType;	
 	Property<int>									DoublePressTimeInMs; 
+	Signal<bool>									Checked;	
+	Signal<>											Clicked;	
+	Signal<>											DoubleClicked;	
 };
 
 }}

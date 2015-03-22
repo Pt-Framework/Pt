@@ -49,7 +49,7 @@ protected:
 	virtual void init();
 
 private:
-	void onClosedByButton(Button* button);
+	void onClosedByButton();
     
 private:
 	Pt::Hmi::DialogModel* _model;

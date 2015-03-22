@@ -103,7 +103,7 @@ void MainWindow::init()
 	//Text
 	_textLabelModel.AutoSize.set(true);
 	_textLabelModel.Size.set(Pt::Gfx::SizeF(500,30));
-	_textLabelModel.Caption.set("&This is a Platinum C++ Human Machine Interface demo");
+	_textLabelModel.Caption.set("&This is a Platinum C++");
 	_textLabelModel.Position.set(Pt::Gfx::PointF(20,20));
 	_textLabelModel.ForeColor.set(Pt::Gfx::ARgbColor(255,0,0,0));
 	_textLabelModel.UseMnemonic.set(true);	
@@ -126,7 +126,7 @@ void MainWindow::init()
 	_dialogButtonModel.Position.set(Pt::Gfx::PointF(20,100));
 	_dialogButtonModel.Size.set(Pt::Gfx::SizeF(150,25));
 	_dialogButtonModel.UseMnemonic.set(false);
-	_dialogButton.PressedAction  += Pt::slot(*this, &MainWindow::onShowDialog);
+	_dialogButtonModel.Clicked  += Pt::slot(*this, &MainWindow::onShowDialog);
 	
 	_mainPanel.addChild(&_dialogButton);
 		
@@ -136,13 +136,13 @@ void MainWindow::init()
 	_closeButtonModel.ActionKey.set("C//x");
 	_closeButtonModel.Position.set(Pt::Gfx::PointF(590,525));
 	_closeButtonModel.Size.set(Pt::Gfx::SizeF(150,25));
-	_closeButton.PressedAction += Pt::slot(*this, &MainWindow::onClosed);
+	_closeButtonModel.Clicked += Pt::slot(*this, &MainWindow::onClosed);
 	
 	addChild(&_closeButton);
 	addChild(&_mainPanel);
 }
 
-void MainWindow::onShowDialog(Button* button)
+void MainWindow::onShowDialog()
 {
 	Dialog1 dialog(&_dialog1model);
 	dialog.doModal(this);
@@ -160,7 +160,7 @@ void MainWindow::onClosedByWindow(const Property<bool>& closed )
 	Pt::Hmi::Application::instance().exit();
 }
 
-void MainWindow::onClosed(Button* button)
+void MainWindow::onClosed()
 {
 	close();	
 	Pt::Hmi::Application::instance().exit();

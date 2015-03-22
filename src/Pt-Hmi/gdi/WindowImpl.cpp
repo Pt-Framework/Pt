@@ -23,7 +23,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include "WindowViewImpl.h"
+#include "WindowImpl.h"
 #include "ApplicationImpl.h"
 #include <Windows.h>
 #include <WindowsX.h>
@@ -38,7 +38,7 @@
 namespace Pt{
 namespace Hmi{
 
-WindowViewImpl::WindowViewImpl(WindowModel* model, PaintSurface* surface)
+WindowImpl::WindowImpl(WindowModel* model, PaintSurface* surface)
 : _hwnd(0)
 , _ignoreSizePositionEvent(false)
 , _model(0)
@@ -48,13 +48,13 @@ WindowViewImpl::WindowViewImpl(WindowModel* model, PaintSurface* surface)
 	init(model, surface);
 
 	Pt::Hmi::Application* app = (Pt::Hmi::Application*) &Pt::Hmi::Application::instance();	
-	app->impl()->WindowEvent += Pt::slot(*this, &WindowViewImpl::onWindowEvent);
+	app->impl()->WindowEvent += Pt::slot(*this, &WindowImpl::onWindowEvent);
 	_pointerEvent.buttons().resize(3);	
 
 	create();
 }
 
-void WindowViewImpl::create()
+void WindowImpl::create()
 {
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
@@ -64,7 +64,7 @@ void WindowViewImpl::create()
 	UpdateWindow(_hwnd);	
 }
 
-void WindowViewImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
+void WindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 {
 	if(!_model->Enabled.get())
 		return;
@@ -114,7 +114,7 @@ void WindowViewImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 	_windowEvent.send(_keyEvent);
 }
 
-void WindowViewImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wparam, long lparam, bool& handled)
+void WindowImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wparam, long lparam, bool& handled)
 {
 	if(_hwnd != wnd)
 		return;	
@@ -196,12 +196,12 @@ void WindowViewImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int 
 	}
 }
 
-WindowViewImpl::~WindowViewImpl()
+WindowImpl::~WindowImpl()
 {
     DestroyWindow(_hwnd);
 }
 
-bool WindowViewImpl::onClosing()
+bool WindowImpl::onClosing()
 {
 	if(!_model->CanClose.get())
 		return false;
@@ -212,7 +212,7 @@ bool WindowViewImpl::onClosing()
 	return true;
 }
 
-void WindowViewImpl::onSize(WPARAM wParam, LPARAM lParam)
+void WindowImpl::onSize(WPARAM wParam, LPARAM lParam)
 {
 	if(_ignoreSizePositionEvent)
 		return;
@@ -240,7 +240,7 @@ void WindowViewImpl::onSize(WPARAM wParam, LPARAM lParam)
 
 }
 
-void WindowViewImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
+void WindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 {	
 	int xPos = GET_X_LPARAM(lparam); 
 	int yPos = GET_Y_LPARAM(lparam); 
@@ -279,7 +279,7 @@ void WindowViewImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 	_windowEvent.send(_pointerEvent);
 }
 
-void WindowViewImpl::setWindowSizeAndPos(bool firstShow)
+void WindowImpl::setWindowSizeAndPos(bool firstShow)
 {
 	_ignoreSizePositionEvent = true;
 	
@@ -317,7 +317,7 @@ void WindowViewImpl::setWindowSizeAndPos(bool firstShow)
 				}
 				else
 				{
-					WindowViewImpl* parentImpl = 0;
+					WindowImpl* parentImpl = 0;
 
 					for(size_t i = 0; i < parent->outputDevices().size(); ++i)
 					{	
@@ -326,7 +326,7 @@ void WindowViewImpl::setWindowSizeAndPos(bool firstShow)
 						if( parentDevice == 0)
 							continue;
 
-						parentImpl = dynamic_cast<WindowViewImpl*>(parentDevice->impl());
+						parentImpl = dynamic_cast<WindowImpl*>(parentDevice->impl());
 						
 						if( parentImpl != 0)
 							break;
@@ -346,7 +346,7 @@ void WindowViewImpl::setWindowSizeAndPos(bool firstShow)
 	_ignoreSizePositionEvent = false;
 }
 
-void WindowViewImpl::centerWindowTo(HWND parent)
+void WindowImpl::centerWindowTo(HWND parent)
 {
 
 	RECT parentRect;   
@@ -363,7 +363,7 @@ void WindowViewImpl::centerWindowTo(HWND parent)
 	SetWindowPos(_hwnd,0, posX, posY, size.width(), size.height(), SWP_DRAWFRAME);
 }
 
-void WindowViewImpl::updateModelSizeAndPos()
+void WindowImpl::updateModelSizeAndPos()
 {
 	RECT  info;
 	GetWindowRect(_hwnd, &info);
@@ -377,7 +377,7 @@ void WindowViewImpl::updateModelSizeAndPos()
 	_windowEvent.send(_resizeEvent);
 }
 
-void WindowViewImpl::onMove()
+void WindowImpl::onMove()
 {
 	if(_ignoreSizePositionEvent)
 		return;
@@ -392,7 +392,7 @@ void WindowViewImpl::onMove()
 	updateModelSizeAndPos();
 }
 
-void WindowViewImpl::onPaint()
+void WindowImpl::onPaint()
 {   		
 	PAINTSTRUCT ps;
 	HDC windowContext = BeginPaint(_hwnd, &ps);
@@ -403,7 +403,7 @@ void WindowViewImpl::onPaint()
 	EndPaint(_hwnd, &ps);	
 }
 
-void WindowViewImpl::setWindowIcon()
+void WindowImpl::setWindowIcon()
 {
 	if( _model->Icon.get().width() == 0 ||  _model->Icon.get().height() == 0)
 		return;
@@ -433,7 +433,7 @@ void WindowViewImpl::setWindowIcon()
 	SetClassLong(_hwnd, GCL_HICON, (LONG)icon); 	
 }
 
-void WindowViewImpl::setWindowProperties()
+void WindowImpl::setWindowProperties()
 {
 	SetWindowText(_hwnd, _model->Caption.get().c_str());
 
@@ -534,7 +534,7 @@ void WindowViewImpl::setWindowProperties()
 		ShowWindow(_hwnd, SW_SHOW);		
 }
 
-void WindowViewImpl::destroy()
+void WindowImpl::destroy()
 {
 	if( _hwnd == 0)
 		return;
@@ -543,7 +543,7 @@ void WindowViewImpl::destroy()
 	_hwnd = 0;
 }
 
-void WindowViewImpl::render()
+void WindowImpl::render()
 {	
 
  bool firstShow = (_hwnd == 0);

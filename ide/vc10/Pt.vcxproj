@@ -327,7 +327,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PainterImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\WindowViewImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\WindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.h" />
@@ -524,7 +524,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\CursorImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PainterImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\WindowViewImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\gdi\WindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Label.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\LabelModel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.cpp" />

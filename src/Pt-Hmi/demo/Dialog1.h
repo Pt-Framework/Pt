@@ -45,8 +45,8 @@ protected:
 	virtual void init();
 
 private:
-	void onClosedByButton(Button* button);
-	void onShowNextDialog(Button* button);
+	void onClosedByButton();
+	void onShowNextDialog();
 
 private:
 	Pt::Hmi::DialogModel* _model;

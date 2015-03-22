@@ -44,10 +44,6 @@ public:
 	Button(ButtonModel* model);
 	virtual ~Button();
 
-	Signal<Button*> PressedAction;
-	Signal<Button*> DoublePressedAction;
-	Signal<Button*, bool> CheckedAction;
-
 	ButtonModel* buttonModel()
 	{
 		return _buttonModel;
@@ -61,7 +57,6 @@ public:
 protected:
 	virtual void onPressedAction();
 	virtual void onDoublePressedAction();
-	virtual void onCheckedAction(bool checked);
 	virtual void onMnemonic();
 	virtual void onPointerInput(const PointingEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);

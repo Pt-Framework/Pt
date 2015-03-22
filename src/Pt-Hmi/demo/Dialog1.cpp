@@ -59,7 +59,7 @@ void Dialog1::init()
 	_newDialogModel.Caption.set("New Dialog [CTRL+F]");
 	_newDialogModel.ActionKey.set("C//f");
 
-	_newDialog.PressedAction += Pt::slot(*this,&Dialog1::onShowNextDialog);
+	_newDialogModel.Clicked += Pt::slot(*this,&Dialog1::onShowNextDialog);
 	addChild(&_newDialog);
 
 	//Close Button
@@ -67,16 +67,16 @@ void Dialog1::init()
 	_closeButtonModel.Size.set(Pt::Gfx::SizeF(200,25));
 	_closeButtonModel.ActionKey.set("C//x");
 	_closeButtonModel.Caption.set("Close [CTRL+X]");
-	_closeButton.PressedAction +=  Pt::slot(*this,&Dialog1::onClosedByButton);
+	_closeButtonModel.Clicked +=  Pt::slot(*this,&Dialog1::onClosedByButton);
 	addChild(&_closeButton);
 }
 
-void Dialog1::onClosedByButton(Button* button)
+void Dialog1::onClosedByButton()
 {
 	close();
 }
 
-void Dialog1::onShowNextDialog(Button* button)
+void Dialog1::onShowNextDialog()
 {
 	Dialog2 dialog(&_dialog2model);
 	dialog.doModal(this);		

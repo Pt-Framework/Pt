@@ -10,6 +10,7 @@ Label::Label(LabelModel* model)
 : Panel(model)
 , _labelModel(model)
 {
+	_labelModel->BorderStyle.set(Hmi::BorderStyleType::NoBorder);
 }
 
 Label::~Label()
@@ -36,7 +37,7 @@ void Label::onRender()
 		Panel::onRender();
 
 		//Render the label
-		Pt::Gfx::PointF	pos(0, currentSize.height()  - metric.ascent() - metric.descent());
+		Pt::Gfx::PointF	pos(0, metric.ascent());
 		Pt::Gfx::Pen	pen(1, _labelModel->ForeColor.get());
 
 		localPainter.setFont(_labelModel->Font.get());
@@ -63,7 +64,7 @@ void Label::onRender()
 				const double textWidthHalf	= metric.width()/2;	
 				const double textHeightHalf = metric.height()/2;	
 								
-				Pt::Gfx::PointF pos(widthHalf - textWidthHalf, (heightHalf - textHeightHalf) +  (metric.height()  - metric.descent()));							
+				Pt::Gfx::PointF pos(widthHalf - textWidthHalf, (heightHalf - textHeightHalf) + metric.ascent());							
 				localPainter.setFont(_labelModel->Font.get());
 				localPainter.setPen(pen);
 

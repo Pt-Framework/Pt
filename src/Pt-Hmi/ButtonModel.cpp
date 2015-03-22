@@ -10,7 +10,7 @@ ButtonModel::ButtonModel()
 , PT_HMI_INIT_PROPERTY_VALUE(ButtonType,Pt::Hmi::ButtonType::Press)
 , PT_HMI_INIT_PROPERTY_VALUE(DoublePressTimeInMs,1500)
 {
-    BackColor.set(Pt::Gfx::ARgbColor(245,245,245));
+   BackColor.set(Pt::Gfx::ARgbColor(245,245,245));
 	BorderStyle.set(Pt::Hmi::BorderStyleType::Widget);
 	BorderWidth.set(1);
 	Caption.set("Button");	

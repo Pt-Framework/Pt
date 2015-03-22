@@ -53,9 +53,9 @@ protected:
 	void init();
 
 private:
-	void onClosed(Button* button);
+	void onClosed();
 	void onClosedByWindow(const Property<bool>& closed );
-	void onShowDialog(Button* button);
+	void onShowDialog();
 
 private:
 	Pt::Hmi::DialogModel _dialog1model;
