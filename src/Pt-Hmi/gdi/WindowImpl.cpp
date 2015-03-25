@@ -40,11 +40,11 @@ WindowImpl::WindowImpl(PaintSurface* surface)
 : _hwnd(0)
 , _app(Pt::Hmi::Application::instance())
 , _surface(surface)
-{	
-	_app.impl()->WindowEvent += Pt::slot(*this, &WindowImpl::onWindowEvent);
-	_pointerEvent.buttons().resize(3);	
+{    
+    _app.impl()->WindowEvent += Pt::slot(*this, &WindowImpl::onWindowEvent);
+    _pointerEvent.buttons().resize(3);    
 
-	create();
+    create();
 }
 
 
@@ -56,25 +56,25 @@ WindowImpl::~WindowImpl()
 
 void WindowImpl::create()
 {
-	if( _hwnd != 0)
-		throw std::logic_error("hwnd already created");
+    if( _hwnd != 0)
+        throw std::logic_error("hwnd already created");
 
-	HINSTANCE hInstance = GetModuleHandle(NULL);
+    HINSTANCE hInstance = GetModuleHandle(NULL);
 
-	_hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, GetDesktopWindow(), NULL, hInstance, NULL );
+    _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, GetDesktopWindow(), NULL, hInstance, NULL );
   BringWindowToTop(_hwnd);
-	ShowWindow(_hwnd, SW_HIDE);    
-	UpdateWindow(_hwnd);	
+    ShowWindow(_hwnd, SW_HIDE);    
+    UpdateWindow(_hwnd);    
 }
 
 
 void WindowImpl::destroy()
 {
-	if( _hwnd == 0)
-		return;
+    if( _hwnd == 0)
+        return;
 
-	DestroyWindow(_hwnd);
-	_hwnd = 0;
+    DestroyWindow(_hwnd);
+    _hwnd = 0;
 }
 
 
@@ -92,124 +92,124 @@ void WindowImpl::hide()
 
 void WindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 {
-	BYTE keyboardState[256];
+    BYTE keyboardState[256];
 
-	GetKeyboardState(keyboardState);
+    GetKeyboardState(keyboardState);
 
-	if(msg == WM_KEYDOWN)
-		_keyEvent.setState(KeyEvent::KeyDown);
-	else if(msg == WM_KEYUP)
-		_keyEvent.setState(KeyEvent::KeyUp);			
-	
-	if(msg == WM_SYSCOMMAND)
-	{
-		_keyEvent.setState(KeyEvent::KeyUp);
-		_keyEvent.setAlt(wparam == SC_KEYMENU);
-		_keyEvent.setShift(false);
-		_keyEvent.setCtrl(false);
-		_keyEvent.setUnicode(lparam);
-	}
-	else
-	{
-		if((lparam & 0xFFF) != 1)
-			return;//Repeat count
+    if(msg == WM_KEYDOWN)
+        _keyEvent.setState(KeyEvent::KeyDown);
+    else if(msg == WM_KEYUP)
+        _keyEvent.setState(KeyEvent::KeyUp);            
+    
+    if(msg == WM_SYSCOMMAND)
+    {
+        _keyEvent.setState(KeyEvent::KeyUp);
+        _keyEvent.setAlt(wparam == SC_KEYMENU);
+        _keyEvent.setShift(false);
+        _keyEvent.setCtrl(false);
+        _keyEvent.setUnicode(lparam);
+    }
+    else
+    {
+        if((lparam & 0xFFF) != 1)
+            return;//Repeat count
 
-		keyboardState[VK_CONTROL] = 0;
-		keyboardState[VK_LCONTROL] = 0;
-		keyboardState[VK_RCONTROL] = 0;
+        keyboardState[VK_CONTROL] = 0;
+        keyboardState[VK_LCONTROL] = 0;
+        keyboardState[VK_RCONTROL] = 0;
 
-		if(wparam == 16 )
-		{//Shift key
-			_keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);
-		}
-		else if(wparam == 17 )
-		{//Controll key
-			_keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
-		}
+        if(wparam == 16 )
+        {//Shift key
+            _keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);
+        }
+        else if(wparam == 17 )
+        {//Controll key
+            _keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
+        }
 
-		Pt::uint32_t scanCode = ((lparam >> 16) & 0xFF);			
-		Pt::uint32_t ucode = 0;			
-		
-		ToUnicode( wparam, scanCode , (BYTE*)keyboardState, (LPWSTR)&ucode, 4, 0);	
-		_keyEvent.setUnicode(ucode);
-	}
+        Pt::uint32_t scanCode = ((lparam >> 16) & 0xFF);            
+        Pt::uint32_t ucode = 0;            
+        
+        ToUnicode( wparam, scanCode , (BYTE*)keyboardState, (LPWSTR)&ucode, 4, 0);    
+        _keyEvent.setUnicode(ucode);
+    }
 
-	_windowEvent.send(_keyEvent);
+    _windowEvent.send(_keyEvent);
 }
 
 void WindowImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wparam, long lparam, bool& handled)
 {
-	if(_hwnd != wnd)
-		return;	
+    if(_hwnd != wnd)
+        return;    
 
-	switch(message)
-	{
-		case WM_LBUTTONDOWN:		
-		case WM_MBUTTONDOWN:
-		case WM_RBUTTONDOWN:
-		case WM_LBUTTONUP:		
-		case WM_MBUTTONUP:
-		case WM_RBUTTONUP:
-		case WM_MOUSEMOVE:
-		case WM_LBUTTONDBLCLK:
-		case WM_RBUTTONDBLCLK:
-		case WM_MBUTTONDBLCLK:
-	    {
-			onMouse(message, wparam, lparam);
-			handled = true;
-		}
-		break;
+    switch(message)
+    {
+        case WM_LBUTTONDOWN:        
+        case WM_MBUTTONDOWN:
+        case WM_RBUTTONDOWN:
+        case WM_LBUTTONUP:        
+        case WM_MBUTTONUP:
+        case WM_RBUTTONUP:
+        case WM_MOUSEMOVE:
+        case WM_LBUTTONDBLCLK:
+        case WM_RBUTTONDBLCLK:
+        case WM_MBUTTONDBLCLK:
+        {
+            onMouse(message, wparam, lparam);
+            handled = true;
+        }
+        break;
 
-		case WM_SYSCOMMAND:
-			onKey(message, wparam, lparam);
-		break;
+        case WM_SYSCOMMAND:
+            onKey(message, wparam, lparam);
+        break;
 
-		case WM_KEYDOWN:
-		case WM_KEYUP:		
-		{
-			onKey(message, wparam, lparam);
-			handled = true;
-		}
-		break;
+        case WM_KEYDOWN:
+        case WM_KEYUP:        
+        {
+            onKey(message, wparam, lparam);
+            handled = true;
+        }
+        break;
 
-		case WM_PAINT:
-		{
-			onPaint();
-			handled = true;
-		}
-		break;
-		
-		case WM_SIZE:
-		{
-			onSize(wparam, lparam);
-			handled = true;
-		}
-		break;
+        case WM_PAINT:
+        {
+            onPaint();
+            handled = true;
+        }
+        break;
+        
+        case WM_SIZE:
+        {
+            onSize(wparam, lparam);
+            handled = true;
+        }
+        break;
 
-		case WM_MOVE:
-		{
-			onMove();
-			handled = true;
-		}
-		break;
+        case WM_MOVE:
+        {
+            onMove();
+            handled = true;
+        }
+        break;
 
-		case WM_DESTROY:
-		{			
-			handled = true;
-		}
-		break;
+        case WM_DESTROY:
+        {            
+            handled = true;
+        }
+        break;
 
-		case WM_CLOSE:
-		{
-			onClosing();	
-			handled = true;			
-		}
-		break;
-		case WM_KILLFOCUS:
-		{
-		}
-		break;		
-	}
+        case WM_CLOSE:
+        {
+            onClosing();    
+            handled = true;            
+        }
+        break;
+        case WM_KILLFOCUS:
+        {
+        }
+        break;        
+    }
 }
 
 
@@ -224,95 +224,95 @@ void WindowImpl::onSize(WPARAM wParam, LPARAM lParam)
 {
   WindowStateType::Type state = WindowStateType::Normal;
 
-	switch(wParam)
-	{
-		case SIZE_MAXHIDE:
-		case SIZE_MAXSHOW:
-		break;
+    switch(wParam)
+    {
+        case SIZE_MAXHIDE:
+        case SIZE_MAXSHOW:
+        break;
 
-		case SIZE_MAXIMIZED:
-			state = WindowStateType::Maximazed;							
-		break;
+        case SIZE_MAXIMIZED:
+            state = WindowStateType::Maximazed;                            
+        break;
 
-		case SIZE_MINIMIZED:
-			state = WindowStateType::Minimized;			
-		break;
+        case SIZE_MINIMIZED:
+            state = WindowStateType::Minimized;            
+        break;
  
-		case SIZE_RESTORED:
-			state = WindowStateType::Normal;
-		break;
-	}
+        case SIZE_RESTORED:
+            state = WindowStateType::Normal;
+        break;
+    }
 
-	RECT  info;
-	GetWindowRect(_hwnd, &info);
-	Pt::Gfx::SizeF winSize(info.right - info.left, info.bottom - info.top);
-	_resizeEvent.setSize(winSize);
+    RECT  info;
+    GetWindowRect(_hwnd, &info);
+    Pt::Gfx::SizeF winSize(info.right - info.left, info.bottom - info.top);
+    _resizeEvent.setSize(winSize);
   _resizeEvent.setState(state);
-	_windowEvent.send(_resizeEvent);
+    _windowEvent.send(_resizeEvent);
 }
 
 void WindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
-{	
-	int xPos = GET_X_LPARAM(lparam); 
-	int yPos = GET_Y_LPARAM(lparam); 
+{    
+    int xPos = GET_X_LPARAM(lparam); 
+    int yPos = GET_Y_LPARAM(lparam); 
 
-	switch(msg)
-	{
-		case WM_LBUTTONDOWN:
-			_pointerEvent.buttons()[0].setState(Pt::Hmi::DeviceButton::Pressed);
-		break;
-		
-		case WM_LBUTTONUP:		
-			_pointerEvent.buttons()[0].setState(Pt::Hmi::DeviceButton::Released);
-		break;
-							
-		case WM_MBUTTONDOWN:
-			_pointerEvent.buttons()[1].setState(Pt::Hmi::DeviceButton::Pressed);
-		break;
+    switch(msg)
+    {
+        case WM_LBUTTONDOWN:
+            _pointerEvent.buttons()[0].setState(Pt::Hmi::DeviceButton::Pressed);
+        break;
+        
+        case WM_LBUTTONUP:        
+            _pointerEvent.buttons()[0].setState(Pt::Hmi::DeviceButton::Released);
+        break;
+                            
+        case WM_MBUTTONDOWN:
+            _pointerEvent.buttons()[1].setState(Pt::Hmi::DeviceButton::Pressed);
+        break;
 
-		case WM_MBUTTONUP:
-			_pointerEvent.buttons()[1].setState(Pt::Hmi::DeviceButton::Released);
-		break;
+        case WM_MBUTTONUP:
+            _pointerEvent.buttons()[1].setState(Pt::Hmi::DeviceButton::Released);
+        break;
 
-		case WM_RBUTTONDOWN:		
-			_pointerEvent.buttons()[2].setState(Pt::Hmi::DeviceButton::Pressed);
-		break;
+        case WM_RBUTTONDOWN:        
+            _pointerEvent.buttons()[2].setState(Pt::Hmi::DeviceButton::Pressed);
+        break;
 
-		case WM_RBUTTONUP:
-			_pointerEvent.buttons()[2].setState(Pt::Hmi::DeviceButton::Released);
-		break;		
-	}
+        case WM_RBUTTONUP:
+            _pointerEvent.buttons()[2].setState(Pt::Hmi::DeviceButton::Released);
+        break;        
+    }
   
-	 Pt::Gfx::PointF p = _app.toUnit(Pt::Gfx::Point(xPos, yPos));
-	_pointerEvent.setX(p.x());
-	_pointerEvent.setY(p.y());			
+     Pt::Gfx::PointF p = _app.toUnit(Pt::Gfx::Point(xPos, yPos));
+    _pointerEvent.setX(p.x());
+    _pointerEvent.setY(p.y());            
 
-	_windowEvent.send(_pointerEvent);
+    _windowEvent.send(_pointerEvent);
 }
 
 
 void WindowImpl::onMove()
 {
-	RECT  info;
-	GetWindowRect(_hwnd, &info);
-	Pt::Gfx::PointF winPos(info.left, info.right);
-	_positionEvent.setPosition(winPos);
+    RECT  info;
+    GetWindowRect(_hwnd, &info);
+    Pt::Gfx::PointF winPos(info.left, info.right);
+    _positionEvent.setPosition(winPos);
 }
 
 
 void WindowImpl::onPaint()
-{   		
-	RECT  info;
-	GetWindowRect(_hwnd, &info);
+{           
+    RECT  info;
+    GetWindowRect(_hwnd, &info);
 
-	PAINTSTRUCT ps;
-	HDC windowContext = BeginPaint(_hwnd, &ps);
-	
-	HDC bitmapDeviceConText = _surface->impl()->deviceContext();
-	BitBlt(windowContext, 0, 0, info.right - info.left, 
-        info.bottom - info.top, bitmapDeviceConText, 0, 0, SRCCOPY);	
-	
-  EndPaint(_hwnd, &ps);	
+    PAINTSTRUCT ps;
+    HDC windowContext = BeginPaint(_hwnd, &ps);
+    
+    HDC bitmapDeviceConText = _surface->impl()->deviceContext();
+    BitBlt(windowContext, 0, 0, info.right - info.left, 
+        info.bottom - info.top, bitmapDeviceConText, 0, 0, SRCCOPY);    
+    
+  EndPaint(_hwnd, &ps);    
 }
 
 
@@ -333,9 +333,9 @@ void WindowImpl::setSize(const Gfx::SizeF& sizef)
 void WindowImpl::showTitle(bool p)
 {
   LONG style = GetWindowLong(_hwnd, GWL_STYLE);
-	
-	if( p)
-		style |= WS_CAPTION;
+    
+    if( p)
+        style |= WS_CAPTION;
   else
     style &= ~WS_CAPTION;
 
@@ -353,8 +353,8 @@ void WindowImpl::showMinimizedButton(bool p)
 {
   LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
-	if(p)
-		style |= WS_MINIMIZEBOX;
+    if(p)
+        style |= WS_MINIMIZEBOX;
   else
     style &= ~WS_MINIMIZEBOX;
 
@@ -366,8 +366,8 @@ void WindowImpl::showMaximizeButton(bool p)
 {
   LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
-	if(p)
-		style |= WS_MAXIMIZEBOX;
+    if(p)
+        style |= WS_MAXIMIZEBOX;
   else
     style &= ~WS_MAXIMIZEBOX;
 
@@ -379,8 +379,8 @@ void WindowImpl::showSysMenu(bool p)
 {
   LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
-	if(p)
-		style |= WS_SYSMENU;
+    if(p)
+        style |= WS_SYSMENU;
   else
     style &= ~WS_SYSMENU;
 
@@ -396,21 +396,21 @@ void WindowImpl::setTopMost()
 
 void WindowImpl::setWindowState(WindowStateType::Type p)
 {
-	LONG style = GetWindowLong(_hwnd, GWL_STYLE);
+    LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
-	switch(p)
-	{
-		case Pt::Hmi::WindowStateType::Normal:			
-		break;
+    switch(p)
+    {
+        case Pt::Hmi::WindowStateType::Normal:            
+        break;
 
-		case Pt::Hmi::WindowStateType::Maximazed:
-			style |= WS_MAXIMIZE;
-		break;
+        case Pt::Hmi::WindowStateType::Maximazed:
+            style |= WS_MAXIMIZE;
+        break;
 
-		case Pt::Hmi::WindowStateType::Minimized:
-			style |= WS_MINIMIZE;
-		break;
-	}
+        case Pt::Hmi::WindowStateType::Minimized:
+            style |= WS_MINIMIZE;
+        break;
+    }
 
   SetWindowLong(_hwnd, GWL_STYLE, style); 
 }
@@ -418,41 +418,41 @@ void WindowImpl::setWindowState(WindowStateType::Type p)
 
 void WindowImpl::setBorder(WindowBorderType::Type p)
 {
-	LONG style = GetWindowLong(_hwnd, GWL_STYLE);
+    LONG style = GetWindowLong(_hwnd, GWL_STYLE);
   LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
-	switch( p)
-	{
-		case Pt::Hmi::WindowBorderType::NoBorder:			
-		break;
+    switch( p)
+    {
+        case Pt::Hmi::WindowBorderType::NoBorder:            
+        break;
 
-		case Pt::Hmi::WindowBorderType::Sizeable:
-			style |= WS_THICKFRAME;
-		break;
+        case Pt::Hmi::WindowBorderType::Sizeable:
+            style |= WS_THICKFRAME;
+        break;
 
-		case Pt::Hmi::WindowBorderType::Dialog:
-			style |= WS_DLGFRAME;			
-		break;
+        case Pt::Hmi::WindowBorderType::Dialog:
+            style |= WS_DLGFRAME;            
+        break;
 
-		case Pt::Hmi::WindowBorderType::DialogSizeable:
-			style |= WS_DLGFRAME;			
-			style |= WS_THICKFRAME;
-		break;
+        case Pt::Hmi::WindowBorderType::DialogSizeable:
+            style |= WS_DLGFRAME;            
+            style |= WS_THICKFRAME;
+        break;
 
-		case Pt::Hmi::WindowBorderType::Tool:
-			style |= WS_DLGFRAME;
-			exStyle |= WS_EX_TOOLWINDOW;
-		break;
+        case Pt::Hmi::WindowBorderType::Tool:
+            style |= WS_DLGFRAME;
+            exStyle |= WS_EX_TOOLWINDOW;
+        break;
 
-		case Pt::Hmi::WindowBorderType::ToolSizeable:
-			style |= WS_THICKFRAME;
-			exStyle |= WS_EX_TOOLWINDOW;
-		break;
+        case Pt::Hmi::WindowBorderType::ToolSizeable:
+            style |= WS_THICKFRAME;
+            exStyle |= WS_EX_TOOLWINDOW;
+        break;
 
-		default:
-			style |= WS_BORDER; 
-		break;
-	}
+        default:
+            style |= WS_BORDER; 
+        break;
+    }
 
   SetWindowLong(_hwnd, GWL_STYLE, style);
   SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle);
@@ -464,7 +464,7 @@ void WindowImpl::showInTaskbar(bool p)
   LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
   if(p)
-		exStyle |= WS_EX_APPWINDOW;  
+        exStyle |= WS_EX_APPWINDOW;  
   else
     exStyle &= ~WS_EX_APPWINDOW; 
   
@@ -474,38 +474,38 @@ void WindowImpl::showInTaskbar(bool p)
 
 void WindowImpl::setIcon(const Pt::Gfx::ARgbImage& icon)
 {
-	if(icon.width() == 0 || icon.height() == 0)
-		return;
+    if(icon.width() == 0 || icon.height() == 0)
+        return;
 
-	HINSTANCE hInstance = GetModuleHandle(NULL);
-	const size_t planes = 4;
-	std::vector<Pt::uint8_t> bitmapBuffer(icon.width() * icon.height() * planes);
-		
-	for(size_t y = 0; y < icon.height(); ++y)
-	{
-		const size_t offsetLine = y * (icon.width()*planes);
+    HINSTANCE hInstance = GetModuleHandle(NULL);
+    const size_t planes = 4;
+    std::vector<Pt::uint8_t> bitmapBuffer(icon.width() * icon.height() * planes);
+        
+    for(size_t y = 0; y < icon.height(); ++y)
+    {
+        const size_t offsetLine = y * (icon.width()*planes);
 
-		for(size_t x = 0; x < icon.width(); ++x)
-		{
-			const size_t index  = offsetLine + (x*planes);
+        for(size_t x = 0; x < icon.width(); ++x)
+        {
+            const size_t index  = offsetLine + (x*planes);
 
-			const Pt::Gfx::ARgbColor& pix =  icon.pixel(x,y);
-				
-			bitmapBuffer[index]     = static_cast<unsigned char>(pix.blue());	
-			bitmapBuffer[index + 1] = static_cast<unsigned char>(pix.green());
-			bitmapBuffer[index + 2] = static_cast<unsigned char>(pix.red());
-			bitmapBuffer[index + 3] = static_cast<unsigned char>(pix.alpha());
-		}		
-	}
+            const Pt::Gfx::ARgbColor& pix =  icon.pixel(x,y);
+                
+            bitmapBuffer[index]     = static_cast<unsigned char>(pix.blue());    
+            bitmapBuffer[index + 1] = static_cast<unsigned char>(pix.green());
+            bitmapBuffer[index + 2] = static_cast<unsigned char>(pix.red());
+            bitmapBuffer[index + 3] = static_cast<unsigned char>(pix.alpha());
+        }        
+    }
 
-	HICON hIcon = ::CreateIcon(hInstance, icon.width(), icon.height(), 4, 8, 0, (BYTE*)&bitmapBuffer[0]);
-	SetClassLong(_hwnd, GCL_HICON, (LONG)hIcon); 	
+    HICON hIcon = ::CreateIcon(hInstance, icon.width(), icon.height(), 4, 8, 0, (BYTE*)&bitmapBuffer[0]);
+    SetClassLong(_hwnd, GCL_HICON, (LONG)hIcon);     
 }
 
 
 void WindowImpl::render()
 {
-	InvalidateRect(_hwnd, NULL, FALSE);
+    InvalidateRect(_hwnd, NULL, FALSE);
 }
 
 }}

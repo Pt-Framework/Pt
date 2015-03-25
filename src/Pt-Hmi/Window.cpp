@@ -173,22 +173,6 @@ bool Window::moveFocusNext()
 	return focusNextChild(index);
 }
 
-Widget* Window::mainWidget()
-{
-	if(children().size() != 0)
-		return children()[0];
-
-	return 0;
-}
-
-const Widget* Window::mainWidget() const
-{	
-	if(children().size() != 0)
-		return children()[0];
-
-	return 0;
-}
-
 
 void Window::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
 {

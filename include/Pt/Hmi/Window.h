@@ -40,117 +40,109 @@ class PositionEvent;
 
 namespace WindowStartPositionType
 {
-	enum Type
-	{
-		Manual,
-		CenterScreen,
-		CenterParent,
-	};
+    enum Type
+    {
+        Manual,
+        CenterScreen,
+        CenterParent,
+    };
 }
 
 namespace WindowBorderType
 {
-	enum Type
-	{
+    enum Type
+    {
         NoBorder,
-		Fixed,
-		Sizeable,
-		Tool,
-		ToolSizeable,
-		Dialog,
-		DialogSizeable
-	};
+        Fixed,
+        Sizeable,
+        Tool,
+        ToolSizeable,
+        Dialog,
+        DialogSizeable
+    };
 }
 
 
 class PT_HMI_API Window  : public Widget
 {
-public:	
-	Window();
-	
-	virtual ~Window();
+public:    
+    Window();
+    
+    ~Window();
 
-	Property<Pt::Gfx::SizeF>							MinimumSize;
-	Property<Pt::Gfx::SizeF>								MaximumSize;
-	Property<WindowStartPositionType::Type>	WindowStartPostion;
-	Property<WindowStateType::Type>				WindowState;	
-	Property<bool>								ShowInTaskbar;
-	Property<bool>								ShowTitle;
-	Property<bool>								ShowMinimizeButton;
-	Property<bool>								ShowMaximizeButton;
-	Property<bool>								ShowSysMenu;
-	Property<std::string>						Caption;
-	Property<WindowBorderType::Type>			Border;
-	Property<Pt::Gfx::ARgbImage>				Icon;
-	Property<bool>								Closed;
-	Property<bool>								CanClose;
-	Property<bool>								TopMost;
-	Property<std::string>				  FocuseMoveKey;
-
-public:
-	Widget* mainWidget();
-	const Widget* mainWidget() const;		
+    Property<Pt::Gfx::SizeF>                  MinimumSize;
+    Property<Pt::Gfx::SizeF>                  MaximumSize;
+    Property<WindowStartPositionType::Type>   WindowStartPostion;
+    Property<WindowStateType::Type>           WindowState;    
+    Property<bool>                            ShowInTaskbar;
+    Property<bool>                            ShowTitle;
+    Property<bool>                            ShowMinimizeButton;
+    Property<bool>                            ShowMaximizeButton;
+    Property<bool>                            ShowSysMenu;
+    Property<std::string>                     Caption;
+    Property<WindowBorderType::Type>          Border;
+    Property<Pt::Gfx::ARgbImage>              Icon;
+    Property<bool>                            Closed;
+    Property<bool>                            CanClose;
+    Property<bool>                            TopMost;
+    Property<std::string>                     FocuseMoveKey;      
 
 protected:
-	virtual void onPointerInput(const PointingEvent& ev);
-	virtual void onKeyInput(const KeyEvent& ev);
+    virtual void onPointerInput(const PointingEvent& ev);
+    virtual void onKeyInput(const KeyEvent& ev);
+    virtual void resizeEvent(const ResizeEvent& ev);
+    virtual void positionEvent(const PositionEvent& ev);
+    virtual void closeEvent(const CloseEvent& ev);
+    virtual void onInvalidate();
+   
+private: 
+    void onPositionChanged(const Property<Pt::Gfx::PointF>& prop);
+    
+    void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
+    
+    void onClosedChanged(const Property<bool> & closed);
+  
+    void onVisibleChanged(const Property<bool> & visible);
 
-  void onPositionChanged(const Property<Pt::Gfx::PointF>& prop);
-	
-  void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
-	
-  void onClosedChanged(const Property<bool> & closed);
+    void onCaptionChanged(const Property<std::string> & p);
   
-  void onVisibleChanged(const Property<bool> & visible);
+    void onShowTitleChanged(const Property<bool> & p);
+  
+    void onShowMinimizedButtonChanged(const Property<bool> & p);
+  
+    void onShowMaximizeButtonChanged(const Property<bool> & p);
+  
+    void onShowSysMenuChanged(const Property<bool> & p);
 
-  void onCaptionChanged(const Property<std::string> & p);
+    void onTopMostChanged(const Property<bool> & p);
   
-  void onShowTitleChanged(const Property<bool> & p);
+    void onWindowStateChanged(const Property<WindowStateType::Type> & p);
   
-  void onShowMinimizedButtonChanged(const Property<bool> & p);
+    void onBorderChanged(const Property<WindowBorderType::Type> & p);
   
-  void onShowMaximizeButtonChanged(const Property<bool> & p);
+    void onShowInTaskbarChanged(const Property<bool> & p);
   
-  void onShowSysMenuChanged(const Property<bool> & p);
+    void onIconChanged(const Property<Pt::Gfx::ARgbImage> & p);
 
-  void onTopMostChanged(const Property<bool> & p);
-  
-  void onWindowStateChanged(const Property<WindowStateType::Type> & p);
-  
-  void onBorderChanged(const Property<WindowBorderType::Type> & p);
-  
-  void onShowInTaskbarChanged(const Property<bool> & p);
-  
-  void onIconChanged(const Property<Pt::Gfx::ARgbImage> & p);
-
-
-  virtual void onInvalidate();
-	
 protected:
-	bool focusNextChild(int index);
-	
-	int getFocusedChild() const
-	{
-		return 0;
-	}
+    bool focusNextChild(int index);
+    
+    int getFocusedChild() const
+    {
+        return 0;
+    }
 
-  bool moveFocusNext();
-	
-	bool moveFocusPrev()
-	{
-		return true;
-	}	
-
-	void resizeEvent(const ResizeEvent& ev);
-	void positionEvent(const PositionEvent& ev);
-  void closeEvent(const CloseEvent& ev);
-
+    bool moveFocusNext();
+    
+    bool moveFocusPrev()
+    {
+        return true;
+    }    
+    
 private:
-	
-
-private:
-	WindowImpl*		_impl;	
+    WindowImpl* _impl;    
 };
 
 }}
+
 #endif
