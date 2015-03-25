@@ -70,8 +70,8 @@ void MainWindow::init()
 		}			
 	}
 	
-	Position.set(Pt::Gfx::PointF(200,200));
-	Size.set(Pt::Gfx::SizeF(800,615));
+	Position = Pt::Gfx::PointF(200,200);
+	Size = Pt::Gfx::SizeF(800,615);
 	Caption.set("This is a Platinum C++ Human Machine Interface demo  ");
   WindowState.set(Hmi::WindowStateType::Normal);
 	WindowStartPostion.set(Hmi::WindowStartPositionType::CenterScreen);
@@ -149,13 +149,12 @@ void MainWindow::show()
 
 void MainWindow::onClosedByWindow(const Property<bool>& closed )
 {
-	close();
 	Pt::Hmi::Application::instance().exit();
 }
 
 void MainWindow::onClosed()
 {
-	close();	
+	Closed = true;	
 	Pt::Hmi::Application::instance().exit();
 }
 

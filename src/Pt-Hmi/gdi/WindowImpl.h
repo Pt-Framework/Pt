@@ -23,6 +23,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+
 #ifndef Pt_Hmi_WindowImpl_H
 #define Pt_Hmi_WindowImpl_H
 
@@ -33,12 +34,14 @@
 #include <Pt/Hmi/PointingEvent.h>
 #include <Pt/Hmi/PositionEvent.h>
 #include <Pt/Hmi/ResizeEvent.h>
+#include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/Window.h>
 #include <Windows.h>
 #include <map>
 
-
 namespace Pt{
+
 namespace Hmi{
 
 class Application;
@@ -46,16 +49,48 @@ class Application;
 class WindowImpl : public Pt::Connectable
 {
 public:
-	WindowImpl(Window* window, PaintSurface* surface);
+	WindowImpl(PaintSurface* surface);
 
 	virtual ~WindowImpl();
 	
+	void create();
+	
+  void destroy();
+
+  void show();
+
+  void hide();
+
 	void render();
 
 	Pt::Signal<const Pt::Event&>& windowEvent()
 	{
 		return _windowEvent;
-	} 
+	}
+
+  void setPosition(const Gfx::PointF& p);
+
+  void setSize(const Gfx::SizeF& size);
+
+  void showTitle(bool p);
+
+  void setCaption(const std::string& text);
+
+  void showMinimizedButton(bool p);
+  
+  void showMaximizeButton(bool p);
+  
+  void showSysMenu(bool p);
+
+  void setTopMost();
+  
+  void setWindowState(WindowStateType::Type p);
+  
+  void setBorder(WindowBorderType::Type p);
+  
+  void showInTaskbar(bool p);
+  
+  void setIcon(const Pt::Gfx::ARgbImage& p);
 
 protected:
 	void onWindowEvent(HWND wnd, unsigned int msg, WPARAM wparam, LPARAM lparam, bool& handled);
@@ -66,30 +101,22 @@ protected:
 	void onMouse(unsigned int msg,  WPARAM wparam, LPARAM lparam);
 	void onKey(unsigned int ms, WPARAM wparam, LPARAM lparam);
 	void onMove();
-	bool onClosing();	
+	void onClosing();	
 
 protected:	
-	void updateModelSizeAndPos();
-	void setWindowSizeAndPos(bool firstShow);
-	void setWindowProperties();	
-	void setWindowIcon();
 	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
-	void create();
-	void destroy();
-	void centerWindowTo(HWND parent);
 
 private:	
-	Pt::Hmi::Application* _app; 
+  HWND													_hwnd;
+	Pt::Hmi::Application&         _app; 
+  Pt::Hmi::PaintSurface*				_surface;
 	Pt::Signal<const Pt::Event&>	_windowEvent;
 	KeyEvent											_keyEvent;
 	PointingEvent									_pointerEvent;
 	ResizeEvent										_resizeEvent;
 	PositionEvent									_positionEvent;
-	bool													_ignoreSizePositionEvent;
-	Window*												_window;
-	Pt::Hmi::PaintSurface*				_surface;
-	HWND													_hwnd;
 };
 
 }}
+
 #endif

@@ -43,10 +43,10 @@ Dialog2::~Dialog2()
 void Dialog2::init()
 {
 	//Dialog
-	Size.set(Pt::Gfx::SizeF(450,200));
-	Position.set(Pt::Gfx::PointF(400,400));
-	Caption.set("Pt-Hmi-demo");
-	WindowStartPostion.set(Hmi::WindowStartPositionType::CenterParent);
+	Size = Pt::Gfx::SizeF(450,200);
+	Position = Pt::Gfx::PointF(400,400);
+	Caption = std::string("Pt-Hmi-demo");
+	WindowStartPostion = Hmi::WindowStartPositionType::CenterParent;
 	ShowMaximizeButton.set(false);
 	ShowMinimizeButton.set(false);
 	ShowSysMenu.set(false);
@@ -81,7 +81,7 @@ void Dialog2::init()
     
 void Dialog2::onClosedByButton()
 {
-	close();
+	Closed = true;
 }
 
 }}}

@@ -76,6 +76,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Api.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Application.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Button.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Controller.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceButton.h" />

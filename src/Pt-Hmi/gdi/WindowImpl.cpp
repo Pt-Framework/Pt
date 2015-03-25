@@ -31,31 +31,33 @@
 #include <Pt/Gfx/Rgb888Color.h>
 #include <Pt/Gfx/Rgb888Image.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Window.h>
 #include "PaintSurfaceImpl.h"
 
 namespace Pt{
 namespace Hmi{
 
-WindowImpl::WindowImpl(Window* window, PaintSurface* surface)
+WindowImpl::WindowImpl(PaintSurface* surface)
 : _hwnd(0)
-, _ignoreSizePositionEvent(false)
-, _window(window)
+, _app(Pt::Hmi::Application::instance())
 , _surface(surface)
 {	
-
-	_app= (Pt::Hmi::Application*) &Pt::Hmi::Application::instance();	
-	_app->impl()->WindowEvent += Pt::slot(*this, &WindowImpl::onWindowEvent);
+	_app.impl()->WindowEvent += Pt::slot(*this, &WindowImpl::onWindowEvent);
 	_pointerEvent.buttons().resize(3);	
 
 	create();
 }
 
+
+WindowImpl::~WindowImpl()
+{
+  destroy();
+}
+
+
 void WindowImpl::create()
 {
 	if( _hwnd != 0)
 		throw std::logic_error("hwnd already created");
-
 
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
@@ -65,11 +67,31 @@ void WindowImpl::create()
 	UpdateWindow(_hwnd);	
 }
 
-void WindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
+
+void WindowImpl::destroy()
 {
-	if(!_window->Enabled.get())
+	if( _hwnd == 0)
 		return;
 
+	DestroyWindow(_hwnd);
+	_hwnd = 0;
+}
+
+
+void WindowImpl::show()
+{
+  ShowWindow(_hwnd, SW_SHOW);
+}
+
+
+void WindowImpl::hide()
+{
+  ShowWindow(_hwnd, SW_HIDE);
+}
+
+
+void WindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
+{
 	BYTE keyboardState[256];
 
 	GetKeyboardState(keyboardState);
@@ -179,66 +201,54 @@ void WindowImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wpar
 
 		case WM_CLOSE:
 		{
-			if( onClosing())
-				destroy();	
-				
+			onClosing();	
 			handled = true;			
 		}
 		break;
 		case WM_KILLFOCUS:
 		{
-			if(_window->TopMost.get())
-			{
-				BringWindowToTop(_hwnd);
-				handled = true;
-			}
 		}
 		break;		
 	}
 }
 
-WindowImpl::~WindowImpl()
+
+void WindowImpl::onClosing()
 {
-    DestroyWindow(_hwnd);
+  CloseEvent closeEvent;
+  _windowEvent.send(closeEvent);
 }
 
-bool WindowImpl::onClosing()
-{
-	if(!_window->CanClose.get())
-		return false;
-    
-  //Set the closed flag
-  _window->Closed = true;
-        
-	return true;
-}
 
 void WindowImpl::onSize(WPARAM wParam, LPARAM lParam)
 {
-	if(_ignoreSizePositionEvent)
-		return;
+  WindowStateType::Type state = WindowStateType::Normal;
 
 	switch(wParam)
 	{
 		case SIZE_MAXHIDE:
 		case SIZE_MAXSHOW:
-
 		break;
 
 		case SIZE_MAXIMIZED:
-			_window->WindowState = WindowStateType::Maximazed;							
+			state = WindowStateType::Maximazed;							
 		break;
 
 		case SIZE_MINIMIZED:
-			_window->WindowState = WindowStateType::Minimized;			
+			state = WindowStateType::Minimized;			
 		break;
  
 		case SIZE_RESTORED:
-			_window->WindowState = WindowStateType::Normal;
-			updateModelSizeAndPos();
+			state = WindowStateType::Normal;
 		break;
 	}
 
+	RECT  info;
+	GetWindowRect(_hwnd, &info);
+	Pt::Gfx::SizeF winSize(info.right - info.left, info.bottom - info.top);
+	_resizeEvent.setSize(winSize);
+  _resizeEvent.setState(state);
+	_windowEvent.send(_resizeEvent);
 }
 
 void WindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
@@ -273,196 +283,122 @@ void WindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 		break;		
 	}
   
-	 Pt::Gfx::PointF p = _app->toUnit(Pt::Gfx::Point(xPos, yPos));
+	 Pt::Gfx::PointF p = _app.toUnit(Pt::Gfx::Point(xPos, yPos));
 	_pointerEvent.setX(p.x());
 	_pointerEvent.setY(p.y());			
 
 	_windowEvent.send(_pointerEvent);
 }
 
-void WindowImpl::setWindowSizeAndPos(bool firstShow)
-{
-	_ignoreSizePositionEvent = true;
-	
-	RECT  info;
-	GetWindowRect(_hwnd, &info);
-
-	Pt::Gfx::Size winSize = Pt::Gfx::Size(info.right - info.left, info.bottom - info.top);
-	Pt::Gfx::Point winPos = Pt::Gfx::Point(info.left, info.right);
-	
-	Pt::Gfx::Point pos = _app->fromUnit(_window->Position.get());
-	Pt::Gfx::Size size = _app->fromUnit(_window->Size.get());
-
-	if( winSize != size ||  pos != winPos) 
-		SetWindowPos(_hwnd,0, pos.x(), pos.y(), size.width(), size.height(), 0);	
-	
-	if(firstShow)
-	{
-		switch(_window->WindowStartPostion.get())
-		{
-			case WindowStartPositionType::Manual:
-			{
-				Pt::Gfx::Point pos = _app->fromUnit(_window->Position.get());
-				Pt::Gfx::Size size = _app->fromUnit(_window->Size.get());
-				SetWindowPos(_hwnd,0, pos.x(), pos.y(), size.width(), size.height(), 0);
-			}
-			break;
-/*			
-			case WindowStartPositionType::CenterParent:
-			{				
-				Window* parent = _controller->windowParent();
-				
-				if( parent == 0)
-				{
-					centerWindowTo(GetDesktopWindow());
-				}
-				else
-				{
-					WindowImpl* parentImpl = 0;
-
-					for(size_t i = 0; i < parent->outputDevices().size(); ++i)
-					{	
-						WindowView* parentDevice = dynamic_cast<WindowView*>(parent->outputDevices()[i]);
-
-						if( parentDevice == 0)
-							continue;
-
-						parentImpl = dynamic_cast<WindowImpl*>(parentDevice->impl());
-						
-						if( parentImpl != 0)
-							break;
-					}
-
-					centerWindowTo(parentImpl->hwnd());
-				}
-			}
-			break;
-			*/
-			case WindowStartPositionType::CenterScreen:
-				centerWindowTo(GetDesktopWindow());
-			break;
-		}
-	}
-
-	_ignoreSizePositionEvent = false;
-}
-
-void WindowImpl::centerWindowTo(HWND parent)
-{
-
-	RECT parentRect;   
-	GetWindowRect(parent, &parentRect);
-	int horizontal = parentRect.left + ((parentRect.right - parentRect.left )/2);
-	int vertical = parentRect.top + (parentRect.bottom - parentRect.top)/2;
-	Pt::Gfx::Size mySize  = _app->fromUnit(_window->Size.get());
-
-	int posX = horizontal - (mySize.width()/2);
-	int posY = vertical - (mySize.height()/2);
-				
-	_window->Position.set(_app->toUnit(Pt::Gfx::Point( posX,posY)));
-	Pt::Gfx::Size size = _app->fromUnit(_window->Size.get());
-	SetWindowPos(_hwnd,0, posX, posY, size.width(), size.height(), SWP_DRAWFRAME);
-}
-
-void WindowImpl::updateModelSizeAndPos()
-{
-	RECT  info;
-	GetWindowRect(_hwnd, &info);
-	Pt::Gfx::SizeF winSize(info.right - info.left, info.bottom - info.top);
-	Pt::Gfx::PointF winPos(info.left, info.right);
-
-	_positionEvent.setPosition(winPos);
-	_resizeEvent.setSize(winSize);
-
-	_windowEvent.send(_positionEvent);
-	_windowEvent.send(_resizeEvent);
-}
 
 void WindowImpl::onMove()
 {
-	if(_ignoreSizePositionEvent)
-		return;
-
-	if(!_window->Enabled.get())
-	{
-		setWindowSizeAndPos(false);
-		setWindowProperties();
-		return;
-	}
-
-	updateModelSizeAndPos();
+	RECT  info;
+	GetWindowRect(_hwnd, &info);
+	Pt::Gfx::PointF winPos(info.left, info.right);
+	_positionEvent.setPosition(winPos);
 }
+
 
 void WindowImpl::onPaint()
 {   		
+	RECT  info;
+	GetWindowRect(_hwnd, &info);
+
 	PAINTSTRUCT ps;
 	HDC windowContext = BeginPaint(_hwnd, &ps);
-	Pt::Gfx::Size size = _app->fromUnit(_window->Size.get());
 	
 	HDC bitmapDeviceConText = _surface->impl()->deviceContext();
-	BitBlt(windowContext, 0, 0, size.width(), size.height(), bitmapDeviceConText, 0, 0, SRCCOPY);	
-	EndPaint(_hwnd, &ps);	
+	BitBlt(windowContext, 0, 0, info.right - info.left, 
+        info.bottom - info.top, bitmapDeviceConText, 0, 0, SRCCOPY);	
+	
+  EndPaint(_hwnd, &ps);	
 }
 
-void WindowImpl::setWindowIcon()
+
+void WindowImpl::setPosition(const Gfx::PointF& pf)
 {
-	if( _window->Icon.get().width() == 0 ||  _window->Icon.get().height() == 0)
-		return;
-
-	HINSTANCE hInstance = GetModuleHandle(NULL);
-	const size_t planes = 4;
-	std::vector<Pt::uint8_t> bitmapBuffer(_window->Icon.get().width() * _window->Icon.get().height() *planes);
-		
-	for(size_t y = 0; y < _window->Icon.get().height(); ++y)
-	{
-		const size_t offsetLine = y * (_window->Icon.get().width()*planes);
-
-		for(size_t x = 0; x < _window->Icon.get().width(); ++x)
-		{
-			const size_t index  = offsetLine + (x*planes);
-
-			const Pt::Gfx::ARgbColor& pix =  _window->Icon.get().pixel(x,y);
-				
-			bitmapBuffer[index]     = static_cast<unsigned char>(pix.blue());	
-			bitmapBuffer[index + 1] = static_cast<unsigned char>(pix.green());
-			bitmapBuffer[index + 2] = static_cast<unsigned char>(pix.red());
-			bitmapBuffer[index + 3] = static_cast<unsigned char>(pix.alpha());
-		}		
-	}
-
-	HICON icon = ::CreateIcon(GetModuleHandle(NULL), _window->Icon.get().width(), _window->Icon.get().height(), 4, 8, 0, (BYTE*)&bitmapBuffer[0]);
-	SetClassLong(_hwnd, GCL_HICON, (LONG)icon); 	
+  Gfx::Point p = _app.fromUnit(pf);
+  SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, SWP_DRAWFRAME|SWP_NOSIZE);
 }
 
-void WindowImpl::setWindowProperties()
-{
-	SetWindowText(_hwnd, _window->Caption.get().c_str());
 
-	long style = 0;
-	long exStyle = 0;
+void WindowImpl::setSize(const Gfx::SizeF& sizef)
+{
+  Gfx::Size size = _app.fromUnit(sizef);
+  SetWindowPos(_hwnd, 0, 0, 0, size.width(), size.height(), SWP_DRAWFRAME|SWP_NOMOVE);
+}
+
+
+void WindowImpl::showTitle(bool p)
+{
+  LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 	
-	//Visibility
-	if(_window->Visible.get())
-		style |= WS_VISIBLE;
-	
-	//Title	
-	if( _window->ShowTitle.get())
+	if( p)
 		style |= WS_CAPTION;
+  else
+    style &= ~WS_CAPTION;
 
-	//Minimize button
-	if( _window->ShowMinimizeButton.get())
+  SetWindowLong(_hwnd, GWL_STYLE, style); 
+}
+
+
+void WindowImpl::setCaption(const std::string& text)
+{
+  SetWindowText(_hwnd, text.c_str());
+}
+
+
+void WindowImpl::showMinimizedButton(bool p)
+{
+  LONG style = GetWindowLong(_hwnd, GWL_STYLE);
+
+	if(p)
 		style |= WS_MINIMIZEBOX;
+  else
+    style &= ~WS_MINIMIZEBOX;
 
-	//Maximize button
-	if( _window->ShowMaximizeButton.get())
+  SetWindowLong(_hwnd, GWL_STYLE, style); 
+}
+
+
+void WindowImpl::showMaximizeButton(bool p)
+{
+  LONG style = GetWindowLong(_hwnd, GWL_STYLE);
+
+	if(p)
 		style |= WS_MAXIMIZEBOX;
-		
-	//System menu
-	if( _window->ShowSysMenu.get())
+  else
+    style &= ~WS_MAXIMIZEBOX;
+
+  SetWindowLong(_hwnd, GWL_STYLE, style); 
+}
+
+
+void WindowImpl::showSysMenu(bool p)
+{
+  LONG style = GetWindowLong(_hwnd, GWL_STYLE);
+
+	if(p)
 		style |= WS_SYSMENU;
-		
-	//Windows state
-	switch(_window->WindowState.get())
+  else
+    style &= ~WS_SYSMENU;
+
+  SetWindowLong(_hwnd, GWL_STYLE, style); 
+}
+
+
+void WindowImpl::setTopMost()
+{
+  BringWindowToTop(_hwnd);
+}
+
+
+void WindowImpl::setWindowState(WindowStateType::Type p)
+{
+	LONG style = GetWindowLong(_hwnd, GWL_STYLE);
+
+	switch(p)
 	{
 		case Pt::Hmi::WindowStateType::Normal:			
 		break;
@@ -475,9 +411,17 @@ void WindowImpl::setWindowProperties()
 			style |= WS_MINIMIZE;
 		break;
 	}
-	
-	//Window border behaviour
-	switch( _window->Border.get())
+
+  SetWindowLong(_hwnd, GWL_STYLE, style); 
+}
+
+
+void WindowImpl::setBorder(WindowBorderType::Type p)
+{
+	LONG style = GetWindowLong(_hwnd, GWL_STYLE);
+  LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
+
+	switch( p)
 	{
 		case Pt::Hmi::WindowBorderType::NoBorder:			
 		break;
@@ -510,73 +454,57 @@ void WindowImpl::setWindowProperties()
 		break;
 	}
 
-	//Show in taskbar
-	if(_window->ShowInTaskbar.get())
-	{
-		exStyle |= WS_EX_APPWINDOW;  
-		SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle); 
-	}
-	else
-	{
-		SetWindowLong(_hwnd, GWL_STYLE, style);  
-	}
-
-	long styleVisible = GetWindowLong(_hwnd, GWL_STYLE);  
-
-
-	SetWindowLong(_hwnd, GWL_STYLE, style);  
-
-	bool visible = ((styleVisible & WS_VISIBLE) == WS_VISIBLE);
-
-	if(!_window->Visible.get() && visible)
-		ShowWindow(_hwnd, SW_HIDE);
-	
-	if( !visible && _window->Visible.get())
-		ShowWindow(_hwnd, SW_SHOW);		
+  SetWindowLong(_hwnd, GWL_STYLE, style);
+  SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle);
 }
 
-void WindowImpl::destroy()
+
+void WindowImpl::showInTaskbar(bool p)
 {
-	if( _hwnd == 0)
+  LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
+
+  if(p)
+		exStyle |= WS_EX_APPWINDOW;  
+  else
+    exStyle &= ~WS_EX_APPWINDOW; 
+  
+  SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle);
+}
+
+
+void WindowImpl::setIcon(const Pt::Gfx::ARgbImage& icon)
+{
+	if(icon.width() == 0 || icon.height() == 0)
 		return;
 
-	DestroyWindow(_hwnd);
-	_hwnd = 0;
+	HINSTANCE hInstance = GetModuleHandle(NULL);
+	const size_t planes = 4;
+	std::vector<Pt::uint8_t> bitmapBuffer(icon.width() * icon.height() * planes);
+		
+	for(size_t y = 0; y < icon.height(); ++y)
+	{
+		const size_t offsetLine = y * (icon.width()*planes);
+
+		for(size_t x = 0; x < icon.width(); ++x)
+		{
+			const size_t index  = offsetLine + (x*planes);
+
+			const Pt::Gfx::ARgbColor& pix =  icon.pixel(x,y);
+				
+			bitmapBuffer[index]     = static_cast<unsigned char>(pix.blue());	
+			bitmapBuffer[index + 1] = static_cast<unsigned char>(pix.green());
+			bitmapBuffer[index + 2] = static_cast<unsigned char>(pix.red());
+			bitmapBuffer[index + 3] = static_cast<unsigned char>(pix.alpha());
+		}		
+	}
+
+	HICON hIcon = ::CreateIcon(hInstance, icon.width(), icon.height(), 4, 8, 0, (BYTE*)&bitmapBuffer[0]);
+	SetClassLong(_hwnd, GCL_HICON, (LONG)hIcon); 	
 }
+
 
 void WindowImpl::render()
-{	
-
- bool firstShow = (_hwnd == 0);
-
-	//ToDo: create/destroy visible hide
-	if(_window->Closed.get())
-	{
-		
-		if(_hwnd != 0)
-			destroy();
-
-		return;
-	}
-	else
-	{
-		if(_hwnd == 0)
-		{
-			if(_window->Visible.get())
-			{			  
-				create();
-			}
-			else
-			{
-				_window = 0;
-				return;
-			}
-		}
-	}
-
-	setWindowSizeAndPos(firstShow);
-	setWindowProperties();	
-	setWindowIcon();	
+{
 	InvalidateRect(_hwnd, NULL, FALSE);
 }
 

@@ -34,8 +34,8 @@ namespace Hmi{
 Dialog::Dialog()
 : PT_HMI_INIT_PROPERTY_VALUE(Result, DialogResultType::Undefined)
 {
-	ShowInTaskbar.set(false);
-	ShowSysMenu.set(true);
+	ShowInTaskbar = false;
+	ShowSysMenu = true;
 }
 
 Dialog::~Dialog()
@@ -45,9 +45,8 @@ Dialog::~Dialog()
 void Dialog::doModal(Window* parent)
 {	
 	bool parentTopMost = false;
-	
-	Closed.set(false);
-  Visible.set(true);
+	  
+  Visible = true;
 
 	//Setup the parent as disabled and TopMost = false.
 	parentTopMost = parent->TopMost.get();

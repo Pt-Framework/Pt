@@ -44,10 +44,10 @@ Dialog1::~Dialog1()
 void Dialog1::init()
 {
 	//Dialog
-	Size.set(Pt::Gfx::SizeF(700,500));
-	Position.set(Pt::Gfx::PointF(400,400));
-	Caption.set("This is a sample modal dialog 1");
-	WindowStartPostion.set(Hmi::WindowStartPositionType::CenterParent);
+	Size  = Pt::Gfx::SizeF(700,500);
+	Position = Pt::Gfx::PointF(400,400);
+	Caption = std::string("This is a sample modal dialog 1");
+	WindowStartPostion = Hmi::WindowStartPositionType::CenterParent;
 
 	//New dialog button 
 	_newDialog.Position.set(Pt::Gfx::PointF(400,300));

@@ -29,12 +29,13 @@
 #define Pt_Hmi_Controller_Window_H
 
 #include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/ResizeEvent.h>
 
 namespace Pt{
 namespace Hmi{
 
 class WindowImpl;
-class ResizeEvent;
+class CloseEvent;
 class PositionEvent;
 
 namespace WindowStartPositionType
@@ -58,17 +59,6 @@ namespace WindowBorderType
 		ToolSizeable,
 		Dialog,
 		DialogSizeable
-	};
-}
-
-
-namespace WindowStateType
-{
-	enum Type
-	{
-		Normal,
-		Minimized,
-		Maximazed,
 	};
 }
 
@@ -99,14 +89,42 @@ public:
 
 public:
 	Widget* mainWidget();
-	const Widget* mainWidget() const;	
-	bool close();	
+	const Widget* mainWidget() const;		
 
 protected:
 	virtual void onPointerInput(const PointingEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);
-	virtual void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
-	virtual void onInvalidate();
+
+  void onPositionChanged(const Property<Pt::Gfx::PointF>& prop);
+	
+  void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
+	
+  void onClosedChanged(const Property<bool> & closed);
+  
+  void onVisibleChanged(const Property<bool> & visible);
+
+  void onCaptionChanged(const Property<std::string> & p);
+  
+  void onShowTitleChanged(const Property<bool> & p);
+  
+  void onShowMinimizedButtonChanged(const Property<bool> & p);
+  
+  void onShowMaximizeButtonChanged(const Property<bool> & p);
+  
+  void onShowSysMenuChanged(const Property<bool> & p);
+
+  void onTopMostChanged(const Property<bool> & p);
+  
+  void onWindowStateChanged(const Property<WindowStateType::Type> & p);
+  
+  void onBorderChanged(const Property<WindowBorderType::Type> & p);
+  
+  void onShowInTaskbarChanged(const Property<bool> & p);
+  
+  void onIconChanged(const Property<Pt::Gfx::ARgbImage> & p);
+
+
+  virtual void onInvalidate();
 	
 protected:
 	bool focusNextChild(int index);
@@ -125,9 +143,10 @@ protected:
 
 	void resizeEvent(const ResizeEvent& ev);
 	void positionEvent(const PositionEvent& ev);
+  void closeEvent(const CloseEvent& ev);
 
 private:
-	void onClosed(const Property<bool> & closed);
+	
 
 private:
 	WindowImpl*		_impl;	

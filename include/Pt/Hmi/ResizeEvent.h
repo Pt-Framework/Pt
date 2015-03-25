@@ -5,9 +5,18 @@
 #include <Pt/Event.h>
 #include <Pt/Gfx/Size.h>
 
-
 namespace Pt{
 namespace Hmi{
+
+namespace WindowStateType
+{
+	enum Type
+	{
+		Normal,
+		Minimized,
+		Maximazed,
+	};
+}
 
 class PT_HMI_API ResizeEvent : public Pt::BasicEvent<ResizeEvent>
 {
@@ -18,6 +27,16 @@ public:
 
 	virtual ~ResizeEvent()
 	{
+	}
+
+  WindowStateType::Type state() const
+  {
+    return _state;
+  }
+
+	void setState(WindowStateType::Type s)
+	{
+		_state = s;
 	}
 	
 	void setSize(const Pt::Gfx::SizeF& s)
@@ -31,7 +50,8 @@ public:
 	}
 
 private:
-	Pt::Gfx::SizeF _size;	
+	Pt::Gfx::SizeF _size;
+  WindowStateType::Type _state;	
 };
 
 }}
