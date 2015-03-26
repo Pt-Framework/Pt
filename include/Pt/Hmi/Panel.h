@@ -14,9 +14,9 @@ public:
 	virtual ~Panel();	
 
 public:
-	Property<BorderStyleType::Type> BorderStyle;
-	Property<bool>				BorderRoundEdge;	
-	Property<double>			BorderWidth;	
+	Property<BorderStyle::Type>          PanelBorderStyle;
+	Property<bool>				               PanelBorderRoundEdge;	
+	Property<double>			               PanelBorderWidth;	
 
 protected:
 	virtual void onPointerInput(const PointingEvent& ev);

@@ -40,15 +40,15 @@ Window::Window()
 : _impl(new WindowImpl(&paintSurface() ) )
 , PT_HMI_INIT_PROPERTY_VALUE(MinimumSize,Pt::Gfx::SizeF(0,0))
 , PT_HMI_INIT_PROPERTY_VALUE(MaximumSize,Pt::Gfx::SizeF(65535,65535))
-, PT_HMI_INIT_PROPERTY_VALUE(WindowStartPostion, WindowStartPositionType::Manual)
-, PT_HMI_INIT_PROPERTY_VALUE(WindowState, WindowStateType::Normal)
+, PT_HMI_INIT_PROPERTY_VALUE(StartPostion, WindowStartPosition::Manual)
+, PT_HMI_INIT_PROPERTY_VALUE(State, WindowState::Normal)
 , PT_HMI_INIT_PROPERTY_VALUE(ShowInTaskbar,true)
 , PT_HMI_INIT_PROPERTY_VALUE(ShowTitle,true)
 , PT_HMI_INIT_PROPERTY_VALUE(ShowMinimizeButton,true)
 , PT_HMI_INIT_PROPERTY_VALUE(ShowMaximizeButton,true)
 , PT_HMI_INIT_PROPERTY_VALUE(ShowSysMenu,true)	
 , PT_HMI_INIT_PROPERTY_VALUE(Caption,"")
-, PT_HMI_INIT_PROPERTY_VALUE(Border,WindowBorderType::Sizeable)
+, PT_HMI_INIT_PROPERTY_VALUE(Border,WindowBorder::Sizeable)
 , PT_HMI_INIT_PROPERTY_VALUE(Icon, Pt::Gfx::ARgbImage(0,0))
 , PT_HMI_INIT_PROPERTY_VALUE(Closed,false)
 , PT_HMI_INIT_PROPERTY_VALUE(CanClose,true)
@@ -57,8 +57,9 @@ Window::Window()
 {
 	Visible.set(false);
 	Focused.set(true);
+  Name.set("Window");
 		
-	Size.Changed += Pt::slot(*this, &Window::onSizeChanged);						
+   Size.Changed += Pt::slot(*this, &Window::onSizeChanged);	
   Position.Changed += Pt::slot(*this, &Window::onPositionChanged);
   Closed.Changed += Pt::slot(*this, &Window::onClosedChanged);
   Visible.Changed += Pt::slot(*this, &Window::onVisibleChanged);
@@ -68,16 +69,16 @@ Window::Window()
   ShowMaximizeButton.Changed += Pt::slot(*this, &Window::onShowMaximizeButtonChanged);
   ShowSysMenu.Changed += Pt::slot(*this, &Window::onShowSysMenuChanged);
   TopMost.Changed  += Pt::slot(*this, &Window::onTopMostChanged);
-  WindowState.Changed += Pt::slot(*this, &Window::onWindowStateChanged);
+  State.Changed += Pt::slot(*this, &Window::onWindowStateChanged);
   Border.Changed += Pt::slot(*this, &Window::onBorderChanged);
   ShowInTaskbar.Changed += Pt::slot(*this, &Window::onShowInTaskbarChanged);
   Icon.Changed += Pt::slot(*this, &Window::onIconChanged);
 
-	_impl->windowEvent() += Pt::slot(*this, &Widget::pointerInput);
-	_impl->windowEvent() += Pt::slot(*this, &Widget::keyInput);	
-	_impl->windowEvent() += Pt::slot(*this, &Window::resizeEvent);
-	_impl->windowEvent() += Pt::slot(*this, &Window::positionEvent);
-  _impl->windowEvent() += Pt::slot(*this, &Window::closeEvent);	
+	_impl->windowEvent() += Pt::slot(*this, &Window::onPointerInput);
+	_impl->windowEvent() += Pt::slot(*this, &Window::onKeyInput);	
+	_impl->windowEvent() += Pt::slot(*this, &Window::onResizeEvent);
+	_impl->windowEvent() += Pt::slot(*this, &Window::onPositionEvent);
+  _impl->windowEvent() += Pt::slot(*this, &Window::onCloseEvent);	
 
   Position = Pt::Gfx::PointF(20,20);
 	Size =  Pt::Gfx::SizeF(200,200);
@@ -88,27 +89,21 @@ Window::~Window()
 {
 }
 
-bool Window::focusNextChild(int index)
+Pt::Signal<const Pt::Event&>& Window::eventReady()
 {
-	index++;
-	
-	for( ; index < (int)children().size(); ++index)
-	{
-		Widget* child = children()[index];
-		
-		if(!child->AcceptFocus.get())
-			continue;
+  return _impl->windowEvent();
+}
 
-		child->Focused = true;
-		return true;
-	}
 
-	return false;
+void Window::onInvalidate()
+{
+	render();
+	_impl->render();
 }
 
 
 void Window::onKeyInput(const KeyEvent& ev)
-{ 
+{
 	if( ! Enabled.get() )
 		return;
 
@@ -116,61 +111,54 @@ void Window::onKeyInput(const KeyEvent& ev)
 	{
 		if( Focused.get())
 		{
-			if(!moveFocusNext())
+			if( !focusNext() )
 				Focused = true;
 
-			render();
+			invalidate();
 		}
 	}
 
-	if(ev.toUTF8String() ==  FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && ev.shift())
+	if( ev.toUTF8String() ==  FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && ev.shift() )
 	{
-		if( Focused.get())
+		if( Focused.get() )
 		{
-			if(!moveFocusPrev())
+			if( !focusPrev() )
 				Focused = true;
 
-			render();
+			invalidate();
 		}
 	}
 
-	for( size_t i = 0; i < children().size(); ++i)
-		children()[i]->keyInput(ev);
+  Widget::onKeyInput(ev);
 }
 
-void Window::onPointerInput(const PointingEvent& ev)
+
+void Window::onResizeEvent(const ResizeEvent& ev)
 {
-	if(!Enabled.get())
+	const Pt::Gfx::SizeF& curSize = Size.get();
+
+	if( curSize == ev.size() ) 
 		return;
-	
-	CursorT.get().setCursor(Pt::Hmi::Cursors::Default);
 
-	for( size_t i = 0; i < children().size(); ++i)
-		children()[i]->pointerInput(ev);	
+  State = ev.state();
+	Size = ev.size();    
 }
 
 
-bool Window::moveFocusNext()
+void Window::onPositionEvent(const PositionEvent& ev)
 {
-	if(children().size() == 0)
-		return false;
+	const Pt::Gfx::PointF& curPos = Position.get();
 
-	const int index = getFocusedChild();
+	if( curPos == ev.position() ) 
+		return;
 
-	if( index == -1)
-		return focusNextChild(index);
-	
-	Widget* child = children()[index];
-		
-	if(!child->AcceptFocus.get())
-	{
-		child->Focused = true;
-		return true;
-	}
+	Position = ev.position();  
+}
 
-	Focused = false;
 
-	return focusNextChild(index);
+void Window::onCloseEvent(const CloseEvent& ev)
+{
+  Closed = true;
 }
 
 
@@ -182,12 +170,7 @@ void Window::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
 
 void Window::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 {
-  _impl->setSize( prop.get() );
-
-	paintSurface().resize( Size.get() );	
-	
-	if( Visible.get() )
-		render();
+  _impl->setSize( prop.get() );  
 }
 
 
@@ -259,13 +242,13 @@ void Window::onTopMostChanged(const Property<bool> & p)
 }
 
 
-void Window::onWindowStateChanged(const Property<WindowStateType::Type> & p)
+void Window::onWindowStateChanged(const Property<WindowState::Type> & p)
 {
   _impl->setWindowState( p.get() );
 }
 
 
-void Window::onBorderChanged(const Property<WindowBorderType::Type> & p)
+void Window::onBorderChanged(const Property<WindowBorder::Type> & p)
 {
   _impl->setBorder( p.get() );
 }
@@ -280,42 +263,6 @@ void Window::onShowInTaskbarChanged(const Property<bool> & p)
 void Window::onIconChanged(const Property<Pt::Gfx::ARgbImage> & p)
 {
   _impl->setIcon( p.get() );
-}
-
-
-void Window::resizeEvent(const ResizeEvent& ev)
-{
-	const Pt::Gfx::SizeF& curSize = Size.get();
-
-	if( curSize == ev.size() ) 
-		return;
-
-  WindowState = ev.state();
-	Size = ev.size();
-}
-
-
-void Window::positionEvent(const PositionEvent& ev)
-{
-	const Pt::Gfx::PointF& curPos = Position.get();
-
-	if( curPos == ev.position() ) 
-		return;
-
-	Position = ev.position();
-}
-
-
-void Window::closeEvent(const CloseEvent& ev)
-{
-  Closed = true;
-}
-
-
-void Window::onInvalidate()
-{
-	render();
-	_impl->render();
 }
 
 }}

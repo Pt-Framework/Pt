@@ -27,6 +27,10 @@ public:
 
 public:	
 	KeyEvent()
+  : _alt(false)
+	, _shift(false)
+	, _ctrl(false)
+	, _state(KeyNone)
 	{
 	}
 
@@ -116,7 +120,7 @@ public:
 	}
 
 private:
-   Pt::Char _unicode;
+  Pt::Char _unicode;
 	bool _alt;
 	bool _shift;
 	bool _ctrl;

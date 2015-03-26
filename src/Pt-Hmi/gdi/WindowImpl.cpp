@@ -41,10 +41,10 @@ WindowImpl::WindowImpl(PaintSurface* surface)
 , _app(Pt::Hmi::Application::instance())
 , _surface(surface)
 {    
-    _app.impl()->WindowEvent += Pt::slot(*this, &WindowImpl::onWindowEvent);
-    _pointerEvent.buttons().resize(3);    
+  _app.impl()->WindowEvent += Pt::slot(*this, &WindowImpl::onWindowEvent);
+  _pointerEvent.buttons().resize(3);    
 
-    create();
+  create();
 }
 
 
@@ -56,25 +56,25 @@ WindowImpl::~WindowImpl()
 
 void WindowImpl::create()
 {
-    if( _hwnd != 0)
-        throw std::logic_error("hwnd already created");
+  if( _hwnd != 0)
+    throw std::logic_error("hwnd already created");
 
-    HINSTANCE hInstance = GetModuleHandle(NULL);
+  HINSTANCE hInstance = GetModuleHandle(NULL);
 
-    _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, GetDesktopWindow(), NULL, hInstance, NULL );
+  _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, GetDesktopWindow(), NULL, hInstance, NULL );
   BringWindowToTop(_hwnd);
-    ShowWindow(_hwnd, SW_HIDE);    
-    UpdateWindow(_hwnd);    
+  ShowWindow(_hwnd, SW_HIDE);    
+  UpdateWindow(_hwnd);    
 }
 
 
 void WindowImpl::destroy()
 {
-    if( _hwnd == 0)
-        return;
+  if( _hwnd == 0)
+      return;
 
-    DestroyWindow(_hwnd);
-    _hwnd = 0;
+  DestroyWindow(_hwnd);
+  _hwnd = 0;
 }
 
 
@@ -92,49 +92,49 @@ void WindowImpl::hide()
 
 void WindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 {
-    BYTE keyboardState[256];
+  BYTE keyboardState[256];
 
-    GetKeyboardState(keyboardState);
+  GetKeyboardState(keyboardState);
 
-    if(msg == WM_KEYDOWN)
-        _keyEvent.setState(KeyEvent::KeyDown);
-    else if(msg == WM_KEYUP)
-        _keyEvent.setState(KeyEvent::KeyUp);            
+  if(msg == WM_KEYDOWN)
+      _keyEvent.setState(KeyEvent::KeyDown);
+  else if(msg == WM_KEYUP)
+      _keyEvent.setState(KeyEvent::KeyUp);            
     
-    if(msg == WM_SYSCOMMAND)
-    {
-        _keyEvent.setState(KeyEvent::KeyUp);
-        _keyEvent.setAlt(wparam == SC_KEYMENU);
-        _keyEvent.setShift(false);
-        _keyEvent.setCtrl(false);
-        _keyEvent.setUnicode(lparam);
-    }
-    else
-    {
-        if((lparam & 0xFFF) != 1)
-            return;//Repeat count
+  if(msg == WM_SYSCOMMAND)
+  {
+    _keyEvent.setState(KeyEvent::KeyUp);
+    _keyEvent.setAlt(wparam == SC_KEYMENU);
+    _keyEvent.setShift(false);
+    _keyEvent.setCtrl(false);
+    _keyEvent.setUnicode(lparam);
+  }
+  else
+  {
+      if((lparam & 0xFFF) != 1)
+          return;//Repeat count
 
-        keyboardState[VK_CONTROL] = 0;
-        keyboardState[VK_LCONTROL] = 0;
-        keyboardState[VK_RCONTROL] = 0;
+      keyboardState[VK_CONTROL] = 0;
+      keyboardState[VK_LCONTROL] = 0;
+      keyboardState[VK_RCONTROL] = 0;
 
-        if(wparam == 16 )
-        {//Shift key
-            _keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);
-        }
-        else if(wparam == 17 )
-        {//Controll key
-            _keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
-        }
+      if(wparam == 16 )
+      {//Shift key
+        _keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);
+      }
+      else if(wparam == 17 )
+      {//Controll key
+        _keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
+      }
 
-        Pt::uint32_t scanCode = ((lparam >> 16) & 0xFF);            
-        Pt::uint32_t ucode = 0;            
+      Pt::uint32_t scanCode = ((lparam >> 16) & 0xFF);            
+      Pt::uint32_t ucode = 0;            
         
-        ToUnicode( wparam, scanCode , (BYTE*)keyboardState, (LPWSTR)&ucode, 4, 0);    
-        _keyEvent.setUnicode(ucode);
-    }
+      ToUnicode( wparam, scanCode , (BYTE*)keyboardState, (LPWSTR)&ucode, 4, 0);    
+      _keyEvent.setUnicode(ucode);
+  }
 
-    _windowEvent.send(_keyEvent);
+  _windowEvent.send(_keyEvent);
 }
 
 void WindowImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wparam, long lparam, bool& handled)
@@ -222,34 +222,36 @@ void WindowImpl::onClosing()
 
 void WindowImpl::onSize(WPARAM wParam, LPARAM lParam)
 {
-  WindowStateType::Type state = WindowStateType::Normal;
+  WindowState::Type state = WindowState::Normal;
 
-    switch(wParam)
-    {
-        case SIZE_MAXHIDE:
-        case SIZE_MAXSHOW:
-        break;
+  switch(wParam)
+  {
+      case SIZE_MAXHIDE:
+      case SIZE_MAXSHOW:
+      break;
 
-        case SIZE_MAXIMIZED:
-            state = WindowStateType::Maximazed;                            
-        break;
+      case SIZE_MAXIMIZED:
+          state = WindowState::Maximazed;                            
+      break;
 
-        case SIZE_MINIMIZED:
-            state = WindowStateType::Minimized;            
-        break;
+      case SIZE_MINIMIZED:
+          state = WindowState::Minimized;            
+      break;
  
-        case SIZE_RESTORED:
-            state = WindowStateType::Normal;
-        break;
-    }
-
-    RECT  info;
-    GetWindowRect(_hwnd, &info);
-    Pt::Gfx::SizeF winSize(info.right - info.left, info.bottom - info.top);
-    _resizeEvent.setSize(winSize);
+      case SIZE_RESTORED:
+          state = WindowState::Normal;
+      break;
+  }
+ 
+  int width  = LOWORD(lParam);
+  int height = HIWORD(lParam);  
+    
+  Pt::Gfx::SizeF winSize(width, height);
+  _resizeEvent.setSize(winSize);
   _resizeEvent.setState(state);
-    _windowEvent.send(_resizeEvent);
+  _windowEvent.send(_resizeEvent);
 }
+
 
 void WindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 {    
@@ -309,10 +311,9 @@ void WindowImpl::onPaint()
     HDC windowContext = BeginPaint(_hwnd, &ps);
     
     HDC bitmapDeviceConText = _surface->impl()->deviceContext();
-    BitBlt(windowContext, 0, 0, info.right - info.left, 
-        info.bottom - info.top, bitmapDeviceConText, 0, 0, SRCCOPY);    
+    BitBlt(windowContext, 0, 0, info.right - info.left,  info.bottom - info.top, bitmapDeviceConText, 0, 0, SRCCOPY);    
     
-  EndPaint(_hwnd, &ps);    
+    EndPaint(_hwnd, &ps);    
 }
 
 
@@ -326,7 +327,17 @@ void WindowImpl::setPosition(const Gfx::PointF& pf)
 void WindowImpl::setSize(const Gfx::SizeF& sizef)
 {
   Gfx::Size size = _app.fromUnit(sizef);
-  SetWindowPos(_hwnd, 0, 0, 0, size.width(), size.height(), SWP_DRAWFRAME|SWP_NOMOVE);
+
+  RECT clientRect;
+  SetRect(&clientRect, 0, 0, size.width() - 1, size.height() - 1);
+
+  LONG style = GetWindowLong(_hwnd, GWL_STYLE);
+
+  AdjustWindowRectEx(&clientRect, style, false, 0);
+    
+  LONG clientWidth  = clientRect.right  - clientRect.left + 1;
+  LONG clientHeight = clientRect.bottom - clientRect.top  + 1;
+  SetWindowPos(_hwnd, NULL, 0, 0, clientWidth, clientHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
 
@@ -394,20 +405,20 @@ void WindowImpl::setTopMost()
 }
 
 
-void WindowImpl::setWindowState(WindowStateType::Type p)
+void WindowImpl::setWindowState(WindowState::Type p)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
     switch(p)
     {
-        case Pt::Hmi::WindowStateType::Normal:            
+        case Pt::Hmi::WindowState::Normal:            
         break;
 
-        case Pt::Hmi::WindowStateType::Maximazed:
+        case Pt::Hmi::WindowState::Maximazed:
             style |= WS_MAXIMIZE;
         break;
 
-        case Pt::Hmi::WindowStateType::Minimized:
+        case Pt::Hmi::WindowState::Minimized:
             style |= WS_MINIMIZE;
         break;
     }
@@ -416,35 +427,35 @@ void WindowImpl::setWindowState(WindowStateType::Type p)
 }
 
 
-void WindowImpl::setBorder(WindowBorderType::Type p)
+void WindowImpl::setBorder(WindowBorder::Type p)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
   LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
     switch( p)
     {
-        case Pt::Hmi::WindowBorderType::NoBorder:            
+        case Pt::Hmi::WindowBorder::NoBorder:            
         break;
 
-        case Pt::Hmi::WindowBorderType::Sizeable:
+        case Pt::Hmi::WindowBorder::Sizeable:
             style |= WS_THICKFRAME;
         break;
 
-        case Pt::Hmi::WindowBorderType::Dialog:
+        case Pt::Hmi::WindowBorder::Dialog:
             style |= WS_DLGFRAME;            
         break;
 
-        case Pt::Hmi::WindowBorderType::DialogSizeable:
+        case Pt::Hmi::WindowBorder::DialogSizeable:
             style |= WS_DLGFRAME;            
             style |= WS_THICKFRAME;
         break;
 
-        case Pt::Hmi::WindowBorderType::Tool:
+        case Pt::Hmi::WindowBorder::Tool:
             style |= WS_DLGFRAME;
             exStyle |= WS_EX_TOOLWINDOW;
         break;
 
-        case Pt::Hmi::WindowBorderType::ToolSizeable:
+        case Pt::Hmi::WindowBorder::ToolSizeable:
             style |= WS_THICKFRAME;
             exStyle |= WS_EX_TOOLWINDOW;
         break;

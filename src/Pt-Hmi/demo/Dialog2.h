@@ -51,7 +51,7 @@ private:
 	Pt::Hmi::Button _okButton;
 	Pt::Hmi::Button _cancelButton;	
 	Pt::Hmi::Label  _label;
-	Pt::Hmi::Panel  _panel;
+	Pt::Hmi::Panel  _panel1;
 };
 
 }}}

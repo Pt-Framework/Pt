@@ -73,16 +73,16 @@ void MainWindow::init()
 	Position = Pt::Gfx::PointF(200,200);
 	Size = Pt::Gfx::SizeF(800,615);
 	Caption.set("This is a Platinum C++ Human Machine Interface demo  ");
-  WindowState.set(Hmi::WindowStateType::Normal);
-	WindowStartPostion.set(Hmi::WindowStartPositionType::CenterScreen);
+  State.set(Hmi::WindowState::Normal);
+	StartPostion.set(Hmi::WindowStartPosition::CenterScreen);
 	Closed.Changed += Pt::slot(*this, &MainWindow::onClosedByWindow);
 
 	
 	//Panel
-	_mainPanel.Size.set(Pt::Gfx::SizeF(700,480));
-	_mainPanel.Position.set(Pt::Gfx::PointF(40,40));
-	_mainPanel.BorderWidth.set(3);	
-	_mainPanel.BorderStyle.set(Pt::Hmi::BorderStyleType::Sizeable);
+	_mainPanel.Size = Pt::Gfx::SizeF(700,480);
+	_mainPanel.Position = Pt::Gfx::PointF(40,40);
+	_mainPanel.PanelBorderWidth = 3;	
+	_mainPanel.PanelBorderStyle = Pt::Hmi::BorderStyle::Sizeable;
 	{
 		std::stringstream memoryStream;
 		memoryStream.write((char*)Pt::Forms::DemoImage::image, Pt::Forms::DemoImage::imageSize);	
@@ -91,15 +91,16 @@ void MainWindow::init()
 		delete im;
 	}
 
-	_mainPanel.BackgroundImageLayout = Pt::Hmi::ImageLayoutType::Strech;
+	_mainPanel.BackgroundImageLayout = Pt::Hmi::ImageLayout::Strech;
 
 	//Text
 	_textLabel.AutoSize.set(true);
 	_textLabel.Size.set(Pt::Gfx::SizeF(500,30));
-	_textLabel.Caption.set("&This is a Platinum C++");
+	_textLabel.Caption = std::string("&This is a Platinum C++");
 	_textLabel.Position.set(Pt::Gfx::PointF(20,20));
 	_textLabel.ForeColor.set(Pt::Gfx::ARgbColor(255,0,0,0));
 	_textLabel.UseMnemonic.set(true);	
+  _textLabel.bindMnemonicToWidget(&_toggleButton);
 	//_textLabel.labelModel().PainterSurfaceType = Pt::Hmi::PainterType::Image;
 	_mainPanel.addChild(&_textLabel);
 	
@@ -108,8 +109,7 @@ void MainWindow::init()
 	_toggleButton.Caption.set("Toggle Me [CTRL+I]");
 	_toggleButton.ActionKey.set("C//i");
 	_toggleButton.Position.set(Pt::Gfx::PointF(20,60));
-	_toggleButton.Size.set(Pt::Gfx::SizeF(150,25));	
-	_textLabel.bindMnemonicToWidget(&_toggleButton);
+	_toggleButton.Size.set(Pt::Gfx::SizeF(150,25));		
 	_mainPanel.addChild(&_toggleButton);
 
 	//Dialog button

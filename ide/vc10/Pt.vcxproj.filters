@@ -1233,9 +1233,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\x11\ViewImpl.h">
       <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ViewImpl.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
@@ -1297,6 +1294,15 @@
       <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WindowImpl.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\Window.h">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Margin.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1444,11 +1450,14 @@
     <None Include="..\..\src\Pt-Hmi\Jamfile">
       <Filter>Pt-Hmi</Filter>
     </None>
-    <None Include="..\..\src\Pt-Hmi\cocoa\ViewImpl.mm">
-      <Filter>Pt-Hmi\cocoa</Filter>
-    </None>
     <None Include="..\..\src\Pt-Hmi\demo\Jamfile">
       <Filter>Pt-Hmi\demo</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Hmi\cocoa\WindowImpl.mm">
+      <Filter>Pt-Hmi\cocoa</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Hmi\cocoa\Window.mm">
+      <Filter>Pt-Hmi\cocoa</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

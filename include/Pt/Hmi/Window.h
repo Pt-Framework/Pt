@@ -38,7 +38,7 @@ class WindowImpl;
 class CloseEvent;
 class PositionEvent;
 
-namespace WindowStartPositionType
+namespace WindowStartPosition
 {
     enum Type
     {
@@ -48,7 +48,7 @@ namespace WindowStartPositionType
     };
 }
 
-namespace WindowBorderType
+namespace WindowBorder
 {
     enum Type
     {
@@ -66,21 +66,22 @@ namespace WindowBorderType
 class PT_HMI_API Window  : public Widget
 {
 public:    
-    Window();
-    
+    Window();    
     ~Window();
+
+    Pt::Signal<const Pt::Event&>& eventReady();
 
     Property<Pt::Gfx::SizeF>                  MinimumSize;
     Property<Pt::Gfx::SizeF>                  MaximumSize;
-    Property<WindowStartPositionType::Type>   WindowStartPostion;
-    Property<WindowStateType::Type>           WindowState;    
+    Property<WindowStartPosition::Type>       StartPostion;
+    Property<WindowState::Type>               State;    
     Property<bool>                            ShowInTaskbar;
     Property<bool>                            ShowTitle;
     Property<bool>                            ShowMinimizeButton;
     Property<bool>                            ShowMaximizeButton;
     Property<bool>                            ShowSysMenu;
     Property<std::string>                     Caption;
-    Property<WindowBorderType::Type>          Border;
+    Property<WindowBorder::Type>              Border;
     Property<Pt::Gfx::ARgbImage>              Icon;
     Property<bool>                            Closed;
     Property<bool>                            CanClose;
@@ -88,18 +89,21 @@ public:
     Property<std::string>                     FocuseMoveKey;      
 
 protected:
-    virtual void onPointerInput(const PointingEvent& ev);
-    virtual void onKeyInput(const KeyEvent& ev);
-    virtual void resizeEvent(const ResizeEvent& ev);
-    virtual void positionEvent(const PositionEvent& ev);
-    virtual void closeEvent(const CloseEvent& ev);
     virtual void onInvalidate();
-   
+	  
+    virtual void onKeyInput(const KeyEvent& ev);
+
+    virtual void onResizeEvent(const ResizeEvent& ev);
+    
+    virtual void onPositionEvent(const PositionEvent& ev);
+    
+    virtual void onCloseEvent(const CloseEvent& ev);
+       
 private: 
-    void onPositionChanged(const Property<Pt::Gfx::PointF>& prop);
-    
     void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
-    
+
+    void onPositionChanged(const Property<Pt::Gfx::PointF>& prop);    
+
     void onClosedChanged(const Property<bool> & closed);
   
     void onVisibleChanged(const Property<bool> & visible);
@@ -116,29 +120,14 @@ private:
 
     void onTopMostChanged(const Property<bool> & p);
   
-    void onWindowStateChanged(const Property<WindowStateType::Type> & p);
+    void onWindowStateChanged(const Property<WindowState::Type> & p);
   
-    void onBorderChanged(const Property<WindowBorderType::Type> & p);
+    void onBorderChanged(const Property<WindowBorder::Type> & p);
   
     void onShowInTaskbarChanged(const Property<bool> & p);
   
-    void onIconChanged(const Property<Pt::Gfx::ARgbImage> & p);
+    void onIconChanged(const Property<Pt::Gfx::ARgbImage> & p);    
 
-protected:
-    bool focusNextChild(int index);
-    
-    int getFocusedChild() const
-    {
-        return 0;
-    }
-
-    bool moveFocusNext();
-    
-    bool moveFocusPrev()
-    {
-        return true;
-    }    
-    
 private:
     WindowImpl* _impl;    
 };

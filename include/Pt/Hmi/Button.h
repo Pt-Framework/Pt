@@ -30,6 +30,7 @@
 
 #include <Pt/Hmi/Label.h>
 #include <Pt/System/Timer.h>
+#include <Pt/Gfx/ARgbImage.h>
 
 namespace Pt{
 namespace Hmi{
@@ -57,7 +58,9 @@ public:
 	Property<bool>								Armed;		
 	Property<ButtonType::Type>    ButtonType;	
 	Property<int>									DoublePressTimeInMs; 
-	Signal<bool>									Checked;	
+  Property<Pt::Gfx::ARgbImage>  Image;	
+  Property<Align::Type>         ImageAlign;
+	Signal<bool>									Checked;	  
 	Signal<>											Clicked;	
 	Signal<>											DoubleClicked;	
 

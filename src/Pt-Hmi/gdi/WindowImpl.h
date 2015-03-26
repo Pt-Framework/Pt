@@ -84,9 +84,9 @@ public:
 
   void setTopMost();
   
-  void setWindowState(WindowStateType::Type p);
+  void setWindowState(WindowState::Type p);
   
-  void setBorder(WindowBorderType::Type p);
+  void setBorder(WindowBorder::Type p);
   
   void showInTaskbar(bool p);
   

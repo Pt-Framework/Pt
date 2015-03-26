@@ -44,16 +44,19 @@ Button::Button()
 , PT_HMI_INIT_PROPERTY_VALUE(Armed,false)
 , PT_HMI_INIT_PROPERTY_VALUE(ButtonType,Pt::Hmi::ButtonType::Press)
 , PT_HMI_INIT_PROPERTY_VALUE(DoublePressTimeInMs,1500)
+, PT_HMI_INIT_PROPERTY_VALUE(Image, Pt::Gfx::ARgbImage(0,0))
+, PT_HMI_INIT_PROPERTY_VALUE(ImageAlign, Align::MidleLeft)
 {
-   BackColor.set(Pt::Gfx::ARgbColor(245,245,245));
-	BorderStyle.set(BorderStyleType::Widget);
-	BorderWidth.set(1);
+  BackColor.set(Pt::Gfx::ARgbColor(245,245,245));
+	PanelBorderStyle.set(BorderStyle::Widget);
+	PanelBorderWidth.set(1);
 	Caption.set("Button");	
+  Name.set("Button");
 	AutoSize.set(false);
-	TextAlign.set(TextAlignType::MidleCenter);
+	TextAlign.set(Align::MidleCenter);
 	AcceptFocus.set(true);
-	BorderRoundEdge.set(true);
-	BorderStyle.set(BorderStyleType::Single);
+	PanelBorderRoundEdge.set(true);
+	PanelBorderStyle.set(BorderStyle::Single);
 	
 	ButtonState.Changed += Pt::slot(*this, &Button::onButtonStateChanged);
 	
@@ -236,8 +239,7 @@ void Button::onKeyInput(const KeyEvent& ev)
 }
 
 void Button::onPointerInput(const PointingEvent& ev)
-{	
-	
+{		
 	Pt::Gfx::PointF point = toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
 
 	if(!Enabled.get())
@@ -341,10 +343,10 @@ void Button::onPointerInput(const PointingEvent& ev)
 
 void Button::onRender()
 {	
-	if(!Visible.get())
+	if( !Visible.get() )
 		return;	
 	 
-	if(!Enabled.get())
+	if( !Enabled.get() )
 	{
 		ForeColor.set(Pt::Gfx::ARgbColor(0,100,100,100));
 		Label::onRender();
@@ -352,11 +354,11 @@ void Button::onRender()
 	}			
 
 	ForeColor.set(Pt::Gfx::ARgbColor(0,0,0,0));
-	HighLight.set(ButtonState.get() == DeviceButton::Pressed);
+	HighLight.set( ButtonState.get() == DeviceButton::Pressed );
 
 	Label::onRender();
 	
-	if(ButtonState.get() == DeviceButton::Pressed)
+	if( ButtonState.get() == DeviceButton::Pressed )
 		return;
 
 	Pt::Hmi::Painter& localPainter = paintSurface().painter();

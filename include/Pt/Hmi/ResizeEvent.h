@@ -8,7 +8,7 @@
 namespace Pt{
 namespace Hmi{
 
-namespace WindowStateType
+namespace WindowState
 {
 	enum Type
 	{
@@ -29,12 +29,12 @@ public:
 	{
 	}
 
-  WindowStateType::Type state() const
+  WindowState::Type state() const
   {
     return _state;
   }
 
-	void setState(WindowStateType::Type s)
+	void setState(WindowState::Type s)
 	{
 		_state = s;
 	}
@@ -51,7 +51,7 @@ public:
 
 private:
 	Pt::Gfx::SizeF _size;
-  WindowStateType::Type _state;	
+  WindowState::Type _state;	
 };
 
 }}

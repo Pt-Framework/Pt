@@ -7,10 +7,12 @@ namespace Hmi{
 
 Panel::Panel()
 : _resizeDir(No)
-, PT_HMI_INIT_PROPERTY_VALUE(BorderStyle,BorderStyleType::Single)
-, PT_HMI_INIT_PROPERTY_VALUE(BorderWidth,3)
-, PT_HMI_INIT_PROPERTY_VALUE(BorderRoundEdge,false)
+, PT_HMI_INIT_PROPERTY_VALUE(PanelBorderStyle,BorderStyle::Single)
+, PT_HMI_INIT_PROPERTY_VALUE(PanelBorderWidth,3)
+, PT_HMI_INIT_PROPERTY_VALUE(PanelBorderRoundEdge,false)
 {
+  AcceptFocus.set(false);
+  Name.set("Panel");
 }
 
 
@@ -123,26 +125,26 @@ void Panel::onPointerInput(const PointingEvent& ev)
 	Pt::Gfx::PointF p =  toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
 	Pt::Gfx::SizeF size = Size.get();
 	
-	double sizeR = size.width() -  BorderWidth.get();
-	double sizeB = size.height() - BorderWidth.get();
+	double sizeR = size.width() -  PanelBorderWidth.get();
+	double sizeB = size.height() - PanelBorderWidth.get();
 			
-	switch(BorderStyle.get())
+	switch(PanelBorderStyle.get())
 	{
-		case BorderStyleType::Sizeable:
+		case BorderStyle::Sizeable:
 		{
 			if( contains(p) )
 			{
-				if(p.x() < BorderWidth.get() && p.y() <  BorderWidth.get())
+				if(p.x() < PanelBorderWidth.get() && p.y() <  PanelBorderWidth.get())
 				{//Corner NW
 					CursorT.get().setCursor(Cursors::SizeNS);
 					_resizeDir = NorthWest;
 				}	
-				else if(p.x() > sizeR && p.y() <  BorderWidth.get())
+				else if(p.x() > sizeR && p.y() <  PanelBorderWidth.get())
 				{//corner NE
 					CursorT.get().setCursor(Cursors::SizeNS);
 					_resizeDir= NorthEast;
 				}
-				else if(p.x() < BorderWidth.get() &&  p.y() > sizeB )
+				else if(p.x() < PanelBorderWidth.get() &&  p.y() > sizeB )
 				{//corner SW
 					CursorT.get().setCursor(Cursors::SizeWE);
 					_resizeDir = SouthWest;
@@ -154,7 +156,7 @@ void Panel::onPointerInput(const PointingEvent& ev)
 				}
 				else
 				{
-					if( p.x() < BorderWidth.get())				
+					if( p.x() < PanelBorderWidth.get())				
 					{//West
 						CursorT.get().setCursor(Cursors::SizeWE);
 						_resizeDir = West;
@@ -164,7 +166,7 @@ void Panel::onPointerInput(const PointingEvent& ev)
 						CursorT.get().setCursor(Cursors::SizeWE);
 						_resizeDir = East;
 					}
-					else if( p.y() < BorderWidth.get())
+					else if( p.y() < PanelBorderWidth.get())
 					{//North
 						CursorT.get().setCursor(Cursors::SizeNS);
 						_resizeDir = North;
@@ -184,6 +186,7 @@ void Panel::onPointerInput(const PointingEvent& ev)
       {
           CursorT.get().setCursor(Cursors::Default);
       }
+
 			handleResize(ev);
 		}
 		break;
@@ -207,18 +210,18 @@ void Panel::onRender()
 
 	int corner = 0;
 
-	if(BorderRoundEdge.get())
+	if(PanelBorderRoundEdge.get())
 		corner = 2;
     
-	size_t border =  (size_t) BorderWidth.get();	
-	Pt::Gfx::SizeF  clientSize(Size.get().width() - BorderWidth.get()/2, Size.get().height() - BorderWidth.get()/2);	
-	Pt::Gfx::RectF  clientRect(Pt::Gfx::PointF( BorderWidth.get()/2, BorderWidth.get()/2), clientSize);
+	size_t border =  (size_t) PanelBorderWidth.get();	
+	Pt::Gfx::SizeF  clientSize(Size.get().width() - PanelBorderWidth.get()/2, Size.get().height() - PanelBorderWidth.get()/2);	
+	Pt::Gfx::RectF  clientRect(Pt::Gfx::PointF( PanelBorderWidth.get()/2, PanelBorderWidth.get()/2), clientSize);
 	
 	Pt::Hmi::Painter& localPainter = paintSurface().painter();
 						
-	switch(BorderStyle.get())
+	switch(PanelBorderStyle.get())
 	{
-		case BorderStyleType::Single:
+		case BorderStyle::Single:
 		{			
 			std::vector<Pt::Gfx::PointF> points1(5);
 			std::vector<Pt::Gfx::PointF> points2(5);
@@ -273,7 +276,7 @@ void Panel::onRender()
 
 		break;
 			
-		case BorderStyleType::Widget:
+		case BorderStyle::Widget:
 		{			
 			std::vector<Pt::Gfx::PointF> points1(5);
 			std::vector<Pt::Gfx::PointF> points2(5);
@@ -333,7 +336,7 @@ void Panel::onRender()
 		}
 		break;
 
-		case BorderStyleType::Border3D:
+		case BorderStyle::Border3D:
 		{
 			std::vector<Pt::Gfx::PointF> points1(3);
 			std::vector<Pt::Gfx::PointF> points2(3);
@@ -370,7 +373,7 @@ void Panel::onRender()
 		}
 		break;
 
-		case BorderStyleType::Sizeable:
+		case BorderStyle::Sizeable:
 		{
 			Pt::Gfx::Pen pen1(border, ForeColor.get());
 			localPainter.setPen(pen1);				

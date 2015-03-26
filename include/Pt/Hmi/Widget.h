@@ -6,6 +6,7 @@
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/Property.h>
 #include <Pt/Hmi/Cursor.h>
+#include <Pt/Hmi/Margin.h>
 #include <Pt/Connectable.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Point.h>
@@ -15,19 +16,19 @@
 namespace Pt{
 namespace Hmi{
    
-namespace BorderStyleType
+namespace BorderStyle
 {
-    enum Type
-    {
-        NoBorder,
-        Single,
-        Border3D,
-        Sizeable,
-        Widget,
-    };
+  enum Type
+  {
+    NoBorder,
+    Single,
+    Border3D,
+    Sizeable,
+    Widget
+  };
 }
 
-namespace ImageLayoutType
+namespace ImageLayout
 {
 	enum Type
 	{
@@ -39,7 +40,7 @@ namespace ImageLayoutType
 	};
 }
 
-namespace TextAlignType
+namespace Align
 {
 	enum Type
 	{
@@ -51,15 +52,26 @@ namespace TextAlignType
 		MidleRight,
 		BottomLeft,
 		BottomCenter,
-		BottomRight,
+		BottomRight
 	};
 }
 
+namespace Docking
+{
+	enum Type
+	{
+    None,
+		Left,
+		Top,
+		Right,
+		Bottom,
+		Fill
+	};
+}
 
 class PT_HMI_API Widget : public Pt::Connectable
 {
 public:	
-	
 	virtual ~Widget();		
 				
 	void addChild(Widget* child);
@@ -71,53 +83,43 @@ public:
 		return _children;
 	}
 
-	inline const Widget* parent() const
+	const Widget* parent() const
 	{
 		return _parent;
 	}
 
-	inline Widget* parent()
+	Widget* parent()
 	{
 		return _parent;
 	}
 
-	inline void setParent(Widget* parent)
+	void setParent(Widget* parent)
 	{
 		_parent = parent;
 	}
 
 	void bindMnemonicToWidget(Widget* widget);
 
-	inline PaintSurface& paintSurface()
+	PaintSurface& paintSurface()
 	{
 		return _paintSurface;
 	}
 
-	void pointerInput(const PointingEvent& ev)
-	{
-		onPointerInput(ev);
-	}
+	bool contains(const Pt::Gfx::PointF& p);
+ 	
+  bool focusNext();
+	
+  bool focusPrev();		
 
-	void keyInput(const KeyEvent& ev)
-	{
-		onKeyInput(ev);
-	}
+	void invalidate();
 
-	void mnemonic()
-	{
-		onMnemonic();
-	}
+  void render();
 
-	void invalidate();	
-
-	void render();
+  void mnemonic();
 
 	Pt::Gfx::PointF toClient(const Pt::Gfx::PointF& globalPoint);
 
 	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot);
-
-protected:
-	Widget();
 
 public:
 	Property<bool>									Enabled;		
@@ -129,38 +131,49 @@ public:
   Property<Pt::Gfx::ARgbColor>		BackColorHightLight;
 	Property<Pt::Gfx::ARgbColor>		ForeColor;
 	Property<Pt::Gfx::ARgbImage>		BackgroundImage;
-	Property<ImageLayoutType::Type>	BackgroundImageLayout;
+	Property<ImageLayout::Type>	    BackgroundImageLayout;
 	Property<int>										Opacity;
 	Property<Cursor>                CursorT;
-	Property<TextAlignType::Type>		TextAlign;
+	Property<Align::Type>		        TextAlign;
 	Property<bool>									Focused; 
 	Property<bool>									AcceptFocus;
   Property<bool>									HighLight;
 	Property<std::string>						FocusedActionKey;
 	Property<std::string>						Caption;		
 	Property<bool>									UseMnemonic;	
-	
+  Property<std::string>						Name;		
+  Property<Pt::Hmi::Margin>       Margin;
+  Property<Docking::Type>         Dock;
+
 protected:
+  Widget();	
+
+protected:
+  virtual void onInvalidate();
+	virtual void onRender();
 	virtual void onPointerInput(const PointingEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);
 	virtual void onMnemonic();
-	virtual void onRender();
-	virtual void onInvalidate();
 
-protected:
-	bool contains(const Pt::Gfx::PointF& p);
+private:
+  void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
+  void onFocusChanged(const Property<bool>& prop);
+  void onCaptionChanged(const Property<std::string>& prop);
 
-private:		
-	void onFocusChanged(const Property<bool>& prop);		
-	int getFocusedChild() const;
-	std::string getMnemonicKey() const;
+private:			  
+  bool focusNextChild(int index);
+	bool focusPrevChild(int index);
+	int getFocusedChild() const;	
+  static void updatePosSizeNoInval(Widget& w, const Pt::Gfx::SizeF& s, const Pt::Gfx::PointF& p);
 
-private:	
+private:	  
 	Widget*								_parent;	
 	std::vector<Widget*>  _children;	
 	Widget*								_mnemonicWidget;	
 	PaintSurface					_paintSurface;	
+  std::string           _mnemonicKey;
 };
 
 }}
+
 #endif

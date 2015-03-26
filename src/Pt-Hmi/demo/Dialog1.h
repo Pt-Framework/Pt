@@ -47,6 +47,16 @@ private:
 	void onShowNextDialog();
 
 private:
+  Pt::Hmi::Panel  _panel1;
+  Pt::Hmi::Panel  _panel2;
+  Pt::Hmi::Panel  _panel3;
+  Pt::Hmi::Panel  _panel4;
+  Pt::Hmi::Panel  _panel5;
+  Pt::Hmi::Panel  _panel6;
+  Pt::Hmi::Panel  _panel7;
+  Pt::Hmi::Panel  _panel8;
+  Pt::Hmi::Panel  _panel9;
+  
 	Pt::Hmi::Button _closeButton;	
 	Pt::Hmi::Button _newDialog;
 	bool _clicked;

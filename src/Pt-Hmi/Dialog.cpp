@@ -34,7 +34,8 @@ namespace Hmi{
 Dialog::Dialog()
 : PT_HMI_INIT_PROPERTY_VALUE(Result, DialogResultType::Undefined)
 {
-	ShowInTaskbar = false;
+	Name.set("Dialog");
+  ShowInTaskbar = false;
 	ShowSysMenu = true;
 }
 

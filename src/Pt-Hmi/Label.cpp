@@ -10,8 +10,9 @@ Label::Label()
  , PT_HMI_INIT_PROPERTY_VALUE(AutoSize,true)
 {
 	Caption.set("Label");
+  Name.set("Label");
 	ForeColor.set(Pt::Gfx::ARgbColor(0,0,0,0));
-	BorderStyle.set(BorderStyleType::NoBorder);
+	PanelBorderStyle.set(BorderStyle::NoBorder);
 }
 
 Label::~Label()
@@ -52,7 +53,7 @@ void Label::onRender()
 
 		switch(TextAlign.get())
 		{
-			case Pt::Hmi::TextAlignType::MidleCenter:
+			case Pt::Hmi::Align::MidleCenter:
 			{
 				Pt::Gfx::Pen	pen(1,ForeColor.get());
 				Pt::Gfx::SizeF	widgetSize =  Size.get();

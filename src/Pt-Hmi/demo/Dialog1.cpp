@@ -47,23 +47,67 @@ void Dialog1::init()
 	Size  = Pt::Gfx::SizeF(700,500);
 	Position = Pt::Gfx::PointF(400,400);
 	Caption = std::string("This is a sample modal dialog 1");
-	WindowStartPostion = Hmi::WindowStartPositionType::CenterParent;
+	StartPostion = Hmi::WindowStartPosition::CenterParent;
+
+  //Left
+  _panel1.Size = Pt::Gfx::SizeF(200,20);
+  _panel1.BackColor = Pt::Gfx::ARgbColor(0, 0, 255,0);
+  _panel1.Dock = Docking::Left;
+  addChild(&_panel1);
+
+  _panel2.BackColor = Pt::Gfx::ARgbColor(0, 255, 255,0);
+  _panel2.Dock = Docking::Left;
+  addChild(&_panel2);
+  
+  //Top
+  _panel3.BackColor = Pt::Gfx::ARgbColor(0, 0, 255,0);
+  _panel3.Dock = Docking::Top;
+  addChild(&_panel3);
+
+  _panel4.BackColor = Pt::Gfx::ARgbColor(0, 255, 255,0);
+  _panel4.Dock = Docking::Top;
+  addChild(&_panel4);
+
+  //Right
+  _panel5.BackColor = Pt::Gfx::ARgbColor(0, 255, 0,0);
+  _panel5.Dock = Docking::Right;
+  addChild(&_panel5);
+
+  _panel6.BackColor = Pt::Gfx::ARgbColor(0, 255, 255,0);
+  _panel6.Dock = Docking::Right;
+  addChild(&_panel6);
+  
+  //Bottom
+  _panel7.Size = Pt::Gfx::SizeF(10, 200);
+  _panel7.BackColor = Pt::Gfx::ARgbColor(0, 255, 0,0);
+  _panel7.Dock = Docking::Bottom;
+  addChild(&_panel7);
+
+  _panel8.BackColor = Pt::Gfx::ARgbColor(0, 255, 255,0);
+  _panel8.Dock = Docking::Bottom;
+  addChild(&_panel8);
+  //Fill
+
+  _panel9.BackColor = Pt::Gfx::ARgbColor(0, 0, 0,255);
+  _panel9.Dock = Docking::Fill;
+  
+  addChild(&_panel9);
 
 	//New dialog button 
-	_newDialog.Position.set(Pt::Gfx::PointF(400,300));
-	_newDialog.Size.set(Pt::Gfx::SizeF(200,25));
+	_newDialog.Dock = Docking::Right;
+	_newDialog.Size.set(Pt::Gfx::SizeF(100,25));
 	_newDialog.Caption.set("New Dialog [CTRL+F]");
 	_newDialog.ActionKey.set("C//f");
 	_newDialog.Clicked += Pt::slot(*this,&Dialog1::onShowNextDialog);
-	addChild(&_newDialog);
+	_panel1.addChild(&_newDialog);
 
 	//Close Button
-	_closeButton.Position.set(Pt::Gfx::PointF(400,360));
-	_closeButton.Size.set(Pt::Gfx::SizeF(200,25));
+	_closeButton.Dock = Docking::Right;
+	_closeButton.Size.set(Pt::Gfx::SizeF(100,25));
 	_closeButton.ActionKey.set("C//x");
 	_closeButton.Caption.set("Close [CTRL+X]");
 	_closeButton.Clicked +=  Pt::slot(*this,&Dialog1::onClosedByButton);
-	addChild(&_closeButton);
+	_panel1.addChild(&_closeButton);
 }
 
 void Dialog1::onClosedByButton()
