@@ -73,6 +73,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Size.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\YuvColor.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Yv12Image.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\ActivateEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Api.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Application.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Button.h" />

@@ -27,6 +27,7 @@
 #include <Pt/Hmi/Dialog.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/ImagePainter.h>
+#include "WindowImpl.h"
 
 namespace Pt{
 namespace Hmi{
@@ -43,21 +44,19 @@ Dialog::~Dialog()
 {
 }
 
+
 void Dialog::doModal(Window* parent)
 {	
-	bool parentTopMost = false;
-	  
   Visible = true;
 
 	//Setup the parent as disabled and TopMost = false.
-	parentTopMost = parent->TopMost.get();
 	parent->Enabled = false;	
-	parent->TopMost = false;
   parent->invalidate(); //Notify the parent.
-
+	parent->impl()->setForceTopMost(false);
+	
 	//Setup the dialog as aenabled and top most.	
 	Enabled = true;
-	TopMost = true;
+	impl()->setForceTopMost(true);
 
 	//Invalidate the dialog
 	invalidate();
@@ -67,8 +66,8 @@ void Dialog::doModal(Window* parent)
 		Application::instance().nextEvent();
 
 	//Restore the parent state.
-	parent->Enabled = true;
-	parent->TopMost = parentTopMost;
+	parent->impl()->setForceTopMost(true);
+	parent->Enabled = true;	
 	parent->invalidate();	
 }
 

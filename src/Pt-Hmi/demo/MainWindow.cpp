@@ -94,13 +94,13 @@ void MainWindow::init()
 	_mainPanel.BackgroundImageLayout = Pt::Hmi::ImageLayout::Strech;
 
 	//Text
-	_textLabel.AutoSize.set(true);
+	_textLabel.AutoSize = true;
 	_textLabel.Size.set(Pt::Gfx::SizeF(500,30));
-	_textLabel.Caption = std::string("&This is a Platinum C++");
-	_textLabel.Position.set(Pt::Gfx::PointF(20,20));
-	_textLabel.ForeColor.set(Pt::Gfx::ARgbColor(255,0,0,0));
-	_textLabel.UseMnemonic.set(true);	
-  _textLabel.bindMnemonicToWidget(&_toggleButton);
+	_textLabel.Caption = std::string("T&his is a Platinum C++");
+	_textLabel.Position = Pt::Gfx::PointF(20,20);
+	_textLabel.ForeColor = Pt::Gfx::ARgbColor(255,0,0,0);
+	_textLabel.UseMnemonic = true;	
+  _textLabel.bindMnemonicToWidget(_toggleButton);
 	//_textLabel.labelModel().PainterSurfaceType = Pt::Hmi::PainterType::Image;
 	_mainPanel.addChild(&_textLabel);
 	
@@ -114,11 +114,11 @@ void MainWindow::init()
 
 	//Dialog button
 	_dialogButton.ButtonType.set(Hmi::ButtonType::Press);
-	_dialogButton.Caption.set("&Dialog [CTRL+D]");
+	_dialogButton.Caption = std::string("&&Dia&log [CTRL+D]&");
 	_dialogButton.ActionKey.set("C//d");
 	_dialogButton.Position.set(Pt::Gfx::PointF(20,100));
 	_dialogButton.Size.set(Pt::Gfx::SizeF(150,25));	
-	_dialogButton.UseMnemonic.set(false);
+	_dialogButton.UseMnemonic = true;
 	_dialogButton.Clicked  += Pt::slot(*this, &MainWindow::onShowDialog);
 	
 	_mainPanel.addChild(&_dialogButton);
@@ -131,8 +131,8 @@ void MainWindow::init()
 	_closeButton.Size.set(Pt::Gfx::SizeF(150,25));
 	_closeButton.Clicked += Pt::slot(*this, &MainWindow::onClosed);
 	
-	addChild(&_closeButton);
 	addChild(&_mainPanel);
+	addChild(&_closeButton);	
 }
 
 void MainWindow::onShowDialog()

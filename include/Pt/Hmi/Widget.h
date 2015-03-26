@@ -98,7 +98,7 @@ public:
 		_parent = parent;
 	}
 
-	void bindMnemonicToWidget(Widget* widget);
+	void bindMnemonicToWidget(Widget& widget);	
 
 	PaintSurface& paintSurface()
 	{
@@ -120,6 +120,11 @@ public:
 	Pt::Gfx::PointF toClient(const Pt::Gfx::PointF& globalPoint);
 
 	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot);
+
+public:
+	static int getMnemonicIndex(const std::string& text);
+
+	static std::string removeMnemonic(const std::string& text);
 
 public:
 	Property<bool>									Enabled;		

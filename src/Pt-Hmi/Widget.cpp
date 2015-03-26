@@ -32,14 +32,16 @@ Widget::Widget()
 , PT_HMI_INIT_PROPERTY_VALUE(Dock, Docking::None)
 , _parent(0)
 {
+	bindMnemonicToWidget( *this );	
 	Focused.Changed += Pt::slot( *this, &Widget::onFocusChanged );
   Size.Changed += Pt::slot(*this, &Widget::onSizeChanged);				
-  Caption.Changed += Pt::slot(*this, &Widget::onCaptionChanged);		
+  Caption.Changed += Pt::slot(*this, &Widget::onCaptionChanged);			
 }
 
 
 Widget::~Widget()
 {
+
 }
 
 
@@ -309,11 +311,12 @@ void Widget::onInvalidate()
 }
 
 
-
-
 void Widget::onKeyInput(const KeyEvent& ev)
 { 	
-	if(UseMnemonic.get() && _mnemonicWidget != 0 && Enabled.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp)
+	if( !Enabled.get() )
+			return;
+
+	if(UseMnemonic.get() && Enabled.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp)
 	{		
 		std::string mnKey = "";
 
@@ -333,20 +336,22 @@ void Widget::onKeyInput(const KeyEvent& ev)
 
 void Widget::onPointerInput(const PointingEvent& ev)
 {
+	if( !Enabled.get() )
+			return;
+
 	for( size_t i = 0; i < children().size(); ++i)
 		_children[i]->onPointerInput(ev);
 }
 
 
-void Widget::bindMnemonicToWidget(Widget* widget)
+void Widget::bindMnemonicToWidget(Widget& widget)
 {
-	_mnemonicWidget = widget;
+	_mnemonicWidget = &widget;
 }
-
 
 void Widget::onMnemonic()
 {	
-		Focused = true;
+	Focused = true;
 }
 
 
@@ -422,7 +427,7 @@ int Widget::getFocusedChild() const
 	for( ; i < (int)children().size(); ++i)
 	{
 		const Widget* child = children()[i];
-		if(child->Focused.get())
+		if( child->Focused.get() )
 			return i;		
 	}		
 
@@ -432,26 +437,24 @@ int Widget::getFocusedChild() const
 
 bool Widget::focusPrev()
 {
-	if(children().size() == 0)
+	if( children().size() == 0 )
 		return false;
 
 	int index = getFocusedChild();
 
-	if( index != -1)
-	{
-		Widget* child  = children()[index];
-
-		if(!child->AcceptFocus.get())
-		{
-			if(child->focusPrev())
-				return true;
-		}
-
-		child->Focused = false;
-		return focusPrevChild(index);
-	}
+	if( index == -1)
+		return focusPrevChild( children().size() );
 	
-	return focusPrevChild(children().size());
+	Widget* child  = children()[index];
+
+	if(!child->AcceptFocus.get())
+	{
+		if(child->focusPrev())
+			return true;
+	}
+
+	child->Focused = false;
+	return focusPrevChild(index);
 }
 
 
@@ -474,7 +477,6 @@ bool Widget::focusNext()
 	}
 
 	child->Focused = false;
-
 	return focusNextChild(index);
 }
 
@@ -509,18 +511,65 @@ void Widget::onFocusChanged( const Property<bool>& prop )
 	}
 }
 
+std::string Widget::removeMnemonic(const std::string& text)
+{
+	std::string removed;
+
+	for( size_t i = 0; i < text.size(); ++i )
+	{				
+		if( text[i] != '&')
+		{		
+			removed += text[i];	
+			continue;
+		}
+		
+		if( (i + 1) == text.size() )
+			continue;
+
+		if(text[i+1] != '&')
+			continue;
+
+		removed += text[i];
+		++i;
+	}
+
+	return removed;		
+}
+
+
+int Widget::getMnemonicIndex(const std::string& text)
+{	 
+	size_t pos = 0;
+
+	for( size_t i = 0; i < text.size() - 1; ++i)
+	{				
+		if( text[i] == '&'  && text[i +1] =='&' )
+			++i;
+		else if (text[i] == '&'  && 	text[i +1] !='&')
+			return pos;
+
+		pos++;
+	}
+
+	return std::string::npos;
+}
 
 void Widget::onCaptionChanged(const Property<std::string>& prop)
 {
-  _mnemonicKey.clear();
+	_mnemonicKey.clear();
 
-	int index = prop.get().find('&');
+	if( !UseMnemonic.get() )
+		return;  
 	
-	if( index < 0 || ((index + 1) > (int) prop.get().size()))
+	int index = getMnemonicIndex(prop.get());
+
+	if( index == std::string::npos )
 		return;
+					
+	std::string unescaped = Widget::removeMnemonic(prop.get());
 
 	_mnemonicKey = "A//";	
-	_mnemonicKey+= std::tolower(prop.get()[index + 1]);
+	_mnemonicKey += std::tolower(unescaped[index]);
 }
 
 

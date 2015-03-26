@@ -61,9 +61,7 @@ Button::Button()
 	ButtonState.Changed += Pt::slot(*this, &Button::onButtonStateChanged);
 	
 	_doublePressTimer.timeout() += Pt::slot(*this, &Button::onDoublePressedTimeout);
-	_doublePressTimer.setActive(Pt::Hmi::Application::instance().loop());
-	
-	bindMnemonicToWidget(this);
+	_doublePressTimer.setActive(Pt::Hmi::Application::instance().loop());	
 }
 
 Button::~Button()

@@ -40,6 +40,7 @@ WindowImpl::WindowImpl(PaintSurface* surface)
 : _hwnd(0)
 , _app(Pt::Hmi::Application::instance())
 , _surface(surface)
+, _forceTopMost(false)
 {    
   _app.impl()->WindowEvent += Pt::slot(*this, &WindowImpl::onWindowEvent);
   _pointerEvent.buttons().resize(3);    
@@ -205,10 +206,22 @@ void WindowImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wpar
             handled = true;            
         }
         break;
+
         case WM_KILLFOCUS:
         {
+					if( _forceTopMost )
+						BringWindowToTop( _hwnd );
+					else
+						_activateEvent.setActive(false);
         }
         break;        
+
+				case WM_SETFOCUS:
+				{
+					_activateEvent.setActive(true);
+					_windowEvent.send(_activateEvent);
+				}
+				break;
     }
 }
 
@@ -399,9 +412,14 @@ void WindowImpl::showSysMenu(bool p)
 }
 
 
-void WindowImpl::setTopMost()
+void WindowImpl::setForceTopMost(bool force)
 {
-  BringWindowToTop(_hwnd);
+	_forceTopMost = force;
+
+	if( _forceTopMost )
+	{
+		BringWindowToTop(_hwnd);		
+	}
 }
 
 
@@ -482,6 +500,10 @@ void WindowImpl::showInTaskbar(bool p)
   SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle);
 }
 
+void WindowImpl::setEnable(bool e)
+{
+	EnableWindow(_hwnd, e);
+}
 
 void WindowImpl::setIcon(const Pt::Gfx::ARgbImage& icon)
 {

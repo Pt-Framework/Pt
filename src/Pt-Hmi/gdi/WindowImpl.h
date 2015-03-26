@@ -35,6 +35,7 @@
 #include <Pt/Hmi/PositionEvent.h>
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
+#include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Window.h>
 #include <Windows.h>
@@ -82,7 +83,7 @@ public:
   
   void showSysMenu(bool p);
 
-  void setTopMost();
+  void setForceTopMost(bool force);
   
   void setWindowState(WindowState::Type p);
   
@@ -91,6 +92,8 @@ public:
   void showInTaskbar(bool p);
   
   void setIcon(const Pt::Gfx::ARgbImage& p);
+
+	void setEnable(bool e);
 
 protected:
 	void onWindowEvent(HWND wnd, unsigned int msg, WPARAM wparam, LPARAM lparam, bool& handled);
@@ -115,6 +118,8 @@ private:
 	PointingEvent									_pointerEvent;
 	ResizeEvent										_resizeEvent;
 	PositionEvent									_positionEvent;
+	ActivateEvent									_activateEvent;
+	bool													_forceTopMost;
 };
 
 }}

@@ -37,6 +37,7 @@ namespace Hmi{
 class WindowImpl;
 class CloseEvent;
 class PositionEvent;
+class ActivateEvent;
 
 namespace WindowStartPosition
 {
@@ -85,8 +86,9 @@ public:
     Property<Pt::Gfx::ARgbImage>              Icon;
     Property<bool>                            Closed;
     Property<bool>                            CanClose;
-    Property<bool>                            TopMost;
     Property<std::string>                     FocuseMoveKey;      
+
+		WindowImpl* impl();
 
 protected:
     virtual void onInvalidate();
@@ -98,6 +100,8 @@ protected:
     virtual void onPositionEvent(const PositionEvent& ev);
     
     virtual void onCloseEvent(const CloseEvent& ev);
+
+		virtual void onActivateEvent(const ActivateEvent& ev);
        
 private: 
     void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
@@ -126,8 +130,9 @@ private:
   
     void onShowInTaskbarChanged(const Property<bool> & p);
   
-    void onIconChanged(const Property<Pt::Gfx::ARgbImage> & p);    
+    void onIconChanged(const Property<Pt::Gfx::ARgbImage> & p);    		
 
+		void onEnabledChanged(const Property<bool> & p);
 private:
     WindowImpl* _impl;    
 };

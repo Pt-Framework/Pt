@@ -11,7 +11,7 @@ Panel::Panel()
 , PT_HMI_INIT_PROPERTY_VALUE(PanelBorderWidth,3)
 , PT_HMI_INIT_PROPERTY_VALUE(PanelBorderRoundEdge,false)
 {
-  AcceptFocus.set(false);
+  AcceptFocus = false;
   Name.set("Panel");
 }
 

@@ -31,6 +31,7 @@
 #include <Pt/Hmi/Application.h>
 #include "WindowImpl.h"
 #include <Pt/Hmi/PositionEvent.h>
+#include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Gfx/Size.h>
 
 namespace Pt{
@@ -52,14 +53,14 @@ Window::Window()
 , PT_HMI_INIT_PROPERTY_VALUE(Icon, Pt::Gfx::ARgbImage(0,0))
 , PT_HMI_INIT_PROPERTY_VALUE(Closed,false)
 , PT_HMI_INIT_PROPERTY_VALUE(CanClose,true)
-, PT_HMI_INIT_PROPERTY_VALUE(TopMost, false)
 , PT_HMI_INIT_PROPERTY_VALUE(FocuseMoveKey, "\t")
 {
-	Visible.set(false);
-	Focused.set(true);
-  Name.set("Window");
+	Visible = false;
+	Focused = true;
+  Name = std::string("Window");
+	AcceptFocus = false;
 		
-   Size.Changed += Pt::slot(*this, &Window::onSizeChanged);	
+  Size.Changed += Pt::slot(*this, &Window::onSizeChanged);	
   Position.Changed += Pt::slot(*this, &Window::onPositionChanged);
   Closed.Changed += Pt::slot(*this, &Window::onClosedChanged);
   Visible.Changed += Pt::slot(*this, &Window::onVisibleChanged);
@@ -68,21 +69,21 @@ Window::Window()
   ShowMinimizeButton.Changed += Pt::slot(*this, &Window::onShowMinimizedButtonChanged);
   ShowMaximizeButton.Changed += Pt::slot(*this, &Window::onShowMaximizeButtonChanged);
   ShowSysMenu.Changed += Pt::slot(*this, &Window::onShowSysMenuChanged);
-  TopMost.Changed  += Pt::slot(*this, &Window::onTopMostChanged);
   State.Changed += Pt::slot(*this, &Window::onWindowStateChanged);
   Border.Changed += Pt::slot(*this, &Window::onBorderChanged);
   ShowInTaskbar.Changed += Pt::slot(*this, &Window::onShowInTaskbarChanged);
   Icon.Changed += Pt::slot(*this, &Window::onIconChanged);
+	Enabled.Changed += Pt::slot(*this, &Window::onEnabledChanged);
 
 	_impl->windowEvent() += Pt::slot(*this, &Window::onPointerInput);
 	_impl->windowEvent() += Pt::slot(*this, &Window::onKeyInput);	
 	_impl->windowEvent() += Pt::slot(*this, &Window::onResizeEvent);
 	_impl->windowEvent() += Pt::slot(*this, &Window::onPositionEvent);
   _impl->windowEvent() += Pt::slot(*this, &Window::onCloseEvent);	
+	_impl->windowEvent() += Pt::slot(*this, &Window::onActivateEvent);	
 
   Position = Pt::Gfx::PointF(20,20);
 	Size =  Pt::Gfx::SizeF(200,200);
-
 }
 
 Window::~Window()
@@ -92,6 +93,11 @@ Window::~Window()
 Pt::Signal<const Pt::Event&>& Window::eventReady()
 {
   return _impl->windowEvent();
+}
+
+WindowImpl* Window::impl()
+{
+	return _impl;
 }
 
 
@@ -104,29 +110,23 @@ void Window::onInvalidate()
 
 void Window::onKeyInput(const KeyEvent& ev)
 {
-	if( ! Enabled.get() )
+	if( !Enabled.get() )
 		return;
-
-	if(ev.toUTF8String() == FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && !ev.shift())
+	
+	if( ev.toUTF8String() == FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp )
 	{
-		if( Focused.get())
-		{
-			if( !focusNext() )
-				Focused = true;
-
-			invalidate();
+		if(  ev.shift() )
+		{		
+				if( !focusPrev() )
+					focusPrev();
 		}
-	}
-
-	if( ev.toUTF8String() ==  FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && ev.shift() )
-	{
-		if( Focused.get() )
+		else
 		{
-			if( !focusPrev() )
-				Focused = true;
-
-			invalidate();
+				if( !focusNext() )
+					focusNext();
 		}
+
+		invalidate();
 	}
 
   Widget::onKeyInput(ev);
@@ -161,6 +161,10 @@ void Window::onCloseEvent(const CloseEvent& ev)
   Closed = true;
 }
 
+void Window::onActivateEvent(const ActivateEvent& ev)
+{
+	Focused = ev.active();
+}
 
 void Window::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
 {
@@ -176,7 +180,10 @@ void Window::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 
 void Window::onClosedChanged(const Property<bool> & closed)
 {	
-	if( ! CanClose.get() )
+	if( !Enabled.get() )
+		return;
+
+	if( !CanClose.get() )
 		return;
     
   //Set the closed flag
@@ -234,14 +241,6 @@ void Window::onShowSysMenuChanged(const Property<bool> & p)
   _impl->showSysMenu( p.get() );
 }
 
-
-void Window::onTopMostChanged(const Property<bool> & p)
-{
-  if( p.get() )
-    _impl->setTopMost();
-}
-
-
 void Window::onWindowStateChanged(const Property<WindowState::Type> & p)
 {
   _impl->setWindowState( p.get() );
@@ -263,6 +262,12 @@ void Window::onShowInTaskbarChanged(const Property<bool> & p)
 void Window::onIconChanged(const Property<Pt::Gfx::ARgbImage> & p)
 {
   _impl->setIcon( p.get() );
+}
+
+
+void Window::onEnabledChanged(const Property<bool> & p)
+{
+	_impl->setEnable( p.get() );
 }
 
 }}

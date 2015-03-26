@@ -420,13 +420,13 @@ void PainterImpl::drawLine(const Pt::Gfx::PointF& fromF, const  Pt::Gfx::PointF&
 	Pt::Gfx::Point from = Application::instance().fromUnit(fromF);
 	Pt::Gfx::Point to = Application::instance().fromUnit(toF);
 
-    POINT points[2];
-    points[0].x = from.x();
-    points[0].y = from.y();
-    points[1].x = to.x();
-    points[1].y = to.y();
+  POINT points[2];
+  points[0].x = from.x();
+  points[0].y = from.y();
+  points[1].x = to.x();
+  points[1].y = to.y();
 
-    Polyline(_surface->deviceContext(), points, 2);
+  Polyline(_surface->deviceContext(), points, 2);
 }
 
 void PainterImpl::drawText(const Pt::Gfx::PointF& toF, const Pt::String& text)
@@ -436,22 +436,22 @@ void PainterImpl::drawText(const Pt::Gfx::PointF& toF, const Pt::String& text)
     SetRect(&rectangle, to.x(), to.y(), to.x(), to.y());
 
     _text.clear();
-	text.toUtf16( std::back_inserter(_text) );	
+		text.toUtf16( std::back_inserter(_text) );	
 	
-    int rezt = DrawTextW(_surface->deviceContext(), _text.c_str(), -1, &rectangle, DT_NOCLIP);	
+    int rezt = DrawTextW(_surface->deviceContext(), _text.c_str(), -1, &rectangle, DT_NOCLIP| DT_NOPREFIX );	
 }
 
 void PainterImpl::fillRect(const Pt::Gfx::RectF& rectF)
 {
 	Pt::Gfx::Rect rect = Application::instance().fromUnit(rectF);
 
-    RECT rectangle;
-    const Pt::Gfx::Point topLeft     = rect.topLeft();
-    const Pt::Gfx::Point bottomRight = rect.bottomRight();
-    SetRect(&rectangle, topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
+  RECT rectangle;
+  const Pt::Gfx::Point topLeft     = rect.topLeft();
+  const Pt::Gfx::Point bottomRight = rect.bottomRight();
+  SetRect(&rectangle, topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
 
-    HBRUSH currentBrush = (HBRUSH)GetCurrentObject(_surface->deviceContext(), OBJ_BRUSH);
-    FillRect(_surface->deviceContext(), &rectangle, currentBrush);
+  HBRUSH currentBrush = (HBRUSH)GetCurrentObject(_surface->deviceContext(), OBJ_BRUSH);
+  FillRect(_surface->deviceContext(), &rectangle, currentBrush);
 }
 
 void PainterImpl::drawRect(const Pt::Gfx::RectF& rectF)

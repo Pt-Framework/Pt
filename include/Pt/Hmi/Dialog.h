@@ -55,6 +55,8 @@ public:
 	void doModal(Window* parent);
 
 	Property<DialogResultType::Type>	Result;		
+
+private:   
 };
 
 }}
