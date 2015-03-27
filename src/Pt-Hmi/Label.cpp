@@ -25,23 +25,30 @@ void Label::onRender()
 	if(!Visible.get())
 		return;		
 
-	Pt::Hmi::Painter& localPainter = paintSurface().painter();	
-	Pt::Gfx::PointF pos;
-
-	Pt::String caption;
-
+	Pt::Hmi::Painter&   localPainter = paintSurface().painter();	
+	Pt::Gfx::PointF     pos;
+	Pt::String          caption;
+  Gfx::ARgbColor      foreColor = Enabled.get() ? ForeColor.get() : DisabledColor.get();
+  Pt::Gfx::Pen	      pen( 1, foreColor);
+  Pt::Gfx::SizeF	    size = paintSurface().size();
+  
 	if( UseMnemonic.get() )
 		caption = Widget::removeMnemonic(Caption.get()).c_str();
 	else
 		caption = Caption.get().c_str();
 
-	if(AutoSize.get())
+	if( AutoSize.get() )
 	{		
 		//Calculate the current and adjust the size
 		localPainter.setFont(Font.get());
 		Pt::Gfx::FontMetrics metric = localPainter.fontMetrics(caption);
-		Pt::Gfx::SizeF currentSize = Pt::Gfx::SizeF(metric.width(), metric.height());
-		Size.set(currentSize);
+
+		Pt::Gfx::SizeF currentSize = Pt::Gfx::SizeF( metric.width() + Margin.get().left() + Margin.get().right() , 
+                                                 metric.height() + Margin.get().top() +  Margin.get().bottom() );
+    
+    Visible.set(false); //No invalidate event.
+		Size = currentSize;
+    Visible.set(true);
 
 		//Render the panel	
 		Panel::onRender();
@@ -51,40 +58,110 @@ void Label::onRender()
 	else
 	{		
 		Panel::onRender();
+							
+		Pt::Gfx::FontMetrics	metric = localPainter.fontMetrics(caption);
+    
+    localPainter.setFont(Font.get());		
 
 		switch(TextAlign.get())
 		{
-			case Pt::Hmi::Align::MidleCenter:
-			{
-				Pt::Gfx::Pen	pen(1,ForeColor.get());
-				Pt::Gfx::SizeF	widgetSize =  Size.get();
-				
-				localPainter.setFont(Font.get());
-				Pt::Gfx::FontMetrics	metric = localPainter.fontMetrics(caption);
-				
-				const double widthHalf		= Size.get().width()/2;				
-				const double heightHalf		= Size.get().height()/2;				
-				const double textWidthHalf	= metric.width()/2;	
-				const double textHeightHalf = metric.height()/2;	
+      case Hmi::Align::TopLeft:
+      {
+			  pos = Pt::Gfx::PointF( 0, metric.ascent() );			
+      }
+      break;
+
+		  case Hmi::Align::TopCenter:
+      {
+        const double widthHalf		  = size.width()/2;							  				
+			  const double textWidthHalf	= metric.width()/2;				  								
+			  pos = Pt::Gfx::PointF(widthHalf - textWidthHalf, metric.ascent());	
+      }
+      break;
+		
+      case Hmi::Align::TopRight:
+      {
+			  const double width		  = size.width();				
+			  const double textWidth	= metric.width();									
+			  pos = Pt::Gfx::PointF(width - textWidth, metric.ascent());	
+      }
+      break;
+
+		  case Hmi::Align::MidleLeft:
+      {			  
+        const double heightHalf		  = size.height()/2;				
+			  const double textHeightHalf = metric.height()/2;
 								
-				pos = Pt::Gfx::PointF(widthHalf - textWidthHalf, (heightHalf - textHeightHalf) + metric.ascent());							
-			}
-			break;
-		}
+			  pos = Pt::Gfx::PointF(0, (heightHalf - textHeightHalf) + metric.ascent());
+      }
+      break;
+
+		  case Hmi::Align::MidleCenter:
+		  {			
+			  const double widthHalf		  = size.width()/2;				
+			  const double heightHalf		  = size.height()/2;				
+			  const double textWidthHalf	= metric.width()/2;	
+			  const double textHeightHalf = metric.height()/2;	
+								
+			  pos = Pt::Gfx::PointF(widthHalf - textWidthHalf, (heightHalf - textHeightHalf) + metric.ascent());							
+		  }
+		  break;
+
+		  case Hmi::Align::MidleRight:
+      {
+			  const double width		  = size.width();				
+			  const double textWidth	= metric.width();	
+        
+        const double heightHalf		  = size.height()/2;				
+			  const double textHeightHalf = metric.height()/2;	
+								
+			  pos = Pt::Gfx::PointF(width - textWidth, (heightHalf - textHeightHalf) + metric.ascent());	
+      }
+      break;
+
+		  case Hmi::Align::BottomLeft:
+      {
+        const double height	  = size.height();				
+			  const double textHeight = metric.height();	
+								
+			  pos = Pt::Gfx::PointF(0, (height- textHeight) + metric.ascent());	
+      }
+      break;
+
+		  case Hmi::Align::BottomCenter:
+      {
+			  const double widthHalf		  = size.width()/2;				
+			  const double textWidthHalf	= metric.width()/2;	
+
+        const double height	  = size.height();				
+			  const double textHeight = metric.height();	
+								
+			  pos = Pt::Gfx::PointF(widthHalf - textWidthHalf, (height- textHeight) + metric.ascent());	
+      }
+      break;
+
+		  case Hmi::Align::BottomRight:
+      {
+        const double width		  = size.width();				
+			  const double textWidth	= metric.width();	
+
+        const double height	  = size.height();				
+			  const double textHeight = metric.height();	
+								
+			  pos = Pt::Gfx::PointF(width - textWidth, (height- textHeight) + metric.ascent());	
+      }
+      break;
+    }
 	}
 
-	Pt::Gfx::Pen	pen(1, ForeColor.get());
-
-	localPainter.setFont(Font.get());
-	localPainter.setPen(pen);
-
-	localPainter.drawText(pos, caption);
+  localPainter.setPen(pen);
+  localPainter.drawText(pos, caption);
 
 	if( UseMnemonic.get() )
 	{			
 		int index = Widget::getMnemonicIndex( Caption.get() );
 		
-		if( index != std::string::npos  && ((index + 1) < caption.size()) )
+		if( index != std::string::npos  && ((index + 1) < (int) caption.size()) )
 		{	
 			std::string subString(  caption.begin(), caption.begin() + index );
 

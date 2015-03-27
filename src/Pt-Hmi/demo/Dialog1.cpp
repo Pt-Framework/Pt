@@ -26,6 +26,7 @@
 
 #include "Dialog1.h"
 #include "Dialog2.h"
+#include <Pt/Hmi/Margin.h>
 
 namespace Pt{
 namespace Hmi{
@@ -95,17 +96,17 @@ void Dialog1::init()
 
 	//New dialog button 
 	_newDialog.Dock = Docking::Right;
-	_newDialog.Size.set(Pt::Gfx::SizeF(100,25));
-	_newDialog.Caption.set("New Dialog [CTRL+F]");
-	_newDialog.ActionKey.set("C//f");
+	_newDialog.Size = Pt::Gfx::SizeF(100,25);
+	_newDialog.Caption = std::string("New Dialog [CTRL+F]");
+	_newDialog.ActionKey = std::string("C//f");
 	_newDialog.Clicked += Pt::slot(*this,&Dialog1::onShowNextDialog);
 	_panel1.addChild(&_newDialog);
 
 	//Close Button
 	_closeButton.Dock = Docking::Right;
-	_closeButton.Size.set(Pt::Gfx::SizeF(100,25));
-	_closeButton.ActionKey.set("C//x");
-	_closeButton.Caption.set("Close [CTRL+X]");
+	_closeButton.Size = Pt::Gfx::SizeF(100,25);
+	_closeButton.ActionKey = std::string("C//x");
+	_closeButton.Caption = std::string("Close [CTRL+X]");
 	_closeButton.Clicked +=  Pt::slot(*this,&Dialog1::onClosedByButton);
 	_panel1.addChild(&_closeButton);
 }

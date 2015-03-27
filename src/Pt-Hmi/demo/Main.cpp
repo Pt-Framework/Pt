@@ -11,7 +11,6 @@ int main(int argc, char* args[])
 	
 		mainWindow.show();
 
-		application.showConsole();
 		application.run();
 	}
 	catch(const std::exception& ex)

@@ -48,33 +48,36 @@ MainWindow::~MainWindow()
 
 void MainWindow::init()
 {	
-	//Window
-	{
+	
+	{//Icon
 		std::stringstream memoryStream;
 		
 		memoryStream.write((char*)Pt::Forms::Atesion::icon, Pt::Forms::Atesion::iconSize);	
 		
 		Pt::Gfx::ARgbImage* im = Pt::Gfx::ImageReader::read(memoryStream);
-		Icon = *im;
-		delete im;
+
 		//Generate Alpha channel
-		for(size_t y = 0;  y < Icon.get().height(); ++y)
+		for( size_t y = 0;  y < im->height(); ++y )
 		{
-			for(size_t x = 0;  x < Icon.get().width(); ++x)
+			for( size_t x = 0;  x < im->width(); ++x )
 			{
-				Pt::Gfx::ARgbColor& pix =  Icon.get().pixel(x,y);
+				Pt::Gfx::ARgbColor& pix =  im->pixel(x,y);
 				
 				if( pix.blue() == 255 && pix.red() == 255 && pix.green() == 255)
 					pix.setAlpha(0);
 			}
 		}			
+
+    Icon = *im;
+	  delete im;
 	}
+  
 	
 	Position = Pt::Gfx::PointF(200,200);
 	Size = Pt::Gfx::SizeF(800,615);
-	Caption.set("This is a Platinum C++ Human Machine Interface demo  ");
-  State.set(Hmi::WindowState::Normal);
-	StartPostion.set(Hmi::WindowStartPosition::CenterScreen);
+	Caption = std::string("This is a Platinum C++ Human Machine Interface demo  ");
+  State = Hmi::WindowState::Normal;
+	StartPostion = Hmi::WindowStartPosition::CenterParent;
 	Closed.Changed += Pt::slot(*this, &MainWindow::onClosedByWindow);
 
 	
@@ -83,52 +86,52 @@ void MainWindow::init()
 	_mainPanel.Position = Pt::Gfx::PointF(40,40);
 	_mainPanel.PanelBorderWidth = 3;	
 	_mainPanel.PanelBorderStyle = Pt::Hmi::BorderStyle::Sizeable;
+
 	{
 		std::stringstream memoryStream;
 		memoryStream.write((char*)Pt::Forms::DemoImage::image, Pt::Forms::DemoImage::imageSize);	
-		Pt::Gfx::ARgbImage* im = Pt::Gfx::ImageReader::read(memoryStream);
-		_mainPanel.BackgroundImage = *im;
-		delete im;
+		std::auto_ptr<Pt::Gfx::ARgbImage> im(Pt::Gfx::ImageReader::read(memoryStream));
+		_mainPanel.BackgroundImage = *im;		
 	}
 
 	_mainPanel.BackgroundImageLayout = Pt::Hmi::ImageLayout::Strech;
 
 	//Text
 	_textLabel.AutoSize = true;
-	_textLabel.Size.set(Pt::Gfx::SizeF(500,30));
+  _textLabel.Margin = Hmi::Margin(10);
+	_textLabel.Size = Pt::Gfx::SizeF(500,30);
 	_textLabel.Caption = std::string("T&his is a Platinum C++");
 	_textLabel.Position = Pt::Gfx::PointF(20,20);
 	_textLabel.ForeColor = Pt::Gfx::ARgbColor(255,0,0,0);
 	_textLabel.UseMnemonic = true;	
   _textLabel.bindMnemonicToWidget(_toggleButton);
-	//_textLabel.labelModel().PainterSurfaceType = Pt::Hmi::PainterType::Image;
 	_mainPanel.addChild(&_textLabel);
 	
 	//Toggle button
-	_toggleButton.ButtonType.set(Hmi::ButtonType::Toggle);
-	_toggleButton.Caption.set("Toggle Me [CTRL+I]");
-	_toggleButton.ActionKey.set("C//i");
-	_toggleButton.Position.set(Pt::Gfx::PointF(20,60));
-	_toggleButton.Size.set(Pt::Gfx::SizeF(150,25));		
+	_toggleButton.ButtonType = Hmi::ButtonType::Toggle;
+	_toggleButton.Caption = std::string("Toggle Me [CTRL+I]");
+	_toggleButton.ActionKey = std::string("C//i");
+	_toggleButton.Position = Pt::Gfx::PointF(20,60);
+	_toggleButton.Size = Pt::Gfx::SizeF(150,25);		
 	_mainPanel.addChild(&_toggleButton);
 
-	//Dialog button
-	_dialogButton.ButtonType.set(Hmi::ButtonType::Press);
+	//Dialog button  
+	_dialogButton.ButtonType = Hmi::ButtonType::Press;
 	_dialogButton.Caption = std::string("&&Dia&log [CTRL+D]&");
-	_dialogButton.ActionKey.set("C//d");
-	_dialogButton.Position.set(Pt::Gfx::PointF(20,100));
-	_dialogButton.Size.set(Pt::Gfx::SizeF(150,25));	
+	_dialogButton.ActionKey = std::string("C//d");
+	_dialogButton.Position = Pt::Gfx::PointF(20,100);
+	_dialogButton.Size = Pt::Gfx::SizeF(150,25);	
 	_dialogButton.UseMnemonic = true;
 	_dialogButton.Clicked  += Pt::slot(*this, &MainWindow::onShowDialog);
 	
 	_mainPanel.addChild(&_dialogButton);
 		
 	//Close button
-	_closeButton.ButtonType.set(Hmi::ButtonType::Press);
-	_closeButton.Caption.set("Close [CTRL+X]");
-	_closeButton.ActionKey.set("C//x");
-	_closeButton.Position.set(Pt::Gfx::PointF(590,525));
-	_closeButton.Size.set(Pt::Gfx::SizeF(150,25));
+	_closeButton.ButtonType = Hmi::ButtonType::Press;
+	_closeButton.Caption = std::string("Close [CTRL+X]");
+	_closeButton.ActionKey = std::string("C//x");
+	_closeButton.Position = Pt::Gfx::PointF(590,525);
+	_closeButton.Size = Pt::Gfx::SizeF(150,25);
 	_closeButton.Clicked += Pt::slot(*this, &MainWindow::onClosed);
 	
 	addChild(&_mainPanel);

@@ -15,7 +15,7 @@
 
 namespace Pt{
 namespace Hmi{
-   
+  
 namespace BorderStyle
 {
   enum Type
@@ -67,6 +67,25 @@ namespace Docking
 		Bottom,
 		Fill
 	};
+}
+
+namespace FlowLayout
+{
+  enum  Type
+  {
+    None,
+    Vertical,
+    Horizontal
+  };
+}
+
+namespace FlowLayoutDirection
+{
+  enum  Type
+  {
+    LeftToRightTopToBottom,
+    RightToLeftBottomToTop
+  };
 }
 
 class PT_HMI_API Widget : public Pt::Connectable
@@ -133,8 +152,9 @@ public:
 	Property<Pt::Gfx::PointF>				Position;
 	Property<Pt::Gfx::SizeF>				Size;
 	Property<Pt::Gfx::ARgbColor>		BackColor;
-  Property<Pt::Gfx::ARgbColor>		BackColorHightLight;
+  Property<Pt::Gfx::ARgbColor>		HighlightColor;
 	Property<Pt::Gfx::ARgbColor>		ForeColor;
+  Property<Pt::Gfx::ARgbColor>		DisabledColor;
 	Property<Pt::Gfx::ARgbImage>		BackgroundImage;
 	Property<ImageLayout::Type>	    BackgroundImageLayout;
 	Property<int>										Opacity;
@@ -149,6 +169,8 @@ public:
   Property<std::string>						Name;		
   Property<Pt::Hmi::Margin>       Margin;
   Property<Docking::Type>         Dock;
+  Property<FlowLayout::Type>	    FlowLayout;	
+  Property<FlowLayoutDirection::Type> FlowDirection;
 
 protected:
   Widget();	
@@ -156,6 +178,7 @@ protected:
 protected:
   virtual void onInvalidate();
 	virtual void onRender();
+  virtual void onLayout();
 	virtual void onPointerInput(const PointingEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);
 	virtual void onMnemonic();

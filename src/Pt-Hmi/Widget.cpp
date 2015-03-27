@@ -14,8 +14,9 @@ Widget::Widget()
 , PT_HMI_INIT_PROPERTY_VALUE(Position, Pt::Gfx::PointF(0,0))
 , PT_HMI_INIT_PROPERTY_VALUE(Size, Pt::Gfx::SizeF(100,100))
 , PT_HMI_INIT_PROPERTY_VALUE(BackColor,Pt::Gfx::ARgbColor(237,237,237))
-, PT_HMI_INIT_PROPERTY_VALUE(BackColorHightLight,Pt::Gfx::ARgbColor(200,200,200))
-, PT_HMI_INIT_PROPERTY_VALUE(ForeColor, Pt::Gfx::ARgbColor(70,70,70))
+, PT_HMI_INIT_PROPERTY_VALUE(HighlightColor,Pt::Gfx::ARgbColor(200,200,200))
+, PT_HMI_INIT_PROPERTY_VALUE(ForeColor, Pt::Gfx::ARgbColor(0,0,0))
+, PT_HMI_INIT_PROPERTY_VALUE(DisabledColor, Pt::Gfx::ARgbColor(178,178,178))
 , PT_HMI_INIT_PROPERTY_VALUE(BackgroundImage, Pt::Gfx::ARgbImage(0,0))
 , PT_HMI_INIT_PROPERTY_VALUE(BackgroundImageLayout, ImageLayout::NoLayout)
 , PT_HMI_INIT_PROPERTY_VALUE(Opacity,0)
@@ -30,6 +31,8 @@ Widget::Widget()
 , PT_HMI_INIT_PROPERTY_VALUE(Name,"Widget")
 , PT_HMI_INIT_PROPERTY(Margin)
 , PT_HMI_INIT_PROPERTY_VALUE(Dock, Docking::None)
+, PT_HMI_INIT_PROPERTY_VALUE(FlowLayout, Hmi::FlowLayout::None)
+, PT_HMI_INIT_PROPERTY_VALUE(FlowDirection, Hmi::FlowLayoutDirection::LeftToRightTopToBottom)
 , _parent(0)
 {
 	bindMnemonicToWidget( *this );	
@@ -113,23 +116,19 @@ void Widget::mnemonic()
 
 
 void Widget::invalidate()
-{
+{  
 	onInvalidate();
 }
 
 
-void Widget::render()
+void Widget::onLayout()
 {
-	if( ! Visible.get() )
-		return;
-	
-	onRender();
-
-	Pt::Hmi::Painter& localPainter = _paintSurface.painter();
+  Pt::Hmi::Painter& localPainter = paintSurface().painter();
+  Gfx::SizeF clientSize = paintSurface().size();
   double posLeft  = 0;
   double posTop   = 0;
-  double posRight  = Size.get().width();
-  double posBottom = Size.get().height();
+  double posRight  = clientSize.width();
+  double posBottom = clientSize.height();
   std::vector<Widget*> fillChilds;
 
 	for( size_t i = 0; i < children().size(); ++i )
@@ -137,66 +136,115 @@ void Widget::render()
 		Widget*	child = _children[i];			
 		    
     Pt::Gfx::PointF point = child->Position.get();
-
-    switch(child->Dock.get())
+    if( FlowLayout.get() == Hmi::FlowLayout::None)
     {
-      case Docking::None:        
+      switch(child->Dock.get())
       {
-        point.setX( point.x() );
-        point.setY( point.y() );		    
-      }
-      break;
+        case Docking::None:        
+        {
+          point.setX( point.x() );
+          point.setY( point.y() );		    
+        }
+        break;
 
-      case Docking::Left:
-      {
-        point.setX( posLeft );
-        point.setY( posTop );		    
-        posLeft += child->Size.get().width();      
+        case Docking::Left:
+        {
+          point.setX( posLeft );
+          point.setY( posTop );		    
+          posLeft += child->Size.get().width();      
         
-        updatePosSizeNoInval( *child, Pt::Gfx::SizeF( child->Size.get().width(), Size.get().height() ), point ); 
-      }
-      break;
+          updatePosSizeNoInval( *child, Pt::Gfx::SizeF( child->Size.get().width(), clientSize.height() ), point ); 
+        }
+        break;
 
-      case Docking::Top:
-      {
-        point.setX( posLeft );
-        point.setY( posTop  );		    
-        posTop += child->Size.get().height();      
+        case Docking::Top:
+        {
+          point.setX( posLeft );
+          point.setY( posTop  );		    
+          posTop += child->Size.get().height();      
         
-        updatePosSizeNoInval(*child, Pt::Gfx::SizeF(  Size.get().width(), child->Size.get().height() ), point );
-      }
-      break;
+          updatePosSizeNoInval(*child, Pt::Gfx::SizeF(  clientSize.width(), child->Size.get().height() ), point );
+        }
+        break;
 
-      case Docking::Right:
-      {
-        posRight -= child->Size.get().width();     
-        point.setX( posRight );
-        point.setY( posTop );		                     
+        case Docking::Right:
+        {
+          posRight -= child->Size.get().width();     
+          point.setX( posRight );
+          point.setY( posTop );		                     
         
-        updatePosSizeNoInval(*child, Pt::Gfx::SizeF(  child->Size.get().width(), Size.get().height() - posTop ), point );
-      }
-      break;
+          updatePosSizeNoInval(*child, Pt::Gfx::SizeF(  child->Size.get().width(), clientSize.height() - posTop ), point );
+        }
+        break;
 
-      case Docking::Bottom:
-      {
-        posBottom -= child->Size.get().height();    
-        point.setX( posLeft );
-        point.setY( posBottom  );		              
+        case Docking::Bottom:
+        {
+          posBottom -= child->Size.get().height();    
+          point.setX( posLeft );
+          point.setY( posBottom  );		              
         
-        double width = posRight - posLeft;
-        updatePosSizeNoInval(*child, Pt::Gfx::SizeF( width, child->Size.get().height() ), point);
-      }
-      break;
+          double width = posRight - posLeft;
+          updatePosSizeNoInval(*child, Pt::Gfx::SizeF( width, child->Size.get().height() ), point);
+        }
+        break;
 
-      case Docking::Fill:
-      {
-        fillChilds.push_back(child);
-        continue;
-      }      
+        case Docking::Fill:
+        {
+          fillChilds.push_back(child);
+          continue;
+        }      
+      }
+    }
+    else
+    {
+        switch( FlowLayout.get() )
+        {
+          case Hmi::FlowLayout::Horizontal:
+          {
+                        
+            if( FlowDirection.get() == FlowLayoutDirection::LeftToRightTopToBottom )
+            {
+              point.setX( posLeft );
+              posLeft += child->Size.get().width() + child->Margin.get().left() + child->Margin.get().right();
+            }
+            else
+            {
+              posRight -= (child->Size.get().width() + child->Margin.get().left() + child->Margin.get().right() );
+              point.setX( posRight );              
+            }
+
+            point.setY( 0 );	
+            updatePosSizeNoInval(*child, Pt::Gfx::SizeF( child->Size.get().width(), clientSize.height() ), point);
+          }
+          break;
+
+          case Hmi::FlowLayout::Vertical:
+          {
+            point.setX( 0 );
+
+            if( FlowDirection.get() == FlowLayoutDirection::LeftToRightTopToBottom )
+            {
+              point.setY( posTop );
+              posTop += child->Size.get().height() + child->Margin.get().top() + child->Margin.get().bottom();	
+            }
+            else
+            {
+              posBottom -= child->Size.get().height();              
+              point.setY( posBottom  );	
+            }
+
+            updatePosSizeNoInval(*child, Pt::Gfx::SizeF( clientSize.width(), child->Size.get().height() ), point);
+          }
+          break;
+        }
     }
 
     child->render();
-    localPainter.drawSurface(point, child->paintSurface());
+    
+    const double& x = point.x() + child->Margin.get().left();
+    const double& y = point.y() + child->Margin.get().top();
+
+    localPainter.drawSurface(Gfx::PointF(x, y) , child->paintSurface());
 	}	
 
   if( fillChilds.size() != 0 )
@@ -204,15 +252,30 @@ void Widget::render()
     Widget* child = fillChilds[0]; 
     Pt::Gfx::PointF point(posLeft, posTop);
 
-    const double& width = posRight - posTop;
+    const double& width = posRight - posLeft;
     const double& height = posBottom - posTop;
-    updatePosSizeNoInval( *child, Pt::Gfx::SizeF( width, height ), point );
 
+    updatePosSizeNoInval( *child, Pt::Gfx::SizeF( width, height ), point );
     child->render();
+
+    const double& x = point.x() + child->Margin.get().left();
+    const double& y = point.y() + child->Margin.get().top();
+
+    point.setX(x);
+    point.setY(y);
+    
     localPainter.drawSurface(point, child->paintSurface());
   }
 }
 
+void Widget::render()
+{
+	if( ! Visible.get() )
+		return;
+	
+	onRender();
+	onLayout();
+}
 
 
 void Widget::onRender()
@@ -220,26 +283,20 @@ void Widget::onRender()
 	if( ! Visible.get() )
 		return;
 
-  Pt::Gfx::SizeF size = Size.get();
-  size.setWidth( size.width() );
-	if( Size.get().width() < 0 ||  Size.get().height() < 0)
-		return;
+  Pt::Gfx::SizeF size = _paintSurface.size();;
 
-	Pt::Gfx::SizeF bufferSize = _paintSurface.size();
+	if( size.width() < 0 ||  size.height() < 0)
+		return; 
 
-	//ToDo: move this check to surface resize.
-	if(bufferSize.width() != size.width() ||bufferSize.height() != size.height())
-		_paintSurface.resize(size);
-
-	Pt::Gfx::ARgbImage& backImage = BackgroundImage.get();
-	Pt::Hmi::Painter&	localPainter = _paintSurface.painter();
-	Pt::Gfx::RectF		rect(Pt::Gfx::PointF(0,0),size);
+	Pt::Gfx::ARgbImage& backImage    = BackgroundImage.get();
+	Pt::Hmi::Painter&	  localPainter = _paintSurface.painter();
+	Pt::Gfx::RectF		  rect(Pt::Gfx::PointF(0,0),size);
 	
 	localPainter.setFont(Font.get());
 
 	if(HighLight.get())
 	{       
-		Pt::Gfx::Brush	brush(BackColorHightLight.get());
+		Pt::Gfx::Brush	brush(HighlightColor.get());
         
 		localPainter.setBrush(brush);
 		localPainter.fillRect(rect);
@@ -575,7 +632,10 @@ void Widget::onCaptionChanged(const Property<std::string>& prop)
 
 void Widget::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 {
-	paintSurface().resize( prop.get() );	
+  const double&  width  = prop.get().width() - ( Margin.get().left() + Margin.get().right() );
+  const double&  height = prop.get().height() - ( Margin.get().top() + Margin.get().bottom() );
+
+	paintSurface().resize( Gfx::SizeF(width,  height ) );	
 	
 	if( Visible.get() )
 		invalidate();

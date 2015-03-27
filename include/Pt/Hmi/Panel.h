@@ -14,9 +14,10 @@ public:
 	virtual ~Panel();	
 
 public:
-	Property<BorderStyle::Type>          PanelBorderStyle;
-	Property<bool>				               PanelBorderRoundEdge;	
-	Property<double>			               PanelBorderWidth;	
+	Property<BorderStyle::Type>    PanelBorderStyle;
+	Property<bool>				         PanelBorderRoundEdge;	
+	Property<double>			         PanelBorderWidth;	  
+  Property<Pt::Gfx::ARgbColor>	 BorderColor;
 
 protected:
 	virtual void onPointerInput(const PointingEvent& ev);

@@ -24,7 +24,7 @@ Pt::Gfx::ARgbImage PaintSurface::toImage() const
 void PaintSurface::resize(const Pt::Gfx::SizeF& size)
 {
 	_impl->resize(size);
-    _painter.setSurface(*this);
+  _painter.setSurface(*this);
 }
 
 Pt::Gfx::SizeF PaintSurface::size() const

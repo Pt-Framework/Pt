@@ -1230,9 +1230,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\x11\PaintSurfaceImpl.h">
       <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\x11\ViewImpl.h">
-      <Filter>Pt-Hmi\x11</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
@@ -1307,6 +1304,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\ActivateEvent.h">
       <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\WindowImpl.h">
+      <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2385,9 +2385,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\x11\PaintSurfaceImpl.cpp">
       <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\x11\ViewImpl.cpp">
-      <Filter>Pt-Hmi\x11</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
@@ -2441,6 +2438,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\WindowImpl.cpp">
       <Filter>Pt-Hmi\gdi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\WindowImpl.cpp">
+      <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -43,8 +43,7 @@ namespace WindowStartPosition
 {
     enum Type
     {
-        Manual,
-        CenterScreen,
+        Manual,        
         CenterParent,
     };
 }
@@ -86,6 +85,7 @@ public:
     Property<Pt::Gfx::ARgbImage>              Icon;
     Property<bool>                            Closed;
     Property<bool>                            CanClose;
+    Property<bool>                            FirstShow;
     Property<std::string>                     FocuseMoveKey;      
 
 		WindowImpl* impl();
@@ -133,6 +133,7 @@ private:
     void onIconChanged(const Property<Pt::Gfx::ARgbImage> & p);    		
 
 		void onEnabledChanged(const Property<bool> & p);
+
 private:
     WindowImpl* _impl;    
 };

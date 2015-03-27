@@ -142,7 +142,7 @@ void Painter::drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm, const Pt:
 }
 
 void Painter::drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm)
-{
+{  
 	_impl->drawSurface(to, pm);
 }	
 	

@@ -9,7 +9,12 @@ namespace Hmi{
 class Margin
 {
   public:
-    Margin(double left, double top, double right, double bottom)
+    Margin(const double& all)
+    {
+      setAll(all);
+    }
+
+    Margin(const double& left, const double& top, const double& right, const double& bottom)
     {
       assign( left, top, right, bottom );
     }
@@ -66,6 +71,11 @@ class Margin
     {
       _bottom = bottom;
     } 
+
+    void setAll(const double& value)
+    {
+      assign( value, value, value, value );
+    }
 
   private:
     double _left;

@@ -43,40 +43,60 @@ Dialog2::~Dialog2()
 void Dialog2::init()
 {
 	//Dialog
-	Size = Pt::Gfx::SizeF(450,200);
-	Position = Pt::Gfx::PointF(400,400);
-	Caption = std::string("Pt-Hmi-demo");
-	StartPostion = Hmi::WindowStartPosition::CenterParent;
-	ShowMaximizeButton.set(false);
-	ShowMinimizeButton.set(false);
-	ShowSysMenu.set(false);
+	Size               = Pt::Gfx::SizeF(450,200);
+	Position           = Pt::Gfx::PointF(400,400);
+	Caption            = std::string("Pt-Hmi-demo");
+	StartPostion       = Hmi::WindowStartPosition::CenterParent;
+	ShowMaximizeButton = false;
+	ShowMinimizeButton = false;
+	ShowSysMenu        = false;
 
-	_panel1.Dock = Docking::Bottom;
-	_panel1.Size.set(Pt::Gfx::SizeF(385,100));
-	_panel1.PanelBorderStyle.set(Hmi::BorderStyle::Single);
-	_panel1.PanelBorderRoundEdge.set(true);
-	addChild(&_panel1);
+  	//Label
+	_label.Dock         = Docking::Fill;
+	_label.AutoSize     = false;
+  _label.UseMnemonic  = true;
+  _label.TextAlign    = Hmi::Align::MidleCenter;
+	_label.Caption      = std::string("&Do you want to close me?");
+  _label.Margin       = Hmi::Margin(10);
+  _label.bindMnemonicToWidget( _okButton );
+	_mainPanel.addChild(&_label);
+
+  //Main panel
+  _mainPanel.Name      = std::string("Main panel");
+	_mainPanel.Margin    = Hmi::Margin(4);
+  _mainPanel.Size      = Pt::Gfx::SizeF(385,40);
+  _mainPanel.Dock      = Hmi::Docking::Fill;
+  _mainPanel.PanelBorderStyle = Hmi::BorderStyle::Border3D;
+  _mainPanel.PanelBorderWidth = 2;
+  _mainPanel.PanelBorderRoundEdge = true;
+	addChild(&_mainPanel);
+
+  //Ok/Cancel Panel	
+	_okCancelPanel.Margin = Hmi::Margin(4);
+  _okCancelPanel.Size = Pt::Gfx::SizeF(385,40);
+  _okCancelPanel.Dock = Hmi::Docking::Bottom;
+  _okCancelPanel.PanelBorderStyle = Hmi::BorderStyle::NoBorder;
+  _okCancelPanel.FlowLayout = Hmi::FlowLayout::Horizontal;
+  _okCancelPanel.FlowDirection = Hmi::FlowLayoutDirection::RightToLeftBottomToTop;	
+	addChild(&_okCancelPanel);
 
 	//Cancel button
+  _cancelButton.Margin = Hmi::Margin(2,4,2,4);
   _cancelButton.Dock = Docking::Right;
-	_cancelButton.Size = Pt::Gfx::SizeF(100,23);
-	_cancelButton.Caption.set("Cancel");
+	_cancelButton.Size = Pt::Gfx::SizeF(100,40);
+	_cancelButton.Caption = std::string("Cancel");
 	_cancelButton.Clicked += Pt::slot(*this,&Dialog2::onClosedByButton);
-	_panel1.addChild(&_cancelButton);
+	_okCancelPanel.addChild(&_cancelButton);
 
 	//OK Button
+  _okButton.Margin = Hmi::Margin(2,4,2,4);
 	_okButton.Dock = Docking::Right;
-	_okButton.Size = Pt::Gfx::SizeF(100,23);
-	_okButton.Caption.set("OK");
-	_okButton.ActionKey.set("C//x");
+	_okButton.Size = Pt::Gfx::SizeF(100,40);
+	_okButton.Caption = std::string("OK");
+	_okButton.ActionKey = std::string("C//x");
 	_okButton.Clicked += Pt::slot(*this,&Dialog2::onClosedByButton);
-	_panel1.addChild(&_okButton);
+	_okCancelPanel.addChild(&_okButton);
 
-	//Label
-	_label.Dock = Docking::Fill;
-	_label.AutoSize.set(true);
-	_label.Caption.set("Do you want to close me?");
-	addChild(&_label);
 }
     
 void Dialog2::onClosedByButton()

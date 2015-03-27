@@ -54,13 +54,14 @@ Window::Window()
 , PT_HMI_INIT_PROPERTY_VALUE(Closed,false)
 , PT_HMI_INIT_PROPERTY_VALUE(CanClose,true)
 , PT_HMI_INIT_PROPERTY_VALUE(FocuseMoveKey, "\t")
+, PT_HMI_INIT_PROPERTY_VALUE(FirstShow,true)
 {
 	Visible = false;
 	Focused = true;
   Name = std::string("Window");
 	AcceptFocus = false;
 		
-  Size.Changed += Pt::slot(*this, &Window::onSizeChanged);	
+  Size.Changed  += Pt::slot(*this, &Window::onSizeChanged);	
   Position.Changed += Pt::slot(*this, &Window::onPositionChanged);
   Closed.Changed += Pt::slot(*this, &Window::onClosedChanged);
   Visible.Changed += Pt::slot(*this, &Window::onVisibleChanged);
@@ -203,6 +204,17 @@ void Window::onVisibleChanged(const Property<bool> & visible)
   //Set the closed flag
 	if( visible.get() )
 	{
+
+    if( FirstShow.get() )
+    {
+      if( parent() != 0  && StartPostion.get() == WindowStartPosition::CenterParent )
+      {
+          //Todo center parent.
+      }  
+
+      FirstShow = false;
+    }
+
     _impl->show();
 	}
   else

@@ -55,17 +55,17 @@ PaintSurfaceImpl::PaintSurfaceImpl()
 
 PaintSurfaceImpl::~PaintSurfaceImpl()
 {
-    HPEN oldPen = (HPEN)SelectObject(_deviceContext, _oldPen);
-    DeleteObject(oldPen);
+  HPEN oldPen = (HPEN)SelectObject(_deviceContext, _oldPen);
+  DeleteObject(oldPen);
 
-    HPEN oldBrush = (HPEN)SelectObject(_deviceContext, _oldBrush);
-    DeleteObject(oldBrush);
+  HPEN oldBrush = (HPEN)SelectObject(_deviceContext, _oldBrush);
+  DeleteObject(oldBrush);
 
-    HPEN oldFont = (HPEN)SelectObject(_deviceContext, _oldFont);
-    DeleteObject(oldFont);
+  HPEN oldFont = (HPEN)SelectObject(_deviceContext, _oldFont);
+  DeleteObject(oldFont);
 
-    DeleteDC(_deviceContext);
-    DeleteObject(_bitmapHandle);
+  DeleteDC(_deviceContext);
+  DeleteObject(_bitmapHandle);
 }
 
 Pt::Gfx::ARgbImage PaintSurfaceImpl::toImage()
@@ -78,8 +78,11 @@ Pt::Gfx::ARgbImage PaintSurfaceImpl::toImage()
 	
 void PaintSurfaceImpl::resize(const Pt::Gfx::SizeF& size)
 {
+  if( _size == size )
+    return;
+
 	_size = size;
-	Pt::Gfx::Size nsize = Application::instance().fromUnit(_size);
+	Pt::Gfx::Size nsize = Application::instance().fromUnit( _size );
 
 	//Save the old settings
 	COLORREF textColor = GetTextColor(_deviceContext);
@@ -91,11 +94,11 @@ void PaintSurfaceImpl::resize(const Pt::Gfx::SizeF& size)
   DeleteDC(_deviceContext);
 	DeleteObject(_bitmapHandle);
 
-    //Create a new context and bitmap
-    HDC screenDC = CreateDC(_T("DISPLAY"), NULL, NULL, NULL);
-    _deviceContext = CreateCompatibleDC(screenDC);
-    _bitmapHandle = CreateCompatibleBitmap(screenDC, nsize.width(), nsize.height());
-    DeleteDC(screenDC);
+  //Create a new context and bitmap
+  HDC screenDC = CreateDC(_T("DISPLAY"), NULL, NULL, NULL);
+  _deviceContext = CreateCompatibleDC(screenDC);
+  _bitmapHandle = CreateCompatibleBitmap(screenDC, nsize.width(), nsize.height());
+  DeleteDC(screenDC);
 
 	//Restore the old settings
 	SelectObject(_deviceContext, _bitmapHandle);

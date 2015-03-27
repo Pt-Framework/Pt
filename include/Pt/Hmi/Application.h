@@ -20,9 +20,9 @@ class KeyEvent;
 class PT_HMI_API Application : public Pt::System::Application
 {
 public:
-    Application(int argc = 0, char** argv = 0);
+  Application(int argc = 0, char** argv = 0);
 
-    virtual ~Application();
+  virtual ~Application();
 
 	static Application& instance();
     
@@ -50,7 +50,7 @@ public:
 	void nextEvent();
 
 private:     
-     ApplicationImpl* _impl; 
+  ApplicationImpl* _impl; 
 };
 
 }}

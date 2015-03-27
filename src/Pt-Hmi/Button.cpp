@@ -122,7 +122,8 @@ void Button::onMnemonic()
 		break;
 	}
 	
-	Label::onMnemonic();		
+  HighLight = ButtonState.get() == DeviceButton::Pressed ;
+	Label::onMnemonic();	    		
 	invalidate();	
 }
 
@@ -162,17 +163,18 @@ void Button::onButtonStateChanged( const Property<DeviceButton::State>& prop )
 
 void Button::onKeyInput(const KeyEvent& ev)
 {		
-	if(!Enabled.get())
+	if( !Enabled.get() )
 	{
 		Label::onKeyInput(ev);
 		return;
 	}
 
-	if(!Visible.get())
+	if( !Visible.get() )
 	{
 		Label::onKeyInput(ev);
 		return;
 	}
+
 	bool genOutput = false;
 
 	switch(ButtonType.get())
@@ -233,7 +235,10 @@ void Button::onKeyInput(const KeyEvent& ev)
 	Label::onKeyInput(ev);
 	
 	if(genOutput)
+  {
+    HighLight = ButtonState.get() == DeviceButton::Pressed ;
 		invalidate();
+  }
 }
 
 void Button::onPointerInput(const PointingEvent& ev)
@@ -335,7 +340,10 @@ void Button::onPointerInput(const PointingEvent& ev)
 	Label::onPointerInput(ev);
 	
 	if(genOutput)
+  {
+  	HighLight = ButtonState.get() == DeviceButton::Pressed ;
 		invalidate();
+  }
 }
 
 
@@ -346,13 +354,9 @@ void Button::onRender()
 	 
 	if( !Enabled.get() )
 	{
-		ForeColor.set(Pt::Gfx::ARgbColor(0,100,100,100));
 		Label::onRender();
 		return;
 	}			
-
-	ForeColor.set(Pt::Gfx::ARgbColor(0,0,0,0));
-	HighLight.set( ButtonState.get() == DeviceButton::Pressed );
 
 	Label::onRender();
 	
@@ -360,11 +364,10 @@ void Button::onRender()
 		return;
 
 	Pt::Hmi::Painter& localPainter = paintSurface().painter();
-	Pt::Gfx::SizeF size = Size.get();
+	Pt::Gfx::SizeF    size = paintSurface().size();
        
-	if(Armed.get() || Focused.get())
+	if( Armed.get() || Focused.get() )
 	{
-		Pt::Gfx::SizeF size = Size.get();
 		size.addHeight(-5);
 		size.addWidth(-5);
 

@@ -338,7 +338,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\x11\KeyHandler.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\PainterImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\PaintSurfaceImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\x11\ViewImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\x11\WindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\x11\X11Fd.h" />
     <ClInclude Include="..\..\src\Pt-Http\ClientImpl.h" />
     <ClInclude Include="..\..\src\Pt-Http\Connection.h" />
@@ -541,7 +541,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\x11\KeyHandler.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\PainterImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\PaintSurfaceImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\x11\ViewImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\x11\WindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\x11\X11Fd.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Authenticator.cpp" />
     <ClCompile Include="..\..\src\Pt-Http\Authorizer.cpp" />

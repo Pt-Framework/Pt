@@ -105,7 +105,7 @@ void WindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
   if(msg == WM_SYSCOMMAND)
   {
     _keyEvent.setState(KeyEvent::KeyUp);
-    _keyEvent.setAlt(wparam == SC_KEYMENU);
+    _keyEvent.setAlt(wparam == SC_KEYMENU );
     _keyEvent.setShift(false);
     _keyEvent.setCtrl(false);
     _keyEvent.setUnicode(lparam);
@@ -121,10 +121,12 @@ void WindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 
       if(wparam == 16 )
       {//Shift key
+        _keyEvent.setAlt(false);
         _keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);
       }
       else if(wparam == 17 )
       {//Controll key
+        _keyEvent.setAlt(false);
         _keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
       }
 

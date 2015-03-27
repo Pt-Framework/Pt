@@ -33,7 +33,7 @@ public:
 
 private:
 	PaintSurfaceImpl*	_impl;
-	Painter				_painter;
+	Painter				_painter;  
 };
 
 }}
