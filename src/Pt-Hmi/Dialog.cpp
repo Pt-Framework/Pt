@@ -38,6 +38,9 @@ Dialog::Dialog()
 	Name.set("Dialog");
   ShowInTaskbar = false;
 	ShowSysMenu = true;
+	Border = WindowBorder::Dialog;
+	StartPostion = WindowStartPosition::CenterParent;
+	ShowInTaskbar = true;
 }
 
 Dialog::~Dialog()
@@ -47,7 +50,9 @@ Dialog::~Dialog()
 
 void Dialog::doModal(Window* parent)
 {	
-  Visible = true;
+	setWindowParent(parent);  
+	
+	Visible = true;	
 
 	//Setup the parent as disabled and TopMost = false.
 	parent->Enabled = false;	
@@ -56,7 +61,7 @@ void Dialog::doModal(Window* parent)
 	
 	//Setup the dialog as aenabled and top most.	
 	Enabled = true;
-	impl()->setForceTopMost(true);
+	impl()->setForceTopMost(true);	
 
 	//Invalidate the dialog
 	invalidate();
@@ -69,6 +74,7 @@ void Dialog::doModal(Window* parent)
 	parent->impl()->setForceTopMost(true);
 	parent->Enabled = true;	
 	parent->invalidate();	
+	setWindowParent(0);
 }
 
 }}

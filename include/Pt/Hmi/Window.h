@@ -41,32 +41,32 @@ class ActivateEvent;
 
 namespace WindowStartPosition
 {
-    enum Type
-    {
-        Manual,        
-        CenterParent,
-    };
+  enum Type
+  {
+    Manual,        
+    CenterParent,
+  };
 }
 
 namespace WindowBorder
 {
-    enum Type
-    {
-        NoBorder,
-        Fixed,
-        Sizeable,
-        Tool,
-        ToolSizeable,
-        Dialog,
-        DialogSizeable
-    };
+  enum Type
+  {
+    NoBorder,
+    Fixed,
+    Sizeable,
+    Tool,
+    ToolSizeable,
+    Dialog,
+    DialogSizeable
+  };
 }
 
 
 class PT_HMI_API Window  : public Widget
 {
 public:    
-    Window();    
+    Window(Window* parent = 0);    
     ~Window();
 
     Pt::Signal<const Pt::Event&>& eventReady();
@@ -89,6 +89,11 @@ public:
     Property<std::string>                     FocuseMoveKey;      
 
 		WindowImpl* impl();
+		
+		void setWindowParent(Window* parent);
+
+		Window* windowParent() const;
+		
 
 protected:
     virtual void onInvalidate();
@@ -136,6 +141,7 @@ private:
 
 private:
     WindowImpl* _impl;    
+		Window*     _winParent;
 };
 
 }}

@@ -347,8 +347,9 @@ void WindowImpl::setSize(const Gfx::SizeF& sizef)
   SetRect(&clientRect, 0, 0, size.width() - 1, size.height() - 1);
 
   LONG style = GetWindowLong(_hwnd, GWL_STYLE);
+	LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
-  AdjustWindowRectEx(&clientRect, style, false, 0);
+  AdjustWindowRectEx(&clientRect, style, false, exStyle);
     
   LONG clientWidth  = clientRect.right  - clientRect.left + 1;
   LONG clientHeight = clientRect.bottom - clientRect.top  + 1;
@@ -450,19 +451,24 @@ void WindowImpl::setWindowState(WindowState::Type p)
 void WindowImpl::setBorder(WindowBorder::Type p)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
-  LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
+		LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
     switch( p)
     {
         case Pt::Hmi::WindowBorder::NoBorder:            
+						style &= ~WS_DLGFRAME;
+						style &= ~WS_THICKFRAME; 
+						exStyle &= ~WS_EX_TOOLWINDOW;						
         break;
 
         case Pt::Hmi::WindowBorder::Sizeable:
             style |= WS_THICKFRAME;
+						style &= ~WS_DLGFRAME;
         break;
 
         case Pt::Hmi::WindowBorder::Dialog:
-            style |= WS_DLGFRAME;            
+            style |= WS_DLGFRAME;   
+						style &= ~WS_THICKFRAME;         
         break;
 
         case Pt::Hmi::WindowBorder::DialogSizeable:
@@ -472,16 +478,19 @@ void WindowImpl::setBorder(WindowBorder::Type p)
 
         case Pt::Hmi::WindowBorder::Tool:
             style |= WS_DLGFRAME;
+						style &= ~WS_THICKFRAME; 
             exStyle |= WS_EX_TOOLWINDOW;
         break;
 
         case Pt::Hmi::WindowBorder::ToolSizeable:
+						style &= ~WS_DLGFRAME;
             style |= WS_THICKFRAME;
             exStyle |= WS_EX_TOOLWINDOW;
         break;
 
         default:
             style |= WS_BORDER; 
+						style &= ~WS_THICKFRAME;
         break;
     }
 
@@ -491,15 +500,15 @@ void WindowImpl::setBorder(WindowBorder::Type p)
 
 
 void WindowImpl::showInTaskbar(bool p)
-{
-  LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
+{	
+  LONG style = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
   if(p)
-        exStyle |= WS_EX_APPWINDOW;  
+		style |= WS_EX_APPWINDOW;  
   else
-    exStyle &= ~WS_EX_APPWINDOW; 
-  
-  SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle);
+    style &= ~WS_EX_APPWINDOW; 
+  	
+  SetWindowLong(_hwnd, GWL_EXSTYLE, style);	
 }
 
 void WindowImpl::setEnable(bool e)
@@ -522,14 +531,14 @@ void WindowImpl::setIcon(const Pt::Gfx::ARgbImage& icon)
 
         for(size_t x = 0; x < icon.width(); ++x)
         {
-            const size_t index  = offsetLine + (x*planes);
+          const size_t index  = offsetLine + (x*planes);
 
-            const Pt::Gfx::ARgbColor& pix =  icon.pixel(x,y);
+          const Pt::Gfx::ARgbColor& pix =  icon.pixel(x,y);
                 
-            bitmapBuffer[index]     = static_cast<unsigned char>(pix.blue());    
-            bitmapBuffer[index + 1] = static_cast<unsigned char>(pix.green());
-            bitmapBuffer[index + 2] = static_cast<unsigned char>(pix.red());
-            bitmapBuffer[index + 3] = static_cast<unsigned char>(pix.alpha());
+          bitmapBuffer[index]     = static_cast<unsigned char>(pix.blue());    
+          bitmapBuffer[index + 1] = static_cast<unsigned char>(pix.green());
+          bitmapBuffer[index + 2] = static_cast<unsigned char>(pix.red());
+          bitmapBuffer[index + 3] = static_cast<unsigned char>(pix.alpha());
         }        
     }
 
@@ -540,7 +549,7 @@ void WindowImpl::setIcon(const Pt::Gfx::ARgbImage& icon)
 
 void WindowImpl::render()
 {
-    InvalidateRect(_hwnd, NULL, FALSE);
+	InvalidateRect(_hwnd, NULL, FALSE);
 }
 
 }}

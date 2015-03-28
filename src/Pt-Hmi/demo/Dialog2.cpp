@@ -50,7 +50,7 @@ void Dialog2::init()
 	ShowMaximizeButton = false;
 	ShowMinimizeButton = false;
 	ShowSysMenu        = false;
-
+	Border = WindowBorder::DialogSizeable;
   	//Label
 	_label.Dock         = Docking::Fill;
 	_label.AutoSize     = false;
@@ -81,6 +81,10 @@ void Dialog2::init()
 	addChild(&_okCancelPanel);
 
 	//Cancel button
+	std::string actionCancel;
+	actionCancel += (char) 27;
+	_cancelButton.ActionKey = actionCancel;
+	
   _cancelButton.Margin = Hmi::Margin(2,4,2,4);
   _cancelButton.Dock = Docking::Right;
 	_cancelButton.Size = Pt::Gfx::SizeF(100,40);
@@ -95,6 +99,9 @@ void Dialog2::init()
 	_okButton.Caption = std::string("OK");
 	_okButton.ActionKey = std::string("C//x");
 	_okButton.Clicked += Pt::slot(*this,&Dialog2::onClosedByButton);
+	std::string ac;
+	ac += (char) 13;
+	_okButton.ActionKey = ac;
 	_okCancelPanel.addChild(&_okButton);
 
 }

@@ -46,69 +46,53 @@ void Dialog1::init()
 {
 	//Dialog
 	Size  = Pt::Gfx::SizeF(700,500);
+	MinimumSize = Size.get();
 	Position = Pt::Gfx::PointF(400,400);
 	Caption = std::string("This is a sample modal dialog 1");
 	StartPostion = Hmi::WindowStartPosition::CenterParent;
+	BackColor = Gfx::ARgbColor(0,255,255);
+	Border = WindowBorder::DialogSizeable;
 
-  //Left
-  _panel1.Size = Pt::Gfx::SizeF(200,20);
-  _panel1.BackColor = Pt::Gfx::ARgbColor(0, 0, 255,0);
-  _panel1.Dock = Docking::Left;
+	//New dialog button 
+	_newDialogButton.Margin = Hmi::Margin(5);
+	_newDialogButton.Dock = Docking::Right;
+	_newDialogButton.Position = Gfx::PointF(10,10);
+	_newDialogButton.Size = Pt::Gfx::SizeF(200,30);
+	_newDialogButton.Caption = std::string("New Dialog [CTRL+F]");
+	_newDialogButton.ActionKey = std::string("C//f");
+	_newDialogButton.Clicked += Pt::slot(*this,&Dialog1::onShowNextDialog);
+	_panel1.addChild(&_newDialogButton);
+
+	//Close Button
+	_closeButton.Margin = Hmi::Margin(5);
+	_closeButton.Dock = Docking::Right;
+	_closeButton.Position = Gfx::PointF(10,10);
+	_closeButton.Size = Pt::Gfx::SizeF(200,30);
+	_closeButton.ActionKey = std::string("C//x");
+	_closeButton.Caption = std::string("Close [CTRL+X]");
+	_closeButton.Clicked +=  Pt::slot(*this,&Dialog1::onClosedByButton);
+	_panel1.addChild(&_closeButton);
+  
+	_panel1.Size = Pt::Gfx::SizeF(200,50);
+  _panel1.Dock = Docking::Bottom;
   addChild(&_panel1);
 
   _panel2.BackColor = Pt::Gfx::ARgbColor(0, 255, 255,0);
   _panel2.Dock = Docking::Left;
   addChild(&_panel2);
   
-  //Top
+  
   _panel3.BackColor = Pt::Gfx::ARgbColor(0, 0, 255,0);
-  _panel3.Dock = Docking::Top;
+  _panel3.Dock = Docking::Right;
   addChild(&_panel3);
 
   _panel4.BackColor = Pt::Gfx::ARgbColor(0, 255, 255,0);
   _panel4.Dock = Docking::Top;
   addChild(&_panel4);
-
-  //Right
-  _panel5.BackColor = Pt::Gfx::ARgbColor(0, 255, 0,0);
-  _panel5.Dock = Docking::Right;
-  addChild(&_panel5);
-
-  _panel6.BackColor = Pt::Gfx::ARgbColor(0, 255, 255,0);
-  _panel6.Dock = Docking::Right;
-  addChild(&_panel6);
   
-  //Bottom
-  _panel7.Size = Pt::Gfx::SizeF(10, 200);
-  _panel7.BackColor = Pt::Gfx::ARgbColor(0, 255, 0,0);
-  _panel7.Dock = Docking::Bottom;
-  addChild(&_panel7);
-
-  _panel8.BackColor = Pt::Gfx::ARgbColor(0, 255, 255,0);
-  _panel8.Dock = Docking::Bottom;
-  addChild(&_panel8);
-  //Fill
-
-  _panel9.BackColor = Pt::Gfx::ARgbColor(0, 0, 0,255);
-  _panel9.Dock = Docking::Fill;
-  
-  addChild(&_panel9);
-
-	//New dialog button 
-	_newDialog.Dock = Docking::Right;
-	_newDialog.Size = Pt::Gfx::SizeF(100,25);
-	_newDialog.Caption = std::string("New Dialog [CTRL+F]");
-	_newDialog.ActionKey = std::string("C//f");
-	_newDialog.Clicked += Pt::slot(*this,&Dialog1::onShowNextDialog);
-	_panel1.addChild(&_newDialog);
-
-	//Close Button
-	_closeButton.Dock = Docking::Right;
-	_closeButton.Size = Pt::Gfx::SizeF(100,25);
-	_closeButton.ActionKey = std::string("C//x");
-	_closeButton.Caption = std::string("Close [CTRL+X]");
-	_closeButton.Clicked +=  Pt::slot(*this,&Dialog1::onClosedByButton);
-	_panel1.addChild(&_closeButton);
+  _panel5.BackColor = Pt::Gfx::ARgbColor(0, 255, 0,255);
+  _panel5.Dock = Docking::Fill;
+  addChild(&_panel5);    
 }
 
 void Dialog1::onClosedByButton()

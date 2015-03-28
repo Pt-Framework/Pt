@@ -192,7 +192,7 @@ private:
   bool focusNextChild(int index);
 	bool focusPrevChild(int index);
 	int getFocusedChild() const;	
-  static void updatePosSizeNoInval(Widget& w, const Pt::Gfx::SizeF& s, const Pt::Gfx::PointF& p);
+  static void updatePosAndSize(Widget& w, const Pt::Gfx::SizeF& s, const Pt::Gfx::PointF& p);
 
 private:	  
 	Widget*								_parent;	

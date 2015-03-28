@@ -74,12 +74,14 @@ void MainWindow::init()
   
 	
 	Position = Pt::Gfx::PointF(200,200);
-	Size = Pt::Gfx::SizeF(800,615);
+	Size = Pt::Gfx::SizeF(800,600);
+	MinimumSize = Pt::Gfx::SizeF(200,200);
+	MaximumSize = Size.get();
 	Caption = std::string("This is a Platinum C++ Human Machine Interface demo  ");
   State = Hmi::WindowState::Normal;
 	StartPostion = Hmi::WindowStartPosition::CenterParent;
 	Closed.Changed += Pt::slot(*this, &MainWindow::onClosedByWindow);
-
+	Border = WindowBorder::NoBorder;
 	
 	//Panel
 	_mainPanel.Size = Pt::Gfx::SizeF(700,480);

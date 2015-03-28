@@ -93,7 +93,7 @@ public:
   
   void setIcon(const Pt::Gfx::ARgbImage& p);
 
-	void setEnable(bool e);
+	void setEnable(bool e);	
 
 protected:
 	void onWindowEvent(HWND wnd, unsigned int msg, WPARAM wparam, LPARAM lparam, bool& handled);

@@ -37,10 +37,10 @@
 namespace Pt{
 namespace Hmi{
 
-Window::Window()
+Window::Window(Window* parent)
 : _impl(new WindowImpl(&paintSurface() ) )
 , PT_HMI_INIT_PROPERTY_VALUE(MinimumSize,Pt::Gfx::SizeF(0,0))
-, PT_HMI_INIT_PROPERTY_VALUE(MaximumSize,Pt::Gfx::SizeF(65535,65535))
+, PT_HMI_INIT_PROPERTY_VALUE(MaximumSize,Pt::Gfx::SizeF(std::numeric_limits<Pt::uint32_t>::max() ,std::numeric_limits<Pt::uint32_t>::max()))
 , PT_HMI_INIT_PROPERTY_VALUE(StartPostion, WindowStartPosition::Manual)
 , PT_HMI_INIT_PROPERTY_VALUE(State, WindowState::Normal)
 , PT_HMI_INIT_PROPERTY_VALUE(ShowInTaskbar,true)
@@ -55,6 +55,7 @@ Window::Window()
 , PT_HMI_INIT_PROPERTY_VALUE(CanClose,true)
 , PT_HMI_INIT_PROPERTY_VALUE(FocuseMoveKey, "\t")
 , PT_HMI_INIT_PROPERTY_VALUE(FirstShow,true)
+, _winParent(parent)
 {
 	Visible = false;
 	Focused = true;
@@ -87,9 +88,23 @@ Window::Window()
 	Size =  Pt::Gfx::SizeF(200,200);
 }
 
+
 Window::~Window()
 {
 }
+
+
+void Window::setWindowParent(Window* parent)
+{
+	_winParent = parent;
+}
+
+
+Window* Window::windowParent() const
+{
+	return _winParent;
+}
+
 
 Pt::Signal<const Pt::Event&>& Window::eventReady()
 {
@@ -175,7 +190,19 @@ void Window::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
 
 void Window::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 {
-  _impl->setSize( prop.get() );  
+	if( prop.get().width() < MinimumSize.get().width() ||   prop.get().height() < MinimumSize.get().height())
+	{
+		Size = MinimumSize.get();
+		return;
+	}
+		
+	if( prop.get().width() > MaximumSize.get().width() ||  prop.get().height() > MaximumSize.get().height())
+	{
+		Size =  MaximumSize.get() ;
+		return;
+	}
+
+  _impl->setSize( Size.get() );  
 }
 
 
@@ -207,9 +234,11 @@ void Window::onVisibleChanged(const Property<bool> & visible)
 
     if( FirstShow.get() )
     {
-      if( parent() != 0  && StartPostion.get() == WindowStartPosition::CenterParent )
+      if( windowParent() != 0  && StartPostion.get() == WindowStartPosition::CenterParent )
       {
-          //Todo center parent.
+          double x = windowParent()->Position.get().x() + (windowParent()->Size.get().width()/2  - Size.get().width()/2);
+					double y = windowParent()->Position.get().y() + (windowParent()->Size.get().height()/2  - Size.get().height()/2);
+					Position = Gfx::PointF(x,y);
       }  
 
       FirstShow = false;
@@ -262,6 +291,8 @@ void Window::onWindowStateChanged(const Property<WindowState::Type> & p)
 void Window::onBorderChanged(const Property<WindowBorder::Type> & p)
 {
   _impl->setBorder( p.get() );
+
+	Size.Changed.send(Size); //Notify size changed
 }
 
 
@@ -283,3 +314,4 @@ void Window::onEnabledChanged(const Property<bool> & p)
 }
 
 }}
+

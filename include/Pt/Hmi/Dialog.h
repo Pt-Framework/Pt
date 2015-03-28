@@ -56,7 +56,7 @@ public:
 
 	Property<DialogResultType::Type>	Result;		
 
-private:   
+private:   	
 };
 
 }}
