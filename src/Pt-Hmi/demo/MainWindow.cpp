@@ -112,7 +112,7 @@ void MainWindow::init()
 	//Toggle button
 	_toggleButton.ButtonType = Hmi::ButtonType::Toggle;
 	_toggleButton.Caption = std::string("Toggle Me [CTRL+I]");
-	_toggleButton.ActionKey = std::string("C//i");
+	_toggleButton.ShortcutKey = std::string("C//i");
 	_toggleButton.Position = Pt::Gfx::PointF(20,60);
 	_toggleButton.Size = Pt::Gfx::SizeF(150,25);		
 	_mainPanel.addChild(&_toggleButton);
@@ -120,7 +120,7 @@ void MainWindow::init()
 	//Dialog button  
 	_dialogButton.ButtonType = Hmi::ButtonType::Press;
 	_dialogButton.Caption = std::string("&&Dia&log [CTRL+D]&");
-	_dialogButton.ActionKey = std::string("C//d");
+	_dialogButton.ShortcutKey = std::string("C//d");
 	_dialogButton.Position = Pt::Gfx::PointF(20,100);
 	_dialogButton.Size = Pt::Gfx::SizeF(150,25);	
 	_dialogButton.UseMnemonic = true;
@@ -131,7 +131,7 @@ void MainWindow::init()
 	//Close button
 	_closeButton.ButtonType = Hmi::ButtonType::Press;
 	_closeButton.Caption = std::string("Close [CTRL+X]");
-	_closeButton.ActionKey = std::string("C//x");
+	_closeButton.ShortcutKey = std::string("C//x");
 	_closeButton.Position = Pt::Gfx::PointF(590,525);
 	_closeButton.Size = Pt::Gfx::SizeF(150,25);
 	_closeButton.Clicked += Pt::slot(*this, &MainWindow::onClosed);

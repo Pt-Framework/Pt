@@ -53,8 +53,7 @@ public:
 	Button();
 	virtual ~Button();
 
-	Property<DeviceButton::State> ButtonState;	
-	Property<std::string>         ActionKey;		
+	Property<DeviceButton::State> ButtonState;		
 	Property<bool>								Armed;		
 	Property<ButtonType::Type>    ButtonType;	
 	Property<int>									DoublePressTimeInMs; 
@@ -68,6 +67,8 @@ protected:
 	virtual void onPressedAction();
 	virtual void onDoublePressedAction();
 	virtual void onMnemonic();
+	virtual void onShortcutKey(KeyEvent::KeyState state);
+	virtual void onActionKey(KeyEvent::KeyState state);
 	virtual void onPointerInput(const PointingEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);
 	virtual void onButtonStateChanged( const Property<DeviceButton::State>& prop);

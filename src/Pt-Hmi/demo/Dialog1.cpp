@@ -59,7 +59,7 @@ void Dialog1::init()
 	_newDialogButton.Position = Gfx::PointF(10,10);
 	_newDialogButton.Size = Pt::Gfx::SizeF(200,30);
 	_newDialogButton.Caption = std::string("New Dialog [CTRL+F]");
-	_newDialogButton.ActionKey = std::string("C//f");
+	_newDialogButton.ShortcutKey = std::string("C//f");
 	_newDialogButton.Clicked += Pt::slot(*this,&Dialog1::onShowNextDialog);
 	_panel1.addChild(&_newDialogButton);
 
@@ -68,7 +68,7 @@ void Dialog1::init()
 	_closeButton.Dock = Docking::Right;
 	_closeButton.Position = Gfx::PointF(10,10);
 	_closeButton.Size = Pt::Gfx::SizeF(200,30);
-	_closeButton.ActionKey = std::string("C//x");
+	_closeButton.ShortcutKey = std::string("C//x");
 	_closeButton.Caption = std::string("Close [CTRL+X]");
 	_closeButton.Clicked +=  Pt::slot(*this,&Dialog1::onClosedByButton);
 	_panel1.addChild(&_closeButton);

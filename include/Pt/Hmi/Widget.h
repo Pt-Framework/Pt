@@ -146,31 +146,32 @@ public:
 	static std::string removeMnemonic(const std::string& text);
 
 public:
-	Property<bool>									Enabled;		
-	Property<bool>									Visible;
-	Property<Pt::Gfx::Font>					Font;
-	Property<Pt::Gfx::PointF>				Position;
-	Property<Pt::Gfx::SizeF>				Size;
-	Property<Pt::Gfx::ARgbColor>		BackColor;
-  Property<Pt::Gfx::ARgbColor>		HighlightColor;
-	Property<Pt::Gfx::ARgbColor>		ForeColor;
-  Property<Pt::Gfx::ARgbColor>		DisabledColor;
-	Property<Pt::Gfx::ARgbImage>		BackgroundImage;
-	Property<ImageLayout::Type>	    BackgroundImageLayout;
-	Property<int>										Opacity;
-	Property<Cursor>                CursorT;
-	Property<Align::Type>		        TextAlign;
-	Property<bool>									Focused; 
-	Property<bool>									AcceptFocus;
-  Property<bool>									HighLight;
-	Property<std::string>						FocusedActionKey;
-	Property<std::string>						Caption;		
-	Property<bool>									UseMnemonic;	
-  Property<std::string>						Name;		
-  Property<Pt::Hmi::Margin>       Margin;
-  Property<Docking::Type>         Dock;
-  Property<FlowLayout::Type>	    FlowLayout;	
+	Property<bool>											Enabled;		
+	Property<bool>											Visible;
+	Property<Pt::Gfx::Font>							Font;
+	Property<Pt::Gfx::PointF>						Position;
+	Property<Pt::Gfx::SizeF>						Size;
+	Property<Pt::Gfx::ARgbColor>				BackColor;
+  Property<Pt::Gfx::ARgbColor>				HighlightColor;
+	Property<Pt::Gfx::ARgbColor>				ForeColor;
+  Property<Pt::Gfx::ARgbColor>				DisabledColor;
+	Property<Pt::Gfx::ARgbImage>				BackgroundImage;
+	Property<ImageLayout::Type>					BackgroundImageLayout;
+	Property<int>												Opacity;
+	Property<Cursor>										CursorT;
+	Property<Align::Type>								TextAlign;
+	Property<bool>											Focused; 
+	Property<bool>											AcceptFocus;
+  Property<bool>											HighLight;
+	Property<std::string>								FocusedActionKey;
+	Property<std::string>								Caption;		
+	Property<bool>											UseMnemonic;	
+  Property<std::string>								Name;		
+  Property<Pt::Hmi::Margin>						Margin;
+  Property<Docking::Type>							Dock;
+  Property<FlowLayout::Type>					FlowLayout;	
   Property<FlowLayoutDirection::Type> FlowDirection;
+	Property<std::string>								ShortcutKey;		
 
 protected:
   Widget();	
@@ -182,6 +183,8 @@ protected:
 	virtual void onPointerInput(const PointingEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);
 	virtual void onMnemonic();
+	virtual void onActionKey(KeyEvent::KeyState state);
+	virtual void onShortcutKey(KeyEvent::KeyState state);
 
 private:
   void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);

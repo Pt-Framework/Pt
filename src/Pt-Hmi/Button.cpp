@@ -40,7 +40,6 @@ Button::Button()
 , _timeout(false)
 , _pressCounter(0)
 , PT_HMI_INIT_PROPERTY_VALUE(ButtonState,Pt::Hmi::DeviceButton::Released)
-, PT_HMI_INIT_PROPERTY_VALUE(ActionKey,"")
 , PT_HMI_INIT_PROPERTY_VALUE(Armed,false)
 , PT_HMI_INIT_PROPERTY_VALUE(ButtonType,Pt::Hmi::ButtonType::Press)
 , PT_HMI_INIT_PROPERTY_VALUE(DoublePressTimeInMs,1500)
@@ -161,84 +160,77 @@ void Button::onButtonStateChanged( const Property<DeviceButton::State>& prop )
 	}
 }
 
-void Button::onKeyInput(const KeyEvent& ev)
-{		
-	if( !Enabled.get() )
-	{
-		Label::onKeyInput(ev);
-		return;
-	}
-
-	if( !Visible.get() )
-	{
-		Label::onKeyInput(ev);
-		return;
-	}
-
-	bool genOutput = false;
-
-	switch(ButtonType.get())
+void Button::onActionKey( KeyEvent::KeyState state )
+{
+	switch( ButtonType.get() )
 	{
 		case ButtonType::Press:
 		{
-			if(ev.toUTF8String() == FocusedActionKey.get() && Focused.get())	
+			ButtonState = ( state == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;
+		}
+		break;
+		
+		case ButtonType::Toggle:
+		{
+			if((state == KeyEvent::KeyDown))
 			{
-				ButtonState = (ev.state() == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;
-				genOutput = true;
-			}
-			else if(ev.shortCutKey() == ActionKey.get())
-			{
-				ButtonState = (ev.state() == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;				
-				Focused = false;
-				Focused = true;
-				genOutput = true;
-			}
-			else
-			{
-				if(ButtonState.get() != DeviceButton::Released)
-				{
+				if(ButtonState.get() == DeviceButton::Pressed)
 					ButtonState = DeviceButton::Released;
-					genOutput = true;
-				}
+				else
+					ButtonState = DeviceButton::Pressed;
 			}
+		}
+		break;
+	}
+
+	HighLight = ButtonState.get() == DeviceButton::Pressed ;
+	invalidate();
+}
+
+void Button::onShortcutKey( KeyEvent::KeyState state )
+{
+	switch( ButtonType.get() )
+	{
+		case ButtonType::Press:
+		{
+			ButtonState = (state == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;				
+			Focused = false;
+			Focused = true;
 		}
 		break;
 
 		case ButtonType::Toggle:
 		{
-			if(ev.toUTF8String() == FocusedActionKey.get() && Focused.get())		
+			if( state == KeyEvent::KeyDown )
 			{
-				if((ev.state() == KeyEvent::KeyDown))
-				{
-					if(ButtonState.get() == DeviceButton::Pressed)
-						ButtonState = DeviceButton::Released;
-					else
-						ButtonState = DeviceButton::Pressed;
-
-					genOutput = true;
-				}
+				ButtonState = (ButtonState.get() == DeviceButton::Pressed) ? DeviceButton::Released : DeviceButton::Pressed;											
+				Focused = false;
+				Focused = true;
 			}
-			else if(ev.shortCutKey() == ActionKey.get())
-			{			
-				if((ev.state() == KeyEvent::KeyDown))
-				{
-					ButtonState = (ButtonState.get() == DeviceButton::Pressed) ? DeviceButton::Released : DeviceButton::Pressed;											
-					Focused = false;
-					Focused = true;
-					genOutput = true;
-				}
-			}
-		}			
+		}
 		break;
 	}
 	
+	HighLight = ButtonState.get() == DeviceButton::Pressed ;
+	invalidate();			
+}
+
+void Button::onKeyInput(const KeyEvent& ev)
+{		
+	if( !Enabled.get() )
+		return;
+
+	if( !Visible.get() )
+		return;
+
 	Label::onKeyInput(ev);
-	
-	if(genOutput)
-  {
-    HighLight = ButtonState.get() == DeviceButton::Pressed ;
+
+	if(ButtonType.get() == ButtonType::Press && ButtonState.get() != DeviceButton::Released)
+	{
+		ButtonState = DeviceButton::Released;
+    HighLight = ButtonState.get() == DeviceButton::Pressed;
 		invalidate();
-  }
+	}		
 }
 
 void Button::onPointerInput(const PointingEvent& ev)

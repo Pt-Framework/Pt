@@ -33,6 +33,7 @@ Widget::Widget()
 , PT_HMI_INIT_PROPERTY_VALUE(Dock, Docking::None)
 , PT_HMI_INIT_PROPERTY_VALUE(FlowLayout, Hmi::FlowLayout::None)
 , PT_HMI_INIT_PROPERTY_VALUE(FlowDirection, Hmi::FlowLayoutDirection::LeftToRightTopToBottom)
+, PT_HMI_INIT_PROPERTY_VALUE(ShortcutKey,"")
 , _parent(0)
 {
 	bindMnemonicToWidget( *this );	
@@ -377,13 +378,22 @@ void Widget::onInvalidate()
 		parent()->onInvalidate();		
 }
 
+void Widget::onActionKey(KeyEvent::KeyState state)
+{
+}
+
+void Widget::onShortcutKey(KeyEvent::KeyState state)
+{
+
+}
 
 void Widget::onKeyInput(const KeyEvent& ev)
 { 	
 	if( !Enabled.get() )
 			return;
 
-	if(UseMnemonic.get() && Enabled.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp)
+	//Mnemonic handling
+	if( UseMnemonic.get() && Enabled.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp )
 	{		
 		std::string mnKey = "";
 
@@ -396,6 +406,19 @@ void Widget::onKeyInput(const KeyEvent& ev)
 			_mnemonicWidget->mnemonic();			
 	}
 
+	//Action key handling
+	if( ev.toUTF8String() == FocusedActionKey.get() && Focused.get() )	
+	{
+		onActionKey( ev.state() );
+	}
+	
+	//Shortcurt Key
+	if( ev.shortCutKey() == ShortcutKey.get() )
+	{
+		onShortcutKey( ev.state() );
+	}
+
+	//Propagate to children.
 	for( size_t i = 0; i < children().size(); ++i)
 		children()[i]->onKeyInput(ev);
 }
