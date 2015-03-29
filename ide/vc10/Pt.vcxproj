@@ -329,7 +329,8 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ViewImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\WindowImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\WindowManager.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.h" />
@@ -526,7 +527,8 @@
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ViewImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\WindowImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\WindowManager.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Panel.cpp" />

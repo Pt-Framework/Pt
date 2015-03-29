@@ -1242,9 +1242,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ViewImpl.h">
-      <Filter>Pt-Hmi\linux-fb</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
@@ -1307,6 +1304,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\x11\WindowImpl.h">
       <Filter>Pt-Hmi\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\WindowImpl.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\WindowManager.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2403,9 +2406,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\CursorImpl.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ViewImpl.cpp">
-      <Filter>Pt-Hmi\linux-fb</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
@@ -2441,6 +2441,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\WindowImpl.cpp">
       <Filter>Pt-Hmi\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\WindowImpl.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\WindowManager.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

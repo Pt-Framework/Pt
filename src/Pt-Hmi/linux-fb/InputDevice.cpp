@@ -62,14 +62,14 @@ bool InputDevice::onRun()
 
 	int bytes = ::read(_ioh.fd, ev, sizeof(struct input_event) * 64);
     
-	if( bytes < (int) sizeof(struct input_event) )
+		if( bytes < (int) sizeof(struct input_event) )
     {
         return false;
     }
 
     for( unsigned i = 0; i < bytes / sizeof(input_event); i++ )
     {
-		Application::instance().impl()->inputEvent().send(ev[i]);
+			Application::instance().impl()->windowManager().systemEvent().send(ev[i]);
     }
 
     return true;

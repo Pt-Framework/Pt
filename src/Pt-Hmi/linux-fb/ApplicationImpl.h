@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2006 Marc Boris Duerner
+ * Copyright (C) 2015 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,10 +31,13 @@
 #define Pt_Hmi_ApplicationImpl_h
 
 #include "InputDevice.h"
+#include "WindowImpl.h"
 #include <Pt/System/MainLoop.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/ARgbImage.h>
+#include "WindowManager.h"
 
 namespace Pt {
 
@@ -42,12 +46,13 @@ namespace Hmi {
 class ApplicationImpl : public Pt::System::MainLoop
 {
     public:
-        ApplicationImpl();
+    ApplicationImpl();
 
-        ~ApplicationImpl();
+    ~ApplicationImpl();
 
 		void showConsole(bool t)
 		{
+			//TODO:
 		}
 
 		Pt::Gfx::PointF toUnit(const Pt::Gfx::Point& value)
@@ -104,23 +109,23 @@ class ApplicationImpl : public Pt::System::MainLoop
 			return 0;
 		}
 
-		Pt::Signal<const Pt::Event&>& systemEvent()
-		{
-			return _systemEvent;
-		}
-
 		Pt::Signal<const struct input_event&>& inputEvent()
 		{
 			return _inputEvent;
 		}
 
 		void nextEvent();
-		
+
+		WindowManager& windowManager()
+		{
+			return _windowManager;
+		}
+
 	protected:
-		Pt::Signal<const Pt::Event&> _systemEvent;
 		Pt::Signal<const struct input_event&> _inputEvent;
 		InputDevice _inputDevice;
-        InputDevice _inputDevice2;
+		InputDevice _inputDevice2;
+		WindowManager _windowManager;
 };
 
 } // namespace
@@ -128,3 +133,4 @@ class ApplicationImpl : public Pt::System::MainLoop
 } // namespace
 
 #endif
+
