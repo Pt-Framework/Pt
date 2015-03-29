@@ -85,9 +85,8 @@ public:
 private:
     Display* _display;
     X11Fd	_xfd;
-
 		Pt::Signal<const Pt::Event&> _systemEvent;				
-	double _dpi;
+		double _dpi;
 };
 
 }}

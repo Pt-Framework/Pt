@@ -40,7 +40,7 @@
 #include "Pt/Gfx/Rgb888Color.h"
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/NativePaintSurface.h>
+#include <Pt/Hmi/PaintSurface.h>
 #include <iostream>
 #include <algorithm>
 #include "ApplicationImpl.h"
@@ -111,7 +111,7 @@ void PainterImpl::destroy()
 }
 
 
-void PainterImpl::setSurface(NativePaintSurface& surface)
+void PainterImpl::setSurface(PaintSurface& surface)
 {
     destroy();
     create();
@@ -249,7 +249,7 @@ void PainterImpl::setBrush(const Gfx::Brush& brush)
     else if( brush.fillStyle() == Gfx::Brush::TextureFill ) 
     {
         Display* display = Application::instance().impl()->display();
-        NativePaintSurface tile( Pt::Gfx::SizeF(brush.texture().width(), brush.texture().height()) );
+        PaintSurface tile( Pt::Gfx::SizeF(brush.texture().width(), brush.texture().height()) );
         Painter& painter = tile.painter();
         painter.drawImage( Gfx::PointF(0, 0), brush.texture() );
         XSetFillStyle( display, _brushGc, FillTiled );
@@ -530,30 +530,27 @@ void PainterImpl::fillPolygon(const Pt::Gfx::PointF* points, const size_t pointC
 
 void PainterImpl::drawSurface(const Pt::Gfx::PointF& toF, PaintSurface& pm, const  Pt::Gfx::Region& pixmapRegion)
 {
-    NativePaintSurface* npm =  (NativePaintSurface*) &pm;
+	Display* display = Application::instance().impl()->display();
+	::Drawable from = pm.impl()->drawable();
 
-    Display* display = Application::instance().impl()->display();
-    ::Drawable from = npm->impl()->drawable();
+	Pt::Gfx::Size size =  Application::instance().fromUnit(pm.size());
+	Pt::Gfx::Point to =  Application::instance().fromUnit(toF);
 
-    Pt::Gfx::Size size =  Application::instance().fromUnit(pm.size());
-    Pt::Gfx::Point to =  Application::instance().fromUnit(toF);
-
-    XCopyArea( display, from, drawable(), _brushGc, pixmapRegion.x(), pixmapRegion.y(), size.width(), size.height(), to.x(), to.y() );
-    XSync(display, false);
-        
+	XCopyArea( display, from, drawable(), _brushGc, pixmapRegion.x(), pixmapRegion.y(), size.width(), size.height(), to.x(), to.y() );
+	XSync(display, false);        
 }
+
 
 void PainterImpl::drawSurface(const Pt::Gfx::PointF& toF, PaintSurface& surface)
 {
-    NativePaintSurface* npm =  (NativePaintSurface*) &surface;
-    Display* display = Application::instance().impl()->display();
-    ::Drawable from = npm->impl()->drawable();
+		Display* display = Application::instance().impl()->display();
+		::Drawable from = pm.impl()->drawable();
 
-    Pt::Gfx::Size size = Application::instance().fromUnit(surface.size());
-    Pt::Gfx::Point to =  Application::instance().fromUnit(toF);
+		Pt::Gfx::Size size = Application::instance().fromUnit(surface.size());
+		Pt::Gfx::Point to =  Application::instance().fromUnit(toF);
 
-    XCopyArea( display, from, drawable(), _brushGc, 0, 0, size.width(), size.height(), to.x(), to.y() );
-    XSync(display, false);
+		XCopyArea( display, from, drawable(), _brushGc, 0, 0, size.width(), size.height(), to.x(), to.y() );
+		XSync(display, false);
 }
 
 void PainterImpl::drawImage(const Gfx::PointF& to, const Gfx::ARgbImage& image)

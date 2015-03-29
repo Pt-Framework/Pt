@@ -73,7 +73,7 @@ class PainterImpl
 
         void drawLine(const Pt::Gfx::PointF& from, const Pt::Gfx::PointF& to);
 
-		void drawText( const Pt::Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline );
+				void drawText( const Pt::Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline );
 
         void drawText(const Pt::Gfx::PointF& to, const Pt::String& Text);
 
@@ -143,7 +143,7 @@ class PainterImpl
 
         void addFontName(const std::string& fontName);
 
-		void setSurface(PaintSurface& surface);
+				void setSurface(PaintSurface& surface);
 
     protected:
         void drawCompatibleImage(size_t x, size_t y, size_t depth, const char* data, size_t width, size_t height);

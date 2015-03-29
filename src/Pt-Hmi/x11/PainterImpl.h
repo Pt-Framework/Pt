@@ -50,7 +50,6 @@ namespace Pt {
 namespace Hmi {
 
 class PaintSurfaceImpl;
-class NativePaintSurface;
 class PaintSurface;
 
 class PainterImpl
@@ -84,7 +83,7 @@ class PainterImpl
 
         void drawLine(const Pt::Gfx::PointF& from, const Pt::Gfx::PointF& to);
 
-		void drawText( const Pt::Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline );
+				void drawText( const Pt::Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline );
 
         void drawText(const Pt::Gfx::PointF& to, const Pt::String& Text);
 
@@ -152,7 +151,7 @@ class PainterImpl
         }
 
         void addFontName(const std::string& fontName);        
-        void setSurface(NativePaintSurface& surface);
+        void setSurface(PaintSurface& surface);
 
     protected:
         std::string determinePlatformDefaultFontName();

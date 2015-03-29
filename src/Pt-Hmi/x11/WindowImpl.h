@@ -30,83 +30,112 @@ Free Software Foundation, Inc.,
 #undef Above
 #undef Below
 
-#include <Pt/Api.h>
 #include <Pt/Connectable.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Rect.h>
-#include <Pt/Hmi/WindowModel.h>
-#include <Pt/Hmi/Painter.h>
-#include <Pt/Hmi/PointingEvent.h>
+#include <Pt/Signal.h>
+#include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/KeyEvent.h>
-#include <vector>
-#include <Pt/Hmi/NativePainter.h>
+#include <Pt/Hmi/PointingEvent.h>
+#include <Pt/Hmi/PositionEvent.h>
+#include <Pt/Hmi/ResizeEvent.h>
+#include <Pt/Hmi/CloseEvent.h>
+#include <Pt/Hmi/ActivateEvent.h>
+#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Window.h>
 
 namespace Pt{
 namespace Hmi{
 
-class ViewImpl :public Pt::Connectable
+class WindowImpl :public Pt::Connectable
 {
-public:
-    ViewImpl();
-    virtual ~ViewImpl();
+	public:
+    WindowImpl(PaintSurface* surface);
+	  virtual ~WindowImpl();
 
-	void output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model);
+		void create();
+	
+		void destroy();
 
-	Window window()
-	{
-		return _window;
-	}
+		void show();
 
-private:
-	void onWindowEvent(XEvent& ev);
-	void onClientMessage(XEvent& ev);
-	void onMotionNotify(XEvent& ev);
-	void onMouseButtonPress(XEvent& ev);
-	void onMouseButtonRelease(XEvent& xev);
-	void onPaint(XEvent& xev);
-	void onConfigureNotify(XEvent& xev);
-	void onKeyEvent(XEvent& ev);
+		void hide();
 
-private:
-	void drawSurface(Pt::Hmi::PaintSurface& surface);
-	void bringWindowToTop();
-	void create();
-	void destroy();
-	void show();
-	void hide();
-	void writeWindowSizeAndPos();
-	void writeWindowProperties();
-	void redraw();
-    void pixelToScreen(char* data, const Pt::Gfx::ARgbColor& pixel);
-	void updateDrawBuffer();
-	void maximizeWindow();
-	void minimizeWindow();
-	void restoreWindow();
-    bool isWindowMinimized();
-    bool isWindowMaximazed();
-    
-private:
-	  Atom AtomAppWake;
-	  Atom AtomWindowResize;
-	  Atom AtomWindowMove;
-	  Atom AtomWindowClosed;
-	  Atom AtomWMProtocols;
+		void render();
 
-	bool					_ignoreSizeEvent;
-	Pt::Hmi::WindowModel* 		_model;
-	Pt::Hmi::Window* 	_controller;
-	Pt::Hmi::PointingEvent 	_mouseEvent;
-	Pt::Hmi::KeyEvent      	_keyEvent;
-	Window  				_window;
-	GC 						_brushGc;
-	Display* 				_display;
-	unsigned int			_windowBorderWidth;
-	bool 					_visible;
-	std::vector<char> 		_pixelBuffer;
-    int _x;
-    int _y;
-    int _width;
-    int _height;
+		Pt::Signal<const Pt::Event&>& windowEvent()
+		{
+			return _windowEvent;
+		}
+
+		void setPosition(const Gfx::PointF& p);
+
+		void setSize(const Gfx::SizeF& size);
+
+		void showTitle(bool p);
+
+		void setCaption(const std::string& text);
+
+		void showMinimizedButton(bool p);
+  
+		void showMaximizeButton(bool p);
+  
+		void showSysMenu(bool p);
+
+		void setForceTopMost(bool force);
+  
+		void setWindowState(WindowState::Type p);
+  
+		void setBorder(WindowBorder::Type p);
+  
+		void showInTaskbar(bool p);
+  
+		void setIcon(const Pt::Gfx::ARgbImage& p);
+
+		void setEnable(bool e);	
+   
+	private:
+		void onWindowEvent(XEvent& ev);	
+		void onClientMessage(XEvent& xev);
+		void onMotionNotify(XEvent& xev); 
+		void onMouseButtonPress(XEvent& xev);
+		void onMouseButtonRelease(XEvent& xev);
+		void onKeyEvent(XEvent& xev);
+		void onConfigureNotify( XEvent& xev);
+
+	private:
+		void bringWindowToTop();
+		bool isWindowMinimized();
+		bool isWindowMaximazed();
+		void restoreWindow();
+		void minimizeWindow();
+		void maximizeWindow();
+
+	private:
+		Atom AtomAppWake;
+		Atom AtomWindowResize;
+		Atom AtomWindowMove;
+		Atom AtomWindowClosed;
+		Atom AtomWMProtocols;
+		Pt::Hmi::Application&         _app; 
+		Pt::Hmi::PaintSurface*				_surface;
+		Pt::Signal<const Pt::Event&>	_windowEvent;
+		KeyEvent											_keyEvent;
+		PointingEvent									_pointerEvent;
+		ResizeEvent										_resizeEvent;
+		PositionEvent									_positionEvent;
+		ActivateEvent									_activateEvent;
+		bool													_forceTopMost;		
+		::Window  										_window;
+		::GC 													_brushGc;
+		::Display* 										_display;
+		std::vector<char> 						_pixelBuffer;
+		bool													_forceTopMost;
+		int _x;
+		int _y;
+		int _width;
+		int _height;
+		bool _showTitle;
+		std::string _title;
 };
 
 }}

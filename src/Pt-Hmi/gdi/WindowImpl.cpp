@@ -314,6 +314,7 @@ void WindowImpl::onMove()
     GetWindowRect(_hwnd, &info);
     Pt::Gfx::PointF winPos(info.left, info.right);
     _positionEvent.setPosition(winPos);
+		_windowEvent.send( _positionEvent );
 }
 
 
