@@ -18,16 +18,16 @@
  ***************************************************************************/
 
 #include <Pt/Hmi/Api.h>
-#include "ViewImpl.h"
+#include "WindowImpl.h"
 #import <AppKit/NSWindow.h>
 #include <Pt/Hmi/KeyEvent.h>
 
 @interface Window : NSWindow
 {
-    Pt::Hmi::ViewImpl* _outDevice;
+    Pt::Hmi::WindowImpl* _outDevice;
     
 }
     
-- (void) setDevice:  (Pt::Hmi::ViewImpl*) device ;
+- (void) setDevice:  (Pt::Hmi::WindowImpl*) device ;
 
 @end

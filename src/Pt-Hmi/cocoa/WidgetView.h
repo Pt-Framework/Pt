@@ -24,17 +24,16 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Hmi/Api.h>
-#include "ViewImpl.h"
-#include <Pt/Hmi/WindowModel.h>
+#include "WindowImpl.h"
 #import <AppKit/NSView.h>
 
 @interface WidgetView : NSView
 {
-    Pt::Hmi::ViewImpl* _outDevice;
+    Pt::Hmi::WindowImpl* _outDevice;
     
 }
     
-- (WidgetView*) init:  (Pt::Hmi::ViewImpl*) device ;
+- (WidgetView*) init:  (Pt::Hmi::WindowImpl*) device ;
 
 - (void) drawRect:(NSRect)rect;
 

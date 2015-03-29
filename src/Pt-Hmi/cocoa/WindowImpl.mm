@@ -23,27 +23,22 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include "ViewImpl.h"
-#include <Pt/Hmi/Widget.h>
+#include "WindowImpl.h"
 #include <Pt/Hmi/Application.h>
 #include "ApplicationImpl.h"
 #include <Pt/Gfx/Rgb888Color.h>
 #include <Pt/Gfx/Rgb888Image.h>
-#include <Pt/Hmi/WindowModel.h>
-#include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/View.h>
-#include "WidgetView.h"
-#include "Window.h"
 
 namespace Pt{
 namespace Hmi{
 
 
-ViewImpl::ViewImpl()
-: _model(0)
-, _visible(false)
+WindowImpl::WindowImpl(PaintSurface* surface)
+: _surface( surface )
+, _showtitle( true )
+, _topMost( false )
 {
-    _mouseEvent.buttons().resize(3);
+	_mouseEvent.buttons().resize(3);
     
 	/* ToDO: Window position tracking timer. Use this:
 
@@ -55,47 +50,52 @@ ViewImpl::ViewImpl()
 		in create().
 	*/
 
-    _timer.setActive(Application::instance().loop());
-    _timer.timeout() += Pt::slot(*this, &ViewImpl::onPosition);
+	_timer.setActive(Application::instance().loop());
+	_timer.timeout() += Pt::slot(*this, &ViewImpl::onPosition);
 
 	create();
 }
 
-NSView* ViewImpl::view()
+
+NSView* WindowImpl::view()
 {
 	return _view;
 }
+
     
-void ViewImpl::create()
+void WindowImpl::create()
 {
-    _window = nil;
-    _view = [[WidgetView alloc] init: this ];
+	_window = nil;
+	_view = [[WidgetView alloc] init: this ];
 
 	Gfx::PointF at(20, 20);
 	Gfx::SizeF size(400, 200);
 
-	_window = [[Window alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height()) styleMask:NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask backing:NSBackingStoreBuffered defer:NO];
+	_windowStyle = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
+	_window = [[Window alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height()) styleMask:_windowStyle backing:NSBackingStoreBuffered defer:NO];
     
 	[_window setReleasedWhenClosed: NO];
 	[_window setAcceptsMouseMovedEvents:YES];
-    [_window setInitialFirstResponder: _view];
+	[_window setInitialFirstResponder: _view];
 	[_window setContentView: _view];    
     
 	[_window makeKeyAndOrderFront:_window];
 	[_view setHidden:NO];
-     _level = [_window level];
-    _visible = true;
+		_level = [_window level];
+	_visible = true;
 	_timer.start(100);
 }
 
-ViewImpl::~ViewImpl()
+
+WindowImpl::~WindowImpl()
 {
 	destroy();
 }
 
-void ViewImpl::destroy()
+
+void WindowImpl::destroy()
 {
-    if(_window == nil)
+    if( _window == nil )
         return;
     
     _timer.stop();
@@ -104,205 +104,207 @@ void ViewImpl::destroy()
     [_view release];
 	_view = nil;
     _window = nil;
-    
-    //Notife closed
-    _controller->ClosedAction.send(_controller);
 }    
+
+
+void WindowImpl::show()
+{
+	[_window setIsVisible:YES]
+}
     
-void ViewImpl::writeWindowProperties()
-{        
-	//Visibility
-	if(_model->Visible.get() && !_visible)
-	{
-		[_window makeKeyAndOrderFront:_window];
-		[NSApp activateIgnoringOtherApps:YES];
-		_visible = true;
-	}
+
+void WindowImpl::hide()
+{
+	[_window setIsVisible:NO]
+}
+
+void WindowImpl::render()
+{
+	[_view setNeedsDisplay:YES];
+}
+
+void WindowImpl::setPosition(const Gfx::PointF& p)
+{
+	NSRect windowRect =  [_window frame];
+    
+	int screenHeight = [[NSScreen mainScreen] frame].size.height;
+
+    windowRect.origin.x = p.x();
+    windowRect.origin.y = screenHeight - (p.y() + windowRect.size.height );
+
+    [_window setFrame:windowRect display:YES animate:NO];
+}
+
+
+void WindowImpl::setSize(const Gfx::SizeF& size)
+{
+	NSRect windowRect =  [_window frame];
         
-	if(!_model->Visible.get() && _visible)
-	{
-		[_window orderOut:_window];
-		_visible = false;
-		return;
-	}
-    
+    windowRect.size.width = size.width();
+    windowRect.size.height = size.height();
+    [_window setFrame:windowRect display:YES animate:NO];
+}
+
+void WindowImpl::showTitle(bool p)
+{
+	_showtitle = p;
+	setCaption( _title );
+}
+
+void WindowImpl::setCaption(const std::string& text)
+{
+	_title = text;
+
     //Title
-    NSString* title = [NSString stringWithCString:_model->Caption.get().c_str() encoding:[NSString defaultCStringEncoding]];
-		
-    if( _model->ShowTitle.get())
+    if( _showtitle )
+	{ 
+		NSString* title = [NSString stringWithCString:_title.c_str() encoding:[NSString defaultCStringEncoding]];		    
         [_window setTitle: title];
+	}
     else
-        [_window setTitle: title];
-        
-    //Border styl
-    int windowStyle = 0;
-    
-    switch( _model->Border.get())
-    {
-        case Pt::Hmi::WindowBorderType::Sizeable:
-        case Pt::Hmi::WindowBorderType::DialogSizeable:
-        case Pt::Hmi::WindowBorderType::ToolSizeable:
-        {//Sizeable
-            windowStyle = NSTitledWindowMask| NSClosableWindowMask| NSResizableWindowMask;
-        }
-        break;
-                
-        case Pt::Hmi::WindowBorderType::Dialog:
-        case Pt::Hmi::WindowBorderType::Tool:
-        {//Fixed size
-            windowStyle =  NSTitledWindowMask| NSClosableWindowMask;
-        }
-        break;
-            
-        case Pt::Hmi::WindowBorderType::NoBorder:
-        {
-             windowStyle = NSBorderlessWindowMask;
-        }
+	{
+		NSString* title = [NSString stringWithCString:"" encoding:[NSString defaultCStringEncoding]];		    
+        [_window setTitle: title];        
+	}
 
-        default:
-        break;
-    }
-    
-    //Windows state
-    if( _model->ShowMinimizeButton.get())
-    {
-        windowStyle |=  NSMiniaturizableWindowMask;
-    }
+}
 
+void WindowImpl::showMinimizedButton(bool p)
+{   
+    if( p )
+		windowStyle |=  NSMiniaturizableWindowMask;
+	else
+		windowStyle &=  ~NSMiniaturizableWindowMask;
     
     [_window setStyleMask: windowStyle];
 }
+  
+void WindowImpl::showMaximizeButton(bool p)
+{
+	//TODO:
+}
+  
+void WindowImpl::showSysMenu(bool p)
+{
+	//TODO:
+}
 
+void WindowImpl::setForceTopMost(bool force)
+{
+	_topMost = force;
+
+	if( _topMost )
+		bringToFront();
+}
+  
+void WindowImpl::setWindowState(WindowState::Type p)
+{
+    switch(_model->WindowState.get())
+    {
+        case Pt::Hmi::WindowStateType::Normal:
+            if([_window isMiniaturized])
+                [_window deminiaturize:_window];
+        break;
+            
+        case Pt::Hmi::WindowStateType::Maximazed:
+            [_window setFrame: [[NSScreen mainScreen] frame] display:YES];
+        break;
+            
+        case Pt::Hmi::WindowStateType::Minimized:
+            [_window miniaturize: _window];
+         break;
+    }
+}
+  
+void WindowImpl::setBorder(WindowBorder::Type p)
+{	
+	_windowStyle &= (~NSTitledWindowMask & ~NSClosableWindowMask & ~NSResizableWindowMask & ~NSBorderlessWindowMask);
+
+	switch( p)
+	{
+		case Pt::Hmi::WindowBorderType::Sizeable:
+		case Pt::Hmi::WindowBorderType::DialogSizeable:
+		case Pt::Hmi::WindowBorderType::ToolSizeable:
+		{//Sizeable			 
+			_windowStyle |= NSTitledWindowMask| NSClosableWindowMask| NSResizableWindowMask;
+		}
+		break;
+                
+		case Pt::Hmi::WindowBorderType::Dialog:
+		case Pt::Hmi::WindowBorderType::Tool:
+		{//Fixed size
+			_windowStyle |= NSTitledWindowMask| NSClosableWindowMask;
+		}
+		break;
+            
+		case Pt::Hmi::WindowBorderType::NoBorder:
+		{
+			_windowStyle |= NSBorderlessWindowMask;
+		}
+
+		default:
+		break;
+	}
     
-void ViewImpl::onLMouseUp(double x, double y)
+	[_window setStyleMask: _windowStyle];
+}
+  
+void WindowImpl::showInTaskbar(bool p)
+{
+	//TODO:
+}
+  
+void WindowImpl::setIcon(const Pt::Gfx::ARgbImage& p)
+{
+	//TODO:
+}
+
+void WindowImpl::setEnable(bool e)
+{
+	//TODO:
+}
+
+void WindowImpl::bringToFront()
+{
+    [_window setLevel: NSFloatingWindowLevel];
+}
+
+
+void WindowImpl::onLostFocus()
+{
+	if( _topMost )
+		brintToFront();
+}
+    
+void WindowImpl::onLMouseUp(double x, double y)
 {
     Pt::Gfx::PointF pos = convertMousePosition(x,y);
     
     _mouseEvent.buttons()[0].setState(DeviceButton::Released);
     _mouseEvent.setX(pos.x());
 	_mouseEvent.setY(pos.y());
-    Application::instance().systemEvent().send(_mouseEvent);
+    _windowEvent.send(_mouseEvent);
 }
     
-void ViewImpl::onLMouseDown(double x, double y)
+void WindowImpl::onLMouseDown(double x, double y)
 {
     Pt::Gfx::PointF pos = convertMousePosition(x,y);
     
     _mouseEvent.buttons()[0].setState(DeviceButton::Pressed);
     _mouseEvent.setX(pos.x());
 	_mouseEvent.setY(pos.y());
-
-   Application::instance().systemEvent().send(_mouseEvent);
+	_windowEvent.send(_mouseEvent);
 }
     
-void ViewImpl::onMouseMove(double x, double y)
+void WindowImpl::onMouseMove(double x, double y)
 {
     Pt::Gfx::PointF pos = convertMousePosition(x,y);
     _mouseEvent.setX(pos.x());
     _mouseEvent.setY(pos.y());
-    Application::instance().systemEvent().send(_mouseEvent);
-}
-    
-    
-void ViewImpl::centerWindowTo(NSRect* parentRect)
-{
-    int screenHeight = [[NSScreen mainScreen] frame].size.height;
-    
-    int horizontal = parentRect->size.width/2 +parentRect->origin.x;
-    int vertical = screenHeight - (parentRect->size.height/2 + parentRect->origin.y);
-    
-    Pt::Gfx::Size mySize  = _model->fromUnit(_model->Size.get());
-        
-    int posX = horizontal - (mySize.width()/2);
-    int posY = vertical - (mySize.height()/2);
-        
-    _model->Position.set(_model->toUnit(Pt::Gfx::Point( posX,posY)));
-}
-    
-void ViewImpl::writeWindowSizeAndPos(bool firstShow)
-{
-    if(firstShow)
-    {
-        switch(_model->WindowStartPostion.get())
-        {
-            case WindowStartPositionType::Manual:
-                break;
-                
-            case WindowStartPositionType::CenterParent:
-            {
-                Window* parent = _controller->windowParent();
-				
-                if( parent == 0)
-                {
-				    NSRect rect = [[NSScreen mainScreen] frame];
-                    centerWindowTo(&rect);
-                }
-                else
-                {
-				    
-                    ViewImpl* parentImpl = 0;
-                    
-                    for(size_t i = 0; i < parent->outputDevices().size(); ++i)
-                    {
-                        View* parentDevice = dynamic_cast<View*>(parent->outputDevices()[i]);
-                        
-                        if( parentDevice == 0)
-                            continue;
-                        
-                        parentImpl = dynamic_cast<ViewImpl*>(parentDevice->impl());
-						
-                        if( parentImpl != 0)
-                            break;
-                    }
-                
-				     NSRect rect = [parentImpl->window() frame];
-				
-                    centerWindowTo(&rect);
-                }
-            }
-                break;
-                
-            case WindowStartPositionType::CenterScreen:
-			{
-			NSRect rect = [[NSScreen mainScreen] frame];
-                centerWindowTo(&rect);
-                    }
-			
-                break;
-        }
-    }
-    
-    switch(_model->WindowState.get())
-    {
-        case Pt::Hmi::WindowStateType::Normal:
-            if([_window isMiniaturized])
-                [_window deminiaturize:_window];
-            break;
-            
-        case Pt::Hmi::WindowStateType::Maximazed:
-            [_window setFrame: [[NSScreen mainScreen] frame] display:YES];
-            break;
-            
-        case Pt::Hmi::WindowStateType::Minimized:
-            [_window miniaturize: _window];
-            break;
-    }
-    
-    int screenHeight = [[NSScreen mainScreen] frame].size.height;
-    NSRect windowRect =  [_window frame];
-    
-    //Position
-    windowRect.origin.x = _model->Position.get().x();
-    windowRect.origin.y = screenHeight - (_model->Position.get().y() + _model->Size.get().height());
-    
-    //Size
-    windowRect.size.width = _model->Size.get().width();
-    windowRect.size.height = _model->Size.get().height();
-    [_window setFrame:windowRect display:YES animate:NO];
-    
-}
-    
-Pt::Gfx::PointF ViewImpl::convertMousePosition(double x, double y)
+    _windowEvent.send(_mouseEvent);
+}      
+
+Pt::Gfx::PointF WindowImpl::convertMousePosition(double x, double y)
 {
     NSRect windowRect = [_window frame];
     double gx = x;
@@ -310,50 +312,59 @@ Pt::Gfx::PointF ViewImpl::convertMousePosition(double x, double y)
     return Pt::Gfx::PointF(gx,gy);
 }
     
-void ViewImpl::onKeyDown(int key)
+void WindowImpl::onKeyDown(int key)
 {
     _keyEvent.setUnicode(key);
     
     _keyEvent.setState(KeyEvent::KeyDown);
     
-	Application::instance().systemEvent().send(_keyEvent);
+	_windowEvent.send(_keyEvent);
 }
 
-void ViewImpl::onKeyUp(int key)
+void WindowImpl::onKeyUp(int key)
 {
     _keyEvent.setUnicode(key);
     
     _keyEvent.setState(KeyEvent::KeyUp);
     
-	Application::instance().systemEvent().send(_keyEvent);
+	_windowEvent.send(_keyEvent);
 }
     
-void ViewImpl::onSpezialKeyEvent(unsigned int mask)
+void WindowImpl::onSpezialKeyEvent(unsigned int mask)
 {
     _keyEvent.setUnicode(0);
     _keyEvent.setAlt((mask & NSAlternateKeyMask) == NSAlternateKeyMask);
     _keyEvent.setShift(((mask & NSShiftKeyMask) == NSShiftKeyMask) | ((mask & NSAlphaShiftKeyMask) == NSAlphaShiftKeyMask));
     _keyEvent.setCtrl(((mask & NSControlKeyMask) == NSControlKeyMask) | ((mask & NSCommandKeyMask) == NSCommandKeyMask));
     
-   	Application::instance().systemEvent().send(_keyEvent);
+   	_windowEvent.send(_keyEvent);
 }
     
-void ViewImpl::checkModal()
-{
-    if(_model->TopMost.get())
-        [_window setLevel: NSFloatingWindowLevel];
-    else
-        [_window setLevel: NSNormalWindowLevel];
-}
     
-void ViewImpl::onPosition()
-{
-    if( _model == 0)
+void WindowImpl::onPosition()
+{      
+    
+    int screenHeight = [[NSScreen mainScreen] frame].size.height;
+    
+    //Window
+    NSRect windowRect = [_window frame];
+    Pt::Gfx::PointF pos(windowRect.origin.x, screenHeight - (windowRect.origin.y + windowRect.size.height));
+    
+    if( pos.x()  == _positionEvent.position().x() && pos.y()  == _positionEvent.position().y() )
         return;
     
-    if([_window isMiniaturized])
+	_positionEvent.setPosition(pos);
+	
+    _windowEvent.send( _positionEvent );
+}
+    
+void WindowImpl::onSize()
+{   
+    int screenHeight = [[NSScreen mainScreen] frame].size.height;
+    
+	if([_window isMiniaturized])
     {
-        _model->WindowState = WindowStateType::Minimized;
+		_resizeEvent.setState(WindowStateType::Minimized);
     }
     else
     {
@@ -362,91 +373,26 @@ void ViewImpl::onPosition()
         
         if( maxRect.size.width == currentRect.size.width && maxRect.size.height == currentRect.size.height &&
            maxRect.origin.x == currentRect.origin.x &&  maxRect.origin.y == currentRect.origin.y)
-        {
-            _model->WindowState = WindowStateType::Minimized;
+        {		
+			_resizeEvent.setState(WindowStateType::Maximized);
         }
         else
         {
-            _model->WindowState = WindowStateType::Normal;
+			_resizeEvent.setState(WindowStateType::Normal);
         }
     }
 
-    
-    int screenHeight = [[NSScreen mainScreen] frame].size.height;
-    
     //Window
     NSRect windowRect = [_window frame];
-    Pt::Gfx::PointF pos(windowRect.origin.x, screenHeight - (windowRect.origin.y + windowRect.size.height));
-    
-    if( pos.x()  == _model->Position.get().x() && pos.y()  == _model->Position.get().y())
-        return;
-    
-    _model->Position = pos;
-}
-    
-void ViewImpl::onPositionAndSize()
-{
-    if( _model == 0)
-        return;
-    
-    int screenHeight = [[NSScreen mainScreen] frame].size.height;
-    
-    //Window
-    NSRect windowRect = [_window frame];
-    _model->Position = Pt::Gfx::PointF(windowRect.origin.x,screenHeight - (windowRect.origin.y + windowRect.size.height));
-    _model->Size = Pt::Gfx::SizeF(windowRect.size.width,windowRect.size.height);
-}
-    
-bool ViewImpl::onCanClose()
-{
-    bool canClose = false;
-    
-    _controller->ClosingAction.send(_controller, canClose);
+    _resizeEvent.setSize( Pt::Gfx::SizeF(windowRect.size.width,windowRect.size.height) );
 
-    if(canClose)
-    {
-        destroy();
-    }
-    return canClose;
+	_windowEvent.send( _resizeEvent );
 }
 
-    
-void ViewImpl::output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model)
+void WindowImpl::onClosing()
 {
-        bool firstShow = (_model == 0);
-        _model = dynamic_cast<WindowModel*>(model);
-        _controller = dynamic_cast<Window*>(controller);
-        
-        _mouseEvent.setController(_controller);
-        _keyEvent.setController(_controller);
-    
-        //Create/Destroy handling
-        if(_model->Closed.get())
-        {
-            if(_view != nil)
-                destroy();
-            
-            _model= 0;
-            return;
-        }
-        else
-        {
-            if(_view == nil)
-            {
-                if(_model->Visible.get())
-                    create();
-                else
-                    return;
-            }
-        }
-        
-        //Size and position handling
-        writeWindowProperties();
-        checkModal();
-        writeWindowSizeAndPos(firstShow);
-        
-        //Redraw
-        [_view setNeedsDisplay:YES];
+	CloseEvent closeEvent;
+	_windowEvent.send( closeEvent );
 }
     
 }}

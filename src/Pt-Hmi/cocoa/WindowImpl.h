@@ -26,14 +26,17 @@
 #ifndef Pt_Hmi_ViewImpl_H
 #define Pt_Hmi_ViewImpl_H
 
-#include <Pt/Hmi/Model.h>
-#include <Pt/Hmi/Output.h>
+#include <Pt/Connectable.h>
+#include <Pt/Signal.h>
 #include <Pt/Hmi/Api.h>
-#include <Pt/Gfx/Gfx.h>
-#include <Pt/Gfx/Painter.h>
-#include <Pt/Hmi/WindowModel.h>
-#include <Pt/Hmi/PointingEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
+#include <Pt/Hmi/PointingEvent.h>
+#include <Pt/Hmi/PositionEvent.h>
+#include <Pt/Hmi/ResizeEvent.h>
+#include <Pt/Hmi/CloseEvent.h>
+#include <Pt/Hmi/ActivateEvent.h>
+#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/System/Timer.h>
 #include <map>
 
@@ -43,66 +46,109 @@
     #import <AppKit/NSView.h>
     #import <AppKit/NSScreen.h> 
 #else
-struct NSRect;
+	struct NSRect;
 	struct NSView;
-    struct NSWindow;
-    struct NSResponder;
-    struct NSGraphicsContext;
+  struct NSWindow;
+	struct NSResponder;
+	struct NSGraphicsContext;
 #endif
 
 namespace Pt{	
 namespace Hmi{
 
-class ViewImpl : public Pt::Connectable
+class WindowImpl : public Pt::Connectable
 {
-public:
-	ViewImpl();
-	virtual ~ViewImpl();
+	public:
+		WindowImpl(PaintSurface* surface);
 
-    void output(Pt::Hmi::Controller* controller, Pt::Hmi::Model* model);
+		virtual ~WindowImpl();
+
+		void create();
+	
+		void destroy();
+
+		void show();
+
+		void hide();
+
+		void render();
+
+		void setPosition(const Gfx::PointF& p);
+
+		void setSize(const Gfx::SizeF& size);
+
+		void showTitle(bool p);
+
+		void setCaption(const std::string& text);
+
+		void showMinimizedButton(bool p);
+  
+		void showMaximizeButton(bool p);
+  
+		void showSysMenu(bool p);
+
+		void setForceTopMost(bool force);
+  
+		void setWindowState(WindowState::Type p);
+  
+		void setBorder(WindowBorder::Type p);
+  
+		void showInTaskbar(bool p);
+  
+		void setIcon(const Pt::Gfx::ARgbImage& p);
+
+		void setEnable(bool e);	
+
+		Pt::Signal<const Pt::Event&>& windowEvent()
+		{
+			return _windowEvent;
+		}
     
-    inline WindowModel* model()
-    {
-        return _model;
-    }
+		NSView* view();
     
-    NSView* view();
-    
-    NSWindow* window()
-    {
-        return _window;
-    }
+		NSWindow* window()
+		{
+				return _window;
+		}
+
+		PaintSurface* paintSurface() const;
+		{
+			return _surface;
+		}
+
 public:
-    void onPositionAndSize();
-    void onPosition();
-    bool onCanClose();
-    void onMouseMove(double x,double y);
-    void onLMouseDown(double x, double y);
-    void onLMouseUp(double x, double y);
-    void onKeyDown(int key);
-    void onKeyUp(int key);
-    void onSpezialKeyEvent(unsigned int mask);
-    void onLostFocus();
+	void onSize();
+	void onPosition();
+	void onClosing();
+	void onMouseMove(double x,double y);
+	void onLMouseDown(double x, double y);
+	void onLMouseUp(double x, double y);
+	void onKeyDown(int key);
+	void onKeyUp(int key);
+	void onSpezialKeyEvent(unsigned int mask);
+	void onLostFocus();
     
 private:
-    void writeWindowSizeAndPos(bool firstShow);
-	void checkModal();
-	void writeWindowProperties();    
-	void create();
-	void destroy();
-    void centerWindowTo(NSRect* parentRect);
-    Pt::Gfx::PointF convertMousePosition(double x, double y);
+	void bringToFront();
+	Pt::Gfx::PointF convertMousePosition(double x, double y);
 
 private:
 	NSWindow*				_window;
 	NSView*					_view;
-	Pt::Hmi::WindowModel*	_model;
-    Pt::Hmi::Window* _controller;
-    Pt::Hmi::PointingEvent 	_mouseEvent;
-	Pt::Hmi::KeyEvent      	_keyEvent;
-    Pt::System::Timer       _timer;
-    bool					_visible;
-    int						_level;
+  Pt::Hmi::PaintSurface*				_surface;
+	Pt::Signal<const Pt::Event&>	_windowEvent;
+	KeyEvent											_keyEvent;
+	PointingEvent									_pointerEvent;
+	ResizeEvent										_resizeEvent;
+	PositionEvent									_positionEvent;
+	ActivateEvent									_activateEvent;
+	bool													_forceTopMost;
+	Pt::System::Timer       _timer;
+  bool					_showtitle;
+  int						_level;
+	std::string		_title;
+	int _windowStyle;
+	bool	_topMost;
 };
 
 }}

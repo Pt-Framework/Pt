@@ -33,7 +33,6 @@
 #include <Pt/System/EventLoop.h>
 #include <Pt/System/Selectable.h>
 #include <Pt/Singleton.h>
-#include <Pt/Hmi/Controller.h>
 #include <Pt/Hmi/PointingEvent.h>
 #import <CoreFoundation/CFRunLoop.h>
 #import <CoreFoundation/CFFileDescriptor.h>
@@ -101,7 +100,7 @@ public:
 
 	inline void showConsole(bool show = true)
 	{
-        
+        //TODO:
 	}		
     
 	double toUnit(int value)

@@ -64,11 +64,6 @@ public:
 
 	void render();
 
-	Pt::Signal<const Pt::Event&>& windowEvent()
-	{
-		return _windowEvent;
-	}
-
   void setPosition(const Gfx::PointF& p);
 
   void setSize(const Gfx::SizeF& size);
@@ -94,6 +89,13 @@ public:
   void setIcon(const Pt::Gfx::ARgbImage& p);
 
 	void setEnable(bool e);	
+
+
+	Pt::Signal<const Pt::Event&>& windowEvent()
+	{
+		return _windowEvent;
+	}
+
 
 protected:
 	void onWindowEvent(HWND wnd, unsigned int msg, WPARAM wparam, LPARAM lparam, bool& handled);

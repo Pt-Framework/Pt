@@ -178,12 +178,14 @@ void PainterImpl::setFont(const Gfx::Font& font)
 
 Gfx::FontMetrics PainterImpl::fontMetrics() const
 {
+	//TODO:
     return Gfx::FontMetrics(0, 0, 0, 0);
 }
 
 
 Gfx::FontMetrics PainterImpl::fontMetrics(const Pt::String& text) const
 {
+	//TODO:
     return Gfx::FontMetrics(0, 0, 0, 0);
 }
 
@@ -216,11 +218,12 @@ void PainterImpl::drawRect(const Gfx::RectF& rect)
 
 void PainterImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
-
+//TODO:
 }
     
 void PainterImpl::drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline )
 {
+//TODO:
 }
     
 void PainterImpl::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
@@ -236,7 +239,7 @@ void PainterImpl::drawPolyline(const Gfx::PointF* points, const size_t pointCoun
 
 void PainterImpl::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-
+//TODO:
 }
 
 
@@ -249,7 +252,7 @@ void PainterImpl::fillRect(const Gfx::RectF& rect)
 
 void PainterImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-
+//TODO:
 }
 
 
@@ -295,13 +298,13 @@ void PainterImpl::drawSurface(const Gfx::PointF& to, PaintSurface& pm, const Gfx
 
 void PainterImpl::drawImage(const Gfx::PointF& to, const Gfx::ARgbImage& image)
 {
-
+//TODO:
 }
 
 
 void PainterImpl::drawImage(const Gfx::PointF& to, const Gfx::ARgbImage& image, const Gfx::Region& imageRegion)
 {
-
+//TODO:
 }
 
 }}

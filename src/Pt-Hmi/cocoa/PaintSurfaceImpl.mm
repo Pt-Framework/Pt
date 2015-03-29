@@ -22,8 +22,8 @@
 namespace Pt {
 namespace Hmi {
 
-PaintSurfaceImpl::PaintSurfaceImpl(const Pt::Gfx::SizeF& size)
-: _size(size)
+PaintSurfaceImpl::PaintSurfaceImpl()
+: _size(800, 600)
 {
     create();
 }
@@ -62,6 +62,7 @@ void PaintSurfaceImpl::resize(const Pt::Gfx::SizeF& size)
 
 Pt::Gfx::ARgbImage PaintSurfaceImpl::toImage()
 {
+	//TODO:
 	Pt::Gfx::ARgbImage image(800,600);
 	return image;
 }

@@ -139,9 +139,6 @@ void WindowImpl::destroy()
 	XDestroyWindow(_display, _window);
 	XSync(_display, false);
 	_window = 0;
-
-  CloseEvent closeEvent;
-  _windowEvent.send( closeEvent );
 }
 
 
@@ -393,6 +390,7 @@ void WindowImpl::setSize(const Gfx::SizeF& s)
     _height = size.height();
 	}
 }
+
 
 void WindowImpl::setPosition(const Gfx::PointF& p)
 {

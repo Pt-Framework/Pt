@@ -85,10 +85,8 @@
 
 - (void) drawRect:(NSRect)rect
 {
-    if(_outDevice->model() == nil)
-        return;
     
-    Pt::Hmi::PaintSurface* surface = _outDevice->model()->paintSurface();
+    Pt::Hmi::PaintSurface* surface = _outDevice->paintSurface();
     
     Pt::Hmi::PaintSurfaceImpl* impl = surface->impl();
     CGContextRef context = impl->context();
@@ -107,14 +105,14 @@
 {
     [super setFrameOrigin:origin];
     
-    _outDevice->onPositionAndSize();
+    _outDevice->onPosition();
 }
 
 - (void)setFrameSize:(NSSize)frameSize
 {
     [super setFrameSize:frameSize];
     
-    _outDevice->onPositionAndSize();
+    _outDevice->onSize();
 }
 
 - (void) mouseDown:(NSEvent*)ev
@@ -144,7 +142,8 @@
 
 - (BOOL) windowShouldClose:(id)window
 {
-    return _outDevice->onCanClose();
+    outDevice->onClosing();
+	return false;
 }
 
 @end

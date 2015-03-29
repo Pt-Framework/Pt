@@ -44,7 +44,6 @@ WindowImpl::WindowImpl(PaintSurface* surface)
 {    
   _app.impl()->WindowEvent += Pt::slot(*this, &WindowImpl::onWindowEvent);
   _pointerEvent.buttons().resize(3);    
-
   create();
 }
 

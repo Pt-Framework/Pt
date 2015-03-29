@@ -36,11 +36,11 @@ namespace Hmi {
 class PaintSurfaceImpl 
 {
     public:
-        PaintSurfaceImpl(const Pt::Gfx::SizeF& size);            
+        PaintSurfaceImpl();            
 
         virtual ~PaintSurfaceImpl();
 
-		void resize(const Pt::Gfx::SizeF& size);
+				void resize(const Pt::Gfx::SizeF& size);
 
         inline const Gfx::SizeF& size() const
         { return _size; }
