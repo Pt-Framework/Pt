@@ -228,34 +228,31 @@ void Button::onKeyInput(const KeyEvent& ev)
 	if(ButtonType.get() == ButtonType::Press && ButtonState.get() != DeviceButton::Released)
 	{
 		ButtonState = DeviceButton::Released;
-    HighLight = ButtonState.get() == DeviceButton::Pressed;
+        HighLight = ButtonState.get() == DeviceButton::Pressed;
 		invalidate();
 	}		
 }
 
 void Button::onPointerInput(const PointingEvent& ev)
-{		
+{
+    
 	Pt::Gfx::PointF point = toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
-
+    
+    Label::onPointerInput(ev);
+    
 	if(!Enabled.get())
-	{
-		Label::onPointerInput(ev);
 		return;
-	}
 
 	if(!Visible.get())
-	{
-		Label::onPointerInput(ev);
 		return;
-	}
 
+    
 	if(!contains(point))
 	{
 		Armed = false;
-		Label::onPointerInput(ev);
 		return;
 	}
-
+    
 	bool genOutput = false;
 
 	if(!Armed.get())
@@ -265,10 +262,7 @@ void Button::onPointerInput(const PointingEvent& ev)
 	}
 
 	if( ev.buttons().size() == 0)
-	{
-		Label::onPointerInput(ev);
 		return;
-	}	
 
 	switch(ButtonType.get())
 	{
@@ -328,10 +322,8 @@ void Button::onPointerInput(const PointingEvent& ev)
 		}				
 		break;
 	}
-
-	Label::onPointerInput(ev);
 	
-	if(genOutput)
+  if(genOutput)
   {
   	HighLight = ButtonState.get() == DeviceButton::Pressed ;
 		invalidate();

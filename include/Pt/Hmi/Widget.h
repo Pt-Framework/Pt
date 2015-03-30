@@ -141,7 +141,7 @@ public:
 	Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot);
 
 public:
-	static int getMnemonicIndex(const std::string& text);
+	static size_t getMnemonicIndex(const std::string& text);
 
 	static std::string removeMnemonic(const std::string& text);
 

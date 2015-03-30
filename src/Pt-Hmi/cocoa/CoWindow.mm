@@ -16,14 +16,14 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#import "Window.h"
+#import "CoWindow.h"
 #import <AppKit/NSApplication.h>
 #import <AppKit/NSEvent.h>
 
 
-@implementation Window
+@implementation CoWindow
 
-- (void) setDevice : (Pt::Hmi::ViewImpl*) device
+- (void) setDevice : (Pt::Hmi::WindowImpl*) device
 {
     _outDevice = device;
 }

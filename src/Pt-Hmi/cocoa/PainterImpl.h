@@ -116,7 +116,8 @@ class PainterImpl
         void addFontName(const std::string& fontName)
         {
         }
-    
+    private:
+    Pt::Gfx::PointF tranPoint(const Pt::Gfx::PointF& p);
 	protected:
         Gfx::Pen            _pen;
         Gfx::Brush          _brush;

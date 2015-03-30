@@ -111,7 +111,7 @@ class WindowImpl : public Pt::Connectable
 				return _window;
 		}
 
-		PaintSurface* paintSurface() const;
+		PaintSurface* paintSurface()
 		{
 			return _surface;
 		}
@@ -142,7 +142,6 @@ private:
 	ResizeEvent										_resizeEvent;
 	PositionEvent									_positionEvent;
 	ActivateEvent									_activateEvent;
-	bool													_forceTopMost;
 	Pt::System::Timer       _timer;
   bool					_showtitle;
   int						_level;

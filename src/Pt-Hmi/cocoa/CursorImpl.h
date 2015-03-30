@@ -32,7 +32,6 @@
 namespace Pt{
 namespace Hmi{
 
-class Controller;
     
 class CursorImpl
 {

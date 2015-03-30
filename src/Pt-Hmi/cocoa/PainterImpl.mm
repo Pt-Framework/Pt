@@ -39,6 +39,11 @@ PainterImpl::~PainterImpl()
 {
 }
 
+Pt::Gfx::PointF PainterImpl::tranPoint(const Pt::Gfx::PointF& p)
+{
+    return Pt::Gfx::PointF(p.x(), _surface->size().height() - p.y());
+}
+
 void PainterImpl::setPen(const Gfx::Pen& pen)
 {
     _pen = pen;
@@ -130,6 +135,7 @@ const Gfx::Pen& PainterImpl::pen() const
 void PainterImpl::setSurface(PaintSurface& s)
 {
     _surface = s.impl();
+    
     setPen(_pen);
     setBrush(_brush);
     setFont(_font);
@@ -198,11 +204,13 @@ const std::list<std::string>& PainterImpl::fontFamilyNames()
 
 void PainterImpl::drawPixel(const Gfx::PointF& to)
 {
-    drawLine(to, to);
+    drawLine(tranPoint(to), tranPoint(to));
 }
 
-void PainterImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
+void PainterImpl::drawLine(const Gfx::PointF& f, const Gfx::PointF& t)
 {
+    Gfx::PointF from = tranPoint(f);
+    Gfx::PointF to  = tranPoint(t);
     CGContextMoveToPoint(_surface->context(), from.x(), from.y());
     CGContextAddLineToPoint(_surface->context(), to.x(), to.y());
     CGContextStrokePath(_surface->context());
@@ -211,7 +219,7 @@ void PainterImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 
 void PainterImpl::drawRect(const Gfx::RectF& rect)
 {
-    CGRect cgRect = CGRectMake(rect.x(), rect.y(), rect.width(), rect.height());
+    CGRect cgRect = CGRectMake(rect.x(), _surface->size().height() - (rect.y() + rect.height()), rect.width(), rect.height());
     CGContextStrokeRect(_surface->context(),cgRect);
 }
 
@@ -226,8 +234,13 @@ void PainterImpl::drawText( const Gfx::PointF& to, const Pt::String& text, const
 //TODO:
 }
     
-void PainterImpl::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
-{    
+void PainterImpl::drawPolyline(const Gfx::PointF* p, const size_t pointCount)
+{
+    std::vector<Gfx::PointF> points(pointCount);
+    
+    for( size_t i = 0; i < pointCount; ++i)
+        points[i] = tranPoint(p[i]);
+    
     CGContextMoveToPoint(_surface->context(), points[0].x(), points[0].y());
     
     for( size_t i = 1; i < pointCount; ++i)
@@ -245,7 +258,7 @@ void PainterImpl::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size
 
 void PainterImpl::fillRect(const Gfx::RectF& rect)
 {
-    CGRect cgRect = CGRectMake(rect.x(), rect.y(), rect.width(), rect.height());
+    CGRect cgRect = CGRectMake(rect.x(), _surface->size().height() - (rect.y() + rect.height()) , rect.width(), rect.height());
     CGContextFillRect(_surface->context(), cgRect);
 }
 
@@ -256,8 +269,13 @@ void PainterImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size
 }
 
 
-void PainterImpl::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
+void PainterImpl::fillPolygon(const Gfx::PointF* p, const size_t pointCount)
 {
+    std::vector<Gfx::PointF> points(pointCount);
+    
+    for( size_t i = 0; i < pointCount; ++i)
+        points[i] = tranPoint(p[i]);
+    
     CGContextMoveToPoint(_surface->context(), points[0].x(), points[0].y());
     
     for( size_t i = 1; i < pointCount; ++i)
@@ -275,10 +293,12 @@ void PainterImpl::drawSurface(const Gfx::PointF& to, PaintSurface& pm)
     CGImageRef image =  CGBitmapContextCreateImage(context);
     
     CGContextRef myContext = _surface->context();
-    CGRect rect = CGRectMake(to.x(), to.y(), pm.size().width(), pm.size().height());
+    CGRect rect = CGRectMake(to.x(), _surface->size().height() - (to.y() + pm.size().height()), pm.size().width(), pm.size().height());
     
     CGContextDrawImage(myContext,rect,image);
+
     CGImageRelease(image);
+    
 }
 
 void PainterImpl::drawSurface(const Gfx::PointF& to, PaintSurface& pm, const Gfx::Region& pmRegion)
@@ -290,7 +310,7 @@ void PainterImpl::drawSurface(const Gfx::PointF& to, PaintSurface& pm, const Gfx
     
     CGContextRef myContext = _surface->context();
     
-    CGRect rect = CGRectMake(to.x(), to.y(), pm.size().width(), pm.size().height());
+    CGRect rect = CGRectMake(to.x(), _surface->size().height() - (to.y() + pm.size().height()), pm.size().width(), pm.size().height());
     
     CGContextDrawImage(myContext,rect,image);
     CGImageRelease(image);

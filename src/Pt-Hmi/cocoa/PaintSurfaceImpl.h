@@ -40,7 +40,7 @@ class PaintSurfaceImpl
 
         virtual ~PaintSurfaceImpl();
 
-				void resize(const Pt::Gfx::SizeF& size);
+        void resize(const Pt::Gfx::SizeF& size);
 
         inline const Gfx::SizeF& size() const
         { return _size; }

@@ -22,7 +22,7 @@
 #import <AppKit/NSWindow.h>
 #include <Pt/Hmi/KeyEvent.h>
 
-@interface Window : NSWindow
+@interface CoWindow : NSWindow
 {
     Pt::Hmi::WindowImpl* _outDevice;
     

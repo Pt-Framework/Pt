@@ -24,6 +24,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include "WindowImpl.h"
+#include "WidgetView.h"
+#include "PaintSurfaceImpl.h"
+#include "CoWindow.h"
 #include <Pt/Hmi/Application.h>
 #include "ApplicationImpl.h"
 #include <Pt/Gfx/Rgb888Color.h>
@@ -38,7 +41,7 @@ WindowImpl::WindowImpl(PaintSurface* surface)
 , _showtitle( true )
 , _topMost( false )
 {
-	_mouseEvent.buttons().resize(3);
+	_pointerEvent.buttons().resize(3);
     
 	/* ToDO: Window position tracking timer. Use this:
 
@@ -51,7 +54,8 @@ WindowImpl::WindowImpl(PaintSurface* surface)
 	*/
 
 	_timer.setActive(Application::instance().loop());
-	_timer.timeout() += Pt::slot(*this, &ViewImpl::onPosition);
+    //TODO: remove timer for window position traking, use position changed system event
+	_timer.timeout() += Pt::slot(*this, &WindowImpl::onPosition);
 
 	create();
 }
@@ -72,7 +76,7 @@ void WindowImpl::create()
 	Gfx::SizeF size(400, 200);
 
 	_windowStyle = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
-	_window = [[Window alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height()) styleMask:_windowStyle backing:NSBackingStoreBuffered defer:NO];
+    _window = [[CoWindow alloc] initWithContentRect:NSMakeRect(at.x(), at.y(), size.width(), size.height()) styleMask:_windowStyle backing:NSBackingStoreBuffered defer:NO];
     
 	[_window setReleasedWhenClosed: NO];
 	[_window setAcceptsMouseMovedEvents:YES];
@@ -81,8 +85,7 @@ void WindowImpl::create()
     
 	[_window makeKeyAndOrderFront:_window];
 	[_view setHidden:NO];
-		_level = [_window level];
-	_visible = true;
+    _level = [_window level];
 	_timer.start(100);
 }
 
@@ -109,13 +112,14 @@ void WindowImpl::destroy()
 
 void WindowImpl::show()
 {
-	[_window setIsVisible:YES]
+    [_window makeKeyAndOrderFront:_window];
+    [NSApp activateIgnoringOtherApps:YES];
 }
     
 
 void WindowImpl::hide()
 {
-	[_window setIsVisible:NO]
+    [_window orderOut:_window ];
 }
 
 void WindowImpl::render()
@@ -138,6 +142,7 @@ void WindowImpl::setPosition(const Gfx::PointF& p)
 
 void WindowImpl::setSize(const Gfx::SizeF& size)
 {
+    //TODO: this is the client size
 	NSRect windowRect =  [_window frame];
         
     windowRect.size.width = size.width();
@@ -170,13 +175,14 @@ void WindowImpl::setCaption(const std::string& text)
 }
 
 void WindowImpl::showMinimizedButton(bool p)
-{   
-    if( p )
-		windowStyle |=  NSMiniaturizableWindowMask;
-	else
-		windowStyle &=  ~NSMiniaturizableWindowMask;
+{
     
-    [_window setStyleMask: windowStyle];
+    if( p )
+		_windowStyle |=  NSMiniaturizableWindowMask;
+	else
+		_windowStyle &=  ~NSMiniaturizableWindowMask;
+    
+    [_window setStyleMask: _windowStyle];
 }
   
 void WindowImpl::showMaximizeButton(bool p)
@@ -199,18 +205,18 @@ void WindowImpl::setForceTopMost(bool force)
   
 void WindowImpl::setWindowState(WindowState::Type p)
 {
-    switch(_model->WindowState.get())
+    switch(p)
     {
-        case Pt::Hmi::WindowStateType::Normal:
+        case Pt::Hmi::WindowState::Normal:
             if([_window isMiniaturized])
                 [_window deminiaturize:_window];
         break;
             
-        case Pt::Hmi::WindowStateType::Maximazed:
+        case Pt::Hmi::WindowState::Maximazed:
             [_window setFrame: [[NSScreen mainScreen] frame] display:YES];
         break;
             
-        case Pt::Hmi::WindowStateType::Minimized:
+        case Pt::Hmi::WindowState::Minimized:
             [_window miniaturize: _window];
          break;
     }
@@ -222,22 +228,22 @@ void WindowImpl::setBorder(WindowBorder::Type p)
 
 	switch( p)
 	{
-		case Pt::Hmi::WindowBorderType::Sizeable:
-		case Pt::Hmi::WindowBorderType::DialogSizeable:
-		case Pt::Hmi::WindowBorderType::ToolSizeable:
+		case Pt::Hmi::WindowBorder::Sizeable:
+		case Pt::Hmi::WindowBorder::DialogSizeable:
+		case Pt::Hmi::WindowBorder::ToolSizeable:
 		{//Sizeable			 
 			_windowStyle |= NSTitledWindowMask| NSClosableWindowMask| NSResizableWindowMask;
 		}
 		break;
                 
-		case Pt::Hmi::WindowBorderType::Dialog:
-		case Pt::Hmi::WindowBorderType::Tool:
+		case Pt::Hmi::WindowBorder::Dialog:
+		case Pt::Hmi::WindowBorder::Tool:
 		{//Fixed size
 			_windowStyle |= NSTitledWindowMask| NSClosableWindowMask;
 		}
 		break;
             
-		case Pt::Hmi::WindowBorderType::NoBorder:
+		case Pt::Hmi::WindowBorder::NoBorder:
 		{
 			_windowStyle |= NSBorderlessWindowMask;
 		}
@@ -266,49 +272,51 @@ void WindowImpl::setEnable(bool e)
 
 void WindowImpl::bringToFront()
 {
-    [_window setLevel: NSFloatingWindowLevel];
+   //TODO:
 }
 
 
 void WindowImpl::onLostFocus()
 {
+    //TODO: call onLostFocus if the window lost focus
 	if( _topMost )
-		brintToFront();
+		bringToFront();
 }
     
 void WindowImpl::onLMouseUp(double x, double y)
 {
     Pt::Gfx::PointF pos = convertMousePosition(x,y);
     
-    _mouseEvent.buttons()[0].setState(DeviceButton::Released);
-    _mouseEvent.setX(pos.x());
-	_mouseEvent.setY(pos.y());
-    _windowEvent.send(_mouseEvent);
+    _pointerEvent.buttons()[0].setState(DeviceButton::Released);
+    _pointerEvent.setX(pos.x());
+	_pointerEvent.setY(pos.y());
+    _windowEvent.send(_pointerEvent);
 }
     
 void WindowImpl::onLMouseDown(double x, double y)
 {
     Pt::Gfx::PointF pos = convertMousePosition(x,y);
     
-    _mouseEvent.buttons()[0].setState(DeviceButton::Pressed);
-    _mouseEvent.setX(pos.x());
-	_mouseEvent.setY(pos.y());
-	_windowEvent.send(_mouseEvent);
+    _pointerEvent.buttons()[0].setState(DeviceButton::Pressed);
+    _pointerEvent.setX(pos.x());
+	_pointerEvent.setY(pos.y());
+	_windowEvent.send(_pointerEvent);
 }
     
 void WindowImpl::onMouseMove(double x, double y)
 {
     Pt::Gfx::PointF pos = convertMousePosition(x,y);
-    _mouseEvent.setX(pos.x());
-    _mouseEvent.setY(pos.y());
-    _windowEvent.send(_mouseEvent);
+    _pointerEvent.setX(pos.x());
+    _pointerEvent.setY(pos.y());
+    _windowEvent.send(_pointerEvent);
 }      
 
 Pt::Gfx::PointF WindowImpl::convertMousePosition(double x, double y)
 {
+    int screenHeight = [[NSScreen mainScreen] frame].size.height;
     NSRect windowRect = [_window frame];
-    double gx = x;
-    double gy = (windowRect.size.height - y);
+    double gx = x;;
+    double gy = windowRect.size.height - y -18;// TODO: determinat the correct client rect
     return Pt::Gfx::PointF(gx,gy);
 }
     
@@ -324,7 +332,6 @@ void WindowImpl::onKeyDown(int key)
 void WindowImpl::onKeyUp(int key)
 {
     _keyEvent.setUnicode(key);
-    
     _keyEvent.setState(KeyEvent::KeyUp);
     
 	_windowEvent.send(_keyEvent);
@@ -342,13 +349,12 @@ void WindowImpl::onSpezialKeyEvent(unsigned int mask)
     
     
 void WindowImpl::onPosition()
-{      
-    
+{
     int screenHeight = [[NSScreen mainScreen] frame].size.height;
     
     //Window
     NSRect windowRect = [_window frame];
-    Pt::Gfx::PointF pos(windowRect.origin.x, screenHeight - (windowRect.origin.y + windowRect.size.height));
+    Pt::Gfx::PointF pos(windowRect.origin.x,  (screenHeight - windowRect.origin.y - windowRect.size.height));
     
     if( pos.x()  == _positionEvent.position().x() && pos.y()  == _positionEvent.position().y() )
         return;
@@ -358,13 +364,14 @@ void WindowImpl::onPosition()
     _windowEvent.send( _positionEvent );
 }
     
+    
 void WindowImpl::onSize()
 {   
     int screenHeight = [[NSScreen mainScreen] frame].size.height;
     
 	if([_window isMiniaturized])
     {
-		_resizeEvent.setState(WindowStateType::Minimized);
+		_resizeEvent.setState(WindowState::Minimized);
     }
     else
     {
@@ -374,15 +381,15 @@ void WindowImpl::onSize()
         if( maxRect.size.width == currentRect.size.width && maxRect.size.height == currentRect.size.height &&
            maxRect.origin.x == currentRect.origin.x &&  maxRect.origin.y == currentRect.origin.y)
         {		
-			_resizeEvent.setState(WindowStateType::Maximized);
+			_resizeEvent.setState(WindowState::Maximazed);
         }
         else
         {
-			_resizeEvent.setState(WindowStateType::Normal);
+			_resizeEvent.setState(WindowState::Normal);
         }
     }
 
-    //Window
+   // TODO: determinate the correct client rect
     NSRect windowRect = [_window frame];
     _resizeEvent.setSize( Pt::Gfx::SizeF(windowRect.size.width,windowRect.size.height) );
 

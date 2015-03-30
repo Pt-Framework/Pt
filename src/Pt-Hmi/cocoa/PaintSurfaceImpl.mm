@@ -36,24 +36,31 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
     
 void PaintSurfaceImpl::destroy()
 {
+    if(  _context == nullptr)
+        return;
+    
     CGContextRelease(_context);
+    _context = nullptr;
 }
     
 void PaintSurfaceImpl::create()
 {
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     
-    _context = CGBitmapContextCreate(0, _size.width(), _size.height(), 8, 0, colorSpace, kCGImageAlphaPremultipliedLast);
-    
-    CGContextTranslateCTM(_context, 0, _size.height() );
-    CGContextScaleCTM(_context, 1, -1);
-    
+    _context = CGBitmapContextCreate(nullptr, _size.width(), _size.height(), 8, 0, colorSpace, kCGImageAlphaPremultipliedLast);
     CGColorSpaceRelease(colorSpace);
 }
+    
     
 void PaintSurfaceImpl::resize(const Pt::Gfx::SizeF& size)
 {
 	_size = size;
+    
+    if( _size.width() ==  0)
+        _size.setWidth(20);
+    
+    if( _size.height() ==  0)
+        _size.setHeight(20);
     
     destroy();
     create();

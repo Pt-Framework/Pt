@@ -78,15 +78,15 @@ void MainWindow::init()
 	MinimumSize = Pt::Gfx::SizeF(200,200);
 	MaximumSize = Size.get();
 	Caption = std::string("This is a Platinum C++ Human Machine Interface demo  ");
-  State = Hmi::WindowState::Normal;
+    State = Hmi::WindowState::Normal;
 	StartPostion = Hmi::WindowStartPosition::CenterParent;
 	Closed.Changed += Pt::slot(*this, &MainWindow::onClosedByWindow);
-	Border = WindowBorder::NoBorder;
+	Border = WindowBorder::Sizeable;
 	
 	//Panel
 	_mainPanel.Size = Pt::Gfx::SizeF(700,480);
 	_mainPanel.Position = Pt::Gfx::PointF(40,40);
-	_mainPanel.PanelBorderWidth = 3;	
+	_mainPanel.PanelBorderWidth = 3;
 	_mainPanel.PanelBorderStyle = Pt::Hmi::BorderStyle::Sizeable;
 
 	{
@@ -127,7 +127,7 @@ void MainWindow::init()
 	_dialogButton.Clicked  += Pt::slot(*this, &MainWindow::onShowDialog);
 	
 	_mainPanel.addChild(&_dialogButton);
-		
+	
 	//Close button
 	_closeButton.ButtonType = Hmi::ButtonType::Press;
 	_closeButton.Caption = std::string("Close [CTRL+X]");
@@ -137,7 +137,7 @@ void MainWindow::init()
 	_closeButton.Clicked += Pt::slot(*this, &MainWindow::onClosed);
 	
 	addChild(&_mainPanel);
-	addChild(&_closeButton);	
+	addChild(&_closeButton);
 }
 
 void MainWindow::onShowDialog()

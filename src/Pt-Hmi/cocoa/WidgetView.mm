@@ -35,7 +35,7 @@
 
 @implementation WidgetView
 
-- (WidgetView*) init : (Pt::Hmi::ViewImpl*) device
+- (WidgetView*) init : (Pt::Hmi::WindowImpl*) device
 {
     self = [super init];
     _outDevice = device;
@@ -89,6 +89,7 @@
     Pt::Hmi::PaintSurface* surface = _outDevice->paintSurface();
     
     Pt::Hmi::PaintSurfaceImpl* impl = surface->impl();
+    
     CGContextRef context = impl->context();
     
     CGImageRef image =  CGBitmapContextCreateImage(context);
@@ -142,7 +143,7 @@
 
 - (BOOL) windowShouldClose:(id)window
 {
-    outDevice->onClosing();
+    _outDevice->onClosing();
 	return false;
 }
 

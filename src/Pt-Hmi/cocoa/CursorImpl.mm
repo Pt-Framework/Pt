@@ -24,11 +24,6 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include "CursorImpl.h"
-#include <Pt/Hmi/Controller.h>
-
-#include "ViewImpl.h"
-#include <Pt/Hmi/View.h>
-#include <Pt/Hmi/Window.h>
 #import <AppKit/NSView.h>
 #import <AppKit/NSCursor.h>
 #import <AppKit/NSLayoutConstraint.h>

@@ -74,7 +74,7 @@ void Widget::removeChild(Widget* child)
 Pt::Gfx::PointF Widget::toClient( const Pt::Gfx::PointF& globalPoint )
 {
 	if( _parent == 0 )
-		return Pt::Gfx::PointF( globalPoint.x(), globalPoint.y() );
+		return Pt::Gfx::PointF(  globalPoint.x(),  globalPoint.y());
 
 	Pt::Gfx::PointF parPoint = _parent->toClient( globalPoint );
 	return Pt::Gfx::PointF( parPoint.x() - Position.get().x(), parPoint.y() - Position.get().y() );
@@ -447,15 +447,10 @@ void Widget::onMnemonic()
 
 bool Widget::contains(const Pt::Gfx::PointF& p)
 {
-	double x1, x2, y1, y2;
-	
-	x1 = 0;
-	x2 = x1  + Size.get().width();
-
-	y1 = 0;
-	y2 = y1  + Size.get().height();
-	
-	return ((p.x() >= x1) && (p.x() < x2) && (p.y() >= y1) && (p.y() < y2));
+    if( p.x()  < Size.get().width() && p.x() > 0 && p.y() < Size.get().height() && p.y() > 0)
+        return true;
+ 
+    return false;
 }
 
 
@@ -627,7 +622,7 @@ std::string Widget::removeMnemonic(const std::string& text)
 }
 
 
-int Widget::getMnemonicIndex(const std::string& text)
+size_t Widget::getMnemonicIndex(const std::string& text)
 {	 
 	size_t pos = 0;
 
