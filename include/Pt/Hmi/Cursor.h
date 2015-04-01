@@ -17,6 +17,8 @@ namespace Cursors
 		IBeam,
 		SizeNS,
 		SizeWE,
+		SizeNESW,
+		SizeNWSE,
 		UserDefined,
 	};
 }

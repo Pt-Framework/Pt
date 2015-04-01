@@ -2,21 +2,12 @@
 #define Pt_Hmi_ResizeEvent_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/WindowProperties.h>
 #include <Pt/Event.h>
 #include <Pt/Gfx/Size.h>
 
 namespace Pt{
 namespace Hmi{
-
-namespace WindowState
-{
-	enum Type
-	{
-		Normal,
-		Minimized,
-		Maximazed,
-	};
-}
 
 class PT_HMI_API ResizeEvent : public Pt::BasicEvent<ResizeEvent>
 {

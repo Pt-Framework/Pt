@@ -1,5 +1,5 @@
-/* Copyright (C) 2013 Marc Boris Duerner 
- * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2015 Marc Boris Duerner 
+ * Copyright (C) 2015 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,11 +25,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef Pt_Hmi_Controller_Window_H
-#define Pt_Hmi_Controller_Window_H
+#ifndef Pt_Hmi_MainWindow_H
+#define Pt_Hmi_MainWindow_H
 
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/ResizeEvent.h>
+#include <Pt/Hmi/WindowManager.h>
+#include <Pt/Hmi/ChildWindow.h>
+#include <Pt/Hmi/WindowProperties.h>
 
 namespace Pt{
 namespace Hmi{
@@ -39,35 +42,11 @@ class CloseEvent;
 class PositionEvent;
 class ActivateEvent;
 
-namespace WindowStartPosition
-{
-  enum Type
-  {
-    Manual,        
-    CenterParent,
-  };
-}
-
-namespace WindowBorder
-{
-  enum Type
-  {
-    NoBorder,
-    Fixed,
-    Sizeable,
-    Tool,
-    ToolSizeable,
-    Dialog,
-    DialogSizeable
-  };
-}
-
-
-class PT_HMI_API Window  : public Widget
+class PT_HMI_API MainWindow  : public Widget
 {
 public:    
-    Window(Window* parent = 0);    
-    ~Window();
+    MainWindow(MainWindow* parent = 0);    
+    ~MainWindow();
 
     Pt::Signal<const Pt::Event&>& eventReady();
 
@@ -90,10 +69,13 @@ public:
 
 		WindowImpl* impl();
 		
-		void setWindowParent(Window* parent);
+		void setWindowParent(MainWindow* parent);
 
-		Window* windowParent() const;
+		MainWindow* windowParent() const;
 		
+		void addChildWindow(ChildWindow& w);
+		void removeChildWindow(ChildWindow& w);
+		const std::vector<ChildWindow*>& childWindows() const;
 
 protected:
     virtual void onInvalidate();
@@ -144,8 +126,9 @@ private:
 		void onMaxSizeChnaged(const Property<Pt::Gfx::SizeF>& prop);
 
 private:
-    WindowImpl* _impl;    
-		Window*     _winParent;
+    WindowImpl*		_impl;    
+		MainWindow*		_winParent;
+		WindowManager _windowManager;
 };
 
 }}

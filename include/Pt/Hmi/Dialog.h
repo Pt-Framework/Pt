@@ -26,7 +26,7 @@
 #ifndef Pt_Hmi_Dialog_H
 #define Pt_Hmi_Dialog_H
 
-#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/MainWindow.h>
 
 namespace Pt{
 namespace Hmi{
@@ -46,13 +46,13 @@ namespace DialogResultType
 	};
 }
 
-class PT_HMI_API Dialog  : public Window
+class PT_HMI_API Dialog  : public MainWindow
 {
 public:
 	Dialog();
 	virtual ~Dialog();	
 
-	void doModal(Window* parent);
+	void doModal(MainWindow* parent);
 
 	Property<DialogResultType::Type>	Result;		
 

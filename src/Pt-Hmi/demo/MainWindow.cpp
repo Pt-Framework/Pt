@@ -75,19 +75,21 @@ void MainWindow::init()
 	
 	Position = Pt::Gfx::PointF(200,200);
 	Size = Pt::Gfx::SizeF(800,600);
-	MinimumSize = Pt::Gfx::SizeF(200,200);
-	MaximumSize = Size.get();
+	ShowTitle = true;	
+	ShowInTaskbar = true;
+	ShowSysMenu = true;
+	Border = WindowBorder::Sizeable;
 	Caption = std::string("This is a Platinum C++ Human Machine Interface demo  ");
-   State = Hmi::WindowState::Normal;
+  State = Hmi::WindowState::Normal;
 	StartPostion = Hmi::WindowStartPosition::CenterParent;
 	Closed.Changed += Pt::slot(*this, &MainWindow::onClosedByWindow);
-	Border = WindowBorder::Sizeable;
+	
 	
 	//Panel
 	_mainPanel.Size = Pt::Gfx::SizeF(700,480);
 	_mainPanel.Position = Pt::Gfx::PointF(40,40);
 	_mainPanel.PanelBorderWidth = 3;
-	_mainPanel.PanelBorderStyle = Pt::Hmi::BorderStyle::Sizeable;
+	_mainPanel.PanelBorderStyle = Pt::Hmi::BorderStyle::Single;
 
 	{
 		std::stringstream memoryStream;
@@ -136,8 +138,16 @@ void MainWindow::init()
 	_closeButton.Size = Pt::Gfx::SizeF(150,25);
 	_closeButton.Clicked += Pt::slot(*this, &MainWindow::onClosed);
 	
-	addChild(&_mainPanel);
-	addChild(&_closeButton);
+	_childWindow2.addChild(&_mainPanel);
+	//addChild(&_closeButton);
+
+	_childWindow1.Position = Pt::Gfx::PointF(20,20);
+	_childWindow1.Size = Pt::Gfx::SizeF(200,300);
+	_childWindow2.Position = Pt::Gfx::PointF(80,80);
+	_childWindow2.Size = Pt::Gfx::SizeF(800,600);
+
+	addChildWindow(_childWindow1);
+	addChildWindow(_childWindow2);
 }
 
 void MainWindow::onShowDialog()

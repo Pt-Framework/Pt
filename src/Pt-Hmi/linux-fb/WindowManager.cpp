@@ -97,7 +97,7 @@ void WindowManager::copyImageData(ssize_t toX, ssize_t toY, const char* data, si
 }
 
 
-WindowImpl* WindowManager::active()
+ChildWindow* Window* WindowManager::active()
 {	
 		return  _windows [ _windows.size() - 1 ];
 }

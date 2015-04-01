@@ -1245,9 +1245,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Window.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Button.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1310,6 +1307,18 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\WindowManager.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ChildWindow.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowProperties.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\MainWindow.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h">
+      <Filter>Pt-Hmi</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2373,9 +2382,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Controller.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\PropertyBase.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
@@ -2408,9 +2414,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Window.cpp">
-      <Filter>Pt-Hmi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Button.cpp">
       <Filter>Pt-Hmi</Filter>
@@ -2447,6 +2450,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\WindowManager.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ChildWindow.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\MainWindow.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\WindowManager.cpp">
+      <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

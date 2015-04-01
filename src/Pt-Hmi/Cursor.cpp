@@ -1,6 +1,5 @@
 #include <Pt/Hmi/Cursor.h>
 #include "CursorImpl.h"
-#include <Pt/Hmi/Window.h>
 
 namespace Pt{
 namespace Hmi{

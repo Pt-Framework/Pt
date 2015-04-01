@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 
 
-#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/MainWindow.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Application.h>
 #include "WindowImpl.h"
@@ -37,7 +37,7 @@
 namespace Pt{
 namespace Hmi{
 
-Window::Window(Window* parent)
+MainWindow::MainWindow(MainWindow* parent)
 : _impl(new WindowImpl(&paintSurface() ) )
 , PT_HMI_INIT_PROPERTY_VALUE(MinimumSize,Pt::Gfx::SizeF(0,0))
 , PT_HMI_INIT_PROPERTY_VALUE(MaximumSize,Pt::Gfx::SizeF(std::numeric_limits<Pt::uint16_t>::max() ,std::numeric_limits<Pt::uint16_t>::max()))
@@ -56,35 +56,40 @@ Window::Window(Window* parent)
 , PT_HMI_INIT_PROPERTY_VALUE(FocuseMoveKey, "\t")
 , PT_HMI_INIT_PROPERTY_VALUE(FirstShow,true)
 , _winParent(parent)
+, _windowManager(*this)
 {
+
+	_impl->windowEvent() += Pt::slot(_windowManager, &WindowManager::onPointerInput);
+	_impl->windowEvent() += Pt::slot(_windowManager, &WindowManager::onKeyInput);
+	
 	Visible = false;
 	Focused = true;
   Name = std::string("Window");
 	AcceptFocus = false;
 		
-  Size.Changed  += Pt::slot(*this, &Window::onSizeChanged);	
-  Position.Changed += Pt::slot(*this, &Window::onPositionChanged);
-  Closed.Changed += Pt::slot(*this, &Window::onClosedChanged);
-  Visible.Changed += Pt::slot(*this, &Window::onVisibleChanged);
-  Caption.Changed += Pt::slot(*this, &Window::onCaptionChanged);
-  ShowTitle.Changed += Pt::slot(*this, &Window::onShowTitleChanged);
-  ShowMinimizeButton.Changed += Pt::slot(*this, &Window::onShowMinimizedButtonChanged);
-  ShowMaximizeButton.Changed += Pt::slot(*this, &Window::onShowMaximizeButtonChanged);
-  ShowSysMenu.Changed += Pt::slot(*this, &Window::onShowSysMenuChanged);
-  State.Changed += Pt::slot(*this, &Window::onWindowStateChanged);
-  Border.Changed += Pt::slot(*this, &Window::onBorderChanged);
-  ShowInTaskbar.Changed += Pt::slot(*this, &Window::onShowInTaskbarChanged);
-  Icon.Changed += Pt::slot(*this, &Window::onIconChanged);
-	Enabled.Changed += Pt::slot(*this, &Window::onEnabledChanged);
-	MinimumSize.Changed += Pt::slot(*this, &Window::onMinSizeChnaged);
-	MaximumSize.Changed += Pt::slot(*this, &Window::onMaxSizeChnaged);
+  Size.Changed  += Pt::slot(*this, &MainWindow::onSizeChanged);	
+  Position.Changed += Pt::slot(*this, &MainWindow::onPositionChanged);
+  Closed.Changed += Pt::slot(*this, &MainWindow::onClosedChanged);
+  Visible.Changed += Pt::slot(*this, &MainWindow::onVisibleChanged);
+  Caption.Changed += Pt::slot(*this, &MainWindow::onCaptionChanged);
+  ShowTitle.Changed += Pt::slot(*this, &MainWindow::onShowTitleChanged);
+  ShowMinimizeButton.Changed += Pt::slot(*this, &MainWindow::onShowMinimizedButtonChanged);
+  ShowMaximizeButton.Changed += Pt::slot(*this, &MainWindow::onShowMaximizeButtonChanged);
+  ShowSysMenu.Changed += Pt::slot(*this, &MainWindow::onShowSysMenuChanged);
+  State.Changed += Pt::slot(*this, &MainWindow::onWindowStateChanged);
+  Border.Changed += Pt::slot(*this, &MainWindow::onBorderChanged);
+  ShowInTaskbar.Changed += Pt::slot(*this, &MainWindow::onShowInTaskbarChanged);
+  Icon.Changed += Pt::slot(*this, &MainWindow::onIconChanged);
+	Enabled.Changed += Pt::slot(*this, &MainWindow::onEnabledChanged);
+	MinimumSize.Changed += Pt::slot(*this, &MainWindow::onMinSizeChnaged);
+	MaximumSize.Changed += Pt::slot(*this, &MainWindow::onMaxSizeChnaged);
 
-	_impl->windowEvent() += Pt::slot(*this, &Window::onPointerInput);
-	_impl->windowEvent() += Pt::slot(*this, &Window::onKeyInput);	
-	_impl->windowEvent() += Pt::slot(*this, &Window::onResizeEvent);
-	_impl->windowEvent() += Pt::slot(*this, &Window::onPositionEvent);
-  _impl->windowEvent() += Pt::slot(*this, &Window::onCloseEvent);	
-	_impl->windowEvent() += Pt::slot(*this, &Window::onActivateEvent);	
+	_impl->windowEvent() += Pt::slot(*this, &MainWindow::onPointerInput);
+	_impl->windowEvent() += Pt::slot(*this, &MainWindow::onKeyInput);	
+	_impl->windowEvent() += Pt::slot(*this, &MainWindow::onResizeEvent);
+	_impl->windowEvent() += Pt::slot(*this, &MainWindow::onPositionEvent);
+  _impl->windowEvent() += Pt::slot(*this, &MainWindow::onCloseEvent);	
+	_impl->windowEvent() += Pt::slot(*this, &MainWindow::onActivateEvent);	
 
   Position = Pt::Gfx::PointF(20,20);
 	Size =  Pt::Gfx::SizeF(200,200);
@@ -93,42 +98,59 @@ Window::Window(Window* parent)
 }
 
 
-Window::~Window()
+MainWindow::~MainWindow()
 {
 }
 
 
-void Window::setWindowParent(Window* parent)
+const std::vector<ChildWindow*>& MainWindow::childWindows() const
+{
+	return _windowManager.windows();
+}
+
+void MainWindow::addChildWindow(ChildWindow& w)
+{
+	_windowManager.add(&w);
+}
+
+void MainWindow::removeChildWindow(ChildWindow& w)
+{
+	_windowManager.remove(&w);
+}
+
+
+void MainWindow::setWindowParent(MainWindow* parent)
 {
 	_winParent = parent;
 }
 
 
-Window* Window::windowParent() const
+MainWindow* MainWindow::windowParent() const
 {
 	return _winParent;
 }
 
 
-Pt::Signal<const Pt::Event&>& Window::eventReady()
+Pt::Signal<const Pt::Event&>& MainWindow::eventReady()
 {
   return _impl->windowEvent();
 }
 
-WindowImpl* Window::impl()
+WindowImpl* MainWindow::impl()
 {
 	return _impl;
 }
 
 
-void Window::onInvalidate()
+void MainWindow::onInvalidate()
 {
-	render();
-	_impl->render();
+	render();	
+	_windowManager.render();
+	_impl->render();		
 }
 
 
-void Window::onKeyInput(const KeyEvent& ev)
+void MainWindow::onKeyInput(const KeyEvent& ev)
 {
 	if( !Enabled.get() )
 		return;
@@ -153,7 +175,7 @@ void Window::onKeyInput(const KeyEvent& ev)
 }
 
 
-void Window::onResizeEvent(const ResizeEvent& ev)
+void MainWindow::onResizeEvent(const ResizeEvent& ev)
 {
 	const Pt::Gfx::SizeF& curSize = Size.get();
 
@@ -165,7 +187,7 @@ void Window::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-void Window::onPositionEvent(const PositionEvent& ev)
+void MainWindow::onPositionEvent(const PositionEvent& ev)
 {
 	const Pt::Gfx::PointF& curPos = Position.get();
 
@@ -176,29 +198,29 @@ void Window::onPositionEvent(const PositionEvent& ev)
 }
 
 
-void Window::onCloseEvent(const CloseEvent& ev)
+void MainWindow::onCloseEvent(const CloseEvent& ev)
 {
   Closed = true;
 }
 
-void Window::onActivateEvent(const ActivateEvent& ev)
+void MainWindow::onActivateEvent(const ActivateEvent& ev)
 {
 	Focused = ev.active();
 }
 
-void Window::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
+void MainWindow::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
 {
   _impl->setPosition( prop.get() );
 }
 
 
-void Window::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
+void MainWindow::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 {
   _impl->setSize( Size.get() );  
 }
 
 
-void Window::onClosedChanged(const Property<bool> & closed)
+void MainWindow::onClosedChanged(const Property<bool> & closed)
 {	
 	if( !Enabled.get() )
 		return;
@@ -218,7 +240,7 @@ void Window::onClosedChanged(const Property<bool> & closed)
 }
 
 
-void Window::onVisibleChanged(const Property<bool> & visible)
+void MainWindow::onVisibleChanged(const Property<bool> & visible)
 {
   //Set the closed flag
 	if( visible.get() )
@@ -244,42 +266,42 @@ void Window::onVisibleChanged(const Property<bool> & visible)
 }
 
 
-void Window::onCaptionChanged(const Property<std::string> & p)
+void MainWindow::onCaptionChanged(const Property<std::string> & p)
 {
   _impl->setCaption( p.get() );
 }
 
 
-void Window::onShowTitleChanged(const Property<bool> & p)
+void MainWindow::onShowTitleChanged(const Property<bool> & p)
 {
   _impl->showTitle( p.get() );
 }
 
 
-void Window::onShowMinimizedButtonChanged(const Property<bool> & p)
+void MainWindow::onShowMinimizedButtonChanged(const Property<bool> & p)
 {
   _impl->showMinimizedButton( p.get() );
 }
 
 
-void Window::onShowMaximizeButtonChanged(const Property<bool> & p)
+void MainWindow::onShowMaximizeButtonChanged(const Property<bool> & p)
 {
   _impl->showMaximizeButton( p.get() );
 }
 
 
-void Window::onShowSysMenuChanged(const Property<bool> & p)
+void MainWindow::onShowSysMenuChanged(const Property<bool> & p)
 {
   _impl->showSysMenu( p.get() );
 }
 
-void Window::onWindowStateChanged(const Property<WindowState::Type> & p)
+void MainWindow::onWindowStateChanged(const Property<WindowState::Type> & p)
 {
   _impl->setWindowState( p.get() );
 }
 
 
-void Window::onBorderChanged(const Property<WindowBorder::Type> & p)
+void MainWindow::onBorderChanged(const Property<WindowBorder::Type> & p)
 {
   _impl->setBorder( p.get() );
 
@@ -287,29 +309,29 @@ void Window::onBorderChanged(const Property<WindowBorder::Type> & p)
 }
 
 
-void Window::onShowInTaskbarChanged(const Property<bool> & p)
+void MainWindow::onShowInTaskbarChanged(const Property<bool> & p)
 {
   _impl->showInTaskbar( p.get() );
 }
 
 
-void Window::onIconChanged(const Property<Pt::Gfx::ARgbImage> & p)
+void MainWindow::onIconChanged(const Property<Pt::Gfx::ARgbImage> & p)
 {
   _impl->setIcon( p.get() );
 }
 
 
-void Window::onEnabledChanged(const Property<bool> & p)
+void MainWindow::onEnabledChanged(const Property<bool> & p)
 {
 	_impl->setEnable( p.get() );
 }
 
-void Window::onMinSizeChnaged(const Property<Pt::Gfx::SizeF>& prop)
+void MainWindow::onMinSizeChnaged(const Property<Pt::Gfx::SizeF>& prop)
 {
 	_impl->setMinSize( prop.get() );
 }
 		
-void Window::onMaxSizeChnaged(const Property<Pt::Gfx::SizeF>& prop)
+void MainWindow::onMaxSizeChnaged(const Property<Pt::Gfx::SizeF>& prop)
 {
 	_impl->setMaxSize( prop.get() );
 }

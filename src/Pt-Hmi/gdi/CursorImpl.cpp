@@ -28,7 +28,6 @@
 #include <Windows.h>
 #include <Pt/Hmi/Application.h>
 #include "ApplicationImpl.h"
-#include <Pt/Hmi/Window.h>
 
 namespace Pt{
 namespace Hmi{
@@ -75,6 +74,15 @@ void CursorImpl::setCursor(Cursors::Type c)
 		case Cursors::SizeWE:
 			_cursor = LoadCursor(hin, IDC_SIZEWE);
 		break;
+
+		case Cursors::SizeNESW:
+			_cursor = LoadCursor(hin, IDC_SIZENESW);
+		break;
+
+		case Cursors::SizeNWSE:
+			_cursor = LoadCursor(hin, IDC_SIZENWSE);
+		break;
+
 	}
 
 	SetCursor(_cursor);

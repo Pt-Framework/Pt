@@ -77,6 +77,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Api.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Application.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Button.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\ChildWindow.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Controller.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h" />
@@ -85,6 +86,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Dialog.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Label.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\MainWindow.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Margin.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Panel.h" />
@@ -94,7 +96,8 @@
     <ClInclude Include="..\..\include\Pt\Hmi\PropertyBase.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\Window.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowProperties.h" />
     <ClInclude Include="..\..\include\Pt\Http\Api.h" />
     <ClInclude Include="..\..\include\Pt\Http\Authenticator.h" />
     <ClInclude Include="..\..\include\Pt\Http\Authorizer.h" />
@@ -509,8 +512,8 @@
     <ClCompile Include="..\..\src\Pt-Gfx\Stroke.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Button.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\ChildWindow.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Controller.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\Dialog1.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\Dialog2.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\Main.cpp" />
@@ -529,12 +532,13 @@
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\WindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\WindowManager.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\MainWindow.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Panel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PropertyBase.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\Window.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\WindowManager.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\CursorImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.cpp" />

@@ -26,7 +26,7 @@
 #ifndef Pt_Hmi_Demo_MainWindow_h
 #define Pt_Hmi_Demo_MainWindow_h
 
-#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/MainWindow.h>
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Label.h>
@@ -36,7 +36,7 @@ namespace Pt{
 namespace Hmi{
 namespace Demo{
 
-class MainWindow : public Pt::Hmi::Window
+class MainWindow : public Pt::Hmi::MainWindow
 {
 public:
 	MainWindow();
@@ -58,6 +58,8 @@ private:
 	Pt::Hmi::Button _toggleButton;
 	Pt::Hmi::Button _dialogButton;
 	Pt::Hmi::Label  _textLabel;	
+	ChildWindow     _childWindow1;
+	ChildWindow     _childWindow2;
 }; 
 
 }}}

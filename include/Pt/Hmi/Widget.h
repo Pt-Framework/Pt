@@ -23,7 +23,6 @@ namespace BorderStyle
     NoBorder,
     Single,
     Border3D,
-    Sizeable,
     Widget
   };
 }

@@ -1,5 +1,5 @@
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/WindowProperties.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Brush.h>
 

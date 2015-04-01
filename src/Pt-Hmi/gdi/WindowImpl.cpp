@@ -335,16 +335,16 @@ void WindowImpl::onMove(LPARAM lParam)
 
 void WindowImpl::onPaint()
 {           
-    RECT  info;
-    GetWindowRect(_hwnd, &info);
+  RECT  info;
+  GetWindowRect(_hwnd, &info);
 
-    PAINTSTRUCT ps;
-    HDC windowContext = BeginPaint(_hwnd, &ps);
+  PAINTSTRUCT ps;
+  HDC windowContext = BeginPaint(_hwnd, &ps);
     
-    HDC bitmapDeviceConText = _surface->impl()->deviceContext();
-    BitBlt(windowContext, 0, 0, info.right - info.left,  info.bottom - info.top, bitmapDeviceConText, 0, 0, SRCCOPY);    
+  HDC bitmapDeviceConText = _surface->impl()->deviceContext();
+  BitBlt(windowContext, 0, 0, info.right - info.left,  info.bottom - info.top, bitmapDeviceConText, 0, 0, SRCCOPY);    
     
-    EndPaint(_hwnd, &ps);    
+  EndPaint(_hwnd, &ps);    
 }
 
 
@@ -479,7 +479,7 @@ void WindowImpl::setBorder(WindowBorder::Type p)
 
         case Pt::Hmi::WindowBorder::Sizeable:
             style |= WS_THICKFRAME;
-						style &= ~WS_DLGFRAME;
+						style |= WS_DLGFRAME;
         break;
 
         case Pt::Hmi::WindowBorder::Dialog:

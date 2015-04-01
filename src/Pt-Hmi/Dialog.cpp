@@ -48,7 +48,7 @@ Dialog::~Dialog()
 }
 
 
-void Dialog::doModal(Window* parent)
+void Dialog::doModal(MainWindow* parent)
 {	
 	setWindowParent(parent);  
 	

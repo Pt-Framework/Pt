@@ -26,8 +26,10 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   Label.cpp					   
 					   Panel.cpp					   
 					   Widget.cpp					   
-					   Window.cpp					   
-					   Dialog.cpp					   
+					   MainWindow.cpp					   
+					   Dialog.cpp		
+					   ChildWindow.cpp		
+					   WindowManager.cpp	   
 					   ;
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx  ;
