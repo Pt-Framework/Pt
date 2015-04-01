@@ -36,6 +36,7 @@
 namespace Pt{
 namespace Hmi{
 
+
 WindowImpl::WindowImpl(PaintSurface* surface)
 : _hwnd(0)
 , _app(Pt::Hmi::Application::instance())
@@ -139,6 +140,7 @@ void WindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
   _windowEvent.send(_keyEvent);
 }
 
+
 void WindowImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wparam, long lparam, bool& handled)
 {
     if(_hwnd != wnd)
@@ -190,7 +192,7 @@ void WindowImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wpar
 
         case WM_MOVE:
         {
-            onMove();
+            onMove(lparam);
             handled = true;
         }
         break;
@@ -221,6 +223,17 @@ void WindowImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wpar
 				{
 					_activateEvent.setActive(true);
 					_windowEvent.send(_activateEvent);
+				}
+				break;
+
+				case WM_GETMINMAXINFO:
+				{
+					MINMAXINFO* mmi = (MINMAXINFO*)lparam;
+					POINT min = { _minSize.width(), _minSize.height() };
+					POINT max = { _maxSize.width(), _maxSize.height() };
+					mmi->ptMaxTrackSize = max; 
+					mmi->ptMinTrackSize = min;
+					handled = true;  
 				}
 				break;
     }
@@ -307,13 +320,16 @@ void WindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 }
 
 
-void WindowImpl::onMove()
-{
-    RECT  info;
-    GetWindowRect(_hwnd, &info);
-    Pt::Gfx::PointF winPos(info.left, info.right);
-    _positionEvent.setPosition(winPos);
-		_windowEvent.send( _positionEvent );
+void WindowImpl::onMove(LPARAM lParam)
+{ 
+	RECT  info;
+  GetWindowRect(_hwnd, &info);
+	int xPos = info.left;
+	int yPos = info.top;
+
+  Pt::Gfx::PointF winPos(xPos, yPos);
+  _positionEvent.setPosition(winPos);
+	_windowEvent.send( _positionEvent );
 }
 
 
@@ -453,7 +469,7 @@ void WindowImpl::setBorder(WindowBorder::Type p)
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 		LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
-    switch( p)
+    switch( p )
     {
         case Pt::Hmi::WindowBorder::NoBorder:            
 						style &= ~WS_DLGFRAME;
@@ -498,6 +514,16 @@ void WindowImpl::setBorder(WindowBorder::Type p)
   SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle);
 }
 
+
+void WindowImpl::setMinSize(const Pt::Gfx::SizeF& s)
+{
+	_minSize = _app.fromUnit(s);
+}
+	
+void WindowImpl::setMaxSize(const Pt::Gfx::SizeF& s)
+{
+	_maxSize = _app.fromUnit(s);			
+}
 
 void WindowImpl::showInTaskbar(bool p)
 {	
@@ -552,4 +578,5 @@ void WindowImpl::render()
 	InvalidateRect(_hwnd, NULL, FALSE);
 }
 
-}}
+
+}}//Namespace

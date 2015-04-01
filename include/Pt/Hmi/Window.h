@@ -139,6 +139,10 @@ private:
 
 		void onEnabledChanged(const Property<bool> & p);
 
+		void onMinSizeChnaged(const Property<Pt::Gfx::SizeF>& prop);
+		
+		void onMaxSizeChnaged(const Property<Pt::Gfx::SizeF>& prop);
+
 private:
     WindowImpl* _impl;    
 		Window*     _winParent;

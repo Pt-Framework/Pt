@@ -40,7 +40,7 @@ namespace Hmi{
 Window::Window(Window* parent)
 : _impl(new WindowImpl(&paintSurface() ) )
 , PT_HMI_INIT_PROPERTY_VALUE(MinimumSize,Pt::Gfx::SizeF(0,0))
-, PT_HMI_INIT_PROPERTY_VALUE(MaximumSize,Pt::Gfx::SizeF(std::numeric_limits<Pt::uint32_t>::max() ,std::numeric_limits<Pt::uint32_t>::max()))
+, PT_HMI_INIT_PROPERTY_VALUE(MaximumSize,Pt::Gfx::SizeF(std::numeric_limits<Pt::uint16_t>::max() ,std::numeric_limits<Pt::uint16_t>::max()))
 , PT_HMI_INIT_PROPERTY_VALUE(StartPostion, WindowStartPosition::Manual)
 , PT_HMI_INIT_PROPERTY_VALUE(State, WindowState::Normal)
 , PT_HMI_INIT_PROPERTY_VALUE(ShowInTaskbar,true)
@@ -76,6 +76,8 @@ Window::Window(Window* parent)
   ShowInTaskbar.Changed += Pt::slot(*this, &Window::onShowInTaskbarChanged);
   Icon.Changed += Pt::slot(*this, &Window::onIconChanged);
 	Enabled.Changed += Pt::slot(*this, &Window::onEnabledChanged);
+	MinimumSize.Changed += Pt::slot(*this, &Window::onMinSizeChnaged);
+	MaximumSize.Changed += Pt::slot(*this, &Window::onMaxSizeChnaged);
 
 	_impl->windowEvent() += Pt::slot(*this, &Window::onPointerInput);
 	_impl->windowEvent() += Pt::slot(*this, &Window::onKeyInput);	
@@ -86,6 +88,8 @@ Window::Window(Window* parent)
 
   Position = Pt::Gfx::PointF(20,20);
 	Size =  Pt::Gfx::SizeF(200,200);
+	_impl->setMinSize(MinimumSize.get());
+	_impl->setMaxSize(MaximumSize.get());
 }
 
 
@@ -190,18 +194,6 @@ void Window::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
 
 void Window::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 {
-	if( prop.get().width() < MinimumSize.get().width() ||   prop.get().height() < MinimumSize.get().height())
-	{
-		Size = MinimumSize.get();
-		return;
-	}
-		
-	if( prop.get().width() > MaximumSize.get().width() ||  prop.get().height() > MaximumSize.get().height())
-	{
-		Size =  MaximumSize.get() ;
-		return;
-	}
-
   _impl->setSize( Size.get() );  
 }
 
@@ -231,7 +223,6 @@ void Window::onVisibleChanged(const Property<bool> & visible)
   //Set the closed flag
 	if( visible.get() )
 	{
-
     if( FirstShow.get() )
     {
       if( windowParent() != 0  && StartPostion.get() == WindowStartPosition::CenterParent )
@@ -312,6 +303,17 @@ void Window::onEnabledChanged(const Property<bool> & p)
 {
 	_impl->setEnable( p.get() );
 }
+
+void Window::onMinSizeChnaged(const Property<Pt::Gfx::SizeF>& prop)
+{
+	_impl->setMinSize( prop.get() );
+}
+		
+void Window::onMaxSizeChnaged(const Property<Pt::Gfx::SizeF>& prop)
+{
+	_impl->setMaxSize( prop.get() );
+}
+
 
 }}
 

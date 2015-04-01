@@ -78,7 +78,7 @@ void MainWindow::init()
 	MinimumSize = Pt::Gfx::SizeF(200,200);
 	MaximumSize = Size.get();
 	Caption = std::string("This is a Platinum C++ Human Machine Interface demo  ");
-    State = Hmi::WindowState::Normal;
+   State = Hmi::WindowState::Normal;
 	StartPostion = Hmi::WindowStartPosition::CenterParent;
 	Closed.Changed += Pt::slot(*this, &MainWindow::onClosedByWindow);
 	Border = WindowBorder::Sizeable;

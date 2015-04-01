@@ -59,6 +59,8 @@ public:
   void destroy();
 
   void show();
+	
+	void showModal(WindowImpl* impl);
 
   void hide();
 
@@ -90,6 +92,10 @@ public:
 
 	void setEnable(bool e);	
 
+	void setMinSize(const Pt::Gfx::SizeF& s);
+	
+	void setMaxSize(const Pt::Gfx::SizeF& s);
+
 
 	Pt::Signal<const Pt::Event&>& windowEvent()
 	{
@@ -105,7 +111,7 @@ protected:
 	void onSize(WPARAM wparam, LPARAM lparam);
 	void onMouse(unsigned int msg,  WPARAM wparam, LPARAM lparam);
 	void onKey(unsigned int ms, WPARAM wparam, LPARAM lparam);
-	void onMove();
+	void onMove(LPARAM lparam);
 	void onClosing();	
 
 protected:	
@@ -122,6 +128,8 @@ private:
 	PositionEvent									_positionEvent;
 	ActivateEvent									_activateEvent;
 	bool													_forceTopMost;
+	Pt::Gfx::Size                 _minSize;
+	Pt::Gfx::Size                 _maxSize;
 };
 
 }}
