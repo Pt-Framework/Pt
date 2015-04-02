@@ -35,6 +35,7 @@ Widget::Widget()
 , PT_HMI_INIT_PROPERTY_VALUE(FlowDirection, Hmi::FlowLayoutDirection::LeftToRightTopToBottom)
 , PT_HMI_INIT_PROPERTY_VALUE(ShortcutKey,"")
 , _parent(0)
+, _isValid(false)
 {
 	bindMnemonicToWidget( *this );	
 	Focused.Changed += Pt::slot( *this, &Widget::onFocusChanged );
@@ -107,6 +108,7 @@ void Widget::updatePosAndSize(Widget& w, const Pt::Gfx::SizeF& s, const Pt::Gfx:
   w.Visible.set(false);  //Avoid invalidate.              
   w.Position = p;
   w.Size = s;  
+	w._isValid = false;
   w.Visible.set(visible);
 }
 
@@ -118,13 +120,15 @@ void Widget::mnemonic()
 
 
 void Widget::invalidate()
-{  
+{  	
+	_isValid = false;
 	onInvalidate();
 }
 
 
 void Widget::onLayout()
 {
+
   Pt::Hmi::Painter& localPainter = paintSurface().painter();
   Gfx::SizeF clientSize = paintSurface().size();
   double posLeft  = 0;
@@ -249,7 +253,7 @@ void Widget::onLayout()
         break;
       }
     }
-
+		
     child->render();
     
     const double x = point.x() + child->Margin.get().left();
@@ -284,8 +288,12 @@ void Widget::render()
 	if( ! Visible.get() )
 		return;
 	
-	onRender();	
+	if( !_isValid )
+		onRender();	
+
 	onLayout();	
+
+	_isValid = true;
 }
 
 
@@ -305,7 +313,7 @@ void Widget::onRender()
 	
 	localPainter.setFont(Font.get());
 
-	if(HighLight.get())
+	if( HighLight.get() )
 	{       
 		Pt::Gfx::Brush	brush(HighlightColor.get());
         
@@ -375,7 +383,7 @@ void Widget::onRender()
 void Widget::onInvalidate()
 {
 	if( parent() )
-		parent()->onInvalidate();		
+		parent()->invalidate();		
 }
 
 void Widget::onActionKey(KeyEvent::KeyState state)
@@ -403,19 +411,21 @@ void Widget::onKeyInput(const KeyEvent& ev)
 		mnKey += ev.toUTF8String();
 
 		 if(_mnemonicKey == mnKey)
-			_mnemonicWidget->mnemonic();			
+		 {
+				_mnemonicWidget->mnemonic();						
+		 }
 	}
 
 	//Action key handling
 	if( ev.toUTF8String() == FocusedActionKey.get() && Focused.get() )	
 	{
-		onActionKey( ev.state() );
+		onActionKey( ev.state() );		
 	}
 	
 	//Shortcurt Key
 	if( ev.shortCutKey() == ShortcutKey.get() )
 	{
-		onShortcutKey( ev.state() );
+		onShortcutKey( ev.state() );		
 	}
 
 	//Propagate to children.
@@ -567,7 +577,8 @@ bool Widget::focusNext()
 
 
 void Widget::onFocusChanged( const Property<bool>& prop )
-{
+{	
+
   if( !Focused.get() )
 	{//False => all childs set to false.
 		for( size_t i = 0; i < children().size(); ++i)
@@ -576,11 +587,16 @@ void Widget::onFocusChanged( const Property<bool>& prop )
 			child->Focused.set(false);						
 			child->Focused.Changed.send(child->Focused);
 		}
+
+		invalidate();
     return;
 	}
 
 	if( parent() == 0 )
+	{
+		invalidate();
     return;
+	}
 		
 	//Set parent focused.
 	parent()->Focused.set(true);
@@ -594,6 +610,8 @@ void Widget::onFocusChanged( const Property<bool>& prop )
 		if( child != this )
 			child->Focused = false;
 	}
+
+	invalidate();
 }
 
 std::string Widget::removeMnemonic(const std::string& text)

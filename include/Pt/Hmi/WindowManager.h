@@ -33,20 +33,24 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/ARgbImage.h>
+#include <Pt/Connectable.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/PositionEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/ChildWindow.h>
 
 namespace Pt {
 namespace Hmi {
 
+class ChildWindow;
+class Window;
+class PointingEvent;
+
 class WindowManager : public Pt::Connectable
 {
  public:
-    WindowManager(Widget& parent);
+    WindowManager(Window& parent);
 
     virtual ~WindowManager();
 
@@ -77,7 +81,7 @@ class WindowManager : public Pt::Connectable
 		void updateFocus();		
 
 	private:
-		Widget&											_parent;
+		Window&											_parent;
 		std::vector<ChildWindow*>		_windows;		
 		ResizeDirection::Type				_sizingDirection;
 };

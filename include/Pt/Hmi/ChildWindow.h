@@ -28,15 +28,15 @@
 #define Pt_Hmi_ChildWindow_H
 
 #include <Pt/Hmi/Panel.h>
-#include <Pt/Hmi/WindowProperties.h>
+#include <Pt/Hmi/Window.h>
 
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API ChildWindow  : public Widget
+class PT_HMI_API ChildWindow  : public Hmi::Window
 {
 public:
-	friend class WindowManager;
+	friend class WindowManager;    
 
 	ChildWindow();
 	virtual ~ChildWindow();	
@@ -52,29 +52,10 @@ protected:
 		_lastSizePoint = p;
 	}
 
-public:
-    Property<Pt::Gfx::SizeF>                  MinimumSize;
-    Property<Pt::Gfx::SizeF>                  MaximumSize;
-    Property<WindowStartPosition::Type>       StartPostion;
-    Property<WindowState::Type>               State;    
-    Property<bool>                            ShowTitle;
-    Property<bool>                            ShowMinimizeButton;
-    Property<bool>                            ShowMaximizeButton;
-    Property<bool>                            ShowSysMenu;
-    Property<std::string>                     Caption;
-    Property<WindowBorder::Type>              WindowBorder;
-    Property<Pt::Gfx::ARgbImage>              Icon;
-    Property<bool>                            Closed;
-    Property<bool>                            CanClose;
-    Property<bool>                            FirstShow;
-    Property<std::string>                     FocuseMoveKey;    
+public:  
 		Property<double>													BorderWidth;	  
 		Property<Pt::Gfx::ARgbColor>							BorderColor;
 		Property<Pt::Gfx::ARgbColor>							FocusedColor;
-
-		void handleKeyInput(const KeyEvent& ev);
-    void handlePointerInput( const Pt::Hmi::PointingEvent& mouseEvent );   
-
 protected:
 		virtual void onRender();
 		virtual void onInvalidate();

@@ -141,7 +141,6 @@ public:
 
 public:
 	static size_t getMnemonicIndex(const std::string& text);
-
 	static std::string removeMnemonic(const std::string& text);
 
 public:
@@ -175,6 +174,7 @@ public:
 protected:
   Widget();	
 
+
 protected:
   virtual void onInvalidate();
 	virtual void onRender();
@@ -202,6 +202,7 @@ private:
 	Widget*								_mnemonicWidget;	
 	PaintSurface					_paintSurface;	
   std::string           _mnemonicKey;
+	bool									_isValid;
 };
 
 }}

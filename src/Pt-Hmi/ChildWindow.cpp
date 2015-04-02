@@ -31,26 +31,12 @@ namespace Pt{
 namespace Hmi{
 
 ChildWindow::ChildWindow()
-: PT_HMI_INIT_PROPERTY_VALUE(MinimumSize,Pt::Gfx::SizeF(0,0))
-, PT_HMI_INIT_PROPERTY_VALUE(MaximumSize,Pt::Gfx::SizeF(std::numeric_limits<Pt::uint16_t>::max() ,std::numeric_limits<Pt::uint16_t>::max()))
-, PT_HMI_INIT_PROPERTY_VALUE(StartPostion, WindowStartPosition::Manual)
-, PT_HMI_INIT_PROPERTY_VALUE(State, WindowState::Normal)
-, PT_HMI_INIT_PROPERTY_VALUE(ShowTitle,true)
-, PT_HMI_INIT_PROPERTY_VALUE(ShowMinimizeButton,true)
-, PT_HMI_INIT_PROPERTY_VALUE(ShowMaximizeButton,true)
-, PT_HMI_INIT_PROPERTY_VALUE(ShowSysMenu,true)	
-, PT_HMI_INIT_PROPERTY_VALUE(Caption,"")
-, PT_HMI_INIT_PROPERTY_VALUE(WindowBorder,WindowBorder::Sizeable)
-, PT_HMI_INIT_PROPERTY_VALUE(Icon, Pt::Gfx::ARgbImage(0,0))
-, PT_HMI_INIT_PROPERTY_VALUE(Closed,false)
-, PT_HMI_INIT_PROPERTY_VALUE(CanClose,true)
-, PT_HMI_INIT_PROPERTY_VALUE(FocuseMoveKey, "\t")
-, PT_HMI_INIT_PROPERTY_VALUE(FirstShow,true)  
-, PT_HMI_INIT_PROPERTY_VALUE(BorderWidth,5)
+: PT_HMI_INIT_PROPERTY_VALUE(BorderWidth,5)
 , PT_HMI_INIT_PROPERTY_VALUE(BorderColor, Pt::Gfx::ARgbColor(178,178,178))
 , PT_HMI_INIT_PROPERTY_VALUE(FocusedColor, Pt::Gfx::ARgbColor(108,108,108))
 {
 	Widget::BackColor = Pt::Gfx::ARgbColor(0, 255, 255, 255);
+	Visible = true;
 }
 
 
@@ -96,19 +82,12 @@ void ChildWindow::onRender()
 
 void ChildWindow::onInvalidate()
 {
-	render();		
+	render();	
+	_windowManager.render();
+	
+	if( _winParent != 0)
+	_winParent->invalidate();
+	
 }
-
-void ChildWindow::handleKeyInput(const KeyEvent& ev)
-{
-	onKeyInput(ev);
-}
-
-
-void ChildWindow::handlePointerInput( const Pt::Hmi::PointingEvent& mouseEvent )
-{
-	onPointerInput(mouseEvent);
-}
-
 
 }}

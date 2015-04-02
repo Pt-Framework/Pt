@@ -28,7 +28,7 @@
 #ifndef Pt_Hmi_MainWindow_H
 #define Pt_Hmi_MainWindow_H
 
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/ChildWindow.h>
@@ -42,7 +42,7 @@ class CloseEvent;
 class PositionEvent;
 class ActivateEvent;
 
-class PT_HMI_API MainWindow  : public Widget
+class PT_HMI_API MainWindow  : public Window
 {
 public:    
     MainWindow(MainWindow* parent = 0);    
@@ -50,38 +50,11 @@ public:
 
     Pt::Signal<const Pt::Event&>& eventReady();
 
-    Property<Pt::Gfx::SizeF>                  MinimumSize;
-    Property<Pt::Gfx::SizeF>                  MaximumSize;
-    Property<WindowStartPosition::Type>       StartPostion;
-    Property<WindowState::Type>               State;    
-    Property<bool>                            ShowInTaskbar;
-    Property<bool>                            ShowTitle;
-    Property<bool>                            ShowMinimizeButton;
-    Property<bool>                            ShowMaximizeButton;
-    Property<bool>                            ShowSysMenu;
-    Property<std::string>                     Caption;
-    Property<WindowBorder::Type>              Border;
-    Property<Pt::Gfx::ARgbImage>              Icon;
-    Property<bool>                            Closed;
-    Property<bool>                            CanClose;
-    Property<bool>                            FirstShow;
-    Property<std::string>                     FocuseMoveKey;      
-
-		WindowImpl* impl();
-		
-		void setWindowParent(MainWindow* parent);
-
-		MainWindow* windowParent() const;
-		
-		void addChildWindow(ChildWindow& w);
-		void removeChildWindow(ChildWindow& w);
-		const std::vector<ChildWindow*>& childWindows() const;
+		WindowImpl* impl();		
 
 protected:
     virtual void onInvalidate();
 	  
-    virtual void onKeyInput(const KeyEvent& ev);
-
     virtual void onResizeEvent(const ResizeEvent& ev);
     
     virtual void onPositionEvent(const PositionEvent& ev);
@@ -127,8 +100,7 @@ private:
 
 private:
     WindowImpl*		_impl;    
-		MainWindow*		_winParent;
-		WindowManager _windowManager;
+
 };
 
 }}

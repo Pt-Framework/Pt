@@ -28,11 +28,14 @@
 
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/ChildWindow.h>
+#include <Pt/Hmi/PointingEvent.h>
+#include <Pt/Hmi/Window.h>
 
 namespace Pt {
 namespace Hmi {
 
-WindowManager::WindowManager(Widget& parent)
+WindowManager::WindowManager(Window& parent)
 : _parent( parent )
 , _sizingDirection( ResizeDirection::No )
 {
@@ -88,7 +91,7 @@ void WindowManager::remove( ChildWindow* w )
 }
 
 
-void WindowManager::activate(ChildWindow* w)
+void WindowManager::activate( ChildWindow* w )
 {
 	std::vector<ChildWindow*>::iterator it = std::find(_windows.begin(), _windows.end(), w);
 
@@ -256,7 +259,7 @@ ResizeDirection::Type WindowManager::detSizeDirection( ChildWindow* w, const Pt:
 	Pt::Gfx::PointF				p( Pt::Gfx::PointF( ev.x(), ev.y() ) );
 	Pt::Gfx::SizeF				size = w->Size.get();
 	ResizeDirection::Type resizeDir = ResizeDirection::No;
-	double								border = w->BorderWidth.get();
+	double								border = w->BorderWidth.get()+5;
 	double								sizeR  = size.width() -  border;
 	double								sizeB  = size.height() - border;
 
@@ -341,8 +344,10 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointingEvent& mouseEvent )
 		_sizingDirection = ResizeDirection::No;
 
 	if(_sizingDirection == ResizeDirection::No )
+	{
 		if( !updateActive( mouseEvent ) )
 			return;
+	}
 			
 	ChildWindow* childWindow = active();
 	
@@ -356,22 +361,18 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointingEvent& mouseEvent )
 	
 	localWidgetEvent.setX( mouseEvent.x() -  childWindow->Position.get().x() ) ;
 	localWidgetEvent.setY( mouseEvent.y() -  childWindow->Position.get().y() ) ;
-		
+				
 	if( _sizingDirection == ResizeDirection::No )
 	{
-		_sizingDirection = detSizeDirection( childWindow, localWidgetEvent );
-
-		if( _sizingDirection != ResizeDirection::No )
-			doSizing( childWindow, mouseEvent );			
+		childWindow->handlePointerInput( localWidgetEvent );
+		childWindow->setLastSizePoint( Pt::Gfx::PointF(mouseEvent.x(), mouseEvent.y() ) );
+		_sizingDirection = detSizeDirection( childWindow, localWidgetEvent );	
 	}
 	else
 	{
-			doSizing( childWindow, mouseEvent );				
+		doSizing( childWindow, mouseEvent );				
 	}
-
-	if( _sizingDirection == ResizeDirection::No )
-		childWindow->handlePointerInput( localWidgetEvent );		
-	
+		
 	invalidate();
 }
 

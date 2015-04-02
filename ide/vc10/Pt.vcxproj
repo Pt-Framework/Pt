@@ -96,6 +96,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\PropertyBase.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Window.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowProperties.h" />
     <ClInclude Include="..\..\include\Pt\Http\Api.h" />
@@ -538,6 +539,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Panel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PropertyBase.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Window.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowManager.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\CursorImpl.cpp" />
