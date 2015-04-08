@@ -214,7 +214,11 @@ class PT_HMI_API Widget : public Pt::Connectable
 		virtual void onInvalidate();
 		virtual void onRender();
 		virtual void onLayout();
+
 		virtual void onPointerInput(const PointerEvent& ev);
+		virtual void onPointerEnter();
+		virtual void onPointerLeaved();
+		
 		virtual void onKeyInput(const KeyEvent& ev);
 		virtual void onMnemonic();
 		virtual void onActionKey(KeyEvent::KeyState state);

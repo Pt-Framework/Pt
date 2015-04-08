@@ -36,7 +36,7 @@ void Label::onRender()
 		caption = Widget::removeMnemonic(Caption.get()).c_str();
 	else
 		caption = Caption.get().c_str();
-
+	
 	if( AutoSize.get() )
 	{		
 		//Calculate the current and adjust the size

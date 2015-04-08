@@ -403,15 +403,27 @@ void Widget::onShortcutKey(KeyEvent::KeyState state)
 }
 
 
+void Widget::onPointerEnter()
+{
+	Application::instance().setCursor( Cursor.get() );
+}
+
+
+void Widget::onPointerLeaved()
+{
+
+}
+
+		
 void Widget::onPointerInput(const PointerEvent& ev)
 {	
 	Pt::Gfx::PointF local = toClient( Pt::Gfx::PointF( ev.x(), ev.y() ) );
-
-	if( contains( local) )
-		Application::instance().setCursor( Cursor.get() );
-
+	
 	if( ! Enabled.get() )
 			return;
+
+	//Todo: onPointerEnter	
+
 
 	for( size_t i = 0; i < children().size(); ++i)
 		_children[i]->eventReceived().send(ev);
