@@ -57,11 +57,11 @@ void Dialog::doModal(MainWindow* parent)
 	//Setup the parent as disabled and TopMost = false.
 	parent->Enabled = false;	
   parent->invalidate(); //Notify the parent.
-	parent->impl()->setForceTopMost(false);
+	parent->setTopMost(false);
 	
 	//Setup the dialog as aenabled and top most.	
 	Enabled = true;
-	impl()->setForceTopMost(true);	
+	setTopMost(true);	
 
 	//Invalidate the dialog
 	invalidate();
@@ -71,7 +71,7 @@ void Dialog::doModal(MainWindow* parent)
 		Application::instance().nextEvent();
 
 	//Restore the parent state.
-	parent->impl()->setForceTopMost(true);
+	parent->setTopMost(true);
 	parent->Enabled = true;	
 	parent->invalidate();	
 	setWindowParent(0);

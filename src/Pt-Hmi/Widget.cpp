@@ -44,8 +44,8 @@ Widget::Widget()
   Caption.Changed += Pt::slot(*this, &Widget::onCaptionChanged);			
 	Focused.Changed += Pt::slot( *this, &Widget::onFocusChanged );
 
-	eventReady() += Pt::slot(*this, &Widget::onKeyInput);
-	eventReady() += Pt::slot(*this, &Widget::onPointerInput);
+	eventReceived() += Pt::slot(*this, &Widget::onKeyInput);
+	eventReceived() += Pt::slot(*this, &Widget::onPointerInput);
 }
 
 
@@ -453,7 +453,7 @@ void Widget::onPointerInput(const PointingEvent& ev)
 			return;
 
 	for( size_t i = 0; i < children().size(); ++i)
-		_children[i]->eventReady().send(ev);
+		_children[i]->eventReceived().send(ev);
 }
 
 

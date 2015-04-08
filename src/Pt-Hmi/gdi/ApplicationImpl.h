@@ -91,10 +91,6 @@ class ApplicationImpl : public Pt::System::EventLoop
 
 		void setCursor(const Cursor& cursor);
 	
-		inline Pt::Signal<const Pt::Event&>& systemEvent()
-		{
-			return _systemEvent;
-		}
 
     protected:
         static long CALLBACK wndProc(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);
@@ -156,8 +152,6 @@ class ApplicationImpl : public Pt::System::EventLoop
 		double _width;
 		double _height;
 		double _dpi;
-
-		Pt::Signal<const Pt::Event&> _systemEvent;			
 
     private:
         System::Mutex _mutex;

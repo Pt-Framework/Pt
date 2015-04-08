@@ -1284,9 +1284,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Margin.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ActivateEvent.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\x11\WindowImpl.h">
       <Filter>Pt-Hmi\x11</Filter>
     </ClInclude>

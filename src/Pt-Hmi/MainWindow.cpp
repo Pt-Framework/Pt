@@ -40,8 +40,8 @@ MainWindow::MainWindow(MainWindow* parent)
 
 	_impl = new WindowImpl( this );
 
-	eventReady() += Pt::slot( _windowManager, &WindowManager::onPointerInput );
-	eventReady() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
+	eventReceived() += Pt::slot( _windowManager, &WindowManager::onPointerInput );
+	eventReceived() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
 	
 	Visible = false;
 	Focused = true;
@@ -91,6 +91,10 @@ void MainWindow::onInvalidate()
 	_impl->render();		
 }
 
+void MainWindow::setTopMost(bool topMost)
+{
+	_impl->setTopMost( topMost );
+}
 
 void MainWindow::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
 {

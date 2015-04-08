@@ -170,9 +170,9 @@ class PT_HMI_API Widget : public Pt::Connectable
 
 		Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot);
 
-		Pt::Signal<const Pt::Event&>& eventReady()
+		Pt::Signal<const Pt::Event&>& eventReceived()
 		{
-			return _eventReady;
+			return _eventReceived;
 		}
 
 	public:
@@ -240,7 +240,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 		PaintSurface							 _paintSurface;	
 		std::string								 _mnemonicKey;
 		bool											 _isValid;
-		Pt::Signal<const Pt::Event&> _eventReady;
+		Pt::Signal<const Pt::Event&> _eventReceived;
 };
 
 }}

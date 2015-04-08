@@ -139,7 +139,7 @@ void WindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
       _keyEvent.setUnicode(ucode);
   }
 
-  _window->eventReady().send(_keyEvent);
+  _window->eventReceived().send(_keyEvent);
 }
 
 
@@ -316,7 +316,7 @@ void WindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
     _pointerEvent.setX(p.x());
     _pointerEvent.setY(p.y());            
 
-    _window->eventReady().send(_pointerEvent);
+    _window->eventReceived().send(_pointerEvent);
 }
 
 
@@ -430,7 +430,7 @@ void WindowImpl::showSysMenu(bool p)
 }
 
 
-void WindowImpl::setForceTopMost(bool force)
+void WindowImpl::setTopMost(bool force)
 {
 	_forceTopMost = force;
 

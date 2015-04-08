@@ -154,7 +154,7 @@ void WindowManager::onKeyInput( const Pt::Hmi::KeyEvent& keyEvent )
 	if( w == 0 )
 		return;
 
-	w->eventReady().send( keyEvent );		
+	w->eventReceived().send( keyEvent );		
 }
 
 
@@ -364,7 +364,7 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointingEvent& mouseEvent )
 				
 	if( _sizingDirection == ResizeDirection::No )
 	{
-		childWindow->eventReady().send( localWidgetEvent );
+		childWindow->eventReceived().send( localWidgetEvent );
 		childWindow->setLastSizePoint( Pt::Gfx::PointF(mouseEvent.x(), mouseEvent.y() ) );
 		_sizingDirection = detSizeDirection( childWindow, localWidgetEvent );	
 	}

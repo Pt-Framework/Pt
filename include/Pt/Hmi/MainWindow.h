@@ -37,9 +37,6 @@ namespace Pt{
 namespace Hmi{
 
 class WindowImpl;
-class CloseEvent;
-class PositionEvent;
-class ActivateEvent;
 
 class PT_HMI_API MainWindow  : public Window
 {
@@ -48,10 +45,12 @@ class PT_HMI_API MainWindow  : public Window
     ~MainWindow();    
 
 		WindowImpl* impl();		
+		
+		void setTopMost( bool topMost );
 
 	protected:
-    virtual void onInvalidate();	  
-       
+    virtual void onInvalidate();	     		
+
 	private: 
     void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
 

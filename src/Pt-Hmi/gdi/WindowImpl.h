@@ -58,8 +58,6 @@ public:
 
   void show();
 	
-	void showModal(WindowImpl* impl);
-
   void hide();
 
 	void render();
@@ -78,7 +76,7 @@ public:
   
   void showSysMenu(bool p);
 
-  void setForceTopMost(bool force);
+  void setTopMost(bool force);
   
   void setWindowState(WindowState::Type p);
   
