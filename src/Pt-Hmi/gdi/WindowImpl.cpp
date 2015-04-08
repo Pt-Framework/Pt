@@ -44,9 +44,9 @@ WindowImpl::WindowImpl(Window* window)
 , _forceTopMost( false )
 , _window( window )
 {    
-	_app.impl()->WindowEvent += Pt::slot(*this, &WindowImpl::onWindowEvent);  
 	_pointerEvent.buttons().resize(3);    
   create();
+	_app.impl()->WindowEvent += Pt::slot(*this, &WindowImpl::onWindowEvent);  
 }
 
 

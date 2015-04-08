@@ -33,7 +33,6 @@
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/PointingEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
-#include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/WindowProperties.h>
 #include <Windows.h>
