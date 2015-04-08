@@ -24,15 +24,14 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 
-#ifndef Pt_Hmi_WindowImpl_H
-#define Pt_Hmi_WindowImpl_H
+#ifndef Pt_Hmi_MainWindowImpl_H
+#define Pt_Hmi_MainWindowImpl_H
 
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/KeyEvent.h>
-#include <Pt/Hmi/PointingEvent.h>
-#include <Pt/Hmi/CloseEvent.h>
+#include <Pt/Hmi/PointerEvent.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/WindowProperties.h>
 #include <Windows.h>
@@ -45,12 +44,12 @@ namespace Hmi{
 class Application;
 class Window;
 
-class WindowImpl : public Pt::Connectable
+class MainWindowImpl : public Pt::Connectable
 {
 public:
-	WindowImpl(Window* window);
+	MainWindowImpl(Window* window);
 
-	virtual ~WindowImpl();
+	virtual ~MainWindowImpl();
 	
 	void create();
 	
@@ -94,14 +93,11 @@ public:
 
 protected:
 	void onWindowEvent(HWND wnd, unsigned int msg, WPARAM wparam, LPARAM lparam, bool& handled);
-
-protected:
 	void onPaint();
 	void onSize(WPARAM wparam, LPARAM lparam);
 	void onMouse(unsigned int msg,  WPARAM wparam, LPARAM lparam);
 	void onKey(unsigned int ms, WPARAM wparam, LPARAM lparam);
-	void onMove(LPARAM lparam);
-	void onClosing();	
+	void onMove(LPARAM lparam);	
 
 protected:	
 	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
@@ -110,7 +106,7 @@ private:
   HWND													_hwnd;
 	Pt::Hmi::Application&         _app; 
 	KeyEvent											_keyEvent;
-	PointingEvent									_pointerEvent;
+	PointerEvent									_pointerEvent;
 	Window*												_window;
 	bool													_forceTopMost;
 	Pt::Gfx::Size                 _minSize;

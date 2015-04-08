@@ -234,7 +234,7 @@ void Button::onKeyInput(const KeyEvent& ev)
 	}		
 }
 
-void Button::onPointerInput(const PointingEvent& ev)
+void Button::onPointerInput(const PointerEvent& ev)
 {    
 	Pt::Gfx::PointF point = toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
     

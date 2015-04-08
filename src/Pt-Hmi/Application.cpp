@@ -1,7 +1,7 @@
 #include "ApplicationImpl.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/System/MainLoop.h>
-#include <Pt/Hmi/PointingEvent.h>
+#include <Pt/Hmi/PointerEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
 
 namespace Pt {
@@ -35,11 +35,6 @@ Pt::Gfx::PointF Application::toUnit(const Pt::Gfx::Point& value)
 Pt::Gfx::SizeF Application::toUnit(const Pt::Gfx::Size& value)
 {
 	return _impl->toUnit(value);
-}
-
-void Application::showConsole(bool show)
-{
-	_impl->showConsole(show);
 }
 
 Pt::Gfx::Point Application::fromUnit(const Pt::Gfx::PointF& value)
@@ -90,11 +85,6 @@ double Application::resolutionDPI() const
 ApplicationImpl* Application::impl()
 {
 	return _impl;
-}
-
-Pt::Signal<const Pt::Event&>& Application::systemEvent()
-{
-	return _impl->systemEvent();
 }
 
 void Application::nextEvent()

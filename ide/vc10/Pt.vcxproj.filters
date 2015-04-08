@@ -1209,9 +1209,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PointingEvent.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Property.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1272,12 +1269,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\demo\MainWindow.h">
       <Filter>Pt-Hmi\demo</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\WindowImpl.h">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WindowImpl.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
@@ -1306,6 +1297,12 @@
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.h">
+      <Filter>Pt-Hmi\gdi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PointerEvent.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2424,9 +2421,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\demo\MainWindow.cpp">
       <Filter>Pt-Hmi\demo</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\WindowImpl.cpp">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\x11\WindowImpl.cpp">
       <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
@@ -2450,6 +2444,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp">
       <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.cpp">
+      <Filter>Pt-Hmi\gdi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

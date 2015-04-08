@@ -31,8 +31,6 @@
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Connectable.h>
-#include <Pt/Hmi/CloseEvent.h>
-#include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/WindowProperties.h>
 
@@ -41,7 +39,8 @@ namespace Hmi {
 
 class ChildWindow;
 class Window;
-class PointingEvent;
+class PointerEvent;
+class KeyEvent;
 
 class WindowManager : public Pt::Connectable
 {
@@ -58,7 +57,7 @@ class WindowManager : public Pt::Connectable
 		
 		void render();
 		
-		void onPointerInput( const Pt::Hmi::PointingEvent& mouseEvent );
+		void onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent );
 
 		void onKeyInput( const Pt::Hmi::KeyEvent& keyEvent );		 
 		
@@ -70,16 +69,18 @@ class WindowManager : public Pt::Connectable
 		}		
 				 
 	private:
-		void doSizing( ChildWindow* w, const PointingEvent& ev );
-		ResizeDirection::Type detSizeDirection( ChildWindow* w, const Pt::Hmi::PointingEvent& ev );
+		void doSizing( ChildWindow* w, const PointerEvent& ev );
+		ResizeDirection::Type detSizeDirection( ChildWindow* w, const Pt::Hmi::PointerEvent& ev );
 		void invalidate();		
-		bool updateActive( const Pt::Hmi::PointingEvent& mouseEvent );
+		bool updateActive( const Pt::Hmi::PointerEvent& mouseEvent );
 		void updateFocus();		
 
 	private:
 		Window&											_parent;
 		std::vector<ChildWindow*>		_windows;		
 		ResizeDirection::Type				_sizingDirection;
+		Pt::Gfx::PointF							_lastSizePoint;
+
 };
 
 }} // namespace

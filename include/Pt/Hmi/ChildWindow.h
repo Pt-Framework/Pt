@@ -36,33 +36,17 @@ namespace Hmi{
 class PT_HMI_API ChildWindow  : public Hmi::Window
 {
 	public:
-		friend class WindowManager;    
-
-		ChildWindow();
+		ChildWindow();	
 		virtual ~ChildWindow();	
 
-	private:
-		const Pt::Gfx::PointF& lastSizePoint() const
-		{
-			return _lastSizePoint;
-		}
-
-		void setLastSizePoint(	const Pt::Gfx::PointF& p )
-		{
-			_lastSizePoint = p;
-		}
-
 	public:  
-			Property<double>													BorderWidth;	  
-			Property<Pt::Gfx::ARgbColor>							BorderColor;
-			Property<Pt::Gfx::ARgbColor>							FocusedColor;
+			Property<double>							BorderWidth;	  
+			Property<Pt::Gfx::ARgbColor>	BorderColor;
+			Property<Pt::Gfx::ARgbColor>	FocusedColor;
 
 	protected:
 			virtual void onRender();
-			virtual void onInvalidate();
-
-	private:
-		Pt::Gfx::PointF _lastSizePoint;
+			virtual void onInvalidate();		
 };
 
 }}

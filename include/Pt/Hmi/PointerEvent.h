@@ -24,8 +24,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_PointingEvent_h
-#define Pt_Hmi_PointingEvent_h
+#ifndef Pt_Hmi_PointerEvent_h
+#define Pt_Hmi_PointerEvent_h
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/DeviceButton.h>
@@ -36,14 +36,14 @@
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API PointingEvent : public Pt::BasicEvent<PointingEvent>
+class PT_HMI_API PointerEvent : public Pt::BasicEvent<PointerEvent>
 {
 public:	
-	explicit PointingEvent()
+	explicit PointerEvent()
 	{
 	}
 
-	virtual ~PointingEvent()
+	virtual ~PointerEvent()
 	{
 	}
 

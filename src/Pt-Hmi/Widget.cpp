@@ -403,6 +403,21 @@ void Widget::onShortcutKey(KeyEvent::KeyState state)
 }
 
 
+void Widget::onPointerInput(const PointerEvent& ev)
+{	
+	Pt::Gfx::PointF local = toClient( Pt::Gfx::PointF( ev.x(), ev.y() ) );
+
+	if( contains( local) )
+		Application::instance().setCursor( Cursor.get() );
+
+	if( ! Enabled.get() )
+			return;
+
+	for( size_t i = 0; i < children().size(); ++i)
+		_children[i]->eventReceived().send(ev);
+}
+
+
 void Widget::onKeyInput(const KeyEvent& ev)
 { 	
 	if( !Enabled.get() )
@@ -439,21 +454,6 @@ void Widget::onKeyInput(const KeyEvent& ev)
 	//Propagate to children.
 	for( size_t i = 0; i < children().size(); ++i)
 		children()[i]->onKeyInput(ev);
-}
-
-
-void Widget::onPointerInput(const PointingEvent& ev)
-{	
-	Pt::Gfx::PointF local = toClient( Pt::Gfx::PointF( ev.x(), ev.y() ) );
-
-	if( contains( local) )
-		Application::instance().setCursor( Cursor.get() );
-
-	if( !Enabled.get() )
-			return;
-
-	for( size_t i = 0; i < children().size(); ++i)
-		_children[i]->eventReceived().send(ev);
 }
 
 

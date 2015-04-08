@@ -23,7 +23,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software*/
- #include <Pt/Hmi/ChildWindow.h>
+#include <Pt/Hmi/ChildWindow.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Pen.h>
 
@@ -42,6 +42,7 @@ ChildWindow::ChildWindow()
 
 ChildWindow::~ChildWindow()
 {
+//Todo: remove from window manager
 }
 
 

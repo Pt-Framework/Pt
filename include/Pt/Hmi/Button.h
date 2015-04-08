@@ -35,7 +35,7 @@
 namespace Pt{
 namespace Hmi{
 
-class PointingEvent;
+class PointerEvent;
 
 namespace ButtonType
 {
@@ -69,7 +69,7 @@ protected:
 	virtual void onMnemonic();
 	virtual void onShortcutKey(KeyEvent::KeyState state);
 	virtual void onActionKey(KeyEvent::KeyState state);
-	virtual void onPointerInput(const PointingEvent& ev);
+	virtual void onPointerInput(const PointerEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);
 	virtual void onButtonStateChanged( const Property<DeviceButton::State>& prop);
 	virtual void onDoublePressedTimeout();

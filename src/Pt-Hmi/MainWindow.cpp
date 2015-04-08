@@ -28,7 +28,7 @@
 #include <Pt/Hmi/MainWindow.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Application.h>
-#include "WindowImpl.h"
+#include "MainWindowImpl.h"
 #include <Pt/Gfx/Size.h>
 
 namespace Pt{
@@ -38,7 +38,7 @@ MainWindow::MainWindow(MainWindow* parent)
 : _impl(0)
 {
 
-	_impl = new WindowImpl( this );
+	_impl = new MainWindowImpl( this );
 
 	eventReceived() += Pt::slot( _windowManager, &WindowManager::onPointerInput );
 	eventReceived() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
@@ -75,11 +75,6 @@ MainWindow::MainWindow(MainWindow* parent)
 MainWindow::~MainWindow()
 {
 	delete _impl;
-}
-
-WindowImpl* MainWindow::impl()
-{
-	return _impl;
 }
 
 
@@ -225,7 +220,6 @@ void MainWindow::onMaxSizeChnaged(const Property<Pt::Gfx::SizeF>& prop)
 {
 	_impl->setMaxSize( prop.get() );
 }
-
 
 }}
 

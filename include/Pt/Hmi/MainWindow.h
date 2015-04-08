@@ -36,22 +36,22 @@
 namespace Pt{
 namespace Hmi{
 
-class WindowImpl;
+class MainWindowImpl;
 
 class PT_HMI_API MainWindow  : public Window
 {
 	public:    
     MainWindow(MainWindow* parent = 0);    
-    ~MainWindow();    
-
-		WindowImpl* impl();		
-		
+    
+		~MainWindow();    
+	
 		void setTopMost( bool topMost );
 
 	protected:
     virtual void onInvalidate();	     		
 
-	private: 
+	private: 			
+
     void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
 
     void onPositionChanged(const Property<Pt::Gfx::PointF>& prop);    
@@ -87,7 +87,7 @@ class PT_HMI_API MainWindow  : public Window
 		void onMaxSizeChnaged(const Property<Pt::Gfx::SizeF>& prop);
 
 	private:
-    WindowImpl*		_impl;    
+    MainWindowImpl*		_impl;    
 
 };
 

@@ -27,9 +27,9 @@
 #ifndef Pt_Hmi_Controller_Widget_H
 #define Pt_Hmi_Controller_Widget_H
 
-#include <Pt/Hmi/PointingEvent.h>
-#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/PointerEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
+#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Property.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Margin.h>
@@ -214,7 +214,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 		virtual void onInvalidate();
 		virtual void onRender();
 		virtual void onLayout();
-		virtual void onPointerInput(const PointingEvent& ev);
+		virtual void onPointerInput(const PointerEvent& ev);
 		virtual void onKeyInput(const KeyEvent& ev);
 		virtual void onMnemonic();
 		virtual void onActionKey(KeyEvent::KeyState state);

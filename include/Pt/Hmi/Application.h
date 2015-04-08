@@ -26,9 +26,7 @@ public:
   virtual ~Application();
 
 	static Application& instance();
-    
-	void showConsole(bool show = true);
-	    
+
 	Pt::Gfx::PointF toUnit(const Pt::Gfx::Point& value);
 	Pt::Gfx::SizeF toUnit(const Pt::Gfx::Size& value);
 	double toUnit(int value);
@@ -45,8 +43,6 @@ public:
 	double resolutionDPI() const;
 
 	ApplicationImpl* impl();
-
-	Pt::Signal<const Pt::Event&>& systemEvent();
 	
 	void nextEvent();
 

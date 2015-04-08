@@ -23,7 +23,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include "WindowImpl.h"
+#include "MainWindowImpl.h"
 #include "ApplicationImpl.h"
 #include <Windows.h>
 #include <WindowsX.h>
@@ -38,7 +38,7 @@ namespace Pt{
 namespace Hmi{
 
 
-WindowImpl::WindowImpl(Window* window)
+MainWindowImpl::MainWindowImpl(Window* window)
 : _hwnd( 0 )
 , _app( Pt::Hmi::Application::instance() )
 , _forceTopMost( false )
@@ -46,18 +46,17 @@ WindowImpl::WindowImpl(Window* window)
 {    
 	_pointerEvent.buttons().resize(3);    
   create();
-	_app.impl()->WindowEvent += Pt::slot(*this, &WindowImpl::onWindowEvent);  
+	_app.impl()->windowEvent() += Pt::slot(*this, &MainWindowImpl::onWindowEvent);  
 }
 
 
-WindowImpl::~WindowImpl()
+MainWindowImpl::~MainWindowImpl()
 {
-	_app.impl()->WindowEvent -= Pt::slot(*this, &WindowImpl::onWindowEvent);  
   destroy();
 }
 
 
-void WindowImpl::create()
+void MainWindowImpl::create()
 {
   if( _hwnd != 0)
     throw std::logic_error("hwnd already created");
@@ -71,7 +70,7 @@ void WindowImpl::create()
 }
 
 
-void WindowImpl::destroy()
+void MainWindowImpl::destroy()
 {
   if( _hwnd == 0)
       return;
@@ -81,19 +80,19 @@ void WindowImpl::destroy()
 }
 
 
-void WindowImpl::show()
+void MainWindowImpl::show()
 {
   ShowWindow(_hwnd, SW_SHOW);
 }
 
 
-void WindowImpl::hide()
+void MainWindowImpl::hide()
 {
   ShowWindow(_hwnd, SW_HIDE);
 }
 
 
-void WindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
+void MainWindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 {
   BYTE keyboardState[256];
 
@@ -143,12 +142,12 @@ void WindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 }
 
 
-void WindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam, LPARAM lparam, 	bool& handled )
+void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam, LPARAM lparam, 	bool& handled )
 {
-
     if(_hwnd != wnd)
         return;    
 
+	
     switch(message)
     {
         case WM_LBUTTONDOWN:        
@@ -208,8 +207,7 @@ void WindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam, LP
 
         case WM_CLOSE:
         {
-            onClosing();    
-            handled = true;            
+            _window->Closed  = true;                     
         }
         break;
 
@@ -242,13 +240,7 @@ void WindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam, LP
 }
 
 
-void WindowImpl::onClosing()
-{
-	_window->Closed  = true;
-}
-
-
-void WindowImpl::onSize(WPARAM wParam, LPARAM lParam)
+void MainWindowImpl::onSize(WPARAM wParam, LPARAM lParam)
 {
   WindowState::Type state = WindowState::Normal;
 
@@ -280,7 +272,7 @@ void WindowImpl::onSize(WPARAM wParam, LPARAM lParam)
 }
 
 
-void WindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
+void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 {    
     int xPos = GET_X_LPARAM(lparam); 
     int yPos = GET_Y_LPARAM(lparam); 
@@ -320,7 +312,7 @@ void WindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 }
 
 
-void WindowImpl::onMove(LPARAM lParam)
+void MainWindowImpl::onMove(LPARAM lParam)
 { 
 	RECT  info;
   GetWindowRect(_hwnd, &info);
@@ -332,7 +324,7 @@ void WindowImpl::onMove(LPARAM lParam)
 }
 
 
-void WindowImpl::onPaint()
+void MainWindowImpl::onPaint()
 {           
   RECT  info;
   GetWindowRect(_hwnd, &info);
@@ -347,14 +339,14 @@ void WindowImpl::onPaint()
 }
 
 
-void WindowImpl::setPosition(const Gfx::PointF& pf)
+void MainWindowImpl::setPosition(const Gfx::PointF& pf)
 {
   Gfx::Point p = _app.fromUnit(pf);
   SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, SWP_DRAWFRAME|SWP_NOSIZE);
 }
 
 
-void WindowImpl::setSize(const Gfx::SizeF& sizef)
+void MainWindowImpl::setSize(const Gfx::SizeF& sizef)
 {
   Gfx::Size size = _app.fromUnit(sizef);
 
@@ -372,7 +364,7 @@ void WindowImpl::setSize(const Gfx::SizeF& sizef)
 }
 
 
-void WindowImpl::showTitle(bool p)
+void MainWindowImpl::showTitle(bool p)
 {
   LONG style = GetWindowLong(_hwnd, GWL_STYLE);
     
@@ -385,13 +377,13 @@ void WindowImpl::showTitle(bool p)
 }
 
 
-void WindowImpl::setCaption(const std::string& text)
+void MainWindowImpl::setCaption(const std::string& text)
 {
   SetWindowText(_hwnd, text.c_str());
 }
 
 
-void WindowImpl::showMinimizedButton(bool p)
+void MainWindowImpl::showMinimizedButton(bool p)
 {
   LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
@@ -404,7 +396,7 @@ void WindowImpl::showMinimizedButton(bool p)
 }
 
 
-void WindowImpl::showMaximizeButton(bool p)
+void MainWindowImpl::showMaximizeButton(bool p)
 {
   LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
@@ -417,7 +409,7 @@ void WindowImpl::showMaximizeButton(bool p)
 }
 
 
-void WindowImpl::showSysMenu(bool p)
+void MainWindowImpl::showSysMenu(bool p)
 {
   LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
@@ -430,7 +422,7 @@ void WindowImpl::showSysMenu(bool p)
 }
 
 
-void WindowImpl::setTopMost(bool force)
+void MainWindowImpl::setTopMost(bool force)
 {
 	_forceTopMost = force;
 
@@ -441,7 +433,7 @@ void WindowImpl::setTopMost(bool force)
 }
 
 
-void WindowImpl::setWindowState(WindowState::Type p)
+void MainWindowImpl::setWindowState(WindowState::Type p)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
@@ -463,7 +455,7 @@ void WindowImpl::setWindowState(WindowState::Type p)
 }
 
 
-void WindowImpl::setBorder(WindowBorder::Type p)
+void MainWindowImpl::setBorder(WindowBorder::Type p)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 		LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
@@ -514,17 +506,17 @@ void WindowImpl::setBorder(WindowBorder::Type p)
 }
 
 
-void WindowImpl::setMinSize(const Pt::Gfx::SizeF& s)
+void MainWindowImpl::setMinSize(const Pt::Gfx::SizeF& s)
 {
 	_minSize = _app.fromUnit(s);
 }
 	
-void WindowImpl::setMaxSize(const Pt::Gfx::SizeF& s)
+void MainWindowImpl::setMaxSize(const Pt::Gfx::SizeF& s)
 {
 	_maxSize = _app.fromUnit(s);			
 }
 
-void WindowImpl::showInTaskbar(bool p)
+void MainWindowImpl::showInTaskbar(bool p)
 {	
   LONG style = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
@@ -536,12 +528,12 @@ void WindowImpl::showInTaskbar(bool p)
   SetWindowLong(_hwnd, GWL_EXSTYLE, style);	
 }
 
-void WindowImpl::setEnable(bool e)
+void MainWindowImpl::setEnable(bool e)
 {
 	EnableWindow(_hwnd, e);
 }
 
-void WindowImpl::setIcon(const Pt::Gfx::ARgbImage& icon)
+void MainWindowImpl::setIcon(const Pt::Gfx::ARgbImage& icon)
 {
     if(icon.width() == 0 || icon.height() == 0)
         return;
@@ -572,10 +564,9 @@ void WindowImpl::setIcon(const Pt::Gfx::ARgbImage& icon)
 }
 
 
-void WindowImpl::render()
+void MainWindowImpl::render()
 {
 	InvalidateRect(_hwnd, NULL, FALSE);
 }
 
-
-}}//Namespace
+}} // namespace

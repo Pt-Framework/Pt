@@ -2,7 +2,6 @@
 #define Pt_Hmi_Panel_H
 
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/PointingEvent.h>
 #include <Pt/Hmi/WindowProperties.h>
 
 namespace Pt{

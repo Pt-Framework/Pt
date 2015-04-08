@@ -23,11 +23,13 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/ChildWindow.h>
-#include <Pt/Hmi/PointingEvent.h>
+#include <Pt/Hmi/PointerEvent.h>
+#include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/Window.h>
 
 namespace Pt {
@@ -42,7 +44,6 @@ WindowManager::WindowManager(Window& parent)
 
 WindowManager::~WindowManager()
 {
-	_windows.clear();
 }
 
 
@@ -124,7 +125,7 @@ void WindowManager::render()
 }
 
 
-bool WindowManager::updateActive( const Pt::Hmi::PointingEvent& mouseEvent )
+bool WindowManager::updateActive( const Pt::Hmi::PointerEvent& mouseEvent )
 {
 	for( int i = _windows.size() - 1;  i > -1; --i )
 	{
@@ -158,7 +159,7 @@ void WindowManager::onKeyInput( const Pt::Hmi::KeyEvent& keyEvent )
 }
 
 
-void WindowManager::doSizing( ChildWindow* w, const PointingEvent& ev )
+void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 {
 	const std::vector<DeviceButton>& button = ev.buttons();
 	
@@ -167,7 +168,7 @@ void WindowManager::doSizing( ChildWindow* w, const PointingEvent& ev )
 	if( button[0].state() != DeviceButton::Pressed )
 	{
 		_sizingDirection = ResizeDirection::No;
-		w->setLastSizePoint( point );
+		_lastSizePoint =  point;
 		return;
 	}	
 	
@@ -175,8 +176,8 @@ void WindowManager::doSizing( ChildWindow* w, const PointingEvent& ev )
 	double height = w->Size.get().height();
 	double posX   = w->Position.get().x();
 	double posY   = w->Position.get().y();
-	double deltaX = ( point.x() - w->lastSizePoint().x() );
-	double deltaY = ( point.y() - w->lastSizePoint().y() );
+	double deltaX = ( point.x() - _lastSizePoint.x() );
+	double deltaY = ( point.y() - _lastSizePoint.y() );
 
 	switch( _sizingDirection )
 	{
@@ -250,11 +251,11 @@ void WindowManager::doSizing( ChildWindow* w, const PointingEvent& ev )
 	if( w->Size.get() != Pt::Gfx::SizeF(width,height) )
 		w->Size = Pt::Gfx::SizeF(width,height);
 
-	w->setLastSizePoint( point );
+	_lastSizePoint =  point;
 }
 
 
-ResizeDirection::Type WindowManager::detSizeDirection( ChildWindow* w, const Pt::Hmi::PointingEvent& ev )
+ResizeDirection::Type WindowManager::detSizeDirection( ChildWindow* w, const Pt::Hmi::PointerEvent& ev )
 {
 	Pt::Gfx::PointF				p( Pt::Gfx::PointF( ev.x(), ev.y() ) );
 	Pt::Gfx::SizeF				size = w->Size.get();
@@ -332,7 +333,7 @@ ResizeDirection::Type WindowManager::detSizeDirection( ChildWindow* w, const Pt:
 }
 
 
-void WindowManager::onPointerInput( const Pt::Hmi::PointingEvent& mouseEvent )
+void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 {
 	if( _windows.size() == 0 )
 	{
@@ -357,7 +358,7 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointingEvent& mouseEvent )
 		return;
 	}
 
-	Pt::Hmi::PointingEvent localWidgetEvent = mouseEvent;
+	Pt::Hmi::PointerEvent localWidgetEvent = mouseEvent;
 	
 	localWidgetEvent.setX( mouseEvent.x() -  childWindow->Position.get().x() ) ;
 	localWidgetEvent.setY( mouseEvent.y() -  childWindow->Position.get().y() ) ;
@@ -365,7 +366,7 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointingEvent& mouseEvent )
 	if( _sizingDirection == ResizeDirection::No )
 	{
 		childWindow->eventReceived().send( localWidgetEvent );
-		childWindow->setLastSizePoint( Pt::Gfx::PointF(mouseEvent.x(), mouseEvent.y() ) );
+		_lastSizePoint =  Pt::Gfx::PointF(mouseEvent.x(), mouseEvent.y() ) ;
 		_sizingDirection = detSizeDirection( childWindow, localWidgetEvent );	
 	}
 	else

@@ -77,7 +77,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Application.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Button.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ChildWindow.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceButton.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceControlDial.h" />
@@ -88,7 +87,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Margin.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Panel.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\PointingEvent.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\PointerEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Property.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PropertyBase.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
@@ -320,9 +319,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\demo\MainWindow.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\CursorImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PainterImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\WindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.h" />
@@ -517,9 +516,9 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Dialog.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\CursorImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PainterImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\WindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Label.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\CursorImpl.cpp" />

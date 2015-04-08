@@ -51,7 +51,6 @@ Window::Window(Window* parent)
 , _winParent(parent)
 , _windowManager(*this)
 {
-
 	Visible = false;
 	Focused = true;
   Name = std::string("Window");
@@ -107,12 +106,12 @@ void Window::onKeyInput(const KeyEvent& ev)
 	{
 		if(  ev.shift() )
 		{		
-				if( !focusPrev() )
+				if( ! focusPrev() )
 					focusPrev();
 		}
 		else
 		{
-				if( !focusNext() )
+				if( ! focusNext() )
 					focusNext();
 		}
 
@@ -122,6 +121,4 @@ void Window::onKeyInput(const KeyEvent& ev)
   Widget::onKeyInput(ev);
 }
 
-
 }}
-
