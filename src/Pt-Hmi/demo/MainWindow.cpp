@@ -41,7 +41,7 @@ namespace Demo{
 MainWindow::MainWindow()
 {
 	init();	
-	Hmi::Cursor::loadCur("c:\\aero_arrow.cur", this->Cursor.get());	
+	//Hmi::Cursor::loadCur("c:\\aero_arrow.cur", this->Cursor.get());	
 }
 
 MainWindow::~MainWindow()
