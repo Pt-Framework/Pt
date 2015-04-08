@@ -52,6 +52,7 @@ MainWindowImpl::MainWindowImpl(Window* window)
 
 MainWindowImpl::~MainWindowImpl()
 {
+  _app.impl()->windowEvent() -= Pt::slot(*this, &MainWindowImpl::onWindowEvent);  
   destroy();
 }
 
