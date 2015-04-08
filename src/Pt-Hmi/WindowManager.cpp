@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2006 Marc Boris Duerner
+/* 
+ * Copyright (C) 2015 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,9 +23,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/ChildWindow.h>
@@ -44,6 +42,7 @@ WindowManager::WindowManager(Window& parent)
 
 WindowManager::~WindowManager()
 {
+	_windows.clear();
 }
 
 
@@ -52,25 +51,26 @@ ChildWindow* WindowManager::active()
 	if( _windows.size() == 0)
 		return 0;
 
-	return _windows [ _windows.size() - 1 ];
+	return _windows[ _windows.size() - 1 ];
 }
 
 
 void WindowManager::updateFocus()
 {
-	if(_windows.size() == 0)
+	if( _windows.size() == 0 )
 		return;
 
 	for( size_t i = 0; i < _windows.size() - 1; ++i )
 		_windows[i]->Focused = false;
 
-	_windows[_windows.size() - 1]->Focused = true;
+	_windows[ _windows.size() - 1 ]->Focused = true;
 }
 
 
 void WindowManager::add( ChildWindow* w )
 {
 	_windows.push_back(w);
+	
 	updateFocus();
 
 	invalidate();
@@ -154,7 +154,7 @@ void WindowManager::onKeyInput( const Pt::Hmi::KeyEvent& keyEvent )
 	if( w == 0 )
 		return;
 
-	w->handleKeyInput( keyEvent );		
+	w->eventReady().send( keyEvent );		
 }
 
 
@@ -180,7 +180,7 @@ void WindowManager::doSizing( ChildWindow* w, const PointingEvent& ev )
 
 	switch( _sizingDirection )
 	{
-		case  ResizeDirection:: North:
+		case  ResizeDirection::North:
 		{			
 			posY +=  deltaY;
 			height -= deltaY;
@@ -271,55 +271,55 @@ ResizeDirection::Type WindowManager::detSizeDirection( ChildWindow* w, const Pt:
 			{
 				if(p.x() < border && p.y() <  border)
 				{//Corner NW
-					w->CursorT.get().setCursor(Cursors::SizeNWSE);
+//					w->CursorT.get().setCursor(Cursors::SizeNWSE);
 					resizeDir = ResizeDirection::NorthWest;
 				}	
 				else if(p.x() > sizeR && p.y() < border)
 				{//corner NE
-					w->CursorT.get().setCursor(Cursors::SizeNESW);
+//					w->CursorT.get().setCursor(Cursors::SizeNESW);
 					resizeDir= ResizeDirection::NorthEast;
 				}
 				else if(p.x() < border &&  p.y() > sizeB )
 				{//corner SW
-					w->CursorT.get().setCursor(Cursors::SizeNESW);
+//					w->CursorT.get().setCursor(Cursors::SizeNESW);
 					resizeDir = ResizeDirection::SouthWest;
 				}
 				else if(p.x() > sizeR &&  p.y() > sizeB )
 				{//corner SE
-					w->CursorT.get().setCursor(Cursors::SizeNWSE);
+//					w->CursorT.get().setCursor(Cursors::SizeNWSE);
 					resizeDir = ResizeDirection::SouthEast;
 				}
 				else
 				{
 					if( p.x() < border)				
 					{//West
-						w->CursorT.get().setCursor(Cursors::SizeWE);
+//						w->CursorT.get().setCursor(Cursors::SizeWE);
 						resizeDir = ResizeDirection::West;
 					}
 					else if(p.x() >= sizeR)
 					{//East
-						w->CursorT.get().setCursor(Cursors::SizeWE);
+//						w->CursorT.get().setCursor(Cursors::SizeWE);
 						resizeDir = ResizeDirection::East;
 					}
 					else if( p.y() < border)
 					{//North
-						w->CursorT.get().setCursor(Cursors::SizeNS);
+//						w->CursorT.get().setCursor(Cursors::SizeNS);
 						resizeDir = ResizeDirection::North;
 					}
 					else if(p.y() >sizeB)
 					{//South
-						w->CursorT.get().setCursor(Cursors::SizeNS);
+//						w->CursorT.get().setCursor(Cursors::SizeNS);
 						resizeDir = ResizeDirection::South;
 					}
 					else
 					{
-						w->CursorT.get().setCursor(Cursors::Default);
+//						w->CursorT.get().setCursor(Cursors::Default);
 					}
 				}
 			}
       else
       {
-          w->CursorT.get().setCursor(Cursors::Default);
+//          w->CursorT.get().setCursor(Cursors::Default);
       }
 		}
 		break;
@@ -364,7 +364,7 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointingEvent& mouseEvent )
 				
 	if( _sizingDirection == ResizeDirection::No )
 	{
-		childWindow->handlePointerInput( localWidgetEvent );
+		childWindow->eventReady().send( localWidgetEvent );
 		childWindow->setLastSizePoint( Pt::Gfx::PointF(mouseEvent.x(), mouseEvent.y() ) );
 		_sizingDirection = detSizeDirection( childWindow, localWidgetEvent );	
 	}

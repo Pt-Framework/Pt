@@ -1,5 +1,6 @@
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/WindowProperties.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Brush.h>
 
@@ -8,8 +9,8 @@ namespace Hmi{
 
 Widget::Widget()
 : _mnemonicWidget(0)
-, PT_HMI_INIT_PROPERTY_VALUE(Enabled,true)
-, PT_HMI_INIT_PROPERTY_VALUE(Visible,true)
+, PT_HMI_INIT_PROPERTY_VALUE(Enabled, true)
+, PT_HMI_INIT_PROPERTY_VALUE(Visible, true )
 , PT_HMI_INIT_PROPERTY_VALUE(Font,Pt::Gfx::Font("Sans Serif",12))
 , PT_HMI_INIT_PROPERTY_VALUE(Position, Pt::Gfx::PointF(0,0))
 , PT_HMI_INIT_PROPERTY_VALUE(Size, Pt::Gfx::SizeF(100,100))
@@ -20,9 +21,8 @@ Widget::Widget()
 , PT_HMI_INIT_PROPERTY_VALUE(BackgroundImage, Pt::Gfx::ARgbImage(0,0))
 , PT_HMI_INIT_PROPERTY_VALUE(BackgroundImageLayout, ImageLayout::NoLayout)
 , PT_HMI_INIT_PROPERTY_VALUE(Opacity,0)
-, PT_HMI_INIT_PROPERTY(CursorT)
+, PT_HMI_INIT_PROPERTY(Cursor)
 , PT_HMI_INIT_PROPERTY_VALUE(TextAlign, Align::MidleCenter)
-, PT_HMI_INIT_PROPERTY_VALUE(Focused, false)
 , PT_HMI_INIT_PROPERTY_VALUE(AcceptFocus,true)
 , PT_HMI_INIT_PROPERTY_VALUE(HighLight, false)
 , PT_HMI_INIT_PROPERTY_VALUE(FocusedActionKey," ")
@@ -33,14 +33,19 @@ Widget::Widget()
 , PT_HMI_INIT_PROPERTY_VALUE(Dock, Docking::None)
 , PT_HMI_INIT_PROPERTY_VALUE(FlowLayout, Hmi::FlowLayout::None)
 , PT_HMI_INIT_PROPERTY_VALUE(FlowDirection, Hmi::FlowLayoutDirection::LeftToRightTopToBottom)
-, PT_HMI_INIT_PROPERTY_VALUE(ShortcutKey,"")
+, PT_HMI_INIT_PROPERTY_VALUE(ShortcutKey, "")
+, PT_HMI_INIT_PROPERTY_VALUE(Focused,true)
 , _parent(0)
 , _isValid(false)
 {
 	bindMnemonicToWidget( *this );	
-	Focused.Changed += Pt::slot( *this, &Widget::onFocusChanged );
+	
   Size.Changed += Pt::slot(*this, &Widget::onSizeChanged);				
   Caption.Changed += Pt::slot(*this, &Widget::onCaptionChanged);			
+	Focused.Changed += Pt::slot( *this, &Widget::onFocusChanged );
+
+	eventReady() += Pt::slot(*this, &Widget::onKeyInput);
+	eventReady() += Pt::slot(*this, &Widget::onPointerInput);
 }
 
 
@@ -101,6 +106,7 @@ Pt::Gfx::PointF Widget::fromClient( const Pt::Gfx::PointF& localPoint, bool toRo
 	return Pt::Gfx::PointF(x,y);
 }
 
+
 void Widget::updatePosAndSize(Widget& w, const Pt::Gfx::SizeF& s, const Pt::Gfx::PointF& p)
 {
   bool visible  = w.Visible.get();
@@ -128,7 +134,6 @@ void Widget::invalidate()
 
 void Widget::onLayout()
 {
-
   Pt::Hmi::Painter& localPainter = paintSurface().painter();
   Gfx::SizeF clientSize = paintSurface().size();
   double posLeft  = 0;
@@ -283,6 +288,7 @@ void Widget::onLayout()
   }
 }
 
+
 void Widget::render()
 {
 	if( ! Visible.get() )
@@ -386,14 +392,16 @@ void Widget::onInvalidate()
 		parent()->invalidate();		
 }
 
+
 void Widget::onActionKey(KeyEvent::KeyState state)
 {
 }
 
+
 void Widget::onShortcutKey(KeyEvent::KeyState state)
 {
-
 }
+
 
 void Widget::onKeyInput(const KeyEvent& ev)
 { 	
@@ -435,12 +443,17 @@ void Widget::onKeyInput(const KeyEvent& ev)
 
 
 void Widget::onPointerInput(const PointingEvent& ev)
-{
+{	
+	Pt::Gfx::PointF local = toClient( Pt::Gfx::PointF( ev.x(), ev.y() ) );
+
+	if( contains( local) )
+		Application::instance().setCursor( Cursor.get() );
+
 	if( !Enabled.get() )
 			return;
 
 	for( size_t i = 0; i < children().size(); ++i)
-		_children[i]->onPointerInput(ev);
+		_children[i]->eventReady().send(ev);
 }
 
 
@@ -448,6 +461,7 @@ void Widget::bindMnemonicToWidget(Widget& widget)
 {
 	_mnemonicWidget = &widget;
 }
+
 
 void Widget::onMnemonic()
 {	
@@ -457,10 +471,10 @@ void Widget::onMnemonic()
 
 bool Widget::contains(const Pt::Gfx::PointF& p)
 {
-    if( p.x()  < Size.get().width() && p.x() > 0 && p.y() < Size.get().height() && p.y() > 0)
-        return true;
+	if( p.x()  < Size.get().width() && p.x() > 0 && p.y() < Size.get().height() && p.y() > 0)
+			return true;
  
-    return false;
+	return false;
 }
 
 
@@ -487,7 +501,6 @@ bool Widget::focusPrevChild(int index)
 
 	return false;
 }
-
 
 
 bool Widget::focusNextChild( int index )
@@ -614,6 +627,7 @@ void Widget::onFocusChanged( const Property<bool>& prop )
 	invalidate();
 }
 
+
 std::string Widget::removeMnemonic(const std::string& text)
 {
 	std::string removed;
@@ -657,6 +671,7 @@ size_t Widget::getMnemonicIndex(const std::string& text)
 	return std::string::npos;
 }
 
+
 void Widget::onCaptionChanged(const Property<std::string>& prop)
 {
 	_mnemonicKey.clear();
@@ -686,6 +701,5 @@ void Widget::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 	if( Visible.get() )
 		invalidate();
 }
-
 
 }} //namespace

@@ -79,7 +79,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Button.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ChildWindow.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\Controller.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceButton.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceControlDial.h" />
@@ -91,10 +90,8 @@
     <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Panel.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PointingEvent.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\PositionEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Property.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PropertyBase.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h" />
@@ -316,7 +313,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WidgetView.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\Window.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\demo\AtesionIcon.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\demo\DemoImage.h" />
@@ -431,11 +427,11 @@
     <None Include="..\..\Jamrules" />
     <None Include="..\..\src\Pt-Gfx\Jamfile" />
     <None Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.mm" />
+    <None Include="..\..\src\Pt-Hmi\cocoa\CoWindow.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\PaintSurfaceImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\WidgetView.mm" />
-    <None Include="..\..\src\Pt-Hmi\cocoa\Window.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\WindowImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\demo\Jamfile" />
     <None Include="..\..\src\Pt-Hmi\Jamfile" />
@@ -514,7 +510,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Button.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ChildWindow.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\Controller.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\Dialog1.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\Dialog2.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\Main.cpp" />

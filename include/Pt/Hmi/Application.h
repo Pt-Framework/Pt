@@ -2,6 +2,7 @@
 #define Pt_Hmi_Application_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Cursor.h>
 #include <Pt/System/Application.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
@@ -48,6 +49,8 @@ public:
 	Pt::Signal<const Pt::Event&>& systemEvent();
 	
 	void nextEvent();
+
+	void setCursor(const Cursor& cursor);
 
 private:     
   ApplicationImpl* _impl; 

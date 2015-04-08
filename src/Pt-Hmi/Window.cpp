@@ -1,5 +1,5 @@
-/* Copyright (C) 2013 Marc Boris Duerner 
- * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2015 Marc Boris Duerner 
+ * Copyright (C) 2015 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,11 +24,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-
-
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/ChildWindow.h>
-#include <Pt/Hmi/PositionEvent.h>
 #include <Pt/Hmi/ActivateEvent.h>
 
 namespace Pt{
@@ -64,20 +61,9 @@ Window::Window(Window* parent)
 	Size =  Pt::Gfx::SizeF(200,200);
 }
 
+
 Window::~Window()
 {
-}
-
-
-void Window::handleKeyInput(const KeyEvent& ev)
-{
-	onKeyInput(ev);
-}
-
-
-void Window::handlePointerInput( const Pt::Hmi::PointingEvent& mouseEvent )
-{
-	onPointerInput(mouseEvent);
 }
 
 
@@ -111,6 +97,7 @@ Window* Window::windowParent() const
 {
 	return _winParent;
 }
+
 
 void Window::onKeyInput(const KeyEvent& ev)
 {

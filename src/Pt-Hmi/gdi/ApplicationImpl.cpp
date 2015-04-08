@@ -323,6 +323,28 @@ void ApplicationImpl::nextEvent()
 	waitNext();
 }
 
+void ApplicationImpl::setCursor(const Cursor& cursor)
+{
+	return;
+
+	HCURSOR handle  =  0;
+
+	if( cursor.width() == 0 || cursor.height() == 0 )
+	{
+		handle = LoadCursor(NULL, IDC_ARROW);
+	}
+	else
+	{
+		handle = CreateCursor( NULL, cursor.xHotSpot(), cursor.yHotSpot(), cursor.width(), 
+																 cursor.height(), cursor.andBitmap(), cursor.xorBitmap() );
+
+		if( handle == 0 )
+			handle = LoadCursor(NULL, IDC_ARROW);
+	}
+
+	SetCursor( handle );									
+}
+
 void ApplicationImpl::getScreeResolution(int& horizontal, int& vertical)
 {
    const HWND hDesktop = GetDesktopWindow();

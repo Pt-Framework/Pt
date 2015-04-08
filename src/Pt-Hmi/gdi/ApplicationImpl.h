@@ -27,6 +27,7 @@
 #ifndef Pt_Hmi_ApplicationImpl_h
 #define Pt_Hmi_ApplicationImpl_h
 
+#include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
@@ -87,6 +88,8 @@ class ApplicationImpl : public Pt::System::EventLoop
 		double resolutionDPI() const;
 		
 		void showConsole(bool show);
+
+		void setCursor(const Cursor& cursor);
 	
 		inline Pt::Signal<const Pt::Event&>& systemEvent()
 		{
@@ -134,7 +137,7 @@ class ApplicationImpl : public Pt::System::EventLoop
 		void getScreeResolution(int& horizontal, int& vertical);
 
 	public:		
-		Pt::Signal<HWND, unsigned int, unsigned int, long, bool&> WindowEvent;
+		Pt::Signal<HWND, unsigned int, WPARAM, LPARAM, bool&> WindowEvent;
 
     private:
         //! @brief Instance handle of this application

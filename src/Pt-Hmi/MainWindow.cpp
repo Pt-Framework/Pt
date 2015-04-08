@@ -25,32 +25,31 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 
-
 #include <Pt/Hmi/MainWindow.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Application.h>
 #include "WindowImpl.h"
-#include <Pt/Hmi/PositionEvent.h>
-#include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Gfx/Size.h>
 
 namespace Pt{
 namespace Hmi{
 
 MainWindow::MainWindow(MainWindow* parent)
-: _impl(new WindowImpl(&paintSurface() ) )
+: _impl(0)
 {
 
-	_impl->windowEvent() += Pt::slot(_windowManager, &WindowManager::onPointerInput);
-	_impl->windowEvent() += Pt::slot(_windowManager, &WindowManager::onKeyInput);
+	_impl = new WindowImpl( this );
+
+	eventReady() += Pt::slot( _windowManager, &WindowManager::onPointerInput );
+	eventReady() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
 	
 	Visible = false;
 	Focused = true;
   Name = std::string("Window");
 	AcceptFocus = false;
 		
-  Size.Changed  += Pt::slot(*this, &MainWindow::onSizeChanged);	
   Position.Changed += Pt::slot(*this, &MainWindow::onPositionChanged);
+	Size.Changed += Pt::slot(*this, &MainWindow::onSizeChanged);
   Closed.Changed += Pt::slot(*this, &MainWindow::onClosedChanged);
   Visible.Changed += Pt::slot(*this, &MainWindow::onVisibleChanged);
   Caption.Changed += Pt::slot(*this, &MainWindow::onCaptionChanged);
@@ -66,13 +65,6 @@ MainWindow::MainWindow(MainWindow* parent)
 	MinimumSize.Changed += Pt::slot(*this, &MainWindow::onMinSizeChnaged);
 	MaximumSize.Changed += Pt::slot(*this, &MainWindow::onMaxSizeChnaged);
 
-	_impl->windowEvent() += Pt::slot(*this, &MainWindow::onPointerInput);
-	_impl->windowEvent() += Pt::slot(*this, &MainWindow::onKeyInput);	
-	_impl->windowEvent() += Pt::slot(*this, &MainWindow::onResizeEvent);
-	_impl->windowEvent() += Pt::slot(*this, &MainWindow::onPositionEvent);
-  _impl->windowEvent() += Pt::slot(*this, &MainWindow::onCloseEvent);	
-	_impl->windowEvent() += Pt::slot(*this, &MainWindow::onActivateEvent);	
-
   Position = Pt::Gfx::PointF(20,20);
 	Size =  Pt::Gfx::SizeF(200,200);
 	_impl->setMinSize(MinimumSize.get());
@@ -82,11 +74,7 @@ MainWindow::MainWindow(MainWindow* parent)
 
 MainWindow::~MainWindow()
 {
-}
-
-Pt::Signal<const Pt::Event&>& MainWindow::eventReady()
-{
-  return _impl->windowEvent();
+	delete _impl;
 }
 
 WindowImpl* MainWindow::impl()
@@ -103,38 +91,6 @@ void MainWindow::onInvalidate()
 	_impl->render();		
 }
 
-void MainWindow::onResizeEvent(const ResizeEvent& ev)
-{
-	const Pt::Gfx::SizeF& curSize = Size.get();
-
-	if( curSize == ev.size() ) 
-		return;
-
-  State = ev.state();
-	Size = ev.size();    
-}
-
-
-void MainWindow::onPositionEvent(const PositionEvent& ev)
-{
-	const Pt::Gfx::PointF& curPos = Position.get();
-
-	if( curPos == ev.position() ) 
-		return;
-
-	Position = ev.position();  
-}
-
-
-void MainWindow::onCloseEvent(const CloseEvent& ev)
-{
-  Closed = true;
-}
-
-void MainWindow::onActivateEvent(const ActivateEvent& ev)
-{
-	Focused = ev.active();
-}
 
 void MainWindow::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
 {
@@ -144,7 +100,7 @@ void MainWindow::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
 
 void MainWindow::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 { 
-  _impl->setSize( Size.get() );  		
+  _impl->setSize( Size.get() );  			
 }
 
 

@@ -7,6 +7,7 @@ int main(int argc, char* args[])
 	try
 	{
 		Pt::Hmi::Application	application;
+		
 		Pt::Hmi::Demo::MainWindow	mainWindow;
 	
 		mainWindow.show();

@@ -1,5 +1,4 @@
-/*
- * Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,9 +22,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #ifndef Pt_Hmi_WindowManager_h
 #define Pt_Hmi_WindowManager_h
 
@@ -35,10 +32,9 @@
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Connectable.h>
 #include <Pt/Hmi/CloseEvent.h>
-#include <Pt/Hmi/ResizeEvent.h>
-#include <Pt/Hmi/PositionEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/WindowProperties.h>
 
 namespace Pt {
 namespace Hmi {

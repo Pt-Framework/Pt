@@ -31,6 +31,7 @@
 namespace Pt{
 namespace Hmi{
 
+
 namespace DialogResultType
 {
 	enum Type
@@ -46,18 +47,20 @@ namespace DialogResultType
 	};
 }
 
+
 class PT_HMI_API Dialog  : public MainWindow
 {
-public:
-	Dialog();
-	virtual ~Dialog();	
+	public:
+		Dialog();
+		virtual ~Dialog();	
 
-	void doModal(MainWindow* parent);
+		void doModal(MainWindow* parent);
 
-	Property<DialogResultType::Type>	Result;		
+		Property<DialogResultType::Type>	Result;		
 
-private:   	
+	private:   	
 };
+
 
 }}
 #endif

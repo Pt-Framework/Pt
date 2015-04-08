@@ -37,22 +37,22 @@ namespace Demo{
 
 class Dialog2 : public Pt::Hmi::Dialog
 {
-public:
-	Dialog2();
-	virtual ~Dialog2();
+	public:
+		Dialog2();
+		virtual ~Dialog2();
 
-protected:
-	virtual void init();
+	protected:
+		virtual void init();
 
-private:
-	void onClosedByButton();
+	private:
+		void onClosedByButton();
     
-private:
-	Pt::Hmi::Button _okButton;
-	Pt::Hmi::Button _cancelButton;	
-	Pt::Hmi::Label  _label;
-	Pt::Hmi::Panel  _okCancelPanel;
-  Pt::Hmi::Panel  _mainPanel;
+	private:
+		Pt::Hmi::Button _okButton;
+		Pt::Hmi::Button _cancelButton;	
+		Pt::Hmi::Label  _label;
+		Pt::Hmi::Panel  _okCancelPanel;
+		Pt::Hmi::Panel  _mainPanel;
 };
 
 }}}

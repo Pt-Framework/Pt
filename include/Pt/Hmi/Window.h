@@ -23,8 +23,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #ifndef Pt_Hmi_Window_H
 #define Pt_Hmi_Window_H
 
@@ -36,13 +35,10 @@ namespace Pt {
 namespace Hmi {
 
 class ChildWindow;
-class PositionEvent;
-class ActivateEvent;
-class ResizeEvent;
 
 class PT_HMI_API Window  : public Widget
 {
-public:    		
+	public:    		
     virtual ~Window();    
 
     Property<Pt::Gfx::SizeF>                  MinimumSize;
@@ -62,27 +58,25 @@ public:
     Property<bool>                            FirstShow;
     Property<std::string>                     FocuseMoveKey;      
 		Property<WindowBorder::Type>							WindowBorder;
-		
-		
+				
 		void setWindowParent(Window* parent);
 
 		Window* windowParent() const;
 		
 		void addChildWindow(ChildWindow& w);
+
 		void removeChildWindow(ChildWindow& w);
 
 		const std::vector<ChildWindow*>& childWindows() const;
 
-protected:
+	protected:
 		Window(Window* parent = 0);    
-		void handleKeyInput(const KeyEvent& ev);
-    void handlePointerInput( const Pt::Hmi::PointingEvent& mouseEvent );   		
 
-protected:		
+	protected:		
 		virtual void onKeyInput(const KeyEvent& ev);		
 
-protected:
-		Window*		_winParent;
+	protected:
+		Window*				_winParent;
 		WindowManager _windowManager;
 };
 

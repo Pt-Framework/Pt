@@ -9,15 +9,15 @@ namespace Hmi{
 
 class PT_HMI_API Label  : public Panel
 {
-public:
-	Label();
-	virtual ~Label();	
+	public:
+		Label();
+		virtual ~Label();	
 
-public:
-	Property<bool> AutoSize;	
+	public:
+		Property<bool> AutoSize;	
 
-protected:
-	virtual void onRender();
+	protected:
+		virtual void onRender();
 };
 
 }}

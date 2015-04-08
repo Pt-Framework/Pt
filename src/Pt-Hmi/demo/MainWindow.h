@@ -38,28 +38,29 @@ namespace Demo{
 
 class MainWindow : public Pt::Hmi::MainWindow
 {
-public:
-	MainWindow();
-	virtual ~MainWindow();
+	public:
+		MainWindow();
+		virtual ~MainWindow();
 
-	void show();
+		void show();
 
-protected:
-	void init();
+	protected:
+		void init();
 
-private:
-	void onClosed();
-	void onClosedByWindow(const Property<bool>& closed );
-	void onShowDialog();
+	private:
+		void onClosed();
+		void onClosedByWindow(const Property<bool>& closed );
+		void onShowDialog();
 
-private:
-	Pt::Hmi::Panel  _mainPanel;	
-	Pt::Hmi::Button _closeButton;
-	Pt::Hmi::Button _toggleButton;
-	Pt::Hmi::Button _dialogButton;
-	Pt::Hmi::Label  _textLabel;	
-	ChildWindow     _childWindow1;
-	ChildWindow     _childWindow2;
+	private:
+	
+		Pt::Hmi::Panel  _mainPanel;	
+		Pt::Hmi::Button _closeButton;
+		Pt::Hmi::Button _toggleButton;
+		Pt::Hmi::Button _dialogButton;
+		Pt::Hmi::Label  _textLabel;	
+		ChildWindow     _childWindow1;
+		ChildWindow     _childWindow2;
 }; 
 
 }}}

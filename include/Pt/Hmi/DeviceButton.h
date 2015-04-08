@@ -8,35 +8,34 @@ namespace Hmi{
 
 class PT_HMI_API DeviceButton
 {
+	public:
+		enum State 
+		{
+			Released,
+			Pressed
+		};
 
-public:
-	enum State 
-	{
-		Released,
-		Pressed
-	};
-
-	DeviceButton()
-	: _state(Released)
-	{
-	}
+		DeviceButton()
+		: _state(Released)
+		{
+		}
 	
-	virtual ~DeviceButton()
-	{
-	}
+		virtual ~DeviceButton()
+		{
+		}
 
-	inline State state() const
-	{
-		return _state;
-	}
+		inline State state() const
+		{
+			return _state;
+		}
 
-	inline void setState(State s)
-	{
-		_state = s;
-	}
+		inline void setState(State s)
+		{
+			_state = s;
+		}
 
-private:
-	State _state;
+	private:
+		State _state;
 };
 
 }}

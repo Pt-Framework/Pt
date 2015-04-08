@@ -35,27 +35,26 @@ namespace Demo {
 
 class Dialog1 : public Pt::Hmi::Dialog
 {
-public:
-	Dialog1();
-	virtual ~Dialog1();
+	public:
+		Dialog1();
+		virtual ~Dialog1();
 
-protected:
-	virtual void init();
+	protected:
+		virtual void init();
 
-private:
-	void onClosedByButton();
-	void onShowNextDialog();
+	private:
+		void onClosedByButton();
+		void onShowNextDialog();
 
-private:
-  Pt::Hmi::Panel  _panel1;
-  Pt::Hmi::Panel  _panel2;
-  Pt::Hmi::Panel  _panel3;
-  Pt::Hmi::Panel  _panel4;
-  Pt::Hmi::Panel  _panel5;
-  
-	Pt::Hmi::Button _closeButton;	
-	Pt::Hmi::Button _newDialogButton;
-	bool _clicked;
+	private:
+		Pt::Hmi::Panel  _panel1;
+		Pt::Hmi::Panel  _panel2;
+		Pt::Hmi::Panel  _panel3;
+		Pt::Hmi::Panel  _panel4;
+		Pt::Hmi::Panel  _panel5;  
+		Pt::Hmi::Button _closeButton;	
+		Pt::Hmi::Button _newDialogButton;
+		bool						_clicked;
 }; 
 
 }}}

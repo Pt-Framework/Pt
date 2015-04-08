@@ -75,8 +75,7 @@ void Button::onDoublePressedTimeout()
 }
 
 void Button::onPressedAction()
-{
-	Clicked.send();
+{	
 	_pressCounter++;
 	
 	if(_pressCounter == 1)
@@ -87,6 +86,8 @@ void Button::onPressedAction()
 		_pressCounter = 0;
 		DoubleClicked.send();
 	}
+
+	Clicked.send();
 }
 
 void Button::onMnemonic()
@@ -234,18 +235,16 @@ void Button::onKeyInput(const KeyEvent& ev)
 }
 
 void Button::onPointerInput(const PointingEvent& ev)
-{
-    
+{    
 	Pt::Gfx::PointF point = toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
     
-    Label::onPointerInput(ev);
+	Label::onPointerInput(ev);
     
 	if(!Enabled.get())
 		return;
 
 	if(!Visible.get())
 		return;
-
     
 	if(!contains(point))
 	{
@@ -293,8 +292,8 @@ void Button::onPointerInput(const PointingEvent& ev)
 
 					if(ButtonState.get() != DeviceButton::Released)
 					{
-						ButtonState = DeviceButton::Released;						
 						genOutput = true;
+						ButtonState = DeviceButton::Released;												
 					}
 				}
 				break;
@@ -314,6 +313,7 @@ void Button::onPointerInput(const PointingEvent& ev)
 			if(ev.buttons()[0].state() == DeviceButton::Pressed )
 			{
 				genOutput = true;
+
 				if(ButtonState.get() == DeviceButton::Pressed)
 					ButtonState = DeviceButton::Released;
 				else
@@ -323,7 +323,7 @@ void Button::onPointerInput(const PointingEvent& ev)
 		break;
 	}
 	
-  if(genOutput)
+  if( genOutput )
   {
   	HighLight = ButtonState.get() == DeviceButton::Pressed ;
 		invalidate();

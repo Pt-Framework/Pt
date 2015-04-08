@@ -31,26 +31,28 @@
 #include <Pt/Gfx/Rgb888Color.h>
 #include <Pt/Gfx/Rgb888Image.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Window.h>
 #include "PaintSurfaceImpl.h"
 
 namespace Pt{
 namespace Hmi{
 
 
-WindowImpl::WindowImpl(PaintSurface* surface)
-: _hwnd(0)
-, _app(Pt::Hmi::Application::instance())
-, _surface(surface)
-, _forceTopMost(false)
+WindowImpl::WindowImpl(Window* window)
+: _hwnd( 0 )
+, _app( Pt::Hmi::Application::instance() )
+, _forceTopMost( false )
+, _window( window )
 {    
-  _app.impl()->WindowEvent += Pt::slot(*this, &WindowImpl::onWindowEvent);
-  _pointerEvent.buttons().resize(3);    
+	_app.impl()->WindowEvent += Pt::slot(*this, &WindowImpl::onWindowEvent);  
+	_pointerEvent.buttons().resize(3);    
   create();
 }
 
 
 WindowImpl::~WindowImpl()
 {
+	_app.impl()->WindowEvent -= Pt::slot(*this, &WindowImpl::onWindowEvent);  
   destroy();
 }
 
@@ -137,12 +139,13 @@ void WindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
       _keyEvent.setUnicode(ucode);
   }
 
-  _windowEvent.send(_keyEvent);
+  _window->eventReady().send(_keyEvent);
 }
 
 
-void WindowImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wparam, long lparam, bool& handled)
+void WindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam, LPARAM lparam, 	bool& handled )
 {
+
     if(_hwnd != wnd)
         return;    
 
@@ -215,14 +218,13 @@ void WindowImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wpar
 					if( _forceTopMost )
 						BringWindowToTop( _hwnd );
 					else
-						_activateEvent.setActive(false);
+						_window->Focused = false;
         }
         break;        
 
 				case WM_SETFOCUS:
 				{
-					_activateEvent.setActive(true);
-					_windowEvent.send(_activateEvent);
+					_window->Focused = true;
 				}
 				break;
 
@@ -242,8 +244,7 @@ void WindowImpl::onWindowEvent(HWND wnd, unsigned int message, unsigned int wpar
 
 void WindowImpl::onClosing()
 {
-  CloseEvent closeEvent;
-  _windowEvent.send(closeEvent);
+	_window->Closed  = true;
 }
 
 
@@ -274,9 +275,8 @@ void WindowImpl::onSize(WPARAM wParam, LPARAM lParam)
   int height = HIWORD(lParam);  
     
   Pt::Gfx::SizeF winSize(width, height);
-  _resizeEvent.setSize(winSize);
-  _resizeEvent.setState(state);
-  _windowEvent.send(_resizeEvent);
+	_window->Size = winSize;
+	_window->State = state;
 }
 
 
@@ -316,7 +316,7 @@ void WindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
     _pointerEvent.setX(p.x());
     _pointerEvent.setY(p.y());            
 
-    _windowEvent.send(_pointerEvent);
+    _window->eventReady().send(_pointerEvent);
 }
 
 
@@ -328,8 +328,7 @@ void WindowImpl::onMove(LPARAM lParam)
 	int yPos = info.top;
 
   Pt::Gfx::PointF winPos(xPos, yPos);
-  _positionEvent.setPosition(winPos);
-	_windowEvent.send( _positionEvent );
+	_window->Position  = winPos;
 }
 
 
@@ -341,7 +340,7 @@ void WindowImpl::onPaint()
   PAINTSTRUCT ps;
   HDC windowContext = BeginPaint(_hwnd, &ps);
     
-  HDC bitmapDeviceConText = _surface->impl()->deviceContext();
+  HDC bitmapDeviceConText = _window->paintSurface().impl()->deviceContext();
   BitBlt(windowContext, 0, 0, info.right - info.left,  info.bottom - info.top, bitmapDeviceConText, 0, 0, SRCCOPY);    
     
   EndPaint(_hwnd, &ps);    

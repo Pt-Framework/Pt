@@ -29,7 +29,6 @@
 #define Pt_Hmi_MainWindow_H
 
 #include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/ChildWindow.h>
 #include <Pt/Hmi/WindowProperties.h>
@@ -44,26 +43,16 @@ class ActivateEvent;
 
 class PT_HMI_API MainWindow  : public Window
 {
-public:    
+	public:    
     MainWindow(MainWindow* parent = 0);    
-    ~MainWindow();
-
-    Pt::Signal<const Pt::Event&>& eventReady();
+    ~MainWindow();    
 
 		WindowImpl* impl();		
 
-protected:
-    virtual void onInvalidate();
-	  
-    virtual void onResizeEvent(const ResizeEvent& ev);
-    
-    virtual void onPositionEvent(const PositionEvent& ev);
-    
-    virtual void onCloseEvent(const CloseEvent& ev);
-
-		virtual void onActivateEvent(const ActivateEvent& ev);
+	protected:
+    virtual void onInvalidate();	  
        
-private: 
+	private: 
     void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
 
     void onPositionChanged(const Property<Pt::Gfx::PointF>& prop);    
@@ -98,7 +87,7 @@ private:
 		
 		void onMaxSizeChnaged(const Property<Pt::Gfx::SizeF>& prop);
 
-private:
+	private:
     WindowImpl*		_impl;    
 
 };

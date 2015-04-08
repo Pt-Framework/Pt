@@ -1197,9 +1197,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Application.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Controller.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1260,12 +1257,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PositionEvent.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\demo\AtesionIcon.h">
       <Filter>Pt-Hmi\demo</Filter>
     </ClInclude>
@@ -1288,9 +1279,6 @@
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WindowImpl.h">
-      <Filter>Pt-Hmi\cocoa</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\cocoa\Window.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Margin.h">
@@ -1474,7 +1462,7 @@
     <None Include="..\..\src\Pt-Hmi\cocoa\WindowImpl.mm">
       <Filter>Pt-Hmi\cocoa</Filter>
     </None>
-    <None Include="..\..\src\Pt-Hmi\cocoa\Window.mm">
+    <None Include="..\..\src\Pt-Hmi\cocoa\CoWindow.mm">
       <Filter>Pt-Hmi\cocoa</Filter>
     </None>
   </ItemGroup>
@@ -2382,9 +2370,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Controller.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\PropertyBase.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
@@ -2464,6 +2449,9 @@
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Window.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>

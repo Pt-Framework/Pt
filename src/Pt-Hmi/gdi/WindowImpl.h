@@ -32,8 +32,6 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/PointingEvent.h>
-#include <Pt/Hmi/PositionEvent.h>
-#include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/PaintSurface.h>
@@ -46,11 +44,12 @@ namespace Pt{
 namespace Hmi{
 
 class Application;
+class Window;
 
 class WindowImpl : public Pt::Connectable
 {
 public:
-	WindowImpl(PaintSurface* surface);
+	WindowImpl(Window* window);
 
 	virtual ~WindowImpl();
 	
@@ -96,13 +95,6 @@ public:
 	
 	void setMaxSize(const Pt::Gfx::SizeF& s);
 
-
-	Pt::Signal<const Pt::Event&>& windowEvent()
-	{
-		return _windowEvent;
-	}
-
-
 protected:
 	void onWindowEvent(HWND wnd, unsigned int msg, WPARAM wparam, LPARAM lparam, bool& handled);
 
@@ -120,13 +112,9 @@ protected:
 private:	
   HWND													_hwnd;
 	Pt::Hmi::Application&         _app; 
-  Pt::Hmi::PaintSurface*				_surface;
-	Pt::Signal<const Pt::Event&>	_windowEvent;
 	KeyEvent											_keyEvent;
 	PointingEvent									_pointerEvent;
-	ResizeEvent										_resizeEvent;
-	PositionEvent									_positionEvent;
-	ActivateEvent									_activateEvent;
+	Window*												_window;
 	bool													_forceTopMost;
 	Pt::Gfx::Size                 _minSize;
 	Pt::Gfx::Size                 _maxSize;

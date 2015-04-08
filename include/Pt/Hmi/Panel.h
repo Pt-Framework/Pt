@@ -10,18 +10,18 @@ namespace Hmi{
 
 class PT_HMI_API Panel  : public Widget
 {
-public:
-	Panel();
-	virtual ~Panel();	
+	public:
+		Panel();
+		virtual ~Panel();	
 
-public:
-	Property<BorderStyle::Type>    PanelBorderStyle;
-	Property<bool>				         PanelBorderRoundEdge;	
-	Property<double>			         PanelBorderWidth;	  
-  Property<Pt::Gfx::ARgbColor>	 BorderColor;
+	public:
+		Property<BorderStyle::Type>    PanelBorderStyle;
+		Property<bool>				         PanelBorderRoundEdge;	
+		Property<double>			         PanelBorderWidth;	  
+		Property<Pt::Gfx::ARgbColor>	 BorderColor;
 
-protected:
-	virtual void onRender();
+	protected:
+		virtual void onRender();
 };
 
 }}

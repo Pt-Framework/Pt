@@ -27,6 +27,7 @@
 #include "Dialog1.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/Cursor.h>
 #include <Pt/Gfx/ImageReader.h>
 #include <Pt/Gfx/ARgbImage.h>
 #include "DemoImage.h"
@@ -39,12 +40,14 @@ namespace Demo{
 
 MainWindow::MainWindow()
 {
-	init();
+	init();	
+	Hmi::Cursor::loadCur("c:\\aero_arrow.cur", this->Cursor.get());	
 }
 
 MainWindow::~MainWindow()
 {
 }
+
 
 void MainWindow::init()
 {	
@@ -83,8 +86,7 @@ void MainWindow::init()
   State = Hmi::WindowState::Normal;
 	StartPostion = Hmi::WindowStartPosition::CenterParent;
 	Closed.Changed += Pt::slot(*this, &MainWindow::onClosedByWindow);
-	
-	
+
 	//Panel
 	_mainPanel.Size = Pt::Gfx::SizeF(700,480);
 	_mainPanel.Position = Pt::Gfx::PointF(40,40);
@@ -150,11 +152,13 @@ void MainWindow::init()
 	addChildWindow(_childWindow2);
 }
 
+
 void MainWindow::onShowDialog()
 {
 	Dialog1 dialog;
 	dialog.doModal(this);		
 }
+
 
 void MainWindow::show()
 {
@@ -162,10 +166,12 @@ void MainWindow::show()
 	invalidate();
 }
 
+
 void MainWindow::onClosedByWindow(const Property<bool>& closed )
 {
 	Pt::Hmi::Application::instance().exit();
 }
+
 
 void MainWindow::onClosed()
 {

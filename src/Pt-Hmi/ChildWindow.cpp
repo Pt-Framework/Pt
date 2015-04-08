@@ -85,7 +85,7 @@ void ChildWindow::onInvalidate()
 	render();	
 	_windowManager.render();
 	
-	if( _winParent != 0)
+	if( _winParent != 0 )
 	_winParent->invalidate();
 	
 }

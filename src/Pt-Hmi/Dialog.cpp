@@ -67,7 +67,7 @@ void Dialog::doModal(MainWindow* parent)
 	invalidate();
 	
 	//Wait of termination of the dialog.
-	while(!Closed.get())
+	while( !Closed.get() )
 		Application::instance().nextEvent();
 
 	//Restore the parent state.

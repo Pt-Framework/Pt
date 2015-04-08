@@ -11,18 +11,22 @@
 namespace Pt {
 namespace Hmi {
     
-class PT_HMI_API PropertyBase
+class PropertyBase
 {
-public:
-	PropertyBase(const char* name);
-        
-  inline const std::string& name() const
-  {
-      return _name;
-  }
+	public:
+		PropertyBase(const char* name);
 
-private:
-   std::string _name;
+		virtual ~PropertyBase()
+		{
+		}
+        
+		inline const std::string& name() const
+		{
+				return _name;
+		}
+
+	private:
+		 std::string _name;
 };
 
 }}

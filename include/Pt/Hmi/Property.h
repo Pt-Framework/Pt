@@ -1,7 +1,6 @@
 #ifndef Pt_Hmi_Property_h
 #define Pt_Hmi_Property_h
 
-
 #include <Pt/Signal.h>
 #include <string>
 #include <Pt/Hmi/PropertyBase.h>
@@ -24,21 +23,18 @@ public:
 	{
 	}
 
-    virtual ~Property()
-	{
-	}
 
-	inline T& get()
+	T& get()
 	{
 		return _value;
 	}
 
-	inline const T& get() const
+	const T& get() const
 	{
 		return _value;
 	}
 	
-	inline void set(const T& value) 
+	void set(const T& value) 
 	{
 		_value = value;
 	}
