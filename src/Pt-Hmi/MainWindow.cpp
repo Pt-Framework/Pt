@@ -80,9 +80,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::onInvalidate()
 {
-	render();		
-
-	_windowManager.render();
+	Window::onInvalidate();
 	_impl->render();		
 }
 

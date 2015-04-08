@@ -65,6 +65,14 @@ Window::~Window()
 }
 
 
+void Window::onInvalidate()
+{
+	render();		
+
+	_windowManager.render();
+}
+
+
 const std::vector<ChildWindow*>& Window::childWindows() const
 {
 	return _windowManager.windows();

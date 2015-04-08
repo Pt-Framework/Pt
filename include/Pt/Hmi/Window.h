@@ -73,7 +73,8 @@ class PT_HMI_API Window  : public Widget
 		Window(Window* parent = 0);    
 
 	protected:		
-		virtual void onKeyInput(const KeyEvent& ev);		
+		virtual void onKeyInput(const KeyEvent& ev);	
+    virtual void onInvalidate();	  	
 
 	protected:
 		Window*				_winParent;
