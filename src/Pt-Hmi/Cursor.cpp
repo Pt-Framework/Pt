@@ -1,11 +1,15 @@
 #include <Pt/Hmi/Cursor.h>
+#include <Pt/Byteorder.h>
 #include <fstream>
 
 namespace Pt{
 namespace Hmi{
 
 Cursor::Cursor()
+: _width(0)
+, _height(0)
 {
+	*this = defaultCursor();
 }
 
 
@@ -14,48 +18,83 @@ Cursor::~Cursor()
 
 }
 
-
-void Cursor::loadCur(const char* curFile, Cursor& cursor)
+const Cursor& Cursor::defaultCursor()
 {
-	std::ifstream stream(curFile, std::ios::binary);
-
-	if(!stream)
-		throw std::invalid_argument("file not found");
-
-	loadCur(stream, cursor);
+	static Cursor cursor;
+	return cursor;
 }
 
+const Cursor& Cursor::arrowCursor()
+{
+	static Cursor cursor;
+	return cursor;
+}
 
-void Cursor::loadCur(std::istream& stream, Cursor& cursor)
-{		
-	Pt::uint16_t size16;
-	Pt::uint32_t size32;
-	Pt::uint32_t headerOffset;	
-	
-	stream.seekg(18, std::ios_base::beg);
-	stream.read((char*)&headerOffset, 4);
+const Cursor& Cursor::waitCursor()
+{
+	static Cursor cursor;
+	return cursor;
+}
 
-	stream.seekg(headerOffset + 4, std::ios_base::beg);
-	
-	stream.read((char*)&size32, 4);
-	cursor._width = size32;
-	
-	stream.read((char*)&size32, 4);
-	cursor._height = size32;
+const Cursor& Cursor::sizeNWSECursor()
+{
+	static Cursor cursor;
+	return cursor;
+}
 
-	stream.read((char*)&size16, 2);
-	size_t planes = size16;
+const Cursor& Cursor::sizeNESWCursor()
+{
+	static Cursor cursor;
+	return cursor;
+}
 
-	stream.read((char*)&size16, 2);
-	cursor._bitsPerPixel = size16;
+const Cursor& Cursor::sizeWECursor()
+{
+	static Cursor cursor;
+	return cursor;
+}
 
-	stream.seekg(headerOffset + 4 + 4 + 4 + 2 + 2 + 4 + 4 + 4 + 4 + 4 + 4 + 8, std::ios_base::beg);
+const Cursor& Cursor::sizeNSCursor()
+{
+	static Cursor cursor;
+	return cursor;
+}
 
-	cursor._andBitmap.resize(cursor._width * cursor._height * cursor._bitsPerPixel/8, 0);
-	cursor._xorBitmap.resize(cursor._width * cursor._height * cursor._bitsPerPixel/8, 0);
-	
-	stream.read((char*)&cursor._xorBitmap[0], cursor._xorBitmap.size() );
-	stream.read((char*)&cursor._andBitmap[0], cursor._andBitmap.size() );
+void Cursor::load( const Pt::Gfx::ARgbImage& image, size_t xHotspot, size_t yHotspot )
+{
+	_xHotspot = xHotspot;
+	_yHotspot = yHotspot;
+	_height = image.height();
+	_width = image.width();
+
+	for( size_t y = 0; y < _height; ++y )
+	{
+		for( size_t x = 0; x < _width; ++x)
+		{
+			const Gfx::ARgbColor& color = image.pixel(x,y);
+
+			if( color.alpha() == 0 )
+			{
+				_andMask.push_back(0xff);
+				_andMask.push_back(0xff);
+				_andMask.push_back(0xff);
+
+				_xorMask.push_back(0);
+				_xorMask.push_back(0);
+				_xorMask.push_back(0);
+			}
+			else
+			{
+				_andMask.push_back(0);
+				_andMask.push_back(0);
+				_andMask.push_back(0);
+					
+				_xorMask.push_back((Pt::uint8_t) color.red());
+				_xorMask.push_back((Pt::uint8_t)color.green());
+				_xorMask.push_back((Pt::uint8_t)color.blue());
+			}
+		}
+	}
 }
 
 }}

@@ -166,6 +166,11 @@ class PT_HMI_API Widget : public Pt::Connectable
 
 		void mnemonic();
 
+		bool hasPointer() const
+		{
+			return _containPointer;
+		}
+
 		Pt::Gfx::PointF toClient(const Pt::Gfx::PointF& globalPoint);
 
 		Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot);
@@ -210,25 +215,27 @@ class PT_HMI_API Widget : public Pt::Connectable
 	protected:
 		Widget();	
 
+	public:
+		virtual void onPointerLeaved();
+
 	protected:
 		virtual void onInvalidate();
 		virtual void onRender();
 		virtual void onLayout();
 
 		virtual void onPointerInput(const PointerEvent& ev);
-		virtual void onPointerEnter();
-		virtual void onPointerLeaved();
+		virtual void onPointerEnter();		
 		
 		virtual void onKeyInput(const KeyEvent& ev);
 		virtual void onMnemonic();
 		virtual void onActionKey(KeyEvent::KeyState state);
 		virtual void onShortcutKey(KeyEvent::KeyState state);
-
+	
 	private:
 		void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
 		void onFocusChanged(const Property<bool>& prop);
-		void onCaptionChanged(const Property<std::string>& prop);
-
+		void onCaptionChanged(const Property<std::string>& prop);		
+		void onCursorChanged(const Property<Hmi::Cursor>& prop);
 	private:			  
 		bool focusNextChild(int index);
 		bool focusPrevChild(int index);
@@ -243,7 +250,8 @@ class PT_HMI_API Widget : public Pt::Connectable
 		Widget*										 _mnemonicWidget;	
 		PaintSurface							 _paintSurface;	
 		std::string								 _mnemonicKey;
-		bool											 _isValid;
+		bool											 _isValid;		
+		bool											 _containPointer;	
 		Pt::Signal<const Pt::Event&> _eventReceived;
 };
 

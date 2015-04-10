@@ -92,7 +92,7 @@ void Application::nextEvent()
 	_impl->nextEvent();
 }
 
-void Application::setCursor(const Cursor& cursor)
+void Application::setCursor(const Cursor* cursor)
 {
 	_impl->setCursor(cursor);
 }

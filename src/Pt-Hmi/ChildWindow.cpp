@@ -33,7 +33,7 @@ namespace Hmi{
 ChildWindow::ChildWindow()
 : PT_HMI_INIT_PROPERTY_VALUE(BorderWidth,5)
 , PT_HMI_INIT_PROPERTY_VALUE(BorderColor, Pt::Gfx::ARgbColor(178,178,178))
-, PT_HMI_INIT_PROPERTY_VALUE(FocusedColor, Pt::Gfx::ARgbColor(108,108,108))
+, PT_HMI_INIT_PROPERTY_VALUE(FocusedColor, Pt::Gfx::ARgbColor(255,108,108))
 {
 	Widget::BackColor = Pt::Gfx::ARgbColor(0, 255, 255, 255);
 	Visible = true;

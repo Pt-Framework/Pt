@@ -795,9 +795,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.h">
       <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\CursorImpl.h">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Ssl\Certificate.h">
       <Filter>Pt-Ssl</Filter>
     </ClInclude>
@@ -2071,9 +2068,6 @@
       <Filter>Pt-XmlRpc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.cpp">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\CursorImpl.cpp">
       <Filter>Pt-Hmi\gdi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ssl\Certificate.cpp">

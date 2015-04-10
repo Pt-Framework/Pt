@@ -99,9 +99,6 @@ protected:
 	void onKey(unsigned int ms, WPARAM wparam, LPARAM lparam);
 	void onMove(LPARAM lparam);	
 
-protected:	
-	void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
-
 private:	
   HWND													_hwnd;
 	Pt::Hmi::Application&         _app; 

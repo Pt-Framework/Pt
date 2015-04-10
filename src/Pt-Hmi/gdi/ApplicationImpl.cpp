@@ -26,6 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include "ApplicationImpl.h"
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Cursor.h>3
 #include <Pt/System/IOError.h>
 
 namespace Pt {
@@ -78,6 +79,7 @@ void Selector::processMessage()
 ApplicationImpl::ApplicationImpl()
 : Pt::System::EventLoop()
 , _dpi(96.0)
+, _cursorHandle(0)
 {
 	FreeConsole();
 
@@ -93,7 +95,7 @@ ApplicationImpl::ApplicationImpl()
 	_factorX = _width / _screenWidth;
 	_factorY = _height / _screenHeight;
 	_offsetX = 0;
-	_offsetY = 0;	
+	_offsetY = 0;		
 }
 
 
@@ -184,57 +186,107 @@ double ApplicationImpl::unitSizeMm() const
 }
 
 
-void ApplicationImpl::setCursor(const Cursor& cursor)
+HBITMAP ApplicationImpl::createImage888(const Pt::uint8_t* data, size_t width, size_t height)
+{
+	HDC hDC        = ::GetDC(NULL);
+	HDC hMainDC    = ::CreateCompatibleDC(hDC); 
+
+	BITMAPINFO bitmapInfo;
+	ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+
+	bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER); // Size of this struct.
+	bitmapInfo.bmiHeader.biWidth       = width;             // Bitmap width.
+	bitmapInfo.bmiHeader.biHeight      = -(ssize_t)height;  // Bitmap height. Negative value = top-down image.
+	bitmapInfo.bmiHeader.biPlanes      = 1;                 // Always 1.
+	bitmapInfo.bmiHeader.biBitCount    = 24;                // We internally use a 32-bit bitmap.
+	bitmapInfo.bmiHeader.biCompression = BI_RGB;            // Uncompressed (top-down) RGB bitmap.
+	bitmapInfo.bmiHeader.biSizeImage   = 0;                 // 0 = automatic for BI_RGB-images.
+	bitmapInfo.bmiHeader.biClrUsed     = 0;                 // 0 = No color table.
+	bitmapInfo.bmiHeader.biClrImportant= 0;                 // 0 = No color table.
+
+	VOID* imageBits;
+	HBITMAP bitmap = CreateDIBSection(hMainDC, &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
+
+	memcpy(imageBits, data, width * height * 3);
+
+	::DeleteDC(hMainDC);
+	::ReleaseDC(NULL,hDC);
+
+	return bitmap;
+}
+
+void ApplicationImpl::setCursor(const Cursor* cursor)
 {	
-	return;
+	if( _cursorHandle != 0 )			
+		DestroyCursor( _cursorHandle );
 
-	HCURSOR handle  =  0;
+	if( cursor == 0 )
+	{//Default cursor
+		_cursorHandle = LoadCursor(NULL, IDC_ARROW);		
 
-	if( cursor.width() == 0 || cursor.height() == 0 )
-	{
-		handle = LoadCursor(NULL, IDC_ARROW);
-	}
-	else
-	{
-		handle = CreateCursor( NULL, cursor.xHotSpot(), cursor.yHotSpot(), cursor.width(), 
-																 cursor.height(), cursor.andBitmap(), cursor.xorBitmap() );
-
-		if( handle == 0 )
-			handle = LoadCursor(NULL, IDC_ARROW);
+		SetCursor( _cursorHandle );
+		return;
 	}
 
-	SetCursor( handle );									
+	if( cursor->width() == 0 || cursor->height() == 0 )
+	{
+		_cursorHandle = LoadCursor( NULL, IDC_ARROW );		
+
+		SetCursor( _cursorHandle );
+		return;
+	}
+
+	HBITMAP andMask = createImage888( &cursor->andRgb888()[0], cursor->width(),  cursor->height() );
+	HBITMAP xorMask = createImage888( &cursor->xorRgb888()[0], cursor->width(),  cursor->height() );
+
+	ICONINFO iconInfo;
+
+	iconInfo.fIcon = false; 
+	iconInfo.xHotspot = cursor->xHotspot();
+	iconInfo.yHotspot = cursor->yHotspot();
+	iconInfo.hbmColor = andMask;
+	iconInfo.hbmMask  = xorMask;
+
+	_cursorHandle = CreateIconIndirect(&iconInfo);
+
+	if( _cursorHandle == 0 )
+		_cursorHandle = LoadCursor(NULL, IDC_ARROW);
+
+	SetCursor( _cursorHandle );	
+
+	DeleteObject( andMask );
+	DeleteObject( xorMask );
 }
 
 
 void ApplicationImpl::getScreeResolution(int& horizontal, int& vertical)
 {
-   const HWND hDesktop = GetDesktopWindow();
-   RECT desktop;   
-   GetWindowRect(hDesktop, &desktop);
-   horizontal = desktop.right;
-   vertical = desktop.bottom;
+  const HWND hDesktop = GetDesktopWindow();
+  RECT desktop;   
+  GetWindowRect(hDesktop, &desktop);
+  horizontal = desktop.right;
+  vertical = desktop.bottom;
 }
 
 
 void ApplicationImpl::registerWindowClasses()
 {
-    std::string topLevelWindow = "Pt-Hmi";
+	std::string topLevelWindow = "Pt-Hmi";
 
-    WNDCLASS topWindowClass;
+	WNDCLASS topWindowClass;
 
-    topWindowClass.style         = CS_HREDRAW | CS_VREDRAW;
-    topWindowClass.lpfnWndProc   = (WNDPROC)ApplicationImpl::wndProc;
-    topWindowClass.cbClsExtra    = 0;
-    topWindowClass.cbWndExtra    = 0;
-    topWindowClass.hInstance     = _instanceHandle;
-    topWindowClass.hIcon         = NULL;
-    topWindowClass.hCursor       = LoadCursor(NULL, IDC_ARROW);
-    topWindowClass.hbrBackground = NULL;
-    topWindowClass.lpszMenuName  = NULL;
-    topWindowClass.lpszClassName = topLevelWindow.c_str();
+	topWindowClass.style         = CS_HREDRAW | CS_VREDRAW;
+	topWindowClass.lpfnWndProc   = (WNDPROC)ApplicationImpl::wndProc;
+	topWindowClass.cbClsExtra    = 0;
+	topWindowClass.cbWndExtra    = 0;
+	topWindowClass.hInstance     = _instanceHandle;
+	topWindowClass.hIcon         = NULL;
+	topWindowClass.hCursor       = NULL;
+	topWindowClass.hbrBackground = NULL;
+	topWindowClass.lpszMenuName  = NULL;
+	topWindowClass.lpszClassName = topLevelWindow.c_str();
 
-    RegisterClass(&topWindowClass);
+	RegisterClass(&topWindowClass);
 }
 
 

@@ -37,15 +37,18 @@ Widget::Widget()
 , PT_HMI_INIT_PROPERTY_VALUE(Focused,true)
 , _parent(0)
 , _isValid(false)
+, _containPointer(false)
 {
 	bindMnemonicToWidget( *this );	
 	
   Size.Changed += Pt::slot(*this, &Widget::onSizeChanged);				
   Caption.Changed += Pt::slot(*this, &Widget::onCaptionChanged);			
 	Focused.Changed += Pt::slot( *this, &Widget::onFocusChanged );
+	Cursor.Changed +=  Pt::slot( *this, &Widget::onCursorChanged );
 
 	eventReceived() += Pt::slot(*this, &Widget::onKeyInput);
 	eventReceived() += Pt::slot(*this, &Widget::onPointerInput);
+	Application::instance().setCursor( &Cursor.get() );
 }
 
 
@@ -80,7 +83,7 @@ void Widget::removeChild(Widget* child)
 Pt::Gfx::PointF Widget::toClient( const Pt::Gfx::PointF& globalPoint )
 {
 	if( _parent == 0 )
-		return Pt::Gfx::PointF(  globalPoint.x(),  globalPoint.y());
+		return globalPoint;
 
 	Pt::Gfx::PointF parPoint = _parent->toClient( globalPoint );
 	return Pt::Gfx::PointF( parPoint.x() - Position.get().x(), parPoint.y() - Position.get().y() );
@@ -405,13 +408,15 @@ void Widget::onShortcutKey(KeyEvent::KeyState state)
 
 void Widget::onPointerEnter()
 {
-	Application::instance().setCursor( Cursor.get() );
+	_containPointer = true;
+	Application::instance().setCursor( &Cursor.get() );
 }
 
 
 void Widget::onPointerLeaved()
-{
-
+{	
+	_containPointer = false;
+	Application::instance().setCursor( );
 }
 
 		
@@ -421,9 +426,17 @@ void Widget::onPointerInput(const PointerEvent& ev)
 	
 	if( ! Enabled.get() )
 			return;
-
-	//Todo: onPointerEnter	
-
+	
+	if( !_containPointer )
+	{
+		if( contains( local ) )
+			onPointerEnter();
+	}
+	else
+	{
+		if( !contains( local ) )
+			onPointerLeaved();
+	}
 
 	for( size_t i = 0; i < children().size(); ++i)
 		_children[i]->eventReceived().send(ev);
@@ -483,7 +496,7 @@ void Widget::onMnemonic()
 
 bool Widget::contains(const Pt::Gfx::PointF& p)
 {
-	if( p.x()  < Size.get().width() && p.x() > 0 && p.y() < Size.get().height() && p.y() > 0)
+	if( p.x()  < Size.get().width() && p.x() >= 0 && p.y() < Size.get().height() && p.y() >= 0)
 			return true;
  
 	return false;
@@ -712,6 +725,12 @@ void Widget::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 	
 	if( Visible.get() )
 		invalidate();
+}
+
+void Widget::onCursorChanged(const Property<Hmi::Cursor>& prop)
+{
+	if( _containPointer )
+		Application::instance().setCursor( &Cursor.get() );	
 }
 
 }} //namespace

@@ -46,7 +46,7 @@ public:
 	
 	void nextEvent();
 
-	void setCursor(const Cursor& cursor);
+	void setCursor(const Cursor* cursor = 0);
 
 private:     
   ApplicationImpl* _impl; 

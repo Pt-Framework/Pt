@@ -3,6 +3,7 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Types.h>
+#include <Pt/Gfx/ARgbImage.h>
 #include <vector>
 
 namespace Pt{
@@ -11,57 +12,57 @@ namespace Hmi{
 class PT_HMI_API Cursor
 {
 	public:
-		static void loadCur(const char* curFile, Cursor& cursor);
-		static void loadCur(std::istream& stream, Cursor& cursor);
+		Cursor();				
 
-	public:
-		Cursor();			
-		
 		virtual ~Cursor();
 
-		int width() const
+		void load( const Pt::Gfx::ARgbImage& image, size_t xHotspot, size_t yHotspot );	
+			
+		const std::vector<Pt::uint8_t>& andRgb888() const 
+		{
+			return _andMask;
+		}
+		
+		const std::vector<Pt::uint8_t>& xorRgb888() const 
+		{
+			return _xorMask;
+		}
+
+		size_t width() const
 		{
 			return _width;
 		}
-		
-		int height() const
+
+		size_t height() const
 		{
 			return _height;
 		}
 
-		int xHotSpot() const
+		size_t xHotspot() const
 		{
-			return _xHotSpot;
+			return _xHotspot;
 		}
 
-		int yHotSpot() const
+		size_t yHotspot() const
 		{
-			return _yHotSpot;
-		}
-	
-		int bitsPerPixel() const
-		{
-			return _bitsPerPixel;
+			return _yHotspot;
 		}
 
-		const Pt::uint8_t* xorBitmap() const
-		{
-			return &_xorBitmap[0];
-		}
-
-		const Pt::uint8_t* andBitmap() const
-		{
-			return &_andBitmap[0];
-		}
+		static const Cursor& defaultCursor();
+		static const Cursor& arrowCursor();
+		static const Cursor& waitCursor();
+		static const Cursor& sizeNWSECursor();
+		static const Cursor& sizeNESWCursor();
+		static const Cursor& sizeWECursor();
+		static const Cursor& sizeNSCursor();
 
 	private:
-		int _width;
-		int _height;
-		int _xHotSpot;
-		int _yHotSpot;
-		int _bitsPerPixel;
-		std::vector<Pt::uint8_t> _xorBitmap;
-		std::vector<Pt::uint8_t> _andBitmap;
+		std::vector<Pt::uint8_t> _andMask;
+		std::vector<Pt::uint8_t> _xorMask;		
+		size_t _width;
+		size_t _height;
+		size_t _xHotspot;
+		size_t _yHotspot;
 };
 
 }}

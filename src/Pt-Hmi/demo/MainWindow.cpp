@@ -41,7 +41,6 @@ namespace Demo{
 MainWindow::MainWindow()
 {
 	init();	
-	//Hmi::Cursor::loadCur("c:\\aero_arrow.cur", this->Cursor.get());	
 }
 
 MainWindow::~MainWindow()
@@ -86,7 +85,7 @@ void MainWindow::init()
   State = Hmi::WindowState::Normal;
 	StartPostion = Hmi::WindowStartPosition::CenterParent;
 	Closed.Changed += Pt::slot(*this, &MainWindow::onClosedByWindow);
-
+	BackColor = Gfx::ARgbColor(100,100,100);
 	//Panel
 	_mainPanel.Size = Pt::Gfx::SizeF(700,480);
 	_mainPanel.Position = Pt::Gfx::PointF(40,40);
@@ -134,14 +133,18 @@ void MainWindow::init()
 	
 	//Close button
 	_closeButton.ButtonType = Hmi::ButtonType::Press;
-	_closeButton.Caption = std::string("Close [CTRL+X]");
+	_closeButton.Caption = std::string("Close App [CTRL+X]");
 	_closeButton.ShortcutKey = std::string("C//x");
 	_closeButton.Position = Pt::Gfx::PointF(590,525);
 	_closeButton.Size = Pt::Gfx::SizeF(150,25);
 	_closeButton.Clicked += Pt::slot(*this, &MainWindow::onClosed);
+	_closeButton.Size = Pt::Gfx::SizeF(20, 40);
+	_closeButton.Dock = Docking::Bottom;
+	_closeButton.Margin = Hmi::Margin(5);
+	_childWindow2.addChild(&_closeButton);
 	
 	_childWindow2.addChild(&_mainPanel);
-	//addChild(&_closeButton);
+
 
 	_childWindow1.Position = Pt::Gfx::PointF(20,20);
 	_childWindow1.Size = Pt::Gfx::SizeF(200,300);

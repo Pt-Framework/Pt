@@ -40,6 +40,7 @@ class PT_HMI_API PointerEvent : public Pt::BasicEvent<PointerEvent>
 {
 public:	
 	explicit PointerEvent()
+	: _buttons(3)
 	{
 	}
 

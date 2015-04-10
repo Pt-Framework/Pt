@@ -80,6 +80,7 @@ private:
 	bool _timeout;
 	int _pressCounter;
 	Pt::System::Timer _doublePressTimer;
+	DeviceButton::State _lastPointerState;
 };
 
 }}

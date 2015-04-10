@@ -151,6 +151,7 @@ void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam
 	
     switch(message)
     {
+
         case WM_LBUTTONDOWN:        
         case WM_MBUTTONDOWN:
         case WM_RBUTTONDOWN:

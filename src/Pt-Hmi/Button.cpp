@@ -45,6 +45,7 @@ Button::Button()
 , PT_HMI_INIT_PROPERTY_VALUE(DoublePressTimeInMs,1500)
 , PT_HMI_INIT_PROPERTY_VALUE(Image, Pt::Gfx::ARgbImage(0,0))
 , PT_HMI_INIT_PROPERTY_VALUE(ImageAlign, Align::MidleLeft)
+, _lastPointerState( DeviceButton::Released )
 {
   BackColor.set(Pt::Gfx::ARgbColor(245,245,245));
 	PanelBorderStyle.set(BorderStyle::Widget);
@@ -239,17 +240,27 @@ void Button::onPointerInput(const PointerEvent& ev)
 	Pt::Gfx::PointF point = toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
     
 	Label::onPointerInput(ev);
-    
-	if(!Enabled.get())
-		return;
-
-	if(!Visible.get())
-		return;
-    
-	if(!contains(point))
+		    
+	if( !Enabled.get() )
 	{
-		Armed = false;
+		_lastPointerState = ev.buttons()[0].state();
 		return;
+	}
+
+	if( !Visible.get() )
+	{
+		_lastPointerState = ev.buttons()[0].state();
+		return;
+	}
+    
+	if( !contains(point) )
+	{
+		if( Armed.get() )
+			Armed = false;
+
+		_lastPointerState = ev.buttons()[0].state();
+
+		return;			
 	}
     
 	bool genOutput = false;
@@ -260,69 +271,71 @@ void Button::onPointerInput(const PointerEvent& ev)
 		genOutput = true;
 	}
 
-	if( ev.buttons().size() == 0)
-		return;
-
-	switch(ButtonType.get())
-	{
-		case ButtonType::Press:
+	if( _lastPointerState != ev.buttons()[0].state() )		
+	{	
+		switch(ButtonType.get())
 		{
-			if(!Focused.get())
+			case ButtonType::Press:
 			{
-				genOutput = true;						
-				Focused = false;
-				Focused = true;					
-			}
-
-			switch(ev.buttons()[0].state())
-			{
-				case DeviceButton::Pressed:
-				{		
-
-					if(ButtonState.get() != DeviceButton::Pressed)
-					{
-						genOutput = true;						
-						ButtonState = DeviceButton::Pressed;
-					}
-				}
-				break;
-			
-				case DeviceButton::Released:			
+				if(!Focused.get())
 				{
-
-					if(ButtonState.get() != DeviceButton::Released)
-					{
-						genOutput = true;
-						ButtonState = DeviceButton::Released;												
-					}
+					genOutput = true;						
+					Focused = false;
+					Focused = true;					
 				}
-				break;
+
+				switch(ev.buttons()[0].state())
+				{
+					case DeviceButton::Pressed:
+					{		
+
+						if(ButtonState.get() != DeviceButton::Pressed)
+						{
+							genOutput = true;						
+							ButtonState = DeviceButton::Pressed;
+						}
+					}
+					break;
+			
+					case DeviceButton::Released:			
+					{
+
+						if(ButtonState.get() != DeviceButton::Released)
+						{
+							genOutput = true;
+							ButtonState = DeviceButton::Released;												
+						}
+					}
+					break;
+				}
 			}
+			break;
+
+			case ButtonType::Toggle:
+			{
+				if(!Focused.get())	
+				{
+					Focused = false;
+					Focused = true;
+					genOutput = true;
+				}
+
+				if(ev.buttons()[0].state() == DeviceButton::Pressed )
+				{
+					genOutput = true;
+
+					if(ButtonState.get() == DeviceButton::Pressed)
+						ButtonState = DeviceButton::Released;
+					else
+						ButtonState = DeviceButton::Pressed;
+				}
+			}				
+			break;
 		}
-		break;
-
-		case ButtonType::Toggle:
-		{
-			if(!Focused.get())	
-			{
-				Focused = false;
-				Focused = true;
-				genOutput = true;
-			}
-
-			if(ev.buttons()[0].state() == DeviceButton::Pressed )
-			{
-				genOutput = true;
-
-				if(ButtonState.get() == DeviceButton::Pressed)
-					ButtonState = DeviceButton::Released;
-				else
-					ButtonState = DeviceButton::Pressed;
-			}
-		}				
-		break;
 	}
-	
+
+	_lastPointerState = ev.buttons()[0].state();
+
   if( genOutput )
   {
   	HighLight = ButtonState.get() == DeviceButton::Pressed ;

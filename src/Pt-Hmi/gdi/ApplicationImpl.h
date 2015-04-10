@@ -73,6 +73,7 @@ class ApplicationImpl : public Pt::System::EventLoop
 			return _windowEvent;
 		}
 
+
 	public:
 		double toUnit(int value);
 		Pt::Gfx::PointF toUnit(const Pt::Gfx::Point& value);
@@ -87,10 +88,11 @@ class ApplicationImpl : public Pt::System::EventLoop
 		double resolutionDPI() const;
 		
 	public:
-		void setCursor(const Cursor& cursor);
+		void setCursor(const Cursor* cursor = 0);
 	
 	protected:
 		static long CALLBACK wndProc(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);
+		static HBITMAP createImage888(const Pt::uint8_t* data, size_t width, size_t height);
 		LRESULT dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);
 
 	protected:
@@ -147,6 +149,7 @@ class ApplicationImpl : public Pt::System::EventLoop
 		System::EventQueue _eventQueue;
 		Pt::Hmi::Selector _selector;        
 		std::vector<System::Selectable*> _avail;
+		HCURSOR _cursorHandle;
 };
 
 }}

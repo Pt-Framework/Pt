@@ -135,13 +135,18 @@ bool WindowManager::updateActive( const Pt::Hmi::PointerEvent& mouseEvent )
 		{
 			if( _windows[i] == active() )
 				return true;
-			
+
 			if( mouseEvent.buttons()[0].state() != DeviceButton::Pressed )
 				return false;
-
+			
 			activate( _windows[i] );			
 			return true;
 		}	
+		else
+		{
+			if( _windows[i]->hasPointer() )
+					_windows[i]->onPointerLeaved();
+		}
 	}	 
 
 	return false;
@@ -272,56 +277,56 @@ ResizeDirection::Type WindowManager::detSizeDirection( ChildWindow* w, const Pt:
 			{
 				if(p.x() < border && p.y() <  border)
 				{//Corner NW
-//					w->CursorT.get().setCursor(Cursors::SizeNWSE);
+					w->Cursor = Cursor::sizeNWSECursor();
 					resizeDir = ResizeDirection::NorthWest;
 				}	
 				else if(p.x() > sizeR && p.y() < border)
 				{//corner NE
-//					w->CursorT.get().setCursor(Cursors::SizeNESW);
+					w->Cursor = Cursor::sizeNESWCursor();
 					resizeDir= ResizeDirection::NorthEast;
 				}
 				else if(p.x() < border &&  p.y() > sizeB )
 				{//corner SW
-//					w->CursorT.get().setCursor(Cursors::SizeNESW);
+					w->Cursor = Cursor::sizeNESWCursor();
 					resizeDir = ResizeDirection::SouthWest;
 				}
 				else if(p.x() > sizeR &&  p.y() > sizeB )
 				{//corner SE
-//					w->CursorT.get().setCursor(Cursors::SizeNWSE);
+					w->Cursor = Cursor::sizeNWSECursor();
 					resizeDir = ResizeDirection::SouthEast;
 				}
 				else
 				{
 					if( p.x() < border)				
 					{//West
-//						w->CursorT.get().setCursor(Cursors::SizeWE);
+						w->Cursor = Cursor::sizeWECursor();
 						resizeDir = ResizeDirection::West;
 					}
 					else if(p.x() >= sizeR)
 					{//East
-//						w->CursorT.get().setCursor(Cursors::SizeWE);
+						w->Cursor = Cursor::sizeWECursor();
 						resizeDir = ResizeDirection::East;
 					}
 					else if( p.y() < border)
 					{//North
-//						w->CursorT.get().setCursor(Cursors::SizeNS);
+						w->Cursor = Cursor::sizeNSCursor();
 						resizeDir = ResizeDirection::North;
 					}
 					else if(p.y() >sizeB)
 					{//South
-//						w->CursorT.get().setCursor(Cursors::SizeNS);
+						w->Cursor = Cursor::sizeNSCursor();
 						resizeDir = ResizeDirection::South;
 					}
 					else
 					{
-//						w->CursorT.get().setCursor(Cursors::Default);
+						w->Cursor = Cursor::defaultCursor();
 					}
 				}
 			}
-      else
-      {
-//          w->CursorT.get().setCursor(Cursors::Default);
-      }
+			else
+			{
+				w->Cursor = Cursor::defaultCursor();
+			}
 		}
 		break;
             
@@ -358,16 +363,15 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 		return;
 	}
 
-	Pt::Hmi::PointerEvent localWidgetEvent = mouseEvent;
-	
-	localWidgetEvent.setX( mouseEvent.x() -  childWindow->Position.get().x() ) ;
-	localWidgetEvent.setY( mouseEvent.y() -  childWindow->Position.get().y() ) ;
-				
+	Pt::Hmi::PointerEvent localMouseEvent = mouseEvent;
+	localMouseEvent.setX( mouseEvent.x() - childWindow->Position.get().x()  ) ;
+	localMouseEvent.setY( mouseEvent.y() - childWindow->Position.get().y() ) ;
+
 	if( _sizingDirection == ResizeDirection::No )
 	{
-		childWindow->eventReceived().send( localWidgetEvent );
+		childWindow->eventReceived().send( localMouseEvent );
 		_lastSizePoint =  Pt::Gfx::PointF(mouseEvent.x(), mouseEvent.y() ) ;
-		_sizingDirection = detSizeDirection( childWindow, localWidgetEvent );	
+		_sizingDirection = detSizeDirection( childWindow, localMouseEvent );	
 	}
 	else
 	{
