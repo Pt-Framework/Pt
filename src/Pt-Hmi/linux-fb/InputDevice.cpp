@@ -142,6 +142,18 @@ bool InputDevice::onRun()
 				else if(ev.code == REL_Y)
 					_mouseEvent.addY( static_cast<double>(ev.value) );
 
+				if( _mouseEvent.x() < 0 )
+					_mouseEvent.setX( 0);
+
+				if( _mouseEvent.x() >= Application::instance().mainScreen().width() )
+					_mouseEvent.setX( Application::instance().mainScreen().width() - 1 );
+
+				if( _mouseEvent.y() < 0 )
+					_mouseEvent.setY( 0);
+
+				if( _mouseEvent.y() >= Application::instance().mainScreen().height() )
+					_mouseEvent.setY( Application::instance().mainScreen().height() - 1 );
+
 				Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );				                				
 			}
 			break;
