@@ -62,12 +62,6 @@ class ScreenImpl : public Window
 		{ 
 			return (char*)_buffer; 
 		}
-
-		WindowManager& windowManager()
-		{
-			return _windowManager;
-		}
-
 		
 	protected:
 		virtual void onInvalidate();
@@ -117,7 +111,6 @@ class ScreenImpl : public Window
 		void saveCursorImage(const Pt::Hmi::PointerEvent& mouseEvent);
 
 	private:
-		WindowManager						_windowManager;
 		int											_fd;
 		fb_var_screeninfo				_screenInfo;
 		fb_fix_screeninfo				_fixedInfo;

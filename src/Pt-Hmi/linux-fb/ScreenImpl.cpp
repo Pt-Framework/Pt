@@ -221,9 +221,9 @@ void ScreenImpl::copyImageData(ssize_t toX, ssize_t toY, const char* data, size_
 
 void ScreenImpl::onInvalidate()
 {
-	_windowManager.render();
-	drawImage( 0, 0, paintSurface().impl()->image().begin(), paintSurface().impl()->image().end(), _screenInfo.xres, _screenInfo.yres );
+	Window::onInvalidate();
 	
+	drawImage( 0, 0, paintSurface().impl()->image().begin(), paintSurface().impl()->image().end(), _screenInfo.xres, _screenInfo.yres );	
 }
 
 
