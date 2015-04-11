@@ -144,6 +144,11 @@ void ScreenImpl::blitPlane(const std::vector<Pt::uint8_t>& plane, size_t w, size
 						case XorOp:
 							*pixelBuffer ^= *pixelCursor;
 						break;
+
+						case CopyOp:
+							*pixelBuffer = *pixelCursor;
+						break;
+
 					}
 				}
 				break;
@@ -156,14 +161,41 @@ void ScreenImpl::blitPlane(const std::vector<Pt::uint8_t>& plane, size_t w, size
 }
 
 
-void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
+void ScreenImpl::saveCursorImage( const Pt::Hmi::PointerEvent& mouseEvent )
 {
+	const size_t pixelSizeInByte = depth() / 8;		
+	_cursorPos    = Pt::Gfx::Point( mouseEvent.x(), mouseEvent.y() );	
+	_cursorWidth  = Cursor.get().width();
+	_cursorHeight = Cursor.get().height();
 	
+	const size_t yMax = std::min<size_t>(_cursorPos.y() + _cursorHeight, _screenInfo.yres );	
+	const size_t widthInPixel = ((_cursorPos.x() + _cursorWidth)  < _screenInfo.xres ? _cursorWidth : ((_cursorPos.x() + _cursorWidth) - _screenInfo.xres) );
+	const size_t widthInByte = widthInPixel * pixelSizeInByte;	
+	const Pt::uint8_t* bufferData = ( const Pt::uint8_t* ) _buffer;
 	
+	_cursorBuffer.resize( _cursorWidth * _cursorHeight * pixelSizeInByte, 0 );	
+	
+	for( size_t y = _cursorPos.y(); y < yMax; ++y )
+	{
+		const size_t lineOffset  = y * (_screenInfo.xres * pixelSizeInByte)  + (_cursorPos.x() * pixelSizeInByte);
+		memcpy( &_cursorBuffer[lineOffset], &bufferData[lineOffset], widthInByte );
+	}
+}
+
+
+void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
+{	
+	if( _cursorBuffer.size() != 0 )
+		blitPlane(_cursorBuffer, _cursorWidth, _cursorHeight, _cursorPos, CopyOp);
+
 	_windowManager.onPointerInput(mouseEvent);	
 
+	_cursorBuffer.clear();
+
 	if( Cursor.get().width() == 0 )
-		return;
+		return;	
+
+	saveCursorImage(mouseEvent);
 
 	blitPlane( Cursor.get().andRgb888(), Cursor.get().width(), Cursor.get().height(), Pt::Gfx::Point( ( int) mouseEvent.x(), (int) mouseEvent.y()), AndOp );
 	blitPlane( Cursor.get().xorRgb888(), Cursor.get().width(), Cursor.get().height(), Pt::Gfx::Point( (int) mouseEvent.x(), (int) mouseEvent.y()), XorOp );

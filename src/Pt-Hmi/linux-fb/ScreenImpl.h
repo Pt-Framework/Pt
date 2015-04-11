@@ -108,11 +108,13 @@ class ScreenImpl : public Window
 
 		enum BlitOp
 		{
+			CopyOp,
 			AndOp,
 			XorOp
 		};
 
 		void blitPlane(const std::vector<Pt::uint8_t>& plane, size_t width, size_t height, const Gfx::Point& pos, BlitOp op);
+		void saveCursorImage(const Pt::Hmi::PointerEvent& mouseEvent);
 
 	private:
 		WindowManager						_windowManager;
@@ -122,6 +124,11 @@ class ScreenImpl : public Window
 		void*										_buffer;
 		Pt::size_t							_bufferSize;
 		PaintSurface            _paintSurface;	
+		
+		std::vector<Pt::uint8_t>	_cursorBuffer;
+		Pt::Gfx::Point            _cursorPos;
+		size_t									  _cursorWidth;	
+		size_t									  _cursorHeight;	
 };
 
 }}
