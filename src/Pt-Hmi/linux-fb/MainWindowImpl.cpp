@@ -95,32 +95,37 @@ void MainWindowImpl::destroy()
 
 void MainWindowImpl::show()
 {
-	_windowImpl->Visible = true;
+	_windowImpl->Visible = true;	
+	_windowImpl->invalidate();
 }
 
 
 void MainWindowImpl::hide()
 {
 	_windowImpl->Visible = false;
+	_windowImpl->invalidate();
 }
 
 
 void MainWindowImpl::render()
 {
-	_app.mainScreen().impl()->windowManager().render();
+	_windowImpl->invalidate();
 }
 
 
 void MainWindowImpl::setPosition(const Gfx::PointF& p)
 {	
 	if( _windowImpl->Position.get() != p ) 
+	{
 		_windowImpl->Position = p;
+		_windowImpl->invalidate();
+	}
 }
 
 void MainWindowImpl::setSize(const Gfx::SizeF& size)
 {
 	if( _windowImpl->Size.get() != size)
-	_windowImpl->Size = size;
+		_windowImpl->Size = size;
 }
 
 
