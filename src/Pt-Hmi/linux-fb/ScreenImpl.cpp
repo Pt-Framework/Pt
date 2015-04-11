@@ -32,6 +32,11 @@
 #include <sys/ioctl.h> 
 #include <sys/mman.h>
 #include <unistd.h>
+#include <Pt/System/Logger.h>
+
+
+PT_LOG_DEFINE("Pt.Hmi.Screen")
+
 
 namespace Pt{
 namespace Hmi{
@@ -39,10 +44,9 @@ namespace Hmi{
 ScreenImpl::ScreenImpl()
 : _windowManager( *this )
 {
-	eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerInput );
-	eventReceived() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
-	
 
+
+	std::clog<<"a1"<<std::endl;
  // Open the frame buffer device
     _fd = open ("/dev/fb0", O_RDWR);
 
@@ -85,49 +89,60 @@ ScreenImpl::ScreenImpl()
     unsigned _pitch = _screenInfo.xres * _screenInfo.bits_per_pixel / 8;
     _bufferSize     = _pitch * _screenInfo.yres;
     _buffer         =  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);	
+	Pt::uint8_t* pixel = (	Pt::uint8_t* ) _buffer;
+	for( size_t i = 0; i < _bufferSize; ++i)
+	{
+		pixel[i] = 160;
+	}
+	
 
-		Size = Pt::Gfx::SizeF( _screenInfo.xres,  _screenInfo.yres );
-		Position = Pt::Gfx::PointF(0,0 );
+	PT_LOG_INFO("open Screen = " << _screenInfo.xres << ", " << _screenInfo.yres );
+	Size = Pt::Gfx::SizeF( _screenInfo.xres,  _screenInfo.yres );
+	Position = Pt::Gfx::PointF(0,0 );
+	eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerInput );
+	eventReceived() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
+
 }
 
 
 void ScreenImpl::blitPlane(const std::vector<Pt::uint8_t>& plane, size_t w, size_t h, const Gfx::Point& pos, BlitOp op)
 {
-	static const size_t planePixelSize = 3;
+	static const size_t planePixelSize = 4;
 	const size_t bufferPixelSize = depth() / 8;
 	const size_t bufferHeight = std::min<size_t>(  pos.y() + h, _screenInfo.yres ); 
 	const size_t bufferWidth  = std::min<size_t>(  pos.x() + w, _screenInfo.xres ); 
 
-	size_t yCur = 0;
-	size_t xCur = 0;
+	size_t yCursor = 0;
+	size_t xCursor = 0;
+	
 
-	for( size_t yBuffer = pos.y(); yBuffer < bufferHeight; ++yBuffer, ++yCur )
+	for( size_t yBuffer = pos.y(); yBuffer < bufferHeight; ++yBuffer, ++yCursor )
 	{
-		const size_t lineOffsetBuffer = yBuffer * (_screenInfo.xres * bufferPixelSize);
-		const size_t lineOffsetCur    = yCur * (w * planePixelSize);
+		const size_t lineOffsetBuffer  = yBuffer * (_screenInfo.xres * bufferPixelSize);
+		const size_t lineOffsetCursor  = yCursor * (w * planePixelSize);
 		
-		xCur = 0;
+		xCursor = 0;
 
-		for( size_t xBuffer = pos.x(); xBuffer < bufferWidth; ++xBuffer, ++xCur  )
+		for( size_t xBuffer = pos.x(); xBuffer < bufferWidth; ++xBuffer, ++xCursor  )
 		{			
 			Pt::uint8_t* pointerBuffer = &((Pt::uint8_t*)_buffer)[lineOffsetBuffer + (xBuffer * bufferPixelSize)];
-			const Pt::uint8_t* pointerCur = &plane[lineOffsetCur + (xCur * planePixelSize)];
+			const Pt::uint8_t* pointerCursor = &plane[lineOffsetCursor + (xCursor * planePixelSize)];
 
 			switch( depth() )
 			{
 				case 32:
 				{
 					Pt::uint32_t* pixelBuffer = (Pt::uint32_t*) pointerBuffer;
-					const Pt::uint32_t* pixelCur = (const Pt::uint32_t*) pointerCur;
+					const Pt::uint32_t* pixelCursor = (const Pt::uint32_t*) pointerCursor;
 
 					switch( op )											
 					{
 						case AndOp:
-							*pixelBuffer &= *pixelCur;
+							*pixelBuffer &= *pixelCursor;
 						break;
 
 						case XorOp:
-							*pixelBuffer ^= *pixelCur;
+							*pixelBuffer ^= *pixelCursor;
 						break;
 					}
 				}
@@ -143,7 +158,8 @@ void ScreenImpl::blitPlane(const std::vector<Pt::uint8_t>& plane, size_t w, size
 
 void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 {
-	//Todo: blt old...
+	
+	
 	_windowManager.onPointerInput(mouseEvent);	
 
 	if( Cursor.get().width() == 0 )

@@ -57,7 +57,7 @@ public:
 
 private:     
   ApplicationImpl* _impl; 
-	Screen _mainScreen;
+  Screen _mainScreen;
 };
 
 }}

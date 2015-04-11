@@ -51,7 +51,7 @@ MainWindowImpl::MainWindowImpl(Window* window)
 , _app(Application::instance() )
 , _windowImpl(0)
 { 	
-
+	create();
 }
 
 
@@ -68,7 +68,7 @@ void MainWindowImpl::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 
 void MainWindowImpl::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
 {
-	_apiWindow->Position = prop.get();
+	_apiWindow->Position = prop.get() ;
 }
 
 
@@ -112,12 +112,14 @@ void MainWindowImpl::render()
 
 
 void MainWindowImpl::setPosition(const Gfx::PointF& p)
-{
-	_windowImpl->Position = p;
+{	
+	if( _windowImpl->Position.get() != p ) 
+		_windowImpl->Position = p;
 }
 
 void MainWindowImpl::setSize(const Gfx::SizeF& size)
 {
+	if( _windowImpl->Size.get() != size)
 	_windowImpl->Size = size;
 }
 

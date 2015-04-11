@@ -51,12 +51,13 @@ Window::Window(Window* parent)
 , _winParent(parent)
 , _windowManager(*this)
 {
-	Visible = false;
-	Focused = true;
+
+  Visible = false;
+  Focused = true;
   Name = std::string("Window");
-	AcceptFocus = false;	
+  AcceptFocus = false;	
   Position = Pt::Gfx::PointF(20,20);
-	Size =  Pt::Gfx::SizeF(200,200);
+  Size =  Pt::Gfx::SizeF(200,200);
 }
 
 

@@ -37,11 +37,14 @@ ApplicationImpl::ApplicationImpl()
 : _inputDevice("/dev/input/event0")
 , _inputDevice2("/dev/input/event1")
 {  		 
+
+
    _inputDevice.setActive(*this);
    _inputDevice.begin();
 
    _inputDevice2.setActive(*this);
    _inputDevice2.begin();  
+
 }
 
 

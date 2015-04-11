@@ -21,7 +21,7 @@ Widget::Widget()
 , PT_HMI_INIT_PROPERTY_VALUE(BackgroundImage, Pt::Gfx::ARgbImage(0,0))
 , PT_HMI_INIT_PROPERTY_VALUE(BackgroundImageLayout, ImageLayout::NoLayout)
 , PT_HMI_INIT_PROPERTY_VALUE(Opacity,0)
-, PT_HMI_INIT_PROPERTY(Cursor)
+, PT_HMI_INIT_PROPERTY_VALUE(Cursor, Hmi::Cursor::defaultCursor())
 , PT_HMI_INIT_PROPERTY_VALUE(TextAlign, Align::MidleCenter)
 , PT_HMI_INIT_PROPERTY_VALUE(AcceptFocus,true)
 , PT_HMI_INIT_PROPERTY_VALUE(HighLight, false)
@@ -39,16 +39,16 @@ Widget::Widget()
 , _isValid(false)
 , _containPointer(false)
 {
+	std::clog<<"a1"<<std::endl;
 	bindMnemonicToWidget( *this );	
 	
-  Size.Changed += Pt::slot(*this, &Widget::onSizeChanged);				
-  Caption.Changed += Pt::slot(*this, &Widget::onCaptionChanged);			
+ 	 Size.Changed += Pt::slot(*this, &Widget::onSizeChanged);				
+ 	 Caption.Changed += Pt::slot(*this, &Widget::onCaptionChanged);			
 	Focused.Changed += Pt::slot( *this, &Widget::onFocusChanged );
 	Cursor.Changed +=  Pt::slot( *this, &Widget::onCursorChanged );
 
 	eventReceived() += Pt::slot(*this, &Widget::onKeyInput);
 	eventReceived() += Pt::slot(*this, &Widget::onPointerInput);
-	Application::instance().setCursor( &Cursor.get() );
 }
 
 

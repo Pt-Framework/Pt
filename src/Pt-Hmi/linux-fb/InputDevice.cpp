@@ -140,7 +140,7 @@ bool InputDevice::onRun()
 				if(ev.code == REL_X)
 					_mouseEvent.addX( static_cast<double>(ev.value) );
 				else if(ev.code == REL_Y)
-					_mouseEvent.addX( static_cast<double>(ev.value) );
+					_mouseEvent.addY( static_cast<double>(ev.value) );
 
 				Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );				                				
 			}

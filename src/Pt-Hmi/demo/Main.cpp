@@ -1,13 +1,15 @@
 #include "MainWindow.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Main.h>
+#include <Pt/System/Logger.h>
 
 int main(int argc, char* args[])
 {	
 	try
 	{
+		Pt::System::Logger::setLogLevel( "Pt.Hmi", Pt::System::Trace );
+
 		Pt::Hmi::Application	application;
-				
 		Pt::Hmi::Demo::MainWindow	mainWindow;
 	
 		mainWindow.show();

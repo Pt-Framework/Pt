@@ -12,7 +12,7 @@ Cursor::Cursor()
 : _width(0)
 , _height(0)
 {
-	*this = defaultCursor();
+	
 }
 
 
@@ -29,7 +29,7 @@ const Cursor& Cursor::defaultCursor()
 
 
 const Cursor& Cursor::arrowCursor()
-{
+{	
 	static Cursor cursor;
 
 	if( cursor.width() != 0 )
@@ -38,7 +38,7 @@ const Cursor& Cursor::arrowCursor()
 	std::stringstream memoryStream;
 		
 	memoryStream.write((char*)Pt::Hmi::g_arrowCursor, Pt::Hmi::g_arrowCursorSize);	
-		
+				
 	Pt::Gfx::ARgbImage* im = Pt::Gfx::ImageReader::read(memoryStream);
 
 	//Generate Alpha channel
@@ -54,11 +54,10 @@ const Cursor& Cursor::arrowCursor()
 				pix.setAlpha(0xffff);
 		}
 	}			
-
+	
 	cursor.load(*im, 0, 0);
-
-	delete im;
-
+	
+	delete im;	
 	return cursor;
 }
 
@@ -116,6 +115,7 @@ void Cursor::load( const Pt::Gfx::ARgbImage& image, size_t xHotspot, size_t yHot
 				_andMask.push_back( 0xff );
 				_andMask.push_back( 0xff );
 				_andMask.push_back( 0xff );				
+				_andMask.push_back( 0xff );	
 
 				_xorMask.push_back( 0 );
 				_xorMask.push_back( 0 );
