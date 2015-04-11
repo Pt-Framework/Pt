@@ -64,36 +64,31 @@ const Cursor& Cursor::arrowCursor()
 
 const Cursor& Cursor::waitCursor()
 {
-	static Cursor cursor;
-	return cursor;
+	return arrowCursor();
 }
 
 
 const Cursor& Cursor::sizeNWSECursor()
 {
-	static Cursor cursor;
-	return cursor;
+	return arrowCursor();
 }
 
 
 const Cursor& Cursor::sizeNESWCursor()
 {
-	static Cursor cursor;
-	return cursor;
+	return arrowCursor();
 }
 
 
 const Cursor& Cursor::sizeWECursor()
 {
-	static Cursor cursor;
-	return cursor;
+	return arrowCursor();
 }
 
 
 const Cursor& Cursor::sizeNSCursor()
 {
-	static Cursor cursor;
-	return cursor;
+	return arrowCursor();
 }
 
 

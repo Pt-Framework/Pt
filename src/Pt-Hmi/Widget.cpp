@@ -310,7 +310,7 @@ void Widget::onRender()
 	if( ! Visible.get() )
 		return;
 
-  Pt::Gfx::SizeF size = _paintSurface.size();;
+	  Pt::Gfx::SizeF size = _paintSurface.size();
 
 	if( size.width() < 0 ||  size.height() < 0)
 		return; 
@@ -332,8 +332,7 @@ void Widget::onRender()
 	{
 		Pt::Gfx::Brush	brush(BackColor.get());
 	
-		localPainter.setBrush(brush);
-    
+		localPainter.setBrush(brush);    	
 		localPainter.fillRect(rect);
 	}
 

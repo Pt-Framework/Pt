@@ -69,7 +69,6 @@ Window::~Window()
 void Window::onInvalidate()
 {
 	render();		
-
 	_windowManager.render();
 }
 

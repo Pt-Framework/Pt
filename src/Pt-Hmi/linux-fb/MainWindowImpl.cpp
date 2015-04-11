@@ -75,6 +75,7 @@ void MainWindowImpl::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
 void MainWindowImpl::create()
 {
 	_windowImpl = new ChildWindow();
+	_windowImpl->setWindowParent(_app.mainScreen().impl());
 	_app.mainScreen().impl()->windowManager().add( _windowImpl );
 
 	_windowImpl->Size.Changed += Pt::slot(*this, &MainWindowImpl::onSizeChanged);
@@ -108,7 +109,7 @@ void MainWindowImpl::hide()
 
 
 void MainWindowImpl::render()
-{
+{	
 	_windowImpl->invalidate();
 }
 

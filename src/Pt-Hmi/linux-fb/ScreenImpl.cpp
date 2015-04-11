@@ -43,7 +43,6 @@ namespace Hmi{
 
 ScreenImpl::ScreenImpl()
 {
-	std::clog<<"a1"<<std::endl;
  // Open the frame buffer device
     _fd = open ("/dev/fb0", O_RDWR);
 
@@ -86,19 +85,12 @@ ScreenImpl::ScreenImpl()
     unsigned _pitch = _screenInfo.xres * _screenInfo.bits_per_pixel / 8;
     _bufferSize     = _pitch * _screenInfo.yres;
     _buffer         =  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);	
-	Pt::uint8_t* pixel = (	Pt::uint8_t* ) _buffer;
-	for( size_t i = 0; i < _bufferSize; ++i)
-	{
-		pixel[i] = 160;
-	}
-	
 
-	PT_LOG_INFO("open Screen = " << _screenInfo.xres << ", " << _screenInfo.yres );
+	Visible = true;
 	Size = Pt::Gfx::SizeF( _screenInfo.xres,  _screenInfo.yres );
 	Position = Pt::Gfx::PointF(0,0 );
-	eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerInput );
+	BackColor = Pt::Gfx::ARgbColor(170,170,170);	
 	eventReceived() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
-
 }
 
 
@@ -182,8 +174,8 @@ void ScreenImpl::saveCursorImage( const Pt::Hmi::PointerEvent& mouseEvent )
 
 void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 {	
-	if( _cursorBuffer.size() != 0 )
-		blitPlane(_cursorBuffer, _cursorWidth, _cursorHeight, _cursorPos, CopyOp);
+/*	if( _cursorBuffer.size() != 0 )
+		blitPlane(_cursorBuffer, _cursorWidth, _cursorHeight, _cursorPos, CopyOp); */
 
 	_windowManager.onPointerInput(mouseEvent);	
 
@@ -192,7 +184,7 @@ void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 	if( Cursor.get().width() == 0 )
 		return;	
 
-	saveCursorImage(mouseEvent);
+//	saveCursorImage(mouseEvent);
 
 	blitPlane( Cursor.get().andRgb888(), Cursor.get().width(), Cursor.get().height(), Pt::Gfx::Point( ( int) mouseEvent.x(), (int) mouseEvent.y()), AndOp );
 	blitPlane( Cursor.get().xorRgb888(), Cursor.get().width(), Cursor.get().height(), Pt::Gfx::Point( (int) mouseEvent.x(), (int) mouseEvent.y()), XorOp );
@@ -201,25 +193,34 @@ void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 
 void ScreenImpl::copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight)
 {
-	toX  = (_screenInfo.xres  - fromWidth) ;
-
 	size_t pixelSize = depth() / 8;
-	unsigned bufferOffset = toX + ( toY * _screenInfo.xres );
-	char* bufferData = (char*)( _buffer) + ( bufferOffset * pixelSize);
 
-	for(size_t n = 0; n < fromHeight; ++n)
+	if( toX == 0 && toY == 0 && fromWidth == _screenInfo.xres && fromHeight == _screenInfo.yres )
 	{
-		memcpy(bufferData, data, fromWidth * pixelSize);
-		bufferData += (size_t) _screenInfo.xres * pixelSize;
-		data += fromWidth * pixelSize;
+		memcpy(_buffer, data, fromWidth * fromHeight * pixelSize);
+	}
+	else
+	{
+		toX  = (_screenInfo.xres  - fromWidth) ;
+
+		unsigned bufferOffset = toX + ( toY * _screenInfo.xres );
+		char* bufferData = (char*)( _buffer) + ( bufferOffset * pixelSize);
+
+		for(size_t n = 0; n < fromHeight; ++n)
+		{
+			memcpy(bufferData, data, fromWidth * pixelSize);
+			bufferData += (size_t) _screenInfo.xres * pixelSize;
+			data += fromWidth * pixelSize;
+		}
 	}
 }
 
 
 void ScreenImpl::onInvalidate()
-{
-	Window::onInvalidate();
-	
+{	
+	render();		
+	_windowManager.render();
+
 	drawImage( 0, 0, paintSurface().impl()->image().begin(), paintSurface().impl()->image().end(), _screenInfo.xres, _screenInfo.yres );	
 }
 

@@ -113,7 +113,8 @@ void WindowManager::invalidate()
 
 
 void WindowManager::render()
-{	
+{		
+
 	Painter& painter = _parent.paintSurface().painter();
 	
 	for( size_t i = 0; i < _windows.size(); ++i )
@@ -363,8 +364,9 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 		_sizingDirection = ResizeDirection::No;
 		return;
 	}
-
+	
 	Pt::Hmi::PointerEvent localMouseEvent = mouseEvent;
+	
 	localMouseEvent.setX( mouseEvent.x() - childWindow->Position.get().x()  ) ;
 	localMouseEvent.setY( mouseEvent.y() - childWindow->Position.get().y() ) ;
 

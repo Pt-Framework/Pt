@@ -65,7 +65,7 @@ class ScreenImpl : public Window
 		
 	protected:
 		virtual void onInvalidate();
-		void onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent );
+		virtual void onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent );
 
 	private:
    
@@ -74,15 +74,23 @@ class ScreenImpl : public Window
     {
         const char* imageData = 0;
 
+        //for(Iterator it = begin; it != end; ++it)
+        //{
+        //  (*it).setRed((*it).red() * 256);
+        //  (*it).setGreen((*it).green() * 256);
+        //  (*it).setBlue((*it).blue() * 256);
+        //}
+
         switch( depth() )
         {
             case 32:
-            {
+            {				
                 Gfx::Rgb888Image rgbImage( width, height );
                 assign( begin, end, rgbImage.begin() );
+                imageData = 0;
                 this->copyImageData( toX, toY, (char*)rgbImage.data(), rgbImage.width(), rgbImage.height() );                    
             }
-						break;
+			break;
 
             case 16:
             {
@@ -91,7 +99,7 @@ class ScreenImpl : public Window
                 imageData = (char*)( rgbImage.data() );
                 this->copyImageData( toX, toY, (char*)rgbImage.data(), rgbImage.width(), rgbImage.height() );                    
             }
-						break;
+			break;
 
             default:
                 imageData = 0;

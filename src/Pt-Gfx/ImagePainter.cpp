@@ -305,7 +305,8 @@ void ImagePainter::drawImage( const  Gfx::PointF& to, const ARgbImage& image )
         stopY = _image.height();
 
     for( Pt::ssize_t y = startY; y < stopY; ++y)
-    {
+    {				
+
         for( Pt::ssize_t x = startX; x < stopX; ++x)
         {
             _image.at(x,y) = image.at(x -startX, y -startY);

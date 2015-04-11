@@ -79,6 +79,21 @@ bool InputDevice::onRun()
     {
 			case EV_KEY:
 			{
+
+				if( ev.code == 272 )	
+				{
+					_mouseEvent.buttons()[0].setState( ev.value == 0 ? DeviceButton::Released : DeviceButton::Pressed);
+					Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );				                				
+					break;
+				}
+				
+				if( ev.code == 273 )	
+				{
+					_mouseEvent.buttons()[2].setState( ev.value == 0 ? DeviceButton::Released : DeviceButton::Pressed);
+					Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );				                				
+					break;
+				}
+
 				if(ev.value == 1)
 					_keyEvent.setState(KeyEvent::KeyDown);
 				else if(ev.value == 0)
@@ -86,7 +101,7 @@ bool InputDevice::onRun()
 				else
 					break;;
 			
-	      switch(ev.code)
+		        switch(ev.code)
 				{
 					case KEY_RIGHTALT:
 					case KEY_LEFTALT:
@@ -135,7 +150,7 @@ bool InputDevice::onRun()
 			}
 			break;
 
-      case EV_REL:
+	       case EV_REL:
 			{
 				if(ev.code == REL_X)
 					_mouseEvent.addX( static_cast<double>(ev.value) );
@@ -176,7 +191,13 @@ bool InputDevice::onRun()
 					break;
                     
 					case ABS_PRESSURE:
+						std::clog<<"Press"<< std::endl;
+					break;
+
 					case ABS_MT_PRESSURE:                  
+						std::clog<<"Press"<< std::endl;
+					break;
+
 					default:
 					break;
 				}

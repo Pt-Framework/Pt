@@ -231,6 +231,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 		virtual void onActionKey(KeyEvent::KeyState state);
 		virtual void onShortcutKey(KeyEvent::KeyState state);
 	
+	
 	private:
 		void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
 		void onFocusChanged(const Property<bool>& prop);
