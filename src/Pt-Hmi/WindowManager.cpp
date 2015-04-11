@@ -258,6 +258,7 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 		w->Size = Pt::Gfx::SizeF(width,height);
 
 	_lastSizePoint =  point;
+	invalidate();
 }
 
 
@@ -377,9 +378,7 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 	else
 	{
 		doSizing( childWindow, mouseEvent );				
-	}
-		
-	invalidate();
+	}			
 }
 
 
