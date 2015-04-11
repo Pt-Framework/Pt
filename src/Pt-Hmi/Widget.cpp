@@ -38,8 +38,7 @@ Widget::Widget()
 , _parent(0)
 , _isValid(false)
 , _containPointer(false)
-{
-	std::clog<<"a1"<<std::endl;
+{	
 	bindMnemonicToWidget( *this );	
 	
  	 Size.Changed += Pt::slot(*this, &Widget::onSizeChanged);				

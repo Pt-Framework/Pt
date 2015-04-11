@@ -39,7 +39,6 @@ WindowManager::WindowManager(Window& parent)
 : _parent( parent )
 , _sizingDirection( ResizeDirection::No )
 {
-	std::clog<<"a1"<<std::endl;
 }
 
 
