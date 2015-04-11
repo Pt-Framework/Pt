@@ -82,12 +82,27 @@ namespace Gfx {
      * top-left corner of the drawing area the painter was created for. All drawing or writing is done
      * in the current color, using the current paint mode, and in the current font.
      */
+
+		namespace RenderMode
+		{	
+			enum Type
+			{
+				Normal,
+				BitBlit, //TDOO: only for draw Image
+				AlphaBlending
+			};
+		}
+
     class PT_GFX_API Painter
     {
-        public:
+        public:						
+
             //! @brief Empty virtual destructor.
             virtual ~Painter()
             {}
+
+
+						virtual void setRenderMode(RenderMode::Type mode) = 0;
 
             /**
              * @brief Sets the pen of this painter to the given pen.

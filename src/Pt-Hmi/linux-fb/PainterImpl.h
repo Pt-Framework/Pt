@@ -35,10 +35,14 @@ class PainterImpl
 {
 public:
     PainterImpl(PaintSurfaceImpl* surface);
-
+		
     virtual ~PainterImpl();
-   
-	virtual void setPen(const Gfx::Pen& pen);
+  
+		void setRenderMode(Gfx::RenderMode::Type mode)
+		{
+		}
+	 
+		virtual void setPen(const Gfx::Pen& pen);
 
     virtual const Gfx::Pen& pen() const;
 

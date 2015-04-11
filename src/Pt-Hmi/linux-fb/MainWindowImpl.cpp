@@ -26,9 +26,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "WindowImpl.h"
+#include "MainWindowImpl.h"
 #include "PaintSurfaceImpl.h"
 #include "ApplicationImpl.h"
+#include "ScreenImpl.h"
 #include <Pt/Hmi/Application.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,30 +42,161 @@
 #include <sys/ioctl.h>
 #include <string.h>
 #include <errno.h>
-#include "KeyHandler.h"
 
 namespace Pt {
 namespace Hmi {
 
-WindowImpl::WindowImpl(PaintSurface* surface)
-: _surface(surface)
+MainWindowImpl::MainWindowImpl(Window* window)
+: _apiWindow(window)
+, _app(Application::instance() )
+, _windowImpl(0)
 { 	
-	Application::instance().impl()->inputEvent() += Pt::slot(*this, &ViewImpl::onInputEvent);
+
 }
 
 
-WindowImpl::~WindowImpl()
+MainWindowImpl::~MainWindowImpl()
 {
- 
+	destroy();
 }
 
 
-
-void WindowImpl::render()
+void MainWindowImpl::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 {
-	Pt::Gfx::ARgbImage& image = _surface->impl()->image();
+	_apiWindow->Size = prop.get();
+}
 
-	this->drawImage( 0, 0, image.begin(), image.end(), image.width(), image.height() );
+void MainWindowImpl::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
+{
+	_apiWindow->Position = prop.get();
+}
+
+
+void MainWindowImpl::create()
+{
+	_windowImpl = new ChildWindow();
+	_app.mainScreen().impl()->windowManager().add( _windowImpl );
+
+	_windowImpl->Size.Changed += Pt::slot(*this, &MainWindowImpl::onSizeChanged);
+	_windowImpl->Position.Changed += Pt::slot(*this, &MainWindowImpl::onPositionChanged);
+}
+	
+
+void MainWindowImpl::destroy()
+{
+	if( _windowImpl == 0 )
+		return;
+
+	_app.mainScreen().impl()->windowManager().remove( _windowImpl );
+	delete _windowImpl;
+	_windowImpl = 0;
+}
+
+
+void MainWindowImpl::show()
+{
+	_windowImpl->Visible = true;
+}
+
+
+void MainWindowImpl::hide()
+{
+	_windowImpl->Visible = false;
+}
+
+
+void MainWindowImpl::render()
+{
+	_app.mainScreen().impl()->windowManager().render();
+}
+
+
+void MainWindowImpl::setPosition(const Gfx::PointF& p)
+{
+	_windowImpl->Position = p;
+}
+
+void MainWindowImpl::setSize(const Gfx::SizeF& size)
+{
+	_windowImpl->Size = size;
+}
+
+
+void MainWindowImpl::showTitle(bool p)
+{
+	_windowImpl->ShowTitle = p;
+}
+
+
+void MainWindowImpl::setCaption(const std::string& text)
+{
+	_windowImpl->Caption = text;
+}
+
+
+void MainWindowImpl::showMinimizedButton(bool p)
+{
+	_windowImpl->ShowMinimizeButton = p;
+}
+  
+
+void MainWindowImpl::showMaximizeButton(bool p)
+{
+	_windowImpl->ShowMaximizeButton = p;
+}
+  
+
+void MainWindowImpl::showSysMenu(bool p)
+{
+	_windowImpl->ShowSysMenu = true;
+}
+
+
+void MainWindowImpl::setForceTopMost(bool force)
+{
+	
+}
+  
+
+void MainWindowImpl::setWindowState(WindowState::Type p)
+{
+	_windowImpl->State = p;
+}
+  
+
+void MainWindowImpl::setBorder(WindowBorder::Type p)
+{
+	_windowImpl->Border = p;
+}
+  
+
+void MainWindowImpl::showInTaskbar(bool p)
+{
+	_windowImpl->ShowInTaskbar = p;
+}
+  
+
+void MainWindowImpl::setIcon(const Pt::Gfx::ARgbImage& p)
+{
+	_windowImpl->Icon = p;
+}
+
+
+void MainWindowImpl::setEnable(bool e)
+{
+	_windowImpl->Enabled = e;
+}
+
+
+void MainWindowImpl::setMinSize(const Pt::Gfx::SizeF& s)
+{
+	_windowImpl->MinimumSize = s;
+}
+	
+
+void MainWindowImpl::setMaxSize(const Pt::Gfx::SizeF& s)
+{
+	_windowImpl->MaximumSize = s;
 }
 
 }} // namespace

@@ -26,7 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include "ApplicationImpl.h"
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Cursor.h>3
+#include <Pt/Hmi/Cursor.h>
 #include <Pt/System/IOError.h>
 
 namespace Pt {
@@ -198,7 +198,7 @@ HBITMAP ApplicationImpl::createImage888(const Pt::uint8_t* data, size_t width, s
 	bitmapInfo.bmiHeader.biWidth       = width;             // Bitmap width.
 	bitmapInfo.bmiHeader.biHeight      = -(ssize_t)height;  // Bitmap height. Negative value = top-down image.
 	bitmapInfo.bmiHeader.biPlanes      = 1;                 // Always 1.
-	bitmapInfo.bmiHeader.biBitCount    = 24;                // We internally use a 32-bit bitmap.
+	bitmapInfo.bmiHeader.biBitCount    = 32;                // We internally use a 32-bit bitmap.
 	bitmapInfo.bmiHeader.biCompression = BI_RGB;            // Uncompressed (top-down) RGB bitmap.
 	bitmapInfo.bmiHeader.biSizeImage   = 0;                 // 0 = automatic for BI_RGB-images.
 	bitmapInfo.bmiHeader.biClrUsed     = 0;                 // 0 = No color table.
@@ -244,8 +244,8 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 	iconInfo.fIcon = false; 
 	iconInfo.xHotspot = cursor->xHotspot();
 	iconInfo.yHotspot = cursor->yHotspot();
-	iconInfo.hbmColor = andMask;
-	iconInfo.hbmMask  = xorMask;
+	iconInfo.hbmColor = xorMask;
+	iconInfo.hbmMask  = andMask;
 
 	_cursorHandle = CreateIconIndirect(&iconInfo);
 

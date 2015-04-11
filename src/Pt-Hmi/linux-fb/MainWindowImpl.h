@@ -33,25 +33,23 @@ Free Software Foundation, Inc.,
 #include <Pt/Signal.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/KeyEvent.h>
-#include <Pt/Hmi/PointingEvent.h>
-#include <Pt/Hmi/PositionEvent.h>
-#include <Pt/Hmi/ResizeEvent.h>
-#include <Pt/Hmi/CloseEvent.h>
-#include <Pt/Hmi/ActivateEvent.h>
-#include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/WindowProperties.h>
+#include <Pt/Hmi/ChildWindow.h>
+#include <Pt/Gfx/ARgbImage.h>
 #include <linux/input.h>
-
 
 namespace Pt {
 namespace Hmi {
 
-class WindowImpl  :public Pt::Connectable
+class Window;
+class Application;
+
+class MainWindowImpl  : public Pt::Connectable
 {
 	public:
-		WindowImpl(PaintSurface* surface);
+		MainWindowImpl(Window* Window);
     
-		~WindowImpl();
+		~MainWindowImpl();
 
 		void create();
 	
@@ -89,70 +87,23 @@ class WindowImpl  :public Pt::Connectable
 
 		void setEnable(bool e);	
 
-
-		Pt::Signal<const Pt::Event&>& windowEvent()
-		{
-			return _windowEvent;
-		}
-			
-		const Pt::Gfx::SizeF& windowSize() const
-		{
-			return _size;
-		}
-		
-		void onActivate();
-
-		void onDeactivate();
+		void setMinSize(const Pt::Gfx::SizeF& s);
 	
+		void setMaxSize(const Pt::Gfx::SizeF& s);
 
+		void setTopMost(bool top)
+		{
+		}
+	
 	protected:
-        template <typename Iterator>
-        void drawImage(ssize_t toX, ssize_t toY, Iterator begin, Iterator end, size_t width, size_t height)
-        {
-            const char* imageData = 0;
+    void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
+    void onPositionChanged(const Property<Pt::Gfx::PointF>& prop);    
 
-            switch( depth() )
-            {
-                case 32:
-                {
-                    Gfx::Rgb888Image rgbImage( width, height );
-                    assign( begin, end, rgbImage.begin() );
-                    this->copyImageData( toX, toY, (char*)rgbImage.data(), rgbImage.width(), rgbImage.height() );                    
-                }
-								break;
-
-                case 16:
-                {
-                    Gfx::Rgb565Image rgbImage( width, height );
-                    assign( begin, end, rgbImage.begin() );
-                    imageData = (char*)( rgbImage.data() );
-                    this->copyImageData( toX, toY, (char*)rgbImage.data(), rgbImage.width(), rgbImage.height() );                    
-                }
-								break;
-
-                default:
-                    imageData = 0;
-            }
-        }
-
-		void copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight);
-
-		Pt::ssize_t depth() const
-		{ return _screenInfo.bits_per_pixel;}
-
-		Pt::ssize_t width() const
-		{ return _screenInfo.xres;}
-
-		Pt::ssize_t height() const
-		{ return _screenInfo.yres;}
-
-		char* frameBuffer()
-		{ return (char*)_buffer; }
-			
 	private:    
-		PaintSurface*           _surface;
-		PaintSurface						_windowSurface;
-		Pt::Gfx::SizeF					_windowSize;
+
+		Window* _apiWindow;
+		Pt::Hmi::ChildWindow* _windowImpl;
+		Pt::Hmi::Application& _app;
 
 };
 

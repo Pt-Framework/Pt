@@ -73,6 +73,7 @@ ImagePainter::ImagePainter( ARgbImage& image )
 , _stroke( 0 )
 , _fillSolid( 0 )
 , _fillTexture( 0 )
+, _renderMode( RenderMode::Normal )
 {
     std::auto_ptr<FillSolid>              fillSolid( new FillSolid() );
     std::auto_ptr<FillTexture>            fillTexture( new FillTexture() );
@@ -123,6 +124,11 @@ ImagePainter::~ImagePainter()
         delete _fillSolid;
    }
    catch(...) {}
+}
+
+void ImagePainter::setRenderMode( Gfx::RenderMode::Type mode)
+{
+	_renderMode = mode;
 }
 
 void ImagePainter::setPen( const Pen& pen )

@@ -49,6 +49,8 @@ class PainterImpl
 
         virtual ~PainterImpl();
 
+				void setRenderMode(Gfx::RenderMode::Type mode);
+
         void setPen(const Gfx::Pen& pen);
 
         const Gfx::Pen& pen() const;
@@ -161,6 +163,7 @@ class PainterImpl
         Gfx::Font  _font;
         mutable std::wstring _text;
         std::list<std::string> _fontNamesList;
+				Gfx::RenderMode::Type _renderMode;
 
     private:
         static DWORD toGdiPenStyle( const Pt::Gfx::Pen& pen );

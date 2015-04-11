@@ -150,6 +150,7 @@ class ApplicationImpl : public Pt::System::EventLoop
 		Pt::Hmi::Selector _selector;        
 		std::vector<System::Selectable*> _avail;
 		HCURSOR _cursorHandle;
+
 };
 
 }}

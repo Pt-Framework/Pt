@@ -26,8 +26,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "InputDevice.h"
 #include <linux/input.h>
+#include <linux/kd.h>
+#include <linux/keyboard.h>
+
+#include "InputDevice.h"
+#include "ScreenImpl.h"
 #include <Pt/Hmi/Application.h>
 #include "ApplicationImpl.h"
 
@@ -58,21 +62,120 @@ InputDevice::~InputDevice()
 
 bool InputDevice::onRun()
 {
-	struct input_event ev[64];
+	struct input_event evts[64];
 
-	int bytes = ::read(_ioh.fd, ev, sizeof(struct input_event) * 64);
+	int bytes = ::read(_ioh.fd, evts, sizeof(struct input_event) * 64);
     
-		if( bytes < (int) sizeof(struct input_event) )
-    {
-        return false;
-    }
+	if( bytes < (int) sizeof(struct input_event) )
+	{
+			return false;
+	}
 
-    for( unsigned i = 0; i < bytes / sizeof(input_event); i++ )
-    {
-			Application::instance().impl()->windowManager().systemEvent().send(ev[i]);
-    }
+	for( unsigned i = 0; i < bytes / sizeof(input_event); i++ )
+	{
+		struct input_event& ev = evts[i];
 
-    return true;
+    switch (ev.type)
+    {
+			case EV_KEY:
+			{
+				if(ev.value == 1)
+					_keyEvent.setState(KeyEvent::KeyDown);
+				else if(ev.value == 0)
+					_keyEvent.setState(KeyEvent::KeyUp);
+				else
+					break;;
+			
+	      switch(ev.code)
+				{
+					case KEY_RIGHTALT:
+					case KEY_LEFTALT:
+						_keyEvent.setAlt(_keyEvent.state() == KeyEvent::KeyDown);
+											break;	
+		
+					case KEY_LEFTCTRL:
+					case KEY_RIGHTCTRL:
+						_keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
+					break;
+
+					case KEY_LEFTSHIFT:
+					case KEY_RIGHTSHIFT:
+						_keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);  
+					break;  
+
+					default:
+					{
+						struct kbentry ke;
+						ke.kb_table = 0;
+						ke.kb_index = ev.code;
+
+						::ioctl(STDIN_FILENO, KDGKBENT, (unsigned long)&ke);
+					
+						unsigned unicode = 0;
+						unsigned typ = KTYP(ke.kb_value);
+						unsigned value = KVAL(ke.kb_value);
+                    
+						if(typ == KT_LETTER|| typ == KT_LATIN)
+						{
+								unicode = value;
+						}
+						else if(typ == KT_PAD && value < 10)
+						{
+								unicode = 0x30 + value;
+						}
+						else
+								break;
+
+							_keyEvent.setUnicode(unicode);
+						}
+					break;
+				}
+
+				Application::instance().mainScreen().impl()->eventReceived().send( _keyEvent );				
+			}
+			break;
+
+      case EV_REL:
+			{
+				if(ev.code == REL_X)
+					_mouseEvent.addX( static_cast<double>(ev.value) );
+				else if(ev.code == REL_Y)
+					_mouseEvent.addX( static_cast<double>(ev.value) );
+
+				Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );				                				
+			}
+			break;
+
+			case EV_ABS:
+			{
+				switch(ev.code)
+				{
+					case ABS_MT_SLOT:                
+					case ABS_MT_TRACKING_ID:
+                
+					case ABS_X:
+					case ABS_MT_POSITION_X:
+						_mouseEvent.setX( static_cast<double>(ev.value) );
+					break;
+                    
+					case ABS_Y:
+					case ABS_MT_POSITION_Y:
+						_mouseEvent.setY( static_cast<double>(ev.value) );
+					break;
+                    
+					case ABS_PRESSURE:
+					case ABS_MT_PRESSURE:                  
+					default:
+					break;
+				}
+
+				Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );
+			}
+			break;  
+		}		
+	}
+
+	return true;
 }
 
 
@@ -88,5 +191,4 @@ void InputDevice::onDetach(System::EventLoop& loop)
 }
 
 } // namespace
-
 } // namespace

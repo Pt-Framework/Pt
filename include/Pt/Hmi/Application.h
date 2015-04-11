@@ -1,22 +1,19 @@
 #ifndef Pt_Hmi_Application_h
 #define Pt_Hmi_Application_h
 
-#include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Cursor.h>
 #include <Pt/System/Application.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
-#include <Pt/Singleton.h>
+#include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Event.h>
+#include <Pt/Hmi/Screen.h>
 
 namespace Pt {
 namespace Hmi {
 
 class ApplicationImpl;
-class Controller;
-class PointingEvent;
-class KeyEvent;
 
 class PT_HMI_API Application : public Pt::System::Application
 {
@@ -48,8 +45,19 @@ public:
 
 	void setCursor(const Cursor* cursor = 0);
 
+	const Screen& mainScreen() const
+	{
+		return _mainScreen;
+	}
+
+	Screen& mainScreen()
+	{
+		return _mainScreen;
+	}
+
 private:     
   ApplicationImpl* _impl; 
+	Screen _mainScreen;
 };
 
 }}

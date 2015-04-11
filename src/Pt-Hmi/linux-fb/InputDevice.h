@@ -32,6 +32,8 @@
 #include "posix/Selector.h"
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/KeyEvent.h>
+#include <Pt/Hmi/PointerEvent.h>
 #include <Pt/System/Selectable.h>
 #include <Pt/System/MainLoop.h>
 
@@ -45,7 +47,6 @@ class InputDevice : public System::Selectable
 {
 	public:
 		InputDevice(const char* deviceName);
-
 		~InputDevice();
 
 		void begin()
@@ -82,6 +83,8 @@ class InputDevice : public System::Selectable
 	private:
 		Pt::System::IOHandle _ioh;
 		Pt::System::EventLoop* _loop;
+		Pt::Hmi::KeyEvent _keyEvent;
+		Pt::Hmi::PointerEvent _mouseEvent;
 };
 
 } // namespace

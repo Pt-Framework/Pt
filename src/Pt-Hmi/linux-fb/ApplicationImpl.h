@@ -31,13 +31,13 @@
 #define Pt_Hmi_ApplicationImpl_h
 
 #include "InputDevice.h"
-#include "WindowImpl.h"
 #include <Pt/System/MainLoop.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/ARgbImage.h>
-#include "WindowManager.h"
+#include <Pt/Hmi/WindowManager.h>
+#include <Pt/Hmi/Cursor.h>
 
 namespace Pt {
 
@@ -50,10 +50,6 @@ class ApplicationImpl : public Pt::System::MainLoop
 
     ~ApplicationImpl();
 
-		void showConsole(bool t)
-		{
-			//TODO:
-		}
 
 		Pt::Gfx::PointF toUnit(const Pt::Gfx::Point& value)
 		{
@@ -116,16 +112,13 @@ class ApplicationImpl : public Pt::System::MainLoop
 
 		void nextEvent();
 
-		WindowManager& windowManager()
-		{
-			return _windowManager;
-		}
+		void setCursor( const Hmi::Cursor* cursor );
 
 	protected:
 		Pt::Signal<const struct input_event&> _inputEvent;
 		InputDevice _inputDevice;
-		InputDevice _inputDevice2;
-		WindowManager _windowManager;
+		InputDevice _inputDevice2;		
+
 };
 
 } // namespace

@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2006 Marc Boris Duerner
+/* Copyright (C) 2015 Marc Boris Duerner 
+ * Copyright (C) 2015 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,44 +23,31 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
-#include "ApplicationImpl.h"
-#include <Pt/Hmi/Application.h>
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+#include <Pt/Hmi/Screen.h>
 #include "ScreenImpl.h"
 
-namespace Pt {
-namespace Hmi {
+namespace Pt{
+namespace Hmi{
 
-ApplicationImpl::ApplicationImpl()
-: _inputDevice("/dev/input/event0")
-, _inputDevice2("/dev/input/event1")
-{  		 
-   _inputDevice.setActive(*this);
-   _inputDevice.begin();
-
-   _inputDevice2.setActive(*this);
-   _inputDevice2.begin();  
-}
-
-
-ApplicationImpl::~ApplicationImpl()
+Screen::Screen()
+: _impl( new ScreenImpl() )
 {
-} 
+}
 
-void ApplicationImpl::nextEvent()
+Screen::~Screen()
 {
-	MainLoop::waitNext();
+	delete _impl;
 }
 
-void ApplicationImpl::setCursor( const Hmi::Cursor* cursor )
-{	
-	if( cursor == 0 )
-		Application::instance().mainScreen().impl()->Cursor = Hmi::Cursor::defaultCursor();
-	else
-		Application::instance().mainScreen().impl()->Cursor = *cursor;
+double Screen::width() const
+{
+	return _impl->width();
+}
+		
+double Screen::height() const
+{
+	return _impl->height();
 }
 
-}} // namespace
-
+}}

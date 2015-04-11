@@ -13,7 +13,7 @@ namespace Hmi{
 class PaintSurfaceImpl
 {
 public:		
-	PaintSurfaceImpl(const Pt::Gfx::SizeF& size);
+	PaintSurfaceImpl();
 	virtual ~PaintSurfaceImpl();
 
 	virtual Pt::Gfx::ARgbImage toImage() const

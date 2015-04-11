@@ -38,6 +38,8 @@ public:
 
     virtual ~Painter();
 
+		virtual void setRenderMode(Gfx::RenderMode::Type mode);
+
     virtual void setPen(const Gfx::Pen& pen);
 
     virtual const Gfx::Pen& pen() const;

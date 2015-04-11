@@ -49,6 +49,7 @@ PainterImpl::PainterImpl(PaintSurfaceImpl* surface)
 , _pen(Gfx::Pen(1))
 , _brush(Gfx::Brush(Gfx::ARgbColor(0, 0, 0)))
 , _font(Gfx::Font(determinePlatformDefaultFontName()))
+, _renderMode(Gfx::RenderMode::Normal)
 {
 }
 
@@ -61,6 +62,11 @@ PainterImpl::~PainterImpl()
 void PainterImpl::drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline )
 {
     drawText(to, text);
+}
+
+void PainterImpl::setRenderMode( Gfx::RenderMode::Type mode )
+{
+	_renderMode = mode;
 }
 
 void PainterImpl::setPen(const Gfx::Pen& pen)
@@ -578,9 +584,10 @@ void PainterImpl::drawImage(const Pt::Gfx::PointF& toF, const Gfx::ARgbImage& im
 {
 	Pt::Gfx::Point to = Application::instance().fromUnit(toF);
 
-    Gfx::ARgbSubImage subImage(const_cast<Gfx::ARgbImage&>( image ), imageRegion);
-    this->drawImage( to.x(), to.y(), subImage.begin(), subImage.end(), subImage.width(), subImage.height() );
+	Gfx::ARgbSubImage subImage(const_cast<Gfx::ARgbImage&>( image ), imageRegion);
+	this->drawImage( to.x(), to.y(), subImage.begin(), subImage.end(), subImage.width(), subImage.height() );
 }
+
 
 void PainterImpl::drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height)
 {

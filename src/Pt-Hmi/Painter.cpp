@@ -44,6 +44,11 @@ Painter::~Painter()
 	delete _impl;
 }
 
+void Painter::setRenderMode(Gfx::RenderMode::Type mode)
+{
+	_impl->setRenderMode( mode );
+}
+
 void Painter::setPen(const Gfx::Pen& pen)
 {
 	_impl->setPen(pen);
@@ -173,5 +178,6 @@ void Painter::setSurface(PaintSurface& surface)
 {    
     _impl->setSurface(surface);
 }
+
 
 }}

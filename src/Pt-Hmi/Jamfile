@@ -30,7 +30,8 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   MainWindow.cpp					   
 					   Dialog.cpp		
 					   ChildWindow.cpp		
-					   WindowManager.cpp	   
+					   WindowManager.cpp	  
+					   Screen.cpp 
 					   ;
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx  ;

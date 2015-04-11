@@ -4,10 +4,9 @@
 namespace Pt{
 namespace Hmi{
 
-PaintSurfaceImpl::PaintSurfaceImpl(const Pt::Gfx::SizeF& size)
+PaintSurfaceImpl::PaintSurfaceImpl()
 : _image(100,100)
-{
-	resize(size);
+{	
 }
 
 PaintSurfaceImpl::~PaintSurfaceImpl()

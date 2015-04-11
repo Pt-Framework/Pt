@@ -83,6 +83,8 @@ class PT_GFX_API ImagePainter : public Painter
         //! @brief Destructor.
         ~ImagePainter();
 
+				virtual void setRenderMode( Gfx::RenderMode::Type mode);
+
          //!@see Pt::Gfx::Painter
         virtual void setPen(const Pen& pen);
 
@@ -165,6 +167,7 @@ class PT_GFX_API ImagePainter : public Painter
         Stroke*              _stroke;
         FillSolid*           _fillSolid;
         FillTexture*         _fillTexture;
+				RenderMode::Type     _renderMode;
 };
 
 } //namespace Gfx
