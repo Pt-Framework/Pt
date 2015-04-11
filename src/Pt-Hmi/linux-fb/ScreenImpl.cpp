@@ -42,10 +42,7 @@ namespace Pt{
 namespace Hmi{
 
 ScreenImpl::ScreenImpl()
-: _windowManager( *this )
 {
-
-
 	std::clog<<"a1"<<std::endl;
  // Open the frame buffer device
     _fd = open ("/dev/fb0", O_RDWR);

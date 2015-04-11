@@ -69,6 +69,11 @@ class PT_HMI_API Window  : public Widget
 
 		const std::vector<ChildWindow*>& childWindows() const;
 
+		WindowManager& windowManager()
+		{
+			return _windowManager;
+		}
+
 	protected:
 		Window(Window* parent = 0);    
 
