@@ -49,20 +49,19 @@ namespace Hmi {
 MainWindowImpl::MainWindowImpl(Window* window)
 : _apiWindow(window)
 , _app(Application::instance() )
-, _windowImpl(0)
 { 	
-	create();
+
 }
 
 
 MainWindowImpl::~MainWindowImpl()
 {
-	destroy();
+
 }
 
 
 void MainWindowImpl::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
-{
+{	
 	_apiWindow->Size = prop.get();
 }
 
@@ -71,92 +70,96 @@ void MainWindowImpl::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
 	_apiWindow->Position = prop.get() ;
 }
 
+	
+void MainWindowImpl::onInvalidate()
+{
+	ChildWindow::onInvalidate();
+
+	_apiWindow->invalidate();
+}
+
+
+void MainWindowImpl::onRender()
+{
+	Painter& painter = paintSurface().painter();
+	painter.drawSurface( Pt::Gfx::PointF(0,0), _apiWindow->paintSurface() );	
+}
+
 
 void MainWindowImpl::create()
-{
-	_windowImpl = new ChildWindow();
-	_windowImpl->setWindowParent(_app.mainScreen().impl());
-	_app.mainScreen().impl()->windowManager().add( _windowImpl );
+{	
+	this->setWindowParent( _app.mainScreen().impl() );
+	_app.mainScreen().impl()->windowManager().add( this );
 
-	_windowImpl->Size.Changed += Pt::slot(*this, &MainWindowImpl::onSizeChanged);
-	_windowImpl->Position.Changed += Pt::slot(*this, &MainWindowImpl::onPositionChanged);
+	this->Size.Changed += Pt::slot(*this, &MainWindowImpl::onSizeChanged);
+	this->Position.Changed += Pt::slot(*this, &MainWindowImpl::onPositionChanged);
 }
 	
 
 void MainWindowImpl::destroy()
 {
-	if( _windowImpl == 0 )
-		return;
-
-	_app.mainScreen().impl()->windowManager().remove( _windowImpl );
-	delete _windowImpl;
-	_windowImpl = 0;
+	_app.mainScreen().impl()->windowManager().remove( this );
+	this->setWindowParent(0);
 }
 
 
 void MainWindowImpl::show()
 {
-	_windowImpl->Visible = true;	
-	_windowImpl->invalidate();
+	Visible = true;	
+	render();
 }
 
 
 void MainWindowImpl::hide()
 {
-	_windowImpl->Visible = false;
-	_windowImpl->invalidate();
-}
-
-
-void MainWindowImpl::render()
-{	
-	_windowImpl->invalidate();
+	Visible = false;
+	render();
 }
 
 
 void MainWindowImpl::setPosition(const Gfx::PointF& p)
 {	
-	if( _windowImpl->Position.get() != p ) 
+	if( Position.get() != p ) 
 	{
-		_windowImpl->Position = p;
-		_windowImpl->invalidate();
+		Position = p;
+		render();
 	}
 }
 
 void MainWindowImpl::setSize(const Gfx::SizeF& size)
 {
-	if( _windowImpl->Size.get() != size)
-		_windowImpl->Size = size;
+	if( Size.get() != size)
+		Size = size;
 }
 
 
 void MainWindowImpl::showTitle(bool p)
 {
-	_windowImpl->ShowTitle = p;
+	ShowTitle = p;
 }
 
 
 void MainWindowImpl::setCaption(const std::string& text)
 {
-	_windowImpl->Caption = text;
+	Caption = text;
 }
 
 
 void MainWindowImpl::showMinimizedButton(bool p)
 {
-	_windowImpl->ShowMinimizeButton = p;
+	ShowMinimizeButton = p;
 }
   
 
 void MainWindowImpl::showMaximizeButton(bool p)
 {
-	_windowImpl->ShowMaximizeButton = p;
+	ShowMaximizeButton = p;
 }
   
 
 void MainWindowImpl::showSysMenu(bool p)
 {
-	_windowImpl->ShowSysMenu = true;
+	ShowSysMenu = true;
 }
 
 
@@ -168,43 +171,43 @@ void MainWindowImpl::setForceTopMost(bool force)
 
 void MainWindowImpl::setWindowState(WindowState::Type p)
 {
-	_windowImpl->State = p;
+	State = p;
 }
   
 
 void MainWindowImpl::setBorder(WindowBorder::Type p)
 {
-	_windowImpl->Border = p;
+	Border = p;
 }
   
 
 void MainWindowImpl::showInTaskbar(bool p)
 {
-	_windowImpl->ShowInTaskbar = p;
+	ShowInTaskbar = p;
 }
   
 
 void MainWindowImpl::setIcon(const Pt::Gfx::ARgbImage& p)
 {
-	_windowImpl->Icon = p;
+	Icon = p;
 }
 
 
 void MainWindowImpl::setEnable(bool e)
 {
-	_windowImpl->Enabled = e;
+	Enabled = e;
 }
 
 
 void MainWindowImpl::setMinSize(const Pt::Gfx::SizeF& s)
 {
-	_windowImpl->MinimumSize = s;
+	MinimumSize = s;
 }
-	
+
 
 void MainWindowImpl::setMaxSize(const Pt::Gfx::SizeF& s)
 {
-	_windowImpl->MaximumSize = s;
+	MaximumSize = s;
 }
 
 }} // namespace

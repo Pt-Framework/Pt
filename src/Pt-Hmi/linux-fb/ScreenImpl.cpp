@@ -194,13 +194,15 @@ void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 void ScreenImpl::copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight)
 {
 	size_t pixelSize = depth() / 8;
-
+/*
 	if( toX == 0 && toY == 0 && fromWidth == _screenInfo.xres && fromHeight == _screenInfo.yres )
 	{
 		memcpy(_buffer, data, fromWidth * fromHeight * pixelSize);
 	}
 	else
+*/
 	{
+
 		toX  = (_screenInfo.xres  - fromWidth) ;
 
 		unsigned bufferOffset = toX + ( toY * _screenInfo.xres );

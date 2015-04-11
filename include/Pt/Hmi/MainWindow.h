@@ -41,53 +41,53 @@ class MainWindowImpl;
 class PT_HMI_API MainWindow  : public Window
 {
 	public:    
-    MainWindow(MainWindow* parent = 0);    
+	    MainWindow(MainWindow* parent = 0);    
     
 		~MainWindow();    
-	
+
 		void setTopMost( bool topMost );
 
 	protected:
-    virtual void onInvalidate();	     		
+	    virtual void onInvalidate();	     		
 
 	private: 			
 
-    void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
+		void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
 
-    void onPositionChanged(const Property<Pt::Gfx::PointF>& prop);    
+		void onPositionChanged(const Property<Pt::Gfx::PointF>& prop);    
 
-    void onClosedChanged(const Property<bool> & closed);
-  
-    void onVisibleChanged(const Property<bool> & visible);
+		void onClosedChanged(const Property<bool> & closed);
+	  
+		void onVisibleChanged(const Property<bool> & visible);
 
-    void onCaptionChanged(const Property<std::string> & p);
-  
-    void onShowTitleChanged(const Property<bool> & p);
-  
-    void onShowMinimizedButtonChanged(const Property<bool> & p);
-  
-    void onShowMaximizeButtonChanged(const Property<bool> & p);
-  
-    void onShowSysMenuChanged(const Property<bool> & p);
+		void onCaptionChanged(const Property<std::string> & p);
+	  
+		void onShowTitleChanged(const Property<bool> & p);
+	  
+		void onShowMinimizedButtonChanged(const Property<bool> & p);
+	  
+		void onShowMaximizeButtonChanged(const Property<bool> & p);
+	  
+		void onShowSysMenuChanged(const Property<bool> & p);
 
-    void onTopMostChanged(const Property<bool> & p);
-  
-    void onWindowStateChanged(const Property<WindowState::Type> & p);
-  
-    void onBorderChanged(const Property<WindowBorder::Type> & p);
-  
-    void onShowInTaskbarChanged(const Property<bool> & p);
-  
-    void onIconChanged(const Property<Pt::Gfx::ARgbImage> & p);    		
+		void onTopMostChanged(const Property<bool> & p);
+	  
+		void onWindowStateChanged(const Property<WindowState::Type> & p);
+	  
+		void onBorderChanged(const Property<WindowBorder::Type> & p);
+	  
+		void onShowInTaskbarChanged(const Property<bool> & p);
+	  
+		void onIconChanged(const Property<Pt::Gfx::ARgbImage> & p);    		
 
 		void onEnabledChanged(const Property<bool> & p);
 
 		void onMinSizeChnaged(const Property<Pt::Gfx::SizeF>& prop);
-		
+	
 		void onMaxSizeChnaged(const Property<Pt::Gfx::SizeF>& prop);
 
 	private:
-    MainWindowImpl*		_impl;    
+		MainWindowImpl*	 _impl;    
 
 };
 

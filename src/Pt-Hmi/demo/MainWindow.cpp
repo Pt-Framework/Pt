@@ -151,7 +151,7 @@ void MainWindow::init()
 	_childWindow2.Position = Pt::Gfx::PointF(80,80);
 	_childWindow2.Size = Pt::Gfx::SizeF(800,600);
 
-//	addChildWindow(_childWindow1);
+	addChildWindow(_childWindow1);
 //	addChildWindow(_childWindow2);
 
 }

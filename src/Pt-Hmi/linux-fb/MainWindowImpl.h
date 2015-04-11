@@ -44,7 +44,7 @@ namespace Hmi {
 class Window;
 class Application;
 
-class MainWindowImpl  : public Pt::Connectable
+class MainWindowImpl  : public ChildWindow
 {
 	public:
 		MainWindowImpl(Window* Window);
@@ -58,8 +58,6 @@ class MainWindowImpl  : public Pt::Connectable
 		void show();
 
 		void hide();
-
-		void render();
 
 		void setPosition(const Gfx::PointF& p);
 
@@ -96,13 +94,15 @@ class MainWindowImpl  : public Pt::Connectable
 		}
 	
 	protected:
-    void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
-    void onPositionChanged(const Property<Pt::Gfx::PointF>& prop);    
+	    void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
+    	void onPositionChanged(const Property<Pt::Gfx::PointF>& prop);    
+
+		virtual void onInvalidate();
+		virtual void onRender();
 
 	private:    
 
 		Window* _apiWindow;
-		Pt::Hmi::ChildWindow* _windowImpl;
 		Pt::Hmi::Application& _app;
 
 };

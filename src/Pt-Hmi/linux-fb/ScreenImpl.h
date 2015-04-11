@@ -69,42 +69,42 @@ class ScreenImpl : public Window
 
 	private:
    
-    template <typename Iterator>
-    void drawImage(ssize_t toX, ssize_t toY, Iterator begin, Iterator end, size_t width, size_t height)
-    {
-        const char* imageData = 0;
+		template <typename Iterator>
+		void drawImage(ssize_t toX, ssize_t toY, Iterator begin, Iterator end, size_t width, size_t height)
+		{
+		    const char* imageData = 0;
 
-        //for(Iterator it = begin; it != end; ++it)
-        //{
-        //  (*it).setRed((*it).red() * 256);
-        //  (*it).setGreen((*it).green() * 256);
-        //  (*it).setBlue((*it).blue() * 256);
-        //}
+		    //for(Iterator it = begin; it != end; ++it)
+		    //{
+		    //  (*it).setRed((*it).red() * 256);
+		    //  (*it).setGreen((*it).green() * 256);
+		    //  (*it).setBlue((*it).blue() * 256);
+		    //}
 
-        switch( depth() )
-        {
-            case 32:
-            {				
-                Gfx::Rgb888Image rgbImage( width, height );
-                assign( begin, end, rgbImage.begin() );
-                imageData = 0;
-                this->copyImageData( toX, toY, (char*)rgbImage.data(), rgbImage.width(), rgbImage.height() );                    
-            }
-			break;
+		    switch( depth() )
+		    {
+		        case 32:
+		        {				
+		           	Gfx::Rgb888Image rgbImage( width, height );
+		            assign( begin, end, rgbImage.begin() );
+		            imageData = 0;
+		            this->copyImageData( toX, toY, (char*)rgbImage.data(), rgbImage.width(), rgbImage.height() );                    
+		        }
+				break;
 
-            case 16:
-            {
-                Gfx::Rgb565Image rgbImage( width, height );
-                assign( begin, end, rgbImage.begin() );
-                imageData = (char*)( rgbImage.data() );
-                this->copyImageData( toX, toY, (char*)rgbImage.data(), rgbImage.width(), rgbImage.height() );                    
-            }
-			break;
+		        case 16:
+		        {
+		            Gfx::Rgb565Image rgbImage( width, height );
+		            assign( begin, end, rgbImage.begin() );
+		            imageData = (char*)( rgbImage.data() );
+		            this->copyImageData( toX, toY, (char*)rgbImage.data(), rgbImage.width(), rgbImage.height() );                    
+		        }
+				break;
 
-            default:
-                imageData = 0;
-        }
-    }
+		        default:
+		            imageData = 0;
+		    }
+		}
 
 		void copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight);
 

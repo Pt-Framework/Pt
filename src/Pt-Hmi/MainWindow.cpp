@@ -45,10 +45,10 @@ MainWindow::MainWindow(MainWindow* parent)
 	
 	Visible = false;
 	Focused = true;
-  Name = std::string("Window");
+ 	 Name = std::string("Window");
 	AcceptFocus = false;
 		
-  Position.Changed += Pt::slot(*this, &MainWindow::onPositionChanged);
+	 Position.Changed += Pt::slot(*this, &MainWindow::onPositionChanged);
 	Size.Changed += Pt::slot(*this, &MainWindow::onSizeChanged);
   Closed.Changed += Pt::slot(*this, &MainWindow::onClosedChanged);
   Visible.Changed += Pt::slot(*this, &MainWindow::onVisibleChanged);
@@ -69,11 +69,13 @@ MainWindow::MainWindow(MainWindow* parent)
 	Size =  Pt::Gfx::SizeF(200,200);
 	_impl->setMinSize(MinimumSize.get());
 	_impl->setMaxSize(MaximumSize.get());
+	_impl->create();
 }
 
 
 MainWindow::~MainWindow()
 {
+	_impl->destroy();
 	delete _impl;
 }
 

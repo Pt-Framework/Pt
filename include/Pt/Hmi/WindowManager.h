@@ -68,10 +68,12 @@ class WindowManager : public Pt::Connectable
 			return _windows;
 		}		
 				 
+
+
 	private:
+		void invalidate();	
 		void doSizing( ChildWindow* w, const PointerEvent& ev );
-		ResizeDirection::Type detSizeDirection( ChildWindow* w, const Pt::Hmi::PointerEvent& ev );
-		void invalidate();		
+		ResizeDirection::Type detSizeDirection( ChildWindow* w, const Pt::Hmi::PointerEvent& ev );	
 		bool updateActive( const Pt::Hmi::PointerEvent& mouseEvent );
 		void updateFocus();		
 

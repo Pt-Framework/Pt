@@ -305,15 +305,15 @@ void ImagePainter::drawImage( const  Gfx::PointF& to, const ARgbImage& image )
         stopY = _image.height();
 
     void*  data = _image.data();
-
+	
     for( Pt::ssize_t y = startY; y < stopY; ++y)
     {				
-		Pt::uint8_t* lineOffsetTarget = (Pt::uint8_t*) _image.scanLine(y);
-		lineOffsetTarget += startX * sizeof(Gfx::ArgbColor);
+		Pt::uint8_t* lineOffsetTarget = (Pt::uint8_t*) _image.scanline(y);
+		lineOffsetTarget += startX * sizeof(Gfx::ARgbColor);
 
-		const Pt::uint8_t* lineOffsetSource = image.scanLine(y -startY);		
+		const Pt::uint8_t* lineOffsetSource = (const Pt::uint8_t*) image.scanline(y -startY);		
 
-		memcpy( lineOffsetTarget, lineOffsetSource, (stopX - startX)* sizeof(Gfx::ArgbColor));
+		memcpy( lineOffsetTarget, lineOffsetSource, (stopX - startX)* sizeof(Gfx::ARgbColor));
     }
 }
 
