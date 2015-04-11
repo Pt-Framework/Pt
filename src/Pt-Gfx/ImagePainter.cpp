@@ -304,13 +304,16 @@ void ImagePainter::drawImage( const  Gfx::PointF& to, const ARgbImage& image )
     if( static_cast<size_t>(stopY) > _image.height())
         stopY = _image.height();
 
+    void*  data = _image.data();
+
     for( Pt::ssize_t y = startY; y < stopY; ++y)
     {				
+		Pt::uint8_t* lineOffsetTarget = (Pt::uint8_t*) _image.scanLine(y);
+		lineOffsetTarget += startX * sizeof(Gfx::ArgbColor);
 
-        for( Pt::ssize_t x = startX; x < stopX; ++x)
-        {
-            _image.at(x,y) = image.at(x -startX, y -startY);
-        }
+		const Pt::uint8_t* lineOffsetSource = image.scanLine(y -startY);		
+
+		memcpy( lineOffsetTarget, lineOffsetSource, (stopX - startX)* sizeof(Gfx::ArgbColor));
     }
 }
 
