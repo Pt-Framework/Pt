@@ -41,8 +41,8 @@ Widget::Widget()
 {	
 	bindMnemonicToWidget( *this );	
 	
- 	 Size.Changed += Pt::slot(*this, &Widget::onSizeChanged);				
- 	 Caption.Changed += Pt::slot(*this, &Widget::onCaptionChanged);			
+ 	Size.Changed += Pt::slot(*this, &Widget::onSizeChanged);				
+ 	Caption.Changed += Pt::slot(*this, &Widget::onCaptionChanged);			
 	Focused.Changed += Pt::slot( *this, &Widget::onFocusChanged );
 	Cursor.Changed +=  Pt::slot( *this, &Widget::onCursorChanged );
 
@@ -407,6 +407,7 @@ void Widget::onShortcutKey(KeyEvent::KeyState state)
 void Widget::onPointerEnter()
 {
 	_containPointer = true;
+  std::clog<<"Enter = " << Cursor.get().name()  << std::endl;
 	Application::instance().setCursor( &Cursor.get() );
 }
 
@@ -414,7 +415,10 @@ void Widget::onPointerEnter()
 void Widget::onPointerLeaved()
 {	
 	_containPointer = false;
-	Application::instance().setCursor( );
+  std::clog<<"Leave = " << Cursor.get().name()  << std::endl;
+
+  if( _parent != 0 )
+	  Application::instance().setCursor( &_parent->Cursor.get() ); 
 }
 
 		
@@ -716,7 +720,7 @@ void Widget::onCaptionChanged(const Property<std::string>& prop)
 
 void Widget::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 {
-  const double  width  = prop.get().width() - ( Margin.get().left() + Margin.get().right() );
+  const double  width  = prop.get().width() -  ( Margin.get().left() + Margin.get().right() );
   const double  height = prop.get().height() - ( Margin.get().top() + Margin.get().bottom() );
 
 	paintSurface().resize( Gfx::SizeF(width,  height ) );	
@@ -727,8 +731,6 @@ void Widget::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 
 void Widget::onCursorChanged(const Property<Hmi::Cursor>& prop)
 {
-	if( _containPointer )
-		Application::instance().setCursor( &Cursor.get() );	
 }
 
 }} //namespace

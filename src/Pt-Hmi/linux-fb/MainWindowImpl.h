@@ -94,17 +94,17 @@ class MainWindowImpl  : public ChildWindow
 		}
 	
 	protected:
-	    void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
-    	void onPositionChanged(const Property<Pt::Gfx::PointF>& prop);    
+	  void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
+    void onPositionChanged(const Property<Pt::Gfx::PointF>& prop);    
 
 		virtual void onInvalidate();
 		virtual void onRender();
+		virtual void onPointerInput(const PointerEvent& ev);				
+		virtual void onKeyInput(const KeyEvent& ev);
 
 	private:    
-
 		Window* _apiWindow;
 		Pt::Hmi::Application& _app;
-
 };
 
 }} // namespace

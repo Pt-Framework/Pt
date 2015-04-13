@@ -81,7 +81,7 @@ ApplicationImpl::ApplicationImpl()
 , _dpi(96.0)
 , _cursorHandle(0)
 {
-	FreeConsole();
+	//FreeConsole();
 
 	_instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
 
@@ -216,25 +216,15 @@ HBITMAP ApplicationImpl::createImage888(const Pt::uint8_t* data, size_t width, s
 }
 
 void ApplicationImpl::setCursor(const Cursor* cursor)
-{	
+{	  
 	if( _cursorHandle != 0 )			
 		DestroyCursor( _cursorHandle );
 
 	if( cursor == 0 )
-	{//Default cursor
-		_cursorHandle = LoadCursor(NULL, IDC_ARROW);		
-
-		SetCursor( _cursorHandle );
 		return;
-	}
 
-	if( cursor->width() == 0 || cursor->height() == 0 )
-	{
-		_cursorHandle = LoadCursor( NULL, IDC_ARROW );		
-
-		SetCursor( _cursorHandle );
+	if( cursor->empty() )
 		return;
-	}
 
 	HBITMAP andMask = createImage888( &cursor->andRgb888()[0], cursor->width(),  cursor->height() );
 	HBITMAP xorMask = createImage888( &cursor->xorRgb888()[0], cursor->width(),  cursor->height() );
@@ -249,11 +239,10 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 
 	_cursorHandle = CreateIconIndirect(&iconInfo);
 
-	if( _cursorHandle == 0 )
-		_cursorHandle = LoadCursor(NULL, IDC_ARROW);
+	if( _cursorHandle != 0 )
+	  SetCursor( _cursorHandle );	
 
-	SetCursor( _cursorHandle );	
-
+  std::clog<<"Cursor = " << cursor->name() << std::endl;
 	DeleteObject( andMask );
 	DeleteObject( xorMask );
 }

@@ -49,10 +49,9 @@ class PT_HMI_API MainWindow  : public Window
 
 	protected:
 	    virtual void onInvalidate();	     		
+      virtual void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
 
-	private: 			
-
-		void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
+	private: 					
 
 		void onPositionChanged(const Property<Pt::Gfx::PointF>& prop);    
 

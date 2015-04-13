@@ -24,7 +24,6 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-
 #include <Pt/Hmi/MainWindow.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Application.h>
@@ -48,8 +47,7 @@ MainWindow::MainWindow(MainWindow* parent)
  	 Name = std::string("Window");
 	AcceptFocus = false;
 		
-	 Position.Changed += Pt::slot(*this, &MainWindow::onPositionChanged);
-	Size.Changed += Pt::slot(*this, &MainWindow::onSizeChanged);
+ Position.Changed += Pt::slot(*this, &MainWindow::onPositionChanged);
   Closed.Changed += Pt::slot(*this, &MainWindow::onClosedChanged);
   Visible.Changed += Pt::slot(*this, &MainWindow::onVisibleChanged);
   Caption.Changed += Pt::slot(*this, &MainWindow::onCaptionChanged);
@@ -99,6 +97,7 @@ void MainWindow::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
 
 void MainWindow::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
 { 
+  Window::onSizeChanged( prop ) ;
   _impl->setSize( Size.get() );  			
 }
 
@@ -113,13 +112,9 @@ void MainWindow::onClosedChanged(const Property<bool> & closed)
     
   //Set the closed flag
 	if( closed.get() )
-	{
     _impl->destroy();
-	}
   else
-  {
 		_impl->create();
-  }
 }
 
 

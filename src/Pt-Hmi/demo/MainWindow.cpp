@@ -86,7 +86,8 @@ void MainWindow::init()
 	StartPostion = Hmi::WindowStartPosition::CenterParent;
 	Closed.Changed += Pt::slot(*this, &MainWindow::onClosedByWindow);
 	BackColor = Gfx::ARgbColor(100,100,100);
-	//Panel
+	
+  //Panel
 	_mainPanel.Size = Pt::Gfx::SizeF(700,480);
 	_mainPanel.Position = Pt::Gfx::PointF(40,40);
 	_mainPanel.PanelBorderWidth = 3;
@@ -110,6 +111,7 @@ void MainWindow::init()
 	_textLabel.ForeColor = Pt::Gfx::ARgbColor(255,0,0,0);
 	_textLabel.UseMnemonic = true;	
   _textLabel.bindMnemonicToWidget(_toggleButton);
+  _textLabel.Cursor = Hmi::Cursor::waitCursor();
 	_mainPanel.addChild(&_textLabel);
 	
 	//Toggle button
@@ -146,14 +148,14 @@ void MainWindow::init()
 	_childWindow2.addChild(&_mainPanel);
 
 
+  _childWindow1.Cursor = Hmi::Cursor::waitCursor();
 	_childWindow1.Position = Pt::Gfx::PointF(20,20);
 	_childWindow1.Size = Pt::Gfx::SizeF(200,300);
 	_childWindow2.Position = Pt::Gfx::PointF(80,80);
 	_childWindow2.Size = Pt::Gfx::SizeF(800,600);
 
 	addChildWindow(_childWindow1);
-//	addChildWindow(_childWindow2);
-
+	//addChildWindow(_childWindow2);
 }
 
 

@@ -40,13 +40,44 @@ class PT_HMI_API ChildWindow  : public Hmi::Window
 		virtual ~ChildWindow();	
 
 	public:  
-			Property<double>							BorderWidth;	  
-			Property<Pt::Gfx::ARgbColor>	BorderColor;
-			Property<Pt::Gfx::ARgbColor>	FocusedColor;
+		Property<double>							BorderWidth;	  
+		Property<Pt::Gfx::ARgbColor>	BorderColor;
+		Property<Pt::Gfx::ARgbColor>	FocusedColor;        
+    
+    const Panel* titleBar() const
+    {
+      if( ShowTitle.get() )
+        return &_titelBar;
+      else
+        return 0;
+    }
+
+    Panel* titleBar()
+    {
+      if( ShowTitle.get() )
+        return &_titelBar;
+      else
+        return 0;
+    }
+
+    const Pt::Gfx::SizeF&	 winSize() const
+    {
+        return _winSize;    
+    }
 
 	protected:
-			virtual void onRender();
-			virtual void onInvalidate();		
+	  virtual void onRender();
+    virtual void onInvalidate();		
+    virtual void onSizeChanged(const Property<Gfx::SizeF>& prop);
+
+  private:    
+    void onFocusChanged(const Property<bool>& prop);        
+    void onShowTitleBar(const Property<bool>& prop); 
+
+  private:
+    Panel _titelBar;
+    Pt::Gfx::SizeF	 _winSize;    
+
 };
 
 }}

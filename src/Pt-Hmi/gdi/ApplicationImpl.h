@@ -89,7 +89,11 @@ class ApplicationImpl : public Pt::System::EventLoop
 		
 	public:
 		void setCursor(const Cursor* cursor = 0);
-	
+		HCURSOR cursorHandle()
+    {
+      return 	_cursorHandle;
+    }
+
 	protected:
 		static long CALLBACK wndProc(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);
 		static HBITMAP createImage888(const Pt::uint8_t* data, size_t width, size_t height);

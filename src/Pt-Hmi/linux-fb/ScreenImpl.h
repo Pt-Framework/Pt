@@ -115,8 +115,8 @@ class ScreenImpl : public Window
 			XorOp
 		};
 
-		void blitPlane(const std::vector<Pt::uint8_t>& plane, size_t width, size_t height, const Gfx::Point& pos, BlitOp op);
-		void saveCursorImage(const Pt::Hmi::PointerEvent& mouseEvent);
+		void bitBlit(const std::vector<Pt::uint8_t>& plane, size_t width, size_t height, const Gfx::Point& pos, BlitOp op);
+		void saveCursorBackImage(const Pt::Hmi::PointerEvent& mouseEvent);
 
 	private:
 		int											_fd;

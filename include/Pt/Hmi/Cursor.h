@@ -15,8 +15,6 @@ class PT_HMI_API Cursor
 		Cursor();				
 
 		virtual ~Cursor();
-
-		void load( const Pt::Gfx::ARgbImage& image, size_t xHotspot, size_t yHotspot );	
 			
 		const std::vector<Pt::uint8_t>& andRgb888() const 
 		{
@@ -47,14 +45,55 @@ class PT_HMI_API Cursor
 		{
 			return _yHotspot;
 		}
+    
+		void setXHotspot(size_t v) 
+		{
+			_xHotspot = v;
+		}
 
+		void setYHotspot(size_t v) 
+		{
+			_yHotspot = v;
+		}
+
+    void setName( const std::string& n)
+    {
+      _name = n;
+    }
+
+    const std::string& name() const
+    {
+      return _name;
+    }
+
+    bool empty() const
+    {
+      return _andMask.empty();
+    }
+
+    void clear()
+    {
+    	_andMask.clear();
+		   _xorMask.clear();
+		  _width = 0;
+		  _height = 0;
+    }
+
+  public:
 		static const Cursor& defaultCursor();
 		static const Cursor& arrowCursor();
-		static const Cursor& waitCursor();
+		static const Cursor& waitCursor();    
 		static const Cursor& sizeNWSECursor();
 		static const Cursor& sizeNESWCursor();
 		static const Cursor& sizeWECursor();
 		static const Cursor& sizeNSCursor();
+    static const Cursor& moveCursor();
+  
+  public:
+    static void fromImage( const Pt::Gfx::ARgbImage& image, Cursor& cursor );	
+    static void loadCursor( const char* pngFile, const Gfx::ARgbColor& alphaColor, Cursor& cursor );
+    static void loadCursor( std::istream& pngStream, const Gfx::ARgbColor& alphaColor, Cursor& cursor );
+    static void loadCursor( const Pt::uint8_t* pngBuffer, const size_t streamSize, const Gfx::ARgbColor& alphaColor, Cursor& cursor );
 
 	private:
 		std::vector<Pt::uint8_t> _andMask;
@@ -63,6 +102,7 @@ class PT_HMI_API Cursor
 		size_t _height;
 		size_t _xHotspot;
 		size_t _yHotspot;
+    std::string  _name;
 };
 
 }}

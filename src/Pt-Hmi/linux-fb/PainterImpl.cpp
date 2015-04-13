@@ -139,12 +139,12 @@ void PainterImpl::fillPolygon(const Pt::Gfx::PointF* points, const size_t pointC
 
 void PainterImpl::drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm, const Pt::Gfx::Region& pmRegion)
 {
-	_painter.drawImage(to, pm.toImage(), pmRegion);
+	_painter.drawImage(to, pm.impl()->image(), pmRegion);
 }
 
 void PainterImpl::drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm)
 {
-	_painter.drawImage(to, pm.toImage());
+	_painter.drawImage(to, pm.impl()->image());
 }
 		
 void PainterImpl::drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image)

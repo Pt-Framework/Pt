@@ -33,6 +33,9 @@ void Panel::onRender()
 	if(PanelBorderRoundEdge.get())
 		corner = 2;
     
+  if( PanelBorderWidth.get() == 0 )
+    return;
+
   Gfx::SizeF size = paintSurface().size();
 	size_t border =  (size_t) PanelBorderWidth.get();	
 	Pt::Gfx::SizeF  clientSize(size.width() - PanelBorderWidth.get()/2, size.height() - PanelBorderWidth.get()/2);	

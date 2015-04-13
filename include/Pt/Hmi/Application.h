@@ -58,6 +58,7 @@ public:
 private:     
   ApplicationImpl* _impl; 
   Screen _mainScreen;
+  std::string _cursorName;
 };
 
 }}

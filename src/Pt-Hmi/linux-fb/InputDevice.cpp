@@ -150,7 +150,7 @@ bool InputDevice::onRun()
 			}
 			break;
 
-	       case EV_REL:
+      case EV_REL:
 			{
 				if(ev.code == REL_X)
 					_mouseEvent.addX( static_cast<double>(ev.value) );
@@ -182,20 +182,19 @@ bool InputDevice::onRun()
                 
 					case ABS_X:
 					case ABS_MT_POSITION_X:
+            std::cout<<"ABS_X" << ev.value<<std::endl;
 						_mouseEvent.setX( static_cast<double>(ev.value) );
 					break;
                     
 					case ABS_Y:
 					case ABS_MT_POSITION_Y:
+          std::cout<<"ABS_Y" << ev.value<<std::endl;
 						_mouseEvent.setY( static_cast<double>(ev.value) );
 					break;
                     
 					case ABS_PRESSURE:
-						std::clog<<"Press"<< std::endl;
-					break;
-
 					case ABS_MT_PRESSURE:                  
-						std::clog<<"Press"<< std::endl;
+            _mouseEvent.buttons()[0].setState( ev.value == 0 ? DeviceButton::Released : DeviceButton::Pressed );						
 					break;
 
 					default:

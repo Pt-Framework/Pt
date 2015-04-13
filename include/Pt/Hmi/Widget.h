@@ -230,13 +230,14 @@ class PT_HMI_API Widget : public Pt::Connectable
 		virtual void onMnemonic();
 		virtual void onActionKey(KeyEvent::KeyState state);
 		virtual void onShortcutKey(KeyEvent::KeyState state);
-	
+	  virtual void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
 	
 	private:
-		void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
+		
 		void onFocusChanged(const Property<bool>& prop);
 		void onCaptionChanged(const Property<std::string>& prop);		
 		void onCursorChanged(const Property<Hmi::Cursor>& prop);
+
 	private:			  
 		bool focusNextChild(int index);
 		bool focusPrevChild(int index);

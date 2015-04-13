@@ -44,16 +44,14 @@ MainWindowImpl::MainWindowImpl(Window* window)
 , _forceTopMost( false )
 , _window( window )
 {    
-	_pointerEvent.buttons().resize(3);    
-  create();
+	_pointerEvent.buttons().resize(3);      
 	_app.impl()->windowEvent() += Pt::slot(*this, &MainWindowImpl::onWindowEvent);  
 }
 
 
 MainWindowImpl::~MainWindowImpl()
 {
-  _app.impl()->windowEvent() -= Pt::slot(*this, &MainWindowImpl::onWindowEvent);  
-  destroy();
+  _app.impl()->windowEvent() -= Pt::slot(*this, &MainWindowImpl::onWindowEvent);    
 }
 
 

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2006-2007 Marc Boris Duerner
+ * Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
+ * Copyright (C) 2006-2015 Marc Boris Duerner
  * Copyright (C) 2006-2007 PTV AG
  * Copyright (C) 2010 Aloysius Indrayanto
  *
@@ -26,25 +26,21 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-#include "Pt/Math.h"
-
-#include "Pt/Gfx/ImagePainter.h"
-#include "Pt/Gfx/ARgbImage.h"
-#include "Pt/Gfx/Pen.h"
-#include "Pt/Gfx/Point.h"
-#include "Pt/Gfx/Brush.h"
-#include "Pt/Gfx/Font.h"
-#include "Pt/Gfx/FontMetrics.h"
-#include "Pt/String.h"
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+#include <Pt/Math.h>
+#include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Gfx/ARgbImage.h>
+#include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/String.h>
 #include "Pt/System/Clock.h"
-
 #include "DrawPolyline.h"
 #include "DrawThinPolyline.h"
 #include "DrawWideSolidPolyline.h"
 #include "DrawWideDashPolyline.h"
-
 #include "DrawEllipse.h"
 #include "DrawThinEllipse.h"
 #include "DrawThickEllipse.h"
@@ -54,9 +50,7 @@
 #include "Fill.h"
 #include "Stroke.h"
 
-
 namespace Pt {
-
 namespace Gfx {
 
 ImagePainter::ImagePainter( ARgbImage& image )
@@ -110,7 +104,8 @@ ImagePainter::ImagePainter( ARgbImage& image )
 
 ImagePainter::~ImagePainter()
 {
-    try {
+    try 
+    {
         delete _drawThinPolyline;
         delete _drawWideSolidPolyline;
         delete _drawWideDashPolyline;
@@ -126,10 +121,12 @@ ImagePainter::~ImagePainter()
    catch(...) {}
 }
 
+
 void ImagePainter::setRenderMode( Gfx::RenderMode::Type mode)
 {
 	_renderMode = mode;
 }
+
 
 void ImagePainter::setPen( const Pen& pen )
 {
@@ -147,7 +144,7 @@ void ImagePainter::setPen( const Pen& pen )
         else
             _drawPolyline = _drawWideDashPolyline;
 
-        _drawEllipse    = _drawThickEllipse;
+        _drawEllipse = _drawThickEllipse;
     }
 }
 
@@ -261,10 +258,10 @@ void ImagePainter::fillEllipse( const  Gfx::PointF& topLeft, const  Gfx::SizeF& 
 
 void ImagePainter::drawPolyline( const  Gfx::PointF* points, const size_t pointCount )
 {
-    if( _pen.size()  == 0 )
-        return;	
+  if( _pen.size()  == 0 )
+      return;	
 	
-    _drawPolyline->draw( _image, _pen, points, pointCount );
+  _drawPolyline->draw( _image, _pen, points, pointCount );
 }
 
 void ImagePainter::fillPolygon( const  Gfx::PointF* points, const size_t pointCount )
@@ -274,54 +271,69 @@ void ImagePainter::fillPolygon( const  Gfx::PointF* points, const size_t pointCo
 
 void ImagePainter::drawImage( const  Gfx::PointF& to, const ARgbImage& image )
 {
-    Pt::ssize_t startX =  to.x();
-    Pt::ssize_t stopX =  to.x() + image.width();
+  //Cliping  
+  Pt::ssize_t startX =  to.x();
+  Pt::ssize_t stopX  =  to.x() + image.width();
     
-    if( startX < 0)
-        startX = 0;
+  if( startX < 0 )
+      startX = 0;
     
-    if( static_cast<size_t>(startX) > _image.width())
-        startX = _image.width();
+  if( static_cast<size_t>(startX) > _image.width() )
+      startX = _image.width();
 
-    if( stopX < 0)
-        stopX = 0;
+  if( stopX < 0)
+      stopX = 0;
     
-    if( static_cast<size_t>(stopX) > _image.width())
-        stopX = _image.width();
+  if( static_cast<size_t>(stopX) > _image.width() )
+      stopX = _image.width();
 
-    Pt::ssize_t startY =  to.y();
-    Pt::ssize_t stopY =  to.y() + image.height();
+  Pt::ssize_t startY =  to.y();
+  Pt::ssize_t stopY  =  to.y() + image.height();
         
-    if( startY < 0)
-        startY = 0;
+  if( startY < 0 )
+      startY = 0;
     
-    if( static_cast<size_t>(startY) > _image.height())
-        startY = _image.height();
+  if( static_cast<size_t>(startY) > _image.height() )
+      startY = _image.height();
 
-    if( stopY < 0)
-        stopY = 0;
+  if( stopY < 0 )
+      stopY = 0;
     
-    if( static_cast<size_t>(stopY) > _image.height())
-        stopY = _image.height();
-
-    void*  data = _image.data();
+  if( static_cast<size_t>(stopY) > _image.height() )
+      stopY = _image.height();
 	
-    for( Pt::ssize_t y = startY; y < stopY; ++y)
-    {				
-		Pt::uint8_t* lineOffsetTarget = (Pt::uint8_t*) _image.scanline(y);
-		lineOffsetTarget += startX * sizeof(Gfx::ARgbColor);
+  //Render
+  switch( _renderMode )
+  {
+    case RenderMode::Normal:
+    {
+      for( Pt::ssize_t y = startY; y < stopY; ++y )
+      {				
+        Pt::uint8_t* lineOffsetTarget = (Pt::uint8_t*) _image.scanline(y);
+        lineOffsetTarget += startX * sizeof(Gfx::ARgbColor);
 
-		const Pt::uint8_t* lineOffsetSource = (const Pt::uint8_t*) image.scanline(y -startY);		
+        const Pt::uint8_t* lineOffsetSource = (const Pt::uint8_t*) image.scanline(y - startY);		
 
-		memcpy( lineOffsetTarget, lineOffsetSource, (stopX - startX)* sizeof(Gfx::ARgbColor));
+        memcpy( lineOffsetTarget, lineOffsetSource, (stopX - startX) * sizeof(Gfx::ARgbColor));
+      }
     }
+    break;
+
+    case RenderMode::BitBlit:
+      //TODO:
+    break;
+
+    case RenderMode::AlphaBlending:
+      //TODO:
+    break;
+  }
 }
 
 void ImagePainter::drawImage( const  Gfx::PointF& to, const ARgbImage& image, const Region& imageRegion )
 {
+  //TODO: region handling
+  drawImage( to, image );
 }
 
-}
-
-}
+}} //namespace
 

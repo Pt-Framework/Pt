@@ -94,7 +94,12 @@ void Application::nextEvent()
 
 void Application::setCursor(const Cursor* cursor)
 {
+  if(_cursorName  == cursor->name() )
+    return;
+
 	_impl->setCursor(cursor);
+
+  _cursorName = cursor->name();
 }
 
 }}

@@ -23,14 +23,14 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/ChildWindow.h>
 #include <Pt/Hmi/PointerEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Application.h>
 
 namespace Pt {
 namespace Hmi {
@@ -38,6 +38,7 @@ namespace Hmi {
 WindowManager::WindowManager(Window& parent)
 : _parent( parent )
 , _sizingDirection( ResizeDirection::No )
+, _app( Application::instance() )
 {
 }
 
@@ -132,24 +133,39 @@ bool WindowManager::updateActive( const Pt::Hmi::PointerEvent& mouseEvent )
 	{
 		Pt::Gfx::PointF local( mouseEvent.x() - _windows[i]->Position.get().x() , mouseEvent.y() - _windows[i]->Position.get().y() );
 
-		if( _windows[i]->contains( local ) )
+		if( contains( _windows[i], local ) )
 		{
 			if( _windows[i] == active() )
 				return true;
 
 			if( mouseEvent.buttons()[0].state() != DeviceButton::Pressed )
 				return false;
-			
-			activate( _windows[i] );			
+
+      activate( _windows[i] );			
 			return true;
 		}	
 		else
 		{
-			if( _windows[i]->hasPointer() )
+
+      Pt::Gfx::PointF clientLocal;
+      
+      if( _windows[i]->titleBar() != 0 ) 
+      {
+        clientLocal =  Gfx::PointF( mouseEvent.x() - _windows[i]->Position.get().x() - _windows[i]->BorderWidth.get() , 
+                                    mouseEvent.y() - _windows[i]->Position.get().y() -  _windows[i]->titleBar()->Size.get().height() ) ;
+      }
+      else
+      {
+        clientLocal =  Gfx::PointF( mouseEvent.x() - _windows[i]->Position.get().x() - _windows[i]->BorderWidth.get() , 
+                                    mouseEvent.y() - _windows[i]->Position.get().y() - _windows[i]->BorderWidth.get() ) ;
+      }
+
+			if( _windows[i]->hasPointer()  && _windows[i]->contains( clientLocal ) )
 					_windows[i]->onPointerLeaved();
 		}
 	}	 
 
+  _app.setCursor( &_parent.Cursor.get() );
 	return false;
 }
 
@@ -178,8 +194,8 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 		return;
 	}	
 	
-	double width  = w->Size.get().width();
-	double height = w->Size.get().height();
+	double width  = w->winSize().width();
+	double height = w->winSize().height();
 	double posX   = w->Position.get().x();
 	double posY   = w->Position.get().y();
 	double deltaX = ( point.x() - _lastSizePoint.x() );
@@ -254,87 +270,90 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 	if( w->Position.get() != Pt::Gfx::PointF(posX, posY) )
 		w->Position =  Pt::Gfx::PointF(posX, posY) ;
 	
-	if( w->Size.get() != Pt::Gfx::SizeF(width,height) )
-		w->Size = Pt::Gfx::SizeF(width,height);
+	if( w->winSize() != Pt::Gfx::SizeF(width, height) )
+		w->Size = sizeFromWinSize(w, width, height);
 
-	_lastSizePoint =  point;
+	_lastSizePoint = point;
 	invalidate();
 }
 
 
+Pt::Gfx::SizeF WindowManager::sizeFromWinSize( const ChildWindow* w, double width, double height)
+{
+  if( w->titleBar() != 0 )
+    return Pt::Gfx::SizeF( width - w->BorderWidth.get() * 2, height - w->BorderWidth.get() - w->titleBar()->Size.get().height() );
+  else
+    return Pt::Gfx::SizeF( width - w->BorderWidth.get() * 2, height - w->BorderWidth.get() * 2 );
+}
+
+
+bool WindowManager::contains(const ChildWindow* w, const Pt::Gfx::PointF& p)
+{  
+	if( p.x() < w->winSize().width() && p.x() >= 0 && p.y() < w->winSize().height() && p.y() >= 0)
+			return true;
+ 
+	return false;
+}
+
 ResizeDirection::Type WindowManager::detSizeDirection( ChildWindow* w, const Pt::Hmi::PointerEvent& ev )
 {
-	Pt::Gfx::PointF				p( Pt::Gfx::PointF( ev.x(), ev.y() ) );
-	Pt::Gfx::SizeF				size = w->Size.get();
-	ResizeDirection::Type resizeDir = ResizeDirection::No;
-	double								border = w->BorderWidth.get()+5;
-	double								sizeR  = size.width() -  border;
-	double								sizeB  = size.height() - border;
+	if( w->WindowBorder.get() != WindowBorder::Sizeable )
+    return ResizeDirection::No;
 
-	switch( w->WindowBorder.get() )
+	ResizeDirection::Type resizeDir = ResizeDirection::No;
+	Pt::Gfx::SizeF				size   = w->winSize();
+	double								border = w->BorderWidth.get();
+	double								sizeR  = size.width() - border;
+  double								sizeB  = size.height() - border;
+	
+  Pt::Gfx::PointF p( ev.x() - w->Position.get().x(), ev.y() - w->Position.get().y() );
+
+	if( contains(w, p) )
 	{
-		case WindowBorder::Sizeable:
+		if(p.x() < border && p.y() <  border)
+		{//Corner NW
+      _app.setCursor( &Cursor::sizeNWSECursor() );
+			resizeDir = ResizeDirection::NorthWest;
+		}	
+		else if(p.x() > sizeR && p.y() < border)
+		{//corner NE
+      _app.setCursor( &Cursor::sizeNESWCursor() );
+			resizeDir= ResizeDirection::NorthEast;
+		}
+		else if(p.x() < border &&  p.y() > sizeB )
+		{//corner SW
+      _app.setCursor( &Cursor::sizeNESWCursor() );					
+			resizeDir = ResizeDirection::SouthWest;
+		}
+		else if(p.x() > sizeR &&  p.y() > sizeB )
+		{//corner SE          
+			_app.setCursor( &Cursor::sizeNWSECursor() );
+			resizeDir = ResizeDirection::SouthEast;
+		}
+		else
 		{
-			if( w->contains(p) )
-			{
-				if(p.x() < border && p.y() <  border)
-				{//Corner NW
-					w->Cursor = Cursor::sizeNWSECursor();
-					resizeDir = ResizeDirection::NorthWest;
-				}	
-				else if(p.x() > sizeR && p.y() < border)
-				{//corner NE
-					w->Cursor = Cursor::sizeNESWCursor();
-					resizeDir= ResizeDirection::NorthEast;
-				}
-				else if(p.x() < border &&  p.y() > sizeB )
-				{//corner SW
-					w->Cursor = Cursor::sizeNESWCursor();
-					resizeDir = ResizeDirection::SouthWest;
-				}
-				else if(p.x() > sizeR &&  p.y() > sizeB )
-				{//corner SE
-					w->Cursor = Cursor::sizeNWSECursor();
-					resizeDir = ResizeDirection::SouthEast;
-				}
-				else
-				{
-					if( p.x() < border)				
-					{//West
-						w->Cursor = Cursor::sizeWECursor();
-						resizeDir = ResizeDirection::West;
-					}
-					else if(p.x() >= sizeR)
-					{//East
-						w->Cursor = Cursor::sizeWECursor();
-						resizeDir = ResizeDirection::East;
-					}
-					else if( p.y() < border)
-					{//North
-						w->Cursor = Cursor::sizeNSCursor();
-						resizeDir = ResizeDirection::North;
-					}
-					else if(p.y() >sizeB)
-					{//South
-						w->Cursor = Cursor::sizeNSCursor();
-						resizeDir = ResizeDirection::South;
-					}
-					else
-					{
-						w->Cursor = Cursor::defaultCursor();
-					}
-				}
+			if( p.x() < border)				
+			{//West            
+				_app.setCursor( &Cursor::sizeWECursor() );
+				resizeDir = ResizeDirection::West;
 			}
-			else
-			{
-				w->Cursor = Cursor::defaultCursor();
+			else if(p.x() >= sizeR )
+			{//East
+				_app.setCursor( &Cursor::sizeWECursor() );
+				resizeDir = ResizeDirection::East;
+			}
+			else if( p.y() < border)
+			{//North
+				_app.setCursor( &Cursor::sizeNSCursor() );
+				resizeDir = ResizeDirection::North;
+			}
+			else if(p.y() >sizeB)
+			{//South
+				_app.setCursor( &Cursor::sizeNSCursor() );
+				resizeDir = ResizeDirection::South;
 			}
 		}
-		break;
-            
-		default:          
-		break;
-	}
+  }	
 
 	return resizeDir;
 }
@@ -367,14 +386,20 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 	
 	Pt::Hmi::PointerEvent localMouseEvent = mouseEvent;
 	
-	localMouseEvent.setX( mouseEvent.x() - childWindow->Position.get().x()  ) ;
-	localMouseEvent.setY( mouseEvent.y() - childWindow->Position.get().y() ) ;
+  localMouseEvent.setX( mouseEvent.x() - childWindow->Position.get().x() - childWindow->BorderWidth.get() ) ;
+  
+  if( childWindow->titleBar() != 0 ) 	
+	  localMouseEvent.setY( mouseEvent.y() - childWindow->Position.get().y() - childWindow->titleBar()->Size.get().height() ) ;
+  else
+    localMouseEvent.setY( mouseEvent.y() - childWindow->Position.get().y()) ;
 
 	if( _sizingDirection == ResizeDirection::No )
 	{
-		childWindow->eventReceived().send( localMouseEvent );
-		_lastSizePoint =  Pt::Gfx::PointF(mouseEvent.x(), mouseEvent.y() ) ;
-		_sizingDirection = detSizeDirection( childWindow, localMouseEvent );	
+		_lastSizePoint = Pt::Gfx::PointF( mouseEvent.x(), mouseEvent.y() ) ;
+		_sizingDirection = detSizeDirection( childWindow, mouseEvent );	
+    
+    if( childWindow->contains( Gfx::PointF( localMouseEvent.x(), localMouseEvent.y() ) ) )
+        childWindow->eventReceived().send( localMouseEvent );
 	}
 	else
 	{

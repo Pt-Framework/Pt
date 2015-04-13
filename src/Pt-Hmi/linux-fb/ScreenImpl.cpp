@@ -32,11 +32,6 @@
 #include <sys/ioctl.h> 
 #include <sys/mman.h>
 #include <unistd.h>
-#include <Pt/System/Logger.h>
-
-
-PT_LOG_DEFINE("Pt.Hmi.Screen")
-
 
 namespace Pt{
 namespace Hmi{
@@ -81,10 +76,12 @@ ScreenImpl::ScreenImpl()
                          // 4 -> Direct color
                          // 5 -> Pseudo color readonly
 
-    // Memory map the display
-    unsigned _pitch = _screenInfo.xres * _screenInfo.bits_per_pixel / 8;
-    _bufferSize     = _pitch * _screenInfo.yres;
-    _buffer         =  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);	
+  // Memory map the display
+  std::clog<<"LineWidth = " << _fixedInfo.line_length << " xres = " << _screenInfo.xres << std::endl;
+  std::clog<<"yres = " << _screenInfo.yres << std::endl;
+  const unsigned widthInBytes = _screenInfo.xres * _screenInfo.bits_per_pixel / 8;
+  _bufferSize     = _fixedInfo.line_length * _screenInfo.yres;
+  _buffer         =  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);	
 
 	Visible = true;
 	Size = Pt::Gfx::SizeF( _screenInfo.xres,  _screenInfo.yres );
@@ -94,7 +91,7 @@ ScreenImpl::ScreenImpl()
 }
 
 
-void ScreenImpl::blitPlane(const std::vector<Pt::uint8_t>& plane, size_t w, size_t h, const Gfx::Point& pos, BlitOp op)
+void ScreenImpl::bitBlit(const std::vector<Pt::uint8_t>& plane, size_t w, size_t h, const Gfx::Point& pos, BlitOp op)
 {
 	static const size_t planePixelSize = 4;
 	const size_t bufferPixelSize = depth() / 8;
@@ -102,12 +99,11 @@ void ScreenImpl::blitPlane(const std::vector<Pt::uint8_t>& plane, size_t w, size
 	const size_t bufferWidth  = std::min<size_t>(  pos.x() + w, _screenInfo.xres ); 
 
 	size_t yCursor = 0;
-	size_t xCursor = 0;
-	
+	size_t xCursor = 0;	
 
 	for( size_t yBuffer = pos.y(); yBuffer < bufferHeight; ++yBuffer, ++yCursor )
 	{
-		const size_t lineOffsetBuffer  = yBuffer * (_screenInfo.xres * bufferPixelSize);
+		const size_t lineOffsetBuffer  = yBuffer * _fixedInfo.line_length;
 		const size_t lineOffsetCursor  = yCursor * (w * planePixelSize);
 		
 		xCursor = 0;
@@ -137,12 +133,12 @@ void ScreenImpl::blitPlane(const std::vector<Pt::uint8_t>& plane, size_t w, size
 						case CopyOp:
 							*pixelBuffer = *pixelCursor;
 						break;
-
 					}
 				}
 				break;
 
 				case 16:
+          //TODO:
 				break;
 			}
 		}
@@ -150,7 +146,7 @@ void ScreenImpl::blitPlane(const std::vector<Pt::uint8_t>& plane, size_t w, size
 }
 
 
-void ScreenImpl::saveCursorImage( const Pt::Hmi::PointerEvent& mouseEvent )
+void ScreenImpl::saveCursorBackImage( const Pt::Hmi::PointerEvent& mouseEvent )
 {
 	const size_t pixelSizeInByte = depth() / 8;		
 	_cursorPos    = Pt::Gfx::Point( mouseEvent.x(), mouseEvent.y() );	
@@ -158,7 +154,7 @@ void ScreenImpl::saveCursorImage( const Pt::Hmi::PointerEvent& mouseEvent )
 	_cursorHeight = Cursor.get().height();
 	
 	const size_t yMax = std::min<size_t>(_cursorPos.y() + _cursorHeight, _screenInfo.yres );	
-	const size_t widthInPixel = ((_cursorPos.x() + _cursorWidth)  < _screenInfo.xres ? _cursorWidth : ((_cursorPos.x() + _cursorWidth) - _screenInfo.xres) );
+	const size_t widthInPixel = ((_cursorPos.x() + _cursorWidth)  < _screenInfo.xres ? _cursorWidth : ( _screenInfo.xres - _cursorPos.x() ) );
 	const size_t widthInByte = widthInPixel * pixelSizeInByte;	
 	const Pt::uint8_t* bufferData = ( const Pt::uint8_t* ) _buffer;
 	
@@ -166,16 +162,17 @@ void ScreenImpl::saveCursorImage( const Pt::Hmi::PointerEvent& mouseEvent )
 	
 	for( size_t y = _cursorPos.y(); y < yMax; ++y )
 	{
-		const size_t lineOffset  = y * (_screenInfo.xres * pixelSizeInByte)  + (_cursorPos.x() * pixelSizeInByte);
-		memcpy( &_cursorBuffer[lineOffset], &bufferData[lineOffset], widthInByte );
+		const size_t lineOffsetBuffer  = y * _fixedInfo.line_length  + (_cursorPos.x() * pixelSizeInByte);
+    const size_t lineOffsetCursor  = ( y - _cursorPos.y() )  * widthInByte;     
+		memcpy( &_cursorBuffer[lineOffsetCursor], &bufferData[lineOffsetBuffer], widthInByte );
 	}
 }
 
 
 void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 {	
-/*	if( _cursorBuffer.size() != 0 )
-		blitPlane(_cursorBuffer, _cursorWidth, _cursorHeight, _cursorPos, CopyOp); */
+	if( _cursorBuffer.size() != 0 )
+		bitBlit( _cursorBuffer, _cursorWidth, _cursorHeight, _cursorPos, CopyOp );
 
 	_windowManager.onPointerInput(mouseEvent);	
 
@@ -184,23 +181,23 @@ void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 	if( Cursor.get().width() == 0 )
 		return;	
 
-//	saveCursorImage(mouseEvent);
+	saveCursorBackImage(mouseEvent);
 
-	blitPlane( Cursor.get().andRgb888(), Cursor.get().width(), Cursor.get().height(), Pt::Gfx::Point( ( int) mouseEvent.x(), (int) mouseEvent.y()), AndOp );
-	blitPlane( Cursor.get().xorRgb888(), Cursor.get().width(), Cursor.get().height(), Pt::Gfx::Point( (int) mouseEvent.x(), (int) mouseEvent.y()), XorOp );
+  //Todo: only one blit 
+	bitBlit( Cursor.get().andRgb888(), Cursor.get().width(), Cursor.get().height(), Pt::Gfx::Point( ( int) mouseEvent.x(), (int) mouseEvent.y()), AndOp );
+	bitBlit( Cursor.get().xorRgb888(), Cursor.get().width(), Cursor.get().height(), Pt::Gfx::Point( (int) mouseEvent.x(), (int) mouseEvent.y()), XorOp );
 }
 
 
 void ScreenImpl::copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight)
 {
 	size_t pixelSize = depth() / 8;
-/*
-	if( toX == 0 && toY == 0 && fromWidth == _screenInfo.xres && fromHeight == _screenInfo.yres )
+
+/*	if( toX == 0 && toY == 0 && fromWidth == _screenInfo.xres && fromHeight == _screenInfo.yres )
 	{
 		memcpy(_buffer, data, fromWidth * fromHeight * pixelSize);
 	}
-	else
-*/
+	else*/
 	{
 
 		toX  = (_screenInfo.xres  - fromWidth) ;
@@ -211,7 +208,7 @@ void ScreenImpl::copyImageData(ssize_t toX, ssize_t toY, const char* data, size_
 		for(size_t n = 0; n < fromHeight; ++n)
 		{
 			memcpy(bufferData, data, fromWidth * pixelSize);
-			bufferData += (size_t) _screenInfo.xres * pixelSize;
+			bufferData += (size_t) _fixedInfo.line_length;
 			data += fromWidth * pixelSize;
 		}
 	}

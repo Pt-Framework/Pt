@@ -60,9 +60,24 @@ MainWindowImpl::~MainWindowImpl()
 }
 
 
-void MainWindowImpl::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
-{	
-	_apiWindow->Size = prop.get();
+void MainWindowImpl::onPointerInput( const PointerEvent& ev )
+{
+  _apiWindow->eventReceived().send(ev);
+}
+
+
+void MainWindowImpl::onKeyInput( const KeyEvent& ev )
+{
+  _apiWindow->eventReceived().send( ev );
+}
+
+
+void MainWindowImpl::onSizeChanged( const Property<Pt::Gfx::SizeF>& prop )
+{	  
+  ChildWindow::onSizeChanged( prop );
+
+  if( _apiWindow->Size.get() != prop.get() )
+	  _apiWindow->Size = prop.get();
 }
 
 void MainWindowImpl::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
@@ -81,8 +96,17 @@ void MainWindowImpl::onInvalidate()
 
 void MainWindowImpl::onRender()
 {
+  ChildWindow::onRender();
+
 	Painter& painter = paintSurface().painter();
-	painter.drawSurface( Pt::Gfx::PointF(0,0), _apiWindow->paintSurface() );	
+  
+  if( titleBar() != 0)
+	  painter.drawSurface( Pt::Gfx::PointF(BorderWidth.get(), BorderWidth.get()  + titleBar()->Size.get().height() ), _apiWindow->paintSurface() );	
+  else
+    painter.drawSurface( Pt::Gfx::PointF(BorderWidth.get(), BorderWidth.get() ), _apiWindow->paintSurface() );	
+
+
+  _windowManager.render();
 }
 
 
@@ -91,7 +115,6 @@ void MainWindowImpl::create()
 	this->setWindowParent( _app.mainScreen().impl() );
 	_app.mainScreen().impl()->windowManager().add( this );
 
-	this->Size.Changed += Pt::slot(*this, &MainWindowImpl::onSizeChanged);
 	this->Position.Changed += Pt::slot(*this, &MainWindowImpl::onPositionChanged);
 }
 	
@@ -126,9 +149,11 @@ void MainWindowImpl::setPosition(const Gfx::PointF& p)
 	}
 }
 
-void MainWindowImpl::setSize(const Gfx::SizeF& size)
-{
-	if( Size.get() != size)
+
+void MainWindowImpl::setSize( const Gfx::SizeF& size )
+{  
+ 
+	if( Size.get() != size )
 		Size = size;
 }
 
@@ -169,13 +194,13 @@ void MainWindowImpl::setForceTopMost(bool force)
 }
   
 
-void MainWindowImpl::setWindowState(WindowState::Type p)
+void MainWindowImpl::setWindowState( WindowState::Type p )
 {
 	State = p;
 }
   
 
-void MainWindowImpl::setBorder(WindowBorder::Type p)
+void MainWindowImpl::setBorder( WindowBorder::Type p )
 {
 	Border = p;
 }

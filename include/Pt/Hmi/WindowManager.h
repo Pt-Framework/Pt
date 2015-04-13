@@ -32,6 +32,7 @@
 #include <Pt/Gfx/ARgbImage.h>
 #include <Pt/Connectable.h>
 #include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/WindowProperties.h>
 
 namespace Pt {
@@ -41,6 +42,7 @@ class ChildWindow;
 class Window;
 class PointerEvent;
 class KeyEvent;
+class Application;
 
 class WindowManager : public Pt::Connectable
 {
@@ -68,9 +70,10 @@ class WindowManager : public Pt::Connectable
 			return _windows;
 		}		
 				 
-
-
 	private:
+    static bool contains(const ChildWindow* w, const Pt::Gfx::PointF& p);
+    static Pt::Gfx::SizeF sizeFromWinSize( const ChildWindow* w, double width, double height); 
+  private:
 		void invalidate();	
 		void doSizing( ChildWindow* w, const PointerEvent& ev );
 		ResizeDirection::Type detSizeDirection( ChildWindow* w, const Pt::Hmi::PointerEvent& ev );	
@@ -82,7 +85,7 @@ class WindowManager : public Pt::Connectable
 		std::vector<ChildWindow*>		_windows;		
 		ResizeDirection::Type				_sizingDirection;
 		Pt::Gfx::PointF							_lastSizePoint;
-
+    Application&                _app;  
 };
 
 }} // namespace
