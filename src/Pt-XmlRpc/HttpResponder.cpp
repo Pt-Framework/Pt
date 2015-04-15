@@ -42,6 +42,7 @@ namespace XmlRpc {
 HttpResponder::HttpResponder(HttpService& httpService, Remoting::ServiceDefinition& rpcService)
 : Http::Responder(httpService)
 , XmlRpc::Responder(rpcService)
+, _request(0)
 , _reply(0)
 {
 }
@@ -55,6 +56,7 @@ HttpResponder::~HttpResponder()
 // pass only ReplyHeader and body stream
 void HttpResponder::onBeginRequest(Http::Request& request, Pt::Http::Reply& reply, System::EventLoop& loop)
 {
+    _request = &request;
     _reply = 0;
     
     beginMessage( request.body() );

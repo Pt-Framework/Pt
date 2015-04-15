@@ -51,6 +51,12 @@ class PT_SOAP_API HttpResponder : public Http::Responder
 
         ~HttpResponder();
 
+        Http::Request* request()
+        { return _request; }
+
+        Http::Reply* reply()
+        { return _reply; }
+
     protected:
         // inheritdoc
         void onBeginRequest(Http::Request& request, Http::Reply& reply, System::EventLoop& loop);
@@ -77,7 +83,8 @@ class PT_SOAP_API HttpResponder : public Http::Responder
         void advanceSoapReply(Http::Reply& reply);
 
     private:
-         Http::Reply* _reply;
+        Http::Request* _request;
+        Http::Reply* _reply;
 };
 
 } // namespace Soap
