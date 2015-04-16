@@ -49,6 +49,11 @@ Connection::~Connection()
 }
 
 
+void Connection::setPeerName(const std::string& peerName)
+{
+}
+
+
 const char* Connection::currentCipher() const
 {
     return "NONE";
