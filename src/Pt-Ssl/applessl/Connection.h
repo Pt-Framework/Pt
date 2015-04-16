@@ -46,6 +46,8 @@ class Connection
 
         ~Connection();
 
+        void setPeerName(const std::string& peerName);
+
         bool connected() const
         { return _connected; }
 

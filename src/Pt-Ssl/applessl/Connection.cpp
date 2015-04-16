@@ -136,6 +136,12 @@ Connection::~Connection()
 }
 
 
+void Connection::setPeerName(const std::string& peerName)
+{
+    SSLSetPeerDomainName(_context, peerName.c_str(), peerName.size());
+}
+
+
 const char* Connection::currentCipher() const
 {
     SSLCipherSuite cipherSuite;

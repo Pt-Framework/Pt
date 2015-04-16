@@ -45,6 +45,8 @@ class Connection
 
         ~Connection();
 
+        void setPeerName(const std::string& peerName);
+
         bool connected() const
         { return _connected; }
 
@@ -64,12 +66,16 @@ class Connection
 
         std::streamsize read(char* buf, size_t n, std::streamsize isize);
 
+    protected:
+        void verifyPeerName();
+
     private:
         std::ios* _ios;
-        bool _connected;
         BIO* _in;
         BIO* _out;
         SSL* _ssl;
+        std::string _peerName;
+        bool _connected;
 };
 
 } // namespace Ssl

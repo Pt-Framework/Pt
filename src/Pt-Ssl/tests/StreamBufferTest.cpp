@@ -91,6 +91,7 @@ void StreamBufferTest::Handshake()
     // client begins the handshake
     std::stringstream data;
     Pt::Ssl::StreamBuffer client(clientContext, data, Pt::Ssl::Connect);
+    client.setPeerName("SGC Mainframe");
 
     // server begins the handskake
     Pt::Ssl::StreamBuffer server(serverContext, data, Pt::Ssl::Accept);

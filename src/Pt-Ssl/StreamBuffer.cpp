@@ -83,6 +83,15 @@ void StreamBuffer::open(Context& ctx, std::ios& ios, OpenMode mode)
 }
 
 
+void StreamBuffer::setPeerName(const std::string& peerName)
+{
+    if( ! _connection )
+      throw std::logic_error("no ssl connection");
+
+    return _connection->setPeerName(peerName); 
+}
+
+
 void StreamBuffer::close()
 {
     if(_connection)

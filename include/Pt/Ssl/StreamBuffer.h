@@ -62,8 +62,12 @@ class PT_SSL_API StreamBuffer : public BasicStreamBuffer<char>
         /** @brief Opens the stream buffer. 
         */
         void open(Context& ctx, std::ios& ios, OpenMode mode);
+        
+        /** @brief Sets the expected peer name.
+        */
+        void setPeerName(const std::string& peerName);
 
-         /** @brief Return the currently used cipher.
+        /** @brief Return the currently used cipher.
         */
         const char* currentCipher() const;
 

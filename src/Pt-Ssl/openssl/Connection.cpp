@@ -43,10 +43,10 @@ namespace Ssl {
 
 Connection::Connection(Context& ctx, std::ios& ios, OpenMode omode)
 : _ios(&ios)
-, _connected(false)
 , _in(0)
 , _out(0)
 , _ssl(0)
+, _connected(false)
 {
     // Create the SSL objects
     _in  = BIO_new( BIO_s_mem() );
@@ -71,6 +71,34 @@ Connection::~Connection()
 {
     if(_ssl)
         SSL_free(_ssl); 
+}
+
+
+void Connection::setPeerName(const std::string& peerName)
+{
+    _peerName = peerName;
+}
+
+
+void Connection::verifyPeerName()
+{
+    if( _peerName.empty() )
+        return;
+
+    if( ! _ssl )
+        throw HandshakeFailed("SSL handshake failed");
+
+    X509* peer = SSL_get_peer_certificate(_ssl);
+    if( ! peer) 
+        throw HandshakeFailed("SSL handshake failed");
+
+    char peerCN[256];
+    int ret = X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peerCN, sizeof(peerCN));
+    if(ret <= 0) 
+        throw HandshakeFailed("SSL handshake failed");
+
+    if(_peerName != peerCN)
+        throw HandshakeFailed("SSL handshake failed");
 }
 
 
@@ -159,6 +187,7 @@ bool Connection::writeHandshake()
 
     if(ret == 1)
     {
+        verifyPeerName();
         _connected = true;
     }
 
@@ -225,6 +254,7 @@ bool Connection::readHandshake()
 
     if( ret == 1 && BIO_pending(_out) <= 0 )
     {
+        verifyPeerName();
         _connected = true;
     }
 
