@@ -61,7 +61,8 @@ void CertificateStore::loadPkcs12(std::istream& is, const char* passwd)
     while( is )
     {
         is.read( rbuf, rbufSize );
-        data.insert( data.end(), rbuf, rbuf + is.gcount() );
+        std::streamsize n = is.gcount();
+        data.insert( data.end(), rbuf, rbuf + n );
     }
 
     if( data.empty() )

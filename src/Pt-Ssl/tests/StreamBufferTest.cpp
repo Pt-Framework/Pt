@@ -78,7 +78,7 @@ void StreamBufferTest::Handshake()
 
     // Client context
     Pt::Ssl::Context clientContext;
-    clientContext.setVerifyMode(Pt::Ssl::TryVerify);
+    clientContext.setVerifyMode(Pt::Ssl::AlwaysVerify);
 
     const Pt::Ssl::Certificate* clientCert = store.findCertificate("Atlantis Mainframe");
     PT_UNIT_ASSERT( clientCert );
