@@ -144,6 +144,18 @@ const Net::Endpoint& HttpClient::host() const
 }
 
 
+Pt::Http::Request& HttpClient::request()
+{
+    return _client.request();
+}
+
+
+Pt::Http::Reply& HttpClient::reply()
+{
+    return _client.reply();
+}
+
+
 void HttpClient::close()
 {
     // TODO: this could be part of the Remoting::Client interface

@@ -107,6 +107,10 @@ class PT_SOAP_API HttpClient : public Client
         */
         const Net::Endpoint& host() const;
 
+        Pt::Http::Request& request();
+
+        Pt::Http::Reply& reply();
+
         /** @brief Closes the connection.
         */
         void close();
