@@ -407,7 +407,7 @@ void Widget::onShortcutKey(KeyEvent::KeyState state)
 void Widget::onPointerEnter()
 {
 	_containPointer = true;
-  std::clog<<"Enter = " << Cursor.get().name()  << std::endl;
+  std::clog<<"Enter "<< std::endl;
 	Application::instance().setCursor( &Cursor.get() );
 }
 
@@ -415,7 +415,7 @@ void Widget::onPointerEnter()
 void Widget::onPointerLeaved()
 {	
 	_containPointer = false;
-  std::clog<<"Leave = " << Cursor.get().name()  << std::endl;
+  std::clog<<"Leave " << std::endl;
 
   if( _parent != 0 )
 	  Application::instance().setCursor( &_parent->Cursor.get() ); 

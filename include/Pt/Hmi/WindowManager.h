@@ -73,7 +73,8 @@ class WindowManager : public Pt::Connectable
 	private:
     static bool contains(const ChildWindow* w, const Pt::Gfx::PointF& p);
     static Pt::Gfx::SizeF sizeFromWinSize( const ChildWindow* w, double width, double height); 
-  private:
+	static Gfx::PointF toClient(const ChildWindow* w, Gfx::PointF& p);
+private:
 		void invalidate();	
 		void doSizing( ChildWindow* w, const PointerEvent& ev );
 		ResizeDirection::Type detSizeDirection( ChildWindow* w, const Pt::Hmi::PointerEvent& ev );	
