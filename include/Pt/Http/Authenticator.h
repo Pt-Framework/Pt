@@ -84,7 +84,7 @@ class Authentication
             Authenticates the @a request using the @a credentials in response
             to the corresponding @a reply.
         */
-        virtual bool authenticate(Credentials& credentials, Request& request, const Reply& reply) const = 0;
+        virtual bool authenticate(const Credentials& credentials, Request& request, const Reply& reply) = 0;
 
     private:
         std::string _name;
@@ -106,8 +106,10 @@ class PT_HTTP_API BasicAuthentication : public Authentication
         virtual ~BasicAuthentication()
         {}
 
+        void preAuthenticate(const Credential& credential, Request& request);
+
         // inheric docs
-        virtual bool authenticate(Credentials& credentials, Request& request, const Reply& reply) const;
+        virtual bool authenticate(const Credentials& credentials, Request& request, const Reply& reply);
 };
 
 /** @brief %Client side authentication.
@@ -129,7 +131,7 @@ class PT_HTTP_API Authenticator : private NonCopyable
 
         /** @brief Adds an authentication method.
         */
-        void addAuthentication(const Authentication& auth);
+        void addAuthentication(Authentication& auth);
         
         /** @brief Set credential for a realm.
         */
@@ -141,7 +143,7 @@ class PT_HTTP_API Authenticator : private NonCopyable
 
     private:
         Credentials _credentials;
-        std::vector<const Authentication*> _auths;
+        std::vector<Authentication*> _auths;
         BasicAuthentication _basicAuth;
 };
 

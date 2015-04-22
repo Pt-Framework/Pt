@@ -237,6 +237,12 @@ void HttpClient::onEndInvoke()
         _error = false;
         throw;
     }
+
+    // TODO: an alternative might be to throw AccessFailed for 401 replies
+    //       or handle these in a special way. Also consider throwing a 
+    //       HttpError in Http::Client if statusCode > 400
+    if( _client.reply().statusCode() > 300)
+        throw Remoting::Fault("request failed");
 }
 
 

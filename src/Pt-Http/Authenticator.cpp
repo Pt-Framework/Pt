@@ -38,7 +38,21 @@ namespace Pt {
 
 namespace Http {
 
-bool BasicAuthentication::authenticate(Credentials& credentials, Request& request, const Reply& reply) const
+void BasicAuthentication::preAuthenticate(const Credential& credential, Request& request)
+{
+    std::ostringstream oss;
+    oss << "Basic ";
+               
+    BasicTextOStream<char, char> b64(oss, new Base64Codec());
+    b64 << credential.user() << ':' << credential.password();
+    b64.terminate();
+
+    //PT_LOG_DEBUG("set Authorization to " << oss.str());
+    request.header().set("Authorization", oss.str().c_str());
+}
+
+
+bool BasicAuthentication::authenticate(const Credentials& credentials, Request& request, const Reply& reply)
 { 
     const char* auth = reply.header().get("WWW-Authenticate");
     if( ! auth)
@@ -57,7 +71,7 @@ bool BasicAuthentication::authenticate(Credentials& credentials, Request& reques
     getline(iss, token, '"');
     getline(iss, token, '"');
 
-    Credentials::iterator it = credentials.find(token);
+    Credentials::const_iterator it = credentials.find(token);
     if( it == credentials.end() )
         return false;
 
@@ -85,7 +99,7 @@ Authenticator::~Authenticator()
 }
 
 
-void Authenticator::addAuthentication(const Authentication& auth)
+void Authenticator::addAuthentication(Authentication& auth)
 {
     _auths.push_back(&auth);
 }
@@ -110,7 +124,7 @@ bool Authenticator::authenticate(Request& request, const Reply& reply)
     for(std::string::size_type n = 0; n < authType.size(); ++n)
         authType[n] = std::tolower(authType[n]);
 
-    std::vector<const Authentication*>::const_iterator it;
+    std::vector<Authentication*>::const_iterator it;
     for(it = _auths.begin(); it != _auths.end(); it++)
     {
         if(authType == (*it)->name())
