@@ -190,6 +190,8 @@ class Connection : public Connectable
 
         void setSecure(Ssl::Context& ctx);
 
+        void setPeerName(const std::string& peer);
+
         //void setActive(System::EventLoop& loop);
 
         System::EventLoop* loop() const

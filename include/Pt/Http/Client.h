@@ -111,6 +111,10 @@ class PT_HTTP_API Client : public Connectable
         */
         void setSecure(Ssl::Context& ctx);
 
+        /** @brief Set expected SSL peer name.
+        */
+        void setPeerName(const std::string& peer);
+
         /** @brief Set host to connect to.
         */
         void setHost(const Net::Endpoint& ep);

@@ -70,6 +70,10 @@ class PT_SOAP_API HttpClient : public Client
         */
         void setSecure(Ssl::Context& ctx);
 
+        /** @brief Set expected SSL peer name.
+        */
+        void setPeerName(const std::string& peer);
+
         /** @brief Enables HTTP keep-alive.
         */
         void setKeepAlive();

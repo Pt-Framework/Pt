@@ -177,6 +177,12 @@ void Connection::setSecure(Ssl::Context& ctx)
 }
 
 
+void Connection::setPeerName(const std::string& peer)
+{
+    _sslbuf.setPeerName(peer);
+}
+
+
 //void Connection::setActive(System::EventLoop& loop)
 //{
 //    _socket.setActive(loop);

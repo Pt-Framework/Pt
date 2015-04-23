@@ -132,6 +132,12 @@ void HttpClient::setSecure(Ssl::Context& ctx)
 }
 
 
+void HttpClient::setPeerName(const std::string& peer)
+{
+    _client.setPeerName(peer);
+}
+
+
 void HttpClient::setKeepAlive()
 {
     Pt::Http::MessageHeader& header = _client.request().header();

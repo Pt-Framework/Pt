@@ -123,6 +123,12 @@ void Client::setSecure(Ssl::Context& ctx)
 }
 
 
+void Client::setPeerName(const std::string& peer)
+{
+    _impl->setPeerName(peer);
+}
+
+
 void Client::setHost(const Net::Endpoint& ep)
 {
     _impl->setHost(ep);

@@ -58,6 +58,12 @@ void ClientImpl::setSecure(Ssl::Context& ctx)
 }
 
 
+void ClientImpl::setPeerName(const std::string& peer)
+{
+    _conn.setPeerName(peer);
+}
+
+
 void ClientImpl::send(bool finished)
 {
     if(_hstate == Idle || _hstate == OnRequestComplete)
