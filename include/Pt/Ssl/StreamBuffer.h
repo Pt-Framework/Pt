@@ -133,6 +133,7 @@ class PT_SSL_API StreamBuffer : public BasicStreamBuffer<char>
 
     private:
         Connection*  _connection;
+        std::string  _peerName;
         std::size_t  _ibufferSize;
         char*        _ibuffer;
         std::size_t  _obufferSize;

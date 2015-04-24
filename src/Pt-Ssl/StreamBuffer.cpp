@@ -80,15 +80,18 @@ void StreamBuffer::open(Context& ctx, std::ios& ios, OpenMode mode)
     }
     
     _connection = new Connection(ctx, ios, mode);
+
+    if( ! _peerName.empty() )
+        _connection->setPeerName(_peerName); 
 }
 
 
 void StreamBuffer::setPeerName(const std::string& peerName)
 {
-    if( ! _connection )
-      throw std::logic_error("no ssl connection");
+    _peerName = peerName;
 
-    return _connection->setPeerName(peerName); 
+    if( _connection )
+      _connection->setPeerName(peerName); 
 }
 
 
