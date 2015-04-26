@@ -32,6 +32,10 @@
 #include <Pt/Gfx/Rgb888Image.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/SizeEvent.h>
+#include <Pt/Hmi/PositionEvent.h>
+#include <Pt/Hmi/CloseEvent.h>
+#include <Pt/Hmi/FocusEvent.h>
 #include "PaintSurfaceImpl.h"
 
 namespace Pt{
@@ -145,11 +149,9 @@ void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam
 {
     if(_hwnd != wnd)
         return;    
-
 	
     switch(message)
     {
-
         case WM_LBUTTONDOWN:        
         case WM_MBUTTONDOWN:
         case WM_RBUTTONDOWN:
@@ -207,7 +209,7 @@ void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam
 
         case WM_CLOSE:
         {
-            _window->Closed  = true;                     
+            onClose();
         }
         break;
 
@@ -216,13 +218,14 @@ void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam
 					if( _forceTopMost )
 						BringWindowToTop( _hwnd );
 					else
-						_window->Focused = false;
+						onFocus(false);
+
         }
         break;        
 
 				case WM_SETFOCUS:
 				{
-					_window->Focused = true;
+					onFocus(true);
 				}
 				break;
 
@@ -237,6 +240,19 @@ void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam
 				}
 				break;
     }
+}
+
+void MainWindowImpl::onClose()
+{
+	CloseEvent ev;
+	_window->eventReceived().send(ev);
+}
+
+
+void MainWindowImpl::onFocus(bool f)
+{
+	FocusEvent ev(f);
+	_window->eventReceived().send(ev);
 }
 
 
@@ -266,9 +282,8 @@ void MainWindowImpl::onSize(WPARAM wParam, LPARAM lParam)
   int width  = LOWORD(lParam);
   int height = HIWORD(lParam);  
     
-  Pt::Gfx::SizeF winSize(width, height);
-	_window->Size = winSize;
-	_window->State = state;
+	Pt::Hmi::SizeEvent ev( Pt::Gfx::SizeF(width, height), state);
+	_window->eventReceived().send(ev);
 }
 
 
@@ -319,8 +334,8 @@ void MainWindowImpl::onMove(LPARAM lParam)
 	int xPos = info.left;
 	int yPos = info.top;
 
-  Pt::Gfx::PointF winPos(xPos, yPos);
-	_window->Position  = winPos;
+	PositionEvent ev( Pt::Gfx::PointF(xPos, yPos) );
+  _window->eventReceived().send( ev );	
 }
 
 
@@ -345,6 +360,11 @@ void MainWindowImpl::setPosition(const Gfx::PointF& pf)
   SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, SWP_DRAWFRAME|SWP_NOSIZE);
 }
 
+
+void MainWindowImpl::focus()
+{	
+	SetFocus(_hwnd);
+}
 
 void MainWindowImpl::setSize(const Gfx::SizeF& sizef)
 {

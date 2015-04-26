@@ -12,8 +12,8 @@ Widget::Widget()
 , PT_HMI_INIT_PROPERTY_VALUE(Enabled, true)
 , PT_HMI_INIT_PROPERTY_VALUE(Visible, true )
 , PT_HMI_INIT_PROPERTY_VALUE(Font,Pt::Gfx::Font("Sans Serif",12))
-, PT_HMI_INIT_PROPERTY_VALUE(Position, Pt::Gfx::PointF(0,0))
-, PT_HMI_INIT_PROPERTY_VALUE(Size, Pt::Gfx::SizeF(100,100))
+, Position("Position", *this, &Widget::position, &Widget::setPosition )
+, Size("Size", *this, &Widget::size, &Widget::setSize)
 , PT_HMI_INIT_PROPERTY_VALUE(BackColor,Pt::Gfx::ARgbColor(237,237,237))
 , PT_HMI_INIT_PROPERTY_VALUE(HighlightColor,Pt::Gfx::ARgbColor(200,200,200))
 , PT_HMI_INIT_PROPERTY_VALUE(ForeColor, Pt::Gfx::ARgbColor(0,0,0))
@@ -26,7 +26,7 @@ Widget::Widget()
 , PT_HMI_INIT_PROPERTY_VALUE(AcceptFocus,true)
 , PT_HMI_INIT_PROPERTY_VALUE(HighLight, false)
 , PT_HMI_INIT_PROPERTY_VALUE(FocusedActionKey," ")
-, PT_HMI_INIT_PROPERTY_VALUE(Caption,"")
+, Caption("Caption", *this, &Widget::caption, &Widget::setCaption )
 , PT_HMI_INIT_PROPERTY_VALUE(UseMnemonic,true)
 , PT_HMI_INIT_PROPERTY_VALUE(Name,"Widget")
 , PT_HMI_INIT_PROPERTY(Margin)
@@ -34,20 +34,17 @@ Widget::Widget()
 , PT_HMI_INIT_PROPERTY_VALUE(FlowLayout, Hmi::FlowLayout::None)
 , PT_HMI_INIT_PROPERTY_VALUE(FlowDirection, Hmi::FlowLayoutDirection::LeftToRightTopToBottom)
 , PT_HMI_INIT_PROPERTY_VALUE(ShortcutKey, "")
-, PT_HMI_INIT_PROPERTY_VALUE(Focused,true)
 , _parent(0)
 , _isValid(false)
 , _containPointer(false)
+, _size(200,200)
+, _position( 0, 0)
+, _isFocused(false)
 {	
 	bindMnemonicToWidget( *this );	
 	
- 	Size.Changed += Pt::slot(*this, &Widget::onSizeChanged);				
- 	Caption.Changed += Pt::slot(*this, &Widget::onCaptionChanged);			
-	Focused.Changed += Pt::slot( *this, &Widget::onFocusChanged );
-	Cursor.Changed +=  Pt::slot( *this, &Widget::onCursorChanged );
-
 	eventReceived() += Pt::slot(*this, &Widget::onKeyInput);
-	eventReceived() += Pt::slot(*this, &Widget::onPointerInput);
+	eventReceived() += Pt::slot(*this, &Widget::onPointerInput);	
 }
 
 
@@ -407,7 +404,6 @@ void Widget::onShortcutKey(KeyEvent::KeyState state)
 void Widget::onPointerEnter()
 {
 	_containPointer = true;
-  std::clog<<"Enter "<< std::endl;
 	Application::instance().setCursor( &Cursor.get() );
 }
 
@@ -415,8 +411,6 @@ void Widget::onPointerEnter()
 void Widget::onPointerLeaved()
 {	
 	_containPointer = false;
-  std::clog<<"Leave " << std::endl;
-
   if( _parent != 0 )
 	  Application::instance().setCursor( &_parent->Cursor.get() ); 
 }
@@ -467,7 +461,7 @@ void Widget::onKeyInput(const KeyEvent& ev)
 	}
 
 	//Action key handling
-	if( ev.toUTF8String() == FocusedActionKey.get() && Focused.get() )	
+	if( ev.toUTF8String() == FocusedActionKey.get() && isFocused() )	
 	{
 		onActionKey( ev.state() );		
 	}
@@ -492,7 +486,7 @@ void Widget::bindMnemonicToWidget(Widget& widget)
 
 void Widget::onMnemonic()
 {	
-	Focused = true;
+	setFocus( true );
 }
 
 
@@ -515,13 +509,13 @@ bool Widget::focusPrevChild(int index)
 
 		if(child->AcceptFocus.get())
 		{
-			child->Focused = true;
+			child->setFocus(true);
 			return true;
 		}
 
 		if(child->focusPrev())
 		{
-			child->Focused = true;
+			child->setFocus(true);
 			return true;
 		}
 	}
@@ -540,13 +534,13 @@ bool Widget::focusNextChild( int index )
 
 		if(child->AcceptFocus.get())
 		{
-			child->Focused = true;
+			child->setFocus(true);
 			return true;
 		}
 
 		if(child->focusNext())
 		{
-			child->Focused = true;
+			child->setFocus(true);
 			return true;
 		}
 	}
@@ -562,7 +556,7 @@ int Widget::getFocusedChild() const
 	for( ; i < (int)children().size(); ++i)
 	{
 		const Widget* child = children()[i];
-		if( child->Focused.get() )
+		if( child->isFocused() )
 			return i;		
 	}		
 
@@ -588,7 +582,7 @@ bool Widget::focusPrev()
 			return true;
 	}
 
-	child->Focused = false;
+	child->setFocus(false);
 	return focusPrevChild(index);
 }
 
@@ -611,21 +605,21 @@ bool Widget::focusNext()
 			return true;
 	}
 
-	child->Focused = false;
+	child->setFocus(false);
 	return focusNextChild(index);
 }
 
 
-void Widget::onFocusChanged( const Property<bool>& prop )
+void Widget::setFocus( bool isFocused )
 {	
+	_isFocused = isFocused;
 
-  if( !Focused.get() )
+  if( !_isFocused )
 	{//False => all childs set to false.
 		for( size_t i = 0; i < children().size(); ++i)
 		{
-			Pt::Hmi::Widget* child = children()[i];
-			child->Focused.set(false);						
-			child->Focused.Changed.send(child->Focused);
+			Pt::Hmi::Widget* child = children()[i];			
+			child->setFocus(false);									
 		}
 
 		invalidate();
@@ -638,9 +632,8 @@ void Widget::onFocusChanged( const Property<bool>& prop )
     return;
 	}
 		
-	//Set parent focused.
-	parent()->Focused.set(true);
-	parent()->Focused.Changed.send(parent()->Focused);
+	//Set parent focused.	
+	parent()->setFocus(true);
 
 	//All sibling set to false. Only me let it true
 	for( size_t i = 0; i < parent()->children().size(); i++ )
@@ -648,10 +641,12 @@ void Widget::onFocusChanged( const Property<bool>& prop )
 		Widget* child = parent()->children()[i];
 				
 		if( child != this )
-			child->Focused = false;
+			child->setFocus( false );
 	}
 
 	invalidate();
+
+	Focused.send(_isFocused);
 }
 
 
@@ -699,38 +694,40 @@ size_t Widget::getMnemonicIndex(const std::string& text)
 }
 
 
-void Widget::onCaptionChanged(const Property<std::string>& prop)
+void Widget::setCaption( const std::string& c )
 {
+	_caption = c;
+
 	_mnemonicKey.clear();
 
 	if( !UseMnemonic.get() )
 		return;  
 	
-	int index = getMnemonicIndex(prop.get());
+	int index = getMnemonicIndex(_caption);
 
 	if( index == std::string::npos )
 		return;
 					
-	std::string unescaped = Widget::removeMnemonic(prop.get());
+	std::string unescaped = Widget::removeMnemonic(_caption);
 
 	_mnemonicKey = "A//";	
 	_mnemonicKey += std::tolower(unescaped[index]);
 }
 
 
-void Widget::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
+void Widget::setSize(const Pt::Gfx::SizeF& size)
 {
-  const double  width  = prop.get().width() -  ( Margin.get().left() + Margin.get().right() );
-  const double  height = prop.get().height() - ( Margin.get().top() + Margin.get().bottom() );
+	_size = size;			
+
+	const double  width  = _size.width() -  ( Margin.get().left() + Margin.get().right() );
+	const double  height = _size.height() - ( Margin.get().top() + Margin.get().bottom() );
 
 	paintSurface().resize( Gfx::SizeF(width,  height ) );	
 	
 	if( Visible.get() )
 		invalidate();
+			
 }
 
-void Widget::onCursorChanged(const Property<Hmi::Cursor>& prop)
-{
-}
 
 }} //namespace

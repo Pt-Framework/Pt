@@ -33,6 +33,7 @@
 #include <Pt/Connectable.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Cursor.h>
+#include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/WindowProperties.h>
 
 namespace Pt {
@@ -87,6 +88,7 @@ private:
 		ResizeDirection::Type				_sizingDirection;
 		Pt::Gfx::PointF							_lastSizePoint;
     Application&                _app;  
+		FocusEvent									_focusEvent;	
 };
 
 }} // namespace

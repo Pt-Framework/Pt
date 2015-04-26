@@ -62,10 +62,14 @@ namespace Pt {
 			if( _windows.size() == 0 )
 				return;
 
-			for( size_t i = 0; i < _windows.size() - 1; ++i )
-				_windows[i]->Focused = false;
-
-			_windows[ _windows.size() - 1 ]->Focused = true;
+			for( size_t i = 0; i < _windows.size() - 1; ++i )			
+			{
+				_focusEvent.setFocus(false);
+				_windows[i]->eventReceived().send(_focusEvent);
+			}							
+				
+			_focusEvent.setFocus(true);
+			_windows[ _windows.size() - 1 ]->eventReceived().send( _focusEvent );
 		}
 
 
@@ -129,18 +133,11 @@ namespace Pt {
 
 		 Gfx::PointF WindowManager::toClient(const ChildWindow* w, Gfx::PointF& p)
 		{
-			Pt::Gfx::PointF client;
+				Pt::Gfx::PointF client;
 
-				if( w->titleBar() != 0 ) 
-				{
-					client =  Gfx::PointF( p.x() - w->Position.get().x() - w->BorderWidth.get() , 
-						p.y() - w->Position.get().y() -  w->titleBar()->Size.get().height() ) ;
-				}
-				else
-				{
-					client =  Gfx::PointF( p.x() - w->Position.get().x() - w->BorderWidth.get() , 
-						p.y() - w->Position.get().y() - w->BorderWidth.get() ) ;
-				}
+
+				client =  Gfx::PointF( p.x() - w->Position.get().x() - w->BorderWidth.get() , 
+					p.y() - w->Position.get().y() - w->BorderWidth.get() ) ;
 				return client;
 		}
 
@@ -197,8 +194,8 @@ namespace Pt {
 				return;
 			}	
 
-			double width  = w->winSize().width();
-			double height = w->winSize().height();
+			double width  = w->Size.get().width();
+			double height = w->Size.get().height();
 			double posX   = w->Position.get().x();
 			double posY   = w->Position.get().y();
 			double deltaX = ( point.x() - _lastSizePoint.x() );
@@ -273,7 +270,7 @@ namespace Pt {
 			if( w->Position.get() != Pt::Gfx::PointF(posX, posY) )
 				w->Position =  Pt::Gfx::PointF(posX, posY) ;
 
-			if( w->winSize() != Pt::Gfx::SizeF(width, height) )
+			if( w->Size.get() != Pt::Gfx::SizeF(width, height) )
 				w->Size = sizeFromWinSize(w, width, height);
 
 			_lastSizePoint = point;
@@ -283,16 +280,13 @@ namespace Pt {
 
 		Pt::Gfx::SizeF WindowManager::sizeFromWinSize( const ChildWindow* w, double width, double height)
 		{
-			if( w->titleBar() != 0 )
-				return Pt::Gfx::SizeF( width - w->BorderWidth.get() * 2, height - w->BorderWidth.get() - w->titleBar()->Size.get().height() );
-			else
 				return Pt::Gfx::SizeF( width - w->BorderWidth.get() * 2, height - w->BorderWidth.get() * 2 );
 		}
 
 
 		bool WindowManager::contains(const ChildWindow* w, const Pt::Gfx::PointF& p)
 		{  
-			if( p.x() < w->winSize().width() && p.x() >= 0 && p.y() < w->winSize().height() && p.y() >= 0)
+			if( p.x() < w->Size.get().width() && p.x() >= 0 && p.y() < w->Size.get().height() && p.y() >= 0)
 				return true;
 
 			return false;
@@ -304,7 +298,7 @@ namespace Pt {
 				return ResizeDirection::No;
 
 			ResizeDirection::Type resizeDir = ResizeDirection::No;
-			Pt::Gfx::SizeF				size   = w->winSize();
+			Pt::Gfx::SizeF				size   = w->Size.get();
 			double								border = w->BorderWidth.get();
 			double								sizeR  = size.width() - border;
 			double								sizeB  = size.height() - border;
@@ -391,9 +385,6 @@ namespace Pt {
 
 			localMouseEvent.setX( mouseEvent.x() - childWindow->Position.get().x() - childWindow->BorderWidth.get() ) ;
 
-			if( childWindow->titleBar() != 0 ) 	
-				localMouseEvent.setY( mouseEvent.y() - childWindow->Position.get().y() - childWindow->titleBar()->Size.get().height() ) ;
-			else
 				localMouseEvent.setY( mouseEvent.y() - childWindow->Position.get().y()) ;
 
 			if( _sizingDirection == ResizeDirection::No )

@@ -34,66 +34,15 @@ ChildWindow::ChildWindow()
 : PT_HMI_INIT_PROPERTY_VALUE(BorderWidth,5)
 , PT_HMI_INIT_PROPERTY_VALUE(BorderColor, Pt::Gfx::ARgbColor(0,0,100))
 , PT_HMI_INIT_PROPERTY_VALUE(FocusedColor, Pt::Gfx::ARgbColor(0,0,255))
-, _winSize(200, 200)
 {
- 
-  Focused.Changed += Pt::slot(*this, &ChildWindow::onFocusChanged);
-  BackColor = Pt::Gfx::ARgbColor(0, 255, 255, 255);	
-  ShowTitle.Changed += Pt::slot( *this, &ChildWindow::onShowTitleBar );
-  _titelBar.Dock = Docking::Top;
-  _titelBar.Size = Gfx::SizeF( 100 ,25 );
-  _titelBar.BackColor = BorderColor;
-  _titelBar.PanelBorderWidth = 0;
- 
-  if( ShowTitle.get() )
-    addChild( &_titelBar );
 
-  Visible = true;    
+  BackColor = Pt::Gfx::ARgbColor(0, 255, 255, 255);	
 }
 
 
 ChildWindow::~ChildWindow()
 {
-//Todo: remove from window manager
-}
-
-void ChildWindow::onSizeChanged( const Property<Gfx::SizeF>& prop )
-{
-  if( titleBar() != 0 )
-  {
-    _winSize = Gfx::SizeF( prop.get().width() + BorderWidth.get() * 2, 
-                           prop.get().height() + BorderWidth.get()  + titleBar()->Size.get().height() );
-  }
-  else
-  {
-    _winSize = Gfx::SizeF( prop.get().width() + BorderWidth.get() * 2, 
-                           prop.get().height() + BorderWidth.get() * 2 );
-  }
-
-	paintSurface().resize( Gfx::SizeF( _winSize.width(),  _winSize.height() ) );	
-	
-	if( Visible.get() )
-		invalidate();
-}
-
-
-void ChildWindow::onShowTitleBar(const Property<bool>& prop)
-{
-  if( prop.get() )
-   addChild( &_titelBar );
-  else
-   removeChild( &_titelBar );
-}
-
-
-void ChildWindow::onFocusChanged(const Property<bool>& prop)
-{
-  if( prop.get() )
-    _titelBar.BackColor = FocusedColor;
-  else
-    _titelBar.BackColor = BorderColor;
-
-  invalidate();
+	//Todo: remove from window manager
 }
 
 
@@ -104,7 +53,7 @@ void ChildWindow::onRender()
 
 	Widget::onRender();	
    
-    const double&		border =  BorderWidth.get();	
+   const double&		border =  BorderWidth.get();	
 	Gfx::SizeF			size = paintSurface().size();	
 	Pt::Gfx::RectF		rect(Pt::Gfx::PointF(border/2.0, border/2.0), Pt::Gfx::SizeF( size.width() + 1 - border, size.height() + 1- border) ); 
 	Pt::Hmi::Painter& localPainter = paintSurface().painter();
@@ -117,7 +66,7 @@ void ChildWindow::onRender()
 		case WindowBorder::Tool:
 		case WindowBorder::ToolSizeable:
 		{				
-			const Pt::Gfx::ARgbColor& color = Focused.get() ? FocusedColor.get() : BorderColor.get() ;
+			const Pt::Gfx::ARgbColor& color = isFocused() ? FocusedColor.get() : BorderColor.get() ;
 			Pt::Gfx::Pen pen((size_t) border, color, Pt::Gfx::Pen::SolidStyle, Pt::Gfx::Pen::RoundCap, Pt::Gfx::Pen::MiterJoin);
 			localPainter.setPen(pen);
 				

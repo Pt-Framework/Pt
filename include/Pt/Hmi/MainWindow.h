@@ -41,50 +41,59 @@ class MainWindowImpl;
 class PT_HMI_API MainWindow  : public Window
 {
 	public:    
-	    MainWindow(MainWindow* parent = 0);    
+	  MainWindow(MainWindow* parent = 0);    
     
 		~MainWindow();    
 
 		void setTopMost( bool topMost );
+						
 
 	protected:
-	    virtual void onInvalidate();	     		
-      virtual void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
+	  virtual void onInvalidate();	     		
+
+		virtual void setClosed(bool c);		
+		virtual void setFocus(bool f);
 
 	private: 					
 
-		void onPositionChanged(const Property<Pt::Gfx::PointF>& prop);    
+		void onPositionChanged(const Pt::Gfx::PointF& prop);    
 
-		void onClosedChanged(const Property<bool> & closed);
+		void onClosedChanged(const bool& closed);
 	  
-		void onVisibleChanged(const Property<bool> & visible);
+		void onVisibleChanged(const bool& visible);
 
-		void onCaptionChanged(const Property<std::string> & p);
+		void onCaptionChanged(const std::string& p);
 	  
-		void onShowTitleChanged(const Property<bool> & p);
+		void onShowTitleChanged(const bool& p);
 	  
-		void onShowMinimizedButtonChanged(const Property<bool> & p);
+		void onShowMinimizedButtonChanged(const bool& p);
 	  
-		void onShowMaximizeButtonChanged(const Property<bool> & p);
+		void onShowMaximizeButtonChanged(const bool& p);
 	  
-		void onShowSysMenuChanged(const Property<bool> & p);
+		void onShowSysMenuChanged(const bool& p);
 
-		void onTopMostChanged(const Property<bool> & p);
+		void onTopMostChanged(const bool& p);
 	  
-		void onWindowStateChanged(const Property<WindowState::Type> & p);
+		void onWindowStateChanged(const WindowState::Type& p);
 	  
-		void onBorderChanged(const Property<WindowBorder::Type> & p);
+		void onBorderChanged(const WindowBorder::Type& p);
 	  
-		void onShowInTaskbarChanged(const Property<bool> & p);
+		void onShowInTaskbarChanged(const bool& p);
 	  
-		void onIconChanged(const Property<Pt::Gfx::ARgbImage> & p);    		
+		void onIconChanged(const Pt::Gfx::ARgbImage & p);    		
 
-		void onEnabledChanged(const Property<bool> & p);
+		void onEnabledChanged(const bool & p);
 
-		void onMinSizeChnaged(const Property<Pt::Gfx::SizeF>& prop);
+		void onMinSizeChnaged(const Pt::Gfx::SizeF& prop);
 	
-		void onMaxSizeChnaged(const Property<Pt::Gfx::SizeF>& prop);
+		void onMaxSizeChnaged(const Pt::Gfx::SizeF& prop);
 
+	protected:
+	
+		virtual void setSize(const Pt::Gfx::SizeF& size);
+		virtual void setPosition(const Pt::Gfx::PointF& pos);
+		virtual void setCaption( const std::string& c);
+		
 	private:
 		MainWindowImpl*	 _impl;    
 

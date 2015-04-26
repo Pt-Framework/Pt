@@ -56,7 +56,7 @@ class PT_HMI_API Dialog  : public MainWindow
 
 		void doModal(MainWindow* parent);
 
-		Property<DialogResultType::Type>	Result;		
+		ValueProperty<DialogResultType::Type>	Result;		
 
 	private:   	
 };

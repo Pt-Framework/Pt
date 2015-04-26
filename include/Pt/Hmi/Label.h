@@ -14,7 +14,7 @@ class PT_HMI_API Label  : public Panel
 		virtual ~Label();	
 
 	public:
-		Property<bool> AutoSize;	
+		ValueProperty<bool> AutoSize;	
 
 	protected:
 		virtual void onRender();

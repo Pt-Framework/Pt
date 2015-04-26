@@ -91,6 +91,8 @@ public:
 	
 	void setMaxSize(const Pt::Gfx::SizeF& s);
 
+	void focus();
+
 protected:
 	void onWindowEvent(HWND wnd, unsigned int msg, WPARAM wparam, LPARAM lparam, bool& handled);
 	void onPaint();
@@ -98,6 +100,8 @@ protected:
 	void onMouse(unsigned int msg,  WPARAM wparam, LPARAM lparam);
 	void onKey(unsigned int ms, WPARAM wparam, LPARAM lparam);
 	void onMove(LPARAM lparam);	
+	void onClose();
+	void onFocus(bool f);
 
 private:	
   HWND													_hwnd;

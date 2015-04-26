@@ -84,7 +84,7 @@ void MainWindow::init()
 	Caption = std::string("This is a Platinum C++ Human Machine Interface demo  ");
   State = Hmi::WindowState::Normal;
 	StartPostion = Hmi::WindowStartPosition::CenterParent;
-	Closed.Changed += Pt::slot(*this, &MainWindow::onClosedByWindow);
+	Closed += Pt::slot(*this, &MainWindow::onClosed);
 	BackColor = Gfx::ARgbColor(100,100,100);
 	
   //Panel
@@ -156,6 +156,7 @@ void MainWindow::init()
 
 	addChildWindow(_childWindow1);
 	addChildWindow(_childWindow2);
+	
 }
 
 
@@ -168,20 +169,13 @@ void MainWindow::onShowDialog()
 
 void MainWindow::show()
 {
-	Visible = true;
-	invalidate();
-}
-
-
-void MainWindow::onClosedByWindow(const Property<bool>& closed )
-{
-	Pt::Hmi::Application::instance().exit();
+	Visible = true;	
 }
 
 
 void MainWindow::onClosed()
 {
-	Closed = true;	
+	close();
 	Pt::Hmi::Application::instance().exit();
 }
 

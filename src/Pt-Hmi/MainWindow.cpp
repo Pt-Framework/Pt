@@ -41,33 +41,30 @@ MainWindow::MainWindow(MainWindow* parent)
 
 	eventReceived() += Pt::slot( _windowManager, &WindowManager::onPointerInput );
 	eventReceived() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
-	
+
 	Visible = false;
-	Focused = true;
  	 Name = std::string("Window");
 	AcceptFocus = false;
-		
- Position.Changed += Pt::slot(*this, &MainWindow::onPositionChanged);
-  Closed.Changed += Pt::slot(*this, &MainWindow::onClosedChanged);
-  Visible.Changed += Pt::slot(*this, &MainWindow::onVisibleChanged);
-  Caption.Changed += Pt::slot(*this, &MainWindow::onCaptionChanged);
-  ShowTitle.Changed += Pt::slot(*this, &MainWindow::onShowTitleChanged);
-  ShowMinimizeButton.Changed += Pt::slot(*this, &MainWindow::onShowMinimizedButtonChanged);
-  ShowMaximizeButton.Changed += Pt::slot(*this, &MainWindow::onShowMaximizeButtonChanged);
-  ShowSysMenu.Changed += Pt::slot(*this, &MainWindow::onShowSysMenuChanged);
-  State.Changed += Pt::slot(*this, &MainWindow::onWindowStateChanged);
-  Border.Changed += Pt::slot(*this, &MainWindow::onBorderChanged);
-  ShowInTaskbar.Changed += Pt::slot(*this, &MainWindow::onShowInTaskbarChanged);
-  Icon.Changed += Pt::slot(*this, &MainWindow::onIconChanged);
-	Enabled.Changed += Pt::slot(*this, &MainWindow::onEnabledChanged);
-	MinimumSize.Changed += Pt::slot(*this, &MainWindow::onMinSizeChnaged);
-	MaximumSize.Changed += Pt::slot(*this, &MainWindow::onMaxSizeChnaged);
+		  
+	//Todo: change from ValueProperty to Property.
+  Visible.changed() += Pt::slot(*this, &MainWindow::onVisibleChanged);
+  ShowTitle.changed() += Pt::slot(*this, &MainWindow::onShowTitleChanged);
+  ShowMinimizeButton.changed() += Pt::slot(*this, &MainWindow::onShowMinimizedButtonChanged);
+  ShowMaximizeButton.changed() += Pt::slot(*this, &MainWindow::onShowMaximizeButtonChanged);
+  ShowSysMenu.changed() += Pt::slot(*this, &MainWindow::onShowSysMenuChanged);
+  State.changed() += Pt::slot(*this, &MainWindow::onWindowStateChanged);
+  Border.changed() += Pt::slot(*this, &MainWindow::onBorderChanged);
+  ShowInTaskbar.changed() += Pt::slot(*this, &MainWindow::onShowInTaskbarChanged);
+  Icon.changed() += Pt::slot(*this, &MainWindow::onIconChanged);
+	Enabled.changed() += Pt::slot(*this, &MainWindow::onEnabledChanged);
+	MinimumSize.changed() += Pt::slot(*this, &MainWindow::onMinSizeChnaged);
+	MaximumSize.changed() += Pt::slot(*this, &MainWindow::onMaxSizeChnaged);
 
   Position = Pt::Gfx::PointF(20,20);
 	Size =  Pt::Gfx::SizeF(200,200);
 	_impl->setMinSize(MinimumSize.get());
 	_impl->setMaxSize(MaximumSize.get());
-	_impl->create();
+	setClosed(false);
 }
 
 
@@ -89,20 +86,8 @@ void MainWindow::setTopMost(bool topMost)
 	_impl->setTopMost( topMost );
 }
 
-void MainWindow::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
-{
-  _impl->setPosition( prop.get() );
-}
 
-
-void MainWindow::onSizeChanged(const Property<Pt::Gfx::SizeF>& prop)
-{ 
-  Window::onSizeChanged( prop ) ;
-  _impl->setSize( Size.get() );  			
-}
-
-
-void MainWindow::onClosedChanged(const Property<bool> & closed)
+void MainWindow::onClosedChanged(const bool& closed)
 {	
 	if( !Enabled.get() )
 		return;
@@ -111,17 +96,20 @@ void MainWindow::onClosedChanged(const Property<bool> & closed)
 		return;
     
   //Set the closed flag
-	if( closed.get() )
+	if( closed )
     _impl->destroy();
   else
 		_impl->create();
 }
 
 
-void MainWindow::onVisibleChanged(const Property<bool> & visible)
+void MainWindow::onVisibleChanged(const bool& visible)
 {
+	if( isClosed() )
+		setClosed(false);
+
   //Set the closed flag
-	if( visible.get() )
+	if( visible )
 	{
     if( FirstShow.get() )
     {
@@ -142,78 +130,126 @@ void MainWindow::onVisibleChanged(const Property<bool> & visible)
 		_impl->hide();
   }
 
+	setClosed(false);
 	invalidate();
 }
 
 
-void MainWindow::onCaptionChanged(const Property<std::string> & p)
+void MainWindow::setCaption( const std::string& c )
 {
-  _impl->setCaption( p.get() );
+	Widget::setCaption( c );
+  _impl->setCaption( c );
 }
 
 
-void MainWindow::onShowTitleChanged(const Property<bool> & p)
+void MainWindow::onShowTitleChanged(const bool& p)
 {
-  _impl->showTitle( p.get() );
+  _impl->showTitle( p );
 }
 
 
-void MainWindow::onShowMinimizedButtonChanged(const Property<bool> & p)
+void MainWindow::onShowMinimizedButtonChanged(const bool& p)
 {
-  _impl->showMinimizedButton( p.get() );
+  _impl->showMinimizedButton( p );
 }
 
 
-void MainWindow::onShowMaximizeButtonChanged(const Property<bool> & p)
+void MainWindow::onShowMaximizeButtonChanged(const bool& p)
 {
-  _impl->showMaximizeButton( p.get() );
+  _impl->showMaximizeButton( p );
 }
 
 
-void MainWindow::onShowSysMenuChanged(const Property<bool> & p)
+void MainWindow::onShowSysMenuChanged(const bool& p)
 {
-  _impl->showSysMenu( p.get() );
+  _impl->showSysMenu( p );
 }
 
-void MainWindow::onWindowStateChanged(const Property<WindowState::Type> & p)
+void MainWindow::onWindowStateChanged(const WindowState::Type& p)
 {
-  _impl->setWindowState( p.get() );
-}
-
-
-void MainWindow::onBorderChanged(const Property<WindowBorder::Type> & p)
-{
-  _impl->setBorder( p.get() );
-
-	Size.Changed.send(Size); //Notify size changed
+  _impl->setWindowState( p );
 }
 
 
-void MainWindow::onShowInTaskbarChanged(const Property<bool> & p)
+void MainWindow::onBorderChanged(const WindowBorder::Type& p)
 {
-  _impl->showInTaskbar( p.get() );
+  _impl->setBorder( p );
+
+	Size.changed().send(Size.get()); //Notify size changed
 }
 
 
-void MainWindow::onIconChanged(const Property<Pt::Gfx::ARgbImage> & p)
+void MainWindow::onShowInTaskbarChanged(const bool& p)
 {
-  _impl->setIcon( p.get() );
+  _impl->showInTaskbar( p );
 }
 
 
-void MainWindow::onEnabledChanged(const Property<bool> & p)
+void MainWindow::onIconChanged(const Pt::Gfx::ARgbImage& p)
 {
-	_impl->setEnable( p.get() );
+  _impl->setIcon( p );
 }
 
-void MainWindow::onMinSizeChnaged(const Property<Pt::Gfx::SizeF>& prop)
+
+void MainWindow::onEnabledChanged(const bool& p)
 {
-	_impl->setMinSize( prop.get() );
+	_impl->setEnable( p );
+}
+
+void MainWindow::onMinSizeChnaged(const Pt::Gfx::SizeF& prop)
+{
+	_impl->setMinSize( prop );
 }
 		
-void MainWindow::onMaxSizeChnaged(const Property<Pt::Gfx::SizeF>& prop)
+void MainWindow::onMaxSizeChnaged(const Pt::Gfx::SizeF& prop)
 {
-	_impl->setMaxSize( prop.get() );
+	_impl->setMaxSize( prop );
+}
+
+void MainWindow::setSize(const Pt::Gfx::SizeF& size)
+{
+	Widget::setSize(size);		
+	_impl->setSize( size );
+}
+
+void MainWindow::setPosition(const Pt::Gfx::PointF& pos)
+{
+	Widget::setPosition( pos);
+	_impl->setPosition( pos);
+}
+
+void MainWindow::setFocus(bool f)
+{
+	Widget::setFocus(f);
+	_impl->focus();	
+}
+
+
+void MainWindow::setClosed(bool close)
+{
+	if( !Enabled.get() )
+		return;
+
+	if( close )
+	{
+
+		if( !CanClose.get() || isClosed() )
+			return;
+	
+		_impl->destroy();
+		Visible = false;				
+						
+	}
+	else
+	{
+		
+		if(  !isClosed()  )
+			return;
+
+		_impl->create();
+	}
+
+	Window::setClosed(close);	
 }
 
 }}

@@ -53,15 +53,16 @@ public:
 	Button();
 	virtual ~Button();
 
-	Property<DeviceButton::State> ButtonState;		
-	Property<bool>								Armed;		
-	Property<ButtonType::Type>    ButtonType;	
-	Property<int>									DoublePressTimeInMs; 
-  Property<Pt::Gfx::ARgbImage>  Image;	
-  Property<Align::Type>         ImageAlign;
-	Signal<bool>									Checked;	  
-	Signal<>											Clicked;	
-	Signal<>											DoubleClicked;	
+	ValueProperty<DeviceButton::State> ButtonState;		
+	ValueProperty<bool>								 Armed;		
+	ValueProperty<ButtonType::Type>    ButtonType;	
+	ValueProperty<int>								 DoublePressTimeInMs; 
+  ValueProperty<Pt::Gfx::ARgbImage>  Image;	
+  ValueProperty<Align::Type>         ImageAlign;
+
+	Signal<bool>											 Checked;	  
+	Signal<>													 Clicked;	
+	Signal<>													 DoubleClicked;	
 
 protected:
 	virtual void onPressedAction();
@@ -71,7 +72,7 @@ protected:
 	virtual void onActionKey(KeyEvent::KeyState state);
 	virtual void onPointerInput(const PointerEvent& ev);
 	virtual void onKeyInput(const KeyEvent& ev);
-	virtual void onButtonStateChanged( const Property<DeviceButton::State>& prop);
+	virtual void onButtonStateChanged( const DeviceButton::State& prop);
 	virtual void onDoublePressedTimeout();
 	virtual void onRender();
 

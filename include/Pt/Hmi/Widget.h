@@ -29,6 +29,8 @@
 
 #include <Pt/Hmi/PointerEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
+#include <Pt/Hmi/SizeEvent.h>
+#include <Pt/Hmi/PositionEvent.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Property.h>
 #include <Pt/Hmi/Cursor.h>
@@ -185,32 +187,44 @@ class PT_HMI_API Widget : public Pt::Connectable
 		static std::string removeMnemonic(const std::string& text);
 
 	public:
-		Property<bool>											Focused; 
-		Property<bool>											Enabled;		
-		Property<bool>											Visible;
-		Property<Pt::Gfx::Font>							Font;
-		Property<Pt::Gfx::PointF>						Position;
-		Property<Pt::Gfx::SizeF>						Size;
-		Property<Pt::Gfx::ARgbColor>				BackColor;
-		Property<Pt::Gfx::ARgbColor>				HighlightColor;
-		Property<Pt::Gfx::ARgbColor>				ForeColor;
-		Property<Pt::Gfx::ARgbColor>				DisabledColor;
-		Property<Pt::Gfx::ARgbImage>				BackgroundImage;
-		Property<ImageLayout::Type>					BackgroundImageLayout;
-		Property<int>												Opacity;
-		Property<Hmi::Cursor>								Cursor;
-		Property<Align::Type>								TextAlign;		
-		Property<bool>											AcceptFocus;
-		Property<bool>											HighLight;
-		Property<std::string>								FocusedActionKey;
-		Property<std::string>								Caption;		
-		Property<bool>											UseMnemonic;	
-		Property<std::string>								Name;		
-		Property<Pt::Hmi::Margin>						Margin;
-		Property<Docking::Type>							Dock;
-		Property<FlowLayout::Type>					FlowLayout;	
-		Property<FlowLayoutDirection::Type> FlowDirection;
-		Property<std::string>								ShortcutKey;				
+		ValueProperty<bool>											Enabled;		
+		ValueProperty<bool>											Visible;
+		ValueProperty<Pt::Gfx::Font>						Font;
+		Property<Widget,Pt::Gfx::PointF>				Position;
+		Property<Widget,Pt::Gfx::SizeF>					Size;
+		ValueProperty<Pt::Gfx::ARgbColor>				BackColor;
+		ValueProperty<Pt::Gfx::ARgbColor>				HighlightColor;
+		ValueProperty<Pt::Gfx::ARgbColor>				ForeColor;
+		ValueProperty<Pt::Gfx::ARgbColor>				DisabledColor;
+		ValueProperty<Pt::Gfx::ARgbImage>				BackgroundImage;
+		ValueProperty<ImageLayout::Type>				BackgroundImageLayout;
+		ValueProperty<int>											Opacity;
+		ValueProperty<Hmi::Cursor>							Cursor;
+		ValueProperty<Align::Type>							TextAlign;		
+		ValueProperty<bool>											AcceptFocus;
+		ValueProperty<bool>											HighLight;
+		ValueProperty<std::string>							FocusedActionKey;
+		Property<Widget,std::string>						Caption;		
+		ValueProperty<bool>											UseMnemonic;	
+		ValueProperty<std::string>							Name;		
+		ValueProperty<Pt::Hmi::Margin>					Margin;
+		ValueProperty<Docking::Type>						Dock;
+		ValueProperty<FlowLayout::Type>					FlowLayout;			
+		ValueProperty<std::string>							ShortcutKey;
+		ValueProperty<FlowLayoutDirection::Type> FlowDirection;				
+
+		Signal<bool> Focused;
+
+		bool isFocused() const
+		{
+			return _isFocused;
+		}
+
+		void focus()
+		{
+			setFocus(true);			
+		}
+
 
 	protected:
 		Widget();	
@@ -223,20 +237,41 @@ class PT_HMI_API Widget : public Pt::Connectable
 		virtual void onRender();
 		virtual void onLayout();
 
-		virtual void onPointerInput(const PointerEvent& ev);
+		virtual void onPointerInput(const PointerEvent& ev);		
 		virtual void onPointerEnter();		
 		
 		virtual void onKeyInput(const KeyEvent& ev);
 		virtual void onMnemonic();
 		virtual void onActionKey(KeyEvent::KeyState state);
-		virtual void onShortcutKey(KeyEvent::KeyState state);
-	  virtual void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
-	
-	private:
+		virtual void onShortcutKey(KeyEvent::KeyState state);	  
 		
-		void onFocusChanged(const Property<bool>& prop);
-		void onCaptionChanged(const Property<std::string>& prop);		
-		void onCursorChanged(const Property<Hmi::Cursor>& prop);
+
+		virtual void setPosition(const Pt::Gfx::PointF& pos)
+		{
+			_position = pos;			
+		}	
+
+		virtual void setSize(const Pt::Gfx::SizeF& size);
+			
+		virtual void setFocus(bool isFocused);
+		virtual void setCaption( const std::string& c);
+
+	protected:
+		const Pt::Gfx::SizeF& size() const
+		{
+			return _size;
+		}
+
+		const Pt::Gfx::PointF& position() const
+		{
+			return _position;
+		}
+		
+		const std::string& caption() const
+		{
+			return _caption;
+		}
+
 
 	private:			  
 		bool focusNextChild(int index);
@@ -255,6 +290,10 @@ class PT_HMI_API Widget : public Pt::Connectable
 		bool											 _isValid;		
 		bool											 _containPointer;	
 		Pt::Signal<const Pt::Event&> _eventReceived;
+		Pt::Gfx::SizeF							_size;
+		Pt::Gfx::PointF             _position;
+		bool											  _isFocused;
+		std::string									_caption;		
 };
 
 }}

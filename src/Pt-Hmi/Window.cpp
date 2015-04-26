@@ -40,24 +40,26 @@ Window::Window(Window* parent)
 , PT_HMI_INIT_PROPERTY_VALUE(ShowMinimizeButton,true)
 , PT_HMI_INIT_PROPERTY_VALUE(ShowMaximizeButton,true)
 , PT_HMI_INIT_PROPERTY_VALUE(ShowSysMenu,true)	
-, PT_HMI_INIT_PROPERTY_VALUE(Caption,"")
 , PT_HMI_INIT_PROPERTY_VALUE(Border,WindowBorder::Sizeable)
 , PT_HMI_INIT_PROPERTY_VALUE(Icon, Pt::Gfx::ARgbImage(0,0))
-, PT_HMI_INIT_PROPERTY_VALUE(Closed,false)
 , PT_HMI_INIT_PROPERTY_VALUE(CanClose,true)
 , PT_HMI_INIT_PROPERTY_VALUE(FocuseMoveKey, "\t")
 , PT_HMI_INIT_PROPERTY_VALUE(FirstShow,true)
 , PT_HMI_INIT_PROPERTY_VALUE(WindowBorder, WindowBorder::Sizeable)
 , _winParent(parent)
 , _windowManager(*this)
+, _isClosed(true)
 {
 
   Visible = false;
-  Focused = true;
   Name = std::string("Window");
   AcceptFocus = false;	
   Position = Pt::Gfx::PointF(20,20);
   Size =  Pt::Gfx::SizeF(200,200);
+	eventReceived() += Pt::slot(*this, &Window::onSizeEvent);
+	eventReceived() += Pt::slot(*this, &Window::onPositionEvent);
+	eventReceived() += Pt::slot(*this, &Window::onFocusEvent);
+	eventReceived() += Pt::slot(*this, &Window::onCloseEvent);
 }
 
 
@@ -72,6 +74,7 @@ void Window::onInvalidate()
 	_windowManager.render();
 }
 
+	
 
 const std::vector<ChildWindow*>& Window::childWindows() const
 {
@@ -128,5 +131,44 @@ void Window::onKeyInput(const KeyEvent& ev)
 
   Widget::onKeyInput(ev);
 }
+
+void Window::onSizeEvent(const SizeEvent& ev)
+{
+	Widget::setSize( ev.size() );
+	Size.changed().send( ev.size() );	
+	State = ev.state();
+}
+
+
+void Window::onPositionEvent( const PositionEvent& ev)
+{
+	Widget::setPosition( ev.position() );
+	Position.changed().send( ev.position() );	
+}
+
+
+void Window::onFocusEvent( const FocusEvent& ev)
+{
+	setFocus( ev.isFocussed() );	
+}
+
+void Window::close()
+{
+	setClosed(true);	
+}
+
+
+void Window::onCloseEvent(const CloseEvent& ev)
+{
+	setClosed(true);
+}
+
+void Window::setClosed( bool c)
+{
+	_isClosed = c;
+
+	if( _isClosed )
+		Closed.send();							
+}		
 
 }}

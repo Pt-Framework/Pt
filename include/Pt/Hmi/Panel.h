@@ -14,10 +14,10 @@ class PT_HMI_API Panel  : public Widget
 		virtual ~Panel();	
 
 	public:
-		Property<BorderStyle::Type>    PanelBorderStyle;
-		Property<bool>				         PanelBorderRoundEdge;	
-		Property<double>			         PanelBorderWidth;	  
-		Property<Pt::Gfx::ARgbColor>	 BorderColor;
+		ValueProperty<BorderStyle::Type>    PanelBorderStyle;
+		ValueProperty<bool>				         PanelBorderRoundEdge;	
+		ValueProperty<double>			         PanelBorderWidth;	  
+		ValueProperty<Pt::Gfx::ARgbColor>	 BorderColor;
 
 	protected:
 		virtual void onRender();

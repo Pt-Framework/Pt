@@ -108,7 +108,7 @@ void Dialog2::init()
     
 void Dialog2::onClosedByButton()
 {
-	Closed = true;
+	close();
 }
 
 }}}

@@ -5,9 +5,6 @@
 #include <Pt/Signal.h>
 #include <string>
 
-#define PT_HMI_INIT_PROPERTY_VALUE(prop, value) prop(#prop, value)
-#define PT_HMI_INIT_PROPERTY(prop) prop(#prop)
-
 namespace Pt {
 namespace Hmi {
     
@@ -25,6 +22,10 @@ class PropertyBase
 				return _name;
 		}
 
+	  virtual Pt::Any getValue() const = 0;
+
+	  virtual void setValue(const Pt::Any& value, bool notify = true ) = 0;
+		
 	private:
 		 std::string _name;
 };

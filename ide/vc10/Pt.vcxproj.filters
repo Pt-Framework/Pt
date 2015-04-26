@@ -1308,6 +1308,18 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.h">
       <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\SizeEvent.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PositionEvent.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\FocusEvent.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

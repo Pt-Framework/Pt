@@ -49,7 +49,6 @@ class MainWindow : public Pt::Hmi::MainWindow
 
 	private:
 		void onClosed();
-		void onClosedByWindow(const Property<bool>& closed );
 		void onShowDialog();
 
 	private:	

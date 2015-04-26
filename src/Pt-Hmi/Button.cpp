@@ -58,7 +58,8 @@ Button::Button()
 	PanelBorderRoundEdge.set(true);
 	PanelBorderStyle.set(BorderStyle::Single);
 	
-	ButtonState.Changed += Pt::slot(*this, &Button::onButtonStateChanged);
+	//Todo: change property to Property
+	ButtonState.changed() += Pt::slot(*this, &Button::onButtonStateChanged);
 	
 	_doublePressTimer.timeout() += Pt::slot(*this, &Button::onDoublePressedTimeout);
 	_doublePressTimer.setActive(Pt::Hmi::Application::instance().loop());	
@@ -134,7 +135,7 @@ void Button::onDoublePressedAction()
 	_doublePressTimer.stop();
 }
 
-void Button::onButtonStateChanged( const Property<DeviceButton::State>& prop )
+void Button::onButtonStateChanged( const DeviceButton::State& prop )
 {
 	switch( ButtonType.get())
 	{
@@ -196,8 +197,8 @@ void Button::onShortcutKey( KeyEvent::KeyState state )
 		case ButtonType::Press:
 		{
 			ButtonState = (state == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;				
-			Focused = false;
-			Focused = true;
+			setFocus( true );
+
 		}
 		break;
 
@@ -206,8 +207,7 @@ void Button::onShortcutKey( KeyEvent::KeyState state )
 			if( state == KeyEvent::KeyDown )
 			{
 				ButtonState = (ButtonState.get() == DeviceButton::Pressed) ? DeviceButton::Released : DeviceButton::Pressed;											
-				Focused = false;
-				Focused = true;
+				setFocus( true );
 			}
 		}
 		break;
@@ -277,11 +277,10 @@ void Button::onPointerInput(const PointerEvent& ev)
 		{
 			case ButtonType::Press:
 			{
-				if(!Focused.get())
+				if(!isFocused())
 				{
 					genOutput = true;						
-					Focused = false;
-					Focused = true;					
+					setFocus(true);															
 				}
 
 				switch(ev.buttons()[0].state())
@@ -313,10 +312,9 @@ void Button::onPointerInput(const PointerEvent& ev)
 
 			case ButtonType::Toggle:
 			{
-				if(!Focused.get())	
+				if(!isFocused())	
 				{
-					Focused = false;
-					Focused = true;
+					setFocus(true);			
 					genOutput = true;
 				}
 
@@ -363,7 +361,7 @@ void Button::onRender()
 	Pt::Hmi::Painter& localPainter = paintSurface().painter();
 	Pt::Gfx::SizeF    size = paintSurface().size();
        
-	if( Armed.get() || Focused.get() )
+	if( Armed.get() || isFocused() )
 	{
 		size.addHeight(-5);
 		size.addWidth(-5);

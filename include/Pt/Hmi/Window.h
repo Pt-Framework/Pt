@@ -30,6 +30,8 @@
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/WindowProperties.h>
+#include <Pt/Hmi/FocusEvent.h>
+#include <Pt/Hmi/CloseEvent.h>
 
 namespace Pt {
 namespace Hmi {
@@ -41,23 +43,21 @@ class PT_HMI_API Window  : public Widget
 	public:    		
     virtual ~Window();    
 
-    Property<Pt::Gfx::SizeF>                  MinimumSize;
-    Property<Pt::Gfx::SizeF>                  MaximumSize;
-    Property<WindowStartPosition::Type>       StartPostion;
-    Property<WindowState::Type>               State;    
-    Property<bool>                            ShowInTaskbar;
-    Property<bool>                            ShowTitle;
-    Property<bool>                            ShowMinimizeButton;
-    Property<bool>                            ShowMaximizeButton;
-    Property<bool>                            ShowSysMenu;
-    Property<std::string>                     Caption;
-    Property<WindowBorder::Type>              Border;
-    Property<Pt::Gfx::ARgbImage>              Icon;
-    Property<bool>                            Closed;
-    Property<bool>                            CanClose;
-    Property<bool>                            FirstShow;
-    Property<std::string>                     FocuseMoveKey;      
-		Property<WindowBorder::Type>							WindowBorder;
+    ValueProperty<Pt::Gfx::SizeF>                  MinimumSize;
+    ValueProperty<Pt::Gfx::SizeF>                  MaximumSize;
+    ValueProperty<WindowStartPosition::Type>       StartPostion;
+    ValueProperty<WindowState::Type>               State;    
+    ValueProperty<bool>                            ShowInTaskbar;
+    ValueProperty<bool>                            ShowTitle;
+    ValueProperty<bool>                            ShowMinimizeButton;
+    ValueProperty<bool>                            ShowMaximizeButton;
+    ValueProperty<bool>                            ShowSysMenu;
+    ValueProperty<WindowBorder::Type>              Border;
+    ValueProperty<Pt::Gfx::ARgbImage>              Icon;
+    ValueProperty<bool>                            CanClose;
+    ValueProperty<bool>                            FirstShow;
+    ValueProperty<std::string>                     FocuseMoveKey;      
+		ValueProperty<WindowBorder::Type>							 WindowBorder;
 				
 		void setWindowParent(Window* parent);
 
@@ -74,16 +74,33 @@ class PT_HMI_API Window  : public Widget
 			return _windowManager;
 		}
 
+		bool isClosed() const
+		{
+			return _isClosed;
+		}
+
+		Signal<> Closed;	
+
+		void close();
+
 	protected:
 		Window(Window* parent = 0);    
 
 	protected:		
-		virtual void onKeyInput(const KeyEvent& ev);	
-    virtual void onInvalidate();	  	
+		virtual void onKeyInput(const KeyEvent& ev);			
+    virtual void onInvalidate();  			
+		virtual void setClosed( bool close );				
+
+	protected:
+		void onSizeEvent(const SizeEvent& ev);
+		void onPositionEvent( const PositionEvent& ev);
+		void onFocusEvent( const FocusEvent& ev);
+		void onCloseEvent(const CloseEvent& ev);
 
 	protected:
 		Window*				_winParent;
-		WindowManager _windowManager;
+		WindowManager _windowManager;		
+		bool	_isClosed;
 };
 
 }}
