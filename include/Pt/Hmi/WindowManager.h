@@ -34,6 +34,8 @@
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/FocusEvent.h>
+#include <Pt/Hmi/SizeEvent.h>
+#include <Pt/Hmi/PositionEvent.h>
 #include <Pt/Hmi/WindowProperties.h>
 
 namespace Pt {
@@ -71,16 +73,20 @@ class WindowManager : public Pt::Connectable
 			return _windows;
 		}		
 				 
-	private:
-    static bool contains(const ChildWindow* w, const Pt::Gfx::PointF& p);
-    static Pt::Gfx::SizeF sizeFromWinSize( const ChildWindow* w, double width, double height); 
-	static Gfx::PointF toClient(const ChildWindow* w, Gfx::PointF& p);
+
 private:
 		void invalidate();	
 		void doSizing( ChildWindow* w, const PointerEvent& ev );
+		void doMoving( ChildWindow* w, const PointerEvent& ev );
 		ResizeDirection::Type detSizeDirection( ChildWindow* w, const Pt::Hmi::PointerEvent& ev );	
 		bool updateActive( const Pt::Hmi::PointerEvent& mouseEvent );
 		void updateFocus();		
+		Gfx::PointF renderWindowFrame(ChildWindow* w);
+		Gfx::PointF toClient(const ChildWindow* w, Gfx::PointF& p);
+		Pt::Gfx::SizeF clientSize( double width, double height);
+		Pt::Gfx::SizeF windowSize( const ChildWindow* w);
+		bool contains(const ChildWindow* w, const Pt::Gfx::PointF& p);
+		bool detMoving (  ChildWindow* w, const Pt::Hmi::PointerEvent& ev );
 
 	private:
 		Window&											_parent;
@@ -89,6 +95,13 @@ private:
 		Pt::Gfx::PointF							_lastSizePoint;
     Application&                _app;  
 		FocusEvent									_focusEvent;	
+		double											_titleBarHeight;
+		double											_borderWidth;
+		Pt::Gfx::ARgbColor          _borderColor; 
+		SizeEvent										_sizeEvent;
+		PositionEvent               _positionEvent; 	
+		bool												_moving;	
+		Gfx::PointF									_movingOffset;
 };
 
 }} // namespace

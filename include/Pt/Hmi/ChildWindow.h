@@ -39,13 +39,7 @@ class PT_HMI_API ChildWindow  : public Hmi::Window
 		ChildWindow();	
 		virtual ~ChildWindow();	
 
-	public:  
-		ValueProperty<double>							BorderWidth;	  
-		ValueProperty<Pt::Gfx::ARgbColor>	BorderColor;
-		ValueProperty<Pt::Gfx::ARgbColor>	FocusedColor;        
-
-	protected:
-	  virtual void onRender();
+	protected:	  
     virtual void onInvalidate();					
 };
 

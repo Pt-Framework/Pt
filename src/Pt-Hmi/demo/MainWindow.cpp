@@ -153,10 +153,12 @@ void MainWindow::init()
 	_childWindow1.Size = Pt::Gfx::SizeF(200,300);
 	_childWindow2.Position = Pt::Gfx::PointF(80,80);
 	_childWindow2.Size = Pt::Gfx::SizeF(800,600);
-
+	
 	addChildWindow(_childWindow1);
 	addChildWindow(_childWindow2);
 	
+	_childWindow1.Visible = true;
+	_childWindow2.Visible = true;
 }
 
 
