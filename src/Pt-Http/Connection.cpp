@@ -238,9 +238,18 @@ void Connection::sendRequest(Request& request)
                 PT_LOG_DEBUG("syncing buffer");
                 _sockios.flush();
 
+                if( _sslbuf.isConnected() )
+                    break;
+
                 PT_LOG_DEBUG("reading handshake");
-                while( _sslbuf.readHandshake() )
-                    ;
+                for( ; ; )
+                {
+                    if( _sockbuf.sgetc() == std::char_traits<char>::eof() )
+                        throw System::IOError("connection lost");
+
+                    if( ! _sslbuf.readHandshake() )
+                        break;
+                }
 
                 if( _sslbuf.isConnected() )
                     break;
