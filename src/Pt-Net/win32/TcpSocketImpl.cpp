@@ -542,7 +542,6 @@ std::size_t TcpSocketImpl::beginWrite(System::EventLoop& loop, const char* buffe
         }
         else
         {
-            std::cerr << WSAGetLastError() << std::endl;
             throw System::IOError("WSASend");
         }
     }
@@ -558,26 +557,35 @@ std::size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer,
     PT_LOG_DEBUG(_fd << " endWrite");
 
     _eventFlags &= ~FD_WRITE;
-
-    // set socket to blocking mode
     setEventFlags(0, 0);
 
-    u_long argp = 0;
-    ::ioctlsocket(_fd, FIONBIO, &argp);
+    // set socket to blocking mode
+    //u_long argp = 0;
+    //::ioctlsocket(_fd, FIONBIO, &argp);
 
-    DWORD numberOfBytesSent = 0;
+    DWORD bytesSent = 0;
+    int rc = WSASend(_fd, &_sendBuffer, 1, &bytesSent, 0, NULL, NULL);
 
-    int rc = WSASend(_fd, &_sendBuffer, 1, &numberOfBytesSent, 0, NULL, NULL);
+    // TODO:
+    // we cannot blocking send data, because this could overflow the TCP
+    // buffer and noone will be able to read off data, if the reader is
+    // in the same process. Instead we throw IOPending below. It might
+    // be a good idea to give up the rule that a begin call with an immediate
+    // end call should behave like a blocking call.
 
     // set socket to non-blocking mode
-    argp = 1;
-    ::ioctlsocket(_fd, FIONBIO, &argp);
+    //argp = 1;
+    //::ioctlsocket(_fd, FIONBIO, &argp);
+
     setEventFlags(_ioh.handle(), _eventFlags);
 
     if(rc == SOCKET_ERROR)
         throw System::IOError("WSASend");
 
-    return  numberOfBytesSent;
+    if(bytesSent == 0 && n != 0)
+        throw System::IOPending("WSA operation pending");
+
+    return bytesSent;
 }
 
 
