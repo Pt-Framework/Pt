@@ -3618,6 +3618,7 @@ class XmlReaderImpl
         void onCharactersMax(int_type c)
         {
             _chars.clear();
+            _chars.setChunk(true);
             _parse = &XmlReaderImpl::onCharacters;
             onCharacters(c);
         }
@@ -3752,6 +3753,7 @@ class XmlReaderImpl
         void onCDataMax(int_type c)
         {
             _chars.clear();
+            _chars.setChunk(true);
 
             if(_options & ReportCData)
                 _chars.setCData(true);
