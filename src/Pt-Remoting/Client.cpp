@@ -89,6 +89,8 @@ void Client::cancel()
 {
     if(_method)
         _method->cancel();
+    else
+        cancelCall();
 
     _method = 0;
 }

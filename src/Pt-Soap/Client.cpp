@@ -170,6 +170,7 @@ void Client::onCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv
 
 void Client::onCancel()
 {
+    _r = 0;
     _argv = 0;
     _argc = 0;
     _arg = 0;
