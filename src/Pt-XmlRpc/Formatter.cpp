@@ -462,9 +462,9 @@ bool Formatter::advance(const Pt::Xml::Node& node)
                 // maybe <value>...<type>...</type>...</value>  (case 1)
                 //    or <value>...</value>                     (case 2)
                 const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
-                _str = chars.content();
+                _str += chars.content();
                 
-                //NOTE we could get rid of this is the XmlReader could be set up
+                //NOTE we could get rid of this if the XmlReader could be set up
                 //     to ignore characters between two start tags and only report
                 //     "leaf characters".
             }
@@ -803,15 +803,14 @@ bool Formatter::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::Characters)
             {
                 const Xml::Characters& chars = static_cast<const Xml::Characters&>(node);
-                _state = OnScalar;
 
-                PT_LOG_DEBUG("-> found string " << chars.content().narrow());
-                _composer->setString( chars.content() );
+                PT_LOG_DEBUG("string value: " << chars.content().narrow());
+                _str += chars.content();
             }
-            else if(node.type() == Xml::Node::EndElement) // no content, for example empty strings
+            else if(node.type() == Xml::Node::EndElement)
             {
-                PT_LOG_DEBUG("-> found empty value ");
-                _composer->setString( Pt::String() );
+                PT_LOG_DEBUG("string value end");
+                _composer->setString( _str );
                 _state = OnScalarEnd;
             }
             else

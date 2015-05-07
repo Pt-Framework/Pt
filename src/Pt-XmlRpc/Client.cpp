@@ -65,7 +65,8 @@ static const Pt::Char XMLRPC_FAULT_END[]  = { '<', '/', 'f', 'a', 'u', 'l', 't',
 
 
 Client::Client()
-: _argv(0)
+: _r(0)
+, _argv(0)
 , _argc(0)
 , _arg(0)
 , _argn(0)
@@ -93,15 +94,14 @@ bool Client::isFailed() const
 
 void Client::onBeginCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv, unsigned argc)
 {
+    _r = &r;
     _argv = argv;
     _argc = argc;
     _arg = 0;
     _argn = 0;
     
     _state = OnBegin;
-
     _reader.reset(_bin);
-    _formatter.beginParse(r);
 
     _isFault = false;
 
@@ -130,15 +130,14 @@ void Client::onEndCall()
 
 void Client::onCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv, unsigned argc)
 {
+    _r = &r;
     _argv = argv;
     _argc = argc;
     _arg = 0;
     _argn = 0;
 
     _state = OnBegin;
-
     _reader.reset(_bin);
-    _formatter.beginParse(r);
 
     _isFault = false;
 
@@ -240,6 +239,9 @@ void Client::finishMessage()
 void Client::beginResult(std::istream& is)
 {
     _bin.reset(is);
+
+    assert(_r);
+    _formatter.beginParse(*_r);
 }
 
 
@@ -291,6 +293,9 @@ void Client::setFault(int rc, const char* msg)
 void Client::processResult(std::istream& is)
 {
     _bin.reset(is);
+
+    assert(_r);
+    _formatter.beginParse(*_r);
 
     try
     {

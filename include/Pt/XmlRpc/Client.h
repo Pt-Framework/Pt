@@ -170,6 +170,7 @@ class PT_XMLRPC_API Client : public Pt::Remoting::Client
             OnMethodResponseEnd
         };
 
+        Composer* _r;
         Decomposer** _argv;
         unsigned _argc;
         Decomposer* _arg;

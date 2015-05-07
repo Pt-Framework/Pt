@@ -74,7 +74,8 @@ static const Pt::Char SOAP_REASON_END[]  = { '<', '/', 's', 'o', 'a', 'p', ':', 
 
 
 Client::Client(ServiceDeclaration& service)
-: _argv(0)
+: _r(0)
+, _argv(0)
 , _argc(0)
 , _arg(0)
 , _argn(0)
@@ -104,15 +105,14 @@ bool Client::isFailed() const
 
 void Client::onBeginCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv, unsigned argc)
 {
+    _r = &r;
     _argv = argv;
     _argc = argc;
     _arg = 0;
     _argn = 0;
     
     _state = OnBegin;
-   
     _reader.reset(_bin);
-    _fmt.beginParse(r);
 
     _isFault = false;
 
@@ -141,15 +141,14 @@ void Client::onEndCall()
 
 void Client::onCall(Composer& r, Remoting::RemoteCall& method, Decomposer** argv, unsigned argc)
 {
+    _r = &r;
     _argv = argv;
     _argc = argc;
     _arg = 0;
     _argn = 0;
     
     _state = OnBegin;
-    
     _reader.reset(_bin);
-    _fmt.beginParse(r);
 
     _isFault = false;
 
@@ -270,6 +269,9 @@ void Client::finishMessage()
 void Client::beginResult(std::istream& is)
 {
     _bin.reset(is);
+
+    assert(_r);
+    _fmt.beginParse(*_r);
 }
 
 
@@ -321,6 +323,9 @@ void Client::setFault(int rc, const char* msg)
 void Client::processResult(std::istream& is)
 {
     _bin.reset(is);
+
+    assert(_r);
+    _fmt.beginParse(*_r);
 
     try
     {

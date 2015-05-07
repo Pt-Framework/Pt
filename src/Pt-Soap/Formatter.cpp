@@ -389,6 +389,7 @@ void Formatter::onFinishStruct()
 
 void Formatter::onBeginParse(Composer& composer)
 {
+    _str.clear();
     _state = OnBegin;
     _composer = &composer;
 }
@@ -472,7 +473,10 @@ bool Formatter::advance(const Pt::Xml::Node& node)
         }
         else if(typeId == Type::String)
         {
-            _composer->setString( c.content() );
+            if( ! c.isChunk() )
+                _composer->setString( c.content() );
+            else
+                _str += c.content(); 
         }
         else if(typeId == Type::Base64)
         {
@@ -502,6 +506,12 @@ bool Formatter::advance(const Pt::Xml::Node& node)
         // handle empty string values
         if(_state == OnStartElement || _state == OnBegin)
             _composer->setString( Pt::String() );
+
+        if( ! _str.empty() )
+        {
+            _composer->setString(_str);
+            _str.clear();
+        }
 
         _composer = _composer->finish();
 

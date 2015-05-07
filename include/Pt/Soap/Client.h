@@ -170,6 +170,7 @@ class PT_SOAP_API Client : public Pt::Remoting::Client
             OnEnvelopeEnd
         };
 
+        Composer* _r;
         Decomposer** _argv;
         unsigned _argc;
         Decomposer* _arg;

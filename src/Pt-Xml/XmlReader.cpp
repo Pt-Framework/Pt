@@ -4157,7 +4157,7 @@ class XmlReaderImpl
         {
             if( _chunkSize != 0 )
             {
-                _chars.setChunk(false);
+                //_chars.setChunk(false);
                 _current = &_chars;
                 _chunkSize = 0;
             }
@@ -4189,7 +4189,7 @@ class XmlReaderImpl
         , _usedSize(0)
         , _maxSize(2048)
         , _startElem(_nsctx)
-        , _maxChunkSize(1024)
+        , _maxChunkSize(2048)
         , _chunkSize(0) 
         , _docType(_dtd)
         , _paramEntity(false)
@@ -4215,7 +4215,7 @@ class XmlReaderImpl
         , _usedSize(0)
         , _maxSize(2048)
         , _startElem(_nsctx)
-        , _maxChunkSize(1024)
+        , _maxChunkSize(2048)
         , _chunkSize(0)
         , _docType(_dtd)
         , _paramEntity(false)
