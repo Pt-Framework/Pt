@@ -532,6 +532,10 @@ MessageProgress Connection::endSendRequest()
     {
         PT_LOG_DEBUG("read SSL handshake");
         _sockbuf.endRead();
+
+        if( _socket.isEof() )
+            throw System::IOError("connection lost");
+
         return progress;
     }
 
@@ -811,6 +815,10 @@ MessageProgress Connection::endReceiveRequest()
     {
         PT_LOG_DEBUG("read SSL handshake");
         _sockbuf.endRead();
+
+        if( _socket.isEof() )
+            throw System::IOError("connection lost");
+        
         return progress;
     }
 
