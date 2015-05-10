@@ -336,6 +336,9 @@ class ServerTest : public Pt::Unit::TestSuite
             Pt::Ssl::Context serverCtx;
             setupSslServerContext(serverCtx);
             
+            // NOTE: enable this to cause a server side handshake failure
+            //serverCtx.setProtocol(Pt::Ssl::TLSv1);
+            
             // start HTTP server          
             Pt::Http::Server server(*_loop);
             server.setSecure(serverCtx);
