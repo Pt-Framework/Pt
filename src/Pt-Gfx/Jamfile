@@ -40,6 +40,7 @@ SharedLibrary Pt-Gfx : ARgbColor.cpp
                        FillEllipse.cpp
                        Stroke.cpp
                        ImageReader.cpp
+					   Image.cpp
 			;
 
 LinkSharedLibraries Pt-Gfx : Pt ;

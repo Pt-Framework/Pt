@@ -50,6 +50,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\FontMetrics.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\GenericAlgo.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Gfx.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Image.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageAlgo.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImagePainter.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageReader.h" />
@@ -496,6 +497,7 @@
     <ClCompile Include="..\..\src\Pt-Gfx\FreeType.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\GfxPerf.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\GreyscaleTest.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\Image.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ImagePainterDemo.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ImagePainterTest.cpp" />

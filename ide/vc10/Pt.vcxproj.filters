@@ -1320,6 +1320,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\FocusEvent.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Image.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2459,6 +2462,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.cpp">
       <Filter>Pt-Hmi\gdi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\Image.cpp">
+      <Filter>Pt-Gfx</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
