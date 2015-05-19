@@ -34,6 +34,8 @@
 #include <Pt/Gfx/Api.h>
 #include <vector>
 
+#include <cstring> // For memcpy() in newer GCC
+
 namespace Pt{
 namespace Gfx2{
 
