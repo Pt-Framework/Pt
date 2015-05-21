@@ -24,6 +24,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "ClockImpl.h"
+#include "Pt/System/SystemError.h"
 #include "Pt/SourceInfo.h"
 #include <sys/time.h>
 #include <time.h>
@@ -98,10 +99,16 @@ DateTime ClockImpl::getLocalTime()
 
 Timespan ClockImpl::getSystemTicks()
 {
-    struct timeval tv;
-    gettimeofday( &tv, 0 );
+    timespec tp;
+    int r = clock_gettime(CLOCK_MONOTONIC, &tp);
+    if(r != 0)
+        throw System::SystemError("clock_gettime");
 
-    return Timespan(tv.tv_sec, tv.tv_usec);
+    return Timespan(tp.tv_sec, tp.tv_nsec/1000);
+
+    //struct timeval tv;
+    //gettimeofday( &tv, 0 );
+    //return Timespan(tv.tv_sec, tv.tv_usec);
 }
 
 } // namespace Pt
