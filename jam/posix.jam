@@ -1,3 +1,34 @@
+rule ConfigureRt
+{
+    WITH_RT = [ CheckBuildC++ "#include <time.h>"
+                              "#include <sys/time.h>"
+                              "int main() { timespec tp; clock_gettime(CLOCK_MONOTONIC, &tp); return 0; }"
+                            : ""
+                            : -lc ] ;
+
+    if ! $(WITH_RT)
+    {
+        WITH_RT = [ CheckBuildC++ "#include <time.h>"
+                                  "#include <sys/time.h>"
+                                  "int main() { timespec tp; clock_gettime(CLOCK_MONOTONIC, &tp); return 0; }"
+                                : ""
+                                : -lrt ] ;
+
+        if $(WITH_RT)
+        {
+            RT_LIBS += -lrt ;
+        }
+    }
+
+    EchoOption WITH_RT : "Rt library" ;
+    Configure WITH_RT ;
+
+    if $(WITH_RT)
+    {
+        EchoOption RT_LIBS : "Rt lib flags" ;
+        Configure RT_LIBS ;
+    }
+}
 
 rule ConfigureDl
 {

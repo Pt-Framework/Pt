@@ -110,6 +110,13 @@ if ! $(SYS)
 {
     Load posix.jam ;
 
+    ConfigureRt ;
+
+    if ! $(WITH_RT)
+    {
+        Exit "ERROR: rt is required." ;
+    }
+    
     ConfigureDl ;
 
     if ! $(WITH_DL)
@@ -124,7 +131,7 @@ if ! $(SYS)
         Exit "ERROR: pthread is required." ;
     }
 
-    SYSLIBS += $(DL_LIBS) $(PTHREAD_LIBS) ;
+    SYSLIBS += $(RT_LIBS) $(DL_LIBS) $(PTHREAD_LIBS) ;
 
     ConfigureUnixSockets ;
 
