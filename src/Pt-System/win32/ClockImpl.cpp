@@ -152,6 +152,40 @@ Timespan ClockImpl::getSystemTicks()
     //return Timespan( Pt::int64_t(1000) * GetTickCount() );
 }
 
+//u64 nano_count()
+//{
+//    static double scale_factor;
+//
+//    static u32 hi = 0;
+//    static u32 lo = 0;
+//
+//    LARGE_INTEGER count;
+//    BOOL ret = QueryPerformanceCounter(&count);
+//    if(ret == 0)
+//        fatal_error("QueryPerformanceCounter", 0);
+//
+//    if(scale_factor == 0.0)
+//    {
+//        LARGE_INTEGER frequency;
+//        BOOL ret = QueryPerformanceFrequency(&frequency);
+//        if(ret == 0)
+//            fatal_error("QueryPerformanceFrequency", 0);
+//        scale_factor = (1000000000.0 / frequency.QuadPart);
+//    }
+//
+//#ifdef FACTOR_64
+//    hi = count.HighPart;
+//#else
+//    /* On VirtualBox, QueryPerformanceCounter does not increment
+//    the high part every time the low part overflows.  Workaround. */
+//    if(lo > count.LowPart)
+//        hi++;
+//#endif
+//    lo = count.LowPart;
+//
+//    return (u64)((((u64)hi << 32) | (u64)lo) * scale_factor);
+//}
+
 } // namespace Pt
 
 } // namespace System
