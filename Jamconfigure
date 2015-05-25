@@ -110,7 +110,7 @@ if ! $(SYS)
 {
     Load posix.jam ;
 
-    ConfigureRt ;
+    ConfigurePosixClock ;
 
     if ! $(WITH_RT)
     {

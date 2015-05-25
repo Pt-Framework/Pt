@@ -1,4 +1,4 @@
-rule ConfigureRt
+rule ConfigurePosixClock
 {
     WITH_RT = [ CheckBuildC++ "#include <time.h>"
                               "#include <sys/time.h>"
