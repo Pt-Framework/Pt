@@ -214,9 +214,9 @@ void DateTimeTest::testIsoConvert()
 {
     Pt::DateTime dt(2001, 11, 15, 12, 45, 23, 956);
     std::string isoString = dt.toIsoString();
-    PT_UNIT_ASSERT( isoString == "2001-11-15 12:45:23.956" );
+    PT_UNIT_ASSERT( isoString == "2001-11-15T12:45:23.956" );
 
-    dt = Pt::DateTime::fromIsoString("1789-05-12 23:59:59.999");
+    dt = Pt::DateTime::fromIsoString("1789-05-12T23:59:59.999");
     PT_UNIT_ASSERT( dt.year() == 1789 );
     PT_UNIT_ASSERT( dt.month() == 5 );
     PT_UNIT_ASSERT( dt.day() == 12 );

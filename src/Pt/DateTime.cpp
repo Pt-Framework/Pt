@@ -155,7 +155,7 @@ void dateTimeToString(std::basic_string<CharT>& str, const DateTime& dt)
     ret[7] = '-';
     ret[8] = static_cast<char>('0' + dt.date().day() / 10);
     ret[9] = '0' + dt.date().day() % 10;
-    ret[10] = ' ';
+    ret[10] = 'T';
     ret[11] = static_cast<char>('0' + dt.time().hour() / 10);
     ret[12] = '0' + dt.time().hour() % 10;
     ret[13] = ':';
@@ -189,7 +189,7 @@ DateTime dateTimeFromString(const std::string& s)
     if (s.size() < 23
         || s.at(4) != '-'
         || s.at(7) != '-'
-        || s.at(10) != ' '
+        //|| s.at(10) != 'T'
         || s.at(13) != ':'
         || s.at(16) != ':'
         || s.at(19) != '.')
