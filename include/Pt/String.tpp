@@ -472,13 +472,13 @@ OutIterT basic_string<Pt::Char>::toUtf16(OutIterT to) const
         if( ch < 0xD800 ||
            (ch > 0xDFFF && ch <= 0xFFFF) )
         {
-            *to++ = *from;
+            *to++ = static_cast<Pt::uint16_t>(*from);
         }
         else if(ch > 0xFFFF && ch <= 0x0010FFFF)
         {
             const int n = (ch - 0x0010000UL);
-            *to++ = ((n >> 10) + 0xD800);
-            *to++ = ((n & 0x3FFU) + 0xDC00);
+            *to++ = static_cast<Pt::uint16_t>( (n >> 10) + 0xD800 );
+            *to++ = static_cast<Pt::uint16_t>( (n & 0x3FFU) + 0xDC00 );
         }
         else
         {
