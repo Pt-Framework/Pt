@@ -213,6 +213,8 @@ class PT_SYSTEM_API Process : private NonCopyable
         */
         int wait();
 
+        bool tryWait(int& status);
+
         //! @brief Returns an I/O device to stdin.
         IODevice* stdInput();
 

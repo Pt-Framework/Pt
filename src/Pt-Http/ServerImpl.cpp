@@ -210,28 +210,16 @@ void Acceptor::onRequest(MessageProgress progress)
 {
     PT_LOG_TRACE("Acceptor::onRequest");
 
-    if( progress.header() )
+    try
     {
-        PT_LOG_DEBUG("received request header");
-        assert(_responder == 0);
-        _responder = _servlet->service()->getResponder( _request );
+        if( progress.header() )
+        {
+            PT_LOG_DEBUG("received request header");
+            assert(_responder == 0);
+            _responder = _servlet->service()->getResponder( _request );
             
-        assert(_responder);
-        _responder->beginRequest( _request, _reply, *_conn.loop() );
-
-        if( _reply.isSending() )
-        {
-            PT_LOG_DEBUG("request interrupted");
-            return;
-        }
-    }
-    
-    if( progress.body() )
-    {     
-        if( _responder)
-        {
-            PT_LOG_DEBUG("received request body");
-            _responder->readRequest(_request, _reply, *_conn.loop());
+            assert(_responder);
+            _responder->beginRequest( _request, _reply, *_conn.loop() );
 
             if( _reply.isSending() )
             {
@@ -239,36 +227,57 @@ void Acceptor::onRequest(MessageProgress progress)
                 return;
             }
         }
-        else
-        {
-            // no responder means that request was interruped and will be ignored
-            PT_LOG_DEBUG("ignoring request body");
-            _request.discard();
-        }
-    }
+    
+        if( progress.body() )
+        {     
+            if( _responder)
+            {
+                PT_LOG_DEBUG("received request body");
+                _responder->readRequest(_request, _reply, *_conn.loop());
 
-    if( progress.finished() )
+                if( _reply.isSending() )
+                {
+                    PT_LOG_DEBUG("request interrupted");
+                    return;
+                }
+            }
+            else
+            {
+                // no responder means that request was interruped and will be ignored
+                PT_LOG_DEBUG("ignoring request body");
+                _request.discard();
+            }
+        }
+
+        if( progress.finished() )
+        {
+            if( ! _conn.isConnected() )
+            {
+                PT_LOG_DEBUG("not connected anymore");
+                _finished.send(*this);
+                return;
+            }
+
+            if(_responder)
+            {
+                PT_LOG_DEBUG("request body finished, begin reply");
+                _responder->beginReply(_request, _reply, *_conn.loop());
+                return;
+            }
+
+            // if there is no responder, the reply was finished before the request was
+            // read completely. In this case the remaining request will be ignored
+        }
+
+        PT_LOG_DEBUG("read request");
+        _request.beginReceive();
+    }
+    catch(const System::IOError& e) 
     {
-        if( ! _conn.isConnected() )
-        {
-            PT_LOG_DEBUG("not connected anymore");
-            _finished.send(*this);
-            return;
-        }
-
-        if(_responder)
-        {
-            PT_LOG_DEBUG("request body finished, begin reply");
-            _responder->beginReply(_request, _reply, *_conn.loop());
-            return;
-        }
-
-        // if there is no responder, the reply was finished before the request was
-        // read completely. In this case the remaining request will be ignored
+        PT_LOG_WARN("EXCEPTION: " << e.what());
+        _finished.send(*this);
     }
 
-    PT_LOG_DEBUG("read request");
-    _request.beginReceive();
 }
 
 

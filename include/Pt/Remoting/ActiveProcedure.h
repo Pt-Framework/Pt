@@ -632,6 +632,36 @@ class ActiveProcedure<R, A1, A2, A3, A4, A5,
             _args[5] = 0;
         }
 
+        A1& a1()
+        { return _v1; }
+
+        const A1& a1() const
+        { return _v1; }
+
+        A2& a2()
+        { return _v2; }
+
+        const A2& a2() const
+        { return _v2; }
+
+        A3& a3()
+        { return _v3; }
+
+        const A3& a3() const
+        { return _v3; }
+
+        A4& a4()
+        { return _v4; }
+
+        const A4& a4() const
+        { return _v4; }
+
+        A5& a5()
+        { return _v5; }
+
+        const A5& a5() const
+        { return _v5; }
+
     protected:
         Composer** onBeginArgs()
         {
@@ -723,6 +753,30 @@ class ActiveProcedure<R, A1, A2, A3, A4,
             _args[4] = 0;
         }
 
+        A1& a1()
+        { return _v1; }
+
+        const A1& a1() const
+        { return _v1; }
+
+        A2& a2()
+        { return _v2; }
+
+        const A2& a2() const
+        { return _v2; }
+
+        A3& a3()
+        { return _v3; }
+
+        const A3& a3() const
+        { return _v3; }
+
+        A4& a4()
+        { return _v4; }
+
+        const A4& a4() const
+        { return _v4; }
+
     protected:
         Composer** onBeginArgs()
         {
@@ -808,6 +862,24 @@ class ActiveProcedure<R, A1, A2, A3,
             _args[3] = 0;
 
         }
+
+        A1& a1()
+        { return _v1; }
+
+        const A1& a1() const
+        { return _v1; }
+
+        A2& a2()
+        { return _v2; }
+
+        const A2& a2() const
+        { return _v2; }
+
+        A3& a3()
+        { return _v3; }
+
+        const A3& a3() const
+        { return _v3; }
 
     protected:
         Composer** onBeginArgs()

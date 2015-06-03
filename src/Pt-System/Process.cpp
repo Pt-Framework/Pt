@@ -87,6 +87,12 @@ int Process::wait()
 }
 
 
+bool Process::tryWait(int& status) 
+{
+    return _impl->tryWait(status);
+}
+
+
 IODevice* Process::stdInput()
 {
     return _impl->stdInput();
