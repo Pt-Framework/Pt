@@ -30,6 +30,7 @@
 #include <Pt/XmlRpc/HttpService.h>
 #include <Pt/Http/Request.h>
 #include <Pt/Http/Reply.h>
+#include <Pt/System/IOError.h>
 #include <Pt/System/Logger.h>
 #include <cassert>
 
@@ -72,14 +73,28 @@ void HttpResponder::onReadRequest(Http::Request& request, Pt::Http::Reply& reply
 
 void HttpResponder::onBeginReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
-    _reply = &reply;
-    finishMessage(loop);
+    try
+    {
+        _reply = &reply;
+        finishMessage(loop);
+    }
+    catch(const SerializationError& se)
+    {
+      throw System::IOError( se.what() );
+    }
 }
 
 
 void HttpResponder::onWriteReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
-    advanceReply(reply);
+    try
+    {
+        advanceReply(reply);
+    }
+    catch(const SerializationError& se)
+    {
+      throw System::IOError( se.what() );
+    }
 }
 
 
