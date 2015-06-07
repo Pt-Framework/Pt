@@ -52,7 +52,7 @@ namespace Hmi {
 
 ApplicationImpl::ApplicationImpl()
 : _inputDevice("/dev/input/event0")
-, _inputDevice2("/dev/input/event1")
+, _inputDevice2("/dev/input/event2")
 {  		 
 	_inputDevice.setActive(*this);
 	_inputDevice.begin();
