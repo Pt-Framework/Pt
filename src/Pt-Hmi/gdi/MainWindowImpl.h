@@ -61,7 +61,7 @@ public:
 
 	void render();
 
-  void setPosition(const Ui::PointF& p);
+  void setPos(const Ui::PointF& p);
 
   void setSize(const Ui::SizeF& size);
 

@@ -120,7 +120,7 @@ void MainWindowImpl::hide()
 }
 
 
-void MainWindowImpl::setPosition(const Ui::PointF& p)
+void MainWindowImpl::setPos(const Ui::PointF& p)
 {	
 	if( Position.get() != p ) 
 	{

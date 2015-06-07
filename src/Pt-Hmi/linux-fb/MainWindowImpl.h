@@ -59,7 +59,7 @@ class MainWindowImpl  : public ChildWindow
 
 		void hide();
 
-		void setPosition(const Ui::PointF& p);
+		void setPos(const Ui::PointF& p);
 
 		void setSize(const Ui::SizeF& size);
 

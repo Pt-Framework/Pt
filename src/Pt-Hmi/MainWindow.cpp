@@ -215,7 +215,7 @@ void MainWindow::setSize(const Ui::SizeF& size)
 void MainWindow::setPosition(const Ui::PointF& pos)
 {
 	Widget::setPosition( pos);
-	_impl->setPosition( pos);
+	_impl->setPos( pos);
 }
 
 void MainWindow::setFocus(bool f)

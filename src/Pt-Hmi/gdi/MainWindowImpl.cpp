@@ -354,7 +354,7 @@ void MainWindowImpl::onPaint()
 }
 
 
-void MainWindowImpl::setPosition(const Ui::PointF& pf)
+void MainWindowImpl::setPos(const Ui::PointF& pf)
 {
   Ui::Point p = _app.fromUnit(pf);
   SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, SWP_DRAWFRAME|SWP_NOSIZE);
