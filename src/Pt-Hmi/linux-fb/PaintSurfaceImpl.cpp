@@ -1,6 +1,8 @@
 #include "PaintSurfaceImpl.h"
 #include <Pt/Hmi/Application.h>
 #include "ScreenImpl.h"
+#include "ApplicationImpl.h"
+#include <linux/fb.h>
 
 namespace Pt{
 namespace Hmi{
@@ -18,13 +20,16 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
 
 void PaintSurfaceImpl::resize(const Ui::SizeF& size)
 {
-	const size_t depth  =  Application::instance().mainScreen().impl()->depth();
-	const size_t stride =  Application::instance().mainScreen().impl()->stride();		
+  const fb_var_screeninfo& screenInfo = Application::instance().impl()->screenInfo();
+	const fb_fix_screeninfo& fixedInfo = Application::instance().impl()->fixedInfo();
+
+	const size_t depth  =  screenInfo.bits_per_pixel;
+	const size_t stride =  fixedInfo.line_length -  screenInfo.xres;
 	
 	if( depth == 16)
-		_image.resize(size.width(), size.height(), stride, Ui::ImageFormat::rgb565() );
+		_image.resize(size.width(), size.height(), Ui::ImageFormat::rgb565(), stride );
 	else if( depth == 32 )
-		_image.resize(size.width(), size.height(), stride, Ui::ImageFormat::argb8888() );
+		_image.resize(size.width(), size.height(), Ui::ImageFormat::argb8888(), stride);
 }
 
 Ui::SizeF PaintSurfaceImpl::size() const

@@ -51,21 +51,6 @@ class ScreenImpl : public Window
 		{
 			return  Size.get().height();
 		}
-
-		Pt::ssize_t depth() const
-		{ 
-			return _screenInfo.bits_per_pixel;
-		}
-
-		Pt::ssize_t stride() const
-		{ 
-			return _fixedInfo.line_length -  _screenInfo.xres;
-		}
-
-		char* frameBuffer()
-		{ 
-			return (char*)_buffer; 
-		}
 		 		 
 		
 	protected:
@@ -84,17 +69,15 @@ class ScreenImpl : public Window
 		void saveCursorBackImage(const Pt::Hmi::PointerEvent& mouseEvent);
 
 	private:
-		int											_fd;
-		fb_var_screeninfo				_screenInfo;
-		fb_fix_screeninfo				_fixedInfo;
-		void*										_buffer;
-		Pt::size_t							_bufferSize;
-		PaintSurface            _paintSurface;	
-		
 		std::vector<Pt::uint8_t>	_cursorBuffer;
 		Ui::Point			            _cursorPos;
 		size_t									  _cursorWidth;	
 		size_t									  _cursorHeight;	
+		const fb_var_screeninfo&	_screenInfo;
+		const fb_fix_screeninfo&	_fixedInfo;
+		size_t		_depth;
+		char*     _buffer; 
+		size_t _bufferSize;
 };
 
 }}

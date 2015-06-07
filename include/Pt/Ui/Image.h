@@ -65,7 +65,15 @@ class PT_UI_API Image
 
 		void setColor( const Color& color );
 
-		void resize( size_t width, size_t height, size_t strideInBytes = 0, const ImageFormat& format = ImageFormat::argb8888() )
+		void resize( size_t width, size_t height, size_t strideInBytes = 0)
+		{
+			_stride = strideInBytes;
+			_width = width;
+			_height = height;
+			_buffer.resize( ( width * _format->pixelSize() + _stride) * height ); 
+		}
+
+		void resize( size_t width, size_t height, const ImageFormat& format, size_t strideInBytes = 0)
 		{
 			_format = &format;
 			_stride = strideInBytes;

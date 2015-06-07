@@ -32,47 +32,20 @@
 #include <sys/ioctl.h> 
 #include <sys/mman.h>
 #include <unistd.h>
+#include <Pt/Hmi/Application.h>
+#include "ApplicationImpl.h"
 
 namespace Pt{
 namespace Hmi{
 
-/*_fixedInfo.type;   // 0 -> Packed pixels
-                         // 1 -> Non interleaved planes
-                         // 2 -> Interleaved planes
-                         // 3 -> Text/attributes
-                         // 4 -> EGA/VGA planes
-
-    /_fixedInfo.visual; // 0 -> Mono (1=black, 0=white)
-                         // 1 -> Mono (1=white, 0=black)
-                         // 2 -> True color
-                         // 3 -> Pseudo color (like atari)
-                         // 4 -> Direct color
-                         // 5 -> Pseudo color readonly
-*/
 
 ScreenImpl::ScreenImpl()
-{
-  _fd = open ("/dev/fb0", O_RDWR);
-
-  if(_fd < 0)
-      throw std::runtime_error("Could not open framebuffer device" + PT_SOURCEINFO);
-
-  if( 0 > ioctl(_fd, FBIOGET_VSCREENINFO, &_screenInfo) )
-      throw std::runtime_error("FBIOGET_VSCREENINFO failed" + PT_SOURCEINFO);
-
-  // Get the fixed state
-  if( ioctl(_fd, FBIOGET_FSCREENINFO, &_fixedInfo) < 0 )
-      throw std::runtime_error("FBIOGET_FSCREENINFO failed" + PT_SOURCEINFO);
-
-    
-  // Memory map the display
-  std::clog<<"LineWidth = " << _fixedInfo.line_length << " xres = " << _screenInfo.xres << std::endl;
-  std::clog<<"yres = " << _screenInfo.yres << std::endl;
-
-  const unsigned widthInBytes = _screenInfo.xres * _screenInfo.bits_per_pixel / 8;
-  _bufferSize     = _fixedInfo.line_length * _screenInfo.yres;
-  _buffer         =  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);	
-
+: _screenInfo( Application::instance().impl()->screenInfo() )
+, _fixedInfo(  Application::instance().impl()->fixedInfo() )
+, _depth( _screenInfo.bits_per_pixel )
+, _buffer( Application::instance().impl()->frameBuffer()  )
+, _bufferSize( _fixedInfo.line_length * _screenInfo.yres ) 
+{  
 	Visible = true;
 	Size = Ui::SizeF( _screenInfo.xres,  _screenInfo.yres );
 	Position = Ui::PointF(0,0 );
@@ -83,8 +56,9 @@ ScreenImpl::ScreenImpl()
 
 void ScreenImpl::bitBlit(const std::vector<Pt::uint8_t>& plane, size_t w, size_t h, const Ui::Point& pos, BlitOp op)
 {
+
 	static const size_t planePixelSize = 4;
-	const size_t bufferPixelSize = depth() / 8;
+	const size_t bufferPixelSize = _depth / 8;
 	const size_t bufferHeight = std::min<size_t>(  pos.y() + h, _screenInfo.yres ); 
 	const size_t bufferWidth  = std::min<size_t>(  pos.x() + w, _screenInfo.xres ); 
 
@@ -103,7 +77,7 @@ void ScreenImpl::bitBlit(const std::vector<Pt::uint8_t>& plane, size_t w, size_t
 			Pt::uint8_t* pointerBuffer = &((Pt::uint8_t*)_buffer)[lineOffsetBuffer + (xBuffer * bufferPixelSize)];
 			const Pt::uint8_t* pointerCursor = &plane[lineOffsetCursor + (xCursor * planePixelSize)];
 
-			switch( depth() )
+			switch( _depth )
 			{
 				case 32:
 				{
@@ -138,7 +112,7 @@ void ScreenImpl::bitBlit(const std::vector<Pt::uint8_t>& plane, size_t w, size_t
 
 void ScreenImpl::saveCursorBackImage( const Pt::Hmi::PointerEvent& mouseEvent )
 {
-	const size_t pixelSizeInByte = depth() / 8;		
+	const size_t pixelSizeInByte = _depth / 8;		
 	_cursorPos    = Ui::Point( mouseEvent.x(), mouseEvent.y() );	
 	_cursorWidth  = Cursor.get().width();
 	_cursorHeight = Cursor.get().height();
@@ -192,11 +166,7 @@ void ScreenImpl::onInvalidate()
 
 ScreenImpl::~ScreenImpl()
 {
-	if(_buffer)
-		munmap(_buffer, _bufferSize);
 
-	if(_fd > 0)
-		::close(_fd);
 }
 
 }}

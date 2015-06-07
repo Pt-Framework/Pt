@@ -38,9 +38,9 @@
 #include <Pt/Ui/Image.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Cursor.h>
+#include <linux/fb.h>
 
 namespace Pt {
-
 namespace Hmi {
 
 class ApplicationImpl : public Pt::System::MainLoop
@@ -114,10 +114,43 @@ class ApplicationImpl : public Pt::System::MainLoop
 
 		void setCursor( const Hmi::Cursor* cursor );
 
+		/*
+		Pt::ssize_t depth() const
+		{ 
+			return _screenInfo.bits_per_pixel;
+		}
+
+		Pt::ssize_t stride() const
+		{ 
+			return _fixedInfo.line_length -  _screenInfo.xres;
+		}
+
+		*/
+
+		char* frameBuffer()
+		{ 
+			return (char*)_buffer; 
+		}
+
+	  const fb_var_screeninfo& screenInfo() const
+		{
+			return _screenInfo;
+		}
+
+		const fb_fix_screeninfo& fixedInfo() const
+		{
+			return _fixedInfo;
+		}
+
 	protected:
 		Pt::Signal<const struct input_event&> _inputEvent;
 		InputDevice _inputDevice;
 		InputDevice _inputDevice2;		
+		int											_fd;
+		fb_var_screeninfo				_screenInfo;
+		fb_fix_screeninfo				_fixedInfo;
+		void*										_buffer;
+
 
 };
 
