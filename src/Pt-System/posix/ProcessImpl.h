@@ -24,7 +24,10 @@ class ProcessImpl : private NonCopyable
         { return _procInfo; }
 
         Process::State state() const
-        { return _state; }
+        { 
+          tryWait(_state);
+          return _state; 
+        }
 
         void start();
 

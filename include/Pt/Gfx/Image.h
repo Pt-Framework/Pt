@@ -33,8 +33,7 @@
 #include <Pt/Types.h>
 #include <Pt/Gfx/Api.h>
 #include <vector>
-
-#include <cstring> // For memcpy() in newer GCC
+#include <cstring>
 
 namespace Pt{
 namespace Gfx2{
