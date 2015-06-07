@@ -31,8 +31,8 @@ namespace Pt{
 namespace Hmi{
 
 Window::Window(Window* parent)
-: PT_HMI_INIT_PROPERTY_VALUE(MinimumSize,Pt::Gfx::SizeF(0,0))
-, PT_HMI_INIT_PROPERTY_VALUE(MaximumSize,Pt::Gfx::SizeF(std::numeric_limits<Pt::uint16_t>::max() ,std::numeric_limits<Pt::uint16_t>::max()))
+: PT_HMI_INIT_PROPERTY_VALUE(MinimumSize,Ui::SizeF(0,0))
+, PT_HMI_INIT_PROPERTY_VALUE(MaximumSize,Ui::SizeF(std::numeric_limits<Pt::uint16_t>::max() ,std::numeric_limits<Pt::uint16_t>::max()))
 , PT_HMI_INIT_PROPERTY_VALUE(StartPostion, WindowStartPosition::Manual)
 , PT_HMI_INIT_PROPERTY_VALUE(State, WindowState::Normal)
 , PT_HMI_INIT_PROPERTY_VALUE(ShowInTaskbar,true)
@@ -41,7 +41,7 @@ Window::Window(Window* parent)
 , PT_HMI_INIT_PROPERTY_VALUE(ShowMaximizeButton,true)
 , PT_HMI_INIT_PROPERTY_VALUE(ShowSysMenu,true)	
 , PT_HMI_INIT_PROPERTY_VALUE(Border,WindowBorder::Sizeable)
-, PT_HMI_INIT_PROPERTY_VALUE(Icon, Pt::Gfx::ARgbImage(0,0))
+, PT_HMI_INIT_PROPERTY_VALUE(Icon, Ui::Image(0,0))
 , PT_HMI_INIT_PROPERTY_VALUE(CanClose,true)
 , PT_HMI_INIT_PROPERTY_VALUE(FocuseMoveKey, "\t")
 , PT_HMI_INIT_PROPERTY_VALUE(FirstShow,true)
@@ -54,8 +54,8 @@ Window::Window(Window* parent)
   Visible = false;
   Name = std::string("Window");
   AcceptFocus = false;	
-  Position = Pt::Gfx::PointF(20,20);
-  Size =  Pt::Gfx::SizeF(200,200);
+  Position = Ui::PointF(20,20);
+  Size =  Ui::SizeF(200,200);
 	eventReceived() += Pt::slot(*this, &Window::onSizeEvent);
 	eventReceived() += Pt::slot(*this, &Window::onPositionEvent);
 	eventReceived() += Pt::slot(*this, &Window::onFocusEvent);

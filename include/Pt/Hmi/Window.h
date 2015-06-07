@@ -32,6 +32,7 @@
 #include <Pt/Hmi/WindowProperties.h>
 #include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
+#include <Pt/Ui/Image.h>
 
 namespace Pt {
 namespace Hmi {
@@ -43,8 +44,8 @@ class PT_HMI_API Window  : public Widget
 	public:    		
     virtual ~Window();    
 
-    ValueProperty<Pt::Gfx::SizeF>                  MinimumSize;
-    ValueProperty<Pt::Gfx::SizeF>                  MaximumSize;
+    ValueProperty<Ui::SizeF>                  MinimumSize;
+    ValueProperty<Ui::SizeF>                  MaximumSize;
     ValueProperty<WindowStartPosition::Type>       StartPostion;
     ValueProperty<WindowState::Type>               State;    
     ValueProperty<bool>                            ShowInTaskbar;
@@ -53,7 +54,7 @@ class PT_HMI_API Window  : public Widget
     ValueProperty<bool>                            ShowMaximizeButton;
     ValueProperty<bool>                            ShowSysMenu;
     ValueProperty<WindowBorder::Type>              Border;
-    ValueProperty<Pt::Gfx::ARgbImage>              Icon;
+    ValueProperty<Ui::Image>						           Icon;
     ValueProperty<bool>                            CanClose;
     ValueProperty<bool>                            FirstShow;
     ValueProperty<std::string>                     FocuseMoveKey;      

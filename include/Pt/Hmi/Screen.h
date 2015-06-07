@@ -47,7 +47,7 @@ class PT_HMI_API Screen
 		ScreenImpl* impl()
 		{
 			return _impl;
-		}
+		}		
 
 	private:
 		ScreenImpl* _impl;

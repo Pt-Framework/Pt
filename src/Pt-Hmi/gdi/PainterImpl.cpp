@@ -30,11 +30,10 @@
 #include "PaintSurfaceImpl.h"
 #include "Pt/Types.h"
 #include <Pt/System/Clock.h>
-#include "Pt/Gui/Pixmap.h"
-#include "Pt/Gfx/Rect.h"
-#include "Pt/Gfx/Region.h"
-#include "Pt/Gfx/FontMetrics.h"
-#include "Pt/Gfx/Rgb888Color.h"
+#include "Pt/Ui/Rect.h"
+#include "Pt/Ui/Region.h"
+#include "Pt/Ui/FontMetrics.h"
+#include "Pt/Ui/Color.h"
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/PaintSurface.h>
@@ -46,10 +45,10 @@ namespace Hmi {
 
 PainterImpl::PainterImpl(PaintSurfaceImpl* surface)
 : _surface(surface)
-, _pen(Gfx::Pen(1))
-, _brush(Gfx::Brush(Gfx::ARgbColor(0, 0, 0)))
-, _font(Gfx::Font(determinePlatformDefaultFontName()))
-, _renderMode(Gfx::RenderMode::Normal)
+, _pen(Ui::Pen(1))
+, _brush(Ui::Brush(Ui::Color(0, 0, 0)))
+, _font(Ui::Font(determinePlatformDefaultFontName()))
+, _renderMode(Ui::RenderMode::Normal)
 {
 }
 
@@ -59,27 +58,25 @@ PainterImpl::~PainterImpl()
 }
 
 
-void PainterImpl::drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline )
+void PainterImpl::drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline )
 {
+	//Todo: impl
     drawText(to, text);
 }
 
-void PainterImpl::setRenderMode( Gfx::RenderMode::Type mode )
+void PainterImpl::setRenderMode( Ui::RenderMode::Type mode )
 {
 	_renderMode = mode;
 }
 
-void PainterImpl::setPen(const Gfx::Pen& pen)
+void PainterImpl::setPen(const Ui::Pen& pen)
 {
-    if (pen == _pen) 
-        return;
-
     _pen = pen;
     updatePen();
 }
 
 
-DWORD PainterImpl::toGdiPenStyle( const Pt::Gfx::Pen& pen )
+DWORD PainterImpl::toGdiPenStyle( const Ui::Pen& pen )
 {
 #ifdef _WIN32_WCE
     DWORD penStyle = 0;
@@ -89,10 +86,10 @@ DWORD PainterImpl::toGdiPenStyle( const Pt::Gfx::Pen& pen )
 
     switch( pen.style() )
     {
-        case Gfx::Pen::SolidStyle:
+        case Ui::Pen::SolidStyle:
             penStyle |= PS_SOLID;
         break;
-        case Gfx::Pen::DashStyle:
+        case Ui::Pen::DashStyle:
             penStyle |= PS_DASH;
         break;
     }
@@ -100,20 +97,20 @@ DWORD PainterImpl::toGdiPenStyle( const Pt::Gfx::Pen& pen )
 #ifndef _WIN32_WCE
     switch( pen.capStyle() )
     {
-        case Pt::Gfx::Pen::RoundCap:
+        case Ui::Pen::RoundCap:
             penStyle |= PS_ENDCAP_ROUND;
         break;
-        case Pt::Gfx::Pen::FlatCap:
+        case Ui::Pen::FlatCap:
             penStyle |= PS_ENDCAP_FLAT;
         break;
     }
 
     switch( pen.joinStyle() )
     {
-        case Pt::Gfx::Pen::RoundJoin:
+        case Ui::Pen::RoundJoin:
              penStyle |= PS_JOIN_ROUND;
         break;
-        case Pt::Gfx::Pen::BevelJoin:
+        case Ui::Pen::BevelJoin:
              penStyle |= PS_JOIN_BEVEL;
         break;
     }
@@ -125,9 +122,6 @@ DWORD PainterImpl::toGdiPenStyle( const Pt::Gfx::Pen& pen )
 
 void PainterImpl::updatePen()
 {
-    Gfx::Rgb888Color penCol;
-    assign( penCol, _pen.color() );
-
     DWORD penStyle = toGdiPenStyle( _pen );
 
 #ifdef _WIN32_WCE
@@ -135,7 +129,7 @@ void PainterImpl::updatePen()
 #else
     LOGBRUSH brush;
     brush.lbStyle = BS_SOLID ;
-    brush.lbColor = RGB(penCol.red(), penCol.green(), penCol.blue());
+    brush.lbColor = RGB(_pen.color().red()* 255, _pen.color().green()* 255, _pen.color().blue()* 255);
 
     HPEN newPen = ExtCreatePen( penStyle , _pen.size(), &brush, 0, NULL );
 #endif
@@ -145,17 +139,17 @@ void PainterImpl::updatePen()
     DeleteObject(oldPen);
 
     // Set the Text color to the pen color.
-    SetTextColor(_surface->deviceContext(), RGB(penCol.red(), penCol.green(), penCol.blue()));
+    SetTextColor(_surface->deviceContext(), RGB(_pen.color().red()*255, _pen.color().green()*255, _pen.color().blue()*255));
 }
 
 
-const Gfx::Pen& PainterImpl::pen() const
+const Ui::Pen& PainterImpl::pen() const
 {
     return _pen;
 }
 
 
-void PainterImpl::setBrush(const Gfx::Brush& brush)
+void PainterImpl::setBrush(const Ui::Brush& brush)
 {
     _brush = brush;
     updateBrush();
@@ -168,23 +162,18 @@ void PainterImpl::updateBrush()
 
     switch (_brush.fillStyle()) {
 
-        case Gfx::Brush::SolidFill: {
-            Gfx::Rgb888Color col;
-            assign( col, _brush.color() );
-            newBrushHandle = CreateSolidBrush(RGB(col.red(), col.green(), col.blue()));
+        case Ui::Brush::SolidFill: 
+				{
+            newBrushHandle = CreateSolidBrush(RGB(_brush.color().red()*255, _brush.color().green()*255, _brush.color().blue()*255));
             break;
         }
 
-        case Gfx::Brush::TextureFill: 
-		{
-            const Gfx::ARgbImage& texture = _brush.texture();
+        case Ui::Brush::TextureFill: 
+				{
+            const Ui::Image& texture = _brush.texture();
 
-            if (texture.empty())
+            if (texture.width() != 0)
             {
-                // Convert our generic format to a 32 bit image format which Windows can understand.
-                Gfx::Rgb888Image rgb32Image(_brush.texture().width(), _brush.texture().height());
-                assign(_brush.texture().begin(), _brush.texture().end(), rgb32Image.begin());
-
                 // Fill the info for a device-independent bitmap to hold the texture data in the Windows system.
                 BITMAPINFO bitmapInfo;
                 ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
@@ -193,7 +182,7 @@ void PainterImpl::updateBrush()
                 bitmapInfo.bmiHeader.biWidth       = texture.width();             // Bitmap width.
                 bitmapInfo.bmiHeader.biHeight      = -(ssize_t)texture.height();  // Bitmap height. Top-down image.
                 bitmapInfo.bmiHeader.biPlanes      = 1;                           // Always 1.
-                bitmapInfo.bmiHeader.biBitCount    = 32;                          // We internally use a 32-bit bitmap.
+                bitmapInfo.bmiHeader.biBitCount    = texture.format().pixelSize()*8;  // We internally use a 32-bit bitmap.
                 bitmapInfo.bmiHeader.biCompression = BI_RGB;                      // Uncompressed (top-down) RGB bitmap.
                 bitmapInfo.bmiHeader.biSizeImage   = 0;                           // 0 = automatic for BI_RGB-images.
                 bitmapInfo.bmiHeader.biClrUsed     = 0;                           // 0 = No color table.
@@ -205,7 +194,7 @@ void PainterImpl::updateBrush()
                 HBITMAP bitmap = CreateDIBSection(_surface->deviceContext(), &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
 
                 // Copy image data from the texture to the Windows bitmap.
-                memcpy(imageBits, rgb32Image.data(), texture.width() * texture.height() * 4);
+                memcpy(imageBits, texture.pixel(0,0), texture.width() * texture.height() * texture.format().pixelSize());
 
                 // Create the actual brush from this bitmap.
                 newBrushHandle = CreatePatternBrush(bitmap);
@@ -232,12 +221,12 @@ void PainterImpl::updateBrush()
 }
 
 
-const Gfx::Brush& PainterImpl::brush() const
+const Ui::Brush& PainterImpl::brush() const
 {
     return _brush;
 }
 
-void PainterImpl::setFont(const Gfx::Font& font)
+void PainterImpl::setFont(const Ui::Font& font)
 {
     if (font == _font) 
         return;
@@ -255,18 +244,18 @@ void PainterImpl::updateFont()
     
 	switch (_font.fontStyle()) 
 	{
-        case Gfx::Font::NormalStyle:
-        case Gfx::Font::ItalicStyle:
+        case Ui::Font::NormalStyle:
+        case Ui::Font::ItalicStyle:
             fontWeight = FW_NORMAL;
         break;
 
-        case Gfx::Font::BoldStyle:
-        case Gfx::Font::BoldItalicStyle:
+        case Ui::Font::BoldStyle:
+        case Ui::Font::BoldItalicStyle:
             fontWeight = FW_BOLD;
         break;
     }
 
-    BYTE italic = (_font.fontStyle() == Gfx::Font::ItalicStyle || _font.fontStyle() == Gfx::Font::BoldItalicStyle);
+    BYTE italic = (_font.fontStyle() == Ui::Font::ItalicStyle || _font.fontStyle() == Ui::Font::BoldItalicStyle);
 
     LOGFONT fontDescription;
     fontDescription.lfHeight         = -((int)_font.size()); // negative value -> Value is converted to device units.
@@ -293,11 +282,8 @@ void PainterImpl::updateFont()
     HFONT oldFont = (HFONT)SelectObject(_surface->deviceContext(), newFont);
 
     DeleteObject(oldFont);
-    
-	Gfx::Rgb888Color penCol;
-    assign( penCol, _pen.color() );
-
-    SetTextColor(_surface->deviceContext(), RGB(penCol.red(), penCol.green(), penCol.blue()));
+    	
+    SetTextColor(_surface->deviceContext(), RGB(_pen.color().red()*255, _pen.color().green()*255, _pen.color() .blue()*255));
 }
 
 std::string PainterImpl::determinePlatformDefaultFontName()
@@ -312,22 +298,22 @@ std::string PainterImpl::determinePlatformDefaultFontName()
 }
 
 
-const Gfx::Font& PainterImpl::font() const
+const Ui::Font& PainterImpl::font() const
 {
     return _font;
 }
 
 
-Gfx::FontMetrics PainterImpl::fontMetrics() const
+Ui::FontMetrics PainterImpl::fontMetrics() const
 {
     TEXTMETRIC metrics;
     GetTextMetrics(_surface->deviceContext(), &metrics);
 
-    return Gfx::FontMetrics(metrics.tmAscent, metrics.tmDescent, 0, metrics.tmHeight);
+    return Ui::FontMetrics(metrics.tmAscent, metrics.tmDescent, 0, metrics.tmHeight);
 }
 
 
-Gfx::FontMetrics PainterImpl::fontMetrics(Pt::String text) const
+Ui::FontMetrics PainterImpl::fontMetrics(Pt::String text) const
 {
     SIZE textSize;
     TEXTMETRIC basicMetrics;
@@ -336,10 +322,10 @@ Gfx::FontMetrics PainterImpl::fontMetrics(Pt::String text) const
     _text.clear();
 	text.toUtf16( std::back_inserter(_text) );
     GetTextExtentPoint32W(_surface->deviceContext(), _text.c_str(), _text.length(), &textSize);
-	Pt::Gfx::Size size(textSize.cx, textSize.cy);
-	Pt::Gfx::SizeF sizeF = Application::instance().toUnit(size);
+	Ui::Size size(textSize.cx, textSize.cy);
+	Ui::SizeF sizeF = Application::instance().toUnit(size);
 
-    return Gfx::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, (int)sizeF.width(), (int)sizeF.height());
+    return Ui::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, (int)sizeF.width(), (int)sizeF.height());
 }
 
 
@@ -406,25 +392,21 @@ int PainterImpl::depth() const
 }
 
 
-void PainterImpl::drawPixel(const Pt::Gfx::PointF& toF)
+void PainterImpl::drawPixel(const Ui::PointF& toF)
 {
-    Pt::Gfx::Point to = Application::instance().fromUnit(toF);
-
-    Gfx::Rgb888Color col;
-
-    assign( col, _pen.color() );
+  Ui::Point to = Application::instance().fromUnit(toF);    
     
-	SetPixel( _surface->deviceContext(), to.x(), to.y(), RGB(col.red(), col.green(), col.blue()) );
+	SetPixel( _surface->deviceContext(), to.x(), to.y(), RGB(_pen.color().red() *255, _pen.color() .green()*255, _pen.color().blue() * 255) );
 }
 
 
-void PainterImpl::drawLine(const Pt::Gfx::PointF& fromF, const  Pt::Gfx::PointF& toF)
+void PainterImpl::drawLine(const Ui::PointF& fromF, const  Ui::PointF& toF)
 {
 	if (_pen.size() == 0) 
 		return; 
 
-	Pt::Gfx::Point from = Application::instance().fromUnit(fromF);
-	Pt::Gfx::Point to = Application::instance().fromUnit(toF);
+	Ui::Point from = Application::instance().fromUnit(fromF);
+	Ui::Point to = Application::instance().fromUnit(toF);
 
   POINT points[2];
   points[0].x = from.x();
@@ -435,9 +417,9 @@ void PainterImpl::drawLine(const Pt::Gfx::PointF& fromF, const  Pt::Gfx::PointF&
   Polyline(_surface->deviceContext(), points, 2);
 }
 
-void PainterImpl::drawText(const Pt::Gfx::PointF& toF, const Pt::String& text)
+void PainterImpl::drawText(const Ui::PointF& toF, const Pt::String& text)
 {
-	Pt::Gfx::Point to = Application::instance().fromUnit(toF);
+	Ui::Point to = Application::instance().fromUnit(toF);
     RECT rectangle;
     SetRect(&rectangle, to.x(), to.y(), to.x(), to.y());
 
@@ -447,22 +429,22 @@ void PainterImpl::drawText(const Pt::Gfx::PointF& toF, const Pt::String& text)
     int rezt = DrawTextW(_surface->deviceContext(), _text.c_str(), -1, &rectangle, DT_NOCLIP| DT_NOPREFIX );	
 }
 
-void PainterImpl::fillRect(const Pt::Gfx::RectF& rectF)
+void PainterImpl::fillRect(const Ui::RectF& rectF)
 {
-	Pt::Gfx::Rect rect = Application::instance().fromUnit(rectF);
+	Ui::Rect rect = Application::instance().fromUnit(rectF);
 
   RECT rectangle;
-  const Pt::Gfx::Point topLeft     = rect.topLeft();
-  const Pt::Gfx::Point bottomRight = rect.bottomRight();
+  const Ui::Point topLeft     = rect.topLeft();
+  const Ui::Point bottomRight = rect.bottomRight();
   SetRect(&rectangle, topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
 
   HBRUSH currentBrush = (HBRUSH)GetCurrentObject(_surface->deviceContext(), OBJ_BRUSH);
   FillRect(_surface->deviceContext(), &rectangle, currentBrush);
 }
 
-void PainterImpl::drawRect(const Pt::Gfx::RectF& rectF)
+void PainterImpl::drawRect(const Ui::RectF& rectF)
 {
-	Pt::Gfx::Rect rect = Application::instance().fromUnit(rectF);
+	Ui::Rect rect = Application::instance().fromUnit(rectF);
 
     if (rect.size().width() == 1 && rect.size().height() == 1) 
 	{
@@ -474,18 +456,18 @@ void PainterImpl::drawRect(const Pt::Gfx::RectF& rectF)
 
     HBRUSH originalBrush = (HBRUSH)SelectObject(_surface->deviceContext(), GetStockObject(NULL_BRUSH));
 
-    const Pt::Gfx::Point topLeft     = rect.topLeft();
-    const Pt::Gfx::Point bottomRight = rect.bottomRight();
+    const Ui::Point topLeft     = rect.topLeft();
+    const Ui::Point bottomRight = rect.bottomRight();
     Rectangle(_surface->deviceContext(), topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
 
     SelectObject(_surface->deviceContext(), originalBrush);
 }
 
 
-void PainterImpl::drawEllipse(const Pt::Gfx::PointF& topLeftF, const Pt::Gfx::SizeF& sizeF)
+void PainterImpl::drawEllipse(const Ui::PointF& topLeftF, const Ui::SizeF& sizeF)
 {
-	Pt::Gfx::Point topLeft = Application::instance().fromUnit(topLeftF);
-	Pt::Gfx::Size size = Application::instance().fromUnit(sizeF);
+	Ui::Point topLeft = Application::instance().fromUnit(topLeftF);
+	Ui::Size size = Application::instance().fromUnit(sizeF);
 
     HBRUSH originalBrush = (HBRUSH)SelectObject(_surface->deviceContext(), GetStockObject(NULL_BRUSH));
 
@@ -495,10 +477,10 @@ void PainterImpl::drawEllipse(const Pt::Gfx::PointF& topLeftF, const Pt::Gfx::Si
 }
 
 
-void PainterImpl::fillEllipse(const Pt::Gfx::PointF& topLeftF, const Pt::Gfx::SizeF& sizeF)
+void PainterImpl::fillEllipse(const Ui::PointF& topLeftF, const Ui::SizeF& sizeF)
 {
-	Pt::Gfx::Point topLeft = Application::instance().fromUnit(topLeftF);
-	Pt::Gfx::Size size = Application::instance().fromUnit(sizeF);
+	Ui::Point topLeft = Application::instance().fromUnit(topLeftF);
+	Ui::Size size = Application::instance().fromUnit(sizeF);
 
     // Temporarily select the empty pen to only draw the filling.
     HPEN originalPen = (HPEN)SelectObject(_surface->deviceContext(), GetStockObject(NULL_PEN));
@@ -515,7 +497,7 @@ void PainterImpl::fillEllipse(const Pt::Gfx::PointF& topLeftF, const Pt::Gfx::Si
 }
 
 
-void PainterImpl::drawPolyline(const Pt::Gfx::PointF* points, const size_t pointCount)
+void PainterImpl::drawPolyline(const Ui::PointF* points, const size_t pointCount)
 {
     if (_pen.size() == 0)
        return;
@@ -524,7 +506,7 @@ void PainterImpl::drawPolyline(const Pt::Gfx::PointF* points, const size_t point
 
     for (size_t i = 0; i < pointCount; i++)
     {
-		Pt::Gfx::Point p = Application::instance().fromUnit(points[i]);
+		Ui::Point p = Application::instance().fromUnit(points[i]);
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -533,7 +515,7 @@ void PainterImpl::drawPolyline(const Pt::Gfx::PointF* points, const size_t point
 }
 
 
-void PainterImpl::fillPolygon(const Pt::Gfx::PointF* points, const size_t pointCount)
+void PainterImpl::fillPolygon(const Ui::PointF* points, const size_t pointCount)
 {
     HPEN originalPen = (HPEN)SelectObject(_surface->deviceContext(), GetStockObject(NULL_PEN));
 
@@ -541,7 +523,7 @@ void PainterImpl::fillPolygon(const Pt::Gfx::PointF* points, const size_t pointC
 
      for (size_t i = 0; i < pointCount; i++)
     {
-		Pt::Gfx::Point p = Application::instance().fromUnit(points[i]);
+		Ui::Point p = Application::instance().fromUnit(points[i]);
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -552,10 +534,10 @@ void PainterImpl::fillPolygon(const Pt::Gfx::PointF* points, const size_t pointC
 }
 
 
-void PainterImpl::drawSurface(const Pt::Gfx::PointF& toF, PaintSurface& surface, const  Pt::Gfx::Region& pixmapRegion)
+void PainterImpl::drawSurface(const Ui::PointF& toF, PaintSurface& surface, const  Ui::Region& pixmapRegion)
 {
 
-	Pt::Gfx::Point to = Application::instance().fromUnit(toF);
+	Ui::Point to = Application::instance().fromUnit(toF);
 
     // Copy contents from the source bitmap to the destination (=new) bitmap.
     BitBlt( _surface->deviceContext(), to.x(), to.y(), pixmapRegion.width(), pixmapRegion.height(),
@@ -563,29 +545,33 @@ void PainterImpl::drawSurface(const Pt::Gfx::PointF& toF, PaintSurface& surface,
 
 }
 
-void PainterImpl::drawSurface(const Pt::Gfx::PointF& toF, PaintSurface& surface)
+void PainterImpl::drawSurface(const Ui::PointF& toF, PaintSurface& surface)
 {
 
-	Pt::Gfx::Point to = Application::instance().fromUnit(toF);
-	Pt::Gfx::Size size = Application::instance().fromUnit(surface.size());
+	Ui::Point to = Application::instance().fromUnit(toF);
+	Ui::Size size = Application::instance().fromUnit(surface.size());
 
     BitBlt( _surface->deviceContext(), to.x(), to.y(), size.width(), size.height(), surface.impl()->deviceContext(),  
 	        0, 0, SRCCOPY);
 }
 
-void PainterImpl::drawImage(const Pt::Gfx::PointF& toF, const Gfx::ARgbImage& image)
+void PainterImpl::drawImage(const Ui::PointF& toF, const Ui::Image& image)
 {
-	Pt::Gfx::Point to = Application::instance().fromUnit(toF);
+	Ui::Point to = Application::instance().fromUnit(toF);
 
-    this->drawImage( to.x(), to.y(), image.begin(), image.end(), image.width(), image.height() );
+	const size_t depth = image.format().pixelSize() * 8; 
+
+	drawCompatibleImage(to.x(), to.y(), depth,  (const char*) image.pixel(0,0), image.width(), image.height() );
 }
 
-void PainterImpl::drawImage(const Pt::Gfx::PointF& toF, const Gfx::ARgbImage& image, const  Pt::Gfx::Region& imageRegion)
+void PainterImpl::drawImage(const Ui::PointF& toF, const Ui::Image& image, const  Ui::Region& imageRegion)
 {
-	Pt::Gfx::Point to = Application::instance().fromUnit(toF);
+	Ui::Point to = Application::instance().fromUnit(toF);
 
-	Gfx::ARgbSubImage subImage(const_cast<Gfx::ARgbImage&>( image ), imageRegion);
-	this->drawImage( to.x(), to.y(), subImage.begin(), subImage.end(), subImage.width(), subImage.height() );
+	//Todo: impl region
+	const size_t depth = image.format().pixelSize() * 8; 
+
+	drawCompatibleImage(to.x(), to.y(), depth,  (const char*) image.pixel(0,0), image.width(), image.height() );
 }
 
 
@@ -597,7 +583,7 @@ void PainterImpl::drawIndependentImage(size_t x, size_t y, const char* data, siz
     bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER); // Size of this struct.
     bitmapInfo.bmiHeader.biWidth       = width;             // Bitmap width.
     bitmapInfo.bmiHeader.biHeight      = -(ssize_t)height;  // Bitmap height. Negative value = top-down image.
-    bitmapInfo.bmiHeader.biPlanes      = 1;                 // Always 1.
+    bitmapInfo.bmiHeader.biPlanes      = 1;                 // Always 1.			
     bitmapInfo.bmiHeader.biBitCount    = 32;                // We internally use a 32-bit bitmap.
     bitmapInfo.bmiHeader.biCompression = BI_RGB;            // Uncompressed (top-down) RGB bitmap.
     bitmapInfo.bmiHeader.biSizeImage   = 0;                 // 0 = automatic for BI_RGB-images.
@@ -624,12 +610,12 @@ void PainterImpl::drawCompatibleImage(size_t x, size_t y, size_t depth, const ch
     HBITMAP bitmap = CreateBitmap(width, height, 1, depth, (VOID*)data);
 
     if (bitmap == NULL) 
-	{
+	  {
         drawIndependentImage(x, y, data, width, height);
         return;
     }
 
-    HDC bitmapDeviceConText = CreateCompatibleDC(NULL);
+    HDC bitmapDeviceConText = CreateCompatibleDC(NULL );
     SelectObject(bitmapDeviceConText, bitmap);
 
     BitBlt(_surface->deviceContext(), x, y, width, height, bitmapDeviceConText, 0, 0, SRCCOPY);

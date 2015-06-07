@@ -24,7 +24,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include <Pt/UI/Argb8888Format.h>
+#include <Pt/Ui/Argb8888Format.h>
 
 namespace Pt{
 namespace Ui{
@@ -38,19 +38,23 @@ Argb8888Format::Argb8888Format()
 
 void Argb8888Format::setColor(Pt::uint8_t* pixel, const Color& c) const
 {
-	*pixel = (Pt::uint8_t) (c.alpha() * 255.0f);
-	pixel++;
-	*pixel = (Pt::uint8_t)(c.red() * 255.0f);
+	*pixel = (Pt::uint8_t)(c.blue() * 255.0f);	
+	
 	pixel++;
 	*pixel = (Pt::uint8_t)(c.green() * 255.0f);
+	
 	pixel++;
-	*pixel = (Pt::uint8_t)(c.blue() * 255.0f);			 
+	*pixel = (Pt::uint8_t)(c.red() * 255.0f);
+	
+	pixel++;
+	*pixel = (Pt::uint8_t) (c.alpha() * 255.0f);	
+		 
 }
 
 
 Color Argb8888Format::color(const Pt::uint8_t* pixel) const
 {
-	return Color( (*pixel) / 255.0f, *(pixel +1)/255.0f, *(pixel +2)/255.0f, *(pixel +3)/255.0f);
+	return Color( (*(pixel+3)) / 255.0f, *(pixel +2)/255.0f, *(pixel +1)/255.0f, *(pixel)/255.0f);
 }
 
 

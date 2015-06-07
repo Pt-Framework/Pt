@@ -45,19 +45,19 @@ Dialog1::~Dialog1()
 void Dialog1::init()
 {
 	//Dialog
-	Size  = Pt::Gfx::SizeF(700,500);
+	Size  = Ui::SizeF(700,500);
 	MinimumSize = Size.get();
-	Position = Pt::Gfx::PointF(400,400);
+	Position = Ui::PointF(400,400);
 	Caption = std::string("This is a sample modal dialog 1");
 	StartPostion = Hmi::WindowStartPosition::CenterParent;
-	BackColor = Gfx::ARgbColor(0,255,255);
+	BackColor = Ui::Color(0,1,1);
 	Border = WindowBorder::DialogSizeable;
 
 	//New dialog button 
 	_newDialogButton.Margin = Hmi::Margin(5);
 	_newDialogButton.Dock = Docking::Right;
-	_newDialogButton.Position = Gfx::PointF(10,10);
-	_newDialogButton.Size = Pt::Gfx::SizeF(200,30);
+	_newDialogButton.Position = Ui::PointF(10,10);
+	_newDialogButton.Size = Ui::SizeF(200,30);
 	_newDialogButton.Caption = std::string("New Dialog [CTRL+F]");
 	_newDialogButton.ShortcutKey = std::string("C//f");
 	_newDialogButton.Clicked += Pt::slot(*this,&Dialog1::onShowNextDialog);
@@ -66,31 +66,31 @@ void Dialog1::init()
 	//Close Button
 	_closeButton.Margin = Hmi::Margin(5);
 	_closeButton.Dock = Docking::Right;
-	_closeButton.Position = Gfx::PointF(10,10);
-	_closeButton.Size = Pt::Gfx::SizeF(200,30);
+	_closeButton.Position = Ui::PointF(10,10);
+	_closeButton.Size = Ui::SizeF(200,30);
 	_closeButton.ShortcutKey = std::string("C//x");
 	_closeButton.Caption = std::string("Close [CTRL+X]");
 	_closeButton.Clicked +=  Pt::slot(*this,&Dialog1::onClosedByButton);
 	_panel1.addChild(&_closeButton);
   
-	_panel1.Size = Pt::Gfx::SizeF(200,50);
+	_panel1.Size = Ui::SizeF(200,50);
   _panel1.Dock = Docking::Bottom;
   addChild(&_panel1);
 
-  _panel2.BackColor = Pt::Gfx::ARgbColor(0, 255, 255,0);
+  _panel2.BackColor = Ui::Color(0, 1, 1,0);
   _panel2.Dock = Docking::Left;
   addChild(&_panel2);
   
   
-  _panel3.BackColor = Pt::Gfx::ARgbColor(0, 0, 255,0);
+  _panel3.BackColor = Ui::Color(0, 0, 1,0);
   _panel3.Dock = Docking::Right;
   addChild(&_panel3);
 
-  _panel4.BackColor = Pt::Gfx::ARgbColor(0, 255, 255,0);
+  _panel4.BackColor = Ui::Color(0, 1, 1,0);
   _panel4.Dock = Docking::Top;
   addChild(&_panel4);
   
-  _panel5.BackColor = Pt::Gfx::ARgbColor(0, 255, 0,255);
+  _panel5.BackColor = Ui::Color(0, 1, 0,1);
   _panel5.Dock = Docking::Fill;
   addChild(&_panel5);    
 }

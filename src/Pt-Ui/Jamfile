@@ -12,11 +12,12 @@ if $(FREETYPE_INCLUDES)
 }
 
 SharedLibrary Pt-Ui : Color.cpp                       
-					            Image.cpp
+					  Image.cpp
                       ImageFormat.cpp
+					  ImagePainter.cpp
                       Argb8888Format.cpp
-                      Rgb888Fomrat.cpp
-                      Rgb565Fomrat.cpp
+                      Rgb888Format.cpp
+                      Rgb565Format.cpp
                       Brush.cpp
                       Pen.cpp
                       Font.cpp
@@ -34,6 +35,9 @@ SharedLibrary Pt-Ui : Color.cpp
                       Fill.cpp
                       FillEllipse.cpp
                       FillPolygon.cpp
+					  FreeType.cpp
+					  ClipPolygon.cpp
+					  ImageReader.cpp
 			              ;
 
 LinkSharedLibraries Pt-Ui : Pt  Pt-System ;
@@ -46,10 +50,10 @@ if $(FREETYPE_LINKFLAGS)
 }
 else
 {
-    LinkLibraries Pt-Ui : Pt-Gfx-freetype ;
+    LinkLibraries Pt-Ui : Pt-Ui-freetype ;
 }
 
- LinkLibraries Pt-UI : png ;
+LinkLibraries Pt-Ui : png ;
 
 if ! $(FREETYPE_LINKFLAGS)
 {

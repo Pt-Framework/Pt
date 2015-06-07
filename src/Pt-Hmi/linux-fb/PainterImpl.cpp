@@ -35,42 +35,42 @@ PainterImpl::~PainterImpl()
 {
 }
 
-void PainterImpl::setPen(const Gfx::Pen& pen)
+void PainterImpl::setPen(const Ui::Pen& pen)
 {
 	_painter.setPen(pen);
 }
 
-const Gfx::Pen& PainterImpl::pen() const
+const Ui::Pen& PainterImpl::pen() const
 {
 	return _painter.pen();
 }
 
-void PainterImpl::setBrush(const Gfx::Brush& brush)
+void PainterImpl::setBrush(const Ui::Brush& brush)
 {
 	_painter.setBrush(brush);
 }
 
-const Gfx::Brush& PainterImpl::brush() const
+const Ui::Brush& PainterImpl::brush() const
 {
 	return _painter.brush();
 }
 
-void PainterImpl::setFont(const Gfx::Font& font)
+void PainterImpl::setFont(const Ui::Font& font)
 {
 	_painter.setFont(font);
 }
 
-const Gfx::Font& PainterImpl::font() const
+const Ui::Font& PainterImpl::font() const
 {
 	return _painter.font();
 }
 
-Gfx::FontMetrics PainterImpl::fontMetrics() const
+Ui::FontMetrics PainterImpl::fontMetrics() const
 {
 	return _painter.fontMetrics();
 }
 
-Gfx::FontMetrics PainterImpl::fontMetrics(Pt::String text) const
+Ui::FontMetrics PainterImpl::fontMetrics(Pt::String text) const
 {
 	return _painter.fontMetrics(text);
 }
@@ -85,74 +85,74 @@ int PainterImpl::depth() const
 	return 0;
 }
 
-void PainterImpl::drawPixel(const Pt::Gfx::PointF& to)
+void PainterImpl::drawPixel(const Ui::PointF& to)
 {
 	_painter.drawPixel(to);
 }
 
-void PainterImpl::drawLine(const Pt::Gfx::PointF& from, const Pt::Gfx::PointF& to)
+void PainterImpl::drawLine(const Ui::PointF& from, const Ui::PointF& to)
 {
 	_painter.drawLine(from, to);
 }
 
-void PainterImpl::drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline )
+void PainterImpl::drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline )
 {
-	Pt::Gfx::FontMetrics metrics =  fontMetrics(text);
+	Ui::FontMetrics metrics =  fontMetrics(text);
 	_painter.drawText(to, text, outline);
 }
 
-void PainterImpl::drawText(const Pt::Gfx::PointF& to, const Pt::String& text)
+void PainterImpl::drawText(const Ui::PointF& to, const Pt::String& text)
 {	
-	Pt::Gfx::FontMetrics metrics =  fontMetrics(text);	
+	Ui::FontMetrics metrics =  fontMetrics(text);	
 	_painter.drawText(to, text);
 }
 
-void PainterImpl::drawRect(const Pt::Gfx::RectF& rectangle)
+void PainterImpl::drawRect(const Ui::RectF& rectangle)
 {
 	_painter.drawRect(rectangle);
 }
 
-void PainterImpl::fillRect(const Pt::Gfx::RectF& rectangle)
+void PainterImpl::fillRect(const Ui::RectF& rectangle)
 {
 	_painter.fillRect(rectangle);
 }
 
-void PainterImpl::drawEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size)
+void PainterImpl::drawEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size)
 {
 	_painter.drawEllipse(topLeft, size);
 }
 
-void PainterImpl::fillEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size)
+void PainterImpl::fillEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size)
 {
 	_painter.fillEllipse(topLeft, size);
 }
 
-void PainterImpl::drawPolyline(const Pt::Gfx::PointF* points, const size_t pointCount)
+void PainterImpl::drawPolyline(const Ui::PointF* points, const size_t pointCount)
 {
 	_painter.drawPolyline(points, pointCount);		
 }
 
-void PainterImpl::fillPolygon(const Pt::Gfx::PointF* points, const size_t pointCount)
+void PainterImpl::fillPolygon(const Ui::PointF* points, const size_t pointCount)
 {
 	_painter.fillPolygon(points,pointCount);
 }
 
-void PainterImpl::drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm, const Pt::Gfx::Region& pmRegion)
+void PainterImpl::drawSurface(const Ui::PointF& to, PaintSurface& pm, const Ui::Region& pmRegion)
 {
 	_painter.drawImage(to, pm.impl()->image(), pmRegion);
 }
 
-void PainterImpl::drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm)
+void PainterImpl::drawSurface(const Ui::PointF& to, PaintSurface& pm)
 {
 	_painter.drawImage(to, pm.impl()->image());
 }
 		
-void PainterImpl::drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image)
+void PainterImpl::drawImage(const Ui::PointF& to, const Ui::Image& image)
 {
 	_painter.drawImage(to, image);
 }
 
-void PainterImpl::drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion)
+void PainterImpl::drawImage(const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion)
 {
 	_painter.drawImage(to, image, imageRegion);
 }

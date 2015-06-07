@@ -36,8 +36,8 @@ namespace Hmi{
 PaintSurfaceImpl::PaintSurfaceImpl()
 : _deviceContext(0)
 {
-	_size = Pt::Gfx::SizeF(10,10);
-	Pt::Gfx::Size nsize = Application::instance().fromUnit(_size);
+	_size = Ui::SizeF(10,10);
+	Ui::Size nsize = Application::instance().fromUnit(_size);
 
 	HDC screenDC = CreateDC(_T("DISPLAY"), NULL, NULL, NULL);
 	_deviceContext = CreateCompatibleDC(screenDC);
@@ -68,21 +68,21 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
   DeleteObject(_bitmapHandle);
 }
 
-Pt::Gfx::ARgbImage PaintSurfaceImpl::toImage()
+Ui::Image PaintSurfaceImpl::toImage()
 {
-	Pt::Gfx::Size size = Application::instance().fromUnit(_size);
+	Ui::Size size = Application::instance().fromUnit(_size);
 	//TODO: conver _bitmapHandle to PT image
-	Pt::Gfx::ARgbImage	image(size.width(), size.height());
+	Ui::Image	image(size.width(), size.height());
 	return image;
 }
 	
-void PaintSurfaceImpl::resize(const Pt::Gfx::SizeF& size)
+void PaintSurfaceImpl::resize(const Ui::SizeF& size)
 {
   if( _size == size )
     return;
 
 	_size = size;
-	Pt::Gfx::Size nsize = Application::instance().fromUnit( _size );
+	Ui::Size nsize = Application::instance().fromUnit( _size );
 
 	//Save the old settings
 	COLORREF textColor = GetTextColor(_deviceContext);

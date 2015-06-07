@@ -65,7 +65,7 @@ class DrawThinEllipse : public DrawEllipse
             if( y >= int(image.height()) || y < 0)
                 return;
 
-            image.pixel( x, y ) = pen.color();
+            image.setColor( x, y , pen.color() );
         }
 };
 

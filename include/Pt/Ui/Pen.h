@@ -73,21 +73,21 @@ class PT_UI_API Pen
         *
         * The default pen color is black. The default style is solid. The default cap and join style are round.
         */
-        Pen( size_t size );
+        explicit Pen( size_t size );
 
         /**
         * @brief Creates a new Pen object with the specified style
         *
         * The default pen size is 1. The default pen color is black. The default cap and join style are round.
         */
-        Pen( PenStyle style );
+        explicit Pen( PenStyle style );
 
         /**
         * @brief Creates a new Pen object with the specified color
         *
         * The default pen size is 1. The default style is solid. The default cap and join style are round.
         */
-        Pen( const Color& color );
+        explicit Pen( const Color& color );
 
         /**
         * @brief Creates a new Pen object using the specified size, color and style.
@@ -145,28 +145,10 @@ class PT_UI_API Pen
         */
         const Image& buffer() const;
 
-        /**
-        * @brief Equality-operator (==) which compares the given Pen's by comparing their
-        * properties.
-        *
-        * The size and color are compared. If all values are the same, $true$ is returned;
-        * $false$ otherwise.
-        *
-        * @param a The Pen object to compare with Pen object b.
-        * @param b The Pen object to compare with Pen object a.
-        * @return $true$ when the Pen objects are the same; $false$ otherwise.
-        */
-        friend PT_UI_API bool operator==(const Pen& a, const Pen& b);
-
-        friend PT_UI_API bool operator<(const Pen& a, const Pen& b);
 
   private:
       SmartPtr<PenData> _penData;
 };
-
-PT_UI_API void operator >>=(const SerializationInfo& si, Pen& p);
-
-PT_UI_API void operator <<=(SerializationInfo& si, const Pen& p);
 
 
 class PT_UI_API PenData
@@ -175,16 +157,19 @@ class PT_UI_API PenData
       PenData( size_t size, const Color& color, Pen::PenStyle style, Pen::CapStyle cap, Pen::JoinStyle join )
       : _size( size )
       , _style( style )
-      , _buffer( 64, 1, color )
+      , _buffer( 64, 1)
       , _capStyle( cap )
       , _joinStyle( join )
-      { }
+			, _color(color)
+      { 
+				_buffer.setColor( color);
+			}
 
       ~PenData()
       { }
 
       const Color& color() const
-      { return _buffer.pixel( 0, 0); }
+      { return _color; }
 
       const Image& buffer() const
       { return _buffer; }
@@ -207,6 +192,7 @@ class PT_UI_API PenData
       Image       _buffer;
       Pen::CapStyle   _capStyle;
       Pen::JoinStyle  _joinStyle;
+			Color						_color;
 };
 
 } } // namespace 

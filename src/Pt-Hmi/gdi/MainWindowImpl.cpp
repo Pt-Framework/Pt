@@ -28,8 +28,8 @@
 #include <Windows.h>
 #include <WindowsX.h>
 #include <assert.h>
-#include <Pt/Gfx/Rgb888Color.h>
-#include <Pt/Gfx/Rgb888Image.h>
+#include <Pt/Ui/Color.h>
+#include <Pt/Ui/Image.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/SizeEvent.h>
@@ -282,7 +282,7 @@ void MainWindowImpl::onSize(WPARAM wParam, LPARAM lParam)
   int width  = LOWORD(lParam);
   int height = HIWORD(lParam);  
     
-	Pt::Hmi::SizeEvent ev( Pt::Gfx::SizeF(width, height), state);
+	Pt::Hmi::SizeEvent ev( Ui::SizeF(width, height), state);
 	_window->eventReceived().send(ev);
 }
 
@@ -319,7 +319,7 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
         break;        
     }
   
-     Pt::Gfx::PointF p = _app.toUnit(Pt::Gfx::Point(xPos, yPos));
+     Ui::PointF p = _app.toUnit(Ui::Point(xPos, yPos));
     _pointerEvent.setX(p.x());
     _pointerEvent.setY(p.y());            
 
@@ -334,7 +334,7 @@ void MainWindowImpl::onMove(LPARAM lParam)
 	int xPos = info.left;
 	int yPos = info.top;
 
-	PositionEvent ev( Pt::Gfx::PointF(xPos, yPos) );
+	PositionEvent ev( Ui::PointF(xPos, yPos) );
   _window->eventReceived().send( ev );	
 }
 
@@ -354,9 +354,9 @@ void MainWindowImpl::onPaint()
 }
 
 
-void MainWindowImpl::setPosition(const Gfx::PointF& pf)
+void MainWindowImpl::setPosition(const Ui::PointF& pf)
 {
-  Gfx::Point p = _app.fromUnit(pf);
+  Ui::Point p = _app.fromUnit(pf);
   SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, SWP_DRAWFRAME|SWP_NOSIZE);
 }
 
@@ -366,9 +366,9 @@ void MainWindowImpl::focus()
 	SetFocus(_hwnd);
 }
 
-void MainWindowImpl::setSize(const Gfx::SizeF& sizef)
+void MainWindowImpl::setSize(const Ui::SizeF& sizef)
 {
-  Gfx::Size size = _app.fromUnit(sizef);
+  Ui::Size size = _app.fromUnit(sizef);
 
   RECT clientRect;
   SetRect(&clientRect, 0, 0, size.width() - 1, size.height() - 1);
@@ -526,12 +526,12 @@ void MainWindowImpl::setBorder(WindowBorder::Type p)
 }
 
 
-void MainWindowImpl::setMinSize(const Pt::Gfx::SizeF& s)
+void MainWindowImpl::setMinSize(const Ui::SizeF& s)
 {
 	_minSize = _app.fromUnit(s);
 }
 	
-void MainWindowImpl::setMaxSize(const Pt::Gfx::SizeF& s)
+void MainWindowImpl::setMaxSize(const Ui::SizeF& s)
 {
 	_maxSize = _app.fromUnit(s);			
 }
@@ -553,7 +553,7 @@ void MainWindowImpl::setEnable(bool e)
 	EnableWindow(_hwnd, e);
 }
 
-void MainWindowImpl::setIcon(const Pt::Gfx::ARgbImage& icon)
+void MainWindowImpl::setIcon(const Ui::Image& icon)
 {
     if(icon.width() == 0 || icon.height() == 0)
         return;
@@ -570,7 +570,7 @@ void MainWindowImpl::setIcon(const Pt::Gfx::ARgbImage& icon)
         {
           const size_t index  = offsetLine + (x*planes);
 
-          const Pt::Gfx::ARgbColor& pix =  icon.pixel(x,y);
+          const Ui::Color& pix =  icon.color(x,y);
                 
           bitmapBuffer[index]     = static_cast<unsigned char>(pix.blue());    
           bitmapBuffer[index + 1] = static_cast<unsigned char>(pix.green());

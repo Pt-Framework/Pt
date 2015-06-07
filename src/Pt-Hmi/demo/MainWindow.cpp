@@ -28,11 +28,13 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/Cursor.h>
-#include <Pt/Gfx/ImageReader.h>
-#include <Pt/Gfx/ARgbImage.h>
+#include <Pt/Ui/ImageReader.h>
+#include <Pt/Ui/Image.h>
+#include <Pt/Ui/ImagePainter.h>
 #include "DemoImage.h"
 #include "AtesionIcon.h"
 #include <sstream>
+#include <fstream>
 
 namespace Pt{
 namespace Hmi{
@@ -50,23 +52,23 @@ MainWindow::~MainWindow()
 
 void MainWindow::init()
 {	
-	
+
 	{//Icon
 		std::stringstream memoryStream;
 		
 		memoryStream.write((char*)Pt::Forms::Atesion::icon, Pt::Forms::Atesion::iconSize);	
 		
-		Pt::Gfx::ARgbImage* im = Pt::Gfx::ImageReader::read(memoryStream);
+		Ui::Image* im = Ui::ImageReader::read(memoryStream);
 
 		//Generate Alpha channel
 		for( size_t y = 0;  y < im->height(); ++y )
 		{
 			for( size_t x = 0;  x < im->width(); ++x )
 			{
-				Pt::Gfx::ARgbColor& pix =  im->pixel(x,y);
+				Ui::Color color =  im->color(x,y);
 				
-				if( pix.blue() == 255 && pix.red() == 255 && pix.green() == 255)
-					pix.setAlpha(0);
+				if( color.blue() == 1 && color.red() == 1 && color.green() == 1)
+					color.setAlpha(0);
 			}
 		}			
 
@@ -75,8 +77,8 @@ void MainWindow::init()
 	}
   
 	
-	Position = Pt::Gfx::PointF(200,200);
-	Size = Pt::Gfx::SizeF(800,600);
+	Position = Ui::PointF(200,200);
+	Size = Ui::SizeF(800,600);
 	ShowTitle = true;	
 	ShowInTaskbar = true;
 	ShowSysMenu = true;
@@ -85,30 +87,36 @@ void MainWindow::init()
   State = Hmi::WindowState::Normal;
 	StartPostion = Hmi::WindowStartPosition::CenterParent;
 	Closed += Pt::slot(*this, &MainWindow::onClosed);
-	BackColor = Gfx::ARgbColor(100,100,100);
-	
+	BackColor = Ui::Color(0.5,0.5,0.5);
+	/*
   //Panel
-	_mainPanel.Size = Pt::Gfx::SizeF(700,480);
-	_mainPanel.Position = Pt::Gfx::PointF(40,40);
+	_mainPanel.Size = Ui::SizeF(700,480);
+	_mainPanel.Position = Ui::PointF(40,40);
 	_mainPanel.PanelBorderWidth = 3;
 	_mainPanel.PanelBorderStyle = Pt::Hmi::BorderStyle::Single;
 
 	{
-		std::stringstream memoryStream;
-		memoryStream.write((char*)Pt::Forms::DemoImage::image, Pt::Forms::DemoImage::imageSize);	
-		std::auto_ptr<Pt::Gfx::ARgbImage> im(Pt::Gfx::ImageReader::read(memoryStream));
-		_mainPanel.BackgroundImage = *im;		
+		//std::stringstream memoryStream;
+		//memoryStream.write((char*)Pt::Forms::DemoImage::image, Pt::Forms::DemoImage::imageSize);	
+		
+
+		std::ifstream fsdd("C:\\Users\\cr\\Desktop\\Red.png",std::ios::binary);
+
+		std::auto_ptr<Ui::Image> im(Ui::ImageReader::read(fsdd));
+		//_mainPanel.BackgroundImage = *im;		
 	}
 
-	_mainPanel.BackgroundImageLayout = Pt::Hmi::ImageLayout::Strech;
+	_mainPanel.BackgroundImage = _drawBuffer;		
+
+	_mainPanel.BackgroundImageLayout = Pt::Hmi::ImageLayout::Center;
 
 	//Text
 	_textLabel.AutoSize = true;
   _textLabel.Margin = Hmi::Margin(10);
-	_textLabel.Size = Pt::Gfx::SizeF(500,30);
+	_textLabel.Size = Ui::SizeF(500,30);
 	_textLabel.Caption = std::string("T&his is a Platinum C++");
-	_textLabel.Position = Pt::Gfx::PointF(20,20);
-	_textLabel.ForeColor = Pt::Gfx::ARgbColor(255,0,0,0);
+	_textLabel.Position = Ui::PointF(20,20);
+	_textLabel.ForeColor = Ui::Color(1,0,0,0);
 	_textLabel.UseMnemonic = true;	
   _textLabel.bindMnemonicToWidget(_toggleButton);
   _textLabel.Cursor = Hmi::Cursor::waitCursor();
@@ -118,16 +126,16 @@ void MainWindow::init()
 	_toggleButton.ButtonType = Hmi::ButtonType::Toggle;
 	_toggleButton.Caption = std::string("Toggle Me [CTRL+I]");
 	_toggleButton.ShortcutKey = std::string("C//i");
-	_toggleButton.Position = Pt::Gfx::PointF(20,60);
-	_toggleButton.Size = Pt::Gfx::SizeF(150,25);		
+	_toggleButton.Position = Ui::PointF(20,60);
+	_toggleButton.Size = Ui::SizeF(150,25);		
 	_mainPanel.addChild(&_toggleButton);
 
 	//Dialog button  
 	_dialogButton.ButtonType = Hmi::ButtonType::Press;
 	_dialogButton.Caption = std::string("&&Dia&log [CTRL+D]&");
 	_dialogButton.ShortcutKey = std::string("C//d");
-	_dialogButton.Position = Pt::Gfx::PointF(20,100);
-	_dialogButton.Size = Pt::Gfx::SizeF(150,25);	
+	_dialogButton.Position = Ui::PointF(20,100);
+	_dialogButton.Size = Ui::SizeF(150,25);	
 	_dialogButton.UseMnemonic = true;
 	_dialogButton.Clicked  += Pt::slot(*this, &MainWindow::onShowDialog);
 	
@@ -137,10 +145,10 @@ void MainWindow::init()
 	_closeButton.ButtonType = Hmi::ButtonType::Press;
 	_closeButton.Caption = std::string("Close App [CTRL+X]");
 	_closeButton.ShortcutKey = std::string("C//x");
-	_closeButton.Position = Pt::Gfx::PointF(590,525);
-	_closeButton.Size = Pt::Gfx::SizeF(150,25);
+	_closeButton.Position = Ui::PointF(590,525);
+	_closeButton.Size = Ui::SizeF(150,25);
 	_closeButton.Clicked += Pt::slot(*this, &MainWindow::onClosed);
-	_closeButton.Size = Pt::Gfx::SizeF(20, 40);
+	_closeButton.Size = Ui::SizeF(20, 40);
 	_closeButton.Dock = Docking::Bottom;
 	_closeButton.Margin = Hmi::Margin(5);
 	_childWindow2.addChild(&_closeButton);
@@ -148,17 +156,19 @@ void MainWindow::init()
 	_childWindow2.addChild(&_mainPanel);
 
 
-    _childWindow1.Cursor = Hmi::Cursor::waitCursor();
-	_childWindow1.Position = Pt::Gfx::PointF(20,20);
-	_childWindow1.Size = Pt::Gfx::SizeF(200,300);
-	_childWindow2.Position = Pt::Gfx::PointF(80,80);
-	_childWindow2.Size = Pt::Gfx::SizeF(800,600);
+  _childWindow1.Cursor = Hmi::Cursor::waitCursor();
+	_childWindow1.Position = Ui::PointF(20,20);
+	_childWindow1.Size = Ui::SizeF(200,300);
+	_childWindow2.Position = Ui::PointF(80,80);
+	_childWindow2.Size = Ui::SizeF(800,600);
 	
 	addChildWindow(_childWindow1);
 	addChildWindow(_childWindow2);
 	
 	_childWindow1.Visible = true;
-	_childWindow2.Visible = true;
+	_childWindow2.Visible = true;*/
+
+	BackgroundImage = _drawBuffer;
 }
 
 

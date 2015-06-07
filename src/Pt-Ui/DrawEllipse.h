@@ -30,6 +30,8 @@
 
 #include <Pt/Ui/Image.h>
 #include <Pt/Ui/Pen.h>
+#include <Pt/Ui/Point.h>
+#include <Pt/Ui/Size.h>
 
 namespace Pt{
 namespace Ui{

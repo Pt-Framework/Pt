@@ -31,8 +31,7 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Cursor.h>
 #include <linux/fb.h>
-#include <Pt/Gfx/Rgb888Color.h>
-#include <Pt/Gfx/Rgb565Color.h>
+#include <Pt/Ui/Color.h>
 
 namespace Pt{
 namespace Hmi{
@@ -58,56 +57,22 @@ class ScreenImpl : public Window
 			return _screenInfo.bits_per_pixel;
 		}
 
+		Pt::ssize_t stride() const
+		{ 
+			return _fixedInfo.line_length -  _screenInfo.xres;
+		}
+
 		char* frameBuffer()
 		{ 
 			return (char*)_buffer; 
 		}
+		 		 
 		
 	protected:
 		virtual void onInvalidate();
 		virtual void onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent );
 
-	private:
-   
-		template <typename Iterator>
-		void drawImage(ssize_t toX, ssize_t toY, Iterator begin, Iterator end, size_t width, size_t height)
-		{
-		    const char* imageData = 0;
-
-		    //for(Iterator it = begin; it != end; ++it)
-		    //{
-		    //  (*it).setRed((*it).red() * 256);
-		    //  (*it).setGreen((*it).green() * 256);
-		    //  (*it).setBlue((*it).blue() * 256);
-		    //}
-
-		    switch( depth() )
-		    {
-		        case 32:
-		        {				
-		           	Gfx::Rgb888Image rgbImage( width, height );
-		            assign( begin, end, rgbImage.begin() );
-		            imageData = 0;
-		            this->copyImageData( toX, toY, (char*)rgbImage.data(), rgbImage.width(), rgbImage.height() );                    
-		        }
-				break;
-
-		        case 16:
-		        {
-		            Gfx::Rgb565Image rgbImage( width, height );
-		            assign( begin, end, rgbImage.begin() );
-		            imageData = (char*)( rgbImage.data() );
-		            this->copyImageData( toX, toY, (char*)rgbImage.data(), rgbImage.width(), rgbImage.height() );                    
-		        }
-				break;
-
-		        default:
-		            imageData = 0;
-		    }
-		}
-
-		void copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight);
-
+	private:   				
 		enum BlitOp
 		{
 			CopyOp,
@@ -115,7 +80,7 @@ class ScreenImpl : public Window
 			XorOp
 		};
 
-		void bitBlit(const std::vector<Pt::uint8_t>& plane, size_t width, size_t height, const Gfx::Point& pos, BlitOp op);
+		void bitBlit(const std::vector<Pt::uint8_t>& plane, size_t width, size_t height, const Ui::Point& pos, BlitOp op);
 		void saveCursorBackImage(const Pt::Hmi::PointerEvent& mouseEvent);
 
 	private:
@@ -127,7 +92,7 @@ class ScreenImpl : public Window
 		PaintSurface            _paintSurface;	
 		
 		std::vector<Pt::uint8_t>	_cursorBuffer;
-		Pt::Gfx::Point            _cursorPos;
+		Ui::Point            _cursorPos;
 		size_t									  _cursorWidth;	
 		size_t									  _cursorHeight;	
 };

@@ -36,10 +36,10 @@
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Margin.h>
 #include <Pt/Connectable.h>
-#include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/ARgbColor.h>
+#include <Pt/Ui/Font.h>
+#include <Pt/Ui/Point.h>
+#include <Pt/Ui/Size.h>
+#include <Pt/Ui/Color.h>
 
 namespace Pt{
 namespace Hmi{
@@ -156,7 +156,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 			return _paintSurface;
 		}
 
-		bool contains(const Pt::Gfx::PointF& p);
+		bool contains(const Ui::PointF& p);
  	
 		bool focusNext();
 	
@@ -173,9 +173,9 @@ class PT_HMI_API Widget : public Pt::Connectable
 			return _containPointer;
 		}
 
-		Pt::Gfx::PointF toClient(const Pt::Gfx::PointF& globalPoint);
+		Ui::PointF toClient(const Ui::PointF& globalPoint);
 
-		Pt::Gfx::PointF fromClient(const Pt::Gfx::PointF& localPoint, bool toRoot);
+		Ui::PointF fromClient(const Ui::PointF& localPoint, bool toRoot);
 
 		Pt::Signal<const Pt::Event&>& eventReceived()
 		{
@@ -189,14 +189,14 @@ class PT_HMI_API Widget : public Pt::Connectable
 	public:
 		ValueProperty<bool>											Enabled;		
 		ValueProperty<bool>											Visible;
-		ValueProperty<Pt::Gfx::Font>						Font;
-		Property<Widget,Pt::Gfx::PointF>				Position;
-		Property<Widget,Pt::Gfx::SizeF>					Size;
-		ValueProperty<Pt::Gfx::ARgbColor>				BackColor;
-		ValueProperty<Pt::Gfx::ARgbColor>				HighlightColor;
-		ValueProperty<Pt::Gfx::ARgbColor>				ForeColor;
-		ValueProperty<Pt::Gfx::ARgbColor>				DisabledColor;
-		ValueProperty<Pt::Gfx::ARgbImage>				BackgroundImage;
+		ValueProperty<Ui::Font>						Font;
+		Property<Widget,Ui::PointF>				Position;
+		Property<Widget,Ui::SizeF>					Size;
+		ValueProperty<Ui::Color>				BackColor;
+		ValueProperty<Ui::Color>				HighlightColor;
+		ValueProperty<Ui::Color>				ForeColor;
+		ValueProperty<Ui::Color>				DisabledColor;
+		ValueProperty<Ui::Image>				BackgroundImage;
 		ValueProperty<ImageLayout::Type>				BackgroundImageLayout;
 		ValueProperty<int>											Opacity;
 		ValueProperty<Hmi::Cursor>							Cursor;
@@ -246,23 +246,23 @@ class PT_HMI_API Widget : public Pt::Connectable
 		virtual void onShortcutKey(KeyEvent::KeyState state);	  
 		
 
-		virtual void setPosition(const Pt::Gfx::PointF& pos)
+		virtual void setPosition(const Ui::PointF& pos)
 		{
 			_position = pos;			
 		}	
 
-		virtual void setSize(const Pt::Gfx::SizeF& size);
+		virtual void setSize(const Ui::SizeF& size);
 			
 		virtual void setFocus(bool isFocused);
 		virtual void setCaption( const std::string& c);
 
 	protected:
-		const Pt::Gfx::SizeF& size() const
+		const Ui::SizeF& size() const
 		{
 			return _size;
 		}
 
-		const Pt::Gfx::PointF& position() const
+		const Ui::PointF& position() const
 		{
 			return _position;
 		}
@@ -279,7 +279,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 		int getFocusedChild() const;	
 
 	private:
-		static void updatePosAndSize(Widget& w, const Pt::Gfx::SizeF& s, const Pt::Gfx::PointF& p);
+		static void updatePosAndSize(Widget& w, const Ui::SizeF& s, const Ui::PointF& p);
 
 	private:	  
 		Widget*										 _parent;	
@@ -290,8 +290,8 @@ class PT_HMI_API Widget : public Pt::Connectable
 		bool											 _isValid;		
 		bool											 _containPointer;	
 		Pt::Signal<const Pt::Event&> _eventReceived;
-		Pt::Gfx::SizeF							_size;
-		Pt::Gfx::PointF             _position;
+		Ui::SizeF							_size;
+		Ui::PointF             _position;
 		bool											  _isFocused;
 		std::string									_caption;		
 };

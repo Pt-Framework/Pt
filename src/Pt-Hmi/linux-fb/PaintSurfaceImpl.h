@@ -3,9 +3,9 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/ARgbImage.h>
-#include <Pt/Gfx/Painter.h>
+#include <Pt/Ui/Size.h>
+#include <Pt/Ui/Image.h>
+#include <Pt/Ui/Painter.h>
 
 namespace Pt{
 namespace Hmi{
@@ -16,21 +16,16 @@ public:
 	PaintSurfaceImpl();
 	virtual ~PaintSurfaceImpl();
 
-	virtual Pt::Gfx::ARgbImage toImage() const
-	{
-		return _image;
-	}
+	virtual void resize(const Ui::SizeF& size);	
+	virtual  Ui::SizeF size() const;
 
-	virtual void resize(const Pt::Gfx::SizeF& size);	
-	virtual  Pt::Gfx::SizeF size() const;
-
-	Pt::Gfx::ARgbImage& image()
+	Ui::Image& image()
 	{
-		return _image; 
+		return *_image; 
 	}
 
 private:
-	Pt::Gfx::ARgbImage _image;	
+	Ui::Image* _image;	
 };
 
 }}

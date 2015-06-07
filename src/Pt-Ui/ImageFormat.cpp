@@ -40,20 +40,20 @@ ImageFormat::ImageFormat( size_t pixelSize, size_t channels )
 }
 
 
-const ImageFormat& ImageFormat::ImageFormat::rgb565()
+const ImageFormat& ImageFormat::rgb565()
 {
 	static const Rgb565Format f;
 	return f;
 }
 
-const ImageFormat& ImageFormat::ImageFormat::rgb888()
+const ImageFormat& ImageFormat::rgb888()
 {
 	static const Rgb888Format f;
 	return f;
 
 }
 
-const ImageFormat& ImageFormat::ImageFormat::argb8888()
+const ImageFormat& ImageFormat::argb8888()
 {
 	static const Argb8888Format f;
 	return f;

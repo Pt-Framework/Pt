@@ -71,20 +71,6 @@ void MainWindowImpl::onKeyInput( const KeyEvent& ev )
   _apiWindow->eventReceived().send( ev );
 }
 
-
-void MainWindowImpl::onSizeChanged( const Property<Pt::Gfx::SizeF>& prop )
-{	  
-  ChildWindow::onSizeChanged( prop );
-
-  if( _apiWindow->Size.get() != prop.get() )
-	  _apiWindow->Size = prop.get();
-}
-
-void MainWindowImpl::onPositionChanged(const Property<Pt::Gfx::PointF>& prop)
-{
-	_apiWindow->Position = prop.get() ;
-}
-
 	
 void MainWindowImpl::onInvalidate()
 {
@@ -100,11 +86,7 @@ void MainWindowImpl::onRender()
 
 	Painter& painter = paintSurface().painter();
   
-  if( titleBar() != 0)
-	  painter.drawSurface( Pt::Gfx::PointF(BorderWidth.get(), BorderWidth.get()  + titleBar()->Size.get().height() ), _apiWindow->paintSurface() );	
-  else
-    painter.drawSurface( Pt::Gfx::PointF(BorderWidth.get(), BorderWidth.get() ), _apiWindow->paintSurface() );	
-
+  painter.drawSurface( Ui::PointF(0, 0), _apiWindow->paintSurface() );	
 
   _windowManager.render();
 }
@@ -114,8 +96,6 @@ void MainWindowImpl::create()
 {	
 	this->setWindowParent( _app.mainScreen().impl() );
 	_app.mainScreen().impl()->windowManager().add( this );
-
-	this->Position.Changed += Pt::slot(*this, &MainWindowImpl::onPositionChanged);
 }
 	
 
@@ -140,7 +120,7 @@ void MainWindowImpl::hide()
 }
 
 
-void MainWindowImpl::setPosition(const Gfx::PointF& p)
+void MainWindowImpl::setPosition(const Ui::PointF& p)
 {	
 	if( Position.get() != p ) 
 	{
@@ -150,7 +130,7 @@ void MainWindowImpl::setPosition(const Gfx::PointF& p)
 }
 
 
-void MainWindowImpl::setSize( const Gfx::SizeF& size )
+void MainWindowImpl::setSize( const  Ui::SizeF& size )
 {  
  
 	if( Size.get() != size )
@@ -212,7 +192,7 @@ void MainWindowImpl::showInTaskbar(bool p)
 }
   
 
-void MainWindowImpl::setIcon(const Pt::Gfx::ARgbImage& p)
+void MainWindowImpl::setIcon(const Ui::Image& p)
 {
 	Icon = p;
 }
@@ -224,13 +204,13 @@ void MainWindowImpl::setEnable(bool e)
 }
 
 
-void MainWindowImpl::setMinSize(const Pt::Gfx::SizeF& s)
+void MainWindowImpl::setMinSize(const Ui::SizeF& s)
 {
 	MinimumSize = s;
 }
 
 
-void MainWindowImpl::setMaxSize(const Pt::Gfx::SizeF& s)
+void MainWindowImpl::setMaxSize(const Ui::SizeF& s)
 {
 	MaximumSize = s;
 }

@@ -21,17 +21,12 @@
 #define PT_HMI_GDI_PAINTERIMPL_H
 
 #include <Pt/Api.h>
-#include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/Gfx.h>
-#include <Pt/Gfx/Pen.h>
-#include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/Algorithm.h>
-#include <Pt/Gfx/ARgbImage.h>
-#include <Pt/Gfx/Rgb888Image.h>
-#include <Pt/Gfx/Rgb565Image.h>
-#include <Pt/Gfx/Rgb555Color.h>
-#include <Pt/Gfx/Region.h>
+#include <Pt/Ui/Painter.h>
+#include <Pt/Ui/Font.h>
+#include <Pt/Ui/Pen.h>
+#include <Pt/Ui/Brush.h>
+#include <Pt/Ui/Image.h>
+#include <Pt/Ui/Region.h>
 
 
 #include <windows.h>
@@ -49,99 +44,55 @@ class PainterImpl
 
         virtual ~PainterImpl();
 
-				void setRenderMode(Gfx::RenderMode::Type mode);
+				void setRenderMode(Ui::RenderMode::Type mode);
 
-        void setPen(const Gfx::Pen& pen);
+        void setPen(const Ui::Pen& pen);
 
-        const Gfx::Pen& pen() const;
+        const Ui::Pen& pen() const;
 
-        void setBrush(const Gfx::Brush& brush);
+        void setBrush(const Ui::Brush& brush);
 
-        const Gfx::Brush& brush() const;
+        const Ui::Brush& brush() const;
 
-        void setFont(const Gfx::Font& font);
+        void setFont(const Ui::Font& font);
 
-        const Gfx::Font& font() const;
+        const Ui::Font& font() const;
 
-        Gfx::FontMetrics fontMetrics() const;
+        Ui::FontMetrics fontMetrics() const;
 
-        Gfx::FontMetrics fontMetrics(Pt::String Text) const;
+        Ui::FontMetrics fontMetrics(Pt::String Text) const;
 
         const std::list<std::string>& fontFamilyNames();
 
         int depth() const;
 
-        void drawPixel(const Pt::Gfx::PointF& to);
+        void drawPixel(const Ui::PointF& to);
 
-        void drawLine(const Pt::Gfx::PointF& from, const Pt::Gfx::PointF& to);
+        void drawLine(const Ui::PointF& from, const Ui::PointF& to);
 
-				void drawText( const Pt::Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline );
+				void drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline );
 
-        void drawText(const Pt::Gfx::PointF& to, const Pt::String& Text);
+        void drawText(const Ui::PointF& to, const Pt::String& Text);
 
-        void drawRect(const Pt::Gfx::RectF& rectangle);
+        void drawRect(const Ui::RectF& rectangle);
 
-        void fillRect(const Pt::Gfx::RectF& rectangle);
+        void fillRect(const Ui::RectF& rectangle);
 
-        void drawEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size);
+        void drawEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size);
 
-        void fillEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size);
+        void fillEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size);
 
-        void drawPolyline(const Pt::Gfx::PointF* points, const size_t pointCount);
+        void drawPolyline(const Ui::PointF* points, const size_t pointCount);
 
-        void fillPolygon(const Pt::Gfx::PointF* points, const size_t pointCount);
+        void fillPolygon(const Ui::PointF* points, const size_t pointCount);
 
-        void drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm, const Pt::Gfx::Region& pmRegion);
+        void drawSurface(const Ui::PointF& to, PaintSurface& pm, const Ui::Region& pmRegion);
 
-        void drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm);
+        void drawSurface(const Ui::PointF& to, PaintSurface& pm);
 		
-        void drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image);
+        void drawImage(const Ui::PointF& to, const Ui::Image& image);
 
-        void drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion);
-
-        template <typename Iterator>
-        void drawImage(size_t x, size_t y, Iterator begin, Iterator end, size_t width, size_t height)
-        {
-            if (width == 0 || height == 0) {
-                return; // Don't draw empty images.
-            }
-
-            // Try to convert our generic image format (ARgbImage) to an image format that is compatible
-            // with the current device settings. If this is not possible, convert it to a 32-bit
-            // device-independent image that windows has to convert to the current device settings
-            // when we bit-blit it.
-            switch (depth()) {
-                case 32:
-                case 24: {
-                    Gfx::Rgb888Image rgb32Image(width, height);
-                    assign(begin, end, rgb32Image.begin());
-                    drawCompatibleImage(x, y, depth(), (char*)rgb32Image.data(), rgb32Image.width(), rgb32Image.height());
-                    break;
-                }
-
-                case 16: {
-                    Gfx::Rgb565Image rgb16Image(width, height);
-                    assign(begin, end, rgb16Image.begin());
-                    drawCompatibleImage(x, y, 16, (char*)rgb16Image.data(), rgb16Image.width(), rgb16Image.height());
-                    break;
-                }
-
-
-                case 15: {
-                    Gfx::Rgb555Image rgb16Image(width, height);
-                    assign(begin, end, rgb16Image.begin());
-                    drawCompatibleImage(x, y, 16, (char*)rgb16Image.data(), rgb16Image.width(), rgb16Image.height());
-                    break;
-                }
-
-                default: { // Below 16 bit or anything inbetween
-                    Gfx::Rgb888Image rgb32Image(width, height);
-                    assign(begin, end, rgb32Image.begin());
-                    drawIndependentImage(x, y, (char*)rgb32Image.data(), rgb32Image.width(), rgb32Image.height());
-                    break;
-                }
-            }
-        }
+        void drawImage(const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion);
 
         void addFontName(const std::string& fontName);
 
@@ -158,15 +109,15 @@ class PainterImpl
         void updateBrush();
     protected:
         PaintSurfaceImpl*  _surface;
-        Gfx::Pen   _pen;
-        Gfx::Brush _brush;
-        Gfx::Font  _font;
+        Ui::Pen   _pen;
+        Ui::Brush _brush;
+        Ui::Font  _font;
         mutable std::wstring _text;
         std::list<std::string> _fontNamesList;
-				Gfx::RenderMode::Type _renderMode;
+				Ui::RenderMode::Type _renderMode;
 
     private:
-        static DWORD toGdiPenStyle( const Pt::Gfx::Pen& pen );
+        static DWORD toGdiPenStyle( const Ui::Pen& pen );
 };
 
 }}

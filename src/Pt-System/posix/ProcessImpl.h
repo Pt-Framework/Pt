@@ -25,7 +25,6 @@ class ProcessImpl : private NonCopyable
 
         Process::State state() const
         { 
-          tryWait(_state);
           return _state; 
         }
 

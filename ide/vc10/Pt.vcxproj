@@ -88,6 +88,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Label.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MainWindow.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Margin.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Painter.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Panel.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PointerEvent.h" />
@@ -236,22 +237,19 @@
     <ClInclude Include="..\..\include\Pt\TypeInfo.h" />
     <ClInclude Include="..\..\include\Pt\Types.h" />
     <ClInclude Include="..\..\include\Pt\TypeTraits.h" />
-    <ClInclude Include="..\..\include\Pt\Ui\Algorithm.h" />
     <ClInclude Include="..\..\include\Pt\Ui\Api.h" />
     <ClInclude Include="..\..\include\Pt\Ui\Argb8888Format.h" />
     <ClInclude Include="..\..\include\Pt\Ui\Brush.h" />
     <ClInclude Include="..\..\include\Pt\Ui\ClipLine.h" />
     <ClInclude Include="..\..\include\Pt\Ui\ClipPolygon.h" />
     <ClInclude Include="..\..\include\Pt\Ui\Color.h" />
-    <ClInclude Include="..\..\include\Pt\Ui\ColorAlgo.h" />
     <ClInclude Include="..\..\include\Pt\Ui\Exception.h" />
     <ClInclude Include="..\..\include\Pt\Ui\Font.h" />
     <ClInclude Include="..\..\include\Pt\Ui\FontMetrics.h" />
-    <ClInclude Include="..\..\include\Pt\Ui\GenericAlgo.h" />
     <ClInclude Include="..\..\include\Pt\Ui\Image.h" />
-    <ClInclude Include="..\..\include\Pt\Ui\ImageAlgo.h" />
     <ClInclude Include="..\..\include\Pt\Ui\ImageFormat.h" />
     <ClInclude Include="..\..\include\Pt\Ui\ImagePainter.h" />
+    <ClInclude Include="..\..\include\Pt\Ui\ImageReader.h" />
     <ClInclude Include="..\..\include\Pt\Ui\Painter.h" />
     <ClInclude Include="..\..\include\Pt\Ui\Pen.h" />
     <ClInclude Include="..\..\include\Pt\Ui\Point.h" />
@@ -455,6 +453,7 @@
     <ClInclude Include="..\..\src\Pt-Ui\libpng\zlib.h" />
     <ClInclude Include="..\..\src\Pt-Ui\libpng\zutil.h" />
     <ClInclude Include="..\..\src\Pt-Ui\Stroke.h" />
+    <ClInclude Include="..\..\src\Pt-Ui\Vera.h" />
     <ClInclude Include="..\..\src\Pt-XmlRpc\HttpResponder.h" />
     <ClInclude Include="..\..\src\Pt-Xml\AttributeListModel.h" />
     <ClInclude Include="..\..\src\Pt-Xml\AttributeModel.h" />
@@ -483,7 +482,6 @@
     <None Include="..\..\include\Pt\Remoting\RemoteProcedure.tpp" />
     <None Include="..\..\include\Pt\Signal.tpp" />
     <None Include="..\..\include\Pt\String.tpp" />
-    <None Include="..\..\include\Pt\Ui\ImageAlgo.tpp" />
     <None Include="..\..\jam.bat" />
     <None Include="..\..\Jambase" />
     <None Include="..\..\Jamconfigure" />
@@ -616,6 +614,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MainWindow.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Panel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PropertyBase.cpp" />
@@ -772,6 +771,7 @@
     <ClCompile Include="..\..\src\Pt-System\win32\ThreadImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Ui\Argb8888Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Ui\Brush.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ui\ClipPolygon.cpp" />
     <ClCompile Include="..\..\src\Pt-Ui\Color.cpp" />
     <ClCompile Include="..\..\src\Pt-Ui\Dash.cpp" />
     <ClCompile Include="..\..\src\Pt-Ui\DrawText.cpp" />
@@ -790,6 +790,8 @@
     <ClCompile Include="..\..\src\Pt-Ui\FreeType.cpp" />
     <ClCompile Include="..\..\src\Pt-Ui\Image.cpp" />
     <ClCompile Include="..\..\src\Pt-Ui\ImageFormat.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ui\ImagePainter.cpp" />
+    <ClCompile Include="..\..\src\Pt-Ui\ImageReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Ui\libpng\adler32.c" />
     <ClCompile Include="..\..\src\Pt-Ui\libpng\compress.c" />
     <ClCompile Include="..\..\src\Pt-Ui\libpng\crc32.c" />

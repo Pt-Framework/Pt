@@ -5,7 +5,7 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Event.h>
 #include <Pt/Hmi/WindowProperties.h>
-#include <Pt/Gfx/Size.h>
+#include <Pt/Ui/Size.h>
 
 
 namespace Pt{
@@ -14,7 +14,7 @@ namespace Hmi{
 class PT_HMI_API SizeEvent : public Pt::BasicEvent<SizeEvent>
 {
 	public:	
-		SizeEvent(const Pt::Gfx::SizeF&  size, const WindowState::Type&  state)
+		SizeEvent(const Ui::SizeF&  size, const WindowState::Type&  state)
 		: _size( size )
 		, _state( state )
 		{
@@ -31,13 +31,13 @@ class PT_HMI_API SizeEvent : public Pt::BasicEvent<SizeEvent>
 		}
 
 
-		void setSize( const Pt::Gfx::SizeF&  size )
+		void setSize( const Ui::SizeF&  size )
 		{
 			_size = size;
 		}
 
 
-		const Pt::Gfx::SizeF&  size( ) const
+		const Ui::SizeF&  size( ) const
 		{
 			return _size;
 		}
@@ -55,7 +55,7 @@ class PT_HMI_API SizeEvent : public Pt::BasicEvent<SizeEvent>
 		}
 
 	private:
-		Pt::Gfx::SizeF _size;
+		Ui::SizeF _size;
 		WindowState::Type _state;
 };
 

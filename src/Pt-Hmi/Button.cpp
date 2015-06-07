@@ -28,9 +28,9 @@
 
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Gfx/Pen.h>
-#include <Pt/Gfx/ARgbColor.h>
-#include <Pt/Gfx/Point.h>
+#include <Pt/Ui/Pen.h>
+#include <Pt/Ui/Color.h>
+#include <Pt/Ui/Point.h>
 
 namespace Pt{
 namespace Hmi{
@@ -43,11 +43,11 @@ Button::Button()
 , PT_HMI_INIT_PROPERTY_VALUE(Armed,false)
 , PT_HMI_INIT_PROPERTY_VALUE(ButtonType,Pt::Hmi::ButtonType::Press)
 , PT_HMI_INIT_PROPERTY_VALUE(DoublePressTimeInMs,1500)
-, PT_HMI_INIT_PROPERTY_VALUE(Image, Pt::Gfx::ARgbImage(0,0))
+, PT_HMI_INIT_PROPERTY_VALUE(Image,Ui::Image(0,0))
 , PT_HMI_INIT_PROPERTY_VALUE(ImageAlign, Align::MidleLeft)
 , _lastPointerState( DeviceButton::Released )
 {
-  BackColor.set(Pt::Gfx::ARgbColor(245,245,245));
+  BackColor.set(Ui::Color(245/255.0,245/255.0,245/255.0));
 	PanelBorderStyle.set(BorderStyle::Widget);
 	PanelBorderWidth.set(1);
 	Caption.set("Button");	
@@ -237,7 +237,7 @@ void Button::onKeyInput(const KeyEvent& ev)
 
 void Button::onPointerInput(const PointerEvent& ev)
 {    
-	Pt::Gfx::PointF point = toClient(Pt::Gfx::PointF(ev.x(), ev.y()));
+	Ui::PointF point = toClient(Ui::PointF(ev.x(), ev.y()));
     
 	Label::onPointerInput(ev);
 		    
@@ -359,19 +359,19 @@ void Button::onRender()
 		return;
 
 	Pt::Hmi::Painter& localPainter = paintSurface().painter();
-	Pt::Gfx::SizeF    size = paintSurface().size();
+	Ui::SizeF    size = paintSurface().size();
        
 	if( Armed.get() || isFocused() )
 	{
 		size.addHeight(-5);
 		size.addWidth(-5);
 
-		Pt::Gfx::ARgbColor armedColor(0,160,160,160);
+		Ui::Color armedColor(0,160/255.0,160/255.0,160/255.0);
 		 
-		Pt::Gfx::Pen pen(1, armedColor, Pt::Gfx::Pen::DashStyle);
+		Ui::Pen pen(1, armedColor, Ui::Pen::DashStyle);
 		
 		localPainter.setPen(pen);		
-		Pt::Gfx::RectF rect(Pt::Gfx::PointF(2,2), size);
+		Ui::RectF rect(Ui::PointF(2,2), size);
 		localPainter.drawRect(rect);		
 	}		
 }

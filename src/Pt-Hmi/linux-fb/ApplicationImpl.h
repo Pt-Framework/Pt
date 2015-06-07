@@ -32,10 +32,10 @@
 
 #include "InputDevice.h"
 #include <Pt/System/MainLoop.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Rect.h>
-#include <Pt/Gfx/ARgbImage.h>
+#include <Pt/Ui/Point.h>
+#include <Pt/Ui/Size.h>
+#include <Pt/Ui/Rect.h>
+#include <Pt/Ui/Image.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Cursor.h>
 
@@ -51,14 +51,14 @@ class ApplicationImpl : public Pt::System::MainLoop
     ~ApplicationImpl();
 
 
-		Pt::Gfx::PointF toUnit(const Pt::Gfx::Point& value)
+		Ui::PointF toUnit(const Ui::Point& value)
 		{
-			return Pt::Gfx::PointF(value.x(), value.y());
+			return Ui::PointF(value.x(), value.y());
 		}
 
-		Pt::Gfx::SizeF toUnit(const Pt::Gfx::Size& value)
+		Ui::SizeF toUnit(const Ui::Size& value)
 		{
-			return Pt::Gfx::SizeF(value.width(), value.height());
+			return Ui::SizeF(value.width(), value.height());
 		}
 
 		double toUnit(int value)
@@ -66,19 +66,19 @@ class ApplicationImpl : public Pt::System::MainLoop
 			return value;
 		}
 
-		Pt::Gfx::Point fromUnit(const Pt::Gfx::PointF& value)
+		Ui::Point fromUnit(const Ui::PointF& value)
 		{
-			return Pt::Gfx::Point(value.x(), value.y());
+			return Ui::Point(value.x(), value.y());
 		}
 
-		Pt::Gfx::Size fromUnit(const Pt::Gfx::SizeF& value)
+		Ui::Size fromUnit(const Ui::SizeF& value)
 		{
-			return Pt::Gfx::Size(value.width(), value.height());
+			return Ui::Size(value.width(), value.height());
 		}
 
-		Pt::Gfx::Rect fromUnit(const Pt::Gfx::RectF& value)
+		Ui::Rect fromUnit(const Ui::RectF& value)
 		{
-			return Pt::Gfx::Rect(Gfx::Point( value.x(), value.y()) , Gfx::Size(value.width(), value.height()));
+			return Ui::Rect(Ui::Point( value.x(), value.y()) , Ui::Size(value.width(), value.height()));
 		}
 
 		int fromUnit(double value)

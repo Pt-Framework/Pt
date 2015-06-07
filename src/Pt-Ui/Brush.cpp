@@ -66,7 +66,15 @@ BrushData::BrushData(Brush::FillStyle fillStyle, const Color& color, const Image
 , _color(color)
 , _texture(0)
 {
-  _texture = (texture != 0) ?   new Image(*texture) : new Image(64, 1);
+  if(texture != 0) 	
+	{
+		  _texture = new Image(*texture);
+	}
+	else
+	{
+		 _texture  = new Image(64, 1);
+		 _texture->setColor( color );
+	}
 }
 
 

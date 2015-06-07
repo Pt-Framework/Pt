@@ -202,7 +202,7 @@ typedef BasicPoint<double>       PointF;
 class PointCompareFunctorXY
 {
 public:
-    bool operator()(const Pt::UI::Point& pt1, const Pt::UI::Point& pt2) const
+    bool operator()(const Point& pt1, const Point& pt2) const
     {
         if( (pt1.x() < pt2.x()) ||
             ( (pt1.x() == pt2.x()) && (pt1.y() < pt2.y()) ) )

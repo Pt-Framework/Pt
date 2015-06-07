@@ -16,18 +16,13 @@ PaintSurface::~PaintSurface()
 	delete _impl;
 }
 
-Pt::Gfx::ARgbImage PaintSurface::toImage() const
-{
-	return _impl->toImage();
-}
-
-void PaintSurface::resize(const Pt::Gfx::SizeF& size)
+void PaintSurface::resize(const Ui::SizeF& size)
 {
 	_impl->resize(size);
   _painter.setSurface(*this);
 }
 
-Pt::Gfx::SizeF PaintSurface::size() const
+Ui::SizeF PaintSurface::size() const
 {
 	return _impl->size();
 }

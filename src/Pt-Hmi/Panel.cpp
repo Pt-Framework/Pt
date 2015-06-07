@@ -1,6 +1,7 @@
 #include <Pt/Hmi/Panel.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Pen.h>
+#include <Pt/Ui/Point.h>
+#include <Pt/Ui/Pen.h>
+#include <Pt/Ui/Rect.h>
 
 namespace Pt{
 namespace Hmi{
@@ -9,7 +10,7 @@ Panel::Panel()
 : PT_HMI_INIT_PROPERTY_VALUE(PanelBorderStyle,BorderStyle::Single)
 , PT_HMI_INIT_PROPERTY_VALUE(PanelBorderWidth,3)
 , PT_HMI_INIT_PROPERTY_VALUE(PanelBorderRoundEdge,false)
-, PT_HMI_INIT_PROPERTY_VALUE(BorderColor, Pt::Gfx::ARgbColor(178,178,178))
+, PT_HMI_INIT_PROPERTY_VALUE(BorderColor, Ui::Color(178/255.0,178/255.0,178/255.0))
 {
   AcceptFocus = false;
   Name.set("Panel");
@@ -36,10 +37,10 @@ void Panel::onRender()
   if( PanelBorderWidth.get() == 0 )
     return;
 
-  Gfx::SizeF size = paintSurface().size();
+  Ui::SizeF size = paintSurface().size();
 	size_t border =  (size_t) PanelBorderWidth.get();	
-	Pt::Gfx::SizeF  clientSize(size.width() - PanelBorderWidth.get()/2, size.height() - PanelBorderWidth.get()/2);	
-	Pt::Gfx::RectF  clientRect(Pt::Gfx::PointF( PanelBorderWidth.get()/2, PanelBorderWidth.get()/2), clientSize);
+	Ui::SizeF  clientSize(size.width() - PanelBorderWidth.get()/2, size.height() - PanelBorderWidth.get()/2);	
+	Ui::RectF  clientRect(Ui::PointF( PanelBorderWidth.get()/2, PanelBorderWidth.get()/2), clientSize);
 	
 	Pt::Hmi::Painter& localPainter = paintSurface().painter();
 						
@@ -47,8 +48,8 @@ void Panel::onRender()
 	{
 		case BorderStyle::Single:
 		{			
-			std::vector<Pt::Gfx::PointF> points1(5);
-			std::vector<Pt::Gfx::PointF> points2(5);
+			std::vector<Ui::PointF> points1(5);
+			std::vector<Ui::PointF> points2(5);
 
 			//P0
 			points1[0].setX(corner);
@@ -91,7 +92,7 @@ void Panel::onRender()
 			points2[4].setX(corner);
 			points2[4].setY(clientRect.height());
 		
-			Pt::Gfx::Pen pen(1, BorderColor.get());
+			Ui::Pen pen(1, BorderColor.get());
 			localPainter.setPen(pen);
 				
 			localPainter.drawPolyline(&points1[0], points1.size());								
@@ -102,8 +103,8 @@ void Panel::onRender()
 			
 		case BorderStyle::Widget:
 		{			
-			std::vector<Pt::Gfx::PointF> points1(5);
-			std::vector<Pt::Gfx::PointF> points2(5);
+			std::vector<Ui::PointF> points1(5);
+			std::vector<Ui::PointF> points2(5);
 
 			//P0
 			points1[0].setX(corner);
@@ -147,12 +148,12 @@ void Panel::onRender()
 			points2[4].setY(clientRect.height());
 
 
-			Pt::Gfx::Pen pen(border, BorderColor.get() );
+			Ui::Pen pen(border, BorderColor.get() );
 			localPainter.setPen(pen);
 				
 			localPainter.drawPolyline(&points2[0], points2.size());
                 
-			Pt::Gfx::Pen pen2(border,  BorderColor.get());
+			Ui::Pen pen2(border,  BorderColor.get());
 			localPainter.setPen(pen2);
                 
 			localPainter.drawPolyline(&points1[0], points1.size());
@@ -162,8 +163,8 @@ void Panel::onRender()
 
 		case BorderStyle::Border3D:
 		{
-			std::vector<Pt::Gfx::PointF> points1(3);
-			std::vector<Pt::Gfx::PointF> points2(3);
+			std::vector<Ui::PointF> points1(3);
+			std::vector<Ui::PointF> points2(3);
 
 			points1[0].setX(0);
 			points1[0].setY(clientRect.height());
@@ -185,12 +186,12 @@ void Panel::onRender()
 			points2[2].setY(clientRect.height());
 
 		
-			Pt::Gfx::Pen pen(border, Pt::Gfx::ARgbColor(255,255,255));
+			Ui::Pen pen(border, Ui::Color(255/255.0,255/255.0,255/255.0));
 			localPainter.setPen(pen);
 				
 			localPainter.drawPolyline(&points1[0], points1.size());
 								
-			Pt::Gfx::Pen pen2(border, DisabledColor.get() );
+			Ui::Pen pen2(border, DisabledColor.get() );
 			localPainter.setPen(pen2);
 
 			localPainter.drawPolyline(&points2[0], points2.size());			

@@ -128,48 +128,48 @@ double ApplicationImpl::toUnit(int unit)
 }
 
 
-Pt::Gfx::PointF ApplicationImpl::toUnit(const Pt::Gfx::Point& value)
+Ui::PointF ApplicationImpl::toUnit(const Ui::Point& value)
 {
 	const double x = value.x() * _factorX  + _offsetX;
 	const double y = value.y() * _factorY  + _offsetY;
 
-	return Pt::Gfx::PointF(std::ceil(x),std::ceil(y));
+	return Ui::PointF(std::ceil(x),std::ceil(y));
 }
 
 
-Pt::Gfx::SizeF ApplicationImpl::toUnit(const Pt::Gfx::Size& value)
+Ui::SizeF ApplicationImpl::toUnit(const Ui::Size& value)
 {
 	const double width = value.width() * _factorX  + _offsetX;
 	const double height = value.height() * _factorY  + _offsetY;
 
-	return Pt::Gfx::SizeF(std::ceil(width),std::ceil(height));
+	return Ui::SizeF(std::ceil(width),std::ceil(height));
 }
 
 
-Pt::Gfx::Point ApplicationImpl::fromUnit(const Pt::Gfx::PointF& value)
+Ui::Point ApplicationImpl::fromUnit(const Ui::PointF& value)
 {
 	double factorX = _screenWidth / _width;
 	double factorY = _screenHeight / _height;
 	int x = (int) ( value.x() * factorX); 
 	int y = (int) ( value.y() * factorY);
 
-	return Pt::Gfx::Point(x,y);
+	return Ui::Point(x,y);
 }
 
 
-Pt::Gfx::Size ApplicationImpl::fromUnit(const Pt::Gfx::SizeF& value)
+Ui::Size ApplicationImpl::fromUnit(const Ui::SizeF& value)
 {
 	double factorX = _screenWidth / _width;
 	double factorY = _screenHeight / _height;
 	int width = (int) ( value.width() * factorX); 
 	int height = (int) ( value.height() * factorY);
-	return Pt::Gfx::Size(width,height);
+	return Ui::Size(width,height);
 }
 
 
-Pt::Gfx::Rect ApplicationImpl::fromUnit(const Pt::Gfx::RectF& value)
+Ui::Rect ApplicationImpl::fromUnit(const Ui::RectF& value)
 {
-	Pt::Gfx::Rect rect(Pt::Gfx::Point(value.x(), value.y()), Pt::Gfx::Size(value.width(), value.height()));
+	Ui::Rect rect(Ui::Point(value.x(), value.y()), Ui::Size(value.width(), value.height()));
 	return rect;
 }
 
@@ -242,7 +242,6 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 	if( _cursorHandle != 0 )
 	  SetCursor( _cursorHandle );	
 
-  std::clog<<"Cursor = " << cursor->name() << std::endl;
 	DeleteObject( andMask );
 	DeleteObject( xorMask );
 }

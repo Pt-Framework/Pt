@@ -84,14 +84,14 @@ ScreenImpl::ScreenImpl()
   _buffer         =  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);	
 
 	Visible = true;
-	Size = Pt::Gfx::SizeF( _screenInfo.xres,  _screenInfo.yres );
-	Position = Pt::Gfx::PointF(0,0 );
-	BackColor = Pt::Gfx::ARgbColor(170,170,170);	
+	Size = Ui::SizeF( _screenInfo.xres,  _screenInfo.yres );
+	Position = Ui::PointF(0,0 );
+	BackColor = Ui::Color(170,170,170);	
 	eventReceived() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
 }
 
 
-void ScreenImpl::bitBlit(const std::vector<Pt::uint8_t>& plane, size_t w, size_t h, const Gfx::Point& pos, BlitOp op)
+void ScreenImpl::bitBlit(const std::vector<Pt::uint8_t>& plane, size_t w, size_t h, const Ui::Point& pos, BlitOp op)
 {
 	static const size_t planePixelSize = 4;
 	const size_t bufferPixelSize = depth() / 8;
@@ -149,7 +149,7 @@ void ScreenImpl::bitBlit(const std::vector<Pt::uint8_t>& plane, size_t w, size_t
 void ScreenImpl::saveCursorBackImage( const Pt::Hmi::PointerEvent& mouseEvent )
 {
 	const size_t pixelSizeInByte = depth() / 8;		
-	_cursorPos    = Pt::Gfx::Point( mouseEvent.x(), mouseEvent.y() );	
+	_cursorPos    = Ui::Point( mouseEvent.x(), mouseEvent.y() );	
 	_cursorWidth  = Cursor.get().width();
 	_cursorHeight = Cursor.get().height();
 	
@@ -184,34 +184,8 @@ void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 	saveCursorBackImage(mouseEvent);
 
   //Todo: only one blit 
-	bitBlit( Cursor.get().andRgb888(), Cursor.get().width(), Cursor.get().height(), Pt::Gfx::Point( ( int) mouseEvent.x(), (int) mouseEvent.y()), AndOp );
-	bitBlit( Cursor.get().xorRgb888(), Cursor.get().width(), Cursor.get().height(), Pt::Gfx::Point( (int) mouseEvent.x(), (int) mouseEvent.y()), XorOp );
-}
-
-
-void ScreenImpl::copyImageData(ssize_t toX, ssize_t toY, const char* data, size_t fromWidth, size_t fromHeight)
-{
-	size_t pixelSize = depth() / 8;
-
-/*	if( toX == 0 && toY == 0 && fromWidth == _screenInfo.xres && fromHeight == _screenInfo.yres )
-	{
-		memcpy(_buffer, data, fromWidth * fromHeight * pixelSize);
-	}
-	else*/
-	{
-
-		toX  = (_screenInfo.xres  - fromWidth) ;
-
-		unsigned bufferOffset = toX + ( toY * _screenInfo.xres );
-		char* bufferData = (char*)( _buffer) + ( bufferOffset * pixelSize);
-
-		for(size_t n = 0; n < fromHeight; ++n)
-		{
-			memcpy(bufferData, data, fromWidth * pixelSize);
-			bufferData += (size_t) _fixedInfo.line_length;
-			data += fromWidth * pixelSize;
-		}
-	}
+	bitBlit( Cursor.get().andRgb888(), Cursor.get().width(), Cursor.get().height(), Ui::Point( ( int) mouseEvent.x(), (int) mouseEvent.y()), AndOp );
+	bitBlit( Cursor.get().xorRgb888(), Cursor.get().width(), Cursor.get().height(), Ui::Point( (int) mouseEvent.x(), (int) mouseEvent.y()), XorOp );
 }
 
 
@@ -220,7 +194,9 @@ void ScreenImpl::onInvalidate()
 	render();		
 	_windowManager.render();
 
-	drawImage( 0, 0, paintSurface().impl()->image().begin(), paintSurface().impl()->image().end(), _screenInfo.xres, _screenInfo.yres );	
+	const Ui::Image& image= paintSurface().impl()->image();
+
+	memcpy( _buffer, image.pixel(0, 0), _bufferSize);	
 }
 
 
@@ -230,7 +206,7 @@ ScreenImpl::~ScreenImpl()
 		munmap(_buffer, _bufferSize);
 
 	if(_fd > 0)
-		close(_fd);
+		::close(_fd);
 }
 
 }}

@@ -83,13 +83,13 @@ namespace Gfx {
      * in the current color, using the current paint mode, and in the current font.
      */
 
-		namespace RenderMode
+		namespace AlphaBlending
 		{	
 			enum Type
 			{
-				Normal,
-				BitBlit, //TDOO: only for draw Image
-				AlphaBlending
+				NoAlpha,
+				AlphaMask,
+				AlphaBlend
 			};
 		}
 
@@ -102,7 +102,7 @@ namespace Gfx {
             {}
 
 
-						virtual void setRenderMode(RenderMode::Type mode) = 0;
+						virtual void setRenderMode(AlphaBlending::Type mode) = 0;
 
             /**
              * @brief Sets the pen of this painter to the given pen.

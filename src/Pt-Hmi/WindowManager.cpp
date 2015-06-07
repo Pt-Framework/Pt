@@ -31,8 +31,9 @@
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Gfx/Pen.h>
-#include <Pt/Gfx/Brush.h>
+#include <Pt/Ui/Pen.h>
+#include <Pt/Ui/Brush.h>
+#include <Pt/Ui/Point.h>
 
 namespace Pt {
 namespace Hmi {
@@ -43,7 +44,7 @@ WindowManager::WindowManager(Window& parent)
 , _app( Application::instance() )
 , _titleBarHeight(20)
 , _borderWidth(3)
-, _borderColor(0,0,255)
+, _borderColor(0,0,255/255.0)
 , _moving(false)
 {
 }
@@ -123,26 +124,26 @@ void WindowManager::invalidate()
 }
 
 
-Gfx::PointF WindowManager::renderWindowFrame(ChildWindow* w)
+Ui::PointF WindowManager::renderWindowFrame(ChildWindow* w)
 {
 	Painter& painter = _parent.paintSurface().painter();
 
 	//Render Frame
-	Pt::Gfx::PointF pos = w->Position.get();
-	Pt::Gfx::RectF  rect( pos, Pt::Gfx::SizeF(w->Size.get().width() + _borderWidth*2, _titleBarHeight + w->Size.get().height()  + _borderWidth) ) ;
+	Ui::PointF pos = w->Position.get();
+	Ui::RectF  rect( pos, Ui::SizeF(w->Size.get().width() + _borderWidth*2, _titleBarHeight + w->Size.get().height()  + _borderWidth) ) ;
 
-	Pt::Gfx::Pen  pen((size_t) _borderWidth*2, _borderColor);
+	Ui::Pen  pen((size_t) _borderWidth*2, _borderColor);
 	painter.setPen(pen);
 	painter.drawRect(rect);		
 	
 	//Render Titel bar
-	Pt::Gfx::Brush brush(_borderColor);
-	Pt::Gfx::RectF rectTitel( pos, Pt::Gfx::SizeF(w->Size.get().width() + _borderWidth*2, _titleBarHeight) ) ;
+	Ui::Brush brush(_borderColor);
+	Ui::RectF rectTitel( pos, Ui::SizeF(w->Size.get().width() + _borderWidth*2, _titleBarHeight) ) ;
 
 	painter.setBrush(brush);
 	painter.fillRect(rectTitel);	
 		
-	return Pt::Gfx::PointF( pos.x() + _borderWidth, pos.y() + _titleBarHeight );	
+	return Ui::PointF( pos.x() + _borderWidth, pos.y() + _titleBarHeight );	
 }
 
 void WindowManager::render()
@@ -155,17 +156,17 @@ void WindowManager::render()
 				
 		w->render();
 
-		Gfx::PointF clientPos = renderWindowFrame(w);
+		Ui::PointF clientPos = renderWindowFrame(w);
 
 		painter.drawSurface( clientPos, w->paintSurface() );
 	}
 }
 
 
-Gfx::PointF WindowManager::toClient(const ChildWindow* w, Gfx::PointF& p)
+Ui::PointF WindowManager::toClient(const ChildWindow* w, const Ui::PointF& p)
 {
-		Pt::Gfx::PointF client;
-		client =  Gfx::PointF( p.x() - w->Position.get().x() - _borderWidth ,  p.y() - w->Position.get().y() - _borderWidth ) ;
+		Ui::PointF client;
+		client =  Ui::PointF( p.x() - w->Position.get().x() - _borderWidth ,  p.y() - w->Position.get().y() - _borderWidth ) ;
 		return client;
 }
 
@@ -173,12 +174,12 @@ bool WindowManager::updateActive( const Pt::Hmi::PointerEvent& mouseEvent )
 {
 	for( int i = _windows.size() - 1;  i > -1; --i )
 	{
-		Pt::Gfx::PointF local( mouseEvent.x() - _windows[i]->Position.get().x() , mouseEvent.y() - _windows[i]->Position.get().y() );
+		Ui::PointF local( mouseEvent.x() - _windows[i]->Position.get().x() , mouseEvent.y() - _windows[i]->Position.get().y() );
 
 		if( !contains( _windows[i], local ) )
 			continue;
 				
-		const Pt::Gfx::PointF& client = toClient( _windows[i], Gfx::PointF( mouseEvent.x(), mouseEvent.y() ) );
+		const Ui::PointF& client = toClient( _windows[i], Ui::PointF( mouseEvent.x(), mouseEvent.y() ) );
 				 
 		if( _windows[i]->hasPointer()  && ! _windows[i]->contains( client ) )
 			_windows[i]->onPointerLeaved();
@@ -213,7 +214,7 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 {
 	const std::vector<DeviceButton>& button = ev.buttons();
 
-	Pt::Gfx::PointF point( ev.x(), ev.y() );
+	Ui::PointF point( ev.x(), ev.y() );
 
 	if( button[0].state() != DeviceButton::Pressed )
 	{
@@ -222,7 +223,7 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 		return;
 	}	
 
-	Gfx::SizeF winSize = windowSize(w);
+	Ui::SizeF winSize = windowSize(w);
 	double width  = winSize.width();
 	double height = winSize.height();
 	double posX   = w->Position.get().x();
@@ -296,13 +297,13 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 		break;
 	}
 
-	if( w->Position.get() != Pt::Gfx::PointF(posX, posY) )
+	if( w->Position.get() != Ui::PointF(posX, posY) )
 	{
-		_positionEvent.setPosition(Pt::Gfx::PointF(posX, posY));
+		_positionEvent.setPosition(Ui::PointF(posX, posY));
 		w->eventReceived().send(_positionEvent);		
 	}
 
-	if( w->Size.get() != Pt::Gfx::SizeF(width, height) )
+	if( w->Size.get() != Ui::SizeF(width, height) )
 	{
 		_sizeEvent.setSize( clientSize(width, height) );
 		w->eventReceived().send( _sizeEvent );
@@ -313,21 +314,21 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 }
 
 
-Pt::Gfx::SizeF WindowManager::clientSize( double width, double height)
+Ui::SizeF WindowManager::clientSize( double width, double height)
 {
-	return Pt::Gfx::SizeF( width - _borderWidth*2, height - _borderWidth - _titleBarHeight);
+	return Ui::SizeF( width - _borderWidth*2, height - _borderWidth - _titleBarHeight);
 }
 
 
-Pt::Gfx::SizeF WindowManager::windowSize( const ChildWindow* w)
+Ui::SizeF WindowManager::windowSize( const ChildWindow* w)
 {
-	return Pt::Gfx::SizeF( w->Size.get().width() + _borderWidth*2, w->Size.get().height() + _borderWidth + _titleBarHeight);
+	return Ui::SizeF( w->Size.get().width() + _borderWidth*2, w->Size.get().height() + _borderWidth + _titleBarHeight);
 }
 
 
-bool WindowManager::contains(const ChildWindow* w, const Pt::Gfx::PointF& p)
+bool WindowManager::contains(const ChildWindow* w, const Ui::PointF& p)
 {  
-	Pt::Gfx::SizeF winSize = windowSize(w);
+	Ui::SizeF winSize = windowSize(w);
 
 	if( p.x() < winSize.width() && p.x() >= 0 && p.y() < winSize.height() && p.y() >= 0)
 		return true;
@@ -340,11 +341,11 @@ bool WindowManager::detMoving(  ChildWindow* w, const Pt::Hmi::PointerEvent& ev 
 	if( ev.buttons()[0].state() != DeviceButton::Pressed  || _moving )
 		return false;
 
-	const Gfx::PointF& p = w->Position.get();
+	const Ui::PointF& p = w->Position.get();
 	 
 	if( ev.x() < (p.x() + _borderWidth*2 + w->Size.get().width())  && ev.x() >= p.x()  && ev.y() < (p.y() + _titleBarHeight) && ev.y() >= p.y() )
 	{				
-		_movingOffset = Gfx::PointF( ev.x(), ev.y() );
+		_movingOffset = Ui::PointF( ev.x(), ev.y() );
 
 		return true;
 	}
@@ -358,12 +359,12 @@ ResizeDirection::Type WindowManager::detSizeDirection( ChildWindow* w, const Pt:
 		return ResizeDirection::No;
 
 	ResizeDirection::Type resizeDir = ResizeDirection::No;
-	Pt::Gfx::SizeF				size   = w->Size.get();
+	Ui::SizeF				size   = w->Size.get();
 	double								border = _borderWidth;
 	double								sizeR  = size.width() - border;
 	double								sizeB  = size.height() - border;
 
-	Pt::Gfx::PointF p( ev.x() - w->Position.get().x(), ev.y() - w->Position.get().y() );
+	Ui::PointF p( ev.x() - w->Position.get().x(), ev.y() - w->Position.get().y() );
 
 	if( contains(w, p) )
 	{
@@ -426,7 +427,7 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 
 	const std::vector<DeviceButton>& button = ev.buttons();
 
-	Pt::Gfx::PointF point( ev.x(), ev.y() );
+	Ui::PointF point( ev.x(), ev.y() );
 
 	if( button[0].state() != DeviceButton::Pressed )
 	{	
@@ -438,13 +439,13 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 	//moving window
 	double dtX =  ev.x() - _movingOffset.x();
 	double dtY =  ev.y() - _movingOffset.y();
-	Gfx::PointF newPos( w->Position.get().x() + dtX, w->Position.get().y() + dtY);
+	Ui::PointF newPos( w->Position.get().x() + dtX, w->Position.get().y() + dtY);
 
 	_positionEvent.setPosition(newPos);
 
 	w->eventReceived().send( _positionEvent );
 
-	_movingOffset = Gfx::PointF( ev.x() , ev.y() );
+	_movingOffset = Ui::PointF( ev.x() , ev.y() );
 	invalidate();
 	std::clog<<"move"<<std::endl;
 }
@@ -487,13 +488,13 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 
 	if( _sizingDirection == ResizeDirection::No  && ! _moving)
 	{
-		_lastSizePoint = Pt::Gfx::PointF( mouseEvent.x(), mouseEvent.y() ) ;
+		_lastSizePoint = Ui::PointF( mouseEvent.x(), mouseEvent.y() ) ;
 
 		_sizingDirection = detSizeDirection( childWindow, mouseEvent );	
 		
 		_moving = detMoving( childWindow, mouseEvent );	
 
-		if( childWindow->contains( Gfx::PointF( localMouseEvent.x(), localMouseEvent.y() ) ) )
+		if( childWindow->contains( Ui::PointF( localMouseEvent.x(), localMouseEvent.y() ) ) )
 			childWindow->eventReceived().send( localMouseEvent );
 
 		return;

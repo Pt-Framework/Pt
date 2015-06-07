@@ -3,7 +3,7 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Types.h>
-#include <Pt/Gfx/ARgbImage.h>
+#include <Pt/Ui/Image.h>
 #include <vector>
 
 namespace Pt{
@@ -90,10 +90,10 @@ class PT_HMI_API Cursor
     static const Cursor& moveCursor();
   
   public:
-    static void fromImage( const Pt::Gfx::ARgbImage& image, Cursor& cursor );	
-    static void loadCursor( const char* pngFile, const Gfx::ARgbColor& alphaColor, Cursor& cursor );
-    static void loadCursor( std::istream& pngStream, const Gfx::ARgbColor& alphaColor, Cursor& cursor );
-    static void loadCursor( const Pt::uint8_t* pngBuffer, const size_t streamSize, const Gfx::ARgbColor& alphaColor, Cursor& cursor );
+    static void fromImage( const Ui::Image& image, Cursor& cursor );	
+    static void loadCursor( const char* pngFile, const Ui::Color& alphaColor, Cursor& cursor );
+    static void loadCursor( std::istream& pngStream, const Ui::Color& alphaColor, Cursor& cursor );
+    static void loadCursor( const Pt::uint8_t* pngBuffer, const size_t streamSize, const Ui::Color& alphaColor, Cursor& cursor );
 
 	private:
 		std::vector<Pt::uint8_t> _andMask;

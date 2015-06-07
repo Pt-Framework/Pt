@@ -61,9 +61,9 @@ public:
 
 	void render();
 
-  void setPosition(const Gfx::PointF& p);
+  void setPosition(const Ui::PointF& p);
 
-  void setSize(const Gfx::SizeF& size);
+  void setSize(const Ui::SizeF& size);
 
   void showTitle(bool p);
 
@@ -83,13 +83,13 @@ public:
   
   void showInTaskbar(bool p);
   
-  void setIcon(const Pt::Gfx::ARgbImage& p);
+  void setIcon(const Ui::Image& p);
 
 	void setEnable(bool e);	
 
-	void setMinSize(const Pt::Gfx::SizeF& s);
+	void setMinSize(const Ui::SizeF& s);
 	
-	void setMaxSize(const Pt::Gfx::SizeF& s);
+	void setMaxSize(const Ui::SizeF& s);
 
 	void focus();
 
@@ -110,8 +110,8 @@ private:
 	PointerEvent									_pointerEvent;
 	Window*												_window;
 	bool													_forceTopMost;
-	Pt::Gfx::Size                 _minSize;
-	Pt::Gfx::Size                 _maxSize;
+	Ui::Size                 _minSize;
+	Ui::Size                 _maxSize;
 };
 
 }}

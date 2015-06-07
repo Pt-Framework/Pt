@@ -1,5 +1,4 @@
-/* Copyright (C) 2006-2015 Marc Boris Duerner
- * Copyright (C) 2010 Aloysius Indrayanto
+/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,31 +23,26 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Ui_Algorithm_h
-#define Pt_Ui_Algorithm_h
+#ifndef PT_UI_IMAGEREADER_H
+#define PT_UI_IMAGEREADER_H
 
-#include <Pt/Ui/ColorAlgo.h>
-#include <Pt/Ui/ImageAlgo.h>
+#include <Pt/Ui/Image.h>
+#include <iostream>
 
-namespace Pt {
-namespace Ui {
+namespace Pt{
+namespace Ui{
 
-    /** @brief Transform one sequence into another.*/
-    template <typename InIteratorT, typename OutIteratorT, typename OperationT> inline
-    OperationT transform(InIteratorT begin, InIteratorT end, OutIteratorT dest, OperationT op)
-    {
-        for(; begin != end; ++begin, ++dest) op(*dest, *begin);
-          return op;
-    }
+class PT_UI_API ImageReader
+{
+public:
+    
+    static Image* read(std::istream& stream);
+    static Image* read(const char* file);
+    
+};
 
-    /** @brief Transform one sequence into another.*/
-    template <typename IteratorT, typename OperationT> inline
-    OperationT transform(IteratorT begin, IteratorT end, OperationT op)
-    {
-        for(; begin != end; ++begin) op(*begin);
-          return op;
-    }
-
-}} // namespace 
+    
+}}
 
 #endif
+

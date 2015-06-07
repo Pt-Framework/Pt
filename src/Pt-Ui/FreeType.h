@@ -1,7 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
  *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
- *   Copyright (C) 2006-2007 PTV AG                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU Library General Public License as       *
@@ -18,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef PT_GFX_FREETYPE_H
-#define PT_GFX_FREETYPE_H
+#ifndef PT_UI_FREETYPE_H
+#define PT_UI_FREETYPE_H
 
 #include "freetype/include/ft2build.h"
 #include FT_FREETYPE_H
@@ -29,7 +28,7 @@
 #include "Pt/Singleton.h"
 
 namespace Pt{
-namespace Gfx{
+namespace Ui{
 
 class FreeType : public Pt::Singleton<FreeType>
 {

@@ -1,9 +1,8 @@
-#ifndef Pt_Gfx_vera_h
-#define Pt_Gfx_vera_h
+#ifndef PT_UI_VERA_H
+#define PT_UI_VERA_H
 
 namespace Pt{
-
-namespace Gfx{
+namespace Ui{
 
 
 static const unsigned char vera[] = {

@@ -38,17 +38,20 @@ Rgb888Format::Rgb888Format()
 
 void Rgb888Format::setColor(Pt::uint8_t* pixel, const Color& c) const
 {
-	*pixel = (Pt::uint8_t)(c.red() * 255.0f);
+	*pixel = (Pt::uint8_t)(c.blue() * 255.0f);		
+	
 	pixel++;
-	*pixel = (Pt::uint8_t)(c.green() * 255.0f);
+	*pixel = (Pt::uint8_t)(c.green() * 255.0f);	
+	
 	pixel++;
-	*pixel = (Pt::uint8_t)(c.blue() * 255.0f);			 
+	*pixel = (Pt::uint8_t)(c.red() * 255.0f);		
+		 
 }
 
 
 Color Rgb888Format::color(const Pt::uint8_t* pixel) const
 {
-	return Color(1, *(pixel +1)/255.0f, *(pixel +2)/255.0f, *(pixel +3)/255.0f);
+	return Color(1, *(pixel+2)/255.0f, *(pixel +1)/255.0f, *(pixel)/255.0f);
 }
 
 

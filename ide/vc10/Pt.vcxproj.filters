@@ -1506,17 +1506,14 @@
     <ClInclude Include="..\..\src\Pt-Ui\Stroke.h">
       <Filter>Pt-Ui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\Algorithm.h">
+    <ClInclude Include="..\..\src\Pt-Ui\Vera.h">
       <Filter>Pt-Ui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\ColorAlgo.h">
+    <ClInclude Include="..\..\include\Pt\Ui\ImageReader.h">
       <Filter>Pt-Ui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\GenericAlgo.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\ImageAlgo.h">
-      <Filter>Pt-Ui</Filter>
+    <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
+      <Filter>Pt-Hmi</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1737,9 +1734,6 @@
     </None>
     <None Include="..\..\src\Pt-Ui\freetype\src\Jamfile">
       <Filter>Pt-Ui\freetype\src</Filter>
-    </None>
-    <None Include="..\..\include\Pt\Ui\ImageAlgo.tpp">
-      <Filter>Pt-Ui</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -2897,6 +2891,18 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Ui\Stroke.cpp">
       <Filter>Pt-Ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ui\ImagePainter.cpp">
+      <Filter>Pt-Ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ui\ClipPolygon.cpp">
+      <Filter>Pt-Ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ui\ImageReader.cpp">
+      <Filter>Pt-Ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp">
+      <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

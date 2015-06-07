@@ -29,6 +29,7 @@
 #include <Pt/Ui/Image.h>
 #include <Pt/StringStream.h>
 #include <Pt/Convert.h>
+#include <Pt/SourceInfo.h>
 
 namespace Pt {
 namespace Ui {
@@ -91,56 +92,6 @@ Pen::JoinStyle Pen::joinStyle() const
 const Image& Pen::buffer() const
 {
     return _penData->buffer();
-}
-
-
-bool operator==(const Pen& a, const Pen& b)
-{
-	return a._penData->size() == b._penData->size() &&
-	       a._penData->color() == b._penData->color() &&
-	       a._penData->style() == b._penData->style();
-}
-
-
-bool operator<(const Pen& a, const Pen& b)
-{
-	return a._penData->size() < b._penData->size();
-}
-
-
-void operator >>=(const SerializationInfo& si, Pen& pen)
-{
-    size_t              penSize;
-    Color      penColor;
-    Pt::ssize_t         penStyle;
-    Pt::String html;
-
-    Pt::String s;
-    si.getString(s);
-    Pt::StringStream ss(s);
-    ss >> penSize;
-    ss.get();
-
-    getline( ss, html, Pt::Char('-') );
-
-    ss >> penStyle;
-
-    if( ss.fail() )
-        throw ConversionError( PT_ERROR_MSG("Pen") );
-
-    pen = Pen(penSize,Color::fromHtml(html), (Pen::PenStyle)penStyle);
-}
-
-
-void operator <<=(SerializationInfo& si, const Pen& pen)
-{
-    Pt::StringStream ss;
-    ss << pen.size() << Pt::Char('-')
-       << pen.color().toHtml() << Pt::Char('-')
-       << pen.style();
-
-    si.setString( ss.str() );
-    si.setTypeName("Pen");
 }
 
 } } // namespace

@@ -27,27 +27,27 @@ Application& Application::instance()
 }
 
 	
-Pt::Gfx::PointF Application::toUnit(const Pt::Gfx::Point& value)
+Ui::PointF Application::toUnit(const Ui::Point& value)
 {
 	return _impl->toUnit(value);
 }
 
-Pt::Gfx::SizeF Application::toUnit(const Pt::Gfx::Size& value)
+Ui::SizeF Application::toUnit(const Ui::Size& value)
 {
 	return _impl->toUnit(value);
 }
 
-Pt::Gfx::Point Application::fromUnit(const Pt::Gfx::PointF& value)
+Ui::Point Application::fromUnit(const Ui::PointF& value)
 {
 	return _impl->fromUnit(value);
 }
 
-Pt::Gfx::Size Application::fromUnit(const Pt::Gfx::SizeF& value)
+Ui::Size Application::fromUnit(const Ui::SizeF& value)
 {
 	return _impl->fromUnit(value);
 }
 
-Pt::Gfx::Rect Application::fromUnit(const Pt::Gfx::RectF& value)
+Ui::Rect Application::fromUnit(const Ui::RectF& value)
 {
 	return _impl->fromUnit(value);
 }

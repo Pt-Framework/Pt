@@ -4,7 +4,7 @@
 #include <Pt/Types.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Event.h>
-#include <Pt/Gfx/Point.h>
+#include <Pt/Ui/Point.h>
 
 
 namespace Pt{
@@ -13,7 +13,7 @@ namespace Hmi{
 class PT_HMI_API PositionEvent : public Pt::BasicEvent<PositionEvent>
 {
 	public:	
-		PositionEvent(const Pt::Gfx::PointF& pos)
+		PositionEvent(const Ui::PointF& pos)
 		: _position( pos )		
 		{
 		}
@@ -29,19 +29,19 @@ class PT_HMI_API PositionEvent : public Pt::BasicEvent<PositionEvent>
 		}
 
 
-		void setPosition( const Pt::Gfx::PointF&  pos )
+		void setPosition( const Ui::PointF&  pos )
 		{
 			_position = pos;
 		}
 
 
-		const Pt::Gfx::PointF&  position( ) const
+		const Ui::PointF&  position( ) const
 		{
 			return _position;
 		}	
 
 	private:
-		Pt::Gfx::PointF _position;
+		Ui::PointF _position;
 };
 
 }}

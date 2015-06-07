@@ -23,8 +23,8 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Painter.h>
-#include <Pt/Gfx/ImagePainter.h>
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Ui/ImagePainter.h>
+#include <Pt/Ui/FontMetrics.h>
 
 namespace Pt {
 namespace Hmi {
@@ -38,64 +38,64 @@ public:
 		
     virtual ~PainterImpl();
   
-		void setRenderMode(Gfx::RenderMode::Type mode)
+		void setRenderMode(Ui::RenderMode::Type mode)
 		{
 		}
 	 
-		virtual void setPen(const Gfx::Pen& pen);
+		virtual void setPen(const Ui::Pen& pen);
 
-    virtual const Gfx::Pen& pen() const;
+    virtual const Ui::Pen& pen() const;
 
-    virtual void setBrush(const Gfx::Brush& brush);
+    virtual void setBrush(const Ui::Brush& brush);
 
-    virtual const Gfx::Brush& brush() const;
+    virtual const Ui::Brush& brush() const;
 
-    virtual void setFont(const Gfx::Font& font);
+    virtual void setFont(const Ui::Font& font);
 
-    virtual const Gfx::Font& font() const;
+    virtual const Ui::Font& font() const;
 
-    virtual Gfx::FontMetrics fontMetrics() const;
+    virtual Ui::FontMetrics fontMetrics() const;
 
-    virtual Gfx::FontMetrics fontMetrics(Pt::String Text) const;
+    virtual Ui::FontMetrics fontMetrics(Pt::String Text) const;
 
     virtual const std::list<std::string>& fontFamilyNames();
 
     virtual int depth() const;
 
-    virtual void drawPixel(const Pt::Gfx::PointF& to);
+    virtual void drawPixel(const Ui::PointF& to);
 
-    virtual void drawLine(const Pt::Gfx::PointF& from, const Pt::Gfx::PointF& to);
+    virtual void drawLine(const Ui::PointF& from, const Ui::PointF& to);
 
-	virtual void drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline );
+	virtual void drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline );
 
-    virtual void drawText(const Pt::Gfx::PointF& to, const Pt::String& Text);
+    virtual void drawText(const Ui::PointF& to, const Pt::String& Text);
 
-    virtual void drawRect(const Pt::Gfx::RectF& rectangle);
+    virtual void drawRect(const Ui::RectF& rectangle);
 
-    virtual void fillRect(const Pt::Gfx::RectF& rectangle);
+    virtual void fillRect(const Ui::RectF& rectangle);
 
-    virtual void drawEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size);
+    virtual void drawEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size);
 
-    virtual void fillEllipse(const Pt::Gfx::PointF& topLeft, const Pt::Gfx::SizeF& size);
+    virtual void fillEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size);
 
-    virtual void drawPolyline(const Pt::Gfx::PointF* points, const size_t pointCount);
+    virtual void drawPolyline(const Ui::PointF* points, const size_t pointCount);
 
-    virtual void fillPolygon(const Pt::Gfx::PointF* points, const size_t pointCount);
+    virtual void fillPolygon(const Ui::PointF* points, const size_t pointCount);
 
-    virtual void drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm, const Pt::Gfx::Region& pmRegion);
+    virtual void drawSurface(const Ui::PointF& to, PaintSurface& pm, const Ui::Region& pmRegion);
 
-    virtual void drawSurface(const Pt::Gfx::PointF& to, PaintSurface& pm);
+    virtual void drawSurface(const Ui::PointF& to, PaintSurface& pm);
 		
-    virtual void drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image);
+    virtual void drawImage(const Ui::PointF& to, const Ui::Image& image);
 
-    virtual void drawImage(const Pt::Gfx::PointF& to, const Gfx::ARgbImage& image, const Pt::Gfx::Region& imageRegion);    
+    virtual void drawImage(const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion);    
 
     virtual void addFontName(const std::string& fontName);
 
 	void setSurface(PaintSurface& s);
 	
 private:
-	Pt::Gfx::ImagePainter _painter;
+	Ui::ImagePainter _painter;
 };
 
 }}

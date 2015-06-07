@@ -31,15 +31,15 @@ namespace Pt{
 namespace Ui{
 
 
-Image::Image(const ImageFormat& format = ImageFormat::argb8888())		
-:_format(&format)
+Image::Image(const ImageFormat& format)		
+: _format(&format)
 {
 	resize(1, 1);
 }
 			
       	
-Image::Image(size_t width, size_t height, size_t stride = 0, const ImageFormat& format = ImageFormat::argb8888())
-:_format(&format)
+Image::Image(size_t width, size_t height, size_t stride, const ImageFormat& format )
+: _format(&format)
 {
 	resize(width, height, stride);
 }
@@ -48,6 +48,22 @@ Image::Image(size_t width, size_t height, size_t stride = 0, const ImageFormat& 
 Image::~Image()		
 {
 
+}
+
+void Image::setColor( const Color& color )
+{
+	Pt::uint8_t* it =  pixel(0,0);	
+	
+	std::vector<Pt::uint8_t> pixel( format().pixelSize() );
+	format().setColor(&pixel[0], color);
+	
+	const size_t count = (_width + _stride) * _height;
+
+	for( size_t  i = 0; i < count; ++i )
+	{				
+		memcpy(it, &(pixel[0]), pixel.size());
+		it += pixel.size();
+	}
 }
 	
   		

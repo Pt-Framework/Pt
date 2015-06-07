@@ -1,6 +1,7 @@
 #include <Pt/Hmi/Label.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Pen.h>
+#include <Pt/Ui/Point.h>
+#include <Pt/Ui/Pen.h>
+#include <Pt/Ui/FontMetrics.h>
 
 namespace Pt{
 namespace Hmi{
@@ -11,7 +12,7 @@ Label::Label()
 {
 	Caption.set("Label");
   Name.set("Label");
-	ForeColor.set(Pt::Gfx::ARgbColor(0,0,0,0));
+	ForeColor.set(Ui::Color(0,0,0,0));
 	PanelBorderStyle.set(BorderStyle::NoBorder);
 }
 
@@ -26,11 +27,11 @@ void Label::onRender()
 		return;		
 
 	Pt::Hmi::Painter&   localPainter = paintSurface().painter();	
-	Pt::Gfx::PointF     pos;
+	Ui::PointF     pos;
 	Pt::String          caption;
-  Gfx::ARgbColor      foreColor = Enabled.get() ? ForeColor.get() : DisabledColor.get();
-  Pt::Gfx::Pen	      pen( 1, foreColor);
-  Pt::Gfx::SizeF	    size = paintSurface().size();
+  Ui::Color      foreColor = Enabled.get() ? ForeColor.get() : DisabledColor.get();
+  Ui::Pen	      pen( 1, foreColor);
+  Ui::SizeF	    size = paintSurface().size();
   
 	if( UseMnemonic.get() )
 		caption = Widget::removeMnemonic(Caption.get()).c_str();
@@ -41,9 +42,9 @@ void Label::onRender()
 	{		
 		//Calculate the current and adjust the size
 		localPainter.setFont(Font.get());
-		Pt::Gfx::FontMetrics metric = localPainter.fontMetrics(caption);
+		Ui::FontMetrics metric = localPainter.fontMetrics(caption);
 
-		Pt::Gfx::SizeF currentSize = Pt::Gfx::SizeF( metric.width() + Margin.get().left() + Margin.get().right() , 
+		Ui::SizeF currentSize = Ui::SizeF( metric.width() + Margin.get().left() + Margin.get().right() , 
                                                  metric.height() + Margin.get().top() +  Margin.get().bottom() );
     
     Visible.set(false); //No invalidate event.
@@ -53,13 +54,13 @@ void Label::onRender()
 		//Render the panel	
 		Panel::onRender();
 
-		pos = Pt::Gfx::PointF(0, metric.ascent());
+		pos = Ui::PointF(0, metric.ascent());
 	}
 	else
 	{		
 		Panel::onRender();
 							
-		Pt::Gfx::FontMetrics	metric = localPainter.fontMetrics(caption);
+		Ui::FontMetrics	metric = localPainter.fontMetrics(caption);
     
     localPainter.setFont(Font.get());		
 
@@ -67,7 +68,7 @@ void Label::onRender()
 		{
       case Hmi::Align::TopLeft:
       {
-			  pos = Pt::Gfx::PointF( 0, metric.ascent() );			
+			  pos = Ui::PointF( 0, metric.ascent() );			
       }
       break;
 
@@ -75,7 +76,7 @@ void Label::onRender()
       {
         const double widthHalf		  = size.width()/2;							  				
 			  const double textWidthHalf	= metric.width()/2;				  								
-			  pos = Pt::Gfx::PointF(widthHalf - textWidthHalf, metric.ascent());	
+			  pos = Ui::PointF(widthHalf - textWidthHalf, metric.ascent());	
       }
       break;
 		
@@ -83,7 +84,7 @@ void Label::onRender()
       {
 			  const double width		  = size.width();				
 			  const double textWidth	= metric.width();									
-			  pos = Pt::Gfx::PointF(width - textWidth, metric.ascent());	
+			  pos = Ui::PointF(width - textWidth, metric.ascent());	
       }
       break;
 
@@ -92,7 +93,7 @@ void Label::onRender()
         const double heightHalf		  = size.height()/2;				
 			  const double textHeightHalf = metric.height()/2;
 								
-			  pos = Pt::Gfx::PointF(0, (heightHalf - textHeightHalf) + metric.ascent());
+			  pos = Ui::PointF(0, (heightHalf - textHeightHalf) + metric.ascent());
       }
       break;
 
@@ -103,7 +104,7 @@ void Label::onRender()
 			  const double textWidthHalf	= metric.width()/2;	
 			  const double textHeightHalf = metric.height()/2;	
 								
-			  pos = Pt::Gfx::PointF(widthHalf - textWidthHalf, (heightHalf - textHeightHalf) + metric.ascent());							
+			  pos = Ui::PointF(widthHalf - textWidthHalf, (heightHalf - textHeightHalf) + metric.ascent());							
 		  }
 		  break;
 
@@ -115,7 +116,7 @@ void Label::onRender()
         const double heightHalf		  = size.height()/2;				
 			  const double textHeightHalf = metric.height()/2;	
 								
-			  pos = Pt::Gfx::PointF(width - textWidth, (heightHalf - textHeightHalf) + metric.ascent());	
+			  pos = Ui::PointF(width - textWidth, (heightHalf - textHeightHalf) + metric.ascent());	
       }
       break;
 
@@ -124,7 +125,7 @@ void Label::onRender()
         const double height	  = size.height();				
 			  const double textHeight = metric.height();	
 								
-			  pos = Pt::Gfx::PointF(0, (height- textHeight) + metric.ascent());	
+			  pos = Ui::PointF(0, (height- textHeight) + metric.ascent());	
       }
       break;
 
@@ -136,7 +137,7 @@ void Label::onRender()
         const double height	  = size.height();				
 			  const double textHeight = metric.height();	
 								
-			  pos = Pt::Gfx::PointF(widthHalf - textWidthHalf, (height- textHeight) + metric.ascent());	
+			  pos = Ui::PointF(widthHalf - textWidthHalf, (height- textHeight) + metric.ascent());	
       }
       break;
 
@@ -148,7 +149,7 @@ void Label::onRender()
         const double height	  = size.height();				
 			  const double textHeight = metric.height();	
 								
-			  pos = Pt::Gfx::PointF(width - textWidth, (height- textHeight) + metric.ascent());	
+			  pos = Ui::PointF(width - textWidth, (height- textHeight) + metric.ascent());	
       }
       break;
     }
@@ -165,15 +166,15 @@ void Label::onRender()
 		{	
 			std::string subString(  caption.begin(), caption.begin() + index );
 
-			Pt::Gfx::FontMetrics metric = localPainter.fontMetrics( Pt::String( subString.c_str() ) );
+			Ui::FontMetrics metric = localPainter.fontMetrics( Pt::String( subString.c_str() ) );
 	
-			Gfx::PointF linePos( pos.x() + metric.width() - 1, pos.y()  + 1);
+			Ui::PointF linePos( pos.x() + metric.width() - 1, pos.y()  + 1);
 
 			subString = caption[index];
 
 			metric = localPainter.fontMetrics( Pt::String( subString.c_str() ) );
 
-			localPainter.drawLine( linePos , Pt::Gfx::PointF( linePos.x() + metric.width(), linePos.y() ) );
+			localPainter.drawLine( linePos , Ui::PointF( linePos.x() + metric.width(), linePos.y() ) );
 		}
 	}
 }

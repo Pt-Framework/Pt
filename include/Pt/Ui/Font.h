@@ -105,9 +105,9 @@ inline bool operator<(const Font& a, const Font& b)
 }
 
 
-PT_UI_API void operator >>=( const SerializationInfo& si, Gfx::Font& x );
+PT_UI_API void operator >>=( const SerializationInfo& si, Font& x );
 
-PT_UI_API void operator <<=( SerializationInfo& si, const Gfx::Font& x );
+PT_UI_API void operator <<=( SerializationInfo& si, const Font& x );
 
 }} //namespace
 

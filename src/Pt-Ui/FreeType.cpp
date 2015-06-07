@@ -29,11 +29,11 @@
  */
 #include "FreeType.h"
 #include <stdexcept>
-#include "Pt/SourceInfo.h"
+#include <Pt/SourceInfo.h>
 
 namespace Pt {
 
-    namespace Gfx {
+    namespace Ui {
 
         FreeType::FreeType()
         {

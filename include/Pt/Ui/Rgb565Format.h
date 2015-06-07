@@ -38,30 +38,12 @@ namespace Ui{
 class PT_UI_API Rgb565Format : public ImageFormat
 {
 	public:	
-		Rgb565Format()
-		: ImageFormat(2, 3)
-		{
-		}
+		Rgb565Format();
 
-		void setColor(Pt::uint8_t* pixel, const Color& c) const
-		{
-			Pt::uint16_t* val = (Pt::uint16_t*) pixel;			
-			*val  =  (Pt::uint16_t) (c.red() * 32.0f);
-			*val  |=  ((Pt::uint16_t) (c.green() * 64.0f))  << 5;
-			*val  |=  ((Pt::uint16_t) (c.blue() * 32.0f))  << 11;
-		}
+		void setColor(Pt::uint8_t* pixel, const Color& c) const;
+		
 
-		Color color(const Pt::uint8_t* pixel) const
-		{
-			const Pt::uint16_t* val = (const Pt::uint16_t*) pixel;
-
-			const float r = ((*val & 0xF800) >> 11) / 32.0f;
-			const float g = ((*val & 0x07E0) >> 5) / 64.0f;
-			const float b = (*val & 0x001F) / 32.0f;
-
-			return Color(1, r, g, b );
-		}
-
+		Color color(const Pt::uint8_t* pixel) const;
 };
 
 

@@ -26,7 +26,6 @@
 
 #include <Pt/Hmi/Dialog.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Gfx/ImagePainter.h>
 
 namespace Pt{
 namespace Hmi{

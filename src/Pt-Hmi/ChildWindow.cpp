@@ -24,8 +24,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software*/
 #include <Pt/Hmi/ChildWindow.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Pen.h>
+#include <Pt/Ui/Point.h>
+#include <Pt/Ui/Pen.h>
 
 namespace Pt{
 namespace Hmi{
@@ -33,7 +33,7 @@ namespace Hmi{
 ChildWindow::ChildWindow()
 {
 
-  BackColor = Pt::Gfx::ARgbColor(0, 255, 255, 255);	
+  BackColor = Ui::Color(0, 1, 1, 1);	
 }
 
 

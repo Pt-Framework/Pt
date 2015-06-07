@@ -60,8 +60,8 @@ MainWindow::MainWindow(MainWindow* parent)
 	MinimumSize.changed() += Pt::slot(*this, &MainWindow::onMinSizeChnaged);
 	MaximumSize.changed() += Pt::slot(*this, &MainWindow::onMaxSizeChnaged);
 
-  Position = Pt::Gfx::PointF(20,20);
-	Size =  Pt::Gfx::SizeF(200,200);
+  Position = Ui::PointF(20,20);
+	Size =  Ui::SizeF(200,200);
 	_impl->setMinSize(MinimumSize.get());
 	_impl->setMaxSize(MaximumSize.get());
 	setClosed(false);
@@ -117,7 +117,7 @@ void MainWindow::onVisibleChanged(const bool& visible)
       {
           double x = windowParent()->Position.get().x() + (windowParent()->Size.get().width()/2  - Size.get().width()/2);
 					double y = windowParent()->Position.get().y() + (windowParent()->Size.get().height()/2  - Size.get().height()/2);
-					Position = Gfx::PointF(x,y);
+					Position = Ui::PointF(x,y);
       }  
 
       FirstShow = false;
@@ -185,7 +185,7 @@ void MainWindow::onShowInTaskbarChanged(const bool& p)
 }
 
 
-void MainWindow::onIconChanged(const Pt::Gfx::ARgbImage& p)
+void MainWindow::onIconChanged(const Ui::Image& p)
 {
   _impl->setIcon( p );
 }
@@ -196,23 +196,23 @@ void MainWindow::onEnabledChanged(const bool& p)
 	_impl->setEnable( p );
 }
 
-void MainWindow::onMinSizeChnaged(const Pt::Gfx::SizeF& prop)
+void MainWindow::onMinSizeChnaged(const Ui::SizeF& prop)
 {
 	_impl->setMinSize( prop );
 }
 		
-void MainWindow::onMaxSizeChnaged(const Pt::Gfx::SizeF& prop)
+void MainWindow::onMaxSizeChnaged(const Ui::SizeF& prop)
 {
 	_impl->setMaxSize( prop );
 }
 
-void MainWindow::setSize(const Pt::Gfx::SizeF& size)
+void MainWindow::setSize(const Ui::SizeF& size)
 {
 	Widget::setSize(size);		
 	_impl->setSize( size );
 }
 
-void MainWindow::setPosition(const Pt::Gfx::PointF& pos)
+void MainWindow::setPosition(const Ui::PointF& pos)
 {
 	Widget::setPosition( pos);
 	_impl->setPosition( pos);

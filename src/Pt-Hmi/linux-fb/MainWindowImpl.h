@@ -20,8 +20,7 @@ Free Software Foundation, Inc.,
 #define Pt_Hmi_WindowImpl_h
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Gfx/Rgb888Image.h>
-#include <Pt/Gfx/Rgb565Image.h>
+#include <Pt/Ui/Image.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <linux/fb.h>
@@ -35,8 +34,9 @@ Free Software Foundation, Inc.,
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/WindowProperties.h>
 #include <Pt/Hmi/ChildWindow.h>
-#include <Pt/Gfx/ARgbImage.h>
 #include <linux/input.h>
+#include <Pt/Ui/Size.h>
+#include <Pt/Ui/Point.h>
 
 namespace Pt {
 namespace Hmi {
@@ -59,9 +59,9 @@ class MainWindowImpl  : public ChildWindow
 
 		void hide();
 
-		void setPosition(const Gfx::PointF& p);
+		void setPosition(const Ui::PointF& p);
 
-		void setSize(const Gfx::SizeF& size);
+		void setSize(const Ui::SizeF& size);
 
 		void showTitle(bool p);
 
@@ -81,22 +81,19 @@ class MainWindowImpl  : public ChildWindow
   
 		void showInTaskbar(bool p);
   
-		void setIcon(const Pt::Gfx::ARgbImage& p);
+		void setIcon(const Ui::Image& p);
 
 		void setEnable(bool e);	
 
-		void setMinSize(const Pt::Gfx::SizeF& s);
+		void setMinSize(const Ui::SizeF& s);
 	
-		void setMaxSize(const Pt::Gfx::SizeF& s);
+		void setMaxSize(const Ui::SizeF& s);
 
 		void setTopMost(bool top)
 		{
 		}
 	
 	protected:
-	  void onSizeChanged(const Property<Pt::Gfx::SizeF>& prop);
-    void onPositionChanged(const Property<Pt::Gfx::PointF>& prop);    
-
 		virtual void onInvalidate();
 		virtual void onRender();
 		virtual void onPointerInput(const PointerEvent& ev);				

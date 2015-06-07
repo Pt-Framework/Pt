@@ -2,9 +2,9 @@
 #define Pt_Hmi_Application_h
 
 #include <Pt/System/Application.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Rect.h>
+#include <Pt/Ui/Point.h>
+#include <Pt/Ui/Size.h>
+#include <Pt/Ui/Rect.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Event.h>
@@ -24,13 +24,13 @@ public:
 
 	static Application& instance();
 
-	Pt::Gfx::PointF toUnit(const Pt::Gfx::Point& value);
-	Pt::Gfx::SizeF toUnit(const Pt::Gfx::Size& value);
+	Ui::PointF toUnit(const Ui::Point& value);
+	Ui::SizeF toUnit(const Ui::Size& value);
 	double toUnit(int value);
 
-	Pt::Gfx::Point fromUnit(const Pt::Gfx::PointF& value);
-	Pt::Gfx::Size fromUnit(const Pt::Gfx::SizeF& value);
-	Pt::Gfx::Rect fromUnit(const Pt::Gfx::RectF& value);
+	Ui::Point fromUnit(const Ui::PointF& value);
+	Ui::Size fromUnit(const Ui::SizeF& value);
+	Ui::Rect fromUnit(const Ui::RectF& value);
 	int fromUnit(double value);
 
 	double unitSizeInch() const;

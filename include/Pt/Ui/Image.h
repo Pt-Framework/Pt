@@ -44,6 +44,7 @@ class PT_UI_API Image
 				
 		Image(size_t width, size_t height, size_t stride = 0, const ImageFormat& format = ImageFormat::argb8888());
 		
+
 		virtual ~Image();
 	
 		size_t width() const
@@ -61,13 +62,17 @@ class PT_UI_API Image
 			return _stride;
 		}
 
+
+		void setColor( const Color& color );
 		void resize( size_t width, size_t height, size_t strideInBytes = 0 )
 		{
 			_stride = strideInBytes;
+			_width = width;
+			_height = height;
 			_buffer.resize( ( width * _format->pixelSize() + _stride) * height ); 
 		}
 		
-		Color color(size_t x, size_t y)
+		Color color(size_t x, size_t y) const
 		{
 			return _format->color(pixel(x,y));
 		}
