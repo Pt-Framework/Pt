@@ -24,9 +24,9 @@ void PaintSurfaceImpl::resize(const Ui::SizeF& size)
 	const fb_fix_screeninfo& fixedInfo = Application::instance().impl()->fixedInfo();
 
 	const size_t depth  =  screenInfo.bits_per_pixel;
-	const size_t stride =  fixedInfo.line_length -  screenInfo.xres;
+	const size_t stride =  fixedInfo.line_length/(depth/8) -  screenInfo.xres;
 	
-	if( depth == 16)
+	if( depth == 16 )
 		_image.resize(size.width(), size.height(), Ui::ImageFormat::rgb565(), stride );
 	else if( depth == 32 )
 		_image.resize(size.width(), size.height(), Ui::ImageFormat::argb8888(), stride);

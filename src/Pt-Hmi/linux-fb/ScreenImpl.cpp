@@ -156,7 +156,7 @@ void ScreenImpl::onInvalidate()
 	render();		
 	_windowManager.render();
 
-	const Ui::Image& image= paintSurface().impl()->image();
+	const Ui::Image& image = paintSurface().impl()->image();
 
 	memcpy( _buffer, image.pixel(0, 0), _bufferSize);	
 }
