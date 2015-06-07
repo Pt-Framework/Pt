@@ -80,6 +80,7 @@ void WindowManager::updateFocus()
 }
 
 
+
 void WindowManager::add( ChildWindow* w )
 {
 	_windows.push_back(w);
@@ -421,7 +422,6 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 	
 	if( !_moving ) 
 	{
-		std::clog<<"No move"<<std::endl;
 		return;
 	}
 
@@ -430,8 +430,7 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 	Ui::PointF point( ev.x(), ev.y() );
 
 	if( button[0].state() != DeviceButton::Pressed )
-	{	
-		std::clog<<"No move"<<std::endl;	
+	{		
 		_moving = false;
 		return;
 	}	
@@ -447,7 +446,7 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 
 	_movingOffset = Ui::PointF( ev.x() , ev.y() );
 	invalidate();
-	std::clog<<"move"<<std::endl;
+
 }
 
 
