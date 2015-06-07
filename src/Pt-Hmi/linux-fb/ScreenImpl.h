@@ -92,7 +92,7 @@ class ScreenImpl : public Window
 		PaintSurface            _paintSurface;	
 		
 		std::vector<Pt::uint8_t>	_cursorBuffer;
-		Ui::Point            _cursorPos;
+		Ui::Point			            _cursorPos;
 		size_t									  _cursorWidth;	
 		size_t									  _cursorHeight;	
 };

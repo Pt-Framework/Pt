@@ -21,11 +21,11 @@ public:
 
 	Ui::Image& image()
 	{
-		return *_image; 
+		return _image; 
 	}
 
 private:
-	Ui::Image* _image;	
+	Ui::Image _image;	
 };
 
 }}

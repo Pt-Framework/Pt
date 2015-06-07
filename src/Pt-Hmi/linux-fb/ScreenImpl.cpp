@@ -36,49 +36,39 @@
 namespace Pt{
 namespace Hmi{
 
-ScreenImpl::ScreenImpl()
-{
- // Open the frame buffer device
-    _fd = open ("/dev/fb0", O_RDWR);
-
-    if(_fd < 0)
-        throw std::runtime_error("Could not open framebuffer device" + PT_SOURCEINFO);
-
-/*
-    if( 0 > ioctl(_fd, FBIOGET_VSCREENINFO, &_screenInfo) )
-        throw std::runtime_error("FBIOGET_VSCREENINFO failed" + PT_SOURCEINFO);
-
-    _screenInfo.bits_per_pixel = 16;
-    _screenInfo.xres           = 640;
-    _screenInfo.yres           = 480;
-
-    if( 0 > ioctl(_fd, FBIOPUT_VSCREENINFO, &_screenInfo) )
-        throw std::runtime_error("FBIOPUT_VSCREENINFO failed" + PT_SOURCEINFO);
-*/
-
-    if( 0 > ioctl(_fd, FBIOGET_VSCREENINFO, &_screenInfo) )
-        throw std::runtime_error("FBIOGET_VSCREENINFO failed" + PT_SOURCEINFO);
-
-    // Get the fixed state
-    if( ioctl(_fd, FBIOGET_FSCREENINFO, &_fixedInfo) < 0 )
-        throw std::runtime_error("FBIOGET_FSCREENINFO failed" + PT_SOURCEINFO);
-
-    //_fixedInfo.type;   // 0 -> Packed pixels
+/*_fixedInfo.type;   // 0 -> Packed pixels
                          // 1 -> Non interleaved planes
                          // 2 -> Interleaved planes
                          // 3 -> Text/attributes
                          // 4 -> EGA/VGA planes
 
-    //_fixedInfo.visual; // 0 -> Mono (1=black, 0=white)
+    /_fixedInfo.visual; // 0 -> Mono (1=black, 0=white)
                          // 1 -> Mono (1=white, 0=black)
                          // 2 -> True color
                          // 3 -> Pseudo color (like atari)
                          // 4 -> Direct color
                          // 5 -> Pseudo color readonly
+*/
 
+ScreenImpl::ScreenImpl()
+{
+  _fd = open ("/dev/fb0", O_RDWR);
+
+  if(_fd < 0)
+      throw std::runtime_error("Could not open framebuffer device" + PT_SOURCEINFO);
+
+  if( 0 > ioctl(_fd, FBIOGET_VSCREENINFO, &_screenInfo) )
+      throw std::runtime_error("FBIOGET_VSCREENINFO failed" + PT_SOURCEINFO);
+
+  // Get the fixed state
+  if( ioctl(_fd, FBIOGET_FSCREENINFO, &_fixedInfo) < 0 )
+      throw std::runtime_error("FBIOGET_FSCREENINFO failed" + PT_SOURCEINFO);
+
+    
   // Memory map the display
   std::clog<<"LineWidth = " << _fixedInfo.line_length << " xres = " << _screenInfo.xres << std::endl;
   std::clog<<"yres = " << _screenInfo.yres << std::endl;
+
   const unsigned widthInBytes = _screenInfo.xres * _screenInfo.bits_per_pixel / 8;
   _bufferSize     = _fixedInfo.line_length * _screenInfo.yres;
   _buffer         =  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);	
@@ -86,7 +76,7 @@ ScreenImpl::ScreenImpl()
 	Visible = true;
 	Size = Ui::SizeF( _screenInfo.xres,  _screenInfo.yres );
 	Position = Ui::PointF(0,0 );
-	BackColor = Ui::Color(170,170,170);	
+	BackColor = Ui::Color(170/255.0,170/255.0,170/255.0);	
 	eventReceived() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
 }
 
