@@ -53,9 +53,8 @@ Window::Window(Window* parent)
 
   Visible = false;
   Name = std::string("Window");
-  AcceptFocus = false;	
-  Position = Ui::PointF(20,20);
-  Size =  Ui::SizeF(200,200);
+  AcceptFocus = false ;	
+
 	eventReceived() += Pt::slot(*this, &Window::onSizeEvent);
 	eventReceived() += Pt::slot(*this, &Window::onPositionEvent);
 	eventReceived() += Pt::slot(*this, &Window::onFocusEvent);
