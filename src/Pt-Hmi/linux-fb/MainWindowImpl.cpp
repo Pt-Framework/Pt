@@ -144,7 +144,7 @@ void MainWindowImpl::showTitle(bool p)
 }
 
 
-void MainWindowImpl::setCaption(const std::string& text)
+void MainWindowImpl::setWindowCaption(const std::string& text)
 {
 	Caption = text;
 }

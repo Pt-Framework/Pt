@@ -65,7 +65,7 @@ class MainWindowImpl  : public ChildWindow
 
 		void showTitle(bool p);
 
-		void setCaption(const std::string& text);
+		void setWindowCaption(const std::string& text);
 
 		void showMinimizedButton(bool p);
   

@@ -138,7 +138,7 @@ void MainWindow::onVisibleChanged(const bool& visible)
 void MainWindow::setCaption( const std::string& c )
 {
 	Widget::setCaption( c );
-  _impl->setCaption( c );
+  _impl->setWindowCaption( c );
 }
 
 
