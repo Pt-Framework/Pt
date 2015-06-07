@@ -46,9 +46,8 @@ ScreenImpl::ScreenImpl()
 , _buffer( Application::instance().impl()->frameBuffer()  )
 , _bufferSize( _fixedInfo.line_length * _screenInfo.yres ) 
 {  
-	Visible = true;
+	Visible = true;	
 	Size = Ui::SizeF( _screenInfo.xres,  _screenInfo.yres );
-	Position = Ui::PointF(0,0 );
 	BackColor = Ui::Color(170/255.0,170/255.0,170/255.0);	
 	eventReceived() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
 }
@@ -56,7 +55,6 @@ ScreenImpl::ScreenImpl()
 
 void ScreenImpl::bitBlit(const std::vector<Pt::uint8_t>& plane, size_t w, size_t h, const Ui::Point& pos, BlitOp op)
 {
-
 	static const size_t planePixelSize = 4;
 	const size_t bufferPixelSize = _depth / 8;
 	const size_t bufferHeight = std::min<size_t>(  pos.y() + h, _screenInfo.yres ); 
