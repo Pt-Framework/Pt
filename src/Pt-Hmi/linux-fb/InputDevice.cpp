@@ -169,6 +169,7 @@ bool InputDevice::onRun()
 				if( _mouseEvent.y() >= Application::instance().mainScreen().height() )
 					_mouseEvent.setY( Application::instance().mainScreen().height() - 1 );
 
+				
 				Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );				                				
 			}
 			break;
@@ -200,6 +201,7 @@ bool InputDevice::onRun()
 					default:
 					break;
 				}
+				
 
 				Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );
 			}
