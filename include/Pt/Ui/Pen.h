@@ -28,7 +28,7 @@
 #ifndef PT_UI_PEN_H
 #define PT_UI_PEN_H
 
-#include <Pt/UI/Api.h>
+#include <Pt/Ui/Api.h>
 #include <Pt/Ui/Image.h>
 #include <Pt/Ui/Color.h>
 #include <Pt/SmartPtr.h>

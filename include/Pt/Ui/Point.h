@@ -28,7 +28,7 @@
 #ifndef PT_UI_POINT_H
 #define PT_UI_POINT_H
 
-#include <Pt/UI/Api.h>
+#include <Pt/Ui/Api.h>
 #include <Pt/Types.h>
 #include <Pt/SourceInfo.h>
 #include <Pt/SerializationInfo.h>

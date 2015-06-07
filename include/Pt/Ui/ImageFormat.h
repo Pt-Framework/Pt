@@ -28,8 +28,8 @@
 #ifndef PT_UI_IMAGEFORMAT_H
 #define PT_UI_IMAGEFORMAT_H
 
-#include <Pt/UI/Api.h>
-#include <Pt/UI/Color.h>
+#include <Pt/Ui/Api.h>
+#include <Pt/Ui/Color.h>
 #include <vector>
 
 namespace Pt{

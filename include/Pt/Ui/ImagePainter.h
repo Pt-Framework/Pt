@@ -29,13 +29,13 @@
 #define PT_UI_IMAGEPAINTER_H
 
 #include <Pt/String.h>
-#include <Pt/UI/Api.h>
-#include <Pt/UI/Painter.h>
-#include <Pt/UI/Pen.h>
-#include <Pt/UI/Brush.h>
-#include <Pt/UI/Region.h>
-#include <Pt/UI/Font.h>
-#include <Pt/UI/Rect.h>
+#include <Pt/Ui/Api.h>
+#include <Pt/Ui/Painter.h>
+#include <Pt/Ui/Pen.h>
+#include <Pt/Ui/Brush.h>
+#include <Pt/Ui/Region.h>
+#include <Pt/Ui/Font.h>
+#include <Pt/Ui/Rect.h>
 #include <memory>
 
 

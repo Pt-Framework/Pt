@@ -28,7 +28,7 @@
 #ifndef PT_UI_FONTMETRICS_H
 #define PT_UI_FONTMETRICS_H
 
-#include <Pt/UI/Api.h>
+#include <Pt/Ui/Api.h>
 #include <Pt/Types.h>
 
 namespace Pt {

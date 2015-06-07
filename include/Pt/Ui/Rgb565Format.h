@@ -27,9 +27,9 @@
 #ifndef PT_UI_RGB565FORMAT_H
 #define PT_UI_RGB565FORMAT_H
 
-#include <Pt/UI/Api.h>
-#include <Pt/UI/ImageFormat.h>
-#include <Pt/UI/Color.h>
+#include <Pt/Ui/Api.h>
+#include <Pt/Ui/ImageFormat.h>
+#include <Pt/Ui/Color.h>
 
 namespace Pt{
 namespace Ui{

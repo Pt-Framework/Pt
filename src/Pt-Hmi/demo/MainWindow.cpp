@@ -88,7 +88,7 @@ void MainWindow::init()
 	StartPostion = Hmi::WindowStartPosition::CenterParent;
 	Closed += Pt::slot(*this, &MainWindow::onClosed);
 	BackColor = Ui::Color(0.5,0.5,0.5);
-	/*
+
   //Panel
 	_mainPanel.Size = Ui::SizeF(700,480);
 	_mainPanel.Position = Ui::PointF(40,40);
@@ -96,18 +96,15 @@ void MainWindow::init()
 	_mainPanel.PanelBorderStyle = Pt::Hmi::BorderStyle::Single;
 
 	{
-		//std::stringstream memoryStream;
-		//memoryStream.write((char*)Pt::Forms::DemoImage::image, Pt::Forms::DemoImage::imageSize);	
-		
+		std::stringstream memoryStream;
+		memoryStream.write((char*)Pt::Forms::DemoImage::image, Pt::Forms::DemoImage::imageSize);	
+				
 
-		std::ifstream fsdd("C:\\Users\\cr\\Desktop\\Red.png",std::ios::binary);
-
-		std::auto_ptr<Ui::Image> im(Ui::ImageReader::read(fsdd));
-		//_mainPanel.BackgroundImage = *im;		
+		std::auto_ptr<Ui::Image> im(Ui::ImageReader::read(memoryStream));
+		_mainPanel.BackgroundImage = *im;		
 	}
 
-	_mainPanel.BackgroundImage = _drawBuffer;		
-
+	
 	_mainPanel.BackgroundImageLayout = Pt::Hmi::ImageLayout::Center;
 
 	//Text
@@ -166,7 +163,7 @@ void MainWindow::init()
 	addChildWindow(_childWindow2);
 	
 	_childWindow1.Visible = true;
-	_childWindow2.Visible = true;*/
+	_childWindow2.Visible = true;
 
 	BackgroundImage = _drawBuffer;
 }

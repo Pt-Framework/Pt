@@ -29,7 +29,7 @@
 #define PT_UI_COLOR_H
 
 #include <Pt/Types.h>
-#include <Pt/UI/Api.h>
+#include <Pt/Ui/Api.h>
 #include <Pt/String.h>
 
 namespace Pt{
