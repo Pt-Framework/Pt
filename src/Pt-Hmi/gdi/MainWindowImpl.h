@@ -61,9 +61,9 @@ public:
 
 	void render();
 
-  void setPos(const Ui::PointF& p);
+  void setWindowPos(const Ui::PointF& p);
 
-  void setSize(const Ui::SizeF& size);
+  void setWindowSize(const Ui::SizeF& size);
 
   void showTitle(bool p);
 

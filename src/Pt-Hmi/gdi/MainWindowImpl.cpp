@@ -354,7 +354,7 @@ void MainWindowImpl::onPaint()
 }
 
 
-void MainWindowImpl::setPos(const Ui::PointF& pf)
+void MainWindowImpl::setWindowPos(const Ui::PointF& pf)
 {
   Ui::Point p = _app.fromUnit(pf);
   SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, SWP_DRAWFRAME|SWP_NOSIZE);
@@ -366,7 +366,7 @@ void MainWindowImpl::focus()
 	SetFocus(_hwnd);
 }
 
-void MainWindowImpl::setSize(const Ui::SizeF& sizef)
+void MainWindowImpl::setWindowSize(const Ui::SizeF& sizef)
 {
   Ui::Size size = _app.fromUnit(sizef);
 

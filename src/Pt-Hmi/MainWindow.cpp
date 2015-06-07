@@ -209,13 +209,13 @@ void MainWindow::onMaxSizeChnaged(const Ui::SizeF& prop)
 void MainWindow::setSize(const Ui::SizeF& size)
 {
 	Widget::setSize(size);		
-	_impl->setSize( size );
+	_impl->setWindowSize( size );
 }
 
 void MainWindow::setPosition(const Ui::PointF& pos)
 {
 	Widget::setPosition( pos);
-	_impl->setPos( pos);
+	_impl->setWindowPos( pos);
 }
 
 void MainWindow::setFocus(bool f)
