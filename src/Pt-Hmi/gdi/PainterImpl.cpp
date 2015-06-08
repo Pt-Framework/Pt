@@ -48,7 +48,7 @@ PainterImpl::PainterImpl(PaintSurfaceImpl* surface)
 , _pen(Ui::Pen(1))
 , _brush(Ui::Brush(Ui::Color(0, 0, 0)))
 , _font(Ui::Font(determinePlatformDefaultFontName()))
-, _renderMode(Ui::RenderMode::Normal)
+, _renderMode(Ui::RenderMode::NoAlpha)
 {
 }
 

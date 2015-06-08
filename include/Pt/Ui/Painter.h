@@ -87,8 +87,8 @@ namespace RenderMode
 {	
 	enum Type
 	{
-		Normal,
-		BitBlit, //TDOO: only for draw Image
+		NoAlpha,
+		AlphaBlit,
 		AlphaBlending
 	};
 }

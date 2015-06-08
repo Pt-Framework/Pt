@@ -50,6 +50,65 @@ Image::~Image()
 
 }
 
+
+Image Image::convert(const ImageFormat& toFormat) const
+{
+	if( *_format == toFormat )
+		return *this;
+
+	Image image(_width, _height, _stride, toFormat);
+
+	for( size_t y = 0; y < _height; ++y)
+	{
+		for( size_t x = 0; x < _width; ++x )
+		{
+			const Color pixelColor = color(x,y);
+			image.setColor(x , y, pixelColor);
+		}
+	}
+
+	return image;
+}
+
+
+Image Image::subImage( const Region& regionIn) const
+{
+	//Cliping.
+	Region clipedRegion = regionIn;
+	
+	if( regionIn.left() + regionIn.width() >= _width )
+		clipedRegion.setWidth( _width - regionIn.left() );
+
+	if( regionIn.top() + regionIn.height() >= _height )
+		clipedRegion.setWidth( _height - regionIn.top() );
+
+	if( regionIn.left() < 0)
+		clipedRegion.setLeft(0);
+
+	if( regionIn.top() < 0)
+		clipedRegion.setTop(0);
+
+	//Copy to new image
+	Image image(clipedRegion.width(), clipedRegion.height(), _stride, *_format);
+
+	for( size_t y = clipedRegion.top(); y  < clipedRegion.bottom(); ++y)
+	{
+		const size_t lineBeginOffset = y * (_width * _format->pixelSize() + _stride);
+
+		const size_t targetY = y - clipedRegion.top();
+		
+		const size_t xStartOffset = lineBeginOffset + (clipedRegion.left() * _format->pixelSize());
+		const size_t xEnd   = lineBeginOffset + (clipedRegion.right() * _format->pixelSize());
+
+		const size_t lineSize = (clipedRegion.right() - clipedRegion.left()) * _format->pixelSize();
+
+		memcpy( image.pixel(0,targetY), &_buffer[xStartOffset], lineSize );
+	}
+
+	return image;
+}
+
+
 void Image::setColor( const Color& color )
 {
 	Pt::uint8_t* it =  pixel(0,0);	

@@ -61,6 +61,26 @@ class PT_UI_API ImageFormat
 			return buffer;
 		}
 
+		bool operator==(const ImageFormat& a) 
+		{
+			return ( _pixelSize == a._pixelSize && _channels == a._channels );				
+		}
+
+		bool operator!=(const ImageFormat& a) 
+		{
+			return ( _pixelSize != a._pixelSize || _channels != a._channels );				
+		}
+
+		bool operator==(const ImageFormat& a) const
+		{
+			return ( _pixelSize == a._pixelSize && _channels == a._channels );				
+		}
+
+		bool operator!=(const ImageFormat& a) const
+		{
+			return ( _pixelSize != a._pixelSize || _channels != a._channels );				
+		}		
+
 		static const ImageFormat& rgb565();
 		static const ImageFormat& rgb888();
 		static const ImageFormat& argb8888();
@@ -69,6 +89,7 @@ class PT_UI_API ImageFormat
 		 size_t _pixelSize;
 		 size_t _channels;
 };
+
 
 }}
 

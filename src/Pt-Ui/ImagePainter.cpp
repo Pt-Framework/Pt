@@ -66,11 +66,11 @@ ImagePainter::ImagePainter( Image& image )
 , _stroke( 0 )
 , _fillSolid( 0 )
 , _fillTexture( 0 )
-, _renderMode( RenderMode::Normal )
+, _renderMode( RenderMode::NoAlpha )
 {
     std::auto_ptr<FillSolid>              fillSolid( new FillSolid() );
     std::auto_ptr<FillTexture>            fillTexture( new FillTexture() );
-    std::auto_ptr<Stroke>                 stroke( new Stroke() );
+    std::auto_ptr<Stroke>                 stroke( new Stroke(_renderMode) );
     std::auto_ptr<DrawThinPolyline>       dThinPolyline( new DrawThinPolyline );
     dThinPolyline->setOutput( *stroke );
     std::auto_ptr<DrawWideSolidPolyline>  dWidePolyline( new DrawWideSolidPolyline );
@@ -268,11 +268,14 @@ void ImagePainter::fillPolygon( const  PointF* points, const size_t pointCount )
     _fillPolygon->draw( _image, _brush, points, pointCount );
 }
 
-void ImagePainter::drawImage( const  PointF& to, const Image& image )
+void ImagePainter::drawImage( const  PointF& to, const Image& sourceImage )
 {
-  //Cliping  
+	if( sourceImage.format() != _image.format() )
+		throw std::logic_error( "wrong image format");
+
+  //Cliping  X,width
   Pt::ssize_t startX =  to.x();
-  Pt::ssize_t stopX  =  to.x() + image.width();
+  Pt::ssize_t stopX  =  to.x() + sourceImage.width();
     
   if( startX < 0 )
       startX = 0;
@@ -286,8 +289,9 @@ void ImagePainter::drawImage( const  PointF& to, const Image& image )
   if( static_cast<size_t>(stopX) > _image.width() )
       stopX = _image.width();
 
+		//Cliping Y,height
   Pt::ssize_t startY =  to.y();
-  Pt::ssize_t stopY  =  to.y() + image.height();
+  Pt::ssize_t stopY  =  to.y() + sourceImage.height();
         
   if( startY < 0 )
       startY = 0;
@@ -304,21 +308,21 @@ void ImagePainter::drawImage( const  PointF& to, const Image& image )
   //Render
   switch( _renderMode )
   {
-    case RenderMode::Normal:
+    case RenderMode::NoAlpha:
     {
       for( Pt::ssize_t y = startY; y < stopY; ++y )
       {				
         Pt::uint8_t* lineOffsetTarget = (Pt::uint8_t*) _image.pixel(0, y);
         lineOffsetTarget += startX * _image.format().pixelSize();
 
-        const Pt::uint8_t* lineOffsetSource = (const Pt::uint8_t*) image.pixel(0, y - startY);		
+        const Pt::uint8_t* lineOffsetSource = (const Pt::uint8_t*) sourceImage.pixel(0, y - startY);		
 
-        memcpy( lineOffsetTarget, lineOffsetSource, (stopX - startX) * image.format().pixelSize() );
+        memcpy( lineOffsetTarget, lineOffsetSource, (stopX - startX) * sourceImage.format().pixelSize() );
       }
     }
     break;
 
-    case RenderMode::BitBlit:
+    case RenderMode::AlphaBlit:
       //TODO:
     break;
 
@@ -328,10 +332,12 @@ void ImagePainter::drawImage( const  PointF& to, const Image& image )
   }
 }
 
-void ImagePainter::drawImage( const  PointF& to, const Image& image, const Region& imageRegion )
+void ImagePainter::drawImage( const  PointF& to, const Image& sourceImage, const Region& regionIn )
 {
-  //TODO: region handling
-  drawImage( to, image );
+	//Todo: optimize this whithout sub image.
+	Image subImage = sourceImage.subImage(regionIn);
+
+	ImagePainter::drawImage(to, subImage);
 }
 
 }} //namespace

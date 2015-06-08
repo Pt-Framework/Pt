@@ -33,7 +33,8 @@
 namespace Pt{
 namespace Ui{
 
-Stroke::Stroke()
+Stroke::Stroke(RenderMode::Type m)
+: _renderMode(m)
 { 
 
 }
@@ -45,13 +46,15 @@ Stroke::~Stroke()
         
 void Stroke::stroke( Image& image, const Pen& pen, ssize_t xpos, ssize_t ypos)
 {
-    if( xpos < 0  || static_cast<size_t>(xpos) >= image.width())
-        return;
+  if( xpos < 0  || static_cast<size_t>(xpos) >= image.width())
+      return;
 
-    if( ypos <0 || static_cast<size_t>(ypos) >= image.height())
-        return;
+  if( ypos <0 || static_cast<size_t>(ypos) >= image.height())
+      return;
 
-    image.setColor(xpos,ypos, pen.color());
+	const Image& colorBuffer = pen.buffer();
+  
+	memcpy(image.pixel(xpos, ypos), colorBuffer.pixel(0,0), image.format().pixelSize() );
 }
 
 
@@ -86,19 +89,30 @@ void Stroke::stroke( Image& image, const Pen& pen, ssize_t xpos, ssize_t ypos, s
         length =  image.width() - xpos;
 
     //Copy pixels blockwise to the target image.
-    while(length)
-    {
-        const size_t fillLength = std::min( length, colorBuffer.width() );
+		switch(_renderMode)
+		{
+			case RenderMode::NoAlpha:
+			{
+				while(length)
+				{
+						const size_t fillLength = std::min( length, colorBuffer.width() );
 
-        if(fillLength)
-        {
-            std::memcpy( image.pixel( xpos, ypos ), colorBuffer.pixel(0,0),
-                         fillLength * image.format().pixelSize() );
-        }
+						if( fillLength )
+							std::memcpy( image.pixel( xpos, ypos ), colorBuffer.pixel(0,0), fillLength * image.format().pixelSize() );
 
-        length -= fillLength;
-        xpos   += fillLength;
-    }
+						length -= fillLength;
+						xpos   += fillLength;
+				}
+			}
+			break;
+
+			case RenderMode::AlphaBlit:
+			break;
+						
+			case RenderMode::AlphaBlending:
+			break;
+		}
+
 }
 
 }}//namespace

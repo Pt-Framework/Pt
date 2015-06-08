@@ -29,20 +29,27 @@
 #define PT_UI_STROKE_H
 
 #include <Pt/Ui/Image.h>
-
+#include <Pt/Ui/Painter.h>
 namespace Pt{
 namespace Ui{
 
 class Stroke
 {
     public:
-        Stroke();
+        Stroke(RenderMode::Type mode);
         virtual ~Stroke();        
 
         virtual void stroke( Image& image, const Pen& pen, ssize_t xpos, ssize_t ypos);
 
-        virtual void stroke( Image& image, const Pen& pen,
-                             ssize_t xpos, ssize_t ypos, size_t length );
+        virtual void stroke( Image& image, const Pen& pen, ssize_t xpos, ssize_t ypos, size_t length );
+
+				RenderMode::Type renderMode() const
+				{
+					return _renderMode;
+				}
+
+		private:
+			RenderMode::Type _renderMode;
 };
 
 }}//namespace

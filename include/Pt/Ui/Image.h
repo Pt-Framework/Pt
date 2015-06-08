@@ -31,6 +31,7 @@
 #include <Pt/Types.h>
 #include <Pt/Ui/Api.h>
 #include <Pt/Ui/ImageFormat.h>
+#include <Pt/Ui/Region.h>
 #include <vector>
 #include <cstring>
 
@@ -118,7 +119,20 @@ class PT_UI_API Image
 			return *_format;
 		}		
 
+		Image convert(const ImageFormat& toFormat) const;
 		
+		Image subImage( const Region& region) const ;
+
+		const Image& operator=(const Image& image)
+		{
+			_format = image._format;
+			_buffer = image._buffer;
+			_width = image._width;
+			_height = image._height;
+			_stride = image._stride;
+			return *this;
+		}
+
 	protected:
 		size_t pixelOffsetInBytes( size_t x, size_t y) const
 		{
