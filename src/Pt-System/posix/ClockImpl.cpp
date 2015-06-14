@@ -29,6 +29,10 @@
 #include <sys/time.h>
 #include <time.h>
 
+#if defined(WITH_MACH_CLOCK)
+#include <mach/mach_time.h>
+#endif
+
 namespace Pt {
 
 namespace System {
@@ -97,6 +101,23 @@ DateTime ClockImpl::getLocalTime()
 }
 
 
+#if defined(WITH_MACH_CLOCK)
+
+Timespan ClockImpl::getSystemTicks()
+{
+    mach_timebase_info_data_t info;
+    kern_return_t ret = mach_timebase_info(&info);
+    if(ret != 0)
+        throw SystemError("mach_timebase_info");
+        
+    uint64_t scaling_factor = info.numer/info.denom;
+    uint64_t time = mach_absolute_time() / 1000;
+    
+    return Timespan(time * scaling_factor);
+}
+
+#else // WITH_POSIX_CLOCK
+
 Timespan ClockImpl::getSystemTicks()
 {
     timespec tp;
@@ -105,28 +126,9 @@ Timespan ClockImpl::getSystemTicks()
         throw System::SystemError("clock_gettime");
 
     return Timespan(tp.tv_sec, tp.tv_nsec/1000);
-
-    //struct timeval tv;
-    //gettimeofday( &tv, 0 );
-    //return Timespan(tv.tv_sec, tv.tv_usec);
 }
 
-//u64 nano_count()
-//{
-//    u64 time = mach_absolute_time();
-//
-//    static u64 scaling_factor = 0;
-//    if(!scaling_factor)
-//    {
-//        mach_timebase_info_data_t info;
-//        kern_return_t ret = mach_timebase_info(&info);
-//        if(ret != 0)
-//            fatal_error("mach_timebase_info failed",ret);
-//        scaling_factor = info.numer/info.denom;
-//    }
-//
-//    return time * scaling_factor;
-//}
+#endif
 
 } // namespace Pt
 

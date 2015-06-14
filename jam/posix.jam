@@ -1,32 +1,36 @@
 rule ConfigurePosixClock
 {
-    WITH_RT = [ CheckBuildC++ "#include <time.h>"
-                              "#include <sys/time.h>"
-                              "int main() { timespec tp; clock_gettime(CLOCK_MONOTONIC, &tp); return 0; }"
+    WITH_POSIX_CLOCK = [ CheckBuildC++ "#include <time.h>"
+                                       "#include <sys/time.h>"
+                                       "int main() { timespec tp;"
+                                       "clock_gettime(CLOCK_MONOTONIC, &tp);"
+                                       "return 0; }"
                             : ""
                             : -lc ] ;
 
-    if ! $(WITH_RT)
+    if ! $(WITH_POSIX_CLOCK)
     {
-        WITH_RT = [ CheckBuildC++ "#include <time.h>"
-                                  "#include <sys/time.h>"
-                                  "int main() { timespec tp; clock_gettime(CLOCK_MONOTONIC, &tp); return 0; }"
+        WITH_POSIX_CLOCK = [ CheckBuildC++ "#include <time.h>"
+                                           "#include <sys/time.h>"
+                                           "int main() { timespec tp;"
+                                           "clock_gettime(CLOCK_MONOTONIC, &tp);"
+                                           "return 0; }"
                                 : ""
                                 : -lrt ] ;
 
-        if $(WITH_RT)
+        if $(WITH_POSIX_CLOCK)
         {
-            RT_LIBS += -lrt ;
+            POSIX_CLOCK_LIBS += -lrt ;
         }
     }
 
-    EchoOption WITH_RT : "Rt library" ;
-    Configure WITH_RT ;
+    EchoOption WITH_POSIX_CLOCK : "Posix clock" ;
+    Configure WITH_POSIX_CLOCK ;
 
-    if $(WITH_RT)
+    if $(WITH_POSIX_CLOCK)
     {
-        EchoOption RT_LIBS : "Rt lib flags" ;
-        Configure RT_LIBS ;
+        EchoOption POSIX_CLOCK_LIBS : "Posix clock lib flags" ;
+        Configure POSIX_CLOCK_LIBS ;
     }
 }
 

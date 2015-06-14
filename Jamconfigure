@@ -112,9 +112,20 @@ if ! $(SYS)
 
     ConfigurePosixClock ;
 
-    if ! $(WITH_RT)
+    if ! $(WITH_POSIX_CLOCK)
     {
-        Exit "ERROR: rt is required." ;
+        WITH_MACH_CLOCK = [ CheckBuildC++ "#include <mach/mach_time.h>"
+                                          "int main() { mach_absolute_time(); return 0; }"
+                                        : ""
+                                        : "" ] ;
+                                        
+        EchoOption WITH_MACH_CLOCK : "Mach clock" ;
+        Configure WITH_MACH_CLOCK ;
+    }
+
+    if ! $(WITH_POSIX_CLOCK) && ! $(WITH_MACH_CLOCK)
+    {
+        Exit "ERROR: clocks are required." ;
     }
     
     ConfigureDl ;
@@ -131,7 +142,7 @@ if ! $(SYS)
         Exit "ERROR: pthread is required." ;
     }
 
-    SYSLIBS += $(RT_LIBS) $(DL_LIBS) $(PTHREAD_LIBS) ;
+    SYSLIBS += $(POSIX_CLOCK_LIBS) $(MACH_CLOCK_LIBS) $(DL_LIBS) $(PTHREAD_LIBS) ;
 
     ConfigureUnixSockets ;
 

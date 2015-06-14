@@ -4,6 +4,11 @@ SubDirHdrs $(PT_TOP)/src/Pt-System/$(SYS:L) ;
 SubDirC++Flags [ FDefines PT_SYSTEM_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-System ;
 
+if $(WITH_MACH_CLOCK)
+{
+    SubDirC++Flags [ FDefines WITH_MACH_CLOCK ] ;
+}
+
 PT_SYSTEM_IMPL_SUBDIR = [ FDirName $(PT_TOP) src Pt-System $(SYS:L) ] ;
 PT_SYSTEM_IMPL += [ GLOB $(PT_SYSTEM_IMPL_SUBDIR) : *.cpp  ] ;
 

@@ -48,7 +48,7 @@ class SerialDeviceTest : public Pt::Unit::TestSuite
 		, _port("COM5")
         {
             //Pt::Unit::TestSuite::registerMethod( "ReadAsync", *this, &SerialDeviceTest::ReadAsync );
-			Pt::Unit::TestSuite::registerMethod( "testRTS", *this, &SerialDeviceTest::testRTS );			
+			//Pt::Unit::TestSuite::registerMethod( "testRTS", *this, &SerialDeviceTest::testRTS );			
 			//Pt::Unit::TestSuite::registerMethod( "testDTR", *this, &SerialDeviceTest::testDTR );			
 			//Pt::Unit::TestSuite::registerMethod( "testBreak", *this, &SerialDeviceTest::testBreak );			
 			//Pt::Unit::TestSuite::registerMethod( "testDSR", *this, &SerialDeviceTest::testDSR );			
