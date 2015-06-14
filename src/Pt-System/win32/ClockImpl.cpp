@@ -24,8 +24,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "ClockImpl.h"
-#include "Pt/SourceInfo.h"
-#include "Pt/System/SystemError.h"
+#include <Pt/SourceInfo.h>
+#include <Pt/System/SystemError.h>
 #include <stdexcept>
 #include <time.h>
 
@@ -73,7 +73,12 @@ ClockImpl::~ClockImpl()
 
 void ClockImpl::start()
 {
+#ifdef _WIN32_WCE
     _secondStartValue = GetTickCount();
+#else
+    _secondStartValue = GetTickCount64();
+#endif
+
     QueryPerformanceCounter( &_startValue );
 }
 
@@ -81,15 +86,20 @@ void ClockImpl::start()
 Timespan ClockImpl::stop()
 {
     QueryPerformanceCounter( &_stopValue );
+
+#ifdef _WIN32_WCE
     _secondStopValue = GetTickCount();
+#else
+    _secondStopValue = GetTickCount64();
+#endif
 
     LARGE_INTEGER delta;
-    delta.QuadPart      = _stopValue.QuadPart - _startValue.QuadPart;
-    DWORD secondDelta   = _secondStopValue - _secondStartValue;
+    delta.QuadPart        = _stopValue.QuadPart - _startValue.QuadPart;
+    ULONGLONG secondDelta = _secondStopValue - _secondStartValue;
 
     if( secondDelta > 100 )
     {
-        return Timespan(secondDelta / 1000 , ( secondDelta * 1000 ) % 1000000 );
+        return Timespan(secondDelta * 1000);
     }
 
     const long secs = static_cast<long>(delta.QuadPart / _frequency.QuadPart);
@@ -104,13 +114,13 @@ Pt::DateTime ClockImpl::getSystemTime()
     SYSTEMTIME systemTime;
     GetSystemTime(&systemTime);
 
-    return DateTime (    systemTime.wYear,
-                systemTime.wMonth,
-                systemTime.wDay,
-                systemTime.wHour,
-                systemTime.wMinute,
-                systemTime.wSecond,
-                systemTime.wMilliseconds    );
+    return DateTime(systemTime.wYear,
+                    systemTime.wMonth,
+                    systemTime.wDay,
+                    systemTime.wHour,
+                    systemTime.wMinute,
+                    systemTime.wSecond,
+                    systemTime.wMilliseconds );
 }
 
 
@@ -119,76 +129,27 @@ Pt::DateTime ClockImpl::getLocalTime()
     SYSTEMTIME systemTime;
     GetLocalTime(&systemTime);
 
-    return DateTime (    systemTime.wYear,
-                systemTime.wMonth,
-                systemTime.wDay,
-                systemTime.wHour,
-                systemTime.wMinute,
-                systemTime.wSecond,
-                systemTime.wMilliseconds    );
+    return DateTime(systemTime.wYear,
+                    systemTime.wMonth,
+                    systemTime.wDay,
+                    systemTime.wHour,
+                    systemTime.wMinute,
+                    systemTime.wSecond,
+                    systemTime.wMilliseconds);
 }
 
 
 Timespan ClockImpl::getSystemTicks()
 {
-    FILETIME ft;
+#ifdef _WIN32_WCE
+    ULONGLONG msecs = GetTickCount();
+#else
+    ULONGLONG msecs = GetTickCount64();
+#endif
 
-    // win32 only : GetSystemTimeAsFileTime(&ft);
-    SYSTEMTIME st;
-    GetSystemTime( &st );
-    SystemTimeToFileTime( &st, &ft );
-
-    // number of 100-nanosecond intervals since January 1, 1601 (UTC)
-    Pt::uint64_t tmpres = 0;
-    tmpres |= ft.dwHighDateTime;
-    tmpres <<= 32;
-    tmpres |= ft.dwLowDateTime;
-
-    // convert to microseconds
-    tmpres /= 10;
-
-    return Timespan( static_cast<Pt::int64_t>(tmpres) );
-
-    //return Timespan( Pt::int64_t(1000) * GetTickCount() );
+    return Timespan( Pt::int64_t(1000) * msecs );
 }
-
-//u64 nano_count()
-//{
-//    static double scale_factor;
-//
-//    static u32 hi = 0;
-//    static u32 lo = 0;
-//
-//    LARGE_INTEGER count;
-//    BOOL ret = QueryPerformanceCounter(&count);
-//    if(ret == 0)
-//        fatal_error("QueryPerformanceCounter", 0);
-//
-//    if(scale_factor == 0.0)
-//    {
-//        LARGE_INTEGER frequency;
-//        BOOL ret = QueryPerformanceFrequency(&frequency);
-//        if(ret == 0)
-//            fatal_error("QueryPerformanceFrequency", 0);
-//        scale_factor = (1000000000.0 / frequency.QuadPart);
-//    }
-//
-//#ifdef FACTOR_64
-//    hi = count.HighPart;
-//#else
-//    /* On VirtualBox, QueryPerformanceCounter does not increment
-//    the high part every time the low part overflows.  Workaround. */
-//    if(lo > count.LowPart)
-//        hi++;
-//#endif
-//    lo = count.LowPart;
-//
-//    return (u64)((((u64)hi << 32) | (u64)lo) * scale_factor);
-//}
 
 } // namespace Pt
 
 } // namespace System
-
-
-

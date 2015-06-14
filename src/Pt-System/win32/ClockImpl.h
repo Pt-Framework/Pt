@@ -1,10 +1,10 @@
 #ifndef PT_SYSTEM_CLOCK_IMPL_H
 #define PT_SYSTEM_CLOCK_IMPL_H
 
-#include "Pt/WinVer.h"
-#include "Pt/DateTime.h"
-#include "Pt/Timespan.h"
-#include "Pt/System/Api.h"
+#include <Pt/WinVer.h>
+#include <Pt/DateTime.h>
+#include <Pt/Timespan.h>
+#include <Pt/System/Api.h>
 #include <windows.h>
 
 namespace Pt {
@@ -32,8 +32,8 @@ class ClockImpl
         LARGE_INTEGER   _frequency;
         LARGE_INTEGER   _startValue;
         LARGE_INTEGER   _stopValue;
-        DWORD           _secondStartValue;
-        DWORD           _secondStopValue;
+        ULONGLONG       _secondStartValue;
+        ULONGLONG       _secondStopValue;
 };
 
 } // namespace Pt
