@@ -64,7 +64,7 @@ public:
 
     virtual void drawLine(const Ui::PointF& from, const Ui::PointF& to);
 
-	virtual void drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline );
+	  virtual void drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline );
 
     virtual void drawText(const Ui::PointF& to, const Pt::String& Text);
 
@@ -90,8 +90,7 @@ public:
 
     virtual void addFontName(const std::string& fontName);
 
-    void setSurface(PaintSurface& surface);
-
+    void setSurface(PaintSurface& surface);    
 private:
 	PainterImpl* _impl;
 };

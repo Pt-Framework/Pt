@@ -208,7 +208,7 @@ void MainWindow::onMaxSizeChnaged(const Ui::SizeF& prop)
 
 void MainWindow::setSize(const Ui::SizeF& size)
 {
-	Widget::setSize(size);		
+	Window::setSize(size);		
 	_impl->setWindowSize( size );
 }
 

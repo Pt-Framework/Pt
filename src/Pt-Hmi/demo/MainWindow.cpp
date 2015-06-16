@@ -90,10 +90,12 @@ void MainWindow::init()
 	BackColor = Ui::Color(0.5,0.5,0.5);
 
   //Panel
+  
+  _mainPanel.DoubleBuffering = true;
 	_mainPanel.Size = Ui::SizeF(700,480);
 	_mainPanel.Position = Ui::PointF(40,40);
 	_mainPanel.PanelBorderWidth = 3;
-	_mainPanel.PanelBorderStyle = Pt::Hmi::BorderStyle::Single;
+	_mainPanel.PanelBorderStyle = Pt::Hmi::BorderStyle::Single;  
 
 	{
 		std::stringstream memoryStream;
@@ -105,13 +107,13 @@ void MainWindow::init()
 	}
 
 	
-	_mainPanel.BackgroundImageLayout = Pt::Hmi::ImageLayout::Center;
+	_mainPanel.BackgroundImageLayout = Pt::Hmi::ImageLayout::Strech;    	
 
-	//Text
-	_textLabel.AutoSize = true;
+	//Text	
   _textLabel.Margin = Hmi::Margin(10);
 	_textLabel.Size = Ui::SizeF(500,30);
 	_textLabel.Caption = std::string("T&his is a Platinum C++");
+  _textLabel.AutoSize = true;
 	_textLabel.Position = Ui::PointF(20,20);
 	_textLabel.ForeColor = Ui::Color(1,0,0,0);
 	_textLabel.UseMnemonic = true;	
@@ -150,21 +152,23 @@ void MainWindow::init()
 	_closeButton.Margin = Hmi::Margin(5);
 	_childWindow2.addChild(&_closeButton);
 	
-	_childWindow2.addChild(&_mainPanel);
-
-
+  
   _childWindow1.Cursor = Hmi::Cursor::waitCursor();
 	_childWindow1.Position = Ui::PointF(20,20);
 	_childWindow1.Size = Ui::SizeF(200,300);
 	_childWindow2.Position = Ui::PointF(80,80);
 	_childWindow2.Size = Ui::SizeF(800,600);
 	
+  _childWindow2.addChild(&_mainPanel);
+
 	addChildWindow(_childWindow1);
 	addChildWindow(_childWindow2);
 	
 	_childWindow1.Visible = true;
-	_childWindow2.Visible = true;
+  _childWindow1.invalidate();
 
+	_childWindow2.Visible = true;
+  _childWindow2.invalidate();  
 	BackgroundImage = _drawBuffer;
 }
 

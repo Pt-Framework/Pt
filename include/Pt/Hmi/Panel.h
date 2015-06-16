@@ -20,7 +20,7 @@ class PT_HMI_API Panel  : public Widget
 		ValueProperty<Ui::Color>					 BorderColor;
 
 	protected:
-		virtual void onRender();
+		virtual void onRender(PaintSurface& paintSurface);
 };
 
 }}

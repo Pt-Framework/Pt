@@ -34,7 +34,7 @@ namespace Ui{
 Image::Image(const ImageFormat& format)		
 : _format(&format)
 {
-	resize(1, 1);
+	resize(0, 0);
 }
 			
       	
@@ -68,6 +68,60 @@ Image Image::convert(const ImageFormat& toFormat) const
 	}
 
 	return image;
+}
+
+
+Image Image::blockScale( const SizeF& newSize) const
+{
+  Image resultImage( newSize.width(), newSize.height(), _stride, *_format);
+
+  const double dx = newSize.width() /_width;
+  const double dy = newSize.height() / _height;
+
+  double xTarget = 0;
+  double yTarget = 0;
+
+  for( size_t ySource = 0; ySource < _height; ++ySource)
+  {        
+    xTarget = 0;
+
+    for( size_t xSource = 0; xSource < _width;  ++xSource)
+    {
+      const Pt::uint8_t* pixelSource = pixel( xSource, ySource);
+      
+      Pt::uint8_t* pixelTarget = resultImage.pixel( (size_t) xTarget, (size_t)yTarget);       
+      memcpy( pixelTarget, pixelSource, _format->pixelSize());
+      
+      for( size_t i = 1; i < dx; ++i)
+      {
+        const size_t xPos = (size_t)xTarget + i;
+        const size_t yPos = (size_t)yTarget;
+
+        if( xPos >= resultImage.width() )
+          break;
+
+        memcpy( resultImage.pixel( xPos, yPos), pixelSource, _format->pixelSize());
+      }
+
+       xTarget += dx;
+    }
+        
+    const Pt::uint8_t* sourceLine = resultImage.pixel( 0, (size_t)yTarget);     
+    
+    for( size_t i = 1 ; i < dy ; ++i)
+    {      
+      const size_t yPos = (size_t) yTarget + i;
+
+      if( yPos >= resultImage.height() )
+        break;
+                 
+      memcpy( resultImage.pixel( 0, yPos), sourceLine, resultImage.width() * _format->pixelSize() + _stride);
+    }
+
+    yTarget += dy;
+  }  
+
+  return resultImage;
 }
 
 

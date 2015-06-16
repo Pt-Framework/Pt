@@ -10,15 +10,15 @@ namespace Hmi{
 Widget::Widget()
 : _mnemonicWidget(0)
 , PT_HMI_INIT_PROPERTY_VALUE(Enabled, true)
-, PT_HMI_INIT_PROPERTY_VALUE(Visible, true )
+, PT_HMI_INIT_PROPERTY_VALUE(Visible, false )
 , PT_HMI_INIT_PROPERTY_VALUE(Font,Ui::Font("Sans Serif",12))
 , Position("Position", *this, &Widget::position, &Widget::setPosition )
 , Size("Size", *this, &Widget::size, &Widget::setSize)
-, PT_HMI_INIT_PROPERTY_VALUE(BackColor,Ui::Color(237/255.0,237/255.0,237/255.0))
-, PT_HMI_INIT_PROPERTY_VALUE(HighlightColor,Ui::Color(200/255.0,200/255.0,200/255.0))
-, PT_HMI_INIT_PROPERTY_VALUE(ForeColor, Ui::Color(0,0,0))
-, PT_HMI_INIT_PROPERTY_VALUE(DisabledColor, Ui::Color(178/255.0,178/255.0,178/255.0))
-, PT_HMI_INIT_PROPERTY_VALUE(BackgroundImage, Ui::Image(1,1))
+, PT_HMI_INIT_PROPERTY_VALUE(BackColor,Ui::Color::fromRgb8(237,237,237))
+, PT_HMI_INIT_PROPERTY_VALUE(HighlightColor,Ui::Color::fromRgb8(200,200,200))
+, PT_HMI_INIT_PROPERTY_VALUE(ForeColor, Ui::Color::fromRgb8(0,0,0))
+, PT_HMI_INIT_PROPERTY_VALUE(DisabledColor, Ui::Color::fromRgb8(178,178,178))
+, PT_HMI_INIT_PROPERTY_VALUE(BackgroundImage, Ui::Image())
 , PT_HMI_INIT_PROPERTY_VALUE(BackgroundImageLayout, ImageLayout::NoLayout)
 , PT_HMI_INIT_PROPERTY_VALUE(Opacity,0)
 , PT_HMI_INIT_PROPERTY_VALUE(Cursor, Hmi::Cursor::defaultCursor())
@@ -34,17 +34,16 @@ Widget::Widget()
 , PT_HMI_INIT_PROPERTY_VALUE(FlowLayout, Hmi::FlowLayout::None)
 , PT_HMI_INIT_PROPERTY_VALUE(FlowDirection, Hmi::FlowLayoutDirection::LeftToRightTopToBottom)
 , PT_HMI_INIT_PROPERTY_VALUE(ShortcutKey, "")
+, PT_HMI_INIT_PROPERTY_VALUE(DoubleBuffering,false)
 , _parent(0)
-, _isValid(false)
 , _containPointer(false)
 , _size(200,200)
 , _position( 0, 0)
 , _isFocused(false)
+, _isValid(false)
 {	
-	bindMnemonicToWidget( *this );	
-	
-	eventReceived() += Pt::slot(*this, &Widget::onKeyInput);
-	eventReceived() += Pt::slot(*this, &Widget::onPointerInput);	
+	bindMnemonicToWidget( *this );		
+  DoubleBuffering.changed() += Pt::slot(*this, &Widget::onDoubleBufferingChanged);
 }
 
 
@@ -58,6 +57,9 @@ void Widget::addChild(Widget* child)
 {
 	_children.push_back(child);
 	child->setParent(this);
+  child->Visible = true;  
+  child->invalidate();
+  
 	invalidate();
 }
 
@@ -70,9 +72,12 @@ void Widget::removeChild(Widget* child)
 			continue;
 		
 		_children.erase(_children.begin() + i);
+    child->Visible = false;
 		child->setParent(0);
 		return;
 	}			
+
+  invalidate();
 }	
 
 
@@ -86,35 +91,32 @@ Ui::PointF Widget::toClient( const Ui::PointF& globalPoint )
 }
 
 
-Ui::PointF Widget::fromClient( const Ui::PointF& localPoint, bool toRoot )
+Ui::PointF Widget::fromClient( const Ui::PointF& localPoint)
 {
 	double x = localPoint.x();
 	double y = localPoint.y();
-	const Widget* widget = _parent;
+	const Widget* widget = parent();
 
 	while( widget != 0 )
-	{		
-		widget = widget->parent();
+	{						
+		if( widget->parent() != 0)
+    {
+      x += widget->Position.get().x();
+		  y += widget->Position.get().y();	
+    }
 
-		if(!(toRoot && widget == 0))
-		{
-			x += widget->Position.get().x();
-			y += widget->Position.get().y();
-		}
+    widget = widget->parent();
 	}	
+
 	return Ui::PointF(x,y);
 }
 
 
 void Widget::updatePosAndSize(Widget& w, const Ui::SizeF& s, const Ui::PointF& p)
-{
-  bool visible  = w.Visible.get();
-        
-  w.Visible.set(false);  //Avoid invalidate.              
-  w.Position = p;
-  w.Size = s;  
-	w._isValid = false;
-  w.Visible.set(visible);
+{       
+  w.Position.set(p);
+  w.Size.set(s);      
+  _isValid = false;
 }
 
 
@@ -126,15 +128,15 @@ void Widget::mnemonic()
 
 void Widget::invalidate()
 {  	
-	_isValid = false;
+  std::clog<<"invalidate"<<std::endl;
+  _isValid = false;
 	onInvalidate();
 }
 
 
 void Widget::onLayout()
 {
-  Pt::Hmi::Painter& localPainter = paintSurface().painter();
-  Ui::SizeF clientSize = paintSurface().size();
+  Ui::SizeF clientSize = Size.get();
   double posLeft  = 0;
   double posTop   = 0;
   double posRight  = clientSize.width();
@@ -144,10 +146,7 @@ void Widget::onLayout()
 	for( size_t i = 0; i < children().size(); ++i )
 	{
 		Widget*	child = _children[i];			
-		 
-		if( !child->Visible.get() )
-				continue;
-   
+		    
     Ui::PointF point = child->Position.get();
 
     if( FlowLayout.get() == Hmi::FlowLayout::None )
@@ -169,7 +168,7 @@ void Widget::onLayout()
 
 					posLeft += child->Size.get().width();      
 					        
-          updatePosAndSize( *child, size, point ); 
+          updatePosAndSize( *child, size, point );           
         }
         break;
 
@@ -256,14 +255,7 @@ void Widget::onLayout()
         }
         break;
       }
-    }
-		
-    child->render();
-    
-    const double x = point.x() + child->Margin.get().left();
-    const double y = point.y() + child->Margin.get().top();
-
-    localPainter.drawSurface(Ui::PointF(x, y) , child->paintSurface());
+    }		        
 	}	
 
   if( fillLayoutChildren.size() != 0 )
@@ -275,46 +267,53 @@ void Widget::onLayout()
     const double& height = posBottom - posTop;
 
     updatePosAndSize( *child, Ui::SizeF( width, height ), point );
-    child->render();
-
-    const double& x = point.x() + child->Margin.get().left();
-    const double& y = point.y() + child->Margin.get().top();
-
-    point.setX(x);
-    point.setY(y);
-    
-    localPainter.drawSurface(point, child->paintSurface());
   }
 }
 
 
-void Widget::render()
+void Widget::render(PaintSurface& surface)
 {
-	if( ! Visible.get() )
-		return;
-	
-	if( !_isValid )
-		onRender();	
+  //Layout children
+  onLayout();	
 
-	onLayout();	
+  //Calculate Origin
+  const Ui::PointF pos = parent() == 0 ? Ui::PointF(0,0) : Position.get() ;
+  const Ui::PointF globPoint = fromClient( pos );
+  const Ui::PointF drawPos(globPoint.x() + Margin.get().left(), globPoint.y() + Margin.get().top());
+  const Ui::SizeF  drawSize( Size.get().width() - Margin.get().left() - Margin.get().right(), Size.get().height() - Margin.get().top() - Margin.get().bottom());
+  
+  surface.setOrigin(drawPos, drawSize);
+  
+  if( _isValid  && DoubleBuffering.get() )  
+  {       
+    surface.painter().drawSurface(Ui::PointF(0,0), _widgetSurface);
+    return;
+  }
 
-	_isValid = true;
+  //Render       
+	onRender(surface);	
+  
+  //Render children
+  for( size_t i = 0; i < _children.size(); ++i)
+    _children[i]->render(surface);   
+
+  if( DoubleBuffering.get() )
+    _widgetSurface.painter().drawSurface(Ui::PointF(-globPoint.x(),-globPoint.y()), surface);
+  
+  _isValid = true;
 }
 
 
-void Widget::onRender()
+void Widget::onRender( PaintSurface& surface )
 {		
-	if( ! Visible.get() )
-		return;
+  const Ui::SizeF size = surface.originSize();
 
-	  Ui::SizeF size = _paintSurface.size();
-
-	if( size.width() < 0 ||  size.height() < 0)
+	if( size.width() < 0 || size.height() < 0)
 		return; 
 
-	Ui::Image& backImage    = BackgroundImage.get();
-	Pt::Hmi::Painter&	  localPainter = _paintSurface.painter();
-	Ui::RectF		  rect(Ui::PointF(0,0),size);
+	Ui::Image& backImage = BackgroundImage.get();
+	Pt::Hmi::Painter&	   localPainter = surface.painter();
+	Ui::RectF		         rect(Pt::Ui::PointF(0,0), size);
 	
 	localPainter.setFont(Font.get());
 
@@ -333,21 +332,21 @@ void Widget::onRender()
 		localPainter.fillRect(rect);
 	}
 
-	if( backImage.width() != 0 && backImage.height() != 0)
+	if( !backImage.empty() )
 	{
 		switch( BackgroundImageLayout.get())
 		{				
 			case ImageLayout::NoLayout:
 			{
-				localPainter.drawImage(Ui::PointF(0,0), backImage);
+				localPainter.drawImage(Pt::Ui::PointF(0,0), backImage);
 			}
 			break;
 			
 			case ImageLayout::Tile:
 			{
-				for( size_t x = 0; x < _paintSurface.size().width();  x += backImage.width())
+				for( size_t x = 0; x < size.width();  x += backImage.width())
 				{
-					for( size_t y = 0; y < _paintSurface.size().height();  y += backImage.height())
+					for( size_t y = 0; y < size.height();  y += backImage.height())
 						localPainter.drawImage(Ui::PointF(x,y), backImage);
 				}
 			}
@@ -363,20 +362,19 @@ void Widget::onRender()
 			
 			case ImageLayout::Strech:
 			{
-				Ui::Image strech((size_t) _paintSurface.size().width(), (size_t)_paintSurface.size().height() );
-
-//				Ui::blockScale(backImage.begin(), backImage.width(), backImage.height(), strech.begin(), (size_t) _paintSurface.size().width(),  (size_t) _paintSurface.size().height());
-				localPainter.drawImage(Ui::PointF(0,0), strech);
+				Ui::Image strech = backImage.blockScale( size );
+				localPainter.drawImage(Pt::Ui::PointF(0,0), strech);
 			}
 			break;
 
 			case ImageLayout::Zoom:
 			{
-				Ui::Image strech( (size_t) _paintSurface.size().width(), (size_t) _paintSurface.size().height() );
-				double factor = _paintSurface.size().width()/(double)backImage.width();
+        const double factor = size.width()/(double)backImage.width();
+        Pt::Ui::SizeF newSize(backImage.width()*factor, (Pt::size_t)(backImage.height()*factor));
 
-//				Ui::blockScale(backImage.begin(), backImage.width(), backImage.height(),strech.begin(),  strech.width(), (Pt::size_t)(backImage.height()*factor));
-				localPainter.drawImage(Ui::PointF(0,0), strech);
+        Ui::Image strech = backImage.blockScale(newSize);
+				
+        localPainter.drawImage(Pt::Ui::PointF(0,0), strech);
 			}
 			break;
 		}
@@ -387,7 +385,7 @@ void Widget::onRender()
 void Widget::onInvalidate()
 {
 	if( parent() )
-		parent()->invalidate();		
+		parent()->invalidate();		    
 }
 
 
@@ -403,7 +401,7 @@ void Widget::onShortcutKey(KeyEvent::KeyState state)
 
 void Widget::onPointerEnter()
 {
-	_containPointer = true;
+	_containPointer = true;  
 	Application::instance().setCursor( &Cursor.get() );
 }
 
@@ -411,8 +409,11 @@ void Widget::onPointerEnter()
 void Widget::onPointerLeaved()
 {	
 	_containPointer = false;
+
   if( _parent != 0 )
 	  Application::instance().setCursor( &_parent->Cursor.get() ); 
+  else
+    Application::instance().setCursor( &Cursor::defaultCursor() ); 
 }
 
 		
@@ -435,7 +436,7 @@ void Widget::onPointerInput(const PointerEvent& ev)
 	}
 
 	for( size_t i = 0; i < children().size(); ++i)
-		_children[i]->eventReceived().send(ev);
+		_children[i]->onPointerInput(ev);
 }
 
 
@@ -715,18 +716,24 @@ void Widget::setCaption( const std::string& c )
 }
 
 
+void Widget::onDoubleBufferingChanged(const bool& b)
+{
+  if( b )
+    _widgetSurface.resize(_size);
+  else
+    _widgetSurface.resize(Ui::SizeF(1,1));
+
+  invalidate();
+}
+
 void Widget::setSize(const Ui::SizeF& size)
 {
 	_size = size;			
 
-	const double  width  = _size.width() -  ( Margin.get().left() + Margin.get().right() );
-	const double  height = _size.height() - ( Margin.get().top() + Margin.get().bottom() );
-
-	paintSurface().resize( Ui::SizeF(width,  height ) );	
-	
-	if( Visible.get() )
-		invalidate();
-			
+  if( DoubleBuffering.get() )
+     _widgetSurface.resize(_size);
+  else
+    _widgetSurface.resize(Ui::SizeF(1,1));    
 }
 
 

@@ -176,7 +176,7 @@ void Painter::addFontName(const std::string& fontName)
 
 void Painter::setSurface(PaintSurface& surface)
 {    
-    _impl->setSurface(surface);
+  _impl->setSurface(surface);
 }
 
 

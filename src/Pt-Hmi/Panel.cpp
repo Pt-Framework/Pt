@@ -10,10 +10,11 @@ Panel::Panel()
 : PT_HMI_INIT_PROPERTY_VALUE(PanelBorderStyle,BorderStyle::Single)
 , PT_HMI_INIT_PROPERTY_VALUE(PanelBorderWidth,3)
 , PT_HMI_INIT_PROPERTY_VALUE(PanelBorderRoundEdge,false)
-, PT_HMI_INIT_PROPERTY_VALUE(BorderColor, Ui::Color(178/255.0,178/255.0,178/255.0))
+, PT_HMI_INIT_PROPERTY_VALUE(BorderColor, Ui::Color::fromRgb8(178,178,178))
 {
   AcceptFocus = false;
   Name.set("Panel");
+  invalidate();
 }
 
 
@@ -22,12 +23,9 @@ Panel::~Panel()
 }
 
 
-void Panel::onRender()
+void Panel::onRender(PaintSurface& paintSurface)
 {	
-	if(!Visible.get())
-		return;
-
-	Widget::onRender();
+	Widget::onRender(paintSurface);
 
 	int corner = 0;
 
@@ -37,14 +35,17 @@ void Panel::onRender()
   if( PanelBorderWidth.get() == 0 )
     return;
 
-  Ui::SizeF size = paintSurface().size();
+  const Ui::SizeF size = paintSurface.originSize();
+  const Ui::PointF pos = Ui::PointF(0,0);
+
 	size_t border =  (size_t) PanelBorderWidth.get();	
+
 	Ui::SizeF  clientSize(size.width() - PanelBorderWidth.get()/2, size.height() - PanelBorderWidth.get()/2);	
 	Ui::RectF  clientRect(Ui::PointF( PanelBorderWidth.get()/2, PanelBorderWidth.get()/2), clientSize);
 	
-	Pt::Hmi::Painter& localPainter = paintSurface().painter();
+	Pt::Hmi::Painter& localPainter = paintSurface.painter();
 						
-	switch(PanelBorderStyle.get())
+	switch( PanelBorderStyle.get() )
 	{
 		case BorderStyle::Single:
 		{			
@@ -60,7 +61,7 @@ void Panel::onRender()
 			points1[1].setY(clientRect.height() - corner);
 
 			//P2
-			points1[2].setX(0);
+			points1[2].setX( 0);
 			points1[2].setY(corner);
 
 			//P3
@@ -120,16 +121,16 @@ void Panel::onRender()
 
 			//P3
 			points1[3].setX(corner);
-			points1[3].setY(0);
+			points1[3].setY( 0);
 
 			//P4
 			points1[4].setX(clientRect.width() - corner);
-			points1[4].setY(0);
+			points1[4].setY( 0);
 			
 			//---
 			//P0
 			points2[0].setX(clientRect.width() - corner);
-			points2[0].setY(0);
+			points2[0].setY( 0);
 
 			//P1
 			points2[1].setX(clientRect.width());

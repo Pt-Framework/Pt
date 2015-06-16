@@ -347,7 +347,7 @@ void MainWindowImpl::onPaint()
   PAINTSTRUCT ps;
   HDC windowContext = BeginPaint(_hwnd, &ps);
     
-  HDC bitmapDeviceConText = _window->paintSurface().impl()->deviceContext();
+  HDC bitmapDeviceConText = _window->windowSurface().impl()->deviceContext();
   BitBlt(windowContext, 0, 0, info.right - info.left,  info.bottom - info.top, bitmapDeviceConText, 0, 0, SRCCOPY);    
     
   EndPaint(_hwnd, &ps);    

@@ -98,6 +98,7 @@ class PainterImpl
 
 				void setSurface(PaintSurface& surface);
 
+
     protected:
         void drawCompatibleImage(size_t x, size_t y, size_t depth, const char* data, size_t width, size_t height);
         void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
@@ -107,6 +108,11 @@ class PainterImpl
         void updatePen();
         void updateFont();
         void updateBrush();
+        
+        Ui::PointF fromOrigin(const Ui::PointF& p);
+
+        Ui::RectF fromOrigin(const Ui::RectF& p);
+
     protected:
         PaintSurfaceImpl*  _surface;
         Ui::Pen   _pen;

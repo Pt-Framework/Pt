@@ -30,9 +30,16 @@ class PT_HMI_API PaintSurface
 			return _impl;
 		}
 
+    void setOrigin(const Ui::PointF& pos, const Ui::SizeF& size);
+    
+    const Ui::SizeF& originSize() const;
+    
+    const Ui::PointF& originPos() const;
+    
+
 	private:
 		PaintSurfaceImpl*	_impl;
-		Painter				_painter;  
+		Painter				_painter;      
 };
 
 }}

@@ -59,6 +59,8 @@ Window::Window(Window* parent)
 	eventReceived() += Pt::slot(*this, &Window::onPositionEvent);
 	eventReceived() += Pt::slot(*this, &Window::onFocusEvent);
 	eventReceived() += Pt::slot(*this, &Window::onCloseEvent);
+	eventReceived() += Pt::slot(*this, &Window::onKeyInput);
+	eventReceived() += Pt::slot(*this, &Window::onPointerInput);	
 }
 
 
@@ -68,12 +70,18 @@ Window::~Window()
 
 
 void Window::onInvalidate()
-{
-	render();		
+{	  
+  render(_windowSurface);		
 	_windowManager.render();
 }
 
-	
+void Window::setSize(const Ui::SizeF& size)
+{	
+	_windowSurface.resize( size );	
+  Widget::setSize( size); 
+  invalidate();
+}
+	  	
 
 const std::vector<ChildWindow*>& Window::childWindows() const
 {
@@ -131,9 +139,10 @@ void Window::onKeyInput(const KeyEvent& ev)
   Widget::onKeyInput(ev);
 }
 
+
 void Window::onSizeEvent(const SizeEvent& ev)
 {
-	Widget::setSize( ev.size() );
+	Window::setSize( ev.size() );
 	Size.changed().send( ev.size() );	
 	State = ev.state();
 }

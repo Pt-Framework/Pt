@@ -48,15 +48,18 @@ class PT_UI_API Image
 
 		virtual ~Image();
 	
+
 		size_t width() const
 		{
 			return _width;
 		}
 
+
 		size_t height() const
 		{
 			return _height;
 		}
+
 
 		size_t stride() const
 		{
@@ -64,15 +67,23 @@ class PT_UI_API Image
 		}
 
 
+    bool empty() const
+    {
+      return _width == 0 || _height == 0;
+    }
+
+
 		void setColor( const Color& color );
+
 
 		void resize( size_t width, size_t height, size_t strideInBytes = 0)
 		{
 			_stride = strideInBytes;
 			_width = width;
-			_height = height;
+			_height = height;      
 			_buffer.resize( ( width * _format->pixelSize() + _stride) * height ); 
 		}
+
 
 		void resize( size_t width, size_t height, const ImageFormat& format, size_t strideInBytes = 0)
 		{
@@ -83,30 +94,36 @@ class PT_UI_API Image
 			_buffer.resize( ( width * _format->pixelSize() + _stride) * height ); 
 		}
 		
+
 		Color color(size_t x, size_t y) const
 		{
 			return _format->color(pixel(x,y));
 		}
+
 
 		void setColor(size_t x, size_t y, const Color& c)
 		{
 			_format->setColor( pixel(x,y), c);
 		}
 
+
 		Pt::uint8_t* pixel(size_t x, size_t y)
 		{
 			return &_buffer[pixelOffsetInBytes(x,y)];
 		}
+
 
 		const Pt::uint8_t* pixel(size_t x, size_t y) const 
 		{
 			return &_buffer[pixelOffsetInBytes(x,y)];
 		}
 
+
 		void setPixel( size_t x, size_t y, const Pt::uint8_t* p)
 		{
 				memcpy( pixel(x, y), p, _format->pixelSize() );
 		}
+
 
 		void setPixels( size_t x, size_t y, size_t count, const Pt::uint8_t* pixel)
 		{
@@ -114,14 +131,21 @@ class PT_UI_API Image
 				setPixel(i, y, pixel);			
 		}
 
+
 		const ImageFormat& format() const
 		{
 			return *_format;
 		}		
 
+
 		Image convert(const ImageFormat& toFormat) const;
 		
+
 		Image subImage( const Region& region) const ;
+    
+    
+    Image blockScale( const SizeF& newSize) const;
+
 
 		const Image& operator=(const Image& image)
 		{

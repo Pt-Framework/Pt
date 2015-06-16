@@ -17,7 +17,12 @@ class PT_HMI_API Label  : public Panel
 		ValueProperty<bool> AutoSize;	
 
 	protected:
-		virtual void onRender();
+		virtual void onRender(PaintSurface& paintSurface);
+    virtual void onAutoSizeChanged(const bool& a);
+    virtual void onCaptionChanged(const std::string& cap);
+
+  private:
+    void recalcNewSize();
 };
 
 }}

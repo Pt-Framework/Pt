@@ -61,6 +61,7 @@ PainterImpl::~PainterImpl()
 void PainterImpl::drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline )
 {
 	//Todo: impl
+    
     drawText(to, text);
 }
 
@@ -394,7 +395,7 @@ int PainterImpl::depth() const
 
 void PainterImpl::drawPixel(const Ui::PointF& toF)
 {
-  Ui::Point to = Application::instance().fromUnit(toF);    
+  Ui::Point to = Application::instance().fromUnit(fromOrigin(toF));    
     
 	SetPixel( _surface->deviceContext(), to.x(), to.y(), RGB(_pen.color().red() *255, _pen.color() .green()*255, _pen.color().blue() * 255) );
 }
@@ -405,8 +406,8 @@ void PainterImpl::drawLine(const Ui::PointF& fromF, const  Ui::PointF& toF)
 	if (_pen.size() == 0) 
 		return; 
 
-	Ui::Point from = Application::instance().fromUnit(fromF);
-	Ui::Point to = Application::instance().fromUnit(toF);
+	Ui::Point from = Application::instance().fromUnit(fromOrigin(fromF));
+	Ui::Point to = Application::instance().fromUnit(fromOrigin(toF));
 
   POINT points[2];
   points[0].x = from.x();
@@ -419,19 +420,21 @@ void PainterImpl::drawLine(const Ui::PointF& fromF, const  Ui::PointF& toF)
 
 void PainterImpl::drawText(const Ui::PointF& toF, const Pt::String& text)
 {
-	Ui::Point to = Application::instance().fromUnit(toF);
-    RECT rectangle;
-    SetRect(&rectangle, to.x(), to.y(), to.x(), to.y());
+	Ui::Point to = Application::instance().fromUnit(fromOrigin(toF));
+  
+  RECT rectangle;
+  SetRect(&rectangle, to.x(), to.y(), to.x(), to.y());
 
-    _text.clear();
-		text.toUtf16( std::back_inserter(_text) );	
+  _text.clear();
+	text.toUtf16( std::back_inserter(_text) );	
 	
-    int rezt = DrawTextW(_surface->deviceContext(), _text.c_str(), -1, &rectangle, DT_NOCLIP| DT_NOPREFIX );	
+  int rezt = DrawTextW(_surface->deviceContext(), _text.c_str(), -1, &rectangle, DT_NOCLIP| DT_NOPREFIX );	
 }
+
 
 void PainterImpl::fillRect(const Ui::RectF& rectF)
 {
-	Ui::Rect rect = Application::instance().fromUnit(rectF);
+	Ui::Rect rect = Application::instance().fromUnit(fromOrigin(rectF));
 
   RECT rectangle;
   const Ui::Point topLeft     = rect.topLeft();
@@ -444,7 +447,7 @@ void PainterImpl::fillRect(const Ui::RectF& rectF)
 
 void PainterImpl::drawRect(const Ui::RectF& rectF)
 {
-	Ui::Rect rect = Application::instance().fromUnit(rectF);
+	Ui::Rect rect = Application::instance().fromUnit(fromOrigin(rectF));
 
     if (rect.size().width() == 1 && rect.size().height() == 1) 
 	{
@@ -466,20 +469,20 @@ void PainterImpl::drawRect(const Ui::RectF& rectF)
 
 void PainterImpl::drawEllipse(const Ui::PointF& topLeftF, const Ui::SizeF& sizeF)
 {
-	Ui::Point topLeft = Application::instance().fromUnit(topLeftF);
+	Ui::Point topLeft = Application::instance().fromUnit(fromOrigin(topLeftF));
 	Ui::Size size = Application::instance().fromUnit(sizeF);
 
-    HBRUSH originalBrush = (HBRUSH)SelectObject(_surface->deviceContext(), GetStockObject(NULL_BRUSH));
+  HBRUSH originalBrush = (HBRUSH)SelectObject(_surface->deviceContext(), GetStockObject(NULL_BRUSH));
 
-    Ellipse(_surface->deviceContext(), topLeft.x(), topLeft.y(), topLeft.x() + size.width(), topLeft.y() + size.height() );
+  Ellipse(_surface->deviceContext(), topLeft.x(), topLeft.y(), topLeft.x() + size.width(), topLeft.y() + size.height() );
 
-    SelectObject(_surface->deviceContext(), originalBrush);
+  SelectObject(_surface->deviceContext(), originalBrush);
 }
 
 
 void PainterImpl::fillEllipse(const Ui::PointF& topLeftF, const Ui::SizeF& sizeF)
 {
-	Ui::Point topLeft = Application::instance().fromUnit(topLeftF);
+	Ui::Point topLeft = Application::instance().fromUnit(fromOrigin(topLeftF));
 	Ui::Size size = Application::instance().fromUnit(sizeF);
 
     // Temporarily select the empty pen to only draw the filling.
@@ -506,7 +509,7 @@ void PainterImpl::drawPolyline(const Ui::PointF* points, const size_t pointCount
 
     for (size_t i = 0; i < pointCount; i++)
     {
-		Ui::Point p = Application::instance().fromUnit(points[i]);
+		    Ui::Point p = Application::instance().fromUnit(fromOrigin(points[i]));
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -521,9 +524,9 @@ void PainterImpl::fillPolygon(const Ui::PointF* points, const size_t pointCount)
 
     std::vector<POINT> winPoints(pointCount);
 
-     for (size_t i = 0; i < pointCount; i++)
+    for (size_t i = 0; i < pointCount; i++)
     {
-		Ui::Point p = Application::instance().fromUnit(points[i]);
+		    Ui::Point p = Application::instance().fromUnit(fromOrigin(points[i]));
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -537,7 +540,7 @@ void PainterImpl::fillPolygon(const Ui::PointF* points, const size_t pointCount)
 void PainterImpl::drawSurface(const Ui::PointF& toF, PaintSurface& surface, const  Ui::Region& pixmapRegion)
 {
 
-	Ui::Point to = Application::instance().fromUnit(toF);
+	Ui::Point to = Application::instance().fromUnit(fromOrigin(toF));
 
     // Copy contents from the source bitmap to the destination (=new) bitmap.
     BitBlt( _surface->deviceContext(), to.x(), to.y(), pixmapRegion.width(), pixmapRegion.height(),
@@ -548,7 +551,7 @@ void PainterImpl::drawSurface(const Ui::PointF& toF, PaintSurface& surface, cons
 void PainterImpl::drawSurface(const Ui::PointF& toF, PaintSurface& surface)
 {
 
-	Ui::Point to = Application::instance().fromUnit(toF);
+	Ui::Point to = Application::instance().fromUnit(fromOrigin(toF));
 	Ui::Size size = Application::instance().fromUnit(surface.size());
 
     BitBlt( _surface->deviceContext(), to.x(), to.y(), size.width(), size.height(), surface.impl()->deviceContext(),  
@@ -557,7 +560,7 @@ void PainterImpl::drawSurface(const Ui::PointF& toF, PaintSurface& surface)
 
 void PainterImpl::drawImage(const Ui::PointF& toF, const Ui::Image& image)
 {
-	Ui::Point to = Application::instance().fromUnit(toF);
+	Ui::Point to = Application::instance().fromUnit(fromOrigin(toF));
 
 	const size_t depth = image.format().pixelSize() * 8; 
 
@@ -566,7 +569,7 @@ void PainterImpl::drawImage(const Ui::PointF& toF, const Ui::Image& image)
 
 void PainterImpl::drawImage(const Ui::PointF& toF, const Ui::Image& image, const  Ui::Region& imageRegion)
 {
-	Ui::Point to = Application::instance().fromUnit(toF);
+	Ui::Point to = Application::instance().fromUnit(fromOrigin(toF));
 
 	//Todo: impl region
 	const size_t depth = image.format().pixelSize() * 8; 
@@ -624,6 +627,15 @@ void PainterImpl::drawCompatibleImage(size_t x, size_t y, size_t depth, const ch
     DeleteObject(bitmap);
 }
 
+Ui::PointF PainterImpl::fromOrigin(const Ui::PointF& p)
+{
+  return Ui::PointF(_surface->originPos().x() + p.x(), _surface->originPos().y() + p.y());
+}
+
+Ui::RectF PainterImpl::fromOrigin(const Ui::RectF& p)
+{
+  return Ui::RectF( Ui::PointF(_surface->originPos().x() + p.left(), _surface->originPos().y() + p.top()), p.size() );
+}
 
 void PainterImpl::setSurface(PaintSurface& surface)
 {

@@ -23,8 +23,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #ifndef Pt_Hmi_PaintSurfaceImpl_h
 #define Pt_Hmi_PaintSurfaceImpl_h
 
@@ -52,10 +51,26 @@ public:
 		return _size;
 	}
 
-    inline HDC deviceContext() const
+  inline HDC deviceContext() const
 	{
 		return _deviceContext;
 	}
+
+  void setOrigin(const Ui::PointF& pos, const Ui::SizeF& size)
+  {
+    _originPos = pos;
+    _originSize = size;
+  }
+
+  const Ui::PointF& originPos() const
+  {
+    return _originPos;
+  }
+
+  const Ui::SizeF& originSize() const
+  {
+    return _originSize;
+  }
 
 private:
     Ui::SizeF    _size;
@@ -64,6 +79,8 @@ private:
     HPEN		  _oldPen;
     HBRUSH		  _oldBrush;
 	  HFONT	      _oldFont;
+    Ui::PointF _originPos;
+    Ui::SizeF _originSize;
 };
 
 }}

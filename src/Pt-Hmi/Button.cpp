@@ -47,7 +47,7 @@ Button::Button()
 , PT_HMI_INIT_PROPERTY_VALUE(ImageAlign, Align::MidleLeft)
 , _lastPointerState( DeviceButton::Released )
 {
-  BackColor.set(Ui::Color(245/255.0,245/255.0,245/255.0));
+  BackColor.set(Ui::Color::fromRgb8(245,245,245));
 	PanelBorderStyle.set(BorderStyle::Widget);
 	PanelBorderWidth.set(1);
 	Caption.set("Button");	
@@ -237,8 +237,8 @@ void Button::onKeyInput(const KeyEvent& ev)
 
 void Button::onPointerInput(const PointerEvent& ev)
 {    
-	Ui::PointF point = toClient(Ui::PointF(ev.x(), ev.y()));
-    
+	Ui::PointF point = toClient(Ui::PointF(ev.x(), ev.y()));  
+      
 	Label::onPointerInput(ev);
 		    
 	if( !Enabled.get() )
@@ -256,7 +256,10 @@ void Button::onPointerInput(const PointerEvent& ev)
 	if( !contains(point) )
 	{
 		if( Armed.get() )
+    {
 			Armed = false;
+      invalidate();
+    }
 
 		_lastPointerState = ev.buttons()[0].state();
 
@@ -267,7 +270,7 @@ void Button::onPointerInput(const PointerEvent& ev)
 
 	if(!Armed.get())
 	{
-		Armed = true;
+		Armed = true;    
 		genOutput = true;
 	}
 
@@ -342,24 +345,21 @@ void Button::onPointerInput(const PointerEvent& ev)
 }
 
 
-void Button::onRender()
+void Button::onRender(PaintSurface& paintSurface)
 {	
-	if( !Visible.get() )
-		return;	
-	 
 	if( !Enabled.get() )
 	{
-		Label::onRender();
+		Label::onRender(paintSurface);
 		return;
 	}			
 
-	Label::onRender();
+	Label::onRender(paintSurface);
 	
 	if( ButtonState.get() == DeviceButton::Pressed )
 		return;
 
-	Pt::Hmi::Painter& localPainter = paintSurface().painter();
-	Ui::SizeF    size = paintSurface().size();
+	Pt::Hmi::Painter& localPainter = paintSurface.painter();
+  Ui::SizeF size = paintSurface.originSize();
        
 	if( Armed.get() || isFocused() )
 	{

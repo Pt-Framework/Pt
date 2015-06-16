@@ -72,21 +72,28 @@ class WindowManager : public Pt::Connectable
 		{
 			return _windows;
 		}		
-				 
+
+protected:
+    virtual Ui::PointF renderWindowFrame(const ChildWindow* w);				 
 
 private:
 		void invalidate();	
-		void doSizing( ChildWindow* w, const PointerEvent& ev );
+    bool contains(const ChildWindow* w, const Ui::PointF& p);
+
+		ResizeDirection::Type detSizeDirection( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );	
+    bool detMoving ( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );
+
+
+    void doSizing( ChildWindow* w, const PointerEvent& ev );
 		void doMoving( ChildWindow* w, const PointerEvent& ev );
-		ResizeDirection::Type detSizeDirection( ChildWindow* w, const Pt::Hmi::PointerEvent& ev );	
+		
 		bool updateActive( const Pt::Hmi::PointerEvent& mouseEvent );
 		void updateFocus();		
-		Ui::PointF renderWindowFrame(ChildWindow* w);
+		
 		Ui::PointF toClient(const ChildWindow* w, const Ui::PointF& p);
 		Ui::SizeF clientSize( double width, double height);
-		Ui::SizeF windowSize( const ChildWindow* w);
-		bool contains(const ChildWindow* w, const Ui::PointF& p);
-		bool detMoving (  ChildWindow* w, const Pt::Hmi::PointerEvent& ev );
+		Ui::SizeF windowSize( const ChildWindow* w);		
+		
 
 	private:
 		Window&											_parent;
@@ -98,6 +105,8 @@ private:
 		double											_titleBarHeight;
 		double											_borderWidth;
 		Ui::Color						        _borderColor; 
+    Ui::Color						        _titleBarColor; 
+    Ui::Color						        _activeColor; 
 		SizeEvent										_sizeEvent;
 		PositionEvent               _positionEvent; 	
 		bool												_moving;	

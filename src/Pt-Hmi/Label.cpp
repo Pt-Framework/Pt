@@ -10,10 +10,13 @@ Label::Label()
 : Panel()
  , PT_HMI_INIT_PROPERTY_VALUE(AutoSize,true)
 {
-	Caption.set("Label");
+	AutoSize.changed() += Pt::slot(*this, &Label::onAutoSizeChanged);
+  Caption.changed() +=  Pt::slot(*this, &Label::onCaptionChanged);
+  Caption.set("Label");
   Name.set("Label");
-	ForeColor.set(Ui::Color(0,0,0,0));
+	ForeColor.set(Ui::Color::fromRgb8(0,0,0,0));
 	PanelBorderStyle.set(BorderStyle::NoBorder);
+  
 }
 
 Label::~Label()
@@ -21,47 +24,65 @@ Label::~Label()
 }
 
 
-void Label::onRender()
+void Label::recalcNewSize()
 {
-	if(!Visible.get())
-		return;		
+ if( !AutoSize.get() )
+ {
+    invalidate();
+    return;
+ }
+  
+  std::string caption = "";
 
-	Pt::Hmi::Painter&   localPainter = paintSurface().painter();	
-	Ui::PointF     pos;
-	Pt::String          caption;
-  Ui::Color      foreColor = Enabled.get() ? ForeColor.get() : DisabledColor.get();
+  if( UseMnemonic.get() )
+	  caption = Widget::removeMnemonic(Caption.get()).c_str();
+  else
+	  caption = Caption.get().c_str();
+
+  widgetSurface().painter().setFont(Font.get());
+
+  const Ui::FontMetrics metric = widgetSurface().painter().fontMetrics(caption.c_str());
+
+  Size = Ui::SizeF( metric.width() + Margin.get().left() + Margin.get().right(), metric.height() + Margin.get().top() +  Margin.get().bottom() );  
+  invalidate();
+}
+
+
+void Label::onCaptionChanged(const std::string& cap)
+{
+  recalcNewSize();
+}
+
+void Label::onAutoSizeChanged(const bool& a)
+{
+  recalcNewSize();
+}
+
+
+void Label::onRender(PaintSurface& paintSurface)
+{
+	Pt::Hmi::Painter&   localPainter = paintSurface.painter();	
+  Ui::SizeF size = paintSurface.originSize();
+	Ui::PointF    pos;
+	Pt::String    caption;
+  Ui::Color     foreColor = Enabled.get() ? ForeColor.get() : DisabledColor.get();
   Ui::Pen	      pen( 1, foreColor);
-  Ui::SizeF	    size = paintSurface().size();
+  
   
 	if( UseMnemonic.get() )
 		caption = Widget::removeMnemonic(Caption.get()).c_str();
 	else
-		caption = Caption.get().c_str();
-	
-	if( AutoSize.get() )
-	{		
-		//Calculate the current and adjust the size
-		localPainter.setFont(Font.get());
-		Ui::FontMetrics metric = localPainter.fontMetrics(caption);
+		caption = Caption.get().c_str();	  
 
-		Ui::SizeF currentSize = Ui::SizeF( metric.width() + Margin.get().left() + Margin.get().right() , 
-                                                 metric.height() + Margin.get().top() +  Margin.get().bottom() );
-    
-    Visible.set(false); //No invalidate event.
-		Size = currentSize;
-    Visible.set(true);
+  localPainter.setFont(Font.get());
 
-		//Render the panel	
-		Panel::onRender();
-
-		pos = Ui::PointF(0, metric.ascent());
-	}
-	else
-	{		
-		Panel::onRender();
-							
-		Ui::FontMetrics	metric = localPainter.fontMetrics(caption);
-    
+	Ui::FontMetrics	metric = localPainter.fontMetrics(caption);
+  pos = Ui::PointF( 0, metric.ascent() );
+  
+  Panel::onRender(paintSurface);
+              
+	if( !AutoSize.get() )
+	{										        
     localPainter.setFont(Font.get());		
 
 		switch(TextAlign.get())

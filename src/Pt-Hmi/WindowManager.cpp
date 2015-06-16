@@ -43,9 +43,11 @@ WindowManager::WindowManager(Window& parent)
 , _sizingDirection( ResizeDirection::No )
 , _app( Application::instance() )
 , _titleBarHeight(20)
-, _borderWidth(3)
-, _borderColor(0,0,255/255.0)
+, _borderWidth(1)
+, _borderColor(0,0,1)
 , _moving(false)
+, _titleBarColor(0, 0, 1)
+, _activeColor(0, 0, 0.5)
 {
 }
 
@@ -125,51 +127,51 @@ void WindowManager::invalidate()
 }
 
 
-Ui::PointF WindowManager::renderWindowFrame(ChildWindow* w)
+Ui::PointF WindowManager::renderWindowFrame(const ChildWindow* w)
 {
-	Painter& painter = _parent.paintSurface().painter();
+	Painter& painter = _parent.windowSurface().painter();
+
+  Ui::SizeF winSize = windowSize(w);
 
 	//Render Frame
 	Ui::PointF pos = w->Position.get();
-	Ui::RectF  rect( pos, Ui::SizeF(w->Size.get().width() + _borderWidth*2, _titleBarHeight + w->Size.get().height()  + _borderWidth) ) ;
+	Ui::RectF  rect( pos, winSize ) ;
 
-	Ui::Pen  pen((size_t) _borderWidth*2, _borderColor);
+	Ui::Pen  pen((size_t) _borderWidth, _borderColor);
 	painter.setPen(pen);
 	painter.drawRect(rect);		
 	
 	//Render Titel bar
-	Ui::Brush brush(_borderColor);
-	Ui::RectF rectTitel( pos, Ui::SizeF(w->Size.get().width() + _borderWidth*2, _titleBarHeight) ) ;
+	Ui::Brush brush( w->isFocused() ? _activeColor : _titleBarColor );
+	Ui::RectF rectTitle( pos, Ui::SizeF(winSize.width(), _titleBarHeight) ) ;
 
 	painter.setBrush(brush);
-	painter.fillRect(rectTitel);	
+	painter.fillRect(rectTitle);	
 		
 	return Ui::PointF( pos.x() + _borderWidth, pos.y() + _titleBarHeight );	
 }
 
+
 void WindowManager::render()
 {		
-	Painter& painter = _parent.paintSurface().painter();
+	Painter& painter = _parent.windowSurface().painter();
 
 	for( size_t i = 0; i < _windows.size(); ++i )
 	{
 		ChildWindow* w = _windows[i];
 				
-		w->render();
-
 		Ui::PointF clientPos = renderWindowFrame(w);
 
-		painter.drawSurface( clientPos, w->paintSurface() );
+		painter.drawSurface( clientPos, w->windowSurface() );
 	}
 }
 
 
 Ui::PointF WindowManager::toClient(const ChildWindow* w, const Ui::PointF& p)
 {
-		Ui::PointF client;
-		client =  Ui::PointF( p.x() - w->Position.get().x() - _borderWidth ,  p.y() - w->Position.get().y() - _borderWidth ) ;
-		return client;
+		return Ui::PointF( p.x() - w->Position.get().x() - _borderWidth ,  p.y() - w->Position.get().y() - _borderWidth - _titleBarHeight ) ;
 }
+
 
 bool WindowManager::updateActive( const Pt::Hmi::PointerEvent& mouseEvent )
 {
@@ -195,7 +197,6 @@ bool WindowManager::updateActive( const Pt::Hmi::PointerEvent& mouseEvent )
 		return true;
 	}	 
 
-	_app.setCursor( &_parent.Cursor.get() );
 	return false;
 }
 
@@ -213,6 +214,9 @@ void WindowManager::onKeyInput( const Pt::Hmi::KeyEvent& keyEvent )
 
 void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 {
+  if( _sizingDirection == ResizeDirection::No )
+    return;
+
 	const std::vector<DeviceButton>& button = ev.buttons();
 
 	Ui::PointF point( ev.x(), ev.y() );
@@ -234,41 +238,41 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 
 	switch( _sizingDirection )
 	{
-	case  ResizeDirection::North:
+	  case  ResizeDirection::North:
 		{			
 			posY +=  deltaY;
 			height -= deltaY;
 		}
 		break;
 
-	case ResizeDirection::NorthEast:
-		{
-			posY +=  deltaY;
-			height -= deltaY;
-			width += deltaX;
-		}
-		break;
+	  case ResizeDirection::NorthEast:
+	  {
+		  posY +=  deltaY;
+		  height -= deltaY;
+		  width += deltaX;
+	  }
+	  break;
 
-	case ResizeDirection::East:
-		{
-			width += deltaX;
-		}
-		break;
+	  case ResizeDirection::East:
+	  {
+		  width += deltaX;
+	  }
+	  break;
 
-	case ResizeDirection::SouthEast:
-		{
-			height += deltaY;
-			width += deltaX;
-		}
-		break;
-
-	case ResizeDirection::South:
+	  case ResizeDirection::SouthEast:
 		{
 			height += deltaY;
+			width += deltaX;
 		}
 		break;
 
-	case ResizeDirection::SouthWest:
+	  case ResizeDirection::South:
+		{
+			height += deltaY;
+		}
+		break;
+
+	  case ResizeDirection::SouthWest:
 		{
 			height += deltaY;
 			posX +=  deltaX;
@@ -276,26 +280,27 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 		}
 		break;
 
-	case ResizeDirection::West:
+	  case ResizeDirection::West:
 		{
 			posX +=  deltaX;
 			width -= deltaX;
 		}		
 		break;
 
-	case ResizeDirection::NorthWest:
-		{
-			posX +=  deltaX;
-			width -= deltaX;
-			posY +=  deltaY;
-			height -= deltaY;
-		}
-		break;
-	default:
-		{
+	  case ResizeDirection::NorthWest:
+	  {
+		  posX +=  deltaX;
+		  width -= deltaX;
+		  posY +=  deltaY;
+		  height -= deltaY;
+	  }
+	  break;
 
-		}
-		break;
+	  default:
+	  {
+
+	  }
+	  break;
 	}
 
 	if( w->Position.get() != Ui::PointF(posX, posY) )
@@ -337,76 +342,79 @@ bool WindowManager::contains(const ChildWindow* w, const Ui::PointF& p)
 	return false;
 }
 
-bool WindowManager::detMoving(  ChildWindow* w, const Pt::Hmi::PointerEvent& ev )
+bool WindowManager::detMoving( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev )
 {			
 	if( ev.buttons()[0].state() != DeviceButton::Pressed  || _moving )
 		return false;
 
-	const Ui::PointF& p = w->Position.get();
+	const Ui::PointF& position = w->Position.get();
 	 
-	if( ev.x() < (p.x() + _borderWidth*2 + w->Size.get().width())  && ev.x() >= p.x()  && ev.y() < (p.y() + _titleBarHeight) && ev.y() >= p.y() )
+	if( ev.x() < (position.x() + _borderWidth*2 + w->Size.get().width())  && ev.x() >= position.x()  && 
+      (ev.y()) < (position.y() + _titleBarHeight) && (ev.y()+ position.y()) >= (_borderWidth) )
 	{				
 		_movingOffset = Ui::PointF( ev.x(), ev.y() );
-
+    
 		return true;
 	}
 
 	return false;
 }
 
-ResizeDirection::Type WindowManager::detSizeDirection( ChildWindow* w, const Pt::Hmi::PointerEvent& ev )
+
+ResizeDirection::Type WindowManager::detSizeDirection( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev )
 {
-	if( w->WindowBorder.get() != WindowBorder::Sizeable )
-		return ResizeDirection::No;
-
 	ResizeDirection::Type resizeDir = ResizeDirection::No;
-	Ui::SizeF				size   = w->Size.get();
-	double								border = _borderWidth;
-	double								sizeR  = size.width() - border;
-	double								sizeB  = size.height() - border;
 
-	Ui::PointF p( ev.x() - w->Position.get().x(), ev.y() - w->Position.get().y() );
+  if( w->WindowBorder.get() != WindowBorder::Sizeable )
+		return resizeDir;	
 
-	if( contains(w, p) )
+	const Ui::SizeF	size   = w->Size.get();
+	const double		border = _borderWidth;
+	const double		sizeR  = size.width();
+	const double		sizeB  = size.height();
+
+	Ui::PointF localPos( ev.x() - w->Position.get().x(), ev.y() - w->Position.get().y() );
+
+	if( contains(w, localPos) )
 	{
-		if(p.x() < border && p.y() <  border)
+		if(localPos.x() < border && localPos.y() <  border)
 		{//Corner NW
 			_app.setCursor( &Cursor::sizeNWSECursor() );
 			resizeDir = ResizeDirection::NorthWest;
 		}	
-		else if(p.x() > sizeR && p.y() < border)
+		else if(localPos.x() > sizeR && localPos.y() < border)
 		{//corner NE
 			_app.setCursor( &Cursor::sizeNESWCursor() );
-			resizeDir= ResizeDirection::NorthEast;
+			resizeDir = ResizeDirection::NorthEast;
 		}
-		else if(p.x() < border &&  p.y() > sizeB )
+		else if(localPos.x() < border && localPos.y() > sizeB )
 		{//corner SW
 			_app.setCursor( &Cursor::sizeNESWCursor() );					
 			resizeDir = ResizeDirection::SouthWest;
 		}
-		else if(p.x() > sizeR &&  p.y() > sizeB )
+		else if(localPos.x() > sizeR &&  localPos.y() > sizeB )
 		{//corner SE          
 			_app.setCursor( &Cursor::sizeNWSECursor() );
 			resizeDir = ResizeDirection::SouthEast;
 		}
 		else
 		{
-			if( p.x() < border)				
+			if( localPos.x() < border)				
 			{//West            
 				_app.setCursor( &Cursor::sizeWECursor() );
 				resizeDir = ResizeDirection::West;
 			}
-			else if(p.x() >= sizeR )
+			else if(localPos.x() > sizeR )
 			{//East
 				_app.setCursor( &Cursor::sizeWECursor() );
 				resizeDir = ResizeDirection::East;
 			}
-			else if( p.y() < border)
+			else if( localPos.y() < border)
 			{//North
 				_app.setCursor( &Cursor::sizeNSCursor() );
 				resizeDir = ResizeDirection::North;
 			}
-			else if(p.y() >sizeB)
+			else if(localPos.y() > sizeB)
 			{//South
 				_app.setCursor( &Cursor::sizeNSCursor() );
 				resizeDir = ResizeDirection::South;
@@ -417,13 +425,11 @@ ResizeDirection::Type WindowManager::detSizeDirection( ChildWindow* w, const Pt:
 	return resizeDir;
 }
 
+
 void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
-{
-	
+{	
 	if( !_moving ) 
-	{
 		return;
-	}
 
 	const std::vector<DeviceButton>& button = ev.buttons();
 
@@ -445,8 +451,7 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 	w->eventReceived().send( _positionEvent );
 
 	_movingOffset = Ui::PointF( ev.x() , ev.y() );
-	invalidate();
-
+  invalidate();
 }
 
 
@@ -454,13 +459,14 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 {
 	if( _windows.size() == 0 )
 	{
+     _app.setCursor( &Cursor::defaultCursor() );
 		_sizingDirection = ResizeDirection::No;
 		_moving = false;
 		return;
 	}
 
 	if( mouseEvent.buttons()[0].state() == DeviceButton::Released )
-	{
+	{     
 		_sizingDirection = ResizeDirection::No;
 		_moving = false;
 	}
@@ -468,13 +474,17 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 	if(_sizingDirection == ResizeDirection::No  && !_moving )
 	{
 		if( !updateActive( mouseEvent ) )
+    {
+      _app.setCursor( &Cursor::defaultCursor() );
 			return;
+    }
 	}
 
 	ChildWindow* childWindow = active();
 
 	if( childWindow == 0 )
 	{
+    _app.setCursor( &Cursor::defaultCursor() );
 		_sizingDirection = ResizeDirection::No;
 		_moving = false;
 		return;
@@ -483,26 +493,33 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 	Pt::Hmi::PointerEvent localMouseEvent = mouseEvent;
 
 	localMouseEvent.setX( mouseEvent.x() - childWindow->Position.get().x() - _borderWidth ) ;
-	localMouseEvent.setY( mouseEvent.y() - childWindow->Position.get().y() - _titleBarHeight) ;
+	localMouseEvent.setY( mouseEvent.y() - childWindow->Position.get().y() - _titleBarHeight - _borderWidth ) ;
 
-	if( _sizingDirection == ResizeDirection::No  && ! _moving)
+	if( _sizingDirection == ResizeDirection::No && ! _moving)
 	{
 		_lastSizePoint = Ui::PointF( mouseEvent.x(), mouseEvent.y() ) ;
 
-		_sizingDirection = detSizeDirection( childWindow, mouseEvent );	
-		
 		_moving = detMoving( childWindow, mouseEvent );	
 
-		if( childWindow->contains( Ui::PointF( localMouseEvent.x(), localMouseEvent.y() ) ) )
-			childWindow->eventReceived().send( localMouseEvent );
+    if( _moving )
+      return;
+
+		_sizingDirection = detSizeDirection( childWindow, mouseEvent );	
+		
+    if( _sizingDirection != ResizeDirection::No)
+      return;
+      
+		
+    if( !childWindow->contains( Ui::PointF( localMouseEvent.x(), localMouseEvent.y() ) ) )
+      return;       
+
+	  childWindow->eventReceived().send( localMouseEvent );
 
 		return;
 	}
-	
-	
+		
 	doMoving( childWindow, mouseEvent );		
-	doSizing( childWindow, mouseEvent );				
-	
+	doSizing( childWindow, mouseEvent );					
 }
 
 

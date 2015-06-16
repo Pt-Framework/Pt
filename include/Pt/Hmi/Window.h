@@ -84,6 +84,16 @@ class PT_HMI_API Window  : public Widget
 
 		void close();
 
+    PaintSurface& windowSurface()
+    {
+      return _windowSurface;
+    }
+
+		Pt::Signal<const Pt::Event&>& eventReceived()
+		{
+			return _eventReceived;
+		}      
+
 	protected:
 		Window(Window* parent = 0);    
 
@@ -91,6 +101,7 @@ class PT_HMI_API Window  : public Widget
 		virtual void onKeyInput(const KeyEvent& ev);			
     virtual void onInvalidate();  			
 		virtual void setClosed( bool close );				
+    virtual void setSize(const Ui::SizeF& size);
 
 	protected:
 		void onSizeEvent(const SizeEvent& ev);
@@ -102,6 +113,8 @@ class PT_HMI_API Window  : public Widget
 		Window*				_winParent;
 		WindowManager _windowManager;		
 		bool	_isClosed;
+    PaintSurface  _windowSurface;
+   Pt::Signal<const Pt::Event&> _eventReceived;
 };
 
 }}
