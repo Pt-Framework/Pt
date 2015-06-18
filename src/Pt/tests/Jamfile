@@ -26,7 +26,8 @@ Main Pt-test : Pt-test.cpp
                TimeTest.cpp
                TimespanTest.cpp
                TypesTest.cpp
-               TypeTraitsTest.cpp 
+               TypeTraitsTest.cpp
+               WindowsCodecTest.cpp
 			   ;
 
 LinkSharedLibraries Pt-test : Pt-System Pt-Unit Pt ;

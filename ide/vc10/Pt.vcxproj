@@ -276,6 +276,7 @@
     <ClInclude Include="..\..\include\Pt\Utf32Codec.h" />
     <ClInclude Include="..\..\include\Pt\Utf8Codec.h" />
     <ClInclude Include="..\..\include\Pt\Void.h" />
+    <ClInclude Include="..\..\include\Pt\WindowsCodec.h" />
     <ClInclude Include="..\..\include\Pt\WinVer.h" />
     <ClInclude Include="..\..\include\Pt\XmlRpc\Api.h" />
     <ClInclude Include="..\..\include\Pt\XmlRpc\Client.h" />
@@ -544,7 +545,6 @@
     <None Include="..\..\src\Pt-Xml\tests\Jamfile" />
     <None Include="..\..\src\Pt\Jamfile" />
     <None Include="..\..\src\Pt\tests\Jamfile" />
-    <None Include="..\..\src\Pt\tests\Makefile.am" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Pt-Gfx\ARgb8888Color.cpp" />
@@ -929,6 +929,7 @@
     <ClCompile Include="..\..\src\Pt\tests\TimeTest.cpp" />
     <ClCompile Include="..\..\src\Pt\tests\TypesTest.cpp" />
     <ClCompile Include="..\..\src\Pt\tests\TypeTraitsTest.cpp" />
+    <ClCompile Include="..\..\src\Pt\tests\WindowsCodecTest.cpp" />
     <ClCompile Include="..\..\src\Pt\TextBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt\TextStream.cpp" />
     <ClCompile Include="..\..\src\Pt\Time.cpp" />
@@ -936,6 +937,7 @@
     <ClCompile Include="..\..\src\Pt\Utf16Codec.cpp" />
     <ClCompile Include="..\..\src\Pt\Utf32Codec.cpp" />
     <ClCompile Include="..\..\src\Pt\Utf8Codec.cpp" />
+    <ClCompile Include="..\..\src\Pt\WindowsCodec.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E956F801-3E1C-476C-85E0-4EB0FDCC15BC}</ProjectGuid>

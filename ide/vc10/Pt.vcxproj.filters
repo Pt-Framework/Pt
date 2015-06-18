@@ -1515,6 +1515,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\WindowsCodec.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1545,9 +1548,6 @@
       <Filter>Pt</Filter>
     </None>
     <None Include="..\..\src\Pt\tests\Jamfile">
-      <Filter>Pt\tests</Filter>
-    </None>
-    <None Include="..\..\src\Pt\tests\Makefile.am">
       <Filter>Pt\tests</Filter>
     </None>
     <None Include="..\..\src\Pt-System\Jamfile">
@@ -2903,6 +2903,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp">
       <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\WindowsCodecTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\WindowsCodec.cpp">
+      <Filter>Pt</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
