@@ -73,7 +73,7 @@ Image Image::convert(const ImageFormat& toFormat) const
 
 Image Image::blockScale( const SizeF& newSize) const
 {
-  Image resultImage( newSize.width(), newSize.height(), _stride, *_format);
+  Image resultImage( (size_t) newSize.width(), (size_t)newSize.height(), _stride, *_format);
 
   const double dx = newSize.width() /_width;
   const double dy = newSize.height() / _height;

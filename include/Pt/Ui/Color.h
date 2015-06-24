@@ -91,7 +91,7 @@ class PT_UI_API Color
 
     static Color fromRgb8( Pt::uint8_t r, Pt::uint8_t g, Pt::uint8_t b, Pt::uint8_t a = 255)
     {
-      return Color( a/255.0,  r/255.0, g/255.0, b/255.0);
+      return Color( a/255.0f,  r/255.0f, g/255.0f, b/255.0f);
     }
 
 	private:

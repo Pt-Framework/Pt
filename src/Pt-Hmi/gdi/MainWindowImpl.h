@@ -33,7 +33,8 @@
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/PointerEvent.h>
 #include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/WindowProperties.h>
+#include <Pt/Hmi/WindowState.h>
+#include <Pt/Hmi/WindowBorder.h>
 #include <Windows.h>
 #include <map>
 
@@ -93,6 +94,8 @@ public:
 
 	void focus();
 
+  PaintSurface& windowSurface();
+
 protected:
 	void onWindowEvent(HWND wnd, unsigned int msg, WPARAM wparam, LPARAM lparam, bool& handled);
 	void onPaint();
@@ -112,6 +115,7 @@ private:
 	bool													_forceTopMost;
 	Ui::Size                 _minSize;
 	Ui::Size                 _maxSize;
+  PaintSurface            _windowSurface;
 };
 
 }}

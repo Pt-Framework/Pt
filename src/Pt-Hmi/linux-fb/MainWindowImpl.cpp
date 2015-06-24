@@ -1,31 +1,29 @@
-/* Copyright (C) 2013 Marc Boris Duerner
- * Copyright (C) 2013 Laurentiu-Gheorghe Crisan
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
+ /* Copyright (C) 2015 Marc Boris Duerner 
+    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+  
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include "MainWindowImpl.h"
 #include "PaintSurfaceImpl.h"
 #include "ApplicationImpl.h"
@@ -49,14 +47,22 @@ namespace Hmi {
 MainWindowImpl::MainWindowImpl(Window* window)
 : _apiWindow(window)
 , _app(Application::instance() )
+, _forceTopMost(false)
 { 	
-
+  Focused += Pt::slot(*this, &MainWindowImpl::onFocusChanged);
 }
 
 
 MainWindowImpl::~MainWindowImpl()
 {
 
+}
+
+
+void MainWindowImpl::onFocusChanged(bool focused)
+{
+  if( !focused && _forceTopMost )
+    _windowManager.activate(this);
 }
 
 
@@ -80,14 +86,11 @@ void MainWindowImpl::onInvalidate()
 }
 
 
-void MainWindowImpl::onRender()
+void MainWindowImpl::onRender(PaintSurface& paintSurface)
 {
-  ChildWindow::onRender();
+  ChildWindow::onRender(paintSurface);
 
-	Painter& painter = paintSurface().painter();
-  
-  painter.drawSurface( Ui::PointF(0, 0), _apiWindow->paintSurface() );	
-
+  _apiWindow->render( paintSurface );
   _windowManager.render();
 }
 
@@ -103,6 +106,12 @@ void MainWindowImpl::destroy()
 {
 	_app.mainScreen().impl()->windowManager().remove( this );
 	this->setWindowParent(0);
+}
+
+
+void MainWindowImpl::render()
+{
+	Window::render( windowSurface() );
 }
 
 
@@ -122,19 +131,20 @@ void MainWindowImpl::hide()
 
 void MainWindowImpl::setWindowPos(const Ui::PointF& p)
 {	
-	if( Position.get() != p ) 
-	{
-		Position = p;
-		render();
-	}
+	if( Position.get() == p ) 
+    return;
+	
+	Position = p;		
+  render();	
 }
 
 
 void MainWindowImpl::setWindowSize( const  Ui::SizeF& size )
-{  
- 
-	if( Size.get() != size )
-		Size = size;
+{   
+	if( Size.get() == size )
+    return;
+
+  Size = size;
 }
 
 
@@ -170,7 +180,7 @@ void MainWindowImpl::showSysMenu(bool p)
 
 void MainWindowImpl::setForceTopMost(bool force)
 {
-	
+	_forceTopMost = force;
 }
   
 

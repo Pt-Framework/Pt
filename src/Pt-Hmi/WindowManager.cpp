@@ -1,29 +1,28 @@
-/* 
-* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-* 
-* This library is free software; you can redistribute it and/or
-* modify it under the terms of the GNU Lesser General Public
-* License as published by the Free Software Foundation; either
-* version 2.1 of the License, or (at your option) any later version.
-* 
-* As a special exception, you may use this file as part of a free
-* software library without restriction. Specifically, if other files
-* instantiate templates or use macros or inline functions from this
-* file, or you compile this file and link it with other files to
-* produce an executable, this file does not by itself cause the
-* resulting executable to be covered by the GNU General Public
-* License. This exception does not however invalidate any other
-* reasons why the executable file might be covered by the GNU Library
-* General Public License.
-* 
-* This library is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-* Lesser General Public License for more details.
-* 
-* You should have received a copy of the GNU Lesser General Public
-* License along with this library; if not, write to the Free Software
-* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+/* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+ 
+ As a special exception, you may use this file as part of a free
+ software library without restriction. Specifically, if other files
+ instantiate templates or use macros or inline functions from this
+ file, or you compile this file and link it with other files to
+ produce an executable, this file does not by itself cause the
+ resulting executable to be covered by the GNU General Public
+ License. This exception does not however invalidate any other
+ reasons why the executable file might be covered by the GNU Library
+ General Public License.
+ 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+ 
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/ChildWindow.h>
@@ -342,7 +341,7 @@ bool WindowManager::contains(const ChildWindow* w, const Ui::PointF& p)
 	return false;
 }
 
-bool WindowManager::detMoving( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev )
+bool WindowManager::isMoving( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev )
 {			
 	if( ev.buttons()[0].state() != DeviceButton::Pressed  || _moving )
 		return false;
@@ -361,7 +360,7 @@ bool WindowManager::detMoving( const ChildWindow* w, const Pt::Hmi::PointerEvent
 }
 
 
-ResizeDirection::Type WindowManager::detSizeDirection( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev )
+ResizeDirection::Type WindowManager::isSizing( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev )
 {
 	ResizeDirection::Type resizeDir = ResizeDirection::No;
 
@@ -499,12 +498,12 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 	{
 		_lastSizePoint = Ui::PointF( mouseEvent.x(), mouseEvent.y() ) ;
 
-		_moving = detMoving( childWindow, mouseEvent );	
+		_moving = isMoving( childWindow, mouseEvent );	
 
     if( _moving )
       return;
 
-		_sizingDirection = detSizeDirection( childWindow, mouseEvent );	
+		_sizingDirection = isSizing( childWindow, mouseEvent );	
 		
     if( _sizingDirection != ResizeDirection::No)
       return;

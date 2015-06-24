@@ -17,7 +17,7 @@
  * 
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  * 
  * You should have received a copy of the GNU Lesser General Public
@@ -36,7 +36,7 @@
 #include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/SizeEvent.h>
 #include <Pt/Hmi/PositionEvent.h>
-#include <Pt/Hmi/WindowProperties.h>
+#include <Pt/Hmi/ResizeDirection.h>
 
 namespace Pt {
 namespace Hmi {
@@ -49,7 +49,7 @@ class Application;
 
 class WindowManager : public Pt::Connectable
 {
- public:
+  public:
     WindowManager(Window& parent);
 
     virtual ~WindowManager();
@@ -73,16 +73,15 @@ class WindowManager : public Pt::Connectable
 			return _windows;
 		}		
 
-protected:
+  protected:
     virtual Ui::PointF renderWindowFrame(const ChildWindow* w);				 
 
-private:
+  private:
 		void invalidate();	
     bool contains(const ChildWindow* w, const Ui::PointF& p);
 
-		ResizeDirection::Type detSizeDirection( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );	
-    bool detMoving ( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );
-
+		ResizeDirection::Type isSizing( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );	
+    bool isMoving ( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );
 
     void doSizing( ChildWindow* w, const PointerEvent& ev );
 		void doMoving( ChildWindow* w, const PointerEvent& ev );

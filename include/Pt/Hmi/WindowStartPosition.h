@@ -1,5 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
- * Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,62 +22,51 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software*/
-#ifndef Pt_Hmi_WindowProperties_H
-#define Pt_Hmi_WindowProperties_H
+#ifndef Pt_Hmi_WindowStartPosition_H
+#define Pt_Hmi_WindowStartPosition_H
+
+#include <string>
 
 namespace Pt{
 namespace Hmi{
 
-namespace ResizeDirection
+class WindowStartPosition
 {
-	enum Type
-	{
-		No,
-		North,
-		NorthEast,
-		East,
-		SouthEast,
-		South,
-		SouthWest,
-		West,
-		NorthWest
-	};		
-}
+  public:
+    enum Type
+    {
+      Manual,        
+      CenterParent,
+    };
 
-namespace WindowState
-{
-	enum Type
-	{
-		Normal,
-		Minimized,
-		Maximazed,
-	};
-}
+    static std::string toString( WindowStartPosition::Type t )
+    {
+      switch(t)
+      {
+      	case Manual:
+          return "Manual";
 
+        case CenterParent:
+          return "CenterParent";
+      }
 
-namespace WindowStartPosition
-{
-  enum Type
-  {
-    Manual,        
-    CenterParent,
-  };
-}
+      throw std::logic_error("unknown window start position");
+      return "Manual";
+    }
 
-namespace WindowBorder
-{
-  enum Type
-  {
-    NoBorder,
-    Fixed,
-    Sizeable,
-    Tool,
-    ToolSizeable,
-    Dialog,
-    DialogSizeable
-  };
-}
+    static WindowStartPosition::Type fromString( const std::string& t )
+    {
+      if( t == "Manual")
+        return Manual;
 
-}}
+      if( t == "CenterParent")
+        return CenterParent;
+
+      throw std::logic_error("unknown window start position");
+      return Manual;
+		} 
+};
+
+}}//namespace
 
 #endif

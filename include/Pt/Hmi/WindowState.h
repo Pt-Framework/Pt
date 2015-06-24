@@ -24,55 +24,58 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include <Pt/Hmi/Dialog.h>
-#include <Pt/Hmi/Application.h>
+#ifndef Pt_Hmi_WindowState_H
+#define Pt_Hmi_WindowState_H
+
+#include <string>
+#include <stdexcept> 
 
 namespace Pt{
 namespace Hmi{
 
-Dialog::Dialog()
-: PT_HMI_INIT_PROPERTY_VALUE(Result, DialogResultType::Undefined)
+class WindowState
 {
-	Name.set("Dialog");
-  ShowInTaskbar = false;
-	ShowSysMenu = true;
-	Border = WindowBorder::Dialog;
-	StartPostion = WindowStartPosition::CenterParent;
-	ShowInTaskbar = true;
-}
+  public:
+	  enum Type
+	  {
+		  Normal,
+		  Minimized,
+		  Maximazed,
+	  };
 
-Dialog::~Dialog()
-{
-}
+    static std::string toString( WindowState::Type t )
+    {
+      switch(t)
+      {
+      	case Normal:
+          return "Normal";
 
+        case Minimized:
+          return "Minimized";
 
-void Dialog::doModal(MainWindow* parent)
-{	
-	setWindowParent(parent);  
-	
-	Visible = true;	
+        case Maximazed:
+          return "Maximazed";
+      }
 
-	//Setup the parent as disabled and TopMost = false.
-	parent->Enabled = false;	
-  parent->invalidate(); //Notify the parent.
-	parent->setTopMost(false);
-	
-	//Setup the dialog as aenabled and top most.	
-	Enabled = true;
-	setTopMost(true);	
+      throw std::logic_error("unknown window state");
+      return "Normal";
+    }
 
-	//Invalidate the dialog
-	invalidate();
+    static WindowState::Type fromString( const std::string& t )
+    {
+      if( t == "Normal")
+        return Normal;
 
-	//Wait of termination of the dialog.
-	while( !isClosed() )
-		Application::instance().nextEvent();
+      if( t == "Minimized")
+        return Minimized;
 
-	//Restore the parent state.
-	parent->setTopMost(true);
-	parent->Enabled = true;	
-	parent->invalidate();	
-	setWindowParent(0);
-}
+      if( t == "Maximazed")
+        return Maximazed;
 
-}}
+      throw std::logic_error("unknown window state");
+      return Normal;
+		} 
+};
+
+}}//namespace
+#endif

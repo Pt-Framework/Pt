@@ -24,30 +24,87 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include <Pt/Hmi/Screen.h>
-#include "ScreenImpl.h"
+#ifndef Pt_Hmi_WindowBorder_H
+#define Pt_Hmi_WindowBorder_H
+
+#include <string>
+#include <stdexcept> 
 
 namespace Pt{
 namespace Hmi{
 
-Screen::Screen()
-: _impl( new ScreenImpl() )
+class WindowBorder
 {
-}
+  public:
+    enum Type
+    {
+      NoBorder,
+      Fixed,
+      Sizeable,
+      Tool,
+      ToolSizeable,
+      Dialog,
+      DialogSizeable
+    };
 
-Screen::~Screen()
-{
-	delete _impl;
-}
+    static std::string toString( WindowBorder::Type t )
+    {
+      switch(t)
+      {
+      	case NoBorder:
+          return "NoBorder";
 
-double Screen::width() const
-{
-	return _impl->width();
-}
-		
-double Screen::height() const
-{
-	return _impl->height();
-}
+        case Fixed:
+          return "Fixed";
 
-}}
+        case Sizeable:
+          return "Sizeable";
+
+        case Tool:
+          return "Tool";
+
+        case ToolSizeable:
+          return "ToolSizeable";
+
+        case Dialog:
+          return "DialogSizeable";
+
+        case DialogSizeable:
+          return "DialogSizeable";
+      }
+
+      throw std::logic_error("unknown window border");
+      return "NoBorder";
+    }
+
+    static WindowBorder::Type fromString( const std::string& t )
+    {
+      if( t == "NoBorder")
+        return NoBorder;
+
+      if( t == "Fixed")
+        return Fixed;
+
+      if( t == "Sizeable")
+        return Sizeable;
+
+      if( t == "Tool")
+        return Tool;
+
+      if( t == "ToolSizeable")
+        return ToolSizeable;
+
+      if( t == "Dialog")
+        return Dialog;
+
+      if( t == "DialogSizeable")
+        return DialogSizeable;
+
+      throw std::logic_error("unknown window border");
+      return NoBorder;
+		} 
+};
+
+}}//namespace
+
+#endif

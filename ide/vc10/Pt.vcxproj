@@ -95,12 +95,15 @@
     <ClInclude Include="..\..\include\Pt\Hmi\PositionEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Property.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PropertyBase.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\ResizeDirection.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Screen.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\SizeEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowBorder.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowProperties.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowStartPosition.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowState.h" />
     <ClInclude Include="..\..\include\Pt\Http\Api.h" />
     <ClInclude Include="..\..\include\Pt\Http\Authenticator.h" />
     <ClInclude Include="..\..\include\Pt\Http\Authorizer.h" />
