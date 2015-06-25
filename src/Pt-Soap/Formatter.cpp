@@ -425,7 +425,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
 
         const Parameter* child = _paramStack.back()->type()->getParameter( se.name().local().narrow() );
         if( ! child)
-            throw SerializationError("invalid comound type");
+            throw SerializationError("invalid compound type");
         
         _paramStack.push_back(child);
         _state = OnStartElement;
