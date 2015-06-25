@@ -151,6 +151,7 @@ class PT_SOAP_API Formatter : public Pt::Formatter
         
         std::basic_ostream<Char>* _os;
         Pt::String _str;
+        std::vector<char> _data;
 
         Pt::varint_t _r1;
         Pt::varint_t _r2;

@@ -280,7 +280,7 @@ void Formatter::onAddLongDouble(const char* name, long double value,const char* 
 void Formatter::onAddBinary(const char* name, const char* type,
                             const char* data, std::size_t length, const char* id)
 {
-  std::vector<char> to( 2 * length );
+  _data.resize( (2*length) + 4 );
             
   Pt::MBState state;
   const char* nextFrom = 0;
@@ -290,14 +290,14 @@ void Formatter::onAddBinary(const char* name, const char* type,
   Pt::Base64Codec b64;
   r = b64.out(state, 
               data, data+length, nextFrom, 
-              &to[0], &to[0] + to.size(), nextTo);
+              &_data[0], &_data[0] + _data.size(), nextTo);
             
   if(r == Pt::Base64Codec::error)
     throw SerializationError("base64 decoding");
 
-  b64.unshift(state, nextTo, &to[0] + to.size(), nextTo);
+  b64.unshift(state, nextTo, &_data[0] + _data.size(), nextTo);
 
-  Pt::String value(&to[0], nextTo - &to[0]);
+  Pt::String value(&_data[0], nextTo - &_data[0]);
   formatValue(*_os, _paramStack.back()->name(), value.c_str(), value.size() );
 }
 
@@ -481,7 +481,7 @@ bool Formatter::advance(const Pt::Xml::Node& node)
         else if(typeId == Type::Base64)
         {
             std::string from = c.content().narrow();
-            std::vector<char> to( from.size() );
+            _data.resize( from.size() );
             
             Pt::MBState state;
             const char* nextFrom = 0;
@@ -491,12 +491,12 @@ bool Formatter::advance(const Pt::Xml::Node& node)
             Pt::Base64Codec b64;
             r = b64.in(state, 
                        from.c_str(), from.c_str() + from.size(), nextFrom, 
-                       &to[0], &to[0] + to.size(), nextTo);
+                       &_data[0], &_data[0] + _data.size(), nextTo);
             
             if(r != Pt::Base64Codec::ok)
               throw SerializationError("invalid base64 decoding");
 
-            _composer->setBinary( &to[0], nextTo - &to[0] );
+            _composer->setBinary( &_data[0], nextTo - &_data[0] );
         }
 
         _state = OnCharacters;
