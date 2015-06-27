@@ -7,7 +7,7 @@ if exist deploy\linux-gcc-arm-debug (
 
 call:Build -sCONFIG=linux-gcc-arm-debug --debug -sTARGET_OS=linux -sTARGET_OSPLAT=arm ^
 -sTOOLSET=gcc -sTOOLSET_ROOT="%LINARO_ARM_GNUABIHF_2013_11_R1%\bin\arm-linux-gnueabihf-" ^
---with-openssl -sSYSLIBS=-lrt --with-qt5 -sQTDIR=C:\Projekte\Extern\Qt\5.2.1\linux-arm-gnuabihf
+--with-openssl -sSYSLIBS=-lrt --with-qt5 
 
 if %errorlevel% neq 0 (
     echo build failed
@@ -21,7 +21,7 @@ if exist deploy\linux-gcc-arm-release (
 
 call:Build -sCONFIG=linux-gcc-arm-release --debug --optimize -sTARGET_OS=linux -sTARGET_OSPLAT=arm ^
 -sTOOLSET=gcc -sTOOLSET_ROOT="%LINARO_ARM_GNUABIHF_2013_11_R1%\bin\arm-linux-gnueabihf-" ^
---with-openssl -sSYSLIBS=-lrt --with-posix-rt --with-qt5 -sQTDIR=C:\Projekte\Extern\Qt\5.2.1\linux-arm-gnuabihf
+--with-openssl -sSYSLIBS=-lrt --with-posix-rt --with-qt5
 
 if %errorlevel% neq 0 (
     echo build failed
