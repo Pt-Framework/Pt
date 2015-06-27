@@ -191,12 +191,14 @@ bool Timer::update(const Timespan& now)
         {
             Pt::int64_t maxTime = std::numeric_limits<Pt::int64_t>::max();
             _finished = Timespan(maxTime);
-            PT_LOG_DEBUG("timer truncated to: " << _finished.toMSecs());
+            PT_LOG_WARN("timer truncated to: " << _finished.toMSecs());
         }
         else
         {
-            Timespan remaining( Pt::int64_t(_interval) * 1000 );
-            _finished += remaining;
+            Pt::int64_t intervalUSecs = Pt::int64_t(_interval) * 1000;
+            std::size_t skipped = (now - _finished).toUSecs() / intervalUSecs;
+            intervalUSecs += (skipped * intervalUSecs);
+            _finished += Timespan(intervalUSecs);
             PT_LOG_DEBUG("timer set to: " << _finished.toMSecs());
         }
 

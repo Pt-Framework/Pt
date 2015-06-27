@@ -226,6 +226,20 @@ inline Timespan operator -(const Timespan& a, const Timespan& b)
 { return Timespan(a.toUSecs() - b.toUSecs()); }
 
 
+inline Timespan& Timespan::operator += (const Timespan& d)
+{
+    _span += d._span;
+    return *this;
+}
+
+
+inline Timespan& Timespan::operator -= (const Timespan& d)
+{
+    _span -= d._span;
+    return *this;
+}
+
+
 inline int Timespan::days() const
 {
     return int(_span/Days);
@@ -330,19 +344,6 @@ inline bool Timespan::isNull() const
 inline void Timespan::setNull()
 {
     _span = 0;
-}
-
-inline Timespan& Timespan::operator += (const Timespan& d)
-{
-    _span += d._span;
-    return *this;
-}
-
-
-inline Timespan& Timespan::operator -= (const Timespan& d)
-{
-    _span -= d._span;
-    return *this;
 }
 
 } // namespace Pt
