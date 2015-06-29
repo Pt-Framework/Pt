@@ -72,10 +72,12 @@ call jam -q -j4
 
 if %errorlevel% neq 0 (
 
+    echo PARALLEL BUILD FAILED, retry one CPU.
+    set ERRORLEVEL=0
     call jam -q
 
     if %errorlevel% neq 0 (
-        echo PARALLEL BUILD FAILED, retry one CPU.
+        echo ERROR: build failed, giving up.
         goto :eof
     ) 
 ) 
