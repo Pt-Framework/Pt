@@ -1083,6 +1083,7 @@ void Connection::onTimeout()
 {
     PT_LOG_TRACE("Connection::onTimeout");
     _onTimeout = true;
+    _timer.stop();
 
     onInput();
 }

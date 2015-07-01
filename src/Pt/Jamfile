@@ -30,7 +30,6 @@ SharedLibrary Pt : Atomicity.cpp
                    Utf8Codec.cpp
 				   Utf16Codec.cpp
 				   Utf32Codec.cpp
-                   WindowsCodec.cpp
                    ;
 
 MakeLocate Pt : $(PT_OUTPUT_TARGET) ;
