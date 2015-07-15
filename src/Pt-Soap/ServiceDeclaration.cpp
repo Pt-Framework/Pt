@@ -314,7 +314,7 @@ void ServiceDeclaration::createComplexTypeList(ComplexTypesMap& complexTypes, co
 {
     ComplexTypesMap::iterator it = complexTypes.find( type->name() );
     
-    if( it != complexTypes.end())
+    if( it != complexTypes.end() )
         return;
         
     complexTypes[type->name()] = type;
@@ -360,14 +360,14 @@ void ServiceDeclaration::toWsdl( std::ostream& os) const
         {
             const Parameter& param = operation->parameters()[j];                        
                                                 
-            if(param.type()->isSimple())
+            if( param.type()->isSimple() )
             {
-                os << "<s:element minOccurs=\"0\" maxOccurs=\"1\" name=\""
+                os << "<s:element minOccurs=\"1\" maxOccurs=\"1\" name=\""
                    << param.name() <<"\" type=\"s:" << param.type()->name() << "\" />"<<std::endl;
             }
             else
             {
-                os << "<s:element minOccurs=\"0\" maxOccurs=\"1\" name=\"" 
+                os << "<s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"" 
                    << param.name() << "\" type=\"tns:" << param.type()->name() << "\" />"<<std::endl;
                 
                 createComplexTypeList(complexTypes, param.type());
@@ -386,14 +386,14 @@ void ServiceDeclaration::toWsdl( std::ostream& os) const
         {
           os<<"<s:sequence>"<<std::endl;                    
 
-              if(param->type()->isSimple())
+              if( param->type()->isSimple() )
               {
-                  os <<"<s:element minOccurs=\"0\" maxOccurs=\"1\" name=\"" << param->name() 
+                  os <<"<s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"" << param->name() 
                      << "\" type=\"s:"<< param->type()->name()<<"\" />" << std::endl;
               }
               else
               {
-                  os <<"<s:element minOccurs=\"0\" maxOccurs=\"1\" name=\"" << param->name() 
+                  os <<"<s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"" << param->name() 
                       << "\" type=\"tns:" << param->type()->name() << "\" />" << std::endl;
                   
                   createComplexTypeList(complexTypes, param->type());
@@ -417,12 +417,23 @@ void ServiceDeclaration::toWsdl( std::ostream& os) const
 
         for(std::size_t i = 0; i < type->size(); ++i)
         {
-            if(type->getParameter(i)->type()->isSimple())
-                os << "<s:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\"" << type->getParameter(i)->name()
-                   << "\" type=\"s:"<<type->getParameter(i)->type()->name() << "\" />"<<std::endl;
+            const Parameter* member = type->getParameter(i);           
+
+            if( type->typeId() == Type::Array )
+            {
+                os << "<s:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\"" << member->name()
+                   << "\" type=\"s:"<< member->type()->name() << "\" />"<<std::endl;
+            }
+            else if( member->type()->isSimple() )
+            {
+                os << "<s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"" << member->name()
+                   << "\" type=\"s:"<< member->type()->name() << "\" />"<<std::endl;
+            }
             else
-                os << "<s:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\"" << type->getParameter(i)->name()
-                    << "\" type=\"tns:"<<type->getParameter(i)->type()->name() <<"\" />"<<std::endl;
+            {
+                os << "<s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"" << member->name()
+                    << "\" type=\"tns:"<< member->type()->name() <<"\" />"<<std::endl;
+            }
         }
 
         os<<"</s:sequence>"<<std::endl;
@@ -441,7 +452,7 @@ void ServiceDeclaration::toWsdl( std::ostream& os) const
         os << "    <wsdl:part name=\"parameters\" element=\"tns:" << operation->inputName().narrow()<<"\"/>" << std::endl;
         os << "</wsdl:message>" << std::endl;
 
-        //Responce message
+        //Response message
         os << "<wsdl:message name=\"" << operation->outputName().narrow() << "\">" << std::endl;
         os << "    <wsdl:part name=\"parameters\" element=\"tns:" << operation->outputName().narrow() << "\"/>" << std::endl;
         os << "</wsdl:message>" << std::endl;
