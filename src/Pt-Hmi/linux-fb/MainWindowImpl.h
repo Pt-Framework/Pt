@@ -103,7 +103,7 @@ class MainWindowImpl  : public ChildWindow
 	
     virtual PaintSurface& windowSurface()
     {
-      return _windowSurface; 
+      return this->windowSurface(); 
     }
 
     void render();
@@ -119,7 +119,6 @@ class MainWindowImpl  : public ChildWindow
 	private:    
 		Window* _apiWindow;
 		Pt::Hmi::Application& _app;
-    PaintSurface _windowSurface;
     bool _forceTopMost;
 };
 
