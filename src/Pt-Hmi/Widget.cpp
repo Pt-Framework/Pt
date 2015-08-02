@@ -139,7 +139,6 @@ void Widget::updatePosAndSize(Widget& w, const Ui::SizeF& s, const Ui::PointF& p
 {       
   w.Position.set(p);
   w.Size.set(s);      	
-	w._isValid = false;
   _isValid = false;
 }
 
@@ -772,6 +771,8 @@ void Widget::setCaption( const std::string& c )
 void Widget::setSize(const Ui::SizeF& size)
 {
 	_size = size;			
+  
+	_isValid = false;
 
 	PaintSurface* buffer = widgetBuffer();
   if( buffer )

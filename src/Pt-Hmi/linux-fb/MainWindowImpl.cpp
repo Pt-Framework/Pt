@@ -54,9 +54,6 @@ MainWindowImpl::MainWindowImpl(MainWindow* window)
 { 	
   // route all events through MainWindow back to this impl
   eventReceived() += Pt::slot( _apiWindow->eventReceived() );
-
-
-  Focused += Pt::slot(*this, &MainWindowImpl::onFocusChanged);
 }
 
 
@@ -65,12 +62,6 @@ MainWindowImpl::~MainWindowImpl()
 
 }
 
-
-void MainWindowImpl::onFocusChanged(bool focused)
-{ 
-  if( ! focused && _forceTopMost )
-    _apiWindow->windowManager().activate(this);
-}
 
 	
 void MainWindowImpl::onInvalidate()
