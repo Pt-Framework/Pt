@@ -53,6 +53,7 @@ MainWindowImpl::MainWindowImpl(MainWindow* window)
 , _app(Application::instance() )
 , _forceTopMost(false)
 { 	
+	// route all events through MainWindow back to this impl
   eventReceived() += Pt::slot( _apiWindow->eventReceived() );
 
 	Focused += Pt::slot(*this, &MainWindowImpl::onFocusChanged);

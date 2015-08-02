@@ -69,6 +69,12 @@ Window::~Window()
 }
 
 
+PaintSurface* Window::widgetBuffer()
+{
+	return &_surface;
+}
+
+
 void Window::onInvalidate()
 {	  
   render(windowSurface());		

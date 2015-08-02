@@ -65,9 +65,10 @@ void Label::recalcNewSize()
   else
 	  caption = Caption.get().c_str();
 
-  widgetSurface().painter().setFont(Font.get());
+	PaintSurface surface;
+  surface.painter().setFont(Font.get());
 
-  const Ui::FontMetrics metric = widgetSurface().painter().fontMetrics(caption.c_str());
+  const Ui::FontMetrics metric = surface.painter().fontMetrics(caption.c_str());
 
   Size = Ui::SizeF( metric.width() + Margin.get().left() + Margin.get().right(), metric.height() + Margin.get().top() +  Margin.get().bottom() );  
   invalidate();

@@ -204,7 +204,6 @@ class PT_HMI_API Widget : public Pt::Connectable
 		ValueProperty<FlowLayout::Type>					FlowLayout;			
 		ValueProperty<std::string>							ShortcutKey;
 		ValueProperty<FlowLayoutDirection::Type> FlowDirection;				
-    ValueProperty<bool>											 DoubleBuffering;
 
 		Signal<bool> Focused;
 
@@ -228,6 +227,9 @@ class PT_HMI_API Widget : public Pt::Connectable
 	protected:
 		virtual void onInvalidate();
 		virtual void onRender(PaintSurface& paintSurface);
+		
+		virtual PaintSurface* widgetBuffer();
+
 		virtual void onLayout();
 
 		virtual void onPointerInput(const PointerEvent& ev);		
@@ -235,11 +237,9 @@ class PT_HMI_API Widget : public Pt::Connectable
 
     virtual void onPointerEnter();		
 		
-		
 		virtual void onMnemonic();
 		virtual void onActionKey(KeyEvent::KeyState state);
 		virtual void onShortcutKey(KeyEvent::KeyState state);	  
-		virtual void onDoubleBufferingChanged(const bool& b);
 
 		virtual void setPosition(const Ui::PointF& pos)
 		{
@@ -268,11 +268,6 @@ class PT_HMI_API Widget : public Pt::Connectable
 			return _caption;
 		}
 
-    PaintSurface& widgetSurface()
-    {
-      return _widgetSurface;
-    }
-
 	private:			  
 		bool focusNextChild(int index);
 		bool focusPrevChild(int index);
@@ -287,11 +282,10 @@ class PT_HMI_API Widget : public Pt::Connectable
 		Widget*										 _mnemonicWidget;	
 		std::string								 _mnemonicKey;
 		bool											 _containPointer;	
-		Ui::SizeF							_size;
-		Ui::PointF             _position;
+		Ui::SizeF									_size;
+		Ui::PointF                _position;
 		bool											  _isFocused;
 		std::string									_caption;		
-    PaintSurface                _widgetSurface;
     bool                        _isValid;
 };
 

@@ -157,8 +157,7 @@ void WindowManager::render()
 
 	for( size_t i = 0; i < _windows.size(); ++i )
 	{
-		ChildWindow* w = _windows[i];
-				
+		ChildWindow* w = _windows[i];				
 		Ui::PointF clientPos = renderWindowFrame(w);		
 		painter.drawSurface( clientPos, w->windowSurface() );
 	}

@@ -59,7 +59,6 @@ Widget::Widget()
 , PT_HMI_INIT_PROPERTY_VALUE(FlowLayout, Hmi::FlowLayout::None)
 , PT_HMI_INIT_PROPERTY_VALUE(FlowDirection, Hmi::FlowLayoutDirection::LeftToRightTopToBottom)
 , PT_HMI_INIT_PROPERTY_VALUE(ShortcutKey, "")
-, PT_HMI_INIT_PROPERTY_VALUE(DoubleBuffering,false)
 , _parent(0)
 , _containPointer(false)
 , _size(200,200)
@@ -68,7 +67,6 @@ Widget::Widget()
 , _isValid(false)
 {	
 	bindMnemonicToWidget( *this );		
-  DoubleBuffering.changed() += Pt::slot(*this, &Widget::onDoubleBufferingChanged);
 }
 
 
@@ -140,7 +138,8 @@ Ui::PointF Widget::fromClient( const Ui::PointF& localPoint)
 void Widget::updatePosAndSize(Widget& w, const Ui::SizeF& s, const Ui::PointF& p)
 {       
   w.Position.set(p);
-  w.Size.set(s);      
+  w.Size.set(s);      	
+	w._isValid = false;
   _isValid = false;
 }
 
@@ -300,31 +299,62 @@ void Widget::render(PaintSurface& surface)
   //Layout children
   onLayout();	
 
-  //Calculate Origin
-  const Ui::PointF pos = parent() == 0 ? Ui::PointF(0,0) : Position.get() ;
-  const Ui::PointF globPoint = fromClient( pos );
-  const Ui::PointF drawPos(globPoint.x() + Margin.get().left(), globPoint.y() + Margin.get().top());
-  const Ui::SizeF  drawSize( Size.get().width() - Margin.get().left() - Margin.get().right(), Size.get().height() - Margin.get().top() - Margin.get().bottom());
-  
-  surface.setOrigin(drawPos, drawSize);
-  
-  if( _isValid  && DoubleBuffering.get() )  
-  {       
-    surface.painter().drawSurface(Ui::PointF(0,0), _widgetSurface);
-    return;
-  }
+	PaintSurface* buffer = this->widgetBuffer();  
 
-  //Render       
-	onRender(surface);	
+  if( buffer &&  _isValid )
+	{
+    surface.painter().drawSurface(Ui::PointF(0,0), *buffer);		
+		std::clog<<"Blit: " << this->Name.get() << "  " << this->Caption.get() << std::endl;
+		return;
+	}
+	
+	//Render       
+  onRender(surface);	
   
-  //Render children
-  for( size_t i = 0; i < _children.size(); ++i)
-    _children[i]->render(surface);   
+	const Pt::Ui::PointF orgPos = surface.originPos();
+	const Pt::Ui::SizeF orgSize = surface.originSize();
 
-  if( DoubleBuffering.get() )
-    _widgetSurface.painter().drawSurface(Ui::PointF(-globPoint.x(),-globPoint.y()), surface);
+	//Render children
+	for( size_t i = 0; i < _children.size(); ++i)
+	{
+		Widget* child = _children[i];
+	
+	 //Calculate Origin		
+	  const Ui::PointF childGlobPoint = child->fromClient( child->Position.get() );
+		const Ui::PointF drawPos( childGlobPoint.x() + child->Margin.get().left(), childGlobPoint.y() + child->Margin.get().top() );
+		const Ui::SizeF  drawSize( child->Size.get().width() - child->Margin.get().left() - child->Margin.get().right(), 
+		                           child->Size.get().height() - child->Margin.get().top() - child->Margin.get().bottom());
   
-  _isValid = true;
+		surface.setOrigin(drawPos, drawSize);
+		
+		_children[i]->render(surface);   
+	}
+	
+
+	if( buffer )
+	{
+	  const Ui::PointF pos = parent() == 0 ? Ui::PointF(0,0) : Position.get() ;
+		const Ui::PointF globPoint = fromClient( pos );
+		const Ui::PointF drawPos( globPoint.x() + Margin.get().left(), globPoint.y() + Margin.get().top() );
+		const Ui::SizeF  drawSize( Size.get().width() - Margin.get().left() - Margin.get().right(), 
+		                           Size.get().height() - Margin.get().top() - Margin.get().bottom());
+  
+		surface.setOrigin(drawPos, drawSize);
+
+		buffer->painter().drawSurface(Ui::PointF(-globPoint.x(), -globPoint.y()), surface);
+	}
+  
+	surface.setOrigin(orgPos, orgSize); 
+
+
+	_isValid = true;
+
+}
+
+
+PaintSurface* Widget::widgetBuffer()
+{
+	return 0;
 }
 
 
@@ -740,24 +770,13 @@ void Widget::setCaption( const std::string& c )
 }
 
 
-void Widget::onDoubleBufferingChanged(const bool& b)
-{
-  if( b )
-    _widgetSurface.resize(_size);
-  else
-    _widgetSurface.resize(Ui::SizeF(1,1));
-
-  invalidate();
-}
-
 void Widget::setSize(const Ui::SizeF& size)
 {
 	_size = size;			
 
-  if( DoubleBuffering.get() )
-     _widgetSurface.resize(_size);
-  else
-    _widgetSurface.resize(Ui::SizeF(1,1));    
+	PaintSurface* buffer = widgetBuffer();
+  if( buffer )
+     buffer->resize(_size);    
 }
 
 

@@ -41,7 +41,7 @@ namespace Hmi {
 
 class ChildWindow;
 
-class PT_HMI_API Window  : public Widget
+class PT_HMI_API Window : public Widget
 {
 	public:    		
     virtual ~Window();    
@@ -97,6 +97,7 @@ class PT_HMI_API Window  : public Widget
 		Window(Window* parent = 0);    
 
 	protected:		
+		virtual PaintSurface* widgetBuffer();
 		virtual void onKeyInput(const KeyEvent& ev);			
     virtual void onInvalidate();  			
 		virtual void setClosed( bool close );				
@@ -113,6 +114,7 @@ class PT_HMI_API Window  : public Widget
 		WindowManager _windowManager;		
 		bool	_isClosed;
     Pt::Signal<const Pt::Event&> _eventReceived;
+		PaintSurface _surface;
 };
 
 }}

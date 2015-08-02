@@ -91,7 +91,6 @@ void MainWindow::init()
 
   //Panel
   
-  _mainPanel.DoubleBuffering = true;
 	_mainPanel.Size = Ui::SizeF(700,480);
 	_mainPanel.Position = Ui::PointF(40,40);
 	_mainPanel.PanelBorderWidth = 3;
@@ -170,6 +169,7 @@ void MainWindow::init()
 
 	_childWindow2.Visible = true;
   _childWindow2.invalidate();  
+
 	BackgroundImage = _drawBuffer;
 }
 
