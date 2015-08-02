@@ -65,7 +65,7 @@ MainWindowImpl::~MainWindowImpl()
 
 	
 void MainWindowImpl::onInvalidate()
-{	
+{		
 	ChildWindow::onInvalidate();
 	_apiWindow->invalidate();
 }

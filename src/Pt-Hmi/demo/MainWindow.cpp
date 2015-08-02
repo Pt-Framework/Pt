@@ -159,16 +159,18 @@ void MainWindow::init()
 	_childWindow2.Position = Ui::PointF(80,80);
 	_childWindow2.Size = Ui::SizeF(800,600);
 	
-  _childWindow2.addChild(&_mainPanel);
+//  _childWindow2.addChild(&_mainPanel);
 
-	addChildWindow(_childWindow1);
-	addChildWindow(_childWindow2);
+//	addChildWindow(_childWindow1);
+//	addChildWindow(_childWindow2);
 	
 	_childWindow1.Visible = true;
   _childWindow1.invalidate();
 
 	_childWindow2.Visible = true;
   _childWindow2.invalidate();  
+
+	addChild(&_mainPanel);
 
 	BackgroundImage = _drawBuffer;
 }

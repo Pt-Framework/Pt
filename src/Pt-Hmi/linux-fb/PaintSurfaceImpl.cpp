@@ -36,6 +36,8 @@ namespace Hmi{
 
 PaintSurfaceImpl::PaintSurfaceImpl()
 : _image(100,100)
+, _originPos(0,0)
+, _originSize(100,100)
 {	
 }
 
@@ -56,7 +58,10 @@ void PaintSurfaceImpl::resize(const Ui::SizeF& size)
 		_image.resize(size.width(), size.height(), Ui::ImageFormat::rgb565(), stride );
 	else if( depth == 32 )
 		_image.resize(size.width(), size.height(), Ui::ImageFormat::argb8888(), stride);
+
+	_originSize  = size;
 }
+
 
 Ui::SizeF PaintSurfaceImpl::size() const
 {
