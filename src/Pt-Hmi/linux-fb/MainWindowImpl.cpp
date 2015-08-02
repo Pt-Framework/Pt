@@ -109,25 +109,29 @@ void MainWindowImpl::onRender(PaintSurface& paintSurface)
 
 void MainWindowImpl::onSizeEvent(const SizeEvent& ev)
 {
+	ChildWindow::onSizeEvent( ev );
 	_apiWindow->eventReceived().send( ev );
 }
 
 
 void MainWindowImpl::onPositionEvent( const PositionEvent& ev)
 {
+	ChildWindow::onPositionEvent( ev );
 	_apiWindow->eventReceived().send( ev );
 }
 
 
 void MainWindowImpl::onFocusEvent( const FocusEvent& ev)
 {
+	ChildWindow::onFocusEvent( ev );
 	_apiWindow->eventReceived().send( ev );
 }
 
 
 void MainWindowImpl::onCloseEvent(const CloseEvent& ev)
 {
- _apiWindow->eventReceived().send( ev );
+	ChildWindow::onCloseEvent( ev );
+  _apiWindow->eventReceived().send( ev );
 }
 
 
@@ -153,7 +157,6 @@ void MainWindowImpl::render()
 {
 	PT_LOG_TRACE("MainWindowImpl::render");
 
-	Window::render( windowSurface() );
 }
 
 

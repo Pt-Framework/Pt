@@ -51,9 +51,9 @@ Window::Window(Window* parent)
 , _isClosed(true)
 {
 
-  Visible = false;
-  Name = std::string("Window");
-  AcceptFocus = false ;	
+	Visible = false;
+	Name = std::string("Window");
+	AcceptFocus = false ;	
 
 	eventReceived() += Pt::slot(*this, &Window::onSizeEvent);
 	eventReceived() += Pt::slot(*this, &Window::onPositionEvent);
