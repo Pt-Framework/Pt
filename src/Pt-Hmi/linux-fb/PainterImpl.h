@@ -102,7 +102,13 @@ class PainterImpl
 	  void setSurface(PaintSurface& s);
 	
   private:
+        Ui::PointF fromOrigin(const Ui::PointF& p);
+
+        Ui::RectF fromOrigin(const Ui::RectF& p);
+
+  private:
 	  Ui::ImagePainter _painter;
+	  PaintSurfaceImpl*  _surface;	
 };
 
 }}

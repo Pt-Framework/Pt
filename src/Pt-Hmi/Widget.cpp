@@ -318,12 +318,12 @@ void Widget::render(PaintSurface& surface)
 		Widget* child = _children[i];
 	
 	 //Calculate Origin		
-	  const Ui::PointF childGlobPoint = child->fromClient( child->Position.get() );
+ 	  const Ui::PointF childGlobPoint = child->fromClient( child->Position.get() );
 		const Ui::PointF drawPos( childGlobPoint.x() + child->Margin.get().left(), childGlobPoint.y() + child->Margin.get().top() );
 		const Ui::SizeF  drawSize( child->Size.get().width() - child->Margin.get().left() - child->Margin.get().right(), 
 		                           child->Size.get().height() - child->Margin.get().top() - child->Margin.get().bottom());
   
-		surface.setOrigin(drawPos, drawSize);
+		surface.setOrigin(drawPos, drawSize);		
 		
 		_children[i]->render(surface);   
 	}

@@ -99,7 +99,7 @@ class PT_HMI_API Window : public Widget
 	protected:		
 		virtual PaintSurface* widgetBuffer()
 		{
-			return &windowSurface();
+			return 	&windowSurface();
 		}
 
 		virtual void onKeyInput(const KeyEvent& ev);			

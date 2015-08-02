@@ -46,6 +46,7 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
 {
 }
 
+
 void PaintSurfaceImpl::resize(const Ui::SizeF& size)
 {
   const fb_var_screeninfo& screenInfo = Application::instance().impl()->screenInfo();

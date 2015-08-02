@@ -36,6 +36,7 @@ namespace Hmi {
 
 PainterImpl::PainterImpl(PaintSurfaceImpl* surface)
 : _painter(surface->image())
+, _surface(surface)
 {	
 }
 
@@ -95,39 +96,39 @@ int PainterImpl::depth() const
 
 void PainterImpl::drawPixel(const Ui::PointF& to)
 {
-	_painter.drawPixel(to);
+	_painter.drawPixel(fromOrigin(to));
 }
 
 void PainterImpl::drawLine(const Ui::PointF& from, const Ui::PointF& to)
 {
-	_painter.drawLine(from, to);
+	_painter.drawLine(fromOrigin(from), fromOrigin(to));
 }
 
 void PainterImpl::drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline )
 {
 	Ui::FontMetrics metrics =  fontMetrics(text);
-	_painter.drawText(to, text, outline);
+	_painter.drawText(fromOrigin(to), text, outline);
 }
 
 void PainterImpl::drawText(const Ui::PointF& to, const Pt::String& text)
 {	
 	Ui::FontMetrics metrics =  fontMetrics(text);	
-	_painter.drawText(to, text);
+	_painter.drawText(fromOrigin(to), text);
 }
 
 void PainterImpl::drawRect(const Ui::RectF& rectangle)
 {
-	_painter.drawRect(rectangle);
+	_painter.drawRect(fromOrigin(rectangle));
 }
 
 void PainterImpl::fillRect(const Ui::RectF& rectangle)
 {
-	_painter.fillRect(rectangle);
+	_painter.fillRect(fromOrigin(rectangle));
 }
 
 void PainterImpl::drawEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size)
 {
-	_painter.drawEllipse(topLeft, size);
+	_painter.drawEllipse(fromOrigin(topLeft), size);
 }
 
 void PainterImpl::fillEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size)
@@ -137,32 +138,43 @@ void PainterImpl::fillEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size)
 
 void PainterImpl::drawPolyline(const Ui::PointF* points, const size_t pointCount)
 {
-	_painter.drawPolyline(points, pointCount);		
+	std::vector<Ui::PointF> convPoints(points, points + pointCount);
+
+	for( size_t i = 0; i < convPoints.size(); ++i)
+		convPoints[i] = fromOrigin(points[i]);
+
+	_painter.drawPolyline(&convPoints[0], pointCount);		
 }
+
 
 void PainterImpl::fillPolygon(const Ui::PointF* points, const size_t pointCount)
 {
-	_painter.fillPolygon(points,pointCount);
+	std::vector<Ui::PointF> convPoints(points, points + pointCount);
+
+	for( size_t i = 0; i < convPoints.size(); ++i)
+		convPoints[i] = fromOrigin(points[i] );
+
+	_painter.fillPolygon(&convPoints[0],pointCount);
 }
 
 void PainterImpl::drawSurface(const Ui::PointF& to, PaintSurface& pm, const Ui::Region& pmRegion)
 {
-	_painter.drawImage(to, pm.impl()->image(), pmRegion);
+	_painter.drawImage(fromOrigin(to), pm.impl()->image(), pmRegion);
 }
 
 void PainterImpl::drawSurface(const Ui::PointF& to, PaintSurface& pm)
 {
-	_painter.drawImage(to, pm.impl()->image());
+	_painter.drawImage(fromOrigin(to), pm.impl()->image());
 }
 		
 void PainterImpl::drawImage(const Ui::PointF& to, const Ui::Image& image)
 {
-	_painter.drawImage(to, image);
+	_painter.drawImage(fromOrigin(to), image);
 }
 
 void PainterImpl::drawImage(const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion)
 {
-	_painter.drawImage(to, image, imageRegion);
+	_painter.drawImage(fromOrigin(to), image, imageRegion);
 }
 
 void PainterImpl::addFontName(const std::string& fontName)
@@ -170,9 +182,20 @@ void PainterImpl::addFontName(const std::string& fontName)
 	
 }
 
+Ui::PointF PainterImpl::fromOrigin(const Ui::PointF& p)
+{
+  return Ui::PointF(_surface->originPos().x() + p.x(), _surface->originPos().y() + p.y());
+}
+
+
+Ui::RectF PainterImpl::fromOrigin(const Ui::RectF& p)
+{
+  return Ui::RectF( Ui::PointF(_surface->originPos().x() + p.left(), _surface->originPos().y() + p.top()), p.size() );
+}
+
 void PainterImpl::setSurface(PaintSurface& s)
 {
-
+	_surface = s.impl();
 }
 
 	
