@@ -91,8 +91,9 @@ void MainWindowImpl::onInvalidate()
 {
 	PT_LOG_TRACE("MainWindowImpl::onInvalidate");
 
-  ChildWindow::onInvalidate();
-  _apiWindow->invalidate();
+	ChildWindow::onInvalidate();
+
+	_apiWindow->invalidate();
 }
 
 
@@ -101,8 +102,32 @@ void MainWindowImpl::onRender(PaintSurface& paintSurface)
 	PT_LOG_TRACE("MainWindowImpl::onRender");
 
   ChildWindow::onRender(paintSurface);
+
   _apiWindow->render( paintSurface );
   _windowManager.render();
+}
+
+void MainWindowImpl::onSizeEvent(const SizeEvent& ev)
+{
+	_apiWindow->eventReceived().send( ev );
+}
+
+
+void MainWindowImpl::onPositionEvent( const PositionEvent& ev)
+{
+	_apiWindow->eventReceived().send( ev );
+}
+
+
+void MainWindowImpl::onFocusEvent( const FocusEvent& ev)
+{
+	_apiWindow->eventReceived().send( ev );
+}
+
+
+void MainWindowImpl::onCloseEvent(const CloseEvent& ev)
+{
+ _apiWindow->eventReceived().send( ev );
 }
 
 
@@ -128,7 +153,7 @@ void MainWindowImpl::render()
 {
 	PT_LOG_TRACE("MainWindowImpl::render");
 
-//	onRender( windowSurface() );
+	Window::render( windowSurface() );
 }
 
 
@@ -156,16 +181,16 @@ void MainWindowImpl::setWindowPos(const Ui::PointF& p)
     return;
 	
 	Position = p;		
-    render();	
+  render();	
 }
 
 
 void MainWindowImpl::setWindowSize( const  Ui::SizeF& size )
 {   
 	if( Size.get() == size )
-    	return;
+    return;
 
-	Size = size ;
+  Size = size;
 }
 
 

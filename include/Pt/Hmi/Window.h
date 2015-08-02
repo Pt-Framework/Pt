@@ -101,12 +101,10 @@ class PT_HMI_API Window  : public Widget
     virtual void onInvalidate();  			
 		virtual void setClosed( bool close );				
     virtual void setSize(const Ui::SizeF& size);
-
-	protected:
-		void onSizeEvent(const SizeEvent& ev);
-		void onPositionEvent( const PositionEvent& ev);
-		void onFocusEvent( const FocusEvent& ev);
-		void onCloseEvent(const CloseEvent& ev);
+		virtual void onSizeEvent(const SizeEvent& ev);
+		virtual void onPositionEvent( const PositionEvent& ev);
+		virtual void onFocusEvent( const FocusEvent& ev);
+		virtual void onCloseEvent(const CloseEvent& ev);
 
 	protected:
 		Window*				_winParent;
