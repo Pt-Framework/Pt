@@ -111,14 +111,8 @@ class MainWindowImpl  : public ChildWindow
 	protected:
 		virtual void onInvalidate();
 	  virtual void onRender(PaintSurface& paintSurface);
-		virtual void onPointerInput(const PointerEvent& ev);				
-		virtual void onKeyInput(const KeyEvent& ev);
-		virtual void onSizeEvent(const SizeEvent& ev);
-		virtual void onPositionEvent( const PositionEvent& ev);
-		virtual void onFocusEvent( const FocusEvent& ev);
-		virtual void onCloseEvent(const CloseEvent& ev);
 
-    
+	protected:   
     void onFocusChanged(bool focused);
 
 	private:    

@@ -28,6 +28,7 @@
 #include "PaintSurfaceImpl.h"
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
+#include <Pt/Hmi/MainWindow.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/System/Logger.h>
 #include <stdio.h>
@@ -52,7 +53,9 @@ MainWindowImpl::MainWindowImpl(MainWindow* window)
 , _app(Application::instance() )
 , _forceTopMost(false)
 { 	
-  Focused += Pt::slot(*this, &MainWindowImpl::onFocusChanged);
+  eventReceived() += Pt::slot( _apiWindow->eventReceived() );
+
+	Focused += Pt::slot(*this, &MainWindowImpl::onFocusChanged);
 }
 
 
@@ -68,22 +71,6 @@ void MainWindowImpl::onFocusChanged(bool focused)
 
   if( ! focused && _forceTopMost )
     _windowManager.activate(this);
-}
-
-
-void MainWindowImpl::onPointerInput( const PointerEvent& ev )
-{
-	PT_LOG_TRACE("MainWindowImpl::onPointerInput");
-
-  _apiWindow->eventReceived().send(ev);
-}
-
-
-void MainWindowImpl::onKeyInput( const KeyEvent& ev )
-{
-	PT_LOG_TRACE("MainWindowImpl::onKeyInput");
-
-  _apiWindow->eventReceived().send( ev );
 }
 
 	
@@ -105,33 +92,6 @@ void MainWindowImpl::onRender(PaintSurface& paintSurface)
 
   _apiWindow->render( paintSurface );
   _windowManager.render();
-}
-
-void MainWindowImpl::onSizeEvent(const SizeEvent& ev)
-{
-	ChildWindow::onSizeEvent( ev );
-	_apiWindow->eventReceived().send( ev );
-}
-
-
-void MainWindowImpl::onPositionEvent( const PositionEvent& ev)
-{
-	ChildWindow::onPositionEvent( ev );
-	_apiWindow->eventReceived().send( ev );
-}
-
-
-void MainWindowImpl::onFocusEvent( const FocusEvent& ev)
-{
-	ChildWindow::onFocusEvent( ev );
-	_apiWindow->eventReceived().send( ev );
-}
-
-
-void MainWindowImpl::onCloseEvent(const CloseEvent& ev)
-{
-	ChildWindow::onCloseEvent( ev );
-  _apiWindow->eventReceived().send( ev );
 }
 
 
