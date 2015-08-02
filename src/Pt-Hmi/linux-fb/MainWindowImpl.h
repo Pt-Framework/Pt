@@ -106,7 +106,7 @@ class MainWindowImpl  : public ChildWindow
       return ChildWindow::windowSurface(); 
     }
 
-    void render();
+    void render();	
     
 	protected:
 		virtual void onInvalidate();

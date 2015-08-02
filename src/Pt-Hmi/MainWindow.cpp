@@ -38,9 +38,6 @@ MainWindow::MainWindow(MainWindow* parent)
 {
 	_impl = new MainWindowImpl( this );
 
-	eventReceived() += Pt::slot( _windowManager, &WindowManager::onPointerInput );
-	eventReceived() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
-
 	Visible = false;
  	 Name = std::string("Window");
 	AcceptFocus = false;
@@ -76,8 +73,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::onInvalidate()
 {
-	Window::onInvalidate();
-	_impl->render();		
+	Window::onInvalidate();		
+	_impl->render();
 }
 
 PaintSurface& MainWindow::windowSurface()

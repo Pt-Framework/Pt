@@ -43,7 +43,6 @@
 #include <string.h>
 #include <errno.h>
 
-PT_LOG_DEFINE("Pt.Hmi")
 
 namespace Pt {
 namespace Hmi {
@@ -53,10 +52,11 @@ MainWindowImpl::MainWindowImpl(MainWindow* window)
 , _app(Application::instance() )
 , _forceTopMost(false)
 { 	
-	// route all events through MainWindow back to this impl
+  // route all events through MainWindow back to this impl
   eventReceived() += Pt::slot( _apiWindow->eventReceived() );
 
-	Focused += Pt::slot(*this, &MainWindowImpl::onFocusChanged);
+
+  Focused += Pt::slot(*this, &MainWindowImpl::onFocusChanged);
 }
 
 
@@ -67,39 +67,28 @@ MainWindowImpl::~MainWindowImpl()
 
 
 void MainWindowImpl::onFocusChanged(bool focused)
-{
-	PT_LOG_TRACE("MainWindowImpl::onFocusChanged " << focused);
-
+{ 
   if( ! focused && _forceTopMost )
-    _windowManager.activate(this);
+    _apiWindow->windowManager().activate(this);
 }
 
 	
 void MainWindowImpl::onInvalidate()
-{
-	PT_LOG_TRACE("MainWindowImpl::onInvalidate");
-
+{	
 	ChildWindow::onInvalidate();
-
 	_apiWindow->invalidate();
 }
 
 
 void MainWindowImpl::onRender(PaintSurface& paintSurface)
 {
-	PT_LOG_TRACE("MainWindowImpl::onRender");
-
-  ChildWindow::onRender(paintSurface);
-
   _apiWindow->render( paintSurface );
-  _windowManager.render();
+  _apiWindow->windowManager().render();
 }
 
 
 void MainWindowImpl::create()
 {	
-	PT_LOG_TRACE("MainWindowImpl::create");
-
 	this->setWindowParent( _app.mainScreen().impl() );
 	_app.mainScreen().impl()->windowManager().add( this );
 }
@@ -107,8 +96,6 @@ void MainWindowImpl::create()
 
 void MainWindowImpl::destroy()
 {
-	PT_LOG_TRACE("MainWindowImpl::destroy");
-
 	_app.mainScreen().impl()->windowManager().remove( this );
 	this->setWindowParent(0);
 }
@@ -116,45 +103,37 @@ void MainWindowImpl::destroy()
 
 void MainWindowImpl::render()
 {
-	PT_LOG_TRACE("MainWindowImpl::render");
-
+ 
 }
 
 
 void MainWindowImpl::show()
 {
-	PT_LOG_TRACE("MainWindowImpl::show");
-
 	Visible = true;	
-	render();
 }
 
 
 void MainWindowImpl::hide()
 {
-	PT_LOG_TRACE("MainWindowImpl::hide");
-
 	Visible = false;
-	render();
 }
 
 
 void MainWindowImpl::setWindowPos(const Ui::PointF& p)
-{	
-	if( Position.get() == p ) 
-    return;
-	
-	Position = p;		
-  render();	
+{	  
+	 if( Position.get()  ==  p )
+			return;
+
+	Window::setPosition( p );
 }
 
 
 void MainWindowImpl::setWindowSize( const  Ui::SizeF& size )
 {   
-	if( Size.get() == size )
-    return;
+	 if( Size.get()  == size )
+			return;
 
-  Size = size;
+	Window::setSize( size );
 }
 
 

@@ -131,7 +131,7 @@ void ScreenImpl::saveCursorBackImage( const Pt::Hmi::PointerEvent& mouseEvent )
 	for( size_t y = _cursorPos.y(); y < yMax; ++y )
 	{
 		const size_t lineOffsetBuffer  = y * _fixedInfo.line_length  + (_cursorPos.x() * pixelSizeInByte);
-    const size_t lineOffsetCursor  = ( y - _cursorPos.y() )  * widthInByte;     
+	    const size_t lineOffsetCursor  = ( y - _cursorPos.y() )  * widthInByte;     
 		memcpy( &_cursorBuffer[lineOffsetCursor], &bufferData[lineOffsetBuffer], widthInByte );
 	}
 }

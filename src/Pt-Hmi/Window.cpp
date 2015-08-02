@@ -61,6 +61,10 @@ Window::Window(Window* parent)
 	eventReceived() += Pt::slot(*this, &Window::onCloseEvent);
 	eventReceived() += Pt::slot(*this, &Window::onKeyInput);
 	eventReceived() += Pt::slot(*this, &Window::onPointerInput);	
+
+    eventReceived() += Pt::slot( _windowManager, &WindowManager::onPointerInput );
+    eventReceived() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
+
 }
 
 
@@ -75,6 +79,7 @@ void Window::onInvalidate()
   render(windowSurface());		
   _windowManager.render();
 }
+
 
 void Window::setSize(const Ui::SizeF& size)
 {	
