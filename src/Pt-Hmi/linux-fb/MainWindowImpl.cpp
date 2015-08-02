@@ -42,6 +42,8 @@
 #include <string.h>
 #include <errno.h>
 
+PT_LOG_DEFINE("Pt.Hmi")
+
 namespace Pt {
 namespace Hmi {
 
