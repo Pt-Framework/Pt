@@ -299,12 +299,11 @@ void Widget::render(PaintSurface& surface)
   //Layout children
   onLayout();	
 
-	PaintSurface* buffer = this->widgetBuffer();  
+ PaintSurface* buffer = this->widgetBuffer();  
 
-  if( buffer &&  _isValid )
+    if( buffer &&  _isValid )
 	{
-    surface.painter().drawSurface(Ui::PointF(0,0), *buffer);		
-		std::clog<<"Blit: " << this->Name.get() << "  " << this->Caption.get() << std::endl;
+    surface.painter().drawSurface(Ui::PointF(0,0), *buffer);				
 		return;
 	}
 	

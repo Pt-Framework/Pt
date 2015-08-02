@@ -139,6 +139,7 @@ void ScreenImpl::saveCursorBackImage( const Pt::Hmi::PointerEvent& mouseEvent )
 
 void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 {	
+
 	if( _cursorBuffer.size() != 0 )
 		bitBlit( _cursorBuffer, _cursorWidth, _cursorHeight, _cursorPos, CopyOp );
 
@@ -159,8 +160,8 @@ void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 
 void ScreenImpl::onInvalidate()
 {	
-	render( windowSurface() );		
-	_windowManager.render();
+	
+	Window::onInvalidate();
 
 	const Ui::Image& image = windowSurface().impl()->image();
 

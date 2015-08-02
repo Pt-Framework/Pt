@@ -71,6 +71,7 @@ Window::~Window()
 
 void Window::onInvalidate()
 {	  
+  windowSurface().setOrigin(Pt::Ui::PointF(0,0), this->Size.get() );
   render(windowSurface());		
   _windowManager.render();
 }
