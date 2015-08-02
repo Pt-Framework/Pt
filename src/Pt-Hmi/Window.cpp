@@ -72,12 +72,12 @@ Window::~Window()
 void Window::onInvalidate()
 {	  
   render(windowSurface());		
-	_windowManager.render();
+  _windowManager.render();
 }
 
 void Window::setSize(const Ui::SizeF& size)
 {	
-	windowSurface().resize( size );	
+  windowSurface().resize( size );	
   Widget::setSize( size); 
   invalidate();
 }

@@ -61,6 +61,7 @@ InputDevice::~InputDevice()
 bool InputDevice::onRun()
 {
 	struct input_event evts[64];
+		
 
 	int bytes = ::read(_ioh.fd, evts, sizeof(struct input_event) * 64);
     
@@ -167,7 +168,7 @@ bool InputDevice::onRun()
 				if( _mouseEvent.y() >= Application::instance().mainScreen().height() )
 					_mouseEvent.setY( Application::instance().mainScreen().height() - 1 );
 
-				
+						                
 				Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );				                				
 			}
 			break;
@@ -181,19 +182,19 @@ bool InputDevice::onRun()
                 
 					case ABS_X:
 					case ABS_MT_POSITION_X:
-            std::cout<<"ABS_X" << ev.value<<std::endl;
+			            std::cout<<"ABS_X" << ev.value<<std::endl;
 						_mouseEvent.setX( static_cast<double>(ev.value) );
 					break;
                     
 					case ABS_Y:
 					case ABS_MT_POSITION_Y:
-          std::cout<<"ABS_Y" << ev.value<<std::endl;
+				          std::cout<<"ABS_Y" << ev.value<<std::endl;
 						_mouseEvent.setY( static_cast<double>(ev.value) );
 					break;
                     
 					case ABS_PRESSURE:
 					case ABS_MT_PRESSURE:                  
-            _mouseEvent.buttons()[0].setState( ev.value == 0 ? DeviceButton::Released : DeviceButton::Pressed );						
+			            _mouseEvent.buttons()[0].setState( ev.value == 0 ? DeviceButton::Released : DeviceButton::Pressed );						
 					break;
 
 					default:

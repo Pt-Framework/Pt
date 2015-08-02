@@ -81,7 +81,7 @@ class ScreenImpl : public Window
 		size_t		_depth;
 		char*     _buffer; 
 		size_t _bufferSize;
-    PaintSurface _windowSurface;
+	    PaintSurface _windowSurface;
 };
 
 }}

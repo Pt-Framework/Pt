@@ -101,18 +101,19 @@ class MainWindowImpl  : public ChildWindow
 		{
 		}
 	
-    virtual PaintSurface& windowSurface()
-    {
-      return this->windowSurface(); 
-    }
+		virtual PaintSurface& windowSurface()
+		{
+			return ChildWindow::windowSurface(); 
+		}
 
     void render();
     
 	protected:
 		virtual void onInvalidate();
-	  virtual void onRender(PaintSurface& paintSurface);
+  	    virtual void onRender(PaintSurface& paintSurface);
 		virtual void onPointerInput(const PointerEvent& ev);				
 		virtual void onKeyInput(const KeyEvent& ev);
+
     
     void onFocusChanged(bool focused);
 
