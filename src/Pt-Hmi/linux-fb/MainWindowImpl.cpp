@@ -94,7 +94,7 @@ void MainWindowImpl::destroy()
 
 void MainWindowImpl::render()
 {
- 
+	_app.mainScreen().impl()->invalidate();
 }
 
 
