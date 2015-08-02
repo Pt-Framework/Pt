@@ -98,12 +98,13 @@ void MainWindow::init()
 	_mainPanel.PanelBorderStyle = Pt::Hmi::BorderStyle::Single;  
 
 	{
+	/*
 		std::stringstream memoryStream;
-		memoryStream.write((char*)Pt::Forms::DemoImage::image, Pt::Forms::DemoImage::imageSize);	
-				
+		memoryStream.write((char*)Pt::Forms::DemoImage::image, Pt::Forms::DemoImage::imageSize);					
 
 		std::auto_ptr<Ui::Image> im(Ui::ImageReader::read(memoryStream));
 		_mainPanel.BackgroundImage = *im;		
+		*/
 	}
 
 	
