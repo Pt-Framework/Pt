@@ -49,13 +49,13 @@
 namespace Pt {
 namespace Hmi {
 
-class Window;
+class MainWindow;
 class Application;
 
 class MainWindowImpl  : public ChildWindow
 {
 	public:
-		MainWindowImpl(Window* Window);
+		MainWindowImpl(MainWindow* Window);
     
 		~MainWindowImpl();
 
@@ -122,7 +122,7 @@ class MainWindowImpl  : public ChildWindow
     void onFocusChanged(bool focused);
 
 	private:    
-		Window* _apiWindow;
+		MainWindow* _apiWindow;
 		Pt::Hmi::Application& _app;
     bool _forceTopMost;
 };

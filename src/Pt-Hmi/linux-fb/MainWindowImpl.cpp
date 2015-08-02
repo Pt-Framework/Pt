@@ -47,7 +47,7 @@ PT_LOG_DEFINE("Pt.Hmi")
 namespace Pt {
 namespace Hmi {
 
-MainWindowImpl::MainWindowImpl(Window* window)
+MainWindowImpl::MainWindowImpl(MainWindow* window)
 : _apiWindow(window)
 , _app(Application::instance() )
 , _forceTopMost(false)
