@@ -97,7 +97,11 @@ class PT_HMI_API Window : public Widget
 		Window(Window* parent = 0);    
 
 	protected:		
-		virtual PaintSurface* widgetBuffer();
+		virtual PaintSurface* widgetBuffer()
+		{
+			return &windowSurface();
+		}
+
 		virtual void onKeyInput(const KeyEvent& ev);			
     virtual void onInvalidate();  			
 		virtual void setClosed( bool close );				
@@ -113,8 +117,7 @@ class PT_HMI_API Window : public Widget
 		Window*				_winParent;
 		WindowManager _windowManager;		
 		bool	_isClosed;
-    Pt::Signal<const Pt::Event&> _eventReceived;
-		PaintSurface _surface;
+    Pt::Signal<const Pt::Event&> _eventReceived;		
 };
 
 }}

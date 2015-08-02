@@ -46,6 +46,7 @@ class PT_HMI_API MainWindow  : public Window
 		void setTopMost( bool topMost );						
 
     virtual PaintSurface& windowSurface();
+				
 
 	protected:	
 		virtual void setSize(const Ui::SizeF& size);
