@@ -7,7 +7,7 @@ int main(int argc, char* args[])
 {	
 	try
 	{
-		Pt::System::Logger::setLogLevel( "Pt.Hmi", Pt::System::Trace );
+		Pt::System::Logger::setLogLevel( "Pt.Hmi", Pt::System::Debug );
 
 		Pt::Hmi::Application	application;
 		Pt::Hmi::Demo::MainWindow	mainWindow;
