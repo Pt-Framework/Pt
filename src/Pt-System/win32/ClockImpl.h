@@ -29,11 +29,7 @@ class ClockImpl
         static Timespan getSystemTicks();
 
     private:
-        LARGE_INTEGER   _frequency;
-        LARGE_INTEGER   _startValue;
-        LARGE_INTEGER   _stopValue;
-        ULONGLONG       _secondStartValue;
-        ULONGLONG       _secondStopValue;
+        Timespan _startValue;
 };
 
 } // namespace Pt

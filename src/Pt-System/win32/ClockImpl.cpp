@@ -26,8 +26,42 @@
 #include "ClockImpl.h"
 #include <Pt/SourceInfo.h>
 #include <Pt/System/SystemError.h>
-#include <stdexcept>
-#include <time.h>
+
+namespace {
+
+Pt::Timespan queryPerformanceCounter()
+{
+#ifndef _WIN32_WCE
+    DWORD_PTR cpuMask = 0x01;
+
+    DWORD_PTR threadAffinity = SetThreadAffinityMask( GetCurrentThread(), cpuMask );
+    if( ! threadAffinity )
+        throw Pt::System::SystemError("SetThreadAffinityMask");
+#endif
+
+    LARGE_INTEGER value;
+    LARGE_INTEGER frequency;
+
+    if( ! QueryPerformanceFrequency( &frequency ) )
+        throw Pt::System::SystemError("QueryPerformanceFrequency");
+
+    if( ! QueryPerformanceCounter( &value ) )
+        throw Pt::System::SystemError("QueryPerformanceCounter");
+
+#ifndef _WIN32_WCE
+    if( ! SetThreadAffinityMask( GetCurrentThread(), threadAffinity ) )
+        throw Pt::System::SystemError("SetProcessAffinityMask");
+#endif
+
+    LONGLONG seconds = value.QuadPart / frequency.QuadPart;
+    LONGLONG remain = value.QuadPart - (seconds * frequency.QuadPart);
+    LONGLONG usecs = remain * 1000000 / frequency.QuadPart;
+    usecs += seconds * 1000000;
+
+    return Pt::Timespan(usecs);
+}
+
+}
 
 namespace Pt {
 
@@ -35,34 +69,6 @@ namespace System {
 
 ClockImpl::ClockImpl()
 {
-    //DWORD procAffinity;
-    //DWORD sysAffinity;
-    DWORD_PTR cpuMask = 0x01;
-
-#ifndef _WIN32_WCE
-    // HANDLE currentProcessHandle = GetCurrentProcess();
-
-    // if( ! GetProcessAffinityMask( currentProcessHandle,  &procAffinity, &sysAffinity ))
-    //     throw SystemError( PT_ERROR_MSG("GetProcessAffinityMask failed") );
-
-    // if( ! SetProcessAffinityMask( currentProcessHandle, 0x01 ) )
-    //     throw SystemError( PT_ERROR_MSG("SetProcessAffinityMask failed") );
-
-    DWORD_PTR threadAffinity = SetThreadAffinityMask( GetCurrentThread(), cpuMask );
-    if( ! threadAffinity )
-        throw SystemError( PT_ERROR_MSG("SetProcessAffinityMask failed") );
-#endif
-
-    if( ! QueryPerformanceFrequency( &_frequency ) )
-        throw SystemError( PT_ERROR_MSG("QueryPerformanceFrequency failed") );
-
-#ifndef _WIN32_WCE
-    // if( ! SetProcessAffinityMask( currentProcessHandle, procAffinity ) )
-    //     throw SystemError( PT_ERROR_MSG("SetProcessAffinityMask failed") );
-
-    if( ! SetThreadAffinityMask( GetCurrentThread(), threadAffinity ) )
-        throw SystemError( PT_ERROR_MSG("SetProcessAffinityMask failed") );
-#endif
 }
 
 
@@ -73,39 +79,14 @@ ClockImpl::~ClockImpl()
 
 void ClockImpl::start()
 {
-#ifdef _WIN32_WCE
-    _secondStartValue = GetTickCount();
-#else
-    _secondStartValue = GetTickCount64();
-#endif
-
-    QueryPerformanceCounter( &_startValue );
+    _startValue = queryPerformanceCounter();
 }
 
 
 Timespan ClockImpl::stop()
 {
-    QueryPerformanceCounter( &_stopValue );
-
-#ifdef _WIN32_WCE
-    _secondStopValue = GetTickCount();
-#else
-    _secondStopValue = GetTickCount64();
-#endif
-
-    LARGE_INTEGER delta;
-    delta.QuadPart        = _stopValue.QuadPart - _startValue.QuadPart;
-    ULONGLONG secondDelta = _secondStopValue - _secondStartValue;
-
-    if( secondDelta > 100 )
-    {
-        return Timespan(secondDelta * 1000);
-    }
-
-    const long secs = static_cast<long>(delta.QuadPart / _frequency.QuadPart);
-    const long usecs = static_cast<long>(((delta.QuadPart * 1000000) / _frequency.QuadPart ) % 1000000);
-           
-    return Timespan(secs, usecs);
+    Pt::Timespan stopValue = queryPerformanceCounter();
+    return stopValue - _startValue;
 }
 
 
@@ -141,13 +122,12 @@ Pt::DateTime ClockImpl::getLocalTime()
 
 Timespan ClockImpl::getSystemTicks()
 {
-#ifdef _WIN32_WCE
-    ULONGLONG msecs = GetTickCount();
-#else
+#ifdef __cplusplus_winrt
     ULONGLONG msecs = GetTickCount64();
-#endif
-
     return Timespan( Pt::int64_t(1000) * msecs );
+#else  
+    return queryPerformanceCounter();
+#endif
 }
 
 } // namespace Pt

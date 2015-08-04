@@ -110,10 +110,11 @@ Timespan ClockImpl::getSystemTicks()
     if(ret != 0)
         throw SystemError("mach_timebase_info");
         
-    uint64_t scaling_factor = info.numer/info.denom;
-    uint64_t time = mach_absolute_time() / 1000;
-    
-    return Timespan(time * scaling_factor);
+    uint64_t time = mach_absolute_time();
+    time /= info.denom;
+    time *= info.numer;
+
+    return Timespan(time / uint64_t(1000));
 }
 
 #else // WITH_POSIX_CLOCK
