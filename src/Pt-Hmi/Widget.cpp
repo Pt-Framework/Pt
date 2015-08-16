@@ -299,15 +299,12 @@ void Widget::render(PaintSurface& surface)
 	//Layout children
 	onLayout();	
 
+
 	PaintSurface* buffer = this->widgetBuffer();  
 
     if( buffer &&  _isValid )
 	{
-		Pt::Ui::PointF pos(surface.originPos().x(), surface.originPos().y());		
-		
-		surface.setOrigin( pos, surface.originSize() );
-
-		surface.painter().drawSurface(Ui::PointF(0 ,0), *buffer);				
+		surface.painter().drawSurface( Ui::PointF(0 ,0), *buffer );
 		return;
 	}
 
@@ -333,22 +330,10 @@ void Widget::render(PaintSurface& surface)
 		_children[i]->render(surface);   
 	}
 	
+	surface.setOrigin(orgPos, orgSize);		
 
-	if( buffer )
-	{
-	  	const Ui::PointF pos = parent() == 0 ? Ui::PointF(0,0) : Position.get() ;
-		const Ui::PointF globPoint = fromClient( pos );
-		const Ui::PointF drawPos( globPoint.x() + Margin.get().left(), globPoint.y() + Margin.get().top() );
-		const Ui::SizeF  drawSize( Size.get().width() - Margin.get().left() - Margin.get().right(), 
-		                           Size.get().height() - Margin.get().top() - Margin.get().bottom());
-  
-		surface.setOrigin( drawPos, drawSize );
-
-		buffer->painter().drawSurface(Ui::PointF(0, 0), surface);
-	}
-  
-	surface.setOrigin(orgPos, orgSize); 
-
+	if( buffer )	
+		buffer->painter().drawSurface(Ui::PointF(0, 0), surface);	  
 
 	_isValid = true;
 

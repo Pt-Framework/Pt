@@ -145,7 +145,7 @@ Image Image::subImage( const Region& regionIn) const
 	//Copy to new image
 	Image image(clipedRegion.width(), clipedRegion.height(), _stride, *_format);
 
-	for( size_t y = clipedRegion.top(); y  < clipedRegion.bottom(); ++y)
+	for( size_t y = clipedRegion.top(); y  <= clipedRegion.bottom(); ++y)
 	{
 		const size_t lineBeginOffset = y * (_width * _format->pixelSize() + _stride);
 
@@ -154,7 +154,7 @@ Image Image::subImage( const Region& regionIn) const
 		const size_t xStartOffset = lineBeginOffset + (clipedRegion.left() * _format->pixelSize());
 		const size_t xEnd   = lineBeginOffset + (clipedRegion.right() * _format->pixelSize());
 
-		const size_t lineSize = (clipedRegion.right() - clipedRegion.left()) * _format->pixelSize();
+		const size_t lineSize = (clipedRegion.right() - clipedRegion.left() + 1) * _format->pixelSize();
 
 		memcpy( image.pixel(0,targetY), &_buffer[xStartOffset], lineSize );
 	}

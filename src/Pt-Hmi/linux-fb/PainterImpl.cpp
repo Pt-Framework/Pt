@@ -162,9 +162,22 @@ void PainterImpl::drawSurface(const Ui::PointF& to, PaintSurface& pm, const Ui::
 	_painter.drawImage(fromOrigin(to), pm.impl()->image(), pmRegion);
 }
 
-void PainterImpl::drawSurface(const Ui::PointF& to, PaintSurface& pm)
+void PainterImpl::drawSurface( const Ui::PointF& to, PaintSurface& surface)
 {
-	_painter.drawImage(fromOrigin(to), pm.impl()->image());
+	if( surface.originPos() != Ui::PointF(0,0) || surface.originSize() != surface.size() )
+	{
+		//Todo: optimize this
+		Ui::Point pos((size_t)surface.originPos().x(),(size_t)surface.originPos().y());
+		Ui::Size  size( (size_t)surface.originSize().width(), (size_t)surface.originSize().height() );
+
+		Ui::Region regionIn(pos, size );
+		Ui::Image subImage = surface.impl()->image().subImage(regionIn);
+		_painter.drawImage(fromOrigin(to), subImage );
+	}
+	else
+	{
+		_painter.drawImage(fromOrigin(to), surface.impl()->image() );
+	}
 }
 		
 void PainterImpl::drawImage(const Ui::PointF& to, const Ui::Image& image)
