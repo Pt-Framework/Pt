@@ -155,6 +155,9 @@ class DrawText
 
                     if( buffer[ px ] )
                         mixColor( pixel, color, buffer[ px ] );
+
+										image.setColor(dsx, dsy, pixel);
+									
                 }
             }
         }
