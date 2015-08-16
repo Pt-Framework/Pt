@@ -42,7 +42,7 @@ WindowManager::WindowManager(Window& parent)
 , _sizingDirection( ResizeDirection::No )
 , _app( Application::instance() )
 , _titleBarHeight(20)
-, _borderWidth(15)
+, _borderWidth(5)
 , _borderColor(0,0,1)
 , _moving(false)
 , _titleBarColor(0, 0, 1)
@@ -140,10 +140,13 @@ Ui::PointF WindowManager::renderWindowFrame(const ChildWindow* w)
 {
 	Painter& painter = _parent.windowSurface().painter();
 
-  Ui::SizeF winSize = windowSize(w);
+  Ui::SizeF winSize = windowSize(w);	
+	winSize.addHeight( -_borderWidth/2 );
+	winSize.addWidth( -_borderWidth/2 );
 
+	
 	//Render Frame
-	Ui::PointF pos = w->Position.get();
+	Ui::PointF pos( w->Position.get().x() + _borderWidth/2, w->Position.get().y() + _borderWidth/2);
 	Ui::RectF  rect( pos, winSize ) ;
 
 	Ui::Pen  pen((size_t) _borderWidth, _borderColor);
@@ -157,7 +160,7 @@ Ui::PointF WindowManager::renderWindowFrame(const ChildWindow* w)
 	painter.setBrush(brush);
 	painter.fillRect(rectTitle);	
 		
-	return Ui::PointF( pos.x() + _borderWidth, pos.y() + _titleBarHeight );	
+	return Ui::PointF( w->Position.get().x() + _borderWidth, w->Position.get().y() + _titleBarHeight );	
 }
 
 
