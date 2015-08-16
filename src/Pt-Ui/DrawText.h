@@ -167,17 +167,17 @@ class DrawText
              const uint32_t oF = factor;
              const uint32_t rF = 255 - oF;
 
-             const uint32_t dR = uint32_t( dst.red() * 255   ) * rF;
-             const uint32_t dG = uint32_t( dst.green() *255 ) * rF;
-             const uint32_t dB = uint32_t( dst.blue() *255 ) * rF;
+             const uint32_t dR = uint32_t( dst.red() ) * rF;
+             const uint32_t dG = uint32_t( dst.green()) * rF;
+             const uint32_t dB = uint32_t( dst.blue() ) * rF;
 
-             const uint32_t sR = uint32_t( src.red() *255  ) * oF;
-             const uint32_t sG = uint32_t( src.green()*255 ) * oF;
-             const uint32_t sB = uint32_t( src.blue() *255 ) * oF;
+             const uint32_t sR = uint32_t( src.red() ) * oF;
+             const uint32_t sG = uint32_t( src.green()) * oF;
+             const uint32_t sB = uint32_t( src.blue() ) * oF;
 
-             dst.setRed  ( (dR + sR) / 255.0f);
-             dst.setGreen( (dG + sG) / 255.0f);
-             dst.setBlue ( (dB + sB) / 255.0f);
+             dst.setRed  ( (dR + sR));
+             dst.setGreen( (dG + sG));
+             dst.setBlue ( (dB + sB));
         }
 
         inline FTC_FaceID faceId() const
