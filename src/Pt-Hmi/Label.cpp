@@ -103,7 +103,10 @@ void Label::onRender(PaintSurface& paintSurface)
 
   localPainter.setFont(Font.get());
 
-	Ui::FontMetrics	metric = localPainter.fontMetrics(caption);
+	Ui::FontMetrics	metric = localPainter.fontMetrics("Hallo");
+
+	std::clog<<"Ascent: "<< metric.ascent() << " Descent: "<< metric.descent()  << " Width: " << metric.width() << " Height: "<<metric.height()<<std::endl;
+
   pos = Ui::PointF( 0, metric.ascent() );
   
   Panel::onRender(paintSurface);

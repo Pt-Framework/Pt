@@ -1293,9 +1293,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\ChildWindow.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowProperties.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\MainWindow.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1517,6 +1514,18 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\WindowsCodec.h">
       <Filter>Pt</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowStartPosition.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowState.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowBorder.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ResizeDirection.h">
+      <Filter>Pt-Hmi</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
