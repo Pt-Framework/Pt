@@ -33,6 +33,7 @@
 #include <Pt/Ui/Pen.h>
 #include <Pt/Ui/Brush.h>
 #include <Pt/Ui/Point.h>
+#include <cmath>
 
 namespace Pt {
 namespace Hmi {
@@ -140,11 +141,11 @@ Ui::PointF WindowManager::renderWindowFrame(const ChildWindow* w)
 {
 	Painter& painter = _parent.windowSurface().painter();
 
-	Ui::SizeF winSize( w->Size.get().width() + _borderWidth, w->Size.get().height() + _borderWidth/2 + _titleBarHeight);
+	Ui::SizeF winSize( w->Size.get().width() + _borderWidth, w->Size.get().height() + _borderWidth/2.0 + _titleBarHeight);
 	
 
 	//Render Frame
-	Ui::PointF pos( w->Position.get().x() + _borderWidth/2, w->Position.get().y() + _borderWidth/2);
+	Ui::PointF pos( w->Position.get().x() + _borderWidth/2.0, w->Position.get().y() + _borderWidth/2.0 );
 	Ui::RectF  rect( pos, winSize ) ;	
 
 	Ui::Pen  pen((size_t) _borderWidth, _borderColor);
@@ -314,15 +315,15 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 	  break;
 	}
 
+	Ui::SizeF size(width, height);
 	Ui::PointF pos(posX, posY);
-
+	
 	if( w->Position.get() != pos )
 	{
 		_positionEvent.setPosition(pos);
-		w->eventReceived().send(_positionEvent);		
+		w->eventReceived().send(_positionEvent);	
 	}
 
-	Ui::SizeF size(width, height);
 
 	if( w->Size.get() != size )
 	{
