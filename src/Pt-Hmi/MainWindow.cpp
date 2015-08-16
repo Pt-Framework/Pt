@@ -209,8 +209,10 @@ void MainWindow::onMaxSizeChnaged(const Ui::SizeF& prop)
 
 void MainWindow::setSize(const Ui::SizeF& size)
 {
-	Window::setSize(size);		
+	windowSurface().resize( size );	
+	Widget::setSize( size); 	
 	_impl->setWindowSize( size );
+	invalidate();
 }
 
 void MainWindow::setPosition(const Ui::PointF& pos)

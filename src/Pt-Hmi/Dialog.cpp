@@ -50,17 +50,17 @@ void Dialog::doModal(MainWindow* parent)
 {	
 	setWindowParent(parent);  
 	
-	Visible = true;	
 
 	//Setup the parent as disabled and TopMost = false.
 	parent->Enabled = false;	
-  parent->invalidate(); //Notify the parent.
+   parent->invalidate(); //Notify the parent.
 	parent->setTopMost(false);
 	
 	//Setup the dialog as aenabled and top most.	
 	Enabled = true;
 	setTopMost(true);	
 
+	Visible = true;	
 	//Invalidate the dialog
 	invalidate();
 

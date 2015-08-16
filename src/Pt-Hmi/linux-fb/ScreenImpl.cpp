@@ -26,6 +26,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include "ScreenImpl.h"
 #include <Pt/Hmi/PaintSurface.h>
+#include <Pt/System/Clock.h>
 #include "PaintSurfaceImpl.h"
 #include <algorithm>
 #include <fcntl.h>
@@ -159,13 +160,10 @@ void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 
 
 void ScreenImpl::onInvalidate()
-{	
-	
+{		
 	Window::onInvalidate();
-
 	const Ui::Image& image = windowSurface().impl()->image();
-
-	memcpy( _buffer, image.pixel(0, 0), _bufferSize);	
+	memcpy( _buffer, image.pixel(0, 0), _bufferSize);	    
 }
 
 

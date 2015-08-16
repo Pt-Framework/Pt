@@ -53,6 +53,7 @@ MainWindowImpl::MainWindowImpl(MainWindow* window)
 , _forceTopMost(false)
 { 	
   // route all events through MainWindow back to this impl
+  eventReceived().disconnectAll();
   eventReceived() += Pt::slot( _apiWindow->eventReceived() );
 }
 

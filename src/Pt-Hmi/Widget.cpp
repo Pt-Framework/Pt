@@ -80,9 +80,9 @@ void Widget::addChild(Widget* child)
 {
 	_children.push_back(child);
 	child->setParent(this);
-  child->Visible = true;  
-  child->invalidate();
-  
+	child->_isValid = false;
+	child->Visible = true;  
+	child->invalidate();  
 	invalidate();
 }
 
@@ -95,7 +95,7 @@ void Widget::removeChild(Widget* child)
 			continue;
 		
 		_children.erase(_children.begin() + i);
-    child->Visible = false;
+		child->Visible = false;
 		child->setParent(0);
 		return;
 	}			
@@ -113,22 +113,20 @@ Ui::PointF Widget::toClient( const Ui::PointF& globalPoint )
 	return Ui::PointF( parPoint.x() - Position.get().x(), parPoint.y() - Position.get().y() );
 }
 
-
-Ui::PointF Widget::fromClient( const Ui::PointF& localPoint)
+ 
+Ui::PointF Widget::fromClient( const Ui::PointF& localPoint )
 {
 	double x = localPoint.x();
 	double y = localPoint.y();
 	const Widget* widget = parent();
+	
 
-	while( widget != 0 )
+	while( widget != 0  &&  widget->parent() != 0 )
 	{						
-		if( widget->parent() != 0)
-    {
-      x += widget->Position.get().x();
-		  y += widget->Position.get().y();	
-    }
+		x += widget->Position.get().x();
+		y += widget->Position.get().y();	
 
-    widget = widget->parent();
+    	widget = widget->parent();
 	}	
 
 	return Ui::PointF(x,y);
@@ -295,23 +293,26 @@ void Widget::onLayout()
 
 void Widget::render(PaintSurface& surface)
 {
-  //Layout children
-  onLayout();	
+	if(!Visible.get() )
+		return;
 
- PaintSurface* buffer = this->widgetBuffer();  
+	//Layout children
+	onLayout();	
 
-  if( buffer &&  _isValid )
+	PaintSurface* buffer = this->widgetBuffer();  
+
+    if( buffer &&  _isValid )
 	{
-		Pt::Ui::PointF pos(surface.originPos().x() - this->Margin.get().left(), surface.originPos().y() - this->Margin.get().top());
+		Pt::Ui::PointF pos(surface.originPos().x() - this->Margin.get().left(), surface.originPos().y() - this->Margin.get().top());		
 		
 		surface.setOrigin( pos, surface.originSize() );
 
 		surface.painter().drawSurface(Ui::PointF(0 ,0), *buffer);				
 		return;
 	}
-	
+
 	//Render       
-  onRender(surface);	
+	onRender(surface);	
   
 	const Pt::Ui::PointF orgPos = surface.originPos();
 	const Pt::Ui::SizeF orgSize = surface.originSize();
@@ -321,8 +322,8 @@ void Widget::render(PaintSurface& surface)
 	{
 		Widget* child = _children[i];
 	
-	 //Calculate Origin		
- 	  const Ui::PointF childGlobPoint = child->fromClient( child->Position.get() );
+	 	//Calculate Origin		
+ 	  	const Ui::PointF childGlobPoint = child->fromClient( child->Position.get() );
 		const Ui::PointF drawPos( childGlobPoint.x() + child->Margin.get().left(), childGlobPoint.y() + child->Margin.get().top() );
 		const Ui::SizeF  drawSize( child->Size.get().width() - child->Margin.get().left() - child->Margin.get().right(), 
 		                           child->Size.get().height() - child->Margin.get().top() - child->Margin.get().bottom());
@@ -335,15 +336,15 @@ void Widget::render(PaintSurface& surface)
 
 	if( buffer )
 	{
-	  const Ui::PointF pos = parent() == 0 ? Ui::PointF(0,0) : Position.get() ;
+	  	const Ui::PointF pos = parent() == 0 ? Ui::PointF(0,0) : Position.get() ;
 		const Ui::PointF globPoint = fromClient( pos );
 		const Ui::PointF drawPos( globPoint.x() + Margin.get().left(), globPoint.y() + Margin.get().top() );
 		const Ui::SizeF  drawSize( Size.get().width() - Margin.get().left() - Margin.get().right(), 
 		                           Size.get().height() - Margin.get().top() - Margin.get().bottom());
   
-		surface.setOrigin(drawPos, drawSize);
+		surface.setOrigin( drawPos, drawSize );
 
-		buffer->painter().drawSurface(Ui::PointF(-globPoint.x(), -globPoint.y()), surface);
+		buffer->painter().drawSurface(Ui::PointF(0,0), surface);
 	}
   
 	surface.setOrigin(orgPos, orgSize); 

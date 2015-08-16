@@ -92,7 +92,7 @@ void MainWindow::init()
   //Panel
   
 	_mainPanel.Size = Ui::SizeF(700,480);
-	_mainPanel.Position = Ui::PointF(40,40);
+	_mainPanel.Position = Ui::PointF(15,15);
 	_mainPanel.PanelBorderWidth = 3;
 	_mainPanel.PanelBorderStyle = Pt::Hmi::BorderStyle::Single;  
 

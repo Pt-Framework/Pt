@@ -51,7 +51,6 @@ Window::Window(Window* parent)
 , _isClosed(true)
 {
 
-	Visible = false;
 	Name = std::string("Window");
 	AcceptFocus = false ;	
 
@@ -74,8 +73,8 @@ Window::~Window()
 
 
 void Window::onInvalidate()
-{	  
-  render(windowSurface());		
+{	    		
+	render(windowSurface());		
   _windowManager.render();
 }
 
@@ -146,7 +145,7 @@ void Window::onKeyInput(const KeyEvent& ev)
 
 
 void Window::onSizeEvent(const SizeEvent& ev)
-{
+{	
 	Window::setSize( ev.size() );
 	Size.changed().send( ev.size() );	
 	State = ev.state();
@@ -156,7 +155,7 @@ void Window::onSizeEvent(const SizeEvent& ev)
 void Window::onPositionEvent( const PositionEvent& ev)
 {
 	Widget::setPosition( ev.position() );
-	Position.changed().send( ev.position() );	
+	Position.changed().send( ev.position() );		
 }
 
 

@@ -42,7 +42,7 @@ WindowManager::WindowManager(Window& parent)
 , _sizingDirection( ResizeDirection::No )
 , _app( Application::instance() )
 , _titleBarHeight(20)
-, _borderWidth(1)
+, _borderWidth(3)
 , _borderColor(0,0,1)
 , _moving(false)
 , _titleBarColor(0, 0, 1)
@@ -61,7 +61,17 @@ ChildWindow* WindowManager::active()
 	if( _windows.size() == 0)
 		return 0;
 
-	return _windows[ _windows.size() - 1 ];
+	size_t index = _windows.size() - 1;
+
+	while(index >= 0)
+	{
+		
+	    if( _windows[ index]->Visible.get() )
+			return _windows[ index];
+		--index;
+	}
+
+	return 0;
 }
 
 
@@ -158,6 +168,10 @@ void WindowManager::render()
 	for( size_t i = 0; i < _windows.size(); ++i )
 	{
 		ChildWindow* w = _windows[i];				
+
+		if( !w->Visible.get() )
+   		  continue;
+
 		Ui::PointF clientPos = renderWindowFrame(w);		
 		painter.drawSurface( clientPos, w->windowSurface() );
 	}
@@ -224,10 +238,9 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 		_lastSizePoint =  point;
 		return;
 	}	
-
-	Ui::SizeF winSize = windowSize(w);
-	double width  = winSize.width();
-	double height = winSize.height();
+	
+	double width  = w->Size.get().width();
+	double height = w->Size.get().height();
 	double posX   = w->Position.get().x();
 	double posY   = w->Position.get().y();
 	double deltaX = ( point.x() - _lastSizePoint.x() );
@@ -300,20 +313,23 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 	  break;
 	}
 
-	if( w->Position.get() != Ui::PointF(posX, posY) )
+	Ui::PointF pos(posX, posY);
+
+	if( w->Position.get() != pos )
 	{
-		_positionEvent.setPosition(Ui::PointF(posX, posY));
+		_positionEvent.setPosition(pos);
 		w->eventReceived().send(_positionEvent);		
 	}
 
-	if( w->Size.get() != Ui::SizeF(width, height) )
+	Ui::SizeF size(width, height);
+
+	if( w->Size.get() != size )
 	{
-		_sizeEvent.setSize( clientSize(width, height) );
+		_sizeEvent.setSize( size );
 		w->eventReceived().send( _sizeEvent );
 	}
 
 	_lastSizePoint = point;
-	invalidate();
 }
 
 
@@ -498,21 +514,21 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 
 		_moving = isMoving( childWindow, mouseEvent );	
 
-    if( _moving )
-      return;
+		if( _moving )
+		  return;
 
-		_sizingDirection = isSizing( childWindow, mouseEvent );	
+			_sizingDirection = isSizing( childWindow, mouseEvent );	
 		
-    if( _sizingDirection != ResizeDirection::No)
-      return;
-      
+		if( _sizingDirection != ResizeDirection::No)
+		  return;
+		  
 		
-    if( !childWindow->contains( Ui::PointF( localMouseEvent.x(), localMouseEvent.y() ) ) )
-      return;       
+		if( !childWindow->contains( Ui::PointF( localMouseEvent.x(), localMouseEvent.y() ) ) )
+		  return;       
+		
+		  childWindow->eventReceived().send( localMouseEvent );
 
-	  childWindow->eventReceived().send( localMouseEvent );
-
-		return;
+		 return;
 	}
 		
 	doMoving( childWindow, mouseEvent );		
