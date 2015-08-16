@@ -342,7 +342,7 @@ Ui::SizeF WindowManager::clientSize( double width, double height)
 
 Ui::SizeF WindowManager::windowSize( const ChildWindow* w)
 {
-	return 	Ui::SizeF( w->Size.get().width() + _borderWidth, w->Size.get().height() + _borderWidth/2 + _titleBarHeight);
+	return 	Ui::SizeF( w->Size.get().width() + _borderWidth*2, w->Size.get().height() + _borderWidth + _titleBarHeight);
 }
 
 
