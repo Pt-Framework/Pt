@@ -72,12 +72,13 @@ void Dialog2::init()
 	addChild(&_mainPanel);
 
   //Ok/Cancel Panel	
-	_okCancelPanel.Margin = Hmi::Margin(4);
-  _okCancelPanel.Size = Ui::SizeF(385,40);
+  _okCancelPanel.Margin = Hmi::Margin(6);
+  _okCancelPanel.Size = Ui::SizeF(385,80);
   _okCancelPanel.Dock = Hmi::Docking::Bottom;
   _okCancelPanel.PanelBorderStyle = Hmi::BorderStyle::NoBorder;
   _okCancelPanel.FlowLayout = Hmi::FlowLayout::Horizontal;
   _okCancelPanel.FlowDirection = Hmi::FlowLayoutDirection::RightToLeftBottomToTop;	
+	_okCancelPanel.BackColor = Ui::Color(1,1,0,0);
 	addChild(&_okCancelPanel);
 
 	//Cancel button

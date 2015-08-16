@@ -432,7 +432,7 @@ ResizeDirection::Type WindowManager::isSizing( const ChildWindow* w, const Pt::H
 			else if(localPos.y() > sizeB)
 			{//South
 				_app.setCursor( &Cursor::sizeNSCursor() );
-				resizeDir = ResizeDirection::South;
+				resizeDir = ResizeDirection::South;			
 			}
 		}
 	}	
@@ -474,7 +474,7 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 {
 	if( _windows.size() == 0 )
 	{
-     _app.setCursor( &Cursor::defaultCursor() );
+	    _app.setCursor( &Cursor::defaultCursor() );
 		_sizingDirection = ResizeDirection::No;
 		_moving = false;
 		return;
@@ -489,10 +489,10 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 	if(_sizingDirection == ResizeDirection::No  && !_moving )
 	{
 		if( !updateActive( mouseEvent ) )
-    {
-      _app.setCursor( &Cursor::defaultCursor() );
-			return;
-    }
+		{
+		  _app.setCursor( &Cursor::defaultCursor() );
+		 return;
+		}
 	}
 
 	ChildWindow* childWindow = active();

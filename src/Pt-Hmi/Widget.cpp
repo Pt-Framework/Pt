@@ -308,32 +308,56 @@ void Widget::render(PaintSurface& surface)
 		return;
 	}
 
-	//Render       
-	onRender(surface);	
-  
-	const Pt::Ui::PointF orgPos = surface.originPos();
-	const Pt::Ui::SizeF orgSize = surface.originSize();
-
-	//Render children
-	for( size_t i = 0; i < _children.size(); ++i)
+	if( !buffer )
 	{
-		Widget* child = _children[i];
-	
-	 	//Calculate Origin		
-		const Ui::PointF childGlobPoint = child->fromClient( child->Position.get() );
-		const Ui::PointF drawPos( childGlobPoint.x() + child->Margin.get().left(), childGlobPoint.y() + child->Margin.get().top() );
-		const Ui::SizeF  drawSize( child->Size.get().width() - child->Margin.get().left() - child->Margin.get().right(), 
-		                           child->Size.get().height() - child->Margin.get().top() - child->Margin.get().bottom());
-  
-		surface.setOrigin(drawPos, drawSize);		
-		
-		_children[i]->render(surface);   
-	}
-	
-	surface.setOrigin(orgPos, orgSize);		
+		//Render       
+		onRender(surface);	
+	  
+		const Pt::Ui::PointF orgPos = surface.originPos();
+		const Pt::Ui::SizeF orgSize = surface.originSize();
 
-	if( buffer )	
-		buffer->painter().drawSurface(Ui::PointF(0, 0), surface);	  
+		//Render children
+		for( size_t i = 0; i < _children.size(); ++i)
+		{
+			Widget* child = _children[i];
+	
+		 	//Calculate Origin		
+			const Ui::PointF childGlobPoint = child->fromClient( child->Position.get() );
+			const Ui::PointF drawPos( childGlobPoint.x() + child->Margin.get().left(), childGlobPoint.y() + child->Margin.get().top() );
+			const Ui::SizeF  drawSize( child->Size.get().width() - child->Margin.get().left() - child->Margin.get().right(), 
+				                       child->Size.get().height() - child->Margin.get().top() - child->Margin.get().bottom());
+	  
+			surface.setOrigin(drawPos, drawSize);		
+		
+			_children[i]->render(surface);   
+		}
+	
+		surface.setOrigin(orgPos, orgSize);		
+	}
+	else
+	{
+		//Render       
+		onRender(*buffer);		  
+
+		//Render children
+		for( size_t i = 0; i < _children.size(); ++i)
+		{
+			Widget* child = _children[i];
+	
+		 	//Calculate Origin		
+			const Ui::PointF drawPos( child->Position.get().x() + child->Margin.get().left(), child->Position.get().y()+ child->Margin.get().top() );
+			const Ui::SizeF  drawSize( child->Size.get().width() - child->Margin.get().left() - child->Margin.get().right(), 
+				                       child->Size.get().height() - child->Margin.get().top() - child->Margin.get().bottom());
+	  
+			buffer->setOrigin(drawPos, drawSize);		
+		
+			_children[i]->render(*buffer);   
+		}
+
+		buffer->setOrigin(Ui::PointF(0,0), buffer->size());		
+
+		surface.painter().drawSurface(Ui::PointF(0,0), *buffer);	  
+	}
 
 	_isValid = true;
 
