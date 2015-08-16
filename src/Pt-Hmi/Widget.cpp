@@ -765,8 +765,13 @@ void Widget::setSize(const Ui::SizeF& size)
 	_isValid = false;
 
 	PaintSurface* buffer = widgetBuffer();
-  if( buffer )
-     buffer->resize(_size);    
+
+	if( buffer )
+    {
+		const Ui::SizeF marginSize( _size.width() - Margin.get().left() - Margin.get().right(), _size.height() - Margin.get().top() - Margin.get().bottom() );
+
+     	buffer->resize( marginSize );  
+	}
 }
 
 

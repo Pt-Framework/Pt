@@ -203,7 +203,17 @@ Ui::PointF PainterImpl::fromOrigin(const Ui::PointF& p)
 
 Ui::RectF PainterImpl::fromOrigin(const Ui::RectF& p)
 {
-  return Ui::RectF( Ui::PointF(_surface->originPos().x() + p.left(), _surface->originPos().y() + p.top()), p.size() );
+	Ui::PointF pos( _surface->originPos().x() + p.left(), _surface->originPos().y() + p.top() );
+	Ui::SizeF size( p.size() );
+	const Ui::SizeF& orgSize = _surface->originSize();
+
+	if( size.width() > orgSize.width() )
+		size.setWidth( orgSize.width() );
+
+	if( size.height() > orgSize.height() )
+		size.setHeight( orgSize.height() );
+	
+  return Ui::RectF( pos, size);
 }
 
 void PainterImpl::setSurface(PaintSurface& s)
