@@ -164,20 +164,20 @@ class DrawText
 
         inline void mixColor(Color& dst, const Color& src, const uint8_t& factor)
         {
-             const uint32_t oF = factor;
-             const uint32_t rF = 255 - oF;
+             const float oF = factor/255.0f;
+             const float rF = 1.0f - oF;
 
-             const uint32_t dR = uint32_t( dst.red() ) * rF;
-             const uint32_t dG = uint32_t( dst.green()) * rF;
-             const uint32_t dB = uint32_t( dst.blue() ) * rF;
+             const float dR = dst.red() * rF;
+             const float dG = dst.green() * rF;
+             const float dB = dst.blue() * rF;
 
-             const uint32_t sR = uint32_t( src.red() ) * oF;
-             const uint32_t sG = uint32_t( src.green()) * oF;
-             const uint32_t sB = uint32_t( src.blue() ) * oF;
+             const float sR = src.red() * oF;
+             const float sG = src.green() * oF;
+             const float sB = src.blue()* oF;
 
-             dst.setRed  ( (dR + sR));
-             dst.setGreen( (dG + sG));
-             dst.setBlue ( (dB + sB));
+             dst.setRed  ( (dR + sR) );
+             dst.setGreen( (dG + sG) );
+             dst.setBlue ( (dB + sB) );
         }
 
         inline FTC_FaceID faceId() const
