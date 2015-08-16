@@ -155,7 +155,7 @@ void Window::onSizeEvent(const SizeEvent& ev)
 void Window::onPositionEvent( const PositionEvent& ev)
 {
 	Widget::setPosition( ev.position() );
-	Position.changed().send( ev.position() );		
+	Position.changed().send( ev.position() );	
 }
 
 

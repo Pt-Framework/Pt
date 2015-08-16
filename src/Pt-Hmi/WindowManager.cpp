@@ -42,7 +42,7 @@ WindowManager::WindowManager(Window& parent)
 , _sizingDirection( ResizeDirection::No )
 , _app( Application::instance() )
 , _titleBarHeight(20)
-, _borderWidth(3)
+, _borderWidth(15)
 , _borderColor(0,0,1)
 , _moving(false)
 , _titleBarColor(0, 0, 1)
@@ -243,8 +243,8 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 	double height = w->Size.get().height();
 	double posX   = w->Position.get().x();
 	double posY   = w->Position.get().y();
-	double deltaX = ( point.x() - _lastSizePoint.x() );
-	double deltaY = ( point.y() - _lastSizePoint.y() );
+	double deltaX = ( point.x() - _lastSizePoint.x() + 1);
+	double deltaY = ( point.y() - _lastSizePoint.y() + 1);
 
 	switch( _sizingDirection )
 	{
@@ -464,7 +464,7 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 	w->eventReceived().send( _positionEvent );
 
 	_movingOffset = Ui::PointF( ev.x() , ev.y() );
-  invalidate();
+	invalidate();
 }
 
 
