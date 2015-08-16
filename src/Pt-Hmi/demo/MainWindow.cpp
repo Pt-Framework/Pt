@@ -110,13 +110,15 @@ void MainWindow::init()
 	_mainPanel.BackgroundImageLayout = Pt::Hmi::ImageLayout::Strech;    	
 
 	//Text	
-  _textLabel.Margin = Hmi::Margin(10);
+
 	_textLabel.AutoSize = true;
+	_textLabel.Margin = Hmi::Margin(10);
 	_textLabel.Size = Ui::SizeF(500,30);
 	_textLabel.Caption = std::string("T&his is a Platinum C++");  
 	_textLabel.Position = Ui::PointF(20,20);
 	_textLabel.ForeColor = Ui::Color(1,0,0,0);
 	_textLabel.UseMnemonic = true;	
+	_textLabel.BackColor = Ui::Color(1,1,1,0);
   _textLabel.bindMnemonicToWidget(_toggleButton);
   _textLabel.Cursor = Hmi::Cursor::waitCursor();
 	_mainPanel.addChild(&_textLabel);

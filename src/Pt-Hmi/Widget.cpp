@@ -300,9 +300,13 @@ void Widget::render(PaintSurface& surface)
 
  PaintSurface* buffer = this->widgetBuffer();  
 
-    if( buffer &&  _isValid )
+  if( buffer &&  _isValid )
 	{
-    surface.painter().drawSurface(Ui::PointF(0,0), *buffer);				
+		Pt::Ui::PointF pos(surface.originPos().x() - this->Margin.get().left(), surface.originPos().y() - this->Margin.get().top());
+		
+		surface.setOrigin( pos, surface.originSize() );
+
+		surface.painter().drawSurface(Ui::PointF(0 ,0), *buffer);				
 		return;
 	}
 	
