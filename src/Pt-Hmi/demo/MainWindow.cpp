@@ -111,9 +111,9 @@ void MainWindow::init()
 
 	//Text	
   _textLabel.Margin = Hmi::Margin(10);
+	_textLabel.AutoSize = true;
 	_textLabel.Size = Ui::SizeF(500,30);
-	_textLabel.Caption = std::string("T&his is a Platinum C++");
-  _textLabel.AutoSize = true;
+	_textLabel.Caption = std::string("T&his is a Platinum C++");  
 	_textLabel.Position = Ui::PointF(20,20);
 	_textLabel.ForeColor = Ui::Color(1,0,0,0);
 	_textLabel.UseMnemonic = true;	
