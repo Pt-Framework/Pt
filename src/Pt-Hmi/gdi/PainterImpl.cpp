@@ -542,9 +542,9 @@ void PainterImpl::drawSurface(const Ui::PointF& toF, PaintSurface& surface, cons
 
 	Ui::Point to = Application::instance().fromUnit(fromOrigin(toF));
 
-    // Copy contents from the source bitmap to the destination (=new) bitmap.
-    BitBlt( _surface->deviceContext(), to.x(), to.y(), pixmapRegion.width(), pixmapRegion.height(),
-            surface.impl()->deviceContext(), pixmapRegion.x(), pixmapRegion.y(), SRCCOPY );
+  // Copy contents from the source bitmap to the destination (=new) bitmap.
+  BitBlt( _surface->deviceContext(), to.x(), to.y(), pixmapRegion.width(), pixmapRegion.height(),
+          surface.impl()->deviceContext(), pixmapRegion.x(), pixmapRegion.y(), SRCCOPY );
 
 }
 
@@ -555,7 +555,7 @@ void PainterImpl::drawSurface(const Ui::PointF& toF, PaintSurface& surface)
 	Ui::Size size = Application::instance().fromUnit(surface.size());
 
     BitBlt( _surface->deviceContext(), to.x(), to.y(), size.width(), size.height(), surface.impl()->deviceContext(),  
-	        0, 0, SRCCOPY);
+	        surface.originPos().x(), surface.originPos().y(), SRCCOPY);
 }
 
 void PainterImpl::drawImage(const Ui::PointF& toF, const Ui::Image& image)

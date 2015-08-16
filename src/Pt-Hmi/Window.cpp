@@ -73,8 +73,8 @@ Window::~Window()
 
 
 void Window::onInvalidate()
-{	    		
-	render(windowSurface());		
+{	  	
+  render(windowSurface());		
   _windowManager.render();
 }
 
