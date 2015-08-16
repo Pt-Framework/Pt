@@ -42,7 +42,7 @@ WindowManager::WindowManager(Window& parent)
 , _sizingDirection( ResizeDirection::No )
 , _app( Application::instance() )
 , _titleBarHeight(20)
-, _borderWidth(5)
+, _borderWidth(6)
 , _borderColor(0,0,1)
 , _moving(false)
 , _titleBarColor(0, 0, 1)
@@ -140,14 +140,12 @@ Ui::PointF WindowManager::renderWindowFrame(const ChildWindow* w)
 {
 	Painter& painter = _parent.windowSurface().painter();
 
-  Ui::SizeF winSize = windowSize(w);	
-	winSize.addHeight( -_borderWidth/2 );
-	winSize.addWidth( -_borderWidth/2 );
-
+	Ui::SizeF winSize( w->Size.get().width() + _borderWidth, w->Size.get().height() + _borderWidth/2 + _titleBarHeight);
 	
+
 	//Render Frame
 	Ui::PointF pos( w->Position.get().x() + _borderWidth/2, w->Position.get().y() + _borderWidth/2);
-	Ui::RectF  rect( pos, winSize ) ;
+	Ui::RectF  rect( pos, winSize ) ;	
 
 	Ui::Pen  pen((size_t) _borderWidth, _borderColor);
 	painter.setPen(pen);
@@ -160,7 +158,7 @@ Ui::PointF WindowManager::renderWindowFrame(const ChildWindow* w)
 	painter.setBrush(brush);
 	painter.fillRect(rectTitle);	
 		
-	return Ui::PointF( w->Position.get().x() + _borderWidth, w->Position.get().y() + _titleBarHeight );	
+	return Ui::PointF( pos.x() + _borderWidth/2, pos.y()  +_titleBarHeight );	
 }
 
 
@@ -175,7 +173,7 @@ void WindowManager::render()
 		if( !w->Visible.get() )
    		  continue;
 
-		Ui::PointF clientPos = renderWindowFrame(w);		
+		Ui::PointF clientPos = renderWindowFrame(w);				
 		painter.drawSurface( clientPos, w->windowSurface() );
 	}
 }
@@ -246,8 +244,8 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 	double height = w->Size.get().height();
 	double posX   = w->Position.get().x();
 	double posY   = w->Position.get().y();
-	double deltaX = ( point.x() - _lastSizePoint.x() + 1);
-	double deltaY = ( point.y() - _lastSizePoint.y() + 1);
+	double deltaX = ( point.x() - _lastSizePoint.x());
+	double deltaY = ( point.y() - _lastSizePoint.y());
 
 	switch( _sizingDirection )
 	{
@@ -344,7 +342,7 @@ Ui::SizeF WindowManager::clientSize( double width, double height)
 
 Ui::SizeF WindowManager::windowSize( const ChildWindow* w)
 {
-	return Ui::SizeF( w->Size.get().width() + _borderWidth*2, w->Size.get().height() + _borderWidth + _titleBarHeight);
+	return 	Ui::SizeF( w->Size.get().width() + _borderWidth, w->Size.get().height() + _borderWidth/2 + _titleBarHeight);
 }
 
 

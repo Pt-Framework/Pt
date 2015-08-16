@@ -77,7 +77,7 @@ void MainWindow::init()
 	}
   
 	
-	Position = Ui::PointF(200,200);
+	Position = Ui::PointF(20,20);
 	Size = Ui::SizeF(800,600);
 	ShowTitle = true;	
 	ShowInTaskbar = true;
@@ -91,8 +91,8 @@ void MainWindow::init()
 
   //Panel
   
-	_mainPanel.Size = Ui::SizeF(700,480);
-	_mainPanel.Position = Ui::PointF(15,15);
+	_mainPanel.Size = Ui::SizeF(800,600);
+	_mainPanel.Position = Ui::PointF(20,20);
 	_mainPanel.PanelBorderWidth = 3;
 	_mainPanel.PanelBorderStyle = Pt::Hmi::BorderStyle::Single;  
 
@@ -161,7 +161,6 @@ void MainWindow::init()
 	_childWindow2.Position = Ui::PointF(80,80);
 	_childWindow2.Size = Ui::SizeF(800,600);
 	
-//  _childWindow2.addChild(&_mainPanel);
 
 	addChildWindow(_childWindow1);
 	addChildWindow(_childWindow2);
