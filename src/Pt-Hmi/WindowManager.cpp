@@ -139,25 +139,25 @@ void WindowManager::invalidate()
 
 Ui::PointF WindowManager::renderWindowFrame(const ChildWindow* w)
 {
-	Painter& painter = _parent.windowSurface().painter();
+	const Ui::SizeF& size = w->Size.get();
+	const Ui::SizeF winSize( size.width() + _borderWidth, size.height() + _borderWidth/2.0 + _titleBarHeight);	
 
-	Ui::SizeF winSize( w->Size.get().width() + _borderWidth, w->Size.get().height() + _borderWidth/2.0 + _titleBarHeight);
-	
+	Painter& painter = _parent.windowSurface().painter();
 
 	//Render Frame
 	Ui::PointF pos( w->Position.get().x() + _borderWidth/2.0, w->Position.get().y() + _borderWidth/2.0 );
 	Ui::RectF  rect( pos, winSize ) ;	
 
 	Ui::Pen  pen((size_t) _borderWidth, _borderColor);
-	painter.setPen(pen);
-	painter.drawRect(rect);		
+	painter.setPen( pen );
+	painter.drawRect( rect );		
 	
 	//Render Titel bar
 	Ui::Brush brush( w->isFocused() ? _activeColor : _titleBarColor );
 	Ui::RectF rectTitle( pos, Ui::SizeF(winSize.width(), _titleBarHeight) ) ;
 
-	painter.setBrush(brush);
-	painter.fillRect(rectTitle);	
+	painter.setBrush( brush );
+	painter.fillRect( rectTitle );	
 		
 	return Ui::PointF( pos.x() + _borderWidth/2, pos.y()  +_titleBarHeight );	
 }
@@ -317,13 +317,24 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 
 	Ui::SizeF size(width, height);
 	Ui::PointF pos(posX, posY);
-	
+
+	if( width < w->MinimumSize.get().width() )
+		size.setWidth( w->MinimumSize.get().width() );
+
+	if( height < w->MinimumSize.get().height() )
+		size.setHeight( w->MinimumSize.get().height() );
+				
+	if( width > w->MaximumSize.get().width() )
+		size.setWidth( w->MaximumSize.get().width() );
+
+	if( height > w->MaximumSize.get().height() )
+		size.setHeight( w->MaximumSize.get().height() );
+
 	if( w->Position.get() != pos )
 	{
 		_positionEvent.setPosition(pos);
 		w->eventReceived().send(_positionEvent);	
 	}
-
 
 	if( w->Size.get() != size )
 	{
@@ -334,22 +345,9 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 	_lastSizePoint = point;
 }
 
-
-Ui::SizeF WindowManager::clientSize( double width, double height)
-{
-	return Ui::SizeF( width - _borderWidth*2, height - _borderWidth - _titleBarHeight);
-}
-
-
-Ui::SizeF WindowManager::windowSize( const ChildWindow* w)
-{
-	return 	Ui::SizeF( w->Size.get().width() + _borderWidth*2, w->Size.get().height() + _borderWidth + _titleBarHeight);
-}
-
-
 bool WindowManager::contains(const ChildWindow* w, const Ui::PointF& p)
 {  
-	Ui::SizeF winSize = windowSize(w);
+	Ui::SizeF winSize( w->Size.get().width() + _borderWidth*2, w->Size.get().height() + _borderWidth + _titleBarHeight );
 
 	if( p.x() < winSize.width() && p.x() >= 0 && p.y() < winSize.height() && p.y() >= 0)
 		return true;

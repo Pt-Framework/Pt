@@ -67,6 +67,8 @@ class PaintSurfaceImpl
       return _originSize;
     }
 
+		void reserve( size_t bytes );
+
   private:
 	  Ui::Image _image;	
     Pt::Ui::SizeF _originSize;

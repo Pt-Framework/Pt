@@ -162,8 +162,8 @@ void MainWindow::init()
 	_childWindow2.Size = Ui::SizeF(800,600);
 	
 
-//	addChildWindow(_childWindow1);
-	//addChildWindow(_childWindow2);
+	addChildWindow( _childWindow1 );
+  addChildWindow( _childWindow2 );
 	
 	_childWindow1.Visible = true;
   _childWindow1.invalidate();

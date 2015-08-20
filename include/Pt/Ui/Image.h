@@ -93,8 +93,9 @@ class PT_UI_API Image
 			_height = height;
 			_buffer.resize( ( width * _format->pixelSize() + _stride) * height ); 
 		}
-		
 
+		void reserve( size_t bytes );
+		
 		Color color(size_t x, size_t y) const
 		{
 			return _format->color(pixel(x,y));

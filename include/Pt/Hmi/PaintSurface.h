@@ -43,7 +43,7 @@ class PT_HMI_API PaintSurface
 
 		virtual ~PaintSurface();
 
-		virtual void resize(const Ui::SizeF& size);
+		virtual void resize(const Ui::SizeF& size);		
 
 		virtual Ui::SizeF size() const;
 

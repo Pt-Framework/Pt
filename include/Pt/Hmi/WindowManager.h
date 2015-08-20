@@ -90,9 +90,6 @@ class WindowManager : public Pt::Connectable
 		void updateFocus();		
 		
 		Ui::PointF toClient(const ChildWindow* w, const Ui::PointF& p);
-		Ui::SizeF clientSize( double width, double height);
-		Ui::SizeF windowSize( const ChildWindow* w);		
-		
 
 	private:
 		Window&											_parent;

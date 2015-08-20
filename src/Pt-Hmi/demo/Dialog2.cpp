@@ -72,12 +72,12 @@ void Dialog2::init()
 	addChild(&_mainPanel);
 
   //Ok/Cancel Panel	
-  _okCancelPanel.Margin = Hmi::Margin(6);
+  _okCancelPanel.Margin = Hmi::Margin(5);
   _okCancelPanel.Size = Ui::SizeF(385,80);
   _okCancelPanel.Dock = Hmi::Docking::Bottom;
   _okCancelPanel.PanelBorderStyle = Hmi::BorderStyle::NoBorder;
   _okCancelPanel.FlowLayout = Hmi::FlowLayout::Horizontal;
-  _okCancelPanel.FlowDirection = Hmi::FlowLayoutDirection::RightToLeftBottomToTop;	
+  _okCancelPanel.FlowDirection = Hmi::FlowLayoutDirection::RightToLeftBottomToTop;
 	_okCancelPanel.BackColor = Ui::Color(1,1,0,0);
 	addChild(&_okCancelPanel);
 
@@ -86,16 +86,16 @@ void Dialog2::init()
 	actionCancel += (char) 27;
 	_cancelButton.ShortcutKey = actionCancel;
 	
-  _cancelButton.Margin = Hmi::Margin(2,4,2,4);
-  _cancelButton.Dock = Docking::Right;
+  _cancelButton.Margin = Hmi::Margin(5);
+//  _cancelButton.Dock = Docking::Right;
 	_cancelButton.Size = Ui::SizeF(100,40);
 	_cancelButton.Caption = std::string("Cancel");
 	_cancelButton.Clicked += Pt::slot(*this,&Dialog2::onClosedByButton);
 	_okCancelPanel.addChild(&_cancelButton);
 
 	//OK Button
-  _okButton.Margin = Hmi::Margin(2,4,2,4);
-	_okButton.Dock = Docking::Right;
+  _okButton.Margin = Hmi::Margin(5);
+//	_okButton.Dock = Docking::Right;
 	_okButton.Size = Ui::SizeF(100,40);
 	_okButton.Caption = std::string("OK");
 	_okButton.ShortcutKey = std::string("C//x");

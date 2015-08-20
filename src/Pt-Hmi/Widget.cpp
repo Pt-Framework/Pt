@@ -154,9 +154,9 @@ void Widget::invalidate()
 }
 
 
-void Widget::onLayout()
+void Widget::onLayout( PaintSurface& surface )
 {
-  Ui::SizeF clientSize = Size.get();
+  Ui::SizeF clientSize = surface.originSize();
   double posLeft  = 0;
   double posTop   = 0;
   double posRight  = clientSize.width();
@@ -171,7 +171,7 @@ void Widget::onLayout()
 
     if( FlowLayout.get() == Hmi::FlowLayout::None )
     {
-      switch(child->Dock.get())
+      switch( child->Dock.get() )
       {
         case Docking::None:        
         {
@@ -238,21 +238,20 @@ void Widget::onLayout()
       switch( FlowLayout.get() )
       {
         case Hmi::FlowLayout::Horizontal:
-        {
-                        
+        {                        
           if( FlowDirection.get() == FlowLayoutDirection::LeftToRightTopToBottom )
           {
             point.setX( posLeft );
-            posLeft += child->Size.get().width() + child->Margin.get().left() + child->Margin.get().right();
+            posLeft += child->Size.get().width();
           }
           else
           {
-            posRight -= (child->Size.get().width() + child->Margin.get().left() + child->Margin.get().right() );
+            posRight -= child->Size.get().width();
             point.setX( posRight );              
           }
 
           point.setY( 0 );	
-          updatePosAndSize(*child, Ui::SizeF( child->Size.get().width(), clientSize.height() ), point);
+          updatePosAndSize( *child, Ui::SizeF( child->Size.get().width(), clientSize.height() ), point );
         }
         break;
 
@@ -263,15 +262,15 @@ void Widget::onLayout()
           if( FlowDirection.get() == FlowLayoutDirection::LeftToRightTopToBottom )
           {
             point.setY( posTop );
-            posTop += child->Size.get().height() + child->Margin.get().top() + child->Margin.get().bottom();	
+            posTop += child->Size.get().height();	
           }
           else
           {
-            posBottom -= child->Size.get().height();              
+            posBottom -= child->Size.get().height(); 
             point.setY( posBottom  );	
           }
 
-          updatePosAndSize(*child, Ui::SizeF( clientSize.width(), child->Size.get().height() ), point);
+          updatePosAndSize( *child, Ui::SizeF( clientSize.width(), child->Size.get().height() ), point );
         }
         break;
       }
@@ -283,8 +282,8 @@ void Widget::onLayout()
     Widget* child = fillLayoutChildren[0]; 
     Ui::PointF point(posLeft, posTop);
 
-    const double& width = posRight - posLeft;
-    const double& height = posBottom - posTop;
+    const double width  = posRight - posLeft;
+    const double height = posBottom - posTop;
 
     updatePosAndSize( *child, Ui::SizeF( width, height ), point );
   }
@@ -297,12 +296,11 @@ void Widget::render(PaintSurface& surface)
 		return;
 
 	//Layout children
-	onLayout();	
-
+	onLayout( surface );	
 
 	PaintSurface* buffer = this->widgetBuffer();  
-
-    if( buffer &&  _isValid )
+	
+  if( buffer &&  _isValid )
 	{
 		surface.painter().drawSurface( Ui::PointF(0 ,0), *buffer );
 		return;
@@ -311,13 +309,13 @@ void Widget::render(PaintSurface& surface)
 	if( !buffer )
 	{
 		//Render       
-		onRender(surface);	
+		onRender( surface );	
 	  
 		const Pt::Ui::PointF orgPos = surface.originPos();
 		const Pt::Ui::SizeF orgSize = surface.originSize();
 
 		//Render children
-		for( size_t i = 0; i < _children.size(); ++i)
+		for( size_t i = 0; i < _children.size(); ++i )
 		{
 			Widget* child = _children[i];
 	
@@ -325,33 +323,34 @@ void Widget::render(PaintSurface& surface)
 			const Ui::PointF childGlobPoint = child->fromClient( child->Position.get() );
 			const Ui::PointF drawPos( childGlobPoint.x() + child->Margin.get().left(), childGlobPoint.y() + child->Margin.get().top() );
 			const Ui::SizeF  drawSize( child->Size.get().width() - child->Margin.get().left() - child->Margin.get().right(), 
-				                       child->Size.get().height() - child->Margin.get().top() - child->Margin.get().bottom());
+				                         child->Size.get().height() - child->Margin.get().top() - child->Margin.get().bottom() );
 	  
-			surface.setOrigin(drawPos, drawSize);		
+			surface.setOrigin( drawPos, drawSize );		
 		
-			_children[i]->render(surface);   
+			_children[i]->render( surface );   
 		}
 	
-		surface.setOrigin(orgPos, orgSize);		
+		surface.setOrigin( orgPos, orgSize );		
 	}
 	else
 	{
 		//Render       
-		onRender(*buffer);		  
+		onRender( *buffer );		  
 
 		//Render children
-		for( size_t i = 0; i < _children.size(); ++i)
+		for( size_t i = 0; i < _children.size(); ++i )
 		{
 			Widget* child = _children[i];
 	
 		 	//Calculate Origin		
-			const Ui::PointF drawPos( child->Position.get().x() + child->Margin.get().left(), child->Position.get().y()+ child->Margin.get().top() );
-			const Ui::SizeF  drawSize( child->Size.get().width() - child->Margin.get().left() - child->Margin.get().right(), 
-				                       child->Size.get().height() - child->Margin.get().top() - child->Margin.get().bottom());
+			const Ui::PointF drawPos( child->Position.get().x() + child->Margin.get().left(), child->Position.get().y() + child->Margin.get().top() );
+			
+			Ui::SizeF drawSize( child->Size.get().width()  - child->Margin.get().left() - child->Margin.get().right(), 
+			                    child->Size.get().height() - child->Margin.get().top()  - child->Margin.get().bottom() );
 	  
-			buffer->setOrigin(drawPos, drawSize);		
+			buffer->setOrigin( drawPos, drawSize );		
 		
-			_children[i]->render(*buffer);   
+			child->render(*buffer);   
 		}
 
 		buffer->setOrigin(Ui::PointF(0,0), buffer->size());		
@@ -360,7 +359,6 @@ void Widget::render(PaintSurface& surface)
 	}
 
 	_isValid = true;
-
 }
 
 
@@ -385,7 +383,7 @@ void Widget::onRender( PaintSurface& surface )
 
 	if( HighLight.get() )
 	{       
-		Ui::Brush	brush(HighlightColor.get());
+		Ui::Brush	brush( HighlightColor.get() );
         
 		localPainter.setBrush(brush);
 		localPainter.fillRect(rect);
@@ -404,15 +402,15 @@ void Widget::onRender( PaintSurface& surface )
 		{				
 			case ImageLayout::NoLayout:
 			{
-				localPainter.drawImage(Pt::Ui::PointF(0,0), backImage);
+				localPainter.drawImage( Pt::Ui::PointF(0,0), backImage );
 			}
 			break;
 			
 			case ImageLayout::Tile:
 			{
-				for( size_t x = 0; x < size.width();  x += backImage.width())
+				for( size_t x = 0; x < size.width();  x += backImage.width() )
 				{
-					for( size_t y = 0; y < size.height();  y += backImage.height())
+					for( size_t y = 0; y < size.height();  y += backImage.height() )
 						localPainter.drawImage(Ui::PointF(x,y), backImage);
 				}
 			}
@@ -429,7 +427,7 @@ void Widget::onRender( PaintSurface& surface )
 			case ImageLayout::Strech:
 			{
 				Ui::Image strech = backImage.blockScale( size );
-				localPainter.drawImage(Pt::Ui::PointF(0,0), strech);
+				localPainter.drawImage( Pt::Ui::PointF(0,0), strech );
 			}
 			break;
 
@@ -791,10 +789,10 @@ void Widget::setSize(const Ui::SizeF& size)
 	PaintSurface* buffer = widgetBuffer();
 
 	if( buffer )
-    {
+  {
 		const Ui::SizeF marginSize( _size.width() - Margin.get().left() - Margin.get().right(), _size.height() - Margin.get().top() - Margin.get().bottom() );
 
-     	buffer->resize( marginSize );  
+   	buffer->resize( marginSize );  
 	}
 }
 

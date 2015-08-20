@@ -179,5 +179,9 @@ void Image::setColor( const Color& color )
 	}
 }
 	
+void Image::reserve( size_t bytes )
+{
+	_buffer.reserve( bytes );
+}
   		
 }}

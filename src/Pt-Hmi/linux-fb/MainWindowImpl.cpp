@@ -55,6 +55,8 @@ MainWindowImpl::MainWindowImpl(MainWindow* window)
   // route all events through MainWindow back to this impl
   eventReceived().disconnectAll();
   eventReceived() += Pt::slot( _apiWindow->eventReceived() );
+
+	windowSurface().impl()->reserve( 1920 * 1080 * 4 );
 }
 
 

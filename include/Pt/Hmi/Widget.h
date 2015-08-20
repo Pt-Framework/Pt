@@ -230,7 +230,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 		
 		virtual PaintSurface* widgetBuffer();
 
-		virtual void onLayout();
+		virtual void onLayout( PaintSurface& surface );
 
 		virtual void onPointerInput(const PointerEvent& ev);		
 		virtual void onKeyInput(const KeyEvent& ev);

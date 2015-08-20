@@ -46,21 +46,21 @@ class PT_HMI_API Window : public Widget
 	public:    		
     virtual ~Window();    
 
-    ValueProperty<Ui::SizeF>                  MinimumSize;
-    ValueProperty<Ui::SizeF>                  MaximumSize;
-    ValueProperty<Hmi::WindowStartPosition::Type>       StartPostion;
-    ValueProperty<Hmi::WindowState::Type>               State;    
-    ValueProperty<bool>                            ShowInTaskbar;
-    ValueProperty<bool>                            ShowTitle;
-    ValueProperty<bool>                            ShowMinimizeButton;
-    ValueProperty<bool>                            ShowMaximizeButton;
-    ValueProperty<bool>                            ShowSysMenu;
-    ValueProperty<Hmi::WindowBorder::Type>              Border;
-    ValueProperty<Ui::Image>						           Icon;
-    ValueProperty<bool>                            CanClose;
-    ValueProperty<bool>                            FirstShow;
-    ValueProperty<std::string>                     FocuseMoveKey;      
-		ValueProperty<Hmi::WindowBorder::Type>				 WindowBorder;
+    ValueProperty<Ui::SizeF>												MinimumSize;
+    ValueProperty<Ui::SizeF>												MaximumSize;
+    ValueProperty<Hmi::WindowStartPosition::Type>   StartPostion;
+    ValueProperty<Hmi::WindowState::Type>           State;    
+    ValueProperty<bool>                             ShowInTaskbar;
+    ValueProperty<bool>                             ShowTitle;
+    ValueProperty<bool>                             ShowMinimizeButton;
+    ValueProperty<bool>                             ShowMaximizeButton;
+    ValueProperty<bool>                             ShowSysMenu;
+    ValueProperty<Hmi::WindowBorder::Type>          Border;
+    ValueProperty<Ui::Image>						            Icon;
+    ValueProperty<bool>                             CanClose;
+    ValueProperty<bool>                             FirstShow;
+    ValueProperty<std::string>                      FocuseMoveKey;      
+		ValueProperty<Hmi::WindowBorder::Type>				  WindowBorder;
 				
 		void setWindowParent(Window* parent);
 

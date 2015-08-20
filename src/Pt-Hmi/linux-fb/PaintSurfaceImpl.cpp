@@ -69,4 +69,9 @@ Ui::SizeF PaintSurfaceImpl::size() const
 	return Ui::SizeF(_image.width(), _image.height());
 }
 
+void PaintSurfaceImpl::reserve( size_t bytes )
+{
+	_image.reserve( bytes );
+}
+
 }}
