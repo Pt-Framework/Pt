@@ -447,30 +447,30 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 
 	const std::vector<DeviceButton>& button = ev.buttons();
 
-	Ui::PointF point( ev.x(), ev.y() );
-
-	if( point.x() <= 0 ) 
-		point.setX( 0);
-
-	if( point.y() <= 0 ) 
-		point.setY(0);
-
 	if( button[0].state() != DeviceButton::Pressed )
 	{		
 		_moving = false;
 		return;
 	}	
 
+	Ui::PointF point( ev.x(), ev.y() );
+
+	if( point.x() <= 0 ) 
+		point.setX(0);
+
+	if( point.y() <= 0 ) 
+		point.setY(0);
+
 	//moving window
-	const double dtX =  ev.x() - _movingOffset.x();
-	const double dtY =  ev.y() - _movingOffset.y();
+	const double dtX =  point.x() - _movingOffset.x();
+	const double dtY =  point.y() - _movingOffset.y();
 	Ui::PointF newPos( w->Position.get().x() + dtX, w->Position.get().y() + dtY);
 		
 	_positionEvent.setPosition(newPos);
 
 	w->eventReceived().send( _positionEvent );
 
-	_movingOffset = Ui::PointF( ev.x() , ev.y() );
+	_movingOffset = Ui::PointF( point.x() , point.y() );
 	invalidate();
 }
 
