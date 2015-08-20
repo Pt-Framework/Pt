@@ -74,7 +74,7 @@ class WindowManager : public Pt::Connectable
 		}		
 
   protected:
-    virtual Ui::PointF renderWindowFrame(const ChildWindow* w);				 
+    virtual Ui::PointF renderFrame(const ChildWindow* w);				 
 
   private:
 		void invalidate();	

@@ -33,9 +33,7 @@ namespace Hmi{
 
 ChildWindow::ChildWindow()
 {
-
   BackColor = Ui::Color(0, 1, 1, 1);	
-
 }
 
 

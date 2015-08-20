@@ -137,8 +137,8 @@ void WindowManager::invalidate()
 }
 
 
-Ui::PointF WindowManager::renderWindowFrame(const ChildWindow* w)
-{
+Ui::PointF WindowManager::renderFrame(const ChildWindow* w)
+{	
 	const Ui::SizeF& size = w->Size.get();
 	const Ui::SizeF winSize( size.width() + _borderWidth, size.height() + _borderWidth/2.0 + _titleBarHeight);	
 
@@ -174,7 +174,7 @@ void WindowManager::render()
 		if( !w->Visible.get() )
    		  continue;
 
-		Ui::PointF clientPos = renderWindowFrame(w);				
+		const Ui::PointF clientPos = renderFrame(w);				
 		painter.drawSurface( clientPos, w->windowSurface() );
 	}
 }
@@ -221,7 +221,8 @@ void WindowManager::onKeyInput( const Pt::Hmi::KeyEvent& keyEvent )
 	if( w == 0 )
 		return;
 
-	w->eventReceived().send( keyEvent );		
+	if( w->Enabled.get() )
+			w->eventReceived().send( keyEvent );		
 }
 
 
@@ -448,6 +449,12 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 
 	Ui::PointF point( ev.x(), ev.y() );
 
+	if( point.x() <= 0 ) 
+		point.setX( 0);
+
+	if( point.y() <= 0 ) 
+		point.setY(0);
+
 	if( button[0].state() != DeviceButton::Pressed )
 	{		
 		_moving = false;
@@ -455,10 +462,10 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 	}	
 
 	//moving window
-	double dtX =  ev.x() - _movingOffset.x();
-	double dtY =  ev.y() - _movingOffset.y();
+	const double dtX =  ev.x() - _movingOffset.x();
+	const double dtY =  ev.y() - _movingOffset.y();
 	Ui::PointF newPos( w->Position.get().x() + dtX, w->Position.get().y() + dtY);
-
+		
 	_positionEvent.setPosition(newPos);
 
 	w->eventReceived().send( _positionEvent );
@@ -503,6 +510,14 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 		return;
 	}
 
+	if( !childWindow->Enabled.get() )
+	{
+	  _app.setCursor( &Cursor::defaultCursor() );
+		_sizingDirection = ResizeDirection::No;
+		_moving = false;
+		return;
+	}
+
 	Pt::Hmi::PointerEvent localMouseEvent = mouseEvent;
 
 	localMouseEvent.setX( mouseEvent.x() - childWindow->Position.get().x() - _borderWidth ) ;
@@ -525,8 +540,8 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 		
 		if( !childWindow->contains( Ui::PointF( localMouseEvent.x(), localMouseEvent.y() ) ) )
 		  return;       
-		
-		  childWindow->eventReceived().send( localMouseEvent );
+				
+		 childWindow->eventReceived().send( localMouseEvent );
 
 		 return;
 	}
