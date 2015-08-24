@@ -527,7 +527,7 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 
 	if( childWindow == 0 )
 	{
-    _app.setCursor( &Cursor::defaultCursor() );
+	    _app.setCursor( &Cursor::defaultCursor() );
 		_sizingDirection = ResizeDirection::No;
 		_moving = false;
 		return;
@@ -536,9 +536,9 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 	if( !childWindow->Enabled.get() )
 	{
 	  _app.setCursor( &Cursor::defaultCursor() );
-		_sizingDirection = ResizeDirection::No;
-		_moving = false;
-		return;
+	  _sizingDirection = ResizeDirection::No;
+	  _moving = false;
+	   return;
 	}
 
 	Pt::Hmi::PointerEvent localMouseEvent = mouseEvent;
