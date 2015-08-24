@@ -482,7 +482,7 @@ void Widget::onPointerLeaved()
 
 		
 void Widget::onPointerInput(const PointerEvent& ev)
-{	
+{		
 	Ui::PointF local = toClient( Ui::PointF( ev.x(), ev.y() ) );
 	
 	if( ! Enabled.get() )

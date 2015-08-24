@@ -88,6 +88,7 @@ class WindowManager : public Pt::Connectable
 		
 		bool updateActive( const Pt::Hmi::PointerEvent& mouseEvent );
 		void updateFocus();		
+		void clearFocus();
 		
 		Ui::PointF toClient(const ChildWindow* w, const Ui::PointF& p);
 

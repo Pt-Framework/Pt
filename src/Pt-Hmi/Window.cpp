@@ -61,9 +61,8 @@ Window::Window(Window* parent)
 	eventReceived() += Pt::slot(*this, &Window::onKeyInput);
 	eventReceived() += Pt::slot(*this, &Window::onPointerInput);	
 
-    eventReceived() += Pt::slot( _windowManager, &WindowManager::onPointerInput );
-    eventReceived() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
-
+	eventReceived() += Pt::slot( _windowManager, &WindowManager::onPointerInput );
+	eventReceived() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
 }
 
 
@@ -119,6 +118,12 @@ Window* Window::windowParent() const
 }
 
 
+void Window::onPointerInput(const PointerEvent& ev)
+{	
+	Widget::onPointerInput(ev);
+}
+
+
 void Window::onKeyInput(const KeyEvent& ev)
 {
 	if( !Enabled.get() )
@@ -128,7 +133,7 @@ void Window::onKeyInput(const KeyEvent& ev)
 	{
 		if(  ev.shift() )
 		{		
-				if( ! focusPrev() )
+				if( !focusPrev() )
 					focusPrev();
 		}
 		else

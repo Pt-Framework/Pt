@@ -48,6 +48,7 @@
 #include "FillPolygon.h"
 #include "Fill.h"
 #include "Stroke.h"
+#include <Pt/Ui/ClipPolygon.h>
 
 namespace Pt {
 namespace Ui {
@@ -273,38 +274,26 @@ void ImagePainter::drawImage( const  PointF& to, const Image& sourceImage )
 	if( sourceImage.format() != _image.format() )
 		throw std::logic_error( "wrong image format");
 
-  //Cliping  X,width
-  Pt::ssize_t startX =  to.x();
-  Pt::ssize_t stopX  =  to.x() + sourceImage.width();
-    
-  if( startX < 0 )
-      startX = 0;
-    
-  if( static_cast<size_t>(startX) > _image.width() )
-      startX = _image.width();
-
-  if( stopX < 0)
-      stopX = 0;
-    
-  if( static_cast<size_t>(stopX) > _image.width() )
-      stopX = _image.width();
-
-		//Cliping Y,height
-  Pt::ssize_t startY =  to.y();
-  Pt::ssize_t stopY  =  to.y() + sourceImage.height();
-        
-  if( startY < 0 )
-      startY = 0;
-    
-  if( static_cast<size_t>(startY) > _image.height() )
-      startY = _image.height();
-
-  if( stopY < 0 )
-      stopY = 0;
-    
-  if( static_cast<size_t>(stopY) > _image.height() )
-      stopY = _image.height();
+	ClipPolygon cliping;
 	
+	std::vector<Ui::PointF> cliped;
+	RectF clipArea( PointF(0,0), SizeF( _image.width(), _image.height() ) );
+
+	
+	cliped.push_back(to);
+	cliped.push_back(PointF(to.x() + sourceImage.width(), to.y() ) );
+	cliped.push_back(PointF(to.x() + sourceImage.width(), to.y()  + sourceImage.height() ) );
+	cliped.push_back(PointF(to.x(), to.y()  + sourceImage.height() ) );
+
+	cliping(cliped, clipArea);
+ 
+  const Pt::size_t startX =  cliped[0].x();
+  const Pt::size_t stopX  =  cliped[1].x();
+ 
+	//Cliping Y,height
+  const Pt::size_t startY =  cliped[0].y();
+  const Pt::size_t stopY  =  cliped[3].y();
+         
   //Render
   switch( _renderMode )
   {

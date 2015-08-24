@@ -103,6 +103,7 @@ class PT_HMI_API Window : public Widget
 		}
 
 		virtual void onKeyInput(const KeyEvent& ev);			
+		virtual void onPointerInput(const PointerEvent& ev);	
     virtual void onInvalidate();  			
 		virtual void setClosed( bool close );				
     virtual void setSize(const Ui::SizeF& size);
