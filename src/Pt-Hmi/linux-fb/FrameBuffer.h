@@ -88,9 +88,10 @@ protected:
 
 
     char* buffer()
-		{ 
-			return &((char*)_buffer)[_backBufferOffset]; 
-		}
+	{ 
+		char* base = (char*) _buffer;
+		return  _yoffset == 0  ? base : base + _bufferSize;
+	}
 
     size_t size() const
     {
@@ -113,7 +114,7 @@ protected:
 		fb_var_screeninfo	_screenInfo;
 		fb_fix_screeninfo	_fixedInfo;        
 		void*							_buffer;
-    size_t            _backBufferOffset;  
+    size_t            _yoffset;  
     size_t            _bufferSize;
     size_t		        _depth;
 };

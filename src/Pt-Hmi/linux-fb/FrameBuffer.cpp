@@ -60,18 +60,21 @@ FrameBuffer::FrameBuffer()
 		throw std::runtime_error("FBIOGET_VSCREENINFO failed" + PT_SOURCEINFO);
 
 
-  _screenInfo.yres_virtual = _screenInfo.yres * 2;
+  _screenInfo.vsync_len = _screenInfo.yres * 2;
 
   if( 0 > ioctl(_fd, FBIOPUT_VSCREENINFO, &_screenInfo) )
 		throw std::runtime_error("FBIOPUT_VSCREENINFO  failed" + PT_SOURCEINFO);
 
 	// Get the fixed state
-	if( ioctl(_fd, FBIOGET_VSCREENINFO, &_fixedInfo) < 0 )
+	if( ioctl(_fd, FBIOGET_FSCREENINFO, &_fixedInfo) < 0 )
 		throw std::runtime_error("FBIOGET_FSCREENINFO failed" + PT_SOURCEINFO);
     
 	// Memory map the display
+	std::clog<<"nen:" << _fixedInfo.smem_len/(1024.0 * 1024.0) << std::endl;
+	std::clog<<"line:"<< _fixedInfo.line_length << std::endl;
+
 	_bufferSize         = _fixedInfo.line_length * _screenInfo.yres;
-  _backBufferOffset   = _screenInfo.yres;
+	_yoffset   			= _screenInfo.yres;
 	_buffer             =  mmap(NULL, _bufferSize * 2, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);	
 }
 
@@ -100,7 +103,7 @@ void FrameBuffer::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const U
 	static const size_t planePixelSize = 4;
 	const size_t bufferPixelSize = depth() / 8;
 	const size_t bufferWidth  = std::min<size_t>(  pos.x() + w, width() ); 
-  const size_t bufferHeight = std::min<size_t>(  pos.y() + h, height() ); 
+    const size_t bufferHeight = std::min<size_t>(  pos.y() + h, height() ); 
 	size_t yCursor = 0;
 	size_t xCursor = 0;	
 
@@ -174,13 +177,13 @@ void FrameBuffer::sync()
 {
   struct fb_var_screeninfo variable_info;
 
-	ioctl( _fd, FBIOGET_VSCREENINFO, &variable_info ); 	
+   ioctl( _fd, FBIOGET_VSCREENINFO, &variable_info ); 	
   
-  variable_info.yoffset = _backBufferOffset;
+  variable_info.yoffset = _yoffset;
 
   ioctl( _fd, FBIOPAN_DISPLAY, &variable_info );
 
-  _backBufferOffset =  _backBufferOffset == 0 ? _screenInfo.yres: 0;
+  _yoffset =  _yoffset == 0 ? _screenInfo.yres: 0;
 }
 
 }} // namespace
