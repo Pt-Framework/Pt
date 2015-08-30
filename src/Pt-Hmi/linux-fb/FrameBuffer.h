@@ -86,12 +86,15 @@ class FrameBuffer
 
 protected:
 
-
     char* buffer()
-	{ 
-		char* base = (char*) _buffer;
-		return  _yoffset == 0  ? base : base + _bufferSize;
+	{ 		
+		
+		if( !_doubleBuffer )
+			return _buffer;
+
+		return  _yoffset == 0  ? _buffer : _buffer+ _bufferSize;
 	}
+
 
     size_t size() const
     {
@@ -113,10 +116,11 @@ protected:
 		int								_fd;
 		fb_var_screeninfo	_screenInfo;
 		fb_fix_screeninfo	_fixedInfo;        
-		void*							_buffer;
+		char*							_buffer;
     size_t            _yoffset;  
     size_t            _bufferSize;
     size_t		        _depth;
+	bool _doubleBuffer;
 };
 
 } // namespace

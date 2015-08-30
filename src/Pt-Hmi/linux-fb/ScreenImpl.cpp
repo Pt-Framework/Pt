@@ -70,10 +70,10 @@ void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 	if( Cursor.get().width() == 0 )
 		return;	
 
-	saveCursorBackImage(mouseEvent);
+   saveCursorBackImage(mouseEvent);
 
-	_frameBuffer.bitBlit( &Cursor.get().andRgb888()[0], Cursor.get().width(), Cursor.get().height(), Ui::Point( ( int) mouseEvent.x(), (int) mouseEvent.y()), FrameBuffer::AndOp );
-	_frameBuffer.bitBlit( &Cursor.get().xorRgb888()[0], Cursor.get().width(), Cursor.get().height(), Ui::Point( (int) mouseEvent.x(), (int) mouseEvent.y()), FrameBuffer::XorOp );
+  _frameBuffer.bitBlit( &Cursor.get().andRgb888()[0], Cursor.get().width(), Cursor.get().height(), Ui::Point( ( int) mouseEvent.x(), (int) mouseEvent.y()), FrameBuffer::AndOp );
+  _frameBuffer.bitBlit( &Cursor.get().xorRgb888()[0], Cursor.get().width(), Cursor.get().height(), Ui::Point( (int) mouseEvent.x(), (int) mouseEvent.y()), FrameBuffer::XorOp );
   _frameBuffer.sync();
 }
 

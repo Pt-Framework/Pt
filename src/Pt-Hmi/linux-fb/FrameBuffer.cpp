@@ -30,9 +30,16 @@
 #include <fcntl.h>
 #include <sys/ioctl.h> 
 #include <sys/mman.h>
+#include <stdio.h>
+#include <errno.h>
+
+#define PAGE_SHIFT 12
+#define PAGE_SIZE (1UL << PAGE_SHIFT)
+#define PAGE_MASK (~(PAGE_SIZE-1)) 
 
 namespace Pt {
 namespace Hmi {
+
 
 
   /*_fixedInfo.type;   // 0 -> Packed pixels
@@ -50,6 +57,7 @@ namespace Hmi {
 */
 
 FrameBuffer::FrameBuffer()
+: _doubleBuffer( true )
 {  		 
 	_fd = open ("/dev/fb0", O_RDWR);
 
@@ -59,23 +67,26 @@ FrameBuffer::FrameBuffer()
 	if( 0 > ioctl(_fd, FBIOGET_VSCREENINFO, &_screenInfo) )
 		throw std::runtime_error("FBIOGET_VSCREENINFO failed" + PT_SOURCEINFO);
 
-
-  _screenInfo.vsync_len = _screenInfo.yres * 2;
-
-  if( 0 > ioctl(_fd, FBIOPUT_VSCREENINFO, &_screenInfo) )
-		throw std::runtime_error("FBIOPUT_VSCREENINFO  failed" + PT_SOURCEINFO);
-
 	// Get the fixed state
 	if( ioctl(_fd, FBIOGET_FSCREENINFO, &_fixedInfo) < 0 )
 		throw std::runtime_error("FBIOGET_FSCREENINFO failed" + PT_SOURCEINFO);
     
 	// Memory map the display
-	std::clog<<"nen:" << _fixedInfo.smem_len/(1024.0 * 1024.0) << std::endl;
+	std::clog<<"nen:"<< _fixedInfo.smem_len << std::endl;
 	std::clog<<"line:"<< _fixedInfo.line_length << std::endl;
-
 	_bufferSize         = _fixedInfo.line_length * _screenInfo.yres;
-	_yoffset   			= _screenInfo.yres;
-	_buffer             =  mmap(NULL, _bufferSize * 2, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);	
+	std::clog<<"Size:"<< _bufferSize << std::endl;
+	_yoffset   = _screenInfo.yres;
+
+	_buffer  = (char*)  mmap(NULL, _bufferSize * 2, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);	
+
+	if( _buffer == (void*) -1 ) 
+	{
+		_buffer  =  (char*) mmap(NULL, _bufferSize , PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);	
+		_doubleBuffer =  false;
+	}
+
+	std::clog<<"Buffer adr:"<< (void*) _buffer << std::endl;
 }
 
   
@@ -154,20 +165,18 @@ void FrameBuffer::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const U
 
 void FrameBuffer::grabImage( Ui::Image& image, const Ui::Point& pos,  const Ui::Size& size)
 {
-  const size_t pixelSizeInByte = depth() / 8;		
+    const size_t pixelSizeInByte = depth() / 8;		
 
-  const size_t yMax = std::min<size_t>(pos.y() + size.height(), height() );	
+    const size_t yMax = std::min<size_t>(pos.y() + size.height(), height() );	
 	const size_t widthInPixel = ((pos.x() + size.width())  < width() ?  size.width() : ( width()  - pos.x() ) );
-	const size_t widthInByte = widthInPixel * pixelSizeInByte;	
-
-	const Pt::uint8_t* bufferData = ( const Pt::uint8_t* ) _buffer;
+	const size_t widthInByte = widthInPixel * pixelSizeInByte;		
 	
-	image.resize(  size.width() * size.height(), 0 );	
+	image.resize(  size.width() , size.height() );	
 	
 	for( size_t y = pos.y(); y < yMax; ++y )
 	{
 		const size_t lineOffsetBuffer  = y * _fixedInfo.line_length  + (pos.x() * pixelSizeInByte);
-		memcpy( image.pixel(0,y), &bufferData[lineOffsetBuffer], widthInByte );
+		memcpy( image.pixel(0,y - pos.y()), &_buffer[lineOffsetBuffer], widthInByte );
 	}
 }
 
@@ -175,6 +184,9 @@ void FrameBuffer::grabImage( Ui::Image& image, const Ui::Point& pos,  const Ui::
 
 void FrameBuffer::sync()
 {
+	if( !_doubleBuffer )
+		return;
+
   struct fb_var_screeninfo variable_info;
 
    ioctl( _fd, FBIOGET_VSCREENINFO, &variable_info ); 	
