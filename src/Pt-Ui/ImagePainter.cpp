@@ -299,16 +299,18 @@ void ImagePainter::drawImage( const  PointF& to, const Image& sourceImage )
     yTargetBegin = 0;
   }
 
-  const int lineEndOffset = to.x() + sourceImage.width();
-
   int lineLength = sourceImage.width();   
 
-  if( lineEndOffset >  _image.width()  )
-      lineLength = _image.width() - xTargetBegin;
+  if( to.x()  < 0 )
+    lineLength += to.x();
 
-  if( lineEndOffset  <  0 )
-    return;
-    
+  if( (xTargetBegin + lineLength) > _image.width()  )
+      lineLength -= (xTargetBegin + lineLength) - _image.width() ;
+ 
+  if( lineLength  <=  0 )
+    return;  
+
+
   const int endYOffset = to.y() + sourceImage.height();
 
   int lines = sourceImage.height();   
