@@ -54,8 +54,7 @@ ScreenImpl::~ScreenImpl()
 
 
 void ScreenImpl::saveCursorBackImage( const Pt::Hmi::PointerEvent& mouseEvent )
-{
-	const size_t pixelSizeInByte = _frameBuffer.depth() / 8;		
+{	
 	_cursorPos    = Ui::Point( mouseEvent.x(), mouseEvent.y() );	
   _frameBuffer.grabImage( _cursorBuffer, _cursorPos, Ui::Size( Cursor.get().width(), Cursor.get().height() ) );
 }

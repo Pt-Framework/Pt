@@ -78,6 +78,12 @@ class FrameBuffer
     
     void sync();
 
+    size_t strideInBytes() const
+    {
+        return  _fixedInfo.line_length - ( width() *  depth() /8  );
+    }
+
+
 protected:
 
 
@@ -108,7 +114,7 @@ protected:
 		fb_fix_screeninfo	_fixedInfo;        
 		void*							_buffer;
     size_t            _backBufferOffset;  
-    size_t            _bufferSize  
+    size_t            _bufferSize;
     size_t		        _depth;
 };
 
