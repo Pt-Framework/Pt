@@ -48,7 +48,6 @@
 #include "FillPolygon.h"
 #include "Fill.h"
 #include "Stroke.h"
-#include <Pt/Ui/ClipPolygon.h>
 
 namespace Pt {
 namespace Ui {
@@ -274,40 +273,73 @@ void ImagePainter::drawImage( const  PointF& to, const Image& sourceImage )
 	if( sourceImage.format() != _image.format() )
 		throw std::logic_error( "wrong image format");
 
-	ClipPolygon cliping;
-	
-	std::vector<Ui::PointF> cliped;
-	RectF clipArea( PointF(0,0), SizeF( _image.width(), _image.height() ) );
+  //source
+  int xSourceBegin = 0;
+  int ySourceBegin = 0;
 
-	
-	cliped.push_back(to);
-	cliped.push_back(PointF(to.x() + sourceImage.width(), to.y() ) );
-	cliped.push_back(PointF(to.x() + sourceImage.width(), to.y()  + sourceImage.height() ) );
-	cliped.push_back(PointF(to.x(), to.y()  + sourceImage.height() ) );
+  //target
+  int xTargetBegin = to.x();
+  int yTargetBegin = to.y();
 
-	cliping(cliped, clipArea);
- 
-  const Pt::size_t startX =  cliped[0].x();
-  const Pt::size_t stopX  =  cliped[1].x();
- 
-	//Cliping Y,height
-  const Pt::size_t startY =  cliped[0].y();
-  const Pt::size_t stopY  =  cliped[3].y();
-         
+  if( to.x() >= _image.width() )
+     return;
+
+  if( to.x() < 0 )
+  {
+    xSourceBegin = -to.x();
+    xTargetBegin = 0;
+  }
+
+  if( to.y() > _image.height() )
+     return;
+
+  if( to.y() < 0 )
+  {
+    ySourceBegin = -to.y();
+    yTargetBegin = 0;
+  }
+
+  const int lineEndOffset = xTargetBegin + sourceImage.width();
+
+  int lineSize = sourceImage.width();   
+
+  if( lineEndOffset >  _image.width()  )
+      lineSize = _image.width() - xTargetBegin;
+
+  if( lineEndOffset  <  0 )
+    return;
+    
+  const int endYOffset = yTargetBegin + sourceImage.height();
+
+  int lines = sourceImage.height();   
+
+  if( endYOffset >  _image.height()  )
+      lines = _image.height() - yTargetBegin;
+
+  if( endYOffset  <  0 )
+    return;
+  
+
+  const Pt::uint8_t* scanLineSource = sourceImage.pixel( xSourceBegin, ySourceBegin );
+  Pt::uint8_t* scanLineTarget = _image.pixel( xTargetBegin, yTargetBegin );
+
+  const int targetStride = _image.width() * _image.format().pixelSize() +  _image.stride();
+  const int sourceStride = sourceImage.width() * sourceImage.format().pixelSize() +  sourceImage.stride();
+
+
   //Render
   switch( _renderMode )
   {
     case RenderMode::NoAlpha:
-    {
-      for( Pt::ssize_t y = startY; y < stopY; ++y )
-      {				
-        Pt::uint8_t* lineOffsetTarget = (Pt::uint8_t*) _image.pixel(0, y);
-        lineOffsetTarget += startX * _image.format().pixelSize();
+    {	//Copy to new image	          
+      int i = 0;
 
-        const Pt::uint8_t* lineOffsetSource = (const Pt::uint8_t*) sourceImage.pixel(0, y - startY);		
-
-        memcpy( lineOffsetTarget, lineOffsetSource, (stopX - startX) * sourceImage.format().pixelSize() );
-      }
+			while( i < lines )
+			{                
+        memcpy( scanLineTarget, scanLineSource, lineSize );
+        scanLineSource += sourceStride;
+        scanLineTarget += targetStride;
+			}	
     }
     break;
 
@@ -320,6 +352,7 @@ void ImagePainter::drawImage( const  PointF& to, const Image& sourceImage )
     break;
   }
 }
+
 
 void ImagePainter::drawImage( const  PointF& to, const Image& sourceImage, const Region& regionIn )
 {

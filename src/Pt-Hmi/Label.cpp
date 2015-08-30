@@ -211,7 +211,9 @@ void Label::onRender(PaintSurface& paintSurface)
 	{			
 		int index = Widget::getMnemonicIndex( Caption.get() );
 		
-		if( index != std::string::npos  && ((index + 1) < (int) caption.size()) )
+		if( index != std::string::npos 
+      
+      && ((index + 1) < (int) caption.size()) )
 		{	
 			std::string subString(  caption.begin(), caption.begin() + index );
 

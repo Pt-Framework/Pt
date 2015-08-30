@@ -62,7 +62,7 @@ class WindowManager : public Pt::Connectable
 		
 		void render();
 		
-		void onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent );
+		void onPointerInput( const Pt::Hmi::PointerEvent& pointerEvent );
 
 		void onKeyInput( const Pt::Hmi::KeyEvent& keyEvent );		 
 		

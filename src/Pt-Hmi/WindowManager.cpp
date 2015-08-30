@@ -219,12 +219,17 @@ bool WindowManager::updateActive( const Pt::Hmi::PointerEvent& mouseEvent )
 		if( w == active() )
 		{
 			if( mouseEvent.buttons()[0].state() == DeviceButton::Pressed )
+			{
 				updateFocus();
+			}
+
 			return true;
 		}
 
 		if( mouseEvent.buttons()[0].state() != DeviceButton::Pressed )
+		{
 			return false;
+		}
 					
 		activate( w );
 		updateFocus();
@@ -232,7 +237,9 @@ bool WindowManager::updateActive( const Pt::Hmi::PointerEvent& mouseEvent )
 	}	 
 
 	if( mouseEvent.buttons()[0].state() == DeviceButton::Pressed )
+	{
 		clearFocus();
+	}
 
 	return false;
 }

@@ -163,7 +163,7 @@ void MainWindow::init()
 	
 
 	addChildWindow( _childWindow1 );
-  addChildWindow( _childWindow2 );
+  _childWindow1.addChildWindow( _childWindow2 );
 	
 	_childWindow1.Visible = true;
   _childWindow1.invalidate();

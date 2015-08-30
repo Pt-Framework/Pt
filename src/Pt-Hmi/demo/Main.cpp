@@ -1,7 +1,9 @@
 #include "MainWindow.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Main.h>
+#include <Pt/Ui/Point.h>
 #include <Pt/System/Logger.h>
+#include <Pt/Ui/ClipPolygon.h>
 
 int main(int argc, char* args[])
 {	

@@ -27,6 +27,7 @@
 #ifndef PT_UI_CLIPPOLYGON_H
 #define PT_UI_CLIPPOLYGON_H
 
+#include <Pt/Ui/Api.h>
 #include <Pt/Ui/Point.h>
 #include <Pt/Ui/Rect.h>
 
@@ -41,7 +42,7 @@ namespace Ui{
     of polygons against a specified area. The polygon may have
     a complex shape.
  */
-class ClipPolygon
+class PT_UI_API ClipPolygon
 {
     public:
         /** @brief Default constructor

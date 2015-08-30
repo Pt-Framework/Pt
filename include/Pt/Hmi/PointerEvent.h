@@ -36,11 +36,44 @@
 namespace Pt{
 namespace Hmi{
 
+
+class PointerState 
+{
+	public:
+			enum Type 
+			{            	
+				PressToRelease,
+				ReleaseToPress
+			};
+
+	public:
+			PointerState(PointerState::Type v) 
+			: _value(v) 
+			{
+			}
+			
+			operator PointerState::Type() const
+			{ 
+				return _value; 
+			}
+
+			PointerState& operator=(PointerState::Type v) 
+			{
+					_value = v;
+					return *this;
+			}
+
+	private:
+			PointerState::Type _value;
+};
+
+
 class PT_HMI_API PointerEvent : public Pt::BasicEvent<PointerEvent>
 {
 public:	
 	explicit PointerEvent()
 	: _buttons(3)
+	, _state( PointerState::PressToRelease)
 	{
 	}
 
@@ -98,11 +131,22 @@ public:
 		return _controlDial;
 	}	
 
+	PointerState pointerState() const
+	{
+		return _state;
+	}
+
+	void setPointerState( PointerState s )
+	{
+		_state = s;
+	}
+
 private:
 	double _x;
 	double _y;
-	std::vector<DeviceButton>	  _buttons;
+	std::vector<DeviceButton>	     _buttons;
 	std::vector<DeviceControlDial> _controlDial;	
+	PointerState                   _state;
 };
 
 }}
