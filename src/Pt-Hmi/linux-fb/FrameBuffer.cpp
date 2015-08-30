@@ -59,8 +59,14 @@ FrameBuffer::FrameBuffer()
 	if( 0 > ioctl(_fd, FBIOGET_VSCREENINFO, &_screenInfo) )
 		throw std::runtime_error("FBIOGET_VSCREENINFO failed" + PT_SOURCEINFO);
 
+
+  _screenInfo.yres_virtual = _screenInfo.yres * 2;
+
+  if( 0 > ioctl(_fd, FBIOPUT_VSCREENINFO, &_screenInfo) )
+		throw std::runtime_error("FBIOPUT_VSCREENINFO  failed" + PT_SOURCEINFO);
+
 	// Get the fixed state
-	if( ioctl(_fd, FBIOGET_FSCREENINFO, &_fixedInfo) < 0 )
+	if( ioctl(_fd, FBIOGET_VSCREENINFO, &_fixedInfo) < 0 )
 		throw std::runtime_error("FBIOGET_FSCREENINFO failed" + PT_SOURCEINFO);
     
 	// Memory map the display
