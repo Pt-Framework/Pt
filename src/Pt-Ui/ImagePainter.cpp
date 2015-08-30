@@ -301,10 +301,10 @@ void ImagePainter::drawImage( const  PointF& to, const Image& sourceImage )
 
   const int lineEndOffset = xTargetBegin + sourceImage.width();
 
-  int lineSize = sourceImage.width();   
+  int lineLength = sourceImage.width();   
 
   if( lineEndOffset >  _image.width()  )
-      lineSize = _image.width() - xTargetBegin;
+      lineLength = _image.width() - xTargetBegin;
 
   if( lineEndOffset  <  0 )
     return;
@@ -319,22 +319,20 @@ void ImagePainter::drawImage( const  PointF& to, const Image& sourceImage )
   if( endYOffset  <  0 )
     return;
   
-
   const Pt::uint8_t* scanLineSource = sourceImage.pixel( xSourceBegin, ySourceBegin );
   Pt::uint8_t* scanLineTarget = _image.pixel( xTargetBegin, yTargetBegin );
 
   const int targetStride = _image.width() * _image.format().pixelSize() +  _image.stride();
   const int sourceStride = sourceImage.width() * sourceImage.format().pixelSize() +  sourceImage.stride();
 
+  const std::size_t lineSize = lineLength * _image.format().pixelSize();
 
   //Render
   switch( _renderMode )
   {
     case RenderMode::NoAlpha:
     {	//Copy to new image	          
-      int i = 0;
-
-			while( i < lines )
+			for(int i = 0; i < lines; ++i )
 			{                
         memcpy( scanLineTarget, scanLineSource, lineSize );
         scanLineSource += sourceStride;
