@@ -25,30 +25,23 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include "ScreenImpl.h"
+#include "ApplicationImpl.h"
+#include "FrameBuffer.h"
+#include "PaintSurfaceImpl.h"
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/System/Clock.h>
-#include "PaintSurfaceImpl.h"
-#include <algorithm>
-#include <fcntl.h>
-#include <sys/ioctl.h> 
-#include <sys/mman.h>
-#include <unistd.h>
 #include <Pt/Hmi/Application.h>
-#include "ApplicationImpl.h"
+#include <algorithm>
 
 namespace Pt{
 namespace Hmi{
 
 
 ScreenImpl::ScreenImpl()
-: _screenInfo( Application::instance().impl()->screenInfo() )
-, _fixedInfo(  Application::instance().impl()->fixedInfo() )
-, _depth( _screenInfo.bits_per_pixel )
-, _buffer( Application::instance().impl()->frameBuffer()  )
-, _bufferSize( _fixedInfo.line_length * _screenInfo.yres ) 
+: _frameBuffer( Application::instance().impl()->frameBuffer() )
 {  
 	Visible = true;	
-	Size = Ui::SizeF( _screenInfo.xres,  _screenInfo.yres );
+	Size = Ui::SizeF( _frameBuffer.width(),  _frameBuffer.height() );
 	BackColor = Ui::Color(170/255.0,170/255.0,170/255.0);	
 	eventReceived() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
 }
@@ -60,109 +53,38 @@ ScreenImpl::~ScreenImpl()
 }
 
 
-void ScreenImpl::bitBlit(const std::vector<Pt::uint8_t>& plane, size_t w, size_t h, const Ui::Point& pos, BlitOp op)
-{
-	static const size_t planePixelSize = 4;
-	const size_t bufferPixelSize = _depth / 8;
-	const size_t bufferHeight = std::min<size_t>(  pos.y() + h, _screenInfo.yres ); 
-	const size_t bufferWidth  = std::min<size_t>(  pos.x() + w, _screenInfo.xres ); 
-
-	size_t yCursor = 0;
-	size_t xCursor = 0;	
-
-	for( size_t yBuffer = pos.y(); yBuffer < bufferHeight; ++yBuffer, ++yCursor )
-	{
-		const size_t lineOffsetBuffer  = yBuffer * _fixedInfo.line_length;
-		const size_t lineOffsetCursor  = yCursor * (w * planePixelSize);
-		
-		xCursor = 0;
-
-		for( size_t xBuffer = pos.x(); xBuffer < bufferWidth; ++xBuffer, ++xCursor  )
-		{			
-			Pt::uint8_t* pointerBuffer = &((Pt::uint8_t*)_buffer)[lineOffsetBuffer + (xBuffer * bufferPixelSize)];
-			const Pt::uint8_t* pointerCursor = &plane[lineOffsetCursor + (xCursor * planePixelSize)];
-
-			switch( _depth )
-			{
-				case 32:
-				{
-					Pt::uint32_t* pixelBuffer = (Pt::uint32_t*) pointerBuffer;
-					const Pt::uint32_t* pixelCursor = (const Pt::uint32_t*) pointerCursor;
-
-					switch( op )											
-					{
-						case AndOp:
-							*pixelBuffer &= *pixelCursor;
-						break;
-
-						case XorOp:
-							*pixelBuffer ^= *pixelCursor;
-						break;
-
-						case CopyOp:
-							*pixelBuffer = *pixelCursor;
-						break;
-					}
-				}
-				break;
-
-				case 16:
-          //TODO:
-				break;
-			}
-		}
-	}
-}
-
-
 void ScreenImpl::saveCursorBackImage( const Pt::Hmi::PointerEvent& mouseEvent )
 {
-	const size_t pixelSizeInByte = _depth / 8;		
+	const size_t pixelSizeInByte = _frameBuffer.depth() / 8;		
 	_cursorPos    = Ui::Point( mouseEvent.x(), mouseEvent.y() );	
-	_cursorWidth  = Cursor.get().width();
-	_cursorHeight = Cursor.get().height();
-	
-	const size_t yMax = std::min<size_t>(_cursorPos.y() + _cursorHeight, _screenInfo.yres );	
-	const size_t widthInPixel = ((_cursorPos.x() + _cursorWidth)  < _screenInfo.xres ? _cursorWidth : ( _screenInfo.xres - _cursorPos.x() ) );
-	const size_t widthInByte = widthInPixel * pixelSizeInByte;	
-	const Pt::uint8_t* bufferData = ( const Pt::uint8_t* ) _buffer;
-	
-	_cursorBuffer.resize( _cursorWidth * _cursorHeight * pixelSizeInByte, 0 );	
-	
-	for( size_t y = _cursorPos.y(); y < yMax; ++y )
-	{
-		const size_t lineOffsetBuffer  = y * _fixedInfo.line_length  + (_cursorPos.x() * pixelSizeInByte);
-	    const size_t lineOffsetCursor  = ( y - _cursorPos.y() )  * widthInByte;     
-		memcpy( &_cursorBuffer[lineOffsetCursor], &bufferData[lineOffsetBuffer], widthInByte );
-	}
+  _frameBuffer.grabImage( _cursorBuffer, _cursorPos, Ui::Size( Cursor.get().width(), Cursor.get().height() ) );
 }
 
 
 void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 {	
-	if( _cursorBuffer.size() != 0 )
-		bitBlit( _cursorBuffer, _cursorWidth, _cursorHeight, _cursorPos, CopyOp );
+	if( _cursorBuffer.width() != 0  && _cursorBuffer.height() != 0 )
+		_frameBuffer.bitBlit( _cursorBuffer.pixel(0,0),_cursorBuffer.width(), _cursorBuffer.height(), _cursorPos, FrameBuffer::CopyOp );
 
 	_windowManager.onPointerInput(mouseEvent);	
-
-	_cursorBuffer.clear();
 
 	if( Cursor.get().width() == 0 )
 		return;	
 
 	saveCursorBackImage(mouseEvent);
 
-  //Todo: only one blit 
-	bitBlit( Cursor.get().andRgb888(), Cursor.get().width(), Cursor.get().height(), Ui::Point( ( int) mouseEvent.x(), (int) mouseEvent.y()), AndOp );
-	bitBlit( Cursor.get().xorRgb888(), Cursor.get().width(), Cursor.get().height(), Ui::Point( (int) mouseEvent.x(), (int) mouseEvent.y()), XorOp );
+	_frameBuffer.bitBlit( &Cursor.get().andRgb888()[0], Cursor.get().width(), Cursor.get().height(), Ui::Point( ( int) mouseEvent.x(), (int) mouseEvent.y()), FrameBuffer::AndOp );
+	_frameBuffer.bitBlit( &Cursor.get().xorRgb888()[0], Cursor.get().width(), Cursor.get().height(), Ui::Point( (int) mouseEvent.x(), (int) mouseEvent.y()), FrameBuffer::XorOp );
+  _frameBuffer.sync();
 }
 
 
 void ScreenImpl::onInvalidate()
 {		
-	Window::onInvalidate();
-	const Ui::Image& image = windowSurface().impl()->image();
-	memcpy( _buffer, image.pixel(0, 0), _bufferSize);	    
+	Window::onInvalidate(); 
+
+  _frameBuffer.bitBlit( windowSurface().impl()->image() );
+  _frameBuffer.sync();
 }
 
 

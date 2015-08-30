@@ -24,11 +24,10 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_ApplicationImpl_h
-#define Pt_Hmi_ApplicationImpl_h
+#ifndef Pt_Hmi_FrameBuffer_h
+#define Pt_Hmi_FrameBuffer_h
 
 #include "InputDevice.h"
-#include "FrameBuffer.h"
 #include <Pt/System/MainLoop.h>
 #include <Pt/Ui/Point.h>
 #include <Pt/Ui/Size.h>
@@ -36,97 +35,81 @@
 #include <Pt/Ui/Image.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Cursor.h>
+#include <linux/fb.h>
 
 namespace Pt {
 namespace Hmi {
 
-class ApplicationImpl : public Pt::System::MainLoop
+class FrameBuffer
 {
-    public:
-    ApplicationImpl();
-
-    ~ApplicationImpl();
-
-
-		Ui::PointF toUnit(const Ui::Point& value)
+  public:
+    enum BlitOp
 		{
-			return Ui::PointF(value.x(), value.y());
-		}
+			CopyOp,
+			AndOp,
+			XorOp
+		};
 
-		Ui::SizeF toUnit(const Ui::Size& value)
-		{
-			return Ui::SizeF(value.width(), value.height());
-		}
+    FrameBuffer();
 
-		double toUnit(int value)
-		{
-			return value;
-		}
+    ~FrameBuffer();
+		
 
-		Ui::Point fromUnit(const Ui::PointF& value)
-		{
-			return Ui::Point(value.x(), value.y());
-		}
-
-		Ui::Size fromUnit(const Ui::SizeF& value)
-		{
-			return Ui::Size(value.width(), value.height());
-		}
-
-		Ui::Rect fromUnit(const Ui::RectF& value)
-		{
-			return Ui::Rect(Ui::Point( value.x(), value.y()) , Ui::Size(value.width(), value.height()));
-		}
-
-		int fromUnit(double value)
-		{
-			return (int) value;
-		}
-
-		double unitSizeInch() const
-		{
-			return 0;
-		}
-			
-		double unitSizeMm() const
-		{
-			return 0;
-		}
-
-		void setResolution(double dpi)
-		{
-		}
-
-		double resolutionDPI() const
-		{
-			return 0;
-		}
-
-		Pt::Signal<const struct input_event&>& inputEvent()
-		{
-			return _inputEvent;
-		}
-
-		void nextEvent();
-
-		void setCursor( const Hmi::Cursor* cursor );
-
-    const FrameBuffer& frameBuffer() const
+    size_t width() const
     {
-      return _frameBuffer;
+        return _screenInfo.xres;
     }
 
-    FrameBuffer& frameBuffer()
+    size_t height() const
     {
-      return _frameBuffer;
+      return _screenInfo.yres;
+    }	
+
+    size_t depth() const
+    {
+       return _screenInfo.bits_per_pixel;
     }
 
-  protected:
-		Pt::Signal<const struct input_event&> _inputEvent;
-		InputDevice _inputDevice;
-		InputDevice _inputDevice2;		
-    FrameBuffer _frameBuffer;
+    void bitBlit( const Pt::uint8_t* , size_t width, size_t height, const Ui::Point& pos, BlitOp op );
 
+    void bitBlit( const Ui::Image& image );
+    
+    void grabImage( Ui::Image& image, const Ui::Point& pos,  const Ui::Size& size);
+    
+    void sync();
+
+protected:
+
+
+    char* buffer()
+		{ 
+			return &((char*)_buffer)[_backBufferOffset]; 
+		}
+
+    size_t size() const
+    {
+      return _bufferSize;
+    }
+
+
+	  const fb_var_screeninfo& screenInfo() const
+		{
+			return _screenInfo;
+		}
+
+		const fb_fix_screeninfo& fixedInfo() const
+		{
+			return _fixedInfo;
+		}    
+
+	protected:
+		int								_fd;
+		fb_var_screeninfo	_screenInfo;
+		fb_fix_screeninfo	_fixedInfo;        
+		void*							_buffer;
+    size_t            _backBufferOffset;  
+    size_t            _bufferSize  
+    size_t		        _depth;
 };
 
 } // namespace

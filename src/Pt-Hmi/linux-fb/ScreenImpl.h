@@ -31,11 +31,12 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/PaintSurface.h>
-#include <linux/fb.h>
 #include <Pt/Ui/Color.h>
 
 namespace Pt{
 namespace Hmi{
+
+class FrameBuffer;
 
 class ScreenImpl : public Window
 {
@@ -60,28 +61,14 @@ class ScreenImpl : public Window
 		virtual void onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent );
 
 
-	private:   				
-		enum BlitOp
-		{
-			CopyOp,
-			AndOp,
-			XorOp
-		};
-
-		void bitBlit(const std::vector<Pt::uint8_t>& plane, size_t width, size_t height, const Ui::Point& pos, BlitOp op);
+	private:   						
 		void saveCursorBackImage(const Pt::Hmi::PointerEvent& mouseEvent);
 
 	private:
-		std::vector<Pt::uint8_t>	_cursorBuffer;
-		Ui::Point			            _cursorPos;
-		size_t									  _cursorWidth;	
-		size_t									  _cursorHeight;	
-		const fb_var_screeninfo&	_screenInfo;
-		const fb_fix_screeninfo&	_fixedInfo;
-		size_t		_depth;
-		char*     _buffer; 
-		size_t _bufferSize;
-	    PaintSurface _windowSurface;
+		Ui::Image	      _cursorBuffer;
+		Ui::Point			  _cursorPos;
+    PaintSurface    _windowSurface;
+    FrameBuffer&    _frameBuffer;  
 };
 
 }}

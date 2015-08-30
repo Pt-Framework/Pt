@@ -309,8 +309,7 @@ void ImagePainter::drawImage( const  PointF& to, const Image& sourceImage )
  
   if( lineLength  <=  0 )
     return;  
-
-
+   
   const int endYOffset = to.y() + sourceImage.height();
 
   int lines = sourceImage.height();   
