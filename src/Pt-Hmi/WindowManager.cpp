@@ -297,7 +297,7 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 
 	Ui::PointF point( ev.x(), ev.y() );
 
-	if( button[0].state() != DeviceButton::Pressed )
+	if( button[_actionButton].state() != DeviceButton::Pressed )
 	{
 		_sizingDirection = ResizeDirection::No;
 		_lastSizePoint =  point;
