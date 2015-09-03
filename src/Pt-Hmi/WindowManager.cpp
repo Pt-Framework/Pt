@@ -140,7 +140,7 @@ void WindowManager::invalidate()
 
 Ui::PointF WindowManager::renderFrame( const ChildWindow* w )
 {	
-	const Ui::SizeF& size = w->Size.get();
+	const Ui::SizeF& size =  w->windowSurface().surface.originSize();
 	const Ui::SizeF winSize( size.width() + _borderWidth, size.height() + _borderWidth/2.0 + _titleBarPanel.Size.get().height() );	
 
 	Painter& painter = _parent.windowSurface().painter();
@@ -190,7 +190,7 @@ Ui::PointF WindowManager::renderFrame( const ChildWindow* w )
 
     _titleLabel.Caption    = w->Caption.get();
 
-    _titleLabel.Visible      = w->ShowTitle.get();
+    _titleLabel.Visible    = w->ShowTitle.get();
 
     _titleBarPanel.render( _parent.windowSurface() );	  
 
