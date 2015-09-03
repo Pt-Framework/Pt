@@ -44,30 +44,53 @@ WindowManager::WindowManager(Window& parent)
 , _sizingDirection( ResizeDirection::No )
 , _app( Application::instance() )
 , _borderWidth(5)
-, _borderColor(0,0,1)
 , _moving(false)
-, _titleBarColor(0, 0, 1)
-, _activeColor(1, 0, 0)
+, _inactiveColor(0.8, 0.8, 0.8)
+, _activeColor(0.7, 0.7, 0.7)
 , _pointerLastState( DeviceButton::Released )
 , _focusOnPointerOver( false )
 , _actionButton(0)
 {
-  _closeButton.Size = Ui::SizeF(24,16 );
-  _closeButton.Caption = "X";
+	Margin buttonMargin =  Margin(1,1,1,3);
+
+	_closeButton.PanelBorderRoundEdge = false;
+  _closeButton.Dock    = Docking::Right;
+	_closeButton.Margin  = buttonMargin;
+	_closeButton.Size		 = Ui::SizeF(20,5 );
+  _closeButton.Caption = "x";
+	_closeButton.TextAlign = Align::TopCenter;
   _closeButton.Visible = true;
   _closeButton.Enabled = true;
-  _closeButton.Dock    = Docking::Right;
-  _closeButton.Margin  = Margin(1);
+ 
+  
+	_maxButton.PanelBorderRoundEdge = false;
+	_maxButton.Dock    = Docking::Right;
+	_maxButton.Margin  = buttonMargin;
+	_maxButton.Size		 = Ui::SizeF(20,5 );
+  _maxButton.Caption = "+";
+  _maxButton.Visible = true;
+  _maxButton.Enabled = true;
+
+	_minButton.PanelBorderRoundEdge = false;
+	_minButton.Dock    = Docking::Right;
+	_minButton.Margin  = buttonMargin;
+	_minButton.Size		 = Ui::SizeF(20,5 );
+  _minButton.Caption = "-";
+  _minButton.Visible = true;
+  _minButton.Enabled = true;
 
   _titleLabel.Dock = Docking::Fill;
   _titleLabel.TextAlign = Align::MidleCenter;
   _titleLabel.Visible = true;
 
+	_titleBarPanel.BackColor = _inactiveColor;
   _titleBarPanel.Position = Ui::PointF(0,0);
   _titleBarPanel.Size = Ui::SizeF( 16, 20 );
 
   _titleBarPanel.addChild( &_titleLabel );  
   _titleBarPanel.addChild( &_closeButton );
+	_titleBarPanel.addChild( &_maxButton );
+	_titleBarPanel.addChild( &_minButton );
   _titleBarPanel.Visible = true;
   
 }
@@ -141,7 +164,9 @@ void WindowManager::invalidate()
 Ui::PointF WindowManager::renderFrame( ChildWindow* w )
 {	
 	const Ui::SizeF size =  w->Size.get();
-	const Ui::SizeF winSize( size.width() + _borderWidth, size.height() + _borderWidth/2.0 + _titleBarPanel.Size.get().height() );	
+	const Ui::SizeF winSize( size.width() + _borderWidth, size.height() + _borderWidth + _titleBarPanel.Size.get().height() );	
+	
+	Ui::Color color = w->isWindowFocused() ? _activeColor : _inactiveColor;  
 
 	Painter& painter = _parent.windowSurface().painter();
 
@@ -155,7 +180,7 @@ Ui::PointF WindowManager::renderFrame( ChildWindow* w )
       case WindowBorder::Sizeable:
       {	        
 	        Ui::RectF  rect( pos, winSize ) ;	
-	        Ui::Pen    pen((size_t) _borderWidth, _borderColor);
+	        Ui::Pen    pen((size_t) _borderWidth, color);
 
 	        painter.setPen( pen );
 	        painter.drawRect( rect );		
@@ -167,7 +192,7 @@ Ui::PointF WindowManager::renderFrame( ChildWindow* w )
       case WindowBorder::ToolSizeable:
       {
 	        Ui::RectF  rect( pos, winSize ) ;	
-	        Ui::Pen    pen((size_t) _borderWidth, _borderColor);
+	        Ui::Pen    pen((size_t) _borderWidth, color);
 	        painter.setPen( pen );
 	        painter.drawRect( rect );		
       }
@@ -183,21 +208,19 @@ Ui::PointF WindowManager::renderFrame( ChildWindow* w )
     Ui::SizeF   size = Ui::SizeF( winSize.width() - _borderWidth, _titleBarPanel.Size.get().height() );
     
     _parent.windowSurface().setOrigin( to,size );
-
-    _titleBarPanel.Size      = size;
-    _titleBarPanel.BackColor = w->isWindowFocused() ? _activeColor : _titleBarColor;  
-    _titleLabel.BackColor = _titleBarPanel.BackColor;
-
+			
+    _titleLabel.BackColor = color;
     _titleLabel.Caption    = w->Caption.get();
-
     _titleLabel.Visible    = w->ShowTitle.get();
 
+    _titleBarPanel.Size      = size;
+    _titleBarPanel.BackColor = color;  
     _titleBarPanel.render( _parent.windowSurface() );	  
 
     _parent.windowSurface().setOrigin( saveOrgPos, saveOrgSize );    
   }
 
-  return Ui::PointF( pos.x() + _borderWidth/2, pos.y()  + _titleBarPanel.Size.get().height() );	 
+  return Ui::PointF( pos.x() + _borderWidth/2, pos.y()  + _titleBarPanel.Size.get().height()  + _borderWidth/2 );	 
 }
 
 

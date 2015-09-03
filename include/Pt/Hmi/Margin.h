@@ -35,12 +35,12 @@ namespace Hmi{
 class Margin
 {
   public:
-    Margin(const double& all)
+    Margin(double all)
     {
       setAll(all);
     }
 
-    Margin(const double& left, const double& top, const double& right, const double& bottom)
+    Margin(const double left, const double top, const double right, const double bottom)
     {
       assign( left, top, right, bottom );
     }
@@ -50,7 +50,7 @@ class Margin
       assign( 0, 0, 0, 0);
     }
 
-    void assign( const double& left, const double& top, const double& right, const double& bottom )
+    void assign( double left, double top, double right, double bottom )
     {
       _left = left;
       _top = top;
@@ -58,47 +58,47 @@ class Margin
       _bottom = bottom;
     }
 
-    const double& left() const
+    double left() const
     {
       return _left;
     }
     
-    void setLeft(const double& left)
+    void setLeft(double left)
     {
       _left = left;
     }
 
-    const double& top() const
+    double top() const
     {
       return _top;
     }
     
-    void setTop(const double& top)
+    void setTop(double top)
     {
       _top = top;
     } 
 
-    const double& right() const
+    double right() const
     {
       return _right;
     }
     
-    void setRight(const double& right)
+    void setRight(double right)
     {
       _right = right;
     } 
 
-    const double& bottom() const
+    double bottom() const
     {
       return _bottom;
     }
     
-    void setBottom(const double& bottom)
+    void setBottom(double bottom)
     {
       _bottom = bottom;
     } 
 
-    void setAll(const double& value)
+    void setAll(double value)
     {
       assign( value, value, value, value );
     }

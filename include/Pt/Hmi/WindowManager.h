@@ -122,8 +122,7 @@ class WindowManager : public Pt::Connectable
     Application&              _app;  
 		FocusEvent								_focusEvent;	
 		double										_borderWidth;
-		Ui::Color						      _borderColor; 
-    Ui::Color						      _titleBarColor; 
+    Ui::Color						      _inactiveColor; 
     Ui::Color						      _activeColor; 
 		SizeEvent									_sizeEvent;
 		PositionEvent             _positionEvent; 	
@@ -133,6 +132,8 @@ class WindowManager : public Pt::Connectable
     bool                      _focusOnPointerOver;    
     size_t                    _actionButton;  
     Button                    _closeButton;
+		Button                    _maxButton;
+		Button                    _minButton;
     Panel                     _titleBarPanel;
     Label                     _titleLabel;
 };

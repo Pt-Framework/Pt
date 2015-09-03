@@ -95,7 +95,7 @@ void MainWindow::init()
 	_mainPanel.Position = Ui::PointF(20,20);
 	_mainPanel.PanelBorderWidth = 3;
 	_mainPanel.PanelBorderStyle = Pt::Hmi::BorderStyle::Single;  
-
+	_mainPanel.Dock = Docking::Fill;
 	{
 	/*
 		std::stringstream memoryStream;
@@ -155,17 +155,19 @@ void MainWindow::init()
 	_childWindow2.addChild(&_closeButton);
 	
   
-  _childWindow1.Cursor = Hmi::Cursor::waitCursor();
+//  _childWindow1.Cursor = Hmi::Cursor::waitCursor();
 	_childWindow1.Position = Ui::PointF(20,20);
 	_childWindow1.Size = Ui::SizeF(200,300);
 	_childWindow2.Position = Ui::PointF(80,80);
 	_childWindow2.Size = Ui::SizeF(800,600);
+	_childWindow2.BackColor = _mainPanel.BackColor;
   _childWindow2.Caption = "Child 2";
 	
 
 	addChildWindow( _childWindow1 );
   _childWindow1.addChildWindow( _childWindow2 );
 	
+	_childWindow1.BackColor = this->BackColor;
 	_childWindow1.Visible = true;
   _childWindow1.Caption = "Child 1";
   _childWindow1.Icon = Icon;
@@ -175,7 +177,7 @@ void MainWindow::init()
 	_childWindow2.Visible = true;
   _childWindow2.invalidate();  
 
-	addChild(&_mainPanel);
+	_childWindow2.addChild(&_mainPanel);
 
 	BackgroundImage = _drawBuffer;
 }
