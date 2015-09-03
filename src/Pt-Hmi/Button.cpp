@@ -195,7 +195,7 @@ void Button::onShortcutKey( KeyEvent::KeyState state )
 		case ButtonType::Press:
 		{
 			ButtonState = (state == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;				
-			setFocus( true );
+			setWidgetFocus( true );
 
 		}
 		break;
@@ -205,7 +205,7 @@ void Button::onShortcutKey( KeyEvent::KeyState state )
 			if( state == KeyEvent::KeyDown )
 			{
 				ButtonState = (ButtonState.get() == DeviceButton::Pressed) ? DeviceButton::Released : DeviceButton::Pressed;											
-				setFocus( true );
+				setWidgetFocus( true );
 			}
 		}
 		break;
@@ -278,10 +278,10 @@ void Button::onPointerInput(const PointerEvent& ev)
 		{
 			case ButtonType::Press:
 			{
-				if(!isFocused())
+				if(!isWidgetFocused())
 				{
 					genOutput = true;						
-					setFocus(true);															
+					setWidgetFocus(true);															
 				}
 
 				switch(ev.buttons()[0].state())
@@ -313,9 +313,9 @@ void Button::onPointerInput(const PointerEvent& ev)
 
 			case ButtonType::Toggle:
 			{
-				if(!isFocused())	
+				if(!isWidgetFocused())	
 				{
-					setFocus(true);			
+					setWidgetFocus(true);			
 					genOutput = true;
 				}
 
@@ -359,7 +359,7 @@ void Button::onRender(PaintSurface& paintSurface)
 	Pt::Hmi::Painter& localPainter = paintSurface.painter();
   Ui::SizeF size = paintSurface.originSize();
        
-	if( Armed.get() || isFocused() )
+	if( Armed.get() || isWidgetFocused() )
 	{
 		size.addHeight(-5);
 		size.addWidth(-5);

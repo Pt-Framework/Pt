@@ -33,6 +33,7 @@
 #include <Pt/Ui/Pen.h>
 #include <Pt/Ui/Brush.h>
 #include <Pt/Ui/Point.h>
+#include <Pt/String.h>
 #include <cmath>
 
 namespace Pt {
@@ -42,13 +43,33 @@ WindowManager::WindowManager(Window& parent)
 : _parent( parent )
 , _sizingDirection( ResizeDirection::No )
 , _app( Application::instance() )
-, _titleBarHeight(20)
-, _borderWidth(6)
+, _borderWidth(5)
 , _borderColor(0,0,1)
 , _moving(false)
 , _titleBarColor(0, 0, 1)
-, _activeColor(0, 0, 0.5)
+, _activeColor(1, 0, 0)
+, _pointerLastState( DeviceButton::Released )
+, _focusOnPointerOver( false )
+, _actionButton(0)
 {
+  _closeButton.Size = Ui::SizeF(24,16 );
+  _closeButton.Caption = "X";
+  _closeButton.Visible = true;
+  _closeButton.Enabled = true;
+  _closeButton.Dock    = Docking::Right;
+  _closeButton.Margin  = Margin(1);
+
+  _titleLabel.Dock = Docking::Fill;
+  _titleLabel.TextAlign = Align::MidleCenter;
+  _titleLabel.Visible = true;
+
+  _titleBarPanel.Position = Ui::PointF(0,0);
+  _titleBarPanel.Size = Ui::SizeF( 16, 20 );
+
+  _titleBarPanel.addChild( &_titleLabel );  
+  _titleBarPanel.addChild( &_closeButton );
+  _titleBarPanel.Visible = true;
+  
 }
 
 
@@ -76,72 +97,40 @@ ChildWindow* WindowManager::active()
 }
 
 
-void WindowManager::clearFocus()
-{
-	for( size_t i = 0; i < _windows.size(); ++i )			
-	{
-		if( _windows[i]->isFocused() )
-		{
-			_focusEvent.setFocus(false);
-			_windows[i]->eventReceived().send(_focusEvent);
-		}
-	}		
-}
-
-
-void WindowManager::updateFocus()
-{
-	for( size_t i = 0; i < _windows.size() - 1; ++i )			
-	{
-		if( _windows[i]->isFocused() )
-		{
-			_focusEvent.setFocus(false);
-			_windows[i]->eventReceived().send(_focusEvent);
-		}
-	}							
-			
-	if( !_windows[ _windows.size() - 1 ]->isFocused())
-	{
-		_focusEvent.setFocus(true);
-		_windows[ _windows.size() - 1 ]->eventReceived().send( _focusEvent );
-	}
-}
-
-
-
 void WindowManager::add( ChildWindow* w )
 {
 	_windows.push_back(w);
-
-	updateFocus();
-
-	invalidate();
+	invalidate();  
 }
 
 
 void WindowManager::remove( ChildWindow* w )
 {
-	std::vector<ChildWindow*>::iterator it = std::find(_windows.begin(), _windows.end(), w);
+	std::vector<ChildWindow*>::iterator it = std::find( _windows.begin(), _windows.end(), w );
 
 	if( it == _windows.end() )
 		return;
 
-	_windows.erase( it );		
+	_windows.erase( it );		    
+  
 	invalidate();
 }
 
 
 void WindowManager::activate( ChildWindow* w )
 {
-	std::vector<ChildWindow*>::iterator it = std::find(_windows.begin(), _windows.end(), w);
+	std::vector<ChildWindow*>::iterator it = std::find( _windows.begin(), _windows.end(), w );
 
 	if( it == _windows.end() )
 		return;
 
 	_windows.erase( it );	
-	_windows.push_back(w);
+	_windows.push_back( w );    
 
-	updateFocus();	
+  FocusEvent focused( true );
+
+  w->eventReceived().send( focused );
+  invalidate();
 }
 
 
@@ -151,29 +140,66 @@ void WindowManager::invalidate()
 }
 
 
-Ui::PointF WindowManager::renderFrame(const ChildWindow* w)
+Ui::PointF WindowManager::renderFrame( const ChildWindow* w )
 {	
 	const Ui::SizeF& size = w->Size.get();
-	const Ui::SizeF winSize( size.width() + _borderWidth, size.height() + _borderWidth/2.0 + _titleBarHeight);	
+	const Ui::SizeF winSize( size.width() + _borderWidth, size.height() + _borderWidth/2.0 + _titleBarPanel.Size.get().height() );	
 
 	Painter& painter = _parent.windowSurface().painter();
 
-	//Render Frame
-	Ui::PointF pos( w->Position.get().x() + _borderWidth/2.0, w->Position.get().y() + _borderWidth/2.0 );
-	Ui::RectF  rect( pos, winSize ) ;	
-
-	Ui::Pen  pen((size_t) _borderWidth, _borderColor);
-	painter.setPen( pen );
-	painter.drawRect( rect );		
+  Ui::PointF pos( w->Position.get().x() + _borderWidth/2.0, w->Position.get().y() + _borderWidth/2.0 );
 	
-	//Render Titel bar
-	Ui::Brush brush( w->isFocused() ? _activeColor : _titleBarColor );
-	Ui::RectF rectTitle( pos, Ui::SizeF(winSize.width(), _titleBarHeight) ) ;
+  switch( w->Border.get() )
+  {
+      case WindowBorder::Dialog:
+      case WindowBorder::DialogSizeable:
+      case WindowBorder::Fixed:
+      case WindowBorder::Sizeable:
+      {	        
+	        Ui::RectF  rect( pos, winSize ) ;	
+	        Ui::Pen    pen((size_t) _borderWidth, _borderColor);
 
-	painter.setBrush( brush );
-	painter.fillRect( rectTitle );	
-		
-	return Ui::PointF( pos.x() + _borderWidth/2, pos.y()  +_titleBarHeight );	
+	        painter.setPen( pen );
+	        painter.drawRect( rect );		
+      }
+
+      break;
+
+      case WindowBorder::Tool:
+      case WindowBorder::ToolSizeable:
+      {
+	        Ui::RectF  rect( pos, winSize ) ;	
+	        Ui::Pen    pen((size_t) _borderWidth, _borderColor);
+	        painter.setPen( pen );
+	        painter.drawRect( rect );		
+      }
+      break;
+  }
+
+  if( w->Border.get() != WindowBorder::NoBorder )
+  {
+    Ui::PointF saveOrgPos = _parent.windowSurface().originPos();
+    Ui::SizeF  saveOrgSize = _parent.windowSurface().originSize();
+
+    Ui::PointF  to( pos.x() + _borderWidth/2, pos.y() + _borderWidth/2 ); 
+    Ui::SizeF   size = Ui::SizeF( winSize.width() - _borderWidth, _titleBarPanel.Size.get().height() );
+    
+    _parent.windowSurface().setOrigin( to,size );
+
+    _titleBarPanel.Size      = size;
+    _titleBarPanel.BackColor = w->isWindowFocused() ? _activeColor : _titleBarColor;  
+    _titleLabel.BackColor = _titleBarPanel.BackColor;
+
+    _titleLabel.Caption    = w->Caption.get();
+
+    _titleLabel.Visible      = w->ShowTitle.get();
+
+    _titleBarPanel.render( _parent.windowSurface() );	  
+
+    _parent.windowSurface().setOrigin( saveOrgPos, saveOrgSize );    
+  }
+
+  return Ui::PointF( pos.x() + _borderWidth/2, pos.y()  + _titleBarPanel.Size.get().height() );	 
 }
 
 
@@ -196,64 +222,70 @@ void WindowManager::render()
 
 Ui::PointF WindowManager::toClient(const ChildWindow* w, const Ui::PointF& p)
 {
-		return Ui::PointF( p.x() - w->Position.get().x() - _borderWidth ,  p.y() - w->Position.get().y() - _borderWidth - _titleBarHeight ) ;
+  return Ui::PointF( p.x() - w->Position.get().x() - _borderWidth ,  p.y() - w->Position.get().y() - _borderWidth - _titleBarPanel.Size.get().height() ) ;
 }
 
 
-bool WindowManager::updateActive( const Pt::Hmi::PointerEvent& mouseEvent )
+bool WindowManager::updateActive( const Pt::Hmi::PointerEvent& pointerEvent )
 {	
 	for( int i = _windows.size() - 1;  i > -1; --i )
 	{
 		ChildWindow* w = _windows[i];
 
-		Ui::PointF local( mouseEvent.x() - w->Position.get().x() , mouseEvent.y() - w->Position.get().y() );
+		Ui::PointF local( pointerEvent.x() - w->Position.get().x() , pointerEvent.y() - w->Position.get().y() );
 
 		if( !contains( w, local ) )
 			continue;
-	
-		const Ui::PointF& client = toClient( w, Ui::PointF( mouseEvent.x(), mouseEvent.y() ) );
+
+		const Ui::PointF& client = toClient( w, Ui::PointF( pointerEvent.x(), pointerEvent.y() ) );
 				 
-		if( w->hasPointer()  && !w->contains( client ) && w->Enabled.get() )
+		if( w->hasPointer()  && !w->contains( client ) && w->Enabled.get() && !_moving && _sizingDirection == ResizeDirection::No )
 			w->onPointerLeaved();
 							
 		if( w == active() )
-		{
-			if( mouseEvent.buttons()[0].state() == DeviceButton::Pressed )
-			{
-				updateFocus();
-			}
-
 			return true;
-		}
 
-		if( mouseEvent.buttons()[0].state() != DeviceButton::Pressed )
-		{
-			return false;
-		}
+		if( pointerEvent.buttons()[_actionButton].state() != DeviceButton::Pressed )
+			return false;    
 					
-		activate( w );
-		updateFocus();
+		activate( w );    
 		return true;
 	}	 
-
-	if( mouseEvent.buttons()[0].state() == DeviceButton::Pressed )
-	{
-		clearFocus();
-	}
 
 	return false;
 }
 
 
-void WindowManager::onKeyInput( const Pt::Hmi::KeyEvent& keyEvent )
-{
-	ChildWindow* w = active();
+Window* WindowManager::getFosusedWindow( WindowManager* manager )
+{     
+  for( size_t i = 0; i < manager->windows().size(); ++i )
+  {
+    Window* child = manager->windows()[i];
+    
+    if( child->isWindowFocused() )
+        return child;
 
-	if( w == 0 )
-		return;
+    Window* focused = getFosusedWindow( &child->windowManager() );
+
+    if( focused != 0 )
+      return focused;
+  }
+
+  return 0;
+}
+
+
+bool WindowManager::keyInput( const Pt::Hmi::KeyEvent& keyEvent )
+{
+  Window* w = getFosusedWindow(this);
+
+  if( w == 0 )
+    return false;
 
 	if( w->Enabled.get() )
 			w->eventReceived().send( keyEvent );		
+
+   return true;
 }
 
 
@@ -374,12 +406,13 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 		w->eventReceived().send( _sizeEvent );
 	}
 
-	_lastSizePoint = point;
+	_lastSizePoint = point;  
 }
+
 
 bool WindowManager::contains(const ChildWindow* w, const Ui::PointF& p)
 {  
-	Ui::SizeF winSize( w->Size.get().width() + _borderWidth*2, w->Size.get().height() + _borderWidth + _titleBarHeight );
+	Ui::SizeF winSize( w->Size.get().width() + _borderWidth*2, w->Size.get().height() + _borderWidth + _titleBarPanel.Size.get().height() );
 
 	if( p.x() < winSize.width() && p.x() >= 0 && p.y() < winSize.height() && p.y() >= 0)
 		return true;
@@ -387,18 +420,18 @@ bool WindowManager::contains(const ChildWindow* w, const Ui::PointF& p)
 	return false;
 }
 
+
 bool WindowManager::isMoving( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev )
 {			
-	if( ev.buttons()[0].state() != DeviceButton::Pressed  || _moving )
+	if( ev.buttons()[_actionButton].state() != DeviceButton::Pressed  || _moving  ||  _pointerLastState !=  DeviceButton::Released )
 		return false;
 
 	const Ui::PointF& position = w->Position.get();
 	 
 	if( ev.x() < (position.x() + _borderWidth*2 + w->Size.get().width())  && ev.x() >= position.x()  && 
-      (ev.y()) < (position.y() + _titleBarHeight) && (ev.y()+ position.y()) >= (_borderWidth) )
+      (ev.y()) < (position.y() + _titleBarPanel.Size.get().height()) && (ev.y()+ position.y()) >= (_borderWidth) )
 	{				
 		_movingOffset = Ui::PointF( ev.x(), ev.y() );
-    
 		return true;
 	}
 
@@ -410,15 +443,15 @@ ResizeDirection::Type WindowManager::isSizing( const ChildWindow* w, const Pt::H
 {
 	ResizeDirection::Type resizeDir = ResizeDirection::No;
 
-  if( w->WindowBorder.get() != WindowBorder::Sizeable )
+  if( w->WindowBorder.get() != WindowBorder::Sizeable  ||  _pointerLastState !=  DeviceButton::Released )
 		return resizeDir;	
 
 	const Ui::SizeF	size   = w->Size.get();
 	const double		border = _borderWidth;
 	const double		sizeR  = size.width();
-	const double		sizeB  = size.height();
+	const double		sizeB  = size.height() + _titleBarPanel.Size.get().height();
 
-	Ui::PointF localPos( ev.x() - w->Position.get().x(), ev.y() - w->Position.get().y() );
+	Ui::PointF localPos( ev.x() - w->Position.get().x(), ev.y() - w->Position.get().y() );  
 
 	if( contains(w, localPos) )
 	{
@@ -466,7 +499,6 @@ ResizeDirection::Type WindowManager::isSizing( const ChildWindow* w, const Pt::H
 			}
 		}
 	}	
-
 	return resizeDir;
 }
 
@@ -478,7 +510,7 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 
 	const std::vector<DeviceButton>& button = ev.buttons();
 
-	if( button[0].state() != DeviceButton::Pressed )
+	if( button[_actionButton].state() != DeviceButton::Pressed )
 	{		
 		_moving = false;
 		return;
@@ -500,33 +532,35 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 
 	w->eventReceived().send( _positionEvent );
 	
-	_movingOffset = Ui::PointF( point.x() , point.y() );
+	_movingOffset = Ui::PointF( point.x() , point.y() );  
 	invalidate();
 }
 
 
-void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
+bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 {
 	if( _windows.size() == 0 )
 	{
-	   _app.setCursor( &Cursor::defaultCursor() );
 		_sizingDirection = ResizeDirection::No;
 		_moving = false;
-		return;
+    _pointerLastState = pointerEvent.buttons()[_actionButton].state();        
+    _app.setCursor( &(_parent.Cursor.get()) );
+		return false;
 	}
 
-	if( mouseEvent.buttons()[0].state() == DeviceButton::Released )
+	if( pointerEvent.buttons()[_actionButton].state() == DeviceButton::Released )
 	{     
 		_sizingDirection = ResizeDirection::No;
 		_moving = false;
 	}
 
-	if( _sizingDirection == ResizeDirection::No  && !_moving )
+	if( _sizingDirection == ResizeDirection::No && !_moving )
 	{
-		if( !updateActive( mouseEvent ) )
+		if( !updateActive( pointerEvent ) )
 		{
-		  _app.setCursor( &Cursor::defaultCursor() );		 
-			return;
+      _pointerLastState = pointerEvent.buttons()[_actionButton].state();
+      _app.setCursor( &(_parent.Cursor.get()) );      
+			return false;
 		}		
 	}
 
@@ -534,52 +568,56 @@ void WindowManager::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 
 	if( childWindow == 0 )
 	{
-	    _app.setCursor( &Cursor::defaultCursor() );
 		_sizingDirection = ResizeDirection::No;
 		_moving = false;
-		return;
+    _pointerLastState = pointerEvent.buttons()[_actionButton].state();    
+    _app.setCursor( &(_parent.Cursor.get()) );
+    
+		return false;
 	}
 
-	if( !childWindow->Enabled.get() )
+	Pt::Hmi::PointerEvent localMouseEvent = pointerEvent;
+
+	localMouseEvent.setX( pointerEvent.x() - childWindow->Position.get().x() - _borderWidth ) ;
+	localMouseEvent.setY( pointerEvent.y() - childWindow->Position.get().y() - _titleBarPanel.Size.get().height() - _borderWidth ) ;  
+
+	if( _sizingDirection != ResizeDirection::No || _moving )
 	{
-	  _app.setCursor( &Cursor::defaultCursor() );
-	  _sizingDirection = ResizeDirection::No;
-	  _moving = false;
-	   return;
-	}
+	  doMoving( childWindow, pointerEvent );		
+	  doSizing( childWindow, pointerEvent );				
+    _pointerLastState = pointerEvent.buttons()[_actionButton].state();
+    return true;
+  }
 
-	Pt::Hmi::PointerEvent localMouseEvent = mouseEvent;
+	_lastSizePoint = Ui::PointF( pointerEvent.x(), pointerEvent.y() ) ;
 
-	localMouseEvent.setX( mouseEvent.x() - childWindow->Position.get().x() - _borderWidth ) ;
-	localMouseEvent.setY( mouseEvent.y() - childWindow->Position.get().y() - _titleBarHeight - _borderWidth ) ;
+	_moving = isMoving( childWindow, pointerEvent );	
 
-	if( _sizingDirection == ResizeDirection::No && !_moving )
-	{
-		_lastSizePoint = Ui::PointF( mouseEvent.x(), mouseEvent.y() ) ;
+	if( _moving )
+  {
+    _pointerLastState = pointerEvent.buttons()[_actionButton].state();
+		return true;
+  }
 
-		_moving = isMoving( childWindow, mouseEvent );	
-
-		if( _moving )
-		  return;
-
-		_sizingDirection = isSizing( childWindow, mouseEvent );	
+	_sizingDirection = isSizing( childWindow, pointerEvent );	
 		
-		if( _sizingDirection != ResizeDirection::No)
-		  return;
-		  
+	if( _sizingDirection != ResizeDirection::No)
+  {
+    _pointerLastState = pointerEvent.buttons()[_actionButton].state();
+		return true;
+  }
 		
-		if( !childWindow->contains( Ui::PointF( localMouseEvent.x(), localMouseEvent.y() ) ) )
-		  return;       
-				
-		 childWindow->eventReceived().send( localMouseEvent );
+  if( !childWindow->Enabled.get() )
+  {
+    _pointerLastState = pointerEvent.buttons()[_actionButton].state();
+		return true;
+  }
 
-		 return;
-	}
-		
-	doMoving( childWindow, mouseEvent );		
-	doSizing( childWindow, mouseEvent );							
+	if( childWindow->contains( Ui::PointF( localMouseEvent.x(), localMouseEvent.y() ) ) )	
+    childWindow->eventReceived().send( localMouseEvent );
+	
+  _pointerLastState = pointerEvent.buttons()[_actionButton].state();
+  return true;
 }
 
-
 }} // namespace
-

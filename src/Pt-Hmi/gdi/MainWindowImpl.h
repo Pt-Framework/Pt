@@ -58,6 +58,8 @@ public:
 
   void show();
 	
+  void activate();
+
   void hide();
 
 	void render();

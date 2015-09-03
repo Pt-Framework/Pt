@@ -62,6 +62,8 @@ class PT_HMI_API Window : public Widget
     ValueProperty<std::string>                      FocuseMoveKey;      
 		ValueProperty<Hmi::WindowBorder::Type>				  WindowBorder;
 				
+		Signal<bool> WindowFocusedAction;
+
 		void setWindowParent(Window* parent);
 
 		Window* windowParent() const;
@@ -91,27 +93,40 @@ class PT_HMI_API Window : public Widget
 		Pt::Signal<const Pt::Event&>& eventReceived()
 		{
 			return _eventReceived;
-		}      
+		} 
+
+    bool isWindowFocused() const
+    {
+      return _windowFocused;
+    }
+
+    virtual void activate() = 0;
 
 	protected:
 		Window(Window* parent = 0);    
 
 	protected:		
+    virtual void setWindowFocused( bool f )
+    {
+        _windowFocused = f;
+        WindowFocusedAction.send( _windowFocused );
+    }
+
 		virtual PaintSurface* widgetBuffer()
 		{
 			return 	&windowSurface();
 		}
 
-		virtual void onKeyInput(const KeyEvent& ev);			
-		virtual void onPointerInput(const PointerEvent& ev);	
+		virtual void onKeyInput( const KeyEvent& ev );			
+		virtual void onPointerInput( const PointerEvent& ev );	
     virtual void onInvalidate();  			
 		virtual void setClosed( bool close );				
-    virtual void setSize(const Ui::SizeF& size);
-		
+    virtual void setSize( const Ui::SizeF& size );
+		virtual void onFocusEvent( const FocusEvent& ev );
+
 	protected:
 		void onSizeEvent(const SizeEvent& ev);
-		void onPositionEvent( const PositionEvent& ev);
-		void onFocusEvent( const FocusEvent& ev);
+		void onPositionEvent( const PositionEvent& ev);		
 		void onCloseEvent(const CloseEvent& ev);
 
 	protected:
@@ -119,6 +134,7 @@ class PT_HMI_API Window : public Widget
 		WindowManager _windowManager;		
 		bool	_isClosed;
     Pt::Signal<const Pt::Event&> _eventReceived;		
+    bool                    _windowFocused;
 };
 
 }}

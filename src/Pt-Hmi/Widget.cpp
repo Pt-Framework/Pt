@@ -63,7 +63,7 @@ Widget::Widget()
 , _containPointer(false)
 , _size(200,200)
 , _position( 0, 0)
-, _isFocused(false)
+, _isWidgetFocused(false)
 , _isValid(false)
 {	
 	bindMnemonicToWidget( *this );		
@@ -476,8 +476,6 @@ void Widget::onPointerLeaved()
 
   if( _parent != 0 )
 	  Application::instance().setCursor( &_parent->Cursor.get() ); 
-  else
-    Application::instance().setCursor( &Cursor::defaultCursor() ); 
 }
 
 		
@@ -485,7 +483,7 @@ void Widget::onPointerInput(const PointerEvent& ev)
 {		
 	Ui::PointF local = toClient( Ui::PointF( ev.x(), ev.y() ) );
 	
-	if( ! Enabled.get() )
+	if( !Enabled.get() )
 			return;
 	
 	if( !_containPointer )
@@ -526,7 +524,7 @@ void Widget::onKeyInput(const KeyEvent& ev)
 	}
 
 	//Action key handling
-	if( ev.toUTF8String() == FocusedActionKey.get() && isFocused() )	
+	if( ev.toUTF8String() == FocusedActionKey.get() && isWidgetFocused() )	
 	{
 		onActionKey( ev.state() );		
 	}
@@ -551,7 +549,7 @@ void Widget::bindMnemonicToWidget(Widget& widget)
 
 void Widget::onMnemonic()
 {	
-	setFocus( true );
+	setWidgetFocus( true );
 }
 
 
@@ -574,13 +572,13 @@ bool Widget::focusPrevChild(int index)
 
 		if(child->AcceptFocus.get())
 		{
-			child->setFocus(true);
+			child->setWidgetFocus(true);
 			return true;
 		}
 
 		if(child->focusPrev())
 		{
-			child->setFocus(true);
+			child->setWidgetFocus(true);
 			return true;
 		}
 	}
@@ -599,13 +597,13 @@ bool Widget::focusNextChild( int index )
 
 		if(child->AcceptFocus.get())
 		{
-			child->setFocus(true);
+			child->setWidgetFocus(true);
 			return true;
 		}
 
 		if(child->focusNext())
 		{
-			child->setFocus(true);
+			child->setWidgetFocus(true);
 			return true;
 		}
 	}
@@ -621,7 +619,7 @@ int Widget::getFocusedChild() const
 	for( ; i < (int)children().size(); ++i)
 	{
 		const Widget* child = children()[i];
-		if( child->isFocused() )
+		if( child->isWidgetFocused() )
 			return i;		
 	}		
 
@@ -647,7 +645,7 @@ bool Widget::focusPrev()
 			return true;
 	}
 
-	child->setFocus(false);
+	child->setWidgetFocus(false);
 	return focusPrevChild(index);
 }
 
@@ -670,21 +668,21 @@ bool Widget::focusNext()
 			return true;
 	}
 
-	child->setFocus(false);
+	child->setWidgetFocus(false);
 	return focusNextChild(index);
 }
 
 
-void Widget::setFocus( bool isFocused )
+void Widget::setWidgetFocus( bool isFocused )
 {	
-	_isFocused = isFocused;
+	_isWidgetFocused = isFocused;
 
-  if( !_isFocused )
+  if( !_isWidgetFocused )
 	{//False => all childs set to false.
 		for( size_t i = 0; i < children().size(); ++i)
 		{
 			Pt::Hmi::Widget* child = children()[i];			
-			child->setFocus(false);									
+			child->setWidgetFocus(false);									
 		}
 
 		invalidate();
@@ -698,7 +696,7 @@ void Widget::setFocus( bool isFocused )
 	}
 		
 	//Set parent focused.	
-	parent()->setFocus(true);
+	parent()->setWidgetFocus(true);
 
 	//All sibling set to false. Only me let it true
 	for( size_t i = 0; i < parent()->children().size(); i++ )
@@ -706,12 +704,12 @@ void Widget::setFocus( bool isFocused )
 		Widget* child = parent()->children()[i];
 				
 		if( child != this )
-			child->setFocus( false );
+			child->setWidgetFocus( false );
 	}
 
 	invalidate();
 
-	Focused.send(_isFocused);
+	WidgetFocusedAction.send(_isWidgetFocused);
 }
 
 

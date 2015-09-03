@@ -160,13 +160,17 @@ void MainWindow::init()
 	_childWindow1.Size = Ui::SizeF(200,300);
 	_childWindow2.Position = Ui::PointF(80,80);
 	_childWindow2.Size = Ui::SizeF(800,600);
+  _childWindow2.Caption = "Test the best! Right now!";
 	
 
 	addChildWindow( _childWindow1 );
   _childWindow1.addChildWindow( _childWindow2 );
 	
 	_childWindow1.Visible = true;
+  _childWindow1.Caption = "----Test the best! Right now!----";
+  _childWindow1.Icon = Icon;
   _childWindow1.invalidate();
+
 
 	_childWindow2.Visible = true;
   _childWindow2.invalidate();  
@@ -187,6 +191,7 @@ void MainWindow::onShowDialog()
 void MainWindow::show()
 {
 	Visible = true;	
+  _childWindow1.activate();
 }
 
 

@@ -55,4 +55,12 @@ PaintSurface& ChildWindow::windowSurface()
   return _windowSurface;
 }
 
+void ChildWindow::activate()
+{
+  if( _winParent == 0)
+    return;
+
+  _winParent->windowManager().activate( this );
+}
+
 }}

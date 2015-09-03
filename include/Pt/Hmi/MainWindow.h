@@ -47,6 +47,7 @@ class PT_HMI_API MainWindow  : public Window
 
     virtual PaintSurface& windowSurface();
 				
+    virtual void activate();
 
 	protected:	
 		virtual void setSize(const Ui::SizeF& size);
@@ -57,7 +58,7 @@ class PT_HMI_API MainWindow  : public Window
 
 		virtual void setClosed(bool c);		
 
-		virtual void setFocus(bool f);
+		virtual void setWindowFocused(bool f);
 
   protected:
     virtual void onInvalidate();	

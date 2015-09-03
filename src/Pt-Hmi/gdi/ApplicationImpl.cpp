@@ -217,14 +217,14 @@ HBITMAP ApplicationImpl::createImage888(const Pt::uint8_t* data, size_t width, s
 
 void ApplicationImpl::setCursor(const Cursor* cursor)
 {	  
-	if( _cursorHandle != 0 )			
-		DestroyCursor( _cursorHandle );
-
 	if( cursor == 0 )
 		return;
 
 	if( cursor->empty() )
 		return;
+
+  if( _cursorHandle != 0 )			
+		DestroyCursor( _cursorHandle );
 
 	HBITMAP andMask = createImage888( &cursor->andRgb888()[0], cursor->width(),  cursor->height() );
 	HBITMAP xorMask = createImage888( &cursor->xorRgb888()[0], cursor->width(),  cursor->height() );

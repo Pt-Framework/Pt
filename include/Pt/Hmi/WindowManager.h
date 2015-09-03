@@ -35,8 +35,10 @@
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/SizeEvent.h>
+#include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/PositionEvent.h>
 #include <Pt/Hmi/ResizeDirection.h>
+#include <Pt/Hmi/DeviceButton.h>
 
 namespace Pt {
 namespace Hmi {
@@ -62,9 +64,9 @@ class WindowManager : public Pt::Connectable
 		
 		void render();
 		
-		void onPointerInput( const Pt::Hmi::PointerEvent& pointerEvent );
+		bool pointerInput( const Pt::Hmi::PointerEvent& pointerEvent );
 
-		void onKeyInput( const Pt::Hmi::KeyEvent& keyEvent );		 
+		bool keyInput( const Pt::Hmi::KeyEvent& keyEvent );		 
 		
 		ChildWindow* active();
 
@@ -73,12 +75,32 @@ class WindowManager : public Pt::Connectable
 			return _windows;
 		}		
 
+    size_t actionButton() const 
+    {
+        return _actionButton;
+    }
+
+    void setActionButton( size_t index )
+    {
+        _actionButton = index;
+    }
+
+    const Button& closeButton() const
+    {
+      return _closeButton;
+    }
+
+    Button& closeButton()
+    {
+      return _closeButton;
+    }
+
   protected:
-    virtual Ui::PointF renderFrame(const ChildWindow* w);				 
+    virtual Ui::PointF renderFrame(const ChildWindow* w);				     
 
   private:
 		void invalidate();	
-    bool contains(const ChildWindow* w, const Ui::PointF& p);
+    bool contains( const ChildWindow* w, const Ui::PointF& p );
 
 		ResizeDirection::Type isSizing( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );	
     bool isMoving ( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );
@@ -87,27 +109,32 @@ class WindowManager : public Pt::Connectable
 		void doMoving( ChildWindow* w, const PointerEvent& ev );
 		
 		bool updateActive( const Pt::Hmi::PointerEvent& mouseEvent );
-		void updateFocus();		
-		void clearFocus();
-		
-		Ui::PointF toClient(const ChildWindow* w, const Ui::PointF& p);
+	
+    Window* getFosusedWindow(WindowManager* manager);
 
+		Ui::PointF toClient(const ChildWindow* w, const Ui::PointF& p);  
+    
 	private:
-		Window&											_parent;
-		std::vector<ChildWindow*>		_windows;		
-		ResizeDirection::Type				_sizingDirection;
-		Ui::PointF									_lastSizePoint;
-    Application&                _app;  
-		FocusEvent									_focusEvent;	
-		double											_titleBarHeight;
-		double											_borderWidth;
-		Ui::Color						        _borderColor; 
-    Ui::Color						        _titleBarColor; 
-    Ui::Color						        _activeColor; 
-		SizeEvent										_sizeEvent;
-		PositionEvent               _positionEvent; 	
-		bool												_moving;	
-		Ui::PointF									_movingOffset;
+		Window&										_parent;
+		std::vector<ChildWindow*>	_windows;		
+		ResizeDirection::Type			_sizingDirection;
+		Ui::PointF								_lastSizePoint;
+    Application&              _app;  
+		FocusEvent								_focusEvent;	
+		double										_borderWidth;
+		Ui::Color						      _borderColor; 
+    Ui::Color						      _titleBarColor; 
+    Ui::Color						      _activeColor; 
+		SizeEvent									_sizeEvent;
+		PositionEvent             _positionEvent; 	
+		bool											_moving;	
+		Ui::PointF								_movingOffset;
+    DeviceButton::State       _pointerLastState;  
+    bool                      _focusOnPointerOver;    
+    size_t                    _actionButton;  
+    Button                    _closeButton;
+    Panel                     _titleBarPanel;
+    Label                     _titleLabel;
 };
 
 }} // namespace

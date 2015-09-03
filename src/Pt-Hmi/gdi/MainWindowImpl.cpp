@@ -73,9 +73,9 @@ void MainWindowImpl::create()
   HINSTANCE hInstance = GetModuleHandle(NULL);
 
   _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, GetDesktopWindow(), NULL, hInstance, NULL );
-  BringWindowToTop(_hwnd);
-  ShowWindow(_hwnd, SW_HIDE);    
-  UpdateWindow(_hwnd);    
+  BringWindowToTop( _hwnd );
+  ShowWindow( _hwnd, SW_HIDE );    
+  UpdateWindow( _hwnd );
 }
 
 
@@ -156,21 +156,29 @@ void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam
     if(_hwnd != wnd)
         return;    
 	
-    switch(message)
+    switch( message )
     {
+        case WM_MOUSEMOVE:
+        {
+          TRACKMOUSEEVENT tme ={ sizeof(TRACKMOUSEEVENT), TME_LEAVE, _hwnd, 0 };
+          TrackMouseEvent(&tme);              
+          onMouse(message, wparam, lparam);
+          handled = true;
+        }
+        break;
+
         case WM_LBUTTONDOWN:        
         case WM_MBUTTONDOWN:
         case WM_RBUTTONDOWN:
         case WM_LBUTTONUP:        
         case WM_MBUTTONUP:
-        case WM_RBUTTONUP:
-        case WM_MOUSEMOVE:
+        case WM_RBUTTONUP:        
         case WM_LBUTTONDBLCLK:
         case WM_RBUTTONDBLCLK:
         case WM_MBUTTONDBLCLK:
-        {
-            onMouse(message, wparam, lparam);
-            handled = true;
+        {          
+           onMouse(message, wparam, lparam);
+           handled = true;
         }
         break;
 
@@ -224,16 +232,9 @@ void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam
 					if( _forceTopMost )
 						BringWindowToTop( _hwnd );
 					else
-						onFocus(false);
-
+						onFocus( false );
         }
         break;        
-
-				case WM_SETFOCUS:
-				{
-					onFocus(true);
-				}
-				break;
 
 				case WM_GETMINMAXINFO:
 				{
@@ -245,6 +246,10 @@ void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam
 					handled = true;  
 				}
 				break;
+
+        case WM_MOUSELEAVE:
+           _window->onPointerLeaved();
+        break;
     }
 }
 
@@ -339,13 +344,13 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 							_pointerEvent.setPointerState( PointerState::PressToRelease ); 
 
         break;
-
+        
         case WM_RBUTTONUP:
             _pointerEvent.buttons()[2].setState(Pt::Hmi::DeviceButton::Released);
 
 						if( _pointerEvent.pointerState() == PointerState::PressToRelease )
 							_pointerEvent.setPointerState( PointerState::ReleaseToPress ); 
-        break;				        
+        break;			
     }
   
      Ui::PointF p = _app.toUnit(Ui::Point(xPos, yPos));
@@ -393,6 +398,12 @@ void MainWindowImpl::setWindowPos(const Ui::PointF& pf)
 void MainWindowImpl::focus()
 {	
 	SetFocus(_hwnd);
+}
+
+void MainWindowImpl::activate()
+{
+  SetActiveWindow( _hwnd );
+  BringWindowToTop( _hwnd );
 }
 
 void MainWindowImpl::setWindowSize(const Ui::SizeF& sizef)

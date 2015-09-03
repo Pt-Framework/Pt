@@ -112,6 +112,10 @@ void MainWindowImpl::hide()
 	Visible = false;
 }
 
+void MainWindowImpl::activate()
+{
+  _app.mainScreen().impl()->windowManager().activate( this ); 
+}
 
 void MainWindowImpl::setWindowPos(const Ui::PointF& p)
 {	  

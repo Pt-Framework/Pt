@@ -49,8 +49,8 @@ Window::Window(Window* parent)
 , _winParent(parent)
 , _windowManager(*this)
 , _isClosed(true)
+, _windowFocused(false)
 {
-
 	Name = std::string("Window");
 	AcceptFocus = false ;	
 
@@ -60,9 +60,6 @@ Window::Window(Window* parent)
 	eventReceived() += Pt::slot(*this, &Window::onCloseEvent);
 	eventReceived() += Pt::slot(*this, &Window::onKeyInput);
 	eventReceived() += Pt::slot(*this, &Window::onPointerInput);	
-
-	eventReceived() += Pt::slot( _windowManager, &WindowManager::onPointerInput );
-	eventReceived() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
 }
 
 
@@ -120,12 +117,30 @@ Window* Window::windowParent() const
 
 void Window::onPointerInput(const PointerEvent& ev)
 {	
+  if( _windowManager.pointerInput( ev ) )
+      return;
+
+  if( ev.buttons()[_windowManager.actionButton()].state() == DeviceButton::Pressed )
+    eventReceived().send( FocusEvent( true ) );
+
+  if( !Enabled.get() )
+		return;	
+
 	Widget::onPointerInput(ev);
 }
 
 
 void Window::onKeyInput(const KeyEvent& ev)
 {
+  if( _windowManager.keyInput( ev ) )
+      return;
+
+  if( !_windowFocused )
+  {
+    FocusEvent fcev( true );
+    eventReceived().send( fcev );
+  }
+
 	if( !Enabled.get() )
 		return;
 	
@@ -148,7 +163,6 @@ void Window::onKeyInput(const KeyEvent& ev)
   Widget::onKeyInput(ev);
 }
 
-
 void Window::onSizeEvent(const SizeEvent& ev)
 {	
 	Window::setSize( ev.size() );
@@ -165,9 +179,22 @@ void Window::onPositionEvent( const PositionEvent& ev)
 
 
 void Window::onFocusEvent( const FocusEvent& ev)
-{
-	setFocus( ev.isFocussed() );	
+{ 
+  FocusEvent fcev( false );
+
+  if( _winParent != 0  && ev.isFocused() )
+     _winParent->eventReceived().send( fcev );
+
+  for( size_t i = 0; i < _windowManager.windows().size(); ++i )
+    _windowManager.windows()[i]->eventReceived().send( fcev );
+
+  if( _windowFocused != ev.isFocused() )
+  {
+    _windowFocused = ev.isFocused();	 
+    invalidate();
+  }
 }
+
 
 void Window::close()
 {
