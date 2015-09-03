@@ -138,9 +138,9 @@ void WindowManager::invalidate()
 }
 
 
-Ui::PointF WindowManager::renderFrame( const ChildWindow* w )
+Ui::PointF WindowManager::renderFrame( ChildWindow* w )
 {	
-	const Ui::SizeF& size =  w->windowSurface().surface.originSize();
+	const Ui::SizeF size =  w->Size.get();
 	const Ui::SizeF winSize( size.width() + _borderWidth, size.height() + _borderWidth/2.0 + _titleBarPanel.Size.get().height() );	
 
 	Painter& painter = _parent.windowSurface().painter();
@@ -176,7 +176,7 @@ Ui::PointF WindowManager::renderFrame( const ChildWindow* w )
 
   if( w->Border.get() != WindowBorder::NoBorder )
   {
-    Ui::PointF saveOrgPos = _parent.windowSurface().originPos();
+    Ui::PointF saveOrgPos  = _parent.windowSurface().originPos();
     Ui::SizeF  saveOrgSize = _parent.windowSurface().originSize();
 
     Ui::PointF  to( pos.x() + _borderWidth/2, pos.y() + _borderWidth/2 ); 
