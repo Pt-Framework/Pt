@@ -127,9 +127,7 @@ void WindowManager::activate( ChildWindow* w )
 	_windows.erase( it );	
 	_windows.push_back( w );    
 
-  FocusEvent focused( true );
-
-  w->eventReceived().send( focused );
+  w->eventReceived().send( FocusEvent() );
   invalidate();
 }
 
@@ -212,9 +210,10 @@ void WindowManager::render()
 		ChildWindow* w = _windows[i];				
 
 		if( !w->Visible.get() )
-   		  continue;
+   		  continue;		
 
 		const Ui::PointF clientPos = renderFrame(w);				
+		w->windowManager().render();
 		painter.drawSurface( clientPos, w->windowSurface() );
 	}
 }

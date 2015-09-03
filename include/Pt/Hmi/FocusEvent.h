@@ -37,35 +37,15 @@ namespace Hmi{
 class PT_HMI_API FocusEvent : public Pt::BasicEvent<FocusEvent>
 {
 	public:	
-		FocusEvent(bool f)	
-    :_isFocused( f)
+		FocusEvent()	
 		{
 		}
-
-
-		FocusEvent()
-		{
-		}
-
 
 		virtual ~FocusEvent()
 		{
 		}
 
-
-		void setFocus( bool f )
-		{
-			_isFocused = f;
-		}
-
-
-		bool isFocused( ) const
-		{
-			return _isFocused;
-		}	
-
 	private:
-		bool _isFocused;
 };
 
 }}

@@ -58,7 +58,9 @@ class PT_HMI_API MainWindow  : public Window
 
 		virtual void setClosed(bool c);		
 
-		virtual void setWindowFocused(bool f);
+		virtual void onSetFocus();
+
+		virtual void onRemoveFocus();
 
   protected:
     virtual void onInvalidate();	

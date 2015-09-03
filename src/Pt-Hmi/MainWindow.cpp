@@ -221,16 +221,22 @@ void MainWindow::setPosition(const Ui::PointF& pos)
 	_impl->setWindowPos( pos);
 }
 
-void MainWindow::setWindowFocused(bool f)
-{
-	Window::setWindowFocused(f);
-	_impl->focus();	
-}
-
 
 void MainWindow::activate()
 {
   _impl->activate();
+}
+
+void MainWindow::onSetFocus()
+{
+	_impl->focus(true); 
+	Window::onSetFocus();
+}
+
+void MainWindow::onRemoveFocus()
+{
+	_impl->focus(false); 
+	Window::onRemoveFocus();
 }
 
 

@@ -94,7 +94,7 @@ public:
 	
 	void setMaxSize(const Ui::SizeF& s);
 
-	void focus();
+	void focus(bool f);
 
   PaintSurface& windowSurface();
 

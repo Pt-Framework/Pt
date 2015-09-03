@@ -62,7 +62,7 @@ class PT_HMI_API Window : public Widget
     ValueProperty<std::string>                      FocuseMoveKey;      
 		ValueProperty<Hmi::WindowBorder::Type>				  WindowBorder;
 				
-		Signal<bool> WindowFocusedAction;
+		Signal<bool> FocusedAction;
 
 		void setWindowParent(Window* parent);
 
@@ -104,14 +104,9 @@ class PT_HMI_API Window : public Widget
 
 	protected:
 		Window(Window* parent = 0);    
+		void removeFocus();
 
 	protected:		
-    virtual void setWindowFocused( bool f )
-    {
-        _windowFocused = f;
-        WindowFocusedAction.send( _windowFocused );
-    }
-
 		virtual PaintSurface* widgetBuffer()
 		{
 			return 	&windowSurface();
@@ -123,6 +118,8 @@ class PT_HMI_API Window : public Widget
 		virtual void setClosed( bool close );				
     virtual void setSize( const Ui::SizeF& size );
 		virtual void onFocusEvent( const FocusEvent& ev );
+		virtual void onSetFocus();
+		virtual void onRemoveFocus();
 
 	protected:
 		void onSizeEvent(const SizeEvent& ev);

@@ -262,8 +262,8 @@ void MainWindowImpl::onClose()
 
 void MainWindowImpl::onFocus(bool f)
 {
-	FocusEvent ev(f);
-	_window->eventReceived().send(ev);
+	if( f)
+		_window->eventReceived().send( FocusEvent() );
 }
 
 
@@ -395,9 +395,10 @@ void MainWindowImpl::setWindowPos(const Ui::PointF& pf)
 }
 
 
-void MainWindowImpl::focus()
+void MainWindowImpl::focus(bool f)
 {	
-	SetFocus(_hwnd);
+	if( f)
+		SetFocus(_hwnd);
 }
 
 void MainWindowImpl::activate()

@@ -121,7 +121,7 @@ void Window::onPointerInput(const PointerEvent& ev)
       return;
 
   if( ev.buttons()[_windowManager.actionButton()].state() == DeviceButton::Pressed )
-    eventReceived().send( FocusEvent( true ) );
+    eventReceived().send( FocusEvent() );
 
   if( !Enabled.get() )
 		return;	
@@ -136,10 +136,7 @@ void Window::onKeyInput(const KeyEvent& ev)
       return;
 
   if( !_windowFocused )
-  {
-    FocusEvent fcev( true );
-    eventReceived().send( fcev );
-  }
+    eventReceived().send( FocusEvent() );
 
 	if( !Enabled.get() )
 		return;
@@ -178,21 +175,33 @@ void Window::onPositionEvent( const PositionEvent& ev)
 }
 
 
-void Window::onFocusEvent( const FocusEvent& ev)
+void Window::onFocusEvent( const FocusEvent& ev )
 { 
-  FocusEvent fcev( false );
+	onRemoveFocus();			
+	onSetFocus();
+  invalidate();
+}
 
-  if( _winParent != 0  && ev.isFocused() )
-     _winParent->eventReceived().send( fcev );
 
-  for( size_t i = 0; i < _windowManager.windows().size(); ++i )
-    _windowManager.windows()[i]->eventReceived().send( fcev );
+void Window::onSetFocus()
+{
+  _windowFocused = true;	 
+}
 
-  if( _windowFocused != ev.isFocused() )
-  {
-    _windowFocused = ev.isFocused();	 
-    invalidate();
-  }
+void Window::onRemoveFocus()
+{
+	if( _winParent != 0 ) 	
+		_winParent->onRemoveFocus();
+	else
+		removeFocus();
+}
+
+void Window::removeFocus()
+{
+	_windowFocused = false;
+
+	for( size_t i = 0; i < _windowManager.windows().size(); ++ i)
+		_windowManager.windows()[i]->removeFocus();
 }
 
 
