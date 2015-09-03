@@ -120,7 +120,7 @@ void Window::onPointerInput(const PointerEvent& ev)
   if( _windowManager.pointerInput( ev ) )
       return;
 
-  if( ev.buttons()[_windowManager.actionButton()].state() == DeviceButton::Pressed )
+  if( ev.buttons()[_windowManager.actionButton()].state() == DeviceButton::Pressed && !_windowFocused  )
     eventReceived().send( FocusEvent() );
 
   if( !Enabled.get() )

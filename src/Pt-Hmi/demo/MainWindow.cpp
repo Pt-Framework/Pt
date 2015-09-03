@@ -83,7 +83,7 @@ void MainWindow::init()
 	ShowInTaskbar = true;
 	ShowSysMenu = true;
 	Border = WindowBorder::Sizeable;
-	Caption = std::string("This is a Platinum C++ Human Machine Interface demo  ");
+	
   State = Hmi::WindowState::Normal;
 	StartPostion = Hmi::WindowStartPosition::CenterParent;
 	Closed += Pt::slot(*this, &MainWindow::onClosed);
@@ -160,14 +160,14 @@ void MainWindow::init()
 	_childWindow1.Size = Ui::SizeF(200,300);
 	_childWindow2.Position = Ui::PointF(80,80);
 	_childWindow2.Size = Ui::SizeF(800,600);
-  _childWindow2.Caption = "Test the best! Right now!";
+  _childWindow2.Caption = "Child 2";
 	
 
 	addChildWindow( _childWindow1 );
   _childWindow1.addChildWindow( _childWindow2 );
 	
 	_childWindow1.Visible = true;
-  _childWindow1.Caption = "----Test the best! Right now!----";
+  _childWindow1.Caption = "Child 1";
   _childWindow1.Icon = Icon;
   _childWindow1.invalidate();
 

@@ -212,4 +212,17 @@ void MainWindowImpl::setMaxSize(const Ui::SizeF& s)
 	MaximumSize = s;
 }
 
+void MainWindowImpl::focus( bool f)
+{	
+/*
+	if( f) 
+		onSetFocus();
+	else
+		onRemoveFocus();
+
+	if( f )
+	_app.mainScreen().impl()->windowManager().activate( this );*/
+}
+
+
 }} // namespace

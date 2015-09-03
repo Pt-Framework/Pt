@@ -72,17 +72,17 @@ public:
 
 	const Screen& mainScreen() const
 	{
-		return _mainScreen;
+		return *_mainScreen;
 	}
 
 	Screen& mainScreen()
 	{
-		return _mainScreen;
+		return *_mainScreen;
 	}
 
 private:     
   ApplicationImpl* _impl; 
-  Screen _mainScreen;
+  Screen* _mainScreen;
   std::string _cursorName;
 };
 

@@ -35,14 +35,16 @@ namespace Hmi {
 Application::Application(int argc, char** argv)
 : System::Application(0, argc, argv)
 , _impl( new ApplicationImpl() ) 
-, _mainScreen()
+, _mainScreen(0)
 { 	
 	this->init(*_impl);
+	_mainScreen = new Screen();
 }
 
 
 Application::~Application()
 {
+	delete _mainScreen;
 	delete _impl;
 }
 

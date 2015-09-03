@@ -43,7 +43,7 @@ ScreenImpl::ScreenImpl()
 	Visible = true;	
 	Size = Ui::SizeF( _frameBuffer.width(),  _frameBuffer.height() );
 	BackColor = Ui::Color(170/255.0,170/255.0,170/255.0);	
-	eventReceived() += Pt::slot( _windowManager, &WindowManager::onKeyInput );
+	eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerInput );
 }
 
 
@@ -65,7 +65,7 @@ void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 	if( _cursorBuffer.width() != 0  && _cursorBuffer.height() != 0 )
 		_frameBuffer.bitBlit( _cursorBuffer.pixel(0,0),_cursorBuffer.width(), _cursorBuffer.height(), _cursorPos, FrameBuffer::CopyOp );
 
-	_windowManager.onPointerInput(mouseEvent);	
+	_windowManager.pointerInput(mouseEvent);	
 
 	if( Cursor.get().width() == 0 )
 		return;	

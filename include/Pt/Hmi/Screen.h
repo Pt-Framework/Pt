@@ -43,6 +43,7 @@ class PT_HMI_API Screen
 
 		double width() const;
 		double height() const;
+	
 		
 		ScreenImpl* impl()
 		{

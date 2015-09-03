@@ -102,6 +102,8 @@ class MainWindowImpl  : public ChildWindow
 		void setTopMost(bool top)
 		{
 		}
+
+		void focus( bool f);
 	
     virtual PaintSurface& windowSurface()
     {

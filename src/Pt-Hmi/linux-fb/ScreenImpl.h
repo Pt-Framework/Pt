@@ -55,6 +55,11 @@ class ScreenImpl : public Window
 		}
 		 		 
 		virtual PaintSurface& windowSurface();
+	
+		virtual void activate()
+		{
+		}
+
 
 	protected:
 		virtual void onInvalidate();
@@ -67,8 +72,8 @@ class ScreenImpl : public Window
 	private:
 		Ui::Image	      _cursorBuffer;
 		Ui::Point			  _cursorPos;
-    PaintSurface    _windowSurface;
-    FrameBuffer&    _frameBuffer;  
+	    PaintSurface    _windowSurface;
+    	FrameBuffer&    _frameBuffer;  
 };
 
 }}
