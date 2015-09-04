@@ -31,6 +31,7 @@
 #include <Pt/Unit/Api.h>
 #include <Pt/Unit/Test.h>
 #include <Pt/SerializationInfo.h>
+#include <Pt/TypeTraits.h>
 #include <Pt/Void.h>
 #include <Pt/Method.h>
 #include <stdexcept>
@@ -86,6 +87,15 @@ namespace Unit {
             typedef C ClassT;
             typedef void (C::*MemFuncT)(A1, A2, A3, A4, A5, A6, A7, A8);
 
+            typedef typename TypeTraits<A1>::Value V1;
+            typedef typename TypeTraits<A2>::Value V2;
+            typedef typename TypeTraits<A3>::Value V3;
+            typedef typename TypeTraits<A4>::Value V4;
+            typedef typename TypeTraits<A5>::Value V5;
+            typedef typename TypeTraits<A6>::Value V6;
+            typedef typename TypeTraits<A7>::Value V7;
+            typedef typename TypeTraits<A8>::Value V8;
+
         public:
             BasicTestMethod(const std::string& name, C& object, MemFuncT ptr)
             : Pt::Method<void, C, A1, A2, A3, A4, A5, A6, A7, A8>(object, ptr)
@@ -100,31 +110,31 @@ namespace Unit {
                 if(argCount != 8)
                     throw std::invalid_argument("invalid number of arguments");
 
-                A1 a1 = A1();
-                args[0] >>= a1;
+                V1 v1 = V1();
+                args[0] >>= v1;
 
-                A2 a2 = A2();
-                args[1] >>= a2;
+                V2 v2 = V2();
+                args[1] >>= v2;
 
-                A3 a3 = A3();
-                args[2] >>= a3;
+                V3 v3 = V3();
+                args[2] >>= v3;
 
-                A4 a4 = A4();
-                args[3] >>= a4;
+                V4 v4 = V4();
+                args[3] >>= v4;
 
-                A5 a5 = A5();
-                args[4] >>= a5;
+                V5 v5 = V5();
+                args[4] >>= v5;
 
-                A6 a6 = A6();
-                args[5] >>= a6;
+                V6 v6 = V6();
+                args[5] >>= v6;
 
-                A7 a7 = A7();
-                args[6] >>= a7;
+                V7 v7 = V7();
+                args[6] >>= v7;
 
-                A8 a8 = A8();
-                args[7] >>= a8;
+                V8 v8 = V8();
+                args[7] >>= v8;
 
-                Pt::Method<void, C>::call(a1, a2, a3, a4, a5, a6, a7, a8);
+                Pt::Method<void, C>::call(v1, v2, v3, v4, v5, v6, v7, v8);
             }
     };
 
@@ -150,6 +160,12 @@ namespace Unit {
             typedef C ClassT;
             typedef void (C::*MemFuncT)(A1, A2, A3, A4, A5);
 
+            typedef typename TypeTraits<A1>::Value V1;
+            typedef typename TypeTraits<A2>::Value V2;
+            typedef typename TypeTraits<A3>::Value V3;
+            typedef typename TypeTraits<A4>::Value V4;
+            typedef typename TypeTraits<A5>::Value V5;
+
         public:
             BasicTestMethod(const std::string& name, C& object, MemFuncT ptr)
             : Pt::Method<void, C, A1, A2, A3, A4, A5>(object, ptr)
@@ -164,22 +180,22 @@ namespace Unit {
                 if(argCount != 5)
                     throw std::invalid_argument("invalid number of arguments");
 
-                A1 a1 = A1();
-                args[0] >>= a1;
+                V1 v1 = V1();
+                args[0] >>= v1;
 
-                A2 a2 = A2();
-                args[1] >>= a2;
+                V2 v2 = V2();
+                args[1] >>= v2;
 
-                A3 a3 = A3();
-                args[2] >>= a3;
+                V3 v3 = V3();
+                args[2] >>= v3;
 
-                A4 a4 = A4();
-                args[3] >>= a4;
+                V4 v4 = V4();
+                args[3] >>= v4;
 
-                A5 a5 = A5();
-                args[4] >>= a5;
+                V5 v5 = V5();
+                args[4] >>= v5;
 
-                Pt::Method<void, C, A1, A2, A3, A4, A5>::call(a1, a2, a3, a4, a5);
+                Pt::Method<void, C, A1, A2, A3, A4, A5>::call(v1, v2, v3, v4, v5);
             }
     };
 
@@ -204,6 +220,11 @@ namespace Unit {
             typedef C ClassT;
             typedef void (C::*MemFuncT)(A1, A2, A3, A4);
 
+            typedef typename TypeTraits<A1>::Value V1;
+            typedef typename TypeTraits<A2>::Value V2;
+            typedef typename TypeTraits<A3>::Value V3;
+            typedef typename TypeTraits<A4>::Value V4;
+
         public:
             BasicTestMethod(const std::string& name, C& object, MemFuncT ptr)
             : Pt::Method<void, C, A1, A2, A3, A4>(object, ptr)
@@ -218,19 +239,19 @@ namespace Unit {
                 if(argCount != 4)
                     throw std::invalid_argument("invalid number of arguments");
 
-                A1 a1 = A1();
-                args[0] >>= a1;
+                V1 v1 = V1();
+                args[0] >>= v1;
 
-                A2 a2 = A2();
-                args[1] >>= a2;
+                V2 v2 = V2();
+                args[1] >>= v2;
 
-                A3 a3 = A3();
-                args[2] >>= a3;
+                V3 v3 = V3();
+                args[2] >>= v3;
 
-                A4 a4 = A4();
-                args[3] >>= a4;
+                V4 v4 = V4();
+                args[3] >>= v4;
 
-                Pt::Method<void, C, A1, A2, A3, A4>::call(a1, a2, a3, a4);
+                Pt::Method<void, C, A1, A2, A3, A4>::call(v1, v2, v3, v4);
             }
     };
 
@@ -254,6 +275,10 @@ namespace Unit {
             typedef C ClassT;
             typedef void (C::*MemFuncT)(A1, A2, A3);
 
+            typedef typename TypeTraits<A1>::Value V1;
+            typedef typename TypeTraits<A2>::Value V2;
+            typedef typename TypeTraits<A3>::Value V3;
+
         public:
             BasicTestMethod(const std::string& name, C& object, MemFuncT ptr)
             : Pt::Method<void, C, A1, A2, A3>(object, ptr)
@@ -268,16 +293,16 @@ namespace Unit {
                 if(argCount != 3)
                     throw std::invalid_argument("invalid number of arguments");
 
-                A1 a1 = A1();
-                args[0] >>= a1;
+                V1 v1 = V1();
+                args[0] >>= v1;
 
-                A2 a2 = A2();
-                args[1] >>= a2;
+                V2 v2 = V2();
+                args[1] >>= v2;
 
-                A3 a3 = A3();
-                args[2] >>= a3;
+                V3 v3 = V3();
+                args[2] >>= v3;
 
-                Pt::Method<void, C, A1, A2, A3>::call(a1, a2, a3);
+                Pt::Method<void, C, A1, A2, A3>::call(v1, v2, v3);
             }
     };
 
@@ -300,6 +325,9 @@ namespace Unit {
             typedef C ClassT;
             typedef void (C::*MemFuncT)(A1, A2);
 
+            typedef typename TypeTraits<A1>::Value V1;
+            typedef typename TypeTraits<A2>::Value V2;
+
         public:
             BasicTestMethod(const std::string& name, C& object, MemFuncT ptr)
             : Pt::Method<void, C, A1, A2>(object, ptr)
@@ -314,13 +342,13 @@ namespace Unit {
                 if(argCount != 2)
                     throw std::invalid_argument("invalid number of arguments");
 
-                A1 a1 = A1();
-                args[0] >>= a1;
+                V1 v1 = V1();
+                args[0] >>= v1;
 
-                A2 a2 = A2();
-                args[1] >>= a2;
+                V2 v2 = V2();
+                args[1] >>= v2;
 
-                Pt::Method<void, C, A1, A2>::call(a1, a2);
+                Pt::Method<void, C, A1, A2>::call(v1, v2);
             }
     };
 
@@ -342,6 +370,8 @@ namespace Unit {
             typedef C ClassT;
             typedef void (C::*MemFuncT)(A1);
 
+            typedef typename TypeTraits<A1>::Value V1;
+
         public:
             BasicTestMethod(const std::string& name, C& object, MemFuncT ptr)
             : Pt::Method<void, C, A1>(object, ptr)
@@ -356,9 +386,9 @@ namespace Unit {
                 if(argCount != 1)
                     throw std::invalid_argument("invalid number of arguments");
 
-                A1 a1 = A1();
-                args[0] >>= a1;
-                Pt::Method<void, C, A1>::call(a1);
+                V1 v1 = V1();
+                args[0] >>= v1;
+                Pt::Method<void, C, A1>::call(v1);
             }
     };
 

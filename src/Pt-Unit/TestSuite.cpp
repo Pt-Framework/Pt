@@ -78,7 +78,7 @@ void TestSuite::runTest( const std::string& name, const SerializationInfo* si, s
 {
     TestMethod* test = this->findTestMethod(name);
     if(!test)
-        throw std::runtime_error("No such test");
+        throw std::invalid_argument("no such test");
 
     Context ctx(*this, *test, si, argCount);
     ctx.run();
