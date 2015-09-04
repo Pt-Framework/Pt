@@ -96,11 +96,11 @@ class MyTestProtocol : public Pt::Unit::TestProtocol
 
             data[0] <<= 4;
             data[1] <<= 9;
-            suite.runTest( "Addition", data, 2 );
+            suite.runTest( "MyTestSuite::Addition", data, 2 );
 
             data[0] <<= 13;
             data[1] <<= 2;
-            suite.runTest( "Addition", data, 2 );
+            suite.runTest( "MyTestSuite::Addition", data, 2 );
         }
 };
 @endcode
