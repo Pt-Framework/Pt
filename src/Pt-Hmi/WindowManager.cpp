@@ -45,8 +45,8 @@ WindowManager::WindowManager(Window& parent)
 , _app( Application::instance() )
 , _borderWidth(5)
 , _moving(false)
-, _inactiveColor(0.8, 0.8, 0.8)
-, _activeColor(0.7, 0.7, 0.7)
+, _inactiveColor(0.8f, 0.8f, 0.8f)
+, _activeColor(0.7f, 0.7f, 0.7f)
 , _pointerLastState( DeviceButton::Released )
 , _focusOnPointerOver( false )
 , _actionButton(0)
@@ -91,6 +91,7 @@ WindowManager::WindowManager(Window& parent)
   _titleBarPanel.addChild( &_closeButton );
 	_titleBarPanel.addChild( &_maxButton );
 	_titleBarPanel.addChild( &_minButton );
+  _titleBarPanel.Margin = Margin(0);
   _titleBarPanel.Visible = true;
   
 }
@@ -209,12 +210,16 @@ Ui::PointF WindowManager::renderFrame( ChildWindow* w )
     
     _parent.windowSurface().setOrigin( to,size );
 			
+    _closeButton.BorderColor = color;
+    _minButton.BorderColor = color;
+    _maxButton.BorderColor = color;
     _titleLabel.BackColor = color;
     _titleLabel.Caption    = w->Caption.get();
     _titleLabel.Visible    = w->ShowTitle.get();
 
     _titleBarPanel.Size      = size;
     _titleBarPanel.BackColor = color;  
+    _titleBarPanel.BorderColor = color;
     _titleBarPanel.render( _parent.windowSurface() );	  
 
     _parent.windowSurface().setOrigin( saveOrgPos, saveOrgSize );    

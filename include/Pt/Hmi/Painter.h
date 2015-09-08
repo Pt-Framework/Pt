@@ -98,6 +98,11 @@ public:
     virtual void addFontName(const std::string& fontName);
 
     void setSurface(PaintSurface& surface);    
+    
+    PainterImpl* impl()
+    {
+        return _impl;
+    }
 private:
 	PainterImpl* _impl;
 };

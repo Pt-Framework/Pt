@@ -39,6 +39,11 @@ namespace Ui {
 class Region
 {
     public:
+        Region()
+        {
+        }
+
+
         Region(const Point& topLeft, const Size& size)
         : _topLeft(topLeft)
         , _size(size)

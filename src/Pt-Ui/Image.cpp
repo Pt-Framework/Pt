@@ -30,9 +30,21 @@
 namespace Pt{
 namespace Ui{
 
+Image::Image( Pt::uint8_t* buffer, Ui::Size size,  Ui::Size maxSize,  size_t stride, const ImageFormat& format )
+: _format(&format)
+, _buffer( buffer )
+, _maxSize( maxSize )
+, _width( size.width() )
+, _height( size.height() )
+, _stride( stride )
+{
+}
+
 
 Image::Image(const ImageFormat& format)		
 : _format(&format)
+, _buffer(0)
+, _stride(0)
 {
 	resize(0, 0);
 }
@@ -40,8 +52,10 @@ Image::Image(const ImageFormat& format)
       	
 Image::Image(size_t width, size_t height, size_t stride, const ImageFormat& format )
 : _format(&format)
+, _buffer(0)
+, _stride(stride)
 {
-	resize(width, height, stride);
+	resize(width, height, _stride);
 }
 		
 
@@ -178,10 +192,6 @@ void Image::setColor( const Color& color )
 		it += pixel.size();
 	}
 }
-	
-void Image::reserve( size_t bytes )
-{
-	_buffer.reserve( bytes );
-}
+
   		
 }}

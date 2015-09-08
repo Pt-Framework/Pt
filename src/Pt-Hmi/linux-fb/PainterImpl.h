@@ -30,6 +30,7 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/RenderPath.h>
 #include <Pt/Ui/ImagePainter.h>
 #include <Pt/Ui/FontMetrics.h>
 
@@ -37,6 +38,8 @@ namespace Pt {
 namespace Hmi {
 
 class PaintSurface;
+
+
 
 class PainterImpl
 {
@@ -69,9 +72,12 @@ class PainterImpl
 
     virtual int depth() const;
 
+
     virtual void drawPixel(const Ui::PointF& to);
 
     virtual void drawLine(const Ui::PointF& from, const Ui::PointF& to);
+    
+    virtual void drawPolyline(const Ui::PointF* points, const size_t pointCount);
 
 	  virtual void drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline );
 
@@ -79,15 +85,7 @@ class PainterImpl
 
     virtual void drawRect(const Ui::RectF& rectangle);
 
-    virtual void fillRect(const Ui::RectF& rectangle);
-
     virtual void drawEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size);
-
-    virtual void fillEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size);
-
-    virtual void drawPolyline(const Ui::PointF* points, const size_t pointCount);
-
-    virtual void fillPolygon(const Ui::PointF* points, const size_t pointCount);
 
     virtual void drawSurface(const Ui::PointF& to, PaintSurface& pm, const Ui::Region& pmRegion);
 
@@ -97,18 +95,33 @@ class PainterImpl
 
     virtual void drawImage(const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion);    
 
+
+    virtual void fillRect(const Ui::RectF& rectangle);    
+
+    virtual void fillEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size);
+
+    virtual void fillPolygon(const Ui::PointF* points, const size_t pointCount);
+
     virtual void addFontName(const std::string& fontName);
 
-	  void setSurface(PaintSurface& s);
-	
-  private:
-        Ui::PointF fromOrigin(const Ui::PointF& p);
+	  void setSurface( PaintSurface& s );	    
 
-        Ui::RectF fromOrigin(const Ui::RectF& p);
+    Ui::ImagePainter& imagePainter()
+    {
+      return _painter;
+    }
 
   private:
-	  Ui::ImagePainter _painter;
+    Ui::PointF fromOrigin(const Ui::PointF& p);
+
+    Ui::RectF fromOrigin(const Ui::RectF& p);
+
+  private:
+	  Ui::ImagePainter  _painter;
 	  PaintSurfaceImpl*  _surface;	
+    Ui::Pen           _pen;
+    Ui::Brush         _brush;
+    Ui::Font          _font;
 };
 
 }}

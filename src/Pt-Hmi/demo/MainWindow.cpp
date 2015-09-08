@@ -93,7 +93,6 @@ void MainWindow::init()
   
 	_mainPanel.Size = Ui::SizeF(800,600);
 	_mainPanel.Position = Ui::PointF(20,20);
-	_mainPanel.PanelBorderWidth = 3;
 	_mainPanel.PanelBorderStyle = Pt::Hmi::BorderStyle::Single;  
 	_mainPanel.Dock = Docking::Fill;
 	{
@@ -160,14 +159,12 @@ void MainWindow::init()
 	_childWindow1.Size = Ui::SizeF(200,300);
 	_childWindow2.Position = Ui::PointF(80,80);
 	_childWindow2.Size = Ui::SizeF(800,600);
-	_childWindow2.BackColor = _mainPanel.BackColor;
   _childWindow2.Caption = "Child 2";
 	
 
 	addChildWindow( _childWindow1 );
   _childWindow1.addChildWindow( _childWindow2 );
-	
-	_childWindow1.BackColor = this->BackColor;
+		
 	_childWindow1.Visible = true;
   _childWindow1.Caption = "Child 1";
   _childWindow1.Icon = Icon;

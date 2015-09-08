@@ -34,7 +34,7 @@ namespace Hmi{
 
 Panel::Panel()
 : PT_HMI_INIT_PROPERTY_VALUE(PanelBorderStyle,BorderStyle::Single)
-, PT_HMI_INIT_PROPERTY_VALUE(PanelBorderWidth,3)
+, PT_HMI_INIT_PROPERTY_VALUE(PanelBorderWidth,1)
 , PT_HMI_INIT_PROPERTY_VALUE(PanelBorderRoundEdge,false)
 , PT_HMI_INIT_PROPERTY_VALUE(BorderColor, Ui::Color::fromRgb8(178,178,178))
 {
@@ -79,24 +79,24 @@ void Panel::onRender(PaintSurface& paintSurface)
 			std::vector<Ui::PointF> points2(5);
 
 			//P0
-			points1[0].setX(corner);
-			points1[0].setY(clientRect.height());
+			points1[0].setX(clientRect.left() + corner);
+			points1[0].setY(clientRect.top() + clientRect.height());
 
 			//P1
-			points1[1].setX(0);
-			points1[1].setY(clientRect.height() - corner);
+			points1[1].setX(clientRect.left());
+			points1[1].setY(clientRect.top() +clientRect.height() - corner);
 
 			//P2
-			points1[2].setX( 0);
+			points1[2].setX(clientRect.left());
 			points1[2].setY(corner);
 
 			//P3
-			points1[3].setX(corner);
-			points1[3].setY(0);
+			points1[3].setX(clientRect.left() + corner);
+			points1[3].setY(clientRect.top());
 
 			//P4
-			points1[4].setX(clientRect.width() - corner);
-			points1[4].setY(0);
+			points1[4].setX(clientRect.left() + clientRect.width() - corner);
+			points1[4].setY(clientRect.top());
 			
 			//---
 			//P0
@@ -119,7 +119,7 @@ void Panel::onRender(PaintSurface& paintSurface)
 			points2[4].setX(corner);
 			points2[4].setY(clientRect.height());
 		
-			Ui::Pen pen(1, BorderColor.get());
+			Ui::Pen pen(border, BorderColor.get());
 			localPainter.setPen(pen);
 				
 			localPainter.drawPolyline(&points1[0], points1.size());								

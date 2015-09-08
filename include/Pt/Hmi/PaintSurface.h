@@ -39,7 +39,7 @@ class PaintSurfaceImpl;
 class PT_HMI_API PaintSurface
 {
 	public:		
-		PaintSurface();
+		PaintSurface();    
 
 		virtual ~PaintSurface();
 

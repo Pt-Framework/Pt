@@ -41,6 +41,8 @@ namespace Ui{
 class PT_UI_API Image
 {
 	public:		
+    Image( Pt::uint8_t* buffer, Ui::Size size, Ui::Size maxSize,  size_t stride = 0, const ImageFormat& format = ImageFormat::argb8888() );
+
 		Image(const ImageFormat& format = ImageFormat::argb8888());
 				
 		Image(size_t width, size_t height, size_t stride = 0, const ImageFormat& format = ImageFormat::argb8888());
@@ -76,26 +78,44 @@ class PT_UI_API Image
 		void setColor( const Color& color );
 
 
-		void resize( size_t width, size_t height, size_t strideInBytes = 0)
+		void resize( size_t width, size_t height, size_t strideInBytes = 0 )
 		{
-			_stride = strideInBytes;
-			_width = width;
-			_height = height;      
-			_buffer.resize( ( width * _format->pixelSize() + _stride) * height ); 
+      _stride = strideInBytes;
+			_width  = width;
+			_height = height;
+
+      if( _width == 0 || _height == 0 )
+          return;
+
+      if( _buffer == 0 )
+      {
+			  _defaultBuffer.resize( ( width * _format->pixelSize() + _stride) * height ); 
+        _buffer = &_defaultBuffer[0];         
+        return;
+      }
+      
+      if( _defaultBuffer.size() != 0  &&  _buffer == &_defaultBuffer[0])
+      {
+        _defaultBuffer.resize( ( width * _format->pixelSize() + _stride) * height ); 
+        _buffer = &_defaultBuffer[0];
+        return;
+      }
+
+      const size_t noOfPixelReq =  (width + strideInBytes)  * height;
+      const size_t maxNoOfPixel = (_maxSize.width() + _stride)  *_maxSize.height();
+
+      if( noOfPixelReq > maxNoOfPixel )
+        throw std::logic_error( "Requested image size exceed the defined max. image size.");
 		}
 
 
 		void resize( size_t width, size_t height, const ImageFormat& format, size_t strideInBytes = 0)
 		{
-			_format = &format;
-			_stride = strideInBytes;
-			_width = width;
-			_height = height;
-			_buffer.resize( ( width * _format->pixelSize() + _stride) * height ); 
+      _format = &format;
+      resize(width, height, strideInBytes );
 		}
 
-		void reserve( size_t bytes );
-		
+	
 		Color color(size_t x, size_t y) const
 		{
 			return _format->color(pixel(x,y));
@@ -167,10 +187,13 @@ class PT_UI_API Image
 
 	private:
 	  const ImageFormat* _format;
-		std::vector<Pt::uint8_t> _buffer;		
+		std::vector<Pt::uint8_t> _defaultBuffer;		
+    Pt::uint8_t* _buffer;
+
 		size_t _width;
 		size_t _height;
 		size_t _stride;
+    Ui::Size _maxSize;
 };
 
 }}

@@ -1,5 +1,4 @@
- /* Copyright (C) 2015 Marc Boris Duerner 
-    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+ /* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -24,57 +23,40 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_ScreenImpl_H
-#define Pt_Hmi_ScreenImpl_H
+#ifndef PT_HMI_POLYLINEPATH_H
+#define PT_HMI_POLYLINEPATH_H
 
-#include <Pt/Hmi/WindowManager.h>
-#include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/Cursor.h>
-#include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Ui/Color.h>
+#include <Pt/Hmi/RenderPath.h>
+#include <Pt/Ui/Pen.h>
+#include <Pt/Ui/Point.h>
+#include <vector>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+namespace Hmi {
 
-class FrameBuffer;
+class PolylinePath : public RenderPath
+{  
+  public:
+    PolylinePath( const Ui::Pen& pen, const Ui::PointF* points, size_t count)
+    : RenderPath( RenderPath::DrawPolyline )   
+    , _pen(pen)
+    , _points(points, points + count)
+    {
+    }
 
-class ScreenImpl : public Window
-{
-	public:
-		ScreenImpl();
-		virtual ~ScreenImpl();
+    const Ui::Pen& pen() const
+    {
+      return _pen;
+    }
 
-		double width() const
-		{
-			return  Size.get().width();
-		}
+    const std::vector<Ui::PointF>& points() const
+    {
+      return _points;
+    }    
 
-		double height() const
-		{
-			return  Size.get().height();
-		}
-		 		 
-		virtual PaintSurface& windowSurface();
-	
-		virtual void activate()
-		{
-		}
-
-
-	protected:
-		virtual void onInvalidate();
-
-		virtual void onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent );
-
-
-	private:   						
-		void saveCursorBackImage(const Pt::Hmi::PointerEvent& mouseEvent);
-
-	private:
-		Ui::Image	      _cursorBuffer;
-		Ui::Point			  _cursorPos;
-    PaintSurface    _windowSurface;
-    FrameBuffer&    _frameBuffer;  
+  private:
+     Ui::Pen    _pen;
+     std::vector<Ui::PointF> _points;
 };
 
 }}

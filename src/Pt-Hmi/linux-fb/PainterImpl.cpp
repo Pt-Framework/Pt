@@ -30,6 +30,16 @@
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/LinePath.h>
+#include <Pt/Hmi/TextPath.h>
+#include <Pt/Hmi/EllipsePath.h>
+#include <Pt/Hmi/RectPath.h>
+#include <Pt/Hmi/PolylinePath.h>
+#include <Pt/Hmi/FillRectPath.h>
+#include <Pt/Hmi/FillEllipsePath.h>
+#include <Pt/Hmi/FillPolygonPath.h>
+#include <Pt/Hmi/SurfacePath.h>
+#include <Pt/Hmi/ImagePath.h>
 
 namespace Pt {
 namespace Hmi {
@@ -46,32 +56,33 @@ PainterImpl::~PainterImpl()
 
 void PainterImpl::setPen(const Ui::Pen& pen)
 {
-	_painter.setPen(pen);
+	_pen = pen;
 }
 
 const Ui::Pen& PainterImpl::pen() const
 {
-	return _painter.pen();
+	return _pen;
 }
 
 void PainterImpl::setBrush(const Ui::Brush& brush)
 {
-	_painter.setBrush(brush);
+	_brush = brush;
 }
 
 const Ui::Brush& PainterImpl::brush() const
 {
-	return _painter.brush();
+	return _brush;
 }
 
 void PainterImpl::setFont(const Ui::Font& font)
 {
-	_painter.setFont(font);
+  _painter.setFont( font );
+	_font = font;
 }
 
 const Ui::Font& PainterImpl::font() const
 {
-	return _painter.font();
+	return _font;
 }
 
 Ui::FontMetrics PainterImpl::fontMetrics() const
@@ -95,46 +106,39 @@ int PainterImpl::depth() const
 }
 
 void PainterImpl::drawPixel(const Ui::PointF& to)
-{
-	_painter.drawPixel(fromOrigin(to));
+{  
+  _surface->addPath( new LinePath( _pen, fromOrigin(to), fromOrigin(to) ) );
 }
 
 void PainterImpl::drawLine(const Ui::PointF& from, const Ui::PointF& to)
-{
-	_painter.drawLine(fromOrigin(from), fromOrigin(to));
+{    
+  _surface->addPath( new LinePath( _pen, fromOrigin(to), fromOrigin(to) ) );
 }
+
 
 void PainterImpl::drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline )
-{
-	Ui::FontMetrics metrics =  fontMetrics(text);
-	_painter.drawText(fromOrigin(to), text, outline);
+{	 
+  _surface->addPath( new TextPath(_pen, fromOrigin(to), _font,  text , outline) );
 }
+
 
 void PainterImpl::drawText(const Ui::PointF& to, const Pt::String& text)
-{	
-	Ui::FontMetrics metrics =  fontMetrics(text);	
-	_painter.drawText(fromOrigin(to), text);
+{	  
+  _surface->addPath( new TextPath(_pen, fromOrigin(to), _font,  text, 0) );
 }
 
-void PainterImpl::drawRect(const Ui::RectF& rectangle)
-{
-	_painter.drawRect(fromOrigin(rectangle));
-}
-
-void PainterImpl::fillRect(const Ui::RectF& rectangle)
-{
-	_painter.fillRect(fromOrigin(rectangle));
-}
 
 void PainterImpl::drawEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size)
 {
-	_painter.drawEllipse(fromOrigin(topLeft), size);
+  _surface->addPath( new EllipsePath(_pen, fromOrigin( topLeft ), size) );	
 }
 
-void PainterImpl::fillEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size)
+
+void PainterImpl::drawRect(const Ui::RectF& rectangle)
 {
-	_painter.fillEllipse(topLeft, size);
+  _surface->addPath( new RectPath( _pen, rectangle) );
 }
+
 
 void PainterImpl::drawPolyline(const Ui::PointF* points, const size_t pointCount)
 {
@@ -143,7 +147,20 @@ void PainterImpl::drawPolyline(const Ui::PointF* points, const size_t pointCount
 	for( size_t i = 0; i < convPoints.size(); ++i)
 		convPoints[i] = fromOrigin(points[i]);
 
-	_painter.drawPolyline(&convPoints[0], pointCount);		
+  _surface->addPath( new PolylinePath(_pen, &convPoints[0], convPoints.size() ) );
+}
+
+
+void PainterImpl::fillRect(const Ui::RectF& rectangle)
+{
+  Ui::RectF orgRect = fromOrigin( rectangle );
+  _surface->addPath( new FillRectPath(_brush, orgRect) );
+}
+
+
+void PainterImpl::fillEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size)
+{
+  _surface->addPath( new FillEllipsePath( _brush,fromOrigin( topLeft ), size ) );
 }
 
 
@@ -154,40 +171,30 @@ void PainterImpl::fillPolygon(const Ui::PointF* points, const size_t pointCount)
 	for( size_t i = 0; i < convPoints.size(); ++i)
 		convPoints[i] = fromOrigin(points[i] );
 
-	_painter.fillPolygon(&convPoints[0],pointCount);
+  _surface->addPath( new FillPolygonPath( _brush, &convPoints[0], convPoints.size() );
 }
+
 
 void PainterImpl::drawSurface(const Ui::PointF& to, PaintSurface& pm, const Ui::Region& pmRegion)
 {
-	_painter.drawImage(fromOrigin(to), pm.impl()->image(), pmRegion);
+  _surface->addPath( new SurfacePath( pm, to, pmRegion ) );
 }
 
-void PainterImpl::drawSurface( const Ui::PointF& to, PaintSurface& surface)
-{
-	if( surface.originPos() != Ui::PointF(0,0) || surface.originSize() != surface.size() )
-	{
-		//Todo: optimize this
-		Ui::Point pos((size_t)surface.originPos().x(),(size_t)surface.originPos().y());
-		Ui::Size  size( (size_t)surface.originSize().width(), (size_t)surface.originSize().height() );
 
-		Ui::Region regionIn(pos, size );
-		Ui::Image subImage = surface.impl()->image().subImage(regionIn);
-		_painter.drawImage(fromOrigin(to), subImage );
-	}
-	else
-	{
-		_painter.drawImage(fromOrigin(to), surface.impl()->image() );
-	}
+void PainterImpl::drawSurface( const Ui::PointF& to, PaintSurface& pm)
+{
+  _surface->addPath( new SurfacePath( pm, to, 0) );
 }
 		
+
 void PainterImpl::drawImage(const Ui::PointF& to, const Ui::Image& image)
 {
-	_painter.drawImage(fromOrigin(to), image);
+  _surface->addPath( new SurfacePath( image, to, 0) );
 }
 
 void PainterImpl::drawImage(const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion)
 {
-	_painter.drawImage(fromOrigin(to), image, imageRegion);
+    _surface->addPath( new SurfacePath( image, to, imageRegion) );
 }
 
 void PainterImpl::addFontName(const std::string& fontName)
@@ -216,10 +223,10 @@ Ui::RectF PainterImpl::fromOrigin(const Ui::RectF& p)
   return Ui::RectF( pos, size);
 }
 
+
 void PainterImpl::setSurface(PaintSurface& s)
 {
 	_surface = s.impl();
 }
-
 	
 }}

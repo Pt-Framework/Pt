@@ -35,6 +35,9 @@
 #include <Pt/Ui/Image.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Cursor.h>
+#include <Pt/Ui/Rgb565Format.h>
+#include <Pt/Ui/Rgb888Format.h>
+#include <Pt/Ui/Argb8888Format.h>
 #include <linux/fb.h>
 
 namespace Pt {
@@ -83,17 +86,23 @@ class FrameBuffer
         return  _fixedInfo.line_length - ( width() *  depth() /8  );
     }
 
+    const Ui::ImageFormat& format() const 
+    {
+        return *_format;
+    }
 
-protected:
+
 
     char* buffer()
-	{ 		
+	  { 		
 		
-		if( !_doubleBuffer )
-			return _buffer;
+		  if( !_doubleBuffer )
+			  return _buffer;
 
-		return  _yoffset == 0  ? _buffer : _buffer+ _bufferSize;
-	}
+		  return  _yoffset == 0  ? _buffer : _buffer+ _bufferSize;
+	  }
+
+protected:
 
 
     size_t size() const
@@ -120,7 +129,8 @@ protected:
     size_t            _yoffset;  
     size_t            _bufferSize;
     size_t		        _depth;
-	bool _doubleBuffer;
+	  bool _doubleBuffer;
+    Ui::ImageFormat* _format;
 };
 
 } // namespace

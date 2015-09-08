@@ -37,6 +37,8 @@
 namespace Pt{
 namespace Hmi{
 
+class RenderPath;
+
 class PaintSurfaceImpl
 {
   public:		
@@ -67,12 +69,32 @@ class PaintSurfaceImpl
       return _originSize;
     }
 
-		void reserve( size_t bytes );
+		void clearPath()
+    {
+        for( size_t i = 0; i < _path.size(); ++i)
+        {
+            delete _path[i];
+        }
+        _path.clear();
+    }
+
+    const std::vector<RenderPath*>& path() const
+    {
+        return _path;
+    }
+
+    void addPath( RenderPath* path )
+    {
+      _path.push_back( path );
+    }
+
+    void render(Painter& painter);
 
   private:
 	  Ui::Image _image;	
     Pt::Ui::SizeF _originSize;
     Pt::Ui::PointF _originPos;
+    std::vector<RenderPath*> _path;
 };
 
 }}

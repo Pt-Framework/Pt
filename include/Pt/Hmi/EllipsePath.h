@@ -1,5 +1,4 @@
- /* Copyright (C) 2015 Marc Boris Duerner 
-    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+ /* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -24,57 +23,50 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_ScreenImpl_H
-#define Pt_Hmi_ScreenImpl_H
+#ifndef PT_HMI_ELLIPSEPATH_H
+#define PT_HMI_ELLIPSEPATH_H
 
-#include <Pt/Hmi/WindowManager.h>
-#include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/Cursor.h>
-#include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Ui/Color.h>
+#include <Pt/Hmi/RenderPath.h>
+#include <Pt/Ui/Pen.h>
+#include <Pt/Ui/Point.h>
+#include <Pt/Ui/Size.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+namespace Hmi {
 
-class FrameBuffer;
-
-class ScreenImpl : public Window
-{
-	public:
-		ScreenImpl();
-		virtual ~ScreenImpl();
-
-		double width() const
-		{
-			return  Size.get().width();
-		}
-
-		double height() const
-		{
-			return  Size.get().height();
-		}
-		 		 
-		virtual PaintSurface& windowSurface();
-	
-		virtual void activate()
-		{
-		}
+class EllipsePath : public RenderPath
+{  
+  public:
+    EllipsePath( const Ui::Pen& pen, const Ui::PointF& topLeft,  const Ui::SizeF& size)
+    : RenderPath( RenderPath::DrawEllipse )   
+    , _pen(pen)
+    , _topLeft(topLeft)
+    , _size(size)
+    {
+    }
 
 
-	protected:
-		virtual void onInvalidate();
+    const Ui::Pen& pen() const
+    {
+      return _pen;
+    }
 
-		virtual void onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent );
 
+    const Ui::PointF& topLeft() const
+    {
+      return _topLeft;
+    }
 
-	private:   						
-		void saveCursorBackImage(const Pt::Hmi::PointerEvent& mouseEvent);
+    
+    const Ui::SizeF& size() const
+    {
+      return _size;
+    }
 
-	private:
-		Ui::Image	      _cursorBuffer;
-		Ui::Point			  _cursorPos;
-    PaintSurface    _windowSurface;
-    FrameBuffer&    _frameBuffer;  
+  private:
+     Ui::Pen    _pen;
+     Ui::PointF _topLeft;
+     Ui::SizeF  _size;
 };
 
 }}

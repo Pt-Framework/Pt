@@ -1,5 +1,4 @@
- /* Copyright (C) 2015 Marc Boris Duerner 
-    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+ /* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -24,57 +23,69 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_ScreenImpl_H
-#define Pt_Hmi_ScreenImpl_H
+#ifndef PT_HMI_TEXTPATH_H
+#define PT_HMI_TEXTPATH_H
 
-#include <Pt/Hmi/WindowManager.h>
-#include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/Cursor.h>
-#include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Ui/Color.h>
+#include <Pt/Hmi/RenderPath.h>
+#include <Pt/Ui/Pen.h>
+#include <Pt/Ui/Point.h>
+#include <Pt/String.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+namespace Hmi {
 
-class FrameBuffer;
+class TextPath : public RenderPath
+{  
+  public:
+    TextPath( const Ui::Pen& pen, const Ui::PointF& to,  const Ui::Font& font, const Pt::String& text,  const Ui::Color* outline)
+    : RenderPath( RenderPath::DrawText )       
+    , _pen(pen)
+    , _to(to)
+    , _text(text)
+    , _font(font)
+    {
+       if( outline != 0 )
+        _outline = *outline;
+       else
+         _outline.setAlpha( -1.0f);
+    }
 
-class ScreenImpl : public Window
-{
-	public:
-		ScreenImpl();
-		virtual ~ScreenImpl();
-
-		double width() const
-		{
-			return  Size.get().width();
-		}
-
-		double height() const
-		{
-			return  Size.get().height();
-		}
-		 		 
-		virtual PaintSurface& windowSurface();
-	
-		virtual void activate()
-		{
-		}
+    const Ui::Pen& pen() const
+    {
+      return _pen;
+    }
 
 
-	protected:
-		virtual void onInvalidate();
+    const Ui::PointF& to() const
+    {
+      return _to;
+    }
 
-		virtual void onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent );
 
+    const String& text() const
+    {
+        return _text;
+    }
 
-	private:   						
-		void saveCursorBackImage(const Pt::Hmi::PointerEvent& mouseEvent);
+    const Ui::Color* outline() const
+    {
+        if( _outline.alpha() == -1.0f )
+            return 0;
 
-	private:
-		Ui::Image	      _cursorBuffer;
-		Ui::Point			  _cursorPos;
-    PaintSurface    _windowSurface;
-    FrameBuffer&    _frameBuffer;  
+        return &_outline;
+    }
+
+    const Ui::Font& font() const
+    {
+        return _font;
+    }
+
+  private:
+     Ui::Pen    _pen;     
+     Ui::PointF _to;
+     String     _text;
+     Ui::Color  _outline;  
+     Ui::Font   _font;
 };
 
 }}

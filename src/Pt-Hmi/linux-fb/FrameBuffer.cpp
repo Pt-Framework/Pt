@@ -87,6 +87,27 @@ FrameBuffer::FrameBuffer()
 	}
 
 	std::clog<<"Buffer adr:"<< (void*) _buffer << std::endl;
+
+  const size_t noOfBytesPerPixel = depth() % 8 != 0 ? depth() / 8 + 1 : depth() / 8;       
+
+  switch( noOfBytesPerPixel )
+  {
+    case 2:
+        _format = new Ui::Rgb565Format();
+    break;
+
+    case 3:
+        _format = new Ui::Rgb888Format();
+    break;
+
+    case 4:
+      _format =  new Ui::Argb8888Format();
+    break;
+
+    default:
+      _format =  new Ui::Argb8888Format();
+    break;
+  } 
 }
 
   
@@ -98,6 +119,9 @@ FrameBuffer::~FrameBuffer()
 
 	if(_fd > 0)
 		::close(_fd);
+
+  if( _format != 0)
+     delete _format;
 } 
 
 

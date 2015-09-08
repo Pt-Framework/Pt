@@ -133,6 +133,9 @@
     <Filter Include="Pt-Ui\freetype\src">
       <UniqueIdentifier>{54f00d44-dcee-4751-959b-6840181170ca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Hmi\RenderPath">
+      <UniqueIdentifier>{c992b913-5ea4-4ccd-9442-47c4ccb08ecf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1529,6 +1532,39 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\LinePath.h">
+      <Filter>Pt-Hmi\RenderPath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PolylinePath.h">
+      <Filter>Pt-Hmi\RenderPath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\TextPath.h">
+      <Filter>Pt-Hmi\RenderPath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\RenderPath.h">
+      <Filter>Pt-Hmi\RenderPath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\RectPath.h">
+      <Filter>Pt-Hmi\RenderPath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\SurfacePath.h">
+      <Filter>Pt-Hmi\RenderPath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ImagePath.h">
+      <Filter>Pt-Hmi\RenderPath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\EllipsePath.h">
+      <Filter>Pt-Hmi\RenderPath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\FillEllipsePath.h">
+      <Filter>Pt-Hmi\RenderPath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\FillRectPath.h">
+      <Filter>Pt-Hmi\RenderPath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\FillPolygonPath.h">
+      <Filter>Pt-Hmi\RenderPath</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
