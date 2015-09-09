@@ -50,10 +50,6 @@ void ChildWindow::onInvalidate()
     _winParent->invalidate();	
 }
 
-PaintSurface& ChildWindow::windowSurface()
-{
-  return _windowSurface;
-}
 
 void ChildWindow::activate()
 {

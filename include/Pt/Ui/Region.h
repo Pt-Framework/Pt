@@ -25,8 +25,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_GFX_REGION_H
-#define PT_GFX_REGION_H
+#ifndef PT_UI_REGION_H
+#define PT_UI_REGION_H
 
 #include <Pt/Ui/Point.h>
 #include <Pt/Ui/Size.h>

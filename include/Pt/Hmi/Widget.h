@@ -160,7 +160,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 
 		void invalidate();
 
-		void render(PaintSurface& surface);
+		void render();
 
 		void mnemonic();
 
@@ -216,7 +216,17 @@ class PT_HMI_API Widget : public Pt::Connectable
 		{
 			setWidgetFocus(true);			
 		}
+		
+		const PaintSurface& surface() const
+		{
+			return _surface;
+		}
 
+
+		PaintSurface& surface()
+		{
+			return _surface;
+		}
 
 	protected:
 		Widget();	
@@ -228,7 +238,6 @@ class PT_HMI_API Widget : public Pt::Connectable
 		virtual void onInvalidate();
 		virtual void onRender(PaintSurface& paintSurface);
 		
-		virtual PaintSurface* widgetBuffer();
 
 		virtual void onLayout( PaintSurface& surface );
 
@@ -287,6 +296,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 		bool											  _isWidgetFocused;
 		std::string									_caption;		
     bool                        _isValid;
+		PaintSurface 							_surface;
 };
 
 }}

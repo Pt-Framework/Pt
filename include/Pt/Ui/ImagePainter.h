@@ -36,6 +36,7 @@
 #include <Pt/Ui/Region.h>
 #include <Pt/Ui/Font.h>
 #include <Pt/Ui/Rect.h>
+#include <Pt/Ui/Region.h>
 #include <memory>
 
 
@@ -142,6 +143,16 @@ class PT_UI_API ImagePainter : public Painter
         virtual void drawImage(const  PointF& to, const Image& image,
                                const  Region& imageRegion);
 
+				void setClip( const Region& region)
+				{
+					_clipRegion = region;
+				}
+
+				const Region& clip() const
+				{
+					return _clipRegion;
+				}
+
     private:
         Image&           _image;
         Pen                  _pen;
@@ -163,6 +174,7 @@ class PT_UI_API ImagePainter : public Painter
         FillSolid*           _fillSolid;
         FillTexture*         _fillTexture;
 				RenderMode::Type     _renderMode;
+				Region               _clipRegion;
 };
 
 } //namespace Gfx

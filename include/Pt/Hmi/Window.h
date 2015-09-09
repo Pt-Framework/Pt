@@ -86,9 +86,7 @@ class PT_HMI_API Window : public Widget
 
 		Signal<> Closed;	
 
-		void close();
-
-    virtual PaintSurface& windowSurface() = 0;
+		void close();    
 
 		Pt::Signal<const Pt::Event&>& eventReceived()
 		{
@@ -107,10 +105,6 @@ class PT_HMI_API Window : public Widget
 		void removeFocus();
 
 	protected:		
-		virtual PaintSurface* widgetBuffer()
-		{
-			return 	&windowSurface();
-		}
 
 		virtual void onKeyInput( const KeyEvent& ev );			
 		virtual void onPointerInput( const PointerEvent& ev );	

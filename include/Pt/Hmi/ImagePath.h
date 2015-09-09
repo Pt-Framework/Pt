@@ -61,6 +61,11 @@ class ImagePath : public RenderPath
     }
     
 
+		const Ui::Image& image() const
+		{
+			return _image;
+		}
+
   private:
      Ui::Image _image;
      Ui::PointF _to;

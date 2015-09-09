@@ -91,9 +91,8 @@ WindowManager::WindowManager(Window& parent)
   _titleBarPanel.addChild( &_closeButton );
 	_titleBarPanel.addChild( &_maxButton );
 	_titleBarPanel.addChild( &_minButton );
-  _titleBarPanel.Margin = Margin(0);
-  _titleBarPanel.Visible = true;
-  
+  _titleBarPanel.Margin = Margin(0);  
+	_titleBarPanel.Visible = true;	  	
 }
 
 
@@ -207,20 +206,27 @@ Ui::PointF WindowManager::renderFrame( ChildWindow* w )
 
     Ui::PointF  to( pos.x() + _borderWidth/2, pos.y() + _borderWidth/2 ); 
     Ui::SizeF   size = Ui::SizeF( winSize.width() - _borderWidth, _titleBarPanel.Size.get().height() );
-    
-    _parent.windowSurface().setOrigin( to,size );
-			
-    _closeButton.BorderColor = color;
-    _minButton.BorderColor = color;
-    _maxButton.BorderColor = color;
+    		
+    _closeButton.BorderColor = Ui::Color(0.5f,0.5f,0.5f);
+    _minButton.BorderColor = _closeButton.BorderColor.get();
+    _maxButton.BorderColor = _closeButton.BorderColor.get();
     _titleLabel.BackColor = color;
     _titleLabel.Caption    = w->Caption.get();
     _titleLabel.Visible    = w->ShowTitle.get();
 
+		_titleBarPanel.Position = to;
     _titleBarPanel.Size      = size;
-    _titleBarPanel.BackColor = color;  
+    _titleBarPanel.BackColor = color; 
     _titleBarPanel.BorderColor = color;
-    _titleBarPanel.render( _parent.windowSurface() );	  
+    
+		 
+		_parent.windowSurface().setOrigin( to,size );
+		
+		_titleBarPanel.setParent( &_parent );
+		
+		_titleBarPanel.render( _parent.windowSurface() );	  
+		
+		_titleBarPanel.setParent( 0 );
 
     _parent.windowSurface().setOrigin( saveOrgPos, saveOrgSize );    
   }

@@ -40,12 +40,13 @@
 #include <Pt/Hmi/FillPolygonPath.h>
 #include <Pt/Hmi/SurfacePath.h>
 #include <Pt/Hmi/ImagePath.h>
+#include "ScreenImpl.h"
 
 namespace Pt {
 namespace Hmi {
 
 PainterImpl::PainterImpl(PaintSurfaceImpl* surface)
-: _painter(surface->image())
+: _painter( Application::instance().mainScreen().impl()->image())
 , _surface(surface)
 {	
 }
@@ -109,6 +110,7 @@ void PainterImpl::drawPixel(const Ui::PointF& to)
 {  
   _surface->addPath( new LinePath( _pen, fromOrigin(to), fromOrigin(to) ) );
 }
+
 
 void PainterImpl::drawLine(const Ui::PointF& from, const Ui::PointF& to)
 {    
@@ -177,24 +179,24 @@ void PainterImpl::fillPolygon(const Ui::PointF* points, const size_t pointCount)
 
 void PainterImpl::drawSurface(const Ui::PointF& to, PaintSurface& pm, const Ui::Region& pmRegion)
 {
-  _surface->addPath( new SurfacePath( pm, to, pmRegion ) );
+  _surface->addPath( new SurfacePath( pm, fromOrigin(to), &pmRegion ) );
 }
 
 
 void PainterImpl::drawSurface( const Ui::PointF& to, PaintSurface& pm)
 {
-  _surface->addPath( new SurfacePath( pm, to, 0) );
+  _surface->addPath( new SurfacePath( pm, fromOrigin(to), 0) );
 }
 		
 
 void PainterImpl::drawImage(const Ui::PointF& to, const Ui::Image& image)
 {
-  _surface->addPath( new SurfacePath( image, to, 0) );
+  _surface->addPath( new ImagePath( image, fromOrigin(to), 0) );
 }
 
 void PainterImpl::drawImage(const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion)
 {
-    _surface->addPath( new SurfacePath( image, to, imageRegion) );
+	_surface->addPath( new ImagePath( image, fromOrigin(to), &imageRegion) );
 }
 
 void PainterImpl::addFontName(const std::string& fontName)
@@ -227,6 +229,113 @@ Ui::RectF PainterImpl::fromOrigin(const Ui::RectF& p)
 void PainterImpl::setSurface(PaintSurface& s)
 {
 	_surface = s.impl();
+}
+
+
+void PainterImpl::flush()
+{
+	const std::vector<RenderPath*>& paths = _surface->path();
+	Ui::Region myClip = _painter.clip();
+
+  for( size_t i = 0; i < paths.size(); ++i )
+  {
+    switch( paths[i]->operation() )
+    {
+      case RenderPath::DrawLine:
+      {
+         LinePath* path = (LinePath*)paths[i];
+         _painter.setPen( path->pen() );
+         _painter.drawLine( path->from() , path->to() );
+      }
+      break;
+      
+      case RenderPath::DrawPolyline:
+      {
+         PolylinePath* path = (PolylinePath*)paths[i];
+         _painter.setPen( path->pen() );
+         _painter.drawPolyline( &path->points()[0], path->points().size() );
+      }
+      break;
+      
+      case RenderPath::DrawText:
+      {
+        TextPath* path = (TextPath*) paths[i];
+        _painter.setPen( path->pen() );
+
+        if( path->outline() != 0 )
+          _painter.drawText(path->to(), path->text(), path->outline() );
+        else
+          _painter.drawText(path->to(), path->text());
+      }
+      break;
+      
+      case RenderPath::DrawRect:
+      {
+        RectPath* path = (RectPath*) paths[i];
+        _painter.setPen( path->pen() );
+        _painter.drawRect( path->rect() );
+      }
+      break;
+      
+      case RenderPath::DrawPixel:
+      {
+         LinePath* path = (LinePath*)paths[i];
+         _painter.setPen( path->pen() );
+         _painter.drawPixel( path->to() );
+      }
+      break;
+      
+      case RenderPath::DrawEllipse:
+      {
+        EllipsePath* path = (EllipsePath*) paths[i];
+        
+        _painter.setPen( path->pen() );
+        _painter.drawEllipse( path->topLeft(), path->size() );
+      }
+      break;
+      
+      case RenderPath::DrawSurface:
+      {
+        SurfacePath* path = (SurfacePath*) paths[i];
+				_painter.setClip( Ui::Region( Ui::Point(path->to().x(),path->to().x()) , Ui::Size(path->surface().size().width(), path->surface().size().height() ) );
+        path->surface().painter().impl()->flush();        
+				_painter.setClip( myClip );
+      }
+      break;
+
+      case RenderPath::DrawImage:
+      {
+				ImagePath* path =  (ImagePath*) paths[i];
+        _painter.drawImage(path->to(), path->image(), path->region() );
+      }
+      break;
+
+      case RenderPath::FillRect:
+			{
+				FillRectPath* path = (FillRectPath*) paths[i];
+				_painter.setBrush( path->brush() );
+				_painter.fillRect( path->rect() ); 
+			}
+      break;
+
+      case RenderPath::FillEllipse:
+			{
+				FillEllipsePath* path = (FillEllipsePath*) paths[i];
+				_painter.setBrush( path->brush() );
+				_painter.fillEllipse( path->topLeft(), path->size() );
+			}
+
+      break;
+
+      case RenderPath::FillPolygon:
+			{
+				FillPolygonPath* path = (FillPolygonPath*) paths[i];
+				_painter.setBrush( path->brush() );
+				_painter.fillPolygon( &path->points()[0], path->points().size() );
+			}
+      break;
+    }
+  }
 }
 	
 }}

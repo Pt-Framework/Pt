@@ -105,11 +105,8 @@ class PainterImpl
     virtual void addFontName(const std::string& fontName);
 
 	  void setSurface( PaintSurface& s );	    
-
-    Ui::ImagePainter& imagePainter()
-    {
-      return _painter;
-    }
+		
+		void flush();
 
   private:
     Ui::PointF fromOrigin(const Ui::PointF& p);

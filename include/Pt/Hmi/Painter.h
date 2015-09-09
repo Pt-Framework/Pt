@@ -97,6 +97,8 @@ public:
 
     virtual void addFontName(const std::string& fontName);
 
+		void flush();
+
     void setSurface(PaintSurface& surface);    
     
     PainterImpl* impl()

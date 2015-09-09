@@ -39,6 +39,7 @@ namespace Hmi{
 
 ScreenImpl::ScreenImpl()
 : _frameBuffer( Application::instance().impl()->frameBuffer() )
+, _image( _frameBuffer.buffer(), _frameBuffer.imgSize(), _frameBuffer.imgSize(), _frameBuffer.strideInBytes(), _frameBuffer.format() )
 {  
 	Visible = true;	
 	Size = Ui::SizeF( _frameBuffer.width(),  _frameBuffer.height() );

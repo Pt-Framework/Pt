@@ -60,6 +60,15 @@ class ScreenImpl : public Window
 		{
 		}
 
+		const Ui::Image& image() const
+		{
+			return _image;
+		} 
+
+		Ui::Image& image() 
+		{
+			return _image;
+		} 
 
 	protected:
 		virtual void onInvalidate();
@@ -75,6 +84,7 @@ class ScreenImpl : public Window
 		Ui::Point			  _cursorPos;
     PaintSurface    _windowSurface;
     FrameBuffer&    _frameBuffer;  
+		Ui::Image       _image;
 };
 
 }}

@@ -38,12 +38,10 @@ class PT_HMI_API ChildWindow  : public Hmi::Window
 	public:
 		ChildWindow();	
 		virtual ~ChildWindow();	
-    virtual PaintSurface& windowSurface();
     virtual void activate();
 
 	protected:	  
     virtual void onInvalidate();			
-    PaintSurface _windowSurface;		
 };
 
 }}

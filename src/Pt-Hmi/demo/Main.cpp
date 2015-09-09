@@ -19,7 +19,7 @@ int main(int argc, char* args[])
 		mainWindow2.Caption = "Main 2";
 
 		mainWindow1.show();
-		mainWindow2.show();
+		//mainWindow2.show();
 
 		application.run();
 	}

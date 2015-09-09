@@ -46,13 +46,9 @@ class PaintSurfaceImpl
 	  virtual ~PaintSurfaceImpl();
 
 	  virtual void resize(const Ui::SizeF& size);	
+
 	  virtual  Ui::SizeF size() const;
 
-	  Ui::Image& image()
-	  {
-		  return _image; 
-	  }
-    
     void setOrigin(const Ui::PointF& pos, const Ui::SizeF& size)
     {
       _originPos = pos;
@@ -88,13 +84,11 @@ class PaintSurfaceImpl
       _path.push_back( path );
     }
 
-    void render(Painter& painter);
-
   private:
-	  Ui::Image _image;	
-    Pt::Ui::SizeF _originSize;
-    Pt::Ui::PointF _originPos;
-    std::vector<RenderPath*> _path;
+		Pt::Ui::SizeF							_size;
+    Pt::Ui::SizeF							_originSize;
+    Pt::Ui::PointF						_originPos;
+    std::vector<RenderPath*>	_path;
 };
 
 }}

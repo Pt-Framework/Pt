@@ -97,7 +97,10 @@ class PainterImpl
         void addFontName(const std::string& fontName);
 
 				void setSurface(PaintSurface& surface);
-
+				
+				void flush()
+				{
+				}
 
     protected:
         void drawCompatibleImage(size_t x, size_t y, size_t depth, const char* data, size_t width, size_t height);

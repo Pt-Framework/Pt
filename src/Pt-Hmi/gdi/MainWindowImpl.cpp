@@ -58,13 +58,6 @@ MainWindowImpl::~MainWindowImpl()
   _app.impl()->windowEvent() -= Pt::slot(*this, &MainWindowImpl::onWindowEvent);    
 }
 
-
-PaintSurface& MainWindowImpl::windowSurface()
-{
-  return _windowSurface;
-}
-
-
 void MainWindowImpl::create()
 {
   if( _hwnd != 0)
@@ -381,7 +374,7 @@ void MainWindowImpl::onPaint()
   PAINTSTRUCT ps;
   HDC windowContext = BeginPaint(_hwnd, &ps);
     
-  HDC bitmapDeviceConText = windowSurface().impl()->deviceContext();
+  HDC bitmapDeviceConText = _window->surface().impl()->deviceContext();
   BitBlt(windowContext, 0, 0, info.right - info.left,  info.bottom - info.top, bitmapDeviceConText, 0, 0, SRCCOPY);    
     
   EndPaint(_hwnd, &ps);    

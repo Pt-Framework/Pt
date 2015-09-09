@@ -96,8 +96,6 @@ public:
 
 	void focus(bool f);
 
-  PaintSurface& windowSurface();
-
 protected:
 	void onWindowEvent(HWND wnd, unsigned int msg, WPARAM wparam, LPARAM lparam, bool& handled);
 	void onPaint();
@@ -117,7 +115,6 @@ private:
 	bool													_forceTopMost;
 	Ui::Size                 _minSize;
 	Ui::Size                 _maxSize;
-  PaintSurface            _windowSurface;
 };
 
 }}

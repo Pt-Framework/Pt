@@ -45,8 +45,6 @@ class PT_HMI_API MainWindow  : public Window
 
 		void setTopMost( bool topMost );						
 
-    virtual PaintSurface& windowSurface();
-				
     virtual void activate();
 
 	protected:	

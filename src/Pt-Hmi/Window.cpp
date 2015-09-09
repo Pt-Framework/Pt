@@ -70,14 +70,13 @@ Window::~Window()
 
 void Window::onInvalidate()
 {	  	
-  render(windowSurface());		
+  render();		
   _windowManager.render();
 }
 
 
 void Window::setSize(const Ui::SizeF& size)
 {	
-  windowSurface().resize( size );	
   Widget::setSize( size); 
   invalidate();
 }

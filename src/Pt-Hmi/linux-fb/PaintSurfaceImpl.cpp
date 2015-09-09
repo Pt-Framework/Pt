@@ -29,25 +29,13 @@
 #include "ApplicationImpl.h"
 #include <Pt/Ui/ImagePainter.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/RenderPath.h>
-#include <Pt/Hmi/LinePath.h>
-#include <Pt/Hmi/PolylinePath.h>
-#include <Pt/Hmi/TextPath.h>
-#include <Pt/Hmi/RectPath.h>
-#include <Pt/Hmi/EllipsePath.h>
-#include <Pt/Hmi/SurfacePath.h>
-#include <Pt/Hmi/ImagePath.h>
 
 namespace Pt{
 namespace Hmi{
 
 PaintSurfaceImpl::PaintSurfaceImpl()
-: _image( Application::instance().impl()->frameBuffer().buffer(), 
-          Ui::SizeF( 100,100),
-          Ui::SizeF(Application::instance().impl()->frameBuffer().width(),  Application::instance().impl()->frameBuffer().height()),
-          Application::instance().impl()->frameBuffer().strideInBytes(), 
-          Application::instance().impl()->frameBuffer().format() )
-, _originSize(100,100)
+: _originSize(100,100)
+, _size(100,100)
 {	
 }
 
@@ -59,109 +47,14 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
 
 void PaintSurfaceImpl::resize(const Ui::SizeF& size)
 {
-  const FrameBuffer& frameBuffer = Application::instance().impl()->frameBuffer();
-	
-	if( frameBuffer.depth() == 16 )
-		_image.resize(size.width(), size.height(), Ui::ImageFormat::rgb565(), frameBuffer.strideInBytes() );
-	else if( frameBuffer.depth() == 32 )
-		_image.resize(size.width(), size.height(), Ui::ImageFormat::argb8888(), frameBuffer.strideInBytes() );
-
 	_originSize  = size;  
+	_size = size;
 }
 
 
 Ui::SizeF PaintSurfaceImpl::size() const
 {
-	return Ui::SizeF(_image.width(), _image.height());
-}
-
-
-void PaintSurfaceImpl::render(Painter& painter)
-{
-  Ui::ImagePainter& imgPainter = painter.impl()->imagePainter();
-
-  for( size_t i = 0; i < _path.size(); ++i )
-  {
-    switch( _path[i]->operation() )
-    {
-      case RenderPath::DrawLine:
-      {
-         LinePath* path = (LinePath*)_path[i];
-         imgPainter.setPen( path->pen() );
-         imgPainter.drawLine( path->from() , path->to() );
-      }
-      break;
-      
-      case RenderPath::DrawPolyline:
-      {
-         PolylinePath* path = (PolylinePath*)_path[i];
-         imgPainter.setPen( path->pen() );
-         imgPainter.drawPolyline( &path->points()[0], path->points().size() );
-      }
-      break;
-      
-      case RenderPath::DrawText:
-      {
-        TextPath* path = (TextPath*) _path[i];
-        imgPainter.setPen( path->pen() );
-
-        if( path->outline() != 0 )
-          imgPainter.drawText(path->to(), path->text(), path->outline() );
-        else
-          imgPainter.drawText(path->to(), path->text());
-      }
-      break;
-      
-      case RenderPath::DrawRect:
-      {
-        RectPath* path = (RectPath*) _path[i];
-        imgPainter.setPen( path->pen() );
-        imgPainter.drawRect( path->rect() );
-      }
-      break;
-      
-      case RenderPath::DrawPixel:
-      {
-         LinePath* path = (LinePath*)_path[i];
-         imgPainter.setPen( path->pen() );
-         imgPainter.drawPixel( path->to() );
-      }
-      break;
-      
-      case RenderPath::DrawEllipse:
-      {
-        EllipsePath* path = (EllipsePath*) _path[i];
-        
-        imgPainter.setPen( path->pen() );
-        imgPainter.drawEllipse( path->topLeft(), path->size() );
-      }
-      break;
-      
-      case RenderPath::DrawSurface:
-      {//TODO:
-        SurfacePath* path = (SurfacePath*) _path[i];
-        path->surface().setOrigin( path->to(), path->surface().size() );
-        path->surface().impl()->render( path->surface().painter() );        
-      }
-      break;
-
-      case RenderPath::DrawImage:
-      {
-          ImagePath 
-      }
-      break;
-
-      case RenderPath::FillRect:
-      break;
-
-      case RenderPath::FillEllipse:
-      break;
-
-      case RenderPath::FillPolygon:
-      break;
-
-    }
-  }
+	return _size;
 }
 
 }}

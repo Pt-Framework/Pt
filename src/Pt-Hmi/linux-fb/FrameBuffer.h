@@ -91,8 +91,6 @@ class FrameBuffer
         return *_format;
     }
 
-
-
     char* buffer()
 	  { 		
 		
@@ -101,6 +99,11 @@ class FrameBuffer
 
 		  return  _yoffset == 0  ? _buffer : _buffer+ _bufferSize;
 	  }
+
+		Ui::Size imgSize() const 
+		{
+			return Ui::Size( width(), height() );
+		}
 
 protected:
 
