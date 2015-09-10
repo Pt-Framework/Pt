@@ -23,46 +23,40 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_HMI_RENDERPATH_H
-#define PT_HMI_RENDERPATH_H
+#ifndef PT_UI_POLYLINEPATHINFO_H
+#define PT_UI_POLYLINEPATHINFO_H
 
-#include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Ui/RenderPathInfo.h>
+#include <Pt/Ui/Pen.h>
+#include <Pt/Ui/Point.h>
+#include <vector>
 
 namespace Pt {
-namespace Hmi {
+namespace Ui {
 
-class RenderPath
-{
+class PolylinePathInfo : public RenderPathInfo
+{  
   public:
-    enum Operation
-    {
-      DrawLine,
-      DrawPolyline,
-      DrawText,
-      DrawRect,
-      DrawPixel,
-      DrawEllipse,
-      DrawSurface,
-      DrawImage,
-      FillRect,
-      FillEllipse,
-      FillPolygon
-    };
-
-  public:
-    RenderPath( Operation op )
-    : _operation( op )    
+    PolylinePathInfo( const Ui::Pen& pen, const Ui::PointF* points, size_t count)
+    : RenderPathInfo( RenderPathInfo::DrawPolyline )   
+    , _pen(pen)
+    , _points(points, points + count)
     {
     }
 
-    Operation operation() const
+    const Ui::Pen& pen() const
     {
-        return _operation;
+      return _pen;
     }
+
+    const std::vector<Ui::PointF>& points() const
+    {
+      return _points;
+    }    
 
   private:
-    Operation     _operation;
+     Ui::Pen    _pen;
+     std::vector<Ui::PointF> _points;
 };
 
 }}

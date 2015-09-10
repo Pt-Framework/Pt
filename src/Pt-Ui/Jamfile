@@ -35,9 +35,10 @@ SharedLibrary Pt-Ui : Color.cpp
                       Fill.cpp
                       FillEllipse.cpp
                       FillPolygon.cpp
-					  FreeType.cpp
-					  ClipPolygon.cpp
-					  ImageReader.cpp
+                      FreeType.cpp
+                      ClipPolygon.cpp
+                      ImageReader.cpp
+                      RenderPath.cpp
 			              ;
 
 LinkSharedLibraries Pt-Ui : Pt  Pt-System ;

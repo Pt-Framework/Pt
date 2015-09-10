@@ -1,5 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+ /* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -24,38 +23,50 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_Screen_H
-#define Pt_Hmi_Screen_H
+#ifndef PT_UI_FILLELLIPSEPATHINFO_H
+#define PT_UI_FILLELLIPSEPATHINFO_H
 
-#include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Window.h>
+#include <Pt/Ui/RenderPathInfo.h>
+#include <Pt/Ui/Brush.h>
+#include <Pt/Ui/Point.h>
+#include <Pt/Ui/Size.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+namespace Ui {
 
-class ScreenImpl;
-
-class PT_HMI_API Screen
-{
-	public:
-		Screen();
-		virtual ~Screen();
-
-		double width() const;
-		double height() const;
-	
-    Ui::SizeF size() const
+class FillEllipsePathInfo : public RenderPathInfo
+{  
+  public:
+    FillEllipsePathInfo( const Ui::Brush& brush, const Ui::PointF& topLeft,  const Ui::SizeF& size)
+    : RenderPathInfo( RenderPathInfo::FillEllipse )   
+    , _brush(brush)
+    , _topLeft(topLeft)
+    , _size(size)
     {
-      return Ui::SizeF( width(), height() );
     }
-		
-		ScreenImpl* impl()
-		{
-			return _impl;
-		}		
 
-	private:
-		ScreenImpl* _impl;
+
+    const Ui::Brush& brush() const
+    {
+      return _brush;
+    }
+
+
+    const Ui::PointF& topLeft() const
+    {
+      return _topLeft;
+    }
+
+    
+    const Ui::SizeF& size() const
+    {
+      return _size;
+    }
+
+  private:
+     Ui::Brush    _brush;
+     Ui::PointF _topLeft;
+     Ui::SizeF  _size;
 };
 
 }}

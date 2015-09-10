@@ -34,14 +34,14 @@
 #include "ApplicationImpl.h"
 
 namespace Pt {
-
 namespace Hmi {
 
 InputDevice::InputDevice(const char* deviceName)
 : _ioh(*this)
 , _loop(0)
 {
-    _ioh.fd = ::open(deviceName, O_RDONLY|O_NONBLOCK);
+  _ioh.fd = ::open(deviceName, O_RDONLY|O_NONBLOCK);
+
 	if( _ioh.fd < 0 )
 		throw Pt::System::AccessFailed(deviceName);
 }

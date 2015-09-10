@@ -77,10 +77,6 @@ void MainWindow::onInvalidate()
 	_impl->render();
 }
 
-PaintSurface& MainWindow::windowSurface()
-{
-  return _impl->windowSurface();
-}
 
 void MainWindow::setTopMost(bool topMost)
 {
@@ -209,7 +205,6 @@ void MainWindow::onMaxSizeChnaged(const Ui::SizeF& prop)
 
 void MainWindow::setSize(const Ui::SizeF& size)
 {
-	windowSurface().resize( size );	
 	Widget::setSize( size); 	
 	_impl->setWindowSize( size );
 	invalidate();

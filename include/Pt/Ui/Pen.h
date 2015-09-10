@@ -157,7 +157,7 @@ class PT_UI_API PenData
       PenData( size_t size, const Color& color, Pen::PenStyle style, Pen::CapStyle cap, Pen::JoinStyle join )
       : _size( size )
       , _style( style )
-      , _buffer( 64, 1)
+      , _buffer( Ui::Size( 64, 1) )
       , _capStyle( cap )
       , _joinStyle( join )
 			, _color(color)

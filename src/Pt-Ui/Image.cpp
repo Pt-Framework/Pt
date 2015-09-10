@@ -30,34 +30,28 @@
 namespace Pt{
 namespace Ui{
 
-Image::Image( Pt::uint8_t* buffer, Ui::Size size,  Ui::Size maxSize,  size_t stride, const ImageFormat& format )
-: _format(&format)
-, _buffer( buffer )
-, _maxSize( maxSize )
-, _width( size.width() )
-, _height( size.height() )
-, _stride( stride )
-{
-}
-
-
+ 
 Image::Image(const ImageFormat& format)		
 : _format(&format)
-, _buffer(0)
-, _stride(0)
 {
-	resize(0, 0);
+	resize( Ui::Size(0,0) );
 }
 			
       	
-Image::Image(size_t width, size_t height, size_t stride, const ImageFormat& format )
-: _format(&format)
-, _buffer(0)
-, _stride(stride)
+Image::Image(const Ui::Size& size,  const ImageFormat& format, size_t stride )
+: _buffer(0)
 {
-	resize(width, height, _stride);
+	resize(size, format, stride);
 }
 		
+
+
+Image::Image( Pt::uint8_t* buffer, const Ui::Size& size, const ImageFormat& format, size_t stride )
+{
+  resize( buffer, size, format, stride );
+}
+
+
 
 Image::~Image()		
 {
@@ -70,7 +64,7 @@ Image Image::convert(const ImageFormat& toFormat) const
 	if( *_format == toFormat )
 		return *this;
 
-	Image image(_width, _height, _stride, toFormat);
+	Image image(Ui::Size(_width, _height), toFormat, _stride);
 
 	for( size_t y = 0; y < _height; ++y)
 	{
@@ -87,7 +81,7 @@ Image Image::convert(const ImageFormat& toFormat) const
 
 Image Image::blockScale( const SizeF& newSize) const
 {
-  Image resultImage( (size_t) newSize.width(), (size_t)newSize.height(), _stride, *_format);
+  Image resultImage( Ui::Size((size_t) newSize.width(), (size_t)newSize.height()) ,  *_format, _stride );
 
   const double dx = newSize.width() /_width;
   const double dy = newSize.height() / _height;
@@ -157,18 +151,18 @@ Image Image::subImage( const Region& regionIn) const
 		clipedRegion.setTop(0);
 
 	//Copy to new image
-	Image image(clipedRegion.width(), clipedRegion.height(), _stride, *_format);
+	Image image( Ui::Size( clipedRegion.width(), clipedRegion.height()), *_format, _stride );
 
-	for( size_t y = clipedRegion.top(); y  <= clipedRegion.bottom(); ++y)
+	for( int y = clipedRegion.top(); y  <= clipedRegion.bottom(); ++y)
 	{
-		const size_t lineBeginOffset = y * (_width * _format->pixelSize() + _stride);
+		const int lineBeginOffset = y * (_width * _format->pixelSize() + _stride);
 
-		const size_t targetY = y - clipedRegion.top();
+		const int targetY = y - clipedRegion.top();
 		
-		const size_t xStartOffset = lineBeginOffset + (clipedRegion.left() * _format->pixelSize());
-		const size_t xEnd   = lineBeginOffset + (clipedRegion.right() * _format->pixelSize());
+		const int xStartOffset = lineBeginOffset + (clipedRegion.left() * _format->pixelSize());
+		const int xEnd   = lineBeginOffset + (clipedRegion.right() * _format->pixelSize());
 
-		const size_t lineSize = (clipedRegion.right() - clipedRegion.left() + 1) * _format->pixelSize();
+		const int lineSize = (clipedRegion.right() - clipedRegion.left() + 1) * _format->pixelSize();
 
 		memcpy( image.pixel(0,targetY), &_buffer[xStartOffset], lineSize );
 	}
@@ -193,5 +187,46 @@ void Image::setColor( const Color& color )
 	}
 }
 
-  		
+
+
+void Image::resize( const Ui::Size& size,  size_t strideInBytes )
+{
+  _stride = strideInBytes;
+	_width  = size.width();
+	_height = size.height();
+
+  _defaultBuffer.clear();
+
+  if( _width == 0 || _height == 0 )
+      return;
+
+	_defaultBuffer.resize( ( _width * _format->pixelSize() + _stride) * _height ); 
+  _buffer = &_defaultBuffer[0];         
+}
+
+
+void Image::resize( const Ui::Size& size, const ImageFormat& format, size_t strideInBytes )
+{
+  _format = &format;
+  resize( size, strideInBytes );
+}
+
+
+void Image::resize( Pt::uint8_t* buffer, const Ui::Size& size,size_t strideInBytes  )
+{
+  _stride = strideInBytes;
+	_width  = size.width();
+	_height = size.height();
+  _buffer = buffer;
+  _defaultBuffer.clear();  
+}
+
+
+void Image::resize( Pt::uint8_t* buffer, const Ui::Size& size, const ImageFormat& format, size_t strideInBytes  )
+{
+  _format = &format;
+  resize( buffer, size, strideInBytes );
+}
+
+
 }}

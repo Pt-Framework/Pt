@@ -48,22 +48,6 @@ void PaintSurface::resize(const Ui::SizeF& size)
   _painter.setSurface(*this);
 }
 
-const Ui::SizeF& PaintSurface::originSize() const
-{
-  return _impl->originSize();
-}
-
-void PaintSurface::setOrigin(const Ui::PointF& pos, const Ui::SizeF& size)
-{
-  _impl->setOrigin(pos,size);
-}
-
-
-const Ui::PointF& PaintSurface::originPos() const
-{
-  return _impl->originPos();
-}
-
 Ui::SizeF PaintSurface::size() const
 {
 	return _impl->size();

@@ -33,11 +33,11 @@
 namespace Pt{
 namespace Hmi{
 
+
 PaintSurfaceImpl::PaintSurfaceImpl()
 : _deviceContext(0)
 {
 	_size = Ui::SizeF(10,10);
-  setOrigin(Ui::PointF(0,0), _size);
 
 	Ui::Size nsize = Application::instance().fromUnit(_size);
 
@@ -47,13 +47,14 @@ PaintSurfaceImpl::PaintSurfaceImpl()
     
 	DeleteDC(screenDC);
 
-   _oldPen   = (HPEN)  GetCurrentObject(_deviceContext, OBJ_PEN);
-   _oldBrush = (HBRUSH) GetCurrentObject(_deviceContext, OBJ_BRUSH);
-   _oldFont  = (HFONT) GetCurrentObject(_deviceContext, OBJ_FONT);
+  _oldPen   = (HPEN)  GetCurrentObject(_deviceContext, OBJ_PEN);
+  _oldBrush = (HBRUSH) GetCurrentObject(_deviceContext, OBJ_BRUSH);
+  _oldFont  = (HFONT) GetCurrentObject(_deviceContext, OBJ_FONT);
 
   SelectObject(_deviceContext, _bitmapHandle);
 	SetBkMode(_deviceContext, TRANSPARENT);
 }
+
 
 PaintSurfaceImpl::~PaintSurfaceImpl()
 {
@@ -70,10 +71,9 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
   DeleteObject(_bitmapHandle);
 }
 
+
 void PaintSurfaceImpl::resize(const Ui::SizeF& size)
 {
-  _originSize = size;
-
   if( _size == size )
     return;
 
@@ -104,6 +104,7 @@ void PaintSurfaceImpl::resize(const Ui::SizeF& size)
 	SetTextColor(_deviceContext, textColor);
 	SetBkMode(_deviceContext, TRANSPARENT);
 }
+
 
 }}
 

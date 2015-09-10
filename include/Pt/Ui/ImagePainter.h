@@ -37,6 +37,8 @@
 #include <Pt/Ui/Font.h>
 #include <Pt/Ui/Rect.h>
 #include <Pt/Ui/Region.h>
+#include <Pt/Ui/ClipLine.h>
+#include <Pt/Ui/ClipPolygon.h>
 #include <memory>
 
 
@@ -143,18 +145,40 @@ class PT_UI_API ImagePainter : public Painter
         virtual void drawImage(const  PointF& to, const Image& image,
                                const  Region& imageRegion);
 
-				void setClip( const Region& region)
+				void setClip( const RectF& rect)
+        {
+          _clipRect = rect;
+        }
+
+				const RectF& clip() const
 				{
-					_clipRegion = region;
+					return _clipRect;
 				}
 
-				const Region& clip() const
-				{
-					return _clipRegion;
-				}
+        void setOrigin( const Ui::PointF& org )
+        {
+          _origin = org;
+        }
+
+        const Ui::PointF& origin() const
+        {
+            return _origin;
+        }
 
     private:
-        Image&           _image;
+      Ui::PointF fromOrigin( const Ui::PointF& p )
+      {
+          return _origin + p;
+      }
+
+      Ui::RectF fromOrigin( const Ui::RectF& r )
+      {
+        return Ui::RectF( _origin + r.origin(), r.size() );
+      }
+
+
+    private:
+        Image&               _image;
         Pen                  _pen;
         Brush                _brush;
         Font                 _font;
@@ -174,7 +198,10 @@ class PT_UI_API ImagePainter : public Painter
         FillSolid*           _fillSolid;
         FillTexture*         _fillTexture;
 				RenderMode::Type     _renderMode;
-				Region               _clipRegion;
+				RectF                 _clipRect;
+        Ui::PointF           _origin;
+        ClipPolygon          _clipPolygon;
+        ClipLine             _clipLine;
 };
 
 } //namespace Gfx

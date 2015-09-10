@@ -30,95 +30,136 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Painter.h>
-#include <Pt/Hmi/RenderPath.h>
 #include <Pt/Ui/ImagePainter.h>
 #include <Pt/Ui/FontMetrics.h>
+#include <Pt/Ui/RenderPath.h>
 
 namespace Pt {
 namespace Hmi {
 
 class PaintSurface;
 
-
-
 class PainterImpl
 {
   public:
-    PainterImpl(PaintSurfaceImpl* surface);
+    PainterImpl( PaintSurfaceImpl* surface );
 		
     virtual ~PainterImpl();
-  
-		void setRenderMode(Ui::RenderMode::Type mode)
-		{
-		}
-	 
-		virtual void setPen(const Ui::Pen& pen);
+  			 
+    void drawPixel( const Ui::PointF& to );
 
-    virtual const Ui::Pen& pen() const;
-
-    virtual void setBrush(const Ui::Brush& brush);
-
-    virtual const Ui::Brush& brush() const;
-
-    virtual void setFont(const Ui::Font& font);
-
-    virtual const Ui::Font& font() const;
-
-    virtual Ui::FontMetrics fontMetrics() const;
-
-    virtual Ui::FontMetrics fontMetrics(Pt::String Text) const;
-
-    virtual const std::list<std::string>& fontFamilyNames();
-
-    virtual int depth() const;
-
-
-    virtual void drawPixel(const Ui::PointF& to);
-
-    virtual void drawLine(const Ui::PointF& from, const Ui::PointF& to);
+    void drawLine( const Ui::PointF& from, const Ui::PointF& to );
     
-    virtual void drawPolyline(const Ui::PointF* points, const size_t pointCount);
+    void drawPolyline( const Ui::PointF* points, const size_t pointCount );
 
-	  virtual void drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline );
+    void drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline );
 
-    virtual void drawText(const Ui::PointF& to, const Pt::String& Text);
+    void drawText( const Ui::PointF& to, const Pt::String& Text );
 
-    virtual void drawRect(const Ui::RectF& rectangle);
+    void drawRect( const Ui::RectF& rectangle );
 
-    virtual void drawEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size);
+    void drawEllipse( const Ui::PointF& topLeft, const Ui::SizeF& size );
 
-    virtual void drawSurface(const Ui::PointF& to, PaintSurface& pm, const Ui::Region& pmRegion);
+    void drawSurface( const Ui::PointF& to, PaintSurface& surface, const Ui::Region& pmRegion );
 
-    virtual void drawSurface(const Ui::PointF& to, PaintSurface& pm);
+    void drawSurface( const Ui::PointF& to, PaintSurface& surface );
 		
-    virtual void drawImage(const Ui::PointF& to, const Ui::Image& image);
+    void drawImage( const Ui::PointF& to, const Ui::Image& image );
 
-    virtual void drawImage(const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion);    
+    void drawImage( const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion ); 
 
+    void fillRect( const Ui::RectF& rectangle );    
 
-    virtual void fillRect(const Ui::RectF& rectangle);    
+    void fillEllipse( const Ui::PointF& topLeft, const Ui::SizeF& size );
 
-    virtual void fillEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size);
+    void fillPolygon( const Ui::PointF* points, const size_t pointCount );
+    
+    void flush();
+        
+  public:
+    void setClip( const Ui::RectF& rect )
+    {
+        _painter.setClip( rect );
+    }    
 
-    virtual void fillPolygon(const Ui::PointF* points, const size_t pointCount);
+    const Ui::RectF& clip() const 
+    {
+      return _painter.clip();
+    }
 
-    virtual void addFontName(const std::string& fontName);
+    void setOrigin( const Ui::PointF& p )
+    {
+      _painter.setOrigin( p );
+    }
 
-	  void setSurface( PaintSurface& s );	    
-		
-		void flush();
+    const Ui::PointF& origin() const
+    {
+      return  _painter.origin();
+    }
+
+    void setPen( const Ui::Pen& pen )
+    {
+	    _painter.setPen(pen);
+    }
+
+    const Ui::Pen& pen() const
+    {
+	    return _painter.pen();
+    }
+
+    void setBrush( const Ui::Brush& brush )
+    {
+	    _painter.setBrush( brush) ;
+    }
+
+    const Ui::Brush& brush() const
+    {
+	    return _painter.brush();
+    }
+
+    void setFont( const Ui::Font& font )
+    {
+      _painter.setFont( font );	
+    }
+
+    const Ui::Font& font() const
+    {
+	    return _painter.font();
+    }
+
+    Ui::FontMetrics fontMetrics() const
+    {
+	    return _painter.fontMetrics();
+    }
+
+    Ui::FontMetrics fontMetrics( Pt::String text ) const
+    {
+	    return _painter.fontMetrics(text);
+    }
+
+    const std::list<std::string>& PainterImpl::fontFamilyNames()
+    {
+	    return _painter.fontFamilyNames();
+    }    
+
+    void setRenderMode( Ui::RenderMode::Type mode )
+    {
+      _painter.setRenderMode( mode );
+    }
+
+    void setSurface( PaintSurface& s )
+    {
+	    _surface = s.impl();
+    }
+
+    void addFontName( const std::string& fontName )
+    {
+	    //Todo: add font name.
+    }
 
   private:
-    Ui::PointF fromOrigin(const Ui::PointF& p);
-
-    Ui::RectF fromOrigin(const Ui::RectF& p);
-
-  private:
-	  Ui::ImagePainter  _painter;
-	  PaintSurfaceImpl*  _surface;	
-    Ui::Pen           _pen;
-    Ui::Brush         _brush;
-    Ui::Font          _font;
+	  Ui::ImagePainter     _painter;
+	  PaintSurfaceImpl*    _surface;	
 };
 
 }}

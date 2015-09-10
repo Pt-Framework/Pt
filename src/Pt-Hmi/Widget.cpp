@@ -156,7 +156,7 @@ void Widget::invalidate()
 
 void Widget::onLayout( PaintSurface& surface )
 {
-  Ui::SizeF clientSize = surface.originSize();
+  Ui::SizeF clientSize = surface.size();
   double posLeft  = 0;
   double posTop   = 0;
   double posRight  = clientSize.width();
@@ -292,7 +292,7 @@ void Widget::onLayout( PaintSurface& surface )
 
 void Widget::render()
 {
-	if(!Visible.get() )
+	if(!Visible.get()  && _isValid )
 		return;
 
 	//Layout children
@@ -304,51 +304,51 @@ void Widget::render()
 	//Render children
 	for( size_t i = 0; i < _children.size(); ++i )
 	{
-		Widget* child = _children[i];
-	
-		//Calculate Origin		
-		const Ui::PointF childGlobPoint = child->fromClient( child->Position.get() );
-		const Ui::PointF drawPos( childGlobPoint.x() + child->Margin.get().left(), childGlobPoint.y() + child->Margin.get().top() );
-		const Ui::SizeF  drawSize( child->Size.get().width() - child->Margin.get().left() - child->Margin.get().right(), 
-				                        child->Size.get().height() - child->Margin.get().top() - child->Margin.get().bottom() );
-	  
-		surface.setOrigin( drawPos, drawSize );		
+		Widget* child = _children[i];	
 		
-		_children[i]->render( surface );   
+    _children[i]->render();   
+
+    surface().painter().drawSurface( child->Position.get(), _children[i]->surface() );
 	}
 	
-	surface.setOrigin( orgPos, orgSize );			
-
 	_isValid = true;
 }
 
 
 void Widget::onRender( PaintSurface& surface )
 {		
-  const Ui::SizeF size = surface.originSize();
+  const Ui::SizeF size = clientSize();
 
 	if( size.width() < 0 || size.height() < 0)
 		return; 
 
-	Ui::Image& backImage = BackgroundImage.get();
-	Pt::Hmi::Painter&	   localPainter = surface.painter();
-	Ui::RectF		         rect(Pt::Ui::PointF(0,0), size);
-	
-	localPainter.setFont(Font.get());
+	const Ui::Image&   backImage = BackgroundImage.get();
+	Pt::Hmi::Painter&	 painter = surface.painter();
+  Ui::PointF         pos = clientPos();
+	Ui::RectF		       rectClient( pos, size );
+  Ui::RectF		       rect( Ui::PointF(0,0), surface.size() );
+  
+  if( _parent != 0 )
+  {
+    Ui::Brush	backBrush(_parent->BackColor.get() );  		  
+    painter.setBrush(backBrush);
+    painter.fillRect(rect);
+  }
+
+  painter.setFont(Font.get());
 
 	if( HighLight.get() )
 	{       
-		Ui::Brush	brush( HighlightColor.get() );
-        
-		localPainter.setBrush(brush);
-		localPainter.fillRect(rect);
+		Ui::Brush	brush( HighlightColor.get() );        
+		painter.setBrush(brush);
+		painter.fillRect(rectClient);
 	}
 	else
 	{
 		Ui::Brush	brush(BackColor.get());
 	
-		localPainter.setBrush(brush);    	
-		localPainter.fillRect(rect);
+		painter.setBrush(brush);    	
+		painter.fillRect(rectClient);
 	}
 
 	if( !backImage.empty() )
@@ -357,32 +357,32 @@ void Widget::onRender( PaintSurface& surface )
 		{				
 			case ImageLayout::NoLayout:
 			{
-				localPainter.drawImage( Pt::Ui::PointF(0,0), backImage );
+				painter.drawImage( Pt::Ui::PointF(0,0), backImage );
 			}
 			break;
 			
 			case ImageLayout::Tile:
 			{
-				for( size_t x = 0; x < size.width();  x += backImage.width() )
+				for( size_t x = pos.x(); x < size.width();  x += backImage.width() )
 				{
-					for( size_t y = 0; y < size.height();  y += backImage.height() )
-						localPainter.drawImage(Ui::PointF(x,y), backImage);
+					for( size_t y = pos.y(); y < size.height();  y += backImage.height() )
+						painter.drawImage(Ui::PointF(x,y), backImage);
 				}
 			}
 			break;
 
 			case ImageLayout::Center:
 			{
-				double x = size.width()/2  - backImage.width()/2;
-				double y = size.height()/2  - backImage.height()/2;
-				localPainter.drawImage(Ui::PointF(x,y), backImage);
+				const double x = pos.x() + size.width()/2  - backImage.width()/2;
+				const double y = pos.y() + size.height()/2  - backImage.height()/2;
+				painter.drawImage(Ui::PointF(x,y), backImage);
 			}
 			break;
 			
 			case ImageLayout::Strech:
 			{
 				Ui::Image strech = backImage.blockScale( size );
-				localPainter.drawImage( Pt::Ui::PointF(0,0), strech );
+				painter.drawImage( pos, strech );
 			}
 			break;
 
@@ -393,7 +393,7 @@ void Widget::onRender( PaintSurface& surface )
 
         Ui::Image strech = backImage.blockScale(newSize);
 				
-        localPainter.drawImage(Pt::Ui::PointF(0,0), strech);
+        painter.drawImage(pos, strech);
 			}
 			break;
 		}
@@ -737,6 +737,7 @@ void Widget::setSize(const Ui::SizeF& size)
 {
 	_size = size;			
   
+  surface().resize( _size );
 	_isValid = false;
 }
 

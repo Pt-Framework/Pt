@@ -28,17 +28,14 @@
 #define Pt_Hmi_InputDevice_h
 
 #include "posix/Selector.h"
-
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/PointerEvent.h>
 #include <Pt/System/Selectable.h>
 #include <Pt/System/MainLoop.h>
-
 #include <unistd.h>
 
 namespace Pt {
-
 namespace Hmi {
 
 class InputDevice : public System::Selectable
@@ -50,7 +47,7 @@ class InputDevice : public System::Selectable
 		void begin()
 		{      
 		  if( ! _loop )
-			throw std::logic_error("input device not active");
+			  throw std::logic_error("input device not active");
 
 			Pt::System::Selector& selector = _loop->selector();
 			selector.beginRead(&_ioh);
@@ -72,7 +69,9 @@ class InputDevice : public System::Selectable
 		virtual bool onRun();
 
 		virtual void onCancel()
-		{ throw std::logic_error("not implemented"); }
+		{ 
+        throw std::logic_error("not implemented"); 
+    }
     
 		void onAttach(System::EventLoop& loop);
 

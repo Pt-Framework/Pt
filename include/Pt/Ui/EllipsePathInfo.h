@@ -23,27 +23,27 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_HMI_RECTPATH_H
-#define PT_HMI_RECTPATH_H
+#ifndef PT_UI_ELLIPSEPATHINFO_H
+#define PT_UI_ELLIPSEPATHINFO_H
 
-#include <Pt/Hmi/RenderPath.h>
+#include <Pt/Ui/RenderPathInfo.h>
 #include <Pt/Ui/Pen.h>
 #include <Pt/Ui/Point.h>
 #include <Pt/Ui/Size.h>
 
 namespace Pt {
-namespace Hmi {
+namespace Ui {
 
-class RectPath : public RenderPath
+class EllipsePathInfo : public RenderPathInfo
 {  
   public:
-    RectPath( const Ui::Pen& pen, const Ui::RectF& rect)
-    : RenderPath( RenderPath::DrawRect )   
+    EllipsePathInfo( const Ui::Pen& pen, const Ui::PointF& topLeft, const Ui::SizeF& size)
+    : RenderPathInfo( RenderPathInfo::DrawEllipse )   
     , _pen(pen)
-    , _rect(rect)
+    , _topLeft(topLeft)
+    , _size(size)
     {
     }
-
 
     const Ui::Pen& pen() const
     {
@@ -51,15 +51,21 @@ class RectPath : public RenderPath
     }
 
 
-    const Ui::RectF& rect() const
+    const Ui::PointF& topLeft() const
     {
-      return _rect;
+      return _topLeft;
     }
+
     
+    const Ui::SizeF& size() const
+    {
+      return _size;
+    }
 
   private:
      Ui::Pen    _pen;
-     Ui::RectF _rect;
+     Ui::PointF _topLeft;
+     Ui::SizeF  _size;
 };
 
 }}

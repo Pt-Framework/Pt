@@ -179,9 +179,4 @@ void Painter::setSurface(PaintSurface& surface)
   _impl->setSurface(surface);
 }
 
-void Painter::flush()
-{
-	_impl->flush();
-}
-
 }}

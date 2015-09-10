@@ -79,8 +79,6 @@ class FrameBuffer
     
     void grabImage( Ui::Image& image, const Ui::Point& pos,  const Ui::Size& size);
     
-    void sync();
-
     size_t strideInBytes() const
     {
         return  _fixedInfo.line_length - ( width() *  depth() /8  );
@@ -92,47 +90,28 @@ class FrameBuffer
     }
 
     char* buffer()
-	  { 		
-		
-		  if( !_doubleBuffer )
+	  { 				
 			  return _buffer;
-
-		  return  _yoffset == 0  ? _buffer : _buffer+ _bufferSize;
 	  }
 
-		Ui::Size imgSize() const 
+    const char* buffer() const
+	  { 				
+			  return _buffer;
+	  }
+
+		Ui::Size size() const 
 		{
 			return Ui::Size( width(), height() );
 		}
 
-protected:
-
-
-    size_t size() const
-    {
-      return _bufferSize;
-    }
-
-
-	  const fb_var_screeninfo& screenInfo() const
-		{
-			return _screenInfo;
-		}
-
-		const fb_fix_screeninfo& fixedInfo() const
-		{
-			return _fixedInfo;
-		}    
-
-	protected:
+	private:
 		int								_fd;
 		fb_var_screeninfo	_screenInfo;
 		fb_fix_screeninfo	_fixedInfo;        
 		char*							_buffer;
     size_t            _yoffset;  
     size_t            _bufferSize;
-    size_t		        _depth;
-	  bool _doubleBuffer;
+    size_t		        _depth;	  
     Ui::ImageFormat* _format;
 };
 

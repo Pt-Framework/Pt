@@ -23,40 +23,43 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_HMI_FILLPOLYGONPATH_H
-#define PT_HMI_FILLPOLYGONPATH_H
+#ifndef PT_UI_RECTPATHINFO_H
+#define PT_UI_RECTPATHINFO_H
 
-#include <Pt/Hmi/RenderPath.h>
-#include <Pt/Ui/Brush.h>
+#include <Pt/Ui/RenderPathInfo.h>
+#include <Pt/Ui/Pen.h>
 #include <Pt/Ui/Point.h>
-#include <vector>
+#include <Pt/Ui/Size.h>
 
 namespace Pt {
-namespace Hmi {
+namespace Ui {
 
-class FillPolygonPath : public RenderPath
+class RectPathInfo : public RenderPathInfo
 {  
   public:
-    FillPolygonPath( const Ui::Brush& brush, const Ui::PointF* points, size_t count)
-    : RenderPath( RenderPath::FillPolygon )   
-    , _brush(brush)
-    , _points(points, points + count)
+    RectPathInfo( const Ui::Pen& pen, const Ui::RectF& rect)
+    : RenderPathInfo( RenderPathInfo::DrawRect )   
+    , _pen(pen)
+    , _rect(rect)
     {
     }
 
-    const Ui::Brush& brush() const
+
+    const Ui::Pen& pen() const
     {
-      return _brush;
+      return _pen;
     }
 
-    const std::vector<Ui::PointF>& points() const
+
+    const Ui::RectF& rect() const
     {
-      return _points;
-    }    
+      return _rect;
+    }
+    
 
   private:
-     Ui::Brush    _brush;
-     std::vector<Ui::PointF> _points;
+     Ui::Pen    _pen;
+     Ui::RectF _rect;
 };
 
 }}

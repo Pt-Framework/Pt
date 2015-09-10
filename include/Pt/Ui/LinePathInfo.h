@@ -1,5 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+ /* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -24,38 +23,46 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_Screen_H
-#define Pt_Hmi_Screen_H
+#ifndef PT_UI_LINEPATHINFO_H
+#define PT_Ui_LINEPATHINFO_H
 
-#include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Window.h>
+#include <Pt/Ui/RenderPathInfo.h>
+#include <Pt/Ui/Pen.h>
+#include <Pt/Ui/Point.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+namespace Ui {
 
-class ScreenImpl;
-
-class PT_HMI_API Screen
-{
-	public:
-		Screen();
-		virtual ~Screen();
-
-		double width() const;
-		double height() const;
-	
-    Ui::SizeF size() const
+class LinePathInfo : public RenderPathInfo
+{  
+  public:
+    LinePathInfo( const Ui::Pen& pen, const Ui::PointF& from, const Ui::PointF& to)
+    : RenderPathInfo( RenderPathInfo::DrawLine )   
+    , _pen(pen)
+    , _from(from)
+    , _to(to)
     {
-      return Ui::SizeF( width(), height() );
     }
-		
-		ScreenImpl* impl()
-		{
-			return _impl;
-		}		
 
-	private:
-		ScreenImpl* _impl;
+    const Ui::Pen& pen() const
+    {
+      return _pen;
+    }
+
+    const Ui::PointF& from() const
+    {
+      return _from;
+    }
+
+    const Ui::PointF& to() const
+    {
+      return _to;
+    }
+
+  private:
+     Ui::Pen    _pen;
+     Ui::PointF _from;
+     Ui::PointF _to;
 };
 
 }}

@@ -23,50 +23,43 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_HMI_FILLELLIPSEPATH_H
-#define PT_HMI_FILLELLIPSEPATH_H
-
-#include <Pt/Hmi/RenderPath.h>
-#include <Pt/Ui/Brush.h>
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Size.h>
+#ifndef PT_UI_RENDERPATHINFO_H
+#define PT_UI_RENDERPATHINFO_H
 
 namespace Pt {
-namespace Hmi {
+namespace Ui {
 
-class FillEllipsePath : public RenderPath
-{  
+class RenderPathInfo
+{
   public:
-    FillEllipsePath( const Ui::Brush& brush, const Ui::PointF& topLeft,  const Ui::SizeF& size)
-    : RenderPath( RenderPath::FillEllipse )   
-    , _brush(brush)
-    , _topLeft(topLeft)
-    , _size(size)
+    enum Operation
+    {
+      DrawLine,
+      DrawPolyline,
+      DrawText,
+      DrawRect,
+      DrawPixel,
+      DrawEllipse,
+      DrawSurface,
+      DrawImage,
+      FillRect,
+      FillEllipse,
+      FillPolygon
+    };
+
+  public:
+    RenderPathInfo( Operation op )
+    : _operation( op )    
     {
     }
 
-
-    const Ui::Brush& brush() const
+    Operation operation() const
     {
-      return _brush;
-    }
-
-
-    const Ui::PointF& topLeft() const
-    {
-      return _topLeft;
-    }
-
-    
-    const Ui::SizeF& size() const
-    {
-      return _size;
+        return _operation;
     }
 
   private:
-     Ui::Brush    _brush;
-     Ui::PointF _topLeft;
-     Ui::SizeF  _size;
+    Operation     _operation;
 };
 
 }}

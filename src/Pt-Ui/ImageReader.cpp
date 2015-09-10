@@ -179,7 +179,7 @@ Image* ImageReader::read(std::istream& source)
 	    
 
 
-		Image* image = new Image(imgWidth, imgHeight, 0, Ui::ImageFormat::argb8888() );				  
+		  Image* image = new Image( Ui::Size(imgWidth, imgHeight), Ui::ImageFormat::argb8888() );				  
     
 			for( size_t x = 0; x < imgWidth; ++x)
 			{

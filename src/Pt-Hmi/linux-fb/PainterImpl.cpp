@@ -30,312 +30,238 @@
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/LinePath.h>
-#include <Pt/Hmi/TextPath.h>
-#include <Pt/Hmi/EllipsePath.h>
-#include <Pt/Hmi/RectPath.h>
-#include <Pt/Hmi/PolylinePath.h>
-#include <Pt/Hmi/FillRectPath.h>
-#include <Pt/Hmi/FillEllipsePath.h>
-#include <Pt/Hmi/FillPolygonPath.h>
-#include <Pt/Hmi/SurfacePath.h>
-#include <Pt/Hmi/ImagePath.h>
+#include <Pt/Hmi/SurfacePathInfo.h>
+#include <Pt/Ui/ImagePathInfo.h>
+#include <Pt/Ui/LinePathInfo.h>
+#include <Pt/Ui/TextPathInfo.h>
+#include <Pt/Ui/EllipsePathInfo.h>
+#include <Pt/Ui/RectPathInfo.h>
+#include <Pt/Ui/PolylinePathInfo.h>
+#include <Pt/Ui/FillRectPathInfo.h>
+#include <Pt/Ui/FillEllipsePathInfo.h>
+#include <Pt/Ui/FillPolygonPathInfo.h>
 #include "ScreenImpl.h"
 
 namespace Pt {
 namespace Hmi {
 
-PainterImpl::PainterImpl(PaintSurfaceImpl* surface)
-: _painter( Application::instance().mainScreen().impl()->image())
-, _surface(surface)
+PainterImpl::PainterImpl( PaintSurfaceImpl* surface )
+: _painter( Application::instance().mainScreen().impl()->image() )
+, _surface( surface )
 {	
 }
+
 
 PainterImpl::~PainterImpl()
 {
 }
 
-void PainterImpl::setPen(const Ui::Pen& pen)
-{
-	_pen = pen;
-}
 
-const Ui::Pen& PainterImpl::pen() const
-{
-	return _pen;
-}
-
-void PainterImpl::setBrush(const Ui::Brush& brush)
-{
-	_brush = brush;
-}
-
-const Ui::Brush& PainterImpl::brush() const
-{
-	return _brush;
-}
-
-void PainterImpl::setFont(const Ui::Font& font)
-{
-  _painter.setFont( font );
-	_font = font;
-}
-
-const Ui::Font& PainterImpl::font() const
-{
-	return _font;
-}
-
-Ui::FontMetrics PainterImpl::fontMetrics() const
-{
-	return _painter.fontMetrics();
-}
-
-Ui::FontMetrics PainterImpl::fontMetrics(Pt::String text) const
-{
-	return _painter.fontMetrics(text);
-}
-
-const std::list<std::string>& PainterImpl::fontFamilyNames()
-{
-	return _painter.fontFamilyNames();
-}
-
-int PainterImpl::depth() const
-{
-	return 0;
-}
-
-void PainterImpl::drawPixel(const Ui::PointF& to)
-{  
-  _surface->addPath( new LinePath( _pen, fromOrigin(to), fromOrigin(to) ) );
+void PainterImpl::drawPixel( const Ui::PointF& to )
+{   
+  _surface->path().add( new Ui::LinePathInfo( pen(), to, to) );
 }
 
 
-void PainterImpl::drawLine(const Ui::PointF& from, const Ui::PointF& to)
+void PainterImpl::drawLine( const Ui::PointF& from, const Ui::PointF& to )
 {    
-  _surface->addPath( new LinePath( _pen, fromOrigin(to), fromOrigin(to) ) );
+  _surface->path().add( new Ui::LinePathInfo( pen(), to, to ) );
 }
 
 
 void PainterImpl::drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline )
 {	 
-  _surface->addPath( new TextPath(_pen, fromOrigin(to), _font,  text , outline) );
+  _surface->path().add( new Ui::TextPathInfo( pen(), to, font(),  text , outline ) );
 }
 
 
-void PainterImpl::drawText(const Ui::PointF& to, const Pt::String& text)
+void PainterImpl::drawText( const Ui::PointF& to, const Pt::String& text )
 {	  
-  _surface->addPath( new TextPath(_pen, fromOrigin(to), _font,  text, 0) );
+  _surface->path().add( new Ui::TextPathInfo( pen(), to, font(),  text, 0 ) );
 }
 
 
-void PainterImpl::drawEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size)
+void PainterImpl::drawEllipse( const Ui::PointF& topLeft, const Ui::SizeF& size )
 {
-  _surface->addPath( new EllipsePath(_pen, fromOrigin( topLeft ), size) );	
+  _surface->path().add( new Ui::EllipsePathInfo( pen(), topLeft, size ) );	
 }
 
 
-void PainterImpl::drawRect(const Ui::RectF& rectangle)
+void PainterImpl::drawRect( const Ui::RectF& rectangle )
 {
-  _surface->addPath( new RectPath( _pen, rectangle) );
+  _surface->path().add( new Ui::RectPathInfo( pen(), rectangle) );
 }
 
 
-void PainterImpl::drawPolyline(const Ui::PointF* points, const size_t pointCount)
+void PainterImpl::drawPolyline( const Ui::PointF* points, const size_t pointCount )
 {
-	std::vector<Ui::PointF> convPoints(points, points + pointCount);
-
-	for( size_t i = 0; i < convPoints.size(); ++i)
-		convPoints[i] = fromOrigin(points[i]);
-
-  _surface->addPath( new PolylinePath(_pen, &convPoints[0], convPoints.size() ) );
+  _surface->path().add( new Ui::PolylinePathInfo( pen(), points, pointCount ) );
 }
 
 
-void PainterImpl::fillRect(const Ui::RectF& rectangle)
+void PainterImpl::fillRect( const Ui::RectF& rectangle )
 {
-  Ui::RectF orgRect = fromOrigin( rectangle );
-  _surface->addPath( new FillRectPath(_brush, orgRect) );
+ 
+  _surface->path().add( new Ui::FillRectPathInfo( brush(), rectangle ) );
 }
 
 
-void PainterImpl::fillEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size)
+void PainterImpl::fillEllipse( const Ui::PointF& topLeft, const Ui::SizeF& size )
 {
-  _surface->addPath( new FillEllipsePath( _brush,fromOrigin( topLeft ), size ) );
+  _surface->path().add( new Ui::FillEllipsePathInfo( brush(), topLeft, size ) );
 }
 
 
-void PainterImpl::fillPolygon(const Ui::PointF* points, const size_t pointCount)
+void PainterImpl::fillPolygon( const Ui::PointF* points, const size_t pointCount )
 {
-	std::vector<Ui::PointF> convPoints(points, points + pointCount);
-
-	for( size_t i = 0; i < convPoints.size(); ++i)
-		convPoints[i] = fromOrigin(points[i] );
-
-  _surface->addPath( new FillPolygonPath( _brush, &convPoints[0], convPoints.size() );
+  _surface->path().add( new Ui::FillPolygonPathInfo( brush(), points, pointCount ) );
 }
 
 
-void PainterImpl::drawSurface(const Ui::PointF& to, PaintSurface& pm, const Ui::Region& pmRegion)
+void PainterImpl::drawSurface( const Ui::PointF& to, PaintSurface& pm, const Ui::Region& pmRegion )
 {
-  _surface->addPath( new SurfacePath( pm, fromOrigin(to), &pmRegion ) );
+  _surface->path().add( new SurfacePathInfo( pm, to, &pmRegion ) );
 }
 
 
-void PainterImpl::drawSurface( const Ui::PointF& to, PaintSurface& pm)
+void PainterImpl::drawSurface( const Ui::PointF& to, PaintSurface& pm )
 {
-  _surface->addPath( new SurfacePath( pm, fromOrigin(to), 0) );
+  _surface->path().add( new SurfacePathInfo( pm, to, 0 ) );
 }
 		
 
-void PainterImpl::drawImage(const Ui::PointF& to, const Ui::Image& image)
+void PainterImpl::drawImage(const Ui::PointF& to, const Ui::Image& image )
 {
-  _surface->addPath( new ImagePath( image, fromOrigin(to), 0) );
-}
-
-void PainterImpl::drawImage(const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion)
-{
-	_surface->addPath( new ImagePath( image, fromOrigin(to), &imageRegion) );
-}
-
-void PainterImpl::addFontName(const std::string& fontName)
-{
-	
-}
-
-Ui::PointF PainterImpl::fromOrigin(const Ui::PointF& p)
-{
-  return Ui::PointF(_surface->originPos().x() + p.x(), _surface->originPos().y() + p.y());
+  _surface->path().add( new Ui::ImagePathInfo( image, to, 0 ) );
 }
 
 
-Ui::RectF PainterImpl::fromOrigin(const Ui::RectF& p)
+void PainterImpl::drawImage( const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion )
 {
-	Ui::PointF pos( _surface->originPos().x() + p.left(), _surface->originPos().y() + p.top() );
-	Ui::SizeF size( p.size() );
-	const Ui::SizeF& orgSize = _surface->originSize();
-
-	if( size.width() > orgSize.width() )
-		size.setWidth( orgSize.width() );
-
-	if( size.height() > orgSize.height() )
-		size.setHeight( orgSize.height() );
-	
-  return Ui::RectF( pos, size);
-}
-
-
-void PainterImpl::setSurface(PaintSurface& s)
-{
-	_surface = s.impl();
+	_surface->path.add( new Ui::ImagePathInfo( image, to, &imageRegion ) );
 }
 
 
 void PainterImpl::flush()
 {
-	const std::vector<RenderPath*>& paths = _surface->path();
-	Ui::Region myClip = _painter.clip();
+  const Ui::RenderPath& path = _surface->path();
 
-  for( size_t i = 0; i < paths.size(); ++i )
+  for( size_t i = 0; i < path.size(); ++i )
   {
-    switch( paths[i]->operation() )
+    switch( path.at(i)->operation() )
     {
-      case RenderPath::DrawLine:
+      case Ui::RenderPathInfo::DrawLine:
       {
-         LinePath* path = (LinePath*)paths[i];
-         _painter.setPen( path->pen() );
-         _painter.drawLine( path->from() , path->to() );
+        const Ui::LinePathInfo* info = (const Ui::LinePathInfo*)path[i];
+        _painter.setPen( info->pen() );
+        _painter.drawLine( info->from() , info->to() );
       }
       break;
       
-      case RenderPath::DrawPolyline:
-      {
-         PolylinePath* path = (PolylinePath*)paths[i];
-         _painter.setPen( path->pen() );
-         _painter.drawPolyline( &path->points()[0], path->points().size() );
-      }
-      break;
-      
-      case RenderPath::DrawText:
-      {
-        TextPath* path = (TextPath*) paths[i];
-        _painter.setPen( path->pen() );
 
-        if( path->outline() != 0 )
-          _painter.drawText(path->to(), path->text(), path->outline() );
+      case Ui::RenderPathInfo::DrawText:
+      {
+        const Ui::TextPathInfo* info = (const Ui::TextPathInfo*) path[i];
+        _painter.setPen( info->pen() );
+
+        if( info->outline() != 0 )
+          _painter.drawText(info->to(), info->text(), info->outline() );
         else
-          _painter.drawText(path->to(), path->text());
+          _painter.drawText(info->to(), info->text());
       }
       break;
+
       
-      case RenderPath::DrawRect:
+      case Ui::RenderPathInfo::DrawEllipse:
       {
-        RectPath* path = (RectPath*) paths[i];
-        _painter.setPen( path->pen() );
-        _painter.drawRect( path->rect() );
-      }
-      break;
-      
-      case RenderPath::DrawPixel:
-      {
-         LinePath* path = (LinePath*)paths[i];
-         _painter.setPen( path->pen() );
-         _painter.drawPixel( path->to() );
-      }
-      break;
-      
-      case RenderPath::DrawEllipse:
-      {
-        EllipsePath* path = (EllipsePath*) paths[i];
+        const Ui::EllipsePathInfo* info = (const Ui::EllipsePathInfo*) path[i];
         
-        _painter.setPen( path->pen() );
-        _painter.drawEllipse( path->topLeft(), path->size() );
+        _painter.setPen( info->pen() );
+        _painter.drawEllipse( info->topLeft(), info->size() );
+      }
+      break;
+
+
+      case Ui::RenderPathInfo::DrawRect:
+      {
+        const Ui::RectPathInfo* info = (const Ui::RectPathInfo*) path[i];
+        _painter.setPen( info->pen() );
+        _painter.drawRect( info->rect() );
+      }
+      break;
+
+
+      case Ui::RenderPathInfo::DrawPolyline:
+      {
+         const Ui::PolylinePathInfo* info = (const Ui::PolylinePathInfo*)path[i];
+         _painter.setPen( info->pen() );
+         _painter.drawPolyline( &info->points()[0], info->points().size() );
+      }
+      break;
+          
+      
+      case Ui::RenderPathInfo::DrawPixel:
+      {
+         const Ui::LinePathInfo* info = (const Ui::LinePathInfo*)path[i];
+         _painter.setPen( info->pen() );
+         _painter.drawPixel( info->to() );
       }
       break;
       
-      case RenderPath::DrawSurface:
+
+      case Ui::RenderPathInfo::DrawImage:
       {
-        SurfacePath* path = (SurfacePath*) paths[i];
-				_painter.setClip( Ui::Region( Ui::Point(path->to().x(),path->to().x()) , Ui::Size(path->surface().size().width(), path->surface().size().height() ) );
-        path->surface().painter().impl()->flush();        
-				_painter.setClip( myClip );
+				const Ui::ImagePathInfo* info =  (const Ui::ImagePathInfo*) path[i];
+        _painter.drawImage(info->to(), info->image(), info->region() );
       }
       break;
 
-      case RenderPath::DrawImage:
+
+      case Ui::RenderPathInfo::FillRect:
+			{
+				const Ui::FillRectPathInfo* info = (const Ui::FillRectPathInfo*) path[i];
+				_painter.setBrush( info->brush() );
+				_painter.fillRect( info->rect() ); 
+			}
+      break;
+
+
+      case Ui::RenderPathInfo::FillEllipse:
+			{
+				const Ui::FillEllipsePathInfo* info = (const Ui::FillEllipsePathInfo*) path[i];
+				_painter.setBrush( info->brush() );
+				_painter.fillEllipse( info->topLeft(), info->size() );
+			}
+      break;
+
+
+      case Ui::RenderPathInfo::FillPolygon:
+			{
+				const Ui::FillPolygonPathInfo* info = (const Ui::FillPolygonPathInfo*) path[i];
+				_painter.setBrush( info->brush() );
+				_painter.fillPolygon( &info->points()[0], info->points().size() );
+			}
+      break;
+
+
+      case Ui::RenderPathInfo::DrawSurface:
       {
-				ImagePath* path =  (ImagePath*) paths[i];
-        _painter.drawImage(path->to(), path->image(), path->region() );
+        SurfacePathInfo* info = (SurfacePathInfo*) path[i];
+        
+        const Ui::SizeF  size( info->surface().size().width(), info->surface().size().height() );
+
+        const Ui::PointF absolutPos     = origin() + info->to();
+				PainterImpl*     surfacePainter = info->surface().painter().impl();
+
+        surfacePainter->setOrigin( absolutPos );
+        surfacePainter->setClip( Ui::RectF( absolutPos, size ) );        
+        surfacePainter->flush();  
       }
-      break;
-
-      case RenderPath::FillRect:
-			{
-				FillRectPath* path = (FillRectPath*) paths[i];
-				_painter.setBrush( path->brush() );
-				_painter.fillRect( path->rect() ); 
-			}
-      break;
-
-      case RenderPath::FillEllipse:
-			{
-				FillEllipsePath* path = (FillEllipsePath*) paths[i];
-				_painter.setBrush( path->brush() );
-				_painter.fillEllipse( path->topLeft(), path->size() );
-			}
-
-      break;
-
-      case RenderPath::FillPolygon:
-			{
-				FillPolygonPath* path = (FillPolygonPath*) paths[i];
-				_painter.setBrush( path->brush() );
-				_painter.fillPolygon( &path->points()[0], path->points().size() );
-			}
       break;
     }
   }
+
+  _surface->path().clear();
 }
 	
 }}

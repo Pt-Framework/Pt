@@ -277,6 +277,18 @@ class PT_HMI_API Widget : public Pt::Connectable
 			return _caption;
 		}
 
+    const Ui::SizeF clientSize() const
+    {
+        return Ui::SizeF( _size.width() - Margin.get().left() -  Margin.get().right(),
+                          _size.height() - Margin.get().top() -  Margin.get().bottom() );
+                          
+    }
+
+    const Ui::PointF clientPos() const
+    {
+        return Ui::PointF( Margin.get().left(),  Margin.get().top() );
+    }
+
 	private:			  
 		bool focusNextChild(int index);
 		bool focusPrevChild(int index);

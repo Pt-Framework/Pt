@@ -168,7 +168,7 @@ Ui::PointF WindowManager::renderFrame( ChildWindow* w )
 	
 	Ui::Color color = w->isWindowFocused() ? _activeColor : _inactiveColor;  
 
-	Painter& painter = _parent.windowSurface().painter();
+	Painter& painter = _parent.surface().painter();
 
   Ui::PointF pos( w->Position.get().x() + _borderWidth/2.0, w->Position.get().y() + _borderWidth/2.0 );
 	
@@ -201,9 +201,6 @@ Ui::PointF WindowManager::renderFrame( ChildWindow* w )
 
   if( w->Border.get() != WindowBorder::NoBorder )
   {
-    Ui::PointF saveOrgPos  = _parent.windowSurface().originPos();
-    Ui::SizeF  saveOrgSize = _parent.windowSurface().originSize();
-
     Ui::PointF  to( pos.x() + _borderWidth/2, pos.y() + _borderWidth/2 ); 
     Ui::SizeF   size = Ui::SizeF( winSize.width() - _borderWidth, _titleBarPanel.Size.get().height() );
     		
@@ -214,21 +211,14 @@ Ui::PointF WindowManager::renderFrame( ChildWindow* w )
     _titleLabel.Caption    = w->Caption.get();
     _titleLabel.Visible    = w->ShowTitle.get();
 
-		_titleBarPanel.Position = to;
-    _titleBarPanel.Size      = size;
-    _titleBarPanel.BackColor = color; 
-    _titleBarPanel.BorderColor = color;
-    
-		 
-		_parent.windowSurface().setOrigin( to,size );
-		
-		_titleBarPanel.setParent( &_parent );
-		
-		_titleBarPanel.render( _parent.windowSurface() );	  
-		
+		_titleBarPanel.Position    = to;
+    _titleBarPanel.Size        = size;
+    _titleBarPanel.BackColor   = color; 
+    _titleBarPanel.BorderColor = color;    		 				
+		_titleBarPanel.setParent( &_parent );		
+		_titleBarPanel.render();	  		
+    _parent.surface().painter().drawSurface( to, _titleBarPanel.surface() );
 		_titleBarPanel.setParent( 0 );
-
-    _parent.windowSurface().setOrigin( saveOrgPos, saveOrgSize );    
   }
 
   return Ui::PointF( pos.x() + _borderWidth/2, pos.y()  + _titleBarPanel.Size.get().height()  + _borderWidth/2 );	 
@@ -237,7 +227,7 @@ Ui::PointF WindowManager::renderFrame( ChildWindow* w )
 
 void WindowManager::render()
 {		
-	Painter& painter = _parent.windowSurface().painter();
+	Painter& painter = _parent.surface().painter();
 
 	for( size_t i = 0; i < _windows.size(); ++i )
 	{
@@ -248,7 +238,7 @@ void WindowManager::render()
 
 		const Ui::PointF clientPos = renderFrame(w);				
 		w->windowManager().render();
-		painter.drawSurface( clientPos, w->windowSurface() );
+		painter.drawSurface( clientPos, w->surface() );
 	}
 }
 

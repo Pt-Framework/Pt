@@ -72,7 +72,7 @@ BrushData::BrushData(Brush::FillStyle fillStyle, const Color& color, const Image
 	}
 	else
 	{
-		 _texture  = new Image(64, 1);
+		 _texture  = new Image( Ui::Size( 64, 1 ));
 		 _texture->setColor( color );
 	}
 }

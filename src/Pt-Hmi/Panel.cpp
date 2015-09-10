@@ -61,15 +61,15 @@ void Panel::onRender(PaintSurface& paintSurface)
   if( PanelBorderWidth.get() == 0 )
     return;
 
-  const Ui::SizeF size = paintSurface.originSize();
-  const Ui::PointF pos = Ui::PointF(0,0);
+  const Ui::SizeF  size = clientSize();
+  const Ui::PointF pos  = clientPos();
 
 	size_t border =  (size_t) PanelBorderWidth.get();	
 
 	Ui::SizeF  clientSize(size.width() - PanelBorderWidth.get()/2, size.height() - PanelBorderWidth.get()/2);	
 	Ui::RectF  clientRect(Ui::PointF( PanelBorderWidth.get()/2, PanelBorderWidth.get()/2), clientSize);
 	
-	Pt::Hmi::Painter& localPainter = paintSurface.painter();
+	Pt::Hmi::Painter& painter = paintSurface.painter();
 						
 	switch( PanelBorderStyle.get() )
 	{
@@ -79,51 +79,51 @@ void Panel::onRender(PaintSurface& paintSurface)
 			std::vector<Ui::PointF> points2(5);
 
 			//P0
-			points1[0].setX(corner);
-			points1[0].setY(clientRect.height());
+			points1[0].setX(pos.x() + corner);
+			points1[0].setY(pos.y() + clientRect.height());
 
 			//P1
-			points1[1].setX(0);
-			points1[1].setY(clientRect.height() - corner);
+			points1[1].setX(pos.x());
+			points1[1].setY(pos.y() + clientRect.height() - corner);
 
 			//P2
-			points1[2].setX(0);
-			points1[2].setY(corner);
+			points1[2].setX(pos.x());
+			points1[2].setY(pos.y() + corner);
 
 			//P3
-			points1[3].setX(corner);
-			points1[3].setY(0);
+			points1[3].setX(pos.x() + corner);
+			points1[3].setY(pos.y());
 
 			//P4
-			points1[4].setX(clientRect.width() - corner);
-			points1[4].setY(0);
+			points1[4].setX(pos.x() + clientRect.width() - corner);
+			points1[4].setY(pos.y() );
 			
 			//---
 			//P0
-			points2[0].setX(clientRect.width() - corner);
-			points2[0].setY(0);
+			points2[0].setX(pos.x() + clientRect.width() - corner);
+			points2[0].setY(pos.y());
 
 			//P1
-			points2[1].setX(clientRect.width());
-			points2[1].setY(corner);
+			points2[1].setX(pos.x() + clientRect.width());
+			points2[1].setY(pos.y() + corner);
 
 			//P2
-			points2[2].setX(clientRect.width());
-			points2[2].setY(clientRect.height() - corner);
+			points2[2].setX(pos.x() + clientRect.width());
+			points2[2].setY(pos.y() + clientRect.height() - corner);
 
 			//P3
-			points2[3].setX(clientRect.width() - corner);
-			points2[3].setY(clientRect.height());
+			points2[3].setX(pos.x() + clientRect.width() - corner);
+			points2[3].setY(pos.y() + clientRect.height());
 
 			//P4
-			points2[4].setX(corner);
-			points2[4].setY(clientRect.height());
+			points2[4].setX(pos.x() + corner);
+			points2[4].setY(pos.y() + clientRect.height());
 		
 			Ui::Pen pen(border, BorderColor.get());
-			localPainter.setPen(pen);
+			painter.setPen(pen);
 				
-			localPainter.drawPolyline(&points1[0], points1.size());								
-			localPainter.drawPolyline(&points2[0], points2.size());
+			painter.drawPolyline(&points1[0], points1.size());								
+			painter.drawPolyline(&points2[0], points2.size());
 		}
 
 		break;
@@ -134,56 +134,56 @@ void Panel::onRender(PaintSurface& paintSurface)
 			std::vector<Ui::PointF> points2(5);
 
 			//P0
-			points1[0].setX(corner);
-			points1[0].setY(clientRect.height());
+			points1[0].setX(pos.x() + corner);
+			points1[0].setY(pos.y() + clientRect.height());
 
 			//P1
-			points1[1].setX(0);
-			points1[1].setY(clientRect.height() - corner);
+			points1[1].setX(pos.x());
+			points1[1].setY(pos.y() + clientRect.height() - corner);
 
 			//P2
-			points1[2].setX(0);
-			points1[2].setY(corner);
+			points1[2].setX(pos.x());
+			points1[2].setY(pos.y() + corner);
 
 			//P3
-			points1[3].setX(corner);
-			points1[3].setY( 0);
+			points1[3].setX(pos.x() + corner);
+			points1[3].setY(pos.y());
 
 			//P4
-			points1[4].setX(clientRect.width() - corner);
-			points1[4].setY( 0);
+			points1[4].setX(pos.x() + clientRect.width() - corner);
+			points1[4].setY(pos.y());
 			
 			//---
 			//P0
-			points2[0].setX(clientRect.width() - corner);
-			points2[0].setY( 0);
+			points2[0].setX(pos.x() + clientRect.width() - corner);
+			points2[0].setY(pos.y());
 
 			//P1
-			points2[1].setX(clientRect.width());
-			points2[1].setY(corner);
+			points2[1].setX(pos.x() + clientRect.width());
+			points2[1].setY(pos.y() + corner);
 
 			//P2
-			points2[2].setX(clientRect.width());
-			points2[2].setY(clientRect.height() - corner);
+			points2[2].setX(pos.x() + clientRect.width());
+			points2[2].setY(pos.y() + clientRect.height() - corner);
 
 			//P3
-			points2[3].setX(clientRect.width() - corner);
-			points2[3].setY(clientRect.height());
+			points2[3].setX(pos.x() + clientRect.width() - corner);
+			points2[3].setY(pos.y() + clientRect.height());
 
 			//P4
-			points2[4].setX(corner);
-			points2[4].setY(clientRect.height());
+			points2[4].setX(pos.x() + corner);
+			points2[4].setY(pos.y() + clientRect.height());
 
 
 			Ui::Pen pen(border, BorderColor.get() );
-			localPainter.setPen(pen);
+			painter.setPen(pen);
 				
-			localPainter.drawPolyline(&points2[0], points2.size());
+			painter.drawPolyline(&points2[0], points2.size());
                 
 			Ui::Pen pen2(border,  BorderColor.get());
-			localPainter.setPen(pen2);
+			painter.setPen(pen2);
                 
-			localPainter.drawPolyline(&points1[0], points1.size());
+			painter.drawPolyline(&points1[0], points1.size());
             
 		}
 		break;
@@ -193,35 +193,35 @@ void Panel::onRender(PaintSurface& paintSurface)
 			std::vector<Ui::PointF> points1(3);
 			std::vector<Ui::PointF> points2(3);
 
-			points1[0].setX(0);
-			points1[0].setY(clientRect.height());
+			points1[0].setX(pos.x());
+			points1[0].setY(pos.y() +clientRect.height());
 
-			points1[1].setX(0);
-			points1[1].setY(0);
+			points1[1].setX(pos.x());
+			points1[1].setY(pos.y());
 				
-			points1[2].setX(clientRect.width());
-			points1[2].setY(0);
+			points1[2].setX(pos.x() + clientRect.width());
+			points1[2].setY(pos.y());
 
 
-			points2[0].setX(clientRect.width());
-			points2[0].setY(0);
+			points2[0].setX(pos.x() + clientRect.width());
+			points2[0].setY(pos.y());
 
-			points2[1].setX(clientRect.width());
-			points2[1].setY(clientRect.height());
+			points2[1].setX(pos.x() + clientRect.width());
+			points2[1].setY(pos.y() + clientRect.height());
 
-			points2[2].setX(0);
-			points2[2].setY(clientRect.height());
+			points2[2].setX(pos.x());
+			points2[2].setY(pos.y() + clientRect.height());
 
 		
 			Ui::Pen pen(border, Ui::Color(255/255.0,255/255.0,255/255.0));
-			localPainter.setPen(pen);
+			painter.setPen(pen);
 				
-			localPainter.drawPolyline(&points1[0], points1.size());
+			painter.drawPolyline(&points1[0], points1.size());
 								
 			Ui::Pen pen2(border, DisabledColor.get() );
-			localPainter.setPen(pen2);
+			painter.setPen(pen2);
 
-			localPainter.drawPolyline(&points2[0], points2.size());			
+			painter.drawPolyline(&points2[0], points2.size());			
 		}
 		break;	
 		default:

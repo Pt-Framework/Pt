@@ -23,36 +23,28 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_HMI_TEXTPATH_H
-#define PT_HMI_TEXTPATH_H
+#ifndef PT_UI_IMAGEPATHINFO_H
+#define PT_UI_IMAGEPATHINFO_H
 
-#include <Pt/Hmi/RenderPath.h>
-#include <Pt/Ui/Pen.h>
+#include <Pt/Ui/RenderPathInfo.h>
 #include <Pt/Ui/Point.h>
-#include <Pt/String.h>
+#include <Pt/Ui/Image.h>
 
 namespace Pt {
-namespace Hmi {
+namespace Ui {
 
-class TextPath : public RenderPath
+class ImagePathInfo : public RenderPathInfo
 {  
   public:
-    TextPath( const Ui::Pen& pen, const Ui::PointF& to,  const Ui::Font& font, const Pt::String& text,  const Ui::Color* outline)
-    : RenderPath( RenderPath::DrawText )       
-    , _pen(pen)
-    , _to(to)
-    , _text(text)
-    , _font(font)
+    ImagePathInfo( const Ui::Image& image, const Ui::PointF& to, const Ui::Region* pmRegion = 0 )
+    : RenderPathInfo( RenderPathInfo::DrawSurface )       
+    , _image(image)
+    , _to(to)     
     {
-       if( outline != 0 )
-        _outline = *outline;
-       else
-         _outline.setAlpha( -1.0f);
-    }
-
-    const Ui::Pen& pen() const
-    {
-      return _pen;
+      if( pmRegion != 0)
+        _region = *pmRegion;
+      else
+        _region.setLeft(-1);
     }
 
 
@@ -62,30 +54,21 @@ class TextPath : public RenderPath
     }
 
 
-    const String& text() const
+    const Ui::Region& region() const
     {
-        return _text;
+        return _region;
     }
+    
 
-    const Ui::Color* outline() const
-    {
-        if( _outline.alpha() == -1.0f )
-            return 0;
-
-        return &_outline;
-    }
-
-    const Ui::Font& font() const
-    {
-        return _font;
-    }
+		const Ui::Image& image() const
+		{
+			return _image;
+		}
 
   private:
-     Ui::Pen    _pen;     
+     Ui::Image _image;
      Ui::PointF _to;
-     String     _text;
-     Ui::Color  _outline;  
-     Ui::Font   _font;
+     Ui::Region _region;
 };
 
 }}

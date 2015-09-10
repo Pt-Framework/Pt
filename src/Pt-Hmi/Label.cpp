@@ -88,36 +88,31 @@ void Label::onAutoSizeChanged(const bool& a)
 
 void Label::onRender(PaintSurface& paintSurface)
 {
-	Pt::Hmi::Painter&   localPainter = paintSurface.painter();	
-  Ui::SizeF size = paintSurface.originSize();
-	Ui::PointF    pos;
-	Pt::String    caption;
-  Ui::Color     foreColor = Enabled.get() ? ForeColor.get() : DisabledColor.get();
-  Ui::Pen	      pen( 1, foreColor);
-  
-  
+	Pt::Hmi::Painter& painter = paintSurface.painter();	
+  Ui::SizeF         size = clientSize();
+	Ui::PointF        pos = clientPos();
+	Pt::String        caption;
+  Ui::Color         foreColor = Enabled.get() ? ForeColor.get() : DisabledColor.get();
+  Ui::Pen	          pen( 1, foreColor);
+    
 	if( UseMnemonic.get() )
 		caption = Widget::removeMnemonic(Caption.get()).c_str();
 	else
 		caption = Caption.get().c_str();	  
 
-  localPainter.setFont(Font.get());
+  painter.setFont(Font.get());
 
-	Ui::FontMetrics	metric = localPainter.fontMetrics(caption);
-
-  pos = Ui::PointF( 0, metric.ascent() );
+	Ui::FontMetrics	metric = painter.fontMetrics(caption);
   
   Panel::onRender(paintSurface);
               
 	if( !AutoSize.get() )
-	{										        
-    localPainter.setFont(Font.get());		
-
+	{										            	
 		switch(TextAlign.get())
 		{
       case Hmi::Align::TopLeft:
       {
-			  pos = Ui::PointF( 0, metric.ascent() );			
+			  pos += Ui::PointF( 0, metric.ascent() );			
       }
       break;
 
@@ -125,7 +120,7 @@ void Label::onRender(PaintSurface& paintSurface)
       {
         const double widthHalf		  = size.width()/2;							  				
 			  const double textWidthHalf	= metric.width()/2;				  								
-			  pos = Ui::PointF(widthHalf - textWidthHalf, metric.ascent());	
+			  pos += Ui::PointF(widthHalf - textWidthHalf, metric.ascent());	
       }
       break;
 		
@@ -133,7 +128,7 @@ void Label::onRender(PaintSurface& paintSurface)
       {
 			  const double width		  = size.width();				
 			  const double textWidth	= metric.width();									
-			  pos = Ui::PointF(width - textWidth, metric.ascent());	
+			  pos += Ui::PointF(width - textWidth, metric.ascent());	
       }
       break;
 
@@ -142,7 +137,7 @@ void Label::onRender(PaintSurface& paintSurface)
         const double heightHalf		  = size.height()/2;				
 			  const double textHeightHalf = metric.height()/2;
 								
-			  pos = Ui::PointF(0, (heightHalf - textHeightHalf) + metric.ascent());
+			  pos += Ui::PointF(0, (heightHalf - textHeightHalf) + metric.ascent());
       }
       break;
 
@@ -153,7 +148,7 @@ void Label::onRender(PaintSurface& paintSurface)
 			  const double textWidthHalf	= metric.width()/2;	
 			  const double textHeightHalf = metric.height()/2;	
 								
-			  pos = Ui::PointF(widthHalf - textWidthHalf, (heightHalf - textHeightHalf) + metric.ascent());							
+			  pos += Ui::PointF(widthHalf - textWidthHalf, (heightHalf - textHeightHalf) + metric.ascent());							
 		  }
 		  break;
 
@@ -165,7 +160,7 @@ void Label::onRender(PaintSurface& paintSurface)
         const double heightHalf		  = size.height()/2;				
 			  const double textHeightHalf = metric.height()/2;	
 								
-			  pos = Ui::PointF(width - textWidth, (heightHalf - textHeightHalf) + metric.ascent());	
+			  pos += Ui::PointF(width - textWidth, (heightHalf - textHeightHalf) + metric.ascent());	
       }
       break;
 
@@ -174,7 +169,7 @@ void Label::onRender(PaintSurface& paintSurface)
         const double height	  = size.height();				
 			  const double textHeight = metric.height();	
 								
-			  pos = Ui::PointF(0, (height- textHeight) + metric.ascent());	
+			  pos += Ui::PointF(0, (height- textHeight) + metric.ascent());	
       }
       break;
 
@@ -186,7 +181,7 @@ void Label::onRender(PaintSurface& paintSurface)
         const double height	  = size.height();				
 			  const double textHeight = metric.height();	
 								
-			  pos = Ui::PointF(widthHalf - textWidthHalf, (height- textHeight) + metric.ascent());	
+			  pos += Ui::PointF(widthHalf - textWidthHalf, (height- textHeight) + metric.ascent());	
       }
       break;
 
@@ -198,14 +193,18 @@ void Label::onRender(PaintSurface& paintSurface)
         const double height	  = size.height();				
 			  const double textHeight = metric.height();	
 								
-			  pos = Ui::PointF(width - textWidth, (height- textHeight) + metric.ascent());	
+			  pos += Ui::PointF(width - textWidth, (height- textHeight) + metric.ascent());	
       }
       break;
     }
 	}
+  else
+  {
+      pos += Ui::PointF( 0, metric.ascent() );
+  }
 
-  localPainter.setPen(pen);
-  localPainter.drawText(pos, caption);
+  painter.setPen(pen);
+  painter.drawText(pos, caption);
 
 	if( UseMnemonic.get() )
 	{			
@@ -217,15 +216,15 @@ void Label::onRender(PaintSurface& paintSurface)
 		{	
 			std::string subString(  caption.begin(), caption.begin() + index );
 
-			Ui::FontMetrics metric = localPainter.fontMetrics( Pt::String( subString.c_str() ) );
+			Ui::FontMetrics metric = painter.fontMetrics( Pt::String( subString.c_str() ) );
 	
 			Ui::PointF linePos( pos.x() + metric.width() - 1, pos.y()  + 1);
 
 			subString = caption[index];
 
-			metric = localPainter.fontMetrics( Pt::String( subString.c_str() ) );
+			metric = painter.fontMetrics( Pt::String( subString.c_str() ) );
 
-			localPainter.drawLine( linePos , Ui::PointF( linePos.x() + metric.width(), linePos.y() ) );
+			painter.drawLine( linePos , Ui::PointF( linePos.x() + metric.width(), linePos.y() ) );
 		}
 	}
 }

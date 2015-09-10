@@ -75,7 +75,7 @@ public:
 
     virtual void drawText(const Ui::PointF& to, const Pt::String& Text);
 
-    virtual void drawRect(const Ui::RectF& rectangle);
+    virtual void drawRect(const Ui::RectF& rectangle);        
 
     virtual void fillRect(const Ui::RectF& rectangle);
 
@@ -96,8 +96,6 @@ public:
     virtual void drawImage(const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion);      
 
     virtual void addFontName(const std::string& fontName);
-
-		void flush();
 
     void setSurface(PaintSurface& surface);    
     

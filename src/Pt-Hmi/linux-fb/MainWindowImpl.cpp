@@ -48,15 +48,12 @@ namespace Pt {
 namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(MainWindow* window)
-: _apiWindow(window)
-, _app(Application::instance() )
-, _forceTopMost(false)
+: _app(Application::instance() )
+, _apiWindow(window)
 { 	
   // route all events through MainWindow back to this impl
   eventReceived().disconnectAll();
   eventReceived() += Pt::slot( _apiWindow->eventReceived() );
-
-	//windowSurface().impl()->reserve( 1920 * 1080 * 4 );
 }
 
 
@@ -64,7 +61,6 @@ MainWindowImpl::~MainWindowImpl()
 {
 
 }
-
 
 	
 void MainWindowImpl::onInvalidate()
@@ -76,13 +72,13 @@ void MainWindowImpl::onInvalidate()
 
 void MainWindowImpl::onRender(PaintSurface& paintSurface)
 {
-  _apiWindow->render( paintSurface );
+  _apiWindow->render();
   _apiWindow->windowManager().render();
 }
 
 
 void MainWindowImpl::create()
-{	
+{
 	this->setWindowParent( _app.mainScreen().impl() );
 	_app.mainScreen().impl()->windowManager().add( this );
 }
@@ -103,7 +99,7 @@ void MainWindowImpl::render()
 
 void MainWindowImpl::show()
 {
-	Visible = true;	
+	Visible = true;
 }
 
 
@@ -112,13 +108,15 @@ void MainWindowImpl::hide()
 	Visible = false;
 }
 
+
 void MainWindowImpl::activate()
 {
   _app.mainScreen().impl()->windowManager().activate( this ); 
 }
 
+
 void MainWindowImpl::setWindowPos(const Ui::PointF& p)
-{	  
+{
 	 if( Position.get()  ==  p )
 			return;
 
@@ -127,7 +125,7 @@ void MainWindowImpl::setWindowPos(const Ui::PointF& p)
 
 
 void MainWindowImpl::setWindowSize( const  Ui::SizeF& size )
-{   
+{
 	 if( Size.get()  == size )
 			return;
 
@@ -151,7 +149,7 @@ void MainWindowImpl::showMinimizedButton(bool p)
 {
 	ShowMinimizeButton = p;
 }
-  
+
 
 void MainWindowImpl::showMaximizeButton(bool p)
 {
@@ -165,9 +163,9 @@ void MainWindowImpl::showSysMenu(bool p)
 }
 
 
-void MainWindowImpl::setForceTopMost(bool force)
+void MainWindowImpl::setTopMost(bool force)
 {
-	_forceTopMost = force;
+	//ToDo:
 }
   
 
@@ -175,19 +173,19 @@ void MainWindowImpl::setWindowState( WindowState::Type p )
 {
 	State = p;
 }
-  
+
 
 void MainWindowImpl::setBorder( WindowBorder::Type p )
 {
 	Border = p;
 }
-  
+
 
 void MainWindowImpl::showInTaskbar(bool p)
 {
 	ShowInTaskbar = p;
 }
-  
+
 
 void MainWindowImpl::setIcon(const Ui::Image& p)
 {
@@ -212,16 +210,14 @@ void MainWindowImpl::setMaxSize(const Ui::SizeF& s)
 	MaximumSize = s;
 }
 
-void MainWindowImpl::focus( bool f)
-{	
-/*
-	if( f) 
-		onSetFocus();
-	else
-		onRemoveFocus();
+void MainWindowImpl::bringToFront()
+{
+  //ToDo:
+}
 
-	if( f )
-	_app.mainScreen().impl()->windowManager().activate( this );*/
+void MainWindowImpl::focus()
+{
+  //ToDo:
 }
 
 

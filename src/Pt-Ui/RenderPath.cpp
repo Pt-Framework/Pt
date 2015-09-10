@@ -23,44 +23,34 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_HMI_FILLRECTPATH_H
-#define PT_HMI_FILLRECTPATH_H
-
-#include <Pt/Hmi/RenderPath.h>
-#include <Pt/Ui/Brush.h>
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Size.h>
+#include <Pt/Ui/RenderPath.h>
 
 namespace Pt {
-namespace Hmi {
+namespace Ui {
 
-class FillRectPath : public RenderPath
-{  
-  public:
-    FillRectPath( const Ui::Brush& brush, const Ui::RectF& rect)
-    : RenderPath( RenderPath::FillRect )   
-    , _brush(brush)
-    , _rect(rect)
-    {
-    }
+RenderPath::RenderPath()
+{
+}
 
 
-    const Ui::Brush& brush() const
-    {
-      return _brush;
-    }
+RenderPath::~RenderPath()
+{
+  clear();
+}
 
 
-    const Ui::RectF& rect() const
-    {
-      return _rect;
-    }
-    
-  private:
-     Ui::Brush _brush;
-     Ui::RectF _rect;
-};
+void RenderPath::clear()
+{
+  for( size_t i = 0; i < _path.size(); ++i )
+      delete _path[i];
+
+  _path.clear();
+}
+
+
+void RenderPath::add(RenderPathInfo* info )
+{
+  _path.push_back( info );
+}  
 
 }}
-
-#endif

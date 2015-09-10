@@ -28,6 +28,7 @@
 #include "ApplicationImpl.h"
 #include "FrameBuffer.h"
 #include "PaintSurfaceImpl.h"
+#include "PainterImpl.h"
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/System/Clock.h>
 #include <Pt/Hmi/Application.h>
@@ -35,16 +36,16 @@
 
 namespace Pt{
 namespace Hmi{
-
-
+  
 ScreenImpl::ScreenImpl()
 : _frameBuffer( Application::instance().impl()->frameBuffer() )
-, _image( _frameBuffer.buffer(), _frameBuffer.imgSize(), _frameBuffer.imgSize(), _frameBuffer.strideInBytes(), _frameBuffer.format() )
+, _image( _frameBuffer.buffer(),  Ui::Size( (size_t)_frameBuffer.width(), (size_t)_frameBuffer.height() ) ,  _frameBuffer.format(), _frameBuffer.strideInBytes() )
 {  
-	Visible = true;	
-	Size = Ui::SizeF( _frameBuffer.width(),  _frameBuffer.height() );
-	BackColor = Ui::Color(170/255.0,170/255.0,170/255.0);	
-	eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerInput );
+	Visible   = true;	
+	Size      = Ui::SizeF( _frameBuffer.width(), _frameBuffer.height() );
+	BackColor = Ui::Color( 170/255.0f, 170/255.0f, 170/255.0f );	
+	
+  eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerInput );
 }
 
 
@@ -54,7 +55,7 @@ ScreenImpl::~ScreenImpl()
 }
 
 
-void ScreenImpl::saveCursorBackImage( const Pt::Hmi::PointerEvent& mouseEvent )
+void ScreenImpl::saveCursorImage( const Pt::Hmi::PointerEvent& mouseEvent )
 {	
 	_cursorPos    = Ui::Point( mouseEvent.x(), mouseEvent.y() );	
   _frameBuffer.grabImage( _cursorBuffer, _cursorPos, Ui::Size( Cursor.get().width(), Cursor.get().height() ) );
@@ -71,11 +72,10 @@ void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 	if( Cursor.get().width() == 0 )
 		return;	
 
-   saveCursorBackImage(mouseEvent);
+   saveCursorImage(mouseEvent);
 
   _frameBuffer.bitBlit( &Cursor.get().andRgb888()[0], Cursor.get().width(), Cursor.get().height(), Ui::Point( ( int) mouseEvent.x(), (int) mouseEvent.y()), FrameBuffer::AndOp );
-  _frameBuffer.bitBlit( &Cursor.get().xorRgb888()[0], Cursor.get().width(), Cursor.get().height(), Ui::Point( (int) mouseEvent.x(), (int) mouseEvent.y()), FrameBuffer::XorOp );
-  _frameBuffer.sync();
+  _frameBuffer.bitBlit( &Cursor.get().xorRgb888()[0], Cursor.get().width(), Cursor.get().height(), Ui::Point( (int) mouseEvent.x(), (int) mouseEvent.y()), FrameBuffer::XorOp );  
 }
 
 
@@ -83,15 +83,17 @@ void ScreenImpl::onInvalidate()
 {		
 	Window::onInvalidate(); 
 
-  _frameBuffer.bitBlit( windowSurface().impl()->image() );
-  _frameBuffer.sync();
+  PainterImpl* painter =  surface().painter().impl();
+
+  painter->setOrigin( Ui::PointF( 0,0) );
+  painter->setClip( Ui::RectF( painter->origin(), size() ) );
+  painter->flush();  
 }
 
 
-PaintSurface& ScreenImpl::windowSurface()
+void ScreenImpl::activate()
 {
-  return _windowSurface;
+  //ToDo: activate for multiple screen.
 }
-
 
 }}

@@ -34,8 +34,7 @@ namespace Pt{
 namespace Hmi{
 
 PaintSurfaceImpl::PaintSurfaceImpl()
-: _originSize(100,100)
-, _size(100,100)
+:  _size(10,10)
 {	
 }
 
@@ -46,9 +45,9 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
 
 
 void PaintSurfaceImpl::resize(const Ui::SizeF& size)
-{
-	_originSize  = size;  
+{	
 	_size = size;
+  _path.clear();
 }
 
 

@@ -56,31 +56,13 @@ public:
 		return _deviceContext;
 	}
 
-  void setOrigin(const Ui::PointF& pos, const Ui::SizeF& size)
-  {
-    _originPos = pos;
-    _originSize = size;
-  }
-
-  const Ui::PointF& originPos() const
-  {
-    return _originPos;
-  }
-
-  const Ui::SizeF& originSize() const
-  {
-    return _originSize;
-  }
-
 private:
-    Ui::SizeF    _size;
-    HDC           _deviceContext;
-    HBITMAP       _bitmapHandle;            
+    Ui::SizeF _size;
+    HDC       _deviceContext;
+    HBITMAP   _bitmapHandle;            
     HPEN		  _oldPen;
-    HBRUSH		  _oldBrush;
-	  HFONT	      _oldFont;
-    Ui::PointF _originPos;
-    Ui::SizeF _originSize;
+    HBRUSH		_oldBrush;
+	  HFONT	    _oldFont;
 };
 
 }}

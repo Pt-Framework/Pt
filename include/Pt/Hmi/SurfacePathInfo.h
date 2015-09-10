@@ -23,23 +23,23 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_HMI_IMAGEPATH_H
-#define PT_HMI_IMAGEPATH_H
+#ifndef PT_HMI_SURFACEPATH_H
+#define PT_HMI_SURFACEPATH_H
 
-#include <Pt/Hmi/RenderPath.h>
+#include <Pt/Ui/RenderPathInfo.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Ui/Point.h>
-#include <Pt/Ui/Image.h>
+#include <Pt/Ui/Size.h>
 
 namespace Pt {
 namespace Hmi {
 
-class ImagePath : public RenderPath
+class SurfacePathInfo : public Ui::RenderPathInfo
 {  
   public:
-    ImagePath( const Ui::Image& image, const Ui::PointF& to, const Ui::Region* pmRegion = 0 )
-    : RenderPath( RenderPath::DrawSurface )       
-    , _image(image)
+    SurfacePathInfo( const PaintSurface& surface, const Ui::PointF& to, const Ui::Region* pmRegion = 0 )
+    : Ui::RenderPathInfo( Ui::RenderPathInfo::DrawSurface )       
+    , _surface(surface)
     , _to(to)     
     {
       if( pmRegion != 0)
@@ -60,14 +60,18 @@ class ImagePath : public RenderPath
         return _region;
     }
     
+    const PaintSurface& surface() const
+    {
+        return _surface;
+    }
 
-		const Ui::Image& image() const
-		{
-			return _image;
-		}
+    PaintSurface& surface()
+    {
+        return _surface;
+    }
 
   private:
-     Ui::Image _image;
+     PaintSurface _surface;
      Ui::PointF _to;
      Ui::Region _region;
 };

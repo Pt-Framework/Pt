@@ -118,8 +118,7 @@ class DrawThinPolyline : public DrawPolyline
             }
         }
 
-        std::vector<bool>	_dashPattern;
-        ClipLine			_clipLine;
+        std::vector<bool>	_dashPattern;        
         enum{  xAxis = 0, yAxis = 1 };
 };
 

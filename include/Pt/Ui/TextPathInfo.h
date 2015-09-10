@@ -23,28 +23,33 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_HMI_ELLIPSEPATH_H
-#define PT_HMI_ELLIPSEPATH_H
+#ifndef PT_UI_TEXTPATHINFO_H
+#define PT_UI_TEXTPATHINFO_H
 
-#include <Pt/Hmi/RenderPath.h>
+#include <Pt/Ui/RenderPathInfo.h>
 #include <Pt/Ui/Pen.h>
 #include <Pt/Ui/Point.h>
-#include <Pt/Ui/Size.h>
+#include <Pt/Ui/Font.h>
+#include <Pt/String.h>
 
 namespace Pt {
-namespace Hmi {
+namespace Ui {
 
-class EllipsePath : public RenderPath
+class TextPathInfo : public RenderPathInfo
 {  
   public:
-    EllipsePath( const Ui::Pen& pen, const Ui::PointF& topLeft,  const Ui::SizeF& size)
-    : RenderPath( RenderPath::DrawEllipse )   
+    TextPathInfo( const Ui::Pen& pen, const Ui::PointF& to,  const Ui::Font& font, const Pt::String& text,  const Ui::Color* outline)
+    : RenderPathInfo( RenderPathInfo::DrawText )       
     , _pen(pen)
-    , _topLeft(topLeft)
-    , _size(size)
+    , _to(to)
+    , _text(text)
+    , _font(font)
     {
+       if( outline != 0 )
+        _outline = *outline;
+       else
+         _outline.setAlpha( -1.0f);
     }
-
 
     const Ui::Pen& pen() const
     {
@@ -52,21 +57,36 @@ class EllipsePath : public RenderPath
     }
 
 
-    const Ui::PointF& topLeft() const
+    const Ui::PointF& to() const
     {
-      return _topLeft;
+      return _to;
     }
 
-    
-    const Ui::SizeF& size() const
+
+    const String& text() const
     {
-      return _size;
+        return _text;
+    }
+
+    const Ui::Color* outline() const
+    {
+        if( _outline.alpha() == -1.0f )
+            return 0;
+
+        return &_outline;
+    }
+
+    const Ui::Font& font() const
+    {
+        return _font;
     }
 
   private:
-     Ui::Pen    _pen;
-     Ui::PointF _topLeft;
-     Ui::SizeF  _size;
+     Ui::Pen    _pen;     
+     Ui::PointF _to;
+     String     _text;
+     Ui::Color  _outline;  
+     Ui::Font   _font;
 };
 
 }}

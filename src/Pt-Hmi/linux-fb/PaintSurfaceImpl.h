@@ -33,6 +33,7 @@
 #include <Pt/Ui/Point.h>
 #include <Pt/Ui/Image.h>
 #include <Pt/Ui/Painter.h>
+#include <Pt/Ui/RenderPath.h>
 
 namespace Pt{
 namespace Hmi{
@@ -45,50 +46,23 @@ class PaintSurfaceImpl
 	  PaintSurfaceImpl();
 	  virtual ~PaintSurfaceImpl();
 
-	  virtual void resize(const Ui::SizeF& size);	
+	  void resize(const Ui::SizeF& size);	
 
-	  virtual  Ui::SizeF size() const;
+	  Ui::SizeF size() const;
 
-    void setOrigin(const Ui::PointF& pos, const Ui::SizeF& size)
-    {
-      _originPos = pos;
-      _originSize = size;
-    }
-
-    const Ui::PointF& originPos() const
-    {
-      return _originPos;
-    }
-
-    const Ui::SizeF& originSize() const
-    {
-      return _originSize;
-    }
-
-		void clearPath()
-    {
-        for( size_t i = 0; i < _path.size(); ++i)
-        {
-            delete _path[i];
-        }
-        _path.clear();
-    }
-
-    const std::vector<RenderPath*>& path() const
+    const Ui::RenderPath& path() const
     {
         return _path;
     }
 
-    void addPath( RenderPath* path )
+    Ui::RenderPath& path()
     {
-      _path.push_back( path );
+        return _path;
     }
 
-  private:
-		Pt::Ui::SizeF							_size;
-    Pt::Ui::SizeF							_originSize;
-    Pt::Ui::PointF						_originPos;
-    std::vector<RenderPath*>	_path;
+  private:       
+		Ui::SizeF			 _size;
+    Ui::RenderPath _path;
 };
 
 }}

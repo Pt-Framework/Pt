@@ -33,9 +33,6 @@
 #include <stdio.h>
 #include <errno.h>
 
-#define PAGE_SHIFT 12
-#define PAGE_SIZE (1UL << PAGE_SHIFT)
-#define PAGE_MASK (~(PAGE_SIZE-1)) 
 
 namespace Pt {
 namespace Hmi {
@@ -72,21 +69,9 @@ FrameBuffer::FrameBuffer()
 		throw std::runtime_error("FBIOGET_FSCREENINFO failed" + PT_SOURCEINFO);
     
 	// Memory map the display
-	std::clog<<"nen:"<< _fixedInfo.smem_len << std::endl;
-	std::clog<<"line:"<< _fixedInfo.line_length << std::endl;
-	_bufferSize         = _fixedInfo.line_length * _screenInfo.yres;
-	std::clog<<"Size:"<< _bufferSize << std::endl;
-	_yoffset   = _screenInfo.yres;
-
-	_buffer  = (char*)  mmap(NULL, _bufferSize * 2, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);	
-
-	if( _buffer == (void*) -1 ) 
-	{
-		_buffer  =  (char*) mmap(NULL, _bufferSize , PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);	
-		_doubleBuffer =  false;
-	}
-
-	std::clog<<"Buffer adr:"<< (void*) _buffer << std::endl;
+	_bufferSize = _fixedInfo.line_length * _screenInfo.yres;
+	_yoffset    = _screenInfo.yres;
+	_buffer     = (char*)  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);	
 
   const size_t noOfBytesPerPixel = depth() % 8 != 0 ? depth() / 8 + 1 : depth() / 8;       
 
@@ -129,7 +114,7 @@ void FrameBuffer::bitBlit( const Ui::Image& image )
 {
   const size_t imageSize = (image.width() * image.format().pixelSize() + image.stride()) * image.height();
 
-  memcpy( buffer() , image.pixel( 0,0 ), std::min( size(), imageSize ) );  
+  memcpy( buffer() , image.pixel( 0,0 ), std::min( _bufferSize, imageSize ) );  
 }
 
 
@@ -189,9 +174,9 @@ void FrameBuffer::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const U
 
 void FrameBuffer::grabImage( Ui::Image& image, const Ui::Point& pos,  const Ui::Size& size)
 {
-    const size_t pixelSizeInByte = depth() / 8;		
+  const size_t pixelSizeInByte = depth() / 8;		
 
-    const size_t yMax = std::min<size_t>(pos.y() + size.height(), height() );	
+  const size_t yMax = std::min<size_t>(pos.y() + size.height(), height() );	
 	const size_t widthInPixel = ((pos.x() + size.width())  < width() ?  size.width() : ( width()  - pos.x() ) );
 	const size_t widthInByte = widthInPixel * pixelSizeInByte;		
 	
@@ -204,23 +189,6 @@ void FrameBuffer::grabImage( Ui::Image& image, const Ui::Point& pos,  const Ui::
 	}
 }
 
-
-
-void FrameBuffer::sync()
-{
-	if( !_doubleBuffer )
-		return;
-
-  struct fb_var_screeninfo variable_info;
-
-   ioctl( _fd, FBIOGET_VSCREENINFO, &variable_info ); 	
-  
-  variable_info.yoffset = _yoffset;
-
-  ioctl( _fd, FBIOPAN_DISPLAY, &variable_info );
-
-  _yoffset =  _yoffset == 0 ? _screenInfo.yres: 0;
-}
 
 }} // namespace
 

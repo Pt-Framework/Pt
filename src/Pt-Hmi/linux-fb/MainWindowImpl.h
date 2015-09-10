@@ -27,24 +27,16 @@
 #ifndef Pt_Hmi_WindowImpl_h
 #define Pt_Hmi_WindowImpl_h
 
-#include <Pt/Hmi/Api.h>
-#include <Pt/Ui/Image.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <linux/fb.h>
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
+#include <Pt/Ui/Size.h>
+#include <Pt/Ui/Point.h>
+#include <Pt/Ui/Image.h>
+#include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/WindowState.h>
 #include <Pt/Hmi/ChildWindow.h>
-#include <linux/input.h>
-#include <Pt/Ui/Size.h>
-#include <Pt/Ui/Point.h>
 
 namespace Pt {
 namespace Hmi {
@@ -57,7 +49,7 @@ class MainWindowImpl  : public ChildWindow
 	public:
 		MainWindowImpl(MainWindow* Window);
     
-		~MainWindowImpl();
+		virtual ~MainWindowImpl();
 
 		void create();
 	
@@ -83,7 +75,7 @@ class MainWindowImpl  : public ChildWindow
   
 		void showSysMenu(bool p);
 
-		void setForceTopMost(bool force);
+		void setTopMost(bool force);
   
 		void setWindowState(WindowState::Type p);
   
@@ -99,30 +91,19 @@ class MainWindowImpl  : public ChildWindow
 	
 		void setMaxSize(const Ui::SizeF& s);
 
-		void setTopMost(bool top)
-		{
-		}
+		void bringToFront();
 
-		void focus( bool f);
-	
-    virtual PaintSurface& windowSurface()
-    {
-      return ChildWindow::windowSurface(); 
-    }
+		void focus();
 
-    void render();	
-    
+    void render();
+
 	protected:
 		virtual void onInvalidate();
 	  virtual void onRender(PaintSurface& paintSurface);
 
-	protected:   
-    void onFocusChanged(bool focused);
-
-	private:    
-		MainWindow* _apiWindow;
-		Pt::Hmi::Application& _app;
-    bool _forceTopMost;
+	private:
+    Pt::Hmi::Application& _app;
+    MainWindow*           _apiWindow;
 };
 
 }} // namespace

@@ -356,8 +356,9 @@ void Button::onRender(PaintSurface& paintSurface)
 	if( ButtonState.get() == DeviceButton::Pressed )
 		return;
 
-	Pt::Hmi::Painter& localPainter = paintSurface.painter();
-  Ui::SizeF size = paintSurface.originSize();
+	Pt::Hmi::Painter& painter = paintSurface.painter();
+  Ui::SizeF  size = clientSize();
+  Ui::PointF pos  = clientPos();
        
 	if( Armed.get() || isWidgetFocused() )
 	{
@@ -368,9 +369,9 @@ void Button::onRender(PaintSurface& paintSurface)
 		 
 		Ui::Pen pen(1, armedColor, Ui::Pen::DashStyle);
 		
-		localPainter.setPen(pen);		
-		Ui::RectF rect(Ui::PointF(2,2), size);
-		localPainter.drawRect(rect);		
+		painter.setPen(pen);		
+		Ui::RectF rect(pos + Ui::PointF(2,2), size);
+		painter.drawRect(rect);		
 	}		
 }
 

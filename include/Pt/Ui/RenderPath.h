@@ -23,40 +23,56 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_HMI_POLYLINEPATH_H
-#define PT_HMI_POLYLINEPATH_H
+#ifndef PT_UI_RENDERPATH_H
+#define PT_UI_RENDERPATH_H
 
-#include <Pt/Hmi/RenderPath.h>
-#include <Pt/Ui/Pen.h>
-#include <Pt/Ui/Point.h>
+#include <Pt/Ui/Api.h>
+#include <Pt/Ui/RenderPathInfo.h>
+#include <Pt/Types.h>
 #include <vector>
 
 namespace Pt {
-namespace Hmi {
+namespace Ui {
 
-class PolylinePath : public RenderPath
+class PT_UI_API RenderPath
 {  
   public:
-    PolylinePath( const Ui::Pen& pen, const Ui::PointF* points, size_t count)
-    : RenderPath( RenderPath::DrawPolyline )   
-    , _pen(pen)
-    , _points(points, points + count)
+    RenderPath();
+
+    virtual ~RenderPath();
+
+    void add( RenderPathInfo* info );
+   
+    void clear();
+
+    size_t size() const
     {
+      return _path.size();
     }
 
-    const Ui::Pen& pen() const
-    {
-      return _pen;
-    }
+   RenderPathInfo* operator[]( size_t i ) 
+   {
+     return _path[i];
+   }
 
-    const std::vector<Ui::PointF>& points() const
-    {
-      return _points;
-    }    
+   const RenderPathInfo* operator[]( size_t i ) const
+   {
+     return _path[i];
+   }
+
+   RenderPathInfo* at( size_t i ) 
+   {
+     return _path.at(i);
+   }
+
+   const RenderPathInfo* at( size_t i ) const
+   {
+     return _path.at(i);
+   }
 
   private:
-     Ui::Pen    _pen;
-     std::vector<Ui::PointF> _points;
+    std::vector<RenderPathInfo*> _path;
+  
 };
 
 }}

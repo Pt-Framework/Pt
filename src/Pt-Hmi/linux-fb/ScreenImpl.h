@@ -32,6 +32,7 @@
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Ui/Color.h>
+#include <Pt/Ui/Image.h>
 
 namespace Pt{
 namespace Hmi{
@@ -54,11 +55,7 @@ class ScreenImpl : public Window
 			return  Size.get().height();
 		}
 		 		 
-		virtual PaintSurface& windowSurface();
-	
-		virtual void activate()
-		{
-		}
+		virtual void activate();
 
 		const Ui::Image& image() const
 		{
@@ -72,19 +69,16 @@ class ScreenImpl : public Window
 
 	protected:
 		virtual void onInvalidate();
-
 		virtual void onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent );
 
-
 	private:   						
-		void saveCursorBackImage(const Pt::Hmi::PointerEvent& mouseEvent);
+		void saveCursorImage(const Pt::Hmi::PointerEvent& mouseEvent);
 
 	private:
-		Ui::Image	      _cursorBuffer;
-		Ui::Point			  _cursorPos;
-    PaintSurface    _windowSurface;
-    FrameBuffer&    _frameBuffer;  
-		Ui::Image       _image;
+    FrameBuffer&  _frameBuffer;  
+		Ui::Image	    _cursorBuffer;
+		Ui::Point			_cursorPos;    
+		Ui::Image     _image;
 };
 
 }}

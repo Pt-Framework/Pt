@@ -32,6 +32,7 @@
 #include <Pt/Ui/Api.h>
 #include <Pt/Ui/ImageFormat.h>
 #include <Pt/Ui/Region.h>
+#include <Pt/Ui/Size.h>
 #include <vector>
 #include <cstring>
 
@@ -41,13 +42,12 @@ namespace Ui{
 class PT_UI_API Image
 {
 	public:		
-    Image( Pt::uint8_t* buffer, Ui::Size size, Ui::Size maxSize,  size_t stride = 0, const ImageFormat& format = ImageFormat::argb8888() );
+		Image( const ImageFormat& format = ImageFormat::argb8888() );
+    
+    Image( const Ui::Size& size, const ImageFormat& format = ImageFormat::argb8888(), size_t stride = 0 );
 
-		Image(const ImageFormat& format = ImageFormat::argb8888());
-				
-		Image(size_t width, size_t height, size_t stride = 0, const ImageFormat& format = ImageFormat::argb8888());
-		
-
+    Image( Pt::uint8_t* buffer, const Ui::Size& size, const ImageFormat& format = ImageFormat::argb8888(), size_t stride = 0 );
+							
 		virtual ~Image();
 	
 
@@ -68,6 +68,10 @@ class PT_UI_API Image
 			return _stride;
 		}
 
+    Ui::Size size() const
+    {
+        return Ui::Size( _width, _height );
+    }
 
     bool empty() const
     {
@@ -77,43 +81,13 @@ class PT_UI_API Image
 
 		void setColor( const Color& color );
 
+		void resize( const Ui::Size& size,  size_t strideInBytes = 0 );
 
-		void resize( size_t width, size_t height, size_t strideInBytes = 0 )
-		{
-      _stride = strideInBytes;
-			_width  = width;
-			_height = height;
+		void resize( const Ui::Size& size, const ImageFormat& format, size_t strideInBytes = 0);
 
-      if( _width == 0 || _height == 0 )
-          return;
+    void resize( Pt::uint8_t* buffer, const Ui::Size& size,size_t strideInBytes = 0 );    
 
-      if( _buffer == 0 )
-      {
-			  _defaultBuffer.resize( ( width * _format->pixelSize() + _stride) * height ); 
-        _buffer = &_defaultBuffer[0];         
-        return;
-      }
-      
-      if( _defaultBuffer.size() != 0  &&  _buffer == &_defaultBuffer[0])
-      {
-        _defaultBuffer.resize( ( width * _format->pixelSize() + _stride) * height ); 
-        _buffer = &_defaultBuffer[0];
-        return;
-      }
-
-      const size_t noOfPixelReq =  (width + strideInBytes)  * height;
-      const size_t maxNoOfPixel = (_maxSize.width() + _stride)  *_maxSize.height();
-
-      if( noOfPixelReq > maxNoOfPixel )
-        throw std::logic_error( "Requested image size exceed the defined max. image size.");
-		}
-
-
-		void resize( size_t width, size_t height, const ImageFormat& format, size_t strideInBytes = 0)
-		{
-      _format = &format;
-      resize(width, height, strideInBytes );
-		}
+    void resize( Pt::uint8_t* buffer, const Ui::Size& size, const ImageFormat& format, size_t strideInBytes = 0 );
 
 	
 		Color color(size_t x, size_t y) const

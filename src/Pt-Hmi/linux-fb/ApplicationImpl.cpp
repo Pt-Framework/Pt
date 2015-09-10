@@ -50,18 +50,17 @@ ApplicationImpl::~ApplicationImpl()
 {
 } 
 
+
 void ApplicationImpl::nextEvent()
 {
 	MainLoop::waitNext();
 }
 
+
 void ApplicationImpl::setCursor( const Hmi::Cursor* cursor )
 {	
-	if( cursor == 0 )
-		Application::instance().mainScreen().impl()->Cursor = Hmi::Cursor::defaultCursor();
-	else
-		Application::instance().mainScreen().impl()->Cursor = *cursor;
+	Application::instance().mainScreen().impl()->Cursor = cursor == 0 ? Hmi::Cursor::defaultCursor() : *cursor;
 }
 
-}} // namespace
+}}
 

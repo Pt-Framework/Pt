@@ -60,15 +60,16 @@ PainterImpl::~PainterImpl()
 
 void PainterImpl::drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline )
 {
-	//Todo: impl
-    
+	//Todo: implement outline    
     drawText(to, text);
 }
+
 
 void PainterImpl::setRenderMode( Ui::RenderMode::Type mode )
 {
 	_renderMode = mode;
 }
+
 
 void PainterImpl::setPen(const Ui::Pen& pen)
 {
@@ -161,59 +162,60 @@ void PainterImpl::updateBrush()
 {
     HBRUSH newBrushHandle;
 
-    switch (_brush.fillStyle()) {
+    switch (_brush.fillStyle()) 
+    {
 
-        case Ui::Brush::SolidFill: 
-				{
-            newBrushHandle = CreateSolidBrush(RGB(_brush.color().red()*255, _brush.color().green()*255, _brush.color().blue()*255));
-            break;
+      case Ui::Brush::SolidFill: 
+	    {
+          newBrushHandle = CreateSolidBrush(RGB(_brush.color().red()*255, _brush.color().green()*255, _brush.color().blue()*255));
+          break;
+      }
+
+      case Ui::Brush::TextureFill: 
+	    {
+        const Ui::Image& texture = _brush.texture();
+
+        if (texture.width() != 0)
+        {
+            // Fill the info for a device-independent bitmap to hold the texture data in the Windows system.
+            BITMAPINFO bitmapInfo;
+            ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+
+            bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);    // Size of this struct.
+            bitmapInfo.bmiHeader.biWidth       = texture.width();             // Bitmap width.
+            bitmapInfo.bmiHeader.biHeight      = -(ssize_t)texture.height();  // Bitmap height. Top-down image.
+            bitmapInfo.bmiHeader.biPlanes      = 1;                           // Always 1.
+            bitmapInfo.bmiHeader.biBitCount    = texture.format().pixelSize()*8;  // We internally use a 32-bit bitmap.
+            bitmapInfo.bmiHeader.biCompression = BI_RGB;                      // Uncompressed (top-down) RGB bitmap.
+            bitmapInfo.bmiHeader.biSizeImage   = 0;                           // 0 = automatic for BI_RGB-images.
+            bitmapInfo.bmiHeader.biClrUsed     = 0;                           // 0 = No color table.
+            bitmapInfo.bmiHeader.biClrImportant= 0;                           // 0 = No color table.
+
+            // Create the device-independent bitmap that will be filled with the texture
+            // and used as brush.
+            VOID* imageBits;
+            HBITMAP bitmap = CreateDIBSection(_surface->deviceContext(), &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
+
+            // Copy image data from the texture to the Windows bitmap.
+            memcpy(imageBits, texture.pixel(0,0), texture.width() * texture.height() * texture.format().pixelSize());
+
+            // Create the actual brush from this bitmap.
+            newBrushHandle = CreatePatternBrush(bitmap);
+
+            // Free the bitmap again.
+            DeleteObject(bitmap);
         }
+        else // texture.empty() == true
+        {
+            // Use the empty brush for empty textures.
+            newBrushHandle = (HBRUSH)GetStockObject(NULL_BRUSH);
+        }            
+      }
+    break;
 
-        case Ui::Brush::TextureFill: 
-				{
-            const Ui::Image& texture = _brush.texture();
-
-            if (texture.width() != 0)
-            {
-                // Fill the info for a device-independent bitmap to hold the texture data in the Windows system.
-                BITMAPINFO bitmapInfo;
-                ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
-
-                bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);    // Size of this struct.
-                bitmapInfo.bmiHeader.biWidth       = texture.width();             // Bitmap width.
-                bitmapInfo.bmiHeader.biHeight      = -(ssize_t)texture.height();  // Bitmap height. Top-down image.
-                bitmapInfo.bmiHeader.biPlanes      = 1;                           // Always 1.
-                bitmapInfo.bmiHeader.biBitCount    = texture.format().pixelSize()*8;  // We internally use a 32-bit bitmap.
-                bitmapInfo.bmiHeader.biCompression = BI_RGB;                      // Uncompressed (top-down) RGB bitmap.
-                bitmapInfo.bmiHeader.biSizeImage   = 0;                           // 0 = automatic for BI_RGB-images.
-                bitmapInfo.bmiHeader.biClrUsed     = 0;                           // 0 = No color table.
-                bitmapInfo.bmiHeader.biClrImportant= 0;                           // 0 = No color table.
-
-                // Create the device-independent bitmap that will be filled with the texture
-                // and used as brush.
-                VOID* imageBits;
-                HBITMAP bitmap = CreateDIBSection(_surface->deviceContext(), &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
-
-                // Copy image data from the texture to the Windows bitmap.
-                memcpy(imageBits, texture.pixel(0,0), texture.width() * texture.height() * texture.format().pixelSize());
-
-                // Create the actual brush from this bitmap.
-                newBrushHandle = CreatePatternBrush(bitmap);
-
-                // Free the bitmap again.
-                DeleteObject(bitmap);
-            }
-            else // texture.empty() == true
-            {
-                // Use the empty brush for empty textures.
-                newBrushHandle = (HBRUSH)GetStockObject(NULL_BRUSH);
-            }            
-        }
-		break;
-
-        default:
-            // TODO Throw runtime exception in case we do not check for every possible value of Brush::FillStyle?
-	    return;
+    default:
+          // TODO Throw runtime exception in case we do not check for every possible value of Brush::FillStyle?
+    return;
     }
 
     HBRUSH oldBrushHandle = (HBRUSH)SelectObject(_surface->deviceContext(), newBrushHandle);
@@ -226,6 +228,7 @@ const Ui::Brush& PainterImpl::brush() const
 {
     return _brush;
 }
+
 
 void PainterImpl::setFont(const Ui::Font& font)
 {
@@ -395,7 +398,7 @@ int PainterImpl::depth() const
 
 void PainterImpl::drawPixel(const Ui::PointF& toF)
 {
-  Ui::Point to = Application::instance().fromUnit(fromOrigin(toF));    
+  Ui::Point to = Application::instance().fromUnit(toF);    
     
 	SetPixel( _surface->deviceContext(), to.x(), to.y(), RGB(_pen.color().red() *255, _pen.color() .green()*255, _pen.color().blue() * 255) );
 }
@@ -406,8 +409,8 @@ void PainterImpl::drawLine(const Ui::PointF& fromF, const  Ui::PointF& toF)
 	if (_pen.size() == 0) 
 		return; 
 
-	Ui::Point from = Application::instance().fromUnit(fromOrigin(fromF));
-	Ui::Point to = Application::instance().fromUnit(fromOrigin(toF));
+	Ui::Point from = Application::instance().fromUnit(fromF);
+	Ui::Point to = Application::instance().fromUnit(toF);
 
   POINT points[2];
   points[0].x = from.x();
@@ -420,7 +423,7 @@ void PainterImpl::drawLine(const Ui::PointF& fromF, const  Ui::PointF& toF)
 
 void PainterImpl::drawText(const Ui::PointF& toF, const Pt::String& text)
 {
-	Ui::Point to = Application::instance().fromUnit(fromOrigin(toF));
+	Ui::Point to = Application::instance().fromUnit(toF);
   
   RECT rectangle;
   SetRect(&rectangle, to.x(), to.y(), to.x(), to.y());
@@ -434,7 +437,7 @@ void PainterImpl::drawText(const Ui::PointF& toF, const Pt::String& text)
 
 void PainterImpl::fillRect(const Ui::RectF& rectF)
 {
-	Ui::Rect rect = Application::instance().fromUnit(fromOrigin(rectF));
+	Ui::Rect rect = Application::instance().fromUnit(rectF);
 
   RECT rectangle;
   const Ui::Point topLeft     = rect.topLeft();
@@ -447,7 +450,7 @@ void PainterImpl::fillRect(const Ui::RectF& rectF)
 
 void PainterImpl::drawRect(const Ui::RectF& rectF)
 {
-	Ui::Rect rect = Application::instance().fromUnit(fromOrigin(rectF));
+	Ui::Rect rect = Application::instance().fromUnit(rectF);
 
     if (rect.size().width() == 1 && rect.size().height() == 1) 
 	{
@@ -469,7 +472,7 @@ void PainterImpl::drawRect(const Ui::RectF& rectF)
 
 void PainterImpl::drawEllipse(const Ui::PointF& topLeftF, const Ui::SizeF& sizeF)
 {
-	Ui::Point topLeft = Application::instance().fromUnit(fromOrigin(topLeftF));
+	Ui::Point topLeft = Application::instance().fromUnit(topLeftF);
 	Ui::Size size = Application::instance().fromUnit(sizeF);
 
   HBRUSH originalBrush = (HBRUSH)SelectObject(_surface->deviceContext(), GetStockObject(NULL_BRUSH));
@@ -482,7 +485,7 @@ void PainterImpl::drawEllipse(const Ui::PointF& topLeftF, const Ui::SizeF& sizeF
 
 void PainterImpl::fillEllipse(const Ui::PointF& topLeftF, const Ui::SizeF& sizeF)
 {
-	Ui::Point topLeft = Application::instance().fromUnit(fromOrigin(topLeftF));
+	Ui::Point topLeft = Application::instance().fromUnit(topLeftF);
 	Ui::Size size = Application::instance().fromUnit(sizeF);
 
     // Temporarily select the empty pen to only draw the filling.
@@ -509,7 +512,7 @@ void PainterImpl::drawPolyline(const Ui::PointF* points, const size_t pointCount
 
     for (size_t i = 0; i < pointCount; i++)
     {
-		    Ui::Point p = Application::instance().fromUnit(fromOrigin(points[i]));
+		    Ui::Point p = Application::instance().fromUnit(points[i]);
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -526,7 +529,7 @@ void PainterImpl::fillPolygon(const Ui::PointF* points, const size_t pointCount)
 
     for (size_t i = 0; i < pointCount; i++)
     {
-		    Ui::Point p = Application::instance().fromUnit(fromOrigin(points[i]));
+		    Ui::Point p = Application::instance().fromUnit(points[i]);
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -540,7 +543,7 @@ void PainterImpl::fillPolygon(const Ui::PointF* points, const size_t pointCount)
 void PainterImpl::drawSurface(const Ui::PointF& toF, PaintSurface& surface, const  Ui::Region& pixmapRegion)
 {
 
-	Ui::Point to = Application::instance().fromUnit(fromOrigin(toF));
+	Ui::Point to = Application::instance().fromUnit(toF);
 
   // Copy contents from the source bitmap to the destination (=new) bitmap.
   BitBlt( _surface->deviceContext(), to.x(), to.y(), pixmapRegion.width(), pixmapRegion.height(),
@@ -551,16 +554,15 @@ void PainterImpl::drawSurface(const Ui::PointF& toF, PaintSurface& surface, cons
 void PainterImpl::drawSurface(const Ui::PointF& toF, PaintSurface& surface)
 {
 
-	Ui::Point to = Application::instance().fromUnit(fromOrigin(toF));
+	Ui::Point to = Application::instance().fromUnit(toF);
 	Ui::Size size = Application::instance().fromUnit(surface.size());
 
-    BitBlt( _surface->deviceContext(), to.x(), to.y(), size.width(), size.height(), surface.impl()->deviceContext(),  
-	        surface.originPos().x(), surface.originPos().y(), SRCCOPY);
+  BitBlt( _surface->deviceContext(), to.x(), to.y(), size.width(), size.height(), surface.impl()->deviceContext(),  0, 0, SRCCOPY);
 }
 
 void PainterImpl::drawImage(const Ui::PointF& toF, const Ui::Image& image)
 {
-	Ui::Point to = Application::instance().fromUnit(fromOrigin(toF));
+	Ui::Point to = Application::instance().fromUnit(toF);
 
 	const size_t depth = image.format().pixelSize() * 8; 
 
@@ -569,7 +571,7 @@ void PainterImpl::drawImage(const Ui::PointF& toF, const Ui::Image& image)
 
 void PainterImpl::drawImage(const Ui::PointF& toF, const Ui::Image& image, const  Ui::Region& imageRegion)
 {
-	Ui::Point to = Application::instance().fromUnit(fromOrigin(toF));
+	Ui::Point to = Application::instance().fromUnit(toF);
 
 	//Todo: impl region
 	const size_t depth = image.format().pixelSize() * 8; 
@@ -627,15 +629,6 @@ void PainterImpl::drawCompatibleImage(size_t x, size_t y, size_t depth, const ch
     DeleteObject(bitmap);
 }
 
-Ui::PointF PainterImpl::fromOrigin(const Ui::PointF& p)
-{
-  return Ui::PointF(_surface->originPos().x() + p.x(), _surface->originPos().y() + p.y());
-}
-
-Ui::RectF PainterImpl::fromOrigin(const Ui::RectF& p)
-{
-  return Ui::RectF( Ui::PointF(_surface->originPos().x() + p.left(), _surface->originPos().y() + p.top()), p.size() );
-}
 
 void PainterImpl::setSurface(PaintSurface& surface)
 {

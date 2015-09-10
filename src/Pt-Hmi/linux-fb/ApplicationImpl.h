@@ -42,11 +42,10 @@ namespace Hmi {
 
 class ApplicationImpl : public Pt::System::MainLoop
 {
-    public:
+  public:
     ApplicationImpl();
 
-    ~ApplicationImpl();
-
+    virtual ~ApplicationImpl();
 
 		Ui::PointF toUnit(const Ui::Point& value)
 		{
