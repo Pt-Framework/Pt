@@ -138,7 +138,7 @@ void PainterImpl::drawImage(const Ui::PointF& to, const Ui::Image& image )
 
 void PainterImpl::drawImage( const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion )
 {
-	_surface->path.add( new Ui::ImagePathInfo( image, to, &imageRegion ) );
+	_surface->path().add( new Ui::ImagePathInfo( image, to, &imageRegion ) );
 }
 
 
