@@ -144,12 +144,10 @@ LogManager::~LogManager()
     std::map<std::string, LogChannel*>::iterator iter;
     for( iter = _channelMap.begin(); iter != _channelMap.end(); ++iter )
     {
+        // close channel no matter what the refcount is, all targets are already gone
         LogChannel* channel = iter->second;
-        if( 0 == channel->unref() )
-        {
-            channel->close();
-            _pluginManager.destroy( channel );
-        }
+        channel->close();
+        _pluginManager.destroy( channel );
     }
 
     _channelMap.clear();
