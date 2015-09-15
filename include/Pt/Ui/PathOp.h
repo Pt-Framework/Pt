@@ -23,43 +23,49 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_UI_RENDERPATHINFO_H
-#define PT_UI_RENDERPATHINFO_H
+#ifndef PT_UI_PATHOP_H
+#define PT_UI_PATHOP_H
+
+#include <Pt/Ui/RenderOp.h>
+#include <Pt/Ui/Point.h>
+#include <Pt/Ui/Image.h>
 
 namespace Pt {
 namespace Ui {
 
-class RenderPathInfo
-{
+class PathOp : public RenderOp
+{  
   public:
-    enum Operation
-    {
-      DrawLine,
-      DrawPolyline,
-      DrawText,
-      DrawRect,
-      DrawPixel,
-      DrawEllipse,
-      DrawSurface,
-      DrawImage,
-      FillRect,
-      FillEllipse,
-      FillPolygon
-    };
-
-  public:
-    RenderPathInfo( Operation op )
-    : _operation( op )    
+    PathOp( const RenderPath& path, const Ui::PointF& to, const Ui::SizeF& size )
+    : _path(path)
+    , _to(to)     
+		, _size( size )
     {
     }
 
-    Operation operation() const
-    {
-        return _operation;
+
+    virtual void execute( Painter& painter ) const
+    {					
+			PointF org = painter.origin();			
+			RectF clip = painter.clip();
+
+			painter.setOrigin( org + _to );
+			painter.setClip( RectF(_to, _size) );	
+			painter.drawPath( _path );  			
+			
+			painter.setOrigin(org);			
+			painter.setClip(clip);			
     }
 
+    virtual RenderOp* clone() const
+    {      
+        return new PathOp( _path, _to, _size );
+    }
+   
   private:
-    Operation     _operation;
+     RenderPath _path;
+     Ui::PointF _to;
+     Ui::SizeF _size;
 };
 
 }}

@@ -33,15 +33,6 @@ ScreenImpl::ScreenImpl()
 : _dpi(96.0)
 , _cursorHandle(0)
 {
- 	 _size = screeResolution();
-
-	_width  = _size.width() * unitSizeInch()*_dpi;
-	_height = _size.height() * unitSizeInch()*_dpi;
-	
-	_factorX = _width / _size.width();
-	_factorY = _height / _size.height();
-	_offsetX = 0;
-	_offsetY = 0;		
 
 }
 
@@ -51,6 +42,18 @@ ScreenImpl::~ScreenImpl()
 	
 }
 
+void ScreenImpl::init()
+{
+ 	 _size = screeResolution();
+
+	_width  = _size.width() * unitSizeInch()*_dpi;
+	_height = _size.height() * unitSizeInch()*_dpi;
+	
+	_factorX = _width / _size.width();
+	_factorY = _height / _size.height();
+	_offsetX = 0;
+	_offsetY = 0;		
+}
 
 double ScreenImpl::width() const
 {

@@ -30,7 +30,7 @@
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/SurfaceOp.h>
+#include <Pt/Ui/PathOp.h>
 #include <Pt/Ui/RenderOp.h>
 #include <Pt/Ui/EllipseOp.h>
 #include <Pt/Ui/FillRectOp.h>
@@ -121,13 +121,14 @@ void PainterImpl::fillPolygon( const Ui::PointF* points, const size_t pointCount
 
 void PainterImpl::drawSurface( const Ui::PointF& to, PaintSurface& pm, const Ui::Region& pmRegion )
 {
-  _surface->path().add( new SurfaceOp( pm, to, &pmRegion ) );
+	//Todo: region handling
+  _surface->path().add( new Ui::PathOp( pm.impl()->path(), to, pm.size()) );
 }
 
 
 void PainterImpl::drawSurface( const Ui::PointF& to, PaintSurface& pm )
 {
-  _surface->path().add( new SurfaceOp( pm, to, 0 ) );
+  _surface->path().add( new Ui::PathOp( pm.impl()->path(), to, pm.size()) );
 }
 		
 
@@ -156,6 +157,7 @@ void PainterImpl::flush()
   painter.setOrigin( _origin );
   painter.setClip( _clip );	
   painter.drawPath( _surface->path() );  
+	painter.flush();
   _surface->path().clear();
 }
 

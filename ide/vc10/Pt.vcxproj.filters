@@ -1359,11 +1359,11 @@
     <ClInclude Include="..\..\include\Pt\Ui\TextOp.h">
       <Filter>Pt-Ui</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\SurfaceOp.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\WindowTitleBar.h">
       <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Ui\PathOp.h">
+      <Filter>Pt-Ui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

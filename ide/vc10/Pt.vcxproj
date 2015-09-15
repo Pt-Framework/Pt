@@ -55,7 +55,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\ResizeDirection.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Screen.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\SizeEvent.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\SurfaceOp.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowBorder.h" />
@@ -219,6 +218,7 @@
     <ClInclude Include="..\..\include\Pt\Ui\ImageReader.h" />
     <ClInclude Include="..\..\include\Pt\Ui\LineOp.h" />
     <ClInclude Include="..\..\include\Pt\Ui\Painter.h" />
+    <ClInclude Include="..\..\include\Pt\Ui\PathOp.h" />
     <ClInclude Include="..\..\include\Pt\Ui\Pen.h" />
     <ClInclude Include="..\..\include\Pt\Ui\Point.h" />
     <ClInclude Include="..\..\include\Pt\Ui\PolylineOp.h" />
