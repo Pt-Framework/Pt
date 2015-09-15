@@ -10,7 +10,7 @@
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
   file, or you compile this file and link it with other files to
-  produce an executable, this file does not by itself cause the
+  produce an executable, this file does not by itself cause th93e
   resulting executable to be covered by the GNU General Public
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
@@ -54,7 +54,6 @@ namespace Hmi {
 */
 
 FrameBuffer::FrameBuffer()
-: _doubleBuffer( true )
 {  		 
 	_fd = open ("/dev/fb0", O_RDWR);
 

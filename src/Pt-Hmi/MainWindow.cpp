@@ -224,13 +224,12 @@ void MainWindow::activate()
 
 void MainWindow::onSetFocus()
 {
-	_impl->focus(true); 
+	_impl->focus(); 
 	Window::onSetFocus();
 }
 
 void MainWindow::onRemoveFocus()
-{
-	_impl->focus(false); 
+{	
 	Window::onRemoveFocus();
 }
 

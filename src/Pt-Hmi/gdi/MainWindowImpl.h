@@ -95,7 +95,7 @@ public:
 	
 	void setMaxSize(const Ui::SizeF& s);
 
-	void focus(bool f);
+	void focus();
 
 protected:
 	void onWindowEvent(HWND wnd, unsigned int msg, WPARAM wparam, LPARAM lparam, bool& handled);

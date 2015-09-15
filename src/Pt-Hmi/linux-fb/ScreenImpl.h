@@ -32,6 +32,7 @@
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Ui/Color.h>
 #include <Pt/Ui/Image.h>
+#include "FrameBuffer.h"
 
 namespace Pt{
 namespace Hmi{

@@ -59,7 +59,7 @@ class MainWindowImpl  : public ChildWindow
 
 		void hide();
 
-    void activate();
+	    void activate();
 
 		void setWindowPos(const Ui::PointF& p);
 
@@ -95,7 +95,7 @@ class MainWindowImpl  : public ChildWindow
 
 		void focus();
 
-    void render();
+	    void render();
 
 	protected:
 		virtual void onInvalidate();

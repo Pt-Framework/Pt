@@ -40,7 +40,7 @@ namespace Hmi{
   
 ScreenImpl::ScreenImpl()
 : _frameBuffer()
-, _image( _frameBuffer.buffer(),  Ui::Size( (size_t)_frameBuffer.width(), (size_t)_frameBuffer.height() ) ,  _frameBuffer.format(), _frameBuffer.strideInBytes() )
+, _image( (Pt::uint8_t*)  _frameBuffer.buffer(),  Ui::Size( (size_t)_frameBuffer.width(), (size_t)_frameBuffer.height() ) ,  _frameBuffer.format(), _frameBuffer.strideInBytes() )
 , _dpi(96.0)
 {  
 	Visible   = true;	

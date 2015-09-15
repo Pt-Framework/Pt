@@ -78,6 +78,11 @@ class PainterImpl
     
     void flush();
         
+	int depth() const
+	{
+		return 0;
+	}
+
   public:
     void setClip( const Ui::RectF& rect )
     {
@@ -139,7 +144,7 @@ class PainterImpl
 	    return _painter.fontMetrics(text);
     }
 
-    const std::list<std::string>& PainterImpl::fontFamilyNames()
+    const std::list<std::string>& fontFamilyNames()
     {
 	    return _painter.fontFamilyNames();
     }    

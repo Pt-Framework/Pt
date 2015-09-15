@@ -390,10 +390,9 @@ void MainWindowImpl::setWindowPos(const Ui::PointF& pf)
 }
 
 
-void MainWindowImpl::focus(bool f)
+void MainWindowImpl::focus()
 {	
-	if( f)
-		SetFocus(_hwnd);
+	SetFocus(_hwnd);
 }
 
 void MainWindowImpl::activate()

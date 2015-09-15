@@ -66,7 +66,7 @@ class TextOp : public RenderOp
       if( _outline.alpha() != -1.0f )
         return new TextOp( _pen, _to, _font, _text, &_outline );      
 
-      return new TextOp( _pen, _to, _font, _text );      
+      return new TextOp( _pen, _to, _font, _text, 0 );      
     }
 
   private:
