@@ -23,10 +23,10 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_HMI_SURFACEPATH_H
-#define PT_HMI_SURFACEPATH_H
+#ifndef PT_HMI_SURFACEOP_H
+#define PT_HMI_SURFACEOP_H
 
-#include <Pt/Ui/RenderPathInfo.h>
+#include <Pt/Ui/RenderOp.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Ui/Point.h>
 #include <Pt/Ui/Size.h>
@@ -34,12 +34,11 @@
 namespace Pt {
 namespace Hmi {
 
-class SurfacePathInfo : public Ui::RenderPathInfo
+class SurfaceOp : public Ui::RenderOp
 {  
   public:
-    SurfacePathInfo( const PaintSurface& surface, const Ui::PointF& to, const Ui::Region* pmRegion = 0 )
-    : Ui::RenderPathInfo( Ui::RenderPathInfo::DrawSurface )       
-    , _surface(surface)
+    SurfaceOp(  PaintSurface& surface, const Ui::PointF& to, const Ui::Region* pmRegion = 0 )
+    : _surface(surface)
     , _to(to)     
     {
       if( pmRegion != 0)
@@ -49,29 +48,27 @@ class SurfacePathInfo : public Ui::RenderPathInfo
     }
 
 
-    const Ui::PointF& to() const
-    {
-      return _to;
+    virtual void execute( Ui::Painter& painter ) const
+    {                     
+        const Ui::SizeF  size( _surface.size().width(),_surface.size().height() );
+        const Ui::PointF absolutPos  = painter.origin() + _to;
+				Ui::Painter&   surfacePainter   = _surface.painter();
+
+        surfacePainter.setOrigin( absolutPos );
+        surfacePainter.setClip( Ui::RectF( absolutPos, size ) );        
+        surfacePainter.flush();
     }
 
+    virtual Ui::RenderOp* clone() const
+    {
+      if( _region.left() == -1 )
+        return new SurfaceOp( _surface, _to, 0 ); 
 
-    const Ui::Region& region() const
-    {
-        return _region;
-    }
-    
-    const PaintSurface& surface() const
-    {
-        return _surface;
-    }
-
-    PaintSurface& surface()
-    {
-        return _surface;
+      return new SurfaceOp( _surface, _to, &_region );
     }
 
   private:
-     PaintSurface _surface;
+     PaintSurface& _surface;
      Ui::PointF _to;
      Ui::Region _region;
 };
