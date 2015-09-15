@@ -45,7 +45,7 @@ class FillRectOp : public RenderOp
     virtual void execute( Painter& painter) const
     {
        painter.setBrush( _brush );
-			 painter.fillRect( _rect ); 
+	   painter.fillRect( _rect ); 
     }
 
     virtual RenderOp* clone() const

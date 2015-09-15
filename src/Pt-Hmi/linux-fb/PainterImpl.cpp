@@ -47,8 +47,8 @@ namespace Pt {
 namespace Hmi {
 
 PainterImpl::PainterImpl( PaintSurfaceImpl* surface )
-: _painter( Application::instance().mainScreen().impl()->image() )
-, _surface( surface )
+: _surface( surface )
+, _renderMode( Ui::RenderMode::NoAlpha )
 {	
 }
 
@@ -148,10 +148,43 @@ void PainterImpl::drawPath( const Ui::RenderPath& path )
   _surface->path().addPath( path );
 }
 
+
 void PainterImpl::flush()
-{
-  _painter.drawPath( _surface->path() );
+{	
+  Ui::ImagePainter painter( Application::instance().mainScreen().impl()->image() );
+
+  painter.setOrigin( _origin );
+  painter.setClip( _clip );	
+  painter.drawPath( _surface->path() );  
   _surface->path().clear();
 }
+
+
+Ui::FontMetrics PainterImpl::fontMetrics() const
+{
+  Ui::ImagePainter painter( Application::instance().mainScreen().impl()->image() );
 	
+  painter.setFont( _font );
+
+  return painter.fontMetrics();
+}
+
+
+Ui::FontMetrics PainterImpl::fontMetrics( Pt::String text ) const
+{
+  Ui::ImagePainter painter( Application::instance().mainScreen().impl()->image() );
+	
+  painter.setFont( _font );
+
+  return painter.fontMetrics(text);
+}
+
+	
+const std::list<std::string>& PainterImpl::fontFamilyNames()
+{
+    Ui::ImagePainter painter( Application::instance().mainScreen().impl()->image() );
+  return painter.fontFamilyNames();
+}
+
+
 }}

@@ -117,7 +117,6 @@ class WindowManager : public Pt::Connectable
     
 	private:
 		Application&              _app;  
-		Screen&										_screen;
 		Window&										_parent;
 		std::vector<ChildWindow*>	_windows;		
 		ResizeDirection::Type			_sizingDirection;

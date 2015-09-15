@@ -37,7 +37,7 @@ namespace Hmi {
 class SurfaceOp : public Ui::RenderOp
 {  
   public:
-    SurfaceOp( const PaintSurface& surface, const Ui::PointF& to, const Ui::Region* pmRegion = 0 )
+    SurfaceOp(  PaintSurface& surface, const Ui::PointF& to, const Ui::Region* pmRegion = 0 )
     : _surface(surface)
     , _to(to)     
     {
@@ -47,12 +47,13 @@ class SurfaceOp : public Ui::RenderOp
         _region.setLeft(-1);
     }
 
+
     virtual void execute( Ui::Painter& painter ) const
     {             
         //ToDo:  _region
         const Ui::SizeF  size( _surface.size().width(),_surface.size().height() );
         const Ui::PointF absolutPos  = painter.origin() + _to;
-				Ui::Painter&     surfacePainter   = _surface.painter();
+		Ui::Painter&   surfacePainter   = _surface.painter();
 
         surfacePainter.setOrigin( absolutPos );
         surfacePainter.setClip( Ui::RectF( absolutPos, size ) );        
@@ -68,7 +69,7 @@ class SurfaceOp : public Ui::RenderOp
     }
 
   private:
-     mutable PaintSurface _surface;
+     PaintSurface& _surface;
      Ui::PointF _to;
      Ui::Region _region;
 };

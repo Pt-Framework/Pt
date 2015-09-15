@@ -171,15 +171,14 @@ void FrameBuffer::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const U
 }
 
 
-void FrameBuffer::grabImage( Ui::Image& image, const Ui::Point& pos,  const Ui::Size& size)
-{
-  const size_t pixelSizeInByte = depth() / 8;		
-
-  const size_t yMax = std::min<size_t>(pos.y() + size.height(), height() );	
+void FrameBuffer::grabImage( const Ui::Point& pos, Ui::Image& image)
+{	
+	const size_t pixelSizeInByte = depth() / 8;		
+	const Ui::Size& size= image.size();
+	const size_t yMax = std::min<size_t>(pos.y() + size.height(), height() );	
 	const size_t widthInPixel = ((pos.x() + size.width())  < width() ?  size.width() : ( width()  - pos.x() ) );
 	const size_t widthInByte = widthInPixel * pixelSizeInByte;		
 	
-	image.resize(  size.width() , size.height() );	
 	
 	for( size_t y = pos.y(); y < yMax; ++y )
 	{

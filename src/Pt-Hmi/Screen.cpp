@@ -50,6 +50,11 @@ double Screen::height() const
 	return _impl->height();
 }
 
+void Screen::init()
+{
+	_impl->init();
+}
+
 
 Ui::PointF Screen::toUnit(const Ui::Point& value)
 {

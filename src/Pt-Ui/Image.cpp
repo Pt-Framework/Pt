@@ -192,16 +192,16 @@ void Image::setColor( const Color& color )
 void Image::resize( const Ui::Size& size,  size_t strideInBytes )
 {
   _stride = strideInBytes;
-	_width  = size.width();
-	_height = size.height();
+  _width  = size.width();
+  _height = size.height();
 
   _defaultBuffer.clear();
 
   if( _width == 0 || _height == 0 )
       return;
 
-	_defaultBuffer.resize( ( _width * _format->pixelSize() + _stride) * _height ); 
-  _buffer = &_defaultBuffer[0];         
+  _defaultBuffer.resize( ( _width * _format->pixelSize() + _stride) * _height ); 
+  _buffer = &_defaultBuffer[0];  	       
 }
 
 

@@ -40,6 +40,11 @@ ImageFormat::ImageFormat( size_t pixelSize, size_t channels )
 }
 
 
+ImageFormat::~ImageFormat()
+{
+
+}
+
 const ImageFormat& ImageFormat::rgb565()
 {
 	static const Rgb565Format f;

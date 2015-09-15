@@ -235,29 +235,18 @@ void ImagePainter::drawText( const PointF& to, const String& text, const Color* 
 }
 
 
-void ImagePainter::drawRect(const  RectF& r)
+void ImagePainter::drawRect(const  RectF& rect)
 {    
-    std::vector<PointF> points( 4);
 
-    points.push_back( fromOrigin( r.topLeft() ) ); 
-    points.push_back( fromOrigin( r.topRight() ));
-    points.push_back( fromOrigin( r.bottomRight() ));
-    points.push_back( fromOrigin( r.bottomLeft() ));    
+    this->drawLine( rect.topLeft(), rect.topRight() );
 
-    _clipPolygon( points, _clipRect );
-
-    RectF rect( Ui::PointF( points[0].x(), points[0].y() ), 
-                 Ui::SizeF( points[1].x() - points[0].x(),  points[3].y() -  points[0].y() ) );
-
-    this->drawLine(rect.topLeft(), rect.topRight() );
-
-    this->drawLine(PointF( rect.topRight().x(), rect.topRight().y()),
+    this->drawLine( PointF( rect.topRight().x(), rect.topRight().y()),
                    PointF( rect.bottomRight().x(), rect.bottomRight().y()) );
 
-    this->drawLine(PointF( rect.bottomRight().x(), rect.bottomRight().y() ),
+    this->drawLine( PointF( rect.bottomRight().x(), rect.bottomRight().y() ),
                    PointF( rect.bottomLeft().x(), rect.bottomLeft().y() ) );
 
-    this->drawLine(PointF( rect.bottomLeft().x(), rect.bottomLeft().y() ),
+    this->drawLine( PointF( rect.bottomLeft().x(), rect.bottomLeft().y() ),
                    rect.topLeft() );
 }
 
@@ -265,13 +254,12 @@ void ImagePainter::fillRect(const  RectF& r)
 {
     std::vector<PointF> points( 4);
 
-    points.push_back( fromOrigin( r.topLeft() ) ); 
-    points.push_back( fromOrigin( r.topRight() ));
-    points.push_back( fromOrigin( r.bottomRight() ));
-    points.push_back( fromOrigin( r.bottomLeft() ));    
-
-    _clipPolygon( points, _clipRect );
-
+    points.push_back( r.topLeft()  ); 
+    points.push_back( r.topRight() );
+    points.push_back( r.bottomRight() );
+    points.push_back( r.bottomLeft() );        
+    
+    
     this->fillPolygon( &points[0], points.size() );
 }
 
@@ -296,7 +284,7 @@ void ImagePainter::drawPolyline( const  PointF* ps, const size_t pointCount )
       points[i] = fromOrigin( ps[i] );
 
   _clipPolygon( points, _clipRect );
-  _drawPolyline->draw( _image, _pen, &points[0], pointCount );
+  _drawPolyline->draw( _image, _pen, &points[0], points.size() );
 }
 
 
@@ -305,11 +293,12 @@ void ImagePainter::fillPolygon( const  PointF* ps, const size_t pointCount )
     std::vector<PointF> points(pointCount) ;
 
   for( size_t i = 0; i < pointCount; ++i )
-      points[i] =fromOrigin( ps[i] );
+      points[i] = fromOrigin( ps[i] );
 
-  _clipPolygon( points, _clipRect );
+	
+   _clipPolygon( points, _clipRect );
 
-  _fillPolygon->draw( _image, _brush, &points[0], pointCount );
+  _fillPolygon->draw( _image, _brush, &points[0], points.size() );
 }
 
 

@@ -57,8 +57,8 @@ class ScreenImpl : public Window
 		}
 		 		 
 		virtual void activate()
-    {
-    }
+		{
+		}
 
 		const Ui::Image& image() const
 		{
@@ -127,6 +127,8 @@ class ScreenImpl : public Window
     }
 		
 		void setCursor(const Hmi::Cursor* cursor );
+
+	void init();
 
 	protected:
 		virtual void onInvalidate();

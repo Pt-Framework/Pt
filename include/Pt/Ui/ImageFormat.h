@@ -40,6 +40,9 @@ class PT_UI_API ImageFormat
 	public:
 		ImageFormat( size_t pixelSize, size_t channels );
 
+		virtual ~ImageFormat();
+		
+
 		size_t pixelSize() const
 		{
 			return _pixelSize;

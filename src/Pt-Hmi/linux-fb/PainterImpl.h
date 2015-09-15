@@ -86,72 +86,64 @@ class PainterImpl
   public:
     void setClip( const Ui::RectF& rect )
     {
-        _painter.setClip( rect );
+        _clip = rect ;
     }    
 
     const Ui::RectF& clip() const 
     {
-      return _painter.clip();
+      return _clip;
     }
 
     void setOrigin( const Ui::PointF& p )
     {
-      _painter.setOrigin( p );
+		_origin =  p;
     }
 
     const Ui::PointF& origin() const
     {
-      return  _painter.origin();
+      return  _origin;
     }
 
     void setPen( const Ui::Pen& pen )
     {
-	    _painter.setPen(pen);
+	    _pen = pen;
     }
 
     const Ui::Pen& pen() const
     {
-	    return _painter.pen();
+	    return _pen;
     }
 
     void setBrush( const Ui::Brush& brush )
     {
-	    _painter.setBrush( brush) ;
+	    _brush = brush ;
     }
 
     const Ui::Brush& brush() const
     {
-	    return _painter.brush();
+	    return _brush;
     }
 
     void setFont( const Ui::Font& font )
     {
-      _painter.setFont( font );	
+      _font = font;	
     }
 
     const Ui::Font& font() const
     {
-	    return _painter.font();
+	    return _font;
     }
 
-    Ui::FontMetrics fontMetrics() const
-    {
-	    return _painter.fontMetrics();
-    }
+    Ui::FontMetrics fontMetrics() const;
+    
+    Ui::FontMetrics fontMetrics( Pt::String text ) const;
+    
+    const std::list<std::string>& fontFamilyNames();
 
-    Ui::FontMetrics fontMetrics( Pt::String text ) const
-    {
-	    return _painter.fontMetrics(text);
-    }
-
-    const std::list<std::string>& fontFamilyNames()
-    {
-	    return _painter.fontFamilyNames();
-    }    
 
     void setRenderMode( Ui::RenderMode::Type mode )
     {
-      _painter.setRenderMode( mode );
+      _renderMode =  mode;
     }
 
     void setSurface( PaintSurface& s )
@@ -165,8 +157,14 @@ class PainterImpl
     }
 
   private:
-	  Ui::ImagePainter     _painter;
-	  PaintSurfaceImpl*    _surface;	
+	  PaintSurfaceImpl*   	_surface;	
+	  Ui::RenderMode::Type 	_renderMode;
+	  Ui::Font 				_font;
+	  Ui::Pen   			_pen;
+ 	  Ui::Brush 			_brush;
+	  Ui::RectF 			_clip;
+	  Ui::PointF 			_origin;	
+	
 };
 
 }}

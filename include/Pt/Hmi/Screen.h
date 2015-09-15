@@ -46,6 +46,8 @@ class PT_HMI_API Screen
 
 		virtual ~Screen();
 
+	void init();
+
 		double width() const;
 
 		double height() const;

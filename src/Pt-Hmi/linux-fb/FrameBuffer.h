@@ -77,7 +77,7 @@ class FrameBuffer
 
     void bitBlit( const Ui::Image& image );
     
-    void grabImage( Ui::Image& image, const Ui::Point& pos,  const Ui::Size& size);
+    void grabImage( const Ui::Point& pos, Ui::Image& image);
     
     size_t strideInBytes() const
     {
@@ -93,6 +93,11 @@ class FrameBuffer
 	  { 				
 			  return _buffer;
 	  }
+
+	size_t bufferSize() const
+	{
+	return _bufferSize;
+	}
 
     const char* buffer() const
 	  { 				

@@ -163,7 +163,7 @@ void MainWindow::init()
 	
 
 	addChildWindow( _childWindow1 );
-  _childWindow1.addChildWindow( _childWindow2 );
+   _childWindow1.addChildWindow( _childWindow2 );
 		
 	_childWindow1.Visible = true;
   _childWindow1.Caption = "Child 1";
@@ -172,7 +172,7 @@ void MainWindow::init()
 
 
 	_childWindow2.Visible = true;
-  _childWindow2.invalidate();  
+    _childWindow2.invalidate();  
 
 	_childWindow2.addChild(&_mainPanel);
 
