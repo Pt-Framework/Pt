@@ -68,6 +68,8 @@ class PainterImpl
 
     void drawImage( const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion ); 
 
+    void drawPath( const Ui::RenderPath& path );
+
     void fillRect( const Ui::RectF& rectangle );    
 
     void fillEllipse( const Ui::PointF& topLeft, const Ui::SizeF& size );

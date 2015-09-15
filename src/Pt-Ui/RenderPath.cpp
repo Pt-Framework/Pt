@@ -48,7 +48,7 @@ void RenderPath::clear()
 }
 
 
-void RenderPath::add(RenderPathInfo* info )
+void RenderPath::add(RenderOp* info )
 {
   _path.push_back( info );
 }  

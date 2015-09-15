@@ -49,6 +49,7 @@ PainterImpl::PainterImpl(PaintSurfaceImpl* surface)
 , _brush(Ui::Brush(Ui::Color(0, 0, 0)))
 , _font(Ui::Font(determinePlatformDefaultFontName()))
 , _renderMode(Ui::RenderMode::NoAlpha)
+, _screen( Application::instance().mainScreen() )
 {
 }
 
@@ -327,7 +328,7 @@ Ui::FontMetrics PainterImpl::fontMetrics(Pt::String text) const
 	text.toUtf16( std::back_inserter(_text) );
     GetTextExtentPoint32W(_surface->deviceContext(), _text.c_str(), _text.length(), &textSize);
 	Ui::Size size(textSize.cx, textSize.cy);
-	Ui::SizeF sizeF = Application::instance().toUnit(size);
+	Ui::SizeF sizeF = _screen.toUnit(size);
 
     return Ui::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, (int)sizeF.width(), (int)sizeF.height());
 }
@@ -398,7 +399,7 @@ int PainterImpl::depth() const
 
 void PainterImpl::drawPixel(const Ui::PointF& toF)
 {
-  Ui::Point to = Application::instance().fromUnit(toF);    
+  Ui::Point to = _screen.fromUnit(toF);    
     
 	SetPixel( _surface->deviceContext(), to.x(), to.y(), RGB(_pen.color().red() *255, _pen.color() .green()*255, _pen.color().blue() * 255) );
 }
@@ -409,8 +410,8 @@ void PainterImpl::drawLine(const Ui::PointF& fromF, const  Ui::PointF& toF)
 	if (_pen.size() == 0) 
 		return; 
 
-	Ui::Point from = Application::instance().fromUnit(fromF);
-	Ui::Point to = Application::instance().fromUnit(toF);
+	Ui::Point from = _screen.fromUnit(fromF);
+	Ui::Point to = _screen.fromUnit(toF);
 
   POINT points[2];
   points[0].x = from.x();
@@ -423,7 +424,7 @@ void PainterImpl::drawLine(const Ui::PointF& fromF, const  Ui::PointF& toF)
 
 void PainterImpl::drawText(const Ui::PointF& toF, const Pt::String& text)
 {
-	Ui::Point to = Application::instance().fromUnit(toF);
+	Ui::Point to = _screen.fromUnit(toF);
   
   RECT rectangle;
   SetRect(&rectangle, to.x(), to.y(), to.x(), to.y());
@@ -437,7 +438,7 @@ void PainterImpl::drawText(const Ui::PointF& toF, const Pt::String& text)
 
 void PainterImpl::fillRect(const Ui::RectF& rectF)
 {
-	Ui::Rect rect = Application::instance().fromUnit(rectF);
+	Ui::Rect rect = _screen.fromUnit(rectF);
 
   RECT rectangle;
   const Ui::Point topLeft     = rect.topLeft();
@@ -450,7 +451,7 @@ void PainterImpl::fillRect(const Ui::RectF& rectF)
 
 void PainterImpl::drawRect(const Ui::RectF& rectF)
 {
-	Ui::Rect rect = Application::instance().fromUnit(rectF);
+	Ui::Rect rect = _screen.fromUnit(rectF);
 
     if (rect.size().width() == 1 && rect.size().height() == 1) 
 	{
@@ -472,8 +473,8 @@ void PainterImpl::drawRect(const Ui::RectF& rectF)
 
 void PainterImpl::drawEllipse(const Ui::PointF& topLeftF, const Ui::SizeF& sizeF)
 {
-	Ui::Point topLeft = Application::instance().fromUnit(topLeftF);
-	Ui::Size size = Application::instance().fromUnit(sizeF);
+	Ui::Point topLeft = _screen.fromUnit(topLeftF);
+	Ui::Size size = _screen.fromUnit(sizeF);
 
   HBRUSH originalBrush = (HBRUSH)SelectObject(_surface->deviceContext(), GetStockObject(NULL_BRUSH));
 
@@ -485,8 +486,8 @@ void PainterImpl::drawEllipse(const Ui::PointF& topLeftF, const Ui::SizeF& sizeF
 
 void PainterImpl::fillEllipse(const Ui::PointF& topLeftF, const Ui::SizeF& sizeF)
 {
-	Ui::Point topLeft = Application::instance().fromUnit(topLeftF);
-	Ui::Size size = Application::instance().fromUnit(sizeF);
+	Ui::Point topLeft = _screen.fromUnit(topLeftF);
+	Ui::Size size =_screen.fromUnit(sizeF);
 
     // Temporarily select the empty pen to only draw the filling.
     HPEN originalPen = (HPEN)SelectObject(_surface->deviceContext(), GetStockObject(NULL_PEN));
@@ -512,7 +513,7 @@ void PainterImpl::drawPolyline(const Ui::PointF* points, const size_t pointCount
 
     for (size_t i = 0; i < pointCount; i++)
     {
-		    Ui::Point p = Application::instance().fromUnit(points[i]);
+		    Ui::Point p = _screen.fromUnit(points[i]);
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -529,7 +530,7 @@ void PainterImpl::fillPolygon(const Ui::PointF* points, const size_t pointCount)
 
     for (size_t i = 0; i < pointCount; i++)
     {
-		    Ui::Point p = Application::instance().fromUnit(points[i]);
+		    Ui::Point p = _screen.fromUnit(points[i]);
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -543,7 +544,7 @@ void PainterImpl::fillPolygon(const Ui::PointF* points, const size_t pointCount)
 void PainterImpl::drawSurface(const Ui::PointF& toF, PaintSurface& surface, const  Ui::Region& pixmapRegion)
 {
 
-	Ui::Point to = Application::instance().fromUnit(toF);
+	Ui::Point to = _screen.fromUnit(toF);
 
   // Copy contents from the source bitmap to the destination (=new) bitmap.
   BitBlt( _surface->deviceContext(), to.x(), to.y(), pixmapRegion.width(), pixmapRegion.height(),
@@ -554,15 +555,15 @@ void PainterImpl::drawSurface(const Ui::PointF& toF, PaintSurface& surface, cons
 void PainterImpl::drawSurface(const Ui::PointF& toF, PaintSurface& surface)
 {
 
-	Ui::Point to = Application::instance().fromUnit(toF);
-	Ui::Size size = Application::instance().fromUnit(surface.size());
+	Ui::Point to = _screen.fromUnit(toF);
+	Ui::Size size = _screen.fromUnit(surface.size());
 
   BitBlt( _surface->deviceContext(), to.x(), to.y(), size.width(), size.height(), surface.impl()->deviceContext(),  0, 0, SRCCOPY);
 }
 
 void PainterImpl::drawImage(const Ui::PointF& toF, const Ui::Image& image)
 {
-	Ui::Point to = Application::instance().fromUnit(toF);
+	Ui::Point to = _screen.fromUnit(toF);
 
 	const size_t depth = image.format().pixelSize() * 8; 
 
@@ -571,7 +572,7 @@ void PainterImpl::drawImage(const Ui::PointF& toF, const Ui::Image& image)
 
 void PainterImpl::drawImage(const Ui::PointF& toF, const Ui::Image& image, const  Ui::Region& imageRegion)
 {
-	Ui::Point to = Application::instance().fromUnit(toF);
+	Ui::Point to = _screen.fromUnit(toF);
 
 	//Todo: impl region
 	const size_t depth = image.format().pixelSize() * 8; 
@@ -636,6 +637,13 @@ void PainterImpl::setSurface(PaintSurface& surface)
 	updateBrush();
 	updateFont();
 	updatePen();	
+}
+
+
+void PainterImpl::drawPath( const Ui::RenderPath& path )
+{
+    for( size_t i = 0; i < path.size(); ++i )
+      path[i]->execute( *this );
 }
 
 }}

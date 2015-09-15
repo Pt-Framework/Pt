@@ -72,27 +72,7 @@ class ApplicationImpl : public Pt::System::EventLoop
 		{
 			return _windowEvent;
 		}
-
-
-	public:
-		double toUnit(int value);
-		Ui::PointF toUnit(const Ui::Point& value);
-		Ui::SizeF toUnit(const Ui::Size& value);
-		int fromUnit(double value);
-		Ui::Point fromUnit(const Ui::PointF& value);
-		Ui::Size fromUnit(const Ui::SizeF& value);
-		Ui::Rect fromUnit(const Ui::RectF& value);		
-		double unitSizeInch() const;
-		double unitSizeMm() const;
-		void setResolution(double dpi);
-		double resolutionDPI() const;
-		
-	public:
-		void setCursor(const Cursor* cursor = 0);
-		HCURSOR cursorHandle()
-    {
-      return 	_cursorHandle;
-    }
+	
 
 	protected:
 		static long CALLBACK wndProc(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);
@@ -135,25 +115,13 @@ class ApplicationImpl : public Pt::System::EventLoop
 	private:
     HINSTANCE _instanceHandle;
 		Pt::Signal<HWND, unsigned int, WPARAM, LPARAM, bool&> _windowEvent;
-	
-	private:
-		int _screenWidth;
-		int _screenHeight;
-		double _factorX;
-		double _offsetX;
-		double _factorY;
-		double _offsetY;
-		double _width;
-		double _height;
-		double _dpi;
-	
 	private:
 		System::Mutex _mutex;
 		System::TimerQueue _timerQueue;
 		System::EventQueue _eventQueue;
 		Pt::Hmi::Selector _selector;        
 		std::vector<System::Selectable*> _avail;
-		HCURSOR _cursorHandle;
+		
 
 };
 

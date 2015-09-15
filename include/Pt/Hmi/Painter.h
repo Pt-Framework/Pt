@@ -31,12 +31,14 @@
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Ui/FontMetrics.h>
 #include <Pt/Ui/Painter.h>
+#include <Pt/Ui/RenderPath.h>
 
 namespace Pt {
 namespace Hmi {
 
 class PainterImpl;
 class PaintSurface;
+
 
 class PT_HMI_API Painter : public Pt::Ui::Painter
 {
@@ -95,7 +97,21 @@ public:
 
     virtual void drawImage(const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion);      
 
+    virtual void drawPath( const Ui::RenderPath& path );
+
     virtual void addFontName(const std::string& fontName);
+
+		virtual void setClip( const Ui::RectF& rect);
+
+		virtual const Ui::RectF& clip() const;
+
+    virtual void setOrigin( const Ui::PointF& org );
+
+    virtual const Ui::PointF& origin() const;
+    
+    virtual void flush();
+
+    
 
     void setSurface(PaintSurface& surface);    
     

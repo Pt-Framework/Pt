@@ -48,27 +48,8 @@ public:
   virtual ~Application();
 
 	static Application& instance();
-
-	Ui::PointF toUnit(const Ui::Point& value);
-	Ui::SizeF toUnit(const Ui::Size& value);
-	double toUnit(int value);
-
-	Ui::Point fromUnit(const Ui::PointF& value);
-	Ui::Size fromUnit(const Ui::SizeF& value);
-	Ui::Rect fromUnit(const Ui::RectF& value);
-	int fromUnit(double value);
-
-	double unitSizeInch() const;
-	double unitSizeMm() const;
-
-	void setResolution(double dpi);
-	double resolutionDPI() const;
-
-	ApplicationImpl* impl();
 	
 	void nextEvent();
-
-	void setCursor(const Cursor* cursor = 0);
 
 	const Screen& mainScreen() const
 	{
@@ -80,10 +61,11 @@ public:
 		return *_mainScreen;
 	}
 
+  ApplicationImpl* impl();
+
 private:     
-  ApplicationImpl* _impl; 
-  Screen* _mainScreen;
-  std::string _cursorName;
+  ApplicationImpl*  _impl; 
+  Screen*           _mainScreen;
 };
 
 }}

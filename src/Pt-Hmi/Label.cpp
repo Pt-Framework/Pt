@@ -53,10 +53,7 @@ Label::~Label()
 void Label::recalcNewSize()
 {
  if( !AutoSize.get() )
- {
-    invalidate();
     return;
- }
   
   std::string caption = "";
 

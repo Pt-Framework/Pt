@@ -59,7 +59,7 @@ class PT_HMI_API PaintSurface
 
 	private:
 		PaintSurfaceImpl*	_impl;
-		Painter				_painter;      
+		Hmi::Painter			_painter;      
 };
 
 }}

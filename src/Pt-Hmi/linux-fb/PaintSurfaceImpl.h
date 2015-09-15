@@ -44,6 +44,7 @@ class PaintSurfaceImpl
 {
   public:		
 	  PaintSurfaceImpl();
+
 	  virtual ~PaintSurfaceImpl();
 
 	  void resize(const Ui::SizeF& size);	

@@ -55,7 +55,7 @@ class FrameBuffer
 
     FrameBuffer();
 
-    ~FrameBuffer();
+    virtual ~FrameBuffer();
 		
 
     size_t width() const
@@ -112,7 +112,7 @@ class FrameBuffer
     size_t            _yoffset;  
     size_t            _bufferSize;
     size_t		        _depth;	  
-    Ui::ImageFormat* _format;
+    Ui::ImageFormat*  _format;
 };
 
 } // namespace

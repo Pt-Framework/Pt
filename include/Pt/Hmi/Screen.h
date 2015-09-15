@@ -29,6 +29,10 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Cursor.h>
+#include <Pt/Ui/Size.h>
+#include <Pt/Ui/Point.h>
+#include <Pt/Ui/Rect.h>
 
 namespace Pt{
 namespace Hmi{
@@ -39,16 +43,42 @@ class PT_HMI_API Screen
 {
 	public:
 		Screen();
+
 		virtual ~Screen();
 
 		double width() const;
+
 		double height() const;
 	
     Ui::SizeF size() const
     {
       return Ui::SizeF( width(), height() );
     }
-		
+
+	  Ui::PointF toUnit( const Ui::Point& value );
+	  
+    Ui::SizeF toUnit( const Ui::Size& value );
+	  
+    double toUnit( int value );
+
+	  Ui::Point fromUnit( const Ui::PointF& value );
+	  
+    Ui::Size fromUnit( const Ui::SizeF& value );
+	  
+    Ui::Rect fromUnit( const Ui::RectF& value );
+	  
+    int fromUnit( double value );
+
+	  double unitSizeInch() const;
+	  
+    double unitSizeMm() const;
+
+	  void setResolution( double dpi );
+	  
+    double resolutionDPI() const;
+    
+    void setCursor( const Cursor* cursor = 0 );
+
 		ScreenImpl* impl()
 		{
 			return _impl;

@@ -50,4 +50,65 @@ double Screen::height() const
 	return _impl->height();
 }
 
+
+Ui::PointF Screen::toUnit(const Ui::Point& value)
+{
+	return _impl->toUnit(value);
+}
+
+Ui::SizeF Screen::toUnit(const Ui::Size& value)
+{
+	return _impl->toUnit(value);
+}
+
+Ui::Point Screen::fromUnit(const Ui::PointF& value)
+{
+	return _impl->fromUnit(value);
+}
+
+Ui::Size Screen::fromUnit(const Ui::SizeF& value)
+{
+	return _impl->fromUnit(value);
+}
+
+Ui::Rect Screen::fromUnit(const Ui::RectF& value)
+{
+	return _impl->fromUnit(value);
+}
+
+double Screen::unitSizeInch() const
+{
+	return _impl->unitSizeInch();
+}
+
+int Screen::fromUnit(double val) 
+{
+	return _impl->fromUnit(val);
+}
+
+double Screen::toUnit(int val) 
+{
+	return _impl->toUnit(val);
+}
+
+double Screen::unitSizeMm() const
+{
+	return _impl->unitSizeMm();
+}
+
+void Screen::setResolution(double dpi)
+{
+	_impl->setResolution(dpi);
+}
+
+double Screen::resolutionDPI() const
+{
+	return _impl->resolutionDPI();
+}
+
+void Screen::setCursor( const Cursor* cursor )
+{
+  _impl->setCursor( cursor );
+}
+
 }}

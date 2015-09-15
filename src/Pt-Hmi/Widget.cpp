@@ -363,9 +363,9 @@ void Widget::onRender( PaintSurface& surface )
 			
 			case ImageLayout::Tile:
 			{
-				for( size_t x = pos.x(); x < size.width();  x += backImage.width() )
+				for( double x = pos.x(); x < size.width();  x += backImage.width() )
 				{
-					for( size_t y = pos.y(); y < size.height();  y += backImage.height() )
+					for( double y = pos.y(); y < size.height();  y += backImage.height() )
 						painter.drawImage(Ui::PointF(x,y), backImage);
 				}
 			}
@@ -421,7 +421,7 @@ void Widget::onShortcutKey(KeyEvent::KeyState state)
 void Widget::onPointerEnter()
 {
 	_containPointer = true;  
-	Application::instance().setCursor( &Cursor.get() );
+	Application::instance().mainScreen().setCursor( &Cursor.get() );
 }
 
 
@@ -430,7 +430,7 @@ void Widget::onPointerLeaved()
 	_containPointer = false;
 
   if( _parent != 0 )
-	  Application::instance().setCursor( &_parent->Cursor.get() ); 
+	  Application::instance().mainScreen().setCursor( &_parent->Cursor.get() ); 
 }
 
 		
@@ -697,6 +697,9 @@ std::string Widget::removeMnemonic(const std::string& text)
 size_t Widget::getMnemonicIndex(const std::string& text)
 {	 
 	size_t pos = 0;
+  
+  if( text.empty() )    
+	  return std::string::npos;
 
 	for( size_t i = 0; i < text.size() - 1; ++i)
 	{				

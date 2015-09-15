@@ -53,10 +53,10 @@ public:
 	virtual ~Button();
 
 	ValueProperty<DeviceButton::State> ButtonState;		
-	ValueProperty<bool>								 Armed;		
+	ValueProperty<bool>								 Hover;		
 	ValueProperty<ButtonType::Type>    ButtonType;	
 	ValueProperty<int>								 DoublePressTimeInMs; 
-  ValueProperty<Ui::Image>					Image;	
+  ValueProperty<Ui::Image>					 Image;	
   ValueProperty<Align::Type>         ImageAlign;
 
 	Signal<bool>											 Checked;	  

@@ -25,13 +25,24 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include "ScreenImpl.h"
-#include <Windows.h>
 
 namespace Pt{
 namespace Hmi{
 
 ScreenImpl::ScreenImpl()
+: _dpi(96.0)
+, _cursorHandle(0)
 {
+ 	 _size = screeResolution();
+
+	_width  = _size.width() * unitSizeInch()*_dpi;
+	_height = _size.height() * unitSizeInch()*_dpi;
+	
+	_factorX = _width / _size.width();
+	_factorY = _height / _size.height();
+	_offsetX = 0;
+	_offsetY = 0;		
+
 }
 
 
@@ -58,5 +69,157 @@ double ScreenImpl::height() const
   return  desktop.bottom;
 }
 
+
+void ScreenImpl::setResolution(double dpi)
+{
+	_dpi = dpi;
+}
+
+
+double ScreenImpl::resolutionDPI() const
+{
+	return _dpi;
+}
+
+
+int ScreenImpl::fromUnit(double unit)
+{
+	return (int) (unit *unitSizeInch()* _dpi);
+}
+
+
+double ScreenImpl::toUnit(int unit)
+{
+	return unitSizeInch()/_dpi * unit;
+}
+
+
+Ui::PointF ScreenImpl::toUnit(const Ui::Point& value)
+{
+	const double x = value.x() * _factorX  + _offsetX;
+	const double y = value.y() * _factorY  + _offsetY;
+
+	return Ui::PointF(std::ceil(x),std::ceil(y));
+}
+
+
+Ui::SizeF ScreenImpl::toUnit(const Ui::Size& value)
+{
+	const double width = value.width() * _factorX  + _offsetX;
+	const double height = value.height() * _factorY  + _offsetY;
+
+	return Ui::SizeF(std::ceil(width),std::ceil(height));
+}
+
+
+Ui::Point ScreenImpl::fromUnit(const Ui::PointF& value)
+{
+	double factorX = _size.width() / _width;
+	double factorY = _size.height() / _height;
+	int x = (int) ( value.x() * factorX); 
+	int y = (int) ( value.y() * factorY);
+
+	return Ui::Point(x,y);
+}
+
+
+Ui::Size ScreenImpl::fromUnit(const Ui::SizeF& value)
+{
+	double factorX = _size.width() / _width;
+	double factorY = _size.height() / _height;
+	int width = (int) ( value.width() * factorX); 
+	int height = (int) ( value.height() * factorY);
+	return Ui::Size(width,height);
+}
+
+
+Ui::Rect ScreenImpl::fromUnit(const Ui::RectF& value)
+{
+	Ui::Rect rect(Ui::Point(value.x(), value.y()), Ui::Size(value.width(), value.height()));
+	return rect;
+}
+
+
+double ScreenImpl::unitSizeInch() const
+{
+	return 1.0/96.0;
+}
+
+
+double ScreenImpl::unitSizeMm() const
+{
+	return 25.4 * unitSizeInch();
+}
+
+
+HBITMAP ScreenImpl::createImage888(const Pt::uint8_t* data, size_t width, size_t height)
+{
+	HDC hDC        = ::GetDC(NULL);
+	HDC hMainDC    = ::CreateCompatibleDC(hDC); 
+
+	BITMAPINFO bitmapInfo;
+	ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+
+	bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER); // Size of this struct.
+	bitmapInfo.bmiHeader.biWidth       = width;             // Bitmap width.
+	bitmapInfo.bmiHeader.biHeight      = -(ssize_t)height;  // Bitmap height. Negative value = top-down image.
+	bitmapInfo.bmiHeader.biPlanes      = 1;                 // Always 1.
+	bitmapInfo.bmiHeader.biBitCount    = 32;                // We internally use a 32-bit bitmap.
+	bitmapInfo.bmiHeader.biCompression = BI_RGB;            // Uncompressed (top-down) RGB bitmap.
+	bitmapInfo.bmiHeader.biSizeImage   = 0;                 // 0 = automatic for BI_RGB-images.
+	bitmapInfo.bmiHeader.biClrUsed     = 0;                 // 0 = No color table.
+	bitmapInfo.bmiHeader.biClrImportant= 0;                 // 0 = No color table.
+
+	VOID* imageBits;
+	HBITMAP bitmap = CreateDIBSection(hMainDC, &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
+
+	memcpy(imageBits, data, width * height * 3);
+
+	::DeleteDC(hMainDC);
+	::ReleaseDC(NULL,hDC);
+
+	return bitmap;
+}
+
+
+void ScreenImpl::setCursor(const Cursor* cursor)
+{	  
+	if( cursor == 0 )
+		return;
+
+	if( cursor->empty() )
+		return;
+
+  if( _cursorHandle != 0 )			
+		DestroyCursor( _cursorHandle );
+
+	HBITMAP andMask = createImage888( &cursor->andRgb888()[0], cursor->width(),  cursor->height() );
+	HBITMAP xorMask = createImage888( &cursor->xorRgb888()[0], cursor->width(),  cursor->height() );
+
+	ICONINFO iconInfo;
+
+	iconInfo.fIcon = false; 
+	iconInfo.xHotspot = cursor->xHotspot();
+	iconInfo.yHotspot = cursor->yHotspot();
+	iconInfo.hbmColor = xorMask;
+	iconInfo.hbmMask  = andMask;
+
+	_cursorHandle = CreateIconIndirect(&iconInfo);
+
+	if( _cursorHandle != 0 )
+	  SetCursor( _cursorHandle );	
+
+	DeleteObject( andMask );
+	DeleteObject( xorMask );
+}
+
+
+Ui::Size ScreenImpl::screeResolution()
+{
+  RECT desktop;    
+  GetWindowRect(GetDesktopWindow(), &desktop);
+
+  return Ui::Size( desktop.right, desktop.bottom );
+}
 
 }}

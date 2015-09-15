@@ -47,85 +47,17 @@ class ApplicationImpl : public Pt::System::MainLoop
 
     virtual ~ApplicationImpl();
 
-		Ui::PointF toUnit(const Ui::Point& value)
-		{
-			return Ui::PointF(value.x(), value.y());
-		}
-
-		Ui::SizeF toUnit(const Ui::Size& value)
-		{
-			return Ui::SizeF(value.width(), value.height());
-		}
-
-		double toUnit(int value)
-		{
-			return value;
-		}
-
-		Ui::Point fromUnit(const Ui::PointF& value)
-		{
-			return Ui::Point(value.x(), value.y());
-		}
-
-		Ui::Size fromUnit(const Ui::SizeF& value)
-		{
-			return Ui::Size(value.width(), value.height());
-		}
-
-		Ui::Rect fromUnit(const Ui::RectF& value)
-		{
-			return Ui::Rect(Ui::Point( value.x(), value.y()) , Ui::Size(value.width(), value.height()));
-		}
-
-		int fromUnit(double value)
-		{
-			return (int) value;
-		}
-
-		double unitSizeInch() const
-		{
-			return 0;
-		}
-			
-		double unitSizeMm() const
-		{
-			return 0;
-		}
-
-		void setResolution(double dpi)
-		{
-		}
-
-		double resolutionDPI() const
-		{
-			return 0;
-		}
-
 		Pt::Signal<const struct input_event&>& inputEvent()
 		{
 			return _inputEvent;
 		}
 
 		void nextEvent();
-
-		void setCursor( const Hmi::Cursor* cursor );
-
-    const FrameBuffer& frameBuffer() const
-    {
-      return _frameBuffer;
-    }
-
-    FrameBuffer& frameBuffer()
-    {
-      return _frameBuffer;
-    }
-
+    
   protected:
 		Pt::Signal<const struct input_event&> _inputEvent;
 		InputDevice _inputDevice;
-		InputDevice _inputDevice2;		
-    FrameBuffer _frameBuffer;
-
+		InputDevice _inputDevice2;		    
 };
 
 } // namespace

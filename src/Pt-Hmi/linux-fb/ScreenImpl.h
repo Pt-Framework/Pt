@@ -29,7 +29,6 @@
 
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Ui/Color.h>
 #include <Pt/Ui/Image.h>
@@ -38,6 +37,7 @@ namespace Pt{
 namespace Hmi{
 
 class FrameBuffer;
+class Cursor;
 
 class ScreenImpl : public Window
 {
@@ -55,7 +55,9 @@ class ScreenImpl : public Window
 			return  Size.get().height();
 		}
 		 		 
-		virtual void activate();
+		virtual void activate()
+    {
+    }
 
 		const Ui::Image& image() const
 		{
@@ -67,18 +69,74 @@ class ScreenImpl : public Window
 			return _image;
 		} 
 
+		double toUnit(int value)
+    {
+      return value;
+    }
+
+		Ui::PointF toUnit(const Ui::Point& value)
+    {
+      return Ui::PointF( value.x(), value.y() );
+    }
+
+		Ui::SizeF toUnit(const Ui::Size& value)
+    {
+      return Ui::SizeF( value.width(), value.height() );
+    }
+
+		int fromUnit(double value)
+    {
+      return (int) value;
+    }
+
+		Ui::Point fromUnit(const Ui::PointF& value)
+    {
+      return Ui::Point( (int)value.x(), (int)value.y() );
+    }
+
+		Ui::Size fromUnit(const Ui::SizeF& value)
+    {
+       return Ui::Size( (int)value.width(), (int)value.height() );
+    }
+
+		Ui::Rect fromUnit(const Ui::RectF& value)
+    {
+      return Ui::Rect( Ui::Point( (int) value.x(), (int)value.y()) , Ui::Size( (int)value.width(), (int)value.height() ) );
+    }
+
+    double unitSizeInch() const
+    {
+	    return 1.0/96;
+    }
+
+    double unitSizeMm() const
+    {
+	    return 25.4 * unitSizeInch();
+    }
+
+
+		void setResolution(double dpi)
+    {
+      _dpi = dpi;
+    }
+
+		double resolutionDPI() const
+    {
+      return _dpi;
+    }
+		
+		void setCursor(const Hmi::Cursor* cursor );
+
 	protected:
 		virtual void onInvalidate();
 		virtual void onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent );
 
-	private:   						
-		void saveCursorImage(const Pt::Hmi::PointerEvent& mouseEvent);
-
 	private:
-    FrameBuffer&  _frameBuffer;  
-		Ui::Image	    _cursorBuffer;
-		Ui::Point			_cursorPos;    
-		Ui::Image     _image;
+    FrameBuffer _frameBuffer;  
+		Ui::Image	  _cursorBackground;
+		Ui::Point		_cursorPos;    
+		Ui::Image   _image;
+    double      _dpi;
 };
 
 }}

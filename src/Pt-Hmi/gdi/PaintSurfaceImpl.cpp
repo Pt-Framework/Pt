@@ -39,7 +39,7 @@ PaintSurfaceImpl::PaintSurfaceImpl()
 {
 	_size = Ui::SizeF(10,10);
 
-	Ui::Size nsize = Application::instance().fromUnit(_size);
+	Ui::Size nsize = Application::instance().mainScreen().fromUnit(_size);
 
 	HDC screenDC = CreateDC(_T("DISPLAY"), NULL, NULL, NULL);
 	_deviceContext = CreateCompatibleDC(screenDC);
@@ -78,7 +78,7 @@ void PaintSurfaceImpl::resize(const Ui::SizeF& size)
     return;
 
 	_size = size;
-	Ui::Size nsize = Application::instance().fromUnit( _size );
+	Ui::Size nsize = Application::instance().mainScreen().fromUnit( _size );
 
 	//Save the old settings
 	COLORREF textColor = GetTextColor(_deviceContext);

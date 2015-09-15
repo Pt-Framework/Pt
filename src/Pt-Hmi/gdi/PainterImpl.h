@@ -27,8 +27,7 @@
 #include <Pt/Ui/Brush.h>
 #include <Pt/Ui/Image.h>
 #include <Pt/Ui/Region.h>
-
-
+#include <Pt/Ui/RenderPath.h>
 #include <windows.h>
 
 namespace Pt {
@@ -36,8 +35,9 @@ namespace Hmi {
 
 class PaintSurfaceImpl;
 class PaintSurface;
+class Screen;
 
-class PainterImpl
+class PainterImpl : public Ui::Painter
 {
     public:
         PainterImpl(PaintSurfaceImpl* surface);
@@ -94,9 +94,37 @@ class PainterImpl
 
         void drawImage(const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion);
 
+        void drawPath( const Ui::RenderPath& path );
+
         void addFontName(const std::string& fontName);
 
 				void setSurface(PaintSurface& surface);
+
+        void setOrigin( const Ui::PointF& origin )
+        {
+          _origin = origin;
+        }
+        
+        const Ui::PointF& origin() const
+        {
+            return _origin;
+        }
+
+        void flush()
+        {
+
+        }
+
+        void setClip( const Ui::RectF& clip )
+        {
+          _clip = clip;
+        }
+
+
+        const Ui::RectF& clip() const
+        {
+            return _clip;
+        }
 
 
     protected:
@@ -117,6 +145,9 @@ class PainterImpl
         mutable std::wstring _text;
         std::list<std::string> _fontNamesList;
 				Ui::RenderMode::Type _renderMode;
+        Ui::RectF _clip;
+        Ui::PointF _origin;
+        Screen& _screen;
 
     private:
         static DWORD toGdiPenStyle( const Ui::Pen& pen );

@@ -233,6 +233,8 @@ class PT_HMI_API Widget : public Pt::Connectable
 
 	public:
 		virtual void onPointerLeaved();
+		virtual void onPointerInput(const PointerEvent& ev);		
+    virtual void onKeyInput(const KeyEvent& ev);
 
 	protected:
 		virtual void onInvalidate();
@@ -241,8 +243,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 
 		virtual void onLayout( PaintSurface& surface );
 
-		virtual void onPointerInput(const PointerEvent& ev);		
-		virtual void onKeyInput(const KeyEvent& ev);
+		
 
     virtual void onPointerEnter();		
 		

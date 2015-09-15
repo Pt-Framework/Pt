@@ -27,7 +27,7 @@
 #define PT_UI_RENDERPATH_H
 
 #include <Pt/Ui/Api.h>
-#include <Pt/Ui/RenderPathInfo.h>
+#include <Pt/Ui/RenderOp.h>
 #include <Pt/Types.h>
 #include <vector>
 
@@ -41,7 +41,7 @@ class PT_UI_API RenderPath
 
     virtual ~RenderPath();
 
-    void add( RenderPathInfo* info );
+    void add( RenderOp* info );
    
     void clear();
 
@@ -50,28 +50,34 @@ class PT_UI_API RenderPath
       return _path.size();
     }
 
-   RenderPathInfo* operator[]( size_t i ) 
+   RenderOp* operator[]( size_t i ) 
    {
      return _path[i];
    }
 
-   const RenderPathInfo* operator[]( size_t i ) const
+   const RenderOp* operator[]( size_t i ) const
    {
      return _path[i];
    }
 
-   RenderPathInfo* at( size_t i ) 
+   RenderOp* at( size_t i ) 
    {
      return _path.at(i);
    }
 
-   const RenderPathInfo* at( size_t i ) const
+   const RenderOp* at( size_t i ) const
    {
      return _path.at(i);
+   }
+
+   void addPath( const RenderPath& path )
+   {
+     for( size_t i = 0; i < path.size(); ++i)      
+       _path.push_back( path[i]->clone() );
    }
 
   private:
-    std::vector<RenderPathInfo*> _path;
+    std::vector<RenderOp*> _path;
   
 };
 

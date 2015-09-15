@@ -82,7 +82,7 @@ void Window::setSize(const Ui::SizeF& size)
 }
 	  	
 
-const std::vector<ChildWindow*>& Window::childWindows() const
+const std::vector<ChildWindow*> Window::childWindows() const
 {
 	return _windowManager.windows();
 }

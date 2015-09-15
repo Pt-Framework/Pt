@@ -36,6 +36,7 @@
 #include <Pt/Hmi/PositionEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/FocusEvent.h>
+#include <Pt/Hmi/Screen.h>
 #include "PaintSurfaceImpl.h"
 
 namespace Pt{
@@ -47,6 +48,7 @@ MainWindowImpl::MainWindowImpl(Window* window)
 , _app( Pt::Hmi::Application::instance() )
 , _forceTopMost( false )
 , _window( window )
+, _screen( _app.mainScreen() )
 {    
 	_pointerEvent.buttons().resize(3);      
 	_app.impl()->windowEvent() += Pt::slot(*this, &MainWindowImpl::onWindowEvent);  
@@ -346,7 +348,7 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
         break;			
     }
   
-     Ui::PointF p = _app.toUnit(Ui::Point(xPos, yPos));
+     Ui::PointF p = _screen.toUnit(Ui::Point(xPos, yPos));
     _pointerEvent.setX(p.x());
     _pointerEvent.setY(p.y());            
 
@@ -383,7 +385,7 @@ void MainWindowImpl::onPaint()
 
 void MainWindowImpl::setWindowPos(const Ui::PointF& pf)
 {
-  Ui::Point p = _app.fromUnit(pf);
+  Ui::Point p = _screen.fromUnit(pf);
   SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, SWP_DRAWFRAME|SWP_NOSIZE);
 }
 
@@ -402,7 +404,7 @@ void MainWindowImpl::activate()
 
 void MainWindowImpl::setWindowSize(const Ui::SizeF& sizef)
 {
-  Ui::Size size = _app.fromUnit(sizef);
+  Ui::Size size = _screen.fromUnit(sizef);
 
   RECT clientRect;
   SetRect(&clientRect, 0, 0, size.width() - 1, size.height() - 1);
@@ -562,12 +564,12 @@ void MainWindowImpl::setBorder(WindowBorder::Type p)
 
 void MainWindowImpl::setMinSize(const Ui::SizeF& s)
 {
-	_minSize = _app.fromUnit(s);
+	_minSize = _screen.fromUnit(s);
 }
 	
 void MainWindowImpl::setMaxSize(const Ui::SizeF& s)
 {
-	_maxSize = _app.fromUnit(s);			
+	_maxSize = _screen.fromUnit(s);			
 }
 
 void MainWindowImpl::showInTaskbar(bool p)

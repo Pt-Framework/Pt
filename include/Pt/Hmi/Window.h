@@ -72,7 +72,7 @@ class PT_HMI_API Window : public Widget
 
 		void removeChildWindow(ChildWindow& w);
 
-		const std::vector<ChildWindow*>& childWindows() const;
+		const std::vector<ChildWindow*> childWindows() const;
 
 		WindowManager& windowManager()
 		{

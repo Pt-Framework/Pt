@@ -56,11 +56,5 @@ void ApplicationImpl::nextEvent()
 	MainLoop::waitNext();
 }
 
-
-void ApplicationImpl::setCursor( const Hmi::Cursor* cursor )
-{	
-	Application::instance().mainScreen().impl()->Cursor = cursor == 0 ? Hmi::Cursor::defaultCursor() : *cursor;
-}
-
 }}
 

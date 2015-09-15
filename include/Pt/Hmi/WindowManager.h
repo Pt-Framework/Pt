@@ -48,6 +48,7 @@ class Window;
 class PointerEvent;
 class KeyEvent;
 class Application;
+class Screen;
 
 class WindowManager : public Pt::Connectable
 {
@@ -115,11 +116,12 @@ class WindowManager : public Pt::Connectable
 		Ui::PointF toClient(const ChildWindow* w, const Ui::PointF& p);  
     
 	private:
+		Application&              _app;  
+		Screen&										_screen;
 		Window&										_parent;
 		std::vector<ChildWindow*>	_windows;		
 		ResizeDirection::Type			_sizingDirection;
-		Ui::PointF								_lastSizePoint;
-    Application&              _app;  
+		Ui::PointF								_lastSizePoint;    
 		FocusEvent								_focusEvent;	
 		double										_borderWidth;
     Ui::Color						      _inactiveColor; 

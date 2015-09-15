@@ -93,6 +93,8 @@ namespace RenderMode
 	};
 }
 
+class RenderPath;
+
 class PT_UI_API Painter
 {
     public:						
@@ -423,6 +425,19 @@ class PT_UI_API Painter
           * of the image to be drawn at the specified position.
           */
         virtual void drawImage(const PointF& to, const Image& image, const Region& imageRegion) = 0;
+
+
+        virtual void drawPath( const RenderPath& path ) = 0;
+
+        virtual void setOrigin( const Ui::PointF& origin ) = 0;
+        
+        virtual const Ui::PointF& origin() const = 0;
+
+        virtual void flush() = 0;
+
+        virtual void setClip( const Ui::RectF& clip ) = 0;
+
+        virtual const Ui::RectF& clip() const = 0;
 };
 
 }} // namespace

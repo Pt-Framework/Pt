@@ -179,4 +179,34 @@ void Painter::setSurface(PaintSurface& surface)
   _impl->setSurface(surface);
 }
 
+void Painter::setClip( const Ui::RectF& rect)
+{
+  _impl->setClip( rect );
+}
+
+const Ui::RectF& Painter::clip() const
+{
+    return _impl->clip() ;
+}
+
+void Painter::setOrigin( const Ui::PointF& org )
+{
+  _impl->setOrigin( org );
+}
+
+const Ui::PointF& Painter::origin() const
+{
+  return _impl->origin();
+}
+
+void Painter::flush()
+{
+    _impl->flush();
+}
+
+void Painter::drawPath( const Ui::RenderPath& path )
+{
+  _impl->drawPath( path );
+}
+
 }}

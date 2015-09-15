@@ -27,6 +27,12 @@
 #ifndef Pt_Hmi_ScreenImpl_H
 #define Pt_Hmi_ScreenImpl_H
 
+#include <Pt/Ui/Size.h>
+#include <Pt/Ui/Point.h>
+#include <Pt/Ui/Rect.h>
+#include <Pt/Hmi/Cursor.h>
+#include <Windows.h>
+
 namespace Pt{
 namespace Hmi{
 
@@ -37,7 +43,52 @@ class ScreenImpl
 		virtual ~ScreenImpl();
 
 		double width() const;
+
 		double height() const;
+
+		double toUnit(int value);
+
+		Ui::PointF toUnit(const Ui::Point& value);
+
+		Ui::SizeF toUnit(const Ui::Size& value);
+
+		int fromUnit(double value);
+
+		Ui::Point fromUnit(const Ui::PointF& value);
+
+		Ui::Size fromUnit(const Ui::SizeF& value);
+
+		Ui::Rect fromUnit(const Ui::RectF& value);		
+
+		double unitSizeInch() const;
+
+		double unitSizeMm() const;
+
+		void setResolution(double dpi);
+
+		double resolutionDPI() const;
+		
+		void setCursor(const Cursor* cursor );
+
+		HCURSOR cursorHandle()
+    {
+      return 	_cursorHandle;
+    }
+
+private:
+    Ui::Size screeResolution();
+    static HBITMAP createImage888(const Pt::uint8_t* data, size_t width, size_t height);
+
+  private:
+    Ui::Size _size;
+		double _factorX;
+		double _offsetX;
+		double _factorY;
+		double _offsetY;
+		double _width;
+		double _height;
+		double _dpi;
+	  HCURSOR _cursorHandle;
 };
 
 }}

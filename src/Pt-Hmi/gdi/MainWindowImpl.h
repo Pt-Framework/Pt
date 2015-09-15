@@ -44,6 +44,7 @@ namespace Hmi{
 
 class Application;
 class Window;
+class Screen;
 
 class MainWindowImpl : public Pt::Connectable
 {
@@ -115,6 +116,7 @@ private:
 	bool													_forceTopMost;
 	Ui::Size                 _minSize;
 	Ui::Size                 _maxSize;
+  Screen&                  _screen; 
 };
 
 }}

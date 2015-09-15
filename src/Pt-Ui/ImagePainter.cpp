@@ -408,5 +408,11 @@ void ImagePainter::drawImage( const  PointF& to, const Image& sourceImage, const
 }
 
 
+void ImagePainter::drawPath( const RenderPath& path )
+{  
+  for( size_t i = 0; i < path.size(); ++i )
+    path[i]->execute(  *this );  
+}
+
 }} //namespace
 

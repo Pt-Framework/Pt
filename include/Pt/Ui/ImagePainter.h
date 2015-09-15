@@ -39,6 +39,7 @@
 #include <Pt/Ui/Region.h>
 #include <Pt/Ui/ClipLine.h>
 #include <Pt/Ui/ClipPolygon.h>
+#include <Pt/Ui/RenderPath.h>
 #include <memory>
 
 
@@ -145,24 +146,32 @@ class PT_UI_API ImagePainter : public Painter
         virtual void drawImage(const  PointF& to, const Image& image,
                                const  Region& imageRegion);
 
-				void setClip( const RectF& rect)
+        virtual void drawPath( const RenderPath& path );
+        
+
+
+				virtual void setClip( const RectF& rect)
         {
           _clipRect = rect;
         }
 
-				const RectF& clip() const
+				virtual const RectF& clip() const
 				{
 					return _clipRect;
 				}
 
-        void setOrigin( const Ui::PointF& org )
+        virtual void setOrigin( const Ui::PointF& org )
         {
           _origin = org;
         }
 
-        const Ui::PointF& origin() const
+        virtual const Ui::PointF& origin() const
         {
             return _origin;
+        }
+
+        virtual void flush()
+        {
         }
 
     private:
@@ -209,3 +218,4 @@ class PT_UI_API ImagePainter : public Painter
 } //namespace Pt
 
 #endif
+

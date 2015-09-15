@@ -78,182 +78,19 @@ void Selector::processMessage()
 
 ApplicationImpl::ApplicationImpl()
 : Pt::System::EventLoop()
-, _dpi(96.0)
-, _cursorHandle(0)
 {
-	//FreeConsole();
+#ifndef _DEBUG  
+	FreeConsole();
+#endif
 
 	_instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
 
 	registerWindowClasses();
-
-	getScreeResolution(_screenWidth, _screenHeight);
-
-	_width  = _screenWidth * unitSizeInch()*_dpi;
-	_height = _screenHeight * unitSizeInch()*_dpi;
-	
-	_factorX = _width / _screenWidth;
-	_factorY = _height / _screenHeight;
-	_offsetX = 0;
-	_offsetY = 0;		
 }
 
 
 ApplicationImpl::~ApplicationImpl()
 {
-}
-
-
-void ApplicationImpl::setResolution(double dpi)
-{
-	_dpi = dpi;
-}
-
-
-double ApplicationImpl::resolutionDPI() const
-{
-	return _dpi;
-}
-
-
-int ApplicationImpl::fromUnit(double unit)
-{
-	return (int) (unit *unitSizeInch()* _dpi);
-}
-
-
-double ApplicationImpl::toUnit(int unit)
-{
-	return unitSizeInch()/_dpi * unit;
-}
-
-
-Ui::PointF ApplicationImpl::toUnit(const Ui::Point& value)
-{
-	const double x = value.x() * _factorX  + _offsetX;
-	const double y = value.y() * _factorY  + _offsetY;
-
-	return Ui::PointF(std::ceil(x),std::ceil(y));
-}
-
-
-Ui::SizeF ApplicationImpl::toUnit(const Ui::Size& value)
-{
-	const double width = value.width() * _factorX  + _offsetX;
-	const double height = value.height() * _factorY  + _offsetY;
-
-	return Ui::SizeF(std::ceil(width),std::ceil(height));
-}
-
-
-Ui::Point ApplicationImpl::fromUnit(const Ui::PointF& value)
-{
-	double factorX = _screenWidth / _width;
-	double factorY = _screenHeight / _height;
-	int x = (int) ( value.x() * factorX); 
-	int y = (int) ( value.y() * factorY);
-
-	return Ui::Point(x,y);
-}
-
-
-Ui::Size ApplicationImpl::fromUnit(const Ui::SizeF& value)
-{
-	double factorX = _screenWidth / _width;
-	double factorY = _screenHeight / _height;
-	int width = (int) ( value.width() * factorX); 
-	int height = (int) ( value.height() * factorY);
-	return Ui::Size(width,height);
-}
-
-
-Ui::Rect ApplicationImpl::fromUnit(const Ui::RectF& value)
-{
-	Ui::Rect rect(Ui::Point(value.x(), value.y()), Ui::Size(value.width(), value.height()));
-	return rect;
-}
-
-
-double ApplicationImpl::unitSizeInch() const
-{
-	return 1.0/96.0;
-}
-
-
-double ApplicationImpl::unitSizeMm() const
-{
-	return 25.4 * unitSizeInch();
-}
-
-
-HBITMAP ApplicationImpl::createImage888(const Pt::uint8_t* data, size_t width, size_t height)
-{
-	HDC hDC        = ::GetDC(NULL);
-	HDC hMainDC    = ::CreateCompatibleDC(hDC); 
-
-	BITMAPINFO bitmapInfo;
-	ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
-
-	bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER); // Size of this struct.
-	bitmapInfo.bmiHeader.biWidth       = width;             // Bitmap width.
-	bitmapInfo.bmiHeader.biHeight      = -(ssize_t)height;  // Bitmap height. Negative value = top-down image.
-	bitmapInfo.bmiHeader.biPlanes      = 1;                 // Always 1.
-	bitmapInfo.bmiHeader.biBitCount    = 32;                // We internally use a 32-bit bitmap.
-	bitmapInfo.bmiHeader.biCompression = BI_RGB;            // Uncompressed (top-down) RGB bitmap.
-	bitmapInfo.bmiHeader.biSizeImage   = 0;                 // 0 = automatic for BI_RGB-images.
-	bitmapInfo.bmiHeader.biClrUsed     = 0;                 // 0 = No color table.
-	bitmapInfo.bmiHeader.biClrImportant= 0;                 // 0 = No color table.
-
-	VOID* imageBits;
-	HBITMAP bitmap = CreateDIBSection(hMainDC, &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
-
-	memcpy(imageBits, data, width * height * 3);
-
-	::DeleteDC(hMainDC);
-	::ReleaseDC(NULL,hDC);
-
-	return bitmap;
-}
-
-void ApplicationImpl::setCursor(const Cursor* cursor)
-{	  
-	if( cursor == 0 )
-		return;
-
-	if( cursor->empty() )
-		return;
-
-  if( _cursorHandle != 0 )			
-		DestroyCursor( _cursorHandle );
-
-	HBITMAP andMask = createImage888( &cursor->andRgb888()[0], cursor->width(),  cursor->height() );
-	HBITMAP xorMask = createImage888( &cursor->xorRgb888()[0], cursor->width(),  cursor->height() );
-
-	ICONINFO iconInfo;
-
-	iconInfo.fIcon = false; 
-	iconInfo.xHotspot = cursor->xHotspot();
-	iconInfo.yHotspot = cursor->yHotspot();
-	iconInfo.hbmColor = xorMask;
-	iconInfo.hbmMask  = andMask;
-
-	_cursorHandle = CreateIconIndirect(&iconInfo);
-
-	if( _cursorHandle != 0 )
-	  SetCursor( _cursorHandle );	
-
-	DeleteObject( andMask );
-	DeleteObject( xorMask );
-}
-
-
-void ApplicationImpl::getScreeResolution(int& horizontal, int& vertical)
-{
-  const HWND hDesktop = GetDesktopWindow();
-  RECT desktop;   
-  GetWindowRect(hDesktop, &desktop);
-  horizontal = desktop.right;
-  vertical = desktop.bottom;
 }
 
 

@@ -23,70 +23,54 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_UI_TEXTPATHINFO_H
-#define PT_UI_TEXTPATHINFO_H
+#ifndef PT_HMI_SURFACEOP_H
+#define PT_HMI_SURFACEOP_H
 
-#include <Pt/Ui/RenderPathInfo.h>
-#include <Pt/Ui/Pen.h>
+#include <Pt/Ui/RenderOp.h>
+#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Ui/Point.h>
-#include <Pt/Ui/Font.h>
-#include <Pt/String.h>
+#include <Pt/Ui/Size.h>
 
 namespace Pt {
-namespace Ui {
+namespace Hmi {
 
-class TextPathInfo : public RenderPathInfo
+class SurfaceOp : public Ui::RenderOp
 {  
   public:
-    TextPathInfo( const Ui::Pen& pen, const Ui::PointF& to,  const Ui::Font& font, const Pt::String& text,  const Ui::Color* outline)
-    : RenderPathInfo( RenderPathInfo::DrawText )       
-    , _pen(pen)
-    , _to(to)
-    , _text(text)
-    , _font(font)
+    SurfaceOp( const PaintSurface& surface, const Ui::PointF& to, const Ui::Region* pmRegion = 0 )
+    : _surface(surface)
+    , _to(to)     
     {
-       if( outline != 0 )
-        _outline = *outline;
-       else
-         _outline.setAlpha( -1.0f);
+      if( pmRegion != 0)
+        _region = *pmRegion;
+      else
+        _region.setLeft(-1);
     }
 
-    const Ui::Pen& pen() const
-    {
-      return _pen;
+    virtual void execute( Ui::Painter& painter ) const
+    {             
+        //ToDo:  _region
+        const Ui::SizeF  size( _surface.size().width(),_surface.size().height() );
+        const Ui::PointF absolutPos  = painter.origin() + _to;
+				Ui::Painter&     surfacePainter   = _surface.painter();
+
+        surfacePainter.setOrigin( absolutPos );
+        surfacePainter.setClip( Ui::RectF( absolutPos, size ) );        
+        surfacePainter.flush();
     }
 
-
-    const Ui::PointF& to() const
+    virtual Ui::RenderOp* clone() const
     {
-      return _to;
-    }
+      if( _region.left() == -1 )
+        return new SurfaceOp( _surface, _to, 0 ); 
 
-
-    const String& text() const
-    {
-        return _text;
-    }
-
-    const Ui::Color* outline() const
-    {
-        if( _outline.alpha() == -1.0f )
-            return 0;
-
-        return &_outline;
-    }
-
-    const Ui::Font& font() const
-    {
-        return _font;
+      return new SurfaceOp( _surface, _to, &_region );
     }
 
   private:
-     Ui::Pen    _pen;     
+     mutable PaintSurface _surface;
      Ui::PointF _to;
-     String     _text;
-     Ui::Color  _outline;  
-     Ui::Font   _font;
+     Ui::Region _region;
 };
 
 }}

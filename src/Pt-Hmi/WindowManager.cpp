@@ -40,9 +40,10 @@ namespace Pt {
 namespace Hmi {
 
 WindowManager::WindowManager(Window& parent)
-: _parent( parent )
+: _app( Application::instance() )
+, _parent( parent )
+, _screen( _app.mainScreen() )
 , _sizingDirection( ResizeDirection::No )
-, _app( Application::instance() )
 , _borderWidth(5)
 , _moving(false)
 , _inactiveColor(0.8f, 0.8f, 0.8f)
@@ -480,44 +481,44 @@ ResizeDirection::Type WindowManager::isSizing( const ChildWindow* w, const Pt::H
 	{
 		if(localPos.x() < border && localPos.y() <  border)
 		{//Corner NW
-			_app.setCursor( &Cursor::sizeNWSECursor() );
+			_screen.setCursor( &Cursor::sizeNWSECursor() );
 			resizeDir = ResizeDirection::NorthWest;
 		}	
 		else if(localPos.x() > sizeR && localPos.y() < border)
 		{//corner NE
-			_app.setCursor( &Cursor::sizeNESWCursor() );
+			_screen.setCursor( &Cursor::sizeNESWCursor() );
 			resizeDir = ResizeDirection::NorthEast;
 		}
 		else if(localPos.x() < border && localPos.y() > sizeB )
 		{//corner SW
-			_app.setCursor( &Cursor::sizeNESWCursor() );					
+			_screen.setCursor( &Cursor::sizeNESWCursor() );					
 			resizeDir = ResizeDirection::SouthWest;
 		}
 		else if(localPos.x() > sizeR &&  localPos.y() > sizeB )
 		{//corner SE          
-			_app.setCursor( &Cursor::sizeNWSECursor() );
+			_screen.setCursor( &Cursor::sizeNWSECursor() );
 			resizeDir = ResizeDirection::SouthEast;
 		}
 		else
 		{
 			if( localPos.x() < border)				
 			{//West            
-				_app.setCursor( &Cursor::sizeWECursor() );
+				_screen.setCursor( &Cursor::sizeWECursor() );
 				resizeDir = ResizeDirection::West;
 			}
 			else if(localPos.x() > sizeR )
 			{//East
-				_app.setCursor( &Cursor::sizeWECursor() );
+				_screen.setCursor( &Cursor::sizeWECursor() );
 				resizeDir = ResizeDirection::East;
 			}
 			else if( localPos.y() < border)
 			{//North
-				_app.setCursor( &Cursor::sizeNSCursor() );
+				_screen.setCursor( &Cursor::sizeNSCursor() );
 				resizeDir = ResizeDirection::North;
 			}
 			else if(localPos.y() > sizeB)
 			{//South
-				_app.setCursor( &Cursor::sizeNSCursor() );
+				_screen.setCursor( &Cursor::sizeNSCursor() );
 				resizeDir = ResizeDirection::South;			
 			}
 		}
@@ -567,7 +568,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 		_sizingDirection = ResizeDirection::No;
 		_moving = false;
     _pointerLastState = pointerEvent.buttons()[_actionButton].state();        
-    _app.setCursor( &(_parent.Cursor.get()) );
+    _screen.setCursor( &(_parent.Cursor.get()) );
 		return false;
 	}
 
@@ -582,7 +583,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 		if( !updateActive( pointerEvent ) )
 		{
       _pointerLastState = pointerEvent.buttons()[_actionButton].state();
-      _app.setCursor( &(_parent.Cursor.get()) );      
+      _screen.setCursor( &(_parent.Cursor.get()) );      
 			return false;
 		}		
 	}
@@ -594,7 +595,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 		_sizingDirection = ResizeDirection::No;
 		_moving = false;
     _pointerLastState = pointerEvent.buttons()[_actionButton].state();    
-    _app.setCursor( &(_parent.Cursor.get()) );
+    _screen.setCursor( &(_parent.Cursor.get()) );
     
 		return false;
 	}

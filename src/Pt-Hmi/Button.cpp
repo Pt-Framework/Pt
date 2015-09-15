@@ -38,7 +38,7 @@ Button::Button()
 , _timeout(false)
 , _pressCounter(0)
 , PT_HMI_INIT_PROPERTY_VALUE(ButtonState,Pt::Hmi::DeviceButton::Released)
-, PT_HMI_INIT_PROPERTY_VALUE(Armed,false)
+, PT_HMI_INIT_PROPERTY_VALUE(Hover,false)
 , PT_HMI_INIT_PROPERTY_VALUE(ButtonType,Pt::Hmi::ButtonType::Press)
 , PT_HMI_INIT_PROPERTY_VALUE(DoublePressTimeInMs,1500)
 , PT_HMI_INIT_PROPERTY_VALUE(Image,Ui::Image(0,0))
@@ -253,9 +253,9 @@ void Button::onPointerInput(const PointerEvent& ev)
     
 	if( !contains(point) )
 	{
-		if( Armed.get() )
+		if( Hover.get() )
     {
-			Armed = false;
+			Hover = false;
       invalidate();
     }
 
@@ -266,9 +266,9 @@ void Button::onPointerInput(const PointerEvent& ev)
     
 	bool genOutput = false;
 
-	if(!Armed.get())
+	if(!Hover.get())
 	{
-		Armed = true;    
+		Hover = true;    
 		genOutput = true;
 	}
 
@@ -360,7 +360,7 @@ void Button::onRender(PaintSurface& paintSurface)
   Ui::SizeF  size = clientSize();
   Ui::PointF pos  = clientPos();
        
-	if( Armed.get() || isWidgetFocused() )
+	if( Hover.get() || isWidgetFocused() )
 	{
 		size.addHeight(-5);
 		size.addWidth(-5);
