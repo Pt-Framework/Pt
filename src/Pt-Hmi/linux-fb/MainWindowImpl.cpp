@@ -73,9 +73,7 @@ void MainWindowImpl::onInvalidate()
 void MainWindowImpl::onRender(PaintSurface& paintSurface)
 {
   _apiWindow->render();
-  _apiWindow->windowManager().render();
-  Painter& painter = paintSurface.painter();
-  painter.drawSurface( Ui::PointF( 0,0 ), _apiWindow->surface() );
+  _apiWindow->windowManager().render();  
 }
 
 
@@ -95,6 +93,8 @@ void MainWindowImpl::destroy()
 
 void MainWindowImpl::render()
 {
+  Painter& painter = surface().painter();
+  painter.drawSurface( Ui::PointF( 0,0 ), _apiWindow->surface() );
 	_app.mainScreen().impl()->invalidate();
 }
 

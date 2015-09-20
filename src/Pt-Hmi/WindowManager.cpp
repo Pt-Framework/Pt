@@ -236,8 +236,7 @@ void WindowManager::render()
 		if( !w->Visible.get() )
    		  continue;		
 
-		const Ui::PointF clientPos = renderFrame(w);				
-		w->windowManager().render();    
+		const Ui::PointF clientPos = renderFrame(w);						  
 		painter.drawSurface( clientPos, w->surface() );
 	}
 }
