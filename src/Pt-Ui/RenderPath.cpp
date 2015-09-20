@@ -94,13 +94,13 @@ void RenderPath::translate( double x, double y )
 
 
 void RenderPath::clip( const RectF& clipRect )
-{
-  ClipPolygon clipper;
-
+{  
   for( size_t i = 0; i < _path.size(); ++i )
   {
       if( _path[i]->outline().empty() )
         continue;
+
+      ClipPolygon clipper;
 
       clipper.clip( _path[i]->outline(), clipRect );
   }
