@@ -74,6 +74,8 @@ void MainWindowImpl::onRender(PaintSurface& paintSurface)
 {
   _apiWindow->render();
   _apiWindow->windowManager().render();
+  Painter& painter = paintSurface.painter();
+  painter.drawSurface( Ui::PointF( 0,0 ), _apiWindow->surface() );
 }
 
 
