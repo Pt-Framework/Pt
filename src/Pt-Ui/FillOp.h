@@ -67,6 +67,11 @@ class FillOp : public RenderOp
        return new FillOp( *this );
     }
 
+    virtual std::string name() const
+    {
+      return "fill";
+    }
+
   private:
     Brush _brush;
 };

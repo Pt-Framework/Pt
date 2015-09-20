@@ -77,6 +77,8 @@ class PT_UI_API RenderPath
 
     void render( Painter& painter ) const;
 
+    void print() const;
+
   private:
     std::vector<RenderOp*> _path;      
 };
