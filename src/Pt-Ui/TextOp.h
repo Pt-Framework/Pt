@@ -56,6 +56,9 @@ class TextOp : public RenderOp
 
     virtual void execute( Painter& painter ) const 
     {
+       if( outline().empty() )
+          return;
+
         painter.setPen( _pen );
         painter.setFont( _font );        
         
