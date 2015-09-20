@@ -79,22 +79,44 @@ void PainterImpl::drawEllipse( const Ui::PointF& topLeft, const Ui::SizeF& size 
 
 void PainterImpl::drawRect( const Ui::RectF& rect )
 {
-  Ui::ClipPolygon clipper;
-
   std::vector<Ui::PointF> points;
+  
+  Ui::ClipLine clipper;
 
-  points.push_back( rect.topLeft() );
-  points.push_back( rect.topRight() );
-  points.push_back( rect.bottomRight() );
-  points.push_back( rect.bottomLeft() );
+  Ui::PointF p1 = rect.topLeft();  
+  Ui::PointF p2 = rect.topRight();  
+  
+  clipper.clip(p1, p2, 0,  _surface->size().width(), 0,  _surface->size().height()  );
+  
+  points.push_back( p1 );
 
-  clipper.clip( points, Ui::RectF( Ui::PointF(0,0), Ui::SizeF( _surface->size().width(), _surface->size().height() )  ) );
+  p1 = rect.topRight();  
+  p2 = rect.bottomRight();  
+  
+  clipper.clip(p1, p2, 0,  _surface->size().width(), 0,  _surface->size().height()  );
+ 
+  points.push_back( p2 );
 
-  if( !points.empty() )
-  {
-    points.push_back( points[0] );
-    _surface->path().stroke( _pen, &points[0], points.size() );
-  }
+  p1 = rect.bottomRight();  
+  p2 = rect.bottomLeft();  
+  
+  clipper.clip(p1, p2, 0,  _surface->size().width(), 0,  _surface->size().height()  );
+
+  points.push_back( p2 );
+
+  p1 = rect.bottomLeft();  
+  p2 = rect.topLeft();  
+  
+  clipper.clip(p1, p2, 0,  _surface->size().width(), 0,  _surface->size().height()  );
+
+  points.push_back( p2 );
+
+  if( points.empty() )
+    return;
+  
+   points.push_back( points[0] );
+
+   _surface->path().stroke( _pen, &points[0], points.size() ); 
 }
 
 
