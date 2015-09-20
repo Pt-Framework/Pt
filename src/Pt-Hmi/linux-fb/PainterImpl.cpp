@@ -100,11 +100,24 @@ void PainterImpl::drawRect( const Ui::RectF& rect )
 
 void PainterImpl::drawPolyline( const Ui::PointF* pt, const size_t pointCount )
 {
-  Ui::ClipPolygon clipper;
+  if( pointCount < 2)
+      return;
 
-  std::vector<Ui::PointF> points( pt, pt + pointCount );
+  std::vector<Ui::PointF> points;
+  
+  Ui::PointF p2;  
 
-  clipper.clip( points, Ui::RectF( Ui::PointF(0,0), Ui::SizeF( _surface->size().width(), _surface->size().height() )  ) );
+  for( size_t i = 1; i < pointCount; ++i )
+  {
+    Ui::PointF p1 = pt[i - 1];
+    p2 = pt[i];    
+
+    Ui::ClipLine clipper;
+    clipper.clip(p1, p2, 0,  _surface->size().width(), 0,  _surface->size().height()  );
+    points.push_back( p1 );
+  }
+
+   points.push_back( p2 );
 
    _surface->path().stroke( _pen, &points[0], points.size() );
 }

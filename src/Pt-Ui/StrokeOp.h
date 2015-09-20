@@ -67,6 +67,9 @@ class StrokeOp : public RenderOp
 
     virtual void execute( Painter& painter ) const 
     {
+        if( outline().empty() )
+          return;
+
         painter.setPen( _pen );
         painter.drawPolyline( &outline()[0], outline().size() );
     }
