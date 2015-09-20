@@ -45,6 +45,24 @@ RenderPath::~RenderPath()
 }
 
 
+RenderPath::RenderPath(const RenderPath& p)
+{
+  for( size_t i = 0; i < p.size(); ++i )
+    _path.push_back( p._path[i]->clone() );
+}
+
+
+RenderPath& RenderPath::operator=(const RenderPath& p)
+{
+  clear();
+
+  for( size_t i = 0; i < p.size(); ++i )
+    _path.push_back( p._path[i]->clone() );
+
+  return *this;
+}
+
+
 void RenderPath::clear()
 {
   for( size_t i = 0; i < _path.size(); ++i )

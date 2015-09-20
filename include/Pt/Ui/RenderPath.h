@@ -42,6 +42,10 @@ class PT_UI_API RenderPath
   public:
     RenderPath();
 
+    RenderPath(const RenderPath& p);
+
+    RenderPath& operator=(const RenderPath& p);
+
     virtual ~RenderPath();
   
     void clear();
