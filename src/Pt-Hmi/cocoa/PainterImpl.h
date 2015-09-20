@@ -77,13 +77,9 @@ class PainterImpl
 
         const std::list<std::string>& fontFamilyNames();
 
-        virtual void drawPixel(const Gfx::PointF& to);
-
         virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
 
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& text);
-    
-        void drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline );
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& text);           
 
         virtual void drawRect(const Gfx::RectF& rect);
 

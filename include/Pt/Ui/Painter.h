@@ -213,15 +213,6 @@ class PT_UI_API Painter
           */
         virtual const std::list<std::string>& fontFamilyNames() = 0;
 
-        /**
-          * @brief Draws a single pixel at the specified position.
-          *
-          * The current pen color of this painter is used to draw the pixel.
-          *
-          * @param to The pixel is drawn at this point.
-          * @see setPen()
-          */
-        virtual void drawPixel(const PointF& to) = 0;
 
         /**
           * @brief Draws a line between the two given points, excluding the last point.
@@ -251,7 +242,7 @@ class PT_UI_API Painter
           * @see setPen()
           * @see setFont()
           */
-        virtual void drawText( const PointF& to, const Pt::String& Text, const Color* outline = 0 ) = 0;
+        virtual void drawText( const PointF& to, const Pt::String& Text ) = 0;
 
         /**
           * @brief Draws a rectangle outline.
@@ -400,44 +391,9 @@ class PT_UI_API Painter
           */
         virtual void drawImage(const PointF& to, const Image& image) = 0;
 
-        /**
-          * @brief Draws a rectangle segment of an image at the given position.
-          *
-          * An image segment in the size and at the position of the specified region (imageRegion)
-          * is "cut out" of the given image (image) before it is drawn at the specified position (to).
-          * The coordinates of the Region object are relative to the image's top-left corner and in the
-          * image's coordinate space.
-          *
-          * The image is automatically converted to this painter's color space. The given coordinates
-          * may lay outside of the painter's drawing area. The image will then be clipped. The given
-          * coordinates may be negative. Only the part of the image which are still on the painter's
-          * area are drawn.
-          *
-          * The image segment is drawn left to right and top to bottom. The specified position is
-          * the top-left corner of the cut-out image segment in this painter's coordinate space.
-          *
-          * To not only draw a part of this image, but all of it, use the method
-          * drawImage(const PointF& to, const Image& image);
-          *
-          * @param to The x|y-position to where the image semgnet should be drawn on the painter's area.
-          * @param image The image of which a segment specified by 'imageRect' should to be drawn.
-          * @param imageRegion Specifies the position and size of the segment that is to be cut out
-          * of the image to be drawn at the specified position.
-          */
-        virtual void drawImage(const PointF& to, const Image& image, const Region& imageRegion) = 0;
-
-
         virtual void drawPath( const RenderPath& path ) = 0;
 
-        virtual void setOrigin( const Ui::PointF& origin ) = 0;
-        
-        virtual const Ui::PointF& origin() const = 0;
-
         virtual void flush() = 0;
-
-        virtual void setClip( const Ui::RectF& clip ) = 0;
-
-        virtual const Ui::RectF& clip() const = 0;
 };
 
 }} // namespace

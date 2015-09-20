@@ -112,9 +112,6 @@ class PT_UI_API ImagePainter : public Painter
         virtual const std::list<std::string>& fontFamilyNames();
 
         //!@see Pt::Ui::Painter
-        virtual void drawPixel(const  PointF& to);
-
-        //!@see Pt::Ui::Painter
         virtual void drawLine(const  PointF& from, const  PointF& to);
 
         //!@see Pt::Ui::Painter
@@ -147,44 +144,7 @@ class PT_UI_API ImagePainter : public Painter
                                const  Region& imageRegion);
 
         virtual void drawPath( const RenderPath& path );
-        
-
-
-				virtual void setClip( const RectF& rect)
-        {
-          _clipRect = rect;
-        }
-
-				virtual const RectF& clip() const
-				{
-					return _clipRect;
-				}
-
-        virtual void setOrigin( const Ui::PointF& org )
-        {
-          _origin = org;
-        }
-
-        virtual const Ui::PointF& origin() const
-        {
-            return _origin;
-        }
-
-        virtual void flush()
-        {
-        }
-
-    private:
-      Ui::PointF fromOrigin( const Ui::PointF& p )
-      {
-          return _origin + p;
-      }
-
-      Ui::RectF fromOrigin( const Ui::RectF& r )
-      {
-        return Ui::RectF( _origin + r.origin(), r.size() );
-      }
-
+            
 
     private:
         Image&               _image;
@@ -207,8 +167,6 @@ class PT_UI_API ImagePainter : public Painter
         FillSolid*           _fillSolid;
         FillTexture*         _fillTexture;
 				RenderMode::Type     _renderMode;
-				RectF                 _clipRect;
-        Ui::PointF           _origin;
         ClipPolygon          _clipPolygon;
         ClipLine             _clipLine;
 };

@@ -69,11 +69,7 @@ public:
 
     virtual int depth() const;
 
-    virtual void drawPixel(const Ui::PointF& to);
-
     virtual void drawLine(const Ui::PointF& from, const Ui::PointF& to);
-
-	  virtual void drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline );
 
     virtual void drawText(const Ui::PointF& to, const Pt::String& Text);
 
@@ -89,29 +85,15 @@ public:
 
     virtual void fillPolygon(const Ui::PointF* points, const size_t pointCount);
 
-    virtual void drawSurface(const Ui::PointF& to, PaintSurface& pm, const Ui::Region& pmRegion);
-
-    virtual void drawSurface(const Ui::PointF& to, PaintSurface& pm);
+    virtual void drawSurface(const Ui::PointF& to, const PaintSurface& pm);
 		
     virtual void drawImage(const Ui::PointF& to, const Ui::Image& image);
-
-    virtual void drawImage(const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion);      
 
     virtual void drawPath( const Ui::RenderPath& path );
 
     virtual void addFontName(const std::string& fontName);
-
-		virtual void setClip( const Ui::RectF& rect);
-
-		virtual const Ui::RectF& clip() const;
-
-    virtual void setOrigin( const Ui::PointF& org );
-
-    virtual const Ui::PointF& origin() const;
     
-    virtual void flush();
-
-    
+    virtual void flush();    
 
     void setSurface(PaintSurface& surface);    
     

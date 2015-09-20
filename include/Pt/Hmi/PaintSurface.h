@@ -56,6 +56,11 @@ class PT_HMI_API PaintSurface
 		{
 			return _impl;
 		}
+		
+    inline const PaintSurfaceImpl* impl() const
+		{
+			return _impl;
+		}
 
 	private:
 		PaintSurfaceImpl*	_impl;

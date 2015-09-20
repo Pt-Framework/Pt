@@ -23,46 +23,46 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_HMI_LINEPATH_H
-#define PT_HMI_LINEPATH_H
+#ifndef PT_UI_TEXTEOP_H
+#define PT_UI_TEXTEOP_H
 
-#include <Pt/Hmi/RenderPath.h>
-#include <Pt/Ui/Pen.h>
-#include <Pt/Ui/Point.h>
+#include "RenderOp.h"
 
 namespace Pt {
-namespace Hmi {
+namespace Ui {
 
-class LinePath : public RenderPath
-{  
-  public:
-    LinePath( const Ui::Pen& pen, const Ui::PointF& from, const Ui::PointF& to)
-    : RenderPath( RenderPath::DrawLine )   
-    , _pen(pen)
-    , _from(from)
-    , _to(to)
+class TextOp : public RenderOp
+{
+  public:    
+    
+    TextOp( const Pen& pen, const Font& font, const PointF& to, const Pt::String& text )
+    : _pen( _pen )
+    , _font( font ) 
+    , _to( to )
+    , _text( text )
     {
+      outline().push_back( to );
+      //ToDO: text outline measurement.
     }
 
-    const Ui::Pen& pen() const
+    virtual void execute( Painter& painter ) const 
     {
-      return _pen;
+        painter.setPen( _pen );
+        painter.setFont( _font );        
+        //Todo: clip to new outline
+        painter.drawText( _to, _text );        
     }
 
-    const Ui::PointF& from() const
+    virtual RenderOp* clone()  const 
     {
-      return _from;
-    }
-
-    const Ui::PointF& to() const
-    {
-      return _to;
+       return new TextOp( _pen, _font, outline()[0],  _text );
     }
 
   private:
-     Ui::Pen    _pen;
-     Ui::PointF _from;
-     Ui::PointF _to;
+    Pen _pen;
+    Font _font;
+    PointF _to;
+    Pt::String _text;
 };
 
 }}

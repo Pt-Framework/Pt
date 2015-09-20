@@ -127,6 +127,9 @@
     <Filter Include="Pt-Ui\freetype\src">
       <UniqueIdentifier>{54f00d44-dcee-4751-959b-6840181170ca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Ui\RenderPath">
+      <UniqueIdentifier>{c799c5dd-0269-4c57-afb2-faf122678d8b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1326,44 +1329,26 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\RenderPath.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\EllipseOp.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\FillEllipseOp.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\FillPolygonOp.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\FillRectOp.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\ImageOp.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\LineOp.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\PolylineOp.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\RectOp.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\RenderOp.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\TextOp.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\WindowTitleBar.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\PathOp.h">
-      <Filter>Pt-Ui</Filter>
+    <ClInclude Include="..\..\include\Pt\Ui\RenderPath.h">
+      <Filter>Pt-Ui\RenderPath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ui\FillOp.h">
+      <Filter>Pt-Ui\RenderPath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ui\ImageOp.h">
+      <Filter>Pt-Ui\RenderPath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ui\RenderOp.h">
+      <Filter>Pt-Ui\RenderPath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ui\StrokeOp.h">
+      <Filter>Pt-Ui\RenderPath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Ui\TextOp.h">
+      <Filter>Pt-Ui\RenderPath</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2610,11 +2595,11 @@
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\RenderPath.cpp">
-      <Filter>Pt-Ui</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\WindowTitleBar.cpp">
       <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Ui\RenderPath.cpp">
+      <Filter>Pt-Ui\RenderPath</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

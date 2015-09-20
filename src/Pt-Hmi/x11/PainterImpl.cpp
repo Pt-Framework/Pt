@@ -122,10 +122,6 @@ void PainterImpl::setSurface(PaintSurface& surface)
 }
 
 
-void PainterImpl::drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline )
-{
-    drawText(to, text);
-}
 
 
 long PainterImpl::toXColor(const Gfx::ARgbColor& color)
@@ -405,14 +401,6 @@ int PainterImpl::depth() const
 {
     Display* display = Application::instance().impl()->display();
     return XDefaultDepth(display, XDefaultScreen(display));
-}
-
-
-void PainterImpl::drawPixel(const Pt::Gfx::PointF& toF)
-{
-    Pt::Gfx::Point to = Application::instance().fromUnit(toF);
-    Display* display = Application::instance().impl()->display();
-    XDrawPoint( display, drawable(), _penGc, to.x(), to.y() );
 }
 
 void PainterImpl::drawLine(const Pt::Gfx::PointF& fromF, const  Pt::Gfx::PointF& toF)

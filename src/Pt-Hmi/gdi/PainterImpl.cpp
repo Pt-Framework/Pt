@@ -59,13 +59,6 @@ PainterImpl::~PainterImpl()
 }
 
 
-void PainterImpl::drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline )
-{
-	//Todo: implement outline    
-    drawText(to, text);
-}
-
-
 void PainterImpl::setRenderMode( Ui::RenderMode::Type mode )
 {
 	_renderMode = mode;
@@ -397,14 +390,6 @@ int PainterImpl::depth() const
 }
 
 
-void PainterImpl::drawPixel(const Ui::PointF& toF)
-{
-  Ui::Point to = _screen.fromUnit(toF);    
-    
-	SetPixel( _surface->deviceContext(), to.x(), to.y(), RGB(_pen.color().red() *255, _pen.color() .green()*255, _pen.color().blue() * 255) );
-}
-
-
 void PainterImpl::drawLine(const Ui::PointF& fromF, const  Ui::PointF& toF)
 {
 	if (_pen.size() == 0) 
@@ -457,7 +442,7 @@ void PainterImpl::drawRect(const Ui::RectF& rectF)
 	{
         // Windows does not paint outline rectangles with a size of 1,1. For compatibility
         // to other windowing systems we draw a pixel (1|1) instead.
-        drawPixel(rectF.topLeft());
+        drawLine(rectF.topLeft(), rectF.topLeft());
         return;
     }
 
@@ -541,18 +526,7 @@ void PainterImpl::fillPolygon(const Ui::PointF* points, const size_t pointCount)
 }
 
 
-void PainterImpl::drawSurface(const Ui::PointF& toF, PaintSurface& surface, const  Ui::Region& pixmapRegion)
-{
-
-	Ui::Point to = _screen.fromUnit(toF);
-
-  // Copy contents from the source bitmap to the destination (=new) bitmap.
-  BitBlt( _surface->deviceContext(), to.x(), to.y(), pixmapRegion.width(), pixmapRegion.height(),
-          surface.impl()->deviceContext(), pixmapRegion.x(), pixmapRegion.y(), SRCCOPY );
-
-}
-
-void PainterImpl::drawSurface(const Ui::PointF& toF, PaintSurface& surface)
+void PainterImpl::drawSurface(const Ui::PointF& toF, const PaintSurface& surface)
 {
 
 	Ui::Point to = _screen.fromUnit(toF);
@@ -565,16 +539,6 @@ void PainterImpl::drawImage(const Ui::PointF& toF, const Ui::Image& image)
 {
 	Ui::Point to = _screen.fromUnit(toF);
 
-	const size_t depth = image.format().pixelSize() * 8; 
-
-	drawCompatibleImage(to.x(), to.y(), depth,  (const char*) image.pixel(0,0), image.width(), image.height() );
-}
-
-void PainterImpl::drawImage(const Ui::PointF& toF, const Ui::Image& image, const  Ui::Region& imageRegion)
-{
-	Ui::Point to = _screen.fromUnit(toF);
-
-	//Todo: impl region
 	const size_t depth = image.format().pixelSize() * 8; 
 
 	drawCompatibleImage(to.x(), to.y(), depth,  (const char*) image.pixel(0,0), image.width(), image.height() );
@@ -642,8 +606,7 @@ void PainterImpl::setSurface(PaintSurface& surface)
 
 void PainterImpl::drawPath( const Ui::RenderPath& path )
 {
-    for( size_t i = 0; i < path.size(); ++i )
-      path[i]->execute( *this );
+  path.render( *this );
 }
 
 }}

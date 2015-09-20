@@ -44,9 +44,7 @@ class PainterImpl
   public:
     PainterImpl( PaintSurfaceImpl* surface );
 		
-    virtual ~PainterImpl();
-  			 
-    void drawPixel( const Ui::PointF& to );
+    virtual ~PainterImpl();  			
 
     void drawLine( const Ui::PointF& from, const Ui::PointF& to );
     
@@ -60,9 +58,9 @@ class PainterImpl
 
     void drawEllipse( const Ui::PointF& topLeft, const Ui::SizeF& size );
 
-    void drawSurface( const Ui::PointF& to, PaintSurface& surface, const Ui::Region& pmRegion );
+    void drawSurface( const Ui::PointF& to, const PaintSurface& surface, const Ui::Region& pmRegion );
 
-    void drawSurface( const Ui::PointF& to, PaintSurface& surface );
+    void drawSurface( const Ui::PointF& to, const PaintSurface& surface );
 		
     void drawImage( const Ui::PointF& to, const Ui::Image& image );
 
@@ -84,26 +82,6 @@ class PainterImpl
 	}
 
   public:
-    void setClip( const Ui::RectF& rect )
-    {
-        _clip = rect ;
-    }    
-
-    const Ui::RectF& clip() const 
-    {
-      return _clip;
-    }
-
-    void setOrigin( const Ui::PointF& p )
-    {
-		_origin =  p;
-    }
-
-    const Ui::PointF& origin() const
-    {
-      return  _origin;
-    }
-
     void setPen( const Ui::Pen& pen )
     {
 	    _pen = pen;
@@ -161,10 +139,7 @@ class PainterImpl
 	  Ui::RenderMode::Type 	_renderMode;
 	  Ui::Font 				_font;
 	  Ui::Pen   			_pen;
- 	  Ui::Brush 			_brush;
-	  Ui::RectF 			_clip;
-	  Ui::PointF 			_origin;	
-	
+ 	  Ui::Brush 			_brush;	  
 };
 
 }}

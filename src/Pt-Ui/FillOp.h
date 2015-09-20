@@ -23,29 +23,47 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_UI_RENDERPATHOP_H
-#define PT_UI_RENDERPATHOP_H
+#ifndef PT_UI_FILLOP_H
+#define PT_UI_FILLOP_H
 
-#include <Pt/Ui/Painter.h>
+#include "RenderOp.h"
 
 namespace Pt {
 namespace Ui {
 
-class RenderOp
+class FillOp : public RenderOp
 {
-  public:
-    virtual ~RenderOp()
+  public:    
+    
+    FillOp(const Brush& brush, const PointF* points, size_t count )
+    : _brush( brush ) 
     {
+      outline().assign( points, points + count );
     }
 
-    virtual void execute( Ui::Painter& painter ) const = 0;
-
-    virtual RenderOp* clone() const = 0;
-
-  protected:
-    RenderOp()
+    FillOp(const Brush& brush, const RectF& rect )
+    : _brush( brush ) 
     {
+      outline().push_back( rect.topLeft() );
+      outline().push_back( rect.topRight() );
+      outline().push_back( rect.bottomRight() );
+      outline().push_back( rect.bottomLeft() );      
     }
+
+
+    virtual void execute( Painter& painter ) const 
+    {
+        painter.setBrush( _brush );
+        painter.fillPolygon( &outline()[0], outline().size() );
+    }
+
+    virtual RenderOp* clone()  const 
+    {
+       return new FillOp( _brush, &outline()[0], outline().size() );
+    }
+
+  private:
+    Brush _brush;
 };
 
 }}

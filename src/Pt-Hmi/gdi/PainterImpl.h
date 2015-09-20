@@ -64,13 +64,9 @@ class PainterImpl : public Ui::Painter
 
         const std::list<std::string>& fontFamilyNames();
 
-        int depth() const;
+        int depth() const;        
 
-        void drawPixel(const Ui::PointF& to);
-
-        void drawLine(const Ui::PointF& from, const Ui::PointF& to);
-
-				void drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline );
+        void drawLine(const Ui::PointF& from, const Ui::PointF& to);				
 
         void drawText(const Ui::PointF& to, const Pt::String& Text);
 
@@ -86,13 +82,9 @@ class PainterImpl : public Ui::Painter
 
         void fillPolygon(const Ui::PointF* points, const size_t pointCount);
 
-        void drawSurface(const Ui::PointF& to, PaintSurface& pm, const Ui::Region& pmRegion);
-
-        void drawSurface(const Ui::PointF& to, PaintSurface& pm);
+        void drawSurface(const Ui::PointF& to, const PaintSurface& pm);
 		
         void drawImage(const Ui::PointF& to, const Ui::Image& image);
-
-        void drawImage(const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion);
 
         void drawPath( const Ui::RenderPath& path );
 
@@ -100,32 +92,9 @@ class PainterImpl : public Ui::Painter
 
 				void setSurface(PaintSurface& surface);
 
-        void setOrigin( const Ui::PointF& origin )
-        {
-          _origin = origin;
-        }
-        
-        const Ui::PointF& origin() const
-        {
-            return _origin;
-        }
-
         void flush()
         {
-
         }
-
-        void setClip( const Ui::RectF& clip )
-        {
-          _clip = clip;
-        }
-
-
-        const Ui::RectF& clip() const
-        {
-            return _clip;
-        }
-
 
     protected:
         void drawCompatibleImage(size_t x, size_t y, size_t depth, const char* data, size_t width, size_t height);

@@ -79,11 +79,7 @@ class PainterImpl
 
         int depth() const;
 
-        void drawPixel(const Pt::Gfx::PointF& to);
-
         void drawLine(const Pt::Gfx::PointF& from, const Pt::Gfx::PointF& to);
-
-				void drawText( const Pt::Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline );
 
         void drawText(const Pt::Gfx::PointF& to, const Pt::String& Text);
 

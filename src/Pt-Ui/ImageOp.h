@@ -23,52 +23,42 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_UI_IMAGEPATHINFO_H
-#define PT_UI_IMAGEPATHINFO_H
+#ifndef PT_UI_IMAGEOP_H
+#define PT_UI_IMAGEOP_H
 
-#include <Pt/Ui/RenderPathInfo.h>
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Image.h>
+#include "RenderOp.h"
+#include <Pt/Ui/Painter.h>
 
 namespace Pt {
 namespace Ui {
 
-class ImagePathInfo : public RenderPathInfo
-{  
-  public:
-    ImagePathInfo( const Ui::Image& image, const Ui::PointF& to, const Ui::Region* pmRegion = 0 )
-    : RenderPathInfo( RenderPathInfo::DrawSurface )       
-    , _image(image)
-    , _to(to)     
+class ImageOp : public RenderOp
+{
+  public:        
+    ImageOp( const PointF& to, const Image& image )
+    : _to( to )
+    , _image( image )
     {
-      if( pmRegion != 0)
-        _region = *pmRegion;
-      else
-        _region.setLeft(-1);
+      outline().push_back( to );
+      outline().push_back( Ui::PointF(to.x()+ _image.width() , to.y() ) );
+      outline().push_back( Ui::PointF(to.x()+ _image.width() , to.y() + _image.height() ) );
+      outline().push_back( Ui::PointF(to.x() , to.y() + _image.height() ) );
+    }
+
+    virtual void execute( Painter& painter ) const 
+    {
+        painter.drawImage( _to, _image );   
     }
 
 
-    const Ui::PointF& to() const
+    virtual RenderOp* clone()  const 
     {
-      return _to;
+       return new ImageOp( _to, _image );
     }
-
-
-    const Ui::Region& region() const
-    {
-        return _region;
-    }
-    
-
-		const Ui::Image& image() const
-		{
-			return _image;
-		}
 
   private:
-     Ui::Image _image;
-     Ui::PointF _to;
-     Ui::Region _region;
+    PointF _to;
+    const Image& _image;
 };
 
 }}

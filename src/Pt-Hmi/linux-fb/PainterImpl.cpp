@@ -30,17 +30,7 @@
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Ui/PathOp.h>
-#include <Pt/Ui/RenderOp.h>
-#include <Pt/Ui/EllipseOp.h>
-#include <Pt/Ui/FillRectOp.h>
-#include <Pt/Ui/LineOp.h>
-#include <Pt/Ui/RectOp.h>
-#include <Pt/Ui/PolylineOp.h>
-#include <Pt/Ui/TextOp.h>
-#include <Pt/Ui/ImageOp.h>
-#include <Pt/Ui/FillEllipseOp.h>
-#include <Pt/Ui/FillPolygonOp.h>
+#include <Pt/Ui/ClipPolygon.h>
 #include "ScreenImpl.h"
 
 namespace Pt {
@@ -57,90 +47,86 @@ PainterImpl::~PainterImpl()
 {
 }
 
-
-void PainterImpl::drawPixel( const Ui::PointF& to )
-{   
-  _surface->path().add( new Ui::LineOp( pen(), to, to) );
-}
-
-
 void PainterImpl::drawLine( const Ui::PointF& from, const Ui::PointF& to )
 {    
-  _surface->path().add( new Ui::LineOp( pen(), to, to ) );
-}
-
-
-void PainterImpl::drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline )
-{	 
-  _surface->path().add( new Ui::TextOp( pen(), to, font(),  text , outline ) );
+  _surface->path().stroke( _pen, from , to );
 }
 
 
 void PainterImpl::drawText( const Ui::PointF& to, const Pt::String& text )
 {	  
-  _surface->path().add( new Ui::TextOp( pen(), to, font(),  text, 0 ) );
+  _surface->path().drawText( _pen, _font, to, text );
 }
 
 
 void PainterImpl::drawEllipse( const Ui::PointF& topLeft, const Ui::SizeF& size )
 {
-  _surface->path().add( new Ui::EllipseOp( pen(), topLeft, size ) );	
+//Todo: draw ellipse op
 }
 
 
 void PainterImpl::drawRect( const Ui::RectF& rectangle )
 {
-  _surface->path().add( new Ui::RectOp( pen(), rectangle) );
+  _surface->path().stroke( _pen, rectangle );
 }
 
 
 void PainterImpl::drawPolyline( const Ui::PointF* points, const size_t pointCount )
 {
-  _surface->path().add( new Ui::PolylineOp( pen(), points, pointCount ) );
+    _surface->path().stroke( _pen, points, pointCount );
 }
 
 
 void PainterImpl::fillRect( const Ui::RectF& rectangle )
 {
  
-  _surface->path().add( new Ui::FillRectOp( brush(), rectangle ) );
+  _surface->path().fill( _brush, rectangle );
 }
 
 
 void PainterImpl::fillEllipse( const Ui::PointF& topLeft, const Ui::SizeF& size )
 {
-  _surface->path().add( new Ui::FillEllipseOp( brush(), topLeft, size ) );
+ //Todo;  
 }
 
 
 void PainterImpl::fillPolygon( const Ui::PointF* points, const size_t pointCount )
 {
-  _surface->path().add( new Ui::FillPolygonOp( brush(), points, pointCount ) );
+    _surface->path().fill( _brush, points, pointCount );
 }
 
 
-void PainterImpl::drawSurface( const Ui::PointF& to, PaintSurface& pm, const Ui::Region& pmRegion )
+void PainterImpl::drawSurface( const Ui::PointF& to, const PaintSurface& pm )
 {
-	//Todo: region handling
-  _surface->path().add( new Ui::PathOp( pm.impl()->path(), to, pm.size()) );
-}
+  Ui::RenderPath path( pm.impl()->path() );
+  
+  path.translate( to.x(), to.y() );
+   
+  Ui::RectF clipRect(  Ui::PointF(0,0),_surface->size() );
 
+  Ui::ClipPolygon clipper;
+  
+  std::vector<Ui::PointF> points;
 
-void PainterImpl::drawSurface( const Ui::PointF& to, PaintSurface& pm )
-{
-  _surface->path().add( new Ui::PathOp( pm.impl()->path(), to, pm.size()) );
+  points.push_back( to  );
+  points.push_back( Ui::PointF(to.x() + pm.size().width(),  to.y() ) );
+  points.push_back( Ui::PointF(to.x() + pm.size().width(),  to.y() + pm.size().height()) );
+  points.push_back( Ui::PointF(to.x(),  to.y() + pm.size().height()) );
+
+  clipper.clip( points, clipRect );
+
+  if( !points.empty() )
+  {
+    path.clip(  Ui::RectF(points[0], points[2] ) ); 
+   
+    _surface->path().addPath( path );
+  }
 }
 		
 
 void PainterImpl::drawImage(const Ui::PointF& to, const Ui::Image& image )
 {
-  _surface->path().add( new Ui::ImageOp( image, to, 0 ) );
-}
-
-
-void PainterImpl::drawImage( const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion )
-{
-	_surface->path().add( new Ui::ImageOp( image, to, &imageRegion ) );
+  _surface->path().drawImage( to, image );
 }
 
 
@@ -154,11 +140,8 @@ void PainterImpl::flush()
 {	
   Ui::ImagePainter painter( Application::instance().mainScreen().impl()->image() );
 
-  painter.setOrigin( _origin );
-  painter.setClip( _clip );	
   painter.drawPath( _surface->path() );  
-	painter.flush();
-  _surface->path().clear();
+	_surface->path().clear();
 }
 
 

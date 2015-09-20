@@ -24,6 +24,12 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Ui/RenderPath.h>
+#include <Pt/Ui/ClipPolygon.h>
+#include "RenderOp.h"
+#include "ImageOp.h"
+#include "StrokeOp.h"
+#include "TextOp.h"
+#include "FillOp.h"
 
 namespace Pt {
 namespace Ui {
@@ -48,9 +54,84 @@ void RenderPath::clear()
 }
 
 
-void RenderPath::add(RenderOp* info )
+void RenderPath::addPath( const RenderPath& path )
 {
-  _path.push_back( info );
-}  
+  for( size_t i = 0; i < path.size(); ++i )
+    _path.push_back( path._path[i]->clone() );
+}
+
+
+void RenderPath::translate( double x, double y )
+{ 
+  for( size_t i = 0; i < _path.size(); ++i )
+  {
+    for( size_t j = 0; j < _path[i]->outline().size() ; ++ j )
+    {
+      _path[i]->outline()[j].addX( x ) ;
+      _path[i]->outline()[j].addY( y ) ;
+    }
+  }
+}
+
+
+void RenderPath::clip( const RectF& clipRect )
+{
+  ClipPolygon clipper;
+
+  for( size_t i = 0; i < _path.size(); ++i )
+  {
+      if( _path[i]->outline().empty() )
+        continue;
+
+      clipper.clip( _path[i]->outline(), clipRect );
+  }
+}
+
+
+void RenderPath::drawText( const Pen& pen, const Font& font, const PointF& to, const Pt::String& text )
+{
+  _path.push_back( new TextOp(pen, font, to, text ) );
+}
+
+
+void RenderPath::stroke( const Pen& pen, const PointF* points, size_t count )
+{
+  _path.push_back( new StrokeOp( pen, points, count ) );
+}
+
+
+void RenderPath::stroke( const Pen& pen, const PointF& from, const PointF& to )
+{
+   _path.push_back( new StrokeOp( pen, from, to ) );
+}
+
+void RenderPath::stroke( const Pen& pen, const RectF& rect )
+{
+  _path.push_back( new StrokeOp( pen, rect) );
+}
+
+
+void RenderPath::fill( const Brush& brush, const PointF* points, size_t count )
+{
+  _path.push_back( new FillOp(brush, points, count) );
+}
+
+void RenderPath::fill( const Brush& brush, const RectF& rect )
+{
+  _path.push_back( new FillOp( brush, rect ) );
+}
+
+
+void RenderPath::drawImage( const PointF& to, const Image& image )
+{
+  _path.push_back( new ImageOp(to, image) );
+}
+
+
+void RenderPath::render( Painter& painter ) const 
+{
+  for( size_t i = 0; i < _path.size(); ++i )
+    _path[i]->execute( painter );
+}
 
 }}

@@ -23,54 +23,55 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_HMI_SURFACEOP_H
-#define PT_HMI_SURFACEOP_H
+#ifndef PT_UI_STROKEOP_H
+#define PT_UI_STROKEOP_H
 
-#include <Pt/Ui/RenderOp.h>
-#include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Size.h>
+#include "RenderOp.h"
 
 namespace Pt {
-namespace Hmi {
+namespace Ui {
 
-class SurfaceOp : public Ui::RenderOp
-{  
-  public:
-    SurfaceOp(  PaintSurface& surface, const Ui::PointF& to, const Ui::Region* pmRegion = 0 )
-    : _surface(surface)
-    , _to(to)     
+class StrokeOp : public RenderOp
+{
+  public:    
+    
+    StrokeOp(const Pen& pen, const PointF* points, size_t count )
+    : _pen( pen ) 
     {
-      if( pmRegion != 0)
-        _region = *pmRegion;
-      else
-        _region.setLeft(-1);
+      outline().assign( points, points + count );
     }
 
-
-    virtual void execute( Ui::Painter& painter ) const
-    {                     
-        const Ui::SizeF  size( _surface.size().width(),_surface.size().height() );
-        const Ui::PointF absolutPos  = painter.origin() + _to;
-				Ui::Painter&   surfacePainter   = _surface.painter();
-
-        surfacePainter.setOrigin( absolutPos );
-        surfacePainter.setClip( Ui::RectF( absolutPos, size ) );        
-        surfacePainter.flush();
+    StrokeOp(const Pen& pen, const PointF& from, const PointF& to )
+    : _pen( pen ) 
+    {
+      outline().push_back( from );
+      outline().push_back( to );
     }
 
-    virtual Ui::RenderOp* clone() const
+    
+    StrokeOp(const Pen& pen, const RectF& rect )
+    : _pen( pen ) 
     {
-      if( _region.left() == -1 )
-        return new SurfaceOp( _surface, _to, 0 ); 
+      outline().push_back( rect.topLeft() );
+      outline().push_back(rect.topRight() );
+      outline().push_back(rect.bottomRight() );
+      outline().push_back(rect.bottomLeft() );
+      outline().push_back(rect.topLeft() );
+    }
 
-      return new SurfaceOp( _surface, _to, &_region );
+    virtual void execute( Painter& painter ) const 
+    {
+        painter.setPen( _pen );
+        painter.drawPolyline( &outline()[0], outline().size() );
+    }
+
+    virtual RenderOp* clone()  const 
+    {
+       return new StrokeOp( _pen, &outline()[0], outline().size() );
     }
 
   private:
-     PaintSurface& _surface;
-     Ui::PointF _to;
-     Ui::Region _region;
+    Pen _pen;
 };
 
 }}

@@ -93,12 +93,8 @@ void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 void ScreenImpl::onInvalidate()
 {		
   Window::onInvalidate(); 
-
-  const Ui::PointF origin( 0,0);
+  
   Painter& painter = surface().painter();
-
-  painter.setOrigin(origin );
-  painter.setClip( Ui::RectF( origin, size() ) );
   painter.flush();
 
   memcpy( _frameBuffer.buffer(), _image.pixel(0,0), _frameBuffer.bufferSize() );		

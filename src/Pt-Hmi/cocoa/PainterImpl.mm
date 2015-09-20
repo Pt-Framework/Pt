@@ -202,10 +202,6 @@ const std::list<std::string>& PainterImpl::fontFamilyNames()
     return _fontList;
 }
 
-void PainterImpl::drawPixel(const Gfx::PointF& to)
-{
-    drawLine(tranPoint(to), tranPoint(to));
-}
 
 void PainterImpl::drawLine(const Gfx::PointF& f, const Gfx::PointF& t)
 {
@@ -228,12 +224,7 @@ void PainterImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
 //TODO:
 }
-    
-void PainterImpl::drawText( const Gfx::PointF& to, const Pt::String& text, const Gfx::ARgbColor* outline )
-{
-//TODO:
-}
-    
+        
 void PainterImpl::drawPolyline(const Gfx::PointF* p, const size_t pointCount)
 {
     std::vector<Gfx::PointF> points(pointCount);

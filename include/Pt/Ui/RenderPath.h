@@ -27,12 +27,15 @@
 #define PT_UI_RENDERPATH_H
 
 #include <Pt/Ui/Api.h>
-#include <Pt/Ui/RenderOp.h>
 #include <Pt/Types.h>
+#include <Pt/String.h>
+#include <Pt/Ui/Painter.h>
 #include <vector>
 
 namespace Pt {
 namespace Ui {
+
+class RenderOp;
 
 class PT_UI_API RenderPath
 {  
@@ -40,9 +43,7 @@ class PT_UI_API RenderPath
     RenderPath();
 
     virtual ~RenderPath();
-
-    void add( RenderOp* info );
-   
+  
     void clear();
 
     size_t size() const
@@ -50,35 +51,30 @@ class PT_UI_API RenderPath
       return _path.size();
     }
 
-   RenderOp* operator[]( size_t i ) 
-   {
-     return _path[i];
-   }
+    void addPath( const RenderPath& path );   
 
-   const RenderOp* operator[]( size_t i ) const
-   {
-     return _path[i];
-   }
+    void drawText( const Pen& pen, const Font& font, const PointF& to, const Pt::String& text ); 
+   
+    void stroke( const Pen& pen, const PointF* points, size_t count );
+    
+    void stroke( const Pen& pen, const PointF& from, const PointF& to );
 
-   RenderOp* at( size_t i ) 
-   {
-     return _path.at(i);
-   }
+    void stroke( const Pen& pen, const RectF& rect );
 
-   const RenderOp* at( size_t i ) const
-   {
-     return _path.at(i);
-   }
+    void fill( const Brush& brush, const PointF* points, size_t count );
+    
+    void fill( const Brush& brush, const RectF& rect );
 
-   void addPath( const RenderPath& path )
-   {
-     for( size_t i = 0; i < path.size(); ++i)      
-       _path.push_back( path[i]->clone() );
-   }
+    void drawImage( const PointF& to, const Image& image );
+
+    void translate( double x, double y );
+   
+    void clip( const RectF& clipRect );
+
+    void render( Painter& painter ) const;
 
   private:
-    std::vector<RenderOp*> _path;
-  
+    std::vector<RenderOp*> _path;      
 };
 
 }}

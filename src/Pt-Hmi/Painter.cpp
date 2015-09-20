@@ -99,19 +99,9 @@ int Painter::depth() const
 	return _impl->depth();
 }
 
-void Painter::drawPixel(const Ui::PointF& to)
-{
-	_impl->drawPixel(to);
-}
-
 void Painter::drawLine(const Ui::PointF& from, const Ui::PointF& to)
 {
 	_impl->drawLine(from,to);
-}
-
-void Painter::drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline )
-{
-	_impl->drawText( to,text, outline);
 }
 
 void Painter::drawText(const Ui::PointF& to, const Pt::String& Text)
@@ -149,12 +139,8 @@ void Painter::fillPolygon(const Ui::PointF* points, const size_t pointCount)
 	_impl->fillPolygon(points, pointCount);
 }
 
-void Painter::drawSurface(const Ui::PointF& to, PaintSurface& pm, const Ui::Region& pmRegion)
-{
-	_impl->drawSurface(to, pm, pmRegion);
-}
 
-void Painter::drawSurface(const Ui::PointF& to, PaintSurface& pm)
+void Painter::drawSurface(const Ui::PointF& to, const PaintSurface& pm)
 {  
 	_impl->drawSurface(to, pm);
 }	
@@ -162,11 +148,6 @@ void Painter::drawSurface(const Ui::PointF& to, PaintSurface& pm)
 void Painter::drawImage(const Ui::PointF& to, const Ui::Image& image)
 {
 	_impl->drawImage(to, image);
-}
-
-void Painter::drawImage(const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion)
-{
-	_impl->drawImage(to, image, imageRegion);
 }
 
 void Painter::addFontName(const std::string& fontName)
@@ -177,26 +158,6 @@ void Painter::addFontName(const std::string& fontName)
 void Painter::setSurface(PaintSurface& surface)
 {    
   _impl->setSurface(surface);
-}
-
-void Painter::setClip( const Ui::RectF& rect)
-{
-  _impl->setClip( rect );
-}
-
-const Ui::RectF& Painter::clip() const
-{
-    return _impl->clip() ;
-}
-
-void Painter::setOrigin( const Ui::PointF& org )
-{
-  _impl->setOrigin( org );
-}
-
-const Ui::PointF& Painter::origin() const
-{
-  return _impl->origin();
 }
 
 void Painter::flush()
