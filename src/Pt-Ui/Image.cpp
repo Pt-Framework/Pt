@@ -52,7 +52,6 @@ Image::Image( Pt::uint8_t* buffer, const Ui::Size& size, const ImageFormat& form
 }
 
 
-
 Image::~Image()		
 {
 

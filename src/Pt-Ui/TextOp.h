@@ -36,7 +36,7 @@ class TextOp : public RenderOp
   public:    
     
     TextOp( const Pen& pen, const Font& font, const PointF& to, const Pt::String& text )
-    : _pen( _pen )
+    : _pen( pen )
     , _font( font ) 
     , _to( to )
     , _text( text )

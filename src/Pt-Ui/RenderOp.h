@@ -27,11 +27,12 @@
 #define PT_UI_RENDEROP_H
 
 #include <Pt/Ui/Painter.h>
+#include <Pt/NonCopyable.h>
 
 namespace Pt {
 namespace Ui {
 
-class RenderOp
+class RenderOp : private Pt::NonCopyable
 {
   public:    
     virtual ~RenderOp()
