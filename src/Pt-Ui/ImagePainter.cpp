@@ -212,9 +212,9 @@ void ImagePainter::drawLine(const PointF& from, const  PointF& to)
 }
 
 
-void ImagePainter::drawText( const PointF& to, const String& text, const Color* outline )
+void ImagePainter::drawText( const PointF& to, const String& text )
 { 
-   _drawText->draw( _image, _pen.color(), to , text, outline );
+   _drawText->draw( _image, _pen.color(), to , text );
 }
 
 
@@ -354,15 +354,6 @@ void ImagePainter::drawImage( const  PointF& p, const Image& sourceImage )
       //TODO:
     break;
   }
-}
-
-
-void ImagePainter::drawImage( const  PointF& to, const Image& sourceImage, const Region& regionIn )
-{
-	//Todo: optimize this whithout sub image.
-	Image subImage = sourceImage.subImage(regionIn);
-
-	ImagePainter::drawImage(to, subImage);
 }
 
 

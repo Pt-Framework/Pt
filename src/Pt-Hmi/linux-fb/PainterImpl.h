@@ -48,9 +48,7 @@ class PainterImpl
 
     void drawLine( const Ui::PointF& from, const Ui::PointF& to );
     
-    void drawPolyline( const Ui::PointF* points, const size_t pointCount );
-
-    void drawText( const Ui::PointF& to, const Pt::String& text, const Ui::Color* outline );
+    void drawPolyline( const Ui::PointF* points, const size_t pointCount );    
 
     void drawText( const Ui::PointF& to, const Pt::String& Text );
 
@@ -63,8 +61,6 @@ class PainterImpl
     void drawSurface( const Ui::PointF& to, const PaintSurface& surface );
 		
     void drawImage( const Ui::PointF& to, const Ui::Image& image );
-
-    void drawImage( const Ui::PointF& to, const Ui::Image& image, const Ui::Region& imageRegion ); 
 
     void drawPath( const Ui::RenderPath& path );
 

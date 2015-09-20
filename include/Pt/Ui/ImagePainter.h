@@ -115,8 +115,7 @@ class PT_UI_API ImagePainter : public Painter
         virtual void drawLine(const  PointF& from, const  PointF& to);
 
         //!@see Pt::Ui::Painter
-        virtual void drawText(const  PointF& to, const Pt::String& text,
-                              const Color* outline = 0 );
+        virtual void drawText(const  PointF& to, const Pt::String& text );
 
         //!@see Pt::Ui::Painter
         virtual void drawRect(const  RectF& rect);
@@ -139,12 +138,11 @@ class PT_UI_API ImagePainter : public Painter
         //!@see Pt::Ui::Painter
         virtual void drawImage(const  PointF& to, const Image& image);
 
-        //!@see Pt::Ui::Painter
-        virtual void drawImage(const  PointF& to, const Image& image,
-                               const  Region& imageRegion);
-
         virtual void drawPath( const RenderPath& path );
             
+        virtual void flush()
+        {
+        }
 
     private:
         Image&               _image;
