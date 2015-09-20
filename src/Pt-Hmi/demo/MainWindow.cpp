@@ -54,18 +54,6 @@ MainWindow::~MainWindow()
 void MainWindow::init()
 {	
 
-  Ui::ClipPolygon clipper;
-  
-  std::vector<Ui::PointF> points;
-
-  points.push_back(Ui::PointF( 1,1 ) );
-  points.push_back(Ui::PointF( 5,1 ) );
-  points.push_back(Ui::PointF( 5,4 ) );
-  points.push_back(Ui::PointF( 1,4 ) );
-  
-  clipper.clip(points, Ui::RectF( Ui::PointF(0,0), Ui::SizeF(7,6 ) ));
-  
-
 	{//Icon
 		std::stringstream memoryStream;
 		
@@ -100,7 +88,7 @@ void MainWindow::init()
   State = Hmi::WindowState::Normal;
 	StartPostion = Hmi::WindowStartPosition::CenterParent;
 	Closed += Pt::slot(*this, &MainWindow::onClosed);
-	BackColor = Ui::Color(0.5,0.5,0.5);
+	BackColor = Ui::Color(1,0,0);
 
   //Panel
   

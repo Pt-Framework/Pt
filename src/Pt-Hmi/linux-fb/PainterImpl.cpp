@@ -210,7 +210,7 @@ Ui::FontMetrics PainterImpl::fontMetrics( Pt::String text ) const
 	
 const std::list<std::string>& PainterImpl::fontFamilyNames()
 {
-    Ui::ImagePainter painter( Application::instance().mainScreen().impl()->image() );
+   Ui::ImagePainter painter( Application::instance().mainScreen().impl()->image() );
   return painter.fontFamilyNames();
 }
 
