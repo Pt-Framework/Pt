@@ -37,17 +37,15 @@ class TextOp : public RenderOp
 
      TextOp( const TextOp& op )
     : _pen( op._pen )
-    , _font( op._font ) 
-    , _to( op._to )
+    , _font( op._font )     
     , _text( op._text )
     {
       outline() = op.outline();
     }
 
-    TextOp( const Pen& pen, const Font& font, const PointF& to, const Pt::String& text, const RectF& textRect )
+    TextOp( const Pen& pen, const Font& font, const Pt::String& text, const RectF& textRect )
     : _pen( pen )
-    , _font( font ) 
-    , _to( to )
+    , _font( font )     
     , _text( text )
     {
       outline().push_back( textRect.topLeft() );
@@ -60,8 +58,8 @@ class TextOp : public RenderOp
     {
         painter.setPen( _pen );
         painter.setFont( _font );        
-        //Todo: clip to new outline
-        painter.drawText( _to, _text );        
+        
+        painter.drawText( outline()[0], _text );        
     }
 
     virtual RenderOp* clone()  const 
@@ -71,8 +69,7 @@ class TextOp : public RenderOp
 
   private:
     Pen _pen;
-    Font _font;
-    PointF _to;
+    Font _font;    
     Pt::String _text;
 };
 

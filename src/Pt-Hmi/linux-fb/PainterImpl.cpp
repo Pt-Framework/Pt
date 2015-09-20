@@ -67,7 +67,7 @@ void PainterImpl::drawText( const Ui::PointF& to, const Pt::String& text )
 
   Ui::RectF rect(to, Ui::SizeF( metrics.width(), metrics.height() ) );
 
-  _surface->path().drawText( _pen, _font, to, text, rect );
+  _surface->path().drawText( _pen, _font, text, rect );
 }
 
 

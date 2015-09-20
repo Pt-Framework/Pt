@@ -57,7 +57,7 @@ class PT_UI_API RenderPath
 
     void addPath( const RenderPath& path );   
 
-    void drawText( const Pen& pen, const Font& font, const PointF& to, const Pt::String& text, const RectF& textRect ); 
+    void drawText( const Pen& pen, const Font& font, const Pt::String& text, const RectF& textRect ); 
    
     void stroke( const Pen& pen, const PointF* points, size_t count );
     
