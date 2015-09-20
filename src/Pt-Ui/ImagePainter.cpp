@@ -359,7 +359,6 @@ void ImagePainter::drawImage( const  PointF& p, const Image& sourceImage )
 
 void ImagePainter::drawPath( const RenderPath& path )
 {  
-   path.print();
    path.render( *this );
 }
 

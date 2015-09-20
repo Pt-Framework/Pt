@@ -90,7 +90,11 @@ void PainterImpl::drawRect( const Ui::RectF& rect )
 
   clipper.clip( points, Ui::RectF( Ui::PointF(0,0), Ui::SizeF( _surface->size().width(), _surface->size().height() )  ) );
 
-  _surface->path().stroke( _pen, &points[0], points.size() );
+  if( !points.empty() )
+  {
+    points.push_back( points[0] );
+    _surface->path().stroke( _pen, &points[0], points.size() );
+  }
 }
 
 

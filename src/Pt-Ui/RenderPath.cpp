@@ -153,10 +153,4 @@ void RenderPath::render( Painter& painter ) const
     _path[i]->execute( painter );
 }
 
-void RenderPath::print() const
-{
-  for( size_t i = 0; i < _path.size(); ++i )
-    std::clog<<i<<" "<<_path[i]->name()<<std::endl;
-}
-
 }}

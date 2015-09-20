@@ -75,9 +75,7 @@ class PT_UI_API RenderPath
    
     void clip( const RectF& clipRect );
 
-    void render( Painter& painter ) const;
-
-    void print() const;
+    void render( Painter& painter ) const;    
 
   private:
     std::vector<RenderOp*> _path;      
