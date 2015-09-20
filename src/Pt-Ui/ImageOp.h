@@ -64,6 +64,12 @@ class ImageOp : public RenderOp
        return new ImageOp(*this);
     }
 
+    
+    virtual std::string name() const
+    {
+      return "image";
+    }
+
   private:
     PointF _to;
     const Image& _image;

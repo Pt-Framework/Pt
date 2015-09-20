@@ -76,6 +76,11 @@ class StrokeOp : public RenderOp
        return new StrokeOp( *this );
     }
 
+    virtual std::string name() const
+    {
+      return "stroke";
+    }
+
   private:
     Pen _pen;
 };

@@ -35,7 +35,7 @@ class TextOp : public RenderOp
 {
   public:    
 
-     TextOp( const TextOp& op )
+    TextOp( const TextOp& op )
     :  RenderOp( op )
     , _pen( op._pen )
     , _font( op._font )     
@@ -65,6 +65,11 @@ class TextOp : public RenderOp
     virtual RenderOp* clone()  const 
     {
        return new TextOp( *this );
+    }
+
+    virtual std::string name() const
+    {
+      return "text";
     }
 
   private:

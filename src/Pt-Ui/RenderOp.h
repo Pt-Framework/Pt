@@ -54,6 +54,12 @@ class RenderOp : private Pt::NonCopyable
         return _outline;
     }
 
+        
+    virtual std::string name() const
+    {
+      return "op";
+    }
+
   protected:
     RenderOp()
     {
