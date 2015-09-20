@@ -34,16 +34,27 @@ namespace Ui {
 class TextOp : public RenderOp
 {
   public:    
-    
-    TextOp( const Pen& pen, const Font& font, const PointF& to, const Pt::String& text )
+
+     TextOp( const TextOp& op )
+    : _pen( op._pen )
+    , _font( op._font ) 
+    , _to( op._to )
+    , _text( op._text )
+    {
+      outline() = op.outline();
+    }
+
+    TextOp( const Pen& pen, const Font& font, const PointF& to, const Pt::String& text, const RectF& textRect )
     : _pen( pen )
     , _font( font ) 
     , _to( to )
     , _text( text )
     {
-      outline().push_back( to );
-      //ToDO: text outline measurement.
-    }
+      outline().push_back( textRect.topLeft() );
+      outline().push_back( textRect.topRight() );
+      outline().push_back( textRect.bottomRight() );
+      outline().push_back( textRect.bottomLeft() );      
+    }    
 
     virtual void execute( Painter& painter ) const 
     {
@@ -55,7 +66,7 @@ class TextOp : public RenderOp
 
     virtual RenderOp* clone()  const 
     {
-       return new TextOp( _pen, _font, outline()[0],  _text );
+       return new TextOp( *this );
     }
 
   private:

@@ -106,9 +106,9 @@ void RenderPath::clip( const RectF& clipRect )
 }
 
 
-void RenderPath::drawText( const Pen& pen, const Font& font, const PointF& to, const Pt::String& text )
+void RenderPath::drawText( const Pen& pen, const Font& font, const PointF& to, const Pt::String& text, const RectF& textRect )
 {
-  _path.push_back( new TextOp(pen, font, to, text ) );
+  _path.push_back( new TextOp(pen, font, to, text, textRect ) );
 }
 
 
