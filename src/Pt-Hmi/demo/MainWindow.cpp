@@ -31,6 +31,7 @@
 #include <Pt/Ui/ImageReader.h>
 #include <Pt/Ui/Image.h>
 #include <Pt/Ui/ImagePainter.h>
+#include <Pt/Ui/ClipPolygon.h>
 #include "DemoImage.h"
 #include "AtesionIcon.h"
 #include <sstream>
@@ -52,6 +53,18 @@ MainWindow::~MainWindow()
 
 void MainWindow::init()
 {	
+
+  Ui::ClipPolygon clipper;
+  
+  std::vector<Ui::PointF> points;
+
+  points.push_back(Ui::PointF( 1,1 ) );
+  points.push_back(Ui::PointF( 5,1 ) );
+  points.push_back(Ui::PointF( 5,4 ) );
+  points.push_back(Ui::PointF( 1,4 ) );
+  
+  clipper.clip(points, Ui::RectF( Ui::PointF(0,0), Ui::SizeF(7,6 ) ));
+  
 
 	{//Icon
 		std::stringstream memoryStream;

@@ -102,7 +102,7 @@ void PainterImpl::drawPolyline( const Ui::PointF* pt, const size_t pointCount )
 
   clipper.clip( points, Ui::RectF( Ui::PointF(0,0), Ui::SizeF( _surface->size().width(), _surface->size().height() )  ) );
 
-   _surface->path().stroke( _pen, &points[0], pointCount );
+   _surface->path().stroke( _pen, &points[0], points.size() );
 }
 
 
@@ -137,7 +137,7 @@ void PainterImpl::fillPolygon( const Ui::PointF* pt, const size_t pointCount )
 
   clipper.clip( points, Ui::RectF( Ui::PointF(0,0), Ui::SizeF( _surface->size().width(), _surface->size().height() )  ) );
 
-  _surface->path().fill( _brush, &points[0], pointCount );
+  _surface->path().fill( _brush, &points[0], points.size() );
 }
 
 

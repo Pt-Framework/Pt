@@ -85,8 +85,9 @@ void RenderPath::translate( double x, double y )
   {
     for( size_t j = 0; j < _path[i]->outline().size() ; ++ j )
     {
-      _path[i]->outline()[j].addX( x ) ;
-      _path[i]->outline()[j].addY( y ) ;
+      PointF& p = _path[i]->outline()[j];
+      p.addX( x ) ;
+      p.addY( y ) ;
     }
   }
 }
