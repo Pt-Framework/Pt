@@ -50,6 +50,11 @@ class FillOp : public RenderOp
       outline().push_back( rect.bottomLeft() );      
     }
 
+    FillOp( const FillOp& op )
+    : RenderOp( op )
+    , _brush( op._brush )
+    {
+    }
 
     virtual void execute( Painter& painter ) const 
     {
@@ -59,7 +64,7 @@ class FillOp : public RenderOp
 
     virtual RenderOp* clone()  const 
     {
-       return new FillOp( _brush, &outline()[0], outline().size() );
+       return new FillOp( *this );
     }
 
   private:

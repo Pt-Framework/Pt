@@ -59,6 +59,11 @@ class RenderOp : private Pt::NonCopyable
     {
     }  
 
+    RenderOp(const RenderOp& op)
+    : _outline( op._outline )
+    {         
+    }  
+
     std::vector<PointF> _outline;
 };
 

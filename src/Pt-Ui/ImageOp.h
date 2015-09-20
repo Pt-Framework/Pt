@@ -45,6 +45,14 @@ class ImageOp : public RenderOp
       outline().push_back( Ui::PointF(to.x() , to.y() + _image.height() ) );
     }
 
+    ImageOp( const ImageOp& op )
+    : RenderOp( op )
+    , _to( op._to)
+    , _image( op._image )
+    {
+    }
+
+
     virtual void execute( Painter& painter ) const 
     {
         painter.drawImage( _to, _image );   
@@ -53,7 +61,7 @@ class ImageOp : public RenderOp
 
     virtual RenderOp* clone()  const 
     {
-       return new ImageOp( _to, _image );
+       return new ImageOp(*this);
     }
 
   private:

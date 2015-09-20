@@ -36,11 +36,11 @@ class TextOp : public RenderOp
   public:    
 
      TextOp( const TextOp& op )
-    : _pen( op._pen )
+    :  RenderOp( op )
+    , _pen( op._pen )
     , _font( op._font )     
     , _text( op._text )
     {
-      outline() = op.outline();
     }
 
     TextOp( const Pen& pen, const Font& font, const Pt::String& text, const RectF& textRect )

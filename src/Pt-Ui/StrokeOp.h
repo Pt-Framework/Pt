@@ -59,6 +59,12 @@ class StrokeOp : public RenderOp
       outline().push_back(rect.topLeft() );
     }
 
+    StrokeOp( const StrokeOp& op )
+    : RenderOp( op )
+    , _pen( op._pen )
+    {
+    }
+
     virtual void execute( Painter& painter ) const 
     {
         painter.setPen( _pen );
@@ -67,7 +73,7 @@ class StrokeOp : public RenderOp
 
     virtual RenderOp* clone()  const 
     {
-       return new StrokeOp( _pen, &outline()[0], outline().size() );
+       return new StrokeOp( *this );
     }
 
   private:
