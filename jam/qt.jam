@@ -86,7 +86,7 @@ rule Qt5LibName
 
 rule QtLinkLibs_Windows
 {       
-    if $(WITH_DEBUG)
+    if $(WITH_DEBUG) && ! $(WITH_OPTIM)
     {   
         return $(<:S="d.lib") ;
     }
@@ -145,8 +145,8 @@ rule ConfigureQt
     if ! $(WITH_QT)
     {       
         QT_SUFLIB = .lib ;
-        
-        if ! $(WITH_OPTIM)
+
+        if $(WITH_DEBUG) && ! $(WITH_OPTIM)
         {   
             QT_SUFLIB = d.lib ;
         }
