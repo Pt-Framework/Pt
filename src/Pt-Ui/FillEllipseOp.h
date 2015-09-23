@@ -23,58 +23,51 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_UI_TEXTEOP_H
-#define PT_UI_TEXTEOP_H
+#ifndef PT_UI_FILLELLIPSEOP_H
+#define PT_UI_FILLELLIPSEOP_H
 
 #include "RenderOp.h"
 
 namespace Pt {
 namespace Ui {
 
-class TextOp : public RenderOp
+class FillEllipseOp : public RenderOp
 {
   public:    
+    
+    FillEllipseOp(const Brush& brush, const PointF& topLeft, const SizeF& size)
+    : _brush( brush ) 
+    {
+      outline().push_back( topLeft );
+    }
 
-    TextOp( const TextOp& op )
-    :  RenderOp( op )
-    , _pen( op._pen )
-    , _font( op._font )     
-    , _text( op._text )
+
+    FillEllipseOp( const FillEllipseOp& op )
+    : RenderOp( op )
+    , _size( op._size )
+    , _brush( op._brush )
     {
     }
 
-    TextOp( const Pen& pen, const Font& font, const Pt::String& text )
-    : _pen( pen )
-    , _font( font )     
-    , _text( text )
-    {
-    }    
-
     virtual void execute( Painter& painter ) const 
     {
-       if( outline().empty() )
-          return;
-
-        painter.setPen( _pen );
-        painter.setFont( _font );        
-        
-        painter.drawText( outline()[0], _text );        
+        painter.setBrush( _brush );
+        painter.fillEllipse( outline()[0], _size );
     }
 
     virtual RenderOp* clone()  const 
     {
-       return new TextOp( *this );
+       return new FillEllipseOp( *this );
     }
 
     virtual std::string name() const
     {
-      return "text";
+      return "fillEllipse";
     }
 
   private:
-    Pen _pen;
-    Font _font;    
-    Pt::String _text;
+    Brush _brush;
+    Ui::SizeF _size;
 };
 
 }}

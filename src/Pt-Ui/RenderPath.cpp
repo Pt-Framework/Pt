@@ -24,12 +24,14 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Ui/RenderPath.h>
-#include <Pt/Ui/ClipPolygon.h>
 #include "RenderOp.h"
 #include "ImageOp.h"
 #include "StrokeOp.h"
 #include "TextOp.h"
+#include "PathOp.h"
 #include "FillOp.h"
+#include "EllipseOp.h"
+#include "FillEllipseOp.h"
 
 namespace Pt {
 namespace Ui {
@@ -72,10 +74,9 @@ void RenderPath::clear()
 }
 
 
-void RenderPath::addPath( const RenderPath& path )
+void RenderPath::path( const RectF& clip,  const RenderPath& path )
 {
-  for( size_t i = 0; i < path.size(); ++i )
-    _path.push_back( path._path[i]->clone() );
+    _path.push_back( new PathOp(clip, path) );
 }
 
 
@@ -92,24 +93,9 @@ void RenderPath::translate( double x, double y )
   }
 }
 
-
-void RenderPath::clip( const RectF& clipRect )
-{  
-  for( size_t i = 0; i < _path.size(); ++i )
-  {
-      if( _path[i]->outline().empty() )
-        continue;
-
-      ClipPolygon clipper;
-
-      clipper.clip( _path[i]->outline(), clipRect );
-  }
-}
-
-
-void RenderPath::drawText( const Pen& pen, const Font& font, const Pt::String& text, const RectF& textRect )
+void RenderPath::text( const Pen& pen, const Font& font, const Pt::String& text)
 {
-  _path.push_back( new TextOp(pen, font, text, textRect ) );
+  _path.push_back( new TextOp(pen, font, text) );
 }
 
 
@@ -141,7 +127,19 @@ void RenderPath::fill( const Brush& brush, const RectF& rect )
 }
 
 
-void RenderPath::drawImage( const PointF& to, const Image& image )
+void RenderPath::ellipse( const Pen& pen, const PointF& leftTop, const Ui::SizeF& size )
+{
+  _path.push_back( new EllipseOp( pen, leftTop, size ) );
+}
+
+
+void RenderPath::fillEllipse( const Brush& brush, const PointF& leftTop, const Ui::SizeF& size )
+{
+  _path.push_back( new FillEllipseOp( brush, leftTop, size ) );
+}
+
+
+void RenderPath::image( const PointF& to, const Image& image )
 {
   _path.push_back( new ImageOp(to, image) );
 }

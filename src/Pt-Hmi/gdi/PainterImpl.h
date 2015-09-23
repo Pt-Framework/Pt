@@ -26,7 +26,6 @@
 #include <Pt/Ui/Pen.h>
 #include <Pt/Ui/Brush.h>
 #include <Pt/Ui/Image.h>
-#include <Pt/Ui/Region.h>
 #include <Pt/Ui/RenderPath.h>
 #include <windows.h>
 
@@ -56,15 +55,11 @@ class PainterImpl : public Ui::Painter
 
         void setFont(const Ui::Font& font);
 
-        const Ui::Font& font() const;
-
-        Ui::FontMetrics fontMetrics() const;
+        const Ui::Font& font() const;        
 
         Ui::FontMetrics fontMetrics(Pt::String Text) const;
 
-        const std::list<std::string>& fontFamilyNames();
-
-        int depth() const;        
+        const std::list<std::string>& fontFamilyNames();        
 
         void drawLine(const Ui::PointF& from, const Ui::PointF& to);				
 
@@ -92,9 +87,23 @@ class PainterImpl : public Ui::Painter
 
 				void setSurface(PaintSurface& surface);
 
+        static Ui::FontMetrics fontMetrics( const Ui::Font& font, const Pt::String& text );
+
         void flush()
         {
         }
+        
+        void setClip( const Ui::RectF& clip )
+        {
+          _clip = clip;
+        }
+        
+        const Ui::RectF& clip() const
+        {
+          return _clip;
+        }
+
+        void clear( const Ui::Color& color );
 
     protected:
         void drawCompatibleImage(size_t x, size_t y, size_t depth, const char* data, size_t width, size_t height);

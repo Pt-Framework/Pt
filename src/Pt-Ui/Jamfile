@@ -12,9 +12,9 @@ if $(FREETYPE_INCLUDES)
 }
 
 SharedLibrary Pt-Ui : Color.cpp                       
-					  Image.cpp
+                      Image.cpp
                       ImageFormat.cpp
-					  ImagePainter.cpp
+                      ImagePainter.cpp
                       Argb8888Format.cpp
                       Rgb888Format.cpp
                       Rgb565Format.cpp
@@ -23,22 +23,12 @@ SharedLibrary Pt-Ui : Color.cpp
                       Font.cpp
                       FontMetrics.cpp
                       Exception.cpp
-                      Dash.cpp
                       DrawText.cpp
-                      DrawThickEllipse.cpp
-                      DrawThinEllipse.cpp
-                      DrawThinPolyline.cpp
-                      Stroke.cpp
-                      DrawWidePolyline.cpp
-                      DrawWideDashPolyline.cpp
-                      DrawWideSolidPolyline.cpp
-                      Fill.cpp
-                      FillEllipse.cpp
-                      FillPolygon.cpp
                       FreeType.cpp
                       ClipPolygon.cpp
                       ImageReader.cpp
                       RenderPath.cpp
+                      Rasterizer.cpp
 			              ;
 
 LinkSharedLibraries Pt-Ui : Pt  Pt-System ;

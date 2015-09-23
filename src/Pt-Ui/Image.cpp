@@ -78,9 +78,9 @@ Image Image::convert(const ImageFormat& toFormat) const
 }
 
 
-Image Image::blockScale( const SizeF& newSize) const
+Image Image::blockScale( const Size& newSize) const
 {
-  Image resultImage( Ui::Size((size_t) newSize.width(), (size_t)newSize.height()) ,  *_format, _stride );
+  Image resultImage(newSize,  *_format, _stride );
 
   const double dx = newSize.width() /_width;
   const double dy = newSize.height() / _height;
@@ -132,10 +132,10 @@ Image Image::blockScale( const SizeF& newSize) const
 }
 
 
-Image Image::subImage( const Region& regionIn) const
+Image Image::subImage( const Rect& regionIn) const
 {
 	//Cliping.
-	Region clipedRegion = regionIn;
+	Rect clipedRegion = regionIn;
 	
 	if( regionIn.left() + regionIn.width() >= _width )
 		clipedRegion.setWidth( _width - regionIn.left() );

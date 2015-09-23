@@ -94,7 +94,7 @@ void ScreenImpl::onInvalidate()
 {		
   Window::onInvalidate(); 
   
-  Painter& painter = surface().painter();
+  Hmi::Painter& painter = surface().painter();
   painter.flush();
 
   memcpy( _frameBuffer.buffer(), _image.pixel(0,0), _frameBuffer.bufferSize() );		

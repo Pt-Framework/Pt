@@ -42,9 +42,9 @@ class PT_UI_API RenderPath
   public:
     RenderPath();
 
-    RenderPath(const RenderPath& p);
+    RenderPath( const RenderPath& p );
 
-    RenderPath& operator=(const RenderPath& p);
+    RenderPath& operator=( const RenderPath& p );
 
     virtual ~RenderPath();
   
@@ -55,9 +55,9 @@ class PT_UI_API RenderPath
       return _path.size();
     }
 
-    void addPath( const RenderPath& path );   
+    void path( const RectF& clip, const RenderPath& path );   
 
-    void drawText( const Pen& pen, const Font& font, const Pt::String& text, const RectF& textRect ); 
+    void text( const Pen& pen, const Font& font, const Pt::String& text ); 
    
     void stroke( const Pen& pen, const PointF* points, size_t count );
     
@@ -69,12 +69,14 @@ class PT_UI_API RenderPath
     
     void fill( const Brush& brush, const RectF& rect );
 
-    void drawImage( const PointF& to, const Image& image );
+    void image( const PointF& to, const Image& image );
 
-    void translate( double x, double y );
-   
-    void clip( const RectF& clipRect );
+    void ellipse( const Pen& pen, const PointF& leftTop, const Ui::SizeF& size );
+    
+    void fillEllipse( const Brush& brush, const PointF& leftTop, const Ui::SizeF& size );
 
+    void translate( double x, double y );  
+    
     void render( Painter& painter ) const;    
 
   private:

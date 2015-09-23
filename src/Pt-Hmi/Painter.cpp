@@ -79,25 +79,12 @@ const Ui::Font& Painter::font() const
 	return _impl->font();
 }
 
-Ui::FontMetrics Painter::fontMetrics() const
-{
-	return _impl->fontMetrics();
-}
 
 Ui::FontMetrics Painter::fontMetrics(Pt::String Text) const
 {
 	return _impl->fontMetrics(Text);
 }
 
-const std::list<std::string>& Painter::fontFamilyNames()
-{
-	return _impl->fontFamilyNames();
-}
-
-int Painter::depth() const
-{
-	return _impl->depth();
-}
 
 void Painter::drawLine(const Ui::PointF& from, const Ui::PointF& to)
 {
@@ -165,9 +152,29 @@ void Painter::flush()
     _impl->flush();
 }
 
+Ui::FontMetrics Painter::fontMetrics( const Ui::Font& font, const Pt::String& text )
+{
+  return PainterImpl::fontMetrics( font, text );
+}
+
 void Painter::drawPath( const Ui::RenderPath& path )
 {
   _impl->drawPath( path );
+}
+
+void Painter::setClip( const Ui::RectF& clip )
+{
+  _impl->setClip( clip );
+}
+        
+const Ui::RectF& Painter::clip() const
+{
+  return _impl->clip(); 
+}
+
+void Painter::clear( const Ui::Color& color)
+{
+  _impl->clear( color );
 }
 
 }}

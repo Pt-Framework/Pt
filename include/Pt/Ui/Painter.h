@@ -36,7 +36,6 @@
 #include <Pt/Ui/FontMetrics.h>
 #include <Pt/Ui/Pen.h>
 #include <Pt/Ui/Brush.h>
-#include <Pt/Ui/Region.h>
 #include <Pt/String.h>
 #include <cstddef>
 #include <string>
@@ -170,21 +169,6 @@ class PT_UI_API Painter
           */
         virtual const Font& font() const = 0;
 
-        //static const std::vector<std::string> listFontNames() const = 0;
-
-        /**
-          * @brief Returns the general font metrics of the currently selected font.
-          *
-          * The font metrics contain the font's ascent, descent and height.
-          * The width-attribute of the returned FontMetrics object always is set to 0.
-          *
-          * To measure the size of a Text, use fontMetrics(std::string).
-          *
-          * @return The font metrics of the currently selected font.
-          * @see fontMetrics(std::string)
-          */
-        virtual FontMetrics fontMetrics() const = 0;
-
         /**
           * @brief Returns the metrics of the given Text for the currently selected font.
           *
@@ -199,20 +183,6 @@ class PT_UI_API Painter
           * @see fontMetrics(std::string)
           */
         virtual FontMetrics fontMetrics(Pt::String Text) const = 0;
-
-        /**
-          * @brief Returns a list of installed font (family) names on the current platform and device.
-          *
-          * The returned font family names list contains all font names, that may be used to
-          * create a new Font object using the Font constructor. The returned set of font names
-          * not only depends on the installed fonts of the platform, but also on the device for
-          * which this painter is active. A printer device might provide more, less or different
-          * fonts than a display (widget) device.
-          *
-          * @return A list of installed font names on the current platform and device.
-          */
-        virtual const std::list<std::string>& fontFamilyNames() = 0;
-
 
         /**
           * @brief Draws a line between the two given points, excluding the last point.
@@ -393,7 +363,11 @@ class PT_UI_API Painter
 
         virtual void drawPath( const RenderPath& path ) = 0;
 
-        virtual void flush() = 0;
+        virtual void setClip( const RectF& clip ) = 0;
+        
+        virtual const Ui::RectF& clip() const = 0;
+
+        virtual void clear( const Ui::Color& color = Ui::Color( 1, 1, 1 ) ) = 0;        
 };
 
 }} // namespace

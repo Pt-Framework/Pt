@@ -59,15 +59,9 @@ public:
 
     virtual void setFont(const Ui::Font& font);
 
-    virtual const Ui::Font& font() const;
+    virtual const Ui::Font& font() const;    
 
-    virtual Ui::FontMetrics fontMetrics() const;
-
-    virtual Ui::FontMetrics fontMetrics(Pt::String Text) const;
-
-    virtual const std::list<std::string>& fontFamilyNames();
-
-    virtual int depth() const;
+    virtual Ui::FontMetrics fontMetrics(Pt::String Text) const;    
 
     virtual void drawLine(const Ui::PointF& from, const Ui::PointF& to);
 
@@ -94,6 +88,14 @@ public:
     virtual void addFontName(const std::string& fontName);
     
     virtual void flush();    
+    
+    virtual void setClip( const Ui::RectF& clip );
+        
+    virtual const Ui::RectF& clip() const;
+
+    virtual void clear( const Ui::Color& color = Ui::Color( 1, 1, 1 ) );
+
+    static Ui::FontMetrics fontMetrics( const Ui::Font& font, const Pt::String& text );
 
     void setSurface(PaintSurface& surface);    
     

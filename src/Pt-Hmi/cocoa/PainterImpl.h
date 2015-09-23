@@ -95,8 +95,6 @@ class PainterImpl
 
         virtual void drawSurface(const Gfx::PointF& to, PaintSurface& pm);
 
-        virtual void drawSurface(const Gfx::PointF& to, PaintSurface& pm, const Gfx::Region& pmRegion);
-
         virtual void drawImage(const Gfx::PointF& to, const Gfx::ARgbImage& image);
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::ARgbImage& image, const Gfx::Region& imageRegion);

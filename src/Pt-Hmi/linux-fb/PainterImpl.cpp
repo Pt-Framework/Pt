@@ -30,8 +30,6 @@
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Ui/ClipLine.h>
-#include <Pt/Ui/ClipPolygon.h>
 #include "ScreenImpl.h"
 
 namespace Pt {
@@ -48,135 +46,51 @@ PainterImpl::~PainterImpl()
 {
 }
 
-void PainterImpl::drawLine( const Ui::PointF& f, const Ui::PointF& t )
+void PainterImpl::drawLine( const Ui::PointF& from, const Ui::PointF& to )
 {    
-  Ui::ClipLine clipper;
-
-   Ui::PointF from(f);
-   Ui::PointF to(t);
-
-  clipper.clip( from, to, 0, _surface->size().width(),  0, _surface->size().height() );
-
   _surface->path().stroke( _pen, from , to );
 }
 
 
 void PainterImpl::drawText( const Ui::PointF& to, const Pt::String& text )
 {	  
-  Ui::FontMetrics metrics = fontMetrics(text);
-
-  Ui::RectF rect(to, Ui::SizeF( metrics.width(), metrics.height() ) );
-
-  _surface->path().drawText( _pen, _font, text, rect );
+  _surface->path().text( _pen, _font, text);
 }
 
 
 void PainterImpl::drawEllipse( const Ui::PointF& topLeft, const Ui::SizeF& size )
 {
-//Todo: draw ellipse op
+ _surface->path().ellipse( topLeft, size );
 }
 
 
 void PainterImpl::drawRect( const Ui::RectF& rect )
 {
-  std::vector<Ui::PointF> points;
-  
-  Ui::ClipLine clipper;
-
-  Ui::PointF p1 = rect.topLeft();  
-  Ui::PointF p2 = rect.topRight();  
-  
-  clipper.clip(p1, p2, 0,  _surface->size().width(), 0,  _surface->size().height()  );
-  
-  points.push_back( p1 );
-
-  p1 = rect.topRight();  
-  p2 = rect.bottomRight();  
-  
-  clipper.clip(p1, p2, 0,  _surface->size().width(), 0,  _surface->size().height()  );
- 
-  points.push_back( p2 );
-
-  p1 = rect.bottomRight();  
-  p2 = rect.bottomLeft();  
-  
-  clipper.clip(p1, p2, 0,  _surface->size().width(), 0,  _surface->size().height()  );
-
-  points.push_back( p2 );
-
-  p1 = rect.bottomLeft();  
-  p2 = rect.topLeft();  
-  
-  clipper.clip(p1, p2, 0,  _surface->size().width(), 0,  _surface->size().height()  );
-
-  points.push_back( p2 );
-
-  if( points.empty() )
-    return;
-  
-   points.push_back( points[0] );
-
-   _surface->path().stroke( _pen, &points[0], points.size() ); 
+  _surface->path().stroke( _pen, rect );  
 }
 
 
 void PainterImpl::drawPolyline( const Ui::PointF* pt, const size_t pointCount )
 {
-  if( pointCount < 2)
-      return;
-
-  std::vector<Ui::PointF> points;
-  
-  Ui::PointF p2;  
-
-  for( size_t i = 1; i < pointCount; ++i )
-  {
-    Ui::PointF p1 = pt[i - 1];
-    p2 = pt[i];    
-
-    Ui::ClipLine clipper;
-    clipper.clip(p1, p2, 0,  _surface->size().width(), 0,  _surface->size().height()  );
-    points.push_back( p1 );
-  }
-
-   points.push_back( p2 );
-
-   _surface->path().stroke( _pen, &points[0], points.size() );
+  _surface->path().stroke( _pen, pt, pointCount );  
 }
 
 
 void PainterImpl::fillRect( const Ui::RectF& rect )
 { 
-  Ui::ClipPolygon clipper;
-
-  std::vector<Ui::PointF> points;
-
-  points.push_back( rect.topLeft() );
-  points.push_back( rect.topRight() );
-  points.push_back( rect.bottomRight() );
-  points.push_back( rect.bottomLeft() );
-
-  clipper.clip( points, Ui::RectF( Ui::PointF(0,0), Ui::SizeF( _surface->size().width(), _surface->size().height() )  ) );
-
-  _surface->path().fill( _brush, &points[0], points.size() );
+  _surface->path().fill( _brush, rect );
 }
 
 
 void PainterImpl::fillEllipse( const Ui::PointF& topLeft, const Ui::SizeF& size )
 {
- //Todo;  
+  _surface->path().fillEllipse( _brush, topLeft, size );
 }
 
 
 void PainterImpl::fillPolygon( const Ui::PointF* pt, const size_t pointCount )
-{
-  Ui::ClipPolygon clipper;
-
-  std::vector<Ui::PointF> points( pt, pt + pointCount );
-
-  clipper.clip( points, Ui::RectF( Ui::PointF(0,0), Ui::SizeF( _surface->size().width(), _surface->size().height() )  ) );
-
-  _surface->path().fill( _brush, &points[0], points.size() );
+{  
+  _surface->path().fill( _brush, pt, pointCount );
 }
 
 
@@ -184,37 +98,21 @@ void PainterImpl::drawSurface( const Ui::PointF& to, const PaintSurface& pm )
 {
   Ui::RenderPath path( pm.impl()->path() );
   
-  path.translate( to.x(), to.y() );
+  path.translate( to.x(), to.y() );  
 
-  path.clip( Ui::RectF( Ui::PointF(0,0), _surface->size() ) );
-
-  _surface->path().addPath( path );
+  _surface->path().path( Ui::RectF( to, pm.size() ),  path );
 }
 		
 
 void PainterImpl::drawImage(const Ui::PointF& to, const Ui::Image& image )
-{
-  //Todo:
-/*
-  std::vector<Ui::PointF> imgRect;
-
-  imgRect.push_back( to );
-  imgRect.push_back( Ui::PointF( to.x() + image.width(), to.y() ) );
-  imgRect.push_back( Ui::PointF( to.x() + image.width(), to.y()  + image.height()) );
-  imgRect.push_back( Ui::PointF( to.x(), to.y()  + image.height()) );
-
-  Ui::ClipPolygon clipper;
-
-  clipper.clip( imgRect, Ui::RectF( Ui::PointF(0,0), _surface->size() )  );
-  
-  _surface->path().drawImage( to, image);
-  */
+{  
+  _surface->path().image( to, image );
 }
 
 
 void PainterImpl::drawPath( const Ui::RenderPath& path )
 {
-  _surface->path().addPath( path );
+  _surface->path().path( Ui::RectF( Ui::PointF(0,0), _surface->size() ),  path );
 }
 
 
@@ -227,30 +125,18 @@ void PainterImpl::flush()
 }
 
 
-Ui::FontMetrics PainterImpl::fontMetrics() const
-{
-  Ui::ImagePainter painter( Application::instance().mainScreen().impl()->image() );
-	
-  painter.setFont( _font );
-
-  return painter.fontMetrics();
-}
-
-
 Ui::FontMetrics PainterImpl::fontMetrics( Pt::String text ) const
-{
-  Ui::ImagePainter painter( Application::instance().mainScreen().impl()->image() );
-	
-  painter.setFont( _font );
-
-  return painter.fontMetrics(text);
+{  
+  return Ui::ImagePainter::fontMetrics( _font, text);
 }
 
-	
-const std::list<std::string>& PainterImpl::fontFamilyNames()
-{
-   Ui::ImagePainter painter( Application::instance().mainScreen().impl()->image() );
-  return painter.fontFamilyNames();
+
+void PainterImpl::clear( const Ui::Color& color )
+{      
+ _surface->path().clear();
+
+  setBrush( Ui::Brush(color) );
+  fillRect( Ui::RectF(Ui::PointF( 0,0 ), _surface->size() ) ); 
 }
 
 

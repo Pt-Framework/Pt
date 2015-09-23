@@ -292,14 +292,15 @@ void Widget::onLayout( PaintSurface& surface )
 
 void Widget::render()
 {
-	if(!Visible.get()  && _isValid )
+	if( !Visible.get())
 		return;
 
 	//Layout children
 	onLayout( surface() );	
 
 	//Render       
-	onRender( surface() );		  
+  if( !_isValid )
+	  onRender( surface() );		  
 
 	//Render children
 	for( size_t i = 0; i < _children.size(); ++i )
@@ -381,7 +382,7 @@ void Widget::onRender( PaintSurface& surface )
 			
 			case ImageLayout::Strech:
 			{
-				Ui::Image strech = backImage.blockScale( size );
+				Ui::Image strech = backImage.blockScale( Ui::Size((int) size.width(), (int)size.height() ) );
 				painter.drawImage( pos, strech );
 			}
 			break;
@@ -389,7 +390,7 @@ void Widget::onRender( PaintSurface& surface )
 			case ImageLayout::Zoom:
 			{
         const double factor = size.width()/(double)backImage.width();
-        Pt::Ui::SizeF newSize(backImage.width()*factor, (Pt::size_t)(backImage.height()*factor));
+        Pt::Ui::Size newSize( ( size_t)( backImage.width()*factor), (size_t)(backImage.height()*factor));
 
         Ui::Image strech = backImage.blockScale(newSize);
 				
@@ -402,7 +403,7 @@ void Widget::onRender( PaintSurface& surface )
 
 
 void Widget::onInvalidate()
-{
+{  
 	if( parent() )
 		parent()->invalidate();		    
 }

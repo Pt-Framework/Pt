@@ -310,6 +310,17 @@ class BasicRect
             return _p != other._p || _s != other._s;
         }
 
+        std::vector<BasicPoint<PointT> > points() const
+        {
+          std::vector<BasicPoint<PointT> > point;
+
+          point.push_back( topLeft() );
+          point.push_back( topRight() );
+          point.push_back( bottomRight() );
+          point.push_back( bottomLeft() );
+          return point;
+        }
+
     protected:
         BasicPoint<PointT> _p;
         BasicSize<SizeT>  _s;

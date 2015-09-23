@@ -36,185 +36,73 @@
 #include <Pt/Ui/FontMetrics.h>
 #include <Pt/String.h>
 #include "Pt/System/Clock.h"
-#include "DrawPolyline.h"
-#include "DrawThinPolyline.h"
-#include "DrawWideSolidPolyline.h"
-#include "DrawWideDashPolyline.h"
-#include "DrawEllipse.h"
-#include "DrawThinEllipse.h"
-#include "DrawThickEllipse.h"
-#include "DrawText.h"
-#include "FillEllipse.h"
-#include "FillPolygon.h"
-#include "Fill.h"
-#include "Stroke.h"
 
 namespace Pt {
 namespace Ui {
 
 ImagePainter::ImagePainter( Image& image )
-: _image( image )
-, _font("Vera", 12)
-, _drawPolyline( 0 )
-, _drawThinPolyline(0 )
-, _drawWideSolidPolyline( 0)
-, _drawEllipse( 0 )
-, _drawThinEllipse( 0 )
-, _drawThickEllipse( 0 )
-, _fillPolygon( 0 )
-, _drawText( 0 )
-, _stroke( 0 )
-, _fillSolid( 0 )
-, _fillTexture( 0 )
-, _renderMode( RenderMode::NoAlpha )
+: _rasterizer( image  )
 {
-    std::auto_ptr<FillSolid>              fillSolid( new FillSolid() );
-    std::auto_ptr<FillTexture>            fillTexture( new FillTexture() );
-    std::auto_ptr<Stroke>                 stroke( new Stroke(_renderMode) );
-    std::auto_ptr<DrawThinPolyline>       dThinPolyline( new DrawThinPolyline );
-    dThinPolyline->setOutput( *stroke );
-    std::auto_ptr<DrawWideSolidPolyline>  dWidePolyline( new DrawWideSolidPolyline );
-    std::auto_ptr<DrawWideDashPolyline>   dWideDashPolyline( new DrawWideDashPolyline );
-    dWidePolyline->setOutput( *stroke );
-    dWideDashPolyline->setOutput( *stroke );
-    std::auto_ptr<DrawText>               dText( new DrawText() );
-    dText->setFont(_font);
-    std::auto_ptr<DrawThinEllipse>        dThinEllipse( new DrawThinEllipse() );
-    std::auto_ptr<DrawThickEllipse>       dThickEllipse( new DrawThickEllipse() );
-    std::auto_ptr<FillPolygon>            fillPolygon( new FillPolygon() );
-    fillPolygon->setOutput( *fillSolid );
-    std::auto_ptr<FillEllipse>            fillEllipse( new FillEllipse() );
-
-
-    _drawThinPolyline        = dThinPolyline.release();
-    _drawWideSolidPolyline   = dWidePolyline.release();
-    _drawWideDashPolyline    = dWideDashPolyline.release();
-    _drawPolyline            = _drawThinPolyline;
-    _drawText                = dText.release();
-    _drawThinEllipse         = dThinEllipse.release();
-    _drawThickEllipse        = dThickEllipse.release();
-    _drawEllipse             = _drawThinEllipse;
-    _fillEllipse             = fillEllipse.release();
-    _fillPolygon             = fillPolygon.release();
-    _fillSolid               = fillSolid.release();
-    _fillTexture             = fillTexture.release();
-    _stroke                  = stroke.release();
 }
+
 
 ImagePainter::~ImagePainter()
 {
-    try 
-    {
-        delete _drawThinPolyline;
-        delete _drawWideSolidPolyline;
-        delete _drawWideDashPolyline;
-        delete _fillPolygon;
-        delete _drawText;
-        delete _drawThinEllipse;
-        delete _drawThickEllipse;
-        delete _fillEllipse;
-        delete _stroke;
-        delete _fillTexture;
-        delete _fillSolid;
-   }
-   catch(...) {}
+
 }
 
 
 void ImagePainter::setRenderMode( RenderMode::Type mode)
 {
-	_renderMode = mode;
+	_rasterizer.setRenderMode( mode);
 }
 
 
 void ImagePainter::setPen( const Pen& pen )
 {
-    _pen = pen;
-
-    if( _pen.size() == 1 )
-    {
-        _drawPolyline   = _drawThinPolyline;
-        _drawEllipse    = _drawThinEllipse;
-    }
-    else
-    {
-        if( _pen.style() == Pen::SolidStyle )
-            _drawPolyline = _drawWideSolidPolyline;
-        else
-            _drawPolyline = _drawWideDashPolyline;
-
-        _drawEllipse = _drawThickEllipse;
-    }
+  _rasterizer.setPen( pen ) ;
 }
 
 const Pen& ImagePainter::pen() const
 {
-    return _pen;
+    return _rasterizer.pen();
 }
 
 void ImagePainter::setBrush(const Brush& brush)
 {
-    _brush = brush;
-
-    if(_brush.fillStyle() == Brush::TextureFill)
-    {
-        _fillPolygon->setOutput( *_fillTexture );
-        _fillEllipse->setOutput( *_fillTexture );
-    }
-    else
-    {
-        _fillPolygon->setOutput( *_fillSolid );
-        _fillEllipse->setOutput( *_fillSolid );
-    }
+  _rasterizer.setBrush( brush);
 }
 
 const Brush& ImagePainter::brush() const
 {
-    return _brush;
+    return _rasterizer.brush();
 }
 
 void ImagePainter::setFont(const Font& font)
-{
-    _font = font;
-    _drawText->setFont(_font);
+{    
+    _rasterizer.setFont( font );
 }
 
 const Font& ImagePainter::font() const
 {
-    return _font;
-}
-
-FontMetrics ImagePainter::fontMetrics() const
-{
-    return fontMetrics( Pt::String() );
+    return _rasterizer.font();
 }
 
 FontMetrics ImagePainter::fontMetrics( String text) const
 {
-    return _drawText->fontMetrics( text );
+    return _rasterizer.fontMetrics( text );
 }
-
-const std::list<std::string>& ImagePainter::fontFamilyNames()
-{
-    static const std::list<std::string> empty;
-    return empty;
-}
-
 
 void ImagePainter::drawLine(const PointF& from, const  PointF& to)
 {
-    if( _pen.size()  == 0 )
-        return;
-
     PointF points[] = { from ,  to  };
-
-    _drawPolyline->draw(_image, _pen, points, 2);
+    _rasterizer.stroke( points, 2);
 }
 
 
 void ImagePainter::drawText( const PointF& to, const String& text )
 { 
-   _drawText->draw( _image, _pen.color(), to , text );
+  _rasterizer.strokeText( to, text );
 }
 
 
@@ -233,6 +121,7 @@ void ImagePainter::drawRect(const  RectF& rect)
                    rect.topLeft() );
 }
 
+
 void ImagePainter::fillRect(const  RectF& r)
 {
     std::vector<PointF> points( 4);
@@ -241,126 +130,67 @@ void ImagePainter::fillRect(const  RectF& r)
     points.push_back( r.topRight() );
     points.push_back( r.bottomRight() );
     points.push_back( r.bottomLeft() );        
-    
-    
-    this->fillPolygon( &points[0], points.size() );
+        
+    _rasterizer.fill(  &points[0], points.size() );
 }
+
 
 void ImagePainter::drawEllipse( const  PointF& topLeft, const  SizeF& size )
 {
-    _drawEllipse->draw( _image, _pen, topLeft, size );
+  _rasterizer.strokeEllipse( topLeft, size );
 }
+
 
 void ImagePainter::fillEllipse( const  PointF& topLeft, const  SizeF& size )
 {
-    _fillEllipse->draw( _image, _brush, topLeft, size );
+   _rasterizer.fillEllipse( topLeft, size );
 }
+
 
 void ImagePainter::drawPolyline( const  PointF* ps, const size_t pointCount )
 {
-  if( _pen.size()  == 0 )
-      return;	
-	
-  _drawPolyline->draw( _image, _pen, ps, pointCount);
+  _rasterizer.stroke( ps, pointCount );
 }
 
 
 void ImagePainter::fillPolygon( const  PointF* ps, const size_t pointCount )
 {    
-  _fillPolygon->draw( _image, _brush, ps, pointCount );
+  _rasterizer.fill( ps, pointCount );
 }
 
 
-void ImagePainter::drawImage( const  PointF& p, const Image& sourceImage )
+void ImagePainter::drawImage( const  PointF& to, const Image& image )
 {
-	if( sourceImage.format() != _image.format() )
-		throw std::logic_error( "wrong image format");
-
-  PointF to = p;
-  //source
-  int xSourceBegin = 0;
-  int ySourceBegin = 0;
-
-  //target
-  int xTargetBegin = to.x();
-  int yTargetBegin = to.y();
-
-  if( to.x() >= _image.width() )
-     return;
-
-  if( to.x() < 0 )
-  {
-    xSourceBegin = -to.x();
-    xTargetBegin = 0;
-  }
-
-  if( to.y() > _image.height() )
-     return;
-
-  if( to.y() < 0 )
-  {
-    ySourceBegin = -to.y();
-    yTargetBegin = 0;
-  }
-
-  int lineLength = sourceImage.width();   
-
-  if( to.x()  < 0 )
-    lineLength += to.x();
-
-  if( (xTargetBegin + lineLength) > _image.width()  )
-      lineLength -= (xTargetBegin + lineLength) - _image.width() ;
- 
-  if( lineLength  <=  0 )
-    return;  
-   
-  const int endYOffset = to.y() + sourceImage.height();
-
-  int lines = sourceImage.height();   
-
-  if( endYOffset >  _image.height()  )
-      lines = _image.height() - yTargetBegin;
-
-  if( endYOffset  <  0 )
-    return;
-  
-  const Pt::uint8_t* scanLineSource = sourceImage.pixel( xSourceBegin, ySourceBegin );
-  Pt::uint8_t* scanLineTarget = _image.pixel( xTargetBegin, yTargetBegin );
-
-  const int targetStride = _image.width() * _image.format().pixelSize() +  _image.stride();
-  const int sourceStride = sourceImage.width() * sourceImage.format().pixelSize() +  sourceImage.stride();
-
-  const std::size_t lineSize = lineLength * _image.format().pixelSize();
-
-  //Render
-  switch( _renderMode )
-  {
-    case RenderMode::NoAlpha:
-    {	//Copy to new image	          
-			for(int i = 0; i < lines; ++i )
-			{                
-        memcpy( scanLineTarget, scanLineSource, lineSize );
-        scanLineSource += sourceStride;
-        scanLineTarget += targetStride;
-			}	
-    }
-    break;
-
-    case RenderMode::AlphaBlit:
-      //TODO:
-    break;
-
-    case RenderMode::AlphaBlending:
-      //TODO:
-    break;
-  }
+  _rasterizer.image( to, image );
 }
 
+
+FontMetrics ImagePainter::fontMetrics( const Font& font, const Pt::String& text )
+{
+  return Rasterizer::fontMetrics( font, text );
+}
 
 void ImagePainter::drawPath( const RenderPath& path )
 {  
    path.render( *this );
 }
+
+
+void ImagePainter::setClip( const RectF& clip )
+{
+  _rasterizer.setClip( clip );
+}
+        
+const Ui::RectF& ImagePainter::clip() const
+{
+  return _rasterizer.clip();
+}
+
+void ImagePainter::clear( const Ui::Color& color )
+{
+  _rasterizer.clear( color );
+}
+
 
 }} //namespace
 

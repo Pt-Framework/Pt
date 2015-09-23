@@ -31,8 +31,8 @@
 #include <Pt/Types.h>
 #include <Pt/Ui/Api.h>
 #include <Pt/Ui/ImageFormat.h>
-#include <Pt/Ui/Region.h>
 #include <Pt/Ui/Size.h>
+#include <Pt/Ui/Rect.h>
 #include <vector>
 #include <cstring>
 
@@ -136,16 +136,23 @@ class PT_UI_API Image
 		Image convert(const ImageFormat& toFormat) const;
 		
 
-		Image subImage( const Region& region) const ;
+		Image subImage( const Rect& rect) const ;
     
     
-    Image blockScale( const SizeF& newSize) const;
+    Image blockScale( const Size& newSize) const;
 
 
 		const Image& operator=(const Image& image)
 		{
 			_format = image._format;
-			_buffer = image._buffer;
+
+      _defaultBuffer = image._defaultBuffer;
+
+      if( _defaultBuffer.size() != 0 )         
+        _buffer = &_defaultBuffer[0];
+      else
+        _buffer = image._buffer;
+
 			_width = image._width;
 			_height = image._height;
 			_stride = image._stride;

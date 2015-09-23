@@ -32,6 +32,7 @@
 #include <Pt/Ui/Image.h>
 #include <Pt/Ui/ImagePainter.h>
 #include <Pt/Ui/ClipPolygon.h>
+#include <Pt/Ui/Rasterizer.h>
 #include "DemoImage.h"
 #include "AtesionIcon.h"
 #include <sstream>
@@ -50,7 +51,7 @@ MainWindow::~MainWindow()
 {
 }
 
-
+#if 0
 void MainWindow::init()
 {	
 
@@ -178,6 +179,48 @@ void MainWindow::init()
 	_childWindow2.addChild(&_mainPanel);
 
 	BackgroundImage = _drawBuffer;
+}
+
+#endif
+
+void MainWindow::init()
+{
+	Position = Ui::PointF(20,20);
+	Size = Ui::SizeF(800,600);
+	ShowTitle = true;	
+	ShowInTaskbar = true;
+	ShowSysMenu = true;
+	Border = WindowBorder::Sizeable;	
+  State = Hmi::WindowState::Normal;
+	StartPostion = Hmi::WindowStartPosition::CenterParent;
+	Closed += Pt::slot(*this, &MainWindow::onClosed);
+	BackColor = Ui::Color(0,1,0);
+
+   Ui::Image image( Ui::Size( 1000,1000) );
+   Ui::Rasterizer raster( image );
+   Ui::RectF clip(Ui::PointF( 10, 10) , Ui::SizeF(200,200 ) );
+   
+   raster.clear();
+    
+   raster.setPen( Ui::Pen(5, Ui::Color( 1, 0, 0) ) );
+
+   Ui::RectF rect( Ui::PointF(20,20) , Ui::SizeF( 200,400 ) );
+   
+   raster.setBrush( Ui::Brush( Ui::Color(0,1,0 )));
+
+   raster.fill(&clip.points()[0], 4 );
+
+   raster.setClip(clip);  
+
+   std::vector<Ui::PointF> points = rect.points();
+
+   points.push_back( points[0] );
+   
+   raster.setBrush( Ui::Brush( Ui::Color(1,1,0 )));
+
+   raster.fill( &points[0], points.size() );
+
+   BackgroundImage = image;
 }
 
 

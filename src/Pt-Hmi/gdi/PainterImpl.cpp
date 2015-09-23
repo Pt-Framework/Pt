@@ -31,7 +31,6 @@
 #include "Pt/Types.h"
 #include <Pt/System/Clock.h>
 #include "Pt/Ui/Rect.h"
-#include "Pt/Ui/Region.h"
 #include "Pt/Ui/FontMetrics.h"
 #include "Pt/Ui/Color.h"
 #include <Pt/Hmi/PaintSurface.h>
@@ -301,16 +300,6 @@ const Ui::Font& PainterImpl::font() const
     return _font;
 }
 
-
-Ui::FontMetrics PainterImpl::fontMetrics() const
-{
-    TEXTMETRIC metrics;
-    GetTextMetrics(_surface->deviceContext(), &metrics);
-
-    return Ui::FontMetrics(metrics.tmAscent, metrics.tmDescent, 0, metrics.tmHeight);
-}
-
-
 Ui::FontMetrics PainterImpl::fontMetrics(Pt::String text) const
 {
     SIZE textSize;
@@ -381,12 +370,6 @@ const std::list<std::string>& PainterImpl::fontFamilyNames()
     }
 
     return _fontNamesList;
-}
-
-
-int PainterImpl::depth() const
-{
-    return GetDeviceCaps(_surface->deviceContext(), BITSPIXEL);
 }
 
 
@@ -528,7 +511,6 @@ void PainterImpl::fillPolygon(const Ui::PointF* points, const size_t pointCount)
 
 void PainterImpl::drawSurface(const Ui::PointF& toF, const PaintSurface& surface)
 {
-
 	Ui::Point to = _screen.fromUnit(toF);
 	Ui::Size size = _screen.fromUnit(surface.size());
 
@@ -604,9 +586,26 @@ void PainterImpl::setSurface(PaintSurface& surface)
 }
 
 
+Ui::FontMetrics PainterImpl::fontMetrics( const Ui::Font& font, const Pt::String& text )
+{
+  PaintSurface surface;
+  surface.resize( Ui::SizeF(200, 200) );
+  surface.painter().setFont( font );
+  return surface.painter().fontMetrics( text );
+}
+
+
 void PainterImpl::drawPath( const Ui::RenderPath& path )
 {
   path.render( *this );
+}
+
+
+void PainterImpl::clear( const Ui::Color& color )
+{
+  Ui::RectF rect(Ui::PointF(0,0), _surface->size() );   
+  setBrush( Ui::Brush( color ) );
+  fillRect( rect );
 }
 
 }}

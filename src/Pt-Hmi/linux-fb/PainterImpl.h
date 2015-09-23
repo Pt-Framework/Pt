@@ -72,11 +72,6 @@ class PainterImpl
     
     void flush();
         
-	int depth() const
-	{
-		return 0;
-	}
-
   public:
     void setPen( const Ui::Pen& pen )
     {
@@ -106,9 +101,7 @@ class PainterImpl
     const Ui::Font& font() const
     {
 	    return _font;
-    }
-
-    Ui::FontMetrics fontMetrics() const;
+    }    
     
     Ui::FontMetrics fontMetrics( Pt::String text ) const;
     
@@ -130,12 +123,25 @@ class PainterImpl
 	    //Todo: add font name.
     }
 
+    void setClip( const Ui::RectF& clip )
+    {
+      _clip = clip;
+    }
+
+    const Ui::RectF& clip() const
+    {
+      return _clip;
+    }
+
+    void clear( const Ui::Color& color );
+
   private:
 	  PaintSurfaceImpl*   	_surface;	
 	  Ui::RenderMode::Type 	_renderMode;
 	  Ui::Font 				_font;
 	  Ui::Pen   			_pen;
  	  Ui::Brush 			_brush;	  
+    Ui::RectF       _clip;
 };
 
 }}

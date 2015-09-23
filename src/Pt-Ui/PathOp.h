@@ -23,58 +23,58 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_UI_TEXTEOP_H
-#define PT_UI_TEXTEOP_H
+#ifndef PT_UI_PATHOP_H
+#define PT_UI_PATHOP_H
 
 #include "RenderOp.h"
+#include <Pt/Ui/RenderPath.h>
 
 namespace Pt {
 namespace Ui {
 
-class TextOp : public RenderOp
+class PathOp : public RenderOp
 {
-  public:    
-
-    TextOp( const TextOp& op )
-    :  RenderOp( op )
-    , _pen( op._pen )
-    , _font( op._font )     
-    , _text( op._text )
+  public:        
+    PathOp( const RectF& clip, const RenderPath& path )    
+    : _path( path )
     {
+      outline() = clip.points();
     }
 
-    TextOp( const Pen& pen, const Font& font, const Pt::String& text )
-    : _pen( pen )
-    , _font( font )     
-    , _text( text )
-    {
-    }    
+
+    PathOp( const PathOp& op )
+    : RenderOp( op )    
+    {       
+    }
+
 
     virtual void execute( Painter& painter ) const 
     {
-       if( outline().empty() )
-          return;
+      const RectF& orgClip = painter.clip();        
+      const RectF  clip( outline()[0], outline()[2] );
 
-        painter.setPen( _pen );
-        painter.setFont( _font );        
-        
-        painter.drawText( outline()[0], _text );        
+      painter.setClip( clip );
+
+      painter.drawPath( _path );
+
+      painter.setClip( orgClip );
     }
+
 
     virtual RenderOp* clone()  const 
     {
-       return new TextOp( *this );
+       return new PathOp( *this );
     }
+
 
     virtual std::string name() const
     {
-      return "text";
+      return "path";
     }
 
+
   private:
-    Pen _pen;
-    Font _font;    
-    Pt::String _text;
+    RenderPath _path;    
 };
 
 }}
