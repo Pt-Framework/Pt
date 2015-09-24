@@ -135,19 +135,24 @@ Image Image::blockScale( const Size& newSize) const
 Image Image::subImage( const Rect& regionIn) const
 {
 	//Cliping.
-	Rect clipedRegion = regionIn;
-	
+	int width = _width;
+	int height = _height;
+	int x = regionIn.left();
+	int y = regionIn.top();
+
 	if( regionIn.left() + regionIn.width() >= _width )
-		clipedRegion.setWidth( _width - regionIn.left() );
+		width =  _width - regionIn.left();
 
 	if( regionIn.top() + regionIn.height() >= _height )
-		clipedRegion.setWidth( _height - regionIn.top() );
+		height =  _height - regionIn.top() ;
 
 	if( regionIn.left() < 0)
-		clipedRegion.setLeft(0);
+		x = 0;
 
 	if( regionIn.top() < 0)
-		clipedRegion.setTop(0);
+		y = 0;
+
+	Rect clipedRegion( Point(x,y), Size(width, height ) );
 
 	//Copy to new image
 	Image image(Gfx::Size( clipedRegion.width(), clipedRegion.height()), *_format, _stride );

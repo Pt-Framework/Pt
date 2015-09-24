@@ -68,53 +68,24 @@ class BasicRect
         }
 
         //! @brief Set this BasicRect using the given BasicPoint and BasicSize
-        BasicRect& setGeometry(const BasicPoint<PointT>& p,
-                                const BasicSize<SizeT>& s)
+        void set(const BasicPoint<PointT>& p, const BasicSize<SizeT>& s)
         {
             _p = p;
             _s = s;
-            return *this;
         }
 
         //! @brief Set this BasicRect using the given BasicPoints
-        BasicRect& setGeometry(const BasicPoint<PointT>& p1, const BasicPoint<PointT>& p2)
+        void set(const BasicPoint<PointT>& p1, const BasicPoint<PointT>& p2)
         {
             this->setOrigin( p1 );
             this->setWidth(p2.x() - p1.x() + 1);
             this->setHeight(p2.y() - p1.y() + 1);
-            return *this;
-        }
-
-        //! @brief Set the origin of this BasicRect using the given BasicPoint
-        void setOrigin(const BasicPoint<PointT>& p)
-        {
-            _p = p;
-        }
-
-        //! @brief Set the origin of this BasicRect using the given X and Y values
-        void setOrigin(PointT x, PointT y)
-        {
-            _p.set(x, y);
         }
 
         //! @brief Return the origin of this BasicRect as a const BasicPoint
         const BasicPoint<PointT>& origin() const
         {
             return _p;
-        }
-
-        //! @brief Set the X origin of this BasicRect
-        BasicRect& setX(PointT x)
-        {
-            _p.setX( x );
-            return *this;
-        }
-
-        //! @brief Set the Y origin of this BasicRect
-        BasicRect& setY(PointT y)
-        {
-            _p.setY( y );
-            return *this;
         }
 
         //! @brief Return the X origin of this BasicRect
@@ -129,34 +100,10 @@ class BasicRect
             return _p.y();
         }
 
-        //! @brief Set the width and height of this BasicRect using the given BasicSize
-        void setSize(const BasicSize<SizeT>& s)
-        {
-            _s = s;
-        }
-
-        //! @brief Set the width and height of this BasicRect using the given width and height values
-        void setSize(SizeT width, SizeT height)
-        {
-            _s.setWidthHeight(width, height);
-        }
-
         //! @brief Return the width and height of this BasicRect as a const BasicSize
         const BasicSize<SizeT>& size() const
         {
             return _s;
-        }
-
-        //! @brief Set the width of this BasicRect
-        void setWidth(SizeT w)
-        {
-            _s.setWidth(w);
-        }
-
-        //! @brief Set the height of this BasicRect
-        void setHeight(SizeT w)
-        {
-            _s.setHeight(w);
         }
 
         //! @brief Return the width of this BasicRect
@@ -169,32 +116,6 @@ class BasicRect
         SizeT height() const
         {
             return _s.height();
-        }
-
-        //! @brief Move the left side of this BasicRect to the given coordinate (does not resize the BasicRect)
-        void setLeft(PointT value)
-        {
-            setWidth( this->width() + this->x() - value );
-            setX( value );
-        }
-
-        //! @brief Move the top side of this BasicRect to the given coordinate (does not resize the BasicRect)
-        void setTop(PointT value)
-        {
-            setHeight( this->height() + this->y() - value );
-            setY( value );
-        }
-
-        //! @brief Move the right side of this BasicRect to the given coordinate (resize the BasicRect)
-        void setRight( PointT value )
-        {
-            setWidth( this->width() + (value - right()) );
-        }
-
-        //! @brief Move the bottom side of this BasicRect to the given coordinate (resize the BasicRect)
-        void setBottom( PointT value )
-        {
-            setHeight( this->height() + value - this->bottom() );
         }
 
         //! @brief Return the X coordinate of the left side of this BasicRect
@@ -219,62 +140,6 @@ class BasicRect
         PointT bottom() const
         {
             return _p.y() + _s.height() - 1;
-        }
-
-        //! @brief Increment the position of the left side of this BasicRect by the given value
-        BasicRect& addLeft(PointT delta)
-        {
-          setLeft( left() + delta);
-          return *this;
-        }
-
-        //! @brief Decrement the position of the left side of this BasicRect by the given value
-        BasicRect& subLeft(PointT delta)
-        {
-          setLeft( left() - delta);
-          return *this;
-        }
-
-        //! @brief Increment the position of the top side of this BasicRect by the given value
-        BasicRect& addTop(PointT delta)
-        {
-          setTop( top() +  delta);
-          return *this;
-        }
-
-        //! @brief Decrement the position of the top side of this BasicRect by the given value
-        BasicRect& subTop(PointT delta)
-        {
-          setTop( top() -  delta);
-          return *this;
-        }
-
-        //! @brief Increment the position of the right side of this BasicRect by the given value
-        BasicRect& addRight(PointT delta)
-        {
-          setRight( right() +  delta);
-          return *this;
-        }
-
-        //! @brief Decrement the position of the right side of this BasicRect by the given value
-        BasicRect& subRight(PointT delta)
-        {
-          setRight( right() -  delta);
-          return *this;
-        }
-
-        //! @brief Increment the position of the bottom side of this BasicRect by the given value
-        BasicRect& addBottom(PointT delta)
-        {
-          setBottom( bottom() +  delta);
-          return *this;
-        }
-
-        //! @brief Decrement the position of the bottom side of this BasicRect by the given value
-        BasicRect& subBottom(PointT delta)
-        {
-          setBottom( bottom() -  delta);
-          return * this;
         }
 
         //! @brief Return the top left coordinates as a const BasicPoint<SizeT>
@@ -320,12 +185,6 @@ class BasicRect
           point.push_back( bottomLeft() );
           return point;
         }
-
-				bool empty() const
-				{
-					return _s.width() == 0 || _s.height() == 0;
-				}
-
 
 				BasicRect<PointT,SizeT> intersect( const BasicRect<PointT,SizeT>& r ) const 
 				{

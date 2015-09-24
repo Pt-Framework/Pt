@@ -56,7 +56,7 @@ class PathOp : public RenderOp
 			
 			const RectF interClip = orgClip.intersect( _clip );
 			 
-			if( interClip.empty() )
+			if( interClip.isNull() )
 				return;
 			
 			painter.setClip( orgClip.intersect( _clip ) );
