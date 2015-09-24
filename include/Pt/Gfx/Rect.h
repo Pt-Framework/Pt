@@ -336,7 +336,7 @@ class BasicRect
 					inter.setRight( std::min(this->right(), r.right() ) );
 					inter.setBottom( std::min(this->bottom(), r.bottom() ) );
 
-					if( inter.right() > inter.left() && inter.bottom() > inter.top() )
+					if( !(inter.right() > inter.left() && inter.bottom() > inter.top()) )
 						return BasicRect<PointT,SizeT>();
 
 					return inter;
