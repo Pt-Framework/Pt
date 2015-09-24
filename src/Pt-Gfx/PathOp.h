@@ -37,14 +37,15 @@ class PathOp : public RenderOp
   public:        
     PathOp( const RectF& clip, const RenderPath& path )    
     : _path( path )
+		, _clip( clip )
     {
-      outline() = clip.points();
     }
 
 
     PathOp( const PathOp& op )
     : RenderOp( op )    
     , _path( op._path )
+		, _clip( op._clip )
     {       
     }
 
@@ -52,9 +53,8 @@ class PathOp : public RenderOp
     virtual void execute( Painter& painter ) const 
     {
       const RectF& orgClip = painter.clip();        
-      const RectF  clip( outline()[0], outline()[2] );
 
-      painter.setClip( clip );
+      painter.setClip( _clip );
 
       painter.drawPath( _path );
 
@@ -75,12 +75,13 @@ class PathOp : public RenderOp
 
 		virtual void translate( double x, double y )
 		{
-			RenderOp::translate( x, y );
-			_path.translate( x, y );
+			_path.translate( x, y );						
+			_clip = RectF( PointF( _clip.topLeft().x() + x, _clip.topLeft().y() + y ), _clip.size() );			
 		}
 		
   private:
     RenderPath _path;    
+		Gfx::RectF _clip;
 };
 
 }}
