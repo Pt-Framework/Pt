@@ -41,6 +41,7 @@ DrawText::DrawText()
 : _fontAngle( 0 )
 , _faceId( 0 )
 , _charMapId( 0 )
+, _clip( PointF( 0, 0), SizeF( 60000, 60000))
 {
     _matrix.xx = 0;
     _matrix.xy = 0;
