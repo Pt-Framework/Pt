@@ -54,11 +54,15 @@ class PathOp : public RenderOp
     {
       const RectF& orgClip = painter.clip();        
 			
-      painter.setClip( orgClip.intersect( _clip ) );
+			const RectF interClip = orgClip.intersect( _clip );
+			 
+			if( interClip.empty() )
+				return;
+			
+			painter.setClip( orgClip.intersect( _clip ) );
 
-      painter.drawPath( _path );
-
-      painter.setClip( orgClip );
+			painter.drawPath( _path );
+			painter.setClip( orgClip );      
     }
 
 
