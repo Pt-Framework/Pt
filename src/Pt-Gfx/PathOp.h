@@ -52,27 +52,21 @@ class PathOp : public RenderOp
 
     virtual void execute( Painter& painter ) const 
     {
-      	RectF orgClip   = painter.clip();        			
-		RectF interClip = orgClip.intersect( _clip );		 		
+      RectF orgClip   = painter.clip();        			
+			RectF interClip = orgClip.intersect( _clip );		 		
 
-		if( interClip.isNull() )
-			return;
+			if( interClip.isNull() )
+				return;
 
-		painter.setClip( interClip );
-		painter.drawPath( _path );
-		painter.setClip( orgClip );      
+			painter.setClip( interClip );
+			painter.drawPath( _path );
+			painter.setClip( orgClip );      
     }
 
 
     virtual RenderOp* clone()  const 
     {
        return new PathOp( *this );
-    }
-
-
-    virtual std::string name() const
-    {
-      return "path";
     }
 
 		virtual void translate( double x, double y )

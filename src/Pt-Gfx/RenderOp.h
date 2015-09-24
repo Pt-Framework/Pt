@@ -43,29 +43,23 @@ class RenderOp : private Pt::NonCopyable
 
     virtual RenderOp* clone() const = 0;
 
-    const std::vector<PointF>& outline() const
+    const std::vector<PointF>& points() const
     {
-        return _outline;
+        return _points;
     }
 
     
-    std::vector<PointF>& outline()
+    std::vector<PointF>& points()
     {
-        return _outline;
-    }
-
-        
-    virtual std::string name() const
-    {
-      return "op";
+        return _points;
     }
 
 		virtual void translate( double x, double y )
 		{
-			for( size_t i = 0; i < _outline.size(); ++ i)
+			for( size_t i = 0; i < _points.size(); ++ i)
 			{
-				_outline[i].addX( x );
-				_outline[i].addY( y );
+				_points[i].addX( x );
+				_points[i].addY( y );
 			}				
 		}
 
@@ -75,11 +69,11 @@ class RenderOp : private Pt::NonCopyable
     }  
 
     RenderOp(const RenderOp& op)
-    : _outline( op._outline )
+    : _points( op._points )
     {         
     }  
 
-    std::vector<PointF> _outline;
+    std::vector<PointF> _points;
 };
 
 }}

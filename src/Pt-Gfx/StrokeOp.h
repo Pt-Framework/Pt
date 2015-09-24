@@ -35,28 +35,28 @@ class StrokeOp : public RenderOp
 {
   public:    
     
-    StrokeOp(const Pen& pen, const PointF* points, size_t count )
+    StrokeOp(const Pen& pen, const PointF* pts, size_t count )
     : _pen( pen ) 
     {
-      outline().assign( points, points + count );
+      points().assign( pts, pts + count );
     }
 
     StrokeOp(const Pen& pen, const PointF& from, const PointF& to )
     : _pen( pen ) 
     {
-      outline().push_back( from );
-      outline().push_back( to );
+      points().push_back( from );
+      points().push_back( to );
     }
 
     
     StrokeOp(const Pen& pen, const RectF& rect )
     : _pen( pen ) 
     {
-      outline().push_back( rect.topLeft() );
-      outline().push_back(rect.topRight() );
-      outline().push_back(rect.bottomRight() );
-      outline().push_back(rect.bottomLeft() );
-      outline().push_back(rect.topLeft() );
+      points().push_back( rect.topLeft() );
+      points().push_back(rect.topRight() );
+      points().push_back(rect.bottomRight() );
+      points().push_back(rect.bottomLeft() );
+      points().push_back(rect.topLeft() );
     }
 
     StrokeOp( const StrokeOp& op )
@@ -67,21 +67,16 @@ class StrokeOp : public RenderOp
 
     virtual void execute( Painter& painter ) const 
     {
-        if( outline().empty() )
+        if( points().empty() )
           return;
 
         painter.setPen( _pen );
-        painter.drawPolyline( &outline()[0], outline().size() );
+        painter.drawPolyline( &points()[0], points().size() );
     }
 
     virtual RenderOp* clone()  const 
     {
        return new StrokeOp( *this );
-    }
-
-    virtual std::string name() const
-    {
-      return "stroke";
     }
 
   private:

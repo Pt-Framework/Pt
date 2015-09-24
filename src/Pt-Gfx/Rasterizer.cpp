@@ -1841,10 +1841,10 @@ void Rasterizer::bresenhamLineSegment( int signdx, int signdy, int axis, int x1,
 
 void Rasterizer::stroke( int x, int y)
 {  
-  if( x < _clip.left()  || x >= _clip.right())
+  if( x < _clip.left()  || x > _clip.right())
       return;
 
-  if( y < _clip.top() || y >= _clip.bottom())
+  if( y < _clip.top() || y > _clip.bottom())
       return;
 
 	const Image& colorBuffer = _pen.buffer();
@@ -1915,13 +1915,13 @@ void Rasterizer::clipSpan( int& xpos, int& ypos, size_t& length )
 		return;
   }
 
-	if( ypos >= _clip.bottom() )
+	if( ypos > _clip.bottom() )
 	{
 		length = 0;
 		return;
 	}
 
-	if( xpos >= _clip.right() )
+	if( xpos > _clip.right() )
 	{
 		length = 0;
 		return;

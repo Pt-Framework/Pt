@@ -36,26 +36,21 @@ class ImageOp : public RenderOp
 {
   public:        
     ImageOp( const PointF& to, const Image& image )
-    : _to( to )
-    , _image( image )
+    : _image( image )
     {
-      outline().push_back( to );
-      outline().push_back(Gfx::PointF(to.x()+ _image.width() , to.y() ) );
-      outline().push_back(Gfx::PointF(to.x()+ _image.width() , to.y() + _image.height() ) );
-      outline().push_back(Gfx::PointF(to.x() , to.y() + _image.height() ) );
+      points().push_back( to );
     }
 
     ImageOp( const ImageOp& op )
     : RenderOp( op )
-    , _to( op._to)
     , _image( op._image )
     {
     }
 
-
     virtual void execute( Painter& painter ) const 
     {
-        painter.drawImage( _to, _image );   
+				if( !points().empty() )
+					painter.drawImage( points()[0], _image );   
     }
 
 
@@ -63,15 +58,8 @@ class ImageOp : public RenderOp
     {
        return new ImageOp(*this);
     }
-
     
-    virtual std::string name() const
-    {
-      return "image";
-    }
-
-  private:
-    PointF _to;
+  private:    
     const Image& _image;
 };
 

@@ -86,6 +86,7 @@ void RenderPath::translate( double x, double y )
 		_path[i]->translate( x, y );
 }
 
+
 void RenderPath::text( const PointF& to, const Pen& pen, const Font& font, const Pt::String& text)
 {
   _path.push_back( new TextOp(to, pen, font, text) );

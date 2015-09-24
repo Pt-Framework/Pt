@@ -48,28 +48,23 @@ class TextOp : public RenderOp
     , _font( font )     
     , _text( text )
     {
-			outline().push_back( to );
+			points().push_back( to );
     }    
 
     virtual void execute( Painter& painter ) const 
     {
-       if( outline().empty() )
+       if( points().empty() )
           return;
 
         painter.setPen( _pen );
         painter.setFont( _font );        
         
-        painter.drawText( outline()[0], _text );        
+        painter.drawText( points()[0], _text );        
     }
 
     virtual RenderOp* clone()  const 
     {
        return new TextOp( *this );
-    }
-
-    virtual std::string name() const
-    {
-      return "text";
     }
 
   private:

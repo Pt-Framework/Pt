@@ -38,7 +38,7 @@ class EllipseOp : public RenderOp
     EllipseOp(const Pen& pen, const PointF& topLeft, const SizeF& size)
     : _pen( pen ) 
     {
-      outline().push_back( topLeft );
+      points().push_back( topLeft );
     }
 
 
@@ -52,7 +52,7 @@ class EllipseOp : public RenderOp
     virtual void execute( Painter& painter ) const 
     {
         painter.setPen( _pen );
-        painter.drawEllipse( outline()[0], _size );
+        painter.drawEllipse( points()[0], _size );
     }
 
     virtual RenderOp* clone()  const 
@@ -60,14 +60,9 @@ class EllipseOp : public RenderOp
        return new EllipseOp( *this );
     }
 
-    virtual std::string name() const
-    {
-      return "ellipse";
-    }
-
   private:
     Pen _pen;
-   Gfx::SizeF _size;
+    Gfx::SizeF _size;
 };
 
 }}

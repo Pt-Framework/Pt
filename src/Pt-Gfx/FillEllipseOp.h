@@ -38,7 +38,7 @@ class FillEllipseOp : public RenderOp
     FillEllipseOp(const Brush& brush, const PointF& topLeft, const SizeF& size)
     : _brush( brush ) 
     {
-      outline().push_back( topLeft );
+      points().push_back( topLeft );
     }
 
 
@@ -52,7 +52,7 @@ class FillEllipseOp : public RenderOp
     virtual void execute( Painter& painter ) const 
     {
         painter.setBrush( _brush );
-        painter.fillEllipse( outline()[0], _size );
+        painter.fillEllipse( points()[0], _size );
     }
 
     virtual RenderOp* clone()  const 
@@ -60,14 +60,9 @@ class FillEllipseOp : public RenderOp
        return new FillEllipseOp( *this );
     }
 
-    virtual std::string name() const
-    {
-      return "fillEllipse";
-    }
-
   private:
     Brush _brush;
-   Gfx::SizeF _size;
+    Gfx::SizeF _size;
 };
 
 }}

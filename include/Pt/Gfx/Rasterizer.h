@@ -159,12 +159,12 @@ class PT_GFX_API Rasterizer
     void dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace, unsigned int* dash );
         
   private:
-    Image& _image;
+    Image&		_image;
     DrawText*  _text;   
-    RectF    _clip;    
-    Font    _font;
-    Brush   _brush;
-    Pen     _pen;    
+    RectF			_clip;    
+    Font			_font;
+    Brush			_brush;
+    Pen				_pen;    
     RenderMode::Type _mode;     
       
 };

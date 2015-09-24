@@ -35,19 +35,19 @@ class FillOp : public RenderOp
 {
   public:    
     
-    FillOp(const Brush& brush, const PointF* points, size_t count )
+    FillOp(const Brush& brush, const PointF* pts, size_t count )
     : _brush( brush ) 
     {
-      outline().assign( points, points + count );
+      points().assign( pts, pts + count );
     }
 
     FillOp(const Brush& brush, const RectF& rect )
     : _brush( brush ) 
     {
-      outline().push_back( rect.topLeft() );
-      outline().push_back( rect.topRight() );
-      outline().push_back( rect.bottomRight() );
-      outline().push_back( rect.bottomLeft() );      
+      points().push_back( rect.topLeft() );
+      points().push_back( rect.topRight() );
+      points().push_back( rect.bottomRight() );
+      points().push_back( rect.bottomLeft() );      
     }
 
     FillOp( const FillOp& op )
@@ -59,17 +59,12 @@ class FillOp : public RenderOp
     virtual void execute( Painter& painter ) const 
     {
         painter.setBrush( _brush );
-        painter.fillPolygon( &outline()[0], outline().size() );
+        painter.fillPolygon( &points()[0], points().size() );
     }
 
     virtual RenderOp* clone()  const 
     {
        return new FillOp( *this );
-    }
-
-    virtual std::string name() const
-    {
-      return "fill";
     }
 
   private:

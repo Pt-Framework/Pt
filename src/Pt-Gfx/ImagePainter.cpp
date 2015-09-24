@@ -1,7 +1,6 @@
 /*
  * Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2015 Marc Boris Duerner
- * Copyright (C) 2010 Aloysius Indrayanto
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -63,40 +62,47 @@ void ImagePainter::setPen( const Pen& pen )
   _rasterizer.setPen( pen ) ;
 }
 
+
 const Pen& ImagePainter::pen() const
 {
     return _rasterizer.pen();
 }
+
 
 void ImagePainter::setBrush(const Brush& brush)
 {
   _rasterizer.setBrush( brush);
 }
 
+
 const Brush& ImagePainter::brush() const
 {
-    return _rasterizer.brush();
+	return _rasterizer.brush();
 }
+
 
 void ImagePainter::setFont(const Font& font)
 {    
-    _rasterizer.setFont( font );
+	_rasterizer.setFont( font );
 }
+
 
 const Font& ImagePainter::font() const
 {
-    return _rasterizer.font();
+	return _rasterizer.font();
 }
+
 
 FontMetrics ImagePainter::fontMetrics( String text) const
 {
-    return _rasterizer.fontMetrics( text );
+	return _rasterizer.fontMetrics( text );
 }
+
 
 void ImagePainter::drawLine(const PointF& from, const  PointF& to)
 {
-    PointF points[] = { from ,  to  };
-    _rasterizer.stroke( points, 2);
+	PointF points[] = { from ,  to  };
+	_rasterizer.stroke( points, 2);
 }
 
 
@@ -106,32 +112,24 @@ void ImagePainter::drawText( const PointF& to, const String& text )
 }
 
 
-void ImagePainter::drawRect(const  RectF& rect)
+void ImagePainter::drawRect( const  RectF& rect )
 {    
+  this->drawLine( rect.topLeft(), rect.topRight() );
 
-    this->drawLine( rect.topLeft(), rect.topRight() );
+  this->drawLine( PointF( rect.topRight().x(), rect.topRight().y()),
+                  PointF( rect.bottomRight().x(), rect.bottomRight().y()) );
 
-    this->drawLine( PointF( rect.topRight().x(), rect.topRight().y()),
-                   PointF( rect.bottomRight().x(), rect.bottomRight().y()) );
+  this->drawLine( PointF( rect.bottomRight().x(), rect.bottomRight().y() ),
+                  PointF( rect.bottomLeft().x(), rect.bottomLeft().y() ) );
 
-    this->drawLine( PointF( rect.bottomRight().x(), rect.bottomRight().y() ),
-                   PointF( rect.bottomLeft().x(), rect.bottomLeft().y() ) );
-
-    this->drawLine( PointF( rect.bottomLeft().x(), rect.bottomLeft().y() ),
-                   rect.topLeft() );
+  this->drawLine( PointF( rect.bottomLeft().x(), rect.bottomLeft().y() ),
+                  rect.topLeft() );
 }
 
 
-void ImagePainter::fillRect(const  RectF& r)
-{
-    std::vector<PointF> points( 4);
-
-    points.push_back( r.topLeft()  ); 
-    points.push_back( r.topRight() );
-    points.push_back( r.bottomRight() );
-    points.push_back( r.bottomLeft() );        
-        
-    _rasterizer.fill(  &points[0], points.size() );
+void ImagePainter::fillRect( const  RectF& r )
+{  
+  _rasterizer.fill( &r.points()[0], 4 );
 }
 
 
@@ -170,6 +168,7 @@ FontMetrics ImagePainter::fontMetrics( const Font& font, const Pt::String& text 
   return Rasterizer::fontMetrics( font, text );
 }
 
+
 void ImagePainter::drawPath( const RenderPath& path )
 {  
    path.render( *this );
@@ -180,11 +179,13 @@ void ImagePainter::setClip( const RectF& clip )
 {
   _rasterizer.setClip( clip );
 }
-        
+      
+			  
 const Gfx::RectF& ImagePainter::clip() const
 {
   return _rasterizer.clip();
 }
+
 
 void ImagePainter::clear( const Gfx::Color& color )
 {
