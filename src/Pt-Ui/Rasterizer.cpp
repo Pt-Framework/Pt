@@ -3509,4 +3509,5 @@ void Rasterizer::clear( const Color& color)
   setBrush( bs );
   fill( &rect.points()[0], 4);
 }
+
 }}
