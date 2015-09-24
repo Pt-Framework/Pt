@@ -60,6 +60,15 @@ class RenderOp : private Pt::NonCopyable
       return "op";
     }
 
+		virtual void translate( double x, double y )
+		{
+			for( size_t i = 0; i < _outline.size(); ++ i)
+			{
+				_outline[i].addX( x );
+				_outline[i].addX( y );
+			}				
+		}
+
   protected:
     RenderOp()
     {

@@ -100,7 +100,7 @@ void PainterImpl::drawSurface( const Gfx::PointF& to, const PaintSurface& pm )
   
   path.translate( to.x(), to.y() );  
 
-  _surface->path().path(Gfx::RectF( to, pm.size() ),  path );
+  _surface->path().path( Gfx::RectF( to, pm.size() ),  path );
 }
 		
 

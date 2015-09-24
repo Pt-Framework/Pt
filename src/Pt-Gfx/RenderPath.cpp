@@ -83,14 +83,7 @@ void RenderPath::path( const RectF& clip,  const RenderPath& path )
 void RenderPath::translate( double x, double y )
 { 
   for( size_t i = 0; i < _path.size(); ++i )
-  {
-    for( size_t j = 0; j < _path[i]->outline().size() ; ++ j )
-    {
-      PointF& p = _path[i]->outline()[j];
-      p.addX( x ) ;
-      p.addY( y ) ;
-    }
-  }
+		_path[i]->translate( x, y );
 }
 
 void RenderPath::text( const PointF& to, const Pen& pen, const Font& font, const Pt::String& text)

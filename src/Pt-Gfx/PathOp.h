@@ -73,7 +73,12 @@ class PathOp : public RenderOp
       return "path";
     }
 
-
+		virtual void translate( double x, double y )
+		{
+			RenderOp::translate( x, y );
+			_path.translate( x, y );
+		}
+		
   private:
     RenderPath _path;    
 };
