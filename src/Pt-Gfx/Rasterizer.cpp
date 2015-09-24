@@ -34,6 +34,7 @@
 #include <Pt/Gfx/ClipPolygon.h>
 #include <Pt/Gfx/Image.h>
 #include <algorithm>
+#include <cmath>
 
 namespace Pt{
 namespace Gfx{

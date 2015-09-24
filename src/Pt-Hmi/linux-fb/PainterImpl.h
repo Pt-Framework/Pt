@@ -56,8 +56,6 @@ class PainterImpl
 
     void drawEllipse( const Gfx::PointF& topLeft, const Gfx::SizeF& size );
 
-    void drawSurface( const Gfx::PointF& to, const PaintSurface& surface, const Gfx::Region& pmRegion );
-
     void drawSurface( const Gfx::PointF& to, const PaintSurface& surface );
 		
     void drawImage( const Gfx::PointF& to, const Gfx::Image& image );
@@ -103,7 +101,9 @@ class PainterImpl
 	    return _font;
     }    
     
-   Gfx::FontMetrics fontMetrics( Pt::String text ) const;
+     Gfx::FontMetrics fontMetrics( Pt::String text ) const;
+
+     static Gfx::FontMetrics fontMetrics( const Gfx::Font& font, Pt::String text );
     
     const std::list<std::string>& fontFamilyNames();
 
@@ -136,12 +136,12 @@ class PainterImpl
     void clear( const Gfx::Color& color );
 
   private:
-	  PaintSurfaceImpl*   	_surface;	
+	 PaintSurfaceImpl*   	_surface;	
 	 Gfx::RenderMode::Type 	_renderMode;
 	 Gfx::Font 				_font;
 	 Gfx::Pen   			_pen;
  	 Gfx::Brush 			_brush;	  
-   Gfx::RectF       _clip;
+	 Gfx::RectF       _clip;
 };
 
 }}

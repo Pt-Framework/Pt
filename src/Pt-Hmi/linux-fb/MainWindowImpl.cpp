@@ -95,7 +95,7 @@ void MainWindowImpl::render()
 {
   Painter& painter = surface().painter();
   painter.drawSurface(Gfx::PointF( 0,0 ), _apiWindow->surface() );
-	_app.mainScreen().impl()->invalidate();
+  _app.mainScreen().impl()->invalidate();
 }
 
 

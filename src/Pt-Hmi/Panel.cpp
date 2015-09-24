@@ -121,7 +121,7 @@ void Panel::onRender(PaintSurface& paintSurface)
 		
 			Gfx::Pen pen(border, BorderColor.get());
 			painter.setPen(pen);
-				
+			
 			painter.drawPolyline(&points1[0], points1.size());								
 			painter.drawPolyline(&points2[0], points2.size());
 		}

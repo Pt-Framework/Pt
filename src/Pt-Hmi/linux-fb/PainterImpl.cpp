@@ -60,7 +60,7 @@ void PainterImpl::drawText( const Gfx::PointF& to, const Pt::String& text )
 
 void PainterImpl::drawEllipse( const Gfx::PointF& topLeft, const Gfx::SizeF& size )
 {
- _surface->path().ellipse( topLeft, size );
+ _surface->path().ellipse( _pen, topLeft, size );
 }
 
 
@@ -120,14 +120,20 @@ void PainterImpl::flush()
 {	
  Gfx::ImagePainter painter( Application::instance().mainScreen().impl()->image() );
 
-  painter.drawPath( _surface->path() );  
-	_surface->path().clear();
+  painter.drawPath( _surface->path() );   
+  _surface->path().clear();
 }
 
 
 Gfx::FontMetrics PainterImpl::fontMetrics( Pt::String text ) const
 {  
   return Gfx::ImagePainter::fontMetrics( _font, text);
+}
+
+
+Gfx::FontMetrics PainterImpl::fontMetrics( const Gfx::Font& font, Pt::String text )
+{
+  return Gfx::ImagePainter::fontMetrics( font, text );
 }
 
 

@@ -77,19 +77,19 @@ FrameBuffer::FrameBuffer()
   switch( noOfBytesPerPixel )
   {
     case 2:
-        _format = newGfx::Rgb565Format();
+        _format = new Gfx::Rgb565Format();
     break;
 
     case 3:
-        _format = newGfx::Rgb888Format();
+        _format = new Gfx::Rgb888Format();
     break;
 
     case 4:
-      _format =  newGfx::Argb8888Format();
+      _format =  new Gfx::Argb8888Format();
     break;
 
     default:
-      _format =  newGfx::Argb8888Format();
+      _format =  new Gfx::Argb8888Format();
     break;
   } 
 }

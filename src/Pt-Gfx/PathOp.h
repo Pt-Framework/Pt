@@ -44,6 +44,7 @@ class PathOp : public RenderOp
 
     PathOp( const PathOp& op )
     : RenderOp( op )    
+    , _path( op._path )
     {       
     }
 

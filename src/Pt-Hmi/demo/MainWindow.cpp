@@ -164,8 +164,8 @@ void MainWindow::init()
   _childWindow2.Caption = "Child 2";
 	
 
-	addChildWindow( _childWindow1 );
-   _childWindow1.addChildWindow( _childWindow2 );
+	addChildWindow( _childWindow2 );
+//   _childWindow1.addChildWindow( _childWindow2 );
 		
 	_childWindow1.Visible = true;
   _childWindow1.Caption = "Child 1";
