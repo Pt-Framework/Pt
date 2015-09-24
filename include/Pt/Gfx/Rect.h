@@ -331,15 +331,15 @@ class BasicRect
 				{
 					BasicRect<PointT,SizeT> inter;					 
 
-					inter.setLeft( std::max(this->left(), r.left() ) ) ;
-					inter.setTop( std::max(this->top(), r.top() ) ) ;
-					inter.setRight( std::min(this->right(), r.right() ) );
-					inter.setBottom( std::min(this->bottom(), r.bottom() ) );
+					PointT left =  std::max(this->left(), r.left() );
+					PointT top  = std::max(this->top(), r.top() ) ;
+					PointT right = std::min(this->right(), r.right() );
+					PointT bottom =  std::min(this->bottom(), r.bottom() );
 
-					if( !(inter.right() > inter.left() && inter.bottom() > inter.top()) )
+					if( !(right > left && bottom > top ) )
 						return BasicRect<PointT,SizeT>();
 
-					return inter;
+					return BasicRect<PointT,SizeT>(  BasicPoint<PointT>( left, top ), BasicSize<SizeT>( right - left, bottom -top ) );
 				}
 
 
