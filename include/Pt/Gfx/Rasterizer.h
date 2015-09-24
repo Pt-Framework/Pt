@@ -67,10 +67,7 @@ class PT_GFX_API Rasterizer
       return _brush;
     }
 
-    void setClip( const RectF& clip )
-    {
-      _clip = clip;
-    }
+    void setClip( const RectF& clip );
 
     const RectF& clip() const
     {

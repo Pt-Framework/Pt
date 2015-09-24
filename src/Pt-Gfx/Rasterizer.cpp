@@ -3526,4 +3526,10 @@ void Rasterizer::clear( const Color& color)
   fill( &rect.points()[0], 4);
 }
 
+void Rasterizer::setClip( const RectF& clip )
+{
+	_clip = clip;
+	_text->setClip( _clip );
+}
+
 }}
