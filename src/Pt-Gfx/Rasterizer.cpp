@@ -3177,6 +3177,10 @@ void Rasterizer::fill( const PointF* pts, size_t pointCount)
     EdgeSet::iterator currentPos;
     std::vector<PointF> points( pts, pts + pointCount );
 
+		ClipPolygon clipper;
+
+    clipper( points, _clip );
+
     // find unclipped origin coordinates
     //
     PointF origin( std::numeric_limits<Pt::ssize_t>::max(), std::numeric_limits<Pt::ssize_t>::max() );
@@ -3187,10 +3191,6 @@ void Rasterizer::fill( const PointF* pts, size_t pointCount)
         origin.setX( std::min( origin.x(), points[n].x() ) );
         origin.setY( std::min( origin.y(), points[n].y() ) );
     }
-
-    ClipPolygon clipper;
-
-    clipper( points, _clip );
 
     if( points.end() != points.begin() )
         points.push_back( points[0] );
