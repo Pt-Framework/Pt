@@ -28,8 +28,8 @@
 #include <Windows.h>
 #include <WindowsX.h>
 #include <assert.h>
-#include <Pt/Ui/Color.h>
-#include <Pt/Ui/Image.h>
+#include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Image.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/SizeEvent.h>
@@ -288,7 +288,7 @@ void MainWindowImpl::onSize(WPARAM wParam, LPARAM lParam)
   int width  = LOWORD(lParam);
   int height = HIWORD(lParam);  
     
-	Pt::Hmi::SizeEvent ev( Ui::SizeF(width, height), state);
+	Pt::Hmi::SizeEvent ev(Gfx::SizeF(width, height), state);
 	_window->eventReceived().send(ev);
 }
 
@@ -348,7 +348,7 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
         break;			
     }
   
-     Ui::PointF p = _screen.toUnit(Ui::Point(xPos, yPos));
+    Gfx::PointF p = _screen.toUnit(Gfx::Point(xPos, yPos));
     _pointerEvent.setX(p.x());
     _pointerEvent.setY(p.y());            
 
@@ -363,7 +363,7 @@ void MainWindowImpl::onMove(LPARAM lParam)
 	int xPos = info.left;
 	int yPos = info.top;
 
-	PositionEvent ev( Ui::PointF(xPos, yPos) );
+	PositionEvent ev(Gfx::PointF(xPos, yPos) );
   _window->eventReceived().send( ev );	
 }
 
@@ -383,9 +383,9 @@ void MainWindowImpl::onPaint()
 }
 
 
-void MainWindowImpl::setWindowPos(const Ui::PointF& pf)
+void MainWindowImpl::setWindowPos(const Gfx::PointF& pf)
 {
-  Ui::Point p = _screen.fromUnit(pf);
+ Gfx::Point p = _screen.fromUnit(pf);
   SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, SWP_DRAWFRAME|SWP_NOSIZE);
 }
 
@@ -401,9 +401,9 @@ void MainWindowImpl::activate()
   BringWindowToTop( _hwnd );
 }
 
-void MainWindowImpl::setWindowSize(const Ui::SizeF& sizef)
+void MainWindowImpl::setWindowSize(const Gfx::SizeF& sizef)
 {
-  Ui::Size size = _screen.fromUnit(sizef);
+ Gfx::Size size = _screen.fromUnit(sizef);
 
   RECT clientRect;
   SetRect(&clientRect, 0, 0, size.width() - 1, size.height() - 1);
@@ -561,12 +561,12 @@ void MainWindowImpl::setBorder(WindowBorder::Type p)
 }
 
 
-void MainWindowImpl::setMinSize(const Ui::SizeF& s)
+void MainWindowImpl::setMinSize(const Gfx::SizeF& s)
 {
 	_minSize = _screen.fromUnit(s);
 }
 	
-void MainWindowImpl::setMaxSize(const Ui::SizeF& s)
+void MainWindowImpl::setMaxSize(const Gfx::SizeF& s)
 {
 	_maxSize = _screen.fromUnit(s);			
 }
@@ -588,7 +588,7 @@ void MainWindowImpl::setEnable(bool e)
 	EnableWindow(_hwnd, e);
 }
 
-void MainWindowImpl::setIcon(const Ui::Image& icon)
+void MainWindowImpl::setIcon(const Gfx::Image& icon)
 {
     if(icon.width() == 0 || icon.height() == 0)
         return;
@@ -605,7 +605,7 @@ void MainWindowImpl::setIcon(const Ui::Image& icon)
         {
           const size_t index  = offsetLine + (x*planes);
 
-          const Ui::Color& pix =  icon.color(x,y);
+          const Gfx::Color& pix =  icon.color(x,y);
                 
           bitmapBuffer[index]     = static_cast<unsigned char>(pix.blue());    
           bitmapBuffer[index + 1] = static_cast<unsigned char>(pix.green());

@@ -37,7 +37,7 @@ namespace Hmi {
 
 PainterImpl::PainterImpl( PaintSurfaceImpl* surface )
 : _surface( surface )
-, _renderMode( Ui::RenderMode::NoAlpha )
+, _renderMode(Gfx::RenderMode::NoAlpha )
 {	
 }
 
@@ -46,97 +46,97 @@ PainterImpl::~PainterImpl()
 {
 }
 
-void PainterImpl::drawLine( const Ui::PointF& from, const Ui::PointF& to )
+void PainterImpl::drawLine( const Gfx::PointF& from, const Gfx::PointF& to )
 {    
   _surface->path().stroke( _pen, from , to );
 }
 
 
-void PainterImpl::drawText( const Ui::PointF& to, const Pt::String& text )
+void PainterImpl::drawText( const Gfx::PointF& to, const Pt::String& text )
 {	  
   _surface->path().text( _pen, _font, text);
 }
 
 
-void PainterImpl::drawEllipse( const Ui::PointF& topLeft, const Ui::SizeF& size )
+void PainterImpl::drawEllipse( const Gfx::PointF& topLeft, const Gfx::SizeF& size )
 {
  _surface->path().ellipse( topLeft, size );
 }
 
 
-void PainterImpl::drawRect( const Ui::RectF& rect )
+void PainterImpl::drawRect( const Gfx::RectF& rect )
 {
   _surface->path().stroke( _pen, rect );  
 }
 
 
-void PainterImpl::drawPolyline( const Ui::PointF* pt, const size_t pointCount )
+void PainterImpl::drawPolyline( const Gfx::PointF* pt, const size_t pointCount )
 {
   _surface->path().stroke( _pen, pt, pointCount );  
 }
 
 
-void PainterImpl::fillRect( const Ui::RectF& rect )
+void PainterImpl::fillRect( const Gfx::RectF& rect )
 { 
   _surface->path().fill( _brush, rect );
 }
 
 
-void PainterImpl::fillEllipse( const Ui::PointF& topLeft, const Ui::SizeF& size )
+void PainterImpl::fillEllipse( const Gfx::PointF& topLeft, const Gfx::SizeF& size )
 {
   _surface->path().fillEllipse( _brush, topLeft, size );
 }
 
 
-void PainterImpl::fillPolygon( const Ui::PointF* pt, const size_t pointCount )
+void PainterImpl::fillPolygon( const Gfx::PointF* pt, const size_t pointCount )
 {  
   _surface->path().fill( _brush, pt, pointCount );
 }
 
 
-void PainterImpl::drawSurface( const Ui::PointF& to, const PaintSurface& pm )
+void PainterImpl::drawSurface( const Gfx::PointF& to, const PaintSurface& pm )
 {
-  Ui::RenderPath path( pm.impl()->path() );
+ Gfx::RenderPath path( pm.impl()->path() );
   
   path.translate( to.x(), to.y() );  
 
-  _surface->path().path( Ui::RectF( to, pm.size() ),  path );
+  _surface->path().path(Gfx::RectF( to, pm.size() ),  path );
 }
 		
 
-void PainterImpl::drawImage(const Ui::PointF& to, const Ui::Image& image )
+void PainterImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image )
 {  
   _surface->path().image( to, image );
 }
 
 
-void PainterImpl::drawPath( const Ui::RenderPath& path )
+void PainterImpl::drawPath( const Gfx::RenderPath& path )
 {
-  _surface->path().path( Ui::RectF( Ui::PointF(0,0), _surface->size() ),  path );
+  _surface->path().path(Gfx::RectF(Gfx::PointF(0,0), _surface->size() ),  path );
 }
 
 
 void PainterImpl::flush()
 {	
-  Ui::ImagePainter painter( Application::instance().mainScreen().impl()->image() );
+ Gfx::ImagePainter painter( Application::instance().mainScreen().impl()->image() );
 
   painter.drawPath( _surface->path() );  
 	_surface->path().clear();
 }
 
 
-Ui::FontMetrics PainterImpl::fontMetrics( Pt::String text ) const
+Gfx::FontMetrics PainterImpl::fontMetrics( Pt::String text ) const
 {  
-  return Ui::ImagePainter::fontMetrics( _font, text);
+  return Gfx::ImagePainter::fontMetrics( _font, text);
 }
 
 
-void PainterImpl::clear( const Ui::Color& color )
+void PainterImpl::clear( const Gfx::Color& color )
 {      
  _surface->path().clear();
 
-  setBrush( Ui::Brush(color) );
-  fillRect( Ui::RectF(Ui::PointF( 0,0 ), _surface->size() ) ); 
+  setBrush(Gfx::Brush(color) );
+  fillRect(Gfx::RectF(Gfx::PointF( 0,0 ), _surface->size() ) ); 
 }
 
 

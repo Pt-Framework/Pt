@@ -97,48 +97,48 @@ double ScreenImpl::toUnit(int unit)
 }
 
 
-Ui::PointF ScreenImpl::toUnit(const Ui::Point& value)
+Gfx::PointF ScreenImpl::toUnit(const Gfx::Point& value)
 {
 	const double x = value.x() * _factorX  + _offsetX;
 	const double y = value.y() * _factorY  + _offsetY;
 
-	return Ui::PointF(std::ceil(x),std::ceil(y));
+	return Gfx::PointF(std::ceil(x),std::ceil(y));
 }
 
 
-Ui::SizeF ScreenImpl::toUnit(const Ui::Size& value)
+Gfx::SizeF ScreenImpl::toUnit(const Gfx::Size& value)
 {
 	const double width = value.width() * _factorX  + _offsetX;
 	const double height = value.height() * _factorY  + _offsetY;
 
-	return Ui::SizeF(std::ceil(width),std::ceil(height));
+	return Gfx::SizeF(std::ceil(width),std::ceil(height));
 }
 
 
-Ui::Point ScreenImpl::fromUnit(const Ui::PointF& value)
+Gfx::Point ScreenImpl::fromUnit(const Gfx::PointF& value)
 {
 	double factorX = _size.width() / _width;
 	double factorY = _size.height() / _height;
 	int x = (int) ( value.x() * factorX); 
 	int y = (int) ( value.y() * factorY);
 
-	return Ui::Point(x,y);
+	return Gfx::Point(x,y);
 }
 
 
-Ui::Size ScreenImpl::fromUnit(const Ui::SizeF& value)
+Gfx::Size ScreenImpl::fromUnit(const Gfx::SizeF& value)
 {
 	double factorX = _size.width() / _width;
 	double factorY = _size.height() / _height;
 	int width = (int) ( value.width() * factorX); 
 	int height = (int) ( value.height() * factorY);
-	return Ui::Size(width,height);
+	return Gfx::Size(width,height);
 }
 
 
-Ui::Rect ScreenImpl::fromUnit(const Ui::RectF& value)
+Gfx::Rect ScreenImpl::fromUnit(const Gfx::RectF& value)
 {
-	Ui::Rect rect(Ui::Point(value.x(), value.y()), Ui::Size(value.width(), value.height()));
+	Gfx::Rect rect(Gfx::Point(value.x(), value.y()),Gfx::Size(value.width(), value.height()));
 	return rect;
 }
 
@@ -217,12 +217,12 @@ void ScreenImpl::setCursor(const Cursor* cursor)
 }
 
 
-Ui::Size ScreenImpl::screeResolution()
+Gfx::Size ScreenImpl::screeResolution()
 {
   RECT desktop;    
   GetWindowRect(GetDesktopWindow(), &desktop);
 
-  return Ui::Size( desktop.right, desktop.bottom );
+  return Gfx::Size( desktop.right, desktop.bottom );
 }
 
 }}

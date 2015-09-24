@@ -27,7 +27,7 @@
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
-#include <Pt/Ui/Brush.h>
+#include <Pt/Gfx/Brush.h>
 
 namespace Pt{
 namespace Hmi{
@@ -36,14 +36,14 @@ Widget::Widget()
 : _mnemonicWidget(0)
 , PT_HMI_INIT_PROPERTY_VALUE(Enabled, true)
 , PT_HMI_INIT_PROPERTY_VALUE(Visible, false )
-, PT_HMI_INIT_PROPERTY_VALUE(Font,Ui::Font("Sans Serif",12))
+, PT_HMI_INIT_PROPERTY_VALUE(Font,Gfx::Font("Sans Serif",12))
 , Position("Position", *this, &Widget::position, &Widget::setPosition )
 , Size("Size", *this, &Widget::size, &Widget::setSize)
-, PT_HMI_INIT_PROPERTY_VALUE(BackColor,Ui::Color::fromRgb8(237,237,237))
-, PT_HMI_INIT_PROPERTY_VALUE(HighlightColor,Ui::Color::fromRgb8(200,200,200))
-, PT_HMI_INIT_PROPERTY_VALUE(ForeColor, Ui::Color::fromRgb8(0,0,0))
-, PT_HMI_INIT_PROPERTY_VALUE(DisabledColor, Ui::Color::fromRgb8(178,178,178))
-, PT_HMI_INIT_PROPERTY_VALUE(BackgroundImage, Ui::Image())
+, PT_HMI_INIT_PROPERTY_VALUE(BackColor,Gfx::Color::fromRgb8(237,237,237))
+, PT_HMI_INIT_PROPERTY_VALUE(HighlightColor,Gfx::Color::fromRgb8(200,200,200))
+, PT_HMI_INIT_PROPERTY_VALUE(ForeColor,Gfx::Color::fromRgb8(0,0,0))
+, PT_HMI_INIT_PROPERTY_VALUE(DisabledColor,Gfx::Color::fromRgb8(178,178,178))
+, PT_HMI_INIT_PROPERTY_VALUE(BackgroundImage,Gfx::Image())
 , PT_HMI_INIT_PROPERTY_VALUE(BackgroundImageLayout, ImageLayout::NoLayout)
 , PT_HMI_INIT_PROPERTY_VALUE(Opacity,0)
 , PT_HMI_INIT_PROPERTY_VALUE(Cursor, Hmi::Cursor::defaultCursor())
@@ -104,17 +104,17 @@ void Widget::removeChild(Widget* child)
 }	
 
 
-Ui::PointF Widget::toClient( const Ui::PointF& globalPoint )
+Gfx::PointF Widget::toClient( const Gfx::PointF& globalPoint )
 {
 	if( _parent == 0 )
 		return globalPoint;
 
-	Ui::PointF parPoint = _parent->toClient( globalPoint );
-	return Ui::PointF( parPoint.x() - Position.get().x(), parPoint.y() - Position.get().y() );
+	Gfx::PointF parPoint = _parent->toClient( globalPoint );
+	return Gfx::PointF( parPoint.x() - Position.get().x(), parPoint.y() - Position.get().y() );
 }
 
  
-Ui::PointF Widget::fromClient( const Ui::PointF& localPoint )
+Gfx::PointF Widget::fromClient( const Gfx::PointF& localPoint )
 {
 	double x = localPoint.x();
 	double y = localPoint.y();
@@ -129,11 +129,11 @@ Ui::PointF Widget::fromClient( const Ui::PointF& localPoint )
     	widget = widget->parent();
 	}	
 
-	return Ui::PointF(x,y);
+	return Gfx::PointF(x,y);
 }
 
 
-void Widget::updatePosAndSize(Widget& w, const Ui::SizeF& s, const Ui::PointF& p)
+void Widget::updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p)
 {       
   w.Position.set(p);
   w.Size.set(s);      	
@@ -156,7 +156,7 @@ void Widget::invalidate()
 
 void Widget::onLayout( PaintSurface& surface )
 {
-  Ui::SizeF clientSize = surface.size();
+ Gfx::SizeF clientSize = surface.size();
   double posLeft  = 0;
   double posTop   = 0;
   double posRight  = clientSize.width();
@@ -167,7 +167,7 @@ void Widget::onLayout( PaintSurface& surface )
 	{
 		Widget*	child = _children[i];			
 		    
-    Ui::PointF point = child->Position.get();
+   Gfx::PointF point = child->Position.get();
 
     if( FlowLayout.get() == Hmi::FlowLayout::None )
     {
@@ -184,7 +184,7 @@ void Widget::onLayout( PaintSurface& surface )
         {
           point.setX( posLeft );
           point.setY( posTop );		    
-          Ui::SizeF size( child->Size.get().width(), (posBottom - posTop));
+         Gfx::SizeF size( child->Size.get().width(), (posBottom - posTop));
 
 					posLeft += child->Size.get().width();      
 					        
@@ -196,7 +196,7 @@ void Widget::onLayout( PaintSurface& surface )
         {
           point.setX( posLeft );
           point.setY( posTop  );		    
-					Ui::SizeF size( (posRight - posLeft), child->Size.get().height());
+					Gfx::SizeF size( (posRight - posLeft), child->Size.get().height());
 
 				  posTop += child->Size.get().height();      
         
@@ -210,7 +210,7 @@ void Widget::onLayout( PaintSurface& surface )
           point.setX( posRight );
           point.setY( posTop );		                     
 					
-					Ui::SizeF size( child->Size.get().width(), (posBottom - posTop) );
+					Gfx::SizeF size( child->Size.get().width(), (posBottom - posTop) );
         
           updatePosAndSize(*child, size, point );
         }
@@ -221,7 +221,7 @@ void Widget::onLayout( PaintSurface& surface )
           posBottom -= child->Size.get().height();    
           point.setX( posLeft );
           point.setY( posBottom  );		                      
-					Ui::SizeF size( (posRight - posLeft), child->Size.get().height() );
+					Gfx::SizeF size( (posRight - posLeft), child->Size.get().height() );
           updatePosAndSize(*child, size, point);
         }
         break;
@@ -251,7 +251,7 @@ void Widget::onLayout( PaintSurface& surface )
           }
 
           point.setY( 0 );	
-          updatePosAndSize( *child, Ui::SizeF( child->Size.get().width(), clientSize.height() ), point );
+          updatePosAndSize( *child,Gfx::SizeF( child->Size.get().width(), clientSize.height() ), point );
         }
         break;
 
@@ -270,7 +270,7 @@ void Widget::onLayout( PaintSurface& surface )
             point.setY( posBottom  );	
           }
 
-          updatePosAndSize( *child, Ui::SizeF( clientSize.width(), child->Size.get().height() ), point );
+          updatePosAndSize( *child,Gfx::SizeF( clientSize.width(), child->Size.get().height() ), point );
         }
         break;
       }
@@ -280,12 +280,12 @@ void Widget::onLayout( PaintSurface& surface )
   if( fillLayoutChildren.size() != 0 )
   {
     Widget* child = fillLayoutChildren[0]; 
-    Ui::PointF point(posLeft, posTop);
+   Gfx::PointF point(posLeft, posTop);
 
     const double width  = posRight - posLeft;
     const double height = posBottom - posTop;
 
-    updatePosAndSize( *child, Ui::SizeF( width, height ), point );
+    updatePosAndSize( *child,Gfx::SizeF( width, height ), point );
   }
 }
 
@@ -318,20 +318,20 @@ void Widget::render()
 
 void Widget::onRender( PaintSurface& surface )
 {		
-  const Ui::SizeF size = clientSize();
+  const Gfx::SizeF size = clientSize();
 
 	if( size.width() < 0 || size.height() < 0)
 		return; 
 
-	const Ui::Image&   backImage = BackgroundImage.get();
+	const Gfx::Image&   backImage = BackgroundImage.get();
 	Pt::Hmi::Painter&	 painter = surface.painter();
-  Ui::PointF         pos = clientPos();
-	Ui::RectF		       rectClient( pos, size );
-  Ui::RectF		       rect( Ui::PointF(0,0), surface.size() );
+ Gfx::PointF         pos = clientPos();
+	Gfx::RectF		       rectClient( pos, size );
+ Gfx::RectF		       rect(Gfx::PointF(0,0), surface.size() );
   
   if( _parent != 0 )
   {
-    Ui::Brush	backBrush(_parent->BackColor.get() );  		  
+   Gfx::Brush	backBrush(_parent->BackColor.get() );  		  
     painter.setBrush(backBrush);
     painter.fillRect(rect);
   }
@@ -340,13 +340,13 @@ void Widget::onRender( PaintSurface& surface )
 
 	if( HighLight.get() )
 	{       
-		Ui::Brush	brush( HighlightColor.get() );        
+		Gfx::Brush	brush( HighlightColor.get() );        
 		painter.setBrush(brush);
 		painter.fillRect(rectClient);
 	}
 	else
 	{
-		Ui::Brush	brush(BackColor.get());
+		Gfx::Brush	brush(BackColor.get());
 	
 		painter.setBrush(brush);    	
 		painter.fillRect(rectClient);
@@ -358,7 +358,7 @@ void Widget::onRender( PaintSurface& surface )
 		{				
 			case ImageLayout::NoLayout:
 			{
-				painter.drawImage( Pt::Ui::PointF(0,0), backImage );
+				painter.drawImage( Pt::Gfx::PointF(0,0), backImage );
 			}
 			break;
 			
@@ -367,7 +367,7 @@ void Widget::onRender( PaintSurface& surface )
 				for( double x = pos.x(); x < size.width();  x += backImage.width() )
 				{
 					for( double y = pos.y(); y < size.height();  y += backImage.height() )
-						painter.drawImage(Ui::PointF(x,y), backImage);
+						painter.drawImage(Gfx::PointF(x,y), backImage);
 				}
 			}
 			break;
@@ -376,13 +376,13 @@ void Widget::onRender( PaintSurface& surface )
 			{
 				const double x = pos.x() + size.width()/2  - backImage.width()/2;
 				const double y = pos.y() + size.height()/2  - backImage.height()/2;
-				painter.drawImage(Ui::PointF(x,y), backImage);
+				painter.drawImage(Gfx::PointF(x,y), backImage);
 			}
 			break;
 			
 			case ImageLayout::Strech:
 			{
-				Ui::Image strech = backImage.blockScale( Ui::Size((int) size.width(), (int)size.height() ) );
+				Gfx::Image strech = backImage.blockScale(Gfx::Size((int) size.width(), (int)size.height() ) );
 				painter.drawImage( pos, strech );
 			}
 			break;
@@ -390,9 +390,9 @@ void Widget::onRender( PaintSurface& surface )
 			case ImageLayout::Zoom:
 			{
         const double factor = size.width()/(double)backImage.width();
-        Pt::Ui::Size newSize( ( size_t)( backImage.width()*factor), (size_t)(backImage.height()*factor));
+        Pt::Gfx::Size newSize( ( size_t)( backImage.width()*factor), (size_t)(backImage.height()*factor));
 
-        Ui::Image strech = backImage.blockScale(newSize);
+       Gfx::Image strech = backImage.blockScale(newSize);
 				
         painter.drawImage(pos, strech);
 			}
@@ -437,7 +437,7 @@ void Widget::onPointerLeaved()
 		
 void Widget::onPointerInput(const PointerEvent& ev)
 {		
-	Ui::PointF local = toClient( Ui::PointF( ev.x(), ev.y() ) );
+	Gfx::PointF local = toClient(Gfx::PointF( ev.x(), ev.y() ) );
 	
 	if( !Enabled.get() )
 			return;
@@ -509,7 +509,7 @@ void Widget::onMnemonic()
 }
 
 
-bool Widget::contains(const Ui::PointF& p)
+bool Widget::contains(const Gfx::PointF& p)
 {
 	if( p.x()  < Size.get().width() && p.x() >= 0 && p.y() < Size.get().height() && p.y() >= 0)
 			return true;
@@ -737,7 +737,7 @@ void Widget::setCaption( const std::string& c )
 }
 
 
-void Widget::setSize(const Ui::SizeF& size)
+void Widget::setSize(const Gfx::SizeF& size)
 {
 	_size = size;			
   

@@ -77,19 +77,19 @@ FrameBuffer::FrameBuffer()
   switch( noOfBytesPerPixel )
   {
     case 2:
-        _format = new Ui::Rgb565Format();
+        _format = newGfx::Rgb565Format();
     break;
 
     case 3:
-        _format = new Ui::Rgb888Format();
+        _format = newGfx::Rgb888Format();
     break;
 
     case 4:
-      _format =  new Ui::Argb8888Format();
+      _format =  newGfx::Argb8888Format();
     break;
 
     default:
-      _format =  new Ui::Argb8888Format();
+      _format =  newGfx::Argb8888Format();
     break;
   } 
 }
@@ -109,7 +109,7 @@ FrameBuffer::~FrameBuffer()
 } 
 
 
-void FrameBuffer::bitBlit( const Ui::Image& image )
+void FrameBuffer::bitBlit( const Gfx::Image& image )
 {
   const size_t imageSize = (image.width() * image.format().pixelSize() + image.stride()) * image.height();
 
@@ -117,7 +117,7 @@ void FrameBuffer::bitBlit( const Ui::Image& image )
 }
 
 
-void FrameBuffer::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const Ui::Point& pos, BlitOp op )
+void FrameBuffer::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const Gfx::Point& pos, BlitOp op )
 {
 	static const size_t planePixelSize = 4;
 	const size_t bufferPixelSize = depth() / 8;
@@ -171,10 +171,10 @@ void FrameBuffer::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const U
 }
 
 
-void FrameBuffer::grabImage( const Ui::Point& pos, Ui::Image& image)
+void FrameBuffer::grabImage( const Gfx::Point& pos,Gfx::Image& image)
 {	
 	const size_t pixelSizeInByte = depth() / 8;		
-	const Ui::Size& size= image.size();
+	const Gfx::Size& size= image.size();
 	const size_t yMax = std::min<size_t>(pos.y() + size.height(), height() );	
 	const size_t widthInPixel = ((pos.x() + size.width())  < width() ?  size.width() : ( width()  - pos.x() ) );
 	const size_t widthInByte = widthInPixel * pixelSizeInByte;		

@@ -42,13 +42,13 @@ PaintSurface::~PaintSurface()
 	delete _impl;
 }
 
-void PaintSurface::resize(const Ui::SizeF& size)
+void PaintSurface::resize(const Gfx::SizeF& size)
 {
 	_impl->resize(size);
   _painter.setSurface(*this);
 }
 
-Ui::SizeF PaintSurface::size() const
+Gfx::SizeF PaintSurface::size() const
 {
 	return _impl->size();
 }

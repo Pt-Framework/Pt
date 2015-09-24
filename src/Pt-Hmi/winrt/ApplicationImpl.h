@@ -49,13 +49,13 @@ public:
 
     virtual void Uninitialize();
 
-    virtual void SetWindow( Windows::UI::Core::CoreWindow^ window );
+    virtual void SetWindow( Windows::Gfx::Core::CoreWindow^ window );
 
     virtual void Run();
 
     virtual void Load( Platform::String^ entryPoint ) ;
 
-	Windows::UI::Core::CoreDispatcher^ dispatcher()
+	Windows::Gfx::Core::CoreDispatcher^ dispatcher()
 	{
 		return _dispatcher;
 	}
@@ -66,8 +66,8 @@ public:
 		_impl = (ApplicationImpl*)ptr;
 	}
 private:
-	Windows::UI::Core::CoreWindow^ _window;
-	Windows::UI::Core::CoreDispatcher^ _dispatcher;
+	Windows::Gfx::Core::CoreWindow^ _window;
+	Windows::Gfx::Core::CoreDispatcher^ _dispatcher;
 	ApplicationImpl* _impl;
 
 };
@@ -79,7 +79,7 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         virtual ~ApplicationImpl();
 	
-        void Closed(Windows::UI::Core::CoreWindow^ Sender, Windows::UI::Core::CoreWindowEventArgs^ Args);
+        void Closed(Windows::Gfx::Core::CoreWindow^ Sender, Windows::Gfx::Core::CoreWindowEventArgs^ Args);
 
 		Windows::ApplicationModel::Core::IFrameworkView^ frameworkView()
 		{

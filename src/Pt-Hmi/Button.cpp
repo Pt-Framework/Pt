@@ -26,9 +26,9 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Ui/Pen.h>
-#include <Pt/Ui/Color.h>
-#include <Pt/Ui/Point.h>
+#include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Point.h>
 
 namespace Pt{
 namespace Hmi{
@@ -41,11 +41,11 @@ Button::Button()
 , PT_HMI_INIT_PROPERTY_VALUE(Hover,false)
 , PT_HMI_INIT_PROPERTY_VALUE(ButtonType,Pt::Hmi::ButtonType::Press)
 , PT_HMI_INIT_PROPERTY_VALUE(DoublePressTimeInMs,1500)
-, PT_HMI_INIT_PROPERTY_VALUE(Image,Ui::Image(0,0))
+, PT_HMI_INIT_PROPERTY_VALUE(Image,Gfx::Image(0,0))
 , PT_HMI_INIT_PROPERTY_VALUE(ImageAlign, Align::MidleLeft)
 , _lastPointerState( DeviceButton::Released )
 {
-  BackColor.set(Ui::Color::fromRgb8(245,245,245));
+  BackColor.set(Gfx::Color::fromRgb8(245,245,245));
 	PanelBorderStyle.set(BorderStyle::Widget);
 	PanelBorderWidth.set(1);
 	Caption.set("Button");	
@@ -235,7 +235,7 @@ void Button::onKeyInput(const KeyEvent& ev)
 
 void Button::onPointerInput(const PointerEvent& ev)
 {    
-	Ui::PointF point = toClient(Ui::PointF(ev.x(), ev.y()));  
+	Gfx::PointF point = toClient(Gfx::PointF(ev.x(), ev.y()));  
       
 	Label::onPointerInput(ev);
 		    
@@ -357,20 +357,20 @@ void Button::onRender(PaintSurface& paintSurface)
 		return;
 
 	Pt::Hmi::Painter& painter = paintSurface.painter();
-  Ui::SizeF  size = clientSize();
-  Ui::PointF pos  = clientPos();
+ Gfx::SizeF  size = clientSize();
+ Gfx::PointF pos  = clientPos();
        
 	if( Hover.get() || isWidgetFocused() )
 	{
 		size.addHeight(-5);
 		size.addWidth(-5);
 
-		Ui::Color armedColor(0,160/255.0f,160/255.0f,160/255.0f);
+		Gfx::Color armedColor(0,160/255.0f,160/255.0f,160/255.0f);
 		 
-		Ui::Pen pen(1, armedColor, Ui::Pen::DashStyle);
+		Gfx::Pen pen(1, armedColor,Gfx::Pen::DashStyle);
 		
 		painter.setPen(pen);		
-		Ui::RectF rect(pos + Ui::PointF(2,2), size);
+		Gfx::RectF rect(pos +Gfx::PointF(2,2), size);
 		painter.drawRect(rect);		
 	}		
 }

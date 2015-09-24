@@ -27,7 +27,7 @@
 #include "PaintSurfaceImpl.h"
 #include "ScreenImpl.h"
 #include "ApplicationImpl.h"
-#include <Pt/Ui/ImagePainter.h>
+#include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Hmi/Application.h>
 
 namespace Pt{
@@ -44,14 +44,14 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
 }
 
 
-void PaintSurfaceImpl::resize(const Ui::SizeF& size)
+void PaintSurfaceImpl::resize(const Gfx::SizeF& size)
 {	
 	_size = size;
   _path.clear();
 }
 
 
-Ui::SizeF PaintSurfaceImpl::size() const
+Gfx::SizeF PaintSurfaceImpl::size() const
 {
 	return _size;
 }

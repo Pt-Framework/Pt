@@ -34,7 +34,7 @@
 #include <Pt/Hmi/WindowBorder.h>
 #include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
-#include <Pt/Ui/Image.h>
+#include <Pt/Gfx/Image.h>
 
 namespace Pt {
 namespace Hmi {
@@ -46,8 +46,8 @@ class PT_HMI_API Window : public Widget
 	public:    		
     virtual ~Window();    
 
-    ValueProperty<Ui::SizeF>												MinimumSize;
-    ValueProperty<Ui::SizeF>												MaximumSize;
+    ValueProperty<Gfx::SizeF>												MinimumSize;
+    ValueProperty<Gfx::SizeF>												MaximumSize;
     ValueProperty<Hmi::WindowStartPosition::Type>   StartPostion;
     ValueProperty<Hmi::WindowState::Type>           State;    
     ValueProperty<bool>                             ShowInTaskbar;
@@ -56,7 +56,7 @@ class PT_HMI_API Window : public Widget
     ValueProperty<bool>                             ShowMaximizeButton;
     ValueProperty<bool>                             ShowSysMenu;
     ValueProperty<Hmi::WindowBorder::Type>          Border;
-    ValueProperty<Ui::Image>						            Icon;
+    ValueProperty<Gfx::Image>						            Icon;
     ValueProperty<bool>                             CanClose;
     ValueProperty<bool>                             FirstShow;
     ValueProperty<std::string>                      FocuseMoveKey;      
@@ -110,7 +110,7 @@ class PT_HMI_API Window : public Widget
 		virtual void onPointerInput( const PointerEvent& ev );	
     virtual void onInvalidate();  			
 		virtual void setClosed( bool close );				
-    virtual void setSize( const Ui::SizeF& size );
+    virtual void setSize( const Gfx::SizeF& size );
 		virtual void onFocusEvent( const FocusEvent& ev );
 		virtual void onSetFocus();
 		virtual void onRemoveFocus();

@@ -94,7 +94,7 @@ void MainWindowImpl::destroy()
 void MainWindowImpl::render()
 {
   Painter& painter = surface().painter();
-  painter.drawSurface( Ui::PointF( 0,0 ), _apiWindow->surface() );
+  painter.drawSurface(Gfx::PointF( 0,0 ), _apiWindow->surface() );
 	_app.mainScreen().impl()->invalidate();
 }
 
@@ -117,7 +117,7 @@ void MainWindowImpl::activate()
 }
 
 
-void MainWindowImpl::setWindowPos(const Ui::PointF& p)
+void MainWindowImpl::setWindowPos(const Gfx::PointF& p)
 {
 	 if( Position.get()  ==  p )
 			return;
@@ -126,7 +126,7 @@ void MainWindowImpl::setWindowPos(const Ui::PointF& p)
 }
 
 
-void MainWindowImpl::setWindowSize( const  Ui::SizeF& size )
+void MainWindowImpl::setWindowSize( const Gfx::SizeF& size )
 {
 	 if( Size.get()  == size )
 			return;
@@ -189,7 +189,7 @@ void MainWindowImpl::showInTaskbar(bool p)
 }
 
 
-void MainWindowImpl::setIcon(const Ui::Image& p)
+void MainWindowImpl::setIcon(const Gfx::Image& p)
 {
 	Icon = p;
 }
@@ -201,13 +201,13 @@ void MainWindowImpl::setEnable(bool e)
 }
 
 
-void MainWindowImpl::setMinSize(const Ui::SizeF& s)
+void MainWindowImpl::setMinSize(const Gfx::SizeF& s)
 {
 	MinimumSize = s;
 }
 
 
-void MainWindowImpl::setMaxSize(const Ui::SizeF& s)
+void MainWindowImpl::setMaxSize(const Gfx::SizeF& s)
 {
 	MaximumSize = s;
 }

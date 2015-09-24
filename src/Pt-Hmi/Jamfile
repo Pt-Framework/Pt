@@ -34,7 +34,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   Screen.cpp 
 					   ;
 
-LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Ui  ;
+LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx  ;
 LinkLibs Pt-Hmi : $(GUILIBS) ;
 MakeLocate Pt-Hmi : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-Hmi : $(PT_INSTALL_LIBDIR) ;

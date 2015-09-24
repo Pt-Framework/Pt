@@ -28,9 +28,9 @@
 #define Pt_Hmi_PaintSurfaceImpl_h
 
 #include <Pt/Hmi/Property.h>
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Size.h>
-#include <Pt/Ui/Image.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Image.h>
 #include <Windows.h>
 
 namespace Pt{
@@ -44,9 +44,9 @@ public:
 	PaintSurfaceImpl();
 	virtual ~PaintSurfaceImpl();	
 	
-	void resize(const Ui::SizeF& size);	
+	void resize(const Gfx::SizeF& size);	
 
-	inline const Ui::SizeF& size() const
+	inline const Gfx::SizeF& size() const
 	{
 		return _size;
 	}
@@ -57,7 +57,7 @@ public:
 	}
 
 private:
-    Ui::SizeF _size;
+   Gfx::SizeF _size;
     HDC       _deviceContext;
     HBITMAP   _bitmapHandle;            
     HPEN		  _oldPen;

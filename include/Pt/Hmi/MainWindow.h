@@ -48,9 +48,9 @@ class PT_HMI_API MainWindow  : public Window
     virtual void activate();
 
 	protected:	
-		virtual void setSize(const Ui::SizeF& size);
+		virtual void setSize(const Gfx::SizeF& size);
 
-		virtual void setPosition(const Ui::PointF& pos);
+		virtual void setPosition(const Gfx::PointF& pos);
 
 		virtual void setCaption( const std::string& c);	       		
 
@@ -64,7 +64,7 @@ class PT_HMI_API MainWindow  : public Window
     virtual void onInvalidate();	
 
 	private: 					
-		void onPositionChanged(const Ui::PointF& prop);    
+		void onPositionChanged(const Gfx::PointF& prop);    
 
 		void onClosedChanged(const bool& closed);
 	  
@@ -88,13 +88,13 @@ class PT_HMI_API MainWindow  : public Window
 	  
 		void onShowInTaskbarChanged(const bool& p);
 	  
-		void onIconChanged(const Ui::Image & p);    		
+		void onIconChanged(const Gfx::Image & p);    		
 
 		void onEnabledChanged(const bool & p);
 
-		void onMinSizeChnaged(const Ui::SizeF& prop);
+		void onMinSizeChnaged(const Gfx::SizeF& prop);
 	
-		void onMaxSizeChnaged(const Ui::SizeF& prop);
+		void onMaxSizeChnaged(const Gfx::SizeF& prop);
 		
 	private:
 		MainWindowImpl*	 _impl;    

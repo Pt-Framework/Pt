@@ -1,2 +1,0 @@
-SubDir PT_TOP src Pt-Ui freetype ;
-SubInclude PT_TOP src Pt-Ui freetype src ;

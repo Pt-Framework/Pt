@@ -25,15 +25,15 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Hmi/ChildWindow.h>
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Pen.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Pen.h>
 
 namespace Pt{
 namespace Hmi{
 
 ChildWindow::ChildWindow()
 {
-  BackColor = Ui::Color(0, 1, 1, 1);	
+  BackColor =Gfx::Color(0, 1, 1, 1);	
 }
 
 

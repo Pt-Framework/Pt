@@ -30,10 +30,10 @@
 #include "InputDevice.h"
 #include "FrameBuffer.h"
 #include <Pt/System/MainLoop.h>
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Size.h>
-#include <Pt/Ui/Rect.h>
-#include <Pt/Ui/Image.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/Image.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Cursor.h>
 

@@ -36,10 +36,10 @@
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Margin.h>
 #include <Pt/Connectable.h>
-#include <Pt/Ui/Font.h>
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Size.h>
-#include <Pt/Ui/Color.h>
+#include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Color.h>
 
 namespace Pt{
 namespace Hmi{
@@ -152,7 +152,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 		void bindMnemonicToWidget(Widget& widget);	
 
 
-		bool contains(const Ui::PointF& p);
+		bool contains(const Gfx::PointF& p);
  	
 		bool focusNext();
 	
@@ -169,9 +169,9 @@ class PT_HMI_API Widget : public Pt::Connectable
 			return _containPointer;
 		}
 
-		Ui::PointF toClient(const Ui::PointF& globalPoint);
+		Gfx::PointF toClient(const Gfx::PointF& globalPoint);
 
-		Ui::PointF fromClient(const Ui::PointF& localPoint);
+		Gfx::PointF fromClient(const Gfx::PointF& localPoint);
 
 
 	public:
@@ -181,14 +181,14 @@ class PT_HMI_API Widget : public Pt::Connectable
 	public:
 		ValueProperty<bool>											Enabled;		
 		ValueProperty<bool>											Visible;
-		ValueProperty<Ui::Font>						Font;
-		Property<Widget,Ui::PointF>				Position;
-		Property<Widget,Ui::SizeF>					Size;
-		ValueProperty<Ui::Color>				BackColor;
-		ValueProperty<Ui::Color>				HighlightColor;
-		ValueProperty<Ui::Color>				        ForeColor;
-		ValueProperty<Ui::Color>				        DisabledColor;
-		ValueProperty<Ui::Image>				        BackgroundImage;
+		ValueProperty<Gfx::Font>						Font;
+		Property<Widget,Gfx::PointF>				Position;
+		Property<Widget,Gfx::SizeF>					Size;
+		ValueProperty<Gfx::Color>				BackColor;
+		ValueProperty<Gfx::Color>				HighlightColor;
+		ValueProperty<Gfx::Color>				        ForeColor;
+		ValueProperty<Gfx::Color>				        DisabledColor;
+		ValueProperty<Gfx::Image>				        BackgroundImage;
 		ValueProperty<ImageLayout::Type>				BackgroundImageLayout;
 		ValueProperty<int>											Opacity;
 		ValueProperty<Hmi::Cursor>							Cursor;
@@ -251,24 +251,24 @@ class PT_HMI_API Widget : public Pt::Connectable
 		virtual void onActionKey(KeyEvent::KeyState state);
 		virtual void onShortcutKey(KeyEvent::KeyState state);	  
 
-		virtual void setPosition(const Ui::PointF& pos)
+		virtual void setPosition(const Gfx::PointF& pos)
 		{
 			_position = pos;			
 		}	
 
-		virtual void setSize(const Ui::SizeF& size);
+		virtual void setSize(const Gfx::SizeF& size);
 			
 		virtual void setWidgetFocus(bool isFocused);
 
 		virtual void setCaption( const std::string& c);
 
 	protected:
-		const Ui::SizeF& size() const
+		const Gfx::SizeF& size() const
 		{
 			return _size;
 		}
 
-		const Ui::PointF& position() const
+		const Gfx::PointF& position() const
 		{
 			return _position;
 		}
@@ -278,16 +278,16 @@ class PT_HMI_API Widget : public Pt::Connectable
 			return _caption;
 		}
 
-    const Ui::SizeF clientSize() const
+    const Gfx::SizeF clientSize() const
     {
-        return Ui::SizeF( _size.width() - Margin.get().left() -  Margin.get().right(),
+        return Gfx::SizeF( _size.width() - Margin.get().left() -  Margin.get().right(),
                           _size.height() - Margin.get().top() -  Margin.get().bottom() );
                           
     }
 
-    const Ui::PointF clientPos() const
+    const Gfx::PointF clientPos() const
     {
-        return Ui::PointF( Margin.get().left(),  Margin.get().top() );
+        return Gfx::PointF( Margin.get().left(),  Margin.get().top() );
     }
 
 	private:			  
@@ -296,7 +296,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 		int getFocusedChild() const;	
 
 	private:
-		void updatePosAndSize(Widget& w, const Ui::SizeF& s, const Ui::PointF& p);
+		void updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p);
 
 	private:	  
 		Widget*										 _parent;	
@@ -304,8 +304,8 @@ class PT_HMI_API Widget : public Pt::Connectable
 		Widget*										 _mnemonicWidget;	
 		std::string								 _mnemonicKey;
 		bool											 _containPointer;	
-		Ui::SizeF									_size;
-		Ui::PointF                _position;
+		Gfx::SizeF									_size;
+		Gfx::PointF                _position;
 		bool											  _isWidgetFocused;
 		std::string									_caption;		
     bool                        _isValid;

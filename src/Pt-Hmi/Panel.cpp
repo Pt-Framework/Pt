@@ -25,9 +25,9 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Hmi/Panel.h>
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Pen.h>
-#include <Pt/Ui/Rect.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/Rect.h>
 
 namespace Pt{
 namespace Hmi{
@@ -36,7 +36,7 @@ Panel::Panel()
 : PT_HMI_INIT_PROPERTY_VALUE(PanelBorderStyle,BorderStyle::Single)
 , PT_HMI_INIT_PROPERTY_VALUE(PanelBorderWidth,1)
 , PT_HMI_INIT_PROPERTY_VALUE(PanelBorderRoundEdge,false)
-, PT_HMI_INIT_PROPERTY_VALUE(BorderColor, Ui::Color::fromRgb8(178,178,178))
+, PT_HMI_INIT_PROPERTY_VALUE(BorderColor,Gfx::Color::fromRgb8(178,178,178))
 {
   AcceptFocus = false;
   Name.set("Panel");
@@ -61,13 +61,13 @@ void Panel::onRender(PaintSurface& paintSurface)
   if( PanelBorderWidth.get() == 0 )
     return;
 
-  const Ui::SizeF  size = clientSize();
-  const Ui::PointF pos  = clientPos();
+  const Gfx::SizeF  size = clientSize();
+  const Gfx::PointF pos  = clientPos();
 
 	size_t border =  (size_t) PanelBorderWidth.get();	
 
-	Ui::SizeF  clientSize(size.width() - PanelBorderWidth.get()/2, size.height() - PanelBorderWidth.get()/2);	
-	Ui::RectF  clientRect(Ui::PointF( PanelBorderWidth.get()/2, PanelBorderWidth.get()/2), clientSize);
+	Gfx::SizeF  clientSize(size.width() - PanelBorderWidth.get()/2, size.height() - PanelBorderWidth.get()/2);	
+	Gfx::RectF  clientRect(Gfx::PointF( PanelBorderWidth.get()/2, PanelBorderWidth.get()/2), clientSize);
 	
 	Pt::Hmi::Painter& painter = paintSurface.painter();
 						
@@ -75,8 +75,8 @@ void Panel::onRender(PaintSurface& paintSurface)
 	{
 		case BorderStyle::Single:
 		{			
-			std::vector<Ui::PointF> points1(5);
-			std::vector<Ui::PointF> points2(5);
+			std::vector<Gfx::PointF> points1(5);
+			std::vector<Gfx::PointF> points2(5);
 
 			//P0
 			points1[0].setX(pos.x() + corner);
@@ -119,7 +119,7 @@ void Panel::onRender(PaintSurface& paintSurface)
 			points2[4].setX(pos.x() + corner);
 			points2[4].setY(pos.y() + clientRect.height());
 		
-			Ui::Pen pen(border, BorderColor.get());
+			Gfx::Pen pen(border, BorderColor.get());
 			painter.setPen(pen);
 				
 			painter.drawPolyline(&points1[0], points1.size());								
@@ -130,8 +130,8 @@ void Panel::onRender(PaintSurface& paintSurface)
 			
 		case BorderStyle::Widget:
 		{			
-			std::vector<Ui::PointF> points1(5);
-			std::vector<Ui::PointF> points2(5);
+			std::vector<Gfx::PointF> points1(5);
+			std::vector<Gfx::PointF> points2(5);
 
 			//P0
 			points1[0].setX(pos.x() + corner);
@@ -175,12 +175,12 @@ void Panel::onRender(PaintSurface& paintSurface)
 			points2[4].setY(pos.y() + clientRect.height());
 
 
-			Ui::Pen pen(border, BorderColor.get() );
+			Gfx::Pen pen(border, BorderColor.get() );
 			painter.setPen(pen);
 				
 			painter.drawPolyline(&points2[0], points2.size());
                 
-			Ui::Pen pen2(border,  BorderColor.get());
+			Gfx::Pen pen2(border,  BorderColor.get());
 			painter.setPen(pen2);
                 
 			painter.drawPolyline(&points1[0], points1.size());
@@ -190,8 +190,8 @@ void Panel::onRender(PaintSurface& paintSurface)
 
 		case BorderStyle::Border3D:
 		{
-			std::vector<Ui::PointF> points1(3);
-			std::vector<Ui::PointF> points2(3);
+			std::vector<Gfx::PointF> points1(3);
+			std::vector<Gfx::PointF> points2(3);
 
 			points1[0].setX(pos.x());
 			points1[0].setY(pos.y() +clientRect.height());
@@ -213,12 +213,12 @@ void Panel::onRender(PaintSurface& paintSurface)
 			points2[2].setY(pos.y() + clientRect.height());
 
 		
-			Ui::Pen pen(border, Ui::Color(255/255.0,255/255.0,255/255.0));
+			Gfx::Pen pen(border,Gfx::Color(255/255.0,255/255.0,255/255.0));
 			painter.setPen(pen);
 				
 			painter.drawPolyline(&points1[0], points1.size());
 								
-			Ui::Pen pen2(border, DisabledColor.get() );
+			Gfx::Pen pen2(border, DisabledColor.get() );
 			painter.setPen(pen2);
 
 			painter.drawPolyline(&points2[0], points2.size());			

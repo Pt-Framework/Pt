@@ -29,15 +29,15 @@
 
 #include "InputDevice.h"
 #include <Pt/System/MainLoop.h>
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Size.h>
-#include <Pt/Ui/Rect.h>
-#include <Pt/Ui/Image.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/Image.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Cursor.h>
-#include <Pt/Ui/Rgb565Format.h>
-#include <Pt/Ui/Rgb888Format.h>
-#include <Pt/Ui/Argb8888Format.h>
+#include <Pt/Gfx/Rgb565Format.h>
+#include <Pt/Gfx/Rgb888Format.h>
+#include <Pt/Gfx/Argb8888Format.h>
 #include <linux/fb.h>
 
 namespace Pt {
@@ -73,18 +73,18 @@ class FrameBuffer
        return _screenInfo.bits_per_pixel;
     }
 
-    void bitBlit( const Pt::uint8_t* , size_t width, size_t height, const Ui::Point& pos, BlitOp op );
+    void bitBlit( const Pt::uint8_t* , size_t width, size_t height, const Gfx::Point& pos, BlitOp op );
 
-    void bitBlit( const Ui::Image& image );
+    void bitBlit( const Gfx::Image& image );
     
-    void grabImage( const Ui::Point& pos, Ui::Image& image);
+    void grabImage( const Gfx::Point& pos,Gfx::Image& image);
     
     size_t strideInBytes() const
     {
         return  _fixedInfo.line_length - ( width() *  depth() /8  );
     }
 
-    const Ui::ImageFormat& format() const 
+    const Gfx::ImageFormat& format() const 
     {
         return *_format;
     }
@@ -104,9 +104,9 @@ class FrameBuffer
 			  return _buffer;
 	  }
 
-		Ui::Size size() const 
+		Gfx::Size size() const 
 		{
-			return Ui::Size( width(), height() );
+			return Gfx::Size( width(), height() );
 		}
 
 	private:
@@ -117,7 +117,7 @@ class FrameBuffer
     size_t            _yoffset;  
     size_t            _bufferSize;
     size_t		        _depth;	  
-    Ui::ImageFormat*  _format;
+   Gfx::ImageFormat*  _format;
 };
 
 } // namespace

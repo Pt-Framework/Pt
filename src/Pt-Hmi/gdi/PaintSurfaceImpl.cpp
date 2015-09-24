@@ -37,9 +37,9 @@ namespace Hmi{
 PaintSurfaceImpl::PaintSurfaceImpl()
 : _deviceContext(0)
 {
-	_size = Ui::SizeF(10,10);
+	_size =Gfx::SizeF(10,10);
 
-	Ui::Size nsize = Application::instance().mainScreen().fromUnit(_size);
+	Gfx::Size nsize = Application::instance().mainScreen().fromUnit(_size);
 
 	HDC screenDC = CreateDC(_T("DISPLAY"), NULL, NULL, NULL);
 	_deviceContext = CreateCompatibleDC(screenDC);
@@ -72,13 +72,13 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
 }
 
 
-void PaintSurfaceImpl::resize(const Ui::SizeF& size)
+void PaintSurfaceImpl::resize(const Gfx::SizeF& size)
 {
   if( _size == size )
     return;
 
 	_size = size;
-	Ui::Size nsize = Application::instance().mainScreen().fromUnit( _size );
+	Gfx::Size nsize = Application::instance().mainScreen().fromUnit( _size );
 
 	//Save the old settings
 	COLORREF textColor = GetTextColor(_deviceContext);

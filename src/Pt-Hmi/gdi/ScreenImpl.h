@@ -27,9 +27,9 @@
 #ifndef Pt_Hmi_ScreenImpl_H
 #define Pt_Hmi_ScreenImpl_H
 
-#include <Pt/Ui/Size.h>
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Rect.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Windows.h>
 
@@ -50,17 +50,17 @@ class ScreenImpl
 
 		double toUnit(int value);
 
-		Ui::PointF toUnit(const Ui::Point& value);
+		Gfx::PointF toUnit(const Gfx::Point& value);
 
-		Ui::SizeF toUnit(const Ui::Size& value);
+		Gfx::SizeF toUnit(const Gfx::Size& value);
 
 		int fromUnit(double value);
 
-		Ui::Point fromUnit(const Ui::PointF& value);
+		Gfx::Point fromUnit(const Gfx::PointF& value);
 
-		Ui::Size fromUnit(const Ui::SizeF& value);
+		Gfx::Size fromUnit(const Gfx::SizeF& value);
 
-		Ui::Rect fromUnit(const Ui::RectF& value);		
+		Gfx::Rect fromUnit(const Gfx::RectF& value);		
 
 		double unitSizeInch() const;
 
@@ -78,11 +78,11 @@ class ScreenImpl
     }
 
 private:
-    Ui::Size screeResolution();
+   Gfx::Size screeResolution();
     static HBITMAP createImage888(const Pt::uint8_t* data, size_t width, size_t height);
 
   private:
-    Ui::Size _size;
+   Gfx::Size _size;
 		double _factorX;
 		double _offsetX;
 		double _factorY;

@@ -25,7 +25,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Byteorder.h>
-#include <Pt/Ui/ImageReader.h>
+#include <Pt/Gfx/ImageReader.h>
 #include <fstream>
 #include <sstream>
 #include "ArrowCursor.h"
@@ -59,7 +59,7 @@ const Cursor& Cursor::defaultCursor()
 }
 
 
-void Cursor::loadCursor( const char* pngFile, const Ui::Color& alphaColor, Cursor& cursor )
+void Cursor::loadCursor( const char* pngFile, const Gfx::Color& alphaColor, Cursor& cursor )
 {
   std::fstream fs( pngFile, std::ios::binary |  std::ios::in );
 
@@ -70,16 +70,16 @@ void Cursor::loadCursor( const char* pngFile, const Ui::Color& alphaColor, Curso
 }
 
 
-void Cursor::loadCursor( std::istream& pngStream, const Ui::Color& alphaColor, Cursor& cursor )
+void Cursor::loadCursor( std::istream& pngStream, const Gfx::Color& alphaColor, Cursor& cursor )
 {
-	Ui::Image* im = Ui::ImageReader::read(pngStream);
+	Gfx::Image* im =Gfx::ImageReader::read(pngStream);
 
 	//Generate alpha channel
 	for( size_t y = 0;  y < im->height(); ++y )
 	{
 		for( size_t x = 0;  x < im->width(); ++x )
 		{
-			Ui::Color color =  im->color(x,y);
+			Gfx::Color color =  im->color(x,y);
 				
 			if( color.red() == alphaColor.red() &&  color.green() == alphaColor.green() && color.blue() == alphaColor.blue() )				
 				color.setAlpha(0);
@@ -95,7 +95,7 @@ void Cursor::loadCursor( std::istream& pngStream, const Ui::Color& alphaColor, C
 }
 
 
-void Cursor::loadCursor( const Pt::uint8_t* pngStream, const size_t size, const Ui::Color& alphaColor, Cursor& cursor )
+void Cursor::loadCursor( const Pt::uint8_t* pngStream, const size_t size, const Gfx::Color& alphaColor, Cursor& cursor )
 {						
 	std::stringstream ms;
 		
@@ -112,7 +112,7 @@ const Cursor& Cursor::moveCursor()
 	if( cursor.width() != 0 )
 		return cursor;
 
-	loadCursor( g_moveCursor, g_moveCursorSize,  Ui::Color( 1, 0, 0 ), cursor );
+	loadCursor( g_moveCursor, g_moveCursorSize, Gfx::Color( 1, 0, 0 ), cursor );
   cursor.setXHotspot( 11 );
   cursor.setYHotspot( 11 );
   cursor.setName( "move" );
@@ -126,7 +126,7 @@ const Cursor& Cursor::arrowCursor()
 	if( cursor.width() != 0 )
 		return cursor;
 
-	loadCursor( g_arrowCursor, g_arrowCursorSize,  Ui::Color( 1, 0, 0 ), cursor );
+	loadCursor( g_arrowCursor, g_arrowCursorSize, Gfx::Color( 1, 0, 0 ), cursor );
   cursor.setXHotspot( 0 );
   cursor.setYHotspot( 0 );
   cursor.setName( "arrow" );
@@ -141,7 +141,7 @@ const Cursor& Cursor::waitCursor()
 	if( cursor.width() != 0 )
 		return cursor;
 
-	loadCursor( g_waitCursor, g_waitCursorSize,  Ui::Color( 1, 0, 0 ), cursor );
+	loadCursor( g_waitCursor, g_waitCursorSize, Gfx::Color( 1, 0, 0 ), cursor );
   cursor.setXHotspot( 12 );
   cursor.setYHotspot( 16 );
   cursor.setName( "wait" );
@@ -156,7 +156,7 @@ const Cursor& Cursor::sizeNWSECursor()
 	if( cursor.width() != 0 )
 		return cursor;
 
-	loadCursor( g_sizeNWSECursor, g_sizeNWSECursorSize,  Ui::Color( 1, 0, 0 ), cursor );
+	loadCursor( g_sizeNWSECursor, g_sizeNWSECursorSize, Gfx::Color( 1, 0, 0 ), cursor );
   cursor.setXHotspot( 8 );
   cursor.setYHotspot( 8 );
   cursor.setName( "sizeNWSE" );
@@ -171,7 +171,7 @@ const Cursor& Cursor::sizeNESWCursor()
 	if( cursor.width() != 0 )
 		return cursor;
 
-	loadCursor( g_sizeNESWCursor, g_sizeNESWCursorSize,  Ui::Color( 1, 0, 0 ), cursor );
+	loadCursor( g_sizeNESWCursor, g_sizeNESWCursorSize, Gfx::Color( 1, 0, 0 ), cursor );
   cursor.setXHotspot( 8 );
   cursor.setYHotspot( 8 );
   cursor.setName( "sizeNESW" );
@@ -186,7 +186,7 @@ const Cursor& Cursor::sizeWECursor()
 	if( cursor.width() != 0 )
 		return cursor;
 
-	loadCursor( g_sizeWECursor, g_sizeWECursorSize,  Ui::Color( 1, 0, 0 ), cursor );
+	loadCursor( g_sizeWECursor, g_sizeWECursorSize, Gfx::Color( 1, 0, 0 ), cursor );
   cursor.setXHotspot( 11 );
   cursor.setYHotspot( 4 );
   cursor.setName( "sizeWE" );
@@ -202,7 +202,7 @@ const Cursor& Cursor::sizeNSCursor()
 	if( cursor.width() != 0 )
 		return cursor;
 
-	loadCursor( g_sizeNSCursor, g_sizeNSCursorSize,  Ui::Color( 1, 0, 0 ), cursor );
+	loadCursor( g_sizeNSCursor, g_sizeNSCursorSize, Gfx::Color( 1, 0, 0 ), cursor );
   cursor.setXHotspot( 4 );
   cursor.setYHotspot( 12 );
   cursor.setName( "sizeNS" );
@@ -211,7 +211,7 @@ const Cursor& Cursor::sizeNSCursor()
 }
 
 
-void Cursor::fromImage( const Ui::Image& image, Cursor& cursor)
+void Cursor::fromImage( const Gfx::Image& image, Cursor& cursor)
 {
 	cursor._height   = image.height();
 	cursor._width    = image.width();
@@ -220,7 +220,7 @@ void Cursor::fromImage( const Ui::Image& image, Cursor& cursor)
 	{
 		for( size_t x = 0; x < cursor._width; ++x )
 		{
-			const  Ui::Color& color = image.color( x, y );
+			const Gfx::Color& color = image.color( x, y );
 
 			if( color.alpha() == 0 )
 			{//Transparent

@@ -30,9 +30,9 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Cursor.h>
-#include <Pt/Ui/Size.h>
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Rect.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Rect.h>
 
 namespace Pt{
 namespace Hmi{
@@ -52,22 +52,22 @@ class PT_HMI_API Screen
 
 		double height() const;
 	
-    Ui::SizeF size() const
+   Gfx::SizeF size() const
     {
-      return Ui::SizeF( width(), height() );
+      return Gfx::SizeF( width(), height() );
     }
 
-	  Ui::PointF toUnit( const Ui::Point& value );
+	 Gfx::PointF toUnit( const Gfx::Point& value );
 	  
-    Ui::SizeF toUnit( const Ui::Size& value );
+   Gfx::SizeF toUnit( const Gfx::Size& value );
 	  
     double toUnit( int value );
 
-	  Ui::Point fromUnit( const Ui::PointF& value );
+	 Gfx::Point fromUnit( const Gfx::PointF& value );
 	  
-    Ui::Size fromUnit( const Ui::SizeF& value );
+   Gfx::Size fromUnit( const Gfx::SizeF& value );
 	  
-    Ui::Rect fromUnit( const Ui::RectF& value );
+   Gfx::Rect fromUnit( const Gfx::RectF& value );
 	  
     int fromUnit( double value );
 

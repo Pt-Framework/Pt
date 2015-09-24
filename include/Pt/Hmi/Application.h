@@ -27,9 +27,9 @@
 #define Pt_Hmi_Application_h
 
 #include <Pt/System/Application.h>
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Size.h>
-#include <Pt/Ui/Rect.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Event.h>

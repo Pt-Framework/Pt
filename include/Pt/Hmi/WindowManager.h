@@ -26,10 +26,10 @@
 #ifndef Pt_Hmi_WindowManager_h
 #define Pt_Hmi_WindowManager_h
 
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Size.h>
-#include <Pt/Ui/Rect.h>
-#include <Pt/Ui/Image.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/Image.h>
 #include <Pt/Connectable.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Cursor.h>
@@ -97,11 +97,11 @@ class WindowManager : public Pt::Connectable
     }
 
   protected:
-    virtual Ui::PointF renderFrame( ChildWindow* w);				     
+    virtual Gfx::PointF renderFrame( ChildWindow* w);				     
 
   private:
 		void invalidate();	
-    bool contains( const ChildWindow* w, const Ui::PointF& p );
+    bool contains( const ChildWindow* w, const Gfx::PointF& p );
 
 		ResizeDirection::Type isSizing( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );	
     bool isMoving ( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );
@@ -113,22 +113,22 @@ class WindowManager : public Pt::Connectable
 	
     Window* getFosusedWindow(WindowManager* manager);
 
-		Ui::PointF toClient(const ChildWindow* w, const Ui::PointF& p);  
+		Gfx::PointF toClient(const ChildWindow* w, const Gfx::PointF& p);  
     
 	private:
 		Application&              _app;  
 		Window&										_parent;
 		std::vector<ChildWindow*>	_windows;		
 		ResizeDirection::Type			_sizingDirection;
-		Ui::PointF								_lastSizePoint;    
+		Gfx::PointF								_lastSizePoint;    
 		FocusEvent								_focusEvent;	
 		double										_borderWidth;
-    Ui::Color						      _inactiveColor; 
-    Ui::Color						      _activeColor; 
+   Gfx::Color						      _inactiveColor; 
+   Gfx::Color						      _activeColor; 
 		SizeEvent									_sizeEvent;
 		PositionEvent             _positionEvent; 	
 		bool											_moving;	
-		Ui::PointF								_movingOffset;
+		Gfx::PointF								_movingOffset;
     DeviceButton::State       _pointerLastState;  
     bool                      _focusOnPointerOver;    
     size_t                    _actionButton;  

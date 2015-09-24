@@ -1,0 +1,54 @@
+SubDir PT_TOP src Pt-Gfx ;
+
+SubDirHdrs $(PT_TOP)/include ;
+SubDirHdrs  $(PT_TOP)/src/Pt-Gfx/libpng ;
+SubDirC++Flags [ FDefines PT_GFX_API_EXPORT ] ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx ;
+
+
+if $(FREETYPE_INCLUDES)
+{
+    SubDirHdrs $(FREETYPE_INCLUDES) ;
+}
+
+SharedLibrary Pt-Gfx : Color.cpp                       
+                      Image.cpp
+                      ImageFormat.cpp
+                      ImagePainter.cpp
+                      Argb8888Format.cpp
+                      Rgb888Format.cpp
+                      Rgb565Format.cpp
+                      Brush.cpp
+                      Pen.cpp
+                      Font.cpp
+                      FontMetrics.cpp
+                      Exception.cpp
+                      DrawText.cpp
+                      FreeType.cpp
+                      ClipPolygon.cpp
+                      ImageReader.cpp
+                      RenderPath.cpp
+                      Rasterizer.cpp
+			              ;
+
+LinkSharedLibraries Pt-Gfx : Pt  Pt-System ;
+MakeLocate Pt-Gfx : $(PT_OUTPUT_TARGET) ;
+
+if $(FREETYPE_LINKFLAGS)
+{
+    LinkFlags Pt-Gfx : $(FREETYPE_LINKFLAGS) ;
+    LinkLibs Pt-Gfx : $(FREETYPE_LINKLIBS) ;
+}
+else
+{
+    LinkLibraries Pt-Gfx : Pt-Gfx-freetype ;
+}
+
+LinkLibraries Pt-Gfx : png ;
+
+if ! $(FREETYPE_LINKFLAGS)
+{
+    SubInclude PT_TOP src Pt-Gfx freetype ;
+}
+
+SubInclude PT_TOP src Pt-Gfx libpng ;

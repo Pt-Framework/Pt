@@ -28,7 +28,7 @@
 
 #include <Pt/Types.h>
 #include <Pt/Event.h>
-#include <Pt/Ui/Size.h>
+#include <Pt/Gfx/Size.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/WindowState.h>
 
@@ -39,7 +39,7 @@ namespace Hmi{
 class PT_HMI_API SizeEvent : public Pt::BasicEvent<SizeEvent>
 {
 	public:	
-		SizeEvent(const Ui::SizeF&  size, const Hmi::WindowState::Type&  state)
+		SizeEvent(const Gfx::SizeF&  size, const Hmi::WindowState::Type&  state)
 		: _size( size )
 		, _state( state )
 		{
@@ -56,13 +56,13 @@ class PT_HMI_API SizeEvent : public Pt::BasicEvent<SizeEvent>
 		}
 
 
-		void setSize( const Ui::SizeF&  size )
+		void setSize( const Gfx::SizeF&  size )
 		{
 			_size = size;
 		}
 
 
-		const Ui::SizeF&  size( ) const
+		const Gfx::SizeF&  size( ) const
 		{
 			return _size;
 		}
@@ -80,7 +80,7 @@ class PT_HMI_API SizeEvent : public Pt::BasicEvent<SizeEvent>
 		}
 
 	private:
-		Ui::SizeF _size;
+		Gfx::SizeF _size;
 		Hmi::WindowState::Type _state;
 };
 

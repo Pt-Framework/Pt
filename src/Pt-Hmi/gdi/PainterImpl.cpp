@@ -28,11 +28,11 @@
 #include "win32.h"
 #include "PainterImpl.h"
 #include "PaintSurfaceImpl.h"
-#include "Pt/Types.h"
+#include <Pt/Types.h>
 #include <Pt/System/Clock.h>
-#include "Pt/Ui/Rect.h"
-#include "Pt/Ui/FontMetrics.h"
-#include "Pt/Ui/Color.h"
+#include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/Color.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/PaintSurface.h>
@@ -44,10 +44,10 @@ namespace Hmi {
 
 PainterImpl::PainterImpl(PaintSurfaceImpl* surface)
 : _surface(surface)
-, _pen(Ui::Pen(1))
-, _brush(Ui::Brush(Ui::Color(0, 0, 0)))
-, _font(Ui::Font(determinePlatformDefaultFontName()))
-, _renderMode(Ui::RenderMode::NoAlpha)
+, _pen(Gfx::Pen(1))
+, _brush(Gfx::Brush(Gfx::Color(0, 0, 0)))
+, _font(Gfx::Font(determinePlatformDefaultFontName()))
+, _renderMode(Gfx::RenderMode::NoAlpha)
 , _screen( Application::instance().mainScreen() )
 {
 }
@@ -58,20 +58,20 @@ PainterImpl::~PainterImpl()
 }
 
 
-void PainterImpl::setRenderMode( Ui::RenderMode::Type mode )
+void PainterImpl::setRenderMode(Gfx::RenderMode::Type mode )
 {
 	_renderMode = mode;
 }
 
 
-void PainterImpl::setPen(const Ui::Pen& pen)
+void PainterImpl::setPen(const Gfx::Pen& pen)
 {
     _pen = pen;
     updatePen();
 }
 
 
-DWORD PainterImpl::toGdiPenStyle( const Ui::Pen& pen )
+DWORD PainterImpl::toGdiPenStyle( const Gfx::Pen& pen )
 {
 #ifdef _WIN32_WCE
     DWORD penStyle = 0;
@@ -81,10 +81,10 @@ DWORD PainterImpl::toGdiPenStyle( const Ui::Pen& pen )
 
     switch( pen.style() )
     {
-        case Ui::Pen::SolidStyle:
+        case Gfx::Pen::SolidStyle:
             penStyle |= PS_SOLID;
         break;
-        case Ui::Pen::DashStyle:
+        case Gfx::Pen::DashStyle:
             penStyle |= PS_DASH;
         break;
     }
@@ -92,20 +92,20 @@ DWORD PainterImpl::toGdiPenStyle( const Ui::Pen& pen )
 #ifndef _WIN32_WCE
     switch( pen.capStyle() )
     {
-        case Ui::Pen::RoundCap:
+        case Gfx::Pen::RoundCap:
             penStyle |= PS_ENDCAP_ROUND;
         break;
-        case Ui::Pen::FlatCap:
+        case Gfx::Pen::FlatCap:
             penStyle |= PS_ENDCAP_FLAT;
         break;
     }
 
     switch( pen.joinStyle() )
     {
-        case Ui::Pen::RoundJoin:
+        case Gfx::Pen::RoundJoin:
              penStyle |= PS_JOIN_ROUND;
         break;
-        case Ui::Pen::BevelJoin:
+        case Gfx::Pen::BevelJoin:
              penStyle |= PS_JOIN_BEVEL;
         break;
     }
@@ -138,13 +138,13 @@ void PainterImpl::updatePen()
 }
 
 
-const Ui::Pen& PainterImpl::pen() const
+const Gfx::Pen& PainterImpl::pen() const
 {
     return _pen;
 }
 
 
-void PainterImpl::setBrush(const Ui::Brush& brush)
+void PainterImpl::setBrush(const Gfx::Brush& brush)
 {
     _brush = brush;
     updateBrush();
@@ -158,15 +158,15 @@ void PainterImpl::updateBrush()
     switch (_brush.fillStyle()) 
     {
 
-      case Ui::Brush::SolidFill: 
+      case Gfx::Brush::SolidFill: 
 	    {
           newBrushHandle = CreateSolidBrush(RGB(_brush.color().red()*255, _brush.color().green()*255, _brush.color().blue()*255));
           break;
       }
 
-      case Ui::Brush::TextureFill: 
+      case Gfx::Brush::TextureFill: 
 	    {
-        const Ui::Image& texture = _brush.texture();
+        const Gfx::Image& texture = _brush.texture();
 
         if (texture.width() != 0)
         {
@@ -217,13 +217,13 @@ void PainterImpl::updateBrush()
 }
 
 
-const Ui::Brush& PainterImpl::brush() const
+const Gfx::Brush& PainterImpl::brush() const
 {
     return _brush;
 }
 
 
-void PainterImpl::setFont(const Ui::Font& font)
+void PainterImpl::setFont(const Gfx::Font& font)
 {
     if (font == _font) 
         return;
@@ -241,18 +241,18 @@ void PainterImpl::updateFont()
     
 	switch (_font.fontStyle()) 
 	{
-        case Ui::Font::NormalStyle:
-        case Ui::Font::ItalicStyle:
+        case Gfx::Font::NormalStyle:
+        case Gfx::Font::ItalicStyle:
             fontWeight = FW_NORMAL;
         break;
 
-        case Ui::Font::BoldStyle:
-        case Ui::Font::BoldItalicStyle:
+        case Gfx::Font::BoldStyle:
+        case Gfx::Font::BoldItalicStyle:
             fontWeight = FW_BOLD;
         break;
     }
 
-    BYTE italic = (_font.fontStyle() == Ui::Font::ItalicStyle || _font.fontStyle() == Ui::Font::BoldItalicStyle);
+    BYTE italic = (_font.fontStyle() ==Gfx::Font::ItalicStyle || _font.fontStyle() ==Gfx::Font::BoldItalicStyle);
 
     LOGFONT fontDescription;
     fontDescription.lfHeight         = -((int)_font.size()); // negative value -> Value is converted to device units.
@@ -295,12 +295,12 @@ std::string PainterImpl::determinePlatformDefaultFontName()
 }
 
 
-const Ui::Font& PainterImpl::font() const
+const Gfx::Font& PainterImpl::font() const
 {
     return _font;
 }
 
-Ui::FontMetrics PainterImpl::fontMetrics(Pt::String text) const
+Gfx::FontMetrics PainterImpl::fontMetrics(Pt::String text) const
 {
     SIZE textSize;
     TEXTMETRIC basicMetrics;
@@ -309,10 +309,10 @@ Ui::FontMetrics PainterImpl::fontMetrics(Pt::String text) const
     _text.clear();
 	text.toUtf16( std::back_inserter(_text) );
     GetTextExtentPoint32W(_surface->deviceContext(), _text.c_str(), _text.length(), &textSize);
-	Ui::Size size(textSize.cx, textSize.cy);
-	Ui::SizeF sizeF = _screen.toUnit(size);
+	Gfx::Size size(textSize.cx, textSize.cy);
+	Gfx::SizeF sizeF = _screen.toUnit(size);
 
-    return Ui::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, (int)sizeF.width(), (int)sizeF.height());
+    return Gfx::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, (int)sizeF.width(), (int)sizeF.height());
 }
 
 
@@ -373,13 +373,13 @@ const std::list<std::string>& PainterImpl::fontFamilyNames()
 }
 
 
-void PainterImpl::drawLine(const Ui::PointF& fromF, const  Ui::PointF& toF)
+void PainterImpl::drawLine(const Gfx::PointF& fromF, const Gfx::PointF& toF)
 {
 	if (_pen.size() == 0) 
 		return; 
 
-	Ui::Point from = _screen.fromUnit(fromF);
-	Ui::Point to = _screen.fromUnit(toF);
+	Gfx::Point from = _screen.fromUnit(fromF);
+	Gfx::Point to = _screen.fromUnit(toF);
 
   POINT points[2];
   points[0].x = from.x();
@@ -390,9 +390,9 @@ void PainterImpl::drawLine(const Ui::PointF& fromF, const  Ui::PointF& toF)
   Polyline(_surface->deviceContext(), points, 2);
 }
 
-void PainterImpl::drawText(const Ui::PointF& toF, const Pt::String& text)
+void PainterImpl::drawText(const Gfx::PointF& toF, const Pt::String& text)
 {
-	Ui::Point to = _screen.fromUnit(toF);
+	Gfx::Point to = _screen.fromUnit(toF);
   
   RECT rectangle;
   SetRect(&rectangle, to.x(), to.y(), to.x(), to.y());
@@ -404,22 +404,22 @@ void PainterImpl::drawText(const Ui::PointF& toF, const Pt::String& text)
 }
 
 
-void PainterImpl::fillRect(const Ui::RectF& rectF)
+void PainterImpl::fillRect(const Gfx::RectF& rectF)
 {
-	Ui::Rect rect = _screen.fromUnit(rectF);
+	Gfx::Rect rect = _screen.fromUnit(rectF);
 
   RECT rectangle;
-  const Ui::Point topLeft     = rect.topLeft();
-  const Ui::Point bottomRight = rect.bottomRight();
+  const Gfx::Point topLeft     = rect.topLeft();
+  const Gfx::Point bottomRight = rect.bottomRight();
   SetRect(&rectangle, topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
 
   HBRUSH currentBrush = (HBRUSH)GetCurrentObject(_surface->deviceContext(), OBJ_BRUSH);
   FillRect(_surface->deviceContext(), &rectangle, currentBrush);
 }
 
-void PainterImpl::drawRect(const Ui::RectF& rectF)
+void PainterImpl::drawRect(const Gfx::RectF& rectF)
 {
-	Ui::Rect rect = _screen.fromUnit(rectF);
+	Gfx::Rect rect = _screen.fromUnit(rectF);
 
     if (rect.size().width() == 1 && rect.size().height() == 1) 
 	{
@@ -431,18 +431,18 @@ void PainterImpl::drawRect(const Ui::RectF& rectF)
 
     HBRUSH originalBrush = (HBRUSH)SelectObject(_surface->deviceContext(), GetStockObject(NULL_BRUSH));
 
-    const Ui::Point topLeft     = rect.topLeft();
-    const Ui::Point bottomRight = rect.bottomRight();
+    const Gfx::Point topLeft     = rect.topLeft();
+    const Gfx::Point bottomRight = rect.bottomRight();
     Rectangle(_surface->deviceContext(), topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
 
     SelectObject(_surface->deviceContext(), originalBrush);
 }
 
 
-void PainterImpl::drawEllipse(const Ui::PointF& topLeftF, const Ui::SizeF& sizeF)
+void PainterImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
 {
-	Ui::Point topLeft = _screen.fromUnit(topLeftF);
-	Ui::Size size = _screen.fromUnit(sizeF);
+	Gfx::Point topLeft = _screen.fromUnit(topLeftF);
+	Gfx::Size size = _screen.fromUnit(sizeF);
 
   HBRUSH originalBrush = (HBRUSH)SelectObject(_surface->deviceContext(), GetStockObject(NULL_BRUSH));
 
@@ -452,10 +452,10 @@ void PainterImpl::drawEllipse(const Ui::PointF& topLeftF, const Ui::SizeF& sizeF
 }
 
 
-void PainterImpl::fillEllipse(const Ui::PointF& topLeftF, const Ui::SizeF& sizeF)
+void PainterImpl::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
 {
-	Ui::Point topLeft = _screen.fromUnit(topLeftF);
-	Ui::Size size =_screen.fromUnit(sizeF);
+	Gfx::Point topLeft = _screen.fromUnit(topLeftF);
+	Gfx::Size size =_screen.fromUnit(sizeF);
 
     // Temporarily select the empty pen to only draw the filling.
     HPEN originalPen = (HPEN)SelectObject(_surface->deviceContext(), GetStockObject(NULL_PEN));
@@ -472,7 +472,7 @@ void PainterImpl::fillEllipse(const Ui::PointF& topLeftF, const Ui::SizeF& sizeF
 }
 
 
-void PainterImpl::drawPolyline(const Ui::PointF* points, const size_t pointCount)
+void PainterImpl::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
 {
     if (_pen.size() == 0)
        return;
@@ -481,7 +481,7 @@ void PainterImpl::drawPolyline(const Ui::PointF* points, const size_t pointCount
 
     for (size_t i = 0; i < pointCount; i++)
     {
-		    Ui::Point p = _screen.fromUnit(points[i]);
+		   Gfx::Point p = _screen.fromUnit(points[i]);
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -490,7 +490,7 @@ void PainterImpl::drawPolyline(const Ui::PointF* points, const size_t pointCount
 }
 
 
-void PainterImpl::fillPolygon(const Ui::PointF* points, const size_t pointCount)
+void PainterImpl::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
 {
     HPEN originalPen = (HPEN)SelectObject(_surface->deviceContext(), GetStockObject(NULL_PEN));
 
@@ -498,7 +498,7 @@ void PainterImpl::fillPolygon(const Ui::PointF* points, const size_t pointCount)
 
     for (size_t i = 0; i < pointCount; i++)
     {
-		    Ui::Point p = _screen.fromUnit(points[i]);
+		   Gfx::Point p = _screen.fromUnit(points[i]);
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -509,17 +509,17 @@ void PainterImpl::fillPolygon(const Ui::PointF* points, const size_t pointCount)
 }
 
 
-void PainterImpl::drawSurface(const Ui::PointF& toF, const PaintSurface& surface)
+void PainterImpl::drawSurface(const Gfx::PointF& toF, const PaintSurface& surface)
 {
-	Ui::Point to = _screen.fromUnit(toF);
-	Ui::Size size = _screen.fromUnit(surface.size());
+	Gfx::Point to = _screen.fromUnit(toF);
+	Gfx::Size size = _screen.fromUnit(surface.size());
 
   BitBlt( _surface->deviceContext(), to.x(), to.y(), size.width(), size.height(), surface.impl()->deviceContext(),  0, 0, SRCCOPY);
 }
 
-void PainterImpl::drawImage(const Ui::PointF& toF, const Ui::Image& image)
+void PainterImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 {
-	Ui::Point to = _screen.fromUnit(toF);
+	Gfx::Point to = _screen.fromUnit(toF);
 
 	const size_t depth = image.format().pixelSize() * 8; 
 
@@ -586,25 +586,25 @@ void PainterImpl::setSurface(PaintSurface& surface)
 }
 
 
-Ui::FontMetrics PainterImpl::fontMetrics( const Ui::Font& font, const Pt::String& text )
+Gfx::FontMetrics PainterImpl::fontMetrics( const Gfx::Font& font, const Pt::String& text )
 {
   PaintSurface surface;
-  surface.resize( Ui::SizeF(200, 200) );
+  surface.resize(Gfx::SizeF(200, 200) );
   surface.painter().setFont( font );
   return surface.painter().fontMetrics( text );
 }
 
 
-void PainterImpl::drawPath( const Ui::RenderPath& path )
+void PainterImpl::drawPath( const Gfx::RenderPath& path )
 {
   path.render( *this );
 }
 
 
-void PainterImpl::clear( const Ui::Color& color )
+void PainterImpl::clear( const Gfx::Color& color )
 {
-  Ui::RectF rect(Ui::PointF(0,0), _surface->size() );   
-  setBrush( Ui::Brush( color ) );
+ Gfx::RectF rect(Gfx::PointF(0,0), _surface->size() );   
+  setBrush(Gfx::Brush( color ) );
   fillRect( rect );
 }
 

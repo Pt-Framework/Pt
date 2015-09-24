@@ -30,8 +30,8 @@
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Ui/Color.h>
-#include <Pt/Ui/Image.h>
+#include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Image.h>
 #include "FrameBuffer.h"
 
 namespace Pt{
@@ -60,12 +60,12 @@ class ScreenImpl : public Window
 		{
 		}
 
-		const Ui::Image& image() const
+		const Gfx::Image& image() const
 		{
 			return _image;
 		} 
 
-		Ui::Image& image() 
+		Gfx::Image& image() 
 		{
 			return _image;
 		} 
@@ -75,14 +75,14 @@ class ScreenImpl : public Window
       return value;
     }
 
-		Ui::PointF toUnit(const Ui::Point& value)
+		Gfx::PointF toUnit(const Gfx::Point& value)
     {
-      return Ui::PointF( value.x(), value.y() );
+      return Gfx::PointF( value.x(), value.y() );
     }
 
-		Ui::SizeF toUnit(const Ui::Size& value)
+		Gfx::SizeF toUnit(const Gfx::Size& value)
     {
-      return Ui::SizeF( value.width(), value.height() );
+      return Gfx::SizeF( value.width(), value.height() );
     }
 
 		int fromUnit(double value)
@@ -90,19 +90,19 @@ class ScreenImpl : public Window
       return (int) value;
     }
 
-		Ui::Point fromUnit(const Ui::PointF& value)
+		Gfx::Point fromUnit(const Gfx::PointF& value)
     {
-      return Ui::Point( (int)value.x(), (int)value.y() );
+      return Gfx::Point( (int)value.x(), (int)value.y() );
     }
 
-		Ui::Size fromUnit(const Ui::SizeF& value)
+		Gfx::Size fromUnit(const Gfx::SizeF& value)
     {
-       return Ui::Size( (int)value.width(), (int)value.height() );
+       return Gfx::Size( (int)value.width(), (int)value.height() );
     }
 
-		Ui::Rect fromUnit(const Ui::RectF& value)
+		Gfx::Rect fromUnit(const Gfx::RectF& value)
     {
-      return Ui::Rect( Ui::Point( (int) value.x(), (int)value.y()) , Ui::Size( (int)value.width(), (int)value.height() ) );
+      return Gfx::Rect(Gfx::Point( (int) value.x(), (int)value.y()) ,Gfx::Size( (int)value.width(), (int)value.height() ) );
     }
 
     double unitSizeInch() const
@@ -136,9 +136,9 @@ class ScreenImpl : public Window
 
 	private:
     FrameBuffer _frameBuffer;  
-		Ui::Image	  _cursorBackground;
-		Ui::Point		_cursorPos;    
-		Ui::Image   _image;
+		Gfx::Image	  _cursorBackground;
+		Gfx::Point		_cursorPos;    
+		Gfx::Image   _image;
     double      _dpi;
 };
 

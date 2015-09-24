@@ -25,9 +25,9 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Hmi/Label.h>
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Pen.h>
-#include <Pt/Ui/FontMetrics.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/FontMetrics.h>
 
 namespace Pt{
 namespace Hmi{
@@ -40,7 +40,7 @@ Label::Label()
   Caption.changed() +=  Pt::slot(*this, &Label::onCaptionChanged);
   Caption.set("Label");
   Name.set("Label");
-	ForeColor.set(Ui::Color::fromRgb8(0,0,0,0));
+	ForeColor.set(Gfx::Color::fromRgb8(0,0,0,0));
 	PanelBorderStyle.set(BorderStyle::NoBorder);
   
 }
@@ -65,9 +65,9 @@ void Label::recalcNewSize()
 	PaintSurface surface;
   surface.painter().setFont(Font.get());
 
-  const Ui::FontMetrics metric = surface.painter().fontMetrics(caption.c_str());
+  const Gfx::FontMetrics metric = surface.painter().fontMetrics(caption.c_str());
 
-  Size = Ui::SizeF( metric.width() + Margin.get().left() + Margin.get().right(), metric.height() + Margin.get().top() +  Margin.get().bottom() );  
+  Size =Gfx::SizeF( metric.width() + Margin.get().left() + Margin.get().right(), metric.height() + Margin.get().top() +  Margin.get().bottom() );  
   invalidate();
 }
 
@@ -86,11 +86,11 @@ void Label::onAutoSizeChanged(const bool& a)
 void Label::onRender(PaintSurface& paintSurface)
 {
 	Pt::Hmi::Painter& painter = paintSurface.painter();	
-  Ui::SizeF         size = clientSize();
-	Ui::PointF        pos = clientPos();
+ Gfx::SizeF         size = clientSize();
+	Gfx::PointF        pos = clientPos();
 	Pt::String        caption;
-  Ui::Color         foreColor = Enabled.get() ? ForeColor.get() : DisabledColor.get();
-  Ui::Pen	          pen( 1, foreColor);
+ Gfx::Color         foreColor = Enabled.get() ? ForeColor.get() : DisabledColor.get();
+ Gfx::Pen	          pen( 1, foreColor);
     
 	if( UseMnemonic.get() )
 		caption = Widget::removeMnemonic(Caption.get()).c_str();
@@ -99,7 +99,7 @@ void Label::onRender(PaintSurface& paintSurface)
 
   painter.setFont(Font.get());
 
-	Ui::FontMetrics	metric = painter.fontMetrics(caption);
+	Gfx::FontMetrics	metric = painter.fontMetrics(caption);
   
   Panel::onRender(paintSurface);
               
@@ -109,7 +109,7 @@ void Label::onRender(PaintSurface& paintSurface)
 		{
       case Hmi::Align::TopLeft:
       {
-			  pos += Ui::PointF( 0, metric.ascent() );			
+			  pos +=Gfx::PointF( 0, metric.ascent() );			
       }
       break;
 
@@ -117,7 +117,7 @@ void Label::onRender(PaintSurface& paintSurface)
       {
         const double widthHalf		  = size.width()/2;							  				
 			  const double textWidthHalf	= metric.width()/2;				  								
-			  pos += Ui::PointF(widthHalf - textWidthHalf, metric.ascent());	
+			  pos +=Gfx::PointF(widthHalf - textWidthHalf, metric.ascent());	
       }
       break;
 		
@@ -125,7 +125,7 @@ void Label::onRender(PaintSurface& paintSurface)
       {
 			  const double width		  = size.width();				
 			  const double textWidth	= metric.width();									
-			  pos += Ui::PointF(width - textWidth, metric.ascent());	
+			  pos +=Gfx::PointF(width - textWidth, metric.ascent());	
       }
       break;
 
@@ -134,7 +134,7 @@ void Label::onRender(PaintSurface& paintSurface)
         const double heightHalf		  = size.height()/2;				
 			  const double textHeightHalf = metric.height()/2;
 								
-			  pos += Ui::PointF(0, (heightHalf - textHeightHalf) + metric.ascent());
+			  pos +=Gfx::PointF(0, (heightHalf - textHeightHalf) + metric.ascent());
       }
       break;
 
@@ -145,7 +145,7 @@ void Label::onRender(PaintSurface& paintSurface)
 			  const double textWidthHalf	= metric.width()/2;	
 			  const double textHeightHalf = metric.height()/2;	
 								
-			  pos += Ui::PointF(widthHalf - textWidthHalf, (heightHalf - textHeightHalf) + metric.ascent());							
+			  pos +=Gfx::PointF(widthHalf - textWidthHalf, (heightHalf - textHeightHalf) + metric.ascent());							
 		  }
 		  break;
 
@@ -157,7 +157,7 @@ void Label::onRender(PaintSurface& paintSurface)
         const double heightHalf		  = size.height()/2;				
 			  const double textHeightHalf = metric.height()/2;	
 								
-			  pos += Ui::PointF(width - textWidth, (heightHalf - textHeightHalf) + metric.ascent());	
+			  pos +=Gfx::PointF(width - textWidth, (heightHalf - textHeightHalf) + metric.ascent());	
       }
       break;
 
@@ -166,7 +166,7 @@ void Label::onRender(PaintSurface& paintSurface)
         const double height	  = size.height();				
 			  const double textHeight = metric.height();	
 								
-			  pos += Ui::PointF(0, (height- textHeight) + metric.ascent());	
+			  pos +=Gfx::PointF(0, (height- textHeight) + metric.ascent());	
       }
       break;
 
@@ -178,7 +178,7 @@ void Label::onRender(PaintSurface& paintSurface)
         const double height	  = size.height();				
 			  const double textHeight = metric.height();	
 								
-			  pos += Ui::PointF(widthHalf - textWidthHalf, (height- textHeight) + metric.ascent());	
+			  pos +=Gfx::PointF(widthHalf - textWidthHalf, (height- textHeight) + metric.ascent());	
       }
       break;
 
@@ -190,14 +190,14 @@ void Label::onRender(PaintSurface& paintSurface)
         const double height	  = size.height();				
 			  const double textHeight = metric.height();	
 								
-			  pos += Ui::PointF(width - textWidth, (height- textHeight) + metric.ascent());	
+			  pos +=Gfx::PointF(width - textWidth, (height- textHeight) + metric.ascent());	
       }
       break;
     }
 	}
   else
   {
-      pos += Ui::PointF( 0, metric.ascent() );
+      pos +=Gfx::PointF( 0, metric.ascent() );
   }
 
   painter.setPen(pen);
@@ -213,15 +213,15 @@ void Label::onRender(PaintSurface& paintSurface)
 		{	
 			std::string subString(  caption.begin(), caption.begin() + index );
 
-			Ui::FontMetrics metric = painter.fontMetrics( Pt::String( subString.c_str() ) );
+			Gfx::FontMetrics metric = painter.fontMetrics( Pt::String( subString.c_str() ) );
 	
-			Ui::PointF linePos( pos.x() + metric.width() - 1, pos.y()  + 1);
+			Gfx::PointF linePos( pos.x() + metric.width() - 1, pos.y()  + 1);
 
 			subString = caption[index];
 
 			metric = painter.fontMetrics( Pt::String( subString.c_str() ) );
 
-			painter.drawLine( linePos , Ui::PointF( linePos.x() + metric.width(), linePos.y() ) );
+			painter.drawLine( linePos ,Gfx::PointF( linePos.x() + metric.width(), linePos.y() ) );
 		}
 	}
 }

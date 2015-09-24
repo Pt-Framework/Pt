@@ -59,7 +59,7 @@ class MainWindow : public Pt::Hmi::MainWindow
 		Pt::Hmi::Label  _textLabel;	
 		ChildWindow     _childWindow1;
 		ChildWindow     _childWindow2;
-		Ui::Image			  _drawBuffer;
+		Gfx::Image			  _drawBuffer;
 }; 
 
 }}}

@@ -255,7 +255,6 @@ ConfigureFreetype ;
 if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
 {
     FREETYPE_INCLUDES = [ FDirName $(PT_TOP) src Pt-Gfx freetype include ] ;
-	FREETYPE_INCLUDES += [ FDirName $(PT_TOP) src Pt-Ui freetype include ] ;
     FREETYPE_LINKFLAGS = "" ;
 
     Configure FREETYPE_INCLUDES ;

@@ -29,9 +29,9 @@
 
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
-#include <Pt/Ui/Size.h>
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Image.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Image.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/KeyEvent.h>
@@ -61,9 +61,9 @@ class MainWindowImpl  : public ChildWindow
 
 	    void activate();
 
-		void setWindowPos(const Ui::PointF& p);
+		void setWindowPos(const Gfx::PointF& p);
 
-		void setWindowSize(const Ui::SizeF& size);
+		void setWindowSize(const Gfx::SizeF& size);
 
 		void showTitle(bool p);
 
@@ -83,13 +83,13 @@ class MainWindowImpl  : public ChildWindow
   
 		void showInTaskbar(bool p);
   
-		void setIcon(const Ui::Image& p);
+		void setIcon(const Gfx::Image& p);
 
 		void setEnable(bool e);	
 
-		void setMinSize(const Ui::SizeF& s);
+		void setMinSize(const Gfx::SizeF& s);
 	
-		void setMaxSize(const Ui::SizeF& s);
+		void setMaxSize(const Gfx::SizeF& s);
 
 		void bringToFront();
 

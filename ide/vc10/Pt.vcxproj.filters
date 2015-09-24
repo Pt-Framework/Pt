@@ -109,38 +109,17 @@
     <Filter Include="Pt-XmlRpc\tests">
       <UniqueIdentifier>{f6833083-cbf2-4eca-9fae-4aeb9ad165e5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Ui">
-      <UniqueIdentifier>{1ee8acde-7502-41d6-a65c-0f34980e46ae}</UniqueIdentifier>
+    <Filter Include="Pt-Gfx">
+      <UniqueIdentifier>{8452b63b-9ec1-495d-ac59-6f931182cac7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Ui\Rasterizer">
-      <UniqueIdentifier>{bcb68f49-8e26-4a0a-b6e8-eddacc1f2150}</UniqueIdentifier>
+    <Filter Include="Pt-Gfx\Cliping">
+      <UniqueIdentifier>{736d6ee8-d109-4e42-8bf5-cc9c316514ec}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Ui\Imaging">
-      <UniqueIdentifier>{e97a731e-0148-4637-9c82-a71b2c0a84df}</UniqueIdentifier>
+    <Filter Include="Pt-Gfx\Rasterizer">
+      <UniqueIdentifier>{c6514a1a-8268-4b8a-8d40-cbb9ca8e4a19}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Ui\Cliping">
-      <UniqueIdentifier>{61a97333-b1b5-41d4-a4f3-4913a47619cc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Ui\Path">
-      <UniqueIdentifier>{c799c5dd-0269-4c57-afb2-faf122678d8b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Ui\Extern">
-      <UniqueIdentifier>{4ff53314-343b-4be3-ae28-1e12a0449bc9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Ui\Extern\libpng">
-      <UniqueIdentifier>{a4efc476-3541-480f-8b12-39011ce29c50}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Ui\Extern\freetype">
-      <UniqueIdentifier>{88dca83e-f5d4-46c8-a311-563b20bf43a3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Ui\Extern\freetype\include">
-      <UniqueIdentifier>{c62f2d9c-f40b-4712-a07c-6933e42e5ad6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Ui\Extern\freetype\src">
-      <UniqueIdentifier>{54f00d44-dcee-4751-959b-6840181170ca}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pt-Ui\Extern\fonts">
-      <UniqueIdentifier>{230bfdff-5447-4de4-9da6-0720d349e1c3}</UniqueIdentifier>
+    <Filter Include="Pt-Gfx\Imaging">
+      <UniqueIdentifier>{2425ebad-cf69-48f5-a2fe-0e451bd7c2f0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1149,93 +1128,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\FocusEvent.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\Color.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\Api.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\Point.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\Rect.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\Size.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\Brush.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\FontMetrics.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\Pen.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\Font.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\Painter.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\crc32.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\deflate.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\gzguts.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\inffast.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\inffixed.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\inflate.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\inftrees.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\png.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\pngconf.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\pngdebug.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\pnginfo.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\pnglibconf.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\pngpriv.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\pngstruct.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\trees.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\zconf.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\zlib.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\libpng\zutil.h">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\Exception.h">
-      <Filter>Pt-Ui</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1260,86 +1152,122 @@
     <ClInclude Include="..\..\include\Pt\Hmi\WindowTitleBar.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\RenderPath.h">
-      <Filter>Pt-Ui\Path</Filter>
+    <ClInclude Include="..\..\include\Pt\Gfx\Api.h">
+      <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\FillOp.h">
-      <Filter>Pt-Ui\Path</Filter>
+    <ClInclude Include="..\..\include\Pt\Gfx\Brush.h">
+      <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\ImageOp.h">
-      <Filter>Pt-Ui\Path</Filter>
+    <ClInclude Include="..\..\include\Pt\Gfx\Color.h">
+      <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\RenderOp.h">
-      <Filter>Pt-Ui\Path</Filter>
+    <ClInclude Include="..\..\include\Pt\Gfx\Exception.h">
+      <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\StrokeOp.h">
-      <Filter>Pt-Ui\Path</Filter>
+    <ClInclude Include="..\..\include\Pt\Gfx\Font.h">
+      <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\TextOp.h">
-      <Filter>Pt-Ui\Path</Filter>
+    <ClInclude Include="..\..\include\Pt\Gfx\FontMetrics.h">
+      <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\DrawText.h">
-      <Filter>Pt-Ui\Rasterizer</Filter>
+    <ClInclude Include="..\..\include\Pt\Gfx\Painter.h">
+      <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\EdgeTable.h">
-      <Filter>Pt-Ui\Rasterizer</Filter>
+    <ClInclude Include="..\..\include\Pt\Gfx\Pen.h">
+      <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\Edge.h">
-      <Filter>Pt-Ui\Rasterizer</Filter>
+    <ClInclude Include="..\..\include\Pt\Gfx\Point.h">
+      <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\Rgb888Format.h">
-      <Filter>Pt-Ui\Imaging</Filter>
+    <ClInclude Include="..\..\include\Pt\Gfx\Rect.h">
+      <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\Rgb565Format.h">
-      <Filter>Pt-Ui\Imaging</Filter>
+    <ClInclude Include="..\..\include\Pt\Gfx\Size.h">
+      <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\ImageReader.h">
-      <Filter>Pt-Ui\Imaging</Filter>
+    <ClInclude Include="..\..\src\Pt-Gfx\LineSlope.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\ImageFormat.h">
-      <Filter>Pt-Ui\Imaging</Filter>
+    <ClInclude Include="..\..\src\Pt-Gfx\LineFace.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\Image.h">
-      <Filter>Pt-Ui\Imaging</Filter>
+    <ClInclude Include="..\..\src\Pt-Gfx\LineEdge.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\ClipPolygon.h">
-      <Filter>Pt-Ui\Cliping</Filter>
+    <ClInclude Include="..\..\include\Pt\Gfx\Argb8888Format.h">
+      <Filter>Pt-Gfx\Imaging</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\ClipLine.h">
-      <Filter>Pt-Ui\Cliping</Filter>
+    <ClInclude Include="..\..\src\Pt-Gfx\DrawText.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\Argb8888Format.h">
-      <Filter>Pt-Ui\Imaging</Filter>
+    <ClInclude Include="..\..\include\Pt\Gfx\ClipPolygon.h">
+      <Filter>Pt-Gfx\Cliping</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\Vera.h">
-      <Filter>Pt-Ui\Rasterizer</Filter>
+    <ClInclude Include="..\..\src\Pt-Gfx\EdgeTable.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\LineEdge.h">
-      <Filter>Pt-Ui\Rasterizer</Filter>
+    <ClInclude Include="..\..\include\Pt\Gfx\ClipLine.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\LineFace.h">
-      <Filter>Pt-Ui\Rasterizer</Filter>
+    <ClInclude Include="..\..\src\Pt-Gfx\Edge.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\LineSlope.h">
-      <Filter>Pt-Ui\Rasterizer</Filter>
+    <ClInclude Include="..\..\src\Pt-Gfx\EllipseOp.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\Rasterizer.h">
-      <Filter>Pt-Ui\Rasterizer</Filter>
+    <ClInclude Include="..\..\src\Pt-Gfx\FillEllipseOp.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Ui\ImagePainter.h">
-      <Filter>Pt-Ui</Filter>
+    <ClInclude Include="..\..\src\Pt-Gfx\FillOp.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\FreeType.h">
-      <Filter>Pt-Ui\Rasterizer</Filter>
+    <ClInclude Include="..\..\src\Pt-Gfx\FreeType.h">
+      <Filter>Pt-Gfx\Imaging</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\PathOp.h">
-      <Filter>Pt-Ui\Path</Filter>
+    <ClInclude Include="..\..\include\Pt\Gfx\Image.h">
+      <Filter>Pt-Gfx\Imaging</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\EllipseOp.h">
-      <Filter>Pt-Ui\Path</Filter>
+    <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.h">
+      <Filter>Pt-Gfx\Imaging</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Ui\FillEllipseOp.h">
-      <Filter>Pt-Ui\Path</Filter>
+    <ClInclude Include="..\..\include\Pt\Gfx\ImageReader.h">
+      <Filter>Pt-Gfx\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\ImagePainter.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\ImageOp.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Rasterizer.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\RenderOp.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\RenderPath.h">
+      <Filter>Pt-Gfx\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Rgb888Format.h">
+      <Filter>Pt-Gfx\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Rgb565Format.h">
+      <Filter>Pt-Gfx\Imaging</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\Vera.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\TextOp.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\StrokeOp.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\Span.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\PathOp.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1477,71 +1405,8 @@
     <None Include="..\..\src\Pt-Hmi\cocoa\CoWindow.mm">
       <Filter>Pt-Hmi\cocoa</Filter>
     </None>
-    <None Include="..\..\src\Pt-Ui\Jamfile">
-      <Filter>Pt-Ui</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\fonts\COPYRIGHT.TXT">
-      <Filter>Pt-Ui\Extern\fonts</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\fonts\OpenSans-Bold.ttf">
-      <Filter>Pt-Ui\Extern\fonts</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\fonts\OpenSans-BoldItalic.ttf">
-      <Filter>Pt-Ui\Extern\fonts</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\fonts\OpenSans-ExtraBold.ttf">
-      <Filter>Pt-Ui\Extern\fonts</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\fonts\OpenSans-ExtraBoldItalic.ttf">
-      <Filter>Pt-Ui\Extern\fonts</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\fonts\OpenSans-Italic.ttf">
-      <Filter>Pt-Ui\Extern\fonts</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\fonts\OpenSans-Light.ttf">
-      <Filter>Pt-Ui\Extern\fonts</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\fonts\OpenSans-LightItalic.ttf">
-      <Filter>Pt-Ui\Extern\fonts</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\fonts\OpenSans-Regular.ttf">
-      <Filter>Pt-Ui\Extern\fonts</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\fonts\OpenSans-Semibold.ttf">
-      <Filter>Pt-Ui\Extern\fonts</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\fonts\OpenSans-SemiboldItalic.ttf">
-      <Filter>Pt-Ui\Extern\fonts</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\fonts\README.TXT">
-      <Filter>Pt-Ui\Extern\fonts</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\fonts\RELEASENOTES.TXT">
-      <Filter>Pt-Ui\Extern\fonts</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\fonts\Vera.ttf">
-      <Filter>Pt-Ui\Extern\fonts</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\fonts\VeraBd.ttf">
-      <Filter>Pt-Ui\Extern\fonts</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\fonts\VeraBI.ttf">
-      <Filter>Pt-Ui\Extern\fonts</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\fonts\VeraIt.ttf">
-      <Filter>Pt-Ui\Extern\fonts</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\freetype\Jamfile">
-      <Filter>Pt-Ui\Extern\freetype</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\libpng\Jamfile">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\libpng\libpng-manual.txt">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </None>
-    <None Include="..\..\src\Pt-Ui\freetype\src\Jamfile">
-      <Filter>Pt-Ui\Extern\freetype\src</Filter>
+    <None Include="..\..\src\Pt-Gfx\Jamfile">
+      <Filter>Pt-Gfx</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -2397,120 +2262,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.cpp">
       <Filter>Pt-Hmi\gdi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\Color.cpp">
-      <Filter>Pt-Ui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\Brush.cpp">
-      <Filter>Pt-Ui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\Font.cpp">
-      <Filter>Pt-Ui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\FontMetrics.cpp">
-      <Filter>Pt-Ui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\Pen.cpp">
-      <Filter>Pt-Ui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\adler32.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\compress.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\crc32.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\deflate.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\example.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\gzclose.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\gzlib.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\gzread.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\gzwrite.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\infback.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\inffast.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\inflate.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\inftrees.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\png.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\pngerror.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\pngget.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\pngmem.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\pngpread.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\pngread.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\pngrio.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\pngrtran.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\pngrutil.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\pngset.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\pngtest.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\pngtrans.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\pngwio.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\pngwrite.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\pngwtran.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\pngwutil.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\trees.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\uncompr.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\libpng\zutil.c">
-      <Filter>Pt-Ui\Extern\libpng</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\Exception.cpp">
-      <Filter>Pt-Ui</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
@@ -2526,41 +2277,59 @@
     <ClCompile Include="..\..\src\Pt-Hmi\WindowTitleBar.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\RenderPath.cpp">
-      <Filter>Pt-Ui\Path</Filter>
+    <ClCompile Include="..\..\src\Pt-Gfx\Brush.cpp">
+      <Filter>Pt-Gfx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\DrawText.cpp">
-      <Filter>Pt-Ui\Rasterizer</Filter>
+    <ClCompile Include="..\..\src\Pt-Gfx\Color.cpp">
+      <Filter>Pt-Gfx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\Rgb888Format.cpp">
-      <Filter>Pt-Ui\Imaging</Filter>
+    <ClCompile Include="..\..\src\Pt-Gfx\Exception.cpp">
+      <Filter>Pt-Gfx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\Rgb565Format.cpp">
-      <Filter>Pt-Ui\Imaging</Filter>
+    <ClCompile Include="..\..\src\Pt-Gfx\Font.cpp">
+      <Filter>Pt-Gfx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\ImageReader.cpp">
-      <Filter>Pt-Ui\Imaging</Filter>
+    <ClCompile Include="..\..\src\Pt-Gfx\FontMetrics.cpp">
+      <Filter>Pt-Gfx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\ImageFormat.cpp">
-      <Filter>Pt-Ui\Imaging</Filter>
+    <ClCompile Include="..\..\src\Pt-Gfx\Pen.cpp">
+      <Filter>Pt-Gfx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\Image.cpp">
-      <Filter>Pt-Ui\Imaging</Filter>
+    <ClCompile Include="..\..\src\Pt-Gfx\Argb8888Format.cpp">
+      <Filter>Pt-Gfx\Imaging</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\ClipPolygon.cpp">
-      <Filter>Pt-Ui\Cliping</Filter>
+    <ClCompile Include="..\..\src\Pt-Gfx\DrawText.cpp">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\Argb8888Format.cpp">
-      <Filter>Pt-Ui\Imaging</Filter>
+    <ClCompile Include="..\..\src\Pt-Gfx\ClipPolygon.cpp">
+      <Filter>Pt-Gfx\Cliping</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\Rasterizer.cpp">
-      <Filter>Pt-Ui\Rasterizer</Filter>
+    <ClCompile Include="..\..\src\Pt-Gfx\FreeType.cpp">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\ImagePainter.cpp">
-      <Filter>Pt-Ui</Filter>
+    <ClCompile Include="..\..\src\Pt-Gfx\Image.cpp">
+      <Filter>Pt-Gfx\Imaging</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Ui\FreeType.cpp">
-      <Filter>Pt-Ui\Rasterizer</Filter>
+    <ClCompile Include="..\..\src\Pt-Gfx\ImageFormat.cpp">
+      <Filter>Pt-Gfx\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\ImageReader.cpp">
+      <Filter>Pt-Gfx\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter.cpp">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer.cpp">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\RenderPath.cpp">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\Rgb888Format.cpp">
+      <Filter>Pt-Gfx\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\Rgb565Format.cpp">
+      <Filter>Pt-Gfx\Imaging</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

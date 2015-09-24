@@ -41,7 +41,7 @@ class PT_HMI_API Panel  : public Widget
 		ValueProperty<BorderStyle::Type>   PanelBorderStyle;
 		ValueProperty<bool>				         PanelBorderRoundEdge;	
 		ValueProperty<double>			         PanelBorderWidth;	  
-		ValueProperty<Ui::Color>					 BorderColor;
+		ValueProperty<Gfx::Color>					 BorderColor;
 
 	protected:
 		virtual void onRender(PaintSurface& paintSurface);

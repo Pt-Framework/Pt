@@ -40,7 +40,7 @@ namespace Hmi{
   
 ScreenImpl::ScreenImpl()
 : _frameBuffer()
-, _image(  Ui::Size( (size_t)_frameBuffer.width(), (size_t)_frameBuffer.height() ) ,  _frameBuffer.format(), _frameBuffer.strideInBytes() )
+, _image( Gfx::Size( (size_t)_frameBuffer.width(), (size_t)_frameBuffer.height() ) ,  _frameBuffer.format(), _frameBuffer.strideInBytes() )
 , _dpi(96.0)
 , _cursorPos( 0,0 )
 {
@@ -56,8 +56,8 @@ ScreenImpl::~ScreenImpl()
 void ScreenImpl::init()
 {
 	Visible   = true;	
-	Size =  Ui::SizeF( _frameBuffer.width(), _frameBuffer.height() ) ;
-	BackColor = Ui::Color( 170/255.0f, 170/255.0f, 170/255.0f );			
+	Size = Gfx::SizeF( _frameBuffer.width(), _frameBuffer.height() ) ;
+	BackColor =Gfx::Color( 170/255.0f, 170/255.0f, 170/255.0f );			
 	setCursor(0);	
 	
 
@@ -75,10 +75,10 @@ void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 	if( Cursor.get().width() == 0  || Cursor.get().height() == 0 )
 		return;	
 
-   _cursorPos = Ui::Point( mouseEvent.x(), mouseEvent.y() );	
+   _cursorPos =Gfx::Point( mouseEvent.x(), mouseEvent.y() );	
 	
 	if( (_cursorBackground.width() != Cursor.get().width())  || (_cursorBackground.height() !=  Cursor.get().height()) )
-		_cursorBackground.resize( Ui::Size( Cursor.get().width(),Cursor.get().height()), _frameBuffer.format() ); 
+		_cursorBackground.resize(Gfx::Size( Cursor.get().width(),Cursor.get().height()), _frameBuffer.format() ); 
 		
 
   _frameBuffer.grabImage( _cursorPos, _cursorBackground );

@@ -56,27 +56,27 @@ void Screen::init()
 }
 
 
-Ui::PointF Screen::toUnit(const Ui::Point& value)
+Gfx::PointF Screen::toUnit(const Gfx::Point& value)
 {
 	return _impl->toUnit(value);
 }
 
-Ui::SizeF Screen::toUnit(const Ui::Size& value)
+Gfx::SizeF Screen::toUnit(const Gfx::Size& value)
 {
 	return _impl->toUnit(value);
 }
 
-Ui::Point Screen::fromUnit(const Ui::PointF& value)
+Gfx::Point Screen::fromUnit(const Gfx::PointF& value)
 {
 	return _impl->fromUnit(value);
 }
 
-Ui::Size Screen::fromUnit(const Ui::SizeF& value)
+Gfx::Size Screen::fromUnit(const Gfx::SizeF& value)
 {
 	return _impl->fromUnit(value);
 }
 
-Ui::Rect Screen::fromUnit(const Ui::RectF& value)
+Gfx::Rect Screen::fromUnit(const Gfx::RectF& value)
 {
 	return _impl->fromUnit(value);
 }

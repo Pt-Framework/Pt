@@ -28,8 +28,8 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Painter.h>
-#include <Pt/Ui/Size.h>
-#include <Pt/Ui/Image.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Image.h>
 
 namespace Pt {
 namespace Hmi {
@@ -43,9 +43,9 @@ class PT_HMI_API PaintSurface
 
 		virtual ~PaintSurface();
 
-		virtual void resize(const Ui::SizeF& size);		
+		virtual void resize(const Gfx::SizeF& size);		
 
-		virtual Ui::SizeF size() const;
+		virtual Gfx::SizeF size() const;
 
 		virtual Pt::Hmi::Painter& painter()
 		{

@@ -29,11 +29,11 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Ui/Size.h>
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Image.h>
-#include <Pt/Ui/Painter.h>
-#include <Pt/Ui/RenderPath.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/RenderPath.h>
 
 namespace Pt{
 namespace Hmi{
@@ -47,23 +47,23 @@ class PaintSurfaceImpl
 
 	  virtual ~PaintSurfaceImpl();
 
-	  void resize(const Ui::SizeF& size);	
+	  void resize(const Gfx::SizeF& size);	
 
-	  Ui::SizeF size() const;
+	 Gfx::SizeF size() const;
 
-    const Ui::RenderPath& path() const
+    const Gfx::RenderPath& path() const
     {
         return _path;
     }
 
-    Ui::RenderPath& path()
+   Gfx::RenderPath& path()
     {
         return _path;
     }
 
   private:       
-		Ui::SizeF			 _size;
-    Ui::RenderPath _path;
+		Gfx::SizeF			 _size;
+   Gfx::RenderPath _path;
 };
 
 }}

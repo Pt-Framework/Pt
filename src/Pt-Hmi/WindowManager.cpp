@@ -30,9 +30,9 @@
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Ui/Pen.h>
-#include <Pt/Ui/Brush.h>
-#include <Pt/Ui/Point.h>
+#include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/Point.h>
 #include <Pt/String.h>
 #include <cmath>
 
@@ -56,7 +56,7 @@ WindowManager::WindowManager(Window& parent)
 	_closeButton.PanelBorderRoundEdge = false;
   _closeButton.Dock    = Docking::Right;
 	_closeButton.Margin  = buttonMargin;
-	_closeButton.Size		 = Ui::SizeF(20,5 );
+	_closeButton.Size		 =Gfx::SizeF(20,5 );
   _closeButton.Caption = "x";
 	_closeButton.TextAlign = Align::TopCenter;
   _closeButton.Visible = true;
@@ -66,7 +66,7 @@ WindowManager::WindowManager(Window& parent)
 	_maxButton.PanelBorderRoundEdge = false;
 	_maxButton.Dock    = Docking::Right;
 	_maxButton.Margin  = buttonMargin;
-	_maxButton.Size		 = Ui::SizeF(20,5 );
+	_maxButton.Size		 =Gfx::SizeF(20,5 );
   _maxButton.Caption = "+";
   _maxButton.Visible = true;
   _maxButton.Enabled = true;
@@ -74,7 +74,7 @@ WindowManager::WindowManager(Window& parent)
 	_minButton.PanelBorderRoundEdge = false;
 	_minButton.Dock    = Docking::Right;
 	_minButton.Margin  = buttonMargin;
-	_minButton.Size		 = Ui::SizeF(20,5 );
+	_minButton.Size		 =Gfx::SizeF(20,5 );
   _minButton.Caption = "-";
   _minButton.Visible = true;
   _minButton.Enabled = true;
@@ -84,8 +84,8 @@ WindowManager::WindowManager(Window& parent)
   _titleLabel.Visible = true;
 
 	_titleBarPanel.BackColor = _inactiveColor;
-  _titleBarPanel.Position = Ui::PointF(0,0);
-  _titleBarPanel.Size = Ui::SizeF( 16, 20 );
+  _titleBarPanel.Position =Gfx::PointF(0,0);
+  _titleBarPanel.Size =Gfx::SizeF( 16, 20 );
 
   _titleBarPanel.addChild( &_titleLabel );  
   _titleBarPanel.addChild( &_closeButton );
@@ -161,16 +161,16 @@ void WindowManager::invalidate()
 }
 
 
-Ui::PointF WindowManager::renderFrame( ChildWindow* w )
+Gfx::PointF WindowManager::renderFrame( ChildWindow* w )
 {	
-	const Ui::SizeF size =  w->Size.get();
-	const Ui::SizeF winSize( size.width() + _borderWidth, size.height() + _borderWidth + _titleBarPanel.Size.get().height() );	
+	const Gfx::SizeF size =  w->Size.get();
+	const Gfx::SizeF winSize( size.width() + _borderWidth, size.height() + _borderWidth + _titleBarPanel.Size.get().height() );	
 	
-	Ui::Color color = w->isWindowFocused() ? _activeColor : _inactiveColor;  
+	Gfx::Color color = w->isWindowFocused() ? _activeColor : _inactiveColor;  
 
 	Painter& painter = _parent.surface().painter();
 
-  Ui::PointF pos( w->Position.get().x() + _borderWidth/2.0, w->Position.get().y() + _borderWidth/2.0 );
+ Gfx::PointF pos( w->Position.get().x() + _borderWidth/2.0, w->Position.get().y() + _borderWidth/2.0 );
 	
   switch( w->Border.get() )
   {
@@ -179,8 +179,8 @@ Ui::PointF WindowManager::renderFrame( ChildWindow* w )
       case WindowBorder::Fixed:
       case WindowBorder::Sizeable:
       {	        
-	        Ui::RectF  rect( pos, winSize ) ;	
-	        Ui::Pen    pen((size_t) _borderWidth, color);
+	       Gfx::RectF  rect( pos, winSize ) ;	
+	       Gfx::Pen    pen((size_t) _borderWidth, color);
 
 	        painter.setPen( pen );
 	        painter.drawRect( rect );		
@@ -191,8 +191,8 @@ Ui::PointF WindowManager::renderFrame( ChildWindow* w )
       case WindowBorder::Tool:
       case WindowBorder::ToolSizeable:
       {
-	        Ui::RectF  rect( pos, winSize ) ;	
-	        Ui::Pen    pen((size_t) _borderWidth, color);
+	       Gfx::RectF  rect( pos, winSize ) ;	
+	       Gfx::Pen    pen((size_t) _borderWidth, color);
 	        painter.setPen( pen );
 	        painter.drawRect( rect );		
       }
@@ -201,10 +201,10 @@ Ui::PointF WindowManager::renderFrame( ChildWindow* w )
 
   if( w->Border.get() != WindowBorder::NoBorder )
   {
-    Ui::PointF  to( pos.x() + _borderWidth/2, pos.y() + _borderWidth/2 ); 
-    Ui::SizeF   size = Ui::SizeF( winSize.width() - _borderWidth, _titleBarPanel.Size.get().height() );
+   Gfx::PointF  to( pos.x() + _borderWidth/2, pos.y() + _borderWidth/2 ); 
+   Gfx::SizeF   size =Gfx::SizeF( winSize.width() - _borderWidth, _titleBarPanel.Size.get().height() );
     		
-    _closeButton.BorderColor = Ui::Color(0.5f,0.5f,0.5f);
+    _closeButton.BorderColor =Gfx::Color(0.5f,0.5f,0.5f);
     _minButton.BorderColor = _closeButton.BorderColor.get();
     _maxButton.BorderColor = _closeButton.BorderColor.get();
     _titleLabel.BackColor = color;
@@ -221,7 +221,7 @@ Ui::PointF WindowManager::renderFrame( ChildWindow* w )
 		_titleBarPanel.setParent( 0 );
   }
 
-  return Ui::PointF( pos.x() + _borderWidth/2, pos.y()  + _titleBarPanel.Size.get().height()  + _borderWidth/2 );	 
+  return Gfx::PointF( pos.x() + _borderWidth/2, pos.y()  + _titleBarPanel.Size.get().height()  + _borderWidth/2 );	 
 }
 
 
@@ -236,15 +236,15 @@ void WindowManager::render()
 		if( !w->Visible.get() )
    		  continue;		
 
-		const Ui::PointF clientPos = renderFrame(w);						  
+		const Gfx::PointF clientPos = renderFrame(w);						  
 		painter.drawSurface( clientPos, w->surface() );
 	}
 }
 
 
-Ui::PointF WindowManager::toClient(const ChildWindow* w, const Ui::PointF& p)
+Gfx::PointF WindowManager::toClient(const ChildWindow* w, const Gfx::PointF& p)
 {
-  return Ui::PointF( p.x() - w->Position.get().x() - _borderWidth ,  p.y() - w->Position.get().y() - _borderWidth - _titleBarPanel.Size.get().height() ) ;
+  return Gfx::PointF( p.x() - w->Position.get().x() - _borderWidth ,  p.y() - w->Position.get().y() - _borderWidth - _titleBarPanel.Size.get().height() ) ;
 }
 
 
@@ -254,12 +254,12 @@ bool WindowManager::updateActive( const Pt::Hmi::PointerEvent& pointerEvent )
 	{
 		ChildWindow* w = _windows[i];
 
-		Ui::PointF local( pointerEvent.x() - w->Position.get().x() , pointerEvent.y() - w->Position.get().y() );
+		Gfx::PointF local( pointerEvent.x() - w->Position.get().x() , pointerEvent.y() - w->Position.get().y() );
 
 		if( !contains( w, local ) )
 			continue;
 
-		const Ui::PointF& client = toClient( w, Ui::PointF( pointerEvent.x(), pointerEvent.y() ) );
+		const Gfx::PointF& client = toClient( w,Gfx::PointF( pointerEvent.x(), pointerEvent.y() ) );
 				 
 		if( w->hasPointer()  && !w->contains( client ) && w->Enabled.get() && !_moving && _sizingDirection == ResizeDirection::No )
 			w->onPointerLeaved();
@@ -318,7 +318,7 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 
 	const std::vector<DeviceButton>& button = ev.buttons();
 
-	Ui::PointF point( ev.x(), ev.y() );
+	Gfx::PointF point( ev.x(), ev.y() );
 
 	if( button[_actionButton].state() != DeviceButton::Pressed )
 	{
@@ -401,8 +401,8 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 	  break;
 	}
 
-	Ui::SizeF size(width, height);
-	Ui::PointF pos(posX, posY);
+	Gfx::SizeF size(width, height);
+	Gfx::PointF pos(posX, posY);
 
 	if( width < w->MinimumSize.get().width() )
 		size.setWidth( w->MinimumSize.get().width() );
@@ -432,9 +432,9 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 }
 
 
-bool WindowManager::contains(const ChildWindow* w, const Ui::PointF& p)
+bool WindowManager::contains(const ChildWindow* w, const Gfx::PointF& p)
 {  
-	Ui::SizeF winSize( w->Size.get().width() + _borderWidth*2, w->Size.get().height() + _borderWidth + _titleBarPanel.Size.get().height() );
+	Gfx::SizeF winSize( w->Size.get().width() + _borderWidth*2, w->Size.get().height() + _borderWidth + _titleBarPanel.Size.get().height() );
 
 	if( p.x() < winSize.width() && p.x() >= 0 && p.y() < winSize.height() && p.y() >= 0)
 		return true;
@@ -448,12 +448,12 @@ bool WindowManager::isMoving( const ChildWindow* w, const Pt::Hmi::PointerEvent&
 	if( ev.buttons()[_actionButton].state() != DeviceButton::Pressed  || _moving  ||  _pointerLastState !=  DeviceButton::Released )
 		return false;
 
-	const Ui::PointF& position = w->Position.get();
+	const Gfx::PointF& position = w->Position.get();
 	 
 	if( ev.x() < (position.x() + _borderWidth*2 + w->Size.get().width())  && ev.x() >= position.x()  && 
       (ev.y()) < (position.y() + _titleBarPanel.Size.get().height()) && (ev.y()+ position.y()) >= (_borderWidth) )
 	{				
-		_movingOffset = Ui::PointF( ev.x(), ev.y() );
+		_movingOffset =Gfx::PointF( ev.x(), ev.y() );
 		return true;
 	}
 
@@ -468,13 +468,13 @@ ResizeDirection::Type WindowManager::isSizing( const ChildWindow* w, const Pt::H
   if( w->WindowBorder.get() != WindowBorder::Sizeable  ||  _pointerLastState !=  DeviceButton::Released )
 		return resizeDir;	
 
-	const Ui::SizeF	size   = w->Size.get();
+	const Gfx::SizeF	size   = w->Size.get();
 	const double		border = _borderWidth;
 	const double		sizeR  = size.width();
 	const double		sizeB  = size.height() + _titleBarPanel.Size.get().height();
 	Screen& screen = _app.mainScreen();
 	
-	Ui::PointF localPos( ev.x() - w->Position.get().x(), ev.y() - w->Position.get().y() );  
+	Gfx::PointF localPos( ev.x() - w->Position.get().x(), ev.y() - w->Position.get().y() );  
 
 	if( contains(w, localPos) )
 	{
@@ -539,14 +539,14 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 		return;
 	}	
 
-	Ui::PointF point( ev.x(), ev.y() );
+	Gfx::PointF point( ev.x(), ev.y() );
 
 	if( point.x() < 0 ) 
 		point.setX(0);
 	
 	const double dtX =  point.x() - _movingOffset.x();
 	const double dtY =  point.y() - _movingOffset.y();
-	Ui::PointF newPos( w->Position.get().x() + dtX, w->Position.get().y() + dtY );
+	Gfx::PointF newPos( w->Position.get().x() + dtX, w->Position.get().y() + dtY );
 	
 	if( newPos.y() < 0 ) 
 		newPos.setY( 0 );
@@ -555,7 +555,7 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 
 	w->eventReceived().send( _positionEvent );
 	
-	_movingOffset = Ui::PointF( point.x() , point.y() );  
+	_movingOffset =Gfx::PointF( point.x() , point.y() );  
 	invalidate();
 }
 
@@ -614,7 +614,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
     return true;
   }
 
-	_lastSizePoint = Ui::PointF( pointerEvent.x(), pointerEvent.y() ) ;
+	_lastSizePoint =Gfx::PointF( pointerEvent.x(), pointerEvent.y() ) ;
 
 	_moving = isMoving( childWindow, pointerEvent );	
 
@@ -638,7 +638,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 		return true;
   }
 
-	if( childWindow->contains( Ui::PointF( localMouseEvent.x(), localMouseEvent.y() ) ) )	
+	if( childWindow->contains(Gfx::PointF( localMouseEvent.x(), localMouseEvent.y() ) ) )	
     childWindow->eventReceived().send( localMouseEvent );
 	
   _pointerLastState = pointerEvent.buttons()[_actionButton].state();

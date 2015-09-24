@@ -28,11 +28,11 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/Cursor.h>
-#include <Pt/Ui/ImageReader.h>
-#include <Pt/Ui/Image.h>
-#include <Pt/Ui/ImagePainter.h>
-#include <Pt/Ui/ClipPolygon.h>
-#include <Pt/Ui/Rasterizer.h>
+#include <Pt/Gfx/ImageReader.h>
+#include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Gfx/ClipPolygon.h>
+#include <Pt/Gfx/Rasterizer.h>
 #include "DemoImage.h"
 #include "AtesionIcon.h"
 #include <sstream>
@@ -51,7 +51,7 @@ MainWindow::~MainWindow()
 {
 }
 
-#if 0
+
 void MainWindow::init()
 {	
 
@@ -60,14 +60,14 @@ void MainWindow::init()
 		
 		memoryStream.write((char*)Pt::Forms::Atesion::icon, Pt::Forms::Atesion::iconSize);	
 		
-		Ui::Image* im = Ui::ImageReader::read(memoryStream);
+		Gfx::Image* im =Gfx::ImageReader::read(memoryStream);
 
 		//Generate Alpha channel
 		for( size_t y = 0;  y < im->height(); ++y )
 		{
 			for( size_t x = 0;  x < im->width(); ++x )
 			{
-				Ui::Color color =  im->color(x,y);
+				Gfx::Color color =  im->color(x,y);
 				
 				if( color.blue() == 1 && color.red() == 1 && color.green() == 1)
 					color.setAlpha(0);
@@ -79,8 +79,8 @@ void MainWindow::init()
 	}
   
 	
-	Position = Ui::PointF(20,20);
-	Size = Ui::SizeF(800,600);
+	Position =Gfx::PointF(20,20);
+	Size =Gfx::SizeF(800,600);
 	ShowTitle = true;	
 	ShowInTaskbar = true;
 	ShowSysMenu = true;
@@ -89,12 +89,12 @@ void MainWindow::init()
   State = Hmi::WindowState::Normal;
 	StartPostion = Hmi::WindowStartPosition::CenterParent;
 	Closed += Pt::slot(*this, &MainWindow::onClosed);
-	BackColor = Ui::Color(1,0,0);
+	BackColor =Gfx::Color(0.5,0.5,0.5);
 
   //Panel
   
-	_mainPanel.Size = Ui::SizeF(800,600);
-	_mainPanel.Position = Ui::PointF(20,20);
+	_mainPanel.Size =Gfx::SizeF(800,600);
+	_mainPanel.Position =Gfx::PointF(20,20);
 	_mainPanel.PanelBorderStyle = Pt::Hmi::BorderStyle::Single;  
 	_mainPanel.Dock = Docking::Fill;
 	{
@@ -102,7 +102,7 @@ void MainWindow::init()
 		std::stringstream memoryStream;
 		memoryStream.write((char*)Pt::Forms::DemoImage::image, Pt::Forms::DemoImage::imageSize);					
 
-		std::auto_ptr<Ui::Image> im(Ui::ImageReader::read(memoryStream));
+		std::auto_ptr<Gfx::Image> im(Gfx::ImageReader::read(memoryStream));
 		_mainPanel.BackgroundImage = *im;		
 		*/
 	}
@@ -114,12 +114,12 @@ void MainWindow::init()
 
 	_textLabel.AutoSize = true;
 	_textLabel.Margin = Hmi::Margin(10);
-	_textLabel.Size = Ui::SizeF(500,400);
+	_textLabel.Size =Gfx::SizeF(500,400);
 	_textLabel.Caption = std::string("T&his is a Platinum C++");  
-	_textLabel.Position = Ui::PointF(20,20);
-	_textLabel.ForeColor = Ui::Color(1,0,0,0);
+	_textLabel.Position =Gfx::PointF(20,20);
+	_textLabel.ForeColor =Gfx::Color(1,0,0,0);
 	_textLabel.UseMnemonic = true;	
-	_textLabel.BackColor = Ui::Color(1,1,1,0);
+	_textLabel.BackColor =Gfx::Color(1,1,1,0);
   _textLabel.bindMnemonicToWidget(_toggleButton);
   _textLabel.Cursor = Hmi::Cursor::waitCursor();
 	_mainPanel.addChild(&_textLabel);
@@ -128,16 +128,16 @@ void MainWindow::init()
 	_toggleButton.ButtonType = Hmi::ButtonType::Toggle;
 	_toggleButton.Caption = std::string("Toggle Me [CTRL+I]");
 	_toggleButton.ShortcutKey = std::string("C//i");
-	_toggleButton.Position = Ui::PointF(20,60);
-	_toggleButton.Size = Ui::SizeF(150,25);		
+	_toggleButton.Position =Gfx::PointF(20,60);
+	_toggleButton.Size =Gfx::SizeF(150,25);		
 	_mainPanel.addChild(&_toggleButton);
 
 	//Dialog button  
 	_dialogButton.ButtonType = Hmi::ButtonType::Press;
 	_dialogButton.Caption = std::string("&&Dia&log [CTRL+D]&");
 	_dialogButton.ShortcutKey = std::string("C//d");
-	_dialogButton.Position = Ui::PointF(20,100);
-	_dialogButton.Size = Ui::SizeF(150,25);	
+	_dialogButton.Position =Gfx::PointF(20,100);
+	_dialogButton.Size =Gfx::SizeF(150,25);	
 	_dialogButton.UseMnemonic = true;
 	_dialogButton.Clicked  += Pt::slot(*this, &MainWindow::onShowDialog);
 	
@@ -147,20 +147,20 @@ void MainWindow::init()
 	_closeButton.ButtonType = Hmi::ButtonType::Press;
 	_closeButton.Caption = std::string("Close App [CTRL+X]");
 	_closeButton.ShortcutKey = std::string("C//x");
-	_closeButton.Position = Ui::PointF(590,525);
-	_closeButton.Size = Ui::SizeF(150,25);
+	_closeButton.Position =Gfx::PointF(590,525);
+	_closeButton.Size =Gfx::SizeF(150,25);
 	_closeButton.Clicked += Pt::slot(*this, &MainWindow::onClosed);
-	_closeButton.Size = Ui::SizeF(20, 40);
+	_closeButton.Size =Gfx::SizeF(20, 40);
 	_closeButton.Dock = Docking::Bottom;
 	_closeButton.Margin = Hmi::Margin(5);
 	_childWindow2.addChild(&_closeButton);
 	
   
 //  _childWindow1.Cursor = Hmi::Cursor::waitCursor();
-	_childWindow1.Position = Ui::PointF(20,20);
-	_childWindow1.Size = Ui::SizeF(200,300);
-	_childWindow2.Position = Ui::PointF(80,80);
-	_childWindow2.Size = Ui::SizeF(800,600);
+	_childWindow1.Position =Gfx::PointF(20,20);
+	_childWindow1.Size =Gfx::SizeF(200,300);
+	_childWindow2.Position =Gfx::PointF(80,80);
+	_childWindow2.Size =Gfx::SizeF(800,600);
   _childWindow2.Caption = "Child 2";
 	
 
@@ -180,49 +180,6 @@ void MainWindow::init()
 
 	BackgroundImage = _drawBuffer;
 }
-
-#endif
-
-void MainWindow::init()
-{
-	Position = Ui::PointF(20,20);
-	Size = Ui::SizeF(800,600);
-	ShowTitle = true;	
-	ShowInTaskbar = true;
-	ShowSysMenu = true;
-	Border = WindowBorder::Sizeable;	
-  State = Hmi::WindowState::Normal;
-	StartPostion = Hmi::WindowStartPosition::CenterParent;
-	Closed += Pt::slot(*this, &MainWindow::onClosed);
-	BackColor = Ui::Color(0,1,0);
-
-   Ui::Image image( Ui::Size( 1000,1000) );
-   Ui::Rasterizer raster( image );
-   Ui::RectF clip(Ui::PointF( 10, 10) , Ui::SizeF(200,200 ) );
-   
-   raster.clear();
-    
-   raster.setPen( Ui::Pen(5, Ui::Color( 1, 0, 0) ) );
-
-   Ui::RectF rect( Ui::PointF(20,20) , Ui::SizeF( 200,400 ) );
-   
-   raster.setBrush( Ui::Brush( Ui::Color(0,1,0 )));
-
-   raster.fill(&clip.points()[0], 4 );
-
-   raster.setClip(clip);  
-
-   std::vector<Ui::PointF> points = rect.points();
-
-   points.push_back( points[0] );
-   
-   raster.setBrush( Ui::Brush( Ui::Color(1,1,0 )));
-
-   raster.fill( &points[0], points.size() );
-
-   BackgroundImage = image;
-}
-
 
 void MainWindow::onShowDialog()
 {

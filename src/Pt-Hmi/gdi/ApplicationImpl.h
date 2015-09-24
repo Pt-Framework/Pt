@@ -29,9 +29,9 @@
 
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Api.h>
-#include <Pt/Ui/Point.h>
-#include <Pt/Ui/Size.h>
-#include <Pt/Ui/Rect.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/System/EventLoop.h>
 #include "win32/Selector.h"
 #include <vector>

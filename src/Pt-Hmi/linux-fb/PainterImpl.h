@@ -30,9 +30,9 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Painter.h>
-#include <Pt/Ui/ImagePainter.h>
-#include <Pt/Ui/FontMetrics.h>
-#include <Pt/Ui/RenderPath.h>
+#include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/RenderPath.h>
 
 namespace Pt {
 namespace Hmi {
@@ -46,69 +46,69 @@ class PainterImpl
 		
     virtual ~PainterImpl();  			
 
-    void drawLine( const Ui::PointF& from, const Ui::PointF& to );
+    void drawLine( const Gfx::PointF& from, const Gfx::PointF& to );
     
-    void drawPolyline( const Ui::PointF* points, const size_t pointCount );    
+    void drawPolyline( const Gfx::PointF* points, const size_t pointCount );    
 
-    void drawText( const Ui::PointF& to, const Pt::String& Text );
+    void drawText( const Gfx::PointF& to, const Pt::String& Text );
 
-    void drawRect( const Ui::RectF& rectangle );
+    void drawRect( const Gfx::RectF& rectangle );
 
-    void drawEllipse( const Ui::PointF& topLeft, const Ui::SizeF& size );
+    void drawEllipse( const Gfx::PointF& topLeft, const Gfx::SizeF& size );
 
-    void drawSurface( const Ui::PointF& to, const PaintSurface& surface, const Ui::Region& pmRegion );
+    void drawSurface( const Gfx::PointF& to, const PaintSurface& surface, const Gfx::Region& pmRegion );
 
-    void drawSurface( const Ui::PointF& to, const PaintSurface& surface );
+    void drawSurface( const Gfx::PointF& to, const PaintSurface& surface );
 		
-    void drawImage( const Ui::PointF& to, const Ui::Image& image );
+    void drawImage( const Gfx::PointF& to, const Gfx::Image& image );
 
-    void drawPath( const Ui::RenderPath& path );
+    void drawPath( const Gfx::RenderPath& path );
 
-    void fillRect( const Ui::RectF& rectangle );    
+    void fillRect( const Gfx::RectF& rectangle );    
 
-    void fillEllipse( const Ui::PointF& topLeft, const Ui::SizeF& size );
+    void fillEllipse( const Gfx::PointF& topLeft, const Gfx::SizeF& size );
 
-    void fillPolygon( const Ui::PointF* points, const size_t pointCount );
+    void fillPolygon( const Gfx::PointF* points, const size_t pointCount );
     
     void flush();
         
   public:
-    void setPen( const Ui::Pen& pen )
+    void setPen( const Gfx::Pen& pen )
     {
 	    _pen = pen;
     }
 
-    const Ui::Pen& pen() const
+    const Gfx::Pen& pen() const
     {
 	    return _pen;
     }
 
-    void setBrush( const Ui::Brush& brush )
+    void setBrush( const Gfx::Brush& brush )
     {
 	    _brush = brush ;
     }
 
-    const Ui::Brush& brush() const
+    const Gfx::Brush& brush() const
     {
 	    return _brush;
     }
 
-    void setFont( const Ui::Font& font )
+    void setFont( const Gfx::Font& font )
     {
       _font = font;	
     }
 
-    const Ui::Font& font() const
+    const Gfx::Font& font() const
     {
 	    return _font;
     }    
     
-    Ui::FontMetrics fontMetrics( Pt::String text ) const;
+   Gfx::FontMetrics fontMetrics( Pt::String text ) const;
     
     const std::list<std::string>& fontFamilyNames();
 
 
-    void setRenderMode( Ui::RenderMode::Type mode )
+    void setRenderMode(Gfx::RenderMode::Type mode )
     {
       _renderMode =  mode;
     }
@@ -123,25 +123,25 @@ class PainterImpl
 	    //Todo: add font name.
     }
 
-    void setClip( const Ui::RectF& clip )
+    void setClip( const Gfx::RectF& clip )
     {
       _clip = clip;
     }
 
-    const Ui::RectF& clip() const
+    const Gfx::RectF& clip() const
     {
       return _clip;
     }
 
-    void clear( const Ui::Color& color );
+    void clear( const Gfx::Color& color );
 
   private:
 	  PaintSurfaceImpl*   	_surface;	
-	  Ui::RenderMode::Type 	_renderMode;
-	  Ui::Font 				_font;
-	  Ui::Pen   			_pen;
- 	  Ui::Brush 			_brush;	  
-    Ui::RectF       _clip;
+	 Gfx::RenderMode::Type 	_renderMode;
+	 Gfx::Font 				_font;
+	 Gfx::Pen   			_pen;
+ 	 Gfx::Brush 			_brush;	  
+   Gfx::RectF       _clip;
 };
 
 }}

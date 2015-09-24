@@ -44,95 +44,95 @@ Painter::~Painter()
 	delete _impl;
 }
 
-void Painter::setRenderMode(Ui::RenderMode::Type mode)
+void Painter::setRenderMode(Gfx::RenderMode::Type mode)
 {
 	_impl->setRenderMode( mode );
 }
 
-void Painter::setPen(const Ui::Pen& pen)
+void Painter::setPen(const Gfx::Pen& pen)
 {
 	_impl->setPen(pen);
 }
 
-const Ui::Pen& Painter::pen() const
+const Gfx::Pen& Painter::pen() const
 {
 	return _impl->pen();
 }
 
-void Painter::setBrush(const Ui::Brush& brush)
+void Painter::setBrush(const Gfx::Brush& brush)
 {
 	_impl->setBrush(brush);
 }
 
-const Ui::Brush& Painter::brush() const
+const Gfx::Brush& Painter::brush() const
 {
 	return _impl->brush();
 }
 
-void Painter::setFont(const Ui::Font& font)
+void Painter::setFont(const Gfx::Font& font)
 {
 	_impl->setFont(font);
 }
 
-const Ui::Font& Painter::font() const
+const Gfx::Font& Painter::font() const
 {
 	return _impl->font();
 }
 
 
-Ui::FontMetrics Painter::fontMetrics(Pt::String Text) const
+Gfx::FontMetrics Painter::fontMetrics(Pt::String Text) const
 {
 	return _impl->fontMetrics(Text);
 }
 
 
-void Painter::drawLine(const Ui::PointF& from, const Ui::PointF& to)
+void Painter::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
 	_impl->drawLine(from,to);
 }
 
-void Painter::drawText(const Ui::PointF& to, const Pt::String& Text)
+void Painter::drawText(const Gfx::PointF& to, const Pt::String& Text)
 {
 	_impl->drawText(to, Text);
 }
 
-void Painter::drawRect(const Ui::RectF& rectangle)
+void Painter::drawRect(const Gfx::RectF& rectangle)
 {
 	_impl->drawRect(rectangle);
 }
 
-void Painter::fillRect(const Ui::RectF& rectangle)
+void Painter::fillRect(const Gfx::RectF& rectangle)
 {
 	_impl->fillRect(rectangle);
 }
 
-void Painter::drawEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size)
+void Painter::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
 	_impl->drawEllipse(topLeft, size);
 }
 
-void Painter::fillEllipse(const Ui::PointF& topLeft, const Ui::SizeF& size)
+void Painter::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
 	_impl->fillEllipse(topLeft, size);
 }
 
-void Painter::drawPolyline(const Ui::PointF* points, const size_t pointCount)
+void Painter::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
 {
 	_impl->drawPolyline(points, pointCount);
 }
 
-void Painter::fillPolygon(const Ui::PointF* points, const size_t pointCount)
+void Painter::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
 {
 	_impl->fillPolygon(points, pointCount);
 }
 
 
-void Painter::drawSurface(const Ui::PointF& to, const PaintSurface& pm)
+void Painter::drawSurface(const Gfx::PointF& to, const PaintSurface& pm)
 {  
 	_impl->drawSurface(to, pm);
 }	
 	
-void Painter::drawImage(const Ui::PointF& to, const Ui::Image& image)
+void Painter::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
 {
 	_impl->drawImage(to, image);
 }
@@ -152,27 +152,27 @@ void Painter::flush()
     _impl->flush();
 }
 
-Ui::FontMetrics Painter::fontMetrics( const Ui::Font& font, const Pt::String& text )
+Gfx::FontMetrics Painter::fontMetrics( const Gfx::Font& font, const Pt::String& text )
 {
   return PainterImpl::fontMetrics( font, text );
 }
 
-void Painter::drawPath( const Ui::RenderPath& path )
+void Painter::drawPath( const Gfx::RenderPath& path )
 {
   _impl->drawPath( path );
 }
 
-void Painter::setClip( const Ui::RectF& clip )
+void Painter::setClip( const Gfx::RectF& clip )
 {
   _impl->setClip( clip );
 }
         
-const Ui::RectF& Painter::clip() const
+const Gfx::RectF& Painter::clip() const
 {
   return _impl->clip(); 
 }
 
-void Painter::clear( const Ui::Color& color)
+void Painter::clear( const Gfx::Color& color)
 {
   _impl->clear( color );
 }

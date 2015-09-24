@@ -28,7 +28,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/System/IOError.h>
 
-using namespace Windows::UI::Core;
+using namespace Windows::Gfx::Core;
 
 namespace Pt {
 namespace Hmi {
@@ -52,7 +52,7 @@ void FrameworkView::Run()
 		;
 }
 
-void FrameworkView::SetWindow( Windows::UI::Core::CoreWindow^ window )
+void FrameworkView::SetWindow( Windows::Gfx::Core::CoreWindow^ window )
 {
 	_window = window;
 }
@@ -192,7 +192,7 @@ void ApplicationImpl::onWake()
 	if (_frameworkView->dispatcher() == nullptr)
 		return;
 
-	_frameworkView->dispatcher()->RunAsync( Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([](){}) );
+	_frameworkView->dispatcher()->RunAsync( Windows::Gfx::Core::CoreDispatcherPriority::Normal, ref new Windows::Gfx::Core::DispatchedHandler([](){}) );
 
 }
 

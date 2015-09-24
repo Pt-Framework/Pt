@@ -8,6 +8,6 @@ Main Pt-Hmi-Demo : Main.cpp
 				       Dialog1.cpp
 				       Dialog2.cpp ;
 
-LinkSharedLibraries Pt-Hmi-Demo : Pt Pt-System Pt-Ui Pt-Net Pt-Hmi  ;
+LinkSharedLibraries Pt-Hmi-Demo : Pt Pt-System Pt-Gfx Pt-Net Pt-Hmi  ;
 
 MakeLocate Pt-Hmi-Demo : $(PT_OUTPUT_TARGET) ;

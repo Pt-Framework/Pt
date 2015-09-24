@@ -29,7 +29,7 @@
 
 #include <Pt/Hmi/Label.h>
 #include <Pt/System/Timer.h>
-#include <Pt/Ui/Image.h>
+#include <Pt/Gfx/Image.h>
 
 namespace Pt{
 namespace Hmi{
@@ -56,7 +56,7 @@ public:
 	ValueProperty<bool>								 Hover;		
 	ValueProperty<ButtonType::Type>    ButtonType;	
 	ValueProperty<int>								 DoublePressTimeInMs; 
-  ValueProperty<Ui::Image>					 Image;	
+  ValueProperty<Gfx::Image>					 Image;	
   ValueProperty<Align::Type>         ImageAlign;
 
 	Signal<bool>											 Checked;	  

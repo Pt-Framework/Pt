@@ -43,8 +43,8 @@ Dialog2::~Dialog2()
 void Dialog2::init()
 {
 	//Dialog
-	Size               = Ui::SizeF(450,200);
-	Position           = Ui::PointF(400,400);
+	Size               =Gfx::SizeF(450,200);
+	Position           =Gfx::PointF(400,400);
 	Caption            = std::string("Pt-Hmi-demo");
 	StartPostion       = Hmi::WindowStartPosition::CenterParent;
 	ShowMaximizeButton = false;
@@ -64,7 +64,7 @@ void Dialog2::init()
   //Main panel
   _mainPanel.Name      = std::string("Main panel");
 	_mainPanel.Margin    = Hmi::Margin(4);
-  _mainPanel.Size      = Ui::SizeF(385,40);
+  _mainPanel.Size      =Gfx::SizeF(385,40);
   _mainPanel.Dock      = Hmi::Docking::Fill;
   _mainPanel.PanelBorderStyle = Hmi::BorderStyle::Border3D;
   _mainPanel.PanelBorderWidth = 2;
@@ -73,12 +73,12 @@ void Dialog2::init()
 
   //Ok/Cancel Panel	
   _okCancelPanel.Margin = Hmi::Margin(5);
-  _okCancelPanel.Size = Ui::SizeF(385,80);
+  _okCancelPanel.Size =Gfx::SizeF(385,80);
   _okCancelPanel.Dock = Hmi::Docking::Bottom;
   _okCancelPanel.PanelBorderStyle = Hmi::BorderStyle::NoBorder;
   _okCancelPanel.FlowLayout = Hmi::FlowLayout::Horizontal;
   _okCancelPanel.FlowDirection = Hmi::FlowLayoutDirection::RightToLeftBottomToTop;
-	_okCancelPanel.BackColor = Ui::Color(1,1,0,0);
+	_okCancelPanel.BackColor =Gfx::Color(1,1,0,0);
 	addChild(&_okCancelPanel);
 
 	//Cancel button
@@ -88,7 +88,7 @@ void Dialog2::init()
 	
   _cancelButton.Margin = Hmi::Margin(5);
 //  _cancelButton.Dock = Docking::Right;
-	_cancelButton.Size = Ui::SizeF(100,40);
+	_cancelButton.Size =Gfx::SizeF(100,40);
 	_cancelButton.Caption = std::string("Cancel");
 	_cancelButton.Clicked += Pt::slot(*this,&Dialog2::onClosedByButton);
 	_okCancelPanel.addChild(&_cancelButton);
@@ -96,7 +96,7 @@ void Dialog2::init()
 	//OK Button
   _okButton.Margin = Hmi::Margin(5);
 //	_okButton.Dock = Docking::Right;
-	_okButton.Size = Ui::SizeF(100,40);
+	_okButton.Size =Gfx::SizeF(100,40);
 	_okButton.Caption = std::string("OK");
 	_okButton.ShortcutKey = std::string("C//x");
 	_okButton.Clicked += Pt::slot(*this,&Dialog2::onClosedByButton);
