@@ -44,9 +44,9 @@ class PT_GFX_API Image
 	public:		
 		Image( const ImageFormat& format = ImageFormat::argb8888() );
     
-    Image( const Gfx::Size& size, const ImageFormat& format = ImageFormat::argb8888(), size_t stride = 0 );
+    Image( const Size& size, const ImageFormat& format = ImageFormat::argb8888(), size_t stride = 0 );
 
-    Image( Pt::uint8_t* buffer, const Gfx::Size& size, const ImageFormat& format = ImageFormat::argb8888(), size_t stride = 0 );
+    Image( Pt::uint8_t* buffer, const Size& size, const ImageFormat& format = ImageFormat::argb8888(), size_t stride = 0 );
 							
 		virtual ~Image();
 	
@@ -68,9 +68,9 @@ class PT_GFX_API Image
 			return _stride;
 		}
 
-   Gfx::Size size() const
+		Size size() const
     {
-        return Gfx::Size( _width, _height );
+        return Size( _width, _height );
     }
 
     bool empty() const
@@ -81,13 +81,13 @@ class PT_GFX_API Image
 
 		void setColor( const Color& color );
 
-		void resize( const Gfx::Size& size,  size_t strideInBytes = 0 );
+		void resize( const Size& size,  size_t strideInBytes = 0 );
 
-		void resize( const Gfx::Size& size, const ImageFormat& format, size_t strideInBytes = 0);
+		void resize( const Size& size, const ImageFormat& format, size_t strideInBytes = 0);
 
-    void resize( Pt::uint8_t* buffer, const Gfx::Size& size,size_t strideInBytes = 0 );    
+    void resize( Pt::uint8_t* buffer, const Size& size,size_t strideInBytes = 0 );    
 
-    void resize( Pt::uint8_t* buffer, const Gfx::Size& size, const ImageFormat& format, size_t strideInBytes = 0 );
+    void resize( Pt::uint8_t* buffer, const Size& size, const ImageFormat& format, size_t strideInBytes = 0 );
 
 	
 		Color color(size_t x, size_t y) const
@@ -174,7 +174,7 @@ class PT_GFX_API Image
 		size_t _width;
 		size_t _height;
 		size_t _stride;
-   Gfx::Size _maxSize;
+		Size _maxSize;
 };
 
 }}

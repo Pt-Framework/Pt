@@ -111,7 +111,9 @@ class BasicPoint
         //! @brief Move the BasicPoint as far as th given the X and Y distances
         const BasicPoint& move(T dx, T dy)
         {
-            _x += dx; _y += dy; return *this;
+            _x += dx; 
+						_y += dy; 
+						return *this;
         }
 
 
@@ -192,100 +194,6 @@ class BasicPoint
 
 typedef BasicPoint<Pt::ssize_t>  Point;
 typedef BasicPoint<double>       PointF;
-
-
-/** @brief functor to compare to points.
-  *
-  * The first point is defined as smaller than the second one if the x value
-  * is smaller or the x values are equal and the y value of first point is smaller.
-  */
-class PointCompareFunctorXY
-{
-public:
-    bool operator()(const Point& pt1, const Point& pt2) const
-    {
-        if( (pt1.x() < pt2.x()) ||
-            ( (pt1.x() == pt2.x()) && (pt1.y() < pt2.y()) ) )
-        {
-            return true;
-        }
-        return false;
-    }
-};
-
-
-/** @brief serialization BasicPoint<Pt::uint8_t>
-  *
-  * The type Pt::uint8_t is defined to unsinged char. To make sure the
-  * numbers are not interpreted as unsigned char, a cast to Pt::uint16_t
-  * is done.
-  */
-inline void operator <<=(Pt::SerializationInfo& si, const BasicPoint<Pt::uint8_t>& point)
-{
-    si.addMember("x") <<=  static_cast<Pt::uint16_t>(point.x());
-    si.addMember("y") <<= static_cast<Pt::uint16_t>(point.y());
-    si.setTypeName("Point");
-}
-
-/** @brief serialization BasicPoint
-  */
-template <typename T>
-inline void operator <<=(Pt::SerializationInfo& si, const BasicPoint<T>& point)
-{
-    si.addMember("x") <<= point.x();
-    si.addMember("y") <<= point.y();
-    si.setTypeName("Point");
-}
-
-/** @brief deserialization BasicPoint<Pt::uint8_t>
-  */
-inline void operator >>=(const Pt::SerializationInfo& si, BasicPoint<Pt::uint8_t>& point)
-{
-    Pt::uint16_t x, y;
-    si.getMember("x") >>= x;
-    si.getMember("y") >>= y;
-
-    point.setX( static_cast<Pt::uint8_t>(x) );
-    point.setY( static_cast<Pt::uint8_t>(y)) ;
-}
-
-/** @brief deserialization BasicPoint
-  */
-template <typename T>
-inline void operator >>=(const Pt::SerializationInfo& si, BasicPoint<T>& point)
-{
-    T x, y;
-    si.getMember("x") >>= x;
-    si.getMember("y") >>= y;
-
-    point.setX(x);
-    point.setY(y);
-}
-
-/** @brief serialization of a vector of BasicPoint
-  */
-template <typename T>
-inline void operator <<=(Pt::SerializationInfo& si, const std::vector<BasicPoint<T> >& points)
-{
-    typename std::vector<BasicPoint<T> >::const_iterator it;
-    for(it = points.begin(); it != points.end(); ++it)
-    {
-        si.addMember("Point") <<= *it;
-    }
-}
-
-/** @brief deserialization of a vector of BasicPoint
-  */
-template <typename T>
-inline void operator >>=(const Pt::SerializationInfo& si, std::vector< BasicPoint<T> >& points)
-{
-    Pt::SerializationInfo::ConstIterator it;
-    for (it = si.begin(); it != si.end(); ++it)
-    {
-        points.resize( points.size() + 1 );
-        *it >>= points.back();
-    }
-}
 
 }}
 

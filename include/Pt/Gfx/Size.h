@@ -127,8 +127,8 @@ class BasicSize {
         T _h;
 };
 
-typedef BasicSize<Pt::size_t> Size;
-typedef BasicSize<double>     SizeF;
+typedef BasicSize<Pt::ssize_t> Size;
+typedef BasicSize<double>      SizeF;
 
 }} //namespace
 

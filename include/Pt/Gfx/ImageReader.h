@@ -34,11 +34,9 @@ namespace Gfx{
 
 class PT_GFX_API ImageReader
 {
-public:
-    
+	public:    
     static Image* read(std::istream& stream);
-    static Image* read(const char* file);
-    
+    static Image* read(const char* file);    
 };
 
     
