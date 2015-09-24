@@ -93,9 +93,9 @@ void RenderPath::translate( double x, double y )
   }
 }
 
-void RenderPath::text( const Pen& pen, const Font& font, const Pt::String& text)
+void RenderPath::text( const PointF& to, const Pen& pen, const Font& font, const Pt::String& text)
 {
-  _path.push_back( new TextOp(pen, font, text) );
+  _path.push_back( new TextOp(to, pen, font, text) );
 }
 
 

@@ -43,11 +43,12 @@ class TextOp : public RenderOp
     {
     }
 
-    TextOp( const Pen& pen, const Font& font, const Pt::String& text )
+    TextOp( const PointF& to, const Pen& pen, const Font& font, const Pt::String& text )
     : _pen( pen )
     , _font( font )     
     , _text( text )
     {
+			outline().push_back( to );
     }    
 
     virtual void execute( Painter& painter ) const 

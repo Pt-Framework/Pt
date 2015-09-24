@@ -1206,9 +1206,6 @@
     <ClInclude Include="..\..\src\Pt-Gfx\EdgeTable.h">
       <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\ClipLine.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\Edge.h">
       <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
@@ -1220,9 +1217,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\FillOp.h">
       <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\FreeType.h">
-      <Filter>Pt-Gfx\Imaging</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Image.h">
       <Filter>Pt-Gfx\Imaging</Filter>
@@ -1245,9 +1239,6 @@
     <ClInclude Include="..\..\src\Pt-Gfx\RenderOp.h">
       <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\RenderPath.h">
-      <Filter>Pt-Gfx\Imaging</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb888Format.h">
       <Filter>Pt-Gfx\Imaging</Filter>
     </ClInclude>
@@ -1267,6 +1258,15 @@
       <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\PathOp.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\ClipLine.h">
+      <Filter>Pt-Gfx\Cliping</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\RenderPath.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\FreeType.h">
       <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
   </ItemGroup>

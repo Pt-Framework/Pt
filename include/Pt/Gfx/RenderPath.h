@@ -57,7 +57,7 @@ class PT_GFX_API RenderPath
 
     void path( const RectF& clip, const RenderPath& path );   
 
-    void text( const Pen& pen, const Font& font, const Pt::String& text ); 
+    void text( const PointF& to, const Pen& pen, const Font& font, const Pt::String& text ); 
    
     void stroke( const Pen& pen, const PointF* points, size_t count );
     

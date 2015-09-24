@@ -54,7 +54,7 @@ void PainterImpl::drawLine( const Gfx::PointF& from, const Gfx::PointF& to )
 
 void PainterImpl::drawText( const Gfx::PointF& to, const Pt::String& text )
 {	  
-  _surface->path().text( _pen, _font, text);
+  _surface->path().text( to, _pen, _font, text);
 }
 
 
