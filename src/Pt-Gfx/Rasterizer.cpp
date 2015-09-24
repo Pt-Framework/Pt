@@ -1855,32 +1855,9 @@ void Rasterizer::stroke( int x, int y)
 
 void Rasterizer::stroke( int xpos, int ypos, size_t length )
 {
-  const Image& colorBuffer =_pen.buffer();
+  const Image& colorBuffer = _pen.buffer();
         
-  if( ypos < _clip.top() )
-      return;
-
-  if( ypos >= _clip.bottom() )
-      return;
-
-  if( xpos >= _clip.right() )
-      return;
-
-  if(xpos < _clip.left() )
-  {
-      if(  static_cast<ssize_t>(length) > -xpos )
-      {
-          length +=xpos;
-          xpos = 0;
-      }
-      else
-      {
-          return;
-      }
-  }
-
-  if( (xpos + length) > _clip.right() )
-      length =   _clip.right() - xpos;
+	clipSpan( xpos, ypos, length );
 
 	while( length )
 	{
@@ -1908,6 +1885,8 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  size_t leng
     int xpos = pos.x();
     int ypos = pos.y();
 
+	  clipSpan( xpos, ypos, length );
+
     while(length)
     {
         // x position in the texture to copy from
@@ -1930,24 +1909,68 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  size_t leng
 }
 
 
-void Rasterizer::fillSolid( const Point& origin, const Point& pos,  size_t length)
+void Rasterizer::clipSpan( int& xpos, int& ypos, size_t& length )
 {
-   int xpos = pos.x();
-    int ypos = pos.y();
+	if( ypos < _clip.top() )
+	{
+		length = 0;
+		return;
+  }
 
-    const Image& texture = _brush.texture();
+	if( ypos >= _clip.bottom() )
+	{
+		length = 0;
+		return;
+	}
 
-    // copy pixels blockwise to the target image
-    while(length)
-    {
-      const size_t fillLength = std::min( length, texture.width() );
+	if( xpos >= _clip.right() )
+	{
+		length = 0;
+		return;
+	}
 
-      if(fillLength)
-          std::memcpy( _image.pixel( xpos, ypos ), _brush.texture().pixel(0,0), fillLength * _image.format().pixelSize());        
+	if(xpos < _clip.left() )
+	{
+			if(  static_cast<ssize_t>(length) > - xpos )
+			{
+					length += xpos;
+					xpos = 0;
+			}
+			else
+			{
+				length = 0;
+				return;
+			}
+	}
 
-      length -= fillLength;
-      xpos   += fillLength;
-    }
+	if( (xpos + length) > _clip.right() )
+			length =   _clip.right() - xpos;
+}
+
+
+void Rasterizer::fillSolid( const Point& pos, size_t length )
+{
+	int xpos = pos.x();
+	int ypos = pos.y();
+       
+	clipSpan( xpos, ypos, length );
+
+	if( length == 0 )
+		return;
+
+	const Image& texture = _brush.texture();
+
+	// copy pixels blockwise to the target image
+	while(length)
+	{
+		const size_t fillLength = std::min( length, texture.width() );
+
+		if(fillLength)
+				std::memcpy( _image.pixel( xpos, ypos ), _brush.texture().pixel(0,0), fillLength * _image.format().pixelSize());        
+
+		length -= fillLength;
+		xpos   += fillLength;
+	}
 }
 
 
@@ -1966,7 +1989,7 @@ void Rasterizer::fill(const Point& origin, const Point& pos,  size_t length)
     break;
 
     case Brush::SolidFill:
-      fillSolid(origin, pos,  length);
+      fillSolid(pos,  length);
     break;
   }
 }
