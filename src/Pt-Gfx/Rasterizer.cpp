@@ -1885,8 +1885,6 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  size_t leng
     int xpos = pos.x();
     int ypos = pos.y();
 
-	  clipSpan( xpos, ypos, length );
-
     while(length)
     {
         // x position in the texture to copy from
@@ -1951,13 +1949,8 @@ void Rasterizer::clipSpan( int& xpos, int& ypos, size_t& length )
 void Rasterizer::fillSolid( const Point& pos, size_t length )
 {
 	int xpos = pos.x();
-	int ypos = pos.y();
-       
-	clipSpan( xpos, ypos, length );
-
-	if( length == 0 )
-		return;
-
+	int ypos = pos.y();       
+	
 	const Image& texture = _brush.texture();
 
 	// copy pixels blockwise to the target image
@@ -3184,8 +3177,7 @@ void Rasterizer::fill( const PointF* pts, size_t pointCount)
     // find unclipped origin coordinates
     //
     PointF origin( std::numeric_limits<Pt::ssize_t>::max(), std::numeric_limits<Pt::ssize_t>::max() );
-    //Pt::ssize_t xorig = ;
-    //Pt::ssize_t yorig = std::numeric_limits<Pt::ssize_t>::max();
+
     for(size_t n = 0; n < points.size(); ++n)
     {
         origin.setX( std::min( origin.x(), points[n].x() ) );

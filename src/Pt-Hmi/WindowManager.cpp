@@ -170,7 +170,7 @@ Gfx::PointF WindowManager::renderFrame( ChildWindow* w )
 
 	Painter& painter = _parent.surface().painter();
 
- Gfx::PointF pos( w->Position.get().x() + _borderWidth/2.0, w->Position.get().y() + _borderWidth/2.0 );
+	Gfx::PointF pos( w->Position.get().x() + _borderWidth/2.0, w->Position.get().y() + _borderWidth/2.0 );
 	
   switch( w->Border.get() )
   {

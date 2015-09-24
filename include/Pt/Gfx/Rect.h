@@ -30,7 +30,7 @@
 
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
-
+#include <algorithm>
 namespace Pt {
 namespace Gfx {
 
@@ -320,6 +320,39 @@ class BasicRect
           point.push_back( bottomLeft() );
           return point;
         }
+
+				bool empty() const
+				{
+					return _s.width() == 0 || _s.height() == 0;
+				}
+
+
+				BasicRect<PointT,SizeT> intersect( const BasicRect<PointT,SizeT>& r ) const 
+				{
+					BasicRect<PointT,SizeT> inter;					 
+
+					inter.setLeft( std::max(this->left(), r.left() ) ) ;
+					inter.setTop( std::max(this->top(), r.top() ) ) ;
+					inter.setRight( std::min(this->right(), r.right() ) );
+					inter.setBottom( std::min(this->bottom(), r.bottom() ) );
+
+					if( inter.right() > inter.left() && inter.bottom() > inter.top() )
+						return BasicRect<PointT,SizeT>();
+
+					return inter;
+				}
+
+
+				bool contains( const PointT& p ) const 
+				{
+						if(  
+								p.x() >= _p.x() &&  p.x() <   ( _p.x()  + _s.width()  ) &&
+							   p.y() >= _p.y() &&  p.y() <   ( _p.y()  + _s.height() ) 
+						   )
+								return true;
+							
+						return false;					    
+				}
 
     protected:
         BasicPoint<PointT> _p;
