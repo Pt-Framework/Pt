@@ -65,7 +65,7 @@ class RenderOp : private Pt::NonCopyable
 			for( size_t i = 0; i < _outline.size(); ++ i)
 			{
 				_outline[i].addX( x );
-				_outline[i].addX( y );
+				_outline[i].addY( y );
 			}				
 		}
 
