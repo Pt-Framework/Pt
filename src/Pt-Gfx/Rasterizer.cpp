@@ -206,6 +206,7 @@ Rasterizer::Rasterizer( Image& image )
 , _font("Vera", 12)
 , _clip( RectF(PointF(0,0), SizeF( image.width(), image.height() ) ) )
 {
+	_text->setClip( _clip );
 }
 
 
@@ -1932,7 +1933,7 @@ void Rasterizer::clipSpan( int& xpos, int& ypos, size_t& length )
 			if(  static_cast<ssize_t>(length) > - xpos )
 			{
 					length += xpos;
-					xpos = 0;
+					xpos = _clip.left();
 			}
 			else
 			{

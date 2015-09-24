@@ -125,6 +125,7 @@ void MainWindow::init()
 	_mainPanel.addChild(&_textLabel);
 	
 	//Toggle button
+
 	_toggleButton.ButtonType = Hmi::ButtonType::Toggle;
 	_toggleButton.Caption = std::string("Toggle Me [CTRL+I]");
 	_toggleButton.ShortcutKey = std::string("C//i");

@@ -107,8 +107,8 @@ class DrawText
             Pt::uint32_t             yOffset = 0;
             int                      dsy     = 0;
             int                      dsx     = 0;
-            const Pt::ssize_t        x2      = _clip.width() - 1;
-            const Pt::ssize_t        y2      = _clip.height() - 1;
+            const Pt::ssize_t        x2      = _clip.right();
+            const Pt::ssize_t        y2      = _clip.bottom();
 
             if( bmPitch < width )
                 bmPitch += width;
@@ -116,18 +116,18 @@ class DrawText
             // NOTE: The PixelIterator should not take negative X or Y coordinate, hence we need to offset the starting position
             int ofsx = 0;
             
-            if(xpos < 0) 
+            if(xpos < _clip.left() ) 
             {
                 ofsx = -xpos;
-                xpos = 0;
+                xpos = _clip.left();
             }
             
             int ofsy = 0;
             
-            if(ypos < 0) 
+            if(ypos < _clip.top()) 
             {
                 ofsy = -ypos;
-                ypos = 0;
+                ypos = _clip.top();
             }
 
             dsy = ypos;
