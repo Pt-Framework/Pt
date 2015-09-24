@@ -82,8 +82,8 @@ class BasicRect
 
       void set( const T left, const T right, const T top, const T bottom )
       {
-          _p = BasicPoint<T>( left, right );
-          _s = BasicSize<T>(  right- left + 1 , bottom - top  + 1);
+          _p = BasicPoint<T>( left, top );
+          _s = BasicSize<T>(  right - left + 1 , bottom - top  + 1);
       }
 
       T x() const
@@ -180,14 +180,14 @@ class BasicRect
       }
 
 
-			BasicRect<T> intersect( const BasicRect<T>& r ) const 
+			BasicRect<T> intersect( const BasicRect<T>& rect ) const 
 			{
-				const T left	 = std::max( this->left(), r.left() );
-				const T top		 = std::max( this->top(), r.top() ) ;
-				const T right	 = std::min( this->right(), r.right() );
-				const T bottom = std::min( this->bottom(), r.bottom() );
+				const T l	 = std::max( this->left(), rect.left() );
+				const T t		 = std::max( this->top(), rect.top() ) ;
+				const T r	 = std::min( this->right(), rect.right() );
+				const T b   = std::min( this->bottom(), rect.bottom() );
 
-				return ( (right > left && bottom > top ) ) ? BasicRect<T>(left, right, top, bottom ) : BasicRect<T>() ;
+				return ( (r > l && b > t ) ? BasicRect<T>(l, r, t, b ) : BasicRect<T>() ) ;
 			}
 
 
