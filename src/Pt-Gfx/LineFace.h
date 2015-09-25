@@ -1,6 +1,7 @@
 /* Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2015 Marc Boris Duerner
  * Copyright (C) 2010 Aloysius Indrayanto
+ * Copyright (C) 1988, 1998  The Open Group, MIT X Consortium
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,10 +32,7 @@
 namespace Pt{
 namespace Gfx{ 
 
-/**
- * @brief The line face description.
- *
- */
+/**@brief The line face description. */
 class LineFace
 {
     public:
@@ -101,7 +99,6 @@ class LineFace
         double _k;
 };
 
-}//namespace Gfx
-}//namespace Pt
+}}//namespace
 
 #endif

@@ -112,33 +112,33 @@ class PT_GFX_API Rasterizer
   //Output algo.
   protected: 
     void stroke( int x, int y );
-    void stroke( int x, int y, size_t length );
+    void stroke( int x, int y, int length );
     void outputSpan( const Point& topLeft, int x, int y, int width );
-    void fill( const Point& origin, const Point& pos, size_t length );
-    void fillSolid( const Point& pos,  size_t length );
-    void fillTexture( const Point& origin, const Point& pos,  size_t length );
-		void clipSpan( int& x, int& y, size_t& length );
+    void fill( const Point& origin, const Point& pos, int length );
+    void fillSolid( const Point& pos,  int length );
+    void fillTexture( const Point& origin, const Point& pos,  int length );
+		void clipSpan( int& x, int& y, int& length );
  
   //Thin polyline algo.
   protected:
     enum { xAxis, yAxis };
-    void drawThinSolidPolyline( const PointF* points, size_t pointCount );
-    void drawThinDashPolyline( const PointF* points, size_t pointCount);
-    void stepDash( int dist, int* pDashNum, int* pDashIndex, const unsigned int* pDash, int numInDashList, int *pDashOffset );
-    void bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const unsigned int *pDash, int numInDashList, int *pdashOffset, bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len);    
+    void drawThinSolidPolyline( const PointF* points, int pointCount );
+    void drawThinDashPolyline( const PointF* points, int pointCount);
+    void stepDash( int dist, int* pDashNum, int* pDashIndex, const int* pDash, int numInDashList, int *pDashOffset );
+    void bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const  int *pDash, int numInDashList, int *pdashOffset, bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len);    
     void bresenhamLineSegment( int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len );
 
   //Wide polyline base algo.  
   protected:      
-    int polyBuildPoly( const PointF *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, unsigned int *h );        
+    int polyBuildPoly( const PointF *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, int *h );        
     int buildLineEdge( double x0, double y0, double k, int dx, int dy, int xi, int yi, bool left, LineEdge *edge);
-    void fillRect(int x, int y, unsigned int w, unsigned int h );
-    void fillLine(int y, unsigned int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count );
+    void fillRect(int x, int y,  int w,  int h );
+    void fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count );
     void lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt );
     void roundJoinClip( LineFace *pLeft, LineFace *pRight, LineEdge *edge1, LineEdge *edge2, int *y1, int *y2, bool *left1, bool *left2 );
     int roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, bool *leftEdge );
-    int lineArcI( int xorg, int yorg, std::vector<PointF>& points, std::vector<size_t>& widths);
-    int lineArcD( double xorg, double yorg, std::vector<PointF>& points, std::vector<size_t>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2);
+    int lineArcI( int xorg, int yorg, std::vector<PointF>& points, std::vector<int>& widths);
+    int lineArcD( double xorg, double yorg, std::vector<PointF>& points, std::vector<int>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2);
     int roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftEdge );
     void lineJoin(LineFace *pLeft, LineFace *pRight );
     void lineProjectingCap(const LineFace *face, bool isLeft, bool isInt );
@@ -146,14 +146,14 @@ class PT_GFX_API Rasterizer
 
   //Wide solid polyline algo.
   protected:
-    void drawWideSolidPolyline( const PointF* points, size_t pointCount );
+    void drawWideSolidPolyline( const PointF* points, int pointCount );
     void drawSegment( PointF from, PointF to, bool projectLeft, bool projectRight, LineFace* leftFace, LineFace* rightFace );
 
   //Wide dashed polyline algo.
   protected:
     enum { V_TOP =  0, V_RIGHT = 1, V_BOTTOM = 2, V_LEFT = 3 };
-    void drawWideDashPolyline( const PointF* points, size_t pointCount );
-    void dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace, unsigned int* dash );
+    void drawWideDashPolyline( const PointF* points, int pointCount );
+    void dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash );
         
   private:
     Image&		_image;

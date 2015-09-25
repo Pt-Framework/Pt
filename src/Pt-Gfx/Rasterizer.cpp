@@ -1,5 +1,6 @@
 /* Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2015 Marc Boris Duerner
+ * Copyright (C) 1988, 1998  The Open Group, MIT X Consortium
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -85,8 +86,8 @@ inline void drawGlyph( Image& image, const Color& color, int xpos, int ypos, int
   Pt::uint32_t             yOffset = 0;
   int                      dsy     = 0;
   int                      dsx     = 0;
-  const Pt::ssize_t        x2      = image.width() - 1;
-  const Pt::ssize_t        y2      = image.height() - 1;
+  const int        x2      = image.width() - 1;
+  const int        y2      = image.height() - 1;
 
   if( bmPitch < width )
       bmPitch += width;
@@ -143,7 +144,7 @@ inline void drawGlyph( Image& image, const Color& color, int xpos, int ypos, int
 }
 
 
-inline void addPoint(int xx, int yy, PointF** ppt, unsigned int** pwidth, int& numSpans, int& ycurr, bool& firstspan, int signdy)
+inline void addPoint(int xx, int yy, PointF** ppt,  int** pwidth, int& numSpans, int& ycurr, bool& firstspan, int signdy)
 {
   if( !firstspan && yy == ycurr )
   {
@@ -156,8 +157,8 @@ inline void addPoint(int xx, int yy, PointF** ppt, unsigned int** pwidth, int& n
     }
     else if (xdelta > 0)
     {
-      unsigned int widthcurr = **pwidth;
-      (**pwidth) = std::max( widthcurr, (unsigned int)(1 + xdelta));
+       int widthcurr = **pwidth;
+      (**pwidth) = std::max( widthcurr, ( int)(1 + xdelta));
     }
   }
   else
@@ -292,7 +293,7 @@ void Rasterizer::strokeEllipse( const PointF& topLeft, const SizeF& size )
 }
 
 
-void Rasterizer::drawWideDashPolyline( const PointF* pPts, size_t npt )
+void Rasterizer::drawWideDashPolyline( const PointF* pPts, int npt )
 {
     int	      x1, y1, x2, y2;
     int	      dashNum;					// Absolute number of dash, starts with 0
@@ -309,7 +310,7 @@ void Rasterizer::drawWideDashPolyline( const PointF* pPts, size_t npt )
     LineFace  firstFace;
 
     //Define the dash patter.
-    unsigned  int dashes[2];
+     int dashes[2];
     dashes[0] = _pen.size() * 2; // Length of `on' dashes.
     dashes[1] = _pen.size() * 2;	// Length of `off' dashes.
 
@@ -442,7 +443,7 @@ void Rasterizer::drawWideDashPolyline( const PointF* pPts, size_t npt )
     // Handle `all points coincident' crock, nothing yet drawn
     if( !somethingDrawn && (_pen.style() == Pen::DoubleDash || !(dashNum & 1)) )
     {
-        unsigned int w1;
+         int w1;
 
         switch( _pen.capStyle() )
         {
@@ -465,7 +466,7 @@ void Rasterizer::drawWideDashPolyline( const PointF* pPts, size_t npt )
 }
 
 
-void Rasterizer::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace, unsigned int* dash )
+void Rasterizer::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash )
 {
   int		            dashNum, dashIndex, dashRemain;
     double	            L, l;
@@ -476,7 +477,7 @@ void Rasterizer::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, 
     LineEdge	        left[2], right[2];
     LineFace	        lcapFace, rcapFace;
     int		            nleft, nright;
-    unsigned int	    h;
+     int	    h;
     int		            y;
     int		            dy, dx;
     double	            LRemain;
@@ -943,7 +944,7 @@ void Rasterizer::drawSegment( PointF from, PointF to, bool projectLeft, bool pro
 
         dy = lw;
 
-        fillRect( x, y,(unsigned int)dx, (unsigned int)dy );
+        fillRect( x, y,( int)dx, ( int)dy );
     }
     else if (dx == 0) // Segment is vertical.
     {
@@ -966,7 +967,7 @@ void Rasterizer::drawSegment( PointF from, PointF to, bool projectLeft, bool pro
 
         dx = lw;
 
-        fillRect(  x, y,(unsigned int)dx, (unsigned int)dy );
+        fillRect(  x, y,( int)dx, ( int)dy );
     }
     else
     { // General case: segment is neither horizontal nor vertical.
@@ -1059,26 +1060,26 @@ void Rasterizer::drawSegment( PointF from, PointF to, bool projectLeft, bool pro
 
         if (dx < 0)
         {
-            left->setHeight( (unsigned int)(bottomy - lefty));
-            right->setHeight( (unsigned int)(finaly - righty) );
-            top->setHeight( (unsigned int)(righty - topy) );
+            left->setHeight( ( int)(bottomy - lefty));
+            right->setHeight( ( int)(finaly - righty) );
+            top->setHeight( ( int)(righty - topy) );
         }
         else
         {
-            right->setHeight( (unsigned int)(bottomy - righty));
-            left->setHeight( (unsigned int)(finaly - lefty) );
-            top->setHeight( (unsigned int)(lefty - topy) );
+            right->setHeight( ( int)(bottomy - righty));
+            left->setHeight( ( int)(finaly - lefty) );
+            top->setHeight( ( int)(lefty - topy) );
         }
 
-        bottom->setHeight( (unsigned int)(finaly - bottomy) );
+        bottom->setHeight( ( int)(finaly - bottomy) );
 
         // Fill the rectangle (2 left edges, 2 right edges).
-        fillLine( topy, (unsigned int)(bottom->height() + bottomy - topy), lefts, rights, 2, 2 );
+        fillLine( topy, ( int)(bottom->height() + bottomy - topy), lefts, rights, 2, 2 );
     }
 }
 
 
-void Rasterizer::drawWideSolidPolyline( const  PointF* pPts, size_t npt )
+void Rasterizer::drawWideSolidPolyline( const  PointF* pPts, int npt )
 {
   int		   x1, y1, x2, y2;
     bool	   projectLeft, projectRight;
@@ -1184,7 +1185,7 @@ void Rasterizer::drawWideSolidPolyline( const  PointF* pPts, size_t npt )
 }
 
 
-void Rasterizer::stepDash( int dist, int* pDashNum, int* pDashIndex, const unsigned int* pDash, int numInDashList, int *pDashOffset )
+void Rasterizer::stepDash( int dist, int* pDashNum, int* pDashIndex, const  int* pDash, int numInDashList, int *pDashOffset )
 {
     int	dashNum, dashIndex, dashOffset;
     int totallen;
@@ -1258,7 +1259,7 @@ void Rasterizer::stroke(const PointF* points,  size_t pointCount)
 }
 
 
-void Rasterizer::drawThinDashPolyline( const PointF* points,  size_t pointCount )
+void Rasterizer::drawThinDashPolyline( const PointF* points,  int pointCount )
 {
     const PointF* ppt = points;
     int xstart, ystart;
@@ -1269,7 +1270,7 @@ void Rasterizer::drawThinDashPolyline( const PointF* points,  size_t pointCount 
     int  dashOffset = 0;
     bool isDoubleDash = (_pen.style() == Pen::DoubleDash);
 
-    std::vector<unsigned int> dashes(2);
+    std::vector< int> dashes(2);
     dashes[0] = _pen.size() * 3; // Length of `on' dashes.
     dashes[1] = _pen.size();		// Length of `off' dashes.
 
@@ -1362,12 +1363,12 @@ void Rasterizer::drawThinDashPolyline( const PointF* points,  size_t pointCount 
 
 // Internal: draw dashed Bresenham line segment. Called by miZeroDash().
 // Endpoint semantics are used.
-void Rasterizer::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const unsigned int *pDash, int numInDashList, int *pdashOffset, bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len)
+void Rasterizer::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const  int *pDash, int numInDashList, int *pdashOffset, bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len)
 {
     std::vector<PointF>  ptInit_bg;
     PointF *pptLast_fg,  *pptLast_bg = 0;
-    std::vector<unsigned int>  widthInit_bg;
-    unsigned int *pwidthLast_fg, *pwidthLast_bg = 0;
+    std::vector< int>  widthInit_bg;
+     int *pwidthLast_fg, *pwidthLast_bg = 0;
     int		x, y;
     int 	e3;
     int		dashNum, dashIndex;
@@ -1380,12 +1381,12 @@ void Rasterizer::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const
     int ycurr_fg, ycurr_bg = 0;
 
     PointF *ppt_fg, *ppt_bg = 0;
-    unsigned int *pwidth_fg, *pwidth_bg = 0;
+     int *pwidth_fg, *pwidth_bg = 0;
     bool firstspan_fg, firstspan_bg = false;
 
     // Set up work arrays
     std::vector<PointF> ptInit_fg(len);
-    std::vector<unsigned int> widthInit_fg(len);
+    std::vector< int> widthInit_fg(len);
 
     pptLast_fg = &ptInit_fg[len - 1];
     pwidthLast_fg = &widthInit_fg[len - 1];
@@ -1564,7 +1565,7 @@ void Rasterizer::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const
         if (numSpans_fg > 0)
         { // Have a foreground dash to paint.
             PointF *pptStart_fg;
-            unsigned int *pwidthStart_fg;
+             int *pwidthStart_fg;
 
             if (signdy >= 0)
             {
@@ -1594,7 +1595,7 @@ void Rasterizer::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const
         {// Have a background dash to paint.
 
             PointF *pptStart_bg;
-            unsigned int *pwidthStart_bg;
+             int *pwidthStart_bg;
 
             if (signdy >= 0)
             {
@@ -1636,7 +1637,7 @@ void Rasterizer::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const
     *pdashOffset = (int)(pDash[dashIndex]) - dashRemaining;
 }
 
-void Rasterizer::drawThinSolidPolyline( const PointF* points,  size_t pointCount)
+void Rasterizer::drawThinSolidPolyline( const PointF* points,  int pointCount)
 {
     const PointF *ppt;
 
@@ -1756,17 +1757,17 @@ void Rasterizer::bresenhamLineSegment( int signdx, int signdy, int axis, int x1,
         return;
 
     std::vector<PointF> ptInit(len);
-    std::vector<unsigned int> widthInit(len);
+    std::vector< int> widthInit(len);
 
     PointF* pptLast     = &ptInit[len - 1];
-    unsigned int *pwidthLast = &widthInit[len - 1];
+     int *pwidthLast = &widthInit[len - 1];
 
     int x, y;
     int e3;
     int numSpans = 0;
     int ycurr = 0;
     PointF  *ppt = pptLast;
-    unsigned int *pwidth = pwidthLast;
+     int *pwidth = pwidthLast;
     bool firstspan = true;
 
     if (signdy >= 0)
@@ -1821,8 +1822,8 @@ void Rasterizer::bresenhamLineSegment( int signdx, int signdy, int axis, int x1,
         {// Spans are offset, so shift downward.
             PointF *ppt_src	 = pptLast - (numSpans - 1);
             PointF *ppt_dst	 = &ptInit[0];
-            unsigned int *pwidth_src = pwidthLast - (numSpans - 1);
-            unsigned int *pwidth_dst = &widthInit[0];
+             int *pwidth_src = pwidthLast - (numSpans - 1);
+             int *pwidth_dst = &widthInit[0];
 
             int count = numSpans;
 
@@ -1855,7 +1856,7 @@ void Rasterizer::stroke( int x, int y)
 }
 
 
-void Rasterizer::stroke( int xpos, int ypos, size_t length )
+void Rasterizer::stroke( int xpos, int ypos, int length )
 {
   const Image& colorBuffer = _pen.buffer();
         
@@ -1863,7 +1864,7 @@ void Rasterizer::stroke( int xpos, int ypos, size_t length )
 
 	while( length )
 	{
-			const size_t fillLength = std::min( length, colorBuffer.width() );
+			const int fillLength = std::min( length, (int) colorBuffer.width() );
 
 			if( fillLength )
 				std::memcpy( _image.pixel( xpos, ypos ), colorBuffer.pixel(0,0), fillLength * _image.format().pixelSize() );
@@ -1881,7 +1882,7 @@ void Rasterizer::setFont( const Font& font )
 }
 
 
-void Rasterizer::fillTexture(const Point& origin, const Point& pos,  size_t length )
+void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length )
 {
     const Image& texture = _brush.texture();
     int xpos = pos.x();
@@ -1892,13 +1893,13 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  size_t leng
     while(length)
     {
         // x position in the texture to copy from
-        const size_t textureXPos = (int)( xpos - origin.x() ) % texture.width();
+        const int textureXPos = (int)( xpos - origin.x() ) % texture.width();
 
         // determine the scanline of the texture to copy from
-        const size_t textureYPos = (int) ( ypos - origin.y() ) % texture.height();
+        const int textureYPos = (int) ( ypos - origin.y() ) % texture.height();
 
         // number of pixels to copy from texture
-        const size_t fillLength = std::min( length, texture.width() - textureXPos );
+        const int fillLength = std::min( length, (int)texture.width() - textureXPos );
 
         // Copy pixels from textrure to image
         if(fillLength)
@@ -1911,7 +1912,7 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  size_t leng
 }
 
 
-void Rasterizer::clipSpan( int& xpos, int& ypos, size_t& length )
+void Rasterizer::clipSpan( int& xpos, int& ypos, int& length )
 {
 	if( ypos < _clip.top() )
 	{
@@ -1933,9 +1934,9 @@ void Rasterizer::clipSpan( int& xpos, int& ypos, size_t& length )
 
 	if(xpos < _clip.left() )
 	{
-			if(  static_cast<ssize_t>(length) > - xpos )
+			if(  length > - xpos )
 			{
-					length -= (_clip.left() - xpos );
+					length -= ((int) _clip.left() - xpos );
 					xpos = (int)_clip.left();
 			}
 			else
@@ -1950,7 +1951,7 @@ void Rasterizer::clipSpan( int& xpos, int& ypos, size_t& length )
 }
 
 
-void Rasterizer::fillSolid( const Point& pos, size_t length )
+void Rasterizer::fillSolid( const Point& pos, int length )
 {
 	int xpos = pos.x();
 	int ypos = pos.y();       
@@ -1962,7 +1963,7 @@ void Rasterizer::fillSolid( const Point& pos, size_t length )
 	// copy pixels blockwise to the target image
 	while(length)
 	{
-		const size_t fillLength = std::min( length, texture.width() );
+		const int fillLength = std::min( length, (int) texture.width() );
 
 		if(fillLength)
 				std::memcpy( _image.pixel( xpos, ypos ), _brush.texture().pixel(0,0), fillLength * _image.format().pixelSize());        
@@ -1979,7 +1980,7 @@ void Rasterizer::strokeText( const PointF& to, const Pt::String& text )
 }
 
 
-void Rasterizer::fill(const Point& origin, const Point& pos,  size_t length)
+void Rasterizer::fill(const Point& origin, const Point& pos,  int length)
 {
   switch( _brush.fillStyle())
   {
@@ -2022,7 +2023,7 @@ void Rasterizer::clipStepEdge( int ybase, int& xcl, int& xcr, int& edgey,  LineE
 }
 
 
-int Rasterizer::polyBuildPoly( const PointF *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, unsigned int *h)
+int Rasterizer::polyBuildPoly( const PointF *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, int *h)
 {
     int	    top, bottom;
     double  miny, maxy;
@@ -2055,7 +2056,7 @@ int Rasterizer::polyBuildPoly( const PointF *vertices, const LineSlope *slopes, 
     }
 
     // Compute integer y-value for bottom of polygon (round up).
-    bottomy = static_cast<ssize_t>( ceil( maxy ) + yi );
+    bottomy = static_cast<int>( ceil( maxy ) + yi );
 
     // Determine whether should go `clockwise' or `counterclockwise'
     // to move down the right side of the polygon
@@ -2131,7 +2132,7 @@ int Rasterizer::polyBuildPoly( const PointF *vertices, const LineSlope *slopes, 
         left[nleft-1].setHeight( bottomy - lasty );
 
     // return number of left-side and right-side edges; also height (vertical
-    // range, an unsigned int) and the vertical location of the top vertex
+    // range, an  int) and the vertical location of the top vertex
     // (an integer)
     *pnleft = nleft;
     *pnright = nright;
@@ -2204,11 +2205,11 @@ int Rasterizer::buildLineEdge( double x0, double y0, double k, int dx, int dy, i
 }
 
 
-void Rasterizer::fillRect(int x, int y, unsigned int w, unsigned int h)
+void Rasterizer::fillRect(int x, int y,  int w,  int h)
 {
-    Pt::ssize_t ypos = std::max( 0, y );
+    int ypos = std::max( 0, y );
 
-    Pt::ssize_t yend = 0;
+    int yend = 0;
 
     if( (y + (int) h) > 0 )
         yend = std::min<int>( _clip.height(), y + h ) ;
@@ -2218,7 +2219,7 @@ void Rasterizer::fillRect(int x, int y, unsigned int w, unsigned int h)
 }
 
 
-void Rasterizer::fillLine(int y, unsigned int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count)
+void Rasterizer::fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count)
 {
     int left_x		= 0;
     int left_e		= 0;
@@ -2234,12 +2235,12 @@ void Rasterizer::fillLine(int y, unsigned int overall_height, LineEdge *left, Li
     int right_dy     = 0;
     int right_dx     = 0;
 
-    unsigned int left_height = 0;
-    unsigned int right_height = 0;
+     int left_height = 0;
+     int right_height = 0;
 
     while( (left_count || left_height) && (right_count || right_height) )
     {
-        unsigned int height;
+         int height;
 
         if (!left_height && left_count)
         { // Load fields from next left edge, right edge
@@ -2339,7 +2340,7 @@ void Rasterizer::roundJoinClip (LineFace *pLeft, LineFace *pRight, LineEdge *edg
 void Rasterizer::lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt )
 {
     std::vector<PointF>    points;
-    std::vector<size_t>   widths;
+    std::vector<int>   widths;
 
     int      xorgi = 0;
     int		 yorgi = 0;
@@ -2402,15 +2403,15 @@ void Rasterizer::lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, 
         n = lineArcD( xorg, yorg, points, widths, &edge1, edgey1, edgeleft1, &edge2, edgey2, edgeleft2);
 
     //Stroke the span.
-    for( ssize_t i = 0; i < n; i++)
+    for( int i = 0; i < n; i++)
         stroke((int)points[i].x(), (int)points[i].y(), widths[i] );
 }
 
 
-int Rasterizer::lineArcI( int xorg, int yorg, std::vector<PointF>& points, std::vector<size_t>& widths )
+int Rasterizer::lineArcI( int xorg, int yorg, std::vector<PointF>& points, std::vector<int>& widths )
 {
     PointF *tpts, *bpts;
-    size_t* twids, *bwids;
+    int* twids, *bwids;
     int x, y, e, ex;
     int slw;
 
@@ -2479,10 +2480,10 @@ int Rasterizer::lineArcI( int xorg, int yorg, std::vector<PointF>& points, std::
    round joins, respectively (it respectively yields a half-disk or a pie
    wedge).  Floating point coordinates are used.  Returns number of spans
    in the Spans.  The clipping edges may be modified. */
-int Rasterizer::lineArcD( double xorg, double yorg, std::vector<PointF>& points, std::vector<size_t>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2)
+int Rasterizer::lineArcD( double xorg, double yorg, std::vector<PointF>& points, std::vector<int>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2)
 {
     PointF *pts;
-    size_t *wids;
+    int *wids;
     double radius, x0, y0, el, er, yk, xlk, xrk, k;
     int xbase, ybase, y, boty, xl, xr, xcl, xcr;
     int ymin, ymax;
@@ -2493,7 +2494,7 @@ int Rasterizer::lineArcD( double xorg, double yorg, std::vector<PointF>& points,
     wids = &widths[0];
     xbase = (int)(floor(xorg));
     x0 = xorg - xbase;
-    ybase = static_cast<ssize_t>( ceil(yorg) );
+    ybase = static_cast<int>( ceil(yorg) );
     y0 = yorg - ybase;
     xlk = x0 + x0 + 1.0;
     xrk = x0 + x0 - 1.0;
@@ -2608,7 +2609,7 @@ int Rasterizer::lineArcD( double xorg, double yorg, std::vector<PointF>& points,
             pts->setX( xcl );
             pts->setY( ybase );
             pts++;
-            *wids++ = (unsigned int)(xcr - xcl + 1);
+            *wids++ = ( int)(xcr - xcl + 1);
         }
     }
 
@@ -2655,7 +2656,7 @@ int Rasterizer::lineArcD( double xorg, double yorg, std::vector<PointF>& points,
             pts->setX( xcl );
             pts->setY( ybase );
             pts++;
-            *wids++ = (unsigned int)(xcr - xcl + 1);
+            *wids++ = ( int)(xcr - xcl + 1);
         }
     }
 
@@ -2697,7 +2698,7 @@ int Rasterizer::roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, 
 
     if( dy == 0 )
     {
-        y = static_cast<ssize_t>( ceil( face->ya() ) + face->y() );
+        y = static_cast<int>( ceil( face->ya() ) + face->y() );
         edge->setX( std::numeric_limits<int>::min() );
         edge->setStepX( 0 );
         edge->setSignDX( 0 );
@@ -2709,7 +2710,7 @@ int Rasterizer::roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, 
     else
     {
         y = buildLineEdge( xa, ya, k, dx, dy, face->x(), face->y(), (left ? false : true), edge);
-        edge->setHeight( std::numeric_limits<unsigned int>::max() );	/* number of scanlines to process */
+        edge->setHeight( std::numeric_limits< int>::max() );	/* number of scanlines to process */
     }
 
     *leftEdge = (left ? false : true);
@@ -2749,7 +2750,7 @@ int Rasterizer::roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftE
 
     if (dy == 0)
     {
-        y = static_cast<ssize_t>( ceil( face->ya() ) + face->y() );
+        y = static_cast<int>( ceil( face->ya() ) + face->y() );
         edge->setX( std::numeric_limits<int>::min() );
         edge->setStepX( 0 );
         edge->setSignDX( 0 );
@@ -2762,7 +2763,7 @@ int Rasterizer::roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftE
     {
         y = buildLineEdge( xa, ya,  0.0, dx, dy, face->x(), face->y(), (left ? false : true), edge );
 
-        edge->setHeight( std::numeric_limits<unsigned int>::max() );	/* number of scanlines to process */
+        edge->setHeight( std::numeric_limits< int>::max() );	/* number of scanlines to process */
     }
 
     *leftEdge = (left ? false : true);
@@ -2783,7 +2784,7 @@ void Rasterizer::lineJoin(  LineFace *pLeft, LineFace *pRight )
     LineEdge            left[4], right[4];
     int                 nleft, nright;
     int                 y;
-    unsigned int        height;
+    int        height;
     bool		        swapslopes;
     int		            lw = _pen.size();
 
@@ -3024,7 +3025,7 @@ void Rasterizer::lineProjectingCap( const LineFace *face, bool isLeft, bool isIn
     // special case: line face is horizontal
     if( dy == 0 )
     {
-        lefts[0].setHeight( (unsigned int)lw );
+        lefts[0].setHeight( ( int)lw );
         lefts[0].setX( xorgi );
 
         if( isLeft )
@@ -3036,7 +3037,7 @@ void Rasterizer::lineProjectingCap( const LineFace *face, bool isLeft, bool isIn
         lefts[0].setDX( 0 );
         lefts[0].setDY( lw );
 
-        rights[0].setHeight( (unsigned int)lw );
+        rights[0].setHeight( ( int)lw );
         rights[0].setX( xorgi );
 
         if( !isLeft )
@@ -3049,7 +3050,7 @@ void Rasterizer::lineProjectingCap( const LineFace *face, bool isLeft, bool isIn
         rights[0].setDY( lw );
 
         // fill the rectangle (1 left edge, 1 right edge)
-        fillLine( yorgi - (lw >> 1), (unsigned int)lw,  lefts, rights, 1, 1);
+        fillLine( yorgi - (lw >> 1), ( int)lw,  lefts, rights, 1, 1);
     }
     else if( dx == 0 ) // special case: line face is vertical
     {
@@ -3061,7 +3062,7 @@ void Rasterizer::lineProjectingCap( const LineFace *face, bool isLeft, bool isIn
         else
             bottomy += (lw >> 1);
 
-        lefts[0].setHeight( (unsigned int)(bottomy - topy) );
+        lefts[0].setHeight( ( int)(bottomy - topy) );
         lefts[0].setX( xorgi - (lw >> 1) );
         lefts[0].setStepX( 0 );
         lefts[0].setSignDX( 1 );
@@ -3069,7 +3070,7 @@ void Rasterizer::lineProjectingCap( const LineFace *face, bool isLeft, bool isIn
         lefts[0].setDX( dx );
         lefts[0].setDY( dy );
 
-        rights[0].setHeight( (unsigned int)(bottomy - topy) );
+        rights[0].setHeight( ( int)(bottomy - topy) );
         rights[0].setX( lefts[0].x() + (lw - 1) );
         rights[0].setStepX( 0 );
         rights[0].setSignDX( 1 );
@@ -3078,7 +3079,7 @@ void Rasterizer::lineProjectingCap( const LineFace *face, bool isLeft, bool isIn
         rights[0].setDY( dy );
 
         // fill the rectangle (1 left edge, 1 right edge)
-        fillLine( topy, (unsigned int)(bottomy - topy), lefts, rights, 1, 1);
+        fillLine( topy, ( int)(bottomy - topy), lefts, rights, 1, 1);
     }
     else // general case: line face is neither horizontal nor vertical
     {
@@ -3147,24 +3148,24 @@ void Rasterizer::lineProjectingCap( const LineFace *face, bool isLeft, bool isIn
               maxy = -ya + projectYoff;
           }
 
-        finaly = static_cast<ssize_t>( ceil(maxy) + yorgi );
+        finaly = static_cast<int>( ceil(maxy) + yorgi );
 
         if (dx < 0)
         {
-            left->setHeight( (unsigned int)(bottomy - lefty) );
-            right->setHeight( (unsigned int)(finaly - righty) );
-            top->setHeight( (unsigned int)(righty - topy) );
+            left->setHeight( ( int)(bottomy - lefty) );
+            right->setHeight( ( int)(finaly - righty) );
+            top->setHeight( ( int)(righty - topy) );
         }
         else
         {
-            right->setHeight( (unsigned int)(bottomy - righty) );
-            left->setHeight( (unsigned int)(finaly - lefty) );
-            top->setHeight( (unsigned int)(lefty - topy) );
+            right->setHeight( ( int)(bottomy - righty) );
+            left->setHeight( ( int)(finaly - lefty) );
+            top->setHeight( ( int)(lefty - topy) );
         }
-            bottom->setHeight( (unsigned int)(finaly - bottomy) );
+            bottom->setHeight( ( int)(finaly - bottomy) );
 
         // fill the rectangle (2 left edges, 2 right edges)
-        fillLine( topy, (unsigned int)(bottom->height() + bottomy - topy), lefts, rights, 2, 2 );
+        fillLine( topy, ( int)(bottom->height() + bottomy - topy), lefts, rights, 2, 2 );
     }
 }
 
@@ -3271,7 +3272,7 @@ void Rasterizer::fill( const PointF* pts, size_t pointCount)
     //
     // Start at ymin of the first entry in the GET.
     //
-    ssize_t scanLine = globalEdgeTable.begin()->ymin;
+    int scanLine = globalEdgeTable.begin()->ymin;
 
     //
     // move active edges to AET for current scanline. Keep iterator where
@@ -3290,9 +3291,9 @@ void Rasterizer::fill( const PointF* pts, size_t pointCount)
         //
         for( size_t i = 1; i < activeEdgeTable.size(); i += 2 )
         {
-            const size_t xend   = std::max(activeEdgeTable[i].x, activeEdgeTable[i-1].x);
-            const size_t xbegin   = std::min(activeEdgeTable[i].x, activeEdgeTable[i-1].x);
-            const size_t length = xend - xbegin;
+            const int xend   = std::max(activeEdgeTable[i].x, activeEdgeTable[i-1].x);
+            const int xbegin   = std::min(activeEdgeTable[i].x, activeEdgeTable[i-1].x);
+            const int length = xend - xbegin;
             fill(Point((int)origin.x(), (int)origin.y() ), Point(xbegin, scanLine), length);
         }
 
@@ -3329,8 +3330,8 @@ void Rasterizer::outputSpan( const Point& topLeft, int x, int y, int width )
     if( y < 0 )
         return;
 
-    const ssize_t xend = std::min( x + width, imageWidth );
-    ssize_t       xpos = std::max( 0, x );
+    const int xend = std::min( x + width, imageWidth );
+    int       xpos = std::max( 0, x );
 
     if( xend > xpos )
         fill( topLeft,Gfx::Point(xpos, y), xend-xpos );
@@ -3363,7 +3364,7 @@ void Rasterizer::fillEllipse( const PointF& topLeftIn, const SizeF& size )
     const int       yc     = (int)topLeft.y() + b;
     int             x      = 0;
     int             y      = b;
-    unsigned int    width  = 1;
+     int    width  = 1;
     long            a2     = (long)a*a;
     long            b2     = (long)b*b;
     long            crit1  = -(a2/4 + a%2 + b2);
@@ -3482,7 +3483,7 @@ void Rasterizer::image( const PointF& toIn, const Image& image )
 
   const int targetStride		 = _image.width() * _image.format().pixelSize() +  _image.stride();
   const int sourceStride		 = image.width() * image.format().pixelSize() +  image.stride();
-  const std::size_t lineSize = lineLength * _image.format().pixelSize();
+  const int lineSize = lineLength * _image.format().pixelSize();
 
   //Render
   switch( _mode )
