@@ -1887,6 +1887,8 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  size_t leng
     int xpos = pos.x();
     int ypos = pos.y();
 
+		clipSpan( xpos, ypos, length );
+
     while(length)
     {
         // x position in the texture to copy from
@@ -1954,6 +1956,8 @@ void Rasterizer::fillSolid( const Point& pos, size_t length )
 	int ypos = pos.y();       
 	
 	const Image& texture = _brush.texture();
+
+  clipSpan( xpos, ypos, length );
 
 	// copy pixels blockwise to the target image
 	while(length)
