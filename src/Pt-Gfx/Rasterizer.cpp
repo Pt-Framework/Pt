@@ -1944,7 +1944,7 @@ void Rasterizer::clipSpan( int& xpos, int& ypos, size_t& length )
 	}
 
 	if( (xpos + length) > _clip.right() )
-			length =  (int) _clip.right() - xpos + 1;
+		length =  ((int) _clip.right() - xpos );
 }
 
 
