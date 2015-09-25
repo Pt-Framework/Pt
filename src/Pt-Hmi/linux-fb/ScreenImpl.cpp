@@ -127,21 +127,21 @@ void ScreenImpl::onInvalidate()
 	painter.setPen( Gfx::Pen( Gfx::Color( 0,0,0 )) );	
 	{
 		std::stringstream ss;
-		ss<<"Render: " << (spanRender.toUSecs() / 1000.0)<<" ms";
-		painter.drawText( Gfx::PointF(20,10), Pt::String(ss.str().c_str() ) );
+		ss<<"Invalidate: " << (spanRender.toUSecs() / 1000.0)<<" ms";
+		painter.drawText( Gfx::PointF(20,15), Pt::String(ss.str().c_str() ) );
 	}
 	
 	{
 		std::stringstream ss;
-		ss<<"Graphics out: " << (spanGraphics.toUSecs() / 1000.0)<<" ms";
-		painter.drawText( Gfx::PointF(20,20), Pt::String(ss.str().c_str() ) );
+		ss<<"Render: " << (spanGraphics.toUSecs() / 1000.0)<<" ms";
+		painter.drawText( Gfx::PointF(20,35), Pt::String(ss.str().c_str() ) );
 	}
 
 	
 	{
 		std::stringstream ss;
 		ss<<"Total: " << (spanGraphics.toUSecs() + spanRender.toUSecs() / 1000.0)<<" ms";
-		painter.drawText( Gfx::PointF(20,40), Pt::String(ss.str().c_str() ) );
+		painter.drawText( Gfx::PointF(20,55), Pt::String(ss.str().c_str() ) );
 	}
 		
 	painter.flush();
