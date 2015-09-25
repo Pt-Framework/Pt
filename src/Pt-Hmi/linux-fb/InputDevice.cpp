@@ -211,7 +211,7 @@ bool InputDevice::onRun()
 	}
 
     if(hasPointerEvent)
-        Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );;
+        Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );
 
 	return true;
 }
