@@ -147,7 +147,7 @@ inline void addPoint(int xx, int yy, PointF** ppt, unsigned int** pwidth, int& n
 {
   if( !firstspan && yy == ycurr )
   {
-    int xdelta = xx - (*ppt)->x();
+    int xdelta = xx - (int)(*ppt)->x();
 
     if (xdelta < 0)
     {
@@ -220,6 +220,7 @@ void Rasterizer::strokeEllipse( const PointF& topLeft, const SizeF& size )
 {
     if( size.width() <= 1 || size.height() <= 1 )
         return;
+
     int errorx = 1;
     int errory = 1;
 
@@ -229,11 +230,11 @@ void Rasterizer::strokeEllipse( const PointF& topLeft, const SizeF& size )
     if( (int)size.height()%2 != 0)
         errory  = 0;
 
-    int  a      = size.width()/2;
-    int  b      = size.height()/2;
+    int  a      = (int) size.width()/2;
+    int  b      = (int)size.height()/2;
 
-    int  xc     = topLeft.x() + a;
-    int  yc     = topLeft.y() + b;
+    int  xc     = (int)topLeft.x() + a;
+    int  yc     = (int)topLeft.y() + b;
 
     int  x      = 0;
     int  y      = b;
@@ -316,8 +317,8 @@ void Rasterizer::drawWideDashPolyline( const PointF* pPts, size_t npt )
     if( npt <= 0 )
         return;
 
-    x2 = pPts->x();
-    y2 = pPts->y();
+    x2 = (int)pPts->x();
+    y2 = (int)pPts->y();
     first = true;	// first line segment of polyline
 
     /* determine whether polyline is closed */
@@ -351,8 +352,8 @@ void Rasterizer::drawWideDashPolyline( const PointF* pPts, size_t npt )
 
         ++pPts;
 
-        x2 = pPts->x();
-        y2 = pPts->y();
+        x2 = (int)pPts->x();
+        y2 =(int) pPts->y();
 
         // Have a line segment of nonzero length.
         if( x1 != x2 || y1 != y2 )
@@ -885,11 +886,11 @@ void Rasterizer::drawSegment( PointF from, PointF to, bool projectLeft, bool pro
         bool tbool;
         LineFace *tface;
 
-        tx = from.x();
+        tx = (int)from.x();
         from.setX( to.x());
         to.setX(tx);
 
-        ty = from.y();
+        ty = (int)from.y();
         from.setY(to.y());
         to.setY(ty);
 
@@ -902,20 +903,20 @@ void Rasterizer::drawSegment( PointF from, PointF to, bool projectLeft, bool pro
         rightFace = tface;
     }
 
-    dy = to.y() - from.y();
+    dy = (int)(to.y() - from.y());
     signdx = 1;
-    dx = to.x() - from.x();
+    dx = (int)(to.x() - from.x());
 
     if (dx < 0)
         signdx = -1;
 
-    leftFace->setX(from.x());
-    leftFace->setY(from.y());
+    leftFace->setX((int)from.x());
+    leftFace->setY((int)from.y());
     leftFace->setDX(dx);
     leftFace->setDY(dy);
 
-    rightFace->setX(to.x());
-    rightFace->setY(to.y());
+    rightFace->setX((int)to.x());
+    rightFace->setY((int)to.y());
     rightFace->setDX(-dx); //for faces, (dx,dy) points _into_ line
     rightFace->setDY(-dy);
 
@@ -928,14 +929,14 @@ void Rasterizer::drawSegment( PointF from, PointF to, bool projectLeft, bool pro
         leftFace->setYA(-rightFace->ya());
         leftFace->setK(rightFace->k()); // k = xa * dy - ya * dx
 
-        x = from.x();
+        x = (int)from.x();
 
         if (projectLeft)
             x -= (lw >> 1);
 
-        y = from.y() - (lw >> 1);
+        y = (int)from.y() - (lw >> 1);
 
-        dx = to.x() - x;
+        dx = (int)to.x() - x;
 
         if (projectRight)
             dx += ((lw + 1) >> 1);
@@ -952,13 +953,13 @@ void Rasterizer::drawSegment( PointF from, PointF to, bool projectLeft, bool pro
         rightFace->setXA( -leftFace->xa());
         rightFace->setYA( 0 );
         rightFace->setK( leftFace->k()); // k = xa * dy - ya * dx
-        y = from.y();
+        y = (int)from.y();
 
         if (projectLeft)
         y -= lw >> 1;
 
-        x = from.x() - (lw >> 1);
-        dy = to.y() - y;
+        x = (int)from.x() - (lw >> 1);
+        dy = (int)to.y() - y;
 
         if (projectRight)
         dy += ((lw + 1) >> 1);
@@ -1008,9 +1009,9 @@ void Rasterizer::drawSegment( PointF from, PointF to, bool projectLeft, bool pro
         rightFace->setK(k);
 
         if (projectLeft)
-            righty = buildLineEdge( xa - projectXoff, ya - projectYoff, k, dx, dy, from.x(), from.y(), false, right);
+            righty = buildLineEdge( xa - projectXoff, ya - projectYoff, k, dx, dy, (int)from.x(), (int)from.y(), false, right);
         else
-            righty = buildLineEdge( xa, ya, k, dx, dy, from.x(), from.y(), false, right);
+            righty = buildLineEdge( xa, ya, k, dx, dy, (int)from.x(), (int)from.y(), false, right);
 
           // Build second long edge.
           ya = -ya;
@@ -1018,9 +1019,9 @@ void Rasterizer::drawSegment( PointF from, PointF to, bool projectLeft, bool pro
           k = -k; // xa * dy - ya * dx
 
         if (projectLeft)
-            lefty = buildLineEdge(xa - projectXoff, ya - projectYoff, k, dx, dy, from.x(), from.y(), true, left);
+            lefty = buildLineEdge(xa - projectXoff, ya - projectYoff, k, dx, dy, (int)from.x(), (int)from.y(), true, left);
         else
-            lefty = buildLineEdge(xa, ya, k, dx, dy, from.x(), from.y(), true, left);
+            lefty = buildLineEdge(xa, ya, k, dx, dy, (int)from.x(), (int)from.y(), true, left);
 
         // Build first short edge, on left end.
         if (signdx > 0)
@@ -1033,11 +1034,11 @@ void Rasterizer::drawSegment( PointF from, PointF to, bool projectLeft, bool pro
         {
             double xap = xa - projectXoff;
             double yap = ya - projectYoff;
-            topy = buildLineEdge( xap, yap, xap * dx + yap * dy, -dy, dx, from.x(), from.y(), dx > 0 , top );
+            topy = buildLineEdge( xap, yap, xap * dx + yap * dy, -dy, dx, (int)from.x(), (int)from.y(), dx > 0 , top );
         }
         else
         {
-            topy = buildLineEdge( xa, ya, 0.0, -dy, dx, from.x(), from.y(), dx > 0, top );
+            topy = buildLineEdge( xa, ya, 0.0, -dy, dx,(int) from.x(), (int)from.y(), dx > 0, top );
         }
 
         // Build second short edge, on right end.
@@ -1045,16 +1046,16 @@ void Rasterizer::drawSegment( PointF from, PointF to, bool projectLeft, bool pro
         {
             double xap = xa + projectXoff;
             double yap = ya + projectYoff;
-            bottomy = buildLineEdge( xap, yap, xap * dx + yap * dy, -dy, dx, to.x(), to.y(),dx < 0, bottom );
+            bottomy = buildLineEdge( xap, yap, xap * dx + yap * dy, -dy, dx, (int)to.x(), (int)to.y(),dx < 0, bottom );
             maxy = -ya + projectYoff;
         }
         else
         {
-            bottomy = buildLineEdge( xa, ya, 0.0, -dy, dx, to.x(), to.y(), (dx < 0 ? true : false), bottom );
+            bottomy = buildLineEdge( xa, ya, 0.0, -dy, dx,(int) to.x(), (int)to.y(), (dx < 0 ? true : false), bottom );
             maxy = -ya;
         }
 
-        finaly = static_cast<int>(std::ceil(maxy)) + to.y();
+        finaly = static_cast<int>(std::ceil(maxy)) + (int)to.y();
 
         if (dx < 0)
         {
@@ -1091,8 +1092,8 @@ void Rasterizer::drawWideSolidPolyline( const  PointF* pPts, size_t npt )
     if (npt <= 0)
         return;
 
-    x2 = pPts->x();
-    y2 = pPts->y();
+    x2 = (int)pPts->x();
+    y2 = (int) pPts->y();
     first = true;
 
     // Determine whether polyline is closed.
@@ -1115,8 +1116,8 @@ void Rasterizer::drawWideSolidPolyline( const  PointF* pPts, size_t npt )
 
         ++pPts;
 
-        x2 = pPts->x();
-        y2 = pPts->y();
+        x2 = (int)pPts->x();
+        y2 = (int)pPts->y();
 
         if (x1 != x2 || y1 != y2)
         {
@@ -1277,8 +1278,8 @@ void Rasterizer::drawThinDashPolyline( const PointF* points,  size_t pointCount 
     // Loop through points, drawing a dashed Bresenham segment for each line
     // segment of nonzero length.
 
-    xstart = ppt->x();
-    ystart = ppt->y();
+    xstart =(int) ppt->x();
+    ystart =(int) ppt->y();
     x2 = xstart;
     y2 = ystart;
 
@@ -1289,8 +1290,8 @@ void Rasterizer::drawThinDashPolyline( const PointF* points,  size_t pointCount 
 
         ++ppt;
 
-        x2 = ppt->x();
-        y2 = ppt->y();
+        x2 = (int)ppt->x();
+        y2 = (int)ppt->y();
 
         // Use Bresenham algorithm for sloped lines (no special treatment for
         // horizontal or vertical lines, unlike the undashed case)
@@ -1585,7 +1586,7 @@ void Rasterizer::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const
                 MI_COPY_AND_PAINT_SPANS(paintedSet, pGC->pixels[paintType], numSpans_fg, pptStart_fg, pwidthStart_fg)
                 */
                 for( int i = 0;  i < numSpans_fg; ++i)
-                    stroke(pptStart_fg[i].x(), pptStart_fg[i].y(), pwidthStart_fg[i]);
+                    stroke((int)pptStart_fg[i].x(), (int)pptStart_fg[i].y(), pwidthStart_fg[i]);
             }
         }
 
@@ -1608,7 +1609,7 @@ void Rasterizer::bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const
 
             /* for background dash, use paint type #0 */
             for( int i = 0;  i < numSpans_fg; ++i)
-                stroke(pptStart_bg[i].x(), pptStart_bg[i].y(), pwidthStart_bg[i]);
+                stroke((int)pptStart_bg[i].x(), (int)pptStart_bg[i].y(), pwidthStart_bg[i]);
         }
 
         if (len == 0)
@@ -1652,8 +1653,8 @@ void Rasterizer::drawThinSolidPolyline( const PointF* points,  size_t pointCount
 
     // Loop through points, drawing a solid Bresenham segment for each line segment.
     ppt = points;
-    xstart = ppt->x();
-    ystart = ppt->y();
+    xstart =(int) ppt->x();
+    ystart = (int)ppt->y();
     x2 = xstart;
     y2 = ystart;
 
@@ -1663,8 +1664,8 @@ void Rasterizer::drawThinSolidPolyline( const PointF* points,  size_t pointCount
         y1 = y2;
         ++ppt;
 
-        x2 = ppt->x();
-        y2 = ppt->y();
+        x2 = (int)ppt->x();
+        y2 = (int)ppt->y();
 
         if (x1 == x2)  // Vertical line.
         {
@@ -1685,7 +1686,7 @@ void Rasterizer::drawThinSolidPolyline( const PointF* points,  size_t pointCount
             }
 
             // Restore final point.
-            y2 = ppt->y();
+            y2 =(int) ppt->y();
         }
         else if (y1 == y2)  // Horizontal line.
         {
@@ -1703,7 +1704,7 @@ void Rasterizer::drawThinSolidPolyline( const PointF* points,  size_t pointCount
                 stroke( x1, y1, x2 - x1  );
 
             // Restore final point.
-            x2 = ppt->x();
+            x2 = (int)ppt->x();
         }
         else
         { // Sloped line.
@@ -1833,7 +1834,7 @@ void Rasterizer::bresenhamLineSegment( int signdx, int signdy, int axis, int x1,
         }
 
         for( int i = 0; i < numSpans; ++i)
-            stroke( ptInit[i].x(), ptInit[i].y(), widthInit[i]);
+            stroke( (int)ptInit[i].x(), (int)ptInit[i].y(), widthInit[i]);
     }
 }
 
@@ -1933,7 +1934,7 @@ void Rasterizer::clipSpan( int& xpos, int& ypos, size_t& length )
 			if(  static_cast<ssize_t>(length) > - xpos )
 			{
 					length += xpos;
-					xpos = _clip.left();
+					xpos = (int)_clip.left();
 			}
 			else
 			{
@@ -1943,7 +1944,7 @@ void Rasterizer::clipSpan( int& xpos, int& ypos, size_t& length )
 	}
 
 	if( (xpos + length) > _clip.right() )
-			length =   _clip.right() - xpos;
+			length =  (int) _clip.right() - xpos;
 }
 
 
@@ -2398,7 +2399,7 @@ void Rasterizer::lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, 
 
     //Stroke the span.
     for( ssize_t i = 0; i < n; i++)
-        stroke(points[i].x(), points[i].y(), widths[i] );
+        stroke((int)points[i].x(), (int)points[i].y(), widths[i] );
 }
 
 
@@ -3224,12 +3225,12 @@ void Rasterizer::fill( const PointF* pts, size_t pointCount)
         //
         if( top->y() != bottom->y() )
         {
-            const int dy   = bottom->y() - top->y();
-            const int dx   = bottom->x() - top->x();
+            const int dy   = (int)bottom->y() - (int)top->y();
+            const int dx   = (int)bottom->x() - (int) top->x();
 
-            edge.ymax = bottom->y();  //- 1;   -1 so we don't get last scanline */
-            edge.ymin = top->y();
-            edge.x    = top->x();
+            edge.ymax = (int)bottom->y();  //- 1;   -1 so we don't get last scanline */
+            edge.ymin = (int)top->y();
+            edge.x    = (int)top->x();
 
             //
             // Bresenham stuff...
@@ -3288,7 +3289,7 @@ void Rasterizer::fill( const PointF* pts, size_t pointCount)
             const size_t xend   = std::max(activeEdgeTable[i].x, activeEdgeTable[i-1].x);
             const size_t xbegin   = std::min(activeEdgeTable[i].x, activeEdgeTable[i-1].x);
             const size_t length = (xend - xbegin);
-            fill(Point(origin.x(), origin.y() ), Point(xbegin, scanLine), length);
+            fill(Point((int)origin.x(), (int)origin.y() ), Point(xbegin, scanLine), length);
         }
 
         //
@@ -3352,10 +3353,10 @@ void Rasterizer::fillEllipse( const PointF& topLeftIn, const SizeF& size )
     if( (int) size.height()%2 != 0)
         errory  = 0;
 
-    const int       a      = size.width() /2;
-    const int       b      = size.height() /2;
-    const int       xc     = topLeft.x() + a;
-    const int       yc     = topLeft.y() + b;
+    const int       a      = (int)size.width() /2;
+    const int       b      = (int)size.height() /2;
+    const int       xc     = (int)topLeft.x() + a;
+    const int       yc     = (int)topLeft.y() + b;
     int             x      = 0;
     int             y      = b;
     unsigned int    width  = 1;
@@ -3424,7 +3425,7 @@ void Rasterizer::image( const PointF& toIn, const Image& image )
 	if( image.format() != image.format() )
 		throw std::logic_error( "wrong image format");
 
-  Point to( toIn.x(), toIn.y() );
+  Point to((int) toIn.x(),(int) toIn.y() );
   //source
   int xSourceBegin = 0;
   int ySourceBegin = 0;
@@ -3433,7 +3434,7 @@ void Rasterizer::image( const PointF& toIn, const Image& image )
   int xTargetBegin = to.x();
   int yTargetBegin = to.y();
 
-  if( to.x() >= _image.width() )
+  if( to.x() >= (int)_image.width() )
      return;
 
   if( to.x() < 0 )
@@ -3442,7 +3443,7 @@ void Rasterizer::image( const PointF& toIn, const Image& image )
     xTargetBegin = 0;
   }
 
-  if( to.y() > _image.height() )
+  if( to.y() > (int)_image.height() )
      return;
 
   if( to.y() < 0 )
@@ -3456,7 +3457,7 @@ void Rasterizer::image( const PointF& toIn, const Image& image )
   if( to.x()  < 0 )
     lineLength += to.x();
 
-  if( (xTargetBegin + lineLength) > _image.width()  )
+  if( (xTargetBegin + lineLength) > (int)_image.width()  )
       lineLength -= (xTargetBegin + lineLength) - _image.width() ;
  
   if( lineLength  <=  0 )
@@ -3466,7 +3467,7 @@ void Rasterizer::image( const PointF& toIn, const Image& image )
 
   int lines = image.height();   
 
-  if( endYOffset >  _image.height()  )
+  if( endYOffset >  (int)_image.height()  )
       lines = _image.height() - yTargetBegin;
 
   if( endYOffset  <  0 )
@@ -3475,9 +3476,8 @@ void Rasterizer::image( const PointF& toIn, const Image& image )
   const Pt::uint8_t* scanLineSource = image.pixel( xSourceBegin, ySourceBegin );
   Pt::uint8_t* scanLineTarget = _image.pixel( xTargetBegin, yTargetBegin );
 
-  const int targetStride = _image.width() * _image.format().pixelSize() +  _image.stride();
-  const int sourceStride = image.width() * image.format().pixelSize() +  image.stride();
-
+  const int targetStride		 = _image.width() * _image.format().pixelSize() +  _image.stride();
+  const int sourceStride		 = image.width() * image.format().pixelSize() +  image.stride();
   const std::size_t lineSize = lineLength * _image.format().pixelSize();
 
   //Render

@@ -107,8 +107,8 @@ class DrawText
             Pt::uint32_t             yOffset = 0;
             int                      dsy     = 0;
             int                      dsx     = 0;
-            const Pt::ssize_t        x2      = _clip.right();
-            const Pt::ssize_t        y2      = _clip.bottom();
+            const Pt::ssize_t        x2      = (int) _clip.right();
+            const Pt::ssize_t        y2      = (int) _clip.bottom();
 
             if( bmPitch < width )
                 bmPitch += width;
@@ -119,7 +119,7 @@ class DrawText
             if(xpos < _clip.left() ) 
             {
                 ofsx = -xpos;
-                xpos = _clip.left();
+                xpos = (int) _clip.left();
             }
             
             int ofsy = 0;
@@ -127,7 +127,7 @@ class DrawText
             if(ypos < _clip.top()) 
             {
                 ofsy = -ypos;
-                ypos = _clip.top();
+                ypos = (int)_clip.top();
             }
 
             dsy = ypos;
