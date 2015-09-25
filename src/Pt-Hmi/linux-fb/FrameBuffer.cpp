@@ -188,5 +188,10 @@ void FrameBuffer::grabImage( const Gfx::Point& pos,Gfx::Image& image)
 }
 
 
+void FrameBuffer::flush()
+{
+	ioctl(_fd, FBIO_WAITFORVSYNC, 0);
+}
+
 }} // namespace
 

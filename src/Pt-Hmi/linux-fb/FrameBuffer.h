@@ -109,6 +109,8 @@ class FrameBuffer
 			return Gfx::Size( width(), height() );
 		}
 
+		void flush();
+
 	private:
 		int								_fd;
 		fb_var_screeninfo	_screenInfo;
