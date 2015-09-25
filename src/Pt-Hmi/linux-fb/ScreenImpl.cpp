@@ -107,21 +107,43 @@ void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx
 
 
 void ScreenImpl::onInvalidate()
-{		
-  Window::onInvalidate(); 
+{	
 	Pt::System::Clock clock;
+	Pt::Timespan spanGraphics;
+	Pt::Timespan spanRender;
+
+	clock.start();
+  Window::onInvalidate(); 
 	
+	spanRender = clock.stop();
+
 	clock.start();
 
   Hmi::Painter& painter = surface().painter(); 
 	painter.flush();
 
-	Pt::Timespan span = clock.stop();
+	spanGraphics = clock.stop();
 	
-	std::stringstream ss;
-	ss<<(span.toUSecs() / 1000.0)<<"ms";
-	painter.setPen( Gfx::Pen( Gfx::Color( 0.8,0,0 )) );
-	painter.drawText( Gfx::PointF(20,20), Pt::String(ss.str().c_str() ) );
+	painter.setPen( Gfx::Pen( Gfx::Color( 1,0,0 )) );	
+	{
+		std::stringstream ss;
+		ss<<"Render: " << (spanRender.toUSecs() / 1000.0)<<" ms";
+		painter.drawText( Gfx::PointF(10,20), Pt::String(ss.str().c_str() ) );
+	}
+	
+	{
+		std::stringstream ss;
+		ss<<"Graphics out: " << (spanGraphics.toUSecs() / 1000.0)<<" ms";
+		painter.drawText( Gfx::PointF(20,20), Pt::String(ss.str().c_str() ) );
+	}
+
+	
+	{
+		std::stringstream ss;
+		ss<<"Total: " << (spanGraphics.toUSecs() + spanRender.toUSecs() / 1000.0)<<" ms";
+		painter.drawText( Gfx::PointF(20,40), Pt::String(ss.str().c_str() ) );
+	}
+		
 	painter.flush();
 
 }
