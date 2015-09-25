@@ -40,7 +40,7 @@ namespace Hmi{
   
 ScreenImpl::ScreenImpl()
 : _frameBuffer()
-, _image( Gfx::Size( (size_t)_frameBuffer.width(), (size_t)_frameBuffer.height() ) ,  _frameBuffer.format(), _frameBuffer.strideInBytes() )
+, _image( (Pt::uint8_t*)_frameBuffer.buffer(),  Gfx::Size( (size_t)_frameBuffer.width(), (size_t)_frameBuffer.height() ) ,  _frameBuffer.format(), _frameBuffer.strideInBytes() )
 , _dpi(96.0)
 , _cursorPos( 0,0 )
 {
@@ -96,7 +96,7 @@ void ScreenImpl::onInvalidate()
   
   Hmi::Painter& painter = surface().painter(); 
   painter.flush();
-  memcpy( _frameBuffer.buffer(), _image.pixel(0,0), _frameBuffer.bufferSize() );		
+//  memcpy( _frameBuffer.buffer(), _image.pixel(0,0), _frameBuffer.bufferSize() );		
 }
 
 
