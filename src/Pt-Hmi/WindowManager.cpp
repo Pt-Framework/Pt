@@ -181,7 +181,6 @@ Gfx::PointF WindowManager::renderFrame( ChildWindow* w )
       {	        
 	       Gfx::RectF  rect( pos, winSize ) ;	
 	       Gfx::Pen    pen((size_t) _borderWidth, color);
-
 	        painter.setPen( pen );
 	        painter.drawRect( rect );		
       }

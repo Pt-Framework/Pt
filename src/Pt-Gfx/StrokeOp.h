@@ -53,10 +53,10 @@ class StrokeOp : public GraphicsOp
     : _pen( pen ) 
     {
       points().push_back( rect.topLeft() );
-      points().push_back(rect.topRight() );
-      points().push_back(rect.bottomRight() );
-      points().push_back(rect.bottomLeft() );
-      points().push_back(rect.topLeft() );
+      points().push_back( rect.topRight() );
+      points().push_back( rect.bottomRight() );
+      points().push_back( rect.bottomLeft() );
+      points().push_back( rect.topLeft() );
     }
 
     StrokeOp( const StrokeOp& op )
