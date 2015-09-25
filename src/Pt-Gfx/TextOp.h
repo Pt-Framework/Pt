@@ -26,17 +26,17 @@
 #ifndef PT_GFX_TEXTEOP_H
 #define PT_GFX_TEXTEOP_H
 
-#include "RenderOp.h"
+#include "GraphicsOp.h"
 
 namespace Pt {
 namespace Gfx {
 
-class TextOp : public RenderOp
+class TextOp : public GraphicsOp
 {
   public:    
 
     TextOp( const TextOp& op )
-    :  RenderOp( op )
+    :  GraphicsOp( op )
     , _pen( op._pen )
     , _font( op._font )     
     , _text( op._text )
@@ -62,7 +62,7 @@ class TextOp : public RenderOp
         painter.drawText( points()[0], _text );        
     }
 
-    virtual RenderOp* clone()  const 
+    virtual GraphicsOp* clone()  const 
     {
        return new TextOp( *this );
     }

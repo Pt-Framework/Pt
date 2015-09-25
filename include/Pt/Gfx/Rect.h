@@ -183,9 +183,9 @@ class BasicRect
 			BasicRect<T> intersect( const BasicRect<T>& rect ) const 
 			{
 				const T l	 = std::max( this->left(), rect.left() );
-				const T t		 = std::max( this->top(), rect.top() ) ;
+				const T t	 = std::max( this->top(), rect.top() ) ;
 				const T r	 = std::min( this->right(), rect.right() );
-				const T b   = std::min( this->bottom(), rect.bottom() );
+				const T b  = std::min( this->bottom(), rect.bottom() );
 
 				return ( (r > l && b > t ) ? BasicRect<T>(l, r, t, b ) : BasicRect<T>() ) ;
 			}

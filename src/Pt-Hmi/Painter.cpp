@@ -157,11 +157,6 @@ Gfx::FontMetrics Painter::fontMetrics( const Gfx::Font& font, const Pt::String& 
   return PainterImpl::fontMetrics( font, text );
 }
 
-void Painter::drawPath( const Gfx::RenderPath& path )
-{
-  _impl->drawPath( path );
-}
-
 void Painter::setClip( const Gfx::RectF& clip )
 {
   _impl->setClip( clip );

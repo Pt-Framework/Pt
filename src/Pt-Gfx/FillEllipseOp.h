@@ -26,12 +26,12 @@
 #ifndef PT_GFX_FILLELLIPSEOP_H
 #define PT_GFX_FILLELLIPSEOP_H
 
-#include "RenderOp.h"
+#include "GraphicsOp.h"
 
 namespace Pt {
 namespace Gfx {
 
-class FillEllipseOp : public RenderOp
+class FillEllipseOp : public GraphicsOp
 {
   public:    
     
@@ -43,7 +43,7 @@ class FillEllipseOp : public RenderOp
 
 
     FillEllipseOp( const FillEllipseOp& op )
-    : RenderOp( op )
+    : GraphicsOp( op )
     , _size( op._size )
     , _brush( op._brush )
     {
@@ -55,7 +55,7 @@ class FillEllipseOp : public RenderOp
         painter.fillEllipse( points()[0], _size );
     }
 
-    virtual RenderOp* clone()  const 
+    virtual GraphicsOp* clone()  const 
     {
        return new FillEllipseOp( *this );
     }

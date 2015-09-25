@@ -26,7 +26,6 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/RenderPath.h>
 #include <windows.h>
 
 namespace Pt {
@@ -80,8 +79,6 @@ class PainterImpl : public Gfx::Painter
         void drawSurface(const Gfx::PointF& to, const PaintSurface& pm);
 		
         void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
-
-        void drawPath( const Gfx::RenderPath& path );
 
         void addFontName(const std::string& fontName);
 

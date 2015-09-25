@@ -594,13 +594,6 @@ Gfx::FontMetrics PainterImpl::fontMetrics( const Gfx::Font& font, const Pt::Stri
   return surface.painter().fontMetrics( text );
 }
 
-
-void PainterImpl::drawPath( const Gfx::RenderPath& path )
-{
-  path.render( *this );
-}
-
-
 void PainterImpl::clear( const Gfx::Color& color )
 {
  Gfx::RectF rect(Gfx::PointF(0,0), _surface->size() );   

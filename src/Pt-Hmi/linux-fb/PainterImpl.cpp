@@ -48,71 +48,65 @@ PainterImpl::~PainterImpl()
 
 void PainterImpl::drawLine( const Gfx::PointF& from, const Gfx::PointF& to )
 {    
-  _surface->path().stroke( _pen, from , to );
+  _surface->pipeline().stroke( _pen, from , to );
 }
 
 
 void PainterImpl::drawText( const Gfx::PointF& to, const Pt::String& text )
 {	  
-  _surface->path().text( to, _pen, _font, text);
+  _surface->pipeline().text( to, _pen, _font, text);
 }
 
 
 void PainterImpl::drawEllipse( const Gfx::PointF& topLeft, const Gfx::SizeF& size )
 {
- _surface->path().ellipse( _pen, topLeft, size );
+ _surface->pipeline().ellipse( _pen, topLeft, size );
 }
 
 
 void PainterImpl::drawRect( const Gfx::RectF& rect )
 {
-  _surface->path().stroke( _pen, rect );  
+  _surface->pipeline().stroke( _pen, rect );  
 }
 
 
 void PainterImpl::drawPolyline( const Gfx::PointF* pt, const size_t pointCount )
 {
-  _surface->path().stroke( _pen, pt, pointCount );  
+  _surface->pipeline().stroke( _pen, pt, pointCount );  
 }
 
 
 void PainterImpl::fillRect( const Gfx::RectF& rect )
 { 
-  _surface->path().fill( _brush, rect );
+  _surface->pipeline().fill( _brush, rect );
 }
 
 
 void PainterImpl::fillEllipse( const Gfx::PointF& topLeft, const Gfx::SizeF& size )
 {
-  _surface->path().fillEllipse( _brush, topLeft, size );
+  _surface->pipeline().fillEllipse( _brush, topLeft, size );
 }
 
 
 void PainterImpl::fillPolygon( const Gfx::PointF* pt, const size_t pointCount )
 {  
-  _surface->path().fill( _brush, pt, pointCount );
+  _surface->pipeline().fill( _brush, pt, pointCount );
 }
 
 
 void PainterImpl::drawSurface( const Gfx::PointF& to, const PaintSurface& pm )
 {
- Gfx::RenderPath path( pm.impl()->path() );
+ Gfx::GraphicsPipeline pipeline( pm.impl()->pipeline() );
   
-  path.translate( to.x(), to.y() );  
+  pipeline.translate( to.x(), to.y() );  
 
-  _surface->path().path( Gfx::RectF( to, pm.size() ),  path );
+  _surface->pipeline().addPipeline( Gfx::RectF( to, pm.size() ),  pipeline );
 }
 		
 
 void PainterImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image )
 {  
-  _surface->path().image( to, image );
-}
-
-
-void PainterImpl::drawPath( const Gfx::RenderPath& path )
-{
-  _surface->path().path(Gfx::RectF(Gfx::PointF(0,0), _surface->size() ),  path );
+  _surface->pipeline().image( to, image );
 }
 
 
@@ -120,8 +114,8 @@ void PainterImpl::flush()
 {	
  Gfx::ImagePainter painter( Application::instance().mainScreen().impl()->image() );
 
-  painter.drawPath( _surface->path() );   
-  _surface->path().clear();
+  _surface->pipeline().render( painter );
+  _surface->pipeline().clear();
 }
 
 
@@ -139,7 +133,7 @@ Gfx::FontMetrics PainterImpl::fontMetrics( const Gfx::Font& font, Pt::String tex
 
 void PainterImpl::clear( const Gfx::Color& color )
 {      
- _surface->path().clear();
+ _surface->pipeline().clear();
 
   setBrush(Gfx::Brush(color) );
   fillRect(Gfx::RectF(Gfx::PointF( 0,0 ), _surface->size() ) ); 

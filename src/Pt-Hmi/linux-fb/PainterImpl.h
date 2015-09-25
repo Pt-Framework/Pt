@@ -60,8 +60,6 @@ class PainterImpl
 		
     void drawImage( const Gfx::PointF& to, const Gfx::Image& image );
 
-    void drawPath( const Gfx::RenderPath& path );
-
     void fillRect( const Gfx::RectF& rectangle );    
 
     void fillEllipse( const Gfx::PointF& topLeft, const Gfx::SizeF& size );

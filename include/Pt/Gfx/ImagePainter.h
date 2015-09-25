@@ -30,7 +30,6 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Rasterizer.h>
-#include <Pt/Gfx/RenderPath.h>
 
 namespace Pt {
 namespace Gfx {
@@ -75,8 +74,6 @@ class PT_GFX_API ImagePainter : public Painter
     virtual void fillPolygon(const PointF* points, const size_t pointCount);
 
     virtual void drawImage(const  PointF& to, const Image& image);
-
-    virtual void drawPath( const RenderPath& path );
 
     virtual void setClip( const RectF& clip );
         

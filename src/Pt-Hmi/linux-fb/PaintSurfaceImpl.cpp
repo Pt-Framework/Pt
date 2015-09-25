@@ -47,7 +47,7 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
 void PaintSurfaceImpl::resize(const Gfx::SizeF& size)
 {	
 	_size = size;
-  _path.clear();
+  _pipeline.clear();
 }
 
 

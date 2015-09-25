@@ -23,61 +23,64 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_GFX_PATHOP_H
-#define PT_GFX_PATHOP_H
+#ifndef PT_GFX_GRAPHICSPIPELINE_H
+#define PT_GFX_GRAPHICSPIPELINE_H
 
-#include "RenderOp.h"
-#include <Pt/Gfx/RenderPath.h>
+#include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/Painter.h>
+#include <Pt/Types.h>
+#include <Pt/String.h>
+#include <vector>
 
 namespace Pt {
 namespace Gfx {
 
-class PathOp : public RenderOp
-{
-  public:        
-    PathOp( const RectF& clip, const RenderPath& path )    
-    : _path( path )
-		, _clip( clip )
+class GraphicsOp;
+
+class PT_GFX_API GraphicsPipeline
+{  
+  public:
+    GraphicsPipeline();
+
+    GraphicsPipeline( const GraphicsPipeline& p );
+
+    GraphicsPipeline& operator=( const GraphicsPipeline& p );
+
+    virtual ~GraphicsPipeline();
+  
+    void clear();
+
+    size_t size() const
     {
+      return _path.size();
     }
 
+    void addPipeline( const RectF& clip, const GraphicsPipeline& path );   
 
-    PathOp( const PathOp& op )
-    : RenderOp( op )    
-    , _path( op._path )
-		, _clip( op._clip )
-    {       
-    }
+    void text( const PointF& to, const Pen& pen, const Font& font, const Pt::String& text ); 
+   
+    void stroke( const Pen& pen, const PointF* points, size_t count );
+    
+    void stroke( const Pen& pen, const PointF& from, const PointF& to );
 
+    void stroke( const Pen& pen, const RectF& rect );
 
-    virtual void execute( Painter& painter ) const 
-    {
-      RectF orgClip   = painter.clip();        			
-			RectF interClip = orgClip.intersect( _clip );		 		
+    void fill( const Brush& brush, const PointF* points, size_t count );
+    
+    void fill( const Brush& brush, const RectF& rect );
 
-			if( interClip.isNull() )
-				return;
+    void image( const PointF& to, const Image& image );
 
-			painter.setClip( interClip );
-			painter.drawPath( _path );
-			painter.setClip( orgClip );      
-    }
+    void ellipse( const Pen& pen, const PointF& leftTop, const Gfx::SizeF& size );
+    
+    void fillEllipse( const Brush& brush, const PointF& leftTop, const Gfx::SizeF& size );
 
+    void translate( double x, double y );  
+    
+    void render( Painter& painter ) const;    
 
-    virtual RenderOp* clone()  const 
-    {
-       return new PathOp( *this );
-    }
-
-		virtual void translate( double x, double y )
-		{
-			_path.translate( x, y );						
-			_clip = RectF( PointF( _clip.topLeft().x() + x, _clip.topLeft().y() + y ), _clip.size() );			
-		}
-		
   private:
-    RenderPath _path;    
-		Gfx::RectF _clip;
+    std::vector<GraphicsOp*> _path;      
 };
 
 }}

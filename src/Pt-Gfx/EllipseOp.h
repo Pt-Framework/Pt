@@ -26,12 +26,12 @@
 #ifndef PT_GFX_ELLIPSEOP_H
 #define PT_GFX_ELLIPSEOP_H
 
-#include "RenderOp.h"
+#include "GraphicsOp.h"
 
 namespace Pt {
 namespace Gfx {
 
-class EllipseOp : public RenderOp
+class EllipseOp : public GraphicsOp
 {
   public:    
     
@@ -43,7 +43,7 @@ class EllipseOp : public RenderOp
 
 
     EllipseOp( const EllipseOp& op )
-    : RenderOp( op )
+    : GraphicsOp( op )
     , _size( op._size )
     , _pen( op._pen )
     {
@@ -55,7 +55,7 @@ class EllipseOp : public RenderOp
         painter.drawEllipse( points()[0], _size );
     }
 
-    virtual RenderOp* clone()  const 
+    virtual GraphicsOp* clone()  const 
     {
        return new EllipseOp( *this );
     }

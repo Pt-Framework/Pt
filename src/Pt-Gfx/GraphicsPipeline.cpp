@@ -23,12 +23,12 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include <Pt/Gfx/RenderPath.h>
-#include "RenderOp.h"
+#include <Pt/Gfx/GraphicsPipeline.h>
+#include "GraphicsOp.h"
 #include "ImageOp.h"
 #include "StrokeOp.h"
 #include "TextOp.h"
-#include "PathOp.h"
+#include "PipelineOp.h"
 #include "FillOp.h"
 #include "EllipseOp.h"
 #include "FillEllipseOp.h"
@@ -36,25 +36,25 @@
 namespace Pt {
 namespace Gfx {
 
-RenderPath::RenderPath()
+GraphicsPipeline::GraphicsPipeline()
 {
 }
 
 
-RenderPath::~RenderPath()
+GraphicsPipeline::~GraphicsPipeline()
 {
   clear();
 }
 
 
-RenderPath::RenderPath(const RenderPath& p)
+GraphicsPipeline::GraphicsPipeline(const GraphicsPipeline& p)
 {
   for( size_t i = 0; i < p.size(); ++i )
     _path.push_back( p._path[i]->clone() );
 }
 
 
-RenderPath& RenderPath::operator=(const RenderPath& p)
+GraphicsPipeline& GraphicsPipeline::operator=(const GraphicsPipeline& p)
 {
   clear();
 
@@ -65,7 +65,7 @@ RenderPath& RenderPath::operator=(const RenderPath& p)
 }
 
 
-void RenderPath::clear()
+void GraphicsPipeline::clear()
 {
   for( size_t i = 0; i < _path.size(); ++i )
       delete _path[i];
@@ -74,72 +74,72 @@ void RenderPath::clear()
 }
 
 
-void RenderPath::path( const RectF& clip,  const RenderPath& path )
+void GraphicsPipeline::addPipeline( const RectF& clip,  const GraphicsPipeline& path )
 {
-    _path.push_back( new PathOp(clip, path) );
+    _path.push_back( new PipelineOp(clip, path) );
 }
 
 
-void RenderPath::translate( double x, double y )
+void GraphicsPipeline::translate( double x, double y )
 { 
   for( size_t i = 0; i < _path.size(); ++i )
 		_path[i]->translate( x, y );
 }
 
 
-void RenderPath::text( const PointF& to, const Pen& pen, const Font& font, const Pt::String& text)
+void GraphicsPipeline::text( const PointF& to, const Pen& pen, const Font& font, const Pt::String& text)
 {
   _path.push_back( new TextOp(to, pen, font, text) );
 }
 
 
-void RenderPath::stroke( const Pen& pen, const PointF* points, size_t count )
+void GraphicsPipeline::stroke( const Pen& pen, const PointF* points, size_t count )
 {
   _path.push_back( new StrokeOp( pen, points, count ) );
 }
 
 
-void RenderPath::stroke( const Pen& pen, const PointF& from, const PointF& to )
+void GraphicsPipeline::stroke( const Pen& pen, const PointF& from, const PointF& to )
 {
    _path.push_back( new StrokeOp( pen, from, to ) );
 }
 
-void RenderPath::stroke( const Pen& pen, const RectF& rect )
+void GraphicsPipeline::stroke( const Pen& pen, const RectF& rect )
 {
   _path.push_back( new StrokeOp( pen, rect) );
 }
 
 
-void RenderPath::fill( const Brush& brush, const PointF* points, size_t count )
+void GraphicsPipeline::fill( const Brush& brush, const PointF* points, size_t count )
 {
   _path.push_back( new FillOp(brush, points, count) );
 }
 
-void RenderPath::fill( const Brush& brush, const RectF& rect )
+void GraphicsPipeline::fill( const Brush& brush, const RectF& rect )
 {
   _path.push_back( new FillOp( brush, rect ) );
 }
 
 
-void RenderPath::ellipse( const Pen& pen, const PointF& leftTop, const Gfx::SizeF& size )
+void GraphicsPipeline::ellipse( const Pen& pen, const PointF& leftTop, const Gfx::SizeF& size )
 {
   _path.push_back( new EllipseOp( pen, leftTop, size ) );
 }
 
 
-void RenderPath::fillEllipse( const Brush& brush, const PointF& leftTop, const Gfx::SizeF& size )
+void GraphicsPipeline::fillEllipse( const Brush& brush, const PointF& leftTop, const Gfx::SizeF& size )
 {
   _path.push_back( new FillEllipseOp( brush, leftTop, size ) );
 }
 
 
-void RenderPath::image( const PointF& to, const Image& image )
+void GraphicsPipeline::image( const PointF& to, const Image& image )
 {
   _path.push_back( new ImageOp(to, image) );
 }
 
 
-void RenderPath::render( Painter& painter ) const 
+void GraphicsPipeline::render( Painter& painter ) const 
 {
   for( size_t i = 0; i < _path.size(); ++i )
     _path[i]->execute( painter );

@@ -31,7 +31,6 @@
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/RenderPath.h>
 
 namespace Pt {
 namespace Hmi {
@@ -82,8 +81,6 @@ public:
     virtual void drawSurface(const Gfx::PointF& to, const PaintSurface& pm);
 		
     virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
-
-    virtual void drawPath( const Gfx::RenderPath& path );
 
     virtual void addFontName(const std::string& fontName);
     

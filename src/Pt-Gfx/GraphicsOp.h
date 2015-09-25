@@ -23,64 +23,57 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_GFX_RENDERPATH_H
-#define PT_GFX_RENDERPATH_H
+#ifndef PT_GFX_GRAPHICSOP_H
+#define PT_GFX_GRAPHICSOP_H
 
-#include <Pt/Gfx/Api.h>
-#include <Pt/Types.h>
-#include <Pt/String.h>
 #include <Pt/Gfx/Painter.h>
-#include <vector>
+#include <Pt/NonCopyable.h>
 
 namespace Pt {
 namespace Gfx {
 
-class RenderOp;
-
-class PT_GFX_API RenderPath
-{  
-  public:
-    RenderPath();
-
-    RenderPath( const RenderPath& p );
-
-    RenderPath& operator=( const RenderPath& p );
-
-    virtual ~RenderPath();
-  
-    void clear();
-
-    size_t size() const
+class GraphicsOp : private Pt::NonCopyable
+{
+  public:    
+    virtual ~GraphicsOp()
     {
-      return _path.size();
     }
 
-    void path( const RectF& clip, const RenderPath& path );   
+    virtual void execute( Painter& painter ) const = 0;
 
-    void text( const PointF& to, const Pen& pen, const Font& font, const Pt::String& text ); 
-   
-    void stroke( const Pen& pen, const PointF* points, size_t count );
+    virtual GraphicsOp* clone() const = 0;
+
+    const std::vector<PointF>& points() const
+    {
+        return _points;
+    }
+
     
-    void stroke( const Pen& pen, const PointF& from, const PointF& to );
+    std::vector<PointF>& points()
+    {
+        return _points;
+    }
 
-    void stroke( const Pen& pen, const RectF& rect );
+		virtual void translate( double x, double y )
+		{
+			for( size_t i = 0; i < _points.size(); ++ i)
+			{
+				_points[i].addX( x );
+				_points[i].addY( y );
+			}				
+		}
 
-    void fill( const Brush& brush, const PointF* points, size_t count );
-    
-    void fill( const Brush& brush, const RectF& rect );
+  protected:
+    GraphicsOp()
+    {
+    }  
 
-    void image( const PointF& to, const Image& image );
+    GraphicsOp(const GraphicsOp& op)
+    : _points( op._points )
+    {         
+    }  
 
-    void ellipse( const Pen& pen, const PointF& leftTop, const Gfx::SizeF& size );
-    
-    void fillEllipse( const Brush& brush, const PointF& leftTop, const Gfx::SizeF& size );
-
-    void translate( double x, double y );  
-    
-    void render( Painter& painter ) const;    
-
-  private:
-    std::vector<RenderOp*> _path;      
+    std::vector<PointF> _points;
 };
 
 }}

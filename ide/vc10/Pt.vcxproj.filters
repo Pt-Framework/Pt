@@ -1209,15 +1209,6 @@
     <ClInclude Include="..\..\src\Pt-Gfx\Edge.h">
       <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\EllipseOp.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\FillEllipseOp.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\FillOp.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Image.h">
       <Filter>Pt-Gfx\Imaging</Filter>
     </ClInclude>
@@ -1227,16 +1218,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ImageReader.h">
       <Filter>Pt-Gfx\Imaging</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\ImagePainter.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\ImageOp.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Rasterizer.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\RenderOp.h">
       <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb888Format.h">
@@ -1248,25 +1230,43 @@
     <ClInclude Include="..\..\src\Pt-Gfx\Vera.h">
       <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\TextOp.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\StrokeOp.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\Span.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\PathOp.h">
       <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\ClipLine.h">
       <Filter>Pt-Gfx\Cliping</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\RenderPath.h">
+    <ClInclude Include="..\..\src\Pt-Gfx\FreeType.h">
       <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\FreeType.h">
+    <ClInclude Include="..\..\include\Pt\Gfx\ImagePainter.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\GraphicsPipeline.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\EllipseOp.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\FillEllipseOp.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\FillOp.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\GraphicsOp.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\ImageOp.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\PipelineOp.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\StrokeOp.h">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\TextOp.h">
       <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2316,13 +2316,7 @@
     <ClCompile Include="..\..\src\Pt-Gfx\ImageReader.cpp">
       <Filter>Pt-Gfx\Imaging</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter.cpp">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer.cpp">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\RenderPath.cpp">
       <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\Rgb888Format.cpp">
@@ -2330,6 +2324,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\Rgb565Format.cpp">
       <Filter>Pt-Gfx\Imaging</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\GraphicsPipeline.cpp">
+      <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -27,7 +27,7 @@ SharedLibrary Pt-Gfx : Color.cpp
                       FreeType.cpp
                       ClipPolygon.cpp
                       ImageReader.cpp
-                      RenderPath.cpp
+                      GraphicsPipeline.cpp
                       Rasterizer.cpp
 			              ;
 

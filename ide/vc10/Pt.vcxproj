@@ -40,6 +40,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Exception.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Font.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\FontMetrics.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\GraphicsPipeline.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Image.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImagePainter.h" />
@@ -49,7 +50,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Point.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rasterizer.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rect.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\RenderPath.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb565Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb888Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Size.h" />
@@ -281,12 +281,12 @@
     <ClInclude Include="..\..\src\Pt-Gfx\FillEllipseOp.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\FillOp.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\FreeType.h" />
+    <ClInclude Include="..\..\src\Pt-Gfx\GraphicsOp.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\ImageOp.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\LineEdge.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\LineFace.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\LineSlope.h" />
-    <ClInclude Include="..\..\src\Pt-Gfx\PathOp.h" />
-    <ClInclude Include="..\..\src\Pt-Gfx\RenderOp.h" />
+    <ClInclude Include="..\..\src\Pt-Gfx\PipelineOp.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Span.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\StrokeOp.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\TextOp.h" />
@@ -451,13 +451,13 @@
     <ClCompile Include="..\..\src\Pt-Gfx\Font.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\FontMetrics.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\FreeType.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\GraphicsPipeline.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Image.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ImageFormat.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ImageReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Pen.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\RenderPath.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rgb565Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rgb888Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp" />

@@ -169,12 +169,6 @@ FontMetrics ImagePainter::fontMetrics( const Font& font, const Pt::String& text 
 }
 
 
-void ImagePainter::drawPath( const RenderPath& path )
-{  
-   path.render( *this );
-}
-
-
 void ImagePainter::setClip( const RectF& clip )
 {
   _rasterizer.setClip( clip );

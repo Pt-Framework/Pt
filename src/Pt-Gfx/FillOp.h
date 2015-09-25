@@ -26,12 +26,12 @@
 #ifndef PT_GFX_FILLOP_H
 #define PT_GFX_FILLOP_H
 
-#include "RenderOp.h"
+#include "GraphicsOp.h"
 
 namespace Pt {
 namespace Gfx {
 
-class FillOp : public RenderOp
+class FillOp : public GraphicsOp
 {
   public:    
     
@@ -51,7 +51,7 @@ class FillOp : public RenderOp
     }
 
     FillOp( const FillOp& op )
-    : RenderOp( op )
+    : GraphicsOp( op )
     , _brush( op._brush )
     {
     }
@@ -62,7 +62,7 @@ class FillOp : public RenderOp
         painter.fillPolygon( &points()[0], points().size() );
     }
 
-    virtual RenderOp* clone()  const 
+    virtual GraphicsOp* clone()  const 
     {
        return new FillOp( *this );
     }

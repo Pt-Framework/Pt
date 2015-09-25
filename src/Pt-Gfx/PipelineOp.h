@@ -23,57 +23,61 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_GFX_RENDEROP_H
-#define PT_GFX_RENDEROP_H
+#ifndef PT_GFX_PIPELINEOP_H
+#define PT_GFX_PIPELINEOP_H
 
-#include <Pt/Gfx/Painter.h>
-#include <Pt/NonCopyable.h>
+#include "GraphicsOp.h"
+#include <Pt/Gfx/GraphicsPipeline.h>
 
 namespace Pt {
 namespace Gfx {
 
-class RenderOp : private Pt::NonCopyable
+class PipelineOp : public GraphicsOp
 {
-  public:    
-    virtual ~RenderOp()
+  public:        
+    PipelineOp( const RectF& clip, const GraphicsPipeline& ops )    
+    : _ops( ops )
+		, _clip( clip )
     {
     }
 
-    virtual void execute( Painter& painter ) const = 0;
 
-    virtual RenderOp* clone() const = 0;
-
-    const std::vector<PointF>& points() const
-    {
-        return _points;
+    PipelineOp( const PipelineOp& op )
+    : GraphicsOp( op )    
+    , _ops( op._ops )
+		, _clip( op._clip )
+    {       
     }
 
-    
-    std::vector<PointF>& points()
+
+    virtual void execute( Painter& painter ) const 
     {
-        return _points;
+      RectF orgClip   = painter.clip();        			
+			RectF interClip = orgClip.intersect( _clip );		 		
+
+			if( interClip.isNull() )
+				return;
+
+			painter.setClip( interClip );
+			_ops.render( painter );
+			painter.setClip( orgClip );      
+    }
+
+
+    virtual GraphicsOp* clone()  const 
+    {
+       return new PipelineOp( *this );
     }
 
 		virtual void translate( double x, double y )
 		{
-			for( size_t i = 0; i < _points.size(); ++ i)
-			{
-				_points[i].addX( x );
-				_points[i].addY( y );
-			}				
+			_ops.translate( x, y );						
+			_clip = RectF( PointF( _clip.topLeft().x() + x, _clip.topLeft().y() + y ), _clip.size() );			
 		}
-
-  protected:
-    RenderOp()
-    {
-    }  
-
-    RenderOp(const RenderOp& op)
-    : _points( op._points )
-    {         
-    }  
-
-    std::vector<PointF> _points;
+		
+  private:
+    GraphicsPipeline _ops;    
+		Gfx::RectF _clip;
 };
 
 }}

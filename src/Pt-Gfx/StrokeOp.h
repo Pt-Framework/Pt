@@ -26,12 +26,12 @@
 #ifndef PT_GFX_STROKEOP_H
 #define PT_GFX_STROKEOP_H
 
-#include "RenderOp.h"
+#include "GraphicsOp.h"
 
 namespace Pt {
 namespace Gfx {
 
-class StrokeOp : public RenderOp
+class StrokeOp : public GraphicsOp
 {
   public:    
     
@@ -60,7 +60,7 @@ class StrokeOp : public RenderOp
     }
 
     StrokeOp( const StrokeOp& op )
-    : RenderOp( op )
+    : GraphicsOp( op )
     , _pen( op._pen )
     {
     }
@@ -74,7 +74,7 @@ class StrokeOp : public RenderOp
         painter.drawPolyline( &points()[0], points().size() );
     }
 
-    virtual RenderOp* clone()  const 
+    virtual GraphicsOp* clone()  const 
     {
        return new StrokeOp( *this );
     }

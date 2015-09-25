@@ -26,13 +26,13 @@
 #ifndef PT_GFX_IMAGEOP_H
 #define PT_GFX_IMAGEOP_H
 
-#include "RenderOp.h"
+#include "GraphicsOp.h"
 #include <Pt/Gfx/Painter.h>
 
 namespace Pt {
 namespace Gfx {
 
-class ImageOp : public RenderOp
+class ImageOp : public GraphicsOp
 {
   public:        
     ImageOp( const PointF& to, const Image& image )
@@ -42,7 +42,7 @@ class ImageOp : public RenderOp
     }
 
     ImageOp( const ImageOp& op )
-    : RenderOp( op )
+    : GraphicsOp( op )
     , _image( op._image )
     {
     }
@@ -54,7 +54,7 @@ class ImageOp : public RenderOp
     }
 
 
-    virtual RenderOp* clone()  const 
+    virtual GraphicsOp* clone()  const 
     {
        return new ImageOp(*this);
     }

@@ -33,12 +33,10 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/RenderPath.h>
+#include <Pt/Gfx/GraphicsPipeline.h>
 
 namespace Pt{
 namespace Hmi{
-
-class RenderPath;
 
 class PaintSurfaceImpl
 {
@@ -51,19 +49,19 @@ class PaintSurfaceImpl
 
 	 Gfx::SizeF size() const;
 
-    const Gfx::RenderPath& path() const
+    const Gfx::GraphicsPipeline& pipeline() const
     {
-        return _path;
+        return _pipeline;
     }
 
-   Gfx::RenderPath& path()
+   Gfx::GraphicsPipeline& pipeline()
     {
-        return _path;
+        return _pipeline;
     }
 
   private:       
 		Gfx::SizeF			 _size;
-   Gfx::RenderPath _path;
+    Gfx::GraphicsPipeline _pipeline;
 };
 
 }}
