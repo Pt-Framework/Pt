@@ -1933,7 +1933,7 @@ void Rasterizer::clipSpan( int& xpos, int& ypos, size_t& length )
 	{
 			if(  static_cast<ssize_t>(length) > - xpos )
 			{
-					length += xpos;
+					length -= (_clip.left() - xpos );
 					xpos = (int)_clip.left();
 			}
 			else
