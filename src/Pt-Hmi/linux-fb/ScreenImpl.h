@@ -135,6 +135,20 @@ class ScreenImpl : public Window
 		virtual void onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent );
 
 	private:
+    enum BlitOp
+		{
+			CopyOp,
+			AndOp,
+			XorOp
+		};
+
+		void grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx::Image& image);
+ 
+    void bitBlit( const Pt::uint8_t* , size_t width, size_t height, const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op );
+
+    void bitBlit( const Gfx::Image& image, Pt::uint8_t* buffer );
+
+	private:
     FrameBuffer _frameBuffer;  
 		Gfx::Image	  _cursorBackground;
 		Gfx::Point		_cursorPos;    

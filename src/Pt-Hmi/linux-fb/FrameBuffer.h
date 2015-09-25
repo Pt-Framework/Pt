@@ -46,13 +46,6 @@ namespace Hmi {
 class FrameBuffer
 {
   public:
-    enum BlitOp
-		{
-			CopyOp,
-			AndOp,
-			XorOp
-		};
-
     FrameBuffer();
 
     virtual ~FrameBuffer();
@@ -71,18 +64,17 @@ class FrameBuffer
     size_t depth() const
     {
        return _screenInfo.bits_per_pixel;
-    }
-
-    void bitBlit( const Pt::uint8_t* , size_t width, size_t height, const Gfx::Point& pos, BlitOp op );
-
-    void bitBlit( const Gfx::Image& image );
-    
-    void grabImage( const Gfx::Point& pos,Gfx::Image& image);
+    }    
     
     size_t strideInBytes() const
     {
         return  _fixedInfo.line_length - ( width() *  depth() /8  );
     }
+
+		size_t lineLength() const
+		{
+			return _fixedInfo.line_length;
+		}
 
     const Gfx::ImageFormat& format() const 
     {
@@ -108,8 +100,7 @@ class FrameBuffer
 		{
 			return Gfx::Size( width(), height() );
 		}
-
-		void flush();
+		
 
 	private:
 		int								_fd;

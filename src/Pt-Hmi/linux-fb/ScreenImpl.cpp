@@ -40,7 +40,7 @@ namespace Hmi{
   
 ScreenImpl::ScreenImpl()
 : _frameBuffer()
-, _image( (Pt::uint8_t*)_frameBuffer.buffer(),  Gfx::Size( (size_t)_frameBuffer.width(), (size_t)_frameBuffer.height() ) ,  _frameBuffer.format(), _frameBuffer.strideInBytes() )
+, _image( Gfx::Size( (size_t)_frameBuffer.width(), (size_t)_frameBuffer.height() ) ,  _frameBuffer.format(), _frameBuffer.strideInBytes() )
 , _dpi(96.0)
 , _cursorPos( 0,0 )
 {
@@ -68,7 +68,7 @@ void ScreenImpl::init()
 void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 {		
 	if( !_cursorBackground.empty() )
-		_frameBuffer.bitBlit( _cursorBackground.pixel(0,0), _cursorBackground.width(), _cursorBackground.height(), _cursorPos, FrameBuffer::CopyOp );
+		bitBlit( _cursorBackground.pixel(0,0), _cursorBackground.width(), _cursorBackground.height(), _cursorPos,  _image.pixel(0,0), CopyOp );
 
 	_windowManager.pointerInput( mouseEvent );	
 
@@ -80,24 +80,38 @@ void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 	if( (_cursorBackground.width() != Cursor.get().width())  || (_cursorBackground.height() !=  Cursor.get().height()) )
 		_cursorBackground.resize(Gfx::Size( Cursor.get().width(),Cursor.get().height()), _frameBuffer.format() ); 
 		
+  grabImage( _image.pixel(0,0), _cursorPos, _cursorBackground );
 
-  _frameBuffer.grabImage( _cursorPos, _cursorBackground );
+  bitBlit( &Cursor.get().andRgb888()[0], Cursor.get().width(), Cursor.get().height(), _cursorPos, _image.pixel(0,0), AndOp );
 
-  _frameBuffer.bitBlit( &Cursor.get().andRgb888()[0], Cursor.get().width(), Cursor.get().height(), _cursorPos, FrameBuffer::AndOp );
+  bitBlit( &Cursor.get().xorRgb888()[0], Cursor.get().width(), Cursor.get().height(), _cursorPos, _image.pixel(0,0), XorOp ); 
 
-  _frameBuffer.bitBlit( &Cursor.get().xorRgb888()[0], Cursor.get().width(), Cursor.get().height(), _cursorPos, FrameBuffer::XorOp ); 
+	 memcpy( _frameBuffer.buffer(), _image.pixel(0,0), _frameBuffer.bufferSize() );			
+}
 
+
+void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx::Image& image)
+{	
+	const size_t pixelSizeInByte = _frameBuffer.depth() / 8;		
+	const Gfx::Size& size= image.size();
+	const size_t yMax = std::min<size_t>(pos.y() + size.height(), height() );	
+	const size_t widthInPixel = ((pos.x() + size.width())  < width() ?  size.width() : ( width()  - pos.x() ) );
+	const size_t widthInByte = widthInPixel * pixelSizeInByte;			
+	
+	for( size_t y = pos.y(); y < yMax; ++y )
+	{
+		const size_t lineOffsetBuffer  = y * _frameBuffer.lineLength() + (pos.x() * pixelSizeInByte);
+		memcpy( image.pixel(0,y - pos.y()), &buffer[lineOffsetBuffer], widthInByte );
+	}
 }
 
 
 void ScreenImpl::onInvalidate()
 {		
   Window::onInvalidate(); 
- _frameBuffer.flush();  
-  Hmi::Painter& painter = surface().painter(); 
-  painter.flush();
-//  memcpy( _frameBuffer.buffer(), _image.pixel(0,0), _frameBuffer.bufferSize() );		
 
+  Hmi::Painter& painter = surface().painter(); 
+	painter.flush();
 }
 
 
@@ -106,4 +120,65 @@ void ScreenImpl::setCursor( const Hmi::Cursor* cursor )
 	Cursor = (cursor == 0 ? Hmi::Cursor::defaultCursor() : *cursor );	
 }
 
+
+void ScreenImpl::bitBlit( const Gfx::Image& image, Pt::uint8_t* buffer )
+{
+  const size_t imageSize = (image.width() * image.format().pixelSize() + image.stride()) * image.height();
+
+  memcpy( buffer , image.pixel( 0,0 ), std::min( _frameBuffer.bufferSize(), imageSize ) );  
+}
+
+
+void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op )
+{
+	static const size_t planePixelSize = 4;
+	const size_t bufferPixelSize = _frameBuffer.depth() / 8;
+	const size_t bufferWidth  = std::min<size_t>(  pos.x() + w, width() ); 
+    const size_t bufferHeight = std::min<size_t>(  pos.y() + h, height() ); 
+	size_t yCursor = 0;
+	size_t xCursor = 0;	
+
+	for( size_t yBuffer = pos.y(); yBuffer < bufferHeight; ++yBuffer, ++yCursor )
+	{
+		const size_t lineOffsetBuffer  = yBuffer * _frameBuffer.lineLength();
+		const size_t lineOffsetCursor  = yCursor * (w * planePixelSize);
+		
+		xCursor = 0;
+
+		for( size_t xBuffer = pos.x(); xBuffer < bufferWidth; ++xBuffer, ++xCursor  )
+		{			
+			Pt::uint8_t* pointerBuffer = &((Pt::uint8_t*)buffer)[lineOffsetBuffer + (xBuffer * bufferPixelSize)];
+			const Pt::uint8_t* pointerCursor = &plane[lineOffsetCursor + (xCursor * planePixelSize)];
+
+			switch( _frameBuffer.depth() )
+			{
+				case 32:
+				{
+					Pt::uint32_t* pixelBuffer = (Pt::uint32_t*) pointerBuffer;
+					const Pt::uint32_t* pixelCursor = (const Pt::uint32_t*) pointerCursor;
+
+					switch( op )											
+					{
+						case AndOp:
+							*pixelBuffer &= *pixelCursor;
+						break;
+
+						case XorOp:
+							*pixelBuffer ^= *pixelCursor;
+						break;
+
+						case CopyOp://ToDo::optimize this with memcpy
+							*pixelBuffer = *pixelCursor;
+						break;
+					}
+				}
+				break;
+
+				case 16:
+          //TODO:
+				break;
+			}
+		}
+	}  
+}
 }}
