@@ -93,11 +93,11 @@ void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 void ScreenImpl::onInvalidate()
 {		
   Window::onInvalidate(); 
-  
+ _frameBuffer.flush();  
   Hmi::Painter& painter = surface().painter(); 
   painter.flush();
 //  memcpy( _frameBuffer.buffer(), _image.pixel(0,0), _frameBuffer.bufferSize() );		
-	_frameBuffer.flush();
+
 }
 
 
