@@ -124,11 +124,11 @@ void ScreenImpl::onInvalidate()
 
 	spanGraphics = clock.stop();
 	
-	painter.setPen( Gfx::Pen( Gfx::Color( 1,0,0 )) );	
+	painter.setPen( Gfx::Pen( Gfx::Color( 0,0,0 )) );	
 	{
 		std::stringstream ss;
 		ss<<"Render: " << (spanRender.toUSecs() / 1000.0)<<" ms";
-		painter.drawText( Gfx::PointF(10,10), Pt::String(ss.str().c_str() ) );
+		painter.drawText( Gfx::PointF(20,10), Pt::String(ss.str().c_str() ) );
 	}
 	
 	{
