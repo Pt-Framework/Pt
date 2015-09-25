@@ -32,7 +32,6 @@
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/FontMetrics.h>
-#include <Pt/Gfx/RenderPath.h>
 
 namespace Pt {
 namespace Hmi {
