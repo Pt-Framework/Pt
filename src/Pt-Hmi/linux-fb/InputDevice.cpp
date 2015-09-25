@@ -70,6 +70,8 @@ bool InputDevice::onRun()
 			return false;
 	}
 
+    bool hasPointerEvent = false;
+
 	for( unsigned i = 0; i < bytes / sizeof(input_event); i++ )
 	{
 		struct input_event& ev = evts[i];
@@ -168,8 +170,8 @@ bool InputDevice::onRun()
 				if( _mouseEvent.y() >= Application::instance().mainScreen().height() )
 					_mouseEvent.setY( Application::instance().mainScreen().height() - 1 );
 
-						                
-				Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );				                				
+                hasPointerEvent = true;						                
+				//Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );				                				
 			}
 			break;
 
@@ -201,12 +203,15 @@ bool InputDevice::onRun()
 					break;
 				}
 				
-
-				Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );
+                hasPointerEvent = true;	
+				//Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );
 			}
 			break;  
 		}		
 	}
+
+    if(hasPointerEvent)
+        Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );;
 
 	return true;
 }
