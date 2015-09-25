@@ -2207,7 +2207,7 @@ void Rasterizer::fillRect(int x, int y, unsigned int w, unsigned int h)
     Pt::ssize_t yend = 0;
 
     if( (y + (int) h) > 0 )
-        yend = std::min<int>( _image.height(), y + h ) ;
+        yend = std::min<int>( _clip.height(), y + h ) ;
 
     for( ; ypos < yend; ypos++ )
         stroke(x, ypos, w );
@@ -3222,13 +3222,13 @@ void Rasterizer::fill( const PointF* pts, size_t pointCount)
         // Omit horizontal edges, add others to global edge table. The GET
         // is sorted by primarily by the edges ymin and secondarily by
         // the x value of the edge
-        //
+        
         if( top->y() != bottom->y() )
         {
             const int dy   = (int)bottom->y() - (int)top->y();
             const int dx   = (int)bottom->x() - (int) top->x();
 
-            edge.ymax = (int)bottom->y();  //- 1;   -1 so we don't get last scanline */
+            edge.ymax = (int)bottom->y();//   -1 so we don't get last scanline */
             edge.ymin = (int)top->y();
             edge.x    = (int)top->x();
 
@@ -3288,7 +3288,7 @@ void Rasterizer::fill( const PointF* pts, size_t pointCount)
         {
             const size_t xend   = std::max(activeEdgeTable[i].x, activeEdgeTable[i-1].x);
             const size_t xbegin   = std::min(activeEdgeTable[i].x, activeEdgeTable[i-1].x);
-            const size_t length = (xend - xbegin);
+            const size_t length = xend - xbegin;
             fill(Point((int)origin.x(), (int)origin.y() ), Point(xbegin, scanLine), length);
         }
 
