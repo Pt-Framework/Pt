@@ -128,7 +128,7 @@ void ScreenImpl::onInvalidate()
 	{
 		std::stringstream ss;
 		ss<<"Render: " << (spanRender.toUSecs() / 1000.0)<<" ms";
-		painter.drawText( Gfx::PointF(10,20), Pt::String(ss.str().c_str() ) );
+		painter.drawText( Gfx::PointF(10,10), Pt::String(ss.str().c_str() ) );
 	}
 	
 	{
