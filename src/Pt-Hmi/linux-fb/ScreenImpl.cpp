@@ -119,7 +119,7 @@ void ScreenImpl::onInvalidate()
 	Pt::Timespan span = clock.stop();
 	
 	std::stringstream ss;
-	ss<<(span.toUSecs() / 1000.0);
+	ss<<(span.toUSecs() / 1000.0)<<"ms";
 	painter.setPen( Gfx::Pen( Gfx::Color( 0.8,0,0 )) );
 	painter.drawText( Gfx::PointF(20,20), Pt::String(ss.str().c_str() ) );
 	painter.flush();
