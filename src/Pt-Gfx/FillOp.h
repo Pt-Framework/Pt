@@ -58,6 +58,9 @@ class FillOp : public GraphicsOp
 
     virtual void execute( Painter& painter ) const 
     {
+	   if( points().empty() )
+			return;		
+
         painter.setBrush( _brush );
         painter.fillPolygon( &points()[0], points().size() );
     }
