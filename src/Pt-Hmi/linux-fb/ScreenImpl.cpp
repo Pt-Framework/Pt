@@ -109,9 +109,20 @@ void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx
 void ScreenImpl::onInvalidate()
 {		
   Window::onInvalidate(); 
+	Pt::System::Clock clock;
+	
+	clock.start();
 
   Hmi::Painter& painter = surface().painter(); 
 	painter.flush();
+
+	Pt::Timespan span = clock.stop();
+	
+	std::stringstream ss;
+	ss<<(span.toUSecs() / 1000.0);
+	painter.drawText( Gfx::PointF(0,20), Pt::String(ss.str().c_str() ) );
+	painter.flush();
+
 }
 
 
