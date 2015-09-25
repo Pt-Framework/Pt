@@ -47,7 +47,7 @@ class ActiveEdgeTable : public std::vector<Edge>
         {  push_back( edge ); }
 
 
-        inline void update( ssize_t ypos )
+        inline void update( int ypos )
         {
             for( size_t i = 0; i < size(); i++ )
             {

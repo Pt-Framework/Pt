@@ -54,7 +54,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::init()
 {	
-
 	{//Icon
 		std::stringstream memoryStream;
 		

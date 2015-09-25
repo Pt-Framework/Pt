@@ -53,8 +53,8 @@ class Edge
             return ymin < edge.ymin;
         }
 
-        Pt::ssize_t ymin;  // minimum y of the edge
-        Pt::ssize_t ymax;  // maxinum y of the edge
+        int ymin;  // minimum y of the edge
+        int ymax;  // maxinum y of the edge
         int x;             // current x value
         int m, m1;         // slope and slope + 1
         int incr1, incr2;  // error increments
