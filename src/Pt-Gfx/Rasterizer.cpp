@@ -111,7 +111,7 @@ inline void drawGlyph( Image& image, const Color& color, int xpos, int ypos, int
 
   dsy = ypos;
 
-  for( Pt::int32_t y = ofsy; y < height; ++y, ++dsy )
+  for( int y = ofsy; y < height; ++y, ++dsy )
   {
     yOffset = y * bmPitch;
 
@@ -731,7 +731,7 @@ void Rasterizer::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, 
         if( dashIndex == numInDashList )
             dashIndex = 0;
 
-        dashRemain = (int)(dash[dashIndex]); // whole new dash now `remains'
+        dashRemain = dash[dashIndex]; // whole new dash now `remains'
 
         // Compute color of next dash
         paintType = (dashNum & 1) ? 0 : 1 + ((dashNum / 2) % (numPixels - 1));
@@ -967,7 +967,7 @@ void Rasterizer::drawSegment( PointF from, PointF to, bool projectLeft, bool pro
 
         dx = lw;
 
-        fillRect(  x, y,( int)dx, ( int)dy );
+        fillRect(  x, y, dx, dy );
     }
     else
     { // General case: segment is neither horizontal nor vertical.
@@ -1862,7 +1862,7 @@ void Rasterizer::stroke( int xpos, int ypos, int length )
         
 	clipSpan( xpos, ypos, length );
 
-	while( length )
+	while( length > 0  )
 	{
 			const int fillLength = std::min( length, (int) colorBuffer.width() );
 
