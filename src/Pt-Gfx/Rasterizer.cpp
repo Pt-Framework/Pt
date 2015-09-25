@@ -2206,10 +2206,8 @@ void Rasterizer::fillRect(int x, int y,  int w,  int h)
     int ypos = std::max( 0, y );
     int yend = 0;
 
-		std::clog<<"c: "<< _clip.height()<< " I: " << _image.height()<< std::endl;
-
     if( (y + h) > 0 )
-        yend = std::min<int>( _clip.height(), y + h ) ;
+        yend = std::min<int>( _clip.bottom(), y + h ) ;
 
     for( ; ypos < yend; ypos++ )
         stroke(x, ypos, w );
