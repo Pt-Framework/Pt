@@ -138,17 +138,17 @@ class BasicRect
 
       const BasicPoint<T> topRight() const
       { 
-				return BasicPoint<T>(this->x() + this->width(), this->y()); 
+				return BasicPoint<T>(this->x() + this->width() -1 , this->y()); 
 			}
 
       const BasicPoint<T> bottomLeft() const
       { 
-				return BasicPoint<T>(this->x(), this->y() + this->height()); 
+				return BasicPoint<T>(this->x(), this->y() + this->height() -1); 
 			}
 
       const BasicPoint<T> bottomRight() const
       { 
-				return BasicPoint<T>(this->x() + this->width(), this->y() + this->height()); 
+				return BasicPoint<T>(this->x() + this->width() -1, this->y() + this->height() - 1); 
 			}
 
       BasicRect<T>& operator = (const BasicRect<T>& val)

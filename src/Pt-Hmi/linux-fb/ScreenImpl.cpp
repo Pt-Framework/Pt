@@ -95,9 +95,7 @@ void ScreenImpl::onInvalidate()
   Window::onInvalidate(); 
   
   Hmi::Painter& painter = surface().painter();
-	painter.setClip( Gfx::RectF( Gfx::PointF(0,0), Gfx::SizeF( _image.width(), _image.height() ) ) );
   painter.flush();
-
   memcpy( _frameBuffer.buffer(), _image.pixel(0,0), _frameBuffer.bufferSize() );		
 }
 
