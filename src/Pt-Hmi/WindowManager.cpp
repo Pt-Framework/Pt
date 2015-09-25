@@ -200,8 +200,8 @@ Gfx::PointF WindowManager::renderFrame( ChildWindow* w )
 
   if( w->Border.get() != WindowBorder::NoBorder )
   {
-   Gfx::PointF  to( pos.x() + _borderWidth/2, pos.y() + _borderWidth/2 ); 
-   Gfx::SizeF   size =Gfx::SizeF( winSize.width() - _borderWidth, _titleBarPanel.Size.get().height() );
+		Gfx::PointF  to( pos.x() + _borderWidth/2, pos.y() + _borderWidth/2 ); 
+		Gfx::SizeF   size =Gfx::SizeF( winSize.width() - _borderWidth, _titleBarPanel.Size.get().height() );
     		
     _closeButton.BorderColor =Gfx::Color(0.5f,0.5f,0.5f);
     _minButton.BorderColor = _closeButton.BorderColor.get();

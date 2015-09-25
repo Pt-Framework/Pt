@@ -158,7 +158,7 @@ inline void addPoint(int xx, int yy, PointF** ppt,  int** pwidth, int& numSpans,
     else if (xdelta > 0)
     {
        int widthcurr = **pwidth;
-      (**pwidth) = std::max( widthcurr, ( int)(1 + xdelta));
+      (**pwidth) = std::max( widthcurr, (1 + xdelta));
     }
   }
   else
@@ -1945,7 +1945,7 @@ void Rasterizer::clipSpan( int& xpos, int& ypos, int& length )
 	}
 
 	if( (xpos + length) > _clip.right() )
-		length =  ((int) _clip.right() - xpos );
+		length =  ((int) _clip.right() - xpos  + 1);
 }
 
 
@@ -2204,10 +2204,11 @@ int Rasterizer::buildLineEdge( double x0, double y0, double k, int dx, int dy, i
 void Rasterizer::fillRect(int x, int y,  int w,  int h)
 {
     int ypos = std::max( 0, y );
-
     int yend = 0;
 
-    if( (y + (int) h) > 0 )
+		std::clog<<"c: "<< _clip.height()<< " I: " << _image.height()<< std::endl;
+
+    if( (y + h) > 0 )
         yend = std::min<int>( _clip.height(), y + h ) ;
 
     for( ; ypos < yend; ypos++ )
