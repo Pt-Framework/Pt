@@ -140,7 +140,7 @@ void ScreenImpl::onInvalidate()
 	
 	{
 		std::stringstream ss;
-		ss<<"Total: " << (spanGraphics.toUSecs() + spanRender.toUSecs() / 1000.0)<<" ms";
+		ss<<"Total: " << ((spanGraphics.toUSecs() + spanRender.toUSecs()) / 1000.0)<<" ms";
 		painter.drawText( Gfx::PointF(20,55), Pt::String(ss.str().c_str() ) );
 	}
 		
