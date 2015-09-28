@@ -49,6 +49,43 @@ EchoOption PT_INSTALL_LIBDIR : "Pt Library Install Dir" ;
 Configure PT_INSTALL_LIBDIR ;
 
 #############################################################################
+# zlib compression library
+#############################################################################
+
+if ! --with-zlib in $(ARGV)
+{
+    if ! $(WITH_ZLIB)
+    {
+        WITH_ZLIB = [ CheckBuildC++ "#include <zlib.h>"
+                                    "int main() {"
+                                    "z_stream zstream;"
+                                    "return deflateInit(&zstream, Z_DEFAULT_COMPRESSION); }"
+                                    : [ FIncludes $(ZLIB_INCLUDES) ]
+                                    : "-lz" ] ;
+
+        if $(WITH_ZLIB)
+        {
+            ZLIB_LINKLIBS = -lz ;
+        }
+    }
+}
+
+if ! $(WITH_ZLIB)
+{   
+    WITH_PT_ZLIB = "yes" ;
+    ZLIB_INCLUDES = [ FDirName $(PT_TOP) src zlib include ] ;
+}
+
+Configure WITH_PT_ZLIB ;
+EchoOption --with-zlib : "Builtin zlib library" : $(WITH_PT_ZLIB:E="no") ;
+
+Configure ZLIB_INCLUDES ;
+EchoOption ZLIB_INCLUDES : "ZLib includes" ;
+
+Configure ZLIB_LINKLIBS ;
+EchoOption ZLIB_LINKLIBS : "ZLib libs" ;
+
+#############################################################################
 # Atomic operations
 #############################################################################
 

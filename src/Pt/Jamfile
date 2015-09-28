@@ -3,6 +3,11 @@ SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_API_EXPORT ] [ FDefines $(PT_ATOMICS_DEFINES) ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt ;
 
+if $(ZLIB_INCLUDES)
+{
+    SubDirHdrs $(ZLIB_INCLUDES) ;
+}
+
 SharedLibrary Pt : Atomicity.cpp
                    Connection.cpp
                    Connectable.cpp
@@ -30,10 +35,21 @@ SharedLibrary Pt : Atomicity.cpp
                    Utf8Codec.cpp
 				   Utf16Codec.cpp
 				   Utf32Codec.cpp
+                   ZBuffer.cpp
                    ;
 
 MakeLocate Pt : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt : $(PT_INSTALL_LIBDIR) ;
+
+if $(WITH_PT_ZLIB)
+{
+    LinkLibraries Pt : Pt-zlib ;
+}
+else
+{
+    LinkFlags Pt : $(ZLIB_LINKFLAGS) ;
+    LinkLibs Pt : $(ZLIB_LINKLIBS) ;
+}
 
 #Main itest : itest.mm ;
 #Main_AddLibraries itest : -framework UIKit -framework Foundation -framework CoreGraphics ;

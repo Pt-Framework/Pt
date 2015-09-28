@@ -274,6 +274,7 @@
     <ClInclude Include="..\..\include\Pt\Xml\XmlSerializationContext.h" />
     <ClInclude Include="..\..\include\Pt\Xml\XmlSerializer.h" />
     <ClInclude Include="..\..\include\Pt\Xml\XmlWriter.h" />
+    <ClInclude Include="..\..\include\Pt\ZBuffer.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\DrawText.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Edge.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\EdgeTable.h" />
@@ -749,6 +750,7 @@
     <ClCompile Include="..\..\src\Pt\Utf32Codec.cpp" />
     <ClCompile Include="..\..\src\Pt\Utf8Codec.cpp" />
     <ClCompile Include="..\..\src\Pt\WindowsCodec.cpp" />
+    <ClCompile Include="..\..\src\Pt\ZBuffer.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E956F801-3E1C-476C-85E0-4EB0FDCC15BC}</ProjectGuid>
