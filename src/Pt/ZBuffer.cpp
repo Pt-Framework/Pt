@@ -28,44 +28,51 @@
 
 #include <Pt/ZBuffer.h>
 #include <cassert>
+#include <cstring>
 #include <zlib.h>
 
 namespace Pt {
 
 ZBuffer::ZBuffer()
-: _target(0)
-, _deflate(0)
+: _zbufsize(0)
+, _target(0)
+, _zstr(0)
 {
     this->setg(0, 0, 0);
     this->setp(0, 0);
 
-    _deflate = new z_stream;
-    _deflate->zalloc = (alloc_func)0;
-    _deflate->zfree = (free_func)0;
-    _deflate->opaque = (voidpf)0;
+    _zstr = new z_stream;
+    _zstr->zalloc = (alloc_func)0;
+    _zstr->zfree = (free_func)0;
+    _zstr->opaque = (voidpf)0;
 }
 
 
 ZBuffer::ZBuffer(std::ios& ios)
-: _target(&ios)
-, _deflate(0)
+: _zbufsize(0)
+, _target(&ios)
+, _zstr(0)
 {
-
     this->setg(0, 0, 0);
     this->setp(0, 0);
 
-    _deflate = new z_stream;
-    _deflate->zalloc = (alloc_func)0;
-    _deflate->zfree = (free_func)0;
-    _deflate->opaque = (voidpf)0;
+    _zstr = new z_stream;
+    _zstr->zalloc = (alloc_func)0;
+    _zstr->zfree = (free_func)0;
+    _zstr->opaque = (voidpf)0;
 }
 
 
 ZBuffer::~ZBuffer()
 { 
-    close();
-
-    delete _deflate;
+    try
+    {
+        close();
+    } 
+    catch(...)
+    {}
+    
+    delete _zstr;
 }
 
 
@@ -80,39 +87,121 @@ void ZBuffer::close()
 {
     if( this->pptr() )
     {
-        for(;;)
-        {
-          _deflate->next_out = reinterpret_cast<Bytef*>(_zbuf);
-          _deflate->avail_out = _zbufmax;
-
-          int err = deflate(_deflate, Z_FINISH);
-          if(err == Z_STREAM_END)
-              break;
-            
-          if(err != Z_OK)
-              throw std::ios::failure("deflate failed");
-                  
-          std::streamsize avail = _zbufmax - _deflate->avail_out;
-          avail -= _target->rdbuf()->sputn(_zbuf, avail);
-          if(avail > 0)
-              throw std::ios::failure("deflate failed");
-        }
-
-        deflateEnd(_deflate);
+        deflateEnd(_zstr);
         setp(0, 0);
     }
 
     if( this->gptr() )
     {
-      // TODO: inflateEnd()
+      inflateEnd(_zstr);
       setg(0, 0, 0);
+    }
+
+    _zbufsize = 0;
+}
+
+
+void ZBuffer::finish()
+{
+    if( this->pptr() )
+    {
+        _zstr->next_in  = reinterpret_cast<Bytef*>(_buf);
+        _zstr->avail_in = this->pptr() - this->pbase();
+
+        for(int err = Z_OK; err != Z_STREAM_END; )
+        {
+          _zstr->next_out = reinterpret_cast<Bytef*>(_zbuf);
+          _zstr->avail_out = _zbufmax;
+
+          err = deflate(_zstr, Z_FINISH);
+          if(err != Z_STREAM_END && err != Z_OK)
+              throw std::ios::failure("deflate failed");
+                  
+          std::streamsize avail = _zbufmax - _zstr->avail_out;
+          avail -= _target->rdbuf()->sputn(_zbuf, avail);
+          if(avail > 0)
+              throw std::ios::failure("deflate failed");
+        }
+
+        deflateReset(_zstr);
     }
 }
 
 
 void ZBuffer::import(std::streamsize maxImport)
 {
+    if( ! _target || ! _target->rdbuf() )
+        return;
 
+    if( ! this->gptr() )
+    {
+        close();
+
+        int err = inflateInit(_zstr);
+        if (err != Z_OK) 
+            throw std::ios::failure("inflateInit failed");
+
+        this->setg(_buf, _buf, _buf);
+    }
+
+    // special case: import all available input
+    if(maxImport == 0)
+        maxImport = _target->rdbuf()->in_avail();
+
+    // not more than available zbuffer size
+    const std::streamsize zbufavail = _zbufmax - _zbufsize;
+    maxImport = zbufavail < maxImport ? zbufavail : maxImport;
+
+    if(maxImport > 0)
+    {
+        std::streamsize n = _target->rdbuf()->sgetn( _zbuf + _zbufsize,  maxImport );
+        if(n > 0)
+            _zbufsize += static_cast<int>(n);
+    }
+
+    // make room for decompressed data
+    if( this->gptr() - this->eback() > _pbmax)
+    {
+        std::streamsize movelen = this->egptr() - this->gptr() + _pbmax;
+        std::char_traits<char_type>::move( _buf,
+                                            this->gptr() - _pbmax,
+                                            static_cast<std::size_t>(movelen));
+        this->setg(_buf, _buf + _pbmax, _buf + movelen);
+    }
+
+    // inflate to end of input buffer area
+    const std::streamsize used = this->egptr() - this->eback();
+    const std::streamsize unused = _bufmax - used;
+    assert(used + unused == _bufmax);
+
+    _zstr->next_in = reinterpret_cast<Bytef*>( const_cast<char*>(_zbuf) );
+    _zstr->avail_in = static_cast<uLong>(_zbufsize);
+
+    _zstr->next_out = reinterpret_cast<Bytef*>( this->egptr() );
+    _zstr->avail_out = static_cast<uLong>(unused);
+
+    while( _zstr->avail_in > 0 && _zstr->avail_out > 0)
+    {
+      int err = inflate(_zstr, Z_NO_FLUSH);
+      
+      if(err == Z_STREAM_END)
+          break;
+      
+      if(err != Z_OK)
+          throw std::ios::failure("inflate failed");
+    }
+
+    // move leftover compressed data to front
+    std::memmove(_zbuf, _zstr->next_in, _zstr->avail_in);
+    _zbufsize = _zstr->avail_in;
+
+    std::streamsize generated = unused - _zstr->avail_out;
+    if(generated)
+    {
+        this->setg(this->eback(),               // start of read buffer
+                   this->gptr(),                // gptr position
+                   this->egptr() + generated ); // end of read buffer
+    }
 }
 
 
@@ -172,7 +261,7 @@ ZBuffer::int_type ZBuffer::overflow(int_type ch)
     {
         close();
 
-        int err = deflateInit(_deflate, Z_DEFAULT_COMPRESSION);
+        int err = deflateInit(_zstr, Z_DEFAULT_COMPRESSION);
         if (err != Z_OK) 
           throw std::ios::failure("deflateInit failed");
 
@@ -180,19 +269,19 @@ ZBuffer::int_type ZBuffer::overflow(int_type ch)
     }
     else
     {
-        _deflate->next_in  = reinterpret_cast<Bytef*>(_buf);
-        _deflate->avail_in = this->pptr() - this->pbase();
+        _zstr->next_in  = reinterpret_cast<Bytef*>(_buf);
+        _zstr->avail_in = this->pptr() - this->pbase();
 
-        while(_deflate->avail_in > 0)
+        while(_zstr->avail_in > 0)
         {
-            _deflate->next_out = reinterpret_cast<Bytef*>(_zbuf);
-            _deflate->avail_out = _zbufmax;
+            _zstr->next_out = reinterpret_cast<Bytef*>(_zbuf);
+            _zstr->avail_out = _zbufmax;
 
-            int err = deflate(_deflate, Z_NO_FLUSH);
+            int err = deflate(_zstr, Z_NO_FLUSH);
             if (err != Z_OK) 
                 throw std::ios::failure("deflate failed");
              
-            std::streamsize avail = _zbufmax - _deflate->avail_out;
+            std::streamsize avail = _zbufmax - _zstr->avail_out;
             avail -= _target->rdbuf()->sputn(_zbuf, avail);
             if(avail > 0)
                 return traits_type::eof();

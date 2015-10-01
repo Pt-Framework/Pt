@@ -742,6 +742,7 @@
     <ClCompile Include="..\..\src\Pt\tests\TypesTest.cpp" />
     <ClCompile Include="..\..\src\Pt\tests\TypeTraitsTest.cpp" />
     <ClCompile Include="..\..\src\Pt\tests\WindowsCodecTest.cpp" />
+    <ClCompile Include="..\..\src\Pt\tests\ZBufferTest.cpp" />
     <ClCompile Include="..\..\src\Pt\TextBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt\TextStream.cpp" />
     <ClCompile Include="..\..\src\Pt\Time.cpp" />

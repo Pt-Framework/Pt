@@ -2337,5 +2337,8 @@
     <ClCompile Include="..\..\src\Pt\ZBuffer.cpp">
       <Filter>Pt</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\ZBufferTest.cpp">
+      <Filter>Pt\tests</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

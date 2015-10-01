@@ -1,11 +1,11 @@
 /*
  * Copyright (C) 2015 by Marc Boris Duerner
- *
+ * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- *
+ * 
  * As a special exception, you may use this file as part of a free
  * software library without restriction. Specifically, if other files
  * instantiate templates or use macros or inline functions from this
@@ -15,78 +15,56 @@
  * License. This exception does not however invalidate any other
  * reasons why the executable file might be covered by the GNU Library
  * General Public License.
- *
+ * 
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef PT_ZBUFFER_H
-#define PT_ZBUFFER_H
+#include <Pt/Unit/Assertion.h>
+#include <Pt/Unit/TestSuite.h>
+#include <Pt/Unit/RegisterTest.h>
+#include <Pt/ZBuffer.h>
+#include <sstream>
 
-#include <Pt/Api.h>
-#include <Pt/StreamBuffer.h>
-#include <ios>
-#include <cstddef>
-
-typedef struct z_stream_s z_stream;
-
-namespace Pt {
-
-/** @brief Stream buffer for zlib compression.
-*/
-class PT_API ZBuffer : public BasicStreamBuffer<char>
+class ZBufferTest : public Pt::Unit::TestSuite
 {
-    public:
-        ZBuffer();
+public:
+    ZBufferTest()
+    : TestSuite("ZBufferTest")
+    {
+        Pt::Unit::TestSuite::registerMethod("deflateInflate", 
+                                            *this, &ZBufferTest::deflateInflate);
+    }
 
-        ZBuffer(std::ios& ios);
+protected:
+    void deflateInflate()
+    {
+      std::stringstream oss(std::ios::in|std::ios::out|std::ios::binary);
+      Pt::ZBuffer zbuf(oss);
 
-        virtual ~ZBuffer();
+      std::streamsize n = zbuf.sputn("Hello World!", 12);
+      zbuf.finish();
+      std::clog << "compressed: " << oss.str().size() << " bytes." << std::endl;
+      std::string data = oss.str();
 
-        void open(std::ios& ios);
+      char output[1024];
+      std::streamsize inflated = zbuf.sgetn( output, sizeof(output) );
+      std::clog << "decompressed " << inflated << " bytes: ";
+      std::clog.write(output, inflated) << std::endl;
 
-        void close();
-
-        void finish();
-
-        void import(std::streamsize maxImport = 0);
-
-    protected:
-        // inheritdoc
-        virtual std::streamsize showmanyc();
-
-        // inheritdoc
-        virtual std::streamsize showfull();
-
-        // inheritdoc
-        virtual int sync();
-        
-        // inheritdoc
-        virtual int_type underflow();
-        
-        // inheritdoc
-        virtual int_type overflow(int_type ch);
-
-    private:
-        static const int _pbmax = 4;
-
-        static const int _bufmax = 1024;
-        char _buf[_bufmax];
-
-        static const int _zbufmax = 1024;
-        char _zbuf[_zbufmax];
-        int _zbufsize;
-
-        std::ios* _target;
-        z_stream* _zstr;
+      oss.str(data);
+      oss.clear();
+      inflated = zbuf.sgetn( output, sizeof(output) );
+      std::clog << "decompressed " << inflated << " bytes: ";
+      std::clog.write(output, inflated) << std::endl;
+    }
 };
 
-} // namespace Pt
 
-#endif // PT_ZBUFFER_H
+Pt::Unit::RegisterTest<ZBufferTest> register_ZBufferTest;
