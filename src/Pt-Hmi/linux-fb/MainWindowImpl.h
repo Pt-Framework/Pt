@@ -95,8 +95,6 @@ class MainWindowImpl  : public ChildWindow
 
 		void focus();
 
-	    void render();
-
 	protected:
 		virtual void onInvalidate();
 	  virtual void onRender(PaintSurface& paintSurface);

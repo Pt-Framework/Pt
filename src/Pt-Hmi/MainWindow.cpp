@@ -73,8 +73,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::onInvalidate()
 {
-	Window::onInvalidate();		
-	_impl->render();
+	_impl->invalidate();	
 }
 
 

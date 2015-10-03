@@ -113,7 +113,9 @@ void ScreenImpl::onInvalidate()
 	Pt::Timespan spanRender;
 
 	clock.start();
-  Window::onInvalidate(); 
+
+  Window::render();
+	windowManager().render();
 	
 	spanRender = clock.stop();
 

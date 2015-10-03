@@ -311,7 +311,7 @@ void Widget::render()
 
     surface().painter().drawSurface( child->Position.get(), _children[i]->surface() );
 	}
-	
+		
 	_isValid = true;
 }
 

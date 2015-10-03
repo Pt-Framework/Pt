@@ -63,8 +63,6 @@ public:
 
   void hide();
 
-	void render();
-
   void setWindowPos(const Gfx::PointF& p);
 
   void setWindowSize(const Gfx::SizeF& size);
@@ -96,6 +94,8 @@ public:
 	void setMaxSize(const Gfx::SizeF& s);
 
 	void focus();
+
+	void invalidate();
 
 protected:
 	void onWindowEvent(HWND wnd, unsigned int msg, WPARAM wparam, LPARAM lparam, bool& handled);

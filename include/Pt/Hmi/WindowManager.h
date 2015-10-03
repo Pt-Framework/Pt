@@ -96,11 +96,12 @@ class WindowManager : public Pt::Connectable
       return _closeButton;
     }
 
+		void invalidate();	
+
   protected:
     virtual Gfx::PointF renderFrame( ChildWindow* w);				     
 
-  private:
-		void invalidate();	
+  private:		
     bool contains( const ChildWindow* w, const Gfx::PointF& p );
 
 		ResizeDirection::Type isSizing( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );	

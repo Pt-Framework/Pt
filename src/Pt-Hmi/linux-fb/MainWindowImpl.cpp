@@ -65,15 +65,17 @@ MainWindowImpl::~MainWindowImpl()
 	
 void MainWindowImpl::onInvalidate()
 {		
-	ChildWindow::onInvalidate();
-	_apiWindow->invalidate();
+	_app.mainScreen().impl()->invalidate();
 }
 
 
 void MainWindowImpl::onRender(PaintSurface& paintSurface)
 {
   _apiWindow->render();
-  _apiWindow->windowManager().render();  
+
+	Hmi::Painter& painter = paintSurface.painter();
+	
+	painter.drawSurface( Gfx::PointF(0,0), _apiWindow->surface() );
 }
 
 
@@ -88,14 +90,6 @@ void MainWindowImpl::destroy()
 {
 	_app.mainScreen().impl()->windowManager().remove( this );
 	this->setWindowParent(0);
-}
-
-
-void MainWindowImpl::render()
-{
-  Painter& painter = surface().painter();
-  painter.drawSurface(Gfx::PointF( 0,0 ), _apiWindow->surface() );
-  _app.mainScreen().impl()->invalidate();
 }
 
 

@@ -54,6 +54,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::init()
 {	
+
 	{//Icon
 		std::stringstream memoryStream;
 		
@@ -79,7 +80,7 @@ void MainWindow::init()
   
 	
 	Position =Gfx::PointF(20,20);
-	Size =Gfx::SizeF(800,600);
+	Size =Gfx::SizeF(300,300);
 	ShowTitle = true;	
 	ShowInTaskbar = true;
 	ShowSysMenu = true;
@@ -153,32 +154,32 @@ void MainWindow::init()
 	_closeButton.Size =Gfx::SizeF(20, 40);
 	_closeButton.Dock = Docking::Bottom;
 	_closeButton.Margin = Hmi::Margin(5);
-	_childWindow2.addChild(&_closeButton);
 	
-  
-//  _childWindow1.Cursor = Hmi::Cursor::waitCursor();
-	_childWindow1.Position =Gfx::PointF(20,20);
-	_childWindow1.Size =Gfx::SizeF(200,300);
-	_childWindow2.Position =Gfx::PointF(80,80);
-	_childWindow2.Size =Gfx::SizeF(800,600);
-  _childWindow2.Caption = "Child 2";
-	
+	_childWindow2.addChild(&_closeButton);	  	
+	_childWindow2.Position =Gfx::PointF(10,10);	
+	_childWindow2.Size =Gfx::SizeF(200,200);
+  _childWindow2.Caption = "Child 2";	
+	_childWindow2.addChild(&_mainPanel);
+	_childWindow2.Visible = true;
 
-	addChildWindow( _childWindow2 );
-//   _childWindow1.addChildWindow( _childWindow2 );
-		
+  _childWindow1.addChildWindow( _childWindow2 );		
+//  _childWindow1.Cursor = Hmi::Cursor::waitCursor();
+	_childWindow1.Position = Gfx::PointF(20,20);
+	_childWindow1.Size =Gfx::SizeF(200,300);
 	_childWindow1.Visible = true;
   _childWindow1.Caption = "Child 1";
   _childWindow1.Icon = Icon;
-  _childWindow1.invalidate();
+  
+	addChildWindow( _childWindow1 );	
+	
 
+//	BackgroundImage = _drawBuffer;	
+/*
+	_timer.setActive( Application::instance().loop() );
+	_timer.start(100);
+	_timer.timeout() += Pt::slot(*this, &MainWindow::onTimeout);
+*/
 
-	_childWindow2.Visible = true;
-    _childWindow2.invalidate();  
-
-	_childWindow2.addChild(&_mainPanel);
-
-	BackgroundImage = _drawBuffer;
 }
 
 void MainWindow::onShowDialog()
@@ -191,7 +192,7 @@ void MainWindow::onShowDialog()
 void MainWindow::show()
 {
 	Visible = true;	
-  _childWindow1.activate();
+	invalidate();  
 }
 
 
@@ -199,6 +200,18 @@ void MainWindow::onClosed()
 {
 	close();
 	Pt::Hmi::Application::instance().exit();
+}
+
+void MainWindow::onTimeout()
+{
+  Gfx::PointF pos = Position.get();
+
+	pos.addX( 20 );
+
+	if( pos.x() >  200 )
+			pos.setX( 0 );
+			
+	Position = pos;	
 }
 
 }}}

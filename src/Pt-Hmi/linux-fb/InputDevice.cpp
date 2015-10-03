@@ -184,13 +184,11 @@ bool InputDevice::onRun()
                 
 					case ABS_X:
 					case ABS_MT_POSITION_X:
-			            std::cout<<"ABS_X" << ev.value<<std::endl;
 						_mouseEvent.setX( static_cast<double>(ev.value) );
 					break;
                     
 					case ABS_Y:
 					case ABS_MT_POSITION_Y:
-				          std::cout<<"ABS_Y" << ev.value<<std::endl;
 						_mouseEvent.setY( static_cast<double>(ev.value) );
 					break;
                     

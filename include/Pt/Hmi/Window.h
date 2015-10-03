@@ -108,13 +108,12 @@ class PT_HMI_API Window : public Widget
 
 		virtual void onKeyInput( const KeyEvent& ev );			
 		virtual void onPointerInput( const PointerEvent& ev );	
-    virtual void onInvalidate();  			
 		virtual void setClosed( bool close );				
     virtual void setSize( const Gfx::SizeF& size );
 		virtual void onFocusEvent( const FocusEvent& ev );
 		virtual void onSetFocus();
 		virtual void onRemoveFocus();
-
+		virtual void onRender( PaintSurface& surface );
 	protected:
 		void onSizeEvent(const SizeEvent& ev);
 		void onPositionEvent( const PositionEvent& ev);		

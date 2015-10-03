@@ -31,6 +31,7 @@
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/Property.h>
+#include <Pt/System/Timer.h>
 
 namespace Pt{
 namespace Hmi{
@@ -51,6 +52,8 @@ class MainWindow : public Pt::Hmi::MainWindow
 		void onClosed();
 		void onShowDialog();
 
+		void onTimeout();
+
 	private:	
 		Pt::Hmi::Panel  _mainPanel;	
 		Pt::Hmi::Button _closeButton;
@@ -60,6 +63,7 @@ class MainWindow : public Pt::Hmi::MainWindow
 		ChildWindow     _childWindow1;
 		ChildWindow     _childWindow2;
 		Gfx::Image			  _drawBuffer;
+		Pt::System::Timer _timer;
 }; 
 
 }}}

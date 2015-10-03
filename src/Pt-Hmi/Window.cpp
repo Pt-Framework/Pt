@@ -68,13 +68,6 @@ Window::~Window()
 }
 
 
-void Window::onInvalidate()
-{	  	
-  render();		
-  _windowManager.render();
-}
-
-
 void Window::setSize(const Gfx::SizeF& size)
 {	
   Widget::setSize( size); 
@@ -222,5 +215,12 @@ void Window::setClosed( bool c)
 	if( _isClosed )
 		Closed.send();							
 }		
+
+
+void Window::onRender( PaintSurface& surface )
+{
+	Widget::onRender( surface );
+	_windowManager.render();
+}
 
 }}
