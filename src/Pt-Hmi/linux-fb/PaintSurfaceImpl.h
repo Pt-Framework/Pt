@@ -59,6 +59,11 @@ class PaintSurfaceImpl
         return _pipeline;
     }
 
+	void clear()
+	{
+		_pipeline.clear();
+	}
+
   private:       
 		Gfx::SizeF			 _size;
     Gfx::GraphicsPipeline _pipeline;

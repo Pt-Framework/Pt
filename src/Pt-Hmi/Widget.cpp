@@ -291,7 +291,7 @@ void Widget::onLayout( PaintSurface& surface )
 
 
 void Widget::render()
-{
+{	
 	if( !Visible.get())
 		return;
 
@@ -299,17 +299,20 @@ void Widget::render()
 	onLayout( surface() );	
 
 	//Render       
-  if( !_isValid )
+	if( !_isValid )
+	{
+   	  surface().clear();
 	  onRender( surface() );		  
+	}
 
 	//Render children
 	for( size_t i = 0; i < _children.size(); ++i )
 	{
 		Widget* child = _children[i];	
 		
-    _children[i]->render();   
+    	_children[i]->render();   
 
-    surface().painter().drawSurface( child->Position.get(), _children[i]->surface() );
+	   surface().painter().drawSurface( child->Position.get(), _children[i]->surface() );
 	}
 		
 	_isValid = true;

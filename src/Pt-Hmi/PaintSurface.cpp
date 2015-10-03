@@ -53,4 +53,9 @@ Gfx::SizeF PaintSurface::size() const
 	return _impl->size();
 }
 
+void PaintSurface::clear()
+{
+	_impl->clear();
+}
+
 }}

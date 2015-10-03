@@ -56,6 +56,8 @@ class PT_HMI_API PaintSurface
 		{
 			return _impl;
 		}
+
+		void clear();
 		
     inline const PaintSurfaceImpl* impl() const
 		{

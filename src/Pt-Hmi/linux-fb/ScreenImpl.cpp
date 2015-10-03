@@ -43,6 +43,7 @@ ScreenImpl::ScreenImpl()
 , _image( Gfx::Size( (size_t)_frameBuffer.width(), (size_t)_frameBuffer.height() ) ,  _frameBuffer.format(), _frameBuffer.strideInBytes() )
 , _dpi(96.0)
 , _cursorPos( 0,0 )
+, _drawCursor( true)
 {
    
 }
@@ -67,26 +68,23 @@ void ScreenImpl::init()
 
 void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 {		
+	Pt::System::Clock clock;
+
+	clock.start();
+
+	_drawCursor =  true;
+
 	if( !_cursorBackground.empty() )
-		bitBlit( _cursorBackground.pixel(0,0), _cursorBackground.width(), _cursorBackground.height(), _cursorPos,  _image.pixel(0,0), CopyOp );
+		bitBlit( _cursorBackground.pixel(0,0), _cursorBackground.width(), _cursorBackground.height(), _cursorPos, (Pt::uint8_t*)  _image.pixel(0,0), CopyOp );
 
-	_windowManager.pointerInput( mouseEvent );	
-
-	if( Cursor.get().width() == 0  || Cursor.get().height() == 0 )
-		return;	
-
-   _cursorPos =Gfx::Point( mouseEvent.x(), mouseEvent.y() );	
+	_cursorPos =  Gfx::Point( mouseEvent.x(), mouseEvent.y() );
+	_windowManager.pointerInput( mouseEvent );		
 	
-	if( (_cursorBackground.width() != Cursor.get().width())  || (_cursorBackground.height() !=  Cursor.get().height()) )
-		_cursorBackground.resize(Gfx::Size( Cursor.get().width(),Cursor.get().height()), _frameBuffer.format() ); 
-		
-  grabImage( _image.pixel(0,0), _cursorPos, _cursorBackground );
+	if( _drawCursor )
+		updateScreen();
 
-  bitBlit( &Cursor.get().andRgb888()[0], Cursor.get().width(), Cursor.get().height(), _cursorPos, _image.pixel(0,0), AndOp );
-
-  bitBlit( &Cursor.get().xorRgb888()[0], Cursor.get().width(), Cursor.get().height(), _cursorPos, _image.pixel(0,0), XorOp ); 
-
-	 memcpy( _frameBuffer.buffer(), _image.pixel(0,0), _frameBuffer.bufferSize() );			
+	Pt::Timespan span = clock.stop();
+	std::clog<<"Total: " << (span.toUSecs() / 1000.0)<<" ms"<<std::endl;
 }
 
 
@@ -106,26 +104,52 @@ void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx
 }
 
 
+void ScreenImpl::drawCursor( Pt::uint8_t* buffer )
+{
+	//Draw the mouse to image.
+	if( Cursor.get().width() == 0  || Cursor.get().height() == 0 )
+		return;
+
+	if( (_cursorBackground.width() != Cursor.get().width())  || (_cursorBackground.height() !=  Cursor.get().height()) )
+		_cursorBackground.resize(Gfx::Size( Cursor.get().width(),Cursor.get().height()), _frameBuffer.format() ); 
+
+	grabImage( buffer, _cursorPos, _cursorBackground );
+
+	bitBlit( &Cursor.get().andRgb888()[0], Cursor.get().width(), Cursor.get().height(), _cursorPos, buffer, AndOp );
+	bitBlit( &Cursor.get().xorRgb888()[0], Cursor.get().width(), Cursor.get().height(), _cursorPos, buffer, XorOp );    
+}
+
+
+void ScreenImpl::updateScreen()
+{
+	_drawCursor	= false;
+	drawCursor(  _image.pixel(0,0) );
+	memcpy( _frameBuffer.buffer(), _image.pixel(0,0), _frameBuffer.bufferSize() );			
+}
+
 void ScreenImpl::onInvalidate()
 {	
 	Pt::System::Clock clock;
 	Pt::Timespan spanGraphics;
 	Pt::Timespan spanRender;
 
+	//Load the render pipeline
 	clock.start();
 
-  Window::render();
-	windowManager().render();
+	Window::render();
 	
 	spanRender = clock.stop();
 
+	//Draw the render pipeline to image
 	clock.start();
 
-  Hmi::Painter& painter = surface().painter(); 
-	painter.flush();
+	Hmi::Painter& painter = surface().painter(); 
 
-	spanGraphics = clock.stop();
-	
+	painter.flush();
+	spanGraphics = clock.stop();	
+
+	//Statistics
+/*
 	painter.setPen( Gfx::Pen( Gfx::Color( 0,0,0 )) );	
 	{
 		std::stringstream ss;
@@ -147,7 +171,8 @@ void ScreenImpl::onInvalidate()
 	}
 		
 	painter.flush();
-
+*/
+	updateScreen();
 }
 
 
