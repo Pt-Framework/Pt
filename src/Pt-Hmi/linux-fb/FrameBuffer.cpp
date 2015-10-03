@@ -71,7 +71,7 @@ FrameBuffer::FrameBuffer()
 	_bufferSize = _fixedInfo.line_length * _screenInfo.yres;
 	_yoffset    = _screenInfo.yres;
 	_buffer     = (char*)  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);	
-
+	
   const size_t noOfBytesPerPixel = depth() % 8 != 0 ? depth() / 8 + 1 : depth() / 8;       
 
   switch( noOfBytesPerPixel )

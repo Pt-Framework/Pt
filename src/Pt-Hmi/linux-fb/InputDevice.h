@@ -23,7 +23,10 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+	MA  02110-1301 USA
+*/
+
 #ifndef Pt_Hmi_InputDevice_h
 #define Pt_Hmi_InputDevice_h
 
@@ -42,6 +45,9 @@ class InputDevice : public System::Selectable
 {
 	public:
 		InputDevice(const char* deviceName);
+		
+		InputDevice();
+
 		~InputDevice();
 
 		void begin()
@@ -53,14 +59,9 @@ class InputDevice : public System::Selectable
 			selector.beginRead(&_ioh);
 		}
 
-		void close()
-		{ 
-			if(_ioh.fd != -1)
-			{
-				::close(_ioh.fd); 
-				_ioh.fd = -1;
-			}
-		}
+		void open(const char* deviceName);
+
+		void close();
 
 		void flush()
 		{ this->onRun(); }

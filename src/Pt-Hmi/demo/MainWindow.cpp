@@ -25,6 +25,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
 #include "MainWindow.h"
 #include "Dialog1.h"
+#include <Pt/System/Clock.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/Cursor.h>
@@ -79,12 +80,13 @@ void MainWindow::init()
 	}
   
 	
-	Position =Gfx::PointF(20,20);
-	Size =Gfx::SizeF(300,300);
+	Position =Gfx::PointF(0,0);
+	Size =Gfx::SizeF(600,400);
 	ShowTitle = true;	
 	ShowInTaskbar = true;
 	ShowSysMenu = true;
 	Border = WindowBorder::Sizeable;
+	StartPostion = WindowStartPosition::CenterParent;
 	
   State = Hmi::WindowState::Normal;
 	StartPostion = Hmi::WindowStartPosition::CenterParent;
@@ -114,7 +116,7 @@ void MainWindow::init()
 
 	_textLabel.AutoSize = true;
 	_textLabel.Margin = Hmi::Margin(10);
-	_textLabel.Size =Gfx::SizeF(500,400);
+	_textLabel.Size =Gfx::SizeF(50,40);
 	_textLabel.Caption = std::string("T&his is a Platinum C++");  
 	_textLabel.Position =Gfx::PointF(20,20);
 	_textLabel.ForeColor =Gfx::Color(1,0,0,0);
@@ -154,21 +156,23 @@ void MainWindow::init()
 	_closeButton.Size =Gfx::SizeF(20, 40);
 	_closeButton.Dock = Docking::Bottom;
 	_closeButton.Margin = Hmi::Margin(5);
-	
+
+  	
+//  _childWindow1.Cursor = Hmi::Cursor::waitCursor();
+	_childWindow1.Position = Gfx::PointF(10,10);
+	_childWindow1.Size =Gfx::SizeF(520,350);
+	_childWindow1.Visible = true;
+  _childWindow1.Caption = "Child 1";
+  _childWindow1.Icon = Icon;
+	_childWindow1.addChildWindow( _childWindow2 );	
+		
 	_childWindow2.addChild(&_closeButton);	  	
 	_childWindow2.Position =Gfx::PointF(10,10);	
-	_childWindow2.Size =Gfx::SizeF(200,200);
+	_childWindow2.Size =Gfx::SizeF(420,300);
   _childWindow2.Caption = "Child 2";	
 	_childWindow2.addChild(&_mainPanel);
 	_childWindow2.Visible = true;
 
-  _childWindow1.addChildWindow( _childWindow2 );		
-//  _childWindow1.Cursor = Hmi::Cursor::waitCursor();
-	_childWindow1.Position = Gfx::PointF(20,20);
-	_childWindow1.Size =Gfx::SizeF(200,300);
-	_childWindow1.Visible = true;
-  _childWindow1.Caption = "Child 1";
-  _childWindow1.Icon = Icon;
   
 	addChildWindow( _childWindow1 );	
 	
@@ -176,15 +180,16 @@ void MainWindow::init()
 //	BackgroundImage = _drawBuffer;	
 /*
 	_timer.setActive( Application::instance().loop() );
-	_timer.start(100);
+	_timer.start(50);
 	_timer.timeout() += Pt::slot(*this, &MainWindow::onTimeout);
-*/
-
+	*/
 }
 
 void MainWindow::onShowDialog()
 {
 	Dialog1 dialog;
+	dialog.Size = Gfx::SizeF(500,300 );
+
 	dialog.doModal(this);		
 }
 
@@ -204,14 +209,21 @@ void MainWindow::onClosed()
 
 void MainWindow::onTimeout()
 {
+	Pt::System::Clock clock;
+	
+	clock.start();
+
   Gfx::PointF pos = Position.get();
 
-	pos.addX( 20 );
+	pos.addX( 1 );
 
 	if( pos.x() >  200 )
 			pos.setX( 0 );
 			
 	Position = pos;	
+	invalidate();
+	Pt::Timespan span = clock.stop();
+	std::clog<<"Time=" << span.toUSecs()/1000.0 <<" ms" << std::endl;
 }
 
 }}}

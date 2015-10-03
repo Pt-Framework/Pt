@@ -40,9 +40,9 @@ namespace Hmi{
   
 ScreenImpl::ScreenImpl()
 : _frameBuffer()
+, _cursorPos( 0,0 )
 , _image( Gfx::Size( (size_t)_frameBuffer.width(), (size_t)_frameBuffer.height() ) ,  _frameBuffer.format(), _frameBuffer.strideInBytes() )
 , _dpi(96.0)
-, _cursorPos( 0,0 )
 , _drawCursor( true)
 {
    
@@ -68,23 +68,23 @@ void ScreenImpl::init()
 
 void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 {		
-	Pt::System::Clock clock;
-
-	clock.start();
+	//Pt::System::Clock clock;
+	//clock.start();
 
 	_drawCursor =  true;
 
 	if( !_cursorBackground.empty() )
 		bitBlit( _cursorBackground.pixel(0,0), _cursorBackground.width(), _cursorBackground.height(), _cursorPos, (Pt::uint8_t*)  _image.pixel(0,0), CopyOp );
 
-	_cursorPos =  Gfx::Point( mouseEvent.x(), mouseEvent.y() );
+	if( Cursor.get().width() != 0 )
+		_cursorPos = Gfx::Point( mouseEvent.x() - Cursor.get().xHotspot() , mouseEvent.y() - Cursor.get().yHotspot());
+
 	_windowManager.pointerInput( mouseEvent );		
 	
 	if( _drawCursor )
 		updateScreen();
 
-	Pt::Timespan span = clock.stop();
-	std::clog<<"Total: " << (span.toUSecs() / 1000.0)<<" ms"<<std::endl;
+	//std::clog << "screen update: " << clock.stop().toUSecs() / 1000.0 << " msecs" << std::endl;
 }
 
 
@@ -114,7 +114,7 @@ void ScreenImpl::drawCursor( Pt::uint8_t* buffer )
 		_cursorBackground.resize(Gfx::Size( Cursor.get().width(),Cursor.get().height()), _frameBuffer.format() ); 
 
 	grabImage( buffer, _cursorPos, _cursorBackground );
-
+	
 	bitBlit( &Cursor.get().andRgb888()[0], Cursor.get().width(), Cursor.get().height(), _cursorPos, buffer, AndOp );
 	bitBlit( &Cursor.get().xorRgb888()[0], Cursor.get().width(), Cursor.get().height(), _cursorPos, buffer, XorOp );    
 }
@@ -128,50 +128,13 @@ void ScreenImpl::updateScreen()
 }
 
 void ScreenImpl::onInvalidate()
-{	
-	Pt::System::Clock clock;
-	Pt::Timespan spanGraphics;
-	Pt::Timespan spanRender;
-
+{		
 	//Load the render pipeline
-	clock.start();
-
 	Window::render();
 	
-	spanRender = clock.stop();
-
 	//Draw the render pipeline to image
-	clock.start();
-
 	Hmi::Painter& painter = surface().painter(); 
-
 	painter.flush();
-	spanGraphics = clock.stop();	
-
-	//Statistics
-/*
-	painter.setPen( Gfx::Pen( Gfx::Color( 0,0,0 )) );	
-	{
-		std::stringstream ss;
-		ss<<"Invalidate: " << (spanRender.toUSecs() / 1000.0)<<" ms";
-		painter.drawText( Gfx::PointF(20,15), Pt::String(ss.str().c_str() ) );
-	}
-	
-	{
-		std::stringstream ss;
-		ss<<"Render: " << (spanGraphics.toUSecs() / 1000.0)<<" ms";
-		painter.drawText( Gfx::PointF(20,35), Pt::String(ss.str().c_str() ) );
-	}
-
-	
-	{
-		std::stringstream ss;
-		ss<<"Total: " << ((spanGraphics.toUSecs() + spanRender.toUSecs()) / 1000.0)<<" ms";
-		painter.drawText( Gfx::PointF(20,55), Pt::String(ss.str().c_str() ) );
-	}
-		
-	painter.flush();
-*/
 	updateScreen();
 }
 

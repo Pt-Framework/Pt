@@ -23,17 +23,21 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+	MA  02110-1301  USA
+*/
+
 #include <linux/input.h>
 #include <linux/kd.h>
 #include <linux/keyboard.h>
 
+#include "ApplicationImpl.h"
 #include "InputDevice.h"
 #include "ScreenImpl.h"
 #include <Pt/Hmi/Application.h>
-#include "ApplicationImpl.h"
 
 namespace Pt {
+
 namespace Hmi {
 
 InputDevice::InputDevice(const char* deviceName)
@@ -47,6 +51,14 @@ InputDevice::InputDevice(const char* deviceName)
 }
 
 
+InputDevice::InputDevice()
+: _ioh(*this)
+, _loop(0)
+{
+	_ioh.fd = -1;
+}
+
+
 InputDevice::~InputDevice()
 {
     try
@@ -55,6 +67,27 @@ InputDevice::~InputDevice()
     }
     catch(...)
     {}
+}
+
+
+void InputDevice::open(const char* deviceName)
+{
+	close();
+
+  _ioh.fd = ::open(deviceName, O_RDONLY|O_NONBLOCK);
+
+	if( _ioh.fd < 0 )
+		throw Pt::System::AccessFailed(deviceName);
+}
+
+
+void InputDevice::close()
+{ 
+	if(_ioh.fd != -1)
+	{
+		::close(_ioh.fd); 
+		_ioh.fd = -1;
+	}
 }
 
 
@@ -80,7 +113,6 @@ bool InputDevice::onRun()
     {
 			case EV_KEY:
 			{
-
 				if( ev.code == 272 )	
 				{
 					_mouseEvent.buttons()[0].setState( ev.value == 0 ? DeviceButton::Released : DeviceButton::Pressed);
@@ -227,4 +259,5 @@ void InputDevice::onDetach(System::EventLoop& loop)
 }
 
 } // namespace
+
 } // namespace

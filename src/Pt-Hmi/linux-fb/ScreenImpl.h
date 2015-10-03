@@ -149,6 +149,7 @@ class ScreenImpl : public Window
     void bitBlit( const Gfx::Image& image, Pt::uint8_t* buffer );
 	void drawCursor( Pt::uint8_t* buffer );
 	void updateScreen();
+	
 	private:
     FrameBuffer _frameBuffer;  
 		Gfx::Image	  _cursorBackground;

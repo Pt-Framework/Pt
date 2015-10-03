@@ -55,6 +55,10 @@ public:
 	{
 		return _deviceContext;
 	}
+	void clear()
+	{
+		
+	}
 
 private:
    Gfx::SizeF _size;

@@ -23,33 +23,78 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+	MA 02110-1301	USA
+*/
+
 #include "ApplicationImpl.h"
-#include <Pt/Hmi/Application.h>
 #include "ScreenImpl.h"
+#include <Pt/Hmi/Application.h>
+#include <Pt/System/FileInfo.h>
+#include <Pt/Convert.h>
+#include <fstream>
 #include <fcntl.h>
 #include <sys/ioctl.h> 
 #include <sys/mman.h>
+#include <sys/kd.h>
 
 namespace Pt {
+
 namespace Hmi {
 
 ApplicationImpl::ApplicationImpl()
-: _inputDevice("/dev/input/event0")
-//, _inputDevice2("/dev/input/event1")
-, _inputDevice2("/dev/input/event2")
 {  		 
-	_inputDevice.setActive(*this);
-	_inputDevice.begin();
+	showConsole( false );
+	_inputDevices.reserve(10);
 
-	_inputDevice2.setActive(*this);
-	_inputDevice2.begin();  
+	for(size_t i = 0; i < 10; ++i)
+	{
+		System::Path deviceName("/dev/input/event");
+
+		std::ostringstream oss;
+		oss << i;
+		deviceName += oss.str().c_str();
+			
+		if( Pt::System::FileInfo::exists(deviceName) )
+		{
+			_inputDevices.push_back( new InputDevice( deviceName.toLocal().c_str() ) );
+			_inputDevices.back()->setActive(*this);
+			_inputDevices.back()->begin();
+
+			std::clog << "using: " << deviceName.toLocal() << std::endl;
+		}
+	}
 }
 
 
 ApplicationImpl::~ApplicationImpl()
 {
+	std::vector<InputDevice*>::iterator it;
+	for(it = _inputDevices.begin(); it != _inputDevices.end(); ++it)
+	{
+		delete *it;
+	}
+
+	showConsole(true);
 } 
+
+
+void ApplicationImpl::showConsole(bool s)
+{
+	std::string terminal;
+	std::ifstream ifs("/sys/class/tty/tty0/active");
+	ifs >> terminal;
+	terminal = "/dev/" + terminal;
+
+	int fd = open(terminal.c_str(), O_RDWR);
+	
+	if( ! s )
+		ioctl( fd, KDSETMODE, KD_GRAPHICS );
+	else
+		ioctl( fd, KDSETMODE, KD_TEXT );
+
+	close( fd );
+}
 
 
 void ApplicationImpl::nextEvent()
@@ -57,5 +102,6 @@ void ApplicationImpl::nextEvent()
 	MainLoop::waitNext();
 }
 
-}}
+}
 
+}
