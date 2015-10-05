@@ -74,17 +74,16 @@ class PT_API ZBuffer : public BasicStreamBuffer<char>
         virtual int_type overflow(int_type ch);
 
     private:
-        static const int _pbmax = 4;
+        std::ios* _target;
+        z_stream* _zstr;
 
+        static const int _pbmax = 4;
         static const int _bufmax = 1024;
         char _buf[_bufmax];
 
         static const int _zbufmax = 1024;
         char _zbuf[_zbufmax];
         int _zbufsize;
-
-        std::ios* _target;
-        z_stream* _zstr;
 };
 
 } // namespace Pt

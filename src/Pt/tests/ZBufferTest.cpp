@@ -48,21 +48,17 @@ protected:
       std::stringstream oss(std::ios::in|std::ios::out|std::ios::binary);
       Pt::ZBuffer zbuf(oss);
 
-      std::streamsize n = zbuf.sputn("Hello World!", 12);
+      std::streamsize n = 0;
+      for(unsigned p = 0; p < 120; ++p)
+          n += zbuf.sputn("Hello World!", 12);
+      
       zbuf.finish();
       std::clog << "compressed: " << oss.str().size() << " bytes." << std::endl;
-      std::string data = oss.str();
 
-      char output[1024];
+      char output[2048];
       std::streamsize inflated = zbuf.sgetn( output, sizeof(output) );
-      std::clog << "decompressed " << inflated << " bytes: ";
-      std::clog.write(output, inflated) << std::endl;
-
-      oss.str(data);
-      oss.clear();
-      inflated = zbuf.sgetn( output, sizeof(output) );
-      std::clog << "decompressed " << inflated << " bytes: ";
-      std::clog.write(output, inflated) << std::endl;
+      std::clog << "decompressed " << inflated << " bytes." << std::endl;
+      PT_UNIT_ASSERT_EQUALS(n, inflated);
     }
 };
 

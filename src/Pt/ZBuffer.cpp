@@ -34,9 +34,9 @@
 namespace Pt {
 
 ZBuffer::ZBuffer()
-: _zbufsize(0)
-, _target(0)
+: _target(0)
 , _zstr(0)
+, _zbufsize(0)
 {
     this->setg(0, 0, 0);
     this->setp(0, 0);
@@ -49,9 +49,9 @@ ZBuffer::ZBuffer()
 
 
 ZBuffer::ZBuffer(std::ios& ios)
-: _zbufsize(0)
-, _target(&ios)
+: _target(&ios)
 , _zstr(0)
+, _zbufsize(0)
 {
     this->setg(0, 0, 0);
     this->setp(0, 0);
@@ -135,6 +135,7 @@ void ZBuffer::import(std::streamsize maxImport)
 
     if( ! this->gptr() )
     {
+        // close ends deflating for put area
         close();
 
         int err = inflateInit(_zstr);
@@ -254,11 +255,12 @@ ZBuffer::int_type ZBuffer::underflow()
 
 ZBuffer::int_type ZBuffer::overflow(int_type ch)
 {
-    if( ! _target || ! _target->rdbuf() || this->gptr() )
+    if( ! _target || ! _target->rdbuf() )
         return traits_type::eof();
 
     if( ! this->pptr() )
     {
+        // close ends inflating for get area
         close();
 
         int err = deflateInit(_zstr, Z_DEFAULT_COMPRESSION);
