@@ -30,6 +30,7 @@
 #include <Pt/Unit/TestSuite.h>
 #include <Pt/Unit/RegisterTest.h>
 #include <Pt/ZBuffer.h>
+#include <Pt/ZStream.h>
 #include <sstream>
 
 class ZBufferTest : public Pt::Unit::TestSuite
@@ -38,12 +39,15 @@ public:
     ZBufferTest()
     : TestSuite("ZBufferTest")
     {
-        Pt::Unit::TestSuite::registerMethod("deflateInflate", 
-                                            *this, &ZBufferTest::deflateInflate);
+        Pt::Unit::TestSuite::registerMethod("DeflateInflate", 
+                                            *this, &ZBufferTest::DeflateInflate);
+
+        Pt::Unit::TestSuite::registerMethod("Stream", 
+                                            *this, &ZBufferTest::Stream);
     }
 
 protected:
-    void deflateInflate()
+    void DeflateInflate()
     {
       std::stringstream oss(std::ios::in|std::ios::out|std::ios::binary);
       Pt::ZBuffer zbuf(oss);
@@ -57,6 +61,29 @@ protected:
 
       char output[2048];
       std::streamsize inflated = zbuf.sgetn( output, sizeof(output) );
+      std::clog << "decompressed " << inflated << " bytes." << std::endl;
+      PT_UNIT_ASSERT_EQUALS(n, inflated);
+    }
+
+    void Stream()
+    {
+      std::stringstream oss(std::ios::in|std::ios::out|std::ios::binary);
+      Pt::ZIOStream zstream(oss);
+
+      std::streamsize n = 0;
+      for(unsigned p = 0; p < 120; ++p)
+      {
+          zstream.write("Hello World!", 12);
+          n += 12;
+      }
+      
+      zstream.finish();
+      std::clog << "compressed: " << oss.str().size() << " bytes." << std::endl;
+
+      char output[2048];
+      zstream.read( output, sizeof(output) );
+
+      std::streamsize inflated = zstream.gcount();
       std::clog << "decompressed " << inflated << " bytes." << std::endl;
       PT_UNIT_ASSERT_EQUALS(n, inflated);
     }

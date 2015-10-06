@@ -275,6 +275,7 @@
     <ClInclude Include="..\..\include\Pt\Xml\XmlSerializer.h" />
     <ClInclude Include="..\..\include\Pt\Xml\XmlWriter.h" />
     <ClInclude Include="..\..\include\Pt\ZBuffer.h" />
+    <ClInclude Include="..\..\include\Pt\ZStream.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\DrawText.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Edge.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\EdgeTable.h" />

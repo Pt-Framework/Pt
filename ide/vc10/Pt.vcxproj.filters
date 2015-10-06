@@ -1272,6 +1272,9 @@
     <ClInclude Include="..\..\include\Pt\ZBuffer.h">
       <Filter>Pt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\ZStream.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

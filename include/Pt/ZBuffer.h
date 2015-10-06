@@ -43,18 +43,40 @@ namespace Pt {
 class PT_API ZBuffer : public BasicStreamBuffer<char>
 {
     public:
+        /** @brief Default Constructor.
+        */
         ZBuffer();
-
+        
+        /** @brief Construct with target stream.
+        */
         ZBuffer(std::ios& ios);
 
+        /** @brief Destructor.
+        */
         virtual ~ZBuffer();
+        
+        /** @brief Attach to target stream.
+        */
+        void attach(std::ios& target);
+        
+        /** @brief Detach from target stream.
+        */
+        void detach();
+        
+        /** @brief Reset to begin new compression/decompression.
+        */
+        void reset();
 
-        void open(std::ios& ios);
+        /** @brief Reset to begin new compression/decompression.
+        */
+        void reset(std::ios& target);
 
-        void close();
-
+        /** @brief Finish and flush remaining data to the target stream.
+        */
         void finish();
 
+        /** @brief Import data from the target stream.
+        */
         void import(std::streamsize maxImport = 0);
 
     protected:
