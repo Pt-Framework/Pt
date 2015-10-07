@@ -38,6 +38,7 @@
 #include "Pt/Unit/RegisterTest.h"
 #include "Pt/Timespan.h"
 #include <string>
+#include <iomanip>
 
 PT_LOG_DEFINE_INSTANCE(testlogger, "Pt.testlogger")
 

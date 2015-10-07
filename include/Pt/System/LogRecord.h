@@ -127,17 +127,31 @@ class LogRecord : protected Pt::NonCopyable
             return *this;
         }
 
+        //! @brief Applies @a op to the log record's text.
+        LogRecord& operator<<( std::ostream& (*op)(std::ostream&) )
+        {
+            _text << op;
+            return *this;
+        }
+
+        //! @brief Applies @a op to the log record's text.
+        LogRecord& operator<<( std::ios& (*op)(std::ios&) )
+        {
+            _text << op;
+            return *this;
+        }
+
+        //! @brief Applies @a op to the log record's text.
+        LogRecord& operator<<( std::ios_base& (*op)(std::ios_base&) )
+        {
+            _text << op;
+            return *this;
+        }
+
         //! @brief Sets the source location of the log record.
         LogRecord& operator<<( const Pt::SourceInfo& si )
         {
             _source = si;
-            return *this;
-        }
-
-        //! @brief Applies a manipulator when a log record text is built.
-        LogRecord& operator<<(std::ios_base& (*pf)(std::ios_base&))
-        {
-            pf(_text);
             return *this;
         }
 

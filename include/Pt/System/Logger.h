@@ -331,6 +331,27 @@ class LogMessage : protected Pt::NonCopyable
             return *this;
         }
 
+        //! @brief Applies @a op to the log record.
+        LogMessage& operator<<( std::ostream& (*op)(std::ostream&) )
+        {
+            _record << op;
+            return *this;
+        }
+
+        //! @brief Applies @a op to the log record.
+        LogMessage& operator<<( std::ios& (*op)(std::ios&) )
+        {
+            _record << op;
+            return *this;
+        }
+
+        //! @brief Applies @a op to the log record.
+        LogMessage& operator<<( std::ios_base& (*op)(std::ios_base&) )
+        {
+            _record << op;
+            return *this;
+        }
+
         //! @brief Applies a manipulator to the log message.
         LogMessage& operator<<( LogMessage& (*pf)(LogMessage&) )
         {
