@@ -71,44 +71,45 @@ void HttpResponder::onReadRequest(Http::Request& request, Pt::Http::Reply& reply
 
 void HttpResponder::onBeginReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
-    try
-    {
-        _reply = &reply;
-        finishMessage(loop);
-    }
-    catch(const SerializationError& se)
-    {
-      throw System::IOError( se.what() );
-    }
+    _reply = &reply;
+    finishMessage(loop);
 }
 
 
 void HttpResponder::onWriteReply(const Http::Request& request, Http::Reply& reply, System::EventLoop& loop)
 {
-    try
-    {
-        advanceSoapReply(reply);
-    }
-    catch(const SerializationError& se)
-    {
-      throw System::IOError( se.what() );
-    }
+    advanceReply(reply);
 }
 
 
-void HttpResponder::advanceSoapReply(Http::Reply& reply)
+void HttpResponder::advanceReply(Http::Reply& reply)
 {
-    while( ! advanceResult() )
+    try
     {
-        if(reply.buffer().size() > 8192)
+        while( ! advanceResult() )
         {
-            reply.beginSend(false);
-            return;
+            if(reply.buffer().size() > 8192)
+            {
+                reply.beginSend(false);
+                return;
+            }
         }
-    }
 
-    finishResult();
-    reply.beginSend(true);
+        finishResult();
+        reply.beginSend(true);
+    }
+    catch(const Xml::XmlError& e)
+    {
+      throw System::IOError( e.what() );
+    }
+    catch(const SerializationError& e)
+    {
+      throw System::IOError( e.what() );
+    }
+    catch(const ConversionError& e)
+    {
+      throw System::IOError( e.what() );
+    }
 }
 
 
@@ -120,7 +121,7 @@ void HttpResponder::onResult()
     {
         _reply->header().set("Content-Type", "text/xml");
         beginResult(_reply->body() );
-        advanceSoapReply(*_reply);
+        advanceReply(*_reply);
     }
 }
 
@@ -134,7 +135,7 @@ void HttpResponder::onFault(const Fault& fault)
         _reply->header().set("Content-Type", "text/xml");
         _reply->header().set("Connection", "close");
         beginFault(_reply->body(), fault );
-        advanceSoapReply(*_reply);
+        advanceReply(*_reply);
     }
 }
 

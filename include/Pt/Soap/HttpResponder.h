@@ -80,7 +80,7 @@ class PT_SOAP_API HttpResponder : public Http::Responder
         // inheritdoc
         virtual void onCancel();
 
-        void advanceSoapReply(Http::Reply& reply);
+        void advanceReply(Http::Reply& reply);
 
     private:
         Http::Request* _request;

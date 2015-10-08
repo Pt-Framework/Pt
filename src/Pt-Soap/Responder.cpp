@@ -237,7 +237,7 @@ void Responder::beginResult(std::ostream& os)
     const Parameter* param = _op->getOutput();
     assert(param);
     if( ! param)
-        throw SerializationError("no output defined"); // check if catched
+        throw Remoting::Fault("invalid output parameter");
 
     _formatter.setParameter(*param);
     _result->beginFormat(_formatter);

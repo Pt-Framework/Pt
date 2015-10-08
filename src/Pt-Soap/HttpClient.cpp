@@ -291,8 +291,14 @@ void HttpClient::onRequest(Http::Client& client)
 
         client.beginReceive();
     }
-    catch(const System::IOError&) // HttpError is also an IOError
+    catch(...)
     {
+        // TODO: move _error flag to Soap::Client and join the two methods
+        // setError() and setReady(), so that after setReady() it can be checked
+        // whether the used called onEndInvoke() or onEndCall()
+        //
+        // see Pt::XmlRpc::HttpClient
+
         // defer throw until onEndInvoke() is called
         setError();
         setReady();
@@ -326,8 +332,14 @@ void HttpClient::onReply(Http::Client& client)
             return;
         }
     }
-    catch(const System::IOError&) // HttpError is also an IOError
+    catch(...)
     {
+        // TODO: move _error flag to Soap::Client and join the two methods
+        // setError() and setReady(), so that after setReady() it can be checked
+        // whether the used called onEndInvoke() or onEndCall()
+        //
+        // see Pt::XmlRpc::HttpClient
+
         // defer throw until onEndInvoke() is called
         setError();
         setReady();
