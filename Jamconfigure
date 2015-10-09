@@ -506,6 +506,12 @@ if $(GUI:L) = "symbian-eikon"
     GUILIBS    += $(EPOCROOT)\\EPOC32\\RELEASE\\ARMV5\\LIB\\gdi.dso ;
 }
 
+if --with-egl-gbm in $(ARGV)
+{
+    GUI = egl-gbm ;
+    #GUILIBS = -ldrm -lgdm ;
+}
+
 Configure GUI ;
 EchoOption GUI : "Graphics UI" ;
 
@@ -514,7 +520,6 @@ if $(GUI)
     Configure GUILIBS ;
     EchoOption GUILIBS : "Graphics UI lib flags" ;
 }
-
 
 if --with-hmi in $(ARGV)
 {

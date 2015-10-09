@@ -121,6 +121,9 @@
     <Filter Include="Pt-Gfx\Imaging">
       <UniqueIdentifier>{2425ebad-cf69-48f5-a2fe-0e451bd7c2f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Hmi\egl-gbm">
+      <UniqueIdentifier>{f4b9f7c9-4670-4ee6-8c07-14d589df7075}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1275,6 +1278,24 @@
     <ClInclude Include="..\..\include\Pt\ZStream.h">
       <Filter>Pt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\ApplicationImpl.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\MainWindowImpl.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\PainterImpl.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\PaintSurfaceImpl.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\ScreenImpl.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\InputDevice.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2342,6 +2363,24 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt\tests\ZBufferTest.cpp">
       <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\ApplicationImpl.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\MainWindowImpl.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\PainterImpl.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\PaintSurfaceImpl.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\ScreenImpl.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\InputDevice.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

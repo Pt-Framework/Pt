@@ -305,6 +305,12 @@
     <ClInclude Include="..\..\src\Pt-Hmi\demo\Dialog1.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\demo\Dialog2.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\demo\MainWindow.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\ApplicationImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\InputDevice.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\MainWindowImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\PainterImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\PaintSurfaceImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PainterImpl.h" />
@@ -471,6 +477,12 @@
     <ClCompile Include="..\..\src\Pt-Hmi\demo\Main.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\MainWindow.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Dialog.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\ApplicationImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\InputDevice.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\MainWindowImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\PainterImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\PaintSurfaceImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PainterImpl.cpp" />
