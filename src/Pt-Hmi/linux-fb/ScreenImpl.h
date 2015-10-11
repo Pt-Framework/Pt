@@ -157,6 +157,8 @@ class ScreenImpl : public Window
 	bool _drawCursor;
 };
 
-}}
+}
+
+}
 
 #endif

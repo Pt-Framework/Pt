@@ -35,8 +35,9 @@
 #include <Pt/System/Clock.h>
 #include <algorithm>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+
+namespace Hmi {
   
 ScreenImpl::ScreenImpl()
 : _frameBuffer( Application::instance().impl()->frameBuffer() )
@@ -45,9 +46,9 @@ ScreenImpl::ScreenImpl()
 , _dpi(96.0)
 , _drawCursor( true)
 {
-	Visible   = true;	
-	Size = Gfx::SizeF( _frameBuffer.width(), _frameBuffer.height() ) ;
-	BackColor = Gfx::Color( 170/255.0f, 170/255.0f, 170/255.0f );			
+	Visible.set(true);	
+	Size.set( Gfx::SizeF( _frameBuffer.width(), _frameBuffer.height() ) );
+	BackColor.set( Gfx::Color(170/255.0f, 170/255.0f, 170/255.0f) );			
 	setCursor(0);	
 
   eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerInput );
