@@ -64,6 +64,8 @@ class ApplicationImpl : public Pt::System::MainLoop
 		void nextEvent();
     
 	private:
+		void onInputEvent(const Event& ev);
+
 		void showConsole( bool s);
 
   private:

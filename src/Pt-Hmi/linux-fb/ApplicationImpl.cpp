@@ -61,7 +61,7 @@ ApplicationImpl::ApplicationImpl()
 			device->setScreenLimit( _frameBuffer.size() );
 			device->setActive(*this);
 			device->begin();
-			device->eventReady() += Pt::slot( Application::instance().mainScreen().impl()->eventReceived() );	
+			device->eventReady() += Pt::slot(*this, &ApplicationImpl::onInputEvent);	
 			
 			_inputDevices.push_back(device);
 			std::clog << "using: " << deviceName.toLocal() << std::endl;
@@ -80,6 +80,12 @@ ApplicationImpl::~ApplicationImpl()
 
 	//showConsole(true);
 } 
+
+
+void ApplicationImpl::onInputEvent(const Event& ev)
+{
+	Application::instance().mainScreen().impl()->eventReceived().send(ev);
+}
 
 
 void ApplicationImpl::showConsole(bool s)
