@@ -22,7 +22,10 @@
  
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ MA  02110-1301  USA
+*/
+
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
 #include <Pt/Hmi/Application.h>
@@ -31,6 +34,7 @@
 #include <Pt/Hmi/KeyEvent.h>
 
 namespace Pt {
+
 namespace Hmi {
 
 Application::Application(int argc, char** argv)
@@ -68,5 +72,6 @@ void Application::nextEvent()
 	_impl->nextEvent();
 }
 
-}}
+}
 
+}
