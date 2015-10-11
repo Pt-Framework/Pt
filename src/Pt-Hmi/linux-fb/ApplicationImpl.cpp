@@ -44,7 +44,7 @@ namespace Hmi {
 
 ApplicationImpl::ApplicationImpl()
 {  		 
-	showConsole( false );
+	//showConsole( false );
 	_inputDevices.reserve(10);
 
 	for(size_t i = 0; i < 10; ++i)
@@ -75,7 +75,7 @@ ApplicationImpl::~ApplicationImpl()
 		delete *it;
 	}
 
-	showConsole(true);
+	//showConsole(true);
 } 
 
 

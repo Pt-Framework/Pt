@@ -433,8 +433,7 @@ void Widget::onPointerLeaved()
 {	
 	_containPointer = false;
 
-  if( _parent != 0 )
-	  Application::instance().mainScreen().setCursor( &_parent->Cursor.get() ); 
+	Application::instance().mainScreen().setCursor(0); 
 }
 
 		

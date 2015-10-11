@@ -570,8 +570,8 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 	{
 		_sizingDirection = ResizeDirection::No;
 		_moving = false;
-    _pointerLastState = pointerEvent.buttons()[_actionButton].state();        
-    screen.setCursor( &(_parent.Cursor.get()) );
+		_pointerLastState = pointerEvent.buttons()[_actionButton].state();        
+		screen.setCursor( &Cursor::defaultCursor() );
 		return false;
 	}
 
@@ -585,8 +585,8 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 	{
 		if( !updateActive( pointerEvent ) )
 		{
-      _pointerLastState = pointerEvent.buttons()[_actionButton].state();
-      screen.setCursor( &(_parent.Cursor.get()) );      
+	       _pointerLastState = pointerEvent.buttons()[_actionButton].state();
+			screen.setCursor( &Cursor::defaultCursor() );  		
 			return false;
 		}		
 	}
@@ -597,8 +597,8 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 	{
 		_sizingDirection = ResizeDirection::No;
 		_moving = false;
-    _pointerLastState = pointerEvent.buttons()[_actionButton].state();    
-    screen.setCursor( &(_parent.Cursor.get()) );
+    	_pointerLastState = pointerEvent.buttons()[_actionButton].state();    
+		screen.setCursor( &Cursor::defaultCursor() );
     
 		return false;
 	}
@@ -628,7 +628,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 
 	_sizingDirection = isSizing( childWindow, pointerEvent );	
 		
-	if( _sizingDirection != ResizeDirection::No)
+  if( _sizingDirection != ResizeDirection::No)
   {
     _pointerLastState = pointerEvent.buttons()[_actionButton].state();
 		return true;

@@ -140,8 +140,8 @@ void ScreenImpl::onInvalidate()
 
 
 void ScreenImpl::setCursor( const Hmi::Cursor* cursor )
-{	
-	Cursor = (cursor == 0 ? Hmi::Cursor::defaultCursor() : *cursor );	
+{		
+	Cursor = (cursor == 0 ? Hmi::Cursor::defaultCursor() : *cursor );		
 }
 
 
