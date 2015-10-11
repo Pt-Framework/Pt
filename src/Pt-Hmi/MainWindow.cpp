@@ -205,8 +205,7 @@ void MainWindow::onMaxSizeChnaged(const Gfx::SizeF& prop)
 void MainWindow::setSize(const Gfx::SizeF& size)
 {
 	Widget::setSize( size); 	
-	_impl->setWindowSize( size );
-	invalidate();
+	_impl->setWindowSize(size);
 }
 
 void MainWindow::setPosition(const Gfx::PointF& pos)

@@ -66,14 +66,7 @@ Window::Window(Window* parent)
 Window::~Window()
 {
 }
-
-
-void Window::setSize(const Gfx::SizeF& size)
-{	
-  Widget::setSize( size); 
-  invalidate();
-}
-	  	
+	
 
 const std::vector<ChildWindow*> Window::childWindows() const
 {
@@ -157,6 +150,7 @@ void Window::onSizeEvent(const SizeEvent& ev)
 	Window::setSize( ev.size() );
 	Size.changed().send( ev.size() );	
 	State = ev.state();
+	invalidate();
 }
 
 
@@ -164,6 +158,7 @@ void Window::onPositionEvent( const PositionEvent& ev)
 {
 	Widget::setPosition( ev.position() );
 	Position.changed().send( ev.position() );	
+	invalidate();
 }
 
 
