@@ -46,9 +46,9 @@ ScreenImpl::ScreenImpl()
 , _dpi(96.0)
 , _drawCursor( true)
 {
-	Visible.set(true);	
-	Size.set( Gfx::SizeF( _frameBuffer.width(), _frameBuffer.height() ) );
-	BackColor.set( Gfx::Color(170/255.0f, 170/255.0f, 170/255.0f) );			
+	Size.set( Gfx::SizeF(_frameBuffer.width(), _frameBuffer.height()) );
+	BackColor.set( Gfx::Color(170/255.0f, 170/255.0f, 170/255.0f) );
+	Visible.set(true);			
 	setCursor(0);	
 
   eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerInput );
