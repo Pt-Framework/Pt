@@ -362,8 +362,8 @@ void Button::onRender(PaintSurface& paintSurface)
        
 	if( Hover.get() || isWidgetFocused() )
 	{
-		size.addHeight(-5);
-		size.addWidth(-5);
+		size.addHeight(-4);
+		size.addWidth(-4);
 
 		Gfx::Color armedColor(0,160/255.0f,160/255.0f,160/255.0f);
 		 

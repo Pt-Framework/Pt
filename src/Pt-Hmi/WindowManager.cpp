@@ -43,7 +43,7 @@ WindowManager::WindowManager(Window& parent)
 : _app( Application::instance() )
 , _parent( parent )
 , _sizingDirection( ResizeDirection::No )
-, _borderWidth(5)
+, _borderWidth(4)
 , _moving(false)
 , _inactiveColor(0.8f, 0.8f, 0.8f)
 , _activeColor(0.7f, 0.7f, 0.7f)
@@ -163,14 +163,15 @@ void WindowManager::invalidate()
 
 Gfx::PointF WindowManager::renderFrame( ChildWindow* w )
 {	
-	const Gfx::SizeF size =  w->Size.get();
-	const Gfx::SizeF winSize( size.width() + _borderWidth, size.height() + _borderWidth + _titleBarPanel.Size.get().height() );	
+	const Gfx::SizeF clientSize =  w->Size.get();
+	const Gfx::SizeF winSize( clientSize.width()  + _borderWidth + 1, 
+	                          clientSize.height() + _borderWidth + _titleBarPanel.Size.get().height() + 1 );	
 	
 	Gfx::Color color = w->isWindowFocused() ? _activeColor : _inactiveColor;  
 
 	Painter& painter = _parent.surface().painter();
 
-	Gfx::PointF pos( w->Position.get().x() + _borderWidth/2.0, w->Position.get().y() + _borderWidth/2.0 );
+	Gfx::PointF pos( w->Position.get().x(), w->Position.get().y());
 	
   switch( w->Border.get() )
   {
@@ -200,7 +201,7 @@ Gfx::PointF WindowManager::renderFrame( ChildWindow* w )
 
   if( w->Border.get() != WindowBorder::NoBorder )
   {
-		Gfx::PointF  to( pos.x() + _borderWidth/2, pos.y() + _borderWidth/2 ); 
+		Gfx::PointF  to( pos.x() + std::ceil(_borderWidth/2), pos.y() +  std::ceil(_borderWidth/2) ); 
 		Gfx::SizeF   size =Gfx::SizeF( winSize.width() - _borderWidth, _titleBarPanel.Size.get().height() );
     		
     _closeButton.BorderColor =Gfx::Color(0.5f,0.5f,0.5f);
@@ -216,11 +217,12 @@ Gfx::PointF WindowManager::renderFrame( ChildWindow* w )
     _titleBarPanel.BorderColor = color;    		 				
 		_titleBarPanel.setParent( &_parent );		
 		_titleBarPanel.render();	  		
-    //_parent.surface().painter().drawSurface( to, _titleBarPanel.surface() );
+    _parent.surface().painter().drawSurface( to, _titleBarPanel.surface() );
 		_titleBarPanel.setParent( 0 );
   }
 
-  return Gfx::PointF( pos.x() + _borderWidth/2, pos.y() /* + _titleBarPanel.Size.get().height()*/  + _borderWidth/2 );	 
+  return Gfx::PointF( pos.x() + std::ceil(_borderWidth/2), 
+											pos.y() + std::ceil(_borderWidth/2) + _titleBarPanel.Size.get().height()) ;	 
 }
 
 
