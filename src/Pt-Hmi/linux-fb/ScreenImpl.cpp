@@ -25,14 +25,12 @@
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include "ScreenImpl.h"
-#include "ApplicationImpl.h"
 #include "FrameBuffer.h"
 #include "PaintSurfaceImpl.h"
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/System/Clock.h>
-#include <Pt/Hmi/Application.h>
 #include <algorithm>
 
 namespace Pt{
@@ -45,24 +43,17 @@ ScreenImpl::ScreenImpl()
 , _dpi(96.0)
 , _drawCursor( true)
 {
-   
+	Visible   = true;	
+	Size = Gfx::SizeF( _frameBuffer.width(), _frameBuffer.height() ) ;
+	BackColor = Gfx::Color( 170/255.0f, 170/255.0f, 170/255.0f );			
+	setCursor(0);	
+
+  eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerInput );
 }
 
 
 ScreenImpl::~ScreenImpl()
 {
-
-}
-
-void ScreenImpl::init()
-{
-	Visible   = true;	
-	Size = Gfx::SizeF( _frameBuffer.width(), _frameBuffer.height() ) ;
-	BackColor =Gfx::Color( 170/255.0f, 170/255.0f, 170/255.0f );			
-	setCursor(0);	
-	
-
-    eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerInput );
 }
 
 

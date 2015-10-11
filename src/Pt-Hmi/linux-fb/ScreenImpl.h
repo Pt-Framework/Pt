@@ -128,8 +128,6 @@ class ScreenImpl : public Window
 		
 		void setCursor(const Hmi::Cursor* cursor );
 
-	void init();
-
 	protected:
 		virtual void onInvalidate();
 		virtual void onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent );
