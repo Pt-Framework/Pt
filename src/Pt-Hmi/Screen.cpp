@@ -50,11 +50,6 @@ double Screen::height() const
 	return _impl->height();
 }
 
-void Screen::init()
-{
-	_impl->init();
-}
-
 
 Gfx::PointF Screen::toUnit(const Gfx::Point& value)
 {
