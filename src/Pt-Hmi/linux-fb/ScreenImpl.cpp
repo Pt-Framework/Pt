@@ -60,12 +60,6 @@ ScreenImpl::~ScreenImpl()
 }
 
 
-void ScreenImpl::init()
-{
-
-}
-
-
 void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 {		
 	//Pt::System::Clock clock;

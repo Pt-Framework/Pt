@@ -47,8 +47,6 @@ class ScreenImpl : public Window
 
 		virtual ~ScreenImpl();
 
-		void init();
-
 		double width() const
 		{
 			return  Size.get().width();

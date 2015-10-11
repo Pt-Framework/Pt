@@ -41,7 +41,6 @@ Application::Application(int argc, char** argv)
 	this->init(*_impl);
 
   _mainScreen = new Screen();
-	_mainScreen->impl()->init();
 }
 
 
