@@ -24,6 +24,7 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include "ApplicationImpl.h"
+#include "ScreenImpl.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/System/MainLoop.h>
 #include <Pt/Hmi/PointerEvent.h>
@@ -40,6 +41,7 @@ Application::Application(int argc, char** argv)
 	this->init(*_impl);
 
   _mainScreen = new Screen();
+	_mainScreen->impl()->init();
 }
 
 

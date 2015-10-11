@@ -44,7 +44,10 @@ class ScreenImpl : public Window
 {
 	public:
 		ScreenImpl();
+
 		virtual ~ScreenImpl();
+
+		void init();
 
 		double width() const
 		{
