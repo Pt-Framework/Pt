@@ -31,10 +31,7 @@
 #include <linux/kd.h>
 #include <linux/keyboard.h>
 
-#include "ApplicationImpl.h"
 #include "InputDevice.h"
-#include "ScreenImpl.h"
-#include <Pt/Hmi/Application.h>
 
 namespace Pt {
 
@@ -95,7 +92,6 @@ bool InputDevice::onRun()
 {
 	struct input_event evts[64];
 		
-
 	int bytes = ::read(_ioh.fd, evts, sizeof(struct input_event) * 64);
     
 	if( bytes < (int) sizeof(struct input_event) )
@@ -103,7 +99,7 @@ bool InputDevice::onRun()
 			return false;
 	}
 
-    bool hasPointerEvent = false;
+  bool hasPointerEvent = false;
 
 	for( unsigned i = 0; i < bytes / sizeof(input_event); i++ )
 	{
@@ -115,15 +111,15 @@ bool InputDevice::onRun()
 			{
 				if( ev.code == 272 )	
 				{
-					_mouseEvent.buttons()[0].setState( ev.value == 0 ? DeviceButton::Released : DeviceButton::Pressed);
-					Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );				                				
+					_mouseEvent.buttons()[0].setState( ev.value == 0 ? DeviceButton::Released : DeviceButton::Pressed);	
+					_eventReady.send(_mouseEvent);				                				
 					break;
 				}
 				
 				if( ev.code == 273 )	
 				{
 					_mouseEvent.buttons()[2].setState( ev.value == 0 ? DeviceButton::Released : DeviceButton::Pressed);
-					Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );				                				
+					_eventReady.send(_mouseEvent);			                				
 					break;
 				}
 
@@ -132,24 +128,24 @@ bool InputDevice::onRun()
 				else if(ev.value == 0)
 					_keyEvent.setState(KeyEvent::KeyUp);
 				else
-					break;;
+					break;
 			
-		        switch(ev.code)
+		    switch(ev.code)
 				{
 					case KEY_RIGHTALT:
 					case KEY_LEFTALT:
 						_keyEvent.setAlt(_keyEvent.state() == KeyEvent::KeyDown);
-											break;	
+						break;	
 		
 					case KEY_LEFTCTRL:
 					case KEY_RIGHTCTRL:
 						_keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
-					break;
+					  break;
 
 					case KEY_LEFTSHIFT:
 					case KEY_RIGHTSHIFT:
 						_keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);  
-					break;  
+					  break;  
 
 					default:
 					{
@@ -174,12 +170,12 @@ bool InputDevice::onRun()
 						else
 								break;
 
-							_keyEvent.setUnicode(unicode);
-						}
+						_keyEvent.setUnicode(unicode);
+					}
 					break;
 				}
 
-				Application::instance().mainScreen().impl()->eventReceived().send( _keyEvent );				
+				_eventReady.send(_keyEvent);				
 			}
 			break;
 
@@ -193,17 +189,16 @@ bool InputDevice::onRun()
 				if( _mouseEvent.x() < 0 )
 					_mouseEvent.setX( 0);
 
-				if( _mouseEvent.x() >= Application::instance().mainScreen().width() )
-					_mouseEvent.setX( Application::instance().mainScreen().width() - 1 );
+				if( _mouseEvent.x() >= _screenSize.width() )
+					_mouseEvent.setX( _screenSize.width() - 1 );
 
 				if( _mouseEvent.y() < 0 )
 					_mouseEvent.setY( 0);
 
-				if( _mouseEvent.y() >= Application::instance().mainScreen().height() )
-					_mouseEvent.setY( Application::instance().mainScreen().height() - 1 );
+				if( _mouseEvent.y() >= _screenSize.height() )
+					_mouseEvent.setY( _screenSize.height() - 1 );
 
-                hasPointerEvent = true;						                
-				//Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );				                				
+        hasPointerEvent = true;						                				                				
 			}
 			break;
 
@@ -233,15 +228,16 @@ bool InputDevice::onRun()
 					break;
 				}
 				
-                hasPointerEvent = true;	
-				//Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );
+        hasPointerEvent = true;	
 			}
 			break;  
 		}		
 	}
 
     if(hasPointerEvent)
-        Application::instance().mainScreen().impl()->eventReceived().send( _mouseEvent );
+		{
+				_eventReady.send(_mouseEvent);
+		}
 
 	return true;
 }

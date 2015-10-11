@@ -59,7 +59,7 @@ class MainWindowImpl  : public ChildWindow
 
 		void hide();
 
-	    void activate();
+		void activate();
 
 		void setWindowPos(const Gfx::PointF& p);
 

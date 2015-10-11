@@ -34,11 +34,13 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/PointerEvent.h>
+#include <Pt/Gfx/Size.h>
 #include <Pt/System/Selectable.h>
 #include <Pt/System/MainLoop.h>
 #include <unistd.h>
 
 namespace Pt {
+
 namespace Hmi {
 
 class InputDevice : public System::Selectable
@@ -49,6 +51,11 @@ class InputDevice : public System::Selectable
 		InputDevice();
 
 		~InputDevice();
+
+		void setScreenLimit(const Pt::Gfx::SizeF& size)
+		{
+			_screenSize = size;
+		}
 
 		void begin()
 		{      
@@ -66,6 +73,11 @@ class InputDevice : public System::Selectable
 		void flush()
 		{ this->onRun(); }
 
+		Pt::Signal<const Pt::Event&>& eventReady()
+		{
+				return _eventReady;
+		}
+
 	protected:
 		virtual bool onRun();
 
@@ -81,8 +93,10 @@ class InputDevice : public System::Selectable
 	private:
 		Pt::System::IOHandle _ioh;
 		Pt::System::EventLoop* _loop;
+		Pt::Gfx::SizeF _screenSize;
 		Pt::Hmi::KeyEvent _keyEvent;
 		Pt::Hmi::PointerEvent _mouseEvent;
+		Pt::Signal<const Pt::Event&> _eventReady;
 };
 
 } // namespace
