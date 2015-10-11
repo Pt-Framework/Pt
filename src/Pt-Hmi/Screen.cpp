@@ -30,8 +30,8 @@
 namespace Pt{
 namespace Hmi{
 
-Screen::Screen()
-: _impl( new ScreenImpl() )
+Screen::Screen(ApplicationImpl& app)
+: _impl( new ScreenImpl(app) )
 {
 }
 

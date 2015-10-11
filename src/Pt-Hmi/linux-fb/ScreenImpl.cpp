@@ -39,8 +39,8 @@ namespace Pt {
 
 namespace Hmi {
   
-ScreenImpl::ScreenImpl()
-: _frameBuffer( Application::instance().impl()->frameBuffer() )
+ScreenImpl::ScreenImpl(ApplicationImpl& app)
+: _frameBuffer( app.frameBuffer() )
 , _cursorPos( 0,0 )
 , _image( _frameBuffer.size(), _frameBuffer.format(), _frameBuffer.strideInBytes() )
 , _dpi(96.0)

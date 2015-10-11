@@ -38,11 +38,12 @@ namespace Pt{
 namespace Hmi{
 
 class ScreenImpl;
+class ApplicationImpl;
 
 class PT_HMI_API Screen
 {
 	public:
-		Screen();
+		Screen(ApplicationImpl& app);
 
 		virtual ~Screen();
 

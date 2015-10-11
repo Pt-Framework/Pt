@@ -29,7 +29,7 @@
 namespace Pt{
 namespace Hmi{
 
-ScreenImpl::ScreenImpl()
+ScreenImpl::ScreenImpl(ApplicationImpl&)
 : _dpi(96.0)
 , _cursorHandle(0)
 {

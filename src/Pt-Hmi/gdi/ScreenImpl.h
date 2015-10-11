@@ -36,10 +36,13 @@
 namespace Pt{
 namespace Hmi{
 
+class ApplicationImpl;
+
 class ScreenImpl
 {
 	public:
-		ScreenImpl();
+		ScreenImpl(ApplicationImpl& app);
+		
 		virtual ~ScreenImpl();
 
 		void init();

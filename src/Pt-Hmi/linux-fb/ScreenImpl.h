@@ -37,13 +37,14 @@
 namespace Pt{
 namespace Hmi{
 
+class ApplicationImpl;
 class FrameBuffer;
 class Cursor;
 
 class ScreenImpl : public Window
 {
 	public:
-		ScreenImpl();
+		ScreenImpl(ApplicationImpl& app);
 
 		virtual ~ScreenImpl();
 
