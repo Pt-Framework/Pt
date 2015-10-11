@@ -52,7 +52,7 @@ class InputDevice : public System::Selectable
 
 		~InputDevice();
 
-		void setScreenLimit(const Pt::Gfx::SizeF& size)
+		void setScreenLimit(const Pt::Gfx::Size& size)
 		{
 			_screenSize = size;
 		}
@@ -93,7 +93,7 @@ class InputDevice : public System::Selectable
 	private:
 		Pt::System::IOHandle _ioh;
 		Pt::System::EventLoop* _loop;
-		Pt::Gfx::SizeF _screenSize;
+		Pt::Gfx::Size _screenSize;
 		Pt::Hmi::KeyEvent _keyEvent;
 		Pt::Hmi::PointerEvent _mouseEvent;
 		Pt::Signal<const Pt::Event&> _eventReady;

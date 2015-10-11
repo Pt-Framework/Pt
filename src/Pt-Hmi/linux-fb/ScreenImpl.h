@@ -149,7 +149,7 @@ class ScreenImpl : public Window
 	void updateScreen();
 	
 	private:
-    FrameBuffer _frameBuffer;  
+    FrameBuffer& _frameBuffer;  
 		Gfx::Image	  _cursorBackground;
 		Gfx::Point		_cursorPos;    
 		Gfx::Image   _image;

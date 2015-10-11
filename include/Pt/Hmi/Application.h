@@ -64,9 +64,8 @@ public:
   ApplicationImpl* impl();
 
 private:   
+	ApplicationImpl* _impl; 
 	Screen*          _mainScreen;  
-  ApplicationImpl* _impl; 
-
 };
 
 }}

@@ -56,14 +56,20 @@ class ApplicationImpl : public Pt::System::MainLoop
 			return _inputEvent;
 		}
 
+		FrameBuffer& frameBuffer()
+		{
+			return _frameBuffer;
+		}
+
 		void nextEvent();
     
 	private:
 		void showConsole( bool s);
-  private:
-		Pt::Signal<const struct input_event&> _inputEvent;
-		std::vector<InputDevice*> _inputDevices;
 
+  private:
+		FrameBuffer _frameBuffer; 
+		std::vector<InputDevice*> _inputDevices;
+		Pt::Signal<const struct input_event&> _inputEvent;
 };
 
 } // namespace

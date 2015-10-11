@@ -58,7 +58,7 @@ ApplicationImpl::ApplicationImpl()
 		if( Pt::System::FileInfo::exists(deviceName) )
 		{
 			InputDevice* device = new InputDevice( deviceName.toLocal().c_str() );
-			device->setScreenLimit( Application::instance().mainScreen().size() );
+			device->setScreenLimit( _frameBuffer.size() );
 			device->setActive(*this);
 			device->begin();
 			device->eventReady() += Pt::slot( Application::instance().mainScreen().impl()->eventReceived() );	

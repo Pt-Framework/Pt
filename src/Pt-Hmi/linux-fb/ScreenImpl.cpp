@@ -26,7 +26,9 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include "ScreenImpl.h"
 #include "FrameBuffer.h"
+#include "ApplicationImpl.h"
 #include "PaintSurfaceImpl.h"
+#include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Cursor.h>
@@ -37,9 +39,9 @@ namespace Pt{
 namespace Hmi{
   
 ScreenImpl::ScreenImpl()
-: _frameBuffer()
+: _frameBuffer( Application::instance().impl()->frameBuffer() )
 , _cursorPos( 0,0 )
-, _image( Gfx::Size( (size_t)_frameBuffer.width(), (size_t)_frameBuffer.height() ) ,  _frameBuffer.format(), _frameBuffer.strideInBytes() )
+, _image( _frameBuffer.size(), _frameBuffer.format(), _frameBuffer.strideInBytes() )
 , _dpi(96.0)
 , _drawCursor( true)
 {
