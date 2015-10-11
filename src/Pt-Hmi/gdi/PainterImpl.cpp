@@ -407,33 +407,35 @@ void PainterImpl::drawText(const Gfx::PointF& toF, const Pt::String& text)
 void PainterImpl::fillRect(const Gfx::RectF& rectF)
 {
 	Gfx::Rect rect = _screen.fromUnit(rectF);
+  
+	RECT rectangle;
 
-  RECT rectangle;
-  const Gfx::Point topLeft     = rect.topLeft();
-  const Gfx::Point bottomRight = rect.bottomRight();
-  SetRect(&rectangle, topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
+	rectangle.left	 = rect.left();
+	rectangle.top		 = rect.top();
+
+	rectangle.right  = rect.right() + 1;	
+	rectangle.bottom = rect.bottom() + 1;
 
   HBRUSH currentBrush = (HBRUSH)GetCurrentObject(_surface->deviceContext(), OBJ_BRUSH);
   FillRect(_surface->deviceContext(), &rectangle, currentBrush);
 }
 
+
 void PainterImpl::drawRect(const Gfx::RectF& rectF)
 {
 	Gfx::Rect rect = _screen.fromUnit(rectF);
 
-    if (rect.size().width() == 1 && rect.size().height() == 1) 
+  if (rect.size().width() == 1 && rect.size().height() == 1) 
 	{
         // Windows does not paint outline rectangles with a size of 1,1. For compatibility
         // to other windowing systems we draw a pixel (1|1) instead.
         drawLine(rectF.topLeft(), rectF.topLeft());
         return;
-    }
+   }
 
     HBRUSH originalBrush = (HBRUSH)SelectObject(_surface->deviceContext(), GetStockObject(NULL_BRUSH));
-
-    const Gfx::Point topLeft     = rect.topLeft();
-    const Gfx::Point bottomRight = rect.bottomRight();
-    Rectangle(_surface->deviceContext(), topLeft.x(), topLeft.y(), bottomRight.x(), bottomRight.y());
+    
+    Rectangle(_surface->deviceContext(), rect.left(), rect.top(), rect.right()+1, rect.bottom()+1);
 
     SelectObject(_surface->deviceContext(), originalBrush);
 }

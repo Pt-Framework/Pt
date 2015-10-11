@@ -53,7 +53,7 @@ class MainWindow : public Pt::Hmi::MainWindow
 		void onShowDialog();
 
 		void onTimeout();
-
+		virtual void onRender(PaintSurface& paintSurface);
 	private:	
 		Pt::Hmi::Panel  _mainPanel;	
 		Pt::Hmi::Button _closeButton;

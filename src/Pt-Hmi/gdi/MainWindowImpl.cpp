@@ -371,13 +371,13 @@ void MainWindowImpl::onMove(LPARAM lParam)
 void MainWindowImpl::onPaint()
 {           
   RECT  info;
-  GetWindowRect(_hwnd, &info);
+  GetClientRect(_hwnd, &info);
 
   PAINTSTRUCT ps;
   HDC windowContext = BeginPaint(_hwnd, &ps);
     
   HDC bitmapDeviceConText = _window->surface().impl()->deviceContext();
-  BitBlt(windowContext, 0, 0, info.right - info.left,  info.bottom - info.top, bitmapDeviceConText, 0, 0, SRCCOPY);    
+  BitBlt(windowContext, 0, 0, info.right,  info.bottom, bitmapDeviceConText, 0, 0, SRCCOPY);    
     
   EndPaint(_hwnd, &ps);    
 }

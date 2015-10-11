@@ -101,7 +101,7 @@ class PT_GFX_API Pen
         * @param cap The cap style. This parameter is optional. The default is flat style.
         * @param join The join style. This parameter is optional. The default is round style.
         */
-        Pen( size_t width, const Color& color, PenStyle style = SolidStyle, CapStyle cap = RoundCap, JoinStyle join = BevelJoin );
+        Pen( size_t width, const Color& color, PenStyle style = SolidStyle, CapStyle cap = FlatCap, JoinStyle join = BevelJoin );
 
         /**
         * @brief Returns the size of the pen as specified when created.

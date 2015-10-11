@@ -216,11 +216,11 @@ Gfx::PointF WindowManager::renderFrame( ChildWindow* w )
     _titleBarPanel.BorderColor = color;    		 				
 		_titleBarPanel.setParent( &_parent );		
 		_titleBarPanel.render();	  		
-    _parent.surface().painter().drawSurface( to, _titleBarPanel.surface() );
+    //_parent.surface().painter().drawSurface( to, _titleBarPanel.surface() );
 		_titleBarPanel.setParent( 0 );
   }
 
-  return Gfx::PointF( pos.x() + _borderWidth/2, pos.y()  + _titleBarPanel.Size.get().height()  + _borderWidth/2 );	 
+  return Gfx::PointF( pos.x() + _borderWidth/2, pos.y() /* + _titleBarPanel.Size.get().height()*/  + _borderWidth/2 );	 
 }
 
 

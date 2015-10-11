@@ -114,16 +114,8 @@ void ImagePainter::drawText( const PointF& to, const String& text )
 
 void ImagePainter::drawRect( const  RectF& rect )
 {    
-  this->drawLine( rect.topLeft(), rect.topRight() );
-
-  this->drawLine( PointF( rect.topRight().x(), rect.topRight().y()),
-                  PointF( rect.bottomRight().x(), rect.bottomRight().y()) );
-
-  this->drawLine( PointF( rect.bottomRight().x(), rect.bottomRight().y() ),
-                  PointF( rect.bottomLeft().x(), rect.bottomLeft().y() ) );
-
-  this->drawLine( PointF( rect.bottomLeft().x(), rect.bottomLeft().y() ),
-                  rect.topLeft() );
+	PointF points[5] = { rect.topLeft(), rect.topRight(), rect.bottomRight(), rect.bottomLeft(),  rect.topLeft()  };
+	_rasterizer.stroke( points, 5);
 }
 
 

@@ -176,8 +176,17 @@ void MainWindow::init()
   
 	addChildWindow( _childWindow1 );	
 	
+/*
+	_drawBuffer.resize(  Gfx::Size( 60, 60) );
 
-//	BackgroundImage = _drawBuffer;	
+	Gfx::ImagePainter painter( _drawBuffer );
+
+	painter.setPen( Gfx::Pen( 1, Gfx::Color( 1,0,0 )) );
+	painter.drawLine( Gfx::PointF( 10,10), Gfx::PointF( 15,15));
+	BackgroundImage = _drawBuffer;	
+	*/
+	
+	
 /*
 	_timer.setActive( Application::instance().loop() );
 	_timer.start(50);
@@ -224,6 +233,17 @@ void MainWindow::onTimeout()
 	invalidate();
 	Pt::Timespan span = clock.stop();
 	std::clog<<"Time=" << span.toUSecs()/1000.0 <<" ms" << std::endl;
+}
+
+void MainWindow::onRender(PaintSurface& paintSurface)
+{
+	Window::onRender( paintSurface );
+	/*
+	Hmi::Painter& painter = paintSurface.painter(); 
+	
+	painter.setPen( Gfx::Pen(1, Gfx::Color( 0,1,0 )) );
+	painter.drawLine( Gfx::PointF( 10,10+5), Gfx::PointF( 15,15+5));
+	*/
 }
 
 }}}

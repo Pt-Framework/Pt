@@ -351,7 +351,7 @@ void Widget::onRender( PaintSurface& surface )
 	{
 		Gfx::Brush	brush(BackColor.get());
 	
-		painter.setBrush(brush);    	
+		painter.setBrush(brush);    			
 		painter.fillRect(rectClient);
 	}
 

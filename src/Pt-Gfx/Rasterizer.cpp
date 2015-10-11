@@ -1747,8 +1747,10 @@ void Rasterizer::drawThinSolidPolyline( const PointF* points,  int pointCount)
     // Paint the last point if the end style isn't CapNotLast.  (I.e. assume
     // that a round/butt/projecting/triangular cap that is one pixel wide is
     // the same as the single pixel of the endpoint.)
-    if (_pen.capStyle() != Pen::NotLastCap && (xstart != x2 || ystart != y2 || ppt == points + 1) )
+/*    
+		if (_pen.capStyle() != Pen::NotLastCap && (xstart != x2 || ystart != y2 || ppt == points + 1) )
         stroke( x2, y2);
+*/
 }
 
 void Rasterizer::bresenhamLineSegment( int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len )
@@ -3228,7 +3230,7 @@ void Rasterizer::fill( const PointF* pts, size_t pointCount)
             const int dy   = (int)bottom->y() - (int)top->y();
             const int dx   = (int)bottom->x() - (int) top->x();
 
-            edge.ymax = (int)bottom->y();//   -1 so we don't get last scanline */
+            edge.ymax = (int)bottom->y()+1;//   -1 so we don't get last scanline */
             edge.ymin = (int)top->y();
             edge.x    = (int)top->x();
 
@@ -3288,7 +3290,7 @@ void Rasterizer::fill( const PointF* pts, size_t pointCount)
         {
             const int xend   = std::max(activeEdgeTable[i].x, activeEdgeTable[i-1].x);
             const int xbegin   = std::min(activeEdgeTable[i].x, activeEdgeTable[i-1].x);
-            const int length = xend - xbegin;
+            const int length = xend - xbegin + 1;
             fill(Point((int)origin.x(), (int)origin.y() ), Point(xbegin, scanLine), length);
         }
 
