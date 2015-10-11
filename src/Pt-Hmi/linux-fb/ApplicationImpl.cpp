@@ -82,7 +82,7 @@ ApplicationImpl::~ApplicationImpl()
 } 
 
 
-void ApplicationImpl::onInputEvent(const Event& ev)
+void ApplicationImpl::onInputEvent(const Pt::Event& ev)
 {
 	Application::instance().mainScreen().impl()->eventReceived().send(ev);
 }
