@@ -45,8 +45,6 @@ class ScreenImpl
 		
 		virtual ~ScreenImpl();
 
-		void init();
-
 		double width() const;
 
 		double height() const;

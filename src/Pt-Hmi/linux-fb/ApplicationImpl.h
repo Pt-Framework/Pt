@@ -33,12 +33,6 @@
 #include "InputDevice.h"
 #include "FrameBuffer.h"
 #include <Pt/System/MainLoop.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Rect.h>
-#include <Pt/Gfx/Image.h>
-#include <Pt/Hmi/WindowManager.h>
-#include <Pt/Hmi/Cursor.h>
 
 namespace Pt {
 
@@ -56,6 +50,11 @@ class ApplicationImpl : public Pt::System::MainLoop
 			return _frameBuffer;
 		}
 
+	  Pt::Signal<const Pt::Event&>& eventReady()
+		{
+				return _eventReady;
+		}
+
 		void nextEvent();
     
 	private:
@@ -66,6 +65,7 @@ class ApplicationImpl : public Pt::System::MainLoop
   private:
 		FrameBuffer _frameBuffer; 
 		std::vector<InputDevice*> _inputDevices;
+		Pt::Signal<const Pt::Event&> _eventReady;
 };
 
 } // namespace

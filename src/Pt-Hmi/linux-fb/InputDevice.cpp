@@ -27,11 +27,11 @@
 	MA  02110-1301  USA
 */
 
+#include "InputDevice.h"
+
 #include <linux/input.h>
 #include <linux/kd.h>
 #include <linux/keyboard.h>
-
-#include "InputDevice.h"
 
 namespace Pt {
 

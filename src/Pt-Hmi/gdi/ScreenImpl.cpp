@@ -33,17 +33,6 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
 : _dpi(96.0)
 , _cursorHandle(0)
 {
-
-}
-
-
-ScreenImpl::~ScreenImpl()
-{
-	
-}
-
-void ScreenImpl::init()
-{
  	 _size = screeResolution();
 
 	_width  = _size.width() * unitSizeInch()*_dpi;
@@ -52,7 +41,13 @@ void ScreenImpl::init()
 	_factorX = _width / _size.width();
 	_factorY = _height / _size.height();
 	_offsetX = 0;
-	_offsetY = 0;		
+	_offsetY = 0;	
+}
+
+
+ScreenImpl::~ScreenImpl()
+{
+	
 }
 
 double ScreenImpl::width() const

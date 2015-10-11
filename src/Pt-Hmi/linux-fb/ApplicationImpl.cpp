@@ -28,10 +28,7 @@
 */
 
 #include "ApplicationImpl.h"
-#include "ScreenImpl.h"
-#include <Pt/Hmi/Application.h>
 #include <Pt/System/FileInfo.h>
-#include <Pt/Convert.h>
 #include <fstream>
 #include <fcntl.h>
 #include <sys/ioctl.h> 
@@ -61,7 +58,7 @@ ApplicationImpl::ApplicationImpl()
 			device->setScreenLimit( _frameBuffer.size() );
 			device->setActive(*this);
 			device->begin();
-			device->eventReady() += Pt::slot(*this, &ApplicationImpl::onInputEvent);	
+			device->eventReady() += Pt::slot(_eventReady);	
 			
 			_inputDevices.push_back(device);
 			std::clog << "using: " << deviceName.toLocal() << std::endl;
@@ -80,12 +77,6 @@ ApplicationImpl::~ApplicationImpl()
 
 	showConsole(true);
 } 
-
-
-void ApplicationImpl::onInputEvent(const Pt::Event& ev)
-{
-	Application::instance().mainScreen().impl()->eventReceived().send(ev);
-}
 
 
 void ApplicationImpl::showConsole(bool s)
