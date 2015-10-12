@@ -23,10 +23,7 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-  MA  02110-1301  USA
-*/
-
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #ifndef Pt_Hmi_WindowImpl_h
 #define Pt_Hmi_WindowImpl_h
 
@@ -42,7 +39,6 @@
 #include <Pt/Hmi/ChildWindow.h>
 
 namespace Pt {
-
 namespace Hmi {
 
 class MainWindow;
@@ -63,7 +59,7 @@ class MainWindowImpl  : public ChildWindow
 
 		void hide();
 
-	    void activate();
+		void activate();
 
 		void setWindowPos(const Gfx::PointF& p);
 
@@ -108,8 +104,6 @@ class MainWindowImpl  : public ChildWindow
     MainWindow*           _apiWindow;
 };
 
-} // namespace
-
-} // namespace
+}} // namespace
 
 #endif

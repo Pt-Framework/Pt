@@ -43,8 +43,8 @@
 #include <string.h>
 #include <errno.h>
 
-namespace Pt {
 
+namespace Pt {
 namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(MainWindow* window)
@@ -217,6 +217,4 @@ void MainWindowImpl::focus()
 }
 
 
-} // namespace
-
-} // namespace
+}} // namespace

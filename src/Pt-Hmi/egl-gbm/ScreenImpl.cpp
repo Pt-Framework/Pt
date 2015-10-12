@@ -23,22 +23,35 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, #
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
   MA  02110-1301  USA
 */
 
 #include "ScreenImpl.h"
-#include <Pt/Hmi/WindowManager.h>
+#include "ApplicationImpl.h"
+#include "PaintSurfaceImpl.h"
+#include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Cursor.h>
+#include <Pt/System/Clock.h>
+#include <algorithm>
 
 namespace Pt {
 
 namespace Hmi {
   
-ScreenImpl::ScreenImpl()
-: _cursorPos(0, 0)
-, _dpi(96.0)
+ScreenImpl::ScreenImpl(ApplicationImpl& app)
+: _dpi(96.0)
 {
+  app.eventReady() += Pt::slot(_eventReceived);
+
+  //Size.set( Gfx::SizeF(_frameBuffer.width(), _frameBuffer.height()) );
+  BackColor.set( Gfx::Color(170/255.0f, 170/255.0f, 170/255.0f) );
+  Visible.set(true);      
+  setCursor(0);  
+  
+  eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerInput );
 }
 
 
@@ -47,43 +60,41 @@ ScreenImpl::~ScreenImpl()
 }
 
 
-void ScreenImpl::init()
-{
-	  Visible = true;
-
-    throw std::runtime_error("ScreenImpl: invalid screen size");
-	  //Size = Gfx::SizeF( _frameBuffer.width(), _frameBuffer.height() ) ;
-	  
-    BackColor = Gfx::Color( 170/255.0f, 170/255.0f, 170/255.0f );			
-	  setCursor(0);	
-
-    eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerInput );
-}
-
-
 void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
-{		
-	//Pt::System::Clock clock;
-	//clock.start();
+{    
+  //Pt::System::Clock clock;
+  //clock.start();
 
-	if( Cursor.get().width() != 0 )
-		_cursorPos = Gfx::Point( mouseEvent.x() - Cursor.get().xHotspot() , mouseEvent.y() - Cursor.get().yHotspot());
+  //_drawCursor =  true;
 
-	_windowManager.pointerInput( mouseEvent );		
+  //if( !_cursorBackground.empty() )
+  //  bitBlit( _cursorBackground.pixel(0,0), _cursorBackground.width(), _cursorBackground.height(), _cursorPos, (Pt::uint8_t*)  _image.pixel(0,0), CopyOp );
+
+  //if( Cursor.get().width() != 0 )
+  //  _cursorPos = Gfx::Point( mouseEvent.x() - Cursor.get().xHotspot() , mouseEvent.y() - Cursor.get().yHotspot());
+
+  _windowManager.pointerInput( mouseEvent );    
+  
+  //if( _drawCursor )
+  //  updateScreen();
+
+  //std::clog << "screen update: " << clock.stop().toUSecs() / 1000.0 << " msecs" << std::endl;
 }
 
 
 void ScreenImpl::onInvalidate()
-{		
-	Window::render();
+{    
+  //Load the render pipeline
+  Window::render();
+ 
 }
 
 
 void ScreenImpl::setCursor( const Hmi::Cursor* cursor )
-{	
-	Cursor = (cursor == 0 ? Hmi::Cursor::defaultCursor() : *cursor );	
+{    
+  Cursor = (cursor == 0 ? Hmi::Cursor::defaultCursor() : *cursor );    
 }
 
-} // namespace
+}
 
-} // namespace
+}

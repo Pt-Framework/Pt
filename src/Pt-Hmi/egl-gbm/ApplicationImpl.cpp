@@ -1,4 +1,5 @@
  /* Copyright (C) 2015 Marc Boris Duerner 
+    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -27,8 +28,6 @@
 */
 
 #include "ApplicationImpl.h"
-#include "ScreenImpl.h"
-#include <Pt/Hmi/Application.h>
 #include <Pt/System/FileInfo.h>
 #include <fstream>
 #include <fcntl.h>
@@ -43,8 +42,6 @@ namespace Hmi {
 ApplicationImpl::ApplicationImpl()
 {  		 
 	showConsole( false );
-	
-  _inputDevices.reserve(10);
 
 	for(size_t i = 0; i < 10; ++i)
 	{
@@ -56,10 +53,13 @@ ApplicationImpl::ApplicationImpl()
 			
 		if( Pt::System::FileInfo::exists(deviceName) )
 		{
-			_inputDevices.push_back( new InputDevice( deviceName.toLocal().c_str() ) );
-			_inputDevices.back()->setActive(*this);
-			_inputDevices.back()->begin();
-
+			InputDevice* device = new InputDevice( deviceName.toLocal().c_str() );
+			//device->setScreenLimit( _frameBuffer.size() );
+			device->setActive(*this);
+			device->begin();
+			device->eventReady() += Pt::slot(_eventReady);	
+			
+			_inputDevices.push_back(device);
 			std::clog << "using: " << deviceName.toLocal() << std::endl;
 		}
 	}

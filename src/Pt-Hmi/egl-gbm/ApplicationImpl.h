@@ -1,4 +1,5 @@
  /* Copyright (C) 2015 Marc Boris Duerner 
+    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -31,12 +32,6 @@
 
 #include "InputDevice.h"
 #include <Pt/System/MainLoop.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Rect.h>
-#include <Pt/Gfx/Image.h>
-#include <Pt/Hmi/WindowManager.h>
-#include <Pt/Hmi/Cursor.h>
 
 namespace Pt {
 
@@ -49,20 +44,21 @@ class ApplicationImpl : public Pt::System::MainLoop
 
     virtual ~ApplicationImpl();
 
-		Pt::Signal<const struct input_event&>& inputEvent()
+	  Pt::Signal<const Pt::Event&>& eventReady()
 		{
-			return _inputEvent;
+				return _eventReady;
 		}
 
 		void nextEvent();
     
 	private:
+		void onInputEvent(const Pt::Event& ev);
+
 		void showConsole( bool s);
 
   private:
-		Pt::Signal<const struct input_event&> _inputEvent;
 		std::vector<InputDevice*> _inputDevices;
-
+		Pt::Signal<const Pt::Event&> _eventReady;
 };
 
 } // namespace
