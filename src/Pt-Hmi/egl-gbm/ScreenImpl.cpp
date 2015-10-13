@@ -1,5 +1,6 @@
  /* Copyright (C) 2015 Marc Boris Duerner 
     Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+    Copyright (C) 2015 Ilja Maier
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -30,12 +31,16 @@
 #include "ScreenImpl.h"
 #include "ApplicationImpl.h"
 #include "PaintSurfaceImpl.h"
+#include "Display.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/System/Clock.h>
+#include <Pt/System/Logger.h>
 #include <algorithm>
+
+PT_LOG_DEFINE("Pt.Hmi.Screen")
 
 namespace Pt {
 
@@ -46,7 +51,10 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 {
   app.eventReady() += Pt::slot(_eventReceived);
 
-  //Size.set( Gfx::SizeF(_frameBuffer.width(), _frameBuffer.height()) );
+  Size.set( Gfx::SizeF( app.display().width(), app.display().height() ) ); 
+
+  PT_LOG_DEBUG("Screen size: " << app.display().width() << " x " << app.display().height() );
+
   BackColor.set( Gfx::Color(170/255.0f, 170/255.0f, 170/255.0f) );
   Visible.set(true);      
   setCursor(0);  
@@ -83,10 +91,27 @@ void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 
 
 void ScreenImpl::onInvalidate()
-{    
-  //Load the render pipeline
+{
+  PT_LOG_DEBUG("+++++++++++ INVALIDATING SCREEN ++++++++++");
+  PT_LOG_DEBUG("ScreenImpl::onInvalidate");
   Window::render();
- 
+
+  // if onRender() does not work blit this->surface() here
+  PT_LOG_DEBUG("########## SCREEN INVALIDATED ##########");
+}
+
+
+void ScreenImpl::onRender(PaintSurface& surface)
+{
+  PT_LOG_DEBUG("++++++++++ RENDERING SCREEN ++++++++++");
+  PT_LOG_DEBUG("ScreenImpl::onRender: " << surface.size().width() 
+                                 << ' ' << surface.size().height() );
+
+  Window::onRender(surface);
+
+  // surface contains whole screen image now...
+  PT_LOG_DEBUG("########## BLIT SURFACE TO DISPLAY ##########");
+  //eglSwapBuffers(app.display().display(), surface.impl().surface() );
 }
 
 

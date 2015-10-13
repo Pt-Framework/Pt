@@ -1296,6 +1296,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\InputDevice.h">
       <Filter>Pt-Hmi\egl-gbm</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\Display.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2380,6 +2383,9 @@
       <Filter>Pt-Hmi\egl-gbm</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\InputDevice.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\Display.cpp">
       <Filter>Pt-Hmi\egl-gbm</Filter>
     </ClCompile>
   </ItemGroup>

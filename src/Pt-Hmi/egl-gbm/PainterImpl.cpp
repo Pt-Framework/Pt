@@ -1,5 +1,6 @@
  /* Copyright (C) 2015 Marc Boris Duerner 
     Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+    Copyright (C) 2015 Ilja Maier
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -34,7 +35,9 @@
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/ImagePainter.h>
+#include <Pt/System/Logger.h>
 
+PT_LOG_DEFINE("Pt.Hmi.Painter")
 
 namespace Pt {
 
@@ -44,6 +47,7 @@ PainterImpl::PainterImpl( PaintSurfaceImpl* surface )
 : _surface( surface )
 , _renderMode(Gfx::RenderMode::NoAlpha )
 {	
+  PT_LOG_DEBUG("PainterImpl");
 }
 
 
@@ -53,67 +57,67 @@ PainterImpl::~PainterImpl()
 
 void PainterImpl::drawLine( const Gfx::PointF& from, const Gfx::PointF& to )
 {    
-
+  PT_LOG_DEBUG("drawLine");
 }
 
 
 void PainterImpl::drawText( const Gfx::PointF& to, const Pt::String& text )
 {	  
-
+  PT_LOG_DEBUG("drawText");
 }
 
 
 void PainterImpl::drawEllipse( const Gfx::PointF& topLeft, const Gfx::SizeF& size )
 {
-
+  PT_LOG_DEBUG("drawEllipse");
 }
 
 
 void PainterImpl::drawRect( const Gfx::RectF& rect )
 {
-
+  PT_LOG_DEBUG("drawRect");
 }
 
 
 void PainterImpl::drawPolyline( const Gfx::PointF* pt, const size_t pointCount )
 {
-
+  PT_LOG_DEBUG("drawPolyline");
 }
 
 
 void PainterImpl::fillRect( const Gfx::RectF& rect )
 { 
-
+  PT_LOG_DEBUG("fillRect");
 }
 
 
 void PainterImpl::fillEllipse( const Gfx::PointF& topLeft, const Gfx::SizeF& size )
 {
-
+  PT_LOG_DEBUG("fillEllipse");
 }
 
 
 void PainterImpl::fillPolygon( const Gfx::PointF* pt, const size_t pointCount )
 {  
-
+  PT_LOG_DEBUG("fillPolygon");
 }
 
 
 void PainterImpl::drawSurface( const Gfx::PointF& to, const PaintSurface& pm )
 {
-
+  PT_LOG_DEBUG("drawSurface");
 }
 		
 
 void PainterImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image )
 {  
-
+  PT_LOG_DEBUG("drawImage");
 }
 
 
 void PainterImpl::flush()
 {	
-
+  PT_LOG_DEBUG("flush");
 }
 
 
@@ -130,7 +134,8 @@ Gfx::FontMetrics PainterImpl::fontMetrics( const Gfx::Font& font, Pt::String tex
 
 
 void PainterImpl::clear( const Gfx::Color& color )
-{      
+{
+  PT_LOG_DEBUG("clear");
 }
 
 } // namespace

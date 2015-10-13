@@ -1,5 +1,6 @@
  /* Copyright (C) 2015 Marc Boris Duerner 
     Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+    Copyright (C) 2015 Ilja Maier
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -33,6 +34,9 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Size.h>
 
+#include <GLES2/gl2.h>
+#include <EGL/egl.h>
+
 namespace Pt {
 
 namespace Hmi {
@@ -51,7 +55,8 @@ class PaintSurfaceImpl
         void clear();
 
     private:       
-        Gfx::SizeF  _size;
+        Gfx::SizeF    _size;
+        EGLSurface    _surface;
 };
 
 } // namespace

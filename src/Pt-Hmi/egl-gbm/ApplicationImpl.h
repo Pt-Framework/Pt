@@ -1,5 +1,6 @@
  /* Copyright (C) 2015 Marc Boris Duerner 
     Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+    Copyright (C) 2015 Ilja Maier
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -31,6 +32,7 @@
 #define Pt_Hmi_ApplicationImpl_h
 
 #include "InputDevice.h"
+#include "Display.h"
 #include <Pt/System/MainLoop.h>
 
 namespace Pt {
@@ -50,6 +52,9 @@ class ApplicationImpl : public Pt::System::MainLoop
 		}
 
 		void nextEvent();
+
+    const Display& display() const
+    { return _display; }
     
 	private:
 		void onInputEvent(const Pt::Event& ev);
@@ -59,6 +64,9 @@ class ApplicationImpl : public Pt::System::MainLoop
   private:
 		std::vector<InputDevice*> _inputDevices;
 		Pt::Signal<const Pt::Event&> _eventReady;
+    Display                   _display;
+
+    // hier die drm open
 };
 
 } // namespace

@@ -1,5 +1,6 @@
  /* Copyright (C) 2015 Marc Boris Duerner 
     Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+    Copyright (C) 2015 Ilja Maier
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -105,7 +106,6 @@ class ScreenImpl : public Window
       return 25.4 * unitSizeInch();
     }
 
-
     void setResolution(double dpi)
     {
       _dpi = dpi;
@@ -120,10 +120,10 @@ class ScreenImpl : public Window
 
   protected:
     virtual void onInvalidate();
+    
+    virtual void onRender(PaintSurface& surface);
+    
     virtual void onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent );
-
-  private:
-    void updateScreen();
   
   private:
     double      _dpi;

@@ -509,7 +509,14 @@ if $(GUI:L) = "symbian-eikon"
 if --with-egl-gbm in $(ARGV)
 {
     GUI = egl-gbm ;
-    #GUILIBS = -ldrm -lgdm ;
+    GUILIBS = -lGLESv2 -ldrm -lEGL -lgbm ;
+	
+	LINARO_RPATH = [ FDirName $(LINARO_ARM_GNUABIHF_2013_11_R1:J=" ") arm-linux-gnueabihf lib ] ;
+	LINKFLAGS += -Wl,-rpath-link,\"$(LINARO_RPATH)\" ;
+
+	LINARO_RPATH2 = [ FDirName $(LINARO_ARM_GNUABIHF_2013_11_R1:J=" ") arm-linux-gnueabihf lib arm-linux-gnueabihf ] ;
+    LINKFLAGS += -Wl,-rpath-link,\"$(LINARO_RPATH2)\" ;
+    Configure LINKFLAGS ;
 }
 
 Configure GUI ;

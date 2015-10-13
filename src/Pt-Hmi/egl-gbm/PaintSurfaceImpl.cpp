@@ -1,5 +1,6 @@
  /* Copyright (C) 2015 Marc Boris Duerner 
     Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+    Copyright (C) 2015 Ilja Maier
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -28,6 +29,9 @@
 */
   
 #include "PaintSurfaceImpl.h"
+#include <Pt/System/Logger.h>
+
+PT_LOG_DEFINE("Pt.Hmi.PaintSurface")
 
 namespace Pt {
 
@@ -36,6 +40,7 @@ namespace Hmi {
 PaintSurfaceImpl::PaintSurfaceImpl()
 :  _size(10, 10)
 {	
+  PT_LOG_DEBUG("PaintSurfaceImpl");
 }
 
 
@@ -46,6 +51,7 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
 
 void PaintSurfaceImpl::resize(const Gfx::SizeF& size)
 {	
+  PT_LOG_DEBUG("PaintSurfaceImpl::resize: " << size.width() << ' ' << size.height());
 	_size = size;
 }
 
@@ -57,6 +63,7 @@ Gfx::SizeF PaintSurfaceImpl::size() const
 
 void PaintSurfaceImpl::clear()
 {
+  PT_LOG_DEBUG("PaintSurfaceImpl::clear");
 }
 
 } // namespace
