@@ -1,9 +1,9 @@
-#ifndef PT_XMLRPC_REMOTEPROCEDURE_TPP
-#define PT_XMLRPC_REMOTEPROCEDURE_TPP
+#ifndef PT_REMOTING_REMOTEPROCEDURE_H
+#define PT_REMOTING_REMOTEPROCEDURE_H
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Remoting {
 
 /** @brief Performs a remote procedure call.
 
@@ -83,4 +83,4 @@ class RemoteProcedure
 
 }
 
-#endif // PT_XMLRPC_REMOTEPROCEDURE_TPP
+#endif // PT_REMOTING_REMOTEPROCEDURE_TPP

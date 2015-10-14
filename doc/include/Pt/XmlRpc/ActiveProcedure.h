@@ -1,9 +1,9 @@
-#ifndef PT_XMLRPC_ACTIVEPROCEDURE_H
-#define PT_XMLRPC_ACTIVEPROCEDURE_H
+#ifndef PT_REMOTING_ACTIVEPROCEDURE_H
+#define PT_REMOTING_ACTIVEPROCEDURE_H
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Remoting {
 
 /** @brief Asynchronous service procedure.
 
@@ -16,7 +16,7 @@ namespace XmlRpc {
     is a service procedure without arguments, only returning a std::string.
     
     The two methods onInvoke() and onResult() need to be implemented. When a 
-    XML-RPC request was received and dispatched to an asynchronous procedure,
+    RPC request was received and dispatched to an asynchronous procedure,
     onInvoke() is called with the deserialized arguments and an EventLoop to
     execute further asynchronous operations such as I/O. It is the task of
     the implementer to advance progress of the procedure until a result is
@@ -57,8 +57,8 @@ class ActiveProcedure : public ServiceProcedure
         virtual const R& onResult() = 0;
 };
 
-} // namespace XmlRpc
+} // namespace Remoting
 
 } // namespace Pt
 
-#endif // PT_XMLRPC_SERVICEPROCEDURE_H
+#endif // PT_REMOTING_ACTIVEPROCEDURE_H

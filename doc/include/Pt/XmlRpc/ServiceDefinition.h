@@ -1,22 +1,22 @@
-#ifndef Pt_XmlRpc_ServiceDefinition_h
-#define Pt_XmlRpc_ServiceDefinition_h
+#ifndef Pt_Remoting_ServiceDefinition_h
+#define Pt_Remoting_ServiceDefinition_h
 
 namespace Pt {
 
-namespace XmlRpc {
+namespace Remoting {
 
-/** @brief XML-RPC service definition.
+/** @brief Remote service definition.
 
-    The XML-RPC service provides a number of service procedures to its clients.
+    The remote service provides a number of service procedures to its clients.
     Regular C++ functions or methods can be registered as service procedures,
     but in many cases a derived service simply registers member functions. The
-    XML-RPC requests are then dispatched according to the name of the registered
+    RPC requests are then dispatched according to the name of the registered
     procedures. The arguments and return values must be serializable, for 
     example by supporting serialization to a SerializationInfo. The service
     supports synchronous and asynchronous procedures, where the latter ones
     are factories for %ActiveProcedure objects.
 */
-class PT_XMLRPC_API ServiceDefinition : private NonCopyable
+class ServiceDefinition : private NonCopyable
 {
     public:
         /** @brief Constructor.
@@ -96,7 +96,7 @@ class PT_XMLRPC_API ServiceDefinition : private NonCopyable
         void registerActiveProcedure(const std::string& name, C& obj, A* (C::*mth)(Responder&) const );
 };
 
-} // namespace XmlRpc
+} // namespace Remoting
 
 } // namespace Pt
 
