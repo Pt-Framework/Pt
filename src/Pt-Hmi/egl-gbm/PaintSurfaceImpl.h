@@ -54,6 +54,12 @@ class PaintSurfaceImpl
 
         void clear();
 
+        /*void SetSurface(const EGLSurface& surf)
+        { _surface = surf; }*/
+
+        EGLSurface surface() const
+        { return _surface; }
+
     private:       
         Gfx::SizeF    _size;
         EGLSurface    _surface;

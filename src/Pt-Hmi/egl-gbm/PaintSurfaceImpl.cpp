@@ -40,7 +40,7 @@ namespace Hmi {
 PaintSurfaceImpl::PaintSurfaceImpl()
 :  _size(10, 10)
 {	
-  PT_LOG_DEBUG("PaintSurfaceImpl");
+  //PT_LOG_DEBUG("PaintSurfaceImpl");
 }
 
 
@@ -51,7 +51,7 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
 
 void PaintSurfaceImpl::resize(const Gfx::SizeF& size)
 {	
-  PT_LOG_DEBUG("PaintSurfaceImpl::resize: " << size.width() << ' ' << size.height());
+  //PT_LOG_DEBUG("PaintSurfaceImpl::resize: " << size.width() << ' ' << size.height());
 	_size = size;
 }
 
@@ -63,7 +63,7 @@ Gfx::SizeF PaintSurfaceImpl::size() const
 
 void PaintSurfaceImpl::clear()
 {
-  PT_LOG_DEBUG("PaintSurfaceImpl::clear");
+  //PT_LOG_DEBUG("PaintSurfaceImpl::clear");
 }
 
 } // namespace

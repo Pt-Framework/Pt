@@ -132,13 +132,15 @@ class PainterImpl
 
     void clear( const Gfx::Color& color );
 
+
+
   private:
-	 PaintSurfaceImpl*   	_surface;	
+	 PaintSurfaceImpl*   	  _surface;	
 	 Gfx::RenderMode::Type 	_renderMode;
-	 Gfx::Font 				_font;
-	 Gfx::Pen   			_pen;
- 	 Gfx::Brush 			_brush;	  
-	 Gfx::RectF       _clip;
+	 Gfx::Font 				      _font;
+	 Gfx::Pen   			      _pen;
+ 	 Gfx::Brush 			      _brush;	  
+	 Gfx::RectF             _clip;
 };
 
 } // namespace

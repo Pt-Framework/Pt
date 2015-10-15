@@ -33,12 +33,16 @@
 
 #include <Pt/Hmi/Window.h>
 
+#include <GLES2/gl2.h>
+#include <EGL/egl.h>
+
 namespace Pt {
 
 namespace Hmi {
 
 class ApplicationImpl;
 class Cursor;
+class Display;
 
 class ScreenImpl : public Window
 {
@@ -126,7 +130,12 @@ class ScreenImpl : public Window
     virtual void onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent );
   
   private:
-    double      _dpi;
+    double        _dpi;
+    Display&      _display;
+    
+    //EGLDisplay&   _display;
+    //EGLSurface&   _winSurface;
+
 };
 
 }

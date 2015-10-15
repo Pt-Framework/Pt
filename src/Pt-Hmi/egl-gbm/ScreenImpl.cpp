@@ -32,6 +32,7 @@
 #include "ApplicationImpl.h"
 #include "PaintSurfaceImpl.h"
 #include "Display.h"
+
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PaintSurface.h>
@@ -39,6 +40,7 @@
 #include <Pt/System/Clock.h>
 #include <Pt/System/Logger.h>
 #include <algorithm>
+
 
 PT_LOG_DEFINE("Pt.Hmi.Screen")
 
@@ -48,6 +50,8 @@ namespace Hmi {
   
 ScreenImpl::ScreenImpl(ApplicationImpl& app)
 : _dpi(96.0)
+, _display( app.display() )
+//, _winSurface( app.display().surface() )
 {
   app.eventReady() += Pt::slot(_eventReceived);
 
@@ -104,14 +108,28 @@ void ScreenImpl::onInvalidate()
 void ScreenImpl::onRender(PaintSurface& surface)
 {
   PT_LOG_DEBUG("++++++++++ RENDERING SCREEN ++++++++++");
-  PT_LOG_DEBUG("ScreenImpl::onRender: " << surface.size().width() 
-                                 << ' ' << surface.size().height() );
+  PT_LOG_DEBUG("ScreenImpl::onRender: " << _display.width() 
+                                 << ' ' << _display.height() );
 
-  Window::onRender(surface);
+  //eglMakeCurrent(_display.display(), _display.surface(), _display.surface(), _display.context());
+
+
+  if( ! eglMakeCurrent(_display.display(), _display.surface(), _display.surface(), _display.context()) )
+  {
+    PT_LOG_DEBUG("eglMakeCurrent failed");
+  }
+
+  //glViewport(0, 0, surface.size().width(), surface.size().height());
+  glViewport(0, 0, _display.width(), _display.height());
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  //Window::onRender(surface);
 
   // surface contains whole screen image now...
   PT_LOG_DEBUG("########## BLIT SURFACE TO DISPLAY ##########");
-  //eglSwapBuffers(app.display().display(), surface.impl().surface() );
+
+  eglSwapBuffers(_display.display(), _display.surface() );
 }
 
 

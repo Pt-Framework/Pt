@@ -24,54 +24,62 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-	MA  02110-1301  USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA  02110-1301  USA
 */
 
-#ifndef Pt_Hmi_ApplicationImpl_h
-#define Pt_Hmi_ApplicationImpl_h
+#ifndef Pt_Hmi_EGLDisplay_H
+#define Pt_Hmi_EGLDisplay_H
 
-#include "InputDevice.h"
-#include "Display.h"
-#include <Pt/System/MainLoop.h>
+#include <Pt/Types.h>
+#include <Pt/NonCopyable.h>
+
+#include <GLES2/gl2.h>
+#include <EGL/egl.h>
+
+#include <gbm/gbm.h>
+#include <xf86drm.h>
+#include <xf86drmMode.h>
 
 namespace Pt {
-
 namespace Hmi {
 
-class ApplicationImpl : public Pt::System::MainLoop
+class Display : private Pt::NonCopyable
 {
-  public:
-    ApplicationImpl();
+public:
+  Display();
 
-    virtual ~ApplicationImpl();
+  ~Display();
 
-	  Pt::Signal<const Pt::Event&>& eventReady()
-		{
-				return _eventReady;
-		}
+  EGLDisplay& display()
+  { return _display; }
 
-		void nextEvent();
+  EGLSurface& surface()
+  { return _surface; }
 
-    Display& display()
-    { return _display; }
-    
-	private:
-		void onInputEvent(const Pt::Event& ev);
+  EGLContext& context()
+  { return _context; }
 
-		void showConsole( bool s);
+  Pt::uint16_t width() const
+  { return _width; }
 
-  private:
-		std::vector<InputDevice*>     _inputDevices;
-		Pt::Signal<const Pt::Event&>  _eventReady;
-    Display                       _display;
+  Pt::uint16_t height() const
+  { return _height; }
 
-    // hier die drm open
+private:
+  void init();
+
+private:
+  int           _fd;
+  EGLDisplay    _display;
+  EGLSurface    _surface;
+  EGLContext    _context;
+  Pt::uint16_t  _width;
+  Pt::uint16_t  _height;
 };
 
-} // namespace
+} // namespace Hmi
 
-} // namespace
+} // namespace Pt
 
-#endif
-
+#endif // Pt_Hmi_EGLDisplay_H
