@@ -58,6 +58,11 @@ Display::~Display()
   eglDestroyContext(_display, _context);
   eglTerminate(_display);
 
+  //gbm_bo_destroy(bo);
+  //gbm_device_destroy(device);
+
+  //drmClose(_fd);
+
   if( _fd != -1 )
     close(_fd);
 }
@@ -67,8 +72,9 @@ void Display::init()
 {
   PT_LOG_DEBUG("Display::init" );
 
-  static const char *devices[] = { "vmwgfx", "i915", "radeon", "nouveau", "omapdrm" };
-  for( int i = 0; i < 5; ++i ) 
+  static const char *devices[] = { "vmwgfx", "i915", "radeon", "nouveau", "omapdrm", "exynos" };
+  
+  for( int i = 0; i < 6; ++i ) 
   {
     _fd = drmOpen(devices[i], NULL);
     if( _fd >= 0 )
@@ -76,12 +82,14 @@ void Display::init()
   }
 
   if( _fd < 0 ) 
-  {
     _fd = open("/dev/dri/card0", O_RDWR | O_CLOEXEC);
-  }
+  
   if( _fd < 0 )
     throw System::AccessFailed("/dev/dri/card0");
 
+  //
+  // find DRM mode
+  //
   drmModeRes* resources = drmModeGetResources(_fd);
   if( ! resources )
     throw std::runtime_error("drmModeGetResources failed");
@@ -118,6 +126,10 @@ void Display::init()
     throw std::runtime_error("Could not get DRM mode.");
   }
 
+  _width  = mode->hdisplay;
+  _height = mode->vdisplay;
+  PT_LOG_DEBUG("_width: " << _width << " height:" << _height);
+
   Pt::uint32_t crtc = 0;
   for( int i = 0; i < connector->count_encoders; ++i) 
   {
@@ -141,23 +153,21 @@ void Display::init()
   if( ! crtc )
     throw std::runtime_error("Could not determine CRTC.");
 
+  //
+  // create display from gbm device
+  //
   gbm_device* device = gbm_create_device(_fd);
   if( ! device )
     throw std::runtime_error("Could not determine CRTC.");
 
-  gbm_surface* gbm = gbm_surface_create(device, mode->hdisplay, mode->vdisplay,
-    GBM_FORMAT_XRGB8888, GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
-  if( ! gbm )
-    throw std::runtime_error("Could not initialize GBM surface.");
-
-  // Create EGLDisplay from device
   _display = eglGetDisplay( (EGLNativeDisplayType) device);
+  
   if( ! eglInitialize(_display, 0, 0) )
     throw std::runtime_error("Could not initialize EGL display.");
-
-  PT_LOG_DEBUG("eglGetDisplay" );
   
-  EGLint attr[] = 
+  //eglBindAPI(EGL_OPENGL_ES_API)
+
+  EGLint configAttr[] = 
   {   
     EGL_RED_SIZE,         8,
     EGL_GREEN_SIZE,       8,
@@ -165,82 +175,95 @@ void Display::init()
     EGL_ALPHA_SIZE,       8,
     EGL_DEPTH_SIZE,       16, 
     EGL_RENDERABLE_TYPE,  EGL_OPENGL_ES2_BIT, 
-    EGL_SURFACE_TYPE,     EGL_PBUFFER_BIT, // pbuffer
+    //EGL_SURFACE_TYPE,     EGL_PIXMAP_BIT,
+    EGL_SURFACE_TYPE,     EGL_WINDOW_BIT,
     EGL_NONE
   };
 
   EGLConfig   config;
   EGLint      num_config;
 
-  if( ! eglChooseConfig( _display, attr, &config, 1, &num_config ) ) 
+  if( ! eglChooseConfig( _display, configAttr, &config, 1, &num_config ) ) 
     throw std::runtime_error("Failed to choose config");
 
   if( num_config != 1 )
     throw std::runtime_error("Didn't get exactly one config");
 
-    /*_surface = eglCreateWindowSurface(_display, config, (EGLNativeWindowType)gbm, 0);
-    if( _surface == EGL_NO_SURFACE )
-      throw std::runtime_error("Could not create EGL window surface.");*/
+  EGLint contextAttr[] = 
+  { 
+    EGL_CONTEXT_CLIENT_VERSION, 2, 
+    EGL_NONE 
+  };
+  
+  _context = eglCreateContext(_display, config, EGL_NO_CONTEXT, contextAttr);
+  if( ! _context )
+    throw std::runtime_error("Could not create EGL context." );
 
-   	EGLint attrib_list[] = { EGL_HEIGHT,          256,
-                             EGL_WIDTH,           256,
-                             EGL_LARGEST_PBUFFER, EGL_TRUE,
-                             EGL_NONE 
-                            };
+  //
+  // create surface from gbm
+  //
 
-    _surface = eglCreatePbufferSurface(_display, config, attrib_list);
-    if( _surface == EGL_NO_SURFACE )
-      throw std::runtime_error("Could not create EGL window surface.");
+  gbm_surface* gbm = gbm_surface_create(device, mode->hdisplay, mode->vdisplay,
+    GBM_FORMAT_XRGB8888, GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
+  if( ! gbm )
+    throw std::runtime_error("Could not initialize GBM surface.");
+  
+  _surface = eglCreateWindowSurface(_display, config, (EGLNativeWindowType)gbm, 0);
+  if( _surface == EGL_NO_SURFACE )
+    throw std::runtime_error("Could not create EGL window surface.");
+  
+  //gbm_bo* bo = gbm_bo_create(device,	
+  //                           mode->hdisplay, mode->vdisplay, 
+  //                           GBM_FORMAT_XRGB8888, 
+  //                           GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
 
+  //_surface = eglCreatePixmapSurface(_display, config, (EGLNativePixmapType)bo, 0);
+  //if( _surface == EGL_NO_SURFACE )
+  //  throw std::runtime_error("Could not create EGL window surface.");
 
-    EGLint width;
-    EGLint height;
-    if ( ! eglQuerySurface ( _display, _surface, EGL_WIDTH, &width ) ||
-         ! eglQuerySurface ( _display, _surface, EGL_HEIGHT, &height ))
-    {
-      PT_LOG_DEBUG("eglQuerySurface failed");
-    }
+  if( ! eglMakeCurrent(_display, _surface, _surface, _context) )
+    throw std::runtime_error("Could not set the current EGL context.");
 
-    PT_LOG_DEBUG("Pbuffer width: " << width << " height:" << height);
-
-
-    EGLint contextAttributes[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
-    _context = eglCreateContext(_display, config, EGL_NO_CONTEXT, contextAttributes);
-    if( ! _context )
-      throw std::runtime_error("Could not create EGL context." );
-
-    if( ! eglMakeCurrent(_display, _surface, _surface, _context) )
-      throw std::runtime_error("Could not set the current EGL context.");
-
-    if( ! eglSwapBuffers(_display, _surface) )
-      throw std::runtime_error("Could not perform initial buffer swap.");
-
+  if( ! eglSwapBuffers(_display, _surface) )
+    throw std::runtime_error("Could not perform initial buffer swap.");
+  
   // Lock front buffer
   gbm_bo* bo = gbm_surface_lock_front_buffer(gbm);
   if( ! bo )
     throw std::runtime_error("Could not lock the front buffer.");
 
-  // Add first frame buffer & attach id
   Pt::uint32_t id;
   if( drmModeAddFB(_fd, gbm_bo_get_width(bo), gbm_bo_get_height(bo),
     24, 32, gbm_bo_get_stride(bo), gbm_bo_get_handle(bo).u32, &id) )
-    throw std::runtime_error("Could not add DRM framebuffer.");
+    throw std::runtime_error("drmModeAddFB failed");
 
-  // Set mode
   if( drmModeSetCrtc(_fd, crtc, id, 0, 0, &connector->connector_id, 1, mode))
     throw std::runtime_error("Could not set DRM mode.");
 
-  _width  = mode->hdisplay;
-  _height = mode->vdisplay;
-  
-  PT_LOG_DEBUG("_width: " << _width << " height:" << _height);
-  PT_LOG_DEBUG("_width: " << this->width() << " height:" << this->height());
+  // normally, after eglSwapBuffers a page flip has to be done
+
+  //static drmEventContext drmEvent = {
+  //    DRM_EVENT_CONTEXT_VERSION, nullptr,
+  //    [](int, quint32, quint32, quint32, void *flipping) {
+  //        *reinterpret_cast<bool*>(flipping) = false;
+  //    }
+  //};
+  //bool flipping = true;
+  //drmModePageFlip(_fd, crtc, id, DRM_MODE_PAGE_FLIP_EVENT, &flipping))
+  //while(flipping)
+  //  drmHandleEvent(_fd, &drmEvent);
+
+  gbm_surface_release_buffer(device, bo);
+
+  //
+  // drawing test
+  //
 
   glViewport(0, 0, _width, _height);
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 }
 
-
 } // namespace Hmi
+
 } // namespace Pt
