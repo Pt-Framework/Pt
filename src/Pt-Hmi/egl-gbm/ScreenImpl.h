@@ -128,10 +128,24 @@ class ScreenImpl : public Window
     virtual void onRender(PaintSurface& surface);
     
     virtual void onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent );
+
+
+  private:
+    void initFBO();
+    GLuint LoadShader( GLenum type, const char *shaderSrc );
   
   private:
     double        _dpi;
     Display&      _display;
+
+
+    GLuint _fbo;
+    GLuint _texture;
+    GLuint _program;
+
+     GLint  positionLoc;
+   GLint  texCoordLoc;
+   GLint samplerLoc;
     
     //EGLDisplay&   _display;
     //EGLSurface&   _winSurface;

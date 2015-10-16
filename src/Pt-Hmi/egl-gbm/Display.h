@@ -46,40 +46,42 @@ namespace Hmi {
 
 class Display : private Pt::NonCopyable
 {
-public:
-  Display();
+  public:
+    Display();
 
-  ~Display();
+    ~Display();
 
-  EGLDisplay& display()
-  { return _display; }
+    void updateScreen();
 
-  EGLSurface& surface()
-  { return _surface; }
+    EGLDisplay& display()
+    { return _display; }
 
-  EGLContext& context()
-  { return _context; }
+    EGLSurface& surface()
+    { return _surface; }
 
-  Pt::uint16_t width() const
-  { return _width; }
+    EGLContext& context()
+    { return _context; }
 
-  Pt::uint16_t height() const
-  { return _height; }
+    Pt::uint16_t width() const
+    { return _width; }
 
-private:
-  void init();
+    Pt::uint16_t height() const
+    { return _height; }
 
-  void updateScreen();
+  private:
+    void init();
 
-private:
-  int           _fd;
-  EGLDisplay    _display;
-  EGLSurface    _surface;
-  EGLContext    _context;
-  gbm_device*   _gbm_device;
-  gbm_surface*  _gbm_surface;
-  Pt::uint16_t  _width;
-  Pt::uint16_t  _height;
+
+  private:
+    int           _fd;
+    Pt::uint32_t  _crtc;
+    EGLDisplay    _display;
+    EGLSurface    _surface;
+    EGLContext    _context;
+    gbm_device*   _gbm_device;
+    gbm_surface*  _gbm_surface;
+    Pt::uint16_t  _width;
+    Pt::uint16_t  _height;
 };
 
 } // namespace Hmi

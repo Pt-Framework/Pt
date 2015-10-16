@@ -39,22 +39,27 @@ PT_LOG_DEFINE("Pt.Hmi.Display")
 
 namespace {
 
+void setFlipped(int, Pt::uint32_t, Pt::uint32_t, Pt::uint32_t, void *flipping) 
+{
+    *static_cast<bool*>(flipping) = false;
+}
+
 void deleteBufferId(gbm_bo*, void* data) 
 {
     Pt::uint32_t *i = static_cast<Pt::uint32_t*>(data);
     delete i;
 }
 
-Pt::uint32_t getBufferId(gbm_bo* bo)
+Pt::uint32_t getBufferId(int fd, gbm_bo* bo)
 {
   void* data = gbm_bo_get_user_data(bo);
   if( ! data ) 
   { 
       Pt::uint32_t newId = 0;
       
-      if( drmModeAddFB(_fd, gbm_bo_get_width(bo), gbm_bo_get_height(bo),
+      if( drmModeAddFB(fd, gbm_bo_get_width(bo), gbm_bo_get_height(bo),
                        24, 32, gbm_bo_get_stride(bo),
-                       gbm_bo_get_handle(bo).u32, newId) )
+                       gbm_bo_get_handle(bo).u32, &newId) )
           throw std::runtime_error("drmModeAddFB failed");
 
       data = new Pt::uint32_t(newId);
@@ -73,6 +78,7 @@ namespace Hmi {
 
 Display::Display()
   : _fd(-1)
+  , _crtc(0)
   , _display(0)
   , _surface(0)
   , _context(0)
@@ -168,7 +174,6 @@ void Display::init()
   _height = mode->vdisplay;
   PT_LOG_DEBUG("_width: " << _width << " height:" << _height);
 
-  Pt::uint32_t crtc = 0;
   for( int i = 0; i < connector->count_encoders; ++i) 
   {
     drmModeEncoder* encoder = drmModeGetEncoder(_fd, connector->encoders[i]);
@@ -180,30 +185,30 @@ void Display::init()
     {
       if( (encoder->possible_crtcs & (1 << j)) ) 
       {
-        crtc = resources->crtcs[j];
+        _crtc = resources->crtcs[j];
         break;
       }
     }
-    if( crtc )
+    if( _crtc )
       break;
   }
   
-  if( ! crtc )
+  if( ! _crtc )
     throw std::runtime_error("Could not determine CRTC.");
 
   //
   // create display from gbm device
   //
   _gbm_device = gbm_create_device(_fd);
-  if( ! device )
+  if( ! _gbm_device )
     throw std::runtime_error("Could not determine CRTC.");
 
-  _display = eglGetDisplay( (EGLNativeDisplayType) device);
+  _display = eglGetDisplay( (EGLNativeDisplayType) _gbm_device);
   
   if( ! eglInitialize(_display, 0, 0) )
     throw std::runtime_error("Could not initialize EGL display.");
   
-  //eglBindAPI(EGL_OPENGL_ES_API)
+  eglBindAPI(EGL_OPENGL_ES_API);
 
   EGLint configAttr[] = 
   {   
@@ -261,20 +266,16 @@ void Display::init()
 
   if( ! eglMakeCurrent(_display, _surface, _surface, _context) )
     throw std::runtime_error("Could not set the current EGL context.");
-
-  // is this still neccessary
-  if( ! eglSwapBuffers(_display, _surface) )
-    throw std::runtime_error("Could not perform initial buffer swap.");
   
   gbm_bo* bo = gbm_surface_lock_front_buffer(_gbm_surface);
   if( ! bo )
     throw std::runtime_error("gbm_surface_lock_front_buffer failed");
 
-  Pt::uint32_t id = getBufferId(bo);
+  Pt::uint32_t id = getBufferId(_fd, bo);
 
-  gbm_surface_release_buffer(_gbm_device, bo);
+  gbm_surface_release_buffer(_gbm_surface, bo);
 
-  if( drmModeSetCrtc(_fd, crtc, id, 0, 0, &connector->connector_id, 1, mode))
+  if( drmModeSetCrtc(_fd, _crtc, id, 0, 0, &connector->connector_id, 1, mode))
     throw std::runtime_error("drmModeSetCrtc failed.");
 }
 
@@ -287,22 +288,23 @@ void Display::updateScreen()
   
   gbm_bo* bo = gbm_surface_lock_front_buffer(_gbm_surface);
   if( ! bo )
+  {
+    PT_LOG_DEBUG("Display::updateScreen: gbm_surface_lock_front_buffer failed" );
     throw std::runtime_error("gbm_surface_lock_front_buffer failed");
+  }
 
   bool flipping = true;
-  Pt::uint32_t id = getBufferId(bo);
-  drmModePageFlip(_fd, crtc, id, DRM_MODE_PAGE_FLIP_EVENT, &flipping))
+  Pt::uint32_t id = getBufferId(_fd, bo);
+  drmModePageFlip(_fd, _crtc, id, DRM_MODE_PAGE_FLIP_EVENT, &flipping);
   
   drmEventContext drmEvent = 
   {
       DRM_EVENT_CONTEXT_VERSION,
       0,
-      [](int, Pt::uint32_t, Pt::uint32_t, Pt::uint32_t, void *flipping) {
-          *static_cast<bool*>(flipping) = false;
-      }
+      &setFlipped
   };
 
-  while(flipping)
+  while( flipping )
     drmHandleEvent(_fd, &drmEvent);
 
   gbm_surface_release_buffer(_gbm_surface, bo);
