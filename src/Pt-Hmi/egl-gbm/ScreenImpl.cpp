@@ -124,6 +124,8 @@ void ScreenImpl::onRender(PaintSurface& surface)
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
+  _display.updateScreen();
+
   //Window::onRender(surface);
 
   // surface contains whole screen image now...

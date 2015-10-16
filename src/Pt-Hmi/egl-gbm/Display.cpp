@@ -37,13 +37,47 @@
 
 PT_LOG_DEFINE("Pt.Hmi.Display")
 
+namespace {
+
+void deleteBufferId(gbm_bo*, void* data) 
+{
+    Pt::uint32_t *i = static_cast<Pt::uint32_t*>(data);
+    delete i;
+}
+
+Pt::uint32_t getBufferId(gbm_bo* bo)
+{
+  void* data = gbm_bo_get_user_data(bo);
+  if( ! data ) 
+  { 
+      Pt::uint32_t newId = 0;
+      
+      if( drmModeAddFB(_fd, gbm_bo_get_width(bo), gbm_bo_get_height(bo),
+                       24, 32, gbm_bo_get_stride(bo),
+                       gbm_bo_get_handle(bo).u32, newId) )
+          throw std::runtime_error("drmModeAddFB failed");
+
+      data = new Pt::uint32_t(newId);
+      gbm_bo_set_user_data(bo, data, &deleteBufferId);
+  }
+
+  Pt::uint32_t* id = static_cast<Pt::uint32_t*>(data);
+  return *id;
+}
+
+} // namespace
+
 namespace Pt {
+
 namespace Hmi {
 
 Display::Display()
   : _fd(-1)
   , _display(0)
   , _surface(0)
+  , _context(0)
+  , _gbm_device(0)
+  , _gbm_surface(0)
   , _width(0)
   , _height(0)
 {
@@ -59,7 +93,11 @@ Display::~Display()
   eglTerminate(_display);
 
   //gbm_bo_destroy(bo);
-  //gbm_device_destroy(device);
+  if(_gbm_surface)
+    gbm_surface_destroy(_gbm_surface);
+  
+  if(_gbm_device)
+    gbm_device_destroy(_gbm_device);
 
   //drmClose(_fd);
 
@@ -156,7 +194,7 @@ void Display::init()
   //
   // create display from gbm device
   //
-  gbm_device* device = gbm_create_device(_fd);
+  _gbm_device = gbm_create_device(_fd);
   if( ! device )
     throw std::runtime_error("Could not determine CRTC.");
 
@@ -203,16 +241,16 @@ void Display::init()
   // create surface from gbm
   //
 
-  gbm_surface* gbm = gbm_surface_create(device, mode->hdisplay, mode->vdisplay,
+  _gbm_surface = gbm_surface_create(_gbm_device, mode->hdisplay, mode->vdisplay,
     GBM_FORMAT_XRGB8888, GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
-  if( ! gbm )
+  if( ! _gbm_surface )
     throw std::runtime_error("Could not initialize GBM surface.");
   
-  _surface = eglCreateWindowSurface(_display, config, (EGLNativeWindowType)gbm, 0);
+  _surface = eglCreateWindowSurface(_display, config, (EGLNativeWindowType)_gbm_surface, 0);
   if( _surface == EGL_NO_SURFACE )
     throw std::runtime_error("Could not create EGL window surface.");
   
-  //gbm_bo* bo = gbm_bo_create(device,	
+  //gbm_bo* bo = gbm_bo_create(_gbm_device,	
   //                           mode->hdisplay, mode->vdisplay, 
   //                           GBM_FORMAT_XRGB8888, 
   //                           GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
@@ -224,44 +262,50 @@ void Display::init()
   if( ! eglMakeCurrent(_display, _surface, _surface, _context) )
     throw std::runtime_error("Could not set the current EGL context.");
 
+  // is this still neccessary
   if( ! eglSwapBuffers(_display, _surface) )
     throw std::runtime_error("Could not perform initial buffer swap.");
   
-  // Lock front buffer
-  gbm_bo* bo = gbm_surface_lock_front_buffer(gbm);
+  gbm_bo* bo = gbm_surface_lock_front_buffer(_gbm_surface);
   if( ! bo )
-    throw std::runtime_error("Could not lock the front buffer.");
+    throw std::runtime_error("gbm_surface_lock_front_buffer failed");
 
-  Pt::uint32_t id;
-  if( drmModeAddFB(_fd, gbm_bo_get_width(bo), gbm_bo_get_height(bo),
-    24, 32, gbm_bo_get_stride(bo), gbm_bo_get_handle(bo).u32, &id) )
-    throw std::runtime_error("drmModeAddFB failed");
+  Pt::uint32_t id = getBufferId(bo);
+
+  gbm_surface_release_buffer(_gbm_device, bo);
 
   if( drmModeSetCrtc(_fd, crtc, id, 0, 0, &connector->connector_id, 1, mode))
-    throw std::runtime_error("Could not set DRM mode.");
+    throw std::runtime_error("drmModeSetCrtc failed.");
+}
 
-  // normally, after eglSwapBuffers a page flip has to be done
 
-  //static drmEventContext drmEvent = {
-  //    DRM_EVENT_CONTEXT_VERSION, nullptr,
-  //    [](int, quint32, quint32, quint32, void *flipping) {
-  //        *reinterpret_cast<bool*>(flipping) = false;
-  //    }
-  //};
-  //bool flipping = true;
-  //drmModePageFlip(_fd, crtc, id, DRM_MODE_PAGE_FLIP_EVENT, &flipping))
-  //while(flipping)
-  //  drmHandleEvent(_fd, &drmEvent);
+void Display::updateScreen()
+{
+  PT_LOG_DEBUG("Display::updateScreen" );
+  if( ! eglSwapBuffers(_display, _surface) )
+    throw std::runtime_error("Could not perform initial buffer swap.");
+  
+  gbm_bo* bo = gbm_surface_lock_front_buffer(_gbm_surface);
+  if( ! bo )
+    throw std::runtime_error("gbm_surface_lock_front_buffer failed");
 
-  gbm_surface_release_buffer(device, bo);
+  bool flipping = true;
+  Pt::uint32_t id = getBufferId(bo);
+  drmModePageFlip(_fd, crtc, id, DRM_MODE_PAGE_FLIP_EVENT, &flipping))
+  
+  drmEventContext drmEvent = 
+  {
+      DRM_EVENT_CONTEXT_VERSION,
+      0,
+      [](int, Pt::uint32_t, Pt::uint32_t, Pt::uint32_t, void *flipping) {
+          *static_cast<bool*>(flipping) = false;
+      }
+  };
 
-  //
-  // drawing test
-  //
+  while(flipping)
+    drmHandleEvent(_fd, &drmEvent);
 
-  glViewport(0, 0, _width, _height);
-  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
+  gbm_surface_release_buffer(_gbm_surface, bo);
 }
 
 } // namespace Hmi

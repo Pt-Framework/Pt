@@ -69,11 +69,15 @@ public:
 private:
   void init();
 
+  void updateScreen();
+
 private:
   int           _fd;
   EGLDisplay    _display;
   EGLSurface    _surface;
   EGLContext    _context;
+  gbm_device*   _gbm_device;
+  gbm_surface*  _gbm_surface;
   Pt::uint16_t  _width;
   Pt::uint16_t  _height;
 };
