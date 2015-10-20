@@ -1,9 +1,9 @@
 SubDir PT_TOP src zlib ;
 SubDirHdrs $(PT_TOP)/src/zlib ;
-SubDirHdrs $(PT_TOP)/src/zlib/include ;
-SubDirObjects $(PT_OUTPUT_OBJECT) Pt-zlib ;
+#SubDirHdrs $(PT_TOP)/src/zlib/include ;
+SubDirObjects $(PT_OUTPUT_OBJECT) zlib ;
 
-Library Pt-zlib : adler32.c
+Library $(ZLIB) : adler32.c
                   compress.c
                   crc32.c
                   deflate.c
@@ -19,4 +19,4 @@ Library Pt-zlib : adler32.c
                   uncompr.c
                   zutil.c ;
 
-MakeLocate Pt-zlib : $(PT_OUTPUT_TARGET) ;
+MakeLocate $(ZLIB) : $(PT_OUTPUT_TARGET) ;

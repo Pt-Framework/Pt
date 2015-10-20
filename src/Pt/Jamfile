@@ -41,9 +41,9 @@ SharedLibrary Pt : Atomicity.cpp
 MakeLocate Pt : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt : $(PT_INSTALL_LIBDIR) ;
 
-if $(WITH_PT_ZLIB)
+if $(WITH_BUILTIN_ZLIB)
 {
-    LinkLibraries Pt : Pt-zlib ;
+    LinkLibraries Pt : $(ZLIB) ;
 }
 else
 {

@@ -1,0 +1,27 @@
+SubDir PT_TOP src libpng ;
+SubDirHdrs $(PT_TOP)/src/libpng ;
+SubDirObjects $(PT_OUTPUT_OBJECT) libpng ;
+SubDirCcFlags [ FDefines _CRT_SECURE_NO_WARNINGS ] ;
+
+if $(ZLIB_INCLUDES)
+{
+    SubDirHdrs $(ZLIB_INCLUDES) ;
+}
+
+Library png : png.c
+              pngerror.c
+              pngget.c
+              pngmem.c
+              pngpread.c
+              pngread.c
+              pngrio.c
+              pngrtran.c
+              pngrutil.c
+              pngset.c
+              pngtrans.c
+              pngwio.c
+              pngwrite.c
+              pngwtran.c
+              pngwutil.c ;
+
+MakeLocate png : $(PT_OUTPUT_TARGET) ;

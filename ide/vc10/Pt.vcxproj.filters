@@ -1344,7 +1344,6 @@
     <None Include="..\..\Jambase" />
     <None Include="..\..\Jamconfigure" />
     <None Include="..\..\Jamfile" />
-    <None Include="..\..\Jamrules" />
     <None Include="..\..\src\Pt-Unit\Jamfile">
       <Filter>Pt-Unit</Filter>
     </None>

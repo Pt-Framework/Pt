@@ -413,7 +413,6 @@
     <None Include="..\..\Jambase" />
     <None Include="..\..\Jamconfigure" />
     <None Include="..\..\Jamfile" />
-    <None Include="..\..\Jamrules" />
     <None Include="..\..\src\Pt-Gfx\Jamfile" />
     <None Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\CoWindow.mm" />

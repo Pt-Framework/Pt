@@ -1,10 +1,12 @@
 SubDir PT_TOP src Pt-Gfx ;
-
 SubDirHdrs $(PT_TOP)/include ;
-SubDirHdrs  $(PT_TOP)/src/Pt-Gfx/libpng ;
 SubDirC++Flags [ FDefines PT_GFX_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx ;
 
+if $(PNG_INCLUDES)
+{
+    SubDirHdrs $(PNG_INCLUDES) ;
+}
 
 if $(FREETYPE_INCLUDES)
 {
@@ -12,26 +14,25 @@ if $(FREETYPE_INCLUDES)
 }
 
 SharedLibrary Pt-Gfx : Color.cpp                       
-                      Image.cpp
-                      ImageFormat.cpp
-                      ImagePainter.cpp
-                      Argb8888Format.cpp
-                      Rgb888Format.cpp
-                      Rgb565Format.cpp
-                      Brush.cpp
-                      Pen.cpp
-                      Font.cpp
-                      FontMetrics.cpp
-                      Exception.cpp
-                      DrawText.cpp
-                      FreeType.cpp
-                      ClipPolygon.cpp
-                      ImageReader.cpp
-                      GraphicsPipeline.cpp
-                      Rasterizer.cpp
-			              ;
+                       Image.cpp
+                       ImageFormat.cpp
+                       ImagePainter.cpp
+                       Argb8888Format.cpp
+                       Rgb888Format.cpp
+                       Rgb565Format.cpp
+                       Brush.cpp
+                       Pen.cpp
+                       Font.cpp
+                       FontMetrics.cpp
+                       Exception.cpp
+                       DrawText.cpp
+                       FreeType.cpp
+                       ClipPolygon.cpp
+                       ImageReader.cpp
+                       GraphicsPipeline.cpp
+                       Rasterizer.cpp ;
 
-LinkSharedLibraries Pt-Gfx : Pt  Pt-System ;
+LinkSharedLibraries Pt-Gfx : Pt Pt-System ;
 MakeLocate Pt-Gfx : $(PT_OUTPUT_TARGET) ;
 
 if $(FREETYPE_LINKFLAGS)
@@ -44,11 +45,27 @@ else
     LinkLibraries Pt-Gfx : Pt-Gfx-freetype ;
 }
 
-LinkLibraries Pt-Gfx : png ;
-
 if ! $(FREETYPE_LINKFLAGS)
 {
     SubInclude PT_TOP src Pt-Gfx freetype ;
 }
 
-SubInclude PT_TOP src Pt-Gfx libpng ;
+if $(WITH_BUILTIN_LIBPNG)
+{
+    LinkLibraries Pt-Gfx : png ;
+}
+else
+{
+    LinkFlags Pt-Gfx : $(PNG_LINKFLAGS) ;
+    LinkLibs Pt-Gfx : $(PNG_LINKLIBS) ;
+}
+
+if $(WITH_BUILTIN_ZLIB)
+{
+    LinkLibraries Pt-Gfx : $(ZLIB) ;
+}
+else
+{
+    LinkFlags Pt-Gfx : $(ZLIB_LINKFLAGS) ;
+    LinkLibs Pt-Gfx : $(ZLIB_LINKLIBS) ;
+}

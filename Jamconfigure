@@ -49,43 +49,6 @@ EchoOption PT_INSTALL_LIBDIR : "Pt Library Install Dir" ;
 Configure PT_INSTALL_LIBDIR ;
 
 #############################################################################
-# zlib compression library
-#############################################################################
-
-if ! --with-zlib in $(ARGV)
-{
-    if ! $(WITH_ZLIB)
-    {
-        WITH_ZLIB = [ CheckBuildC++ "#include <zlib.h>"
-                                    "int main() {"
-                                    "z_stream zstream;"
-                                    "return deflateInit(&zstream, Z_DEFAULT_COMPRESSION); }"
-                                    : [ FIncludes $(ZLIB_INCLUDES) ]
-                                    : "-lz" ] ;
-
-        if $(WITH_ZLIB)
-        {
-            ZLIB_LINKLIBS = -lz ;
-        }
-    }
-}
-
-if ! $(WITH_ZLIB)
-{   
-    WITH_PT_ZLIB = "yes" ;
-    ZLIB_INCLUDES = [ FDirName $(PT_TOP) src zlib include ] ;
-}
-
-Configure WITH_PT_ZLIB ;
-EchoOption --with-zlib : "Builtin zlib library" : $(WITH_PT_ZLIB:E="no") ;
-
-Configure ZLIB_INCLUDES ;
-EchoOption ZLIB_INCLUDES : "ZLib includes" ;
-
-Configure ZLIB_LINKLIBS ;
-EchoOption ZLIB_LINKLIBS : "ZLib libs" ;
-
-#############################################################################
 # Atomic operations
 #############################################################################
 
@@ -212,6 +175,93 @@ EchoOption SYSLIBS : "System lib flags" ;
 
 Configure NETLIBS ;
 EchoOption NETLIBS : "Network lib flags" ;
+
+#############################################################################
+# zlib compression library
+#############################################################################
+
+if --with-zlib in $(ARGV) 
+{
+    WITH_BUILTIN_ZLIB = yes ;
+    WITH_ZLIB = yes ;
+}
+
+if ! $(WITH_ZLIB)
+{
+    ZLIB_LINKLIBS ?= -lz ;
+
+    WITH_ZLIB = [ CheckBuildC++ "#include <zlib.h>"
+                                "int main() {"
+                                "z_stream zstream;"
+                                "return deflateInit(&zstream, Z_DEFAULT_COMPRESSION); }"
+                                : [ FIncludes $(ZLIB_INCLUDES) ]
+                                : $(ZLIB_LINKLIBS) ] ;
+}
+
+if ! $(WITH_ZLIB) || $(WITH_BUILTIN_ZLIB)
+{   
+    WITH_BUILTIN_ZLIB = yes ;
+    WITH_ZLIB = yes ;
+    ZLIB_INCLUDES = [ FDirName $(PT_TOP) src zlib ] ;
+    ZLIB_LINKLIBS = "" ;
+}
+
+Configure WITH_BUILTIN_ZLIB ;
+EchoOption --with-zlib : "Builtin zlib library" : $(WITH_BUILTIN_ZLIB:E="no") ;
+
+Configure ZLIB_INCLUDES ;
+EchoOption ZLIB_INCLUDES : "ZLib includes" ;
+
+Configure ZLIB_LINKLIBS ;
+EchoOption ZLIB_LINKLIBS : "ZLib libs" ;
+
+ZLIB = z ;
+
+if ! $(PRELIB)
+{
+    ZLIB = zlib ;
+}
+
+Configure ZLIB ;
+
+#############################################################################
+# PNG support with libpng
+#############################################################################
+
+if --with-libpng in $(ARGV) 
+{
+    WITH_BUILTIN_LIBPNG = yes ;
+    WITH_PNG = yes ;
+}
+
+if ! $(WITH_PNG)
+{
+    PNG_LINKLIBS ?= -lpng ;
+
+    WITH_PNG = [ CheckBuildC++ "#include <png.h>"
+                                "int main() {"
+                                "png_structp pngPtr;"
+                                "return 0; }"
+                                : [ FIncludes $(PNG_INCLUDES) ]
+                                : $(PNG_LINKLIBS) ] ;
+}
+
+if ! $(WITH_PNG) || $(WITH_BUILTIN_LIBPNG)
+{   
+    WITH_BUILTIN_LIBPNG = yes ;
+    WITH_PNG = yes ;
+    PNG_INCLUDES = [ FDirName $(PT_TOP) src libpng ] ;
+    PNG_LINKLIBS = "" ;
+}
+
+Configure WITH_BUILTIN_LIBPNG ;
+EchoOption --with-libpng : "Builtin libpng library" : $(WITH_BUILTIN_LIBPNG:E="no") ;
+
+Configure PNG_INCLUDES ;
+EchoOption PNG_INCLUDES : "PNG includes" ;
+
+Configure PNG_LINKLIBS ;
+EchoOption PNG_LINKLIBS : "PNG libs" ;
 
 #############################################################################
 # SSL libraries and includes

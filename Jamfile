@@ -114,9 +114,14 @@ SubInclude PT_TOP src Pt-Unit ;
 SubInclude PT_TOP src Pt-Xml ;
 SubInclude PT_TOP src Pt-Gfx ;
 
-if $(WITH_PT_ZLIB)
+if $(WITH_BUILTIN_ZLIB)
 {
     SubInclude PT_TOP src zlib ;
+}
+
+if $(WITH_BUILTIN_LIBPNG)
+{
+    SubInclude PT_TOP src libpng ;
 }
 
 if $(SYS)
