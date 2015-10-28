@@ -83,83 +83,150 @@ if ! $(SYS)
 {
     WITH_WIN32 = [ CheckBuildC++ "#include <windows.h>"
                                  "int main() { return 0; }" ] ;
+
     if $(WITH_WIN32)
     {
-        Load win32.jam ;
-    
-        ConfigurePsapi ;
-    
-        if $(WITH_PSAPI)
-        {
-            SYSLIBS += $(PSAPI_LIBS) ;
-        }
-    
-        ConfigureWsa ;
-    
-        if ! $(WITH_WSA)
-        {
-            Exit "ERROR: WSA is required." ;
-        }
-    
-        NETLIBS = $(WSA_LIBS) ;
         SYS = win32 ;
+
+        PSAPI_LINKLIBS ?= Psapi.lib ;
+
+        WITH_PSAPI = [ CheckBuildC++ "#include <windows.h>"
+                                     "#include <Psapi.h>"
+                                     "int main() { PROCESS_MEMORY_COUNTERS pmc;"
+                                     "GetProcessMemoryInfo( NULL, &pmc, sizeof(pmc) );"
+                                     "return 0; }"
+                                     : ""
+                                     : $(PSAPI_LINKLIBS) ] ;
+        
+        if ! $(WITH_PSAPI)
+        {
+            PSAPI_LINKLIBS = -lPsapi ;
+
+            WITH_PSAPI = [ CheckBuildC++ "#include <windows.h>"
+                                         "#include <Psapi.h>"
+                                         "int main() { PROCESS_MEMORY_COUNTERS pmc;"
+                                         "GetProcessMemoryInfo( NULL, &pmc, sizeof(pmc) );"
+                                         "return 0; }"
+                                         : ""
+                                         : $(PSAPI_LINKLIBS) ] ;
+        }
+
+        EchoOption PSAPI_LINKLIBS : "Psapi libs" ;
+        SYSLIBS += $(PSAPI_LINKLIBS) ;
     }
 }
 
 if ! $(SYS)
 {
-    Load posix.jam ;
-
-    ConfigurePosixClock ;
+    SYS = posix ;
+    
+    #
+    # System realtime clock
+    #
+    
+    WITH_POSIX_CLOCK = [ CheckBuildC++ "#include <time.h>"
+                                       "#include <sys/time.h>"
+                                       "int main() { timespec tp;"
+                                       "clock_gettime(CLOCK_MONOTONIC, &tp);"
+                                       "return 0; }"
+                                       : ""
+                                       : -lc ] ;
 
     if ! $(WITH_POSIX_CLOCK)
     {
-        WITH_MACH_CLOCK = [ CheckBuildC++ "#include <mach/mach_time.h>"
-                                          "int main() { mach_absolute_time(); return 0; }"
-                                        : ""
-                                        : "" ] ;
-                                        
-        EchoOption WITH_MACH_CLOCK : "Mach clock" ;
-        Configure WITH_MACH_CLOCK ;
+        POSIX_CLOCK_LINKLIBS = -lrt ;
+
+        WITH_POSIX_CLOCK = [ CheckBuildC++ "#include <time.h>"
+                                           "#include <sys/time.h>"
+                                           "int main() { timespec tp;"
+                                           "clock_gettime(CLOCK_MONOTONIC, &tp);"
+                                           "return 0; }"
+                                           : ""
+                                           : -lrt ] ;
     }
 
-    if ! $(WITH_POSIX_CLOCK) && ! $(WITH_MACH_CLOCK)
+    if ! $(WITH_POSIX_CLOCK)
+    {
+        POSIX_CLOCK_LINKLIBS = "" ;
+
+        WITH_MACH_CLOCK = [ CheckBuildC++ "#include <mach/mach_time.h>"
+                                          "int main() { mach_absolute_time(); return 0; }"
+                                          : ""
+                                          : "" ] ;
+    }
+
+    EchoOption POSIX_CLOCK_LINKLIBS : "Realtime clock libs" ;
+
+    if $(WITH_MACH_CLOCK)
+    {
+        EchoOption WITH_MACH_CLOCK : "Mach clock" : $(WITH_MACH_CLOCK:E="no") ;
+        Configure WITH_MACH_CLOCK ;
+    }
+    else if $(WITH_POSIX_CLOCK)
+    {
+        EchoOption WITH_POSIX_CLOCK : "POSIX clock" : $(WITH_POSIX_CLOCK:E="no") ;
+        Configure WITH_POSIX_CLOCK ;
+    }
+    else
     {
         Exit "ERROR: clocks are required." ;
     }
     
-    ConfigureDl ;
+    #
+    # dynamic library loader
+    #
+
+    WITH_DL = [ CheckBuildC++ "#include <dlfcn.h>"
+                              "int main() { dlopen(0,0); return 0; }"
+                              : ""
+                              : -lc ] ;
+
+    if ! $(WITH_DL)
+    {
+        DL_LINKLIBS = -ldl ;
+
+        WITH_DL = [ CheckBuildC++ "#include <dlfcn.h>"
+                                  "int main() { dlopen(0,0); return 0; }"
+                                  : ""
+                                  : $(DL_LINKLIBS) ] ;
+    }
+
+    EchoOption DL_LINKLIBS : "Dl libs" ;
 
     if ! $(WITH_DL)
     {
         Exit "ERROR: dl is required." ;
     }
 
-    ConfigurePThread ;
+    #
+    # POSIX threads
+    #
+
+    WITH_PTHREADS = [ CheckBuildC++ "#include <pthread.h>"
+                                    "int main() { pthread_t id; void* p;"
+                                    "pthread_join(id, &p); return 0; }"
+                                    : ""
+                                    : -lc ] ;
+
+    if ! $(WITH_PTHREADS)
+    {
+        PTHREAD_LINKLIBS = -lpthread ;
+
+        WITH_PTHREADS = [ CheckBuildC++ "#include <pthread.h>"
+                                        "int main() { pthread_t id; void* p;"
+                                        "pthread_join(id, &p); return 0; }"
+                                        : ""
+                                        : $(PTHREAD_LINKLIBS) ] ;
+    }
+
+    EchoOption PTHREAD_LINKLIBS : "Pthread libs" ;
 
     if ! $(WITH_PTHREADS)
     {
         Exit "ERROR: pthread is required." ;
     }
 
-    SYSLIBS += $(POSIX_CLOCK_LIBS) $(MACH_CLOCK_LIBS) $(DL_LIBS) $(PTHREAD_LIBS) ;
-
-    ConfigureUnixSockets ;
-
-    if ! $(WITH_UNIX_SOCKETS)
-    {
-        Exit "ERROR: unix sockets are required." ;
-    }
-
-    ConfigureNsl ;
-    
-    if ! $(WITH_NSL)
-    {
-        Exit "ERROR: nsl is required." ;
-    }
-
-    NETLIBS = $(UNIX_SOCKET_LIBS) $(NSL_LIBS) ;
-    SYS = posix ;
+    SYSLIBS +=  $(POSIX_CLOCK_LINKLIBS) $(PTHREAD_LINKLIBS) $(DL_LINKLIBS) ;
 }
 
 if $(TARGET_OS) = "aix"
@@ -171,10 +238,127 @@ EchoOption SYS : "Using subsystem" ;
 Configure SYS ;
 
 Configure SYSLIBS ;
-EchoOption SYSLIBS : "System lib flags" ;
+EchoOption SYSLIBS : "System libs" ;
+
+#############################################################################
+# Networking libraries and includes
+#############################################################################
+
+if $(SYS) = "win32"
+{
+    WSA_LINKLIBS ?= wsock32.lib ws2_32.lib Iphlpapi.lib ;
+
+    WITH_WSA = [ CheckBuildC++ "#define WIN32_LEAN_AND_MEAN"
+                                "#include <windows.h>"
+                                "#include <winsock2.h>"
+                                "int main() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
+                                "return 0; }"
+                                : ""
+                                : $(WSA_LINKLIBS) ] ;
+
+    if ! $(WITH_WSA)
+    {
+        WSA_LINKLIBS = winsock.lib Ws2.lib Iphlpapi.lib ;
+
+        WITH_WSA = [ CheckBuildC++ "#define WIN32_LEAN_AND_MEAN"
+                                    "#include <windows.h>"
+                                    "#include <winsock2.h>"
+                                    "int main() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
+                                    "return 0; }"
+                                    : ""
+                                    : $(WSA_LINKLIBS) ] ;
+    }
+
+    if ! $(WITH_WSA)
+    {
+        WSA_LINKLIBS = -lwsock32 -lws2_32 -lIphlpapi ;
+
+        WITH_WSA = [ CheckBuildC++ "#define WIN32_LEAN_AND_MEAN"
+                                    "#include <windows.h>"
+                                    "#include <winsock2.h>"
+                                    "int main() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
+                                    "return 0; }"
+                                    : ""
+                                    : $(WSA_LINKLIBS) ] ;
+    }
+
+    EchoOption WSA_LINKLIBS : "WSA2 libs" ;
+
+    if ! $(WITH_WSA)
+    {
+        Exit "ERROR: windows sockets are required." ;
+    }
+
+    NETLIBS += $(WSA_LINKLIBS) ;
+}
+
+if $(SYS) = posix
+{
+    # QNX can link programs without -lsocket, but needs it for libraries
+
+    UNIX_SOCKETS_LINKLIBS ?= -lsocket ;
+
+    WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
+                                        "#include <sys/socket.h>"
+                                        "int main() { return socket(0,0,0); }"
+                                        : ""
+                                        : $(UNIX_SOCKETS_LINKLIBS) ] ;
+
+    if ! $(WITH_UNIX_SOCKETS)
+    {
+        UNIX_SOCKETS_LINKLIBS = "" ;
+
+        WITH_UNIX_SOCKETS = [ CheckBuildC++ "#include <sys/types.h>"
+                                            "#include <sys/socket.h>"
+                                            "int main() { return socket(0,0,0); }"
+                                            : ""
+                                            : -lc ] ;
+    }
+
+    EchoOption UNIX_SOCKETS_LINKLIBS : "Unix sockets libs" ;
+
+    if ! $(WITH_UNIX_SOCKETS)
+    {
+        Exit "ERROR: unix sockets are required." ;
+    }
+
+    WITH_NSL = [ CheckBuildC++ "#include <netdb.h>"
+                               "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
+                               : ""
+                               : "-lc" ] ;
+
+    if ! $(WITH_NSL)
+    {
+        NSL_LINKLIBS ?= -lnsl ;
+
+        WITH_NSL = [ CheckBuildC++ "#include <netdb.h>"
+                                   "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
+                                   : ""
+                                   : $(NSL_LINKLIBS) ] ;
+    }
+    
+    if ! $(WITH_NSL)
+    {
+        NSL_LINKLIBS = -lsocket ;
+
+        WITH_NSL = [ CheckBuildC++ "#include <netdb.h>"
+                                   "int main() { gethostbyname(\"1.2.3.4\"); return 0; }"
+                                   : ""
+                                   : $(NSL_LINKLIBS) ] ;
+    }
+
+    EchoOption NSL_LINKLIBS : "network services libs" ;
+
+    if ! $(WITH_NSL)
+    {
+        Exit "ERROR: NSL is required." ;
+    }
+
+    NETLIBS += $(NSL_LINKLIBS) $(UNIX_SOCKETS_LINKLIBS) ;
+}
 
 Configure NETLIBS ;
-EchoOption NETLIBS : "Network lib flags" ;
+EchoOption NETLIBS : "Network libs" ;
 
 #############################################################################
 # zlib compression library
@@ -281,34 +465,38 @@ if --with-openssl in $(ARGV)
 
 if ! $(WITH_SSL)
 {
+    SSL_CHECK_LINKLIBS = $(SSL_LINKLIBS:E="-framework Foundation -framework Security") ;
+
     WITH_SSL = [ CheckBuildC++ "#include <Security/Security.h>"
                                "int main() {"
                                "SSLContextRef context;"
                                "SSLNewContext(false, &context);"
                                "return 0; }"
-                               : ""
-                               : "-framework Foundation" "-framework Security" ] ;
+                               : [ FIncludes $(SSL_INCLUDES) ]
+                               : $(SSL_CHECK_LINKLIBS) ] ;
 
     if $(WITH_SSL)
     {
         PT_SSL_IMPL = "applessl" ;
-        SSL_LINKLIBS = "-framework Foundation" "-framework Security" ;
+        SSL_LINKLIBS = $(SSL_CHECK_LINKLIBS) ;
     }
 }
 
 if ! $(WITH_SSL)
 {
+    SSL_CHECK_LINKLIBS = $(SSL_LINKLIBS:E="-lssl -lcrypto") ;
+
     WITH_SSL = [ CheckBuildC++ "#include <openssl/ssl.h>"
                                "int main() {"
                                "SSL_library_init();"
                                 "return 0; }"
                                : [ FIncludes $(SSL_INCLUDES) ]
-                               : -lssl -lcrypto ] ;
+                               : $(SSL_CHECK_LINKLIBS) ] ;
 
     if $(WITH_SSL)
     {
         PT_SSL_IMPL = "openssl" ;
-        SSL_LINKLIBS = -lssl -lcrypto ;
+        SSL_LINKLIBS = $(SSL_CHECK_LINKLIBS) ;
     }
 }
 
