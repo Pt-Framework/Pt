@@ -32,6 +32,7 @@
 #include "ApplicationImpl.h"
 #include "PaintSurfaceImpl.h"
 #include "Display.h"
+#include "ShaderProgram.h"
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
@@ -39,7 +40,10 @@
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/System/Clock.h>
 #include <Pt/System/Logger.h>
+
 #include <algorithm>
+#include <cstdlib> // rand()
+#include <ctime>
 
 
 PT_LOG_DEFINE("Pt.Hmi.Screen")
@@ -65,10 +69,20 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
   
   eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerInput );
 
+  _fboA = 0;
+  _fboB = 0;
+  _depthBuf = 0;
+  _textureA = 0;
+  _textureB = 0;
+  _mainProgram = 0;
+  _textProgram = 0;
 
-  _fbo = 0;
-   _texture = 0;
-   _program = 0;
+  _counter = 0;
+
+  _positionLoc = 0;
+  _texCoordLoc = 0;
+  _samplerLoc = 0;
+  _texColor = 0;
 
    initFBO();
 }
@@ -145,154 +159,129 @@ GLuint ScreenImpl::LoadShader( GLenum type, const char *shaderSrc )
 
 void ScreenImpl::initFBO()
 {
-   char vShaderStr[] =  
+  char vShader[] =  
       "attribute vec4 a_position;   \n"
       "attribute vec2 a_texCoord;   \n"
+      "attribute vec4 a_Color;      \n"
+      "varying vec4 v_Color;        \n"
       "varying vec2 v_texCoord;     \n"
       "void main()                  \n"
       "{                            \n"
       "   gl_Position = a_position; \n"
       "   v_texCoord = a_texCoord;  \n"
+      "   v_Color = a_Color;        \n"
       "}                            \n";
+
    
-   char fShaderStr[] =  
+   char fShader[] =  
       "precision mediump float;                            \n"
       "varying vec2 v_texCoord;                            \n"
+      "varying vec4 v_Color;                               \n"
       "uniform sampler2D s_texture;                        \n"
       "void main()                                         \n"
       "{                                                   \n"
-      "  gl_FragColor = texture2D( s_texture, v_texCoord );\n"
-      "}                                                   \n";
+      "   gl_FragColor = texture2D( s_texture, v_texCoord ) * v_Color; \n"
+      "}\n";
 
-  //glGenFramebuffers(1, &_fbo);
-  //glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+    char vShaderTexture[] =
+    "attribute vec4 a_position; \n"
+    "attribute vec2 a_texCoord; \n"
+    "varying vec2 v_texCoord; \n"
+    "void main() { \n"
+    "  gl_Position = a_position; \n"
+    "  v_texCoord = a_texCoord; \n"
+    "} \n";
 
-  //glGenTextures(1, &_texture);
-  //glBindTexture(GL_TEXTURE_2D, _texture);
-  //glTexImage2D( GL_TEXTURE_2D,
-  //              0,
-  //              GL_RGBA,
-  //              300, 300,
-  //              0,
-  //              GL_RGBA,
-  //              GL_UNSIGNED_BYTE,
-  //              NULL);
+   char fShaderTexture[] =
+    "precision mediump float;  \n"                          
+    "bvarying vec2 v_texCoord; \n"                           
+    "buniform sampler2D tex;  \n"                     
+    "void main() { \n" 
+    "  gl_FragColor = texture2D( tex, v_texCoord ); \n"
+    "}      \n";
 
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  //
-  //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _texture, 0);
- 
-  //// FBO status check
-  //GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-  //switch(status) 
-  //{
-  //case GL_FRAMEBUFFER_COMPLETE:
-  //  break;
-
-  //case GL_FRAMEBUFFER_UNSUPPORTED:
-  //  break;
-
-  //default:
-  //  break;
-  //}
-
-  //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-
-   // 2x2 Image, 3 bytes per pixel (R, G, B)
-   GLubyte pixels[44 * 3] =
-   {  
-      255,   0,   0, // Red
-        0, 255,   0, // Green
-        0,   0, 255, // Blue
-      255, 255,   0,  // Yellow
-
-      255,   0,   0, // Red
-        0, 255,   0, // Green
-        0,   0, 255, // Blue
-      255, 255,   0 , // Yellow
-
-      255,   0,   0, // Red
-        0, 255,   0, // Green
-        0,   0, 255, // Blue
-      255, 255,   0,  // Yellow
-
-      255,   0,   0, // Red
-        0, 255,   0, // Green
-        0,   0, 255, // Blue
-      255, 255,   0 , // Yellow
-
-      255,   0,   0, // Red
-        0, 255,   0, // Green
-        0,   0, 255, // Blue
-      255, 255,   0 , // Yellow
-
-      255,   0,   0, // Red
-        0, 255,   0, // Green
-        0,   0, 255, // Blue
-      255, 255,   0 , // Yellow
-
-      255,   0,   0, // Red
-        0, 255,   0, // Green
-        0,   0, 255, // Blue
-      255, 255,   0 , // Yellow
-
-      255,   0,   0, // Red
-        0, 255,   0, // Green
-        0,   0, 255, // Blue
-      255, 255,   0,  // Yellow
-
-      255,   0,   0, // Red
-        0, 255,   0, // Green
-        0,   0, 255, // Blue
-      255, 255,   0,  // Yellow
-
-      255,   0,   0, // Red
-        0, 255,   0, // Green
-        0,   0, 255, // Blue
-      255, 255,   0,  // Yellow
-
-      255,   0,   0, // Red
-        0, 255,   0, // Green
-        0,   0, 255, // Blue
-      255, 255,   0  // Yellow
-   };
-
-   // Use tightly packed data
-   glPixelStorei ( GL_UNPACK_ALIGNMENT, 1 );
-
-   // Generate a texture object
-   glGenTextures ( 1, &_texture );
-
-   // Bind the texture object
-   glBindTexture ( GL_TEXTURE_2D, _texture );
-
-   // Load the texture
-   glTexImage2D ( GL_TEXTURE_2D, 0, GL_RGB, 5, 8, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels );
-
-   // Set the filtering mode
-   glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-   glTexParameteri ( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-
+  // shader
   GLuint vertexShader;
   GLuint fragmentShader;
 
-  vertexShader = LoadShader( GL_VERTEX_SHADER, vShaderStr );
-  fragmentShader = LoadShader( GL_FRAGMENT_SHADER, fShaderStr );
+  vertexShader = LoadShader( GL_VERTEX_SHADER, vShader );
+  fragmentShader = LoadShader( GL_FRAGMENT_SHADER, fShader );
 
-  _program = glCreateProgram();
-  if( _program == 0 )
+  _mainProgram = glCreateProgram();
+  if( _mainProgram == 0 )
     return;
 
-  glAttachShader( _program, vertexShader );
-  glAttachShader( _program, fragmentShader );
+  glAttachShader( _mainProgram, vertexShader );
+  glAttachShader( _mainProgram, fragmentShader );
 
-  positionLoc = glGetAttribLocation ( _program, "a_position" );
-  texCoordLoc = glGetAttribLocation ( _program, "a_texCoord" );
+  glLinkProgram( _mainProgram );
+  GLint linked;
+  glGetProgramiv( _mainProgram, GL_LINK_STATUS, &linked );
+  if( ! linked ) 
+  {
+    GLint infoLen = 0;
 
-  samplerLoc = glGetUniformLocation ( _program, "s_texture" );
+    glGetProgramiv( _mainProgram, GL_INFO_LOG_LENGTH, &infoLen );
+
+    if( infoLen > 1 )
+    {
+      std::cerr << " linked failed" << std::endl;
+    }
+
+    glDeleteProgram( _mainProgram );
+    return;
+  }
+
+  GLint maxTextureSize;
+  glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+  PT_LOG_DEBUG("GL_MAX_TEXTURE_SIZE: " << maxTextureSize);
+  PT_LOG_DEBUG("OpenGL VERSION: " << glGetString(GL_VERSION));
+  PT_LOG_DEBUG("OpenGL GL_EXTENSIONS " << glGetString(GL_EXTENSIONS));
+
+  //create texture A
+  glEnable(GL_TEXTURE_2D);
+  glGenTextures(1, &_textureA);
+  glBindTexture(GL_TEXTURE_2D, _textureA);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+  // generate texture data
+  std::vector<GLubyte> data(256 * 256 * 4 * sizeof(GLubyte), 0xFFFF00FF);
+  GLubyte val = 0;
+  for( int i = 0; i < 256*256*4; i += 4 )
+  {
+    if( std::rand( /*std::time(0)*/ ) / RAND_MAX > 0.5 )
+      val = 0;
+    else
+      val = 255;
+
+    data[i] = data[i+1] = data[i+2] = val;
+    data[i+3] = 255;
+  }
+
+  //create texture B
+  glEnable(GL_TEXTURE_2D);
+  glGenTextures(1, &_textureB);
+  glBindTexture(GL_TEXTURE_2D, _textureB);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]);
+
+  //create fboA and attach texture A to it
+  glGenFramebuffers(1, &_fboA);
+  glBindFramebuffer(GL_FRAMEBUFFER, _fboA);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _textureA, 0);
+
+  //create fboB and attach texture B to it
+  glGenFramebuffers(1, &_fboB);
+  glBindFramebuffer(GL_FRAMEBUFFER, _fboB);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _textureB, 0);
+
 }
 
 
@@ -301,118 +290,14 @@ void ScreenImpl::onRender(PaintSurface& surface)
   PT_LOG_DEBUG("++++++++++ RENDERING SCREEN ++++++++++");
   PT_LOG_DEBUG("ScreenImpl::onRender: " << _display.width() 
                                  << ' ' << _display.height() );
+  _counter++;
 
-  glViewport(0, 0, surface.size().width(), surface.size().height());
-
-  GLfloat vVertices[] = { -0.5f,  0.5f, 0.0f,  // Position 0
-                            0.0f,  0.0f,        // TexCoord 0 
-                           -0.5f, -0.5f, 0.0f,  // Position 1
-                            0.0f,  1.0f,        // TexCoord 1
-                            0.5f, -0.5f, 0.0f,  // Position 2
-                            1.0f,  1.0f,        // TexCoord 2
-                            0.5f,  0.5f, 0.0f,  // Position 3
-                            1.0f,  0.0f         // TexCoord 3
-                         };
-   GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
+   _display.updateScreen();
+}
 
 
-   glUseProgram ( _program );
-
-   // Load the vertex position
-   glVertexAttribPointer ( positionLoc, 3, GL_FLOAT, 
-                           GL_FALSE, 5 * sizeof(GLfloat), vVertices );
-   // Load the texture coordinate
-   glVertexAttribPointer ( texCoordLoc, 2, GL_FLOAT,
-                           GL_FALSE, 5 * sizeof(GLfloat), &vVertices[3] );
-
-   glEnableVertexAttribArray ( positionLoc );
-   glEnableVertexAttribArray ( texCoordLoc );
-
-   // Bind the texture
-   glActiveTexture ( GL_TEXTURE0 );
-   glBindTexture ( GL_TEXTURE_2D, _texture);
-
-   // Set the sampler texture unit to 0
-   glUniform1i ( samplerLoc, 0 );
-
-   glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices );
-
-
- /* glBindTexture(GL_TEXTURE_2D, _texture);
-  glEnable(GL_TEXTURE_2D);
-  glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-
-  glViewport(0,0, 300, 300);
-  glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);*/
-
-
-
-  
-    // render main
-  /*glClearColor(0.f, 0.f, 1.f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  glEnable(GL_TEXTURE_2D);
-  glActiveTexture(GL_TEXTURE0);*/
-
-
-
-
-
-
-
-
-
-
-  //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-  //glClear(GL_COLOR_BUFFER_BIT);
-
-
-  //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-  //GLuint rboId;
-  //glGenRenderbuffers(1, &rboId);
-  //PT_LOG_DEBUG("glGenRenderbuffers: " << rboId );
-
-  //glBindRenderbuffer(GL_RENDERBUFFER, rboId);
-  //glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, 300, 300);
-  //glBindFramebuffer(GL_RENDERBUFFER, 0);
-  //
-  //GLuint fboId;
-  //glGenFramebuffers(1, &fboId);
-  //glBindFramebuffer(GL_FRAMEBUFFER, fboId);
-
-  //glFramebufferRenderbuffer(GL_FRAMEBUFFER,
-  //                          GL_COLOR_ATTACHMENT0,
-  //                          GL_RENDERBUFFER,
-  //                          rboId);
-
-  //GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-  //PT_LOG_DEBUG("glCheckFramebufferStatus: " << (status != GL_FRAMEBUFFER_COMPLETE) );
-
-  //glClearColor(0.5f, 0.6f, 0.7f, 1.0f);
-  //glClear(GL_COLOR_BUFFER_BIT);
-  ////glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-  
-  
-  
-  
-  _display.updateScreen();
-
-  // switch back to window-system-provided framebuffer
-  
-
-  //Window::onRender(surface);
-
-  // surface contains whole screen image now...
-  PT_LOG_DEBUG("########## BLIT SURFACE TO DISPLAY ##########");
-
-  eglSwapBuffers(_display.display(), _display.surface() );
+void ScreenImpl::RenderTextureToScreen(GLuint textId)
+{
 }
 
 

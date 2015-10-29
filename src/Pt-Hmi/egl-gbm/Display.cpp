@@ -308,6 +308,7 @@ void Display::updateScreen()
     drmHandleEvent(_fd, &drmEvent);
 
   gbm_surface_release_buffer(_gbm_surface, bo);
+
 }
 
 } // namespace Hmi

@@ -133,22 +133,29 @@ class ScreenImpl : public Window
   private:
     void initFBO();
     GLuint LoadShader( GLenum type, const char *shaderSrc );
+    void RenderTextureToScreen(GLuint textId);
   
   private:
     double        _dpi;
     Display&      _display;
 
 
-    GLuint _fbo;
-    GLuint _texture;
-    GLuint _program;
-
-     GLint  positionLoc;
-   GLint  texCoordLoc;
-   GLint samplerLoc;
+    GLuint _fboA; // frame buffer
+    GLuint _fboB; // frame buffer
     
-    //EGLDisplay&   _display;
-    //EGLSurface&   _winSurface;
+    GLuint _textureA;
+    GLuint _textureB;
+    GLuint _mainProgram;
+    GLuint _textProgram;
+
+    int _counter;
+
+    GLuint _depthBuf; // depth buffer
+
+    GLuint _positionLoc;
+    GLuint _texCoordLoc;
+    GLuint _samplerLoc;
+    GLuint _texColor;
 
 };
 
