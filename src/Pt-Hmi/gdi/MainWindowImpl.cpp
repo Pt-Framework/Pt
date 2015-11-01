@@ -243,7 +243,7 @@ void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam
 				break;
 
         case WM_MOUSELEAVE:
-           _window->onPointerLeaved();
+           _window->setPointedWidget(0);
         break;
     }
 }

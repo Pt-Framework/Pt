@@ -60,7 +60,6 @@ Widget::Widget()
 , PT_HMI_INIT_PROPERTY_VALUE(FlowDirection, Hmi::FlowLayoutDirection::LeftToRightTopToBottom)
 , PT_HMI_INIT_PROPERTY_VALUE(ShortcutKey, "")
 , _parent(0)
-, _containPointer(false)
 , _size(200,200)
 , _position( 0, 0)
 , _isWidgetFocused(false)
@@ -424,39 +423,17 @@ void Widget::onShortcutKey(KeyEvent::KeyState state)
 
 void Widget::onPointerEnter()
 {
-	_containPointer = true;  
-	Application::instance().mainScreen().setCursor( &Cursor.get() );
+	Application::instance().mainScreen().setCursor( &Cursor.get() );	
 }
 
 
 void Widget::onPointerLeaved()
 {	
-	_containPointer = false;
-
-	Application::instance().mainScreen().setCursor(0); 
 }
 
 		
 void Widget::onPointerInput(const PointerEvent& ev)
 {		
-	Gfx::PointF local = toClient(Gfx::PointF( ev.x(), ev.y() ) );
-	
-	if( !Enabled.get() )
-			return;
-	
-	if( !_containPointer )
-	{
-		if( contains( local ) )
-			onPointerEnter();
-	}
-	else
-	{
-		if( !contains( local ) )
-			onPointerLeaved();
-	}
-
-	for( size_t i = 0; i < children().size(); ++i)
-		_children[i]->onPointerInput(ev);
 }
 
 
@@ -747,5 +724,31 @@ void Widget::setSize(const Gfx::SizeF& size)
 	_isValid = false;
 }
 
+
+Widget* Widget::findWidget( const Gfx::PointF& pos )
+{
+	std::vector<Widget*>::reverse_iterator it = _children.rbegin();
+
+	if( !Visible.get() )
+			return 0;
+
+	for( ; it != _children.rend(); ++it )
+	{
+		Widget* child = *it;
+
+		Gfx::PointF localPos = child->toClient( pos );		
+		
+		if( child->contains( localPos ) )
+		{
+			Widget* found = child->findWidget( pos );
+
+			if( found )
+				return found;
+		}
+	}
+		
+	return contains( toClient( pos ) )  ? this : 0;
+}
+		
 
 }} //namespace

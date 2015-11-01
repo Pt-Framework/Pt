@@ -50,6 +50,7 @@ Window::Window(Window* parent)
 , _windowManager(*this)
 , _isClosed(true)
 , _windowFocused(false)
+, _pointedWidget( 0 )
 {
 	Name = std::string("Window");
 	AcceptFocus = false ;	
@@ -100,19 +101,38 @@ Window* Window::windowParent() const
 }
 
 
+void Window::setPointedWidget( Widget* widget ) 
+{
+	if( _pointedWidget == widget )
+		return;
+
+	if( _pointedWidget )			
+		_pointedWidget->onPointerLeaved();
+
+	_pointedWidget = widget;
+
+	if( _pointedWidget )
+		_pointedWidget->onPointerEnter();
+}
+
+
+
 void Window::onPointerInput(const PointerEvent& ev)
 {	
   if( _windowManager.pointerInput( ev ) )
+	{
+			this->setPointedWidget( 0 );	
       return;
+	}
 
-  if( ev.buttons()[_windowManager.actionButton()].state() == DeviceButton::Pressed && !_windowFocused  )
-    eventReceived().send( FocusEvent() );
+	Widget* widget = findWidget( Gfx::PointF( ev.x(), ev.y() ) );
 
-  if( !Enabled.get() )
-		return;	
+	this->setPointedWidget( widget );	
 
-	Widget::onPointerInput(ev);
+	if( widget && widget != this )
+		widget->onPointerInput(ev);		
 }
+
 
 
 void Window::onKeyInput(const KeyEvent& ev)
@@ -144,6 +164,7 @@ void Window::onKeyInput(const KeyEvent& ev)
 
   Widget::onKeyInput(ev);
 }
+
 
 void Window::onSizeEvent(const SizeEvent& ev)
 {	

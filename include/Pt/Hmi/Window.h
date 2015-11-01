@@ -98,11 +98,17 @@ class PT_HMI_API Window : public Widget
       return _windowFocused;
     }
 
+
     virtual void activate() = 0;
+
+		void setPointedWidget( Widget* widget);
 
 	protected:
 		Window(Window* parent = 0);    
+
 		void removeFocus();
+
+		
 
 	protected:		
 
@@ -120,6 +126,8 @@ class PT_HMI_API Window : public Widget
 
 	protected:
 		Window*				_winParent;
+		Widget*				_pointedWidget;
+
 		WindowManager _windowManager;		
 		bool	_isClosed;
     Pt::Signal<const Pt::Event&> _eventReceived;		

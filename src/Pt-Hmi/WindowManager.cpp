@@ -50,6 +50,7 @@ WindowManager::WindowManager(Window& parent)
 , _pointerLastState( DeviceButton::Released )
 , _focusOnPointerOver( false )
 , _actionButton(0)
+, _pointedWindow(0)
 {
 	Margin buttonMargin =  Margin(1,1,1,3);
 
@@ -252,6 +253,15 @@ Gfx::PointF WindowManager::toClient(const ChildWindow* w, const Gfx::PointF& p)
 
 void WindowManager::updateActive( const Pt::Hmi::PointerEvent& pointerEvent )
 {	
+	if( pointerEvent.buttons()[_actionButton].state() != DeviceButton::Pressed)
+			return;    
+
+  if( _sizingDirection != ResizeDirection::No)
+		return;
+		
+	if( _moving )
+		return;
+
 	for( int i = _windows.size() - 1;  i > -1; --i )
 	{
 		ChildWindow* w = _windows[i];
@@ -262,16 +272,10 @@ void WindowManager::updateActive( const Pt::Hmi::PointerEvent& pointerEvent )
 			continue;
 
 		const Gfx::PointF& client = toClient( w,Gfx::PointF( pointerEvent.x(), pointerEvent.y() ) );
-				 
-		if( w->hasPointer() && !w->contains( client ) && w->Enabled.get() && !_moving && _sizingDirection == ResizeDirection::No )
-			w->onPointerLeaved();
-							
+				 							
 		if( w == active() )
 			return;
-
-		if( pointerEvent.buttons()[_actionButton].state() != DeviceButton::Pressed )
-			return;    
-					
+							 
 		activate( w );    
 		return;
 	}	 	
@@ -461,68 +465,43 @@ bool WindowManager::isMoving( const ChildWindow* w, const Pt::Hmi::PointerEvent&
 }
 
 
-ResizeDirection::Type WindowManager::isSizing( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev )
-{
-	ResizeDirection::Type resizeDir = ResizeDirection::No;
+ResizeDirection::Type WindowManager::getSizingDirection( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev )
+{	
+	const Gfx::SizeF  wsize = w->Size.get();
+	const Gfx::PointF wpos = w->Position.get();
+	double titleHeight = _titleBarPanel.Size.get().height();
 
-  if( w->WindowBorder.get() != WindowBorder::Sizeable  ||  _pointerLastState !=  DeviceButton::Released )
-		return resizeDir;	
+	std::clog << "EVENT: "<< ev.x() << "x" << ev.y() << " WPOS: " << wpos.x() << "." << wpos.y() << " "<< _borderWidth << std::endl;
+	bool left = ev.x() < (wpos.x() +	_borderWidth);
+	bool right = ev.x() >= wpos.x() + _borderWidth + wsize.width();
+	bool top = ev.y() < wpos.y() + _borderWidth;
+	bool bottom = ev.y() >= wpos.y() + _borderWidth + titleHeight + wsize.height();
 
-	const Gfx::SizeF	size   = w->Size.get();
-	const double		border = _borderWidth;
-	const double		sizeR  = size.width();
-	const double		sizeB  = size.height() + _titleBarPanel.Size.get().height();
-	Screen& screen = _app.mainScreen();
-	
-	Gfx::PointF localPos( ev.x() - w->Position.get().x(), ev.y() - w->Position.get().y() );  
+	//if(top && left)
+	//	return ResizeDirection::NorthWest;
 
-	if( contains(w, localPos) )
-	{
-		if(localPos.x() < border && localPos.y() <  border)
-		{//Corner NW
-			screen.setCursor( &Cursor::sizeNWSECursor() );
-			resizeDir = ResizeDirection::NorthWest;
-		}	
-		else if(localPos.x() > sizeR && localPos.y() < border)
-		{//corner NE
-			screen.setCursor( &Cursor::sizeNESWCursor() );
-			resizeDir = ResizeDirection::NorthEast;
-		}
-		else if(localPos.x() < border && localPos.y() > sizeB )
-		{//corner SW
-			screen.setCursor( &Cursor::sizeNESWCursor() );					
-			resizeDir = ResizeDirection::SouthWest;
-		}
-		else if(localPos.x() > sizeR &&  localPos.y() > sizeB )
-		{//corner SE          
-			screen.setCursor( &Cursor::sizeNWSECursor() );
-			resizeDir = ResizeDirection::SouthEast;
-		}
-		else
-		{
-			if( localPos.x() < border)				
-			{//West            
-				screen.setCursor( &Cursor::sizeWECursor() );
-				resizeDir = ResizeDirection::West;
-			}
-			else if(localPos.x() > sizeR )
-			{//East
-				screen.setCursor( &Cursor::sizeWECursor() );
-				resizeDir = ResizeDirection::East;
-			}
-			else if( localPos.y() < border)
-			{//North
-				screen.setCursor( &Cursor::sizeNSCursor() );
-				resizeDir = ResizeDirection::North;
-			}
-			else if(localPos.y() > sizeB)
-			{//South
-				screen.setCursor( &Cursor::sizeNSCursor() );
-				resizeDir = ResizeDirection::South;			
-			}
-		}
-	}	
-	return resizeDir;
+	//if(top && right)
+	//	return ResizeDirection::NorthEast;
+	//
+	//if(bottom && left)
+	//	return ResizeDirection::SouthWest;
+	//
+	//if(bottom && right)
+	//	return ResizeDirection::SouthEast;
+
+	if(left)				
+		return ResizeDirection::West;
+
+	if(right)
+		return ResizeDirection::East;
+
+	if(top)
+		return ResizeDirection::North;
+
+	if(bottom)
+		return ResizeDirection::South;			
+
+	return ResizeDirection::No;			
 }
 
 
@@ -560,7 +539,7 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 }
 
 
-ChildWindow* WindowManager::windowByPoint( const Gfx::PointF& pos )
+ChildWindow* WindowManager::findWindow( const Gfx::PointF& pos )
 {
 	for( int i = _windows.size() - 1;  i > -1; --i )
 	{
@@ -580,6 +559,46 @@ ChildWindow* WindowManager::windowByPoint( const Gfx::PointF& pos )
 	return 0;
 }
 
+void WindowManager::setPointedWindow( ChildWindow* window )
+{
+	if( _pointedWindow == window )
+		return;
+
+	if( _pointedWindow )
+		_pointedWindow->setPointedWidget(0);
+
+	_pointedWindow = window;
+}
+
+
+void WindowManager::setSizingCursor( ResizeDirection::Type type )
+{
+	Screen& screen = _app.mainScreen();
+
+	switch( type )
+	{
+		case ResizeDirection::East:
+		case ResizeDirection::West:
+			screen.setCursor( &Hmi::Cursor::sizeWECursor() );
+		break;
+
+		case ResizeDirection::NorthEast:
+		case ResizeDirection::SouthWest:
+			screen.setCursor( &Hmi::Cursor::sizeNESWCursor() );
+		break;
+
+		case ResizeDirection::North:		
+		case ResizeDirection::South:
+			screen.setCursor( &Hmi::Cursor::sizeNSCursor() );
+		break;
+		
+		case ResizeDirection::NorthWest:
+		case ResizeDirection::SouthEast:
+			screen.setCursor( &Hmi::Cursor::sizeNWSECursor() );
+		break;		
+	}
+}
+
 
 bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 {
@@ -590,7 +609,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 		_sizingDirection = ResizeDirection::No;
 		_moving = false;
 		_pointerLastState = pointerEvent.buttons()[_actionButton].state();        
-		screen.setCursor( &Cursor::defaultCursor() );
+		setPointedWindow(0);
 		return false;
 	}
 
@@ -605,7 +624,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 	ChildWindow* childWindow = 0;
 	
 	if( _sizingDirection == ResizeDirection::No && !_moving )
-			childWindow = windowByPoint( Gfx::PointF( pointerEvent.x(),  pointerEvent.y() ) );
+			childWindow = findWindow( Gfx::PointF( pointerEvent.x(),  pointerEvent.y() ) );
 	else
 			childWindow = active();
 
@@ -614,8 +633,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 		_sizingDirection = ResizeDirection::No;
 		_moving = false;
     _pointerLastState = pointerEvent.buttons()[_actionButton].state();    
-		screen.setCursor( &Cursor::defaultCursor() );
-    
+    setPointedWindow(0);
 		return false;
 	}
 
@@ -628,39 +646,43 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 	{
 	  doMoving( childWindow, pointerEvent );		
 	  doSizing( childWindow, pointerEvent );				
-    _pointerLastState = pointerEvent.buttons()[_actionButton].state();
+    _pointerLastState = pointerEvent.buttons()[_actionButton].state();		
     return true;
   }
 
 	_lastSizePoint = Gfx::PointF( pointerEvent.x(), pointerEvent.y() ) ;
-
+	
 	_moving = isMoving( childWindow, pointerEvent );	
 
 	if( _moving )
-  {
+  {		
     _pointerLastState = pointerEvent.buttons()[_actionButton].state();
 		return true;
   }
-
-	_sizingDirection = isSizing( childWindow, pointerEvent );	
-		
-  if( _sizingDirection != ResizeDirection::No)
-  {
-    _pointerLastState = pointerEvent.buttons()[_actionButton].state();
-		return true;
-  }
-		
-  if( !childWindow->Enabled.get() )
-  {
-    _pointerLastState = pointerEvent.buttons()[_actionButton].state();
-		return true;
-  }
-
-	if( childWindow->contains(Gfx::PointF( localMouseEvent.x(), localMouseEvent.y() ) ) )	
-    childWindow->eventReceived().send( localMouseEvent );
 	
-  _pointerLastState = pointerEvent.buttons()[_actionButton].state();
-  return true;
+	ResizeDirection::Type sizingDirection = getSizingDirection( childWindow, pointerEvent );	
+
+	setSizingCursor( sizingDirection );
+
+	_sizingDirection = ResizeDirection::No;		
+
+	if( sizingDirection != ResizeDirection::No )
+	{
+		if( pointerEvent.buttons()[_actionButton].state() == DeviceButton::Pressed )
+		{
+			_sizingDirection  = sizingDirection;		
+			_pointerLastState = pointerEvent.buttons()[_actionButton].state();
+		}		
+
+		setPointedWindow(0);
+		return true;
+  }
+
+	setPointedWindow( childWindow );
+	childWindow->eventReceived().send( localMouseEvent );
+	_pointerLastState = pointerEvent.buttons()[_actionButton].state();
+
+	return true;
 }
 
 }} // namespace

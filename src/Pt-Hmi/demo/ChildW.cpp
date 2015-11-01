@@ -17,8 +17,10 @@ ChildW::ChildW()
 	//Panel  
 	_mainPanel.Size =Gfx::SizeF(800,600);
 	_mainPanel.Position =Gfx::PointF(20,20);
+	_mainPanel.Caption = "MainPanel";
 	_mainPanel.PanelBorderStyle = Pt::Hmi::BorderStyle::Single;  
 	_mainPanel.Dock = Docking::Fill;	
+	_mainPanel.BackColor = Gfx::Color(1,0,0 );
 	_mainPanel.BackgroundImageLayout = Pt::Hmi::ImageLayout::Strech;    	
 
 	//Text	
@@ -67,7 +69,7 @@ ChildW::ChildW()
 	_childWindow2.addChild(&_closeButton);	  	
 	_childWindow2.Position =Gfx::PointF(10,10);	
 	_childWindow2.Size =Gfx::SizeF(420,300);
-  _childWindow2.Caption = "Child 2";	
+  _childWindow2.Caption = "Child A";	
 	_childWindow2.addChild(&_mainPanel);
 	_childWindow2.Visible = true;
 

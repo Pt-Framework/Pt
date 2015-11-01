@@ -90,6 +90,7 @@ void Cursor::loadCursor( std::istream& pngStream, const Gfx::Color& alphaColor, 
 		}
 	}			
 
+	im->setColor(0,0, Gfx::Color(0,1,0) );
   fromImage(*im, cursor);
   delete im;
 }

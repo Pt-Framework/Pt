@@ -102,6 +102,10 @@ class WindowManager : public Pt::Connectable
   private:		
     bool contains( const ChildWindow* w, const Gfx::PointF& p );
 
+		void setSizingCursor( ResizeDirection::Type type );
+			
+		ResizeDirection::Type getSizingDirection( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );
+
 		ResizeDirection::Type isSizing( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );	
     bool isMoving ( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );
 
@@ -115,7 +119,9 @@ class WindowManager : public Pt::Connectable
 		Gfx::PointF toClient(const ChildWindow* w, const Gfx::PointF& p);  
 
 		ChildWindow* active();		
-		ChildWindow* windowByPoint( const Gfx::PointF& pos );
+		ChildWindow* findWindow( const Gfx::PointF& pos );
+
+		void setPointedWindow( ChildWindow* window );
 
     
 	private:
@@ -140,6 +146,7 @@ class WindowManager : public Pt::Connectable
 		Button                    _minButton;
     Panel                     _titleBarPanel;
     Label                     _titleLabel;
+		ChildWindow*							_pointedWindow;
 };
 
 }} // namespace

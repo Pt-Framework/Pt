@@ -164,11 +164,6 @@ class PT_HMI_API Widget : public Pt::Connectable
 
 		void mnemonic();
 
-		bool hasPointer() const
-		{
-			return _containPointer;
-		}
-
 		Gfx::PointF toClient(const Gfx::PointF& globalPoint);
 
 		Gfx::PointF fromClient(const Gfx::PointF& localPoint);
@@ -233,20 +228,14 @@ class PT_HMI_API Widget : public Pt::Connectable
 
 	public:
 		virtual void onPointerLeaved();
+		virtual void onPointerEnter();		
 		virtual void onPointerInput(const PointerEvent& ev);		
     virtual void onKeyInput(const KeyEvent& ev);
 
 	protected:
 		virtual void onInvalidate();
 		virtual void onRender(PaintSurface& paintSurface);
-		
-
 		virtual void onLayout( PaintSurface& surface );
-
-		
-
-    virtual void onPointerEnter();		
-		
 		virtual void onMnemonic();
 		virtual void onActionKey(KeyEvent::KeyState state);
 		virtual void onShortcutKey(KeyEvent::KeyState state);	  
@@ -263,6 +252,8 @@ class PT_HMI_API Widget : public Pt::Connectable
 		virtual void setCaption( const std::string& c);
 
 	protected:
+		Widget* findWidget( const Gfx::PointF& pos );
+
 		const Gfx::SizeF& size() const
 		{
 			return _size;
@@ -303,7 +294,6 @@ class PT_HMI_API Widget : public Pt::Connectable
 		std::vector<Widget*>			 _children;	
 		Widget*										 _mnemonicWidget;	
 		std::string								 _mnemonicKey;
-		bool											 _containPointer;	
 		Gfx::SizeF									_size;
 		Gfx::PointF                _position;
 		bool											  _isWidgetFocused;
