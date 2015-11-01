@@ -301,6 +301,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WidgetView.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\demo\AtesionIcon.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\demo\ChildW.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\demo\DemoImage.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\demo\Dialog1.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\demo\Dialog2.h" />
@@ -473,6 +474,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Button.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ChildWindow.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\demo\ChildW.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\Dialog1.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\Dialog2.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\Main.cpp" />

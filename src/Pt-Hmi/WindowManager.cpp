@@ -250,7 +250,7 @@ Gfx::PointF WindowManager::toClient(const ChildWindow* w, const Gfx::PointF& p)
 }
 
 
-bool WindowManager::updateActive( const Pt::Hmi::PointerEvent& pointerEvent )
+void WindowManager::updateActive( const Pt::Hmi::PointerEvent& pointerEvent )
 {	
 	for( int i = _windows.size() - 1;  i > -1; --i )
 	{
@@ -263,20 +263,18 @@ bool WindowManager::updateActive( const Pt::Hmi::PointerEvent& pointerEvent )
 
 		const Gfx::PointF& client = toClient( w,Gfx::PointF( pointerEvent.x(), pointerEvent.y() ) );
 				 
-		if( w->hasPointer()  && !w->contains( client ) && w->Enabled.get() && !_moving && _sizingDirection == ResizeDirection::No )
+		if( w->hasPointer() && !w->contains( client ) && w->Enabled.get() && !_moving && _sizingDirection == ResizeDirection::No )
 			w->onPointerLeaved();
 							
 		if( w == active() )
-			return true;
+			return;
 
 		if( pointerEvent.buttons()[_actionButton].state() != DeviceButton::Pressed )
-			return false;    
+			return;    
 					
 		activate( w );    
-		return true;
-	}	 
-
-	return false;
+		return;
+	}	 	
 }
 
 
@@ -557,8 +555,29 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 
 	w->eventReceived().send( _positionEvent );
 	
-	_movingOffset =Gfx::PointF( point.x() , point.y() );  
+	_movingOffset = Gfx::PointF( point.x() , point.y() );  
 	invalidate();
+}
+
+
+ChildWindow* WindowManager::windowByPoint( const Gfx::PointF& pos )
+{
+	for( int i = _windows.size() - 1;  i > -1; --i )
+	{
+		ChildWindow* w = _windows[i];
+
+		if( !w->Visible.get() )
+			continue;
+
+		Gfx::PointF local( pos.x() - w->Position.get().x() , pos.y() - w->Position.get().y() );
+
+		if( !contains( w, local ) )
+			continue;
+
+		return w;
+	}
+
+	return 0;
 }
 
 
@@ -581,23 +600,20 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 		_moving = false;
 	}
 
-	if( _sizingDirection == ResizeDirection::No && !_moving )
-	{
-		if( !updateActive( pointerEvent ) )
-		{
-	       _pointerLastState = pointerEvent.buttons()[_actionButton].state();
-			screen.setCursor( &Cursor::defaultCursor() );  		
-			return false;
-		}		
-	}
+	updateActive( pointerEvent );
 
-	ChildWindow* childWindow = active();
+	ChildWindow* childWindow = 0;
+	
+	if( _sizingDirection == ResizeDirection::No && !_moving )
+			childWindow = windowByPoint( Gfx::PointF( pointerEvent.x(),  pointerEvent.y() ) );
+	else
+			childWindow = active();
 
 	if( childWindow == 0 )
 	{
 		_sizingDirection = ResizeDirection::No;
 		_moving = false;
-    	_pointerLastState = pointerEvent.buttons()[_actionButton].state();    
+    _pointerLastState = pointerEvent.buttons()[_actionButton].state();    
 		screen.setCursor( &Cursor::defaultCursor() );
     
 		return false;
@@ -616,7 +632,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
     return true;
   }
 
-	_lastSizePoint =Gfx::PointF( pointerEvent.x(), pointerEvent.y() ) ;
+	_lastSizePoint = Gfx::PointF( pointerEvent.x(), pointerEvent.y() ) ;
 
 	_moving = isMoving( childWindow, pointerEvent );	
 

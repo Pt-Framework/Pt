@@ -1302,6 +1302,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\ShaderProgram.h">
       <Filter>Pt-Hmi\egl-gbm</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\demo\ChildW.h">
+      <Filter>Pt-Hmi\demo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2392,6 +2395,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\ShaderProgram.cpp">
       <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\demo\ChildW.cpp">
+      <Filter>Pt-Hmi\demo</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

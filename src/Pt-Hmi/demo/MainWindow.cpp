@@ -44,42 +44,7 @@ namespace Hmi{
 namespace Demo{
 
 MainWindow::MainWindow()
-{
-	init();	
-}
-
-MainWindow::~MainWindow()
-{
-}
-
-
-void MainWindow::init()
 {	
-
-	{//Icon
-		std::stringstream memoryStream;
-		
-		memoryStream.write((char*)Pt::Forms::Atesion::icon, Pt::Forms::Atesion::iconSize);	
-		
-		Gfx::Image* im =Gfx::ImageReader::read(memoryStream);
-
-		//Generate Alpha channel
-		for( size_t y = 0;  y < im->height(); ++y )
-		{
-			for( size_t x = 0;  x < im->width(); ++x )
-			{
-				Gfx::Color color =  im->color(x,y);
-				
-				if( color.blue() == 1 && color.red() == 1 && color.green() == 1)
-					color.setAlpha(0);
-			}
-		}			
-
-    Icon = *im;
-	  delete im;
-	}
-  
-	
 	Position =Gfx::PointF(0,0);
 	Size =Gfx::SizeF(600,400);
 	ShowTitle = true;	
@@ -89,117 +54,20 @@ void MainWindow::init()
 	StartPostion = WindowStartPosition::CenterParent;
 	
   State = Hmi::WindowState::Normal;
-	StartPostion = Hmi::WindowStartPosition::CenterParent;
-	Closed += Pt::slot(*this, &MainWindow::onClosed);
+	StartPostion = Hmi::WindowStartPosition::CenterParent;	
 	BackColor =Gfx::Color(0.5,0.5,0.5);
 
-  //Panel
-  
-	_mainPanel.Size =Gfx::SizeF(800,600);
-	_mainPanel.Position =Gfx::PointF(20,20);
-	_mainPanel.PanelBorderStyle = Pt::Hmi::BorderStyle::Single;  
-	_mainPanel.Dock = Docking::Fill;
-	{
-	/*
-		std::stringstream memoryStream;
-		memoryStream.write((char*)Pt::Forms::DemoImage::image, Pt::Forms::DemoImage::imageSize);					
+	_child1.Position = Gfx::PointF( 200, 200 );
+	_child1.Caption = "Child 1";
+	_child2.Caption = "Child 2";
 
-		std::auto_ptr<Gfx::Image> im(Gfx::ImageReader::read(memoryStream));
-		_mainPanel.BackgroundImage = *im;		
-		*/
-	}
+	addChildWindow( _child1 );
+	addChildWindow( _child2 );
 
-	
-	_mainPanel.BackgroundImageLayout = Pt::Hmi::ImageLayout::Strech;    	
-
-	//Text	
-
-	_textLabel.AutoSize = true;
-	_textLabel.Margin = Hmi::Margin(10);
-	_textLabel.Size =Gfx::SizeF(50,40);
-	_textLabel.Caption = std::string("T&his is a Platinum C++");  
-	_textLabel.Position =Gfx::PointF(20,20);
-	_textLabel.ForeColor =Gfx::Color(1,0,0,0);
-	_textLabel.UseMnemonic = true;	
-	_textLabel.BackColor =Gfx::Color(1,1,1,0);
-  _textLabel.bindMnemonicToWidget(_toggleButton);
-  _textLabel.Cursor = Hmi::Cursor::waitCursor();
-	_mainPanel.addChild(&_textLabel);
-	
-	//Toggle button
-
-	_toggleButton.ButtonType = Hmi::ButtonType::Toggle;
-	_toggleButton.Caption = std::string("Toggle Me [CTRL+I]");
-	_toggleButton.ShortcutKey = std::string("C//i");
-	_toggleButton.Position =Gfx::PointF(20,60);
-	_toggleButton.Size =Gfx::SizeF(150,25);		
-	_mainPanel.addChild(&_toggleButton);
-
-	//Dialog button  
-	_dialogButton.ButtonType = Hmi::ButtonType::Press;
-	_dialogButton.Caption = std::string("&&Dia&log [CTRL+D]&");
-	_dialogButton.ShortcutKey = std::string("C//d");
-	_dialogButton.Position =Gfx::PointF(20,100);
-	_dialogButton.Size =Gfx::SizeF(150,25);	
-	_dialogButton.UseMnemonic = true;
-	_dialogButton.Clicked  += Pt::slot(*this, &MainWindow::onShowDialog);
-	
-	_mainPanel.addChild(&_dialogButton);
-	
-	//Close button
-	_closeButton.ButtonType = Hmi::ButtonType::Press;
-	_closeButton.Caption = std::string("Close App [CTRL+X]");
-	_closeButton.ShortcutKey = std::string("C//x");
-	_closeButton.Position =Gfx::PointF(590,525);
-	_closeButton.Size =Gfx::SizeF(150,25);
-	_closeButton.Clicked += Pt::slot(*this, &MainWindow::onClosed);
-	_closeButton.Size =Gfx::SizeF(20, 40);
-	_closeButton.Dock = Docking::Bottom;
-	_closeButton.Margin = Hmi::Margin(5);
-
-  	
-//  _childWindow1.Cursor = Hmi::Cursor::waitCursor();
-	_childWindow1.Position = Gfx::PointF(10,10);
-	_childWindow1.Size =Gfx::SizeF(520,350);
-	_childWindow1.Visible = true;
-  _childWindow1.Caption = "Child 1";
-  _childWindow1.Icon = Icon;
-	_childWindow1.addChildWindow( _childWindow2 );	
-		
-	_childWindow2.addChild(&_closeButton);	  	
-	_childWindow2.Position =Gfx::PointF(10,10);	
-	_childWindow2.Size =Gfx::SizeF(420,300);
-  _childWindow2.Caption = "Child 2";	
-	_childWindow2.addChild(&_mainPanel);
-	_childWindow2.Visible = true;
-
-  
-	addChildWindow( _childWindow1 );	
-	
-/*
-	_drawBuffer.resize(  Gfx::Size( 60, 60) );
-
-	Gfx::ImagePainter painter( _drawBuffer );
-
-	painter.setPen( Gfx::Pen( 1, Gfx::Color( 1,0,0 )) );
-	painter.drawLine( Gfx::PointF( 10,10), Gfx::PointF( 15,15));
-	BackgroundImage = _drawBuffer;	
-	*/
-	
-	
-/*
-	_timer.setActive( Application::instance().loop() );
-	_timer.start(50);
-	_timer.timeout() += Pt::slot(*this, &MainWindow::onTimeout);
-	*/
 }
 
-void MainWindow::onShowDialog()
+MainWindow::~MainWindow()
 {
-	Dialog1 dialog;
-	dialog.Size = Gfx::SizeF(500,300 );
-
-	dialog.doModal(this);		
 }
 
 
@@ -207,43 +75,6 @@ void MainWindow::show()
 {
 	Visible = true;	
 	invalidate();  
-}
-
-
-void MainWindow::onClosed()
-{
-	close();
-	Pt::Hmi::Application::instance().exit();
-}
-
-void MainWindow::onTimeout()
-{
-	Pt::System::Clock clock;
-	
-	clock.start();
-
-  Gfx::PointF pos = Position.get();
-
-	pos.addX( 1 );
-
-	if( pos.x() >  200 )
-			pos.setX( 0 );
-			
-	Position = pos;	
-	invalidate();
-	Pt::Timespan span = clock.stop();
-	std::clog<<"Time=" << span.toUSecs()/1000.0 <<" ms" << std::endl;
-}
-
-void MainWindow::onRender(PaintSurface& paintSurface)
-{
-	Window::onRender( paintSurface );
-	/*
-	Hmi::Painter& painter = paintSurface.painter(); 
-	
-	painter.setPen( Gfx::Pen(1, Gfx::Color( 0,1,0 )) );
-	painter.drawLine( Gfx::PointF( 10,10+5), Gfx::PointF( 15,15+5));
-	*/
 }
 
 }}}

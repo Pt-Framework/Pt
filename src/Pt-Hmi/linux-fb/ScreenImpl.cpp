@@ -64,9 +64,6 @@ ScreenImpl::~ScreenImpl()
 
 void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 {		
-	//Pt::System::Clock clock;
-	//clock.start();
-
 	_drawCursor =  true;
 
 	if( !_cursorBackground.empty() )
@@ -79,8 +76,6 @@ void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
 	
 	if( _drawCursor )
 		updateScreen();
-
-	//std::clog << "screen update: " << clock.stop().toUSecs() / 1000.0 << " msecs" << std::endl;
 }
 
 

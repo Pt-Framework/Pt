@@ -67,9 +67,7 @@ class WindowManager : public Pt::Connectable
 		
 		bool pointerInput( const Pt::Hmi::PointerEvent& pointerEvent );
 
-		bool keyInput( const Pt::Hmi::KeyEvent& keyEvent );		 
-		
-		ChildWindow* active();
+		bool keyInput( const Pt::Hmi::KeyEvent& keyEvent );		 			
 
 		const std::vector<ChildWindow*>&	windows() const
 		{
@@ -110,11 +108,15 @@ class WindowManager : public Pt::Connectable
     void doSizing( ChildWindow* w, const PointerEvent& ev );
 		void doMoving( ChildWindow* w, const PointerEvent& ev );
 		
-		bool updateActive( const Pt::Hmi::PointerEvent& mouseEvent );
+		void updateActive( const Pt::Hmi::PointerEvent& mouseEvent );
 	
     Window* getFosusedWindow(WindowManager* manager);
 
 		Gfx::PointF toClient(const ChildWindow* w, const Gfx::PointF& p);  
+
+		ChildWindow* active();		
+		ChildWindow* windowByPoint( const Gfx::PointF& pos );
+
     
 	private:
 		Application&              _app;  

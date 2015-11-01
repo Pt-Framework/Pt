@@ -27,15 +27,12 @@
 #define Pt_Hmi_Demo_MainWindow_h
 
 #include <Pt/Hmi/MainWindow.h>
-#include <Pt/Hmi/Button.h>
-#include <Pt/Hmi/Panel.h>
-#include <Pt/Hmi/Label.h>
-#include <Pt/Hmi/Property.h>
-#include <Pt/System/Timer.h>
+#include "ChildW.h"
 
 namespace Pt{
 namespace Hmi{
 namespace Demo{
+
 
 class MainWindow : public Pt::Hmi::MainWindow
 {
@@ -45,25 +42,10 @@ class MainWindow : public Pt::Hmi::MainWindow
 
 		void show();
 
-	protected:
-		void init();
-
 	private:
-		void onClosed();
-		void onShowDialog();
+		ChildW _child1;
+		ChildW _child2;
 
-		void onTimeout();
-		virtual void onRender(PaintSurface& paintSurface);
-	private:	
-		Pt::Hmi::Panel  _mainPanel;	
-		Pt::Hmi::Button _closeButton;
-		Pt::Hmi::Button _toggleButton;
-		Pt::Hmi::Button _dialogButton;
-		Pt::Hmi::Label  _textLabel;	
-		ChildWindow     _childWindow1;
-		ChildWindow     _childWindow2;
-		Gfx::Image			  _drawBuffer;
-		Pt::System::Timer _timer;
 }; 
 
 }}}
