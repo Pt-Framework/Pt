@@ -124,17 +124,21 @@ if ! $(SYS)
     # System realtime clock
     #
     
+    # Linux can link programs without -lrt, but needs it to run
+
+    POSIX_CLOCK_LINKLIBS ?= -lrt ;
+
     WITH_POSIX_CLOCK = [ CheckBuildC++ "#include <time.h>"
                                        "#include <sys/time.h>"
                                        "int main() { timespec tp;"
                                        "clock_gettime(CLOCK_MONOTONIC, &tp);"
                                        "return 0; }"
                                        : ""
-                                       : -lc ] ;
+                                       : $(POSIX_CLOCK_LINKLIBS) ] ;
 
     if ! $(WITH_POSIX_CLOCK)
     {
-        POSIX_CLOCK_LINKLIBS = -lrt ;
+        POSIX_CLOCK_LINKLIBS = "" ;
 
         WITH_POSIX_CLOCK = [ CheckBuildC++ "#include <time.h>"
                                            "#include <sys/time.h>"
@@ -142,7 +146,7 @@ if ! $(SYS)
                                            "clock_gettime(CLOCK_MONOTONIC, &tp);"
                                            "return 0; }"
                                            : ""
-                                           : -lrt ] ;
+                                           : -lc ] ;
     }
 
     if ! $(WITH_POSIX_CLOCK)
