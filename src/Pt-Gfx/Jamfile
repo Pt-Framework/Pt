@@ -35,19 +35,14 @@ SharedLibrary Pt-Gfx : Color.cpp
 LinkSharedLibraries Pt-Gfx : Pt Pt-System ;
 MakeLocate Pt-Gfx : $(PT_OUTPUT_TARGET) ;
 
-if $(FREETYPE_LINKFLAGS)
+if $(WITH_BUILTIN_FREETYPE)
 {
-    LinkFlags Pt-Gfx : $(FREETYPE_LINKFLAGS) ;
-    LinkLibs Pt-Gfx : $(FREETYPE_LINKLIBS) ;
+    LinkLibraries Pt-Gfx : freetype ;
 }
 else
 {
-    LinkLibraries Pt-Gfx : Pt-Gfx-freetype ;
-}
-
-if ! $(FREETYPE_LINKFLAGS)
-{
-    SubInclude PT_TOP src Pt-Gfx freetype ;
+    LinkFlags Pt-Gfx : $(FREETYPE_LINKFLAGS) ;
+    LinkLibs Pt-Gfx : $(FREETYPE_LINKLIBS) ;
 }
 
 if $(WITH_BUILTIN_LIBPNG)

@@ -448,6 +448,47 @@ Configure PNG_LINKLIBS ;
 EchoOption PNG_LINKLIBS : "PNG libs" ;
 
 #############################################################################
+# Freetype support
+#############################################################################
+
+if --with-freetype in $(ARGV) 
+{
+    WITH_BUILTIN_FREETYPE = yes ;
+    WITH_FREETYPE = yes ;
+}
+
+if ! $(WITH_FREETYPE)
+{
+    FREETYPE_LINKLIBS ?= -lfreetype ;
+
+    WITH_FREETYPE = [ CheckBuildC++ "#include <ft2build.h>"
+                                    "#include FT_FREETYPE_H"
+                                    "int main() {"
+                                    "FT_Library ft;"
+                                    "FT_Init_FreeType( &ft );"
+                                    "return 0; }"
+                                    : [ FIncludes $(FREETYPE_INCLUDES) ]
+                                    : $(FREETYPE_LINKLIBS) ] ;
+}
+
+if ! $(WITH_FREETYPE) || $(WITH_BUILTIN_FREETYPE)
+{   
+    WITH_BUILTIN_FREETYPE = yes ;
+    WITH_FREETYPE = yes ;
+    FREETYPE_INCLUDES = [ FDirName $(PT_TOP) src freetype include ] ;
+    FREETYPE_LINKLIBS = "" ;
+}
+
+Configure WITH_BUILTIN_FREETYPE ;
+EchoOption --with-freetype : "Builtin freetype library" : $(WITH_BUILTIN_FREETYPE:E="no") ;
+
+Configure FREETYPE_INCLUDES ;
+EchoOption FREETYPE_INCLUDES : "Freetype includes" ;
+
+Configure FREETYPE_LINKLIBS ;
+EchoOption FREETYPE_LINKLIBS : "Freetype libs" ;
+
+#############################################################################
 # SSL libraries and includes
 #############################################################################
 
@@ -518,23 +559,6 @@ EchoOption SSL_INCLUDES : "SSL includes" ;
 
 Configure SSL_LINKLIBS ;
 EchoOption SSL_LINKLIBS : "SSL libs" ;
-
-#############################################################################
-# Gfx libraries and includes
-#############################################################################
-
-Load freetype.jam ;
-
-ConfigureFreetype ;
-    
-if ! $(FREETYPE_INCLUDES) || ! $(FREETYPE_LINKFLAGS)
-{
-    FREETYPE_INCLUDES = [ FDirName $(PT_TOP) src Pt-Gfx freetype include ] ;
-    FREETYPE_LINKFLAGS = "" ;
-
-    Configure FREETYPE_INCLUDES ;
-    EchoOption FREETYPE_INCLUDES : "Builtin freetype library" ;
-}
 
 #############################################################################
 # MFC Support
