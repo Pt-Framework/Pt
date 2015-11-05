@@ -1,11 +1,11 @@
 SubDir PT_TOP src Pt-WxWidgets ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirHdrs $(PT_TOP)/src/Pt-System ;
-SubDirHdrs $(PT_TOP)/src/Pt-WxWidgets/$(SYS:L) ;
+SubDirHdrs $(PT_TOP)/src/Pt-WxWidgets/$(PT_SYSTEM:L) ;
 SubDirC++Flags [ FDefines PT_WXWIDGETS_API_EXPORT ] $(WX_C++FLAGS) ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-WxWidgets ;
 
-PT_WXWIDGETS_SUBDIR = [ FDirName $(PT_TOP) src Pt-WxWidgets $(SYS:L) ] ;
+PT_WXWIDGETS_SUBDIR = [ FDirName $(PT_TOP) src Pt-WxWidgets $(PT_SYSTEM:L) ] ;
 PT_WXWIDGETS_SOURCES += [ GLOB $(PT_WXWIDGETS_SUBDIR) : *.cpp  ] ;
 
 SharedLibrary Pt-WxWidgets : $(PT_WXWIDGETS_SOURCES)

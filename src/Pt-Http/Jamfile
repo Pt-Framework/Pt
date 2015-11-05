@@ -1,7 +1,6 @@
 SubDir PT_TOP src Pt-Http ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_HTTP_API_EXPORT ] ;
-SubDirHdrs $(PT_TOP)/src/Pt-Http/$(SYS:L) ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Http ;
 
 SharedLibrary Pt-Http : Authorizer.cpp

@@ -1,11 +1,11 @@
 SubDir PT_TOP src Pt-Net ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_NET_API_EXPORT ] ;
-SubDirHdrs $(PT_TOP)/src/Pt-Net/$(SYS:L) ;
-SubDirHdrs $(PT_TOP)/src/Pt-System/$(SYS:L) ;
+SubDirHdrs $(PT_TOP)/src/Pt-Net/$(PT_SYSTEM:L) ;
+SubDirHdrs $(PT_TOP)/src/Pt-System/$(PT_SYSTEM:L) ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Net ;
 
-PT_NET_SUBDIR = [ FDirName $(PT_TOP) src Pt-Net $(SYS:L) ] ;
+PT_NET_SUBDIR = [ FDirName $(PT_TOP) src Pt-Net $(PT_SYSTEM:L) ] ;
 PT_NET_IMPL += [ GLOB $(PT_NET_SUBDIR) : *.cpp  ] ;
 
 SharedLibrary Pt-Net : $(PT_NET_IMPL)

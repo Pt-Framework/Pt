@@ -1,6 +1,6 @@
 SubDir PT_TOP src Pt-System ;
 SubDirHdrs $(PT_TOP)/include ;
-SubDirHdrs $(PT_TOP)/src/Pt-System/$(SYS:L) ;
+SubDirHdrs $(PT_TOP)/src/Pt-System/$(PT_SYSTEM:L) ;
 SubDirC++Flags [ FDefines PT_SYSTEM_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-System ;
 
@@ -9,7 +9,7 @@ if $(WITH_MACH_CLOCK)
     SubDirC++Flags [ FDefines WITH_MACH_CLOCK ] ;
 }
 
-PT_SYSTEM_IMPL_SUBDIR = [ FDirName $(PT_TOP) src Pt-System $(SYS:L) ] ;
+PT_SYSTEM_IMPL_SUBDIR = [ FDirName $(PT_TOP) src Pt-System $(PT_SYSTEM:L) ] ;
 PT_SYSTEM_IMPL += [ GLOB $(PT_SYSTEM_IMPL_SUBDIR) : *.cpp  ] ;
 
 SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
@@ -47,9 +47,7 @@ SharedLibrary Pt-System : $(PT_SYSTEM_IMPL)
                           ;
 
 LinkSharedLibraries Pt-System : Pt ;
-
-LinkLibs Pt-System : $(SYSLIBS) ;
-
+LinkLibs Pt-System : $(PT_SYSTEM_LINKLIBS) ;
 MakeLocate Pt-System : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-System : $(PT_INSTALL_LIBDIR) ;
 

@@ -2,23 +2,14 @@ SubDir PT_TOP src Pt-Db sqlite ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirC++Flags [ FDefines PT_DB_API_EXPORT ] ;
 
-# sqlite.org's codebase has a file for the OSm specific code.
-# On wince the file is identical to win32 and has lots of ifdefs.
-#
 if $(TARGET_OS:L) = wince
 {
-	# only the C++ compiler seemed to define _WIN32_WC, but not the
+	# only the C++ compiler seemed to define _WIN32_WCE, but not the
 	# C compiler ??? -marc 
 	CCFLAGS += /D_WIN32_WCE ;
-	OS_SOURCES = [ FDirName os_win32.c ] ;
-}
-else
-{
-	OS_SOURCES = [ FDirName os_$(SYS:L).c ] ;
 }
 
-PT_SQLITE_SOURCES = sqlite3.c
-                    ;
+PT_SQLITE_SOURCES = sqlite3.c ;
 
 PT_SQLITE_SOURCES += SQLConnection.cpp 
                      Connector.cpp
@@ -27,7 +18,7 @@ PT_SQLITE_SOURCES += SQLConnection.cpp
                      SQLStatement.cpp
                      StmtRow.cpp
                      StmtValue.cpp
-                   ;
+                     ;
 
 Library Pt-Db-sqlite : $(PT_SQLITE_SOURCES) ;
 Library_MakeLocate Pt-Db-sqlite : $(PT_OUTPUT_TARGET) ;

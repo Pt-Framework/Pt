@@ -2,12 +2,15 @@
 # OpenSSL libraries and includes
 #############################################################################
 
-# find matching openssl configuration file first for SYS, then for TARGET_OS
-local opensslconf_target = [ FDirName $(PT_TOP) src openssl opensslconf-$(SYS:L)-$(TARGET_OSPLAT:L).h ] ;
-Echo $(opensslconf_target) ;
+#
+# prefer openssl configuration for TARGET_OS over OS family (PT_SYSTEM)
+#
+
+local opensslconf_target = [ FDirName $(PT_TOP) src openssl opensslconf-$(TARGET_OS:L)-$(TARGET_OSPLAT:L).h ] ;
+
 if ! [ CHECK_IF_FILE $(opensslconf_target) ]
 {
-    opensslconf_target = [ FDirName $(PT_TOP) src openssl opensslconf-$(TARGET_OS:L)-$(TARGET_OSPLAT:L).h ] ;
+    opensslconf_target = [ FDirName $(PT_TOP) src openssl opensslconf-$(PT_SYSTEM:L)-$(TARGET_OSPLAT:L).h ] ;
         
     if ! [ CHECK_IF_FILE $(opensslconf_target) ]
     {
@@ -15,21 +18,29 @@ if ! [ CHECK_IF_FILE $(opensslconf_target) ]
     }
 }
 
+#
 # copy crypto/opensslconf.h file
+#
+
 local opensslconf = [ FDirName $(PT_TOP) src openssl crypto opensslconf.h ] ;
-local r = [ TryCommand $(CP) $(opensslconf_target) $(opensslconf) ] ;
-if ! $(r)
+if ! [ TryCommand $(CP) $(opensslconf_target) $(opensslconf) ]
 {
     Exit "ERROR: Could not copy opensslconf.h." ;
 }
 
+#
 # copy openssl/opensslconf.h file
+#
+
 opensslconf = [ FDirName $(PT_TOP) src openssl include openssl opensslconf.h ] ;
-r = [ TryCommand $(CP) $(opensslconf_target) $(opensslconf) ] ;
-if ! $(r)
+if ! [ TryCommand $(CP) $(opensslconf_target) $(opensslconf) ]
 {
     Exit "ERROR: Could not copy opensslconf.h." ;
 }
+
+#
+# Defines required by openssl
+#
 
 OPENSSL_CFLAGS += [ FDefines L_ENDIAN ] ;
 

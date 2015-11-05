@@ -1,15 +1,15 @@
 SubDir PT_TOP src Pt-Qt ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirHdrs $(PT_TOP)/src/Pt-System ;
-SubDirHdrs $(PT_TOP)/src/Pt-Qt/$(SYS:L) ;
+SubDirHdrs $(PT_TOP)/src/Pt-Qt/$(PT_SYSTEM:L) ;
 SubDirHdrs $(QT_INCLUDES) ;
 SubDirC++Flags [ FDefines PT_QT_API_EXPORT ] ;
 SubDirC++Flags $(QT_C++FLAGS) ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Qt ;
 
-Moc MainLoopImpl.moc.cpp : [ FDirName $(SYS:L) MainLoopImpl.h ] ;
+Moc MainLoopImpl.moc.cpp : [ FDirName $(PT_SYSTEM:L) MainLoopImpl.h ] ;
 
-PT_QT_IMPL_DIR = [ FDirName $(PT_TOP) src Pt-Qt $(SYS:L) ] ;
+PT_QT_IMPL_DIR = [ FDirName $(PT_TOP) src Pt-Qt $(PT_SYSTEM:L) ] ;
 PT_QT_SOURCES += [ GLOB $(PT_QT_IMPL_DIR) : *.cpp  ] ;
 PT_QT_SOURCES += MainLoopImpl.moc.cpp
                  Application.cpp

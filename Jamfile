@@ -134,7 +134,7 @@ if $(WITH_OPENSSL)
     SubInclude PT_TOP src openssl ;
 }
 
-if $(SYS)
+if $(PT_SYSTEM)
 {
     SubInclude PT_TOP src Pt-System ;
     SubInclude PT_TOP src Pt-Net ;

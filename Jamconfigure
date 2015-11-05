@@ -1,7 +1,7 @@
 SubDir PT_TOP ;
 
 #############################################################################
-# Compiler and linker settings
+# Toolset configuration
 #############################################################################
 
 if --nlog in $(ARGV)
@@ -19,6 +19,7 @@ ConfigureC++ ;
 #############################################################################
 # Output directories used by MakeLocate and SubDirObjects
 #############################################################################
+
 PT_OUTPUT_TARGET ?= [ FDirName $(PT_TOP) build $(CONFIG) ] ;
 EchoOption PT_OUTPUT_TARGET : "Pt Binary Output Dir" ;
 Configure PT_OUTPUT_TARGET ;
@@ -34,6 +35,7 @@ Configure PT_OUTPUT_TEST ;
 #############################################################################
 # Installation directories
 #############################################################################
+
 PT_INSTALL_DIR ?= [ FDirName $(PT_TOP) deploy $(CONFIG) ] ;
 
 PT_INSTALL_BINDIR ?= [ FDirName $(PT_INSTALL_DIR) bin ] ; 
@@ -49,77 +51,67 @@ EchoOption PT_INSTALL_LIBDIR : "Pt Library Install Dir" ;
 Configure PT_INSTALL_LIBDIR ;
 
 #############################################################################
-# Atomic operations
-#############################################################################
-
-if ! $(WITH_ATOMICS)
-{
-    WITH_ATOMICS = [ CheckBuildC++ "int main() {"
-                                   "int n = 0, m = 0;"
-                                   "__atomic_load(&n, &m, __ATOMIC_SEQ_CST);"
-                                   "return 0; }"
-                                 : ""
-                                 : "" ] ;
-
-    if $(WITH_ATOMICS)
-    {
-        PT_ATOMICS_DEFINES = PT_ATOMICS_GNU_BUILTIN ;
-
-        Configure PT_ATOMICS_DEFINES ;
-        EchoOption PT_ATOMICS_DEFINES : "Atomicity support" ;
-    }
-}
-
-#############################################################################
 # System libraries and includes
 #############################################################################
 
 if $(TARGET_OS:L) = winrt
 {
-    SYS = winrt ;
+    PT_SYSTEM ?= winrt ;
 }
 
-if ! $(SYS)
+if ! $(Pt_SYSTEM)
 {
     WITH_WIN32 = [ CheckBuildC++ "#include <windows.h>"
                                  "int main() { return 0; }" ] ;
 
     if $(WITH_WIN32)
     {
-        SYS = win32 ;
-
-        PSAPI_LINKLIBS ?= Psapi.lib ;
-
-        WITH_PSAPI = [ CheckBuildC++ "#include <windows.h>"
-                                     "#include <Psapi.h>"
-                                     "int main() { PROCESS_MEMORY_COUNTERS pmc;"
-                                     "GetProcessMemoryInfo( NULL, &pmc, sizeof(pmc) );"
-                                     "return 0; }"
-                                     : ""
-                                     : $(PSAPI_LINKLIBS) ] ;
-        
-        if ! $(WITH_PSAPI)
-        {
-            PSAPI_LINKLIBS = -lPsapi ;
-
-            WITH_PSAPI = [ CheckBuildC++ "#include <windows.h>"
-                                         "#include <Psapi.h>"
-                                         "int main() { PROCESS_MEMORY_COUNTERS pmc;"
-                                         "GetProcessMemoryInfo( NULL, &pmc, sizeof(pmc) );"
-                                         "return 0; }"
-                                         : ""
-                                         : $(PSAPI_LINKLIBS) ] ;
-        }
-
-        EchoOption PSAPI_LINKLIBS : "Psapi libs" ;
-        SYSLIBS += $(PSAPI_LINKLIBS) ;
+        PT_SYSTEM = win32 ;
     }
 }
 
-if ! $(SYS)
+# fallback to POSIX
+PT_SYSTEM ?= posix ;
+
+#
+# Configuration for win32 systems
+#
+
+if $(PT_SYSTEM) = win32
 {
-    SYS = posix ;
-    
+    PSAPI_LINKLIBS ?= Psapi.lib ;
+
+    WITH_PSAPI = [ CheckBuildC++ "#include <windows.h>"
+                                 "#include <Psapi.h>"
+                                 "int main() { PROCESS_MEMORY_COUNTERS pmc;"
+                                 "GetProcessMemoryInfo( NULL, &pmc, sizeof(pmc) );"
+                                 "return 0; }"
+                                 : ""
+                                 : $(PSAPI_LINKLIBS) ] ;
+        
+    if ! $(WITH_PSAPI)
+    {
+        PSAPI_LINKLIBS = -lPsapi ;
+
+        WITH_PSAPI = [ CheckBuildC++ "#include <windows.h>"
+                                        "#include <Psapi.h>"
+                                        "int main() { PROCESS_MEMORY_COUNTERS pmc;"
+                                        "GetProcessMemoryInfo( NULL, &pmc, sizeof(pmc) );"
+                                        "return 0; }"
+                                        : ""
+                                        : $(PSAPI_LINKLIBS) ] ;
+    }
+
+    EchoOption PSAPI_LINKLIBS : "Psapi libs" ;
+    PT_SYSTEM_LINKLIBS += $(PSAPI_LINKLIBS) ;
+}
+
+#
+# Configuration for POSIX systems
+#
+
+if $(PT_SYSTEM) = posix
+{   
     #
     # System realtime clock
     #
@@ -230,25 +222,25 @@ if ! $(SYS)
         Exit "ERROR: pthread is required." ;
     }
 
-    SYSLIBS +=  $(POSIX_CLOCK_LINKLIBS) $(PTHREAD_LINKLIBS) $(DL_LINKLIBS) ;
+    PT_SYSTEM_LINKLIBS +=  $(POSIX_CLOCK_LINKLIBS) $(PTHREAD_LINKLIBS) $(DL_LINKLIBS) ;
 }
 
 if $(TARGET_OS) = "aix"
 {
-    LINKLIBS += $(SYSLIBS) ;
+    LINKLIBS += $(PT_SYSTEM_LINKLIBS) ;
 }
 
-EchoOption SYS : "Using subsystem" ;
-Configure SYS ;
+EchoOption PT_SYSTEM : "System abstraction" ;
+Configure PT_SYSTEM ;
 
-Configure SYSLIBS ;
-EchoOption SYSLIBS : "System libs" ;
+Configure PT_SYSTEM_LINKLIBS ;
+EchoOption PT_SYSTEM_LINKLIBS : "System linklibs" ;
 
 #############################################################################
 # Networking libraries and includes
 #############################################################################
 
-if $(SYS) = "win32"
+if $(PT_SYSTEM) = win32
 {
     WSA_LINKLIBS ?= wsock32.lib ws2_32.lib Iphlpapi.lib ;
 
@@ -296,7 +288,7 @@ if $(SYS) = "win32"
     NETLIBS += $(WSA_LINKLIBS) ;
 }
 
-if $(SYS) = posix
+if $(PT_SYSTEM) = posix
 {
     # QNX can link programs without -lsocket, but needs it for libraries
 
@@ -363,6 +355,28 @@ if $(SYS) = posix
 
 Configure NETLIBS ;
 EchoOption NETLIBS : "Network libs" ;
+
+#############################################################################
+# Atomic operations
+#############################################################################
+
+if ! $(WITH_ATOMICS)
+{
+    WITH_ATOMICS = [ CheckBuildC++ "int main() {"
+                                   "int n = 0, m = 0;"
+                                   "__atomic_load(&n, &m, __ATOMIC_SEQ_CST);"
+                                   "return 0; }"
+                                 : ""
+                                 : "" ] ;
+
+    if $(WITH_ATOMICS)
+    {
+        PT_ATOMICS_DEFINES = PT_ATOMICS_GNU_BUILTIN ;
+
+        Configure PT_ATOMICS_DEFINES ;
+        EchoOption PT_ATOMICS_DEFINES : "Atomicity support" ;
+    }
+}
 
 #############################################################################
 # zlib compression library
@@ -599,7 +613,6 @@ if --with-mfc in $(ARGV)
     EchoOption MFC_LINKFLAGS : "MFC Linker Flags" ;
     Configure MFC_LINKFLAGS ;
 }
-
 
 #############################################################################
 # Wx Widgets Support
