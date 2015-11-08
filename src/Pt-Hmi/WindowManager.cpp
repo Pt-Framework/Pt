@@ -615,7 +615,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 	localMouseEvent.setX( pointerEvent.x() - childWindow->Position.get().x() - _borderWidth ) ;
 	localMouseEvent.setY( pointerEvent.y() - childWindow->Position.get().y() - _titleBarHeight - _borderWidth ) ;  
 
-	if( _sizingDirection != ResizeDirection::No || _moving )
+	if( (_sizingDirection != ResizeDirection::No || _moving) && childWindow->isWindowFocused() )
 	{
 	  doMoving( childWindow, pointerEvent );		
 	  doSizing( childWindow, pointerEvent );				
