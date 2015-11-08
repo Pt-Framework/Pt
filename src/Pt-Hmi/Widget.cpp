@@ -453,13 +453,13 @@ void Widget::onPointerEvent(const PointerEvent& ev)
 
 void Widget::onKeyEvent(const KeyEvent& ev)
 { 	
-	if( !Enabled.get() )
+	if( ! Enabled.get() )
 			return;
 
-	//Mnemonic handling
+	// mnemonic handling
 	if( UseMnemonic.get() && Enabled.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp )
 	{		
-		std::string mnKey = "";
+		std::string mnKey;
 
 		if( ev.alt())
 			mnKey = "A//";
@@ -472,19 +472,19 @@ void Widget::onKeyEvent(const KeyEvent& ev)
 		 }
 	}
 
-	//Action key handling
+	// action key handling
 	if( ev.toUTF8String() == FocusedActionKey.get() && hasFocus() )	
 	{
 		onActionKey( ev.state() );		
 	}
 	
-	//Shortcurt Key
+	// shortcurt Key
 	if( ev.shortCutKey() == ShortcutKey.get() )
 	{
 		onShortcutKey( ev.state() );		
 	}
 
-	//Propagate to children.
+	// propagate to children
 	for( size_t i = 0; i < children().size(); ++i)
 		children()[i]->onKeyEvent(ev);
 }

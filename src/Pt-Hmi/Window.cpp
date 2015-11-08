@@ -137,20 +137,19 @@ void Window::onPointerEvent(const PointerEvent& ev)
 }
 
 
-
 void Window::onKeyEvent(const KeyEvent& ev)
 {
   if( _windowManager.keyInput( ev ) )
       return;
 
-	if( !Enabled.get() )
+	if( ! Enabled.get() )
 		return;
 	
 	if( ev.toUTF8String() == FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp )
 	{
 		if(  ev.shift() )
 		{		
-				if( !focusPrev() )
+				if( ! focusPrev() )
 					focusPrev();
 		}
 		else
