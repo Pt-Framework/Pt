@@ -84,16 +84,6 @@ class WindowManager : public Pt::Connectable
         _actionButton = index;
     }
 
-    const Button& closeButton() const
-    {
-      return _closeButton;
-    }
-
-    Button& closeButton()
-    {
-      return _closeButton;
-    }
-
 		void invalidate();	
 
   protected:
@@ -133,7 +123,8 @@ class WindowManager : public Pt::Connectable
 		FocusEvent								_focusEvent;	
 		double										_borderWidth;
    Gfx::Color						      _inactiveColor; 
-   Gfx::Color						      _activeColor; 
+   Gfx::Color						      _activeColor;
+	 Gfx::Color                 _textColor;
 		SizeEvent									_sizeEvent;
 		PositionEvent             _positionEvent; 	
 		bool											_moving;	
@@ -141,11 +132,7 @@ class WindowManager : public Pt::Connectable
     DeviceButton::State       _pointerLastState;  
     bool                      _focusOnPointerOver;    
     size_t                    _actionButton;  
-    Button                    _closeButton;
-		Button                    _maxButton;
-		Button                    _minButton;
-    Panel                     _titleBarPanel;
-    Label                     _titleLabel;
+		double                    _titleBarHeight;
 		ChildWindow*							_pointedWindow;
 };
 

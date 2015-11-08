@@ -300,7 +300,7 @@ void Widget::render()
 	//Render       
 	if( !_isValid )
 	{
-   	  surface().clear();
+   	surface().clear();
 	  onRender( surface() );		  
 	}
 

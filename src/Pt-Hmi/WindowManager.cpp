@@ -46,54 +46,15 @@ WindowManager::WindowManager(Window& parent)
 , _borderWidth(4)
 , _moving(false)
 , _inactiveColor(0.8f, 0.8f, 0.8f)
-, _activeColor(0.7f, 0.7f, 0.7f)
+, _activeColor(0.6f, 0.6f, 0.8f)
+, _textColor(0.0, 0.0, 0.0)
 , _pointerLastState( DeviceButton::Released )
 , _focusOnPointerOver( false )
 , _actionButton(0)
+, _titleBarHeight(20)
 , _pointedWindow(0)
 {
-	Margin buttonMargin =  Margin(1,1,1,3);
-
-	_closeButton.PanelBorderRoundEdge = false;
-  _closeButton.Dock    = Docking::Right;
-	_closeButton.Margin  = buttonMargin;
-	_closeButton.Size		 =Gfx::SizeF(20,5 );
-  _closeButton.Caption = "x";
-	_closeButton.TextAlign = Align::TopCenter;
-  _closeButton.Visible = true;
-  _closeButton.Enabled = true;
- 
-  
-	_maxButton.PanelBorderRoundEdge = false;
-	_maxButton.Dock    = Docking::Right;
-	_maxButton.Margin  = buttonMargin;
-	_maxButton.Size		 =Gfx::SizeF(20,5 );
-  _maxButton.Caption = "+";
-  _maxButton.Visible = true;
-  _maxButton.Enabled = true;
-
-	_minButton.PanelBorderRoundEdge = false;
-	_minButton.Dock    = Docking::Right;
-	_minButton.Margin  = buttonMargin;
-	_minButton.Size		 =Gfx::SizeF(20,5 );
-  _minButton.Caption = "-";
-  _minButton.Visible = true;
-  _minButton.Enabled = true;
-
-  _titleLabel.Dock = Docking::Fill;
-  _titleLabel.TextAlign = Align::MidleCenter;
-  _titleLabel.Visible = true;
-
-	_titleBarPanel.BackColor = _inactiveColor;
-  _titleBarPanel.Position =Gfx::PointF(0,0);
-  _titleBarPanel.Size =Gfx::SizeF( 16, 20 );
-
-  _titleBarPanel.addChild( &_titleLabel );  
-  _titleBarPanel.addChild( &_closeButton );
-	_titleBarPanel.addChild( &_maxButton );
-	_titleBarPanel.addChild( &_minButton );
-  _titleBarPanel.Margin = Margin(0);  
-	_titleBarPanel.Visible = true;	  	
+	Margin buttonMargin =  Margin(1,1,1,3);  	
 }
 
 
@@ -165,8 +126,7 @@ void WindowManager::invalidate()
 Gfx::PointF WindowManager::renderFrame( ChildWindow* w )
 {	
 	const Gfx::SizeF clientSize =  w->Size.get();
-	const Gfx::SizeF winSize( clientSize.width()  + _borderWidth + 1, 
-	                          clientSize.height() + _borderWidth + _titleBarPanel.Size.get().height() + 1 );	
+	const Gfx::SizeF winSize( clientSize.width()  + _borderWidth*2,  clientSize.height() + _borderWidth*2 + _titleBarHeight);	
 	
 	Gfx::Color color = w->isWindowFocused() ? _activeColor : _inactiveColor;  
 
@@ -180,50 +140,59 @@ Gfx::PointF WindowManager::renderFrame( ChildWindow* w )
       case WindowBorder::DialogSizeable:
       case WindowBorder::Fixed:
       case WindowBorder::Sizeable:
-      {	        
-	       Gfx::RectF  rect( pos, winSize ) ;	
-	       Gfx::Pen    pen((size_t) _borderWidth, color);
-	        painter.setPen( pen );
-	        painter.drawRect( rect );		
-      }
-
-      break;
-
       case WindowBorder::Tool:
       case WindowBorder::ToolSizeable:
-      {
-	       Gfx::RectF  rect( pos, winSize ) ;	
-	       Gfx::Pen    pen((size_t) _borderWidth, color);
-	        painter.setPen( pen );
-	        painter.drawRect( rect );		
+      {	        
+	        Gfx::Brush brush(color);
+	        painter.setBrush(brush);
+
+					Gfx::Pen pen(1, _textColor);
+					painter.setPen(pen);
+					
+					Gfx::RectF leftBorder( pos.x(), 
+					                       pos.x() + _borderWidth,
+													       pos.y() + _borderWidth, 
+													       pos.y() + winSize.height() - _borderWidth - 1 );
+					painter.fillRect(leftBorder);
+
+					Gfx::RectF topBorder(pos.x(),
+					                     pos.x() + winSize.width() - 1,
+															 pos.y(),
+															 pos.y() + _borderWidth);
+					painter.fillRect(topBorder);
+
+					Gfx::RectF rightBorder(pos.x() + winSize.width() - _borderWidth,
+					                       pos.x() + winSize.width() - 1,
+																 pos.y() + _borderWidth,
+																 pos.y() + winSize.height() - _borderWidth - 1 );
+					painter.fillRect(rightBorder);
+
+					Gfx::RectF bottomBorder(pos.x(),
+					                        pos.x() + winSize.width() - 1,
+																	pos.y() + winSize.height() - _borderWidth,
+																	pos.y() + winSize.height() - 1);
+					painter.fillRect(bottomBorder);
+
+					Gfx::RectF titleArea( pos.x() + _borderWidth,
+					                      pos.x() + winSize.width() - _borderWidth - 1,
+																pos.y() + _borderWidth,
+																pos.y() + _borderWidth + _titleBarHeight - 1);
+					painter.fillRect(titleArea);
+
+					const Gfx::Font& font = w->Font.get();
+					
+					Gfx::FontMetrics fm = painter.fontMetrics(font, Pt::String("A") );
+					double textMargin = (_titleBarHeight - fm.height()) / 2;
+					Gfx::PointF textPos(pos.x() + _borderWidth + _titleBarHeight, pos.y() + _titleBarHeight - textMargin);
+
+					painter.setFont(font);
+					painter.drawText(textPos, Pt::String( w->Caption.get().c_str()) );
       }
+
       break;
   }
 
-  if( w->Border.get() != WindowBorder::NoBorder )
-  {
-		Gfx::PointF  to( pos.x() + std::ceil(_borderWidth/2), pos.y() +  std::ceil(_borderWidth/2) ); 
-		Gfx::SizeF   size =Gfx::SizeF( winSize.width() - _borderWidth, _titleBarPanel.Size.get().height() );
-    		
-    _closeButton.BorderColor =Gfx::Color(0.5f,0.5f,0.5f);
-    _minButton.BorderColor = _closeButton.BorderColor.get();
-    _maxButton.BorderColor = _closeButton.BorderColor.get();
-    _titleLabel.BackColor = color;
-    _titleLabel.Caption    = w->Caption.get();
-    _titleLabel.Visible    = w->ShowTitle.get();
-
-		_titleBarPanel.Position    = to;
-    _titleBarPanel.Size        = size;
-    _titleBarPanel.BackColor   = color; 
-    _titleBarPanel.BorderColor = color;    		 				
-		_titleBarPanel.setParent( &_parent );		
-		_titleBarPanel.render();	  		
-    _parent.surface().painter().drawSurface( to, _titleBarPanel.surface() );
-		_titleBarPanel.setParent( 0 );
-  }
-
-  return Gfx::PointF( pos.x() + std::ceil(_borderWidth/2), 
-											pos.y() + std::ceil(_borderWidth/2) + _titleBarPanel.Size.get().height()) ;	 
+  return Gfx::PointF( pos.x() + _borderWidth, pos.y() + _borderWidth + _titleBarHeight) ;	 
 }
 
 
@@ -247,7 +216,7 @@ void WindowManager::render()
 
 Gfx::PointF WindowManager::toClient(const ChildWindow* w, const Gfx::PointF& p)
 {
-  return Gfx::PointF( p.x() - w->Position.get().x() - _borderWidth ,  p.y() - w->Position.get().y() - _borderWidth - _titleBarPanel.Size.get().height() ) ;
+  return Gfx::PointF( p.x() - w->Position.get().x() - _borderWidth ,  p.y() - w->Position.get().y() - _borderWidth - _titleBarHeight ) ;
 }
 
 
@@ -438,7 +407,7 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 
 bool WindowManager::contains(const ChildWindow* w, const Gfx::PointF& p)
 {  
-	Gfx::SizeF winSize( w->Size.get().width() + _borderWidth*2, w->Size.get().height() + _borderWidth + _titleBarPanel.Size.get().height() );
+	Gfx::SizeF winSize( w->Size.get().width() + _borderWidth*2, w->Size.get().height() + _borderWidth*2 + _titleBarHeight );
 
 	if( p.x() < winSize.width() && p.x() >= 0 && p.y() < winSize.height() && p.y() >= 0)
 		return true;
@@ -455,7 +424,7 @@ bool WindowManager::isMoving( const ChildWindow* w, const Pt::Hmi::PointerEvent&
 	const Gfx::PointF& position = w->Position.get();
 	 
 	if( ev.x() < (position.x() + _borderWidth*2 + w->Size.get().width())  && ev.x() >= position.x()  && 
-      (ev.y()) < (position.y() + _titleBarPanel.Size.get().height()) && (ev.y()+ position.y()) >= (_borderWidth) )
+      (ev.y()) < (position.y() + _titleBarHeight) && (ev.y()+ position.y()) >= (_borderWidth) )
 	{				
 		_movingOffset =Gfx::PointF( ev.x(), ev.y() );
 		return true;
@@ -468,8 +437,8 @@ bool WindowManager::isMoving( const ChildWindow* w, const Pt::Hmi::PointerEvent&
 ResizeDirection::Type WindowManager::getSizingDirection( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev )
 {	
 	const Gfx::SizeF  wsize = w->Size.get();
-	const Gfx::PointF wpos = w->Position.get();
-	double titleHeight = _titleBarPanel.Size.get().height();
+	const Gfx::PointF wpos  = w->Position.get();
+	double titleHeight = _titleBarHeight;
 
 	std::clog << "EVENT: "<< ev.x() << "x" << ev.y() << " WPOS: " << wpos.x() << "." << wpos.y() << " "<< _borderWidth << std::endl;
 	bool left = ev.x() < (wpos.x() +	_borderWidth);
@@ -477,17 +446,17 @@ ResizeDirection::Type WindowManager::getSizingDirection( const ChildWindow* w, c
 	bool top = ev.y() < wpos.y() + _borderWidth;
 	bool bottom = ev.y() >= wpos.y() + _borderWidth + titleHeight + wsize.height();
 
-	//if(top && left)
-	//	return ResizeDirection::NorthWest;
+	if(top && left)
+		return ResizeDirection::NorthWest;
 
-	//if(top && right)
-	//	return ResizeDirection::NorthEast;
-	//
-	//if(bottom && left)
-	//	return ResizeDirection::SouthWest;
-	//
-	//if(bottom && right)
-	//	return ResizeDirection::SouthEast;
+	if(top && right)
+		return ResizeDirection::NorthEast;
+	
+	if(bottom && left)
+		return ResizeDirection::SouthWest;
+	
+	if(bottom && right)
+		return ResizeDirection::SouthEast;
 
 	if(left)				
 		return ResizeDirection::West;
@@ -595,7 +564,11 @@ void WindowManager::setSizingCursor( ResizeDirection::Type type )
 		case ResizeDirection::NorthWest:
 		case ResizeDirection::SouthEast:
 			screen.setCursor( &Hmi::Cursor::sizeNWSECursor() );
-		break;		
+		break;
+		
+		default:
+		  screen.setCursor( &Hmi::Cursor::defaultCursor() );
+			break;	
 	}
 }
 
@@ -640,7 +613,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 	Pt::Hmi::PointerEvent localMouseEvent = pointerEvent;
 
 	localMouseEvent.setX( pointerEvent.x() - childWindow->Position.get().x() - _borderWidth ) ;
-	localMouseEvent.setY( pointerEvent.y() - childWindow->Position.get().y() - _titleBarPanel.Size.get().height() - _borderWidth ) ;  
+	localMouseEvent.setY( pointerEvent.y() - childWindow->Position.get().y() - _titleBarHeight - _borderWidth ) ;  
 
 	if( _sizingDirection != ResizeDirection::No || _moving )
 	{
