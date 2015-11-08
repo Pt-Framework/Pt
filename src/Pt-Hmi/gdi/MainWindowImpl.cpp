@@ -32,8 +32,8 @@
 #include <Pt/Gfx/Image.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/SizeEvent.h>
-#include <Pt/Hmi/PositionEvent.h>
+#include <Pt/Hmi/ResizeEvent.h>
+#include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/Screen.h>
@@ -293,7 +293,7 @@ void MainWindowImpl::onSize(WPARAM wParam, LPARAM lParam)
   int width  = LOWORD(lParam);
   int height = HIWORD(lParam);  
     
-	Pt::Hmi::SizeEvent ev(Gfx::SizeF(width, height), state);
+	Pt::Hmi::ResizeEvent ev(Gfx::SizeF(width, height), state);
 	_window->processEvent(ev);
 }
 
@@ -368,7 +368,7 @@ void MainWindowImpl::onMove(LPARAM lParam)
 	int xPos = info.left;
 	int yPos = info.top;
 
-	PositionEvent ev(Gfx::PointF(xPos, yPos) );
+	MoveEvent ev(Gfx::PointF(xPos, yPos) );
   _window->processEvent( ev );	
 }
 

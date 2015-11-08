@@ -55,6 +55,8 @@ Window::Window(Window* parent)
 	Name = std::string("Window");
 	AcceptFocus = false ;	
 
+	eventReceived() += Pt::slot(*this, &Window::onMoveEvent);
+	eventReceived() += Pt::slot(*this, &Window::onResizeEvent);
 	eventReceived() += Pt::slot(*this, &Window::onActivateEvent);
 	eventReceived() += Pt::slot(*this, &Window::onCloseEvent);
 }
@@ -164,7 +166,7 @@ void Window::onKeyInput(const KeyEvent& ev)
 }
 
 
-void Window::onSizeEvent(const SizeEvent& ev)
+void Window::onResizeEvent(const ResizeEvent& ev)
 {	
 	Window::setSize( ev.size() );
 	Size.changed().send( ev.size() );	
@@ -173,7 +175,7 @@ void Window::onSizeEvent(const SizeEvent& ev)
 }
 
 
-void Window::onPositionEvent( const PositionEvent& ev)
+void Window::onMoveEvent( const MoveEvent& ev)
 {
 	Widget::setPosition( ev.position() );
 	Position.changed().send( ev.position() );	

@@ -1290,13 +1290,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\demo\ChildW.h">
       <Filter>Pt-Hmi\demo</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\SizeEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\PointerEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PositionEvent.h">
       <Filter>Pt-Hmi\Events</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h">
@@ -1306,6 +1300,12 @@
       <Filter>Pt-Hmi\Events</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\ActivateEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\MoveEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h">
       <Filter>Pt-Hmi\Events</Filter>
     </ClInclude>
   </ItemGroup>

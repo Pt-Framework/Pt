@@ -22,45 +22,39 @@
  
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_PositionEvent_h
-#define Pt_Hmi_PositionEvent_h
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+ 02110-1301  USA
+*/
+
+#ifndef Pt_Hmi_MoveEvent_h
+#define Pt_Hmi_MoveEvent_h
 
 #include <Pt/Types.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Event.h>
 #include <Pt/Gfx/Point.h>
 
-
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API PositionEvent : public Pt::BasicEvent<PositionEvent>
+class PT_HMI_API MoveEvent : public Pt::BasicEvent<MoveEvent>
 {
 	public:	
-		PositionEvent(const Gfx::PointF& pos)
+		MoveEvent(const Gfx::PointF& pos)
 		: _position( pos )		
 		{
 		}
 
-
-		PositionEvent()
+		virtual ~MoveEvent()
 		{
 		}
 
-
-		virtual ~PositionEvent()
-		{
-		}
-
-
-		void setPosition( const Gfx::PointF&  pos )
+		void setPosition(const Gfx::PointF&  pos)
 		{
 			_position = pos;
 		}
 
-
-		const Gfx::PointF&  position( ) const
+		const Gfx::PointF& position() const
 		{
 			return _position;
 		}	
@@ -72,4 +66,3 @@ class PT_HMI_API PositionEvent : public Pt::BasicEvent<PositionEvent>
 }}
 
 #endif
-

@@ -29,8 +29,8 @@
 
 #include <Pt/Hmi/PointerEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
-#include <Pt/Hmi/SizeEvent.h>
-#include <Pt/Hmi/PositionEvent.h>
+#include <Pt/Hmi/ResizeEvent.h>
+#include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Property.h>
 #include <Pt/Hmi/Cursor.h>
@@ -244,12 +244,6 @@ class PT_HMI_API Widget : public Pt::Connectable
     
 		virtual void onKeyInput(const KeyEvent& ev);
 		
-		virtual void onSizeEvent(const SizeEvent& ev)
-		{}
-		
-		virtual void onPositionEvent(const PositionEvent& ev)
-		{}		
-
 	protected:
 		virtual void onInvalidate();
 		virtual void onRender(PaintSurface& paintSurface);

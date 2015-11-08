@@ -417,14 +417,14 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 
 	if( w->Position.get() != pos )
 	{
-		_positionEvent.setPosition(pos);
-		w->processEvent(_positionEvent);	
+		MoveEvent mev(pos);
+		w->processEvent(mev);	
 	}
 
 	if( w->Size.get() != size )
 	{
-		_sizeEvent.setSize( size );
-		w->processEvent( _sizeEvent );
+		ResizeEvent rev(size);
+		w->processEvent(rev);
 	}
 
 	_lastSizePoint = point;  
@@ -527,9 +527,8 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 	if( newPos.y() < 0 ) 
 		newPos.setY( 0 );
 		
-	_positionEvent.setPosition(newPos);
-
-	w->processEvent( _positionEvent );
+	MoveEvent mev(newPos);
+	w->processEvent( mev );
 	
 	_movingOffset = Gfx::PointF( point.x() , point.y() );  
 	invalidate();

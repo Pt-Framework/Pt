@@ -67,8 +67,7 @@ Widget::Widget()
 {	
 	bindMnemonicToWidget( *this );
 
-	_eventReceived += Pt::slot(*this, &Widget::onSizeEvent);
-	_eventReceived += Pt::slot(*this, &Widget::onPositionEvent);
+	
 	_eventReceived += Pt::slot(*this, &Widget::onKeyInput);
 	_eventReceived += Pt::slot(*this, &Widget::onPointerInput);			
 }

@@ -22,9 +22,12 @@
  
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_SizeEvent_h
-#define Pt_Hmi_SizeEvent_h
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+ 02110-1301  USA
+*/
+
+#ifndef Pt_Hmi_ResizeEvent_h
+#define Pt_Hmi_ResizeEvent_h
 
 #include <Pt/Types.h>
 #include <Pt/Event.h>
@@ -32,47 +35,40 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/WindowState.h>
 
-
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API SizeEvent : public Pt::BasicEvent<SizeEvent>
+class PT_HMI_API ResizeEvent : public Pt::BasicEvent<ResizeEvent>
 {
 	public:	
-		SizeEvent(const Gfx::SizeF&  size, const Hmi::WindowState::Type&  state)
+		ResizeEvent(const Gfx::SizeF&  size, const Hmi::WindowState::Type& state = Hmi::WindowState::Normal)
 		: _size( size )
 		, _state( state )
 		{
 		}
 
-
-		SizeEvent()
+		ResizeEvent()
 		{
 		}
 
-
-		virtual ~SizeEvent()
+		virtual ~ResizeEvent()
 		{
 		}
-
 
 		void setSize( const Gfx::SizeF&  size )
 		{
 			_size = size;
 		}
 
-
 		const Gfx::SizeF&  size( ) const
 		{
 			return _size;
 		}
 
-
 		void setState( const Hmi::WindowState::Type&  state )
 		{
 			_state = state;
 		}
-
 
 		const Hmi::WindowState::Type& state( ) const
 		{

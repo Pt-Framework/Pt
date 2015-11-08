@@ -108,8 +108,8 @@ class PT_HMI_API Window : public Widget
 		virtual void onRender( PaintSurface& surface );
 
 	protected:
-		void onSizeEvent(const SizeEvent& ev);
-		void onPositionEvent( const PositionEvent& ev);		
+		void onResizeEvent(const ResizeEvent& ev);
+		void onMoveEvent( const MoveEvent& ev);		
 		void onCloseEvent(const CloseEvent& ev);
 
 	private:

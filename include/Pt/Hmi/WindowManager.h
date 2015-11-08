@@ -34,9 +34,9 @@
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/ActivateEvent.h>
-#include <Pt/Hmi/SizeEvent.h>
+#include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/Button.h>
-#include <Pt/Hmi/PositionEvent.h>
+#include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/ResizeDirection.h>
 #include <Pt/Hmi/DeviceButton.h>
 
@@ -130,8 +130,6 @@ class WindowManager : public Pt::Connectable
    Gfx::Color						      _inactiveColor; 
    Gfx::Color						      _activeColor;
 	 Gfx::Color                 _textColor;
-		SizeEvent									_sizeEvent;
-		PositionEvent             _positionEvent; 	
 		bool											_moving;	
 		Gfx::PointF								_movingOffset;
     DeviceButton::State       _pointerLastState;  
