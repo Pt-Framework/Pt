@@ -423,8 +423,10 @@ bool WindowManager::isMoving( const ChildWindow* w, const Pt::Hmi::PointerEvent&
 
 	const Gfx::PointF& position = w->Position.get();
 	 
-	if( ev.x() < (position.x() + _borderWidth*2 + w->Size.get().width())  && ev.x() >= position.x()  && 
-      (ev.y()) < (position.y() + _titleBarHeight) && (ev.y()+ position.y()) >= (_borderWidth) )
+	if(  (ev.x() < (position.x() + _borderWidth*2 + w->Size.get().width())  && ev.x() >= position.x())  && 
+			 (ev.x() >= (position.x() + _borderWidth)) &&
+       (ev.y() < (position.y() + _titleBarHeight) ) && ((ev.y()+ position.y()) >= _borderWidth ) &&
+			 (ev.y() >= (position.y() + _borderWidth)))
 	{				
 		_movingOffset =Gfx::PointF( ev.x(), ev.y() );
 		return true;
