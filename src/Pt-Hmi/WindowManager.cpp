@@ -102,6 +102,12 @@ void WindowManager::remove( ChildWindow* w )
 }
 
 
+void WindowManager::clear()
+{
+	_windows.clear();
+}
+
+
 void WindowManager::activate(ChildWindow* w)
 {
 	deactivate();

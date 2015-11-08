@@ -97,8 +97,6 @@ class PT_HMI_API Window : public Widget
 
 		void setPointedWidget( Widget* widget);
 
-		void processEvent(const Pt::Event& ev);
-
 	protected:
 		Window(Window* parent = 0);
 
@@ -123,9 +121,8 @@ class PT_HMI_API Window : public Widget
 //TODO:		Widget*				_focusWidget;
 
 		WindowManager _windowManager;		
-		bool	_isClosed;
-    Pt::Signal<const Pt::Event&> _eventReceived;		
-    bool                    _isActive;
+		bool	_isClosed;		
+    bool  _isActive;
 };
 
 }}

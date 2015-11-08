@@ -224,7 +224,7 @@ void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam
 
 				case WM_ACTIVATE:
 				{
-					onActivate( true );
+					onActivate( wparam != 0 );
 				}
 				break;
 				

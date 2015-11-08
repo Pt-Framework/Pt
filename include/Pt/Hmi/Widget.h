@@ -222,15 +222,33 @@ class PT_HMI_API Widget : public Pt::Connectable
 			return _surface;
 		}
 
+		void processEvent(const Pt::Event& ev);
+
 	protected:
 		Widget();	
+
+		Pt::Signal<const Pt::Event&>& eventReceived()
+		{
+			return _eventReceived;
+		}
 
 	public:
 		virtual void onPointerLeaved();
 		virtual void onPointerEnter();		
-		virtual void onPointerInput(const PointerEvent& ev);		
-    virtual void onKeyInput(const KeyEvent& ev);
 		virtual void onFocusChanged(bool hasFocus);
+
+	protected:
+		virtual void onEvent(const Pt::Event& ev);
+
+		virtual void onPointerInput(const PointerEvent& ev);		
+    
+		virtual void onKeyInput(const KeyEvent& ev);
+		
+		virtual void onSizeEvent(const SizeEvent& ev)
+		{}
+		
+		virtual void onPositionEvent(const PositionEvent& ev)
+		{}		
 
 	protected:
 		virtual void onInvalidate();
@@ -290,6 +308,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 		void updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p);
 
 	private:	  
+	  Pt::Signal<const Pt::Event&> _eventReceived;
 		Widget*										 _parent;	
 		std::vector<Widget*>			 _children;	
 		Widget*										 _mnemonicWidget;	

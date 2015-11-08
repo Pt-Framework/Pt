@@ -55,12 +55,8 @@ Window::Window(Window* parent)
 	Name = std::string("Window");
 	AcceptFocus = false ;	
 
-	_eventReceived += Pt::slot(*this, &Window::onSizeEvent);
-	_eventReceived += Pt::slot(*this, &Window::onPositionEvent);
-	_eventReceived += Pt::slot(*this, &Window::onActivateEvent);
-	_eventReceived += Pt::slot(*this, &Window::onCloseEvent);
-	_eventReceived += Pt::slot(*this, &Window::onKeyInput);
-	_eventReceived += Pt::slot(*this, &Window::onPointerInput);	
+	eventReceived() += Pt::slot(*this, &Window::onActivateEvent);
+	eventReceived() += Pt::slot(*this, &Window::onCloseEvent);
 }
 
 
@@ -122,12 +118,6 @@ void Window::setPointedWidget( Widget* widget )
 }
 
 
-void Window::processEvent(const Pt::Event& ev)
-{
-	_eventReceived.send(ev);
-}
-
-
 void Window::onPointerInput(const PointerEvent& ev)
 {	
   if( _windowManager.pointerInput( ev ) )
@@ -141,7 +131,7 @@ void Window::onPointerInput(const PointerEvent& ev)
 	this->setPointedWidget( widget );	
 
 	if( widget && widget != this )
-		widget->onPointerInput(ev);		
+		widget->processEvent(ev);		
 }
 
 
@@ -193,10 +183,14 @@ void Window::onPositionEvent( const PositionEvent& ev)
 
 void Window::onActivateEvent(const ActivateEvent& ev)
 { 
-	if( ! ev.isActive() )
-		_windowManager.deactivate();
+	_isActive = ev.isActive();
 
-	_isActive = ev.isActive();		  
+	if( ! _isActive )
+	{
+		_windowManager.deactivate();
+		return;
+	}
+	  
 	invalidate();
 }
 

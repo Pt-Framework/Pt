@@ -66,6 +66,9 @@ MainWindow::MainWindow(MainWindow* parent)
 
 MainWindow::~MainWindow()
 {
+	//TODO: remove from window manager
+	_windowManager.clear();
+
 	_impl->destroy();
 	delete _impl;
 }

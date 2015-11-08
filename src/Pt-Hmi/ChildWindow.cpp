@@ -39,7 +39,8 @@ ChildWindow::ChildWindow()
 
 ChildWindow::~ChildWindow()
 {
-	//Todo: remove from window manager
+	//TODO: remove from window manager
+	_windowManager.clear();
 }
 
 

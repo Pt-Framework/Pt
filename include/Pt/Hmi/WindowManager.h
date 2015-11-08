@@ -60,8 +60,10 @@ class WindowManager : public Pt::Connectable
 		void add( ChildWindow* w );
 
 		void remove( ChildWindow* window );
-
-		void activate( ChildWindow* w );		
+		
+		void clear();	
+		
+		void activate( ChildWindow* w );
 		
 		void deactivate();
 		

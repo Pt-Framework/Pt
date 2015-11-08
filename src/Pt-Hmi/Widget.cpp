@@ -65,13 +65,17 @@ Widget::Widget()
 , _hasFocus(false)
 , _isValid(false)
 {	
-	bindMnemonicToWidget( *this );		
+	bindMnemonicToWidget( *this );
+
+	_eventReceived += Pt::slot(*this, &Widget::onSizeEvent);
+	_eventReceived += Pt::slot(*this, &Widget::onPositionEvent);
+	_eventReceived += Pt::slot(*this, &Widget::onKeyInput);
+	_eventReceived += Pt::slot(*this, &Widget::onPointerInput);			
 }
 
 
 Widget::~Widget()
 {
-
 }
 
 
@@ -429,6 +433,18 @@ void Widget::onPointerEnter()
 
 void Widget::onPointerLeaved()
 {	
+}
+
+
+void Widget::processEvent(const Pt::Event& ev)
+{
+	onEvent(ev);
+}
+
+
+void Widget::onEvent(const Pt::Event& ev)
+{
+	_eventReceived.send(ev);
 }
 
 		
