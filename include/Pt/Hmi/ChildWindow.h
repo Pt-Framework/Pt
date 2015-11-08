@@ -37,11 +37,14 @@ class PT_HMI_API ChildWindow  : public Hmi::Window
 {
 	public:
 		ChildWindow();	
-		virtual ~ChildWindow();	
-    virtual void activate();
 
-	protected:	  
-    virtual void onInvalidate();			
+		virtual ~ChildWindow();	
+		
+	protected:	
+    virtual void onInvalidate();
+
+	private:
+		virtual void onActivate(); 
 };
 
 }}

@@ -16,7 +16,6 @@ class ChildW : public Hmi::ChildWindow
 {
 	public:
 		ChildW();
-
 		~ChildW();
 
 	private:

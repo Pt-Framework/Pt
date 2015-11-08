@@ -49,18 +49,18 @@ Window::Window(Window* parent)
 , _winParent(parent)
 , _windowManager(*this)
 , _isClosed(true)
-, _windowFocused(false)
+, _isActive(false)
 , _pointedWidget( 0 )
 {
 	Name = std::string("Window");
 	AcceptFocus = false ;	
 
-	eventReceived() += Pt::slot(*this, &Window::onSizeEvent);
-	eventReceived() += Pt::slot(*this, &Window::onPositionEvent);
-	eventReceived() += Pt::slot(*this, &Window::onFocusEvent);
-	eventReceived() += Pt::slot(*this, &Window::onCloseEvent);
-	eventReceived() += Pt::slot(*this, &Window::onKeyInput);
-	eventReceived() += Pt::slot(*this, &Window::onPointerInput);	
+	_eventReceived += Pt::slot(*this, &Window::onSizeEvent);
+	_eventReceived += Pt::slot(*this, &Window::onPositionEvent);
+	_eventReceived += Pt::slot(*this, &Window::onActivateEvent);
+	_eventReceived += Pt::slot(*this, &Window::onCloseEvent);
+	_eventReceived += Pt::slot(*this, &Window::onKeyInput);
+	_eventReceived += Pt::slot(*this, &Window::onPointerInput);	
 }
 
 
@@ -78,7 +78,7 @@ const std::vector<ChildWindow*> Window::childWindows() const
 void Window::addChildWindow(ChildWindow& w)
 {
 	w.setWindowParent(this);
-	_windowManager.add(&w);	
+	_windowManager.add(&w);		
 }
 
 
@@ -101,6 +101,12 @@ Window* Window::windowParent() const
 }
 
 
+void Window::activate()
+{
+	onActivate();
+}
+
+
 void Window::setPointedWidget( Widget* widget ) 
 {
 	if( _pointedWidget == widget )
@@ -116,6 +122,11 @@ void Window::setPointedWidget( Widget* widget )
 }
 
 
+void Window::processEvent(const Pt::Event& ev)
+{
+	_eventReceived.send(ev);
+}
+
 
 void Window::onPointerInput(const PointerEvent& ev)
 {	
@@ -129,9 +140,6 @@ void Window::onPointerInput(const PointerEvent& ev)
 
 	this->setPointedWidget( widget );	
 
-  if( !_windowFocused  && ev.buttons()[0].state() == DeviceButton::Pressed )
-    eventReceived().send( FocusEvent() );
-
 	if( widget && widget != this )
 		widget->onPointerInput(ev);		
 }
@@ -142,9 +150,6 @@ void Window::onKeyInput(const KeyEvent& ev)
 {
   if( _windowManager.keyInput( ev ) )
       return;
-
-  if( !_windowFocused )
-    eventReceived().send( FocusEvent() );
 
 	if( !Enabled.get() )
 		return;
@@ -186,33 +191,13 @@ void Window::onPositionEvent( const PositionEvent& ev)
 }
 
 
-void Window::onFocusEvent( const FocusEvent& ev )
+void Window::onActivateEvent(const ActivateEvent& ev)
 { 
-	onRemoveFocus();			
-	onSetFocus();
-  invalidate();
-}
+	if( ! ev.isActive() )
+		_windowManager.deactivate();
 
-
-void Window::onSetFocus()
-{
-  _windowFocused = true;	 
-}
-
-void Window::onRemoveFocus()
-{
-	if( _winParent != 0 ) 	
-		_winParent->onRemoveFocus();
-	else
-		removeFocus();
-}
-
-void Window::removeFocus()
-{
-	_windowFocused = false;
-
-	for( size_t i = 0; i < _windowManager.windows().size(); ++ i)
-		_windowManager.windows()[i]->removeFocus();
+	_isActive = ev.isActive();		  
+	invalidate();
 }
 
 

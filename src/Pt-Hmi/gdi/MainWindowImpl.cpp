@@ -35,7 +35,7 @@
 #include <Pt/Hmi/SizeEvent.h>
 #include <Pt/Hmi/PositionEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
-#include <Pt/Hmi/FocusEvent.h>
+#include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/Screen.h>
 #include "PaintSurfaceImpl.h"
 
@@ -142,7 +142,7 @@ void MainWindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
       _keyEvent.setUnicode(ucode);
   }
 
-  _window->eventReceived().send(_keyEvent);
+  _window->processEvent(_keyEvent);
 }
 
 
@@ -222,12 +222,18 @@ void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam
         }
         break;
 
+				case WM_ACTIVATE:
+				{
+					onActivate( true );
+				}
+				break;
+				
         case WM_KILLFOCUS:
         {
 					if( _forceTopMost )
 						BringWindowToTop( _hwnd );
 					else
-						onFocus( false );
+						onActivate( false );
         }
         break;        
 
@@ -251,14 +257,13 @@ void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam
 void MainWindowImpl::onClose()
 {
 	CloseEvent ev;
-	_window->eventReceived().send(ev);
+	_window->processEvent(ev);
 }
 
 
-void MainWindowImpl::onFocus(bool f)
+void MainWindowImpl::onActivate(bool f)
 {
-	if( f)
-		_window->eventReceived().send( FocusEvent() );
+	_window->processEvent( ActivateEvent(f) );
 }
 
 
@@ -289,7 +294,7 @@ void MainWindowImpl::onSize(WPARAM wParam, LPARAM lParam)
   int height = HIWORD(lParam);  
     
 	Pt::Hmi::SizeEvent ev(Gfx::SizeF(width, height), state);
-	_window->eventReceived().send(ev);
+	_window->processEvent(ev);
 }
 
 
@@ -352,7 +357,7 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
     _pointerEvent.setX(p.x());
     _pointerEvent.setY(p.y());            
 
-    _window->eventReceived().send(_pointerEvent);
+    _window->processEvent(_pointerEvent);
 }
 
 
@@ -364,7 +369,7 @@ void MainWindowImpl::onMove(LPARAM lParam)
 	int yPos = info.top;
 
 	PositionEvent ev(Gfx::PointF(xPos, yPos) );
-  _window->eventReceived().send( ev );	
+  _window->processEvent( ev );	
 }
 
 
@@ -403,7 +408,10 @@ void MainWindowImpl::activate()
 
 void MainWindowImpl::setWindowSize(const Gfx::SizeF& sizef)
 {
- Gfx::Size size = _screen.fromUnit(sizef);
+	if( _hwnd == 0)
+		return;
+
+  Gfx::Size size = _screen.fromUnit(sizef);
 
   RECT clientRect;
   SetRect(&clientRect, 0, 0, size.width() - 1, size.height() - 1);

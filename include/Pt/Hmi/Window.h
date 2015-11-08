@@ -32,7 +32,7 @@
 #include <Pt/Hmi/WindowStartPosition.h>
 #include <Pt/Hmi/WindowState.h>
 #include <Pt/Hmi/WindowBorder.h>
-#include <Pt/Hmi/FocusEvent.h>
+#include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Gfx/Image.h>
 
@@ -88,50 +88,44 @@ class PT_HMI_API Window : public Widget
 
 		void close();    
 
-		Pt::Signal<const Pt::Event&>& eventReceived()
-		{
-			return _eventReceived;
-		} 
+    void activate();
 
-    bool isWindowFocused() const
+    bool isActive() const
     {
-      return _windowFocused;
+      return _isActive;
     }
-
-
-    virtual void activate() = 0;
 
 		void setPointedWidget( Widget* widget);
 
+		void processEvent(const Pt::Event& ev);
+
 	protected:
-		Window(Window* parent = 0);    
-
-		void removeFocus();
-
-		
+		Window(Window* parent = 0);
 
 	protected:		
-
 		virtual void onKeyInput( const KeyEvent& ev );			
 		virtual void onPointerInput( const PointerEvent& ev );	
 		virtual void setClosed( bool close );				
-		virtual void onFocusEvent( const FocusEvent& ev );
-		virtual void onSetFocus();
-		virtual void onRemoveFocus();
+		virtual void onActivateEvent(const ActivateEvent& ev);
 		virtual void onRender( PaintSurface& surface );
+
 	protected:
 		void onSizeEvent(const SizeEvent& ev);
 		void onPositionEvent( const PositionEvent& ev);		
 		void onCloseEvent(const CloseEvent& ev);
 
+	private:
+		virtual void onActivate() = 0;
+
 	protected:
 		Window*				_winParent;
 		Widget*				_pointedWidget;
+//TODO:		Widget*				_focusWidget;
 
 		WindowManager _windowManager;		
 		bool	_isClosed;
     Pt::Signal<const Pt::Event&> _eventReceived;		
-    bool                    _windowFocused;
+    bool                    _isActive;
 };
 
 }}

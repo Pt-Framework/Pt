@@ -124,6 +124,9 @@
     <Filter Include="Pt-Hmi\egl-gbm">
       <UniqueIdentifier>{f4b9f7c9-4670-4ee6-8c07-14d589df7075}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Hmi\Events">
+      <UniqueIdentifier>{6f2f13a1-ae7e-44a8-93c4-fce09d724d91}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1017,9 +1020,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceControlDial.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Property.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1101,9 +1101,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.h">
       <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PointerEvent.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\ArrowCursor.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1118,18 +1115,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.h">
       <Filter>Pt-Hmi\gdi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\SizeEvent.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PositionEvent.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\FocusEvent.h">
-      <Filter>Pt-Hmi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
       <Filter>Pt-Hmi</Filter>
@@ -1304,6 +1289,24 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\demo\ChildW.h">
       <Filter>Pt-Hmi\demo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\SizeEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PointerEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PositionEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ActivateEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

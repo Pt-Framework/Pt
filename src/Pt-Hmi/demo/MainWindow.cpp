@@ -74,7 +74,7 @@ MainWindow::~MainWindow()
 void MainWindow::show()
 {
 	Visible = true;	
-	invalidate();  
+	
 }
 
 }}}

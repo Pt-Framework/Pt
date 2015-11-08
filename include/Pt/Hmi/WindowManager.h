@@ -33,7 +33,7 @@
 #include <Pt/Connectable.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Cursor.h>
-#include <Pt/Hmi/FocusEvent.h>
+#include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/SizeEvent.h>
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/PositionEvent.h>
@@ -61,7 +61,9 @@ class WindowManager : public Pt::Connectable
 
 		void remove( ChildWindow* window );
 
-		void activate(ChildWindow* w);		
+		void activate( ChildWindow* w );		
+		
+		void deactivate();
 		
 		void render();
 		
@@ -109,6 +111,8 @@ class WindowManager : public Pt::Connectable
 		Gfx::PointF toClient(const ChildWindow* w, const Gfx::PointF& p);  
 
 		ChildWindow* active();		
+		
+
 		ChildWindow* findWindow( const Gfx::PointF& pos );
 
 		void setPointedWindow( ChildWindow* window );
@@ -120,7 +124,6 @@ class WindowManager : public Pt::Connectable
 		std::vector<ChildWindow*>	_windows;		
 		ResizeDirection::Type			_sizingDirection;
 		Gfx::PointF								_lastSizePoint;    
-		FocusEvent								_focusEvent;	
 		double										_borderWidth;
    Gfx::Color						      _inactiveColor; 
    Gfx::Color						      _activeColor;

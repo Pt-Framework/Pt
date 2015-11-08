@@ -45,8 +45,6 @@ class PT_HMI_API MainWindow  : public Window
 
 		void setTopMost( bool topMost );						
 
-    virtual void activate();
-
 	protected:	
 		virtual void setSize(const Gfx::SizeF& size);
 
@@ -56,14 +54,12 @@ class PT_HMI_API MainWindow  : public Window
 
 		virtual void setClosed(bool c);		
 
-		virtual void onSetFocus();
-
-		virtual void onRemoveFocus();
-
   protected:
-    virtual void onInvalidate();	
+    virtual void onInvalidate();			
 
-	private: 					
+	private:
+		virtual void onActivate();
+					
 		void onPositionChanged(const Gfx::PointF& prop);    
 
 		void onClosedChanged(const bool& closed);

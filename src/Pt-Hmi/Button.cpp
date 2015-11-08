@@ -278,7 +278,7 @@ void Button::onPointerInput(const PointerEvent& ev)
 		{
 			case ButtonType::Press:
 			{
-				if(!isWidgetFocused())
+				if(!hasFocus())
 				{
 					genOutput = true;						
 					setWidgetFocus(true);															
@@ -313,7 +313,7 @@ void Button::onPointerInput(const PointerEvent& ev)
 
 			case ButtonType::Toggle:
 			{
-				if(!isWidgetFocused())	
+				if(!hasFocus())	
 				{
 					setWidgetFocus(true);			
 					genOutput = true;
@@ -360,7 +360,7 @@ void Button::onRender(PaintSurface& paintSurface)
  Gfx::SizeF  size = clientSize();
  Gfx::PointF pos  = clientPos();
        
-	if( Hover.get() || isWidgetFocused() )
+	if( Hover.get() || hasFocus() )
 	{
 		size.addHeight(-4);
 		size.addWidth(-4);

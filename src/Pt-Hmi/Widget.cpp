@@ -62,7 +62,7 @@ Widget::Widget()
 , _parent(0)
 , _size(200,200)
 , _position( 0, 0)
-, _isWidgetFocused(false)
+, _hasFocus(false)
 , _isValid(false)
 {	
 	bindMnemonicToWidget( *this );		
@@ -459,7 +459,7 @@ void Widget::onKeyInput(const KeyEvent& ev)
 	}
 
 	//Action key handling
-	if( ev.toUTF8String() == FocusedActionKey.get() && isWidgetFocused() )	
+	if( ev.toUTF8String() == FocusedActionKey.get() && hasFocus() )	
 	{
 		onActionKey( ev.state() );		
 	}
@@ -554,7 +554,7 @@ int Widget::getFocusedChild() const
 	for( ; i < (int)children().size(); ++i)
 	{
 		const Widget* child = children()[i];
-		if( child->isWidgetFocused() )
+		if( child->hasFocus() )
 			return i;		
 	}		
 
@@ -610,9 +610,9 @@ bool Widget::focusNext()
 
 void Widget::setWidgetFocus( bool isFocused )
 {	
-	_isWidgetFocused = isFocused;
+	_hasFocus = isFocused;
 
-  if( !_isWidgetFocused )
+  if( !_hasFocus)
 	{//False => all childs set to false.
 		for( size_t i = 0; i < children().size(); ++i)
 		{
@@ -644,7 +644,13 @@ void Widget::setWidgetFocus( bool isFocused )
 
 	invalidate();
 
-	WidgetFocusedAction.send(_isWidgetFocused);
+	onFocusChanged(_hasFocus);
+}
+
+
+void Widget::onFocusChanged(bool hasFocus)
+{
+
 }
 
 

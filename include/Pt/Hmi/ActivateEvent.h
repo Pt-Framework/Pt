@@ -23,8 +23,8 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_FocusEvent_h
-#define Pt_Hmi_FocusEvent_h
+#ifndef Pt_Hmi_ActivateEvent_h
+#define Pt_Hmi_ActivateEvent_h
 
 #include <Pt/Types.h>
 #include <Pt/Hmi/Api.h>
@@ -34,18 +34,25 @@
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API FocusEvent : public Pt::BasicEvent<FocusEvent>
+class PT_HMI_API ActivateEvent : public Pt::BasicEvent<ActivateEvent>
 {
 	public:	
-		FocusEvent()	
+		ActivateEvent(bool isActive)	
+		: _isActive( isActive )
 		{
 		}
 
-		virtual ~FocusEvent()
+		virtual ~ActivateEvent()
 		{
+		}
+
+		bool isActive() const
+		{
+			return _isActive;
 		}
 
 	private:
+		bool _isActive;
 };
 
 }}

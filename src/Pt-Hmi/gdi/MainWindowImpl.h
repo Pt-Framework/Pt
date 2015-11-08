@@ -105,7 +105,7 @@ protected:
 	void onKey(unsigned int ms, WPARAM wparam, LPARAM lparam);
 	void onMove(LPARAM lparam);	
 	void onClose();
-	void onFocus(bool f);
+	void onActivate(bool f);
 
 private:	
   HWND													_hwnd;

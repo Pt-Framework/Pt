@@ -214,21 +214,9 @@ void MainWindow::setPosition(const Gfx::PointF& pos)
 	_impl->setWindowPos( pos);
 }
 
-
-void MainWindow::activate()
+void MainWindow::onActivate()
 {
-  _impl->activate();
-}
-
-void MainWindow::onSetFocus()
-{
-	_impl->focus(); 
-	Window::onSetFocus();
-}
-
-void MainWindow::onRemoveFocus()
-{	
-	Window::onRemoveFocus();
+		_impl->activate(); 
 }
 
 

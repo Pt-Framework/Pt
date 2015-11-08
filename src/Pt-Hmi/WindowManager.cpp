@@ -102,18 +102,34 @@ void WindowManager::remove( ChildWindow* w )
 }
 
 
-void WindowManager::activate( ChildWindow* w )
+void WindowManager::activate(ChildWindow* w)
 {
-	std::vector<ChildWindow*>::iterator it = std::find( _windows.begin(), _windows.end(), w );
+	deactivate();
 
-	if( it == _windows.end() )
-		return;
+	std::vector<ChildWindow*>::iterator it = std::find(_windows.begin(), _windows.end(), w);
+	if( it != _windows.end() )
+		_windows.erase(it);
+		
+	_windows.push_back(w);    
 
-	_windows.erase( it );	
-	_windows.push_back( w );    
+	w->processEvent( ActivateEvent(true) );
+}
 
-  w->eventReceived().send( FocusEvent() );
-  invalidate();
+
+void WindowManager::deactivate()
+{
+	std::vector<ChildWindow*>::iterator it = _windows.begin();
+	
+	for( ; it != _windows.end(); ++it)
+	{
+			ChildWindow* w = *it;
+
+			if( w->isActive() )
+			{
+				w->processEvent( ActivateEvent(false) );				
+				break;
+			}
+	}		
 }
 
 
@@ -128,7 +144,7 @@ Gfx::PointF WindowManager::renderFrame( ChildWindow* w )
 	const Gfx::SizeF clientSize =  w->Size.get();
 	const Gfx::SizeF winSize( clientSize.width()  + _borderWidth*2,  clientSize.height() + _borderWidth*2 + _titleBarHeight);	
 	
-	Gfx::Color color = w->isWindowFocused() ? _activeColor : _inactiveColor;  
+	Gfx::Color color = w->isActive() ? _activeColor : _inactiveColor;  
 
 	Painter& painter = _parent.surface().painter();
 
@@ -231,23 +247,27 @@ void WindowManager::updateActive( const Pt::Hmi::PointerEvent& pointerEvent )
 	if( _moving )
 		return;
 
-	for( int i = _windows.size() - 1;  i > -1; --i )
+	std::vector<ChildWindow*>::reverse_iterator rit =  _windows.rbegin();
+
+	for( ; rit != _windows.rend(); ++rit )
 	{
-		ChildWindow* w = _windows[i];
+		ChildWindow* w = *rit;
 
-		Gfx::PointF local( pointerEvent.x() - w->Position.get().x() , pointerEvent.y() - w->Position.get().y() );
+		Gfx::PointF pos( pointerEvent.x(), pointerEvent.y());
 
-		if( !contains( w, local ) )
+		if( !contains( w, pos ) )
 			continue;
 
-		const Gfx::PointF& client = toClient( w,Gfx::PointF( pointerEvent.x(), pointerEvent.y() ) );
-				 							
-		if( w == active() )
+		const Gfx::PointF& client = toClient( w, Gfx::PointF( pointerEvent.x(), pointerEvent.y() ) );
+		
+		if( w->isActive() )		 													
 			return;
-							 
+			 
 		activate( w );    
 		return;
 	}	 	
+
+	deactivate();
 }
 
 
@@ -257,7 +277,7 @@ Window* WindowManager::getFosusedWindow( WindowManager* manager )
   {
     Window* child = manager->windows()[i];
     
-    if( child->isWindowFocused() )
+    if( child->isActive() )
         return child;
 
     Window* focused = getFosusedWindow( &child->windowManager() );
@@ -278,7 +298,7 @@ bool WindowManager::keyInput( const Pt::Hmi::KeyEvent& keyEvent )
     return false;
 
 	if( w->Enabled.get() )
-			w->eventReceived().send( keyEvent );		
+			w->processEvent( keyEvent );		
 
    return true;
 }
@@ -392,13 +412,13 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 	if( w->Position.get() != pos )
 	{
 		_positionEvent.setPosition(pos);
-		w->eventReceived().send(_positionEvent);	
+		w->processEvent(_positionEvent);	
 	}
 
 	if( w->Size.get() != size )
 	{
 		_sizeEvent.setSize( size );
-		w->eventReceived().send( _sizeEvent );
+		w->processEvent( _sizeEvent );
 	}
 
 	_lastSizePoint = point;  
@@ -409,8 +429,9 @@ bool WindowManager::contains(const ChildWindow* w, const Gfx::PointF& p)
 {  
 	Gfx::SizeF winSize( w->Size.get().width() + _borderWidth*2, w->Size.get().height() + _borderWidth*2 + _titleBarHeight );
 
-	if( p.x() < winSize.width() && p.x() >= 0 && p.y() < winSize.height() && p.y() >= 0)
-		return true;
+	if( p.x() >= w->Position.get().x() && p.x() <  w->Position.get().x() + winSize.width() &&
+	    p.y() >= w->Position.get().y() && p.y() <  w->Position.get().y() + winSize.height() )
+				return true;
 
 	return false;
 }
@@ -442,7 +463,6 @@ ResizeDirection::Type WindowManager::getSizingDirection( const ChildWindow* w, c
 	const Gfx::PointF wpos  = w->Position.get();
 	double titleHeight = _titleBarHeight;
 
-	std::clog << "EVENT: "<< ev.x() << "x" << ev.y() << " WPOS: " << wpos.x() << "." << wpos.y() << " "<< _borderWidth << std::endl;
 	bool left = ev.x() < (wpos.x() +	_borderWidth);
 	bool right = ev.x() >= wpos.x() + _borderWidth + wsize.width();
 	bool top = ev.y() < wpos.y() + _borderWidth;
@@ -503,7 +523,7 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 		
 	_positionEvent.setPosition(newPos);
 
-	w->eventReceived().send( _positionEvent );
+	w->processEvent( _positionEvent );
 	
 	_movingOffset = Gfx::PointF( point.x() , point.y() );  
 	invalidate();
@@ -519,9 +539,7 @@ ChildWindow* WindowManager::findWindow( const Gfx::PointF& pos )
 		if( !w->Visible.get() )
 			continue;
 
-		Gfx::PointF local( pos.x() - w->Position.get().x() , pos.y() - w->Position.get().y() );
-
-		if( !contains( w, local ) )
+		if( !contains( w, pos ) )
 			continue;
 
 		return w;
@@ -617,7 +635,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 	localMouseEvent.setX( pointerEvent.x() - childWindow->Position.get().x() - _borderWidth ) ;
 	localMouseEvent.setY( pointerEvent.y() - childWindow->Position.get().y() - _titleBarHeight - _borderWidth ) ;  
 
-	if( (_sizingDirection != ResizeDirection::No || _moving) && childWindow->isWindowFocused() )
+	if( (_sizingDirection != ResizeDirection::No || _moving) && childWindow->isActive() )
 	{
 	  doMoving( childWindow, pointerEvent );		
 	  doSizing( childWindow, pointerEvent );				
@@ -654,7 +672,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
   }
 
 	setPointedWindow( childWindow );
-	childWindow->eventReceived().send( localMouseEvent );
+	childWindow->processEvent( localMouseEvent );
 	_pointerLastState = pointerEvent.buttons()[_actionButton].state();
 
 	return true;

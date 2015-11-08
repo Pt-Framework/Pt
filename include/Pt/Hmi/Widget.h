@@ -199,15 +199,14 @@ class PT_HMI_API Widget : public Pt::Connectable
 		ValueProperty<FlowLayout::Type>					 FlowLayout;			
 		ValueProperty<std::string>							 ShortcutKey;
 		ValueProperty<FlowLayoutDirection::Type> FlowDirection;				
+		
 
-		Signal<bool> WidgetFocusedAction;
-
-		virtual bool isWidgetFocused() const
+		bool hasFocus() const
 		{
-			return _isWidgetFocused;
+			return _hasFocus;
 		}
 
-		void focusWidget()
+		void focus()
 		{
 			setWidgetFocus(true);			
 		}
@@ -231,6 +230,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 		virtual void onPointerEnter();		
 		virtual void onPointerInput(const PointerEvent& ev);		
     virtual void onKeyInput(const KeyEvent& ev);
+		virtual void onFocusChanged(bool hasFocus);
 
 	protected:
 		virtual void onInvalidate();
@@ -296,7 +296,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 		std::string								 _mnemonicKey;
 		Gfx::SizeF									_size;
 		Gfx::PointF                _position;
-		bool											  _isWidgetFocused;
+		bool											  _hasFocus;
 		std::string									_caption;		
     bool                        _isValid;
 		PaintSurface 							_surface;

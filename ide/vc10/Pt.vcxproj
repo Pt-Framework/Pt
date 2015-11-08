@@ -53,6 +53,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb565Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb888Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Size.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\ActivateEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Api.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Application.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Button.h" />
@@ -62,7 +63,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceButton.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceControlDial.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Dialog.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\FocusEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Label.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MainWindow.h" />

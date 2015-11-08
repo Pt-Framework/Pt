@@ -42,6 +42,7 @@ ChildWindow::~ChildWindow()
 	//Todo: remove from window manager
 }
 
+
 void ChildWindow::onInvalidate()
 {
 	Window::onInvalidate();
@@ -51,12 +52,12 @@ void ChildWindow::onInvalidate()
 }
 
 
-void ChildWindow::activate()
+void ChildWindow::onActivate()
 {
   if( _winParent == 0)
     return;
 
-  _winParent->windowManager().activate( this );
+  _winParent->windowManager().activate( this );	
 }
 
 }}
