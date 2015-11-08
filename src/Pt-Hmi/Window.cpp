@@ -129,6 +129,9 @@ void Window::onPointerInput(const PointerEvent& ev)
 
 	this->setPointedWidget( widget );	
 
+  if( !_windowFocused  && ev.buttons()[0].state() == DeviceButton::Pressed )
+    eventReceived().send( FocusEvent() );
+
 	if( widget && widget != this )
 		widget->onPointerInput(ev);		
 }
