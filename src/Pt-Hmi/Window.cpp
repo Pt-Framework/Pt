@@ -120,7 +120,7 @@ void Window::setPointedWidget( Widget* widget )
 }
 
 
-void Window::onPointerInput(const PointerEvent& ev)
+void Window::onPointerEvent(const PointerEvent& ev)
 {	
   if( _windowManager.pointerInput( ev ) )
 	{
@@ -138,7 +138,7 @@ void Window::onPointerInput(const PointerEvent& ev)
 
 
 
-void Window::onKeyInput(const KeyEvent& ev)
+void Window::onKeyEvent(const KeyEvent& ev)
 {
   if( _windowManager.keyInput( ev ) )
       return;
@@ -162,7 +162,7 @@ void Window::onKeyInput(const KeyEvent& ev)
 		invalidate();
 	}
 
-  Widget::onKeyInput(ev);
+  Widget::onKeyEvent(ev);
 }
 
 

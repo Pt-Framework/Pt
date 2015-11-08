@@ -23,7 +23,10 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+	02110-1301  USA
+*/
+
 #ifndef Pt_Hmi_Controller_Widget_H
 #define Pt_Hmi_Controller_Widget_H
 
@@ -41,8 +44,9 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Color.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+
+namespace Hmi {
   
 namespace BorderStyle
 {
@@ -232,17 +236,17 @@ class PT_HMI_API Widget : public Pt::Connectable
 			return _eventReceived;
 		}
 
+	protected:
+		virtual void onEvent(const Pt::Event& ev);
+
+		virtual void onPointerEvent(const PointerEvent& ev);		
+    
+		virtual void onKeyEvent(const KeyEvent& ev);
+
 	public:
 		virtual void onPointerLeaved();
 		virtual void onPointerEnter();		
 		virtual void onFocusChanged(bool hasFocus);
-
-	protected:
-		virtual void onEvent(const Pt::Event& ev);
-
-		virtual void onPointerInput(const PointerEvent& ev);		
-    
-		virtual void onKeyInput(const KeyEvent& ev);
 		
 	protected:
 		virtual void onInvalidate();
@@ -315,6 +319,8 @@ class PT_HMI_API Widget : public Pt::Connectable
 		PaintSurface 							_surface;
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif

@@ -69,8 +69,8 @@ protected:
 	virtual void onMnemonic();
 	virtual void onShortcutKey(KeyEvent::KeyState state);
 	virtual void onActionKey(KeyEvent::KeyState state);
-	virtual void onPointerInput(const PointerEvent& ev);
-	virtual void onKeyInput(const KeyEvent& ev);
+	virtual void onPointerEvent(const PointerEvent& ev);
+	virtual void onKeyEvent(const KeyEvent& ev);
 	virtual void onButtonStateChanged( const DeviceButton::State& prop);
 	virtual void onDoublePressedTimeout();
 	virtual void onRender(PaintSurface& surface);

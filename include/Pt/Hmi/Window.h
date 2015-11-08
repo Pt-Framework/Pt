@@ -23,7 +23,10 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+	02110-1301  USA
+*/
+
 #ifndef Pt_Hmi_Window_H
 #define Pt_Hmi_Window_H
 
@@ -37,6 +40,7 @@
 #include <Pt/Gfx/Image.h>
 
 namespace Pt {
+
 namespace Hmi {
 
 class ChildWindow;
@@ -101,16 +105,20 @@ class PT_HMI_API Window : public Widget
 		Window(Window* parent = 0);
 
 	protected:		
-		virtual void onKeyInput( const KeyEvent& ev );			
-		virtual void onPointerInput( const PointerEvent& ev );	
-		virtual void setClosed( bool close );				
-		virtual void onActivateEvent(const ActivateEvent& ev);
-		virtual void onRender( PaintSurface& surface );
+		virtual void onKeyEvent( const KeyEvent& ev );			
+		
+		virtual void onPointerEvent( const PointerEvent& ev );	
+		
+		virtual void onResizeEvent(const ResizeEvent& ev);
+		
+		virtual void onMoveEvent( const MoveEvent& ev);		
+		
+		virtual void onCloseEvent(const CloseEvent& ev);
 
 	protected:
-		void onResizeEvent(const ResizeEvent& ev);
-		void onMoveEvent( const MoveEvent& ev);		
-		void onCloseEvent(const CloseEvent& ev);
+		virtual void onActivateEvent(const ActivateEvent& ev);
+		virtual void onRender( PaintSurface& surface );
+		virtual void setClosed( bool close );	
 
 	private:
 		virtual void onActivate() = 0;
@@ -125,6 +133,8 @@ class PT_HMI_API Window : public Widget
     bool  _isActive;
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif

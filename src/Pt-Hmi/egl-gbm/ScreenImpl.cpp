@@ -67,7 +67,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
   Visible.set(true);      
   setCursor(0);  
   
-  eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerInput );
+  eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerEvent );
 
   _fboA = 0;
   _fboB = 0;
@@ -93,7 +93,7 @@ ScreenImpl::~ScreenImpl()
 }
 
 
-void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
+void ScreenImpl::onPointerEvent( const Pt::Hmi::PointerEvent& mouseEvent )
 {    
   //Pt::System::Clock clock;
   //clock.start();

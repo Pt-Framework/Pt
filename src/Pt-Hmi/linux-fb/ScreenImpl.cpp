@@ -53,7 +53,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 	Visible.set(true);			
 	setCursor(0);	
 	
-  eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerInput );
+  eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerEvent );
 }
 
 
@@ -62,7 +62,7 @@ ScreenImpl::~ScreenImpl()
 }
 
 
-void ScreenImpl::onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent )
+void ScreenImpl::onPointerEvent( const Pt::Hmi::PointerEvent& mouseEvent )
 {		
 	_drawCursor =  true;
 

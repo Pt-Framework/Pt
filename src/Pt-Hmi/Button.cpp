@@ -215,7 +215,7 @@ void Button::onShortcutKey( KeyEvent::KeyState state )
 	invalidate();			
 }
 
-void Button::onKeyInput(const KeyEvent& ev)
+void Button::onKeyEvent(const KeyEvent& ev)
 {		
 	if( !Enabled.get() )
 		return;
@@ -223,7 +223,7 @@ void Button::onKeyInput(const KeyEvent& ev)
 	if( !Visible.get() )
 		return;
 
-	Label::onKeyInput(ev);
+	Label::onKeyEvent(ev);
 
 	if(ButtonType.get() == ButtonType::Press && ButtonState.get() != DeviceButton::Released)
 	{
@@ -233,11 +233,11 @@ void Button::onKeyInput(const KeyEvent& ev)
 	}		
 }
 
-void Button::onPointerInput(const PointerEvent& ev)
+void Button::onPointerEvent(const PointerEvent& ev)
 {    
 	Gfx::PointF point = toClient(Gfx::PointF(ev.x(), ev.y()));  
       
-	Label::onPointerInput(ev);
+	Label::onPointerEvent(ev);
 		    
 	if( !Enabled.get() )
 	{

@@ -132,7 +132,7 @@ class ScreenImpl : public Window
 
 	protected:
 		virtual void onInvalidate();
-		virtual void onPointerInput( const Pt::Hmi::PointerEvent& mouseEvent );
+		virtual void onPointerEvent( const Pt::Hmi::PointerEvent& mouseEvent );
 
 	private:
     enum BlitOp

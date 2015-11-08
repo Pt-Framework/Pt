@@ -67,9 +67,8 @@ Widget::Widget()
 {	
 	bindMnemonicToWidget( *this );
 
-	
-	_eventReceived += Pt::slot(*this, &Widget::onKeyInput);
-	_eventReceived += Pt::slot(*this, &Widget::onPointerInput);			
+	_eventReceived += Pt::slot(*this, &Widget::onKeyEvent);
+	_eventReceived += Pt::slot(*this, &Widget::onPointerEvent);			
 }
 
 
@@ -447,12 +446,12 @@ void Widget::onEvent(const Pt::Event& ev)
 }
 
 		
-void Widget::onPointerInput(const PointerEvent& ev)
+void Widget::onPointerEvent(const PointerEvent& ev)
 {		
 }
 
 
-void Widget::onKeyInput(const KeyEvent& ev)
+void Widget::onKeyEvent(const KeyEvent& ev)
 { 	
 	if( !Enabled.get() )
 			return;
@@ -487,7 +486,7 @@ void Widget::onKeyInput(const KeyEvent& ev)
 
 	//Propagate to children.
 	for( size_t i = 0; i < children().size(); ++i)
-		children()[i]->onKeyInput(ev);
+		children()[i]->onKeyEvent(ev);
 }
 
 
