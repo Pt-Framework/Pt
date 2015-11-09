@@ -340,26 +340,13 @@ std::size_t SerialDeviceImpl::timeout() const
 SerialDeviceImpl::SerialDeviceImpl(SerialDevice& device)
 : OverlappedIODeviceImpl(device)
 , _device(device)
-, _waitHandle(INVALID_HANDLE_VALUE)
 , _eventMask(0)
 {
-    _waitHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
-    if( _waitHandle == NULL )
-        throw SystemError("CreateEvent");
-
-    _readOv.Offset = 0;
-    _readOv.OffsetHigh = 0;
-    _readOv.hEvent = NULL;
-
-    _writeOv.Offset = 0;
-    _writeOv.OffsetHigh = 0;
-    _writeOv.hEvent = NULL;
 }
 
 
 SerialDeviceImpl::~SerialDeviceImpl()
 {
-    ::CloseHandle(_waitHandle);
 }
 
 
@@ -440,51 +427,51 @@ size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, size_t n, bool
         _writeOv.hEvent = _ioh.handle();
     }
 
-	DWORD readBytes = 0;
-	if( FALSE == ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv) )
-	{
-		DWORD err = GetLastError();
-		if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
-		{
-			eof = true;
-			return 0;
-		}
+    DWORD readBytes = 0;
+    if( FALSE == ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv) )
+    {
+        DWORD err = GetLastError();
+        if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
+        {
+            eof = true;
+            return 0;
+        }
 
-		loop.selector().disableOverlapped(_ioh);
-		_readOv.hEvent = NULL;
-		_writeOv.hEvent = NULL;
+        loop.selector().disableOverlapped(_ioh);
+        _readOv.hEvent = NULL;
+        _writeOv.hEvent = NULL;
 
-		throw IOError("read failed");
-	}
+        throw IOError("read failed");
+    }
 
-	if(readBytes > 0)
+    if(readBytes > 0)
         return readBytes;
 
-	SetCommMask(handle(), EV_RXCHAR);
-	
-	_eventMask = 0;
-	BOOL ret = ::WaitCommEvent(handle(), &_eventMask, &_readOv);
-	if(ret == FALSE)
-	{
-		DWORD err = GetLastError();
-		if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
-		{
-			eof = true;
-			return 0;
-		}
-		else if( err == ERROR_IO_PENDING )
-		{
-			return 0;
-		}
+    SetCommMask(handle(), EV_RXCHAR);
+    
+    _eventMask = 0;
+    BOOL ret = ::WaitCommEvent(handle(), &_eventMask, &_readOv);
+    if(ret == FALSE)
+    {
+        DWORD err = GetLastError();
+        if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
+        {
+            eof = true;
+            return 0;
+        }
+        else if( err == ERROR_IO_PENDING )
+        {
+            return 0;
+        }
 
-		loop.selector().disableOverlapped(_ioh);
-		_readOv.hEvent = NULL;
-		_writeOv.hEvent = NULL;
+        loop.selector().disableOverlapped(_ioh);
+        _readOv.hEvent = NULL;
+        _writeOv.hEvent = NULL;
 
-		throw IOError("read failed");
-	}
-		
-	return 0;
+        throw IOError("read failed");
+    }
+        
+    return 0;
 }
 
 
@@ -504,7 +491,7 @@ std::size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t
         }
     }
 
-	readBytes = 0;
+    readBytes = 0;
     if( FALSE == ReadFile(handle(), (void*)buffer, n, &readBytes, &_readOv) )
     {
         DWORD err = GetLastError();
@@ -514,9 +501,9 @@ std::size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t
             return 0;
         }
 
-		loop.selector().disableOverlapped(_ioh);
-		_readOv.hEvent = NULL;
-		_writeOv.hEvent = NULL;
+        loop.selector().disableOverlapped(_ioh);
+        _readOv.hEvent = NULL;
+        _writeOv.hEvent = NULL;
 
         throw IOError("read failed");
     }
@@ -527,17 +514,17 @@ std::size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t
 
 bool SerialDeviceImpl::runRead(EventLoop& loop)
 {  
-	if( HasOverlappedIoCompleted(&_readOv) )
+    if( HasOverlappedIoCompleted(&_readOv) )
     {
-		COMSTAT stat;
-		ClearCommError(handle(), NULL, &stat);
-		if(stat.cbInQue > 0)
-			return true;
+        COMSTAT stat;
+        ClearCommError(handle(), NULL, &stat);
+        if(stat.cbInQue > 0)
+          return true;
 
-		// TODO:
-		// sometimes he overlapped handle is signalled,
-		// but no data is available, so keep waiting
-		::WaitCommEvent(handle(), &_eventMask, &_readOv);
+        // TODO:
+        // sometimes he overlapped handle is signalled,
+        // but no data is available, so keep waiting
+        ::WaitCommEvent(handle(), &_eventMask, &_readOv);
     }
 
     return false;
@@ -546,49 +533,56 @@ bool SerialDeviceImpl::runRead(EventLoop& loop)
 
 std::size_t SerialDeviceImpl::read(char* buffer, std::size_t n, bool& eof)
 {
+    if( ! _ioEvent)
+    {
+        _ioEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
+        if( _ioEvent == NULL )
+            throw SystemError("CreateEvent failed");
+    }
+
     OVERLAPPED ov;
-    ov.hEvent = _waitHandle;
-    ov.Offset = 0;
-    ov.OffsetHigh = 0;
+    ov.hEvent = _ioEvent;
+    ov.Offset = _readOv.Offset;
+    ov.OffsetHigh = _readOv.OffsetHigh;
     
     DWORD bufsize = n > std::numeric_limits<DWORD>::max() ? std::numeric_limits<DWORD>::max()
                                                           : static_cast<DWORD>(n);
 
     for(;;)
     {
-	    DWORD readBytes = 0;
-	    if( FALSE == ReadFile(handle(), (void*)buffer, bufsize, &readBytes, &ov) )
-	    {
-		    DWORD err = GetLastError();
-		    if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
-		    {
-			    eof = true;
-			    return 0;
-		    }
+        DWORD readBytes = 0;
+        if( FALSE == ReadFile(handle(), (void*)buffer, bufsize, &readBytes, &ov) )
+        {
+            DWORD err = GetLastError();
+            if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
+            {
+                eof = true;
+                return 0;
+            }
 
-		    throw IOError("read failed");
-	    }
+            throw IOError("read failed");
+        }
 
-	    if(readBytes > 0)
+        if(readBytes > 0)
             return readBytes;
 
-	    SetCommMask(handle(), EV_RXCHAR);
-	
-	    _eventMask = 0;
-	    BOOL ret = ::WaitCommEvent(handle(), &_eventMask, &ov);
-	    if(ret == FALSE)
-	    {
-		    DWORD err = GetLastError();
-		    if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
-		    {
-			    eof = true;
-			    return 0;
-		    }
-		    else if( err != ERROR_IO_PENDING )
-		    {
-		        throw IOError("read failed");
+        SetCommMask(handle(), EV_RXCHAR);
+    
+        _eventMask = 0;
+        BOOL ret = ::WaitCommEvent(handle(), &_eventMask, &ov);
+        if(ret == FALSE)
+        {
+            DWORD err = GetLastError();
+            if( ERROR_HANDLE_EOF == err || ERROR_BROKEN_PIPE == err )
+            {
+                eof = true;
+                return 0;
             }
-	    }
+            else if( err != ERROR_IO_PENDING )
+            {
+                throw IOError("read failed");
+            }
+        }
 
         DWORD result = WaitForSingleObject(ov.hEvent, _timeout);
 
@@ -757,42 +751,42 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
 
 void SerialDeviceImpl::setRts(bool on)
 {
-	DWORD flag = on ? SETRTS : CLRRTS;	
-	EscapeCommFunction(handle(), flag);
+    DWORD flag = on ? SETRTS : CLRRTS;    
+    EscapeCommFunction(handle(), flag);
 }
 
 void SerialDeviceImpl::setDtr(bool on)
 {
-	DWORD flag = on ? SETDTR : CLRDTR;	
-	EscapeCommFunction(handle(), flag);
+    DWORD flag = on ? SETDTR : CLRDTR;    
+    EscapeCommFunction(handle(), flag);
 }
 
 void SerialDeviceImpl::setBreak(bool on)
 {
-	DWORD flag = on ? SETBREAK : CLRBREAK;	
-	EscapeCommFunction(handle(), flag);
+    DWORD flag = on ? SETBREAK : CLRBREAK;    
+    EscapeCommFunction(handle(), flag);
 }
 
 void SerialDeviceImpl::sendBreak(int duration)
 {
-	duration = duration == 0 ? 300 : duration;
-	setBreak(true);
-	::Sleep(duration);
-	setBreak(false);
+    duration = duration == 0 ? 300 : duration;
+    setBreak(true);
+    ::Sleep(duration);
+    setBreak(false);
 }
 
 bool SerialDeviceImpl::isCts() const
 {
-	DWORD flags = 0;
-	GetCommModemStatus( handle() , &flags);
-	return ((flags & MS_CTS_ON) == MS_CTS_ON);
+    DWORD flags = 0;
+    GetCommModemStatus( handle() , &flags);
+    return ((flags & MS_CTS_ON) == MS_CTS_ON);
 }
 
 bool SerialDeviceImpl::isDsr() const
 {
-	DWORD flags = 0;
-	GetCommModemStatus( handle() , &flags);
-	return ((flags & MS_DSR_ON) == MS_DSR_ON);	
+    DWORD flags = 0;
+    GetCommModemStatus( handle() , &flags);
+    return ((flags & MS_DSR_ON) == MS_DSR_ON);    
 }
 
 
@@ -818,16 +812,16 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
         break;
 
         case SerialDevice::FlowControlHard:
-			commState.fInX = commState.fOutX = 1;
+            commState.fInX = commState.fOutX = 1;
             commState.fOutxCtsFlow = 1;
             commState.fRtsControl = RTS_CONTROL_HANDSHAKE;
         break;
 
-		case SerialDevice::FlowControlNone:
-		    commState.fRtsControl = RTS_CONTROL_DISABLE;
-			commState.fOutxCtsFlow = 0;
-			commState.fInX = commState.fOutX = 0;
-		break;
+        case SerialDevice::FlowControlNone:
+            commState.fRtsControl = RTS_CONTROL_DISABLE;
+            commState.fOutxCtsFlow = 0;
+            commState.fInX = commState.fOutX = 0;
+        break;
     }
 
     writeCommState( commState );

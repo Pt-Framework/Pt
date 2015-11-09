@@ -51,11 +51,11 @@ class SerialDeviceImpl : public OverlappedIODeviceImpl
 
         void cancel(EventLoop& loop);
 
-		virtual size_t beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
+        virtual size_t beginRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
 
-		virtual size_t endRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
+        virtual size_t endRead(EventLoop& loop, char* buffer, size_t n, bool& eof);
 
-		virtual bool runRead(EventLoop& loop);
+        virtual bool runRead(EventLoop& loop);
 
         size_t read( char* buffer, size_t count, bool& eof );
 
@@ -79,18 +79,18 @@ class SerialDeviceImpl : public OverlappedIODeviceImpl
         
         SerialDevice::FlowControl flowControl() const;
         
-		void setRts(bool on);
+        void setRts(bool on);
 
-		void setDtr(bool on);
+        void setDtr(bool on);
 
-		void setBreak(bool on);
-		
-		void sendBreak(int duration);
+        void setBreak(bool on);
+        
+        void sendBreak(int duration);
 
-		bool isCts() const;
+        bool isCts() const;
 
-		bool isDsr() const;
-		        
+        bool isDsr() const;
+                
 #ifdef _WIN32_WCE
         bool runRead(EventLoop&);
 
@@ -134,10 +134,7 @@ class SerialDeviceImpl : public OverlappedIODeviceImpl
 #else // normal WIN32
     private:
         SerialDevice& _device;
-        HANDLE _waitHandle;
-        OVERLAPPED _readOv;
-        OVERLAPPED _writeOv;
-		DWORD _eventMask;
+        DWORD _eventMask;
         DCB _orgCommState;
 #endif
 };
