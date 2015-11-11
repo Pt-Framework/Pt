@@ -657,6 +657,11 @@ if --with-wxwidgets in $(ARGV)
 
 if --with-qt5 in $(ARGV)
 {
+    QT5_SUPPORT = yes ;
+}
+
+if $(QT5_SUPPORT)
+{
 	QT5_LIBS = Qt5Core Qt5Widgets Qt5Gui ;
 	QT_LIBS = QtCore QtWidgets QtGui ;
 
@@ -702,8 +707,14 @@ if --with-qt5 in $(ARGV)
 								: [ FIncludes $(QT_INCLUDES) ] $(QT_C++FLAGS)
 								: $(QT_LINKLIBS) $(QT_LINKFLAGS) ] ;
 	}
+}
 
-	EchoOption QTDIR : "Qt directory" ;
+EchoOption --with-qt5 : "Qt support" : $(QT5_SUPPORT:E="no") ;
+
+if $(QT5_SUPPORT)
+{
+    EchoOption QTDIR : "Qt directory" ;
+    Configure WITH_QT ;
 
 	EchoOption QT_INCLUDES : "Qt includes" ;
 	Configure QT_INCLUDES ;
@@ -727,33 +738,35 @@ if --with-qt5 in $(ARGV)
 # Qt meta object compiler
 #############################################################################
 
-QT_MOC ?= moc ;
-
-WITH_QT_MOC = [ CheckBuild $(QT_MOC) check.h -o check.moc.cpp
-                         : "#include <QtCore/QObject>"
-                           "class moctest : public QObject{ Q_OBJECT };"
-                         : check.h
-                         : check.moc.cpp ] ;
-
-if ! $(WITH_QT_MOC)
+if $(WITH_QT)
 {
-    QT_MOC = [ FDirName $(QTDIR) bin $(QT_MOC) ] ;
+    QT_MOC ?= moc ;
 
     WITH_QT_MOC = [ CheckBuild $(QT_MOC) check.h -o check.moc.cpp
-                              : "#include <QtCore/QObject>"
-                                "class moctest : public QObject{ Q_OBJECT };"
-                              : check.h
-                              : check.moc.cpp ] ;
+                             : "#include <QtCore/QObject>"
+                               "class moctest : public QObject{ Q_OBJECT };"
+                             : check.h
+                             : check.moc.cpp ] ;
+
+    if ! $(WITH_QT_MOC)
+    {
+        QT_MOC = [ FDirName $(QTDIR) bin $(QT_MOC) ] ;
+
+        WITH_QT_MOC = [ CheckBuild $(QT_MOC) check.h -o check.moc.cpp
+                                  : "#include <QtCore/QObject>"
+                                    "class moctest : public QObject{ Q_OBJECT };"
+                                  : check.h
+                                  : check.moc.cpp ] ;
+    }
+
+    EchoOption QT_MOC : "Qt moc tool" : $(QT_MOC) ;
+    Configure QT_MOC : $(QT_MOC) ;
+
+    if ! $(WITH_QT_MOC)
+    {
+        Exit "ERROR: Qt moc tool not found." ;
+    }
 }
-
-EchoOption QT_MOC : "Qt moc tool" : $(QT_MOC) ;
-Configure QT_MOC : $(QT_MOC) ;
-
-if ! $(WITH_QT_MOC)
-{
-    Exit "ERROR: Qt moc tool not found." ;
-}
-
 #############################################################################
 # GUI libraries and includes
 #############################################################################

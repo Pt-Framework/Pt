@@ -178,7 +178,6 @@ if $(PT_SYSTEM)
 
     if $(WITH_QT) = yes
     {
-        Load qt.jam ;
         SubInclude PT_TOP src Pt-Qt ;
     }
 
