@@ -41,6 +41,22 @@ rule Bulk
 }
 
 
+rule BuildFile
+{
+    local _out = [ FGristFiles $(1) ] ;
+    local _in  = [ FGristFiles $(2) ] ;
+    local _action = $(3) ;
+
+    MakeLocate $(_out) : $(LOCATE_SOURCE) ;
+    SEARCH on $(_in) = $(SEARCH_SOURCE) ;
+    Depends $(_out) : $(_in) ;
+    
+    $(_action) $(_out) : $(_in) ;
+
+    Clean clean : $(_out) ;
+}
+
+
 rule Cc
 {
     local _h ;

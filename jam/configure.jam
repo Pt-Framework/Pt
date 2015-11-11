@@ -544,6 +544,36 @@ rule ConfigureC++
 }
 
 
+rule CheckBuild
+{
+    ConfigureLog "\n[ CheckBuild ]" ;
+    
+    local _cmd = $(1) ;
+    local _src = $(2) ;
+    local _in = $(3) ;
+    local _out = $(4) ;
+
+    ConfigureLog $(_src) ;
+
+    for local _line in $(_src)
+    {
+        WriteFile $(_in) : $(_line) ;
+    }
+
+    local r = [ TryCommand $(_cmd) ] ;
+
+    TryCommand $(RM) $(_in) ;
+
+    if $(_out)
+    {
+        TryCommand $(RM) $(_out) ;
+        # TODO: only return true if _out exists after the check was run
+    }
+
+    return $(r) ;
+}
+
+
 rule CheckBuildCc
 {
     ConfigureLog "\n[ CheckBuildCc ]" ;
