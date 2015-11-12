@@ -7,7 +7,8 @@ if exist deploy\linux-gcc-arm-debug (
 
 call:Build -sCONFIG=linux-gcc-arm-debug --debug -sTARGET_OS=linux -sTARGET_OSPLAT=arm ^
 -sTOOLSET=gcc -sTOOLSET_ROOT="%LINARO_ARM_GNUABIHF_2013_11_R1%\bin\arm-linux-gnueabihf-" ^
---with-openssl --with-qt5 
+-sLINKFLAGS="-Wl,-rpath-link,\"%LINARO_ARM_GNUABIHF_2013_11_R1%\arm-linux-gnueabihf\lib\" -Wl,-rpath-link,\"%LINARO_ARM_GNUABIHF_2013_11_R1%\arm-linux-gnueabihf\libarm-linux-gnueabihf\"" ^
+--with-openssl --with-qt5 -sQT_LINKLIBS="-lQt5Core -lQt5Widgets -lQt5Gui -lGLESv2 -ldrm -ldrm_omap -lwayland-server -lEGL"
 
 if %errorlevel% neq 0 (
     echo build failed
@@ -21,7 +22,8 @@ if exist deploy\linux-gcc-arm-release (
 
 call:Build -sCONFIG=linux-gcc-arm-release --debug --optimize -sTARGET_OS=linux -sTARGET_OSPLAT=arm ^
 -sTOOLSET=gcc -sTOOLSET_ROOT="%LINARO_ARM_GNUABIHF_2013_11_R1%\bin\arm-linux-gnueabihf-" ^
---with-openssl --with-qt5
+-sLINKFLAGS="-Wl,-rpath-link,\"%LINARO_ARM_GNUABIHF_2013_11_R1%\arm-linux-gnueabihf\lib\" -Wl,-rpath-link,\"%LINARO_ARM_GNUABIHF_2013_11_R1%\arm-linux-gnueabihf\libarm-linux-gnueabihf\"" ^
+--with-openssl --with-qt5 -sQT_LINKLIBS="-lQt5Core -lQt5Widgets -lQt5Gui -lGLESv2 -ldrm -ldrm_omap -lwayland-server -lEGL"
 
 if %errorlevel% neq 0 (
     echo build failed
