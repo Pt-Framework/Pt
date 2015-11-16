@@ -24,6 +24,7 @@
 #include "Pt/WinVer.h"
 #include "Pt/System/Api.h"
 #include "Pt/System/IOError.h"
+#include "Pt/SourceInfo.h"
 #include <windows.h>
 
 namespace Pt {

@@ -98,6 +98,7 @@
     <ClInclude Include="..\..\include\Pt\Http\Service.h" />
     <ClInclude Include="..\..\include\Pt\Http\Servlet.h" />
     <ClInclude Include="..\..\include\Pt\Invokable.h" />
+    <ClInclude Include="..\..\include\Pt\IOError.h" />
     <ClInclude Include="..\..\include\Pt\IOStream.h" />
     <ClInclude Include="..\..\include\Pt\LiteralPtr.h" />
     <ClInclude Include="..\..\include\Pt\Locale.h" />
@@ -720,6 +721,7 @@
     <ClCompile Include="..\..\src\Pt\DateTime.cpp" />
     <ClCompile Include="..\..\src\Pt\Deserializer.cpp" />
     <ClCompile Include="..\..\src\Pt\Facets.cpp" />
+    <ClCompile Include="..\..\src\Pt\IOError.cpp" />
     <ClCompile Include="..\..\src\Pt\PageAllocator.cpp" />
     <ClCompile Include="..\..\src\Pt\PoolAllocator.cpp" />
     <ClCompile Include="..\..\src\Pt\Regex.cpp" />

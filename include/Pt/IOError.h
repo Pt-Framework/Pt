@@ -23,24 +23,67 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ * MA  02110-1301  USA
  */
 
-#ifndef PT_SYSTEM_IOERROR_H
-#define PT_SYSTEM_IOERROR_H
+#ifndef PT_IOERROR_H
+#define PT_IOERROR_H
 
-#include <Pt/System/Api.h>
-#include <Pt/IOError.h>
+#include <Pt/Api.h>
+#include <ios>
+#include <stdexcept>
 
 namespace Pt {
 
-namespace System {
+/** @brief I/O error.
+*/
+class PT_API IOError : public std::ios::failure
+{
+    public:
+        /** @brief Construct with error message.
+        */
+        explicit IOError(const std::string& what);
 
-using Pt::IOError;
-using Pt::AccessFailed;
+        /** @brief Construct with error message.
+        */
+        explicit IOError(const char* what);
 
-} // namespace System
+        /** @brief Destructor.
+        */
+        ~IOError() throw()
+        {}
+};
+
+/** @brief Failed to access a resource.
+
+    @ingroup FileSystem
+*/
+class PT_API AccessFailed : public IOError
+{
+    public:
+        /** @brief Construct with resource string.
+        */
+        explicit AccessFailed(const char* resource);
+
+        /** @brief Construct with resource string.
+        */
+        explicit AccessFailed(const std::string& resource);
+
+        /** @brief Destructor.
+        */
+        ~AccessFailed() throw()
+        {}
+
+        /** @brief Returns the ID of the inaccessible resource.
+        */
+        const std::string& resource() const
+        { return _resource; }
+
+    private:
+        std::string _resource;
+};
 
 } // namespace Pt
 
-#endif // PT_SYSTEM_IOERROR_H
+#endif // PT_IOERROR_H

@@ -27,6 +27,7 @@
  */
 
 #include <Pt/ZBuffer.h>
+#include <Pt/IOError.h>
 #include <cassert>
 #include <cstring>
 #include <zlib.h>
@@ -127,12 +128,12 @@ void ZBuffer::finish()
 
           err = deflate(_zstr, Z_FINISH);
           if(err != Z_STREAM_END && err != Z_OK)
-              throw std::ios::failure("deflate failed");
+              throw IOError("deflate failed");
                   
           std::streamsize avail = _zbufmax - _zstr->avail_out;
           avail -= _target->rdbuf()->sputn(_zbuf, avail);
           if(avail > 0)
-              throw std::ios::failure("deflate failed");
+              throw IOError("deflate failed");
         }
 
         deflateReset(_zstr);
@@ -152,7 +153,7 @@ void ZBuffer::import(std::streamsize maxImport)
 
         int err = inflateInit(_zstr);
         if (err != Z_OK) 
-            throw std::ios::failure("inflateInit failed");
+            throw IOError("inflateInit failed");
 
         this->setg(_buf, _buf, _buf);
     }
@@ -201,7 +202,7 @@ void ZBuffer::import(std::streamsize maxImport)
           break;
       
       if(err != Z_OK)
-          throw std::ios::failure("inflate failed");
+          throw IOError("inflate failed");
     }
 
     // move leftover compressed data to front
@@ -277,7 +278,7 @@ ZBuffer::int_type ZBuffer::overflow(int_type ch)
 
         int err = deflateInit(_zstr, Z_DEFAULT_COMPRESSION);
         if (err != Z_OK) 
-          throw std::ios::failure("deflateInit failed");
+          throw IOError("deflateInit failed");
 
         this->setp( _buf, _buf + _bufmax );
     }
@@ -293,7 +294,7 @@ ZBuffer::int_type ZBuffer::overflow(int_type ch)
 
             int err = deflate(_zstr, Z_NO_FLUSH);
             if (err != Z_OK) 
-                throw std::ios::failure("deflate failed");
+                throw IOError("deflate failed");
              
             std::streamsize avail = _zbufmax - _zstr->avail_out;
             avail -= _target->rdbuf()->sputn(_zbuf, avail);

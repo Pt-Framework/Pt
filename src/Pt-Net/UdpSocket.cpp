@@ -30,6 +30,7 @@
 #include <Pt/Net/UdpSocket.h>
 #include <Pt/System/EventLoop.h>
 #include <Pt/System/IOError.h>
+#include <Pt/SourceInfo.h>
 #include <stdexcept>
 #include <memory>
 

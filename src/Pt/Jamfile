@@ -15,6 +15,7 @@ SharedLibrary Pt : Atomicity.cpp
                    Date.cpp
                    DateTime.cpp
                    Deserializer.cpp
+                   IOError.cpp
                    PageAllocator.cpp
                    PoolAllocator.cpp
                    Regex.cpp

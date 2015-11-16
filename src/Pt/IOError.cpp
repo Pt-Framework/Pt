@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2004 Marc Boris Duerner
- * Copyright (C) 2005 Aloysius Indrayanto
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,14 +23,13 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA  02110-1301  USA
  */
-#include <Pt/System/IOError.h>
+#include <Pt/IOError.h>
 #include <string>
 
 namespace Pt {
-
-namespace System {
 
 IOError::IOError(const std::string& msg)
 : std::ios::failure(msg)
@@ -41,12 +39,6 @@ IOError::IOError(const std::string& msg)
 
 IOError::IOError(const char* msg)
 : std::ios::failure(msg)
-{
-}
-
-
-IOPending::IOPending(const char* msg)
-: IOError(msg)
 {
 }
 
@@ -63,7 +55,5 @@ AccessFailed::AccessFailed(const std::string& resource)
 , _resource(resource)
 {
 }
-
-} // namespace System
 
 } // namespace Pt

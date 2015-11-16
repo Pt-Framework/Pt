@@ -583,7 +583,7 @@ std::size_t TcpSocketImpl::endWrite(System::EventLoop& loop, const char* buffer,
         throw System::IOError("WSASend");
 
     if(bytesSent == 0 && n != 0)
-        throw System::IOPending("WSA operation pending");
+        throw IOError("WSA operation pending");
 
     return bytesSent;
 }

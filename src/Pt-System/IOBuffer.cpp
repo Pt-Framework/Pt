@@ -28,6 +28,7 @@
 
 #include <Pt/System/IOBuffer.h>
 #include <Pt/System/IOError.h>
+#include <Pt/SourceInfo.h>
 #include <algorithm>
 #include <stdexcept>
 #include <cstring>
@@ -86,7 +87,7 @@ void IOBuffer::init(std::size_t bufferSize, bool extend)
 void IOBuffer::attach(IODevice& ioDevice)
 { 
     if( ioDevice.isReading() || ioDevice.isWriting() )
-        throw IOPending("IODevice in use");
+        throw IOError("I/O operation pending");
 
     this->detach();
 
@@ -102,7 +103,7 @@ void IOBuffer::detach()
         return;
 
     if( _ioDevice->isReading() || _ioDevice->isWriting() )
-        throw IOPending("IODevice in use");
+        throw IOError("I/O operation pending");
 
     _ioDevice->inputReady() -= slot(*this, &IOBuffer::onRead);
     _ioDevice->outputReady() -= slot(*this, &IOBuffer::onWrite);
@@ -120,7 +121,7 @@ void IOBuffer::reset()
 void IOBuffer::discard()
 {
     if(_ioDevice && (_ioDevice->isReading() || _ioDevice->isWriting()))
-        throw IOPending("IOBuffer in use");
+        throw IOError("I/O operation pending");
 
     setg(0, 0, 0);
 

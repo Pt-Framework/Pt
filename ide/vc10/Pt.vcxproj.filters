@@ -1308,6 +1308,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h">
       <Filter>Pt-Hmi\Events</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\IOError.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2401,6 +2404,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\demo\ChildW.cpp">
       <Filter>Pt-Hmi\demo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\IOError.cpp">
+      <Filter>Pt</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
