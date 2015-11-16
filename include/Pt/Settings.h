@@ -507,6 +507,8 @@ class PT_API Settings : private SerializationInfo
         */
         Settings();
 
+        void clear();
+
         /** @brief Begin of entries.
         */
         ConstEntry begin() const

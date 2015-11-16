@@ -42,6 +42,12 @@ Settings::Settings()
 {}
 
 
+void Settings::clear()
+{
+  SerializationInfo::clear();
+}
+
+
 void Settings::load(std::basic_istream<Pt::Char>& is)
 {
     SettingsReader reader(is);
