@@ -5,6 +5,11 @@ SubDirHdrs $(PT_TOP)/src/Pt-Hmi/$(GUI:L) ;
 SubDirC++Flags [ FDefines PT_HMI_API_EXPORT ] ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Hmi ;
 
+if $(GUI_INCLUDES)
+{
+    SubDirHdrs $(GUI_INCLUDES) ;
+}
+
 if $(GUI:L) = x11
 {
     SubDirHdrs $(FREETYPE_INCLUDES) ;
@@ -38,4 +43,5 @@ LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx  ;
 LinkLibs Pt-Hmi : $(GUILIBS) ;
 MakeLocate Pt-Hmi : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-Hmi : $(PT_INSTALL_LIBDIR) ;
- SubInclude PT_TOP src Pt-Hmi demo ;		
+
+SubInclude PT_TOP src Pt-Hmi demo ;		

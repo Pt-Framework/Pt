@@ -874,6 +874,9 @@ if --with-egl-gbm in $(ARGV)
 	LINARO_RPATH2 = [ FDirName $(LINARO_ARM_GNUABIHF_2013_11_R1:J=" ") arm-linux-gnueabihf lib arm-linux-gnueabihf ] ;
     LINKFLAGS += -Wl,-rpath-link,\"$(LINARO_RPATH2)\" ;
     Configure LINKFLAGS ;
+
+    #GUI_INCLUDES = [ FDirName $(LINARO_ARM_GNUABIHF_2013_11_R1:J=" ") arm-linux-gnueabihf libc usr include libdrm ] ;
+    #Configure GUI_INCLUDES ;
 }
 
 Configure GUI ;
