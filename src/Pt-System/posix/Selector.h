@@ -29,6 +29,7 @@
 #ifndef PT_SYSTEM_POSIX_SELECTOR_H
 #define PT_SYSTEM_POSIX_SELECTOR_H
 
+#include "Pt/SourceInfo.h"
 #include "Pt/System/Api.h"
 #include "Pt/System/IOError.h"
 #include "Pt/System/SystemError.h"
