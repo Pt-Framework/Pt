@@ -1311,6 +1311,9 @@
     <ClInclude Include="..\..\include\Pt\IOError.h">
       <Filter>Pt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\PngReader.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2407,6 +2410,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt\IOError.cpp">
       <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\PngReader.cpp">
+      <Filter>Pt-Gfx</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

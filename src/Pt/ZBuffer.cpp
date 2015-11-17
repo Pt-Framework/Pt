@@ -104,6 +104,8 @@ void ZBuffer::reset()
     }
 
     _zbufsize = 0;
+
+    detach();
 }
 
 

@@ -47,6 +47,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ImageReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Painter.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Pen.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\PngReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Point.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rasterizer.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rect.h" />
@@ -468,6 +469,7 @@
     <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ImageReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Pen.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\PngReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rgb565Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rgb888Format.cpp" />

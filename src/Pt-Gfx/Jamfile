@@ -13,24 +13,25 @@ if $(FREETYPE_INCLUDES)
     SubDirHdrs $(FREETYPE_INCLUDES) ;
 }
 
-SharedLibrary Pt-Gfx : Color.cpp                       
+SharedLibrary Pt-Gfx : Argb8888Format.cpp
+                       Brush.cpp
+                       ClipPolygon.cpp
+                       Color.cpp
+                       DrawText.cpp
+                       Exception.cpp
+                       Font.cpp
+                       FontMetrics.cpp
+                       FreeType.cpp
+                       GraphicsPipeline.cpp          
                        Image.cpp
                        ImageFormat.cpp
                        ImagePainter.cpp
-                       Argb8888Format.cpp
-                       Rgb888Format.cpp
-                       Rgb565Format.cpp
-                       Brush.cpp
-                       Pen.cpp
-                       Font.cpp
-                       FontMetrics.cpp
-                       Exception.cpp
-                       DrawText.cpp
-                       FreeType.cpp
-                       ClipPolygon.cpp
                        ImageReader.cpp
-                       GraphicsPipeline.cpp
-                       Rasterizer.cpp ;
+                       Pen.cpp
+                       PngReader.cpp
+                       Rasterizer.cpp
+                       Rgb888Format.cpp
+                       Rgb565Format.cpp ;
 
 LinkSharedLibraries Pt-Gfx : Pt Pt-System ;
 MakeLocate Pt-Gfx : $(PT_OUTPUT_TARGET) ;
