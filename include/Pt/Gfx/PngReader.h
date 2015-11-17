@@ -41,6 +41,8 @@ namespace Gfx {
 
 class Image;
 
+/** TODO: ImageIOHandler used by ImageReader and ImageWriter
+*/
 class PT_GFX_API PngReader
 {
     public:
