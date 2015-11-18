@@ -104,12 +104,12 @@ PngReader::PngReader()
 }
 
 
-PngReader::PngReader(std::istream& is)
+PngReader::PngReader(std::istream& is, Image& image)
 : _target(&is)
 , _state(OnBegin)
 , _pngRead(0)
 , _pngInfo(0)
-, _image(0)
+, _image(&image)
 , _width(0)
 , _height(0)
 , _depth(0)
@@ -127,15 +127,17 @@ PngReader::~PngReader()
 }
 
 
-void PngReader::attach(std::istream& is)
+void PngReader::attach(std::istream& is, Image& image)
 {
     _target = &is;
+    _image = &image;
 }
 
 
 void PngReader::detach()
 {
     _target = 0;
+    _image = 0;
 }
 
 
@@ -150,7 +152,6 @@ void PngReader::reset()
     _pngRead = 0;
     _pngInfo = 0;
 
-    _image = 0;
     _width = 0;
     _height = 0;
     _depth = 0;
@@ -160,10 +161,10 @@ void PngReader::reset()
 }
 
 
-bool PngReader::advance()
+Image* PngReader::advance()
 {
     if( ! _target || ! _target->rdbuf() || ! _image )
-      return false;
+      return 0;
 
     if( ! _pngRead )
     {
@@ -183,7 +184,7 @@ bool PngReader::advance()
     if(_state == OnBegin)
     {
         if(avail < 8)
-          return false;
+          return 0;
 
         char signature[8];
         std::streamsize n = _target->rdbuf()->sgetn(signature, sizeof(signature));
@@ -207,7 +208,7 @@ bool PngReader::advance()
         png_process_data(_pngRead, _pngInfo, (png_byte*)_buffer, (png_size_t)n);
     }
 
-    return _state == OnEnd;
+    return _state == OnEnd ? _image : 0;
 }
 
 

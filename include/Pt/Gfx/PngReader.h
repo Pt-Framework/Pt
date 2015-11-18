@@ -50,17 +50,17 @@ class PT_GFX_API PngReader
         */
         PngReader();
 
-        /** @brief Construct with target stream.
+        /** @brief Construct with target stream and image.
         */
-        PngReader(std::istream& is);
+        PngReader(std::istream& is, Image& image);
 
         /** @brief Destructor.
         */
         ~PngReader();
 
-        /** @brief Attach to target stream.
+        /** @brief Attach to target stream and image.
         */
-        void attach(std::istream& is);
+        void attach(std::istream& is, Image& image);
 
         /** @brief Detach from target stream.
         */
@@ -72,18 +72,9 @@ class PT_GFX_API PngReader
 
         /** @brief Reads image data from the target stream.
         */
-        bool advance();
+        Image* advance();
 
-        /** @brief Sets the target image.
-        */
-        void setImage(Image& image)
-        { _image = &image; }
-
-        /** @brief Returns the target image.
-        */
-        Image* image()
-        { return _image; }
-
+    public:
         ///! @internal
         static void onInfo(PngReader& reader, png_struct_def* png, png_info_def* info);
 
