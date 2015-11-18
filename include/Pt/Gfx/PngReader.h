@@ -97,7 +97,7 @@ class PT_GFX_API PngReader
         enum State 
         {
             OnBegin = 0,
-            OnSignature = 1,
+            OnData = 1,
             OnEnd = 2
         };
 

@@ -195,7 +195,7 @@ bool PngReader::advance()
           throw IOError("invalid png format");
 
         png_set_sig_bytes( _pngRead, static_cast<int>(n) );
-        _state = OnSignature;
+        _state = OnData;
     }
 
     while(avail > 0 && _state != OnEnd)
