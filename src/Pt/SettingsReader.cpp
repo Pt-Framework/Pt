@@ -198,9 +198,9 @@ void SettingsReader::pushValue()
         }
         else if(digits >= 1)
         {
-            Pt::int32_t i = 0;
+            Pt::int64_t i = 0;
             Pt::parseInt(_token.begin(), _token.end(), i);
-            _current->setInt32(i);
+            _current->setInt64(i);
         }
         else
         {

@@ -63,11 +63,15 @@ class PT_API ZBuffer : public BasicStreamBuffer<char>
         */
         void detach();
         
-        /** @brief Reset to begin new compression/decompression.
+        /** @brief Discards the buffer content and resets the state.
+        */
+        void discard();
+
+        /** @brief Detach from target stream, discard the buffer and reset the state.
         */
         void reset();
 
-        /** @brief Reset to begin new compression/decompression.
+        /** @brief Attach to target stream, discard the buffer and reset the state.
         */
         void reset(std::ios& target);
 

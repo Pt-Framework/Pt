@@ -89,7 +89,7 @@ void ZBuffer::detach()
 }
 
 
-void ZBuffer::reset()
+void ZBuffer::discard()
 {
     if( this->pptr() )
     {
@@ -104,14 +104,19 @@ void ZBuffer::reset()
     }
 
     _zbufsize = 0;
+}
 
+
+void ZBuffer::reset()
+{
+    discard();
     detach();
 }
 
 
 void ZBuffer::reset(std::ios& target)
 {
-    reset();
+    discard();
     attach(target);
 }
 
@@ -150,8 +155,8 @@ void ZBuffer::import(std::streamsize maxImport)
 
     if( ! this->gptr() )
     {
-        // reset ends deflating for put area
-        reset();
+        // discard ends deflating for put area
+        discard();
 
         int err = inflateInit(_zstr);
         if (err != Z_OK) 
@@ -275,8 +280,8 @@ ZBuffer::int_type ZBuffer::overflow(int_type ch)
 
     if( ! this->pptr() )
     {
-        // reset ends inflating for get area
-        reset();
+        // discard ends inflating for get area
+        discard();
 
         int err = deflateInit(_zstr, Z_DEFAULT_COMPRESSION);
         if (err != Z_OK) 
