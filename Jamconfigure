@@ -466,6 +466,45 @@ Configure PNG_LINKLIBS ;
 EchoOption PNG_LINKLIBS : "PNG libs" ;
 
 #############################################################################
+# JPEG support with libjpeg
+#############################################################################
+
+if --with-libjpeg in $(ARGV) 
+{
+    WITH_BUILTIN_LIBJPEG = yes ;
+    WITH_JPEG = yes ;
+}
+
+if ! $(WITH_JPEG)
+{
+    JPEG_LINKLIBS ?= -ljpeg ;
+
+    WITH_JPEG = [ CheckBuildC++ "#include <jpeglib.h>"
+                                "int main() {"
+                                "struct jpeg_compress_struct cinfo;"
+                                "return 0; }"
+                                : [ FIncludes $(JPEG_INCLUDES) ]
+                                : $(JPEG_LINKLIBS) ] ;
+}
+
+if ! $(WITH_JPEG) || $(WITH_BUILTIN_LIBJPEG)
+{   
+    WITH_BUILTIN_LIBJPEG = yes ;
+    WITH_JPEG = yes ;
+    JPEG_INCLUDES = [ FDirName $(PT_TOP) src libjpeg ] ;
+    JPEG_LINKLIBS = "" ;
+}
+
+Configure WITH_BUILTIN_LIBJPEG ;
+EchoOption --with-libjpeg : "Builtin libjpeg library" : $(WITH_BUILTIN_LIBJPEG:E="no") ;
+
+Configure JPEG_INCLUDES ;
+EchoOption JPEG_INCLUDES : "JPEG includes" ;
+
+Configure JPEG_LINKLIBS ;
+EchoOption JPEG_LINKLIBS : "JPEG libs" ;
+
+#############################################################################
 # Freetype support
 #############################################################################
 
