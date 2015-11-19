@@ -31,29 +31,27 @@ namespace Pt{
 namespace Hmi{
 
 Window::Window(Window* parent)
-: PT_HMI_INIT_PROPERTY_VALUE(MinimumSize,Gfx::SizeF(0,0))
-, PT_HMI_INIT_PROPERTY_VALUE(MaximumSize,Gfx::SizeF(std::numeric_limits<Pt::uint16_t>::max() ,std::numeric_limits<Pt::uint16_t>::max()))
-, PT_HMI_INIT_PROPERTY_VALUE(StartPostion, Hmi::WindowStartPosition::Manual)
-, PT_HMI_INIT_PROPERTY_VALUE(State, Hmi::WindowState::Normal)
-, PT_HMI_INIT_PROPERTY_VALUE(ShowInTaskbar,true)
-, PT_HMI_INIT_PROPERTY_VALUE(ShowTitle,true)
-, PT_HMI_INIT_PROPERTY_VALUE(ShowMinimizeButton,true)
-, PT_HMI_INIT_PROPERTY_VALUE(ShowMaximizeButton,true)
-, PT_HMI_INIT_PROPERTY_VALUE(ShowSysMenu,true)	
-, PT_HMI_INIT_PROPERTY_VALUE(Border,WindowBorder::Sizeable)
-, PT_HMI_INIT_PROPERTY_VALUE(Icon,Gfx::Image(0,0))
-, PT_HMI_INIT_PROPERTY_VALUE(CanClose,true)
-, PT_HMI_INIT_PROPERTY_VALUE(FocuseMoveKey, "\t")
-, PT_HMI_INIT_PROPERTY_VALUE(FirstShow,true)
-, PT_HMI_INIT_PROPERTY_VALUE(WindowBorder, WindowBorder::Sizeable)
-, _winParent(parent)
+: _minimumSize(0,0)
+, _maximumSize( 2000,2000)
+, _startPostion( WindowStartPosition::Manual )
+, _state(WindowState::Normal )
+, _showInTaskbar( false)
+, _showTitle( true)
+, _showMinimizeButton( true)
+, _showMaximizeButton(true)
+, _showSysMenu( true)
+, _border( WindowBorder::Sizeable)
+, _icon()
+, _canClose( true)
+, _firstShow(false)
+, _focuseMoveKey("")
+,  _winParent(parent)
 , _windowManager(*this)
 , _isClosed(true)
 , _isActive(false)
 , _pointedWidget( 0 )
 {
-	Name = std::string("Window");
-	AcceptFocus = false ;	
+	setAcceptFocus(false);	
 
 	eventReceived() += Pt::slot(*this, &Window::onMoveEvent);
 	eventReceived() += Pt::slot(*this, &Window::onResizeEvent);
@@ -111,7 +109,7 @@ void Window::setPointedWidget( Widget* widget )
 		return;
 
 	if( _pointedWidget )			
-		_pointedWidget->onPointerLeaved();
+		_pointedWidget->onPointerLeave();
 
 	_pointedWidget = widget;
 
@@ -142,10 +140,10 @@ void Window::onKeyEvent(const KeyEvent& ev)
   if( _windowManager.keyInput( ev ) )
       return;
 
-	if( ! Enabled.get() )
+	if( ! isEnabled() )
 		return;
 	
-	if( ev.toUTF8String() == FocuseMoveKey.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp )
+	if( ev.toUTF8String() == _focuseMoveKey && ev.state() == Pt::Hmi::KeyEvent::KeyUp )
 	{
 		if(  ev.shift() )
 		{		
@@ -168,16 +166,14 @@ void Window::onKeyEvent(const KeyEvent& ev)
 void Window::onResizeEvent(const ResizeEvent& ev)
 {	
 	Window::setSize( ev.size() );
-	Size.changed().send( ev.size() );	
-	State = ev.state();
+	_state = ev.state();
 	invalidate();
 }
 
 
 void Window::onMoveEvent( const MoveEvent& ev)
 {
-	Widget::setPosition( ev.position() );
-	Position.changed().send( ev.position() );	
+	Widget::setPosition( ev.position() );	
 	invalidate();
 }
 

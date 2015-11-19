@@ -39,138 +39,47 @@ template<typename C, typename A>
 class Property  : public PropertyBase
 {
 public:
-  Property(const char* name,  C& parent, const A& (C::*getter)() const, void (C::*setter)(const A& type) )
-	: PropertyBase(name)
-  , _obj(&parent)
+  Property(const char* name, const A& (C::*getter)() const, void (C::*setter)(const A& type) )
+	: PropertyBase(name)  
 	, _getter( getter)
 	, _setter(setter)        
 	{
 
 	}
 
-
-  Pt::Any getValue() const
+  Pt::Any getValue(const Widget* obj) const
   {
-      return  (_obj->*_getter)();
+		 Pt::Any any( &get( obj ) );
+     return any;
   }
 
 
-  void setValue(const Pt::Any& a, bool notify = true)
+  void setValue( Widget* obj, const Pt::Any& a)
   {
     typedef typename Pt::TypeTraits<A>::ConstReference ConstRefT ;
 
     ConstRefT val = Pt::any_cast<ConstRefT>(a) ;
-    (_obj->*_setter)(val);
-		
-		if( notify ) 
-			_changed.send(val);
+    set(obj, val );	
   }
 		
 
-
-	const A& get() const
+	const A& get(const Widget* w) const
 	{
-		return (_obj->*_getter)();
+		const C* obj = static_cast<const Widget*>(w);
+
+		return (obj->*_getter)();
 	}
 	
 
-	void set(const A& value) 
+	void set(Widget* widget, const A& value) 
 	{
+		C* obj = static_cast<Widget*>(w);
 		(_obj->*_setter)(value);		
 	}
 
-
-	Property<C,A>& operator=(const A& value)
-	{
-		(_obj->*_setter)(value);
-		_changed.send(value);
-		return *this;
-	}
-
-	Pt::Signal< const A& >& changed()
-	{
-		return _changed;
-	}
-
-private:
-	C* _obj;
+private:	
 	const A& (C::*_getter)() const;
-	void (C::*_setter)(const A&);
-	Pt::Signal<const A&> _changed;	
-};
-
-
-#define PT_HMI_INIT_PROPERTY_VALUE(prop, value) prop(#prop, value)
-#define PT_HMI_INIT_PROPERTY(prop) prop(#prop)
-
-template<typename T>
-class ValueProperty  : public PropertyBase
-{
-public:
-  ValueProperty(const char* name)
-	: PropertyBase(name)
-	{
-
-	}
-
-
-  ValueProperty(const char* name, const T& value )
-	: PropertyBase(name)
-	, _value(value)
-	{
-
-	}
-
-
-  Pt::Any getValue() const
-  {
-      return  Pt::Any(_value);
-  }
-
-
-  void setValue(const Pt::Any& a, bool notify = true)
-  {
-		typedef typename Pt::TypeTraits<T>::ConstReference ConstRefT ;
-		_value = Pt::any_cast<ConstRefT>(a) ;
-		
-		if( notify ) 
-			_changed.send(_value);
-  }
-		
-
-	T& get()
-	{
-		return _value;
-	}
-
-
-	const T& get() const
-	{
-		return _value;
-	}
-	
-
-	void set(const T& value) 
-	{
-		_value = value;
-	}
-
-
-	ValueProperty<T>& operator=(const T& value)
-	{
-		_value = value;
-		_changed.send(_value);
-		return *this;
-	}
-
-	Pt::Signal< const T& >& changed()
-	{
-		return _changed;
-	}
-
-private:
-	T _value;
-	Pt::Signal<const T&> _changed;	
+	void (C::*_setter)(const A& type);
 };
 
 }}

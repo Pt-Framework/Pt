@@ -32,40 +32,40 @@
 namespace Pt{
 namespace Hmi{
 
+
 Widget::Widget()
-: _mnemonicWidget(0)
-, PT_HMI_INIT_PROPERTY_VALUE(Enabled, true)
-, PT_HMI_INIT_PROPERTY_VALUE(Visible, false )
-, PT_HMI_INIT_PROPERTY_VALUE(Font,Gfx::Font("Sans Serif",12))
-, Position("Position", *this, &Widget::position, &Widget::setPosition )
-, Size("Size", *this, &Widget::size, &Widget::setSize)
-, PT_HMI_INIT_PROPERTY_VALUE(BackColor,Gfx::Color::fromRgb8(237,237,237))
-, PT_HMI_INIT_PROPERTY_VALUE(HighlightColor,Gfx::Color::fromRgb8(200,200,200))
-, PT_HMI_INIT_PROPERTY_VALUE(ForeColor,Gfx::Color::fromRgb8(0,0,0))
-, PT_HMI_INIT_PROPERTY_VALUE(DisabledColor,Gfx::Color::fromRgb8(178,178,178))
-, PT_HMI_INIT_PROPERTY_VALUE(BackgroundImage,Gfx::Image())
-, PT_HMI_INIT_PROPERTY_VALUE(BackgroundImageLayout, ImageLayout::NoLayout)
-, PT_HMI_INIT_PROPERTY_VALUE(Opacity,0)
-, PT_HMI_INIT_PROPERTY_VALUE(Cursor, Hmi::Cursor::defaultCursor())
-, PT_HMI_INIT_PROPERTY_VALUE(TextAlign, Align::MidleCenter)
-, PT_HMI_INIT_PROPERTY_VALUE(AcceptFocus,true)
-, PT_HMI_INIT_PROPERTY_VALUE(HighLight, false)
-, PT_HMI_INIT_PROPERTY_VALUE(FocusedActionKey," ")
-, Caption("Caption", *this, &Widget::caption, &Widget::setCaption )
-, PT_HMI_INIT_PROPERTY_VALUE(UseMnemonic,true)
-, PT_HMI_INIT_PROPERTY_VALUE(Name,"Widget")
-, PT_HMI_INIT_PROPERTY(Margin)
-, PT_HMI_INIT_PROPERTY_VALUE(Dock, Docking::None)
-, PT_HMI_INIT_PROPERTY_VALUE(FlowLayout, Hmi::FlowLayout::None)
-, PT_HMI_INIT_PROPERTY_VALUE(FlowDirection, Hmi::FlowLayoutDirection::LeftToRightTopToBottom)
-, PT_HMI_INIT_PROPERTY_VALUE(ShortcutKey, "")
+: _enabled( true)
+, _visible( false)
+, _highlight( false)
+, _font("Sans Serif",12)
+, _backgroundColor(Gfx::Color::fromRgb8(237,237,237))
+, _highlightColor(  Gfx::Color::fromRgb8(200,200,200) )
+, _foregroundColor( Gfx::Color::fromRgb8(0,0,0) )
+, _disabledColor( Gfx::Color::fromRgb8(178,178,178))
+, _backgroundImage()
+, _backgroundImageLayout(  ImageLayout::NoLayout )
+, _cursor( Hmi::Cursor::defaultCursor() )
+, _textAlign( Align::MidleCenter )
+, _acceptFocus( true) 
+, _focusedActionKey( "")
+, _caption("")
+, _name("")
+, _margin(0)
+, _dock(Docking::None )
+, _flowLayout( FlowLayout::None )
+, _flowDirection( FlowLayoutDirection::LeftToRightTopToBottom)
+, _shortcutKey("")
+, _hasFocus( false)
+, _useMnemonic( false)
+, _mnemonicKey("")
+, _size( 100, 100)
+, _position( 10,10) 
+, _mnemonicWidget(0)
 , _parent(0)
-, _size(200,200)
-, _position( 0, 0)
-, _hasFocus(false)
 , _isValid(false)
 {	
-	bindMnemonicToWidget( *this );
+
+  bindMnemonicToWidget( *this );
 
 	_eventReceived += Pt::slot(*this, &Widget::onKeyEvent);
 	_eventReceived += Pt::slot(*this, &Widget::onPointerEvent);			
@@ -82,7 +82,7 @@ void Widget::addChild(Widget* child)
 	_children.push_back(child);
 	child->setParent(this);
 	child->_isValid = false;
-	child->Visible = true;  
+	child->setVisible( true);  
 	child->invalidate();  
 	invalidate();
 }
@@ -96,7 +96,7 @@ void Widget::removeChild(Widget* child)
 			continue;
 		
 		_children.erase(_children.begin() + i);
-		child->Visible = false;
+		child->setVisible( false);
 		child->setParent(0);
 		return;
 	}			
@@ -111,7 +111,7 @@ Gfx::PointF Widget::toClient( const Gfx::PointF& globalPoint )
 		return globalPoint;
 
 	Gfx::PointF parPoint = _parent->toClient( globalPoint );
-	return Gfx::PointF( parPoint.x() - Position.get().x(), parPoint.y() - Position.get().y() );
+	return Gfx::PointF( parPoint.x() - position().x(), parPoint.y() - position().y() );
 }
 
  
@@ -124,8 +124,8 @@ Gfx::PointF Widget::fromClient( const Gfx::PointF& localPoint )
 
 	while( widget != 0  &&  widget->parent() != 0 )
 	{						
-		x += widget->Position.get().x();
-		y += widget->Position.get().y();	
+		x += widget->position().x();
+		y += widget->position().y();	
 
     	widget = widget->parent();
 	}	
@@ -136,8 +136,8 @@ Gfx::PointF Widget::fromClient( const Gfx::PointF& localPoint )
 
 void Widget::updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p)
 {       
-  w.Position.set(p);
-  w.Size.set(s);      	
+  w.setPosition(p);
+  w.setSize(s);      	
   _isValid = false;
 }
 
@@ -168,11 +168,11 @@ void Widget::onLayout( PaintSurface& surface )
 	{
 		Widget*	child = _children[i];			
 		    
-   Gfx::PointF point = child->Position.get();
+   Gfx::PointF point = child->position();
 
-    if( FlowLayout.get() == Hmi::FlowLayout::None )
+    if( flowLayout() == Hmi::FlowLayout::None )
     {
-      switch( child->Dock.get() )
+      switch( child->dock() )
       {
         case Docking::None:        
         {
@@ -185,9 +185,9 @@ void Widget::onLayout( PaintSurface& surface )
         {
           point.setX( posLeft );
           point.setY( posTop );		    
-         Gfx::SizeF size( child->Size.get().width(), (posBottom - posTop));
+         Gfx::SizeF size( child->size().width(), (posBottom - posTop));
 
-					posLeft += child->Size.get().width();      
+					posLeft += child->size().width();      
 					        
           updatePosAndSize( *child, size, point );           
         }
@@ -197,9 +197,9 @@ void Widget::onLayout( PaintSurface& surface )
         {
           point.setX( posLeft );
           point.setY( posTop  );		    
-					Gfx::SizeF size( (posRight - posLeft), child->Size.get().height());
+					Gfx::SizeF size( (posRight - posLeft), child->size().height());
 
-				  posTop += child->Size.get().height();      
+				  posTop += child->size().height();      
         
           updatePosAndSize(*child, size, point );
         }
@@ -207,11 +207,11 @@ void Widget::onLayout( PaintSurface& surface )
 
         case Docking::Right:
         {
-          posRight -= child->Size.get().width();     
+          posRight -= child->size().width();     
           point.setX( posRight );
           point.setY( posTop );		                     
 					
-					Gfx::SizeF size( child->Size.get().width(), (posBottom - posTop) );
+					Gfx::SizeF size( child->size().width(), (posBottom - posTop) );
         
           updatePosAndSize(*child, size, point );
         }
@@ -219,10 +219,10 @@ void Widget::onLayout( PaintSurface& surface )
 
         case Docking::Bottom:
         {
-          posBottom -= child->Size.get().height();    
+          posBottom -= child->size().height();    
           point.setX( posLeft );
           point.setY( posBottom  );		                      
-					Gfx::SizeF size( (posRight - posLeft), child->Size.get().height() );
+					Gfx::SizeF size( (posRight - posLeft), child->size().height() );
           updatePosAndSize(*child, size, point);
         }
         break;
@@ -236,23 +236,23 @@ void Widget::onLayout( PaintSurface& surface )
     }
     else
     {
-      switch( FlowLayout.get() )
+      switch( flowLayout() )
       {
         case Hmi::FlowLayout::Horizontal:
         {                        
-          if( FlowDirection.get() == FlowLayoutDirection::LeftToRightTopToBottom )
+          if( flowLayout() == FlowLayoutDirection::LeftToRightTopToBottom )
           {
             point.setX( posLeft );
-            posLeft += child->Size.get().width();
+            posLeft += child->size().width();
           }
           else
           {
-            posRight -= child->Size.get().width();
+            posRight -= child->size().width();
             point.setX( posRight );              
           }
 
           point.setY( 0 );	
-          updatePosAndSize( *child,Gfx::SizeF( child->Size.get().width(), clientSize.height() ), point );
+          updatePosAndSize( *child,Gfx::SizeF( child->size().width(), clientSize.height() ), point );
         }
         break;
 
@@ -260,18 +260,18 @@ void Widget::onLayout( PaintSurface& surface )
         {
           point.setX( 0 );
 
-          if( FlowDirection.get() == FlowLayoutDirection::LeftToRightTopToBottom )
+          if( flowDirection() == FlowLayoutDirection::LeftToRightTopToBottom )
           {
             point.setY( posTop );
-            posTop += child->Size.get().height();	
+            posTop += child->size().height();	
           }
           else
           {
-            posBottom -= child->Size.get().height(); 
+            posBottom -= child->size().height(); 
             point.setY( posBottom  );	
           }
 
-          updatePosAndSize( *child,Gfx::SizeF( clientSize.width(), child->Size.get().height() ), point );
+          updatePosAndSize( *child,Gfx::SizeF( clientSize.width(), child->size().height() ), point );
         }
         break;
       }
@@ -293,7 +293,7 @@ void Widget::onLayout( PaintSurface& surface )
 
 void Widget::render()
 {	
-	if( !Visible.get())
+	if( !visible())
 		return;
 
 	//Layout children
@@ -313,7 +313,7 @@ void Widget::render()
 		
     	_children[i]->render();   
 
-	   surface().painter().drawSurface( child->Position.get(), _children[i]->surface() );
+	   surface().painter().drawSurface( child->position(), _children[i]->surface() );
 	}
 		
 	_isValid = true;
@@ -327,7 +327,7 @@ void Widget::onRender( PaintSurface& surface )
 	if( size.width() < 0 || size.height() < 0)
 		return; 
 
-	const Gfx::Image&   backImage = BackgroundImage.get();
+	const Gfx::Image&   backImage = backgroundImage();
 	Pt::Hmi::Painter&	 painter = surface.painter();
  Gfx::PointF         pos = clientPos();
 	Gfx::RectF		       rectClient( pos, size );
@@ -335,22 +335,22 @@ void Widget::onRender( PaintSurface& surface )
   
   if( _parent != 0 )
   {
-   Gfx::Brush	backBrush(_parent->BackColor.get() );  		  
+   Gfx::Brush	backBrush(_parent->backgroundColor() );  		  
     painter.setBrush(backBrush);
     painter.fillRect(rect);
   }
 
-  painter.setFont(Font.get());
+  painter.setFont(font());
 
-	if( HighLight.get() )
+	if( highlight() )
 	{       
-		Gfx::Brush	brush( HighlightColor.get() );        
+		Gfx::Brush	brush( highlightColor() );        
 		painter.setBrush(brush);
 		painter.fillRect(rectClient);
 	}
 	else
 	{
-		Gfx::Brush	brush(BackColor.get());
+		Gfx::Brush	brush(backgroundColor());
 	
 		painter.setBrush(brush);    			
 		painter.fillRect(rectClient);
@@ -358,7 +358,7 @@ void Widget::onRender( PaintSurface& surface )
 
 	if( !backImage.empty() )
 	{
-		switch( BackgroundImageLayout.get())
+		switch( backgroundImageLayout())
 		{				
 			case ImageLayout::NoLayout:
 			{
@@ -425,11 +425,11 @@ void Widget::onShortcutKey(KeyEvent::KeyState state)
 
 void Widget::onPointerEnter()
 {
-	Application::instance().mainScreen().setCursor( &Cursor.get() );	
+	Application::instance().mainScreen().setCursor( &cursor() );	
 }
 
 
-void Widget::onPointerLeaved()
+void Widget::onPointerLeave()
 {	
 }
 
@@ -453,11 +453,11 @@ void Widget::onPointerEvent(const PointerEvent& ev)
 
 void Widget::onKeyEvent(const KeyEvent& ev)
 { 	
-	if( ! Enabled.get() )
+	if( ! isEnabled() )
 			return;
 
 	// mnemonic handling
-	if( UseMnemonic.get() && Enabled.get() && ev.state() == Pt::Hmi::KeyEvent::KeyUp )
+	if( useMnemonic() && ev.state() == Pt::Hmi::KeyEvent::KeyUp )
 	{		
 		std::string mnKey;
 
@@ -473,13 +473,13 @@ void Widget::onKeyEvent(const KeyEvent& ev)
 	}
 
 	// action key handling
-	if( ev.toUTF8String() == FocusedActionKey.get() && hasFocus() )	
+	if( ev.toUTF8String() == focusedActionKey() && hasFocus() )	
 	{
 		onActionKey( ev.state() );		
 	}
 	
 	// shortcurt Key
-	if( ev.shortCutKey() == ShortcutKey.get() )
+	if( ev.shortCutKey() == shortcutKey() )
 	{
 		onShortcutKey( ev.state() );		
 	}
@@ -498,13 +498,13 @@ void Widget::bindMnemonicToWidget(Widget& widget)
 
 void Widget::onMnemonic()
 {	
-	setWidgetFocus( true );
+	setFocus();
 }
 
 
 bool Widget::contains(const Gfx::PointF& p)
 {
-	if( p.x()  < Size.get().width() && p.x() >= 0 && p.y() < Size.get().height() && p.y() >= 0)
+	if( p.x()  < size().width() && p.x() >= 0 && p.y() < size().height() && p.y() >= 0)
 			return true;
  
 	return false;
@@ -519,15 +519,15 @@ bool Widget::focusPrevChild(int index)
 	{
 		Widget* child = children()[index];
 
-		if(child->AcceptFocus.get())
+		if(child->acceptFocus())
 		{
-			child->setWidgetFocus(true);
+			child->setFocus();
 			return true;
 		}
 
 		if(child->focusPrev())
 		{
-			child->setWidgetFocus(true);
+			child->setFocus();
 			return true;
 		}
 	}
@@ -544,15 +544,15 @@ bool Widget::focusNextChild( int index )
 	{
 		Widget* child = children()[index];
 
-		if(child->AcceptFocus.get())
+		if(child->acceptFocus())
 		{
-			child->setWidgetFocus(true);
+			child->setFocus();
 			return true;
 		}
 
 		if(child->focusNext())
 		{
-			child->setWidgetFocus(true);
+			child->setFocus();
 			return true;
 		}
 	}
@@ -588,13 +588,13 @@ bool Widget::focusPrev()
 	
 	Widget* child  = children()[index];
 
-	if(!child->AcceptFocus.get())
+	if(!child->acceptFocus())
 	{
 		if(child->focusPrev())
 			return true;
 	}
 
-	child->setWidgetFocus(false);
+	child->onFocus( false);
 	return focusPrevChild(index);
 }
 
@@ -611,18 +611,18 @@ bool Widget::focusNext()
 	
 	Widget* child = children()[index];
 		
-	if(!child->AcceptFocus.get())
+	if(!child->acceptFocus())
 	{
 		if(child->focusNext())
 			return true;
 	}
 
-	child->setWidgetFocus(false);
+  child->onFocus(false);
 	return focusNextChild(index);
 }
 
 
-void Widget::setWidgetFocus( bool isFocused )
+void Widget::onFocus( bool isFocused )
 {	
 	_hasFocus = isFocused;
 
@@ -631,7 +631,7 @@ void Widget::setWidgetFocus( bool isFocused )
 		for( size_t i = 0; i < children().size(); ++i)
 		{
 			Pt::Hmi::Widget* child = children()[i];			
-			child->setWidgetFocus(false);									
+			child->onFocus(false);									
 		}
 
 		invalidate();
@@ -645,7 +645,7 @@ void Widget::setWidgetFocus( bool isFocused )
 	}
 		
 	//Set parent focused.	
-	parent()->setWidgetFocus(true);
+	parent()->onFocus(true);
 
 	//All sibling set to false. Only me let it true
 	for( size_t i = 0; i < parent()->children().size(); i++ )
@@ -653,18 +653,10 @@ void Widget::setWidgetFocus( bool isFocused )
 		Widget* child = parent()->children()[i];
 				
 		if( child != this )
-			child->setWidgetFocus( false );
+			child->onFocus( false );
 	}
 
 	invalidate();
-
-	onFocusChanged(_hasFocus);
-}
-
-
-void Widget::onFocusChanged(bool hasFocus)
-{
-
 }
 
 
@@ -721,7 +713,7 @@ void Widget::setCaption( const std::string& c )
 
 	_mnemonicKey.clear();
 
-	if( !UseMnemonic.get() )
+	if( !useMnemonic() )
 		return;  
 	
 	int index = getMnemonicIndex(_caption);
@@ -736,7 +728,7 @@ void Widget::setCaption( const std::string& c )
 }
 
 
-void Widget::setSize(const Gfx::SizeF& size)
+void Widget::onResize(const Gfx::SizeF& size)
 {
 	_size = size;			
   
@@ -744,12 +736,18 @@ void Widget::setSize(const Gfx::SizeF& size)
 	_isValid = false;
 }
 
+	
+void Widget::onMove(const Gfx::PointF& pos)
+{
+    _position = pos;
+    _isValid = false;
+}
 
 Widget* Widget::findWidget( const Gfx::PointF& pos )
 {
 	std::vector<Widget*>::reverse_iterator it = _children.rbegin();
 
-	if( !Visible.get() )
+	if( !visible() )
 			return 0;
 
 	for( ; it != _children.rend(); ++it )
@@ -770,5 +768,27 @@ Widget* Widget::findWidget( const Gfx::PointF& pos )
 	return contains( toClient( pos ) )  ? this : 0;
 }
 		
+
+
+Widget* Widget::findWidget( const std::string& name )
+{
+
+  if( _name == name )
+      return this;
+
+  std::vector<Widget*>::iterator it = _children.begin();
+
+	for( ; it != _children.end(); ++it )
+	{
+		Widget* child = *it;
+
+		Widget* found = child->findWidget( name );
+
+		if( found )
+			return found;		
+	}
+		
+	return  0;
+}
 
 }} //namespace

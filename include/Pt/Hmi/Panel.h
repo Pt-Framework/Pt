@@ -37,12 +37,53 @@ class PT_HMI_API Panel  : public Widget
 		Panel();
 		virtual ~Panel();	
 
-	public:
-		ValueProperty<BorderStyle::Type>   PanelBorderStyle;
-		ValueProperty<bool>				         PanelBorderRoundEdge;	
-		ValueProperty<double>			         PanelBorderWidth;	  
-		ValueProperty<Gfx::Color>					 BorderColor;
+    BorderStyle::Type panelBorderStyle() const
+    {   
+        return  _panelBorderStyle;
+    }
 
+    void setPanelBorderStyle(BorderStyle::Type t)         
+    {   
+        _panelBorderStyle = t;
+    }
+
+
+		bool panelBorderRoundEdge() const
+    {   
+      return _panelBorderRoundEdge;
+    }
+
+    void setPanelBorderRoundEdge( bool b)
+    {   
+      _panelBorderRoundEdge = b;
+    }
+
+    void setPanelBorderWidth( double w )
+    {
+      _panelBorderWidth = w;
+    }
+
+    double panelBorderWidth() const	  
+    {   
+       return _panelBorderWidth;
+    }
+         
+    void setBorderColor(Gfx::Color b)
+    {
+      _borderColor = b;
+    }
+
+    Gfx::Color borderColor() const
+    {
+      return _borderColor;
+    }
+
+	private:
+		BorderStyle::Type _panelBorderStyle;
+		bool				      _panelBorderRoundEdge;	
+		double			      _panelBorderWidth;	  
+		Gfx::Color				_borderColor;
+                          
 	protected:
 		virtual void onRender(PaintSurface& paintSurface);
 		virtual PaintSurface* widgetBuffer()

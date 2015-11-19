@@ -52,16 +52,62 @@ public:
 	Button();
 	virtual ~Button();
 
-	ValueProperty<DeviceButton::State> ButtonState;		
-	ValueProperty<bool>								 Hover;		
-	ValueProperty<ButtonType::Type>    ButtonType;	
-	ValueProperty<int>								 DoublePressTimeInMs; 
-  ValueProperty<Gfx::Image>					 Image;	
-  ValueProperty<Align::Type>         ImageAlign;
+   DeviceButton::State buttonState() const
+   {
+      return _buttonState;
+   }
 
+   bool hover() const
+   {
+      return _hover;
+   }
+
+   ButtonType::Type  buttonType() const
+   {
+    return _buttonType;	
+   }
+
+   void setButtonType( ButtonType::Type t)
+   {
+      _buttonType = t;
+   }
+	
+   int doublePressTimeInMs() const
+   {
+    return _doublePressTimeInMs; 
+   }
+   
+   void setDoublePressTimeInMs( int t )
+   {
+     _doublePressTimeInMs = t;
+   }
+
+    void setImage(const Gfx::Image&  i) 
+    {
+       _image = i;
+    }
+
+    Align::Type  imageAlign()  const
+    {
+       return _imageAlign;
+    }
+
+    void setImageAlign(const Align::Type&  i) 
+    {
+       _imageAlign = i;
+    }
+	
 	Signal<bool>											 Checked;	  
 	Signal<>													 Clicked;	
 	Signal<>													 DoubleClicked;	
+
+private:
+  DeviceButton::State _buttonState;		
+	bool								_hover;		
+	ButtonType::Type  _buttonType;	
+	int								_doublePressTimeInMs; 
+  Gfx::Image					_image;	
+  Align::Type       _imageAlign;
 
 protected:
 	virtual void onPressedAction();

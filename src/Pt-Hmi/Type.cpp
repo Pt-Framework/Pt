@@ -1,3 +1,4 @@
+
 /* Copyright (C) 2015 Marc Boris Duerner 
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
@@ -24,44 +25,15 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_Label_H
-#define Pt_Hmi_Label_H
-
-#include <Pt/Hmi/Panel.h>
+#include <Pt/Hmi/Type.h>
 
 namespace Pt{
 namespace Hmi{
 
-
-class PT_HMI_API Label  : public Panel
+Type::Type( const std::string& name, void* (* create)() )
+: _name(name)
+,_create( create)
 {
-	public:
-		Label();
-		virtual ~Label();	
-
-    void setAutoSize( bool a )
-    {
-      _autoSize= a;
-    }
-
-    bool autoSize() const
-    {
-      return _autoSize;
-    }
-
-
-	public:
-		bool _autoSize;	
-
-	protected:
-		virtual void onRender(PaintSurface& paintSurface);
-    virtual void onAutoSizeChanged(const bool& a);
-    virtual void onCaptionChanged(const std::string& cap);
-
-  private:
-    void recalcNewSize();
-};
+}
 
 }}
-
-#endif

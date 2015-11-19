@@ -49,23 +49,7 @@ class PT_HMI_API Window : public Widget
 {
 	public:    		
     virtual ~Window();    
-
-    ValueProperty<Gfx::SizeF>												MinimumSize;
-    ValueProperty<Gfx::SizeF>												MaximumSize;
-    ValueProperty<Hmi::WindowStartPosition::Type>   StartPostion;
-    ValueProperty<Hmi::WindowState::Type>           State;    
-    ValueProperty<bool>                             ShowInTaskbar;
-    ValueProperty<bool>                             ShowTitle;
-    ValueProperty<bool>                             ShowMinimizeButton;
-    ValueProperty<bool>                             ShowMaximizeButton;
-    ValueProperty<bool>                             ShowSysMenu;
-    ValueProperty<Hmi::WindowBorder::Type>          Border;
-    ValueProperty<Gfx::Image>						            Icon;
-    ValueProperty<bool>                             CanClose;
-    ValueProperty<bool>                             FirstShow;
-    ValueProperty<std::string>                      FocuseMoveKey;      
-		ValueProperty<Hmi::WindowBorder::Type>				  WindowBorder;
-				
+    				
 		Signal<bool> FocusedAction;
 
 		void setWindowParent(Window* parent);
@@ -101,6 +85,146 @@ class PT_HMI_API Window : public Widget
 
 		void setPointedWidget( Widget* widget);
 
+    const Gfx::SizeF&	minimumSize() const
+    {
+      return _minimumSize;
+    }
+
+    void setMinimumSize(const Gfx::SizeF& s)
+    {
+      _minimumSize = s;
+    }
+
+    const Gfx::SizeF&	maximumSize() const
+    {
+      return _maximumSize;
+    }
+
+    void setMaximumSize(const Gfx::SizeF& s)
+    {
+      _maximumSize = s;
+    }
+
+    const Hmi::WindowStartPosition::Type& startPostion() const
+    {
+      return _startPostion;
+    }
+
+    void setStartPostion(const Hmi::WindowStartPosition::Type& p)
+    {
+      _startPostion = p;
+    }
+
+    const Hmi::WindowState::Type& state() const
+    {
+      return _state;
+    }
+
+    void setState(const Hmi::WindowState::Type& s)
+    {
+      _state = s;
+    }
+
+    bool showInTaskbar() const
+    {
+      return _showInTaskbar;
+    }
+
+    void setShowInTaskbar(bool s)
+    {
+      _showInTaskbar = s;
+    }
+
+    bool showTitle() const
+    {
+      return _showTitle;
+    }
+
+    void setShowTitle(bool s)
+    {
+      _showTitle = s;
+    }
+
+    bool showMinimizeButton() const
+    {
+      return _showMinimizeButton;
+    }
+
+    void setShowMinimizeButton(bool s)
+    {
+      _showMinimizeButton = s;
+    }
+
+    bool showMaximizeButton() const
+    {
+      return _showMaximizeButton;
+    }
+
+    void setShowMaximizeButton(bool s)
+    {
+      _showMaximizeButton = s;
+    }
+
+    bool showSysMenu() const
+    {
+      return _showSysMenu;
+    }
+
+    void setShowSysMenu(bool s)
+    {
+      _showSysMenu = s;
+    }
+
+    const Hmi::WindowBorder::Type& border() const
+    {
+      return _border;
+    }
+
+    void setBorder(const Hmi::WindowBorder::Type& t)
+    {
+      _border = t;
+    }
+
+    const Gfx::Image&	icon() const
+    {
+      return _icon;
+    }
+
+    void setIcon(const Gfx::Image& i)
+    {
+      _icon = i;
+    }
+
+    bool canClose() const
+    {
+      return _canClose;
+    }
+
+    void setCanClose(bool c)
+    {
+      _canClose = c;
+    }
+
+    bool firstShow() const
+    {
+      return _firstShow;
+    }
+
+    void setFirstShow(bool b)
+    {
+      _firstShow = b;
+    }
+
+    const std::string& focuseMoveKey()const
+    {
+      return _focuseMoveKey;
+    }
+
+    void setFocuseMoveKey(const std::string& s)
+    {
+      _focuseMoveKey = s;
+    }
+
 	protected:
 		Window(Window* parent = 0);
 
@@ -122,6 +246,22 @@ class PT_HMI_API Window : public Widget
 
 	private:
 		virtual void onActivate() = 0;
+
+  private:
+    Gfx::SizeF												_minimumSize;
+    Gfx::SizeF												_maximumSize;
+    Hmi::WindowStartPosition::Type   _startPostion;
+    Hmi::WindowState::Type           _state;    
+    bool                             _showInTaskbar;
+    bool                             _showTitle;
+    bool                             _showMinimizeButton;
+    bool                             _showMaximizeButton;
+    bool                             _showSysMenu;
+    Hmi::WindowBorder::Type          _border;
+    Gfx::Image						            _icon;
+    bool                             _canClose;
+    bool                             _firstShow;
+    std::string                      _focuseMoveKey;      		
 
 	protected:
 		Window*				_winParent;

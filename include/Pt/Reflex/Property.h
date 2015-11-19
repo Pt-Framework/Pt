@@ -25,8 +25,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifndef PT_REFLEX_PROPERTYPROXY_H
-#define PT_REFLEX_PROPERTYPROXY_H
+#ifndef PT_REFLEX_PROPERTY_H
+#define PT_REFLEX_PROPERTY_H
 
 #include <Pt/Reflex/PropertyInfo.h>
 #include <Pt/Reflex/TypeManager.h>
@@ -40,13 +40,13 @@ namespace Pt {
 namespace Reflex {
 
 template <typename C, typename T>
-class ReadWritePropertyProxy : public PropertyInfo
+class Property : public PropertyInfo
 {
     public:
-        typedef T (*Getter)(C&);
-        typedef void (*Setter)(C&, T);
+        typedef T (C::*Getter)() const;
+        typedef void (C::*Setter)(T);
 
-        ReadWritePropertyProxy(TypeManager& ctx, const std::string& name, Getter getter, Setter setter )
+        Property(TypeManager& ctx, const std::string& name, Getter getter, Setter setter )
         : _name(name)
         , _getter(getter)
         , _setter(setter)
@@ -54,7 +54,15 @@ class ReadWritePropertyProxy : public PropertyInfo
             _type = ctx.getType( typeid(T) );
         }
 
-        ~ReadWritePropertyProxy()
+        Property(Type& type, const std::string& name, Getter getter, Setter setter )
+        : _name(name)
+        , _getter(getter)
+        , _setter(setter)
+				, _type(&type)
+        {
+        }
+
+        ~Property()
         { }
 
         virtual Type& type()
@@ -68,7 +76,8 @@ class ReadWritePropertyProxy : public PropertyInfo
         virtual Pt::Any get(void* instance)
         {
             C* t = static_cast<C*>( instance );
-            T r = _getter(*t);
+
+						T r = (t->*_getter)();
             return ReturnTraits<T>::make(r);
         }
 
@@ -76,7 +85,8 @@ class ReadWritePropertyProxy : public PropertyInfo
         {
             C* t = static_cast<C*>( instance );
             T a = ArgumentTraits<T>::cast( *_type, type, value.get() );
-            _setter( *t, a );
+
+						(t->*_setter)(a);
         }
 
         virtual void set(void* instance, Any& value)
@@ -86,7 +96,7 @@ class ReadWritePropertyProxy : public PropertyInfo
 						typedef typename Pt::TypeTraits<T>::ConstReference ConstRef;
 						ConstRef a = any_cast<ConstRef>(value);
 						
-						_setter( *t, a );
+						(t->*_setter)(a);
         }
 
     private:
@@ -101,3 +111,4 @@ class ReadWritePropertyProxy : public PropertyInfo
 }
 
 #endif
+

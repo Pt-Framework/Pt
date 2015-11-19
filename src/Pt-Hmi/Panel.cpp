@@ -33,14 +33,12 @@ namespace Pt{
 namespace Hmi{
 
 Panel::Panel()
-: PT_HMI_INIT_PROPERTY_VALUE(PanelBorderStyle,BorderStyle::Single)
-, PT_HMI_INIT_PROPERTY_VALUE(PanelBorderWidth,1)
-, PT_HMI_INIT_PROPERTY_VALUE(PanelBorderRoundEdge,false)
-, PT_HMI_INIT_PROPERTY_VALUE(BorderColor,Gfx::Color::fromRgb8(178,178,178))
+: _panelBorderStyle(BorderStyle::Single)
+, _panelBorderWidth(1)
+, _panelBorderRoundEdge(false)
+, _borderColor(Gfx::Color::fromRgb8(178,178,178))
 {
-  AcceptFocus = false;
-  Name.set("Panel");
-  invalidate();
+  setAcceptFocus(false);  
 }
 
 
@@ -55,23 +53,23 @@ void Panel::onRender(PaintSurface& paintSurface)
 
 	int corner = 0;
 
-	if(PanelBorderRoundEdge.get())
+	if(_panelBorderRoundEdge)
 		corner = 2;
     
-  if( PanelBorderWidth.get() == 0 )
+  if( _panelBorderWidth == 0 )
     return;
 
   const Gfx::SizeF  size = clientSize();
   const Gfx::PointF pos  = clientPos();
 
-	size_t border =  (size_t) PanelBorderWidth.get();	
+	size_t border =  (size_t) _panelBorderWidth;	
 
-	Gfx::SizeF  clientSize(size.width() - PanelBorderWidth.get()/2, size.height() - PanelBorderWidth.get()/2);	
-	Gfx::RectF  clientRect(Gfx::PointF( PanelBorderWidth.get()/2, PanelBorderWidth.get()/2), clientSize);
+	Gfx::SizeF  clientSize(size.width() - _panelBorderWidth/2, size.height() - _panelBorderWidth/2);	
+	Gfx::RectF  clientRect(Gfx::PointF( _panelBorderWidth/2, _panelBorderWidth/2), clientSize);
 	
 	Pt::Hmi::Painter& painter = paintSurface.painter();
 						
-	switch( PanelBorderStyle.get() )
+	switch( _panelBorderStyle )
 	{
 		case BorderStyle::Single:
 		{			
@@ -119,7 +117,7 @@ void Panel::onRender(PaintSurface& paintSurface)
 			points2[4].setX(pos.x() + corner);
 			points2[4].setY(pos.y() + clientRect.height());
 		
-			Gfx::Pen pen(border, BorderColor.get());
+			Gfx::Pen pen(border, _borderColor);
 			painter.setPen(pen);
 			
 			painter.drawPolyline(&points1[0], points1.size());								
@@ -175,12 +173,12 @@ void Panel::onRender(PaintSurface& paintSurface)
 			points2[4].setY(pos.y() + clientRect.height());
 
 
-			Gfx::Pen pen(border, BorderColor.get() );
+			Gfx::Pen pen(border, _borderColor);
 			painter.setPen(pen);
 				
 			painter.drawPolyline(&points2[0], points2.size());
                 
-			Gfx::Pen pen2(border,  BorderColor.get());
+			Gfx::Pen pen2(border,  _borderColor);
 			painter.setPen(pen2);
                 
 			painter.drawPolyline(&points1[0], points1.size());
@@ -218,7 +216,7 @@ void Panel::onRender(PaintSurface& paintSurface)
 				
 			painter.drawPolyline(&points1[0], points1.size());
 								
-			Gfx::Pen pen2(border, DisabledColor.get() );
+			Gfx::Pen pen2(border, _borderColor );
 			painter.setPen(pen2);
 
 			painter.drawPolyline(&points2[0], points2.size());			

@@ -78,7 +78,10 @@
     <ClInclude Include="..\..\include\Pt\Hmi\ResizeDirection.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Screen.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Type.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\TypeManager.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\WidgetType.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowBorder.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h" />
@@ -510,7 +513,10 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Panel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PropertyBase.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Screen.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Type.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\TypeManager.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\WidgetType.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Window.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowManager.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowTitleBar.cpp" />
@@ -797,7 +803,7 @@
     <NMakeBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -q -j2 -sPT_TOP=$(SolutionDir)..\..\</NMakeBuildCommandLine>
     <NMakeCleanCommandLine>cd ..\.. &amp;&amp; jam.bat clean</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -qa -j2 -sPT_TOP=$(SolutionDir)..\..\</NMakeReBuildCommandLine>
-    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions); PT_QT_API_EXPORT</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions); PT_QT_API_EXPORT;PT_HMI_API_EXPORT</NMakePreprocessorDefinitions>
     <NMakeIncludeSearchPath>$(SolutionDir)..\..\include;$(SolutionDir)..\..\src\Pt-System\win32\;$(SolutionDir)..\..\src\Pt-Qt\win32\;$(QTDIR)\include</NMakeIncludeSearchPath>
   </PropertyGroup>
   <ItemDefinitionGroup>

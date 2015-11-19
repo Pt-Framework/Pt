@@ -1,3 +1,4 @@
+
 /* Copyright (C) 2015 Marc Boris Duerner 
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
@@ -24,44 +25,81 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_Label_H
-#define Pt_Hmi_Label_H
+#ifndef PT_HMI_TYPE_H
+#define PT_HMI_TYPE_H
 
-#include <Pt/Hmi/Panel.h>
+#include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Property.h>
+#include <map>
+#include <string>
 
 namespace Pt{
 namespace Hmi{
 
-
-class PT_HMI_API Label  : public Panel
+  
+class PT_HMI_API Type
 {
-	public:
-		Label();
-		virtual ~Label();	
+  public:
+      Type( const std::string& name);
 
-    void setAutoSize( bool a )
-    {
-      _autoSize= a;
-    }
+      void registerProperty( PropertyBase* prop )
+      {
+        _properties[prop->name() ] = prop;
+      }
+        
 
-    bool autoSize() const
-    {
-      return _autoSize;
-    }
+      template<typename C, typename A>
+      void registerProperty( const char* name, const A& (C::*getter)() const, void (C::*setter)(const A& type) )
+      {
+        _properties[name] = new Property( name, getter, setter );
+      }      
+
+      void setBase( Type* base )
+      {
+          _base = base;
+      }
+
+      const Type* base() const
+      {
+         return _base;
+      }
+
+      Type* base()
+      {
+         return _base;
+      }
+
+      PropertyBase* getProperty( const std::string& name ) 
+      {
+          std::map<std::string, PropertyBase*>::iterator it =  _properties.find( name) ;
+
+          if( it == _properties.end() )
+          {
+              if( _base != 0 )
+                return  _base->getProperty( name );
+
+              return 0;
+          }
+
+          return  it->second;
+      }
+
+      virtual Widget* create() = 0;
 
 
-	public:
-		bool _autoSize;	
-
-	protected:
-		virtual void onRender(PaintSurface& paintSurface);
-    virtual void onAutoSizeChanged(const bool& a);
-    virtual void onCaptionChanged(const std::string& cap);
+      const std::string& name() const
+      {
+        return _name;
+      }
 
   private:
-    void recalcNewSize();
+      Type* _base;
+      std::string _name;
+      std::map<std::string, PropertyBase*> _properties;
+
 };
 
 }}
+
 
 #endif

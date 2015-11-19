@@ -34,6 +34,8 @@
 namespace Pt {
 namespace Hmi {
     
+class Widget;
+
 class PropertyBase
 {
 	public:
@@ -43,14 +45,14 @@ class PropertyBase
 		{
 		}
         
-		inline const std::string& name() const
+		const std::string& name() const
 		{
 				return _name;
 		}
 
-	  virtual Pt::Any getValue() const = 0;
+	  virtual Pt::Any getValue(const Widget* obj) const = 0;
 
-	  virtual void setValue(const Pt::Any& value, bool notify = true ) = 0;
+	  virtual void setValue(Widget* obj, const Pt::Any& value) = 0;
 		
 	private:
 		 std::string _name;

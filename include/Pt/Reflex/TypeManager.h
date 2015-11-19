@@ -294,9 +294,15 @@ class PT_REFLEX_API TypeManager
 
         virtual ~TypeManager();
 
-        virtual void* alloc(std::size_t bytes) = 0;
+        virtual void* alloc(std::size_t bytes)
+				{
+					return new char[bytes];
+				}
 
-        virtual void dealloc(void* p, std::size_t bytes) = 0;
+        virtual void dealloc(void* p, std::size_t bytes)
+				{
+					delete[] p;
+				}
 
         Type* getType(const std::type_info& ti);
 

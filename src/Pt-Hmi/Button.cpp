@@ -37,27 +37,22 @@ Button::Button()
 : _pressed(false)
 , _timeout(false)
 , _pressCounter(0)
-, PT_HMI_INIT_PROPERTY_VALUE(ButtonState,Pt::Hmi::DeviceButton::Released)
-, PT_HMI_INIT_PROPERTY_VALUE(Hover,false)
-, PT_HMI_INIT_PROPERTY_VALUE(ButtonType,Pt::Hmi::ButtonType::Press)
-, PT_HMI_INIT_PROPERTY_VALUE(DoublePressTimeInMs,1500)
-, PT_HMI_INIT_PROPERTY_VALUE(Image,Gfx::Image(0,0))
-, PT_HMI_INIT_PROPERTY_VALUE(ImageAlign, Align::MidleLeft)
+, _buttonState(Pt::Hmi::DeviceButton::Released)
+, _hover(false)
+, _buttonType(Pt::Hmi::ButtonType::Press)
+, _doublePressTimeInMs(1500)
+, _image(Gfx::Image(0,0))
+, _imageAlign( Align::MidleLeft)
 , _lastPointerState( DeviceButton::Released )
 {
-  BackColor.set(Gfx::Color::fromRgb8(245,245,245));
-	PanelBorderStyle.set(BorderStyle::Widget);
-	PanelBorderWidth.set(1);
-	Caption.set("Button");	
-  Name.set("Button");
-	AutoSize.set(false);
-	TextAlign.set(Align::MidleCenter);
-	AcceptFocus.set(true);
-	PanelBorderRoundEdge.set(true);
-	PanelBorderStyle.set(BorderStyle::Single);
-	
-	//Todo: change property to Property
-	ButtonState.changed() += Pt::slot(*this, &Button::onButtonStateChanged);
+  setBackgroundColor(Gfx::Color::fromRgb8(245,245,245));
+  setPanelBorderStyle(BorderStyle::Widget);
+  setPanelBorderWidth(1);
+  setAutoSize(false);
+  setTextAlign(Align::MidleCenter);
+  setAcceptFocus(true);
+  setPanelBorderRoundEdge(true);
+  setPanelBorderStyle(BorderStyle::Single);
 	
 	_doublePressTimer.timeout() += Pt::slot(*this, &Button::onDoublePressedTimeout);
 	_doublePressTimer.setActive(Pt::Hmi::Application::instance().loop());	
@@ -79,7 +74,7 @@ void Button::onPressedAction()
 	_pressCounter++;
 	
 	if(_pressCounter == 1)
-		_doublePressTimer.start(DoublePressTimeInMs.get());
+		_doublePressTimer.start(_doublePressTimeInMs);
 
 	if( _pressCounter == 2)	
 	{
@@ -92,19 +87,19 @@ void Button::onPressedAction()
 
 void Button::onMnemonic()
 {
-	if(!Enabled.get())
+	if(!isEnabled())
 	{
 		Label::onMnemonic();
 		return;
 	}
 
-	if(!Visible.get())
+	if(!visible())
 	{
 		Label::onMnemonic();
 		return;
 	}
 
-	switch(ButtonType.get())
+	switch(_buttonType)
 	{
 		case ButtonType::Press:
 		{
@@ -114,15 +109,15 @@ void Button::onMnemonic()
 
 		case ButtonType::Toggle:
 		{
-			if(ButtonState.get() == DeviceButton::Pressed)
-				ButtonState = DeviceButton::Released;
+			if(_buttonState== DeviceButton::Pressed)
+				_buttonState= DeviceButton::Released;
 			else
-				ButtonState = DeviceButton::Pressed;
+				_buttonState= DeviceButton::Pressed;
 		}			
 		break;
 	}
 	
-  HighLight = ButtonState.get() == DeviceButton::Pressed ;
+  setHighlight( _buttonState== DeviceButton::Pressed);
 	Label::onMnemonic();	    		
 	invalidate();	
 }
@@ -135,11 +130,11 @@ void Button::onDoublePressedAction()
 
 void Button::onButtonStateChanged( const DeviceButton::State& prop )
 {
-	switch( ButtonType.get())
+	switch( _buttonType)
 	{
 		case Pt::Hmi::ButtonType::Press:
 		
-			switch( ButtonState.get())
+			switch( _buttonState)
 			{
 				case Pt::Hmi::DeviceButton::Pressed:
 					_pressed = true;
@@ -156,18 +151,19 @@ void Button::onButtonStateChanged( const DeviceButton::State& prop )
 		break;
 
 		case Pt::Hmi::ButtonType::Toggle:
-			Checked.send((ButtonState.get() == Pt::Hmi::DeviceButton::Pressed));
+			Checked.send((_buttonState== Pt::Hmi::DeviceButton::Pressed));
 		break;
 	}
 }
 
+
 void Button::onActionKey( KeyEvent::KeyState state )
 {
-	switch( ButtonType.get() )
+	switch( _buttonType )
 	{
 		case ButtonType::Press:
 		{
-			ButtonState = ( state == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;
+			_buttonState= ( state == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;
 		}
 		break;
 		
@@ -175,27 +171,27 @@ void Button::onActionKey( KeyEvent::KeyState state )
 		{
 			if((state == KeyEvent::KeyDown))
 			{
-				if(ButtonState.get() == DeviceButton::Pressed)
-					ButtonState = DeviceButton::Released;
+				if(_buttonState== DeviceButton::Pressed)
+					_buttonState= DeviceButton::Released;
 				else
-					ButtonState = DeviceButton::Pressed;
+					_buttonState= DeviceButton::Pressed;
 			}
 		}
 		break;
 	}
 
-	HighLight = ButtonState.get() == DeviceButton::Pressed ;
+	setHighlight( _buttonState== DeviceButton::Pressed ) ;
 	invalidate();
 }
 
 void Button::onShortcutKey( KeyEvent::KeyState state )
 {
-	switch( ButtonType.get() )
+	switch( _buttonType)
 	{
 		case ButtonType::Press:
 		{
-			ButtonState = (state == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;				
-			setWidgetFocus( true );
+			_buttonState= (state == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;				
+			onFocus( true );
 
 		}
 		break;
@@ -204,31 +200,32 @@ void Button::onShortcutKey( KeyEvent::KeyState state )
 		{
 			if( state == KeyEvent::KeyDown )
 			{
-				ButtonState = (ButtonState.get() == DeviceButton::Pressed) ? DeviceButton::Released : DeviceButton::Pressed;											
-				setWidgetFocus( true );
+				_buttonState= (_buttonState== DeviceButton::Pressed) ? DeviceButton::Released : DeviceButton::Pressed;											
+				onFocus( true );
 			}
 		}
 		break;
 	}
 	
-	HighLight = ButtonState.get() == DeviceButton::Pressed ;
+	setHighlight( _buttonState== DeviceButton::Pressed );
 	invalidate();			
 }
 
+
 void Button::onKeyEvent(const KeyEvent& ev)
 {		
-	if( !Enabled.get() )
+	if( !isEnabled() )
 		return;
 
-	if( !Visible.get() )
+	if( !visible() )
 		return;
 
 	Label::onKeyEvent(ev);
 
-	if(ButtonType.get() == ButtonType::Press && ButtonState.get() != DeviceButton::Released)
+	if(_buttonType == ButtonType::Press && _buttonState!= DeviceButton::Released)
 	{
-		ButtonState = DeviceButton::Released;
-        HighLight = ButtonState.get() == DeviceButton::Pressed;
+		_buttonState= DeviceButton::Released;
+     setHighlight( _buttonState== DeviceButton::Pressed);
 		invalidate();
 	}		
 }
@@ -239,13 +236,13 @@ void Button::onPointerEvent(const PointerEvent& ev)
       
 	Label::onPointerEvent(ev);
 		    
-	if( !Enabled.get() )
+	if( !isEnabled() )
 	{
 		_lastPointerState = ev.buttons()[0].state();
 		return;
 	}
 
-	if( !Visible.get() )
+	if( !visible() )
 	{
 		_lastPointerState = ev.buttons()[0].state();
 		return;
@@ -253,9 +250,9 @@ void Button::onPointerEvent(const PointerEvent& ev)
     
 	if( !contains(point) )
 	{
-		if( Hover.get() )
+		if( _hover )
     {
-			Hover = false;
+			_hover =   false;
       invalidate();
     }
 
@@ -266,22 +263,22 @@ void Button::onPointerEvent(const PointerEvent& ev)
     
 	bool genOutput = false;
 
-	if(!Hover.get())
+	if(!_hover)
 	{
-		Hover = true;    
+		_hover =   true;    
 		genOutput = true;
 	}
 
 	if( _lastPointerState != ev.buttons()[0].state() )		
 	{	
-		switch(ButtonType.get())
+		switch(_buttonType)
 		{
 			case ButtonType::Press:
 			{
 				if(!hasFocus())
 				{
 					genOutput = true;						
-					setWidgetFocus(true);															
+					onFocus(true);															
 				}
 
 				switch(ev.buttons()[0].state())
@@ -289,10 +286,10 @@ void Button::onPointerEvent(const PointerEvent& ev)
 					case DeviceButton::Pressed:
 					{		
 
-						if(ButtonState.get() != DeviceButton::Pressed)
+						if(_buttonState != DeviceButton::Pressed)
 						{
 							genOutput = true;						
-							ButtonState = DeviceButton::Pressed;
+							_buttonState = DeviceButton::Pressed;
 						}
 					}
 					break;
@@ -300,10 +297,10 @@ void Button::onPointerEvent(const PointerEvent& ev)
 					case DeviceButton::Released:			
 					{
 
-						if(ButtonState.get() != DeviceButton::Released)
+						if(_buttonState!= DeviceButton::Released)
 						{
 							genOutput = true;
-							ButtonState = DeviceButton::Released;												
+							_buttonState= DeviceButton::Released;												
 						}
 					}
 					break;
@@ -315,7 +312,7 @@ void Button::onPointerEvent(const PointerEvent& ev)
 			{
 				if(!hasFocus())	
 				{
-					setWidgetFocus(true);			
+					onFocus(true);			
 					genOutput = true;
 				}
 
@@ -323,10 +320,10 @@ void Button::onPointerEvent(const PointerEvent& ev)
 				{
 					genOutput = true;
 
-					if(ButtonState.get() == DeviceButton::Pressed)
-						ButtonState = DeviceButton::Released;
+					if(_buttonState== DeviceButton::Pressed)
+						_buttonState= DeviceButton::Released;
 					else
-						ButtonState = DeviceButton::Pressed;
+						_buttonState= DeviceButton::Pressed;
 				}
 			}				
 			break;
@@ -337,7 +334,7 @@ void Button::onPointerEvent(const PointerEvent& ev)
 
   if( genOutput )
   {
-  	HighLight = ButtonState.get() == DeviceButton::Pressed ;
+  	setHighlight( _buttonState== DeviceButton::Pressed) ;
 		invalidate();
   }
 }
@@ -345,7 +342,7 @@ void Button::onPointerEvent(const PointerEvent& ev)
 
 void Button::onRender(PaintSurface& paintSurface)
 {	
-	if( !Enabled.get() )
+	if( !isEnabled() )
 	{
 		Label::onRender(paintSurface);
 		return;
@@ -353,14 +350,14 @@ void Button::onRender(PaintSurface& paintSurface)
 
 	Label::onRender(paintSurface);
 	
-	if( ButtonState.get() == DeviceButton::Pressed )
+	if( _buttonState== DeviceButton::Pressed )
 		return;
 
 	Pt::Hmi::Painter& painter = paintSurface.painter();
  Gfx::SizeF  size = clientSize();
  Gfx::PointF pos  = clientPos();
        
-	if( Hover.get() || hasFocus() )
+	if( _hover || hasFocus() )
 	{
 		size.addHeight(-4);
 		size.addWidth(-4);

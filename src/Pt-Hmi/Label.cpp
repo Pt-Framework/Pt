@@ -34,14 +34,10 @@ namespace Hmi{
 
 Label::Label()
 : Panel()
- , PT_HMI_INIT_PROPERTY_VALUE(AutoSize,true)
+, _autoSize(true)
 {
-	AutoSize.changed() += Pt::slot(*this, &Label::onAutoSizeChanged);
-  Caption.changed() +=  Pt::slot(*this, &Label::onCaptionChanged);
-  Caption.set("Label");
-  Name.set("Label");
-	ForeColor.set(Gfx::Color::fromRgb8(0,0,0,0));
-	PanelBorderStyle.set(BorderStyle::NoBorder);
+	setForegroundColor(Gfx::Color::fromRgb8(0,0,0,0));
+	setPanelBorderStyle(BorderStyle::NoBorder);
   
 }
 
@@ -52,22 +48,22 @@ Label::~Label()
 
 void Label::recalcNewSize()
 {
- if( !AutoSize.get() )
+ if( !_autoSize)
     return;
   
-  std::string caption = "";
+  std::string captionStr = "";
 
-  if( UseMnemonic.get() )
-	  caption = Widget::removeMnemonic(Caption.get()).c_str();
+  if( useMnemonic() )
+	  captionStr = Widget::removeMnemonic(caption().c_str());
   else
-	  caption = Caption.get().c_str();
+	  captionStr = caption();
 
 	PaintSurface surface;
-  surface.painter().setFont(Font.get());
+  surface.painter().setFont(font());
 
-  const Gfx::FontMetrics metric = surface.painter().fontMetrics(caption.c_str());
+  const Gfx::FontMetrics metric = surface.painter().fontMetrics(captionStr.c_str());
 
-  Size =Gfx::SizeF( metric.width() + Margin.get().left() + Margin.get().right(), metric.height() + Margin.get().top() +  Margin.get().bottom() );  
+  setSize(  Gfx::SizeF( metric.width() + margin().left() + margin().right(), metric.height() +margin().top() +  margin().bottom() ) );  
   invalidate();
 }
 
@@ -88,24 +84,24 @@ void Label::onRender(PaintSurface& paintSurface)
 	Pt::Hmi::Painter& painter = paintSurface.painter();	
  Gfx::SizeF         size = clientSize();
 	Gfx::PointF        pos = clientPos();
-	Pt::String        caption;
- Gfx::Color         foreColor = Enabled.get() ? ForeColor.get() : DisabledColor.get();
+	Pt::String        captionStr;
+ Gfx::Color         foreColor = isEnabled() ? foregroundColor() : disabledColor();
  Gfx::Pen	          pen( 1, foreColor);
     
-	if( UseMnemonic.get() )
-		caption = Widget::removeMnemonic(Caption.get()).c_str();
+	if( useMnemonic() )
+		captionStr = Widget::removeMnemonic(caption()).c_str();
 	else
-		caption = Caption.get().c_str();	  
+		captionStr = caption().c_str();	  
 
-  painter.setFont(Font.get());
+  painter.setFont(font());
 
-	Gfx::FontMetrics	metric = painter.fontMetrics(caption);
+	Gfx::FontMetrics	metric = painter.fontMetrics(captionStr);
   
   Panel::onRender(paintSurface);
               
-	if( !AutoSize.get() )
+	if( !autoSize() )
 	{										            	
-		switch(TextAlign.get())
+		switch(textAlign())
 		{
       case Hmi::Align::TopLeft:
       {
@@ -201,23 +197,23 @@ void Label::onRender(PaintSurface& paintSurface)
   }
 
   painter.setPen(pen);
-  painter.drawText(pos, caption);
+  painter.drawText(pos, captionStr);
 
-	if( UseMnemonic.get() )
+	if( useMnemonic() )
 	{			
-		int index = Widget::getMnemonicIndex( Caption.get() );
+		int index = Widget::getMnemonicIndex( caption() );
 		
 		if( index != std::string::npos 
       
-      && ((index + 1) < (int) caption.size()) )
+      && ((index + 1) < (int) captionStr.size()) )
 		{	
-			std::string subString(  caption.begin(), caption.begin() + index );
+			std::string subString(  captionStr.begin(), captionStr.begin() + index );
 
 			Gfx::FontMetrics metric = painter.fontMetrics( Pt::String( subString.c_str() ) );
 	
 			Gfx::PointF linePos( pos.x() + metric.width() - 1, pos.y()  + 1);
 
-			subString = caption[index];
+			subString = captionStr[index];
 
 			metric = painter.fontMetrics( Pt::String( subString.c_str() ) );
 

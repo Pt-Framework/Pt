@@ -414,7 +414,8 @@ class PT_REFLEX_API Type
 
         virtual ~Type();
 
-        virtual void define(TypeManager& context) = 0;
+        virtual void define(TypeManager& context)
+				{}
 
         const std::type_info* id() const
         { return _id; }
@@ -476,6 +477,14 @@ class PT_REFLEX_API Type
 
             return false;
         }
+
+				template <typename T>
+				void setProperty(const char* name, const T& value)
+				{
+					Pt::Reflex::PropertyInfo* p = wt.property(name);
+					if(p)
+						p->set(this, value);
+				}
 
         virtual std::size_t size() const = 0;
 
@@ -560,6 +569,9 @@ class PT_REFLEX_API Type
         template <typename C, typename T>
         void registerProperty( TypeManager& context, const char* name, T (*getter)(C&), void (*setter)(C&, T) );
 
+        template <typename C, typename T>
+        void registerProperty( Type& type, const char* name, T (C::*getter)() const, void (C::*setter)(T) );
+
         bool registerConstructor(ConstructorInfo* mi);
 
         bool registerProperty(PropertyInfo* pi);
@@ -593,6 +605,19 @@ class PT_REFLEX_API Type
         MethodTable _mtab;
 };
 
+template <typename T>
+class BasicType : public Type 
+{
+	public:
+		BasicType(const std::string& name)
+		: Type(typeid(T), name)
+		{
+		}
+
+		std::size_t size() const 
+		{ return sizeof(T); }
+};
+
 }
 
 }
@@ -600,6 +625,7 @@ class PT_REFLEX_API Type
 #include <Pt/Reflex/ConstructorProxy.h>
 #include <Pt/Reflex/MethodProxy.h>
 #include <Pt/Reflex/PropertyProxy.h>
+#include <Pt/Reflex/Property.h>
 
 namespace Pt {
 
@@ -737,9 +763,22 @@ inline void Type::registerMethod( TypeManager& context, const char* name, R (T::
 
 
 template <typename C, typename T>
-void Type::registerProperty( TypeManager& tm, const char* name, T (*getter)(C&), void (*setter)(C&, T) )
+void Type::registerProperty( TypeManager& tm, const char* name, 
+                             T (*getter)(C&), void (*setter)(C&, T) )
 {
     PropertyInfo* pi = new ReadWritePropertyProxy<C, T>(tm, name, getter, setter);
+    if ( ! Type::registerProperty(pi) )
+    {
+        delete pi;
+    }
+}
+
+
+template <typename C, typename T>
+void Type::registerProperty( Type& type, const char* name, 
+                             T (C::*getter)() const, void (C::*setter)(T) )
+{
+    PropertyInfo* pi = new Property<C, T>(type, name, getter, setter);
     if ( ! Type::registerProperty(pi) )
     {
         delete pi;
