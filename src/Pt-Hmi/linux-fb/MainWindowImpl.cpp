@@ -51,9 +51,7 @@ MainWindowImpl::MainWindowImpl(MainWindow* window)
 : _app(Application::instance() )
 , _apiWindow(window)
 { 	
-  // route all events through MainWindow back to this impl
-  eventReceived().disconnectAll();
-  eventReceived() += Pt::slot( _apiWindow->eventReceived() );
+  eventReceived() += Pt::slot( *_apiWindow, &MainWindow::processEvent );
 }
 
 
