@@ -31,14 +31,13 @@ namespace Pt{
 namespace Hmi{
 
 Dialog::Dialog()
-: PT_HMI_INIT_PROPERTY_VALUE(Result, DialogResultType::Undefined)
+: _result( DialogResultType::Undefined)
 {
-	Name.set("Dialog");
-  ShowInTaskbar = false;
-	ShowSysMenu = true;
-	Border = WindowBorder::Dialog;
-	StartPostion = WindowStartPosition::CenterParent;
-	ShowInTaskbar = true;
+  setShowInTaskbar( false) ;
+	setShowSysMenu( true);
+	setBorder(  WindowBorder::Dialog );
+	setStartPostion ( WindowStartPosition::CenterParent );
+	setShowInTaskbar( true);
 }
 
 Dialog::~Dialog()
@@ -52,15 +51,15 @@ void Dialog::doModal(MainWindow* parent)
 	
 
 	//Setup the parent as disabled and TopMost = false.
-	parent->Enabled = false;	
-   parent->invalidate(); //Notify the parent.
+	parent->setEnabled ( false);	
+  parent->invalidate(); //Notify the parent.
 	parent->setTopMost(false);
 	
 	//Setup the dialog as aenabled and top most.	
-	Enabled = true;
+	setEnabled( true);
 	setTopMost(true);	
 
-	Visible = true;	
+	setVisible( true);	
 	//Invalidate the dialog
 	invalidate();
 
@@ -70,7 +69,7 @@ void Dialog::doModal(MainWindow* parent)
 
 	//Restore the parent state.
 	parent->setTopMost(true);
-	parent->Enabled = true;	
+	parent->setEnabled( true);	
 	parent->invalidate();	
 	setWindowParent(0);
 }

@@ -42,6 +42,7 @@ Dialog2::~Dialog2()
 
 void Dialog2::init()
 {
+/*
 	//Dialog
 	Size               =Gfx::SizeF(450,200);
 	Position           =Gfx::PointF(400,400);
@@ -103,7 +104,7 @@ void Dialog2::init()
 	std::string ac;
 	ac += (char) 13;
 	_okButton.ShortcutKey = ac;
-	_okCancelPanel.addChild(&_okButton);
+	_okCancelPanel.addChild(&_okButton);*/
 
 }
     

@@ -38,11 +38,11 @@ MainWindow::MainWindow(MainWindow* parent)
 {
 	_impl = new MainWindowImpl( this );
 
-	Visible = false;
- 	 Name = std::string("Window");
-	AcceptFocus = false;
+	setVisible(false);
+	setAcceptFocus(false);
 		  
 	//Todo: change from ValueProperty to Property.
+  /*
   Visible.changed() += Pt::slot(*this, &MainWindow::onVisibleChanged);
   ShowTitle.changed() += Pt::slot(*this, &MainWindow::onShowTitleChanged);
   ShowMinimizeButton.changed() += Pt::slot(*this, &MainWindow::onShowMinimizedButtonChanged);
@@ -55,11 +55,11 @@ MainWindow::MainWindow(MainWindow* parent)
 	Enabled.changed() += Pt::slot(*this, &MainWindow::onEnabledChanged);
 	MinimumSize.changed() += Pt::slot(*this, &MainWindow::onMinSizeChnaged);
 	MaximumSize.changed() += Pt::slot(*this, &MainWindow::onMaxSizeChnaged);
-
-  Position =Gfx::PointF(20,20);
-	Size = Gfx::SizeF(200,200);
-	_impl->setMinSize(MinimumSize.get());
-	_impl->setMaxSize(MaximumSize.get());
+  */
+  setPosition( Gfx::PointF(20,20) );
+	setSize(Gfx::SizeF(200,200));
+	_impl->setMinSize(minimumSize());
+	_impl->setMaxSize(maximumSize());
 	setClosed(false);
 }
 
@@ -88,10 +88,10 @@ void MainWindow::setTopMost(bool topMost)
 
 void MainWindow::onClosedChanged(const bool& closed)
 {	
-	if( !Enabled.get() )
+	if( !isEnabled() )
 		return;
 
-	if( !CanClose.get() )
+	if( !canClose() )
 		return;
     
   //Set the closed flag
@@ -110,16 +110,16 @@ void MainWindow::onVisibleChanged(const bool& visible)
   //Set the closed flag
 	if( visible )
 	{
-    if( FirstShow.get() )
+    if( firstShow() )
     {
-      if( windowParent() != 0  && StartPostion.get() == WindowStartPosition::CenterParent )
+      if( windowParent() != 0  && startPostion() == WindowStartPosition::CenterParent )
       {
-          double x = windowParent()->Position.get().x() + (windowParent()->Size.get().width()/2  - Size.get().width()/2);
-					double y = windowParent()->Position.get().y() + (windowParent()->Size.get().height()/2  - Size.get().height()/2);
-					Position =Gfx::PointF(x,y);
+          double x = windowParent()->position().x() + (windowParent()->size().width()/2  - size().width()/2);
+					double y = windowParent()->position().y() + (windowParent()->size().height()/2  - size().height()/2);
+					setPosition( Gfx::PointF(x,y) );
       }  
 
-      FirstShow = false;
+      setFirstShow(false);
     }
 
     _impl->show();
@@ -173,8 +173,6 @@ void MainWindow::onWindowStateChanged(const WindowState::Type& p)
 void MainWindow::onBorderChanged(const WindowBorder::Type& p)
 {
   _impl->setBorder( p );
-
-	Size.changed().send(Size.get()); //Notify size changed
 }
 
 
@@ -223,19 +221,29 @@ void MainWindow::onActivate()
 }
 
 
+void MainWindow::onVisible( bool b )
+{
+  if(b )
+     _impl->show();
+  else
+    _impl->hide();
+    
+    Window::onVisible( b);
+}
+
 void MainWindow::setClosed(bool close)
 {
-	if( !Enabled.get() )
+	if( !isEnabled() )
 		return;
 
 	if( close )
 	{
 
-		if( !CanClose.get() || isClosed() )
+		if( !canClose() || isClosed() )
 			return;
 	
 		_impl->destroy();
-		Visible = false;				
+		setVisible (false);				
 						
 	}
 	else

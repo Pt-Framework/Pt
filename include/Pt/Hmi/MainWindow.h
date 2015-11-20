@@ -44,8 +44,7 @@ class PT_HMI_API MainWindow  : public Window
 		virtual ~MainWindow();    
 
 		void setTopMost( bool topMost );						
-
-	protected:	
+	
 		virtual void setSize(const Gfx::SizeF& size);
 
 		virtual void setPosition(const Gfx::PointF& pos);
@@ -59,6 +58,8 @@ class PT_HMI_API MainWindow  : public Window
 
 	private:
 		virtual void onActivate();
+
+    virtual void onVisible( bool b );
 					
 		void onPositionChanged(const Gfx::PointF& prop);    
 

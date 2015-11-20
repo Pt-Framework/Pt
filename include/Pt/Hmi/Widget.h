@@ -451,7 +451,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 
     void setVisible( bool b )
     {
-      _visible = b;
+      onVisible(b);
     }
 
     bool visible() const
@@ -474,6 +474,7 @@ class PT_HMI_API Widget : public Pt::Connectable
     {
       return _disabledColor;
     }
+    		virtual void setCaption( const std::string& c);
 
       
 	private:
@@ -511,8 +512,10 @@ class PT_HMI_API Widget : public Pt::Connectable
 		virtual void onMnemonic();
 		virtual void onActionKey(KeyEvent::KeyState state);
 		virtual void onShortcutKey(KeyEvent::KeyState state);	  
-		virtual void setCaption( const std::string& c);
-
+    virtual void onVisible( bool b )
+    {
+          _visible = b;
+    }
 	protected:		
 
     const Gfx::SizeF clientSize() const

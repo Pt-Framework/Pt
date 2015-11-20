@@ -33,7 +33,7 @@ namespace Hmi{
 
 ChildWindow::ChildWindow()
 {
-  BackColor =Gfx::Color(0, 1, 1, 1);	
+  setBackgroundColor( Gfx::Color(0, 1, 1, 1) );	
 }
 
 

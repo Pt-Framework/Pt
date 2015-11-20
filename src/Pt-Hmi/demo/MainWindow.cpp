@@ -45,21 +45,13 @@ namespace Demo{
 
 MainWindow::MainWindow()
 {	
-	Position =Gfx::PointF(0,0);
-	Size =Gfx::SizeF(600,400);
-	ShowTitle = true;	
-	ShowInTaskbar = true;
-	ShowSysMenu = true;
-	Border = WindowBorder::Sizeable;
-	StartPostion = WindowStartPosition::CenterParent;
-	
-  State = Hmi::WindowState::Normal;
-	StartPostion = Hmi::WindowStartPosition::CenterParent;	
-	BackColor =Gfx::Color(0.5,0.5,0.5);
+	setPosition (  Gfx::PointF(0,0) );
+	setSize( Gfx::SizeF(600,400) );
+	setBackgroundColor( Gfx::Color(0.5,0.5,0.5) );
 
-	_child1.Position = Gfx::PointF( 200, 200 );
-	_child1.Caption = "Child 1";
-	_child2.Caption = "Child 2";
+	_child1.setPosition ( Gfx::PointF( 200, 200 ) );
+	_child1.setCaption( "Child 1" );
+	_child2.setCaption( "Child 2" );
 
 	addChildWindow( _child1 );
 	addChildWindow( _child2 );
@@ -73,7 +65,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::show()
 {
-	Visible = true;	
+	setVisible( true );	
+  invalidate();
 	
 }
 

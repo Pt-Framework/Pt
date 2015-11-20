@@ -30,9 +30,8 @@
 namespace Pt{
 namespace Hmi{
 
-Type::Type( const std::string& name, void* (* create)() )
+Type::Type( const std::string& name )
 : _name(name)
-,_create( create)
 {
 }
 

@@ -72,7 +72,7 @@ ChildWindow* WindowManager::active()
 
 	while( index >= 0 )
 	{		
-		if( _windows[index]->Visible.get() )
+		if( _windows[index]->visible() )
 			return _windows[ index];
 
 		--index;
@@ -147,16 +147,16 @@ void WindowManager::invalidate()
 
 Gfx::PointF WindowManager::renderFrame( ChildWindow* w )
 {	
-	const Gfx::SizeF clientSize =  w->Size.get();
+	const Gfx::SizeF clientSize =  w->size();
 	const Gfx::SizeF winSize( clientSize.width()  + _borderWidth*2,  clientSize.height() + _borderWidth*2 + _titleBarHeight);	
 	
 	Gfx::Color color = w->isActive() ? _activeColor : _inactiveColor;  
 
 	Painter& painter = _parent.surface().painter();
 
-	Gfx::PointF pos( w->Position.get().x(), w->Position.get().y());
+	Gfx::PointF pos( w->position().x(), w->position().y());
 	
-  switch( w->Border.get() )
+  switch( w->border() )
   {
       case WindowBorder::Dialog:
       case WindowBorder::DialogSizeable:
@@ -201,14 +201,14 @@ Gfx::PointF WindowManager::renderFrame( ChildWindow* w )
 																pos.y() + _borderWidth + _titleBarHeight - 1);
 					painter.fillRect(titleArea);
 
-					const Gfx::Font& font = w->Font.get();
+					const Gfx::Font& font = w->font();
 					
 					Gfx::FontMetrics fm = painter.fontMetrics(font, Pt::String("A") );
 					double textMargin = (_titleBarHeight - fm.height()) / 2;
 					Gfx::PointF textPos(pos.x() + _borderWidth + _titleBarHeight, pos.y() + _titleBarHeight - textMargin);
 
 					painter.setFont(font);
-					painter.drawText(textPos, Pt::String( w->Caption.get().c_str()) );
+					painter.drawText(textPos, Pt::String( w->caption().c_str()) );
       }
 
       break;
@@ -226,7 +226,7 @@ void WindowManager::render()
 	{
 		ChildWindow* w = _windows[i];				
 
-		if( !w->Visible.get() )
+		if( !w->visible() )
    		  continue;		
 		
 		const Gfx::PointF clientPos = renderFrame(w);						  
@@ -238,7 +238,7 @@ void WindowManager::render()
 
 Gfx::PointF WindowManager::toClient(const ChildWindow* w, const Gfx::PointF& p)
 {
-  return Gfx::PointF( p.x() - w->Position.get().x() - _borderWidth ,  p.y() - w->Position.get().y() - _borderWidth - _titleBarHeight ) ;
+  return Gfx::PointF( p.x() - w->position().x() - _borderWidth ,  p.y() - w->position().y() - _borderWidth - _titleBarHeight ) ;
 }
 
 
@@ -303,7 +303,7 @@ bool WindowManager::keyInput( const Pt::Hmi::KeyEvent& keyEvent )
   if( w == 0 )
     return false;
 
-	if( w->Enabled.get() )
+	if( w->isEnabled() )
 			w->processEvent( keyEvent );		
 
    return true;
@@ -326,10 +326,10 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 		return;
 	}	
 	
-	double width  = w->Size.get().width();
-	double height = w->Size.get().height();
-	double posX   = w->Position.get().x();
-	double posY   = w->Position.get().y();
+	double width  = w->size().width();
+	double height = w->size().height();
+	double posX   = w->position().x();
+	double posY   = w->position().y();
 	double deltaX = ( point.x() - _lastSizePoint.x());
 	double deltaY = ( point.y() - _lastSizePoint.y());
 
@@ -403,25 +403,25 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 	Gfx::SizeF size(width, height);
 	Gfx::PointF pos(posX, posY);
 
-	if( width < w->MinimumSize.get().width() )
-		size.setWidth( w->MinimumSize.get().width() );
+	if( width < w->minimumSize().width() )
+		size.setWidth( w->minimumSize().width() );
 
-	if( height < w->MinimumSize.get().height() )
-		size.setHeight( w->MinimumSize.get().height() );
+	if( height < w->minimumSize().height() )
+		size.setHeight( w->minimumSize().height() );
 				
-	if( width > w->MaximumSize.get().width() )
-		size.setWidth( w->MaximumSize.get().width() );
+	if( width > w->maximumSize().width() )
+		size.setWidth( w->maximumSize().width() );
 
-	if( height > w->MaximumSize.get().height() )
-		size.setHeight( w->MaximumSize.get().height() );
+	if( height > w->maximumSize().height() )
+		size.setHeight( w->maximumSize().height() );
 
-	if( w->Position.get() != pos )
+	if( w->position() != pos )
 	{
 		MoveEvent mev(pos);
 		w->processEvent(mev);	
 	}
 
-	if( w->Size.get() != size )
+	if( w->size() != size )
 	{
 		ResizeEvent rev(size);
 		w->processEvent(rev);
@@ -433,10 +433,10 @@ void WindowManager::doSizing( ChildWindow* w, const PointerEvent& ev )
 
 bool WindowManager::contains(const ChildWindow* w, const Gfx::PointF& p)
 {  
-	Gfx::SizeF winSize( w->Size.get().width() + _borderWidth*2, w->Size.get().height() + _borderWidth*2 + _titleBarHeight );
+	Gfx::SizeF winSize( w->size().width() + _borderWidth*2, w->size().height() + _borderWidth*2 + _titleBarHeight );
 
-	if( p.x() >= w->Position.get().x() && p.x() <  w->Position.get().x() + winSize.width() &&
-	    p.y() >= w->Position.get().y() && p.y() <  w->Position.get().y() + winSize.height() )
+	if( p.x() >= w->position().x() && p.x() <  w->position().x() + winSize.width() &&
+	    p.y() >= w->position().y() && p.y() <  w->position().y() + winSize.height() )
 				return true;
 
 	return false;
@@ -448,9 +448,9 @@ bool WindowManager::isMoving( const ChildWindow* w, const Pt::Hmi::PointerEvent&
 	if( ev.buttons()[_actionButton].state() != DeviceButton::Pressed  || _moving  ||  _pointerLastState !=  DeviceButton::Released )
 		return false;
 
-	const Gfx::PointF& position = w->Position.get();
+	const Gfx::PointF& position = w->position();
 	 
-	if(  (ev.x() < (position.x() + _borderWidth*2 + w->Size.get().width())  && ev.x() >= position.x())  && 
+	if(  (ev.x() < (position.x() + _borderWidth*2 + w->size().width())  && ev.x() >= position.x())  && 
 			 (ev.x() >= (position.x() + _borderWidth)) &&
        (ev.y() < (position.y() + _titleBarHeight) ) && ((ev.y()+ position.y()) >= _borderWidth ) &&
 			 (ev.y() >= (position.y() + _borderWidth)))
@@ -465,8 +465,8 @@ bool WindowManager::isMoving( const ChildWindow* w, const Pt::Hmi::PointerEvent&
 
 ResizeDirection::Type WindowManager::getSizingDirection( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev )
 {	
-	const Gfx::SizeF  wsize = w->Size.get();
-	const Gfx::PointF wpos  = w->Position.get();
+	const Gfx::SizeF  wsize = w->size();
+	const Gfx::PointF wpos  = w->position();
 	double titleHeight = _titleBarHeight;
 
 	bool left = ev.x() < (wpos.x() +	_borderWidth);
@@ -522,7 +522,7 @@ void WindowManager::doMoving( ChildWindow* w, const PointerEvent& ev )
 	
 	const double dtX =  point.x() - _movingOffset.x();
 	const double dtY =  point.y() - _movingOffset.y();
-	Gfx::PointF newPos( w->Position.get().x() + dtX, w->Position.get().y() + dtY );
+	Gfx::PointF newPos( w->position().x() + dtX, w->position().y() + dtY );
 	
 	if( newPos.y() < 0 ) 
 		newPos.setY( 0 );
@@ -541,7 +541,7 @@ ChildWindow* WindowManager::findWindow( const Gfx::PointF& pos )
 	{
 		ChildWindow* w = _windows[i];
 
-		if( !w->Visible.get() )
+		if( !w->visible() )
 			continue;
 
 		if( !contains( w, pos ) )
@@ -637,8 +637,8 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 
 	Pt::Hmi::PointerEvent localMouseEvent = pointerEvent;
 
-	localMouseEvent.setX( pointerEvent.x() - childWindow->Position.get().x() - _borderWidth ) ;
-	localMouseEvent.setY( pointerEvent.y() - childWindow->Position.get().y() - _titleBarHeight - _borderWidth ) ;  
+	localMouseEvent.setX( pointerEvent.x() - childWindow->position().x() - _borderWidth ) ;
+	localMouseEvent.setY( pointerEvent.y() - childWindow->position().y() - _titleBarHeight - _borderWidth ) ;  
 
 	if( (_sizingDirection != ResizeDirection::No || _moving) && childWindow->isActive() )
 	{

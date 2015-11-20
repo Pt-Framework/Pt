@@ -57,9 +57,14 @@ class PT_HMI_API Dialog  : public MainWindow
 
 		void doModal(MainWindow* parent);
 
-		ValueProperty<DialogResultType::Type>	Result;		
+    DialogResultType::Type result() const
+    {
+      return _result;
+    }
 
-	private:   	
+  private:
+		DialogResultType::Type _result;		
+  	
 };
 
 

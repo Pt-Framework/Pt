@@ -45,16 +45,13 @@ Dialog1::~Dialog1()
 void Dialog1::init()
 {
 	//Dialog
-	Size  =Gfx::SizeF(700,500);
-	MinimumSize = Size.get();
-	Position =Gfx::PointF(400,400);
-	Caption = std::string("This is a sample modal dialog 1");
-	StartPostion = Hmi::WindowStartPosition::CenterParent;
-	BackColor =Gfx::Color(0,1,1);
-	Border = WindowBorder::DialogSizeable;
-
+	setSize( Gfx::SizeF(700,500) );
+	setPosition( Gfx::PointF(400,400) );
+	setCaption( std::string("This is a sample modal dialog 1") );
+	setBackgroundColor( Gfx::Color(0,1,1) );
+  /*
 	//New dialog button 
-	_newDialogButton.Margin = Hmi::Margin(5);
+	_newDialogButton.setMargin( Hmi::Margin(5) );
 	_newDialogButton.Dock = Docking::Right;
 	_newDialogButton.Position =Gfx::PointF(10,10);
 	_newDialogButton.Size =Gfx::SizeF(200,30);
@@ -92,7 +89,7 @@ void Dialog1::init()
   
   _panel5.BackColor =Gfx::Color(0, 1, 0,1);
   _panel5.Dock = Docking::Fill;
-  addChild(&_panel5);    
+  addChild(&_panel5);    */
 }
 
 void Dialog1::onClosedByButton()
