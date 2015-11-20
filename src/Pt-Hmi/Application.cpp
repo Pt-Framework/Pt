@@ -72,6 +72,6 @@ void Application::nextEvent()
 	_impl->nextEvent();
 }
 
-}
+} // namespace
 
-}
+} // namespace

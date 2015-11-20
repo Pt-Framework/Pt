@@ -37,12 +37,11 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   ChildWindow.cpp		
 					   WindowManager.cpp	  
 					   Screen.cpp 
-             Type.cpp
-             TypeManager.cpp
-
+                       WidgetType.cpp
+                       TypeManager.cpp
 					   ;
 
-LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx  ;
+LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx Pt-Reflex ;
 LinkLibs Pt-Hmi : $(GUILIBS) ;
 MakeLocate Pt-Hmi : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-Hmi : $(PT_INSTALL_LIBDIR) ;

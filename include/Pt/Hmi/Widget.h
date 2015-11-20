@@ -38,13 +38,11 @@
 #include <Pt/Hmi/Property.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Margin.h>
-#include <Pt/Hmi/Type.h>
 #include <Pt/Connectable.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Color.h>
-#include <Pt/Reflex/Type.h>
 #include <map>
 
 namespace Pt {

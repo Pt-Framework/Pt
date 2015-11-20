@@ -22,45 +22,38 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
   
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  You should have received a copy of the GNU Lesser General Public License
+  along with this library; if not, write to the Free Software Foundation, 
+  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+*/
 #ifndef PT_HMI_TYPEMANAGER_H
 #define PT_HMI_TYPEMANAGER_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Type.h>
-#include <map>
-#include <string>
+#include <Pt/Hmi/WidgetType.h>
+#include <Pt/Reflex/TypeManager.h>
 
-namespace Pt{
-namespace Hmi{
-  
-class PT_HMI_API TypeManager
+namespace Pt {
+
+namespace Hmi {
+
+class PT_HMI_API TypeManager : public Reflex::TypeManager
 {
-  public:
-    static void registerType( Type& t );
+    public:
+        TypeManager();
 
-    static Type* getType(const std::string& name);
+        ~TypeManager();
 
-  private:
-    static std::map<std::string, Type*> _types;    
+        virtual void* alloc(std::size_t bytes);
+
+        virtual void dealloc(void* p, std::size_t bytes);
+
+    private:
+        WidgetType _widgetType;
 };
 
+} // namespace
 
-template<typename T> 
-class RegisterType
-{
-  public:
-    RegisterType()
-    {
-      TypeManager::registerType( &_type );
-    }
-
-  private:
-    T _type;
-};
-
-}}
+} // namespace
 
 #endif

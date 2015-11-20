@@ -22,29 +22,39 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
   
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  You should have received a copy of the GNU Lesser General Public License
+  along with this library; if not, write to the Free Software Foundation, 
+  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+*/
 #include <Pt/Hmi/TypeManager.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
 
-std::map<std::string, Type*> TypeManager::_types;   
+namespace Hmi {
 
-void TypeManager::registerType( Type& t )
+TypeManager::TypeManager()
 {
-  _types[t.name()] = &t;
+    this->registerType(_widgetType);
+    _widgetType.define(*this);
 }
 
-Type* TypeManager::getType(const std::string& name)
-{
-  std::map<std::string, Type*>::iterator it = _types.find(name);
-  
-  if( it == _types.end() )
-      return 0;
 
-  return it->second;
+TypeManager::~TypeManager()
+{
 }
 
-}}
+
+void* TypeManager::alloc(std::size_t bytes)
+{
+	return ::operator new(bytes);
+}
+
+
+void TypeManager::dealloc(void* p, std::size_t bytes)
+{
+	return ::operator delete(p);
+}
+
+} // namespace
+
+} // namespace

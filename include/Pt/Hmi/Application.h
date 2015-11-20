@@ -36,38 +36,41 @@
 #include <Pt/Hmi/Screen.h>
 
 namespace Pt {
+
 namespace Hmi {
 
 class ApplicationImpl;
 
 class PT_HMI_API Application : public Pt::System::Application
 {
-public:
-  Application(int argc = 0, char** argv = 0);
+  public:
+    Application(int argc = 0, char** argv = 0);
 
-  virtual ~Application();
+    virtual ~Application();
 
-	static Application& instance();
+	  static Application& instance();
 	
-	void nextEvent();
+	  void nextEvent();
 
-	const Screen& mainScreen() const
-	{
-		return *_mainScreen;
-	}
+	  const Screen& mainScreen() const
+	  {
+		  return *_mainScreen;
+	  }
 
-	Screen& mainScreen()
-	{
-		return *_mainScreen;
-	}
+	  Screen& mainScreen()
+	  {
+		  return *_mainScreen;
+	  }
 
-  ApplicationImpl* impl();
+    ApplicationImpl* impl();
 
-private:   
-	ApplicationImpl* _impl; 
-	Screen*          _mainScreen;  
+  private:
+	  ApplicationImpl* _impl; 
+	  Screen* _mainScreen;  
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif

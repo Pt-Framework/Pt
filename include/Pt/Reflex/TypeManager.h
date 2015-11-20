@@ -296,12 +296,12 @@ class PT_REFLEX_API TypeManager
 
         virtual void* alloc(std::size_t bytes)
 				{
-					return new char[bytes];
+					return ::operator new(bytes);
 				}
 
         virtual void dealloc(void* p, std::size_t bytes)
 				{
-					delete[] p;
+					return ::operator delete(p);
 				}
 
         Type* getType(const std::type_info& ti);

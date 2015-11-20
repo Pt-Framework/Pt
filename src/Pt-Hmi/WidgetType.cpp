@@ -23,27 +23,33 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+*/
+
 #include <Pt/Hmi/WidgetType.h>
-#include <Pt/Hmi/TypeManager.h>
 #include <Pt/Hmi/Widget.h>
-#include <string>
 
 namespace Pt {
+
 namespace Hmi {
     
 WidgetType::WidgetType()
-: Type("Widget")
+: Reflex::Type(typeid(Widget), "Pt::Hmi::Widget")
 {
-  registerProperty("name", &Widget::name, &Widget::setName );  
 }
 
-Widget* WidgetType::create()
+
+std::size_t WidgetType::size() const
 {
-   return 0;
+    return sizeof(Widget);
 }
 
-static RegisterType<WidgetType> _widgetType;
 
-}}
+void WidgetType::define(Reflex::TypeManager& tm)
+{
+  registerProperty(tm, "name", &Widget::name, &Widget::setName );  
+}
 
+} // namespace
+
+} // namespace

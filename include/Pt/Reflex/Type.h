@@ -570,7 +570,7 @@ class PT_REFLEX_API Type
         void registerProperty( TypeManager& context, const char* name, T (*getter)(C&), void (*setter)(C&, T) );
 
         template <typename C, typename T>
-        void registerProperty( Type& type, const char* name, T (C::*getter)() const, void (C::*setter)(T) );
+        void registerProperty( TypeManager& context, const char* name, T (C::*getter)() const, void (C::*setter)(T) );
 
         bool registerConstructor(ConstructorInfo* mi);
 
@@ -587,12 +587,12 @@ class PT_REFLEX_API Type
     protected:
         virtual PropertyInfo* onProperty(const char* name);
 
-        Type(const Type&);
-
-        Type& operator=(const Type&);
-
         void setParent(TypeManager* tm)
         { _tm = tm; }
+
+    private:
+        Type(const Type&);
+        Type& operator=(const Type&);
 
     private:
         TypeManager* _tm;
@@ -605,8 +605,9 @@ class PT_REFLEX_API Type
         MethodTable _mtab;
 };
 
+
 template <typename T>
-class BasicType : public Type 
+class BasicType : public Reflex::Type 
 {
 	public:
 		BasicType(const std::string& name)
@@ -775,10 +776,10 @@ void Type::registerProperty( TypeManager& tm, const char* name,
 
 
 template <typename C, typename T>
-void Type::registerProperty( Type& type, const char* name, 
+void Type::registerProperty( TypeManager& tm, const char* name, 
                              T (C::*getter)() const, void (C::*setter)(T) )
 {
-    PropertyInfo* pi = new Property<C, T>(type, name, getter, setter);
+    PropertyInfo* pi = new Property<C, T>(tm, name, getter, setter);
     if ( ! Type::registerProperty(pi) )
     {
         delete pi;
