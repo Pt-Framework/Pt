@@ -264,8 +264,9 @@ bool Utf8Codec::do_always_noconv() const throw()
 }
 
 
-std::codecvt_base::result Utf8Codec::do_unshift(Pt::MBState&, char*, char*, char*&) const
+std::codecvt_base::result Utf8Codec::do_unshift(Pt::MBState&, char* to , char* toEnd, char*& toNext) const
 { 
+    toNext = to;
     return std::codecvt_base::noconv; 
 }
 

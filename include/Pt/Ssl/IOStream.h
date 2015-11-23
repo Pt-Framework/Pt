@@ -127,8 +127,8 @@ class IOStream : public BasicIOStream<char>
             Call isShutdown() to find out if a shutdown notify was received
             and isClosed() if the connection was prematurely closed.
         */
-        void import(std::streamsize maxImport = 0)
-        { _sb.import(maxImport); }
+        std::streamsize import(std::streamsize maxImport = 0)
+        { return _sb.import(maxImport); }
 
         /** @brief Returns the ssl buffer.
         */

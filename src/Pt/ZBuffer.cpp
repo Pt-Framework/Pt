@@ -148,10 +148,10 @@ void ZBuffer::finish()
 }
 
 
-void ZBuffer::import(std::streamsize maxImport)
+std::streamsize ZBuffer::import(std::streamsize maxImport)
 {
     if( ! _target || ! _target->rdbuf() )
-        return;
+        return 0;
 
     if( ! this->gptr() )
     {
@@ -165,6 +165,8 @@ void ZBuffer::import(std::streamsize maxImport)
         this->setg(_buf, _buf, _buf);
     }
 
+    std::streamsize n = 0;
+
     // special case: import all available input
     if(maxImport == 0)
         maxImport = _target->rdbuf()->in_avail();
@@ -175,7 +177,7 @@ void ZBuffer::import(std::streamsize maxImport)
 
     if(maxImport > 0)
     {
-        std::streamsize n = _target->rdbuf()->sgetn( _zbuf + _zbufsize,  maxImport );
+        n = _target->rdbuf()->sgetn( _zbuf + _zbufsize,  maxImport );
         if(n > 0)
             _zbufsize += static_cast<int>(n);
     }
@@ -223,6 +225,8 @@ void ZBuffer::import(std::streamsize maxImport)
                    this->gptr(),                // gptr position
                    this->egptr() + generated ); // end of read buffer
     }
+
+    return n;
 }
 
 

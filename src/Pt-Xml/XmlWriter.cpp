@@ -596,7 +596,7 @@ class XmlWriterImpl
         {
             if( _formatting )
             {
-                tos << std::endl;
+                tos.put( Pt::Char('\n') );
 
                 for(size_t n = 0; n < width; ++n)
                 {

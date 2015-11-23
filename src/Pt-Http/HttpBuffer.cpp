@@ -268,12 +268,14 @@ bool HttpBuffer::isEnd() const
 }
 
 
-void HttpBuffer::import(std::streamsize n)
+std::streamsize HttpBuffer::import(std::streamsize n)
 {
     PT_LOG_TRACE("HttpBuffer::import(" << n << ")");
 
+    std::streamsize r = 0;
+
     if( ! _sbuf)
-        return;
+        return 0;
 
     if(n == 0)
     {
@@ -309,6 +311,8 @@ void HttpBuffer::import(std::streamsize n)
         while(n-- && ! _chunkParser.end())
         {
             char ch = _sbuf->sbumpc();
+            ++r;
+
             _chunkParser.parse(ch);
             if( _chunkParser.hasChunk() )
             {
@@ -334,12 +338,12 @@ void HttpBuffer::import(std::streamsize n)
     if( this->isEnd() )
     {
         PT_LOG_TRACE("received all content -> EOF");
-        return;
+        return r;
     }
 
     PT_LOG_DEBUG("http buffer refill: " << n);
     if(n == 0)
-        return;
+        return r;
 
     n = _sbuf->sgetn(_buffer + MaxPutback + leftover, n);
 
@@ -349,6 +353,8 @@ void HttpBuffer::import(std::streamsize n)
 
     _contentLength -= static_cast<std::size_t>(n);
     PT_LOG_DEBUG("remaining content length: " << _contentLength);
+
+    return r + n;
 }
 
 

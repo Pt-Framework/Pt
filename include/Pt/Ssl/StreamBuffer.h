@@ -112,8 +112,9 @@ class PT_SSL_API StreamBuffer : public BasicStreamBuffer<char>
         /** @brief Reads user message from the underlying stream.
             
             Call isShutdown() to find out if a shutdown notify was received.
+            Returns the number of bytes consumed from the underlyig stream.
         */
-        void import(std::streamsize maxImport = 0);
+        std::streamsize import(std::streamsize maxImport = 0);
 
     protected:
         // inheritdoc

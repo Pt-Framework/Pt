@@ -80,8 +80,10 @@ class PT_API ZBuffer : public BasicStreamBuffer<char>
         void finish();
 
         /** @brief Import data from the target stream.
+
+            Returns the number of bytes consumed from the underlyig stream.
         */
-        void import(std::streamsize maxImport = 0);
+        std::streamsize import(std::streamsize maxImport = 0);
 
     protected:
         // inheritdoc

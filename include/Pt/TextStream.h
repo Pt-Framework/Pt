@@ -164,13 +164,6 @@ class BasicTextIStream : public BasicIStream<CharT>
             _tbuffer.reset(is);
         }
 
-        /** @brief Terminate the character sequence.
-        */
-        void terminate()
-        {
-            _tbuffer.terminate();
-        }
-
         /** @brief Returns the stream buffer.
         */
         BasicTextBuffer<intern_type, extern_type>& textBuffer()
@@ -310,13 +303,6 @@ class BasicTextOStream : public BasicOStream<CharT>
             _tbuffer.reset(os);
         }
 
-        /** @brief Terminate the character sequence.
-        */
-        void terminate()
-        {
-            _tbuffer.terminate();
-        }
-
         /** @brief Returns the stream buffer.
         */
         BasicTextBuffer<intern_type, extern_type>& textBuffer()
@@ -454,13 +440,6 @@ class BasicTextStream : public BasicIOStream<CharT>
         void reset(StreamType& ios)
         {
             _tbuffer.reset(ios);
-        }
-
-        /** @brief Terminate the character sequence.
-        */
-        void terminate()
-        {
-            _tbuffer.terminate();
         }
 
         /** @brief Returns the stream buffer.

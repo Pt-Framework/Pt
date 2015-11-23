@@ -196,13 +196,14 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
         }
 
         /** @brief Import data from the external device.
+
+            Returns the number of bytes consumed from the underlying stream.
         */
-        void import(std::streamsize size = 0)
+        std::streamsize import(std::streamsize size = 0)
         {
             if( this->pptr() )
             {
-                if( -1 == this->terminate() )
-                    return;
+                discard();
             }
 
             if( ! this->gptr() )
@@ -210,6 +211,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
                 this->setg(_ibuf, _ibuf, _ibuf);
             }
 
+            std::streamsize n = 0;
             std::basic_streambuf<extern_type>* rdbuf = _target ? _target->rdbuf()
                                                                : 0;
             
@@ -223,7 +225,7 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
 
             if(size > 0 && rdbuf)
             {
-                std::streamsize n = rdbuf->sgetn( _ebuf + _ebufsize,  size );
+                n = rdbuf->sgetn( _ebuf + _ebufsize,  size );
                 _ebufsize += static_cast<int>(n);
                 if(n <= 0)
                 {
@@ -247,16 +249,19 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             // rdbuf == 0 means "at end of input"
             if( rdbuf == 0 && _ebufsize == 0 && r == CodecType::partial)
                 throw ConversionError("character encoding");
+
+            return n;
         }
 
         /** @brief Import data from a buffer.
+
+            Returns the number of bytes consumed from the input string.
         */
         std::streamsize import(const extern_type* buf, std::streamsize size)
         {
             if( this->pptr() )
             {
-                if( -1 == this->terminate() )
-                    return 0;
+                discard();
             }
 
             if( ! this->gptr() )
@@ -286,60 +291,43 @@ class BasicTextBuffer : public BasicStreamBuffer<CharT>
             return size;
         }
 
-        /** @brief Terminate the character sequence.
-        */
-        int terminate()
-        {
-            if( this->pptr() )
-            {
-                if( -1 == this->sync() )
-                    return -1;
-
-                if( _target && _target->rdbuf() && _codec && ! _codec->always_noconv() )
-                {
-                    typename CodecType::result res = CodecType::error;
-                    do
-                    {
-                        extern_type* next = 0;
-                        res = _codec->unshift(_state, _ebuf, _ebuf + _ebufmax, next);
-                        _ebufsize = static_cast<int>(next - _ebuf);
-
-                        if(res == CodecType::error)
-                        {
-                            throw ConversionError("character encoding");
-                        }
-                        else if(res == CodecType::ok || res == CodecType::partial)
-                        {
-                            if(_ebufsize > 0)
-                            {
-                                _ebufsize -= static_cast<int>(_target->rdbuf()->sputn(_ebuf, _ebufsize));
-                                if(_ebufsize)
-                                    return -1;
-                            }
-                        }
-                    }
-                    while(res == CodecType::partial);
-                }
-            }
-
-            discard();
-            
-            return 0;
-        }
-
     protected:
         // inheritdoc
         virtual int sync()
         {
-            if( this->pptr() )
+            if( ! this->pptr() )
+                return 0;
+
+            // write the whole buffer to the underlying stream.
+            while( this->pptr() > this->pbase() )
             {
-                // Try to write out the whole buffer to the underlying stream.
-                while( this->pptr() > this->pbase() )
+                if( this->overflow( traits_type::eof() ) == traits_type::eof() )
+                    return -1;
+            }
+
+            // unshift the character sequence
+            if( _target && _target->rdbuf() && _codec )
+            {
+                typename CodecType::result res = CodecType::error;
+
+                do
                 {
-                    if( this->overflow( traits_type::eof() ) == traits_type::eof() )
+                    extern_type* next = 0;
+                    res = _codec->unshift(_state, _ebuf, _ebuf + _ebufmax, next);
+                    if(res == CodecType::noconv)
+                        break;
+
+                    if(res == CodecType::error)
+                        throw ConversionError("character encoding");
+
+                    std::streamsize n = static_cast<std::streamsize>(next - _ebuf);
+                    if( n != _target->rdbuf()->sputn(_ebuf, n) )
                         return -1;
                 }
+                while(res == CodecType::partial);
             }
+
+            discard();
 
             return 0;
         }

@@ -45,7 +45,7 @@ void BasicAuthentication::preAuthenticate(const Credential& credential, Request&
                
     BasicTextOStream<char, char> b64(oss, new Base64Codec());
     b64 << credential.user() << ':' << credential.password();
-    b64.terminate();
+    b64.flush();
 
     //PT_LOG_DEBUG("set Authorization to " << oss.str());
     request.header().set("Authorization", oss.str().c_str());
@@ -80,7 +80,7 @@ bool BasicAuthentication::authenticate(const Credentials& credentials, Request& 
                
     BasicTextOStream<char, char> b64(oss, new Base64Codec());
     b64 << it->second.user() << ':' << it->second.password();
-    b64.terminate();
+    b64.flush();
 
     //PT_LOG_DEBUG("set Authorization to " << oss.str());
     request.header().set("Authorization", oss.str().c_str());

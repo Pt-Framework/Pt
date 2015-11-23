@@ -181,12 +181,12 @@ bool StreamBuffer::isClosed() const
 }
 
 
-void StreamBuffer::import(std::streamsize maxImport)
+std::streamsize StreamBuffer::import(std::streamsize maxImport)
 {
     PT_LOG_TRACE("StreamBuffer::import");
 
     if( ! _connection )
-        return;
+        return 0;
 
     if( ! _ibuffer ) 
     {
@@ -200,7 +200,7 @@ void StreamBuffer::import(std::streamsize maxImport)
     if( leftover == _ibufferSize - _pbmax)
     {
         PT_LOG_DEBUG("get area is full");
-        return;
+        return 0;
     }
 
     // move unread bytes and putback to front
@@ -236,7 +236,7 @@ void StreamBuffer::import(std::streamsize maxImport)
                     _ibuffer + used + readSize );  // end of get area
     }
 
-    return;
+    return readSize;
 }
 
 

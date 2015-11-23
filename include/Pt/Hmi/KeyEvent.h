@@ -124,7 +124,7 @@ public:
 		std::stringstream ss;		
 		Pt::TextStream stream(ss, new Pt::Utf8Codec());
 		stream<<unicodeChar;
-		stream.terminate();
+		stream.flush();
 		return ss.str();
 	}
 

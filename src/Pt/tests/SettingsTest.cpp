@@ -149,7 +149,6 @@ void SettingsTest::Writer()
     std::ostringstream ss;
     Pt::TextOStream ts(ss, new Pt::Utf8Codec);
     settings.save(ts);
-    ts.terminate();
     ts.flush();
 
     std::clog << "\n\n"

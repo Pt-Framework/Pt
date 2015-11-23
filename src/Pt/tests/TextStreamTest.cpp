@@ -184,7 +184,7 @@ void TextStreamTest::Base64Out()
     std::stringstream ss3;
     Pt::BasicTextStream<char, char> ts3(ss3, new Pt::Base64Codec);
     ts3 << "abcdefgh";
-    ts3.terminate();
+    ts3.flush();
     PT_UNIT_ASSERT( ss3.str() == "YWJjZGVmZ2g=" );
 }
 

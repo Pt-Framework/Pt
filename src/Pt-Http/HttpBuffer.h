@@ -108,7 +108,11 @@ class HttpBuffer : public std::streambuf
 
         void beginBody(const MessageHeader& reply);
 
-        void import(std::streamsize n = 0);
+        /** @brief Import data from the target stream.
+
+            Returns the number of bytes consumed from the underlyig stream.
+        */
+        std::streamsize import(std::streamsize n = 0);
 
         bool isEnd() const;
 
