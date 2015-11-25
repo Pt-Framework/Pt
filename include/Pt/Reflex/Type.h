@@ -415,7 +415,7 @@ class PT_REFLEX_API Type
         virtual ~Type();
 
         virtual void define(TypeManager& context)
-				{}
+        {}
 
         const std::type_info* id() const
         { return _id; }
@@ -441,7 +441,7 @@ class PT_REFLEX_API Type
 
                 t = t->base();
             }
-;
+
             return false;
         }
 
@@ -477,14 +477,6 @@ class PT_REFLEX_API Type
 
             return false;
         }
-
-				template <typename T>
-				void setProperty(const char* name, const T& value)
-				{
-					Pt::Reflex::PropertyInfo* p = wt.property(name);
-					if(p)
-						p->set(this, value);
-				}
 
         virtual std::size_t size() const = 0;
 
@@ -542,7 +534,7 @@ class PT_REFLEX_API Type
         void registerMethod(const char* name, Pt::Any (*proxy)(T&, Pt::Reflex::Argument&, Pt::Reflex::Argument&),
                             Pt::Reflex::Type& rtype, Pt::Reflex::Type& t1, Pt::Reflex::Type& t2);
 
-                            template <typename R, typename T>
+        template <typename R, typename T>
         void registerMethod( TypeManager& context, const char* name, R (*method)(T&) );
 
         template <typename R, typename T, typename A1>
@@ -607,16 +599,16 @@ class PT_REFLEX_API Type
 
 
 template <typename T>
-class BasicType : public Reflex::Type 
+class BasicType : public Reflex::Type
 {
-	public:
-		BasicType(const std::string& name)
-		: Type(typeid(T), name)
-		{
-		}
+    public:
+        BasicType(const std::string& name)
+        : Type(typeid(T), name)
+        {
+        }
 
-		std::size_t size() const 
-		{ return sizeof(T); }
+        std::size_t size() const 
+        { return sizeof(T); }
 };
 
 }
