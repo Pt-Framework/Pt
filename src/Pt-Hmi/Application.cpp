@@ -75,15 +75,30 @@ void Application::sendEvent(Widget& w, const Pt::Event& ev)
 }
 
 
-Widget* Application::findWidget( const std::string& name )
+Widget* Application::findWidget(const std::string& name)
 {
+	std::vector<Window*>::iterator it;
+	for(it = _windows.begin(); it != _windows.end(); ++it)
+	{
+		Widget* w = (*it)->findWidget(name);
+		if(w)
+			return w;
+	}
 	return 0;
 }
 
 
-ApplicationImpl* Application::impl()
+void Application::registerWindow(Window& w)
 {
-	return _impl;
+	_windows.push_back(&w);
+}
+
+
+void Application::unregisterWindow(Window& w)
+{
+	std::vector<Window*>::iterator it = std::find(_windows.begin(), _windows.end(), &w);
+	if( it != _windows.end() )
+		_windows.erase(it);
 }
 
 } // namespace

@@ -61,11 +61,15 @@ MainWindow::MainWindow(MainWindow* parent)
 	_impl->setMinSize(minimumSize());
 	_impl->setMaxSize(maximumSize());
 	setClosed(false);
+
+	Hmi::Application::instance().registerWindow(*this);
 }
 
 
 MainWindow::~MainWindow()
 {
+	Hmi::Application::instance().unregisterWindow(*this);
+
 	//TODO: remove from window manager
 	_windowManager.clear();
 
