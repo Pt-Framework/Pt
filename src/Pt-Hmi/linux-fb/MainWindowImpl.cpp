@@ -43,15 +43,14 @@
 #include <string.h>
 #include <errno.h>
 
-
 namespace Pt {
+
 namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(MainWindow* window)
 : _app(Application::instance() )
 , _apiWindow(window)
 { 	
-  eventReceived() += Pt::slot( *this, &MainWindowImpl::onWindowEvent );
 }
 
 
@@ -60,7 +59,7 @@ MainWindowImpl::~MainWindowImpl()
 }
 
 
-void MainWindowImpl::onWindowEvent(const Pt::Event& ev)
+void MainWindowImpl::onEvent(const Pt::Event& ev)
 {
 	_app.sendEvent(*_apiWindow, ev);
 }

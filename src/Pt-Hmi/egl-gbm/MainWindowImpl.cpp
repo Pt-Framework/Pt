@@ -43,24 +43,28 @@
 #include <string.h>
 #include <errno.h>
 
-
 namespace Pt {
+
 namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(MainWindow* window)
 : _app(Application::instance() )
 , _apiWindow(window)
 { 	
-	eventReceived() += Pt::slot( *_apiWindow, &MainWindow::processEvent );
 }
 
 
 MainWindowImpl::~MainWindowImpl()
 {
-
 }
 
 	
+void MainWindowImpl::onEvent(const Pt::Event& ev)
+{
+	_app.sendEvent(*_apiWindow, ev);
+}
+
+
 void MainWindowImpl::onInvalidate()
 {		
 	_app.mainScreen().impl()->invalidate();
@@ -120,7 +124,7 @@ void MainWindowImpl::setWindowPos(const Gfx::PointF& p)
 
 void MainWindowImpl::setWindowSize( const Gfx::SizeF& size )
 {
-	 if( size()  == size )
+	 if( Window::size()  == size )
 			return;
 
 	Window::setSize( size );

@@ -96,8 +96,11 @@ class MainWindowImpl  : public ChildWindow
 		void focus();
 
 	protected:
+		virtual void onEvent(const Pt::Event& ev);
+		
 		virtual void onInvalidate();
-	  virtual void onRender(PaintSurface& paintSurface);
+	  
+		virtual void onRender(PaintSurface& paintSurface);
 
 	private:
     Pt::Hmi::Application& _app;
