@@ -52,7 +52,7 @@ Button::Button()
   setContentAlignment(MidleCenter);
   setAcceptFocus(true);
   setPanelBorderRoundEdge(true);
-  setPanelBorderStyle(BorderStyle::Single);
+  setPanelBorderStyle(Panel::Single);
 	
 	_doublePressTimer.timeout() += Pt::slot(*this, &Button::onDoublePressedTimeout);
 	_doublePressTimer.setActive(Pt::Hmi::Application::instance().loop());	

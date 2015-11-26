@@ -27,11 +27,16 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/ChildWindow.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+
+namespace Hmi {
 
 Window::Window(Window* parent)
-: _minimumSize(0,0)
+: _winParent(parent)
+, _apointedWidget( 0 )
+, _focusedWidget( 0)
+, _windowManager(*this)
+, _minimumSize(0,0)
 , _maximumSize( 2000,2000)
 , _startPostion( WindowStartPosition::Manual )
 , _state(WindowState::Normal )
@@ -45,107 +50,117 @@ Window::Window(Window* parent)
 , _canClose( true)
 , _firstShow(true)
 , _focuseMoveKey("")
-, _winParent(parent)
-, _windowManager(*this)
 , _isClosed(true)
 , _isActive(false)
-, _apointedWidget( 0 )
-, _focusedWidget( 0)
 {
-	setAcceptFocus(false);	
+    setAcceptFocus(false);    
 
-	eventReady() += Pt::slot(*this, &Window::onMoveEvent);
-	eventReady() += Pt::slot(*this, &Window::onResizeEvent);
-	eventReady() += Pt::slot(*this, &Window::onActivateEvent);
-	eventReady() += Pt::slot(*this, &Window::onCloseEvent);
+    eventReady() += Pt::slot(*this, &Window::onMoveEvent);
+    eventReady() += Pt::slot(*this, &Window::onResizeEvent);
+    eventReady() += Pt::slot(*this, &Window::onActivateEvent);
+    eventReady() += Pt::slot(*this, &Window::onCloseEvent);
 }
 
 
 Window::~Window()
 {
-	_windowManager.clear();
-
+    _windowManager.clear();
 }
-	
+    
 
 const std::vector<ChildWindow*> Window::windows() const
 {
-	return _windowManager.windows();
+    return _windowManager.windows();
 }
 
 
 void Window::addWindow(ChildWindow& w)
 {
-	w._winParent = this;
-	w.setVisible( true);
-	_windowManager.add(&w);		
+    w._winParent = this;
+    w.setVisible( true);
+    _windowManager.add(&w);        
 }
 
 
 void Window::removeWindow(ChildWindow& w)
 {
-	_windowManager.remove(&w);
-	w.setVisible( false);
-	w._winParent = 0;
+    _windowManager.remove(&w);
+    w.setVisible( false);
+    w._winParent = 0;
 }
 
 
+Window* Window::getWindow()
+{
+    return this;
+}
+
 Window* Window::windowParent() const
 {
-	return _winParent;
+    return _winParent;
+}
+
+
+void Window::onWidgetRemoved( Widget& w  )
+{
+    if( _apointedWidget == &w )
+        _apointedWidget = 0;
+
+    if( _focusedWidget == &w )
+        _focusedWidget = 0;        
 }
 
 
 void Window::activate()
 {
-	onActivate();
+    onActivate();
 }
 
 
 void Window::setPointedWidget( Widget* widget ) 
 {
-	if( _apointedWidget == widget )
-		return;
+    if( _apointedWidget == widget )
+        return;
 
-	if( _apointedWidget )			
-		_apointedWidget->onPointerLeave();
+    if( _apointedWidget )            
+        _apointedWidget->onPointerLeave();
 
-	_apointedWidget = widget;
+    _apointedWidget = widget;
 
-	if( _apointedWidget )
-		_apointedWidget->onPointerEnter();
+    if( _apointedWidget )
+        _apointedWidget->onPointerEnter();
 }
 
 
 void Window::setFocusedWidget( Widget* widget ) 
 {
-	if( _focusedWidget == widget )
-		return;
+    if( _focusedWidget == widget )
+        return;
 
-	if( _focusedWidget )			
-		_focusedWidget->setFocus(false);
+    if( _focusedWidget )            
+        _focusedWidget->setFocus(false);
 
-	_focusedWidget = widget;
+    _focusedWidget = widget;
 
-	if( _focusedWidget )
-		_focusedWidget->setFocus(true);
+    if( _focusedWidget )
+        _focusedWidget->setFocus(true);
 }
 
 
 void Window::onPointerEvent(const PointerEvent& ev)
-{	
+{    
   if( _windowManager.pointerInput( ev ) )
-	{
-			this->setPointedWidget( 0 );	
+    {
+            this->setPointedWidget( 0 );    
       return;
-	}
+    }
 
-	Widget* widget = findWidget( Gfx::PointF( ev.x(), ev.y() ) );
+    Widget* widget = findWidget( Gfx::PointF( ev.x(), ev.y() ) );
 
-	this->setPointedWidget( widget );	
+    this->setPointedWidget( widget );    
 
-	if( widget && widget != this )
-		widget->processEvent(ev);		
+    if( widget && widget != this )
+        widget->processEvent(ev);        
 }
 
 void Window::onKeyEvent(const KeyEvent& ev)
@@ -153,146 +168,140 @@ void Window::onKeyEvent(const KeyEvent& ev)
   if( _windowManager.keyInput( ev ) )
       return;
 
-	if( ! isEnabled() )
-		return;
-	
-	if( ev.toUTF8String() == _focuseMoveKey && ev.state() == Pt::Hmi::KeyEvent::KeyUp )
-	{	
-		if(  ev.shift() )
-		{	
-				if(!focusPrev() )
-					focusPrev();
-		}
-		else
-		{
-				if( !focusNext() )
-					focusNext();
-		}		
+    if( ! isEnabled() )
+        return;
+    
+    if( ev.toUTF8String() == _focuseMoveKey && ev.state() == Pt::Hmi::KeyEvent::KeyUp )
+    {    
+        if(  ev.shift() )
+        {    
+                if(!focusPrev() )
+                    focusPrev();
+        }
+        else
+        {
+                if( !focusNext() )
+                    focusNext();
+        }        
 
-		invalidate();
-	}
+        invalidate();
+    }
 
   Widget::onKeyEvent(ev);
 }
 
 
 void Window::onResizeEvent(const ResizeEvent& ev)
-{	
-	Window::setSize( ev.size() );
-	_state = ev.state();
-	invalidate();
+{    
+    Window::setSize( ev.size() );
+    _state = ev.state();
+    invalidate();
 }
 
 
 void Window::onMoveEvent( const MoveEvent& ev)
 {
-	Widget::setPosition( ev.position() );	
-	invalidate();
+    Widget::setPosition( ev.position() );    
+    invalidate();
 }
 
 void Window::onShowTitle( bool s )
 {
-	_showTitle = s;
+    _showTitle = s;
 }
 
 
 void Window::onShowMinimizeButton( bool s )
 {
-	_showMinimizeButton = s;
+    _showMinimizeButton = s;
 }
 
 
 void Window::onShowMaximizeButton( bool s )
 {
-	_showMaximizeButton = s;
+    _showMaximizeButton = s;
 }
 
 
 void Window::onShowSystemMenu( bool  s )
 {
-	_showSysMenu = s;
+    _showSysMenu = s;
 }
 
 
 void Window::onState(const Hmi::WindowState::Type& s)
 {
-	_state = s;
+    _state = s;
 }
 
 
 void Window::onBorder(const Hmi::WindowBorder::Type& t)
 {
-	_border = t;
+    _border = t;
 }
 
 void Window::onShowInTaskbar(bool s)
 {
-	_showInTaskbar = s;
+    _showInTaskbar = s;
 }
 
 
 void Window::onIcon(const Gfx::Image& i)
 {
-	_icon = i;
+    _icon = i;
 }
 
 
 void Window::onSetMinimumSize( const Gfx::SizeF& s )
 {
-	_minimumSize = s;
+    _minimumSize = s;
 }
 
 
 void Window::onSetMaximumSize(const Gfx::SizeF& s)
 {
-	_maximumSize = s;
+    _maximumSize = s;
 }
 
 
 void Window::onActivateEvent(const ActivateEvent& ev)
 { 
-	_isActive = ev.isActive();
+    _isActive = ev.isActive();
 
-	if( ! _isActive )
-	{
-		_windowManager.deactivate();
-		return;
-	}
-	  
-	invalidate();
+    if( ! _isActive )
+    {
+        _windowManager.deactivate();
+        return;
+    }
+      
+    invalidate();
 }
 
 
 void Window::close()
 {
-	onClose();	
+    onClose();    
 }
 
 
 void Window::onCloseEvent(const CloseEvent& ev)
 {
-	_isClosed =  true;
+    _isClosed =  true;
 }
 
 
 void Window::onClose()
 {
-	setVisible( false );
-}		
+    setVisible( false );
+}        
 
 void Window::onRender( PaintSurface& surface )
 {
-	Widget::onRender( surface );
-	_windowManager.render();
+    Widget::onRender( surface );
+    _windowManager.render();
 }
 
-void Window::onWidgetRemoved( Widget& w  )
-{
-	if( _apointedWidget == &w )
-		_apointedWidget = 0;
+} // namespace
 
-	if( _focusedWidget == &w )
-		_focusedWidget = 0;		
-}
+} // namespace
 
-}}

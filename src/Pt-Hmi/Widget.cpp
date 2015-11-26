@@ -23,18 +23,23 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
+*/
+
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Brush.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
 
+namespace Hmi {
 
 Widget::Widget()
-: _enabled( true)
+: _window(0)
+, _parent(0)
+, _enabled( true)
 , _visible( false)
 , _backgroundColor(Gfx::Color::fromRgb8(237,237,237))
 , _foregroundColor( Gfx::Color::fromRgb8(0,0,0) )
@@ -48,92 +53,123 @@ Widget::Widget()
 , _hasFocus( false)
 , _size( 100, 100)
 , _position( 10,10) 
-, _parent(0)
 , _isValid(false)
-{	
-
-	eventReady() += Pt::slot(*this, &Widget::onKeyEvent);
-	eventReady() += Pt::slot(*this, &Widget::onPointerEvent);			
+{    
+    eventReady() += Pt::slot(*this, &Widget::onKeyEvent);
+    eventReady() += Pt::slot(*this, &Widget::onPointerEvent);            
 }
 
 
 Widget::~Widget()
 {
+    // remove this widget from its parent
+    if(_parent)
+    {
+        std::vector<Widget*>& widgets = _parent->_children;
+        std::vector<Widget*>::iterator it;
+        it = std::remove(widgets.begin(), widgets.end(), this);
+        widgets.erase(it, widgets.end());
+    }
+
+    // remove this widget from its children
+    std::vector<Widget*>::iterator it;
+    for(it = _children.begin(); it != _children.end(); ++it)
+    {
+        Widget* child = *it;
+        
+        child->_parent = 0;
+        child->setWindow(0);
+        child->setVisible(false);
+    }
 }
 
 
 void Widget::addWidget(Widget& child)
 {
-	_children.push_back(&child);
-	child._parent = this;	
-	child.setWindow( this->getWindow() );
-	child._isValid = false;
-	child.setVisible( true);  
+    if(child._parent = this)
+        return;
 
-  invalidate();
+    // remove from previous parent
+    if(child._parent)
+    {
+        child._parent->removeWidget(child);
+    }
+
+    _children.push_back(&child);
+    child._parent = this;    
+    child.setWindow( this->getWindow() );
+    child._isValid = false;
+    child.setVisible(true);  
+
+    invalidate();
 }
-
 
 
 void Widget::removeWidget(Widget& child)
 {
-	for(size_t i = 0; i < _children.size(); ++i)
-	{
-		if(_children[i] != &child)
-			continue;
-		
-		_children.erase(_children.begin() + i);
-		child.setVisible( false);
-		child._parent = 0;
+    for(size_t i = 0; i < _children.size(); ++i)
+    {
+        if(_children[i] != &child)
+            continue;
+        
+        _children.erase(_children.begin() + i);
+        child.setVisible(false);
+        child._parent = 0;
 
-		if( child._window != 0 )
-		{
-				child._window->onWidgetRemoved( child );
-				child.setWindow( 0 );
-		}
-		return;
-	}			
+        if( child._window != 0 )
+        {
+            child._window->onWidgetRemoved( child );
+            child.setWindow( 0 );
+        }
+        
+        return;
+    }            
 
-  invalidate();
-}	
+    invalidate();
+}    
+
+
+Window* Widget::getWindow()
+{
+    return _window;
+}
 
 
 void Widget::setWindow(Window* w)
 {
-	if( _window == w )
-		return;
+    if( _window == w )
+        return;
 
-	_window = w;
-	
-	for( size_t i = 0; i < _children.size(); ++i )
-		_children[i]->setWindow(w);
-	
+    _window = w;
+    
+    for( size_t i = 0; i < _children.size(); ++i )
+        _children[i]->setWindow(w);
 }
 
 
 Widget* Widget::findWidget( const Gfx::PointF& pos )
 {
-	std::vector<Widget*>::reverse_iterator it = _children.rbegin();
+    std::vector<Widget*>::reverse_iterator it = _children.rbegin();
 
-	if( !visible() )
-			return 0;
+    if( !visible() )
+            return 0;
 
-	for( ; it != _children.rend(); ++it )
-	{
-		Widget* child = *it;
+    for( ; it != _children.rend(); ++it )
+    {
+        Widget* child = *it;
 
-		Gfx::PointF localPos = child->toClient( pos );		
-		
-		if( child->contains( localPos ) )
-		{
-			Widget* found = child->findWidget( pos );
+        Gfx::PointF localPos = child->toClient( pos );        
+        
+        if( child->contains( localPos ) )
+        {
+            Widget* found = child->findWidget( pos );
 
-			if( found )
-				return found;
-		}
-	}
-		
-	return contains( toClient( pos ) )  ? this : 0;
+            if( found )
+                return found;
+        }
+    }
+        
+    return contains( toClient( pos ) )  ? this : 0;
 }
 
 
@@ -145,46 +181,46 @@ Widget* Widget::findWidget( const std::string& name )
 
   std::vector<Widget*>::iterator it = _children.begin();
 
-	for( ; it != _children.end(); ++it )
-	{
-		Widget* child = *it;
+    for( ; it != _children.end(); ++it )
+    {
+        Widget* child = *it;
 
-		Widget* found = child->findWidget( name );
+        Widget* found = child->findWidget( name );
 
-		if( found )
-			return found;		
-	}
-		
-	return  0;
+        if( found )
+            return found;        
+    }
+        
+    return  0;
 }
 
 
 Gfx::PointF Widget::toClient( const Gfx::PointF& globalPoint )
 {
-	if( _parent == 0 )
-		return globalPoint;
+    if( _parent == 0 )
+        return globalPoint;
 
-	Gfx::PointF parPoint = _parent->toClient( globalPoint );
-	return Gfx::PointF( parPoint.x() - position().x(), parPoint.y() - position().y() );
+    Gfx::PointF parPoint = _parent->toClient( globalPoint );
+    return Gfx::PointF( parPoint.x() - position().x(), parPoint.y() - position().y() );
 }
 
  
 Gfx::PointF Widget::fromClient( const Gfx::PointF& localPoint )
 {
-	double x = localPoint.x();
-	double y = localPoint.y();
-	const Widget* widget = parent();
-	
+    double x = localPoint.x();
+    double y = localPoint.y();
+    const Widget* widget = parent();
+    
 
-	while( widget != 0  &&  widget->parent() != 0 )
-	{						
-		x += widget->position().x();
-		y += widget->position().y();	
+    while( widget != 0  &&  widget->parent() != 0 )
+    {                        
+        x += widget->position().x();
+        y += widget->position().y();    
 
-    	widget = widget->parent();
-	}	
+        widget = widget->parent();
+    }    
 
-	return Gfx::PointF(x,y);
+    return Gfx::PointF(x,y);
 }
 
 
@@ -192,15 +228,15 @@ Gfx::PointF Widget::fromClient( const Gfx::PointF& localPoint )
 //void Widget::updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p)
 //{       
 //  w.setPosition(p);
-//  w.setSize(s);      	
+//  w.setSize(s);          
 //  _isValid = false;
 //}
 
 
 void Widget::invalidate()
-{  	  
+{        
   _isValid = false;
-	onInvalidate();
+    onInvalidate();
 }
 
 
@@ -214,10 +250,10 @@ void Widget::onLayout( PaintSurface& surface )
   double posBottom = clientSize.height();
   std::vector<Widget*> fillLayoutChildren;
 
-	for( size_t i = 0; i < children().size(); ++i )
-	{
-		Widget*	child = _children[i];			
-		    
+    for( size_t i = 0; i < children().size(); ++i )
+    {
+        Widget*    child = _children[i];            
+            
    Gfx::PointF point = child->position();
 
     if( flowLayout() == Hmi::FlowLayout::None )
@@ -227,18 +263,18 @@ void Widget::onLayout( PaintSurface& surface )
         case Docking::None:        
         {
           point.setX( point.x() );
-          point.setY( point.y() );		    
+          point.setY( point.y() );            
         }
         break;
 
         case Docking::Left:
         {
           point.setX( posLeft );
-          point.setY( posTop );		    
+          point.setY( posTop );            
          Gfx::SizeF size( child->size().width(), (posBottom - posTop));
 
-					posLeft += child->size().width();      
-					        
+                    posLeft += child->size().width();      
+                            
           updatePosAndSize( *child, size, point );           
         }
         break;
@@ -246,10 +282,10 @@ void Widget::onLayout( PaintSurface& surface )
         case Docking::Top:
         {
           point.setX( posLeft );
-          point.setY( posTop  );		    
-					Gfx::SizeF size( (posRight - posLeft), child->size().height());
+          point.setY( posTop  );            
+                    Gfx::SizeF size( (posRight - posLeft), child->size().height());
 
-				  posTop += child->size().height();      
+                  posTop += child->size().height();      
         
           updatePosAndSize(*child, size, point );
         }
@@ -259,9 +295,9 @@ void Widget::onLayout( PaintSurface& surface )
         {
           posRight -= child->size().width();     
           point.setX( posRight );
-          point.setY( posTop );		                     
-					
-					Gfx::SizeF size( child->size().width(), (posBottom - posTop) );
+          point.setY( posTop );                             
+                    
+                    Gfx::SizeF size( child->size().width(), (posBottom - posTop) );
         
           updatePosAndSize(*child, size, point );
         }
@@ -271,8 +307,8 @@ void Widget::onLayout( PaintSurface& surface )
         {
           posBottom -= child->size().height();    
           point.setX( posLeft );
-          point.setY( posBottom  );		                      
-					Gfx::SizeF size( (posRight - posLeft), child->size().height() );
+          point.setY( posBottom  );                              
+                    Gfx::SizeF size( (posRight - posLeft), child->size().height() );
           updatePosAndSize(*child, size, point);
         }
         break;
@@ -301,7 +337,7 @@ void Widget::onLayout( PaintSurface& surface )
             point.setX( posRight );              
           }
 
-          point.setY( 0 );	
+          point.setY( 0 );    
           updatePosAndSize( *child,Gfx::SizeF( child->size().width(), clientSize.height() ), point );
         }
         break;
@@ -313,20 +349,20 @@ void Widget::onLayout( PaintSurface& surface )
           if( flowDirection() == FlowLayoutDirection::LeftToRightTopToBottom )
           {
             point.setY( posTop );
-            posTop += child->size().height();	
+            posTop += child->size().height();    
           }
           else
           {
             posBottom -= child->size().height(); 
-            point.setY( posBottom  );	
+            point.setY( posBottom  );    
           }
 
           updatePosAndSize( *child,Gfx::SizeF( clientSize.width(), child->size().height() ), point );
         }
         break;
       }
-    }		        
-	}	
+    }                
+    }    
 
   if( fillLayoutChildren.size() != 0 )
   {
@@ -342,114 +378,114 @@ void Widget::onLayout( PaintSurface& surface )
 
 
 void Widget::render()
-{	
-	if( !visible())
-		return;
+{    
+    if( !visible())
+        return;
 
-	//Layout children
-	onLayout( surface() );	
+    //Layout children
+    onLayout( surface() );    
 
-	//Render       
-	if( !_isValid )
-	{
-   	surface().clear();
-	  onRender( surface() );		  
-	}
+    //Render       
+    if( !_isValid )
+    {
+       surface().clear();
+      onRender( surface() );          
+    }
 
-	//Render children
-	for( size_t i = 0; i < _children.size(); ++i )
-	{
-		Widget* child = _children[i];	
-		
-    	_children[i]->render();   
+    //Render children
+    for( size_t i = 0; i < _children.size(); ++i )
+    {
+        Widget* child = _children[i];    
+        
+        _children[i]->render();   
 
-	   surface().painter().drawSurface( child->position(), _children[i]->surface() );
-	}
-		
-	_isValid = true;
+       surface().painter().drawSurface( child->position(), _children[i]->surface() );
+    }
+        
+    _isValid = true;
 }
 
 
 void Widget::onRender( PaintSurface& surface )
-{		
+{        
   const Gfx::SizeF& size = this->size();
 
-	if( size.width() < 0 || size.height() < 0)
-		return; 
+    if( size.width() < 0 || size.height() < 0)
+        return; 
 
-	const Gfx::Image&   backImage = backgroundImage();
-	Pt::Hmi::Painter&	 painter = surface.painter();
+    const Gfx::Image&   backImage = backgroundImage();
+    Pt::Hmi::Painter&     painter = surface.painter();
  Gfx::PointF         pos(0,0);
-	Gfx::RectF		       rectClient( pos, size );
- Gfx::RectF		       rect(Gfx::PointF(0,0), surface.size() );
+    Gfx::RectF               rectClient( pos, size );
+ Gfx::RectF               rect(Gfx::PointF(0,0), surface.size() );
   
   if( _parent != 0 )
   {
-   Gfx::Brush	backBrush(_parent->backgroundColor() );  		  
+   Gfx::Brush    backBrush(_parent->backgroundColor() );            
     painter.setBrush(backBrush);
     painter.fillRect(rect);
   }
 
 
-	Gfx::Brush	brush(backgroundColor());
-	
-	painter.setBrush(brush);    			
-	painter.fillRect(rectClient);
+    Gfx::Brush    brush(backgroundColor());
+    
+    painter.setBrush(brush);                
+    painter.fillRect(rectClient);
 
-	if( !backImage.empty() )
-	{
-		switch( backgroundImageLayout())
-		{				
-			case ImageLayout::NoLayout:
-			{
-				painter.drawImage( Pt::Gfx::PointF(0,0), backImage );
-			}
-			break;
-			
-			case ImageLayout::Tile:
-			{
-				for( double x = pos.x(); x < size.width();  x += backImage.width() )
-				{
-					for( double y = pos.y(); y < size.height();  y += backImage.height() )
-						painter.drawImage(Gfx::PointF(x,y), backImage);
-				}
-			}
-			break;
+    if( !backImage.empty() )
+    {
+        switch( backgroundImageLayout())
+        {                
+            case ImageLayout::NoLayout:
+            {
+                painter.drawImage( Pt::Gfx::PointF(0,0), backImage );
+            }
+            break;
+            
+            case ImageLayout::Tile:
+            {
+                for( double x = pos.x(); x < size.width();  x += backImage.width() )
+                {
+                    for( double y = pos.y(); y < size.height();  y += backImage.height() )
+                        painter.drawImage(Gfx::PointF(x,y), backImage);
+                }
+            }
+            break;
 
-			case ImageLayout::Center:
-			{
-				const double x = pos.x() + size.width()/2  - backImage.width()/2;
-				const double y = pos.y() + size.height()/2  - backImage.height()/2;
-				painter.drawImage(Gfx::PointF(x,y), backImage);
-			}
-			break;
-			
-			case ImageLayout::Strech:
-			{
-				Gfx::Image strech = backImage.blockScale(Gfx::Size((int) size.width(), (int)size.height() ) );
-				painter.drawImage( pos, strech );
-			}
-			break;
+            case ImageLayout::Center:
+            {
+                const double x = pos.x() + size.width()/2  - backImage.width()/2;
+                const double y = pos.y() + size.height()/2  - backImage.height()/2;
+                painter.drawImage(Gfx::PointF(x,y), backImage);
+            }
+            break;
+            
+            case ImageLayout::Strech:
+            {
+                Gfx::Image strech = backImage.blockScale(Gfx::Size((int) size.width(), (int)size.height() ) );
+                painter.drawImage( pos, strech );
+            }
+            break;
 
-			case ImageLayout::Zoom:
-			{
+            case ImageLayout::Zoom:
+            {
         const double factor = size.width()/(double)backImage.width();
         Pt::Gfx::Size newSize( ( size_t)( backImage.width()*factor), (size_t)(backImage.height()*factor));
 
        Gfx::Image strech = backImage.blockScale(newSize);
-				
+                
         painter.drawImage(pos, strech);
-			}
-			break;
-		}
-	}	
+            }
+            break;
+        }
+    }    
 }
 
 
 void Widget::onInvalidate()
 {  
-	if( parent() )
-		parent()->invalidate();		    
+    if( parent() )
+        parent()->invalidate();            
 }
 
 
@@ -465,229 +501,229 @@ void Widget::onShortcutKey(KeyEvent::KeyState state)
 
 void Widget::onPointerEnter()
 {
-	Application::instance().mainScreen().setCursor( &cursor() );	
+    Application::instance().mainScreen().setCursor( &cursor() );    
 }
 
 
 void Widget::onPointerLeave()
-{	
+{    
 }
 
 
 void Widget::processEvent(const Pt::Event& ev)
 {
-	onEvent(ev);
+    onEvent(ev);
 }
 
 
 void Widget::onEvent(const Pt::Event& ev)
 {
-	_eventReady.send(ev);
+    _eventReady.send(ev);
 }
 
-		
+        
 void Widget::onPointerEvent(const PointerEvent& ev)
-{		
-	if( ev.buttons()[0].state() == DeviceButton::Pressed && _acceptFocus)
-		_window->setFocusedWidget( this );
+{        
+    if( ev.buttons()[0].state() == DeviceButton::Pressed && _acceptFocus)
+        _window->setFocusedWidget( this );
 }
 
 
 void Widget::onKeyEvent(const KeyEvent& ev)
-{ 	
-	if( ! isEnabled() )
-			return;
+{     
+    if( ! isEnabled() )
+            return;
 
-	//// mnemonic handling
-	if( !_mnemonicKey.empty() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && _visible )
-	{		
-		std::string mnKey;
+    //// mnemonic handling
+    if( !_mnemonicKey.empty() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && _visible )
+    {        
+        std::string mnKey;
 
-		if( ev.alt())
-			mnKey = "A//";
-			
-		mnKey += ev.toUTF8String();
+        if( ev.alt())
+            mnKey = "A//";
+            
+        mnKey += ev.toUTF8String();
 
     if(_mnemonicKey == mnKey)
-				onMnemonic();
-	}
+                onMnemonic();
+    }
 
-	// action key handling
-	if( ev.toUTF8String() == focusedActionKey() && hasFocus() )	
-	{
-		onActionKey( ev.state() );		
-	}
-	
-	// shortcurt Key
-	if( ev.shortCutKey() == shortcutKey() )
-	{
-		onShortcutKey( ev.state() );		
-	}
+    // action key handling
+    if( ev.toUTF8String() == focusedActionKey() && hasFocus() )    
+    {
+        onActionKey( ev.state() );        
+    }
+    
+    // shortcurt Key
+    if( ev.shortCutKey() == shortcutKey() )
+    {
+        onShortcutKey( ev.state() );        
+    }
 
-	// propagate to children
-	for( size_t i = 0; i < children().size(); ++i)
-		children()[i]->onKeyEvent(ev);
+    // propagate to children
+    for( size_t i = 0; i < children().size(); ++i)
+        children()[i]->onKeyEvent(ev);
 }
 
 
 void Widget::onMnemonic()
 {
-	_mnemonicEntered.send();
+    _mnemonicEntered.send();
 }
 
 
 bool Widget::contains(const Gfx::PointF& p)
 {
-	if( p.x()  < size().width() && p.x() >= 0 && p.y() < size().height() && p.y() >= 0)
-			return true;
+    if( p.x()  < size().width() && p.x() >= 0 && p.y() < size().height() && p.y() >= 0)
+            return true;
  
-	return false;
+    return false;
 }
 
 
 bool Widget::focusPrevChild(int index)
 {
-	index--;
-	
-	for( ; index >= 0; --index)
-	{
-		Widget* child = children()[index];
+    index--;
+    
+    for( ; index >= 0; --index)
+    {
+        Widget* child = children()[index];
 
-		if(child->acceptFocus())
-		{
-			child->setFocus(true);
-			return true;
-		}
+        if(child->acceptFocus())
+        {
+            child->setFocus(true);
+            return true;
+        }
 
-		if(child->focusPrev())
-		{
-			child->setFocus(true);
-			return true;
-		}
-	}
+        if(child->focusPrev())
+        {
+            child->setFocus(true);
+            return true;
+        }
+    }
 
-	return false;
+    return false;
 }
 
 
 bool Widget::focusNextChild( int index )
 {
-	index++;
-	
-	for( ; index < (int)children().size(); ++index )
-	{
-		Widget* child = children()[index];
+    index++;
+    
+    for( ; index < (int)children().size(); ++index )
+    {
+        Widget* child = children()[index];
 
-		if(child->acceptFocus())
-		{
-			child->setFocus(true);
-			return true;
-		}
+        if(child->acceptFocus())
+        {
+            child->setFocus(true);
+            return true;
+        }
 
-		if(child->focusNext())
-		{
-			child->setFocus(true);
-			return true;
-		}
-	}
+        if(child->focusNext())
+        {
+            child->setFocus(true);
+            return true;
+        }
+    }
 
-	return false;
+    return false;
 }
 
 
 bool Widget::focusPrev()
 {
-	if( children().size() == 0 )
-		return false;
+    if( children().size() == 0 )
+        return false;
 
-	std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->focusedWidget() );	
+    std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->focusedWidget() );    
 
-	if(  it == _children.end())
-		return focusPrevChild( children().size() );
-		
-	size_t index = it - _children.begin();
+    if(  it == _children.end())
+        return focusPrevChild( children().size() );
+        
+    size_t index = it - _children.begin();
 
-	if(!(*it)->acceptFocus())
-	{
-		if((*it)->focusPrev())
-			return true;
-	}
-	
-	return focusPrevChild(index);
+    if(!(*it)->acceptFocus())
+    {
+        if((*it)->focusPrev())
+            return true;
+    }
+    
+    return focusPrevChild(index);
 }
 
 
 bool Widget::focusNext()
 {
-	if( children().size() == 0 )
-		return false;
+    if( children().size() == 0 )
+        return false;
 
-	std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->focusedWidget() );	
+    std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->focusedWidget() );    
 
-	if( it == _children.end() )
-		return focusNextChild(-1);
-	
-	size_t index = it - _children.begin();
+    if( it == _children.end() )
+        return focusNextChild(-1);
+    
+    size_t index = it - _children.begin();
 
-	Widget* child = children()[index];
-		
-	if(!child->acceptFocus())
-	{
-		if(child->focusNext())
-			return true;
-	}
+    Widget* child = children()[index];
+        
+    if(!child->acceptFocus())
+    {
+        if(child->focusNext())
+            return true;
+    }
   
-	return focusNextChild(index);
+    return focusNextChild(index);
 }
 
 
 void Widget::onSetFocus( bool isFocused )
-{	
-	_hasFocus = isFocused;
+{    
+    _hasFocus = isFocused;
 
   if( !_hasFocus)
-	{//False => all childs set to false.
-		for( size_t i = 0; i < children().size(); ++i)
-		{
-			Pt::Hmi::Widget* child = children()[i];			
-			child->setFocus(false);									
-		}
+    {//False => all childs set to false.
+        for( size_t i = 0; i < children().size(); ++i)
+        {
+            Pt::Hmi::Widget* child = children()[i];            
+            child->setFocus(false);                                    
+        }
 
-		invalidate();
+        invalidate();
     return;
-	}
+    }
 
-	if( parent() == 0 )
-	{
-		invalidate();
+    if( parent() == 0 )
+    {
+        invalidate();
     return;
-	}
-		
-	//Set parent focused.	
-	parent()->setFocus(true);
+    }
+        
+    //Set parent focused.    
+    parent()->setFocus(true);
 
-	//All sibling set to false. Only me let it true
-	for( size_t i = 0; i < parent()->children().size(); i++ )
-	{
-		Widget* child = parent()->children()[i];
-				
-		if( child != this )
-			child->setFocus( false );
-	}
+    //All sibling set to false. Only me let it true
+    for( size_t i = 0; i < parent()->children().size(); i++ )
+    {
+        Widget* child = parent()->children()[i];
+                
+        if( child != this )
+            child->setFocus( false );
+    }
 
-	invalidate();
+    invalidate();
 }
 
 
 void Widget::onSetSize(const Gfx::SizeF& size)
 {
-	_size = size;			
+    _size = size;            
   
   surface().resize( _size );
-	_isValid = false;
+    _isValid = false;
 }
 
-	
+    
 void Widget::onSetPosition(const Gfx::PointF& pos)
 {
    _position = pos;
@@ -697,97 +733,99 @@ void Widget::onSetPosition(const Gfx::PointF& pos)
 
 void Widget::onSetVisible( bool b )
 {
-	_visible = b;
+    _visible = b;
 }
 
 
 
 void Widget::onSetCaption( const std::string& c )
 {
-	_caption = c;	
+    _caption = c;    
 
-	_mnemonicKey.clear();
+    _mnemonicKey.clear();
 
-	int index = getMnemonicIndex(_caption);
+    int index = getMnemonicIndex(_caption);
 
-	if( index == std::string::npos )
-		return;
-					
-	std::string unescaped = Widget::removeMnemonic(_caption);
+    if( index == std::string::npos )
+        return;
+                    
+    std::string unescaped = Widget::removeMnemonic(_caption);
 
-	_mnemonicKey = "A//";	
-	_mnemonicKey += std::tolower(unescaped[index]);
+    _mnemonicKey = "A//";    
+    _mnemonicKey += std::tolower(unescaped[index]);
 }
 
 
 
 size_t Widget::getMnemonicIndex(const std::string& text)
-{	 
-	size_t pos = 0;
+{     
+    size_t pos = 0;
   
   if( text.empty() )    
-	  return std::string::npos;
+      return std::string::npos;
 
-	for( size_t i = 0; i < text.size() - 1; ++i)
-	{				
-		if( text[i] == '&'  && text[i +1] =='&' )
-			++i;
-		else if (text[i] == '&'  && 	text[i +1] !='&')
-			return pos;
+    for( size_t i = 0; i < text.size() - 1; ++i)
+    {                
+        if( text[i] == '&'  && text[i +1] =='&' )
+            ++i;
+        else if (text[i] == '&'  &&     text[i +1] !='&')
+            return pos;
 
-		pos++;
-	}
+        pos++;
+    }
 
-	return std::string::npos;
+    return std::string::npos;
 }
 
 
 std::string Widget::removeMnemonic(const std::string& text)
 {
-	std::string removed;
+    std::string removed;
 
-	for( size_t i = 0; i < text.size(); ++i )
-	{				
-		if( text[i] != '&')
-		{		
-			removed += text[i];	
-			continue;
-		}
-		
-		if( (i + 1) == text.size() )
-			continue;
+    for( size_t i = 0; i < text.size(); ++i )
+    {                
+        if( text[i] != '&')
+        {        
+            removed += text[i];    
+            continue;
+        }
+        
+        if( (i + 1) == text.size() )
+            continue;
 
-		if(text[i+1] != '&')
-			continue;
+        if(text[i+1] != '&')
+            continue;
 
-		removed += text[i];
-		++i;
-	}
+        removed += text[i];
+        ++i;
+    }
 
-	return removed;		
+    return removed;        
 }
 
 void Widget::onSetEnabled( bool e )
 {
-	_enabled = e;
+    _enabled = e;
 }
 
 
 void Widget::bindMnemonic( Widget& w )
 {
-	_mnemonicEntered += Pt::slot( w, &Widget::onMnemonic);
+    _mnemonicEntered += Pt::slot( w, &Widget::onMnemonic);
 }
 
 
 void Widget::unbindMnemonic( Widget& w )
 {
-	_mnemonicEntered -= Pt::slot( w, &Widget::onMnemonic);
+    _mnemonicEntered -= Pt::slot( w, &Widget::onMnemonic);
 }
 
 
 void Widget::unbindMnemonic()
 {
-	_mnemonicEntered.disconnectAll();
+    _mnemonicEntered.disconnectAll();
 }
 
-}} //namespace
+} // namespace
+
+} // namespace

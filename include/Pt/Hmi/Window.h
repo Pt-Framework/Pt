@@ -27,8 +27,8 @@
   02110-1301  USA
 */
 
-#ifndef Pt_Hmi_Window_H
-#define Pt_Hmi_Window_H
+#ifndef PT_HMI_WINDOW_H
+#define PT_HMI_WINDOW_H
 
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/WindowManager.h>
@@ -40,16 +40,17 @@
 #include <Pt/Gfx/Image.h>
 
 namespace Pt {
+
 namespace Hmi {
 
 class ChildWindow;
 
 class PT_HMI_API Window : public Widget
 {
-	 friend class Widget;
+     friend class Widget;
 
-  public:    		
-    virtual ~Window();        						
+  public:            
+    virtual ~Window();                                
 
     Window* windowParent() const;
     
@@ -58,6 +59,8 @@ class PT_HMI_API Window : public Widget
     void removeWindow(ChildWindow& w);
 
     const std::vector<ChildWindow*> windows() const;
+
+    virtual Window* getWindow();
 
     WindowManager& windowManager()
     {
@@ -85,7 +88,7 @@ class PT_HMI_API Window : public Widget
 
     void setPointedWidget( Widget* widget );
 
-    const Gfx::SizeF&	minimumSize() const
+    const Gfx::SizeF&    minimumSize() const
     {
       return _minimumSize;
     }
@@ -95,7 +98,7 @@ class PT_HMI_API Window : public Widget
       onSetMinimumSize( s );
     }
 
-    const Gfx::SizeF&	maximumSize() const
+    const Gfx::SizeF&    maximumSize() const
     {
       return _maximumSize;
     }
@@ -186,7 +189,7 @@ class PT_HMI_API Window : public Widget
       onBorder(t);
     }
 
-    const Gfx::Image&	icon() const
+    const Gfx::Image&    icon() const
     {
       return _icon;
     }
@@ -238,7 +241,7 @@ class PT_HMI_API Window : public Widget
 
 
   protected:
-    Window(Window* parent = 0);	
+    Window(Window* parent = 0);    
 
     virtual void onKeyEvent( const KeyEvent& ev );
 
@@ -278,31 +281,24 @@ class PT_HMI_API Window : public Widget
 
     virtual void onClose();
 
-		virtual void onWidgetRemoved( Widget& w  );
+    virtual void onWidgetRemoved( Widget& w  );
 
-		void setFocusedWidget(Widget* w );
+    void setFocusedWidget(Widget* w );
 
-		virtual Window* getWindow()
-		{
-			return this;
-		}
-
-		Widget* focusedWidget() 
-		{
-			return _focusedWidget;
-		}
-
-		
+    Widget* focusedWidget() 
+    {
+        return _focusedWidget;
+    }
 
   private:
-    Window*													 _winParent;
-    Widget*													 _apointedWidget;
-		Widget*													 _focusedWidget;
-    WindowManager										 _windowManager;
-    bool														 _isClosed;
-    bool														 _isActive;
-    Gfx::SizeF											 _minimumSize;
-    Gfx::SizeF											 _maximumSize;
+    Window*                          _winParent;
+    Widget*                          _apointedWidget;
+    Widget*                          _focusedWidget;
+    WindowManager                    _windowManager;
+    bool                             _isClosed;
+    bool                             _isActive;
+    Gfx::SizeF                       _minimumSize;
+    Gfx::SizeF                       _maximumSize;
     Hmi::WindowStartPosition::Type   _startPostion;
     Hmi::WindowState::Type           _state;    
     bool                             _showInTaskbar;
@@ -311,12 +307,14 @@ class PT_HMI_API Window : public Widget
     bool                             _showMaximizeButton;
     bool                             _showSysMenu;
     Hmi::WindowBorder::Type          _border;
-    Gfx::Image						           _icon;
+    Gfx::Image                       _icon;
     bool                             _canClose;
     bool                             _firstShow;
     std::string                      _focuseMoveKey;    
 };
 
-}}
+} // namespace
 
-#endif
+} // namespace
+
+#endif // PT_HMI_WINDOW_H
