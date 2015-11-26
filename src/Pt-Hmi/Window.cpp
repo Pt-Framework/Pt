@@ -53,10 +53,10 @@ Window::Window(Window* parent)
 {
 	setAcceptFocus(false);	
 
-	eventReceived() += Pt::slot(*this, &Window::onMoveEvent);
-	eventReceived() += Pt::slot(*this, &Window::onResizeEvent);
-	eventReceived() += Pt::slot(*this, &Window::onActivateEvent);
-	eventReceived() += Pt::slot(*this, &Window::onCloseEvent);
+	eventReady() += Pt::slot(*this, &Window::onMoveEvent);
+	eventReady() += Pt::slot(*this, &Window::onResizeEvent);
+	eventReady() += Pt::slot(*this, &Window::onActivateEvent);
+	eventReady() += Pt::slot(*this, &Window::onCloseEvent);
 }
 
 

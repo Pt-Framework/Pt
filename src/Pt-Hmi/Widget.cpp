@@ -67,8 +67,8 @@ Widget::Widget()
 
   bindMnemonicToWidget( *this );
 
-	_eventReceived += Pt::slot(*this, &Widget::onKeyEvent);
-	_eventReceived += Pt::slot(*this, &Widget::onPointerEvent);			
+	eventReady() += Pt::slot(*this, &Widget::onKeyEvent);
+	eventReady() += Pt::slot(*this, &Widget::onPointerEvent);			
 }
 
 
@@ -443,7 +443,7 @@ void Widget::processEvent(const Pt::Event& ev)
 
 void Widget::onEvent(const Pt::Event& ev)
 {
-	_eventReceived.send(ev);
+	_eventReady.send(ev);
 }
 
 		

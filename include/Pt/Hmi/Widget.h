@@ -183,9 +183,9 @@ class PT_HMI_API Widget : public Pt::Connectable
 	protected:
 		Widget();	
 
-		Pt::Signal<const Pt::Event&>& eventReceived()
+		Pt::Signal<const Pt::Event&>& eventReady()
 		{
-			return _eventReceived;
+			return _eventReady;
 		}
 
 		virtual void onEvent(const Pt::Event& ev);
@@ -537,7 +537,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 		void updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p);
 
 	private:	  
-	  Pt::Signal<const Pt::Event&> _eventReceived;
+	  Pt::Signal<const Pt::Event&> _eventReady;
 		Widget*										 _parent;	
 		std::vector<Widget*>			 _children;	
 		Widget*										 _mnemonicWidget;	
