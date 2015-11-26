@@ -100,6 +100,9 @@ class MainWindowImpl  : public ChildWindow
 	  virtual void onRender(PaintSurface& paintSurface);
 
 	private:
+		void onWindowEvent(const Pt::Event& ev);
+
+	private:
     Pt::Hmi::Application& _app;
     MainWindow*           _apiWindow;
 };

@@ -61,15 +61,29 @@ Application& Application::instance()
 }
 	
 
-ApplicationImpl* Application::impl()
-{
-	return _impl;
-}
-
-
 void Application::nextEvent()
 {
 	_impl->nextEvent();
+}
+
+
+void Application::sendEvent(Widget& w, const Pt::Event& ev)
+{
+	// TODO: check event filter before dispatching the event
+
+	w.processEvent(ev);
+}
+
+
+Widget* Application::findWidget( const std::string& name )
+{
+	return 0;
+}
+
+
+ApplicationImpl* Application::impl()
+{
+	return _impl;
 }
 
 } // namespace

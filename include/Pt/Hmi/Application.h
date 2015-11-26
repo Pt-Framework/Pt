@@ -52,6 +52,8 @@ class PT_HMI_API Application : public Pt::System::Application
 	
 	  void nextEvent();
 
+		void sendEvent(Widget& w, const Pt::Event& ev);
+
 	  const Screen& mainScreen() const
 	  {
 		  return *_mainScreen;
@@ -61,6 +63,8 @@ class PT_HMI_API Application : public Pt::System::Application
 	  {
 		  return *_mainScreen;
 	  }
+
+		Widget* findWidget( const std::string& name );
 
     ApplicationImpl* impl();
 

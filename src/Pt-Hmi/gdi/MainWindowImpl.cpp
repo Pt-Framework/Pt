@@ -142,7 +142,7 @@ void MainWindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
       _keyEvent.setUnicode(ucode);
   }
 
-  _window->processEvent(_keyEvent);
+	_app.sendEvent(*_window, _keyEvent);
 }
 
 
@@ -357,7 +357,7 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
     _pointerEvent.setX(p.x());
     _pointerEvent.setY(p.y());            
 
-    _window->processEvent(_pointerEvent);
+		_app.sendEvent(*_window, _pointerEvent);
 }
 
 

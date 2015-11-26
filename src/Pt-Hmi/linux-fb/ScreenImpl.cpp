@@ -46,14 +46,13 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 , _dpi(96.0)
 , _drawCursor( true)
 {
-	app.eventReady() += Pt::slot(_eventReceived);
+	app.eventReady() += Pt::slot( *this, &ScreenImpl::onPointerEvent );
+	app.eventReady() += Pt::slot( *this, &ScreenImpl::onKeyEvent );
 
-	Size.set( Gfx::SizeF(_frameBuffer.width(), _frameBuffer.height()) );
-	BackColor.set( Gfx::Color(170/255.0f, 170/255.0f, 170/255.0f) );
-	Visible.set(true);			
+	setSize( Gfx::SizeF(_frameBuffer.width(), _frameBuffer.height()) );
+	setBackgroundColor( Gfx::Color(170/255.0f, 170/255.0f, 170/255.0f) );
+	setVisible(true);			
 	setCursor(0);	
-	
-  eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerEvent );
 }
 
 
@@ -69,13 +68,19 @@ void ScreenImpl::onPointerEvent( const Pt::Hmi::PointerEvent& mouseEvent )
 	if( !_cursorBackground.empty() )
 		bitBlit( _cursorBackground.pixel(0,0), _cursorBackground.width(), _cursorBackground.height(), _cursorPos, (Pt::uint8_t*)  _image.pixel(0,0), CopyOp );
 
-	if( Cursor.get().width() != 0 )
-		_cursorPos = Gfx::Point( mouseEvent.x() - Cursor.get().xHotspot() , mouseEvent.y() - Cursor.get().yHotspot());
+	if( cursor().width() != 0 )
+		_cursorPos = Gfx::Point( mouseEvent.x() - cursor().xHotspot() , mouseEvent.y() - cursor().yHotspot());
 
 	_windowManager.pointerInput( mouseEvent );		
 	
 	if( _drawCursor )
 		updateScreen();
+}
+
+
+void ScreenImpl::onKeyEvent(const Pt::Hmi::KeyEvent& ev)
+{		
+	_windowManager.keyInput(ev);		
 }
 
 
@@ -98,16 +103,16 @@ void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx
 void ScreenImpl::drawCursor( Pt::uint8_t* buffer )
 {
 	//Draw the mouse to image.
-	if( Cursor.get().width() == 0  || Cursor.get().height() == 0 )
+	if( cursor().width() == 0  || cursor().height() == 0 )
 		return;
 
-	if( (_cursorBackground.width() != Cursor.get().width())  || (_cursorBackground.height() !=  Cursor.get().height()) )
-		_cursorBackground.resize(Gfx::Size( Cursor.get().width(),Cursor.get().height()), _frameBuffer.format() ); 
+	if( (_cursorBackground.width() != cursor().width())  || (_cursorBackground.height() !=  cursor().height()) )
+		_cursorBackground.resize(Gfx::Size( cursor().width(),cursor().height()), _frameBuffer.format() ); 
 
 	grabImage( buffer, _cursorPos, _cursorBackground );
 	
-	bitBlit( &Cursor.get().andRgb888()[0], Cursor.get().width(), Cursor.get().height(), _cursorPos, buffer, AndOp );
-	bitBlit( &Cursor.get().xorRgb888()[0], Cursor.get().width(), Cursor.get().height(), _cursorPos, buffer, XorOp );    
+	bitBlit( &cursor().andRgb888()[0], cursor().width(), cursor().height(), _cursorPos, buffer, AndOp );
+	bitBlit( &cursor().xorRgb888()[0], cursor().width(), cursor().height(), _cursorPos, buffer, XorOp );    
 }
 
 
@@ -130,9 +135,9 @@ void ScreenImpl::onInvalidate()
 }
 
 
-void ScreenImpl::setCursor( const Hmi::Cursor* cursor )
+void ScreenImpl::setCursor( const Hmi::Cursor* crs )
 {		
-	Cursor = (cursor == 0 ? Hmi::Cursor::defaultCursor() : *cursor );		
+	Window::setCursor( crs == 0 ? Hmi::Cursor::defaultCursor() : *crs  );		
 }
 
 
@@ -196,4 +201,9 @@ void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const Gf
 		}
 	}  
 }
+
+void ScreenImpl::onActivate()
+{ 
+}
+
 }}

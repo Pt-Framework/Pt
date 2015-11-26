@@ -57,14 +57,14 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 , _display( app.display() )
 //, _winSurface( app.display().surface() )
 {
-  app.eventReady() += Pt::slot(_eventReceived);
+  app.eventReady() += Pt::slot(eventReceived());
 
-  Size.set( Gfx::SizeF( app.display().width(), app.display().height() ) ); 
+  setSize( Gfx::SizeF( app.display().width(), app.display().height() ) ); 
 
   PT_LOG_DEBUG("Screen size: " << app.display().width() << " x " << app.display().height() );
 
-  BackColor.set( Gfx::Color(170/255.0f, 170/255.0f, 170/255.0f) );
-  Visible.set(true);      
+  setBackgroundColor( Gfx::Color(170/255.0f, 170/255.0f, 170/255.0f) );
+  setVisible(true);      
   setCursor(0);  
   
   eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerEvent );
@@ -303,7 +303,12 @@ void ScreenImpl::RenderTextureToScreen(GLuint textId)
 
 void ScreenImpl::setCursor( const Hmi::Cursor* cursor )
 {    
-  Cursor = (cursor == 0 ? Hmi::Cursor::defaultCursor() : *cursor );    
+  Window::setCursor(cursor == 0 ? Hmi::Cursor::defaultCursor() : *cursor );    
+}
+
+void ScreenImpl::onActivate()
+{
+
 }
 
 }

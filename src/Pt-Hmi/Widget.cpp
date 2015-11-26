@@ -145,6 +145,7 @@ void Widget::updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF&
 void Widget::mnemonic()
 {
 	onMnemonic();
+
 }
 
 

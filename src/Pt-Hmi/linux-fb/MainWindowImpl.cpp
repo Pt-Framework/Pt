@@ -51,16 +51,21 @@ MainWindowImpl::MainWindowImpl(MainWindow* window)
 : _app(Application::instance() )
 , _apiWindow(window)
 { 	
-  eventReceived() += Pt::slot( *_apiWindow, &MainWindow::processEvent );
+  eventReceived() += Pt::slot( *this, &MainWindowImpl::onWindowEvent );
 }
 
 
 MainWindowImpl::~MainWindowImpl()
 {
-
 }
 
-	
+
+void MainWindowImpl::onWindowEvent(const Pt::Event& ev)
+{
+	_app.sendEvent(*_apiWindow, ev);
+}
+
+
 void MainWindowImpl::onInvalidate()
 {		
 	_app.mainScreen().impl()->invalidate();
@@ -93,13 +98,13 @@ void MainWindowImpl::destroy()
 
 void MainWindowImpl::show()
 {
-	Visible = true;
+	setVisible(true);
 }
 
 
 void MainWindowImpl::hide()
 {
-	Visible = false;
+	setVisible(false);
 }
 
 
@@ -111,7 +116,7 @@ void MainWindowImpl::activate()
 
 void MainWindowImpl::setWindowPos(const Gfx::PointF& p)
 {
-	 if( Position.get()  ==  p )
+	 if( position()  ==  p )
 			return;
 
 	Window::setPosition( p );
@@ -120,7 +125,7 @@ void MainWindowImpl::setWindowPos(const Gfx::PointF& p)
 
 void MainWindowImpl::setWindowSize( const Gfx::SizeF& size )
 {
-	 if( Size.get()  == size )
+	 if( Window::size()  == size )
 			return;
 
 	Window::setSize( size );
@@ -129,31 +134,31 @@ void MainWindowImpl::setWindowSize( const Gfx::SizeF& size )
 
 void MainWindowImpl::showTitle(bool p)
 {
-	ShowTitle = p;
+	setShowTitle(p);
 }
 
 
 void MainWindowImpl::setWindowCaption(const std::string& text)
 {
-	Caption = text;
+	setCaption(text);
 }
 
 
 void MainWindowImpl::showMinimizedButton(bool p)
 {
-	ShowMinimizeButton = p;
+	setShowMinimizeButton(p);
 }
 
 
 void MainWindowImpl::showMaximizeButton(bool p)
 {
-	ShowMaximizeButton = p;
+	setShowMaximizeButton(p);
 }
   
 
 void MainWindowImpl::showSysMenu(bool p)
 {
-	ShowSysMenu = true;
+	setShowSysMenu(true);
 }
 
 
@@ -165,43 +170,43 @@ void MainWindowImpl::setTopMost(bool force)
 
 void MainWindowImpl::setWindowState( WindowState::Type p )
 {
-	State = p;
+	setState(p);
 }
 
 
 void MainWindowImpl::setBorder( WindowBorder::Type p )
 {
-	Border = p;
+	setBorder(p);
 }
 
 
 void MainWindowImpl::showInTaskbar(bool p)
 {
-	ShowInTaskbar = p;
+	setShowInTaskbar(p);
 }
 
 
 void MainWindowImpl::setIcon(const Gfx::Image& p)
 {
-	Icon = p;
+	setIcon(p);
 }
 
 
 void MainWindowImpl::setEnable(bool e)
 {
-	Enabled = e;
+	setEnabled(e);
 }
 
 
 void MainWindowImpl::setMinSize(const Gfx::SizeF& s)
 {
-	MinimumSize = s;
+	setMinimumSize(s);
 }
 
 
 void MainWindowImpl::setMaxSize(const Gfx::SizeF& s)
 {
-	MaximumSize = s;
+	setMaximumSize(s);
 }
 
 void MainWindowImpl::bringToFront()

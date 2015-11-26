@@ -50,12 +50,12 @@ class ScreenImpl : public Window
 
 		double width() const
 		{
-			return  Size.get().width();
+			return  size().width();
 		}
 
 		double height() const
 		{
-			return  Size.get().height();
+			return  size().height();
 		}
 		 		 
 		virtual void activate()
@@ -132,7 +132,9 @@ class ScreenImpl : public Window
 
 	protected:
 		virtual void onInvalidate();
+		virtual void onActivate();
 		virtual void onPointerEvent( const Pt::Hmi::PointerEvent& mouseEvent );
+		virtual void onKeyEvent(const Pt::Hmi::KeyEvent& ev);
 
 	private:
     enum BlitOp

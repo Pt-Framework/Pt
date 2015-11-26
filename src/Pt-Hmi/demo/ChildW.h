@@ -5,7 +5,6 @@
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Label.h>
-#include <Pt/Hmi/Property.h>
 
 namespace Pt{
 namespace Hmi{

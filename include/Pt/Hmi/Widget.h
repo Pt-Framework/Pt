@@ -35,7 +35,6 @@
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/Property.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Margin.h>
 #include <Pt/Connectable.h>
@@ -43,6 +42,7 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Signal.h>
 #include <map>
 
 namespace Pt {
