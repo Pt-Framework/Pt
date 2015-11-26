@@ -42,14 +42,14 @@ Button::Button()
 , _buttonType(Pt::Hmi::ButtonType::Press)
 , _doublePressTimeInMs(1500)
 , _image(Gfx::Image(0,0))
-, _imageAlign( Align::MidleLeft)
+, _imageAlign( MidleLeft)
 , _lastPointerState( DeviceButton::Released )
 {
   setBackgroundColor(Gfx::Color::fromRgb8(245,245,245));
-  setPanelBorderStyle(BorderStyle::Widget);
+  setPanelBorderStyle(Custom);
   setPanelBorderWidth(1);
   setAutoSize(false);
-  setTextAlign(Align::MidleCenter);
+  setContentAlignment(MidleCenter);
   setAcceptFocus(true);
   setPanelBorderRoundEdge(true);
   setPanelBorderStyle(BorderStyle::Single);
@@ -87,18 +87,6 @@ void Button::onPressedAction()
 
 void Button::onMnemonic()
 {
-	if(!isEnabled())
-	{
-		Label::onMnemonic();
-		return;
-	}
-
-	if(!visible())
-	{
-		Label::onMnemonic();
-		return;
-	}
-
 	switch(_buttonType)
 	{
 		case ButtonType::Press:
@@ -116,8 +104,7 @@ void Button::onMnemonic()
 		}			
 		break;
 	}
-	
-  setHighlight( _buttonState== DeviceButton::Pressed);
+	  
 	Label::onMnemonic();	    		
 	invalidate();	
 }
@@ -180,7 +167,6 @@ void Button::onActionKey( KeyEvent::KeyState state )
 		break;
 	}
 
-	setHighlight( _buttonState== DeviceButton::Pressed ) ;
 	invalidate();
 }
 
@@ -191,7 +177,7 @@ void Button::onShortcutKey( KeyEvent::KeyState state )
 		case ButtonType::Press:
 		{
 			_buttonState= (state == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;				
-			onFocus( true );
+			setFocus( true );
 
 		}
 		break;
@@ -201,13 +187,12 @@ void Button::onShortcutKey( KeyEvent::KeyState state )
 			if( state == KeyEvent::KeyDown )
 			{
 				_buttonState= (_buttonState== DeviceButton::Pressed) ? DeviceButton::Released : DeviceButton::Pressed;											
-				onFocus( true );
+				setFocus( true );
 			}
 		}
 		break;
 	}
 	
-	setHighlight( _buttonState== DeviceButton::Pressed );
 	invalidate();			
 }
 
@@ -225,7 +210,6 @@ void Button::onKeyEvent(const KeyEvent& ev)
 	if(_buttonType == ButtonType::Press && _buttonState!= DeviceButton::Released)
 	{
 		_buttonState= DeviceButton::Released;
-     setHighlight( _buttonState== DeviceButton::Pressed);
 		invalidate();
 	}		
 }
@@ -278,7 +262,7 @@ void Button::onPointerEvent(const PointerEvent& ev)
 				if(!hasFocus())
 				{
 					genOutput = true;						
-					onFocus(true);															
+					setFocus(true);															
 				}
 
 				switch(ev.buttons()[0].state())
@@ -312,7 +296,7 @@ void Button::onPointerEvent(const PointerEvent& ev)
 			{
 				if(!hasFocus())	
 				{
-					onFocus(true);			
+					setFocus(true);			
 					genOutput = true;
 				}
 
@@ -334,7 +318,6 @@ void Button::onPointerEvent(const PointerEvent& ev)
 
   if( genOutput )
   {
-  	setHighlight( _buttonState== DeviceButton::Pressed) ;
 		invalidate();
   }
 }
@@ -354,8 +337,8 @@ void Button::onRender(PaintSurface& paintSurface)
 		return;
 
 	Pt::Hmi::Painter& painter = paintSurface.painter();
- Gfx::SizeF  size = clientSize();
- Gfx::PointF pos  = clientPos();
+ Gfx::SizeF  size = this->size();
+ Gfx::PointF pos  = this->position();
        
 	if( _hover || hasFocus() )
 	{

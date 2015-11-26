@@ -113,54 +113,6 @@ void MainWindowImpl::activate()
 }
 
 
-void MainWindowImpl::setWindowPos(const Gfx::PointF& p)
-{
-	 if( position()  ==  p )
-			return;
-
-	Window::setPosition( p );
-}
-
-
-void MainWindowImpl::setWindowSize( const Gfx::SizeF& size )
-{
-	 if( Window::size()  == size )
-			return;
-
-	Window::setSize( size );
-}
-
-
-void MainWindowImpl::showTitle(bool p)
-{
-	setShowTitle(p);
-}
-
-
-void MainWindowImpl::setWindowCaption(const std::string& text)
-{
-	setCaption(text);
-}
-
-
-void MainWindowImpl::showMinimizedButton(bool p)
-{
-	setShowMinimizeButton(p);
-}
-
-
-void MainWindowImpl::showMaximizeButton(bool p)
-{
-	setShowMaximizeButton(p);
-}
-  
-
-void MainWindowImpl::showSysMenu(bool p)
-{
-	setShowSysMenu(true);
-}
-
-
 void MainWindowImpl::setTopMost(bool force)
 {
 	//ToDo:

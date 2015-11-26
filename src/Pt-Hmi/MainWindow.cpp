@@ -37,30 +37,12 @@ MainWindow::MainWindow(MainWindow* parent)
 : _impl(0)
 {
 	_impl = new MainWindowImpl( this );
-
-	setVisible(false);
+	
+	_impl->create();
+	_impl->setMinimumSize(minimumSize());
+	_impl->setMaximumSize(maximumSize());
+	
 	setAcceptFocus(false);
-		  
-	//Todo: change from ValueProperty to Property.
-  /*
-  Visible.changed() += Pt::slot(*this, &MainWindow::onVisibleChanged);
-  ShowTitle.changed() += Pt::slot(*this, &MainWindow::onShowTitleChanged);
-  ShowMinimizeButton.changed() += Pt::slot(*this, &MainWindow::onShowMinimizedButtonChanged);
-  ShowMaximizeButton.changed() += Pt::slot(*this, &MainWindow::onShowMaximizeButtonChanged);
-  ShowSysMenu.changed() += Pt::slot(*this, &MainWindow::onShowSysMenuChanged);
-  State.changed() += Pt::slot(*this, &MainWindow::onWindowStateChanged);
-  Border.changed() += Pt::slot(*this, &MainWindow::onBorderChanged);
-  ShowInTaskbar.changed() += Pt::slot(*this, &MainWindow::onShowInTaskbarChanged);
-  Icon.changed() += Pt::slot(*this, &MainWindow::onIconChanged);
-	Enabled.changed() += Pt::slot(*this, &MainWindow::onEnabledChanged);
-	MinimumSize.changed() += Pt::slot(*this, &MainWindow::onMinSizeChnaged);
-	MaximumSize.changed() += Pt::slot(*this, &MainWindow::onMaxSizeChnaged);
-  */
-  setPosition( Gfx::PointF(20,20) );
-	setSize(Gfx::SizeF(200,200));
-	_impl->setMinSize(minimumSize());
-	_impl->setMaxSize(maximumSize());
-	setClosed(false);
 
 	Hmi::Application::instance().registerWindow(*this);
 }
@@ -69,9 +51,6 @@ MainWindow::MainWindow(MainWindow* parent)
 MainWindow::~MainWindow()
 {
 	Hmi::Application::instance().unregisterWindow(*this);
-
-	//TODO: remove from window manager
-	_windowManager.clear();
 
 	_impl->destroy();
 	delete _impl;
@@ -90,176 +69,126 @@ void MainWindow::setTopMost(bool topMost)
 }
 
 
-void MainWindow::onClosedChanged(const bool& closed)
-{	
-	if( !isEnabled() )
-		return;
-
-	if( !canClose() )
-		return;
-    
-  //Set the closed flag
-	if( closed )
-    _impl->destroy();
-  else
-		_impl->create();
-}
-
-
-void MainWindow::onVisibleChanged(const bool& visible)
-{
-	if( isClosed() )
-		setClosed(false);
-
-  //Set the closed flag
-	if( visible )
-	{
-    if( firstShow() )
-    {
-      if( windowParent() != 0  && startPostion() == WindowStartPosition::CenterParent )
-      {
-          double x = windowParent()->position().x() + (windowParent()->size().width()/2  - size().width()/2);
-					double y = windowParent()->position().y() + (windowParent()->size().height()/2  - size().height()/2);
-					setPosition( Gfx::PointF(x,y) );
-      }  
-
-      setFirstShow(false);
-    }
-
-    _impl->show();
-	}
-  else
-  {
-		_impl->hide();
-  }
-
-	setClosed(false);
-	invalidate();
-}
-
-
-void MainWindow::setCaption( const std::string& c )
-{
-	Widget::setCaption( c );
-  _impl->setWindowCaption( c );
-}
-
-
-void MainWindow::onShowTitleChanged(const bool& p)
-{
-  _impl->showTitle( p );
-}
-
-
-void MainWindow::onShowMinimizedButtonChanged(const bool& p)
-{
-  _impl->showMinimizedButton( p );
-}
-
-
-void MainWindow::onShowMaximizeButtonChanged(const bool& p)
-{
-  _impl->showMaximizeButton( p );
-}
-
-
-void MainWindow::onShowSysMenuChanged(const bool& p)
-{
-  _impl->showSysMenu( p );
-}
-
-void MainWindow::onWindowStateChanged(const WindowState::Type& p)
-{
-  _impl->setWindowState( p );
-}
-
-
-void MainWindow::onBorderChanged(const WindowBorder::Type& p)
-{
-  _impl->setBorder( p );
-}
-
-
-void MainWindow::onShowInTaskbarChanged(const bool& p)
-{
-  _impl->showInTaskbar( p );
-}
-
-
-void MainWindow::onIconChanged(const Gfx::Image& p)
-{
-  _impl->setIcon( p );
-}
-
-
-void MainWindow::onEnabledChanged(const bool& p)
-{
-	_impl->setEnable( p );
-}
-
-void MainWindow::onMinSizeChnaged(const Gfx::SizeF& prop)
-{
-	_impl->setMinSize( prop );
-}
-		
-void MainWindow::onMaxSizeChnaged(const Gfx::SizeF& prop)
-{
-	_impl->setMaxSize( prop );
-}
-
-void MainWindow::setSize(const Gfx::SizeF& size)
-{
-	Widget::setSize( size); 	
-	_impl->setWindowSize(size);
-}
-
-void MainWindow::setPosition(const Gfx::PointF& pos)
-{
-	Widget::setPosition( pos);
-	_impl->setWindowPos( pos);
-}
-
 void MainWindow::onActivate()
 {
 		_impl->activate(); 
 }
 
 
-void MainWindow::onVisible( bool b )
+void MainWindow::onSetVisible( bool b )
 {
   if(b )
      _impl->show();
   else
     _impl->hide();
     
-    Window::onVisible( b);
+    Window::onSetVisible( b);
 }
 
-void MainWindow::setClosed(bool close)
+void MainWindow::onSetPosition(const Gfx::PointF& pos ) 
+{
+	_impl->setPosition( pos );
+	Window::onSetPosition( pos );
+
+}
+
+void MainWindow::onSetSize(const Gfx::SizeF& size)
+{
+	_impl->setSize( size );
+	Window::onSetSize( size );
+}
+
+void MainWindow::onShowTitle( bool s )
+{
+	_impl->setShowTitle( s );
+	Window::onShowTitle( s );
+}
+
+
+void MainWindow::onSetCaption( const std::string& s )
+{
+	_impl->setCaption( s );
+	Window::onSetCaption( s );
+}
+
+void MainWindow::onShowMinimizeButton( bool s )
+{
+	_impl->setShowMinimizeButton( s );
+	Window::onShowMinimizeButton( s );
+}
+
+
+void MainWindow::onShowMaximizeButton( bool s )
+{
+	_impl->setShowMaximizeButton( s );
+	Window::onShowMaximizeButton( s );
+}
+
+
+void MainWindow::onShowSystemMenu( bool  s )
+{
+	_impl->setShowSystemMenu( s );
+	Window::onShowSystemMenu( s );
+}
+
+
+void MainWindow::onState(const Hmi::WindowState::Type& s)
+{
+	_impl->setState( s );
+	Window::onState( s );
+}
+
+
+void MainWindow::onBorder(const Hmi::WindowBorder::Type& b)
+{
+	_impl->setBorder( b );
+	Window::onBorder( b );
+}
+
+
+void MainWindow::onShowInTaskbar(bool s)
+{
+	_impl->setShowInTaskbar( s );
+	Window::onShowInTaskbar( s );
+}
+
+
+void MainWindow::onIcon(const Gfx::Image& i)
+{
+	_impl->setIcon( i );
+	Window::onIcon( i );
+}
+
+void MainWindow::onSetEnabled( bool e )
+{
+	_impl->setEnabled( e );
+	Window::onSetEnabled( e );	
+}
+
+void MainWindow::onSetMinimumSize( const Gfx::SizeF& s )
+{
+	_impl->setMinimumSize( s );
+	Window::onSetMinimumSize( s );	
+}
+
+
+void MainWindow::onSetMaximumSize(const Gfx::SizeF& s)
+{
+	_impl->setMaximumSize( s );
+	Window::onSetMaximumSize( s );	
+}
+
+void MainWindow::onClose()
 {
 	if( !isEnabled() )
 		return;
 
-	if( close )
-	{
-
-		if( !canClose() || isClosed() )
-			return;
+	if( !canClose() || isClosed() )
+		return;
 	
-		_impl->destroy();
-		setVisible (false);				
-						
-	}
-	else
-	{
-		
-		if(  !isClosed()  )
-			return;
-
-		_impl->create();
-	}
-
-	Window::setClosed(close);	
+	_impl->destroy();
+					
+	Window::onClose();	
 }
 
 }}

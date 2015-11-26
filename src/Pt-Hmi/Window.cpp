@@ -49,7 +49,8 @@ Window::Window(Window* parent)
 , _windowManager(*this)
 , _isClosed(true)
 , _isActive(false)
-, _pointedWidget( 0 )
+, _apointedWidget( 0 )
+, _focusedWidget( 0)
 {
 	setAcceptFocus(false);	
 
@@ -62,32 +63,30 @@ Window::Window(Window* parent)
 
 Window::~Window()
 {
+	_windowManager.clear();
+
 }
 	
 
-const std::vector<ChildWindow*> Window::childWindows() const
+const std::vector<ChildWindow*> Window::windows() const
 {
 	return _windowManager.windows();
 }
 
 
-void Window::addChildWindow(ChildWindow& w)
+void Window::addWindow(ChildWindow& w)
 {
-	w.setWindowParent(this);
+	w._winParent = this;
+	w.setVisible( true);
 	_windowManager.add(&w);		
 }
 
 
-void Window::removeChildWindow(ChildWindow& w)
+void Window::removeWindow(ChildWindow& w)
 {
 	_windowManager.remove(&w);
-	w.setWindowParent(0);
-}
-
-
-void Window::setWindowParent(Window* parent)
-{
-	_winParent = parent;
+	w.setVisible( false);
+	w._winParent = 0;
 }
 
 
@@ -105,16 +104,31 @@ void Window::activate()
 
 void Window::setPointedWidget( Widget* widget ) 
 {
-	if( _pointedWidget == widget )
+	if( _apointedWidget == widget )
 		return;
 
-	if( _pointedWidget )			
-		_pointedWidget->onPointerLeave();
+	if( _apointedWidget )			
+		_apointedWidget->onPointerLeave();
 
-	_pointedWidget = widget;
+	_apointedWidget = widget;
 
-	if( _pointedWidget )
-		_pointedWidget->onPointerEnter();
+	if( _apointedWidget )
+		_apointedWidget->onPointerEnter();
+}
+
+
+void Window::setFocusedWidget( Widget* widget ) 
+{
+	if( _focusedWidget == widget )
+		return;
+
+	if( _focusedWidget )			
+		_focusedWidget->setFocus(false);
+
+	_focusedWidget = widget;
+
+	if( _focusedWidget )
+		_focusedWidget->setFocus(true);
 }
 
 
@@ -134,7 +148,6 @@ void Window::onPointerEvent(const PointerEvent& ev)
 		widget->processEvent(ev);		
 }
 
-
 void Window::onKeyEvent(const KeyEvent& ev)
 {
   if( _windowManager.keyInput( ev ) )
@@ -144,17 +157,17 @@ void Window::onKeyEvent(const KeyEvent& ev)
 		return;
 	
 	if( ev.toUTF8String() == _focuseMoveKey && ev.state() == Pt::Hmi::KeyEvent::KeyUp )
-	{
+	{	
 		if(  ev.shift() )
-		{		
-				if( ! focusPrev() )
+		{	
+				if(!focusPrev() )
 					focusPrev();
 		}
 		else
 		{
-				if( ! focusNext() )
+				if( !focusNext() )
 					focusNext();
-		}
+		}		
 
 		invalidate();
 	}
@@ -177,6 +190,64 @@ void Window::onMoveEvent( const MoveEvent& ev)
 	invalidate();
 }
 
+void Window::onShowTitle( bool s )
+{
+	_showTitle = s;
+}
+
+
+void Window::onShowMinimizeButton( bool s )
+{
+	_showMinimizeButton = s;
+}
+
+
+void Window::onShowMaximizeButton( bool s )
+{
+	_showMaximizeButton = s;
+}
+
+
+void Window::onShowSystemMenu( bool  s )
+{
+	_showSysMenu = s;
+}
+
+
+void Window::onState(const Hmi::WindowState::Type& s)
+{
+	_state = s;
+}
+
+
+void Window::onBorder(const Hmi::WindowBorder::Type& t)
+{
+	_border = t;
+}
+
+void Window::onShowInTaskbar(bool s)
+{
+	_showInTaskbar = s;
+}
+
+
+void Window::onIcon(const Gfx::Image& i)
+{
+	_icon = i;
+}
+
+
+void Window::onSetMinimumSize( const Gfx::SizeF& s )
+{
+	_minimumSize = s;
+}
+
+
+void Window::onSetMaximumSize(const Gfx::SizeF& s)
+{
+	_maximumSize = s;
+}
+
 
 void Window::onActivateEvent(const ActivateEvent& ev)
 { 
@@ -194,28 +265,34 @@ void Window::onActivateEvent(const ActivateEvent& ev)
 
 void Window::close()
 {
-	setClosed(true);	
+	onClose();	
 }
 
 
 void Window::onCloseEvent(const CloseEvent& ev)
 {
-	setClosed(true);
+	_isClosed =  true;
 }
 
-void Window::setClosed( bool c)
+
+void Window::onClose()
 {
-	_isClosed = c;
-
-	if( _isClosed )
-		Closed.send();							
+	setVisible( false );
 }		
-
 
 void Window::onRender( PaintSurface& surface )
 {
 	Widget::onRender( surface );
 	_windowManager.render();
+}
+
+void Window::onWidgetRemoved( Widget& w  )
+{
+	if( _apointedWidget == &w )
+		_apointedWidget = 0;
+
+	if( _focusedWidget == &w )
+		_focusedWidget = 0;		
 }
 
 }}

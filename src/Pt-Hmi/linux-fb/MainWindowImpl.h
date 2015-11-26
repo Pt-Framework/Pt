@@ -59,21 +59,7 @@ class MainWindowImpl  : public ChildWindow
 
 		void hide();
 
-		void activate();
-
-		void setWindowPos(const Gfx::PointF& p);
-
-		void setWindowSize(const Gfx::SizeF& size);
-
-		void showTitle(bool p);
-
-		void setWindowCaption(const std::string& text);
-
-		void showMinimizedButton(bool p);
-  
-		void showMaximizeButton(bool p);
-  
-		void showSysMenu(bool p);
+		void activate();		
 
 		void setTopMost(bool force);
   

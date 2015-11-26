@@ -36,6 +36,8 @@ namespace Hmi{
 class PT_HMI_API Label  : public Panel
 {
 	public:
+
+	public:
 		Label();
 		virtual ~Label();	
 

@@ -53,8 +53,7 @@ WindowManager::WindowManager(Window& parent)
 , _actionButton(0)
 , _titleBarHeight(20)
 , _pointedWindow(0)
-{
-	Margin buttonMargin =  Margin(1,1,1,3);  	
+{	
 }
 
 
@@ -244,7 +243,7 @@ Gfx::PointF WindowManager::toClient(const ChildWindow* w, const Gfx::PointF& p)
 
 void WindowManager::updateActive( const Pt::Hmi::PointerEvent& pointerEvent )
 {	
-	if( pointerEvent.buttons()[_actionButton].state() != DeviceButton::Pressed)
+	if( pointerEvent.buttons()[_actionButton].state() != DeviceButton::Pressed || _pointerLastState !=  DeviceButton::Released)
 			return;    
 
   if( _sizingDirection != ResizeDirection::No)
@@ -590,10 +589,6 @@ void WindowManager::setSizingCursor( ResizeDirection::Type type )
 		case ResizeDirection::SouthEast:
 			screen.setCursor( &Hmi::Cursor::sizeNWSECursor() );
 		break;
-		
-		default:
-		  screen.setCursor( &Hmi::Cursor::defaultCursor() );
-			break;	
 	}
 }
 
@@ -666,7 +661,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pointerEvent )
 
 	if( sizingDirection != ResizeDirection::No )
 	{
-		if( pointerEvent.buttons()[_actionButton].state() == DeviceButton::Pressed )
+		if( pointerEvent.buttons()[_actionButton].state() == DeviceButton::Pressed && _pointerLastState == DeviceButton::Released )
 		{
 			_sizingDirection  = sizingDirection;		
 			_pointerLastState = pointerEvent.buttons()[_actionButton].state();

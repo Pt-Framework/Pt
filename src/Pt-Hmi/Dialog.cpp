@@ -47,8 +47,6 @@ Dialog::~Dialog()
 
 void Dialog::doModal(MainWindow* parent)
 {	
-	setWindowParent(parent);  
-	
 
 	//Setup the parent as disabled and TopMost = false.
 	parent->setEnabled ( false);	
@@ -71,7 +69,6 @@ void Dialog::doModal(MainWindow* parent)
 	parent->setTopMost(true);
 	parent->setEnabled( true);	
 	parent->invalidate();	
-	setWindowParent(0);
 }
 
 }}

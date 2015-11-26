@@ -36,36 +36,21 @@ namespace Hmi{
 Widget::Widget()
 : _enabled( true)
 , _visible( false)
-, _highlight( false)
-, _font("Sans Serif",12)
 , _backgroundColor(Gfx::Color::fromRgb8(237,237,237))
-, _highlightColor(  Gfx::Color::fromRgb8(200,200,200) )
 , _foregroundColor( Gfx::Color::fromRgb8(0,0,0) )
-, _disabledColor( Gfx::Color::fromRgb8(178,178,178))
 , _backgroundImage()
 , _backgroundImageLayout(  ImageLayout::NoLayout )
 , _cursor( Hmi::Cursor::defaultCursor() )
-, _textAlign( Align::MidleCenter )
 , _acceptFocus( true) 
 , _focusedActionKey( "")
-, _caption("")
 , _name("")
-, _margin(0)
-, _dock(Docking::None )
-, _flowLayout( FlowLayout::None )
-, _flowDirection( FlowLayoutDirection::LeftToRightTopToBottom)
 , _shortcutKey("")
 , _hasFocus( false)
-, _useMnemonic( false)
-, _mnemonicKey("")
 , _size( 100, 100)
 , _position( 10,10) 
-, _mnemonicWidget(0)
 , _parent(0)
 , _isValid(false)
 {	
-
-  bindMnemonicToWidget( *this );
 
 	eventReady() += Pt::slot(*this, &Widget::onKeyEvent);
 	eventReady() += Pt::slot(*this, &Widget::onPointerEvent);			
@@ -77,32 +62,101 @@ Widget::~Widget()
 }
 
 
-void Widget::addChild(Widget* child)
+void Widget::addWidget(Widget& child)
 {
-	_children.push_back(child);
-	child->setParent(this);
-	child->_isValid = false;
-	child->setVisible( true);  
-	child->invalidate();  
-	invalidate();
+	_children.push_back(&child);
+	child._parent = this;	
+	child.setWindow( this->getWindow() );
+	child._isValid = false;
+	child.setVisible( true);  
+
+  invalidate();
 }
 
 
-void Widget::removeChild(Widget* child)
+
+void Widget::removeWidget(Widget& child)
 {
 	for(size_t i = 0; i < _children.size(); ++i)
 	{
-		if(_children[i] != child)
+		if(_children[i] != &child)
 			continue;
 		
 		_children.erase(_children.begin() + i);
-		child->setVisible( false);
-		child->setParent(0);
+		child.setVisible( false);
+		child._parent = 0;
+
+		if( child._window != 0 )
+		{
+				child._window->onWidgetRemoved( child );
+				child.setWindow( 0 );
+		}
 		return;
 	}			
 
   invalidate();
 }	
+
+
+void Widget::setWindow(Window* w)
+{
+	if( _window == w )
+		return;
+
+	_window = w;
+	
+	for( size_t i = 0; i < _children.size(); ++i )
+		_children[i]->setWindow(w);
+	
+}
+
+
+Widget* Widget::findWidget( const Gfx::PointF& pos )
+{
+	std::vector<Widget*>::reverse_iterator it = _children.rbegin();
+
+	if( !visible() )
+			return 0;
+
+	for( ; it != _children.rend(); ++it )
+	{
+		Widget* child = *it;
+
+		Gfx::PointF localPos = child->toClient( pos );		
+		
+		if( child->contains( localPos ) )
+		{
+			Widget* found = child->findWidget( pos );
+
+			if( found )
+				return found;
+		}
+	}
+		
+	return contains( toClient( pos ) )  ? this : 0;
+}
+
+
+Widget* Widget::findWidget( const std::string& name )
+{
+
+  if( _name == name )
+      return this;
+
+  std::vector<Widget*>::iterator it = _children.begin();
+
+	for( ; it != _children.end(); ++it )
+	{
+		Widget* child = *it;
+
+		Widget* found = child->findWidget( name );
+
+		if( found )
+			return found;		
+	}
+		
+	return  0;
+}
 
 
 Gfx::PointF Widget::toClient( const Gfx::PointF& globalPoint )
@@ -134,19 +188,13 @@ Gfx::PointF Widget::fromClient( const Gfx::PointF& localPoint )
 }
 
 
-void Widget::updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p)
-{       
-  w.setPosition(p);
-  w.setSize(s);      	
-  _isValid = false;
-}
 
-
-void Widget::mnemonic()
-{
-	onMnemonic();
-
-}
+//void Widget::updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p)
+//{       
+//  w.setPosition(p);
+//  w.setSize(s);      	
+//  _isValid = false;
+//}
 
 
 void Widget::invalidate()
@@ -158,6 +206,7 @@ void Widget::invalidate()
 
 void Widget::onLayout( PaintSurface& surface )
 {
+/*
  Gfx::SizeF clientSize = surface.size();
   double posLeft  = 0;
   double posTop   = 0;
@@ -288,7 +337,7 @@ void Widget::onLayout( PaintSurface& surface )
     const double height = posBottom - posTop;
 
     updatePosAndSize( *child,Gfx::SizeF( width, height ), point );
-  }
+  }*/
 }
 
 
@@ -323,14 +372,14 @@ void Widget::render()
 
 void Widget::onRender( PaintSurface& surface )
 {		
-  const Gfx::SizeF size = clientSize();
+  const Gfx::SizeF& size = this->size();
 
 	if( size.width() < 0 || size.height() < 0)
 		return; 
 
 	const Gfx::Image&   backImage = backgroundImage();
 	Pt::Hmi::Painter&	 painter = surface.painter();
- Gfx::PointF         pos = clientPos();
+ Gfx::PointF         pos(0,0);
 	Gfx::RectF		       rectClient( pos, size );
  Gfx::RectF		       rect(Gfx::PointF(0,0), surface.size() );
   
@@ -341,21 +390,11 @@ void Widget::onRender( PaintSurface& surface )
     painter.fillRect(rect);
   }
 
-  painter.setFont(font());
 
-	if( highlight() )
-	{       
-		Gfx::Brush	brush( highlightColor() );        
-		painter.setBrush(brush);
-		painter.fillRect(rectClient);
-	}
-	else
-	{
-		Gfx::Brush	brush(backgroundColor());
+	Gfx::Brush	brush(backgroundColor());
 	
-		painter.setBrush(brush);    			
-		painter.fillRect(rectClient);
-	}
+	painter.setBrush(brush);    			
+	painter.fillRect(rectClient);
 
 	if( !backImage.empty() )
 	{
@@ -449,6 +488,8 @@ void Widget::onEvent(const Pt::Event& ev)
 		
 void Widget::onPointerEvent(const PointerEvent& ev)
 {		
+	if( ev.buttons()[0].state() == DeviceButton::Pressed && _acceptFocus)
+		_window->setFocusedWidget( this );
 }
 
 
@@ -457,8 +498,8 @@ void Widget::onKeyEvent(const KeyEvent& ev)
 	if( ! isEnabled() )
 			return;
 
-	// mnemonic handling
-	if( useMnemonic() && ev.state() == Pt::Hmi::KeyEvent::KeyUp )
+	//// mnemonic handling
+	if( !_mnemonicKey.empty() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && _visible )
 	{		
 		std::string mnKey;
 
@@ -467,10 +508,8 @@ void Widget::onKeyEvent(const KeyEvent& ev)
 			
 		mnKey += ev.toUTF8String();
 
-		 if(_mnemonicKey == mnKey)
-		 {
-				_mnemonicWidget->mnemonic();						
-		 }
+    if(_mnemonicKey == mnKey)
+				onMnemonic();
 	}
 
 	// action key handling
@@ -491,15 +530,9 @@ void Widget::onKeyEvent(const KeyEvent& ev)
 }
 
 
-void Widget::bindMnemonicToWidget(Widget& widget)
-{
-	_mnemonicWidget = &widget;
-}
-
-
 void Widget::onMnemonic()
-{	
-	setFocus();
+{
+	_mnemonicEntered.send();
 }
 
 
@@ -522,13 +555,13 @@ bool Widget::focusPrevChild(int index)
 
 		if(child->acceptFocus())
 		{
-			child->setFocus();
+			child->setFocus(true);
 			return true;
 		}
 
 		if(child->focusPrev())
 		{
-			child->setFocus();
+			child->setFocus(true);
 			return true;
 		}
 	}
@@ -547,13 +580,13 @@ bool Widget::focusNextChild( int index )
 
 		if(child->acceptFocus())
 		{
-			child->setFocus();
+			child->setFocus(true);
 			return true;
 		}
 
 		if(child->focusNext())
 		{
-			child->setFocus();
+			child->setFocus(true);
 			return true;
 		}
 	}
@@ -562,40 +595,24 @@ bool Widget::focusNextChild( int index )
 }
 
 
-int Widget::getFocusedChild() const
-{
-	int i = 0;
-	
-	for( ; i < (int)children().size(); ++i)
-	{
-		const Widget* child = children()[i];
-		if( child->hasFocus() )
-			return i;		
-	}		
-
-	return -1;
-}
-
-
 bool Widget::focusPrev()
 {
 	if( children().size() == 0 )
 		return false;
 
-	int index = getFocusedChild();
+	std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->focusedWidget() );	
 
-	if( index == -1)
+	if(  it == _children.end())
 		return focusPrevChild( children().size() );
-	
-	Widget* child  = children()[index];
+		
+	size_t index = it - _children.begin();
 
-	if(!child->acceptFocus())
+	if(!(*it)->acceptFocus())
 	{
-		if(child->focusPrev())
+		if((*it)->focusPrev())
 			return true;
 	}
-
-	child->onFocus( false);
+	
 	return focusPrevChild(index);
 }
 
@@ -605,11 +622,13 @@ bool Widget::focusNext()
 	if( children().size() == 0 )
 		return false;
 
-	const int index = getFocusedChild();
+	std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->focusedWidget() );	
 
-	if( index == -1)
-		return focusNextChild(index);
+	if( it == _children.end() )
+		return focusNextChild(-1);
 	
+	size_t index = it - _children.begin();
+
 	Widget* child = children()[index];
 		
 	if(!child->acceptFocus())
@@ -617,13 +636,12 @@ bool Widget::focusNext()
 		if(child->focusNext())
 			return true;
 	}
-
-  child->onFocus(false);
+  
 	return focusNextChild(index);
 }
 
 
-void Widget::onFocus( bool isFocused )
+void Widget::onSetFocus( bool isFocused )
 {	
 	_hasFocus = isFocused;
 
@@ -632,7 +650,7 @@ void Widget::onFocus( bool isFocused )
 		for( size_t i = 0; i < children().size(); ++i)
 		{
 			Pt::Hmi::Widget* child = children()[i];			
-			child->onFocus(false);									
+			child->setFocus(false);									
 		}
 
 		invalidate();
@@ -646,7 +664,7 @@ void Widget::onFocus( bool isFocused )
 	}
 		
 	//Set parent focused.	
-	parent()->onFocus(true);
+	parent()->setFocus(true);
 
 	//All sibling set to false. Only me let it true
 	for( size_t i = 0; i < parent()->children().size(); i++ )
@@ -654,10 +672,73 @@ void Widget::onFocus( bool isFocused )
 		Widget* child = parent()->children()[i];
 				
 		if( child != this )
-			child->onFocus( false );
+			child->setFocus( false );
 	}
 
 	invalidate();
+}
+
+
+void Widget::onSetSize(const Gfx::SizeF& size)
+{
+	_size = size;			
+  
+  surface().resize( _size );
+	_isValid = false;
+}
+
+	
+void Widget::onSetPosition(const Gfx::PointF& pos)
+{
+   _position = pos;
+   _isValid = false;
+}
+
+
+void Widget::onSetVisible( bool b )
+{
+	_visible = b;
+}
+
+
+
+void Widget::onSetCaption( const std::string& c )
+{
+	_caption = c;	
+
+	_mnemonicKey.clear();
+
+	int index = getMnemonicIndex(_caption);
+
+	if( index == std::string::npos )
+		return;
+					
+	std::string unescaped = Widget::removeMnemonic(_caption);
+
+	_mnemonicKey = "A//";	
+	_mnemonicKey += std::tolower(unescaped[index]);
+}
+
+
+
+size_t Widget::getMnemonicIndex(const std::string& text)
+{	 
+	size_t pos = 0;
+  
+  if( text.empty() )    
+	  return std::string::npos;
+
+	for( size_t i = 0; i < text.size() - 1; ++i)
+	{				
+		if( text[i] == '&'  && text[i +1] =='&' )
+			++i;
+		else if (text[i] == '&'  && 	text[i +1] !='&')
+			return pos;
+
+		pos++;
+	}
+
+	return std::string::npos;
 }
 
 
@@ -686,110 +767,27 @@ std::string Widget::removeMnemonic(const std::string& text)
 	return removed;		
 }
 
-
-size_t Widget::getMnemonicIndex(const std::string& text)
-{	 
-	size_t pos = 0;
-  
-  if( text.empty() )    
-	  return std::string::npos;
-
-	for( size_t i = 0; i < text.size() - 1; ++i)
-	{				
-		if( text[i] == '&'  && text[i +1] =='&' )
-			++i;
-		else if (text[i] == '&'  && 	text[i +1] !='&')
-			return pos;
-
-		pos++;
-	}
-
-	return std::string::npos;
+void Widget::onSetEnabled( bool e )
+{
+	_enabled = e;
 }
 
 
-void Widget::setCaption( const std::string& c )
+void Widget::bindMnemonic( Widget& w )
 {
-	_caption = c;
-
-	_mnemonicKey.clear();
-
-	if( !useMnemonic() )
-		return;  
-	
-	int index = getMnemonicIndex(_caption);
-
-	if( index == std::string::npos )
-		return;
-					
-	std::string unescaped = Widget::removeMnemonic(_caption);
-
-	_mnemonicKey = "A//";	
-	_mnemonicKey += std::tolower(unescaped[index]);
+	_mnemonicEntered += Pt::slot( w, &Widget::onMnemonic);
 }
 
 
-void Widget::onResize(const Gfx::SizeF& size)
+void Widget::unbindMnemonic( Widget& w )
 {
-	_size = size;			
-  
-  surface().resize( _size );
-	_isValid = false;
+	_mnemonicEntered -= Pt::slot( w, &Widget::onMnemonic);
 }
 
-	
-void Widget::onMove(const Gfx::PointF& pos)
+
+void Widget::unbindMnemonic()
 {
-    _position = pos;
-    _isValid = false;
-}
-
-Widget* Widget::findWidget( const Gfx::PointF& pos )
-{
-	std::vector<Widget*>::reverse_iterator it = _children.rbegin();
-
-	if( !visible() )
-			return 0;
-
-	for( ; it != _children.rend(); ++it )
-	{
-		Widget* child = *it;
-
-		Gfx::PointF localPos = child->toClient( pos );		
-		
-		if( child->contains( localPos ) )
-		{
-			Widget* found = child->findWidget( pos );
-
-			if( found )
-				return found;
-		}
-	}
-		
-	return contains( toClient( pos ) )  ? this : 0;
-}
-		
-
-
-Widget* Widget::findWidget( const std::string& name )
-{
-
-  if( _name == name )
-      return this;
-
-  std::vector<Widget*>::iterator it = _children.begin();
-
-	for( ; it != _children.end(); ++it )
-	{
-		Widget* child = *it;
-
-		Widget* found = child->findWidget( name );
-
-		if( found )
-			return found;		
-	}
-		
-	return  0;
+	_mnemonicEntered.disconnectAll();
 }
 
 }} //namespace

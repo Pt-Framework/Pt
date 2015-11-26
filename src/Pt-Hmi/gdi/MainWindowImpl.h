@@ -63,37 +63,35 @@ public:
 
   void hide();
 
-  void setWindowPos(const Gfx::PointF& p);
+  void setPosition(const Gfx::PointF& p);
 
-  void setWindowSize(const Gfx::SizeF& size);
+  void setSize(const Gfx::SizeF& size);
 
-  void showTitle(bool p);
+  void setShowTitle(bool p);
 
-  void setWindowCaption(const std::string& text);
+  void setCaption(const std::string& text);
 
-  void showMinimizedButton(bool p);
+  void setShowMinimizeButton(bool p);
   
-  void showMaximizeButton(bool p);
+  void setShowMaximizeButton(bool p);
   
-  void showSysMenu(bool p);
-
-  void setTopMost(bool force);
-  
-  void setWindowState(WindowState::Type p);
+  void setShowSystemMenu(bool p);
+	 
+  void setState(WindowState::Type p);
   
   void setBorder(WindowBorder::Type p);
   
-  void showInTaskbar(bool p);
+  void setShowInTaskbar(bool p);
   
   void setIcon(const Gfx::Image& p);
 
-	void setEnable(bool e);	
+	void setEnabled(bool e);	
 
-	void setMinSize(const Gfx::SizeF& s);
+	void setMinimumSize(const Gfx::SizeF& s);
 	
-	void setMaxSize(const Gfx::SizeF& s);
+	void setMaximumSize(const Gfx::SizeF& s);	
 
-	void focus();
+	void setTopMost( bool topMost );
 
 	void invalidate();
 

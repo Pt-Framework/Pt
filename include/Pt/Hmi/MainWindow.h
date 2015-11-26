@@ -45,54 +45,46 @@ class PT_HMI_API MainWindow  : public Window
 
 		void setTopMost( bool topMost );						
 	
-		virtual void setSize(const Gfx::SizeF& size);
-
-		virtual void setPosition(const Gfx::PointF& pos);
-
-		virtual void setCaption( const std::string& c);	       		
-
-		virtual void setClosed(bool c);		
-
+	
   protected:
     virtual void onInvalidate();			
 
-	private:
 		virtual void onActivate();
 
-    virtual void onVisible( bool b );
-					
-		void onPositionChanged(const Gfx::PointF& prop);    
+	private:
 
-		void onClosedChanged(const bool& closed);
-	  
-		void onVisibleChanged(const bool& visible);
+    virtual void onSetVisible( bool b );
 
-		void onCaptionChanged(const std::string& p);
-	  
-		void onShowTitleChanged(const bool& p);
-	  
-		void onShowMinimizedButtonChanged(const bool& p);
-	  
-		void onShowMaximizeButtonChanged(const bool& p);
-	  
-		void onShowSysMenuChanged(const bool& p);
+		virtual void onSetPosition(const Gfx::PointF& pos);
 
-		void onTopMostChanged(const bool& p);
-	  
-		void onWindowStateChanged(const Hmi::WindowState::Type& p);
-	  
-		void onBorderChanged(const WindowBorder::Type& p);
-	  
-		void onShowInTaskbarChanged(const bool& p);
-	  
-		void onIconChanged(const Gfx::Image & p);    		
+		virtual void onSetSize(const Gfx::SizeF& size);
 
-		void onEnabledChanged(const bool & p);
+		virtual void onShowTitle( bool s );
 
-		void onMinSizeChnaged(const Gfx::SizeF& prop);
-	
-		void onMaxSizeChnaged(const Gfx::SizeF& prop);
+		virtual void onSetCaption( const std::string& s );
+
+		virtual void onShowMinimizeButton( bool s );
+
+		virtual void onShowMaximizeButton( bool s );
+
+		virtual void onShowSystemMenu( bool  s );
+
+		virtual void onState(const Hmi::WindowState::Type& s);
 		
+		virtual void onBorder(const Hmi::WindowBorder::Type& t);
+
+		virtual void onShowInTaskbar(bool s);
+
+		virtual void onIcon(const Gfx::Image& i);
+
+		virtual void onSetEnabled( bool e );
+
+		virtual void onSetMinimumSize( const Gfx::SizeF& s );
+
+		virtual void onSetMaximumSize(const Gfx::SizeF& s);
+
+		virtual void onClose();	
+
 	private:
 		MainWindowImpl*	 _impl;    
 };

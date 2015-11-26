@@ -59,8 +59,8 @@ void Panel::onRender(PaintSurface& paintSurface)
   if( _panelBorderWidth == 0 )
     return;
 
-  const Gfx::SizeF  size = clientSize();
-  const Gfx::PointF pos  = clientPos();
+  const Gfx::SizeF  size = this->size();
+  const Gfx::PointF pos  = this->position();
 
 	size_t border =  (size_t) _panelBorderWidth;	
 
@@ -126,7 +126,7 @@ void Panel::onRender(PaintSurface& paintSurface)
 
 		break;
 			
-		case BorderStyle::Widget:
+		case BorderStyle::Custom:
 		{			
 			std::vector<Gfx::PointF> points1(5);
 			std::vector<Gfx::PointF> points2(5);

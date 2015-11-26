@@ -24,28 +24,28 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_Margine_H
-#define Pt_Hmi_Margine_H
+#ifndef Pt_Hmi_Spacing_H
+#define Pt_Hmi_Spacing_H
 
 #include <Pt/Hmi/Api.h>
 
 namespace Pt{
 namespace Hmi{
 
-class Margin
+class Spacing
 {
   public:
-    Margin(double all)
+    Spacing(double all)
     {
       setAll(all);
     }
 
-    Margin(const double left, const double top, const double right, const double bottom)
+    Spacing(const double left, const double top, const double right, const double bottom)
     {
       assign( left, top, right, bottom );
     }
 
-    Margin()    
+    Spacing()    
     {
       assign( 0, 0, 0, 0);
     }

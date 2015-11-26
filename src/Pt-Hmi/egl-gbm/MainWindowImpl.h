@@ -59,41 +59,7 @@ class MainWindowImpl  : public ChildWindow
 
 		void hide();
 
-		void activate();
-
-		void setWindowPos(const Gfx::PointF& p);
-
-		void setWindowSize(const Gfx::SizeF& size);
-
-		void showTitle(bool p);
-
-		void setWindowCaption(const std::string& text);
-
-		void showMinimizedButton(bool p);
-  
-		void showMaximizeButton(bool p);
-  
-		void showSysMenu(bool p);
-
-		void setTopMost(bool force);
-  
-		void setWindowState(WindowState::Type p);
-  
-		void setBorder(WindowBorder::Type p);
-  
-		void showInTaskbar(bool p);
-  
-		void setIcon(const Gfx::Image& p);
-
-		void setEnable(bool e);	
-
-		void setMinSize(const Gfx::SizeF& s);
-	
-		void setMaxSize(const Gfx::SizeF& s);
-
-		void bringToFront();
-
-		void focus();
+		void activate();	    		 		
 
 	protected:
 		virtual void onEvent(const Pt::Event& ev);

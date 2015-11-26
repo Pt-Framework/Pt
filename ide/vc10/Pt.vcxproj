@@ -66,8 +66,8 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Dialog.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Label.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Layout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MainWindow.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\Margin.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MoveEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Painter.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h" />
@@ -76,6 +76,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\ResizeDirection.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Screen.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Spacing.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowBorder.h" />

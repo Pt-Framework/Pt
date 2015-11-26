@@ -26,7 +26,7 @@
 
 #include "Dialog1.h"
 #include "Dialog2.h"
-#include <Pt/Hmi/Margin.h>
+#include <Pt/Hmi/Spacing.h>
 
 namespace Pt{
 namespace Hmi{

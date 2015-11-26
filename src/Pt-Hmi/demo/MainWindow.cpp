@@ -53,8 +53,8 @@ MainWindow::MainWindow()
 	_child1.setCaption( "Child 1" );
 	_child2.setCaption( "Child 2" );
 
-	addChildWindow( _child1 );
-	addChildWindow( _child2 );
+	addWindow( _child1 );
+	addWindow( _child2 );
 
 }
 

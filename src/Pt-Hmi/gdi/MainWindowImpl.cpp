@@ -51,13 +51,15 @@ MainWindowImpl::MainWindowImpl(Window* window)
 , _screen( _app.mainScreen() )
 {    
 	_pointerEvent.buttons().resize(3);      
-	_app.impl()->windowEvent() += Pt::slot(*this, &MainWindowImpl::onWindowEvent);  
+	_app.impl()->windowEvent() += Pt::slot(*this, &MainWindowImpl::onWindowEvent);
+
 }
 
 
 MainWindowImpl::~MainWindowImpl()
 {
-  _app.impl()->windowEvent() -= Pt::slot(*this, &MainWindowImpl::onWindowEvent);    
+  _app.impl()->windowEvent() -= Pt::slot(*this, &MainWindowImpl::onWindowEvent); 
+
 }
 
 void MainWindowImpl::create()
@@ -388,16 +390,10 @@ void MainWindowImpl::onPaint()
 }
 
 
-void MainWindowImpl::setWindowPos(const Gfx::PointF& pf)
+void MainWindowImpl::setPosition(const Gfx::PointF& pf)
 {
  Gfx::Point p = _screen.fromUnit(pf);
   SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, SWP_DRAWFRAME|SWP_NOSIZE);
-}
-
-
-void MainWindowImpl::focus()
-{	
-	SetFocus(_hwnd);
 }
 
 void MainWindowImpl::activate()
@@ -406,7 +402,8 @@ void MainWindowImpl::activate()
   BringWindowToTop( _hwnd );
 }
 
-void MainWindowImpl::setWindowSize(const Gfx::SizeF& sizef)
+
+void MainWindowImpl::setSize(const Gfx::SizeF& sizef)
 {
 	if( _hwnd == 0)
 		return;
@@ -427,7 +424,7 @@ void MainWindowImpl::setWindowSize(const Gfx::SizeF& sizef)
 }
 
 
-void MainWindowImpl::showTitle(bool p)
+void MainWindowImpl::setShowTitle(bool p)
 {
   LONG style = GetWindowLong(_hwnd, GWL_STYLE);
     
@@ -440,13 +437,13 @@ void MainWindowImpl::showTitle(bool p)
 }
 
 
-void MainWindowImpl::setWindowCaption(const std::string& text)
+void MainWindowImpl::setCaption(const std::string& text)
 {
   SetWindowText(_hwnd, text.c_str());
 }
 
 
-void MainWindowImpl::showMinimizedButton(bool p)
+void MainWindowImpl::setShowMinimizeButton(bool p)
 {
   LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
@@ -459,7 +456,7 @@ void MainWindowImpl::showMinimizedButton(bool p)
 }
 
 
-void MainWindowImpl::showMaximizeButton(bool p)
+void MainWindowImpl::setShowMaximizeButton(bool p)
 {
   LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
@@ -472,7 +469,7 @@ void MainWindowImpl::showMaximizeButton(bool p)
 }
 
 
-void MainWindowImpl::showSysMenu(bool p)
+void MainWindowImpl::setShowSystemMenu(bool p)
 {
   LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
@@ -485,18 +482,7 @@ void MainWindowImpl::showSysMenu(bool p)
 }
 
 
-void MainWindowImpl::setTopMost(bool force)
-{
-	_forceTopMost = force;
-
-	if( _forceTopMost )
-	{
-		BringWindowToTop(_hwnd);		
-	}
-}
-
-
-void MainWindowImpl::setWindowState(WindowState::Type p)
+void MainWindowImpl::setState(WindowState::Type p)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
@@ -569,17 +555,17 @@ void MainWindowImpl::setBorder(WindowBorder::Type p)
 }
 
 
-void MainWindowImpl::setMinSize(const Gfx::SizeF& s)
+void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
 {
 	_minSize = _screen.fromUnit(s);
 }
 	
-void MainWindowImpl::setMaxSize(const Gfx::SizeF& s)
+void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 {
 	_maxSize = _screen.fromUnit(s);			
 }
 
-void MainWindowImpl::showInTaskbar(bool p)
+void MainWindowImpl::setShowInTaskbar(bool p)
 {	
   LONG style = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
@@ -591,9 +577,14 @@ void MainWindowImpl::showInTaskbar(bool p)
   SetWindowLong(_hwnd, GWL_EXSTYLE, style);	
 }
 
-void MainWindowImpl::setEnable(bool e)
+void MainWindowImpl::setEnabled(bool e)
 {
 	EnableWindow(_hwnd, e);
+}
+
+void MainWindowImpl::setTopMost( bool topMost )
+{
+
 }
 
 void MainWindowImpl::setIcon(const Gfx::Image& icon)

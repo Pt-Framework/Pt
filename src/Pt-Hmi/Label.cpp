@@ -63,7 +63,7 @@ void Label::recalcNewSize()
 
   const Gfx::FontMetrics metric = surface.painter().fontMetrics(captionStr.c_str());
 
-  setSize(  Gfx::SizeF( metric.width() + margin().left() + margin().right(), metric.height() +margin().top() +  margin().bottom() ) );  
+  setSize(  Gfx::SizeF( metric.width() + layout().margin().left() + layout().margin().right(), metric.height() +layout().margin().top() +  layout().margin().bottom() ) );  
   invalidate();
 }
 
@@ -82,10 +82,10 @@ void Label::onAutoSizeChanged(const bool& a)
 void Label::onRender(PaintSurface& paintSurface)
 {
 	Pt::Hmi::Painter& painter = paintSurface.painter();	
- Gfx::SizeF         size = clientSize();
-	Gfx::PointF        pos = clientPos();
+ Gfx::SizeF         size = this->size();
+	Gfx::PointF        pos = this->position();
 	Pt::String        captionStr;
- Gfx::Color         foreColor = isEnabled() ? foregroundColor() : disabledColor();
+ Gfx::Color         foreColor = foregroundColor();
  Gfx::Pen	          pen( 1, foreColor);
     
 	if( useMnemonic() )
@@ -101,15 +101,15 @@ void Label::onRender(PaintSurface& paintSurface)
               
 	if( !autoSize() )
 	{										            	
-		switch(textAlign())
+		switch(contentAlignment())
 		{
-      case Hmi::Align::TopLeft:
+      case Widget::TopLeft:
       {
 			  pos +=Gfx::PointF( 0, metric.ascent() );			
       }
       break;
 
-		  case Hmi::Align::TopCenter:
+		  case Widget::TopCenter:
       {
         const double widthHalf		  = size.width()/2;							  				
 			  const double textWidthHalf	= metric.width()/2;				  								
@@ -117,7 +117,7 @@ void Label::onRender(PaintSurface& paintSurface)
       }
       break;
 		
-      case Hmi::Align::TopRight:
+      case Widget::TopRight:
       {
 			  const double width		  = size.width();				
 			  const double textWidth	= metric.width();									
@@ -125,7 +125,7 @@ void Label::onRender(PaintSurface& paintSurface)
       }
       break;
 
-		  case Hmi::Align::MidleLeft:
+		  case Widget::MidleLeft:
       {			  
         const double heightHalf		  = size.height()/2;				
 			  const double textHeightHalf = metric.height()/2;
@@ -134,7 +134,7 @@ void Label::onRender(PaintSurface& paintSurface)
       }
       break;
 
-		  case Hmi::Align::MidleCenter:
+		  case Widget::MidleCenter:
 		  {			
 			  const double widthHalf		  = size.width()/2;				
 			  const double heightHalf		  = size.height()/2;				
@@ -145,7 +145,7 @@ void Label::onRender(PaintSurface& paintSurface)
 		  }
 		  break;
 
-		  case Hmi::Align::MidleRight:
+		  case Widget::MidleRight:
       {
 			  const double width		  = size.width();				
 			  const double textWidth	= metric.width();	
@@ -157,7 +157,7 @@ void Label::onRender(PaintSurface& paintSurface)
       }
       break;
 
-		  case Hmi::Align::BottomLeft:
+		  case Widget::BottomLeft:
       {
         const double height	  = size.height();				
 			  const double textHeight = metric.height();	
@@ -166,7 +166,7 @@ void Label::onRender(PaintSurface& paintSurface)
       }
       break;
 
-		  case Hmi::Align::BottomCenter:
+		  case Widget::BottomCenter:
       {
 			  const double widthHalf		  = size.width()/2;				
 			  const double textWidthHalf	= metric.width()/2;	
@@ -178,7 +178,7 @@ void Label::onRender(PaintSurface& paintSurface)
       }
       break;
 
-		  case Hmi::Align::BottomRight:
+		  case Widget::BottomRight:
       {
         const double width		  = size.width();				
 			  const double textWidth	= metric.width();	

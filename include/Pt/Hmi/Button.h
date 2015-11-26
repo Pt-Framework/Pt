@@ -87,12 +87,12 @@ public:
        _image = i;
     }
 
-    Align::Type  imageAlign()  const
+    Alignment imageAlign()  const
     {
        return _imageAlign;
     }
 
-    void setImageAlign(const Align::Type&  i) 
+    void setImageAlign(const Alignment&  i) 
     {
        _imageAlign = i;
     }
@@ -107,7 +107,7 @@ private:
 	ButtonType::Type  _buttonType;	
 	int								_doublePressTimeInMs; 
   Gfx::Image					_image;	
-  Align::Type       _imageAlign;
+  Alignment     _imageAlign;
 
 protected:
 	virtual void onPressedAction();

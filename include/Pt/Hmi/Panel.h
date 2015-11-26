@@ -34,15 +34,25 @@ namespace Hmi{
 class PT_HMI_API Panel  : public Widget
 {
 	public:
+		enum BorderStyle
+		{
+			NoBorder,
+			Single,
+			Border3D,
+			Custom
+		};
+
+
+	public:
 		Panel();
 		virtual ~Panel();	
 
-    BorderStyle::Type panelBorderStyle() const
+    BorderStyle panelBorderStyle() const
     {   
         return  _panelBorderStyle;
     }
 
-    void setPanelBorderStyle(BorderStyle::Type t)         
+    void setPanelBorderStyle(BorderStyle t)         
     {   
         _panelBorderStyle = t;
     }
@@ -79,7 +89,7 @@ class PT_HMI_API Panel  : public Widget
     }
 
 	private:
-		BorderStyle::Type _panelBorderStyle;
+		BorderStyle				 _panelBorderStyle;
 		bool				      _panelBorderRoundEdge;	
 		double			      _panelBorderWidth;	  
 		Gfx::Color				_borderColor;
