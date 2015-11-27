@@ -531,9 +531,7 @@ void Widget::onPointerEvent(const PointerEvent& ev)
 
 void Widget::onKeyEvent(const KeyEvent& ev)
 {     
-    if( ! isEnabled() )
-            return;
-
+/*
     //// mnemonic handling
     if( !_mnemonicKey.empty() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && _visible )
     {        
@@ -544,7 +542,7 @@ void Widget::onKeyEvent(const KeyEvent& ev)
             
         mnKey += ev.toUTF8String();
 
-    if(_mnemonicKey == mnKey)
+        if(_mnemonicKey == mnKey)
                 onMnemonic();
     }
 
@@ -562,7 +560,7 @@ void Widget::onKeyEvent(const KeyEvent& ev)
 
     // propagate to children
     for( size_t i = 0; i < children().size(); ++i)
-        children()[i]->onKeyEvent(ev);
+        children()[i]->onKeyEvent(ev); */
 }
 
 

@@ -149,7 +149,7 @@ void Window::setFocusedWidget( Widget* widget )
 
 void Window::onPointerEvent(const PointerEvent& ev)
 {    
-  if( _windowManager.pointerInput( ev ) )
+    if( _windowManager.pointerInput( ev ) )
     {
             this->setPointedWidget( 0 );    
       return;
@@ -187,7 +187,9 @@ void Window::onKeyEvent(const KeyEvent& ev)
         invalidate();
     }
 
-  Widget::onKeyEvent(ev);
+ if( _focusedWidget != 0 )
+    _focusedWidget->onKeyEvent(ev);
+
 }
 
 
