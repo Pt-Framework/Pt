@@ -37,7 +37,7 @@ Label::Label()
 , _autoSize(true)
 {
 	setForegroundColor(Gfx::Color::fromRgb8(0,0,0,0));
-	setPanelBorderStyle(BorderStyle::NoBorder);
+	setPanelBorderStyle(NoBorder);
   
 }
 

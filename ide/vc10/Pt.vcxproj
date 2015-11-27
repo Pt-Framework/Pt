@@ -64,6 +64,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceButton.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceControlDial.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Dialog.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Key.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Label.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Layout.h" />
@@ -495,6 +496,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PainterImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Key.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Label.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.cpp" />

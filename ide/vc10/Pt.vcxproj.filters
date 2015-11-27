@@ -1311,6 +1311,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Spacing.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Key.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2407,6 +2410,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\PngReader.cpp">
       <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Key.cpp">
+      <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

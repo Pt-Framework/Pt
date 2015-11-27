@@ -33,7 +33,7 @@ namespace Pt{
 namespace Hmi{
 
 Panel::Panel()
-: _panelBorderStyle(BorderStyle::Single)
+: _panelBorderStyle(Single)
 , _panelBorderWidth(1)
 , _panelBorderRoundEdge(false)
 , _borderColor(Gfx::Color::fromRgb8(178,178,178))
@@ -71,7 +71,7 @@ void Panel::onRender(PaintSurface& paintSurface)
 						
 	switch( _panelBorderStyle )
 	{
-		case BorderStyle::Single:
+		case Single:
 		{			
 			std::vector<Gfx::PointF> points1(5);
 			std::vector<Gfx::PointF> points2(5);
@@ -126,7 +126,7 @@ void Panel::onRender(PaintSurface& paintSurface)
 
 		break;
 			
-		case BorderStyle::Custom:
+		case Custom:
 		{			
 			std::vector<Gfx::PointF> points1(5);
 			std::vector<Gfx::PointF> points2(5);
@@ -186,7 +186,7 @@ void Panel::onRender(PaintSurface& paintSurface)
 		}
 		break;
 
-		case BorderStyle::Border3D:
+		case Border3D:
 		{
 			std::vector<Gfx::PointF> points1(3);
 			std::vector<Gfx::PointF> points2(3);

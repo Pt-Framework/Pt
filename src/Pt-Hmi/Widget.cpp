@@ -44,12 +44,12 @@ Widget::Widget()
 , _backgroundColor(Gfx::Color::fromRgb8(237,237,237))
 , _foregroundColor( Gfx::Color::fromRgb8(0,0,0) )
 , _backgroundImage()
-, _backgroundImageLayout(  ImageLayout::NoLayout )
+, _backgroundImageLayout( NoLayout )
 , _cursor( Hmi::Cursor::defaultCursor() )
 , _acceptFocus( true) 
-, _focusedActionKey( "")
+, _focusedActionKey()
 , _name("")
-, _shortcutKey("")
+, _shortcutKey()
 , _hasFocus( false)
 , _size( 100, 100)
 , _position( 10,10) 
@@ -141,11 +141,10 @@ void Widget::setWindow(Window* w)
         return;
 
     _window = w;
-    
+      
     for( size_t i = 0; i < _children.size(); ++i )
         _children[i]->setWindow(w);
 }
-
 
 Widget* Widget::findWidget( const Gfx::PointF& pos )
 {
@@ -436,13 +435,13 @@ void Widget::onRender( PaintSurface& surface )
     {
         switch( backgroundImageLayout())
         {                
-            case ImageLayout::NoLayout:
+            case NoLayout:
             {
                 painter.drawImage( Pt::Gfx::PointF(0,0), backImage );
             }
             break;
             
-            case ImageLayout::Tile:
+            case Tile:
             {
                 for( double x = pos.x(); x < size.width();  x += backImage.width() )
                 {
@@ -452,7 +451,7 @@ void Widget::onRender( PaintSurface& surface )
             }
             break;
 
-            case ImageLayout::Center:
+            case Center:
             {
                 const double x = pos.x() + size.width()/2  - backImage.width()/2;
                 const double y = pos.y() + size.height()/2  - backImage.height()/2;
@@ -460,14 +459,14 @@ void Widget::onRender( PaintSurface& surface )
             }
             break;
             
-            case ImageLayout::Strech:
+            case Strech:
             {
                 Gfx::Image strech = backImage.blockScale(Gfx::Size((int) size.width(), (int)size.height() ) );
                 painter.drawImage( pos, strech );
             }
             break;
 
-            case ImageLayout::Zoom:
+            case Zoom:
             {
         const double factor = size.width()/(double)backImage.width();
         Pt::Gfx::Size newSize( ( size_t)( backImage.width()*factor), (size_t)(backImage.height()*factor));
@@ -749,8 +748,8 @@ void Widget::onSetCaption( const std::string& c )
                     
     std::string unescaped = Widget::removeMnemonic(_caption);
 
-    _mnemonicKey = "A//";    
-    _mnemonicKey += std::tolower(unescaped[index]);
+    _mnemonicKey.setAlt(true);    
+    _mnemonicKey.setUnicode(  std::toupper(unescaped[index]));
 }
 
 

@@ -225,12 +225,12 @@ class PT_HMI_API Widget : public Pt::Connectable
             onSetFocus(b);            
         }
 
-        const std::string& focusedActionKey() const
+        const Key& focusedActionKey() const
         {
             return _focusedActionKey;
         }
 
-        void setFocusedActionKey( const std::string& ak )
+        void setFocusedActionKey( const Key& ak )
         {
           _focusedActionKey = ak;
         }
@@ -260,14 +260,14 @@ class PT_HMI_API Widget : public Pt::Connectable
             return _layout;
         }
 
-        const std::string& shortcutKey() const
+        const Key& shortcutKey() const
         {
            return _shortcutKey;
         }
 
-        void setShortcutKey( const std::string&  k )
+        void setShortcutKey( const Key&  k )
         {
-           _shortcutKey = k;
+            _shortcutKey=  k;
         }
 
         void setVisible( bool b )
@@ -331,6 +331,7 @@ class PT_HMI_API Widget : public Pt::Connectable
         
         virtual void onSetCaption( const std::string& s );
 
+
     protected:
         Widget();    
 
@@ -355,9 +356,9 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         virtual void onRender(PaintSurface& paintSurface);        
 
-        virtual void onActionKey(KeyEvent::KeyState state);
-
-        virtual void onShortcutKey(KeyEvent::KeyState state);             
+        virtual void onActionKey(KeyEvent::KeyState state);    
+              
+        virtual void onShortcutKey(KeyEvent::KeyState state);
 
         virtual void onMnemonic();
     
@@ -389,17 +390,17 @@ class PT_HMI_API Widget : public Pt::Connectable
         ImageLayout               _backgroundImageLayout;
         Hmi::Cursor               _cursor;
         bool                     _acceptFocus;
-        std::string             _focusedActionKey;
+        Key             _focusedActionKey;
         std::string             _name;                    
         Layout                 _layout;
-        std::string            _shortcutKey;
+        Key                     _shortcutKey;
         bool                     _hasFocus;            
         Gfx::SizeF             _size;
         Gfx::PointF            _position;            
         Alignment               _contentAlignment;
         std::string             _caption;
         Gfx::Font               _font;
-        std::string            _mnemonicKey;    
+        Key            _mnemonicKey;    
         Pt::Signal<>            _mnemonicEntered;
            
 

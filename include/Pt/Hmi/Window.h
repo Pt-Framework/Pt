@@ -35,6 +35,7 @@
 #include <Pt/Hmi/WindowStartPosition.h>
 #include <Pt/Hmi/WindowState.h>
 #include <Pt/Hmi/WindowBorder.h>
+#include <Pt/Hmi/Key.h>
 #include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Gfx/Image.h>
@@ -219,12 +220,12 @@ class PT_HMI_API Window : public Widget
       _firstShow = b;
     }
 
-    const std::string& focuseMoveKey()const
+    const Key& focuseMoveKey()const
     {
       return _focuseMoveKey;
     }
 
-    void setFocuseMoveKey(const std::string& s)
+    void setFocuseMoveKey(const Key& s)
     {
       _focuseMoveKey = s;
     }
@@ -239,6 +240,10 @@ class PT_HMI_API Window : public Widget
       onSetCaption( c );
     }
 
+
+    void registerShortcut( Widget* w );
+
+    void unregisterShortcut( Widget* w );
 
   protected:
     Window(Window* parent = 0);    
@@ -310,7 +315,9 @@ class PT_HMI_API Window : public Widget
     Gfx::Image                       _icon;
     bool                             _canClose;
     bool                             _firstShow;
-    std::string                      _focuseMoveKey;    
+    Key                              _focuseMoveKey;    
+    std::map<Key, std::vector<Widget*> > _shortcuts; 
+
 };
 
 } // namespace

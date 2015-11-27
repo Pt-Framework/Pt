@@ -112,10 +112,10 @@ void MainWindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
   if(msg == WM_SYSCOMMAND)
   {
     _keyEvent.setState(KeyEvent::KeyUp);
-    _keyEvent.setAlt(wparam == SC_KEYMENU );
-    _keyEvent.setShift(false);
-    _keyEvent.setCtrl(false);
-    _keyEvent.setUnicode(lparam);
+    _keyEvent.key().setAlt(wparam == SC_KEYMENU );
+    _keyEvent.key().setShift(false);
+    _keyEvent.key().setCtrl(false);
+    _keyEvent.key().setUnicode(lparam);
   }
   else
   {
@@ -128,20 +128,20 @@ void MainWindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 
       if(wparam == 16 )
       {//Shift key
-        _keyEvent.setAlt(false);
-        _keyEvent.setShift(_keyEvent.state() == KeyEvent::KeyDown);
+        _keyEvent.key().setAlt(false);
+        _keyEvent.key().setShift(_keyEvent.state() == KeyEvent::KeyDown);
       }
       else if(wparam == 17 )
       {//Controll key
-        _keyEvent.setAlt(false);
-        _keyEvent.setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
+        _keyEvent.key().setAlt(false);
+        _keyEvent.key().setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
       }
 
       Pt::uint32_t scanCode = ((lparam >> 16) & 0xFF);            
       Pt::uint32_t ucode = 0;            
         
       ToUnicode( wparam, scanCode , (BYTE*)keyboardState, (LPWSTR)&ucode, 4, 0);    
-      _keyEvent.setUnicode(ucode);
+      _keyEvent.key().setUnicode(ucode);
   }
 
 	_app.sendEvent(*_window, _keyEvent);

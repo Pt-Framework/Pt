@@ -49,7 +49,7 @@ Window::Window(Window* parent)
 , _icon()
 , _canClose( true)
 , _firstShow(true)
-, _focuseMoveKey("")
+, _focuseMoveKey()
 , _isClosed(true)
 , _isActive(false)
 {
@@ -171,9 +171,9 @@ void Window::onKeyEvent(const KeyEvent& ev)
     if( ! isEnabled() )
         return;
     
-    if( ev.toUTF8String() == _focuseMoveKey && ev.state() == Pt::Hmi::KeyEvent::KeyUp )
+    if( ev.key() == _focuseMoveKey && ev.state() == Pt::Hmi::KeyEvent::KeyUp )
     {    
-        if(  ev.shift() )
+        if(  ev.key().shift() )
         {    
                 if(!focusPrev() )
                     focusPrev();
@@ -301,6 +301,39 @@ void Window::onRender( PaintSurface& surface )
 {
     Widget::onRender( surface );
     _windowManager.render();
+}
+
+void Window::registerShortcut( Widget* w )
+{
+   std::map<Key, std::vector<Widget*> >::iterator it = _shortcuts.find( w->shortcutKey() );
+
+   if( it == _shortcuts.end() )
+   {
+    std::vector<Widget*> widgets;
+    widgets.push_back( w);
+    std::pair<Key,std::vector<Widget*> > pair( w->shortcutKey(), widgets );
+    _shortcuts.insert( pair );
+  }
+  else
+  {
+    it->second.push_back( w);
+  }
+}
+
+
+void Window::unregisterShortcut( Widget* w )
+{
+    std::map<Key, std::vector<Widget*> >::iterator it = _shortcuts.find( w->shortcutKey() );
+    
+    if( it == _shortcuts.end() )
+      return;
+
+   std::vector<Widget*>::iterator wt = std::find( it->second.begin(), it->second.end(), w );
+
+   if( wt == it->second.end() )
+    return;
+
+    it->second.erase( wt );
 }
 
 } // namespace

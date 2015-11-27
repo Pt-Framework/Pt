@@ -35,7 +35,7 @@ ChildW::ChildW()
 	//Toggle button
 	_toggleButton.setButtonType(  Hmi::ButtonType::Toggle );
 	_toggleButton.setCaption( std::string("Toggle Me [CTRL+I]") );
-	_toggleButton.setShortcutKey( std::string("C//i") );
+//	_toggleButton.setShortcutKey( std::string("C//i") );
 	_toggleButton.setPosition( Gfx::PointF(20,60) );
 	_toggleButton.setSize( Gfx::SizeF(150,25) );		
 	_mainPanel.addWidget(_toggleButton);
@@ -43,7 +43,7 @@ ChildW::ChildW()
 	//Dialog button  
 	_dialogButton.setButtonType( Hmi::ButtonType::Press );
 	_dialogButton.setCaption(std::string("&&Dia&log [CTRL+D]&") );
-	_dialogButton.setShortcutKey( std::string("C//d") );
+//	_dialogButton.setShortcutKey( std::string("C//d") );
 	_dialogButton.setPosition( Gfx::PointF(20,100));
 	_dialogButton.setSize( Gfx::SizeF(150,25) );	
 	
@@ -52,7 +52,7 @@ ChildW::ChildW()
 	//Close button
 	_closeButton.setButtonType(Hmi::ButtonType::Press);
 	_closeButton.setCaption(std::string("Close App [CTRL+X]"));
-	_closeButton.setShortcutKey(std::string("C//x"));
+//	_closeButton.setShortcutKey(std::string("C//x"));
 	_closeButton.setPosition(Gfx::PointF(590,525));
 	_closeButton.setSize(Gfx::SizeF(150,25));
 	_closeButton.setSize(Gfx::SizeF(20, 40));
