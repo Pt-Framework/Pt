@@ -47,8 +47,8 @@ void Dialog1::init()
 	//Dialog
 	setSize( Gfx::SizeF(700,500) );
 	setPosition( Gfx::PointF(400,400) );
-	setCaption( std::string("This is a sample modal dialog 1") );
-	setBackgroundColor( Gfx::Color(0,1,1) );
+	setTitle( std::string("This is a sample modal dialog 1") );
+
   /*
 	//New dialog button 
 	_newDialogButton.setMargin( Hmi::Margin(5) );

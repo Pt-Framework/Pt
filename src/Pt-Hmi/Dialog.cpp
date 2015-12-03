@@ -33,11 +33,11 @@ namespace Hmi{
 Dialog::Dialog()
 : _result( DialogResultType::Undefined)
 {
-  setShowInTaskbar( false) ;
-	setShowSysMenu( true);
-	setBorder(  WindowBorder::Dialog );
-	setStartPostion ( WindowStartPosition::CenterParent );
-	setShowInTaskbar( true);
+ // setShowInTaskbar( false) ;
+	//setShowSysMenu( true);
+	//setBorder(  WindowBorder::Dialog );
+	//setStartPostion ( WindowStartPosition::CenterParent );
+	//setShowInTaskbar( true);
 }
 
 Dialog::~Dialog()
@@ -45,7 +45,7 @@ Dialog::~Dialog()
 }
 
 
-void Dialog::doModal(MainWindow* parent)
+void Dialog::doModal(Window* parent)
 {	
 /*
 	//Setup the parent as disabled and TopMost = false.

@@ -11,7 +11,7 @@ ChildW::ChildW()
 	setPosition( Gfx::PointF(10,10) );
 	setSize( Gfx::SizeF(520,350) );
 	setVisible( true) ;
-  setCaption(  "Child 1" );
+    setTitle(  "Child 1" );
 
 	//Panel  
 	_mainPanel.setSize( Gfx::SizeF(800,600) );
@@ -58,14 +58,14 @@ ChildW::ChildW()
 	_closeButton.setSize(Gfx::SizeF(20, 40));
 	_closeButton.layout().setDocking( Layout::Bottom);
 	
-	_childWindow2.addWidget(_closeButton);	  	
+	//_childWindow2.setMainWidget(&_closeButton);	  	
 	_childWindow2.setPosition(Gfx::PointF(10,10));	
 	_childWindow2.setSize (Gfx::SizeF(420,300));
-  _childWindow2.setCaption ( "Child A");	
-	_childWindow2.addWidget(_mainPanel);
+    _childWindow2.setTitle ( "Child A");	
+	_childWindow2.setMainWidget(&_mainPanel);
 	_childWindow2.setVisible(true);
 
-	addWindow( _childWindow2 );	
+	add( _childWindow2 );	
 }
 
 ChildW::~ChildW()

@@ -32,7 +32,6 @@
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Cursor.h>
-#include <Pt/Hmi/Event.h>
 #include <Pt/Hmi/Screen.h>
 
 namespace Pt {

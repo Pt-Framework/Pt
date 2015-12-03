@@ -45,7 +45,6 @@
 namespace Pt {
 namespace Hmi {
 
-class ChildWindow;
 class Window;
 class PointerEvent;
 class KeyEvent;
@@ -55,22 +54,22 @@ class Screen;
 class WindowManager : public Pt::Connectable
 {
     public:
-        WindowManager(Window& window);
+        WindowManager(Window* window);
 
         virtual ~WindowManager();
 
-        void add(ChildWindow* w);
+        void add(Window& w);
 
-        void remove(ChildWindow* window);
+        void remove(Window& window);
 
         void clear(); 
 
-        const std::vector<ChildWindow*>& windows() const
+        const std::vector<Window*>& windows() const
         {
             return _windows;
         }
 
-        void activate(ChildWindow* w);
+        void activate(Window& w);
 
         void deactivate();
 
@@ -93,39 +92,39 @@ class WindowManager : public Pt::Connectable
         void invalidate();
 
     protected:
-        virtual Gfx::PointF renderFrame( ChildWindow* w);
+        virtual Gfx::PointF renderFrame( Window& w);
 
     private:
-        bool contains( const ChildWindow* w, const Gfx::PointF& p );
+        bool contains( const Window& w, const Gfx::PointF& p );
 
         void setSizingCursor( ResizeDirection::Type type );
  
-        ResizeDirection::Type getSizingDirection( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );
+        ResizeDirection::Type getSizingDirection( const Window& w, const Pt::Hmi::PointerEvent& ev );
 
-        ResizeDirection::Type isSizing( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );    
+        ResizeDirection::Type isSizing( const Window& w, const Pt::Hmi::PointerEvent& ev );    
 
-        bool isMoving ( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );
+        bool isMoving ( const Window& w, const Pt::Hmi::PointerEvent& ev );
 
-        void doSizing( ChildWindow* w, const PointerEvent& ev );
+        void doSizing( Window& w, const PointerEvent& ev );
 
-        void doMoving( ChildWindow* w, const PointerEvent& ev );
+        void doMoving( Window& w, const PointerEvent& ev );
 
         void updateActive( const Pt::Hmi::PointerEvent& mouseEvent );
 
-        Window* getFosusedWindow(WindowManager* manager);
+        Window* getFosusedWindow(WindowManager& manager);
 
-        Gfx::PointF toClient(const ChildWindow* w, const Gfx::PointF& p);  
+        Gfx::PointF toClient(const Window& w, const Gfx::PointF& p);  
 
-        ChildWindow* active();        
+        Window* active();        
 
-        ChildWindow* findWindow( const Gfx::PointF& pos );
+        Window* findWindow( const Gfx::PointF& pos );
 
-        void setPointedWindow( ChildWindow* window );
+        void setPointedWindow( Window* window );
 
     private:
         Application&              _app;
-        Window&                   _window;
-        std::vector<ChildWindow*> _windows;
+        Window*                   _window;
+        std::vector<Window*> _windows;
         ResizeDirection::Type     _sizingDirection;
         Gfx::PointF               _lastSizePoint;
         double                    _borderWidth;
@@ -138,7 +137,7 @@ class WindowManager : public Pt::Connectable
         bool                      _focusOnPointerOver;
         size_t                    _actionButton;  
         double                    _titleBarHeight;
-        ChildWindow*              _pointedWindow;
+        Window*                   _pointedWindow;
 };
 
 }} // namespace

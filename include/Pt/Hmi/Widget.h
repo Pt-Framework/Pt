@@ -52,7 +52,7 @@ class Window;
 
 class PT_HMI_API Widget : public Pt::Connectable
 {
-    friend class Window;
+    friend class WindowImpl;
 
     public: 
         enum ImageLayout
@@ -334,7 +334,6 @@ class PT_HMI_API Widget : public Pt::Connectable
         
         virtual void onSetCaption( const std::string& s );
 
-
     protected:
         Widget();    
 
@@ -348,8 +347,6 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         virtual void onPointerLeave();
     
-        virtual void onInvalidate();
-
         virtual void onLayout(PaintSurface& paintSurface);
 
         virtual void onRender(PaintSurface& paintSurface);        

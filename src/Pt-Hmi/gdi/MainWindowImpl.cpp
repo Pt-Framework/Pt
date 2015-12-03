@@ -43,15 +43,14 @@ namespace Pt{
 namespace Hmi{
 
 
-MainWindowImpl::MainWindowImpl(Window* window)
-: _hwnd( 0 )
+MainWindowImpl::MainWindowImpl(Window* w)
+: WindowImpl(w)
 , _app( Pt::Hmi::Application::instance() )
-, _forceTopMost( false )
-, _window( window )
 , _screen( _app.mainScreen() )
+, _hwnd( 0 )
 {    
-	_pointerEvent.buttons().resize(3);      
 	_app.impl()->windowEvent() += Pt::slot(*this, &MainWindowImpl::onWindowEvent);
+    create();
 
 }
 
@@ -59,20 +58,22 @@ MainWindowImpl::MainWindowImpl(Window* window)
 MainWindowImpl::~MainWindowImpl()
 {
   _app.impl()->windowEvent() -= Pt::slot(*this, &MainWindowImpl::onWindowEvent); 
-
+  destroy();
 }
+
 
 void MainWindowImpl::create()
 {
-  if( _hwnd != 0)
+  if( _hwnd != 0 )
     throw std::logic_error("hwnd already created");
 
   HINSTANCE hInstance = GetModuleHandle(NULL);
 
-  _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, GetDesktopWindow(), NULL, hInstance, NULL );
-  BringWindowToTop( _hwnd );
-  ShowWindow( _hwnd, SW_HIDE );    
-  UpdateWindow( _hwnd );
+  HWND hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, GetDesktopWindow(), NULL, hInstance, NULL );
+  BringWindowToTop( hwnd );
+  ShowWindow( hwnd, SW_HIDE );    
+  UpdateWindow( hwnd );
+  _hwnd = hwnd;
 }
 
 
@@ -88,7 +89,10 @@ void MainWindowImpl::destroy()
 
 void MainWindowImpl::show()
 {
-  ShowWindow(_hwnd, SW_SHOW);
+    if( _hwnd == 0)
+        create();
+
+   ShowWindow(_hwnd, SW_SHOW);
 }
 
 
@@ -103,19 +107,20 @@ void MainWindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
   BYTE keyboardState[256];
 
   GetKeyboardState(keyboardState);
+  KeyEvent keyEvent;
 
   if(msg == WM_KEYDOWN)
-      _keyEvent.setState(KeyEvent::KeyDown);
+      keyEvent.setState(KeyEvent::KeyDown);
   else if(msg == WM_KEYUP)
-      _keyEvent.setState(KeyEvent::KeyUp);            
+      keyEvent.setState(KeyEvent::KeyUp);            
     
   if(msg == WM_SYSCOMMAND)
   {
-    _keyEvent.setState(KeyEvent::KeyUp);
-    _keyEvent.key().setAlt(wparam == SC_KEYMENU );
-    _keyEvent.key().setShift(false);
-    _keyEvent.key().setCtrl(false);
-    _keyEvent.key().setUnicode(lparam);
+    keyEvent.setState(KeyEvent::KeyUp);
+    keyEvent.key().setAlt(wparam == SC_KEYMENU );
+    keyEvent.key().setShift(false);
+    keyEvent.key().setCtrl(false);
+    keyEvent.key().setUnicode(lparam);
   }
   else
   {
@@ -128,23 +133,23 @@ void MainWindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 
       if(wparam == 16 )
       {//Shift key
-        _keyEvent.key().setAlt(false);
-        _keyEvent.key().setShift(_keyEvent.state() == KeyEvent::KeyDown);
+        keyEvent.key().setAlt(false);
+        keyEvent.key().setShift(keyEvent.state() == KeyEvent::KeyDown);
       }
       else if(wparam == 17 )
       {//Controll key
-        _keyEvent.key().setAlt(false);
-        _keyEvent.key().setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
+        keyEvent.key().setAlt(false);
+        keyEvent.key().setCtrl(keyEvent.state() == KeyEvent::KeyDown);
       }
 
       Pt::uint32_t scanCode = ((lparam >> 16) & 0xFF);            
       Pt::uint32_t ucode = 0;            
         
       ToUnicode( wparam, scanCode , (BYTE*)keyboardState, (LPWSTR)&ucode, 4, 0);    
-      _keyEvent.key().setUnicode(ucode);
+      keyEvent.key().setUnicode(ucode);
   }
 
-	_app.sendEvent(*_window, _keyEvent);
+	//_app.sendEvent(*_apiWindow, keyEvent);
 }
 
 
@@ -224,26 +229,23 @@ void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam
         }
         break;
 
-				case WM_ACTIVATE:
-				{
-					onActivate( wparam != 0 );
-				}
-				break;
+		case WM_ACTIVATE:
+		{
+			onActivate( wparam != 0 );
+		}
+		break;
 				
         case WM_KILLFOCUS:
         {
-					if( _forceTopMost )
-						BringWindowToTop( _hwnd );
-					else
-						onActivate( false );
+			onActivate( false );
         }
         break;        
 
 				case WM_GETMINMAXINFO:
 				{
 					MINMAXINFO* mmi = (MINMAXINFO*)lparam;
-					POINT min = { _minSize.width(), _minSize.height() };
-					POINT max = { _maxSize.width(), _maxSize.height() };
+					POINT min = { _minimumSize.width(), _minimumSize.height() };
+					POINT max = { _maximumSize.width(), _maximumSize.height() };
 					mmi->ptMaxTrackSize = max; 
 					mmi->ptMinTrackSize = min;
 					handled = true;  
@@ -251,7 +253,7 @@ void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam
 				break;
 
         case WM_MOUSELEAVE:
-           _window->setPointedWidget(0);
+//           _apiWindow->setPointedWidget(0);
         break;
     }
 }
@@ -259,13 +261,13 @@ void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam
 void MainWindowImpl::onClose()
 {
 	CloseEvent ev;
-	_window->processEvent(ev);
+	_apiWindow->processEvent(ev);
 }
 
 
 void MainWindowImpl::onActivate(bool f)
 {
-	_window->processEvent( ActivateEvent(f) );
+	_apiWindow->processEvent( ActivateEvent(f) );
 }
 
 
@@ -296,7 +298,7 @@ void MainWindowImpl::onSize(WPARAM wParam, LPARAM lParam)
   int height = HIWORD(lParam);  
     
 	Pt::Hmi::ResizeEvent ev(Gfx::SizeF(width, height), state);
-	_window->processEvent(ev);
+	_apiWindow->processEvent(ev);
 }
 
 
@@ -304,62 +306,64 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 {    
     int xPos = GET_X_LPARAM(lparam); 
     int yPos = GET_Y_LPARAM(lparam); 
+    PointerEvent pointerEvent;
+    pointerEvent.buttons().resize(3);
 
     switch(msg)
     {
         case WM_LBUTTONDOWN:
-            _pointerEvent.buttons()[0].setState(Pt::Hmi::DeviceButton::Pressed);
+            pointerEvent.buttons()[0].setState(Pt::Hmi::DeviceButton::Pressed);
 
-						if(_pointerEvent.pointerState() == PointerState::ReleaseToPress )
-							_pointerEvent.setPointerState( PointerState::PressToRelease ); 
+						if(pointerEvent.pointerState() == PointerState::ReleaseToPress )
+							pointerEvent.setPointerState( PointerState::PressToRelease ); 
 							
         break;
         
         case WM_LBUTTONUP:        
-            _pointerEvent.buttons()[0].setState( Pt::Hmi::DeviceButton::Released );
+            pointerEvent.buttons()[0].setState( Pt::Hmi::DeviceButton::Released );
 
-						if( _pointerEvent.pointerState() == PointerState::PressToRelease )
-							_pointerEvent.setPointerState( PointerState::ReleaseToPress ); 
+						if( pointerEvent.pointerState() == PointerState::PressToRelease )
+							pointerEvent.setPointerState( PointerState::ReleaseToPress ); 
 
         break;
                             
         case WM_MBUTTONDOWN:
-            _pointerEvent.buttons()[1].setState(Pt::Hmi::DeviceButton::Pressed);
+            pointerEvent.buttons()[1].setState(Pt::Hmi::DeviceButton::Pressed);
 
-						if(_pointerEvent.pointerState() == PointerState::ReleaseToPress )
-							_pointerEvent.setPointerState( PointerState::PressToRelease ); 
+						if(pointerEvent.pointerState() == PointerState::ReleaseToPress )
+							pointerEvent.setPointerState( PointerState::PressToRelease ); 
 
         break;
 
         case WM_MBUTTONUP:
-            _pointerEvent.buttons()[1].setState(Pt::Hmi::DeviceButton::Released);
+            pointerEvent.buttons()[1].setState(Pt::Hmi::DeviceButton::Released);
 
-						if( _pointerEvent.pointerState() == PointerState::PressToRelease )
-							_pointerEvent.setPointerState( PointerState::ReleaseToPress ); 
+						if( pointerEvent.pointerState() == PointerState::PressToRelease )
+							pointerEvent.setPointerState( PointerState::ReleaseToPress ); 
 
         break;
 
         case WM_RBUTTONDOWN:        
-            _pointerEvent.buttons()[2].setState(Pt::Hmi::DeviceButton::Pressed);
+            pointerEvent.buttons()[2].setState(Pt::Hmi::DeviceButton::Pressed);
 
-						if(_pointerEvent.pointerState() == PointerState::ReleaseToPress )
-							_pointerEvent.setPointerState( PointerState::PressToRelease ); 
+						if(pointerEvent.pointerState() == PointerState::ReleaseToPress )
+							pointerEvent.setPointerState( PointerState::PressToRelease ); 
 
         break;
         
         case WM_RBUTTONUP:
-            _pointerEvent.buttons()[2].setState(Pt::Hmi::DeviceButton::Released);
+            pointerEvent.buttons()[2].setState(Pt::Hmi::DeviceButton::Released);
 
-						if( _pointerEvent.pointerState() == PointerState::PressToRelease )
-							_pointerEvent.setPointerState( PointerState::ReleaseToPress ); 
+						if( pointerEvent.pointerState() == PointerState::PressToRelease )
+							pointerEvent.setPointerState( PointerState::ReleaseToPress ); 
         break;			
     }
   
     Gfx::PointF p = _screen.toUnit(Gfx::Point(xPos, yPos));
-    _pointerEvent.setX(p.x());
-    _pointerEvent.setY(p.y());            
+    pointerEvent.setX(p.x());
+    pointerEvent.setY(p.y());            
 
-	_app.sendEvent(*_window, _pointerEvent);
+	_app.sendEvent(*_apiWindow, pointerEvent);
 }
 
 
@@ -371,29 +375,26 @@ void MainWindowImpl::onMove(LPARAM lParam)
 	int yPos = info.top;
 
 	MoveEvent ev(Gfx::PointF(xPos, yPos) );
-  _window->processEvent( ev );	
+  _apiWindow->processEvent( ev );	
 }
 
 
 void MainWindowImpl::onPaint()
 {           
-if( _window->mainWidget() == 0)
-    return;
+      RECT  info;
+      GetClientRect(_hwnd, &info);
 
-  RECT  info;
-  GetClientRect(_hwnd, &info);
-
-  PAINTSTRUCT ps;
-  HDC windowContext = BeginPaint(_hwnd, &ps);
+      PAINTSTRUCT ps;
+      HDC windowContext = BeginPaint(_hwnd, &ps);
     
-  HDC bitmapDeviceConText = _window->mainWidget()->surface().impl()->deviceContext();
-  BitBlt(windowContext, 0, 0, info.right,  info.bottom, bitmapDeviceConText, 0, 0, SRCCOPY);    
+      HDC bitmapDeviceConText = _apiWindow->surface().impl()->deviceContext();
+      BitBlt(windowContext, 0, 0, info.right,  info.bottom, bitmapDeviceConText, 0, 0, SRCCOPY);    
     
-  EndPaint(_hwnd, &ps);    
+      EndPaint(_hwnd, &ps);    
 }
 
 
-void MainWindowImpl::setPosition(const Gfx::PointF& pf)
+void MainWindowImpl::onSetPosition(const Gfx::PointF& pf)
 {
  Gfx::Point p = _screen.fromUnit(pf);
   SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, SWP_DRAWFRAME|SWP_NOSIZE);
@@ -406,7 +407,7 @@ void MainWindowImpl::activate()
 }
 
 
-void MainWindowImpl::setSize(const Gfx::SizeF& sizef)
+void MainWindowImpl::onSetSize(const Gfx::SizeF& sizef)
 {
 	if( _hwnd == 0)
 		return;
@@ -427,6 +428,14 @@ void MainWindowImpl::setSize(const Gfx::SizeF& sizef)
 }
 
 
+void MainWindowImpl::onSetDecoration( WindowDecoration::Flags deco )
+{
+    setShowTitle( (deco & WindowDecoration::Flags::ShowTitleBar) != 0);
+    setShowMinimizeButton( (deco & WindowDecoration::Flags::ShowMinimizeButton) != 0);
+    setShowMaximizeButton( (deco & WindowDecoration::Flags::ShowMaximizeButton) != 0);
+    setShowSystemMenu( (deco & WindowDecoration::Flags::ShowIcon) != 0);
+}
+
 void MainWindowImpl::setShowTitle(bool p)
 {
   LONG style = GetWindowLong(_hwnd, GWL_STYLE);
@@ -440,7 +449,7 @@ void MainWindowImpl::setShowTitle(bool p)
 }
 
 
-void MainWindowImpl::setCaption(const std::string& text)
+void MainWindowImpl::onSetTitle(const std::string& text)
 {
   SetWindowText(_hwnd, text.c_str());
 }
@@ -485,7 +494,7 @@ void MainWindowImpl::setShowSystemMenu(bool p)
 }
 
 
-void MainWindowImpl::setState(WindowState::Type p)
+void MainWindowImpl::onSetState(WindowState::Type p)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
@@ -507,7 +516,7 @@ void MainWindowImpl::setState(WindowState::Type p)
 }
 
 
-void MainWindowImpl::setBorder(WindowBorder::Type p)
+void MainWindowImpl::onSetBorder(WindowBorder::Type p)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 		LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
@@ -558,39 +567,23 @@ void MainWindowImpl::setBorder(WindowBorder::Type p)
 }
 
 
-void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
+void MainWindowImpl::onSetMinimumSize(const Gfx::SizeF& s)
 {
-	_minSize = _screen.fromUnit(s);
+	
 }
 	
-void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
+void MainWindowImpl::onSetMaximumSize(const Gfx::SizeF& s)
 {
-	_maxSize = _screen.fromUnit(s);			
+	
 }
 
-void MainWindowImpl::setShowInTaskbar(bool p)
-{	
-  LONG style = GetWindowLong(_hwnd, GWL_EXSTYLE);
-
-  if(p)
-		style |= WS_EX_APPWINDOW;  
-  else
-    style &= ~WS_EX_APPWINDOW; 
-  	
-  SetWindowLong(_hwnd, GWL_EXSTYLE, style);	
-}
-
-void MainWindowImpl::setEnabled(bool e)
+void MainWindowImpl::onSetEnabled(bool e)
 {
 	EnableWindow(_hwnd, e);
 }
 
-void MainWindowImpl::setTopMost( bool topMost )
-{
 
-}
-
-void MainWindowImpl::setIcon(const Gfx::Image& icon)
+void MainWindowImpl::onSetIcon(const Gfx::Image& icon)
 {
     if(icon.width() == 0 || icon.height() == 0)
         return;
@@ -623,11 +616,13 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 
 void MainWindowImpl::invalidate()
 {
-    if(_window->mainWidget() == 0 )
-        return;
-
-	_window->mainWidget()->render();
+	render();
 	InvalidateRect(_hwnd, NULL, FALSE);
+}
+
+void MainWindowImpl::close()
+{
+    destroy();
 }
 
 }} // namespace

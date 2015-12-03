@@ -26,7 +26,7 @@
 #ifndef Pt_Hmi_Demo_MainWindow_h
 #define Pt_Hmi_Demo_MainWindow_h
 
-#include <Pt/Hmi/MainWindow.h>
+#include <Pt/Hmi/Window.h>
 #include "ChildW.h"
 
 namespace Pt{
@@ -34,7 +34,7 @@ namespace Hmi{
 namespace Demo{
 
 
-class MainWindow : public Pt::Hmi::MainWindow
+class MainWindow : public Pt::Hmi::Window
 {
 	public:
 		MainWindow();

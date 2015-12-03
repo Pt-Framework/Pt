@@ -40,7 +40,7 @@ class WindowState
 	  {
 		  Normal,
 		  Minimized,
-		  Maximazed,
+		  Maximazed
 	  };
 
     static std::string toString( WindowState::Type t )

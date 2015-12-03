@@ -32,6 +32,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Brush.h>
+#include "WindowImpl.h"
 
 namespace Pt {
 
@@ -202,7 +203,16 @@ Gfx::PointF Widget::fromClient( const Gfx::PointF& localPoint )
 void Widget::invalidate()
 {        
   _isValid = false;
-    onInvalidate();
+
+    if( parent() )
+    {
+        parent()->invalidate();   
+    }
+    else
+    {
+        if( _window != 0 )
+            _window->invalidate();
+    }
 }
 
 
@@ -448,13 +458,6 @@ void Widget::onRender( PaintSurface& surface )
 }
 
 
-void Widget::onInvalidate()
-{  
-    if( parent() )
-        parent()->invalidate();            
-}
-
-
 void Widget::onActionKey(KeyEvent::KeyState state)
 {
 }
@@ -490,7 +493,7 @@ void Widget::onEvent(const Pt::Event& ev)
 void Widget::onPointerEvent(const PointerEvent& ev)
 {        
     if( ev.buttons()[0].state() == DeviceButton::Pressed && _acceptFocus)
-        _window->setFocusedWidget( this );
+        _window->impl()->setFocusedWidget( this );
 }
 
 
@@ -599,7 +602,7 @@ bool Widget::focusPrev()
     if( children().size() == 0 )
         return false;
 
-    std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->focusedWidget() );    
+    std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->impl()->focusedWidget() );    
 
     if(  it == _children.end())
         return focusPrevChild( children().size() );
@@ -621,7 +624,7 @@ bool Widget::focusNext()
     if( children().size() == 0 )
         return false;
 
-    std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->focusedWidget() );    
+    std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->impl()->focusedWidget() );    
 
     if( it == _children.end() )
         return focusNextChild(-1);

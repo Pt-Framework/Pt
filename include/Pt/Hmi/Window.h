@@ -30,295 +30,134 @@
 #ifndef PT_HMI_WINDOW_H
 #define PT_HMI_WINDOW_H
 
-#include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/WindowStartPosition.h>
 #include <Pt/Hmi/WindowState.h>
 #include <Pt/Hmi/WindowBorder.h>
 #include <Pt/Hmi/Key.h>
 #include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
+#include <Pt/Hmi/ResizeEvent.h>
+#include <Pt/Hmi/KeyEvent.h>
+#include <Pt/Hmi/PointerEvent.h>
+#include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Font.h>
 #include <Pt/Connectable.h>
+#include <Pt/Signal.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class ChildWindow;
 class Widget;
+class WindowImpl;
+class PaintSurface;
 
 class PT_HMI_API Window : public Pt::Connectable
 {
    friend class Widget;
+   friend class WindowImpl;
 
-  public:            
+  public:           
+    Window();     
+
     virtual ~Window();                                
 
-    Window* parent()
-    {
-        return _parent;
-    }
+    Window* parent();
 
-    const Window* parent() const
-    {
-        return _parent;
-    }
+    const Window* parent() const;
     
-    void addWindow(ChildWindow& w);
+    void add(Window& w);
 
-    void removeWindow(ChildWindow& w);
+    void remove(Window& w);
 
     Window* findWindow(const std::string& name);
 
-    const std::vector<ChildWindow*>& windows() const
-    {
-        return _windowManager.windows();
-    }
-
-    WindowManager& windowManager()
-    {
-      return _windowManager;
-    }
-
-    const WindowManager& windowManager() const
-    {
-      return _windowManager;
-    }
+    const std::vector<Window*>& windows() const;
 
     Widget* findWidget(const std::string& name);
 
-    Widget* mainWidget() 
-    {
-        return _mainWidget; 
-    }
+    Widget* mainWidget() ;
 
-    const Widget* mainWidget()  const 
-    {
-        return _mainWidget; 
-    }
+    const Widget* mainWidget()  const ;
 
     void setMainWidget(Widget* widget);
-
-  private:    
-    void removeWidget(Widget& w);
-
-  public:
-    bool isClosed() const
-    {
-      return _isClosed;
-    }
-
+  
     void close();    
-
+    
     void activate();
 
-    bool isActive() const
-    {
-      return _isActive;
-    }
+    bool isClosed() const;
 
-    void setPointedWidget( Widget* widget );
+    bool isActive() const;
 
-    const Gfx::SizeF& minimumSize() const
-    {
-      return _minimumSize;
-    }
+    const Gfx::SizeF& minimumSize() const;
 
-    void setMinimumSize(const Gfx::SizeF& s)
-    {
-      onSetMinimumSize( s );
-    }
+    void setMinimumSize(const Gfx::SizeF& s);
 
-    const Gfx::SizeF& maximumSize() const
-    {
-      return _maximumSize;
-    }
+    const Gfx::SizeF& maximumSize() const;
 
-    void setMaximumSize(const Gfx::SizeF& s)
-    {
-      onSetMaximumSize(s);
-    }
+    void setMaximumSize(const Gfx::SizeF& s);
 
-    const Hmi::WindowStartPosition::Type& startPostion() const
-    {
-      return _startPostion;
-    }
+    Hmi::WindowPosition::Type defaultPosition() const;
 
-    void setStartPostion(const Hmi::WindowStartPosition::Type& p)
-    {
-      _startPostion = p;
-    }
+    void setDefaultPosition(Hmi::WindowPosition::Type p);
 
-    const Hmi::WindowState::Type& state() const
-    {
-      return _state;
-    }
+    Hmi::WindowState::Type state() const;
 
-    void setState(const Hmi::WindowState::Type& s)
-    {
-      onState(s);
-    }
+    void setState(Hmi::WindowState::Type s);
+    
+    Hmi::WindowBorder::Type border() const;
 
-    bool showInTaskbar() const
-    {
-      return _showInTaskbar;
-    }
+    void setBorder( Hmi::WindowBorder::Type t);
 
-    void setShowInTaskbar(bool s)
-    {
-      onShowInTaskbar(s);
-    }
+    const Gfx::Image& icon() const;
 
-    bool isShowTitle() const
-    {
-      return _showTitle;
-    }
+    void setIcon(const Gfx::Image& i);
 
-    void setShowTitle(bool s)
-    {
-      _showTitle = s;
-      onShowTitle( s );
-    }
+    bool isClosable() const;
 
-    bool showMinimizeButton() const
-    {
-      return _showMinimizeButton;
-    }
+    void setClosable(bool c);
 
-    void setShowMinimizeButton(bool s)
-    {
-      onShowMinimizeButton( s );
-    }
+    const std::string& title() const;
 
-    bool showMaximizeButton() const
-    {
-      return _showMaximizeButton;
-    }
+    void setTitle( const std::string& t );
 
-    void setShowMaximizeButton(bool s)
-    {
-      onShowMaximizeButton(s);
-    }
+    bool isEnabled() const;
 
-    bool showSysMenu() const
-    {
-      return _showSysMenu;
-    }
+    void setEnabled( bool e );
 
-    void setShowSysMenu(bool s)
-    {
-        onShowSystemMenu(s);
-    }
+    void setVisible( bool b );
 
-    const Hmi::WindowBorder::Type& border() const
-    {
-      return _border;
-    }
+    bool isVisible() const;
 
-    void setBorder(const Hmi::WindowBorder::Type& t)
-    {
-      onBorder(t);
-    }
+    const Gfx::SizeF& size() const;
 
-    const Gfx::Image& icon() const
-    {
-      return _icon;
-    }
+    void setSize( const Gfx::SizeF& s );
 
-    void setIcon(const Gfx::Image& i)
-    {
-      onIcon( i );
-    }
+    const Gfx::PointF& position() const;
 
-    bool canClose() const
-    {
-      return _canClose;
-    }
+    void setPosition( const Gfx::PointF&  p);
 
-    void setCanClose(bool c)
-    {
-      _canClose = c;
-    }
-
-    bool firstShow() const
-    {
-      return _firstShow;
-    }
-
-    void setFirstShow(bool b)
-    {
-      _firstShow = b;
-    }
-
-    const Key& focuseMoveKey()const
-    {
-      return _focuseMoveKey;
-    }
-
-    void setFocuseMoveKey(const Key& s)
-    {
-      _focuseMoveKey = s;
-    }
-
-    const std::string& title() const
-    {
-        return _title;
-    }
-
-    void setTitle( const std::string& t )
-    {
-      onSetTitle(t);
-    }
-
-    bool isEnabled() const
-    {
-        return _enabled;
-    }
-
-    void setEnabled( bool e )
-    {
-        onSetEnabled(e);
-    }
-
-    void setVisible( bool b )
-    {
-        onSetVisible(b);
-    }
-
-    bool visible() const
-    {
-        return _visible;
-    }
-
-    const Gfx::SizeF& size() const
-    {
-        return _size;
-    }
-
-    void setSize( const Gfx::SizeF& s )
-    {
-        onSetSize( s );
-    }
-
-    const Gfx::PointF& position() const
-    {
-        return _position;
-    }
-
-    void setPosition( const Gfx::PointF&  p)
-    {
-        onSetPosition( p );
-    }
-
-    void registerShortcut( Widget* w );
-
-    void unregisterShortcut( Widget* w );
+    void setFont(const Gfx::Font& ft);
+    
+    const Gfx::Font& font() const;
 
     void processEvent(const Pt::Event& ev);
 
-  protected:
-    Window(Window* parent = 0);    
+    WindowImpl* impl()
+    {
+        return _impl;   
+    }
 
+
+    PaintSurface& surface();
+
+    void invalidate();
+
+    void render();
+
+  protected:
     virtual void onEvent(const Pt::Event& ev);
 
     virtual void onKeyEvent( const KeyEvent& ev );
@@ -333,79 +172,11 @@ class PT_HMI_API Window : public Pt::Connectable
 
     virtual void onActivateEvent(const ActivateEvent& ev);
 
-  protected:
-    virtual void onRender( PaintSurface& surface );
-          
-    virtual void onActivate() = 0;
-
-	virtual void onSetTitle(const std::string& t) = 0;
-    
-    virtual void onShowTitle( bool s );
-
-    virtual void onShowMinimizeButton( bool s );
-
-    virtual void onShowMaximizeButton( bool s );
-    
-    virtual void onShowSystemMenu( bool  s );
-
-    virtual void onState(const Hmi::WindowState::Type& s);
-
-    virtual void onBorder(const Hmi::WindowBorder::Type& t);
-    
-    virtual void onShowInTaskbar(bool s);
-
-    virtual void onIcon(const Gfx::Image& i);
-
-    virtual void onSetEnabled( bool e );
-
-    virtual void onSetVisible( bool b );
-
-    virtual void onSetSize(const Gfx::SizeF& size);
-
-    virtual void onSetPosition(const Gfx::PointF& pos);
-
-    virtual void onSetMinimumSize( const Gfx::SizeF& s );
-
-    virtual void onSetMaximumSize(const Gfx::SizeF& s);
-
-    virtual void onClose();
-
-    void setFocusedWidget(Widget* w );
-
-    Widget* focusedWidget() 
-    {
-        return _focusedWidget;
-    }
+    void removeWidget(Widget& w);
 
   private:
-	Pt::Signal<const Pt::Event&>         _eventReady;
-	Widget*                              _mainWidget;
-    Window*                              _parent;
-    Widget*                              _pointerWidget;
-    Widget*                              _focusedWidget;
-    WindowManager                        _windowManager;
-    bool                                 _isClosed;
-    bool                                 _isActive;
-    Gfx::SizeF                           _minimumSize;
-    Gfx::SizeF                           _maximumSize;
-    Hmi::WindowStartPosition::Type       _startPostion;
-    Hmi::WindowState::Type               _state;    
-    bool                                 _showInTaskbar;
-    bool                                 _showTitle;
-    bool                                 _showMinimizeButton;
-    bool                                 _showMaximizeButton;
-    bool                                 _showSysMenu;
-    bool                                 _enabled;
-    bool                                 _visible;
-    Gfx::SizeF                           _size;
-    Gfx::PointF                          _position; 
-    Hmi::WindowBorder::Type              _border;
-	std::string                          _title;
-    Gfx::Image                           _icon;
-    bool                                 _canClose;
-    bool                                 _firstShow;
-    Key                                  _focuseMoveKey;    
-    std::map<Key, std::vector<Widget*> > _shortcuts; 
+    WindowImpl*                    _impl;           
+    Pt::Signal<const Pt::Event&>   _eventReady;
 };
 
 } // namespace

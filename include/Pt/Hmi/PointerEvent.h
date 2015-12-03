@@ -30,7 +30,7 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/DeviceButton.h>
 #include <Pt/Hmi/DeviceControlDial.h>
-#include <Pt/Hmi/Event.h>
+#include <Pt/Event.h>
 #include <vector>
 
 namespace Pt{

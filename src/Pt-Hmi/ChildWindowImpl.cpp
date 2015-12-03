@@ -24,41 +24,94 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include <Pt/Hmi/ChildWindow.h>
+#include "ChildWindowImpl.h"
+#include <Pt/Hmi/Window.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Pen.h>
 
 namespace Pt{
 namespace Hmi{
 
-ChildWindow::ChildWindow()
+ChildWindowImpl::ChildWindowImpl(Window* api, const WindowImpl* impl)
+: WindowImpl(api, impl)
 {
-  setBackgroundColor( Gfx::Color(0, 1, 1, 1) );		
 }
 
 
-ChildWindow::~ChildWindow()
+ChildWindowImpl::~ChildWindowImpl()
 {
-    if(_parent)
-        _parent->removeWindow(*this);
 }
 
 
-void ChildWindow::onInvalidate()
+void ChildWindowImpl::close()
 {
-	Window::onInvalidate();
-
-	if( windowParent() != 0 )
-    windowParent()->invalidate();	
+    hide();
 }
 
 
-void ChildWindow::onActivate()
+void ChildWindowImpl::show()
 {
-  if( windowParent() == 0)
-    return;
-
-  windowParent()->windowManager().activate( this );	
+    _visible = true;
 }
+
+
+void ChildWindowImpl::hide()
+{
+    _visible = false;
+}
+
+void ChildWindowImpl::invalidate()
+{
+    if( _apiWindow->parent() != 0)	
+        _apiWindow->parent()->invalidate();	
+}
+
+void ChildWindowImpl::activate()
+{
+  _windowManager.activate( *_apiWindow );	
+}
+
+
+
+void ChildWindowImpl::onSetPosition(const Gfx::PointF& p)
+{
+}
+
+void ChildWindowImpl::onSetSize(const Gfx::SizeF& size)
+{
+}
+
+void ChildWindowImpl::onSetState(WindowState::Type p)
+{
+}
+
+void ChildWindowImpl::onSetBorder(WindowBorder::Type p)
+{
+}
+
+void ChildWindowImpl::onSetIcon(const Gfx::Image& p)
+{
+}
+
+void ChildWindowImpl::onSetEnabled(bool e)
+{
+}
+
+void ChildWindowImpl::onSetMinimumSize(const Gfx::SizeF& s)
+{
+}
+
+void ChildWindowImpl::onSetMaximumSize(const Gfx::SizeF& s)
+{
+}
+
+void ChildWindowImpl::onSetDecoration( WindowDecoration::Flags d )	
+{
+}
+
+void ChildWindowImpl::onSetTitle( const std::string& t )
+{
+}
+
 
 }}

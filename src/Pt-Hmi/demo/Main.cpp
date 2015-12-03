@@ -15,7 +15,7 @@ int main(int argc, char* args[])
 		Pt::Hmi::Demo::MainWindow	mainWindow1;
 	
 		std::cout<<"W: "<< application.mainScreen().width()<<" H: "<<application.mainScreen().height()<<std::endl;
-		mainWindow1.setCaption("Main 1");
+		mainWindow1.setTitle("Main 1");
 		mainWindow1.show();
 		
 		application.run();

@@ -47,14 +47,13 @@ MainWindow::MainWindow()
 {	
 	setPosition (  Gfx::PointF(0,0) );
 	setSize( Gfx::SizeF(600,400) );
-	setBackgroundColor( Gfx::Color(0.5,0.5,0.5) );
-
+    setTitle("Main 1");
 	_child1.setPosition ( Gfx::PointF( 200, 200 ) );
-	_child1.setCaption( "Child 1" );
-	_child2.setCaption( "Child 2" );
+	_child1.setTitle( "Child 1" );
+	_child2.setTitle( "Child 2" );
 
-	addWindow( _child1 );
-	addWindow( _child2 );
+	add( _child1 );
+	add( _child2 );
 
 }
 
@@ -65,9 +64,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::show()
 {
-	setVisible( true );	
-  invalidate();
-	
+  setVisible( true );	
+  invalidate();	
 }
 
 }}}

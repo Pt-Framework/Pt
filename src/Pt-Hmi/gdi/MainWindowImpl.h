@@ -27,94 +27,75 @@
 #ifndef Pt_Hmi_MainWindowImpl_H
 #define Pt_Hmi_MainWindowImpl_H
 
-#include <Pt/Connectable.h>
-#include <Pt/Signal.h>
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/KeyEvent.h>
-#include <Pt/Hmi/PointerEvent.h>
-#include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/WindowState.h>
-#include <Pt/Hmi/WindowBorder.h>
+#include "../WindowImpl.h"
 #include <Windows.h>
-#include <map>
 
 namespace Pt{
-
 namespace Hmi{
 
 class Application;
-class Window;
 class Screen;
 
-class MainWindowImpl : public Pt::Connectable
+class MainWindowImpl : public WindowImpl
 {
-public:
-	MainWindowImpl(Window* window);
+    public:
+        MainWindowImpl(Window* window);
 
-	virtual ~MainWindowImpl();
+        virtual ~MainWindowImpl();
 	
-	void create();
+        virtual void show();
 	
-  void destroy();
+        virtual void activate();
 
-  void show();
+        virtual void hide();
+        
+        virtual void invalidate();
+
+        virtual void onSetPosition(const Gfx::PointF& p);
+
+        virtual void onSetSize(const Gfx::SizeF& size);
 	
-  void activate();
-
-  void hide();
-
-  void setPosition(const Gfx::PointF& p);
-
-  void setSize(const Gfx::SizeF& size);
-
-  void setShowTitle(bool p);
-
-  void setCaption(const std::string& text);
-
-  void setShowMinimizeButton(bool p);
-  
-  void setShowMaximizeButton(bool p);
-  
-  void setShowSystemMenu(bool p);
-	 
-  void setState(WindowState::Type p);
-  
-  void setBorder(WindowBorder::Type p);
-  
-  void setShowInTaskbar(bool p);
-  
-  void setIcon(const Gfx::Image& p);
-
-	void setEnabled(bool e);	
-
-	void setMinimumSize(const Gfx::SizeF& s);
+        virtual void onSetState(WindowState::Type p);
+    
+        virtual void onSetBorder(WindowBorder::Type p);
+       
+        virtual void onSetIcon(const Gfx::Image& p);
+    
+	    virtual void onSetEnabled(bool e);	
+    
+	    virtual void onSetMinimumSize(const Gfx::SizeF& s);
 	
-	void setMaximumSize(const Gfx::SizeF& s);	
+	    virtual void onSetMaximumSize(const Gfx::SizeF& s);	
 
-	void setTopMost( bool topMost );
+        virtual void onSetDecoration( WindowDecoration::Flags d );	
 
-	void invalidate();
+        virtual void onSetTitle( const std::string& t );
+        
+        virtual void close();
 
-protected:
-	void onWindowEvent(HWND wnd, unsigned int msg, WPARAM wparam, LPARAM lparam, bool& handled);
-	void onPaint();
-	void onSize(WPARAM wparam, LPARAM lparam);
-	void onMouse(unsigned int msg,  WPARAM wparam, LPARAM lparam);
-	void onKey(unsigned int ms, WPARAM wparam, LPARAM lparam);
-	void onMove(LPARAM lparam);	
-	void onClose();
-	void onActivate(bool f);
+    protected:
+	    void onWindowEvent(HWND wnd, unsigned int msg, WPARAM wparam, LPARAM lparam, bool& handled);
+	    void onPaint();
+	    void onSize(WPARAM wparam, LPARAM lparam);
+	    void onMouse(unsigned int msg,  WPARAM wparam, LPARAM lparam);
+	    void onKey(unsigned int ms, WPARAM wparam, LPARAM lparam);
+	    void onMove(LPARAM lparam);	
+	    void onClose();
+	    void onActivate(bool f);
 
-private:	
-  HWND													_hwnd;
-	Pt::Hmi::Application&         _app; 
-	KeyEvent											_keyEvent;
-	PointerEvent									_pointerEvent;
-	Window*												_window;
-	bool													_forceTopMost;
-	Gfx::Size                 _minSize;
-	Gfx::Size                 _maxSize;
-  Screen&                  _screen; 
+    private:
+        void setShowTitle(bool p);
+        void setShowMinimizeButton(bool p);
+        void setShowMaximizeButton(bool p);
+        void setShowSystemMenu(bool p);
+        void create();	
+        void destroy();
+
+    private:	
+        Pt::Hmi::Application& _app; 
+        Screen&               _screen; 
+        HWND				  _hwnd;	        
 };
 
 }}

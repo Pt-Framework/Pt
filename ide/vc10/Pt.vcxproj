@@ -58,7 +58,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Api.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Application.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Button.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\ChildWindow.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceButton.h" />
@@ -68,7 +67,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Label.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Layout.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\MainWindow.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MoveEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Painter.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h" />
@@ -81,7 +79,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowBorder.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowDecoration.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowStartPosition.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowState.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowTitleBar.h" />
@@ -296,6 +294,7 @@
     <ClInclude Include="..\..\src\Pt-Gfx\TextOp.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Vera.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\ArrowCursor.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\ChildWindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.h" />
@@ -328,6 +327,8 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\WindowImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\WindowManager.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.h" />
@@ -475,7 +476,7 @@
     <ClCompile Include="..\..\src\Pt-Gfx\Rgb888Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Button.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\ChildWindow.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\ChildWindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\ChildW.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\Dialog1.cpp" />
@@ -505,13 +506,13 @@
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\MainWindow.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Panel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Screen.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Window.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\WindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowManager.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowTitleBar.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.cpp" />

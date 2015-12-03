@@ -1,7 +1,7 @@
 #ifndef Pt_Hmi_Demo_ChildW_h
 #define Pt_Hmi_Demo_ChildW_h
 
-#include <Pt/Hmi/MainWindow.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Label.h>
@@ -11,7 +11,7 @@ namespace Hmi{
 namespace Demo{
 
 
-class ChildW : public Hmi::ChildWindow
+class ChildW : public Hmi::Window
 {
 	public:
 		ChildW();
@@ -22,7 +22,7 @@ class ChildW : public Hmi::ChildWindow
 		void onCloseApp();		
 
 	private:
-		Hmi::ChildWindow     _childWindow2;
+		Hmi::Window     _childWindow2;
 		Hmi::Panel  _mainPanel;	
 		Hmi::Button _closeButton;
 		Hmi::Button _toggleButton;

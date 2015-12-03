@@ -31,12 +31,12 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   Panel.cpp					   
 					   Widget.cpp					   					   
 					   Window.cpp
-					   MainWindow.cpp					   
 					   Dialog.cpp		
-					   ChildWindow.cpp		
-					   WindowManager.cpp	  
+					   WindowManager.cpp
+                       WindowImpl.cpp	  
+                       ChildWindowImpl.cpp
 					   Screen.cpp 
-             Key.cpp
+                       Key.cpp
 					   ;
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx Pt-Reflex ;

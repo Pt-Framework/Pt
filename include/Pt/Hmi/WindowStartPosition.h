@@ -30,16 +30,17 @@
 namespace Pt{
 namespace Hmi{
 
-class WindowStartPosition
+class WindowPosition
 {
   public:
     enum Type
     {
       Manual,        
       CenterParent,
+      CenterScreen
     };
 
-    static std::string toString( WindowStartPosition::Type t )
+    static std::string toString( WindowPosition::Type t )
     {
       switch(t)
       {
@@ -54,7 +55,7 @@ class WindowStartPosition
       return "Manual";
     }
 
-    static WindowStartPosition::Type fromString( const std::string& t )
+    static WindowPosition::Type fromString( const std::string& t )
     {
       if( t == "Manual")
         return Manual;

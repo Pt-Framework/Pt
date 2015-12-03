@@ -27,31 +27,55 @@
   MA  02110-1301  USA
 */
 
-#ifndef Pt_Hmi_ChildWindow_H
-#define Pt_Hmi_ChildWindow_H
+#ifndef Pt_Hmi_ChildWindowImpl_H
+#define Pt_Hmi_ChildWindowImpl_H
 
-#include <Pt/Hmi/Window.h>
+#include "WindowImpl.h"
 
 namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API ChildWindow  : public Hmi::Window
+class PT_HMI_API ChildWindowImpl  : public WindowImpl
 {
     public:
-        ChildWindow();    
+        ChildWindowImpl(Window* api, const WindowImpl* impl);    
 
-        virtual ~ChildWindow();    
+        virtual ~ChildWindowImpl();    
+
+
+        virtual void show();
+	
+        virtual void activate();
+
+        virtual void hide();
         
-    protected:    
-        virtual void onInvalidate();
+        virtual void invalidate();
 
-    private:
-        virtual void onActivate(); 
+        virtual void onSetPosition(const Gfx::PointF& p);
+
+        virtual void onSetSize(const Gfx::SizeF& size);
+	
+        virtual void onSetState(WindowState::Type p);
+    
+        virtual void onSetBorder(WindowBorder::Type p);
+       
+        virtual void onSetIcon(const Gfx::Image& p);
+    
+        virtual void onSetEnabled(bool e);	
+    
+        virtual void onSetMinimumSize(const Gfx::SizeF& s);
+	
+        virtual void onSetMaximumSize(const Gfx::SizeF& s);	
+
+        virtual void onSetDecoration( WindowDecoration::Flags d );	
+
+        virtual void onSetTitle( const std::string& t );
+        
+        virtual void close();
 };
 
 }
-
 }
 
 #endif
