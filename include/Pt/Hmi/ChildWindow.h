@@ -23,30 +23,35 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA  02110-1301  USA
+*/
+
 #ifndef Pt_Hmi_ChildWindow_H
 #define Pt_Hmi_ChildWindow_H
 
-#include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Window.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+
+namespace Hmi {
 
 class PT_HMI_API ChildWindow  : public Hmi::Window
 {
-	public:
-		ChildWindow();	
+    public:
+        ChildWindow();    
 
-		virtual ~ChildWindow();	
-		
-	protected:	
-    virtual void onInvalidate();
+        virtual ~ChildWindow();    
+        
+    protected:    
+        virtual void onInvalidate();
 
-	private:
-		virtual void onActivate(); 
+    private:
+        virtual void onActivate(); 
 };
 
-}}
+}
+
+}
 
 #endif

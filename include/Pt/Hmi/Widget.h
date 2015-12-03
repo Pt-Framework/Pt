@@ -48,6 +48,8 @@ namespace Pt {
 
 namespace Hmi {
 
+class Window;
+
 class PT_HMI_API Widget : public Pt::Connectable
 {
     friend class Window;
@@ -78,6 +80,16 @@ class PT_HMI_API Widget : public Pt::Connectable
     public:    
         virtual ~Widget();
 
+        Widget* parent()
+        {         
+            return _parent;
+        }
+
+        const Widget* parent() const
+        {
+            return _parent;
+        }
+
         void addWidget(Widget& child);
 
         void removeWidget(Widget& child);
@@ -87,20 +99,11 @@ class PT_HMI_API Widget : public Pt::Connectable
             return _children;
         }
 
-        const Widget* parent() const
-        {
-            return _parent;
-        }
 
-        Widget* parent()
-        {         
-            return _parent;
-        }
-        
-        virtual Window* getWindow();
-        
-        void setWindow(Window* w );
+    private:
+        void setWindow(Window* window);
 
+    public:
         Widget* findWidget( const std::string& name );
         
         Widget* findWidget( const Gfx::PointF& pos );
@@ -335,11 +338,6 @@ class PT_HMI_API Widget : public Pt::Connectable
     protected:
         Widget();    
 
-        Pt::Signal<const Pt::Event&>& eventReady()
-        {
-            return _eventReady;
-        }
-
         virtual void onEvent(const Pt::Event& ev);
 
         virtual void onPointerEvent(const PointerEvent& ev);        
@@ -377,31 +375,31 @@ class PT_HMI_API Widget : public Pt::Connectable
 
     private:
         Pt::Signal<const Pt::Event&> _eventReady;
-        Window*                   _window; 
-        Widget*                   _parent;    
-        std::vector<Widget*>      _children;    
-        bool                       _isValid;
-        PaintSurface              _surface;    
-        bool                       _enabled;        
-        bool                     _visible;
-        Gfx::Color               _backgroundColor;
-        Gfx::Color               _foregroundColor;
-        Gfx::Image               _backgroundImage;
-        ImageLayout               _backgroundImageLayout;
-        Hmi::Cursor               _cursor;
-        bool                     _acceptFocus;
-        Key             _focusedActionKey;
-        std::string             _name;                    
-        Layout                 _layout;
-        Key                     _shortcutKey;
-        bool                     _hasFocus;            
-        Gfx::SizeF             _size;
-        Gfx::PointF            _position;            
-        Alignment               _contentAlignment;
-        std::string             _caption;
-        Gfx::Font               _font;
-        Key            _mnemonicKey;    
-        Pt::Signal<>            _mnemonicEntered;
+        Window*                      _window; 
+        Widget*                      _parent;    
+        std::vector<Widget*>         _children;    
+        bool                         _isValid;
+        PaintSurface                 _surface;    
+        bool                         _enabled;        
+        bool                         _visible;
+        Gfx::Color                   _backgroundColor;
+        Gfx::Color                   _foregroundColor;
+        Gfx::Image                   _backgroundImage;
+        ImageLayout                  _backgroundImageLayout;
+        Hmi::Cursor                  _cursor;
+        bool                         _acceptFocus;
+        Key                          _focusedActionKey;
+        std::string                  _name;                    
+        Layout                       _layout;
+        Key                          _shortcutKey;
+        bool                         _hasFocus;            
+        Gfx::SizeF                   _size;
+        Gfx::PointF                  _position;            
+        Alignment                    _contentAlignment;
+        std::string                  _caption;
+        Gfx::Font                    _font;
+        Key                          _mnemonicKey;    
+        Pt::Signal<>                 _mnemonicEntered;
            
 
     private:

@@ -359,7 +359,7 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
     _pointerEvent.setX(p.x());
     _pointerEvent.setY(p.y());            
 
-		_app.sendEvent(*_window, _pointerEvent);
+	_app.sendEvent(*_window, _pointerEvent);
 }
 
 
@@ -377,13 +377,16 @@ void MainWindowImpl::onMove(LPARAM lParam)
 
 void MainWindowImpl::onPaint()
 {           
+if( _window->mainWidget() == 0)
+    return;
+
   RECT  info;
   GetClientRect(_hwnd, &info);
 
   PAINTSTRUCT ps;
   HDC windowContext = BeginPaint(_hwnd, &ps);
     
-  HDC bitmapDeviceConText = _window->surface().impl()->deviceContext();
+  HDC bitmapDeviceConText = _window->mainWidget()->surface().impl()->deviceContext();
   BitBlt(windowContext, 0, 0, info.right,  info.bottom, bitmapDeviceConText, 0, 0, SRCCOPY);    
     
   EndPaint(_hwnd, &ps);    
@@ -620,7 +623,10 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 
 void MainWindowImpl::invalidate()
 {
-	_window->render();
+    if(_window->mainWidget() == 0 )
+        return;
+
+	_window->mainWidget()->render();
 	InvalidateRect(_hwnd, NULL, FALSE);
 }
 

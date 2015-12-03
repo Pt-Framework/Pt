@@ -39,6 +39,8 @@ ChildWindow::ChildWindow()
 
 ChildWindow::~ChildWindow()
 {
+    if(_parent)
+        _parent->removeWindow(*this);
 }
 
 

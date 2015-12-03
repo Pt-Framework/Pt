@@ -20,9 +20,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+*/
+
 #ifndef Pt_Hmi_WindowManager_h
 #define Pt_Hmi_WindowManager_h
 
@@ -52,91 +54,91 @@ class Screen;
 
 class WindowManager : public Pt::Connectable
 {
-  public:
-    WindowManager(Window& parent);
+    public:
+        WindowManager(Window& window);
 
-    virtual ~WindowManager();
+        virtual ~WindowManager();
 
-		void add( ChildWindow* w );
+        void add(ChildWindow* w);
 
-		void remove( ChildWindow* window );
-		
-		void clear();	
-		
-		void activate( ChildWindow* w );
-		
-		void deactivate();
-		
-		void render();
-		
-		bool pointerInput( const Pt::Hmi::PointerEvent& pointerEvent );
+        void remove(ChildWindow* window);
 
-		bool keyInput( const Pt::Hmi::KeyEvent& keyEvent );		 			
+        void clear(); 
 
-		const std::vector<ChildWindow*>&	windows() const
-		{
-			return _windows;
-		}		
+        const std::vector<ChildWindow*>& windows() const
+        {
+            return _windows;
+        }
 
-    size_t actionButton() const 
-    {
-        return _actionButton;
-    }
+        void activate(ChildWindow* w);
 
-    void setActionButton( size_t index )
-    {
-        _actionButton = index;
-    }
+        void deactivate();
 
-		void invalidate();	
+        void render();
 
-  protected:
-    virtual Gfx::PointF renderFrame( ChildWindow* w);				     
+        bool pointerInput( const Pt::Hmi::PointerEvent& pointerEvent );
 
-  private:		
-    bool contains( const ChildWindow* w, const Gfx::PointF& p );
+        bool keyInput( const Pt::Hmi::KeyEvent& keyEvent );
 
-		void setSizingCursor( ResizeDirection::Type type );
-			
-		ResizeDirection::Type getSizingDirection( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );
+        size_t actionButton() const 
+        {
+            return _actionButton;
+        }
 
-		ResizeDirection::Type isSizing( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );	
-    bool isMoving ( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );
+        void setActionButton( size_t index )
+        {
+            _actionButton = index;
+        }
 
-    void doSizing( ChildWindow* w, const PointerEvent& ev );
-		void doMoving( ChildWindow* w, const PointerEvent& ev );
-		
-		void updateActive( const Pt::Hmi::PointerEvent& mouseEvent );
-	
-    Window* getFosusedWindow(WindowManager* manager);
+        void invalidate();
 
-		Gfx::PointF toClient(const ChildWindow* w, const Gfx::PointF& p);  
+    protected:
+        virtual Gfx::PointF renderFrame( ChildWindow* w);
 
-		ChildWindow* active();		
-		
+    private:
+        bool contains( const ChildWindow* w, const Gfx::PointF& p );
 
-		ChildWindow* findWindow( const Gfx::PointF& pos );
+        void setSizingCursor( ResizeDirection::Type type );
+ 
+        ResizeDirection::Type getSizingDirection( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );
 
-		void setPointedWindow( ChildWindow* window );
+        ResizeDirection::Type isSizing( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );    
 
-    
-	private:
-		Application&              _app;  
-		Window&										_parent;
-		std::vector<ChildWindow*>	_windows;		
-		ResizeDirection::Type			_sizingDirection;
-		Gfx::PointF								_lastSizePoint;    
-		double										_borderWidth;
-   Gfx::Color						      _inactiveColor; 
-   Gfx::Color						      _activeColor;
-	 Gfx::Color                 _textColor;
-		bool											_moving;	
-		Gfx::PointF								_movingOffset;
-    DeviceButton::State       _pointerLastState;  
-    bool                      _focusOnPointerOver;    
-    size_t                    _actionButton;  
-		double                    _titleBarHeight;
-		ChildWindow*							_pointedWindow;
+        bool isMoving ( const ChildWindow* w, const Pt::Hmi::PointerEvent& ev );
+
+        void doSizing( ChildWindow* w, const PointerEvent& ev );
+
+        void doMoving( ChildWindow* w, const PointerEvent& ev );
+
+        void updateActive( const Pt::Hmi::PointerEvent& mouseEvent );
+
+        Window* getFosusedWindow(WindowManager* manager);
+
+        Gfx::PointF toClient(const ChildWindow* w, const Gfx::PointF& p);  
+
+        ChildWindow* active();        
+
+        ChildWindow* findWindow( const Gfx::PointF& pos );
+
+        void setPointedWindow( ChildWindow* window );
+
+    private:
+        Application&              _app;
+        Window&                   _window;
+        std::vector<ChildWindow*> _windows;
+        ResizeDirection::Type     _sizingDirection;
+        Gfx::PointF               _lastSizePoint;
+        double                    _borderWidth;
+        Gfx::Color                _inactiveColor;
+        Gfx::Color                _activeColor;
+        Gfx::Color                _textColor;
+        bool                      _moving;
+        Gfx::PointF               _movingOffset;
+        DeviceButton::State       _pointerLastState;
+        bool                      _focusOnPointerOver;
+        size_t                    _actionButton;  
+        double                    _titleBarHeight;
+        ChildWindow*              _pointedWindow;
 };
 
 }} // namespace

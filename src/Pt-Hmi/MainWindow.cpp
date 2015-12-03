@@ -42,8 +42,6 @@ MainWindow::MainWindow(MainWindow* parent)
 	_impl->setMinimumSize(minimumSize());
 	_impl->setMaximumSize(maximumSize());
 	
-	setAcceptFocus(false);
-
 	Hmi::Application::instance().registerWindow(*this);
 }
 

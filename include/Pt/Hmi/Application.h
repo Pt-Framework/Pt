@@ -43,45 +43,47 @@ class ApplicationImpl;
 
 class PT_HMI_API Application : public Pt::System::Application
 {
-	friend class MainWindow;
+    friend class MainWindow;
 
-  public:
-    Application(int argc = 0, char** argv = 0);
+    public:
+        Application(int argc = 0, char** argv = 0);
 
-    virtual ~Application();
+        virtual ~Application();
 
-	  static Application& instance();
-	
-	  void nextEvent();
+        static Application& instance();
+    
+        void nextEvent();
 
-		void sendEvent(Widget& w, const Pt::Event& ev);
+        void sendEvent(Window& w, const Pt::Event& ev);
 
-	  const Screen& mainScreen() const
-	  {
-		  return *_mainScreen;
-	  }
+        const Screen& mainScreen() const
+        {
+            return *_mainScreen;
+        }
 
-	  Screen& mainScreen()
-	  {
-		  return *_mainScreen;
-	  }
+        Screen& mainScreen()
+        {
+            return *_mainScreen;
+        }
 
-		Widget* findWidget( const std::string& name );
+        Widget* findWidget( const std::string& name );
 
-		ApplicationImpl* impl()
-		{
-			return _impl;
-		}
+        Window* findWindow(const std::string& name);
 
-	protected:
-		void registerWindow(Window& w);
+        ApplicationImpl* impl()
+        {
+            return _impl;
+        }
 
-		void unregisterWindow(Window& w);
+    protected:
+        void registerWindow(Window& w);
 
-  private:
-	  ApplicationImpl* _impl; 
-	  Screen* _mainScreen;  
-		std::vector<Window*> _windows;
+        void unregisterWindow(Window& w);
+
+    private:
+        ApplicationImpl* _impl; 
+        Screen* _mainScreen;  
+        std::vector<Window*> _windows;
 };
 
 } // namespace

@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Brush.h>
@@ -54,97 +55,67 @@ Widget::Widget()
 , _size( 100, 100)
 , _position( 10,10) 
 , _isValid(false)
-{    
-    eventReady() += Pt::slot(*this, &Widget::onKeyEvent);
-    eventReady() += Pt::slot(*this, &Widget::onPointerEvent);            
+{      
+    _eventReady += Pt::slot(*this, &Widget::onKeyEvent);
+    _eventReady += Pt::slot(*this, &Widget::onPointerEvent);  
 }
 
 
 Widget::~Widget()
 {
-    // remove this widget from its parent
-    if(_parent)
-    {
-        std::vector<Widget*>& widgets = _parent->_children;
-        std::vector<Widget*>::iterator it;
-        it = std::remove(widgets.begin(), widgets.end(), this);
-        widgets.erase(it, widgets.end());
-    }
-
-    // remove this widget from its children
     std::vector<Widget*>::iterator it;
     for(it = _children.begin(); it != _children.end(); ++it)
-    {
-        Widget* child = *it;
-        
-        child->_parent = 0;
-        child->setWindow(0);
-        child->setVisible(false);
-    }
+        removeWidget(**it);
+
+    if(_parent)
+        _parent->removeWidget(*this);
+
+    if(_window)
+        _window->removeWidget(*this);
 }
 
 
-void Widget::addWidget(Widget& child)
+void Widget::addWidget(Widget& widget)
 {
-    if(child._parent = this)
+    if(widget.parent() == this)
         return;
 
-    // remove from previous parent
-    if(child._parent)
-    {
-        child._parent->removeWidget(child);
-    }
+    if( widget.parent() )
+        widget.parent()->removeWidget(widget);
 
-    _children.push_back(&child);
-    child._parent = this;    
-    child.setWindow( this->getWindow() );
-    child._isValid = false;
-    child.setVisible(true);  
+    _children.push_back(&widget);
+    widget._parent = this;
 
-    invalidate();
+    widget.setWindow(_window);
 }
 
 
-void Widget::removeWidget(Widget& child)
+void Widget::removeWidget(Widget& widget)
 {
-    for(size_t i = 0; i < _children.size(); ++i)
-    {
-        if(_children[i] != &child)
-            continue;
-        
-        _children.erase(_children.begin() + i);
-        child.setVisible(false);
-        child._parent = 0;
-
-        if( child._window != 0 )
-        {
-            child._window->onWidgetRemoved( child );
-            child.setWindow( 0 );
-        }
-        
+    std::vector<Widget*>::iterator it;
+    it = std::find(_children.begin(), _children.end(), &widget);
+    if( it == _children.end() )
         return;
-    }            
+    
+    _children.erase(it);
+    widget._parent = 0;
 
-    invalidate();
-}    
-
-
-Window* Widget::getWindow()
-{
-    return _window;
+    widget.setWindow(0);
 }
 
 
-void Widget::setWindow(Window* w)
+void Widget::setWindow(Window* window)
 {
-    if( _window == w )
-        return;
+    if(_window)
+        _window->removeWidget(*this);
 
-    _window = w;
+    _window = window;
       
-    for( size_t i = 0; i < _children.size(); ++i )
-        _children[i]->setWindow(w);
+    std::vector<Widget*>::iterator it;
+    for(it = _children.begin(); it != _children.end(); ++it)
+        (*it)->setWindow(window);
 }
+
 
 Widget* Widget::findWidget( const Gfx::PointF& pos )
 {
@@ -174,7 +145,6 @@ Widget* Widget::findWidget( const Gfx::PointF& pos )
 
 Widget* Widget::findWidget( const std::string& name )
 {
-
   if( _name == name )
       return this;
 
@@ -182,9 +152,7 @@ Widget* Widget::findWidget( const std::string& name )
 
     for( ; it != _children.end(); ++it )
     {
-        Widget* child = *it;
-
-        Widget* found = child->findWidget( name );
+        Widget* found = (*it)->findWidget( name );
 
         if( found )
             return found;        
@@ -221,7 +189,6 @@ Gfx::PointF Widget::fromClient( const Gfx::PointF& localPoint )
 
     return Gfx::PointF(x,y);
 }
-
 
 
 //void Widget::updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p)
@@ -508,7 +475,6 @@ void Widget::onPointerLeave()
 {    
 }
 
-
 void Widget::processEvent(const Pt::Event& ev)
 {
     onEvent(ev);
@@ -520,7 +486,7 @@ void Widget::onEvent(const Pt::Event& ev)
     _eventReady.send(ev);
 }
 
-        
+       
 void Widget::onPointerEvent(const PointerEvent& ev)
 {        
     if( ev.buttons()[0].state() == DeviceButton::Pressed && _acceptFocus)
