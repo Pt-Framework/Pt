@@ -45,12 +45,13 @@ class DateTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("DateTest")
         {
             Pt::Unit::TestSuite::registerMethod( "Assign", *this, &DateTest::Assign );
+            Pt::Unit::TestSuite::registerMethod( "Increment", *this, &DateTest::Increment );
             Pt::Unit::TestSuite::registerMethod( "IsoConvert", *this, &DateTest::IsoConvert );
         }
 
     protected:
-        void Null();
         void Assign();
+        void Increment();
         void IsoConvert();
 };
 
@@ -80,6 +81,20 @@ void DateTest::Assign()
     PT_UNIT_ASSERT( d == 12 );
 }
 
+
+void DateTest::Increment()
+{
+  Pt::Date d1(2000, 3, 15);
+  d1.addMonths(13);
+  PT_UNIT_ASSERT( d1.day() == 15 );
+  PT_UNIT_ASSERT( d1.month() == 4 );
+  PT_UNIT_ASSERT( d1.year() == 2001 );
+
+  d1.addDays(21);
+  PT_UNIT_ASSERT( d1.day() == 6 );
+  PT_UNIT_ASSERT( d1.month() == 5 );
+  PT_UNIT_ASSERT( d1.year() == 2001 );
+}
 
 void DateTest::IsoConvert()
 {

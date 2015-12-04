@@ -277,6 +277,24 @@ class Date
         */
         bool isLeapYear() const;
 
+        void addDays(int n)
+        { _julian += n; }
+
+        void addMonths(int n)
+        {
+          unsigned m = month() + n % 12;
+          unsigned y  = year() + n / 12;
+          unsigned d = day();
+          
+          if ( m > 12 )
+          {
+            m -= 12;
+            y += 1;
+          }
+
+          set(y, m, d);
+        }
+
         /** \brief Returns the date in ISO-format
 
             Converts the date in ISO-format (yyyy-mm-dd).
