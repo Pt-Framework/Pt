@@ -277,14 +277,21 @@ class Date
         */
         bool isLeapYear() const;
 
+        /** @brief Adds @a n days to the date.
+        */
         void addDays(int n)
         { _julian += n; }
 
+        /** @brief Adds @a n months to the date.
+        */
         void addMonths(int n)
         {
-          unsigned m = month() + n % 12;
-          unsigned y  = year() + n / 12;
-          unsigned d = day();
+          int y = 0;
+          unsigned m = 0, d = 0;
+          get(y, m, d);
+          
+          m += n % 12;
+          y += n / 12;
           
           if ( m > 12 )
           {
@@ -292,6 +299,17 @@ class Date
             y += 1;
           }
 
+          set(y, m, d);
+        }
+
+        /** @brief Adds @a n years to the date.
+        */
+        void addYears(int n)
+        {
+          int y = 0;
+          unsigned m = 0, d = 0;
+          get(y, m, d);
+          y += n;
           set(y, m, d);
         }
 

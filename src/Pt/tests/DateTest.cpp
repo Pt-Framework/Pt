@@ -94,6 +94,11 @@ void DateTest::Increment()
   PT_UNIT_ASSERT( d1.day() == 6 );
   PT_UNIT_ASSERT( d1.month() == 5 );
   PT_UNIT_ASSERT( d1.year() == 2001 );
+  
+  d1.addYears(1000);
+  PT_UNIT_ASSERT( d1.day() == 6 );
+  PT_UNIT_ASSERT( d1.month() == 5 );
+  PT_UNIT_ASSERT( d1.year() == 3001 );
 }
 
 void DateTest::IsoConvert()
