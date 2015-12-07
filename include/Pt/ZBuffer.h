@@ -85,6 +85,8 @@ class PT_API ZBuffer : public BasicStreamBuffer<char>
         */
         std::streamsize import(std::streamsize maxImport = 0);
 
+        std::streamsize import(const char* data, std::streamsize size);
+
     protected:
         // inheritdoc
         virtual std::streamsize showmanyc();
@@ -100,6 +102,9 @@ class PT_API ZBuffer : public BasicStreamBuffer<char>
         
         // inheritdoc
         virtual int_type overflow(int_type ch);
+    
+    private:
+        void inflateBuffer();
 
     private:
         std::ios* _target;

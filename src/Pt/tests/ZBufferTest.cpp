@@ -44,6 +44,9 @@ public:
 
         Pt::Unit::TestSuite::registerMethod("Stream", 
                                             *this, &ZBufferTest::Stream);
+
+        Pt::Unit::TestSuite::registerMethod("ImportBuffer", 
+                                            *this, &ZBufferTest::ImportBuffer);
     }
 
 protected:
@@ -58,6 +61,27 @@ protected:
       
       zbuf.finish();
       std::clog << "compressed: " << oss.str().size() << " bytes." << std::endl;
+
+      char output[2048];
+      std::streamsize inflated = zbuf.sgetn( output, sizeof(output) );
+      std::clog << "decompressed " << inflated << " bytes." << std::endl;
+      PT_UNIT_ASSERT_EQUALS(n, inflated);
+    }
+
+    void ImportBuffer()
+    {
+      std::stringstream oss(std::ios::in|std::ios::out|std::ios::binary);
+      Pt::ZBuffer zbuf(oss);
+
+      std::streamsize n = 12;
+      zbuf.sputn("Hello World!", 12);
+      zbuf.finish();
+      
+      std::string data = oss.str();
+      std::clog << "compressed: " << data.size() << " bytes." << std::endl;
+
+      zbuf.detach();
+      zbuf.import( data.c_str(), data.size() );
 
       char output[2048];
       std::streamsize inflated = zbuf.sgetn( output, sizeof(output) );

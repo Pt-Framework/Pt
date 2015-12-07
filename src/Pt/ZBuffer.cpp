@@ -182,6 +182,44 @@ std::streamsize ZBuffer::import(std::streamsize maxImport)
             _zbufsize += static_cast<int>(n);
     }
 
+    inflateBuffer();
+
+    return n;
+}
+
+
+std::streamsize ZBuffer::import(const char* data, std::streamsize size)
+{
+    if( ! this->gptr() )
+    {
+        // discard ends deflating for put area
+        discard();
+
+        int err = inflateInit(_zstr);
+        if (err != Z_OK) 
+            throw IOError("inflateInit failed");
+
+        this->setg(_buf, _buf, _buf);
+    }
+
+    // not more than available zbuffer size
+    const std::streamsize zbufavail = _zbufmax - _zbufsize;
+    std::streamsize n = zbufavail < size ? zbufavail : size;
+
+    if(n > 0)
+    {
+        std::memcpy(_zbuf + _zbufsize, data, static_cast<std::size_t>(n));
+        _zbufsize += static_cast<int>(n);
+    }
+
+    inflateBuffer();
+
+    return n;
+}
+
+
+void ZBuffer::inflateBuffer()
+{
     // make room for decompressed data
     if( this->gptr() - this->eback() > _pbmax)
     {
@@ -225,8 +263,6 @@ std::streamsize ZBuffer::import(std::streamsize maxImport)
                    this->gptr(),                // gptr position
                    this->egptr() + generated ); // end of read buffer
     }
-
-    return n;
 }
 
 
