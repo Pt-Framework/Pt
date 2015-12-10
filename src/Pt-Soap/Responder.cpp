@@ -164,6 +164,10 @@ bool Responder::parseMessage()
     {
         setFault(fault.rc(), fault.what() );
     }
+    catch(const Remoting::Fault& fault)
+    {
+        setFault( Fault::InternalXmlRpcError, fault.what() );
+    }
 
     return true;
 }

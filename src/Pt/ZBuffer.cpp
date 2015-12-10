@@ -150,9 +150,6 @@ void ZBuffer::finish()
 
 std::streamsize ZBuffer::import(std::streamsize maxImport)
 {
-    if( ! _target || ! _target->rdbuf() )
-        return 0;
-
     if( ! this->gptr() )
     {
         // discard ends deflating for put area
@@ -163,6 +160,12 @@ std::streamsize ZBuffer::import(std::streamsize maxImport)
             throw IOError("inflateInit failed");
 
         this->setg(_buf, _buf, _buf);
+    }
+
+    if( ! _target || ! _target->rdbuf() )
+    {
+        inflateBuffer();
+        return 0;
     }
 
     std::streamsize n = 0;
