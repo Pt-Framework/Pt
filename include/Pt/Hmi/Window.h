@@ -242,6 +242,7 @@ class PT_HMI_API Window : public Pt::Connectable
     PaintSurface                   _surface;
     WindowImpl*                    _impl;           
     Pt::Signal<const Pt::Event&>   _eventReady;
+  
 };
 
 } // namespace

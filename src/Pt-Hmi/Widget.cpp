@@ -41,8 +41,8 @@ namespace Hmi {
 Widget::Widget()
 : _window(0)
 , _parent(0)
-, _enabled( true)
-, _visible( false)
+, _enabled(true)
+, _visible(true)
 , _backgroundColor(Gfx::Color::fromRgb8(237,237,237))
 , _foregroundColor( Gfx::Color::fromRgb8(0,0,0) )
 , _backgroundImage()
@@ -123,7 +123,7 @@ Widget* Widget::findWidget( const Gfx::PointF& pos )
     std::vector<Widget*>::reverse_iterator it = _children.rbegin();
 
     if( !visible() )
-            return 0;
+        return 0;
 
     for( ; it != _children.rend(); ++it )
     {

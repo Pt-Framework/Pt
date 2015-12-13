@@ -44,6 +44,8 @@ namespace Hmi{
 namespace Demo{
 
 MainWindow::MainWindow()
+: _child1()
+, _child2()
 {	
 	setPosition (  Gfx::PointF(0,0) );
 	setSize( Gfx::SizeF(600,400) );

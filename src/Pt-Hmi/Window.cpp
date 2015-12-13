@@ -45,15 +45,17 @@ Window::Window(Window* parent)
 , _maximumSize( 2000,2000)
 , _startPostion( WindowPosition::Manual )
 , _state(WindowState::Normal )
+, _enabled(true)
 , _border( WindowBorder::Sizeable)
 , _icon()
 , _canClose(true)
-, _isClosed(true)
+, _isClosed(false)
 , _isActive(false)
 , _windowManager(this)
 , _mainWidget(0)
-, _position(10,10)
+, _position(0,0)
 , _size(200,200)
+, _visible(true)
 {
     _eventReady += Pt::slot(*this, &Window::onKeyEvent);
     _eventReady += Pt::slot(*this, &Window::onPointerEvent);  
@@ -69,6 +71,7 @@ Window::Window(Window* parent)
         _impl = new MainWindowImpl(this);
         Application::instance().mainScreen().registerWindow(*this);
     }
+
 }
 
 
@@ -104,10 +107,10 @@ void Window::add(Window& child)
         child._parent->_windowManager.remove(child);     
     
     delete child._impl;
-    child._impl = new ChildWindowImpl(&child);    
     
+    child._impl = new ChildWindowImpl(&child);            
     child._parent = this;
-    _windowManager.add(child);            
+    _windowManager.add(child);             
 }
 
 
@@ -117,9 +120,11 @@ void Window::remove(Window& child)
         return;
     
     _windowManager.remove(child);       
-
+    child._parent = 0;
     delete child.impl();             
-    child._impl = new MainWindowImpl(&child);
+    
+    child._impl = new MainWindowImpl(&child);    
+    
     Application::instance().mainScreen().registerWindow(child);
 }
 
@@ -206,6 +211,8 @@ void Window::setPointedWidget( Widget* widget )
 }
 
 
+
+
 void Window::removeWidget(Widget& w)
 {
     if( _pointerWidget == &w )
@@ -239,7 +246,7 @@ Widget* Window::findWidget(const std::string& name)
 
 void Window::activate()
 {
-    _impl->activate(); 
+    _impl->activate();     
 }
 
 
@@ -268,15 +275,18 @@ void Window::onPointerEvent(const PointerEvent& ev)
         return;
     }
 
-    if( _mainWidget )
+    if( !_mainWidget  || ! _mainWidget->visible() )
     {
-        Widget* widget = _mainWidget->findWidget( Gfx::PointF( ev.x(), ev.y() ) );
-
-        this->setPointedWidget( widget );    
-
-        if( widget )
-            widget->processEvent(ev);        
+        Application::instance().mainScreen().setCursor( &Cursor::defaultCursor() );  
+        return;
     }
+    
+    Widget* widget = _mainWidget->findWidget( Gfx::PointF( ev.x(), ev.y() ) );
+
+    this->setPointedWidget( widget );    
+
+    if( widget )
+        widget->processEvent(ev);       
 }
 
 
@@ -314,13 +324,19 @@ void Window::onActivateEvent(const ActivateEvent& ev)
 { 
     _isActive = ev.isActive();
 
-    if( ! _isActive )
+    if( !_isActive )
     {
-        _windowManager.deactivate();
-        return;
-    }      
+        _windowManager.deactivate();  
 
-    invalidate();
+        invalidate();
+    }
+    else
+    {
+       if( _parent )
+           _parent->processEvent(ActivateEvent(true));
+       else
+          invalidate();
+    }                
 }
 
 
@@ -492,8 +508,8 @@ const Gfx::SizeF& Window::size() const
 
 void Window::setSize( const Gfx::SizeF& s )
 {
-    _impl->setSize(s);
     _size = s;
+    _impl->setSize(s);    
     _surface.resize(s);
 }
 

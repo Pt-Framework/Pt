@@ -85,9 +85,17 @@ Window* WindowManager::active()
 
 
 void WindowManager::add( Window& w )
-{
-    _windows.push_back(&w);
-    invalidate();  
+{   
+    if( w.isActive() )
+    {
+        _windows.push_back(&w);
+        activate(w);
+    }
+    else
+    {
+        _windows.insert(_windows.begin(), &w);
+        invalidate();  
+    }    
 }
 
 
@@ -99,7 +107,7 @@ void WindowManager::remove( Window& w )
         return;
 
     _windows.erase( it );            
-  
+    
     invalidate();
 }
 
@@ -153,6 +161,7 @@ Gfx::PointF WindowManager::renderFrame( Window& w )
     const Gfx::SizeF clientSize =  w.size();
     const Gfx::SizeF winSize( clientSize.width()  + _borderWidth*2,  clientSize.height() + _borderWidth*2 + _titleBarHeight);    
     
+
     Gfx::Color color = w.isActive() ? _activeColor : _inactiveColor;  
 
     Hmi::Painter& painter = _window->surface().painter();
@@ -592,7 +601,7 @@ void WindowManager::setSizingCursor( ResizeDirection::Type type )
         case ResizeDirection::NorthWest:
         case ResizeDirection::SouthEast:
             screen.setCursor( &Hmi::Cursor::sizeNWSECursor() );
-        break;
+        break;        
     }
 }
 
