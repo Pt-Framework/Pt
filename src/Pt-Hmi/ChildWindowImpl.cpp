@@ -32,8 +32,8 @@
 namespace Pt{
 namespace Hmi{
 
-ChildWindowImpl::ChildWindowImpl(Window* api, const WindowImpl* impl)
-: WindowImpl(api, impl)
+ChildWindowImpl::ChildWindowImpl(Window* api)
+: WindowImpl(api)
 {
 }
 
@@ -51,66 +51,78 @@ void ChildWindowImpl::close()
 
 void ChildWindowImpl::show()
 {
-    _visible = true;
+    invalidate();
 }
 
 
 void ChildWindowImpl::hide()
 {
-    _visible = false;
+    invalidate();
 }
 
 void ChildWindowImpl::invalidate()
 {
-    if( _apiWindow->parent() != 0)	
+    if( _apiWindow->parent())	
         _apiWindow->parent()->invalidate();	
 }
 
+
 void ChildWindowImpl::activate()
 {
-  _windowManager.activate( *_apiWindow );	
+  _apiWindow->parent()->windowManager().activate( *_apiWindow );	
 }
 
 
 
-void ChildWindowImpl::onSetPosition(const Gfx::PointF& p)
+void ChildWindowImpl::setPosition(const Gfx::PointF& p)
 {
+    invalidate();
 }
 
-void ChildWindowImpl::onSetSize(const Gfx::SizeF& size)
+void ChildWindowImpl::setSize(const Gfx::SizeF& size)
 {
+    invalidate();
 }
 
-void ChildWindowImpl::onSetState(WindowState::Type p)
+void ChildWindowImpl::setState(WindowState::Type p)
 {
+    invalidate();
 }
 
-void ChildWindowImpl::onSetBorder(WindowBorder::Type p)
+void ChildWindowImpl::setBorder(WindowBorder::Type p)
 {
+    invalidate();
 }
 
-void ChildWindowImpl::onSetIcon(const Gfx::Image& p)
+void ChildWindowImpl::setIcon(const Gfx::Image& p)
 {
+    invalidate();
 }
 
-void ChildWindowImpl::onSetEnabled(bool e)
+void ChildWindowImpl::setEnabled(bool e)
 {
+    invalidate();
 }
 
-void ChildWindowImpl::onSetMinimumSize(const Gfx::SizeF& s)
+void ChildWindowImpl::setMinimumSize(const Gfx::SizeF& s)
 {
+    invalidate();
 }
 
-void ChildWindowImpl::onSetMaximumSize(const Gfx::SizeF& s)
+void ChildWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 {
+    invalidate();
 }
 
-void ChildWindowImpl::onSetDecoration( WindowDecoration::Flags d )	
+
+void ChildWindowImpl::setDecoration( WindowDecoration::Flags d )	
 {
+    invalidate();
 }
 
-void ChildWindowImpl::onSetTitle( const std::string& t )
+void ChildWindowImpl::setTitle( const std::string& t )
 {
+    invalidate();
 }
 
 

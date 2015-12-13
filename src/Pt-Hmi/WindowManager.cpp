@@ -25,8 +25,7 @@
  Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include "WindowManager.h"
-#include "WindowImpl.h"
+#include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Window.h>
@@ -290,7 +289,7 @@ Window* WindowManager::getFosusedWindow( WindowManager& manager )
     if( child->isActive() )
         return child;
 
-    Window* focused = getFosusedWindow( child->impl()->windowManager() );
+    Window* focused = getFosusedWindow( child->windowManager() );
 
     if( focused != 0 )
       return focused;
@@ -563,7 +562,7 @@ void WindowManager::setPointedWindow( Window* window )
         return;
 
     if( _pointedWindow )
-        _pointedWindow->impl()->setPointedWidget(0);
+        _pointedWindow->setPointedWidget(0);
 
     _pointedWindow = window;
 }

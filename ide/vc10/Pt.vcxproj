@@ -80,6 +80,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowBorder.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowDecoration.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowStartPosition.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowState.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowTitleBar.h" />
@@ -328,7 +329,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\WindowImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\WindowManager.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.h" />
@@ -799,7 +799,7 @@
     <NMakeCleanCommandLine>cd ..\.. &amp;&amp; jam.bat clean</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>cd ..\.. &amp;&amp; jam.bat -qa -j2 -sPT_TOP=$(SolutionDir)..\..\</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions); PT_QT_API_EXPORT;PT_HMI_API_EXPORT</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath>$(SolutionDir)..\..\include;$(SolutionDir)..\..\src\Pt-System\win32\;$(SolutionDir)..\..\src\Pt-Qt\win32\;$(QTDIR)\include</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(SolutionDir)..\..\include;$(SolutionDir)..\..\src\Pt-System\win32\;$(SolutionDir)..\..\src\Pt-Qt\win32\;$(QTDIR)\include;.\src\gdi</NMakeIncludeSearchPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>

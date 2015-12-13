@@ -28,9 +28,15 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/System/IOError.h>
+#include "MainWindowImpl.h"
 
 namespace Pt {
+
 namespace Hmi {
+
+/////////////////////////////////////////////////////////////////////////////
+// Selector
+/////////////////////////////////////////////////////////////////////////////
 
 Selector::Selector()
 {
@@ -57,24 +63,21 @@ DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bo
 
     if(offset == numHandles)
     {
-        processMessage();
+	    MSG msg;
+
+	    while( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE) )
+	    {
+			    TranslateMessage(&msg);
+			    DispatchMessage(&msg);
+	    }	
     }
 
     return offset;
 }
 
-
-void Selector::processMessage()
-{
-	MSG msg;
-
-	while( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE) )
-	{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-	}	
-}
-
+/////////////////////////////////////////////////////////////////////////////
+// ApplicationImpl
+/////////////////////////////////////////////////////////////////////////////
 
 ApplicationImpl::ApplicationImpl()
 : Pt::System::EventLoop()
@@ -125,19 +128,20 @@ long CALLBACK ApplicationImpl::wndProc(HWND hwnd, unsigned int message, unsigned
 {
 	Pt::Hmi::Application& app =  *((Pt::Hmi::Application*)&Pt::Hmi::Application::instance());
 
-  return app.impl()->dispatchGDIEvent(hwnd, message, wParam, lParam);
-}
+    for( size_t i = 0; i <  app.mainScreen().windows().size(); ++i )
+    {
+        Window* w = app.mainScreen().windows()[i];
+     
+        MainWindowImpl* impl = static_cast<MainWindowImpl*>( w->impl() );
 
+        if( impl->hwnd() != hwnd )
+            continue;
 
-LRESULT ApplicationImpl::dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned int wParam, long lParam)
-{
-	bool handled = false;
-	_windowEvent.send(hwnd, message, wParam, lParam, handled);
-
-	if( ! handled )
-		return DefWindowProc(hwnd, message, wParam, lParam);
-
-	return 0;
+        if( !impl->processEvent( message, wParam, lParam ) )
+    		return DefWindowProc(hwnd, message, wParam, lParam);
+    }
+    
+	return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
 
@@ -152,10 +156,12 @@ void ApplicationImpl::onAttachSelectable(System::Selectable& s)
     _selector.attach(s); 
 }
 
+
 void ApplicationImpl::onDetachSelectable(System::Selectable& s)
 { 
     _selector.detach(s); 
 }
+
 
 void ApplicationImpl::onCancel(System::Selectable& s)
 {
@@ -246,6 +252,5 @@ bool ApplicationImpl::waitNext()
 
     return isActive;
 }
-
 
 }}

@@ -33,6 +33,8 @@
 #include <Pt/Hmi/WindowStartPosition.h>
 #include <Pt/Hmi/WindowState.h>
 #include <Pt/Hmi/WindowBorder.h>
+#include <Pt/Hmi/WindowManager.h>
+#include <Pt/Hmi/WindowDecoration.h>
 #include <Pt/Hmi/Key.h>
 #include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
@@ -56,10 +58,10 @@ class PaintSurface;
 class PT_HMI_API Window : public Pt::Connectable
 {
    friend class Widget;
-   friend class WindowImpl;
+   friend class WindowManager;
 
   public:           
-    Window();     
+    Window(Window* parent = 0);     
 
     virtual ~Window();                                
 
@@ -77,9 +79,9 @@ class PT_HMI_API Window : public Pt::Connectable
 
     Widget* findWidget(const std::string& name);
 
-    Widget* mainWidget() ;
+    Widget* mainWidget();
 
-    const Widget* mainWidget()  const ;
+    const Widget* mainWidget()  const;
 
     void setMainWidget(Widget* widget);
   
@@ -143,6 +145,20 @@ class PT_HMI_API Window : public Pt::Connectable
     
     const Gfx::Font& font() const;
 
+    void setDecoration( WindowDecoration::Flags d );
+
+    WindowDecoration::Flags decoration() const;
+
+    const std::string& name() const
+    {
+        return _name; 
+    }
+
+    void setName(const std::string&  n)
+    {
+        _name = n;
+    }
+
     void processEvent(const Pt::Event& ev);
 
     WindowImpl* impl()
@@ -151,11 +167,25 @@ class PT_HMI_API Window : public Pt::Connectable
     }
 
 
-    PaintSurface& surface();
+    PaintSurface&  surface()
+    {
+        return _surface;
+    }
+
 
     void invalidate();
 
     void render();
+
+    WindowManager& windowManager()
+    {
+        return _windowManager;
+    }
+
+    const WindowManager& windowManager() const 
+    {
+        return _windowManager;
+    }
 
   protected:
     virtual void onEvent(const Pt::Event& ev);
@@ -171,10 +201,45 @@ class PT_HMI_API Window : public Pt::Connectable
     virtual void onCloseEvent(const CloseEvent& ev);
 
     virtual void onActivateEvent(const ActivateEvent& ev);
+    
 
     void removeWidget(Widget& w);
 
+    void setPointedWidget( Widget* widget );
+
+    Widget* focusedWidget() 
+    {
+        return _focusedWidget;
+    }
+
+    void setFocusedWidget( Widget* widget );
+    
+
   private:
+    WindowManager                        _windowManager; 
+    bool                                 _isClosed;
+    bool                                 _isActive;
+    Gfx::SizeF                           _minimumSize;
+    Gfx::SizeF                           _maximumSize;
+    Hmi::WindowPosition::Type            _startPostion;
+    Hmi::WindowState::Type               _state;    
+    bool                                 _enabled;
+    bool                                 _visible;
+    Gfx::SizeF                           _size;
+    Gfx::PointF                          _position; 
+    Hmi::WindowBorder::Type              _border;
+	std::string                          _title;
+    Gfx::Image                           _icon;
+    bool                                 _canClose;    
+    WindowDecoration::Flags             _decoration;   
+    std::string                         _name;    
+    Gfx::Font                           _font;    
+    
+	Widget*                        _mainWidget;
+    Window*                        _parent;
+    Widget*                        _pointerWidget;
+    Widget*                        _focusedWidget;
+    PaintSurface                   _surface;
     WindowImpl*                    _impl;           
     Pt::Signal<const Pt::Event&>   _eventReady;
 };

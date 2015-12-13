@@ -22,7 +22,10 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+ * 02110-1301  USA
+ */
+
 #include "MainWindowImpl.h"
 #include "ApplicationImpl.h"
 #include <Windows.h>
@@ -42,22 +45,18 @@
 namespace Pt{
 namespace Hmi{
 
-
 MainWindowImpl::MainWindowImpl(Window* w)
 : WindowImpl(w)
 , _app( Pt::Hmi::Application::instance() )
 , _screen( _app.mainScreen() )
 , _hwnd( 0 )
 {    
-	_app.impl()->windowEvent() += Pt::slot(*this, &MainWindowImpl::onWindowEvent);
     create();
-
 }
 
 
 MainWindowImpl::~MainWindowImpl()
 {
-  _app.impl()->windowEvent() -= Pt::slot(*this, &MainWindowImpl::onWindowEvent); 
   destroy();
 }
 
@@ -149,15 +148,14 @@ void MainWindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
       keyEvent.key().setUnicode(ucode);
   }
 
-	//_app.sendEvent(*_apiWindow, keyEvent);
+    //_app.sendEvent(*_apiWindow, keyEvent);
 }
 
 
-void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam, LPARAM lparam, 	bool& handled )
+bool MainWindowImpl::processEvent(unsigned int message, WPARAM wparam, LPARAM lparam )
 {
-    if(_hwnd != wnd)
-        return;    
-	
+    bool handled = false;
+
     switch( message )
     {
         case WM_MOUSEMOVE:
@@ -229,45 +227,47 @@ void MainWindowImpl::onWindowEvent(HWND wnd, unsigned int message, WPARAM wparam
         }
         break;
 
-		case WM_ACTIVATE:
-		{
-			onActivate( wparam != 0 );
-		}
-		break;
-				
+        case WM_ACTIVATE:
+        {
+            onActivate( wparam != 0 );
+        }
+        break;
+                
         case WM_KILLFOCUS:
         {
-			onActivate( false );
+            onActivate( false );
         }
         break;        
 
-				case WM_GETMINMAXINFO:
-				{
-					MINMAXINFO* mmi = (MINMAXINFO*)lparam;
-					POINT min = { _minimumSize.width(), _minimumSize.height() };
-					POINT max = { _maximumSize.width(), _maximumSize.height() };
-					mmi->ptMaxTrackSize = max; 
-					mmi->ptMinTrackSize = min;
-					handled = true;  
-				}
-				break;
+        case WM_GETMINMAXINFO:
+        {
+            MINMAXINFO* mmi = (MINMAXINFO*)lparam;
+            POINT min = { _apiWindow->minimumSize().width(), _apiWindow->minimumSize().height() };
+            POINT max = { _apiWindow->maximumSize().width(), _apiWindow->maximumSize().height() };
+            mmi->ptMaxTrackSize = max; 
+            mmi->ptMinTrackSize = min;
+            handled = true;  
+        }
+        break;
 
         case WM_MOUSELEAVE:
 //           _apiWindow->setPointedWidget(0);
         break;
     }
+
+    return handled;
 }
 
 void MainWindowImpl::onClose()
 {
-	CloseEvent ev;
-	_apiWindow->processEvent(ev);
+    CloseEvent ev;
+    _apiWindow->processEvent(ev);
 }
 
 
 void MainWindowImpl::onActivate(bool f)
 {
-	_apiWindow->processEvent( ActivateEvent(f) );
+    _apiWindow->processEvent( ActivateEvent(f) );
 }
 
 
@@ -297,8 +297,8 @@ void MainWindowImpl::onSize(WPARAM wParam, LPARAM lParam)
   int width  = LOWORD(lParam);
   int height = HIWORD(lParam);  
     
-	Pt::Hmi::ResizeEvent ev(Gfx::SizeF(width, height), state);
-	_apiWindow->processEvent(ev);
+    Pt::Hmi::ResizeEvent ev(Gfx::SizeF(width, height), state);
+    _apiWindow->processEvent(ev);
 }
 
 
@@ -314,68 +314,67 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
         case WM_LBUTTONDOWN:
             pointerEvent.buttons()[0].setState(Pt::Hmi::DeviceButton::Pressed);
 
-						if(pointerEvent.pointerState() == PointerState::ReleaseToPress )
-							pointerEvent.setPointerState( PointerState::PressToRelease ); 
-							
+            if(pointerEvent.pointerState() == PointerState::ReleaseToPress )
+                pointerEvent.setPointerState( PointerState::PressToRelease ); 
         break;
         
         case WM_LBUTTONUP:        
             pointerEvent.buttons()[0].setState( Pt::Hmi::DeviceButton::Released );
 
-						if( pointerEvent.pointerState() == PointerState::PressToRelease )
-							pointerEvent.setPointerState( PointerState::ReleaseToPress ); 
+            if( pointerEvent.pointerState() == PointerState::PressToRelease )
+                pointerEvent.setPointerState( PointerState::ReleaseToPress ); 
 
         break;
                             
         case WM_MBUTTONDOWN:
             pointerEvent.buttons()[1].setState(Pt::Hmi::DeviceButton::Pressed);
 
-						if(pointerEvent.pointerState() == PointerState::ReleaseToPress )
-							pointerEvent.setPointerState( PointerState::PressToRelease ); 
+            if(pointerEvent.pointerState() == PointerState::ReleaseToPress )
+                pointerEvent.setPointerState( PointerState::PressToRelease ); 
 
         break;
 
         case WM_MBUTTONUP:
             pointerEvent.buttons()[1].setState(Pt::Hmi::DeviceButton::Released);
 
-						if( pointerEvent.pointerState() == PointerState::PressToRelease )
-							pointerEvent.setPointerState( PointerState::ReleaseToPress ); 
+            if( pointerEvent.pointerState() == PointerState::PressToRelease )
+                pointerEvent.setPointerState( PointerState::ReleaseToPress ); 
 
         break;
 
         case WM_RBUTTONDOWN:        
             pointerEvent.buttons()[2].setState(Pt::Hmi::DeviceButton::Pressed);
 
-						if(pointerEvent.pointerState() == PointerState::ReleaseToPress )
-							pointerEvent.setPointerState( PointerState::PressToRelease ); 
+            if(pointerEvent.pointerState() == PointerState::ReleaseToPress )
+                pointerEvent.setPointerState( PointerState::PressToRelease ); 
 
         break;
         
         case WM_RBUTTONUP:
             pointerEvent.buttons()[2].setState(Pt::Hmi::DeviceButton::Released);
 
-						if( pointerEvent.pointerState() == PointerState::PressToRelease )
-							pointerEvent.setPointerState( PointerState::ReleaseToPress ); 
-        break;			
+            if( pointerEvent.pointerState() == PointerState::PressToRelease )
+                pointerEvent.setPointerState( PointerState::ReleaseToPress ); 
+        break;            
     }
   
     Gfx::PointF p = _screen.toUnit(Gfx::Point(xPos, yPos));
     pointerEvent.setX(p.x());
     pointerEvent.setY(p.y());            
 
-	_app.sendEvent(*_apiWindow, pointerEvent);
+    _app.sendEvent(*_apiWindow, pointerEvent);
 }
 
 
 void MainWindowImpl::onMove(LPARAM lParam)
 { 
-	RECT  info;
+    RECT  info;
   GetWindowRect(_hwnd, &info);
-	int xPos = info.left;
-	int yPos = info.top;
+    int xPos = info.left;
+    int yPos = info.top;
 
-	MoveEvent ev(Gfx::PointF(xPos, yPos) );
-  _apiWindow->processEvent( ev );	
+    MoveEvent ev(Gfx::PointF(xPos, yPos) );
+  _apiWindow->processEvent( ev );    
 }
 
 
@@ -394,9 +393,9 @@ void MainWindowImpl::onPaint()
 }
 
 
-void MainWindowImpl::onSetPosition(const Gfx::PointF& pf)
+void MainWindowImpl::setPosition(const Gfx::PointF& pf)
 {
- Gfx::Point p = _screen.fromUnit(pf);
+  Gfx::Point p = _screen.fromUnit(pf);
   SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, SWP_DRAWFRAME|SWP_NOSIZE);
 }
 
@@ -407,10 +406,10 @@ void MainWindowImpl::activate()
 }
 
 
-void MainWindowImpl::onSetSize(const Gfx::SizeF& sizef)
+void MainWindowImpl::setSize(const Gfx::SizeF& sizef)
 {
-	if( _hwnd == 0)
-		return;
+    if( _hwnd == 0)
+        return;
 
   Gfx::Size size = _screen.fromUnit(sizef);
 
@@ -418,7 +417,7 @@ void MainWindowImpl::onSetSize(const Gfx::SizeF& sizef)
   SetRect(&clientRect, 0, 0, size.width() - 1, size.height() - 1);
 
   LONG style = GetWindowLong(_hwnd, GWL_STYLE);
-	LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
+    LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
   AdjustWindowRectEx(&clientRect, style, false, exStyle);
     
@@ -428,7 +427,7 @@ void MainWindowImpl::onSetSize(const Gfx::SizeF& sizef)
 }
 
 
-void MainWindowImpl::onSetDecoration( WindowDecoration::Flags deco )
+void MainWindowImpl::setDecoration( WindowDecoration::Flags deco )
 {
     setShowTitle( (deco & WindowDecoration::Flags::ShowTitleBar) != 0);
     setShowMinimizeButton( (deco & WindowDecoration::Flags::ShowMinimizeButton) != 0);
@@ -449,7 +448,7 @@ void MainWindowImpl::setShowTitle(bool p)
 }
 
 
-void MainWindowImpl::onSetTitle(const std::string& text)
+void MainWindowImpl::setTitle(const std::string& text)
 {
   SetWindowText(_hwnd, text.c_str());
 }
@@ -494,7 +493,7 @@ void MainWindowImpl::setShowSystemMenu(bool p)
 }
 
 
-void MainWindowImpl::onSetState(WindowState::Type p)
+void MainWindowImpl::setState(WindowState::Type p)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
@@ -516,27 +515,27 @@ void MainWindowImpl::onSetState(WindowState::Type p)
 }
 
 
-void MainWindowImpl::onSetBorder(WindowBorder::Type p)
+void MainWindowImpl::setBorder(WindowBorder::Type p)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
-		LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
+        LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
     switch( p )
     {
         case Pt::Hmi::WindowBorder::NoBorder:            
-						style &= ~WS_DLGFRAME;
-						style &= ~WS_THICKFRAME; 
-						exStyle &= ~WS_EX_TOOLWINDOW;						
+                        style &= ~WS_DLGFRAME;
+                        style &= ~WS_THICKFRAME; 
+                        exStyle &= ~WS_EX_TOOLWINDOW;                        
         break;
 
         case Pt::Hmi::WindowBorder::Sizeable:
             style |= WS_THICKFRAME;
-						style |= WS_DLGFRAME;
+                        style |= WS_DLGFRAME;
         break;
 
         case Pt::Hmi::WindowBorder::Dialog:
             style |= WS_DLGFRAME;   
-						style &= ~WS_THICKFRAME;         
+                        style &= ~WS_THICKFRAME;         
         break;
 
         case Pt::Hmi::WindowBorder::DialogSizeable:
@@ -546,19 +545,19 @@ void MainWindowImpl::onSetBorder(WindowBorder::Type p)
 
         case Pt::Hmi::WindowBorder::Tool:
             style |= WS_DLGFRAME;
-						style &= ~WS_THICKFRAME; 
+                        style &= ~WS_THICKFRAME; 
             exStyle |= WS_EX_TOOLWINDOW;
         break;
 
         case Pt::Hmi::WindowBorder::ToolSizeable:
-						style &= ~WS_DLGFRAME;
+                        style &= ~WS_DLGFRAME;
             style |= WS_THICKFRAME;
             exStyle |= WS_EX_TOOLWINDOW;
         break;
 
         default:
             style |= WS_BORDER; 
-						style &= ~WS_THICKFRAME;
+                        style &= ~WS_THICKFRAME;
         break;
     }
 
@@ -567,23 +566,23 @@ void MainWindowImpl::onSetBorder(WindowBorder::Type p)
 }
 
 
-void MainWindowImpl::onSetMinimumSize(const Gfx::SizeF& s)
+void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
 {
-	
+    
 }
-	
-void MainWindowImpl::onSetMaximumSize(const Gfx::SizeF& s)
+    
+void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 {
-	
-}
-
-void MainWindowImpl::onSetEnabled(bool e)
-{
-	EnableWindow(_hwnd, e);
+    
 }
 
+void MainWindowImpl::setEnabled(bool e)
+{
+    EnableWindow(_hwnd, e);
+}
 
-void MainWindowImpl::onSetIcon(const Gfx::Image& icon)
+
+void MainWindowImpl::setIcon(const Gfx::Image& icon)
 {
     if(icon.width() == 0 || icon.height() == 0)
         return;
@@ -616,8 +615,8 @@ void MainWindowImpl::onSetIcon(const Gfx::Image& icon)
 
 void MainWindowImpl::invalidate()
 {
-	render();
-	InvalidateRect(_hwnd, NULL, FALSE);
+   _apiWindow->render();
+    InvalidateRect(_hwnd, NULL, FALSE);
 }
 
 void MainWindowImpl::close()

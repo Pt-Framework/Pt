@@ -493,7 +493,7 @@ void Widget::onEvent(const Pt::Event& ev)
 void Widget::onPointerEvent(const PointerEvent& ev)
 {        
     if( ev.buttons()[0].state() == DeviceButton::Pressed && _acceptFocus)
-        _window->impl()->setFocusedWidget( this );
+        _window->setFocusedWidget( this );
 }
 
 
@@ -602,7 +602,7 @@ bool Widget::focusPrev()
     if( children().size() == 0 )
         return false;
 
-    std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->impl()->focusedWidget() );    
+    std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->focusedWidget() );    
 
     if(  it == _children.end())
         return focusPrevChild( children().size() );
@@ -624,7 +624,7 @@ bool Widget::focusNext()
     if( children().size() == 0 )
         return false;
 
-    std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->impl()->focusedWidget() );    
+    std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->focusedWidget() );    
 
     if( it == _children.end() )
         return focusNextChild(-1);

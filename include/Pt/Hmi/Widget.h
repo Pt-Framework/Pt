@@ -52,7 +52,7 @@ class Window;
 
 class PT_HMI_API Widget : public Pt::Connectable
 {
-    friend class WindowImpl;
+    friend class Window;
 
     public: 
         enum ImageLayout

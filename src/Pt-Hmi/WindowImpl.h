@@ -33,7 +33,6 @@
 #include <Pt/Hmi/WindowDecoration.h>
 #include <Pt/Hmi/WindowStartPosition.h>
 #include <Pt/Hmi/CloseEvent.h>
-#include "WindowManager.h"
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Image.h>
@@ -44,15 +43,12 @@ namespace Pt{
 namespace Hmi{
 
 class Window;
-class ChildWindowImpl;
 
 class WindowImpl : public Pt::Connectable
 {
     public:
         WindowImpl(Window* api);        
         
-        WindowImpl(Window* api, const WindowImpl* impl);  
-
         virtual ~WindowImpl();
 	
         virtual void show() = 0;
@@ -63,301 +59,31 @@ class WindowImpl : public Pt::Connectable
 
         virtual void invalidate() = 0;  
 
-        bool isActive() const
-        {
-            return _isActive;
-        }
+        virtual void setPosition(const Gfx::PointF& p) = 0;
+   
+        virtual void setSize(const Gfx::SizeF& size) = 0;
 
-        bool isClosed() const
-        {
-            return _isClosed;
-        }
+        virtual void setState(WindowState::Type s) = 0;   
 
-        void setPosition(const Gfx::PointF& p)
-        {
-            onSetPosition(p);
-            _position = p;
-        }
-    
-        const Gfx::PointF& position() const
-        {
-            return _position;
-        }
-
-
-        void setSize(const Gfx::SizeF& size)
-        {
-            onSetSize(size );
-            _size = size;
-            _surface.resize(size);
-        }
-
-
-        const Gfx::SizeF& size() const
-        {
-            return _size;
-        }	
-
-        void setState(WindowState::Type s)
-        {
-            onSetState(s);
-            _state = s; 
-        }
-
-        WindowState::Type state() const
-        {
-            return _state;
-        }
-    
-        void setBorder(WindowBorder::Type b)
-        {
-            onSetBorder(b);
-            _border = b; 
-        }
+        virtual void setBorder( WindowBorder::Type b ) = 0;
        
-        WindowBorder::Type border() const
-        {
-            return _border;
-        }
-
-        void setIcon(const Gfx::Image& i)
-        {
-            onSetIcon(i);
-            _icon = i; 
-        }
+        virtual void setIcon( const Gfx::Image& i ) = 0;
+            
+        virtual void setEnabled( bool e ) = 0;
     
-        const Gfx::Image& icon() const
-        {
-            return _icon;
-        }
-
-	    void setEnabled(bool e)
-        {
-            onSetEnabled(e);
-            _enabled = e;
-        }
-
-        bool isEnabled() const
-        {
-            return _enabled;
-        }
+        virtual void setMinimumSize( const Gfx::SizeF& s ) = 0;
     
-	    void setMinimumSize(const Gfx::SizeF& s)
-        {
-            onSetMinimumSize(s);
-            _minimumSize = s;
-        }
+	    virtual void setMaximumSize( const Gfx::SizeF& s ) = 0;
 
-        const Gfx::SizeF& minimumSize() const
-        {
-            return _minimumSize;
-        }
-	
-	    void setMaximumSize(const Gfx::SizeF& s)
-        {
-            onSetMaximumSize(s);
-            _maximumSize = s;
-        }
+        virtual void setDecoration( WindowDecoration::Flags d ) = 0;
 
-        const Gfx::SizeF& maximumSize() const
-        {
-            return _maximumSize;
-        }
-
-        void setDecoration( WindowDecoration::Flags d )
-        {
-            onSetDecoration(d);
-            _decoration = d;
-        }
-    
-        WindowDecoration::Flags decoration() const
-        {
-            return _decoration;
-        }
-
-
-        void setTitle( const std::string& t )
-        {
-            _title = t;
-        }
-
-        const std::string& title() const
-        {
-            return _title;
-        }
-
-
-        bool isClosable() const
-        {
-            return _canClose;
-        }
-
-        void setClosable(bool c)
-        {
-            _canClose = c;
-        }
+        virtual void setTitle( const std::string& t ) = 0;
 
         virtual void close() = 0;
- 
-        void add(Window& ch );
-
-        void remove(Window& ch );
-
-        const std::vector<Window*>& windows() const 
-        {
-           return _windowManager.windows();
-
-        }
-
-        Window* parent()
-        {
-            return _parent;
-        }
-
-
-        const Window* parent() const
-        {
-            return _parent;
-        }
-
-        const Widget* mainWidget() const
-        {
-            return _mainWidget;
-        }
-
-        Widget* mainWidget()
-        {
-            return _mainWidget;
-        }
-
-        void setDefaultPosition( Hmi::WindowPosition::Type p )
-        {
-            _startPostion = p;
-        }
-
-        Hmi::WindowPosition::Type defaultPosition() const
-        {
-            return _startPostion;
-        }
-
-        bool isVisible() const
-        {
-            return _visible;
-        }
-
-        const std::string& name() const
-        {
-            return _name; 
-        }
-
-        void setName(const std::string&  n)
-        {
-            _name = n;
-        }
-
-        void setFont(const Gfx::Font& ft)
-        {
-            _font = ft;
-        }
-
-        const Gfx::Font& font() const
-        {
-            return _font; 
-        }
-
-
-        void setMainWidget( Widget* w);
-
-        Window* findWindow(const std::string& n );
-
-        Widget* findWidget(const std::string& n );
-
-        void setMainWidget(Widget& w);
-
-        void onPointerEvent(const PointerEvent& ev);
-
-        void onKeyEvent(const KeyEvent& ev);
-
-        void onResizeEvent(const ResizeEvent& ev);
-        
-        void onMoveEvent( const MoveEvent& ev);
-
-        void onActivateEvent(const ActivateEvent& ev);
-        
-        void onCloseEvent(const CloseEvent& ev);
-
-        void removeWidget(Widget& w);
-
-        PaintSurface&  surface()
-        {
-            return _surface;
-        }
-
-        void render();
-
-        WindowManager& windowManager()
-        {
-            return _windowManager;
-        }
-
-        void setPointedWidget( Widget* widget );
-        
-        void setFocusedWidget( Widget* w );
-        
-        Widget* focusedWidget() 
-        {
-            return _focusedWidget;
-        }
 
     protected:
-        virtual void onSetPosition(const Gfx::PointF& p)  = 0;
+        Window*  _apiWindow;
 
-        virtual void onSetSize(const Gfx::SizeF& size) = 0;
-	
-        virtual void onSetState(WindowState::Type p) = 0;
-    
-        virtual void onSetBorder(WindowBorder::Type p) = 0;
-       
-        virtual void onSetIcon(const Gfx::Image& p) = 0;
-    
-	    virtual void onSetEnabled(bool e) = 0;	
-    
-	    virtual void onSetMinimumSize(const Gfx::SizeF& s) = 0;
-	
-	    virtual void onSetMaximumSize(const Gfx::SizeF& s) = 0;	
-
-        virtual void onSetDecoration( WindowDecoration::Flags d ) = 0;
-        
-        virtual void onSetTitle( const std::string& t ) = 0;
-        
-
-   protected:
-        Window*                              _apiWindow;
-        WindowManager                        _windowManager; 
-        bool                                 _isClosed;
-        bool                                 _isActive;
-        Gfx::SizeF                           _minimumSize;
-        Gfx::SizeF                           _maximumSize;
-        Hmi::WindowPosition::Type            _startPostion;
-        Hmi::WindowState::Type               _state;    
-        bool                                 _enabled;
-        bool                                 _visible;
-        Gfx::SizeF                           _size;
-        Gfx::PointF                          _position; 
-        Hmi::WindowBorder::Type              _border;
-	    std::string                          _title;
-        Gfx::Image                           _icon;
-        bool                                 _canClose;    
-        WindowDecoration::Flags             _decoration;   
-        std::string                         _name;    
-        Gfx::Font                           _font;    
-
-    private:
-	    Widget*                        _mainWidget;
-        Window*                        _parent;
-        Widget*                        _pointerWidget;
-        Widget*                        _focusedWidget;
-        PaintSurface                   _surface;
 };
 
 }}

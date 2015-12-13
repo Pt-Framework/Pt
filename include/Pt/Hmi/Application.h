@@ -42,8 +42,6 @@ class ApplicationImpl;
 
 class PT_HMI_API Application : public Pt::System::Application
 {
-    friend class MainWindow;
-
     public:
         Application(int argc = 0, char** argv = 0);
 
@@ -74,15 +72,9 @@ class PT_HMI_API Application : public Pt::System::Application
             return _impl;
         }
 
-    protected:
-        void registerWindow(Window& w);
-
-        void unregisterWindow(Window& w);
-
     private:
         ApplicationImpl* _impl; 
         Screen* _mainScreen;  
-        std::vector<Window*> _windows;
 };
 
 } // namespace

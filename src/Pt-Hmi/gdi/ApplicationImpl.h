@@ -47,8 +47,6 @@ class Selector : public System::Selector
         
       ~Selector();
 
-      void processMessage();
-
   protected:
       virtual DWORD waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout);
 };
@@ -67,17 +65,9 @@ class ApplicationImpl : public Pt::System::EventLoop
 
 		void nextEvent();
 
-
-		Pt::Signal<HWND, unsigned int, WPARAM, LPARAM, bool&>& windowEvent()
-		{
-			return _windowEvent;
-		}
-	
-
 	protected:
 		static long CALLBACK wndProc(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);
 		static HBITMAP createImage888(const Pt::uint8_t* data, size_t width, size_t height);
-		LRESULT dispatchGDIEvent(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);
 
 	protected:
     virtual void onAttachSelectable(System::Selectable&);

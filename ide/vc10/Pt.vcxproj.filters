@@ -1308,13 +1308,13 @@
     <ClInclude Include="..\..\src\Pt-Hmi\WindowImpl.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\WindowManager.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\ChildWindowImpl.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\WindowDecoration.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
   </ItemGroup>

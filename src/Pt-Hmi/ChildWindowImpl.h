@@ -39,7 +39,7 @@ namespace Hmi {
 class PT_HMI_API ChildWindowImpl  : public WindowImpl
 {
     public:
-        ChildWindowImpl(Window* api, const WindowImpl* impl);    
+        ChildWindowImpl(Window* api);    
 
         virtual ~ChildWindowImpl();    
 
@@ -52,25 +52,25 @@ class PT_HMI_API ChildWindowImpl  : public WindowImpl
         
         virtual void invalidate();
 
-        virtual void onSetPosition(const Gfx::PointF& p);
+        virtual void setPosition(const Gfx::PointF& p);
 
-        virtual void onSetSize(const Gfx::SizeF& size);
+        virtual void setSize(const Gfx::SizeF& size);
 	
-        virtual void onSetState(WindowState::Type p);
+        virtual void setState(WindowState::Type p);
     
-        virtual void onSetBorder(WindowBorder::Type p);
+        virtual void setBorder(WindowBorder::Type p);
        
-        virtual void onSetIcon(const Gfx::Image& p);
+        virtual void setIcon(const Gfx::Image& p);
     
-        virtual void onSetEnabled(bool e);	
+        virtual void setEnabled(bool e);	
     
-        virtual void onSetMinimumSize(const Gfx::SizeF& s);
+        virtual void setMinimumSize(const Gfx::SizeF& s);
 	
-        virtual void onSetMaximumSize(const Gfx::SizeF& s);	
+        virtual void setMaximumSize(const Gfx::SizeF& s);	
 
-        virtual void onSetDecoration( WindowDecoration::Flags d );	
+        virtual void setDecoration( WindowDecoration::Flags d );	
 
-        virtual void onSetTitle( const std::string& t );
+        virtual void setTitle( const std::string& t );
         
         virtual void close();
 };

@@ -42,51 +42,68 @@ class ApplicationImpl;
 
 class PT_HMI_API Screen
 {
-	public:
-		Screen(ApplicationImpl& app);
+    friend class Window;
 
-		virtual ~Screen();
+    public:
+        Screen(ApplicationImpl& app);
 
-		double width() const;
+        virtual ~Screen();
 
-		double height() const;
+        double width() const;
+
+        double height() const;
 	
-   Gfx::SizeF size() const
-    {
-      return Gfx::SizeF( width(), height() );
-    }
+        Gfx::SizeF size() const
+        {
+            return Gfx::SizeF( width(), height() );
+        }
 
-	 Gfx::PointF toUnit( const Gfx::Point& value );
+        Gfx::PointF toUnit( const Gfx::Point& value );
 	  
-   Gfx::SizeF toUnit( const Gfx::Size& value );
+        Gfx::SizeF toUnit( const Gfx::Size& value );
 	  
-    double toUnit( int value );
+        double toUnit( int value );
 
-	 Gfx::Point fromUnit( const Gfx::PointF& value );
+        Gfx::Point fromUnit( const Gfx::PointF& value );
 	  
-   Gfx::Size fromUnit( const Gfx::SizeF& value );
+        Gfx::Size fromUnit( const Gfx::SizeF& value );
 	  
-   Gfx::Rect fromUnit( const Gfx::RectF& value );
+        Gfx::Rect fromUnit( const Gfx::RectF& value );
 	  
-    int fromUnit( double value );
+        int fromUnit( double value );
 
-	  double unitSizeInch() const;
+        double unitSizeInch() const;
 	  
-    double unitSizeMm() const;
+        double unitSizeMm() const;
 
-	  void setResolution( double dpi );
+        void setResolution( double dpi );
 	  
-    double resolutionDPI() const;
+        double resolutionDPI() const;
     
-    void setCursor( const Cursor* cursor = 0 );
+        void setCursor( const Cursor* cursor = 0 );
 
-		ScreenImpl* impl()
-		{
-			return _impl;
-		}		
+        ScreenImpl* impl()
+        {
+            return _impl;
+        }		
+
+        Widget* findWidget( const std::string& name );
+
+        Window* findWindow( const std::string& name );
+
+         const std::vector<Window*>& windows() const
+         {
+            return _windows;
+         }
+
+    protected:
+        void registerWindow(Window& w);
+
+        void unregisterWindow(Window& w);
 
 	private:
 		ScreenImpl* _impl;
+        std::vector<Window*> _windows;
 };
 
 }}
