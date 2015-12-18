@@ -54,7 +54,7 @@ class Screen;
 class WindowManager : public Pt::Connectable
 {
     public:
-        WindowManager(Window* window);
+        WindowManager();
 
         virtual ~WindowManager();
 
@@ -62,82 +62,63 @@ class WindowManager : public Pt::Connectable
 
         void remove(Window& window);
 
-        void clear(); 
-
-        const std::vector<Window*>& windows() const
-        {
-            return _windows;
-        }
+        // TODO: WindowIterator
+        const std::vector<Window*>& windows() const;
 
         void activate(Window& w);
 
         void deactivate();
 
-        void render();
+        bool pointerInput(const Pt::Hmi::PointerEvent& pointerEvent);
 
-        bool pointerInput( const Pt::Hmi::PointerEvent& pointerEvent );
+        bool keyInput(const Pt::Hmi::KeyEvent& keyEvent);
 
-        bool keyInput( const Pt::Hmi::KeyEvent& keyEvent );
-
-        size_t actionButton() const 
-        {
-            return _actionButton;
-        }
-
-        void setActionButton( size_t index )
-        {
-            _actionButton = index;
-        }
-
-        void invalidate();
-
-    protected:
-        virtual Gfx::PointF renderFrame( Window& w);
+        void render(PaintSurface& surface);
 
     private:
-        bool contains( const Window& w, const Gfx::PointF& p );
+        bool Initial(const Pt::Hmi::PointerEvent&);
 
-        void setSizingCursor( ResizeDirection::Type type );
- 
-        ResizeDirection::Type getSizingDirection( const Window& w, const Pt::Hmi::PointerEvent& ev );
+        bool IndicateMove(const Pt::Hmi::PointerEvent& pev);
 
-        ResizeDirection::Type isSizing( const Window& w, const Pt::Hmi::PointerEvent& ev );    
+        bool IndicateSizing(const Pt::Hmi::PointerEvent& pev);
+
+        bool MovingWindow(const Pt::Hmi::PointerEvent& pev);
+
+        bool SizingWindow(const PointerEvent& ev );
+
+        ResizeDirection::Type isSizing( const Window& w, const Pt::Hmi::PointerEvent& ev );
 
         bool isMoving ( const Window& w, const Pt::Hmi::PointerEvent& ev );
 
-        void doSizing( Window& w, const PointerEvent& ev );
+    private:
+        bool updateActive(const Pt::Hmi::PointerEvent& mouseEvent);
 
-        void doMoving( Window& w, const PointerEvent& ev );
+        bool contains(const Window& w, double x, double y);
 
-        void updateActive( const Pt::Hmi::PointerEvent& mouseEvent );
+        Window* findWindow(double x, double y);
 
-        Window* getFosusedWindow(WindowManager& manager);
+        void setSizingCursor( ResizeDirection::Type type );
+ 
+        Window* activeWindow(WindowManager& manager); 
 
-        Gfx::PointF toClient(const Window& w, const Gfx::PointF& p);  
-
-        Window* active();        
-
-        Window* findWindow( const Gfx::PointF& pos );
-
-        void setPointedWindow( Window* window );
+        Gfx::PointF renderFrame(const Window& w, PaintSurface& surface);
 
     private:
         Application&              _app;
-        Window*                   _window;
-        std::vector<Window*> _windows;
-        ResizeDirection::Type     _sizingDirection;
-        Gfx::PointF               _lastSizePoint;
+        std::vector<Window*>      _children;
+
+        typedef bool (WindowManager::*State)(const Pt::Hmi::PointerEvent&);
+        State                 _state;
+        Window*               _managedWindow;
+        Pt::Hmi::PointerEvent _lastPointer;
+        ResizeDirection::Type _sizingDirection;
+        
         double                    _borderWidth;
         Gfx::Color                _inactiveColor;
         Gfx::Color                _activeColor;
-        Gfx::Color                _textColor;
-        bool                      _moving;
-        Gfx::PointF               _movingOffset;
-        DeviceButton::State       _pointerLastState;
-        bool                      _focusOnPointerOver;
+        Gfx::Color                _textColor;        
         size_t                    _actionButton;  
         double                    _titleBarHeight;
-        Window*                   _pointedWindow;
 };
 
 }} // namespace

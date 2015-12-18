@@ -51,7 +51,6 @@ Window::Window(Window* parent)
 , _canClose(true)
 , _isClosed(false)
 , _isActive(false)
-, _windowManager(this)
 , _mainWidget(0)
 , _position(0,0)
 , _size(200,200)
@@ -550,8 +549,15 @@ void Window::render()
         _mainWidget->render();
         surface().painter().drawSurface(_mainWidget->position(), _mainWidget->surface() );
     }
-
-    _windowManager.render();
+    else
+    {
+         Hmi::Painter& painter = surface().painter();
+         painter.setBrush( Pt::Gfx::Color(0,0,0) );
+         Pt::Gfx::RectF rect(Pt::Gfx::PointF(0,0), size() );
+         painter.fillRect(rect);
+    }
+    
+    _windowManager.render( surface() );
 }
 
 } // namespace

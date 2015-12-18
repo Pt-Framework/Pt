@@ -73,7 +73,6 @@ void ChildWindowImpl::activate()
 }
 
 
-
 void ChildWindowImpl::setPosition(const Gfx::PointF& p)
 {
     invalidate();

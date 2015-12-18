@@ -36,7 +36,7 @@ class ResizeDirection
   public:
 	  enum Type
 	  {
-		  No,
+		  None,
 		  North,
 		  NorthEast,
 		  East,
@@ -51,8 +51,8 @@ class ResizeDirection
     {
       switch(t)
       {
-      	case No:
-          return "No";
+      	case None:
+          return "None";
 		    
         case North:
           return "North";
@@ -85,8 +85,8 @@ class ResizeDirection
 
     static ResizeDirection::Type fromString( const std::string& t )
     {
-      if( t == "No")
-        return No;
+      if( t == "None")
+        return None;
 		    
       if( t == "North")
         return North;
@@ -113,7 +113,7 @@ class ResizeDirection
         return NorthWest;
       
       throw std::logic_error("unknown resize direction");
-      return No;
+      return None;
     }
 };
 

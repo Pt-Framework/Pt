@@ -30,7 +30,7 @@
 #include <Pt/Hmi/Api.h>
 #include "../WindowImpl.h"
 #include <Windows.h>
-
+#include <Pt/Hmi/PointerEvent.h>
 namespace Pt{
 namespace Hmi{
 
@@ -101,7 +101,8 @@ class MainWindowImpl : public WindowImpl
     private:	
         Pt::Hmi::Application& _app; 
         Screen&               _screen; 
-        HWND				  _hwnd;	        
+        HWND				  _hwnd;
+        PointerEvent          _pointerEvent;
 };
 
 }}

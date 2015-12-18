@@ -398,13 +398,12 @@ class PT_HMI_API Widget : public Pt::Connectable
         Key                          _mnemonicKey;    
         Pt::Signal<>                 _mnemonicEntered;
            
-
     private:
         bool focusNextChild(int index);
         bool focusPrevChild(int index);
 
         //Todo: implement layout
-        //void updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p);
+        void updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p);
     //const Gfx::SizeF clientSize() const
     //{
     //    return Gfx::SizeF( _size.width() - margin().left() -  margin().right(),

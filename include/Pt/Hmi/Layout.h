@@ -33,6 +33,7 @@
 #include <Pt/Hmi/Spacing.h>
 
 namespace Pt {
+
 namespace Hmi {
 
 class Layout
@@ -40,7 +41,7 @@ class Layout
 	public:
 		enum Type
 		{
-			Fixed,
+			None,
 			TopToButton,
 			ButtomToTop,
 			LeftToRight,
@@ -49,7 +50,7 @@ class Layout
   
 		enum Docking
 		{
-			None,
+			Fixed,
 			Left,
 			Top,
 			Right,
@@ -59,10 +60,9 @@ class Layout
 
 	public:
 		Layout()
-		: _type( Fixed )		
-		, _dock( None )
-		{
-		}
+		: _type( None )		
+		, _dock( Fixed )
+		{ }
 
 		Type type() const 
 		{
@@ -74,12 +74,12 @@ class Layout
 			_type = t;
 		}
 
-		const Spacing&  margin() const
+		const Spacing& margin() const
 		{
 			return _margin;
 		}
 
-		Spacing&  margin()
+		Spacing& margin()
 		{
 			return _margin;
 		}
@@ -89,12 +89,12 @@ class Layout
 			_margin = m;
 		}
 
-		const Spacing&  padding() const
+		const Spacing& padding() const
 		{
 			return _padding;
 		}
 
-		Spacing&  padding()
+		Spacing& padding()
 		{
 			return _padding;
 		}
@@ -113,7 +113,6 @@ class Layout
 		{
 			_dock = d;
 		}
-
 
 	private:
 		Type		_type;	

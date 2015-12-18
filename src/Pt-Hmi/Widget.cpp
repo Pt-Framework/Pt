@@ -192,17 +192,17 @@ Gfx::PointF Widget::fromClient( const Gfx::PointF& localPoint )
 }
 
 
-//void Widget::updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p)
-//{       
-//  w.setPosition(p);
-//  w.setSize(s);          
-//  _isValid = false;
-//}
+void Widget::updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p)
+{       
+  w.setPosition(p);
+  w.setSize(s);          
+  _isValid = false;
+}
 
 
 void Widget::invalidate()
-{        
-  _isValid = false;
+{
+    _isValid = false;
 
     if( parent() )
     {
@@ -210,134 +210,161 @@ void Widget::invalidate()
     }
     else
     {
-        if( _window != 0 )
+        if(_window)
             _window->invalidate();
+    }
+}
+
+
+void Widget::render()
+{
+    if( ! visible() )
+        return;
+
+    // layout children
+    onLayout( surface() );
+
+    // render
+    if( ! _isValid )
+    {
+        surface().clear();
+        onRender( surface() );
+        _isValid = true;
+    }
+
+    // render children
+    for( size_t i = 0; i < _children.size(); ++i )
+    {
+        Widget* child = _children[i];
+
+        child->render();
+
+        surface().painter().drawSurface( child->position(), child->surface() );
     }
 }
 
 
 void Widget::onLayout( PaintSurface& surface )
 {
-/*
- Gfx::SizeF clientSize = surface.size();
-  double posLeft  = 0;
-  double posTop   = 0;
-  double posRight  = clientSize.width();
-  double posBottom = clientSize.height();
-  std::vector<Widget*> fillLayoutChildren;
+    Gfx::SizeF clientSize = surface.size();
+    double posLeft  = 0;
+    double posTop   = 0;
+    double posRight  = clientSize.width();
+    double posBottom = clientSize.height();
+    std::vector<Widget*> fillLayoutChildren;
 
     for( size_t i = 0; i < children().size(); ++i )
     {
-        Widget*    child = _children[i];            
+        Widget* child = _children[i];            
             
-   Gfx::PointF point = child->position();
+        Gfx::PointF point = child->position();
 
-    if( flowLayout() == Hmi::FlowLayout::None )
-    {
-      switch( child->dock() )
-      {
-        case Docking::None:        
+        switch( _layout.type() )
         {
-          point.setX( point.x() );
-          point.setY( point.y() );            
-        }
-        break;
+            case Layout::None:
+            {
+              switch( child->layout().docking() )
+              {
+                case Layout::Fixed:        
+                {
+                  point.setX( point.x() );
+                  point.setY( point.y() );            
+                }
+                break;
 
-        case Docking::Left:
-        {
-          point.setX( posLeft );
-          point.setY( posTop );            
-         Gfx::SizeF size( child->size().width(), (posBottom - posTop));
+                case Layout::Left:
+                {
+                  point.setX( posLeft );
+                  point.setY( posTop );            
 
-                    posLeft += child->size().width();      
+                  Gfx::SizeF size( child->size().width(), (posBottom - posTop));
+                  posLeft += child->size().width();      
                             
-          updatePosAndSize( *child, size, point );           
-        }
-        break;
+                  updatePosAndSize( *child, size, point );           
+                }
+                break;
 
-        case Docking::Top:
-        {
-          point.setX( posLeft );
-          point.setY( posTop  );            
-                    Gfx::SizeF size( (posRight - posLeft), child->size().height());
+                case Layout::Top:
+                {
+                  point.setX( posLeft );
+                  point.setY( posTop  );            
+                  Gfx::SizeF size( (posRight - posLeft), child->size().height());
 
                   posTop += child->size().height();      
         
-          updatePosAndSize(*child, size, point );
-        }
-        break;
+                  updatePosAndSize(*child, size, point );
+                }
+                break;
 
-        case Docking::Right:
-        {
-          posRight -= child->size().width();     
-          point.setX( posRight );
-          point.setY( posTop );                             
+                case Layout::Right:
+                {
+                  posRight -= child->size().width();     
+                  point.setX( posRight );
+                  point.setY( posTop );                             
                     
-                    Gfx::SizeF size( child->size().width(), (posBottom - posTop) );
+                            Gfx::SizeF size( child->size().width(), (posBottom - posTop) );
         
-          updatePosAndSize(*child, size, point );
-        }
-        break;
+                  updatePosAndSize(*child, size, point );
+                }
+                break;
 
-        case Docking::Bottom:
-        {
-          posBottom -= child->size().height();    
-          point.setX( posLeft );
-          point.setY( posBottom  );                              
-                    Gfx::SizeF size( (posRight - posLeft), child->size().height() );
-          updatePosAndSize(*child, size, point);
-        }
-        break;
+                case Layout::Bottom:
+                {
+                  posBottom -= child->size().height();    
+                  point.setX( posLeft );
+                  point.setY( posBottom  );                              
+                            Gfx::SizeF size( (posRight - posLeft), child->size().height() );
+                  updatePosAndSize(*child, size, point);
+                }
+                break;
 
-        case Docking::Fill:
-        {
-          fillLayoutChildren.push_back( child );
-          continue;
-        }      
-      }
-    }
-    else
-    {
-      switch( flowLayout() )
-      {
-        case Hmi::FlowLayout::Horizontal:
-        {                        
-          if( flowLayout() == FlowLayoutDirection::LeftToRightTopToBottom )
-          {
-            point.setX( posLeft );
-            posLeft += child->size().width();
-          }
-          else
-          {
-            posRight -= child->size().width();
-            point.setX( posRight );              
-          }
+                case Layout::Fill:
+                {
+                  fillLayoutChildren.push_back( child );
+                  continue;
+                }      
+              }
+            }
 
-          point.setY( 0 );    
-          updatePosAndSize( *child,Gfx::SizeF( child->size().width(), clientSize.height() ), point );
-        }
-        break;
+            case Layout::LeftToRight:
+            {                        
+                point.setX( posLeft );
+                posLeft += child->size().width();
+                point.setY( 0 );    
+               updatePosAndSize( *child,Gfx::SizeF( child->size().width(), clientSize.height() ), point );
 
-        case Hmi::FlowLayout::Vertical:
-        {
-          point.setX( 0 );
+            }
+            break;
 
-          if( flowDirection() == FlowLayoutDirection::LeftToRightTopToBottom )
-          {
-            point.setY( posTop );
-            posTop += child->size().height();    
-          }
-          else
-          {
-            posBottom -= child->size().height(); 
-            point.setY( posBottom  );    
-          }
+            case Layout::RightToLeft:
+            {
+                posRight -= child->size().width();
+                point.setX( posRight );              
+                point.setY( 0 );    
+               updatePosAndSize( *child,Gfx::SizeF( child->size().width(), clientSize.height() ), point );
 
-          updatePosAndSize( *child,Gfx::SizeF( clientSize.width(), child->size().height() ), point );
-        }
-        break;
-      }
-    }                
+            }
+            break;
+
+            case Layout::TopToButton:
+            {
+                point.setX( 0 );
+              
+                point.setY( posTop );
+                posTop += child->size().height();    
+                updatePosAndSize( *child,Gfx::SizeF( clientSize.width(), child->size().height() ), point );
+            }
+            break;
+
+            case Layout::ButtomToTop:
+            {
+                point.setX( 0 );
+                posBottom -= child->size().height(); 
+                point.setY( posBottom  );    
+                updatePosAndSize( *child,Gfx::SizeF( clientSize.width(), child->size().height() ), point );
+            }
+            break;
+        }                    
     }    
 
   if( fillLayoutChildren.size() != 0 )
@@ -349,36 +376,7 @@ void Widget::onLayout( PaintSurface& surface )
     const double height = posBottom - posTop;
 
     updatePosAndSize( *child,Gfx::SizeF( width, height ), point );
-  }*/
-}
-
-
-void Widget::render()
-{    
-    if( !visible())
-        return;
-
-    //Layout children
-    onLayout( surface() );    
-
-    //Render       
-    if( !_isValid )
-    {
-       surface().clear();
-      onRender( surface() );          
-    }
-
-    //Render children
-    for( size_t i = 0; i < _children.size(); ++i )
-    {
-        Widget* child = _children[i];    
-        
-        _children[i]->render();   
-
-       surface().painter().drawSurface( child->position(), _children[i]->surface() );
-    }
-        
-    _isValid = true;
+  }
 }
 
 

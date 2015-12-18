@@ -83,7 +83,7 @@ Widget* Application::findWidget(const std::string& name)
 
 Window* Application::findWindow(const std::string& name)
 {
-    return _mainScreen->findWindow( name);
+    return _mainScreen->findWindow(name);
 }
 
 
