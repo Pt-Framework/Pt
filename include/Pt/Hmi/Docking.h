@@ -27,8 +27,8 @@
 	02110-1301  USA
 */
 
-#ifndef Pt_Hmi_Layout_H
-#define Pt_Hmi_Layout_H
+#ifndef Pt_Hmi_Docking_H
+#define Pt_Hmi_Docking_H
 
 #include <Pt/Hmi/Spacing.h>
 
@@ -36,20 +36,21 @@ namespace Pt {
 
 namespace Hmi {
 
-class Layout
+class Docking
 {
 	public:
 		enum Type
 		{			
-            None,
-			TopToButton,
-			ButtomToTop,
-			LeftToRight,
-			RightToLeft,
+            None,		
+        	Left,
+			Top,
+			Right,
+			Bottom,
+			Fill
 		};
 
 	public:
-		Layout()
+		Docking()
 		: _type( None )		
 		{ }
 
@@ -63,24 +64,24 @@ class Layout
 			_type = t;
 		}
 
-		const Spacing& padding() const
+		const Spacing& margin() const
 		{
-			return _padding;
+			return _margin;
 		}
 
-		Spacing& padding()
+		Spacing& margin()
 		{
-			return _padding;
+			return _margin;
 		}
 
-		void setPadding( const Spacing& p )
+		void setMargin( const Spacing& m )
 		{
-			_padding = p;
+			_margin = m;
 		}
-
+	
 	private:
-		Type	_type;	
-		Spacing _padding;
+		Type    _type;		
+		Spacing _margin;
 };
 
 }}

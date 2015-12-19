@@ -190,7 +190,11 @@ void Window::setMainWidget(Widget* widget)
         if( _mainWidget->parent() )
             _mainWidget->parent()->removeWidget(*_mainWidget);
 
-        _mainWidget->setWindow(this);
+
+       _mainWidget->setWindow(this);
+       _mainWidget->setPosition(Gfx::PointF(0,0) );
+       _mainWidget->setSize( _size);
+       _mainWidget->invalidate();
     }
 }
 
@@ -308,7 +312,17 @@ void Window::onResizeEvent(const ResizeEvent& ev)
     _size = ev.size();
     _state = ev.state();
     _surface.resize(_size);
-    invalidate();
+
+    if( _mainWidget )
+    {
+        _mainWidget->setPosition(Gfx::PointF(0,0));
+        _mainWidget->setSize( _size);
+        _mainWidget->invalidate();
+    }
+    else
+    {
+        invalidate();
+    }
 }
 
 

@@ -107,20 +107,19 @@ void MainWindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
   BYTE keyboardState[256];
 
   GetKeyboardState(keyboardState);
-  KeyEvent keyEvent;
 
   if(msg == WM_KEYDOWN)
-      keyEvent.setState(KeyEvent::KeyDown);
+      _keyEvent.setState(KeyEvent::KeyDown);
   else if(msg == WM_KEYUP)
-      keyEvent.setState(KeyEvent::KeyUp);            
+      _keyEvent.setState(KeyEvent::KeyUp);            
     
   if(msg == WM_SYSCOMMAND)
   {
-    keyEvent.setState(KeyEvent::KeyUp);
-    keyEvent.key().setAlt(wparam == SC_KEYMENU );
-    keyEvent.key().setShift(false);
-    keyEvent.key().setCtrl(false);
-    keyEvent.key().setUnicode(lparam);
+    _keyEvent.setState(KeyEvent::KeyUp);
+    _keyEvent.key().setAlt(wparam == SC_KEYMENU );
+    _keyEvent.key().setShift(false);
+    _keyEvent.key().setCtrl(false);
+    _keyEvent.key().setUnicode(lparam);
   }
   else
   {
@@ -133,23 +132,23 @@ void MainWindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 
       if(wparam == 16 )
       {//Shift key
-        keyEvent.key().setAlt(false);
-        keyEvent.key().setShift(keyEvent.state() == KeyEvent::KeyDown);
+        _keyEvent.key().setAlt(false);
+        _keyEvent.key().setShift(_keyEvent.state() == KeyEvent::KeyDown);
       }
       else if(wparam == 17 )
       {//Controll key
-        keyEvent.key().setAlt(false);
-        keyEvent.key().setCtrl(keyEvent.state() == KeyEvent::KeyDown);
+        _keyEvent.key().setAlt(false);
+        _keyEvent.key().setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
       }
 
       Pt::uint32_t scanCode = ((lparam >> 16) & 0xFF);            
       Pt::uint32_t ucode = 0;            
         
       ToUnicode( wparam, scanCode , (BYTE*)keyboardState, (LPWSTR)&ucode, 4, 0);    
-      keyEvent.key().setUnicode(ucode);
+      _keyEvent.key().setUnicode(ucode);
   }
 
-    //_app.sendEvent(*_apiWindow, keyEvent);
+  _app.sendEvent(*_apiWindow, _keyEvent);
 }
 
 

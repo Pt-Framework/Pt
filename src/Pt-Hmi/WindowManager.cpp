@@ -314,8 +314,6 @@ bool WindowManager::updateActive(const Pt::Hmi::PointerEvent& ev)
 
 bool WindowManager::Initial(const Pt::Hmi::PointerEvent& pev)
 {
-    std::clog << "Initial: " << pev.buttons()[_actionButton].state() << std::endl;
-
    if( pev.buttons()[_actionButton].state() == DeviceButton::Pressed && 
        _lastPointer.buttons()[_actionButton].state() == DeviceButton::Released)
         updateActive(pev);
@@ -352,7 +350,6 @@ bool WindowManager::Initial(const Pt::Hmi::PointerEvent& pev)
 
 bool WindowManager::IndicateMove(const Pt::Hmi::PointerEvent& pev)
 {
-    std::clog << "IndicateMove: " << pev.buttons()[_actionButton].state() << std::endl;
 
     if(pev.buttons()[_actionButton].state() == DeviceButton::Pressed )
     {
@@ -373,8 +370,6 @@ bool WindowManager::IndicateMove(const Pt::Hmi::PointerEvent& pev)
 
 bool WindowManager::MovingWindow(const Pt::Hmi::PointerEvent& pev)
 {
-    std::clog << "MovingWindow: " << pev.buttons()[_actionButton].state() << std::endl;
-
     if( pev.buttons()[_actionButton].state() == DeviceButton::Released )
     {
         _state = &WindowManager::IndicateMove;
@@ -421,8 +416,6 @@ bool WindowManager::isMoving(const Window& w, const Pt::Hmi::PointerEvent& ev)
 
 bool WindowManager::IndicateSizing(const Pt::Hmi::PointerEvent& pev)
 {
-    std::clog << "IndicateSizing: " << pev.buttons()[_actionButton].state() << std::endl;
-
     if(pev.buttons()[_actionButton].state() == DeviceButton::Pressed )
     {
         updateActive(pev);
@@ -518,8 +511,6 @@ void WindowManager::setSizingCursor( ResizeDirection::Type type )
 
 bool WindowManager::SizingWindow(const PointerEvent& ev )
 {  
-    std::clog << "SizingWindow: " << ev.buttons()[_actionButton].state() << std::endl;
-
     if( ev.buttons()[_actionButton].state() == DeviceButton::Released )
     {
         _state = &WindowManager::IndicateSizing;

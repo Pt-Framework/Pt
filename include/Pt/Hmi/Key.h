@@ -25,7 +25,7 @@ class PT_HMI_API Key
    {
       _unicode= ch; 
    }
-
+  
    bool alt() const
    {
       return _alt;
@@ -59,17 +59,17 @@ class PT_HMI_API Key
 
    bool operator==(const Key& k ) const
    {
-      if(_alt != k._alt )
-        return false;
+        if(_alt != k._alt )
+            return false;
         
-       if( _ctrl != k._ctrl )
-        return false;
+        if( _ctrl != k._ctrl )
+            return false;
 
-       if( _shift != k._shift )
-        return false;
+        if( _shift != k._shift )
+            return false;
 
         if( _unicode != k._unicode)
-          return false;
+            return false;
 
         return true;
    }
@@ -81,7 +81,7 @@ class PT_HMI_API Key
 
     bool operator<(const Key& k ) const
     {
-      return toString() < k.toString();
+      return _unicode < k._unicode;
     }
 
 
@@ -92,28 +92,27 @@ class PT_HMI_API Key
 
    void clear()
    {
-      _unicode = 0;
-	    _alt = false;
-	    _shift = false;
-	    _ctrl = false;
+     _unicode = 0;
+     _alt = false;
+     _shift = false;
+     _ctrl = false;
    }
 
 
    const Pt::String toString()  const
-    {
+   {
       Pt::String str;
-        str += _alt ? "A+" : "";
-        str += _shift ? "S+" : "";
-        str += _ctrl ? "C+" : "";
+        str += _alt ? "Alt+" : "";
+        str += _shift ? "Shift+" : "";
+        str += _ctrl ? "Ctrl+" : "";
         str += _unicode;
         return str;
-
     }
   private:
     Pt::Char _unicode;
-	  bool _alt;
-	  bool _shift;
-	  bool _ctrl;
+	bool _alt;
+	bool _shift;
+	bool _ctrl;
 };
 
 }}

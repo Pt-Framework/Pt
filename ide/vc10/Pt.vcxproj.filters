@@ -1317,6 +1317,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Docking.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

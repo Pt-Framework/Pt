@@ -196,6 +196,7 @@ void Widget::updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF&
 {       
   w.setPosition(p);
   w.setSize(s);          
+  w._isValid = false;
   _isValid = false;
 }
 
@@ -263,16 +264,16 @@ void Widget::onLayout( PaintSurface& surface )
         {
             case Layout::None:
             {
-              switch( child->layout().docking() )
+              switch( child->docking().type() )
               {
-                case Layout::Fixed:        
+                case Docking::None:        
                 {
                   point.setX( point.x() );
                   point.setY( point.y() );            
                 }
                 break;
 
-                case Layout::Left:
+                case Docking::Left:
                 {
                   point.setX( posLeft );
                   point.setY( posTop );            
@@ -284,7 +285,7 @@ void Widget::onLayout( PaintSurface& surface )
                 }
                 break;
 
-                case Layout::Top:
+                case Docking::Top:
                 {
                   point.setX( posLeft );
                   point.setY( posTop  );            
@@ -296,35 +297,36 @@ void Widget::onLayout( PaintSurface& surface )
                 }
                 break;
 
-                case Layout::Right:
+                case Docking::Right:
                 {
                   posRight -= child->size().width();     
                   point.setX( posRight );
                   point.setY( posTop );                             
                     
-                            Gfx::SizeF size( child->size().width(), (posBottom - posTop) );
+                  Gfx::SizeF size( child->size().width(), (posBottom - posTop) );
         
                   updatePosAndSize(*child, size, point );
                 }
                 break;
 
-                case Layout::Bottom:
+                case Docking::Bottom:
                 {
                   posBottom -= child->size().height();    
                   point.setX( posLeft );
                   point.setY( posBottom  );                              
-                            Gfx::SizeF size( (posRight - posLeft), child->size().height() );
+                  Gfx::SizeF size( (posRight - posLeft), child->size().height() );
                   updatePosAndSize(*child, size, point);
                 }
                 break;
 
-                case Layout::Fill:
+                case Docking::Fill:
                 {
                   fillLayoutChildren.push_back( child );
                   continue;
                 }      
               }
             }
+            break;
 
             case Layout::LeftToRight:
             {                        
@@ -370,7 +372,7 @@ void Widget::onLayout( PaintSurface& surface )
   if( fillLayoutChildren.size() != 0 )
   {
     Widget* child = fillLayoutChildren[0]; 
-   Gfx::PointF point(posLeft, posTop);
+    Gfx::PointF point(posLeft, posTop);
 
     const double width  = posRight - posLeft;
     const double height = posBottom - posTop;

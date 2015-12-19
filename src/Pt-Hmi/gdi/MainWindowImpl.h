@@ -31,6 +31,8 @@
 #include "../WindowImpl.h"
 #include <Windows.h>
 #include <Pt/Hmi/PointerEvent.h>
+#include <Pt/Hmi/KeyEvent.h>
+
 namespace Pt{
 namespace Hmi{
 
@@ -103,6 +105,7 @@ class MainWindowImpl : public WindowImpl
         Screen&               _screen; 
         HWND				  _hwnd;
         PointerEvent          _pointerEvent;
+        KeyEvent              _keyEvent;
 };
 
 }}

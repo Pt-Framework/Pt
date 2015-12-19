@@ -1,5 +1,6 @@
 #include "ChildW.h"
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Docking.h>
 
 namespace Pt{
 namespace Hmi{
@@ -17,8 +18,7 @@ ChildW::ChildW()
 	_mainPanel.setSize( Gfx::SizeF(800,600) );
 	_mainPanel.setPosition( Gfx::PointF(20,20) );
 	_mainPanel.setCaption( "MainPanel" );
-	_mainPanel.setPanelBorderStyle( Panel::Single );  
-	_mainPanel.layout().setDocking( Layout::Fill);
+	_mainPanel.setPanelBorderStyle( Panel::Single );      
 	_mainPanel.setBackgroundColor(  Gfx::Color(1,0,0 ) );	
 
 	//Text	
@@ -42,6 +42,7 @@ ChildW::ChildW()
 
 	//Dialog button  
 	_dialogButton.setButtonType( Hmi::ButtonType::Press );
+    
 	_dialogButton.setCaption(std::string("&&Dia&log [CTRL+D]&") );
 //	_dialogButton.setShortcutKey( std::string("C//d") );
 	_dialogButton.setPosition( Gfx::PointF(20,100));
@@ -56,7 +57,7 @@ ChildW::ChildW()
 	_closeButton.setPosition(Gfx::PointF(590,525));
 	_closeButton.setSize(Gfx::SizeF(150,25));
 	_closeButton.setSize(Gfx::SizeF(20, 40));
-	_closeButton.layout().setDocking( Layout::Bottom);
+	_closeButton.docking().setType( Docking::Bottom);
 	
 	//_childWindow2.setMainWidget(&_closeButton);	  	
 	_childWindow2.setPosition(Gfx::PointF(10,10));	

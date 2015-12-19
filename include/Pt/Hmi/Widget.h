@@ -36,6 +36,7 @@
 #include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Cursor.h>
+#include <Pt/Hmi/Docking.h>
 #include <Pt/Hmi/Layout.h>
 #include <Pt/Connectable.h>
 #include <Pt/Gfx/Font.h>
@@ -243,10 +244,27 @@ class PT_HMI_API Widget : public Pt::Connectable
             return _name;
         }
 
-            void setName(const std::string& name)
+        
+        void setName(const std::string& name)
         {
           _name = name;
         }
+
+        Docking& docking()
+        {
+            return _docking;
+        }
+
+        const Docking& docking() const
+        {
+            return _docking;
+        }
+
+        void setDocking( const Docking& d )
+        {
+            _docking = d;
+        }
+
 
         void setLayout(const Layout& l )
         {
@@ -397,6 +415,8 @@ class PT_HMI_API Widget : public Pt::Connectable
         Gfx::Font                    _font;
         Key                          _mnemonicKey;    
         Pt::Signal<>                 _mnemonicEntered;
+        Docking                      _docking;
+
            
     private:
         bool focusNextChild(int index);

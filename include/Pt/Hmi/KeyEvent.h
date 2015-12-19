@@ -80,7 +80,7 @@ public:
 private:
 
   Key _key;
-	KeyState _state;
+  KeyState _state;
 };
 
 }}
