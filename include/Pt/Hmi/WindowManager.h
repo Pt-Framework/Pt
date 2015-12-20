@@ -76,19 +76,24 @@ class WindowManager : public Pt::Connectable
         void render(PaintSurface& surface);
 
     private:
+        // OnWindow, OnContent, OnWindowArea
         bool Initial(const Pt::Hmi::PointerEvent&);
 
+        // OnTitle
         bool IndicateMove(const Pt::Hmi::PointerEvent& pev);
 
+        // OnBorder
         bool IndicateSizing(const Pt::Hmi::PointerEvent& pev);
 
+        // OnMove
         bool MovingWindow(const Pt::Hmi::PointerEvent& pev);
 
+        // OnResize
         bool SizingWindow(const PointerEvent& ev );
 
         ResizeDirection::Type isSizing( const Window& w, const Pt::Hmi::PointerEvent& ev );
 
-        bool isMoving ( const Window& w, const Pt::Hmi::PointerEvent& ev );
+        bool isMoving(const Window& w, const Pt::Hmi::PointerEvent& ev);
 
     private:
         bool updateActive(const Pt::Hmi::PointerEvent& mouseEvent);
