@@ -106,6 +106,7 @@ class MainWindowImpl : public WindowImpl
         HWND				  _hwnd;
         PointerEvent          _pointerEvent;
         KeyEvent              _keyEvent;
+        bool                  _hasPointer;     
 };
 
 }}

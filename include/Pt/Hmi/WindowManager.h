@@ -109,7 +109,7 @@ class WindowManager : public Pt::Connectable
 
         Gfx::PointF renderFrame(const Window& w, PaintSurface& surface);
 
-        void forwardEvent(const Pt::Hmi::PointerEvent& pev);
+        void forwardEvent(const Pt::Hmi::PointerEvent& pev, Pt::Hmi::PointerEvent::State s);
 
     private:
         Application&              _app;

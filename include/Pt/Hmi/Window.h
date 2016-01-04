@@ -161,9 +161,6 @@ class PT_HMI_API Window : public Pt::Connectable
 
     void processEvent(const Pt::Event& ev);
     
-    void processLeaveEvent( const PointerEvent& ev );
-
-
     WindowImpl* impl()
     {
         return _impl;   
@@ -196,7 +193,7 @@ class PT_HMI_API Window : public Pt::Connectable
     virtual void onKeyEvent( const KeyEvent& ev );
 
     virtual void onPointerEvent( const PointerEvent& ev );
-
+    
     virtual void onResizeEvent(const ResizeEvent& ev);
 
     virtual void onMoveEvent( const MoveEvent& ev);
@@ -204,8 +201,10 @@ class PT_HMI_API Window : public Pt::Connectable
     virtual void onCloseEvent(const CloseEvent& ev);
 
     virtual void onActivateEvent(const ActivateEvent& ev);
-    
-    virtual void onPointerLeave(  const PointerEvent& ev );
+        
+    virtual void onPointerEnter( const PointerEvent& ev );    
+
+    virtual void onPointerLeave(const PointerEvent& ev );
 
     void removeWidget(Widget& w);
 
@@ -245,7 +244,7 @@ class PT_HMI_API Window : public Pt::Connectable
     Widget*                        _focusedWidget;
     PaintSurface                   _surface;
     WindowImpl*                    _impl;           
-    Pt::Signal<const Pt::Event&>   _eventReady;
+    Pt::Signal<const Pt::Event&>   _eventReady;    
   
 };
 

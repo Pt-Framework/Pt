@@ -214,17 +214,6 @@ void Window::setPointedWidget( Widget* widget )
 }
 
 
-void Window::processLeaveEvent( const PointerEvent& ev )
-{
-    setPointedWidget(0);
-    onPointerLeave(ev);
-}
-
-void Window::onPointerLeave(  const PointerEvent& ev )
-{    
-}
-
-
 void Window::removeWidget(Widget& w)
 {
     if( _pointerWidget == &w )
@@ -280,25 +269,39 @@ void Window::onEvent(const Pt::Event& ev)
 
 
 void Window::onPointerEvent(const PointerEvent& ev)
-{    
+{
+    if( ev.isEnter() )
+        onPointerEnter(ev);
+
     if( _windowManager.pointerInput( ev ) )
     {
-        this->setPointedWidget( 0 );
-        return;
+        if( ! _mainWidget || ! _mainWidget->visible() )
+        {
+            Application::instance().mainScreen().setCursor( &Cursor::defaultCursor() ); 
+            return;
+        }
+
+        Widget* widget = _mainWidget->findWidget( Gfx::PointF( ev.x(), ev.y() ) );
+
+        setPointedWidget( widget );    
+
+        if( widget )
+            widget->processEvent(ev);       
     }
 
-    if( ! _mainWidget  || ! _mainWidget->visible() )
-    {
-        Application::instance().mainScreen().setCursor( &Cursor::defaultCursor() );  
-        return;
-    }
-    
-    Widget* widget = _mainWidget->findWidget( Gfx::PointF( ev.x(), ev.y() ) );
+    if( ev.isLeave() )          
+        onPointerLeave(ev);            
+}
 
-    this->setPointedWidget( widget );    
 
-    if( widget )
-        widget->processEvent(ev);       
+void Window::onPointerEnter( const PointerEvent& ev )
+{
+}
+
+
+void Window::onPointerLeave(const PointerEvent& ev )
+{
+    setPointedWidget( 0 );
 }
 
 

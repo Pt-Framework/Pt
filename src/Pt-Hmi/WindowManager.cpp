@@ -328,15 +328,16 @@ bool WindowManager::isMoving(const Window& w, const Pt::Hmi::PointerEvent& ev)
 }
 
 
-void WindowManager::forwardEvent(const Pt::Hmi::PointerEvent& pev)
+void WindowManager::forwardEvent(const Pt::Hmi::PointerEvent& pev, Pt::Hmi::PointerEvent::State s)
 {
     Pt::Hmi::PointerEvent childEvent = pev;
 
     double childX = pev.x() - _managedWindow->position().x() - _borderWidth;
     double childY = pev.y() - _managedWindow->position().y() - _titleBarHeight - _borderWidth;
 
-    childEvent.setX(childX) ;
-    childEvent.setY(childY) ; 
+    childEvent.setX(childX);
+    childEvent.setY(childY); 
+    childEvent.setState( s);
     _managedWindow->processEvent(childEvent);
 }
 
@@ -469,7 +470,7 @@ bool WindowManager::onBackground(const Pt::Hmi::PointerEvent& pev)
     }
 
      // client area
-    forwardEvent(pev);
+    forwardEvent(pev, PointerEvent::Enter);
     _state = &WindowManager::onClientArea;
     
     return true;
@@ -491,8 +492,9 @@ bool WindowManager::onClientArea( const Pt::Hmi::PointerEvent& pev )
         
     if( ! managedWindow )
     {
-        _managedWindow->processLeaveEvent(pev);
+        forwardEvent(pev, PointerEvent::Leave);
         _managedWindow = 0;
+        
         _state = &WindowManager::onBackground;
         return false;
     }    
@@ -502,7 +504,7 @@ bool WindowManager::onClientArea( const Pt::Hmi::PointerEvent& pev )
         // pointer on title bar
         if( isMoving(*managedWindow, pev) )
         {
-            _managedWindow->processLeaveEvent(pev);
+            forwardEvent(pev, PointerEvent::Leave);
             _managedWindow = managedWindow;
 
             _app.mainScreen().setCursor( &Cursor::moveCursor() );
@@ -515,9 +517,9 @@ bool WindowManager::onClientArea( const Pt::Hmi::PointerEvent& pev )
 
         if( _sizingDirection != ResizeDirection::None )
         {
-            _managedWindow->processLeaveEvent(pev);
+            forwardEvent(pev, PointerEvent::Leave);
             _managedWindow = managedWindow;
-        
+            
             setSizingCursor(_sizingDirection);
             _state = &WindowManager::onResizeArea;
             return true;
@@ -525,7 +527,7 @@ bool WindowManager::onClientArea( const Pt::Hmi::PointerEvent& pev )
     }
 
     // client area
-    forwardEvent(pev);    
+    forwardEvent(pev, PointerEvent::None);    
     return true;
 }
 
@@ -550,6 +552,7 @@ bool WindowManager::onMoveArea(const Pt::Hmi::PointerEvent& pev)
     if( containsInClient( *_managedWindow, pev.x(), pev.y() ) )
     {
         _state = &WindowManager::onClientArea;
+        forwardEvent( pev, PointerEvent::Enter);
         return true;
     }
     
@@ -578,6 +581,7 @@ bool WindowManager::onResizeArea(const Pt::Hmi::PointerEvent& pev)
 
     if( containsInClient( *_managedWindow, pev.x(), pev.y() ) )
     {
+        forwardEvent( pev, PointerEvent::Enter);
         _state = &WindowManager::onClientArea;
         return true;
     }

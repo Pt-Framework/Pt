@@ -50,6 +50,7 @@ MainWindowImpl::MainWindowImpl(Window* w)
 , _app( Pt::Hmi::Application::instance() )
 , _screen( _app.mainScreen() )
 , _hwnd( 0 )
+, _hasPointer(false)
 {    
     _pointerEvent.buttons().resize(3);
     create();
@@ -252,7 +253,11 @@ bool MainWindowImpl::processEvent(unsigned int message, WPARAM wparam, LPARAM lp
 
         case WM_MOUSELEAVE:
             handled = true;  
-            _apiWindow->processLeaveEvent(_pointerEvent );
+            _hasPointer = false;
+            _pointerEvent.setX(-1);
+            _pointerEvent.setY(-1);
+            _pointerEvent.setState( PointerEvent::Leave );
+            _apiWindow->processEvent( _pointerEvent );
         break;
         
     }
@@ -314,53 +319,44 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
         case WM_LBUTTONDOWN:
             _pointerEvent.buttons()[0].setState(Pt::Hmi::DeviceButton::Pressed);
 
-            if(_pointerEvent.pointerState() == PointerState::ReleaseToPress )
-                _pointerEvent.setPointerState( PointerState::PressToRelease ); 
         break;
         
         case WM_LBUTTONUP:        
             _pointerEvent.buttons()[0].setState( Pt::Hmi::DeviceButton::Released );
 
-            if( _pointerEvent.pointerState() == PointerState::PressToRelease )
-                _pointerEvent.setPointerState( PointerState::ReleaseToPress ); 
-
         break;
                             
         case WM_MBUTTONDOWN:
             _pointerEvent.buttons()[1].setState(Pt::Hmi::DeviceButton::Pressed);
-
-            if(_pointerEvent.pointerState() == PointerState::ReleaseToPress )
-                _pointerEvent.setPointerState( PointerState::PressToRelease ); 
-
         break;
 
         case WM_MBUTTONUP:
             _pointerEvent.buttons()[1].setState(Pt::Hmi::DeviceButton::Released);
-
-            if( _pointerEvent.pointerState() == PointerState::PressToRelease )
-                _pointerEvent.setPointerState( PointerState::ReleaseToPress ); 
-
         break;
 
         case WM_RBUTTONDOWN:        
             _pointerEvent.buttons()[2].setState(Pt::Hmi::DeviceButton::Pressed);
 
-            if(_pointerEvent.pointerState() == PointerState::ReleaseToPress )
-                _pointerEvent.setPointerState( PointerState::PressToRelease ); 
-
         break;
         
         case WM_RBUTTONUP:
             _pointerEvent.buttons()[2].setState(Pt::Hmi::DeviceButton::Released);
-
-            if( _pointerEvent.pointerState() == PointerState::PressToRelease )
-                _pointerEvent.setPointerState( PointerState::ReleaseToPress ); 
         break;            
     }
   
     Gfx::PointF p = _screen.toUnit(Gfx::Point(xPos, yPos));
     _pointerEvent.setX(p.x());
     _pointerEvent.setY(p.y());            
+
+    if( ! _hasPointer )
+    {
+        _hasPointer = true;                
+        _pointerEvent.setState( PointerEvent::Enter );
+    }
+    else
+    {
+       _pointerEvent.setState( PointerEvent::None );
+    }
 
     _app.sendEvent(*_apiWindow, _pointerEvent);
 }
