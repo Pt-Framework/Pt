@@ -273,7 +273,7 @@ void Window::onPointerEvent(const PointerEvent& ev)
     if( ev.isEnter() )
         onPointerEnter(ev);
 
-    if( _windowManager.pointerInput( ev ) )
+    if( ! _windowManager.pointerInput( ev ) )
     {
         if( ! _mainWidget || ! _mainWidget->visible() )
         {

@@ -127,6 +127,14 @@ public:
         return _state == Leave;
     }
 
+    bool isPressed(unsigned button) const
+    {
+        if( button >= _buttons.size() )
+            return false;
+
+        return _buttons[button].state() == DeviceButton::Pressed;
+    }
+
 private:
 	double _x;
 	double _y;
