@@ -76,21 +76,20 @@ class WindowManager : public Pt::Connectable
         void render(PaintSurface& surface);
 
     private:
-        // OnWindow, OnContent, OnWindowArea
-        bool Initial(const Pt::Hmi::PointerEvent&);
+        //States
+        bool onBackground( const Pt::Hmi::PointerEvent& pev );
 
-        // OnTitle
-        bool IndicateMove(const Pt::Hmi::PointerEvent& pev);
+        bool onMoveArea( const Pt::Hmi::PointerEvent& pev );
 
-        // OnBorder
-        bool IndicateSizing(const Pt::Hmi::PointerEvent& pev);
+        bool onResizeArea( const Pt::Hmi::PointerEvent& pev );
 
-        // OnMove
-        bool MovingWindow(const Pt::Hmi::PointerEvent& pev);
+        bool onClientArea( const Pt::Hmi::PointerEvent& pev );
 
-        // OnResize
-        bool SizingWindow(const PointerEvent& ev );
+        bool onMoving( const Pt::Hmi::PointerEvent& pev );
 
+        bool onResizing( const PointerEvent& pev );
+
+    private:
         ResizeDirection::Type isSizing( const Window& w, const Pt::Hmi::PointerEvent& ev );
 
         bool isMoving(const Window& w, const Pt::Hmi::PointerEvent& ev);
@@ -100,6 +99,8 @@ class WindowManager : public Pt::Connectable
 
         bool contains(const Window& w, double x, double y);
 
+        bool containsInClient(const Window& w, double x, double y);
+
         Window* findWindow(double x, double y);
 
         void setSizingCursor( ResizeDirection::Type type );
@@ -107,6 +108,8 @@ class WindowManager : public Pt::Connectable
         Window* activeWindow(WindowManager& manager); 
 
         Gfx::PointF renderFrame(const Window& w, PaintSurface& surface);
+
+        void forwardEvent(const Pt::Hmi::PointerEvent& pev);
 
     private:
         Application&              _app;

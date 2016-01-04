@@ -251,8 +251,10 @@ bool MainWindowImpl::processEvent(unsigned int message, WPARAM wparam, LPARAM lp
         break;
 
         case WM_MOUSELEAVE:
-//           _apiWindow->setPointedWidget(0);
+            handled = true;  
+            _apiWindow->processLeaveEvent(_pointerEvent );
         break;
+        
     }
 
     return handled;

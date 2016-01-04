@@ -90,9 +90,9 @@ void Cursor::loadCursor( std::istream& pngStream, const Gfx::Color& alphaColor, 
 		}
 	}			
 
-	im->setColor(0,0, Gfx::Color(0,1,0) );
-  fromImage(*im, cursor);
-  delete im;
+	im->setColor(cursor.xHotspot(),cursor.yHotspot(), Gfx::Color(0,1,0) );
+    fromImage(*im, cursor);
+    delete im;
 }
 
 
@@ -113,10 +113,11 @@ const Cursor& Cursor::moveCursor()
 	if( cursor.width() != 0 )
 		return cursor;
 
+    cursor.setXHotspot( 11 );
+    cursor.setYHotspot( 11 );
+    cursor.setName( "move" );
+
 	loadCursor( g_moveCursor, g_moveCursorSize, Gfx::Color( 1, 0, 0 ), cursor );
-  cursor.setXHotspot( 11 );
-  cursor.setYHotspot( 11 );
-  cursor.setName( "move" );
 	return cursor;
 }
 
@@ -127,10 +128,11 @@ const Cursor& Cursor::arrowCursor()
 	if( cursor.width() != 0 )
 		return cursor;
 
+    cursor.setXHotspot( 0 );
+    cursor.setYHotspot( 0 );
+    cursor.setName( "arrow" );
+
 	loadCursor( g_arrowCursor, g_arrowCursorSize, Gfx::Color( 1, 0, 0 ), cursor );
-  cursor.setXHotspot( 0 );
-  cursor.setYHotspot( 0 );
-  cursor.setName( "arrow" );
 	return cursor;
 }
 
@@ -142,10 +144,11 @@ const Cursor& Cursor::waitCursor()
 	if( cursor.width() != 0 )
 		return cursor;
 
+    cursor.setXHotspot( 12 );
+    cursor.setYHotspot( 16 );
+    cursor.setName( "wait" );
+
 	loadCursor( g_waitCursor, g_waitCursorSize, Gfx::Color( 1, 0, 0 ), cursor );
-  cursor.setXHotspot( 12 );
-  cursor.setYHotspot( 16 );
-  cursor.setName( "wait" );
 	return cursor;
 }
 
@@ -157,10 +160,11 @@ const Cursor& Cursor::sizeNWSECursor()
 	if( cursor.width() != 0 )
 		return cursor;
 
+    cursor.setXHotspot( 8 );
+    cursor.setYHotspot( 8 );
+    cursor.setName( "sizeNWSE" );
+
 	loadCursor( g_sizeNWSECursor, g_sizeNWSECursorSize, Gfx::Color( 1, 0, 0 ), cursor );
-  cursor.setXHotspot( 8 );
-  cursor.setYHotspot( 8 );
-  cursor.setName( "sizeNWSE" );
 	return cursor;
 }
 
@@ -172,10 +176,11 @@ const Cursor& Cursor::sizeNESWCursor()
 	if( cursor.width() != 0 )
 		return cursor;
 
+    cursor.setXHotspot( 8 );
+    cursor.setYHotspot( 8 );
+    cursor.setName( "sizeNESW" );
+
 	loadCursor( g_sizeNESWCursor, g_sizeNESWCursorSize, Gfx::Color( 1, 0, 0 ), cursor );
-  cursor.setXHotspot( 8 );
-  cursor.setYHotspot( 8 );
-  cursor.setName( "sizeNESW" );
 	return cursor;
 }
 
@@ -187,10 +192,11 @@ const Cursor& Cursor::sizeWECursor()
 	if( cursor.width() != 0 )
 		return cursor;
 
+    cursor.setXHotspot( 11 );
+    cursor.setYHotspot( 4 );
+    cursor.setName( "sizeWE" );
+
 	loadCursor( g_sizeWECursor, g_sizeWECursorSize, Gfx::Color( 1, 0, 0 ), cursor );
-  cursor.setXHotspot( 11 );
-  cursor.setYHotspot( 4 );
-  cursor.setName( "sizeWE" );
 
 	return cursor;
 }
@@ -203,11 +209,11 @@ const Cursor& Cursor::sizeNSCursor()
 	if( cursor.width() != 0 )
 		return cursor;
 
-	loadCursor( g_sizeNSCursor, g_sizeNSCursorSize, Gfx::Color( 1, 0, 0 ), cursor );
-  cursor.setXHotspot( 4 );
-  cursor.setYHotspot( 12 );
-  cursor.setName( "sizeNS" );
+    cursor.setXHotspot( 4 );
+    cursor.setYHotspot( 12 );
+    cursor.setName( "sizeNS" );
 
+	loadCursor( g_sizeNSCursor, g_sizeNSCursorSize, Gfx::Color( 1, 0, 0 ), cursor );
 	return cursor;
 }
 

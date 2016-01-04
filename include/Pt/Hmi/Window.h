@@ -58,7 +58,7 @@ class PaintSurface;
 class PT_HMI_API Window : public Pt::Connectable
 {
    friend class Widget;
-   friend class WindowManager;
+   friend class WindowManager;   
 
   public:           
     Window(Window* parent = 0);     
@@ -160,6 +160,9 @@ class PT_HMI_API Window : public Pt::Connectable
     }
 
     void processEvent(const Pt::Event& ev);
+    
+    void processLeaveEvent( const PointerEvent& ev );
+
 
     WindowImpl* impl()
     {
@@ -202,6 +205,7 @@ class PT_HMI_API Window : public Pt::Connectable
 
     virtual void onActivateEvent(const ActivateEvent& ev);
     
+    virtual void onPointerLeave(  const PointerEvent& ev );
 
     void removeWidget(Widget& w);
 

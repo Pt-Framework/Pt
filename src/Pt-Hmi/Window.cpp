@@ -214,6 +214,15 @@ void Window::setPointedWidget( Widget* widget )
 }
 
 
+void Window::processLeaveEvent( const PointerEvent& ev )
+{
+    setPointedWidget(0);
+    onPointerLeave(ev);
+}
+
+void Window::onPointerLeave(  const PointerEvent& ev )
+{    
+}
 
 
 void Window::removeWidget(Widget& w)
@@ -278,7 +287,7 @@ void Window::onPointerEvent(const PointerEvent& ev)
         return;
     }
 
-    if( !_mainWidget  || ! _mainWidget->visible() )
+    if( ! _mainWidget  || ! _mainWidget->visible() )
     {
         Application::instance().mainScreen().setCursor( &Cursor::defaultCursor() );  
         return;

@@ -92,6 +92,7 @@ private:
 		double _height;
 		double _dpi;
 	  HCURSOR _cursorHandle;
+      const Cursor* _currentCursor;
 };
 
 }}

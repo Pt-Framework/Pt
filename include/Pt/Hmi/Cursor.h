@@ -112,7 +112,7 @@ class PT_HMI_API Cursor
 		static const Cursor& sizeNESWCursor();
 		static const Cursor& sizeWECursor();
 		static const Cursor& sizeNSCursor();
-    static const Cursor& moveCursor();
+        static const Cursor& moveCursor();
   
   public:
     static void fromImage( const Gfx::Image& image, Cursor& cursor );	

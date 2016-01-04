@@ -32,6 +32,7 @@ namespace Hmi{
 ScreenImpl::ScreenImpl(ApplicationImpl&)
 : _dpi(96.0)
 , _cursorHandle(0)
+, _currentCursor(0)
 {
  	 _size = screeResolution();
 
@@ -46,8 +47,9 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
 
 
 ScreenImpl::~ScreenImpl()
-{
-	
+{	
+   if( _cursorHandle != 0 )			
+	   DestroyCursor( _cursorHandle );
 }
 
 double ScreenImpl::width() const
@@ -182,14 +184,22 @@ HBITMAP ScreenImpl::createImage888(const Pt::uint8_t* data, size_t width, size_t
 
 void ScreenImpl::setCursor(const Cursor* cursor)
 {	  
+    if( _currentCursor == cursor )
+        return;
+
+    _currentCursor = cursor;
+
 	if( cursor == 0 )
 		return;
 
-	if( cursor->empty() )
-		return;
+   if( _cursorHandle != 0 )			
+	   DestroyCursor( _cursorHandle );
 
-  if( _cursorHandle != 0 )			
-		DestroyCursor( _cursorHandle );
+	if( cursor->empty() )
+    {
+        SetCursor(0);
+		return;
+    }
 
 	HBITMAP andMask = createImage888( &cursor->andRgb888()[0], cursor->width(),  cursor->height() );
 	HBITMAP xorMask = createImage888( &cursor->xorRgb888()[0], cursor->width(),  cursor->height() );

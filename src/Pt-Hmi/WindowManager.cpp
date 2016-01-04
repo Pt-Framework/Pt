@@ -44,7 +44,7 @@ namespace Hmi {
 
 WindowManager::WindowManager()
 : _app( Application::instance() )
-, _state(&WindowManager::Initial)
+, _state(&WindowManager::onBackground)
 , _managedWindow(0)
 , _sizingDirection( ResizeDirection::None )
 , _borderWidth(4)
@@ -312,142 +312,46 @@ bool WindowManager::updateActive(const Pt::Hmi::PointerEvent& ev)
 }
 
 
-bool WindowManager::Initial(const Pt::Hmi::PointerEvent& pev)
-{
-    //std::clog << "Initial: " << pev.buttons()[_actionButton].state()  << this << std::endl;
-
-    if( _lastPointer.buttons()[_actionButton].state() == DeviceButton::Released)
-    {
-       if( pev.buttons()[_actionButton].state() == DeviceButton::Pressed)
-            updateActive(pev);
-
-        _managedWindow = findWindow( pev.x(), pev.y());
-        if( ! _managedWindow )
-            return false;
-
-        // pointer on title bar
-        if( isMoving(*_managedWindow, pev) )
-        {
-            _app.mainScreen().setCursor( &Cursor::moveCursor() );
-            _state = &WindowManager::IndicateMove;
-            return true;
-        }
-
-        // pointer on window border
-        _sizingDirection = isSizing(*_managedWindow, pev);
-        if( _sizingDirection != ResizeDirection::None )
-        {
-            setSizingCursor(_sizingDirection);
-            _state = &WindowManager::IndicateSizing;
-            return true;
-        }
-    }
-
-    // pointer on child window content area
-    if(_managedWindow)
-    {
-        double childX = pev.x() - _managedWindow->position().x() - _borderWidth;
-        double childY = pev.y() - _managedWindow->position().y() - _titleBarHeight - _borderWidth;
-        
-        if( childX >= 0 && 
-            childY >= 0 && 
-            childX <= _managedWindow->size().width() &&
-            childY <= _managedWindow->size().height() )
-        {
-             Pt::Hmi::PointerEvent childEvent = pev;
-             childEvent.setX(childX) ;
-             childEvent.setY(childY) ; 
-            _managedWindow->processEvent(childEvent);
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
-bool WindowManager::IndicateMove(const Pt::Hmi::PointerEvent& pev)
-{
-    //std::clog << "IndicateMove: " << pev.buttons()[_actionButton].state() << this << std::endl;
-
-    if(pev.buttons()[_actionButton].state() == DeviceButton::Pressed )
-    {
-        updateActive(pev);
-        _state = &WindowManager::MovingWindow;
-        return true;
-    }
-
-    if( ! isMoving(*_managedWindow, pev) )
-    {
-        _state = &WindowManager::Initial;
-        return false;
-    }
-
-    return true;
-}
-
-
-bool WindowManager::MovingWindow(const Pt::Hmi::PointerEvent& pev)
-{
-    //std::clog << "MovingWindow: " << pev.buttons()[_actionButton].state() << std::endl;
-
-    if( pev.buttons()[_actionButton].state() == DeviceButton::Released )
-    {
-        _state = &WindowManager::IndicateMove;
-        return true;
-    }
-    
-    double dX = pev.x() - _lastPointer.x();
-    double dY = pev.y() - _lastPointer.y();
-
-    Gfx::PointF winpos = _managedWindow->position();
-    winpos.addX(dX);
-    winpos.addY(dY);
-        
-    MoveEvent mev(winpos);
-    _managedWindow->processEvent(mev);
-     
-    return true;
-}
-
-
 bool WindowManager::isMoving(const Window& w, const Pt::Hmi::PointerEvent& ev)
 {            
     const Gfx::PointF& position = w.position();
      
-    if( (ev.x() < (position.x() + _borderWidth*2 + w.size().width()) && 
-         ev.x() >= position.x()) && 
+    if( (ev.x() < (position.x()  + _borderWidth * 2 + w.size().width() ) ) &&                  
         (ev.x() >= (position.x() + _borderWidth)) &&
-        (ev.y() < (position.y() + _titleBarHeight) ) && 
-        ((ev.y()+ position.y()) >= _borderWidth ) &&
-        (ev.y() >= (position.y() + _borderWidth)))           
+        (ev.y() < (position.y()  + _titleBarHeight + _borderWidth) ) && 
+        (ev.y() >= (position.y() + _borderWidth) ))
+    {      
         return true;
+    }
 
     return false;
 }
 
 
-
-bool WindowManager::IndicateSizing(const Pt::Hmi::PointerEvent& pev)
+void WindowManager::forwardEvent(const Pt::Hmi::PointerEvent& pev)
 {
-    //std::clog << "IndicateSizing: " << pev.buttons()[_actionButton].state()  << this << std::endl;
+    Pt::Hmi::PointerEvent childEvent = pev;
 
-    if(pev.buttons()[_actionButton].state() == DeviceButton::Pressed )
-    {
-        updateActive(pev);
-        _state = &WindowManager::SizingWindow;
-        return true;
-    }
+    double childX = pev.x() - _managedWindow->position().x() - _borderWidth;
+    double childY = pev.y() - _managedWindow->position().y() - _titleBarHeight - _borderWidth;
 
-    ResizeDirection::Type sizingDirection = isSizing(*_managedWindow, pev);
+    childEvent.setX(childX) ;
+    childEvent.setY(childY) ; 
+    _managedWindow->processEvent(childEvent);
+}
 
-    if( sizingDirection == ResizeDirection::None )
-    {
-        _state = &WindowManager::Initial;
-        return false;
-    }
 
-    return true; 
+bool WindowManager::containsInClient(const Window& w, double x, double y)
+{
+    double childX = x - w.position().x() - _borderWidth;
+    double childY = y - w.position().y() - _titleBarHeight - _borderWidth;
+        
+    if( childX >= 0 &&  childY >= 0 && 
+        childX <= w.size().width() &&
+        childY <= w.size().height() )
+    return true;
+
+    return false;
 }
 
 
@@ -525,14 +429,207 @@ void WindowManager::setSizingCursor( ResizeDirection::Type type )
 }
 
 
-bool WindowManager::SizingWindow(const PointerEvent& ev )
+bool WindowManager::onBackground(const Pt::Hmi::PointerEvent& pev)
+{
+    //std::clog << "onBackground: " << pev.buttons()[_actionButton].state()  << std::endl;    
+
+    // active window handling
+    if( _lastPointer.buttons()[_actionButton].state() == DeviceButton::Released)
+    {
+       if( pev.buttons()[_actionButton].state() == DeviceButton::Pressed)
+            updateActive(pev);    
+    }
+
+    // mouse handling
+    _managedWindow = findWindow( pev.x(), pev.y());
+
+    if( ! _managedWindow )
+        return false;
+    
+    if( _lastPointer.buttons()[_actionButton].state() == DeviceButton::Released)
+    {
+        // pointer on title bar
+        if( isMoving(*_managedWindow, pev) )
+        {
+            _app.mainScreen().setCursor( &Cursor::moveCursor() );
+            _state = &WindowManager::onMoveArea;
+            return true;
+        }
+
+        // pointer on window border
+        _sizingDirection = isSizing(*_managedWindow, pev);
+
+        if( _sizingDirection != ResizeDirection::None )
+        {
+            setSizingCursor(_sizingDirection);
+            _state = &WindowManager::onResizeArea;
+            return true;
+        }                                
+        
+    }
+
+     // client area
+    forwardEvent(pev);
+    _state = &WindowManager::onClientArea;
+    
+    return true;
+}
+
+
+bool WindowManager::onClientArea( const Pt::Hmi::PointerEvent& pev )
+{    
+    //std::clog << "onClientArea: " << pev.buttons()[_actionButton].state()  << std::endl;    
+
+    // active window handling
+    if( _lastPointer.buttons()[_actionButton].state() == DeviceButton::Released)
+    {
+       if( pev.buttons()[_actionButton].state() == DeviceButton::Pressed)
+            updateActive(pev);
+    }
+
+    Window* managedWindow = findWindow( pev.x(), pev.y());
+        
+    if( ! managedWindow )
+    {
+        _managedWindow->processLeaveEvent(pev);
+        _managedWindow = 0;
+        _state = &WindowManager::onBackground;
+        return false;
+    }    
+    
+    if( _lastPointer.buttons()[_actionButton].state() == DeviceButton::Released)
+    {   
+        // pointer on title bar
+        if( isMoving(*managedWindow, pev) )
+        {
+            _managedWindow->processLeaveEvent(pev);
+            _managedWindow = managedWindow;
+
+            _app.mainScreen().setCursor( &Cursor::moveCursor() );
+            _state = &WindowManager::onMoveArea;
+            return true;
+        }
+
+        // pointer on window border
+        _sizingDirection = isSizing(*_managedWindow, pev);
+
+        if( _sizingDirection != ResizeDirection::None )
+        {
+            _managedWindow->processLeaveEvent(pev);
+            _managedWindow = managedWindow;
+        
+            setSizingCursor(_sizingDirection);
+            _state = &WindowManager::onResizeArea;
+            return true;
+        }                                
+    }
+
+    // client area
+    forwardEvent(pev);    
+    return true;
+}
+
+
+bool WindowManager::onMoveArea(const Pt::Hmi::PointerEvent& pev)
+{
+    //std::clog << "onMovingArea: " << pev.buttons()[_actionButton].state() << " "<<_managedWindow->title() << std::endl;
+
+    if(pev.buttons()[_actionButton].state() == DeviceButton::Pressed )
+    {        
+        updateActive(pev);
+        _state = &WindowManager::onMoving;
+        return true;
+    }
+
+    if( isMoving(*_managedWindow, pev) )
+    {
+        _app.mainScreen().setCursor( &Cursor::moveCursor() );
+        return true;
+    }
+
+    if( containsInClient( *_managedWindow, pev.x(), pev.y() ) )
+    {
+        _state = &WindowManager::onClientArea;
+        return true;
+    }
+    
+    _state = &WindowManager::onBackground;
+    return false;
+}
+
+
+bool WindowManager::onResizeArea(const Pt::Hmi::PointerEvent& pev)
+{
+    //std::clog << "onResizeArea: " << pev.buttons()[_actionButton].state()  << " "<<_managedWindow->title() << std::endl;
+
+    setSizingCursor(_sizingDirection);
+
+    if(pev.buttons()[_actionButton].state() == DeviceButton::Pressed )
+    {
+        updateActive(pev);
+        _state = &WindowManager::onResizing;
+        return true;
+    }
+
+    ResizeDirection::Type sizingDirection = isSizing(*_managedWindow, pev);
+
+    if( sizingDirection != ResizeDirection::None )
+        return true;
+
+    if( containsInClient( *_managedWindow, pev.x(), pev.y() ) )
+    {
+        _state = &WindowManager::onClientArea;
+        return true;
+    }
+
+    _state = &WindowManager::onBackground;        
+    return false;
+}
+
+
+
+bool WindowManager::onMoving(const Pt::Hmi::PointerEvent& pev)
+{
+    //std::clog << "onMoving: " << pev.buttons()[_actionButton].state() << std::endl;
+
+    if( pev.buttons()[_actionButton].state() == DeviceButton::Released )
+    {
+        _state = isMoving(*_managedWindow, pev) ? &WindowManager::onMoveArea
+                                                : &WindowManager::onBackground;
+
+        return false;
+    }
+    
+    _app.mainScreen().setCursor( &Cursor::moveCursor() );
+
+    double dX = pev.x() - _lastPointer.x();
+    double dY = pev.y() - _lastPointer.y();
+
+    Gfx::PointF winpos = _managedWindow->position();
+    winpos.addX(dX);
+    winpos.addY(dY);
+        
+    MoveEvent mev(winpos);
+    _managedWindow->processEvent(mev);
+     
+    return true;
+}
+
+
+bool WindowManager::onResizing(const PointerEvent& ev )
 {  
-    //std::clog << "SizingWindow: " << ev.buttons()[_actionButton].state() << std::endl;
+//    std::clog << "onResizing: " << ev.buttons()[_actionButton].state() << std::endl;
+
+    setSizingCursor(_sizingDirection);
 
     if( ev.buttons()[_actionButton].state() == DeviceButton::Released )
     {
-        _state = &WindowManager::IndicateSizing;
-        return true;
+        ResizeDirection::Type sizingDirection = isSizing(*_managedWindow, ev);
+
+        _state = sizingDirection == ResizeDirection::None ? &WindowManager::onResizeArea
+                                                          : &WindowManager::onBackground;
+
+        return false;
     }
 
     const std::vector<DeviceButton>& button = ev.buttons();
