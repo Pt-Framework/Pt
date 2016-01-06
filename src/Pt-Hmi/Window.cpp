@@ -273,6 +273,9 @@ void Window::onPointerEvent(const PointerEvent& ev)
     if( ev.isEnter() )
         onPointerEnter(ev);
 
+    if( ev.isLeave() )          
+        onPointerLeave(ev); 
+
     if( ! _windowManager.pointerInput( ev ) )
     {
         if( ! _mainWidget || ! _mainWidget->visible() )
@@ -287,20 +290,19 @@ void Window::onPointerEvent(const PointerEvent& ev)
 
         if( widget )
             widget->processEvent(ev);       
-    }
-
-    if( ev.isLeave() )          
-        onPointerLeave(ev);            
+    }     
 }
 
 
 void Window::onPointerEnter( const PointerEvent& ev )
 {
+    std::clog << "pointer ENTER: " << this ->title() << std::endl;
 }
 
 
 void Window::onPointerLeave(const PointerEvent& ev )
 {
+    std::clog << "pointer LEAVE: " << this->title() << std::endl;
     setPointedWidget( 0 );
 }
 

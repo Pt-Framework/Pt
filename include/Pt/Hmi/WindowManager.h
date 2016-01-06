@@ -65,6 +65,7 @@ class WindowManager : public Pt::Connectable
         // TODO: WindowIterator
         const std::vector<Window*>& windows() const;
 
+        // TODO: Window::activate() should be public
         void activate(Window& w);
 
         void deactivate();
@@ -76,21 +77,18 @@ class WindowManager : public Pt::Connectable
         void render(PaintSurface& surface);
 
     private:
-        //States
-        bool onBackground( const Pt::Hmi::PointerEvent& pev );
+        bool onBackground(const Pt::Hmi::PointerEvent& pev);
 
-        bool onMoveArea( const Pt::Hmi::PointerEvent& pev );
+        bool onWindowFrame(const Pt::Hmi::PointerEvent& pev);
 
-        bool onResizeArea( const Pt::Hmi::PointerEvent& pev );
+        bool onWindowContent(const Pt::Hmi::PointerEvent& pev);
 
-        bool onClientArea( const Pt::Hmi::PointerEvent& pev );
+        bool onWindowMove(const Pt::Hmi::PointerEvent& pev);
 
-        bool onMoving( const Pt::Hmi::PointerEvent& pev );
-
-        bool onResizing( const PointerEvent& pev );
+        bool onWindowResize(const PointerEvent& pev);
 
     private:
-        ResizeDirection::Type isSizing( const Window& w, const Pt::Hmi::PointerEvent& ev );
+        ResizeDirection::Type isSizing(const Window& w, const Pt::Hmi::PointerEvent& ev);
 
         bool isMoving(const Window& w, const Pt::Hmi::PointerEvent& ev);
 
@@ -98,8 +96,6 @@ class WindowManager : public Pt::Connectable
         bool updateActive(const Pt::Hmi::PointerEvent& mouseEvent);
 
         bool contains(const Window& w, double x, double y);
-
-        bool containsInClient(const Window& w, double x, double y);
 
         Window* findWindow(double x, double y);
 
@@ -109,17 +105,19 @@ class WindowManager : public Pt::Connectable
 
         Gfx::PointF renderFrame(const Window& w, PaintSurface& surface);
 
-        void forwardEvent(const Pt::Hmi::PointerEvent& pev, Pt::Hmi::PointerEvent::State s);
+        void forwardEvent(Window& w,
+                          const Pt::Hmi::PointerEvent& pev, 
+                          Pt::Hmi::PointerEvent::State s);
 
     private:
         Application&              _app;
         std::vector<Window*>      _children;
 
         typedef bool (WindowManager::*State)(const Pt::Hmi::PointerEvent&);
-        State                 _state;
-        Window*               _managedWindow;
-        Pt::Hmi::PointerEvent _lastPointer;
-        ResizeDirection::Type _sizingDirection;
+        State                     _state;
+        Window*                   _managedWindow;
+        Pt::Hmi::PointerEvent     _lastPointer;
+        ResizeDirection::Type     _sizingDirection;
         
         double                    _borderWidth;
         Gfx::Color                _inactiveColor;

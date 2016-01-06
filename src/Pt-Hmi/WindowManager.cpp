@@ -125,14 +125,6 @@ void WindowManager::deactivate()
 }
 
 
-bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pev )
-{
-    bool r = (this->*_state)(pev);
-    _lastPointer = pev; 
-    return r;
-}
-
-
 bool WindowManager::keyInput( const Pt::Hmi::KeyEvent& keyEvent )
 {
   Window* w = activeWindow(*this);
@@ -260,11 +252,12 @@ Window* WindowManager::activeWindow( WindowManager& manager )
 
 bool WindowManager::contains(const Window& w, double x, double y)
 {  
-    Gfx::SizeF winSize( w.size().width() + _borderWidth*2, w.size().height() + _borderWidth*2 + _titleBarHeight );
+    Gfx::SizeF winSize(w.size().width() + _borderWidth*2, 
+                       w.size().height() + _borderWidth*2 + _titleBarHeight);
 
     if( x >= w.position().x() && x <  w.position().x() + winSize.width() &&
         y >= w.position().y() && y <  w.position().y() + winSize.height() )
-                return true;
+        return true;
 
     return false;
 }
@@ -316,7 +309,7 @@ bool WindowManager::isMoving(const Window& w, const Pt::Hmi::PointerEvent& ev)
 {            
     const Gfx::PointF& position = w.position();
      
-    if( (ev.x() < (position.x()  + _borderWidth * 2 + w.size().width() ) ) &&                  
+    if( (ev.x() < (position.x()  + _borderWidth + w.size().width() ) ) &&                  
         (ev.x() >= (position.x() + _borderWidth)) &&
         (ev.y() < (position.y()  + _titleBarHeight + _borderWidth) ) && 
         (ev.y() >= (position.y() + _borderWidth) ))
@@ -328,35 +321,7 @@ bool WindowManager::isMoving(const Window& w, const Pt::Hmi::PointerEvent& ev)
 }
 
 
-void WindowManager::forwardEvent(const Pt::Hmi::PointerEvent& pev, Pt::Hmi::PointerEvent::State s)
-{
-    Pt::Hmi::PointerEvent childEvent = pev;
-
-    double childX = pev.x() - _managedWindow->position().x() - _borderWidth;
-    double childY = pev.y() - _managedWindow->position().y() - _titleBarHeight - _borderWidth;
-
-    childEvent.setX(childX);
-    childEvent.setY(childY); 
-    childEvent.setState( s);
-    _managedWindow->processEvent(childEvent);
-}
-
-
-bool WindowManager::containsInClient(const Window& w, double x, double y)
-{
-    double childX = x - w.position().x() - _borderWidth;
-    double childY = y - w.position().y() - _titleBarHeight - _borderWidth;
-        
-    if( childX >= 0 &&  childY >= 0 && 
-        childX <= w.size().width() &&
-        childY <= w.size().height() )
-    return true;
-
-    return false;
-}
-
-
-ResizeDirection::Type WindowManager::isSizing( const Window& w, const Pt::Hmi::PointerEvent& ev )
+ResizeDirection::Type WindowManager::isSizing(const Window& w, const Pt::Hmi::PointerEvent& ev)
 {    
     const Gfx::SizeF  wsize = w.size();
     const Gfx::PointF wpos  = w.position();
@@ -430,175 +395,181 @@ void WindowManager::setSizingCursor( ResizeDirection::Type type )
 }
 
 
-bool WindowManager::onBackground(const Pt::Hmi::PointerEvent& pev)
+void WindowManager::forwardEvent(Window& w,
+                                 const Pt::Hmi::PointerEvent& pev, 
+                                 Pt::Hmi::PointerEvent::State s)
 {
-    //std::clog << "onBackground: " << pev.buttons()[_actionButton].state()  << std::endl;    
+    Pt::Hmi::PointerEvent childEvent = pev;
 
-    // active window handling
+    double childX = pev.x() - w.position().x() - _borderWidth;
+    double childY = pev.y() - w.position().y() - _titleBarHeight - _borderWidth;
+
+    childEvent.setX(childX);
+    childEvent.setY(childY); 
+    childEvent.setState( s);
+    w.processEvent(childEvent);
+}
+
+
+bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pev )
+{
     if( ! _lastPointer.isPressed(_actionButton) )
     {
        if( pev.isPressed(_actionButton) )
             updateActive(pev);    
     }
 
-    // mouse handling
+    bool r = (this->*_state)(pev);
+    _lastPointer = pev; 
+    return r;
+}
+
+
+
+bool WindowManager::onBackground(const Pt::Hmi::PointerEvent& pev)
+{
+    //std::clog << "onBackground: " << this << std::endl;    
+
     _managedWindow = findWindow( pev.x(), pev.y());
 
+    // pointer on window background 
     if( ! _managedWindow )
-        return false;
-    
-    if( ! _lastPointer.isPressed(_actionButton) )
     {
-        // pointer on title bar
-        if( isMoving(*_managedWindow, pev) )
-        {
-            _app.mainScreen().setCursor( &Cursor::moveCursor() );
-            _state = &WindowManager::onMoveArea;
-            return true;
-        }
+        _state = &WindowManager::onBackground;        
+        return false;
+    }
+    
+    // pointer on window title bar
+    if( isMoving(*_managedWindow, pev) )
+    {
+        _app.mainScreen().setCursor( &Cursor::moveCursor() );
 
-        // pointer on window border
-        _sizingDirection = isSizing(*_managedWindow, pev);
-
-        if( _sizingDirection != ResizeDirection::None )
-        {
-            setSizingCursor(_sizingDirection);
-            _state = &WindowManager::onResizeArea;
-            return true;
-        }                                
+        if( ! _lastPointer.isPressed(_actionButton) )
+            _state = &WindowManager::onWindowFrame;
         
+        return true;
     }
 
-     // client area
-    forwardEvent(pev, PointerEvent::Enter);
-    _state = &WindowManager::onClientArea;
+    // pointer on window border
+    _sizingDirection = isSizing(*_managedWindow, pev);
+
+    if( _sizingDirection != ResizeDirection::None )
+    {
+        setSizingCursor(_sizingDirection);
+
+        if( ! _lastPointer.isPressed(_actionButton) )
+            _state = &WindowManager::onWindowFrame;
+        
+        return true;
+    }                                
     
+    // pointer on window content
+    _state = &WindowManager::onWindowContent;
+    forwardEvent(*_managedWindow, pev, PointerEvent::Enter);
     return true;
 }
 
 
-bool WindowManager::onClientArea( const Pt::Hmi::PointerEvent& pev )
-{    
-    //std::clog << "onClientArea: " << pev.buttons()[_actionButton].state()  << std::endl;    
+bool WindowManager::onWindowFrame(const Pt::Hmi::PointerEvent& pev)
+{
+    //std::clog << "onWindowFrame: " << this << std::endl;
 
-    // active window handling
-    if( ! _lastPointer.isPressed(_actionButton) )
+    _managedWindow = findWindow( pev.x(), pev.y() );
+
+    // pointer on window background 
+    if( ! _managedWindow)
     {
-       if( pev.isPressed(_actionButton) )
-            updateActive(pev);
+        _state = &WindowManager::onBackground;        
+        return false;
     }
 
-    Window* managedWindow = findWindow( pev.x(), pev.y());
-        
-    if( ! managedWindow )
+    // pointer on window title bar
+    if( isMoving(*_managedWindow, pev) )
     {
-        forwardEvent(pev, PointerEvent::Leave);
-        _managedWindow = 0;
+        _app.mainScreen().setCursor( &Cursor::moveCursor() );
+
+        if( pev.isPressed(_actionButton) && ! _lastPointer.isPressed(_actionButton) )
+            _state = &WindowManager::onWindowMove;
+        else
+            _state = &WindowManager::onWindowFrame;
+
+        return true;
+    }
+
+    // pointer on window border
+    _sizingDirection = isSizing(*_managedWindow, pev);
+    if( _sizingDirection != ResizeDirection::None )
+    {                      
+        setSizingCursor(_sizingDirection);
+
+        if( pev.isPressed(_actionButton) && ! _lastPointer.isPressed(_actionButton) )
+            _state = &WindowManager::onWindowResize;
+        else
+            _state = &WindowManager::onWindowFrame;
         
+        return true;
+    }   
+
+    // pointer on window content
+    _state = &WindowManager::onWindowContent;
+    forwardEvent( *_managedWindow, pev, PointerEvent::Enter);
+    return true;
+}
+
+
+bool WindowManager::onWindowContent(const Pt::Hmi::PointerEvent& pev)
+{    
+    //std::clog << "onWindowContent: " << this << std::endl;
+    
+    Window* prevWindow = _managedWindow;  
+
+    _managedWindow = findWindow( pev.x(), pev.y() );
+    
+    if(prevWindow && prevWindow != _managedWindow)
+        forwardEvent(*prevWindow, pev, PointerEvent::Leave);
+
+    // pointer on window background
+    if( ! _managedWindow )
+    {        
         _state = &WindowManager::onBackground;
         return false;
     }    
     
-    if( ! _lastPointer.isPressed(_actionButton) )
-    {   
-        // pointer on title bar
-        if( isMoving(*managedWindow, pev) )
-        {
-            forwardEvent(pev, PointerEvent::Leave);
-            _managedWindow = managedWindow;
+    // pointer on window title bar
+    if( isMoving(*_managedWindow, pev) )
+    {
+        forwardEvent(*prevWindow, pev, PointerEvent::Leave);
 
-            _app.mainScreen().setCursor( &Cursor::moveCursor() );
-            _state = &WindowManager::onMoveArea;
-            return true;
-        }
-
-        // pointer on window border
-        _sizingDirection = isSizing(*_managedWindow, pev);
-
-        if( _sizingDirection != ResizeDirection::None )
-        {            
-            forwardEvent(pev, PointerEvent::Leave);
-            _managedWindow = managedWindow;
-            
-            setSizingCursor(_sizingDirection);
-            _state = &WindowManager::onResizeArea;
-            return true;
-        }                                
+        _app.mainScreen().setCursor( &Cursor::moveCursor() );
+        _state = &WindowManager::onWindowFrame;
+        return true;
     }
 
-    // client area
-    forwardEvent(pev, PointerEvent::None);    
+    // pointer on window border
+    _sizingDirection = isSizing(*_managedWindow, pev);
+
+    if( _sizingDirection != ResizeDirection::None )
+    {            
+        forwardEvent(*prevWindow, pev, PointerEvent::Leave);
+            
+        setSizingCursor(_sizingDirection);
+        _state = &WindowManager::onWindowFrame;
+        return true;
+    }                                
+
+    // pointer on window content
+    forwardEvent(*_managedWindow, pev, PointerEvent::None); 
     return true;
 }
 
 
-bool WindowManager::onMoveArea(const Pt::Hmi::PointerEvent& pev)
+bool WindowManager::onWindowMove(const Pt::Hmi::PointerEvent& pev)
 {
-    //std::clog << "onMovingArea: " << pev.buttons()[_actionButton].state() << " "<<_managedWindow->title() << std::endl;
-
-    if( pev.isPressed(_actionButton) )
-    {        
-        updateActive(pev);
-        _state = &WindowManager::onMoving;
-        return true;
-    }
-
-    if( isMoving(*_managedWindow, pev) )
-    {
-        _app.mainScreen().setCursor( &Cursor::moveCursor() );
-        return true;
-    }
-
-    if( containsInClient( *_managedWindow, pev.x(), pev.y() ) )
-    {
-        _state = &WindowManager::onClientArea;
-        forwardEvent( pev, PointerEvent::Enter);
-        return true;
-    }
-    
-    _state = &WindowManager::onBackground;
-    return false;
-}
-
-
-bool WindowManager::onResizeArea(const Pt::Hmi::PointerEvent& pev)
-{
-    //std::clog << "onResizeArea: " << pev.buttons()[_actionButton].state()  << " "<<_managedWindow->title() << std::endl;
-
-    setSizingCursor(_sizingDirection);
-
-    if( pev.isPressed(_actionButton) )
-    {
-        updateActive(pev);
-        _state = &WindowManager::onResizing;
-        return true;
-    }
-
-    ResizeDirection::Type sizingDirection = isSizing(*_managedWindow, pev);
-
-    if( sizingDirection != ResizeDirection::None )
-        return true;
-
-    if( containsInClient( *_managedWindow, pev.x(), pev.y() ) )
-    {
-        forwardEvent( pev, PointerEvent::Enter);
-        _state = &WindowManager::onClientArea;
-        return true;
-    }
-
-    _state = &WindowManager::onBackground;        
-    return false;
-}
-
-
-
-bool WindowManager::onMoving(const Pt::Hmi::PointerEvent& pev)
-{
-    //std::clog << "onMoving: " << pev.buttons()[_actionButton].state() << std::endl;
+    //std::clog << "onWindowMove: " << this << std::endl;
 
     if( ! pev.isPressed(_actionButton) )
     {
-        _state = isMoving(*_managedWindow, pev) ? &WindowManager::onMoveArea
+        _state = isMoving(*_managedWindow, pev) ? &WindowManager::onWindowFrame
                                                 : &WindowManager::onBackground;
 
         return false;
@@ -620,23 +591,22 @@ bool WindowManager::onMoving(const Pt::Hmi::PointerEvent& pev)
 }
 
 
-bool WindowManager::onResizing(const PointerEvent& ev )
+bool WindowManager::onWindowResize(const PointerEvent& pev)
 {  
-//    std::clog << "onResizing: " << ev.buttons()[_actionButton].state() << std::endl;
+    //std::clog << "onWindowResize: " << this << std::endl;
 
-    setSizingCursor(_sizingDirection);
-
-    if( ! ev.isPressed(_actionButton) )
+    if( ! pev.isPressed(_actionButton) )
     {
-        ResizeDirection::Type sizingDirection = isSizing(*_managedWindow, ev);
+        _sizingDirection = isSizing(*_managedWindow, pev);
 
-        _state = sizingDirection == ResizeDirection::None ? &WindowManager::onResizeArea
-                                                          : &WindowManager::onBackground;
-
+        _state = _sizingDirection == ResizeDirection::None ? &WindowManager::onWindowFrame
+                                                           : &WindowManager::onBackground;
         return false;
     }
 
-    Gfx::PointF point( ev.x(), ev.y() );
+    setSizingCursor(_sizingDirection);
+
+    Gfx::PointF point( pev.x(), pev.y() );
     
     double width  = _managedWindow->size().width();
     double height = _managedWindow->size().height();
@@ -735,7 +705,10 @@ bool WindowManager::onResizing(const PointerEvent& ev )
         ResizeEvent rev(size);
         _managedWindow->processEvent(rev);
     }
+
     return true;
 }
 
-}} // namespace
+} // namespace
+
+} // namespace
