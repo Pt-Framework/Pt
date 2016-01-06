@@ -443,10 +443,7 @@ bool WindowManager::onBackground(const Pt::Hmi::PointerEvent& pev)
     if( isMoving(*_managedWindow, pev) )
     {
         _app.mainScreen().setCursor( &Cursor::moveCursor() );
-
-        if( ! _lastPointer.isPressed(_actionButton) )
-            _state = &WindowManager::onWindowFrame;
-        
+        _state = &WindowManager::onWindowFrame;
         return true;
     }
 
@@ -456,10 +453,7 @@ bool WindowManager::onBackground(const Pt::Hmi::PointerEvent& pev)
     if( _sizingDirection != ResizeDirection::None )
     {
         setSizingCursor(_sizingDirection);
-
-        if( ! _lastPointer.isPressed(_actionButton) )
-            _state = &WindowManager::onWindowFrame;
-        
+        _state = &WindowManager::onWindowFrame;
         return true;
     }                                
     
@@ -547,7 +541,6 @@ bool WindowManager::onWindowContent(const Pt::Hmi::PointerEvent& pev)
 
     // pointer on window border
     _sizingDirection = isSizing(*_managedWindow, pev);
-
     if( _sizingDirection != ResizeDirection::None )
     {            
         forwardEvent(*prevWindow, pev, PointerEvent::Leave);

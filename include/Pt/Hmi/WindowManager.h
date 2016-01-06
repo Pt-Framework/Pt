@@ -88,6 +88,7 @@ class WindowManager : public Pt::Connectable
         bool onWindowResize(const PointerEvent& pev);
 
     private:
+        // TODO: checkBorder, checkTitle
         ResizeDirection::Type isSizing(const Window& w, const Pt::Hmi::PointerEvent& ev);
 
         bool isMoving(const Window& w, const Pt::Hmi::PointerEvent& ev);
