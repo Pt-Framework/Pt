@@ -130,6 +130,7 @@ class WindowManager : public Pt::Connectable
         Gfx::Color                _textColor;        
         size_t                    _actionButton;  
         double                    _titleBarHeight;
+        Gfx::PointF               _lastPointerPosition;  
 };
 
 }} // namespace

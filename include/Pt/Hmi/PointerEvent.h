@@ -138,7 +138,7 @@ public:
 private:
 	double _x;
 	double _y;
-	std::vector<DeviceButton>	     _buttons;
+	std::vector<DeviceButton>	    _buttons;
 	std::vector<DeviceControlDial> _controlDial;	
     State _state;
 };

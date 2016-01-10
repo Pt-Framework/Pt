@@ -125,10 +125,22 @@ class PT_HMI_API Screen
             }            
           }
 
+          void setLastPointerEvent( const PointerEvent& pev )
+          {
+             _lastPointer = pev;
+          }
+
+          const PointerEvent& lastPointerEvent() const
+          {
+            return _lastPointer;
+          }
+
+
 	private:
 		ScreenImpl* _impl;
         std::vector<Window*> _windows;
-        Window*              _pointerWindow;           
+        Window*              _pointerWindow;       
+        PointerEvent         _lastPointer;    
 };
 
 }}

@@ -354,6 +354,7 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 
     _pointerEvent.setState( PointerEvent::None );
     _app.sendEvent(*_apiWindow, _pointerEvent);
+    _app.mainScreen().setLastPointerEvent( _pointerEvent);
 }
 
 

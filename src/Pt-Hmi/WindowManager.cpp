@@ -411,14 +411,14 @@ PointerEvent WindowManager::toWindow(Window* w, const PointerEvent& pev)
 
 bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pev )
 {
-    if( ! _lastPointer.isPressed(_actionButton) )
+    if( ! _app.mainScreen().lastPointerEvent().isPressed(_actionButton) )
     {
        if( pev.isPressed(_actionButton) )
             updateActive(pev);    
     }
 
     bool r = (this->*_state)(pev);
-    _lastPointer = pev; 
+    _lastPointerPosition = Gfx::PointF(pev.x(), pev.y());    
     return r;
 }
 
@@ -483,7 +483,7 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::PointerEvent& pev)
     {
         _app.mainScreen().setCursor( &Cursor::moveCursor() );
 
-        if( pev.isPressed(_actionButton) && ! _lastPointer.isPressed(_actionButton) )
+        if( pev.isPressed(_actionButton) && ! _app.mainScreen().lastPointerEvent().isPressed(_actionButton) )
             _state = &WindowManager::onWindowMove;
         else
             _state = &WindowManager::onWindowFrame;
@@ -497,7 +497,7 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::PointerEvent& pev)
     {                      
         setSizingCursor(_sizingDirection);
 
-        if( pev.isPressed(_actionButton) && ! _lastPointer.isPressed(_actionButton) )
+        if( pev.isPressed(_actionButton) && ! _app.mainScreen().lastPointerEvent().isPressed(_actionButton) )
             _state = &WindowManager::onWindowResize;
         else
             _state = &WindowManager::onWindowFrame;
@@ -566,8 +566,8 @@ bool WindowManager::onWindowMove(const Pt::Hmi::PointerEvent& pev)
     
     _app.mainScreen().setCursor( &Cursor::moveCursor() );
 
-    double dX = pev.x() - _lastPointer.x();
-    double dY = pev.y() - _lastPointer.y();
+    double dX = pev.x() - _lastPointerPosition.x();
+    double dY = pev.y() - _lastPointerPosition.y();
 
     Gfx::PointF winpos = _managedWindow->position();
     winpos.addX(dX);
@@ -601,8 +601,8 @@ bool WindowManager::onWindowResize(const PointerEvent& pev)
     double height = _managedWindow->size().height();
     double posX   = _managedWindow->position().x();
     double posY   = _managedWindow->position().y();
-    double deltaX = ( point.x() - _lastPointer.x());
-    double deltaY = ( point.y() - _lastPointer.y());
+    double deltaX = ( point.x() - _lastPointerPosition.x());
+    double deltaY = ( point.y() - _lastPointerPosition.y());
 
     switch( _sizingDirection )
     {
