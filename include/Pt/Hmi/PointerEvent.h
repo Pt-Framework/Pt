@@ -28,119 +28,103 @@
 #define Pt_Hmi_PointerEvent_h
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/DeviceButton.h>
-#include <Pt/Hmi/DeviceControlDial.h>
+#include <Pt/Hmi/Dial.h>
 #include <Pt/Event.h>
-#include <vector>
 
 namespace Pt{
 namespace Hmi{
 
-
 class PT_HMI_API PointerEvent : public Pt::BasicEvent<PointerEvent>
 {
 public:	
-    enum State
-	{         
-        None = 0,   	
-		Enter,
-		Leave                
-	};
+    enum Action
+    {
+        None = 0,
+        Press = 1,
+        Release = 2
+    };
 
 	explicit PointerEvent()
-	: _buttons(3)
-    , _state( None)
+	: _x(0)
+	, _y(0)
+    , _state(0)
+	, _button(0)
+    , _buttonAction(None)
 	{
 	}
     
 	virtual ~PointerEvent()
 	{
 	}
-
-	inline void setX(double x)
-	{
-		_x = x;
-	}
 	
-	inline void setY(double y)
-	{
-		_y = y;
-	}
-
-	inline void addX(double x)
-	{
-		_x += x;
-	}
-	
-	inline void addY(double y)
-	{
-		_y += y;
-	}
-
-	inline double x() const
+    double x() const
 	{
 		return _x;
 	}
 
-	inline double y() const
+	double y() const
 	{
 		return _y;
 	}
-
-	inline const std::vector<DeviceButton>& buttons() const
+	
+    void setX(double x)
 	{
-		return _buttons;
+		_x = x;
+	}
+	
+	void setY(double y)
+	{
+		_y = y;
 	}
 
-	inline const std::vector<DeviceControlDial>& controlDial() const 
+	void addX(double x)
 	{
-		return _controlDial;
+		_x += x;
+	}
+	
+	void addY(double y)
+	{
+		_y += y;
 	}
 
-	inline std::vector<DeviceButton>& buttons()
-	{
-		return _buttons;
-	}
-
-	inline std::vector<DeviceControlDial>& controlDial()
-	{
-		return _controlDial;
-	}	
-
-    State state() const
+    bool isPressed(Pt::uint32_t button) const
     {
-        return _state;
+         Pt::uint32_t mask = 0x1 << button;
+         return (_state & mask) == mask;
     }
 
-    void setState( State s )
+    bool isPress(Pt::uint32_t button) const
     {
-        _state = s;
+         Pt::uint32_t mask = 0x1 << button;
+         return (_button & mask) == mask && _buttonAction == Press;
     }
 
-    bool isEnter() const
+    void unsetButton()
     {
-        return _state == Enter;
+        _button = 0;
+        _buttonAction = None;
     }
 
-    bool isLeave() const
+    void setButton(Pt::uint32_t button, Action action)
     {
-        return _state == Leave;
-    }
+        Pt::uint32_t mask = 0x1 << button;
 
-    bool isPressed(unsigned button) const
-    {
-        if( button >= _buttons.size() )
-            return false;
-
-        return _buttons[button].state() == DeviceButton::Pressed;
+        if(action == Press)
+            _state |= mask;
+        else
+            _state &= (~mask);
+        
+        _button = mask;
+        _buttonAction = action;
     }
 
 private:
-	double _x;
-	double _y;
-	std::vector<DeviceButton>	    _buttons;
-	std::vector<DeviceControlDial> _controlDial;	
-    State _state;
+	double       _x;
+	double       _y;
+    Pt::uint32_t _state;
+	Pt::uint32_t _button;
+    Action       _buttonAction;
+	Dial         _dial;
 };
 
 }}

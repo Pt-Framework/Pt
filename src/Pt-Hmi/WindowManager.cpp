@@ -411,14 +411,11 @@ PointerEvent WindowManager::toWindow(Window* w, const PointerEvent& pev)
 
 bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pev )
 {
-    if( ! _app.mainScreen().lastPointerEvent().isPressed(_actionButton) )
-    {
-       if( pev.isPressed(_actionButton) )
-            updateActive(pev);    
-    }
+    if( pev.isPress(_actionButton) )
+        updateActive(pev);    
 
     bool r = (this->*_state)(pev);
-    _lastPointerPosition = Gfx::PointF(pev.x(), pev.y());    
+    _lastPointerPosition = Gfx::PointF( pev.x(), pev.y() );    
     return r;
 }
 
@@ -473,8 +470,11 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::PointerEvent& pev)
     // pointer on window background 
     if( ! _managedWindow)
     {
-        _app.mainScreen().setPointerWindow( _parent);
-        _state = &WindowManager::onBackground;        
+        _app.mainScreen().setPointerWindow(_parent);
+
+        _state = &WindowManager::onBackground;
+        _parent->processEvent(pev);
+        
         return false;
     }
 
@@ -483,7 +483,7 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::PointerEvent& pev)
     {
         _app.mainScreen().setCursor( &Cursor::moveCursor() );
 
-        if( pev.isPressed(_actionButton) && ! _app.mainScreen().lastPointerEvent().isPressed(_actionButton) )
+        if( pev.isPress(_actionButton) )
             _state = &WindowManager::onWindowMove;
         else
             _state = &WindowManager::onWindowFrame;
@@ -497,7 +497,7 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::PointerEvent& pev)
     {                      
         setSizingCursor(_sizingDirection);
 
-        if( pev.isPressed(_actionButton) && ! _app.mainScreen().lastPointerEvent().isPressed(_actionButton) )
+        if( pev.isPress(_actionButton) )
             _state = &WindowManager::onWindowResize;
         else
             _state = &WindowManager::onWindowFrame;
@@ -522,7 +522,10 @@ bool WindowManager::onWindowContent(const Pt::Hmi::PointerEvent& pev)
     if( ! _managedWindow )
     {        
          _app.mainScreen().setPointerWindow( _parent);
-        _state = &WindowManager::onBackground;
+
+         _state = &WindowManager::onBackground;
+         _parent->processEvent(pev);
+
         return false;
     }        
 

@@ -1017,9 +1017,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceButton.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\DeviceControlDial.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1319,6 +1316,15 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Docking.h">
       <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Dial.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\EnterEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\LeaveEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -22,58 +22,30 @@
  
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_DeviceControllDial_h
-#define Pt_Hmi_DeviceControllDial_h
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+ 02110-1301  USA
+*/
 
-#include <Pt/Hmi/DeviceButton.h>
+#ifndef Pt_Hmi_LeaveEvent_h
+#define Pt_Hmi_LeaveEvent_h
+
+#include <Pt/Event.h>
 
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API DeviceControlDial : public DeviceButton
+class LeaveEvent : public Pt::BasicEvent<LeaveEvent>
 {
-public:
-	enum Direction
-	{
-		Left,
-		Right
-	};
+    public:	
+	    LeaveEvent()
+	    {
+	    }
 
-	DeviceControlDial()
-	: _direction(Left)
-	{
-	}
-	
-	virtual ~DeviceControlDial()
-	{
-	}
-
-	inline Direction direction() const
-	{
-		return _direction;
-	}
-
-	inline void setDirection(Direction d)
-	{
-		_direction = d;
-	}
-
-	inline double delta() const
-	{
-		return  _delta;
-	}
-
-	inline void setDelta(double d)
-	{
-		_delta= d;
-	}
-
-private:
-	Direction _direction;
-	double _delta;
-
+	    virtual ~LeaveEvent()
+	    {
+	    }
 };
 
 }}
+
 #endif

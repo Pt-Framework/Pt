@@ -492,8 +492,7 @@ void Widget::onEvent(const Pt::Event& ev)
        
 void Widget::onPointerEvent(const PointerEvent& ev)
 {        
-    if( ev.buttons()[0].state() == DeviceButton::Pressed && _acceptFocus)
-        _window->setFocusedWidget( this );
+
 }
 
 

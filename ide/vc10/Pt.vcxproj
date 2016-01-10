@@ -61,13 +61,15 @@
     <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceButton.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\DeviceControlDial.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Dial.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Dialog.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Docking.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\EnterEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Key.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Label.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Layout.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\LeaveEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MoveEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Painter.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h" />

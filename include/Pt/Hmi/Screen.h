@@ -110,8 +110,7 @@ class PT_HMI_API Screen
 
             if( _pointerWindow )    
             {
-                Pt::Hmi::PointerEvent leaveEvent;
-                leaveEvent.setState(PointerEvent::Leave);                
+                Pt::Hmi::LeaveEvent leaveEvent;               
                 _pointerWindow->processEvent(leaveEvent);
             }
 
@@ -119,28 +118,15 @@ class PT_HMI_API Screen
 
             if( _pointerWindow )    
             {
-                Pt::Hmi::PointerEvent enterEvent;
-                enterEvent.setState(PointerEvent::Enter);                
+                Pt::Hmi::EnterEvent enterEvent;                
                 _pointerWindow->processEvent(enterEvent);
             }            
           }
 
-          void setLastPointerEvent( const PointerEvent& pev )
-          {
-             _lastPointer = pev;
-          }
-
-          const PointerEvent& lastPointerEvent() const
-          {
-            return _lastPointer;
-          }
-
-
 	private:
 		ScreenImpl* _impl;
         std::vector<Window*> _windows;
-        Window*              _pointerWindow;       
-        PointerEvent         _lastPointer;    
+        Window*              _pointerWindow;           
 };
 
 }}

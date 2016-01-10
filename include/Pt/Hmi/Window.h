@@ -42,6 +42,8 @@
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/PointerEvent.h>
 #include <Pt/Hmi/MoveEvent.h>
+#include <Pt/Hmi/EnterEvent.h>
+#include <Pt/Hmi/LeaveEvent.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Connectable.h>
@@ -166,12 +168,10 @@ class PT_HMI_API Window : public Pt::Connectable
         return _impl;   
     }
 
-
     PaintSurface&  surface()
     {
         return _surface;
     }
-
 
     void invalidate();
 
@@ -194,6 +194,10 @@ class PT_HMI_API Window : public Pt::Connectable
 
     virtual void onPointerEvent( const PointerEvent& ev );
     
+    virtual void onEnterEvent( const EnterEvent& ev );    
+
+    virtual void onLeaveEvent(const LeaveEvent& ev );
+    
     virtual void onResizeEvent(const ResizeEvent& ev);
 
     virtual void onMoveEvent( const MoveEvent& ev);
@@ -201,10 +205,6 @@ class PT_HMI_API Window : public Pt::Connectable
     virtual void onCloseEvent(const CloseEvent& ev);
 
     virtual void onActivateEvent(const ActivateEvent& ev);
-        
-    virtual void onPointerEnter( const PointerEvent& ev );    
-
-    virtual void onPointerLeave(const PointerEvent& ev );
 
     void removeWidget(Widget& w);
 
@@ -217,7 +217,6 @@ class PT_HMI_API Window : public Pt::Connectable
 
     void setFocusedWidget( Widget* widget );
     
-
   private:
     WindowManager                        _windowManager; 
     bool                                 _isClosed;

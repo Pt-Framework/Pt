@@ -64,6 +64,9 @@ Window::Window(Window* parent)
     _eventReady += Pt::slot(*this, &Window::onActivateEvent);
     _eventReady += Pt::slot(*this, &Window::onCloseEvent);
 
+    _eventReady += Pt::slot(*this, &Window::onEnterEvent);
+    _eventReady += Pt::slot(*this, &Window::onLeaveEvent);
+
     if(parent)
         parent->add(*this);
     else
@@ -271,17 +274,6 @@ void Window::onEvent(const Pt::Event& ev)
 
 void Window::onPointerEvent(const PointerEvent& ev)
 {
-    if( ev.isEnter() )
-    {
-        onPointerEnter(ev);
-    }
-
-    if( ev.isLeave() )          
-    {
-        onPointerLeave(ev); 
-        return;
-    }
-
     if( ! _windowManager.pointerInput( ev ) )
     {
         if( ! _mainWidget || ! _mainWidget->visible() )
@@ -300,13 +292,13 @@ void Window::onPointerEvent(const PointerEvent& ev)
 }
 
 
-void Window::onPointerEnter( const PointerEvent& ev )
-{    
+void Window::onEnterEvent( const EnterEvent& ev )
+{
     std::clog << "pointer ENTER: " << this ->title() << std::endl;
 }
 
 
-void Window::onPointerLeave(const PointerEvent& ev )
+void Window::onLeaveEvent(const LeaveEvent& ev )
 {
     std::clog << "pointer LEAVE: " << this->title() << std::endl;
     setPointedWidget( 0 );

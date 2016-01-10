@@ -52,7 +52,6 @@ MainWindowImpl::MainWindowImpl(Window* w)
 , _hwnd( 0 )
 , _hasPointer(false)
 {    
-    _pointerEvent.buttons().resize(3);
     create();
 }
 
@@ -315,36 +314,37 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
     switch(msg)
     {
         case WM_LBUTTONDOWN:
-            _pointerEvent.buttons()[0].setState(Pt::Hmi::DeviceButton::Pressed);
-
+            _pointerEvent.setButton(0, PointerEvent::Press);
         break;
         
         case WM_LBUTTONUP:        
-            _pointerEvent.buttons()[0].setState( Pt::Hmi::DeviceButton::Released );
-
+            _pointerEvent.setButton(0, PointerEvent::Release);
         break;
                             
         case WM_MBUTTONDOWN:
-            _pointerEvent.buttons()[1].setState(Pt::Hmi::DeviceButton::Pressed);
+            _pointerEvent.setButton(1, PointerEvent::Press);
         break;
-
+        
         case WM_MBUTTONUP:
-            _pointerEvent.buttons()[1].setState(Pt::Hmi::DeviceButton::Released);
-        break;
-
+            _pointerEvent.setButton(1, PointerEvent::Release);
+        break;   
+        
         case WM_RBUTTONDOWN:        
-            _pointerEvent.buttons()[2].setState(Pt::Hmi::DeviceButton::Pressed);
-
+            _pointerEvent.setButton(2, PointerEvent::Press);
         break;
         
         case WM_RBUTTONUP:
-            _pointerEvent.buttons()[2].setState(Pt::Hmi::DeviceButton::Released);
-        break;            
+            _pointerEvent.setButton(2, PointerEvent::Release);
+        break; 
+
+        case WM_MOUSEMOVE:
+            _pointerEvent. unsetButton();
+        break;
     }
   
-    Gfx::PointF p = _screen.toUnit(Gfx::Point(xPos, yPos));
-    _pointerEvent.setX(p.x());
-    _pointerEvent.setY(p.y());            
+    Gfx::PointF p = _screen.toUnit( Gfx::Point(xPos, yPos) );
+    _pointerEvent.setX( p.x() );
+    _pointerEvent.setY( p.y() );            
 
     if( ! _hasPointer )
     {
@@ -352,9 +352,7 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
         _app.mainScreen().setPointerWindow( _apiWindow );
     }
 
-    _pointerEvent.setState( PointerEvent::None );
     _app.sendEvent(*_apiWindow, _pointerEvent);
-    _app.mainScreen().setLastPointerEvent( _pointerEvent);
 }
 
 

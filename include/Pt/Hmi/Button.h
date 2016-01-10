@@ -52,11 +52,6 @@ public:
 	Button();
 	virtual ~Button();
 
-   DeviceButton::State buttonState() const
-   {
-      return _buttonState;
-   }
-
    bool hover() const
    {
       return _hover;
@@ -101,8 +96,7 @@ public:
 	Signal<>													 Clicked;	
 	Signal<>													 DoubleClicked;	
 
-private:
-  DeviceButton::State _buttonState;		
+private:		
 	bool								_hover;		
 	ButtonType::Type  _buttonType;	
 	int								_doublePressTimeInMs; 
@@ -117,7 +111,6 @@ protected:
 	virtual void onActionKey(KeyEvent::KeyState state);
 	virtual void onPointerEvent(const PointerEvent& ev);
 	virtual void onKeyEvent(const KeyEvent& ev);
-	virtual void onButtonStateChanged( const DeviceButton::State& prop);
 	virtual void onDoublePressedTimeout();
 	virtual void onRender(PaintSurface& surface);
 
@@ -126,7 +119,6 @@ private:
 	bool _timeout;
 	int _pressCounter;
 	Pt::System::Timer _doublePressTimer;
-	DeviceButton::State _lastPointerState;
 };
 
 }}
