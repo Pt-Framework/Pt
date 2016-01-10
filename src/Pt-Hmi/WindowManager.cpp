@@ -472,6 +472,7 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::PointerEvent& pev)
     {
         _app.mainScreen().setPointerWindow(_parent);
 
+        // TODO: does not work
         _state = &WindowManager::onBackground;
         _parent->processEvent(pev);
         
@@ -523,6 +524,7 @@ bool WindowManager::onWindowContent(const Pt::Hmi::PointerEvent& pev)
     {        
          _app.mainScreen().setPointerWindow( _parent);
 
+         // TODO: does not work
          _state = &WindowManager::onBackground;
          _parent->processEvent(pev);
 
