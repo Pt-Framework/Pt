@@ -1,30 +1,31 @@
-/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
- * 
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * 
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
- * 02110-1301  USA
- */
+/* Copyright (C) 2015 Marc Boris Duerner 
+   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+   
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
+   
+   As a special exception, you may use this file as part of a free
+   software library without restriction. Specifically, if other files
+   instantiate templates or use macros or inline functions from this
+   file, or you compile this file and link it with other files to
+   produce an executable, this file does not by itself cause the
+   resulting executable to be covered by the GNU General Public
+   License. This exception does not however invalidate any other
+   reasons why the executable file might be covered by the GNU Library
+   General Public License.
+   
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+   
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+   MA 02110-1301 USA
+*/
 
 #include "MainWindowImpl.h"
 #include "ApplicationImpl.h"
@@ -314,31 +315,31 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
     switch(msg)
     {
         case WM_LBUTTONDOWN:
-            _pointerEvent.setButton(0, PointerEvent::Press);
+            _pointerEvent.setPress(0);
         break;
         
         case WM_LBUTTONUP:        
-            _pointerEvent.setButton(0, PointerEvent::Release);
+            _pointerEvent.setRelease(0);
         break;
                             
         case WM_MBUTTONDOWN:
-            _pointerEvent.setButton(1, PointerEvent::Press);
+            _pointerEvent.setPress(1);
         break;
         
         case WM_MBUTTONUP:
-            _pointerEvent.setButton(1, PointerEvent::Release);
+            _pointerEvent.setRelease(1);
         break;   
         
         case WM_RBUTTONDOWN:        
-            _pointerEvent.setButton(2, PointerEvent::Press);
+            _pointerEvent.setPress(2);
         break;
         
         case WM_RBUTTONUP:
-            _pointerEvent.setButton(2, PointerEvent::Release);
+            _pointerEvent.setRelease(2);
         break; 
 
         case WM_MOUSEMOVE:
-            _pointerEvent. unsetButton();
+            _pointerEvent.setMove();
         break;
     }
   
