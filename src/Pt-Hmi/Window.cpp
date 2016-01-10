@@ -55,6 +55,7 @@ Window::Window(Window* parent)
 , _position(0,0)
 , _size(200,200)
 , _visible(true)
+, _windowManager(this)
 {
     _eventReady += Pt::slot(*this, &Window::onKeyEvent);
     _eventReady += Pt::slot(*this, &Window::onPointerEvent);  
@@ -271,10 +272,15 @@ void Window::onEvent(const Pt::Event& ev)
 void Window::onPointerEvent(const PointerEvent& ev)
 {
     if( ev.isEnter() )
+    {
         onPointerEnter(ev);
+    }
 
     if( ev.isLeave() )          
+    {
         onPointerLeave(ev); 
+        return;
+    }
 
     if( ! _windowManager.pointerInput( ev ) )
     {
@@ -295,7 +301,7 @@ void Window::onPointerEvent(const PointerEvent& ev)
 
 
 void Window::onPointerEnter( const PointerEvent& ev )
-{
+{    
     std::clog << "pointer ENTER: " << this ->title() << std::endl;
 }
 

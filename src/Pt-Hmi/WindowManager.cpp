@@ -42,7 +42,7 @@
 namespace Pt {
 namespace Hmi {
 
-WindowManager::WindowManager()
+WindowManager::WindowManager(Window* parent)
 : _app( Application::instance() )
 , _state(&WindowManager::onBackground)
 , _managedWindow(0)
@@ -53,6 +53,7 @@ WindowManager::WindowManager()
 , _textColor(0.0, 0.0, 0.0)
 , _actionButton(0)
 , _titleBarHeight(20)
+, _parent(parent)
 {    
 }
 
@@ -395,19 +396,16 @@ void WindowManager::setSizingCursor( ResizeDirection::Type type )
 }
 
 
-void WindowManager::forwardEvent(Window& w,
-                                 const Pt::Hmi::PointerEvent& pev, 
-                                 Pt::Hmi::PointerEvent::State s)
+PointerEvent WindowManager::toWindow(Window* w, const PointerEvent& pev)
 {
     Pt::Hmi::PointerEvent childEvent = pev;
 
-    double childX = pev.x() - w.position().x() - _borderWidth;
-    double childY = pev.y() - w.position().y() - _titleBarHeight - _borderWidth;
+    double childX = pev.x() - w->position().x() - _borderWidth;
+    double childY = pev.y() - w->position().y() - _titleBarHeight - _borderWidth;
 
     childEvent.setX(childX);
-    childEvent.setY(childY); 
-    childEvent.setState( s);
-    w.processEvent(childEvent);
+    childEvent.setY(childY);
+    return childEvent;
 }
 
 
@@ -429,20 +427,20 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pev )
 bool WindowManager::onBackground(const Pt::Hmi::PointerEvent& pev)
 {
     //std::clog << "onBackground: " << this << std::endl;    
-
-    _managedWindow = findWindow( pev.x(), pev.y());
-
+    _managedWindow = findWindow( pev.x(), pev.y() );
+    
     // pointer on window background 
     if( ! _managedWindow )
     {
         _state = &WindowManager::onBackground;        
         return false;
-    }
-    
+    }    
+
     // pointer on window title bar
     if( isMoving(*_managedWindow, pev) )
     {
         _app.mainScreen().setCursor( &Cursor::moveCursor() );
+        _app.mainScreen().setPointerWindow( 0 );
         _state = &WindowManager::onWindowFrame;
         return true;
     }
@@ -453,26 +451,29 @@ bool WindowManager::onBackground(const Pt::Hmi::PointerEvent& pev)
     if( _sizingDirection != ResizeDirection::None )
     {
         setSizingCursor(_sizingDirection);
+        _app.mainScreen().setPointerWindow( 0);
         _state = &WindowManager::onWindowFrame;
         return true;
     }                                
     
     // pointer on window content
-    _state = &WindowManager::onWindowContent;
-    forwardEvent(*_managedWindow, pev, PointerEvent::Enter);
+    _state = &WindowManager::onWindowContent;    
+    _app.mainScreen().setPointerWindow( _managedWindow);
+    _managedWindow->processEvent( toWindow(_managedWindow, pev) );
+
     return true;
 }
 
 
 bool WindowManager::onWindowFrame(const Pt::Hmi::PointerEvent& pev)
 {
-    //std::clog << "onWindowFrame: " << this << std::endl;
-
+    //std::clog << "onWindowFrame: " << this << std::endl;   
     _managedWindow = findWindow( pev.x(), pev.y() );
 
     // pointer on window background 
     if( ! _managedWindow)
     {
+        _app.mainScreen().setPointerWindow( _parent);
         _state = &WindowManager::onBackground;        
         return false;
     }
@@ -506,52 +507,47 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::PointerEvent& pev)
 
     // pointer on window content
     _state = &WindowManager::onWindowContent;
-    forwardEvent( *_managedWindow, pev, PointerEvent::Enter);
+    _app.mainScreen().setPointerWindow( _managedWindow);
+    _managedWindow->processEvent( toWindow(_managedWindow, pev) );
     return true;
 }
 
 
 bool WindowManager::onWindowContent(const Pt::Hmi::PointerEvent& pev)
 {    
-    //std::clog << "onWindowContent: " << this << std::endl;
-    
-    Window* prevWindow = _managedWindow;  
-
+    //std::clog << "onWindowContent: " << this << std::endl;    
     _managedWindow = findWindow( pev.x(), pev.y() );
     
-    if(prevWindow && prevWindow != _managedWindow)
-        forwardEvent(*prevWindow, pev, PointerEvent::Leave);
-
     // pointer on window background
     if( ! _managedWindow )
     {        
+         _app.mainScreen().setPointerWindow( _parent);
         _state = &WindowManager::onBackground;
         return false;
-    }    
-    
+    }        
+
     // pointer on window title bar
     if( isMoving(*_managedWindow, pev) )
     {
-        forwardEvent(*prevWindow, pev, PointerEvent::Leave);
-
         _app.mainScreen().setCursor( &Cursor::moveCursor() );
+        _app.mainScreen().setPointerWindow( 0);
         _state = &WindowManager::onWindowFrame;
         return true;
     }
 
     // pointer on window border
     _sizingDirection = isSizing(*_managedWindow, pev);
+
     if( _sizingDirection != ResizeDirection::None )
     {            
-        forwardEvent(*prevWindow, pev, PointerEvent::Leave);
-            
         setSizingCursor(_sizingDirection);
+        _app.mainScreen().setPointerWindow( 0);
         _state = &WindowManager::onWindowFrame;
         return true;
     }                                
 
     // pointer on window content
-    forwardEvent(*_managedWindow, pev, PointerEvent::None); 
+    _managedWindow->processEvent( toWindow( _managedWindow,  pev) );
     return true;
 }
 

@@ -43,6 +43,8 @@ class ApplicationImpl;
 class PT_HMI_API Screen
 {
     friend class Window;
+    friend class WindowManager;
+    friend class MainWindowImpl;
 
     public:
         Screen(ApplicationImpl& app);
@@ -101,9 +103,32 @@ class PT_HMI_API Screen
 
         void unregisterWindow(Window& w);
 
+        void setPointerWindow( Window* w)
+        {
+            if( _pointerWindow == w )
+                return;
+
+            if( _pointerWindow )    
+            {
+                Pt::Hmi::PointerEvent leaveEvent;
+                leaveEvent.setState(PointerEvent::Leave);                
+                _pointerWindow->processEvent(leaveEvent);
+            }
+
+            _pointerWindow = w;
+
+            if( _pointerWindow )    
+            {
+                Pt::Hmi::PointerEvent enterEvent;
+                enterEvent.setState(PointerEvent::Enter);                
+                _pointerWindow->processEvent(enterEvent);
+            }            
+          }
+
 	private:
 		ScreenImpl* _impl;
         std::vector<Window*> _windows;
+        Window*              _pointerWindow;           
 };
 
 }}

@@ -32,6 +32,7 @@ namespace Hmi{
 
 Screen::Screen(ApplicationImpl& app)
 : _impl( new ScreenImpl(app) )
+, _pointerWindow(0)
 {
 }
 

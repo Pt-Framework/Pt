@@ -7,12 +7,13 @@ namespace Hmi{
 namespace Demo{
 
 
+static int a = 0;
+
 ChildW::ChildW()
 {
 	setPosition( Gfx::PointF(10,10) );
 	setSize( Gfx::SizeF(520,350) );
-	setVisible( true) ;
-    setTitle(  "Child 1" );
+	setVisible( true) ;    
 
 	//Panel  
 	_mainPanel.setSize( Gfx::SizeF(800,600) );
@@ -62,7 +63,15 @@ ChildW::ChildW()
 	//_childWindow2.setMainWidget(&_closeButton);	  	
 	_childWindow2.setPosition(Gfx::PointF(10,10));	
 	_childWindow2.setSize (Gfx::SizeF(420,300));
-    _childWindow2.setTitle ( "Child A");	
+    if( a == 0)
+    {
+        _childWindow2.setTitle ( "Child A");	
+        ++a;
+    }
+    else
+    {
+    _childWindow2.setTitle ( "Child B");	
+    }
 	_childWindow2.setMainWidget(&_mainPanel);
 	_childWindow2.setVisible(true);
 

@@ -54,7 +54,7 @@ class Screen;
 class WindowManager : public Pt::Connectable
 {
     public:
-        WindowManager();
+        WindowManager(Window* parent);
 
         virtual ~WindowManager();
 
@@ -110,6 +110,9 @@ class WindowManager : public Pt::Connectable
                           const Pt::Hmi::PointerEvent& pev, 
                           Pt::Hmi::PointerEvent::State s);
 
+
+         PointerEvent toWindow(Window* w, const PointerEvent& pev);
+
     private:
         Application&              _app;
         std::vector<Window*>      _children;
@@ -117,6 +120,7 @@ class WindowManager : public Pt::Connectable
         typedef bool (WindowManager::*State)(const Pt::Hmi::PointerEvent&);
         State                     _state;
         Window*                   _managedWindow;
+        Window*                   _parent;          
         Pt::Hmi::PointerEvent     _lastPointer;
         ResizeDirection::Type     _sizingDirection;
         

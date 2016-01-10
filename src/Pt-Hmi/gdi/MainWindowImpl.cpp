@@ -254,10 +254,8 @@ bool MainWindowImpl::processEvent(unsigned int message, WPARAM wparam, LPARAM lp
         case WM_MOUSELEAVE:
             handled = true;  
             _hasPointer = false;
-            _pointerEvent.setX(-1);
-            _pointerEvent.setY(-1);
-            _pointerEvent.setState( PointerEvent::Leave );
-            _apiWindow->processEvent( _pointerEvent );
+            _app.mainScreen().setCursor(0);
+            _app.mainScreen().setPointerWindow(0);
         break;
         
     }
@@ -350,14 +348,11 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 
     if( ! _hasPointer )
     {
-        _hasPointer = true;                
-        _pointerEvent.setState( PointerEvent::Enter );
-    }
-    else
-    {
-       _pointerEvent.setState( PointerEvent::None );
+        _hasPointer = true;
+        _app.mainScreen().setPointerWindow( _apiWindow );
     }
 
+    _pointerEvent.setState( PointerEvent::None );
     _app.sendEvent(*_apiWindow, _pointerEvent);
 }
 
