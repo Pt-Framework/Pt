@@ -478,6 +478,7 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::PointerEvent& pev)
     if( isMoving(*_managedWindow, pev) )
     {
         _app.mainScreen().setCursor( &Cursor::moveCursor() );
+        _app.mainScreen().setPointerWindow( 0);
 
         if( pev.isPress(_actionButton) )
             _state = &WindowManager::onWindowMove;
@@ -492,6 +493,7 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::PointerEvent& pev)
     if( _sizingDirection != ResizeDirection::None )
     {                      
         setSizingCursor(_sizingDirection);
+        _app.mainScreen().setPointerWindow( 0);
 
         if( pev.isPress(_actionButton) )
             _state = &WindowManager::onWindowResize;
