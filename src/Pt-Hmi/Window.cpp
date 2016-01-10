@@ -294,13 +294,13 @@ void Window::onPointerEvent(const PointerEvent& ev)
 
 void Window::onEnterEvent( const EnterEvent& ev )
 {
-    std::clog << "pointer ENTER: " << this ->title() << std::endl;
+    std::clog << "ENTER: " << this ->title() << std::endl;
 }
 
 
 void Window::onLeaveEvent(const LeaveEvent& ev )
 {
-    std::clog << "pointer LEAVE: " << this->title() << std::endl;
+    std::clog << "LEAVE: " << this->title() << std::endl;
     setPointedWidget( 0 );
 }
 

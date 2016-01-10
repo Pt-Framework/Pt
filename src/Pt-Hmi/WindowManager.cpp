@@ -420,15 +420,15 @@ bool WindowManager::pointerInput( const Pt::Hmi::PointerEvent& pev )
 }
 
 
-
 bool WindowManager::onBackground(const Pt::Hmi::PointerEvent& pev)
 {
-    //std::clog << "onBackground: " << this << std::endl;    
+    //std::clog << "onBackground: " << _parent->title() << std::endl;    
     _managedWindow = findWindow( pev.x(), pev.y() );
     
     // pointer on window background 
     if( ! _managedWindow )
     {
+        _app.mainScreen().setPointerWindow(_parent);
         _state = &WindowManager::onBackground;        
         return false;
     }    
@@ -457,25 +457,20 @@ bool WindowManager::onBackground(const Pt::Hmi::PointerEvent& pev)
     _state = &WindowManager::onWindowContent;    
     _app.mainScreen().setPointerWindow( _managedWindow);
     _managedWindow->processEvent( toWindow(_managedWindow, pev) );
-
     return true;
 }
 
 
 bool WindowManager::onWindowFrame(const Pt::Hmi::PointerEvent& pev)
 {
-    //std::clog << "onWindowFrame: " << this << std::endl;   
+    //std::clog << "onWindowFrame: " << _parent->title() << std::endl;   
     _managedWindow = findWindow( pev.x(), pev.y() );
 
     // pointer on window background 
     if( ! _managedWindow)
     {
         _app.mainScreen().setPointerWindow(_parent);
-
-        // TODO: does not work
         _state = &WindowManager::onBackground;
-        _parent->processEvent(pev);
-        
         return false;
     }
 
@@ -508,7 +503,7 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::PointerEvent& pev)
 
     // pointer on window content
     _state = &WindowManager::onWindowContent;
-    _app.mainScreen().setPointerWindow( _managedWindow);
+    _app.mainScreen().setPointerWindow(_managedWindow);
     _managedWindow->processEvent( toWindow(_managedWindow, pev) );
     return true;
 }
@@ -516,18 +511,14 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::PointerEvent& pev)
 
 bool WindowManager::onWindowContent(const Pt::Hmi::PointerEvent& pev)
 {    
-    //std::clog << "onWindowContent: " << this << std::endl;    
+    //std::clog << "onWindowContent: " << _parent->title() << std::endl;    
     _managedWindow = findWindow( pev.x(), pev.y() );
     
     // pointer on window background
     if( ! _managedWindow )
     {        
-         _app.mainScreen().setPointerWindow( _parent);
-
-         // TODO: does not work
-         _state = &WindowManager::onBackground;
-         _parent->processEvent(pev);
-
+        _app.mainScreen().setPointerWindow( _parent);
+        _state = &WindowManager::onBackground;
         return false;
     }        
 
@@ -559,7 +550,7 @@ bool WindowManager::onWindowContent(const Pt::Hmi::PointerEvent& pev)
 
 bool WindowManager::onWindowMove(const Pt::Hmi::PointerEvent& pev)
 {
-    //std::clog << "onWindowMove: " << this << std::endl;
+    //std::clog << "onWindowMove: " << _parent->title() << std::endl;
 
     if( ! pev.isPressed(_actionButton) )
     {
@@ -587,7 +578,7 @@ bool WindowManager::onWindowMove(const Pt::Hmi::PointerEvent& pev)
 
 bool WindowManager::onWindowResize(const PointerEvent& pev)
 {  
-    //std::clog << "onWindowResize: " << this << std::endl;
+    //std::clog << "onWindowResize: " << _parent->title() << std::endl;
 
     if( ! pev.isPressed(_actionButton) )
     {
