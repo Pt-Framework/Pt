@@ -106,13 +106,13 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
             _delta = 0;
         }
 
-        bool isScroll(Wheel wheel) const
+        bool isScroll(Pt::uint32_t wheel) const
         {
              Pt::uint32_t mask = 0x1 << wheel;
              return (_wheel & mask) == mask && _action == Scroll;
         }
 
-        void setScroll(Wheel wheel, double d)
+        void setScroll(Pt::uint32_t wheel, double d)
         {
             _action = Scroll;
             _button = 0;
