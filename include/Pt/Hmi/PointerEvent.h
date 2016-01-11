@@ -38,70 +38,6 @@ namespace Pt {
 
 namespace Hmi {
 
-class ScrollEvent : public Pt::BasicEvent<ScrollEvent>
-{
-    enum Axis
-    {
-        Vertical = 0,
-        Horizontal = 1,
-        Depth = 2
-    };
-
-    public:    
-        ScrollEvent()
-        : _x(0)
-        , _y(0)
-        , _axis(Vertical)
-        , _delta(0)
-        { }
-
-        double x() const
-        {
-            return _x;
-        }
-
-        void setX(double x)
-        {
-            _x = x;
-        }
-
-        double y() const
-        {
-            return _y;
-        }
-    
-        void setY(double y)
-        {
-            _y = y;
-        }
-
-        double delta() const
-        {
-            return _delta;
-        }
-    
-        void setDelta(double d)
-        {
-            _delta = d;
-        }
-
-        Axis axis() const
-        {
-            return _axis;
-        }
-    
-        void setAxis(Axis a)
-        {
-            _axis = a;
-        }
-
-    private:
-        double  _x;
-        double  _y;
-        Axis    _axis;
-        double  _delta;
-};
-
 class PointerEvent : public Pt::BasicEvent<PointerEvent>
 {
     public:    
@@ -109,7 +45,8 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
         {
             Move = 0,
             Press = 1,
-            Release = 2
+            Release = 2,
+            Scroll = 3
         };
 
         enum Button
@@ -119,12 +56,21 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
             Middle = 2
         };
 
+        enum Wheel
+        {
+            Vertical = 0,
+            Horizontal = 1,
+            Depth = 2
+        };
+
         PointerEvent()
         : _x(0)
         , _y(0)
-        , _state(0)
-        , _button(0)
         , _action(Move)
+        , _buttonState(0)
+        , _button(0)
+        , _wheel(Vertical)
+        , _delta(0)
         { }
 
         double x() const
@@ -147,16 +93,6 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
             _y = y;
         }
 
-        //void addX(double x)
-        //{
-        //    _x += x;
-        //}
-    
-        //void addY(double y)
-        //{
-        //    _y += y;
-        //}
-
         bool isMove() const
         {
             return _action == Move;
@@ -164,14 +100,35 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
 
         void setMove()
         {
-            _button = 0;
             _action = Move;
+            _button = 0;
+            _wheel = Vertical;
+            _delta = 0;
+        }
+
+        bool isScroll(Wheel wheel) const
+        {
+             Pt::uint32_t mask = 0x1 << wheel;
+             return (_wheel & mask) == mask && _action == Scroll;
+        }
+
+        void setScroll(Wheel wheel, double d)
+        {
+            _action = Scroll;
+            _button = 0;
+            _wheel = wheel;
+            _delta = d;
+        }
+
+        double delta() const
+        {
+            return _delta;
         }
 
         bool isPressed(Pt::uint32_t button) const
         {
              Pt::uint32_t mask = 0x1 << button;
-             return (_state & mask) == mask;
+             return (_buttonState & mask) == mask;
         }
 
         bool isPress(Pt::uint32_t button) const
@@ -189,9 +146,12 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
         {
             Pt::uint32_t mask = 0x1 << button;
 
-            _state |= mask;
-            _button = mask;
             _action = Press;
+            _button = mask;
+            _buttonState |= mask;
+
+            _wheel = Vertical;
+            _delta = 0;
         }
 
         bool isRelease(Pt::uint32_t button) const
@@ -209,17 +169,22 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
         {
             Pt::uint32_t mask = 0x1 << button;
 
-            _state &= (~mask);
-            _button = mask;
             _action = Release;
+            _button = mask;
+            _buttonState &= (~mask);
+
+            _wheel = Vertical;
+            _delta = 0;
         }
 
     private:
         double       _x;
         double       _y;
-        Pt::uint32_t _state;
-        Pt::uint32_t _button;
         Action       _action;
+        Pt::uint32_t _buttonState;
+        Pt::uint32_t _button;
+        Pt::uint32_t _wheel;
+        double       _delta;
 };
 
 } // namespace
