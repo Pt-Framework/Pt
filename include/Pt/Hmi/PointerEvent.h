@@ -1,4 +1,5 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* 
+   Copyright (C) 2015 Marc Boris Duerner 
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
    
    This library is free software; you can redistribute it and/or
@@ -31,36 +32,101 @@
 #define Pt_Hmi_PointerEvent_h
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Dial.h>
 #include <Pt/Event.h>
 
 namespace Pt {
 
 namespace Hmi {
 
+class ScrollEvent : public Pt::BasicEvent<ScrollEvent>
+{
+    enum Axis
+    {
+        Vertical = 0,
+        Horizontal = 1,
+        Depth = 2
+    };
+
+    public:    
+        ScrollEvent()
+        : _x(0)
+        , _y(0)
+        , _axis(Vertical)
+        , _delta(0)
+        { }
+
+        double x() const
+        {
+            return _x;
+        }
+
+        void setX(double x)
+        {
+            _x = x;
+        }
+
+        double y() const
+        {
+            return _y;
+        }
+    
+        void setY(double y)
+        {
+            _y = y;
+        }
+
+        double delta() const
+        {
+            return _delta;
+        }
+    
+        void setDelta(double d)
+        {
+            _delta = d;
+        }
+
+        Axis axis() const
+        {
+            return _axis;
+        }
+    
+        void setAxis(Axis a)
+        {
+            _axis = a;
+        }
+
+    private:
+        double  _x;
+        double  _y;
+        Axis    _axis;
+        double  _delta;
+};
+
 class PointerEvent : public Pt::BasicEvent<PointerEvent>
 {
     public:    
         enum Action
         {
-            None = 0,
+            Move = 0,
             Press = 1,
             Release = 2
         };
 
-        explicit PointerEvent()
+        enum Button
+        {
+            Left = 0,
+            Right = 1,
+            Middle = 2
+        };
+
+        PointerEvent()
         : _x(0)
         , _y(0)
         , _state(0)
         , _button(0)
-        , _action(None)
-        {
-        }
-    
-        virtual ~PointerEvent()
-        {
-        }
-    
+        , _action(Move)
+        { }
+
         double x() const
         {
             return _x;
@@ -81,14 +147,25 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
             _y = y;
         }
 
-        void addX(double x)
-        {
-            _x += x;
-        }
+        //void addX(double x)
+        //{
+        //    _x += x;
+        //}
     
-        void addY(double y)
+        //void addY(double y)
+        //{
+        //    _y += y;
+        //}
+
+        bool isMove() const
         {
-            _y += y;
+            return _action == Move;
+        }
+
+        void setMove()
+        {
+            _button = 0;
+            _action = Move;
         }
 
         bool isPressed(Pt::uint32_t button) const
@@ -101,6 +178,11 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
         {
              Pt::uint32_t mask = 0x1 << button;
              return (_button & mask) == mask && _action == Press;
+        }
+
+        bool isPress() const
+        {
+             return _action == Press;
         }
 
         void setPress(Pt::uint32_t button)
@@ -118,6 +200,11 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
              return (_button & mask) == mask && _action == Release;
         }
 
+        bool isRelease() const
+        {
+             return _action == Release;
+        }
+
         void setRelease(Pt::uint32_t button)
         {
             Pt::uint32_t mask = 0x1 << button;
@@ -127,28 +214,16 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
             _action = Release;
         }
 
-        bool isMove() const
-        {
-            return _action == None;
-        }
-
-        void setMove()
-        {
-            _button = 0;
-            _action = None;
-        }
-
     private:
         double       _x;
         double       _y;
         Pt::uint32_t _state;
         Pt::uint32_t _button;
         Action       _action;
-        Dial         _dial;
 };
 
 } // namespace
 
-}  // namespace
+} // namespace
 
 #endif
