@@ -55,8 +55,9 @@ Window::Window(Window* parent)
 , _position(0,0)
 , _size(200,200)
 , _visible(true)
-, _windowManager(this)
 {
+    _windowManager.init(*this);
+
     _eventReady += Pt::slot(*this, &Window::onKeyEvent);
     _eventReady += Pt::slot(*this, &Window::onPointerEvent);  
     _eventReady += Pt::slot(*this, &Window::onMoveEvent);
@@ -95,6 +96,18 @@ Window::~Window()
         _parent->remove(*this);
 
     delete _impl;
+}
+
+
+Window* Window::parent()
+{
+   return _parent;
+}
+
+
+const Window* Window::parent() const
+{
+    return _parent;
 }
 
 
@@ -138,30 +151,6 @@ const std::vector<Window*>& Window::windows() const
 }
 
 
-Window* Window::parent()
-{
-   return _parent;
-}
-
-
-const Window* Window::parent() const
-{
-    return _parent;
-}
-    
-
-Widget* Window::mainWidget() 
-{
-    return _mainWidget;
-}
-
-
-const Widget* Window::mainWidget()  const 
-{
-    return _mainWidget;
-}
-
-
 Window* Window::findWindow(const std::string& name)
 {
     if(_name == name)
@@ -181,6 +170,18 @@ Window* Window::findWindow(const std::string& name)
     return 0;
 }
 
+    
+Widget* Window::mainWidget() 
+{
+    return _mainWidget;
+}
+
+
+const Widget* Window::mainWidget()  const 
+{
+    return _mainWidget;
+}
+
 
 void Window::setMainWidget(Widget* widget)
 {   
@@ -192,8 +193,7 @@ void Window::setMainWidget(Widget* widget)
     if(_mainWidget)
     {
         if( _mainWidget->parent() )
-            _mainWidget->parent()->removeWidget(*_mainWidget);
-
+            _mainWidget->parent()->remove(*_mainWidget);
 
        _mainWidget->setWindow(this);
        _mainWidget->setPosition(Gfx::PointF(0,0) );
@@ -203,7 +203,13 @@ void Window::setMainWidget(Widget* widget)
 }
 
 
-void Window::setPointedWidget( Widget* widget ) 
+Widget* Window::findWidget(const std::string& name)
+{
+    return _mainWidget ? _mainWidget->findWidget(name) : 0;
+}
+
+
+void Window::setPointerWidget( Widget* widget ) 
 {
     if( _pointerWidget == widget )
         return;
@@ -243,12 +249,6 @@ void Window::setFocusedWidget( Widget* widget )
 }
 
 
-Widget* Window::findWidget(const std::string& name)
-{
-    return _mainWidget ? _mainWidget->findWidget(name) : 0;
-}
-
-
 void Window::activate()
 {
     _impl->activate();     
@@ -284,7 +284,7 @@ void Window::onPointerEvent(const PointerEvent& ev)
 
         Widget* widget = _mainWidget->findWidget( Gfx::PointF( ev.x(), ev.y() ) );
 
-        setPointedWidget( widget );    
+        setPointerWidget( widget );    
 
         if( widget )
             widget->processEvent(ev);       
@@ -301,7 +301,7 @@ void Window::onEnterEvent( const EnterEvent& ev )
 void Window::onLeaveEvent(const LeaveEvent& ev )
 {
     std::clog << "LEAVE: " << this->title() << std::endl;
-    setPointedWidget( 0 );
+    setPointerWidget( 0 );
 }
 
 

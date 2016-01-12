@@ -24,7 +24,7 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
-  02110-1301  USA
+  02110-1301 USA
 */
 
 #ifndef PT_HMI_WIDGET_H
@@ -81,30 +81,16 @@ class PT_HMI_API Widget : public Pt::Connectable
     public:    
         virtual ~Widget();
 
-        Widget* parent()
-        {         
-            return _parent;
-        }
+        Widget* parent();
 
-        const Widget* parent() const
-        {
-            return _parent;
-        }
+        const Widget* parent() const;
 
-        void addWidget(Widget& child);
+        void add(Widget& w);
 
-        void removeWidget(Widget& child);
+        void remove(Widget& w);
 
-        const std::vector<Widget*>& children() const
-        {
-            return _children;
-        }
+        const std::vector<Widget*>& widgets() const;
 
-
-    private:
-        void setWindow(Window* window);
-
-    public:
         Widget* findWidget( const std::string& name );
         
         Widget* findWidget( const Gfx::PointF& pos );
@@ -387,6 +373,9 @@ class PT_HMI_API Widget : public Pt::Connectable
         static std::string removeMnemonic(const std::string& text);        
 
         static size_t getMnemonicIndex(const std::string& text);    
+
+    private:
+        void setWindow(Window* window);
 
     private:
         Pt::Signal<const Pt::Event&> _eventReady;

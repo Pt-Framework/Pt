@@ -31,7 +31,7 @@ ChildW::ChildW()
 	_textLabel.setBackgroundColor( Gfx::Color(1,1,1,0) );
   _textLabel.bindMnemonic(_toggleButton);
   _textLabel.setCursor(  Hmi::Cursor::waitCursor() );
-	_mainPanel.addWidget(_textLabel);
+	_mainPanel.add(_textLabel);
 	
 	//Toggle button
 	_toggleButton.setButtonType(  Hmi::ButtonType::Toggle );
@@ -39,7 +39,7 @@ ChildW::ChildW()
 //	_toggleButton.setShortcutKey( std::string("C//i") );
 	_toggleButton.setPosition( Gfx::PointF(20,60) );
 	_toggleButton.setSize( Gfx::SizeF(150,25) );		
-	_mainPanel.addWidget(_toggleButton);
+	_mainPanel.add(_toggleButton);
 
 	//Dialog button  
 	_dialogButton.setButtonType( Hmi::ButtonType::Press );
@@ -49,7 +49,7 @@ ChildW::ChildW()
 	_dialogButton.setPosition( Gfx::PointF(20,100));
 	_dialogButton.setSize( Gfx::SizeF(150,25) );	
 	
-	_mainPanel.addWidget(_dialogButton);
+	_mainPanel.add(_dialogButton);
 	
 	//Close button
 	_closeButton.setButtonType(Hmi::ButtonType::Press);

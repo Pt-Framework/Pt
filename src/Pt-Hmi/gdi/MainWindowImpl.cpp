@@ -254,6 +254,7 @@ bool MainWindowImpl::processEvent(unsigned int message, WPARAM wparam, LPARAM lp
         case WM_MOUSELEAVE:
             handled = true;  
             _hasPointer = false;
+            _pointerEvent.clear();
             _app.mainScreen().setCursor(0);
             _app.mainScreen().setPointerWindow(0);
         break;

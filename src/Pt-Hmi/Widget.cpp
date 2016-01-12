@@ -66,23 +66,35 @@ Widget::~Widget()
 {
     std::vector<Widget*>::iterator it;
     for(it = _children.begin(); it != _children.end(); ++it)
-        removeWidget(**it);
+        remove(**it);
 
     if(_parent)
-        _parent->removeWidget(*this);
+        _parent->remove(*this);
 
     if(_window)
         _window->removeWidget(*this);
 }
 
 
-void Widget::addWidget(Widget& widget)
+Widget* Widget::parent()
+{         
+    return _parent;
+}
+
+
+const Widget* Widget::parent() const
+{
+    return _parent;
+}
+
+
+void Widget::add(Widget& widget)
 {
     if(widget.parent() == this)
         return;
 
     if( widget.parent() )
-        widget.parent()->removeWidget(widget);
+        widget.parent()->remove(widget);
 
     _children.push_back(&widget);
     widget._parent = this;
@@ -91,7 +103,7 @@ void Widget::addWidget(Widget& widget)
 }
 
 
-void Widget::removeWidget(Widget& widget)
+void Widget::remove(Widget& widget)
 {
     std::vector<Widget*>::iterator it;
     it = std::find(_children.begin(), _children.end(), &widget);
@@ -102,6 +114,12 @@ void Widget::removeWidget(Widget& widget)
     widget._parent = 0;
 
     widget.setWindow(0);
+}
+
+
+const std::vector<Widget*>& Widget::widgets() const
+{
+    return _children;
 }
 
 
@@ -254,7 +272,7 @@ void Widget::onLayout( PaintSurface& surface )
     double posBottom = clientSize.height();
     std::vector<Widget*> fillLayoutChildren;
 
-    for( size_t i = 0; i < children().size(); ++i )
+    for( size_t i = 0; i < widgets().size(); ++i )
     {
         Widget* child = _children[i];            
             
@@ -552,7 +570,7 @@ bool Widget::focusPrevChild(int index)
     
     for( ; index >= 0; --index)
     {
-        Widget* child = children()[index];
+        Widget* child = widgets()[index];
 
         if(child->acceptFocus())
         {
@@ -575,9 +593,9 @@ bool Widget::focusNextChild( int index )
 {
     index++;
     
-    for( ; index < (int)children().size(); ++index )
+    for( ; index < (int)widgets().size(); ++index )
     {
-        Widget* child = children()[index];
+        Widget* child = widgets()[index];
 
         if(child->acceptFocus())
         {
@@ -598,13 +616,13 @@ bool Widget::focusNextChild( int index )
 
 bool Widget::focusPrev()
 {
-    if( children().size() == 0 )
+    if( widgets().size() == 0 )
         return false;
 
     std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->focusedWidget() );    
 
     if(  it == _children.end())
-        return focusPrevChild( children().size() );
+        return focusPrevChild( widgets().size() );
         
     size_t index = it - _children.begin();
 
@@ -620,7 +638,7 @@ bool Widget::focusPrev()
 
 bool Widget::focusNext()
 {
-    if( children().size() == 0 )
+    if( widgets().size() == 0 )
         return false;
 
     std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->focusedWidget() );    
@@ -630,7 +648,7 @@ bool Widget::focusNext()
     
     size_t index = it - _children.begin();
 
-    Widget* child = children()[index];
+    Widget* child = widgets()[index];
         
     if(!child->acceptFocus())
     {
@@ -648,9 +666,9 @@ void Widget::onSetFocus( bool isFocused )
 
   if( !_hasFocus)
     {//False => all childs set to false.
-        for( size_t i = 0; i < children().size(); ++i)
+        for( size_t i = 0; i < widgets().size(); ++i)
         {
-            Pt::Hmi::Widget* child = children()[i];            
+            Pt::Hmi::Widget* child = widgets()[i];            
             child->setFocus(false);                                    
         }
 
@@ -668,9 +686,9 @@ void Widget::onSetFocus( bool isFocused )
     parent()->setFocus(true);
 
     //All sibling set to false. Only me let it true
-    for( size_t i = 0; i < parent()->children().size(); i++ )
+    for( size_t i = 0; i < parent()->widgets().size(); i++ )
     {
-        Widget* child = parent()->children()[i];
+        Widget* child = parent()->widgets()[i];
                 
         if( child != this )
             child->setFocus( false );

@@ -73,6 +73,17 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
         , _delta(0)
         { }
 
+        void clear()
+        {
+            _x = 0;
+            _y = 0;
+            _action = Move;
+            _buttonState = 0;
+            _button = 0;
+            _wheel = Vertical;
+            _delta = 0;
+        }
+
         double x() const
         {
             return _x;

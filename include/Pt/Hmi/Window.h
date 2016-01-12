@@ -75,17 +75,17 @@ class PT_HMI_API Window : public Pt::Connectable
 
     void remove(Window& w);
 
-    Window* findWindow(const std::string& name);
-
     const std::vector<Window*>& windows() const;
 
-    Widget* findWidget(const std::string& name);
+    Window* findWindow(const std::string& name);
 
     Widget* mainWidget();
 
     const Widget* mainWidget()  const;
 
     void setMainWidget(Widget* widget);
+
+    Widget* findWidget(const std::string& name);
   
     void close();    
     
@@ -208,7 +208,7 @@ class PT_HMI_API Window : public Pt::Connectable
 
     void removeWidget(Widget& w);
 
-    void setPointedWidget( Widget* widget );
+    void setPointerWidget( Widget* widget );
 
     Widget* focusedWidget() 
     {
