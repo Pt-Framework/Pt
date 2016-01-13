@@ -105,51 +105,56 @@ void MainWindowImpl::hide()
 
 void MainWindowImpl::onKey(unsigned int msg,  WPARAM wparam, LPARAM lparam)
 {
-  BYTE keyboardState[256];
+    Pt::Char ch;
+    Pt::uint32_t key = KeyCode::None;
 
-  GetKeyboardState(keyboardState);
+    if(msg == WM_SYSCOMMAND)
+    {
+        if( lparam != 0)
+        {
+          key = wparam == SC_KEYMENU ? KeyCode::Alt : KeyCode::None;
+          ch = lparam;
+        }
+        else
+        {         
+          key = KeyCode::LMenu;
+        }         
+    }
+    else
+    {
+        if((lparam & 0xFFF) != 1)
+            return; //Repeat count
 
-  if(msg == WM_KEYDOWN)
-      _keyEvent.setState(KeyEvent::KeyDown);
-  else if(msg == WM_KEYUP)
-      _keyEvent.setState(KeyEvent::KeyUp);            
-    
-  if(msg == WM_SYSCOMMAND)
-  {
-    _keyEvent.setState(KeyEvent::KeyUp);
-    _keyEvent.key().setAlt(wparam == SC_KEYMENU );
-    _keyEvent.key().setShift(false);
-    _keyEvent.key().setCtrl(false);
-    _keyEvent.key().setUnicode(lparam);
-  }
-  else
-  {
-      if((lparam & 0xFFF) != 1)
-          return;//Repeat count
+        BYTE keyboardState[256];
+        GetKeyboardState(keyboardState);
 
-      keyboardState[VK_CONTROL] = 0;
-      keyboardState[VK_LCONTROL] = 0;
-      keyboardState[VK_RCONTROL] = 0;
+        keyboardState[VK_CONTROL] = 0;
+        keyboardState[VK_LCONTROL] = 0;
+        keyboardState[VK_RCONTROL] = 0;
 
-      if(wparam == 16 )
-      {//Shift key
-        _keyEvent.key().setAlt(false);
-        _keyEvent.key().setShift(_keyEvent.state() == KeyEvent::KeyDown);
-      }
-      else if(wparam == 17 )
-      {//Controll key
-        _keyEvent.key().setAlt(false);
-        _keyEvent.key().setCtrl(_keyEvent.state() == KeyEvent::KeyDown);
-      }
+        if(wparam == 16 )
+        {// Shift key
+          key = KeyCode::Shift;
+        }
+        else if(wparam == 17 )
+        {// Control key
+          key = KeyCode::Control;
+        }
 
-      Pt::uint32_t scanCode = ((lparam >> 16) & 0xFF);            
-      Pt::uint32_t ucode = 0;            
-        
-      ToUnicode( wparam, scanCode , (BYTE*)keyboardState, (LPWSTR)&ucode, 4, 0);    
-      _keyEvent.key().setUnicode(ucode);
-  }
+        Pt::uint32_t scanCode = ((lparam >> 16) & 0xFF);            
+        Pt::uint32_t ucode = 0;
+        ToUnicode(wparam, scanCode, (BYTE*)keyboardState, (LPWSTR)&ucode, 4, 0);    
+        ch = ucode;
 
-  _app.sendEvent(*_apiWindow, _keyEvent);
+        key |= wparam;  
+    }
+
+    if(msg == WM_KEYDOWN)
+        _keyEvent.setPress(static_cast<KeyCode::Type>(key), ch);
+    else if(msg == WM_KEYUP)
+        _keyEvent.setRelease(static_cast<KeyCode::Type>(key), ch); 
+
+    _app.sendEvent(*_apiWindow, _keyEvent);
 }
 
 
@@ -180,6 +185,15 @@ bool MainWindowImpl::processEvent(unsigned int message, WPARAM wparam, LPARAM lp
         {          
            onMouse(message, wparam, lparam);
            handled = true;
+        }
+        break;
+
+        case WM_MOUSEWHEEL:
+        {
+            int delta = GET_WHEEL_DELTA_WPARAM(wparam);
+            _scrollEvent.set(0, delta/120.0);
+            _app.sendEvent(*_apiWindow, _scrollEvent);
+            handled = true;
         }
         break;
 
@@ -316,27 +330,27 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
     switch(msg)
     {
         case WM_LBUTTONDOWN:
-            _pointerEvent.setPress(0);
+            _pointerEvent.setPress(PointerEvent::Left);
         break;
         
         case WM_LBUTTONUP:        
-            _pointerEvent.setRelease(0);
+            _pointerEvent.setRelease(PointerEvent::Left);
         break;
                             
         case WM_MBUTTONDOWN:
-            _pointerEvent.setPress(1);
+            _pointerEvent.setPress(PointerEvent::Middle);
         break;
         
         case WM_MBUTTONUP:
-            _pointerEvent.setRelease(1);
+            _pointerEvent.setRelease(PointerEvent::Middle);
         break;   
         
         case WM_RBUTTONDOWN:        
-            _pointerEvent.setPress(2);
+            _pointerEvent.setPress(PointerEvent::Right);
         break;
         
         case WM_RBUTTONUP:
-            _pointerEvent.setRelease(2);
+            _pointerEvent.setRelease(PointerEvent::Right);
         break; 
 
         case WM_MOUSEMOVE:

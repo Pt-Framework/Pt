@@ -58,7 +58,8 @@ Widget::Widget()
 , _isValid(false)
 {      
     _eventReady += Pt::slot(*this, &Widget::onKeyEvent);
-    _eventReady += Pt::slot(*this, &Widget::onPointerEvent);  
+    _eventReady += Pt::slot(*this, &Widget::onPointerEvent);
+    _eventReady += Pt::slot(*this, &Widget::onScrollEvent);
 }
 
 
@@ -476,12 +477,12 @@ void Widget::onRender( PaintSurface& surface )
 }
 
 
-void Widget::onActionKey(KeyEvent::KeyState state)
+void Widget::onActionKey(const KeyEvent& kev)
 {
 }
 
 
-void Widget::onShortcutKey(KeyEvent::KeyState state)
+void Widget::onShortcutKey(const KeyEvent& kev)
 {
 }
 
@@ -511,6 +512,12 @@ void Widget::onEvent(const Pt::Event& ev)
 void Widget::onPointerEvent(const PointerEvent& ev)
 {        
 
+}
+
+
+void Widget::onScrollEvent( const ScrollEvent& ev )
+{
+  
 }
 
 
@@ -725,7 +732,7 @@ void Widget::onSetCaption( const std::string& c )
 {
     _caption = c;    
 
-    _mnemonicKey.clear();
+    _mnemonicKey = KeyCode::None;
 
     int index = getMnemonicIndex(_caption);
 
@@ -734,8 +741,8 @@ void Widget::onSetCaption( const std::string& c )
                     
     std::string unescaped = Widget::removeMnemonic(_caption);
 
-    _mnemonicKey.setAlt(true);    
-    _mnemonicKey.setUnicode(  std::toupper(unescaped[index]));
+    //_mnemonicKey.setAlt(true);    
+    //_mnemonicKey.setUnicode(  std::toupper(unescaped[index]));
 }
 
 

@@ -111,7 +111,7 @@ void Button::onDoublePressedAction()
 
 
 
-void Button::onActionKey( KeyEvent::KeyState state )
+void Button::onActionKey( const KeyEvent& kev )
 {
 	//switch( _buttonType )
 	//{
@@ -137,7 +137,7 @@ void Button::onActionKey( KeyEvent::KeyState state )
 	invalidate();
 }
 
-void Button::onShortcutKey( KeyEvent::KeyState state )
+void Button::onShortcutKey( const KeyEvent& kev )
 {
 	//switch( _buttonType)
 	//{

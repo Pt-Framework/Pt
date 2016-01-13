@@ -23,67 +23,80 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
+*/
 #ifndef Pt_Hmi_KeyEvent_h
 #define Pt_Hmi_KeyEvent_h
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Key.h>
+#include <Pt/Hmi/KeyCode.h>
 #include <Pt/Event.h>
+#include <Pt/String.h>
 
+namespace Pt {
 
-namespace Pt{
-namespace Hmi{
+namespace Hmi {
 
 class PT_HMI_API KeyEvent : public Pt::BasicEvent<KeyEvent>
 {
-public:
+    public:
+	      enum Action
+	      {
+		      Press,
+		      Release
+	      };
 
-	enum KeyState
-	{
-		KeyNone,
-		KeyDown,
-		KeyUp
-	};
+    public:	
+	      KeyEvent()
+        : _action(Release)
+	      , _key(KeyCode::None)
+	      {
+	      }
 
-public:	
-	KeyEvent()
-  : _key()
-	, _state(KeyNone)
-	{
-	}
+        KeyCode::Type key() const
+        {
+            return _key;
+        }
 
-	virtual ~KeyEvent()
-	{
-	}
+        const Pt::Char& unicode() const
+        {
+            return _unicode;
+        }
 
-  KeyState state() const
-  {
-    return _state;
-  }
+        bool isPress() const
+        {
+            return _action == Press;
+        }
 
-  void setState( KeyState s )
-  {
-    _state = s;
-  }
+        void setPress(KeyCode::Type key, const Pt::Char& ch)
+        {
+            _action = Press;
+            _key = key;
+            _unicode = ch;
+        }
 
-  const Key&  key() const
-  {
-    return _key;
-  }
+        bool isRelease() const
+        {
+            return _action == Release;
+        }
 
-  Key&  key()
-  {
-    return _key;
-  }
+        void setRelease(KeyCode::Type key, const Pt::Char& ch)
+        {
+            _action = Release;
+            _key = key;
+            _unicode = ch;
+        }
 
-private:
-
-  Key _key;
-  KeyState _state;
+    private:
+        Action   _action;
+        KeyCode::Type  _key;
+        Pt::Char _unicode;        
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif
 

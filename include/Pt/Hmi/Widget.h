@@ -215,12 +215,12 @@ class PT_HMI_API Widget : public Pt::Connectable
             onSetFocus(b);            
         }
 
-        const Key& focusedActionKey() const
+        KeyCode::Type focusedActionKey() const
         {
             return _focusedActionKey;
         }
 
-        void setFocusedActionKey( const Key& ak )
+        void setFocusedActionKey( KeyCode::Type ak )
         {
           _focusedActionKey = ak;
         }
@@ -267,12 +267,12 @@ class PT_HMI_API Widget : public Pt::Connectable
             return _layout;
         }
 
-        const Key& shortcutKey() const
+        KeyCode::Type shortcutKey() const
         {
            return _shortcutKey;
         }
 
-        void setShortcutKey( const Key&  k )
+        void setShortcutKey( KeyCode::Type  k )
         {
             _shortcutKey=  k;
         }
@@ -343,7 +343,9 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         virtual void onEvent(const Pt::Event& ev);
 
-        virtual void onPointerEvent(const PointerEvent& ev);        
+        virtual void onPointerEvent(const PointerEvent& ev);
+        
+        virtual void onScrollEvent( const ScrollEvent& ev );        
     
         virtual void onKeyEvent(const KeyEvent& ev);
 
@@ -355,9 +357,9 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         virtual void onRender(PaintSurface& paintSurface);        
 
-        virtual void onActionKey(KeyEvent::KeyState state);    
+        virtual void onActionKey(const KeyEvent& kev);    
               
-        virtual void onShortcutKey(KeyEvent::KeyState state);
+        virtual void onShortcutKey(const KeyEvent& kev);
 
         virtual void onMnemonic();
     
@@ -367,7 +369,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         bool useMnemonic() 
         {
-            return !_mnemonicKey.empty();
+            return _mnemonicKey != KeyCode::None;
         }
 
         static std::string removeMnemonic(const std::string& text);        
@@ -392,17 +394,17 @@ class PT_HMI_API Widget : public Pt::Connectable
         ImageLayout                  _backgroundImageLayout;
         Hmi::Cursor                  _cursor;
         bool                         _acceptFocus;
-        Key                          _focusedActionKey;
+        KeyCode::Type                _focusedActionKey;
         std::string                  _name;                    
         Layout                       _layout;
-        Key                          _shortcutKey;
+        KeyCode::Type                _shortcutKey;
         bool                         _hasFocus;            
         Gfx::SizeF                   _size;
         Gfx::PointF                  _position;            
         Alignment                    _contentAlignment;
         std::string                  _caption;
         Gfx::Font                    _font;
-        Key                          _mnemonicKey;    
+        KeyCode::Type                _mnemonicKey;    
         Pt::Signal<>                 _mnemonicEntered;
         Docking                      _docking;
 

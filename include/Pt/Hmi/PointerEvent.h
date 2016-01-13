@@ -38,6 +38,133 @@ namespace Pt {
 
 namespace Hmi {
 
+class ScrollEvent : public Pt::BasicEvent<ScrollEvent>
+{
+    public:
+        enum Wheel
+        {
+            Vertical = 0,
+            Horizontal = 1,
+            Depth = 2
+        };
+
+        ScrollEvent()
+        : _wheelId(Vertical)
+        , _delta(0)
+        { }
+
+        Pt::uint32_t wheelId() const
+        {
+          return _wheelId;
+        }
+
+        double delta() const
+        {
+            return _delta;
+        }
+        
+        void set(Pt::uint32_t wheelId, double d)
+        {
+            _wheelId = wheelId;
+            _delta = d;
+        }
+
+    private:
+        Pt::uint32_t _wheelId;
+        double       _delta;
+};
+
+
+class TouchEvent : public Pt::BasicEvent<TouchEvent>
+{
+    private:    
+        enum Action
+        {
+            Move = 0,
+            Press = 1,
+            Release = 2
+        };
+
+    public:
+        TouchEvent()
+        : _x(0)
+        , _y(0)
+        , _action(Move)
+        , _trackingId(0)
+        {
+        }
+
+        double x() const
+        {
+            return _x;
+        }
+
+        double y() const
+        {
+            return _y;
+        }
+        
+        Pt::uint32_t trackingId() const
+        {
+            return _trackingId;
+        }
+
+        double pressure() const
+        {
+            return _pressure;
+        }
+
+        bool isPress() const
+        {
+            return _action == Press;
+        }
+
+        void setPress(Pt::uint32_t trackId, double x, double y, double p)
+        {
+            _action = Press;
+            _trackingId = trackId;
+            _x = x;
+            _y = y;
+            _pressure = p;
+        }
+
+        bool isRelease() const
+        {
+            return _action == Release;
+        }
+
+        void setRelease(Pt::uint32_t trackId, double x, double y, double p)
+        {
+            _action = Press;
+            _trackingId = trackId;
+            _x = x;
+            _y = y;
+            _pressure = p;
+        }
+
+        bool isMove() const
+        {
+            return _action == Move;
+        }
+
+        void setMove(Pt::uint32_t trackId, double x, double y, double p)
+        {
+            _action = Move;
+            _trackingId = trackId;
+            _x = x;
+            _y = y;
+            _pressure = p;
+        }
+
+    private:
+        double _x;
+        double _y;
+        Action _action;
+        Pt::uint32_t _trackingId;
+        double _pressure;
+};
+
+
 class PointerEvent : public Pt::BasicEvent<PointerEvent>
 {
     public:    
@@ -45,22 +172,14 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
         {
             Move = 0,
             Press = 1,
-            Release = 2,
-            Scroll = 3
+            Release = 2
         };
 
         enum Button
         {
             Left = 0,
             Right = 1,
-            Middle = 2
-        };
-
-        enum Wheel
-        {
-            Vertical = 0,
-            Horizontal = 1,
-            Depth = 2
+            Middle = 2,
         };
 
         PointerEvent()
@@ -69,8 +188,6 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
         , _action(Move)
         , _buttonState(0)
         , _button(0)
-        , _wheel(Vertical)
-        , _delta(0)
         { }
 
         void clear()
@@ -80,8 +197,6 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
             _action = Move;
             _buttonState = 0;
             _button = 0;
-            _wheel = Vertical;
-            _delta = 0;
         }
 
         double x() const
@@ -113,27 +228,6 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
         {
             _action = Move;
             _button = 0;
-            _wheel = Vertical;
-            _delta = 0;
-        }
-
-        bool isScroll(Pt::uint32_t wheel) const
-        {
-             Pt::uint32_t mask = 0x1 << wheel;
-             return (_wheel & mask) == mask && _action == Scroll;
-        }
-
-        void setScroll(Pt::uint32_t wheel, double d)
-        {
-            _action = Scroll;
-            _button = 0;
-            _wheel = wheel;
-            _delta = d;
-        }
-
-        double delta() const
-        {
-            return _delta;
         }
 
         bool isPressed(Pt::uint32_t button) const
@@ -160,9 +254,6 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
             _action = Press;
             _button = mask;
             _buttonState |= mask;
-
-            _wheel = Vertical;
-            _delta = 0;
         }
 
         bool isRelease(Pt::uint32_t button) const
@@ -183,9 +274,6 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
             _action = Release;
             _button = mask;
             _buttonState &= (~mask);
-
-            _wheel = Vertical;
-            _delta = 0;
         }
 
     private:
@@ -194,8 +282,6 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
         Action       _action;
         Pt::uint32_t _buttonState;
         Pt::uint32_t _button;
-        Pt::uint32_t _wheel;
-        double       _delta;
 };
 
 } // namespace

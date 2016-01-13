@@ -35,7 +35,6 @@
 #include <Pt/Hmi/WindowBorder.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/WindowDecoration.h>
-#include <Pt/Hmi/Key.h>
 #include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ResizeEvent.h>
@@ -194,6 +193,8 @@ class PT_HMI_API Window : public Pt::Connectable
 
     virtual void onPointerEvent( const PointerEvent& ev );
     
+    virtual void onScrollEvent( const ScrollEvent& ev );
+
     virtual void onEnterEvent( const EnterEvent& ev );    
 
     virtual void onLeaveEvent(const LeaveEvent& ev );

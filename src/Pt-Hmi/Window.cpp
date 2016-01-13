@@ -59,7 +59,8 @@ Window::Window(Window* parent)
     _windowManager.init(*this);
 
     _eventReady += Pt::slot(*this, &Window::onKeyEvent);
-    _eventReady += Pt::slot(*this, &Window::onPointerEvent);  
+    _eventReady += Pt::slot(*this, &Window::onPointerEvent);
+    _eventReady += Pt::slot(*this, &Window::onScrollEvent);  
     _eventReady += Pt::slot(*this, &Window::onMoveEvent);
     _eventReady += Pt::slot(*this, &Window::onResizeEvent);
     _eventReady += Pt::slot(*this, &Window::onActivateEvent);
@@ -292,6 +293,18 @@ void Window::onPointerEvent(const PointerEvent& ev)
 }
 
 
+void Window::onScrollEvent( const ScrollEvent& ev )
+{
+    std::clog << title() << ": " << ev.delta() << std::endl;
+
+    if( ! _mainWidget )
+        return;
+
+    if( _pointerWidget )
+        _pointerWidget->processEvent(ev);    
+}
+
+
 void Window::onEnterEvent( const EnterEvent& ev )
 {
     std::clog << "ENTER: " << this ->title() << std::endl;
@@ -307,6 +320,7 @@ void Window::onLeaveEvent(const LeaveEvent& ev )
 
 void Window::onKeyEvent(const KeyEvent& ev)
 {
+  std::clog << "Window::onKeyEvent: " << (ev.isPress() ? "press " : "release ") << ev.key() << " " << ev.unicode().narrow() << std::endl;
   if( _windowManager.keyInput( ev ) )
       return;
 

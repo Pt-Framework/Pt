@@ -1299,9 +1299,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Spacing.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Key.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\WindowImpl.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1325,6 +1322,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\LeaveEvent.h">
       <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\KeyCode.h">
+      <Filter>Pt-Hmi</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2416,9 +2416,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\PngReader.cpp">
       <Filter>Pt-Gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Key.cpp">
-      <Filter>Pt-Hmi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\WindowImpl.cpp">
       <Filter>Pt-Hmi</Filter>

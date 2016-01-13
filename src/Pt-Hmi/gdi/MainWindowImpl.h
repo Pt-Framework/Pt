@@ -105,6 +105,7 @@ class MainWindowImpl : public WindowImpl
         Screen&               _screen; 
         HWND				  _hwnd;
         PointerEvent          _pointerEvent;
+        ScrollEvent           _scrollEvent;
         KeyEvent              _keyEvent;
         bool                  _hasPointer;     
 };
