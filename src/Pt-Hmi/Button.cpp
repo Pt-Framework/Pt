@@ -181,7 +181,7 @@ void Button::onKeyEvent(const KeyEvent& ev)
 	//}		
 }
 
-void Button::onPointerEvent(const PointerEvent& ev)
+void Button::onPointerEvent(const MouseEvent& ev)
 {    
 	Gfx::PointF point = toClient(Gfx::PointF(ev.x(), ev.y()));  
       

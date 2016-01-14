@@ -30,7 +30,8 @@
 #ifndef PT_HMI_WIDGET_H
 #define PT_HMI_WIDGET_H
 
-#include <Pt/Hmi/PointerEvent.h>
+#include <Pt/Hmi/MouseEvent.h>
+#include <Pt/Hmi/ScrollEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/MoveEvent.h>
@@ -343,7 +344,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         virtual void onEvent(const Pt::Event& ev);
 
-        virtual void onPointerEvent(const PointerEvent& ev);
+        virtual void onPointerEvent(const MouseEvent& ev);
         
         virtual void onScrollEvent( const ScrollEvent& ev );        
     

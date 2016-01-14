@@ -30,7 +30,8 @@
 #include <Pt/Hmi/Api.h>
 #include "../WindowImpl.h"
 #include <Windows.h>
-#include <Pt/Hmi/PointerEvent.h>
+#include <Pt/Hmi/MouseEvent.h>
+#include <Pt/Hmi/ScrollEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
 
 namespace Pt{
@@ -103,8 +104,8 @@ class MainWindowImpl : public WindowImpl
     private:	
         Pt::Hmi::Application& _app; 
         Screen&               _screen; 
-        HWND				  _hwnd;
-        PointerEvent          _pointerEvent;
+        HWND				          _hwnd;
+        MouseEvent            _mouseEvent;
         ScrollEvent           _scrollEvent;
         KeyEvent              _keyEvent;
         bool                  _hasPointer;     

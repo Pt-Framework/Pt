@@ -1,10 +1,12 @@
-/* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
- 
+/* 
+   Copyright (C) 2015 Marc Boris Duerner 
+   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+   
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
    License as published by the Free Software Foundation; either
    version 2.1 of the License, or (at your option) any later version.
- 
+   
    As a special exception, you may use this file as part of a free
    software library without restriction. Specifically, if other files
    instantiate templates or use macros or inline functions from this
@@ -14,76 +16,66 @@
    License. This exception does not however invalidate any other
    reasons why the executable file might be covered by the GNU Library
    General Public License.
- 
+   
    This library is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Lesser General Public License for more details.
- 
+   
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
    MA 02110-1301 USA
 */
 
-#include "ApplicationImpl.h"
-#include "ScreenImpl.h"
-#include <Pt/Hmi/Application.h>
-#include <Pt/System/MainLoop.h>
+#ifndef Pt_Hmi_ScrollEvent_h
+#define Pt_Hmi_ScrollEvent_h
+
+#include <Pt/Hmi/Api.h>
+#include <Pt/Event.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-Application::Application(int argc, char** argv)
-: System::Application(0, argc, argv)
-, _impl( new ApplicationImpl() ) 
-, _mainScreen(0)
-{ 	
-	this->init(*_impl);
-
-  _mainScreen = new Screen(*_impl);
-}
-
-
-Application::~Application()
+class ScrollEvent : public Pt::BasicEvent<ScrollEvent>
 {
-	delete _mainScreen;
-	delete _impl;
-}
+    public:
+        enum Wheel
+        {
+            Vertical = 0,
+            Horizontal = 1,
+            Depth = 2
+        };
 
+        ScrollEvent()
+        : _wheel(Vertical)
+        , _delta(0)
+        { }
 
-Application& Application::instance()
-{
-    return static_cast<Application&>( System::Application::instance() );
-}
-	
+        Pt::uint32_t wheel() const
+        {
+          return _wheel;
+        }
 
-void Application::nextEvent()
-{
-	_impl->nextEvent();
-}
+        double delta() const
+        {
+            return _delta;
+        }
+        
+        void set(Pt::uint32_t wheel, double d)
+        {
+            _wheel = wheel;
+            _delta = d;
+        }
 
-
-void Application::sendEvent(Window& w, const Pt::Event& ev)
-{
-	// TODO: check event filter before dispatching the event
-
-	w.processEvent(ev);
-}
-
-
-Widget* Application::findWidget(const std::string& name)
-{
-	return _mainScreen->findWidget( name);
-}
-
-
-Window* Application::findWindow(const std::string& name)
-{
-    return _mainScreen->findWindow(name);
-}
+    private:
+        Pt::uint32_t _wheel;
+        double       _delta;
+};
 
 } // namespace
 
 } // namespace
+
+#endif

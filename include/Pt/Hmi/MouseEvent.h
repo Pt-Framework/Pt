@@ -28,8 +28,8 @@
    MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_PointerEvent_h
-#define Pt_Hmi_PointerEvent_h
+#ifndef Pt_Hmi_MouseEvent_h
+#define Pt_Hmi_MouseEvent_h
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Event.h>
@@ -38,134 +38,7 @@ namespace Pt {
 
 namespace Hmi {
 
-class ScrollEvent : public Pt::BasicEvent<ScrollEvent>
-{
-    public:
-        enum Wheel
-        {
-            Vertical = 0,
-            Horizontal = 1,
-            Depth = 2
-        };
-
-        ScrollEvent()
-        : _wheelId(Vertical)
-        , _delta(0)
-        { }
-
-        Pt::uint32_t wheelId() const
-        {
-          return _wheelId;
-        }
-
-        double delta() const
-        {
-            return _delta;
-        }
-        
-        void set(Pt::uint32_t wheelId, double d)
-        {
-            _wheelId = wheelId;
-            _delta = d;
-        }
-
-    private:
-        Pt::uint32_t _wheelId;
-        double       _delta;
-};
-
-
-class TouchEvent : public Pt::BasicEvent<TouchEvent>
-{
-    private:    
-        enum Action
-        {
-            Move = 0,
-            Press = 1,
-            Release = 2
-        };
-
-    public:
-        TouchEvent()
-        : _x(0)
-        , _y(0)
-        , _action(Move)
-        , _trackingId(0)
-        {
-        }
-
-        double x() const
-        {
-            return _x;
-        }
-
-        double y() const
-        {
-            return _y;
-        }
-        
-        Pt::uint32_t trackingId() const
-        {
-            return _trackingId;
-        }
-
-        double pressure() const
-        {
-            return _pressure;
-        }
-
-        bool isPress() const
-        {
-            return _action == Press;
-        }
-
-        void setPress(Pt::uint32_t trackId, double x, double y, double p)
-        {
-            _action = Press;
-            _trackingId = trackId;
-            _x = x;
-            _y = y;
-            _pressure = p;
-        }
-
-        bool isRelease() const
-        {
-            return _action == Release;
-        }
-
-        void setRelease(Pt::uint32_t trackId, double x, double y, double p)
-        {
-            _action = Press;
-            _trackingId = trackId;
-            _x = x;
-            _y = y;
-            _pressure = p;
-        }
-
-        bool isMove() const
-        {
-            return _action == Move;
-        }
-
-        void setMove(Pt::uint32_t trackId, double x, double y, double p)
-        {
-            _action = Move;
-            _trackingId = trackId;
-            _x = x;
-            _y = y;
-            _pressure = p;
-        }
-
-    private:
-        double _x;
-        double _y;
-        Action _action;
-        Pt::uint32_t _trackingId;
-        double _pressure;
-};
-
-
-class PointerEvent : public Pt::BasicEvent<PointerEvent>
+class MouseEvent : public Pt::BasicEvent<MouseEvent>
 {
     public:    
         enum Action
@@ -182,7 +55,7 @@ class PointerEvent : public Pt::BasicEvent<PointerEvent>
             Middle = 2,
         };
 
-        PointerEvent()
+        MouseEvent()
         : _x(0)
         , _y(0)
         , _action(Move)

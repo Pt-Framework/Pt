@@ -509,7 +509,7 @@ void Widget::onEvent(const Pt::Event& ev)
 }
 
        
-void Widget::onPointerEvent(const PointerEvent& ev)
+void Widget::onPointerEvent(const MouseEvent& ev)
 {        
 
 }

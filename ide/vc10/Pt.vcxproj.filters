@@ -1269,9 +1269,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\demo\ChildW.h">
       <Filter>Pt-Hmi\demo</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PointerEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h">
       <Filter>Pt-Hmi\Events</Filter>
     </ClInclude>
@@ -1325,6 +1322,15 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\KeyCode.h">
       <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\MouseEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ScrollEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\TouchEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

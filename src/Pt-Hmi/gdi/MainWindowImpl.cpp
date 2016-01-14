@@ -268,7 +268,7 @@ bool MainWindowImpl::processEvent(unsigned int message, WPARAM wparam, LPARAM lp
         case WM_MOUSELEAVE:
             handled = true;  
             _hasPointer = false;
-            _pointerEvent.clear();
+            _mouseEvent.clear();
             _app.mainScreen().setCursor(0);
             _app.mainScreen().setPointerWindow(0);
         break;
@@ -330,37 +330,37 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
     switch(msg)
     {
         case WM_LBUTTONDOWN:
-            _pointerEvent.setPress(PointerEvent::Left);
+            _mouseEvent.setPress(MouseEvent::Left);
         break;
         
         case WM_LBUTTONUP:        
-            _pointerEvent.setRelease(PointerEvent::Left);
+            _mouseEvent.setRelease(MouseEvent::Left);
         break;
                             
         case WM_MBUTTONDOWN:
-            _pointerEvent.setPress(PointerEvent::Middle);
+            _mouseEvent.setPress(MouseEvent::Middle);
         break;
         
         case WM_MBUTTONUP:
-            _pointerEvent.setRelease(PointerEvent::Middle);
+            _mouseEvent.setRelease(MouseEvent::Middle);
         break;   
         
         case WM_RBUTTONDOWN:        
-            _pointerEvent.setPress(PointerEvent::Right);
+            _mouseEvent.setPress(MouseEvent::Right);
         break;
         
         case WM_RBUTTONUP:
-            _pointerEvent.setRelease(PointerEvent::Right);
+            _mouseEvent.setRelease(MouseEvent::Right);
         break; 
 
         case WM_MOUSEMOVE:
-            _pointerEvent.setMove();
+            _mouseEvent.setMove();
         break;
     }
   
     Gfx::PointF p = _screen.toUnit( Gfx::Point(xPos, yPos) );
-    _pointerEvent.setX( p.x() );
-    _pointerEvent.setY( p.y() );            
+    _mouseEvent.setX( p.x() );
+    _mouseEvent.setY( p.y() );            
 
     if( ! _hasPointer )
     {
@@ -368,7 +368,7 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
         _app.mainScreen().setPointerWindow( _apiWindow );
     }
 
-    _app.sendEvent(*_apiWindow, _pointerEvent);
+    _app.sendEvent(*_apiWindow, _mouseEvent);
 }
 
 

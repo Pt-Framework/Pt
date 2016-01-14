@@ -273,7 +273,7 @@ void Window::onEvent(const Pt::Event& ev)
 }
 
 
-void Window::onPointerEvent(const PointerEvent& ev)
+void Window::onPointerEvent(const MouseEvent& ev)
 {
     if( ! _windowManager.pointerInput( ev ) )
     {

@@ -34,7 +34,7 @@
 namespace Pt{
 namespace Hmi{
 
-class PointerEvent;
+class MouseEvent;
 
 namespace ButtonType
 {
@@ -109,7 +109,7 @@ protected:
 	virtual void onMnemonic();
 	virtual void onShortcutKey(const KeyEvent& kev);
 	virtual void onActionKey(const KeyEvent& kev);
-	virtual void onPointerEvent(const PointerEvent& ev);
+	virtual void onPointerEvent(const MouseEvent& ev);
 	virtual void onKeyEvent(const KeyEvent& ev);
 	virtual void onDoublePressedTimeout();
 	virtual void onRender(PaintSurface& surface);
