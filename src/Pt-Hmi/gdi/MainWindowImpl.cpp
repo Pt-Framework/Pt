@@ -267,9 +267,6 @@ void MainWindowImpl::onSize(WPARAM wParam, LPARAM lParam)
 
 void MainWindowImpl::onKey(unsigned int msg, WPARAM wparam, LPARAM lparam)
 {
-    Pt::Char ch;
-    Key key( static_cast<Key::Code>(wparam) );
-
     BYTE keyboardState[256];
     GetKeyboardState(keyboardState);
 
@@ -288,14 +285,18 @@ void MainWindowImpl::onKey(unsigned int msg, WPARAM wparam, LPARAM lparam)
     bool control = (keyboardState[VK_CONTROL] & 0x80) == 0x80;
     bool alt = (keyboardState[VK_MENU] & 0x80) == 0x80;
 
+    Key::Modifiers modifiers;
     if(shift)
-      key.setModifier(Key::Shift);
+      modifiers |= Key::Shift;
 
     if(control)
-      key.setModifier(Key::Control);
+      modifiers |= Key::Control;
 
     if(alt)
-      key.setModifier(Key::Alt);
+      modifiers |= Key::Alt;
+
+    Key::Code keyCode = static_cast<Key::Code>(wparam);
+    Key key(modifiers, keyCode);
 
     if(msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN)
         _keyEvent.setPress(key, wc);

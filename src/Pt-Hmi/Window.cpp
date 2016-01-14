@@ -320,7 +320,9 @@ void Window::onLeaveEvent(const LeaveEvent& ev )
 
 void Window::onKeyEvent(const KeyEvent& ev)
 {
-  std::clog << "Window::onKeyEvent: " << (ev.isPress() ? "press " : "release ") << ev.key().key() << " " << ev.unicode().narrow() << std::endl;
+  std::clog << "Window::onKeyEvent: " << (ev.isPress() ? "press " : "release ") 
+            << ev.key().keyCode() << " " << ev.unicode().narrow() << std::endl;
+
   if( _windowManager.keyInput( ev ) )
       return;
 

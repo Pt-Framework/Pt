@@ -370,7 +370,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         bool useMnemonic() 
         {
-            return _mnemonicKey.key() != Key::NoKey;
+            return _mnemonicKey.keyCode() != Key::NoKey;
         }
 
         static std::string removeMnemonic(const std::string& text);        

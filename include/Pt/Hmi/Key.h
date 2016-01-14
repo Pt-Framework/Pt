@@ -616,19 +616,15 @@ class Key
                     return Modifiers(_value | m);
                 }
 
-                void set(Modifier m)
+                Modifiers& operator|=(Modifier m)
                 {
                     _value |= m;
+                    return *this;
                 }
 
-                bool isSet(Modifier m) const
+                Pt::uint16_t value() const
                 {
-                    return _value == m;
-                }
-
-                bool isSet(Modifiers list) const
-                {
-                    return _value == list._value;
+                    return _value;
                 }
 
             private:
@@ -675,34 +671,52 @@ class Key
             _modifier = NoModifier;
         }
 
-        void setKey(Code code)
+        void set(Code c)
         {
-            _code = code;
+            _code = c;
+            _modifier = NoModifier;
         }
 
-        Code key() const
+        void set(Modifier m, Code c)
+        {
+            _code = c;
+            _modifier = m;
+        }
+
+        void set(Modifiers m, Code c)
+        {
+            _code = c;
+            _modifier = m.value();
+        }
+
+        Code keyCode() const
         { 
             return static_cast<Code>(_code); 
         }
 
+        bool hasModifiers(Modifier m) const
+        {
+            return _modifier == m;
+        }
+
+        bool hasModifiers(Modifiers m) const
+        {
+            return _modifier == m.value();
+        }
+
         bool isPressed(Modifier m) const
         {
-            return _modifier.isSet(m);
+            return (_modifier & m) == m;
         }
 
         bool isPressed(Modifiers m) const
         {
-            return _modifier.isSet(m);
-        }
-
-        void setModifier(Modifier m)
-        {
-            _modifier = _modifier | m;
+            return (_modifier & m.value()) == m.value();
         }
 
     private:
         Pt::uint16_t _code;
-        Modifiers _modifier;
+        Pt::uint16_t _modifier;
 };
 
 inline Key::Modifiers operator|(Key::Modifier m1, Key::Modifier m2)

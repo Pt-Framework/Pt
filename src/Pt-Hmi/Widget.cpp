@@ -732,7 +732,7 @@ void Widget::onSetCaption( const std::string& c )
 {
     _caption = c;    
 
-    _mnemonicKey.setKey(Key::NoKey);
+    _mnemonicKey.clear();
 
     int index = getMnemonicIndex(_caption);
 

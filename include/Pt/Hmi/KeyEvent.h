@@ -30,7 +30,7 @@
 #define Pt_Hmi_KeyEvent_h
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/KeyCode.h>
+#include <Pt/Hmi/Key.h>
 #include <Pt/Event.h>
 #include <Pt/String.h>
 

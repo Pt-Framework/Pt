@@ -1320,9 +1320,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\LeaveEvent.h">
       <Filter>Pt-Hmi\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\KeyCode.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\MouseEvent.h">
       <Filter>Pt-Hmi\Events</Filter>
     </ClInclude>
@@ -1331,6 +1328,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\TouchEvent.h">
       <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Key.h">
+      <Filter>Pt-Hmi</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
