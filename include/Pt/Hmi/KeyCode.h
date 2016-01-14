@@ -52,6 +52,8 @@ class Key
 
         class Modifiers
         {
+            friend Modifiers operator|(Modifier m1, Modifier m2);
+            
             public:
                 Modifiers()
                 : _value(NoModifier)
@@ -67,14 +69,9 @@ class Key
                     return *this;
                 }
 
-                Modifiers operator|(Modifier m)
+                Modifiers operator|(Modifier m) const
                 {
-                    return Modifiers(_value |= m);
-                }
-
-                friend Modifiers operator|(Modifier m1, Modifier m2)
-                {
-                    return Modifiers(m1|m2);
+                    return Modifiers(_value | m);
                 }
 
                 bool operator==(const Modifiers& list) const
@@ -171,16 +168,10 @@ class Key
         Modifiers _modifier;
 };
 
-inline void testModifier()
+
+inline Key::Modifiers operator|(Key::Modifier m1, Key::Modifier m2)
 {
-    Key key(Key::Tab);
-    key = Key(Key::Alt, Key::Tab);
-
-    bool isMod = key.modifiers() == Key::Alt;
-    isMod = key.modifiers() == Key::Alt|Key::Shift;
-
-    isMod = key.modifiers() & Key::Alt;
-    isMod = key.modifiers() & Key::Alt|Key::Shift;
+    return Key::Modifiers(m1|m2);
 }
 
 
@@ -774,5 +765,17 @@ enum Type
 } // namespace
 
 } // namespace
+
+inline void testModifier()
+{
+    Pt::Hmi::Key key(Pt::Hmi::Key::Tab);
+    key = Pt::Hmi::Key(Pt::Hmi::Key::Alt, Pt::Hmi::Key::Tab);
+
+    bool isMod = key.modifiers() == Pt::Hmi::Key::Alt;
+    isMod = key.modifiers() == (Pt::Hmi::Key::Alt|Pt::Hmi::Key::Shift);
+
+    isMod = key.modifiers() & Pt::Hmi::Key::Alt;
+    isMod = key.modifiers() & (Pt::Hmi::Key::Alt|Pt::Hmi::Key::Shift);
+}
 
 #endif
