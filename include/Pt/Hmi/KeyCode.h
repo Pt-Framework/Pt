@@ -1,9 +1,188 @@
 #ifndef PT_HMI_KEYCODE_H
 #define PT_HMI_KEYCODE_H
 
+#include <Pt/Hmi/Api.h>
+#include <Pt/Types.h>
+
 namespace Pt {
 
 namespace Hmi {
+
+class Key
+{
+    public:
+        enum Code
+        {
+            // No key pressed.
+            NoKey = 0,
+
+            // The BACKSPACE key.
+            Back = 8,
+        
+            // The TAB key.
+            Tab = 9,
+        
+            // The LINEFEED key.
+            LineFeed = 10,
+        
+            // The CLEAR key.
+            Clear = 12,
+        
+            // The ENTER key.
+            Enter = 13,
+        
+            // The RETURN key.
+            Return = 13
+        };
+
+        enum Modifier
+        {
+            // No modifier pressed.
+            NoModifier = 0,
+
+            // The SHIFT modifier key.
+            Shift = 1,
+
+            // The CTRL modifier key.
+            Control = 2,
+
+            // The ALT modifier key.
+            Alt = 4
+        };
+
+        class Modifiers
+        {
+            public:
+                Modifiers()
+                : _value(NoModifier)
+                { }
+
+                Modifiers(Modifier m)
+                : _value(m)
+                { }
+
+                Modifiers operator=(Modifier m)
+                {
+                    _value = m;
+                    return *this;
+                }
+
+                Modifiers operator|(Modifier m)
+                {
+                    return Modifiers(_value |= m);
+                }
+
+                friend Modifiers operator|(Modifier m1, Modifier m2)
+                {
+                    return Modifiers(m1|m2);
+                }
+
+                bool operator==(const Modifiers& list) const
+                {
+                    return _value == list._value;
+                }
+
+                bool operator==(const Modifier& m) const
+                {
+                    return _value == m;
+                }
+
+                bool operator&(Modifiers list2) const
+                {
+                    return (_value & list2._value) == list2._value;
+                }
+
+                bool operator&(Modifier m) const
+                {
+                    return (_value & m) == m;
+                }
+
+            private:
+                explicit Modifiers(Pt::uint16_t value)
+                : _value(value)
+                { }
+
+            private:
+                Pt::uint16_t _value;
+        };
+
+    public:
+        Key()
+        : _code(NoKey)
+        {}
+
+        Key(const Key& key)
+        : _code(key._code)
+        {}
+
+        explicit Key(Code c)
+        : _code(c)
+        {}
+
+        Key(Modifier m, Code c)
+        : _code(c)
+        , _modifier(m)
+        {}
+
+        Key(Modifiers m, Code c)
+        : _code(c)
+        {}
+
+        Key& operator=(const Key& key)
+        {
+            _code = key._code;
+            _modifier = key._modifier;
+            return *this;
+        }
+
+        void clear()
+        {
+            _code = NoKey;
+            _modifier = NoModifier;
+        }
+
+        void setKey(Code code)
+        {
+            _code = code;
+        }
+
+        Code key() const
+        { 
+            return static_cast<Code>(_code); 
+        }
+
+        const Modifiers& modifiers() const
+        {
+            return _modifier;
+        }
+
+        void setModifiers(Modifier m)
+        {
+            _modifier = m;
+        }
+
+        void setModifiers(Modifiers m)
+        {
+            _modifier = m;
+        }
+
+    private:
+        Pt::uint16_t _code;
+        Modifiers _modifier;
+};
+
+inline void testModifier()
+{
+    Key key(Key::Tab);
+    key = Key(Key::Alt, Key::Tab);
+
+    bool isMod = key.modifiers() == Key::Alt;
+    isMod = key.modifiers() == Key::Alt|Key::Shift;
+
+    isMod = key.modifiers() & Key::Alt;
+    isMod = key.modifiers() & Key::Alt|Key::Shift;
+}
+
 
 namespace KeyCode {
 
