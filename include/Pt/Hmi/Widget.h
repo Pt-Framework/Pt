@@ -216,12 +216,12 @@ class PT_HMI_API Widget : public Pt::Connectable
             onSetFocus(b);            
         }
 
-        KeyCode::Type focusedActionKey() const
+        Key focusedActionKey() const
         {
             return _focusedActionKey;
         }
 
-        void setFocusedActionKey( KeyCode::Type ak )
+        void setFocusedActionKey( Key ak )
         {
           _focusedActionKey = ak;
         }
@@ -268,12 +268,12 @@ class PT_HMI_API Widget : public Pt::Connectable
             return _layout;
         }
 
-        KeyCode::Type shortcutKey() const
+        Key shortcutKey() const
         {
            return _shortcutKey;
         }
 
-        void setShortcutKey( KeyCode::Type  k )
+        void setShortcutKey( Key  k )
         {
             _shortcutKey=  k;
         }
@@ -370,7 +370,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         bool useMnemonic() 
         {
-            return _mnemonicKey != KeyCode::None;
+            return _mnemonicKey.key() != Key::NoKey;
         }
 
         static std::string removeMnemonic(const std::string& text);        
@@ -395,17 +395,17 @@ class PT_HMI_API Widget : public Pt::Connectable
         ImageLayout                  _backgroundImageLayout;
         Hmi::Cursor                  _cursor;
         bool                         _acceptFocus;
-        KeyCode::Type                _focusedActionKey;
+        Key                          _focusedActionKey;
         std::string                  _name;                    
         Layout                       _layout;
-        KeyCode::Type                _shortcutKey;
+        Key                          _shortcutKey;
         bool                         _hasFocus;            
         Gfx::SizeF                   _size;
         Gfx::PointF                  _position;            
         Alignment                    _contentAlignment;
         std::string                  _caption;
         Gfx::Font                    _font;
-        KeyCode::Type                _mnemonicKey;    
+        Key                          _mnemonicKey;    
         Pt::Signal<>                 _mnemonicEntered;
         Docking                      _docking;
 

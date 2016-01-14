@@ -50,11 +50,10 @@ class PT_HMI_API KeyEvent : public Pt::BasicEvent<KeyEvent>
     public:	
 	      KeyEvent()
         : _action(Release)
-	      , _key(KeyCode::None)
 	      {
 	      }
 
-        KeyCode::Type key() const
+        Key key() const
         {
             return _key;
         }
@@ -69,7 +68,7 @@ class PT_HMI_API KeyEvent : public Pt::BasicEvent<KeyEvent>
             return _action == Press;
         }
 
-        void setPress(KeyCode::Type key, const Pt::Char& ch)
+        void setPress(Key key, const Pt::Char& ch)
         {
             _action = Press;
             _key = key;
@@ -81,7 +80,7 @@ class PT_HMI_API KeyEvent : public Pt::BasicEvent<KeyEvent>
             return _action == Release;
         }
 
-        void setRelease(KeyCode::Type key, const Pt::Char& ch)
+        void setRelease(Key key, const Pt::Char& ch)
         {
             _action = Release;
             _key = key;
@@ -90,7 +89,7 @@ class PT_HMI_API KeyEvent : public Pt::BasicEvent<KeyEvent>
 
     private:
         Action   _action;
-        KeyCode::Type  _key;
+        Key      _key;
         Pt::Char _unicode;        
 };
 

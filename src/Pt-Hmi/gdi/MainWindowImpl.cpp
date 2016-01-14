@@ -103,50 +103,6 @@ void MainWindowImpl::hide()
 }
 
 
-void MainWindowImpl::onKey(unsigned int msg, WPARAM wparam, LPARAM lparam)
-{
-    Pt::Char ch;
-    Pt::uint32_t key = wparam;
-    unsigned repeatCount = lparam & 0xFFFF;
-    Pt::uint32_t scanCode = ((lparam >> 16) & 0xFF);
-
-    BYTE keyboardState[256];
-    memset(keyboardState, 0, sizeof(keyboardState));
-    GetKeyboardState(keyboardState);
-
-    Pt::uint32_t ucode = 0;
-    ToUnicode(wparam, scanCode, (BYTE*)keyboardState, (LPWSTR)&ucode, 4, 0);    
-    ch = ucode;
-
-    //bool lshift = keyboardState[VK_LSHIFT] & 0x80 == 0x80
-    //bool rshift = keyboardState[VK_RSHIFT] & 0x80 == 0x80;
-    //bool lcontrol = keyboardState[VK_LCONTROL] & 0x80 == 0x80;
-    //bool rcontrol = keyboardState[VK_RCONTROL] & 0x80 == 0x80;
-    //bool lmenu = keyboardState[VK_LMENU] & 0x80 == 0x80;
-    //bool rmenu = keyboardState[VK_RMENU] & 0x80 == 0x80;
-
-    bool shift = (keyboardState[VK_SHIFT] & 0x80) == 0x80;
-    bool control = (keyboardState[VK_CONTROL] & 0x80) == 0x80;
-    bool alt = (keyboardState[VK_MENU] & 0x80) == 0x80;
-
-    if(shift)
-      key |= KeyCode::Shift;
-
-    if(control)
-      key |= KeyCode::Control;
-
-    if(alt)
-      key |= KeyCode::Alt;
-
-    if(msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN)
-        _keyEvent.setPress(static_cast<KeyCode::Type>(key), ch);
-    else if(msg == WM_KEYUP || msg == WM_SYSKEYUP)
-        _keyEvent.setRelease(static_cast<KeyCode::Type>(key), ch); 
-
-    _app.sendEvent(*_apiWindow, _keyEvent);
-}
-
-
 bool MainWindowImpl::processEvent(unsigned int message, WPARAM wparam, LPARAM lparam )
 {
     bool handled = false;
@@ -306,6 +262,48 @@ void MainWindowImpl::onSize(WPARAM wParam, LPARAM lParam)
     
     Pt::Hmi::ResizeEvent ev(Gfx::SizeF(width, height), state);
     _apiWindow->processEvent(ev);
+}
+
+
+void MainWindowImpl::onKey(unsigned int msg, WPARAM wparam, LPARAM lparam)
+{
+    Pt::Char ch;
+    Key key( static_cast<Key::Code>(wparam) );
+
+    BYTE keyboardState[256];
+    GetKeyboardState(keyboardState);
+
+    wchar_t wc = 0;
+    Pt::uint32_t scanCode = ((lparam >> 16) & 0xFF);
+    ToUnicode(wparam, scanCode, (BYTE*)keyboardState, &wc, 1, 0);    
+
+    //bool lshift = keyboardState[VK_LSHIFT] & 0x80 == 0x80
+    //bool rshift = keyboardState[VK_RSHIFT] & 0x80 == 0x80;
+    //bool lcontrol = keyboardState[VK_LCONTROL] & 0x80 == 0x80;
+    //bool rcontrol = keyboardState[VK_RCONTROL] & 0x80 == 0x80;
+    //bool lmenu = keyboardState[VK_LMENU] & 0x80 == 0x80;
+    //bool rmenu = keyboardState[VK_RMENU] & 0x80 == 0x80;
+
+    bool shift = (keyboardState[VK_SHIFT] & 0x80) == 0x80;
+    bool control = (keyboardState[VK_CONTROL] & 0x80) == 0x80;
+    bool alt = (keyboardState[VK_MENU] & 0x80) == 0x80;
+
+    if(shift)
+      key.setModifier(Key::Shift);
+
+    if(control)
+      key.setModifier(Key::Control);
+
+    if(alt)
+      key.setModifier(Key::Alt);
+
+    if(msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN)
+        _keyEvent.setPress(key, wc);
+    else if(msg == WM_KEYUP || msg == WM_SYSKEYUP)
+        _keyEvent.setRelease(key, wc); 
+
+    //unsigned repeatCount = lparam & 0xFFFF;
+    _app.sendEvent(*_apiWindow, _keyEvent);
 }
 
 
