@@ -88,7 +88,7 @@ class MainWindowImpl : public WindowImpl
 	    void onPaint();
 	    void onSize(WPARAM wparam, LPARAM lparam);
 	    void onMouse(unsigned int msg,  WPARAM wparam, LPARAM lparam);
-	    void onKey(unsigned int ms, WPARAM wparam, LPARAM lparam);
+	    void onKey(UINT vkey, UINT scanCode, bool isPress);
 	    void onMove(LPARAM lparam);	
 	    void onClose();
 	    void onActivate(bool f);

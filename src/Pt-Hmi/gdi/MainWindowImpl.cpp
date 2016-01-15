@@ -147,10 +147,15 @@ bool MainWindowImpl::processEvent(unsigned int message, WPARAM wparam, LPARAM lp
         case WM_SYSKEYDOWN:
         case WM_SYSKEYUP:    
         {
-            onKey(message, wparam, lparam);
+            UINT vkey = wparam;
+            UINT scanCode = ((lparam >> 16) & 0xFF);
+            bool isPress = (message == WM_KEYDOWN || message == WM_SYSKEYDOWN);
+            //UINT repeatCount = lparam & 0xFFFF;
+
+            onKey(vkey, scanCode, isPress);
             handled = true;
+            break;
         }
-        break;
 
         case WM_PAINT:
         {
@@ -265,45 +270,41 @@ void MainWindowImpl::onSize(WPARAM wParam, LPARAM lParam)
 }
 
 
-void MainWindowImpl::onKey(unsigned int msg, WPARAM wparam, LPARAM lparam)
+void MainWindowImpl::onKey(UINT vkey, UINT scanCode, bool isPress)
 {
     BYTE keyboardState[256];
     GetKeyboardState(keyboardState);
 
     wchar_t wc = 0;
-    Pt::uint32_t scanCode = ((lparam >> 16) & 0xFF);
-    ToUnicode(wparam, scanCode, (BYTE*)keyboardState, &wc, 1, 0);    
-
-    //bool lshift = keyboardState[VK_LSHIFT] & 0x80 == 0x80
-    //bool rshift = keyboardState[VK_RSHIFT] & 0x80 == 0x80;
-    //bool lcontrol = keyboardState[VK_LCONTROL] & 0x80 == 0x80;
-    //bool rcontrol = keyboardState[VK_RCONTROL] & 0x80 == 0x80;
-    //bool lmenu = keyboardState[VK_LMENU] & 0x80 == 0x80;
-    //bool rmenu = keyboardState[VK_RMENU] & 0x80 == 0x80;
+    ToUnicode(vkey, scanCode, (BYTE*)keyboardState, &wc, 1, 0);    
 
     bool shift = (keyboardState[VK_SHIFT] & 0x80) == 0x80;
     bool control = (keyboardState[VK_CONTROL] & 0x80) == 0x80;
     bool alt = (keyboardState[VK_MENU] & 0x80) == 0x80;
+    bool rwin = (keyboardState[VK_RWIN] & 0x80) == 0x80;
+    bool lwin = (keyboardState[VK_LWIN] & 0x80) == 0x80;
 
     Key::Modifiers modifiers;
     if(shift)
-      modifiers |= Key::Shift;
+        modifiers |= Key::Shift;
 
     if(control)
-      modifiers |= Key::Control;
+        modifiers |= Key::Control;
 
     if(alt)
-      modifiers |= Key::Alt;
+        modifiers |= Key::Alt;
 
-    Key::Code keyCode = static_cast<Key::Code>(wparam);
+    if(rwin || lwin)
+        modifiers |= Key::Meta;
+
+    Key::Code keyCode = static_cast<Key::Code>(vkey);
     Key key(modifiers, keyCode);
 
-    if(msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN)
+    if(isPress)
         _keyEvent.setPress(key, wc);
-    else if(msg == WM_KEYUP || msg == WM_SYSKEYUP)
+    else
         _keyEvent.setRelease(key, wc); 
 
-    //unsigned repeatCount = lparam & 0xFFFF;
     _app.sendEvent(*_apiWindow, _keyEvent);
 }
 

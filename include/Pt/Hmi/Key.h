@@ -3,6 +3,7 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Types.h>
+#include <iostream>
 
 namespace Pt {
 
@@ -589,7 +590,10 @@ class Key
             Control = 2,
 
             // The ALT modifier key.
-            Alt = 4
+            Alt = 4,
+
+            // The Meta modifier key.
+            Meta = 8
         };
 
         class Modifiers
@@ -639,10 +643,7 @@ class Key
     public:
         Key()
         : _code(NoKey)
-        {}
-
-        Key(const Key& key)
-        : _code(key._code)
+        , _modifier(NoModifier)
         {}
 
         explicit Key(Code c)
@@ -656,14 +657,8 @@ class Key
 
         Key(Modifiers m, Code c)
         : _code(c)
+        , _modifier( m.value() )
         {}
-
-        Key& operator=(const Key& key)
-        {
-            _code = key._code;
-            _modifier = key._modifier;
-            return *this;
-        }
 
         void clear()
         {
@@ -694,8 +689,14 @@ class Key
             return static_cast<Code>(_code); 
         }
 
+        bool hasModifiers() const
+        {
+            return _modifier != NoModifier;
+        }
+
         bool hasModifiers(Modifier m) const
         {
+            std::clog << _modifier << " == " << m << std::endl;
             return _modifier == m;
         }
 

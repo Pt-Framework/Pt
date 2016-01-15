@@ -55,11 +55,11 @@ ChildW::ChildW()
 	_closeButton.setButtonType(Hmi::ButtonType::Press);
 	_closeButton.setCaption(std::string("Close App [CTRL+X]"));
 //	_closeButton.setShortcutKey(std::string("C//x"));
-	_closeButton.setPosition(Gfx::PointF(590,525));
-	_closeButton.setSize(Gfx::SizeF(150,25));
+	_closeButton.setPosition(Gfx::PointF(20,200));
 	_closeButton.setSize(Gfx::SizeF(20, 40));
 	_closeButton.docking().setType( Docking::Bottom);
 	
+  _mainPanel.add(_closeButton);
 	//_childWindow2.setMainWidget(&_closeButton);	  	
 	_childWindow2.setPosition(Gfx::PointF(10,10));	
 	_childWindow2.setSize (Gfx::SizeF(420,300));
@@ -74,6 +74,10 @@ ChildW::ChildW()
     }
 	_childWindow2.setMainWidget(&_mainPanel);
 	_childWindow2.setVisible(true);
+
+  _childWindow2.addFocusWidget( _toggleButton);
+  _childWindow2.addFocusWidget( _dialogButton);
+  _childWindow2.addFocusWidget( _closeButton);
 
 	add( _childWindow2 );	
 }

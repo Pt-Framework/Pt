@@ -77,6 +77,18 @@ Widget::~Widget()
 }
 
 
+Window* Widget::window()
+{
+    return _window;
+}
+
+
+const Window* Widget::window() const
+{
+    return _window;
+}
+
+
 Widget* Widget::parent()
 {         
     return _parent;
@@ -511,7 +523,10 @@ void Widget::onEvent(const Pt::Event& ev)
        
 void Widget::onPointerEvent(const MouseEvent& ev)
 {        
-
+    if( ev.isPress(MouseEvent::Left) && _acceptFocus )
+    {
+        _window->setFocusWidget(this);
+    }
 }
 
 
@@ -522,7 +537,17 @@ void Widget::onScrollEvent( const ScrollEvent& ev )
 
 
 void Widget::onKeyEvent(const KeyEvent& ev)
-{     
+{
+    if( (ev.key().keyCode() == Key::Tab) && ev.isPress() )
+    {
+        if( ev.key().hasModifiers(Key::Shift) )
+            _window->focusPrev();
+        else
+            _window->focusNext();
+
+        return;
+    }
+
 /*
     //// mnemonic handling
     if( !_mnemonicKey.empty() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && _visible )
@@ -571,136 +596,16 @@ bool Widget::contains(const Gfx::PointF& p)
 }
 
 
-bool Widget::focusPrevChild(int index)
+void Widget::focus()
 {
-    index--;
-    
-    for( ; index >= 0; --index)
-    {
-        Widget* child = widgets()[index];
-
-        if(child->acceptFocus())
-        {
-            child->setFocus(true);
-            return true;
-        }
-
-        if(child->focusPrev())
-        {
-            child->setFocus(true);
-            return true;
-        }
-    }
-
-    return false;
+    if(_window)
+        _window->setFocusWidget(this);          
 }
 
 
-bool Widget::focusNextChild( int index )
-{
-    index++;
-    
-    for( ; index < (int)widgets().size(); ++index )
-    {
-        Widget* child = widgets()[index];
-
-        if(child->acceptFocus())
-        {
-            child->setFocus(true);
-            return true;
-        }
-
-        if(child->focusNext())
-        {
-            child->setFocus(true);
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
-bool Widget::focusPrev()
-{
-    if( widgets().size() == 0 )
-        return false;
-
-    std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->focusedWidget() );    
-
-    if(  it == _children.end())
-        return focusPrevChild( widgets().size() );
-        
-    size_t index = it - _children.begin();
-
-    if(!(*it)->acceptFocus())
-    {
-        if((*it)->focusPrev())
-            return true;
-    }
-    
-    return focusPrevChild(index);
-}
-
-
-bool Widget::focusNext()
-{
-    if( widgets().size() == 0 )
-        return false;
-
-    std::vector<Widget*>::iterator it = std::find( _children.begin(), _children.end(), _window->focusedWidget() );    
-
-    if( it == _children.end() )
-        return focusNextChild(-1);
-    
-    size_t index = it - _children.begin();
-
-    Widget* child = widgets()[index];
-        
-    if(!child->acceptFocus())
-    {
-        if(child->focusNext())
-            return true;
-    }
-  
-    return focusNextChild(index);
-}
-
-
-void Widget::onSetFocus( bool isFocused )
+void Widget::onFocus(bool hasFocus)
 {    
-    _hasFocus = isFocused;
-
-  if( !_hasFocus)
-    {//False => all childs set to false.
-        for( size_t i = 0; i < widgets().size(); ++i)
-        {
-            Pt::Hmi::Widget* child = widgets()[i];            
-            child->setFocus(false);                                    
-        }
-
-        invalidate();
-    return;
-    }
-
-    if( parent() == 0 )
-    {
-        invalidate();
-    return;
-    }
-        
-    //Set parent focused.    
-    parent()->setFocus(true);
-
-    //All sibling set to false. Only me let it true
-    for( size_t i = 0; i < parent()->widgets().size(); i++ )
-    {
-        Widget* child = parent()->widgets()[i];
-                
-        if( child != this )
-            child->setFocus( false );
-    }
-
+    _hasFocus = hasFocus;
     invalidate();
 }
 

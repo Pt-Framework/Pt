@@ -304,20 +304,19 @@ void Button::onRender(PaintSurface& paintSurface)
 	//	return;
 
 	Pt::Hmi::Painter& painter = paintSurface.painter();
- Gfx::SizeF  size = this->size();
- Gfx::PointF pos  = this->position();
-       
+  Gfx::SizeF  size = this->size();
+      
 	if( _hover || hasFocus() )
 	{
 		size.addHeight(-4);
 		size.addWidth(-4);
 
-		Gfx::Color armedColor(0,160/255.0f,160/255.0f,160/255.0f);
+		Gfx::Color armedColor(1,0,0);
 		 
 		Gfx::Pen pen(1, armedColor,Gfx::Pen::DashStyle);
 		
 		painter.setPen(pen);		
-		Gfx::RectF rect(pos +Gfx::PointF(2,2), size);
+		Gfx::RectF rect(Gfx::PointF(2,2), size);
 		painter.drawRect(rect);		
 	}		
 }

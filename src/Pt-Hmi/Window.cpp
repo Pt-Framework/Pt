@@ -31,6 +31,7 @@
 #include <Pt/Hmi/Application.h>
 #include "MainWindowImpl.h"
 #include "ChildWindowImpl.h"
+#include <cassert>
 
 namespace Pt {
 
@@ -40,7 +41,7 @@ Window::Window(Window* parent)
 : _impl(0)
 , _parent(0)
 , _pointerWidget(0)
-, _focusedWidget(0)
+, _focusWidget(0)
 , _minimumSize(0,0)
 , _maximumSize( 2000,2000)
 , _startPostion( WindowPosition::Manual )
@@ -121,13 +122,13 @@ void Window::add(Window& child)
         Application::instance().mainScreen().unregisterWindow(child);
 
     if( child._parent )
-        child._parent->_windowManager.remove(child);     
+        child._parent->_windowManager.remove(child);
     
     delete child._impl;
     
-    child._impl = new ChildWindowImpl(&child);            
+    child._impl = new ChildWindowImpl(&child);
     child._parent = this;
-    _windowManager.add(child);             
+    _windowManager.add(child);
 }
 
 
@@ -210,46 +211,6 @@ Widget* Window::findWidget(const std::string& name)
 }
 
 
-void Window::setPointerWidget( Widget* widget ) 
-{
-    if( _pointerWidget == widget )
-        return;
-
-    if( _pointerWidget )            
-        _pointerWidget->onPointerLeave();
-
-    _pointerWidget = widget;
-
-    if( _pointerWidget )
-        _pointerWidget->onPointerEnter();
-}
-
-
-void Window::removeWidget(Widget& w)
-{
-    if( _pointerWidget == &w )
-        _pointerWidget = 0;
-
-    if( _focusedWidget == &w )
-        _focusedWidget = 0;        
-}
-
-
-void Window::setFocusedWidget( Widget* widget ) 
-{
-    if( _focusedWidget == widget )
-        return;
-
-    if( _focusedWidget )            
-        _focusedWidget->setFocus(false);
-    
-    _focusedWidget = widget;
-
-    if( _focusedWidget )
-        _focusedWidget->setFocus(true);
-}
-
-
 void Window::activate()
 {
     _impl->activate();     
@@ -275,21 +236,21 @@ void Window::onEvent(const Pt::Event& ev)
 
 void Window::onPointerEvent(const MouseEvent& ev)
 {
-    if( ! _windowManager.pointerInput( ev ) )
+    if( _windowManager.pointerInput( ev ) )
+        return;
+
+    if( ! _mainWidget || ! _mainWidget->visible() )
     {
-        if( ! _mainWidget || ! _mainWidget->visible() )
-        {
-            Application::instance().mainScreen().setCursor( &Cursor::defaultCursor() ); 
-            return;
-        }
+        Application::instance().mainScreen().setCursor( &Cursor::defaultCursor() ); 
+        return;
+    }
 
-        Widget* widget = _mainWidget->findWidget( Gfx::PointF( ev.x(), ev.y() ) );
+    Widget* widget = _mainWidget->findWidget( Gfx::PointF( ev.x(), ev.y() ) );
 
-        setPointerWidget( widget );    
+    setPointerWidget(widget);   
 
-        if( widget )
-            widget->processEvent(ev);       
-    }     
+    if( widget ) 
+      widget->processEvent(ev);       
 }
 
 
@@ -307,31 +268,33 @@ void Window::onScrollEvent( const ScrollEvent& ev )
 
 void Window::onEnterEvent( const EnterEvent& ev )
 {
-    std::clog << "ENTER: " << this ->title() << std::endl;
 }
 
 
 void Window::onLeaveEvent(const LeaveEvent& ev )
 {
-    std::clog << "LEAVE: " << this->title() << std::endl;
     setPointerWidget( 0 );
 }
 
 
 void Window::onKeyEvent(const KeyEvent& ev)
 {
-  std::clog << "Window::onKeyEvent: " << (ev.isPress() ? "press " : "release ") 
-            << ev.key().keyCode() << " " << ev.unicode().narrow() << std::endl;
+  //std::clog << "Window::onKeyEvent: " << (ev.isPress() ? "press " : "release ") 
+  //          << ev.key().keyCode() << " " << ev.unicode().narrow() << std::endl;
 
-  if( _windowManager.keyInput( ev ) )
-      return;
+    if( _windowManager.keyInput( ev ) )
+        return;
 
     if( ! isEnabled() )
         return;
     
- if( _focusedWidget != 0 )
-    _focusedWidget->onKeyEvent(ev);
-
+    if( _focusWidget )
+        _focusWidget->onKeyEvent(ev);
+    else
+    {
+        if(ev.key().keyCode() == Key::Tab && ev.isPress() )
+            focusNext();
+    }
 }
 
 
@@ -602,7 +565,117 @@ void Window::render()
     _windowManager.render( surface() );
 }
 
-} // namespace
+
+void Window::removeWidget(Widget& w)
+{
+    if( _pointerWidget == &w )
+        _pointerWidget = 0;
+
+    if( _focusWidget == &w )
+        _focusWidget = 0;
+
+    removeFocusWidget(w);
+}
+
+
+void Window::setPointerWidget( Widget* widget ) 
+{
+    if( _pointerWidget == widget )
+        return;
+
+    if( _pointerWidget )            
+        _pointerWidget->onPointerLeave();
+
+    _pointerWidget = widget;
+
+    if( _pointerWidget )
+        _pointerWidget->onPointerEnter();
+}
+
+
+void Window::setFocusWidget(Widget* widget) 
+{
+    assert( widget ? widget->window() == this : true);
+
+    if( _focusWidget == widget )
+        return;
+
+    if( _focusWidget )            
+        _focusWidget->onFocus(false);
+    
+    _focusWidget = widget;
+
+    if( _focusWidget )
+        _focusWidget->onFocus(true);
+}
+
+
+void Window::focusPrev()
+{
+    moveFocus(_focusList.rbegin(), _focusList.rend());
+}
+
+
+void Window::focusNext()
+{
+    moveFocus(_focusList.begin(), _focusList.end());
+}
+
+
+template <typename Iter>
+void Window::moveFocus(Iter begin, Iter end)
+{
+    Iter current = std::find(begin, end, _focusWidget);
+    Iter it = current;
+    
+    if( it != end )
+        ++it;
+    else
+        it = begin;
+
+    while(it != current)
+    {
+        if( it == end )
+            it = begin;
+
+        Widget* w = *it;
+        
+        if( w->acceptFocus() )
+        {
+            setFocusWidget(w);
+            return;
+        }
+
+        ++it;
+    }
+}
+
+
+void Window::addFocusWidget(Widget& w)
+{
+    if( w.window() != this )
+        return;
+
+    removeFocusWidget(w);
+
+    _focusList.push_back(&w);
+}
+
+
+void Window::removeFocusWidget(Widget& w)
+{
+    if( w.window() != this )
+        return;
+
+    std::vector<Widget*>::iterator it;
+    it = std::find(_focusList.begin(), _focusList.end(), &w);
+
+    if( it != _focusList.end() )
+        _focusList.erase(it);
+
+    // TODO: should w loose focus?
+}
 
 } // namespace
 
+} // namespace

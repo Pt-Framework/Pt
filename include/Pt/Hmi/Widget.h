@@ -82,6 +82,10 @@ class PT_HMI_API Widget : public Pt::Connectable
     public:    
         virtual ~Widget();
 
+        Window* window();
+
+        const Window* window() const;
+
         Widget* parent();
 
         const Widget* parent() const;
@@ -196,6 +200,7 @@ class PT_HMI_API Widget : public Pt::Connectable
             _cursor = c;
         }
 
+        // TODO: focus by Tab, focus by pointer, both and none 
         bool acceptFocus() const
         {
             return _acceptFocus;
@@ -211,10 +216,7 @@ class PT_HMI_API Widget : public Pt::Connectable
             return _hasFocus;
         }
 
-        void setFocus( bool b)
-        {
-            onSetFocus(b);            
-        }
+        void focus();
 
         Key focusedActionKey() const
         {
@@ -231,7 +233,6 @@ class PT_HMI_API Widget : public Pt::Connectable
             return _name;
         }
 
-        
         void setName(const std::string& name)
         {
           _name = name;
@@ -331,7 +332,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         virtual void onSetSize(const Gfx::SizeF& size);
             
-        virtual void onSetFocus(bool isFocused);
+        virtual void onFocus(bool isFocused);
 
         virtual void onSetVisible( bool b );        
 
@@ -362,11 +363,7 @@ class PT_HMI_API Widget : public Pt::Connectable
               
         virtual void onShortcutKey(const KeyEvent& kev);
 
-        virtual void onMnemonic();
-    
-        bool focusNext();
-    
-        bool focusPrev();        
+        virtual void onMnemonic();      
 
         bool useMnemonic() 
         {
@@ -394,12 +391,9 @@ class PT_HMI_API Widget : public Pt::Connectable
         Gfx::Image                   _backgroundImage;
         ImageLayout                  _backgroundImageLayout;
         Hmi::Cursor                  _cursor;
-        bool                         _acceptFocus;
-        Key                          _focusedActionKey;
         std::string                  _name;                    
         Layout                       _layout;
-        Key                          _shortcutKey;
-        bool                         _hasFocus;            
+        Key                          _shortcutKey;        
         Gfx::SizeF                   _size;
         Gfx::PointF                  _position;            
         Alignment                    _contentAlignment;
@@ -409,10 +403,9 @@ class PT_HMI_API Widget : public Pt::Connectable
         Pt::Signal<>                 _mnemonicEntered;
         Docking                      _docking;
 
-           
-    private:
-        bool focusNextChild(int index);
-        bool focusPrevChild(int index);
+        bool                         _acceptFocus;
+        bool                         _hasFocus;    
+        Key                          _focusedActionKey;
 
         //Todo: implement layout
         void updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p);

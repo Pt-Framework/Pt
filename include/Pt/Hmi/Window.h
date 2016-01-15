@@ -59,8 +59,7 @@ class PaintSurface;
 
 class PT_HMI_API Window : public Pt::Connectable
 {
-   friend class Widget;
-   friend class WindowManager;   
+   friend class Widget; 
 
   public:           
     Window(Window* parent = 0);     
@@ -86,9 +85,9 @@ class PT_HMI_API Window : public Pt::Connectable
     void setMainWidget(Widget* widget);
 
     Widget* findWidget(const std::string& name);
-  
-    void close();    
-    
+
+    void close();
+
     void activate();
 
     bool isClosed() const;
@@ -187,6 +186,14 @@ class PT_HMI_API Window : public Pt::Connectable
         return _windowManager;
     }
 
+    void focusNext();
+    
+    void focusPrev();
+
+    void addFocusWidget(Widget& w);
+
+    void removeFocusWidget(Widget& w);
+
   protected:
     virtual void onEvent(const Pt::Event& ev);
 
@@ -212,12 +219,11 @@ class PT_HMI_API Window : public Pt::Connectable
 
     void setPointerWidget( Widget* widget );
 
-    Widget* focusedWidget() 
-    {
-        return _focusedWidget;
-    }
+    void setFocusWidget(Widget* widget);
 
-    void setFocusedWidget( Widget* widget );
+  private:
+    template <typename Iter>
+    void moveFocus(Iter begin, Iter end);
     
   private:
     WindowManager                        _windowManager; 
@@ -232,20 +238,21 @@ class PT_HMI_API Window : public Pt::Connectable
     Gfx::SizeF                           _size;
     Gfx::PointF                          _position; 
     Hmi::WindowBorder::Type              _border;
-	std::string                          _title;
+    std::string                          _title;
     Gfx::Image                           _icon;
     bool                                 _canClose;    
     WindowDecoration::Flags             _decoration;   
     std::string                         _name;    
     Gfx::Font                           _font;    
     
-	Widget*                        _mainWidget;
+    Widget*                        _mainWidget;
     Window*                        _parent;
     Widget*                        _pointerWidget;
-    Widget*                        _focusedWidget;
+    Widget*                        _focusWidget;
+    std::vector<Widget*>           _focusList;
     PaintSurface                   _surface;
     WindowImpl*                    _impl;           
-    Pt::Signal<const Pt::Event&>   _eventReady;    
+    Pt::Signal<const Pt::Event&>   _eventReady;
   
 };
 
