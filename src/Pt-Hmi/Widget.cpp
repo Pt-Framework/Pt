@@ -551,12 +551,6 @@ void Widget::onKeyEvent(const KeyEvent& ev)
         return;
     }
 
-    if( (ev.unicode() == _mnemonic) && ev.isPress() && ev.key().hasModifiers(Key::Alt) )
-    {
-        onMnemonic();
-        return;
-    }
-
     if( ev.key() == actionKey() && hasFocus() )    
     {
         onActionKey(ev);        
@@ -646,16 +640,24 @@ void Widget::onSetVisible( bool b )
 
 void Widget::onSetCaption( const std::string& c )
 {
-    _caption = c;    
-
-    _mnemonic = 0;
+    _caption = c;        
 
     int index = getMnemonicIndex(_caption);
 
+    _mnemonic = 0;
+
     if( index == std::string::npos )
+    {
+        if( _window )
+            _window->setMnemonic(*this, 0 );
+
         return;
+    }
                     
     _mnemonic = _caption[index + 1];
+
+    if( _window )
+        _window->setMnemonic(*this, &_mnemonic );
 }
 
 
