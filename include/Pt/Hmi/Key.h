@@ -696,7 +696,6 @@ class Key
 
         bool hasModifiers(Modifier m) const
         {
-            std::clog << _modifier << " == " << m << std::endl;
             return _modifier == m;
         }
 

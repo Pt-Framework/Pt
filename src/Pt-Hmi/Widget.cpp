@@ -146,6 +146,9 @@ void Widget::setWindow(Window* window)
     std::vector<Widget*>::iterator it;
     for(it = _children.begin(); it != _children.end(); ++it)
         (*it)->setWindow(window);
+
+    if( _window )
+        _window->addWidget(*this);            
 }
 
 
@@ -607,6 +610,14 @@ void Widget::onFocus(bool hasFocus)
 {    
     _hasFocus = hasFocus;
     invalidate();
+}
+
+void Widget::setFocusIndex(size_t index)
+{
+    _focusIndex = index;
+
+    if( _window )
+        _window->updateFocusOrder();
 }
 
 

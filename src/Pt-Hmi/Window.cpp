@@ -33,9 +33,22 @@
 #include "ChildWindowImpl.h"
 #include <cassert>
 
+
+namespace {
+
+bool lowerFocusIndex(Pt::Hmi::Widget* a, Pt::Hmi::Widget* b )
+{
+    return a->focusIndex() < b->focusIndex();
+}
+
+}
+
 namespace Pt {
 
 namespace Hmi {
+
+
+
 
 Window::Window(Window* parent)
 : _impl(0)
@@ -566,6 +579,12 @@ void Window::render()
 }
 
 
+void Window::addWidget(Widget& w)
+{
+    addFocusWidget(w);  
+}
+
+
 void Window::removeWidget(Widget& w)
 {
     if( _pointerWidget == &w )
@@ -658,7 +677,12 @@ void Window::addFocusWidget(Widget& w)
 
     removeFocusWidget(w);
 
-    _focusList.push_back(&w);
+    if( _focusList.empty() )
+        w.setFocusIndex(0);    
+    else
+        w.setFocusIndex( _focusList.back()->focusIndex() + 1);    
+
+    _focusList.push_back(&w);    
 }
 
 
@@ -674,6 +698,12 @@ void Window::removeFocusWidget(Widget& w)
         _focusList.erase(it);
 
     // TODO: should w loose focus?
+}
+
+
+void Window::updateFocusOrder()
+{
+    std::sort(_focusList.begin(), _focusList.end(), &lowerFocusIndex);
 }
 
 } // namespace

@@ -74,11 +74,6 @@ ChildW::ChildW()
     }
 	_childWindow2.setMainWidget(&_mainPanel);
 	_childWindow2.setVisible(true);
-
-  _childWindow2.addFocusWidget( _toggleButton);
-  _childWindow2.addFocusWidget( _dialogButton);
-  _childWindow2.addFocusWidget( _closeButton);
-
 	add( _childWindow2 );	
 }
 

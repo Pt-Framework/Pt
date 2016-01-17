@@ -190,10 +190,6 @@ class PT_HMI_API Window : public Pt::Connectable
     
     void focusPrev();
 
-    void addFocusWidget(Widget& w);
-
-    void removeFocusWidget(Widget& w);
-
   protected:
     virtual void onEvent(const Pt::Event& ev);
 
@@ -215,15 +211,24 @@ class PT_HMI_API Window : public Pt::Connectable
 
     virtual void onActivateEvent(const ActivateEvent& ev);
 
+  private:
+
     void removeWidget(Widget& w);
+    
+    void addWidget(Widget& w);
 
     void setPointerWidget( Widget* widget );
 
     void setFocusWidget(Widget* widget);
 
-  private:
     template <typename Iter>
     void moveFocus(Iter begin, Iter end);
+
+    void addFocusWidget(Widget& w);
+
+    void removeFocusWidget(Widget& w);
+
+    void updateFocusOrder();
     
   private:
     WindowManager                        _windowManager; 

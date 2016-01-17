@@ -228,6 +228,13 @@ class PT_HMI_API Widget : public Pt::Connectable
           _focusedActionKey = ak;
         }
 
+        size_t  focusIndex() const
+        {
+            return _focusIndex;
+        }
+
+        void setFocusIndex(size_t index);
+
         const std::string& name() const
         {
             return _name;
@@ -406,6 +413,7 @@ class PT_HMI_API Widget : public Pt::Connectable
         bool                         _acceptFocus;
         bool                         _hasFocus;    
         Key                          _focusedActionKey;
+        size_t                       _focusIndex;   
 
         //Todo: implement layout
         void updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p);
