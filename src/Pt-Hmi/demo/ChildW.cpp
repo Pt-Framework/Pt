@@ -23,14 +23,15 @@ ChildW::ChildW()
 	_mainPanel.setBackgroundColor(  Gfx::Color(1,0,0 ) );	
 
 	//Text	
-	_textLabel.setAutoSize( true );
+	_textLabel.setAutoSize( false );
 	_textLabel.setSize( Gfx::SizeF(50,40) );
 	_textLabel.setCaption(  std::string("T&his is a Platinum C++") );  
 	_textLabel.setPosition( Gfx::PointF(20,20) );
 	_textLabel.setForegroundColor( Gfx::Color(1,0,0,0) );	
 	_textLabel.setBackgroundColor( Gfx::Color(1,1,1,0) );
-  _textLabel.setMnemonicWidget(&_toggleButton);
-  _textLabel.setCursor(  Hmi::Cursor::waitCursor() );
+    _textLabel.setMnemonicWidget(&_toggleButton);
+    _textLabel.setCursor(  Hmi::Cursor::waitCursor() );
+    //_textLabel.docking().setType( Docking::Fill);	
 	_mainPanel.add(_textLabel);
 	
 	//Toggle button
@@ -38,16 +39,17 @@ ChildW::ChildW()
 	_toggleButton.setCaption( std::string("Toggle Me [CTRL+I]") );
 	_toggleButton.setShortcut( &Pt::Hmi::Key(Pt::Hmi::Key::Control, Pt::Hmi::Key::I) );
 	_toggleButton.setPosition( Gfx::PointF(20,60) );
-	_toggleButton.setSize( Gfx::SizeF(150,25) );		
+	_toggleButton.setSize( Gfx::SizeF(150,25) );	
+    _toggleButton.docking().setType( Docking::Top);	
 	_mainPanel.add(_toggleButton);
 
 	//Dialog button  
-	_dialogButton.setButtonType( Hmi::ButtonType::Press );
-    
+	_dialogButton.setButtonType( Hmi::ButtonType::Press );    
 	_dialogButton.setCaption(std::string("&&Dia&log [CTRL+D]&") );
 	_dialogButton.setShortcut( &Pt::Hmi::Key(Pt::Hmi::Key::Control, Pt::Hmi::Key::D) );
 	_dialogButton.setPosition( Gfx::PointF(20,100));
 	_dialogButton.setSize( Gfx::SizeF(150,25) );	
+    _dialogButton.docking().setType( Docking::Top);
 	
 	_mainPanel.add(_dialogButton);
 	
@@ -59,7 +61,7 @@ ChildW::ChildW()
 	_closeButton.setSize(Gfx::SizeF(20, 40));
 	_closeButton.docking().setType( Docking::Bottom);
 	
-  _mainPanel.add(_closeButton);
+    _mainPanel.add(_closeButton);
 	//_childWindow2.setMainWidget(&_closeButton);	  	
 	_childWindow2.setPosition(Gfx::PointF(10,10));	
 	_childWindow2.setSize (Gfx::SizeF(420,300));

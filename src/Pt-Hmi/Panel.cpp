@@ -47,9 +47,9 @@ Panel::~Panel()
 }
 
 
-void Panel::onRender(PaintSurface& paintSurface)
+void Panel::onPaint(PaintSurface& paintSurface)
 {	
-	Widget::onRender(paintSurface);
+	Widget::onPaint(paintSurface);
 
 	int corner = 0;
 

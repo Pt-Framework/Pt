@@ -285,10 +285,10 @@ void ScreenImpl::initFBO()
 }
 
 
-void ScreenImpl::onRender(PaintSurface& surface)
+void ScreenImpl::onPaint(PaintSurface& surface)
 {
   PT_LOG_DEBUG("++++++++++ RENDERING SCREEN ++++++++++");
-  PT_LOG_DEBUG("ScreenImpl::onRender: " << _display.width() 
+  PT_LOG_DEBUG("ScreenImpl::onPaint: " << _display.width() 
                                  << ' ' << _display.height() );
   _counter++;
 

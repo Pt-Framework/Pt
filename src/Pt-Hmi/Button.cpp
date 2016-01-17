@@ -296,15 +296,15 @@ void Button::onPointerEvent(const MouseEvent& ev)
 }
 
 
-void Button::onRender(PaintSurface& paintSurface)
+void Button::onPaint(PaintSurface& paintSurface)
 {	
 	if( !isEnabled() )
 	{
-		Label::onRender(paintSurface);
+		Label::onPaint(paintSurface);
 		return;
 	}			
 
-	Label::onRender(paintSurface);
+	Label::onPaint(paintSurface);
 	
 	//if( _buttonState== DeviceButton::Pressed )
 	//	return;

@@ -114,7 +114,7 @@ protected:
 	virtual void onPointerEvent(const MouseEvent& ev);
 	virtual void onKeyEvent(const KeyEvent& ev);
 	virtual void onDoublePressedTimeout();
-	virtual void onRender(PaintSurface& surface);
+	virtual void onPaint(PaintSurface& surface);
 
 private:	
 	bool _pressed;

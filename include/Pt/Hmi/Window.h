@@ -87,14 +87,56 @@ class PT_HMI_API Window : public Pt::Connectable
 
     Widget* findWidget(const std::string& name);
 
-    void close();
-
-    void activate();
-
     bool isClosed() const;
+
+    void close();
 
     bool isActive() const;
 
+    void activate();
+
+    PaintSurface&  surface();
+
+    void invalidate();
+
+    void render();
+
+    WindowManager& windowManager();
+
+    const WindowManager& windowManager() const ;
+
+    void focusNext();
+    
+    void focusPrev();
+
+    void processEvent(const Pt::Event& ev);
+
+    WindowImpl* impl();
+
+  protected:
+    virtual void onEvent(const Pt::Event& ev);
+
+    virtual void onKeyEvent( const KeyEvent& ev );
+
+    virtual void onPointerEvent( const MouseEvent& ev );
+    
+    virtual void onScrollEvent( const ScrollEvent& ev );
+
+    virtual void onEnterEvent( const EnterEvent& ev );    
+
+    virtual void onLeaveEvent(const LeaveEvent& ev );
+    
+    virtual void onResizeEvent(const ResizeEvent& ev);
+
+    virtual void onMoveEvent( const MoveEvent& ev);
+
+    virtual void onCloseEvent(const CloseEvent& ev);
+
+    virtual void onActivateEvent(const ActivateEvent& ev);
+
+
+    // TODO:
+  public:
     const Gfx::SizeF& minimumSize() const;
 
     void setMinimumSize(const Gfx::SizeF& s);
@@ -161,59 +203,7 @@ class PT_HMI_API Window : public Pt::Connectable
         _name = n;
     }
 
-    void processEvent(const Pt::Event& ev);
-    
-    WindowImpl* impl()
-    {
-        return _impl;   
-    }
-
-    PaintSurface&  surface()
-    {
-        return _surface;
-    }
-
-    void invalidate();
-
-    void render();
-
-    WindowManager& windowManager()
-    {
-        return _windowManager;
-    }
-
-    const WindowManager& windowManager() const 
-    {
-        return _windowManager;
-    }
-
-    void focusNext();
-    
-    void focusPrev();
-
-  protected:
-    virtual void onEvent(const Pt::Event& ev);
-
-    virtual void onKeyEvent( const KeyEvent& ev );
-
-    virtual void onPointerEvent( const MouseEvent& ev );
-    
-    virtual void onScrollEvent( const ScrollEvent& ev );
-
-    virtual void onEnterEvent( const EnterEvent& ev );    
-
-    virtual void onLeaveEvent(const LeaveEvent& ev );
-    
-    virtual void onResizeEvent(const ResizeEvent& ev);
-
-    virtual void onMoveEvent( const MoveEvent& ev);
-
-    virtual void onCloseEvent(const CloseEvent& ev);
-
-    virtual void onActivateEvent(const ActivateEvent& ev);
-
   private:
-
     void removeWidget(Widget& w);
     
     void addWidget(Widget& w);
@@ -225,6 +215,8 @@ class PT_HMI_API Window : public Pt::Connectable
     void setPointerWidget( Widget* widget );
 
     void setFocusWidget(Widget* widget);
+
+    Widget* focusWidget();
 
     template <typename Iter>
     void moveFocus(Iter begin, Iter end);

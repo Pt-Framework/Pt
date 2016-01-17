@@ -100,16 +100,6 @@ class PT_HMI_API Widget : public Pt::Connectable
         Widget* findWidget( const std::string& name );
         
         Widget* findWidget( const Gfx::PointF& pos );
-
-        const PaintSurface& surface() const
-        {
-            return _surface;
-        }
-
-        PaintSurface& surface()
-        {
-            return _surface;
-        }
         
         void processEvent(const Pt::Event& ev);
 
@@ -276,6 +266,16 @@ class PT_HMI_API Widget : public Pt::Connectable
             return _layout;
         }
 
+        const Spacing& margin() const
+        {
+            return _margin;                  
+        }
+
+        void setMargin( const Spacing& s )
+        {
+            _margin = s;
+        }
+
         const Key* shortcut() const;
 
         void setShortcut(const Key* k);
@@ -354,9 +354,9 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         virtual void onPointerLeave();
     
-        virtual void onLayout(PaintSurface& paintSurface);
+        virtual void onLayout(PaintSurface& surface);
 
-        virtual void onRender(PaintSurface& paintSurface);        
+        virtual void onPaint(PaintSurface& surface);        
 
         virtual void onActionKey(const KeyEvent& kev);    
               
@@ -396,6 +396,7 @@ class PT_HMI_API Widget : public Pt::Connectable
         Pt::Char                     _mnemonic;    
         Pt::Delegate<void>           _mnemonicEntered;
         Docking                      _docking;
+        Spacing                      _margin;                  
 
         bool                         _acceptFocus;
         bool                         _hasFocus;    

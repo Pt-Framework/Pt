@@ -95,14 +95,7 @@ class PT_HMI_API Panel  : public Widget
 		Gfx::Color				_borderColor;
                           
 	protected:
-		virtual void onRender(PaintSurface& paintSurface);
-		virtual PaintSurface* widgetBuffer()
-		{
-			return &_surface;
-		}
-
-	private:
-		PaintSurface _surface;
+		virtual void onPaint(PaintSurface& surface);
 };
 
 }}

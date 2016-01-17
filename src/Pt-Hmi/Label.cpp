@@ -75,7 +75,7 @@ void Label::onSetCaption(const std::string& cap)
 }
 
 
-void Label::onRender(PaintSurface& paintSurface)
+void Label::onPaint(PaintSurface& paintSurface)
 {
     Pt::Hmi::Painter& painter = paintSurface.painter();	
     Gfx::SizeF         size = this->size();
@@ -93,7 +93,7 @@ void Label::onRender(PaintSurface& paintSurface)
 
     Gfx::FontMetrics	metric = painter.fontMetrics(captionStr);
 
-    Panel::onRender(paintSurface);
+    Panel::onPaint(paintSurface);
 
     if( !autoSize() )
     {										            	

@@ -224,9 +224,9 @@ Widget* Window::findWidget(const std::string& name)
 }
 
 
-void Window::activate()
+bool Window::isClosed() const
 {
-    _impl->activate();     
+  return _isClosed;       
 }
 
 
@@ -235,9 +235,83 @@ void Window::close()
     _impl->close();
 }
 
+
+bool Window::isActive() const
+{
+    return _isActive;
+}
+
+
+void Window::activate()
+{
+    _impl->activate();     
+}
+
+
+void Window::invalidate()
+{
+    _impl->invalidate();
+}
+
+
+void Window::render()
+{
+    if( _mainWidget != 0 )
+    {
+        _mainWidget->render();
+        surface().painter().drawSurface(_mainWidget->position(), _mainWidget->_surface );
+    }
+    else
+    {
+         Hmi::Painter& painter = surface().painter();
+         painter.setBrush( Pt::Gfx::Color(0,0,0) );
+         Pt::Gfx::RectF rect(Pt::Gfx::PointF(0,0), size() );
+         painter.fillRect(rect);
+    }
+    
+    _windowManager.render( surface() );
+}
+
+
+PaintSurface&  Window::surface()
+{
+    return _surface;
+}
+
+
+WindowManager& Window::windowManager()
+{
+    return _windowManager;
+}
+
+
+const WindowManager& Window::windowManager() const 
+{
+    return _windowManager;
+}
+
+
+void Window::focusPrev()
+{
+    moveFocus(_focusList.rbegin(), _focusList.rend());
+}
+
+
+void Window::focusNext()
+{
+    moveFocus(_focusList.begin(), _focusList.end());
+}
+
+
 void Window::processEvent(const Pt::Event& ev)
 {
     onEvent(ev);
+}
+
+
+WindowImpl* Window::impl()
+{
+    return _impl;   
 }
 
 
@@ -323,7 +397,12 @@ void Window::onKeyEvent(const KeyEvent& ev)
     else
     {
         if(ev.key().keyCode() == Key::Tab && ev.isPress() )
+        {
             focusNext();
+
+            if(_focusWidget)
+                _focusWidget->invalidate();
+        }
     }
 }
 
@@ -377,18 +456,6 @@ void Window::onActivateEvent(const ActivateEvent& ev)
 void Window::onCloseEvent(const CloseEvent& ev)
 {
      _isClosed =  true;
-}
-
-
-bool Window::isClosed() const
-{
-  return _isClosed;       
-}
-
-
-bool Window::isActive() const
-{
-    return _isActive;
 }
 
 
@@ -564,35 +631,11 @@ void Window::setFont(const Gfx::Font& ft)
 {
     _font = ft;
 }
-    
+
+
 const Gfx::Font& Window::font() const
 {
     return _font; 
-}
-
-
-void Window::invalidate()
-{
-    _impl->invalidate();
-}
-
-
-void Window::render()
-{
-    if( _mainWidget != 0 )
-    {
-        _mainWidget->render();
-        surface().painter().drawSurface(_mainWidget->position(), _mainWidget->surface() );
-    }
-    else
-    {
-         Hmi::Painter& painter = surface().painter();
-         painter.setBrush( Pt::Gfx::Color(0,0,0) );
-         Pt::Gfx::RectF rect(Pt::Gfx::PointF(0,0), size() );
-         painter.fillRect(rect);
-    }
-    
-    _windowManager.render( surface() );
 }
 
 
@@ -684,15 +727,9 @@ void Window::setFocusWidget(Widget* widget)
 }
 
 
-void Window::focusPrev()
+Widget* Window::focusWidget()
 {
-    moveFocus(_focusList.rbegin(), _focusList.rend());
-}
-
-
-void Window::focusNext()
-{
-    moveFocus(_focusList.begin(), _focusList.end());
+    return _focusWidget;
 }
 
 

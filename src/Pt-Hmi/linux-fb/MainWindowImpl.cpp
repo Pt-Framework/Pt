@@ -71,7 +71,7 @@ void MainWindowImpl::onInvalidate()
 }
 
 
-void MainWindowImpl::onRender(PaintSurface& paintSurface)
+void MainWindowImpl::onPaint(PaintSurface& paintSurface)
 {
   _apiWindow->render();
 

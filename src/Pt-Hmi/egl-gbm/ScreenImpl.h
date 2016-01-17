@@ -127,7 +127,7 @@ class ScreenImpl : public Window
     
 		virtual void onActivate();
 
-    virtual void onRender(PaintSurface& surface);
+    virtual void onPaint(PaintSurface& surface);
     
     virtual void onPointerEvent( const Pt::Hmi::PointerEvent& mouseEvent );
 

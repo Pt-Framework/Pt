@@ -66,7 +66,7 @@ class MainWindowImpl  : public ChildWindow
 		
 		virtual void onInvalidate();
 	  
-		virtual void onRender(PaintSurface& paintSurface);
+		virtual void onPaint(PaintSurface& paintSurface);
 
 	private:
     Pt::Hmi::Application& _app;

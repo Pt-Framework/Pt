@@ -138,6 +138,8 @@ const std::vector<Widget*>& Widget::widgets() const
 
 void Widget::setWindow(Window* window)
 {
+    onFocus(false);
+
     if(_window)
         _window->removeWidget(*this);
 
@@ -228,10 +230,12 @@ Gfx::PointF Widget::fromClient( const Gfx::PointF& localPoint )
 
 void Widget::updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p)
 {       
-  w.setPosition(p);
-  w.setSize(s);          
-  w._isValid = false;
-  _isValid = false;
+    //ToDO: calculate the margin into the size and pos.
+   w._position = p;      
+   w._size = s;              
+   w._surface.resize( _size );  
+   w._isValid = false;
+   _isValid = false;
 }
 
 
@@ -257,13 +261,13 @@ void Widget::render()
         return;
 
     // layout children
-    onLayout( surface() );
+    onLayout(_surface);
 
     // render
     if( ! _isValid )
     {
-        surface().clear();
-        onRender( surface() );
+        _surface.clear();
+        onPaint(_surface);
         _isValid = true;
     }
 
@@ -274,7 +278,7 @@ void Widget::render()
 
         child->render();
 
-        surface().painter().drawSurface( child->position(), child->surface() );
+        _surface.painter().drawSurface( child->position(), child->_surface );
     }
 }
 
@@ -367,7 +371,7 @@ void Widget::onLayout( PaintSurface& surface )
                 point.setX( posLeft );
                 posLeft += child->size().width();
                 point.setY( 0 );    
-               updatePosAndSize( *child,Gfx::SizeF( child->size().width(), clientSize.height() ), point );
+                updatePosAndSize( *child,Gfx::SizeF( child->size().width(), clientSize.height() ), point );
 
             }
             break;
@@ -377,7 +381,7 @@ void Widget::onLayout( PaintSurface& surface )
                 posRight -= child->size().width();
                 point.setX( posRight );              
                 point.setY( 0 );    
-               updatePosAndSize( *child,Gfx::SizeF( child->size().width(), clientSize.height() ), point );
+                updatePosAndSize( *child,Gfx::SizeF( child->size().width(), clientSize.height() ), point );
 
             }
             break;
@@ -416,7 +420,7 @@ void Widget::onLayout( PaintSurface& surface )
 }
 
 
-void Widget::onRender( PaintSurface& surface )
+void Widget::onPaint( PaintSurface& surface )
 {        
   const Gfx::SizeF& size = this->size();
 
@@ -528,7 +532,8 @@ void Widget::onPointerEvent(const MouseEvent& ev)
 {        
     if( ev.isPress(MouseEvent::Left) && _acceptFocus )
     {
-        _window->setFocusWidget(this);
+        focus();
+        invalidate();
     }
 }
 
@@ -547,6 +552,12 @@ void Widget::onKeyEvent(const KeyEvent& ev)
             _window->focusPrev();
         else
             _window->focusNext();
+
+        invalidate();
+
+        Widget* focusWidget = _window->focusWidget();
+        if(focusWidget)
+            focusWidget->invalidate();
 
         return;
     }
@@ -604,8 +615,8 @@ void Widget::setShortcut(const Key* k)
 void Widget::onFocus(bool hasFocus)
 {    
     _hasFocus = hasFocus;
-    invalidate();
 }
+
 
 void Widget::setFocusIndex(size_t index)
 {
@@ -618,9 +629,8 @@ void Widget::setFocusIndex(size_t index)
 
 void Widget::onSetSize(const Gfx::SizeF& size)
 {
-    _size = size;            
-  
-  surface().resize( _size );
+    _size = size;              
+    _surface.resize( _size );
     _isValid = false;
 }
 
@@ -680,14 +690,14 @@ size_t Widget::getMnemonicIndex(const std::string& text)
 {     
     size_t pos = 0;
   
-  if( text.empty() )    
-      return std::string::npos;
+    if( text.empty() )    
+        return std::string::npos;
 
     for( size_t i = 0; i < text.size() - 1; ++i)
     {                
-        if( text[i] == '&'  && text[i +1] =='&' )
+        if( text[i] == '&' && text[i +1] =='&' )
             ++i;
-        else if (text[i] == '&'  &&     text[i +1] !='&')
+        else if (text[i] == '&' && text[i +1] !='&')
             return pos;
 
         pos++;
