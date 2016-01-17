@@ -48,6 +48,7 @@
 #include <Pt/Gfx/Font.h>
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
+#include <map>
 
 namespace Pt {
 
@@ -217,6 +218,10 @@ class PT_HMI_API Window : public Pt::Connectable
     
     void addWidget(Widget& w);
 
+    void setShortcut(Widget& w, const Key* key);
+
+    void setMnemonic(Widget& w, const Char* ch);
+
     void setPointerWidget( Widget* widget );
 
     void setFocusWidget(Widget* widget);
@@ -248,7 +253,10 @@ class PT_HMI_API Window : public Pt::Connectable
     bool                                 _canClose;    
     WindowDecoration::Flags             _decoration;   
     std::string                         _name;    
-    Gfx::Font                           _font;    
+    Gfx::Font                           _font;
+    
+    std::map<Key, Widget*>         _shortcuts; 
+    std::map<Pt::Char, Widget*>    _mnemonics; 
     
     Widget*                        _mainWidget;
     Window*                        _parent;

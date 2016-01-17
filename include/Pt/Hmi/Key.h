@@ -648,6 +648,7 @@ class Key
 
         explicit Key(Code c)
         : _code(c)
+        , _modifier(NoModifier)
         {}
 
         Key(Modifier m, Code c)
@@ -712,6 +713,23 @@ class Key
         bool isPressed(Modifiers m) const
         {
             return (_modifier & m.value()) == m.value();
+        }
+
+        bool operator ==(const Key& k) const
+        {
+            return ! (*this != k);
+        }
+
+        bool operator !=(const Key& k) const
+        {
+            return _code != k._code || 
+                   _modifier != k._modifier;
+        }
+
+        bool operator <(const Key& k) const
+        {
+            return _code < k._code || 
+                   (_code == k._code && _modifier < k._modifier);
         }
 
     private:

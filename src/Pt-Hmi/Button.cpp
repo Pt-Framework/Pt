@@ -85,6 +85,7 @@ void Button::onPressedAction()
 
 void Button::onMnemonic()
 {
+/*
 	switch(_buttonType)
 	{
 		case ButtonType::Press:
@@ -98,9 +99,9 @@ void Button::onMnemonic()
 		}			
 		break;
 	}
-	  
+	*/  
 	Label::onMnemonic();	    		
-	invalidate();	
+//	invalidate();	
 }
 
 void Button::onDoublePressedAction()
@@ -113,6 +114,8 @@ void Button::onDoublePressedAction()
 
 void Button::onActionKey( const KeyEvent& kev )
 {
+    Label::onActionKey(kev);
+
 	//switch( _buttonType )
 	//{
 	//	case ButtonType::Press:
@@ -137,8 +140,10 @@ void Button::onActionKey( const KeyEvent& kev )
 	invalidate();
 }
 
-void Button::onShortcutKey( const KeyEvent& kev )
+void Button::onShortcut( const KeyEvent& kev )
 {
+    Label::onShortcut(kev);
+
 	//switch( _buttonType)
 	//{
 	//	case ButtonType::Press:
@@ -166,10 +171,10 @@ void Button::onShortcutKey( const KeyEvent& kev )
 
 void Button::onKeyEvent(const KeyEvent& ev)
 {		
-	if( !isEnabled() )
+	if( ! isEnabled() )
 		return;
 
-	if( !visible() )
+	if( ! visible() )
 		return;
 
 	Label::onKeyEvent(ev);
@@ -180,6 +185,7 @@ void Button::onKeyEvent(const KeyEvent& ev)
 	//	invalidate();
 	//}		
 }
+
 
 void Button::onPointerEvent(const MouseEvent& ev)
 {    

@@ -29,14 +29,14 @@ ChildW::ChildW()
 	_textLabel.setPosition( Gfx::PointF(20,20) );
 	_textLabel.setForegroundColor( Gfx::Color(1,0,0,0) );	
 	_textLabel.setBackgroundColor( Gfx::Color(1,1,1,0) );
-  _textLabel.bindMnemonic(_toggleButton);
+  _textLabel.setMnemonicWidget(&_toggleButton);
   _textLabel.setCursor(  Hmi::Cursor::waitCursor() );
 	_mainPanel.add(_textLabel);
 	
 	//Toggle button
 	_toggleButton.setButtonType(  Hmi::ButtonType::Toggle );
 	_toggleButton.setCaption( std::string("Toggle Me [CTRL+I]") );
-//	_toggleButton.setShortcutKey( std::string("C//i") );
+	_toggleButton.setShortcut( &Pt::Hmi::Key(Pt::Hmi::Key::Control, Pt::Hmi::Key::I) );
 	_toggleButton.setPosition( Gfx::PointF(20,60) );
 	_toggleButton.setSize( Gfx::SizeF(150,25) );		
 	_mainPanel.add(_toggleButton);
@@ -45,7 +45,7 @@ ChildW::ChildW()
 	_dialogButton.setButtonType( Hmi::ButtonType::Press );
     
 	_dialogButton.setCaption(std::string("&&Dia&log [CTRL+D]&") );
-//	_dialogButton.setShortcutKey( std::string("C//d") );
+	_dialogButton.setShortcut( &Pt::Hmi::Key(Pt::Hmi::Key::Control, Pt::Hmi::Key::D) );
 	_dialogButton.setPosition( Gfx::PointF(20,100));
 	_dialogButton.setSize( Gfx::SizeF(150,25) );	
 	
@@ -54,7 +54,7 @@ ChildW::ChildW()
 	//Close button
 	_closeButton.setButtonType(Hmi::ButtonType::Press);
 	_closeButton.setCaption(std::string("Close App [CTRL+X]"));
-//	_closeButton.setShortcutKey(std::string("C//x"));
+	_closeButton.setShortcut(&Pt::Hmi::Key(Pt::Hmi::Key::Control, Pt::Hmi::Key::X));
 	_closeButton.setPosition(Gfx::PointF(20,200));
 	_closeButton.setSize(Gfx::SizeF(20, 40));
 	_closeButton.docking().setType( Docking::Bottom);

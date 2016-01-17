@@ -45,6 +45,7 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Signal.h>
+#include <Pt/Delegate.h>
 
 namespace Pt {
 
@@ -218,17 +219,17 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         void focus();
 
-        Key focusedActionKey() const
+        Key actionKey() const
         {
-            return _focusedActionKey;
+            return _actionKey;
         }
 
-        void setFocusedActionKey( Key ak )
+        void setActionKey( Key ak )
         {
-          _focusedActionKey = ak;
+          _actionKey = ak;
         }
 
-        size_t  focusIndex() const
+        size_t focusIndex() const
         {
             return _focusIndex;
         }
@@ -260,7 +261,6 @@ class PT_HMI_API Widget : public Pt::Connectable
             _docking = d;
         }
 
-
         void setLayout(const Layout& l )
         {
             _layout = l;
@@ -276,15 +276,9 @@ class PT_HMI_API Widget : public Pt::Connectable
             return _layout;
         }
 
-        Key shortcutKey() const
-        {
-           return _shortcutKey;
-        }
+        const Key* shortcut() const;
 
-        void setShortcutKey( Key  k )
-        {
-            _shortcutKey=  k;
-        }
+        void setShortcut(const Key* k);
 
         void setVisible( bool b )
         {
@@ -298,7 +292,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         void setCaption( const std::string& c )
         {
-                onSetCaption(c);
+            onSetCaption(c);
         }
 
         const std::string& caption() const
@@ -328,12 +322,10 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         bool contains(const Gfx::PointF& p);
 
-        void bindMnemonic( Widget& w );
-        
-        void unbindMnemonic( Widget& w );
+        void setMnemonicWidget(Widget* w);
 
-        void unbindMnemonic();        
-     
+        const Pt::Char* mnemonic() const;
+
     protected:
         virtual void onSetPosition(const Gfx::PointF& pos);
 
@@ -368,14 +360,9 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         virtual void onActionKey(const KeyEvent& kev);    
               
-        virtual void onShortcutKey(const KeyEvent& kev);
+        virtual void onShortcut(const KeyEvent& kev);
 
         virtual void onMnemonic();      
-
-        bool useMnemonic() 
-        {
-            return _mnemonicKey.keyCode() != Key::NoKey;
-        }
 
         static std::string removeMnemonic(const std::string& text);        
 
@@ -406,13 +393,13 @@ class PT_HMI_API Widget : public Pt::Connectable
         Alignment                    _contentAlignment;
         std::string                  _caption;
         Gfx::Font                    _font;
-        Key                          _mnemonicKey;    
-        Pt::Signal<>                 _mnemonicEntered;
+        Pt::Char                     _mnemonic;    
+        Pt::Delegate<void>           _mnemonicEntered;
         Docking                      _docking;
 
         bool                         _acceptFocus;
         bool                         _hasFocus;    
-        Key                          _focusedActionKey;
+        Key                          _actionKey;
         size_t                       _focusIndex;   
 
         //Todo: implement layout

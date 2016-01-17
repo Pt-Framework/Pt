@@ -300,6 +300,23 @@ void Window::onKeyEvent(const KeyEvent& ev)
 
     if( ! isEnabled() )
         return;
+
+    std::map<Key, Widget*>::iterator s = _shortcuts.find( ev.key() );
+    if( s != _shortcuts.end() )
+    {
+        s->second->onShortcut(ev);       
+        return;
+    }
+
+    if( ev.isPress() && ev.key().hasModifiers(Key::Alt) )
+    {
+        std::map<Char, Widget*>::iterator m = _mnemonics.find( ev.unicode() );
+        if( m != _mnemonics.end() )
+        {
+            m->second->onMnemonic();       
+            return;
+        }
+    }
     
     if( _focusWidget )
         _focusWidget->onKeyEvent(ev);
@@ -581,7 +598,10 @@ void Window::render()
 
 void Window::addWidget(Widget& w)
 {
-    addFocusWidget(w);  
+    addFocusWidget(w);
+
+    setShortcut( w, w.shortcut() );
+    setMnemonic( w, w.mnemonic() );
 }
 
 
@@ -594,6 +614,41 @@ void Window::removeWidget(Widget& w)
         _focusWidget = 0;
 
     removeFocusWidget(w);
+
+    setShortcut(w, 0);
+    setMnemonic(w, 0);
+}
+
+
+void Window::setShortcut(Widget& w, const Key* key)
+{
+    std::map<Key, Widget*>::iterator it = _shortcuts.begin();
+    while( it != _shortcuts.end() )
+    {
+        if(it->second == &w)
+            it = _shortcuts.erase(it);
+        else
+            ++it;
+    }
+
+    if(key)
+        _shortcuts[*key] = &w;
+}
+
+
+void Window::setMnemonic(Widget& w, const Char* ch)
+{
+    std::map<Char, Widget*>::iterator it = _mnemonics.begin();
+    while( it != _mnemonics.end() )
+    {
+        if(it->second == &w)
+            it = _mnemonics.erase(it);
+        else
+            ++it;
+    }
+
+    if(ch)
+        _mnemonics[*ch] = &w;
 }
 
 

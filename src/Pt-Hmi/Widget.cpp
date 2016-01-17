@@ -49,13 +49,13 @@ Widget::Widget()
 , _backgroundImageLayout( NoLayout )
 , _cursor( Hmi::Cursor::defaultCursor() )
 , _acceptFocus( true) 
-, _focusedActionKey()
 , _name("")
-, _shortcutKey()
 , _hasFocus( false)
+, _actionKey(Key::Space)
 , _size( 100, 100)
 , _position( 10,10) 
 , _isValid(false)
+, _mnemonic(0)
 {      
     _eventReady += Pt::slot(*this, &Widget::onKeyEvent);
     _eventReady += Pt::slot(*this, &Widget::onPointerEvent);
@@ -497,7 +497,7 @@ void Widget::onActionKey(const KeyEvent& kev)
 }
 
 
-void Widget::onShortcutKey(const KeyEvent& kev)
+void Widget::onShortcut(const KeyEvent& kev)
 {
 }
 
@@ -551,49 +551,29 @@ void Widget::onKeyEvent(const KeyEvent& ev)
         return;
     }
 
-/*
-    //// mnemonic handling
-    if( !_mnemonicKey.empty() && ev.state() == Pt::Hmi::KeyEvent::KeyUp && _visible )
-    {        
-        std::string mnKey;
-
-        if( ev.alt())
-            mnKey = "A//";
-            
-        mnKey += ev.toUTF8String();
-
-        if(_mnemonicKey == mnKey)
-                onMnemonic();
-    }
-
-    // action key handling
-    if( ev.toUTF8String() == focusedActionKey() && hasFocus() )    
+    if( (ev.unicode() == _mnemonic) && ev.isPress() && ev.key().hasModifiers(Key::Alt) )
     {
-        onActionKey( ev.state() );        
-    }
-    
-    // shortcurt Key
-    if( ev.shortCutKey() == shortcutKey() )
-    {
-        onShortcutKey( ev.state() );        
+        onMnemonic();
+        return;
     }
 
-    // propagate to children
-    for( size_t i = 0; i < children().size(); ++i)
-        children()[i]->onKeyEvent(ev); */
+    if( ev.key() == actionKey() && hasFocus() )    
+    {
+        onActionKey(ev);        
+    }
 }
 
 
 void Widget::onMnemonic()
 {
-    _mnemonicEntered.send();
+    _mnemonicEntered.invoke();
 }
 
 
 bool Widget::contains(const Gfx::PointF& p)
 {
     if( p.x()  < size().width() && p.x() >= 0 && p.y() < size().height() && p.y() >= 0)
-            return true;
+        return true;
  
     return false;
 }
@@ -603,6 +583,27 @@ void Widget::focus()
 {
     if(_window)
         _window->setFocusWidget(this);          
+}
+
+
+const Key* Widget::shortcut() const
+{
+    if(_shortcutKey.keyCode() == Key::NoKey)
+        return 0;
+           
+    return &_shortcutKey;
+}
+
+
+void Widget::setShortcut(const Key* k)
+{
+    if( ! k )
+        _shortcutKey.set(Key::NoKey);
+    else
+        _shortcutKey = *k;
+
+    if(_window)
+        _window->setShortcut(*this, k);
 }
 
 
@@ -643,24 +644,34 @@ void Widget::onSetVisible( bool b )
 }
 
 
-
 void Widget::onSetCaption( const std::string& c )
 {
     _caption = c;    
 
-    _mnemonicKey.clear();
+    _mnemonic = 0;
 
     int index = getMnemonicIndex(_caption);
 
     if( index == std::string::npos )
         return;
                     
-    std::string unescaped = Widget::removeMnemonic(_caption);
-
-    //_mnemonicKey.setAlt(true);    
-    //_mnemonicKey.setUnicode(  std::toupper(unescaped[index]));
+    _mnemonic = _caption[index + 1];
 }
 
+
+void Widget::setMnemonicWidget(Widget* w)
+{
+    _mnemonicEntered.disconnectAll();
+
+    if(w)
+        _mnemonicEntered += Pt::slot(*w, &Widget::onMnemonic);
+}
+
+
+const Pt::Char* Widget::mnemonic() const
+{
+    return _mnemonic != 0 ? &_mnemonic : 0;
+}
 
 
 size_t Widget::getMnemonicIndex(const std::string& text)
@@ -712,24 +723,6 @@ std::string Widget::removeMnemonic(const std::string& text)
 void Widget::onSetEnabled( bool e )
 {
     _enabled = e;
-}
-
-
-void Widget::bindMnemonic( Widget& w )
-{
-    _mnemonicEntered += Pt::slot( w, &Widget::onMnemonic);
-}
-
-
-void Widget::unbindMnemonic( Widget& w )
-{
-    _mnemonicEntered -= Pt::slot( w, &Widget::onMnemonic);
-}
-
-
-void Widget::unbindMnemonic()
-{
-    _mnemonicEntered.disconnectAll();
 }
 
 } // namespace

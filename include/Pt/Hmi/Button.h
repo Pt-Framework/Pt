@@ -106,9 +106,11 @@ private:
 protected:
 	virtual void onPressedAction();
 	virtual void onDoublePressedAction();
+
 	virtual void onMnemonic();
-	virtual void onShortcutKey(const KeyEvent& kev);
+	virtual void onShortcut(const KeyEvent& kev);
 	virtual void onActionKey(const KeyEvent& kev);
+
 	virtual void onPointerEvent(const MouseEvent& ev);
 	virtual void onKeyEvent(const KeyEvent& ev);
 	virtual void onDoublePressedTimeout();

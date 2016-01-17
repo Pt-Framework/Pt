@@ -53,7 +53,7 @@ void Label::recalcNewSize()
 
     std::string captionStr = "";
 
-    if( useMnemonic() )
+    if( mnemonic() )
         captionStr = Widget::removeMnemonic(caption().c_str());
     else
         captionStr = caption();
@@ -84,7 +84,7 @@ void Label::onRender(PaintSurface& paintSurface)
     Gfx::Color         foreColor = foregroundColor();
     Gfx::Pen	          pen( 1, foreColor);
 
-    if( useMnemonic() )
+    if( mnemonic() )
         captionStr = Widget::removeMnemonic(caption()).c_str();
     else
         captionStr = caption().c_str();	  
@@ -195,7 +195,7 @@ void Label::onRender(PaintSurface& paintSurface)
     painter.setPen(pen);
     painter.drawText(pos, captionStr);
 
-    if( useMnemonic() )
+    if( mnemonic() )
     {			
         int index = Widget::getMnemonicIndex( caption() );
 
