@@ -259,35 +259,17 @@ void Window::render()
     if( _mainWidget != 0 )
     {
         _mainWidget->render();
-        surface().painter().drawSurface(_mainWidget->position(), _mainWidget->_surface );
+        _surface.painter().drawSurface(_mainWidget->position(), _mainWidget->_surface );
     }
     else
     {
-         Hmi::Painter& painter = surface().painter();
+         Hmi::Painter& painter = _surface.painter();
          painter.setBrush( Pt::Gfx::Color(0,0,0) );
          Pt::Gfx::RectF rect(Pt::Gfx::PointF(0,0), size() );
          painter.fillRect(rect);
     }
     
-    _windowManager.render( surface() );
-}
-
-
-PaintSurface&  Window::surface()
-{
-    return _surface;
-}
-
-
-WindowManager& Window::windowManager()
-{
-    return _windowManager;
-}
-
-
-const WindowManager& Window::windowManager() const 
-{
-    return _windowManager;
+    _windowManager.render( _surface );
 }
 
 
@@ -306,6 +288,24 @@ void Window::focusNext()
 void Window::processEvent(const Pt::Event& ev)
 {
     onEvent(ev);
+}
+
+
+PaintSurface& Window::surface()
+{
+    return _surface;
+}
+
+
+WindowManager& Window::windowManager()
+{
+    return _windowManager;
+}
+
+
+const WindowManager& Window::windowManager() const 
+{
+    return _windowManager;
 }
 
 
@@ -485,18 +485,6 @@ void Window::setMaximumSize(const Gfx::SizeF& s)
 }
 
 
-void Window::setDecoration( WindowDecoration::Flags d )
-{
-    _impl->setDecoration( d );
-    _decoration = d;
-}
-    
-WindowDecoration::Flags Window::decoration() const
-{
-    return _decoration;
-}
-
-
 Hmi::WindowPosition::Type Window::defaultPosition() const
 {
     return _startPostion;
@@ -586,18 +574,18 @@ void Window::setEnabled( bool e )
 }
 
 
+bool Window::isVisible() const
+{
+    return _visible;
+}
+
+
 void Window::setVisible( bool b )
 {
     if(b)
         _impl->show();
     else
         _impl->hide();
-}
-
-
-bool Window::isVisible() const
-{
-    return _visible;
 }
 
 
@@ -627,15 +615,40 @@ void Window::setPosition( const Gfx::PointF& p)
     _position = p;
 }
 
+
+const Gfx::Font& Window::font() const
+{
+    return _font; 
+}
+
+
 void Window::setFont(const Gfx::Font& ft)
 {
     _font = ft;
 }
 
 
-const Gfx::Font& Window::font() const
+WindowDecoration::Flags Window::decoration() const
 {
-    return _font; 
+    return _decoration;
+}
+
+
+void Window::setDecoration( WindowDecoration::Flags d )
+{
+    _impl->setDecoration( d );
+    _decoration = d;
+}
+    
+
+const std::string& Window::name() const
+{
+    return _name; 
+}
+
+void Window::setName(const std::string&  n)
+{
+    _name = n;
 }
 
 
@@ -710,6 +723,12 @@ void Window::setPointerWidget( Widget* widget )
 }
 
 
+Widget* Window::focusWidget()
+{
+    return _focusWidget;
+}
+
+
 void Window::setFocusWidget(Widget* widget) 
 {
     assert( widget ? widget->window() == this : true);
@@ -724,12 +743,6 @@ void Window::setFocusWidget(Widget* widget)
 
     if( _focusWidget )
         _focusWidget->onFocus(true);
-}
-
-
-Widget* Window::focusWidget()
-{
-    return _focusWidget;
 }
 
 
@@ -758,6 +771,13 @@ void Window::moveFocus(Iter begin, Iter end)
         }
 
         ++it;
+    }
+
+    // handles the case when the current focus widget has just been set to 
+    // not accept focus and no other widget can accept focus either.
+    if( _focusWidget && ! _focusWidget->acceptFocus() )
+    {
+        setFocusWidget(0);
     }
 }
 
@@ -793,7 +813,7 @@ void Window::removeFocusWidget(Widget& w)
 }
 
 
-void Window::updateFocusOrder()
+void Window::setFocusIndex(Widget& , size_t)
 {
     std::sort(_focusList.begin(), _focusList.end(), &lowerFocusIndex);
 }

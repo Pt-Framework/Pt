@@ -95,21 +95,24 @@ class PT_HMI_API Window : public Pt::Connectable
 
     void activate();
 
-    PaintSurface&  surface();
-
+    // TODO: rename update()
     void invalidate();
 
     void render();
 
-    WindowManager& windowManager();
-
-    const WindowManager& windowManager() const ;
-
+    // TODO: return new focusWidget() and remove focusWidget()
     void focusNext();
     
+    // TODO: return new focusWidget() and remove focusWidget()
     void focusPrev();
 
     void processEvent(const Pt::Event& ev);
+
+    PaintSurface& surface();
+
+    WindowManager& windowManager();
+
+    const WindowManager& windowManager() const;
 
     WindowImpl* impl();
 
@@ -133,7 +136,6 @@ class PT_HMI_API Window : public Pt::Connectable
     virtual void onCloseEvent(const CloseEvent& ev);
 
     virtual void onActivateEvent(const ActivateEvent& ev);
-
 
     // TODO:
   public:
@@ -173,9 +175,9 @@ class PT_HMI_API Window : public Pt::Connectable
 
     void setEnabled( bool e );
 
-    void setVisible( bool b );
-
     bool isVisible() const;
+
+    void setVisible( bool b );
 
     const Gfx::SizeF& size() const;
 
@@ -185,38 +187,32 @@ class PT_HMI_API Window : public Pt::Connectable
 
     void setPosition( const Gfx::PointF&  p);
 
-    void setFont(const Gfx::Font& ft);
-    
     const Gfx::Font& font() const;
 
-    void setDecoration( WindowDecoration::Flags d );
+    void setFont(const Gfx::Font& ft);
 
     WindowDecoration::Flags decoration() const;
 
-    const std::string& name() const
-    {
-        return _name; 
-    }
+    void setDecoration( WindowDecoration::Flags d );
 
-    void setName(const std::string&  n)
-    {
-        _name = n;
-    }
+    const std::string& name() const;
+
+    void setName(const std::string& n);
 
   private:
-    void removeWidget(Widget& w);
-    
     void addWidget(Widget& w);
 
+    void removeWidget(Widget& w);
+    
     void setShortcut(Widget& w, const Key* key);
 
     void setMnemonic(Widget& w, const Char* ch);
 
     void setPointerWidget( Widget* widget );
 
-    void setFocusWidget(Widget* widget);
-
     Widget* focusWidget();
+
+    void setFocusWidget(Widget* widget);
 
     template <typename Iter>
     void moveFocus(Iter begin, Iter end);
@@ -225,7 +221,7 @@ class PT_HMI_API Window : public Pt::Connectable
 
     void removeFocusWidget(Widget& w);
 
-    void updateFocusOrder();
+    void setFocusIndex(Widget& w, size_t index);
     
   private:
     WindowManager                        _windowManager; 

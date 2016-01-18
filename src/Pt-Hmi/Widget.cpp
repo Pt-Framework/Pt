@@ -623,7 +623,7 @@ void Widget::setFocusIndex(size_t index)
     _focusIndex = index;
 
     if( _window )
-        _window->updateFocusOrder();
+        _window->setFocusIndex(*this, index);
 }
 
 
