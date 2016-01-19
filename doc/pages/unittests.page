@@ -66,7 +66,7 @@ achieved by registering methods that take arguments (the test data) in a
 Pt::Unit::TestSuite.
 
 @code
-class MyTestSuite
+class MyTestSuite : public Pt::Unit::TestSuite
 {
     public:
         MyTestSuite()

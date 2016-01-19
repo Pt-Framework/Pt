@@ -263,7 +263,7 @@ class Arg : public ArgBaseT<T>
 
             for(int i = 1; i < argc; ++i)
             {
-                if (argv[i][0] == '-' && argv[i][1] == ch)
+                if (argv[i] && argv[i][0] == '-' && argv[i][1] == ch)
                 {
                     if(argv[i][2] == '\0' && i < argc - 1)
                     {
@@ -303,7 +303,7 @@ class Arg : public ArgBaseT<T>
             unsigned n = std::strlen(str);
             for (int i = 1; i < argc; ++i)
             {
-                if(std::strncmp(argv[i], str, n) == 0)
+                if(argv[i] && (std::strncmp(argv[i], str, n) == 0))
                 {
                     if (i < argc - 1 && argv[i][n] == '\0')
                     {
