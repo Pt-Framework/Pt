@@ -1,46 +1,50 @@
 /* Copyright (C) 2015 Marc Boris Duerner 
-Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-As a special exception, you may use this file as part of a free
-software library without restriction. Specifically, if other files
-instantiate templates or use macros or inline functions from this
-file, or you compile this file and link it with other files to
-produce an executable, this file does not by itself cause the
-resulting executable to be covered by the GNU General Public
-License. This exception does not however invalidate any other
-reasons why the executable file might be covered by the GNU Library
-General Public License.
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
+*/
+
 #include <Pt/Hmi/Label.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/String.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+
+namespace Hmi {
 
 Label::Label()
-    : Panel()
-    , _autoSize(true)
+: Panel()
+, _autoSize(true)
 {
     setForegroundColor(Gfx::Color::fromRgb8(0,0,0,0));
     setPanelBorderStyle(NoBorder);
-
 }
+
 
 Label::~Label()
 {
@@ -49,29 +53,29 @@ Label::~Label()
 
 void Label::recalcNewSize()
 {
-    if( !_autoSize)
+    // could this be done in onLayout(), or onUpdate()?
+    if( ! _autoSize )
         return;
 
-    std::string captionStr;
-
-    //if( mnemonic() )
-    //    captionStr = Widget::removeMnemonic(caption().c_str());
-    //else
-        captionStr = caption();
-
     PaintSurface surface;
-    surface.painter().setFont(font());
+    surface.painter().setFont( font() );
 
-    const Gfx::FontMetrics metric = surface.painter().fontMetrics(captionStr.c_str());
+    const String& text = this->caption().c_str();
+    Gfx::FontMetrics fm = surface.painter().fontMetrics(text);
 
-    setSize(  Gfx::SizeF( metric.width() + docking().margin().left() + docking().margin().right(), metric.height() +docking().margin().top() +  docking().margin().bottom() ) );  
-    update();
+    const Spacing& margin = docking().margin();
+    Gfx::SizeF size( fm.width() + margin.left() + margin.right(), 
+                     fm.height() + margin.top() +  margin.bottom() );
+    
+    setSize(size);
+    //update();
 }
 
 
 void Label::onSetCaption(const std::string& cap)
 {
     Panel::onSetCaption(cap);
+    
     recalcNewSize();
 }
 
@@ -81,22 +85,19 @@ void Label::onPaint(PaintSurface& paintSurface)
     Pt::Hmi::Painter& painter = paintSurface.painter();	
     Gfx::SizeF         size = this->size();
     Gfx::PointF        pos(0,0);
-    Pt::String        captionStr;
     Gfx::Color         foreColor = foregroundColor();
     Gfx::Pen	          pen( 1, foreColor);
 
-    //if( mnemonic() )
-    //    captionStr = Widget::removeMnemonic(caption()).c_str();
-    //else
-        captionStr = caption().c_str();	  
 
-    painter.setFont(font());
+    Pt::String captionStr = caption().c_str();	  
+
+    painter.setFont( font() );
 
     Gfx::FontMetrics	metric = painter.fontMetrics(captionStr);
 
     Panel::onPaint(paintSurface);
 
-    if( !autoSize() )
+    if( ! autoSize() )
     {										            	
         switch(contentAlignment())
         {
@@ -215,4 +216,6 @@ void Label::onPaint(PaintSurface& paintSurface)
     }
 }
 
-}}
+} // namespace
+
+}  // namespace
