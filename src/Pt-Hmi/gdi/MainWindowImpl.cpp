@@ -606,7 +606,7 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 }
 
 
-void MainWindowImpl::invalidate()
+void MainWindowImpl::update()
 {
    _apiWindow->render();
     InvalidateRect(_hwnd, NULL, FALSE);

@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/FontMetrics.h>
+#include <Pt/String.h>
 
 namespace Pt{
 namespace Hmi{
@@ -51,11 +52,11 @@ void Label::recalcNewSize()
     if( !_autoSize)
         return;
 
-    std::string captionStr = "";
+    std::string captionStr;
 
-    if( mnemonic() )
-        captionStr = Widget::removeMnemonic(caption().c_str());
-    else
+    //if( mnemonic() )
+    //    captionStr = Widget::removeMnemonic(caption().c_str());
+    //else
         captionStr = caption();
 
     PaintSurface surface;
@@ -64,7 +65,7 @@ void Label::recalcNewSize()
     const Gfx::FontMetrics metric = surface.painter().fontMetrics(captionStr.c_str());
 
     setSize(  Gfx::SizeF( metric.width() + docking().margin().left() + docking().margin().right(), metric.height() +docking().margin().top() +  docking().margin().bottom() ) );  
-    invalidate();
+    update();
 }
 
 
@@ -84,9 +85,9 @@ void Label::onPaint(PaintSurface& paintSurface)
     Gfx::Color         foreColor = foregroundColor();
     Gfx::Pen	          pen( 1, foreColor);
 
-    if( mnemonic() )
-        captionStr = Widget::removeMnemonic(caption()).c_str();
-    else
+    //if( mnemonic() )
+    //    captionStr = Widget::removeMnemonic(caption()).c_str();
+    //else
         captionStr = caption().c_str();	  
 
     painter.setFont(font());
@@ -189,31 +190,27 @@ void Label::onPaint(PaintSurface& paintSurface)
     }
     else
     {
-        pos +=Gfx::PointF( 0, metric.ascent() );
+        pos += Gfx::PointF( 0, metric.ascent() );
     }
 
     painter.setPen(pen);
     painter.drawText(pos, captionStr);
 
-    if( mnemonic() )
+    const Char* ch = mnemonic();
+    if(ch)
     {			
-        int index = Widget::getMnemonicIndex( caption() );
+        String::size_type n = captionStr.find( ch->narrow() );
+        if(n != String::npos)
+        {
+            Pt::String text(captionStr.c_str(), n);
+            Gfx::FontMetrics fm = painter.fontMetrics(text);
+            Gfx::PointF from(pos.x() + fm.width(), pos.y() + 1);
 
-        if( index != std::string::npos 
+            text = *ch;
+            fm = painter.fontMetrics(text);
+            Gfx::PointF to( from.x() + fm.width(), from.y() );
 
-            && ((index + 1) < (int) captionStr.size()) )
-        {	
-            std::string subString(  captionStr.begin(), captionStr.begin() + index );
-
-            Gfx::FontMetrics metric = painter.fontMetrics( Pt::String( subString.c_str() ) );
-
-            Gfx::PointF linePos( pos.x() + metric.width() - 1, pos.y()  + 1);
-
-            subString = captionStr[index];
-
-            metric = painter.fontMetrics( Pt::String( subString.c_str() ) );
-
-            painter.drawLine( linePos ,Gfx::PointF( linePos.x() + metric.width(), linePos.y() ) );
+            painter.drawLine(from, to );
         }
     }
 }

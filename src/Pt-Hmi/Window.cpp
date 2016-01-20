@@ -213,7 +213,7 @@ void Window::setMainWidget(Widget* widget)
        _mainWidget->setWindow(this);
        _mainWidget->setPosition(Gfx::PointF(0,0) );
        _mainWidget->setSize( _size);
-       _mainWidget->invalidate();
+       _mainWidget->update();
     }
 }
 
@@ -248,9 +248,21 @@ void Window::activate()
 }
 
 
-void Window::invalidate()
+void Window::focusPrev()
 {
-    _impl->invalidate();
+    moveFocus(_focusList.rbegin(), _focusList.rend());
+}
+
+
+void Window::focusNext()
+{
+    moveFocus(_focusList.begin(), _focusList.end());
+}
+
+
+void Window::update()
+{
+    _impl->update();
 }
 
 
@@ -270,18 +282,6 @@ void Window::render()
     }
     
     _windowManager.render( _surface );
-}
-
-
-void Window::focusPrev()
-{
-    moveFocus(_focusList.rbegin(), _focusList.rend());
-}
-
-
-void Window::focusNext()
-{
-    moveFocus(_focusList.begin(), _focusList.end());
 }
 
 
@@ -401,7 +401,7 @@ void Window::onKeyEvent(const KeyEvent& ev)
             focusNext();
 
             if(_focusWidget)
-                _focusWidget->invalidate();
+                _focusWidget->update();
         }
     }
 }
@@ -417,11 +417,11 @@ void Window::onResizeEvent(const ResizeEvent& ev)
     {
         _mainWidget->setPosition(Gfx::PointF(0,0));
         _mainWidget->setSize( _size);
-        _mainWidget->invalidate();
+        _mainWidget->update();
     }
     else
     {
-        invalidate();
+        update();
     }
 }
 
@@ -429,7 +429,7 @@ void Window::onResizeEvent(const ResizeEvent& ev)
 void Window::onMoveEvent( const MoveEvent& ev)
 {
     _position  = ev.position();  
-    invalidate();
+    update();
 }
 
 
@@ -441,14 +441,14 @@ void Window::onActivateEvent(const ActivateEvent& ev)
     {
         _windowManager.deactivate();  
 
-        invalidate();
+        update();
     }
     else
     {
        if( _parent )
            _parent->processEvent(ActivateEvent(true));
        else
-          invalidate();
+          update();
     }                
 }
 

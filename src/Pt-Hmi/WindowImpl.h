@@ -57,7 +57,7 @@ class WindowImpl : public Pt::Connectable
 
         virtual void activate() = 0;        
 
-        virtual void invalidate() = 0;  
+        virtual void update() = 0;  
 
         virtual void setPosition(const Gfx::PointF& p) = 0;
    

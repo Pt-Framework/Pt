@@ -95,16 +95,16 @@ class PT_HMI_API Window : public Pt::Connectable
 
     void activate();
 
-    // TODO: rename update()
-    void invalidate();
-
-    void render();
-
     // TODO: return new focusWidget() and remove focusWidget()
     void focusNext();
     
     // TODO: return new focusWidget() and remove focusWidget()
     void focusPrev();
+
+    // TODO: rename update()
+    void update();
+
+    void render();
 
     void processEvent(const Pt::Event& ev);
 

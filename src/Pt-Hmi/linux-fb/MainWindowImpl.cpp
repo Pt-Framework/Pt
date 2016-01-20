@@ -67,7 +67,7 @@ void MainWindowImpl::onEvent(const Pt::Event& ev)
 
 void MainWindowImpl::onInvalidate()
 {		
-	_app.mainScreen().impl()->invalidate();
+	_app.mainScreen().impl()->update();
 }
 
 

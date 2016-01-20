@@ -50,7 +50,7 @@ class PT_HMI_API ChildWindowImpl  : public WindowImpl
 
         virtual void hide();
         
-        virtual void invalidate();
+        virtual void update();
 
         virtual void setPosition(const Gfx::PointF& p);
 

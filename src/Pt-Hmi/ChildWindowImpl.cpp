@@ -51,19 +51,19 @@ void ChildWindowImpl::close()
 
 void ChildWindowImpl::show()
 {
-    invalidate();
+    update();
 }
 
 
 void ChildWindowImpl::hide()
 {
-    invalidate();
+    update();
 }
 
-void ChildWindowImpl::invalidate()
+void ChildWindowImpl::update()
 {
     if( _apiWindow->parent())	
-        _apiWindow->parent()->invalidate();	
+        _apiWindow->parent()->update();	
 }
 
 
@@ -75,53 +75,53 @@ void ChildWindowImpl::activate()
 
 void ChildWindowImpl::setPosition(const Gfx::PointF& p)
 {
-    invalidate();
+    update();
 }
 
 void ChildWindowImpl::setSize(const Gfx::SizeF& size)
 {
-    invalidate();
+    update();
 }
 
 void ChildWindowImpl::setState(WindowState::Type p)
 {
-    invalidate();
+    update();
 }
 
 void ChildWindowImpl::setBorder(WindowBorder::Type p)
 {
-    invalidate();
+    update();
 }
 
 void ChildWindowImpl::setIcon(const Gfx::Image& p)
 {
-    invalidate();
+    update();
 }
 
 void ChildWindowImpl::setEnabled(bool e)
 {
-    invalidate();
+    update();
 }
 
 void ChildWindowImpl::setMinimumSize(const Gfx::SizeF& s)
 {
-    invalidate();
+    update();
 }
 
 void ChildWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 {
-    invalidate();
+    update();
 }
 
 
 void ChildWindowImpl::setDecoration( WindowDecoration::Flags d )	
 {
-    invalidate();
+    update();
 }
 
 void ChildWindowImpl::setTitle( const std::string& t )
 {
-    invalidate();
+    update();
 }
 
 

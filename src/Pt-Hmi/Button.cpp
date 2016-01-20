@@ -101,7 +101,7 @@ void Button::onMnemonic()
 	}
 	*/  
 	Label::onMnemonic();	    		
-//	invalidate();	
+//	update();	
 }
 
 void Button::onDoublePressedAction()
@@ -137,7 +137,7 @@ void Button::onActionKey( const KeyEvent& kev )
 	//	break;
 	//}
 
-	invalidate();
+	update();
 }
 
 void Button::onShortcut( const KeyEvent& kev )
@@ -165,7 +165,7 @@ void Button::onShortcut( const KeyEvent& kev )
 	//	break;
 	//}
 	
-	invalidate();			
+	update();			
 }
 
 
@@ -182,7 +182,7 @@ void Button::onKeyEvent(const KeyEvent& ev)
 	//if(_buttonType == ButtonType::Press && _buttonState!= DeviceButton::Released)
 	//{
 	//	_buttonState= DeviceButton::Released;
-	//	invalidate();
+	//	update();
 	//}		
 }
 
@@ -210,7 +210,7 @@ void Button::onPointerEvent(const MouseEvent& ev)
 		if( _hover )
         {
 			    _hover =   false;
-          invalidate();
+          update();
         }
 
 		_lastPointerState = ev.buttons()[0].state();
@@ -291,7 +291,7 @@ void Button::onPointerEvent(const MouseEvent& ev)
 
   if( genOutput )
   {
-		invalidate();
+		update();
   }*/
 }
 

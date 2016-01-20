@@ -100,16 +100,125 @@ class PT_HMI_API Widget : public Pt::Connectable
         Widget* findWidget( const std::string& name );
         
         Widget* findWidget( const Gfx::PointF& pos );
-        
-        void processEvent(const Pt::Event& ev);
 
-        void invalidate();
+        //
+        // transformations
+        //
 
-        void render();
+        bool contains(const Gfx::PointF& p);
 
         Gfx::PointF toClient(const Gfx::PointF& globalPoint);
 
         Gfx::PointF fromClient(const Gfx::PointF& localPoint);
+        
+        //
+        // focus handling
+        //
+
+        bool hasFocus() const;
+
+        void focus();
+
+        bool acceptFocus() const;
+        
+        // TODO: focus by Tab, focus by pointer, both and none 
+        void setAcceptFocus(bool a);
+
+        size_t focusIndex() const;
+
+        void setFocusIndex(size_t index);
+
+        //
+        // special keys
+        //
+
+        Key actionKey() const;
+
+        void setActionKey( Key ak );
+
+        const Key* shortcut() const;
+
+        void setShortcut(const Key* k);
+
+        void setMnemonicWidget(Widget* w);
+
+        const Pt::Char* mnemonic() const;
+
+        void update();
+
+        // TODO: should widget paint itself on parent surface?
+        void render();
+
+        void processEvent(const Pt::Event& ev);
+
+    protected:
+        Widget();    
+
+        virtual void onEvent(const Pt::Event& ev);
+
+        virtual void onPointerEvent(const MouseEvent& ev);
+        
+        virtual void onScrollEvent( const ScrollEvent& ev );        
+    
+        virtual void onKeyEvent(const KeyEvent& ev);
+
+        virtual void onPointerEnter();    
+
+        virtual void onPointerLeave();
+
+        virtual void onFocus(bool isFocused);
+
+        virtual void onActionKey(const KeyEvent& kev);    
+              
+        virtual void onShortcut(const KeyEvent& kev);
+
+        virtual void onMnemonic();       
+
+    public:
+        // TODO
+        const std::string& name() const
+        {
+            return _name;
+        }
+
+        void setName(const std::string& name)
+        {
+          _name = name;
+        }
+
+        void setCaption(const std::string& c)
+        {
+            onSetCaption(c);
+        }
+
+        const std::string& caption() const
+        {
+            return _caption;
+        }
+
+        bool isEnabled() const
+        {
+            return _enabled;
+        }
+
+        void setEnabled( bool e )
+        {
+            onSetEnabled(e);
+        }
+
+        void setVisible( bool b )
+        {
+          onSetVisible(b);
+        }
+
+        bool visible() const
+        {
+          return _visible;
+        }
+
+        //
+        // geometry properties
+        //
 
         const Gfx::SizeF& size() const
         {
@@ -128,113 +237,12 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         void setPosition( const Gfx::PointF&  p)
         {
-                onSetPosition( p );
+            onSetPosition( p );
         }
 
-        const Gfx::Color& backgroundColor() const
-        {
-            return _backgroundColor;
-        }
-
-        void setBackgroundColor( const Gfx::Color& c )
-        {
-            _backgroundColor = c;
-        }
-
-        const Gfx::Color& foregroundColor() const
-        {
-            return _foregroundColor;
-        }
-
-        void setForegroundColor(const Gfx::Color& c )
-        {
-            _foregroundColor = c;
-        }
-
-        bool isEnabled() const
-        {
-            return _enabled;
-        }
-
-        void setEnabled( bool e )
-        {
-            onSetEnabled(e);
-        }
-
-        const Gfx::Image& backgroundImage() const
-        {
-                return _backgroundImage;
-        }
-
-        void setBackgroundImage( const Gfx::Image& im )
-        {
-            _backgroundImage = im;
-        }
-
-        ImageLayout backgroundImageLayout() const
-        {
-            return _backgroundImageLayout;
-        }
-
-        void setBackgroundImageLayout( ImageLayout l )
-        {
-            _backgroundImageLayout = l;
-        }
-    
-        const Hmi::Cursor& cursor() const
-        {
-            return  _cursor;
-        }
-
-        void setCursor( const Hmi::Cursor& c ) 
-        {
-            _cursor = c;
-        }
-
-        // TODO: focus by Tab, focus by pointer, both and none 
-        bool acceptFocus() const
-        {
-            return _acceptFocus;
-        }
-
-        void setAcceptFocus(bool a) 
-        {
-            _acceptFocus = a;
-        }
-
-        bool hasFocus() const
-        {
-            return _hasFocus;
-        }
-
-        void focus();
-
-        Key actionKey() const
-        {
-            return _actionKey;
-        }
-
-        void setActionKey( Key ak )
-        {
-          _actionKey = ak;
-        }
-
-        size_t focusIndex() const
-        {
-            return _focusIndex;
-        }
-
-        void setFocusIndex(size_t index);
-
-        const std::string& name() const
-        {
-            return _name;
-        }
-
-        void setName(const std::string& name)
-        {
-          _name = name;
-        }
+        //
+        // layout properties
+        //
 
         Docking& docking()
         {
@@ -276,28 +284,58 @@ class PT_HMI_API Widget : public Pt::Connectable
             _margin = s;
         }
 
-        const Key* shortcut() const;
-
-        void setShortcut(const Key* k);
-
-        void setVisible( bool b )
+        Alignment contentAlignment()
         {
-          onSetVisible(b);
+            return _contentAlignment;
         }
 
-        bool visible() const
+        void setContentAlignment( Alignment a )
         {
-          return _visible;
+            _contentAlignment = a;
         }
 
-        void setCaption( const std::string& c )
+        //
+        // apperance properties
+        //
+
+        const Gfx::Color& backgroundColor() const
         {
-            onSetCaption(c);
+            return _backgroundColor;
         }
 
-        const std::string& caption() const
+        void setBackgroundColor( const Gfx::Color& c )
         {
-            return _caption;
+            _backgroundColor = c;
+        }
+
+        const Gfx::Color& foregroundColor() const
+        {
+            return _foregroundColor;
+        }
+
+        void setForegroundColor(const Gfx::Color& c )
+        {
+            _foregroundColor = c;
+        }
+
+        const Gfx::Image& backgroundImage() const
+        {
+                return _backgroundImage;
+        }
+
+        void setBackgroundImage( const Gfx::Image& im )
+        {
+            _backgroundImage = im;
+        }
+
+        ImageLayout backgroundImageLayout() const
+        {
+            return _backgroundImageLayout;
+        }
+
+        void setBackgroundImageLayout( ImageLayout l )
+        {
+            _backgroundImageLayout = l;
         }
 
         void setFont( const Gfx::Font& f )
@@ -310,63 +348,30 @@ class PT_HMI_API Widget : public Pt::Connectable
             return _font;
         }
 
-        Alignment contentAlignment()
+        const Hmi::Cursor& cursor() const
         {
-            return _contentAlignment;
+            return  _cursor;
         }
 
-        void setContentAlignment( Alignment a )
+        void setCursor( const Hmi::Cursor& c ) 
         {
-            _contentAlignment = a;
+            _cursor = c;
         }
-
-        bool contains(const Gfx::PointF& p);
-
-        void setMnemonicWidget(Widget* w);
-
-        const Pt::Char* mnemonic() const;
 
     protected:
+        virtual void onLayout(PaintSurface& surface);
+
+        virtual void onPaint(PaintSurface& surface); 
+
         virtual void onSetPosition(const Gfx::PointF& pos);
 
         virtual void onSetSize(const Gfx::SizeF& size);
-            
-        virtual void onFocus(bool isFocused);
 
         virtual void onSetVisible( bool b );        
 
         virtual void onSetEnabled( bool e );
         
         virtual void onSetCaption( const std::string& s );
-
-    protected:
-        Widget();    
-
-        virtual void onEvent(const Pt::Event& ev);
-
-        virtual void onPointerEvent(const MouseEvent& ev);
-        
-        virtual void onScrollEvent( const ScrollEvent& ev );        
-    
-        virtual void onKeyEvent(const KeyEvent& ev);
-
-        virtual void onPointerEnter();    
-
-        virtual void onPointerLeave();
-    
-        virtual void onLayout(PaintSurface& surface);
-
-        virtual void onPaint(PaintSurface& surface);        
-
-        virtual void onActionKey(const KeyEvent& kev);    
-              
-        virtual void onShortcut(const KeyEvent& kev);
-
-        virtual void onMnemonic();      
-
-        static std::string removeMnemonic(const std::string& text);        
-
-        static size_t getMnemonicIndex(const std::string& text);    
 
     private:
         void setWindow(Window* window);

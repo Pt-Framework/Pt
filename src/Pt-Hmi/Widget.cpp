@@ -199,7 +199,16 @@ Widget* Widget::findWidget( const std::string& name )
 }
 
 
-Gfx::PointF Widget::toClient( const Gfx::PointF& globalPoint )
+bool Widget::contains(const Gfx::PointF& p)
+{
+    if( p.x()  < size().width() && p.x() >= 0 && p.y() < size().height() && p.y() >= 0)
+        return true;
+ 
+    return false;
+}
+
+
+Gfx::PointF Widget::toClient(const Gfx::PointF& globalPoint)
 {
     if( _parent == 0 )
         return globalPoint;
@@ -209,7 +218,7 @@ Gfx::PointF Widget::toClient( const Gfx::PointF& globalPoint )
 }
 
  
-Gfx::PointF Widget::fromClient( const Gfx::PointF& localPoint )
+Gfx::PointF Widget::fromClient(const Gfx::PointF& localPoint)
 {
     double x = localPoint.x();
     double y = localPoint.y();
@@ -228,29 +237,106 @@ Gfx::PointF Widget::fromClient( const Gfx::PointF& localPoint )
 }
 
 
-void Widget::updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p)
-{       
-    //ToDO: calculate the margin into the size and pos.
-   w._position = p;      
-   w._size = s;              
-   w._surface.resize( _size );  
-   w._isValid = false;
-   _isValid = false;
+bool Widget::hasFocus() const
+{
+    return _hasFocus;
 }
 
 
-void Widget::invalidate()
+void Widget::focus()
+{
+    if(_window)
+        _window->setFocusWidget(this);          
+}
+
+
+bool Widget::acceptFocus() const
+{
+    return _acceptFocus;
+}
+     
+        
+void Widget::setAcceptFocus(bool a) 
+{
+    _acceptFocus = a;
+}
+
+
+size_t Widget::focusIndex() const
+{
+    return _focusIndex;
+}
+
+
+void Widget::setFocusIndex(size_t index)
+{
+    _focusIndex = index;
+
+    if( _window )
+        _window->setFocusIndex(*this, index);
+}
+
+
+Key Widget::actionKey() const
+{
+    return _actionKey;
+}
+
+
+void Widget::setActionKey( Key ak )
+{
+  _actionKey = ak;
+}
+
+
+const Key* Widget::shortcut() const
+{
+    if(_shortcutKey.keyCode() == Key::NoKey)
+        return 0;
+           
+    return &_shortcutKey;
+}
+
+
+void Widget::setShortcut(const Key* k)
+{
+    if( ! k )
+        _shortcutKey.set(Key::NoKey);
+    else
+        _shortcutKey = *k;
+
+    if(_window)
+        _window->setShortcut(*this, k);
+}
+
+
+void Widget::setMnemonicWidget(Widget* w)
+{
+    _mnemonicEntered.disconnect();
+
+    if(w)
+        _mnemonicEntered += Pt::slot(*w, &Widget::onMnemonic);
+}
+
+
+const Pt::Char* Widget::mnemonic() const
+{
+    return _mnemonic != 0 ? &_mnemonic : 0;
+}
+
+
+void Widget::update()
 {
     _isValid = false;
 
     if( parent() )
     {
-        parent()->invalidate();   
+        parent()->update();   
     }
     else
     {
         if(_window)
-            _window->invalidate();
+            _window->update();
     }
 }
 
@@ -280,6 +366,103 @@ void Widget::render()
 
         _surface.painter().drawSurface( child->position(), child->_surface );
     }
+}
+
+
+void Widget::updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p)
+{       
+    //ToDO: calculate the margin into the size and pos.
+   w._position = p;      
+   w._size = s;              
+   w._surface.resize( _size );  
+   w._isValid = false;
+   _isValid = false;
+}
+
+
+void Widget::processEvent(const Pt::Event& ev)
+{
+    onEvent(ev);
+}
+
+
+void Widget::onEvent(const Pt::Event& ev)
+{
+    _eventReady.send(ev);
+}
+
+       
+void Widget::onPointerEvent(const MouseEvent& ev)
+{        
+    if( ev.isPress(MouseEvent::Left) && _acceptFocus )
+    {
+        focus();
+        update();
+    }
+}
+
+
+void Widget::onScrollEvent( const ScrollEvent& ev )
+{
+  
+}
+
+
+void Widget::onKeyEvent(const KeyEvent& ev)
+{
+    if( (ev.key().keyCode() == Key::Tab) && ev.isPress() )
+    {
+        if( ev.key().hasModifiers(Key::Shift) )
+            _window->focusPrev();
+        else
+            _window->focusNext();
+
+        update();
+
+        Widget* focusWidget = _window->focusWidget();
+        if(focusWidget)
+            focusWidget->update();
+
+        return;
+    }
+
+    if( ev.key() == actionKey() && hasFocus() )    
+    {
+        onActionKey(ev);        
+    }
+}
+
+
+void Widget::onPointerEnter()
+{
+    Application::instance().mainScreen().setCursor( &cursor() );    
+}
+
+
+void Widget::onPointerLeave()
+{    
+}
+
+
+void Widget::onFocus(bool hasFocus)
+{    
+    _hasFocus = hasFocus;
+}
+
+
+void Widget::onActionKey(const KeyEvent& kev)
+{
+}
+
+
+void Widget::onShortcut(const KeyEvent& kev)
+{
+}
+
+
+void Widget::onMnemonic()
+{
+    _mnemonicEntered.invoke();
 }
 
 
@@ -496,137 +679,6 @@ void Widget::onPaint( PaintSurface& surface )
 }
 
 
-void Widget::onActionKey(const KeyEvent& kev)
-{
-}
-
-
-void Widget::onShortcut(const KeyEvent& kev)
-{
-}
-
-
-void Widget::onPointerEnter()
-{
-    Application::instance().mainScreen().setCursor( &cursor() );    
-}
-
-
-void Widget::onPointerLeave()
-{    
-}
-
-void Widget::processEvent(const Pt::Event& ev)
-{
-    onEvent(ev);
-}
-
-
-void Widget::onEvent(const Pt::Event& ev)
-{
-    _eventReady.send(ev);
-}
-
-       
-void Widget::onPointerEvent(const MouseEvent& ev)
-{        
-    if( ev.isPress(MouseEvent::Left) && _acceptFocus )
-    {
-        focus();
-        invalidate();
-    }
-}
-
-
-void Widget::onScrollEvent( const ScrollEvent& ev )
-{
-  
-}
-
-
-void Widget::onKeyEvent(const KeyEvent& ev)
-{
-    if( (ev.key().keyCode() == Key::Tab) && ev.isPress() )
-    {
-        if( ev.key().hasModifiers(Key::Shift) )
-            _window->focusPrev();
-        else
-            _window->focusNext();
-
-        invalidate();
-
-        Widget* focusWidget = _window->focusWidget();
-        if(focusWidget)
-            focusWidget->invalidate();
-
-        return;
-    }
-
-    if( ev.key() == actionKey() && hasFocus() )    
-    {
-        onActionKey(ev);        
-    }
-}
-
-
-void Widget::onMnemonic()
-{
-    _mnemonicEntered.invoke();
-}
-
-
-bool Widget::contains(const Gfx::PointF& p)
-{
-    if( p.x()  < size().width() && p.x() >= 0 && p.y() < size().height() && p.y() >= 0)
-        return true;
- 
-    return false;
-}
-
-
-void Widget::focus()
-{
-    if(_window)
-        _window->setFocusWidget(this);          
-}
-
-
-const Key* Widget::shortcut() const
-{
-    if(_shortcutKey.keyCode() == Key::NoKey)
-        return 0;
-           
-    return &_shortcutKey;
-}
-
-
-void Widget::setShortcut(const Key* k)
-{
-    if( ! k )
-        _shortcutKey.set(Key::NoKey);
-    else
-        _shortcutKey = *k;
-
-    if(_window)
-        _window->setShortcut(*this, k);
-}
-
-
-void Widget::onFocus(bool hasFocus)
-{    
-    _hasFocus = hasFocus;
-}
-
-
-void Widget::setFocusIndex(size_t index)
-{
-    _focusIndex = index;
-
-    if( _window )
-        _window->setFocusIndex(*this, index);
-}
-
-
 void Widget::onSetSize(const Gfx::SizeF& size)
 {
     _size = size;              
@@ -648,89 +700,39 @@ void Widget::onSetVisible( bool b )
 }
 
 
-void Widget::onSetCaption( const std::string& c )
-{
-    _caption = c;        
-
-    int index = getMnemonicIndex(_caption);
-
+void Widget::onSetCaption(const std::string& text)
+{  
+    _caption.clear();
     _mnemonic = 0;
 
-    if( index == std::string::npos )
+    bool onAmp = false;
+    for(std::string::const_iterator it = text.begin(); it != text.end(); ++it)
     {
-        if( _window )
-            _window->setMnemonic(*this, 0 );
+        if(onAmp)
+        {
+            if(*it != '&')
+                _mnemonic = *it;
 
-        return;
-    }
-                    
-    _mnemonic = _caption[index + 1];
-
-    if( _window )
-        _window->setMnemonic(*this, &_mnemonic );
-}
-
-
-void Widget::setMnemonicWidget(Widget* w)
-{
-    _mnemonicEntered.disconnectAll();
-
-    if(w)
-        _mnemonicEntered += Pt::slot(*w, &Widget::onMnemonic);
-}
-
-
-const Pt::Char* Widget::mnemonic() const
-{
-    return _mnemonic != 0 ? &_mnemonic : 0;
-}
-
-
-size_t Widget::getMnemonicIndex(const std::string& text)
-{     
-    size_t pos = 0;
-  
-    if( text.empty() )    
-        return std::string::npos;
-
-    for( size_t i = 0; i < text.size() - 1; ++i)
-    {                
-        if( text[i] == '&' && text[i +1] =='&' )
-            ++i;
-        else if (text[i] == '&' && text[i +1] !='&')
-            return pos;
-
-        pos++;
-    }
-
-    return std::string::npos;
-}
-
-
-std::string Widget::removeMnemonic(const std::string& text)
-{
-    std::string removed;
-
-    for( size_t i = 0; i < text.size(); ++i )
-    {                
-        if( text[i] != '&')
-        {        
-            removed += text[i];    
-            continue;
+            _caption += *it;
+            onAmp = false;
         }
-        
-        if( (i + 1) == text.size() )
-            continue;
-
-        if(text[i+1] != '&')
-            continue;
-
-        removed += text[i];
-        ++i;
+        else
+        {
+            if(*it == '&')
+                onAmp = true;
+            else
+                _caption += *it;
+        }
     }
 
-    return removed;        
+    if(onAmp)
+        _caption += '&';
+    
+    Char* ch = _mnemonic != 0 ? &_mnemonic : 0;
+    if( _window )
+        _window->setMnemonic(*this, ch);
 }
+
 
 void Widget::onSetEnabled( bool e )
 {
