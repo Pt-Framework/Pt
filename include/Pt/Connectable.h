@@ -60,9 +60,6 @@ class PT_API Connectable
         */
         virtual ~Connectable();
 
-        //! @internal
-        void disconnectAll();
-
         /** @internal @brief Registers a %Connection with the %Connectable.
 
             This function is called when a new Connection involving
@@ -113,6 +110,9 @@ class PT_API Connectable
         */
         std::list<Connection>& connections()
         { return _connections; }
+
+        //! @internal
+        void disconnectAll();
 
     private:
         //! @internal @brief A list of all current connections
