@@ -32,6 +32,7 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/String.h>
+#include <Pt/Utf8Codec.h>
 
 namespace Pt {
 
@@ -51,32 +52,36 @@ Label::~Label()
 }
 
 
-void Label::recalcNewSize()
+void Label::setAutoSize(bool a)
 {
-    // could this be done in onLayout(), or onUpdate()?
-    if( ! _autoSize )
-        return;
-
-    PaintSurface surface;
-    surface.painter().setFont( font() );
-
-    const String& text = this->caption().c_str();
-    Gfx::FontMetrics fm = surface.painter().fontMetrics(text);
-
-    const Spacing& margin = docking().margin();
-    Gfx::SizeF size( fm.width() + margin.left() + margin.right(), 
-                     fm.height() + margin.top() +  margin.bottom() );
-    
-    setSize(size);
-    //update();
+    _autoSize = a;
 }
 
 
-void Label::onSetCaption(const std::string& cap)
+bool Label::isAutoSize() const
 {
-    Panel::onSetCaption(cap);
+    return _autoSize;
+}
+
+
+void Label::onUpdate()
+{
+    if( _autoSize )
+    {
+      PaintSurface surface;
+      surface.painter().setFont( font() );
+
+      String text = Pt::Utf8Codec::decode( this->caption() );
+      Gfx::FontMetrics fm = surface.painter().fontMetrics(text);
+
+      const Spacing& margin = docking().margin();
+      Gfx::SizeF size( fm.width() + margin.left() + margin.right(), 
+                       fm.height() + margin.top() +  margin.bottom() );
     
-    recalcNewSize();
+      setSize(size);
+    }
+
+    Widget::onUpdate();
 }
 
 
@@ -88,16 +93,14 @@ void Label::onPaint(PaintSurface& paintSurface)
     Gfx::Color         foreColor = foregroundColor();
     Gfx::Pen	          pen( 1, foreColor);
 
-
     Pt::String captionStr = caption().c_str();	  
 
     painter.setFont( font() );
-
     Gfx::FontMetrics	metric = painter.fontMetrics(captionStr);
 
     Panel::onPaint(paintSurface);
 
-    if( ! autoSize() )
+    if( ! _autoSize )
     {										            	
         switch(contentAlignment())
         {

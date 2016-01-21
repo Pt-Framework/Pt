@@ -359,6 +359,8 @@ class PT_HMI_API Widget : public Pt::Connectable
         }
 
     protected:
+        virtual void onUpdate();
+
         virtual void onLayout(PaintSurface& surface);
 
         virtual void onPaint(PaintSurface& surface); 

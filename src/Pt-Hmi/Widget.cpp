@@ -466,6 +466,11 @@ void Widget::onMnemonic()
 }
 
 
+void Widget::onUpdate()
+{
+}
+
+
 void Widget::onLayout( PaintSurface& surface )
 {
     Gfx::SizeF clientSize = surface.size();
