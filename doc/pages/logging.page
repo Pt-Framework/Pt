@@ -36,7 +36,7 @@ For example, logging statements may be executed indirectly when global objects
 are constructed or destructed. This should result in a static initialization
 fiasco.\n\n
 
-- \b Portability
+- \b Portability \n
 This library is extremly portable and has minimal dependencies. It requires 
 only standard C++ and a standard C++ library.
 
