@@ -105,7 +105,7 @@ void FileDeviceImpl::open(const Path& path, std::ios::openmode mode)
 
 bool FileDeviceImpl::beginOpen(EventLoop& loop, const Path& path, std::ios::openmode mode)
 {
-    String^ str = ref new String( path.impl()->c_str() );
+    Platform::String^ str = ref new Platform::String( path.impl()->c_str() );
 
     _getFileOp = StorageFile::GetFileFromPathAsync(str);
 

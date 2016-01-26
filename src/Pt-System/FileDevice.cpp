@@ -188,7 +188,7 @@ std::size_t FileDevice::onEndWrite(EventLoop& loop, const char* buffer, std::siz
 FileDevice::pos_type FileDevice::onSeek(off_type offset, std::ios::seekdir sd)
 {
     if( _opening || this->isReading() || this->isWriting() )
-        throw IOError( PT_ERROR_MSG("I/O operation pending") );
+        throw IOError("I/O operation pending");
     
     return _impl->seek(offset, sd);
 }

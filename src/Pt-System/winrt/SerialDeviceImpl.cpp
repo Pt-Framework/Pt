@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2007 Marc Boris D�rner
- * Copyright (C) 2007 Laurentiu-Gheorghe Crisan
+ * Copyright (C) 2007-2016 Marc Boris Duerner
+ * Copyright (C) 2007-2016 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,6 +26,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "SerialDeviceImpl.h"
 #include "Pt/System/IOError.h"
 
@@ -33,7 +34,7 @@ namespace Pt {
 
 namespace System {
 
-SerialDeviceImpl::SerialDeviceImpl(IODevice&)
+SerialDeviceImpl::SerialDeviceImpl(SerialDevice& )
 { 
 }
 
@@ -53,64 +54,14 @@ void SerialDeviceImpl::close()
 {
 }
 
-void SerialDeviceImpl::sync()
-{
-
-}
 
 void SerialDeviceImpl::cancel(EventLoop& loop)
 {
 }
 
 
-bool SerialDeviceImpl::runRead(EventLoop& loop)
+void SerialDeviceImpl::sync()
 {
-    return false;
-}
-
-
-bool SerialDeviceImpl::runWrite(EventLoop& loop)
-{
-    return false;
-}
-
-
-std::size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof) 
-{
-    eof = true; 
-    return 0;
-}
-
-
-std::size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
-{
-    eof = true;
-    return 0;
-}
-
-
-std::size_t SerialDeviceImpl::read( char* buffer, std::size_t count, bool& eof )
-{
-    eof = true;
-    return 0;
-}
-
-
-std::size_t SerialDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, std::size_t n)
-{
-    return n;
-}
-
-
-std::size_t SerialDeviceImpl::endWrite(EventLoop& loop, const char* buffer, std::size_t n)
-{
-    return n;
-}   
-
-
-std::size_t SerialDeviceImpl::write(const char* buffer, std::size_t n)
-{
-    return n;
 }
 
 
@@ -170,12 +121,6 @@ SerialDevice::Parity SerialDeviceImpl::parity() const
 }
 
 
-bool SerialDeviceImpl::setSignal(SerialDevice::Signal signal)
-{
-    return false;
-}
-
-
 void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 {
 }
@@ -183,7 +128,87 @@ void SerialDeviceImpl::setFlowControl( SerialDevice::FlowControl flowControl )
 
 SerialDevice::FlowControl SerialDeviceImpl::flowControl() const
 {
-    return SerialDevice::FlowControlBoth;
+    return SerialDevice::FlowControlNone;
+}
+
+
+void SerialDeviceImpl::setRts(bool)
+{
+}
+
+void SerialDeviceImpl::setDtr(bool)
+{
+}
+
+void SerialDeviceImpl::setBreak(bool)
+{
+}
+
+void SerialDeviceImpl::sendBreak(int)
+{
+
+}
+
+bool SerialDeviceImpl::isCts() const
+{
+    return false; 
+}
+
+
+bool SerialDeviceImpl::isDsr() const
+{
+    return false; 
+}
+
+
+bool SerialDeviceImpl::runRead(EventLoop& loop)
+{
+    return false;
+}
+
+
+bool SerialDeviceImpl::runWrite(EventLoop& loop)
+{
+    return false;
+}
+
+
+std::size_t SerialDeviceImpl::beginRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof) 
+{
+    eof = true; 
+    return 0;
+}
+
+
+std::size_t SerialDeviceImpl::endRead(EventLoop& loop, char* buffer, std::size_t n, bool& eof)
+{
+    eof = true;
+    return 0;
+}
+
+
+std::size_t SerialDeviceImpl::read( char* buffer, std::size_t count, bool& eof )
+{
+    eof = true;
+    return 0;
+}
+
+
+std::size_t SerialDeviceImpl::beginWrite(EventLoop& loop, const char* buffer, std::size_t n)
+{
+    return n;
+}
+
+
+std::size_t SerialDeviceImpl::endWrite(EventLoop& loop, const char* buffer, std::size_t n)
+{
+    return n;
+}   
+
+
+std::size_t SerialDeviceImpl::write(const char* buffer, std::size_t n)
+{
+    return n;
 }
 
 }//namespace System

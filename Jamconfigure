@@ -59,7 +59,7 @@ if $(TARGET_OS:L) = winrt
     PT_SYSTEM ?= winrt ;
 }
 
-if ! $(Pt_SYSTEM)
+if ! $(PT_SYSTEM)
 {
     WITH_WIN32 = [ CheckBuildC++ "#include <windows.h>"
                                  "int main() { return 0; }" ] ;
@@ -245,24 +245,24 @@ if $(PT_SYSTEM) = win32
     WSA_LINKLIBS ?= wsock32.lib ws2_32.lib Iphlpapi.lib ;
 
     WITH_WSA = [ CheckBuildC++ "#define WIN32_LEAN_AND_MEAN"
-                                "#include <windows.h>"
-                                "#include <winsock2.h>"
-                                "int main() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
-                                "return 0; }"
-                                : ""
-                                : $(WSA_LINKLIBS) ] ;
+                               "#include <windows.h>"
+                               "#include <winsock2.h>"
+                               "int main() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
+                               "return 0; }"
+                               : ""
+                               : $(WSA_LINKLIBS) ] ;
 
     if ! $(WITH_WSA)
     {
         WSA_LINKLIBS = winsock.lib Ws2.lib Iphlpapi.lib ;
 
         WITH_WSA = [ CheckBuildC++ "#define WIN32_LEAN_AND_MEAN"
-                                    "#include <windows.h>"
-                                    "#include <winsock2.h>"
-                                    "int main() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
-                                    "return 0; }"
-                                    : ""
-                                    : $(WSA_LINKLIBS) ] ;
+                                   "#include <windows.h>"
+                                   "#include <winsock2.h>"
+                                   "int main() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
+                                   "return 0; }"
+                                   : ""
+                                   : $(WSA_LINKLIBS) ] ;
     }
 
     if ! $(WITH_WSA)
@@ -270,12 +270,12 @@ if $(PT_SYSTEM) = win32
         WSA_LINKLIBS = -lwsock32 -lws2_32 -lIphlpapi ;
 
         WITH_WSA = [ CheckBuildC++ "#define WIN32_LEAN_AND_MEAN"
-                                    "#include <windows.h>"
-                                    "#include <winsock2.h>"
-                                    "int main() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
-                                    "return 0; }"
-                                    : ""
-                                    : $(WSA_LINKLIBS) ] ;
+                                   "#include <windows.h>"
+                                   "#include <winsock2.h>"
+                                   "int main() { WSADATA wd; WSAStartup(MAKEWORD(2,2), &wd);"
+                                   "return 0; }"
+                                   : ""
+                                   : $(WSA_LINKLIBS) ] ;
     }
 
     EchoOption WSA_LINKLIBS : "WSA2 libs" ;

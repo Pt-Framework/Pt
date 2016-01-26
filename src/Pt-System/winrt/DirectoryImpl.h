@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Marc Boris Duerner
+ * Copyright (C) 2013-2016 Marc Boris Duerner
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,15 +26,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <Pt/WinVer.h>
 #include <Pt/System/Api.h>
 #include <Pt/System/FileInfo.h>
-#include <string>
-#include <cstddef>
 #include <windows.h>
 
 namespace Pt {
 
 namespace System {
+
+class Path;
 
 class DirectoryIteratorImpl 
 {
@@ -44,9 +45,7 @@ class DirectoryIteratorImpl
         , _findHandle(INVALID_HANDLE_VALUE)
         { }
 
-        DirectoryIteratorImpl(const std::string& path);
-
-        DirectoryIteratorImpl(const char* path);
+        DirectoryIteratorImpl(const Path& path);
 
         ~DirectoryIteratorImpl();
 
@@ -62,7 +61,7 @@ class DirectoryIteratorImpl
         { return _finfo; }
 
     private:
-        void init(const char* path, std::size_t pathlen);
+        void init(const Path& path);
 
     private:
         unsigned int _refs;
@@ -70,43 +69,6 @@ class DirectoryIteratorImpl
         HANDLE _findHandle;
         WIN32_FIND_DATAW _current;
 };
-
-
-//class DirectoryImpl
-//{
-//    public:
-//        static void create(const std::string& path);
-//
-//        static void remove(const std::string& path);
-//
-//        static void move(const std::string& oldName, const std::string& newName);
-//
-//        static void chdir(const std::string& path);
-//
-//        static std::string cwd();
-//
-//        static std::string curdir()
-//        {
-//            return ".";
-//        }
-//
-//        static std::string updir()
-//        {
-//            return "..";
-//        }
-//
-//        static std::string rootdir()
-//        {
-//            return "c:\\";
-//        }
-//
-//        static std::string tmpdir();
-//
-//        static std::string sep()
-//        {
-//            return "\\";
-//        }
-//};
 
 } // namespace System
 

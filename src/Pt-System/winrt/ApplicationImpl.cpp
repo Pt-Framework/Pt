@@ -31,7 +31,6 @@
 #include <Pt/System/Path.h>
 #include <Pt/System/IOError.h>
 
-using namespace Platform;
 using namespace Windows::Storage;
 
 namespace Pt {
@@ -84,7 +83,7 @@ Path ApplicationImpl::cwd()
     // might want RoamingFolder?
     
     // Windows.Storage
-    String^ str = ApplicationData::Current->LocalFolder->Path;
+    Platform::String^ str = ApplicationData::Current->LocalFolder->Path;
     path.impl()->assign( str->Data() );
     return path;
 }
@@ -95,7 +94,7 @@ Path ApplicationImpl::tmpdir()
     Path path;
 
     // Windows.Storage
-    String^ str = ApplicationData::Current->TemporaryFolder->Path;
+    Platform::String^ str = ApplicationData::Current->TemporaryFolder->Path;
     path.impl()->assign( str->Data() );
     return path;
 }

@@ -26,8 +26,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../win32/win32.h"
-#include <string>
+#include "../win32/PathImpl.h"
 
 namespace Pt {
 

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2007 Marc Boris D�rner
- * Copyright (C) 2007 Laurentiu-Gheorghe Crisan
+ * Copyright (C) 2007-2016 Marc Boris Duerner
+ * Copyright (C) 2007-2016 Laurentiu-Gheorghe Crisan
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,6 +26,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #include "win32.h"
 #include "SerialDeviceImpl.h"
 #include "MainLoopImpl.h"

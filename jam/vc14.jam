@@ -1,0 +1,92 @@
+rule ConfigureVisualC
+{
+    if ! $(VISUALC_CONFIGURED)
+    {
+        VISUALC_CONFIGURED = 1 ;
+    
+        VISUALC ?= $(VISUALC:J=" ") ;
+
+        if ! $(VISUALC) 
+        {
+            VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VCExpress\\14.0\\Setup\\VC\\" : "ProductDir" ] ;
+            VISUALC ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\14.0\\Setup\\VC\\" : "ProductDir"  ] ;
+            VISUALC ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\14.0\\Setup\\VC\\" : "ProductDir" ] ;
+
+            VISUALC = $(VISUALC:P) ;
+            VISUALC = $(VISUALC:P) ;
+        }
+        
+        if ! $(VISUALC)
+        {
+            Exit "VISUALC not found" ;
+        }
+
+		CCFLAGS  += /FS ;
+		C++FLAGS += /FS ;
+    
+        VISUALC_PATH = $(VISUALC)\\Common7\\IDE ;
+        Echo "Checking for Visual Studio..." $(VISUALC) ;
+        Configure VISUALC_PATH ;
+    }
+}
+
+
+rule ConfigurePlatformSDK
+{
+    if ! $(PLATFORMSDK_CONFIGURED)
+    {
+        PLATFORMSDK_CONFIGURED = 1 ;
+
+        PLATFORMSDK ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows Kits\\Installed Roots\\" : "KitsRoot10" ] ;
+    
+        if ! $(PLATFORMSDK)
+        {
+            Exit "PLATFORMSDK not found" ;
+        }
+    
+        Echo "Checking for Platform SDK..." $(PLATFORMSDK) ;
+
+        STDHDRS  += \""$(PLATFORMSDK)include\\10.0.10586.0\\um\"" ;
+        STDHDRS  += \""$(PLATFORMSDK)include\\10.0.10586.0\\ucrt\"" ;
+		STDHDRS  += \""$(PLATFORMSDK)include\\10.0.10586.0\\shared\"" ;
+        STDHDRS  += \""$(PLATFORMSDK)include\\10.0.10586.0\\winrt\"" ;
+        CCFLAGS  += /DWIN32 ;
+        C++FLAGS += /DWIN32 ;
+   
+        C++FLAGS += /AI \""$(PLATFORMSDK)UnionMetadata\"" ;
+		C++FLAGS += /AI \""$(VISUALC)\\VC\\VCPackages\"" ;
+
+        if $(TARGET_OSPLAT:L) = "x86_64"
+        {
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\10.0.10586.0\\um\\x64\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\10.0.10586.0\\ucrt\\x64\"" ;
+        }
+        else if $(TARGET_OSPLAT:L) = "x86"
+        {
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\10.0.10586.0\\um\\x86\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\10.0.10586.0\\ucrt\\x86\"" ;
+        }
+        else if $(TARGET_OSPLAT:L) = "arm"
+        {
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\10.0.10586.0\\um\\arm\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\10.0.10586.0\\ucrt\\arm\"" ;
+        }
+        else if $(TARGET_OSPLAT:L) = "arm64"
+        {
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\10.0.10586.0\\um\\arm64\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\10.0.10586.0\\ucrt\\arm64\"" ;
+        }
+
+        Configure STDHDRS ;
+        Configure CCFLAGS ;
+        Configure C++FLAGS ;
+        Configure LINKFLAGS ;
+    }
+}
+
+
+rule ConfigureMt
+{
+}
+
+Load vc.jam ;

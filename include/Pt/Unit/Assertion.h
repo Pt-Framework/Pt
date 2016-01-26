@@ -89,7 +89,7 @@ namespace Unit {
         do { \
             if( !(cond) ) \
                 throw Pt::Unit::Assertion(#cond, PT_SOURCEINFO); \
-        } while (testCond)
+        } while (::Pt::Unit::testCond)
 
     #define PT_UNIT_ASSERT_MSG(cond, what) \
         do { \
@@ -99,7 +99,7 @@ namespace Unit {
                 _pt_msg << what; \
                 throw Pt::Unit::Assertion(_pt_msg.str(), PT_SOURCEINFO); \
             } \
-        } while (testCond)
+        } while (::Pt::Unit::testCond)
 
     // TODO: deprecated
     #define PT_UNIT_ASSERT_EQUALS(value1, value2) \
@@ -110,7 +110,7 @@ namespace Unit {
                 _pt_msg << "not equal: value1 (" #value1 ")=<" << value1 << "> value2 (" #value2 ")=<" << value2 << '>'; \
                 throw Pt::Unit::Assertion(_pt_msg.str(), PT_SOURCEINFO); \
             } \
-        } while (testCond)
+        } while (::Pt::Unit::testCond)
 
     #define PT_UNIT_ASSERT_EQUAL(value1, value2) \
         do { \
@@ -120,7 +120,7 @@ namespace Unit {
                 _pt_msg << "not equal: (" #value1 ")=<" << value1 << ">, (" #value2 ")=<" << value2 << '>'; \
                 throw Pt::Unit::Assertion(_pt_msg.str(), PT_SOURCEINFO); \
             } \
-        } while (testCond)
+        } while (::Pt::Unit::testCond)
 
     #define PT_UNIT_ASSERT_THROW(cond, EX) \
         do { \
@@ -138,7 +138,7 @@ namespace Unit {
             } \
             catch(const EX &) \
             {} \
-        } while (testCond)
+        } while (::Pt::Unit::testCond)
 
     #define PT_UNIT_ASSERT_NOTHROW(cond) \
         do { \
@@ -156,14 +156,14 @@ namespace Unit {
             { \
                 throw Pt::Unit::Assertion("unexpected exception." , PT_SOURCEINFO); \
             } \
-        } while (testCond)
+        } while (::Pt::Unit::testCond)
 
     #define PT_UNIT_FAIL(what) \
         do { \
             std::ostringstream _pt_msg; \
             _pt_msg << what; \
             throw Pt::Unit::Assertion(_pt_msg.str(), PT_SOURCEINFO); \
-        } while (testCond)
+        } while (::Pt::Unit::testCond)
 
 } // namespace Unit
 
