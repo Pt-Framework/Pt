@@ -580,7 +580,7 @@ inline CharT* formatInt(CharT* buf, std::size_t buflen, T si, const FormatT& fmt
 
     do
     {
-        T lsd = u % base;
+        UnsignedInt lsd = u % base;
         u /= base;
         --cur;
         *cur = fmt.toChar( unsigned(lsd) );
