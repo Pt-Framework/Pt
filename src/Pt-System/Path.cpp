@@ -123,7 +123,7 @@ Path& Path::append(const Pt::String& s)
 {
     if( ! empty() && ! s.empty() &&
         _impl->back() != _impl->dirsep() &&
-        s[0] != _impl->dirsep() )
+        s[0] != Char(_impl->dirsep()) )
     { 
         _impl->push_back( _impl->dirsep() );
     }

@@ -407,7 +407,7 @@ class XmlWriterImpl
         void writeAttribute(const Char* localName, std::size_t localNameSize,
                             const Char* value, std::size_t valueSize)
         {
-            if( ! _tos || ! _state == OnStartElement)
+            if( ! _tos || _state != OnStartElementOpen )
                 return;
 
             *_tos << Pt::Char(' ');
@@ -421,7 +421,7 @@ class XmlWriterImpl
                             const Char* localName, std::size_t localNameSize,
                             const Char* value, std::size_t valueSize)
         {
-            if( ! _tos || ! _state == OnStartElement)
+            if( ! _tos || _state != OnStartElementOpen )
                 return;
 
             const Namespace* nsdecl = _nsctx.findUri(ns, nsSize);

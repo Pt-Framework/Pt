@@ -402,7 +402,7 @@ std::streamsize Connection::read(char* buf, std::size_t n, std::streamsize maxIm
         if(sslerr != SSL_ERROR_WANT_READ)
         {
             PT_LOG_DEBUG("ssl error occured");
-            while( sslerr = ERR_get_error() ) 
+            while( (sslerr = ERR_get_error()) ) 
             {
                 PT_LOG_DEBUG("ERR_error_string = " << ERR_error_string(sslerr, 0));
             }

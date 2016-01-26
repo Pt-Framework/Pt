@@ -83,8 +83,8 @@ Connection::Connection()
 , _sslbuf()
 , _httpbuf()
 , _os(&_sockbuf)
-, _outputPipelined(false)
 , _inputPipelined(false)
+, _outputPipelined(false)
 , _timeout(WaitInfinite)
 , _keepaliveTimeout(WaitInfinite)
 , _maxReadSize( NoRequestSizeLimit )
@@ -1187,7 +1187,7 @@ void Connection::beginWrite()
         _sockbuf.beginWrite();
         _timer.start(_timeout);
     } 
-    catch(System::IOError& e)
+    catch(System::IOError&)
     {
         PT_LOG_DEBUG("deferred I/O error");
         _isFailed = true;

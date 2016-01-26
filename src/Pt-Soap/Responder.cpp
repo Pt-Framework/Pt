@@ -250,7 +250,7 @@ void Responder::beginResult(std::ostream& os)
 
 void Responder::beginFault(std::ostream& os, const Fault& fault)
 {
-    int rc = fault.rc();
+    //int rc = fault.rc();
     const char* msg = fault.what();
 
     // text stream might still have bytes in text buffer

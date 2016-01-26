@@ -413,8 +413,6 @@ bool Client::advance(const Pt::Xml::Node& node)
 
             if(node.type() == Xml::Node::StartElement)
             {
-                const Xml::StartElement& se = static_cast<const Xml::StartElement&>(node);
-
                 const Parameter* param = _op->getOutput();
                 if( ! param )
                     throw Fault("undefined output parameter", Fault::MethodNotFound);
@@ -581,7 +579,6 @@ bool Client::advance(const Pt::Xml::Node& node)
 
         case OnEnvelopeEnd:
         {
-            int n = 0;
             break;
         }
     }
