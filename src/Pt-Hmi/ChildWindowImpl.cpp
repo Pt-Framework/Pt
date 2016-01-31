@@ -34,6 +34,7 @@ namespace Hmi{
 
 ChildWindowImpl::ChildWindowImpl(Window* api)
 : WindowImpl(api)
+, _visible( false)
 {
 }
 
@@ -45,20 +46,22 @@ ChildWindowImpl::~ChildWindowImpl()
 
 void ChildWindowImpl::close()
 {
-    hide();
-}
-
-
-void ChildWindowImpl::show()
-{
     update();
 }
 
 
-void ChildWindowImpl::hide()
+void ChildWindowImpl::setVisible(bool b)
 {
+    if( b ) 
+    {
+        if( ! _visible)
+            activate();
+    }
+
+    _visible = b;
     update();
 }
+
 
 void ChildWindowImpl::update()
 {
@@ -69,6 +72,7 @@ void ChildWindowImpl::update()
 
 void ChildWindowImpl::activate()
 {
+  _apiWindow->parent()->activate();
   _apiWindow->parent()->windowManager().activate( *_apiWindow );	
 }
 

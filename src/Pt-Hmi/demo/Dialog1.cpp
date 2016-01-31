@@ -100,7 +100,7 @@ void Dialog1::onClosedByButton()
 void Dialog1::onShowNextDialog()
 {
 	Dialog2 dialog;
-	dialog.doModal(this);		
+	dialog.runModal();		
 }
 	
 }}}

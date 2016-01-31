@@ -26,6 +26,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Hmi/Screen.h>
 #include "ScreenImpl.h"
+#include <Pt/Hmi/Application.h>
 
 namespace Pt{
 namespace Hmi{
@@ -167,5 +168,6 @@ Window* Screen::findWindow(const std::string& name)
 	
     return 0;
 }
+
 
 }}

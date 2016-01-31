@@ -24,24 +24,22 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+
 #include <Pt/Hmi/Button.h>
-#include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/MouseEvent.h>
+#include <Pt/Hmi/TouchEvent.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Point.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+namespace Hmi {
 
 Button::Button()
-: _pressed(false)
-, _timeout(false)
-, _pressCounter(0)
-, _hover(false)
-, _buttonType(Pt::Hmi::ButtonType::Press)
-, _doublePressTimeInMs(1500)
-, _image(Gfx::Image(0,0))
+: _image(Gfx::Image(0,0))
 , _imageAlign( MidleLeft)
+, _isPressed(false)
 {
   setBackgroundColor(Gfx::Color::fromRgb8(245,245,245));
   setPanelBorderStyle(Custom);
@@ -51,269 +49,113 @@ Button::Button()
   setAcceptFocus(true);
   setPanelBorderRoundEdge(true);
   setPanelBorderStyle(Panel::Single);
-	
-	_doublePressTimer.timeout() += Pt::slot(*this, &Button::onDoublePressedTimeout);
-	_doublePressTimer.setActive(Pt::Hmi::Application::instance().loop());	
 }
+
 
 Button::~Button()
 {
 }
 
-void Button::onDoublePressedTimeout()
+
+void Button::onClicked(const Gfx::PointF& pos)
 {
-	_timeout = true;
-	_pressCounter = 0;
-	_doublePressTimer.stop();
+    Label::onClicked(pos);
+    _clicked.send(*this);
 }
 
-void Button::onPressedAction()
-{	
-	_pressCounter++;
-	
-	if(_pressCounter == 1)
-		_doublePressTimer.start(_doublePressTimeInMs);
-
-	if( _pressCounter == 2)	
-	{
-		_pressCounter = 0;
-		DoubleClicked.send();
-	}
-
-	Clicked.send();
-}
 
 void Button::onMnemonic()
 {
-/*
-	switch(_buttonType)
-	{
-		case ButtonType::Press:
-		{
-			onPressedAction();
-		}
-		break;
-
-		case ButtonType::Toggle:
-		{
-		}			
-		break;
-	}
-	*/  
 	Label::onMnemonic();	    		
-//	update();	
+    _clicked.send(*this);
 }
-
-void Button::onDoublePressedAction()
-{
-	DoubleClicked.send();
-	_doublePressTimer.stop();
-}
-
 
 
 void Button::onActionKey( const KeyEvent& kev )
 {
     Label::onActionKey(kev);
-
-	//switch( _buttonType )
-	//{
-	//	case ButtonType::Press:
-	//	{
-	//		_buttonState= ( state == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;
-	//	}
-	//	break;
-	//	
-	//	case ButtonType::Toggle:
-	//	{
-	//		if((state == KeyEvent::KeyDown))
-	//		{
-	//			if(_buttonState== DeviceButton::Pressed)
-	//				_buttonState= DeviceButton::Released;
-	//			else
-	//				_buttonState= DeviceButton::Pressed;
-	//		}
-	//	}
-	//	break;
-	//}
-
-	update();
+    _clicked.send(*this);
 }
+
 
 void Button::onShortcut( const KeyEvent& kev )
 {
     Label::onShortcut(kev);
-
-	//switch( _buttonType)
-	//{
-	//	case ButtonType::Press:
-	//	{
-	//		_buttonState= (state == KeyEvent::KeyDown) ? DeviceButton::Pressed : DeviceButton::Released;				
-	//		setFocus( true );
-
-	//	}
-	//	break;
-
-	//	case ButtonType::Toggle:
-	//	{
-	//		if( state == KeyEvent::KeyDown )
-	//		{
-	//			_buttonState= (_buttonState== DeviceButton::Pressed) ? DeviceButton::Released : DeviceButton::Pressed;											
-	//			setFocus( true );
-	//		}
-	//	}
-	//	break;
-	//}
-	
-	update();			
-}
-
-
-void Button::onKeyEvent(const KeyEvent& ev)
-{		
-	if( ! isEnabled() )
-		return;
-
-	if( ! visible() )
-		return;
-
-	Label::onKeyEvent(ev);
-
-	//if(_buttonType == ButtonType::Press && _buttonState!= DeviceButton::Released)
-	//{
-	//	_buttonState= DeviceButton::Released;
-	//	update();
-	//}		
+    _clicked.send(*this);			
 }
 
 
 void Button::onPointerEvent(const MouseEvent& ev)
 {    
-	Gfx::PointF point = toClient(Gfx::PointF(ev.x(), ev.y()));  
-      
-	Label::onPointerEvent(ev);
-		    
-	//if( !isEnabled() )
-	//{
-	//	_lastPointerState = ev.buttons()[0].state();
-	//	return;
-	//}
+    Label::onPointerEvent(ev);
 
-	//if( !visible() )
-	//{
-	//	_lastPointerState = ev.buttons()[0].state();
-	//	return;
-	//}
-    
-	/*if( !contains(point) )
-	{
-		if( _hover )
-        {
-			    _hover =   false;
-          update();
-        }
+    if( ev.isPressed(MouseEvent::Left) != _isPressed )
+    {
+        _isPressed = ev.isPressed(MouseEvent::Left);
+        update();
+    }
+}
 
-		_lastPointerState = ev.buttons()[0].state();
 
-		return;			
-	}
-    
-	bool genOutput = false;
+void Button::onPointerEnter()
+{
+    Label::onPointerEnter();
+    update();
+}
 
-	if(!_hover)
-	{
-		_hover =   true;    
-		genOutput = true;
-	}
 
-	if( _lastPointerState != ev.buttons()[0].state() )		
-	{	
-		switch(_buttonType)
-		{
-			case ButtonType::Press:
-			{
-				if(!hasFocus())
-				{
-					genOutput = true;						
-					setFocus(true);															
-				}
+void Button::onPointerLeave()
+{
+    Label::onPointerLeave();
+    update();
+}
 
-				switch(ev.buttons()[0].state())
-				{
-					case DeviceButton::Pressed:
-					{		
 
-						if(_buttonState != DeviceButton::Pressed)
-						{
-							genOutput = true;						
-							_buttonState = DeviceButton::Pressed;
-						}
-					}
-					break;
-			
-					case DeviceButton::Released:			
-					{
+void Button::onTouchEvent(const TouchEvent& ev)
+{    
+    Label::onTouchEvent(ev);
 
-						if(_buttonState!= DeviceButton::Released)
-						{
-							genOutput = true;
-							_buttonState= DeviceButton::Released;												
-						}
-					}
-					break;
-				}
-			}
-			break;
-
-			case ButtonType::Toggle:
-			{
-				if(!hasFocus())	
-				{
-					setFocus(true);			
-					genOutput = true;
-				}
-
-				if(ev.buttons()[0].state() == DeviceButton::Pressed )
-				{
-					genOutput = true;
-
-					if(_buttonState== DeviceButton::Pressed)
-						_buttonState= DeviceButton::Released;
-					else
-						_buttonState= DeviceButton::Pressed;
-				}
-			}				
-			break;
-		}
-	}
-
-	_lastPointerState = ev.buttons()[0].state();
-
-  if( genOutput )
-  {
-		update();
-  }*/
+    if( ev.isPress() != _isPressed )
+    {
+        _isPressed = ev.isPress();
+        update();
+    }
 }
 
 
 void Button::onPaint(PaintSurface& paintSurface)
 {	
-	if( !isEnabled() )
-	{
-		Label::onPaint(paintSurface);
-		return;
-	}			
+    bool mouseOver = window()->pointerWidget() == this;
+    Pt::Hmi::Painter& painter = paintSurface.painter();
 
-	Label::onPaint(paintSurface);
-	
-	//if( _buttonState== DeviceButton::Pressed )
-	//	return;
+    Gfx::Color bkgColor = backgroundColor();
 
-	Pt::Hmi::Painter& painter = paintSurface.painter();
-  Gfx::SizeF  size = this->size();
-      
-	if( _hover || hasFocus() )
-	{
+    if( ! isEnabled() )
+    {
+        Label::onPaint(paintSurface);
+        return;
+    }
+
+    if(mouseOver)
+    {
+        setBackgroundColor( Gfx::Color(bkgColor.red() - 0.10 ,
+                                       bkgColor.green() - 0.10 ,
+                                       bkgColor.blue() - 0.10 ) );
+    }
+
+    if( _isPressed )
+    {
+        setBackgroundColor( Gfx::Color(bkgColor.red() - 0.20 ,
+                                       bkgColor.green() - 0.20 ,
+                                       bkgColor.blue() - 0.20 ) );
+    }
+
+    Label::onPaint(paintSurface);
+    setBackgroundColor(bkgColor);
+
+    if( hasFocus() )
+    {
+        Gfx::SizeF  size = this->size();
 		size.addHeight(-4);
 		size.addWidth(-4);
 
@@ -323,8 +165,10 @@ void Button::onPaint(PaintSurface& paintSurface)
 		
 		painter.setPen(pen);		
 		Gfx::RectF rect(Gfx::PointF(2,2), size);
-		painter.drawRect(rect);		
-	}		
+        painter.drawRect(rect);
+    }
 }
 
-}}
+}
+
+}

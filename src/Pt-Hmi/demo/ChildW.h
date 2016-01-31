@@ -5,6 +5,7 @@
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Label.h>
+#include "Dialog1.h"
 
 namespace Pt{
 namespace Hmi{
@@ -17,8 +18,14 @@ class ChildW : public Hmi::Window
 		ChildW();
 		~ChildW();
 
+        void xxx()
+        {
+            remove(_childWindow2);
+            add(_childWindow2);
+            _childWindow2.setVisible(true);
+        }
 	private:
-		void onShowDialog();
+		void onShowDialog(Button& button);
 		void onCloseApp();		
 
 	private:

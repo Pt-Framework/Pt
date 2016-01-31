@@ -43,13 +43,10 @@ class PT_HMI_API ChildWindowImpl  : public WindowImpl
 
         virtual ~ChildWindowImpl();    
 
-
-        virtual void show();
+        virtual void setVisible( bool v);
 	
         virtual void activate();
-
-        virtual void hide();
-        
+       
         virtual void update();
 
         virtual void setPosition(const Gfx::PointF& p);
@@ -73,6 +70,9 @@ class PT_HMI_API ChildWindowImpl  : public WindowImpl
         virtual void setTitle( const std::string& t );
         
         virtual void close();
+
+private:
+    bool _visible;
 };
 
 }

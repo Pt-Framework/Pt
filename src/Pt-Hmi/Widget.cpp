@@ -32,6 +32,8 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Brush.h>
+#include <Pt/String.h>
+#include <Pt/Utf8Codec.h>
 #include "WindowImpl.h"
 
 namespace Pt {
@@ -59,6 +61,7 @@ Widget::Widget()
 {      
     _eventReady += Pt::slot(*this, &Widget::onKeyEvent);
     _eventReady += Pt::slot(*this, &Widget::onPointerEvent);
+    _eventReady += Pt::slot(*this, &Widget::onTouchEvent);
     _eventReady += Pt::slot(*this, &Widget::onScrollEvent);
 }
 
@@ -158,7 +161,7 @@ Widget* Widget::findWidget( const Gfx::PointF& pos )
 {
     std::vector<Widget*>::reverse_iterator it = _children.rbegin();
 
-    if( !visible() )
+    if( ! visible() || ! isEnabled() )
         return 0;
 
     for( ; it != _children.rend(); ++it )
@@ -399,6 +402,16 @@ void Widget::onPointerEvent(const MouseEvent& ev)
         focus();
         update();
     }
+
+    if( ev.isRelease(MouseEvent::Left) && hasFocus() )
+    {
+        onClicked( ev.position() );
+    }
+}
+
+
+void Widget::onTouchEvent(const TouchEvent& ev)
+{
 }
 
 
@@ -441,6 +454,11 @@ void Widget::onPointerEnter()
 
 void Widget::onPointerLeave()
 {    
+}
+
+
+void Widget::onClicked(const Gfx::PointF& pos)
+{
 }
 
 
@@ -684,7 +702,13 @@ void Widget::onPaint( PaintSurface& surface )
 }
 
 
-void Widget::onSetSize(const Gfx::SizeF& size)
+void Widget::setEnabled( bool e )
+{
+    _enabled = e;
+}
+
+
+void Widget::setSize(const Gfx::SizeF& size)
 {
     _size = size;              
     _surface.resize( _size );
@@ -692,20 +716,20 @@ void Widget::onSetSize(const Gfx::SizeF& size)
 }
 
     
-void Widget::onSetPosition(const Gfx::PointF& pos)
+void Widget::setPosition(const Gfx::PointF& pos)
 {
    _position = pos;
    _isValid = false;
 }
 
 
-void Widget::onSetVisible( bool b )
+void Widget::setVisible( bool b )
 {
     _visible = b;
 }
 
 
-void Widget::onSetCaption(const std::string& text)
+void Widget::setCaption(const std::string& text)
 {  
     _caption.clear();
     _mnemonic = 0;
@@ -736,12 +760,22 @@ void Widget::onSetCaption(const std::string& text)
     Char* ch = _mnemonic != 0 ? &_mnemonic : 0;
     if( _window )
         _window->setMnemonic(*this, ch);
+
+    setCaptionMetrics();
 }
 
 
-void Widget::onSetEnabled( bool e )
+void Widget::setFont( const Gfx::Font& f )
 {
-    _enabled = e;
+    _font = f;
+    setCaptionMetrics();
+}
+
+
+void Widget::setCaptionMetrics()
+{  
+    String text = Pt::Utf8Codec::decode( this->caption() );
+    _captionMetrics = Hmi::Painter::fontMetrics( _font, text);
 }
 
 } // namespace

@@ -41,11 +41,6 @@
 #include "Pt/Time.h"
 #include "Pt/DateTime.h"
 
-using namespace std;
-using namespace Pt;
-using namespace Pt::Db;
-
-
 class ValueImplTest : public Pt::Unit::TestSuite
 {
 public:
@@ -105,7 +100,7 @@ void ValueImplTest::Blob()
     PT_UNIT_ASSERT(blob.size() == 6);
     PT_UNIT_ASSERT( std::strncmp(blob.data(), "World!", 6) == 0);
 
-    ValueImpl impl("Hello world!", 12);
+    Pt::Db::ValueImpl impl("Hello world!", 12);
     impl.getBlob(blob);
     PT_UNIT_ASSERT(blob.size() == 12);
     PT_UNIT_ASSERT( std::strncmp(blob.data(), "Hello world!", 12) == 0);
@@ -113,64 +108,64 @@ void ValueImplTest::Blob()
 
 void ValueImplTest::testIsNull()
 {
-    ValueImpl valImp;
+    Pt::Db::ValueImpl valImp;
     PT_UNIT_ASSERT( valImp.isNull() );
 }
 
 void ValueImplTest::testBool()
 {
-    ValueImpl valImp("true");
+    Pt::Db::ValueImpl valImp("true");
     PT_UNIT_ASSERT( valImp.getBool() == true );
 
-    ValueImpl valImp2("T");
+    Pt::Db::ValueImpl valImp2("T");
     PT_UNIT_ASSERT( valImp.getBool() == true );
 
-    ValueImpl valImp3("1");
+    Pt::Db::ValueImpl valImp3("1");
     PT_UNIT_ASSERT( valImp.getBool() == true );
 
-    ValueImpl valImp4("Yes");
+    Pt::Db::ValueImpl valImp4("Yes");
     PT_UNIT_ASSERT( valImp.getBool() == true );
 
-    ValueImpl valImp5("y");
+    Pt::Db::ValueImpl valImp5("y");
     PT_UNIT_ASSERT( valImp.getBool() == true );
 }
 
 void ValueImplTest::testInt()
 {
-    ValueImpl valImp("22");
+    Pt::Db::ValueImpl valImp("22");
     PT_UNIT_ASSERT( valImp.getInt() == 22 );
 
-    ValueImpl valImp2("-42");
+    Pt::Db::ValueImpl valImp2("-42");
     PT_UNIT_ASSERT( valImp2.getInt() == -42 );
 }
 
 void ValueImplTest::testUnsigned()
 {
-    ValueImpl valImp("478");
+    Pt::Db::ValueImpl valImp("478");
     PT_UNIT_ASSERT( valImp.getInt() == 478 );
 }
 
 void ValueImplTest::testFloat()
 {
-    ValueImpl valImp("321.125");
+    Pt::Db::ValueImpl valImp("321.125");
     PT_UNIT_ASSERT( valImp.getFloat() == 321.125f );
 }
 
 void ValueImplTest::testDouble()
 {
-    ValueImpl valImp("321.580078125");
+    Pt::Db::ValueImpl valImp("321.580078125");
     PT_UNIT_ASSERT( valImp.getDouble() == 321.580078125 );
 }
 
 void ValueImplTest::testChar()
 {
-    ValueImpl valImp("c");
+    Pt::Db::ValueImpl valImp("c");
     PT_UNIT_ASSERT( valImp.getChar() == 'c' );
 }
 
 void ValueImplTest::testString()
 {
-    ValueImpl valImp("Frag den Chemiker");
+    Pt::Db::ValueImpl valImp("Frag den Chemiker");
     std::string str;
     valImp.getString(str);
     PT_UNIT_ASSERT( str == "Frag den Chemiker" );
@@ -178,21 +173,21 @@ void ValueImplTest::testString()
 
 void ValueImplTest::testDate()
 {
-    Date date(2001, 11, 30);
-    ValueImpl valImp(date.toIsoString());
+    Pt::Date date(2001, 11, 30);
+    Pt::Db::ValueImpl valImp(date.toIsoString());
     PT_UNIT_ASSERT( valImp.getDate() == date );
 }
 
 void ValueImplTest::testTime()
 {
-    Time time(11, 55, 59, 999);
-    ValueImpl valImp(time.toIsoString());
+    Pt::Time time(11, 55, 59, 999);
+    Pt::Db::ValueImpl valImp(time.toIsoString());
     PT_UNIT_ASSERT( valImp.getTime() == time );
 }
 
 void ValueImplTest::testDateTime()
 {
-    DateTime dateTime(2001, 11, 30, 11, 55, 59, 999);
-    ValueImpl valImp(dateTime.toIsoString());
+    Pt::DateTime dateTime(2001, 11, 30, 11, 55, 59, 999);
+    Pt::Db::ValueImpl valImp(dateTime.toIsoString());
     PT_UNIT_ASSERT( valImp.getDateTime() == dateTime );
 }

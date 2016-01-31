@@ -46,11 +46,9 @@ bool lowerFocusIndex(Pt::Hmi::Widget* a, Pt::Hmi::Widget* b )
 namespace Pt {
 
 namespace Hmi {
+    
 
-
-
-
-Window::Window(Window* parent)
+Window::Window( Window* parent )
 : _impl(0)
 , _parent(0)
 , _pointerWidget(0)
@@ -68,7 +66,7 @@ Window::Window(Window* parent)
 , _mainWidget(0)
 , _position(0,0)
 , _size(200,200)
-, _visible(true)
+, _visible(false)
 {
     _windowManager.init(*this);
 
@@ -85,18 +83,12 @@ Window::Window(Window* parent)
 
     if(parent)
         parent->add(*this);
-    else
-    {
-        _impl = new MainWindowImpl(this);
-        Application::instance().mainScreen().registerWindow(*this);
-    }
-
 }
 
 
 Window::~Window()
 {
-    if(_parent)
+    if( ! _parent)
         Application::instance().mainScreen().unregisterWindow(*this);
 
     setMainWidget(0);
@@ -138,9 +130,12 @@ void Window::add(Window& child)
         child._parent->_windowManager.remove(child);
     
     delete child._impl;
-    
-    child._impl = new ChildWindowImpl(&child);
-    child._parent = this;
+    child._impl = 0;
+
+    child._parent = this;    
+
+    child.updateImpl();
+
     _windowManager.add(child);
 }
 
@@ -152,11 +147,10 @@ void Window::remove(Window& child)
     
     _windowManager.remove(child);       
     child._parent = 0;
+    
     delete child.impl();             
-    
-    child._impl = new MainWindowImpl(&child);    
-    
-    Application::instance().mainScreen().registerWindow(child);
+    child._impl = 0;
+    child.updateImpl();
 }
 
 
@@ -224,6 +218,12 @@ Widget* Window::findWidget(const std::string& name)
 }
 
 
+const Widget* Window::pointerWidget() const
+{
+    return _pointerWidget;
+}
+
+
 bool Window::isClosed() const
 {
   return _isClosed;       
@@ -232,7 +232,8 @@ bool Window::isClosed() const
 
 void Window::close()
 {
-    _impl->close();
+    if( _impl )
+        _impl->close();
 }
 
 
@@ -244,7 +245,8 @@ bool Window::isActive() const
 
 void Window::activate()
 {
-    _impl->activate();     
+    if( _impl ) 
+        _impl->activate();     
 }
 
 
@@ -262,7 +264,8 @@ void Window::focusNext()
 
 void Window::update()
 {
-    _impl->update();
+    if( _impl ) 
+        _impl->update();
 }
 
 
@@ -314,6 +317,58 @@ WindowImpl* Window::impl()
     return _impl;   
 }
 
+void Window::runModal()
+{
+    const std::vector<Window*>& windows =  Application::instance().mainScreen().windows();
+
+     Window* activeWindow = 0;
+
+    std::map<Window*, bool> states;
+
+    std::vector<Window*>::const_iterator it;
+
+	for(it = windows.begin(); it != windows.end(); ++it)
+	{
+        Window* curWindow = (*it);
+
+		if( curWindow != this )
+        {
+            if( curWindow->isActive() )
+                activeWindow  = curWindow;
+
+			states[curWindow ] = curWindow->isEnabled();
+            curWindow->setEnabled(false);
+
+        }
+	}
+
+    setEnabled(true);
+    setVisible(true);
+    update();
+
+    while( !isClosed() )
+    {
+        activate();
+        Application::instance().nextEvent();
+    }
+    
+    std::map<Window*, bool>::iterator mapIt;    
+
+	for(it = windows.begin(); it != windows.end(); ++it)
+	{
+        Window* curWindow = (*it);
+
+        if( activeWindow == curWindow )
+            activeWindow->activate();
+                
+        mapIt = states.find( curWindow );
+
+		if( mapIt != states.end())
+			mapIt->first->setEnabled( mapIt->second );
+	}
+}
+
+
 
 void Window::onEvent(const Pt::Event& ev)
 {
@@ -326,18 +381,26 @@ void Window::onPointerEvent(const MouseEvent& ev)
     if( _windowManager.pointerInput( ev ) )
         return;
 
-    if( ! _mainWidget || ! _mainWidget->visible() )
+    if( ! _mainWidget || 
+        ! _mainWidget->visible() || 
+        ! _mainWidget->isEnabled() )
     {
         Application::instance().mainScreen().setCursor( &Cursor::defaultCursor() ); 
         return;
     }
 
-    Widget* widget = _mainWidget->findWidget( Gfx::PointF( ev.x(), ev.y() ) );
+    Widget* widget = _mainWidget->findWidget( ev.position() );
 
-    setPointerWidget(widget);   
+    // widget can be null
+    setPointerWidget(widget); 
+  
+    if(widget) 
+    {
+        MouseEvent clientEv(ev);
 
-    if( widget ) 
-      widget->processEvent(ev);       
+        clientEv.setPosition( widget->toClient(ev.position()) );
+        widget->processEvent(clientEv);  
+    }
 }
 
 
@@ -467,7 +530,9 @@ const Gfx::SizeF& Window::minimumSize() const
 
 void Window::setMinimumSize(const Gfx::SizeF& s)
 {
-    _impl->setMinimumSize(s);
+    if( _impl ) 
+        _impl->setMinimumSize(s);
+
     _minimumSize = s;
 }
 
@@ -480,7 +545,9 @@ const Gfx::SizeF& Window::maximumSize() const
 
 void Window::setMaximumSize(const Gfx::SizeF& s)
 {
-    _impl->setMaximumSize(s);
+    if( _impl )
+        _impl->setMaximumSize(s);
+
     _maximumSize = s;
 }
 
@@ -505,7 +572,9 @@ Hmi::WindowState::Type Window::state() const
 
 void Window::setState( WindowState::Type s)
 {
-    _impl->setState(s);
+    if( _impl )
+        _impl->setState(s);
+
     _state = s;
 }
 
@@ -518,7 +587,9 @@ WindowBorder::Type Window::border() const
 
 void Window::setBorder(WindowBorder::Type t)
 {
-    _impl->setBorder(t);
+    if( _impl )
+        _impl->setBorder(t);
+
     _border = t;
 }
 
@@ -531,7 +602,9 @@ const Gfx::Image& Window::icon() const
 
 void Window::setIcon(const Gfx::Image& i)
 {
-    _impl->setIcon(i);
+    if( _impl )
+        _impl->setIcon(i);
+
     _icon = i;
 }
 
@@ -556,7 +629,9 @@ const std::string& Window::title() const
 
 void Window::setTitle( const std::string& t )
 {
-    _impl->setTitle(t);
+    if( _impl )
+        _impl->setTitle(t);
+
     _title = t;
 }
 
@@ -569,7 +644,9 @@ bool Window::isEnabled() const
 
 void Window::setEnabled( bool e )
 {
-    _impl->setEnabled(e);
+    if( _impl )
+        _impl->setEnabled(e);
+
     _enabled = e;
 }
 
@@ -580,12 +657,42 @@ bool Window::isVisible() const
 }
 
 
+void Window::updateImpl()
+{
+    if( _impl )
+    {
+        _impl->setVisible(_visible);
+        return;
+    }
+
+    if( _parent )
+    {
+        _impl = new ChildWindowImpl(this);
+    }
+    else
+    {
+        _impl = new MainWindowImpl(this);
+        Application::instance().mainScreen().registerWindow(*this);
+    }
+
+    _impl->setPosition( _position );
+    _impl->setSize( _size );
+//    _impl->setDecoration( _decoration );
+    _impl->setTitle( _title );
+    _impl->setBorder( _border );
+    _impl->setMaximumSize( _minimumSize);
+    _impl->setMaximumSize( _maximumSize );
+    _impl->setIcon(_icon);
+    _impl->setEnabled( _enabled );
+    _impl->setState( _state );
+    _impl->setVisible( _visible);
+}
+
+// TODO: visible flag when updateImpl is used
 void Window::setVisible( bool b )
 {
-    if(b)
-        _impl->show();
-    else
-        _impl->hide();
+    _visible = b;  
+    updateImpl();        
 }
 
 
@@ -598,7 +705,10 @@ const Gfx::SizeF& Window::size() const
 void Window::setSize( const Gfx::SizeF& s )
 {
     _size = s;
-    _impl->setSize(s);    
+
+    if( _impl )
+        _impl->setSize(s);    
+
     _surface.resize(s);
 }
 
@@ -611,7 +721,9 @@ const Gfx::PointF& Window::position() const
 
 void Window::setPosition( const Gfx::PointF& p)
 {
-    _impl->setPosition(p);
+    if( _impl )
+        _impl->setPosition(p);
+
     _position = p;
 }
 
@@ -636,7 +748,9 @@ WindowDecoration::Flags Window::decoration() const
 
 void Window::setDecoration( WindowDecoration::Flags d )
 {
-    _impl->setDecoration( d );
+    if( _impl )            
+        _impl->setDecoration( d );
+
     _decoration = d;
 }
     
@@ -713,10 +827,16 @@ void Window::setPointerWidget( Widget* widget )
     if( _pointerWidget == widget )
         return;
 
-    if( _pointerWidget )            
-        _pointerWidget->onPointerLeave();
-
-    _pointerWidget = widget;
+    if( _pointerWidget )
+    {
+        Widget* w = _pointerWidget;
+        _pointerWidget = widget;
+        w->onPointerLeave();
+    }
+    else
+    {
+        _pointerWidget = widget;
+    }
 
     if( _pointerWidget )
         _pointerWidget->onPointerEnter();
@@ -817,6 +937,8 @@ void Window::setFocusIndex(Widget& , size_t)
 {
     std::sort(_focusList.begin(), _focusList.end(), &lowerFocusIndex);
 }
+
+
 
 } // namespace
 

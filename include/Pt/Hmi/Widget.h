@@ -31,6 +31,7 @@
 #define PT_HMI_WIDGET_H
 
 #include <Pt/Hmi/MouseEvent.h>
+#include <Pt/Hmi/TouchEvent.h>
 #include <Pt/Hmi/ScrollEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/ResizeEvent.h>
@@ -157,14 +158,25 @@ class PT_HMI_API Widget : public Pt::Connectable
         virtual void onEvent(const Pt::Event& ev);
 
         virtual void onPointerEvent(const MouseEvent& ev);
+
+        virtual void onTouchEvent(const TouchEvent& ev);
         
         virtual void onScrollEvent( const ScrollEvent& ev );        
     
         virtual void onKeyEvent(const KeyEvent& ev);
 
+    protected:
+        virtual void onUpdate();
+
+        virtual void onLayout(PaintSurface& surface);
+
+        virtual void onPaint(PaintSurface& surface); 
+
         virtual void onPointerEnter();    
 
         virtual void onPointerLeave();
+
+        virtual void onClicked(const Gfx::PointF& pos);
 
         virtual void onFocus(bool isFocused);
 
@@ -186,14 +198,16 @@ class PT_HMI_API Widget : public Pt::Connectable
           _name = name;
         }
 
-        void setCaption(const std::string& c)
-        {
-            onSetCaption(c);
-        }
+        void setCaption(const std::string& c);
 
         const std::string& caption() const
         {
             return _caption;
+        }
+
+        const Gfx::FontMetrics& captionMetrics() const
+        {
+            return _captionMetrics;
         }
 
         bool isEnabled() const
@@ -201,15 +215,9 @@ class PT_HMI_API Widget : public Pt::Connectable
             return _enabled;
         }
 
-        void setEnabled( bool e )
-        {
-            onSetEnabled(e);
-        }
+        void setEnabled( bool e );
 
-        void setVisible( bool b )
-        {
-          onSetVisible(b);
-        }
+        void setVisible( bool b );
 
         bool visible() const
         {
@@ -225,20 +233,14 @@ class PT_HMI_API Widget : public Pt::Connectable
             return _size;
         }
 
-        void setSize( const Gfx::SizeF& s )
-        {
-                onSetSize( s );
-        }
+        void setSize( const Gfx::SizeF& s );
 
         const Gfx::PointF& position() const
         {
             return _position;
         }
 
-        void setPosition( const Gfx::PointF&  p)
-        {
-            onSetPosition( p );
-        }
+        void setPosition( const Gfx::PointF&  p);
 
         //
         // layout properties
@@ -338,10 +340,7 @@ class PT_HMI_API Widget : public Pt::Connectable
             _backgroundImageLayout = l;
         }
 
-        void setFont( const Gfx::Font& f )
-        {
-            _font = f;
-        }
+        void setFont( const Gfx::Font& f );
 
         const Gfx::Font& font() const
         {
@@ -358,25 +357,10 @@ class PT_HMI_API Widget : public Pt::Connectable
             _cursor = c;
         }
 
-    protected:
-        virtual void onUpdate();
-
-        virtual void onLayout(PaintSurface& surface);
-
-        virtual void onPaint(PaintSurface& surface); 
-
-        virtual void onSetPosition(const Gfx::PointF& pos);
-
-        virtual void onSetSize(const Gfx::SizeF& size);
-
-        virtual void onSetVisible( bool b );        
-
-        virtual void onSetEnabled( bool e );
-        
-        virtual void onSetCaption( const std::string& s );
-
     private:
         void setWindow(Window* window);
+
+        void setCaptionMetrics();
 
     private:
         Pt::Signal<const Pt::Event&> _eventReady;
@@ -399,6 +383,7 @@ class PT_HMI_API Widget : public Pt::Connectable
         Gfx::PointF                  _position;            
         Alignment                    _contentAlignment;
         std::string                  _caption;
+        Gfx::FontMetrics             _captionMetrics;
         Gfx::Font                    _font;
         Pt::Char                     _mnemonic;    
         Pt::Delegate<void>           _mnemonicEntered;

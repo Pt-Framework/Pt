@@ -87,6 +87,8 @@ class PT_HMI_API Window : public Pt::Connectable
 
     Widget* findWidget(const std::string& name);
 
+    const Widget* pointerWidget() const;
+
     bool isClosed() const;
 
     void close();
@@ -100,8 +102,7 @@ class PT_HMI_API Window : public Pt::Connectable
     
     // TODO: return new focusWidget() and remove focusWidget()
     void focusPrev();
-
-    // TODO: rename update()
+    
     void update();
 
     void render();
@@ -115,6 +116,8 @@ class PT_HMI_API Window : public Pt::Connectable
     const WindowManager& windowManager() const;
 
     WindowImpl* impl();
+
+    void runModal();
 
   protected:
     virtual void onEvent(const Pt::Event& ev);
@@ -222,6 +225,8 @@ class PT_HMI_API Window : public Pt::Connectable
     void removeFocusWidget(Widget& w);
 
     void setFocusIndex(Widget& w, size_t index);
+
+    void updateImpl();
     
   private:
     WindowManager                        _windowManager; 
@@ -239,9 +244,9 @@ class PT_HMI_API Window : public Pt::Connectable
     std::string                          _title;
     Gfx::Image                           _icon;
     bool                                 _canClose;    
-    WindowDecoration::Flags             _decoration;   
-    std::string                         _name;    
-    Gfx::Font                           _font;
+    WindowDecoration::Flags              _decoration;   
+    std::string                          _name;    
+    Gfx::Font                            _font;
     
     std::map<Key, Widget*>         _shortcuts; 
     std::map<Pt::Char, Widget*>    _mnemonics; 

@@ -70,11 +70,7 @@ void MainWindowImpl::create()
 
   HINSTANCE hInstance = GetModuleHandle(NULL);
 
-  HWND hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, GetDesktopWindow(), NULL, hInstance, NULL );
-  BringWindowToTop( hwnd );
-  ShowWindow( hwnd, SW_HIDE );    
-  UpdateWindow( hwnd );
-  _hwnd = hwnd;
+  _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, GetDesktopWindow(), NULL, hInstance, NULL );
 }
 
 
@@ -88,20 +84,13 @@ void MainWindowImpl::destroy()
 }
 
 
-void MainWindowImpl::show()
+void MainWindowImpl::setVisible( bool v)
 {
-    if( _hwnd == 0)
-        create();
-
-   ShowWindow(_hwnd, SW_SHOW);
+   if( v )
+       ShowWindow(_hwnd, SW_SHOW) ;
+   else
+       ShowWindow(_hwnd, SW_HIDE);
 }
-
-
-void MainWindowImpl::hide()
-{
-  ShowWindow(_hwnd, SW_HIDE);
-}
-
 
 bool MainWindowImpl::processEvent(unsigned int message, WPARAM wparam, LPARAM lparam )
 {
@@ -389,7 +378,7 @@ void MainWindowImpl::onPaint()
 void MainWindowImpl::setPosition(const Gfx::PointF& pf)
 {
   Gfx::Point p = _screen.fromUnit(pf);
-  SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, SWP_DRAWFRAME|SWP_NOSIZE);
+  SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, SWP_DRAWFRAME|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOZORDER);
 }
 
 void MainWindowImpl::activate()
@@ -608,7 +597,7 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 
 void MainWindowImpl::update()
 {
-   _apiWindow->render();
+    _apiWindow->render();
     InvalidateRect(_hwnd, NULL, FALSE);
 }
 

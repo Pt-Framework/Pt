@@ -1,6 +1,7 @@
 #include "ChildW.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Docking.h>
+#include "Dialog1.h"
 
 namespace Pt{
 namespace Hmi{
@@ -12,8 +13,7 @@ static int a = 0;
 ChildW::ChildW()
 {
 	setPosition( Gfx::PointF(10,10) );
-	setSize( Gfx::SizeF(520,350) );
-	setVisible( true) ;    
+	setSize( Gfx::SizeF(520,350) );	   
 
 	//Panel  
 	_mainPanel.setSize( Gfx::SizeF(800,600) );
@@ -35,7 +35,6 @@ ChildW::ChildW()
 	_mainPanel.add(_textLabel);
 	
 	//Toggle button
-	_toggleButton.setButtonType(  Hmi::ButtonType::Toggle );
 	_toggleButton.setCaption( std::string("Toggle Me [CTRL+I]") );
 	_toggleButton.setShortcut( &Pt::Hmi::Key(Pt::Hmi::Key::Control, Pt::Hmi::Key::I) );
 	_toggleButton.setPosition( Gfx::PointF(20,60) );
@@ -43,18 +42,17 @@ ChildW::ChildW()
     _toggleButton.docking().setType( Docking::Top);	
 	_mainPanel.add(_toggleButton);
 
-	//Dialog button  
-	_dialogButton.setButtonType( Hmi::ButtonType::Press );    
+	//Dialog button     
 	_dialogButton.setCaption(std::string("&&Dia&log [CTRL+D]&") );
 	_dialogButton.setShortcut( &Pt::Hmi::Key(Pt::Hmi::Key::Control, Pt::Hmi::Key::D) );
 	_dialogButton.setPosition( Gfx::PointF(20,100));
 	_dialogButton.setSize( Gfx::SizeF(150,25) );	
     _dialogButton.docking().setType( Docking::Top);
-	
+	_dialogButton.clicked() += Pt::slot(*this, &ChildW::onShowDialog);
+
 	_mainPanel.add(_dialogButton);
 	
 	//Close button
-	_closeButton.setButtonType(Hmi::ButtonType::Press);
 	_closeButton.setCaption(std::string("Close App [CTRL+X]"));
 	_closeButton.setShortcut(&Pt::Hmi::Key(Pt::Hmi::Key::Control, Pt::Hmi::Key::X));
 	_closeButton.setPosition(Gfx::PointF(20,200));
@@ -62,22 +60,23 @@ ChildW::ChildW()
 	_closeButton.docking().setType( Docking::Bottom);
 	
     _mainPanel.add(_closeButton);
+
 	//_childWindow2.setMainWidget(&_closeButton);	  	
 	_childWindow2.setPosition(Gfx::PointF(10,10));	
 	_childWindow2.setSize (Gfx::SizeF(420,300));
     if( a == 0)
     {
-        _childWindow2.setTitle ( "Child A");	
+        _childWindow2.setTitle ("Child A");	
         ++a;
     }
     else
     {
-    _childWindow2.setTitle ( "Child B");	
+    _childWindow2.setTitle ("Child B");	
     }
 	_childWindow2.setMainWidget(&_mainPanel);
-	_childWindow2.setVisible(true);
-	add( _childWindow2 );	
+	add( _childWindow2 );
 }
+
 
 ChildW::~ChildW()
 {
@@ -85,9 +84,10 @@ ChildW::~ChildW()
 }
 
 
-void ChildW::onShowDialog()
+void ChildW::onShowDialog(Button& button)
 {
-
+    Dialog1 d;
+    d.runModal();
 }
 
 void ChildW::onCloseApp()

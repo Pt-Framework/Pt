@@ -31,8 +31,6 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/FontMetrics.h>
-#include <Pt/String.h>
-#include <Pt/Utf8Codec.h>
 
 namespace Pt {
 
@@ -66,13 +64,11 @@ bool Label::isAutoSize() const
 
 void Label::onUpdate()
 {
+    // TODO: preferreSize() in Widget and move autoSize
+    //       to Widget layouting
     if( _autoSize )
     {
-      PaintSurface surface;
-      surface.painter().setFont( font() );
-
-      String text = Pt::Utf8Codec::decode( this->caption() );
-      Gfx::FontMetrics fm = surface.painter().fontMetrics(text);
+      const Gfx::FontMetrics& fm = captionMetrics();
 
       const Spacing& margin = docking().margin();
       Gfx::SizeF size( fm.width() + margin.left() + margin.right(), 

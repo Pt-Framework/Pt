@@ -26,7 +26,7 @@
 #ifndef Pt_Forms_Dialog2_h
 #define Pt_Forms_Dialog2_h
 
-#include <Pt/Hmi/Dialog.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/Panel.h>
@@ -35,7 +35,7 @@ namespace Pt{
 namespace Hmi{
 namespace Demo{
 
-class Dialog2 : public Pt::Hmi::Dialog
+class Dialog2 : public Pt::Hmi::Window
 {
 	public:
 		Dialog2();

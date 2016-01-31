@@ -32,6 +32,7 @@
 #define Pt_Hmi_TouchEvent_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Gfx/Point.h>
 #include <Pt/Event.h>
 
 namespace Pt {
@@ -50,21 +51,40 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
 
     public:
         TouchEvent()
-        : _x(0)
-        , _y(0)
+        : _pos(0, 0)
         , _action(Move)
         , _trackingId(0)
         {
         }
 
+        const Gfx::PointF& position() const
+        {
+            return _pos;
+        }
+
+        void setPosition(const Gfx::PointF& pos)
+        {
+            _pos = pos;
+        }
+
         double x() const
         {
-            return _x;
+            return _pos.x();
         }
 
         double y() const
         {
-            return _y;
+            return _pos.y();
+        }
+    
+        void setX(double x)
+        {
+            _pos.setX(x);
+        }
+    
+        void setY(double y)
+        {
+            _pos.setY(y);
         }
         
         Pt::uint32_t trackingId() const
@@ -86,8 +106,7 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
         {
             _action = Press;
             _trackingId = trackId;
-            _x = x;
-            _y = y;
+            _pos.set(x, y);
             _pressure = p;
         }
 
@@ -100,8 +119,7 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
         {
             _action = Press;
             _trackingId = trackId;
-            _x = x;
-            _y = y;
+            _pos.set(x, y);
             _pressure = p;
         }
 
@@ -114,14 +132,12 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
         {
             _action = Move;
             _trackingId = trackId;
-            _x = x;
-            _y = y;
+            _pos.set(x, y);
             _pressure = p;
         }
 
     private:
-        double _x;
-        double _y;
+        Gfx::PointF  _pos;
         Action _action;
         Pt::uint32_t _trackingId;
         double _pressure;

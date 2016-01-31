@@ -47,12 +47,10 @@ class MainWindowImpl : public WindowImpl
 
         virtual ~MainWindowImpl();
 	
-        virtual void show();
+        virtual void setVisible( bool v);
 	
         virtual void activate();
-
-        virtual void hide();
-        
+       
         virtual void update();
 
         virtual void setPosition(const Gfx::PointF& p);

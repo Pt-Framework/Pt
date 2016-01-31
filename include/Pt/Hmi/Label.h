@@ -38,22 +38,22 @@ namespace Hmi {
 
 class PT_HMI_API Label  : public Panel
 {
-	  public:
-		    Label();
+    public:
+        Label();
 
-		    ~Label();	
+        ~Label();    
 
-        void setAutoSize( bool a );
+        void setAutoSize(bool a);
 
         bool isAutoSize() const;
 
-	  protected:
+    protected:
         virtual void onUpdate();
-		    
+            
         virtual void onPaint(PaintSurface& paintSurface);
 
-	  private:
-		    bool _autoSize;	
+    private:
+        bool _autoSize;    
 };
 
 } // namespace

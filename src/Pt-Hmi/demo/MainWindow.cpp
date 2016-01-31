@@ -45,18 +45,20 @@ namespace Demo{
 
 MainWindow::MainWindow()
 : _child1()
-, _child2()
-{	
+{
 	setPosition (  Gfx::PointF(0,0) );
 	setSize( Gfx::SizeF(600,400) );
     setTitle("Main 1");
 	_child1.setPosition ( Gfx::PointF( 200, 200 ) );
 	_child1.setTitle( "Child 1" );
-	_child2.setTitle( "Child 2" );
-
+    
 	add( _child1 );
-	add( _child2 );
 
+    setVisible( true ); 
+    
+    _child1.setVisible(true);
+
+    _child1.xxx();
 }
 
 MainWindow::~MainWindow()
@@ -65,9 +67,11 @@ MainWindow::~MainWindow()
 
 
 void MainWindow::show()
-{
-  setVisible( true );	
-  update();	
+{	
+  //setVisible( true );   
+  //_child1.setVisible( true );
+
 }
+
 
 }}}

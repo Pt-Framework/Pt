@@ -74,15 +74,7 @@ void WindowManager::init(Window& parent)
 
 void WindowManager::add( Window& w )
 {   
-    if( w.isActive() )
-    {
-        _children.push_back(&w);
-        activate(w);
-    }
-    else
-    {
-        _children.insert(_children.begin(), &w);
-    }    
+    _children.insert(_children.begin(), &w);   
 }
 
 
@@ -109,12 +101,14 @@ void WindowManager::activate(Window& w)
 
     std::vector<Window*>::iterator it = std::find(_children.begin(), _children.end(), &w);
 
-    if( it != _children.end() )
-        _children.erase(it);
+    if( it == _children.end() )
+        return;
+
+    _children.erase(it);
         
     _children.push_back(&w);    
 
-    w.processEvent( ActivateEvent(true) );
+    w.processEvent( ActivateEvent(true) );    
 }
 
 

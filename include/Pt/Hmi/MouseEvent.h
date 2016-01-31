@@ -32,6 +32,7 @@
 #define Pt_Hmi_MouseEvent_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Gfx/Point.h>
 #include <Pt/Event.h>
 
 namespace Pt {
@@ -56,8 +57,7 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
         };
 
         MouseEvent()
-        : _x(0)
-        , _y(0)
+        : _pos(0, 0)
         , _action(Move)
         , _buttonState(0)
         , _button(0)
@@ -65,31 +65,40 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
 
         void clear()
         {
-            _x = 0;
-            _y = 0;
+            _pos.set(0, 0);
             _action = Move;
             _buttonState = 0;
             _button = 0;
         }
 
+        const Gfx::PointF& position() const
+        {
+            return _pos;
+        }
+
+        void setPosition(const Gfx::PointF& pos)
+        {
+            _pos = pos;
+        }
+
         double x() const
         {
-            return _x;
+            return _pos.x();
         }
 
         double y() const
         {
-            return _y;
+            return _pos.y();
         }
     
         void setX(double x)
         {
-            _x = x;
+            _pos.setX(x);
         }
     
         void setY(double y)
         {
-            _y = y;
+            _pos.setY(y);
         }
 
         bool isMove() const
@@ -150,8 +159,7 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
         }
 
     private:
-        double       _x;
-        double       _y;
+        Gfx::PointF  _pos;
         Action       _action;
         Pt::uint32_t _buttonState;
         Pt::uint32_t _button;

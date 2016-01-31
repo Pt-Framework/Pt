@@ -28,100 +28,70 @@
 #define Pt_Hmi_Button_H
 
 #include <Pt/Hmi/Label.h>
-#include <Pt/System/Timer.h>
 #include <Pt/Gfx/Image.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+
+namespace Hmi {
 
 class MouseEvent;
-
-namespace ButtonType
-{
-	enum Type
-	{
-		Press,
-		Toggle
-	};
-}
-
+class TouchEvent;
 
 class PT_HMI_API Button  : public Label
 {
-public:
-	Button();
-	virtual ~Button();
+    public:
+        Button();
+    
+        virtual ~Button();
 
-   bool hover() const
-   {
-      return _hover;
-   }
+        void setImage(const Gfx::Image& i) 
+        {
+            _image = i;
+        }
 
-   ButtonType::Type  buttonType() const
-   {
-    return _buttonType;	
-   }
+        Alignment imageAlignment()  const
+        {
+           return _imageAlign;
+        }
 
-   void setButtonType( ButtonType::Type t)
-   {
-      _buttonType = t;
-   }
-	
-   int doublePressTimeInMs() const
-   {
-    return _doublePressTimeInMs; 
-   }
+        void setImageAlignment(const Alignment& i) 
+        {
+           _imageAlign = i;
+        }
+             
+        Signal<Button&>& clicked()
+        {
+            return _clicked;
+        }
+
+    protected:
+        virtual void onMnemonic();
+
+        virtual void onShortcut(const KeyEvent& kev);
+
+        virtual void onActionKey(const KeyEvent& kev);
+
+        virtual void onPointerEvent(const MouseEvent& ev);
+
+        virtual void onPointerEnter();    
+
+        virtual void onPointerLeave();
+
+        virtual void onTouchEvent(const TouchEvent& ev);
+
+        virtual void onPaint(PaintSurface& surface);
+
+        virtual void onClicked(const Gfx::PointF& pos);
+
+    private:        
+        Signal<Button&> _clicked;
    
-   void setDoublePressTimeInMs( int t )
-   {
-     _doublePressTimeInMs = t;
-   }
+        Gfx::Image _image;    
+        Alignment  _imageAlign;
 
-    void setImage(const Gfx::Image&  i) 
-    {
-       _image = i;
-    }
-
-    Alignment imageAlign()  const
-    {
-       return _imageAlign;
-    }
-
-    void setImageAlign(const Alignment&  i) 
-    {
-       _imageAlign = i;
-    }
-	
-	Signal<bool>											 Checked;	  
-	Signal<>													 Clicked;	
-	Signal<>													 DoubleClicked;	
-
-private:		
-	bool								_hover;		
-	ButtonType::Type  _buttonType;	
-	int								_doublePressTimeInMs; 
-  Gfx::Image					_image;	
-  Alignment     _imageAlign;
-
-protected:
-	virtual void onPressedAction();
-	virtual void onDoublePressedAction();
-
-	virtual void onMnemonic();
-	virtual void onShortcut(const KeyEvent& kev);
-	virtual void onActionKey(const KeyEvent& kev);
-
-	virtual void onPointerEvent(const MouseEvent& ev);
-	virtual void onKeyEvent(const KeyEvent& ev);
-	virtual void onDoublePressedTimeout();
-	virtual void onPaint(PaintSurface& surface);
-
-private:	
-	bool _pressed;
-	bool _timeout;
-	int _pressCounter;
-	Pt::System::Timer _doublePressTimer;
+        bool _isPressed;
 };
 
 }}
+
 #endif

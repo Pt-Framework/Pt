@@ -26,14 +26,14 @@
 #ifndef Pt_Forms_Demo_Dialog1_h
 #define Pt_Forms_Demo_Dialog1_h
 
-#include <Pt/Hmi/Dialog.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Button.h>
 
 namespace Pt {
 namespace Hmi {
 namespace Demo {
 
-class Dialog1 : public Pt::Hmi::Dialog
+class Dialog1 : public Pt::Hmi::Window
 {
 	public:
 		Dialog1();

@@ -30,8 +30,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   Label.cpp					   
 					   Panel.cpp					   
 					   Widget.cpp					   					   
-					   Window.cpp
-					   Dialog.cpp		
+					   Window.cpp	
 					   WindowManager.cpp
                        WindowImpl.cpp	  
                        ChildWindowImpl.cpp
