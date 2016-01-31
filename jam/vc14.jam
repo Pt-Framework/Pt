@@ -8,8 +8,7 @@ rule ConfigureVisualC
 
         if ! $(VISUALC) 
         {
-            VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VCExpress\\14.0\\Setup\\VC\\" : "ProductDir" ] ;
-            VISUALC ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\14.0\\Setup\\VC\\" : "ProductDir"  ] ;
+            VISUALC = [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\14.0\\Setup\\VC\\" : "ProductDir"  ] ;
             VISUALC ?= [ W32_GETREG "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\14.0\\Setup\\VC\\" : "ProductDir" ] ;
 
             VISUALC = $(VISUALC:P) ;
@@ -46,10 +45,13 @@ rule ConfigurePlatformSDK
     
         Echo "Checking for Platform SDK..." $(PLATFORMSDK) ;
 
-        STDHDRS  += \""$(PLATFORMSDK)include\\10.0.10586.0\\um\"" ;
-        STDHDRS  += \""$(PLATFORMSDK)include\\10.0.10586.0\\ucrt\"" ;
-		STDHDRS  += \""$(PLATFORMSDK)include\\10.0.10586.0\\shared\"" ;
-        STDHDRS  += \""$(PLATFORMSDK)include\\10.0.10586.0\\winrt\"" ;
+        WINKITVER = 10.0.10240.0 ;
+        # WINKITVER = 10.0.10586.0 ;
+
+        STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKITVER)\\um\"" ;
+        STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKITVER)\\ucrt\"" ;
+		STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKITVER)\\shared\"" ;
+        STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKITVER)\\winrt\"" ;
         CCFLAGS  += /DWIN32 ;
         C++FLAGS += /DWIN32 ;
    
@@ -58,23 +60,23 @@ rule ConfigurePlatformSDK
 
         if $(TARGET_OSPLAT:L) = "x86_64"
         {
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\10.0.10586.0\\um\\x64\"" ;
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\10.0.10586.0\\ucrt\\x64\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKITVER)\\um\\x64\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKITVER)\\ucrt\\x64\"" ;
         }
         else if $(TARGET_OSPLAT:L) = "x86"
         {
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\10.0.10586.0\\um\\x86\"" ;
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\10.0.10586.0\\ucrt\\x86\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKITVER)\\um\\x86\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKITVER)\\ucrt\\x86\"" ;
         }
         else if $(TARGET_OSPLAT:L) = "arm"
         {
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\10.0.10586.0\\um\\arm\"" ;
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\10.0.10586.0\\ucrt\\arm\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKITVER)\\um\\arm\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKITVER)\\ucrt\\arm\"" ;
         }
         else if $(TARGET_OSPLAT:L) = "arm64"
         {
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\10.0.10586.0\\um\\arm64\"" ;
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\10.0.10586.0\\ucrt\\arm64\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKITVER)\\um\\arm64\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKITVER)\\ucrt\\arm64\"" ;
         }
 
         Configure STDHDRS ;
