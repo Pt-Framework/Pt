@@ -18,12 +18,7 @@ class ChildW : public Hmi::Window
 		ChildW();
 		~ChildW();
 
-        void xxx()
-        {
-            remove(_childWindow2);
-            add(_childWindow2);
-            _childWindow2.setVisible(true);
-        }
+        void xxx();
 	private:
 		void onShowDialog(Button& button);
 		void onCloseApp();		

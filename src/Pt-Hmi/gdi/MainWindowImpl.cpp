@@ -87,10 +87,11 @@ void MainWindowImpl::destroy()
 void MainWindowImpl::setVisible( bool v)
 {
    if( v )
-       ShowWindow(_hwnd, SW_SHOW) ;
+       ShowWindow(_hwnd, SW_SHOW);
    else
        ShowWindow(_hwnd, SW_HIDE);
 }
+
 
 bool MainWindowImpl::processEvent(unsigned int message, WPARAM wparam, LPARAM lparam )
 {

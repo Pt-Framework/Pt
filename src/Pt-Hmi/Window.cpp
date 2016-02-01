@@ -118,40 +118,7 @@ const Window* Window::parent() const
 }
 
 
-void Window::add(Window& child)
-{
-    if( child._parent == this )
-        return;
 
-    if( ! child._parent )
-        Application::instance().mainScreen().unregisterWindow(child);
-
-    if( child._parent )
-        child._parent->_windowManager.remove(child);
-    
-    delete child._impl;
-    child._impl = 0;
-
-    child._parent = this;    
-
-    child.updateImpl();
-
-    _windowManager.add(child);
-}
-
-
-void Window::remove(Window& child)
-{
-    if(child._parent != this)
-        return;
-    
-    _windowManager.remove(child);       
-    child._parent = 0;
-    
-    delete child.impl();             
-    child._impl = 0;
-    child.updateImpl();
-}
 
 
 const std::vector<Window*>& Window::windows() const 
@@ -656,14 +623,45 @@ bool Window::isVisible() const
     return _visible;
 }
 
+void Window::add(Window& child)
+{
+    if( child._parent == this )
+        return;
+
+    if( ! child._parent )
+        Application::instance().mainScreen().unregisterWindow(child);
+
+    if( child._parent )
+        child._parent->_windowManager.remove(child);
+    
+    delete child._impl;
+    child._impl = 0;
+
+    child._parent = this;    
+    child.updateImpl();
+
+    _windowManager.add(child);
+}
+
+
+void Window::remove(Window& child)
+{
+    if(child._parent != this)
+        return;
+    
+    _windowManager.remove(child);
+
+    delete child.impl();             
+    child._impl = 0;
+
+    child._parent = 0;
+    child.updateImpl();
+}
+
 
 void Window::updateImpl()
 {
-    if( _impl )
-    {
-        _impl->setVisible(_visible);
-        return;
-    }
+    assert( ! _impl);
 
     if( _parent )
     {
@@ -688,11 +686,18 @@ void Window::updateImpl()
     _impl->setVisible( _visible);
 }
 
-// TODO: visible flag when updateImpl is used
-void Window::setVisible( bool b )
+
+void Window::setVisible(bool b)
 {
-    _visible = b;  
-    updateImpl();        
+    if(b == _visible)
+        return;
+    
+    _visible = b;
+
+    if( ! _impl)
+        updateImpl(); 
+    else  
+        _impl->setVisible(b);
 }
 
 

@@ -70,12 +70,10 @@ class PT_HMI_API ChildWindowImpl  : public WindowImpl
         virtual void setTitle( const std::string& t );
         
         virtual void close();
-
-private:
-    bool _visible;
 };
 
 }
+
 }
 
 #endif

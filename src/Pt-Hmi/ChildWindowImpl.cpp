@@ -29,12 +29,12 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Pen.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+
+namespace Hmi {
 
 ChildWindowImpl::ChildWindowImpl(Window* api)
 : WindowImpl(api)
-, _visible( false)
 {
 }
 
@@ -50,15 +50,11 @@ void ChildWindowImpl::close()
 }
 
 
-void ChildWindowImpl::setVisible(bool b)
+void ChildWindowImpl::setVisible(bool visible)
 {
-    if( b ) 
-    {
-        if( ! _visible)
-            activate();
-    }
+    if(visible) 
+        activate();
 
-    _visible = b;
     update();
 }
 

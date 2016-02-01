@@ -71,10 +71,19 @@ ChildW::ChildW()
     }
     else
     {
-    _childWindow2.setTitle ("Child B");	
+        _childWindow2.setTitle ("Child B");	
     }
 	_childWindow2.setMainWidget(&_mainPanel);
-	add( _childWindow2 );
+	
+    add( _childWindow2 );
+}
+
+
+void ChildW::xxx()
+{
+    remove(_childWindow2);
+    _childWindow2.setVisible(true);
+    add(_childWindow2);
 }
 
 
