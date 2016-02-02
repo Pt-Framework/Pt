@@ -45,13 +45,29 @@ rule ConfigurePlatformSDK
     
         Echo "Checking for Platform SDK..." $(PLATFORMSDK) ;
 
-        WINKITVER = 10.0.10240.0 ;
-        # WINKITVER = 10.0.10586.0 ;
+        if ! $(WINKIT)
+        {
+            local winkits = [ GLOB [ FDirName $(PLATFORMSDK) include ] : *.*.*.* ] ;
+            for local kit in $(winkits:BS)
+            {
+                if $(kit) > $(WINKIT)
+                {
+                    WINKIT = $(kit:BS) ;
+                } 
+            }
+        }
 
-        STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKITVER)\\um\"" ;
-        STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKITVER)\\ucrt\"" ;
-		STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKITVER)\\shared\"" ;
-        STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKITVER)\\winrt\"" ;
+        if ! $(WINKIT)
+        {
+            Exit "WINKIT not found" ;
+        }
+
+        Echo "Checking for Windows Kit..." $(WINKIT) ;
+
+        STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\um\"" ;
+        STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\ucrt\"" ;
+		STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\shared\"" ;
+        STDHDRS  += \""$(PLATFORMSDK)include\\$(WINKIT)\\winrt\"" ;
         CCFLAGS  += /DWIN32 ;
         C++FLAGS += /DWIN32 ;
    
@@ -60,23 +76,23 @@ rule ConfigurePlatformSDK
 
         if $(TARGET_OSPLAT:L) = "x86_64"
         {
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKITVER)\\um\\x64\"" ;
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKITVER)\\ucrt\\x64\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKIT)\\um\\x64\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKIT)\\ucrt\\x64\"" ;
         }
         else if $(TARGET_OSPLAT:L) = "x86"
         {
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKITVER)\\um\\x86\"" ;
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKITVER)\\ucrt\\x86\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKIT)\\um\\x86\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKIT)\\ucrt\\x86\"" ;
         }
         else if $(TARGET_OSPLAT:L) = "arm"
         {
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKITVER)\\um\\arm\"" ;
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKITVER)\\ucrt\\arm\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKIT)\\um\\arm\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKIT)\\ucrt\\arm\"" ;
         }
         else if $(TARGET_OSPLAT:L) = "arm64"
         {
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKITVER)\\um\\arm64\"" ;
-            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKITVER)\\ucrt\\arm64\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKIT)\\um\\arm64\"" ;
+            LINKFLAGS += /LIBPATH:\""$(PLATFORMSDK)Lib\\$(WINKIT)\\ucrt\\arm64\"" ;
         }
 
         Configure STDHDRS ;

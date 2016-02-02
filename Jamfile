@@ -5,6 +5,10 @@ if $(PTHREAD_INCLUDES)
     SubDirHdrs $(PTHREAD_INCLUDES) ;
 }
 
+Echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX ;
+
+Exit XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX ;
+
 #############################################################################
 # Qt meta object compiler
 #############################################################################
