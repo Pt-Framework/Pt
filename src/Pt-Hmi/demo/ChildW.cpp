@@ -72,7 +72,7 @@ ChildW::ChildW()
 
     //_childWindow2.setMainWidget(&_closeButton);          
     _childWindow2.setPosition(Gfx::PointF(10,10));    
-    _childWindow2.setSize (Gfx::SizeF(420,300));
+    _childWindow2.setSize (Gfx::SizeF(750,500));
     if( a == 0)
     {
         _childWindow2.setTitle ("Child A");    
