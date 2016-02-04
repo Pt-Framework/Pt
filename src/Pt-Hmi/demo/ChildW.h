@@ -14,22 +14,21 @@ namespace Demo{
 
 class ChildW : public Hmi::Window
 {
-	public:
-		ChildW();
-		~ChildW();
+    public:
+        ChildW();
+        ~ChildW();
 
-        void xxx();
-	private:
-		void onShowDialog(Button& button);
-		void onCloseApp();		
+    private:
+        void onShowDialog(Button& button);
+        void onCloseApp();
 
-	private:
-		Hmi::Window     _childWindow2;
-		Hmi::Panel  _mainPanel;	
-		Hmi::Button _closeButton;
-		Hmi::Button _toggleButton;
-		Hmi::Button _dialogButton;
-		Hmi::Label  _textLabel;			
+    private:
+        Hmi::Window _childWindow2;
+        Hmi::Panel  _mainPanel;
+        Hmi::Button _closeButton;
+        Hmi::Button _toggleButton;
+        Hmi::Button _dialogButton;
+        Hmi::Label  _textLabel;
 };
 
 }}}

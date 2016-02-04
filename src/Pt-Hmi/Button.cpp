@@ -66,7 +66,7 @@ void Button::onClicked(const Gfx::PointF& pos)
 
 void Button::onMnemonic()
 {
-	Label::onMnemonic();	    		
+    Label::onMnemonic();                
     _clicked.send(*this);
 }
 
@@ -81,7 +81,7 @@ void Button::onActionKey( const KeyEvent& kev )
 void Button::onShortcut( const KeyEvent& kev )
 {
     Label::onShortcut(kev);
-    _clicked.send(*this);			
+    _clicked.send(*this);            
 }
 
 
@@ -124,7 +124,7 @@ void Button::onTouchEvent(const TouchEvent& ev)
 
 
 void Button::onPaint(PaintSurface& paintSurface)
-{	
+{    
     bool mouseOver = window()->pointerWidget() == this;
     Pt::Hmi::Painter& painter = paintSurface.painter();
 
@@ -136,35 +136,35 @@ void Button::onPaint(PaintSurface& paintSurface)
         return;
     }
 
-    if(mouseOver)
+    if( mouseOver )
     {
-        setBackgroundColor( Gfx::Color(bkgColor.red() - 0.10 ,
-                                       bkgColor.green() - 0.10 ,
-                                       bkgColor.blue() - 0.10 ) );
+        setBackgroundColor( Gfx::Color(bkgColor.red() * 0.9 ,
+                                       bkgColor.green() * 0.9 ,
+                                       bkgColor.blue() * 0.9 ) );
     }
 
     if( _isPressed )
     {
-        setBackgroundColor( Gfx::Color(bkgColor.red() - 0.20 ,
-                                       bkgColor.green() - 0.20 ,
-                                       bkgColor.blue() - 0.20 ) );
+        setBackgroundColor( Gfx::Color(bkgColor.red() * 0.8 ,
+                                       bkgColor.green() * 0.8 ,
+                                       bkgColor.blue() * 0.8 ) );
     }
 
     Label::onPaint(paintSurface);
+    
     setBackgroundColor(bkgColor);
 
     if( hasFocus() )
     {
-        Gfx::SizeF  size = this->size();
-		size.addHeight(-4);
-		size.addWidth(-4);
+        Gfx::SizeF size = this->size();
+        size.addHeight(-4);
+        size.addWidth(-4);
 
-		Gfx::Color armedColor(1,0,0);
-		 
-		Gfx::Pen pen(1, armedColor,Gfx::Pen::DashStyle);
-		
-		painter.setPen(pen);		
-		Gfx::RectF rect(Gfx::PointF(2,2), size);
+        Gfx::Color armedColor(1, 0, 0);
+        Gfx::Pen pen(1, armedColor, Gfx::Pen::DashStyle);
+        
+        painter.setPen(pen);
+        Gfx::RectF rect(Gfx::PointF(2,2), size);
         painter.drawRect(rect);
     }
 }

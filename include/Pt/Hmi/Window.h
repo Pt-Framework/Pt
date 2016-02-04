@@ -87,7 +87,9 @@ class PT_HMI_API Window : public Pt::Connectable
 
     Widget* findWidget(const std::string& name);
 
-    const Widget* pointerWidget() const;
+    Widget* pointerWidget();
+
+    Widget* focusWidget();
 
     bool isClosed() const;
 
@@ -105,6 +107,7 @@ class PT_HMI_API Window : public Pt::Connectable
     
     void update();
 
+    // TODO: make protected/private
     void render();
 
     void processEvent(const Pt::Event& ev);
@@ -212,8 +215,6 @@ class PT_HMI_API Window : public Pt::Connectable
     void setMnemonic(Widget& w, const Char* ch);
 
     void setPointerWidget( Widget* widget );
-
-    Widget* focusWidget();
 
     void setFocusWidget(Widget* widget);
 

@@ -185,7 +185,7 @@ Widget* Window::findWidget(const std::string& name)
 }
 
 
-const Widget* Window::pointerWidget() const
+Widget* Window::pointerWidget()
 {
     return _pointerWidget;
 }
@@ -623,6 +623,7 @@ bool Window::isVisible() const
     return _visible;
 }
 
+
 void Window::add(Window& child)
 {
     if( child._parent == this )
@@ -641,6 +642,8 @@ void Window::add(Window& child)
     child.updateImpl();
 
     _windowManager.add(child);
+
+    update();
 }
 
 
@@ -656,6 +659,8 @@ void Window::remove(Window& child)
 
     child._parent = 0;
     child.updateImpl();
+
+    update();
 }
 
 

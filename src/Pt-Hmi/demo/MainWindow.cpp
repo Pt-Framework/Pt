@@ -46,19 +46,15 @@ namespace Demo{
 MainWindow::MainWindow()
 : _child1()
 {
-	setPosition (  Gfx::PointF(0,0) );
-	setSize( Gfx::SizeF(600,400) );
+    setPosition(  Gfx::PointF(0, 0) );
+    setSize( Gfx::SizeF(600,400) );
     setTitle("Main 1");
-	_child1.setPosition ( Gfx::PointF( 200, 200 ) );
-	_child1.setTitle( "Child 1" );
+    setVisible( true );  // MainWindow
     
-	add( _child1 );
-
-    setVisible( true ); 
-    
-    _child1.setVisible(true);
-
-    _child1.xxx();
+    _child1.setPosition ( Gfx::PointF(10, 10) );
+    _child1.setTitle("Child 1");
+    add( _child1 );
+    _child1.setVisible(true); // Child 1
 }
 
 MainWindow::~MainWindow()
@@ -67,7 +63,7 @@ MainWindow::~MainWindow()
 
 
 void MainWindow::show()
-{	
+{    
   //setVisible( true );   
   //_child1.setVisible( true );
 
