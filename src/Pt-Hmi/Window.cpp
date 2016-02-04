@@ -133,15 +133,15 @@ Window* Window::findWindow(const std::string& name)
         return this;
 
     const std::vector<Window*>& windows = _windowManager.windows();
-	std::vector<Window*>::const_iterator it;
+    std::vector<Window*>::const_iterator it;
 
-	for(it = windows.begin(); it != windows.end(); ++it)
-	{
+    for(it = windows.begin(); it != windows.end(); ++it)
+    {
         Window* w = (*it)->findWindow(name);
-		
+        
         if(w)
-			return w;
-	}
+            return w;
+    }
 
     return 0;
 }
@@ -286,53 +286,47 @@ WindowImpl* Window::impl()
 
 void Window::runModal()
 {
-    const std::vector<Window*>& windows =  Application::instance().mainScreen().windows();
-
-     Window* activeWindow = 0;
-
+    const std::vector<Window*>& windows = Application::instance().mainScreen().windows();
+    Window* activeWindow = 0;
     std::map<Window*, bool> states;
 
     std::vector<Window*>::const_iterator it;
+    for(it = windows.begin(); it != windows.end(); ++it)
+    {
+        Window* w = (*it);
 
-	for(it = windows.begin(); it != windows.end(); ++it)
-	{
-        Window* curWindow = (*it);
-
-		if( curWindow != this )
+        if(w != this)
         {
-            if( curWindow->isActive() )
-                activeWindow  = curWindow;
+            if( w->isActive() )
+                activeWindow = w;
 
-			states[curWindow ] = curWindow->isEnabled();
-            curWindow->setEnabled(false);
-
+            states[w] = w->isEnabled();
+            w->setEnabled(false);
         }
-	}
+    }
 
     setEnabled(true);
     setVisible(true);
-    update();
 
-    while( !isClosed() )
+    while( ! isClosed() )
     {
-        activate();
+        if( ! isActive() )
+            activate();
+        
         Application::instance().nextEvent();
     }
     
-    std::map<Window*, bool>::iterator mapIt;    
+    for(it = windows.begin(); it != windows.end(); ++it)
+    {
+        Window* w = (*it);
 
-	for(it = windows.begin(); it != windows.end(); ++it)
-	{
-        Window* curWindow = (*it);
-
-        if( activeWindow == curWindow )
+        if( activeWindow == w )
             activeWindow->activate();
                 
-        mapIt = states.find( curWindow );
-
-		if( mapIt != states.end())
-			mapIt->first->setEnabled( mapIt->second );
-	}
+        std::map<Window*, bool>::iterator  mapIt = states.find(w);
+        if( mapIt != states.end() )
+            mapIt->first->setEnabled( mapIt->second );
+    }
 }
 
 

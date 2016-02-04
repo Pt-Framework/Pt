@@ -47,7 +47,7 @@ class PT_HMI_API PaintSurface
 
 		virtual Gfx::SizeF size() const;
 
-		virtual Pt::Hmi::Painter& painter()
+		virtual Painter& painter()
 		{
 			return _painter;
 		}

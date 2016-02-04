@@ -73,9 +73,9 @@ class PT_HMI_API Widget : public Pt::Connectable
             TopLeft,
             TopCenter,
             TopRight,
-            MidleLeft,
-            MidleCenter,
-            MidleRight,
+            MiddleLeft,
+            MiddleCenter,
+            MiddleRight,
             BottomLeft,
             BottomCenter,
             BottomRight
@@ -145,12 +145,13 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         const Pt::Char* mnemonic() const;
 
+        void processEvent(const Pt::Event& ev);
+
         void update();
 
+    private:
         // TODO: should widget paint itself on parent surface?
         void render();
-
-        void processEvent(const Pt::Event& ev);
 
     protected:
         Widget();    
@@ -274,6 +275,11 @@ class PT_HMI_API Widget : public Pt::Connectable
         Layout& layout()
         {
             return _layout;
+        }
+
+        Spacing& margin()
+        {
+            return _margin;                  
         }
 
         const Spacing& margin() const

@@ -23,7 +23,9 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
+*/
 
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Window.h>
@@ -34,21 +36,23 @@
 #include <Pt/Gfx/Point.h>
 
 namespace Pt {
+
 namespace Hmi {
 
 Button::Button()
 : _image(Gfx::Image(0,0))
-, _imageAlign( MidleLeft)
+, _imageAlign( MiddleLeft)
 , _isPressed(false)
 {
   setBackgroundColor(Gfx::Color::fromRgb8(245,245,245));
-  setPanelBorderStyle(Custom);
-  setPanelBorderWidth(1);
+
   setAutoSize(false);
-  setContentAlignment(MidleCenter);
+  setContentAlignment(MiddleCenter);
   setAcceptFocus(true);
-  setPanelBorderRoundEdge(true);
-  setPanelBorderStyle(Panel::Single);
+
+  setBorderWidth(1);
+  setBorderRound(true);
+  setBorderStyle(Panel::Single);
 }
 
 
@@ -106,6 +110,7 @@ void Button::onPointerEnter()
 
 void Button::onPointerLeave()
 {
+    _isPressed = false;
     Label::onPointerLeave();
     update();
 }
@@ -126,7 +131,7 @@ void Button::onTouchEvent(const TouchEvent& ev)
 void Button::onPaint(PaintSurface& paintSurface)
 {    
     bool mouseOver = window()->pointerWidget() == this;
-    Pt::Hmi::Painter& painter = paintSurface.painter();
+    Gfx::Painter& painter = paintSurface.painter();
 
     Gfx::Color bkgColor = backgroundColor();
 
@@ -169,6 +174,6 @@ void Button::onPaint(PaintSurface& paintSurface)
     }
 }
 
-}
+} // namespace
 
-}
+} // namespace

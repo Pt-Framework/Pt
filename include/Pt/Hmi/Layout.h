@@ -41,9 +41,9 @@ class Layout
 	public:
 		enum Type
 		{			
-            None,
-			TopToButton,
-			ButtomToTop,
+      None,
+			TopToBottom,
+			BottomToTop,
 			LeftToRight,
 			RightToLeft,
 		};
@@ -63,6 +63,7 @@ class Layout
 			_type = t;
 		}
 
+    // inner spacing
 		const Spacing& padding() const
 		{
 			return _padding;

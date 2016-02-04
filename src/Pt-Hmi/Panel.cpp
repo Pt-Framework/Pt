@@ -33,9 +33,9 @@ namespace Pt{
 namespace Hmi{
 
 Panel::Panel()
-: _panelBorderStyle(Single)
-, _panelBorderWidth(1)
-, _panelBorderRoundEdge(false)
+: _borderStyle(Single)
+, _borderWidth(1)
+, _borderRound(false)
 , _borderColor(Gfx::Color::fromRgb8(178,178,178))
 {
   setAcceptFocus(false);  
@@ -47,29 +47,27 @@ Panel::~Panel()
 }
 
 
-void Panel::onPaint(PaintSurface& paintSurface)
+void Panel::onPaint(PaintSurface& surface)
 {	
-	Widget::onPaint(paintSurface);
+	Widget::onPaint(surface);
 
-	int corner = 0;
-
-	if(_panelBorderRoundEdge)
-		corner = 2;
-    
-  if( _panelBorderWidth == 0 )
+  if( _borderWidth <= 0 )
     return;
 
-  const Gfx::SizeF  size = this->size();
-  const Gfx::PointF pos  = this->position();
-
-	size_t border =  (size_t) _panelBorderWidth;	
-
-	Gfx::SizeF  clientSize(size.width() - _panelBorderWidth/2, size.height() - _panelBorderWidth/2);	
-	Gfx::RectF  clientRect(Gfx::PointF( _panelBorderWidth/2, _panelBorderWidth/2), clientSize);
+	double corner = _borderRound ? 2.0 : 0;
+    
+  const Gfx::SizeF size = surface.size();
+  const Gfx::PointF pos(0,0);
 	
-	Pt::Hmi::Painter& painter = paintSurface.painter();
+  size_t border = static_cast<size_t>(_borderWidth);	
+
+	Gfx::SizeF borderSize(size.width() - _borderWidth/2, size.height() - _borderWidth/2);	
+  Gfx::PointF borderPos(_borderWidth/2, _borderWidth/2);
+	Gfx::RectF borderRect(borderPos, borderSize);
+	
+	Painter& painter = surface.painter();
 						
-	switch( _panelBorderStyle )
+	switch( _borderStyle )
 	{
 		case Single:
 		{			
@@ -78,11 +76,11 @@ void Panel::onPaint(PaintSurface& paintSurface)
 
 			//P0
 			points1[0].setX(pos.x() + corner);
-			points1[0].setY(pos.y() + clientRect.height());
+			points1[0].setY(pos.y() + borderRect.height());
 
 			//P1
 			points1[1].setX(pos.x());
-			points1[1].setY(pos.y() + clientRect.height() - corner);
+			points1[1].setY(pos.y() + borderRect.height() - corner);
 
 			//P2
 			points1[2].setX(pos.x());
@@ -93,29 +91,29 @@ void Panel::onPaint(PaintSurface& paintSurface)
 			points1[3].setY(pos.y());
 
 			//P4
-			points1[4].setX(pos.x() + clientRect.width() - corner);
+			points1[4].setX(pos.x() + borderRect.width() - corner);
 			points1[4].setY(pos.y() );
 			
 			//---
 			//P0
-			points2[0].setX(pos.x() + clientRect.width() - corner);
+			points2[0].setX(pos.x() + borderRect.width() - corner);
 			points2[0].setY(pos.y());
 
 			//P1
-			points2[1].setX(pos.x() + clientRect.width());
+			points2[1].setX(pos.x() + borderRect.width());
 			points2[1].setY(pos.y() + corner);
 
 			//P2
-			points2[2].setX(pos.x() + clientRect.width());
-			points2[2].setY(pos.y() + clientRect.height() - corner);
+			points2[2].setX(pos.x() + borderRect.width());
+			points2[2].setY(pos.y() + borderRect.height() - corner);
 
 			//P3
-			points2[3].setX(pos.x() + clientRect.width() - corner);
-			points2[3].setY(pos.y() + clientRect.height());
+			points2[3].setX(pos.x() + borderRect.width() - corner);
+			points2[3].setY(pos.y() + borderRect.height());
 
 			//P4
 			points2[4].setX(pos.x() + corner);
-			points2[4].setY(pos.y() + clientRect.height());
+			points2[4].setY(pos.y() + borderRect.height());
 		
 			Gfx::Pen pen(border, _borderColor);
 			painter.setPen(pen);
@@ -125,105 +123,45 @@ void Panel::onPaint(PaintSurface& paintSurface)
 		}
 
 		break;
-			
-		case Custom:
-		{			
-			std::vector<Gfx::PointF> points1(5);
-			std::vector<Gfx::PointF> points2(5);
-
-			//P0
-			points1[0].setX(pos.x() + corner);
-			points1[0].setY(pos.y() + clientRect.height());
-
-			//P1
-			points1[1].setX(pos.x());
-			points1[1].setY(pos.y() + clientRect.height() - corner);
-
-			//P2
-			points1[2].setX(pos.x());
-			points1[2].setY(pos.y() + corner);
-
-			//P3
-			points1[3].setX(pos.x() + corner);
-			points1[3].setY(pos.y());
-
-			//P4
-			points1[4].setX(pos.x() + clientRect.width() - corner);
-			points1[4].setY(pos.y());
-			
-			//---
-			//P0
-			points2[0].setX(pos.x() + clientRect.width() - corner);
-			points2[0].setY(pos.y());
-
-			//P1
-			points2[1].setX(pos.x() + clientRect.width());
-			points2[1].setY(pos.y() + corner);
-
-			//P2
-			points2[2].setX(pos.x() + clientRect.width());
-			points2[2].setY(pos.y() + clientRect.height() - corner);
-
-			//P3
-			points2[3].setX(pos.x() + clientRect.width() - corner);
-			points2[3].setY(pos.y() + clientRect.height());
-
-			//P4
-			points2[4].setX(pos.x() + corner);
-			points2[4].setY(pos.y() + clientRect.height());
-
-
-			Gfx::Pen pen(border, _borderColor);
-			painter.setPen(pen);
-				
-			painter.drawPolyline(&points2[0], points2.size());
-                
-			Gfx::Pen pen2(border,  _borderColor);
-			painter.setPen(pen2);
-                
-			painter.drawPolyline(&points1[0], points1.size());
-            
-		}
-		break;
 
 		case Border3D:
 		{
 			std::vector<Gfx::PointF> points1(3);
-			std::vector<Gfx::PointF> points2(3);
-
 			points1[0].setX(pos.x());
-			points1[0].setY(pos.y() +clientRect.height());
+			points1[0].setY(pos.y() +borderRect.height());
 
 			points1[1].setX(pos.x());
 			points1[1].setY(pos.y());
 				
-			points1[2].setX(pos.x() + clientRect.width());
+			points1[2].setX(pos.x() + borderRect.width());
 			points1[2].setY(pos.y());
 
+			Gfx::Pen pen(border, _borderColor);
+			painter.setPen(pen);
+			painter.drawPolyline(&points1[0], points1.size());
 
-			points2[0].setX(pos.x() + clientRect.width());
+      std::vector<Gfx::PointF> points2(3);
+			points2[0].setX(pos.x() + borderRect.width());
 			points2[0].setY(pos.y());
 
-			points2[1].setX(pos.x() + clientRect.width());
-			points2[1].setY(pos.y() + clientRect.height());
+			points2[1].setX(pos.x() + borderRect.width());
+			points2[1].setY(pos.y() + borderRect.height());
 
 			points2[2].setX(pos.x());
-			points2[2].setY(pos.y() + clientRect.height());
+			points2[2].setY(pos.y() + borderRect.height());
 
-		
-			Gfx::Pen pen(border,Gfx::Color(255/255.0,255/255.0,255/255.0));
-			painter.setPen(pen);
-				
-			painter.drawPolyline(&points1[0], points1.size());
-								
-			Gfx::Pen pen2(border, _borderColor );
+      Gfx::Color color(_borderColor.red() * 0.9f, 
+                       _borderColor.green() * 0.9f,
+                       _borderColor.blue() * 0.9f);
+
+			Gfx::Pen pen2( border, color );
 			painter.setPen(pen2);
-
 			painter.drawPolyline(&points2[0], points2.size());			
 		}
 		break;	
-		default:
-		break;			
+		
+    default:
+		    break;			
 	}	
 }
 

@@ -41,7 +41,7 @@ Label::Label()
 , _autoSize(true)
 {
     setForegroundColor(Gfx::Color::fromRgb8(0,0,0,0));
-    setPanelBorderStyle(NoBorder);
+    setBorderStyle(NoBorder);
 }
 
 
@@ -81,124 +81,122 @@ void Label::onUpdate()
 }
 
 
-void Label::onPaint(PaintSurface& paintSurface)
+void Label::onPaint(PaintSurface& surface)
 {
-    Pt::Hmi::Painter& painter = paintSurface.painter();	
-    Gfx::SizeF         size = this->size();
+    Panel::onPaint(surface);
+
+    Painter& painter = surface.painter();    
+    Gfx::SizeF         size = surface.size();
     Gfx::PointF        pos(0,0);
     Gfx::Color         foreColor = foregroundColor();
-    Gfx::Pen	          pen( 1, foreColor);
+    Gfx::Pen             pen(1, foreColor);
 
-    Pt::String captionStr = caption().c_str();	  
+     
+    const Gfx::FontMetrics& metric = captionMetrics();
 
-    painter.setFont( font() );
-    Gfx::FontMetrics	metric = painter.fontMetrics(captionStr);
+    Alignment align = ! _autoSize ? contentAlignment() 
+                                  : Widget::TopLeft;
 
-    Panel::onPaint(paintSurface);
-
-    if( ! _autoSize )
-    {										            	
-        switch(contentAlignment())
-        {
+    switch(align)
+    {
+        default:
         case Widget::TopLeft:
-            {
-                pos +=Gfx::PointF( 0, metric.ascent() );			
-            }
-            break;
+        {
+            pos = Gfx::PointF(0, metric.ascent());            
+        }
+        break;
 
         case Widget::TopCenter:
-            {
-                const double widthHalf		  = size.width()/2;							  				
-                const double textWidthHalf	= metric.width()/2;				  								
-                pos +=Gfx::PointF(widthHalf - textWidthHalf, metric.ascent());	
-            }
-            break;
+        {
+            const double widthHalf          = size.width()/2;                                              
+            const double textWidthHalf    = metric.width()/2;                                                  
+            pos = Gfx::PointF(widthHalf - textWidthHalf, metric.ascent());    
+        }
+        break;
 
         case Widget::TopRight:
-            {
-                const double width		  = size.width();				
-                const double textWidth	= metric.width();									
-                pos +=Gfx::PointF(width - textWidth, metric.ascent());	
-            }
-            break;
+        {
+            const double width          = size.width();                
+            const double textWidth    = metric.width();                                    
+            pos = Gfx::PointF(width - textWidth, metric.ascent());    
+        }
+        break;
 
-        case Widget::MidleLeft:
-            {			  
-                const double heightHalf		  = size.height()/2;				
-                const double textHeightHalf = metric.height()/2;
+        case Widget::MiddleLeft:
+        {              
+            const double heightHalf          = size.height()/2;                
+            const double textHeightHalf = metric.height()/2;
 
-                pos +=Gfx::PointF(0, (heightHalf - textHeightHalf) + metric.ascent());
-            }
-            break;
+            pos = Gfx::PointF(0, (heightHalf - textHeightHalf) + metric.ascent());
+        }
+        break;
 
-        case Widget::MidleCenter:
-            {			
-                const double widthHalf		  = size.width()/2;				
-                const double heightHalf		  = size.height()/2;				
-                const double textWidthHalf	= metric.width()/2;	
-                const double textHeightHalf = metric.height()/2;	
+        case Widget::MiddleCenter:
+        {            
+            const double widthHalf          = size.width()/2;                
+            const double heightHalf          = size.height()/2;                
+            const double textWidthHalf    = metric.width()/2;    
+            const double textHeightHalf = metric.height()/2;    
 
-                pos +=Gfx::PointF(widthHalf - textWidthHalf, (heightHalf - textHeightHalf) + metric.ascent());							
-            }
-            break;
+            pos = Gfx::PointF(widthHalf - textWidthHalf, (heightHalf - textHeightHalf) + metric.ascent());                            
+        }
+        break;
 
-        case Widget::MidleRight:
-            {
-                const double width		  = size.width();				
-                const double textWidth	= metric.width();	
+        case Widget::MiddleRight:
+        {
+            const double width          = size.width();                
+            const double textWidth    = metric.width();    
 
-                const double heightHalf		  = size.height()/2;				
-                const double textHeightHalf = metric.height()/2;	
+            const double heightHalf          = size.height()/2;                
+            const double textHeightHalf = metric.height()/2;    
 
-                pos +=Gfx::PointF(width - textWidth, (heightHalf - textHeightHalf) + metric.ascent());	
-            }
-            break;
+            pos = Gfx::PointF(width - textWidth, (heightHalf - textHeightHalf) + metric.ascent());    
+        }
+        break;
 
         case Widget::BottomLeft:
-            {
-                const double height	  = size.height();				
-                const double textHeight = metric.height();	
+        {
+            const double height      = size.height();                
+            const double textHeight = metric.height();    
 
-                pos +=Gfx::PointF(0, (height- textHeight) + metric.ascent());	
-            }
-            break;
+            pos = Gfx::PointF(0, (height- textHeight) + metric.ascent());    
+        }
+        break;
 
         case Widget::BottomCenter:
-            {
-                const double widthHalf		  = size.width()/2;				
-                const double textWidthHalf	= metric.width()/2;	
+        {
+            const double widthHalf          = size.width()/2;                
+            const double textWidthHalf    = metric.width()/2;    
 
-                const double height	  = size.height();				
-                const double textHeight = metric.height();	
+            const double height      = size.height();                
+            const double textHeight = metric.height();    
 
-                pos +=Gfx::PointF(widthHalf - textWidthHalf, (height- textHeight) + metric.ascent());	
-            }
-            break;
+            pos = Gfx::PointF(widthHalf - textWidthHalf, (height- textHeight) + metric.ascent());    
+        }
+        break;
 
         case Widget::BottomRight:
-            {
-                const double width		  = size.width();				
-                const double textWidth	= metric.width();	
+        {
+            const double width          = size.width();                
+            const double textWidth    = metric.width();    
 
-                const double height	  = size.height();				
-                const double textHeight = metric.height();	
+            const double height      = size.height();                
+            const double textHeight = metric.height();    
 
-                pos +=Gfx::PointF(width - textWidth, (height- textHeight) + metric.ascent());	
-            }
-            break;
+            pos = Gfx::PointF(width - textWidth, (height- textHeight) + metric.ascent());    
         }
-    }
-    else
-    {
-        pos += Gfx::PointF( 0, metric.ascent() );
+        break;
     }
 
+    painter.setFont( font() );
     painter.setPen(pen);
+
+    Pt::String captionStr = caption().c_str(); 
     painter.drawText(pos, captionStr);
 
     const Char* ch = mnemonic();
     if(ch)
-    {			
+    {            
         String::size_type n = captionStr.find( ch->narrow() );
         if(n != String::npos)
         {
@@ -210,7 +208,7 @@ void Label::onPaint(PaintSurface& paintSurface)
             fm = painter.fontMetrics(text);
             Gfx::PointF to( from.x() + fm.width(), from.y() );
 
-            painter.drawLine(from, to );
+            painter.drawLine(from, to);
         }
     }
 }

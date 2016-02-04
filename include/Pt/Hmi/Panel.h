@@ -22,13 +22,17 @@
  
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ MA 02110-1301 USA
+*/
+
 #ifndef Pt_Hmi_Panel_H
 #define Pt_Hmi_Panel_H
 
 #include <Pt/Hmi/Widget.h>
 
 namespace Pt{
+
 namespace Hmi{
 
 class PT_HMI_API Panel  : public Widget
@@ -38,66 +42,66 @@ class PT_HMI_API Panel  : public Widget
 		{
 			NoBorder,
 			Single,
-			Border3D,
-			Custom
+			Border3D
 		};
-
 
 	public:
 		Panel();
-		virtual ~Panel();	
+		
+    virtual ~Panel();	
 
-    BorderStyle panelBorderStyle() const
+    BorderStyle borderStyle() const
     {   
-        return  _panelBorderStyle;
+        return _borderStyle;
     }
 
-    void setPanelBorderStyle(BorderStyle t)         
+    void setBorderStyle(BorderStyle t)         
     {   
-        _panelBorderStyle = t;
+        _borderStyle = t;
     }
 
-
-		bool panelBorderRoundEdge() const
+		bool isBorderRound() const
     {   
-      return _panelBorderRoundEdge;
+      return _borderRound;
     }
 
-    void setPanelBorderRoundEdge( bool b)
+    void setBorderRound(bool b)
     {   
-      _panelBorderRoundEdge = b;
+      _borderRound = b;
     }
 
-    void setPanelBorderWidth( double w )
+    double borderWidth() const	  
+    {   
+       return _borderWidth;
+    }
+
+    void setBorderWidth( double w )
     {
-      _panelBorderWidth = w;
-    }
-
-    double panelBorderWidth() const	  
-    {   
-       return _panelBorderWidth;
+      _borderWidth = w;
     }
          
-    void setBorderColor(Gfx::Color b)
-    {
-      _borderColor = b;
-    }
-
-    Gfx::Color borderColor() const
+    const Gfx::Color& borderColor() const
     {
       return _borderColor;
     }
 
-	private:
-		BorderStyle				 _panelBorderStyle;
-		bool				      _panelBorderRoundEdge;	
-		double			      _panelBorderWidth;	  
-		Gfx::Color				_borderColor;
-                          
-	protected:
+    void setBorderColor(Gfx::Color b)
+    {
+      _borderColor = b;
+    }
+	
+  protected:
 		virtual void onPaint(PaintSurface& surface);
+	
+  private:
+		BorderStyle	_borderStyle;
+		bool				_borderRound;	
+		double			_borderWidth;	  
+		Gfx::Color	_borderColor;
 };
 
-}}
+}
+
+}
 
 #endif

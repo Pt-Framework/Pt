@@ -56,6 +56,7 @@ Widget::Widget()
 , _actionKey(Key::Space)
 , _size( 100, 100)
 , _position( 10,10) 
+, _contentAlignment(TopLeft)
 , _isValid(false)
 , _mnemonic(0)
 {      
@@ -332,6 +333,8 @@ void Widget::update()
 {
     _isValid = false;
 
+    onUpdate();
+
     if( parent() )
     {
         parent()->update();   
@@ -349,7 +352,7 @@ void Widget::render()
     if( ! visible() )
         return;
 
-    // layout children
+    // layout
     onLayout(_surface);
 
     // render
@@ -364,9 +367,7 @@ void Widget::render()
     for( size_t i = 0; i < _children.size(); ++i )
     {
         Widget* child = _children[i];
-
         child->render();
-
         _surface.painter().drawSurface( child->position(), child->_surface );
     }
 }
@@ -374,11 +375,11 @@ void Widget::render()
 
 void Widget::updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p)
 {       
-    //ToDO: calculate the margin into the size and pos.
    w._position = p;      
    w._size = s;              
-   w._surface.resize( _size );  
+   w._surface.resize( s );  
    w._isValid = false;
+   
    _isValid = false;
 }
 
@@ -492,10 +493,12 @@ void Widget::onUpdate()
 void Widget::onLayout( PaintSurface& surface )
 {
     Gfx::SizeF clientSize = surface.size();
-    double posLeft  = 0;
-    double posTop   = 0;
-    double posRight  = clientSize.width();
-    double posBottom = clientSize.height();
+    
+    double posLeft  = _layout.padding().left();
+    double posTop   = _layout.padding().top();
+    double posRight  = clientSize.width() - _layout.padding().right();
+    double posBottom = clientSize.height() - _layout.padding().bottom();
+    
     std::vector<Widget*> fillLayoutChildren;
 
     for( size_t i = 0; i < widgets().size(); ++i )
@@ -523,7 +526,7 @@ void Widget::onLayout( PaintSurface& surface )
                   point.setY( posTop );            
 
                   Gfx::SizeF size( child->size().width(), (posBottom - posTop));
-                  posLeft += child->size().width();      
+                  posLeft += child->size().width(); 
                             
                   updatePosAndSize( *child, size, point );           
                 }
@@ -574,40 +577,65 @@ void Widget::onLayout( PaintSurface& surface )
 
             case Layout::LeftToRight:
             {                        
-                point.setX( posLeft );
-                posLeft += child->size().width();
-                point.setY( 0 );    
-                updatePosAndSize( *child,Gfx::SizeF( child->size().width(), clientSize.height() ), point );
+                point.setX( posLeft + child->margin().left() );
+                point.setY( _layout.padding().top() + child->margin().top() ); 
+                
+                posLeft += child->size().width() + child->margin().left() + child->margin().right();
 
+                Gfx::SizeF childSize( child->size().width(), 
+                                      clientSize.height() - _layout.padding().top() - _layout.padding().bottom() -
+                                      child->margin().top() - child->margin().bottom() );
+                 
+                updatePosAndSize(*child, childSize , point);
             }
             break;
 
             case Layout::RightToLeft:
             {
                 posRight -= child->size().width();
+                posRight -= child->margin().right();
+                
                 point.setX( posRight );              
-                point.setY( 0 );    
-                updatePosAndSize( *child,Gfx::SizeF( child->size().width(), clientSize.height() ), point );
+                point.setY( _layout.padding().top()  ); 
+                
+                posRight -= child->margin().left();
 
+                Gfx::SizeF childSize( child->size().width(), 
+                                      clientSize.height() - _layout.padding().top() - _layout.padding().bottom());
+                                      
+                                         
+                updatePosAndSize( *child, childSize, point );
             }
             break;
 
-            case Layout::TopToButton:
+            case Layout::TopToBottom:
             {
-                point.setX( 0 );
-              
-                point.setY( posTop );
-                posTop += child->size().height();    
-                updatePosAndSize( *child,Gfx::SizeF( clientSize.width(), child->size().height() ), point );
+                point.setX( _layout.padding().left() + child->margin().left()  );
+                point.setY( posTop + child->margin().top() );
+                
+                posTop += child->size().height() + child->margin().top() + child->margin().bottom();
+                
+                Gfx::SizeF childSize( clientSize.width() - _layout.padding().left() - _layout.padding().right(), 
+                                      child->size().height());
+                                         
+                updatePosAndSize(*child, childSize, point);
             }
             break;
 
-            case Layout::ButtomToTop:
+            case Layout::BottomToTop:
             {
-                point.setX( 0 );
-                posBottom -= child->size().height(); 
-                point.setY( posBottom  );    
-                updatePosAndSize( *child,Gfx::SizeF( clientSize.width(), child->size().height() ), point );
+                posBottom -= child->size().height();
+                posBottom -= child->margin().bottom();
+                
+                point.setX( _layout.padding().right() );
+                point.setY( posBottom  );
+                
+                posBottom -= child->margin().top();    
+
+                Gfx::SizeF childSize( clientSize.width() - _layout.padding().left() - _layout.padding().right(), 
+                                      child->size().height() );
+
+                updatePosAndSize(*child, childSize, point);
             }
             break;
         }                    
@@ -628,77 +656,67 @@ void Widget::onLayout( PaintSurface& surface )
 
 void Widget::onPaint( PaintSurface& surface )
 {        
-  const Gfx::SizeF& size = this->size();
+    const Gfx::SizeF& size = surface.size();
 
     if( size.width() < 0 || size.height() < 0)
         return; 
 
-    const Gfx::Image&   backImage = backgroundImage();
-    Pt::Hmi::Painter&     painter = surface.painter();
- Gfx::PointF         pos(0,0);
-    Gfx::RectF               rectClient( pos, size );
- Gfx::RectF               rect(Gfx::PointF(0,0), surface.size() );
-  
-  if( _parent != 0 )
-  {
-   Gfx::Brush    backBrush(_parent->backgroundColor() );            
-    painter.setBrush(backBrush);
-    painter.fillRect(rect);
-  }
-
-
-    Gfx::Brush    brush(backgroundColor());
+    const Gfx::Image& backImage = backgroundImage();
+    Pt::Hmi::Painter& painter = surface.painter();
     
-    painter.setBrush(brush);                
-    painter.fillRect(rectClient);
+    Gfx::Brush brush( backgroundColor() );
+    painter.setBrush(brush);  
+    
+    Gfx::PointF origin(0, 0);
+    Gfx::RectF rect( origin, size );              
+    painter.fillRect(rect);
 
-    if( !backImage.empty() )
-    {
-        switch( backgroundImageLayout())
-        {                
-            case NoLayout:
-            {
-                painter.drawImage( Pt::Gfx::PointF(0,0), backImage );
-            }
-            break;
-            
-            case Tile:
-            {
-                for( double x = pos.x(); x < size.width();  x += backImage.width() )
-                {
-                    for( double y = pos.y(); y < size.height();  y += backImage.height() )
-                        painter.drawImage(Gfx::PointF(x,y), backImage);
-                }
-            }
-            break;
+    if( backImage.empty() )
+        return;
 
-            case Center:
-            {
-                const double x = pos.x() + size.width()/2  - backImage.width()/2;
-                const double y = pos.y() + size.height()/2  - backImage.height()/2;
-                painter.drawImage(Gfx::PointF(x,y), backImage);
-            }
-            break;
-            
-            case Strech:
-            {
-                Gfx::Image strech = backImage.blockScale(Gfx::Size((int) size.width(), (int)size.height() ) );
-                painter.drawImage( pos, strech );
-            }
-            break;
-
-            case Zoom:
-            {
-        const double factor = size.width()/(double)backImage.width();
-        Pt::Gfx::Size newSize( ( size_t)( backImage.width()*factor), (size_t)(backImage.height()*factor));
-
-       Gfx::Image strech = backImage.blockScale(newSize);
-                
-        painter.drawImage(pos, strech);
-            }
-            break;
+    switch( backgroundImageLayout() )
+    {                
+        case NoLayout:
+        {
+            painter.drawImage( Pt::Gfx::PointF(0,0), backImage );
         }
-    }    
+        break;
+            
+        case Tile:
+        {
+            for( double x = 0; x < size.width();  x += backImage.width() )
+            {
+                for( double y = 0; y < size.height();  y += backImage.height() )
+                    painter.drawImage(Gfx::PointF(x,y), backImage);
+            }
+        }
+        break;
+
+        case Center:
+        {
+            const double x = size.width()/2  - backImage.width()/2;
+            const double y = size.height()/2  - backImage.height()/2;
+            painter.drawImage(Gfx::PointF(x,y), backImage);
+        }
+        break;
+            
+        case Strech:
+        {
+            Gfx::Image strech = backImage.blockScale(Gfx::Size((int) size.width(), (int)size.height() ) );
+            painter.drawImage( origin, strech );
+        }
+        break;
+
+        case Zoom:
+        {
+            const double factor = size.width()/(double)backImage.width();
+            Pt::Gfx::Size newSize( ( size_t)( backImage.width()*factor), (size_t)(backImage.height()*factor));
+
+            Gfx::Image strech = backImage.blockScale(newSize);
+            painter.drawImage(origin, strech);
+        }
+        break;
+    }
 }
 
 
