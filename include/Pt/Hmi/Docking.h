@@ -24,7 +24,7 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
-	02110-1301  USA
+    02110-1301  USA
 */
 
 #ifndef Pt_Hmi_Docking_H
@@ -38,50 +38,49 @@ namespace Hmi {
 
 class Docking
 {
-	public:
-		enum Type
-		{			
-            None,		
-        	Left,
-			Top,
-			Right,
-			Bottom,
-			Fill
-		};
+    public:
+        enum Type
+        {
+          Left,
+          Top,
+          Right,
+          Bottom,
+          Fill
+        };
 
-	public:
-		Docking()
-		: _type( None )		
-		{ }
+    public:
+        Docking()
+        : _type(Fill)        
+        { }
 
-		Type type() const 
-		{
-			return _type; 
-		}
+        Type type() const 
+        {
+            return _type; 
+        }
 
-		void setType( Type t )
-		{
-			_type = t;
-		}
+        void setType( Type t )
+        {
+            _type = t;
+        }
 
-		const Spacing& margin() const
-		{
-			return _margin;
-		}
+        const Spacing& margin() const
+        {
+            return _margin;
+        }
 
-		Spacing& margin()
-		{
-			return _margin;
-		}
+        Spacing& margin()
+        {
+            return _margin;
+        }
 
-		void setMargin( const Spacing& m )
-		{
-			_margin = m;
-		}
-	
-	private:
-		Type    _type;		
-		Spacing _margin;
+        void setMargin( const Spacing& m )
+        {
+            _margin = m;
+        }
+    
+    private:
+        Type    _type;        
+        Spacing _margin;
 };
 
 }}

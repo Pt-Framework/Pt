@@ -42,6 +42,7 @@ class Layout
 		enum Type
 		{			
       None,
+      Docking,
 			TopToBottom,
 			BottomToTop,
 			LeftToRight,
