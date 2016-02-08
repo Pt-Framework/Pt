@@ -38,17 +38,19 @@ ChildW::ChildW(const std::string& title)
     //Toggle button
     _toggleButton.setCaption( std::string("Toggle Me [CTRL+I]") );
     _toggleButton.setShortcut( &Pt::Hmi::Key(Pt::Hmi::Key::Control, Pt::Hmi::Key::I) );
-    _toggleButton.setPosition( Gfx::PointF(20,50) );
-    _toggleButton.setSize( Gfx::SizeF(150,32) ); 
+    _toggleButton.setPosition( Gfx::PointF(20,30) );
+    _toggleButton.setSize( Gfx::SizeF(150,30) ); 
     _toggleButton.margin().setAll(5);
+    _toggleButton.docking().setType( Docking::Bottom );
     _toggleButton.update(); 
 
     //Dialog button     
     _dialogButton.setCaption(std::string("&&Dia&log [CTRL+D]&") );
     _dialogButton.setShortcut( &Pt::Hmi::Key(Pt::Hmi::Key::Control, Pt::Hmi::Key::D) );
     _dialogButton.setPosition( Gfx::PointF(20,100));
-    _dialogButton.setSize( Gfx::SizeF(150,36) );
+    _dialogButton.setSize( Gfx::SizeF(150,30) );
     _dialogButton.margin().setAll(5);
+    _dialogButton.docking().setType( Docking::Bottom );
     _dialogButton.clicked() += Pt::slot(*this, &ChildW::onShowDialog);
     _dialogButton.update(); 
     
@@ -56,8 +58,9 @@ ChildW::ChildW(const std::string& title)
     _closeButton.setCaption(std::string("Close App [CTRL+X]"));
     _closeButton.setShortcut(&Pt::Hmi::Key(Pt::Hmi::Key::Control, Pt::Hmi::Key::X));
     _closeButton.setPosition( Gfx::PointF(20,200) );
-    _closeButton.setSize( Gfx::SizeF(150, 40) );
+    _closeButton.setSize( Gfx::SizeF(150, 30) );
     _closeButton.margin().setAll(5);
+    _closeButton.docking().setType( Docking::Bottom );
     _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);
     _closeButton.update(); 
 
@@ -67,9 +70,9 @@ ChildW::ChildW(const std::string& title)
     _buttonBar.docking().setType(Docking::Bottom);
     _buttonBar.update(); 
 
-    _buttonBar.add(_closeButton);
-    _buttonBar.add(_dialogButton);
-    _buttonBar.add(_toggleButton);
+    _mainWidget.add(_closeButton);
+    _mainWidget.add(_dialogButton);
+    _mainWidget.add(_toggleButton);
 
     _mainWidget.add(_textLabel);
     _mainWidget.add(_buttonBar);

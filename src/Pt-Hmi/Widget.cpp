@@ -50,7 +50,7 @@ Widget::Widget()
 , _backgroundImage()
 , _backgroundImageLayout( NoLayout )
 , _cursor( Hmi::Cursor::defaultCursor() )
-, _acceptFocus( true) 
+, _acceptFocus( false) 
 , _name("")
 , _hasFocus( false)
 , _actionKey(Key::Space)
@@ -512,27 +512,24 @@ void Widget::onUpdate()
 
 void Widget::onLayout()
 {
-    Gfx::SizeF clientSize = this->size();
+    double posLeft   = _layout.padding().left();
+    double posTop    = _layout.padding().top();
+    double posRight  = size().width()  - _layout.padding().right();
+    double posBottom = size().height() - _layout.padding().bottom();
     
-    double posLeft  = _layout.padding().left();
-    double posTop   = _layout.padding().top();
-    double posRight  = clientSize.width() - _layout.padding().right();
-    double posBottom = clientSize.height() - _layout.padding().bottom();
-    
-    std::vector<Widget*> fillLayoutChildren;
+    std::vector<Widget*> childrenToFill;
 
     for( size_t i = 0; i < widgets().size(); ++i )
     {
-        Widget* child = _children[i];            
+        Widget* child = widgets()[i];            
             
         Gfx::PointF pos = child->position();
 
         switch( _layout.type() )
         {
             case Layout::None:
-              pos.setX( pos.x() );
-              pos.setY( pos.y() );  
-              break;
+ 
+            break;
 
             case Layout::Docking:
             {
@@ -540,11 +537,11 @@ void Widget::onLayout()
               {
                 case Docking::Left:
                 {
-                  pos.setX( posLeft );
-                  pos.setY( posTop );            
+                  pos.setX( posLeft + child->margin().left() );
+                  pos.setY( posTop  + child->margin().top());            
 
-                  Gfx::SizeF childSize( child->size().width(), (posBottom - posTop));
-                  posLeft += child->size().width(); 
+                  const Gfx::SizeF childSize( child->size().width(), (posBottom - posTop) - child->margin().topBottom() );
+                  posLeft += child->size().width() + child->margin().leftRight(); 
                             
                   updateGeometry(*child, pos, childSize);      
                 }
@@ -552,11 +549,12 @@ void Widget::onLayout()
 
                 case Docking::Top:
                 {
-                  pos.setX( posLeft );
-                  pos.setY( posTop  );            
-                  Gfx::SizeF childSize( (posRight - posLeft), child->size().height());
+                  pos.setX( posLeft + child->margin().left() );
+                  pos.setY( posTop  + child->margin().top() );         
+                     
+                  const Gfx::SizeF childSize( (posRight - posLeft) - child->margin().leftRight() , child->size().height());
 
-                  posTop += child->size().height();      
+                  posTop += child->size().height() + child->margin().topBottom();      
         
                   updateGeometry(*child, pos, childSize);
                 }
@@ -564,29 +562,38 @@ void Widget::onLayout()
 
                 case Docking::Right:
                 {
-                  posRight -= child->size().width();     
-                  pos.setX( posRight );
-                  pos.setY( posTop );                             
+                  posRight -= (child->size().width()  + child->margin().right());  
+                     
+                  pos.setX( posRight  );
+                  pos.setY( posTop + child->margin().top() );                             
                     
-                  Gfx::SizeF childSize( child->size().width(), (posBottom - posTop) );
+                  posRight -=  child->margin().left();
+
+                  const Gfx::SizeF childSize( child->size().width(), (posBottom - posTop) - child->margin().topBottom() );
+
                   updateGeometry(*child, pos, childSize);
                 }
                 break;
 
                 case Docking::Bottom:
                 {
-                  posBottom -= child->size().height();    
-                  pos.setX( posLeft );
-                  pos.setY( posBottom  );                              
-                  Gfx::SizeF childSize( (posRight - posLeft), child->size().height() );
-                  updateGeometry(*child, pos, childSize);
+                  posBottom -= (child->size().height() + child->margin().bottom());   
+                   
+                  pos.setX( posLeft + child->margin().left() );
+                  pos.setY( posBottom  );       
+                  
+                  posBottom -= child->margin().top();                      
+
+                  const Gfx::SizeF childSize( (posRight - posLeft) - child->margin().leftRight(), child->size().height() );
+
+                  updateGeometry(*child, pos,childSize);
                 }
                 break;
 
                 default:
                 case Docking::Fill:
                 {
-                  fillLayoutChildren.push_back( child );
+                  childrenToFill.push_back( child );
                   continue;
                 }      
               }
@@ -600,9 +607,9 @@ void Widget::onLayout()
                 
                 posLeft += child->size().width() + child->margin().left() + child->margin().right();
 
-                Gfx::SizeF childSize( child->size().width(), 
-                                      clientSize.height() - _layout.padding().top() - _layout.padding().bottom() -
-                                      child->margin().top() - child->margin().bottom() );
+                const Gfx::SizeF childSize( child->size().width(), 
+                                            size().height() - _layout.padding().top() - _layout.padding().bottom() -
+                                            child->margin().top() - child->margin().bottom() );
                  
                 updateGeometry(*child, pos, childSize);
             }
@@ -618,9 +625,9 @@ void Widget::onLayout()
                 
                 posRight -= child->margin().left();
 
-                Gfx::SizeF childSize( child->size().width(), 
-                                      clientSize.height() - _layout.padding().top() - _layout.padding().bottom() - 
-                                      child->margin().top() - child->margin().bottom());
+                const Gfx::SizeF childSize( child->size().width(), 
+                                            size().height() - _layout.padding().top() - _layout.padding().bottom() - 
+                                            child->margin().top() - child->margin().bottom());
                                       
                 updateGeometry(*child, pos, childSize);
             }
@@ -633,10 +640,10 @@ void Widget::onLayout()
                 
                 posTop += child->size().height() + child->margin().top() + child->margin().bottom();
                 
-                Gfx::SizeF childSize( clientSize.width() - 
-                                      _layout.padding().left() - _layout.padding().right() -
-                                      child->margin().left() - child->margin().right(), 
-                                      child->size().height());
+                const Gfx::SizeF childSize( size().width() - 
+                                            _layout.padding().left() - _layout.padding().right() -
+                                            child->margin().left() - child->margin().right(), 
+                                            child->size().height());
                                          
                 updateGeometry(*child, pos, childSize);
             }
@@ -652,10 +659,10 @@ void Widget::onLayout()
                 
                 posBottom -= child->margin().top();    
 
-                Gfx::SizeF childSize( clientSize.width() - 
-                                      _layout.padding().left() - _layout.padding().right() -
-                                      child->margin().left() - child->margin().right(), 
-                                      child->size().height() );
+                const Gfx::SizeF childSize( size().width() - 
+                                            _layout.padding().left() - _layout.padding().right() -
+                                            child->margin().left() - child->margin().right(), 
+                                            child->size().height() );
 
                 updateGeometry(*child, pos, childSize);
             }
@@ -663,16 +670,14 @@ void Widget::onLayout()
         }                    
     }    
 
-  if( fillLayoutChildren.size() != 0 )
-  {
-      Widget* child = fillLayoutChildren[0]; 
-      Gfx::PointF pos(posLeft, posTop);
+  if( childrenToFill.empty() )
+    return;
 
-      const double width  = posRight - posLeft;
-      const double height = posBottom - posTop;
+  const Gfx::PointF fillPos(posLeft, posTop);
+  const Gfx::SizeF  fillSize(posRight - posLeft, posBottom - posTop);
 
-      updateGeometry( *child, pos, Gfx::SizeF(width, height) );
-  }
+  for( size_t i = 0; i < childrenToFill.size(); ++i )
+      updateGeometry( *childrenToFill[i], fillPos, fillSize );
 }
 
 

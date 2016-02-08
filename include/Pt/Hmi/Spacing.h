@@ -68,6 +68,16 @@ class Spacing
       _left = left;
     }
 
+    double topBottom() const
+    {
+      return _top + _bottom;
+    }
+
+    double leftRight() const
+    {
+      return _left + _right;
+    }
+
     double top() const
     {
       return _top;
