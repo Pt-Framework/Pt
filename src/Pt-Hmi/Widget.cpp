@@ -347,39 +347,59 @@ void Widget::update()
 }
 
 
-void Widget::render()
+//void Widget::render()
+//{
+//    if( ! visible() )
+//        return;
+//
+//    // layout
+//    onLayout(_surface);
+//
+//    // render
+//    if( ! _isValid )
+//    {
+//        _surface.clear();
+//        onPaint(_surface);
+//        _isValid = true;
+//    }
+//
+//    // render children
+//    for( size_t i = 0; i < _children.size(); ++i )
+//    {
+//        Widget* child = _children[i];
+//        child->render();
+//        _surface.painter().drawSurface( child->position(), child->_surface );
+//    }
+//}
+
+
+void Widget::render(const Gfx::PointF& pos, PaintSurface& parentSurface)
 {
     if( ! visible() )
         return;
 
-    // layout
-    onLayout(_surface);
+    onLayout();
 
-    // render
-    if( ! _isValid )
-    {
-        _surface.clear();
-        onPaint(_surface);
-        _isValid = true;
-    }
+    _isValid = true;
 
-    // render children
     for( size_t i = 0; i < _children.size(); ++i )
     {
         Widget* child = _children[i];
-        child->render();
-        _surface.painter().drawSurface( child->position(), child->_surface );
+
+        Gfx::PointF childPosition(pos.x() + child->position().x(),
+                                  pos.y() + child->position().y() );
+
+        child->render(childPosition, parentSurface);
     }
 }
 
 
-void Widget::updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p)
+void Widget::updateGeometry(Widget& w, const Gfx::PointF& p, const Gfx::SizeF& s)
 {       
-   w._position = p;      
-   w._size = s;              
-   w._surface.resize( s );  
-   w._isValid = false;
-   
+  if(w.size() == s && w.position() == p)
+    return;
+
+   w.setGeometry(p, s);             
    _isValid = false;
 }
 
@@ -490,9 +510,9 @@ void Widget::onUpdate()
 }
 
 
-void Widget::onLayout( PaintSurface& surface )
+void Widget::onLayout()
 {
-    Gfx::SizeF clientSize = surface.size();
+    Gfx::SizeF clientSize = this->size();
     
     double posLeft  = _layout.padding().left();
     double posTop   = _layout.padding().top();
@@ -523,10 +543,10 @@ void Widget::onLayout( PaintSurface& surface )
                   pos.setX( posLeft );
                   pos.setY( posTop );            
 
-                  Gfx::SizeF size( child->size().width(), (posBottom - posTop));
+                  Gfx::SizeF childSize( child->size().width(), (posBottom - posTop));
                   posLeft += child->size().width(); 
                             
-                  updatePosAndSize( *child, size, pos );           
+                  updateGeometry(*child, pos, childSize);      
                 }
                 break;
 
@@ -534,11 +554,11 @@ void Widget::onLayout( PaintSurface& surface )
                 {
                   pos.setX( posLeft );
                   pos.setY( posTop  );            
-                  Gfx::SizeF size( (posRight - posLeft), child->size().height());
+                  Gfx::SizeF childSize( (posRight - posLeft), child->size().height());
 
                   posTop += child->size().height();      
         
-                  updatePosAndSize(*child, size, pos );
+                  updateGeometry(*child, pos, childSize);
                 }
                 break;
 
@@ -548,9 +568,8 @@ void Widget::onLayout( PaintSurface& surface )
                   pos.setX( posRight );
                   pos.setY( posTop );                             
                     
-                  Gfx::SizeF size( child->size().width(), (posBottom - posTop) );
-        
-                  updatePosAndSize(*child, size, pos );
+                  Gfx::SizeF childSize( child->size().width(), (posBottom - posTop) );
+                  updateGeometry(*child, pos, childSize);
                 }
                 break;
 
@@ -559,8 +578,8 @@ void Widget::onLayout( PaintSurface& surface )
                   posBottom -= child->size().height();    
                   pos.setX( posLeft );
                   pos.setY( posBottom  );                              
-                  Gfx::SizeF size( (posRight - posLeft), child->size().height() );
-                  updatePosAndSize(*child, size, pos);
+                  Gfx::SizeF childSize( (posRight - posLeft), child->size().height() );
+                  updateGeometry(*child, pos, childSize);
                 }
                 break;
 
@@ -585,7 +604,7 @@ void Widget::onLayout( PaintSurface& surface )
                                       clientSize.height() - _layout.padding().top() - _layout.padding().bottom() -
                                       child->margin().top() - child->margin().bottom() );
                  
-                updatePosAndSize(*child, childSize , pos);
+                updateGeometry(*child, pos, childSize);
             }
             break;
 
@@ -603,8 +622,7 @@ void Widget::onLayout( PaintSurface& surface )
                                       clientSize.height() - _layout.padding().top() - _layout.padding().bottom() - 
                                       child->margin().top() - child->margin().bottom());
                                       
-                                         
-                updatePosAndSize( *child, childSize, pos );
+                updateGeometry(*child, pos, childSize);
             }
             break;
 
@@ -620,7 +638,7 @@ void Widget::onLayout( PaintSurface& surface )
                                       child->margin().left() - child->margin().right(), 
                                       child->size().height());
                                          
-                updatePosAndSize(*child, childSize, pos);
+                updateGeometry(*child, pos, childSize);
             }
             break;
 
@@ -639,7 +657,7 @@ void Widget::onLayout( PaintSurface& surface )
                                       child->margin().left() - child->margin().right(), 
                                       child->size().height() );
 
-                updatePosAndSize(*child, childSize, pos);
+                updateGeometry(*child, pos, childSize);
             }
             break;
         }                    
@@ -653,7 +671,7 @@ void Widget::onLayout( PaintSurface& surface )
       const double width  = posRight - posLeft;
       const double height = posBottom - posTop;
 
-      updatePosAndSize( *child,Gfx::SizeF( width, height ), pos );
+      updateGeometry( *child, pos, Gfx::SizeF(width, height) );
   }
 }
 
@@ -742,6 +760,13 @@ void Widget::setPosition(const Gfx::PointF& pos)
 {
    _position = pos;
    _isValid = false;
+}
+
+
+void Widget::setGeometry(const Gfx::PointF& pos, const Gfx::SizeF& size)
+{
+  setPosition(pos);
+  setSize(size);
 }
 
 

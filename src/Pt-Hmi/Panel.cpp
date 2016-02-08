@@ -47,6 +47,30 @@ Panel::~Panel()
 }
 
 
+void Panel::render(const Gfx::PointF& pos, PaintSurface& parentSurface)
+{
+    if( ! visible() )
+        return;
+
+    onLayout();
+
+    if( ! _isValid )
+    {
+        _surface.clear();
+        onPaint(_surface);
+        _isValid = true;
+    }
+
+    for( size_t i = 0; i < _children.size(); ++i )
+    {
+        Widget* child = _children[i];
+        child->render(child->position(), _surface);
+    }
+
+    parentSurface.painter().drawSurface(pos, _surface);
+}
+
+
 void Panel::onPaint(PaintSurface& surface)
 {	
 	Widget::onPaint(surface);

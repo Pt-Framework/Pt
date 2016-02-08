@@ -238,17 +238,14 @@ void Window::update()
 
 void Window::render()
 {
-    if( _mainWidget != 0 )
+    Hmi::Painter& painter = _surface.painter();
+    painter.setBrush( Pt::Gfx::Color(0.9, 0.9, 0.9) );
+    Pt::Gfx::RectF rect(Pt::Gfx::PointF(0,0), size() );
+    painter.fillRect(rect);
+
+    if(_mainWidget)
     {
-        _mainWidget->render();
-        _surface.painter().drawSurface(_mainWidget->position(), _mainWidget->_surface );
-    }
-    else
-    {
-         Hmi::Painter& painter = _surface.painter();
-         painter.setBrush( Pt::Gfx::Color(0,0,0) );
-         Pt::Gfx::RectF rect(Pt::Gfx::PointF(0,0), size() );
-         painter.fillRect(rect);
+        _mainWidget->render(Gfx::PointF(0,0), _surface);
     }
     
     _windowManager.render( _surface );

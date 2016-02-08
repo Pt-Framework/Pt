@@ -7,30 +7,38 @@
 #include <Pt/Hmi/Label.h>
 #include "Dialog1.h"
 
-namespace Pt{
-namespace Hmi{
-namespace Demo{
+namespace Pt {
 
+namespace Hmi {
+
+namespace Demo {
 
 class ChildW : public Hmi::Window
 {
     public:
-        ChildW();
+        ChildW(const std::string& title);
+        
         ~ChildW();
 
     private:
         void onShowDialog(Button& button);
-        void onCloseApp();
+        
+        void onCloseApp(Button& button);
 
     private:
         Hmi::Window _childWindow2;
-        Hmi::Panel  _mainPanel;
+        Hmi::Widget  _mainWidget;
         Hmi::Button _closeButton;
         Hmi::Button _toggleButton;
         Hmi::Button _dialogButton;
         Hmi::Label  _textLabel;
+        Hmi::Widget _buttonBar;
 };
 
-}}}
+} // namespace
+
+} // namespace
+
+} // namespace
 
 #endif

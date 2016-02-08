@@ -89,6 +89,8 @@ class PT_HMI_API Panel  : public Widget
     {
       _borderColor = b;
     }
+
+    virtual void render(const Gfx::PointF& pos, PaintSurface& parentSurface);
 	
   protected:
 		virtual void onPaint(PaintSurface& surface);

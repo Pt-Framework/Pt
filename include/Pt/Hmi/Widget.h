@@ -82,6 +82,8 @@ class PT_HMI_API Widget : public Pt::Connectable
         };
 
     public:    
+        Widget();
+        
         virtual ~Widget();
 
         Window* window();
@@ -149,13 +151,13 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         void update();
 
-    private:
+    public:
         // TODO: should widget paint itself on parent surface?
-        void render();
+        //void render();
 
-    protected:
-        Widget();    
+        virtual void render(const Gfx::PointF& pos, PaintSurface& parentSurface);
 
+    protected:    
         virtual void onEvent(const Pt::Event& ev);
 
         virtual void onPointerEvent(const MouseEvent& ev);
@@ -169,7 +171,7 @@ class PT_HMI_API Widget : public Pt::Connectable
     protected:
         virtual void onUpdate();
 
-        virtual void onLayout(PaintSurface& surface);
+        virtual void onLayout();
 
         virtual void onPaint(PaintSurface& surface); 
 
@@ -242,6 +244,8 @@ class PT_HMI_API Widget : public Pt::Connectable
         }
 
         void setPosition( const Gfx::PointF&  p);
+
+        void setGeometry( const Gfx::PointF& pos, const Gfx::SizeF& size);
 
         //
         // layout properties
@@ -368,7 +372,9 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         void setCaptionMetrics();
 
-    private:
+        void updateGeometry(Widget& w, const Gfx::PointF& p, const Gfx::SizeF& s);
+
+    protected:
         Pt::Signal<const Pt::Event&> _eventReady;
         Window*                      _window; 
         Widget*                      _parent;    
@@ -400,21 +406,6 @@ class PT_HMI_API Widget : public Pt::Connectable
         bool                         _hasFocus;    
         Key                          _actionKey;
         size_t                       _focusIndex;   
-
-        //Todo: implement layout
-        void updatePosAndSize(Widget& w, const Gfx::SizeF& s, const Gfx::PointF& p);
-    //const Gfx::SizeF clientSize() const
-    //{
-    //    return Gfx::SizeF( _size.width() - margin().left() -  margin().right(),
-    //                      _size.height() - margin().top() -  margin().bottom() );
-    //                      
-    //}
-
-    //const Gfx::PointF clientPos() const
-    //{
-    //    return Gfx::PointF( margin().left(),  margin().top() );
-    //}
-
 };
 
 } // namespace
