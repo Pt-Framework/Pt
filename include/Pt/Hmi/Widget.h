@@ -36,7 +36,6 @@
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/MoveEvent.h>
-#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Docking.h>
 #include <Pt/Hmi/Layout.h>
@@ -45,6 +44,7 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Signal.h>
 #include <Pt/Delegate.h>
 
@@ -53,6 +53,7 @@ namespace Pt {
 namespace Hmi {
 
 class Window;
+class PaintSurface;
 
 class PT_HMI_API Widget : public Pt::Connectable
 {
@@ -151,11 +152,10 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         void update();
 
-    public:
-        // TODO: should widget paint itself on parent surface?
-        //void render();
+        bool isValid() const
+        { return _isValid; }
 
-        virtual void render(const Gfx::PointF& pos, PaintSurface& parentSurface);
+        void render(const Gfx::PointF& pos, PaintSurface& parentSurface);
 
     protected:    
         virtual void onEvent(const Pt::Event& ev);
@@ -173,7 +173,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         virtual void onLayout();
 
-        virtual void onPaint(PaintSurface& surface); 
+        virtual void onRender(const Gfx::PointF& pos, PaintSurface& surface); 
 
         virtual void onPointerEnter();    
 
@@ -374,13 +374,13 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         void updateGeometry(Widget& w, const Gfx::PointF& p, const Gfx::SizeF& s);
 
-    protected:
+    private:
         Pt::Signal<const Pt::Event&> _eventReady;
         Window*                      _window; 
         Widget*                      _parent;    
         std::vector<Widget*>         _children;    
         bool                         _isValid;
-        PaintSurface                 _surface;    
+          
         bool                         _enabled;        
         bool                         _visible;
         Gfx::Color                   _backgroundColor;

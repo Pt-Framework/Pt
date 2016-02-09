@@ -52,6 +52,8 @@ class PT_HMI_API Label  : public Panel
             
         virtual void onPaint(PaintSurface& paintSurface);
 
+        Gfx::SizeF preferredSize() const;
+
     private:
         bool _autoSize;    
 };

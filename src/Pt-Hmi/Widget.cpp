@@ -347,61 +347,31 @@ void Widget::update()
 }
 
 
-//void Widget::render()
-//{
-//    if( ! visible() )
-//        return;
-//
-//    // layout
-//    onLayout(_surface);
-//
-//    // render
-//    if( ! _isValid )
-//    {
-//        _surface.clear();
-//        onPaint(_surface);
-//        _isValid = true;
-//    }
-//
-//    // render children
-//    for( size_t i = 0; i < _children.size(); ++i )
-//    {
-//        Widget* child = _children[i];
-//        child->render();
-//        _surface.painter().drawSurface( child->position(), child->_surface );
-//    }
-//}
-
-
-void Widget::render(const Gfx::PointF& pos, PaintSurface& parentSurface)
+void Widget::render(const Gfx::PointF& pos, PaintSurface& surface)
 {
     if( ! visible() )
         return;
 
     onLayout();
-
+    onRender(pos, surface);
+    
     _isValid = true;
+}
 
+
+void Widget::onRender(const Gfx::PointF& pos, PaintSurface& surface)
+{
     for( size_t i = 0; i < _children.size(); ++i )
     {
         Widget* child = _children[i];
 
-        Gfx::PointF childPosition(pos.x() + child->position().x(),
-                                  pos.y() + child->position().y() );
+        Gfx::PointF offset(pos.x() + child->position().x(),
+                           pos.y() + child->position().y() );
 
-        child->render(childPosition, parentSurface);
+        child->render(offset, surface);
     }
 }
 
-
-void Widget::updateGeometry(Widget& w, const Gfx::PointF& p, const Gfx::SizeF& s)
-{       
-  if(w.size() == s && w.position() == p)
-    return;
-
-   w.setGeometry(p, s);             
-   _isValid = false;
-}
 
 
 void Widget::processEvent(const Pt::Event& ev)
@@ -507,6 +477,46 @@ void Widget::onMnemonic()
 
 void Widget::onUpdate()
 {
+}
+
+
+void Widget::updateGeometry(Widget& w, const Gfx::PointF& p, const Gfx::SizeF& s)
+{       
+  if(w.size() == s && w.position() == p)
+    return;
+
+   w.setGeometry(p, s);  
+   w._isValid = false;           
+   _isValid = false;
+}
+
+
+bool StackLeft(Widget& w)
+{
+    double posLeft = w.layout().padding().left();
+    
+    for( size_t i = 0; i < w.widgets().size(); ++i )
+    {
+        Widget* child = w.widgets().at(i);   
+
+        double x = posLeft + child->margin().left();
+        double y = w.layout().padding().top() + child->margin().top(); 
+                
+        posLeft += child->size().width() + child->margin().left() + child->margin().right();
+
+        const Gfx::SizeF childSize( child->size().width(), 
+                                    w.size().height() - 
+                                    w.layout().padding().top() - 
+                                    w.layout().padding().bottom() -
+                                    child->margin().top() - 
+                                    child->margin().bottom() );
+                 
+        Gfx::PointF pos(x, y);
+        child->setGeometry(pos, childSize);
+        //child->_isValid = false;
+    }
+
+    return true;
 }
 
 
@@ -681,72 +691,6 @@ void Widget::onLayout()
 }
 
 
-void Widget::onPaint( PaintSurface& surface )
-{        
-    const Gfx::SizeF& size = surface.size();
-
-    if( size.width() < 0 || size.height() < 0)
-        return; 
-
-    const Gfx::Image& backImage = backgroundImage();
-    Pt::Hmi::Painter& painter = surface.painter();
-    
-    Gfx::Brush brush( backgroundColor() );
-    painter.setBrush(brush);  
-    
-    Gfx::PointF origin(0, 0);
-    Gfx::RectF rect( origin, size );              
-    painter.fillRect(rect);
-
-    if( backImage.empty() )
-        return;
-
-    switch( backgroundImageLayout() )
-    {                
-        case NoLayout:
-        {
-            painter.drawImage( Pt::Gfx::PointF(0,0), backImage );
-        }
-        break;
-            
-        case Tile:
-        {
-            for( double x = 0; x < size.width();  x += backImage.width() )
-            {
-                for( double y = 0; y < size.height();  y += backImage.height() )
-                    painter.drawImage(Gfx::PointF(x,y), backImage);
-            }
-        }
-        break;
-
-        case Center:
-        {
-            const double x = size.width()/2  - backImage.width()/2;
-            const double y = size.height()/2  - backImage.height()/2;
-            painter.drawImage(Gfx::PointF(x,y), backImage);
-        }
-        break;
-            
-        case Strech:
-        {
-            Gfx::Image strech = backImage.blockScale(Gfx::Size((int) size.width(), (int)size.height() ) );
-            painter.drawImage( origin, strech );
-        }
-        break;
-
-        case Zoom:
-        {
-            const double factor = size.width()/(double)backImage.width();
-            Pt::Gfx::Size newSize( ( size_t)( backImage.width()*factor), (size_t)(backImage.height()*factor));
-
-            Gfx::Image strech = backImage.blockScale(newSize);
-            painter.drawImage(origin, strech);
-        }
-        break;
-    }
-}
-
-
 void Widget::setEnabled( bool e )
 {
     _enabled = e;
@@ -756,15 +700,12 @@ void Widget::setEnabled( bool e )
 void Widget::setSize(const Gfx::SizeF& size)
 {
     _size = size;              
-    _surface.resize( _size );
-    _isValid = false;
 }
 
     
 void Widget::setPosition(const Gfx::PointF& pos)
 {
    _position = pos;
-   _isValid = false;
 }
 
 

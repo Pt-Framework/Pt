@@ -12,8 +12,8 @@ namespace Demo{
 ChildW::ChildW(const std::string& title)
 {
     setTitle(title);
-    setPosition( Gfx::PointF(10,10) );
-    setSize( Gfx::SizeF(800, 600) );       
+    setPosition( Gfx::PointF(5,5) );
+    setSize( Gfx::SizeF(520, 400) );       
 
     //Panel  
     _mainWidget.setSize( Gfx::SizeF(800, 600) );
@@ -39,7 +39,7 @@ ChildW::ChildW(const std::string& title)
     _toggleButton.setCaption( std::string("Toggle Me [CTRL+I]") );
     _toggleButton.setShortcut( &Pt::Hmi::Key(Pt::Hmi::Key::Control, Pt::Hmi::Key::I) );
     _toggleButton.setPosition( Gfx::PointF(20,30) );
-    _toggleButton.setSize( Gfx::SizeF(150,30) ); 
+    _toggleButton.setSize( Gfx::SizeF(130,30) ); 
     _toggleButton.margin().setAll(5);
     _toggleButton.docking().setType( Docking::Bottom );
     _toggleButton.update(); 
@@ -48,7 +48,7 @@ ChildW::ChildW(const std::string& title)
     _dialogButton.setCaption(std::string("&&Dia&log [CTRL+D]&") );
     _dialogButton.setShortcut( &Pt::Hmi::Key(Pt::Hmi::Key::Control, Pt::Hmi::Key::D) );
     _dialogButton.setPosition( Gfx::PointF(20,100));
-    _dialogButton.setSize( Gfx::SizeF(150,30) );
+    _dialogButton.setSize( Gfx::SizeF(130,30) );
     _dialogButton.margin().setAll(5);
     _dialogButton.docking().setType( Docking::Bottom );
     _dialogButton.clicked() += Pt::slot(*this, &ChildW::onShowDialog);
@@ -58,7 +58,7 @@ ChildW::ChildW(const std::string& title)
     _closeButton.setCaption(std::string("Close App [CTRL+X]"));
     _closeButton.setShortcut(&Pt::Hmi::Key(Pt::Hmi::Key::Control, Pt::Hmi::Key::X));
     _closeButton.setPosition( Gfx::PointF(20,200) );
-    _closeButton.setSize( Gfx::SizeF(150, 30) );
+    _closeButton.setSize( Gfx::SizeF(130, 30) );
     _closeButton.margin().setAll(5);
     _closeButton.docking().setType( Docking::Bottom );
     _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);
@@ -66,20 +66,20 @@ ChildW::ChildW(const std::string& title)
 
     _buttonBar.setSize( Gfx::SizeF(700, 44) );
     _buttonBar.layout().padding().setAll(5);
-    _buttonBar.layout().setType(Layout::RightToLeft);
-    _buttonBar.docking().setType(Docking::Bottom);
+    _buttonBar.layout().setType(Layout::LeftToRight);
+    _buttonBar.docking().setType( Docking::Bottom );
     _buttonBar.update(); 
 
-    _mainWidget.add(_closeButton);
-    _mainWidget.add(_dialogButton);
-    _mainWidget.add(_toggleButton);
+    _buttonBar.add(_closeButton);
+    _buttonBar.add(_dialogButton);
+    _buttonBar.add(_toggleButton);
 
     _mainWidget.add(_textLabel);
     _mainWidget.add(_buttonBar);
 
     //_childWindow2.setMainWidget(&_closeButton);          
-    _childWindow2.setPosition(Gfx::PointF(10,10));    
-    _childWindow2.setSize (Gfx::SizeF(750,500));
+    _childWindow2.setPosition(Gfx::PointF(5,5));    
+    _childWindow2.setSize (Gfx::SizeF(480, 360));
     _childWindow2.setTitle("Child of " + title);    
 
     _childWindow2.setMainWidget(&_mainWidget);

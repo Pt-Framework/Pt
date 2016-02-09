@@ -47,7 +47,7 @@ MainWindow::MainWindow()
 : _child1("Child 1")
 {
     setPosition(  Gfx::PointF(0, 0) );
-    setSize( Gfx::SizeF(1000, 800) );
+    setSize( Gfx::SizeF(600, 600) );
     setTitle("Main 1");
     setVisible( true );  // MainWindow
     

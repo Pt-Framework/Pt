@@ -30,10 +30,12 @@
 #define Pt_Hmi_Panel_H
 
 #include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Gfx/Color.h>
 
-namespace Pt{
+namespace Pt {
 
-namespace Hmi{
+namespace Hmi {
 
 class PT_HMI_API Panel  : public Widget
 {
@@ -90,16 +92,21 @@ class PT_HMI_API Panel  : public Widget
       _borderColor = b;
     }
 
-    virtual void render(const Gfx::PointF& pos, PaintSurface& parentSurface);
+    virtual void onUpdate();
+
+    virtual void onLayout();
+
+    virtual void onRender(const Gfx::PointF& pos, PaintSurface& parentSurface);
 	
   protected:
 		virtual void onPaint(PaintSurface& surface);
 	
   private:
-		BorderStyle	_borderStyle;
-		bool				_borderRound;	
-		double			_borderWidth;	  
-		Gfx::Color	_borderColor;
+    PaintSurface _surface;  
+		BorderStyle	 _borderStyle;
+		bool				 _borderRound;	
+		double			 _borderWidth;	  
+		Gfx::Color	 _borderColor;
 };
 
 }

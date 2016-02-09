@@ -62,9 +62,21 @@ bool Label::isAutoSize() const
 }
 
 
+Gfx::SizeF Label::preferredSize() const
+{
+    const Gfx::FontMetrics& fm = captionMetrics();
+
+    const Spacing& margin = docking().margin();
+    Gfx::SizeF size( fm.width() + layout().padding().leftRight(), 
+                     fm.height() + layout().padding().topBottom() );
+
+    return size;
+}
+
+
 void Label::onUpdate()
 {
-    // TODO: preferreSize() in Widget and move autoSize
+    // TODO: preferredSize() in Widget and move autoSize
     //       to Widget layouting
     if( _autoSize )
     {
