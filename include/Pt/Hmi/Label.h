@@ -43,19 +43,12 @@ class PT_HMI_API Label  : public Panel
 
         ~Label();    
 
-        void setAutoSize(bool a);
-
-        bool isAutoSize() const;
-
     protected:
         virtual void onUpdate();
             
         virtual void onPaint(PaintSurface& paintSurface);
 
-        Gfx::SizeF preferredSize() const;
-
-    private:
-        bool _autoSize;    
+        virtual Gfx::SizeF onAutoSize() const;       
 };
 
 } // namespace

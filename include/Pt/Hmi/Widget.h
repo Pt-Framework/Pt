@@ -44,7 +44,6 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Color.h>
-#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Signal.h>
 #include <Pt/Delegate.h>
 
@@ -187,7 +186,9 @@ class PT_HMI_API Widget : public Pt::Connectable
               
         virtual void onShortcut(const KeyEvent& kev);
 
-        virtual void onMnemonic();       
+        virtual void onMnemonic();   
+        
+        virtual Gfx::SizeF onAutoSize() const;    
 
     public:
         // TODO
@@ -201,16 +202,15 @@ class PT_HMI_API Widget : public Pt::Connectable
           _name = name;
         }
 
+        void setAutoSize(bool a);
+
+        bool isAutoSize() const;
+
         void setCaption(const std::string& c);
 
         const std::string& caption() const
         {
             return _caption;
-        }
-
-        const Gfx::FontMetrics& captionMetrics() const
-        {
-            return _captionMetrics;
         }
 
         bool isEnabled() const
@@ -332,7 +332,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         const Gfx::Image& backgroundImage() const
         {
-                return _backgroundImage;
+            return _backgroundImage;
         }
 
         void setBackgroundImage( const Gfx::Image& im )
@@ -370,8 +370,6 @@ class PT_HMI_API Widget : public Pt::Connectable
     private:
         void setWindow(Window* window);
 
-        void setCaptionMetrics();
-
         void updateGeometry(Widget& w, const Gfx::PointF& p, const Gfx::SizeF& s);
 
     private:
@@ -395,13 +393,13 @@ class PT_HMI_API Widget : public Pt::Connectable
         Gfx::PointF                  _position;            
         Alignment                    _contentAlignment;
         std::string                  _caption;
-        Gfx::FontMetrics             _captionMetrics;
+        //Gfx::FontMetrics             _captionMetrics;
         Gfx::Font                    _font;
         Pt::Char                     _mnemonic;    
         Pt::Delegate<void>           _mnemonicEntered;
         Docking                      _docking;
         Spacing                      _margin;                  
-
+        bool                         _autoSize;
         bool                         _acceptFocus;
         bool                         _hasFocus;    
         Key                          _actionKey;

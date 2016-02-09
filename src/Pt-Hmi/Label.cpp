@@ -31,6 +31,7 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Utf8Codec.h>
 
 namespace Pt {
 
@@ -38,10 +39,10 @@ namespace Hmi {
 
 Label::Label()
 : Panel()
-, _autoSize(true)
 {
     setForegroundColor(Gfx::Color::fromRgb8(0,0,0,0));
     setBorderStyle(NoBorder);
+    setAutoSize(true);
 }
 
 
@@ -50,45 +51,17 @@ Label::~Label()
 }
 
 
-void Label::setAutoSize(bool a)
+Gfx::SizeF Label::onAutoSize() const
 {
-    _autoSize = a;
-}
-
-
-bool Label::isAutoSize() const
-{
-    return _autoSize;
-}
-
-
-Gfx::SizeF Label::preferredSize() const
-{
-    const Gfx::FontMetrics& fm = captionMetrics();
-
-    const Spacing& margin = docking().margin();
-    Gfx::SizeF size( fm.width() + layout().padding().leftRight(), 
-                     fm.height() + layout().padding().topBottom() );
-
-    return size;
+    String text = Pt::Utf8Codec::decode( caption() );
+    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( font(), text);
+    return Gfx::SizeF( fm.width() + layout().padding().leftRight(), 
+                       fm.height() + layout().padding().topBottom() );
 }
 
 
 void Label::onUpdate()
 {
-    // TODO: preferredSize() in Widget and move autoSize
-    //       to Widget layouting
-    if( _autoSize )
-    {
-      const Gfx::FontMetrics& fm = captionMetrics();
-
-      const Spacing& margin = docking().margin();
-      Gfx::SizeF size( fm.width() + margin.left() + margin.right(), 
-                       fm.height() + margin.top() +  margin.bottom() );
-    
-      setSize(size);
-    }
-
     Widget::onUpdate();
 }
 
@@ -101,17 +74,19 @@ void Label::onPaint(PaintSurface& surface)
     Gfx::SizeF         size = surface.size();
     Gfx::PointF        pos(0,0);
     Gfx::Color         foreColor = foregroundColor();
-    Gfx::Pen             pen(1, foreColor);
+    Gfx::Pen           pen(1, foreColor);
 
-     
-    const Gfx::FontMetrics& metric = captionMetrics();
+    painter.setFont( font() );
+    painter.setPen(pen);
 
-    Alignment align = ! _autoSize ? contentAlignment() 
-                                  : Widget::TopLeft;
+    String captionStr = Pt::Utf8Codec::decode( caption() );
+    Gfx::FontMetrics metric = painter.fontMetrics(captionStr);
+
+    Alignment align = ! isAutoSize() ? contentAlignment() 
+                                     : Widget::MiddleCenter;
 
     switch(align)
     {
-        default:
         case Widget::TopLeft:
         {
             pos = Gfx::PointF(0, metric.ascent());            
@@ -143,6 +118,7 @@ void Label::onPaint(PaintSurface& surface)
         }
         break;
 
+        default:
         case Widget::MiddleCenter:
         {            
             const double widthHalf          = size.width()/2;                
@@ -200,10 +176,6 @@ void Label::onPaint(PaintSurface& surface)
         break;
     }
 
-    painter.setFont( font() );
-    painter.setPen(pen);
-
-    Pt::String captionStr = caption().c_str(); 
     painter.drawText(pos, captionStr);
 
     const Char* ch = mnemonic();

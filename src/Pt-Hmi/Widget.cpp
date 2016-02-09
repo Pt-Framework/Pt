@@ -50,6 +50,7 @@ Widget::Widget()
 , _backgroundImage()
 , _backgroundImageLayout( NoLayout )
 , _cursor( Hmi::Cursor::defaultCursor() )
+, _autoSize(false)
 , _acceptFocus( false) 
 , _name("")
 , _hasFocus( false)
@@ -333,6 +334,11 @@ void Widget::update()
 {
     _isValid = false;
 
+    if(_autoSize)
+    {
+        _size = this->onAutoSize();
+    }
+
     onUpdate();
 
     if( parent() )
@@ -472,6 +478,12 @@ void Widget::onShortcut(const KeyEvent& kev)
 void Widget::onMnemonic()
 {
     _mnemonicEntered.invoke();
+}
+
+
+Gfx::SizeF Widget::onAutoSize() const
+{
+    return Gfx::SizeF(0, 0);
 }
 
 
@@ -722,6 +734,18 @@ void Widget::setVisible( bool b )
 }
 
 
+void Widget::setAutoSize(bool a)
+{
+    _autoSize = a;
+}
+
+
+bool Widget::isAutoSize() const
+{
+    return _autoSize;
+}
+
+
 void Widget::setCaption(const std::string& text)
 {  
     _caption.clear();
@@ -754,22 +778,22 @@ void Widget::setCaption(const std::string& text)
     if( _window )
         _window->setMnemonic(*this, ch);
 
-    setCaptionMetrics();
+    //setCaptionMetrics();
 }
 
 
 void Widget::setFont( const Gfx::Font& f )
 {
     _font = f;
-    setCaptionMetrics();
+    //setCaptionMetrics();
 }
 
 
-void Widget::setCaptionMetrics()
-{  
-    String text = Pt::Utf8Codec::decode( this->caption() );
-    _captionMetrics = Hmi::Painter::fontMetrics( _font, text);
-}
+//void Widget::setCaptionMetrics()
+//{  
+//    String text = Pt::Utf8Codec::decode( this->caption() );
+//    _captionMetrics = Hmi::Painter::fontMetrics( _font, text);
+//}
 
 } // namespace
 
