@@ -281,6 +281,7 @@ class PT_HMI_API Widget : public Pt::Connectable
             return _layout;
         }
 
+        // outer spacing
         Spacing& margin()
         {
             return _margin;                  
@@ -295,6 +296,22 @@ class PT_HMI_API Widget : public Pt::Connectable
         {
             _margin = s;
         }
+
+        // inner spacing
+		    const Spacing& padding() const
+		    {
+			    return _padding;
+		    }
+
+		    Spacing& padding()
+		    {
+			    return _padding;
+		    }
+
+		    void setPadding( const Spacing& p )
+		    {
+			    _padding = p;
+		    }
 
         Alignment contentAlignment()
         {
@@ -398,7 +415,8 @@ class PT_HMI_API Widget : public Pt::Connectable
         Pt::Char                     _mnemonic;    
         Pt::Delegate<void>           _mnemonicEntered;
         Docking                      _docking;
-        Spacing                      _margin;                  
+        Spacing                      _margin;
+        Spacing                      _padding;              
         bool                         _autoSize;
         bool                         _acceptFocus;
         bool                         _hasFocus;    

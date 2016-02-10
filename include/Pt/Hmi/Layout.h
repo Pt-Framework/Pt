@@ -64,25 +64,8 @@ class Layout
 			_type = t;
 		}
 
-    // inner spacing
-		const Spacing& padding() const
-		{
-			return _padding;
-		}
-
-		Spacing& padding()
-		{
-			return _padding;
-		}
-
-		void setPadding( const Spacing& p )
-		{
-			_padding = p;
-		}
-
 	private:
 		Type	_type;	
-		Spacing _padding;
 };
 
 }}

@@ -20,7 +20,7 @@ ChildW::ChildW(const std::string& title)
     _mainWidget.setPosition( Gfx::PointF(20,20) );
     _mainWidget.setCaption( "MainPanel" );
     _mainWidget.layout().setType(Layout::Docking);
-    _mainWidget.layout().padding().setAll(20);
+    _mainWidget.padding().setAll(20);
     _mainWidget.update();   
 
     //Text    
@@ -41,7 +41,7 @@ ChildW::ChildW(const std::string& title)
     _toggleButton.setPosition( Gfx::PointF(20,30) );
     _toggleButton.setSize( Gfx::SizeF(130,30) ); 
     _toggleButton.margin().setAll(5);
-    _toggleButton.layout().padding().setAll(5);
+    _toggleButton.padding().setAll(5);
     _toggleButton.docking().setType( Docking::Bottom );
     _toggleButton.update(); 
 
@@ -51,7 +51,7 @@ ChildW::ChildW(const std::string& title)
     _dialogButton.setPosition( Gfx::PointF(20,100));
     _dialogButton.setSize( Gfx::SizeF(130,30) );
     _dialogButton.margin().setAll(5);
-    _dialogButton.layout().padding().setAll(5);
+    _dialogButton.padding().setAll(5);
     _dialogButton.docking().setType( Docking::Bottom );
     _dialogButton.clicked() += Pt::slot(*this, &ChildW::onShowDialog);
     _dialogButton.update(); 
@@ -62,13 +62,13 @@ ChildW::ChildW(const std::string& title)
     _closeButton.setPosition( Gfx::PointF(20,200) );
     _closeButton.setSize( Gfx::SizeF(130, 30) );
     _closeButton.margin().setAll(5);
-    _closeButton.layout().padding().setAll(5);
+    _closeButton.padding().setAll(5);
     _closeButton.docking().setType( Docking::Bottom );
     _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);
     _closeButton.update(); 
 
     _buttonBar.setSize( Gfx::SizeF(700, 44) );
-    _buttonBar.layout().padding().setAll(5);
+    _buttonBar.padding().setAll(5);
     _buttonBar.layout().setType(Layout::LeftToRight);
     _buttonBar.docking().setType( Docking::Bottom );
     _buttonBar.update(); 

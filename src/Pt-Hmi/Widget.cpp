@@ -505,21 +505,21 @@ void Widget::updateGeometry(Widget& w, const Gfx::PointF& p, const Gfx::SizeF& s
 
 bool StackLeft(Widget& w)
 {
-    double posLeft = w.layout().padding().left();
+    double posLeft = w.padding().left();
     
     for( size_t i = 0; i < w.widgets().size(); ++i )
     {
         Widget* child = w.widgets().at(i);   
 
         double x = posLeft + child->margin().left();
-        double y = w.layout().padding().top() + child->margin().top(); 
+        double y = w.padding().top() + child->margin().top(); 
                 
         posLeft += child->size().width() + child->margin().left() + child->margin().right();
 
         const Gfx::SizeF childSize( child->size().width(), 
                                     w.size().height() - 
-                                    w.layout().padding().top() - 
-                                    w.layout().padding().bottom() -
+                                    w.padding().top() - 
+                                    w.padding().bottom() -
                                     child->margin().top() - 
                                     child->margin().bottom() );
                  
@@ -534,10 +534,10 @@ bool StackLeft(Widget& w)
 
 void Widget::onLayout()
 {
-    double posLeft   = _layout.padding().left();
-    double posTop    = _layout.padding().top();
-    double posRight  = size().width()  - _layout.padding().right();
-    double posBottom = size().height() - _layout.padding().bottom();
+    double posLeft   = padding().left();
+    double posTop    = padding().top();
+    double posRight  = size().width()  - padding().right();
+    double posBottom = size().height() - padding().bottom();
     
     std::vector<Widget*> childrenToFill;
 
@@ -625,12 +625,12 @@ void Widget::onLayout()
             case Layout::LeftToRight:
             {                        
                 pos.setX( posLeft + child->margin().left() );
-                pos.setY( _layout.padding().top() + child->margin().top() ); 
+                pos.setY( padding().top() + child->margin().top() ); 
                 
                 posLeft += child->size().width() + child->margin().left() + child->margin().right();
 
                 const Gfx::SizeF childSize( child->size().width(), 
-                                            size().height() - _layout.padding().top() - _layout.padding().bottom() -
+                                            size().height() - padding().top() - padding().bottom() -
                                             child->margin().top() - child->margin().bottom() );
                  
                 updateGeometry(*child, pos, childSize);
@@ -643,12 +643,12 @@ void Widget::onLayout()
                 posRight -= child->margin().right();
                 
                 pos.setX( posRight );              
-                pos.setY( _layout.padding().top() + child->margin().top()  ); 
+                pos.setY( padding().top() + child->margin().top()  ); 
                 
                 posRight -= child->margin().left();
 
                 const Gfx::SizeF childSize( child->size().width(), 
-                                            size().height() - _layout.padding().top() - _layout.padding().bottom() - 
+                                            size().height() - padding().top() - padding().bottom() - 
                                             child->margin().top() - child->margin().bottom());
                                       
                 updateGeometry(*child, pos, childSize);
@@ -657,13 +657,13 @@ void Widget::onLayout()
 
             case Layout::TopToBottom:
             {
-                pos.setX( _layout.padding().left() + child->margin().left()  );
+                pos.setX( padding().left() + child->margin().left()  );
                 pos.setY( posTop + child->margin().top() );
                 
                 posTop += child->size().height() + child->margin().top() + child->margin().bottom();
                 
                 const Gfx::SizeF childSize( size().width() - 
-                                            _layout.padding().left() - _layout.padding().right() -
+                                            padding().left() - padding().right() -
                                             child->margin().left() - child->margin().right(), 
                                             child->size().height());
                                          
@@ -676,13 +676,13 @@ void Widget::onLayout()
                 posBottom -= child->size().height();
                 posBottom -= child->margin().bottom();
                 
-                pos.setX( _layout.padding().left() + child->margin().left() );
+                pos.setX( padding().left() + child->margin().left() );
                 pos.setY( posBottom );
                 
                 posBottom -= child->margin().top();    
 
                 const Gfx::SizeF childSize( size().width() - 
-                                            _layout.padding().left() - _layout.padding().right() -
+                                            padding().left() - padding().right() -
                                             child->margin().left() - child->margin().right(), 
                                             child->size().height() );
 

@@ -55,8 +55,8 @@ Gfx::SizeF Label::onAutoSize() const
 {
     String text = Pt::Utf8Codec::decode( caption() );
     Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( font(), text);
-    return Gfx::SizeF( fm.width() + layout().padding().leftRight(), 
-                       fm.height() + layout().padding().topBottom() );
+    return Gfx::SizeF( fm.width() + padding().leftRight(), 
+                       fm.height() + padding().topBottom() );
 }
 
 
