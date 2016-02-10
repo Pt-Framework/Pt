@@ -85,6 +85,9 @@ namespace Unit {
 
     namespace { bool testCond = false; }
 
+    inline bool getFalse()
+    { return testCond; }
+
     #define PT_UNIT_ASSERT(cond) \
         do { \
             if( !(cond) ) \
