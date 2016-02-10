@@ -32,9 +32,6 @@
 #include <Pt/Gfx/Api.h>
 #include <iosfwd>
 
-struct png_struct_def;
-struct png_info_def;
-
 namespace Pt {
 
 namespace Gfx {
@@ -74,35 +71,8 @@ class PT_GFX_API PngReader
         */
         Image* advance();
 
-    public:
-        ///! @internal
-        static void onInfo(PngReader& reader, png_struct_def* png, png_info_def* info);
-
-        ///! @internal
-        static void onRow(PngReader& reader, unsigned char* data, std::size_t row, int pass);
-
-        ///! @internal
-        static void onEnd(PngReader& reader, png_struct_def* png, png_info_def* info);
-
     private:
-        enum State 
-        {
-            OnBegin = 0,
-            OnData = 1,
-            OnEnd = 2
-        };
-
-    private:
-        std::ios* _target;
-        State _state;
-        png_struct_def* _pngRead;
-        png_info_def* _pngInfo;
-        char _buffer[2048];
-        Image* _image;
-        std::size_t _width;
-        std::size_t _height;
-        std::size_t _depth;
-        std::size_t _channels;
+        class PngReaderImpl* _impl;
 };
 
 } // namespace

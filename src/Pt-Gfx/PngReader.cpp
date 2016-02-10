@@ -35,293 +35,345 @@
 #include <cstdlib>
 #include <png.h>
 
-namespace {
-
-void onPngRead(png_structp png, png_bytep data, png_size_t length)
-{
-    png_voidp p = png_get_io_ptr(png);
-    std::ios* is = static_cast<std::ios*>(p);
-
-    char* buffer = reinterpret_cast<char*>(data);
-    std::streamsize n = static_cast<std::streamsize>(length);
-    is->rdbuf()->sgetn(buffer, n);
-}
-
-
-void onPngInfo(png_structp png, png_infop info)
-{
-    png_voidp p = png_get_progressive_ptr(png);
-    Pt::Gfx::PngReader* reader = static_cast<Pt::Gfx::PngReader*>(p);
-    Pt::Gfx::PngReader::onInfo(*reader, png, info);
- }
-
-
-void onPngRow(png_structp png, png_bytep data, png_uint_32 row, int pass)
-{
-    png_voidp p = png_get_progressive_ptr(png);
-    Pt::Gfx::PngReader* reader = static_cast<Pt::Gfx::PngReader*>(p);
-    Pt::Gfx::PngReader::onRow(*reader, (unsigned char*)data, (std::size_t)row, pass);
-}
-
-
-void onPngEnd(png_structp png, png_infop info)
-{
-    png_voidp p = png_get_progressive_ptr(png);
-    Pt::Gfx::PngReader* reader = static_cast<Pt::Gfx::PngReader*>(p);
-    Pt::Gfx::PngReader::onEnd(*reader, png, info);
-}
-
-
-void onPngError(png_structp png, png_const_charp msg)
-{
-    std::cerr << msg << std::endl;
-    throw Pt::IOError("invalid png format");
-}
-
-
-void onPngWarning(png_structp png, png_const_charp msg)
-{
-    std::clog << msg << std::endl;
-}
-
-} // namespace
-
 namespace Pt {
 
 namespace Gfx {
 
+class PngReaderImpl
+{
+    public:
+        PngReaderImpl()
+        : _target(0)
+        , _state(OnBegin)
+        , _pngRead(0)
+        , _pngInfo(0)
+        , _image(0)
+        , _width(0)
+        , _height(0)
+        , _depth(0)
+        , _channels(0)
+        { }
+
+        PngReaderImpl(std::istream& is, Image& image)
+        : _target(&is)
+        , _state(OnBegin)
+        , _pngRead(0)
+        , _pngInfo(0)
+        , _image(&image)
+        , _width(0)
+        , _height(0)
+        , _depth(0)
+        , _channels(0)
+        { }
+
+        ~PngReaderImpl()
+        {
+          if(_pngRead)
+          {
+              png_destroy_read_struct(&_pngRead, &_pngInfo, (png_infopp)0);
+          }
+        }
+
+        void attach(std::istream& is, Image& image)
+        {
+            _target = &is;
+            _image = &image;
+        }
+
+        void detach()
+        {
+            _target = 0;
+            _image = 0;
+        }
+
+        void reset()
+        {
+            if(_pngRead)
+            {
+                png_destroy_read_struct(&_pngRead, &_pngInfo, (png_infopp)0);
+            }
+
+            _state = OnBegin;
+            _pngRead = 0;
+            _pngInfo = 0;
+
+            _width = 0;
+            _height = 0;
+            _depth = 0;
+            _channels = 0;
+
+            detach();
+        }
+
+        Image* advance()
+        {
+            if( ! _target || ! _target->rdbuf() || ! _image )
+              return 0;
+
+            if( ! _pngRead )
+            {
+                _pngRead = png_create_read_struct(PNG_LIBPNG_VER_STRING, 
+                                                  NULL, &onPngError, &onPngWarning);
+                png_set_read_fn(_pngRead, this, onPngRead);
+                png_set_progressive_read_fn(_pngRead, this, &onPngInfo, &onPngRow, &onPngEnd);
+
+                _pngInfo = png_create_info_struct(_pngRead);
+
+                if( ! _pngRead || ! _pngInfo)
+                    throw IOError("internal png error");
+            }
+
+            std::streamsize avail = _target->rdbuf()->in_avail();
+
+            if(_state == OnBegin)
+            {
+                if(avail < 8)
+                  return 0;
+
+                char signature[8];
+                std::streamsize n = _target->rdbuf()->sgetn(signature, sizeof(signature));
+                if(n > 0)
+                    avail -= n;
+
+                int isPng = png_sig_cmp((png_byte*)signature, 0, static_cast<png_size_t>(n));
+                if(isPng != 0)
+                  throw IOError("invalid png format");
+
+                png_set_sig_bytes( _pngRead, static_cast<int>(n) );
+                _state = OnData;
+            }
+
+            while(avail > 0 && _state != OnEnd)
+            {
+                std::streamsize n = avail > sizeof(_buffer) ? sizeof(_buffer)
+                                                            : avail;
+
+                avail -= _target->rdbuf()->sgetn(_buffer, n);
+                png_process_data(_pngRead, _pngInfo, (png_byte*)_buffer, (png_size_t)n);
+            }
+
+            return _state == OnEnd ? _image : 0;
+        }
+        
+        static void onPngRead(png_structp png, png_bytep data, png_size_t length)
+        {
+            png_voidp p = png_get_io_ptr(png);
+            Pt::Gfx::PngReaderImpl* reader = static_cast<Pt::Gfx::PngReaderImpl*>(p);
+            reader->onRead(png, data, length);
+        }
+
+        void onRead(png_structp png, png_bytep data, png_size_t length)
+        {
+            char* buffer = reinterpret_cast<char*>(data);
+            std::streamsize n = static_cast<std::streamsize>(length);
+            _target->rdbuf()->sgetn(buffer, n);
+        }
+        
+        static void onPngInfo(png_structp png, png_infop info)
+        {
+            png_voidp p = png_get_progressive_ptr(png);
+            Pt::Gfx::PngReaderImpl* reader = static_cast<Pt::Gfx::PngReaderImpl*>(p);
+            reader->onInfo(png, info);
+
+            // update info for libpng
+            png_read_update_info(png, info);
+        }
+
+        void onInfo(png_structp png, png_infop info)
+        {
+            png_voidp p = png_get_progressive_ptr(png);
+            Pt::Gfx::PngReaderImpl* reader = static_cast<Pt::Gfx::PngReaderImpl*>(p);
+
+            // image width in pixel
+            _width = png_get_image_width(png, info);
+
+            // image height in pixel
+            _height = png_get_image_height(png, info);
+   
+            // bits per CHANNEL
+            _depth = png_get_bit_depth(png, info);
+    
+            // number of channels
+            _channels = png_get_channels(png, info);
+    
+            // color type. (RGB, RGBA, Luminance, luminance alpha... palette... etc)
+            png_uint_32 color_type = png_get_color_type(png, info);
+
+            // transformations to image format
+            switch (color_type)
+            {
+                case PNG_COLOR_TYPE_PALETTE:
+                    png_set_palette_to_rgb(png);
+            
+                    // channel info
+                    _channels = 3;
+                    break;
+        
+                case PNG_COLOR_TYPE_GRAY:
+                    if (_depth < 8)
+                        png_set_expand_gray_1_2_4_to_8(png);
+            
+                    // bitdepth info
+                    _depth = 8;
+                    break;
+            }
+    
+            // alpha channel
+            if (png_get_valid(png, info, PNG_INFO_tRNS))
+            {
+                png_set_tRNS_to_alpha(png);
+                _channels += 1;
+            }
+    
+            // round precision down to 8
+            if (_depth == 16)
+            {
+                png_set_strip_16(png);
+                _depth = 8;
+            }
+        }
+        
+        static void onPngRow(png_structp png, png_bytep data, png_uint_32 row, int pass)
+        {
+            png_voidp p = png_get_progressive_ptr(png);
+            Pt::Gfx::PngReaderImpl* reader = static_cast<Pt::Gfx::PngReaderImpl*>(p);
+            reader->onRow(png, data, row, pass);
+        }
+
+        void onRow(png_structp png, png_bytep data, png_uint_32 row, int pass)
+        {
+            // image width in pixel
+            png_uint_32 width =  _width;
+
+            // image height in pixel
+            png_uint_32 height = _height;
+    
+            // bits per CHANNEL
+            png_uint_32 bitdepth = _depth;
+    
+            // number of channels
+            png_uint_32 channels = _channels;
+
+            // resize target image
+            Pt::Gfx::Size imageSize(_width, _height);
+            if( imageSize != _image->size() )
+                _image->resize( imageSize, Pt::Gfx::ImageFormat::argb8888() );
+
+            // TODO: png_progressive_combine_row(png_ptr, old_row, data);
+    
+            std::size_t n = 0;
+		        for( size_t x = 0; x < width; ++x)
+		        {
+			        if( bitdepth == 8 && channels == 3)
+			        {
+                unsigned char red = data[n++];
+                unsigned char green = data[n++];
+                unsigned char blue = data[n++];
+
+                Pt::Gfx::Color pixel(0, red/255.0f, green/255.0f, blue/255.0f);
+				        _image->setColor(x, row, pixel);
+			        }
+
+			        if( bitdepth == 8 && channels == 4)
+			        {
+                unsigned char red = data[n++];
+                unsigned char green = data[n++];
+                unsigned char blue = data[n++];
+                unsigned char alpha = data[n++];
+        
+                Pt::Gfx::Color pixel(alpha/255.0f, red/255.0f, green/255.0f, blue/255.0f);
+				        _image->setColor(x, row, pixel);
+			        }
+		        }
+        }
+
+        static void onPngEnd(png_structp png, png_infop info)
+        {
+            png_voidp p = png_get_progressive_ptr(png);
+            Pt::Gfx::PngReaderImpl* reader = static_cast<Pt::Gfx::PngReaderImpl*>(p);
+            reader->onEnd(png, info);
+        }
+
+        void onEnd(png_structp png, png_infop info)
+        {
+            _state = OnEnd;
+            _width = 0;
+            _height = 0;
+            _depth = 0;
+            _channels = 0;
+        }
+
+        static void onPngError(png_structp png, png_const_charp msg)
+        {
+            std::cerr << msg << std::endl;
+            throw Pt::IOError("invalid png format");
+        }
+
+        static void onPngWarning(png_structp png, png_const_charp msg)
+        {
+            std::clog << msg << std::endl;
+        }
+
+    private:
+        enum State 
+        {
+            OnBegin = 0,
+            OnData = 1,
+            OnEnd = 2
+        };
+
+    private:
+        std::ios* _target;
+        State _state;
+        png_struct_def* _pngRead;
+        png_info_def* _pngInfo;
+        char _buffer[2048];
+        Image* _image;
+        std::size_t _width;
+        std::size_t _height;
+        std::size_t _depth;
+        std::size_t _channels;
+};
+
+
 PngReader::PngReader()
-: _target(0)
-, _state(OnBegin)
-, _pngRead(0)
-, _pngInfo(0)
-, _image(0)
-, _width(0)
-, _height(0)
-, _depth(0)
-, _channels(0)
+: _impl( new PngReaderImpl() )
 {
 }
 
 
 PngReader::PngReader(std::istream& is, Image& image)
-: _target(&is)
-, _state(OnBegin)
-, _pngRead(0)
-, _pngInfo(0)
-, _image(&image)
-, _width(0)
-, _height(0)
-, _depth(0)
-, _channels(0)
+: _impl( new PngReaderImpl() )
 {
 }
 
-
 PngReader::~PngReader()
 {
-  if(_pngRead)
-  {
-      png_destroy_read_struct(&_pngRead, &_pngInfo, (png_infopp)0);
-  }
+  delete _impl;
 }
 
 
 void PngReader::attach(std::istream& is, Image& image)
 {
-    _target = &is;
-    _image = &image;
+    _impl->attach(is, image);
 }
 
 
 void PngReader::detach()
 {
-    _target = 0;
-    _image = 0;
+    _impl->detach();
 }
 
 
 void PngReader::reset()
 {
-    if(_pngRead)
-    {
-        png_destroy_read_struct(&_pngRead, &_pngInfo, (png_infopp)0);
-    }
-
-    _state = OnBegin;
-    _pngRead = 0;
-    _pngInfo = 0;
-
-    _width = 0;
-    _height = 0;
-    _depth = 0;
-    _channels = 0;
-
-    detach();
+    _impl->reset();
 }
 
 
 Image* PngReader::advance()
 {
-    if( ! _target || ! _target->rdbuf() || ! _image )
-      return 0;
-
-    if( ! _pngRead )
-    {
-        _pngRead = png_create_read_struct(PNG_LIBPNG_VER_STRING, 
-                                          NULL, &onPngError, &onPngWarning);
-        png_set_read_fn(_pngRead, _target, onPngRead);
-        png_set_progressive_read_fn(_pngRead, this, &onPngInfo, &onPngRow, &onPngEnd);
-
-        _pngInfo = png_create_info_struct(_pngRead);
-
-        if( ! _pngRead || ! _pngInfo)
-            throw IOError("internal png error");
-    }
-
-    std::streamsize avail = _target->rdbuf()->in_avail();
-
-    if(_state == OnBegin)
-    {
-        if(avail < 8)
-          return 0;
-
-        char signature[8];
-        std::streamsize n = _target->rdbuf()->sgetn(signature, sizeof(signature));
-        if(n > 0)
-            avail -= n;
-
-        int isPng = png_sig_cmp((png_byte*)signature, 0, static_cast<png_size_t>(n));
-        if(isPng != 0)
-          throw IOError("invalid png format");
-
-        png_set_sig_bytes( _pngRead, static_cast<int>(n) );
-        _state = OnData;
-    }
-
-    while(avail > 0 && _state != OnEnd)
-    {
-        std::streamsize n = avail > sizeof(_buffer) ? sizeof(_buffer)
-                                                    : avail;
-
-        avail -= _target->rdbuf()->sgetn(_buffer, n);
-        png_process_data(_pngRead, _pngInfo, (png_byte*)_buffer, (png_size_t)n);
-    }
-
-    return _state == OnEnd ? _image : 0;
-}
-
-
-void PngReader::onInfo(PngReader& reader, png_structp png, png_infop info)
-{
-    // image width in pixel
-    reader._width = png_get_image_width(png, info);
-
-    // image height in pixel
-    reader._height = png_get_image_height(png, info);
-   
-    // bits per CHANNEL
-    reader._depth = png_get_bit_depth(png, info);
-    
-    // number of channels
-    reader._channels = png_get_channels(png, info);
-    
-    // color type. (RGB, RGBA, Luminance, luminance alpha... palette... etc)
-    png_uint_32 color_type = png_get_color_type(png, info);
-
-    // transformations to image format
-    switch (color_type)
-    {
-        case PNG_COLOR_TYPE_PALETTE:
-            png_set_palette_to_rgb(png);
-            
-            // channel info
-            reader._channels = 3;
-            break;
-        
-        case PNG_COLOR_TYPE_GRAY:
-            if (reader._depth < 8)
-                png_set_expand_gray_1_2_4_to_8(png);
-            
-            // bitdepth info
-            reader._depth = 8;
-            break;
-    }
-    
-    // alpha channel
-    if (png_get_valid(png, info, PNG_INFO_tRNS))
-    {
-        png_set_tRNS_to_alpha(png);
-        reader._channels += 1;
-    }
-    
-    // round precision down to 8
-    if (reader._depth == 16)
-    {
-        png_set_strip_16(png);
-        reader._depth = 8;
-    }
-
-    // update info for libpng
-    png_read_update_info(png, info);
-}
-
-
-void PngReader::onRow(PngReader& reader, unsigned char* data, std::size_t row, int pass)
-{
-    // image width in pixel
-    png_uint_32 width =  reader._width;
-
-    // image height in pixel
-    png_uint_32 height = reader._height;
-    
-    // bits per CHANNEL
-    png_uint_32 bitdepth = reader._depth;
-    
-    // number of channels
-    png_uint_32 channels = reader._channels;
-
-    // resize target image
-    Pt::Gfx::Size imageSize(reader._width, reader._height);
-    if( imageSize != reader._image->size() )
-        reader._image->resize( imageSize, Pt::Gfx::ImageFormat::argb8888() );
-
-    // TODO: png_progressive_combine_row(png_ptr, old_row, data);
-    
-    std::size_t n = 0;
-		for( size_t x = 0; x < width; ++x)
-		{
-			if( bitdepth == 8 && channels == 3)
-			{
-        unsigned char red = data[n++];
-        unsigned char green = data[n++];
-        unsigned char blue = data[n++];
-
-        Pt::Gfx::Color pixel(0, red/255.0f, green/255.0f, blue/255.0f);
-				reader._image->setColor(x, row, pixel);
-			}
-
-			if( bitdepth == 8 && channels == 4)
-			{
-        unsigned char red = data[n++];
-        unsigned char green = data[n++];
-        unsigned char blue = data[n++];
-        unsigned char alpha = data[n++];
-        
-        Pt::Gfx::Color pixel(alpha/255.0f, red/255.0f, green/255.0f, blue/255.0f);
-				reader._image->setColor(x, row, pixel);
-			}
-		}
-}
-
-
-void PngReader::onEnd(PngReader& reader, png_structp, png_infop)
-{
-    reader._state = OnEnd;
-    reader._width = 0;
-    reader._height = 0;
-    reader._depth = 0;
-    reader._channels = 0;
+    return _impl->advance();
 }
 
 } // namespace
