@@ -118,9 +118,6 @@ const Window* Window::parent() const
 }
 
 
-
-
-
 const std::vector<Window*>& Window::windows() const 
 {
     return _windowManager.windows();

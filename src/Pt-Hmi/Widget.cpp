@@ -334,11 +334,6 @@ void Widget::update()
 {
     _isValid = false;
 
-    if(_autoSize)
-    {
-        _size = this->onAutoSize();
-    }
-
     onUpdate();
 
     if( parent() )
@@ -489,6 +484,10 @@ Gfx::SizeF Widget::onAutoSize() const
 
 void Widget::onUpdate()
 {
+    if(_autoSize)
+    {
+        _size = this->onAutoSize();
+    }
 }
 
 

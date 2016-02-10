@@ -62,7 +62,7 @@ Gfx::SizeF Label::onAutoSize() const
 
 void Label::onUpdate()
 {
-    Widget::onUpdate();
+    Panel::onUpdate();
 }
 
 
