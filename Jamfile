@@ -133,21 +133,6 @@ if $(WITH_BUILTIN_ZLIB)
     SubInclude PT_TOP src zlib ;
 }
 
-if $(WITH_BUILTIN_LIBPNG)
-{
-    SubInclude PT_TOP src libpng ;
-}
-
-if $(WITH_BUILTIN_LIBJPEG)
-{
-    SubInclude PT_TOP src libjpeg ;
-}
-
-if $(WITH_BUILTIN_FREETYPE)
-{
-    SubInclude PT_TOP src freetype src ;
-}
-
 if $(WITH_OPENSSL)
 {
     SubInclude PT_TOP src openssl ;
@@ -187,6 +172,21 @@ if $(PT_SYSTEM)
 
     if $(WITH_HMI) = yes
     {
+        if $(WITH_BUILTIN_LIBPNG)
+        {
+            SubInclude PT_TOP src libpng ;
+        }
+
+        if $(WITH_BUILTIN_LIBJPEG)
+        {
+            SubInclude PT_TOP src libjpeg ;
+        }
+
+        if $(WITH_BUILTIN_FREETYPE)
+        {
+            SubInclude PT_TOP src freetype src ;
+        }
+
         SubInclude PT_TOP src Pt-Gfx ;
         SubInclude PT_TOP src Pt-Hmi ;		
     }
