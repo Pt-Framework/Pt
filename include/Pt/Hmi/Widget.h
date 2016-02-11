@@ -71,19 +71,6 @@ class PT_HMI_API Widget : public Pt::Connectable
             Zoom
         };
 
-        enum Alignment
-        {
-            TopLeft,
-            TopCenter,
-            TopRight,
-            MiddleLeft,
-            MiddleCenter,
-            MiddleRight,
-            BottomLeft,
-            BottomCenter,
-            BottomRight
-        };
-
     public:    
         Widget();
         
@@ -191,7 +178,9 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         virtual void onMnemonic();   
         
-        virtual Gfx::SizeF onAutoSize() const;    
+        virtual Gfx::SizeF onAutoSize() const;
+
+        String setMnemonic(const String& text);
 
     public:
         // TODO
@@ -212,13 +201,6 @@ class PT_HMI_API Widget : public Pt::Connectable
         typedef void (*Layout)(Layouter&);
         
         void setLayout(Layout layout);
-
-        void setCaption(const std::string& c);
-
-        const std::string& caption() const
-        {
-            return _caption;
-        }
 
         bool isEnabled() const
         {
@@ -305,67 +287,9 @@ class PT_HMI_API Widget : public Pt::Connectable
 			    _padding = p;
 		    }
 
-        Alignment contentAlignment()
-        {
-            return _contentAlignment;
-        }
-
-        void setContentAlignment( Alignment a )
-        {
-            _contentAlignment = a;
-        }
-
         //
         // apperance properties
         //
-
-        const Gfx::Color& backgroundColor() const
-        {
-            return _backgroundColor;
-        }
-
-        void setBackgroundColor( const Gfx::Color& c )
-        {
-            _backgroundColor = c;
-        }
-
-        const Gfx::Color& foregroundColor() const
-        {
-            return _foregroundColor;
-        }
-
-        void setForegroundColor(const Gfx::Color& c )
-        {
-            _foregroundColor = c;
-        }
-
-        const Gfx::Image& backgroundImage() const
-        {
-            return _backgroundImage;
-        }
-
-        void setBackgroundImage( const Gfx::Image& im )
-        {
-            _backgroundImage = im;
-        }
-
-        ImageLayout backgroundImageLayout() const
-        {
-            return _backgroundImageLayout;
-        }
-
-        void setBackgroundImageLayout( ImageLayout l )
-        {
-            _backgroundImageLayout = l;
-        }
-
-        void setFont( const Gfx::Font& f );
-
-        const Gfx::Font& font() const
-        {
-            return _font;
-        }
-
         const Hmi::Cursor& cursor() const
         {
             return  _cursor;
@@ -383,25 +307,16 @@ class PT_HMI_API Widget : public Pt::Connectable
         Pt::Signal<const Pt::Event&> _eventReady;
         Window*                      _window; 
         Widget*                      _parent;    
-        std::vector<Widget*>         _children;    
+        std::vector<Widget*>         _children;
+        std::string                  _name;    
         bool                         _isValid;
-          
         bool                         _enabled;        
         bool                         _visible;
-        Gfx::Color                   _backgroundColor;
-        Gfx::Color                   _foregroundColor;
-        Gfx::Image                   _backgroundImage;
-        ImageLayout                  _backgroundImageLayout;
         Hmi::Cursor                  _cursor;
-        std::string                  _name;                    
         Layout                       _layout;
         Key                          _shortcutKey;        
         Gfx::SizeF                   _size;
         Gfx::PointF                  _position;            
-        Alignment                    _contentAlignment;
-        std::string                  _caption;
-        //Gfx::FontMetrics             _captionMetrics;
-        Gfx::Font                    _font;
         Pt::Char                     _mnemonic;    
         Pt::Delegate<void>           _mnemonicEntered;
         Docking                      _docking;

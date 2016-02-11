@@ -23,17 +23,25 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA  02110-1301  USA
+*/
+
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Rect.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+
+namespace Hmi {
 
 Panel::Panel()
-: _borderStyle(Single)
+: _backgroundColor(Gfx::Color::fromRgb8(237,237,237))
+, _foregroundColor( Gfx::Color::fromRgb8(0,0,0) )
+, _backgroundImage()
+, _backgroundImageLayout( NoLayout )
+, _borderStyle(Single)
 , _borderWidth(1)
 , _borderRound(false)
 , _borderColor(Gfx::Color::fromRgb8(178,178,178))

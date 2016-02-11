@@ -31,7 +31,6 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/FontMetrics.h>
-#include <Pt/Utf8Codec.h>
 
 namespace Pt {
 
@@ -39,6 +38,7 @@ namespace Hmi {
 
 Label::Label()
 : Panel()
+, _contentAlignment(TopLeft)
 {
     setForegroundColor(Gfx::Color::fromRgb8(0,0,0,0));
     setBorderStyle(NoBorder);
@@ -51,10 +51,21 @@ Label::~Label()
 }
 
 
+void Label::setText(const Pt::String& text)
+{
+    _text = Widget::setMnemonic(text);
+}
+
+
+void Label::setFont( const Gfx::Font& f )
+{
+    _font = f;
+}
+
+
 Gfx::SizeF Label::onAutoSize() const
 {
-    String text = Pt::Utf8Codec::decode( caption() );
-    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( font(), text);
+    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( font(), _text);
     return Gfx::SizeF( fm.width() + padding().leftRight(), 
                        fm.height() + padding().topBottom() );
 }
@@ -79,21 +90,20 @@ void Label::onPaint(PaintSurface& surface)
     painter.setFont( font() );
     painter.setPen(pen);
 
-    String captionStr = Pt::Utf8Codec::decode( caption() );
-    Gfx::FontMetrics metric = painter.fontMetrics(captionStr);
+    Gfx::FontMetrics metric = painter.fontMetrics(_text);
 
     Alignment align = ! isAutoSize() ? contentAlignment() 
-                                     : Widget::MiddleCenter;
+                                     : MiddleCenter;
 
     switch(align)
     {
-        case Widget::TopLeft:
+        case TopLeft:
         {
             pos = Gfx::PointF(0, metric.ascent());            
         }
         break;
 
-        case Widget::TopCenter:
+        case TopCenter:
         {
             const double widthHalf          = size.width()/2;                                              
             const double textWidthHalf    = metric.width()/2;                                                  
@@ -101,7 +111,7 @@ void Label::onPaint(PaintSurface& surface)
         }
         break;
 
-        case Widget::TopRight:
+        case TopRight:
         {
             const double width          = size.width();                
             const double textWidth    = metric.width();                                    
@@ -109,7 +119,7 @@ void Label::onPaint(PaintSurface& surface)
         }
         break;
 
-        case Widget::MiddleLeft:
+        case MiddleLeft:
         {              
             const double heightHalf          = size.height()/2;                
             const double textHeightHalf = metric.height()/2;
@@ -119,7 +129,7 @@ void Label::onPaint(PaintSurface& surface)
         break;
 
         default:
-        case Widget::MiddleCenter:
+        case MiddleCenter:
         {            
             const double widthHalf          = size.width()/2;                
             const double heightHalf          = size.height()/2;                
@@ -130,7 +140,7 @@ void Label::onPaint(PaintSurface& surface)
         }
         break;
 
-        case Widget::MiddleRight:
+        case MiddleRight:
         {
             const double width          = size.width();                
             const double textWidth    = metric.width();    
@@ -142,7 +152,7 @@ void Label::onPaint(PaintSurface& surface)
         }
         break;
 
-        case Widget::BottomLeft:
+        case BottomLeft:
         {
             const double height      = size.height();                
             const double textHeight = metric.height();    
@@ -151,7 +161,7 @@ void Label::onPaint(PaintSurface& surface)
         }
         break;
 
-        case Widget::BottomCenter:
+        case BottomCenter:
         {
             const double widthHalf          = size.width()/2;                
             const double textWidthHalf    = metric.width()/2;    
@@ -163,7 +173,7 @@ void Label::onPaint(PaintSurface& surface)
         }
         break;
 
-        case Widget::BottomRight:
+        case BottomRight:
         {
             const double width          = size.width();                
             const double textWidth    = metric.width();    
@@ -176,15 +186,15 @@ void Label::onPaint(PaintSurface& surface)
         break;
     }
 
-    painter.drawText(pos, captionStr);
+    painter.drawText(pos, _text);
 
     const Char* ch = mnemonic();
     if(ch)
     {            
-        String::size_type n = captionStr.find( ch->narrow() );
+        String::size_type n = _text.find( *ch );
         if(n != String::npos)
         {
-            Pt::String text(captionStr.c_str(), n);
+            Pt::String text(_text, 0, n);
             Gfx::FontMetrics fm = painter.fontMetrics(text);
             Gfx::PointF from(pos.x() + fm.width(), pos.y() + 1);
 

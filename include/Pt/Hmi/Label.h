@@ -31,6 +31,7 @@
 #define Pt_Hmi_Label_H
 
 #include <Pt/Hmi/Panel.h>
+#include <Pt/String.h>
 
 namespace Pt {
 
@@ -39,9 +40,47 @@ namespace Hmi {
 class PT_HMI_API Label  : public Panel
 {
     public:
+        enum Alignment
+        {
+            TopLeft,
+            TopCenter,
+            TopRight,
+            MiddleLeft,
+            MiddleCenter,
+            MiddleRight,
+            BottomLeft,
+            BottomCenter,
+            BottomRight
+        };
+
+    public:
         Label();
 
-        ~Label();    
+        ~Label(); 
+
+        const Pt::String& text() const
+        {
+            return _text;
+        }
+
+        void setText(const Pt::String& text);
+           
+        Alignment contentAlignment()
+        {
+            return _contentAlignment;
+        }
+
+        void setContentAlignment( Alignment a )
+        {
+            _contentAlignment = a;
+        }
+
+        void setFont( const Gfx::Font& f );
+
+        const Gfx::Font& font() const
+        {
+            return _font;
+        }
 
     protected:
         virtual void onUpdate();
@@ -49,6 +88,11 @@ class PT_HMI_API Label  : public Panel
         virtual void onPaint(PaintSurface& paintSurface);
 
         virtual Gfx::SizeF onAutoSize() const;       
+
+    private:
+        Alignment _contentAlignment;
+        Gfx::Font _font;
+        Pt::String _text;
 };
 
 } // namespace

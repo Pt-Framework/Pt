@@ -18,7 +18,7 @@ ChildW::ChildW(const std::string& title)
     //Panel  
     _mainWidget.setSize( Gfx::SizeF(800, 600) );
     _mainWidget.setPosition( Gfx::PointF(20,20) );
-    _mainWidget.setCaption( "MainPanel" );
+    _mainWidget.setName("MainPanel");
     _mainWidget.setLayout(Docked);
     _mainWidget.padding().setAll(20);
     _mainWidget.update();   
@@ -26,7 +26,8 @@ ChildW::ChildW(const std::string& title)
     //Text    
     _textLabel.setAutoSize(true);
     _textLabel.setSize( Gfx::SizeF(100,50) );
-    _textLabel.setCaption( std::string("Pla&tinum C++ Framework") );  
+    _textLabel.setName("TextLabel");
+    _textLabel.setText("Pla&tinum C++ Framework");  
     _textLabel.setPosition( Gfx::PointF(60,60) );
     _textLabel.setForegroundColor( Gfx::Color(1,0,0,0) );    
     _textLabel.setBackgroundColor( Gfx::Color(1,1,1,0) );
@@ -36,7 +37,8 @@ ChildW::ChildW(const std::string& title)
     _textLabel.docking().setType(Docking::Fill);    
     
     //Toggle button
-    _toggleButton.setCaption( std::string("Toggle Me [CTRL+I]") );
+    _toggleButton.setName("ToggleButton");
+    _toggleButton.setText("Toggle Me [CTRL+I]" );
     _toggleButton.setShortcut( &Pt::Hmi::Key(Pt::Hmi::Key::Control, Pt::Hmi::Key::I) );
     _toggleButton.setPosition( Gfx::PointF(20,30) );
     _toggleButton.setSize( Gfx::SizeF(130,30) ); 
@@ -45,8 +47,9 @@ ChildW::ChildW(const std::string& title)
     _toggleButton.docking().setType( Docking::Bottom );
     _toggleButton.update(); 
 
-    //Dialog button     
-    _dialogButton.setCaption(std::string("&&Dia&log [CTRL+D]&") );
+    //Dialog button   
+    _dialogButton.setName("DialogButton");  
+    _dialogButton.setText("&&Dia&log [CTRL+D]&");
     _dialogButton.setShortcut( &Pt::Hmi::Key(Pt::Hmi::Key::Control, Pt::Hmi::Key::D) );
     _dialogButton.setPosition( Gfx::PointF(20,100));
     _dialogButton.setSize( Gfx::SizeF(130,30) );
@@ -57,7 +60,8 @@ ChildW::ChildW(const std::string& title)
     _dialogButton.update(); 
     
     //Close button
-    _closeButton.setCaption(std::string("Close App [CTRL+X]"));
+    _closeButton.setName("CloseButton"); 
+    _closeButton.setText("Close App [CTRL+X]");
     _closeButton.setShortcut(&Pt::Hmi::Key(Pt::Hmi::Key::Control, Pt::Hmi::Key::X));
     _closeButton.setPosition( Gfx::PointF(20,200) );
     _closeButton.setSize( Gfx::SizeF(130, 30) );
@@ -67,6 +71,7 @@ ChildW::ChildW(const std::string& title)
     _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);
     _closeButton.update(); 
 
+    _buttonBar.setName("ButtonBar");
     _buttonBar.setSize( Gfx::SizeF(700, 180) );
     _buttonBar.padding().setAll(5);
     _buttonBar.setLayout(StackBottom);

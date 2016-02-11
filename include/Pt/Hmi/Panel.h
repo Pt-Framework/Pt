@@ -52,6 +52,46 @@ class PT_HMI_API Panel  : public Widget
 		
     virtual ~Panel();	
 
+    const Gfx::Color& backgroundColor() const
+    {
+        return _backgroundColor;
+    }
+
+    void setBackgroundColor( const Gfx::Color& c )
+    {
+        _backgroundColor = c;
+    }
+
+    const Gfx::Color& foregroundColor() const
+    {
+        return _foregroundColor;
+    }
+
+    void setForegroundColor(const Gfx::Color& c )
+    {
+        _foregroundColor = c;
+    }
+
+    const Gfx::Image& backgroundImage() const
+    {
+        return _backgroundImage;
+    }
+
+    void setBackgroundImage( const Gfx::Image& im )
+    {
+        _backgroundImage = im;
+    }
+
+    ImageLayout backgroundImageLayout() const
+    {
+        return _backgroundImageLayout;
+    }
+
+    void setBackgroundImageLayout( ImageLayout l )
+    {
+        _backgroundImageLayout = l;
+    }
+
     BorderStyle borderStyle() const
     {   
         return _borderStyle;
@@ -103,6 +143,10 @@ class PT_HMI_API Panel  : public Widget
 	
   private:
     PaintSurface _surface;  
+    Gfx::Color   _backgroundColor;
+    Gfx::Color   _foregroundColor;
+    Gfx::Image   _backgroundImage;
+    ImageLayout  _backgroundImageLayout;
 		BorderStyle	 _borderStyle;
 		bool				 _borderRound;	
 		double			 _borderWidth;	  

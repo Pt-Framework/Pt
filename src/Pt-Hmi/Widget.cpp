@@ -33,8 +33,6 @@
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/String.h>
-#include <Pt/Utf8Codec.h>
-#include "WindowImpl.h"
 
 namespace Pt {
 
@@ -45,10 +43,6 @@ Widget::Widget()
 , _parent(0)
 , _enabled(true)
 , _visible(true)
-, _backgroundColor(Gfx::Color::fromRgb8(237,237,237))
-, _foregroundColor( Gfx::Color::fromRgb8(0,0,0) )
-, _backgroundImage()
-, _backgroundImageLayout( NoLayout )
 , _cursor( Hmi::Cursor::defaultCursor() )
 , _autoSize(false)
 , _acceptFocus( false) 
@@ -58,7 +52,7 @@ Widget::Widget()
 , _actionKey(Key::Space)
 , _size( 100, 100)
 , _position( 10,10) 
-, _contentAlignment(TopLeft)
+
 , _isValid(false)
 , _mnemonic(0)
 {      
@@ -331,6 +325,42 @@ const Pt::Char* Widget::mnemonic() const
 }
 
 
+String Widget::setMnemonic(const String& text)
+{  
+    String str;
+    _mnemonic = 0;
+
+    bool onAmp = false;
+    for(String::const_iterator it = text.begin(); it != text.end(); ++it)
+    {
+        if(onAmp)
+        {
+            if(*it != '&')
+                _mnemonic = *it;
+
+            str += *it;
+            onAmp = false;
+        }
+        else
+        {
+            if(*it == '&')
+                onAmp = true;
+            else
+                str += *it;
+        }
+    }
+
+    if(onAmp)
+        str += '&';
+    
+    Char* ch = _mnemonic != 0 ? &_mnemonic : 0;
+    if( _window )
+        _window->setMnemonic(*this, ch);
+
+    return str;
+}
+
+
 void Widget::processEvent(const Pt::Event& ev)
 {
     onEvent(ev);
@@ -548,57 +578,6 @@ void Widget::setVisible( bool b )
 {
     _visible = b;
 }
-
-
-
-void Widget::setCaption(const std::string& text)
-{  
-    _caption.clear();
-    _mnemonic = 0;
-
-    bool onAmp = false;
-    for(std::string::const_iterator it = text.begin(); it != text.end(); ++it)
-    {
-        if(onAmp)
-        {
-            if(*it != '&')
-                _mnemonic = *it;
-
-            _caption += *it;
-            onAmp = false;
-        }
-        else
-        {
-            if(*it == '&')
-                onAmp = true;
-            else
-                _caption += *it;
-        }
-    }
-
-    if(onAmp)
-        _caption += '&';
-    
-    Char* ch = _mnemonic != 0 ? &_mnemonic : 0;
-    if( _window )
-        _window->setMnemonic(*this, ch);
-
-    //setCaptionMetrics();
-}
-
-
-void Widget::setFont( const Gfx::Font& f )
-{
-    _font = f;
-    //setCaptionMetrics();
-}
-
-
-//void Widget::setCaptionMetrics()
-//{  
-//    String text = Pt::Utf8Codec::decode( this->caption() );
-//    _captionMetrics = Hmi::Painter::fontMetrics( _font, text);
-//}
 
 } // namespace
 
