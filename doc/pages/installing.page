@@ -189,7 +189,7 @@ the unit-test.
 
 Installation of the built artifacts is performed by the means of a
 pseudo-target 'install'. With default settings, no real installation will
-be performed, but the relevant files will onyl copied to a directory named
+be performed, but the relevant files will only copied to a directory named
 'deploy'. If you dare to copy files to your system directories you can set
 the INSTALL_DIR (root directory of the installation), INSTALL_BINDIR (directory
 to install programs), INSTALL_INCLUDEDIR (directory to install header files
