@@ -2423,5 +2423,8 @@
     <ClCompile Include="..\..\src\Pt-Hmi\ChildWindowImpl.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Layout.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

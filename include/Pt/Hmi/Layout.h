@@ -30,44 +30,97 @@
 #ifndef Pt_Hmi_Layout_H
 #define Pt_Hmi_Layout_H
 
+#include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Spacing.h>
+#include <Pt/Hmi/Docking.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class Layout
+class LayoutItem
 {
-	public:
-		enum Type
-		{			
-      None,
-      Docking,
-			TopToBottom,
-			BottomToTop,
-			LeftToRight,
-			RightToLeft,
-		};
+  public:
+    virtual ~LayoutItem()
+    {}
 
-	public:
-		Layout()
-		: _type( None )		
-		{ }
+    virtual const Gfx::PointF& position() const = 0;
 
-		Type type() const 
-		{
-			return _type; 
-		}
+    virtual const Gfx::SizeF& size() const = 0;
 
-		void setType( Type t )
-		{
-			_type = t;
-		}
+    virtual const Spacing& padding() const = 0;
 
-	private:
-		Type	_type;	
+    virtual const Spacing& margin() const = 0;
+
+    virtual const Docking& docking() const = 0;
+
+    virtual void setGeometry(const Gfx::PointF& p, const Gfx::SizeF& s) = 0;
 };
 
-}}
 
-#endif
+class PT_HMI_API Layouter
+{
+    friend class LayoutIterator;
+
+    public:
+        virtual ~Layouter()
+        {}
+
+        virtual const Gfx::PointF& position() const = 0;
+
+        virtual const Gfx::SizeF& size() const = 0;
+
+        virtual const Spacing& padding() const = 0;
+
+        LayoutIterator begin();
+
+        LayoutIterator end();
+
+    protected:
+        virtual LayoutItem* onBegin() = 0;
+
+        virtual LayoutItem* onAdvance() = 0;
+};
+
+
+class PT_HMI_API LayoutIterator
+{
+    public:
+        LayoutIterator();
+
+        explicit LayoutIterator(Layouter& layouter);
+
+        LayoutIterator& operator++();
+        
+        bool operator!=(const LayoutIterator& other) const;
+
+        bool operator==(const LayoutIterator& other) const;
+        
+        LayoutItem& operator*();
+
+        LayoutItem* operator->();
+
+    private:
+        Layouter* _layouter;
+        LayoutItem* _item;
+        std::size_t _n;
+};
+
+
+PT_HMI_API void StackLeft(Layouter& parent);
+
+PT_HMI_API void StackRight(Layouter& parent);
+
+PT_HMI_API void StackTop(Layouter& parent);
+
+PT_HMI_API void StackBottom(Layouter& parent);
+
+PT_HMI_API void Docked(Layouter& parent);
+
+} // namespace
+
+} // namespace
+
+#endif // include guard

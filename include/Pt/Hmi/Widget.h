@@ -54,9 +54,12 @@ namespace Hmi {
 class Window;
 class PaintSurface;
 
+
 class PT_HMI_API Widget : public Pt::Connectable
 {
     friend class Window;
+    friend class WidgetLayoutItem;
+    friend class WidgetLayouter;
 
     public: 
         enum ImageLayout
@@ -157,6 +160,13 @@ class PT_HMI_API Widget : public Pt::Connectable
         void render(const Gfx::PointF& pos, PaintSurface& parentSurface);
 
     protected:    
+        virtual void onUpdate();
+
+        virtual void onLayout();
+
+        virtual void onRender(const Gfx::PointF& pos, PaintSurface& surface); 
+
+    protected:
         virtual void onEvent(const Pt::Event& ev);
 
         virtual void onPointerEvent(const MouseEvent& ev);
@@ -166,13 +176,6 @@ class PT_HMI_API Widget : public Pt::Connectable
         virtual void onScrollEvent( const ScrollEvent& ev );        
     
         virtual void onKeyEvent(const KeyEvent& ev);
-
-    protected:
-        virtual void onUpdate();
-
-        virtual void onLayout();
-
-        virtual void onRender(const Gfx::PointF& pos, PaintSurface& surface); 
 
         virtual void onPointerEnter();    
 
@@ -205,6 +208,10 @@ class PT_HMI_API Widget : public Pt::Connectable
         void setAutoSize(bool a);
 
         bool isAutoSize() const;
+
+        typedef void (*Layout)(Layouter&);
+        
+        void setLayout(Layout layout);
 
         void setCaption(const std::string& c);
 
@@ -264,21 +271,6 @@ class PT_HMI_API Widget : public Pt::Connectable
         void setDocking( const Docking& d )
         {
             _docking = d;
-        }
-
-        void setLayout(const Layout& l )
-        {
-            _layout = l;
-        }
-
-        const Layout& layout() const 
-        {
-            return _layout;
-        }
-
-        Layout& layout()
-        {
-            return _layout;
         }
 
         // outer spacing
@@ -387,8 +379,6 @@ class PT_HMI_API Widget : public Pt::Connectable
     private:
         void setWindow(Window* window);
 
-        void updateGeometry(Widget& w, const Gfx::PointF& p, const Gfx::SizeF& s);
-
     private:
         Pt::Signal<const Pt::Event&> _eventReady;
         Window*                      _window; 
@@ -422,6 +412,118 @@ class PT_HMI_API Widget : public Pt::Connectable
         bool                         _hasFocus;    
         Key                          _actionKey;
         size_t                       _focusIndex;   
+};
+
+
+class WidgetLayoutItem : public LayoutItem
+{
+    public:
+        WidgetLayoutItem()
+        : _widget(0)
+        {}
+
+        explicit WidgetLayoutItem(Widget& w)
+        : _widget(&w)
+        {}
+
+        void setWidget(Widget* w)
+        { _widget = w; }
+
+        Widget* widget()
+        { return _widget; }
+
+        virtual const Gfx::PointF& position() const
+        {
+            return _widget->position();
+        }
+
+        virtual const Gfx::SizeF& size() const
+        {
+            return _widget->size();
+        }
+
+        virtual const Spacing& padding() const
+        {
+            return _widget->padding();
+        }
+
+        virtual const Spacing& margin() const
+        {
+            return _widget->margin();
+        }
+
+        virtual const Docking& docking() const
+        {
+            return _widget->docking();
+        }
+
+        virtual void setGeometry(const Gfx::PointF& p, const Gfx::SizeF& s)
+        {
+            if(_widget->size() == s && _widget->position() == p)
+                return;
+
+            _widget->setGeometry(p, s);
+            _widget->_isValid = false;
+
+            Widget* parent = _widget->parent();
+            if(parent)
+                parent->_isValid = false;
+        }
+
+    private:
+        Widget* _widget;
+};
+
+
+class WidgetLayouter : public Layouter
+{
+    public:
+        WidgetLayouter(Widget& w)
+        : _widget(w)
+        { }
+
+        virtual const Gfx::PointF& position() const
+        {
+            return _widget.position();
+        }
+
+        virtual const Gfx::SizeF& size() const
+        {
+            return _widget.size();
+        }
+
+        virtual const Spacing& padding() const
+        {
+            return _widget.padding();
+        }
+
+    protected:
+        virtual LayoutItem* onBegin()
+        {
+            _it = _widget._children.begin();
+
+            if( _it == _widget._children.end() )
+                return 0;
+
+            _item.setWidget(*_it);
+            return &_item;
+        }
+
+        virtual LayoutItem* onAdvance()
+        {
+            ++_it;
+
+            if( _it == _widget._children.end() )
+                return 0;
+
+            _item.setWidget(*_it);
+            return &_item;
+        }
+
+    private:
+        Widget& _widget;
+        std::vector<Widget*>::iterator _it;
+        WidgetLayoutItem _item;
 };
 
 } // namespace

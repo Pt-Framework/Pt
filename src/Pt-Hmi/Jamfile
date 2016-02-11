@@ -27,7 +27,8 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   PaintSurface.cpp
 					   Painter.cpp                        
 					   Button.cpp					   			   					   
-					   Label.cpp					   
+					   Label.cpp
+                       Layout.cpp				   
 					   Panel.cpp					   
 					   Widget.cpp					   					   
 					   Window.cpp	

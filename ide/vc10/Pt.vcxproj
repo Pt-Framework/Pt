@@ -501,6 +501,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Label.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Layout.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.cpp" />
