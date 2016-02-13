@@ -5,6 +5,7 @@
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Label.h>
+#include <Pt/Hmi/Layout.h>
 #include "Dialog1.h"
 
 namespace Pt {
@@ -27,7 +28,7 @@ class ChildW : public Hmi::Window
 
     private:
         Hmi::Window _childWindow2;
-        Hmi::Widget  _mainWidget;
+        Hmi::DockingLayout  _mainWidget;
         Hmi::Button _closeButton;
         Hmi::Button _toggleButton;
         Hmi::Button _dialogButton;

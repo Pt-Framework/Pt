@@ -33,6 +33,7 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Spacing.h>
 #include <Pt/Hmi/Docking.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 
@@ -57,6 +58,32 @@ class LayoutItem
     virtual const Docking& docking() const = 0;
 
     virtual void setGeometry(const Gfx::PointF& p, const Gfx::SizeF& s) = 0;
+};
+
+
+class Layouter;
+
+class PT_HMI_API LayoutIterator
+{
+    public:
+        LayoutIterator();
+
+        explicit LayoutIterator(Layouter& layouter);
+
+        LayoutIterator& operator++();
+        
+        bool operator!=(const LayoutIterator& other) const;
+
+        bool operator==(const LayoutIterator& other) const;
+        
+        LayoutItem& operator*();
+
+        LayoutItem* operator->();
+
+    private:
+        Layouter* _layouter;
+        LayoutItem* _item;
+        std::size_t _n;
 };
 
 
@@ -85,27 +112,15 @@ class PT_HMI_API Layouter
 };
 
 
-class PT_HMI_API LayoutIterator
+class PT_HMI_API DockingLayout : public Widget
 {
     public:
-        LayoutIterator();
+        DockingLayout();
 
-        explicit LayoutIterator(Layouter& layouter);
+        virtual ~DockingLayout();
 
-        LayoutIterator& operator++();
-        
-        bool operator!=(const LayoutIterator& other) const;
-
-        bool operator==(const LayoutIterator& other) const;
-        
-        LayoutItem& operator*();
-
-        LayoutItem* operator->();
-
-    private:
-        Layouter* _layouter;
-        LayoutItem* _item;
-        std::size_t _n;
+    protected:
+        virtual void onLayout(Layouter& layouter);
 };
 
 

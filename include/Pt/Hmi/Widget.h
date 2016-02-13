@@ -38,7 +38,6 @@
 #include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Docking.h>
-#include <Pt/Hmi/Layout.h>
 #include <Pt/Connectable.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Point.h>
@@ -53,7 +52,7 @@ namespace Hmi {
 
 class Window;
 class PaintSurface;
-
+class Layouter; // TODO
 
 class PT_HMI_API Widget : public Pt::Connectable
 {
@@ -87,6 +86,8 @@ class PT_HMI_API Widget : public Pt::Connectable
         void add(Widget& w);
 
         void remove(Widget& w);
+
+        std::vector<Widget*>& widgets();
 
         const std::vector<Widget*>& widgets() const;
 
@@ -149,7 +150,7 @@ class PT_HMI_API Widget : public Pt::Connectable
     protected:    
         virtual void onUpdate();
 
-        virtual void onLayout();
+        virtual void onLayout(Layouter& layouter);
 
         virtual void onRender(const Gfx::PointF& pos, PaintSurface& surface); 
 
@@ -272,20 +273,20 @@ class PT_HMI_API Widget : public Pt::Connectable
         }
 
         // inner spacing
-		    const Spacing& padding() const
-		    {
-			    return _padding;
-		    }
+        const Spacing& padding() const
+        {
+            return _padding;
+        }
 
-		    Spacing& padding()
-		    {
-			    return _padding;
-		    }
+        Spacing& padding()
+        {
+            return _padding;
+        }
 
-		    void setPadding( const Spacing& p )
-		    {
-			    _padding = p;
-		    }
+        void setPadding( const Spacing& p )
+        {
+            _padding = p;
+        }
 
         //
         // apperance properties
@@ -329,117 +330,6 @@ class PT_HMI_API Widget : public Pt::Connectable
         size_t                       _focusIndex;   
 };
 
-
-class WidgetLayoutItem : public LayoutItem
-{
-    public:
-        WidgetLayoutItem()
-        : _widget(0)
-        {}
-
-        explicit WidgetLayoutItem(Widget& w)
-        : _widget(&w)
-        {}
-
-        void setWidget(Widget* w)
-        { _widget = w; }
-
-        Widget* widget()
-        { return _widget; }
-
-        virtual const Gfx::PointF& position() const
-        {
-            return _widget->position();
-        }
-
-        virtual const Gfx::SizeF& size() const
-        {
-            return _widget->size();
-        }
-
-        virtual const Spacing& padding() const
-        {
-            return _widget->padding();
-        }
-
-        virtual const Spacing& margin() const
-        {
-            return _widget->margin();
-        }
-
-        virtual const Docking& docking() const
-        {
-            return _widget->docking();
-        }
-
-        virtual void setGeometry(const Gfx::PointF& p, const Gfx::SizeF& s)
-        {
-            if(_widget->size() == s && _widget->position() == p)
-                return;
-
-            _widget->setGeometry(p, s);
-            _widget->_isValid = false;
-
-            Widget* parent = _widget->parent();
-            if(parent)
-                parent->_isValid = false;
-        }
-
-    private:
-        Widget* _widget;
-};
-
-
-class WidgetLayouter : public Layouter
-{
-    public:
-        WidgetLayouter(Widget& w)
-        : _widget(w)
-        { }
-
-        virtual const Gfx::PointF& position() const
-        {
-            return _widget.position();
-        }
-
-        virtual const Gfx::SizeF& size() const
-        {
-            return _widget.size();
-        }
-
-        virtual const Spacing& padding() const
-        {
-            return _widget.padding();
-        }
-
-    protected:
-        virtual LayoutItem* onBegin()
-        {
-            _it = _widget._children.begin();
-
-            if( _it == _widget._children.end() )
-                return 0;
-
-            _item.setWidget(*_it);
-            return &_item;
-        }
-
-        virtual LayoutItem* onAdvance()
-        {
-            ++_it;
-
-            if( _it == _widget._children.end() )
-                return 0;
-
-            _item.setWidget(*_it);
-            return &_item;
-        }
-
-    private:
-        Widget& _widget;
-        std::vector<Widget*>::iterator _it;
-        WidgetLayoutItem _item;
-};
 
 } // namespace
 

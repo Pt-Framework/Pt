@@ -33,6 +33,125 @@ namespace Pt {
 
 namespace Hmi {
 
+/////////////////////////////////////////////////////////////////////////////
+// DockingLayout
+/////////////////////////////////////////////////////////////////////////////
+
+DockingLayout::DockingLayout()
+{
+}
+
+
+DockingLayout::~DockingLayout()
+{
+}
+
+
+void DockingLayout::onLayout(Layouter& parent)
+{
+    LayoutIterator it = parent.begin();
+    LayoutIterator end = parent.end();
+
+    double posLeft   = parent.padding().left();
+    double posTop    = parent.padding().top();
+    double posRight  = parent.size().width() - parent.padding().right();
+    double posBottom = parent.size().height() - parent.padding().bottom();
+    bool hasFilled   = false;
+
+    for( ; it != end; ++it)
+    {
+        switch( it->docking().type() )
+        {
+            default:
+            case Docking::Fill:
+                hasFilled = true;
+                break;
+
+            case Docking::Left:
+            {
+              double x = posLeft + it->margin().left();
+              double y = posTop  + it->margin().top();            
+
+              const Gfx::SizeF childSize( it->size().width(), 
+                                          (posBottom - posTop) - 
+                                          it->margin().topBottom() );
+
+              posLeft += it->size().width() + it->margin().leftRight(); 
+                            
+              Gfx::PointF pos(x, y);                   
+              it->setGeometry(pos, childSize);
+              break;  
+            }
+
+            case Docking::Top:
+            {
+              double x = posLeft + it->margin().left();
+              double y = posTop  + it->margin().top();         
+                     
+              const Gfx::SizeF childSize( (posRight - posLeft) - it->margin().leftRight(), 
+                                          it->size().height() );
+
+              posTop += it->size().height() + it->margin().topBottom();      
+        
+              Gfx::PointF pos(x, y);                   
+              it->setGeometry(pos, childSize);
+              break;
+            }
+          
+            case Docking::Right:
+            {
+              posRight -= it->size().width()  + it->margin().right();  
+                     
+              double x = posRight;
+              double y = posTop + it->margin().top();                             
+                    
+              posRight -=  it->margin().left();
+
+              const Gfx::SizeF childSize( it->size().width(), 
+                                          (posBottom - posTop) - 
+                                          it->margin().topBottom() );
+
+              Gfx::PointF pos(x, y);                   
+              it->setGeometry(pos, childSize);
+              break;
+            }
+
+            case Docking::Bottom:
+            {
+              posBottom -= it->size().height() + it->margin().bottom();   
+                   
+              double x = posLeft + it->margin().left();
+              double y = posBottom;       
+                  
+              posBottom -= it->margin().top();                      
+
+              const Gfx::SizeF childSize( (posRight - posLeft) - it->margin().leftRight(), 
+                                          it->size().height() );
+
+              Gfx::PointF pos(x, y);                   
+              it->setGeometry(pos, childSize);
+              break;
+            }
+        }
+    }
+
+    if( ! hasFilled)
+        return;
+    
+    const Gfx::PointF fillPos(posLeft, posTop);
+    const Gfx::SizeF  fillSize(posRight - posLeft, posBottom - posTop);
+
+    for(LayoutIterator it = parent.begin(); it != end; ++it)
+    {
+        if( it->docking().type() == Docking::Fill)
+            it->setGeometry(fillPos, fillSize);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Layouter
+/////////////////////////////////////////////////////////////////////////////
+
 LayoutIterator Layouter::begin()
 {
     return LayoutIterator(*this);
@@ -44,6 +163,9 @@ LayoutIterator Layouter::end()
     return LayoutIterator();
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// LayoutIterator
+/////////////////////////////////////////////////////////////////////////////
 
 LayoutIterator::LayoutIterator()
 : _layouter(0)
@@ -97,6 +219,9 @@ LayoutItem* LayoutIterator::operator->()
     return _item; 
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// StackLeft
+/////////////////////////////////////////////////////////////////////////////
 
 inline void StackLeft(Layouter& parent)
 {

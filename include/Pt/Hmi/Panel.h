@@ -134,7 +134,7 @@ class PT_HMI_API Panel  : public Widget
 
     virtual void onUpdate();
 
-    virtual void onLayout();
+    virtual void onLayout(Layouter& layouter);
 
     virtual void onRender(const Gfx::PointF& pos, PaintSurface& parentSurface);
 	

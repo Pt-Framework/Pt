@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Hmi/Panel.h>
+#include <Pt/Hmi/Layout.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Rect.h>
@@ -61,9 +62,9 @@ void Panel::onUpdate()
 }
 
 
-void Panel::onLayout()
+void Panel::onLayout(Layouter& layouter)
 {
-    Widget::onLayout();
+    Widget::onLayout(layouter);
     
     if( _surface.size() != size() )
         _surface.resize( size() );

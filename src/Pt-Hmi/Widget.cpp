@@ -29,6 +29,7 @@
 
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Layout.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Brush.h>
@@ -37,6 +38,118 @@
 namespace Pt {
 
 namespace Hmi {
+
+class WidgetLayoutItem : public LayoutItem
+{
+    public:
+        WidgetLayoutItem()
+        : _widget(0)
+        {}
+
+        explicit WidgetLayoutItem(Widget& w)
+        : _widget(&w)
+        {}
+
+        void setWidget(Widget* w)
+        { _widget = w; }
+
+        Widget* widget()
+        { return _widget; }
+
+        virtual const Gfx::PointF& position() const
+        {
+            return _widget->position();
+        }
+
+        virtual const Gfx::SizeF& size() const
+        {
+            return _widget->size();
+        }
+
+        virtual const Spacing& padding() const
+        {
+            return _widget->padding();
+        }
+
+        virtual const Spacing& margin() const
+        {
+            return _widget->margin();
+        }
+
+        virtual const Docking& docking() const
+        {
+            return _widget->docking();
+        }
+
+        virtual void setGeometry(const Gfx::PointF& p, const Gfx::SizeF& s)
+        {
+            if(_widget->size() == s && _widget->position() == p)
+                return;
+
+            _widget->setGeometry(p, s);
+            _widget->_isValid = false;
+
+            Widget* parent = _widget->parent();
+            if(parent)
+                parent->_isValid = false;
+        }
+
+    private:
+        Widget* _widget;
+};
+
+
+class WidgetLayouter : public Layouter
+{
+    public:
+        WidgetLayouter(Widget& w)
+        : _widget(w)
+        { }
+
+        virtual const Gfx::PointF& position() const
+        {
+            return _widget.position();
+        }
+
+        virtual const Gfx::SizeF& size() const
+        {
+            return _widget.size();
+        }
+
+        virtual const Spacing& padding() const
+        {
+            return _widget.padding();
+        }
+
+    protected:
+        virtual LayoutItem* onBegin()
+        {
+            _it = _widget._children.begin();
+
+            if( _it == _widget._children.end() )
+                return 0;
+
+            _item.setWidget(*_it);
+            return &_item;
+        }
+
+        virtual LayoutItem* onAdvance()
+        {
+            ++_it;
+
+            if( _it == _widget._children.end() )
+                return 0;
+
+            _item.setWidget(*_it);
+            return &_item;
+        }
+
+    private:
+        Widget& _widget;
+        std::vector<Widget*>::iterator _it;
+        WidgetLayoutItem _item;
+};
+
 
 Widget::Widget()
 : _window(0)
@@ -127,6 +240,12 @@ void Widget::remove(Widget& widget)
     widget._parent = 0;
 
     widget.setWindow(0);
+}
+
+
+std::vector<Widget*>& Widget::widgets()
+{
+    return _children;
 }
 
 
@@ -390,7 +509,9 @@ void Widget::render(const Gfx::PointF& pos, PaintSurface& surface)
     if( ! visible() )
         return;
 
-    onLayout();
+    WidgetLayouter layouter(*this);
+    onLayout(layouter);
+    
     onRender(pos, surface);
     
     _isValid = true;
@@ -406,12 +527,11 @@ void Widget::onUpdate()
 }
 
 
-void Widget::onLayout()
+void Widget::onLayout(Layouter& layouter)
 {
     if( ! _layout)
         return;
 
-    WidgetLayouter layouter(*this);
     _layout(layouter);               
 }
 

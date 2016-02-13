@@ -19,7 +19,7 @@ ChildW::ChildW(const std::string& title)
     _mainWidget.setSize( Gfx::SizeF(800, 600) );
     _mainWidget.setPosition( Gfx::PointF(20,20) );
     _mainWidget.setName("MainPanel");
-    _mainWidget.setLayout(Docked);
+    //_mainWidget.setLayout(Docked);
     _mainWidget.padding().setAll(20);
     _mainWidget.update();   
 
