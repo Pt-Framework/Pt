@@ -58,16 +58,19 @@ Panel::~Panel()
 
 void Panel::onUpdate()
 {
+    if( _surface.size() != size() )
+        _surface.resize( size() );
+
     Widget::onUpdate();
 }
 
 
-void Panel::onLayout(Layouter& layouter)
+void Panel::onLayout(LayoutItem::Iterator begin, LayoutItem::Iterator end)
 {
-    Widget::onLayout(layouter);
+    Widget::onLayout(begin, end);
     
-    if( _surface.size() != size() )
-        _surface.resize( size() );
+    //if( _surface.size() != size() )
+    //    _surface.resize( size() );
 }
 
 

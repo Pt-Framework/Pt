@@ -34,122 +34,11 @@
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/String.h>
+#include <cassert>
 
 namespace Pt {
 
 namespace Hmi {
-
-class WidgetLayoutItem : public LayoutItem
-{
-    public:
-        WidgetLayoutItem()
-        : _widget(0)
-        {}
-
-        explicit WidgetLayoutItem(Widget& w)
-        : _widget(&w)
-        {}
-
-        void setWidget(Widget* w)
-        { _widget = w; }
-
-        Widget* widget()
-        { return _widget; }
-
-        virtual const Gfx::PointF& position() const
-        {
-            return _widget->position();
-        }
-
-        virtual const Gfx::SizeF& size() const
-        {
-            return _widget->size();
-        }
-
-        virtual const Spacing& padding() const
-        {
-            return _widget->padding();
-        }
-
-        virtual const Spacing& margin() const
-        {
-            return _widget->margin();
-        }
-
-        virtual const Docking& docking() const
-        {
-            return _widget->docking();
-        }
-
-        virtual void setGeometry(const Gfx::PointF& p, const Gfx::SizeF& s)
-        {
-            if(_widget->size() == s && _widget->position() == p)
-                return;
-
-            _widget->setGeometry(p, s);
-            _widget->_isValid = false;
-
-            Widget* parent = _widget->parent();
-            if(parent)
-                parent->_isValid = false;
-        }
-
-    private:
-        Widget* _widget;
-};
-
-
-class WidgetLayouter : public Layouter
-{
-    public:
-        WidgetLayouter(Widget& w)
-        : _widget(w)
-        { }
-
-        virtual const Gfx::PointF& position() const
-        {
-            return _widget.position();
-        }
-
-        virtual const Gfx::SizeF& size() const
-        {
-            return _widget.size();
-        }
-
-        virtual const Spacing& padding() const
-        {
-            return _widget.padding();
-        }
-
-    protected:
-        virtual LayoutItem* onBegin()
-        {
-            _it = _widget._children.begin();
-
-            if( _it == _widget._children.end() )
-                return 0;
-
-            _item.setWidget(*_it);
-            return &_item;
-        }
-
-        virtual LayoutItem* onAdvance()
-        {
-            ++_it;
-
-            if( _it == _widget._children.end() )
-                return 0;
-
-            _item.setWidget(*_it);
-            return &_item;
-        }
-
-    private:
-        Widget& _widget;
-        std::vector<Widget*>::iterator _it;
-        WidgetLayoutItem _item;
-};
-
 
 Widget::Widget()
 : _window(0)
@@ -165,8 +54,7 @@ Widget::Widget()
 , _actionKey(Key::Space)
 , _size( 100, 100)
 , _position( 10,10) 
-
-, _isValid(false)
+, _isValid(true)
 , _mnemonic(0)
 {      
     _eventReady += Pt::slot(*this, &Widget::onKeyEvent);
@@ -488,6 +376,13 @@ void Widget::processEvent(const Pt::Event& ev)
 
 void Widget::update()
 {
+    // the widget is already invalid in case of a nested update()
+    // this means the parent must already be invalid or has just
+    // been rendered. therefore we stop the chain of update calls
+    // towards the root of the widget/window tree.
+    if( ! _isValid )
+        return;
+
     _isValid = false;
 
     onUpdate();
@@ -507,10 +402,18 @@ void Widget::update()
 void Widget::render(const Gfx::PointF& pos, PaintSurface& surface)
 {
     if( ! visible() )
+    {
+        _isValid = true;
         return;
+    }
 
-    WidgetLayouter layouter(*this);
-    onLayout(layouter);
+    // TODO: need a isValid flag in window too
+    //       remove next line once added
+    _isValid = false;
+
+    LayoutItem::Iterator begin = LayoutItem::begin();
+    LayoutItem::Iterator end = LayoutItem::end();
+    onLayout(begin, end);
     
     onRender(pos, surface);
     
@@ -520,19 +423,20 @@ void Widget::render(const Gfx::PointF& pos, PaintSurface& surface)
 
 void Widget::onUpdate()
 {
-    if(_autoSize)
-    {
-        _size = this->onAutoSize();
-    }
+    // TODO: find a better place for auto sizing
+    //if(_autoSize)
+    //{
+    //    _size = this->onAutoSize();
+    //}
 }
 
 
-void Widget::onLayout(Layouter& layouter)
+void Widget::onLayout(LayoutItem::Iterator, LayoutItem::Iterator)
 {
     if( ! _layout)
         return;
 
-    _layout(layouter);               
+    _layout(*this); // calls setGeometry() and update()           
 }
 
 
@@ -691,6 +595,9 @@ void Widget::setGeometry(const Gfx::PointF& pos, const Gfx::SizeF& size)
 {
   setPosition(pos);
   setSize(size);
+
+  update();
+  //_isValid = false;
 }
 
 

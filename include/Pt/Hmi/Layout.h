@@ -41,74 +41,52 @@ namespace Pt {
 
 namespace Hmi {
 
-class LayoutItem
+class Layouter
 {
-  public:
-    virtual ~LayoutItem()
-    {}
-
-    virtual const Gfx::PointF& position() const = 0;
-
-    virtual const Gfx::SizeF& size() const = 0;
-
-    virtual const Spacing& padding() const = 0;
-
-    virtual const Spacing& margin() const = 0;
-
-    virtual const Docking& docking() const = 0;
-
-    virtual void setGeometry(const Gfx::PointF& p, const Gfx::SizeF& s) = 0;
-};
-
-
-class Layouter;
-
-class PT_HMI_API LayoutIterator
-{
-    public:
-        LayoutIterator();
-
-        explicit LayoutIterator(Layouter& layouter);
-
-        LayoutIterator& operator++();
-        
-        bool operator!=(const LayoutIterator& other) const;
-
-        bool operator==(const LayoutIterator& other) const;
-        
-        LayoutItem& operator*();
-
-        LayoutItem* operator->();
-
-    private:
-        Layouter* _layouter;
-        LayoutItem* _item;
-        std::size_t _n;
-};
-
-
-class PT_HMI_API Layouter
-{
-    friend class LayoutIterator;
-
     public:
         virtual ~Layouter()
         {}
 
-        virtual const Gfx::PointF& position() const = 0;
+        const Gfx::SizeF& size() const
+        {
+            return _size;
+        }
 
-        virtual const Gfx::SizeF& size() const = 0;
+        void setSize( const Gfx::SizeF& s )
+        {
+            _size = s;
+        }
 
-        virtual const Spacing& padding() const = 0;
+        const Spacing& padding() const
+        {
+            return _padding;
+        }
 
-        LayoutIterator begin();
+        void setPadding(const Spacing& p)
+        {
+            _padding = p;
+        }
 
-        LayoutIterator end();
+        void update(LayoutItem::Iterator begin, LayoutItem::Iterator end)
+        { onUpdate(begin, end); }
 
     protected:
-        virtual LayoutItem* onBegin() = 0;
+        virtual void onUpdate(LayoutItem::Iterator begin, LayoutItem::Iterator end) = 0;
 
-        virtual LayoutItem* onAdvance() = 0;
+    private:
+        Gfx::SizeF _size;
+        Spacing    _padding;
+};
+
+
+class DockingLayouter : public Layouter
+{
+    public:
+        virtual ~DockingLayouter()
+        {}
+
+    protected:
+        virtual void onUpdate(LayoutItem::Iterator begin, LayoutItem::Iterator end);
 };
 
 
@@ -120,19 +98,22 @@ class PT_HMI_API DockingLayout : public Widget
         virtual ~DockingLayout();
 
     protected:
-        virtual void onLayout(Layouter& layouter);
+        virtual void onLayout(LayoutItem::Iterator begin, LayoutItem::Iterator end);
+
+    private:
+        DockingLayouter _layouter;
 };
 
 
-PT_HMI_API void StackLeft(Layouter& parent);
+PT_HMI_API void StackLeft(LayoutItem& parent);
 
-PT_HMI_API void StackRight(Layouter& parent);
+PT_HMI_API void StackRight(LayoutItem& parent);
 
-PT_HMI_API void StackTop(Layouter& parent);
+PT_HMI_API void StackTop(LayoutItem& parent);
 
-PT_HMI_API void StackBottom(Layouter& parent);
+PT_HMI_API void StackBottom(LayoutItem& parent);
 
-PT_HMI_API void Docked(Layouter& parent);
+PT_HMI_API void Docked(LayoutItem& parent);
 
 } // namespace
 
