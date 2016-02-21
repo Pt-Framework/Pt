@@ -296,7 +296,8 @@ class PT_HMI_API Widget : public Pt::Connectable
 
     private:
         void setWindow(Window* window);
-        void propagateUpdate();
+        
+        void onUpdate();
 
     private:
         Pt::Signal<const Pt::Event&> _eventReady;

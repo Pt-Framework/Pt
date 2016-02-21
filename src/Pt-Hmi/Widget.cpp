@@ -373,7 +373,7 @@ void Widget::processEvent(const Pt::Event& ev)
 }
 
 
-void Widget::propagateUpdate()
+void Widget::onUpdate()
 {
     // the widget is already invalid in case of a nested update()
     // this means the parent must already be invalid or has just
@@ -384,7 +384,7 @@ void Widget::propagateUpdate()
 
     if( parent() )
     {
-        parent()->propagateUpdate();   
+        parent()->onUpdate();   
     }
     else
     {
@@ -403,11 +403,11 @@ void Widget::update()
     if( ! _isValid )
         return;
 
-    _isValid = false;    
-
+    _isValid = false; 
+   
     if( parent() )
     {
-        parent()->propagateUpdate();
+        parent()->onUpdate();
     }
     else
     {
