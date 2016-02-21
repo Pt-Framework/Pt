@@ -26,6 +26,7 @@
 #define Pt_Hmi_WindowStartPosition_H
 
 #include <string>
+#include <stdexcept>
 
 namespace Pt{
 namespace Hmi{
@@ -49,6 +50,9 @@ class WindowPosition
 
         case CenterParent:
           return "CenterParent";
+
+        case CenterScreen:
+            return "CenterScreen";
       }
 
       throw std::logic_error("unknown window start position");

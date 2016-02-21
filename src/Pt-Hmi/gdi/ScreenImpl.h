@@ -37,6 +37,7 @@ namespace Pt{
 namespace Hmi{
 
 class ApplicationImpl;
+class Window;
 
 class ScreenImpl
 {
@@ -74,9 +75,17 @@ class ScreenImpl
 		void setCursor(const Cursor* cursor );
 
 		HCURSOR cursorHandle()
-    {
-      return 	_cursorHandle;
-    }
+        {
+            return 	_cursorHandle;
+        }
+
+        void registerWindow(Window& w)
+        {
+        }
+
+        void unregisterWindow(Window& w)
+        {
+        }
 
 private:
    Gfx::Size screeResolution();

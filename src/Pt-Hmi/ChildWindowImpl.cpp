@@ -68,8 +68,11 @@ void ChildWindowImpl::update()
 
 void ChildWindowImpl::activate()
 {
-  _apiWindow->parent()->activate();
-  _apiWindow->parent()->windowManager().activate( *_apiWindow );	
+    if( _apiWindow->parent() )
+    {
+        _apiWindow->parent()->activate();
+        _apiWindow->parent()->windowManager().activate( *_apiWindow );	
+    }
 }
 
 

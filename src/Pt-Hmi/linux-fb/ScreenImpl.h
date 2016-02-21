@@ -41,21 +41,26 @@ class ApplicationImpl;
 class FrameBuffer;
 class Cursor;
 
-class ScreenImpl : public Window
+class ScreenImpl : public Pt::Connectable
 {
 	public:
 		ScreenImpl(ApplicationImpl& app);
 
 		virtual ~ScreenImpl();
 
+        void registerWindow(Window& w);
+
+        void unregisterWindow(Window& w);
+        
+
 		double width() const
 		{
-			return  size().width();
+			return  _size.width();
 		}
 
 		double height() const
 		{
-			return  size().height();
+			return  _size.height();
 		}
 		 		 
 		virtual void activate()
@@ -130,10 +135,11 @@ class ScreenImpl : public Window
 		
 		void setCursor(const Hmi::Cursor* cursor );
 
+        void update();
+
 	protected:
-		virtual void onInvalidate();
 		virtual void onActivate();
-		virtual void onPointerEvent( const Pt::Hmi::PointerEvent& mouseEvent );
+		virtual void onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent );
 		virtual void onKeyEvent(const Pt::Hmi::KeyEvent& ev);
 
 	private:
@@ -154,11 +160,15 @@ class ScreenImpl : public Window
 	
 	private:
     FrameBuffer& _frameBuffer;  
-		Gfx::Image	  _cursorBackground;
-		Gfx::Point		_cursorPos;    
-		Gfx::Image   _image;
+	Gfx::Image	  _cursorBackground;
+	Gfx::Point		_cursorPos;    
+    Gfx::Image   _image;
     double      _dpi;
-	bool _drawCursor;
+	bool _drawCursor;    
+    WindowManager _windowManager;
+    PaintSurface _surface;
+    Cursor _cursor;
+    Gfx::SizeF _size;
 };
 
 }

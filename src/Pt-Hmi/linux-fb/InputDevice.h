@@ -33,7 +33,8 @@
 #include "posix/Selector.h"
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/KeyEvent.h>
-#include <Pt/Hmi/PointerEvent.h>
+#include <Pt/Hmi/MouseEvent.h>
+#include <Pt/Hmi/TouchEvent.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/System/Selectable.h>
 #include <Pt/System/MainLoop.h>
@@ -94,8 +95,12 @@ class InputDevice : public System::Selectable
 		Pt::System::IOHandle _ioh;
 		Pt::System::EventLoop* _loop;
 		Pt::Gfx::Size _screenSize;
+        bool _leftAlt;
+        bool _rightAlt;
+        Key::Modifiers _modifiers;
 		Pt::Hmi::KeyEvent _keyEvent;
-		Pt::Hmi::PointerEvent _mouseEvent;
+		Pt::Hmi::MouseEvent _mouseEvent;
+        Pt::Hmi::TouchEvent _touchEvent;
 		Pt::Signal<const Pt::Event&> _eventReady;
 };
 

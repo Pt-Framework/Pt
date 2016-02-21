@@ -29,6 +29,8 @@
 
 #include "ApplicationImpl.h"
 #include <Pt/System/FileInfo.h>
+#include <iostream>
+#include <sstream>
 #include <fstream>
 #include <fcntl.h>
 #include <sys/ioctl.h> 

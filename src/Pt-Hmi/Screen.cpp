@@ -131,11 +131,14 @@ void Screen::setCursor( const Cursor* cursor )
 void Screen::registerWindow(Window& w)
 {
 	_windows.push_back(&w);
+    _impl->registerWindow(w);
 }
 
 
 void Screen::unregisterWindow(Window& w)
 {
+    _impl->unregisterWindow(w);
+
 	std::vector<Window*>::iterator it = std::find(_windows.begin(), _windows.end(), &w);
 	if( it != _windows.end() )
 		_windows.erase(it);

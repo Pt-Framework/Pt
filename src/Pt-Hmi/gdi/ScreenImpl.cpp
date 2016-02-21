@@ -36,11 +36,8 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
 {
  	 _size = screeResolution();
 
-	_width  = _size.width() * unitSizeInch()*_dpi;
-	_height = _size.height() * unitSizeInch()*_dpi;
-	
-	_factorX = _width / _size.width();
-	_factorY = _height / _size.height();
+	_factorX = 1;
+	_factorY = 1;
 	_offsetX = 0;
 	_offsetY = 0;	
 }

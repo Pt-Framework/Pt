@@ -793,8 +793,8 @@ void Window::setShortcut(Widget& w, const Key* key)
     std::map<Key, Widget*>::iterator it = _shortcuts.begin();
     while( it != _shortcuts.end() )
     {
-        if(it->second == &w)
-            it = _shortcuts.erase(it);
+        if(it->second == &w)        
+            _shortcuts.erase(it++);
         else
             ++it;
     }
@@ -810,7 +810,7 @@ void Window::setMnemonic(Widget& w, const Char* ch)
     while( it != _mnemonics.end() )
     {
         if(it->second == &w)
-            it = _mnemonics.erase(it);
+            _mnemonics.erase(it++);
         else
             ++it;
     }

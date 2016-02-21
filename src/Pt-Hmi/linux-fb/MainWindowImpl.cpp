@@ -28,7 +28,7 @@
 #include "PaintSurfaceImpl.h"
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
-#include <Pt/Hmi/MainWindow.h>
+
 #include <Pt/Hmi/Application.h>
 #include <Pt/System/Logger.h>
 #include <stdio.h>
@@ -47,9 +47,8 @@ namespace Pt {
 
 namespace Hmi {
 
-MainWindowImpl::MainWindowImpl(MainWindow* window)
-: _app(Application::instance() )
-, _apiWindow(window)
+MainWindowImpl::MainWindowImpl(Window* window)
+: ChildWindowImpl(window)
 { 	
 }
 
@@ -59,115 +58,10 @@ MainWindowImpl::~MainWindowImpl()
 }
 
 
-void MainWindowImpl::onEvent(const Pt::Event& ev)
-{
-	_app.sendEvent(*_apiWindow, ev);
-}
 
-
-void MainWindowImpl::onInvalidate()
+void MainWindowImpl::update()
 {		
-	_app.mainScreen().impl()->update();
-}
-
-
-void MainWindowImpl::onPaint(PaintSurface& paintSurface)
-{
-  _apiWindow->render();
-
-	Hmi::Painter& painter = paintSurface.painter();
-	
-	painter.drawSurface( Gfx::PointF(0,0), _apiWindow->surface() );
-}
-
-
-void MainWindowImpl::create()
-{
-	this->setWindowParent( _app.mainScreen().impl() );
-	_app.mainScreen().impl()->windowManager().add( this );
-}
-	
-
-void MainWindowImpl::destroy()
-{
-	_app.mainScreen().impl()->windowManager().remove( this );
-	this->setWindowParent(0);
-}
-
-
-void MainWindowImpl::show()
-{
-	setVisible(true);
-}
-
-
-void MainWindowImpl::hide()
-{
-	setVisible(false);
-}
-
-
-void MainWindowImpl::activate()
-{
-  _app.mainScreen().impl()->windowManager().activate( this ); 
-}
-
-
-void MainWindowImpl::setTopMost(bool force)
-{
-	//ToDo:
-}
-  
-
-void MainWindowImpl::setWindowState( WindowState::Type p )
-{
-	setState(p);
-}
-
-
-void MainWindowImpl::setBorder( WindowBorder::Type p )
-{
-	setBorder(p);
-}
-
-
-void MainWindowImpl::showInTaskbar(bool p)
-{
-	setShowInTaskbar(p);
-}
-
-
-void MainWindowImpl::setIcon(const Gfx::Image& p)
-{
-	setIcon(p);
-}
-
-
-void MainWindowImpl::setEnable(bool e)
-{
-	setEnabled(e);
-}
-
-
-void MainWindowImpl::setMinSize(const Gfx::SizeF& s)
-{
-	setMinimumSize(s);
-}
-
-
-void MainWindowImpl::setMaxSize(const Gfx::SizeF& s)
-{
-	setMaximumSize(s);
-}
-
-void MainWindowImpl::bringToFront()
-{
-  //ToDo:
-}
-
-void MainWindowImpl::focus()
-{
-  //ToDo:
+	Application::instance().mainScreen().impl()->update();
 }
 
 

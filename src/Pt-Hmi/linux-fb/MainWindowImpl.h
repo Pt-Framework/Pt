@@ -36,61 +36,28 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/WindowState.h>
-#include <Pt/Hmi/ChildWindow.h>
+#include "../ChildWindowImpl.h"
 
 namespace Pt {
 namespace Hmi {
 
-class MainWindow;
+class Window;
 class Application;
 
-class MainWindowImpl  : public ChildWindow
+class MainWindowImpl  : public ChildWindowImpl
 {
-	public:
-		MainWindowImpl(MainWindow* Window);
+
+    public:
+	    MainWindowImpl(Window* window);
     
-		virtual ~MainWindowImpl();
+	    virtual ~MainWindowImpl();
 
-		void create();
-	
-		void destroy();
 
-		void show();
+    protected:
+        virtual void update();
 
-		void hide();
-
-		void activate();		
-
-		void setTopMost(bool force);
-  
-		void setWindowState(WindowState::Type p);
-  
-		void setBorder(WindowBorder::Type p);
-  
-		void showInTaskbar(bool p);
-  
-		void setIcon(const Gfx::Image& p);
-
-		void setEnable(bool e);	
-
-		void setMinSize(const Gfx::SizeF& s);
-	
-		void setMaxSize(const Gfx::SizeF& s);
-
-		void bringToFront();
-
-		void focus();
-
-	protected:
-		virtual void onEvent(const Pt::Event& ev);
-
-		virtual void onInvalidate();
-	  
-		virtual void onPaint(PaintSurface& paintSurface);
-
-	private:
-    Pt::Hmi::Application& _app;
-    MainWindow*           _apiWindow;
+    private:
+        Window*           _apiWindow;
 };
 
 }} // namespace
