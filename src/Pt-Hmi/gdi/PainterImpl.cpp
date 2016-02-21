@@ -38,6 +38,7 @@
 #include <Pt/Hmi/PaintSurface.h>
 #include <iostream>
 #include <algorithm>
+#include <Pt/WinVer.h>
 
 namespace Pt {
 namespace Hmi {
@@ -45,7 +46,7 @@ namespace Hmi {
 PainterImpl::PainterImpl(PaintSurfaceImpl* surface)
 : _surface(surface)
 , _pen(Gfx::Pen(1))
-, _brush(Gfx::Brush(Gfx::Color(0, 0, 0)))
+, _brush(Gfx::Brush(Gfx::Color(0, 0, 0, 0)))
 , _font(Gfx::Font(determinePlatformDefaultFontName()))
 , _renderMode(Gfx::RenderMode::NoAlpha)
 , _screen( Application::instance().mainScreen() )
@@ -411,7 +412,7 @@ void PainterImpl::fillRect(const Gfx::RectF& rectF)
 	RECT rectangle;
 
 	rectangle.left	 = rect.left();
-	rectangle.top		 = rect.top();
+	rectangle.top   = rect.top();
 
 	rectangle.right  = rect.right() + 1;	
 	rectangle.bottom = rect.bottom() + 1;
@@ -564,7 +565,7 @@ void PainterImpl::drawCompatibleImage(size_t x, size_t y, size_t depth, const ch
     HBITMAP bitmap = CreateBitmap(width, height, 1, depth, (VOID*)data);
 
     if (bitmap == NULL) 
-	  {
+    {
         drawIndependentImage(x, y, data, width, height);
         return;
     }

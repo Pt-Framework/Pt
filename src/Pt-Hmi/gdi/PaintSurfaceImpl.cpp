@@ -51,7 +51,7 @@ PaintSurfaceImpl::PaintSurfaceImpl()
   _oldBrush = (HBRUSH) GetCurrentObject(_deviceContext, OBJ_BRUSH);
   _oldFont  = (HFONT) GetCurrentObject(_deviceContext, OBJ_FONT);
 
-  SelectObject(_deviceContext, _bitmapHandle);
+   SelectObject(_deviceContext, _bitmapHandle);
 	SetBkMode(_deviceContext, TRANSPARENT);
 }
 

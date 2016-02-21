@@ -46,7 +46,6 @@ bool lowerFocusIndex(Pt::Hmi::Widget* a, Pt::Hmi::Widget* b )
 namespace Pt {
 
 namespace Hmi {
-    
 
 Window::Window( Window* parent )
 : _impl(0)
@@ -58,6 +57,8 @@ Window::Window( Window* parent )
 , _startPostion( WindowPosition::Manual )
 , _state(WindowState::Normal )
 , _enabled(true)
+, _visible(false)
+, _isValid(true)
 , _border( WindowBorder::Sizeable)
 , _icon()
 , _canClose(true)
@@ -66,7 +67,6 @@ Window::Window( Window* parent )
 , _mainWidget(0)
 , _position(0,0)
 , _size(200,200)
-, _visible(false)
 {
     _windowManager.init(*this);
 
@@ -854,13 +854,17 @@ void Window::setFocusWidget(Widget* widget)
     if( _focusWidget == widget )
         return;
 
-    if( _focusWidget )            
+    if( _focusWidget )        
+    {
         _focusWidget->onFocus(false);
+    }
     
     _focusWidget = widget;
 
     if( _focusWidget )
+    {
         _focusWidget->onFocus(true);
+    }
 }
 
 

@@ -33,7 +33,7 @@
 
 	  #if defined(WIN32) || defined(_WIN32) 
 		    #ifndef WINVER
-		    #define WINVER 0x0501
+		    #define WINVER 0x0600
 		    #endif
 
 		    #ifndef _WIN32_WINNT

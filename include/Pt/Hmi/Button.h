@@ -77,6 +77,8 @@ class PT_HMI_API Button  : public Label
 
         virtual void onPointerLeave();
 
+        virtual void onFocus(bool hasFocus);
+
         virtual void onTouchEvent(const TouchEvent& ev);
 
         virtual void onPaint(PaintSurface& surface);

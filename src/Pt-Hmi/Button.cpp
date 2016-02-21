@@ -128,6 +128,13 @@ void Button::onTouchEvent(const TouchEvent& ev)
 }
 
 
+void Button::onFocus(bool hasFocus)
+{    
+    Label::onFocus(hasFocus);
+    update();
+}
+
+
 void Button::onPaint(PaintSurface& paintSurface)
 {    
     bool mouseOver = window()->pointerWidget() == this;

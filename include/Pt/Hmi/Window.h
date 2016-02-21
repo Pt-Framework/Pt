@@ -230,24 +230,25 @@ class PT_HMI_API Window : public Pt::Connectable
     void updateImpl();
     
   private:
-    WindowManager                        _windowManager; 
-    bool                                 _isClosed;
-    bool                                 _isActive;
-    Gfx::SizeF                           _minimumSize;
-    Gfx::SizeF                           _maximumSize;
-    Hmi::WindowPosition::Type            _startPostion;
-    Hmi::WindowState::Type               _state;    
-    bool                                 _enabled;
-    bool                                 _visible;
-    Gfx::SizeF                           _size;
-    Gfx::PointF                          _position; 
-    Hmi::WindowBorder::Type              _border;
-    std::string                          _title;
-    Gfx::Image                           _icon;
-    bool                                 _canClose;    
-    WindowDecoration::Flags              _decoration;   
-    std::string                          _name;    
-    Gfx::Font                            _font;
+    WindowManager                  _windowManager; 
+    bool                           _isClosed;
+    bool                           _isActive;
+    Gfx::SizeF                     _minimumSize;
+    Gfx::SizeF                     _maximumSize;
+    Hmi::WindowPosition::Type      _startPostion;
+    Hmi::WindowState::Type         _state;    
+    bool                           _enabled;
+    bool                           _visible;
+    bool                           _isValid;
+    Gfx::SizeF                     _size;
+    Gfx::PointF                    _position; 
+    Hmi::WindowBorder::Type        _border;
+    std::string                    _title;
+    Gfx::Image                     _icon;
+    bool                           _canClose;    
+    WindowDecoration::Flags        _decoration;   
+    std::string                    _name;    
+    Gfx::Font                      _font;
     
     std::map<Key, Widget*>         _shortcuts; 
     std::map<Pt::Char, Widget*>    _mnemonics; 

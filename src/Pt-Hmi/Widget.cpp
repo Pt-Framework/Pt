@@ -113,7 +113,7 @@ void Widget::add(Widget& widget)
     _children.push_back(&widget);
     widget._parent = this;
 
-    widget.setWindow(_window);
+    widget.setWindow(_window);   
 }
 
 
@@ -374,6 +374,27 @@ void Widget::processEvent(const Pt::Event& ev)
 }
 
 
+void Widget::propagateUpdate()
+{
+    // the widget is already invalid in case of a nested update()
+    // this means the parent must already be invalid or has just
+    // been rendered. therefore we stop the chain of update calls
+    // towards the root of the widget/window tree.
+    if( ! _isValid )
+        return;
+
+    if( parent() )
+    {
+        parent()->propagateUpdate();   
+    }
+    else
+    {
+        if(_window)
+            _window->update();
+    }
+}
+
+
 void Widget::update()
 {
     // the widget is already invalid in case of a nested update()
@@ -383,13 +404,11 @@ void Widget::update()
     if( ! _isValid )
         return;
 
-    _isValid = false;
-
-    onUpdate();
+    _isValid = false;    
 
     if( parent() )
     {
-        parent()->update();   
+        parent()->propagateUpdate();
     }
     else
     {
@@ -407,13 +426,11 @@ void Widget::render(const Gfx::PointF& pos, PaintSurface& surface)
         return;
     }
 
-    // TODO: need a isValid flag in window too
-    //       remove next line once added
-    _isValid = false;
-
     LayoutItem::Iterator begin = LayoutItem::begin();
     LayoutItem::Iterator end = LayoutItem::end();
-    onLayout(begin, end);
+
+    if( ! _isValid )
+        onLayout(begin, end);
     
     onRender(pos, surface);
     
@@ -421,20 +438,12 @@ void Widget::render(const Gfx::PointF& pos, PaintSurface& surface)
 }
 
 
-void Widget::onUpdate()
-{
-    // TODO: find a better place for auto sizing
-    //if(_autoSize)
-    //{
-    //    _size = this->onAutoSize();
-    //}
-}
-
-
 void Widget::onLayout(LayoutItem::Iterator, LayoutItem::Iterator)
 {
     if( ! _layout)
+    {
         return;
+    }
 
     _layout(*this); // calls setGeometry() and update()           
 }
@@ -465,7 +474,6 @@ void Widget::onPointerEvent(const MouseEvent& ev)
     if( ev.isPress(MouseEvent::Left) && _acceptFocus )
     {
         focus();
-        update();
     }
 
     if( ev.isRelease(MouseEvent::Left) && hasFocus() )
@@ -549,9 +557,12 @@ void Widget::onMnemonic()
 }
 
 
-Gfx::SizeF Widget::onAutoSize() const
+Gfx::SizeF Widget::preferredSize() const
 {
-    return Gfx::SizeF(0, 0);
+    if(_autoSize)
+        return this->onAutoSize();
+
+    return _size;
 }
 
 
@@ -564,6 +575,12 @@ void Widget::setAutoSize(bool a)
 bool Widget::isAutoSize() const
 {
     return _autoSize;
+}
+
+
+Gfx::SizeF Widget::onAutoSize() const
+{
+    return Gfx::SizeF(0, 0);
 }
 
 

@@ -13,15 +13,7 @@ ChildW::ChildW(const std::string& title)
 {
     setTitle(title);
     setPosition( Gfx::PointF(5,5) );
-    setSize( Gfx::SizeF(520, 400) );       
-
-    //Panel  
-    _mainWidget.setSize( Gfx::SizeF(800, 600) );
-    _mainWidget.setPosition( Gfx::PointF(20,20) );
-    _mainWidget.setName("MainPanel");
-    //_mainWidget.setLayout(Docked);
-    _mainWidget.padding().setAll(20);
-    _mainWidget.update();   
+    setSize( Gfx::SizeF(520, 400) );         
 
     //Text    
     _textLabel.setAutoSize(true);
@@ -33,9 +25,9 @@ ChildW::ChildW(const std::string& title)
     _textLabel.setBackgroundColor( Gfx::Color(1,1,1,0) );
     _textLabel.setMnemonicWidget(&_toggleButton);
     _textLabel.setCursor( Hmi::Cursor::waitCursor() );
+    _textLabel.docking().setType(Docking::Fill);  
     _textLabel.update();
-    _textLabel.docking().setType(Docking::Fill);    
-    
+
     //Toggle button
     _toggleButton.setName("ToggleButton");
     _toggleButton.setText("Toggle Me [CTRL+I]" );
@@ -76,14 +68,19 @@ ChildW::ChildW(const std::string& title)
     _buttonBar.padding().setAll(5);
     _buttonBar.setLayout(StackBottom);
     _buttonBar.docking().setType( Docking::Bottom );
-    _buttonBar.update(); 
-
     _buttonBar.add(_closeButton);
     _buttonBar.add(_dialogButton);
     _buttonBar.add(_toggleButton);
+    _buttonBar.update(); 
 
+    //Panel  
+    _mainWidget.setSize( Gfx::SizeF(800, 600) );
+    _mainWidget.setPosition( Gfx::PointF(20,20) );
+    _mainWidget.setName("MainPanel");
+    _mainWidget.padding().setAll(20); 
     _mainWidget.add(_textLabel);
     _mainWidget.add(_buttonBar);
+    _mainWidget.update(); 
 
     //_childWindow2.setMainWidget(&_closeButton);          
     _childWindow2.setPosition(Gfx::PointF(5,5));    

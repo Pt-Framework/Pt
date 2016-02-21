@@ -71,12 +71,6 @@ Gfx::SizeF Label::onAutoSize() const
 }
 
 
-void Label::onUpdate()
-{
-    Panel::onUpdate();
-}
-
-
 void Label::onPaint(PaintSurface& surface)
 {
     Panel::onPaint(surface);

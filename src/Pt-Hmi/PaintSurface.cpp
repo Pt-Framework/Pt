@@ -34,7 +34,6 @@ PaintSurface::PaintSurface()
 : _impl( new PaintSurfaceImpl())
 , _painter(*this)
 {
-
 }
 
 PaintSurface::~PaintSurface()
@@ -46,6 +45,9 @@ void PaintSurface::resize(const Gfx::SizeF& size)
 {
 	_impl->resize(size);
   _painter.setSurface(*this);
+
+  _painter.setBrush(Gfx::Brush(Gfx::Color(0,0,1)));
+   _painter.fillRect(Gfx::RectF(Gfx::PointF(0,0), size ));
 }
 
 Gfx::SizeF PaintSurface::size() const

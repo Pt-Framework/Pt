@@ -82,9 +82,7 @@ class PT_HMI_API Label  : public Panel
             return _font;
         }
 
-    protected:
-        virtual void onUpdate();
-            
+    protected:           
         virtual void onPaint(PaintSurface& paintSurface);
 
         virtual Gfx::SizeF onAutoSize() const;       

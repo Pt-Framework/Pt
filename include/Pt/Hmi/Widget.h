@@ -230,8 +230,6 @@ class PT_HMI_API Widget : public Pt::Connectable
         void render(const Gfx::PointF& pos, PaintSurface& parentSurface);
 
     protected:    
-        virtual void onUpdate();
-
         virtual void onLayout(LayoutItem::Iterator begin, LayoutItem::Iterator end);
 
         virtual void onRender(const Gfx::PointF& pos, PaintSurface& surface); 
@@ -280,6 +278,8 @@ class PT_HMI_API Widget : public Pt::Connectable
         void setAutoSize(bool a);
 
         bool isAutoSize() const;
+
+        Gfx::SizeF preferredSize() const;
 
         typedef void (*Layout)(LayoutItem&);
         
@@ -389,6 +389,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 
     private:
         void setWindow(Window* window);
+        void propagateUpdate();
 
     private:
         Pt::Signal<const Pt::Event&> _eventReady;

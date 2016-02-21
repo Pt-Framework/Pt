@@ -56,21 +56,9 @@ Panel::~Panel()
 }
 
 
-void Panel::onUpdate()
-{
-    if( _surface.size() != size() )
-        _surface.resize( size() );
-
-    Widget::onUpdate();
-}
-
-
 void Panel::onLayout(LayoutItem::Iterator begin, LayoutItem::Iterator end)
 {
     Widget::onLayout(begin, end);
-    
-    //if( _surface.size() != size() )
-    //    _surface.resize( size() );
 }
 
 
@@ -78,6 +66,9 @@ void Panel::onRender(const Gfx::PointF& pos, PaintSurface& parentSurface)
 {
     if( ! isValid() )
     {
+        if( _surface.size() != size() )
+            _surface.resize( size() );
+
         _surface.clear();
         onPaint(_surface);
     }
