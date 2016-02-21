@@ -41,55 +41,6 @@ namespace Pt {
 
 namespace Hmi {
 
-class Layouter
-{
-    public:
-        virtual ~Layouter()
-        {}
-
-        const Gfx::SizeF& size() const
-        {
-            return _size;
-        }
-
-        void setSize( const Gfx::SizeF& s )
-        {
-            _size = s;
-        }
-
-        const Spacing& padding() const
-        {
-            return _padding;
-        }
-
-        void setPadding(const Spacing& p)
-        {
-            _padding = p;
-        }
-
-        void update(LayoutItem::Iterator begin, LayoutItem::Iterator end)
-        { onUpdate(begin, end); }
-
-    protected:
-        virtual void onUpdate(LayoutItem::Iterator begin, LayoutItem::Iterator end) = 0;
-
-    private:
-        Gfx::SizeF _size;
-        Spacing    _padding;
-};
-
-
-class DockingLayouter : public Layouter
-{
-    public:
-        virtual ~DockingLayouter()
-        {}
-
-    protected:
-        virtual void onUpdate(LayoutItem::Iterator begin, LayoutItem::Iterator end);
-};
-
-
 class PT_HMI_API DockingLayout : public Widget
 {
     public:
@@ -98,22 +49,47 @@ class PT_HMI_API DockingLayout : public Widget
         virtual ~DockingLayout();
 
     protected:
-        virtual void onLayout(LayoutItem::Iterator begin, LayoutItem::Iterator end);
-
-    private:
-        DockingLayouter _layouter;
+        virtual void onLayout();
 };
 
 
-PT_HMI_API void StackLeft(LayoutItem& parent);
+class PT_HMI_API FlowLayout : public Widget
+{
+    public:
+        enum Direction
+        {
+            LeftToRight,
+            RightToLeft,
+            TopDown,
+            BottomUp
+        };
 
-PT_HMI_API void StackRight(LayoutItem& parent);
+    public:
+        FlowLayout()
+        : _direction(LeftToRight)
+        {}
 
-PT_HMI_API void StackTop(LayoutItem& parent);
+        virtual ~FlowLayout()
+        {}
 
-PT_HMI_API void StackBottom(LayoutItem& parent);
+        void setDirection(Direction d)
+        { _direction = d; }
 
-PT_HMI_API void Docked(LayoutItem& parent);
+    protected:
+        virtual void onLayout();
+
+    private:
+        Direction _direction;
+};
+
+
+void StackLeft(Widget& parent);
+
+void StackRight(Widget& parent);
+
+void StackTop(Widget& parent);
+
+void StackBottom(Widget& parent);
 
 } // namespace
 

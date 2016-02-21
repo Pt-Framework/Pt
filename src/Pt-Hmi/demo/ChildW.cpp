@@ -63,10 +63,10 @@ ChildW::ChildW(const std::string& title)
     _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);
     _closeButton.update(); 
 
+    _buttonBar.setDirection(FlowLayout::BottomUp);
     _buttonBar.setName("ButtonBar");
     _buttonBar.setSize( Gfx::SizeF(700, 180) );
     _buttonBar.padding().setAll(5);
-    _buttonBar.setLayout(StackBottom);
     _buttonBar.docking().setType( Docking::Bottom );
     _buttonBar.add(_closeButton);
     _buttonBar.add(_dialogButton);

@@ -33,7 +33,7 @@ class ChildW : public Hmi::Window
         Hmi::Button _toggleButton;
         Hmi::Button _dialogButton;
         Hmi::Label  _textLabel;
-        Hmi::Widget _buttonBar;
+        Hmi::FlowLayout _buttonBar;
 };
 
 } // namespace

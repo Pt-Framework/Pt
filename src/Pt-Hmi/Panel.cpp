@@ -56,12 +56,6 @@ Panel::~Panel()
 }
 
 
-void Panel::onLayout(LayoutItem::Iterator begin, LayoutItem::Iterator end)
-{
-    Widget::onLayout(begin, end);
-}
-
-
 void Panel::onRender(const Gfx::PointF& pos, PaintSurface& parentSurface)
 {
     if( ! isValid() )

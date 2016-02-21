@@ -49,7 +49,6 @@ Widget::Widget()
 , _autoSize(false)
 , _acceptFocus( false) 
 , _name("")
-, _layout(0)
 , _hasFocus( false)
 , _actionKey(Key::Space)
 , _size( 100, 100)
@@ -426,11 +425,8 @@ void Widget::render(const Gfx::PointF& pos, PaintSurface& surface)
         return;
     }
 
-    LayoutItem::Iterator begin = LayoutItem::begin();
-    LayoutItem::Iterator end = LayoutItem::end();
-
     if( ! _isValid )
-        onLayout(begin, end);
+        onLayout();
     
     onRender(pos, surface);
     
@@ -438,14 +434,8 @@ void Widget::render(const Gfx::PointF& pos, PaintSurface& surface)
 }
 
 
-void Widget::onLayout(LayoutItem::Iterator, LayoutItem::Iterator)
-{
-    if( ! _layout)
-    {
-        return;
-    }
-
-    _layout(*this); // calls setGeometry() and update()           
+void Widget::onLayout()
+{         
 }
 
 
@@ -584,12 +574,6 @@ Gfx::SizeF Widget::onAutoSize() const
 }
 
 
-void Widget::setLayout(Widget::Layout layout)
-{
-    _layout = layout;
-}
-
-
 void Widget::setEnabled( bool e )
 {
     _enabled = e;
@@ -612,9 +596,6 @@ void Widget::setGeometry(const Gfx::PointF& pos, const Gfx::SizeF& size)
 {
   setPosition(pos);
   setSize(size);
-
-  update();
-  //_isValid = false;
 }
 
 

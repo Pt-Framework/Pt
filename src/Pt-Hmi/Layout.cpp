@@ -33,111 +33,6 @@ namespace Pt {
 
 namespace Hmi {
 
-void DockingLayouter::onUpdate(LayoutItem::Iterator begin, LayoutItem::Iterator end)
-{
-    LayoutItem::Iterator it = begin;
-
-    double posLeft   = padding().left();
-    double posTop    = padding().top();
-    double posRight  = size().width() - padding().right();
-    double posBottom = size().height() - padding().bottom();
-    bool hasFilled   = false;
-
-    for( ; it != end; ++it)
-    {
-        switch( it->docking().type() )
-        {
-            default:
-            case Docking::Fill:
-                hasFilled = true;
-                break;
-
-            case Docking::Left:
-            {
-              double x = posLeft + it->margin().left();
-              double y = posTop  + it->margin().top();            
-
-              const Gfx::SizeF childSize( it->size().width(), 
-                                          (posBottom - posTop) - 
-                                          it->margin().topBottom() );
-
-              posLeft += it->size().width() + it->margin().leftRight(); 
-                            
-              Gfx::PointF pos(x, y);                   
-              it->setGeometry(pos, childSize);
-              break;  
-            }
-
-            case Docking::Top:
-            {
-              double x = posLeft + it->margin().left();
-              double y = posTop  + it->margin().top();         
-                     
-              const Gfx::SizeF childSize( (posRight - posLeft) - it->margin().leftRight(), 
-                                          it->size().height() );
-
-              posTop += it->size().height() + it->margin().topBottom();      
-        
-              Gfx::PointF pos(x, y);                   
-              it->setGeometry(pos, childSize);
-              break;
-            }
-          
-            case Docking::Right:
-            {
-              posRight -= it->size().width()  + it->margin().right();  
-                     
-              double x = posRight;
-              double y = posTop + it->margin().top();                             
-                    
-              posRight -=  it->margin().left();
-
-              const Gfx::SizeF childSize( it->size().width(), 
-                                          (posBottom - posTop) - 
-                                          it->margin().topBottom() );
-
-              Gfx::PointF pos(x, y);                   
-              it->setGeometry(pos, childSize);
-              break;
-            }
-
-            case Docking::Bottom:
-            {
-              posBottom -= it->size().height() + it->margin().bottom();   
-                   
-              double x = posLeft + it->margin().left();
-              double y = posBottom;       
-                  
-              posBottom -= it->margin().top();                      
-
-              const Gfx::SizeF childSize( (posRight - posLeft) - it->margin().leftRight(), 
-                                          it->size().height() );
-
-              Gfx::PointF pos(x, y);                   
-              it->setGeometry(pos, childSize);
-              break;
-            }
-        }
-    }
-
-    if( ! hasFilled)
-        return;
-    
-    const Gfx::PointF fillPos(posLeft, posTop);
-    const Gfx::SizeF  fillSize(posRight - posLeft, posBottom - posTop);
-
-    for(it = begin; it != end; ++it)
-    {
-        if( it->docking().type() == Docking::Fill)
-            it->setGeometry(fillPos, fillSize);
-    }
-}
-
-
-/////////////////////////////////////////////////////////////////////////////
-// DockingLayout
-/////////////////////////////////////////////////////////////////////////////
-
 DockingLayout::DockingLayout()
 {
 }
@@ -148,150 +43,20 @@ DockingLayout::~DockingLayout()
 }
 
 
-void DockingLayout::onLayout(LayoutItem::Iterator begin, LayoutItem::Iterator end)
+void DockingLayout::onLayout()
 {
-    _layouter.setSize( size() );
-    _layouter.setPadding( padding() );
-    _layouter.update(begin, end);
-}
+    std::vector<Widget*>::iterator it = this->widgets().begin();
+    std::vector<Widget*>::iterator end = this->widgets().end();
 
-
-/////////////////////////////////////////////////////////////////////////////
-// StackLeft
-/////////////////////////////////////////////////////////////////////////////
-
-inline void StackLeft(LayoutItem& parent)
-{
-    LayoutItem::Iterator it = parent.begin();
-    LayoutItem::Iterator end = parent.end();
-
-    double posLeft = parent.padding().left();
-    
-    for( ; it != end; ++it)
-    {
-        LayoutItem& item = *it;   
-
-        double x = posLeft + it->margin().left();
-        double y = parent.padding().top() + it->margin().top(); 
-                
-        posLeft += it->size().width() + it->margin().left() + it->margin().right();
-
-        const Gfx::SizeF childSize( it->size().width(), 
-                                    parent.size().height() - 
-                                    parent.padding().top() - 
-                                    parent.padding().bottom() -
-                                    it->margin().top() - 
-                                    it->margin().bottom() );
-                 
-        Gfx::PointF pos(x, y);
-        it->setGeometry(pos, childSize);
-    }
-}
-
-
-inline void StackRight(LayoutItem& parent)
-{
-    LayoutItem::Iterator it = parent.begin();
-    LayoutItem::Iterator end = parent.end();
-
-    double posRight  = parent.size().width() - parent.padding().right();
-
-    for( ; it != end; ++it)
-    {
-        posRight -= it->size().width();
-        posRight -= it->margin().right();
-                
-        double x = posRight;              
-        double y = parent.padding().top() + it->margin().top(); 
-                
-        posRight -= it->margin().left();
-
-        const Gfx::SizeF childSize( it->size().width(), 
-                                    parent.size().height() - 
-                                    parent.padding().top() - 
-                                    parent.padding().bottom() - 
-                                    it->margin().top() - 
-                                    it->margin().bottom());
-                   
-        Gfx::PointF pos(x, y);                   
-        it->setGeometry(pos, childSize);
-    }
-}
-
-
-inline void StackTop(LayoutItem& parent)
-{
-    LayoutItem::Iterator it = parent.begin();
-    LayoutItem::Iterator end = parent.end();
-
-    double posTop = parent.padding().top();
-
-    for( ; it != end; ++it)
-    {
-        double x = parent.padding().left() + it->margin().left();
-        double y = posTop + it->margin().top();
-                
-        posTop += it->size().height() + it->margin().top() + it->margin().bottom();
-                
-        const Gfx::SizeF childSize( parent.size().width() - 
-                                    parent.padding().left() -
-                                    parent.padding().right() -
-                                    it->margin().left() - 
-                                    it->margin().right(), 
-                                    it->size().height());
-                                         
-
-                   
-        Gfx::PointF pos(x, y);                   
-        it->setGeometry(pos, childSize);
-    }
-}
-
-
-inline void StackBottom(LayoutItem& parent)
-{
-    LayoutItem::Iterator it = parent.begin();
-    LayoutItem::Iterator end = parent.end();
-
-    double posBottom = parent.size().height() - parent.padding().bottom();
-
-    for( ; it != end; ++it)
-    {
-        posBottom -= it->size().height();
-        posBottom -= it->margin().bottom();
-                
-        double x = parent.padding().left() + it->margin().left();
-        double y = posBottom;
-                
-        posBottom -= it->margin().top();    
-
-        const Gfx::SizeF childSize( parent.size().width() - 
-                                    parent.padding().left() - 
-                                    parent.padding().right() -
-                                    it->margin().left() - 
-                                    it->margin().right(), 
-                                    it->size().height() );
-                                         
-        Gfx::PointF pos(x, y);                   
-        it->setGeometry(pos, childSize);
-    }
-}
-
-
-inline void Docked(LayoutItem& parent)
-{
-    LayoutItem::Iterator it = parent.begin();
-    LayoutItem::Iterator end = parent.end();
-
-    double posLeft   = parent.padding().left();
-    double posTop    = parent.padding().top();
-    double posRight  = parent.size().width() - parent.padding().right();
-    double posBottom = parent.size().height() - parent.padding().bottom();
+    double posLeft   = padding().left();
+    double posTop    = padding().top();
+    double posRight  = size().width() - padding().right();
+    double posBottom = size().height() - padding().bottom();
     bool hasFilled   = false;
 
     for( ; it != end; ++it)
     {
-        switch( it->docking().type() )
+        switch( (*it)->docking().type() )
         {
             default:
             case Docking::Fill:
@@ -300,67 +65,71 @@ inline void Docked(LayoutItem& parent)
 
             case Docking::Left:
             {
-              double x = posLeft + it->margin().left();
-              double y = posTop  + it->margin().top();            
+              double x = posLeft + (*it)->margin().left();
+              double y = posTop  + (*it)->margin().top();            
 
-              const Gfx::SizeF childSize( it->size().width(), 
+              const Gfx::SizeF childSize( (*it)->size().width(), 
                                           (posBottom - posTop) - 
-                                          it->margin().topBottom() );
+                                          (*it)->margin().topBottom() );
 
-              posLeft += it->size().width() + it->margin().leftRight(); 
+              posLeft += (*it)->size().width() + (*it)->margin().leftRight(); 
                             
               Gfx::PointF pos(x, y);                   
-              it->setGeometry(pos, childSize);
+              (*it)->setGeometry(pos, childSize);
+              (*it)->update();
               break;  
             }
 
             case Docking::Top:
             {
-              double x = posLeft + it->margin().left();
-              double y = posTop  + it->margin().top();         
+              double x = posLeft + (*it)->margin().left();
+              double y = posTop  + (*it)->margin().top();         
                      
-              const Gfx::SizeF childSize( (posRight - posLeft) - it->margin().leftRight(), 
-                                          it->size().height() );
+              const Gfx::SizeF childSize( (posRight - posLeft) - (*it)->margin().leftRight(), 
+                                          (*it)->size().height() );
 
-              posTop += it->size().height() + it->margin().topBottom();      
+              posTop += (*it)->size().height() + (*it)->margin().topBottom();      
         
               Gfx::PointF pos(x, y);                   
-              it->setGeometry(pos, childSize);
+              (*it)->setGeometry(pos, childSize);
+              (*it)->update();
               break;
             }
           
             case Docking::Right:
             {
-              posRight -= it->size().width()  + it->margin().right();  
+              posRight -= (*it)->size().width()  + (*it)->margin().right();  
                      
               double x = posRight;
-              double y = posTop + it->margin().top();                             
+              double y = posTop + (*it)->margin().top();                             
                     
-              posRight -=  it->margin().left();
+              posRight -=  (*it)->margin().left();
 
-              const Gfx::SizeF childSize( it->size().width(), 
+              const Gfx::SizeF childSize( (*it)->size().width(), 
                                           (posBottom - posTop) - 
-                                          it->margin().topBottom() );
+                                          (*it)->margin().topBottom() );
 
               Gfx::PointF pos(x, y);                   
-              it->setGeometry(pos, childSize);
+              (*it)->setGeometry(pos, childSize);
+              (*it)->update();
               break;
             }
 
             case Docking::Bottom:
             {
-              posBottom -= it->size().height() + it->margin().bottom();   
+              posBottom -= (*it)->size().height() + (*it)->margin().bottom();   
                    
-              double x = posLeft + it->margin().left();
+              double x = posLeft + (*it)->margin().left();
               double y = posBottom;       
                   
-              posBottom -= it->margin().top();                      
+              posBottom -= (*it)->margin().top();                      
 
-              const Gfx::SizeF childSize( (posRight - posLeft) - it->margin().leftRight(), 
-                                          it->size().height() );
+              const Gfx::SizeF childSize( (posRight - posLeft) - (*it)->margin().leftRight(), 
+                                          (*it)->size().height() );
 
               Gfx::PointF pos(x, y);                   
-              it->setGeometry(pos, childSize);
+              (*it)->setGeometry(pos, childSize);
+              (*it)->update();
               break;
             }
         }
@@ -372,12 +141,175 @@ inline void Docked(LayoutItem& parent)
     const Gfx::PointF fillPos(posLeft, posTop);
     const Gfx::SizeF  fillSize(posRight - posLeft, posBottom - posTop);
 
-    for(LayoutItem::Iterator it = parent.begin(); it != end; ++it)
+    for(it = widgets().begin(); it != end; ++it)
     {
-        if( it->docking().type() == Docking::Fill)
-            it->setGeometry(fillPos, fillSize);
+        if( (*it)->docking().type() == Docking::Fill)
+        {
+            (*it)->setGeometry(fillPos, fillSize);
+            (*it)->update();
+        }
     }
 }
+
+
+void FlowLayout::onLayout()
+{
+    std::vector<Widget*>::iterator it = this->widgets().begin();
+    std::vector<Widget*>::iterator end = this->widgets().end();
+
+    switch(_direction)
+    {
+        default:
+        case LeftToRight:
+            StackLeft(*this);
+            break;
+
+        case RightToLeft:
+            StackRight(*this);
+            break;
+
+        case TopDown:
+            StackTop(*this);
+            break;
+
+        case BottomUp:
+            StackBottom(*this);
+            break;
+    }
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+// StackLeft
+/////////////////////////////////////////////////////////////////////////////
+
+inline void StackLeft(Widget& parent)
+{
+    std::vector<Widget*>::iterator it = parent.widgets().begin();
+    std::vector<Widget*>::iterator end = parent.widgets().end();
+
+    double posLeft = parent.padding().left();
+    
+    for( ; it != end; ++it)
+    {
+        Widget* item = *it;   
+
+        double x = posLeft + item->margin().left();
+        double y = parent.padding().top() + item->margin().top(); 
+                
+        posLeft += item->size().width() + item->margin().left() + item->margin().right();
+
+        const Gfx::SizeF childSize( item->size().width(), 
+                                    parent.size().height() - 
+                                    parent.padding().top() - 
+                                    parent.padding().bottom() -
+                                    item->margin().top() - 
+                                    item->margin().bottom() );
+                 
+        Gfx::PointF pos(x, y);
+        item->setGeometry(pos, childSize);
+        item->update();
+    }
+}
+
+
+inline void StackRight(Widget& parent)
+{
+    std::vector<Widget*>::iterator it = parent.widgets().begin();
+    std::vector<Widget*>::iterator end = parent.widgets().end();
+
+    double posRight  = parent.size().width() - parent.padding().right();
+
+    for( ; it != end; ++it)
+    {
+        Widget* item = *it; 
+
+        posRight -= item->size().width();
+        posRight -= item->margin().right();
+                
+        double x = posRight;              
+        double y = parent.padding().top() + item->margin().top(); 
+                
+        posRight -= item->margin().left();
+
+        const Gfx::SizeF childSize( item->size().width(), 
+                                    parent.size().height() - 
+                                    parent.padding().top() - 
+                                    parent.padding().bottom() - 
+                                    item->margin().top() - 
+                                    item->margin().bottom());
+                   
+        Gfx::PointF pos(x, y);                   
+        item->setGeometry(pos, childSize);
+        item->update();
+    }
+}
+
+
+inline void StackTop(Widget& parent)
+{
+    std::vector<Widget*>::iterator it = parent.widgets().begin();
+    std::vector<Widget*>::iterator end = parent.widgets().end();
+
+    double posTop = parent.padding().top();
+
+    for( ; it != end; ++it)
+    {
+        Widget* item = *it; 
+
+        double x = parent.padding().left() + item->margin().left();
+        double y = posTop + item->margin().top();
+                
+        posTop += item->size().height() + item->margin().top() + item->margin().bottom();
+                
+        const Gfx::SizeF childSize( parent.size().width() - 
+                                    parent.padding().left() -
+                                    parent.padding().right() -
+                                    item->margin().left() - 
+                                    item->margin().right(), 
+                                    item->size().height());
+                                         
+
+                   
+        Gfx::PointF pos(x, y);                   
+        item->setGeometry(pos, childSize);
+        item->update();
+    }
+}
+
+
+inline void StackBottom(Widget& parent)
+{
+    std::vector<Widget*>::iterator it = parent.widgets().begin();
+    std::vector<Widget*>::iterator end = parent.widgets().end();
+
+    double posBottom = parent.size().height() - parent.padding().bottom();
+
+    for( ; it != end; ++it)
+    {
+        Widget* item = *it; 
+        
+        posBottom -= item->size().height();
+        posBottom -= item->margin().bottom();
+                
+        double x = parent.padding().left() + item->margin().left();
+        double y = posBottom;
+                
+        posBottom -= item->margin().top();    
+
+        const Gfx::SizeF childSize( parent.size().width() - 
+                                    parent.padding().left() - 
+                                    parent.padding().right() -
+                                    item->margin().left() - 
+                                    item->margin().right(), 
+                                    item->size().height() );
+                                         
+        Gfx::PointF pos(x, y);                   
+        item->setGeometry(pos, childSize);
+        item->update();
+    }
+}
+
 
 } // namespace
 

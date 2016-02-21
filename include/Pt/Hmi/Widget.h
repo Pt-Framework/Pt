@@ -52,95 +52,10 @@ namespace Hmi {
 
 class Window;
 class PaintSurface;
-class Layouter; // TODO
-
-class LayoutItem
-{
-    public:
-        class Iterator
-        {
-            public:
-                Iterator()
-                : _parent(0)
-                , _current(0)
-                , _n(0)
-                {}
-
-                explicit Iterator(LayoutItem& item)
-                : _parent(&item)
-                , _current(0)
-                , _n(0)
-                {
-                  _current = item.onGet(_n);
-                }
-
-                Iterator& operator++()
-                {
-                    if( ! _parent)
-                      return *this;
-
-                    _current = _parent->onGet( ++_n );
-            
-                    if( ! _current)
-                    {
-                      _parent = 0;
-                      _n = 0;
-                    }
-
-                    return *this;
-                }
-        
-                LayoutItem& operator*()
-                { return *_current; }
-
-                LayoutItem* operator->()
-                { return _current; }
-
-                bool operator!=(const Iterator& other) const
-                { return _current != other._current; }
-
-                bool operator==(const Iterator& other) const
-                { return _current == other._current; }
-
-            private:
-                LayoutItem* _parent;
-                LayoutItem* _current;
-                std::size_t _n;
-        };
-
-    public:
-        virtual ~LayoutItem()
-        {}
-
-        Iterator begin()
-        { return Iterator(*this); }
-
-        Iterator end()
-        { return Iterator(); }
-
-        virtual const Gfx::PointF& position() const = 0;
-
-        virtual const Gfx::SizeF& size() const = 0;
-
-        virtual const Spacing& padding() const = 0;
-
-        virtual const Spacing& margin() const = 0;
-
-        virtual const Docking& docking() const = 0;
-
-        virtual void setGeometry(const Gfx::PointF& p, const Gfx::SizeF& s) = 0;
-
-    protected:
-        virtual LayoutItem* onGet(std::size_t n) = 0;
-};
-
 
 class PT_HMI_API Widget : public Pt::Connectable
-                        , private LayoutItem
 {
     friend class Window;
-    friend class WidgetLayoutItem;
-    friend class WidgetLayouter;
 
     public: 
         enum ImageLayout
@@ -230,7 +145,7 @@ class PT_HMI_API Widget : public Pt::Connectable
         void render(const Gfx::PointF& pos, PaintSurface& parentSurface);
 
     protected:    
-        virtual void onLayout(LayoutItem::Iterator begin, LayoutItem::Iterator end);
+        virtual void onLayout();
 
         virtual void onRender(const Gfx::PointF& pos, PaintSurface& surface); 
 
@@ -280,10 +195,6 @@ class PT_HMI_API Widget : public Pt::Connectable
         bool isAutoSize() const;
 
         Gfx::SizeF preferredSize() const;
-
-        typedef void (*Layout)(LayoutItem&);
-        
-        void setLayout(Layout layout);
 
         bool isEnabled() const
         {
@@ -383,10 +294,6 @@ class PT_HMI_API Widget : public Pt::Connectable
             _cursor = c;
         }
 
-    protected:
-        LayoutItem* onGet(std::size_t n)
-        { return n < _children.size() ? _children[n] : 0; }
-
     private:
         void setWindow(Window* window);
         void propagateUpdate();
@@ -401,7 +308,6 @@ class PT_HMI_API Widget : public Pt::Connectable
         bool                         _enabled;        
         bool                         _visible;
         Hmi::Cursor                  _cursor;
-        Layout                       _layout;
         Key                          _shortcutKey;        
         Gfx::SizeF                   _size;
         Gfx::PointF                  _position;            
