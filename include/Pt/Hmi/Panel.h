@@ -37,7 +37,7 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Panel  : public Widget
+class PT_HMI_API Panel : public Widget
 {
 	public:
 		enum BorderStyle

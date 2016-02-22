@@ -375,9 +375,9 @@ void Widget::processEvent(const Pt::Event& ev)
 
 void Widget::onUpdate()
 {
-    // the widget is already invalid in case of a nested update()
+    // The widget is already invalid in case of a nested update()
     // this means the parent must already be invalid or has just
-    // been rendered. therefore we stop the chain of update calls
+    // been rendered. Therefore we stop the chain of update calls
     // towards the root of the widget/window tree.
     if( ! _isValid )
         return;
@@ -396,9 +396,9 @@ void Widget::onUpdate()
 
 void Widget::update()
 {
-    // the widget is already invalid in case of a nested update()
+    // The widget is already invalid in case of a nested update()
     // this means the parent must already be invalid or has just
-    // been rendered. therefore we stop the chain of update calls
+    // been rendered. Therefore we stop the chain of update calls
     // towards the root of the widget/window tree.
     if( ! _isValid )
         return;

@@ -27,21 +27,26 @@
 	02110-1301  USA
 */
 
-#ifndef Pt_Hmi_Layout_H
-#define Pt_Hmi_Layout_H
+#ifndef Pt_Hmi_DockingLayout_H
+#define Pt_Hmi_DockingLayout_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Spacing.h>
-#include <Pt/Hmi/Docking.h>
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
 
 namespace Pt {
 
 namespace Hmi {
 
+class PT_HMI_API DockingLayout : public Widget
+{
+    public:
+        DockingLayout();
 
+        virtual ~DockingLayout();
+
+    protected:
+        virtual void onLayout();
+};
 
 } // namespace
 

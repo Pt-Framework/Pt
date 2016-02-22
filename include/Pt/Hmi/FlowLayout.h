@@ -27,21 +27,45 @@
 	02110-1301  USA
 */
 
-#ifndef Pt_Hmi_Layout_H
-#define Pt_Hmi_Layout_H
+#ifndef Pt_Hmi_FlowLayout_H
+#define Pt_Hmi_FlowLayout_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Spacing.h>
-#include <Pt/Hmi/Docking.h>
 #include <Pt/Hmi/Widget.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
 
 namespace Pt {
 
 namespace Hmi {
 
+class PT_HMI_API FlowLayout : public Widget
+{
+    public:
+        // Horizontal          use all space in row, same size for elements
+        // HorizontalCenter    place elements accoring to size
+        // Vertical            use all space in row, same size for elements
+        // VerticalCenter      place elements accoring to size
+        enum Alignment
+        {
+            Left,
+            Right,
+            Top,
+            Bottom
+        };
 
+    public:
+        FlowLayout();
+
+        virtual ~FlowLayout();
+
+        void setAlignment(Alignment a)
+        { _alignment = a; }
+
+    protected:
+        virtual void onLayout();
+
+    private:
+        Alignment _alignment;
+};
 
 } // namespace
 

@@ -24,11 +24,12 @@ PT_HMI_IMPL += [ GLOB $(PT_HMI_SUBDIR) : *.mm  ] ;
 SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)					   
 					   Application.cpp
 					   Cursor.cpp
+                       DockingLayout.cpp
+                       FlowLayout.cpp
 					   PaintSurface.cpp
 					   Painter.cpp                        
 					   Button.cpp					   			   					   
-					   Label.cpp
-                       Layout.cpp				   
+					   Label.cpp	   
 					   Panel.cpp					   
 					   Widget.cpp					   					   
 					   Window.cpp	

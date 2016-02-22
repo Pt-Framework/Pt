@@ -63,7 +63,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\DeviceButton.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Dial.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Docking.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\DockingLayout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\EnterEvent.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\FlowLayout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Key.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Label.h" />
@@ -487,6 +489,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\demo\Dialog2.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\Main.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\MainWindow.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\DockingLayout.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\Display.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\InputDevice.cpp" />
@@ -495,6 +498,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\PaintSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\ShaderProgram.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\FlowLayout.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PainterImpl.cpp" />

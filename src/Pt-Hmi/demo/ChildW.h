@@ -5,7 +5,8 @@
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Label.h>
-#include <Pt/Hmi/Layout.h>
+#include <Pt/Hmi/DockingLayout.h>
+#include <Pt/Hmi/FlowLayout.h>
 #include "Dialog1.h"
 
 namespace Pt {
