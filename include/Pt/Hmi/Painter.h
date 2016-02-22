@@ -42,11 +42,11 @@ class PaintSurface;
 class PT_HMI_API Painter : public Pt::Gfx::Painter
 {
 public:
-	Painter(PaintSurface& surface);
+    Painter(PaintSurface& surface);
 
     virtual ~Painter();
 
-		virtual void setRenderMode(Gfx::RenderMode::Type mode);
+        virtual void setRenderMode(Gfx::RenderMode::Type mode);
 
     virtual void setPen(const Gfx::Pen& pen);
 
@@ -79,7 +79,7 @@ public:
     virtual void fillPolygon(const Gfx::PointF* points, const size_t pointCount);
 
     virtual void drawSurface(const Gfx::PointF& to, const PaintSurface& pm);
-		
+        
     virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 
     virtual void addFontName(const std::string& fontName);
@@ -101,7 +101,7 @@ public:
         return _impl;
     }
 private:
-	PainterImpl* _impl;
+    PainterImpl* _impl;
 };
 
 }}

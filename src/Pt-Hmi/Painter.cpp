@@ -35,111 +35,111 @@ namespace Hmi {
 
 Painter::Painter(PaintSurface& surface)
 : _impl(new PainterImpl(surface.impl()))
-{	
+{    
 }
 
 
 Painter::~Painter()
 {
-	delete _impl;
+    delete _impl;
 }
 
 void Painter::setRenderMode(Gfx::RenderMode::Type mode)
 {
-	_impl->setRenderMode( mode );
+    _impl->setRenderMode( mode );
 }
 
 void Painter::setPen(const Gfx::Pen& pen)
 {
-	_impl->setPen(pen);
+    _impl->setPen(pen);
 }
 
 const Gfx::Pen& Painter::pen() const
 {
-	return _impl->pen();
+    return _impl->pen();
 }
 
 void Painter::setBrush(const Gfx::Brush& brush)
 {
-	_impl->setBrush(brush);
+    _impl->setBrush(brush);
 }
 
 const Gfx::Brush& Painter::brush() const
 {
-	return _impl->brush();
+    return _impl->brush();
 }
 
 void Painter::setFont(const Gfx::Font& font)
 {
-	_impl->setFont(font);
+    _impl->setFont(font);
 }
 
 const Gfx::Font& Painter::font() const
 {
-	return _impl->font();
+    return _impl->font();
 }
 
 
 Gfx::FontMetrics Painter::fontMetrics(Pt::String Text) const
 {
-	return _impl->fontMetrics(Text);
+    return _impl->fontMetrics(Text);
 }
 
 
 void Painter::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
-	_impl->drawLine(from,to);
+    _impl->drawLine(from,to);
 }
 
 void Painter::drawText(const Gfx::PointF& to, const Pt::String& Text)
 {
-	_impl->drawText(to, Text);
+    _impl->drawText(to, Text);
 }
 
 void Painter::drawRect(const Gfx::RectF& rectangle)
 {
-	_impl->drawRect(rectangle);
+    _impl->drawRect(rectangle);
 }
 
 void Painter::fillRect(const Gfx::RectF& rectangle)
 {
-	_impl->fillRect(rectangle);
+    _impl->fillRect(rectangle);
 }
 
 void Painter::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-	_impl->drawEllipse(topLeft, size);
+    _impl->drawEllipse(topLeft, size);
 }
 
 void Painter::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-	_impl->fillEllipse(topLeft, size);
+    _impl->fillEllipse(topLeft, size);
 }
 
 void Painter::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
 {
-	_impl->drawPolyline(points, pointCount);
+    _impl->drawPolyline(points, pointCount);
 }
 
 void Painter::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
 {
-	_impl->fillPolygon(points, pointCount);
+    _impl->fillPolygon(points, pointCount);
 }
 
 
 void Painter::drawSurface(const Gfx::PointF& to, const PaintSurface& pm)
 {  
-	_impl->drawSurface(to, pm);
-}	
-	
+    _impl->drawSurface(to, pm);
+}    
+    
 void Painter::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
 {
-	_impl->drawImage(to, image);
+    _impl->drawImage(to, image);
 }
 
 void Painter::addFontName(const std::string& fontName)
 {
-	_impl->addFontName(fontName);
+    _impl->addFontName(fontName);
 }
 
 void Painter::setSurface(PaintSurface& surface)

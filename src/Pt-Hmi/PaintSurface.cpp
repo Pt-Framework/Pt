@@ -38,12 +38,12 @@ PaintSurface::PaintSurface()
 
 PaintSurface::~PaintSurface()
 {
-	delete _impl;
+    delete _impl;
 }
 
 void PaintSurface::resize(const Gfx::SizeF& size)
 {
-	_impl->resize(size);
+    _impl->resize(size);
   _painter.setSurface(*this);
 
   _painter.setBrush(Gfx::Brush(Gfx::Color(0,0,1)));
@@ -52,12 +52,12 @@ void PaintSurface::resize(const Gfx::SizeF& size)
 
 Gfx::SizeF PaintSurface::size() const
 {
-	return _impl->size();
+    return _impl->size();
 }
 
 void PaintSurface::clear()
 {
-	_impl->clear();
+    _impl->clear();
 }
 
 }}

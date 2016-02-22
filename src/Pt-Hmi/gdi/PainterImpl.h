@@ -42,7 +42,7 @@ class PainterImpl : public Gfx::Painter
 
         virtual ~PainterImpl();
 
-				void setRenderMode(Gfx::RenderMode::Type mode);
+                void setRenderMode(Gfx::RenderMode::Type mode);
 
         void setPen(const Gfx::Pen& pen);
 
@@ -60,7 +60,7 @@ class PainterImpl : public Gfx::Painter
 
         const std::list<std::string>& fontFamilyNames();        
 
-        void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);				
+        void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);                
 
         void drawText(const Gfx::PointF& to, const Pt::String& Text);
 
@@ -77,12 +77,12 @@ class PainterImpl : public Gfx::Painter
         void fillPolygon(const Gfx::PointF* points, const size_t pointCount);
 
         void drawSurface(const Gfx::PointF& to, const PaintSurface& pm);
-		
+        
         void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 
         void addFontName(const std::string& fontName);
 
-				void setSurface(PaintSurface& surface);
+                void setSurface(PaintSurface& surface);
 
         static Gfx::FontMetrics fontMetrics( const Gfx::Font& font, const Pt::String& text );
 
@@ -119,7 +119,7 @@ class PainterImpl : public Gfx::Painter
        Gfx::Font  _font;
         mutable std::wstring _text;
         std::list<std::string> _fontNamesList;
-				Gfx::RenderMode::Type _renderMode;
+                Gfx::RenderMode::Type _renderMode;
        Gfx::RectF _clip;
        Gfx::PointF _origin;
         Screen& _screen;

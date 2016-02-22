@@ -37,22 +37,22 @@ namespace Hmi{
 PaintSurfaceImpl::PaintSurfaceImpl()
 : _deviceContext(0)
 {
-	_size =Gfx::SizeF(10,10);
+    _size =Gfx::SizeF(10,10);
 
-	Gfx::Size nsize = Application::instance().mainScreen().fromUnit(_size);
+    Gfx::Size nsize = Application::instance().mainScreen().fromUnit(_size);
 
-	HDC screenDC = CreateDC(_T("DISPLAY"), NULL, NULL, NULL);
-	_deviceContext = CreateCompatibleDC(screenDC);
-	_bitmapHandle = CreateCompatibleBitmap(screenDC, nsize.width(), nsize.height());
+    HDC screenDC = CreateDC(_T("DISPLAY"), NULL, NULL, NULL);
+    _deviceContext = CreateCompatibleDC(screenDC);
+    _bitmapHandle = CreateCompatibleBitmap(screenDC, nsize.width(), nsize.height());
     
-	DeleteDC(screenDC);
+    DeleteDC(screenDC);
 
   _oldPen   = (HPEN)  GetCurrentObject(_deviceContext, OBJ_PEN);
   _oldBrush = (HBRUSH) GetCurrentObject(_deviceContext, OBJ_BRUSH);
   _oldFont  = (HFONT) GetCurrentObject(_deviceContext, OBJ_FONT);
 
    SelectObject(_deviceContext, _bitmapHandle);
-	SetBkMode(_deviceContext, TRANSPARENT);
+    SetBkMode(_deviceContext, TRANSPARENT);
 }
 
 
@@ -77,18 +77,18 @@ void PaintSurfaceImpl::resize(const Gfx::SizeF& size)
   if( _size == size )
     return;
 
-	_size = size;
-	Gfx::Size nsize = Application::instance().mainScreen().fromUnit( _size );
+    _size = size;
+    Gfx::Size nsize = Application::instance().mainScreen().fromUnit( _size );
 
-	//Save the old settings
-	COLORREF textColor = GetTextColor(_deviceContext);
+    //Save the old settings
+    COLORREF textColor = GetTextColor(_deviceContext);
   _oldPen   = (HPEN)  GetCurrentObject(_deviceContext, OBJ_PEN);
   _oldBrush = (HBRUSH) GetCurrentObject(_deviceContext, OBJ_BRUSH);
   _oldFont  = (HFONT) GetCurrentObject(_deviceContext, OBJ_FONT);
 
   //Delete the context and bitmap
   DeleteDC(_deviceContext);
-	DeleteObject(_bitmapHandle);
+    DeleteObject(_bitmapHandle);
 
   //Create a new context and bitmap
   HDC screenDC = CreateDC(_T("DISPLAY"), NULL, NULL, NULL);
@@ -96,13 +96,13 @@ void PaintSurfaceImpl::resize(const Gfx::SizeF& size)
   _bitmapHandle = CreateCompatibleBitmap(screenDC, nsize.width(), nsize.height());
   DeleteDC(screenDC);
 
-	//Restore the old settings
-	SelectObject(_deviceContext, _bitmapHandle);
-	SelectObject(_deviceContext, _oldFont);
-	SelectObject(_deviceContext, _oldBrush);
-	SelectObject(_deviceContext, _oldPen);
-	SetTextColor(_deviceContext, textColor);
-	SetBkMode(_deviceContext, TRANSPARENT);
+    //Restore the old settings
+    SelectObject(_deviceContext, _bitmapHandle);
+    SelectObject(_deviceContext, _oldFont);
+    SelectObject(_deviceContext, _oldBrush);
+    SelectObject(_deviceContext, _oldPen);
+    SetTextColor(_deviceContext, textColor);
+    SetBkMode(_deviceContext, TRANSPARENT);
 }
 
 

@@ -61,7 +61,7 @@ PainterImpl::~PainterImpl()
 
 void PainterImpl::setRenderMode(Gfx::RenderMode::Type mode )
 {
-	_renderMode = mode;
+    _renderMode = mode;
 }
 
 
@@ -160,13 +160,13 @@ void PainterImpl::updateBrush()
     {
 
       case Gfx::Brush::SolidFill: 
-	    {
+        {
           newBrushHandle = CreateSolidBrush(RGB(_brush.color().red()*255, _brush.color().green()*255, _brush.color().blue()*255));
           break;
       }
 
       case Gfx::Brush::TextureFill: 
-	    {
+        {
         const Gfx::Image& texture = _brush.texture();
 
         if (texture.width() != 0)
@@ -240,8 +240,8 @@ void PainterImpl::updateFont()
 
     int fontWeight;
     
-	switch (_font.fontStyle()) 
-	{
+    switch (_font.fontStyle()) 
+    {
         case Gfx::Font::NormalStyle:
         case Gfx::Font::ItalicStyle:
             fontWeight = FW_NORMAL;
@@ -280,7 +280,7 @@ void PainterImpl::updateFont()
     HFONT oldFont = (HFONT)SelectObject(_surface->deviceContext(), newFont);
 
     DeleteObject(oldFont);
-    	
+        
     SetTextColor(_surface->deviceContext(), RGB(_pen.color().red()*255, _pen.color().green()*255, _pen.color() .blue()*255));
 }
 
@@ -308,10 +308,10 @@ Gfx::FontMetrics PainterImpl::fontMetrics(Pt::String text) const
     GetTextMetrics(_surface->deviceContext(), &basicMetrics);
 
     _text.clear();
-	text.toUtf16( std::back_inserter(_text) );
+    text.toUtf16( std::back_inserter(_text) );
     GetTextExtentPoint32W(_surface->deviceContext(), _text.c_str(), _text.length(), &textSize);
-	Gfx::Size size(textSize.cx, textSize.cy);
-	Gfx::SizeF sizeF = _screen.toUnit(size);
+    Gfx::Size size(textSize.cx, textSize.cy);
+    Gfx::SizeF sizeF = _screen.toUnit(size);
 
     return Gfx::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, (int)sizeF.width(), (int)sizeF.height());
 }
@@ -376,11 +376,11 @@ const std::list<std::string>& PainterImpl::fontFamilyNames()
 
 void PainterImpl::drawLine(const Gfx::PointF& fromF, const Gfx::PointF& toF)
 {
-	if (_pen.size() == 0) 
-		return; 
+    if (_pen.size() == 0) 
+        return; 
 
-	Gfx::Point from = _screen.fromUnit(fromF);
-	Gfx::Point to = _screen.fromUnit(toF);
+    Gfx::Point from = _screen.fromUnit(fromF);
+    Gfx::Point to = _screen.fromUnit(toF);
 
   POINT points[2];
   points[0].x = from.x();
@@ -393,29 +393,29 @@ void PainterImpl::drawLine(const Gfx::PointF& fromF, const Gfx::PointF& toF)
 
 void PainterImpl::drawText(const Gfx::PointF& toF, const Pt::String& text)
 {
-	Gfx::Point to = _screen.fromUnit(toF);
+    Gfx::Point to = _screen.fromUnit(toF);
   
   RECT rectangle;
   SetRect(&rectangle, to.x(), to.y(), to.x(), to.y());
 
   _text.clear();
-	text.toUtf16( std::back_inserter(_text) );	
-	
-  int rezt = DrawTextW(_surface->deviceContext(), _text.c_str(), -1, &rectangle, DT_NOCLIP| DT_NOPREFIX );	
+    text.toUtf16( std::back_inserter(_text) );    
+    
+  int rezt = DrawTextW(_surface->deviceContext(), _text.c_str(), -1, &rectangle, DT_NOCLIP| DT_NOPREFIX );    
 }
 
 
 void PainterImpl::fillRect(const Gfx::RectF& rectF)
 {
-	Gfx::Rect rect = _screen.fromUnit(rectF);
+    Gfx::Rect rect = _screen.fromUnit(rectF);
   
-	RECT rectangle;
+    RECT rectangle;
 
-	rectangle.left	 = rect.left();
-	rectangle.top   = rect.top();
+    rectangle.left     = rect.left();
+    rectangle.top   = rect.top();
 
-	rectangle.right  = rect.right() + 1;	
-	rectangle.bottom = rect.bottom() + 1;
+    rectangle.right  = rect.right() + 1;    
+    rectangle.bottom = rect.bottom() + 1;
 
   HBRUSH currentBrush = (HBRUSH)GetCurrentObject(_surface->deviceContext(), OBJ_BRUSH);
   FillRect(_surface->deviceContext(), &rectangle, currentBrush);
@@ -424,10 +424,10 @@ void PainterImpl::fillRect(const Gfx::RectF& rectF)
 
 void PainterImpl::drawRect(const Gfx::RectF& rectF)
 {
-	Gfx::Rect rect = _screen.fromUnit(rectF);
+    Gfx::Rect rect = _screen.fromUnit(rectF);
 
   if (rect.size().width() == 1 && rect.size().height() == 1) 
-	{
+    {
         // Windows does not paint outline rectangles with a size of 1,1. For compatibility
         // to other windowing systems we draw a pixel (1|1) instead.
         drawLine(rectF.topLeft(), rectF.topLeft());
@@ -444,8 +444,8 @@ void PainterImpl::drawRect(const Gfx::RectF& rectF)
 
 void PainterImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
 {
-	Gfx::Point topLeft = _screen.fromUnit(topLeftF);
-	Gfx::Size size = _screen.fromUnit(sizeF);
+    Gfx::Point topLeft = _screen.fromUnit(topLeftF);
+    Gfx::Size size = _screen.fromUnit(sizeF);
 
   HBRUSH originalBrush = (HBRUSH)SelectObject(_surface->deviceContext(), GetStockObject(NULL_BRUSH));
 
@@ -457,8 +457,8 @@ void PainterImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& siz
 
 void PainterImpl::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
 {
-	Gfx::Point topLeft = _screen.fromUnit(topLeftF);
-	Gfx::Size size =_screen.fromUnit(sizeF);
+    Gfx::Point topLeft = _screen.fromUnit(topLeftF);
+    Gfx::Size size =_screen.fromUnit(sizeF);
 
     // Temporarily select the empty pen to only draw the filling.
     HPEN originalPen = (HPEN)SelectObject(_surface->deviceContext(), GetStockObject(NULL_PEN));
@@ -484,7 +484,7 @@ void PainterImpl::drawPolyline(const Gfx::PointF* points, const size_t pointCoun
 
     for (size_t i = 0; i < pointCount; i++)
     {
-		   Gfx::Point p = _screen.fromUnit(points[i]);
+           Gfx::Point p = _screen.fromUnit(points[i]);
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -501,7 +501,7 @@ void PainterImpl::fillPolygon(const Gfx::PointF* points, const size_t pointCount
 
     for (size_t i = 0; i < pointCount; i++)
     {
-		   Gfx::Point p = _screen.fromUnit(points[i]);
+           Gfx::Point p = _screen.fromUnit(points[i]);
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -514,19 +514,19 @@ void PainterImpl::fillPolygon(const Gfx::PointF* points, const size_t pointCount
 
 void PainterImpl::drawSurface(const Gfx::PointF& toF, const PaintSurface& surface)
 {
-	Gfx::Point to = _screen.fromUnit(toF);
-	Gfx::Size size = _screen.fromUnit(surface.size());
+    Gfx::Point to = _screen.fromUnit(toF);
+    Gfx::Size size = _screen.fromUnit(surface.size());
 
   BitBlt( _surface->deviceContext(), to.x(), to.y(), size.width(), size.height(), surface.impl()->deviceContext(),  0, 0, SRCCOPY);
 }
 
 void PainterImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 {
-	Gfx::Point to = _screen.fromUnit(toF);
+    Gfx::Point to = _screen.fromUnit(toF);
 
-	const size_t depth = image.format().pixelSize() * 8; 
+    const size_t depth = image.format().pixelSize() * 8; 
 
-	drawCompatibleImage(to.x(), to.y(), depth,  (const char*) image.pixel(0,0), image.width(), image.height() );
+    drawCompatibleImage(to.x(), to.y(), depth,  (const char*) image.pixel(0,0), image.width(), image.height() );
 }
 
 
@@ -538,7 +538,7 @@ void PainterImpl::drawIndependentImage(size_t x, size_t y, const char* data, siz
     bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER); // Size of this struct.
     bitmapInfo.bmiHeader.biWidth       = width;             // Bitmap width.
     bitmapInfo.bmiHeader.biHeight      = -(ssize_t)height;  // Bitmap height. Negative value = top-down image.
-    bitmapInfo.bmiHeader.biPlanes      = 1;                 // Always 1.			
+    bitmapInfo.bmiHeader.biPlanes      = 1;                 // Always 1.            
     bitmapInfo.bmiHeader.biBitCount    = 32;                // We internally use a 32-bit bitmap.
     bitmapInfo.bmiHeader.biCompression = BI_RGB;            // Uncompressed (top-down) RGB bitmap.
     bitmapInfo.bmiHeader.biSizeImage   = 0;                 // 0 = automatic for BI_RGB-images.
@@ -582,10 +582,10 @@ void PainterImpl::drawCompatibleImage(size_t x, size_t y, size_t depth, const ch
 
 void PainterImpl::setSurface(PaintSurface& surface)
 {
-	_surface = surface.impl();
-	updateBrush();
-	updateFont();
-	updatePen();	
+    _surface = surface.impl();
+    updateBrush();
+    updateFont();
+    updatePen();    
 }
 
 

@@ -39,33 +39,33 @@ class PainterImpl;
 
 class PaintSurfaceImpl
 {
-public:		
-	PaintSurfaceImpl();
-	virtual ~PaintSurfaceImpl();	
-	
-	void resize(const Gfx::SizeF& size);	
+public:        
+    PaintSurfaceImpl();
+    virtual ~PaintSurfaceImpl();    
+    
+    void resize(const Gfx::SizeF& size);    
 
-	inline const Gfx::SizeF& size() const
-	{
-		return _size;
-	}
+    inline const Gfx::SizeF& size() const
+    {
+        return _size;
+    }
 
   inline HDC deviceContext() const
-	{
-		return _deviceContext;
-	}
-	void clear()
-	{
-		
-	}
+    {
+        return _deviceContext;
+    }
+    void clear()
+    {
+        
+    }
 
 private:
    Gfx::SizeF _size;
     HDC       _deviceContext;
     HBITMAP   _bitmapHandle;            
-    HPEN		  _oldPen;
-    HBRUSH		_oldBrush;
-	  HFONT	    _oldFont;
+    HPEN          _oldPen;
+    HBRUSH        _oldBrush;
+      HFONT        _oldFont;
 };
 
 }}

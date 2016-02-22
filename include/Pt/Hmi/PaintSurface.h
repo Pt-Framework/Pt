@@ -38,35 +38,35 @@ class PaintSurfaceImpl;
 
 class PT_HMI_API PaintSurface
 {
-	public:		
-		PaintSurface();    
+    public:        
+        PaintSurface();    
 
-		virtual ~PaintSurface();
+        virtual ~PaintSurface();
 
-		virtual void resize(const Gfx::SizeF& size);		
+        virtual void resize(const Gfx::SizeF& size);        
 
-		virtual Gfx::SizeF size() const;
+        virtual Gfx::SizeF size() const;
 
-		virtual Painter& painter()
-		{
-			return _painter;
-		}
+        virtual Painter& painter()
+        {
+            return _painter;
+        }
 
-		inline PaintSurfaceImpl* impl()
-		{
-			return _impl;
-		}
+        inline PaintSurfaceImpl* impl()
+        {
+            return _impl;
+        }
 
-		void clear();
-		
+        void clear();
+        
     inline const PaintSurfaceImpl* impl() const
-		{
-			return _impl;
-		}
+        {
+            return _impl;
+        }
 
-	private:
-		PaintSurfaceImpl*	_impl;
-		Hmi::Painter			_painter;      
+    private:
+        PaintSurfaceImpl*    _impl;
+        Hmi::Painter            _painter;      
 };
 
 }}
