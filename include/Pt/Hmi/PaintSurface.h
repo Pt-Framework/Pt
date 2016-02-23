@@ -22,7 +22,10 @@
  
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ MA  02110-1301  USA
+*/
+
 #ifndef Pt_Hmi_PaintSurface_h
 #define Pt_Hmi_PaintSurface_h
 
@@ -32,6 +35,7 @@
 #include <Pt/Gfx/Image.h>
 
 namespace Pt {
+
 namespace Hmi {
 
 class PaintSurfaceImpl;
@@ -41,34 +45,30 @@ class PT_HMI_API PaintSurface
     public:        
         PaintSurface();    
 
-        virtual ~PaintSurface();
+        ~PaintSurface();
 
-        virtual void resize(const Gfx::SizeF& size);        
+        void resize(const Gfx::SizeF& size);        
 
-        virtual Gfx::SizeF size() const;
+        Gfx::SizeF size() const;
 
-        virtual Painter& painter()
-        {
-            return _painter;
-        }
-
-        inline PaintSurfaceImpl* impl()
+        void clear();
+        
+        PaintSurfaceImpl* impl()
         {
             return _impl;
         }
 
-        void clear();
-        
-    inline const PaintSurfaceImpl* impl() const
+        const PaintSurfaceImpl* impl() const
         {
             return _impl;
         }
 
     private:
-        PaintSurfaceImpl*    _impl;
-        Hmi::Painter            _painter;      
+        PaintSurfaceImpl* _impl;   
 };
 
-}}
+}
+
+}
 
 #endif

@@ -47,7 +47,7 @@ Panel::Panel()
 , _borderRound(false)
 , _borderColor(Gfx::Color::fromRgb8(178,178,178))
 {
-  setAcceptFocus(false);  
+    setAcceptFocus(false);  
 }
 
 
@@ -56,40 +56,89 @@ Panel::~Panel()
 }
 
 
-void Panel::onRender(const Gfx::PointF& pos, PaintSurface& parentSurface)
+//void Panel::onRender(const Gfx::PointF& pos, 
+//                     PaintSurface& parentSurface, 
+//                     const Gfx::RectF& updateRect)
+//{
+//    if( ! isValid() )
+//    {
+//        if( _surface.size() != size() )
+//            _surface.resize( size() );
+//
+//        _surface.clear();
+//
+//        Painter painter(_surface);
+//        onPaint(painter, updateRect);
+//    }
+//
+//    Gfx::PointF offset(0, 0);
+//    Widget::onRender(offset, _surface, updateRect);
+//
+//    Painter painter(parentSurface);
+//    painter.drawSurface(pos, _surface);
+//}
+
+
+void Panel::onRender(const Gfx::PointF& pos, 
+                     PaintSurface& parentSurface, 
+                     const Gfx::RectF& updateRect)
 {
-    if( ! isValid() )
-    {
-        if( _surface.size() != size() )
-            _surface.resize( size() );
+    Painter painter(parentSurface);
+    painter.setOrigin(pos);
+    onPaint(painter, updateRect);
 
-        _surface.clear();
-        onPaint(_surface);
-    }
-
-    Gfx::PointF offset(0, 0);
-    Widget::onRender(offset, _surface);
-
-    parentSurface.painter().drawSurface(pos, _surface);
+    Widget::onRender(pos, parentSurface, updateRect);
 }
 
 
-void Panel::onPaint(PaintSurface& surface)
+void Panel::onPaint(Painter& painter, const Gfx::RectF& updateRect)
 {	
-    const Gfx::SizeF& size = surface.size();
+    const Gfx::SizeF& size = this->size();
 
     if( size.width() < 0 || size.height() < 0)
         return; 
 
-    const Gfx::Image& backImage = backgroundImage();
-    Pt::Hmi::Painter& painter = surface.painter();
-    
+	  Gfx::RectF borderRect(_borderWidth/2, size.width() - _borderWidth,
+                          _borderWidth/2, size.height() - _borderWidth);
+
+    double corner = _borderRound ? 2.0 : 0;
+		std::vector<Gfx::PointF> outline(9);
+
+    // top left
+		outline[0].setX(0);
+		outline[0].setY(corner);
+
+		outline[1].setX(corner);
+		outline[1].setY(0);
+
+    // top right
+		outline[2].setX(borderRect.width() - corner);
+		outline[2].setY(0);
+
+		outline[3].setX(borderRect.width());
+		outline[3].setY(corner);
+
+    // bottom right
+		outline[4].setX(borderRect.width());
+		outline[4].setY(borderRect.height() - corner);
+
+		outline[5].setX(borderRect.width() - corner);
+		outline[5].setY(borderRect.height());
+
+    // bottom left
+		outline[6].setX(corner);
+		outline[6].setY(borderRect.height());
+
+		outline[7].setX(0);
+		outline[7].setY(borderRect.height() - corner);
+            
+		outline[8] = outline[0];
+
     Gfx::Brush brush( backgroundColor() );
-    painter.setBrush(brush);  
-    
-    Gfx::PointF origin(0, 0);
-    Gfx::RectF rect( origin, size );              
-    painter.fillRect(rect);
+    painter.setBrush(brush); 
+    painter.fillPolygon(&outline[0], outline.size());
+
+    const Gfx::Image& backImage = backgroundImage();
 
     if( ! backImage.empty() )
     {
@@ -116,14 +165,14 @@ void Panel::onPaint(PaintSurface& surface)
             {
                 const double x = size.width()/2  - backImage.width()/2;
                 const double y = size.height()/2  - backImage.height()/2;
-                painter.drawImage(Gfx::PointF(x,y), backImage);
+                painter.drawImage(Gfx::PointF(x, y), backImage);
             }
             break;
             
             case Strech:
             {
                 Gfx::Image strech = backImage.blockScale(Gfx::Size((int) size.width(), (int)size.height() ) );
-                painter.drawImage( origin, strech );
+                painter.drawImage( Pt::Gfx::PointF(0,0), strech );
             }
             break;
 
@@ -133,7 +182,7 @@ void Panel::onPaint(PaintSurface& surface)
                 Pt::Gfx::Size newSize( ( size_t)( backImage.width()*factor), (size_t)(backImage.height()*factor));
 
                 Gfx::Image strech = backImage.blockScale(newSize);
-                painter.drawImage(origin, strech);
+                painter.drawImage( Pt::Gfx::PointF(0,0), strech);
             }
             break;
         }
@@ -141,71 +190,17 @@ void Panel::onPaint(PaintSurface& surface)
 
     if( _borderWidth <= 0 )
       return;
-
-	  double corner = _borderRound ? 2.0 : 0;
-    size_t border = static_cast<size_t>(_borderWidth);	
-
-	  Gfx::SizeF borderSize(size.width() - _borderWidth/2, size.height() - _borderWidth/2);	
-    Gfx::PointF borderPos(_borderWidth/2, _borderWidth/2);
-	  Gfx::RectF borderRect(borderPos, borderSize);
 						
 	  switch( _borderStyle )
 	  {
         default:
 		    case Single:
 		    {			
-			      std::vector<Gfx::PointF> points1(5);
-			      std::vector<Gfx::PointF> points2(5);
-
-			      //P0
-			      points1[0].setX(corner);
-			      points1[0].setY(borderRect.height());
-
-			      //P1
-			      points1[1].setX(0);
-			      points1[1].setY(borderRect.height() - corner);
-
-			      //P2
-			      points1[2].setX(0);
-			      points1[2].setY(corner);
-
-			      //P3
-			      points1[3].setX(corner);
-			      points1[3].setY(0);
-
-			      //P4
-			      points1[4].setX(borderRect.width() - corner);
-			      points1[4].setY(0);
-			
-			      //---
-			      //P0
-			      points2[0].setX(borderRect.width() - corner);
-			      points2[0].setY(0);
-
-			      //P1
-			      points2[1].setX(borderRect.width());
-			      points2[1].setY(corner);
-
-			      //P2
-			      points2[2].setX(borderRect.width());
-			      points2[2].setY(borderRect.height() - corner);
-
-			      //P3
-			      points2[3].setX(borderRect.width() - corner);
-			      points2[3].setY(borderRect.height());
-
-			      //P4
-			      points2[4].setX(corner);
-			      points2[4].setY(borderRect.height());
-		
-			      Gfx::Pen pen(border, _borderColor);
+            Gfx::Pen pen(static_cast<size_t>(_borderWidth), _borderColor);
 			      painter.setPen(pen);
-			
-			      painter.drawPolyline(&points1[0], points1.size());								
-			      painter.drawPolyline(&points2[0], points2.size());
+            painter.drawPolyline(&outline[0], outline.size());
+            break;
 		    }
-
-		    break;
 
 		    case Border3D:
 		    {
@@ -219,7 +214,7 @@ void Panel::onPaint(PaintSurface& surface)
 			      points1[2].setX(0 + borderRect.width());
 			      points1[2].setY(0);
 
-			      Gfx::Pen pen(border, _borderColor);
+			      Gfx::Pen pen(static_cast<size_t>(_borderWidth), _borderColor);
 			      painter.setPen(pen);
 			      painter.drawPolyline(&points1[0], points1.size());
 
@@ -237,12 +232,14 @@ void Panel::onPaint(PaintSurface& surface)
                              _borderColor.green() * 0.9f,
                              _borderColor.blue() * 0.9f);
 
-			      Gfx::Pen pen2( border, color );
+			      Gfx::Pen pen2( static_cast<size_t>(_borderWidth), color );
 			      painter.setPen(pen2);
-			      painter.drawPolyline(&points2[0], points2.size());			
-		    }
-		    break;			
+			      painter.drawPolyline(&points2[0], points2.size());	
+            break;			
+		    }	
 	  }	
 }
 
-}}
+}
+
+}

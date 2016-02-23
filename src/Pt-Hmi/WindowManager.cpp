@@ -143,9 +143,9 @@ bool WindowManager::keyInput( const Pt::Hmi::KeyEvent& keyEvent )
 }
 
 
-void WindowManager::render(PaintSurface& surface)
+void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
 {        
-    Painter& painter = surface.painter();
+    Painter painter(surface);
 
     for( size_t i = 0; i < _children.size(); ++i )
     {
@@ -154,9 +154,12 @@ void WindowManager::render(PaintSurface& surface)
         if( ! w->isVisible() )
              continue;        
         
-        const Gfx::PointF clientPos = renderFrame(*w, surface);                          
+        Gfx::PointF clientPos = renderFrame(*w, surface);                          
         
-        w->render();
+        Gfx::PointF pos = rect.topLeft() - w->position();
+        Gfx::RectF updateRect(pos, rect.size());
+
+        w->render(updateRect);
         painter.drawSurface( clientPos, w->surface() );
     }
 }
@@ -169,7 +172,7 @@ Gfx::PointF WindowManager::renderFrame(const Window& w, PaintSurface& surface)
                               clientSize.height() + _borderWidth*2 + _titleBarHeight);    
     Gfx::Color color = w.isActive() ? _activeColor : _inactiveColor;  
 
-    Hmi::Painter& painter = surface.painter();
+    Painter painter(surface);
     
     Gfx::PointF pos( w.position().x(), w.position().y() );
     

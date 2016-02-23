@@ -42,7 +42,24 @@ class PainterImpl : public Gfx::Painter
 
         virtual ~PainterImpl();
 
-                void setRenderMode(Gfx::RenderMode::Type mode);
+        void setSurface(PaintSurface& surface);
+
+        void setOrigin(const Gfx::PointF& p)
+        {
+            _origin = p;
+        }
+
+        void setClip( const Gfx::RectF& clip )
+        {
+            _clip = clip;
+        }
+        
+        const Gfx::RectF& clip() const
+        {
+            return _clip;
+        }
+
+        void setRenderMode(Gfx::RenderMode::Type mode);
 
         void setPen(const Gfx::Pen& pen);
 
@@ -56,7 +73,9 @@ class PainterImpl : public Gfx::Painter
 
         const Gfx::Font& font() const;        
 
-       Gfx::FontMetrics fontMetrics(Pt::String Text) const;
+        Gfx::FontMetrics fontMetrics(const Pt::String& Text) const;
+
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
 
         const std::list<std::string>& fontFamilyNames();        
 
@@ -82,25 +101,11 @@ class PainterImpl : public Gfx::Painter
 
         void addFontName(const std::string& fontName);
 
-                void setSurface(PaintSurface& surface);
-
-        static Gfx::FontMetrics fontMetrics( const Gfx::Font& font, const Pt::String& text );
-
         void flush()
         {
         }
         
-        void setClip( const Gfx::RectF& clip )
-        {
-          _clip = clip;
-        }
-        
-        const Gfx::RectF& clip() const
-        {
-          return _clip;
-        }
-
-        void clear( const Gfx::Color& color );
+        void clear(const Gfx::Color& color);
 
     protected:
         void drawCompatibleImage(size_t x, size_t y, size_t depth, const char* data, size_t width, size_t height);
@@ -112,22 +117,24 @@ class PainterImpl : public Gfx::Painter
         void updateFont();
         void updateBrush();
         
-    protected:
-        PaintSurfaceImpl*  _surface;
-       Gfx::Pen   _pen;
-       Gfx::Brush _brush;
-       Gfx::Font  _font;
-        mutable std::wstring _text;
-        std::list<std::string> _fontNamesList;
-                Gfx::RenderMode::Type _renderMode;
-       Gfx::RectF _clip;
-       Gfx::PointF _origin;
-        Screen& _screen;
-
     private:
-        static DWORD toGdiPenStyle( const Gfx::Pen& pen );
+        Screen&                _screen;
+        PaintSurfaceImpl*      _surface;
+
+        Gfx::PointF            _origin;
+        Gfx::RectF             _clip;
+
+        Gfx::Pen               _pen;
+        Gfx::Brush             _brush;
+        Gfx::Font              _font;
+
+        mutable std::wstring   _text;
+        std::list<std::string> _fontNamesList;
+        Gfx::RenderMode::Type  _renderMode;
 };
 
-}}
+}
+
+}
 
 #endif

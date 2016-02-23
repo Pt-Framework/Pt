@@ -51,8 +51,7 @@ Widget::Widget()
 , _name("")
 , _hasFocus( false)
 , _actionKey(Key::Space)
-, _size( 100, 100)
-, _position( 10,10) 
+, _geometry(10, 100, 10, 100)
 , _isValid(true)
 , _mnemonic(0)
 {      
@@ -373,7 +372,7 @@ void Widget::processEvent(const Pt::Event& ev)
 }
 
 
-void Widget::onUpdate()
+void Widget::onUpdate(const Gfx::RectF& rect)
 {
     // The widget is already invalid in case of a nested update()
     // this means the parent must already be invalid or has just
@@ -382,19 +381,23 @@ void Widget::onUpdate()
     if( ! _isValid )
         return;
 
+   // update rect in parent coordinates
+   Gfx::RectF updateRect(rect);
+   updateRect.setOrigin( position() + rect.topLeft() );
+
     if( parent() )
     {
-        parent()->onUpdate();   
+        parent()->onUpdate(updateRect);   
     }
     else
     {
         if(_window)
-            _window->update();
+            _window->update(updateRect);
     }
 }
 
 
-void Widget::update()
+void Widget::update(const Gfx::RectF& rect)
 {
     // The widget is already invalid in case of a nested update()
     // this means the parent must already be invalid or has just
@@ -405,19 +408,24 @@ void Widget::update()
 
     _isValid = false; 
    
+   // update rect in parent coordinates
+   Gfx::RectF updateRect(rect);
+   updateRect.setOrigin( position() + rect.topLeft() );
+
     if( parent() )
     {
-        parent()->onUpdate();
+        parent()->onUpdate(updateRect);
     }
     else
     {
         if(_window)
-            _window->update();
+            _window->update(updateRect);
     }
 }
 
 
-void Widget::render(const Gfx::PointF& pos, PaintSurface& surface)
+void Widget::render(const Gfx::PointF& pos, PaintSurface& surface, 
+                    const Gfx::RectF& updateRect)
 {
     if( ! visible() )
     {
@@ -428,7 +436,7 @@ void Widget::render(const Gfx::PointF& pos, PaintSurface& surface)
     if( ! _isValid )
         onLayout();
     
-    onRender(pos, surface);
+    onRender(pos, surface, updateRect);
     
     _isValid = true;
 }
@@ -439,16 +447,27 @@ void Widget::onLayout()
 }
 
 
-void Widget::onRender(const Gfx::PointF& pos, PaintSurface& surface)
+void Widget::onRender(const Gfx::PointF& pos, PaintSurface& surface, 
+                      const Gfx::RectF& rect)
 {
     for( size_t i = 0; i < _children.size(); ++i )
     {
         Widget* child = _children[i];
 
-        Gfx::PointF offset(pos.x() + child->position().x(),
-                           pos.y() + child->position().y() );
+        if( rect.intersect( child->geometry() ).isNull() )
+            continue;
 
-        child->render(offset, surface);
+        //static int _n = 0;
+        //std::clog << _n++ << " RENDER RENDER RENDER " << child->name() << std::endl;
+
+        Gfx::PointF paintOffset( pos.x() + child->position().x(),
+                                 pos.y() + child->position().y() );
+
+        // update rect in child coordinates
+        Gfx::RectF updateRect(rect);
+        updateRect.setOrigin( rect.topLeft() - child->position() );
+
+        child->render(paintOffset, surface, updateRect);
     }
 }
 
@@ -552,7 +571,7 @@ Gfx::SizeF Widget::preferredSize() const
     if(_autoSize)
         return this->onAutoSize();
 
-    return _size;
+    return size();
 }
 
 
@@ -582,13 +601,13 @@ void Widget::setEnabled( bool e )
 
 void Widget::setSize(const Gfx::SizeF& size)
 {
-    _size = size;              
+    _geometry.setSize(size);              
 }
 
     
 void Widget::setPosition(const Gfx::PointF& pos)
 {
-   _position = pos;
+   _geometry.setOrigin(pos);
 }
 
 

@@ -71,12 +71,13 @@ Gfx::SizeF Label::onAutoSize() const
 }
 
 
-void Label::onPaint(PaintSurface& surface)
+void Label::onPaint(Painter& painter, const Gfx::RectF& updateRect)
 {
-    Panel::onPaint(surface);
+    Panel::onPaint(painter, updateRect);
 
-    Painter& painter = surface.painter();    
-    Gfx::SizeF         size = surface.size();
+    //Painter painter(surface);
+       
+    Gfx::SizeF         size = this->size();
     Gfx::PointF        pos(0,0);
     Gfx::Color         foreColor = foregroundColor();
     Gfx::Pen           pen(1, foreColor);

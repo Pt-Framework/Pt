@@ -23,41 +23,46 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include <Pt/Hmi/PaintSurface.h>
-#include "PaintSurfaceImpl.h"
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
+*/
 
-namespace Pt{
-namespace Hmi{
+#include "PaintSurfaceImpl.h"
+#include <Pt/Hmi/PaintSurface.h>
+
+namespace Pt {
+
+namespace Hmi {
 
 PaintSurface::PaintSurface()
 : _impl( new PaintSurfaceImpl())
-, _painter(*this)
 {
 }
+
 
 PaintSurface::~PaintSurface()
 {
     delete _impl;
 }
 
+
 void PaintSurface::resize(const Gfx::SizeF& size)
 {
     _impl->resize(size);
-  _painter.setSurface(*this);
-
-  _painter.setBrush(Gfx::Brush(Gfx::Color(0,0,1)));
-   _painter.fillRect(Gfx::RectF(Gfx::PointF(0,0), size ));
 }
+
 
 Gfx::SizeF PaintSurface::size() const
 {
     return _impl->size();
 }
 
+
 void PaintSurface::clear()
 {
     _impl->clear();
 }
 
-}}
+}
+
+}

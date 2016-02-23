@@ -226,26 +226,27 @@ void Window::focusNext()
 }
 
 
-void Window::update()
+void Window::update(const Gfx::RectF& rect)
 {
     if( _impl ) 
-        _impl->update();
+        _impl->update(rect);
 }
 
 
-void Window::render()
+void Window::render(const Gfx::RectF& updateRect)
 {
-    Hmi::Painter& painter = _surface.painter();
+    Painter painter(_surface);
+
     painter.setBrush( Pt::Gfx::Color(0.9, 0.9, 0.9) );
-    Pt::Gfx::RectF rect(Pt::Gfx::PointF(0,0), size() );
-    painter.fillRect(rect);
+    //Pt::Gfx::RectF rect(Pt::Gfx::PointF(0,0), size() );
+    painter.fillRect(updateRect);
 
     if(_mainWidget)
     {
-        _mainWidget->render(Gfx::PointF(0,0), _surface);
+        _mainWidget->render(Gfx::PointF(0,0), _surface, updateRect);
     }
     
-    _windowManager.render( _surface );
+    _windowManager.render( _surface, updateRect );
 }
 
 
@@ -431,23 +432,39 @@ void Window::onResizeEvent(const ResizeEvent& ev)
     _state = ev.state();
     _surface.resize(_size);
 
+    Gfx::RectF updateRect(_position, _size);
+
+    if(_parent)
+    {
+        Gfx::PointF pos( -_position.x(), -_position.y() );
+       updateRect.set(pos, _parent->size());
+    }
+
     if( _mainWidget )
     {
         _mainWidget->setPosition(Gfx::PointF(0,0));
-        _mainWidget->setSize( _size);
-        _mainWidget->update();
+        _mainWidget->setSize(_size);
+        _mainWidget->update(updateRect);
     }
     else
     {
-        update();
+        update(updateRect);
     }
 }
 
 
-void Window::onMoveEvent( const MoveEvent& ev)
-{
-    _position  = ev.position();  
-    update();
+void Window::onMoveEvent(const MoveEvent& ev)
+{   
+    _position = ev.position();
+    
+    if(_parent)
+    {
+        Gfx::PointF pos( -ev.position().x(), -ev.position().y() );
+        Gfx::RectF updateRect(pos, _parent->size());
+        update(updateRect);
+    }
+    else
+        update();
 }
 
 
@@ -704,10 +721,10 @@ void Window::setSize( const Gfx::SizeF& s )
 {
     _size = s;
 
-    if( _impl )
-        _impl->setSize(s);    
-
     _surface.resize(s);
+
+    if( _impl )
+        _impl->setSize(s);        
 }
 
 

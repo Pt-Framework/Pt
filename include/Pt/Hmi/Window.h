@@ -105,10 +105,16 @@ class PT_HMI_API Window : public Pt::Connectable
     // TODO: return new focusWidget() and remove focusWidget()
     void focusPrev();
     
-    void update();
+    void update(const Gfx::RectF& rect);
+
+    void update()
+    {
+        Gfx::RectF rect( Gfx::PointF(0,0), size() );
+        update(rect);
+    }
 
     // TODO: make protected/private
-    void render();
+    void render(const Gfx::RectF& rect);
 
     void processEvent(const Pt::Event& ev);
 

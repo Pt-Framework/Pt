@@ -596,9 +596,9 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 }
 
 
-void MainWindowImpl::update()
+void MainWindowImpl::update(const Gfx::RectF& rect)
 {
-    _apiWindow->render();
+    _apiWindow->render(rect);
     InvalidateRect(_hwnd, NULL, FALSE);
 }
 

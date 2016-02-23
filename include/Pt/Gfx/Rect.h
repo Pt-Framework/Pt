@@ -24,22 +24,27 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ * MA 02110-1301 USA
+ */
+
 #ifndef PT_GFX_RECT_H
 #define PT_GFX_RECT_H
 
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <algorithm>
-namespace Pt {
-namespace Gfx {
 
+namespace Pt {
+
+namespace Gfx {
 
 template<typename T>
 class BasicRect 
 {
   public:
-      BasicRect( const BasicPoint<T>& p = BasicPoint<T>(0, 0), const BasicSize<T>& s = BasicSize<T>(0, 0) )
+      BasicRect( const BasicPoint<T>& p = BasicPoint<T>(0, 0), 
+                 const BasicSize<T>& s = BasicSize<T>(0, 0) )
       : _p(p)
 			, _s(s)
       {
@@ -53,7 +58,7 @@ class BasicRect
         
 			BasicRect( const T left, const T right, const T top, const T bottom )
       {
-				set( left, right, top, bottom );
+				  set( left, right, top, bottom );
 			}
 
       BasicRect(const BasicRect<T>& val)
@@ -84,6 +89,16 @@ class BasicRect
       {
           _p = BasicPoint<T>( left, top );
           _s = BasicSize<T>(  right - left + 1 , bottom - top  + 1);
+      }
+
+      void setOrigin(const BasicPoint<T>& p)
+      {
+          _p = p;
+      }
+
+      void setSize(const BasicSize<T>& s)
+      {
+          _s = s;
       }
 
       T x() const
@@ -133,30 +148,23 @@ class BasicRect
         
       const BasicPoint<T>& topLeft() const
       { 
-				return _p;
+				  return _p;
 			}
 
       const BasicPoint<T> topRight() const
       { 
-				return BasicPoint<T>(this->x() + this->width() -1 , this->y()); 
+				  return BasicPoint<T>(this->x() + this->width() -1 , this->y()); 
 			}
 
       const BasicPoint<T> bottomLeft() const
       { 
-				return BasicPoint<T>(this->x(), this->y() + this->height() -1); 
+				  return BasicPoint<T>(this->x(), this->y() + this->height() -1); 
 			}
 
       const BasicPoint<T> bottomRight() const
       { 
-				return BasicPoint<T>(this->x() + this->width() -1, this->y() + this->height() - 1); 
+				  return BasicPoint<T>(this->x() + this->width() -1, this->y() + this->height() - 1); 
 			}
-
-      BasicRect<T>& operator = (const BasicRect<T>& val)
-      {
-          _p = val._p;
-          _s = val._s;
-          return *this;
-      }
 
       bool operator==(const BasicRect& other) const
       {
@@ -168,32 +176,34 @@ class BasicRect
           return _p != other._p || _s != other._s;
       }
 
-      std::vector<BasicPoint<T> > points() const
+      void expand(const BasicRect<T>& rect)
       {
-        std::vector<BasicPoint<T> > point;
-
-        point.push_back( topLeft() );
-        point.push_back( topRight() );
-        point.push_back( bottomRight() );
-        point.push_back( bottomLeft() );
-        return point;
+				  const T l	 = std::min( this->left(), rect.left() );
+				  const T t	 = std::min( this->top(), rect.top() );
+				  const T r	 = std::max( this->right(), rect.right() );
+				  const T b  = std::max( this->bottom(), rect.bottom() ); 
+        
+          _p.set(l, t);
+          _s.set(r, b); 
       }
 
-
-			BasicRect<T> intersect( const BasicRect<T>& rect ) const 
+			BasicRect<T> intersect(const BasicRect<T>& rect) const 
 			{
-				const T l	 = std::max( this->left(), rect.left() );
-				const T t	 = std::max( this->top(), rect.top() ) ;
-				const T r	 = std::min( this->right(), rect.right() );
-				const T b  = std::min( this->bottom(), rect.bottom() );
+				  const T l	 = std::max( this->left(), rect.left() );
+				  const T t	 = std::max( this->top(), rect.top() );
+				  const T r	 = std::min( this->right(), rect.right() );
+				  const T b  = std::min( this->bottom(), rect.bottom() );
 
-				return ( (r > l && b > t ) ? BasicRect<T>(l, r, t, b ) : BasicRect<T>() ) ;
+				  return r > l && b > t ? BasicRect<T>(l, r, t, b) 
+                                : BasicRect<T>();
 			}
 
-
-			bool contains( const BasicPoint<T>& p ) const 
+			bool contains(const BasicPoint<T>& p) const 
 			{
-					return (  p.x() >= _p.x() &&  p.x() < ( _p.x()  + _s.width() ) && p.y() >= _p.y() &&  p.y() <  ( _p.y()  + _s.height() ) );
+					return p.x() >= _p.x() &&  
+                 p.x() < _p.x() + _s.width() && 
+                 p.y() >= _p.y() &&  
+                 p.y() <  _p.y() + _s.height();
 			}
 
   protected:
@@ -204,6 +214,8 @@ class BasicRect
 typedef BasicRect<Pt::ssize_t>  Rect;
 typedef BasicRect<double>       RectF;
 
-}} // namespace
+}  // namespace
+
+} // namespace
 
 #endif

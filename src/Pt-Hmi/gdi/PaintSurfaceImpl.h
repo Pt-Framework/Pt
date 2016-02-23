@@ -23,7 +23,10 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ * MA 02110-1301 USA
+ */
+
 #ifndef Pt_Hmi_PaintSurfaceImpl_h
 #define Pt_Hmi_PaintSurfaceImpl_h
 
@@ -32,42 +35,44 @@
 #include <Pt/Gfx/Image.h>
 #include <Windows.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
 
-class PainterImpl;
+namespace Hmi {
 
 class PaintSurfaceImpl
 {
-public:        
-    PaintSurfaceImpl();
-    virtual ~PaintSurfaceImpl();    
-    
-    void resize(const Gfx::SizeF& size);    
-
-    inline const Gfx::SizeF& size() const
-    {
-        return _size;
-    }
-
-  inline HDC deviceContext() const
-    {
-        return _deviceContext;
-    }
-    void clear()
-    {
+    public:        
+        PaintSurfaceImpl();
         
-    }
+        virtual ~PaintSurfaceImpl();    
+    
+        void resize(const Gfx::SizeF& size);    
 
-private:
-   Gfx::SizeF _size;
-    HDC       _deviceContext;
-    HBITMAP   _bitmapHandle;            
-    HPEN          _oldPen;
-    HBRUSH        _oldBrush;
-      HFONT        _oldFont;
+        const Gfx::SizeF& size() const
+        {
+            return _size;
+        }
+
+        HDC deviceContext() const
+        {
+            return _deviceContext;
+        }
+
+        void clear()
+        {
+        }
+
+    private:
+        Gfx::SizeF _size;
+        HDC        _deviceContext;
+        HBITMAP    _bitmapHandle;            
+        HPEN       _oldPen;
+        HBRUSH     _oldBrush;
+        HFONT      _oldFont;
 };
 
-}}
+}
+
+}
 
 #endif

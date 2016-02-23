@@ -46,7 +46,8 @@ ChildWindowImpl::~ChildWindowImpl()
 
 void ChildWindowImpl::close()
 {
-    update();
+    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
+    update(rect);
 }
 
 
@@ -55,14 +56,18 @@ void ChildWindowImpl::setVisible(bool visible)
     if(visible) 
         activate();
 
-    update();
+    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
+    update(rect);
 }
 
 
-void ChildWindowImpl::update()
+void ChildWindowImpl::update(const Gfx::RectF& rect)
 {
-    if( _apiWindow->parent())	
-        _apiWindow->parent()->update();	
+    Gfx::PointF pos = _apiWindow->position() + rect.topLeft();
+    Gfx::RectF parentRect(pos, rect.size());
+
+    if( _apiWindow->parent() )	
+        _apiWindow->parent()->update(parentRect);	
 }
 
 
@@ -78,54 +83,65 @@ void ChildWindowImpl::activate()
 
 void ChildWindowImpl::setPosition(const Gfx::PointF& p)
 {
-    update();
+    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
+    update(rect);
 }
 
 void ChildWindowImpl::setSize(const Gfx::SizeF& size)
 {
-    update();
+    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
+    update(rect);
 }
 
 void ChildWindowImpl::setState(WindowState::Type p)
 {
-    update();
+    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
+    update(rect);
 }
 
 void ChildWindowImpl::setBorder(WindowBorder::Type p)
 {
-    update();
+    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
+    update(rect);
 }
 
 void ChildWindowImpl::setIcon(const Gfx::Image& p)
 {
-    update();
+    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
+    update(rect);
 }
 
 void ChildWindowImpl::setEnabled(bool e)
 {
-    update();
+    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
+    update(rect);
 }
 
 void ChildWindowImpl::setMinimumSize(const Gfx::SizeF& s)
 {
-    update();
+    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
+    update(rect);
 }
 
 void ChildWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 {
-    update();
+    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
+    update(rect);
 }
 
 
 void ChildWindowImpl::setDecoration( WindowDecoration::Flags d )	
 {
-    update();
+    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
+    update(rect);
 }
 
 void ChildWindowImpl::setTitle( const std::string& t )
 {
-    update();
+    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
+    update(rect);
 }
 
+}
 
-}}
+}

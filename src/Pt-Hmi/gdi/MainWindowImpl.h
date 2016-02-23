@@ -51,7 +51,7 @@ class MainWindowImpl : public WindowImpl
 	
         virtual void activate();
        
-        virtual void update();
+        virtual void update(const Gfx::RectF& rect);
 
         virtual void setPosition(const Gfx::PointF& p);
 

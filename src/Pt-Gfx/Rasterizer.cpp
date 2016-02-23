@@ -3523,10 +3523,17 @@ FontMetrics Rasterizer::fontMetrics( const Font& font, const Pt::String& text )
 
 void Rasterizer::clear( const Color& color)
 {
-  RectF rect( PointF( 0,0 ) , SizeF(_image.width(), _image.height() ) );
+  RectF rect( PointF(0,0), SizeF(_image.width(), _image.height() ) );
   Brush bs( color );
   setBrush( bs );
-  fill( &rect.points()[0], 4);
+
+  PointF points[4];
+  points[0] = rect.topLeft();
+  points[1] = rect.topRight();
+  points[2] = rect.bottomRight();
+  points[3] = rect.bottomLeft();
+
+  fill(points, 4);
 }
 
 void Rasterizer::setClip( const RectF& clip )

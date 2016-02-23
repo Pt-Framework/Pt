@@ -81,7 +81,7 @@ class PT_HMI_API Button  : public Label
 
         virtual void onTouchEvent(const TouchEvent& ev);
 
-        virtual void onPaint(PaintSurface& surface);
+        virtual void onPaint(Painter& painter, const Gfx::RectF& updateRect);
 
         virtual void onClicked(const Gfx::PointF& pos);
 

@@ -79,7 +79,7 @@ class WindowManager : public Pt::Connectable
 
         bool keyInput(const Pt::Hmi::KeyEvent& keyEvent);
 
-        void render(PaintSurface& surface);
+        void render(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
         bool onBackground(const Pt::Hmi::MouseEvent& pev);

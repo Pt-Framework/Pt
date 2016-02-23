@@ -137,17 +137,23 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         void processEvent(const Pt::Event& ev);
 
-        void update();
+        void update(const Gfx::RectF& rect);
+
+        void update()
+        {
+            Gfx::RectF rect( Gfx::PointF(0,0), size() );
+            update(rect);
+        }
 
         bool isValid() const
         { return _isValid; }
 
-        void render(const Gfx::PointF& pos, PaintSurface& parentSurface);
+        void render(const Gfx::PointF& pos, PaintSurface& parentSurface, const Gfx::RectF& updateRect);
 
     protected:    
         virtual void onLayout();
 
-        virtual void onRender(const Gfx::PointF& pos, PaintSurface& surface); 
+        virtual void onRender(const Gfx::PointF& pos, PaintSurface& surface, const Gfx::RectF& updateRect); 
 
     protected:
         virtual void onEvent(const Pt::Event& ev);
@@ -214,16 +220,21 @@ class PT_HMI_API Widget : public Pt::Connectable
         // geometry properties
         //
 
+        const Gfx::RectF& geometry() const
+        {
+            return _geometry;
+        }
+
         const Gfx::SizeF& size() const
         {
-            return _size;
+            return _geometry.size();
         }
 
         void setSize( const Gfx::SizeF& s );
 
         const Gfx::PointF& position() const
         {
-            return _position;
+            return _geometry.topLeft();
         }
 
         void setPosition( const Gfx::PointF&  p);
@@ -297,7 +308,7 @@ class PT_HMI_API Widget : public Pt::Connectable
     private:
         void setWindow(Window* window);
         
-        void onUpdate();
+        void onUpdate(const Gfx::RectF& rect);
 
     private:
         Pt::Signal<const Pt::Event&> _eventReady;
@@ -310,8 +321,9 @@ class PT_HMI_API Widget : public Pt::Connectable
         bool                         _visible;
         Hmi::Cursor                  _cursor;
         Key                          _shortcutKey;        
-        Gfx::SizeF                   _size;
-        Gfx::PointF                  _position;            
+        //Gfx::SizeF                   _size;
+        //Gfx::PointF                  _position;   
+        Gfx::RectF                   _geometry;         
         Pt::Char                     _mnemonic;    
         Pt::Delegate<void>           _mnemonicEntered;
         Docking                      _docking;

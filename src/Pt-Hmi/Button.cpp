@@ -135,16 +135,16 @@ void Button::onFocus(bool hasFocus)
 }
 
 
-void Button::onPaint(PaintSurface& paintSurface)
+void Button::onPaint(Painter& painter, const Gfx::RectF& updateRect)
 {    
     bool mouseOver = window()->pointerWidget() == this;
-    Gfx::Painter& painter = paintSurface.painter();
+    //Painter painter( paintSurface );
 
     Gfx::Color bkgColor = backgroundColor();
 
     if( ! isEnabled() )
     {
-        Label::onPaint(paintSurface);
+        Label::onPaint(painter, updateRect);
         return;
     }
 
@@ -162,7 +162,7 @@ void Button::onPaint(PaintSurface& paintSurface)
                                        bkgColor.blue() * 0.8 ) );
     }
 
-    Label::onPaint(paintSurface);
+    Label::onPaint(painter, updateRect);
     
     setBackgroundColor(bkgColor);
 

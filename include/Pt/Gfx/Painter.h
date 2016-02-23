@@ -182,7 +182,7 @@ class PT_GFX_API Painter
           * @return The font metrics of the currently selected font.
           * @see fontMetrics(std::string)
           */
-        virtual FontMetrics fontMetrics(Pt::String Text) const = 0;
+        virtual FontMetrics fontMetrics(const Pt::String& text) const = 0;
 
         /**
           * @brief Draws a line between the two given points, excluding the last point.
