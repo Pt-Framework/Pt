@@ -54,6 +54,7 @@ Widget::Widget()
 , _geometry(10, 100, 10, 100)
 , _isValid(true)
 , _mnemonic(0)
+, _updateRect(_geometry)
 {      
     _eventReady += Pt::slot(*this, &Widget::onKeyEvent);
     _eventReady += Pt::slot(*this, &Widget::onPointerEvent);
@@ -112,6 +113,7 @@ void Widget::add(Widget& widget)
     widget._parent = this;
 
     widget.setWindow(_window);   
+    widget.update();
 }
 
 
@@ -126,6 +128,7 @@ void Widget::remove(Widget& widget)
     widget._parent = 0;
 
     widget.setWindow(0);
+    widget.update();
 }
 
 
@@ -397,6 +400,12 @@ void Widget::onUpdate(const Gfx::RectF& rect)
 }
 
 
+void Widget::update()
+{
+    update(_updateRect);
+}
+
+
 void Widget::update(const Gfx::RectF& rect)
 {
     // The widget is already invalid in case of a nested update()
@@ -601,13 +610,15 @@ void Widget::setEnabled( bool e )
 
 void Widget::setSize(const Gfx::SizeF& size)
 {
-    _geometry.setSize(size);              
+    _geometry.setSize(size);
+    _updateRect.unify(_geometry);            
 }
 
     
 void Widget::setPosition(const Gfx::PointF& pos)
 {
    _geometry.setOrigin(pos);
+   _updateRect.unify(_geometry);   
 }
 
 

@@ -43,6 +43,12 @@ class BasicSize {
         : _w(w), _h(h)
         {}
 
+        void set(T w, T h)
+        {
+            _w = w;
+            _h = h;
+        }
+
         //! @brief Returns the width
         inline T width() const
         { return _w; }

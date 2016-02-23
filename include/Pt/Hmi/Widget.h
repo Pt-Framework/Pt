@@ -139,11 +139,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         void update(const Gfx::RectF& rect);
 
-        void update()
-        {
-            Gfx::RectF rect( Gfx::PointF(0,0), size() );
-            update(rect);
-        }
+        void update();
 
         bool isValid() const
         { return _isValid; }
@@ -333,7 +329,8 @@ class PT_HMI_API Widget : public Pt::Connectable
         bool                         _acceptFocus;
         bool                         _hasFocus;    
         Key                          _actionKey;
-        size_t                       _focusIndex;   
+        size_t                       _focusIndex;
+        Gfx::RectF                   _updateRect; 
 };
 
 

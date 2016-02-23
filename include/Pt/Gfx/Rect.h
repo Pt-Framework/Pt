@@ -176,7 +176,7 @@ class BasicRect
           return _p != other._p || _s != other._s;
       }
 
-      void expand(const BasicRect<T>& rect)
+      void unify(const BasicRect<T>& rect)
       {
 				  const T l	 = std::min( this->left(), rect.left() );
 				  const T t	 = std::min( this->top(), rect.top() );
