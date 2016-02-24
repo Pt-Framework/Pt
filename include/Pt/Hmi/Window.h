@@ -106,11 +106,7 @@ class PT_HMI_API Window : public Pt::Connectable
     
     void update(const Gfx::RectF& rect);
 
-    void update()
-    {
-        Gfx::RectF rect( Gfx::PointF(0,0), size() );
-        update(rect);
-    }
+    void update();
 
     // TODO: make protected/private
     void render(const Gfx::RectF& rect);
@@ -263,6 +259,7 @@ class PT_HMI_API Window : public Pt::Connectable
     Widget*                        _pointerWidget;
     Widget*                        _focusWidget;
     std::vector<Widget*>           _focusList;
+    Gfx::RectF                     _updateRect;
     PixmapSurface                  _surface;
     WindowImpl*                    _impl;           
     Pt::Signal<const Pt::Event&>   _eventReady;

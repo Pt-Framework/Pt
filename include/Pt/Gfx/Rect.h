@@ -178,13 +178,22 @@ class BasicRect
 
       void unify(const BasicRect<T>& rect)
       {
+          if( rect.isNull() )
+              return;
+
+          if( this->isNull() )
+          {
+              _p = rect._p;
+              _s = rect._s;
+              return;
+          }
+
 				  const T l	 = std::min( this->left(), rect.left() );
 				  const T t	 = std::min( this->top(), rect.top() );
 				  const T r	 = std::max( this->right(), rect.right() );
 				  const T b  = std::max( this->bottom(), rect.bottom() ); 
         
-          _p.set(l, t);
-          _s.set(r, b); 
+          set(l, r, t, b);
       }
 
 			BasicRect<T> intersect(const BasicRect<T>& rect) const 

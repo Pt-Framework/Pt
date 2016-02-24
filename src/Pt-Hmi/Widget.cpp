@@ -402,12 +402,6 @@ void Widget::onUpdate(const Gfx::RectF& rect)
 
 void Widget::update()
 {
-    update(_updateRect);
-}
-
-
-void Widget::update(const Gfx::RectF& rect)
-{
     // The widget is already invalid in case of a nested update()
     // this means the parent must already be invalid or has just
     // been rendered. Therefore we stop the chain of update calls
@@ -417,20 +411,53 @@ void Widget::update(const Gfx::RectF& rect)
 
     _isValid = false; 
    
-   // update rect in parent coordinates
-   Gfx::RectF updateRect(rect);
-   updateRect.setOrigin( position() + rect.topLeft() );
-
+    // NOTE: _updateRect is already in parent coordinates
     if( parent() )
     {
-        parent()->onUpdate(updateRect);
+        parent()->onUpdate(_updateRect);
     }
     else
     {
         if(_window)
-            _window->update(updateRect);
+            _window->update(_updateRect);
     }
 }
+
+
+//void Widget::update()
+//{
+//    // update rect was recorded in parent coordinates 
+//    _updateRect.setOrigin( _updateRect.topLeft() - position() );
+//
+//    update(_updateRect);
+//}
+//
+//
+//void Widget::update(const Gfx::RectF& rect)
+//{
+//    // The widget is already invalid in case of a nested update()
+//    // this means the parent must already be invalid or has just
+//    // been rendered. Therefore we stop the chain of update calls
+//    // towards the root of the widget/window tree.
+//    if( ! _isValid )
+//        return;
+//
+//    _isValid = false; 
+//   
+//   // report update rect in parent coordinates
+//   Gfx::RectF updateRect(rect);
+//   updateRect.setOrigin( position() + rect.topLeft() );
+//
+//    if( parent() )
+//    {
+//        parent()->onUpdate(updateRect);
+//    }
+//    else
+//    {
+//        if(_window)
+//            _window->update(updateRect);
+//    }
+//}
 
 
 void Widget::render(PaintSurface& surface, 
@@ -447,6 +474,7 @@ void Widget::render(PaintSurface& surface,
     
     onRender(surface, updateRect);
     
+    _updateRect = _geometry;
     _isValid = true;
 }
 

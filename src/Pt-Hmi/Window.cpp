@@ -53,7 +53,7 @@ Window::Window( Window* parent )
 , _pointerWidget(0)
 , _focusWidget(0)
 , _minimumSize(0,0)
-, _maximumSize( 2000,2000)
+, _maximumSize(2000,2000)
 , _startPostion( WindowPosition::Manual )
 , _state(WindowState::Normal )
 , _enabled(true)
@@ -67,6 +67,7 @@ Window::Window( Window* parent )
 , _mainWidget(0)
 , _position(0,0)
 , _size(200,200)
+, _updateRect(0, 0, 0, 0)
 {
     _windowManager.init(*this);
 
@@ -226,15 +227,31 @@ void Window::focusNext()
 }
 
 
+// updates this window's rect area and _updateRect
+void Window::update()
+{
+    _updateRect.unify( Gfx::RectF(Gfx::PointF(0,0), _size) );
+    update(_updateRect);
+}
+
+
+// updates rect and _updateRect
 void Window::update(const Gfx::RectF& rect)
 {
-    if( _impl ) 
-        _impl->update(rect);
+    _isValid = false;
+
+    _updateRect.unify(rect);
+
+    if(_impl) 
+        _impl->update(_updateRect);
 }
 
 
 void Window::render(const Gfx::RectF& updateRect)
 {
+    if( _isValid )
+        return;
+
     Painter painter(_surface);
     painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
     painter.fillRect(updateRect);
@@ -243,8 +260,11 @@ void Window::render(const Gfx::RectF& updateRect)
     {
         _mainWidget->render(_surface, updateRect);
     }
-    
+
     _windowManager.render(_surface, updateRect);
+
+    _updateRect.set(0, 0, 0, 0);
+    _isValid = true;
 }
 
 
@@ -430,23 +450,22 @@ void Window::onResizeEvent(const ResizeEvent& ev)
     _state = ev.state();
     _surface.resize(_size);
 
-    Gfx::RectF updateRect(_position, _size);
-
     if(_parent)
     {
+        // update whole parent window
         Gfx::PointF pos( -_position.x(), -_position.y() );
-       updateRect.set(pos, _parent->size());
+        Gfx::RectF parentRect(pos, _parent->size());
+        _updateRect.unify(parentRect);
     }
 
     if( _mainWidget )
     {
-        _mainWidget->setPosition(Gfx::PointF(0,0));
         _mainWidget->setSize(_size);
-        _mainWidget->update(updateRect);
+        _mainWidget->update();
     }
     else
     {
-        update(updateRect);
+        update();
     }
 }
 
@@ -457,32 +476,30 @@ void Window::onMoveEvent(const MoveEvent& ev)
     
     if(_parent)
     {
-        Gfx::PointF pos( -ev.position().x(), -ev.position().y() );
-        Gfx::RectF updateRect(pos, _parent->size());
-        update(updateRect);
+        Gfx::RectF updateRect(Gfx::PointF(0, 0), _parent->size());
+        _parent->update(updateRect);
     }
-    else
-        update();
 }
 
 
 void Window::onActivateEvent(const ActivateEvent& ev)
 { 
+    bool activeChange = _isActive != ev.isActive();
+
     _isActive = ev.isActive();
 
-    if( !_isActive )
+    if( ! _isActive )
     {
         _windowManager.deactivate();  
-
-        update();
     }
     else
     {
        if( _parent )
            _parent->processEvent(ActivateEvent(true));
-       else
-          update();
-    }                
+    }   
+    
+    if(activeChange)
+        update();             
 }
 
 
@@ -718,7 +735,6 @@ const Gfx::SizeF& Window::size() const
 void Window::setSize( const Gfx::SizeF& s )
 {
     _size = s;
-
     _surface.resize(s);
 
     if( _impl )
