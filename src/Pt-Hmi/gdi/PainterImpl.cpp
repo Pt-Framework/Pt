@@ -1,30 +1,31 @@
-/*
- * Copyright (C) 2006 Marc Boris Duerner
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
+/* Copyright (C) 2015 Marc Boris Duerner 
+   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+  
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
+*/
 
 #include "win32.h"
 #include "PainterImpl.h"
@@ -95,8 +96,7 @@ namespace Pt {
 namespace Hmi {
 
 PainterImpl::PainterImpl(PaintSurfaceImpl* surface)
-: _screen( Application::instance().mainScreen() )
-, _surface(surface)
+: _surface(surface)
 , _origin(0.0f, 0.0f)
 , _pen(Gfx::Pen(1))
 , _brush(Gfx::Brush(Gfx::Color(0, 0, 0, 0)))
@@ -136,23 +136,24 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
 void PainterImpl::updatePen()
 {
     DWORD penStyle = toGdiPenStyle( _pen );
+    DWORD penColor = RGB(_pen.color().red() * 255, 
+                         _pen.color().green() * 255, 
+                         _pen.color().blue() * 255);
 
 #ifdef _WIN32_WCE
-    HPEN newPen = CreatePen( penStyle, _pen.size(), RGB(penCol.red(), penCol.green(), penCol.blue()) );
+    HPEN newPen = CreatePen(penStyle, _pen.size(), penColor);
 #else
     LOGBRUSH brush;
     brush.lbStyle = BS_SOLID ;
-    brush.lbColor = RGB(_pen.color().red()* 255, _pen.color().green()* 255, _pen.color().blue()* 255);
+    brush.lbColor = penColor;
 
     HPEN newPen = ExtCreatePen( penStyle , _pen.size(), &brush, 0, NULL );
 #endif
 
     HPEN oldPen = (HPEN)SelectObject(_surface->deviceContext(), newPen);
-
     DeleteObject(oldPen);
 
-    // Set the Text color to the pen color.
-    SetTextColor(_surface->deviceContext(), RGB(_pen.color().red()*255, _pen.color().green()*255, _pen.color().blue()*255));
+    SetTextColor(_surface->deviceContext(), penColor);
 }
 
 
@@ -172,65 +173,65 @@ void PainterImpl::setBrush(const Gfx::Brush& brush)
 void PainterImpl::updateBrush()
 {
     HBRUSH newBrushHandle;
+    DWORD brushColor = RGB(_brush.color().red() * 255, 
+                           _brush.color().green() * 255, 
+                           _brush.color().blue() * 255);
 
-    switch (_brush.fillStyle()) 
+    switch( _brush.fillStyle() ) 
     {
-
       case Gfx::Brush::SolidFill: 
-        {
-          newBrushHandle = CreateSolidBrush(RGB(_brush.color().red()*255, _brush.color().green()*255, _brush.color().blue()*255));
+      {
+          newBrushHandle = CreateSolidBrush(brushColor);
           break;
       }
 
       case Gfx::Brush::TextureFill: 
-        {
-        const Gfx::Image& texture = _brush.texture();
+      {
+          const Gfx::Image& texture = _brush.texture();
 
-        if (texture.width() != 0)
-        {
-            // Fill the info for a device-independent bitmap to hold the texture data in the Windows system.
-            BITMAPINFO bitmapInfo;
-            ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+          if(texture.width() != 0)
+          {
+              // Fill the info for a device-independent bitmap to hold the texture data in the Windows system.
+              BITMAPINFO bitmapInfo;
+              ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
 
-            bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);    // Size of this struct.
-            bitmapInfo.bmiHeader.biWidth       = texture.width();             // Bitmap width.
-            bitmapInfo.bmiHeader.biHeight      = -(ssize_t)texture.height();  // Bitmap height. Top-down image.
-            bitmapInfo.bmiHeader.biPlanes      = 1;                           // Always 1.
-            bitmapInfo.bmiHeader.biBitCount    = texture.format().pixelSize()*8;  // We internally use a 32-bit bitmap.
-            bitmapInfo.bmiHeader.biCompression = BI_RGB;                      // Uncompressed (top-down) RGB bitmap.
-            bitmapInfo.bmiHeader.biSizeImage   = 0;                           // 0 = automatic for BI_RGB-images.
-            bitmapInfo.bmiHeader.biClrUsed     = 0;                           // 0 = No color table.
-            bitmapInfo.bmiHeader.biClrImportant= 0;                           // 0 = No color table.
+              bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);    // Size of this struct.
+              bitmapInfo.bmiHeader.biWidth       = texture.width();             // Bitmap width.
+              bitmapInfo.bmiHeader.biHeight      = -(ssize_t)texture.height();  // Bitmap height. Top-down image.
+              bitmapInfo.bmiHeader.biPlanes      = 1;                           // Always 1.
+              bitmapInfo.bmiHeader.biBitCount    = texture.format().pixelSize()*8;  // We internally use a 32-bit bitmap.
+              bitmapInfo.bmiHeader.biCompression = BI_RGB;                      // Uncompressed (top-down) RGB bitmap.
+              bitmapInfo.bmiHeader.biSizeImage   = 0;                           // 0 = automatic for BI_RGB-images.
+              bitmapInfo.bmiHeader.biClrUsed     = 0;                           // 0 = No color table.
+              bitmapInfo.bmiHeader.biClrImportant= 0;                           // 0 = No color table.
 
-            // Create the device-independent bitmap that will be filled with the texture
-            // and used as brush.
-            VOID* imageBits;
-            HBITMAP bitmap = CreateDIBSection(_surface->deviceContext(), &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
+              // Create the device-independent bitmap that will be filled with the texture
+              // and used as brush.
+              VOID* imageBits;
+              HBITMAP bitmap = CreateDIBSection(_surface->deviceContext(), &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
 
-            // Copy image data from the texture to the Windows bitmap.
-            memcpy(imageBits, texture.pixel(0,0), texture.width() * texture.height() * texture.format().pixelSize());
+              // Copy image data from the texture to the Windows bitmap.
+              memcpy(imageBits, texture.pixel(0,0), texture.width() * texture.height() * texture.format().pixelSize());
 
-            // Create the actual brush from this bitmap.
-            newBrushHandle = CreatePatternBrush(bitmap);
+              // Create the actual brush from this bitmap.
+              newBrushHandle = CreatePatternBrush(bitmap);
 
-            // Free the bitmap again.
-            DeleteObject(bitmap);
-        }
-        else // texture.empty() == true
-        {
-            // Use the empty brush for empty textures.
-            newBrushHandle = (HBRUSH)GetStockObject(NULL_BRUSH);
-        }            
+              // Free the bitmap again.
+              DeleteObject(bitmap);
+          }
+          else 
+          {
+              // Use the empty brush for empty textures.
+              newBrushHandle = (HBRUSH)GetStockObject(NULL_BRUSH);
+          }       
+          break;     
       }
-    break;
 
-    default:
-          // TODO Throw runtime exception in case we do not check for every possible value of Brush::FillStyle?
-    return;
+      default:
+          return;
     }
 
     HBRUSH oldBrushHandle = (HBRUSH)SelectObject(_surface->deviceContext(), newBrushHandle);
-
     DeleteObject(oldBrushHandle);
 }
 
@@ -323,23 +324,29 @@ const Gfx::Font& PainterImpl::font() const
 Gfx::FontMetrics PainterImpl::fontMetrics(const Pt::String& text) const
 {
     SIZE textSize;
-    TEXTMETRIC basicMetrics;
-    GetTextMetrics(_surface->deviceContext(), &basicMetrics);
+    TEXTMETRIC tm;
+    GetTextMetrics(_surface->deviceContext(), &tm);
 
     _text.clear();
     text.toUtf16( std::back_inserter(_text) );
-    GetTextExtentPoint32W(_surface->deviceContext(), _text.c_str(), _text.length(), &textSize);
+    
+    GetTextExtentPoint32W(_surface->deviceContext(), 
+                          _text.c_str(), _text.length(), &textSize);
+    
     Gfx::Size size(textSize.cx, textSize.cy);
-    Gfx::SizeF sizeF = _screen.toUnit(size);
+    Gfx::SizeF sizeF = Application::instance().mainScreen().toUnit(size);
 
-    return Gfx::FontMetrics(basicMetrics.tmAscent, basicMetrics.tmDescent, (int)sizeF.width(), (int)sizeF.height());
+    return Gfx::FontMetrics(tm.tmAscent, 
+                            tm.tmDescent, 
+                            (int)sizeF.width(), 
+                            (int)sizeF.height());
 }
 
 
 Gfx::FontMetrics PainterImpl::fontMetrics( const Gfx::Font& font, const Pt::String& text )
 {
-    PaintSurface surface;
-    surface.resize(Gfx::SizeF(200, 200) );
+    PixmapSurface surface;
+    surface.resize( Gfx::SizeF(200, 200) );
   
     Hmi::Painter painter(surface);
     painter.setFont(font);
@@ -409,8 +416,8 @@ void PainterImpl::drawLine(const Gfx::PointF& fromF, const Gfx::PointF& toF)
     if (_pen.size() == 0) 
         return;
 
-    Gfx::Point from = _screen.fromUnit(fromF + _origin);
-    Gfx::Point to = _screen.fromUnit(toF + _origin);
+    Gfx::Point from = _surface->toDevice(fromF);
+    Gfx::Point to = _surface->toDevice(toF);
 
     POINT points[2];
     points[0].x = from.x();
@@ -424,7 +431,7 @@ void PainterImpl::drawLine(const Gfx::PointF& fromF, const Gfx::PointF& toF)
 
 void PainterImpl::drawText(const Gfx::PointF& toF, const Pt::String& text)
 {
-    Gfx::Point to = _screen.fromUnit(toF + _origin);
+    Gfx::Point to = _surface->toDevice(toF);
   
     RECT rectangle;
     SetRect(&rectangle, to.x(), to.y(), to.x(), to.y());
@@ -439,10 +446,7 @@ void PainterImpl::drawText(const Gfx::PointF& toF, const Pt::String& text)
 
 void PainterImpl::fillRect(const Gfx::RectF& rectF)
 {
-    Gfx::RectF to(rectF);
-    to.setOrigin(rectF.topLeft() + _origin);
-
-    Gfx::Rect rect = _screen.fromUnit(to);
+    Gfx::Rect rect = _surface->toDevice(rectF);
   
     RECT rectangle;
 
@@ -459,16 +463,13 @@ void PainterImpl::fillRect(const Gfx::RectF& rectF)
 
 void PainterImpl::drawRect(const Gfx::RectF& rectF)
 {
-    Gfx::RectF to(rectF);
-    to.setOrigin(rectF.topLeft() + _origin);
-
-    Gfx::Rect rect = _screen.fromUnit(to);
+    Gfx::Rect rect = _surface->toDevice(rectF);
 
     if (rect.size().width() == 1 && rect.size().height() == 1) 
     {
         // Windows does not paint outline rectangles with a size of 1,1. For compatibility
         // to other windowing systems we draw a pixel (1|1) instead.
-        drawLine(to.topLeft(), to.topLeft());
+        drawLine(rectF.topLeft(), rectF.topLeft());
         return;
     }
 
@@ -482,8 +483,8 @@ void PainterImpl::drawRect(const Gfx::RectF& rectF)
 
 void PainterImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
 {
-    Gfx::Point topLeft = _screen.fromUnit(topLeftF + _origin);
-    Gfx::Size size = _screen.fromUnit(sizeF);
+    Gfx::Point topLeft = _surface->toDevice(topLeftF + _origin);
+    Gfx::Size size = _surface->toDevice(sizeF);
 
     HBRUSH originalBrush = (HBRUSH)SelectObject(_surface->deviceContext(), GetStockObject(NULL_BRUSH));
 
@@ -497,8 +498,8 @@ void PainterImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& siz
 
 void PainterImpl::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
 {
-    Gfx::Point topLeft = _screen.fromUnit(topLeftF + _origin);
-    Gfx::Size size =_screen.fromUnit(sizeF);
+    Gfx::Point topLeft = _surface->toDevice(topLeftF);
+    Gfx::Size size = _surface->toDevice(sizeF);
 
     // Temporarily select the empty pen to only draw the filling.
     HPEN originalPen = (HPEN)SelectObject(_surface->deviceContext(), GetStockObject(NULL_PEN));
@@ -524,7 +525,7 @@ void PainterImpl::drawPolyline(const Gfx::PointF* points, const size_t pointCoun
 
     for (size_t i = 0; i < pointCount; i++)
     {
-        Gfx::Point p = _screen.fromUnit(points[i] + _origin);
+        Gfx::Point p = _surface->toDevice(points[i]);
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -541,7 +542,7 @@ void PainterImpl::fillPolygon(const Gfx::PointF* points, const size_t pointCount
 
     for (size_t i = 0; i < pointCount; i++)
     {
-        Gfx::Point p = _screen.fromUnit(points[i] + _origin);
+        Gfx::Point p = _surface->toDevice(points[i]);
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -554,16 +555,17 @@ void PainterImpl::fillPolygon(const Gfx::PointF* points, const size_t pointCount
 
 void PainterImpl::drawSurface(const Gfx::PointF& toF, const PaintSurface& surface)
 {
-    Gfx::Point to = _screen.fromUnit(toF + _origin);
-    Gfx::Size size = _screen.fromUnit(surface.size());
+    Gfx::Point to = _surface->toDevice(toF);
+    Gfx::Size size = _surface->toDevice( surface.impl()->size() );
 
-    BitBlt( _surface->deviceContext(), to.x(), to.y(), size.width(), size.height(), surface.impl()->deviceContext(),  0, 0, SRCCOPY);
+    BitBlt( _surface->deviceContext(), to.x(), to.y(), size.width(), size.height(), 
+            surface.impl()->deviceContext(), 0, 0, SRCCOPY);
 }
 
 
 void PainterImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 {
-    Gfx::Point to = _screen.fromUnit(toF + _origin);
+    Gfx::Point to = _surface->toDevice(toF);
 
     const size_t depth = image.format().pixelSize() * 8; 
 
@@ -628,7 +630,6 @@ void PainterImpl::clear(const Gfx::Color& color)
     fillRect(rect);
 }
 
-}
+} // namespace
 
-}
-
+} // namespace

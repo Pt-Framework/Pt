@@ -34,7 +34,64 @@ namespace Pt {
 
 namespace Hmi {
 
-PaintSurfaceImpl::PaintSurfaceImpl()
+PaintAreaImpl::PaintAreaImpl()
+: _surface(0)
+{
+}
+
+
+PaintAreaImpl::~PaintAreaImpl()
+{
+}
+
+
+void PaintAreaImpl::set(PaintSurface& surface, const Gfx::RectF& area)
+{
+    _surface = &surface;
+    _area = area;
+}
+
+
+HDC PaintAreaImpl::deviceContext() const
+{
+    if( ! _surface )
+        return NULL;
+
+    return _surface->impl()->deviceContext();
+}
+
+
+// TODO: move drawing code to PaintSurfaceImpl
+//void PaintAreaImpl::drawLine(const Gfx::PointF& fromF, const Gfx::PointF& toF)
+//{
+//    _surface->impl()->drawLine(fromF + _area.topLeft(),
+//                               toF + _area.topLeft() );
+//}
+
+
+Gfx::Point PaintAreaImpl::toDevice(const Gfx::PointF& p) const
+{
+    return _surface->impl()->toDevice( p + _area.topLeft() );
+}
+
+
+Gfx::Rect PaintAreaImpl::toDevice(const Gfx::RectF& r) const
+{
+    Gfx::RectF rect(r);
+    rect.setOrigin(r.topLeft() + _area.topLeft());
+    return _surface->impl()->toDevice(rect);
+}
+
+
+Gfx::Size PaintAreaImpl::toDevice(const Gfx::SizeF& s) const
+{
+    return _surface->impl()->toDevice(s);
+}
+
+
+
+
+PixmapSurfaceImpl::PixmapSurfaceImpl()
 : _deviceContext(0)
 {
     _size = Gfx::SizeF(10,10);
@@ -47,7 +104,7 @@ PaintSurfaceImpl::PaintSurfaceImpl()
     
     DeleteDC(screenDC);
 
-    _oldPen   = (HPEN)  GetCurrentObject(_deviceContext, OBJ_PEN);
+    _oldPen   = (HPEN) GetCurrentObject(_deviceContext, OBJ_PEN);
     _oldBrush = (HBRUSH) GetCurrentObject(_deviceContext, OBJ_BRUSH);
     _oldFont  = (HFONT) GetCurrentObject(_deviceContext, OBJ_FONT);
 
@@ -56,7 +113,7 @@ PaintSurfaceImpl::PaintSurfaceImpl()
 }
 
 
-PaintSurfaceImpl::~PaintSurfaceImpl()
+PixmapSurfaceImpl::~PixmapSurfaceImpl()
 {
     HPEN oldPen = (HPEN)SelectObject(_deviceContext, _oldPen);
     DeleteObject(oldPen);
@@ -72,7 +129,7 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
 }
 
 
-void PaintSurfaceImpl::resize(const Gfx::SizeF& size)
+void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
 {
     if( _size == size )
         return;
@@ -105,6 +162,30 @@ void PaintSurfaceImpl::resize(const Gfx::SizeF& size)
     SetBkMode(_deviceContext, TRANSPARENT);
 }
 
+
+HDC PixmapSurfaceImpl::deviceContext() const
+{
+    return _deviceContext;
 }
 
+
+Gfx::Point PixmapSurfaceImpl::toDevice(const Gfx::PointF& p) const
+{
+    return Application::instance().mainScreen().fromUnit(p);
 }
+
+
+Gfx::Rect PixmapSurfaceImpl::toDevice(const Gfx::RectF& r) const
+{
+    return Application::instance().mainScreen().fromUnit(r);
+}
+
+
+Gfx::Size PixmapSurfaceImpl::toDevice(const Gfx::SizeF& s) const
+{
+    return Application::instance().mainScreen().fromUnit(s);
+}
+
+} // namespace
+
+} // namespace

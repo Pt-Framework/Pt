@@ -83,7 +83,7 @@ class PT_HMI_API Label  : public Panel
         }
 
     protected:           
-        virtual void onPaint(Painter& painter, const Gfx::RectF& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         virtual Gfx::SizeF onAutoSize() const;       
 

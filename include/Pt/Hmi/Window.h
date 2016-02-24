@@ -56,7 +56,6 @@ namespace Hmi {
 
 class Widget;
 class WindowImpl;
-class PaintSurface;
 
 class PT_HMI_API Window : public Pt::Connectable
 {
@@ -264,7 +263,7 @@ class PT_HMI_API Window : public Pt::Connectable
     Widget*                        _pointerWidget;
     Widget*                        _focusWidget;
     std::vector<Widget*>           _focusList;
-    PaintSurface                   _surface;
+    PixmapSurface                  _surface;
     WindowImpl*                    _impl;           
     Pt::Signal<const Pt::Event&>   _eventReady;
 };

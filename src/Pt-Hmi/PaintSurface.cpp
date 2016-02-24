@@ -34,35 +34,98 @@ namespace Pt {
 
 namespace Hmi {
 
+/////////////////////////////////////////////////////////////////////
+// PaintSurface
+/////////////////////////////////////////////////////////////////////
+
 PaintSurface::PaintSurface()
-: _impl( new PaintSurfaceImpl())
 {
 }
 
 
 PaintSurface::~PaintSurface()
 {
+}
+
+
+
+/////////////////////////////////////////////////////////////////////
+// WindowSurface
+/////////////////////////////////////////////////////////////////////
+
+PaintArea::PaintArea()
+: _impl(new PaintAreaImpl)
+{
+}
+
+
+PaintArea::~PaintArea()
+{
     delete _impl;
 }
 
 
-void PaintSurface::resize(const Gfx::SizeF& size)
+void PaintArea::set(PaintSurface& surface, const Gfx::RectF& area)
+{ 
+    _impl->set(surface, area); 
+}
+
+
+PaintSurfaceImpl* PaintArea::impl()
+{ 
+    return _impl; 
+}
+
+
+const PaintSurfaceImpl* PaintArea::impl() const 
+{ 
+    return _impl; 
+}
+
+/////////////////////////////////////////////////////////////////////
+// PixmapSurface
+/////////////////////////////////////////////////////////////////////
+
+PixmapSurface::PixmapSurface()
+: _impl( new PixmapSurfaceImpl())
+{
+}
+
+
+PixmapSurface::~PixmapSurface()
+{
+    delete _impl;
+}
+
+
+void PixmapSurface::resize(const Gfx::SizeF& size)
 {
     _impl->resize(size);
 }
 
 
-Gfx::SizeF PaintSurface::size() const
+Gfx::SizeF PixmapSurface::size() const
 {
     return _impl->size();
 }
 
 
-void PaintSurface::clear()
+void PixmapSurface::clear()
 {
     _impl->clear();
 }
 
+
+PaintSurfaceImpl* PixmapSurface::impl()
+{ 
+    return _impl; 
 }
 
+const PaintSurfaceImpl* PixmapSurface::impl() const 
+{ 
+    return _impl; 
 }
+
+} // namespace
+
+} // namespace

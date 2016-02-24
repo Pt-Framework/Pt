@@ -29,6 +29,7 @@
 
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Layout.h>
+#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Rect.h>
@@ -56,8 +57,7 @@ Panel::~Panel()
 }
 
 
-//void Panel::onRender(const Gfx::PointF& pos, 
-//                     PaintSurface& parentSurface, 
+//void Panel::onRender(PaintSurface& surface, 
 //                     const Gfx::RectF& updateRect)
 //{
 //    if( ! isValid() )
@@ -71,32 +71,31 @@ Panel::~Panel()
 //        onPaint(painter, updateRect);
 //    }
 //
-//    Gfx::PointF offset(0, 0);
-//    Widget::onRender(offset, _surface, updateRect);
+//    Widget::onRender(_surface, updateRect);
 //
-//    Painter painter(parentSurface);
-//    painter.drawSurface(pos, _surface);
+//    Painter painter(surface);
+//    painter.drawSurface(Gfx::PointF(0, 0), _surface);
 //}
 
 
-void Panel::onRender(const Gfx::PointF& pos, 
-                     PaintSurface& parentSurface, 
-                     const Gfx::RectF& updateRect)
+void Panel::onRender(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    Painter painter(parentSurface);
-    painter.setOrigin(pos);
-    onPaint(painter, updateRect);
+    onPaint(surface, updateRect);
 
-    Widget::onRender(pos, parentSurface, updateRect);
+    Widget::onRender(surface, updateRect);
 }
 
 
-void Panel::onPaint(Painter& painter, const Gfx::RectF& updateRect)
+void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {	
+    
+
     const Gfx::SizeF& size = this->size();
 
     if( size.width() < 0 || size.height() < 0)
         return; 
+
+    Painter painter(surface);
 
 	  Gfx::RectF borderRect(_borderWidth/2, size.width() - _borderWidth,
                           _borderWidth/2, size.height() - _borderWidth);

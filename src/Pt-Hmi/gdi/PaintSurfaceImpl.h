@@ -30,6 +30,7 @@
 #ifndef Pt_Hmi_PaintSurfaceImpl_h
 #define Pt_Hmi_PaintSurfaceImpl_h
 
+#include <Pt/Hmi/Window.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Image.h>
@@ -42,25 +43,78 @@ namespace Hmi {
 class PaintSurfaceImpl
 {
     public:        
-        PaintSurfaceImpl();
+        virtual ~PaintSurfaceImpl()
+        {}   
+
+        virtual const Gfx::SizeF& size() const = 0;
+    
+        virtual HDC deviceContext() const = 0;
+
+        virtual Pt::Gfx::Point toDevice(const Pt::Gfx::PointF&) const = 0;
+
+        virtual Gfx::Rect toDevice(const Gfx::RectF&) const = 0;
+
+        virtual Gfx::Size toDevice(const Gfx::SizeF&) const = 0;
+
+    protected:
+        PaintSurfaceImpl()
+        {}
+};
+
+
+class PaintAreaImpl : public PaintSurfaceImpl
+{
+    public:        
+        PaintAreaImpl();
         
-        virtual ~PaintSurfaceImpl();    
+        virtual ~PaintAreaImpl();   
+
+        void set(PaintSurface& surface, const Gfx::RectF& area); 
+
+        virtual const Gfx::SizeF& size() const
+        {
+            return _area.size();
+        }
+    
+        virtual HDC deviceContext() const;
+
+        virtual Gfx::Point toDevice(const Gfx::PointF& p) const;
+
+        virtual Gfx::Rect toDevice(const Gfx::RectF& p) const;
+
+        virtual Gfx::Size toDevice(const Gfx::SizeF&) const;
+
+    private:
+        PaintSurface* _surface;
+        Gfx::RectF _area;
+};
+
+
+class PixmapSurfaceImpl : public PaintSurfaceImpl
+{
+    public:        
+        PixmapSurfaceImpl();
+        
+        virtual ~PixmapSurfaceImpl();    
     
         void resize(const Gfx::SizeF& size);    
-
-        const Gfx::SizeF& size() const
-        {
-            return _size;
-        }
-
-        HDC deviceContext() const
-        {
-            return _deviceContext;
-        }
 
         void clear()
         {
         }
+
+        virtual const Gfx::SizeF& size() const
+        {
+            return _size;
+        }
+
+        virtual HDC deviceContext() const;
+
+        virtual Gfx::Point toDevice(const Gfx::PointF& p) const;
+
+        virtual Gfx::Rect toDevice(const Gfx::RectF& p) const;
+
+        virtual Gfx::Size toDevice(const Gfx::SizeF&) const;
 
     private:
         Gfx::SizeF _size;
@@ -71,8 +125,8 @@ class PaintSurfaceImpl
         HFONT      _oldFont;
 };
 
-}
+} // namespace
 
-}
+} // namespace
 
 #endif

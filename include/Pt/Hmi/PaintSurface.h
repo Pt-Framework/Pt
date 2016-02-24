@@ -30,9 +30,8 @@
 #define Pt_Hmi_PaintSurface_h
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Rect.h>
 
 namespace Pt {
 
@@ -43,32 +42,67 @@ class PaintSurfaceImpl;
 class PT_HMI_API PaintSurface
 {
     public:        
-        PaintSurface();    
+        virtual ~PaintSurface();
+        
+        virtual PaintSurfaceImpl* impl() = 0;
 
-        ~PaintSurface();
+        virtual const PaintSurfaceImpl* impl() const = 0;
+    
+    protected:
+        PaintSurface();
+};
+
+
+class PaintSurface;
+class PaintAreaImpl;
+
+/** @brief A drawing surface on a window.
+*/
+class PaintArea : public PaintSurface
+{
+    public:
+        PaintArea();
+
+        virtual ~PaintArea();
+
+        void set(PaintSurface& surface, const Gfx::RectF& area);
+
+        virtual PaintSurfaceImpl* impl();
+
+        virtual const PaintSurfaceImpl* impl() const;
+
+    private:
+        PaintAreaImpl* _impl;
+};
+
+
+class PixmapSurfaceImpl;
+
+/** @brief A back buffer drawing surface.
+*/
+class PixmapSurface : public PaintSurface
+{
+    public:
+        PixmapSurface();
+
+        virtual ~PixmapSurface();
 
         void resize(const Gfx::SizeF& size);        
 
         Gfx::SizeF size() const;
 
         void clear();
-        
-        PaintSurfaceImpl* impl()
-        {
-            return _impl;
-        }
 
-        const PaintSurfaceImpl* impl() const
-        {
-            return _impl;
-        }
+        virtual PaintSurfaceImpl* impl();
+
+        virtual const PaintSurfaceImpl* impl() const;
 
     private:
-        PaintSurfaceImpl* _impl;   
+        PixmapSurfaceImpl* _impl;
 };
 
-}
+} // namespace
 
-}
+} // namespace
 
 #endif

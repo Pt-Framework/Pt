@@ -135,34 +135,32 @@ void Button::onFocus(bool hasFocus)
 }
 
 
-void Button::onPaint(Painter& painter, const Gfx::RectF& updateRect)
+void Button::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {    
     bool mouseOver = window()->pointerWidget() == this;
-    //Painter painter( paintSurface );
-
     Gfx::Color bkgColor = backgroundColor();
 
     if( ! isEnabled() )
     {
-        Label::onPaint(painter, updateRect);
+        Label::onPaint(surface, updateRect);
         return;
     }
 
     if( mouseOver )
     {
-        setBackgroundColor( Gfx::Color(bkgColor.red() * 0.9 ,
-                                       bkgColor.green() * 0.9 ,
-                                       bkgColor.blue() * 0.9 ) );
+        setBackgroundColor( Gfx::Color(bkgColor.red() * 0.9f ,
+                                       bkgColor.green() * 0.9f ,
+                                       bkgColor.blue() * 0.9f ) );
     }
 
     if( _isPressed )
     {
-        setBackgroundColor( Gfx::Color(bkgColor.red() * 0.8 ,
-                                       bkgColor.green() * 0.8 ,
-                                       bkgColor.blue() * 0.8 ) );
+        setBackgroundColor( Gfx::Color(bkgColor.red() * 0.8f ,
+                                       bkgColor.green() * 0.8f ,
+                                       bkgColor.blue() * 0.8f ) );
     }
 
-    Label::onPaint(painter, updateRect);
+    Label::onPaint(surface, updateRect);
     
     setBackgroundColor(bkgColor);
 
@@ -175,6 +173,7 @@ void Button::onPaint(Painter& painter, const Gfx::RectF& updateRect)
         Gfx::Color armedColor(1, 0, 0);
         Gfx::Pen pen(1, armedColor, Gfx::Pen::DashStyle);
         
+        Painter painter( surface );
         painter.setPen(pen);
         Gfx::RectF rect(Gfx::PointF(2,2), size);
         painter.drawRect(rect);

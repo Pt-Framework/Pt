@@ -236,17 +236,15 @@ void Window::update(const Gfx::RectF& rect)
 void Window::render(const Gfx::RectF& updateRect)
 {
     Painter painter(_surface);
-
-    painter.setBrush( Pt::Gfx::Color(0.9, 0.9, 0.9) );
-    //Pt::Gfx::RectF rect(Pt::Gfx::PointF(0,0), size() );
+    painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
     painter.fillRect(updateRect);
 
     if(_mainWidget)
     {
-        _mainWidget->render(Gfx::PointF(0,0), _surface, updateRect);
+        _mainWidget->render(_surface, updateRect);
     }
     
-    _windowManager.render( _surface, updateRect );
+    _windowManager.render(_surface, updateRect);
 }
 
 

@@ -144,12 +144,12 @@ class PT_HMI_API Widget : public Pt::Connectable
         bool isValid() const
         { return _isValid; }
 
-        void render(const Gfx::PointF& pos, PaintSurface& parentSurface, const Gfx::RectF& updateRect);
+        void render(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     protected:    
         virtual void onLayout();
 
-        virtual void onRender(const Gfx::PointF& pos, PaintSurface& surface, const Gfx::RectF& updateRect); 
+        virtual void onRender(PaintSurface& surface, const Gfx::RectF& updateRect); 
 
     protected:
         virtual void onEvent(const Pt::Event& ev);
