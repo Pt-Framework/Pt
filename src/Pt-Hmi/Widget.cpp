@@ -54,7 +54,7 @@ Widget::Widget()
 , _geometry(10, 100, 10, 100)
 , _isValid(true)
 , _mnemonic(0)
-, _updateRect(_geometry)
+, _updateRect()
 {      
     _eventReady += Pt::slot(*this, &Widget::onKeyEvent);
     _eventReady += Pt::slot(*this, &Widget::onPointerEvent);
@@ -384,9 +384,12 @@ void Widget::onUpdate(const Gfx::RectF& rect)
     if( ! _isValid )
         return;
 
-   // update rect in parent coordinates
+   // area in parent coordinates
    Gfx::RectF updateRect(rect);
    updateRect.setOrigin( position() + rect.topLeft() );
+
+    // update the given rect and the update area
+    _updateRect.unify(updateRect);
 
     if( parent() )
     {
@@ -411,7 +414,10 @@ void Widget::update()
 
     _isValid = false; 
    
-    // NOTE: _updateRect is already in parent coordinates
+    // update the widget rect and the update area 
+    // all areas are already in parent coordinates
+    _updateRect.unify(_geometry);
+
     if( parent() )
     {
         parent()->onUpdate(_updateRect);
@@ -474,7 +480,7 @@ void Widget::render(PaintSurface& surface,
     
     onRender(surface, updateRect);
     
-    _updateRect = _geometry;
+    _updateRect.clear();
     _isValid = true;
 }
 
@@ -640,6 +646,7 @@ void Widget::setEnabled( bool e )
 
 void Widget::setSize(const Gfx::SizeF& size)
 {
+    _updateRect.unify(_geometry); 
     _geometry.setSize(size);
     _updateRect.unify(_geometry);            
 }
@@ -647,8 +654,9 @@ void Widget::setSize(const Gfx::SizeF& size)
     
 void Widget::setPosition(const Gfx::PointF& pos)
 {
-   _geometry.setOrigin(pos);
-   _updateRect.unify(_geometry);   
+    _updateRect.unify(_geometry); 
+    _geometry.setOrigin(pos);
+    _updateRect.unify(_geometry);   
 }
 
 

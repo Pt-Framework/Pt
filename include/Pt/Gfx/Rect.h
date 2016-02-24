@@ -72,20 +72,26 @@ class BasicRect
           return (_s.width() == 0 || _s.height() == 0 );
       }
 
-      void set( const BasicPoint<T>& p, const BasicSize<T>& s ) 
+      void clear()
+      {
+          _p.set(0, 0);
+          _s.set(0, 0);
+      }
+
+      void set(const BasicPoint<T>& p, const BasicSize<T>& s) 
       {
           _p = p;
           _s = s;
       }
 
-      void set( const BasicPoint<T>& p1, const BasicPoint<T>& p2 )
+      void set(const BasicPoint<T>& p1, const BasicPoint<T>& p2)
       {
           this->setOrigin( p1 );
           this->setWidth(p2.x() - p1.x() + 1);
           this->setHeight(p2.y() - p1.y() + 1);
       }
 
-      void set( const T left, const T right, const T top, const T bottom )
+      void set(const T left, const T right, const T top, const T bottom)
       {
           _p = BasicPoint<T>( left, top );
           _s = BasicSize<T>(  right - left + 1 , bottom - top  + 1);
@@ -163,7 +169,8 @@ class BasicRect
 
       const BasicPoint<T> bottomRight() const
       { 
-				  return BasicPoint<T>(this->x() + this->width() -1, this->y() + this->height() - 1); 
+				  return BasicPoint<T>(this->x() + this->width() -1, 
+                               this->y() + this->height() - 1); 
 			}
 
       bool operator==(const BasicRect& other) const

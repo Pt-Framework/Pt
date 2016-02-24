@@ -67,7 +67,7 @@ Window::Window( Window* parent )
 , _mainWidget(0)
 , _position(0,0)
 , _size(200,200)
-, _updateRect(0, 0, 0, 0)
+, _updateRect()
 {
     _windowManager.init(*this);
 
@@ -227,19 +227,19 @@ void Window::focusNext()
 }
 
 
-// updates this window's rect area and _updateRect
 void Window::update()
 {
+    // update the window rect and the update area
     _updateRect.unify( Gfx::RectF(Gfx::PointF(0,0), _size) );
     update(_updateRect);
 }
 
 
-// updates rect and _updateRect
 void Window::update(const Gfx::RectF& rect)
 {
     _isValid = false;
 
+    // update the given rect and the update area
     _updateRect.unify(rect);
 
     if(_impl) 
@@ -263,7 +263,7 @@ void Window::render(const Gfx::RectF& updateRect)
 
     _windowManager.render(_surface, updateRect);
 
-    _updateRect.set(0, 0, 0, 0);
+    _updateRect.clear();
     _isValid = true;
 }
 
@@ -452,9 +452,10 @@ void Window::onResizeEvent(const ResizeEvent& ev)
 
     if(_parent)
     {
-        // update whole parent window
+        // update area for whole parent window in local coordinates
         Gfx::PointF pos( -_position.x(), -_position.y() );
         Gfx::RectF parentRect(pos, _parent->size());
+
         _updateRect.unify(parentRect);
     }
 
