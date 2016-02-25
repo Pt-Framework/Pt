@@ -40,6 +40,8 @@ namespace Pt {
 
 namespace Hmi {
 
+class PixmapSurface;
+
 class PaintSurfaceImpl
 {
     public:        
@@ -47,14 +49,40 @@ class PaintSurfaceImpl
         {}   
 
         virtual const Gfx::SizeF& size() const = 0;
+
+        virtual void setPen(const Gfx::Pen& pen) = 0;
+
+        virtual void setBrush(const Gfx::Brush& brush) = 0;
+
+        virtual void setFont(const Gfx::Font& font) = 0;
+
+        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const = 0;
     
-        virtual HDC deviceContext() const = 0;
+        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to) = 0;
 
-        virtual Pt::Gfx::Point toDevice(const Pt::Gfx::PointF&) const = 0;
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text) = 0;
 
-        virtual Gfx::Rect toDevice(const Gfx::RectF&) const = 0;
+        virtual void drawRect(const Gfx::RectF& rectangle) = 0;
 
-        virtual Gfx::Size toDevice(const Gfx::SizeF&) const = 0;
+        virtual void fillRect(const Gfx::RectF& rectangle) = 0;
+
+        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
+
+        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
+
+        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount) = 0;
+
+        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount) = 0;
+
+        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface) = 0;
+
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image) = 0;
+
+        static std::string defaultFont();
+
+        static std::list<std::string> fontFamilyNames(); 
+
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
 
     protected:
         PaintSurfaceImpl()
@@ -71,18 +99,35 @@ class PaintAreaImpl : public PaintSurfaceImpl
 
         void set(PaintSurface& surface, const Gfx::RectF& area); 
 
-        virtual const Gfx::SizeF& size() const
-        {
-            return _area.size();
-        }
-    
-        virtual HDC deviceContext() const;
+        virtual const Gfx::SizeF& size() const;
 
-        virtual Gfx::Point toDevice(const Gfx::PointF& p) const;
+        virtual void setPen(const Gfx::Pen& pen);
 
-        virtual Gfx::Rect toDevice(const Gfx::RectF& p) const;
+        virtual void setBrush(const Gfx::Brush& brush);
 
-        virtual Gfx::Size toDevice(const Gfx::SizeF&) const;
+        virtual void setFont(const Gfx::Font& font);
+
+        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
+
+        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
+
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
+
+        virtual void drawRect(const Gfx::RectF& rectangle);
+
+        virtual void fillRect(const Gfx::RectF& rectangle);
+
+        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
+
+        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
+
+        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
+
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 
     private:
         PaintSurface* _surface;
@@ -95,26 +140,43 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
     public:        
         PixmapSurfaceImpl();
         
-        virtual ~PixmapSurfaceImpl();    
+        virtual ~PixmapSurfaceImpl();  
+        
+        void clear();  
     
         void resize(const Gfx::SizeF& size);    
 
-        void clear()
-        {
-        }
+        virtual const Gfx::SizeF& size() const;
 
-        virtual const Gfx::SizeF& size() const
-        {
-            return _size;
-        }
+        virtual void setPen(const Gfx::Pen& pen);
 
-        virtual HDC deviceContext() const;
+        virtual void setBrush(const Gfx::Brush& brush);
 
-        virtual Gfx::Point toDevice(const Gfx::PointF& p) const;
+        virtual void setFont(const Gfx::Font& font);
 
-        virtual Gfx::Rect toDevice(const Gfx::RectF& p) const;
+        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
 
-        virtual Gfx::Size toDevice(const Gfx::SizeF&) const;
+        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
+
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
+
+        virtual void drawRect(const Gfx::RectF& rectangle);
+
+        virtual void fillRect(const Gfx::RectF& rectangle);
+
+        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
+
+        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
+
+        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
+
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+
+        HDC deviceContext() const;
 
     private:
         Gfx::SizeF _size;
@@ -123,6 +185,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         HPEN       _oldPen;
         HBRUSH     _oldBrush;
         HFONT      _oldFont;
+        std::wstring   _text;
 };
 
 } // namespace

@@ -113,7 +113,7 @@ class PT_HMI_API Window : public Pt::Connectable
 
     void processEvent(const Pt::Event& ev);
 
-    PaintSurface& surface();
+    PixmapSurface& surface();
 
     WindowManager& windowManager();
 

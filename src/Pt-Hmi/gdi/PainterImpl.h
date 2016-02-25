@@ -39,11 +39,12 @@
 #include <windows.h>
 
 namespace Pt {
+
 namespace Hmi {
 
 class PaintSurfaceImpl;
 class PaintSurface;
-class Screen;
+class PixmapSurface;
 
 class PainterImpl
 {
@@ -87,7 +88,7 @@ class PainterImpl
 
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
 
-        const std::list<std::string>& fontFamilyNames();        
+        std::list<std::string> fontFamilyNames();        
 
         void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);                
 
@@ -105,41 +106,23 @@ class PainterImpl
 
         void fillPolygon(const Gfx::PointF* points, const size_t pointCount);
 
-        void drawSurface(const Gfx::PointF& to, const PaintSurface& pm);
+        void drawSurface(const Gfx::PointF& to, const PixmapSurface& pm);
         
         void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
-
-        void addFontName(const std::string& fontName);
 
         void flush()
         {
         }
         
         void clear(const Gfx::Color& color);
-
-    protected:
-        void drawCompatibleImage(size_t x, size_t y, size_t depth, const char* data, size_t width, size_t height);
-        void drawIndependentImage(size_t x, size_t y, const char* data, size_t width, size_t height);
-
-        std::string determinePlatformDefaultFontName();
-
-        void updatePen();
-        void updateFont();
-        void updateBrush();
         
     private:
         PaintSurfaceImpl*      _surface;
-
         Gfx::PointF            _origin;
         Gfx::RectF             _clip;
-
         Gfx::Pen               _pen;
         Gfx::Brush             _brush;
         Gfx::Font              _font;
-
-        mutable std::wstring   _text;
-        std::list<std::string> _fontNamesList;
-        Gfx::RenderMode::Type  _renderMode;
 };
 
 }

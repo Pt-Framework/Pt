@@ -126,6 +126,12 @@ const PaintSurfaceImpl* PixmapSurface::impl() const
     return _impl; 
 }
 
+
+PixmapSurfaceImpl* PixmapSurface::pixmapImpl() const
+{ 
+    return _impl; 
+}
+
 } // namespace
 
 } // namespace

@@ -56,7 +56,7 @@ class PT_HMI_API PaintSurface
 class PaintSurface;
 class PaintAreaImpl;
 
-/** @brief A drawing surface on a window.
+/** @brief An area of another surface.
 */
 class PaintArea : public PaintSurface
 {
@@ -96,6 +96,8 @@ class PixmapSurface : public PaintSurface
         virtual PaintSurfaceImpl* impl();
 
         virtual const PaintSurfaceImpl* impl() const;
+
+        PixmapSurfaceImpl* pixmapImpl() const;
 
     private:
         PixmapSurfaceImpl* _impl;

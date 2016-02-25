@@ -279,7 +279,7 @@ void Window::processEvent(const Pt::Event& ev)
 }
 
 
-PaintSurface& Window::surface()
+PixmapSurface& Window::surface()
 {
     return _surface;
 }

@@ -176,7 +176,7 @@ void Painter::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
 }
 
 
-void Painter::drawSurface(const Gfx::PointF& to, const PaintSurface& pm)
+void Painter::drawSurface(const Gfx::PointF& to, const PixmapSurface& pm)
 {  
     _impl->drawSurface(to, pm);
 }    
@@ -185,12 +185,6 @@ void Painter::drawSurface(const Gfx::PointF& to, const PaintSurface& pm)
 void Painter::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
 {
     _impl->drawImage(to, image);
-}
-
-
-void Painter::addFontName(const std::string& fontName)
-{
-    _impl->addFontName(fontName);
 }
 
 
