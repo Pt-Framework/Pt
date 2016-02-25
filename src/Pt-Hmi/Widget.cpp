@@ -384,11 +384,11 @@ void Widget::onUpdate(const Gfx::RectF& rect)
     if( ! _isValid )
         return;
 
-   // area in parent coordinates
+   // given rect in parent coordinates
    Gfx::RectF updateRect(rect);
    updateRect.setOrigin( position() + rect.topLeft() );
 
-    // update the given rect and the update area
+    // add the update area in parent coordinates
     _updateRect.unify(updateRect);
 
     if( parent() )
@@ -414,8 +414,7 @@ void Widget::update()
 
     _isValid = false; 
    
-    // update the widget rect and the update area 
-    // all areas are already in parent coordinates
+    // the update area and window rect are already in parent coordinates
     _updateRect.unify(_geometry);
 
     if( parent() )

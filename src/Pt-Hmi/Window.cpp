@@ -249,7 +249,13 @@ void Window::update(const Gfx::RectF& rect)
 
 void Window::render(const Gfx::RectF& updateRect)
 {
-    if( _isValid )
+    if( ! this->isVisible() )
+    {
+        _isValid = true;
+        return;
+    }
+
+    if(_isValid)
         return;
 
     Painter painter(_surface);
@@ -341,7 +347,6 @@ void Window::runModal()
             mapIt->first->setEnabled( mapIt->second );
     }
 }
-
 
 
 void Window::onEvent(const Pt::Event& ev)
@@ -645,6 +650,7 @@ bool Window::isVisible() const
 }
 
 
+// TODO: are all windows updated correctly?
 void Window::add(Window& child)
 {
     if( child._parent == this )
@@ -667,7 +673,7 @@ void Window::add(Window& child)
     update();
 }
 
-
+// TODO: are all windows updated correctly?
 void Window::remove(Window& child)
 {
     if(child._parent != this)
@@ -713,6 +719,7 @@ void Window::updateImpl()
 }
 
 
+// TODO: should this be changed so user calls update() himself?
 void Window::setVisible(bool b)
 {
     if(b == _visible)
@@ -732,14 +739,16 @@ const Gfx::SizeF& Window::size() const
     return _size;
 }
 
-
+// TODO: should this be changed so user calls update() himself?
 void Window::setSize( const Gfx::SizeF& s )
 {
     _size = s;
     _surface.resize(s);
 
     if( _impl )
-        _impl->setSize(s);        
+        _impl->setSize(s);   
+        
+    // TODO: expand update rect?     
 }
 
 
@@ -748,13 +757,15 @@ const Gfx::PointF& Window::position() const
     return _position;
 }
 
-
+// TODO: should this be changed so user calls update() himself?
 void Window::setPosition( const Gfx::PointF& p)
 {
     if( _impl )
         _impl->setPosition(p);
 
     _position = p;
+
+    // TODO: expand update rect? 
 }
 
 

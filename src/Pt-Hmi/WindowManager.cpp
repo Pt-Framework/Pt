@@ -160,6 +160,9 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
         Gfx::RectF updateRect(pos, rect.size());
 
         w->render(updateRect);
+
+        //static int _n = 0;
+        //std::clog << _n++ << "    window blit: " << w->name() << " " << w->title() << std::endl;
         painter.drawSurface( clientPos, w->surface() );
     }
 }
