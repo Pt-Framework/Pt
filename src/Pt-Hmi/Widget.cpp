@@ -385,7 +385,7 @@ void Widget::onUpdate(const Gfx::RectF& rect)
 
    // given rect in parent coordinates
    Gfx::RectF updateRect(rect);
-   updateRect.setOrigin( position() + rect.topLeft() );
+   updateRect.setOrigin( rect.topLeft() + position() );
 
     // add the update area in parent coordinates
     _updateRect.unify(updateRect);
@@ -426,42 +426,6 @@ void Widget::update()
             _window->update(_updateRect);
     }
 }
-
-
-//void Widget::update()
-//{
-//    // update rect was recorded in parent coordinates 
-//    _updateRect.setOrigin( _updateRect.topLeft() - position() );
-//
-//    update(_updateRect);
-//}
-//
-//
-//void Widget::update(const Gfx::RectF& rect)
-//{
-//    // The widget is already invalid in case of a nested update()
-//    // this means the parent must already be invalid or has just
-//    // been rendered. Therefore we stop the chain of update calls
-//    // towards the root of the widget/window tree.
-//    if( ! _isValid )
-//        return;
-//
-//    _isValid = false; 
-//   
-//   // report update rect in parent coordinates
-//   Gfx::RectF updateRect(rect);
-//   updateRect.setOrigin( position() + rect.topLeft() );
-//
-//    if( parent() )
-//    {
-//        parent()->onUpdate(updateRect);
-//    }
-//    else
-//    {
-//        if(_window)
-//            _window->update(updateRect);
-//    }
-//}
 
 
 void Widget::render(PaintSurface& surface, 
