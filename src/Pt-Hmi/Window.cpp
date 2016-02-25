@@ -95,10 +95,9 @@ Window::~Window()
     setMainWidget(0);
 
     const std::vector<Window*>& children = _windowManager.windows();
-    std::vector<Window*>::const_iterator it;
 
-    for(it = children.begin(); it != children.end(); ++it)
-        this->remove(**it);
+    while( ! children.empty() )
+        remove( *children.back() );
  
     if(_parent)
         _parent->remove(*this);
@@ -823,6 +822,9 @@ void Window::removeWidget(Widget& w)
 
     if( _focusWidget == &w )
         _focusWidget = 0;
+
+    if(_mainWidget == &w)
+        _mainWidget = 0;
 
     removeFocusWidget(w);
 

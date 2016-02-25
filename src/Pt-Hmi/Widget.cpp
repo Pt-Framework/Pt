@@ -65,9 +65,8 @@ Widget::Widget()
 
 Widget::~Widget()
 {
-    std::vector<Widget*>::iterator it;
-    for(it = _children.begin(); it != _children.end(); ++it)
-        remove(**it);
+    while( ! _children.empty() )
+        remove( *_children.back() );
 
     if(_parent)
         _parent->remove(*this);
