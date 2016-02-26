@@ -51,7 +51,7 @@ class PainterImpl
     public:
         PainterImpl(PaintSurfaceImpl* surface);
 
-        ~PainterImpl();
+        virtual ~PainterImpl();
 
         void setSurface(PaintSurface& surface);
 

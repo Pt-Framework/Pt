@@ -192,12 +192,12 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         HDC deviceContext() const;
 
     private:
-        Gfx::SizeF _size;
-        HDC        _deviceContext;
-        HBITMAP    _bitmapHandle;            
-        HPEN       _oldPen;
-        HBRUSH     _oldBrush;
-        HFONT      _oldFont;
+        Gfx::SizeF     _size;
+        HDC            _deviceContext;
+        HBITMAP        _bitmapHandle;
+        HPEN           _oldPen;
+        HBRUSH         _oldBrush;
+        HFONT          _oldFont;
         std::wstring   _text;
 };
 

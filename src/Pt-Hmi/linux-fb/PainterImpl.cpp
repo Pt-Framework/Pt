@@ -39,10 +39,13 @@ namespace Pt {
 
 namespace Hmi {
 
-PainterImpl::PainterImpl( PaintSurfaceImpl* surface )
-: _surface( surface )
-, _renderMode(Gfx::RenderMode::NoAlpha )
-{	
+PainterImpl::PainterImpl(PaintSurfaceImpl* surface)
+: _surface(surface)
+, _origin(0.0f, 0.0f)
+, _pen(1)
+, _brush( Gfx::Color(0, 0, 0, 0) )
+, _font( PaintSurfaceImpl::defaultFont() )
+{
 }
 
 
@@ -50,97 +53,159 @@ PainterImpl::~PainterImpl()
 {
 }
 
-void PainterImpl::drawLine( const Gfx::PointF& from, const Gfx::PointF& to )
-{    
-  _surface->pipeline().stroke( _pen, from , to );
-}
 
-
-void PainterImpl::drawText( const Gfx::PointF& to, const Pt::String& text )
-{	  
-  _surface->pipeline().text( to, _pen, _font, text);
-}
-
-
-void PainterImpl::drawEllipse( const Gfx::PointF& topLeft, const Gfx::SizeF& size )
+void PainterImpl::setSurface(PaintSurface& surface)
 {
- _surface->pipeline().ellipse( _pen, topLeft, size );
+    _surface = surface.impl();
+    
+    _surface->setBrush(_brush);
+    _surface->setFont(_font);
+    _surface->setPen(_pen);  
 }
 
 
-void PainterImpl::drawRect( const Gfx::RectF& rect )
+void PainterImpl::setRenderMode(Gfx::RenderMode::Type)
 {
-  _surface->pipeline().stroke( _pen, rect );  
 }
 
 
-void PainterImpl::drawPolyline( const Gfx::PointF* pt, const size_t pointCount )
+void PainterImpl::setPen(const Gfx::Pen& pen)
 {
-  _surface->pipeline().stroke( _pen, pt, pointCount );  
+    _pen = pen;
+    _surface->setPen(_pen);
 }
 
 
-void PainterImpl::fillRect( const Gfx::RectF& rect )
-{ 
-  _surface->pipeline().fill( _brush, rect );
-}
-
-
-void PainterImpl::fillEllipse( const Gfx::PointF& topLeft, const Gfx::SizeF& size )
+const Gfx::Pen& PainterImpl::pen() const
 {
-  _surface->pipeline().fillEllipse( _brush, topLeft, size );
+    return _pen;
 }
 
 
-void PainterImpl::fillPolygon( const Gfx::PointF* pt, const size_t pointCount )
-{  
-  _surface->pipeline().fill( _brush, pt, pointCount );
-}
-
-
-void PainterImpl::drawSurface( const Gfx::PointF& to, const PaintSurface& pm )
+void PainterImpl::setBrush(const Gfx::Brush& brush)
 {
- Gfx::GraphicsPipeline pipeline( pm.impl()->pipeline() );
-  
-  pipeline.translate( to.x(), to.y() );  
-
-  _surface->pipeline().addPipeline( Gfx::RectF( to, pm.size() ),  pipeline );
+    _brush = brush;
+    _surface->setBrush(_brush);
 }
-		
 
-void PainterImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image )
-{  
-  _surface->pipeline().image( to, image );
+
+const Gfx::Brush& PainterImpl::brush() const
+{
+    return _brush;
+}
+
+
+void PainterImpl::setFont(const Gfx::Font& font)
+{
+    if (font == _font) 
+        return;
+
+    _font = font;
+    _surface->setFont(_font);
+}
+
+
+const Gfx::Font& PainterImpl::font() const
+{
+    return _font;
+}
+
+
+Gfx::FontMetrics PainterImpl::fontMetrics(const Pt::String& text) const
+{
+    return _surface->fontMetrics(text);
+}
+
+
+Gfx::FontMetrics PainterImpl::fontMetrics(const Gfx::Font& font, const Pt::String& text)
+{   
+    return ImagePainter::fontMetrics(font, text);
+}
+
+
+std::list<std::string> PainterImpl::fontFamilyNames()
+{
+    return PaintSurfaceImpl::fontFamilyNames();
+}
+
+
+void PainterImpl::drawLine(const Gfx::PointF& fromF, const Gfx::PointF& toF)
+{
+    if (_pen.size() == 0) 
+        return;
+
+    _surface->drawLine(fromF, toF);
+}
+
+
+void PainterImpl::drawText(const Gfx::PointF& toF, const Pt::String& text)
+{
+    _surface->drawText(toF, text);
+}
+
+
+void PainterImpl::drawRect(const Gfx::RectF& rectF)
+{
+    _surface->drawRect(rectF);
+}
+
+
+void PainterImpl::fillRect(const Gfx::RectF& rectF)
+{
+    _surface->fillRect(rectF);
+}
+
+
+void PainterImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
+{
+    _surface->drawEllipse(topLeftF, sizeF);
+}
+
+
+void PainterImpl::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
+{
+    _surface->fillEllipse(topLeftF, sizeF);
+}
+
+
+void PainterImpl::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
+{
+    if (_pen.size() == 0)
+       return;
+
+    _surface->drawPolyline(points, pointCount);
+}
+
+
+void PainterImpl::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
+{
+    _surface->fillPolygon(points, pointCount);
+}
+
+
+void PainterImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface)
+{
+    _surface->drawSurface(toF, surface);
+}
+
+
+void PainterImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
+{
+    _surface->drawImage(toF, image);
+}
+
+
+void PainterImpl::clear(const Gfx::Color& color)
+{
+    Gfx::RectF rect(Gfx::PointF(0,0), _surface->size() );   
+    setBrush( Gfx::Brush(color) );
+    fillRect(rect);
 }
 
 
 void PainterImpl::flush()
 {	
- Gfx::ImagePainter painter( Application::instance().mainScreen().impl()->image() );
-
-  _surface->pipeline().render( painter );
-  _surface->pipeline().clear();
-}
-
-
-Gfx::FontMetrics PainterImpl::fontMetrics( Pt::String text ) const
-{  
-  return Gfx::ImagePainter::fontMetrics( _font, text);
-}
-
-
-Gfx::FontMetrics PainterImpl::fontMetrics( const Gfx::Font& font, Pt::String text )
-{
-  return Gfx::ImagePainter::fontMetrics( font, text );
-}
-
-
-void PainterImpl::clear( const Gfx::Color& color )
-{      
- _surface->pipeline().clear();
-
-  setBrush(Gfx::Brush(color) );
-  fillRect(Gfx::RectF(Gfx::PointF( 0,0 ), _surface->size() ) ); 
+    _surface->flush();
 }
 
 } // namespace
