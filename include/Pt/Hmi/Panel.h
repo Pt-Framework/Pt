@@ -40,118 +40,119 @@ namespace Hmi {
 
 class PT_HMI_API Panel : public Widget
 {
-	public:
-		enum BorderStyle
-		{
-			NoBorder,
-			Single,
-			Border3D
-		};
+	  public:
+		    enum BorderStyle
+		    {
+			    NoBorder,
+			    Single,
+			    Border3D
+		    };
 
-	public:
-		Panel();
+	  public:
+        Panel();
 		
-    virtual ~Panel();	
+        virtual ~Panel();	
 
-    const Gfx::Color& backgroundColor() const
-    {
-        return _backgroundColor;
-    }
+        const Gfx::Color& backgroundColor() const
+        {
+            return _backgroundColor;
+        }
 
-    void setBackgroundColor( const Gfx::Color& c )
-    {
-        _backgroundColor = c;
-    }
+        void setBackgroundColor( const Gfx::Color& c )
+        {
+            _backgroundColor = c;
+        }
 
-    const Gfx::Color& foregroundColor() const
-    {
-        return _foregroundColor;
-    }
+        const Gfx::Color& foregroundColor() const
+        {
+            return _foregroundColor;
+        }
 
-    void setForegroundColor(const Gfx::Color& c )
-    {
-        _foregroundColor = c;
-    }
+        void setForegroundColor(const Gfx::Color& c )
+        {
+            _foregroundColor = c;
+        }
 
-    const Gfx::Image& backgroundImage() const
-    {
-        return _backgroundImage;
-    }
+        const Gfx::Image& backgroundImage() const
+        {
+            return _backgroundImage;
+        }
 
-    void setBackgroundImage( const Gfx::Image& im )
-    {
-        _backgroundImage = im;
-    }
+        void setBackgroundImage( const Gfx::Image& im )
+        {
+            _backgroundImage = im;
+        }
 
-    ImageLayout backgroundImageLayout() const
-    {
-        return _backgroundImageLayout;
-    }
+        ImageLayout backgroundImageLayout() const
+        {
+            return _backgroundImageLayout;
+        }
 
-    void setBackgroundImageLayout( ImageLayout l )
-    {
-        _backgroundImageLayout = l;
-    }
+        void setBackgroundImageLayout( ImageLayout l )
+        {
+            _backgroundImageLayout = l;
+        }
 
-    BorderStyle borderStyle() const
-    {   
-        return _borderStyle;
-    }
+        BorderStyle borderStyle() const
+        {   
+            return _borderStyle;
+        }
 
-    void setBorderStyle(BorderStyle t)         
-    {   
-        _borderStyle = t;
-    }
+        void setBorderStyle(BorderStyle t)         
+        {   
+            _borderStyle = t;
+        }
 
-		bool isBorderRound() const
-    {   
-      return _borderRound;
-    }
+        bool isBorderRound() const
+        {   
+          return _borderRound;
+        }
 
-    void setBorderRound(bool b)
-    {   
-      _borderRound = b;
-    }
+        void setBorderRound(bool b)
+        {   
+          _borderRound = b;
+        }
 
-    double borderWidth() const	  
-    {   
-       return _borderWidth;
-    }
+        double borderWidth() const	  
+        {   
+            return _borderWidth;
+        }
 
-    void setBorderWidth( double w )
-    {
-      _borderWidth = w;
-    }
+        void setBorderWidth( double w )
+        {
+          _borderWidth = w;
+        }
          
-    const Gfx::Color& borderColor() const
-    {
-      return _borderColor;
-    }
+        const Gfx::Color& borderColor() const
+        {
+          return _borderColor;
+        }
 
-    void setBorderColor(Gfx::Color b)
-    {
-      _borderColor = b;
-    }
+        void setBorderColor(Gfx::Color b)
+        {
+          _borderColor = b;
+        }
 
-    virtual void onRender(PaintSurface& surface, const Gfx::RectF& updateRect);
+    protected:
+        virtual void onRender(const Gfx::PointF& pos, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& updateRect);
 	
-  protected:
-		virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 	
-  private:
-    //PixmapSurface _surface;  
-    Gfx::Color   _backgroundColor;
-    Gfx::Color   _foregroundColor;
-    Gfx::Image   _backgroundImage;
-    ImageLayout  _backgroundImageLayout;
-		BorderStyle	 _borderStyle;
-		bool				 _borderRound;	
-		double			 _borderWidth;	  
-		Gfx::Color	 _borderColor;
+    private: 
+        Gfx::Color   _backgroundColor;
+        Gfx::Color   _foregroundColor;
+        Gfx::Image   _backgroundImage;
+        ImageLayout  _backgroundImageLayout;
+		    BorderStyle	 _borderStyle;
+		    bool				 _borderRound;	
+		    double			 _borderWidth;	  
+		    Gfx::Color	 _borderColor;
 };
 
-}
+} // namespace
 
-}
+} // namespace
 
 #endif

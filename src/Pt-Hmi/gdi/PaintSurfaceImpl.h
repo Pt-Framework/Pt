@@ -30,10 +30,11 @@
 #ifndef Pt_Hmi_PaintSurfaceImpl_h
 #define Pt_Hmi_PaintSurfaceImpl_h
 
-#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Painter.h>
 #include <Windows.h>
 
 namespace Pt {
@@ -72,7 +73,11 @@ class PaintSurfaceImpl
 
         virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount) = 0;
 
+        virtual void drawPolyline(POINT* points, size_t pointCount) = 0;
+
         virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount) = 0;
+
+        virtual void fillPolygon(POINT* points, size_t pointCount) = 0;
 
         virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface) = 0;
 
@@ -90,12 +95,12 @@ class PaintSurfaceImpl
 };
 
 
-class PaintAreaImpl : public PaintSurfaceImpl
+class PaintRegionImpl : public PaintSurfaceImpl
 {
     public:        
-        PaintAreaImpl();
+        PaintRegionImpl();
         
-        virtual ~PaintAreaImpl();   
+        virtual ~PaintRegionImpl();   
 
         void set(PaintSurface& surface, const Gfx::RectF& area); 
 
@@ -123,7 +128,11 @@ class PaintAreaImpl : public PaintSurfaceImpl
 
         virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
 
+        virtual void drawPolyline(POINT* points, size_t pointCount);
+
         virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
+
+        virtual void fillPolygon(POINT* points, size_t pointCount);
 
         virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
 
@@ -170,7 +179,11 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
 
+        virtual void drawPolyline(POINT* points, size_t pointCount);
+
         virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
+
+        virtual void fillPolygon(POINT* points, size_t pointCount);
 
         virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
 

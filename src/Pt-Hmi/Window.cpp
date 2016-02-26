@@ -263,7 +263,8 @@ void Window::render(const Gfx::RectF& updateRect)
 
     if(_mainWidget)
     {
-        _mainWidget->render(_surface, updateRect);
+        Gfx::PointF pos = _mainWidget->position();
+        _mainWidget->render(pos, _surface, updateRect);
     }
 
     _windowManager.render(_surface, updateRect);

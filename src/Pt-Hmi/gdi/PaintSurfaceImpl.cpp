@@ -179,71 +179,71 @@ Gfx::FontMetrics PaintSurfaceImpl::fontMetrics(const Gfx::Font& font, const Pt::
 }
 
 /////////////////////////////////////////////////////////////////////
-// PaintAreaImpl
+// PaintRegionImpl
 /////////////////////////////////////////////////////////////////////
 
-PaintAreaImpl::PaintAreaImpl()
+PaintRegionImpl::PaintRegionImpl()
 : _surface(0)
 {
 }
 
 
-PaintAreaImpl::~PaintAreaImpl()
+PaintRegionImpl::~PaintRegionImpl()
 {
 }
 
 
-void PaintAreaImpl::set(PaintSurface& surface, const Gfx::RectF& area)
+void PaintRegionImpl::set(PaintSurface& surface, const Gfx::RectF& area)
 {
     _surface = &surface;
     _area = area;
 }
 
 
-const Gfx::SizeF& PaintAreaImpl::size() const
+const Gfx::SizeF& PaintRegionImpl::size() const
 {
     return _area.size();
 }
 
 
-void PaintAreaImpl::setPen(const Gfx::Pen& pen)
+void PaintRegionImpl::setPen(const Gfx::Pen& pen)
 {
     _surface->impl()->setPen(pen);
 }
 
 
-void PaintAreaImpl::setBrush(const Gfx::Brush& brush)
+void PaintRegionImpl::setBrush(const Gfx::Brush& brush)
 {
     _surface->impl()->setBrush(brush);
 }
 
 
-void PaintAreaImpl::setFont(const Gfx::Font& font)
+void PaintRegionImpl::setFont(const Gfx::Font& font)
 {
     _surface->impl()->setFont(font);
 }
 
 
-Gfx::FontMetrics PaintAreaImpl::fontMetrics(const Pt::String& text) const
+Gfx::FontMetrics PaintRegionImpl::fontMetrics(const Pt::String& text) const
 {
     return _surface->impl()->fontMetrics(text);
 }
 
 
-void PaintAreaImpl::drawLine(const Gfx::PointF& fromF, const Gfx::PointF& toF)
+void PaintRegionImpl::drawLine(const Gfx::PointF& fromF, const Gfx::PointF& toF)
 {
     _surface->impl()->drawLine(fromF + _area.topLeft(),
                                toF + _area.topLeft() );
 }
 
 
-void PaintAreaImpl::drawText(const Gfx::PointF& toF, const Pt::String& text)
+void PaintRegionImpl::drawText(const Gfx::PointF& toF, const Pt::String& text)
 {
     _surface->impl()->drawText(toF + _area.topLeft(), text);
 }
 
 
-void PaintAreaImpl::drawRect(const Gfx::RectF& r)
+void PaintRegionImpl::drawRect(const Gfx::RectF& r)
 {
     Gfx::RectF rect(r);
     rect.setOrigin(r.topLeft() + _area.topLeft());
@@ -252,7 +252,7 @@ void PaintAreaImpl::drawRect(const Gfx::RectF& r)
 }
 
 
-void PaintAreaImpl::fillRect(const Gfx::RectF& r)
+void PaintRegionImpl::fillRect(const Gfx::RectF& r)
 {
     Gfx::RectF rect(r);
     rect.setOrigin(r.topLeft() + _area.topLeft());
@@ -261,51 +261,69 @@ void PaintAreaImpl::fillRect(const Gfx::RectF& r)
 }
 
 
-void PaintAreaImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
+void PaintRegionImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
 {
     _surface->impl()->drawEllipse(topLeftF + _area.topLeft(), sizeF);
 }
 
 
-void PaintAreaImpl::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
+void PaintRegionImpl::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
 {
     _surface->impl()->fillEllipse(topLeftF + _area.topLeft(), sizeF);
 }
 
 
-void PaintAreaImpl::drawPolyline(const Gfx::PointF* points, size_t pointCount)
+void PaintRegionImpl::drawPolyline(const Gfx::PointF* points, size_t pointCount)
 {
-    std::vector<Gfx::PointF> winPoints(pointCount);
+    std::vector<POINT> winPoints(pointCount);
 
     for (size_t i = 0; i < pointCount; i++)
     {
-        winPoints[i] = points[i] + _area.topLeft();
+        Gfx::PointF pt = points[i] + _area.topLeft();
+        Gfx::Point p = Application::instance().mainScreen().fromUnit(pt);
+        winPoints[i].x = p.x();
+        winPoints[i].y = p.y();
     }
 
     _surface->impl()->drawPolyline(&winPoints[0], pointCount);
 }
 
 
-void PaintAreaImpl::fillPolygon(const Gfx::PointF* points, size_t pointCount)
+void PaintRegionImpl::drawPolyline(POINT* points, size_t pointCount)
 {
-    std::vector<Gfx::PointF> winPoints(pointCount);
+    _surface->impl()->drawPolyline(points, pointCount);
+}
+
+
+void PaintRegionImpl::fillPolygon(const Gfx::PointF* points, size_t pointCount)
+{
+    std::vector<POINT> winPoints(pointCount);
 
     for (size_t i = 0; i < pointCount; i++)
     {
-        winPoints[i] = points[i] + _area.topLeft();
+        Gfx::PointF pt = points[i] + _area.topLeft();
+        Gfx::Point p = Application::instance().mainScreen().fromUnit(pt);
+        winPoints[i].x = p.x();
+        winPoints[i].y = p.y();
     }
 
     _surface->impl()->fillPolygon(&winPoints[0], pointCount);
 }
 
 
-void PaintAreaImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface)
+void PaintRegionImpl::fillPolygon(POINT* points, size_t pointCount)
+{
+    _surface->impl()->fillPolygon(points, pointCount);
+}
+
+
+void PaintRegionImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface)
 {
     _surface->impl()->drawSurface(toF + _area.topLeft(), surface);
 }
 
 
-void PaintAreaImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
+void PaintRegionImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 {
     _surface->impl()->drawImage(toF + _area.topLeft(), image);
 }
@@ -664,14 +682,18 @@ void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* points, const size_t poi
         winPoints[i].y = p.y();
     }
 
-    Polyline( _deviceContext, &winPoints[0], pointCount );
+    drawPolyline(&winPoints[0], pointCount);
+}
+
+
+void PixmapSurfaceImpl::drawPolyline(POINT* points, size_t pointCount)
+{
+    Polyline( _deviceContext, points, pointCount );
 }
 
 
 void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
 {
-    HPEN originalPen = (HPEN)SelectObject(_deviceContext, GetStockObject(NULL_PEN));
-
     std::vector<POINT> winPoints(pointCount);
 
     for (size_t i = 0; i < pointCount; i++)
@@ -681,8 +703,14 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t poin
         winPoints[i].y = p.y();
     }
 
-    Polygon(_deviceContext, &(winPoints[0]), pointCount);
+    fillPolygon(&winPoints[0], pointCount);
+}
 
+
+void PixmapSurfaceImpl::fillPolygon(POINT* points, size_t pointCount)
+{
+    HPEN originalPen = (HPEN)SelectObject(_deviceContext, GetStockObject(NULL_PEN));
+    Polygon(_deviceContext, points, pointCount);
     SelectObject(_deviceContext, originalPen);
 }
 

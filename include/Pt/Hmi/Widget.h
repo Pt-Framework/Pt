@@ -137,20 +137,21 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         void processEvent(const Pt::Event& ev);
 
-
-        //void update(const Gfx::RectF& rect);
-
         void update();
 
         bool isValid() const
         { return _isValid; }
 
-        void render(PaintSurface& surface, const Gfx::RectF& updateRect);
+        void render(const Gfx::PointF& pos, 
+                    PaintSurface& surface, 
+                    const Gfx::RectF& updateRect);
 
-    protected:    
+    protected:   
         virtual void onLayout();
 
-        virtual void onRender(PaintSurface& surface, const Gfx::RectF& updateRect); 
+        virtual void onRender(const Gfx::PointF& pos, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& updateRect); 
 
     protected:
         virtual void onEvent(const Pt::Event& ev);

@@ -428,7 +428,8 @@ void Widget::update()
 }
 
 
-void Widget::render(PaintSurface& surface, 
+void Widget::render(const Gfx::PointF& pos, 
+                    PaintSurface& surface, 
                     const Gfx::RectF& updateRect)
 {
     if( ! visible() )
@@ -440,7 +441,7 @@ void Widget::render(PaintSurface& surface,
     if( ! _isValid )
         onLayout();
     
-    onRender(surface, updateRect);
+    onRender(pos, surface, updateRect);
     
     _updateRect.clear();
     _isValid = true;
@@ -452,29 +453,28 @@ void Widget::onLayout()
 }
 
 
-void Widget::onRender(PaintSurface& surface, const Gfx::RectF& rect)
+void Widget::onRender(const Gfx::PointF& pos, 
+                      PaintSurface& surface, 
+                      const Gfx::RectF& updateRect)
 {
-    PaintArea widgetSurface;
-
     for( size_t i = 0; i < _children.size(); ++i )
     {
         Widget* child = _children[i];
 
-        if( rect.intersect( child->geometry() ).isNull() )
+        if( updateRect.intersect( child->geometry() ).isNull() )
             continue;
 
         //static int _n = 0;
         //std::clog << _n++ << " RENDER RENDER RENDER " << child->name() << std::endl;
 
-        ///Gfx::PointF paintOffset( pos.x() + child->position().x(),
-        ///                         pos.y() + child->position().y() );
+        Gfx::PointF paintOffset( pos.x() + child->position().x(),
+                                 pos.y() + child->position().y() );
 
         // update rect in child coordinates
-        Gfx::RectF updateRect(rect);
-        updateRect.setOrigin( rect.topLeft() - child->position() );
+        Gfx::RectF rect(updateRect);
+        rect.setOrigin( updateRect.topLeft() - child->position() );
 
-        widgetSurface.set( surface, child->geometry() );
-        child->render(widgetSurface, updateRect);
+        child->render(paintOffset, surface, rect);
     }
 }
 

@@ -57,39 +57,20 @@ Panel::~Panel()
 }
 
 
-//void Panel::onRender(PaintSurface& surface, 
-//                     const Gfx::RectF& updateRect)
-//{
-//    if( ! isValid() )
-//    {
-//        if( _surface.size() != size() )
-//            _surface.resize( size() );
-//
-//        _surface.clear();
-//
-//        Painter painter(_surface);
-//        onPaint(painter, updateRect);
-//    }
-//
-//    Widget::onRender(_surface, updateRect);
-//
-//    Painter painter(surface);
-//    painter.drawSurface(Gfx::PointF(0, 0), _surface);
-//}
-
-
-void Panel::onRender(PaintSurface& surface, const Gfx::RectF& updateRect)
+void Panel::onRender(const Gfx::PointF& pos, 
+                     PaintSurface& surface, 
+                     const Gfx::RectF& updateRect)
 {
-    onPaint(surface, updateRect);
+    Gfx::RectF paintRect(pos, size());
+    PaintRegion region(surface, paintRect);
+    onPaint(region, updateRect);
 
-    Widget::onRender(surface, updateRect);
+    Widget::onRender(pos, surface, updateRect);
 }
 
 
 void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {	
-    
-
     const Gfx::SizeF& size = this->size();
 
     if( size.width() < 0 || size.height() < 0)
@@ -239,6 +220,6 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 	  }	
 }
 
-}
+} // namespace
 
-}
+} // namespace

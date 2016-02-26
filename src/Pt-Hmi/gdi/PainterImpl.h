@@ -60,7 +60,7 @@ class PainterImpl
             _origin = p;
         }
 
-        void setClip( const Gfx::RectF& clip )
+        void setClip(const Gfx::RectF& clip)
         {
             _clip = clip;
         }
@@ -125,8 +125,8 @@ class PainterImpl
         Gfx::Font              _font;
 };
 
-}
+} // namespace
 
-}
+} // namespace
 
 #endif

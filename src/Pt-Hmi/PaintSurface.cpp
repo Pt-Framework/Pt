@@ -29,6 +29,7 @@
 
 #include "PaintSurfaceImpl.h"
 #include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/Widget.h>
 
 namespace Pt {
 
@@ -47,37 +48,42 @@ PaintSurface::~PaintSurface()
 {
 }
 
-
-
 /////////////////////////////////////////////////////////////////////
-// WindowSurface
+// PaintRegion
 /////////////////////////////////////////////////////////////////////
 
-PaintArea::PaintArea()
-: _impl(new PaintAreaImpl)
+PaintRegion::PaintRegion()
+: _impl(new PaintRegionImpl)
 {
 }
 
 
-PaintArea::~PaintArea()
+PaintRegion::PaintRegion(PaintSurface& surface, const Gfx::RectF& rect)
+: _impl(new PaintRegionImpl)
+{
+    set(surface, rect);
+}
+
+
+PaintRegion::~PaintRegion()
 {
     delete _impl;
 }
 
 
-void PaintArea::set(PaintSurface& surface, const Gfx::RectF& area)
+void PaintRegion::set(PaintSurface& surface, const Gfx::RectF& rect)
 { 
-    _impl->set(surface, area); 
+    _impl->set(surface, rect); 
 }
 
 
-PaintSurfaceImpl* PaintArea::impl()
+PaintSurfaceImpl* PaintRegion::impl()
 { 
     return _impl; 
 }
 
 
-const PaintSurfaceImpl* PaintArea::impl() const 
+const PaintSurfaceImpl* PaintRegion::impl() const 
 { 
     return _impl; 
 }

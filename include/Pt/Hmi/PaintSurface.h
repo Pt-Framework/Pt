@@ -52,29 +52,28 @@ class PT_HMI_API PaintSurface
         PaintSurface();
 };
 
+class PaintRegionImpl;
 
-class PaintSurface;
-class PaintAreaImpl;
-
-/** @brief An area of another surface.
+/** @brief Drawing region on another surface.
 */
-class PaintArea : public PaintSurface
+class PaintRegion : public PaintSurface
 {
     public:
-        PaintArea();
+        PaintRegion(PaintSurface& surface, const Gfx::RectF& rect);
 
-        virtual ~PaintArea();
+        PaintRegion();
 
-        void set(PaintSurface& surface, const Gfx::RectF& area);
+        virtual ~PaintRegion();
+
+        void set(PaintSurface& surface, const Gfx::RectF& rect);
 
         virtual PaintSurfaceImpl* impl();
 
         virtual const PaintSurfaceImpl* impl() const;
 
     private:
-        PaintAreaImpl* _impl;
+        PaintRegionImpl* _impl;
 };
-
 
 class PixmapSurfaceImpl;
 
