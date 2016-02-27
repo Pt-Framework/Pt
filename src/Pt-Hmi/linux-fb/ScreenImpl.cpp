@@ -1,11 +1,12 @@
- /* Copyright (C) 2015 Marc Boris Duerner 
-    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+ /* 
+  Copyright (C) 2015 Marc Boris Duerner 
+  Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,23 +16,28 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA  02110-1301  USA
+*/
+
 #include "ScreenImpl.h"
 #include "FrameBuffer.h"
 #include "ApplicationImpl.h"
 #include "PaintSurfaceImpl.h"
+
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Cursor.h>
+#include <Pt/Gfx/ImagePainter.h>
 #include <Pt/System/Clock.h>
 #include <algorithm>
 
@@ -44,14 +50,13 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 , _cursorPos( 0,0 )
 , _image( _frameBuffer.size(), _frameBuffer.format(), _frameBuffer.strideInBytes() )
 , _dpi(96.0)
-, _drawCursor( true)
+, _drawCursor(true)
 {
+    app.eventReady() += Pt::slot( *this, &ScreenImpl::onPointerEvent );
+    app.eventReady() += Pt::slot( *this, &ScreenImpl::onKeyEvent );
 
-	app.eventReady() += Pt::slot( *this, &ScreenImpl::onPointerEvent );
-	app.eventReady() += Pt::slot( *this, &ScreenImpl::onKeyEvent );
-
-	_surface.resize( Gfx::SizeF(_frameBuffer.width(), _frameBuffer.height()) );
-	setCursor(0);	
+    _surface.resize( Gfx::SizeF(_frameBuffer.width(), _frameBuffer.height()) );
+    setCursor(0);
 }
 
 
@@ -59,10 +64,12 @@ ScreenImpl::~ScreenImpl()
 {
 }
 
+
 void ScreenImpl::registerWindow(Window& w)
 {
     _windowManager.add(w);
 }
+
 
 void ScreenImpl::unregisterWindow(Window& w)
 {
@@ -70,86 +77,94 @@ void ScreenImpl::unregisterWindow(Window& w)
 }
 
 
-
 void ScreenImpl::onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent )
-{		
-	_drawCursor =  true;
+{        
+    _drawCursor =  true;
 
-	if( !_cursorBackground.empty() )
-		bitBlit( _cursorBackground.pixel(0,0), _cursorBackground.width(), _cursorBackground.height(), _cursorPos, (Pt::uint8_t*)  _image.pixel(0,0), CopyOp );
+    if( !_cursorBackground.empty() )
+        bitBlit( _cursorBackground.pixel(0,0), _cursorBackground.width(), _cursorBackground.height(), _cursorPos, (Pt::uint8_t*)  _image.pixel(0,0), CopyOp );
 
-	if( _cursor.width() != 0 )
-		_cursorPos = Gfx::Point( mouseEvent.x() - _cursor.xHotspot() , mouseEvent.y() - _cursor.yHotspot());
+    if( _cursor.width() != 0 )
+        _cursorPos = Gfx::Point( mouseEvent.x() - _cursor.xHotspot() , mouseEvent.y() - _cursor.yHotspot());
 
-	_windowManager.pointerInput( mouseEvent );		
-	
-	if( _drawCursor )
-		updateScreen();
+    _windowManager.pointerInput( mouseEvent );        
+    
+    if( _drawCursor )
+        updateScreen();
 }
 
 
 void ScreenImpl::onKeyEvent(const Pt::Hmi::KeyEvent& ev)
-{		
-	_windowManager.keyInput(ev);		
+{
+    _windowManager.keyInput(ev);
 }
 
 
 void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx::Image& image)
-{	
-	const size_t pixelSizeInByte = _frameBuffer.depth() / 8;		
-	const Gfx::Size& size= image.size();
-	const size_t yMax = std::min<size_t>(pos.y() + size.height(), height() );	
-	const size_t widthInPixel = ((pos.x() + size.width())  < width() ?  size.width() : ( width()  - pos.x() ) );
-	const size_t widthInByte = widthInPixel * pixelSizeInByte;			
-	
-	for( size_t y = pos.y(); y < yMax; ++y )
-	{
-		const size_t lineOffsetBuffer  = y * _frameBuffer.lineLength() + (pos.x() * pixelSizeInByte);
-		memcpy( image.pixel(0,y - pos.y()), &buffer[lineOffsetBuffer], widthInByte );
-	}
+{    
+    const size_t pixelSizeInByte = _frameBuffer.depth() / 8;        
+    const Gfx::Size& size= image.size();
+    const size_t yMax = std::min<size_t>(pos.y() + size.height(), height() );    
+    const size_t widthInPixel = ((pos.x() + size.width())  < width() ?  size.width() : ( width()  - pos.x() ) );
+    const size_t widthInByte = widthInPixel * pixelSizeInByte;            
+    
+    for( size_t y = pos.y(); y < yMax; ++y )
+    {
+        size_t lineOffset = y * _frameBuffer.lineLength() + 
+                            pos.x() * pixelSizeInByte;
+        memcpy( image.pixel(0,y - pos.y()), &buffer[lineOffset], widthInByte );
+    }
 }
 
 
-void ScreenImpl::drawCursor( Pt::uint8_t* buffer )
+void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
 {
-	//Draw the mouse to image.
-	if( _cursor.width() == 0  || _cursor.height() == 0 )
-		return;
+    if( _cursor.width() == 0  || _cursor.height() == 0 )
+        return;
 
-	if( (_cursorBackground.width() != _cursor.width())  || (_cursorBackground.height() !=  _cursor.height()) )
-		_cursorBackground.resize(Gfx::Size( _cursor.width(),_cursor.height()), _frameBuffer.format() ); 
-
-	grabImage( buffer, _cursorPos, _cursorBackground );
-	
-	bitBlit( &_cursor.andRgb888()[0], _cursor.width(), _cursor.height(), _cursorPos, buffer, AndOp );
-	bitBlit( &_cursor.xorRgb888()[0], _cursor.width(), _cursor.height(), _cursorPos, buffer, XorOp );    
+    if( _cursorBackground.width() != _cursor.width()  || 
+        _cursorBackground.height() != _cursor.height() )
+    {
+        Gfx::Size size(_cursor.width(), _cursor.height());
+        _cursorBackground.resize( size, _frameBuffer.format() ); 
+    }
+    
+    grabImage( buffer, _cursorPos, _cursorBackground );
+    
+    bitBlit(&_cursor.andRgb888()[0], _cursor.width(), _cursor.height(), _cursorPos, buffer, AndOp);
+    bitBlit(&_cursor.xorRgb888()[0], _cursor.width(), _cursor.height(), _cursorPos, buffer, XorOp);    
 }
 
 
 void ScreenImpl::updateScreen()
 {
-	_drawCursor	= false;
-	drawCursor(  _image.pixel(0,0) );
-	memcpy( _frameBuffer.buffer(), _image.pixel(0,0), _frameBuffer.bufferSize() );			
+    _drawCursor    = false;
+    drawCursor(  _image.pixel(0,0) );
+    memcpy( _frameBuffer.buffer(), _image.pixel(0,0), _frameBuffer.bufferSize() );            
 }
 
-void ScreenImpl::update()
-{		    
-    Hmi::Painter& painter =_surface.painter();     
+
+void ScreenImpl::update(const Gfx::RectF& updateRect)
+{            
+    Hmi::Painter painter(_surface);     
     painter.clear();
 
-	//Load the render pipeline
-	_windowManager.render(_surface);
-	
-	//Draw the render pipeline to image	
-	painter.flush();
-	updateScreen();
+    _windowManager.render(_surface, updateRect);
+       
+    painter.flush();
+    Gfx::GraphicsPipeline& pipeline = _surface.pixmapImpl()->pipeline();
+    
+    Gfx::ImagePainter painter(_image);
+    pipeline.render(painter);
+    pipeline.clear();
+
+    updateScreen();
 }
 
 
 void ScreenImpl::setCursor( const Hmi::Cursor* crs )
-{		
-    _cursor  = crs == 0 ? Hmi::Cursor::defaultCursor() : *crs;		
+{        
+    _cursor  = crs == 0 ? Hmi::Cursor::defaultCursor() : *crs;        
 }
 
 
@@ -163,59 +178,62 @@ void ScreenImpl::bitBlit( const Gfx::Image& image, Pt::uint8_t* buffer )
 
 void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op )
 {
-	static const size_t planePixelSize = 4;
-	const size_t bufferPixelSize = _frameBuffer.depth() / 8;
-	const size_t bufferWidth  = std::min<size_t>(  pos.x() + w, width() ); 
+    static const size_t planePixelSize = 4;
+    const size_t bufferPixelSize = _frameBuffer.depth() / 8;
+    const size_t bufferWidth  = std::min<size_t>(  pos.x() + w, width() ); 
     const size_t bufferHeight = std::min<size_t>(  pos.y() + h, height() ); 
-	size_t yCursor = 0;
-	size_t xCursor = 0;	
+    size_t yCursor = 0;
+    size_t xCursor = 0;    
 
-	for( size_t yBuffer = pos.y(); yBuffer < bufferHeight; ++yBuffer, ++yCursor )
-	{
-		const size_t lineOffsetBuffer  = yBuffer * _frameBuffer.lineLength();
-		const size_t lineOffsetCursor  = yCursor * (w * planePixelSize);
-		
-		xCursor = 0;
+    for( size_t yBuffer = pos.y(); yBuffer < bufferHeight; ++yBuffer, ++yCursor )
+    {
+        const size_t lineOffsetBuffer  = yBuffer * _frameBuffer.lineLength();
+        const size_t lineOffsetCursor  = yCursor * (w * planePixelSize);
+        
+        xCursor = 0;
 
-		for( size_t xBuffer = pos.x(); xBuffer < bufferWidth; ++xBuffer, ++xCursor  )
-		{			
-			Pt::uint8_t* pointerBuffer = &((Pt::uint8_t*)buffer)[lineOffsetBuffer + (xBuffer * bufferPixelSize)];
-			const Pt::uint8_t* pointerCursor = &plane[lineOffsetCursor + (xCursor * planePixelSize)];
+        for( size_t xBuffer = pos.x(); xBuffer < bufferWidth; ++xBuffer, ++xCursor  )
+        {            
+            Pt::uint8_t* pointerBuffer = &((Pt::uint8_t*)buffer)[lineOffsetBuffer + (xBuffer * bufferPixelSize)];
+            const Pt::uint8_t* pointerCursor = &plane[lineOffsetCursor + (xCursor * planePixelSize)];
 
-			switch( _frameBuffer.depth() )
-			{
-				case 32:
-				{
-					Pt::uint32_t* pixelBuffer = (Pt::uint32_t*) pointerBuffer;
-					const Pt::uint32_t* pixelCursor = (const Pt::uint32_t*) pointerCursor;
+            switch( _frameBuffer.depth() )
+            {
+                case 32:
+                {
+                    Pt::uint32_t* pixelBuffer = (Pt::uint32_t*) pointerBuffer;
+                    const Pt::uint32_t* pixelCursor = (const Pt::uint32_t*) pointerCursor;
 
-					switch( op )											
-					{
-						case AndOp:
-							*pixelBuffer &= *pixelCursor;
-						break;
+                    switch( op )
+                    {
+                        case AndOp:
+                            *pixelBuffer &= *pixelCursor;
+                        break;
 
-						case XorOp:
-							*pixelBuffer ^= *pixelCursor;
-						break;
+                        case XorOp:
+                            *pixelBuffer ^= *pixelCursor;
+                        break;
 
-						case CopyOp://ToDo::optimize this with memcpy
-							*pixelBuffer = *pixelCursor;
-						break;
-					}
-				}
-				break;
+                        case CopyOp://ToDo::optimize this with memcpy
+                            *pixelBuffer = *pixelCursor;
+                        break;
+                    }
+                    break;
+                }
 
-				case 16:
-          //TODO:
-				break;
-			}
-		}
-	}  
+                case 16:
+                    //TODO:
+                    break;
+            }
+        }
+    }
 }
+
 
 void ScreenImpl::onActivate()
 { 
 }
 
-}}
+} // namespace
+
+} // namespace

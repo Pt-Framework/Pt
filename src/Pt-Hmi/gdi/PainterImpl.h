@@ -110,9 +110,7 @@ class PainterImpl
         
         void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 
-        void flush()
-        {
-        }
+        void flush();
         
         void clear(const Gfx::Color& color);
         

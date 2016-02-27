@@ -41,7 +41,7 @@ class PaintSurfaceImpl;
 
 class PT_HMI_API PaintSurface
 {
-    public:        
+    public:
         virtual ~PaintSurface();
         
         virtual PaintSurfaceImpl* impl() = 0;

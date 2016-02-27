@@ -205,7 +205,6 @@ void PainterImpl::clear(const Gfx::Color& color)
 
 void PainterImpl::flush()
 {	
-    _surface->flush();
 }
 
 } // namespace

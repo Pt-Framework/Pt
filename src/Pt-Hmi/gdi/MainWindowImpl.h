@@ -34,8 +34,8 @@
 #include <Pt/Hmi/ScrollEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+namespace Hmi {
 
 class Application;
 class Screen;
@@ -109,6 +109,8 @@ class MainWindowImpl : public WindowImpl
         bool                  _hasPointer;     
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif

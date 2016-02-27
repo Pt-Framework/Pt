@@ -23,7 +23,10 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
+*/
+
 #include "FrameBuffer.h"
 #include <Pt/Hmi/Application.h>
 #include "ScreenImpl.h"
@@ -33,11 +36,9 @@
 #include <stdio.h>
 #include <errno.h>
 
-
 namespace Pt {
+
 namespace Hmi {
-
-
 
   /*_fixedInfo.type;   // 0 -> Packed pixels
                          // 1 -> Non interleaved planes
@@ -54,60 +55,59 @@ namespace Hmi {
 */
 
 FrameBuffer::FrameBuffer()
-{  		 
-	_fd = open ("/dev/fb0", O_RDWR);
+{           
+    _fd = open ("/dev/fb0", O_RDWR);
 
-	if(_fd < 0)
-		throw std::runtime_error("Could not open framebuffer device" + PT_SOURCEINFO);
+    if(_fd < 0)
+        throw std::runtime_error("Could not open framebuffer device" + PT_SOURCEINFO);
 
-	if( 0 > ioctl(_fd, FBIOGET_VSCREENINFO, &_screenInfo) )
-		throw std::runtime_error("FBIOGET_VSCREENINFO failed" + PT_SOURCEINFO);
+    if( 0 > ioctl(_fd, FBIOGET_VSCREENINFO, &_screenInfo) )
+        throw std::runtime_error("FBIOGET_VSCREENINFO failed" + PT_SOURCEINFO);
 
-	// Get the fixed state
-	if( ioctl(_fd, FBIOGET_FSCREENINFO, &_fixedInfo) < 0 )
-		throw std::runtime_error("FBIOGET_FSCREENINFO failed" + PT_SOURCEINFO);
-    
-	// Memory map the display
-	_bufferSize = _fixedInfo.line_length * _screenInfo.yres;
-	_yoffset    = _screenInfo.yres;
-	_buffer     = (char*)  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);	
-	
-  const size_t noOfBytesPerPixel = depth() % 8 != 0 ? depth() / 8 + 1 : depth() / 8;       
+    // Get the fixed state
+    if( ioctl(_fd, FBIOGET_FSCREENINFO, &_fixedInfo) < 0 )
+        throw std::runtime_error("FBIOGET_FSCREENINFO failed" + PT_SOURCEINFO);
 
-  switch( noOfBytesPerPixel )
-  {
-    case 2:
-        _format = new Gfx::Rgb565Format();
-    break;
+    // Memory map the display
+    _bufferSize = _fixedInfo.line_length * _screenInfo.yres;
+    _yoffset    = _screenInfo.yres;
+    _buffer     = (char*)  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);    
 
-    case 3:
-        _format = new Gfx::Rgb888Format();
-    break;
+    const size_t noOfBytesPerPixel = depth() % 8 != 0 ? depth() / 8 + 1 : depth() / 8;       
 
-    case 4:
-      _format =  new Gfx::Argb8888Format();
-    break;
+    switch( noOfBytesPerPixel )
+    {
+        case 2:
+            _format = new Gfx::Rgb565Format();
+            break;
 
-    default:
-      _format =  new Gfx::Argb8888Format();
-    break;
-  } 
+        case 3:
+            _format = new Gfx::Rgb888Format();
+            break;
+
+        case 4:
+            _format =  new Gfx::Argb8888Format();
+            break;
+
+        default:
+            _format =  new Gfx::Argb8888Format();
+            break;
+    }
 }
 
-  
 
 FrameBuffer::~FrameBuffer()
 {
-	if(_buffer)
-		munmap(_buffer, (_fixedInfo.line_length * _screenInfo.yres));
+    if(_buffer)
+        munmap(_buffer, (_fixedInfo.line_length * _screenInfo.yres));
 
-	if(_fd > 0)
-		::close(_fd);
+    if(_fd > 0)
+        ::close(_fd);
 
   if( _format != 0)
      delete _format;
 } 
 
+} // namespace
 
-}} // namespace
-
+} // namespace

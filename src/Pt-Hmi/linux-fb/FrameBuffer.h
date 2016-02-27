@@ -23,7 +23,10 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
+*/
+
 #ifndef Pt_Hmi_FrameBuffer_h
 #define Pt_Hmi_FrameBuffer_h
 
@@ -41,76 +44,75 @@
 #include <linux/fb.h>
 
 namespace Pt {
+
 namespace Hmi {
 
 class FrameBuffer
 {
-  public:
-    FrameBuffer();
+    public:
+        FrameBuffer();
 
-    virtual ~FrameBuffer();
-		
+        virtual ~FrameBuffer();
 
-    size_t width() const
-    {
-        return _screenInfo.xres;
-    }
+        size_t width() const
+        {
+            return _screenInfo.xres;
+        }
 
-    size_t height() const
-    {
-      return _screenInfo.yres;
-    }	
+        size_t height() const
+        {
+            return _screenInfo.yres;
+        }    
 
-    size_t depth() const
-    {
-       return _screenInfo.bits_per_pixel;
-    }    
-    
-    size_t strideInBytes() const
-    {
-        return  _fixedInfo.line_length - ( width() *  depth() /8  );
-    }
+        size_t depth() const
+        {
+            return _screenInfo.bits_per_pixel;
+        }
 
-		size_t lineLength() const
-		{
-			return _fixedInfo.line_length;
-		}
+        size_t strideInBytes() const
+        {
+            return  _fixedInfo.line_length - ( width() *  depth() /8  );
+        }
 
-    const Gfx::ImageFormat& format() const 
-    {
-        return *_format;
-    }
+        size_t lineLength() const
+        {
+            return _fixedInfo.line_length;
+        }
 
-    char* buffer()
-	  { 				
-			  return _buffer;
-	  }
+        const Gfx::ImageFormat& format() const 
+        {
+            return *_format;
+        }
 
-	size_t bufferSize() const
-	{
-	return _bufferSize;
-	}
+        char* buffer()
+        {
+            return _buffer;
+        }
 
-    const char* buffer() const
-	  { 				
-			  return _buffer;
-	  }
+        size_t bufferSize() const
+        {
+            return _bufferSize;
+        }
 
-		Gfx::Size size() const 
-		{
-			return Gfx::Size( width(), height() );
-		}
-		
+        const char* buffer() const
+        {                 
+            return _buffer;
+        }
 
-	private:
-		int								_fd;
-		fb_var_screeninfo	_screenInfo;
-		fb_fix_screeninfo	_fixedInfo;        
-		char*							_buffer;
-    size_t            _yoffset;  
-    size_t            _bufferSize;
-    size_t		        _depth;	  
-   Gfx::ImageFormat*  _format;
+        Gfx::Size size() const 
+        {
+            return Gfx::Size( width(), height() );
+        }
+
+    private:
+        int               _fd;
+        fb_var_screeninfo _screenInfo;
+        fb_fix_screeninfo _fixedInfo;
+        char*             _buffer;
+        size_t            _yoffset;
+        size_t            _bufferSize;
+        size_t            _depth;
+        Gfx::ImageFormat* _format;
 };
 
 } // namespace
@@ -118,4 +120,3 @@ class FrameBuffer
 } // namespace
 
 #endif
-

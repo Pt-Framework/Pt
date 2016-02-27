@@ -1,6 +1,7 @@
- /* Copyright (C) 2015 Marc Boris Duerner 
-    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+ /* 
+  Copyright (C) 2015 Marc Boris Duerner 
+  Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -23,43 +24,39 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_WindowImpl_h
-#define Pt_Hmi_WindowImpl_h
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
+*/
 
-#include <Pt/Connectable.h>
-#include <Pt/Signal.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Image.h>
-#include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/KeyEvent.h>
-#include <Pt/Hmi/WindowState.h>
+#ifndef Pt_Hmi_MainWindowImpl_h
+#define Pt_Hmi_MainWindowImpl_h
+
 #include "../ChildWindowImpl.h"
 
+#include <Pt/Hmi/Api.h>
+
 namespace Pt {
+
 namespace Hmi {
 
 class Window;
-class Application;
 
-class MainWindowImpl  : public ChildWindowImpl
+class MainWindowImpl : public ChildWindowImpl
 {
-
     public:
-	    MainWindowImpl(Window* window);
-    
-	    virtual ~MainWindowImpl();
+        MainWindowImpl(Window* window);
 
+        virtual ~MainWindowImpl();
 
     protected:
         virtual void update();
 
     private:
-        Window*           _apiWindow;
+        Window* _apiWindow;
 };
 
-}} // namespace
+} // namespace
+
+} // namespace
 
 #endif

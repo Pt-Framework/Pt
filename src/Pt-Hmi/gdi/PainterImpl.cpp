@@ -199,6 +199,11 @@ void PainterImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 }
 
 
+void PainterImpl::flush()
+{	
+}
+
+
 void PainterImpl::clear(const Gfx::Color& color)
 {
     Gfx::RectF rect(Gfx::PointF(0,0), _surface->size() );   

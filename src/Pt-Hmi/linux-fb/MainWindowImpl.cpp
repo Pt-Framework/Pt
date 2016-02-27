@@ -1,6 +1,7 @@
- /* Copyright (C) 2015 Marc Boris Duerner 
-    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+ /* 
+  Copyright (C) 2015 Marc Boris Duerner 
+  Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -23,25 +24,14 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
+*/
+
 #include "MainWindowImpl.h"
-#include "PaintSurfaceImpl.h"
 #include "ApplicationImpl.h"
-#include "ScreenImpl.h"
 
 #include <Pt/Hmi/Application.h>
-#include <Pt/System/Logger.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <fcntl.h>
-#include <getopt.h>
-#include <linux/types.h>
-#include <linux/kd.h>
-#include <linux/keyboard.h>
-#include <sys/ioctl.h>
-#include <string.h>
-#include <errno.h>
 
 namespace Pt {
 
@@ -49,7 +39,7 @@ namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(Window* window)
 : ChildWindowImpl(window)
-{ 	
+{
 }
 
 
@@ -58,11 +48,14 @@ MainWindowImpl::~MainWindowImpl()
 }
 
 
+void MainWindowImpl::update(const Gfx::RectF& updateRect)
+{
+    Gfx::PointF pos = _apiWindow->position() + updateRect.topLeft();
+    Gfx::RectF parentRect(pos, updateRect.size());
 
-void MainWindowImpl::update()
-{		
-	Application::instance().mainScreen().impl()->update();
+    Application::instance().mainScreen().impl()->update(parentRect);
 }
 
+} // namespace
 
-}} // namespace
+} // namespace

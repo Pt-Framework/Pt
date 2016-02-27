@@ -84,8 +84,6 @@ class PaintSurfaceImpl
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image) = 0;
 
-        virtual void flush() = 0;
-
         static std::string defaultFont();
 
         static std::list<std::string> fontFamilyNames(); 
@@ -136,8 +134,6 @@ class PaintRegionImpl : public PaintSurfaceImpl
         virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
-
-        virtual void flush();
 
     private:
         PaintSurface* _surface;
@@ -195,8 +191,6 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
-
-        virtual void flush();
 
     private:
         Gfx::SizeF            _size;

@@ -30,7 +30,6 @@
 #include "PaintSurfaceImpl.h"
 #include "ScreenImpl.h"
 #include "ApplicationImpl.h"
-#include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Hmi/Application.h>
 
 namespace Pt {
@@ -201,12 +200,6 @@ void PaintRegionImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
     _surface->impl()->drawImage(toF + _area.topLeft(), image);
 }
 
-
-void PixmapSurfaceImpl::flush()
-{
-    _surface->impl()->flush();
-}
-
 /////////////////////////////////////////////////////////////////////
 // PixmapSurfaceImpl
 /////////////////////////////////////////////////////////////////////
@@ -319,15 +312,6 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface&
 void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 {
     pipeline().image( to, image )
-}
-
-
-void PixmapSurfaceImpl::flush()
-{
-    Gfx::ImagePainter painter( Application::instance().mainScreen().impl()->image() );
-
-    pipeline().render( painter );
-    pipeline().clear();
 }
 
 } // namespace

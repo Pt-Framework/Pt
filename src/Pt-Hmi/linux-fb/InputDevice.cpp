@@ -1,30 +1,31 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/*
+  Copyright (C) 2015 Marc Boris Duerner 
+  Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-As a special exception, you may use this file as part of a free
-software library without restriction. Specifically, if other files
-instantiate templates or use macros or inline functions from this
-file, or you compile this file and link it with other files to
-produce an executable, this file does not by itself cause the
-resulting executable to be covered by the GNU General Public
-License. This exception does not however invalidate any other
-reasons why the executable file might be covered by the GNU Library
-General Public License.
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-MA  02110-1301  USA
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
 */
 
 #include "InputDevice.h"
@@ -51,8 +52,8 @@ InputDevice::InputDevice(const char* deviceName)
 
 
 InputDevice::InputDevice()
-    : _ioh(*this)
-    , _loop(0)
+: _ioh(*this)
+, _loop(0)
 {
     _ioh.fd = -1;
 }
@@ -111,25 +112,25 @@ bool InputDevice::onRun()
         {
             case EV_KEY:
             {
-                if( ev.code == 272 )	
+                if( ev.code == 272 )    
                 {
                     if( ev.value == 0  )
                         _mouseEvent.setRelease(MouseEvent::Left);
                     else
                         _mouseEvent.setPress(MouseEvent::Left);
 
-                    _eventReady.send(_mouseEvent);				                				
+                    _eventReady.send(_mouseEvent);                                                
                     break;
                 }
 
-                if( ev.code == 273 )	
+                if( ev.code == 273 )    
                 {
                     if( ev.value == 0  )
                         _mouseEvent.setRelease(MouseEvent::Right);
                     else
                         _mouseEvent.setPress(MouseEvent::Right);
 
-                    _eventReady.send(_mouseEvent);			                				
+                    _eventReady.send(_mouseEvent);                                            
                     break;
                 }
 
@@ -146,7 +147,7 @@ bool InputDevice::onRun()
                         else
                             _leftAlt = false;
 
-                        break;	
+                        break;    
 
                     case KEY_RIGHTALT:
                         if(ev.value == 1)
@@ -157,7 +158,7 @@ bool InputDevice::onRun()
                         else
                             _rightAlt = false;
 
-                        break;	
+                        break;    
 
                     case KEY_LEFTCTRL:
                     case KEY_RIGHTCTRL:
@@ -206,11 +207,11 @@ bool InputDevice::onRun()
                 else
                     _keyEvent.setRelease(key, ch);
 
-                _eventReady.send(_keyEvent);				
+                _eventReady.send(_keyEvent);
+                break;
             }
-            break;
 
-        case EV_REL:
+            case EV_REL:
             {
                 if(ev.code == REL_X)
                     _mouseEvent.setX( _mouseEvent.x() + static_cast<double>(ev.value) );
@@ -229,11 +230,11 @@ bool InputDevice::onRun()
                 if( _mouseEvent.y() >= _screenSize.height() )
                     _mouseEvent.setY( _screenSize.height() - 1 );
 
-                hasPointerEvent = true;						                				                				
+                hasPointerEvent = true;
+                break;
             }
-            break;
 
-        case EV_ABS:
+            case EV_ABS:
             {
                 switch(ev.code)
                 {
@@ -258,10 +259,10 @@ bool InputDevice::onRun()
                     break;
                 }
 
-                hasPointerEvent = true;	
+                hasPointerEvent = true;
+                break;
             }
-            break;  
-        }		
+        }
     }
 
     if(hasPointerEvent)
