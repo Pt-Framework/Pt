@@ -154,8 +154,8 @@ void ScreenImpl::update(const Gfx::RectF& updateRect)
     painter.flush();
     Gfx::GraphicsPipeline& pipeline = _surface.pixmapImpl()->pipeline();
     
-    Gfx::ImagePainter painter(_image);
-    pipeline.render(painter);
+    Gfx::ImagePainter imagePainter(_image);
+    pipeline.render(imagePainter);
     pipeline.clear();
 
     updateScreen();

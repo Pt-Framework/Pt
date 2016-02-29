@@ -30,6 +30,7 @@
 
 #include "MainWindowImpl.h"
 #include "ApplicationImpl.h"
+#include "ScreenImpl.h"
 
 #include <Pt/Hmi/Application.h>
 

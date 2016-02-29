@@ -93,7 +93,7 @@ const Font& ImagePainter::font() const
 }
 
 
-FontMetrics ImagePainter::fontMetrics( String text) const
+FontMetrics ImagePainter::fontMetrics(const String& text) const
 {
 	return _rasterizer.fontMetrics( text );
 }

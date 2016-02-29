@@ -49,7 +49,7 @@ class MainWindowImpl : public ChildWindowImpl
         virtual ~MainWindowImpl();
 
     protected:
-        virtual void update();
+        virtual void update(const Gfx::RectF& updateRect);
 
     private:
         Window* _apiWindow;

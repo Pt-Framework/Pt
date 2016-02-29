@@ -29,11 +29,12 @@
 
 #include "PainterImpl.h"
 #include "PaintSurfaceImpl.h"
-#include <Pt/Api.h>
+
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Application.h>
-#include "ScreenImpl.h"
+#include <Pt/Gfx/ImagePainter.h>
+
 
 namespace Pt {
 
@@ -119,7 +120,7 @@ Gfx::FontMetrics PainterImpl::fontMetrics(const Pt::String& text) const
 
 Gfx::FontMetrics PainterImpl::fontMetrics(const Gfx::Font& font, const Pt::String& text)
 {   
-    return ImagePainter::fontMetrics(font, text);
+    return Gfx::ImagePainter::fontMetrics(font, text);
 }
 
 

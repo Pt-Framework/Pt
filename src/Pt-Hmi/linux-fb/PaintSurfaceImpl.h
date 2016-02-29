@@ -47,8 +47,7 @@ class PixmapSurface;
 class PaintSurfaceImpl
 {
     public:        
-        virtual ~PaintSurfaceImpl()
-        {}   
+        virtual ~PaintSurfaceImpl();
 
         virtual const Gfx::SizeF& size() const = 0;
 
@@ -74,11 +73,7 @@ class PaintSurfaceImpl
 
         virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount) = 0;
 
-        virtual void drawPolyline(POINT* points, size_t pointCount) = 0;
-
         virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount) = 0;
-
-        virtual void fillPolygon(POINT* points, size_t pointCount) = 0;
 
         virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface) = 0;
 
@@ -91,8 +86,7 @@ class PaintSurfaceImpl
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
 
     protected:
-        PaintSurfaceImpl()
-        {}
+        PaintSurfaceImpl();
 };
 
 
@@ -194,6 +188,9 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
     private:
         Gfx::SizeF            _size;
+        Gfx::Pen              _pen;
+        Gfx::Brush            _brush;
+        Gfx::Font             _font;
         Gfx::GraphicsPipeline _pipeline;
 };
 

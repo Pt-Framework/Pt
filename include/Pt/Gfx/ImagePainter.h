@@ -55,7 +55,7 @@ class PT_GFX_API ImagePainter : public Painter
 
     virtual const Font& font() const;    
 
-    virtual FontMetrics fontMetrics( Pt::String text) const;
+    virtual FontMetrics fontMetrics(const Pt::String& text) const;
 
     virtual void drawLine(const  PointF& from, const  PointF& to);
 
