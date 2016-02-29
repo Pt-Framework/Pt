@@ -50,9 +50,6 @@ class MainWindowImpl : public ChildWindowImpl
 
     protected:
         virtual void update(const Gfx::RectF& updateRect);
-
-    private:
-        Window* _apiWindow;
 };
 
 } // namespace
