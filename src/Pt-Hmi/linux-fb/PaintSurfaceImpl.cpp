@@ -164,7 +164,7 @@ void PaintRegionImpl::drawPolyline(const Gfx::PointF* points, size_t pointCount)
         translated[i] = pt;
     }
 
-    _surface->impl()->drawPolyline(points, pointCount);
+    _surface->impl()->drawPolyline(&translated[0], pointCount);
 }
 
 

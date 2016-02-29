@@ -129,6 +129,8 @@ class PT_HMI_API Window : public Pt::Connectable
     virtual void onKeyEvent( const KeyEvent& ev );
 
     virtual void onPointerEvent( const MouseEvent& ev );
+
+    virtual void onTouchEvent( const TouchEvent& ev );
     
     virtual void onScrollEvent( const ScrollEvent& ev );
 

@@ -73,6 +73,7 @@ Window::Window( Window* parent )
 
     _eventReady += Pt::slot(*this, &Window::onKeyEvent);
     _eventReady += Pt::slot(*this, &Window::onPointerEvent);
+    _eventReady += Pt::slot(*this, &Window::onTouchEvent);
     _eventReady += Pt::slot(*this, &Window::onScrollEvent);  
     _eventReady += Pt::slot(*this, &Window::onMoveEvent);
     _eventReady += Pt::slot(*this, &Window::onResizeEvent);
@@ -380,6 +381,12 @@ void Window::onPointerEvent(const MouseEvent& ev)
         clientEv.setPosition( widget->toClient(ev.position()) );
         widget->processEvent(clientEv);  
     }
+}
+
+
+void Window::onTouchEvent( const TouchEvent& ev )
+{
+
 }
 
 

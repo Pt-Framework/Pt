@@ -30,6 +30,8 @@
 
 #include "InputDevice.h"
 
+#include <Pt/Hmi/Application.h>
+
 #include <linux/input.h>
 #include <linux/kd.h>
 #include <linux/keyboard.h>
@@ -112,7 +114,8 @@ bool InputDevice::onRun()
         {
             case EV_KEY:
             {
-                if( ev.code == 272 )    
+                //std::clog << "EV_KEY " << ev.code << " " << ev.value << std::endl;
+                if( ev.code == 272 || ev.code == 330)    
                 {
                     if( ev.value == 0  )
                         _mouseEvent.setRelease(MouseEvent::Left);
@@ -213,6 +216,8 @@ bool InputDevice::onRun()
 
             case EV_REL:
             {
+                //std::clog << "EV_REL" << ev.value << std::endl;
+
                 if(ev.code == REL_X)
                     _mouseEvent.setX( _mouseEvent.x() + static_cast<double>(ev.value) );
                 else if(ev.code == REL_Y)
@@ -236,37 +241,44 @@ bool InputDevice::onRun()
 
             case EV_ABS:
             {
+                //std::clog << "EV_ABS" << std::endl;
+
+                Gfx::SizeF screenSize = Application::instance().mainScreen().size();
+                double scaleX =  screenSize.width() / 800.0;
+                double scaleY =  screenSize.height() / 480.0;
+
                 switch(ev.code)
                 {
-                case ABS_MT_SLOT:                
-                case ABS_MT_TRACKING_ID:
+                    case ABS_MT_SLOT:                
+                    case ABS_MT_TRACKING_ID:
 
-                case ABS_X:
-                case ABS_MT_POSITION_X:
-                    _touchEvent.setX( static_cast<double>(ev.value) );
-                    break;
+                    case ABS_X:
+                    case ABS_MT_POSITION_X:
+                        _mouseEvent.setX( static_cast<double>(ev.value)*scaleX  );
+                        break;
 
-                case ABS_Y:
-                case ABS_MT_POSITION_Y:
-                    _touchEvent.setY( static_cast<double>(ev.value) );
-                    break;
+                    case ABS_Y:
+                    case ABS_MT_POSITION_Y:
+                        _mouseEvent.setY( static_cast<double>(ev.value)*scaleY );
+                        break;
 
-                case ABS_PRESSURE:
-                case ABS_MT_PRESSURE:                  
-                    break;
+                    case ABS_PRESSURE:
+                    case ABS_MT_PRESSURE:                  
+                        break;
 
-                default:
-                    break;
-                }
+                    default:
+                        break;
+                  }
 
-                hasPointerEvent = true;
-                break;
+                  hasPointerEvent = true;
+                  break;
             }
         }
     }
 
     if(hasPointerEvent)
     {
+        //std::clog << "mouse: " << _mouseEvent.x() << " " << _mouseEvent.y() << std::endl;
         _eventReady.send(_mouseEvent);
     }
 

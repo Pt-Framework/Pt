@@ -60,12 +60,12 @@ class ScreenImpl : public Pt::Connectable
 
         double width() const
         {
-            return _size.width();
+            return _frameBuffer.width();
         }
 
         double height() const
         {
-            return  _size.height();
+            return _frameBuffer.height();
         }
 
         virtual void activate()
@@ -176,7 +176,6 @@ class ScreenImpl : public Pt::Connectable
         WindowManager _windowManager;
         PixmapSurface _surface;
         Cursor        _cursor;
-        Gfx::SizeF    _size;
 };
 
 } // namespace
