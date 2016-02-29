@@ -39,8 +39,8 @@
 namespace Pt {
 namespace Gfx {
 
-ImagePainter::ImagePainter( Image& image )
-: _rasterizer( image  )
+ImagePainter::ImagePainter(Image& image)
+: _rasterizer(image)
 {
 }
 
@@ -48,6 +48,12 @@ ImagePainter::ImagePainter( Image& image )
 ImagePainter::~ImagePainter()
 {
 
+}
+
+
+void ImagePainter::setImage(Image& image)
+{
+    _rasterizer.setImage(image);
 }
 
 
@@ -113,7 +119,7 @@ void ImagePainter::drawText( const PointF& to, const String& text )
 
 
 void ImagePainter::drawRect( const  RectF& rect )
-{    
+{
 	PointF points[5] = { rect.topLeft(), rect.topRight(), rect.bottomRight(), rect.bottomLeft(),  rect.topLeft()  };
 	_rasterizer.stroke( points, 5);
 }

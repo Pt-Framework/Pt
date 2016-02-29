@@ -140,9 +140,9 @@ void Painter::drawText(const Gfx::PointF& to, const Pt::String& Text)
 }
 
 
-void Painter::drawRect(const Gfx::RectF& rectangle)
+void Painter::drawRect(const Gfx::RectF& rect)
 {
-    _impl->drawRect(rectangle);
+    _impl->drawRect(rect);
 }
 
 

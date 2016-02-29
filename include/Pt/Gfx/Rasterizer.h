@@ -47,6 +47,8 @@ class PT_GFX_API Rasterizer
     
     ~Rasterizer();
 
+    void setImage(Image& image);
+
     void setPen( const Pen& pen )
     {
       _pen = pen;
@@ -156,7 +158,7 @@ class PT_GFX_API Rasterizer
     void dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash );
         
   private:
-    Image&		_image;
+    Image* 		_image;
     DrawText*  _text;   
     RectF			_clip;    
     Font			_font;

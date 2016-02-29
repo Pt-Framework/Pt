@@ -58,6 +58,11 @@ class ScreenImpl : public Pt::Connectable
 
         void unregisterWindow(Window& w);
 
+        const FrameBuffer& frameBuffer() const
+        {
+            return _frameBuffer;
+        }
+
         double width() const
         {
             return _frameBuffer.width();
@@ -72,15 +77,9 @@ class ScreenImpl : public Pt::Connectable
         {
         }
 
-        const Gfx::Image& image() const
-        {
-            return _image;
-        }
+        const Gfx::Image& image() const;
 
-        Gfx::Image& image() 
-        {
-            return _image;
-        } 
+        Gfx::Image& image();
 
         double toUnit(int value)
         {
@@ -170,7 +169,6 @@ class ScreenImpl : public Pt::Connectable
         FrameBuffer&  _frameBuffer;
         Gfx::Image    _cursorBackground;
         Gfx::Point    _cursorPos;
-        Gfx::Image    _image;
         double        _dpi;
         bool          _drawCursor;
         WindowManager _windowManager;

@@ -136,7 +136,7 @@ void Button::onFocus(bool hasFocus)
 
 
 void Button::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
-{    
+{
     bool mouseOver = window()->pointerWidget() == this;
     Gfx::Color bkgColor = backgroundColor();
 

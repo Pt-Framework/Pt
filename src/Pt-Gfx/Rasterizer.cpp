@@ -202,18 +202,28 @@ inline int stepAround( int v, int incr, int max )
 
 
 Rasterizer::Rasterizer( Image& image )
-: _image( image )
+: _image( &image )
 , _text( new DrawText() )
 , _font("Vera", 12)
-, _clip( RectF(PointF(0,0), SizeF( image.width(), image.height() ) ) )
+, _clip(PointF(0,0), SizeF( image.width(), image.height()))
 {
 	_text->setClip( _clip );
+  _text->setFont( _font );
 }
 
 
 Rasterizer::~Rasterizer()
 {
   delete _text;
+}
+
+
+void Rasterizer::setImage( Image& image )
+{
+    _image = &image;
+
+    _clip.set( PointF(0,0), SizeF( image.width(), image.height() ) );
+    _text->setClip( _clip );
 }
 
 
@@ -1854,7 +1864,7 @@ void Rasterizer::stroke( int x, int y)
 
 	const Image& colorBuffer = _pen.buffer();
   
-	memcpy(_image.pixel(x, y), colorBuffer.pixel(0,0), _image.format().pixelSize() );
+	memcpy(_image->pixel(x, y), colorBuffer.pixel(0,0), _image->format().pixelSize() );
 }
 
 
@@ -1869,7 +1879,7 @@ void Rasterizer::stroke( int xpos, int ypos, int length )
 			const int fillLength = std::min( length, (int) colorBuffer.width() );
 
 			if( fillLength )
-				std::memcpy( _image.pixel( xpos, ypos ), colorBuffer.pixel(0,0), fillLength * _image.format().pixelSize() );
+				std::memcpy( _image->pixel( xpos, ypos ), colorBuffer.pixel(0,0), fillLength * _image->format().pixelSize() );
 
 			length -= fillLength;
 			xpos   += fillLength;
@@ -1903,7 +1913,7 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
 
         // Copy pixels from textrure to image
         if(fillLength)
-            std::memcpy( _image.pixel( xpos, ypos ), texture.pixel(textureXPos, textureYPos), fillLength * _image.format().pixelSize() );
+            std::memcpy( _image->pixel( xpos, ypos ), texture.pixel(textureXPos, textureYPos), fillLength * _image->format().pixelSize() );
 
         // Remaining unfilled pixels of the span
         length -= fillLength;
@@ -1964,7 +1974,7 @@ void Rasterizer::fillSolid( const Point& pos, int length )
 		const int fillLength = std::min( length, (int) texture.width() );
 
 		if(fillLength)
-				std::memcpy( _image.pixel( xpos, ypos ), _brush.texture().pixel(0,0), fillLength * _image.format().pixelSize());        
+				std::memcpy( _image->pixel( xpos, ypos ), _brush.texture().pixel(0,0), fillLength * _image->format().pixelSize());        
 
 		length -= fillLength;
 		xpos   += fillLength;
@@ -1974,7 +1984,7 @@ void Rasterizer::fillSolid( const Point& pos, int length )
 
 void Rasterizer::strokeText( const PointF& to, const Pt::String& text )
 { 
-  _text->draw( _image, _pen.color(), to, text );
+  _text->draw( *_image, _pen.color(), to, text );
 }
 
 
@@ -2280,7 +2290,7 @@ void Rasterizer::fillLine(int y,  int overall_height, LineEdge *left, LineEdge *
             if (right_x >= left_x)
             {
                 int xpos = std::max( left_x, 0 );
-                const int endx = std::min<int>( right_x, _image.width() -1);
+                const int endx = std::min<int>( right_x, _image->width() -1);
                 stroke( xpos, y, endx - xpos + 1 );
             }
 
@@ -3318,8 +3328,8 @@ void Rasterizer::fill( const PointF* pts, size_t pointCount)
 
 void Rasterizer::outputSpan( const Point& topLeft, int x, int y, int width )
 {
-    const int imageWidth = static_cast<int>( _image.width() );
-    const int imageHeight = static_cast<int>( _image.height() );
+    const int imageWidth = static_cast<int>( _image->width() );
+    const int imageHeight = static_cast<int>( _image->height() );
 
     if( y >= imageHeight )
         return;
@@ -3436,7 +3446,7 @@ void Rasterizer::image( const PointF& toIn, const Image& image )
   int xTargetBegin = to.x();
   int yTargetBegin = to.y();
 
-  if( to.x() >= (int)_image.width() )
+  if( to.x() >= (int)_image->width() )
      return;
 
   if( to.x() < 0 )
@@ -3445,7 +3455,7 @@ void Rasterizer::image( const PointF& toIn, const Image& image )
     xTargetBegin = 0;
   }
 
-  if( to.y() > (int)_image.height() )
+  if( to.y() > (int)_image->height() )
      return;
 
   if( to.y() < 0 )
@@ -3459,8 +3469,8 @@ void Rasterizer::image( const PointF& toIn, const Image& image )
   if( to.x()  < 0 )
     lineLength += to.x();
 
-  if( (xTargetBegin + lineLength) > (int)_image.width()  )
-      lineLength -= (xTargetBegin + lineLength) - _image.width() ;
+  if( (xTargetBegin + lineLength) > (int)_image->width()  )
+      lineLength -= (xTargetBegin + lineLength) - _image->width() ;
  
   if( lineLength  <=  0 )
     return;  
@@ -3469,18 +3479,18 @@ void Rasterizer::image( const PointF& toIn, const Image& image )
 
   int lines = image.height();   
 
-  if( endYOffset >  (int)_image.height()  )
-      lines = _image.height() - yTargetBegin;
+  if( endYOffset >  (int)_image->height()  )
+      lines = _image->height() - yTargetBegin;
 
   if( endYOffset  <  0 )
     return;
   
   const Pt::uint8_t* scanLineSource = image.pixel( xSourceBegin, ySourceBegin );
-  Pt::uint8_t* scanLineTarget = _image.pixel( xTargetBegin, yTargetBegin );
+  Pt::uint8_t* scanLineTarget = _image->pixel( xTargetBegin, yTargetBegin );
 
-  const int targetStride		 = _image.width() * _image.format().pixelSize() +  _image.stride();
+  const int targetStride		 = _image->width() * _image->format().pixelSize() +  _image->stride();
   const int sourceStride		 = image.width() * image.format().pixelSize() +  image.stride();
-  const int lineSize = lineLength * _image.format().pixelSize();
+  const int lineSize = lineLength * _image->format().pixelSize();
 
   //Render
   switch( _mode )
@@ -3516,14 +3526,14 @@ FontMetrics Rasterizer::fontMetrics( const String& text ) const
 FontMetrics Rasterizer::fontMetrics( const Font& font, const Pt::String& text )
 {
   DrawText textRender;
-  textRender.setFont( font );
+  textRender.setFont(font);
 
-  return textRender.fontMetrics( text );
+  return textRender.fontMetrics(text);
 }
 
 void Rasterizer::clear( const Color& color)
 {
-  RectF rect( PointF(0,0), SizeF(_image.width(), _image.height() ) );
+  RectF rect( PointF(0,0), SizeF(_image->width(), _image->height() ) );
   Brush bs( color );
   setBrush( bs );
 

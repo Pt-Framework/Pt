@@ -464,8 +464,8 @@ void Widget::onRender(const Gfx::PointF& pos,
         if( updateRect.intersect( child->geometry() ).isNull() )
             continue;
 
-        //static int _n = 0;
-        //std::clog << _n++ << " RENDER RENDER RENDER " << child->name() << std::endl;
+        static int _n = 0;
+        std::clog << _n++ << " RENDER RENDER RENDER " << child->name() << std::endl;
 
         Gfx::PointF paintOffset( pos.x() + child->position().x(),
                                  pos.y() + child->position().y() );

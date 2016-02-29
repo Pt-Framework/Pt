@@ -152,7 +152,7 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
         Window* w = _children[i];                
 
         if( ! w->isVisible() )
-             continue;        
+            continue; 
         
         Gfx::PointF clientPos = renderFrame(*w, surface);                          
         
@@ -162,7 +162,7 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
         w->render(updateRect);
 
         //static int _n = 0;
-        //std::clog << _n++ << "    window blit: " << w->name() << " " << w->title() << std::endl;
+        //std::clog << _n++ << " window blit: " << w->name() << " " << w->title() << std::endl;
         painter.drawSurface( clientPos, w->surface() );
     }
 }

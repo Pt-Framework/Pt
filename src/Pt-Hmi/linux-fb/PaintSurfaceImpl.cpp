@@ -31,7 +31,6 @@
 #include "ScreenImpl.h"
 #include "ApplicationImpl.h"
 #include <Pt/Hmi/Application.h>
-#include <Pt/Gfx/ImagePainter.h>
 
 namespace Pt {
 
@@ -49,7 +48,7 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
 
 std::string PaintSurfaceImpl::defaultFont()
 {
-    return std::string();
+    return "Vera";
 }
 
 
@@ -199,9 +198,9 @@ void PaintRegionImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 
 PixmapSurfaceImpl::PixmapSurfaceImpl()
 : _size(10,10)
-, _pen(1)
-, _brush( Gfx::Color(0, 0, 0, 0) )
-, _font( PaintSurfaceImpl::defaultFont() )
+, _image( Gfx::Size(_size.width(), _size.height()), 
+          Application::instance().impl()->frameBuffer().format() )
+, _painter(_image)
 {
 }
 
@@ -213,14 +212,23 @@ PixmapSurfaceImpl::~PixmapSurfaceImpl()
 
 void PixmapSurfaceImpl::clear()
 {
-    _pipeline.clear();
+}
+
+
+void PixmapSurfaceImpl::resize(const Gfx::Size& size, size_t stride)
+{
+    _size.set(size.width(), size.height());
+    _image.resize(size, stride);
+    _painter.setImage(_image);
 }
 
 
 void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
 {
     _size = size;
-    _pipeline.clear();
+    _image.resize( Gfx::Size(_size.width(), _size.height() ) );
+
+    _painter.setImage(_image);
 }
 
 
@@ -232,88 +240,86 @@ const Gfx::SizeF& PixmapSurfaceImpl::size() const
 
 void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
 {
-    _pen = pen;
+    _painter.setPen(pen);
 }
 
 
 void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
 {
-    _brush = brush;
+    _painter.setBrush(brush);
 }
 
 
 void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 {
-    _font = font; 
+    _painter.setFont(font); 
 }
 
 
 Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 {
-    return Gfx::ImagePainter::fontMetrics( _font, text);
+    return _painter.fontMetrics(text);
 }
 
 
 void PixmapSurfaceImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
-    pipeline().stroke( _pen, from , to );
+    _painter.drawLine(from, to);
 }
 
 
 void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
-    pipeline().text( to, _pen, _font, text);
+    _painter.drawText(to, text);
 }
 
 
 void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
 {
-    pipeline().stroke( _pen, rect ); 
+    _painter.drawRect(rect); 
 }
 
 
 void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rect)
 {
-    pipeline().fill( _brush, rect );
+    _painter.fillRect(rect);
 }
 
 
 void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    pipeline().ellipse( _pen, topLeft, size );
+    _painter.drawEllipse(topLeft, size);
 }
 
 
 void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    pipeline().fillEllipse( _brush, topLeft, size );
+    _painter.fillEllipse(topLeft, size);
 }
 
 
 void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
 {
-    pipeline().stroke( _pen, points, pointCount );
+    _painter.drawPolyline(points, pointCount);
 }
 
 
 void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
 {
-    pipeline().fill( _brush, points, pointCount );
+    _painter.fillPolygon(points, pointCount);
 }
 
 
 void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, const PixmapSurface& surface)
 {
-    Gfx::GraphicsPipeline p = surface.pixmapImpl()->pipeline();
-    p.translate( to.x(), to.y() );  
-
-    pipeline().addPipeline(Gfx::RectF(to, surface.size()), p);
+    const Gfx::Image& image = surface.pixmapImpl()->image();
+    _painter.drawImage(to, image);
 }
 
 
 void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
 {
-    pipeline().image( to, image );
+    _painter.drawImage(to, image);
 }
 
 } // namespace

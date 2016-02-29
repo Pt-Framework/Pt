@@ -48,14 +48,13 @@ namespace Hmi {
 ScreenImpl::ScreenImpl(ApplicationImpl& app)
 : _frameBuffer( app.frameBuffer() )
 , _cursorPos( 0,0 )
-, _image( _frameBuffer.size(), _frameBuffer.format(), _frameBuffer.strideInBytes() )
 , _dpi(96.0)
 , _drawCursor(true)
 {
     app.eventReady() += Pt::slot( *this, &ScreenImpl::onPointerEvent );
     app.eventReady() += Pt::slot( *this, &ScreenImpl::onKeyEvent );
 
-    _surface.resize( Gfx::SizeF(_frameBuffer.width(), _frameBuffer.height()) );
+    _surface.pixmapImpl()->resize(_frameBuffer.size(), _frameBuffer.strideInBytes() );
     setCursor(0);
 }
 
@@ -77,12 +76,25 @@ void ScreenImpl::unregisterWindow(Window& w)
 }
 
 
+const Gfx::Image& ScreenImpl::image() const
+{
+    return _surface.pixmapImpl()->image();
+}
+
+
+Gfx::Image& ScreenImpl::image()
+{
+    return _surface.pixmapImpl()->image();
+}
+
+
 void ScreenImpl::onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent )
 {        
     _drawCursor =  true;
 
     if( !_cursorBackground.empty() )
-        bitBlit( _cursorBackground.pixel(0,0), _cursorBackground.width(), _cursorBackground.height(), _cursorPos, (Pt::uint8_t*)  _image.pixel(0,0), CopyOp );
+        bitBlit( _cursorBackground.pixel(0,0), _cursorBackground.width(), _cursorBackground.height(), 
+                 _cursorPos, (Pt::uint8_t*)image().pixel(0,0), CopyOp );
 
     if( _cursor.width() != 0 )
         _cursorPos = Gfx::Point( mouseEvent.x() - _cursor.xHotspot() , mouseEvent.y() - _cursor.yHotspot());
@@ -139,26 +151,30 @@ void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
 void ScreenImpl::updateScreen()
 {
     _drawCursor    = false;
-    drawCursor(  _image.pixel(0,0) );
-    memcpy( _frameBuffer.buffer(), _image.pixel(0,0), _frameBuffer.bufferSize() );            
+    drawCursor( image().pixel(0,0) );
+    memcpy( _frameBuffer.buffer(), image().pixel(0,0), _frameBuffer.bufferSize() );            
 }
 
 
 void ScreenImpl::update(const Gfx::RectF& updateRect)
 {            
-    Hmi::Painter painter(_surface);     
-    painter.clear();
+    Pt::System::Clock clock;
+    clock.start();   
+
+    Painter painter(_surface);
+    painter.setBrush( Pt::Gfx::Color(0.2f, 0.2f, 0.2f) );
+    painter.fillRect(updateRect);
+
+    std::clog << "update rect: " << updateRect.x() << " " 
+              << updateRect.y() << " "
+              << updateRect.width() << " "
+              << updateRect.height() << std::endl;
 
     _windowManager.render(_surface, updateRect);
-       
-    painter.flush();
-    Gfx::GraphicsPipeline& pipeline = _surface.pixmapImpl()->pipeline();
     
-    Gfx::ImagePainter imagePainter(_image);
-    pipeline.render(imagePainter);
-    pipeline.clear();
-
     updateScreen();
+
+    std::clog << "screen update: " << clock.stop().toUSecs() << " usecs." << std::endl;
 }
 
 

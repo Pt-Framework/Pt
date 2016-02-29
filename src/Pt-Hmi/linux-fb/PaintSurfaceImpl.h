@@ -35,8 +35,7 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/GraphicsPipeline.h>
+#include <Pt/Gfx/ImagePainter.h>
 
 namespace Pt {
 
@@ -141,19 +140,21 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         PixmapSurfaceImpl();
         
         virtual ~PixmapSurfaceImpl();  
-        
-        const Gfx::GraphicsPipeline& pipeline() const
-        {
-            return _pipeline;
-        }
-
-        Gfx::GraphicsPipeline& pipeline()
-        {
-            return _pipeline;
-        }
 
         void clear();
+
+        const Gfx::Image& image() const
+        {
+            return _image;
+        }
+
+        Gfx::Image& image()
+        {
+            return _image;
+        }
     
+        void resize(const Gfx::Size& size, size_t stride);
+
         void resize(const Gfx::SizeF& size);    
 
         virtual const Gfx::SizeF& size() const;
@@ -188,10 +189,8 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
     private:
         Gfx::SizeF            _size;
-        Gfx::Pen              _pen;
-        Gfx::Brush            _brush;
-        Gfx::Font             _font;
-        Gfx::GraphicsPipeline _pipeline;
+        Gfx::Image            _image;
+        Gfx::ImagePainter     _painter;
 };
 
 } // namespace
