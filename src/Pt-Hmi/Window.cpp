@@ -456,18 +456,26 @@ void Window::onKeyEvent(const KeyEvent& ev)
 
 void Window::onResizeEvent(const ResizeEvent& ev)
 {    
+    double borderWidth = 4;
+    double titleHeight = 20;
+
+    double updateX = - borderWidth;
+    double updateY = - (borderWidth + titleHeight);
+    double updateWidth = std::max(_size.width(), ev.size().width());
+    updateWidth += borderWidth * 3;
+
+    double updateHeight = std::max(_size.height(), ev.size().height());
+    updateHeight += titleHeight + (borderWidth * 2);
+    updateHeight += titleHeight + borderWidth;
+    
+    Gfx::RectF updateRect( Gfx::PointF(updateX, updateY), 
+                           Gfx::SizeF(updateWidth, updateHeight) );
+    
+    _updateRect.unify(updateRect);
+
     _size = ev.size();
     _state = ev.state();
     _surface.resize(_size);
-
-    if(_parent)
-    {
-        // update area for whole parent window in local coordinates
-        Gfx::PointF pos( -_position.x(), -_position.y() );
-        Gfx::RectF parentRect(pos, _parent->size());
-
-        _updateRect.unify(parentRect);
-    }
 
     if( _mainWidget )
     {
@@ -483,11 +491,27 @@ void Window::onResizeEvent(const ResizeEvent& ev)
 
 void Window::onMoveEvent(const MoveEvent& ev)
 {   
+    double borderWidth = 4;
+    double titleHeight = 20;
+
+    double updateWidth = _size.width();
+    updateWidth += borderWidth * 2;
+
+    double updateHeight = _size.height();
+    updateHeight += titleHeight + (borderWidth * 2);
+    
+    Gfx::RectF updateRect( Gfx::PointF(_position.x(), _position.y()), 
+                           Gfx::SizeF(updateWidth, updateHeight) );
+
     _position = ev.position();
+
+    Gfx::RectF updateRect2( Gfx::PointF(_position.x(), _position.y()), 
+                           Gfx::SizeF(updateWidth, updateHeight) );
+
+    updateRect.unify(updateRect2);
     
     if(_parent)
     {
-        Gfx::RectF updateRect(Gfx::PointF(0, 0), _parent->size());
         _parent->update(updateRect);
     }
 }

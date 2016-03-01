@@ -173,6 +173,8 @@ void ScreenImpl::update(const Gfx::RectF& updateRect)
     
     updateScreen();
     std::clog << "screen update: " << clock.stop().toUSecs() << " usecs." << std::endl;
+    //std::clog << "update area " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
+    //          << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
 }
 
 
