@@ -23,13 +23,17 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#include <Pt/Hmi/Screen.h>
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA  02110-1301  USA
+*/
+
 #include "ScreenImpl.h"
+#include <Pt/Hmi/Screen.h>
 #include <Pt/Hmi/Application.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+
+namespace Hmi {
 
 Screen::Screen(ApplicationImpl& app)
 : _impl( new ScreenImpl(app) )
@@ -40,85 +44,85 @@ Screen::Screen(ApplicationImpl& app)
 
 Screen::~Screen()
 {
-	delete _impl;
+    delete _impl;
 }
 
 
 double Screen::width() const
 {
-	return _impl->width();
+    return _impl->width();
 }
-		
+        
 
 double Screen::height() const
 {
-	return _impl->height();
+    return _impl->height();
 }
 
 
 Gfx::PointF Screen::toUnit(const Gfx::Point& value)
 {
-	return _impl->toUnit(value);
+    return _impl->toUnit(value);
 }
 
 
 Gfx::SizeF Screen::toUnit(const Gfx::Size& value)
 {
-	return _impl->toUnit(value);
+    return _impl->toUnit(value);
 }
 
 
 Gfx::Point Screen::fromUnit(const Gfx::PointF& value)
 {
-	return _impl->fromUnit(value);
+    return _impl->fromUnit(value);
 }
 
 
 Gfx::Size Screen::fromUnit(const Gfx::SizeF& value)
 {
-	return _impl->fromUnit(value);
+    return _impl->fromUnit(value);
 }
 
 
 Gfx::Rect Screen::fromUnit(const Gfx::RectF& value)
 {
-	return _impl->fromUnit(value);
+    return _impl->fromUnit(value);
 }
 
 
 double Screen::unitSizeInch() const
 {
-	return _impl->unitSizeInch();
+    return _impl->unitSizeInch();
 }
 
 
 int Screen::fromUnit(double val) 
 {
-	return _impl->fromUnit(val);
+    return _impl->fromUnit(val);
 }
 
 
 double Screen::toUnit(int val) 
 {
-	return _impl->toUnit(val);
+    return _impl->toUnit(val);
 }
 
 
 double Screen::unitSizeMm() const
 {
-	return _impl->unitSizeMm();
+    return _impl->unitSizeMm();
 }
 
 
 void Screen::setResolution(double dpi)
 {
-	_impl->setResolution(dpi);
+    _impl->setResolution(dpi);
 }
 
 
 double Screen::resolutionDPI() const
 {
-	return _impl->resolutionDPI();
+    return _impl->resolutionDPI();
 }
 
 
@@ -130,7 +134,7 @@ void Screen::setCursor( const Cursor* cursor )
 
 void Screen::registerWindow(Window& w)
 {
-	_windows.push_back(&w);
+    _windows.push_back(&w);
     _impl->registerWindow(w);
 }
 
@@ -139,38 +143,45 @@ void Screen::unregisterWindow(Window& w)
 {
     _impl->unregisterWindow(w);
 
-	std::vector<Window*>::iterator it = std::find(_windows.begin(), _windows.end(), &w);
-	if( it != _windows.end() )
-		_windows.erase(it);
+    std::vector<Window*>::iterator it = std::find(_windows.begin(), _windows.end(), &w);
+    if( it != _windows.end() )
+        _windows.erase(it);
 }
 
 
 Widget* Screen::findWidget(const std::string& name)
 {
-	std::vector<Window*>::iterator it;
-	for(it = _windows.begin(); it != _windows.end(); ++it)
-	{
-		Widget* w = (*it)->findWidget(name);
-		if(w)
-			return w;
-	}
-	
+    std::vector<Window*>::iterator it;
+    for(it = _windows.begin(); it != _windows.end(); ++it)
+    {
+        Widget* w = (*it)->findWidget(name);
+        if(w)
+            return w;
+    }
+    
     return 0;
 }
 
 
 Window* Screen::findWindow(const std::string& name)
 {
-	std::vector<Window*>::iterator it;
-	for(it = _windows.begin(); it != _windows.end(); ++it)
-	{
+    std::vector<Window*>::iterator it;
+    for(it = _windows.begin(); it != _windows.end(); ++it)
+    {
         Window* w = (*it)->findWindow(name);
-		if(w)
-			return w;
-	}
-	
+        if(w)
+            return w;
+    }
+    
     return 0;
 }
 
 
-}}
+void Screen::update(const Gfx::RectF& updateRect)
+{
+    _impl->update(updateRect);
+}
+
+} // namespace
+
+} // namespace

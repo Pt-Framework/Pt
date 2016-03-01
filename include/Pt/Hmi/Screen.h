@@ -23,7 +23,10 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA  02110-1301  USA
+*/
+
 #ifndef Pt_Hmi_Screen_H
 #define Pt_Hmi_Screen_H
 
@@ -34,8 +37,9 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+
+namespace Hmi {
 
 class ScreenImpl;
 class ApplicationImpl;
@@ -54,32 +58,32 @@ class PT_HMI_API Screen
         double width() const;
 
         double height() const;
-	
+    
         Gfx::SizeF size() const
         {
             return Gfx::SizeF( width(), height() );
         }
 
         Gfx::PointF toUnit( const Gfx::Point& value );
-	  
+      
         Gfx::SizeF toUnit( const Gfx::Size& value );
-	  
+      
         double toUnit( int value );
 
         Gfx::Point fromUnit( const Gfx::PointF& value );
-	  
+      
         Gfx::Size fromUnit( const Gfx::SizeF& value );
-	  
+      
         Gfx::Rect fromUnit( const Gfx::RectF& value );
-	  
+      
         int fromUnit( double value );
 
         double unitSizeInch() const;
-	  
+      
         double unitSizeMm() const;
 
         void setResolution( double dpi );
-	  
+      
         double resolutionDPI() const;
     
         void setCursor( const Cursor* cursor = 0 );
@@ -87,7 +91,7 @@ class PT_HMI_API Screen
         ScreenImpl* impl()
         {
             return _impl;
-        }		
+        }        
 
         Widget* findWidget( const std::string& name );
 
@@ -97,6 +101,8 @@ class PT_HMI_API Screen
          {
             return _windows;
          }
+
+         void update(const Gfx::RectF& updateRect);
 
     protected:
         void registerWindow(Window& w);
@@ -123,12 +129,14 @@ class PT_HMI_API Screen
             }            
           }
 
-	private:
-		ScreenImpl* _impl;
+    private:
+        ScreenImpl*          _impl;
         std::vector<Window*> _windows;
         Window*              _pointerWindow;           
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif
