@@ -46,8 +46,8 @@ namespace Demo{
 MainWindow::MainWindow()
 : _child1("Child 1")
 {
-    setPosition(  Gfx::PointF(50, 50) );
-    setSize( Gfx::SizeF(600, 600) );
+    setPosition(  Gfx::PointF(60, 30) );
+    setSize( Gfx::SizeF(600, 430) );
     setTitle("Main 1");
     setVisible( true );  // MainWindow
     

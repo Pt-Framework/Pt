@@ -13,11 +13,11 @@ ChildW::ChildW(const std::string& title)
 {
     setTitle(title);
     setPosition( Gfx::PointF(5,5) );
-    setSize( Gfx::SizeF(520, 400) );         
+    setSize( Gfx::SizeF(520, 380) );         
 
     //Text    
     _textLabel.setAutoSize(true);
-    _textLabel.setSize( Gfx::SizeF(100,50) );
+    _textLabel.setSize( Gfx::SizeF(100,40) );
     _textLabel.setName("TextLabel");
     _textLabel.setText("Pla&tinum C++ Framework");  
     _textLabel.setPosition( Gfx::PointF(60,60) );
@@ -90,7 +90,7 @@ ChildW::ChildW(const std::string& title)
 
     //_childWindow2.setMainWidget(&_closeButton);          
     _childWindow2.setPosition(Gfx::PointF(5,5));    
-    _childWindow2.setSize (Gfx::SizeF(480, 360));
+    _childWindow2.setSize (Gfx::SizeF(480, 320));
     _childWindow2.setTitle("Child of " + title);    
 
     _childWindow2.setMainWidget(&_mainWidget);
