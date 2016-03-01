@@ -514,9 +514,11 @@ void Window::onMoveEvent(const MoveEvent& ev)
     {
         _parent->update(updateRect);
     }
-
-    // TODO: update screen if top-level window (needed for linux-fb)
-    Application::instance().mainScreen().update(updateRect);
+    else
+    {
+        // update screen if top-level window (needed for linux-fb)
+        Application::instance().mainScreen().update(updateRect);
+    }
 }
 
 
