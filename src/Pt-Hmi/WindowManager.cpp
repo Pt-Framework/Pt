@@ -161,8 +161,7 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
 
         w->render(updateRect);
 
-        //static int _n = 0;
-        //std::clog << _n++ << " window blit: " << w->name() << " " << w->title() << std::endl;
+        //std::clog << "window blit: " << w->title() << std::endl;
         painter.drawSurface( clientPos, w->surface() );
     }
 }
@@ -176,7 +175,6 @@ Gfx::PointF WindowManager::renderFrame(const Window& w, PaintSurface& surface)
     Gfx::Color color = w.isActive() ? _activeColor : _inactiveColor;  
 
     Painter painter(surface);
-    
     Gfx::PointF pos( w.position().x(), w.position().y() );
     
     switch( w.border() )

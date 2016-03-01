@@ -259,7 +259,7 @@ void Window::render(const Gfx::RectF& updateRect)
         return;
 
     Painter painter(_surface);
-    painter.setBrush( Pt::Gfx::Color(0.9f, 0.5f, 0.5f) );
+    painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
     painter.fillRect(updateRect);
 
     if(_mainWidget)
@@ -392,8 +392,6 @@ void Window::onTouchEvent( const TouchEvent& ev )
 
 void Window::onScrollEvent( const ScrollEvent& ev )
 {
-    std::clog << title() << ": " << ev.delta() << std::endl;
-
     if( ! _mainWidget )
         return;
 

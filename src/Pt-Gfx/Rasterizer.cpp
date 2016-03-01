@@ -206,6 +206,7 @@ Rasterizer::Rasterizer( Image& image )
 , _text( new DrawText() )
 , _font("Vera", 12)
 , _clip(PointF(0,0), SizeF( image.width(), image.height()))
+, _mode(RenderMode::NoAlpha)
 {
 	_text->setClip( _clip );
   _text->setFont( _font );
