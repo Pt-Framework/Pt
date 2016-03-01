@@ -161,6 +161,8 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
 
         w->render(updateRect);
 
+        // TODO: only blit update rect
+
         //std::clog << "window blit: " << w->title() << std::endl;
         painter.drawSurface( clientPos, w->surface() );
     }
