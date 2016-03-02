@@ -101,6 +101,7 @@ class InputDevice : public System::Selectable
         Key::Modifiers _modifiers;
         Pt::Hmi::KeyEvent _keyEvent;
         Pt::Hmi::MouseEvent _mouseEvent;
+        int _touchMove;
         Pt::Hmi::TouchEvent _touchEvent;
         Pt::Signal<const Pt::Event&> _eventReady;
 };

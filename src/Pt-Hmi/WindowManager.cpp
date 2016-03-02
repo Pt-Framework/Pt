@@ -431,7 +431,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::MouseEvent& mev )
 
 bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
 {
-    //std::clog << "onBackground: " << _parent->title() << std::endl;    
+    //std::clog << "onBackground: " << (_parent ? _parent->title() : "WM") << std::endl;    
     _managedWindow = findWindow( mev.x(), mev.y() );
     
     // pointer on window background 
@@ -472,7 +472,8 @@ bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
 
 bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
 {
-    //std::clog << "onWindowFrame: " << _parent->title() << std::endl;   
+    //std::clog << "onWindowFrame: " << (_parent ? _parent->title() : "WM") << std::endl;   
+    
     _managedWindow = findWindow( mev.x(), mev.y() );
 
     // pointer on window background 
@@ -522,7 +523,8 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
 
 bool WindowManager::onWindowContent(const Pt::Hmi::MouseEvent& mev)
 {    
-    //std::clog << "onWindowContent: " << _parent->title() << std::endl;    
+    //std::clog << "onWindowContent: " << (_parent ? _parent->title() : "WM") << std::endl;    
+    
     _managedWindow = findWindow( mev.x(), mev.y() );
     
     // pointer on window background
@@ -561,7 +563,7 @@ bool WindowManager::onWindowContent(const Pt::Hmi::MouseEvent& mev)
 
 bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
 {
-    //std::clog << "onWindowMove: " << _parent->title() << std::endl;
+    //std::clog << "onWindowMove: " << (_parent ? _parent->title() : "WM") << std::endl;
 
     if( ! mev.isPressed(_actionButton) )
     {
@@ -589,7 +591,7 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
 
 bool WindowManager::onWindowResize(const MouseEvent& mev)
 {  
-    //std::clog << "onWindowResize: " << _parent->title() << std::endl;
+    //std::clog << "onWindowResize: " << (_parent ? _parent->title() : "WM") << std::endl;
 
     if( ! mev.isPressed(_actionButton) )
     {
