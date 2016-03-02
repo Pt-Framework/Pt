@@ -124,15 +124,15 @@ bool InputDevice::onRun()
             case EV_KEY:
             {
                 //std::clog << "EV_KEY " << ev.code << " " << ev.value << std::endl;
-                if( ev.code == 272 || ev.code == 330)    
+                if( ev.code == 272)    
                 {
                     if( ev.value == 0  )
-                    {
-                        _touchMove = 0;
                         _mouseEvent.setRelease(MouseEvent::Left);
-                        _eventReady.send(_mouseEvent);
-                    }
-                                                                   
+                    else
+                        _mouseEvent.setPress(MouseEvent::Left);
+
+                    _eventReady.send(_mouseEvent); 
+                    hasPointerEvent = false;                                               
                     break;
                 }
 
@@ -145,6 +145,18 @@ bool InputDevice::onRun()
 
                     _eventReady.send(_mouseEvent); 
                     hasPointerEvent = false;                                            
+                    break;
+                }
+
+                if(ev.code == 330)    
+                {
+                    if( ev.value == 0  )
+                    {
+                        _touchMove = 0;
+                        _mouseEvent.setRelease(MouseEvent::Left);
+                        _eventReady.send(_mouseEvent);
+                    }
+                                                                   
                     break;
                 }
 
