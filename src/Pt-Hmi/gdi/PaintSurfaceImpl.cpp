@@ -323,6 +323,14 @@ void PaintRegionImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& s
 }
 
 
+void PaintRegionImpl::drawSurface(const Gfx::PointF& toF, 
+                                  const PixmapSurface& pm,
+                                  const Gfx::RectF& pmRect)
+{
+    _surface->impl()->drawSurface(toF + _area.topLeft(), pm, pmRect);
+}
+
+
 void PaintRegionImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 {
     _surface->impl()->drawImage(toF + _area.topLeft(), image);
@@ -723,6 +731,20 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface&
     BitBlt( _deviceContext, 
             to.x(), to.y(), size.width(), size.height(), 
             surface.pixmapImpl()->deviceContext(), 0, 0, SRCCOPY);
+}
+
+
+void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF, 
+                                    const PixmapSurface& pm, 
+                                    const Gfx::RectF& pmRect)
+{
+    Gfx::Point to = Application::instance().mainScreen().fromUnit(toF);
+    Gfx::Size size = Application::instance().mainScreen().fromUnit( pmRect.size() );
+    Gfx::Point from = Application::instance().mainScreen().fromUnit(pmRect.topLeft());
+
+    BitBlt( _deviceContext, 
+            to.x(), to.y(), size.width(), size.height(), 
+            pm.pixmapImpl()->deviceContext(), from.x(), from.y(), SRCCOPY);
 }
 
 

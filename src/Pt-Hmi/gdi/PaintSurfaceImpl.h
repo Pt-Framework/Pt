@@ -81,6 +81,10 @@ class PaintSurfaceImpl
 
         virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface) = 0;
 
+        virtual void drawSurface(const Gfx::PointF& toF, 
+                                 const PixmapSurface& pm,
+                                 const Gfx::RectF& pmRect) = 0;
+
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image) = 0;
 
         static std::string defaultFont();
@@ -136,6 +140,10 @@ class PaintRegionImpl : public PaintSurfaceImpl
 
         virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
 
+        virtual void drawSurface(const Gfx::PointF& toF, 
+                                 const PixmapSurface& pm,
+                                 const Gfx::RectF& pmRect);
+
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 
     private:
@@ -186,6 +194,10 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         virtual void fillPolygon(POINT* points, size_t pointCount);
 
         virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
+
+        virtual void drawSurface(const Gfx::PointF& toF, 
+                                 const PixmapSurface& pm,
+                                 const Gfx::RectF& pmRect);
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 

@@ -187,6 +187,14 @@ void PaintRegionImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& s
 }
 
 
+void PaintRegionImpl::drawSurface(const Gfx::PointF& toF, 
+                                  const PixmapSurface& pm,
+                                  const Gfx::RectF& pmRect)
+{
+    _surface->impl()->drawSurface(toF + _area.topLeft(), pm, pmRect);
+}
+
+
 void PaintRegionImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 {
     _surface->impl()->drawImage(toF + _area.topLeft(), image);
@@ -313,6 +321,15 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t poin
 void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, const PixmapSurface& surface)
 {
     const Gfx::Image& image = surface.pixmapImpl()->image();
+    _painter.drawImage(to, image);
+}
+
+
+void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, 
+                                  const PixmapSurface& pm,
+                                  const Gfx::RectF& pmRect)
+{
+    const Gfx::Image& image = pm.pixmapImpl()->image();
     _painter.drawImage(to, image);
 }
 

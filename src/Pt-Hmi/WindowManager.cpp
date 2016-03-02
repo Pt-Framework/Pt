@@ -143,10 +143,35 @@ bool WindowManager::keyInput( const Pt::Hmi::KeyEvent& keyEvent )
 }
 
 
-void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
-{        
-    Painter painter(surface);
+//void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
+//{        
+//    Painter painter(surface);
+//
+//    for( size_t i = 0; i < _children.size(); ++i )
+//    {
+//        Window* w = _children[i];                
+//
+//        if( ! w->isVisible() )
+//            continue; 
+//        
+//        Gfx::PointF clientPos = renderFrame(*w, surface);                          
+//        
+//        Gfx::PointF pos = rect.topLeft() - w->position();
+//        Gfx::RectF updateRect(pos, rect.size());
+//
+//        w->render(updateRect);
+//
+//        std::clog << "window blit: " << w->title() 
+//                  << " at: " << rect.topLeft().x() << "," << rect.topLeft().y() 
+//                  << " size: " << rect.width() << "x" << rect.height() << std::endl;
+//
+//        painter.drawSurface(clientPos + updateRect.topLeft(), w->surface(), updateRect );
+//    }
+//}
 
+
+void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
+{  
     for( size_t i = 0; i < _children.size(); ++i )
     {
         Window* w = _children[i];                
@@ -156,15 +181,25 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
         
         Gfx::PointF clientPos = renderFrame(*w, surface);                          
         
+        // update rect in child window coordinates
         Gfx::PointF pos = rect.topLeft() - w->position();
         Gfx::RectF updateRect(pos, rect.size());
-
         w->render(updateRect);
 
-        // TODO: only blit update rect
+        std::clog << "window blit: " << w->title() << std::endl;
 
-        //std::clog << "window blit: " << w->title() << std::endl;
-        painter.drawSurface( clientPos, w->surface() );
+        //if(w->title() == "Child of Child 1")
+        //{
+        //    Gfx::RectF clientRect( Gfx::PointF(0,0), w->size() );
+        //    clientRect = clientRect.intersect(updateRect);
+
+        //    Painter painter(surface);
+        //    painter.drawSurface(clientPos + clientRect.topLeft(), w->surface(), clientRect);
+        //    continue;
+        //}
+
+        Painter painter(surface);
+        painter.drawSurface(clientPos, w->surface());
     }
 }
 

@@ -182,6 +182,13 @@ void Painter::drawSurface(const Gfx::PointF& to, const PixmapSurface& pm)
 }    
     
 
+void Painter::drawSurface(const Gfx::PointF& to, 
+                          const PixmapSurface& pm, const Gfx::RectF& pmRect)
+{  
+    _impl->drawSurface(to, pm, pmRect);
+} 
+
+
 void Painter::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
 {
     _impl->drawImage(to, image);

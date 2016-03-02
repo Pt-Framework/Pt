@@ -95,6 +95,10 @@ class PT_GFX_API Rasterizer
 
     void image( const PointF& to, const Image& image );
 
+    void image(const PointF& toIn, 
+               const Image& image, 
+               const RectF& imageRect);
+
     void stroke( const PointF* points, size_t pointCount );
     
     void fill( const PointF* points, size_t pointCount );

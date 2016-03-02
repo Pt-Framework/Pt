@@ -90,6 +90,10 @@ class PT_HMI_API Painter : public Gfx::Painter
         virtual void fillPolygon(const Gfx::PointF* points, const size_t pointCount);
 
         virtual void drawSurface(const Gfx::PointF& to, const PixmapSurface& pm);
+
+        virtual void drawSurface(const Gfx::PointF& to, 
+                                 const PixmapSurface& pm, 
+                                 const Gfx::RectF& pmRect);
         
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
     

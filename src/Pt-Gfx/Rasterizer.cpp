@@ -3439,15 +3439,16 @@ void Rasterizer::image( const PointF& toIn, const Image& image )
 		throw std::logic_error( "wrong image format");
 
   Point to((int) toIn.x(),(int) toIn.y() );
-  //source
+
   int xSourceBegin = 0;
   int ySourceBegin = 0;
 
-  //target
   int xTargetBegin = to.x();
   int yTargetBegin = to.y();
 
-  if( to.x() >= (int)_image->width() )
+  // outside target image
+  if( to.x() >= _image->width() ||
+      to.y() >= _image->height() )
      return;
 
   if( to.x() < 0 )
@@ -3455,9 +3456,6 @@ void Rasterizer::image( const PointF& toIn, const Image& image )
     xSourceBegin = -to.x();
     xTargetBegin = 0;
   }
-
-  if( to.y() > (int)_image->height() )
-     return;
 
   if( to.y() < 0 )
   {
@@ -3493,28 +3491,130 @@ void Rasterizer::image( const PointF& toIn, const Image& image )
   const int sourceStride		 = image.width() * image.format().pixelSize() +  image.stride();
   const int lineSize = lineLength * _image->format().pixelSize();
 
-  //Render
   switch( _mode )
   {
-    case RenderMode::NoAlpha:
-    {	//Copy to new image	          
-			for(int i = 0; i < lines; ++i )
-			{                
-        memcpy( scanLineTarget, scanLineSource, lineSize );
-        scanLineSource += sourceStride;
-        scanLineTarget += targetStride;
-			}	
+      case RenderMode::NoAlpha:
+      {         
+			    for(int i = 0; i < lines; ++i )
+			    {                
+            memcpy( scanLineTarget, scanLineSource, lineSize );
+            scanLineSource += sourceStride;
+            scanLineTarget += targetStride;
+			    }
+
+          break;
+      }
+
+      case RenderMode::AlphaBlit:
+          //TODO:
+          break;
+
+      case RenderMode::AlphaBlending:
+          //TODO:
+          break;
     }
-    break;
+}
 
-    case RenderMode::AlphaBlit:
-      //TODO:
-    break;
 
-    case RenderMode::AlphaBlending:
-      //TODO:
-    break;
+void Rasterizer::image( const PointF& toF, 
+                        const Image& image, 
+                        const RectF& imageRectF)
+{
+	if( image.format() != image.format() )
+		throw std::logic_error( "wrong image format");
+
+  Point to( (int) toF.x(),
+            (int) toF.y() );
+
+  Point imagePos( (int) imageRectF.topLeft().x(), 
+                  (int) imageRectF.topLeft().y() );
+
+  Size imageSize( (int) imageRectF.width(), 
+                  (int) imageRectF.height() );
+
+  if( imagePos.x() + imageSize.width() > image.width() )
+      imageSize.setWidth( image.width() - imagePos.x() );
+
+  if( imagePos.y() + imageSize.height() > image.height() )
+      imageSize.setHeight( image.height() - imagePos.y() );
+
+  Rect imageRect(imagePos, imageSize);
+
+  int xSourceBegin = imagePos.x();
+  int ySourceBegin = imagePos.y();
+
+  int xTargetBegin = to.x();
+  int yTargetBegin = to.y();
+
+  // outside target image
+  if( to.x() >= _image->width() ||
+      to.y() >= _image->height() ||
+      imagePos.x() >= image.width() ||
+      imagePos.y() >= image.height() )
+     return;
+
+  if( to.x() < 0 )
+  {
+      xSourceBegin = imagePos.x() - to.x();
+      xTargetBegin = 0;
   }
+
+  if( to.y() < 0 )
+  {
+    ySourceBegin = imagePos.y() - to.y();
+    yTargetBegin = 0;
+  }
+
+  int lineLength = imageRect.width(); 
+
+  if( to.x() < 0 )
+    lineLength += to.x();
+
+  if( (xTargetBegin + lineLength) > _image->width()  )
+      lineLength -= (xTargetBegin + lineLength) - _image->width() ;
+ 
+  if(lineLength <= 0)
+    return;  
+   
+  const int endYOffset = to.y() + imageRect.height();
+
+  int lines = imageRect.height();   
+
+  if( endYOffset > _image->height()  )
+      lines = _image->height() - yTargetBegin;
+
+  if( endYOffset < 0 )
+    return;
+  
+  const Pt::uint8_t* scanLineSource = image.pixel( xSourceBegin, ySourceBegin );
+  Pt::uint8_t* scanLineTarget = _image->pixel( xTargetBegin, yTargetBegin );
+
+  const int targetStride = _image->width() * _image->format().pixelSize() + _image->stride();
+  const int sourceStride = image.width() * image.format().pixelSize() + image.stride();
+  const int lineSize = lineLength * _image->format().pixelSize();
+
+  switch( _mode )
+  {
+      case RenderMode::NoAlpha:
+      {         
+			    for(int i = 0; i < lines; ++i )
+			    {                
+            memcpy( scanLineTarget, scanLineSource, lineSize );
+            scanLineSource += sourceStride;
+            scanLineTarget += targetStride;
+			    }
+
+          break;
+      }
+
+      case RenderMode::AlphaBlit:
+          //TODO:
+          break;
+
+      case RenderMode::AlphaBlending:
+          //TODO:
+          break;
+    }
 }
 
 

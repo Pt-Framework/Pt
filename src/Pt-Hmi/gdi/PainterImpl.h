@@ -107,6 +107,10 @@ class PainterImpl
         void fillPolygon(const Gfx::PointF* points, const size_t pointCount);
 
         void drawSurface(const Gfx::PointF& to, const PixmapSurface& pm);
+
+        void drawSurface(const Gfx::PointF& to, 
+                         const PixmapSurface& pm, 
+                         const Gfx::RectF& pmRect);
         
         void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 

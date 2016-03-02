@@ -90,7 +90,7 @@ ChildW::ChildW(const std::string& title)
 
     //_childWindow2.setMainWidget(&_closeButton);          
     _childWindow2.setPosition(Gfx::PointF(5,5));    
-    _childWindow2.setSize (Gfx::SizeF(480, 320));
+    _childWindow2.setSize (Gfx::SizeF(240, 320));
     _childWindow2.setTitle("Child of " + title);    
 
     _childWindow2.setMainWidget(&_mainWidget);

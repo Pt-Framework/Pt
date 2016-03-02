@@ -190,6 +190,14 @@ void PainterImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surfa
 }
 
 
+void PainterImpl::drawSurface(const Gfx::PointF& toF, 
+                              const PixmapSurface& pm, 
+                              const Gfx::RectF& pmRect)
+{
+    _surface->drawSurface(toF, pm, pmRect);
+}
+
+
 void PainterImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 {
     _surface->drawImage(toF, image);
