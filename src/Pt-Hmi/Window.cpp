@@ -239,16 +239,30 @@ void Window::update(const Gfx::RectF& rect)
 {
     _isValid = false;
 
-    // update the given rect and the update area
-    _updateRect.unify(rect);
+    Gfx::RectF winRect(rect);
+    Gfx::PointF winPos( rect.topLeft() );
+    winPos.addX(4);
+    winPos.addY(24);
+    winRect.setOrigin(winPos);
 
+    // update the given rect and the update area
+    _updateRect.unify(winRect);
+    
     if(_impl) 
         _impl->update(_updateRect);
+
+    _updateRect.clear();
 }
 
 
-void Window::render(const Gfx::RectF& updateRect)
+void Window::render(const Gfx::RectF& winRect)
 {
+    Gfx::RectF updateRect(winRect);
+    Gfx::PointF updatePos( winRect.topLeft() );
+    updatePos.addX(-4);
+    updatePos.addY(-24);
+    updateRect.setOrigin(updatePos);
+
     if( ! this->isVisible() )
     {
         _isValid = true;
@@ -270,7 +284,6 @@ void Window::render(const Gfx::RectF& updateRect)
 
     _windowManager.render(_surface, updateRect);
 
-    _updateRect.clear();
     _isValid = true;
 }
 

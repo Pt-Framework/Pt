@@ -186,20 +186,25 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
         Gfx::RectF updateRect(pos, rect.size());
         w->render(updateRect);
 
-        std::clog << "window blit: " << w->title() << std::endl;
+        std::clog << "window blit: " << w->title() 
+                  << " " << rect.width() << "x" << rect.height() << std::endl;
 
         //if(w->title() == "Child of Child 1")
-        //{
-        //    Gfx::RectF clientRect( Gfx::PointF(0,0), w->size() );
-        //    clientRect = clientRect.intersect(updateRect);
+        {
+            pos.addX(-4);
+            pos.addY(-24);
+            updateRect.setOrigin(pos);
 
-        //    Painter painter(surface);
-        //    painter.drawSurface(clientPos + clientRect.topLeft(), w->surface(), clientRect);
-        //    continue;
-        //}
+            Gfx::RectF clientRect( Gfx::PointF(0,0), w->size() );
+            clientRect = clientRect.intersect(updateRect);
 
-        Painter painter(surface);
-        painter.drawSurface(clientPos, w->surface());
+            Painter painter(surface);
+            painter.drawSurface(clientPos + clientRect.topLeft(), w->surface(), clientRect);
+            //continue;
+        }
+
+        //Painter painter(surface);
+        //painter.drawSurface(clientPos, w->surface());
     }
 }
 
