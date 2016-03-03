@@ -77,6 +77,8 @@ class PT_GFX_API ImagePainter : public Painter
 
     virtual void drawImage(const  PointF& to, const Image& image);
 
+    virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect);
+
     virtual void setClip( const RectF& clip );
         
     virtual const Gfx::RectF& clip() const;

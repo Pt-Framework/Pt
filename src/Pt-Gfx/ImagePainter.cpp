@@ -137,33 +137,39 @@ void ImagePainter::fillRect( const  RectF& r )
 }
 
 
-void ImagePainter::drawEllipse( const  PointF& topLeft, const  SizeF& size )
+void ImagePainter::drawEllipse( const PointF& topLeft, const  SizeF& size )
 {
   _rasterizer.strokeEllipse( topLeft, size );
 }
 
 
-void ImagePainter::fillEllipse( const  PointF& topLeft, const  SizeF& size )
+void ImagePainter::fillEllipse( const PointF& topLeft, const  SizeF& size )
 {
    _rasterizer.fillEllipse( topLeft, size );
 }
 
 
-void ImagePainter::drawPolyline( const  PointF* ps, const size_t pointCount )
+void ImagePainter::drawPolyline( const PointF* ps, const size_t pointCount )
 {
   _rasterizer.stroke( ps, pointCount );
 }
 
 
-void ImagePainter::fillPolygon( const  PointF* ps, const size_t pointCount )
+void ImagePainter::fillPolygon( const PointF* ps, const size_t pointCount )
 {    
   _rasterizer.fill( ps, pointCount );
 }
 
 
-void ImagePainter::drawImage( const  PointF& to, const Image& image )
+void ImagePainter::drawImage( const PointF& to, const Image& image )
 {
   _rasterizer.image( to, image );
+}
+
+
+void ImagePainter::drawImage(const PointF& to, const Image& image, const RectF& imageRect)
+{
+  _rasterizer.image( to, image, imageRect );
 }
 
 

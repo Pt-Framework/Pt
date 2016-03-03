@@ -57,7 +57,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     _surface.pixmapImpl()->resize(_frameBuffer.size(), _frameBuffer.strideInBytes() );
 
     Painter painter(_surface);
-    painter.clear( Pt::Gfx::Color(0.2f, 0.2f, 0.2f) );
+    painter.clear( Pt::Gfx::Color(0.4f, 0.3f, 0.4f) );
 
     setCursor(0);
 }
@@ -166,15 +166,15 @@ void ScreenImpl::update(const Gfx::RectF& updateRect)
     clock.start();   
 
     Painter painter(_surface);
-    painter.setBrush( Pt::Gfx::Color(0.2f, 0.2f, 0.2f) );
+    painter.setBrush( Pt::Gfx::Color(0.4f, 0.3f, 0.4f) );
     painter.fillRect(updateRect);
 
     _windowManager.render(_surface, updateRect);
     
     updateScreen();
     std::clog << "screen update: " << clock.stop().toUSecs() << " usecs." << std::endl;
-    //std::clog << "update area " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
-    //          << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
+    std::clog << "update area " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
+              << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
 }
 
 

@@ -186,8 +186,8 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
         Gfx::RectF updateRect(pos, rect.size());
         w->render(updateRect);
 
-        std::clog << "window blit: " << w->title() 
-                  << " " << rect.width() << "x" << rect.height() << std::endl;
+        //std::clog << "window blit: " << w->title() 
+        //          << " " << rect.width() << "x" << rect.height() << std::endl;
 
         //if(w->title() == "Child of Child 1")
         {

@@ -361,6 +361,9 @@ class PT_GFX_API Painter
           */
         virtual void drawImage(const PointF& to, const Image& image) = 0;
 
+        // TODO:
+        //virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect) = 0;
+
         virtual void setClip( const RectF& clip ) = 0;
         
         virtual const Gfx::RectF& clip() const = 0;

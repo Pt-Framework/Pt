@@ -330,7 +330,7 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
                                   const Gfx::RectF& pmRect)
 {
     const Gfx::Image& image = pm.pixmapImpl()->image();
-    _painter.drawImage(to, image);
+    _painter.drawImage(to, image, pmRect);
 }
 
 
