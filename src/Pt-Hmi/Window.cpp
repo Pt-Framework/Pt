@@ -513,13 +513,13 @@ void Window::onMoveEvent(const MoveEvent& ev)
     double updateHeight = _size.height();
     updateHeight += titleHeight + (borderWidth * 2);
     
-    Gfx::RectF updateRect( Gfx::PointF(_position.x(), _position.y()), 
-                           Gfx::SizeF(updateWidth, updateHeight) );
+    Gfx::RectF updateRect( Gfx::PointF(_position.x()-1, _position.y()-1), 
+                           Gfx::SizeF(updateWidth+2, updateHeight+2) );
 
     _position = ev.position();
 
-    Gfx::RectF updateRect2( Gfx::PointF(_position.x(), _position.y()), 
-                           Gfx::SizeF(updateWidth, updateHeight) );
+    Gfx::RectF updateRect2( Gfx::PointF(_position.x()-1, _position.y()-1), 
+                           Gfx::SizeF(updateWidth+2, updateHeight+2) );
 
     updateRect.unify(updateRect2);
     
