@@ -1853,8 +1853,6 @@ void Rasterizer::bresenhamLineSegment( int signdx, int signdy, int axis, int x1,
 }
 
 
-
-
 void Rasterizer::stroke( int x, int y)
 {  
   if( x < _clip.left()  || x > _clip.right())
@@ -3174,6 +3172,29 @@ void Rasterizer::lineProjectingCap( const LineFace *face, bool isLeft, bool isIn
 
         // fill the rectangle (2 left edges, 2 right edges)
         fillLine( topy, ( int)(bottom->height() + bottomy - topy), lefts, rights, 2, 2 );
+    }
+}
+
+
+void Rasterizer::fillRect(const RectF& rectF)
+{ 
+    Point pos( rectF.topLeft().x(), rectF.topLeft().y() );
+    Size size( rectF.width(), rectF.height() );
+    Rect rect(pos, size);
+    
+    // clip drawing area
+    Rect imageRect(Point(0,0), _image->size());
+    rect = imageRect.intersect(rect);
+
+    if( rect.isNull() )
+        return;
+
+    int length = rect.width();
+    Point linePos = rect.topLeft();
+    for(unsigned y = 0; y < rect.height(); y++)
+    {
+        fill(rect.topLeft(), linePos, length);
+        linePos.addY(1);
     }
 }
 
