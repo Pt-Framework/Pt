@@ -81,6 +81,8 @@ class WindowManager : public Pt::Connectable
 
         void render(PaintSurface& surface, const Gfx::RectF& updateRect);
 
+        void updateChild( const Window& child, const Gfx::RectF& updateRect );
+
     private:
         bool onBackground(const Pt::Hmi::MouseEvent& pev);
 
@@ -111,7 +113,7 @@ class WindowManager : public Pt::Connectable
 
         Gfx::PointF renderFrame(const Window& w, PaintSurface& surface);
 
-        MouseEvent toWindow(Window* w, const MouseEvent& pev);
+        MouseEvent toWindow(Window* w, const MouseEvent& pev);        
 
     private:
         Application&              _app;
@@ -120,7 +122,7 @@ class WindowManager : public Pt::Connectable
         typedef bool (WindowManager::*State)(const Pt::Hmi::MouseEvent&);
         State                     _state;
         Window*                   _managedWindow;
-        Window*                   _parent;          
+        Window*                   _container;          
         MouseEvent                _lastPointer;
         ResizeDirection::Type     _sizingDirection;
         
@@ -128,7 +130,7 @@ class WindowManager : public Pt::Connectable
         Gfx::Color                _activeColor;
         Gfx::Color                _textColor;        
         size_t                    _actionButton;  
-        Gfx::PointF               _lastPointerPosition;  
+        Gfx::PointF               _lastPointerPosition;        
 };
 
 } // namespace

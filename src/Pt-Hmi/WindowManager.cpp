@@ -54,7 +54,7 @@ WindowManager::WindowManager(Window* parent)
 , _activeColor(0.4f, 0.5f, 0.8f)
 , _textColor(0.0, 0.0, 0.0)
 , _actionButton(0)
-, _parent(parent)
+, _container(parent)
 {    
 }
 
@@ -66,7 +66,7 @@ WindowManager::~WindowManager()
 
 void WindowManager::init(Window& parent)
 {
-    _parent = &parent;
+    _container = &parent;
 }
 
 
@@ -154,18 +154,17 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
         
         // update rect in child window coordinates
         Gfx::PointF pos = rect.topLeft() - w->position();
+        pos.subX( _app.windowBorderWidth() );
+        pos.subY( _app.windowBorderWidth()+ _app.windowTitleHeight()  );
         Gfx::RectF updateRect(pos, rect.size());
-        w->render(updateRect);
 
-        pos.addX(- _app.windowBorderWidth() );
-        pos.addY(- ( _app.windowBorderWidth() + _app.windowTitleHeight()) );
-        updateRect.setOrigin(pos);
+        w->render(updateRect);
 
         Gfx::RectF clientRect( Gfx::PointF(0,0), w->size() );
         clientRect = clientRect.intersect(updateRect);
 
         Painter painter(surface);
-        painter.drawSurface(clientPos + clientRect.topLeft(), w->surface(), clientRect);
+        painter.drawSurface(clientPos + clientRect.topLeft(), w->surface(), clientRect);        
     }
 }
 
@@ -430,15 +429,35 @@ bool WindowManager::pointerInput( const Pt::Hmi::MouseEvent& mev )
 }
 
 
+void WindowManager::updateChild( const Window& child, const Gfx::RectF& childRect )
+{       
+    const double borderWidth  = Application::instance().windowBorderWidth();
+    const double titleHeight  = Application::instance().windowTitleHeight();
+    const Gfx::PointF windowPos = child.position();
+                
+    const Gfx::PointF pos ( windowPos + childRect.topLeft() );
+    const Gfx::SizeF  size( childRect.size().width() + 2* borderWidth,  childRect.size().height() + 2* borderWidth +  titleHeight );
+    const Gfx::RectF  trans( Gfx::PointF( pos.x() + borderWidth,  pos.y() + borderWidth + titleHeight), size );
+
+    if( _container)
+    {                
+        _container->update(trans );
+    }
+    else
+    {
+        _app.mainScreen().update( trans );
+    }
+}
+
 bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
 {
-    //std::clog << "onBackground: " << (_parent ? _parent->title() : "WM") << std::endl;    
+    //std::clog << "onBackground: " << (_container ? _container->title() : "WM") << std::endl;    
     _managedWindow = findWindow( mev.x(), mev.y() );
     
     // pointer on window background 
     if( ! _managedWindow )
     {
-        _app.mainScreen().setPointerWindow(_parent);
+        _app.mainScreen().setPointerWindow(_container);
         _state = &WindowManager::onBackground;        
         return false;
     }    
@@ -473,14 +492,14 @@ bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
 
 bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
 {
-    //std::clog << "onWindowFrame: " << (_parent ? _parent->title() : "WM") << std::endl;   
+    //std::clog << "onWindowFrame: " << (_container ? _container->title() : "WM") << std::endl;   
     
     _managedWindow = findWindow( mev.x(), mev.y() );
 
     // pointer on window background 
     if( ! _managedWindow)
     {
-        _app.mainScreen().setPointerWindow(_parent);
+        _app.mainScreen().setPointerWindow(_container);
         _state = &WindowManager::onBackground;
         return false;
     }
@@ -524,14 +543,14 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
 
 bool WindowManager::onWindowContent(const Pt::Hmi::MouseEvent& mev)
 {    
-    //std::clog << "onWindowContent: " << (_parent ? _parent->title() : "WM") << std::endl;    
+    //std::clog << "onWindowContent: " << (_container ? _container->title() : "WM") << std::endl;    
     
     _managedWindow = findWindow( mev.x(), mev.y() );
     
     // pointer on window background
     if( ! _managedWindow )
     {        
-        _app.mainScreen().setPointerWindow( _parent);
+        _app.mainScreen().setPointerWindow( _container);
         _state = &WindowManager::onBackground;
         return false;
     }        
@@ -564,7 +583,7 @@ bool WindowManager::onWindowContent(const Pt::Hmi::MouseEvent& mev)
 
 bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
 {
-    //std::clog << "onWindowMove: " << (_parent ? _parent->title() : "WM") << std::endl;
+    //std::clog << "onWindowMove: " << (_container ? _container->title() : "WM") << std::endl;
 
     if( ! mev.isPressed(_actionButton) )
     {
@@ -576,23 +595,36 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
     
     _app.mainScreen().setCursor( &Cursor::moveCursor() );
 
-    double dX = mev.x() - _lastPointerPosition.x();
-    double dY = mev.y() - _lastPointerPosition.y();
+    const double dX = mev.x() - _lastPointerPosition.x();
+    const double dY = mev.y() - _lastPointerPosition.y();
+    const double borderWidth  = Application::instance().windowBorderWidth();
+    const double titleHeight  = Application::instance().windowTitleHeight();
 
-    Gfx::PointF winpos = _managedWindow->position();
-    winpos.addX(dX);
-    winpos.addY(dY);
+    Gfx::RectF oldUpdateRect( _managedWindow->position(),_managedWindow->size() );
+
+
+    Gfx::PointF winpos( _managedWindow->position().x() + dX, _managedWindow->position().y() + dY) ;     
+    _managedWindow->processEvent( MoveEvent(winpos) );
+
+    Gfx::RectF newUpdateRect( _managedWindow->position(), _managedWindow->size()  );
+
+    newUpdateRect.unify(oldUpdateRect);         
         
-    MoveEvent ev(winpos);
-    _managedWindow->processEvent(ev);
-     
+    if( _container)
+    {                
+        _container->update(newUpdateRect );
+    }
+    else
+    {
+        _app.mainScreen().update( newUpdateRect );
+    }
     return true;
 }
 
 
 bool WindowManager::onWindowResize(const MouseEvent& mev)
 {  
-    //std::clog << "onWindowResize: " << (_parent ? _parent->title() : "WM") << std::endl;
+    //std::clog << "onWindowResize: " << (_container ? _container->title() : "WM") << std::endl;
 
     if( ! mev.isPressed(_actionButton) )
     {
@@ -693,6 +725,11 @@ bool WindowManager::onWindowResize(const MouseEvent& mev)
     if( height > _managedWindow->maximumSize().height() )
         size.setHeight( _managedWindow->maximumSize().height() );
 
+    const double borderWidth  = Application::instance().windowBorderWidth();
+    const double titleHeight  = Application::instance().windowTitleHeight();
+    
+    Gfx::RectF oldUpdateRect( _managedWindow->position(), _managedWindow->size() );
+
     if( _managedWindow->position() != pos )
     {
         MoveEvent mev(pos);
@@ -704,6 +741,18 @@ bool WindowManager::onWindowResize(const MouseEvent& mev)
         ResizeEvent rev(size);
         _managedWindow->processEvent(rev);
     }
+
+
+    Gfx::RectF newUpdateRect( _managedWindow->position(),  _managedWindow->size() );
+
+    newUpdateRect.unify(oldUpdateRect);   
+
+    Gfx::PointF clientPos( newUpdateRect.topLeft() - _managedWindow->position() );
+    clientPos.subX(  borderWidth );
+    clientPos.subY(  borderWidth +  titleHeight );
+
+    Gfx::RectF updateRect( clientPos, newUpdateRect.size() );
+    _managedWindow->update( updateRect );
 
     return true;
 }

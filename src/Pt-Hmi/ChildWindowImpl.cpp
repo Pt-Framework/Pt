@@ -26,6 +26,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include "ChildWindowImpl.h"
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Pen.h>
 
@@ -61,13 +62,12 @@ void ChildWindowImpl::setVisible(bool visible)
 }
 
 
-void ChildWindowImpl::update(const Gfx::RectF& rect)
+void ChildWindowImpl::update(const Gfx::RectF& clientRect)
 {
-    Gfx::PointF pos = _apiWindow->position() + rect.topLeft();
-    Gfx::RectF parentRect(pos, rect.size());
+    if( !_apiWindow->parent() )	
+        return;
 
-    if( _apiWindow->parent() )	
-        _apiWindow->parent()->update(parentRect);	
+    _apiWindow->parent()->windowManager().updateChild( *_apiWindow, clientRect );	
 }
 
 

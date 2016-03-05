@@ -257,6 +257,7 @@ void MainWindowImpl::onSize(WPARAM wParam, LPARAM lParam)
     
     Pt::Hmi::ResizeEvent ev(Gfx::SizeF(width, height), state);
     _apiWindow->processEvent(ev);
+    _apiWindow->update();
 }
 
 
@@ -357,7 +358,7 @@ void MainWindowImpl::onMove(LPARAM lParam)
     int yPos = info.top;
 
     MoveEvent ev(Gfx::PointF(xPos, yPos) );
-  _apiWindow->processEvent( ev );    
+   _apiWindow->processEvent( ev );          
 }
 
 

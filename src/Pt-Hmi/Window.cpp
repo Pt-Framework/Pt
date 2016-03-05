@@ -67,7 +67,6 @@ Window::Window( Window* parent )
 , _mainWidget(0)
 , _position(0,0)
 , _size(200,200)
-, _updateRect()
 {
     _windowManager.init(*this);
 
@@ -233,32 +232,17 @@ void Window::update()
 }
 
 
-void Window::update(const Gfx::RectF& rect)
+void Window::update(const Gfx::RectF& clientRect)
 {
-    _isValid = false;
-
-    Gfx::PointF framePos( rect.topLeft() );
-    framePos.addX(Application::instance().windowBorderWidth());
-    framePos.addY(Application::instance().windowBorderWidth() + Application::instance().windowTitleHeight());
-    const Gfx::RectF frameRect( framePos, rect.size() );    
-    
-    _updateRect.unify(frameRect);
-    
+    _isValid = false;    
+   
     if(_impl) 
-        _impl->update(_updateRect);
-
-    _updateRect.clear();
+        _impl->update(clientRect);
 }
 
 
 void Window::render(const Gfx::RectF& winRect)
 {
-    Gfx::RectF updateRect(winRect);
-    Gfx::PointF updatePos( winRect.topLeft() );
-    updatePos.addX(-Application::instance().windowBorderWidth());
-    updatePos.addY(-(Application::instance().windowBorderWidth() + Application::instance().windowTitleHeight() ) );
-    updateRect.setOrigin(updatePos);
-
     if( ! this->isVisible() )
     {
         _isValid = true;
@@ -267,18 +251,18 @@ void Window::render(const Gfx::RectF& winRect)
 
     if(_isValid)
         return;
-
+    
     Painter painter(_surface);
     painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
-    painter.fillRect(updateRect);
+    painter.fillRect(winRect);
 
     if(_mainWidget)
     {
         Gfx::PointF pos = _mainWidget->position();
-        _mainWidget->render(pos, _surface, updateRect);
+       _mainWidget->render(pos, _surface, winRect);
     }
 
-    _windowManager.render(_surface, updateRect);
+    _windowManager.render(_surface, winRect);
 
     _isValid = true;
 }
@@ -465,57 +449,18 @@ void Window::onKeyEvent(const KeyEvent& ev)
 
 void Window::onResizeEvent(const ResizeEvent& ev)
 {    
-    const double borderWidth  = Application::instance().windowBorderWidth();
-    const double titleHeight  = Application::instance().windowTitleHeight();        
-    const double updateWidth  = std::max(_size.width(), ev.size().width()) + borderWidth * 2;
-    const double updateHeight = std::max(_size.height(), ev.size().height()) + titleHeight + (borderWidth * 2);
-        
-    Gfx::RectF updateRect( Gfx::PointF(0, 0 ),Gfx::SizeF(updateWidth, updateHeight) );
-    
-    _updateRect.unify(updateRect);
-
     _size = ev.size();
     _state = ev.state();
     _surface.resize(_size);
 
     if( _mainWidget )
-    {
         _mainWidget->setSize(_size);
-        _mainWidget->update();
-    }
-    else
-    {
-        update();
-    }
 }
 
 
 void Window::onMoveEvent(const MoveEvent& ev)
 {   
-    const double borderWidth  = Application::instance().windowBorderWidth();
-    const double titleHeight  = Application::instance().windowTitleHeight();
-    const double updateWidth  = _size.width() + borderWidth * 2;
-    const double updateHeight = _size.height() + titleHeight + borderWidth * 2;
-    
-    Gfx::RectF updateRect( Gfx::PointF(_position.x(), _position.y()), 
-                           Gfx::SizeF(updateWidth, updateHeight) );
-
-    _position = ev.position();
-
-    Gfx::RectF updateRect2( Gfx::PointF(_position.x(), _position.y()), 
-                            Gfx::SizeF(updateWidth, updateHeight) );
-
-    updateRect.unify(updateRect2);
-    
-    if(_parent)
-    {
-        _parent->update(updateRect);
-    }
-    else
-    {
-        // update screen if top-level window (needed for linux-fb)
-        Application::instance().mainScreen().update(updateRect);
-    }
+   _position = ev.position();
 }
 
 
