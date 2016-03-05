@@ -103,7 +103,7 @@ class PT_GFX_API Painter
         {}
 
 
-				virtual void setRenderMode(RenderMode::Type mode) = 0;
+        virtual void setRenderMode(RenderMode::Type mode) = 0;
 
         /**
           * @brief Sets the pen of this painter to the given pen.

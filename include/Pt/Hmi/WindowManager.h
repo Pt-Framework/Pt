@@ -124,12 +124,10 @@ class WindowManager : public Pt::Connectable
         MouseEvent                _lastPointer;
         ResizeDirection::Type     _sizingDirection;
         
-        double                    _borderWidth;
         Gfx::Color                _inactiveColor;
         Gfx::Color                _activeColor;
         Gfx::Color                _textColor;        
         size_t                    _actionButton;  
-        double                    _titleBarHeight;
         Gfx::PointF               _lastPointerPosition;  
 };
 

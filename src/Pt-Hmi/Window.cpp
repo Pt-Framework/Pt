@@ -229,9 +229,7 @@ void Window::focusNext()
 
 void Window::update()
 {
-    // update the window rect and the update area
-    _updateRect.unify( Gfx::RectF(Gfx::PointF(0,0), _size) );
-    update(_updateRect);
+    update( Gfx::RectF(Gfx::PointF(0,0), _size) );
 }
 
 
@@ -239,14 +237,12 @@ void Window::update(const Gfx::RectF& rect)
 {
     _isValid = false;
 
-    Gfx::RectF winRect(rect);
-    Gfx::PointF winPos( rect.topLeft() );
-    winPos.addX(4);
-    winPos.addY(24);
-    winRect.setOrigin(winPos);
-
-    // update the given rect and the update area
-    _updateRect.unify(winRect);
+    Gfx::PointF framePos( rect.topLeft() );
+    framePos.addX(Application::instance().windowBorderWidth());
+    framePos.addY(Application::instance().windowBorderWidth() + Application::instance().windowTitleHeight());
+    const Gfx::RectF frameRect( framePos, rect.size() );    
+    
+    _updateRect.unify(frameRect);
     
     if(_impl) 
         _impl->update(_updateRect);
@@ -259,8 +255,8 @@ void Window::render(const Gfx::RectF& winRect)
 {
     Gfx::RectF updateRect(winRect);
     Gfx::PointF updatePos( winRect.topLeft() );
-    updatePos.addX(-4);
-    updatePos.addY(-24);
+    updatePos.addX(-Application::instance().windowBorderWidth());
+    updatePos.addY(-(Application::instance().windowBorderWidth() + Application::instance().windowTitleHeight() ) );
     updateRect.setOrigin(updatePos);
 
     if( ! this->isVisible() )
@@ -469,20 +465,12 @@ void Window::onKeyEvent(const KeyEvent& ev)
 
 void Window::onResizeEvent(const ResizeEvent& ev)
 {    
-    double borderWidth = 4;
-    double titleHeight = 20;
-
-    double updateX = - borderWidth;
-    double updateY = - (borderWidth + titleHeight);
-    double updateWidth = std::max(_size.width(), ev.size().width());
-    updateWidth += borderWidth * 3;
-
-    double updateHeight = std::max(_size.height(), ev.size().height());
-    updateHeight += titleHeight + (borderWidth * 2);
-    updateHeight += titleHeight + borderWidth;
-    
-    Gfx::RectF updateRect( Gfx::PointF(updateX, updateY), 
-                           Gfx::SizeF(updateWidth, updateHeight) );
+    const double borderWidth  = Application::instance().windowBorderWidth();
+    const double titleHeight  = Application::instance().windowTitleHeight();        
+    const double updateWidth  = std::max(_size.width(), ev.size().width()) + borderWidth * 2;
+    const double updateHeight = std::max(_size.height(), ev.size().height()) + titleHeight + (borderWidth * 2);
+        
+    Gfx::RectF updateRect( Gfx::PointF(0, 0 ),Gfx::SizeF(updateWidth, updateHeight) );
     
     _updateRect.unify(updateRect);
 
@@ -504,22 +492,18 @@ void Window::onResizeEvent(const ResizeEvent& ev)
 
 void Window::onMoveEvent(const MoveEvent& ev)
 {   
-    double borderWidth = 4;
-    double titleHeight = 20;
-
-    double updateWidth = _size.width();
-    updateWidth += borderWidth * 2;
-
-    double updateHeight = _size.height();
-    updateHeight += titleHeight + (borderWidth * 2);
+    const double borderWidth  = Application::instance().windowBorderWidth();
+    const double titleHeight  = Application::instance().windowTitleHeight();
+    const double updateWidth  = _size.width() + borderWidth * 2;
+    const double updateHeight = _size.height() + titleHeight + borderWidth * 2;
     
-    Gfx::RectF updateRect( Gfx::PointF(_position.x()-1, _position.y()-1), 
-                           Gfx::SizeF(updateWidth+2, updateHeight+2) );
+    Gfx::RectF updateRect( Gfx::PointF(_position.x(), _position.y()), 
+                           Gfx::SizeF(updateWidth, updateHeight) );
 
     _position = ev.position();
 
-    Gfx::RectF updateRect2( Gfx::PointF(_position.x()-1, _position.y()-1), 
-                           Gfx::SizeF(updateWidth+2, updateHeight+2) );
+    Gfx::RectF updateRect2( Gfx::PointF(_position.x(), _position.y()), 
+                            Gfx::SizeF(updateWidth, updateHeight) );
 
     updateRect.unify(updateRect2);
     

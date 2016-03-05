@@ -3206,7 +3206,7 @@ void Rasterizer::fill( const PointF* pts, size_t pointCount)
     EdgeSet::iterator currentPos;
     std::vector<PointF> points( pts, pts + pointCount );
 
-		ClipPolygon clipper;
+    ClipPolygon clipper;
 
     clipper( points, _clip );
 

@@ -72,9 +72,22 @@ class PT_HMI_API Application : public Pt::System::Application
             return _impl;
         }
 
+        //TODO: Style
+        double windowBorderWidth() const
+        {
+            return _windowBorderWidth;
+        }
+
+        double windowTitleHeight()  const
+        {
+            return _windowTitleHeight;
+        }
+
     private:
         ApplicationImpl* _impl; 
         Screen* _mainScreen;  
+        double _windowBorderWidth;
+        double _windowTitleHeight;
 };
 
 } // namespace

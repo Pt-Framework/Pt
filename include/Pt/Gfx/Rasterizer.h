@@ -125,7 +125,7 @@ class PT_GFX_API Rasterizer
     void fill( const Point& origin, const Point& pos, int length );
     void fillSolid( const Point& pos,  int length );
     void fillTexture( const Point& origin, const Point& pos,  int length );
-		void clipSpan( int& x, int& y, int& length );
+    void clipSpan( int& x, int& y, int& length );
  
   //Thin polyline algo.
   protected:

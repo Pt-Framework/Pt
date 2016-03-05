@@ -39,6 +39,8 @@ Application::Application(int argc, char** argv)
 : System::Application(0, argc, argv)
 , _impl( new ApplicationImpl() ) 
 , _mainScreen(0)
+, _windowBorderWidth(4)
+, _windowTitleHeight(20)
 { 	
 	this->init(*_impl);
 
