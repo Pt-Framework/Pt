@@ -70,6 +70,18 @@ void WindowManager::init(Window& parent)
 }
 
 
+double WindowManager::borderWidth() const
+{
+    return Application::instance().windowBorderWidth();
+}
+
+
+double WindowManager::titleHeight() const
+{
+    return Application::instance().windowTitleHeight();
+}
+
+
 void WindowManager::add( Window& w )
 {   
     _children.insert(_children.begin(), &w);   
@@ -153,18 +165,17 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
         Gfx::PointF clientPos = renderFrame(*w, surface);                          
         
         // update rect in child window coordinates
-        Gfx::PointF pos = rect.topLeft() - w->position();
-        pos.subX( _app.windowBorderWidth() );
-        pos.subY( _app.windowBorderWidth()+ _app.windowTitleHeight()  );
+        Gfx::PointF pos = rect.topLeft() - clientPos;
         Gfx::RectF updateRect(pos, rect.size());
 
         w->render(updateRect);
 
-        Gfx::RectF clientRect( Gfx::PointF(0,0), w->size() );
-        clientRect = clientRect.intersect(updateRect);
+        // TODO: blit only update rect
+        //Gfx::RectF clientRect( Gfx::PointF(0,0), w->size() );
+        //clientRect = clientRect.intersect(updateRect);
 
         Painter painter(surface);
-        painter.drawSurface(clientPos + clientRect.topLeft(), w->surface(), clientRect);        
+        painter.drawSurface(rect.topLeft(), w->surface(), updateRect);        
     }
 }
 

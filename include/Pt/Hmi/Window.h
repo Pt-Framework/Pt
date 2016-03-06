@@ -123,6 +123,8 @@ class PT_HMI_API Window : public Pt::Connectable
 
     void runModal();
 
+
+
   protected:
     virtual void onEvent(const Pt::Event& ev);
 

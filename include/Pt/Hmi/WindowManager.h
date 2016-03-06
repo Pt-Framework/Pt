@@ -83,6 +83,10 @@ class WindowManager : public Pt::Connectable
 
         void updateChild( const Window& child, const Gfx::RectF& updateRect );
 
+        double borderWidth() const;
+
+        double titleHeight() const;
+
     private:
         bool onBackground(const Pt::Hmi::MouseEvent& pev);
 

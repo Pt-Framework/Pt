@@ -235,7 +235,7 @@ void Window::update()
 void Window::update(const Gfx::RectF& clientRect)
 {
     _isValid = false;    
-   
+
     if(_impl) 
         _impl->update(clientRect);
 }
