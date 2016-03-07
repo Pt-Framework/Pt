@@ -115,7 +115,6 @@ void WindowManager::activate(Window& w)
         return;
 
     _children.erase(it);
-        
     _children.push_back(&w);    
 
     w.processEvent( ActivateEvent(true) );    
@@ -147,9 +146,20 @@ bool WindowManager::keyInput( const Pt::Hmi::KeyEvent& keyEvent )
     return false;
 
     if( w->isEnabled() )
-            w->processEvent( keyEvent );        
+        w->processEvent( keyEvent );
 
    return true;
+}
+
+
+bool WindowManager::pointerInput( const Pt::Hmi::MouseEvent& mev )
+{
+    if( mev.isPress(_actionButton) )
+        updateActive(mev);    
+
+    bool r = (this->*_state)(mev);
+    _lastPointerPosition = Gfx::PointF( mev.x(), mev.y() );    
+    return r;
 }
 
 
@@ -162,18 +172,15 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
         if( ! w->isVisible() )
             continue; 
         
-        Gfx::PointF clientPos = renderFrame(*w, surface);                          
+        Gfx::PointF clientPos = renderFrame(*w, surface);                        
         
         // update rect in child window coordinates
         Gfx::PointF pos = rect.topLeft() - clientPos;
         Gfx::RectF updateRect(pos, rect.size());
         w->render(updateRect);
 
-        //Gfx::RectF childRect( Gfx::PointF(0,0), w->size() );
-        //childRect = childRect.intersect(updateRect);
-
         Painter painter(surface);
-        painter.drawSurface(rect.topLeft(), w->surface(), updateRect);       
+        painter.drawSurface(rect.topLeft(), w->surface(), updateRect);  
     }
 }
 
@@ -427,17 +434,6 @@ MouseEvent WindowManager::toWindow(Window* w, const MouseEvent& mev)
 }
 
 
-bool WindowManager::pointerInput( const Pt::Hmi::MouseEvent& mev )
-{
-    if( mev.isPress(_actionButton) )
-        updateActive(mev);    
-
-    bool r = (this->*_state)(mev);
-    _lastPointerPosition = Gfx::PointF( mev.x(), mev.y() );    
-    return r;
-}
-
-
 void WindowManager::updateChild( const Window& child, const Gfx::RectF& childRect )
 {       
     const double borderWidth  = Application::instance().windowBorderWidth();
@@ -606,6 +602,7 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
 
     const double dX = mev.x() - _lastPointerPosition.x();
     const double dY = mev.y() - _lastPointerPosition.y();
+
     const double borderWidth  = Application::instance().windowBorderWidth();
     const double titleHeight  = Application::instance().windowTitleHeight();
 
