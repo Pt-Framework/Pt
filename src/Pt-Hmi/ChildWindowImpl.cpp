@@ -64,25 +64,27 @@ void ChildWindowImpl::setVisible(bool visible)
 
 void ChildWindowImpl::update(const Gfx::RectF& clientRect)
 {
-    if( !_apiWindow->parent() )	
+    if( ! _apiWindow->parent() )
         return;
 
-    // TODO: window should not know its window decoration
-    double borderWidth  = _apiWindow->parent()->windowManager().borderWidth();
-    double titleHeight  = _apiWindow->parent()->windowManager().titleHeight();
+    _apiWindow->parent()->onUpdate(*_apiWindow, clientRect);	
+}
 
-   // from client rect coordinates to parent window client rect coordinates
-    Gfx::RectF winRect(clientRect);
 
-    Gfx::PointF winPos(winRect.topLeft());
-    winPos.addX(borderWidth);
-    winPos.addY(borderWidth + titleHeight);
+void ChildWindowImpl::onUpdate(Window& child, const Gfx::RectF& childRect)
+{
+    if( ! _apiWindow->parent() )
+        return;
 
-    winPos += _apiWindow->position();
+    double borderWidth = _apiWindow->windowManager().borderWidth();
+    double titleHeight = _apiWindow->windowManager().titleHeight();
 
-    winRect.setOrigin( winPos );
+    Gfx::PointF pos = child.position() + childRect.topLeft();
+    pos.addX(borderWidth);
+    pos.addY(borderWidth + titleHeight);
 
-    _apiWindow->parent()->update(winRect);	
+    Gfx::RectF updateRect( pos, childRect.size() );
+    _apiWindow->parent()->onUpdate(*_apiWindow, updateRect);
 }
 
 

@@ -49,6 +49,8 @@ class PT_HMI_API ChildWindowImpl  : public WindowImpl
        
         virtual void update(const Gfx::RectF& rect);
 
+        virtual void onUpdate(Window& child, const Gfx::RectF& childRect);
+
         virtual void setPosition(const Gfx::PointF& p);
 
         virtual void setSize(const Gfx::SizeF& size);

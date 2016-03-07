@@ -48,8 +48,9 @@ class MainWindowImpl : public ChildWindowImpl
 
         virtual ~MainWindowImpl();
 
-    protected:
         virtual void update(const Gfx::RectF& updateRect);
+
+        virtual void onUpdate(Window& child, const Gfx::RectF& childRect);
 };
 
 } // namespace

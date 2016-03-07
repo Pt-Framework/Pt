@@ -51,10 +51,29 @@ MainWindowImpl::~MainWindowImpl()
 
 void MainWindowImpl::update(const Gfx::RectF& updateRect)
 {
-    Gfx::PointF pos = _apiWindow->position() + updateRect.topLeft();
-    Gfx::RectF parentRect(pos, updateRect.size());
+    double borderWidth = _apiWindow->windowManager().borderWidth();
+    double titleHeight = _apiWindow->windowManager().titleHeight();
 
-    Application::instance().mainScreen().impl()->update(parentRect);
+    Gfx::PointF pos = _apiWindow->position() + updateRect.topLeft();
+    pos.addX(borderWidth);
+    pos.addY(borderWidth + titleHeight);
+
+    Gfx::RectF screenRect( pos, updateRect.size() );
+    Application::instance().mainScreen().impl()->update(screenRect);
+}
+
+
+void MainWindowImpl::onUpdate(Window& child, const Gfx::RectF& childRect)
+{
+    double borderWidth = _apiWindow->windowManager().borderWidth();
+    double titleHeight = _apiWindow->windowManager().titleHeight();
+
+    Gfx::PointF pos = child.position() + childRect.topLeft();
+    pos.addX(borderWidth);
+    pos.addY(borderWidth + titleHeight);
+
+    Gfx::RectF updateRect( pos, childRect.size() );
+    update(updateRect);
 }
 
 } // namespace

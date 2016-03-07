@@ -603,9 +603,27 @@ void MainWindowImpl::update(const Gfx::RectF& rect)
     InvalidateRect(_hwnd, NULL, FALSE);
 }
 
+
+void MainWindowImpl::onUpdate(Window& child, const Gfx::RectF& childRect)
+{
+    double borderWidth = _apiWindow->windowManager().borderWidth();
+    double titleHeight = _apiWindow->windowManager().titleHeight();
+
+    // from client rect coordinates to parent window client rect coordinates
+    Gfx::PointF pos = child.position() + childRect.topLeft();
+    pos.addX(borderWidth);
+    pos.addY(borderWidth + titleHeight);
+
+    Gfx::RectF updateRect( pos, childRect.size() );
+    update(updateRect);	
+}
+
+
 void MainWindowImpl::close()
 {
     destroy();
 }
 
-}} // namespace
+} // namespace
+
+} // namespace

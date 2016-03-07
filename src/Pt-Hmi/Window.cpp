@@ -241,6 +241,15 @@ void Window::update(const Gfx::RectF& clientRect)
 }
 
 
+void Window::onUpdate(Window& child, const Gfx::RectF& childRect)
+{
+    _isValid = false;    
+
+    if(_impl) 
+        _impl->onUpdate(child, childRect);
+}
+
+
 void Window::render(const Gfx::RectF& winRect)
 {
     if( ! this->isVisible() )
@@ -454,7 +463,14 @@ void Window::onResizeEvent(const ResizeEvent& ev)
     _surface.resize(_size);
 
     if( _mainWidget )
+    {
         _mainWidget->setSize(_size);
+        _mainWidget->update();
+    }
+    else
+    {
+        update();
+    }
 }
 
 
@@ -642,7 +658,7 @@ void Window::add(Window& child)
     child._impl = 0;
 
     child._parent = this;    
-    child.updateImpl();
+    child.createImpl();
 
     _windowManager.add(child);
 
@@ -661,13 +677,13 @@ void Window::remove(Window& child)
     child._impl = 0;
 
     child._parent = 0;
-    child.updateImpl();
+    child.createImpl();
 
     update();
 }
 
 
-void Window::updateImpl()
+void Window::createImpl()
 {
     assert( ! _impl);
 
@@ -704,7 +720,7 @@ void Window::setVisible(bool b)
     _visible = b;
 
     if( ! _impl)
-        updateImpl(); 
+        createImpl(); 
     else  
         _impl->setVisible(b);
 }

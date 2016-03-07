@@ -165,9 +165,12 @@ void ScreenImpl::update(const Gfx::RectF& updateRect)
     Pt::System::Clock clock;
     clock.start();   
 
-    if( !_cursorBackground.empty() )
-        bitBlit( _cursorBackground.pixel(0,0), _cursorBackground.width(), _cursorBackground.height(), 
-                 _cursorPos, (Pt::uint8_t*)image().pixel(0,0), CopyOp );
+    if( ! _cursorBackground.empty() )
+        bitBlit( _cursorBackground.pixel(0,0), 
+                 _cursorBackground.width(), 
+                 _cursorBackground.height(), 
+                 _cursorPos, 
+                 image().pixel(0,0), CopyOp );
 
     Painter painter(_surface);
     painter.setBrush( Pt::Gfx::Color(0.4f, 0.3f, 0.4f) );

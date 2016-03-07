@@ -46,63 +46,65 @@ class MainWindowImpl : public WindowImpl
         MainWindowImpl(Window* window);
 
         virtual ~MainWindowImpl();
-	
+    
         virtual void setVisible( bool v);
-	
+    
         virtual void activate();
+
+        virtual void onUpdate(Window& child, const Gfx::RectF& childRect);
        
         virtual void update(const Gfx::RectF& rect);
 
         virtual void setPosition(const Gfx::PointF& p);
 
         virtual void setSize(const Gfx::SizeF& size);
-	
+    
         virtual void setState(WindowState::Type p);
     
         virtual void setBorder(WindowBorder::Type p);
        
         virtual void setIcon(const Gfx::Image& p);
     
-	    virtual void setEnabled(bool e);	
+        virtual void setEnabled(bool e);    
     
-	    virtual void setMinimumSize(const Gfx::SizeF& s);
-	
-	    virtual void setMaximumSize(const Gfx::SizeF& s);	
+        virtual void setMinimumSize(const Gfx::SizeF& s);
+    
+        virtual void setMaximumSize(const Gfx::SizeF& s);    
 
-        virtual void setDecoration( WindowDecoration::Flags d );	
+        virtual void setDecoration( WindowDecoration::Flags d );    
 
         virtual void setTitle( const std::string& t );
         
         virtual void close();
 
-         HWND hwnd()
-         {
-            return _hwnd;
-         }
+        HWND hwnd()
+        {
+          return _hwnd;
+        }
 
-	    bool processEvent( unsigned int msg, WPARAM wparam, LPARAM lparam );
+        bool processEvent( unsigned int msg, WPARAM wparam, LPARAM lparam );
 
     protected:
-	    void onPaint();
-	    void onSize(WPARAM wparam, LPARAM lparam);
-	    void onMouse(unsigned int msg,  WPARAM wparam, LPARAM lparam);
-	    void onKey(UINT vkey, UINT scanCode, bool isPress);
-	    void onMove(LPARAM lparam);	
-	    void onClose();
-	    void onActivate(bool f);
+        void onPaint();
+        void onSize(WPARAM wparam, LPARAM lparam);
+        void onMouse(unsigned int msg,  WPARAM wparam, LPARAM lparam);
+        void onKey(UINT vkey, UINT scanCode, bool isPress);
+        void onMove(LPARAM lparam);
+        void onClose();
+        void onActivate(bool f);
 
     private:
         void setShowTitle(bool p);
         void setShowMinimizeButton(bool p);
         void setShowMaximizeButton(bool p);
         void setShowSystemMenu(bool p);
-        void create();	
+        void create();
         void destroy();
 
-    private:	
+    private:    
         Pt::Hmi::Application& _app; 
         Screen&               _screen; 
-        HWND				          _hwnd;
+        HWND                  _hwnd;
         MouseEvent            _mouseEvent;
         ScrollEvent           _scrollEvent;
         KeyEvent              _keyEvent;

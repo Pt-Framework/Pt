@@ -374,6 +374,32 @@ void Widget::processEvent(const Pt::Event& ev)
 }
 
 
+void Widget::update()
+{
+    // The widget is already invalid in case of a nested update()
+    // this means the parent must already be invalid or has just
+    // been rendered. Therefore we stop the chain of update calls
+    // towards the root of the widget/window tree.
+    if( ! _isValid )
+        return;
+
+    _isValid = false; 
+   
+    // the update area and window rect are already in parent coordinates
+    _updateRect.unify(_geometry);
+
+    if( parent() )
+    {
+        parent()->onUpdate(_updateRect);
+    }
+    else
+    {
+        if(_window)
+            _window->update(_updateRect);
+    }
+}
+
+
 void Widget::onUpdate(const Gfx::RectF& rect)
 {
     // The widget is already invalid in case of a nested update()
@@ -398,32 +424,6 @@ void Widget::onUpdate(const Gfx::RectF& rect)
     {
         if(_window)
             _window->update(updateRect);
-    }
-}
-
-
-void Widget::update()
-{
-    // The widget is already invalid in case of a nested update()
-    // this means the parent must already be invalid or has just
-    // been rendered. Therefore we stop the chain of update calls
-    // towards the root of the widget/window tree.
-    if( ! _isValid )
-        return;
-
-    _isValid = false; 
-   
-    // the update area and window rect are already in parent coordinates
-    _updateRect.unify(_geometry);
-
-    if( parent() )
-    {
-        parent()->onUpdate(_updateRect);
-    }
-    else
-    {
-        if(_window)
-            _window->update(_updateRect);
     }
 }
 

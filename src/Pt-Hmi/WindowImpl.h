@@ -47,31 +47,33 @@ class Window;
 class WindowImpl : public Pt::Connectable
 {
     public:
-        WindowImpl(Window* api);        
+        WindowImpl(Window* api);
         
         virtual ~WindowImpl();
-	
+
         virtual void setVisible(bool b) = 0;
 
-        virtual void activate() = 0;        
+        virtual void activate() = 0;
 
-        virtual void update(const Gfx::RectF& rect) = 0;  
+        virtual void update(const Gfx::RectF& rect) = 0;
+
+        virtual void onUpdate(Window& child, const Gfx::RectF& childRect) = 0;
 
         virtual void setPosition(const Gfx::PointF& p) = 0;
    
         virtual void setSize(const Gfx::SizeF& size) = 0;
 
-        virtual void setState(WindowState::Type s) = 0;   
+        virtual void setState(WindowState::Type s) = 0;
 
         virtual void setBorder( WindowBorder::Type b ) = 0;
-       
+
         virtual void setIcon( const Gfx::Image& i ) = 0;
-            
+
         virtual void setEnabled( bool e ) = 0;
-    
+
         virtual void setMinimumSize( const Gfx::SizeF& s ) = 0;
-    
-	    virtual void setMaximumSize( const Gfx::SizeF& s ) = 0;
+
+          virtual void setMaximumSize( const Gfx::SizeF& s ) = 0;
 
         virtual void setDecoration( WindowDecoration::Flags d ) = 0;
 
@@ -84,6 +86,8 @@ class WindowImpl : public Pt::Connectable
 
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif

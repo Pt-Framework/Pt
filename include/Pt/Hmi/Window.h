@@ -60,6 +60,9 @@ class WindowImpl;
 class PT_HMI_API Window : public Pt::Connectable
 {
    friend class Widget; 
+   friend class WindowImpl;
+   friend class ChildWindowImpl;
+   friend class MainWindowImpl;
 
   public:           
     explicit Window(Window* parent = 0);     
@@ -122,8 +125,6 @@ class PT_HMI_API Window : public Pt::Connectable
     WindowImpl* impl();
 
     void runModal();
-
-
 
   protected:
     virtual void onEvent(const Pt::Event& ev);
@@ -211,6 +212,10 @@ class PT_HMI_API Window : public Pt::Connectable
     void setName(const std::string& n);
 
   private:
+    void createImpl();
+
+    void onUpdate(Window& child, const Gfx::RectF& childRect);
+
     void addWidget(Widget& w);
 
     void removeWidget(Widget& w);
@@ -231,8 +236,6 @@ class PT_HMI_API Window : public Pt::Connectable
     void removeFocusWidget(Widget& w);
 
     void setFocusIndex(Widget& w, size_t index);
-
-    void updateImpl();
     
   private:
     WindowManager                  _windowManager; 
