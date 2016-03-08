@@ -174,7 +174,7 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
         
         Gfx::PointF clientPos = renderFrame(*w, surface);                        
         
-        // update rect in child window coordinates
+        // update rect in child window client rect coordinates
         Gfx::PointF pos = rect.topLeft() - clientPos;
         Gfx::RectF updateRect(pos, rect.size());
         w->render(updateRect);

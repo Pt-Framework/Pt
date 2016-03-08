@@ -418,10 +418,12 @@ void Widget::onUpdate(const Gfx::RectF& rect)
 
     if( parent() )
     {
+        // update rect in parent widget coordinates
         parent()->onUpdate(updateRect);   
     }
     else
     {
+        // update rect in parent window client rect coordinates
         if(_window)
             _window->update(updateRect);
     }

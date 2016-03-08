@@ -62,12 +62,13 @@ void ChildWindowImpl::setVisible(bool visible)
 }
 
 
-void ChildWindowImpl::update(const Gfx::RectF& clientRect)
+void ChildWindowImpl::update(const Gfx::RectF& updateRect)
 {
     if( ! _apiWindow->parent() )
         return;
 
-    _apiWindow->parent()->onUpdate(*_apiWindow, clientRect);	
+    // update rect in _apiWindow client rect coordinates
+    _apiWindow->parent()->onUpdate(*_apiWindow, updateRect);	
 }
 
 
@@ -83,6 +84,7 @@ void ChildWindowImpl::onUpdate(Window& child, const Gfx::RectF& childRect)
     pos.addX(borderWidth);
     pos.addY(borderWidth + titleHeight);
 
+    // update rect in _apiWindow client rect coordinates
     Gfx::RectF updateRect( pos, childRect.size() );
     _apiWindow->parent()->onUpdate(*_apiWindow, updateRect);
 }

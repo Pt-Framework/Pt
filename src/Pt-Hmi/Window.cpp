@@ -228,16 +228,18 @@ void Window::focusNext()
 
 void Window::update()
 {
+    // update rect in this window's client rect coordinates
     update( Gfx::RectF(Gfx::PointF(0,0), _size) );
 }
 
 
-void Window::update(const Gfx::RectF& clientRect)
+void Window::update(const Gfx::RectF& updateRect)
 {
     _isValid = false;    
 
+    // update rect in this window's client rect coordinates
     if(_impl) 
-        _impl->update(clientRect);
+        _impl->update(updateRect);
 }
 
 
@@ -245,12 +247,13 @@ void Window::onUpdate(Window& child, const Gfx::RectF& childRect)
 {
     _isValid = false;    
 
+    // update rect in child window client rect coordinates
     if(_impl) 
         _impl->onUpdate(child, childRect);
 }
 
 
-void Window::render(const Gfx::RectF& winRect)
+void Window::render(const Gfx::RectF& updateRect)
 {
     if( ! this->isVisible() )
     {
@@ -263,15 +266,16 @@ void Window::render(const Gfx::RectF& winRect)
     
     Painter painter(_surface);
     painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
-    painter.fillRect(winRect);
+    painter.fillRect(updateRect);
 
     if(_mainWidget)
     {
+        // pos is always 0,0
         Gfx::PointF pos = _mainWidget->position();
-       _mainWidget->render(pos, _surface, winRect);
+       _mainWidget->render(pos, _surface, updateRect);
     }
 
-    _windowManager.render(_surface, winRect);
+    _windowManager.render(_surface, updateRect);
 
     _isValid = true;
 }

@@ -597,9 +597,10 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 }
 
 
-void MainWindowImpl::update(const Gfx::RectF& rect)
+void MainWindowImpl::update(const Gfx::RectF& updateRect)
 {
-    _apiWindow->render(rect);
+    // update rect is in main windows client rect coordinates
+    _apiWindow->render(updateRect);
     InvalidateRect(_hwnd, NULL, FALSE);
 }
 
