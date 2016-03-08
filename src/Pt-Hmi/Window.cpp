@@ -245,7 +245,7 @@ void Window::update(const Gfx::RectF& updateRect)
 
 void Window::onUpdate(Window& child, const Gfx::RectF& childRect)
 {
-    _isValid = false;    
+    _isValid = false;
 
     // update rect in child window client rect coordinates
     if(_impl) 
@@ -486,22 +486,22 @@ void Window::onMoveEvent(const MoveEvent& ev)
 
 void Window::onActivateEvent(const ActivateEvent& ev)
 { 
-    bool activeChange = _isActive != ev.isActive();
+    //bool activeChange = _isActive != ev.isActive();
 
     _isActive = ev.isActive();
 
-    if( ! _isActive )
-    {
-        _windowManager.deactivate();  
-    }
-    else
-    {
-       if( _parent )
-           _parent->processEvent(ActivateEvent(true));
-    }   
-    
-    if(activeChange)
-        update();             
+    //if( ! _isActive )
+    //{
+    //    _windowManager.deactivate();  
+    //}
+    //else
+    //{
+    //   if( _parent )
+    //       _parent->processEvent(ActivateEvent(true));
+    //}   
+    //
+    //if(activeChange)
+    //    update();
 }
 
 

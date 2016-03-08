@@ -107,6 +107,9 @@ const std::vector<Window*>& WindowManager::windows() const
 
 void WindowManager::activate(Window& w)
 {
+    const double borderWidth = Application::instance().windowBorderWidth();
+    const double titleHeight = Application::instance().windowTitleHeight();
+
     deactivate();
 
     std::vector<Window*>::iterator it = std::find(_children.begin(), _children.end(), &w);
@@ -115,14 +118,32 @@ void WindowManager::activate(Window& w)
         return;
 
     _children.erase(it);
-    _children.push_back(&w);    
+    _children.push_back(&w);
+    w.processEvent( ActivateEvent(true) );
 
-    w.processEvent( ActivateEvent(true) );  
+    Window* parent = w.parent();
+    if(parent)
+        parent->activate();
+
+    Gfx::PointF framePos(0, 0);
+    framePos.subX( borderWidth );
+    framePos.subY( borderWidth +  titleHeight );
+
+    Gfx::SizeF frameSize = w.size();
+    frameSize.addHeight(2 * borderWidth + titleHeight);
+    frameSize.addWidth(2 * borderWidth);
+
+    Gfx::RectF updateRect(framePos, frameSize);
+
+    w.update(updateRect);
 }
 
 
 void WindowManager::deactivate()
 {
+    const double borderWidth = Application::instance().windowBorderWidth();
+    const double titleHeight = Application::instance().windowTitleHeight();
+
     std::vector<Window*>::iterator it = _children.begin();
     
     for( ; it != _children.end(); ++it)
@@ -131,10 +152,45 @@ void WindowManager::deactivate()
 
         if( w->isActive() )
         {
-            w->processEvent( ActivateEvent(false) );                
+            w->processEvent( ActivateEvent(false) );
+
+            Gfx::PointF framePos(0, 0);
+            framePos.subX( borderWidth );
+            framePos.subY( borderWidth +  titleHeight );
+
+            Gfx::SizeF frameSize = w->size();
+            frameSize.addHeight(2 * borderWidth + titleHeight);
+            frameSize.addWidth(2 * borderWidth);
+
+            Gfx::RectF updateRect(framePos, frameSize);
+
+            w->update(updateRect);               
             break;
         }
     }        
+}
+
+
+bool WindowManager::updateActive(const Pt::Hmi::MouseEvent& ev)
+{    
+    std::vector<Window*>::reverse_iterator rit =  _children.rbegin();
+
+    for( ; rit != _children.rend(); ++rit )
+    {
+        Window* w = *rit;
+
+        if( ! contains( *w, ev.x(), ev.y() ) )
+            continue;
+
+        if( w->isActive() )                                                             
+            return true;
+             
+        activate( *w );    
+        return true;
+    }         
+
+    deactivate();
+    return false;
 }
 
 
@@ -187,6 +243,8 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
         Painter painter(surface);
         painter.drawSurface(clientPos + surfaceRect.topLeft(), 
                             w->surface(), surfaceRect);
+
+        //painter.drawRect(rect);
     }
 }
 
@@ -311,29 +369,6 @@ Window* WindowManager::findWindow(double x, double y)
     }
 
     return 0;
-}
-
-
-bool WindowManager::updateActive(const Pt::Hmi::MouseEvent& ev)
-{    
-    std::vector<Window*>::reverse_iterator rit =  _children.rbegin();
-
-    for( ; rit != _children.rend(); ++rit )
-    {
-        Window* w = *rit;
-
-        if( ! contains( *w, ev.x(), ev.y() ) )
-            continue;
-
-        if( w->isActive() )                                                             
-            return true;
-             
-        activate( *w );    
-        return true;
-    }         
-
-    deactivate();
-    return false;
 }
 
 

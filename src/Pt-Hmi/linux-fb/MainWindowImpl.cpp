@@ -49,6 +49,12 @@ MainWindowImpl::~MainWindowImpl()
 }
 
 
+void MainWindowImpl::activate()
+{
+    Application::instance().mainScreen().impl()->windowManager().activate(*_apiWindow);
+}
+
+
 void MainWindowImpl::update(const Gfx::RectF& updateRect)
 {
     double borderWidth = _apiWindow->windowManager().borderWidth();

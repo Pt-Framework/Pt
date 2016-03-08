@@ -48,6 +48,8 @@ class MainWindowImpl : public ChildWindowImpl
 
         virtual ~MainWindowImpl();
 
+        virtual void activate();
+
         virtual void update(const Gfx::RectF& updateRect);
 
         virtual void onUpdate(Window& child, const Gfx::RectF& childRect);

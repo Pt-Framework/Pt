@@ -140,6 +140,11 @@ class ScreenImpl : public Pt::Connectable
 
         void update(const Gfx::RectF& updateRect);
 
+        WindowManager& windowManager()
+        {
+            return _windowManager;
+        }
+
     protected:
         virtual void onActivate();
 

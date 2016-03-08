@@ -92,10 +92,11 @@ void ChildWindowImpl::onUpdate(Window& child, const Gfx::RectF& childRect)
 
 void ChildWindowImpl::activate()
 {
-    if( _apiWindow->parent() )
+    Window* parent = _apiWindow->parent();
+
+    if( parent )
     {
-        _apiWindow->parent()->activate();
-        _apiWindow->parent()->windowManager().activate( *_apiWindow );	
+        parent->windowManager().activate( *_apiWindow );	
     }
 }
 
