@@ -122,7 +122,7 @@ void WindowManager::activate(Window& w)
     w.processEvent( ActivateEvent(true) );
 
     Window* parent = w.parent();
-    if(parent)
+    if(parent && ! parent->isActive() )
         parent->activate();
 
     Gfx::PointF framePos(0, 0);
@@ -134,7 +134,6 @@ void WindowManager::activate(Window& w)
     frameSize.addWidth(2 * borderWidth);
 
     Gfx::RectF updateRect(framePos, frameSize);
-
     w.update(updateRect);
 }
 
@@ -163,7 +162,6 @@ void WindowManager::deactivate()
             frameSize.addWidth(2 * borderWidth);
 
             Gfx::RectF updateRect(framePos, frameSize);
-
             w->update(updateRect);               
             break;
         }
