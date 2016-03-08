@@ -465,7 +465,7 @@ void Widget::onRender(const Gfx::PointF& pos,
             continue;
 
         //static int _n = 0;
-        //std::clog << _n++ << " RENDER RENDER RENDER " << child->name() << std::endl;
+        //std::clog << _n++ << " render widget " << child->name() << std::endl;
 
         Gfx::PointF paintOffset( pos.x() + child->position().x(),
                                  pos.y() + child->position().y() );

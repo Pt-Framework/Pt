@@ -117,7 +117,7 @@ void WindowManager::activate(Window& w)
     _children.erase(it);
     _children.push_back(&w);    
 
-    w.processEvent( ActivateEvent(true) );    
+    w.processEvent( ActivateEvent(true) );  
 }
 
 
@@ -179,8 +179,14 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
         Gfx::RectF updateRect(pos, rect.size());
         w->render(updateRect);
 
+        //std::clog << "render surface: " << w->title() << std::endl;
+
+        Gfx::RectF surfaceRect(Gfx::PointF(0, 0), w->size());
+        surfaceRect = surfaceRect.intersect(updateRect);
+
         Painter painter(surface);
-        painter.drawSurface(rect.topLeft(), w->surface(), updateRect);  
+        painter.drawSurface(clientPos + surfaceRect.topLeft(), 
+                            w->surface(), surfaceRect);
     }
 }
 
