@@ -442,6 +442,12 @@ void Widget::render(const Gfx::PointF& pos,
 
     if( ! _isValid )
         onLayout();
+
+    // TODO: if this works, update() in layouts is not needed and
+    //       _isValid flag is obsolete
+    //
+    //if( ! _updateRect.isNull() )
+    //    onLayout();
     
     onRender(pos, surface, updateRect);
     

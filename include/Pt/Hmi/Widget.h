@@ -139,8 +139,8 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         void update();
 
-        bool isValid() const
-        { return _isValid; }
+        //bool isValid() const
+        //{ return _isValid; }
 
         void render(const Gfx::PointF& pos, 
                     PaintSurface& surface, 
