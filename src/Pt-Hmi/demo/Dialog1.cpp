@@ -45,8 +45,8 @@ Dialog1::~Dialog1()
 void Dialog1::init()
 {
 	//Dialog
-	setSize( Gfx::SizeF(700,500) );
-	setPosition( Gfx::PointF(400,400) );
+	resize( Gfx::SizeF(700,500) );
+	move( Gfx::PointF(400,400) );
 	setTitle( std::string("This is a sample modal dialog 1") );
 
   /*

@@ -55,6 +55,18 @@ void MainWindowImpl::activate()
 }
 
 
+void MainWindowImpl::resize(const Gfx::SizeF& from, const Gfx::SizeF& to)
+{
+    Application::instance().mainScreen().impl()->windowManager().resize(*_apiWindow, from, to);
+}
+
+
+void MainWindowImpl::move(const Gfx::PointF& from, const Gfx::PointF& to)
+{
+    Application::instance().mainScreen().impl()->windowManager().move(*_apiWindow, from, to);
+}
+
+
 void MainWindowImpl::update(const Gfx::RectF& updateRect)
 {
     double borderWidth = _apiWindow->windowManager().borderWidth();

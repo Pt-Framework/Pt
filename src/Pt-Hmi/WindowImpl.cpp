@@ -26,6 +26,7 @@
 
 #include "WindowImpl.h"
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Application.h>
 
 namespace Pt{
 namespace Hmi{
@@ -35,9 +36,50 @@ WindowImpl::WindowImpl(Window* api)
 {
 }
 
+
 WindowImpl::~WindowImpl()
 {
 }
 
+void WindowImpl::onResize(Window& child,
+                          const Gfx::SizeF& oldSize, 
+                          const Gfx::SizeF& size)
+{
+    double borderWidth = _apiWindow->windowManager().borderWidth();
+    double titleHeight = _apiWindow->windowManager().titleHeight();
+
+    Gfx::PointF updatePos(0,0);
+    updatePos.subX(borderWidth);
+    updatePos.subY(borderWidth + titleHeight);
+   
+    Gfx::SizeF updateSize;
+    updateSize.setWidth( std::max(oldSize.width(), size.width()) );
+    updateSize.setHeight( std::max(oldSize.height(), size.height()) );
+    updateSize.addWidth(2* borderWidth);
+    updateSize.addHeight(2* borderWidth + titleHeight);
+    
+    Gfx::RectF updateRect(updatePos, updateSize);
+    child.update(updateRect);
+}
+
+
+void WindowImpl::onMove(Window& child, 
+                        const Gfx::PointF& oldPos, 
+                        const Gfx::PointF& pos)
+{
+    const double borderWidth  = Application::instance().windowBorderWidth();
+    const double titleHeight  = Application::instance().windowTitleHeight();
+
+    Gfx::RectF updateRect( oldPos, child.size() );    
+    Gfx::RectF movedRect( pos, child.size() );
+    updateRect.unify(movedRect);
+
+    Gfx::SizeF updateSize = updateRect.size();
+    updateSize.addWidth(2* borderWidth);
+    updateSize.addHeight(2* borderWidth + titleHeight);
+    updateRect.setSize(updateSize);
+
+    _apiWindow->update(updateRect);
+}
 
 }}

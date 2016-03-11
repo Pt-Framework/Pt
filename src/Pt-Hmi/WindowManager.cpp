@@ -122,7 +122,7 @@ void WindowManager::activate(Window& w)
     w.processEvent( ActivateEvent(true) );
 
     Window* parent = w.parent();
-    if(parent && ! parent->isActive() )
+    if(parent)
         parent->activate();
 
     Gfx::PointF framePos(0, 0);
@@ -473,26 +473,6 @@ MouseEvent WindowManager::toWindow(Window* w, const MouseEvent& mev)
 }
 
 
-void WindowManager::updateChild( const Window& child, const Gfx::RectF& childRect )
-{       
-    const double borderWidth  = Application::instance().windowBorderWidth();
-    const double titleHeight  = Application::instance().windowTitleHeight();
-    const Gfx::PointF windowPos = child.position();
-                
-    const Gfx::PointF pos ( windowPos + childRect.topLeft() );
-    const Gfx::SizeF  size( childRect.size().width() + 2* borderWidth,  childRect.size().height() + 2* borderWidth +  titleHeight );
-    const Gfx::RectF  trans( Gfx::PointF( pos.x() + borderWidth,  pos.y() + borderWidth + titleHeight), size );
-
-    if( _container)
-    {                
-        _container->update(trans );
-    }
-    else
-    {
-        _app.mainScreen().update( trans );
-    }
-}
-
 bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
 {
     //std::clog << "onBackground: " << (_container ? _container->title() : "WM") << std::endl;    
@@ -642,19 +622,29 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
     const double dX = mev.x() - _lastPointerPosition.x();
     const double dY = mev.y() - _lastPointerPosition.y();
 
-    const double borderWidth  = Application::instance().windowBorderWidth();
-    const double titleHeight  = Application::instance().windowTitleHeight();
+    Gfx::PointF from = _managedWindow->position();
 
-    Gfx::RectF updateRect( _managedWindow->position(),
-                           _managedWindow->size() );
+    Gfx::PointF to( _managedWindow->position().x() + dX, 
+                    _managedWindow->position().y() + dY) ;     
+ 
+    _managedWindow->processEvent( MoveEvent(to) );
 
-    Gfx::PointF winpos( _managedWindow->position().x() + dX, 
-                        _managedWindow->position().y() + dY) ;     
+    move(*_managedWindow, from, to);
     
-    _managedWindow->processEvent( MoveEvent(winpos) );
+    return true;
+}
 
-    Gfx::RectF movedRect( _managedWindow->position(), 
-                          _managedWindow->size() );
+
+void WindowManager::move(Window& w, const Gfx::PointF& from, const Gfx::PointF& to)
+{
+    const double borderWidth = Application::instance().windowBorderWidth();
+    const double titleHeight = Application::instance().windowTitleHeight();
+
+    Gfx::RectF updateRect( from,
+                           w.size() );   
+    
+    Gfx::RectF movedRect( to, 
+                          w.size() );
 
     updateRect.unify(movedRect);      
     
@@ -664,12 +654,10 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
 
     updateRect.setSize(frameSize);   
         
-    if( _container)             
+    if(_container)             
         _container->update(updateRect);
     else
         _app.mainScreen().update(updateRect);
-    
-    return true;
 }
 
 
@@ -813,6 +801,33 @@ bool WindowManager::onWindowResize(const MouseEvent& mev)
     _managedWindow->update( updateRect );
 
     return true;
+}
+
+void WindowManager::resize(Window& w, const Gfx::SizeF& from, const Gfx::SizeF& to)
+{
+    const double borderWidth  = Application::instance().windowBorderWidth();
+    const double titleHeight  = Application::instance().windowTitleHeight();
+    
+    Gfx::RectF updateRect( w.position(), 
+                           from );
+
+    Gfx::RectF resizedRect( w.position(),  
+                            to );
+
+    updateRect.unify(resizedRect); 
+
+    Gfx::PointF framePos( updateRect.topLeft() - w.position() );
+    framePos.subX( borderWidth );
+    framePos.subY( borderWidth +  titleHeight );
+
+    Gfx::SizeF frameSize = updateRect.size();
+    frameSize.addHeight(2 * borderWidth + titleHeight);
+    frameSize.addWidth(2 * borderWidth);
+
+    updateRect.set(framePos, frameSize);
+
+    // TODO: avoid second update after processing resize event
+    w.update( updateRect );
 }
 
 } // namespace

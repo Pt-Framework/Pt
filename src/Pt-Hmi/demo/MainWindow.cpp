@@ -46,12 +46,12 @@ namespace Demo{
 MainWindow::MainWindow()
 : _child1("Child 1")
 {
-    setPosition(  Gfx::PointF(60, 30) );
-    setSize( Gfx::SizeF(600, 430) );
+    move(  Gfx::PointF(60, 30) );
+    resize( Gfx::SizeF(600, 430) );
     setTitle("Main 1");
     setVisible( true );  // MainWindow
     
-    _child1.setPosition ( Gfx::PointF(10, 10) );
+    _child1.move( Gfx::PointF(10, 10) );
     add( _child1 );
     
     _child1.setVisible(true); // Child 1

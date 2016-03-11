@@ -55,9 +55,9 @@ class MainWindowImpl : public WindowImpl
        
         virtual void update(const Gfx::RectF& rect);
 
-        virtual void setPosition(const Gfx::PointF& p);
+        virtual void move(const Gfx::PointF& from, const Gfx::PointF& to);
 
-        virtual void setSize(const Gfx::SizeF& size);
+        virtual void resize(const Gfx::SizeF& from, const Gfx::SizeF& to);
     
         virtual void setState(WindowState::Type p);
     

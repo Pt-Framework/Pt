@@ -193,11 +193,11 @@ class PT_HMI_API Window : public Pt::Connectable
 
     const Gfx::SizeF& size() const;
 
-    void setSize( const Gfx::SizeF& s );
+    void resize( const Gfx::SizeF& s );
 
     const Gfx::PointF& position() const;
 
-    void setPosition( const Gfx::PointF&  p);
+    void move(const Gfx::PointF& p);
 
     const Gfx::Font& font() const;
 
@@ -215,6 +215,12 @@ class PT_HMI_API Window : public Pt::Connectable
     void createImpl();
 
     void onUpdate(Window& child, const Gfx::RectF& childRect);
+
+    void onActivate(Window& child);
+
+    void onResize(Window& child, const Gfx::SizeF& from, const Gfx::SizeF& to);
+
+    void onMove(Window& child, const Gfx::PointF& from, const Gfx::PointF& to);
 
     void addWidget(Widget& w);
 

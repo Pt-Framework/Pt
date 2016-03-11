@@ -73,6 +73,10 @@ class WindowManager : public Pt::Connectable
         // TODO: Window::activate() should be public
         void activate(Window& w);
 
+        void move(Window& w, const Gfx::PointF& from, const Gfx::PointF& to);
+
+        void resize(Window& w, const Gfx::SizeF& from, const Gfx::SizeF& to);
+
         void deactivate();
 
         bool pointerInput(const Pt::Hmi::MouseEvent& pointerEvent);
@@ -80,8 +84,6 @@ class WindowManager : public Pt::Connectable
         bool keyInput(const Pt::Hmi::KeyEvent& keyEvent);
 
         void render(PaintSurface& surface, const Gfx::RectF& updateRect);
-
-        void updateChild( const Window& child, const Gfx::RectF& updateRect );
 
         double borderWidth() const;
 

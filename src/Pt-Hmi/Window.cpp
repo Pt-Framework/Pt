@@ -209,8 +209,17 @@ bool Window::isActive() const
 
 void Window::activate()
 {
+    if(_isActive)
+        return;
+
     if( _impl ) 
-        _impl->activate();     
+        _impl->activate();
+}
+
+
+void Window::onActivate(Window& child)
+{
+    windowManager().activate(child);
 }
 
 
@@ -241,6 +250,21 @@ void Window::update(const Gfx::RectF& updateRect)
     if(_impl) 
         _impl->update(updateRect);
 }
+
+
+void Window::onResize(Window& child, const Gfx::SizeF& from, const Gfx::SizeF& to)
+{
+    if(_impl)
+        _impl->onResize(child, from, to);
+}
+
+
+void Window::onMove(Window& child, const Gfx::PointF& from, const Gfx::PointF& to)
+{
+    if(_impl)
+        _impl->onMove(child, from, to);
+}
+
 
 
 void Window::onUpdate(Window& child, const Gfx::RectF& childRect)
@@ -486,22 +510,7 @@ void Window::onMoveEvent(const MoveEvent& ev)
 
 void Window::onActivateEvent(const ActivateEvent& ev)
 { 
-    //bool activeChange = _isActive != ev.isActive();
-
     _isActive = ev.isActive();
-
-    //if( ! _isActive )
-    //{
-    //    _windowManager.deactivate();  
-    //}
-    //else
-    //{
-    //   if( _parent )
-    //       _parent->processEvent(ActivateEvent(true));
-    //}   
-    //
-    //if(activeChange)
-    //    update();
 }
 
 
@@ -701,8 +710,8 @@ void Window::createImpl()
         Application::instance().mainScreen().registerWindow(*this);
     }
 
-    _impl->setPosition( _position );
-    _impl->setSize( _size );
+    _impl->move( _position, _position );
+    _impl->resize( _size, _size );
 //    _impl->setDecoration( _decoration );
     _impl->setTitle( _title );
     _impl->setBorder( _border );
@@ -715,7 +724,6 @@ void Window::createImpl()
 }
 
 
-// TODO: should this be changed so user calls update() himself?
 void Window::setVisible(bool b)
 {
     if(b == _visible)
@@ -735,16 +743,16 @@ const Gfx::SizeF& Window::size() const
     return _size;
 }
 
-// TODO: should this be changed so user calls update() himself?
-void Window::setSize( const Gfx::SizeF& s )
+
+void Window::resize(const Gfx::SizeF& s)
 {
+    Gfx::SizeF from = _size;
+
     _size = s;
     _surface.resize(s);
 
     if( _impl )
-        _impl->setSize(s);   
-        
-    // TODO: expand update rect?     
+        _impl->resize(from, _size);   
 }
 
 
@@ -753,15 +761,14 @@ const Gfx::PointF& Window::position() const
     return _position;
 }
 
-// TODO: should this be changed so user calls update() himself?
-void Window::setPosition( const Gfx::PointF& p)
-{
-    if( _impl )
-        _impl->setPosition(p);
 
+void Window::move(const Gfx::PointF& p)
+{
+    Gfx::PointF from = _position;
     _position = p;
 
-    // TODO: expand update rect? 
+    if( _impl )
+        _impl->move(from, p);
 }
 
 

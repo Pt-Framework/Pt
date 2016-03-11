@@ -12,8 +12,8 @@ namespace Demo{
 ChildW::ChildW(const std::string& title)
 {
     setTitle(title);
-    setPosition( Gfx::PointF(5,5) );
-    setSize( Gfx::SizeF(520, 380) );         
+    move( Gfx::PointF(5,5) );
+    resize( Gfx::SizeF(520, 380) );         
 
     //Text    
     _textLabel.setAutoSize(true);
@@ -89,8 +89,8 @@ ChildW::ChildW(const std::string& title)
     _mainWidget.update(); 
 
     //_childWindow2.setMainWidget(&_closeButton);          
-    _childWindow2.setPosition(Gfx::PointF(5,5));    
-    _childWindow2.setSize (Gfx::SizeF(240, 320));
+    _childWindow2.move(Gfx::PointF(5,5));    
+    _childWindow2.resize (Gfx::SizeF(240, 320));
     _childWindow2.setTitle("Child of " + title);    
 
     _childWindow2.setMainWidget(&_mainWidget);
@@ -107,8 +107,11 @@ ChildW::~ChildW()
 
 void ChildW::onShowDialog(Button& button)
 {
-    Dialog1 d;
-    d.runModal();
+    this->resize(Gfx::SizeF(200,200));
+    this->move(Gfx::PointF(0,0));
+
+    //Dialog1 d;
+    //d.runModal();
 }
 
 void ChildW::onCloseApp(Button& button)

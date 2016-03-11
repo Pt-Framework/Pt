@@ -50,6 +50,10 @@ class MainWindowImpl : public ChildWindowImpl
 
         virtual void activate();
 
+        void resize(const Gfx::SizeF& from, const Gfx::SizeF& to);
+
+        void move(const Gfx::PointF& from, const Gfx::PointF& to);
+
         virtual void update(const Gfx::RectF& updateRect);
 
         virtual void onUpdate(Window& child, const Gfx::RectF& childRect);
