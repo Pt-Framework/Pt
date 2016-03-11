@@ -139,9 +139,6 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         void update();
 
-        //bool isValid() const
-        //{ return _isValid; }
-
         void render(const Gfx::PointF& pos, 
                     PaintSurface& surface, 
                     const Gfx::RectF& updateRect);
@@ -314,7 +311,7 @@ class PT_HMI_API Widget : public Pt::Connectable
         Widget*                      _parent;    
         std::vector<Widget*>         _children;
         std::string                  _name;    
-        bool                         _isValid;
+        bool                         _isUpdating;
         bool                         _enabled;        
         bool                         _visible;
         Hmi::Cursor                  _cursor;

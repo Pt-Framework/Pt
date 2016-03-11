@@ -52,7 +52,7 @@ Widget::Widget()
 , _hasFocus( false)
 , _actionKey(Key::Space)
 , _geometry(10, 100, 10, 100)
-, _isValid(true)
+, _isUpdating(false)
 , _mnemonic(0)
 , _updateRect()
 {      
@@ -380,10 +380,10 @@ void Widget::update()
     // this means the parent must already be invalid or has just
     // been rendered. Therefore we stop the chain of update calls
     // towards the root of the widget/window tree.
-    if( ! _isValid )
+    if( _isUpdating )
         return;
 
-    _isValid = false; 
+    _isUpdating = true; 
    
     // the update area and window rect are already in parent coordinates
     _updateRect.unify(_geometry);
@@ -406,7 +406,7 @@ void Widget::onUpdate(const Gfx::RectF& rect)
     // this means the parent must already be invalid or has just
     // been rendered. Therefore we stop the chain of update calls
     // towards the root of the widget/window tree.
-    if( ! _isValid )
+    if( _isUpdating )
         return;
 
    // given rect in parent coordinates
@@ -436,23 +436,20 @@ void Widget::render(const Gfx::PointF& pos,
 {
     if( ! visible() )
     {
-        _isValid = true;
+        _isUpdating = false;
         return;
     }
 
-    if( ! _isValid )
+    if( _isUpdating )
         onLayout();
 
-    // TODO: if this works, update() in layouts is not needed and
-    //       _isValid flag is obsolete
-    //
-    //if( ! _updateRect.isNull() )
-    //    onLayout();
+    if( ! _updateRect.isNull() )
+        onLayout();
     
     onRender(pos, surface, updateRect);
     
     _updateRect.clear();
-    _isValid = true;
+    _isUpdating = false;
 }
 
 
