@@ -244,7 +244,7 @@ void Window::update()
 
 void Window::update(const Gfx::RectF& updateRect)
 {
-    _isValid = false;    
+    _isValid = false;
 
     // update rect in this window's client rect coordinates
     if(_impl) 
@@ -490,15 +490,15 @@ void Window::onResizeEvent(const ResizeEvent& ev)
     _state = ev.state();
     _surface.resize(_size);
 
-    if( _mainWidget )
-    {
-        _mainWidget->setSize(_size);
-        _mainWidget->update();
-    }
-    else
-    {
-        update();
-    }
+    //if( _mainWidget )
+    //{
+    //    _mainWidget->setSize(_size);
+    //    _mainWidget->update();
+    //}
+    //else
+    //{
+    //    update();
+    //}
 }
 
 
