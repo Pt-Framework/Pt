@@ -244,27 +244,24 @@ void Window::update()
 
 void Window::update(const Gfx::RectF& updateRect)
 {
+    if( _mainWidget )
+    {
+        _mainWidget->update(updateRect);
+        return;
+    }
+
+    onUpdate(updateRect);
+}
+
+
+void Window::onUpdate(const Gfx::RectF& updateRect)
+{
     _isValid = false;
 
     // update rect in this window's client rect coordinates
     if(_impl) 
         _impl->update(updateRect);
 }
-
-
-void Window::onResize(Window& child, const Gfx::SizeF& from, const Gfx::SizeF& to)
-{
-    if(_impl)
-        _impl->onResize(child, from, to);
-}
-
-
-void Window::onMove(Window& child, const Gfx::PointF& from, const Gfx::PointF& to)
-{
-    if(_impl)
-        _impl->onMove(child, from, to);
-}
-
 
 
 void Window::onUpdate(Window& child, const Gfx::RectF& childRect)
@@ -490,6 +487,9 @@ void Window::onResizeEvent(const ResizeEvent& ev)
     _state = ev.state();
     _surface.resize(_size);
 
+    if( _mainWidget )
+        _mainWidget->setSize(_size);
+
     //if( _mainWidget )
     //{
     //    _mainWidget->setSize(_size);
@@ -649,12 +649,6 @@ void Window::setEnabled( bool e )
 }
 
 
-bool Window::isVisible() const
-{
-    return _visible;
-}
-
-
 // TODO: are all windows updated correctly?
 void Window::add(Window& child)
 {
@@ -710,8 +704,8 @@ void Window::createImpl()
         Application::instance().mainScreen().registerWindow(*this);
     }
 
-    _impl->move( _position, _position );
-    _impl->resize( _size, _size );
+    _impl->move(_position);
+    _impl->resize(_size);
 //    _impl->setDecoration( _decoration );
     _impl->setTitle( _title );
     _impl->setBorder( _border );
@@ -724,6 +718,12 @@ void Window::createImpl()
 }
 
 
+bool Window::isVisible() const
+{
+    return _visible;
+}
+
+
 void Window::setVisible(bool b)
 {
     if(b == _visible)
@@ -731,7 +731,7 @@ void Window::setVisible(bool b)
     
     _visible = b;
 
-    if( ! _impl)
+    if( ! _impl )
         createImpl(); 
     else  
         _impl->setVisible(b);
@@ -746,13 +746,19 @@ const Gfx::SizeF& Window::size() const
 
 void Window::resize(const Gfx::SizeF& s)
 {
-    Gfx::SizeF from = _size;
+    if(_impl)
+        _impl->resize(s);
+    else
+    {
+        _size = s;
+        _surface.resize(s);
+    }  
+}
 
-    _size = s;
-    _surface.resize(s);
 
-    if( _impl )
-        _impl->resize(from, _size);   
+void Window::onResize(Window& child, const Gfx::SizeF& s)
+{
+    _windowManager.resizeWindow(child, s);
 }
 
 
@@ -764,11 +770,16 @@ const Gfx::PointF& Window::position() const
 
 void Window::move(const Gfx::PointF& p)
 {
-    Gfx::PointF from = _position;
-    _position = p;
-
     if( _impl )
-        _impl->move(from, p);
+        _impl->move(p);
+    else
+        _position = p;
+}
+
+
+void Window::onMove(Window& child, const Gfx::PointF& to)
+{
+    _windowManager.moveWindow(child, to);
 }
 
 

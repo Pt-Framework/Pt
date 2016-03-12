@@ -137,6 +137,8 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         void processEvent(const Pt::Event& ev);
 
+        void update(const Gfx::RectF& rect);
+
         void update();
 
         void render(const Gfx::PointF& pos, 

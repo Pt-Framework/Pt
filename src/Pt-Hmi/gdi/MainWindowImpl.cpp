@@ -377,9 +377,9 @@ void MainWindowImpl::onPaint()
 }
 
 
-void MainWindowImpl::move(const Gfx::PointF&, const Gfx::PointF& to)
+void MainWindowImpl::move(const Gfx::PointF& pos)
 {
-  Gfx::Point p = _screen.fromUnit(to);
+  Gfx::Point p = _screen.fromUnit(pos);
   SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, SWP_DRAWFRAME|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOZORDER);
 }
 
@@ -390,12 +390,12 @@ void MainWindowImpl::activate()
 }
 
 
-void MainWindowImpl::resize(const Gfx::SizeF&, const Gfx::SizeF& to)
+void MainWindowImpl::resize(const Gfx::SizeF& s)
 {
     if( _hwnd == 0)
         return;
 
-  Gfx::Size size = _screen.fromUnit(to);
+  Gfx::Size size = _screen.fromUnit(s);
 
   RECT clientRect;
   SetRect(&clientRect, 0, 0, size.width() - 1, size.height() - 1);
@@ -610,7 +610,7 @@ void MainWindowImpl::onUpdate(Window& child, const Gfx::RectF& childRect)
     double borderWidth = _apiWindow->windowManager().borderWidth();
     double titleHeight = _apiWindow->windowManager().titleHeight();
 
-    // from client rect coordinates to parent window client rect coordinates
+    // from child client rect coordinates to mainwindow client rect coordinates
     Gfx::PointF pos = child.position() + childRect.topLeft();
     pos.addX(borderWidth);
     pos.addY(borderWidth + titleHeight);

@@ -374,6 +374,38 @@ void Widget::processEvent(const Pt::Event& ev)
 }
 
 
+void Widget::update(const Gfx::RectF& rect)
+{
+    // The widget is already invalid in case of a nested update()
+    // this means the parent must already be invalid or has just
+    // been rendered. Therefore we stop the chain of update calls
+    // towards the root of the widget/window tree.
+    if( _isUpdating )
+        return;
+
+    // to parent client rect coordinates
+    Gfx::PointF updatePos = rect.topLeft() - position();
+    Gfx::RectF updateRect(updatePos, rect.size());
+
+    // the update area and window rect are already in parent coordinates
+    _updateRect.unify(updateRect);
+
+    if( parent() )
+    {
+        _isUpdating = true; 
+        parent()->onUpdate(_updateRect);
+    }
+    else
+    {
+        if(_window)
+        {
+            _isUpdating = true; 
+            _window->onUpdate(_updateRect);
+        }
+    }
+}
+
+
 void Widget::update()
 {
     // The widget is already invalid in case of a nested update()
@@ -383,19 +415,21 @@ void Widget::update()
     if( _isUpdating )
         return;
 
-    _isUpdating = true; 
-   
     // the update area and window rect are already in parent coordinates
     _updateRect.unify(_geometry);
 
     if( parent() )
     {
+        _isUpdating = true; 
         parent()->onUpdate(_updateRect);
     }
     else
     {
         if(_window)
-            _window->update(_updateRect);
+        {
+            _isUpdating = true; 
+            _window->onUpdate(_updateRect);
+        }
     }
 }
 
@@ -425,7 +459,7 @@ void Widget::onUpdate(const Gfx::RectF& rect)
     {
         // update rect in parent window client rect coordinates
         if(_window)
-            _window->update(updateRect);
+            _window->onUpdate(updateRect);
     }
 }
 

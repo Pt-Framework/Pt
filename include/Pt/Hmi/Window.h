@@ -101,6 +101,14 @@ class PT_HMI_API Window : public Pt::Connectable
 
     void activate();
 
+    const Gfx::SizeF& size() const;
+
+    void resize( const Gfx::SizeF& s );
+
+    const Gfx::PointF& position() const;
+
+    void move(const Gfx::PointF& p);
+
     // TODO: return new focusWidget() and remove focusWidget()
     void focusNext();
     
@@ -118,8 +126,10 @@ class PT_HMI_API Window : public Pt::Connectable
 
     PixmapSurface& surface();
 
+    // TODO: remove this only needed by WindowManager::activeWindow
     WindowManager& windowManager();
 
+    // TODO: remove this only needed by WindowManager::activeWindow
     const WindowManager& windowManager() const;
 
     WindowImpl* impl();
@@ -191,14 +201,6 @@ class PT_HMI_API Window : public Pt::Connectable
 
     void setVisible( bool b );
 
-    const Gfx::SizeF& size() const;
-
-    void resize( const Gfx::SizeF& s );
-
-    const Gfx::PointF& position() const;
-
-    void move(const Gfx::PointF& p);
-
     const Gfx::Font& font() const;
 
     void setFont(const Gfx::Font& ft);
@@ -214,13 +216,15 @@ class PT_HMI_API Window : public Pt::Connectable
   private:
     void createImpl();
 
+    void onUpdate(const Gfx::RectF& rect);
+
     void onUpdate(Window& child, const Gfx::RectF& childRect);
 
     void onActivate(Window& child);
 
-    void onResize(Window& child, const Gfx::SizeF& from, const Gfx::SizeF& to);
+    void onResize(Window& child, const Gfx::SizeF& size);
 
-    void onMove(Window& child, const Gfx::PointF& from, const Gfx::PointF& to);
+    void onMove(Window& child, const Gfx::PointF& pos);
 
     void addWidget(Widget& w);
 

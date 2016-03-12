@@ -101,22 +101,22 @@ void ChildWindowImpl::activate()
 }
 
 
-void ChildWindowImpl::resize(const Gfx::SizeF& oldSize, const Gfx::SizeF& size)
+void ChildWindowImpl::resize(const Gfx::SizeF& size)
 {
     Window* parent = _apiWindow->parent();
     if( parent )
     {
-        parent->onResize(*_apiWindow, oldSize, size);	
+        parent->onResize(*_apiWindow, size);	
     }
 }
 
 
-void ChildWindowImpl::move(const Gfx::PointF& from, const Gfx::PointF& to)
+void ChildWindowImpl::move(const Gfx::PointF& to)
 {
     Window* parent = _apiWindow->parent();
     if( parent )
     {
-        parent->onMove(*_apiWindow, from, to);	
+        parent->onMove(*_apiWindow, to);	
     }
 }
 

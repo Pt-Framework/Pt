@@ -55,15 +55,15 @@ void MainWindowImpl::activate()
 }
 
 
-void MainWindowImpl::resize(const Gfx::SizeF& from, const Gfx::SizeF& to)
+void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
-    Application::instance().mainScreen().impl()->windowManager().resize(*_apiWindow, from, to);
+    Application::instance().mainScreen().impl()->windowManager().resizeWindow(*_apiWindow, size);
 }
 
 
-void MainWindowImpl::move(const Gfx::PointF& from, const Gfx::PointF& to)
+void MainWindowImpl::move(const Gfx::PointF& pos)
 {
-    Application::instance().mainScreen().impl()->windowManager().move(*_apiWindow, from, to);
+    Application::instance().mainScreen().impl()->windowManager().moveWindow(*_apiWindow, pos);
 }
 
 

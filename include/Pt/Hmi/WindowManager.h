@@ -73,9 +73,9 @@ class WindowManager : public Pt::Connectable
         // TODO: Window::activate() should be public
         void activate(Window& w);
 
-        void move(Window& w, const Gfx::PointF& from, const Gfx::PointF& to);
+        void moveWindow(Window& w, const Gfx::PointF& pos);
 
-        void resize(Window& w, const Gfx::SizeF& from, const Gfx::SizeF& to);
+        void resizeWindow(Window& w, const Gfx::SizeF& size);
 
         void deactivate();
 

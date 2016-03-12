@@ -107,8 +107,11 @@ ChildW::~ChildW()
 
 void ChildW::onShowDialog(Button& button)
 {
-    this->resize(Gfx::SizeF(200,200));
-    this->move(Gfx::PointF(0,0));
+    Gfx::SizeF size(400,260);
+    _childWindow2.resize(Gfx::SizeF(400,260));
+
+    Gfx::PointF pos(0,0);
+    _childWindow2.move(pos);
 
     //Dialog1 d;
     //d.runModal();

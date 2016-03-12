@@ -59,17 +59,9 @@ class WindowImpl : public Pt::Connectable
 
         virtual void onUpdate(Window& child, const Gfx::RectF& childRect) = 0;
 
-        void onResize(Window& child,
-                      const Gfx::SizeF& oldSize, 
-                      const Gfx::SizeF& size);
-
-        void onMove(Window& child, 
-                    const Gfx::PointF& oldPos, 
-                    const Gfx::PointF& pos);
-
-        virtual void move(const Gfx::PointF& from, const Gfx::PointF& to) = 0;
+        virtual void move(const Gfx::PointF& pos) = 0;
    
-        virtual void resize(const Gfx::SizeF& from, const Gfx::SizeF& to) = 0;
+        virtual void resize(const Gfx::SizeF& size) = 0;
 
         virtual void setState(WindowState::Type s) = 0;
 
@@ -81,7 +73,7 @@ class WindowImpl : public Pt::Connectable
 
         virtual void setMinimumSize( const Gfx::SizeF& s ) = 0;
 
-          virtual void setMaximumSize( const Gfx::SizeF& s ) = 0;
+        virtual void setMaximumSize( const Gfx::SizeF& s ) = 0;
 
         virtual void setDecoration( WindowDecoration::Flags d ) = 0;
 

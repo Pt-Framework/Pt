@@ -622,42 +622,14 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
     const double dX = mev.x() - _lastPointerPosition.x();
     const double dY = mev.y() - _lastPointerPosition.y();
 
-    Gfx::PointF from = _managedWindow->position();
+    //Gfx::PointF from = _managedWindow->position();
 
     Gfx::PointF to( _managedWindow->position().x() + dX, 
                     _managedWindow->position().y() + dY) ;     
- 
-    _managedWindow->processEvent( MoveEvent(to) );
 
-    move(*_managedWindow, from, to);
+    moveWindow(*_managedWindow, to);
     
     return true;
-}
-
-
-void WindowManager::move(Window& w, const Gfx::PointF& from, const Gfx::PointF& to)
-{
-    const double borderWidth = Application::instance().windowBorderWidth();
-    const double titleHeight = Application::instance().windowTitleHeight();
-
-    Gfx::RectF updateRect( from,
-                           w.size() );   
-    
-    Gfx::RectF movedRect( to, 
-                          w.size() );
-
-    updateRect.unify(movedRect);      
-    
-    Gfx::SizeF frameSize = updateRect.size();
-    frameSize.addHeight(2 * borderWidth + titleHeight);
-    frameSize.addWidth(2 * borderWidth);
-
-    updateRect.setSize(frameSize);   
-        
-    if(_container)             
-        _container->update(updateRect);
-    else
-        _app.mainScreen().update(updateRect);
 }
 
 
@@ -764,59 +736,54 @@ bool WindowManager::onWindowResize(const MouseEvent& mev)
     if( height > _managedWindow->maximumSize().height() )
         size.setHeight( _managedWindow->maximumSize().height() );
 
-    const double borderWidth  = Application::instance().windowBorderWidth();
-    const double titleHeight  = Application::instance().windowTitleHeight();
-    
-    Gfx::RectF updateRect( _managedWindow->position(), 
-                           _managedWindow->size() );
-
     if( _managedWindow->position() != pos )
     {
-        MoveEvent mev(pos);
-        _managedWindow->processEvent(mev);    
+        moveWindow(*_managedWindow, pos);    
     }
 
     if( _managedWindow->size() != size )
     {
-        ResizeEvent rev(size);
-        _managedWindow->processEvent(rev);
+        resizeWindow(*_managedWindow, size);
     }
-
-    Gfx::RectF resizedRect( _managedWindow->position(),  
-                            _managedWindow->size() );
-
-    updateRect.unify(resizedRect); 
-
-    Gfx::PointF framePos( updateRect.topLeft() - _managedWindow->position() );
-    framePos.subX( borderWidth );
-    framePos.subY( borderWidth +  titleHeight );
-
-    Gfx::SizeF frameSize = updateRect.size();
-    frameSize.addHeight(2 * borderWidth + titleHeight);
-    frameSize.addWidth(2 * borderWidth);
-
-    updateRect.set(framePos, frameSize);
-
-    // TODO: avoid second update after processing resize event
-    _managedWindow->update( updateRect );
 
     return true;
 }
 
-void WindowManager::resize(Window& w, const Gfx::SizeF& from, const Gfx::SizeF& to)
+
+void WindowManager::moveWindow(Window& w, const Gfx::PointF& to)
+{
+    const double borderWidth = Application::instance().windowBorderWidth();
+    const double titleHeight = Application::instance().windowTitleHeight();
+
+    Gfx::RectF updateRect( w.position(), w.size() );   
+    Gfx::RectF movedRect( to, w.size() );
+    updateRect.unify(movedRect); 
+    
+    w.processEvent( MoveEvent(to) );
+    
+    Gfx::SizeF frameSize = updateRect.size();
+    frameSize.addHeight(2 * borderWidth + titleHeight);
+    frameSize.addWidth(2 * borderWidth);
+
+    updateRect.setSize(frameSize);   
+        
+    if(_container)             
+        _container->update(updateRect);
+    else
+        _app.mainScreen().update(updateRect);
+}
+
+
+void WindowManager::resizeWindow(Window& w, const Gfx::SizeF& to)
 {
     const double borderWidth  = Application::instance().windowBorderWidth();
     const double titleHeight  = Application::instance().windowTitleHeight();
     
-    Gfx::RectF updateRect( w.position(), 
-                           from );
-
-    Gfx::RectF resizedRect( w.position(),  
-                            to );
-
+    Gfx::RectF updateRect(w.position(), w.size());
+    Gfx::RectF resizedRect(w.position(), to);
     updateRect.unify(resizedRect); 
 
-    Gfx::PointF framePos( updateRect.topLeft() - w.position() );
+    Gfx::PointF framePos = updateRect.topLeft() - w.position();
     framePos.subX( borderWidth );
     framePos.subY( borderWidth +  titleHeight );
 
@@ -826,7 +793,9 @@ void WindowManager::resize(Window& w, const Gfx::SizeF& from, const Gfx::SizeF& 
 
     updateRect.set(framePos, frameSize);
 
-    // TODO: avoid second update after processing resize event
+    ResizeEvent rev(to);
+    w.processEvent(rev);
+
     w.update( updateRect );
 }
 
