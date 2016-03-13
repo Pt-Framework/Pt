@@ -47,7 +47,7 @@ class MainWindowImpl : public WindowImpl
 
         virtual ~MainWindowImpl();
     
-        virtual void setVisible( bool v);
+        virtual void show(bool v);
     
         virtual void activate();
 

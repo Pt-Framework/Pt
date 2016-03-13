@@ -96,7 +96,7 @@ ChildW::ChildW(const std::string& title)
     _childWindow2.setMainWidget(&_mainWidget);
     
     add( _childWindow2 );
-    _childWindow2.setVisible(true); // Child A/B
+    _childWindow2.show(true); // Child A/B
 }
 
 

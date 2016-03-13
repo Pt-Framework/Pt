@@ -776,16 +776,16 @@ void WindowManager::moveWindow(Window& w, const Gfx::PointF& to)
 
 void WindowManager::resizeWindow(Window& w, const Gfx::SizeF& to)
 {
-    const double borderWidth  = Application::instance().windowBorderWidth();
-    const double titleHeight  = Application::instance().windowTitleHeight();
+    const double borderWidth = Application::instance().windowBorderWidth();
+    const double titleHeight = Application::instance().windowTitleHeight();
     
     Gfx::RectF updateRect(w.position(), w.size());
     Gfx::RectF resizedRect(w.position(), to);
     updateRect.unify(resizedRect); 
 
     Gfx::PointF framePos = updateRect.topLeft() - w.position();
-    framePos.subX( borderWidth );
-    framePos.subY( borderWidth +  titleHeight );
+    framePos.subX(borderWidth);
+    framePos.subY(borderWidth +  titleHeight);
 
     Gfx::SizeF frameSize = updateRect.size();
     frameSize.addHeight(2 * borderWidth + titleHeight);
@@ -797,6 +797,24 @@ void WindowManager::resizeWindow(Window& w, const Gfx::SizeF& to)
     w.processEvent(rev);
 
     w.update( updateRect );
+}
+
+
+void WindowManager::showWindow(Window& w, bool b)
+{
+    const double borderWidth = Application::instance().windowBorderWidth();
+    const double titleHeight = Application::instance().windowTitleHeight();
+
+    Gfx::PointF framePos = w.position() - w.position();
+    framePos.subX(borderWidth);
+    framePos.subY(borderWidth +  titleHeight);
+
+    Gfx::SizeF frameSize = w.size();
+    frameSize.addHeight(2 * borderWidth + titleHeight);
+    frameSize.addWidth(2 * borderWidth);
+
+    Gfx::RectF updateRect(framePos, frameSize);
+    w.update(updateRect);
 }
 
 } // namespace

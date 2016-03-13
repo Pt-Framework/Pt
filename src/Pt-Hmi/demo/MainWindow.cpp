@@ -39,9 +39,11 @@
 #include <sstream>
 #include <fstream>
 
-namespace Pt{
-namespace Hmi{
-namespace Demo{
+namespace Pt {
+
+namespace Hmi {
+
+namespace Demo {
 
 MainWindow::MainWindow()
 : _child1("Child 1")
@@ -49,25 +51,22 @@ MainWindow::MainWindow()
     move(  Gfx::PointF(60, 30) );
     resize( Gfx::SizeF(600, 430) );
     setTitle("Main 1");
-    setVisible( true );  // MainWindow
+    show( true );  // MainWindow
     
     _child1.move( Gfx::PointF(10, 10) );
     add( _child1 );
     
-    _child1.setVisible(true); // Child 1
+    _child1.show(true); // Child 1
 }
+
 
 MainWindow::~MainWindow()
 {
 }
 
 
-void MainWindow::show()
-{    
-  //setVisible( true );   
-  //_child1.setVisible( true );
+} // namespace
 
-}
+} // namespace
 
-
-}}}
+} // namespace

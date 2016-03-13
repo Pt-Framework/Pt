@@ -52,16 +52,6 @@ void ChildWindowImpl::close()
 }
 
 
-void ChildWindowImpl::setVisible(bool visible)
-{
-    if(visible) 
-        activate();
-
-    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
-    update(rect);
-}
-
-
 void ChildWindowImpl::update(const Gfx::RectF& updateRect)
 {
     if( ! _apiWindow->parent() )
@@ -96,7 +86,18 @@ void ChildWindowImpl::activate()
 
     if( parent )
     {
-        parent->onActivate( *_apiWindow );	
+        parent->onActivate(*_apiWindow);	
+    }
+}
+
+
+void ChildWindowImpl::show(bool visible)
+{
+    Window* parent = _apiWindow->parent();
+
+    if( parent )
+    {
+        parent->onShow(*_apiWindow, visible);	
     }
 }
 

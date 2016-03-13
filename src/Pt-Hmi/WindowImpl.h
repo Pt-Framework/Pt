@@ -51,7 +51,7 @@ class WindowImpl : public Pt::Connectable
         
         virtual ~WindowImpl();
 
-        virtual void setVisible(bool b) = 0;
+        virtual void show(bool b) = 0;
 
         virtual void activate() = 0;
 

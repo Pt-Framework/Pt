@@ -43,7 +43,7 @@ class PT_HMI_API ChildWindowImpl  : public WindowImpl
 
         virtual ~ChildWindowImpl();    
 
-        virtual void setVisible( bool v);
+        virtual void show( bool v);
 	
         virtual void activate();
        

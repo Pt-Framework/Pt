@@ -199,7 +199,7 @@ class PT_HMI_API Window : public Pt::Connectable
 
     bool isVisible() const;
 
-    void setVisible( bool b );
+    void show(bool b = true);
 
     const Gfx::Font& font() const;
 
@@ -221,6 +221,8 @@ class PT_HMI_API Window : public Pt::Connectable
     void onUpdate(Window& child, const Gfx::RectF& childRect);
 
     void onActivate(Window& child);
+
+    void onShow(Window& child, bool b);
 
     void onResize(Window& child, const Gfx::SizeF& size);
 

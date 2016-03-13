@@ -84,7 +84,7 @@ void MainWindowImpl::destroy()
 }
 
 
-void MainWindowImpl::setVisible( bool v)
+void MainWindowImpl::show( bool v)
 {
    if( v )
        ShowWindow(_hwnd, SW_SHOW);

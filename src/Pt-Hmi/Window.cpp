@@ -353,7 +353,7 @@ void Window::runModal()
     }
 
     setEnabled(true);
-    setVisible(true);
+    show(true);
 
     while( ! isClosed() )
     {
@@ -714,7 +714,7 @@ void Window::createImpl()
     _impl->setIcon(_icon);
     _impl->setEnabled( _enabled );
     _impl->setState( _state );
-    _impl->setVisible( _visible);
+    _impl->show(_visible);
 }
 
 
@@ -724,17 +724,24 @@ bool Window::isVisible() const
 }
 
 
-void Window::setVisible(bool b)
+void Window::show(bool b)
 {
     if(b == _visible)
         return;
-    
+
+    // TODO: use an event for this?
     _visible = b;
 
     if( ! _impl )
-        createImpl(); 
+        createImpl(); // also calls setVisible
     else  
-        _impl->setVisible(b);
+        _impl->show(b);
+}
+
+
+void Window::onShow(Window& child, bool b)
+{
+    _windowManager.showWindow(child, b);
 }
 
 
