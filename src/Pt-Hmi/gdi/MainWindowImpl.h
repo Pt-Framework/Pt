@@ -65,7 +65,7 @@ class MainWindowImpl : public WindowImpl
        
         virtual void setIcon(const Gfx::Image& p);
     
-        virtual void setEnabled(bool e);    
+        virtual void enable(bool e);    
     
         virtual void setMinimumSize(const Gfx::SizeF& s);
     

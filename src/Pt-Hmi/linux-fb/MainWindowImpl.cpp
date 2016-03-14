@@ -61,6 +61,12 @@ void MainWindowImpl::show(bool b)
 }
 
 
+void MainWindowImpl::enable(bool b)
+{
+    Application::instance().mainScreen().impl()->windowManager().enableWindow(*_apiWindow, b);
+}
+
+
 void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
     Application::instance().mainScreen().impl()->windowManager().resizeWindow(*_apiWindow, size);

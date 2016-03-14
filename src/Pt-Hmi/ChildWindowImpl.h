@@ -44,6 +44,8 @@ class PT_HMI_API ChildWindowImpl  : public WindowImpl
         virtual ~ChildWindowImpl();    
 
         virtual void show( bool v);
+
+        virtual void enable(bool e);	
 	
         virtual void activate();
        
@@ -60,8 +62,6 @@ class PT_HMI_API ChildWindowImpl  : public WindowImpl
         virtual void setBorder(WindowBorder::Type p);
        
         virtual void setIcon(const Gfx::Image& p);
-    
-        virtual void setEnabled(bool e);	
     
         virtual void setMinimumSize(const Gfx::SizeF& s);
 	

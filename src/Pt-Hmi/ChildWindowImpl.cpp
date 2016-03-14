@@ -122,6 +122,30 @@ void ChildWindowImpl::move(const Gfx::PointF& to)
 }
 
 
+void ChildWindowImpl::enable(bool e)
+{
+    Window* parent = _apiWindow->parent();
+    if( parent )
+    {
+        parent->onEnable(*_apiWindow, e);	
+    }
+}
+
+
+void ChildWindowImpl::setMinimumSize(const Gfx::SizeF& s)
+{
+    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
+    update(rect);
+}
+
+
+void ChildWindowImpl::setMaximumSize(const Gfx::SizeF& s)
+{
+    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
+    update(rect);
+}
+
+
 void ChildWindowImpl::setState(WindowState::Type p)
 {
     Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
@@ -137,27 +161,6 @@ void ChildWindowImpl::setBorder(WindowBorder::Type p)
 
 
 void ChildWindowImpl::setIcon(const Gfx::Image& p)
-{
-    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
-    update(rect);
-}
-
-
-void ChildWindowImpl::setEnabled(bool e)
-{
-    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
-    update(rect);
-}
-
-
-void ChildWindowImpl::setMinimumSize(const Gfx::SizeF& s)
-{
-    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
-    update(rect);
-}
-
-
-void ChildWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 {
     Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
     update(rect);

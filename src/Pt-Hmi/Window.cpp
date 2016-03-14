@@ -331,6 +331,7 @@ WindowImpl* Window::impl()
     return _impl;   
 }
 
+
 void Window::runModal()
 {
     const std::vector<Window*>& windows = Application::instance().mainScreen().windows();
@@ -348,11 +349,11 @@ void Window::runModal()
                 activeWindow = w;
 
             states[w] = w->isEnabled();
-            w->setEnabled(false);
+            w->enable(false);
         }
     }
 
-    setEnabled(true);
+    enable(true);
     show(true);
 
     while( ! isClosed() )
@@ -372,7 +373,7 @@ void Window::runModal()
                 
         std::map<Window*, bool>::iterator  mapIt = states.find(w);
         if( mapIt != states.end() )
-            mapIt->first->setEnabled( mapIt->second );
+            mapIt->first->enable( mapIt->second );
     }
 }
 
@@ -389,7 +390,7 @@ void Window::onPointerEvent(const MouseEvent& ev)
         return;
 
     if( ! _mainWidget || 
-        ! _mainWidget->visible() || 
+        ! _mainWidget->isVisible() || 
         ! _mainWidget->isEnabled() )
     {
         Application::instance().mainScreen().setCursor( &Cursor::defaultCursor() ); 
@@ -489,16 +490,6 @@ void Window::onResizeEvent(const ResizeEvent& ev)
 
     if( _mainWidget )
         _mainWidget->setSize(_size);
-
-    //if( _mainWidget )
-    //{
-    //    _mainWidget->setSize(_size);
-    //    _mainWidget->update();
-    //}
-    //else
-    //{
-    //    update();
-    //}
 }
 
 
@@ -634,21 +625,6 @@ void Window::setTitle( const std::string& t )
 }
 
 
-bool Window::isEnabled() const
-{
-    return _enabled;
-}
-
-
-void Window::setEnabled( bool e )
-{
-    if( _impl )
-        _impl->setEnabled(e);
-
-    _enabled = e;
-}
-
-
 // TODO: are all windows updated correctly?
 void Window::add(Window& child)
 {
@@ -712,7 +688,7 @@ void Window::createImpl()
     _impl->setMaximumSize( _minimumSize);
     _impl->setMaximumSize( _maximumSize );
     _impl->setIcon(_icon);
-    _impl->setEnabled( _enabled );
+    _impl->enable( _enabled );
     _impl->setState( _state );
     _impl->show(_visible);
 }
@@ -742,6 +718,27 @@ void Window::show(bool b)
 void Window::onShow(Window& child, bool b)
 {
     _windowManager.showWindow(child, b);
+}
+
+
+bool Window::isEnabled() const
+{
+    return _enabled;
+}
+
+
+void Window::enable(bool e)
+{
+    _enabled = e;
+
+    if( _impl )
+        _impl->enable(e);
+}
+
+
+void Window::onEnable(Window& child, bool enable)
+{
+    windowManager().enableWindow(child, enable);
 }
 
 
@@ -1006,8 +1003,6 @@ void Window::setFocusIndex(Widget& , size_t)
 {
     std::sort(_focusList.begin(), _focusList.end(), &lowerFocusIndex);
 }
-
-
 
 } // namespace
 

@@ -69,7 +69,7 @@ class WindowImpl : public Pt::Connectable
 
         virtual void setIcon( const Gfx::Image& i ) = 0;
 
-        virtual void setEnabled( bool e ) = 0;
+        virtual void enable( bool e ) = 0;
 
         virtual void setMinimumSize( const Gfx::SizeF& s ) = 0;
 

@@ -165,7 +165,7 @@ Widget* Widget::findWidget( const Gfx::PointF& pos )
 {
     std::vector<Widget*>::reverse_iterator it = _children.rbegin();
 
-    if( ! visible() || ! isEnabled() )
+    if( ! isVisible() || ! isEnabled() )
         return 0;
 
     for( ; it != _children.rend(); ++it )
@@ -468,7 +468,7 @@ void Widget::render(const Gfx::PointF& pos,
                     PaintSurface& surface, 
                     const Gfx::RectF& updateRect)
 {
-    if( ! visible() )
+    if( ! isVisible() )
     {
         _isUpdating = false;
         return;

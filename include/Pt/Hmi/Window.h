@@ -109,6 +109,14 @@ class PT_HMI_API Window : public Pt::Connectable
 
     void move(const Gfx::PointF& p);
 
+    bool isVisible() const;
+
+    void show(bool b = true);
+
+    bool isEnabled() const;
+
+    void enable(bool e);
+
     // TODO: return new focusWidget() and remove focusWidget()
     void focusNext();
     
@@ -193,14 +201,6 @@ class PT_HMI_API Window : public Pt::Connectable
 
     void setTitle( const std::string& t );
 
-    bool isEnabled() const;
-
-    void setEnabled( bool e );
-
-    bool isVisible() const;
-
-    void show(bool b = true);
-
     const Gfx::Font& font() const;
 
     void setFont(const Gfx::Font& ft);
@@ -221,6 +221,8 @@ class PT_HMI_API Window : public Pt::Connectable
     void onUpdate(Window& child, const Gfx::RectF& childRect);
 
     void onActivate(Window& child);
+
+    void onEnable(Window& child, bool enable);
 
     void onShow(Window& child, bool b);
 

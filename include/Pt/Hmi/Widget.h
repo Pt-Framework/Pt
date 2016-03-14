@@ -208,7 +208,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         void setVisible( bool b );
 
-        bool visible() const
+        bool isVisible() const
         {
           return _visible;
         }

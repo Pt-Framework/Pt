@@ -52,6 +52,8 @@ class MainWindowImpl : public ChildWindowImpl
 
         virtual void show(bool b);
 
+        virtual void enable(bool b);
+
         virtual void resize(const Gfx::SizeF& size);
 
         virtual void move(const Gfx::PointF& pos);

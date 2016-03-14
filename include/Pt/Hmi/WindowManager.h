@@ -75,6 +75,8 @@ class WindowManager : public Pt::Connectable
 
         void showWindow(Window& w, bool b);
 
+        void enableWindow(Window& w, bool b);
+
         void moveWindow(Window& w, const Gfx::PointF& pos);
 
         void resizeWindow(Window& w, const Gfx::SizeF& size);

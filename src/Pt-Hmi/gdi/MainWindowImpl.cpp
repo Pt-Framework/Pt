@@ -379,14 +379,20 @@ void MainWindowImpl::onPaint()
 
 void MainWindowImpl::move(const Gfx::PointF& pos)
 {
-  Gfx::Point p = _screen.fromUnit(pos);
-  SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, SWP_DRAWFRAME|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOZORDER);
+    Gfx::Point p = _screen.fromUnit(pos);
+    SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, SWP_DRAWFRAME|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOZORDER);
 }
 
 
 void MainWindowImpl::activate()
 {
-  SetActiveWindow( _hwnd );
+    SetActiveWindow( _hwnd );
+}
+
+
+void MainWindowImpl::enable(bool e)
+{
+    EnableWindow(_hwnd, e);
 }
 
 
@@ -395,19 +401,19 @@ void MainWindowImpl::resize(const Gfx::SizeF& s)
     if( _hwnd == 0)
         return;
 
-  Gfx::Size size = _screen.fromUnit(s);
+    Gfx::Size size = _screen.fromUnit(s);
 
-  RECT clientRect;
-  SetRect(&clientRect, 0, 0, size.width() - 1, size.height() - 1);
+    RECT clientRect;
+    SetRect(&clientRect, 0, 0, size.width() - 1, size.height() - 1);
 
-  LONG style = GetWindowLong(_hwnd, GWL_STYLE);
-    LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
+    LONG style = GetWindowLong(_hwnd, GWL_STYLE);
+      LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
-  AdjustWindowRectEx(&clientRect, style, false, exStyle);
+    AdjustWindowRectEx(&clientRect, style, false, exStyle);
     
-  LONG clientWidth  = clientRect.right  - clientRect.left + 1;
-  LONG clientHeight = clientRect.bottom - clientRect.top  + 1;
-  SetWindowPos(_hwnd, NULL, 0, 0, clientWidth, clientHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+    LONG clientWidth  = clientRect.right  - clientRect.left + 1;
+    LONG clientHeight = clientRect.bottom - clientRect.top  + 1;
+    SetWindowPos(_hwnd, NULL, 0, 0, clientWidth, clientHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
 
@@ -418,6 +424,7 @@ void MainWindowImpl::setDecoration( WindowDecoration::Flags deco )
     setShowMaximizeButton( (deco & WindowDecoration::Flags::ShowMaximizeButton) != 0);
     setShowSystemMenu( (deco & WindowDecoration::Flags::ShowIcon) != 0);
 }
+
 
 void MainWindowImpl::setShowTitle(bool p)
 {
@@ -554,15 +561,11 @@ void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
 {
     
 }
-    
+
+
 void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 {
     
-}
-
-void MainWindowImpl::setEnabled(bool e)
-{
-    EnableWindow(_hwnd, e);
 }
 
 

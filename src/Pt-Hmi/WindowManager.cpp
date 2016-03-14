@@ -249,10 +249,17 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
 
 Gfx::PointF WindowManager::renderFrame(const Window& w, PaintSurface& surface)
 {    
-    const Gfx::SizeF clientSize =  w.size();
-    const Gfx::SizeF winSize( clientSize.width()  + _app.windowBorderWidth()*2,  
-                              clientSize.height() + _app.windowBorderWidth()*2 + _app.windowTitleHeight());    
-    Gfx::Color color = w.isActive() ? _activeColor : _inactiveColor;  
+    const double borderWidth = Application::instance().windowBorderWidth();
+    const double titleHeight = Application::instance().windowTitleHeight();
+
+    Gfx::SizeF clientSize =  w.size();   
+    
+    Gfx::SizeF winSize = w.size();
+    winSize.addWidth(borderWidth * 2);
+    winSize.addHeight(borderWidth * 2 + titleHeight);
+
+    Gfx::Color color = w.isActive() || w.isEnabled() ? _activeColor 
+                                                     : _inactiveColor;  
 
     Painter painter(surface);
     Gfx::PointF pos( w.position().x(), w.position().y() );
@@ -801,6 +808,24 @@ void WindowManager::resizeWindow(Window& w, const Gfx::SizeF& to)
 
 
 void WindowManager::showWindow(Window& w, bool b)
+{
+    const double borderWidth = Application::instance().windowBorderWidth();
+    const double titleHeight = Application::instance().windowTitleHeight();
+
+    Gfx::PointF framePos = w.position() - w.position();
+    framePos.subX(borderWidth);
+    framePos.subY(borderWidth +  titleHeight);
+
+    Gfx::SizeF frameSize = w.size();
+    frameSize.addHeight(2 * borderWidth + titleHeight);
+    frameSize.addWidth(2 * borderWidth);
+
+    Gfx::RectF updateRect(framePos, frameSize);
+    w.update(updateRect);
+}
+
+
+void WindowManager::enableWindow(Window& w, bool b)
 {
     const double borderWidth = Application::instance().windowBorderWidth();
     const double titleHeight = Application::instance().windowTitleHeight();
