@@ -904,16 +904,36 @@ if $(GUI:L) = "symbian-eikon"
 
 if --with-egl-gbm in $(ARGV)
 {
-    GUI = egl-gbm ;
-    GUILIBS = -lGLESv2 -ldrm -lEGL -lgbm ;
-	
-	LINARO_RPATH = [ FDirName $(LINARO_ARM_GNUABIHF_2013_11_R1:J=" ") arm-linux-gnueabihf lib ] ;
-	LINKFLAGS += -Wl,-rpath-link,\"$(LINARO_RPATH)\" ;
+    #GUI = egl-gbm ;
 
-	LINARO_RPATH2 = [ FDirName $(LINARO_ARM_GNUABIHF_2013_11_R1:J=" ") arm-linux-gnueabihf lib arm-linux-gnueabihf ] ;
-    LINKFLAGS += -Wl,-rpath-link,\"$(LINARO_RPATH2)\" ;
-    Configure LINKFLAGS ;
+	WITH_EGL_TEST = 1 ;
+	Configure WITH_EGL_TEST ;
 
+	if $(TARGET_OS:L) = nt
+	{
+		GUI_INCLUDES = \"C:\\Temp\\Dev\\ilma\\Pt EGL\\GLES_SDK_v31\\include\" ;
+		GUI_INCLUDES = $(GUI_INCLUDES:J=" ") ;
+		Configure GUI_INCLUDES ;
+
+		EGL_LINKFLAGS = /LIBPATH:\"C:\\Temp\\Dev\\ilma\\Pt EGL\\GLES_SDK_v31\\x86\" ;
+		LINKFLAGS += $(EGL_LINKFLAGS:J=" ") ;
+		Configure GUI_INCLUDES ;
+
+		GUILIBS = libGLESv2.lib libEGL.lib gdi32.lib user32.lib ;
+		Configure GUILIBS ;
+	}
+	else
+	{
+		GUILIBS = -lGLESv2 -ldrm -lEGL -lgbm ;
+		Configure GUILIBS ;
+
+		LINARO_RPATH = [ FDirName $(LINARO_ARM_GNUABIHF_2013_11_R1:J=" ") arm-linux-gnueabihf lib ] ;
+		LINKFLAGS += -Wl,-rpath-link,\"$(LINARO_RPATH)\" ;
+
+		LINARO_RPATH2 = [ FDirName $(LINARO_ARM_GNUABIHF_2013_11_R1:J=" ") arm-linux-gnueabihf lib arm-linux-gnueabihf ] ;
+		LINKFLAGS += -Wl,-rpath-link,\"$(LINARO_RPATH2)\" ;
+		Configure LINKFLAGS ;
+	}
     #GUI_INCLUDES = [ FDirName $(LINARO_ARM_GNUABIHF_2013_11_R1:J=" ") arm-linux-gnueabihf libc usr include libdrm ] ;
     #Configure GUI_INCLUDES ;
 }

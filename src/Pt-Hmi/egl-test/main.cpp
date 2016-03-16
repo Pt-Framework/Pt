@@ -4,8 +4,12 @@
 #include <GLES2/gl2.h>
 
 #include "RenderScreen.h"
-#include "Display.h"
 
+#ifdef WIN32
+#include "DisplayWin32.h"
+#else
+#include "Display.h"
+#endif
 
 class Application
 {
