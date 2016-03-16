@@ -1,12 +1,12 @@
- /* Copyright (C) 2015 Marc Boris Duerner 
-    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-    Copyright (C) 2015 Ilja Maier
-  
+ /* 
+  Copyright (C) 2015 Marc Boris Duerner 
+  Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
@@ -29,62 +29,37 @@
 */
 
 #include "ScreenImpl.h"
+#include "FrameBuffer.h"
 #include "ApplicationImpl.h"
 #include "PaintSurfaceImpl.h"
-#include "Display.h"
-#include "ShaderProgram.h"
 
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Cursor.h>
+#include <Pt/Gfx/ImagePainter.h>
 #include <Pt/System/Clock.h>
-#include <Pt/System/Logger.h>
-
 #include <algorithm>
-#include <cstdlib> // rand()
-#include <ctime>
-
-
-PT_LOG_DEFINE("Pt.Hmi.Screen")
 
 namespace Pt {
 
 namespace Hmi {
   
 ScreenImpl::ScreenImpl(ApplicationImpl& app)
-: _dpi(96.0)
-, _display( app.display() )
-//, _winSurface( app.display().surface() )
+: _frameBuffer( app.frameBuffer() )
+, _cursorPos( 0,0 )
+, _dpi(96.0)
+, _drawCursor(true)
 {
-  app.eventReady() += Pt::slot(eventReceived());
+    app.eventReady() += Pt::slot( *this, &ScreenImpl::onPointerEvent );
+    app.eventReady() += Pt::slot( *this, &ScreenImpl::onKeyEvent );
 
-  setSize( Gfx::SizeF( app.display().width(), app.display().height() ) ); 
+    _surface.pixmapImpl()->resize(_frameBuffer.size(), _frameBuffer.strideInBytes() );
 
-  PT_LOG_DEBUG("Screen size: " << app.display().width() << " x " << app.display().height() );
+    Painter painter(_surface);
+    painter.clear( Pt::Gfx::Color(0.4f, 0.3f, 0.4f) );
 
-  setBackgroundColor( Gfx::Color(170/255.0f, 170/255.0f, 170/255.0f) );
-  setVisible(true);      
-  setCursor(0);  
-  
-  eventReceived() += Pt::slot( *this, &ScreenImpl::onPointerEvent );
-
-  _fboA = 0;
-  _fboB = 0;
-  _depthBuf = 0;
-  _textureA = 0;
-  _textureB = 0;
-  _mainProgram = 0;
-  _textProgram = 0;
-
-  _counter = 0;
-
-  _positionLoc = 0;
-  _texCoordLoc = 0;
-  _samplerLoc = 0;
-  _texColor = 0;
-
-   initFBO();
+    setCursor(0);
 }
 
 
@@ -93,224 +68,195 @@ ScreenImpl::~ScreenImpl()
 }
 
 
-void ScreenImpl::onPointerEvent( const Pt::Hmi::PointerEvent& mouseEvent )
+void ScreenImpl::registerWindow(Window& w)
+{
+    _windowManager.add(w);
+}
+
+
+void ScreenImpl::unregisterWindow(Window& w)
+{
+    _windowManager.remove(w);
+}
+
+
+const Gfx::Image& ScreenImpl::image() const
+{
+    return _surface.pixmapImpl()->image();
+}
+
+
+Gfx::Image& ScreenImpl::image()
+{
+    return _surface.pixmapImpl()->image();
+}
+
+
+void ScreenImpl::onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent )
+{        
+    _drawCursor =  true;
+
+    if( !_cursorBackground.empty() )
+        bitBlit( _cursorBackground.pixel(0,0), _cursorBackground.width(), _cursorBackground.height(), 
+                 _cursorPos, (Pt::uint8_t*)image().pixel(0,0), CopyOp );
+
+    if( _cursor.width() != 0 )
+        _cursorPos = Gfx::Point( mouseEvent.x() - _cursor.xHotspot() , mouseEvent.y() - _cursor.yHotspot());
+
+    _windowManager.pointerInput( mouseEvent );        
+    
+    if( _drawCursor )
+        updateScreen();
+}
+
+
+void ScreenImpl::onKeyEvent(const Pt::Hmi::KeyEvent& ev)
+{
+    _windowManager.keyInput(ev);
+}
+
+
+void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx::Image& image)
 {    
-  //Pt::System::Clock clock;
-  //clock.start();
-
-  //_drawCursor =  true;
-
-  //if( !_cursorBackground.empty() )
-  //  bitBlit( _cursorBackground.pixel(0,0), _cursorBackground.width(), _cursorBackground.height(), _cursorPos, (Pt::uint8_t*)  _image.pixel(0,0), CopyOp );
-
-  //if( Cursor.get().width() != 0 )
-  //  _cursorPos = Gfx::Point( mouseEvent.x() - Cursor.get().xHotspot() , mouseEvent.y() - Cursor.get().yHotspot());
-
-  _windowManager.pointerInput( mouseEvent );    
-  
-  //if( _drawCursor )
-  //  updateScreen();
-
-  //std::clog << "screen update: " << clock.stop().toUSecs() / 1000.0 << " msecs" << std::endl;
-}
-
-
-void ScreenImpl::onInvalidate()
-{
-  Window::render();
-}
-
-
-
-GLuint ScreenImpl::LoadShader( GLenum type, const char *shaderSrc )
-{
-  GLuint shader;
-  GLint compiled;
-
-  shader = glCreateShader( type );
-
-  if( shader == 0 )
-    return 0;
-
-  glShaderSource( shader, 1, &shaderSrc, NULL );
-  
-  glCompileShader( shader );
-
-  glGetShaderiv( shader, GL_COMPILE_STATUS, &compiled );
-
-  if( ! compiled ) 
-  {
-    GLint infoLen = 0;
-
-    glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &infoLen );
-    if( infoLen > 1 )
+    const size_t pixelSizeInByte = _frameBuffer.depth() / 8;        
+    const Gfx::Size& size= image.size();
+    const size_t yMax = std::min<size_t>(pos.y() + size.height(), height() );    
+    const size_t widthInPixel = ((pos.x() + size.width())  < width() ?  size.width() : ( width()  - pos.x() ) );
+    const size_t widthInByte = widthInPixel * pixelSizeInByte;            
+    
+    for( size_t y = pos.y(); y < yMax; ++y )
     {
-      // error
+        size_t lineOffset = y * _frameBuffer.lineLength() + 
+                            pos.x() * pixelSizeInByte;
+        memcpy( image.pixel(0,y - pos.y()), &buffer[lineOffset], widthInByte );
     }
-
-    glDeleteShader ( shader );
-    return 0;
-  }
-
-  return shader;
 }
 
 
-
-void ScreenImpl::initFBO()
+void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
 {
-  char vShader[] =  
-      "attribute vec4 a_position;   \n"
-      "attribute vec2 a_texCoord;   \n"
-      "attribute vec4 a_Color;      \n"
-      "varying vec4 v_Color;        \n"
-      "varying vec2 v_texCoord;     \n"
-      "void main()                  \n"
-      "{                            \n"
-      "   gl_Position = a_position; \n"
-      "   v_texCoord = a_texCoord;  \n"
-      "   v_Color = a_Color;        \n"
-      "}                            \n";
+    if( _cursor.width() == 0  || _cursor.height() == 0 )
+        return;
 
-   
-   char fShader[] =  
-      "precision mediump float;                            \n"
-      "varying vec2 v_texCoord;                            \n"
-      "varying vec4 v_Color;                               \n"
-      "uniform sampler2D s_texture;                        \n"
-      "void main()                                         \n"
-      "{                                                   \n"
-      "   gl_FragColor = texture2D( s_texture, v_texCoord ) * v_Color; \n"
-      "}\n";
-
-    char vShaderTexture[] =
-    "attribute vec4 a_position; \n"
-    "attribute vec2 a_texCoord; \n"
-    "varying vec2 v_texCoord; \n"
-    "void main() { \n"
-    "  gl_Position = a_position; \n"
-    "  v_texCoord = a_texCoord; \n"
-    "} \n";
-
-   char fShaderTexture[] =
-    "precision mediump float;  \n"                          
-    "bvarying vec2 v_texCoord; \n"                           
-    "buniform sampler2D tex;  \n"                     
-    "void main() { \n" 
-    "  gl_FragColor = texture2D( tex, v_texCoord ); \n"
-    "}      \n";
-
-  // shader
-  GLuint vertexShader;
-  GLuint fragmentShader;
-
-  vertexShader = LoadShader( GL_VERTEX_SHADER, vShader );
-  fragmentShader = LoadShader( GL_FRAGMENT_SHADER, fShader );
-
-  _mainProgram = glCreateProgram();
-  if( _mainProgram == 0 )
-    return;
-
-  glAttachShader( _mainProgram, vertexShader );
-  glAttachShader( _mainProgram, fragmentShader );
-
-  glLinkProgram( _mainProgram );
-  GLint linked;
-  glGetProgramiv( _mainProgram, GL_LINK_STATUS, &linked );
-  if( ! linked ) 
-  {
-    GLint infoLen = 0;
-
-    glGetProgramiv( _mainProgram, GL_INFO_LOG_LENGTH, &infoLen );
-
-    if( infoLen > 1 )
+    if( _cursorBackground.width() != _cursor.width()  || 
+        _cursorBackground.height() != _cursor.height() )
     {
-      std::cerr << " linked failed" << std::endl;
+        Gfx::Size size(_cursor.width(), _cursor.height());
+        _cursorBackground.resize( size, _frameBuffer.format() ); 
     }
-
-    glDeleteProgram( _mainProgram );
-    return;
-  }
-
-  GLint maxTextureSize;
-  glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-  PT_LOG_DEBUG("GL_MAX_TEXTURE_SIZE: " << maxTextureSize);
-  PT_LOG_DEBUG("OpenGL VERSION: " << glGetString(GL_VERSION));
-  PT_LOG_DEBUG("OpenGL GL_EXTENSIONS " << glGetString(GL_EXTENSIONS));
-
-  //create texture A
-  glEnable(GL_TEXTURE_2D);
-  glGenTextures(1, &_textureA);
-  glBindTexture(GL_TEXTURE_2D, _textureA);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-
-  // generate texture data
-  std::vector<GLubyte> data(256 * 256 * 4 * sizeof(GLubyte), 0xFFFF00FF);
-  GLubyte val = 0;
-  for( int i = 0; i < 256*256*4; i += 4 )
-  {
-    if( std::rand( /*std::time(0)*/ ) / RAND_MAX > 0.5 )
-      val = 0;
-    else
-      val = 255;
-
-    data[i] = data[i+1] = data[i+2] = val;
-    data[i+3] = 255;
-  }
-
-  //create texture B
-  glEnable(GL_TEXTURE_2D);
-  glGenTextures(1, &_textureB);
-  glBindTexture(GL_TEXTURE_2D, _textureB);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, &data[0]);
-
-  //create fboA and attach texture A to it
-  glGenFramebuffers(1, &_fboA);
-  glBindFramebuffer(GL_FRAMEBUFFER, _fboA);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _textureA, 0);
-
-  //create fboB and attach texture B to it
-  glGenFramebuffers(1, &_fboB);
-  glBindFramebuffer(GL_FRAMEBUFFER, _fboB);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _textureB, 0);
-
+    
+    grabImage( buffer, _cursorPos, _cursorBackground );
+    
+    bitBlit(&_cursor.andRgb888()[0], _cursor.width(), _cursor.height(), _cursorPos, buffer, AndOp);
+    bitBlit(&_cursor.xorRgb888()[0], _cursor.width(), _cursor.height(), _cursorPos, buffer, XorOp);    
 }
 
 
-void ScreenImpl::onPaint(PaintSurface& surface)
+void ScreenImpl::updateScreen()
 {
-  PT_LOG_DEBUG("++++++++++ RENDERING SCREEN ++++++++++");
-  PT_LOG_DEBUG("ScreenImpl::onPaint: " << _display.width() 
-                                 << ' ' << _display.height() );
-  _counter++;
-
-   _display.updateScreen();
+    _drawCursor    = false;
+    drawCursor( image().pixel(0,0) );
+    memcpy( _frameBuffer.buffer(), image().pixel(0,0), _frameBuffer.bufferSize() );            
 }
 
 
-void ScreenImpl::RenderTextureToScreen(GLuint textId)
+void ScreenImpl::update(const Gfx::RectF& updateRect)
+{                
+    Pt::System::Clock clock;
+    clock.start();   
+
+    //if( ! _cursorBackground.empty() )
+    //    bitBlit( _cursorBackground.pixel(0,0), 
+    //             _cursorBackground.width(), 
+    //             _cursorBackground.height(), 
+    //             _cursorPos, 
+    //             image().pixel(0,0), CopyOp );
+
+    Painter painter(_surface);
+    painter.setBrush( Pt::Gfx::Color(0.4f, 0.3f, 0.4f) );
+    painter.fillRect(updateRect);
+
+    _windowManager.render(_surface, updateRect);
+    
+    updateScreen();
+    std::clog << "screen update: " << clock.stop().toUSecs() << " usecs." << std::endl;
+    std::clog << "update area " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
+              << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
+}
+
+
+void ScreenImpl::setCursor( const Hmi::Cursor* crs )
+{        
+    _cursor  = crs == 0 ? Hmi::Cursor::defaultCursor() : *crs;        
+}
+
+
+void ScreenImpl::bitBlit( const Gfx::Image& image, Pt::uint8_t* buffer )
 {
+  const size_t imageSize = (image.width() * image.format().pixelSize() + image.stride()) * image.height();
+
+  memcpy( buffer , image.pixel( 0,0 ), std::min( _frameBuffer.bufferSize(), imageSize ) );  
 }
 
 
-void ScreenImpl::setCursor( const Hmi::Cursor* cursor )
-{    
-  Window::setCursor(cursor == 0 ? Hmi::Cursor::defaultCursor() : *cursor );    
+void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op )
+{
+    static const size_t planePixelSize = 4;
+    const size_t bufferPixelSize = _frameBuffer.depth() / 8;
+    const size_t bufferWidth  = std::min<size_t>(  pos.x() + w, width() ); 
+    const size_t bufferHeight = std::min<size_t>(  pos.y() + h, height() ); 
+    size_t yCursor = 0;
+    size_t xCursor = 0;    
+
+    for( size_t yBuffer = pos.y(); yBuffer < bufferHeight; ++yBuffer, ++yCursor )
+    {
+        const size_t lineOffsetBuffer  = yBuffer * _frameBuffer.lineLength();
+        const size_t lineOffsetCursor  = yCursor * (w * planePixelSize);
+        
+        xCursor = 0;
+
+        for( size_t xBuffer = pos.x(); xBuffer < bufferWidth; ++xBuffer, ++xCursor  )
+        {            
+            Pt::uint8_t* pointerBuffer = &((Pt::uint8_t*)buffer)[lineOffsetBuffer + (xBuffer * bufferPixelSize)];
+            const Pt::uint8_t* pointerCursor = &plane[lineOffsetCursor + (xCursor * planePixelSize)];
+
+            switch( _frameBuffer.depth() )
+            {
+                case 32:
+                {
+                    Pt::uint32_t* pixelBuffer = (Pt::uint32_t*) pointerBuffer;
+                    const Pt::uint32_t* pixelCursor = (const Pt::uint32_t*) pointerCursor;
+
+                    switch( op )
+                    {
+                        case AndOp:
+                            *pixelBuffer &= *pixelCursor;
+                        break;
+
+                        case XorOp:
+                            *pixelBuffer ^= *pixelCursor;
+                        break;
+
+                        case CopyOp://ToDo::optimize this with memcpy
+                            *pixelBuffer = *pixelCursor;
+                        break;
+                    }
+                    break;
+                }
+
+                case 16:
+                    //TODO:
+                    break;
+            }
+        }
+    }
 }
+
 
 void ScreenImpl::onActivate()
-{
-
+{ 
 }
 
-}
+} // namespace
 
-}
+} // namespace

@@ -1,5 +1,6 @@
  /* Copyright (C) 2015 Marc Boris Duerner 
     Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+    Copyright (C) 2016 Ilja Maier
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -23,54 +24,62 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-	MA  02110-1301  USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA  02110-1301  USA
 */
 
-#ifndef Pt_Hmi_ApplicationImpl_h
-#define Pt_Hmi_ApplicationImpl_h
+#ifndef Pt_Hmi_Shape_H
+#define Pt_Hmi_Shape_H
 
-#include "InputDevice.h"
-#include "FrameBuffer.h"
-#include <Pt/System/MainLoop.h>
+#include <GLES2/gl2.h>
+#include <EGL/egl.h>
+
+#include <vector>
+
+#include "ShaderProgram.h"
+#include "Matrix.h"
 
 namespace Pt {
 
 namespace Hmi {
 
-class ApplicationImpl : public Pt::System::MainLoop
+class Shape
 {
   public:
-    ApplicationImpl();
-
-    virtual ~ApplicationImpl();
-
-		FrameBuffer& frameBuffer()
-		{
-			return _frameBuffer;
-		}
-
-	  Pt::Signal<const Pt::Event&>& eventReady()
-		{
-				return _eventReady;
-		}
-
-		void nextEvent();
+    Shape();
     
-	private:
-		void onInputEvent(const Pt::Event& ev);
+    virtual ~Shape();
 
-		void showConsole( bool s);
+    void draw(const ShaderProgram& program, GLenum mode, const unsigned short* indices);
+
+    const Matrix& getModelView() const
+    { return _modelView; }
+
+    void scale( float factor);
+    void translate( const vec2& position );
+    void rotate( float deg );
+    void reset();
+
+    void setVertices(const std::vector<float>& vertices)
+    { _vertices = vertices; }
+
+    void setTextureCoords(const std::vector<float>& texCoords)
+    { _texCoords = texCoords; }
 
   private:
-		FrameBuffer _frameBuffer; 
-		std::vector<InputDevice*> _inputDevices;
-		Pt::Signal<const Pt::Event&> _eventReady;
+    virtual void generateVertices() = 0;
+   
+  private:
+
+    // TODO: add return multiplication modelviewMatrix = scale * rotation * translation
+    Matrix _modelView; 
+
+    std::vector<float> _vertices;
+    std::vector<float> _texCoords;
 };
 
-} // namespace
+} // namespace Hmi
 
-} // namespace
+} // namespace Pt
 
-#endif
-
+#endif // Pt_Hmi_Shape_H

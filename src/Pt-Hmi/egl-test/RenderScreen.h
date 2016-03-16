@@ -1,5 +1,6 @@
  /* Copyright (C) 2015 Marc Boris Duerner 
     Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+    Copyright (C) 2016 Ilja Maier
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -23,54 +24,61 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-	MA  02110-1301  USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA  02110-1301  USA
 */
 
-#ifndef Pt_Hmi_ApplicationImpl_h
-#define Pt_Hmi_ApplicationImpl_h
+#ifndef Pt_Hmi_Screen_H
+#define Pt_Hmi_Screen_H
 
-#include "InputDevice.h"
-#include "FrameBuffer.h"
-#include <Pt/System/MainLoop.h>
+#include <EGL/egl.h>
+#include <GLES2/gl2.h>
+
+#include <vector>
+#include <map>
+
+#include "ShaderProgram.h"
+#include "Texture.h"
+#include "TextureRect.h"
+#include "SolidRect.h"
 
 namespace Pt {
 
 namespace Hmi {
 
-class ApplicationImpl : public Pt::System::MainLoop
+class RenderScreen 
 {
-  public:
-    ApplicationImpl();
+public:
+  RenderScreen(int width, int height);
 
-    virtual ~ApplicationImpl();
+  ~RenderScreen();
 
-		FrameBuffer& frameBuffer()
-		{
-			return _frameBuffer;
-		}
+  int width() const
+  { return _width; }
 
-	  Pt::Signal<const Pt::Event&>& eventReady()
-		{
-				return _eventReady;
-		}
+  int height() const
+  { return _height; }
 
-		void nextEvent();
-    
-	private:
-		void onInputEvent(const Pt::Event& ev);
+  void Init();
+  void Render();
 
-		void showConsole( bool s);
-
-  private:
-		FrameBuffer _frameBuffer; 
-		std::vector<InputDevice*> _inputDevices;
-		Pt::Signal<const Pt::Event&> _eventReady;
+private:
+  void Cleanup();
+  
+private:
+  int           _width;
+  int           _height;
+  
+  std::map<std::string, Texture*> _textures;
+  
+  // test geometry
+  TextureRect _rectNoiseTexture;
+  TextureRect _rectSolidTexture;
+  SolidRect   _rectSolidColor;
 };
 
-} // namespace
+} // namespace Hmi
 
-} // namespace
+} // namespace Pt
 
-#endif
-
+#endif // Pt_Hmi_Screen_H

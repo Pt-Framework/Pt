@@ -29,25 +29,22 @@
 
 #include "ApplicationImpl.h"
 #include <Pt/System/FileInfo.h>
-#include <Pt/System/Logger.h>
+#include <iostream>
+#include <sstream>
 #include <fstream>
 #include <fcntl.h>
 #include <sys/ioctl.h> 
 #include <sys/mman.h>
 #include <sys/kd.h>
 
-PT_LOG_DEFINE("Pt.Hmi.Application")
-
 namespace Pt {
 
 namespace Hmi {
 
 ApplicationImpl::ApplicationImpl()
-  : _display()
 {  		 
 	showConsole( false );
-
-  System::Logger::setLogLevel("", System::Trace);
+	_inputDevices.reserve(10);
 
 	for(size_t i = 0; i < 10; ++i)
 	{
@@ -56,16 +53,11 @@ ApplicationImpl::ApplicationImpl()
 		std::ostringstream oss;
 		oss << i;
 		deviceName += oss.str().c_str();
-
 			
 		if( Pt::System::FileInfo::exists(deviceName) )
 		{
 			InputDevice* device = new InputDevice( deviceName.toLocal().c_str() );
-      Pt::Gfx::Size size( _display.width(), _display.height() ) ;
-
-      PT_LOG_DEBUG("size: " << size.width() << " x " << size.height() );
-
-			device->setScreenLimit( size);
+			device->setScreenLimit( _frameBuffer.size() );
 			device->setActive(*this);
 			device->begin();
 			device->eventReady() += Pt::slot(_eventReady);	

@@ -1,5 +1,6 @@
  /* Copyright (C) 2015 Marc Boris Duerner 
     Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+    Copyright (C) 2016 Ilja Maier
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -23,54 +24,59 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-	MA  02110-1301  USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA  02110-1301  USA
 */
 
-#ifndef Pt_Hmi_ApplicationImpl_h
-#define Pt_Hmi_ApplicationImpl_h
+#ifndef Pt_Hmi_Matrix_H
+#define Pt_Hmi_Matrix_H
 
-#include "InputDevice.h"
-#include "FrameBuffer.h"
-#include <Pt/System/MainLoop.h>
+#include "Vector.h"
 
 namespace Pt {
 
 namespace Hmi {
 
-class ApplicationImpl : public Pt::System::MainLoop
+class Matrix 
 {
-  public:
-    ApplicationImpl();
+public:
+  Matrix();
 
-    virtual ~ApplicationImpl();
+  Matrix(
+			    float v00, float v01, float v02, float v03,
+			    float v10, float v11, float v12, float v13,
+			    float v20, float v21, float v22, float v23,
+			    float v30, float v31, float v32, float v33
+		    );
 
-		FrameBuffer& frameBuffer()
-		{
-			return _frameBuffer;
-		}
+  ~Matrix();
 
-	  Pt::Signal<const Pt::Event&>& eventReady()
-		{
-				return _eventReady;
-		}
+  const Matrix  operator*( const Matrix& mat ) const;
+  const vec3    operator*( const vec3& v ) const;
+  const vec4    operator*( const vec4& v ) const;
 
-		void nextEvent();
-    
-	private:
-		void onInputEvent(const Pt::Event& ev);
+  Matrix& translate( const vec3& v );
+  Matrix& scale( const vec3& v );
 
-		void showConsole( bool s);
+  Matrix& rotateX( float deg );
+  Matrix& rotateY( float deg );
+  Matrix& rotate( const vec3& axis, float deg );
+  Matrix& identity();
 
-  private:
-		FrameBuffer _frameBuffer; 
-		std::vector<InputDevice*> _inputDevices;
-		Pt::Signal<const Pt::Event&> _eventReady;
+  const float* get() const
+  { return _m; }
+
+  static Matrix perspective( float fovY, float aspect, float zNear, float zFar );
+  static Matrix ortho( float left, float right, float bottom, float top, float zNear, float zFar );
+  static Matrix lookAt( const vec3& eye, const vec3& target, const vec3& up );
+
+public: // TODO: refactor
+  float _m[16];
 };
 
-} // namespace
+} // namespace Hmi
 
-} // namespace
+} // namespace Pt
 
-#endif
 
+#endif // Pt_Hmi_Texture_H

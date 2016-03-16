@@ -44,4 +44,12 @@ LinkLibs Pt-Hmi : $(GUILIBS) ;
 MakeLocate Pt-Hmi : $(PT_OUTPUT_TARGET) ;
 MakeInstall Pt-Hmi : $(PT_INSTALL_LIBDIR) ;
 
+if $(GUI:L) = egl-gbm
+{
+  PT_EGL_TEST_DIR = [ FDirName $(PT_TOP) src Pt-Hmi egl-test ] ;
+  Main egl-test : [ GLOB $(PT_EGL_TEST_DIR) : *.cpp  ] ;
+  LinkLibs egl-test : $(GUILIBS) ;
+  MakeLocate egl-test : $(PT_OUTPUT_TARGET) ;
+}
+
 SubInclude PT_TOP src Pt-Hmi demo ;		

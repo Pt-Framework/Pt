@@ -1,6 +1,7 @@
- /* Copyright (C) 2015 Marc Boris Duerner 
-    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+ /* 
+  Copyright (C) 2015 Marc Boris Duerner 
+  Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -23,56 +24,47 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef Pt_Hmi_WindowImpl_h
-#define Pt_Hmi_WindowImpl_h
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
+*/
 
-#include <Pt/Connectable.h>
-#include <Pt/Signal.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Image.h>
+#ifndef Pt_Hmi_MainWindowImpl_h
+#define Pt_Hmi_MainWindowImpl_h
+
+#include "../ChildWindowImpl.h"
+
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/KeyEvent.h>
-#include <Pt/Hmi/WindowState.h>
-#include <Pt/Hmi/ChildWindow.h>
 
 namespace Pt {
+
 namespace Hmi {
 
-class MainWindow;
-class Application;
+class Window;
 
-class MainWindowImpl  : public ChildWindow
+class MainWindowImpl : public ChildWindowImpl
 {
-	public:
-		MainWindowImpl(MainWindow* Window);
-    
-		virtual ~MainWindowImpl();
+    public:
+        MainWindowImpl(Window* window);
 
-		void create();
-	
-		void destroy();
+        virtual ~MainWindowImpl();
 
-		void show();
+        virtual void activate();
 
-		void hide();
+        virtual void show(bool b);
 
-		void activate();	    		 		
+        virtual void enable(bool b);
 
-	protected:
-		virtual void onEvent(const Pt::Event& ev);
-		
-		virtual void onInvalidate();
-	  
-		virtual void onPaint(PaintSurface& paintSurface);
+        virtual void resize(const Gfx::SizeF& size);
 
-	private:
-    Pt::Hmi::Application& _app;
-    MainWindow*           _apiWindow;
+        virtual void move(const Gfx::PointF& pos);
+
+        virtual void update(const Gfx::RectF& updateRect);
+
+        virtual void onUpdate(Window& child, const Gfx::RectF& childRect);
 };
 
-}} // namespace
+} // namespace
+
+} // namespace
 
 #endif

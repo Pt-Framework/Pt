@@ -24,7 +24,7 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-  MA  02110-1301  USA
+  MA 02110-1301 USA
 */
 
 #ifndef PT_HMI_PAINTERIMPL_H
@@ -33,114 +33,96 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/FontMetrics.h>
 
 namespace Pt {
 
 namespace Hmi {
 
+class PaintSurfaceImpl;
 class PaintSurface;
+class PixmapSurface;
 
 class PainterImpl
 {
-  public:
-    PainterImpl( PaintSurfaceImpl* surface );
-		
-    virtual ~PainterImpl();  			
-
-    void drawLine( const Gfx::PointF& from, const Gfx::PointF& to );
-    
-    void drawPolyline( const Gfx::PointF* points, const size_t pointCount );    
-
-    void drawText( const Gfx::PointF& to, const Pt::String& Text );
-
-    void drawRect( const Gfx::RectF& rectangle );
-
-    void drawEllipse( const Gfx::PointF& topLeft, const Gfx::SizeF& size );
-
-    void drawSurface( const Gfx::PointF& to, const PaintSurface& surface );
-		
-    void drawImage( const Gfx::PointF& to, const Gfx::Image& image );
-
-    void fillRect( const Gfx::RectF& rectangle );    
-
-    void fillEllipse( const Gfx::PointF& topLeft, const Gfx::SizeF& size );
-
-    void fillPolygon( const Gfx::PointF* points, const size_t pointCount );
-    
-    void flush();
+    public:
+        PainterImpl(PaintSurfaceImpl* surface);
         
-  public:
-    void setPen( const Gfx::Pen& pen )
-    {
-	    _pen = pen;
-    }
+        virtual ~PainterImpl();
 
-    const Gfx::Pen& pen() const
-    {
-	    return _pen;
-    }
+        void setSurface(PaintSurface& surface);
 
-    void setBrush( const Gfx::Brush& brush )
-    {
-	    _brush = brush ;
-    }
+        void setOrigin(const Gfx::PointF& p)
+        {
+            _origin = p;
+        }
 
-    const Gfx::Brush& brush() const
-    {
-	    return _brush;
-    }
+        void setClip(const Gfx::RectF& clip)
+        {
+            _clip = clip;
+        }
+        
+        const Gfx::RectF& clip() const
+        {
+            return _clip;
+        }
 
-    void setFont( const Gfx::Font& font )
-    {
-      _font = font;	
-    }
+        void setRenderMode(Gfx::RenderMode::Type mode);
 
-    const Gfx::Font& font() const
-    {
-	    return _font;
-    }    
-    
-    Gfx::FontMetrics fontMetrics( Pt::String text ) const;
+        void setPen(const Gfx::Pen& pen);
 
-    static Gfx::FontMetrics fontMetrics( const Gfx::Font& font, Pt::String text );
+        const Gfx::Pen& pen() const;
 
-    void setRenderMode(Gfx::RenderMode::Type mode )
-    {
-      _renderMode =  mode;
-    }
+        void setBrush(const Gfx::Brush& brush);
 
-    void setSurface( PaintSurface& s )
-    {
-	    _surface = s.impl();
-    }
+        const Gfx::Brush& brush() const;
 
-    void addFontName( const std::string& fontName )
-    {
-	    //Todo: add font name.
-    }
+        void setFont(const Gfx::Font& font);
 
-    void setClip( const Gfx::RectF& clip )
-    {
-      _clip = clip;
-    }
+        const Gfx::Font& font() const;        
 
-    const Gfx::RectF& clip() const
-    {
-      return _clip;
-    }
+        Gfx::FontMetrics fontMetrics(const Pt::String& Text) const;
 
-    void clear( const Gfx::Color& color );
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
 
+        std::list<std::string> fontFamilyNames();        
 
+        void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);                
 
-  private:
-	 PaintSurfaceImpl*   	  _surface;	
-	 Gfx::RenderMode::Type 	_renderMode;
-	 Gfx::Font 				      _font;
-	 Gfx::Pen   			      _pen;
- 	 Gfx::Brush 			      _brush;	  
-	 Gfx::RectF             _clip;
+        void drawText(const Gfx::PointF& to, const Pt::String& Text);
+
+        void drawRect(const Gfx::RectF& rectangle);
+
+        void fillRect(const Gfx::RectF& rectangle);
+
+        void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+        void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+        void drawPolyline(const Gfx::PointF* points, const size_t pointCount);
+
+        void fillPolygon(const Gfx::PointF* points, const size_t pointCount);
+
+        void drawSurface(const Gfx::PointF& to, const PixmapSurface& pm);
+
+        void drawSurface(const Gfx::PointF& to, 
+                         const PixmapSurface& pm, 
+                         const Gfx::RectF& pmRect);
+        
+        void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+
+        void flush();
+        
+        void clear(const Gfx::Color& color);
+
+    private:
+        PaintSurfaceImpl*      _surface;
+        Gfx::PointF            _origin;
+        Gfx::RectF             _clip;
+        Gfx::Pen               _pen;
+        Gfx::Brush             _brush;
+        Gfx::Font              _font;
 };
 
 } // namespace

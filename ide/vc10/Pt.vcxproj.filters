@@ -127,6 +127,9 @@
     <Filter Include="Pt-Hmi\Events">
       <UniqueIdentifier>{6f2f13a1-ae7e-44a8-93c4-fce09d724d91}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Hmi\egl-test">
+      <UniqueIdentifier>{6cd21b01-de79-4a7c-aec3-d783e7c64ca3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1335,6 +1338,54 @@
     <ClInclude Include="..\..\include\Pt\Hmi\FlowLayout.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\Matrix.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\Rectangle.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\Shaders.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\Shape.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\Texture.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-gbm\Vector.h">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-test\Display.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-test\Matrix.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-test\RenderScreen.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-test\ShaderProgram.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-test\Shaders.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-test\Shape.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-test\Texture.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-test\Vector.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-test\SolidRect.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\egl-test\TextureRect.h">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2437,6 +2488,45 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\FlowLayout.cpp">
       <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\Matrix.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\Rectangle.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\Shape.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-gbm\Texture.cpp">
+      <Filter>Pt-Hmi\egl-gbm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-test\Display.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-test\main.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-test\Matrix.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-test\RenderScreen.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-test\ShaderProgram.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-test\Shape.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-test\Texture.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-test\SolidRect.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\egl-test\TextureRect.cpp">
+      <Filter>Pt-Hmi\egl-test</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

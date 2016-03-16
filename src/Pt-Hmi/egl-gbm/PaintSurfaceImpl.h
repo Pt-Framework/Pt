@@ -1,6 +1,5 @@
  /* Copyright (C) 2015 Marc Boris Duerner 
     Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-    Copyright (C) 2015 Ilja Maier
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -25,44 +24,185 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-  MA  02110-1301  USA
+  MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_PaintSurfaceImpl_h
-#define Pt_Hmi_PaintSurfaceImpl_h
+#ifndef Pt_Hmi_ImagePaintSurface_h
+#define Pt_Hmi_ImagePaintSurface_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Gfx/Size.h>
-
-#include <GLES2/gl2.h>
-#include <EGL/egl.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/ImagePainter.h>
 
 namespace Pt {
 
 namespace Hmi {
 
+class PixmapSurface;
+
 class PaintSurfaceImpl
 {
-    public:
-        PaintSurfaceImpl();
-
+    public:        
         virtual ~PaintSurfaceImpl();
 
-        void resize(const Gfx::SizeF& size);
+        virtual const Gfx::SizeF& size() const = 0;
 
-        Gfx::SizeF size() const;
+        virtual void setPen(const Gfx::Pen& pen) = 0;
+
+        virtual void setBrush(const Gfx::Brush& brush) = 0;
+
+        virtual void setFont(const Gfx::Font& font) = 0;
+
+        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const = 0;
+    
+        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to) = 0;
+
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text) = 0;
+
+        virtual void drawRect(const Gfx::RectF& rectangle) = 0;
+
+        virtual void fillRect(const Gfx::RectF& rectangle) = 0;
+
+        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
+
+        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
+
+        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount) = 0;
+
+        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount) = 0;
+
+        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface) = 0;
+        
+        virtual void drawSurface(const Gfx::PointF& toF, 
+                                 const PixmapSurface& pm,
+                                 const Gfx::RectF& pmRect) = 0;
+        
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image) = 0;
+
+        static std::string defaultFont();
+
+        static std::list<std::string> fontFamilyNames(); 
+
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
+
+    protected:
+        PaintSurfaceImpl();
+};
+
+
+class PaintRegionImpl : public PaintSurfaceImpl
+{
+    public:        
+        PaintRegionImpl();
+        
+        virtual ~PaintRegionImpl();   
+
+        void set(PaintSurface& surface, const Gfx::RectF& area); 
+
+        virtual const Gfx::SizeF& size() const;
+
+        virtual void setPen(const Gfx::Pen& pen);
+
+        virtual void setBrush(const Gfx::Brush& brush);
+
+        virtual void setFont(const Gfx::Font& font);
+
+        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
+
+        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
+
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
+
+        virtual void drawRect(const Gfx::RectF& rectangle);
+
+        virtual void fillRect(const Gfx::RectF& rectangle);
+
+        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
+
+        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
+
+        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
+
+        virtual void drawSurface(const Gfx::PointF& toF, 
+                                 const PixmapSurface& pm,
+                                 const Gfx::RectF& pmRect);
+
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+
+    private:
+        PaintSurface* _surface;
+        Gfx::RectF _area;
+};
+
+
+class PixmapSurfaceImpl : public PaintSurfaceImpl
+{
+    public:        
+        PixmapSurfaceImpl();
+        
+        virtual ~PixmapSurfaceImpl();  
 
         void clear();
 
-        /*void SetSurface(const EGLSurface& surf)
-        { _surface = surf; }*/
+        const Gfx::Image& image() const
+        {
+            return _image;
+        }
 
-        EGLSurface surface() const
-        { return _surface; }
+        Gfx::Image& image()
+        {
+            return _image;
+        }
+    
+        void resize(const Gfx::Size& size, size_t stride);
 
-    private:       
-        Gfx::SizeF    _size;
-        EGLSurface    _surface;
+        void resize(const Gfx::SizeF& size);    
+
+        virtual const Gfx::SizeF& size() const;
+
+        virtual void setPen(const Gfx::Pen& pen);
+
+        virtual void setBrush(const Gfx::Brush& brush);
+
+        virtual void setFont(const Gfx::Font& font);
+
+        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
+
+        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
+
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
+
+        virtual void drawRect(const Gfx::RectF& rectangle);
+
+        virtual void fillRect(const Gfx::RectF& rectangle);
+
+        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+
+        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
+
+        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
+
+        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
+
+        virtual void drawSurface(const Gfx::PointF& toF, 
+                                 const PixmapSurface& pm,
+                                 const Gfx::RectF& pmRect);
+
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+
+    private:
+        Gfx::SizeF            _size;
+        Gfx::Image            _image;
+        Gfx::ImagePainter     _painter;
 };
 
 } // namespace

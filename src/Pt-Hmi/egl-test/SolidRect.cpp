@@ -1,5 +1,6 @@
  /* Copyright (C) 2015 Marc Boris Duerner 
     Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+    Copyright (C) 2016 Ilja Maier
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -23,54 +24,57 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-	MA  02110-1301  USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA  02110-1301  USA
 */
 
-#ifndef Pt_Hmi_ApplicationImpl_h
-#define Pt_Hmi_ApplicationImpl_h
+#include "SolidRect.h"
 
-#include "InputDevice.h"
-#include "FrameBuffer.h"
-#include <Pt/System/MainLoop.h>
+namespace {
+
+const unsigned short indices[] = {
+  0, 1, 2,   
+  2, 1, 3,
+};
+
+}
 
 namespace Pt {
 
 namespace Hmi {
-
-class ApplicationImpl : public Pt::System::MainLoop
+  
+SolidRect::SolidRect(float width, float height, vec4 color)
+  : _width(width)
+  , _height(height)
+  , _color(color)
+  , _indices(indices, indices + ( sizeof(indices) / sizeof(unsigned short) ) )
 {
-  public:
-    ApplicationImpl();
+  generateVertices();
+}
 
-    virtual ~ApplicationImpl();
 
-		FrameBuffer& frameBuffer()
-		{
-			return _frameBuffer;
-		}
+SolidRect::~SolidRect()
+{
+}
 
-	  Pt::Signal<const Pt::Event&>& eventReady()
-		{
-				return _eventReady;
-		}
 
-		void nextEvent();
-    
-	private:
-		void onInputEvent(const Pt::Event& ev);
+void SolidRect::generateVertices()
+{
+  std::vector<float> vertices;
+  vertices.resize(4 * 3);
 
-		void showConsole( bool s);
+  float* rectVertices = &vertices[0];
 
-  private:
-		FrameBuffer _frameBuffer; 
-		std::vector<InputDevice*> _inputDevices;
-		Pt::Signal<const Pt::Event&> _eventReady;
-};
+  int i = 0;
 
-} // namespace
+  rectVertices[i++] = 0.0;    rectVertices[i++] = 0.0;      rectVertices[i++] = 0.0;
+  rectVertices[i++] = 0.0;    rectVertices[i++] = _height;  rectVertices[i++] = 0.0;
+  rectVertices[i++] = _width; rectVertices[i++] = 0.0;      rectVertices[i++] = 0.0;
+  rectVertices[i++] = _width; rectVertices[i++] = _height;  rectVertices[i++] = 0.0;
 
-} // namespace
+  this->setVertices(vertices);
+}
 
-#endif
+} // namespace Hmi
 
+} // namespace Pt

@@ -1,12 +1,12 @@
- /* Copyright (C) 2015 Marc Boris Duerner 
-    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-    Copyright (C) 2015 Ilja Maier
-  
+ /* 
+  Copyright (C) 2015 Marc Boris Duerner 
+  Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -16,12 +16,12 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
@@ -31,138 +31,158 @@
 #ifndef Pt_Hmi_ScreenImpl_H
 #define Pt_Hmi_ScreenImpl_H
 
-#include <Pt/Hmi/Window.h>
+#include "FrameBuffer.h"
 
-#include <GLES2/gl2.h>
-#include <EGL/egl.h>
+#include <Pt/Hmi/WindowManager.h>
+#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Image.h>
 
 namespace Pt {
 
 namespace Hmi {
 
 class ApplicationImpl;
+class FrameBuffer;
 class Cursor;
-class Display;
 
-class ScreenImpl : public Window
+class ScreenImpl : public Pt::Connectable
 {
-  public:
-    ScreenImpl(ApplicationImpl& app);
+    public:
+        ScreenImpl(ApplicationImpl& app);
 
-    virtual ~ScreenImpl();
+        virtual ~ScreenImpl();
 
-    double width() const
-    {
-      return  Size.get().width();
-    }
+        void registerWindow(Window& w);
 
-    double height() const
-    {
-      return  Size.get().height();
-    }
-          
-    virtual void activate()
-    {
-    }
+        void unregisterWindow(Window& w);
 
-    double toUnit(int value)
-    {
-      return value;
-    }
+        const FrameBuffer& frameBuffer() const
+        {
+            return _frameBuffer;
+        }
 
-    Gfx::PointF toUnit(const Gfx::Point& value)
-    {
-      return Gfx::PointF( value.x(), value.y() );
-    }
+        double width() const
+        {
+            return _frameBuffer.width();
+        }
 
-    Gfx::SizeF toUnit(const Gfx::Size& value)
-    {
-      return Gfx::SizeF( value.width(), value.height() );
-    }
+        double height() const
+        {
+            return _frameBuffer.height();
+        }
 
-    int fromUnit(double value)
-    {
-      return (int) value;
-    }
+        virtual void activate()
+        {
+        }
 
-    Gfx::Point fromUnit(const Gfx::PointF& value)
-    {
-      return Gfx::Point( (int)value.x(), (int)value.y() );
-    }
+        const Gfx::Image& image() const;
 
-    Gfx::Size fromUnit(const Gfx::SizeF& value)
-    {
-       return Gfx::Size( (int)value.width(), (int)value.height() );
-    }
+        Gfx::Image& image();
 
-    Gfx::Rect fromUnit(const Gfx::RectF& value)
-    {
-      return Gfx::Rect(Gfx::Point( (int) value.x(), (int)value.y()) ,Gfx::Size( (int)value.width(), (int)value.height() ) );
-    }
+        double toUnit(int value)
+        {
+            return value;
+        }
 
-    double unitSizeInch() const
-    {
-      return 1.0/96;
-    }
+            Gfx::PointF toUnit(const Gfx::Point& value)
+        {
+          return Gfx::PointF( value.x(), value.y() );
+        }
 
-    double unitSizeMm() const
-    {
-      return 25.4 * unitSizeInch();
-    }
+        Gfx::SizeF toUnit(const Gfx::Size& value)
+        {
+            return Gfx::SizeF( value.width(), value.height() );
+        }
 
-    void setResolution(double dpi)
-    {
-      _dpi = dpi;
-    }
+        int fromUnit(double value)
+        {
+            return (int) value;
+        }
 
-    double resolutionDPI() const
-    {
-      return _dpi;
-    }
-    
-    void setCursor(const Hmi::Cursor* cursor );
+        Gfx::Point fromUnit(const Gfx::PointF& value)
+        {
+            return Gfx::Point( (int)value.x(), (int)value.y() );
+        }
 
-  protected:
-    virtual void onInvalidate();
-    
-		virtual void onActivate();
+        Gfx::Size fromUnit(const Gfx::SizeF& value)
+        {
+             return Gfx::Size( (int)value.width(), (int)value.height() );
+        }
 
-    virtual void onPaint(PaintSurface& surface);
-    
-    virtual void onPointerEvent( const Pt::Hmi::PointerEvent& mouseEvent );
+        Gfx::Rect fromUnit(const Gfx::RectF& value)
+        {
+            return Gfx::Rect(Gfx::Point( (int) value.x(), (int)value.y()) ,Gfx::Size( (int)value.width(), (int)value.height() ) );
+        }
 
+        double unitSizeInch() const
+        {
+            return 1.0/96;
+        }
 
-  private:
-    void initFBO();
-    GLuint LoadShader( GLenum type, const char *shaderSrc );
-    void RenderTextureToScreen(GLuint textId);
-  
-  private:
-    double        _dpi;
-    Display&      _display;
+        double unitSizeMm() const
+        {
+            return 25.4 * unitSizeInch();
+        }
 
+        void setResolution(double dpi)
+        {
+            _dpi = dpi;
+        }
 
-    GLuint _fboA; // frame buffer
-    GLuint _fboB; // frame buffer
-    
-    GLuint _textureA;
-    GLuint _textureB;
-    GLuint _mainProgram;
-    GLuint _textProgram;
+        double resolutionDPI() const
+        {
+            return _dpi;
+        }
 
-    int _counter;
+        void setCursor(const Hmi::Cursor* cursor );
 
-    GLuint _depthBuf; // depth buffer
+        void update(const Gfx::RectF& updateRect);
 
-    GLuint _positionLoc;
-    GLuint _texCoordLoc;
-    GLuint _samplerLoc;
-    GLuint _texColor;
+        WindowManager& windowManager()
+        {
+            return _windowManager;
+        }
 
+    protected:
+        virtual void onActivate();
+
+        virtual void onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent );
+
+        virtual void onKeyEvent(const Pt::Hmi::KeyEvent& ev);
+
+    private:
+        enum BlitOp
+        {
+            CopyOp,
+            AndOp,
+            XorOp
+        };
+
+        void grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx::Image& image);
+ 
+        void bitBlit( const Pt::uint8_t* , size_t width, size_t height, const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op );
+
+        void bitBlit(const Gfx::Image& image, Pt::uint8_t* buffer);
+
+        void drawCursor( Pt::uint8_t* buffer );
+
+        void updateScreen();
+
+    private:
+        FrameBuffer&  _frameBuffer;
+        Gfx::Image    _cursorBackground;
+        Gfx::Point    _cursorPos;
+        double        _dpi;
+        bool          _drawCursor;
+        WindowManager _windowManager;
+        PixmapSurface _surface;
+        Cursor        _cursor;
 };
 
-}
+} // namespace
 
-}
+} // namespace
 
 #endif

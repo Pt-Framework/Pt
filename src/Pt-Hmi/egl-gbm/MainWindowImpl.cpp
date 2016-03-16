@@ -1,6 +1,7 @@
- /* Copyright (C) 2015 Marc Boris Duerner 
-    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+ /* 
+  Copyright (C) 2015 Marc Boris Duerner 
+  Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -23,34 +24,23 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
+*/
+
 #include "MainWindowImpl.h"
-#include "PaintSurfaceImpl.h"
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
-#include <Pt/Hmi/MainWindow.h>
+
 #include <Pt/Hmi/Application.h>
-#include <Pt/System/Logger.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <fcntl.h>
-#include <getopt.h>
-#include <linux/types.h>
-#include <linux/kd.h>
-#include <linux/keyboard.h>
-#include <sys/ioctl.h>
-#include <string.h>
-#include <errno.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-MainWindowImpl::MainWindowImpl(MainWindow* window)
-: _app(Application::instance() )
-, _apiWindow(window)
-{ 	
+MainWindowImpl::MainWindowImpl(Window* window)
+: ChildWindowImpl(window)
+{
 }
 
 
@@ -58,165 +48,64 @@ MainWindowImpl::~MainWindowImpl()
 {
 }
 
-	
-void MainWindowImpl::onEvent(const Pt::Event& ev)
-{
-	_app.sendEvent(*_apiWindow, ev);
-}
-
-
-void MainWindowImpl::onInvalidate()
-{		
-	_app.mainScreen().impl()->update();
-}
-
-
-void MainWindowImpl::onPaint(PaintSurface& paintSurface)
-{
-  _apiWindow->render();
-
-	Hmi::Painter& painter = paintSurface.painter();
-	
-	painter.drawSurface( Gfx::PointF(0,0), _apiWindow->surface() );
-}
-
-
-void MainWindowImpl::create()
-{
-	this->setWindowParent( _app.mainScreen().impl() );
-	_app.mainScreen().impl()->windowManager().add( this );
-}
-	
-
-void MainWindowImpl::destroy()
-{
-	_app.mainScreen().impl()->windowManager().remove( this );
-	this->setWindowParent(0);
-}
-
-
-void MainWindowImpl::show()
-{
-	setVisible(true);
-}
-
-
-void MainWindowImpl::hide()
-{
-	setVisible(false);
-}
-
 
 void MainWindowImpl::activate()
 {
-  _app.mainScreen().impl()->windowManager().activate( this ); 
+    Application::instance().mainScreen().impl()->windowManager().activate(*_apiWindow);
 }
 
 
-void MainWindowImpl::setWindowPos(const Gfx::PointF& p)
+void MainWindowImpl::show(bool b)
 {
-	 if( position()  ==  p )
-			return;
-
-	Window::setPosition( p );
+    Application::instance().mainScreen().impl()->windowManager().showWindow(*_apiWindow, b);
 }
 
 
-void MainWindowImpl::setWindowSize( const Gfx::SizeF& size )
+void MainWindowImpl::enable(bool b)
 {
-	 if( Window::size()  == size )
-			return;
-
-	Window::setSize( size );
+    Application::instance().mainScreen().impl()->windowManager().enableWindow(*_apiWindow, b);
 }
 
 
-void MainWindowImpl::showTitle(bool p)
+void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
-	setShowTitle(p);
+    Application::instance().mainScreen().impl()->windowManager().resizeWindow(*_apiWindow, size);
 }
 
 
-void MainWindowImpl::setWindowCaption(const std::string& text)
+void MainWindowImpl::move(const Gfx::PointF& pos)
 {
-	setCaption(text);
+    Application::instance().mainScreen().impl()->windowManager().moveWindow(*_apiWindow, pos);
 }
 
 
-void MainWindowImpl::showMinimizedButton(bool p)
+void MainWindowImpl::update(const Gfx::RectF& updateRect)
 {
-	setShowMinimizeButton(p);
+    double borderWidth = _apiWindow->windowManager().borderWidth();
+    double titleHeight = _apiWindow->windowManager().titleHeight();
+
+    Gfx::PointF pos = _apiWindow->position() + updateRect.topLeft();
+    pos.addX(borderWidth);
+    pos.addY(borderWidth + titleHeight);
+
+    Gfx::RectF screenRect( pos, updateRect.size() );
+    Application::instance().mainScreen().impl()->update(screenRect);
 }
 
 
-void MainWindowImpl::showMaximizeButton(bool p)
+void MainWindowImpl::onUpdate(Window& child, const Gfx::RectF& childRect)
 {
-	setShowMaximizeButton(p);
-}
-  
+    double borderWidth = _apiWindow->windowManager().borderWidth();
+    double titleHeight = _apiWindow->windowManager().titleHeight();
 
-void MainWindowImpl::showSysMenu(bool p)
-{
-	setShowSysMenu(true);
-}
+    Gfx::PointF pos = child.position() + childRect.topLeft();
+    pos.addX(borderWidth);
+    pos.addY(borderWidth + titleHeight);
 
-
-void MainWindowImpl::setTopMost(bool force)
-{
-	//ToDo:
-}
-  
-
-void MainWindowImpl::setWindowState( WindowState::Type p )
-{
-	setState(p);
+    Gfx::RectF updateRect( pos, childRect.size() );
+    update(updateRect);
 }
 
+} // namespace
 
-void MainWindowImpl::setBorder( WindowBorder::Type p )
-{
-	setBorder(p);
-}
-
-
-void MainWindowImpl::showInTaskbar(bool p)
-{
-	setShowInTaskbar(p);
-}
-
-
-void MainWindowImpl::setIcon(const Gfx::Image& p)
-{
-	setIcon(p);
-}
-
-
-void MainWindowImpl::setEnable(bool e)
-{
-	setEnabled(e);
-}
-
-
-void MainWindowImpl::setMinSize(const Gfx::SizeF& s)
-{
-	setMinimumSize(s);
-}
-
-
-void MainWindowImpl::setMaxSize(const Gfx::SizeF& s)
-{
-	setMaximumSize(s);
-}
-
-void MainWindowImpl::bringToFront()
-{
-  //ToDo:
-}
-
-void MainWindowImpl::focus()
-{
-  //ToDo:
-}
-
-
-}} // namespace
+} // namespace

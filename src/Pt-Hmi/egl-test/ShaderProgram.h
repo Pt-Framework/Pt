@@ -1,5 +1,6 @@
  /* Copyright (C) 2015 Marc Boris Duerner 
     Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+    Copyright (C) 2015 Ilja Maier
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -23,54 +24,61 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-	MA  02110-1301  USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA  02110-1301  USA
 */
 
-#ifndef Pt_Hmi_ApplicationImpl_h
-#define Pt_Hmi_ApplicationImpl_h
+#ifndef Pt_Hmi_ShaderProgram_H
+#define Pt_Hmi_ShaderProgram_H
 
-#include "InputDevice.h"
-#include "FrameBuffer.h"
-#include <Pt/System/MainLoop.h>
+#include <map>
+#include <string>
+
+#include <GLES2/gl2.h>
+#include <EGL/egl.h>
+
+#include <string>
+#include <map>
 
 namespace Pt {
 
 namespace Hmi {
 
-class ApplicationImpl : public Pt::System::MainLoop
+class ShaderProgram
 {
   public:
-    ApplicationImpl();
+    ShaderProgram(const std::string& vsh, const std::string& fsh);
 
-    virtual ~ApplicationImpl();
+    ~ShaderProgram();
 
-		FrameBuffer& frameBuffer()
-		{
-			return _frameBuffer;
-		}
-
-	  Pt::Signal<const Pt::Event&>& eventReady()
-		{
-				return _eventReady;
-		}
-
-		void nextEvent();
+    void bind();
     
-	private:
-		void onInputEvent(const Pt::Event& ev);
+    void unbind();
 
-		void showConsole( bool s);
+    GLuint uniform(const std::string& name) const;
+    
+    GLuint attribute(const std::string& name) const;
+
+    GLuint programId() const
+    { return _programID; }
 
   private:
-		FrameBuffer _frameBuffer; 
-		std::vector<InputDevice*> _inputDevices;
-		Pt::Signal<const Pt::Event&> _eventReady;
+    GLuint compile(GLenum type, const std::string& source);
+
+    void getAttributes();
+    
+    void getUniforms();
+  
+  private:
+    GLuint                        _programID;
+    GLuint                        _vertID;
+    GLuint                        _fragID;
+    std::map<std::string, GLuint> _uniforms;
+    std::map<std::string, GLuint> _attributes;
 };
 
-} // namespace
+} // namespace Hmi
 
-} // namespace
+} // namespace Pt
 
-#endif
-
+#endif // Pt_Hmi_ShaderProgram_H
