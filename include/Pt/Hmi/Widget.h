@@ -101,6 +101,8 @@ class PT_HMI_API Widget : public Pt::Connectable
         Gfx::PointF toClient(const Gfx::PointF& globalPoint);
 
         Gfx::PointF fromClient(const Gfx::PointF& localPoint);
+
+        Gfx::PointF toWindowPosition(const Gfx::PointF& p) const;
         
         //
         // focus handling
@@ -226,6 +228,8 @@ class PT_HMI_API Widget : public Pt::Connectable
         {
             return _geometry.size();
         }
+
+        void resize(const Gfx::SizeF& size);
 
         void setSize( const Gfx::SizeF& s );
 

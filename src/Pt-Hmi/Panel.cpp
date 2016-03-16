@@ -29,6 +29,7 @@
 
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Layout.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Pen.h>
@@ -57,15 +58,24 @@ Panel::~Panel()
 }
 
 
-void Panel::onRender(const Gfx::PointF& pos, 
-                     PaintSurface& surface, 
+void Panel::onRender(const Gfx::PointF& /*pos*/, 
+                     PaintSurface& /*surface*/, 
                      const Gfx::RectF& updateRect)
 {
-    Gfx::RectF paintRect(pos, size());
-    PaintRegion region(surface, paintRect);
+    Gfx::PointF winpos = toWindowPosition( Gfx::PointF(0,0) );
+    PaintSurface& windowSurface = this->window()->surface();
+
+    Gfx::RectF paintRect(winpos, size());
+    PaintRegion region(windowSurface, paintRect);
     onPaint(region, updateRect);
 
-    Widget::onRender(pos, surface, updateRect);
+    Widget::onRender(Gfx::PointF(0,0), windowSurface, updateRect);
+
+    //Gfx::RectF paintRect(pos, size());
+    //PaintRegion region(surface, paintRect);
+    //onPaint(region, updateRect);
+
+    //Widget::onRender(pos, surface, updateRect);
 }
 
 

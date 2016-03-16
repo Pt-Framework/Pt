@@ -53,6 +53,8 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void sendEvent(Window& w, const Pt::Event& ev);
 
+        void resize(Widget& w, const Gfx::SizeF& size);
+
         const Screen& mainScreen() const
         {
             return *_mainScreen;

@@ -244,6 +244,21 @@ Gfx::PointF Widget::fromClient(const Gfx::PointF& localPoint)
 }
 
 
+Gfx::PointF Widget::toWindowPosition(const Gfx::PointF& p) const
+{
+    Gfx::PointF pos = p + this->position();
+
+    const Widget* w = this;
+    
+    for(w = w->parent(); w != 0; w = w->parent())
+    {
+        pos += w->position();
+    }
+
+    return pos;
+}
+
+
 bool Widget::hasFocus() const
 {
     return _hasFocus;
@@ -652,7 +667,13 @@ void Widget::setSize(const Gfx::SizeF& size)
     _updateRect.unify(_geometry);            
 }
 
-    
+
+void Widget::resize(const Gfx::SizeF& size)
+{
+    Application::instance().resize(*this, size);          
+}
+
+
 void Widget::setPosition(const Gfx::PointF& pos)
 {
     _updateRect.unify(_geometry); 

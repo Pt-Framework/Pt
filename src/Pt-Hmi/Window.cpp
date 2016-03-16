@@ -482,17 +482,6 @@ void Window::onKeyEvent(const KeyEvent& ev)
 }
 
 
-void Window::onResizeEvent(const ResizeEvent& ev)
-{    
-    _size = ev.size();
-    _state = ev.state();
-    _surface.resize(_size);
-
-    if( _mainWidget )
-        _mainWidget->setSize(_size);
-}
-
-
 void Window::onMoveEvent(const MoveEvent& ev)
 {   
    _position = ev.position();
@@ -742,6 +731,8 @@ void Window::onEnable(Window& child, bool enable)
 }
 
 
+
+
 const Gfx::SizeF& Window::size() const
 {
     return _size;
@@ -764,6 +755,19 @@ void Window::onResize(Window& child, const Gfx::SizeF& s)
 {
     _windowManager.resizeWindow(child, s);
 }
+
+
+void Window::onResizeEvent(const ResizeEvent& ev)
+{    
+    _size = ev.size();
+    _state = ev.state();
+    _surface.resize(_size);
+
+    if( _mainWidget )
+        _mainWidget->setSize(_size);
+}
+
+
 
 
 const Gfx::PointF& Window::position() const

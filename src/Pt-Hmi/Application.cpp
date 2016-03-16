@@ -75,6 +75,11 @@ void Application::sendEvent(Window& w, const Pt::Event& ev)
 }
 
 
+void Application::resize(Widget& w, const Gfx::SizeF& size)
+{
+}
+
+
 Widget* Application::findWidget(const std::string& name)
 {
 	return _mainScreen->findWidget( name);
