@@ -54,12 +54,14 @@ Label::~Label()
 void Label::setText(const Pt::String& text)
 {
     _text = Widget::setMnemonic(text);
+    repaint();
 }
 
 
 void Label::setFont( const Gfx::Font& f )
 {
     _font = f;
+    repaint();
 }
 
 

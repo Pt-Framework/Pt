@@ -43,18 +43,12 @@ namespace Hmi {
 Widget::Widget()
 : _window(0)
 , _parent(0)
-, _enabled(true)
-, _visible(true)
 , _cursor( Hmi::Cursor::defaultCursor() )
 , _autoSize(false)
 , _acceptFocus( false) 
-, _name("")
 , _hasFocus( false)
 , _actionKey(Key::Space)
-, _geometry(10, 100, 10, 100)
-, _isUpdating(false)
 , _mnemonic(0)
-, _updateRect()
 {      
     _eventReady += Pt::slot(*this, &Widget::onKeyEvent);
     _eventReady += Pt::slot(*this, &Widget::onPointerEvent);
@@ -112,7 +106,7 @@ void Widget::add(Widget& widget)
     widget._parent = this;
 
     widget.setWindow(_window);   
-    widget.update();
+    widget.repaint();
 }
 
 
@@ -127,7 +121,7 @@ void Widget::remove(Widget& widget)
     widget._parent = 0;
 
     widget.setWindow(0);
-    widget.update();
+    widget.repaint();
 }
 
 
@@ -165,7 +159,7 @@ Widget* Widget::findWidget( const Gfx::PointF& pos )
 {
     std::vector<Widget*>::reverse_iterator it = _children.rbegin();
 
-    if( ! isVisible() || ! isEnabled() )
+    if( ! isVisible() || ! enabled() )
         return 0;
 
     for( ; it != _children.rend(); ++it )
@@ -184,25 +178,6 @@ Widget* Widget::findWidget( const Gfx::PointF& pos )
     }
         
     return contains( toClient( pos ) )  ? this : 0;
-}
-
-
-Widget* Widget::findWidget( const std::string& name )
-{
-  if( _name == name )
-      return this;
-
-  std::vector<Widget*>::iterator it = _children.begin();
-
-    for( ; it != _children.end(); ++it )
-    {
-        Widget* found = (*it)->findWidget( name );
-
-        if( found )
-            return found;        
-    }
-        
-    return  0;
 }
 
 
@@ -385,121 +360,21 @@ String Widget::setMnemonic(const String& text)
 
 void Widget::processEvent(const Pt::Event& ev)
 {
-    onEvent(ev);
+     _eventReady.send(ev);
 }
 
 
-void Widget::update(const Gfx::RectF& rect)
+void Widget::repaint(const Gfx::RectF& rect)
 {
-    // The widget is already invalid in case of a nested update()
-    // this means the parent must already be invalid or has just
-    // been rendered. Therefore we stop the chain of update calls
-    // towards the root of the widget/window tree.
-    if( _isUpdating )
-        return;
-
-    // to parent client rect coordinates
-    Gfx::PointF updatePos = rect.topLeft() - position();
-    Gfx::RectF updateRect(updatePos, rect.size());
-
-    // the update area and window rect are already in parent coordinates
-    _updateRect.unify(updateRect);
-
-    if( parent() )
-    {
-        _isUpdating = true; 
-        parent()->onUpdate(_updateRect);
-    }
-    else
-    {
-        if(_window)
-        {
-            _isUpdating = true; 
-            _window->onUpdate(_updateRect);
-        }
-    }
+    Application::instance().repaint(*this, rect );
 }
 
 
-void Widget::update()
+void Widget::repaint()
 {
-    // The widget is already invalid in case of a nested update()
-    // this means the parent must already be invalid or has just
-    // been rendered. Therefore we stop the chain of update calls
-    // towards the root of the widget/window tree.
-    if( _isUpdating )
-        return;
-
-    // the update area and window rect are already in parent coordinates
-    _updateRect.unify(_geometry);
-
-    if( parent() )
-    {
-        _isUpdating = true; 
-        parent()->onUpdate(_updateRect);
-    }
-    else
-    {
-        if(_window)
-        {
-            _isUpdating = true; 
-            _window->onUpdate(_updateRect);
-        }
-    }
+    repaint(Gfx::RectF( Gfx::PointF(0,0), size() ) );
 }
 
-
-void Widget::onUpdate(const Gfx::RectF& rect)
-{
-    // The widget is already invalid in case of a nested update()
-    // this means the parent must already be invalid or has just
-    // been rendered. Therefore we stop the chain of update calls
-    // towards the root of the widget/window tree.
-    if( _isUpdating )
-        return;
-
-   // given rect in parent coordinates
-   Gfx::RectF updateRect(rect);
-   updateRect.setOrigin( rect.topLeft() + position() );
-
-    // add the update area in parent coordinates
-    _updateRect.unify(updateRect);
-
-    if( parent() )
-    {
-        // update rect in parent widget coordinates
-        parent()->onUpdate(updateRect);   
-    }
-    else
-    {
-        // update rect in parent window client rect coordinates
-        if(_window)
-            _window->onUpdate(updateRect);
-    }
-}
-
-
-void Widget::render(const Gfx::PointF& pos, 
-                    PaintSurface& surface, 
-                    const Gfx::RectF& updateRect)
-{
-    if( ! isVisible() )
-    {
-        _isUpdating = false;
-        return;
-    }
-
-    if( _isUpdating )
-        onLayout();
-
-    if( ! _updateRect.isNull() )
-        onLayout();
-    
-    onRender(pos, surface, updateRect);
-    
-    _updateRect.clear();
-    _isUpdating = false;
-}
 
 
 void Widget::onLayout()
@@ -507,37 +382,24 @@ void Widget::onLayout()
 }
 
 
-void Widget::onRender(const Gfx::PointF& pos, 
-                      PaintSurface& surface, 
-                      const Gfx::RectF& updateRect)
+void Widget::onPaintEvent( const PaintEvent& ev )
 {
-    for( size_t i = 0; i < _children.size(); ++i )
-    {
-        Widget* child = _children[i];
-
-        if( updateRect.intersect( child->geometry() ).isNull() )
-            continue;
-
-        //static int _n = 0;
-        //std::clog << _n++ << " render widget " << child->name() << std::endl;
-
-        Gfx::PointF paintOffset( pos.x() + child->position().x(),
-                                 pos.y() + child->position().y() );
-
-        // update rect in child coordinates
-        Gfx::RectF rect(updateRect);
-        rect.setOrigin( updateRect.topLeft() - child->position() );
-
-        child->render(paintOffset, surface, rect);
-    }
+   Visual::onPaintEvent(ev);
 }
 
 
-void Widget::onEvent(const Pt::Event& ev)
+void Widget::onResizeEvent( const ResizeEvent& ev )
 {
-    _eventReady.send(ev);
+    Visual::onResizeEvent(ev);
+    onLayout();
 }
 
+
+void Widget::resize( const Gfx::SizeF& s )
+{
+    Application::instance().resize(*this, s );
+}
+ 
        
 void Widget::onPointerEvent(const MouseEvent& ev)
 {        
@@ -573,11 +435,12 @@ void Widget::onKeyEvent(const KeyEvent& ev)
         else
             _window->focusNext();
 
-        update();
+        repaint();
 
         Widget* focusWidget = _window->focusWidget();
+
         if(focusWidget)
-            focusWidget->update();
+            focusWidget->repaint();
 
         return;
     }
@@ -653,46 +516,30 @@ Gfx::SizeF Widget::onAutoSize() const
     return Gfx::SizeF(0, 0);
 }
 
-
-void Widget::setEnabled( bool e )
+void Widget::move(const Gfx::PointF& pos)
 {
-    _enabled = e;
+    Application::instance().move(*this, pos );
 }
 
 
-void Widget::setSize(const Gfx::SizeF& size)
+void Widget::enable( bool b )
 {
-    _updateRect.unify(_geometry); 
-    _geometry.setSize(size);
-    _updateRect.unify(_geometry);            
+    Application::instance().enable(*this, b );
 }
-
-
-void Widget::resize(const Gfx::SizeF& size)
-{
-    Application::instance().resize(*this, size);          
-}
-
-
-void Widget::setPosition(const Gfx::PointF& pos)
-{
-    _updateRect.unify(_geometry); 
-    _geometry.setOrigin(pos);
-    _updateRect.unify(_geometry);   
-}
-
 
 void Widget::setGeometry(const Gfx::PointF& pos, const Gfx::SizeF& size)
 {
-  setPosition(pos);
-  setSize(size);
+  move(pos);
+  resize(size);
 }
 
 
-void Widget::setVisible( bool b )
+void Widget::show( bool s )
 {
-    _visible = b;
+    Application::instance().show( *this, s );
 }
+
+
 
 } // namespace
 

@@ -148,7 +148,7 @@ void Screen::unregisterWindow(Window& w)
         _windows.erase(it);
 }
 
-
+/*
 Widget* Screen::findWidget(const std::string& name)
 {
     std::vector<Window*>::iterator it;
@@ -175,12 +175,42 @@ Window* Screen::findWindow(const std::string& name)
     
     return 0;
 }
+*/
 
-
-void Screen::update(const Gfx::RectF& updateRect)
+void Screen::processEvent(const Pt::Event& ev)
 {
-    _impl->update(updateRect);
+ 
 }
+
+                
+void Screen::resize( const Gfx::SizeF& s )
+{
+
+}
+
+
+void Screen::move( const Gfx::PointF& p )
+{
+}
+
+
+void Screen::show( bool b )
+{
+
+}
+
+
+void Screen::enable( bool b  )
+{
+
+}
+
+
+void Screen::repaint(const Gfx::RectF& updateRect)
+{
+//    _impl->repaint(updateRect);
+}
+
 
 } // namespace
 

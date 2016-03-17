@@ -55,9 +55,7 @@ class WindowImpl : public Pt::Connectable
 
         virtual void activate() = 0;
 
-        virtual void update(const Gfx::RectF& rect) = 0;
-
-        virtual void onUpdate(Window& child, const Gfx::RectF& childRect) = 0;
+        virtual void repaint(const Gfx::RectF& rect) = 0;
 
         virtual void move(const Gfx::PointF& pos) = 0;
    

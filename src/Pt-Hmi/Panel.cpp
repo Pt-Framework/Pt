@@ -58,24 +58,16 @@ Panel::~Panel()
 }
 
 
-void Panel::onRender(const Gfx::PointF& /*pos*/, 
-                     PaintSurface& /*surface*/, 
-                     const Gfx::RectF& updateRect)
+void Panel::onPaintEvent( const PaintEvent& ev )
 {
+    Widget::onPaintEvent(ev);
+
     Gfx::PointF winpos = toWindowPosition( Gfx::PointF(0,0) );
     PaintSurface& windowSurface = this->window()->surface();
 
     Gfx::RectF paintRect(winpos, size());
     PaintRegion region(windowSurface, paintRect);
-    onPaint(region, updateRect);
-
-    Widget::onRender(Gfx::PointF(0,0), windowSurface, updateRect);
-
-    //Gfx::RectF paintRect(pos, size());
-    //PaintRegion region(surface, paintRect);
-    //onPaint(region, updateRect);
-
-    //Widget::onRender(pos, surface, updateRect);
+    onPaint(region, ev.rect());
 }
 
 

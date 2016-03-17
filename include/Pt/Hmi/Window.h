@@ -44,6 +44,10 @@
 #include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/EnterEvent.h>
 #include <Pt/Hmi/LeaveEvent.h>
+#include <Pt/Hmi/PaintEvent.h>
+#include <Pt/Hmi/ShowEvent.h>
+#include <Pt/Hmi/EnableEvent.h>
+#include <Pt/Hmi/Visual.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Connectable.h>
@@ -57,7 +61,7 @@ namespace Hmi {
 class Widget;
 class WindowImpl;
 
-class PT_HMI_API Window : public Pt::Connectable
+class PT_HMI_API Window : public Visual
 {
    friend class Widget; 
    friend class WindowImpl;
@@ -79,16 +83,14 @@ class PT_HMI_API Window : public Pt::Connectable
 
     const std::vector<Window*>& windows() const;
 
-    Window* findWindow(const std::string& name);
-
     Widget* mainWidget();
 
     const Widget* mainWidget()  const;
 
     void setMainWidget(Widget* widget);
 
-    Widget* findWidget(const std::string& name);
-
+    Visual* findVisual( Pt::uint64_t id);
+    
     Widget* pointerWidget();
 
     Widget* focusWidget();
@@ -100,22 +102,7 @@ class PT_HMI_API Window : public Pt::Connectable
     bool isActive() const;
 
     void activate();
-
-    const Gfx::SizeF& size() const;
-
-    void resize( const Gfx::SizeF& s );
-
-    const Gfx::PointF& position() const;
-
-    void move(const Gfx::PointF& p);
-
-    bool isVisible() const;
-
-    void show(bool b = true);
-
-    bool isEnabled() const;
-
-    void enable(bool e);
+  
 
     // TODO: return new focusWidget() and remove focusWidget()
     void focusNext();
@@ -123,14 +110,8 @@ class PT_HMI_API Window : public Pt::Connectable
     // TODO: return new focusWidget() and remove focusWidget()
     void focusPrev();
     
-    void update(const Gfx::RectF& rect);
-
-    void update();
-
     // TODO: make protected/private
     void render(const Gfx::RectF& rect);
-
-    void processEvent(const Pt::Event& ev);
 
     PixmapSurface& surface();
 
@@ -144,9 +125,19 @@ class PT_HMI_API Window : public Pt::Connectable
 
     void runModal();
 
-  protected:
-    virtual void onEvent(const Pt::Event& ev);
+    virtual void resize( const Gfx::SizeF& s );
 
+    virtual void move(const Gfx::PointF& p);
+
+    virtual void show( bool b = true );
+    
+    virtual void enable( bool e = true );
+
+    void repaint();
+
+    virtual void repaint(const Gfx::RectF& rect);
+
+  protected:
     virtual void onKeyEvent( const KeyEvent& ev );
 
     virtual void onPointerEvent( const MouseEvent& ev );
@@ -161,11 +152,12 @@ class PT_HMI_API Window : public Pt::Connectable
     
     virtual void onResizeEvent(const ResizeEvent& ev);
 
-    virtual void onMoveEvent( const MoveEvent& ev);
+    virtual void onPaintEvent(const PaintEvent& ev);
 
     virtual void onCloseEvent(const CloseEvent& ev);
 
-    virtual void onActivateEvent(const ActivateEvent& ev);
+    virtual void onActivateEvent(const ActivateEvent& ev);  
+    
 
     // TODO:
   public:
@@ -216,20 +208,6 @@ class PT_HMI_API Window : public Pt::Connectable
   private:
     void createImpl();
 
-    void onUpdate(const Gfx::RectF& rect);
-
-    void onUpdate(Window& child, const Gfx::RectF& childRect);
-
-    void onActivate(Window& child);
-
-    void onEnable(Window& child, bool enable);
-
-    void onShow(Window& child, bool b);
-
-    void onResize(Window& child, const Gfx::SizeF& size);
-
-    void onMove(Window& child, const Gfx::PointF& pos);
-
     void addWidget(Widget& w);
 
     void removeWidget(Widget& w);
@@ -259,22 +237,14 @@ class PT_HMI_API Window : public Pt::Connectable
     Gfx::SizeF                     _maximumSize;
     Hmi::WindowPosition::Type      _startPostion;
     Hmi::WindowState::Type         _state;    
-    bool                           _enabled;
-    bool                           _visible;
-    bool                           _isValid;
-    Gfx::SizeF                     _size;
-    Gfx::PointF                    _position; 
     Hmi::WindowBorder::Type        _border;
     std::string                    _title;
     Gfx::Image                     _icon;
     bool                           _canClose;    
     WindowDecoration::Flags        _decoration;   
-    std::string                    _name;    
-    Gfx::Font                      _font;
-    
+    Gfx::Font                      _font;    
     std::map<Key, Widget*>         _shortcuts; 
-    std::map<Pt::Char, Widget*>    _mnemonics; 
-    
+    std::map<Pt::Char, Widget*>    _mnemonics;     
     Widget*                        _mainWidget;
     Window*                        _parent;
     Widget*                        _pointerWidget;
@@ -282,7 +252,6 @@ class PT_HMI_API Window : public Pt::Connectable
     std::vector<Widget*>           _focusList;
     PixmapSurface                  _surface;
     WindowImpl*                    _impl;           
-    Pt::Signal<const Pt::Event&>   _eventReady;
 };
 
 } // namespace

@@ -96,7 +96,7 @@ void Button::onPointerEvent(const MouseEvent& ev)
     if( ev.isPressed(MouseEvent::Left) != _isPressed )
     {
         _isPressed = ev.isPressed(MouseEvent::Left);
-        update();
+        repaint();
     }
 }
 
@@ -104,7 +104,7 @@ void Button::onPointerEvent(const MouseEvent& ev)
 void Button::onPointerEnter()
 {
     Label::onPointerEnter();
-    update();
+    repaint();
 }
 
 
@@ -112,7 +112,7 @@ void Button::onPointerLeave()
 {
     _isPressed = false;
     Label::onPointerLeave();
-    update();
+    repaint();
 }
 
 
@@ -123,7 +123,7 @@ void Button::onTouchEvent(const TouchEvent& ev)
     if( ev.isPress() != _isPressed )
     {
         _isPressed = ev.isPress();
-        update();
+        repaint();
     }
 }
 
@@ -131,7 +131,7 @@ void Button::onTouchEvent(const TouchEvent& ev)
 void Button::onFocus(bool hasFocus)
 {    
     Label::onFocus(hasFocus);
-    update();
+    repaint();
 }
 
 
@@ -140,12 +140,13 @@ void Button::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
     bool mouseOver = window()->pointerWidget() == this;
     Gfx::Color bkgColor = backgroundColor();
 
-    if( ! isEnabled() )
+    if( ! enabled() )
     {
         Label::onPaint(surface, updateRect);
         return;
     }
 
+    /*
     if( mouseOver )
     {
         setBackgroundColor( Gfx::Color(bkgColor.red() * 0.9f ,
@@ -159,10 +160,10 @@ void Button::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
                                        bkgColor.green() * 0.8f ,
                                        bkgColor.blue() * 0.8f ) );
     }
-
+    */
     Label::onPaint(surface, updateRect);
     
-    setBackgroundColor(bkgColor);
+    //setBackgroundColor(bkgColor);
 
     if( hasFocus() )
     {

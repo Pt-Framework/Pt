@@ -26,43 +26,38 @@
  02110-1301  USA
 */
 
-#ifndef Pt_Hmi_ResizeEvent_h
-#define Pt_Hmi_ResizeEvent_h
+#ifndef Pt_Hmi_PaintEvent_h
+#define Pt_Hmi_PaintEvent_h
 
 #include <Pt/Types.h>
 #include <Pt/Event.h>
-#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/WindowState.h>
 
 namespace Pt{
 namespace Hmi{
 
-class PT_HMI_API ResizeEvent : public Pt::BasicEvent<ResizeEvent>
+class PT_HMI_API PaintEvent : public Pt::BasicEvent<PaintEvent>
 {
 	public:	
-		ResizeEvent( Pt::uint64_t vid, const Gfx::SizeF& size )
-		: _size( size )
+		PaintEvent( Pt::uint64_t vid, const Gfx::RectF& rect )
+		: _rect( rect )
 		, _vid( vid )
 		{
 		}
 
-		ResizeEvent()
+		PaintEvent()
 		{
 		}
 
-		virtual ~ResizeEvent()
+		virtual ~PaintEvent()
 		{
 		}
 
-		void setSize( const Gfx::SizeF&  size )
+		const Gfx::RectF&  rect( ) const
 		{
-			_size = size;
-		}
-
-		const Gfx::SizeF&  size( ) const
-		{
-			return _size;
+			return _rect;
 		}
 
         
@@ -72,7 +67,7 @@ class PT_HMI_API ResizeEvent : public Pt::BasicEvent<ResizeEvent>
         }
 
 	private:
-		Gfx::SizeF _size;
+		Gfx::RectF  _rect;
         Pt::uint64_t _vid;
 };
 

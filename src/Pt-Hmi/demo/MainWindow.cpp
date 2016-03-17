@@ -48,15 +48,16 @@ namespace Demo {
 MainWindow::MainWindow()
 : _child1("Child 1")
 {
-    move(  Gfx::PointF(60, 30) );
-    resize( Gfx::SizeF(600, 430) );
+
     setTitle("Main 1");
     show( true );  // MainWindow
-    
-    _child1.move( Gfx::PointF(10, 10) );
+    move(  Gfx::PointF(60, 30) );
+    resize( Gfx::SizeF(600, 430) );    
+    _child1.show(true); // Child 1
     add( _child1 );
     
-    _child1.show(true); // Child 1
+    _child1.move( Gfx::PointF(10, 10) );
+    _child1.resize(Gfx::SizeF(300,500));            
 }
 
 

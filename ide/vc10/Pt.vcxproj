@@ -64,6 +64,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Dial.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Docking.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DockingLayout.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\EnableEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\EnterEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\FlowLayout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Key.h" />
@@ -74,14 +75,17 @@
     <ClInclude Include="..\..\include\Pt\Hmi\MouseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MoveEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Painter.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\PaintEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Panel.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ResizeDirection.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Screen.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ScrollEvent.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\ShowEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Spacing.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\TouchEvent.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Visual.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowBorder.h" />
@@ -546,6 +550,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Panel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Screen.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Visual.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Window.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowImpl.cpp" />

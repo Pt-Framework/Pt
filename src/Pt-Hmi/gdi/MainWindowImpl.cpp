@@ -40,6 +40,7 @@
 #include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ActivateEvent.h>
+#include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Hmi/Screen.h>
 #include "PaintSurfaceImpl.h"
 
@@ -86,10 +87,13 @@ void MainWindowImpl::destroy()
 
 void MainWindowImpl::show( bool v)
 {
+    _apiWindow->onShowEvent( ShowEvent(_apiWindow->vid(), v ) );
+
    if( v )
        ShowWindow(_hwnd, SW_SHOW);
    else
        ShowWindow(_hwnd, SW_HIDE);
+    
 }
 
 
@@ -186,6 +190,14 @@ bool MainWindowImpl::processEvent(unsigned int message, WPARAM wparam, LPARAM lp
         }
         break;
                 
+        case WM_ENABLE:
+              onEnable(true);
+        break;
+
+        case WS_DISABLED:
+            onEnable(false);
+        break;
+
         case WM_KILLFOCUS:
         {
             onActivate( false );
@@ -223,9 +235,14 @@ void MainWindowImpl::onClose()
 }
 
 
-void MainWindowImpl::onActivate(bool f)
+void MainWindowImpl::onActivate(bool a)
 {
-    _apiWindow->processEvent( ActivateEvent(f) );
+    _apiWindow->processEvent( ActivateEvent(_apiWindow->vid(), a) );
+}
+
+void MainWindowImpl::onEnable(bool e)
+{
+    _apiWindow->processEvent( EnableEvent(_apiWindow->vid(), e) );
 }
 
 
@@ -254,10 +271,10 @@ void MainWindowImpl::onSize(WPARAM wParam, LPARAM lParam)
  
   int width  = LOWORD(lParam);
   int height = HIWORD(lParam);  
-    
-    Pt::Hmi::ResizeEvent ev(Gfx::SizeF(width, height), state);
-    _apiWindow->processEvent(ev);
-    _apiWindow->update();
+
+  _apiWindow->processEvent(ResizeEvent(_apiWindow->vid(), Gfx::SizeF( width, height ) ) );
+
+ 
 }
 
 
@@ -353,23 +370,27 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
 void MainWindowImpl::onMove(LPARAM lParam)
 { 
     RECT  info;
-  GetWindowRect(_hwnd, &info);
+    GetWindowRect(_hwnd, &info);
     int xPos = info.left;
     int yPos = info.top;
 
-    MoveEvent ev(Gfx::PointF(xPos, yPos) );
+    MoveEvent ev(_apiWindow->vid(), Gfx::PointF(xPos, yPos) );
    _apiWindow->processEvent( ev );          
 }
 
 
 void MainWindowImpl::onPaint()
-{           
+{                   
       RECT  info;
-      GetClientRect(_hwnd, &info);
-
       PAINTSTRUCT ps;
+
+      GetClientRect(_hwnd, &info);      
+      
       HDC windowContext = BeginPaint(_hwnd, &ps);
-    
+
+      //TODO: rect optimazatiom
+      _apiWindow->processEvent( PaintEvent( _apiWindow->vid(), Gfx::RectF(Gfx::PointF(0,0), _apiWindow->size() ) ) ); 
+           
       HDC bitmapDeviceConText = _apiWindow->surface().pixmapImpl()->deviceContext();
       BitBlt(windowContext, 0, 0, info.right,  info.bottom, bitmapDeviceConText, 0, 0, SRCCOPY);    
     
@@ -407,13 +428,15 @@ void MainWindowImpl::resize(const Gfx::SizeF& s)
     SetRect(&clientRect, 0, 0, size.width() - 1, size.height() - 1);
 
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
-      LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
+    LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
     AdjustWindowRectEx(&clientRect, style, false, exStyle);
     
     LONG clientWidth  = clientRect.right  - clientRect.left + 1;
     LONG clientHeight = clientRect.bottom - clientRect.top  + 1;
     SetWindowPos(_hwnd, NULL, 0, 0, clientWidth, clientHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+
+    InvalidateRect(_hwnd, NULL, FALSE);
 }
 
 
@@ -600,14 +623,12 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 }
 
 
-void MainWindowImpl::update(const Gfx::RectF& updateRect)
+void MainWindowImpl::repaint(const Gfx::RectF& updateRect)
 {
-    // update rect is in main windows client rect coordinates
-    _apiWindow->render(updateRect);
     InvalidateRect(_hwnd, NULL, FALSE);
 }
 
-
+/*
 void MainWindowImpl::onUpdate(Window& child, const Gfx::RectF& childRect)
 {
     double borderWidth = _apiWindow->windowManager().borderWidth();
@@ -621,7 +642,7 @@ void MainWindowImpl::onUpdate(Window& child, const Gfx::RectF& childRect)
     Gfx::RectF updateRect( pos, childRect.size() );
     _apiWindow->update(updateRect);	
 }
-
+*/
 
 void MainWindowImpl::close()
 {

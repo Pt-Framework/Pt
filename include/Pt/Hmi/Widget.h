@@ -38,6 +38,7 @@
 #include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Docking.h>
+#include <Pt/Hmi/Visual.h>
 #include <Pt/Connectable.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Point.h>
@@ -53,7 +54,7 @@ namespace Hmi {
 class Window;
 class PaintSurface;
 
-class PT_HMI_API Widget : public Pt::Connectable
+class PT_HMI_API Widget : public Visual
 {
     friend class Window;
 
@@ -88,8 +89,7 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         const std::vector<Widget*>& widgets() const;
 
-        Widget* findWidget( const std::string& name );
-        
+       
         Widget* findWidget( const Gfx::PointF& pos );
 
         //
@@ -135,36 +135,32 @@ class PT_HMI_API Widget : public Pt::Connectable
 
         void setMnemonicWidget(Widget* w);
 
-        const Pt::Char* mnemonic() const;
+        const Pt::Char* mnemonic() const;        
 
-        void processEvent(const Pt::Event& ev);
-
-        void update(const Gfx::RectF& rect);
-
-        void update();
 
         void render(const Gfx::PointF& pos, 
                     PaintSurface& surface, 
                     const Gfx::RectF& updateRect);
 
+
+
+        void processEvent(const Pt::Event& ev);
+
+        void resize( const Gfx::SizeF& s );
+
+        void move( const Gfx::PointF& p );
+
+        void show( bool b = true );
+
+        void repaint();
+
+        void enable( bool b = true );
+
+        void repaint( const Gfx::RectF& rect );  
+
     protected:   
         virtual void onLayout();
-
-        virtual void onRender(const Gfx::PointF& pos, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& updateRect); 
-
-    protected:
-        virtual void onEvent(const Pt::Event& ev);
-
-        virtual void onPointerEvent(const MouseEvent& ev);
-
-        virtual void onTouchEvent(const TouchEvent& ev);
         
-        virtual void onScrollEvent( const ScrollEvent& ev );        
-    
-        virtual void onKeyEvent(const KeyEvent& ev);
-
         virtual void onPointerEnter();    
 
         virtual void onPointerLeave();
@@ -181,64 +177,36 @@ class PT_HMI_API Widget : public Pt::Connectable
         
         virtual Gfx::SizeF onAutoSize() const;
 
+    protected:
+        virtual void onPaintEvent( const PaintEvent& ev );
+
+        virtual void onPointerEvent(const MouseEvent& ev);
+
+        virtual void onTouchEvent(const TouchEvent& ev);
+        
+        virtual void onScrollEvent( const ScrollEvent& ev );        
+    
+        virtual void onKeyEvent(const KeyEvent& ev);
+
+        virtual void onResizeEvent( const ResizeEvent& ev );
+
         String setMnemonic(const String& text);
 
     public:
-        // TODO
-        const std::string& name() const
-        {
-            return _name;
-        }
-
-        void setName(const std::string& name)
-        {
-          _name = name;
-        }
-
         void setAutoSize(bool a);
 
         bool isAutoSize() const;
 
         Gfx::SizeF preferredSize() const;
-
-        bool isEnabled() const
-        {
-            return _enabled;
-        }
-
-        void setEnabled( bool e );
-
-        void setVisible( bool b );
-
-        bool isVisible() const
-        {
-          return _visible;
-        }
-
+        
         //
         // geometry properties
         //
 
-        const Gfx::RectF& geometry() const
+        const Gfx::RectF geometry() const
         {
-            return _geometry;
+            return Gfx::RectF( position(), size() );
         }
-
-        const Gfx::SizeF& size() const
-        {
-            return _geometry.size();
-        }
-
-        void resize(const Gfx::SizeF& size);
-
-        void setSize( const Gfx::SizeF& s );
-
-        const Gfx::PointF& position() const
-        {
-            return _geometry.topLeft();
-        }
-
-        void setPosition( const Gfx::PointF&  p);
 
         void setGeometry( const Gfx::PointF& pos, const Gfx::SizeF& size);
 
@@ -309,22 +277,12 @@ class PT_HMI_API Widget : public Pt::Connectable
     private:
         void setWindow(Window* window);
         
-        void onUpdate(const Gfx::RectF& rect);
-
     private:
-        Pt::Signal<const Pt::Event&> _eventReady;
         Window*                      _window; 
         Widget*                      _parent;    
-        std::vector<Widget*>         _children;
-        std::string                  _name;    
-        bool                         _isUpdating;
-        bool                         _enabled;        
-        bool                         _visible;
+        std::vector<Widget*>         _children;        
         Hmi::Cursor                  _cursor;
         Key                          _shortcutKey;        
-        //Gfx::SizeF                   _size;
-        //Gfx::PointF                  _position;   
-        Gfx::RectF                   _geometry;         
         Pt::Char                     _mnemonic;    
         Pt::Delegate<void>           _mnemonicEntered;
         Docking                      _docking;
@@ -334,8 +292,7 @@ class PT_HMI_API Widget : public Pt::Connectable
         bool                         _acceptFocus;
         bool                         _hasFocus;    
         Key                          _actionKey;
-        size_t                       _focusIndex;
-        Gfx::RectF                   _updateRect; 
+        size_t                       _focusIndex;        
 };
 
 
@@ -344,5 +301,3 @@ class PT_HMI_API Widget : public Pt::Connectable
 } // namespace
 
 #endif // PT_HMI_WIDGET_H
-
-

@@ -39,6 +39,11 @@ namespace Pt {
 namespace Hmi {
 
 class ApplicationImpl;
+class Window;
+class Widget;
+
+typedef std::map<Pt::uint64_t, Visual*> VisualMap;
+
 
 class PT_HMI_API Application : public Pt::System::Application
 {
@@ -53,8 +58,6 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void sendEvent(Window& w, const Pt::Event& ev);
 
-        void resize(Widget& w, const Gfx::SizeF& size);
-
         const Screen& mainScreen() const
         {
             return *_mainScreen;
@@ -64,11 +67,11 @@ class PT_HMI_API Application : public Pt::System::Application
         {
             return *_mainScreen;
         }
-
+/*
         Widget* findWidget( const std::string& name );
 
         Window* findWindow(const std::string& name);
-
+        */
         ApplicationImpl* impl()
         {
             return _impl;
@@ -84,12 +87,61 @@ class PT_HMI_API Application : public Pt::System::Application
         {
             return _windowTitleHeight;
         }
+        
+        Pt::uint64_t makeVid()
+        {
+            return _lastVid++;
+        }
+
+
+        void registerVisual( Visual& visual );
+
+        void unregisterVisual( Visual& visual );
+
+        void resize( Window& w, const Gfx::SizeF& s );
+
+        void move( Window& w, const Gfx::PointF& p );
+
+        void show( Window& w, bool visible );
+
+        void enable( Window& w, bool enable );
+
+        void activate( Window& w );
+
+        void repaint(Window& w, const Gfx::RectF& rect );
+
+
+        void repaint(Widget& w, const Gfx::RectF& rect );
+
+        void resize( Widget& w, const Gfx::SizeF& s );
+
+        void move( Widget& w, const Gfx::PointF& to );
+        
+        void show( Widget& w, bool s );
+
+        void enable( Widget& w, bool s );
+        
+
+    protected:        
+        void onResizeEvent( const ResizeEvent& ev );
+
+        void onPaintEvent(const PaintEvent& ev );
+
+        struct PaintInfo
+        {
+            size_t events;
+            Gfx::RectF updateRect;
+        };
 
     private:
         ApplicationImpl* _impl; 
         Screen* _mainScreen;  
         double _windowBorderWidth;
         double _windowTitleHeight;
+        Pt::uint64_t _lastVid;
+        VisualMap _visuals;
+        std::map<Pt::uint64_t, PaintInfo > _paintEvents;
+        size_t  _paintEventsInQueue; 
 };
 
 } // namespace

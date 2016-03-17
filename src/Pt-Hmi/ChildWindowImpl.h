@@ -49,9 +49,7 @@ class PT_HMI_API ChildWindowImpl  : public WindowImpl
 	
         virtual void activate();
        
-        virtual void update(const Gfx::RectF& rect);
-
-        virtual void onUpdate(Window& child, const Gfx::RectF& childRect);
+        virtual void repaint(const Gfx::RectF& rect);
 
         virtual void move(const Gfx::PointF& pos);
 

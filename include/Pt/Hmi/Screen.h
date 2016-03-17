@@ -32,6 +32,7 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Visual.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Point.h>
@@ -44,7 +45,7 @@ namespace Hmi {
 class ScreenImpl;
 class ApplicationImpl;
 
-class PT_HMI_API Screen
+class PT_HMI_API Screen : public Visual
 {
     friend class Window;
     friend class WindowManager;
@@ -93,16 +94,23 @@ class PT_HMI_API Screen
             return _impl;
         }        
 
-        Widget* findWidget( const std::string& name );
-
-        Window* findWindow( const std::string& name );
-
+        
          const std::vector<Window*>& windows() const
          {
             return _windows;
          }
 
-         void update(const Gfx::RectF& updateRect);
+        virtual void processEvent(const Pt::Event& ev);    
+                
+        virtual void resize( const Gfx::SizeF& s );
+
+        virtual void move( const Gfx::PointF& p );
+
+        virtual void show( bool b = true );
+
+        virtual void enable( bool b = true );
+
+        virtual void repaint(const Gfx::RectF& updateRect);
 
     protected:
         void registerWindow(Window& w);

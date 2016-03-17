@@ -50,10 +50,8 @@ class MainWindowImpl : public WindowImpl
         virtual void show(bool v);
     
         virtual void activate();
-
-        virtual void onUpdate(Window& child, const Gfx::RectF& childRect);
        
-        virtual void update(const Gfx::RectF& rect);
+        virtual void repaint(const Gfx::RectF& rect);
 
         virtual void move(const Gfx::PointF& pos);
 
@@ -92,6 +90,7 @@ class MainWindowImpl : public WindowImpl
         void onMove(LPARAM lparam);
         void onClose();
         void onActivate(bool f);
+        void onEnable(bool e);
 
     private:
         void setShowTitle(bool p);

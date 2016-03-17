@@ -40,8 +40,9 @@ namespace Hmi{
 class PT_HMI_API MoveEvent : public Pt::BasicEvent<MoveEvent>
 {
 	public:	
-		MoveEvent(const Gfx::PointF& pos)
-		: _position( pos )		
+		MoveEvent(Pt::uint64_t vid, const Gfx::PointF& pos)
+		: _vid(vid)
+        , _position( pos )		
 		{
 		}
 
@@ -49,17 +50,19 @@ class PT_HMI_API MoveEvent : public Pt::BasicEvent<MoveEvent>
 		{
 		}
 
-		void setPosition(const Gfx::PointF&  pos)
-		{
-			_position = pos;
-		}
-
 		const Gfx::PointF& position() const
 		{
 			return _position;
 		}	
 
+
+        Pt::uint64_t vid() const
+        {
+            return _vid;
+        }
+
 	private:
+        Pt::uint64_t _vid;
 		Gfx::PointF _position;
 };
 

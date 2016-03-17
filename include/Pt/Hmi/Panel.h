@@ -61,6 +61,7 @@ class PT_HMI_API Panel : public Widget
         void setBackgroundColor( const Gfx::Color& c )
         {
             _backgroundColor = c;
+            repaint();
         }
 
         const Gfx::Color& foregroundColor() const
@@ -71,6 +72,7 @@ class PT_HMI_API Panel : public Widget
         void setForegroundColor(const Gfx::Color& c )
         {
             _foregroundColor = c;
+            repaint();
         }
 
         const Gfx::Image& backgroundImage() const
@@ -81,6 +83,7 @@ class PT_HMI_API Panel : public Widget
         void setBackgroundImage( const Gfx::Image& im )
         {
             _backgroundImage = im;
+            repaint();
         }
 
         ImageLayout backgroundImageLayout() const
@@ -91,6 +94,7 @@ class PT_HMI_API Panel : public Widget
         void setBackgroundImageLayout( ImageLayout l )
         {
             _backgroundImageLayout = l;
+            repaint();
         }
 
         BorderStyle borderStyle() const
@@ -101,6 +105,7 @@ class PT_HMI_API Panel : public Widget
         void setBorderStyle(BorderStyle t)         
         {   
             _borderStyle = t;
+            repaint();
         }
 
         bool isBorderRound() const
@@ -111,6 +116,7 @@ class PT_HMI_API Panel : public Widget
         void setBorderRound(bool b)
         {   
           _borderRound = b;
+          repaint();
         }
 
         double borderWidth() const	  
@@ -121,6 +127,7 @@ class PT_HMI_API Panel : public Widget
         void setBorderWidth( double w )
         {
           _borderWidth = w;
+          repaint();
         }
          
         const Gfx::Color& borderColor() const
@@ -131,12 +138,11 @@ class PT_HMI_API Panel : public Widget
         void setBorderColor(Gfx::Color b)
         {
           _borderColor = b;
+          repaint();
         }
 
     protected:
-        virtual void onRender(const Gfx::PointF& pos, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& updateRect);
+        virtual void onPaintEvent( const PaintEvent& ev );
 	
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 	

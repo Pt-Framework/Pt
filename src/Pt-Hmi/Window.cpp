@@ -56,31 +56,21 @@ Window::Window( Window* parent )
 , _maximumSize(2000,2000)
 , _startPostion( WindowPosition::Manual )
 , _state(WindowState::Normal )
-, _enabled(true)
-, _visible(false)
-, _isValid(true)
 , _border( WindowBorder::Sizeable)
 , _icon()
 , _canClose(true)
 , _isClosed(false)
 , _isActive(false)
 , _mainWidget(0)
-, _position(0,0)
-, _size(200,200)
-{
+{    
+
     _windowManager.init(*this);
 
-    _eventReady += Pt::slot(*this, &Window::onKeyEvent);
-    _eventReady += Pt::slot(*this, &Window::onPointerEvent);
-    _eventReady += Pt::slot(*this, &Window::onTouchEvent);
-    _eventReady += Pt::slot(*this, &Window::onScrollEvent);  
-    _eventReady += Pt::slot(*this, &Window::onMoveEvent);
-    _eventReady += Pt::slot(*this, &Window::onResizeEvent);
     _eventReady += Pt::slot(*this, &Window::onActivateEvent);
     _eventReady += Pt::slot(*this, &Window::onCloseEvent);
+    _eventReady += Pt::slot(*this, &Window::onEnterEvent );
+    _eventReady += Pt::slot(*this, &Window::onLeaveEvent );
 
-    _eventReady += Pt::slot(*this, &Window::onEnterEvent);
-    _eventReady += Pt::slot(*this, &Window::onLeaveEvent);
 
     if(parent)
         parent->add(*this);
@@ -124,25 +114,6 @@ const std::vector<Window*>& Window::windows() const
 }
 
 
-Window* Window::findWindow(const std::string& name)
-{
-    if(_name == name)
-        return this;
-
-    const std::vector<Window*>& windows = _windowManager.windows();
-    std::vector<Window*>::const_iterator it;
-
-    for(it = windows.begin(); it != windows.end(); ++it)
-    {
-        Window* w = (*it)->findWindow(name);
-        
-        if(w)
-            return w;
-    }
-
-    return 0;
-}
-
     
 Widget* Window::mainWidget() 
 {
@@ -169,16 +140,9 @@ void Window::setMainWidget(Widget* widget)
             _mainWidget->parent()->remove(*_mainWidget);
 
        _mainWidget->setWindow(this);
-       _mainWidget->setPosition(Gfx::PointF(0,0) );
-       _mainWidget->setSize( _size);
-       _mainWidget->update();
+       _mainWidget->move(Gfx::PointF(0,0) );
+       _mainWidget->resize( size());
     }
-}
-
-
-Widget* Window::findWidget(const std::string& name)
-{
-    return _mainWidget ? _mainWidget->findWidget(name) : 0;
 }
 
 
@@ -217,12 +181,6 @@ void Window::activate()
 }
 
 
-void Window::onActivate(Window& child)
-{
-    windowManager().activate(child);
-}
-
-
 void Window::focusPrev()
 {
     moveFocus(_focusList.rbegin(), _focusList.rend());
@@ -235,77 +193,34 @@ void Window::focusNext()
 }
 
 
-void Window::update()
+void Window::repaint()
 {
-    // update rect in this window's client rect coordinates
-    update( Gfx::RectF(Gfx::PointF(0,0), _size) );
+    repaint( Gfx::RectF(Gfx::PointF(0,0), size()) );
 }
 
 
-void Window::update(const Gfx::RectF& updateRect)
-{
-    if( _mainWidget )
-    {
-        _mainWidget->update(updateRect);
-        return;
-    }
-
-    onUpdate(updateRect);
+void Window::repaint(const Gfx::RectF& updateRect)
+{    
+    if( _impl )
+        _impl->repaint( updateRect );
 }
 
 
-void Window::onUpdate(const Gfx::RectF& updateRect)
-{
-    _isValid = false;
 
-    // update rect in this window's client rect coordinates
-    if(_impl) 
-        _impl->update(updateRect);
-}
-
-
-void Window::onUpdate(Window& child, const Gfx::RectF& childRect)
-{
-    _isValid = false;
-
-    // update rect in child window client rect coordinates
-    if(_impl) 
-        _impl->onUpdate(child, childRect);
-}
-
-
-void Window::render(const Gfx::RectF& updateRect)
+void Window::onPaintEvent(const PaintEvent& ev)
 {
     if( ! this->isVisible() )
-    {
-        _isValid = true;
         return;
-    }
+ 
+    const Gfx::RectF& updateRect = ev.rect();   
 
-    if(_isValid)
-        return;
-    
     Painter painter(_surface);
     painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
     painter.fillRect(updateRect);
 
-    if(_mainWidget)
-    {
-        // pos is always 0,0
-        Gfx::PointF pos = _mainWidget->position();
-       _mainWidget->render(pos, _surface, updateRect);
-    }
-
-    _windowManager.render(_surface, updateRect);
-
-    _isValid = true;
+    _windowManager.render(_surface,  updateRect);
 }
 
-
-void Window::processEvent(const Pt::Event& ev)
-{
-    onEvent(ev);
-}
 
 
 PixmapSurface& Window::surface()
@@ -348,7 +263,7 @@ void Window::runModal()
             if( w->isActive() )
                 activeWindow = w;
 
-            states[w] = w->isEnabled();
+            states[w] = w->enabled();
             w->enable(false);
         }
     }
@@ -378,12 +293,6 @@ void Window::runModal()
 }
 
 
-void Window::onEvent(const Pt::Event& ev)
-{
-    _eventReady.send(ev);
-}
-
-
 void Window::onPointerEvent(const MouseEvent& ev)
 {
     if( _windowManager.pointerInput( ev ) )
@@ -391,7 +300,7 @@ void Window::onPointerEvent(const MouseEvent& ev)
 
     if( ! _mainWidget || 
         ! _mainWidget->isVisible() || 
-        ! _mainWidget->isEnabled() )
+        ! _mainWidget->enabled() )
     {
         Application::instance().mainScreen().setCursor( &Cursor::defaultCursor() ); 
         return;
@@ -447,7 +356,7 @@ void Window::onKeyEvent(const KeyEvent& ev)
     if( _windowManager.keyInput( ev ) )
         return;
 
-    if( ! isEnabled() )
+    if( ! enabled() )
         return;
 
     std::map<Key, Widget*>::iterator s = _shortcuts.find( ev.key() );
@@ -476,16 +385,11 @@ void Window::onKeyEvent(const KeyEvent& ev)
             focusNext();
 
             if(_focusWidget)
-                _focusWidget->update();
+                _focusWidget->repaint();
         }
     }
 }
 
-
-void Window::onMoveEvent(const MoveEvent& ev)
-{   
-   _position = ev.position();
-}
 
 
 void Window::onActivateEvent(const ActivateEvent& ev)
@@ -634,7 +538,7 @@ void Window::add(Window& child)
 
     _windowManager.add(child);
 
-    update();
+    repaint();
 }
 
 // TODO: are all windows updated correctly?
@@ -651,7 +555,7 @@ void Window::remove(Window& child)
     child._parent = 0;
     child.createImpl();
 
-    update();
+    repaint();
 }
 
 
@@ -669,34 +573,22 @@ void Window::createImpl()
         Application::instance().mainScreen().registerWindow(*this);
     }
 
-    _impl->move(_position);
-    _impl->resize(_size);
+    _impl->move(position());
+    _impl->resize(size());
 //    _impl->setDecoration( _decoration );
     _impl->setTitle( _title );
     _impl->setBorder( _border );
     _impl->setMaximumSize( _minimumSize);
     _impl->setMaximumSize( _maximumSize );
     _impl->setIcon(_icon);
-    _impl->enable( _enabled );
+    _impl->enable( enabled() );
     _impl->setState( _state );
-    _impl->show(_visible);
-}
-
-
-bool Window::isVisible() const
-{
-    return _visible;
+    _impl->show(isVisible());
 }
 
 
 void Window::show(bool b)
 {
-    if(b == _visible)
-        return;
-
-    // TODO: use an event for this?
-    _visible = b;
-
     if( ! _impl )
         createImpl(); // also calls setVisible
     else  
@@ -704,75 +596,26 @@ void Window::show(bool b)
 }
 
 
-void Window::onShow(Window& child, bool b)
-{
-    _windowManager.showWindow(child, b);
-}
-
-
-bool Window::isEnabled() const
-{
-    return _enabled;
-}
-
-
 void Window::enable(bool e)
 {
-    _enabled = e;
-
     if( _impl )
         _impl->enable(e);
 }
-
-
-void Window::onEnable(Window& child, bool enable)
-{
-    windowManager().enableWindow(child, enable);
-}
-
-
-
-
-const Gfx::SizeF& Window::size() const
-{
-    return _size;
-}
-
 
 void Window::resize(const Gfx::SizeF& s)
 {
     if(_impl)
         _impl->resize(s);
-    else
-    {
-        _size = s;
-        _surface.resize(s);
-    }  
 }
 
-
-void Window::onResize(Window& child, const Gfx::SizeF& s)
+void Window::onResizeEvent( const ResizeEvent& s )
 {
-    _windowManager.resizeWindow(child, s);
-}
+    Visual::onResizeEvent( s );
 
-
-void Window::onResizeEvent(const ResizeEvent& ev)
-{    
-    _size = ev.size();
-    _state = ev.state();
-    _surface.resize(_size);
+    _surface.resize(s.size());
 
     if( _mainWidget )
-        _mainWidget->setSize(_size);
-}
-
-
-
-
-const Gfx::PointF& Window::position() const
-{
-    return _position;
+        _mainWidget->resize(s.size());
 }
 
 
@@ -780,15 +623,8 @@ void Window::move(const Gfx::PointF& p)
 {
     if( _impl )
         _impl->move(p);
-    else
-        _position = p;
 }
 
-
-void Window::onMove(Window& child, const Gfx::PointF& to)
-{
-    _windowManager.moveWindow(child, to);
-}
 
 
 const Gfx::Font& Window::font() const
@@ -817,17 +653,6 @@ void Window::setDecoration( WindowDecoration::Flags d )
     _decoration = d;
 }
     
-
-const std::string& Window::name() const
-{
-    return _name; 
-}
-
-void Window::setName(const std::string&  n)
-{
-    _name = n;
-}
-
 
 void Window::addWidget(Widget& w)
 {

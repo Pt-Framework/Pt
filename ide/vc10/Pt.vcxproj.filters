@@ -1386,6 +1386,18 @@
     <ClInclude Include="..\..\src\Pt-Hmi\egl-test\TextureRect.h">
       <Filter>Pt-Hmi\egl-test</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Visual.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PaintEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ShowEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\EnableEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2527,6 +2539,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\egl-test\TextureRect.cpp">
       <Filter>Pt-Hmi\egl-test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Visual.cpp">
+      <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

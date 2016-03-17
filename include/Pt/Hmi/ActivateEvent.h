@@ -37,8 +37,9 @@ namespace Hmi{
 class PT_HMI_API ActivateEvent : public Pt::BasicEvent<ActivateEvent>
 {
 	public:	
-		ActivateEvent(bool isActive)	
-		: _isActive( isActive )
+		ActivateEvent(Pt::uint64_t vid, bool isActive)	
+		: _vid(vid)
+        , _isActive( isActive )
 		{
 		}
 
@@ -51,7 +52,13 @@ class PT_HMI_API ActivateEvent : public Pt::BasicEvent<ActivateEvent>
 			return _isActive;
 		}
 
+        Pt::uint64_t vid() const
+        {
+            return _vid;
+        }
+
 	private:
+        Pt::uint64_t _vid;
 		bool _isActive;
 };
 
