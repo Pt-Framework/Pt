@@ -110,7 +110,6 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void repaint(Window& w, const Gfx::RectF& rect );
 
-
         void repaint(Widget& w, const Gfx::RectF& rect );
 
         void resize( Widget& w, const Gfx::SizeF& s );
@@ -121,7 +120,6 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void enable( Widget& w, bool s );
         
-
     protected:        
         void onResizeEvent( const ResizeEvent& ev );
 

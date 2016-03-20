@@ -181,6 +181,21 @@ void Window::activate()
 }
 
 
+Gfx::PointF Window::toScreen(const Gfx::PointF& p) const
+{
+    Gfx::PointF pos = p + this->position();
+
+    const Window* parentWindow = this->parent();
+
+    for(; parentWindow; parentWindow = parentWindow->parent())
+    {
+        pos += parentWindow->position();
+    }
+
+    return pos;
+}
+
+
 void Window::focusPrev()
 {
     moveFocus(_focusList.rbegin(), _focusList.rend());

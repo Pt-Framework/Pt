@@ -83,6 +83,8 @@ class PT_HMI_API Window : public Visual
 
     const std::vector<Window*>& windows() const;
 
+    Gfx::PointF toScreen(const Gfx::PointF& p) const;
+
     Widget* mainWidget();
 
     const Widget* mainWidget()  const;

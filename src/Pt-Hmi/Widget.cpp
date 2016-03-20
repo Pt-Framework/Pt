@@ -234,6 +234,30 @@ Gfx::PointF Widget::toWindowPosition(const Gfx::PointF& p) const
 }
 
 
+Gfx::PointF Widget::toScreen(const Gfx::PointF& p) const
+{
+    Gfx::PointF pos = p + this->position();
+
+    const Widget* parentWidget = this->parent();
+    
+    for(; parentWidget; parentWidget = parentWidget->parent())
+    {
+        pos += parentWidget->position();
+    }
+
+    const Window* parentWindow = this->window();
+    if( ! parentWindow )
+        return pos;
+
+    for(; parentWindow; parentWindow = parentWindow->parent())
+    {
+        pos += parentWindow->position();
+    }
+
+    return pos;
+}
+
+
 bool Widget::hasFocus() const
 {
     return _hasFocus;

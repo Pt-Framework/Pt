@@ -99,32 +99,144 @@ void Application::sendEvent(Window& w, const Pt::Event& ev)
 	w.processEvent(ev);
 }
 
-void Application::repaint(Window& w, const Gfx::RectF& rect )
+
+void Application::repaint(Window& w, const Gfx::RectF& rect)
 {
-    PaintEvent pev( w.vid(), rect );
+    //PaintEvent pev( w.vid(), rect );
+    //loop().commitEvent(pev); 
+
+    Gfx::PointF screenPos = w.toScreen( rect.topLeft() );
+    Gfx::RectF screenRect(screenPos, rect.size());
+
+    PaintEvent pev(0, screenRect);
     loop().commitEvent(pev); 
 }
 
 
-void Application::repaint(Widget& w, const Gfx::RectF& rect )
+void Application::repaint(Widget& w, const Gfx::RectF& rect)
 {
-    std::map<Pt::uint64_t, PaintInfo>::iterator it =  _paintEvents.find(w.vid());
+    //std::map<Pt::uint64_t, PaintInfo>::iterator it =  _paintEvents.find(w.vid());
 
-    if( it != _paintEvents.end() )
-    {
-        it->second.updateRect.unify( rect );
-        it->second.events++;
-    }
-    else
-    {
-        PaintInfo info;
-         info.updateRect = rect;
-         info.events = 1;
-        _paintEvents[w.vid()]  = info;
-    }
+    //if( it != _paintEvents.end() )
+    //{
+    //    it->second.updateRect.unify( rect );
+    //    it->second.events++;
+    //}
+    //else
+    //{
+    //    PaintInfo info;
+    //    info.updateRect = rect;
+    //    info.events = 1;
+    //    _paintEvents[w.vid()]  = info;
+    //}
 
-    PaintEvent pev( w.vid(), rect );
+    // TODO: determine screen update rect allowing for always complete repaint
+    //       of child widgets
+    Gfx::PointF screenPos = w.toScreen( rect.topLeft() );
+    Gfx::RectF screenRect(screenPos, rect.size());
+
+    // TODO: merge events with intersecting update rects
+
+    PaintEvent pev(0, screenRect);
     loop().commitEvent(pev); 
+}
+
+
+void makePaintEvents(std::vector<PaintEvent>& events, 
+                     Widget& widget,
+                     const Gfx::RectF& rect)
+{
+    PaintEvent pev(widget.vid(), rect);
+    events.push_back(pev);
+    
+    const std::vector<Widget*>& widgets = widget.widgets();
+
+    std::vector<Widget*>::const_iterator it;
+    for(it = widgets.begin(); it != widgets.end(); ++it)
+    {
+        Gfx::PointF updatePos = rect.topLeft() - (*it)->position();
+        Gfx::RectF updateRect(updatePos, rect.size());
+
+        makePaintEvents(events, **it, updatePos);
+    }
+}
+
+
+void makePaintEvents(std::vector<PaintEvent>& events, 
+                     Window& window,
+                     const Gfx::RectF& rect)
+{
+    PaintEvent pev(window.vid(), rect);
+    events.push_back(pev);
+
+    Widget* mainWidget = window.mainWidget();
+    if(mainWidget)
+        makePaintEvents(events, *mainWidget, rect);
+
+    const std::vector<Window*>& windows = window.windows();
+    std::vector<Window*>::const_iterator it;
+    for(it = windows.begin(); it != windows.end(); ++it)
+    {
+        // TODO: account for window decoration?
+        Gfx::PointF updatePos = rect.topLeft() - (*it)->position();
+        Gfx::RectF updateRect(updatePos, rect.size());
+
+        makePaintEvents(events, **it, updatePos);
+    }
+}
+
+
+void Application::onPaintEvent(const PaintEvent& ev)
+{
+    assert(ev.vid() == 0);
+
+    // paint events for widgets in each window back to front
+    // paint events for windows front to back
+
+    std::vector<PaintEvent> paintEvents;
+
+    const std::vector<Window*>& windows = this->mainScreen().windows();
+
+    std::vector<Window*>::const_iterator it;
+    for(it = windows.begin(); it != windows.end(); ++it)
+    {
+        Gfx::PointF updatePos = ev.rect().topLeft() - (*it)->position();
+        Gfx::RectF updateRect(updatePos, ev.rect().size());
+
+        makePaintEvents(paintEvents, **it, updatePos);
+    }
+
+    std::vector<PaintEvent>::iterator pit;
+    for(pit = paintEvents.begin(); pit != paintEvents.end(); ++pit)
+    {
+        VisualMap::iterator vit = _visuals.find( pit->vid() );
+        if( vit == _visuals.end() )
+            continue;
+
+        vit->second->processEvent(*pit);
+    }
+
+    //std::map<Pt::uint64_t, PaintInfo>::iterator it = _paintEvents.find(ev.vid() );
+    
+    //Gfx::RectF updateRect = ev.rect();
+
+    //if( it != _paintEvents.end() )
+    //{
+    //    it->second.events--;
+
+    //    if( it->second.events != 0 )
+    //        return;
+
+    //    updateRect = it->second.updateRect;
+    //    _paintEvents.erase(it);
+    //}
+    //        
+    //VisualMap::iterator vit = _visuals.find( ev.vid() );
+
+    //if( vit == _visuals.end() )
+    //    return;
+
+    //vit->second->processEvent( PaintEvent(ev.vid(), updateRect) );
 }
 
 
@@ -297,33 +409,6 @@ void Application::enable( Window& w, bool enable )
     repaint(*w.parent(), updateRect);
    
     repaint(w, Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
-}
-
-
-void Application::onPaintEvent(const PaintEvent& ev )
-{     
-    std::map<Pt::uint64_t, PaintInfo>::iterator it = _paintEvents.find(ev.vid() );
-    
-    Gfx::RectF updateRect = ev.rect();
-
-    if( it != _paintEvents.end() )
-    {
-        it->second.events--;
-
-        if( it->second.events != 0 )
-            return;
-
-        updateRect = it->second.updateRect;
-        _paintEvents.erase(it);
-    }
-            
-    VisualMap::iterator vit = _visuals.find( ev.vid() );
-
-    if( vit == _visuals.end() )
-        return;
-
-    vit->second->processEvent( PaintEvent(ev.vid(), updateRect) );
-    
 }
 
 
