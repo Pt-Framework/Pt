@@ -49,8 +49,6 @@ class PT_HMI_API ChildWindowImpl  : public WindowImpl
 	
         virtual void activate();
        
-        virtual void repaint(const Gfx::RectF& rect);
-
         virtual void move(const Gfx::PointF& pos);
 
         virtual void resize(const Gfx::SizeF& size);
@@ -70,6 +68,8 @@ class PT_HMI_API ChildWindowImpl  : public WindowImpl
         virtual void setTitle( const std::string& t );
         
         virtual void close();
+
+        virtual void paint(const Gfx::RectF& rect);
 };
 
 }

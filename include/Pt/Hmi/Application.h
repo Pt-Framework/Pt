@@ -41,6 +41,8 @@ namespace Hmi {
 class ApplicationImpl;
 class Window;
 class Widget;
+class EraseEvent;
+
 
 typedef std::map<Pt::uint64_t, Visual*> VisualMap;
 
@@ -56,7 +58,7 @@ class PT_HMI_API Application : public Pt::System::Application
     
         void nextEvent();
 
-        void sendEvent(Window& w, const Pt::Event& ev);
+        void sendEvent(Visual& w, const Pt::Event& ev);
 
         const Screen& mainScreen() const
         {
@@ -123,14 +125,15 @@ class PT_HMI_API Application : public Pt::System::Application
     protected:        
         void onResizeEvent( const ResizeEvent& ev );
 
-        void onPaintEvent(const PaintEvent& ev );
+        void onPaintEvent( const PaintEvent& ev );
 
-        struct PaintInfo
-        {
-            size_t events;
-            Gfx::RectF updateRect;
-        };
+        void onMoveEvent( const MoveEvent& ev );
 
+        void onEraseEvent( const EraseEvent& ev );
+
+    private:
+        void updateWidget( Widget& parent, const Gfx::RectF& rect );
+                
     private:
         ApplicationImpl* _impl; 
         Screen* _mainScreen;  
@@ -138,8 +141,6 @@ class PT_HMI_API Application : public Pt::System::Application
         double _windowTitleHeight;
         Pt::uint64_t _lastVid;
         VisualMap _visuals;
-        std::map<Pt::uint64_t, PaintInfo > _paintEvents;
-        size_t  _paintEventsInQueue; 
 };
 
 } // namespace

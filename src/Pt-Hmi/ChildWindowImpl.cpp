@@ -48,34 +48,9 @@ ChildWindowImpl::~ChildWindowImpl()
 
 void ChildWindowImpl::close()
 {
-    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
-    repaint(rect);
+    
 }
 
-
-void ChildWindowImpl::repaint(const Gfx::RectF& updateRect)
-{
-    Application::instance().repaint( *_apiWindow, updateRect);
-}
-
-/*
-void ChildWindowImpl::onUpdate(Window& child, const Gfx::RectF& childRect)
-{
-    if( ! _apiWindow->parent() )
-        return;
-
-    double borderWidth = _apiWindow->windowManager().borderWidth();
-    double titleHeight = _apiWindow->windowManager().titleHeight();
-
-    Gfx::PointF pos = child.position() + childRect.topLeft();
-    pos.addX(borderWidth);
-    pos.addY(borderWidth + titleHeight);
-
-    // update rect in _apiWindow client rect coordinates
-    Gfx::RectF updateRect( pos, childRect.size() );
-    _apiWindow->parent()->onUpdate(*_apiWindow, updateRect);
-}
-*/
 
 void ChildWindowImpl::activate()
 {
@@ -110,50 +85,49 @@ void ChildWindowImpl::enable(bool e)
 
 void ChildWindowImpl::setMinimumSize(const Gfx::SizeF& s)
 {
-    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
-    repaint(rect);
+    
 }
 
 
 void ChildWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 {
-    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
-    repaint(rect);
+    
 }
 
 
 void ChildWindowImpl::setState(WindowState::Type p)
 {
-    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
-    repaint(rect);
+    
 }
 
 
 void ChildWindowImpl::setBorder(WindowBorder::Type p)
 {
-    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
-    repaint(rect);
+    
 }
 
 
 void ChildWindowImpl::setIcon(const Gfx::Image& p)
 {
-    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
-    repaint(rect);
+    
 }
 
 
 void ChildWindowImpl::setDecoration( WindowDecoration::Flags d )	
 {
-    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
-    repaint(rect);
+    
 }
 
 
 void ChildWindowImpl::setTitle( const std::string& t )
 {
-    Gfx::RectF rect( Gfx::PointF(0,0), _apiWindow->size() );
-    repaint(rect);
+    
+}
+
+
+void ChildWindowImpl::paint(const Gfx::RectF& rect)
+{
+
 }
 
 }

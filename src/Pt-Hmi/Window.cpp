@@ -29,6 +29,7 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/EraseEvent.h>
 #include "MainWindowImpl.h"
 #include "ChildWindowImpl.h"
 #include <cassert>
@@ -70,10 +71,12 @@ Window::Window( Window* parent )
     _eventReady += Pt::slot(*this, &Window::onCloseEvent);
     _eventReady += Pt::slot(*this, &Window::onEnterEvent );
     _eventReady += Pt::slot(*this, &Window::onLeaveEvent );
+    _eventReady += Pt::slot(*this, &Window::onEraseEvent );
 
 
     if(parent)
         parent->add(*this);
+
 }
 
 
@@ -217,9 +220,18 @@ void Window::repaint()
 void Window::repaint(const Gfx::RectF& updateRect)
 {    
     if( _impl )
-        _impl->repaint( updateRect );
+     Application::instance().repaint( *this, updateRect);
 }
 
+
+void Window::onEraseEvent( const EraseEvent& ev )
+{ 
+    const Gfx::RectF& updateRect = ev.rect();   
+
+    Painter painter(_surface);
+    painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
+    painter.fillRect(updateRect);
+}
 
 
 void Window::onPaintEvent(const PaintEvent& ev)
@@ -227,13 +239,10 @@ void Window::onPaintEvent(const PaintEvent& ev)
     if( ! this->isVisible() )
         return;
  
-    const Gfx::RectF& updateRect = ev.rect();   
+     _windowManager.render(_surface,  ev.rect());
 
-    Painter painter(_surface);
-    painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
-    painter.fillRect(updateRect);
-
-    _windowManager.render(_surface,  updateRect);
+     if(_impl)
+        _impl->paint(ev.rect());
 }
 
 
@@ -599,6 +608,7 @@ void Window::createImpl()
     _impl->enable( enabled() );
     _impl->setState( _state );
     _impl->show(isVisible());
+    
 }
 
 
@@ -621,6 +631,8 @@ void Window::resize(const Gfx::SizeF& s)
 {
     if(_impl)
         _impl->resize(s);
+    else
+        _size = s;
 }
 
 void Window::onResizeEvent( const ResizeEvent& s )
@@ -638,8 +650,9 @@ void Window::move(const Gfx::PointF& p)
 {
     if( _impl )
         _impl->move(p);
+    else
+        _position = p;
 }
-
 
 
 const Gfx::Font& Window::font() const

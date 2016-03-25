@@ -53,11 +53,12 @@ MainWindow::MainWindow()
     show( true );  // MainWindow
     move(  Gfx::PointF(60, 30) );
     resize( Gfx::SizeF(600, 430) );    
-    _child1.show(true); // Child 1
     add( _child1 );
     
-    _child1.move( Gfx::PointF(10, 10) );
+    _child1.move( Gfx::PointF(40, 5) );
+    _child1.move( Gfx::PointF(40, 10) );
     _child1.resize(Gfx::SizeF(300,500));            
+    _child1.show(true);
 }
 
 

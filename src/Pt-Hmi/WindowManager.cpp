@@ -173,23 +173,16 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
         if( ! w->isVisible() )
             continue; 
         
-        Gfx::PointF clientPos = renderFrame(*w, surface);                        
-        /*
-        // update rect in child window client rect coordinates
-        Gfx::PointF pos = rect.topLeft() - clientPos;
-        Gfx::RectF updateRect(pos, rect.size());
-        w->render(updateRect);
-
-        //std::clog << "render surface: " << w->title() << std::endl;
-        
+        const Gfx::PointF clientPos = renderFrame(*w, surface);                               
+        const Gfx::PointF pos = rect.topLeft() - clientPos;
+        const Gfx::RectF  updateRect(pos, rect.size());        
         Gfx::RectF surfaceRect(Gfx::PointF(0, 0), w->size());
+
         surfaceRect = surfaceRect.intersect(updateRect);
 
         Painter painter(surface);
-        painter.drawSurface(clientPos + surfaceRect.topLeft(), 
-                            w->surface(), surfaceRect);
-                            */
-        //painter.drawRect(rect);
+        painter.drawSurface(clientPos + surfaceRect.topLeft(),  w->surface(), surfaceRect);
+//        painter.drawRect( rect );     
     }
 }
 
@@ -571,9 +564,7 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
         return false;
     }
     
-    _app.mainScreen().setCursor( &Cursor::moveCursor() );
-    
-    
+    _app.mainScreen().setCursor( &Cursor::moveCursor() );        
 
     const double dX = mev.x() - _lastPointerPosition.x();
     const double dY = mev.y() - _lastPointerPosition.y();

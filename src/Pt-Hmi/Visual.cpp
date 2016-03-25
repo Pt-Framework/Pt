@@ -42,8 +42,8 @@ Visual::Visual()
 , _enabled(true)
 , _visible(true)
 , _size(10,10)
-{
- 
+, _position(0,0)
+{ 
     Application::instance().registerVisual(*this );   
 
     _eventReady += Pt::slot(*this, &Visual::onResizeEvent );
@@ -137,5 +137,6 @@ void Visual::onScrollEvent( const ScrollEvent& ev )
 void Visual::onPaintEvent( const PaintEvent& ev )
 {
 }
+
 
 }}

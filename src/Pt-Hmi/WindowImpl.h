@@ -55,8 +55,6 @@ class WindowImpl : public Pt::Connectable
 
         virtual void activate() = 0;
 
-        virtual void repaint(const Gfx::RectF& rect) = 0;
-
         virtual void move(const Gfx::PointF& pos) = 0;
    
         virtual void resize(const Gfx::SizeF& size) = 0;
@@ -78,6 +76,8 @@ class WindowImpl : public Pt::Connectable
         virtual void setTitle( const std::string& t ) = 0;
 
         virtual void close() = 0;
+
+        virtual void paint(const Gfx::RectF& rect) = 0;
 
     protected:
         Window*  _apiWindow;

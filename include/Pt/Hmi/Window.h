@@ -60,6 +60,7 @@ namespace Hmi {
 
 class Widget;
 class WindowImpl;
+class EraseEvent;
 
 class PT_HMI_API Window : public Visual
 {
@@ -156,6 +157,8 @@ class PT_HMI_API Window : public Visual
 
     virtual void onPaintEvent(const PaintEvent& ev);
 
+    virtual void onEraseEvent(const EraseEvent& ev);
+
     virtual void onCloseEvent(const CloseEvent& ev);
 
     virtual void onActivateEvent(const ActivateEvent& ev);  
@@ -229,7 +232,7 @@ class PT_HMI_API Window : public Visual
 
     void removeFocusWidget(Widget& w);
 
-    void setFocusIndex(Widget& w, size_t index);
+    void setFocusIndex(Widget& w, size_t index);    
     
   private:
     WindowManager                  _windowManager; 
@@ -253,7 +256,7 @@ class PT_HMI_API Window : public Visual
     Widget*                        _focusWidget;
     std::vector<Widget*>           _focusList;
     PixmapSurface                  _surface;
-    WindowImpl*                    _impl;           
+    WindowImpl*                    _impl;        
 };
 
 } // namespace

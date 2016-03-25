@@ -127,10 +127,10 @@ class PT_HMI_API Visual : public Pt::Connectable
     
         virtual void onPaintEvent( const PaintEvent& ev );
 
+
     protected:
          Pt::Signal<const Pt::Event&>  _eventReady;
 
-   private:
         Pt::uint64_t _vid;
         std::string  _name;        
         bool         _enabled;
