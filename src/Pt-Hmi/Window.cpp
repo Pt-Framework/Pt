@@ -72,7 +72,9 @@ Window::Window( Window* parent )
     _eventReady += Pt::slot(*this, &Window::onEnterEvent );
     _eventReady += Pt::slot(*this, &Window::onLeaveEvent );
     _eventReady += Pt::slot(*this, &Window::onEraseEvent );
-
+    _eventReady += Pt::slot(*this, &Window::onMoveEvent );
+    _eventReady += Pt::slot(*this, &Window::onResizeEvent );
+    _eventReady += Pt::slot(*this, &Window::onShowEvent );    
 
     if(parent)
         parent->add(*this);
@@ -635,14 +637,29 @@ void Window::resize(const Gfx::SizeF& s)
         _size = s;
 }
 
+void Window::onShowEvent( const ShowEvent& ev )
+{
+    _visible = ev.visible();
+}
+
+void Window::onEnableEvent( const EnableEvent& ev )
+{
+    _enabled = ev.enabled();
+}
+
 void Window::onResizeEvent( const ResizeEvent& s )
 {
-    Visual::onResizeEvent( s );
-
+    _size = s.size();
     _surface.resize(s.size());
 
     if( _mainWidget )
         _mainWidget->resize(s.size());
+}
+
+
+void Window::onMoveEvent(const MoveEvent& ev)
+{
+    _position = ev.position();
 }
 
 

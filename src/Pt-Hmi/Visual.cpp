@@ -41,14 +41,9 @@ Visual::Visual()
 : _vid( Application::instance().makeVid()  )
 , _enabled(true)
 , _visible(true)
-, _size(10,10)
-, _position(0,0)
 { 
     Application::instance().registerVisual(*this );   
 
-    _eventReady += Pt::slot(*this, &Visual::onResizeEvent );
-    _eventReady += Pt::slot(*this, &Visual::onMoveEvent );
-    _eventReady += Pt::slot(*this, &Visual::onShowEvent );
     _eventReady += Pt::slot(*this, &Visual::onKeyEvent );
     _eventReady += Pt::slot(*this, &Visual::onPointerEvent );
     _eventReady += Pt::slot(*this, &Visual::onTouchEvent );
@@ -93,30 +88,6 @@ void Visual::repaint( const Gfx::RectF& rect )
 {
 
 }
-
-void Visual::onResizeEvent(const ResizeEvent& ev)
-{
-    _size = ev.size();
-}
-
-
-void Visual::onMoveEvent( const MoveEvent& ev)
-{
-    _position = ev.position();
-}
-
-
-void Visual::onShowEvent( const ShowEvent& ev)
-{
-    _visible = ev.visible();
-}
-
-
-void Visual::onEnableEvent( const EnableEvent& ev)
-{
-    _enabled = ev.enabled();
-}
-
 
 void Visual::onKeyEvent( const KeyEvent& ev )
 {

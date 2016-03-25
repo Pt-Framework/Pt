@@ -140,6 +140,17 @@ class PT_HMI_API Window : public Visual
 
     virtual void repaint(const Gfx::RectF& rect);
 
+    const Gfx::SizeF& size() const
+    {
+        return _size;
+    }
+
+
+    const Gfx::PointF& position() const
+    {
+        return _position;
+    }
+
   protected:
     virtual void onKeyEvent( const KeyEvent& ev );
 
@@ -154,6 +165,8 @@ class PT_HMI_API Window : public Visual
     virtual void onLeaveEvent(const LeaveEvent& ev );
     
     virtual void onResizeEvent(const ResizeEvent& ev);
+    
+    virtual void onMoveEvent(const MoveEvent& ev);
 
     virtual void onPaintEvent(const PaintEvent& ev);
 
@@ -162,7 +175,12 @@ class PT_HMI_API Window : public Visual
     virtual void onCloseEvent(const CloseEvent& ev);
 
     virtual void onActivateEvent(const ActivateEvent& ev);  
-    
+
+    virtual void onShowEvent( const ShowEvent& ev );
+
+    virtual void onEnableEvent( const EnableEvent& ev );
+
+
 
     // TODO:
   public:
@@ -257,6 +275,8 @@ class PT_HMI_API Window : public Visual
     std::vector<Widget*>           _focusList;
     PixmapSurface                  _surface;
     WindowImpl*                    _impl;        
+    Gfx::PointF                    _position;
+    Gfx::SizeF                     _size;
 };
 
 } // namespace

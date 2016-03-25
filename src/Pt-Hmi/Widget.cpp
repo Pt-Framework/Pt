@@ -400,28 +400,18 @@ void Widget::repaint()
 }
 
 
-
 void Widget::onLayout()
 {         
 }
 
 
-void Widget::onPaintEvent( const PaintEvent& ev )
-{
-   Visual::onPaintEvent(ev);
-}
-
-
-void Widget::onResizeEvent( const ResizeEvent& ev )
-{
-    Visual::onResizeEvent(ev);
-    onLayout();
-}
-
-
 void Widget::resize( const Gfx::SizeF& s )
 {
-    Application::instance().resize(*this, s );
+    _size = s;
+    
+    onLayout();
+
+    repaint();
 }
  
        
@@ -542,7 +532,8 @@ Gfx::SizeF Widget::onAutoSize() const
 
 void Widget::move(const Gfx::PointF& pos)
 {
-    Application::instance().move(*this, pos );
+    _position = pos;
+    repaint();
 }
 
 

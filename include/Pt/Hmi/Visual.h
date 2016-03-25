@@ -72,16 +72,6 @@ class PT_HMI_API Visual : public Pt::Connectable
 
         virtual void repaint( const Gfx::RectF& rect ) = 0;  
 
-        const Gfx::SizeF& size() const
-        {
-            return _size;
-        }
-
-        const Gfx::PointF& position() const
-        {
-            return _position;
-        }
-
         Pt::uint64_t vid() const
         {
             return _vid;
@@ -107,16 +97,8 @@ class PT_HMI_API Visual : public Pt::Connectable
             return _name;
         }
     protected:
-        Visual();       
-                       
-        virtual void onResizeEvent( const ResizeEvent& ev );
-
-        virtual void onMoveEvent( const MoveEvent& ev );
-
-        virtual void onShowEvent( const ShowEvent& ev );
+        Visual();                             
  
-        virtual void onEnableEvent( const EnableEvent& ev );
-
         virtual void onKeyEvent( const KeyEvent& ev );
 
         virtual void onPointerEvent( const MouseEvent& ev );
@@ -135,8 +117,7 @@ class PT_HMI_API Visual : public Pt::Connectable
         std::string  _name;        
         bool         _enabled;
         bool         _visible;
-        Gfx::PointF  _position;
-        Gfx::SizeF   _size;
+
 
 };
 

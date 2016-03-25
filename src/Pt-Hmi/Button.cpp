@@ -146,24 +146,24 @@ void Button::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
         return;
     }
 
-    /*
+    
     if( mouseOver )
     {
         setBackgroundColor( Gfx::Color(bkgColor.red() * 0.9f ,
                                        bkgColor.green() * 0.9f ,
-                                       bkgColor.blue() * 0.9f ) );
+                                       bkgColor.blue() * 0.9f ), false );
     }
 
     if( _isPressed )
     {
         setBackgroundColor( Gfx::Color(bkgColor.red() * 0.8f ,
                                        bkgColor.green() * 0.8f ,
-                                       bkgColor.blue() * 0.8f ) );
+                                       bkgColor.blue() * 0.8f ), false );
     }
-    */
+    
     Label::onPaint(surface, updateRect);
     
-    //setBackgroundColor(bkgColor);
+    setBackgroundColor(bkgColor, false);
 
     if( hasFocus() )
     {

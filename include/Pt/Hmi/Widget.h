@@ -149,7 +149,19 @@ class PT_HMI_API Widget : public Visual
 
         void resize( const Gfx::SizeF& s );
 
+
+        const Gfx::SizeF& size() const
+        {
+            return _size;
+        }
+
         void move( const Gfx::PointF& p );
+
+        const Gfx::PointF& position() const
+        {
+            return _position;
+        }
+
 
         void show( bool b = true );
 
@@ -179,8 +191,6 @@ class PT_HMI_API Widget : public Visual
         virtual Gfx::SizeF onAutoSize() const;
 
     protected:
-        virtual void onPaintEvent( const PaintEvent& ev );
-
         virtual void onPointerEvent(const MouseEvent& ev);
 
         virtual void onTouchEvent(const TouchEvent& ev);
@@ -189,8 +199,7 @@ class PT_HMI_API Widget : public Visual
     
         virtual void onKeyEvent(const KeyEvent& ev);
 
-        virtual void onResizeEvent( const ResizeEvent& ev );
-
+    protected:
         String setMnemonic(const String& text);
 
     public:
@@ -293,7 +302,9 @@ class PT_HMI_API Widget : public Visual
         bool                         _acceptFocus;
         bool                         _hasFocus;    
         Key                          _actionKey;
-        size_t                       _focusIndex;        
+        size_t                       _focusIndex;     
+        Gfx::PointF                  _position;
+        Gfx::SizeF                   _size;   
 };
 
 

@@ -58,10 +58,13 @@ class PT_HMI_API Panel : public Widget
             return _backgroundColor;
         }
 
-        void setBackgroundColor( const Gfx::Color& c )
+        void setBackgroundColor( const Gfx::Color& c, bool doRepaint = true )
         {
             _backgroundColor = c;
-            repaint();
+
+            if( doRepaint )
+                repaint();
+            
         }
 
         const Gfx::Color& foregroundColor() const
