@@ -43,10 +43,6 @@ class Window;
 class Widget;
 class EraseEvent;
 
-
-typedef std::map<Pt::uint64_t, Visual*> VisualMap;
-
-
 class PT_HMI_API Application : public Pt::System::Application
 {
     public:
@@ -121,9 +117,19 @@ class PT_HMI_API Application : public Pt::System::Application
         void show( Widget& w, bool s );
 
         void enable( Widget& w, bool s );
+
+        void update(Window& w, const Gfx::RectF& rect);
+
+        void update(Widget& w, const Gfx::RectF& rect);
+
+        //void processUpdate(Window& w, const Gfx::RectF& rect );
+
+        //void processUpdate(Widget& w, const Gfx::RectF& rect );
         
     protected:        
         void onResizeEvent( const ResizeEvent& ev );
+
+        void onUpdateEvent( const UpdateEvent& ev );
 
         void onPaintEvent( const PaintEvent& ev );
 
@@ -135,12 +141,51 @@ class PT_HMI_API Application : public Pt::System::Application
         void updateWidget( Widget& parent, const Gfx::RectF& rect );
                 
     private:
+        typedef std::map<Pt::uint64_t, Visual*> VisualMap;
+
+        class UpdateInfo
+        {
+            public:
+                explicit UpdateInfo(const Gfx::RectF& rect)
+                : _n(0)
+                , _rect(rect)
+                {
+                }
+
+                const Gfx::RectF& rect() const
+                {
+                    return _rect;
+                }
+
+                void push(const Gfx::RectF& rect)
+                {
+                    if(_n == 0)
+                        _rect = rect;
+                    else
+                        _rect.unify(rect);
+
+                    ++_n;
+                }
+
+                int pop()
+                {
+                    return --_n;
+                }
+
+            private:
+                int _n;
+                Gfx::RectF _rect;
+        };
+
+        typedef std::multimap<Pt::uint64_t, UpdateInfo> UpdateMap;
+
         ApplicationImpl* _impl; 
         Screen* _mainScreen;  
         double _windowBorderWidth;
         double _windowTitleHeight;
         Pt::uint64_t _lastVid;
         VisualMap _visuals;
+        UpdateMap _updates;
 };
 
 } // namespace

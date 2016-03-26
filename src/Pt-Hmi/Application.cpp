@@ -51,6 +51,7 @@ Application::Application(int argc, char** argv)
 
   loop().eventReceived() += Pt::slot(*this, &Application::onResizeEvent );
   loop().eventReceived() += Pt::slot(*this, &Application::onMoveEvent );
+  loop().eventReceived() += Pt::slot(*this, &Application::onUpdateEvent ); 
   loop().eventReceived() += Pt::slot(*this, &Application::onPaintEvent ); 
   loop().eventReceived() += Pt::slot(*this, &Application::onEraseEvent ); 
   
@@ -100,6 +101,58 @@ void Application::sendEvent(Visual& w, const Pt::Event& ev)
 	// TODO: check event filter before dispatching the event
 
 	w.processEvent(ev);
+}
+
+
+void Application::update(Widget& w, const Gfx::RectF& rect)
+{
+    if( w.window() == 0)
+        return;
+    
+    Gfx::PointF updatePos = w.toWindowPosition( rect.topLeft() );
+    Gfx::RectF updateRect( updatePos, rect.size() );
+    update(*w.window(), updateRect );
+}
+
+
+void Application::update(Window& w, const Gfx::RectF& rect)
+{        
+    UpdateMap::iterator it = _updates.find(w.vid());
+    if( it == _updates.end() )
+    {
+        UpdateInfo uinfo(rect);
+        _updates.insert( std::make_pair(w.vid(), uinfo) );
+    }
+    else
+    {
+        it->second.push(rect);
+    }
+
+    UpdateEvent uev(w.vid(), rect);
+    loop().commitEvent(uev);
+}
+
+
+void Application::onUpdateEvent(const UpdateEvent& ev)
+{
+    UpdateMap::iterator it = _updates.find( ev.vid() );
+    if( it == _updates.end() )
+        return;
+
+    if( it->second.pop() != 0)
+        return;
+
+    Gfx::RectF updateRect = it->second.rect();
+    _updates.erase( ev.vid() );
+
+    VisualMap::iterator vit = _visuals.find( ev.vid() );
+
+    if( vit == _visuals.end() )
+        return;
+
+    Window* w = dynamic_cast<Window*>(vit->second);
+    if(w)
+        repaint(*w, ev.rect());
 }
 
 

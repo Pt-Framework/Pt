@@ -388,6 +388,13 @@ void Widget::processEvent(const Pt::Event& ev)
 }
 
 
+void Widget::update()
+{
+    Gfx::RectF updateRect( Gfx::PointF(0,0), size() );
+    Application::instance().update(*this, updateRect );
+}
+
+
 void Widget::repaint(const Gfx::RectF& rect)
 {
     Application::instance().repaint(*this, rect );

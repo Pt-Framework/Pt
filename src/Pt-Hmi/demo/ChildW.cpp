@@ -104,11 +104,16 @@ ChildW::~ChildW()
 
 void ChildW::onShowDialog(Button& button)
 {
-    Gfx::SizeF size(400,260);
-    _childWindow2.resize(Gfx::SizeF(400,260));
+    std::clog << "----------------" << std::endl;
+    _closeButton.setText("AAA");
+    _closeButton.setText("BBB");
+    _closeButton.setText("CCC");
 
-    Gfx::PointF pos(0,0);
-    _childWindow2.move(pos);
+    //Gfx::SizeF size(400,260);
+    //_childWindow2.resize(Gfx::SizeF(400,260));
+
+    //Gfx::PointF pos(0,0);
+    //_childWindow2.move(pos);
 
     //Dialog1 d;
     //d.runModal();

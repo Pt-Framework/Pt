@@ -162,12 +162,13 @@ class PT_HMI_API Widget : public Visual
             return _position;
         }
 
-
         void show( bool b = true );
 
         void repaint();
 
         void enable( bool b = true );
+
+        void update(); 
 
         void repaint( const Gfx::RectF& rect );  
 

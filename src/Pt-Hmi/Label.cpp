@@ -53,8 +53,9 @@ Label::~Label()
 
 void Label::setText(const Pt::String& text)
 {
+    std::clog << "Label::setText: " << text.narrow() << std::endl;
     _text = Widget::setMnemonic(text);
-    repaint();
+    update();
 }
 
 
@@ -75,6 +76,8 @@ Gfx::SizeF Label::onAutoSize() const
 
 void Label::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
+    std::clog << "Label::onPaint: " << _text.narrow() << std::endl;
+
     Panel::onPaint(surface, updateRect);
        
     Gfx::SizeF         size = this->size();
