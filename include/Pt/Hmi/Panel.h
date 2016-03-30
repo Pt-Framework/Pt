@@ -63,7 +63,7 @@ class PT_HMI_API Panel : public Widget
             _backgroundColor = c;
 
             if( doRepaint )
-                repaint();
+                update();
             
         }
 
@@ -75,7 +75,7 @@ class PT_HMI_API Panel : public Widget
         void setForegroundColor(const Gfx::Color& c )
         {
             _foregroundColor = c;
-            repaint();
+            update();
         }
 
         const Gfx::Image& backgroundImage() const
@@ -86,7 +86,7 @@ class PT_HMI_API Panel : public Widget
         void setBackgroundImage( const Gfx::Image& im )
         {
             _backgroundImage = im;
-            repaint();
+            update();
         }
 
         ImageLayout backgroundImageLayout() const
@@ -97,7 +97,7 @@ class PT_HMI_API Panel : public Widget
         void setBackgroundImageLayout( ImageLayout l )
         {
             _backgroundImageLayout = l;
-            repaint();
+            update();
         }
 
         BorderStyle borderStyle() const
@@ -108,7 +108,7 @@ class PT_HMI_API Panel : public Widget
         void setBorderStyle(BorderStyle t)         
         {   
             _borderStyle = t;
-            repaint();
+            update();
         }
 
         bool isBorderRound() const
@@ -119,7 +119,7 @@ class PT_HMI_API Panel : public Widget
         void setBorderRound(bool b)
         {   
           _borderRound = b;
-          repaint();
+          update();
         }
 
         double borderWidth() const	  
@@ -130,7 +130,7 @@ class PT_HMI_API Panel : public Widget
         void setBorderWidth( double w )
         {
           _borderWidth = w;
-          repaint();
+          update();
         }
          
         const Gfx::Color& borderColor() const
@@ -141,7 +141,7 @@ class PT_HMI_API Panel : public Widget
         void setBorderColor(Gfx::Color b)
         {
           _borderColor = b;
-          repaint();
+          update();
         }
 
     protected:

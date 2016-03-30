@@ -96,7 +96,7 @@ void Button::onPointerEvent(const MouseEvent& ev)
     if( ev.isPressed(MouseEvent::Left) != _isPressed )
     {
         _isPressed = ev.isPressed(MouseEvent::Left);
-        repaint();
+        update();
     }
 }
 
@@ -104,7 +104,7 @@ void Button::onPointerEvent(const MouseEvent& ev)
 void Button::onPointerEnter()
 {
     Label::onPointerEnter();
-    repaint();
+    update();
 }
 
 
@@ -112,7 +112,7 @@ void Button::onPointerLeave()
 {
     _isPressed = false;
     Label::onPointerLeave();
-    repaint();
+    update();
 }
 
 
@@ -123,7 +123,7 @@ void Button::onTouchEvent(const TouchEvent& ev)
     if( ev.isPress() != _isPressed )
     {
         _isPressed = ev.isPress();
-        repaint();
+        update();
     }
 }
 
@@ -131,7 +131,7 @@ void Button::onTouchEvent(const TouchEvent& ev)
 void Button::onFocus(bool hasFocus)
 {    
     Label::onFocus(hasFocus);
-    repaint();
+    update();
 }
 
 

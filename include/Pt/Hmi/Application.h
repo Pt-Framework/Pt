@@ -91,40 +91,21 @@ class PT_HMI_API Application : public Pt::System::Application
             return _lastVid++;
         }
 
+        void registerVisual(Visual& visual);
 
-        void registerVisual( Visual& visual );
+        void unregisterVisual(Visual& visual);
 
-        void unregisterVisual( Visual& visual );
+        void resize(Window& w, const Gfx::SizeF& s);
 
-        void resize( Window& w, const Gfx::SizeF& s );
+        void move(Window& w, const Gfx::PointF& p);
 
-        void move( Window& w, const Gfx::PointF& p );
+        void show(Window& w, bool visible);
 
-        void show( Window& w, bool visible );
+        void enable(Window& w, bool enable);
 
-        void enable( Window& w, bool enable );
-
-        void activate( Window& w );
-
-        void repaint(Window& w, const Gfx::RectF& rect );
-
-        void repaint(Widget& w, const Gfx::RectF& rect );
-
-        void resize( Widget& w, const Gfx::SizeF& s );
-
-        void move( Widget& w, const Gfx::PointF& to );
-        
-        void show( Widget& w, bool s );
-
-        void enable( Widget& w, bool s );
+        void activate(Window& w);
 
         void update(Window& w, const Gfx::RectF& rect);
-
-        void update(Widget& w, const Gfx::RectF& rect);
-
-        //void processUpdate(Window& w, const Gfx::RectF& rect );
-
-        //void processUpdate(Widget& w, const Gfx::RectF& rect );
         
     protected:        
         void onResizeEvent( const ResizeEvent& ev );
@@ -138,6 +119,7 @@ class PT_HMI_API Application : public Pt::System::Application
         void onEraseEvent( const EraseEvent& ev );
 
     private:
+        void updateWindow(Window& w, const Gfx::RectF& rect );
         void updateWidget( Widget& parent, const Gfx::RectF& rect );
                 
     private:
@@ -147,10 +129,9 @@ class PT_HMI_API Application : public Pt::System::Application
         {
             public:
                 explicit UpdateInfo(const Gfx::RectF& rect)
-                : _n(0)
+                : _n(1)
                 , _rect(rect)
-                {
-                }
+                { }
 
                 const Gfx::RectF& rect() const
                 {

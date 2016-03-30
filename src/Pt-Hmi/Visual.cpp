@@ -84,10 +84,6 @@ void Visual::enable( bool b )
 
 }
 
-void Visual::repaint( const Gfx::RectF& rect )
-{
-
-}
 
 void Visual::onKeyEvent( const KeyEvent& ev )
 {

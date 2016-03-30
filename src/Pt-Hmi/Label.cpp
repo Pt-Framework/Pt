@@ -62,7 +62,7 @@ void Label::setText(const Pt::String& text)
 void Label::setFont( const Gfx::Font& f )
 {
     _font = f;
-    repaint();
+    update();
 }
 
 

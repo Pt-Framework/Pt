@@ -68,9 +68,7 @@ class PT_HMI_API Visual : public Pt::Connectable
 
         virtual void show( bool b = true ) = 0;
 
-        virtual void enable( bool b = true ) = 0;
-
-        virtual void repaint( const Gfx::RectF& rect ) = 0;  
+        virtual void enable( bool b = true ) = 0; 
 
         Pt::uint64_t vid() const
         {

@@ -213,16 +213,16 @@ void Window::focusNext()
 }
 
 
-void Window::repaint()
+void Window::update()
 {
-    repaint( Gfx::RectF(Gfx::PointF(0,0), size()) );
+    update( Gfx::RectF(Gfx::PointF(0,0), size()) );
 }
 
 
-void Window::repaint(const Gfx::RectF& updateRect)
+void Window::update(const Gfx::RectF& updateRect)
 {    
     if( _impl )
-     Application::instance().repaint( *this, updateRect);
+     Application::instance().update(*this, updateRect);
 }
 
 
@@ -411,7 +411,7 @@ void Window::onKeyEvent(const KeyEvent& ev)
             focusNext();
 
             if(_focusWidget)
-                _focusWidget->repaint();
+                _focusWidget->update();
         }
     }
 }
@@ -564,7 +564,7 @@ void Window::add(Window& child)
 
     _windowManager.add(child);
 
-    repaint();
+    update();
 }
 
 // TODO: are all windows updated correctly?
@@ -581,7 +581,7 @@ void Window::remove(Window& child)
     child._parent = 0;
     child.createImpl();
 
-    repaint();
+    update();
 }
 
 

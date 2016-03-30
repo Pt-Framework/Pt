@@ -104,17 +104,6 @@ void Application::sendEvent(Visual& w, const Pt::Event& ev)
 }
 
 
-void Application::update(Widget& w, const Gfx::RectF& rect)
-{
-    if( w.window() == 0)
-        return;
-    
-    Gfx::PointF updatePos = w.toWindowPosition( rect.topLeft() );
-    Gfx::RectF updateRect( updatePos, rect.size() );
-    update(*w.window(), updateRect );
-}
-
-
 void Application::update(Window& w, const Gfx::RectF& rect)
 {        
     UpdateMap::iterator it = _updates.find(w.vid());
@@ -146,26 +135,24 @@ void Application::onUpdateEvent(const UpdateEvent& ev)
     _updates.erase( ev.vid() );
 
     VisualMap::iterator vit = _visuals.find( ev.vid() );
-
     if( vit == _visuals.end() )
         return;
 
-    Window* w = dynamic_cast<Window*>(vit->second);
-    if(w)
-        repaint(*w, ev.rect());
+    Window* w = static_cast<Window*>(vit->second);
+    updateWindow(*w, ev.rect());
 }
 
 
-void Application::repaint(Window& w, const Gfx::RectF& rect)
+void Application::updateWindow(Window& w, const Gfx::RectF& rect)
 {        
     EraseEvent erv(w.vid(), rect);
-    loop().commitEvent(erv);  
+    loop().queueEvent(erv);  
 
     if( w.mainWidget() )
         updateWidget( *w.mainWidget(), rect );
 
     PaintEvent pev(w.vid(), rect);
-    loop().commitEvent(pev);  
+    loop().queueEvent(pev);  
 
     if( w.parent() )
     {
@@ -174,25 +161,15 @@ void Application::repaint(Window& w, const Gfx::RectF& rect)
         pos.addX( windowBorderWidth() );
         pos.addY( windowBorderWidth() + windowTitleHeight() );
 
-        repaint( *w.parent(), Gfx::RectF( pos, rect.size() ) );
+        updateWindow( *w.parent(), Gfx::RectF( pos, rect.size() ) );
     }
-}
-
-
-void Application::repaint(Widget& w, const Gfx::RectF& rect)
-{
-    if( w.window() == 0)
-        return;
-
-    Gfx::RectF wrect( w.toWindowPosition(rect.topLeft()) , rect.size() );
-    repaint(*w.window(), wrect );
 }
 
 
 void Application::updateWidget( Widget& parent, const Gfx::RectF& rect )
 {
     PaintEvent pev( parent.vid(), rect);
-    loop().commitEvent(pev); 
+    loop().queueEvent(pev); 
 
     std::vector<Widget*>& widgets     = parent.widgets();
     std::vector<Widget*>::iterator it = widgets.begin();
@@ -255,28 +232,6 @@ void Application::onEraseEvent( const EraseEvent& ev )
 }
 
 
-void Application::move( Widget& w, const Gfx::PointF& to )
-{
-    Gfx::RectF updateRect(w.position(), w.size()); 
-    updateRect.unify(Gfx::RectF(to, w.size())); 
-
-    MoveEvent mev(w.vid(), to );    
-    w.processEvent(mev);
-
-//    loop().commitEvent(mev);
-
-    if( !w.window() )
-        return;
-
-    if( w.parent() )
-        repaint( *w.parent(), updateRect  );
-
-    //Todo: check transparency
-    //repaint( w, Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
-}
-
-
-
 void Application::move( Window& w, const Gfx::PointF& to )
 {   
     Gfx::PointF pos = w.position();
@@ -299,32 +254,10 @@ void Application::move( Window& w, const Gfx::PointF& to )
     Gfx::RectF updateRect( pos, size);   
     Gfx::RectF movedRect( to, size);
     updateRect.unify(movedRect); 
-    repaint(*w.parent(), updateRect);
+    update(*w.parent(), updateRect);
     
     //TODO: only child transparent
     //repaint(w, Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
-}
-
-
-void Application::resize( Widget& w, const Gfx::SizeF& s )
-{
-
-    Gfx::SizeF newSize( std::max( w.size().width(), s.width()), 
-                        std::max( w.size().height(), s.height()) );
-
-    //Resize
-    ResizeEvent rev(w.vid(), s);
-    sendEvent(w, rev);
-
-//    loop().commitEvent(rev);
-
-    if( !w.window() )
-        return;
-    
-    if( w.parent() )
-        repaint(*w.parent(), Gfx::RectF( w.position(), newSize ) );    
-
-    repaint(w, Gfx::RectF(Gfx::PointF(0,0), newSize ) );    
 }
 
 
@@ -353,36 +286,7 @@ void Application::resize( Window& w, const Gfx::SizeF& to )
     updateSize.addHeight(2 * borderWidth + titleHeight);
     updateSize.addWidth(2 * borderWidth);
 
-    repaint(w, Gfx::RectF( updatePos, updateSize ) );
-}
-
-
-
-void Application::show( Widget& w, bool s )
-{
-    ShowEvent ev(w.vid(), s );
-    loop().commitEvent(ev);
-
-    if( w.window() == 0)
-      return;
-
-    if( w.parent() )
-        repaint(*w.parent(), Gfx::RectF( w.position(), w.size() ) );
-
-    if( s ) 
-        repaint(w, Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
-}
-
-
-void Application::enable( Widget& w, bool s )
-{
-    EnableEvent ev(w.vid(), s );
-    loop().commitEvent(ev);
-
-    if( w.window() == 0)
-      return;
-
-    repaint(w, Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
+    update(w, Gfx::RectF( updatePos, updateSize ) );
 }
 
 
@@ -404,11 +308,11 @@ void Application::show( Window& w, bool visible )
     ShowEvent sev( w.vid(), visible );
     loop().commitEvent( sev );
         
-    repaint(*w.parent(), updateRect);
+    update(*w.parent(), updateRect);
 
     //Window
     if( visible )
-        repaint(w, Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
+        update(w, Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
 }
 
 
@@ -429,10 +333,8 @@ void Application::enable( Window& w, bool enable )
 
     EnableEvent eev( w.vid(), enable );
     loop().commitEvent( eev );
-
-    repaint(*w.parent(), updateRect);
    
-    repaint(w, Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
+    update(w, Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
 }
 
 

@@ -106,7 +106,7 @@ void Widget::add(Widget& widget)
     widget._parent = this;
 
     widget.setWindow(_window);   
-    widget.repaint();
+    widget.update();
 }
 
 
@@ -121,7 +121,7 @@ void Widget::remove(Widget& widget)
     widget._parent = 0;
 
     widget.setWindow(0);
-    widget.repaint();
+    widget.update();
 }
 
 
@@ -390,20 +390,21 @@ void Widget::processEvent(const Pt::Event& ev)
 
 void Widget::update()
 {
-    Gfx::RectF updateRect( Gfx::PointF(0,0), size() );
-    Application::instance().update(*this, updateRect );
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    update(rect);
 }
 
 
-void Widget::repaint(const Gfx::RectF& rect)
+void Widget::update(const Gfx::RectF& rect)
 {
-    Application::instance().repaint(*this, rect );
-}
+    Window* w = window();
+    if( ! w )
+        return;
+    
+    Gfx::PointF updatePos = toWindowPosition( rect.topLeft() );
+    Gfx::RectF updateRect( updatePos, rect.size() );
 
-
-void Widget::repaint()
-{
-    repaint(Gfx::RectF( Gfx::PointF(0,0), size() ) );
+    Application::instance().update(*w, updateRect );
 }
 
 
@@ -412,13 +413,50 @@ void Widget::onLayout()
 }
 
 
-void Widget::resize( const Gfx::SizeF& s )
+void Widget::move(const Gfx::PointF& pos)
 {
+    Gfx::RectF updateRect(Gfx::PointF(0, 0), _size); 
+
+    Gfx::PointF to = pos - _position;
+    updateRect.unify( Gfx::RectF(to, _size) ); 
+
+    _position = pos;
+
+    update(updateRect);
+}
+
+
+void Widget::enable( bool b )
+{
+    _enabled = b;
+    update();
+}
+
+
+void Widget::setGeometry(const Gfx::PointF& pos, const Gfx::SizeF& size)
+{
+    move(pos);
+    resize(size);
+}
+
+
+void Widget::show( bool s )
+{
+    _visible = s;
+    update();
+}
+
+
+void Widget::resize(const Gfx::SizeF& s)
+{
+    Gfx::SizeF updateSize( std::max( size().width(), s.width()), 
+                           std::max( size().height(), s.height()) );
+
     _size = s;
-    
     onLayout();
 
-    repaint();
+    Gfx::RectF updateRect(Gfx::PointF(0,0), updateSize);
+    update(updateRect);
 }
  
        
@@ -456,12 +494,12 @@ void Widget::onKeyEvent(const KeyEvent& ev)
         else
             _window->focusNext();
 
-        repaint();
+        update();
 
         Widget* focusWidget = _window->focusWidget();
 
         if(focusWidget)
-            focusWidget->repaint();
+            focusWidget->update();
 
         return;
     }
@@ -536,32 +574,6 @@ Gfx::SizeF Widget::onAutoSize() const
 {
     return Gfx::SizeF(0, 0);
 }
-
-void Widget::move(const Gfx::PointF& pos)
-{
-    _position = pos;
-    repaint();
-}
-
-
-void Widget::enable( bool b )
-{
-    Application::instance().enable(*this, b );
-}
-
-void Widget::setGeometry(const Gfx::PointF& pos, const Gfx::SizeF& size)
-{
-  move(pos);
-  resize(size);
-}
-
-
-void Widget::show( bool s )
-{
-    Application::instance().show( *this, s );
-}
-
-
 
 } // namespace
 

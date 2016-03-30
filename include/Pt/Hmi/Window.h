@@ -136,9 +136,9 @@ class PT_HMI_API Window : public Visual
     
     virtual void enable( bool e = true );
 
-    void repaint();
+    void update();
 
-    virtual void repaint(const Gfx::RectF& rect);
+    virtual void update(const Gfx::RectF& rect);
 
     const Gfx::SizeF& size() const
     {

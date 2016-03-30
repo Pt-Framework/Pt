@@ -164,13 +164,11 @@ class PT_HMI_API Widget : public Visual
 
         void show( bool b = true );
 
-        void repaint();
-
         void enable( bool b = true );
 
         void update(); 
 
-        void repaint( const Gfx::RectF& rect );  
+        void update(const Gfx::RectF& rect);
 
     protected:   
         virtual void onLayout();
