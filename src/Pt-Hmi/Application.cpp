@@ -54,6 +54,7 @@ Application::Application(int argc, char** argv)
   loop().eventReceived() += Pt::slot(*this, &Application::onUpdateEvent ); 
   loop().eventReceived() += Pt::slot(*this, &Application::onPaintEvent ); 
   loop().eventReceived() += Pt::slot(*this, &Application::onEraseEvent ); 
+  loop().eventReceived() += Pt::slot(*this, &Application::onMouseEvent );
   
 }
 
@@ -99,6 +100,9 @@ void Application::nextEvent()
 void Application::sendEvent(Visual& w, const Pt::Event& ev)
 {
 	// TODO: check event filter before dispatching the event
+
+    //if(ev.typeInfo() == typeid(MouseEvent) )
+    //    std::clog << "onMouseEvent" << std::endl;
 
 	w.processEvent(ev);
 }
@@ -212,34 +216,45 @@ void Application::onPaintEvent(const PaintEvent& ev)
 
 void Application::onResizeEvent(const ResizeEvent& ev )
 {
-      VisualMap::iterator it = _visuals.find( ev.vid() );
+    VisualMap::iterator it = _visuals.find( ev.vid() );
 
-      if( it == _visuals.end() )
+    if( it == _visuals.end() )
+    return;
+
+    it->second->processEvent(ev );
+}
+
+
+void Application::onMouseEvent(const MouseEvent& ev )
+{
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+
+    if( it == _visuals.end() )
         return;
 
-     it->second->processEvent(ev );
+    it->second->processEvent(ev );
 }
 
 
 void Application::onMoveEvent(const MoveEvent& ev )
 {
-      VisualMap::iterator it = _visuals.find( ev.vid() );
+    VisualMap::iterator it = _visuals.find( ev.vid() );
 
-      if( it == _visuals.end() )
+    if( it == _visuals.end() )
         return;
 
-     it->second->processEvent(ev );
+    it->second->processEvent(ev );
 }
 
 
 void Application::onEraseEvent( const EraseEvent& ev )
 {
-      VisualMap::iterator it = _visuals.find( ev.vid() );
+    VisualMap::iterator it = _visuals.find( ev.vid() );
 
-      if( it == _visuals.end() )
+    if( it == _visuals.end() )
         return;
 
-     it->second->processEvent(ev );
+    it->second->processEvent(ev );
 }
 
 
@@ -249,9 +264,6 @@ void Application::move(Window& w, const Gfx::PointF& to)
 
     MoveEvent mev(w.vid(), to);
     loop().commitEvent(mev);
-
-    // TODO: fix this and go through event loop
-    //sendEvent(w, mev);
 
     if( ! w.parent() )
         return;
@@ -278,9 +290,6 @@ void Application::resize(Window& w, const Gfx::SizeF& to)
 
     ResizeEvent rev(w.vid(), to);
     loop().commitEvent(rev);
-    
-    // TODO: fix this and go through event loop
-    //sendEvent(w, rev);
 
     if( ! w.isVisible() )
         return;

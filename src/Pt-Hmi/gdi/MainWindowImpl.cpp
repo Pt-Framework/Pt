@@ -51,6 +51,7 @@ namespace Hmi{
 MainWindowImpl::MainWindowImpl(Window* w)
 : WindowImpl(w)
 , _app( Pt::Hmi::Application::instance() )
+, _mouseEvent(0)
 , _screen( _app.mainScreen() )
 , _hwnd( 0 )
 , _hasPointer(false)
@@ -367,7 +368,9 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
         _app.mainScreen().setPointerWindow( _apiWindow );
     }
 
-    _app.sendEvent(*_apiWindow, _mouseEvent);
+    _mouseEvent.setId( _apiWindow->vid() );
+    //_app.sendEvent(*_apiWindow, _mouseEvent);
+    _app.loop().commitEvent(_mouseEvent);
 }
 
 

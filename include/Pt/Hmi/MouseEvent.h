@@ -56,12 +56,23 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
             Middle = 2,
         };
 
-        MouseEvent()
-        : _pos(0, 0)
+        MouseEvent(Pt::uint64_t vid)
+        : _vid( vid )
+        , _pos(0, 0)
         , _action(Move)
         , _buttonState(0)
         , _button(0)
         { }
+
+        void setId(Pt::uint64_t vid)
+        {
+            _vid = vid;
+        }
+
+        Pt::uint64_t vid() const
+        {
+            return _vid;
+        }
 
         void clear()
         {
@@ -159,6 +170,7 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
         }
 
     private:
+        Pt::uint64_t _vid;
         Gfx::PointF  _pos;
         Action       _action;
         Pt::uint32_t _buttonState;

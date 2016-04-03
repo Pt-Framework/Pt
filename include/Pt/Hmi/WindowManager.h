@@ -125,7 +125,6 @@ class WindowManager : public Pt::Connectable
         State                     _state;
         Window*                   _managedWindow;
         Window*                   _container;          
-        MouseEvent                _lastPointer;
         ResizeDirection::Type     _sizingDirection;
         
         Gfx::Color                _inactiveColor;

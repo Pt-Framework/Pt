@@ -47,14 +47,14 @@ namespace Demo {
 
 MainWindow::MainWindow()
 : _child1("Child 1")
-, _child2("Child 2")
+//, _child2("Child 2")
 {
     setTitle("Main 1");
     show( true );  // MainWindow
     move(  Gfx::PointF(60, 30) );
     resize( Gfx::SizeF(600, 430) );    
     add( _child1 );
-    add( _child2 );
+    //add( _child2 );
 }
 
 

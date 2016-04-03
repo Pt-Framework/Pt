@@ -47,7 +47,7 @@ class MainWindow : public Pt::Hmi::Window
 
 	private:
 		ChildW _child1;
-		ChildW _child2;
+		//ChildW _child2;
 }; 
 
 }

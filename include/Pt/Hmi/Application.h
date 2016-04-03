@@ -110,6 +110,8 @@ class PT_HMI_API Application : public Pt::System::Application
     protected:        
         void onResizeEvent( const ResizeEvent& ev );
 
+        void onMouseEvent(const MouseEvent& ev );
+
         void onUpdateEvent( const UpdateEvent& ev );
 
         void onPaintEvent( const PaintEvent& ev );
