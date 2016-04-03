@@ -206,22 +206,29 @@ Gfx::PointF Window::toScreen(const Gfx::PointF& p) const
 }
 
 
-void Window::update2(const Gfx::RectF& rect)
+void Window::update()
+{
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    update(rect);
+}
+
+
+void Window::update(const Gfx::RectF& rect)
 {
     Window* parentWindow = this->parent();
     if( parentWindow )
     {
-        parentWindow->onUpdate2(*this, rect);
+        parentWindow->onUpdate(*this, rect);
     }
     else
     {
         // TODO: make screen the parent window
-        Application::instance().onUpdate2(*this, rect);
+        Application::instance().onUpdate(*this, rect);
     }
 }
 
 
-void Window::onUpdate2(Window& child, const Gfx::RectF& rect)
+void Window::onUpdate(Window& child, const Gfx::RectF& rect)
 {
     double borderWidth = Application::instance().windowBorderWidth();
     double titleHeight = Application::instance().windowTitleHeight();
@@ -231,7 +238,7 @@ void Window::onUpdate2(Window& child, const Gfx::RectF& rect)
     updatePos.addY( borderWidth + titleHeight );
 
     Gfx::RectF updateRect(updatePos, rect.size());
-    this->update2(updateRect);
+    this->update(updateRect);
 }
 
 
@@ -244,19 +251,6 @@ void Window::focusPrev()
 void Window::focusNext()
 {
     moveFocus(_focusList.begin(), _focusList.end());
-}
-
-
-void Window::update()
-{
-    update( Gfx::RectF(Gfx::PointF(0,0), size()) );
-}
-
-
-void Window::update(const Gfx::RectF& updateRect)
-{    
-    if( _impl )
-     Application::instance().update(*this, updateRect);
 }
 
 

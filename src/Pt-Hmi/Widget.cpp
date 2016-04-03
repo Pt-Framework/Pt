@@ -395,23 +395,8 @@ void Widget::update()
 }
 
 
-void Widget::update2()
-{
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
-    
-    Window* w = window();
-    if( ! w )
-        return;
-    
-    Gfx::PointF updatePos = toWindowPosition( rect.topLeft() );
-    Gfx::RectF updateRect( updatePos, rect.size() );
-
-    w->update2(updateRect);
-}
-
-
 void Widget::update(const Gfx::RectF& rect)
-{
+{   
     Window* w = window();
     if( ! w )
         return;
@@ -419,7 +404,7 @@ void Widget::update(const Gfx::RectF& rect)
     Gfx::PointF updatePos = toWindowPosition( rect.topLeft() );
     Gfx::RectF updateRect( updatePos, rect.size() );
 
-    Application::instance().update(*w, updateRect );
+    w->update(updateRect);
 }
 
 

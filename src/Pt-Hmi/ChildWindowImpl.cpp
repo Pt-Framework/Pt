@@ -23,7 +23,10 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
+*/
+
 #include "ChildWindowImpl.h"
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Application.h>
@@ -48,7 +51,6 @@ ChildWindowImpl::~ChildWindowImpl()
 
 void ChildWindowImpl::close()
 {
-    
 }
 
 
@@ -85,51 +87,43 @@ void ChildWindowImpl::enable(bool e)
 
 void ChildWindowImpl::setMinimumSize(const Gfx::SizeF& s)
 {
-    
 }
 
 
 void ChildWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 {
-    
 }
 
 
 void ChildWindowImpl::setState(WindowState::Type p)
 {
-    
 }
 
 
 void ChildWindowImpl::setBorder(WindowBorder::Type p)
 {
-    
 }
 
 
 void ChildWindowImpl::setIcon(const Gfx::Image& p)
 {
-    
 }
 
 
 void ChildWindowImpl::setDecoration( WindowDecoration::Flags d )	
 {
-    
 }
 
 
 void ChildWindowImpl::setTitle( const std::string& t )
 {
-    
 }
 
 
 void ChildWindowImpl::paint(const Gfx::RectF& rect)
 {
-
 }
 
-}
+} // namespace
 
-}
+} // namespace

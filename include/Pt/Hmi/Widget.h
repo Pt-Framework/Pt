@@ -168,8 +168,6 @@ class PT_HMI_API Widget : public Visual
 
         void update();
 
-        void update2(); 
-
         void update(const Gfx::RectF& rect);
 
     protected:   

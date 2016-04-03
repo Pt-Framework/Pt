@@ -188,7 +188,7 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
 
         Painter painter(surface);
         painter.drawSurface(clientPos + surfaceRect.topLeft(),  w->surface(), surfaceRect);
-//        painter.drawRect( rect );     
+        //painter.drawRect( rect );     
     }
 }
 

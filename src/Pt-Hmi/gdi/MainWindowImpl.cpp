@@ -623,10 +623,12 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
     SetClassLong(_hwnd, GCL_HICON, (LONG)hIcon);     
 }
 
+
 void MainWindowImpl::paint(const Gfx::RectF& rect )
 {
     InvalidateRect(_hwnd, NULL, FALSE);
 }
+
 
 void MainWindowImpl::close()
 {

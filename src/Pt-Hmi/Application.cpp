@@ -104,9 +104,11 @@ void Application::sendEvent(Visual& w, const Pt::Event& ev)
 }
 
 
-void Application::update(Window& w, const Gfx::RectF& rect)
+void Application::onUpdate(Window& w, const Gfx::RectF& rect)
 {        
-    UpdateMap::iterator it = _updates.find(w.vid());
+    // NOTE: currently, the window is always a top-level window
+
+    UpdateMap::iterator it = _updates.find( w.vid() );
     if( it == _updates.end() )
     {
         UpdateInfo uinfo(rect);
@@ -117,19 +119,40 @@ void Application::update(Window& w, const Gfx::RectF& rect)
         it->second.push(rect);
     }
 
+    // TODO: should translate rect to screen coordinates and application
+    //       should find all windows affected by the update rect
+
     UpdateEvent uev(w.vid(), rect);
     loop().commitEvent(uev);
 }
 
 
-void Application::onUpdate2(Window& w, const Gfx::RectF& rect)
-{        
-    // TODO: use update events !!!
-    updateWindow2(w, rect);
+void Application::onUpdateEvent(const UpdateEvent& ev)
+{
+    UpdateMap::iterator it = _updates.find( ev.vid() );
+    if( it == _updates.end() )
+        return;
+
+    // only last update event
+    if( it->second.pop() != 0)
+        return;
+
+    Gfx::RectF updateRect = it->second.rect();
+    _updates.erase( ev.vid() );
+
+    VisualMap::iterator vit = _visuals.find( ev.vid() );
+    if( vit == _visuals.end() )
+        return;
+
+    // TODO: this cast can be removed once the update rect is in screen
+    //       coordinates and Application finds all windows affected by
+    //       the update rect of the event
+    Window* w = static_cast<Window*>(vit->second);
+    updateWindow(*w, updateRect);
 }
 
 
-void Application::updateWindow2(Window& w, const Gfx::RectF& rect)
+void Application::updateWindow(Window& w, const Gfx::RectF& rect)
 {        
     EraseEvent erv(w.vid(), rect);
     loop().commitEvent(erv);  
@@ -146,55 +169,11 @@ void Application::updateWindow2(Window& w, const Gfx::RectF& rect)
         pos.subY( windowBorderWidth() + windowTitleHeight() );
 
         Gfx::RectF updateRect( pos, rect.size() );
-        updateWindow2(**child, updateRect);
+        updateWindow(**child, updateRect);
     }
 
     PaintEvent pev(w.vid(), rect);
     loop().commitEvent(pev); 
-}
-
-
-void Application::onUpdateEvent(const UpdateEvent& ev)
-{
-    UpdateMap::iterator it = _updates.find( ev.vid() );
-    if( it == _updates.end() )
-        return;
-
-    if( it->second.pop() != 0)
-        return;
-
-    Gfx::RectF updateRect = it->second.rect();
-    _updates.erase( ev.vid() );
-
-    VisualMap::iterator vit = _visuals.find( ev.vid() );
-    if( vit == _visuals.end() )
-        return;
-
-    Window* w = static_cast<Window*>(vit->second);
-    updateWindow(*w, ev.rect());
-}
-
-
-void Application::updateWindow(Window& w, const Gfx::RectF& rect)
-{        
-    EraseEvent erv(w.vid(), rect);
-    loop().queueEvent(erv);  
-
-    if( w.mainWidget() )
-        updateWidget( *w.mainWidget(), rect );
-
-    PaintEvent pev(w.vid(), rect);
-    loop().queueEvent(pev);  
-
-    if( w.parent() )
-    {
-        Gfx::PointF pos( w.position() + rect.topLeft() );
-
-        pos.addX( windowBorderWidth() );
-        pos.addY( windowBorderWidth() + windowTitleHeight() );
-
-        updateWindow( *w.parent(), Gfx::RectF( pos, rect.size() ) );
-    }
 }
 
 
@@ -264,45 +243,46 @@ void Application::onEraseEvent( const EraseEvent& ev )
 }
 
 
-void Application::move( Window& w, const Gfx::PointF& to )
+void Application::move(Window& w, const Gfx::PointF& to)
 {   
-    Gfx::PointF pos = w.position();
+    Gfx::PointF from = w.position();
 
-    MoveEvent rev(w.vid(), to);
-//    loop().commitEvent(rev);
-    w.processEvent(rev);
+    MoveEvent mev(w.vid(), to);
+    loop().commitEvent(mev);
 
-    if(! w.parent() )
+    // TODO: fix this and go through event loop
+    //sendEvent(w, mev);
+
+    if( ! w.parent() )
         return;
     
     const double borderWidth = Application::instance().windowBorderWidth();
     const double titleHeight = Application::instance().windowTitleHeight();
         
     Gfx::SizeF size = w.size();    
-
     size.addWidth( 2 * borderWidth );
     size.addHeight( 2 * borderWidth + titleHeight );
 
-    Gfx::RectF updateRect( pos, size);   
-    Gfx::RectF movedRect( to, size);
-    updateRect.unify(movedRect); 
-    update(*w.parent(), updateRect);
+    Gfx::RectF movedRect(to, size);
+
+    Gfx::RectF updateRect(from, size);  
+    updateRect.unify(movedRect);
     
-    //TODO: only child transparent
-    //repaint(w, Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
+    w.parent()->update(updateRect);
 }
 
 
-void Application::resize( Window& w, const Gfx::SizeF& to )
+void Application::resize(Window& w, const Gfx::SizeF& to)
 {   
-    Gfx::SizeF wSize =  w.size();
+    Gfx::SizeF from = w.size();
 
     ResizeEvent rev(w.vid(), to);
-//    loop().commitEvent(rev);
-   sendEvent(w, rev);
-
+    loop().commitEvent(rev);
     
-    if( !w.isVisible())
+    // TODO: fix this and go through event loop
+    //sendEvent(w, rev);
+
+    if( ! w.isVisible() )
         return;
     
     const double borderWidth = windowBorderWidth();
@@ -310,15 +290,14 @@ void Application::resize( Window& w, const Gfx::SizeF& to )
     
     const Gfx::PointF updatePos(-borderWidth, -(borderWidth + titleHeight) );
 
+    Gfx::SizeF updateSize( std::max( to.width(), from.width() ),
+                           std::max( to.height(), from.height() ));
 
-    Gfx::SizeF updateSize( std::max( to.width(), wSize.width() ),
-                           std::max( to.height(), wSize.height() ));
-
-    
     updateSize.addHeight(2 * borderWidth + titleHeight);
     updateSize.addWidth(2 * borderWidth);
 
-    update(w, Gfx::RectF( updatePos, updateSize ) );
+    Gfx::RectF updateRect( updatePos, updateSize );
+    w.update(updateRect);
 }
 
 
@@ -339,12 +318,8 @@ void Application::show( Window& w, bool visible )
     
     ShowEvent sev( w.vid(), visible );
     loop().commitEvent( sev );
-        
-    update(*w.parent(), updateRect);
-
-    //Window
-    if( visible )
-        update(w, Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
+      
+    w.parent()->update(updateRect);
 }
 
 
@@ -366,7 +341,8 @@ void Application::enable( Window& w, bool enable )
     EnableEvent eev( w.vid(), enable );
     loop().commitEvent( eev );
    
-    update(w, Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
+    w.update( Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
+    //update(w, Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
 }
 
 

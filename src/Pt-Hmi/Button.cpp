@@ -104,7 +104,7 @@ void Button::onPointerEvent(const MouseEvent& ev)
 void Button::onPointerEnter()
 {
     Label::onPointerEnter();
-    update2();
+    update();
 }
 
 
@@ -112,7 +112,7 @@ void Button::onPointerLeave()
 {
     _isPressed = false;
     Label::onPointerLeave();
-    update2();
+    update();
 }
 
 

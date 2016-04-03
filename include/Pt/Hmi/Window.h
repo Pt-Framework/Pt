@@ -107,7 +107,6 @@ class PT_HMI_API Window : public Visual
     bool isActive() const;
 
     void activate();
-  
 
     // TODO: return new focusWidget() and remove focusWidget()
     void focusNext();
@@ -138,13 +137,11 @@ class PT_HMI_API Window : public Visual
     
     virtual void enable( bool e = true );
 
-    void update();
+    virtual void update();
 
-    virtual void update(const Gfx::RectF& rect);
+    void update(const Gfx::RectF& rect);
 
-    void update2(const Gfx::RectF& rect);
-
-    void onUpdate2(Window& w, const Gfx::RectF& rect);
+    void onUpdate(Window& w, const Gfx::RectF& rect);
 
     const Gfx::SizeF& size() const
     {
