@@ -105,6 +105,12 @@ const std::vector<Window*>& WindowManager::windows() const
 }
 
 
+std::vector<Window*>& WindowManager::windows()
+{
+    return _children;
+}
+
+
 void WindowManager::activate(Window& w)
 {
     std::vector<Window*>::iterator it = std::find(_children.begin(), _children.end(), &w);

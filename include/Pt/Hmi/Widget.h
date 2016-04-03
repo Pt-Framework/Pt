@@ -166,7 +166,9 @@ class PT_HMI_API Widget : public Visual
 
         void enable( bool b = true );
 
-        void update(); 
+        void update();
+
+        void update2(); 
 
         void update(const Gfx::RectF& rect);
 

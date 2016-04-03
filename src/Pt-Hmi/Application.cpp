@@ -122,6 +122,38 @@ void Application::update(Window& w, const Gfx::RectF& rect)
 }
 
 
+void Application::onUpdate2(Window& w, const Gfx::RectF& rect)
+{        
+    // TODO: use update events !!!
+    updateWindow2(w, rect);
+}
+
+
+void Application::updateWindow2(Window& w, const Gfx::RectF& rect)
+{        
+    EraseEvent erv(w.vid(), rect);
+    loop().commitEvent(erv);  
+
+    if( w.mainWidget() )
+        updateWidget( *w.mainWidget(), rect );
+
+    std::vector<Window*>& windows = w.windows();
+    std::vector<Window*>::iterator child;
+    for(child = windows.begin(); child != windows.end(); ++child)
+    {
+        Gfx::PointF pos( rect.topLeft() - (*child)->position() );
+        pos.subX( windowBorderWidth() );
+        pos.subY( windowBorderWidth() + windowTitleHeight() );
+
+        Gfx::RectF updateRect( pos, rect.size() );
+        updateWindow2(**child, updateRect);
+    }
+
+    PaintEvent pev(w.vid(), rect);
+    loop().commitEvent(pev); 
+}
+
+
 void Application::onUpdateEvent(const UpdateEvent& ev)
 {
     UpdateMap::iterator it = _updates.find( ev.vid() );

@@ -106,6 +106,8 @@ class PT_HMI_API Application : public Pt::System::Application
         void activate(Window& w);
 
         void update(Window& w, const Gfx::RectF& rect);
+
+        void onUpdate2(Window& w, const Gfx::RectF& rect);
         
     protected:        
         void onResizeEvent( const ResizeEvent& ev );
@@ -117,6 +119,8 @@ class PT_HMI_API Application : public Pt::System::Application
         void onMoveEvent( const MoveEvent& ev );
 
         void onEraseEvent( const EraseEvent& ev );
+        
+        void updateWindow2(Window& w, const Gfx::RectF& rect);
 
     private:
         void updateWindow(Window& w, const Gfx::RectF& rect );

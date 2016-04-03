@@ -55,7 +55,7 @@ void Label::setText(const Pt::String& text)
 {
     std::clog << "Label::setText: " << text.narrow() << std::endl;
     _text = Widget::setMnemonic(text);
-    update();
+    update2();
 }
 
 

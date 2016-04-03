@@ -84,6 +84,8 @@ class PT_HMI_API Window : public Visual
 
     const std::vector<Window*>& windows() const;
 
+    std::vector<Window*>& windows();
+
     Gfx::PointF toScreen(const Gfx::PointF& p) const;
 
     Widget* mainWidget();
@@ -139,6 +141,10 @@ class PT_HMI_API Window : public Visual
     void update();
 
     virtual void update(const Gfx::RectF& rect);
+
+    void update2(const Gfx::RectF& rect);
+
+    void onUpdate2(Window& w, const Gfx::RectF& rect);
 
     const Gfx::SizeF& size() const
     {

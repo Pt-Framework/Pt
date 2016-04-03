@@ -100,6 +100,11 @@ class PT_HMI_API Screen : public Visual
             return _windows;
          }
 
+         std::vector<Window*>& windows()
+         {
+            return _windows;
+         }
+
         virtual void processEvent(const Pt::Event& ev);    
                 
         virtual void resize( const Gfx::SizeF& s );

@@ -70,6 +70,8 @@ class WindowManager : public Pt::Connectable
         // TODO: WindowIterator
         const std::vector<Window*>& windows() const;
 
+        std::vector<Window*>& windows();
+
         // TODO: Window::activate() should be public
         void activate(Window& w);               
 
