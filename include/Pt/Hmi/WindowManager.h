@@ -124,6 +124,8 @@ class WindowManager : public Pt::Connectable
         typedef bool (WindowManager::*State)(const Pt::Hmi::MouseEvent&);
         State                     _state;
         Window*                   _managedWindow;
+        Gfx::PointF               _managedWindowPosition;
+        Gfx::SizeF                _managedWindowSize;
         Window*                   _container;          
         ResizeDirection::Type     _sizingDirection;
         

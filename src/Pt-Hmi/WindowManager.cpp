@@ -488,7 +488,10 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
         _app.mainScreen().setPointerWindow( 0);
 
         if( mev.isPress(_actionButton) )
+        {
             _state = &WindowManager::onWindowMove;
+            _managedWindowPosition = _managedWindow->position();
+        }
         else
             _state = &WindowManager::onWindowFrame;
 
@@ -503,7 +506,11 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
         _app.mainScreen().setPointerWindow( 0);
 
         if( mev.isPress(_actionButton) )
+        {
             _state = &WindowManager::onWindowResize;
+            _managedWindowPosition = _managedWindow->position();
+            _managedWindowSize = _managedWindow->size();
+        }
         else
             _state = &WindowManager::onWindowFrame;
         
@@ -577,8 +584,10 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
 
     //Gfx::PointF from = _managedWindow->position();
 
-    Gfx::PointF to( _managedWindow->position().x() + dX, 
-                    _managedWindow->position().y() + dY) ;     
+    Gfx::PointF to( _managedWindowPosition.x() + dX, 
+                    _managedWindowPosition.y() + dY) ;     
+
+    _managedWindowPosition = to;
 
     _app.move( *_managedWindow, to );
     
@@ -689,11 +698,17 @@ bool WindowManager::onWindowResize(const MouseEvent& mev)
     if( height > _managedWindow->maximumSize().height() )
         size.setHeight( _managedWindow->maximumSize().height() );
 
-    if( _managedWindow->position() != pos )
-        _app.move(*_managedWindow, pos);    
+    if( _managedWindowPosition != pos )
+    {
+        _managedWindowPosition = pos;
+        _app.move(*_managedWindow, pos);
+    }
 
-    if( _managedWindow->size() != size )
+    if( _managedWindowSize != size )
+    {
+        _managedWindowSize = size;
         _app.resize(*_managedWindow, size);
+    }
 
     return true;
 }
