@@ -112,18 +112,13 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void onMouseEvent(const MouseEvent& ev );
 
-        void onUpdateEvent( const UpdateEvent& ev );
+        void onUpdateEvent(const UpdateEvent& ev);
 
         void onPaintEvent( const PaintEvent& ev );
 
         void onMoveEvent( const MoveEvent& ev );
 
         void onEraseEvent( const EraseEvent& ev );
-
-    private:
-        void updateWindow(Window& w, const Gfx::RectF& rect);
-
-        void updateWidget( Widget& parent, const Gfx::RectF& rect );
                 
     private:
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;

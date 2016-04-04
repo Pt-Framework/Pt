@@ -272,12 +272,23 @@ void MainWindowImpl::onSize(WPARAM wParam, LPARAM lParam)
           state = WindowState::Normal;
        
           int width  = LOWORD(lParam);
-          int height = HIWORD(lParam);  
+          int height = HIWORD(lParam); 
 
-          _apiWindow->processEvent( ResizeEvent(_apiWindow->vid(), Gfx::SizeF( width, height ) ));
-          _apiWindow->processEvent( EraseEvent( _apiWindow->vid(), Gfx::RectF(Gfx::PointF(0,0), _apiWindow->size() ) ) );
-          _apiWindow->processEvent( PaintEvent( _apiWindow->vid(), Gfx::RectF(Gfx::PointF(0,0), _apiWindow->size() ) ) ); 
+          Gfx::SizeF to(width, height);
+          
+          ResizeEvent rev(_apiWindow->vid(), to);
+          _apiWindow->processEvent(rev);
+
+          Gfx::RectF updateRect(Gfx::PointF(0,0), to);
+
+          Painter painter(_apiWindow->_surface);
+          painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
+          painter.fillRect(updateRect);
+
+          PaintEvent pev(_apiWindow->vid(), updateRect);
+          _apiWindow->processEvent(pev);
       }
+
       break;
   }   
 }
@@ -387,7 +398,7 @@ void MainWindowImpl::onMove(LPARAM lParam)
 
 
 void MainWindowImpl::onPaint()
-{                   
+{ 
       RECT  info;
       PAINTSTRUCT ps;
 
@@ -436,11 +447,11 @@ void MainWindowImpl::resize(const Gfx::SizeF& s)
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
     LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
-    AdjustWindowRectEx(&clientRect, style, false, exStyle);
+    AdjustWindowRectEx(&clientRect, style, FALSE, exStyle);
     
     LONG clientWidth  = clientRect.right  - clientRect.left + 1;
     LONG clientHeight = clientRect.bottom - clientRect.top  + 1;
-    SetWindowPos(_hwnd, NULL, 0, 0, clientWidth, clientHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+    SetWindowPos(_hwnd, NULL, 0, 0, clientWidth, clientHeight, SWP_NOREDRAW| SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
 

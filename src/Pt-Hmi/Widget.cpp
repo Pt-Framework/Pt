@@ -408,6 +408,26 @@ void Widget::update(const Gfx::RectF& rect)
 }
 
 
+void Widget::paint(const Gfx::RectF& rect)
+{
+    PaintEvent pev( vid(), rect);
+    Application::instance().loop().commitEvent(pev);
+
+    std::vector<Widget*>& widgets = this->widgets();
+    std::vector<Widget*>::iterator it;
+    for(it = widgets.begin() ; it != widgets.end(); ++it)
+    {        
+        Widget* w = (*it);
+
+        if( w->geometry().intersect(rect).isNull() )
+            continue;
+
+        Gfx::RectF updateRect( rect.topLeft() - w->position(), rect.size() );
+        w->paint(updateRect);            
+    }
+}
+
+
 void Widget::onLayout()
 {         
 }

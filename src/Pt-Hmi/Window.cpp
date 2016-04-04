@@ -71,10 +71,9 @@ Window::Window( Window* parent )
     _eventReady += Pt::slot(*this, &Window::onCloseEvent);
     _eventReady += Pt::slot(*this, &Window::onEnterEvent );
     _eventReady += Pt::slot(*this, &Window::onLeaveEvent );
-    _eventReady += Pt::slot(*this, &Window::onEraseEvent );
     _eventReady += Pt::slot(*this, &Window::onMoveEvent );
     _eventReady += Pt::slot(*this, &Window::onResizeEvent );
-    _eventReady += Pt::slot(*this, &Window::onShowEvent );    
+    _eventReady += Pt::slot(*this, &Window::onShowEvent );  
 
     if(parent)
         parent->add(*this);
@@ -254,13 +253,35 @@ void Window::focusNext()
 }
 
 
-void Window::onEraseEvent( const EraseEvent& ev )
-{ 
-    const Gfx::RectF& updateRect = ev.rect();   
+void Window::paint(const Gfx::RectF& rect)
+{
+    const double borderWidth = Application::instance().windowBorderWidth();
+    const double titleHeight = Application::instance().windowTitleHeight();
+
+    if( ! this->isVisible() )
+        return;
 
     Painter painter(_surface);
     painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
-    painter.fillRect(updateRect);
+    painter.fillRect(rect);
+
+    if( mainWidget() )
+        mainWidget()->paint(rect);
+
+    std::vector<Window*>& windows = this->windows();
+    std::vector<Window*>::iterator child;
+    for(child = windows.begin(); child != windows.end(); ++child)
+    {
+        Gfx::PointF pos( rect.topLeft() - (*child)->position() );
+        pos.subX( borderWidth );
+        pos.subY( borderWidth + titleHeight );
+
+        Gfx::RectF updateRect( pos, rect.size() );
+        (*child)->paint(updateRect);
+    }
+
+    PaintEvent pev(vid(), rect);
+    Application::instance().loop().commitEvent(pev);
 }
 
 
@@ -269,12 +290,13 @@ void Window::onPaintEvent(const PaintEvent& ev)
     if( ! this->isVisible() )
         return;
  
-     _windowManager.render(_surface,  ev.rect());
+    const Gfx::RectF& rect = ev.rect();   
 
-     if(_impl)
+    _windowManager.render(_surface, rect);
+
+    if(_impl)
         _impl->paint(ev.rect());
 }
-
 
 
 PixmapSurface& Window::surface()

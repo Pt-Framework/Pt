@@ -138,14 +138,9 @@ class PT_HMI_API Widget : public Visual
 
         const Pt::Char* mnemonic() const;        
 
-
-        void render(const Gfx::PointF& pos, 
-                    PaintSurface& surface, 
-                    const Gfx::RectF& updateRect);
-
-
-
         void processEvent(const Pt::Event& ev);
+
+        void paint(const Gfx::RectF& updateRect);
 
         void resize( const Gfx::SizeF& s );
 

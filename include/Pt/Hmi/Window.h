@@ -113,9 +113,6 @@ class PT_HMI_API Window : public Visual
     
     // TODO: return new focusWidget() and remove focusWidget()
     void focusPrev();
-    
-    // TODO: make protected/private
-    void render(const Gfx::RectF& rect);
 
     PixmapSurface& surface();
 
@@ -128,6 +125,8 @@ class PT_HMI_API Window : public Visual
     WindowImpl* impl();
 
     void runModal();
+    
+    void paint(const Gfx::RectF& rect);
 
     virtual void resize( const Gfx::SizeF& s );
 
@@ -173,8 +172,6 @@ class PT_HMI_API Window : public Visual
 
     virtual void onPaintEvent(const PaintEvent& ev);
 
-    virtual void onEraseEvent(const EraseEvent& ev);
-
     virtual void onCloseEvent(const CloseEvent& ev);
 
     virtual void onActivateEvent(const ActivateEvent& ev);  
@@ -182,8 +179,6 @@ class PT_HMI_API Window : public Visual
     virtual void onShowEvent( const ShowEvent& ev );
 
     virtual void onEnableEvent( const EnableEvent& ev );
-
-
 
     // TODO:
   public:
@@ -253,7 +248,7 @@ class PT_HMI_API Window : public Visual
 
     void removeFocusWidget(Widget& w);
 
-    void setFocusIndex(Widget& w, size_t index);    
+    void setFocusIndex(Widget& w, size_t index);  
     
   private:
     WindowManager                  _windowManager; 

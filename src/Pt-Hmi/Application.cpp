@@ -104,7 +104,7 @@ void Application::sendEvent(Visual& w, const Pt::Event& ev)
     //if(ev.typeInfo() == typeid(MouseEvent) )
     //    std::clog << "onMouseEvent" << std::endl;
 
-	w.processEvent(ev);
+    w.processEvent(ev);
 }
 
 
@@ -133,73 +133,28 @@ void Application::onUpdate(Window& w, const Gfx::RectF& rect)
 
 void Application::onUpdateEvent(const UpdateEvent& ev)
 {
-    UpdateMap::iterator it = _updates.find( ev.vid() );
-    if( it == _updates.end() )
-        return;
-
-    // only last update event
-    if( it->second.pop() != 0)
-        return;
-
-    Gfx::RectF updateRect = it->second.rect();
-    _updates.erase( ev.vid() );
-
     VisualMap::iterator vit = _visuals.find( ev.vid() );
     if( vit == _visuals.end() )
         return;
+
+    Gfx::RectF updateRect = ev.rect();
+
+    UpdateMap::iterator it = _updates.find( ev.vid() );
+    if( it != _updates.end() )
+    {
+        // only last update event
+        if( it->second.pop() != 0)
+            return;
+
+        updateRect = it->second.rect();
+        _updates.erase( ev.vid() );
+    }
 
     // TODO: this cast can be removed once the update rect is in screen
     //       coordinates and Application finds all windows affected by
     //       the update rect of the event
     Window* w = static_cast<Window*>(vit->second);
-    updateWindow(*w, updateRect);
-}
-
-
-void Application::updateWindow(Window& w, const Gfx::RectF& rect)
-{        
-    EraseEvent erv(w.vid(), rect);
-    loop().commitEvent(erv);  
-
-    if( w.mainWidget() )
-        updateWidget( *w.mainWidget(), rect );
-
-    std::vector<Window*>& windows = w.windows();
-    std::vector<Window*>::iterator child;
-    for(child = windows.begin(); child != windows.end(); ++child)
-    {
-        Gfx::PointF pos( rect.topLeft() - (*child)->position() );
-        pos.subX( windowBorderWidth() );
-        pos.subY( windowBorderWidth() + windowTitleHeight() );
-
-        Gfx::RectF updateRect( pos, rect.size() );
-        updateWindow(**child, updateRect);
-    }
-
-    PaintEvent pev(w.vid(), rect);
-    loop().commitEvent(pev); 
-}
-
-
-void Application::updateWidget( Widget& parent, const Gfx::RectF& rect )
-{
-    PaintEvent pev( parent.vid(), rect);
-    loop().queueEvent(pev); 
-
-    std::vector<Widget*>& widgets     = parent.widgets();
-    std::vector<Widget*>::iterator it = widgets.begin();
-
-    for( ; it != widgets.end(); ++it )
-    {        
-        Widget* w = (*it);
-
-        if( w->geometry().intersect(rect).isNull() )
-            continue;
-
-        Gfx::RectF updateRect( rect.topLeft() - w->position(), rect.size() );
-
-        updateWidget( *w, updateRect );            
-    }
+    w->paint(updateRect);
 }
 
 
@@ -219,7 +174,7 @@ void Application::onResizeEvent(const ResizeEvent& ev )
     VisualMap::iterator it = _visuals.find( ev.vid() );
 
     if( it == _visuals.end() )
-    return;
+        return;
 
     it->second->processEvent(ev );
 }
