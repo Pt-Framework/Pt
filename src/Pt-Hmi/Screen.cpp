@@ -30,6 +30,7 @@
 #include "ScreenImpl.h"
 #include <Pt/Hmi/Screen.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/PaintEvent.h>
 
 namespace Pt {
 
@@ -50,6 +51,33 @@ Screen::~Screen()
 
 void Screen::onEvent(const Event& ev)
 {
+    const double borderWidth = Application::instance().windowBorderWidth();
+    const double titleHeight = Application::instance().windowTitleHeight();
+
+    if(ev.typeInfo() != typeid(UpdateEvent) )
+        return;
+
+    const UpdateEvent& uev = static_cast<const UpdateEvent&>(ev);
+    const Gfx::RectF& rect = uev.rect();
+
+    std::vector<Window*>::iterator it;
+    for(it = _windows.begin(); it != _windows.end(); ++it)
+    {
+        Window* w = *it;
+
+        Gfx::RectF windowRect( Gfx::PointF(0,0), w->size() );
+
+        Gfx::PointF pos( rect.topLeft() - w->position() );
+        pos.subX(borderWidth);
+        pos.subY(borderWidth + titleHeight);
+
+        Gfx::RectF updateRect( pos, rect.size() );
+        
+        if( updateRect.intersect(windowRect).isNull() )
+          continue;
+        
+        w->paint(updateRect);
+    }
 }
 
 

@@ -103,23 +103,27 @@ void Application::sendEvent(Visual& w, const Pt::Event& ev)
 
 void Application::onUpdate(Window& w, const Gfx::RectF& rect)
 {        
-    // NOTE: currently, the window is always a top-level window
+    double borderWidth = Application::instance().windowBorderWidth();
+    double titleHeight = Application::instance().windowTitleHeight();
+
+    Gfx::PointF updatePos = rect.topLeft() + w.position();
+    updatePos.addX( borderWidth );
+    updatePos.addY( borderWidth + titleHeight );
+
+    Gfx::RectF updateRect(updatePos, rect.size());
 
     UpdateMap::iterator it = _updates.find( w.vid() );
     if( it == _updates.end() )
     {
-        UpdateInfo uinfo(rect);
-        _updates.insert( std::make_pair(w.vid(), uinfo) );
+        UpdateInfo uinfo(updateRect);
+        _updates.insert( std::make_pair(_mainScreen->vid(), uinfo) );
     }
     else
     {
-        it->second.push(rect);
+        it->second.push(updateRect);
     }
 
-    // TODO: should translate rect to screen coordinates and application
-    //       should find all windows affected by the update rect
-
-    UpdateEvent uev(w.vid(), rect);
+    UpdateEvent uev(_mainScreen->vid(), updateRect);
     loop().commitEvent(uev);
 }
 
@@ -132,10 +136,10 @@ void Application::onUpdateEvent(const UpdateEvent& ev)
 
     Gfx::RectF updateRect = ev.rect();
 
+    // skip all update events except the last one
     UpdateMap::iterator it = _updates.find( ev.vid() );
     if( it != _updates.end() )
     {
-        // only last update event
         if( it->second.pop() != 0)
             return;
 
@@ -143,11 +147,7 @@ void Application::onUpdateEvent(const UpdateEvent& ev)
         _updates.erase( ev.vid() );
     }
 
-    // TODO: this cast can be removed once the update rect is in screen
-    //       coordinates and Application finds all windows affected by
-    //       the update rect of the event
-    Window* w = static_cast<Window*>(vit->second);
-    w->paint(updateRect);
+    vit->second->processEvent(ev);
 }
 
 
