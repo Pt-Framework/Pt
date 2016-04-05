@@ -188,6 +188,10 @@ class PT_HMI_API Widget : public Visual
     protected:
         virtual void onEvent( const Event& ev );
 
+        virtual void onMoveEvent(const MoveEvent& ev);
+
+        virtual void onResizeEvent(const ResizeEvent& ev);
+
         virtual void onPaintEvent( const PaintEvent& ev );
 
         virtual void onPointerEvent(const MouseEvent& ev);

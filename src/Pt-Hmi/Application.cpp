@@ -169,7 +169,7 @@ void Application::onResizeEvent(const ResizeEvent& ev )
     if( it == _visuals.end() )
         return;
 
-    it->second->processEvent(ev );
+    it->second->processEvent(ev);
 }
 
 
@@ -180,7 +180,7 @@ void Application::onMouseEvent(const MouseEvent& ev )
     if( it == _visuals.end() )
         return;
 
-    it->second->processEvent(ev );
+    it->second->processEvent(ev);
 }
 
 
@@ -191,12 +191,14 @@ void Application::onMoveEvent(const MoveEvent& ev )
     if( it == _visuals.end() )
         return;
 
-    it->second->processEvent(ev );
+    it->second->processEvent(ev);
 }
 
 
 void Application::move(Window& w, const Gfx::PointF& to)
 {   
+    // TODO: in theory we should only handle top-level windows here...
+    
     Gfx::PointF from = w.position();
 
     MoveEvent mev(w.vid(), to);
@@ -223,6 +225,8 @@ void Application::move(Window& w, const Gfx::PointF& to)
 
 void Application::resize(Window& w, const Gfx::SizeF& to)
 {   
+    // TODO: in theory we should only handle top-level windows here...
+
     Gfx::SizeF from = w.size();
 
     ResizeEvent rev(w.vid(), to);
@@ -249,6 +253,8 @@ void Application::resize(Window& w, const Gfx::SizeF& to)
 
 void Application::show( Window& w, bool visible )
 {
+    // TODO: in theory we should only handle top-level windows here...
+
     const double borderWidth = Application::instance().windowBorderWidth();
     const double titleHeight = Application::instance().windowTitleHeight();
 
@@ -271,6 +277,8 @@ void Application::show( Window& w, bool visible )
 
 void Application::enable( Window& w, bool enable )
 {
+    // TODO: in theory we should only handle top-level windows here...
+
     const double borderWidth = Application::instance().windowBorderWidth();
     const double titleHeight = Application::instance().windowTitleHeight();
 

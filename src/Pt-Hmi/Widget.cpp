@@ -56,6 +56,8 @@ Widget::Widget()
     _eventReady += Pt::slot(*this, &Widget::onPointerEvent );
     _eventReady += Pt::slot(*this, &Widget::onTouchEvent );
     _eventReady += Pt::slot(*this, &Widget::onScrollEvent );
+    _eventReady += Pt::slot(*this, &Widget::onMoveEvent );
+    _eventReady += Pt::slot(*this, &Widget::onResizeEvent );
     _eventReady += Pt::slot(*this, &Widget::onPaintEvent );
     _eventReady += Pt::slot(*this, &Widget::onKeyEvent);
     _eventReady += Pt::slot(*this, &Widget::onPointerEvent);
@@ -434,22 +436,9 @@ void Widget::paint(const Gfx::RectF& rect)
     }
 }
 
-
+// TODO: move this to a Layout base class
 void Widget::onLayout()
 {         
-}
-
-
-void Widget::move(const Gfx::PointF& pos)
-{
-    Gfx::RectF updateRect(Gfx::PointF(0, 0), _size); 
-
-    Gfx::PointF to = pos - _position;
-    updateRect.unify( Gfx::RectF(to, _size) ); 
-
-    _position = pos;
-
-    update(updateRect);
 }
 
 
@@ -474,15 +463,30 @@ void Widget::show( bool s )
 }
 
 
+void Widget::move(const Gfx::PointF& pos)
+{
+    Gfx::RectF updateRect(Gfx::PointF(0, 0), _size); 
+
+    Gfx::PointF to = pos - _position;
+    updateRect.unify( Gfx::RectF(to, _size) ); 
+
+    MoveEvent mev(vid(), pos);
+    Application::instance().loop().commitEvent(mev);
+
+    update(updateRect);
+}
+
+
 void Widget::resize(const Gfx::SizeF& s)
 {
     Gfx::SizeF updateSize( std::max( size().width(), s.width()), 
                            std::max( size().height(), s.height()) );
 
-    _size = s;
-    onLayout();
-
     Gfx::RectF updateRect(Gfx::PointF(0,0), updateSize);
+
+    ResizeEvent rev(vid(), s);
+    Application::instance().loop().commitEvent(rev);
+    
     update(updateRect);
 }
  
@@ -493,8 +497,23 @@ void Widget::onEvent(const Pt::Event& ev)
 }
 
 
-void Widget::onPaintEvent( const PaintEvent& ev )
+void Widget::onPaintEvent(const PaintEvent& ev)
 {
+}
+
+
+void Widget::onResizeEvent(const ResizeEvent& ev)
+{    
+    _size = ev.size();
+
+    // TODO: move this to a Layout base class
+    onLayout();
+}
+
+
+void Widget::onMoveEvent(const MoveEvent& ev)
+{    
+    _position = ev.position();
 }
 
 
@@ -517,9 +536,8 @@ void Widget::onTouchEvent(const TouchEvent& ev)
 }
 
 
-void Widget::onScrollEvent( const ScrollEvent& ev )
+void Widget::onScrollEvent(const ScrollEvent& ev)
 {
-  
 }
 
 
