@@ -34,26 +34,11 @@
 #include <Pt/Types.h>
 #include <Pt/Event.h>
 #include <Pt/Connectable.h>
-#include <Pt/Signal.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Rect.h>
 #include <string>
 
 namespace Pt {
-namespace Hmi {
 
-class ResizeEvent;
-class MoveEvent;
-class ShowEvent;
-class EnableEvent;
-class MouseEvent;
-class TouchEvent;
-class ScrollEvent;
-class EnterEvent;
-class LeaveEvent;
-class PaintEvent;
-class KeyEvent;
+namespace Hmi {
 
 class PT_HMI_API Visual : public Pt::Connectable
 {
@@ -61,28 +46,10 @@ class PT_HMI_API Visual : public Pt::Connectable
         virtual ~Visual();
 
         void processEvent(const Pt::Event& ev);    
-                
-        virtual void resize( const Gfx::SizeF& s ) = 0;
-
-        virtual void move( const Gfx::PointF& p ) = 0;
-
-        virtual void show( bool b = true ) = 0;
-
-        virtual void enable( bool b = true ) = 0; 
 
         Pt::uint64_t vid() const
         {
             return _vid;
-        }
-
-        bool enabled() const
-        {
-            return _enabled;
-        }
-
-        bool isVisible() const
-        {
-            return _visible;
         }
 
         void setName( const std::string& n )
@@ -94,31 +61,19 @@ class PT_HMI_API Visual : public Pt::Connectable
         {
             return _name;
         }
-    protected:
-        Visual();                             
- 
-        virtual void onKeyEvent( const KeyEvent& ev );
-
-        virtual void onPointerEvent( const MouseEvent& ev );
-
-        virtual void onTouchEvent( const TouchEvent& ev );
-    
-        virtual void onScrollEvent( const ScrollEvent& ev );
-    
-        virtual void onPaintEvent( const PaintEvent& ev );
-
 
     protected:
-         Pt::Signal<const Pt::Event&>  _eventReady;
+        Visual();
+        
+        virtual void onEvent(const Pt::Event& ev) = 0;
 
+    private:
         Pt::uint64_t _vid;
         std::string  _name;        
-        bool         _enabled;
-        bool         _visible;
-
-
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif

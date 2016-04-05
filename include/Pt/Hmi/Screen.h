@@ -94,33 +94,22 @@ class PT_HMI_API Screen : public Visual
             return _impl;
         }        
 
-        
-         const std::vector<Window*>& windows() const
-         {
-            return _windows;
-         }
+        const std::vector<Window*>& windows() const
+        {
+          return _windows;
+        }
 
-         std::vector<Window*>& windows()
-         {
-            return _windows;
-         }
-
-        virtual void processEvent(const Pt::Event& ev);    
-                
-        virtual void resize( const Gfx::SizeF& s );
-
-        virtual void move( const Gfx::PointF& p );
-
-        virtual void show( bool b = true );
-
-        virtual void enable( bool b = true );
-
-        virtual void repaint(const Gfx::RectF& updateRect);
+        std::vector<Window*>& windows()
+        {
+          return _windows;
+        }
 
     protected:
         void registerWindow(Window& w);
 
         void unregisterWindow(Window& w);
+
+        virtual void onEvent( const Event& ev );
 
         void setPointerWindow( Window* w)
         {
@@ -129,23 +118,23 @@ class PT_HMI_API Screen : public Visual
 
             if( _pointerWindow )    
             {
-                Pt::Hmi::LeaveEvent leaveEvent;               
+                Pt::Hmi::LeaveEvent leaveEvent;
                 _pointerWindow->processEvent(leaveEvent);
             }
 
             _pointerWindow = w;
 
-            if( _pointerWindow )    
+            if( _pointerWindow )
             {
-                Pt::Hmi::EnterEvent enterEvent;                
+                Pt::Hmi::EnterEvent enterEvent;
                 _pointerWindow->processEvent(enterEvent);
-            }            
+            }
           }
 
     private:
         ScreenImpl*          _impl;
         std::vector<Window*> _windows;
-        Window*              _pointerWindow;           
+        Window*              _pointerWindow;
 };
 
 } // namespace

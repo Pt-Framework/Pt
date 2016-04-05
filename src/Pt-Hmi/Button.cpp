@@ -140,7 +140,7 @@ void Button::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
     bool mouseOver = window()->pointerWidget() == this;
     Gfx::Color bkgColor = backgroundColor();
 
-    if( ! enabled() )
+    if( ! isEnabled() )
     {
         Label::onPaint(surface, updateRect);
         return;

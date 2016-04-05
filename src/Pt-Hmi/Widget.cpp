@@ -47,9 +47,16 @@ Widget::Widget()
 , _autoSize(false)
 , _acceptFocus( false) 
 , _hasFocus( false)
+, _enabled(true)
+, _visible(true)
 , _actionKey(Key::Space)
 , _mnemonic(0)
 {      
+    _eventReady += Pt::slot(*this, &Widget::onKeyEvent );
+    _eventReady += Pt::slot(*this, &Widget::onPointerEvent );
+    _eventReady += Pt::slot(*this, &Widget::onTouchEvent );
+    _eventReady += Pt::slot(*this, &Widget::onScrollEvent );
+    _eventReady += Pt::slot(*this, &Widget::onPaintEvent );
     _eventReady += Pt::slot(*this, &Widget::onKeyEvent);
     _eventReady += Pt::slot(*this, &Widget::onPointerEvent);
     _eventReady += Pt::slot(*this, &Widget::onTouchEvent);
@@ -159,7 +166,7 @@ Widget* Widget::findWidget( const Gfx::PointF& pos )
 {
     std::vector<Widget*>::reverse_iterator it = _children.rbegin();
 
-    if( ! isVisible() || ! enabled() )
+    if( ! isVisible() || ! isEnabled() )
         return 0;
 
     for( ; it != _children.rend(); ++it )
@@ -479,7 +486,18 @@ void Widget::resize(const Gfx::SizeF& s)
     update(updateRect);
 }
  
-       
+
+void Widget::onEvent(const Pt::Event& ev)
+{
+    _eventReady.send(ev ); 
+}
+
+
+void Widget::onPaintEvent( const PaintEvent& ev )
+{
+}
+
+
 void Widget::onPointerEvent(const MouseEvent& ev)
 {        
     if( ev.isPress(MouseEvent::Left) && _acceptFocus )

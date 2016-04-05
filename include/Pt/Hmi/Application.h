@@ -22,17 +22,20 @@
  
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ MA 02110-1301 USA
+*/
+
 #ifndef Pt_Hmi_Application_h
 #define Pt_Hmi_Application_h
 
-#include <Pt/System/Application.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Rect.h>
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Screen.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
+#include <Pt/System/Application.h>
 
 namespace Pt {
 
@@ -65,11 +68,11 @@ class PT_HMI_API Application : public Pt::System::Application
         {
             return *_mainScreen;
         }
-/*
-        Widget* findWidget( const std::string& name );
+        
+        //Widget* findWidget( const std::string& name );
 
-        Window* findWindow(const std::string& name);
-        */
+        //Window* findWindow(const std::string& name);
+        
         ApplicationImpl* impl()
         {
             return _impl;
@@ -117,8 +120,6 @@ class PT_HMI_API Application : public Pt::System::Application
         void onPaintEvent( const PaintEvent& ev );
 
         void onMoveEvent( const MoveEvent& ev );
-
-        void onEraseEvent( const EraseEvent& ev );
                 
     private:
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;

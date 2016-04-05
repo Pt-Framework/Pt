@@ -38,6 +38,8 @@ namespace Pt {
 
 namespace Hmi {
 
+class PaintEvent;
+
 class PT_HMI_API Panel : public Widget
 {
 	  public:

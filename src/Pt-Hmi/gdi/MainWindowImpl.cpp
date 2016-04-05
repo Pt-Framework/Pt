@@ -29,24 +29,24 @@
 
 #include "MainWindowImpl.h"
 #include "ApplicationImpl.h"
-#include <Windows.h>
-#include <WindowsX.h>
-#include <assert.h>
+#include "PaintSurfaceImpl.h"
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/MoveEvent.h>
-#include <Pt/Hmi/EraseEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Hmi/Screen.h>
-#include "PaintSurfaceImpl.h"
+#include <cassert>
+#include <Windows.h>
+#include <WindowsX.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+
+namespace Hmi {
 
 MainWindowImpl::MainWindowImpl(Window* w)
 : WindowImpl(w)

@@ -30,9 +30,9 @@
 #include "ScreenImpl.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/PaintEvent.h>
-#include <Pt/Hmi/EraseEvent.h>
 #include <Pt/System/MainLoop.h>
 #include <cassert>
+
 namespace Pt {
 
 namespace Hmi {
@@ -53,9 +53,7 @@ Application::Application(int argc, char** argv)
   loop().eventReceived() += Pt::slot(*this, &Application::onMoveEvent );
   loop().eventReceived() += Pt::slot(*this, &Application::onUpdateEvent ); 
   loop().eventReceived() += Pt::slot(*this, &Application::onPaintEvent ); 
-  loop().eventReceived() += Pt::slot(*this, &Application::onEraseEvent ); 
   loop().eventReceived() += Pt::slot(*this, &Application::onMouseEvent );
-  
 }
 
 
@@ -64,7 +62,6 @@ Application::~Application()
 	delete _mainScreen;
 	delete _impl;
 }
-
 
 
 Application& Application::instance()
@@ -99,11 +96,7 @@ void Application::nextEvent()
 
 void Application::sendEvent(Visual& w, const Pt::Event& ev)
 {
-	// TODO: check event filter before dispatching the event
-
-    //if(ev.typeInfo() == typeid(MouseEvent) )
-    //    std::clog << "onMouseEvent" << std::endl;
-
+	  // TODO: check event filter before dispatching the event
     w.processEvent(ev);
 }
 
@@ -192,17 +185,6 @@ void Application::onMouseEvent(const MouseEvent& ev )
 
 
 void Application::onMoveEvent(const MoveEvent& ev )
-{
-    VisualMap::iterator it = _visuals.find( ev.vid() );
-
-    if( it == _visuals.end() )
-        return;
-
-    it->second->processEvent(ev );
-}
-
-
-void Application::onEraseEvent( const EraseEvent& ev )
 {
     VisualMap::iterator it = _visuals.find( ev.vid() );
 
@@ -308,8 +290,6 @@ void Application::enable( Window& w, bool enable )
     w.update( Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
     //update(w, Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
 }
-
-
 
 
 void Application::activate( Window& w )

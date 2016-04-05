@@ -29,7 +29,6 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/EraseEvent.h>
 #include "MainWindowImpl.h"
 #include "ChildWindowImpl.h"
 #include <cassert>
@@ -62,11 +61,18 @@ Window::Window( Window* parent )
 , _canClose(true)
 , _isClosed(false)
 , _isActive(false)
+, _enabled(true)
+, _visible(true)
 , _mainWidget(0)
 {    
 
     _windowManager.init(*this);
 
+    _eventReady += Pt::slot(*this, &Window::onKeyEvent );
+    _eventReady += Pt::slot(*this, &Window::onPointerEvent );
+    _eventReady += Pt::slot(*this, &Window::onTouchEvent );
+    _eventReady += Pt::slot(*this, &Window::onScrollEvent );
+    _eventReady += Pt::slot(*this, &Window::onPaintEvent );
     _eventReady += Pt::slot(*this, &Window::onActivateEvent);
     _eventReady += Pt::slot(*this, &Window::onCloseEvent);
     _eventReady += Pt::slot(*this, &Window::onEnterEvent );
@@ -190,18 +196,16 @@ void Window::activate()
 }
 
 
-Gfx::PointF Window::toScreen(const Gfx::PointF& p) const
+
+void Window::focusPrev()
 {
-    Gfx::PointF pos = p + this->position();
+    moveFocus(_focusList.rbegin(), _focusList.rend());
+}
 
-    const Window* parentWindow = this->parent();
 
-    for(; parentWindow; parentWindow = parentWindow->parent())
-    {
-        pos += parentWindow->position();
-    }
-
-    return pos;
+void Window::focusNext()
+{
+    moveFocus(_focusList.begin(), _focusList.end());
 }
 
 
@@ -238,18 +242,6 @@ void Window::onUpdate(Window& child, const Gfx::RectF& rect)
 
     Gfx::RectF updateRect(updatePos, rect.size());
     this->update(updateRect);
-}
-
-
-void Window::focusPrev()
-{
-    moveFocus(_focusList.rbegin(), _focusList.rend());
-}
-
-
-void Window::focusNext()
-{
-    moveFocus(_focusList.begin(), _focusList.end());
 }
 
 
@@ -339,7 +331,7 @@ void Window::runModal()
             if( w->isActive() )
                 activeWindow = w;
 
-            states[w] = w->enabled();
+            states[w] = w->isEnabled();
             w->enable(false);
         }
     }
@@ -369,6 +361,12 @@ void Window::runModal()
 }
 
 
+void Window::onEvent(const Pt::Event& ev)
+{
+    _eventReady.send(ev ); 
+}
+
+
 void Window::onPointerEvent(const MouseEvent& ev)
 {
     if( _windowManager.pointerInput( ev ) )
@@ -376,7 +374,7 @@ void Window::onPointerEvent(const MouseEvent& ev)
 
     if( ! _mainWidget || 
         ! _mainWidget->isVisible() || 
-        ! _mainWidget->enabled() )
+        ! _mainWidget->isEnabled() )
     {
         Application::instance().mainScreen().setCursor( &Cursor::defaultCursor() ); 
         return;
@@ -432,7 +430,7 @@ void Window::onKeyEvent(const KeyEvent& ev)
     if( _windowManager.keyInput( ev ) )
         return;
 
-    if( ! enabled() )
+    if( ! isEnabled() )
         return;
 
     std::map<Key, Widget*>::iterator s = _shortcuts.find( ev.key() );
@@ -657,7 +655,7 @@ void Window::createImpl()
     _impl->setMaximumSize( _minimumSize);
     _impl->setMaximumSize( _maximumSize );
     _impl->setIcon(_icon);
-    _impl->enable( enabled() );
+    _impl->enable( isEnabled() );
     _impl->setState( _state );
     _impl->show(isVisible());
     

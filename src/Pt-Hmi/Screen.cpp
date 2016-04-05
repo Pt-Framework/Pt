@@ -48,6 +48,11 @@ Screen::~Screen()
 }
 
 
+void Screen::onEvent(const Event& ev)
+{
+}
+
+
 double Screen::width() const
 {
     return _impl->width();
@@ -176,41 +181,6 @@ Window* Screen::findWindow(const std::string& name)
     return 0;
 }
 */
-
-void Screen::processEvent(const Pt::Event& ev)
-{
- 
-}
-
-                
-void Screen::resize( const Gfx::SizeF& s )
-{
-
-}
-
-
-void Screen::move( const Gfx::PointF& p )
-{
-}
-
-
-void Screen::show( bool b )
-{
-
-}
-
-
-void Screen::enable( bool b  )
-{
-
-}
-
-
-void Screen::repaint(const Gfx::RectF& updateRect)
-{
-//    _impl->repaint(updateRect);
-}
-
 
 } // namespace
 

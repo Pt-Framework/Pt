@@ -60,7 +60,6 @@ namespace Hmi {
 
 class Widget;
 class WindowImpl;
-class EraseEvent;
 
 class PT_HMI_API Window : public Visual
 {
@@ -85,8 +84,6 @@ class PT_HMI_API Window : public Visual
     const std::vector<Window*>& windows() const;
 
     std::vector<Window*>& windows();
-
-    Gfx::PointF toScreen(const Gfx::PointF& p) const;
 
     Widget* mainWidget();
 
@@ -147,13 +144,14 @@ class PT_HMI_API Window : public Visual
         return _size;
     }
 
-
     const Gfx::PointF& position() const
     {
         return _position;
     }
 
   protected:
+    virtual void onEvent(const Pt::Event& ev);
+
     virtual void onKeyEvent( const KeyEvent& ev );
 
     virtual void onPointerEvent( const MouseEvent& ev );
@@ -182,6 +180,16 @@ class PT_HMI_API Window : public Visual
 
     // TODO:
   public:
+    bool isEnabled() const
+    {
+        return _enabled;
+    }
+
+    bool isVisible() const
+    {
+        return _visible;
+    }
+
     const Gfx::SizeF& minimumSize() const;
 
     void setMinimumSize(const Gfx::SizeF& s);
@@ -251,9 +259,12 @@ class PT_HMI_API Window : public Visual
     void setFocusIndex(Widget& w, size_t index);  
     
   private:
-    WindowManager                  _windowManager; 
+    Pt::Signal<const Pt::Event&>   _eventReady;
+    WindowManager                  _windowManager;
     bool                           _isClosed;
     bool                           _isActive;
+    bool                           _enabled;
+    bool                           _visible;
     Gfx::SizeF                     _minimumSize;
     Gfx::SizeF                     _maximumSize;
     Hmi::WindowPosition::Type      _startPostion;

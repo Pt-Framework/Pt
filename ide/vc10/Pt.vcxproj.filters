@@ -1398,9 +1398,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\EnableEvent.h">
       <Filter>Pt-Hmi\Events</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\EraseEvent.h">
-      <Filter>Pt-Hmi\Events</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

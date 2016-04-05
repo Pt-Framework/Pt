@@ -26,29 +26,18 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
   02110-1301 USA
 */
+
 #include <Pt/Hmi/Visual.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/ResizeEvent.h>
-#include <Pt/Hmi/MoveEvent.h>
-#include <Pt/Hmi/ShowEvent.h>
-#include <Pt/Hmi/EnableEvent.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
 
+namespace Hmi {
 
 Visual::Visual()
 : _vid( Application::instance().makeVid()  )
-, _enabled(true)
-, _visible(true)
 { 
     Application::instance().registerVisual(*this );   
-
-    _eventReady += Pt::slot(*this, &Visual::onKeyEvent );
-    _eventReady += Pt::slot(*this, &Visual::onPointerEvent );
-    _eventReady += Pt::slot(*this, &Visual::onTouchEvent );
-    _eventReady += Pt::slot(*this, &Visual::onScrollEvent );
-    _eventReady += Pt::slot(*this, &Visual::onPaintEvent );
 }
 
 
@@ -60,50 +49,9 @@ Visual::~Visual()
         
 void Visual::processEvent(const Pt::Event& ev)
 {
-    _eventReady.send(ev );    
+    this->onEvent(ev); 
 }
 
+} // namespace
 
-void Visual::resize( const Gfx::SizeF& s )
-{
-        
-}
-
-void Visual::move( const Gfx::PointF& p )
-{
-    
-}
-
-void Visual::show( bool b )
-{
-
-}
-
-void Visual::enable( bool b )
-{
-
-}
-
-
-void Visual::onKeyEvent( const KeyEvent& ev )
-{
-}
-     
-void Visual::onPointerEvent( const MouseEvent& ev )
-{
-}     
-
-void Visual::onTouchEvent( const TouchEvent& ev )
-{
-}    
-
-void Visual::onScrollEvent( const ScrollEvent& ev )
-{
-}    
-
-void Visual::onPaintEvent( const PaintEvent& ev )
-{
-}
-
-
-}}
+} // namespace

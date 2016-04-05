@@ -152,7 +152,7 @@ bool WindowManager::keyInput( const Pt::Hmi::KeyEvent& keyEvent )
   if( w == 0 )
     return false;
 
-    if( w->enabled() )
+    if( w->isEnabled() )
         w->processEvent( keyEvent );
 
    return true;
@@ -204,7 +204,7 @@ Gfx::PointF WindowManager::renderFrame(const Window& w, PaintSurface& surface)
     winSize.addWidth(borderWidth * 2);
     winSize.addHeight(borderWidth * 2 + titleHeight);
 
-    Gfx::Color color = w.isActive() || w.enabled() ? _activeColor 
+    Gfx::Color color = w.isActive() || w.isEnabled() ? _activeColor 
                                                      : _inactiveColor;  
 
     Painter painter(surface);

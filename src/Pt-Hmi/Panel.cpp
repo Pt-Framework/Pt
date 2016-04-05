@@ -31,6 +31,7 @@
 #include <Pt/Hmi/Layout.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Rect.h>

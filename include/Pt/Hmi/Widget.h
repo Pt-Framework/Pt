@@ -36,6 +36,7 @@
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/MoveEvent.h>
+#include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Docking.h>
 #include <Pt/Hmi/Visual.h>
@@ -185,6 +186,10 @@ class PT_HMI_API Widget : public Visual
         virtual Gfx::SizeF onAutoSize() const;
 
     protected:
+        virtual void onEvent( const Event& ev );
+
+        virtual void onPaintEvent( const PaintEvent& ev );
+
         virtual void onPointerEvent(const MouseEvent& ev);
 
         virtual void onTouchEvent(const TouchEvent& ev);
@@ -197,6 +202,16 @@ class PT_HMI_API Widget : public Visual
         String setMnemonic(const String& text);
 
     public:
+        bool isEnabled() const
+        {
+            return _enabled;
+        }
+
+        bool isVisible() const
+        {
+            return _visible;
+        }
+
         void setAutoSize(bool a);
 
         bool isAutoSize() const;
@@ -282,6 +297,7 @@ class PT_HMI_API Widget : public Visual
         void setWindow(Window* window);
         
     private:
+        Pt::Signal<const Pt::Event&> _eventReady;
         Window*                      _window; 
         Widget*                      _parent;    
         std::vector<Widget*>         _children;        
@@ -294,7 +310,9 @@ class PT_HMI_API Widget : public Visual
         Spacing                      _padding;              
         bool                         _autoSize;
         bool                         _acceptFocus;
-        bool                         _hasFocus;    
+        bool                         _hasFocus;   
+        bool                         _enabled;
+        bool                         _visible; 
         Key                          _actionKey;
         size_t                       _focusIndex;     
         Gfx::PointF                  _position;
