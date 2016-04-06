@@ -27,6 +27,7 @@
 */
 
 #include "ApplicationImpl.h"
+#include "WindowImpl.h"
 #include "ScreenImpl.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/PaintEvent.h>
@@ -147,6 +148,12 @@ void Application::onUpdateEvent(const UpdateEvent& ev)
     }
 
     vit->second->processEvent(ev);
+}
+
+
+void Application::onResize(Window& w, const Gfx::SizeF& s)
+{
+    w.impl()->resize(s);
 }
 
 

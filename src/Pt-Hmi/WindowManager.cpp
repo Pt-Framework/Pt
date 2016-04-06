@@ -612,10 +612,10 @@ bool WindowManager::onWindowResize(const MouseEvent& mev)
 
     Gfx::PointF point( mev.x(), mev.y() );
     
-    double width  = _managedWindow->size().width();
-    double height = _managedWindow->size().height();
-    double posX   = _managedWindow->position().x();
-    double posY   = _managedWindow->position().y();
+    double width  = _managedWindowSize.width();
+    double height = _managedWindowSize.height();
+    double posX   = _managedWindowPosition.x();
+    double posY   = _managedWindowPosition.y();
     double deltaX = ( point.x() - _lastPointerPosition.x());
     double deltaY = ( point.y() - _lastPointerPosition.y());
 

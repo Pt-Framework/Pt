@@ -99,6 +99,8 @@ class PT_HMI_API Application : public Pt::System::Application
         void unregisterVisual(Visual& visual);
 
         void onUpdate(Window& w, const Gfx::RectF& rect);
+
+        void onResize(Window& w, const Gfx::SizeF& s);
         
     protected:        
         void onResizeEvent( const ResizeEvent& ev );

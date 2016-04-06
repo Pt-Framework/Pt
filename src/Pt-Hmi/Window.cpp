@@ -826,15 +826,27 @@ void Window::onMoveEvent(const MoveEvent& ev)
 
 void Window::resize(const Gfx::SizeF& s)
 {
+    // cache requested size in case the impl has not been created
+    // or the window type changes before the resize request executed
     _requestedSize = s;
 
-    if(_impl)
-        _impl->resize(s);
+    // resize is delayed until impl is created
+    if( ! _impl )
+        return;
+
+    Window* parent = this->parent();
+    if(parent)
+        parent->onResize(*this, s);
     else
-    {
-        ResizeEvent rev(this->vid(), s);
-        Application::instance().loop().commitEvent(rev);
-    }
+        Application::instance().onResize(*this, s);
+
+    //if(_impl)
+    //    _impl->resize(s);
+    ////else
+    ////{
+    ////    ResizeEvent rev(this->vid(), s);
+    ////    Application::instance().loop().commitEvent(rev);
+    ////}
 }
 
 
