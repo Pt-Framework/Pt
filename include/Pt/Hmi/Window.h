@@ -297,6 +297,7 @@ class PT_HMI_API Window : public Visual
     WindowImpl*                    _impl;        
     Gfx::PointF                    _position;
     Gfx::SizeF                     _size;
+    Gfx::SizeF                     _requestedSize;
 };
 
 } // namespace

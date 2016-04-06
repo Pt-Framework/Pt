@@ -50,9 +50,9 @@ MainWindow::MainWindow()
 //, _child2("Child 2")
 {
     setTitle("Main 1");
-    show( true );  // MainWindow
-    move(  Gfx::PointF(60, 30) );
-    resize( Gfx::SizeF(600, 430) );    
+    move( Gfx::PointF(60, 30) );
+    resize( Gfx::SizeF(600, 430) ); 
+    show( true );  // MainWindow   
     add( _child1 );
     //add( _child2 );
 }

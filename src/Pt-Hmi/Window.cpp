@@ -64,6 +64,8 @@ Window::Window( Window* parent )
 , _enabled(true)
 , _visible(true)
 , _mainWidget(0)
+, _size(50, 50)
+, _requestedSize(50, 50)
 {    
 
     _windowManager.init(*this);
@@ -630,7 +632,7 @@ void Window::createImpl()
     }
 
     _impl->move(position());
-    _impl->resize(size());
+    _impl->resize(_requestedSize);
 //    _impl->setDecoration( _decoration );
     _impl->setTitle( _title );
     _impl->setBorder( _border );
@@ -824,10 +826,15 @@ void Window::onMoveEvent(const MoveEvent& ev)
 
 void Window::resize(const Gfx::SizeF& s)
 {
+    _requestedSize = s;
+
     if(_impl)
         _impl->resize(s);
     else
-        _size = s;
+    {
+        ResizeEvent rev(this->vid(), s);
+        Application::instance().loop().commitEvent(rev);
+    }
 }
 
 
@@ -857,8 +864,9 @@ void Window::onResize(Window& w, const Gfx::SizeF& to)
 }
 
 
-void Window::onResizeEvent( const ResizeEvent& s )
+void Window::onResizeEvent(const ResizeEvent& s)
 {
+    _requestedSize = s.size();
     _size = s.size();
     _surface.resize(s.size());
 
