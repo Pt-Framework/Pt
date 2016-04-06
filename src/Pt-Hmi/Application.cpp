@@ -54,6 +54,7 @@ Application::Application(int argc, char** argv)
   loop().eventReceived() += Pt::slot(*this, &Application::onUpdateEvent ); 
   loop().eventReceived() += Pt::slot(*this, &Application::onPaintEvent ); 
   loop().eventReceived() += Pt::slot(*this, &Application::onMouseEvent );
+  loop().eventReceived() += Pt::slot(*this, &Application::onActivateEvent );
 }
 
 
@@ -73,12 +74,10 @@ Application& Application::instance()
 void Application::registerVisual( Visual& visual )
 {
     VisualMap::const_iterator it = _visuals.find( visual.vid() );
-
     assert( it == _visuals.end() );
 
-    std::pair<Pt::uint64_t, Visual*> vpair( visual.vid(), &visual );
-
-    _visuals.insert( vpair );
+    VisualMap::value_type elem(visual.vid(), &visual);
+    _visuals.insert(elem);
 }
 
 
@@ -162,7 +161,7 @@ void Application::onPaintEvent(const PaintEvent& ev)
 }
 
 
-void Application::onResizeEvent(const ResizeEvent& ev )
+void Application::onResizeEvent(const ResizeEvent& ev)
 {
     VisualMap::iterator it = _visuals.find( ev.vid() );
 
@@ -195,149 +194,14 @@ void Application::onMoveEvent(const MoveEvent& ev )
 }
 
 
-void Application::move(Window& w, const Gfx::PointF& to)
-{   
-    // TODO: in theory we should only handle top-level windows here...
-    
-    Gfx::PointF from = w.position();
+void Application::onActivateEvent( const ActivateEvent& ev )
+{
+    VisualMap::iterator it = _visuals.find( ev.vid() );
 
-    MoveEvent mev(w.vid(), to);
-    loop().commitEvent(mev);
-
-    if( ! w.parent() )
+    if( it == _visuals.end() )
         return;
-    
-    const double borderWidth = Application::instance().windowBorderWidth();
-    const double titleHeight = Application::instance().windowTitleHeight();
-        
-    Gfx::SizeF size = w.size();    
-    size.addWidth( 2 * borderWidth );
-    size.addHeight( 2 * borderWidth + titleHeight );
 
-    Gfx::RectF movedRect(to, size);
-
-    Gfx::RectF updateRect(from, size);  
-    updateRect.unify(movedRect);
-    
-    w.parent()->update(updateRect);
-}
-
-
-void Application::resize(Window& w, const Gfx::SizeF& to)
-{   
-    // TODO: in theory we should only handle top-level windows here...
-
-    Gfx::SizeF from = w.size();
-
-    ResizeEvent rev(w.vid(), to);
-    loop().commitEvent(rev);
-
-    if( ! w.isVisible() )
-        return;
-    
-    const double borderWidth = windowBorderWidth();
-    const double titleHeight = windowTitleHeight();
-    
-    const Gfx::PointF updatePos(-borderWidth, -(borderWidth + titleHeight) );
-
-    Gfx::SizeF updateSize( std::max( to.width(), from.width() ),
-                           std::max( to.height(), from.height() ));
-
-    updateSize.addHeight(2 * borderWidth + titleHeight);
-    updateSize.addWidth(2 * borderWidth);
-
-    Gfx::RectF updateRect( updatePos, updateSize );
-    w.update(updateRect);
-}
-
-
-void Application::show( Window& w, bool visible )
-{
-    // TODO: in theory we should only handle top-level windows here...
-
-    const double borderWidth = Application::instance().windowBorderWidth();
-    const double titleHeight = Application::instance().windowTitleHeight();
-
-    Gfx::PointF framePos = w.position() - w.position();
-    framePos.subX(borderWidth);
-    framePos.subY(borderWidth +  titleHeight);
-
-    Gfx::SizeF frameSize = w.size();
-    frameSize.addHeight(2 * borderWidth + titleHeight);
-    frameSize.addWidth(2 * borderWidth);
-
-    Gfx::RectF updateRect(framePos, frameSize);
-    
-    ShowEvent sev( w.vid(), visible );
-    loop().commitEvent( sev );
-      
-    w.parent()->update(updateRect);
-}
-
-
-void Application::enable( Window& w, bool enable )
-{
-    // TODO: in theory we should only handle top-level windows here...
-
-    const double borderWidth = Application::instance().windowBorderWidth();
-    const double titleHeight = Application::instance().windowTitleHeight();
-
-    Gfx::PointF framePos = w.position() - w.position();
-    framePos.subX(borderWidth);
-    framePos.subY(borderWidth +  titleHeight);
-
-    Gfx::SizeF frameSize = w.size();
-    frameSize.addHeight(2 * borderWidth + titleHeight);
-    frameSize.addWidth(2 * borderWidth);
-
-    Gfx::RectF updateRect(framePos, frameSize);
-
-    EnableEvent eev( w.vid(), enable );
-    loop().commitEvent( eev );
-   
-    w.update( Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
-    //update(w, Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
-}
-
-
-void Application::activate( Window& w )
-{
-/*
-    const double borderWidth = Application::instance().windowBorderWidth();
-    const double titleHeight = Application::instance().windowTitleHeight();
-
-    Gfx::PointF framePos(0, 0);
-    framePos.subX( borderWidth );
-    framePos.subY( borderWidth +  titleHeight );
-
-    Gfx::SizeF frameSize = w.size();
-    frameSize.addHeight(2 * borderWidth + titleHeight);
-    frameSize.addWidth(2 * borderWidth);
-
-    Gfx::RectF updateRect(framePos, frameSize);
-
-    loop().commitEvent( ActivateEvent( w.vid(), true ) );
-    loop().commitEvent( PaintEvent( w.vid(), Gfx::RectF(Gfx::PointF(0,0), w.size()) ));
-
-    Window* child = &w;
-
-
-    for(Window* parent = w.parent(); parent; parent = w.parent())
-    {
-        std::vector<Window*>::const_iterator it;
-        for( it = parent->windows().begin(); it != parent->windows().end(); ++it)
-        {
-            if( (*it)->isActive() && *it != child )
-            {
-                loop().commitEvent( ActivateEvent( (*it)->vid(), false ) );
-            }
-        }
-
-        loop().commitEvent( ActivateEvent( parent->vid(), true ) );
-
-        child = parent;
-    }
-    */
+    it->second->processEvent(ev);
 }
 
 /*

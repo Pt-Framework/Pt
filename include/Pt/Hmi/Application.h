@@ -98,16 +98,6 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void unregisterVisual(Visual& visual);
 
-        void resize(Window& w, const Gfx::SizeF& s);
-
-        void move(Window& w, const Gfx::PointF& p);
-
-        void show(Window& w, bool visible);
-
-        void enable(Window& w, bool enable);
-
-        void activate(Window& w);
-
         void onUpdate(Window& w, const Gfx::RectF& rect);
         
     protected:        
@@ -120,6 +110,8 @@ class PT_HMI_API Application : public Pt::System::Application
         void onPaintEvent( const PaintEvent& ev );
 
         void onMoveEvent( const MoveEvent& ev );
+
+        void onActivateEvent( const ActivateEvent& ev );
                 
     private:
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;

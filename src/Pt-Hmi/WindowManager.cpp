@@ -137,7 +137,7 @@ bool WindowManager::updateActive(const Pt::Hmi::MouseEvent& ev)
         if( w->isActive() )                                                             
             return true;
              
-        _app.activate( *w);    
+        w->activate();    
         return true;
     }         
 
@@ -204,8 +204,8 @@ Gfx::PointF WindowManager::renderFrame(const Window& w, PaintSurface& surface)
     winSize.addWidth(borderWidth * 2);
     winSize.addHeight(borderWidth * 2 + titleHeight);
 
-    Gfx::Color color = w.isActive() || w.isEnabled() ? _activeColor 
-                                                     : _inactiveColor;  
+    Gfx::Color color = w.isActive() ? _activeColor 
+                                    : _inactiveColor;  
 
     Painter painter(surface);
     Gfx::PointF pos( w.position().x(), w.position().y() );
@@ -589,7 +589,7 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
 
     _managedWindowPosition = to;
 
-    _app.move( *_managedWindow, to );
+    _managedWindow->move(to);
     
     return true;
 }
@@ -701,18 +701,17 @@ bool WindowManager::onWindowResize(const MouseEvent& mev)
     if( _managedWindowPosition != pos )
     {
         _managedWindowPosition = pos;
-        _app.move(*_managedWindow, pos);
+        _managedWindow->move(pos);
     }
 
     if( _managedWindowSize != size )
     {
         _managedWindowSize = size;
-        _app.resize(*_managedWindow, size);
+        _managedWindow->resize(size);
     }
 
     return true;
 }
-
 
 } // namespace
 

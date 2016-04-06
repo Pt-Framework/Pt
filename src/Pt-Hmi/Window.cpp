@@ -186,17 +186,6 @@ bool Window::isActive() const
 }
 
 
-void Window::activate()
-{
-    if(_isActive)
-        return;
-
-    if( _impl ) 
-        _impl->activate();
-}
-
-
-
 void Window::focusPrev()
 {
     moveFocus(_focusList.rbegin(), _focusList.rend());
@@ -465,13 +454,6 @@ void Window::onKeyEvent(const KeyEvent& ev)
 }
 
 
-
-void Window::onActivateEvent(const ActivateEvent& ev)
-{ 
-    _isActive = ev.isActive();
-}
-
-
 void Window::onCloseEvent(const CloseEvent& ev)
 {
      _isClosed =  true;
@@ -671,43 +653,131 @@ void Window::show(bool b)
 }
 
 
-void Window::enable(bool e)
+void Window::onShow( Window& w, bool visible )
 {
-    if( _impl )
-        _impl->enable(e);
+    const double borderWidth = Application::instance().windowBorderWidth();
+    const double titleHeight = Application::instance().windowTitleHeight();
+
+    Gfx::PointF framePos = w.position() - w.position();
+    framePos.subX(borderWidth);
+    framePos.subY(borderWidth +  titleHeight);
+
+    Gfx::SizeF frameSize = w.size();
+    frameSize.addHeight(2 * borderWidth + titleHeight);
+    frameSize.addWidth(2 * borderWidth);
+
+    Gfx::RectF updateRect(framePos, frameSize);
+    
+    ShowEvent sev( w.vid(), visible );
+    Application::instance().loop().commitEvent( sev );
+      
+    w.parent()->update(updateRect);
 }
 
-void Window::resize(const Gfx::SizeF& s)
-{
-    if(_impl)
-        _impl->resize(s);
-    else
-        _size = s;
-}
 
 void Window::onShowEvent( const ShowEvent& ev )
 {
     _visible = ev.visible();
 }
 
+
+void Window::activate()
+{
+    if(_isActive)
+        return;
+
+    if( _impl ) 
+        _impl->activate();
+    else
+        _isActive = true;
+}
+
+
+void Window::onActivate(Window& w)
+{
+    const double borderWidth = Application::instance().windowBorderWidth();
+    const double titleHeight = Application::instance().windowTitleHeight();
+
+    Gfx::PointF framePos(0, 0);
+    framePos.subX( borderWidth );
+    framePos.subY( borderWidth +  titleHeight );
+
+    Gfx::SizeF frameSize = w.size();
+    frameSize.addHeight(2 * borderWidth + titleHeight);
+    frameSize.addWidth(2 * borderWidth);
+
+    Gfx::RectF updateRect(framePos, frameSize);
+
+    ActivateEvent acev( w.vid(), true );
+    Application::instance().loop().commitEvent(acev);
+
+    Window* child = &w;
+
+    for(Window* parent = w.parent(); parent; parent = child->parent())
+    {
+        std::vector<Window*>::const_iterator it;
+        for( it = parent->windows().begin(); it != parent->windows().end(); ++it)
+        {
+            if( (*it)->isActive() && *it != child )
+            {
+                ActivateEvent aev( (*it)->vid(), false );
+                Application::instance().loop().commitEvent(aev);
+
+                (*it)->update();
+            }
+        }
+
+        ActivateEvent aev( parent->vid(), true );
+        Application::instance().loop().commitEvent(aev);
+        parent->update();
+
+        child = parent;
+    }
+
+    w.update();
+}
+
+
+void Window::onActivateEvent(const ActivateEvent& ev)
+{ 
+    _isActive = ev.isActive();
+}
+
+
+void Window::enable(bool e)
+{
+    if( _impl )
+        _impl->enable(e);
+    else
+        _enabled = e;
+}
+
+
+void Window::onEnable( Window& w, bool enable )
+{
+    const double borderWidth = Application::instance().windowBorderWidth();
+    const double titleHeight = Application::instance().windowTitleHeight();
+
+    Gfx::PointF framePos = w.position() - w.position();
+    framePos.subX(borderWidth);
+    framePos.subY(borderWidth +  titleHeight);
+
+    Gfx::SizeF frameSize = w.size();
+    frameSize.addHeight(2 * borderWidth + titleHeight);
+    frameSize.addWidth(2 * borderWidth);
+
+    Gfx::RectF updateRect(framePos, frameSize);
+
+    EnableEvent eev( w.vid(), enable );
+    Application::instance().loop().commitEvent( eev );
+   
+    w.update( Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
+}
+
+
 void Window::onEnableEvent( const EnableEvent& ev )
 {
     _enabled = ev.enabled();
-}
-
-void Window::onResizeEvent( const ResizeEvent& s )
-{
-    _size = s.size();
-    _surface.resize(s.size());
-
-    if( _mainWidget )
-        _mainWidget->resize(s.size());
-}
-
-
-void Window::onMoveEvent(const MoveEvent& ev)
-{
-    _position = ev.position();
 }
 
 
@@ -717,6 +787,83 @@ void Window::move(const Gfx::PointF& p)
         _impl->move(p);
     else
         _position = p;
+}
+
+
+void Window::onMove(Window& w, const Gfx::PointF& to)
+{   
+    Gfx::PointF from = w.position();
+
+    MoveEvent mev(w.vid(), to);
+    Application::instance().loop().commitEvent(mev);
+
+    if( ! w.parent() )
+        return;
+    
+    const double borderWidth = Application::instance().windowBorderWidth();
+    const double titleHeight = Application::instance().windowTitleHeight();
+        
+    Gfx::SizeF size = w.size();    
+    size.addWidth( 2 * borderWidth );
+    size.addHeight( 2 * borderWidth + titleHeight );
+
+    Gfx::RectF movedRect(to, size);
+
+    Gfx::RectF updateRect(from, size);  
+    updateRect.unify(movedRect);
+    
+    w.parent()->update(updateRect);
+}
+
+
+void Window::onMoveEvent(const MoveEvent& ev)
+{
+    _position = ev.position();
+}
+
+
+void Window::resize(const Gfx::SizeF& s)
+{
+    if(_impl)
+        _impl->resize(s);
+    else
+        _size = s;
+}
+
+
+void Window::onResize(Window& w, const Gfx::SizeF& to)
+{   
+    Gfx::SizeF from = w.size();
+
+    ResizeEvent rev(w.vid(), to);
+    Application::instance().loop().commitEvent(rev);
+
+    if( ! w.isVisible() )
+        return;
+    
+    const double borderWidth = Application::instance().windowBorderWidth();
+    const double titleHeight = Application::instance().windowTitleHeight();
+    
+    const Gfx::PointF updatePos(-borderWidth, -(borderWidth + titleHeight) );
+
+    Gfx::SizeF updateSize( std::max( to.width(), from.width() ),
+                           std::max( to.height(), from.height() ));
+
+    updateSize.addHeight(2 * borderWidth + titleHeight);
+    updateSize.addWidth(2 * borderWidth);
+
+    Gfx::RectF updateRect( updatePos, updateSize );
+    w.update(updateRect);
+}
+
+
+void Window::onResizeEvent( const ResizeEvent& s )
+{
+    _size = s.size();
+    _surface.resize(s.size());
+
+    if( _mainWidget )
+        _mainWidget->resize(s.size());
 }
 
 

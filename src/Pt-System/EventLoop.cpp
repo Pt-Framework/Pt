@@ -150,7 +150,7 @@ bool EventQueue::processEvents(Signal<const Event&>& eventSignal)
             throw;
         }
 
-		lock.lock();
+        lock.lock();
         ev->destroy( this->allocator() );
     }
 

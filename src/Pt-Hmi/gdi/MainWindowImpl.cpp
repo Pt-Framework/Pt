@@ -51,9 +51,9 @@ namespace Hmi {
 MainWindowImpl::MainWindowImpl(Window* w)
 : WindowImpl(w)
 , _app( Pt::Hmi::Application::instance() )
-, _mouseEvent(0)
 , _screen( _app.mainScreen() )
-, _hwnd( 0 )
+, _hwnd(0)
+, _mouseEvent(0)
 , _hasPointer(false)
 {    
     create();
@@ -62,7 +62,7 @@ MainWindowImpl::MainWindowImpl(Window* w)
 
 MainWindowImpl::~MainWindowImpl()
 {
-  destroy();
+    destroy();
 }
 
 
@@ -99,329 +99,6 @@ void MainWindowImpl::show( bool v)
 }
 
 
-bool MainWindowImpl::processEvent(unsigned int message, WPARAM wparam, LPARAM lparam )
-{
-    bool handled = false;
-
-    switch( message )
-    {
-        case WM_MOUSEMOVE:
-        {
-          TRACKMOUSEEVENT tme ={ sizeof(TRACKMOUSEEVENT), TME_LEAVE, _hwnd, 0 };
-          TrackMouseEvent(&tme);              
-          onMouse(message, wparam, lparam);
-          handled = true;
-        }
-        break;
-
-        case WM_LBUTTONDOWN:        
-        case WM_MBUTTONDOWN:
-        case WM_RBUTTONDOWN:
-        case WM_LBUTTONUP:        
-        case WM_MBUTTONUP:
-        case WM_RBUTTONUP:        
-        case WM_LBUTTONDBLCLK:
-        case WM_RBUTTONDBLCLK:
-        case WM_MBUTTONDBLCLK:
-        {          
-           onMouse(message, wparam, lparam);
-           handled = true;
-        }
-        break;
-
-        case WM_MOUSEWHEEL:
-        {
-            int delta = GET_WHEEL_DELTA_WPARAM(wparam);
-            _scrollEvent.set(0, delta/120.0);
-            _app.sendEvent(*_apiWindow, _scrollEvent);
-            handled = true;
-        }
-        break;
-
-        case WM_KEYDOWN:
-        case WM_KEYUP:    
-        case WM_SYSKEYDOWN:
-        case WM_SYSKEYUP:    
-        {
-            UINT vkey = wparam;
-            UINT scanCode = ((lparam >> 16) & 0xFF);
-            bool isPress = (message == WM_KEYDOWN || message == WM_SYSKEYDOWN);
-            //UINT repeatCount = lparam & 0xFFFF;
-
-            onKey(vkey, scanCode, isPress);
-            handled = true;
-            break;
-        }
-
-
-        case WM_PAINT:
-        {
-            onPaint();
-            handled = true;
-        }
-        break;
-        
-        case WM_SIZE:
-        {
-            onSize(wparam, lparam);
-            handled = true;
-        }
-        break;
-
-        case WM_MOVE:
-        {
-            onMove(lparam);
-            handled = true;
-        }
-        break;
-
-        case WM_DESTROY:
-        {            
-            handled = true;
-        }
-        break;
-
-        case WM_CLOSE:
-        {
-            onClose();
-        }
-        break;
-
-        case WM_ACTIVATE:
-        {
-            onActivate( wparam != 0 );
-        }
-        break;
-                
-        case WM_ENABLE:
-              onEnable(true);
-        break;
-
-        case WS_DISABLED:
-            onEnable(false);
-        break;
-
-        case WM_KILLFOCUS:
-        {
-            onActivate( false );
-        }
-        break;        
-
-        case WM_GETMINMAXINFO:
-        {
-            MINMAXINFO* mmi = (MINMAXINFO*)lparam;
-            POINT min = { _apiWindow->minimumSize().width(), _apiWindow->minimumSize().height() };
-            POINT max = { _apiWindow->maximumSize().width(), _apiWindow->maximumSize().height() };
-            mmi->ptMaxTrackSize = max; 
-            mmi->ptMinTrackSize = min;
-            handled = true;  
-        }
-        break;
-
-        case WM_MOUSELEAVE:
-            handled = true;  
-            _hasPointer = false;
-            _mouseEvent.clear();
-            _app.mainScreen().setCursor(0);
-            _app.mainScreen().setPointerWindow(0);
-        break;
-        
-    }
-
-    return handled;
-}
-
-void MainWindowImpl::onClose()
-{
-    CloseEvent ev;
-    _apiWindow->processEvent(ev);
-}
-
-
-void MainWindowImpl::onActivate(bool a)
-{
-    _apiWindow->processEvent( ActivateEvent(_apiWindow->vid(), a) );
-}
-
-void MainWindowImpl::onEnable(bool e)
-{
-    _apiWindow->processEvent( EnableEvent(_apiWindow->vid(), e) );
-}
-
-
-void MainWindowImpl::onSize(WPARAM wParam, LPARAM lParam)
-{
-  WindowState::Type state = WindowState::Normal;
-
-  switch(wParam)
-  {
-      case SIZE_MAXHIDE:
-      case SIZE_MAXSHOW:
-      break;
-
-      case SIZE_MAXIMIZED:
-          state = WindowState::Maximazed;                            
-      break;
-
-      case SIZE_MINIMIZED:
-          state = WindowState::Minimized;            
-      break;
- 
-      case SIZE_RESTORED:
-      {
-          state = WindowState::Normal;
-       
-          int width  = LOWORD(lParam);
-          int height = HIWORD(lParam); 
-
-          Gfx::SizeF to(width, height);
-          
-          ResizeEvent rev(_apiWindow->vid(), to);
-          _apiWindow->processEvent(rev);
-
-          Gfx::RectF updateRect(Gfx::PointF(0,0), to);
-
-          Painter painter(_apiWindow->_surface);
-          painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
-          painter.fillRect(updateRect);
-
-          PaintEvent pev(_apiWindow->vid(), updateRect);
-          _apiWindow->processEvent(pev);
-      }
-
-      break;
-  }   
-}
-
-
-void MainWindowImpl::onKey(UINT vkey, UINT scanCode, bool isPress)
-{
-    BYTE keyboardState[256];
-    GetKeyboardState(keyboardState);
-
-    wchar_t wc = 0;
-    ToUnicode(vkey, scanCode, (BYTE*)keyboardState, &wc, 1, 0);    
-
-    bool shift = (keyboardState[VK_SHIFT] & 0x80) == 0x80;
-    bool control = (keyboardState[VK_CONTROL] & 0x80) == 0x80;
-    bool alt = (keyboardState[VK_MENU] & 0x80) == 0x80;
-    bool rwin = (keyboardState[VK_RWIN] & 0x80) == 0x80;
-    bool lwin = (keyboardState[VK_LWIN] & 0x80) == 0x80;
-
-    Key::Modifiers modifiers;
-    if(shift)
-        modifiers |= Key::Shift;
-
-    if(control)
-        modifiers |= Key::Control;
-
-    if(alt)
-        modifiers |= Key::Alt;
-
-    if(rwin || lwin)
-        modifiers |= Key::Meta;
-
-    Key::Code keyCode = static_cast<Key::Code>(vkey);
-    Key key(modifiers, keyCode);
-
-    if(isPress)
-        _keyEvent.setPress(key, wc);
-    else
-        _keyEvent.setRelease(key, wc); 
-
-    _app.sendEvent(*_apiWindow, _keyEvent);
-}
-
-
-void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
-{    
-    int xPos = GET_X_LPARAM(lparam); 
-    int yPos = GET_Y_LPARAM(lparam); 
-
-    switch(msg)
-    {
-        case WM_LBUTTONDOWN:
-            _mouseEvent.setPress(MouseEvent::Left);
-        break;
-        
-        case WM_LBUTTONUP:        
-            _mouseEvent.setRelease(MouseEvent::Left);
-        break;
-                            
-        case WM_MBUTTONDOWN:
-            _mouseEvent.setPress(MouseEvent::Middle);
-        break;
-        
-        case WM_MBUTTONUP:
-            _mouseEvent.setRelease(MouseEvent::Middle);
-        break;   
-        
-        case WM_RBUTTONDOWN:        
-            _mouseEvent.setPress(MouseEvent::Right);
-        break;
-        
-        case WM_RBUTTONUP:
-            _mouseEvent.setRelease(MouseEvent::Right);
-        break; 
-
-        case WM_MOUSEMOVE:
-            _mouseEvent.setMove();
-        break;
-    }
-  
-    Gfx::PointF p = _screen.toUnit( Gfx::Point(xPos, yPos) );
-    _mouseEvent.setX( p.x() );
-    _mouseEvent.setY( p.y() );            
-
-    if( ! _hasPointer )
-    {
-        _hasPointer = true;
-        _app.mainScreen().setPointerWindow( _apiWindow );
-    }
-
-    _mouseEvent.setId( _apiWindow->vid() );
-    //_app.sendEvent(*_apiWindow, _mouseEvent);
-    _app.loop().commitEvent(_mouseEvent);
-}
-
-
-void MainWindowImpl::onMove(LPARAM lParam)
-{ 
-    RECT  info;
-    GetWindowRect(_hwnd, &info);
-    int xPos = info.left;
-    int yPos = info.top;
-
-    MoveEvent ev(_apiWindow->vid(), Gfx::PointF(xPos, yPos) );
-   _apiWindow->processEvent( ev );          
-}
-
-
-void MainWindowImpl::onPaint()
-{ 
-      RECT  info;
-      PAINTSTRUCT ps;
-
-      GetClientRect(_hwnd, &info);      
-      
-      HDC windowContext = BeginPaint(_hwnd, &ps);
-      
-      //TODO: rect optimazatiom
-
-      HDC bitmapDeviceConText = _apiWindow->surface().pixmapImpl()->deviceContext();
-      BitBlt(windowContext, 0, 0, info.right,  info.bottom, bitmapDeviceConText, 0, 0, SRCCOPY);    
-    
-      EndPaint(_hwnd, &ps);    
-}
-
-
-void MainWindowImpl::move(const Gfx::PointF& pos)
-{
-    Gfx::Point p = _screen.fromUnit(pos);
-    SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, SWP_DRAWFRAME|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOZORDER);
-}
-
-
 void MainWindowImpl::activate()
 {
     SetActiveWindow( _hwnd );
@@ -431,6 +108,14 @@ void MainWindowImpl::activate()
 void MainWindowImpl::enable(bool e)
 {
     EnableWindow(_hwnd, e);
+}
+
+
+void MainWindowImpl::move(const Gfx::PointF& pos)
+{
+    Gfx::Point p = _screen.fromUnit(pos);
+    SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, 
+                 SWP_DRAWFRAME|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOZORDER);
 }
 
 
@@ -451,7 +136,8 @@ void MainWindowImpl::resize(const Gfx::SizeF& s)
     
     LONG clientWidth  = clientRect.right  - clientRect.left + 1;
     LONG clientHeight = clientRect.bottom - clientRect.top  + 1;
-    SetWindowPos(_hwnd, NULL, 0, 0, clientWidth, clientHeight, SWP_NOREDRAW| SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+    SetWindowPos(_hwnd, NULL, 0, 0, clientWidth, clientHeight, 
+                 SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
 }
 
 
@@ -597,13 +283,11 @@ void MainWindowImpl::setBorder(WindowBorder::Type p)
 
 void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
 {
-    
 }
 
 
 void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 {
-    
 }
 
 
@@ -638,7 +322,7 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 }
 
 
-void MainWindowImpl::paint(const Gfx::RectF& rect )
+void MainWindowImpl::paint(const Gfx::RectF& rect)
 {
     InvalidateRect(_hwnd, NULL, FALSE);
 }
@@ -647,6 +331,319 @@ void MainWindowImpl::paint(const Gfx::RectF& rect )
 void MainWindowImpl::close()
 {
     destroy();
+}
+
+
+bool MainWindowImpl::processEvent(unsigned int message, WPARAM wparam, LPARAM lparam )
+{
+    bool handled = false;
+
+    switch( message )
+    {
+        case WM_MOUSEMOVE:
+        {
+          TRACKMOUSEEVENT tme ={ sizeof(TRACKMOUSEEVENT), TME_LEAVE, _hwnd, 0 };
+          TrackMouseEvent(&tme);              
+          onMouse(message, wparam, lparam);
+          handled = true;
+        }
+        break;
+
+        case WM_LBUTTONDOWN:        
+        case WM_MBUTTONDOWN:
+        case WM_RBUTTONDOWN:
+        case WM_LBUTTONUP:        
+        case WM_MBUTTONUP:
+        case WM_RBUTTONUP:        
+        case WM_LBUTTONDBLCLK:
+        case WM_RBUTTONDBLCLK:
+        case WM_MBUTTONDBLCLK:
+        {          
+           onMouse(message, wparam, lparam);
+           handled = true;
+        }
+        break;
+
+        case WM_MOUSEWHEEL:
+        {
+            int delta = GET_WHEEL_DELTA_WPARAM(wparam);
+            _scrollEvent.set(0, delta/120.0);
+            _app.sendEvent(*_apiWindow, _scrollEvent);
+            handled = true;
+        }
+        break;
+
+        case WM_KEYDOWN:
+        case WM_KEYUP:    
+        case WM_SYSKEYDOWN:
+        case WM_SYSKEYUP:    
+        {
+            UINT vkey = wparam;
+            UINT scanCode = ((lparam >> 16) & 0xFF);
+            bool isPress = (message == WM_KEYDOWN || message == WM_SYSKEYDOWN);
+            //UINT repeatCount = lparam & 0xFFFF;
+
+            onKey(vkey, scanCode, isPress);
+            handled = true;
+            break;
+        }
+
+
+        case WM_PAINT:
+        {
+            onPaint();
+            handled = true;
+        }
+        break;
+        
+        case WM_SIZE:
+        {
+            onResize(wparam, lparam);
+            handled = true;
+        }
+        break;
+
+        case WM_MOVE:
+        {
+            onMove(lparam);
+            handled = true;
+        }
+        break;
+
+        case WM_DESTROY:
+        {            
+            handled = true;
+        }
+        break;
+
+        case WM_CLOSE:
+        {
+            onClose();
+        }
+        break;
+
+        case WM_ACTIVATE:
+        {
+            onActivate( wparam != 0 );
+        }
+        break;
+                
+        case WM_ENABLE:
+              onEnable(true);
+        break;
+
+        case WS_DISABLED:
+            onEnable(false);
+        break;
+
+        case WM_KILLFOCUS:
+        {
+            onActivate( false );
+        }
+        break;        
+
+        case WM_GETMINMAXINFO:
+        {
+            MINMAXINFO* mmi = (MINMAXINFO*)lparam;
+            POINT min = { _apiWindow->minimumSize().width(), _apiWindow->minimumSize().height() };
+            POINT max = { _apiWindow->maximumSize().width(), _apiWindow->maximumSize().height() };
+            mmi->ptMaxTrackSize = max; 
+            mmi->ptMinTrackSize = min;
+            handled = true;  
+        }
+        break;
+
+        case WM_MOUSELEAVE:
+            handled = true;  
+            _hasPointer = false;
+            _mouseEvent.clear();
+            _app.mainScreen().setCursor(0);
+            _app.mainScreen().setPointerWindow(0);
+        break;
+        
+    }
+
+    return handled;
+}
+
+
+void MainWindowImpl::onClose()
+{
+    CloseEvent ev;
+    _apiWindow->processEvent(ev);
+}
+
+
+void MainWindowImpl::onActivate(bool a)
+{
+    _apiWindow->processEvent( ActivateEvent(_apiWindow->vid(), a) );
+}
+
+
+void MainWindowImpl::onEnable(bool e)
+{
+    _apiWindow->processEvent( EnableEvent(_apiWindow->vid(), e) );
+}
+
+
+void MainWindowImpl::onKey(UINT vkey, UINT scanCode, bool isPress)
+{
+    BYTE keyboardState[256];
+    GetKeyboardState(keyboardState);
+
+    wchar_t wc = 0;
+    ToUnicode(vkey, scanCode, (BYTE*)keyboardState, &wc, 1, 0);    
+
+    bool shift = (keyboardState[VK_SHIFT] & 0x80) == 0x80;
+    bool control = (keyboardState[VK_CONTROL] & 0x80) == 0x80;
+    bool alt = (keyboardState[VK_MENU] & 0x80) == 0x80;
+    bool rwin = (keyboardState[VK_RWIN] & 0x80) == 0x80;
+    bool lwin = (keyboardState[VK_LWIN] & 0x80) == 0x80;
+
+    Key::Modifiers modifiers;
+    if(shift)
+        modifiers |= Key::Shift;
+
+    if(control)
+        modifiers |= Key::Control;
+
+    if(alt)
+        modifiers |= Key::Alt;
+
+    if(rwin || lwin)
+        modifiers |= Key::Meta;
+
+    Key::Code keyCode = static_cast<Key::Code>(vkey);
+    Key key(modifiers, keyCode);
+
+    if(isPress)
+        _keyEvent.setPress(key, wc);
+    else
+        _keyEvent.setRelease(key, wc); 
+
+    _app.loop().commitEvent(_keyEvent);
+}
+
+
+void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
+{    
+    int xPos = GET_X_LPARAM(lparam); 
+    int yPos = GET_Y_LPARAM(lparam); 
+
+    switch(msg)
+    {
+        case WM_LBUTTONDOWN:
+            _mouseEvent.setPress(MouseEvent::Left);
+        break;
+        
+        case WM_LBUTTONUP:        
+            _mouseEvent.setRelease(MouseEvent::Left);
+        break;
+                            
+        case WM_MBUTTONDOWN:
+            _mouseEvent.setPress(MouseEvent::Middle);
+        break;
+        
+        case WM_MBUTTONUP:
+            _mouseEvent.setRelease(MouseEvent::Middle);
+        break;   
+        
+        case WM_RBUTTONDOWN:        
+            _mouseEvent.setPress(MouseEvent::Right);
+        break;
+        
+        case WM_RBUTTONUP:
+            _mouseEvent.setRelease(MouseEvent::Right);
+        break; 
+
+        case WM_MOUSEMOVE:
+            _mouseEvent.setMove();
+        break;
+    }
+  
+    Gfx::PointF p = _screen.toUnit( Gfx::Point(xPos, yPos) );
+    _mouseEvent.setX( p.x() );
+    _mouseEvent.setY( p.y() );            
+
+    if( ! _hasPointer )
+    {
+        _hasPointer = true;
+        _app.mainScreen().setPointerWindow( _apiWindow );
+    }
+
+    _mouseEvent.setId( _apiWindow->vid() );
+    _app.loop().commitEvent(_mouseEvent);
+}
+
+
+void MainWindowImpl::onMove(LPARAM lParam)
+{ 
+    RECT  info;
+    GetWindowRect(_hwnd, &info);
+    int xPos = info.left;
+    int yPos = info.top;
+
+    MoveEvent ev(_apiWindow->vid(), Gfx::PointF(xPos, yPos) );
+   _apiWindow->processEvent( ev );          
+}
+
+
+void MainWindowImpl::onResize(WPARAM wParam, LPARAM lParam)
+{   
+    WindowState::Type state = WindowState::Normal;
+
+    switch(wParam)
+    {
+        case SIZE_MAXHIDE:
+        case SIZE_MAXSHOW:
+            break;
+
+        case SIZE_MAXIMIZED:
+            state = WindowState::Maximazed;                            
+            break;
+
+        case SIZE_MINIMIZED:
+            state = WindowState::Minimized;            
+            break;
+ 
+        default:
+        case SIZE_RESTORED:
+            state = WindowState::Normal;
+            break;
+    }   
+
+    int width  = LOWORD(lParam);
+    int height = HIWORD(lParam); 
+
+    Gfx::SizeF to(width, height);
+          
+    ResizeEvent rev(_apiWindow->vid(), to);
+    _app.loop().commitEvent(rev);
+           
+    Gfx::RectF updateRect(Gfx::PointF(0,0), to);
+    _apiWindow->update(updateRect);
+            
+    // windows starts a nested message loop during resizing, so the events
+    // required for painting need to be processed manually
+    _app.impl()->processEvents();
+}
+
+
+void MainWindowImpl::onPaint()
+{
+    RECT info;
+    GetClientRect(_hwnd, &info);      
+      
+    PAINTSTRUCT ps;
+    HDC windowContext = BeginPaint(_hwnd, &ps);
+
+    // TODO: rect optimization
+    Gfx::RectF updateRect(Gfx::PointF(0,0), _apiWindow->size());
+
+    HDC bitmapContext = _apiWindow->surface().pixmapImpl()->deviceContext();
+    BitBlt(windowContext, 0, 0, info.right, info.bottom, bitmapContext, 0, 0, SRCCOPY);    
+    
+    EndPaint(_hwnd, &ps);    
 }
 
 } // namespace

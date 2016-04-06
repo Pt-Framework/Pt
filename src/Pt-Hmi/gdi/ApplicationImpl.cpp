@@ -147,7 +147,13 @@ long CALLBACK ApplicationImpl::wndProc(HWND hwnd, unsigned int message, unsigned
 
 void ApplicationImpl::nextEvent()
 {
-	waitNext();
+	  waitNext();
+}
+
+
+void ApplicationImpl::processEvents()
+{
+    _eventQueue.processEvents( this->eventReceived() );
 }
 
 
@@ -253,4 +259,6 @@ bool ApplicationImpl::waitNext()
     return isActive;
 }
 
-}}
+} // namespace
+
+} // namespace

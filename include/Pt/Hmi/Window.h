@@ -137,8 +137,6 @@ class PT_HMI_API Window : public Visual
 
     void update(const Gfx::RectF& rect);
 
-    void onUpdate(Window& w, const Gfx::RectF& rect);
-
     const Gfx::SizeF& size() const
     {
         return _size;
@@ -148,6 +146,19 @@ class PT_HMI_API Window : public Visual
     {
         return _position;
     }
+
+  protected:
+    void onUpdate(Window& w, const Gfx::RectF& rect);
+
+    void onShow(Window& w, bool visible);
+
+    void onActivate(Window& w);
+
+    void onEnable(Window& w, bool enable);
+
+    void onMove(Window& w, const Gfx::PointF& to);
+
+    void onResize(Window& w, const Gfx::SizeF& to);
 
   protected:
     virtual void onEvent(const Pt::Event& ev);

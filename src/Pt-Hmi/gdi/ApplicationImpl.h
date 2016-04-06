@@ -65,6 +65,8 @@ class ApplicationImpl : public Pt::System::EventLoop
 
 		void nextEvent();
 
+    void processEvents();
+
 	protected:
 		static long CALLBACK wndProc(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);
 		static HBITMAP createImage888(const Pt::uint8_t* data, size_t width, size_t height);
