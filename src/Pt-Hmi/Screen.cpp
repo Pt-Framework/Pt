@@ -49,35 +49,55 @@ Screen::~Screen()
 }
 
 
+void Screen::onUpdate(Window& w, const Gfx::RectF& updateRect)
+{        
+    UpdateMap::iterator it = _updates.find( w.vid() );
+    if( it == _updates.end() )
+    {
+        UpdateInfo uinfo(updateRect);
+        _updates.insert( std::make_pair(w.vid(), uinfo) );
+    }
+    else
+    {
+        it->second.push(updateRect);
+    }
+
+    UpdateEvent uev(vid(), w.vid(), updateRect);
+    Application::instance().loop().commitEvent(uev);
+}
+
+
+void Screen::onResize(Window& w, const Gfx::SizeF& s)
+{
+    _impl->onResize(w, s);
+}
+
+
 void Screen::onEvent(const Event& ev)
 {
-    const double borderWidth = Application::instance().windowBorderWidth();
-    const double titleHeight = Application::instance().windowTitleHeight();
+    if(ev.typeInfo() == typeid(UpdateEvent) )
+    {
+        const UpdateEvent& uev = static_cast<const UpdateEvent&>(ev);
+        onUpdateEvent(uev);
+    }
+}
 
-    if(ev.typeInfo() != typeid(UpdateEvent) )
+
+void Screen::onUpdateEvent(const UpdateEvent& ev)
+{
+    // skip all update events except the last one
+    UpdateMap::iterator u = _updates.find( ev.window() );
+    if( u == _updates.end() )
         return;
 
-    const UpdateEvent& uev = static_cast<const UpdateEvent&>(ev);
-    const Gfx::RectF& rect = uev.rect();
+    if( u->second.pop() != 0)
+        return;
 
-    std::vector<Window*>::iterator it;
-    for(it = _windows.begin(); it != _windows.end(); ++it)
-    {
-        Window* w = *it;
+    Gfx::RectF rect = u->second.rect();
+    Pt::uint64_t window = u->first;
+    _updates.erase( ev.vid() );
 
-        Gfx::RectF windowRect( Gfx::PointF(0,0), w->size() );
-
-        Gfx::PointF pos( rect.topLeft() - w->position() );
-        pos.subX(borderWidth);
-        pos.subY(borderWidth + titleHeight);
-
-        Gfx::RectF updateRect( pos, rect.size() );
-        
-        if( updateRect.intersect(windowRect).isNull() )
-          continue;
-        
-        w->paint(updateRect);
-    }
+    _impl->onUpdate(window, rect);
 }
 
 

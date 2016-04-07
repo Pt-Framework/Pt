@@ -40,60 +40,66 @@ namespace Hmi{
 
 class PT_HMI_API PaintEvent : public Pt::BasicEvent<PaintEvent>
 {
-	public:	
-		PaintEvent( Pt::uint64_t vid, const Gfx::RectF& rect )
-		: _rect( rect )
-		, _vid( vid )
-		{
-		}
+    public:    
+        PaintEvent( Pt::uint64_t vid, const Gfx::RectF& rect )
+        : _rect( rect )
+        , _vid( vid )
+        {
+        }
 
-		virtual ~PaintEvent()
-		{
-		}
+        virtual ~PaintEvent()
+        {
+        }
 
-		const Gfx::RectF&  rect( ) const
-		{
-			return _rect;
-		}
+        const Gfx::RectF&  rect( ) const
+        {
+            return _rect;
+        }
 
-        
         Pt::uint64_t vid() const
         {
             return _vid;
         }
 
-	private:
-		Gfx::RectF  _rect;
+    private:
+        Gfx::RectF  _rect;
         Pt::uint64_t _vid;
 };
 
 
 class PT_HMI_API UpdateEvent : public Pt::BasicEvent<UpdateEvent>
 {
-	public:	
-		UpdateEvent( Pt::uint64_t vid, const Gfx::RectF& rect )
-		: _rect( rect )
-		, _vid( vid )
-		{
-		}
+    public:    
+        UpdateEvent( Pt::uint64_t vid, Pt::uint64_t w, const Gfx::RectF& rect )
+        : _rect( rect )
+        , _vid( vid )
+        , _window(w)
+        {
+        }
 
-		virtual ~UpdateEvent()
-		{
-		}
+        virtual ~UpdateEvent()
+        {
+        }
 
-		const Gfx::RectF&  rect( ) const
-		{
-			return _rect;
-		}
+        const Gfx::RectF&  rect( ) const
+        {
+            return _rect;
+        }
 
         Pt::uint64_t vid() const
         {
             return _vid;
         }
 
-	private:
-		Gfx::RectF  _rect;
+        Pt::uint64_t window() const
+        {
+            return _window;
+        }
+
+    private:
+        Gfx::RectF  _rect;
         Pt::uint64_t _vid;
+        Pt::uint64_t _window;
 };
 
 }}

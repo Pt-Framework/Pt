@@ -168,7 +168,7 @@ Gfx::FontMetrics PaintSurfaceImpl::fontMetrics(const Gfx::Font& font, const Pt::
     GetTextExtentPoint32W(dc, wtext.c_str(), wtext.size(), &textSize);
     
     Gfx::Size size(textSize.cx, textSize.cy);
-    Gfx::SizeF sizeF = Application::instance().mainScreen().toUnit(size);
+    Gfx::SizeF sizeF = Application::instance().screen().toUnit(size);
 
     ReleaseDC(NULL, dc);
 
@@ -280,7 +280,7 @@ void PaintRegionImpl::drawPolyline(const Gfx::PointF* points, size_t pointCount)
     for (size_t i = 0; i < pointCount; i++)
     {
         Gfx::PointF pt = points[i] + _area.topLeft();
-        Gfx::Point p = Application::instance().mainScreen().fromUnit(pt);
+        Gfx::Point p = Application::instance().screen().fromUnit(pt);
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -302,7 +302,7 @@ void PaintRegionImpl::fillPolygon(const Gfx::PointF* points, size_t pointCount)
     for (size_t i = 0; i < pointCount; i++)
     {
         Gfx::PointF pt = points[i] + _area.topLeft();
-        Gfx::Point p = Application::instance().mainScreen().fromUnit(pt);
+        Gfx::Point p = Application::instance().screen().fromUnit(pt);
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -345,7 +345,7 @@ PixmapSurfaceImpl::PixmapSurfaceImpl()
 {
     _size = Gfx::SizeF(10,10);
 
-    Gfx::Size nsize = Application::instance().mainScreen().fromUnit(_size);
+    Gfx::Size nsize = Application::instance().screen().fromUnit(_size);
 
     HDC screenDC = CreateDC(_T("DISPLAY"), NULL, NULL, NULL);
     _deviceContext = CreateCompatibleDC(screenDC);
@@ -389,7 +389,7 @@ void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
         return;
 
     _size = size;
-    Gfx::Size nsize = Application::instance().mainScreen().fromUnit( _size );
+    Gfx::Size nsize = Application::instance().screen().fromUnit( _size );
 
     //Save the old settings
     COLORREF textColor = GetTextColor(_deviceContext);
@@ -572,7 +572,7 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
                           wtext.c_str(), wtext.size(), &textSize);
     
     Gfx::Size size(textSize.cx, textSize.cy);
-    Gfx::SizeF sizeF = Application::instance().mainScreen().toUnit(size);
+    Gfx::SizeF sizeF = Application::instance().screen().toUnit(size);
 
     return Gfx::FontMetrics(tm.tmAscent, 
                             tm.tmDescent, 
@@ -583,8 +583,8 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 
 void PixmapSurfaceImpl::drawLine(const Gfx::PointF& fromF, const Gfx::PointF& toF)
 {
-    Gfx::Point from = Application::instance().mainScreen().fromUnit(fromF);
-    Gfx::Point to = Application::instance().mainScreen().fromUnit(toF);
+    Gfx::Point from = Application::instance().screen().fromUnit(fromF);
+    Gfx::Point to = Application::instance().screen().fromUnit(toF);
 
     POINT points[2];
     points[0].x = from.x();
@@ -598,7 +598,7 @@ void PixmapSurfaceImpl::drawLine(const Gfx::PointF& fromF, const Gfx::PointF& to
 
 void PixmapSurfaceImpl::drawText(const Gfx::PointF& toF, const Pt::String& text)
 {
-    Gfx::Point to = Application::instance().mainScreen().fromUnit(toF);
+    Gfx::Point to = Application::instance().screen().fromUnit(toF);
   
     RECT rectangle;
     SetRect(&rectangle, to.x(), to.y(), to.x(), to.y());
@@ -613,7 +613,7 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& toF, const Pt::String& text)
 
 void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rectF)
 {
-    Gfx::Rect rect = Application::instance().mainScreen().fromUnit(rectF);
+    Gfx::Rect rect = Application::instance().screen().fromUnit(rectF);
 
     if (rect.size().width() == 1 && rect.size().height() == 1) 
     {
@@ -633,7 +633,7 @@ void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rectF)
 
 void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rectF)
 {
-    Gfx::Rect rect = Application::instance().mainScreen().fromUnit(rectF);
+    Gfx::Rect rect = Application::instance().screen().fromUnit(rectF);
   
     RECT rectangle;
     rectangle.left  = rect.left();
@@ -648,8 +648,8 @@ void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rectF)
 
 void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
 {
-    Gfx::Point topLeft = Application::instance().mainScreen().fromUnit(topLeftF);
-    Gfx::Size size = Application::instance().mainScreen().fromUnit(sizeF);
+    Gfx::Point topLeft = Application::instance().screen().fromUnit(topLeftF);
+    Gfx::Size size = Application::instance().screen().fromUnit(sizeF);
 
     HBRUSH originalBrush = (HBRUSH)SelectObject(_deviceContext, GetStockObject(NULL_BRUSH));
 
@@ -664,8 +664,8 @@ void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::Size
 
 void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
 {
-    Gfx::Point topLeft = Application::instance().mainScreen().fromUnit(topLeftF);
-    Gfx::Size size = Application::instance().mainScreen().fromUnit(sizeF);
+    Gfx::Point topLeft = Application::instance().screen().fromUnit(topLeftF);
+    Gfx::Size size = Application::instance().screen().fromUnit(sizeF);
 
     HPEN originalPen = (HPEN)SelectObject(_deviceContext, GetStockObject(NULL_PEN));
 
@@ -685,7 +685,7 @@ void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* points, const size_t poi
 
     for (size_t i = 0; i < pointCount; i++)
     {
-        Gfx::Point p = Application::instance().mainScreen().fromUnit(points[i]);
+        Gfx::Point p = Application::instance().screen().fromUnit(points[i]);
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -706,7 +706,7 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t poin
 
     for (size_t i = 0; i < pointCount; i++)
     {
-        Gfx::Point p = Application::instance().mainScreen().fromUnit(points[i]);
+        Gfx::Point p = Application::instance().screen().fromUnit(points[i]);
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -725,8 +725,8 @@ void PixmapSurfaceImpl::fillPolygon(POINT* points, size_t pointCount)
 
 void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface)
 {
-    Gfx::Point to = Application::instance().mainScreen().fromUnit(toF);
-    Gfx::Size size = Application::instance().mainScreen().fromUnit( surface.impl()->size() );
+    Gfx::Point to = Application::instance().screen().fromUnit(toF);
+    Gfx::Size size = Application::instance().screen().fromUnit( surface.impl()->size() );
 
     BitBlt( _deviceContext, 
             to.x(), to.y(), size.width(), size.height(), 
@@ -738,9 +738,9 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF,
                                     const PixmapSurface& pm, 
                                     const Gfx::RectF& pmRect)
 {
-    Gfx::Point to = Application::instance().mainScreen().fromUnit(toF);
-    Gfx::Size size = Application::instance().mainScreen().fromUnit( pmRect.size() );
-    Gfx::Point from = Application::instance().mainScreen().fromUnit(pmRect.topLeft());
+    Gfx::Point to = Application::instance().screen().fromUnit(toF);
+    Gfx::Size size = Application::instance().screen().fromUnit( pmRect.size() );
+    Gfx::Point from = Application::instance().screen().fromUnit(pmRect.topLeft());
 
     BitBlt( _deviceContext, 
             to.x(), to.y(), size.width(), size.height(), 
@@ -750,7 +750,7 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF,
 
 void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 {
-    Gfx::Point to = Application::instance().mainScreen().fromUnit(toF);
+    Gfx::Point to = Application::instance().screen().fromUnit(toF);
 
     const size_t depth = image.format().pixelSize() * 8; 
     const Pt::uint8_t* data = image.pixel(0,0);

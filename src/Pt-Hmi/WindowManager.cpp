@@ -386,7 +386,7 @@ ResizeDirection::Type WindowManager::isSizing(const Window& w, const Pt::Hmi::Mo
 
 void WindowManager::setSizingCursor( ResizeDirection::Type type )
 {
-    Screen& screen = _app.mainScreen();
+    Screen& screen = _app.screen();
 
     switch( type )
     {
@@ -434,7 +434,7 @@ bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
     // pointer on window background 
     if( ! _managedWindow )
     {
-        _app.mainScreen().setPointerWindow(_container);
+        _app.screen().setPointerWindow(_container);
         _state = &WindowManager::onBackground;        
         return false;
     }    
@@ -442,8 +442,8 @@ bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
     // pointer on window title bar
     if( isMoving(*_managedWindow, mev) )
     {
-        _app.mainScreen().setCursor( &Cursor::moveCursor() );
-        _app.mainScreen().setPointerWindow( 0 );
+        _app.screen().setCursor( &Cursor::moveCursor() );
+        _app.screen().setPointerWindow( 0 );
         _state = &WindowManager::onWindowFrame;
         return true;
     }
@@ -454,14 +454,14 @@ bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
     if( _sizingDirection != ResizeDirection::None )
     {
         setSizingCursor(_sizingDirection);
-        _app.mainScreen().setPointerWindow( 0);
+        _app.screen().setPointerWindow( 0);
         _state = &WindowManager::onWindowFrame;
         return true;
     }                                
     
     // pointer on window content
     _state = &WindowManager::onWindowContent;    
-    _app.mainScreen().setPointerWindow( _managedWindow);
+    _app.screen().setPointerWindow( _managedWindow);
     _managedWindow->processEvent( toWindow(_managedWindow, mev) );
     return true;
 }
@@ -476,7 +476,7 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
     // pointer on window background 
     if( ! _managedWindow)
     {
-        _app.mainScreen().setPointerWindow(_container);
+        _app.screen().setPointerWindow(_container);
         _state = &WindowManager::onBackground;
         return false;
     }
@@ -484,8 +484,8 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
     // pointer on window title bar
     if( isMoving(*_managedWindow, mev) )
     {
-        _app.mainScreen().setCursor( &Cursor::moveCursor() );
-        _app.mainScreen().setPointerWindow( 0);
+        _app.screen().setCursor( &Cursor::moveCursor() );
+        _app.screen().setPointerWindow( 0);
 
         if( mev.isPress(_actionButton) )
         {
@@ -503,7 +503,7 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
     if( _sizingDirection != ResizeDirection::None )
     {                      
         setSizingCursor(_sizingDirection);
-        _app.mainScreen().setPointerWindow( 0);
+        _app.screen().setPointerWindow( 0);
 
         if( mev.isPress(_actionButton) )
         {
@@ -519,7 +519,7 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
 
     // pointer on window content
     _state = &WindowManager::onWindowContent;
-    _app.mainScreen().setPointerWindow(_managedWindow);
+    _app.screen().setPointerWindow(_managedWindow);
     _managedWindow->processEvent( toWindow(_managedWindow, mev) );
     return true;
 }
@@ -534,7 +534,7 @@ bool WindowManager::onWindowContent(const Pt::Hmi::MouseEvent& mev)
     // pointer on window background
     if( ! _managedWindow )
     {        
-        _app.mainScreen().setPointerWindow( _container);
+        _app.screen().setPointerWindow( _container);
         _state = &WindowManager::onBackground;
         return false;
     }        
@@ -542,8 +542,8 @@ bool WindowManager::onWindowContent(const Pt::Hmi::MouseEvent& mev)
     // pointer on window title bar
     if( isMoving(*_managedWindow, mev) )
     {
-        _app.mainScreen().setCursor( &Cursor::moveCursor() );
-        _app.mainScreen().setPointerWindow( 0);
+        _app.screen().setCursor( &Cursor::moveCursor() );
+        _app.screen().setPointerWindow( 0);
         _state = &WindowManager::onWindowFrame;
         return true;
     }
@@ -554,7 +554,7 @@ bool WindowManager::onWindowContent(const Pt::Hmi::MouseEvent& mev)
     if( _sizingDirection != ResizeDirection::None )
     {            
         setSizingCursor(_sizingDirection);
-        _app.mainScreen().setPointerWindow( 0);
+        _app.screen().setPointerWindow( 0);
         _state = &WindowManager::onWindowFrame;
         return true;
     }                                
@@ -577,7 +577,7 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
         return false;
     }
     
-    _app.mainScreen().setCursor( &Cursor::moveCursor() );        
+    _app.screen().setCursor( &Cursor::moveCursor() );        
 
     const double dX = mev.x() - _lastPointerPosition.x();
     const double dY = mev.y() - _lastPointerPosition.y();
@@ -711,6 +711,32 @@ bool WindowManager::onWindowResize(const MouseEvent& mev)
     }
 
     return true;
+}
+
+
+void WindowManager::onResize(Window& w, const Gfx::SizeF& to)
+{   
+    Gfx::SizeF from = w.size();
+
+    ResizeEvent rev(w.vid(), to);
+    Application::instance().loop().commitEvent(rev);
+
+    if( ! w.isVisible() )
+        return;
+    
+    const double borderWidth = Application::instance().windowBorderWidth();
+    const double titleHeight = Application::instance().windowTitleHeight();
+    
+    const Gfx::PointF updatePos(-borderWidth, -(borderWidth + titleHeight) );
+
+    Gfx::SizeF updateSize( std::max( to.width(), from.width() ),
+                           std::max( to.height(), from.height() ));
+
+    updateSize.addHeight(2 * borderWidth + titleHeight);
+    updateSize.addWidth(2 * borderWidth);
+
+    Gfx::RectF updateRect( updatePos, updateSize );
+    w.update(updateRect);
 }
 
 } // namespace

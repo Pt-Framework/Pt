@@ -128,9 +128,9 @@ long CALLBACK ApplicationImpl::wndProc(HWND hwnd, unsigned int message, unsigned
 {
 	Pt::Hmi::Application& app =  *((Pt::Hmi::Application*)&Pt::Hmi::Application::instance());
 
-    for( size_t i = 0; i <  app.mainScreen().windows().size(); ++i )
+    for( size_t i = 0; i <  app.screen().windows().size(); ++i )
     {
-        Window* w = app.mainScreen().windows()[i];
+        Window* w = app.screen().windows()[i];
      
         MainWindowImpl* impl = static_cast<MainWindowImpl*>( w->impl() );
 

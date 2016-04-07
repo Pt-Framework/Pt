@@ -28,6 +28,9 @@
 */
 
 #include "ScreenImpl.h"
+#include "WindowImpl.h"
+#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Application.h>
 
 namespace Pt {
 
@@ -58,8 +61,26 @@ ScreenImpl::~ScreenImpl()
 }
 
 
-void ScreenImpl::update(const Gfx::RectF&)
+void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
 {
+    w.impl()->resize(s);
+}
+
+
+void ScreenImpl::onUpdate(Pt::uint64_t windowId, const Gfx::RectF& updateRect)
+{
+    std::vector<Window*>& windows = Application::instance().screen().windows();
+
+    std::vector<Window*>::iterator it;
+    for(it = windows.begin(); it != windows.end(); ++it)
+    {
+        Window* w = *it;
+        if(w->vid() == windowId)
+        {
+            w->paint(updateRect);
+            break;
+        }
+    }
 }
 
 

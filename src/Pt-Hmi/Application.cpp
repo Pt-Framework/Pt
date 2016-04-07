@@ -101,59 +101,13 @@ void Application::sendEvent(Visual& w, const Pt::Event& ev)
 }
 
 
-void Application::onUpdate(Window& w, const Gfx::RectF& rect)
-{        
-    double borderWidth = Application::instance().windowBorderWidth();
-    double titleHeight = Application::instance().windowTitleHeight();
-
-    Gfx::PointF updatePos = rect.topLeft() + w.position();
-    updatePos.addX( borderWidth );
-    updatePos.addY( borderWidth + titleHeight );
-
-    Gfx::RectF updateRect(updatePos, rect.size());
-
-    UpdateMap::iterator it = _updates.find( w.vid() );
-    if( it == _updates.end() )
-    {
-        UpdateInfo uinfo(updateRect);
-        _updates.insert( std::make_pair(_mainScreen->vid(), uinfo) );
-    }
-    else
-    {
-        it->second.push(updateRect);
-    }
-
-    UpdateEvent uev(_mainScreen->vid(), updateRect);
-    loop().commitEvent(uev);
-}
-
-
 void Application::onUpdateEvent(const UpdateEvent& ev)
 {
     VisualMap::iterator vit = _visuals.find( ev.vid() );
     if( vit == _visuals.end() )
         return;
 
-    Gfx::RectF updateRect = ev.rect();
-
-    // skip all update events except the last one
-    UpdateMap::iterator it = _updates.find( ev.vid() );
-    if( it != _updates.end() )
-    {
-        if( it->second.pop() != 0)
-            return;
-
-        updateRect = it->second.rect();
-        _updates.erase( ev.vid() );
-    }
-
     vit->second->processEvent(ev);
-}
-
-
-void Application::onResize(Window& w, const Gfx::SizeF& s)
-{
-    w.impl()->resize(s);
 }
 
 
@@ -211,18 +165,6 @@ void Application::onActivateEvent( const ActivateEvent& ev )
     it->second->processEvent(ev);
 }
 
-/*
-Widget* Application::findWidget(const std::string& name)
-{
-	return _mainScreen->findWidget( name);
-}
-
-
-Window* Application::findWindow(const std::string& name)
-{
-    return _mainScreen->findWindow(name);
-}
-*/
 } // namespace
 
 } // namespace

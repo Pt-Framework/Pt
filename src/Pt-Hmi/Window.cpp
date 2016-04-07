@@ -92,7 +92,7 @@ Window::Window( Window* parent )
 Window::~Window()
 {
     if( ! _parent)
-        Application::instance().mainScreen().unregisterWindow(*this);
+        Application::instance().screen().unregisterWindow(*this);
 
     setMainWidget(0);
 
@@ -217,7 +217,7 @@ void Window::update(const Gfx::RectF& rect)
     else
     {
         // TODO: make screen the parent window
-        Application::instance().onUpdate(*this, rect);
+        Application::instance().screen().onUpdate(*this, rect);
     }
 }
 
@@ -308,7 +308,7 @@ WindowImpl* Window::impl()
 
 void Window::runModal()
 {
-    const std::vector<Window*>& windows = Application::instance().mainScreen().windows();
+    const std::vector<Window*>& windows = Application::instance().screen().windows();
     Window* activeWindow = 0;
     std::map<Window*, bool> states;
 
@@ -367,7 +367,7 @@ void Window::onPointerEvent(const MouseEvent& ev)
         ! _mainWidget->isVisible() || 
         ! _mainWidget->isEnabled() )
     {
-        Application::instance().mainScreen().setCursor( &Cursor::defaultCursor() ); 
+        Application::instance().screen().setCursor( &Cursor::defaultCursor() ); 
         return;
     }
 
@@ -583,7 +583,7 @@ void Window::add(Window& child)
         return;
 
     if( ! child._parent )
-        Application::instance().mainScreen().unregisterWindow(child);
+        Application::instance().screen().unregisterWindow(child);
 
     if( child._parent )
         child._parent->_windowManager.remove(child);
@@ -628,11 +628,11 @@ void Window::createImpl()
     else
     {
         _impl = new MainWindowImpl(this);
-        Application::instance().mainScreen().registerWindow(*this);
+        Application::instance().screen().registerWindow(*this);
     }
 
-    _impl->move(position());
-    _impl->resize(_requestedSize);
+    move(position());
+    resize(_requestedSize);
 //    _impl->setDecoration( _decoration );
     _impl->setTitle( _title );
     _impl->setBorder( _border );
@@ -838,41 +838,13 @@ void Window::resize(const Gfx::SizeF& s)
     if(parent)
         parent->onResize(*this, s);
     else
-        Application::instance().onResize(*this, s);
-
-    //if(_impl)
-    //    _impl->resize(s);
-    ////else
-    ////{
-    ////    ResizeEvent rev(this->vid(), s);
-    ////    Application::instance().loop().commitEvent(rev);
-    ////}
+        Application::instance().screen().onResize(*this, s);
 }
 
 
 void Window::onResize(Window& w, const Gfx::SizeF& to)
 {   
-    Gfx::SizeF from = w.size();
-
-    ResizeEvent rev(w.vid(), to);
-    Application::instance().loop().commitEvent(rev);
-
-    if( ! w.isVisible() )
-        return;
-    
-    const double borderWidth = Application::instance().windowBorderWidth();
-    const double titleHeight = Application::instance().windowTitleHeight();
-    
-    const Gfx::PointF updatePos(-borderWidth, -(borderWidth + titleHeight) );
-
-    Gfx::SizeF updateSize( std::max( to.width(), from.width() ),
-                           std::max( to.height(), from.height() ));
-
-    updateSize.addHeight(2 * borderWidth + titleHeight);
-    updateSize.addWidth(2 * borderWidth);
-
-    Gfx::RectF updateRect( updatePos, updateSize );
-    w.update(updateRect);
+    _windowManager.onResize(w, to);
 }
 
 

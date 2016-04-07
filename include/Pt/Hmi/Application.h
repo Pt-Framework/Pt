@@ -44,7 +44,6 @@ namespace Hmi {
 class ApplicationImpl;
 class Window;
 class Widget;
-class EraseEvent;
 
 class PT_HMI_API Application : public Pt::System::Application
 {
@@ -59,19 +58,15 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void sendEvent(Visual& w, const Pt::Event& ev);
 
-        const Screen& mainScreen() const
+        const Screen& screen() const
         {
             return *_mainScreen;
         }
 
-        Screen& mainScreen()
+        Screen& screen()
         {
             return *_mainScreen;
         }
-        
-        //Widget* findWidget( const std::string& name );
-
-        //Window* findWindow(const std::string& name);
         
         ApplicationImpl* impl()
         {
@@ -97,10 +92,6 @@ class PT_HMI_API Application : public Pt::System::Application
         void registerVisual(Visual& visual);
 
         void unregisterVisual(Visual& visual);
-
-        void onUpdate(Window& w, const Gfx::RectF& rect);
-
-        void onResize(Window& w, const Gfx::SizeF& s);
         
     protected:        
         void onResizeEvent( const ResizeEvent& ev );
@@ -118,48 +109,12 @@ class PT_HMI_API Application : public Pt::System::Application
     private:
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;
 
-        class UpdateInfo
-        {
-            public:
-                explicit UpdateInfo(const Gfx::RectF& rect)
-                : _n(1)
-                , _rect(rect)
-                { }
-
-                const Gfx::RectF& rect() const
-                {
-                    return _rect;
-                }
-
-                void push(const Gfx::RectF& rect)
-                {
-                    if(_n == 0)
-                        _rect = rect;
-                    else
-                        _rect.unify(rect);
-
-                    ++_n;
-                }
-
-                int pop()
-                {
-                    return --_n;
-                }
-
-            private:
-                int _n;
-                Gfx::RectF _rect;
-        };
-
-        typedef std::multimap<Pt::uint64_t, UpdateInfo> UpdateMap;
-
         ApplicationImpl* _impl; 
         Screen* _mainScreen;  
         double _windowBorderWidth;
         double _windowTitleHeight;
         Pt::uint64_t _lastVid;
         VisualMap _visuals;
-        UpdateMap _updates;
 };
 
 } // namespace
