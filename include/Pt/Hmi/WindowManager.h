@@ -85,7 +85,9 @@ class WindowManager : public Pt::Connectable
 
         double titleHeight() const;
 
-      void onResize(Window& w, const Gfx::SizeF& to);
+        void onResize(Window& w, const Gfx::SizeF& to);
+
+        void onMove(Window& w, const Gfx::PointF& to);
 
     private:
         bool onBackground(const Pt::Hmi::MouseEvent& pev);

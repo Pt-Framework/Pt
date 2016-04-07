@@ -61,26 +61,21 @@ ScreenImpl::~ScreenImpl()
 }
 
 
+void ScreenImpl::onUpdate(Window& w, const Gfx::RectF& updateRect)
+{
+    w.paint(updateRect);
+}
+
+
 void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
 {
     w.impl()->resize(s);
 }
 
 
-void ScreenImpl::onUpdate(Pt::uint64_t windowId, const Gfx::RectF& updateRect)
+void ScreenImpl::onMove(Window& w, const Gfx::PointF& p)
 {
-    std::vector<Window*>& windows = Application::instance().screen().windows();
-
-    std::vector<Window*>::iterator it;
-    for(it = windows.begin(); it != windows.end(); ++it)
-    {
-        Window* w = *it;
-        if(w->vid() == windowId)
-        {
-            w->paint(updateRect);
-            break;
-        }
-    }
+    w.impl()->move(p);
 }
 
 

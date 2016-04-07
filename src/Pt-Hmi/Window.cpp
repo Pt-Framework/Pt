@@ -66,6 +66,7 @@ Window::Window( Window* parent )
 , _mainWidget(0)
 , _size(50, 50)
 , _requestedSize(50, 50)
+, _requestedPosition(0, 0)
 {    
 
     _windowManager.init(*this);
@@ -631,7 +632,7 @@ void Window::createImpl()
         Application::instance().screen().registerWindow(*this);
     }
 
-    move(position());
+    move(_requestedPosition);
     resize(_requestedSize);
 //    _impl->setDecoration( _decoration );
     _impl->setTitle( _title );
@@ -785,41 +786,24 @@ void Window::onEnableEvent( const EnableEvent& ev )
 
 void Window::move(const Gfx::PointF& p)
 {
+    // cache requested position in case the impl has not been created
+    // or the window type changes before the move request executed
+    _requestedPosition = p;
+
     if( _impl )
         _impl->move(p);
-    else
-        _position = p;
 }
 
 
 void Window::onMove(Window& w, const Gfx::PointF& to)
 {   
-    Gfx::PointF from = w.position();
-
-    MoveEvent mev(w.vid(), to);
-    Application::instance().loop().commitEvent(mev);
-
-    if( ! w.parent() )
-        return;
-    
-    const double borderWidth = Application::instance().windowBorderWidth();
-    const double titleHeight = Application::instance().windowTitleHeight();
-        
-    Gfx::SizeF size = w.size();    
-    size.addWidth( 2 * borderWidth );
-    size.addHeight( 2 * borderWidth + titleHeight );
-
-    Gfx::RectF movedRect(to, size);
-
-    Gfx::RectF updateRect(from, size);  
-    updateRect.unify(movedRect);
-    
-    w.parent()->update(updateRect);
+    _windowManager.onMove(w, to);
 }
 
 
 void Window::onMoveEvent(const MoveEvent& ev)
 {
+    _requestedPosition = ev.position();
     _position = ev.position();
 }
 
@@ -830,15 +814,8 @@ void Window::resize(const Gfx::SizeF& s)
     // or the window type changes before the resize request executed
     _requestedSize = s;
 
-    // resize is delayed until impl is created
-    if( ! _impl )
-        return;
-
-    Window* parent = this->parent();
-    if(parent)
-        parent->onResize(*this, s);
-    else
-        Application::instance().screen().onResize(*this, s);
+    if(_impl)
+        _impl->resize(s);
 }
 
 

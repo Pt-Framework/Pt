@@ -588,8 +588,7 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
                     _managedWindowPosition.y() + dY) ;     
 
     _managedWindowPosition = to;
-
-    _managedWindow->move(to);
+    onMove(*_managedWindow, to);
     
     return true;
 }
@@ -701,13 +700,13 @@ bool WindowManager::onWindowResize(const MouseEvent& mev)
     if( _managedWindowPosition != pos )
     {
         _managedWindowPosition = pos;
-        _managedWindow->move(pos);
+        onMove(*_managedWindow, pos);
     }
 
     if( _managedWindowSize != size )
     {
         _managedWindowSize = size;
-        _managedWindow->resize(size);
+        onResize(*_managedWindow, size);
     }
 
     return true;
@@ -737,6 +736,32 @@ void WindowManager::onResize(Window& w, const Gfx::SizeF& to)
 
     Gfx::RectF updateRect( updatePos, updateSize );
     w.update(updateRect);
+}
+
+
+void WindowManager::onMove(Window& w, const Gfx::PointF& to)
+{   
+    Gfx::PointF from = w.position();
+
+    MoveEvent mev(w.vid(), to);
+    Application::instance().loop().commitEvent(mev);
+
+    if( ! w.parent() )
+        return;
+    
+    const double borderWidth = Application::instance().windowBorderWidth();
+    const double titleHeight = Application::instance().windowTitleHeight();
+        
+    Gfx::SizeF size = w.size();    
+    size.addWidth( 2 * borderWidth );
+    size.addHeight( 2 * borderWidth + titleHeight );
+
+    Gfx::RectF movedRect(to, size);
+
+    Gfx::RectF updateRect(from, size);  
+    updateRect.unify(movedRect);
+    
+    w.parent()->update(updateRect);
 }
 
 } // namespace

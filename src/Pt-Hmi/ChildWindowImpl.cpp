@@ -73,7 +73,12 @@ void ChildWindowImpl::show(bool visible)
 
 
 void ChildWindowImpl::resize(const Gfx::SizeF& size)
-{    
+{
+    Window* parent = _apiWindow->parent();
+    if(parent)
+        parent->onResize(*_apiWindow, size);
+    else // TODO: make screen a parent window
+        Application::instance().screen().onResize(*_apiWindow, size);
 }
 
 
@@ -83,6 +88,8 @@ void ChildWindowImpl::move(const Gfx::PointF& to)
 
     if(parent)
         parent->onMove(*_apiWindow, to);
+    else // TODO: make screen a parent window
+        Application::instance().screen().onMove(*_apiWindow, to);
 }
 
 

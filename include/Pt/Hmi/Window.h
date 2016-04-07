@@ -296,6 +296,7 @@ class PT_HMI_API Window : public Visual
     PixmapSurface                  _surface;
     WindowImpl*                    _impl;        
     Gfx::PointF                    _position;
+    Gfx::PointF                    _requestedPosition;
     Gfx::SizeF                     _size;
     Gfx::SizeF                     _requestedSize;
 };

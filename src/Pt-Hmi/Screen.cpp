@@ -67,12 +67,6 @@ void Screen::onUpdate(Window& w, const Gfx::RectF& updateRect)
 }
 
 
-void Screen::onResize(Window& w, const Gfx::SizeF& s)
-{
-    _impl->onResize(w, s);
-}
-
-
 void Screen::onEvent(const Event& ev)
 {
     if(ev.typeInfo() == typeid(UpdateEvent) )
@@ -94,10 +88,30 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
         return;
 
     Gfx::RectF rect = u->second.rect();
-    Pt::uint64_t window = u->first;
+    Pt::uint64_t windowId = u->first;
     _updates.erase( ev.vid() );
 
-    _impl->onUpdate(window, rect);
+    std::vector<Window*>::iterator it;
+    for(it = _windows.begin(); it != _windows.end(); ++it)
+    {
+        if( (*it)->vid() == windowId )
+        {
+            _impl->onUpdate(**it, rect);
+            break;
+        }
+    }
+}
+
+
+void Screen::onResize(Window& w, const Gfx::SizeF& s)
+{
+    _impl->onResize(w, s);
+}
+
+
+void Screen::onMove(Window& w, const Gfx::PointF& p)
+{
+    _impl->onMove(w, p);
 }
 
 

@@ -108,6 +108,8 @@ class PT_HMI_API Screen : public Visual
 
         void onResize(Window& w, const Gfx::SizeF& s);
 
+        void onMove(Window& w, const Gfx::PointF& p);
+
     protected:
         virtual void onEvent( const Event& ev );
         
