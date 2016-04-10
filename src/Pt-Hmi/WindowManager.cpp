@@ -404,6 +404,8 @@ MouseEvent WindowManager::toWindow(Window* w, const MouseEvent& mev)
 {
     Pt::Hmi::MouseEvent childEvent = mev;
 
+    childEvent.setId( w->vid() );
+
     double childX = mev.x() - w->position().x() - _borderWidth;
     double childY = mev.y() - w->position().y() - _titleHeight - _borderWidth;
 
@@ -831,10 +833,28 @@ void WindowManager::onEnable(Window& w, bool enable)
 
     EnableEvent eev( w.vid(), enable );
     Application::instance().loop().commitEvent( eev );
-   
-    w.update( Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
+     
+    _container->update( updateRect);
 }
 
+
+void WindowManager::onClose(Window& w)
+{
+    Gfx::PointF framePos = w.position() - w.position();
+    framePos.subX(_borderWidth);
+    framePos.subY(_borderWidth +  _titleHeight);
+
+    Gfx::SizeF frameSize = w.size();
+    frameSize.addHeight(2 * _borderWidth + _titleHeight);
+    frameSize.addWidth(2 * _borderWidth);
+
+    Gfx::RectF updateRect(framePos, frameSize);
+
+    CloseEvent ev( w.vid());
+    Application::instance().loop().commitEvent( ev );
+
+    _container->update( updateRect);
+}
 
 } // namespace
 

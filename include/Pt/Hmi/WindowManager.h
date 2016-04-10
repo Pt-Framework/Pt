@@ -93,6 +93,8 @@ class WindowManager : public Pt::Connectable
 
         void onEnable(Window& w, bool enable);
 
+        void onClose(Window& w);
+
         double borderWidth() const
         {
             return _borderWidth;

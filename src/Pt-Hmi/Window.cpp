@@ -58,7 +58,6 @@ Window::Window( Window* parent )
 , _border( WindowBorder::Sizeable)
 , _icon()
 , _canClose(true)
-, _isClosed(false)
 , _visible(true)
 , _mainWidget(0)
 {    
@@ -158,20 +157,16 @@ Widget* Window::pointerWidget()
 
 bool Window::isClosed() const
 {
-  return _isClosed;       
+    return _windowData._isClosed;       
 }
 
 
 void Window::close()
 {
+    _windowDataRequested._isClosed = true;
+
     if( _impl )
         _impl->close();
-}
-
-
-bool Window::isActive() const
-{
-    return _windowData._isActive;
 }
 
 
@@ -199,7 +194,7 @@ void Window::update(const Gfx::RectF& rect)
     if( !_impl )
         return;
 
-    _impl->update(rect);     
+    _impl->update(rect);
 }
 
 
@@ -335,7 +330,7 @@ void Window::onPointerEvent(const MouseEvent& ev)
     Widget* widget = _mainWidget->findWidget( ev.position() );
 
     // widget can be null
-    setPointerWidget(widget); 
+    setPointerWidget(widget);
   
     if(widget) 
     {
@@ -349,7 +344,7 @@ void Window::onPointerEvent(const MouseEvent& ev)
 
 void Window::onTouchEvent( const TouchEvent& ev )
 {
- //TODO:
+    //TODO:
 }
 
 
@@ -363,7 +358,7 @@ void Window::onScrollEvent( const ScrollEvent& ev )
 }
 
 
-void Window::onEnterEvent( const EnterEvent& ev )
+void Window::onEnterEvent(const EnterEvent& ev)
 {
 }
 
@@ -376,8 +371,8 @@ void Window::onLeaveEvent(const LeaveEvent& ev )
 
 void Window::onKeyEvent(const KeyEvent& ev)
 {
-  //std::clog << "Window::onKeyEvent: " << (ev.isPress() ? "press " : "release ") 
-  //          << ev.key().keyCode() << " " << ev.unicode().narrow() << std::endl;
+    //std::clog << "Window::onKeyEvent: " << (ev.isPress() ? "press " : "release ") 
+    //          << ev.key().keyCode() << " " << ev.unicode().narrow() << std::endl;
 
     if( _windowManager.keyInput( ev ) )
         return;
@@ -419,7 +414,8 @@ void Window::onKeyEvent(const KeyEvent& ev)
 
 void Window::onCloseEvent(const CloseEvent& ev)
 {
-     _isClosed =  true;
+     _windowData._isClosed =  true;
+     _windowDataRequested._isClosed = true;
 }
 
 
@@ -537,7 +533,6 @@ void Window::setTitle( const std::string& t )
 }
 
 
-// TODO: are all windows updated correctly?
 void Window::add(Window& child)
 {
     if( child.parent() == this )
@@ -553,7 +548,7 @@ void Window::add(Window& child)
     update();
 }
 
-// TODO: are all windows updated correctly?
+
 void Window::remove(Window& child)
 {
     if(child.parent() != this)
@@ -600,11 +595,11 @@ void Window::initImpl()
 
     _impl->setTitle( _title );
     _impl->setBorder( _border );
-    _impl->setMaximumSize( _minimumSize);
-    _impl->setMaximumSize( _maximumSize );
+    _impl->setMaximumSize(_minimumSize);
+    _impl->setMaximumSize(_maximumSize );
     _impl->setIcon(_icon);
-    _impl->setState( _state );    
-    _impl->show(isVisible());    
+    _impl->setState(_state);    
+    _impl->show( isVisible() );    
 }
 
 
@@ -626,6 +621,12 @@ void Window::onShow( Window& w, bool visible )
 void Window::onShowEvent( const ShowEvent& ev )
 {
     _visible = ev.visible();
+}
+
+
+bool Window::isActive() const
+{
+    return _windowData._isActive;
 }
 
 
@@ -723,6 +724,12 @@ void Window::onResizeEvent(const ResizeEvent& s)
 
     if( _mainWidget )
         _mainWidget->resize(s.size());
+}
+
+
+void Window::onClose(Window& w )
+{
+    _windowManager.onClose(w);
 }
 
 

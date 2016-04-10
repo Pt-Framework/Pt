@@ -53,8 +53,9 @@ MainWindowImpl::MainWindowImpl(Window* w)
 , _app( Pt::Hmi::Application::instance() )
 , _screen( _app.screen() )
 , _hwnd(0)
-, _mouseEvent(0)
+, _mouseEvent(w->vid())
 , _hasPointer(false)
+, _keyEvent(w->vid())
 {    
     create();
 }
@@ -485,8 +486,8 @@ void MainWindowImpl::onShow( bool v )
 
 void MainWindowImpl::onClose()
 {
-    CloseEvent ev;
-    _apiWindow->processEvent(ev);
+    CloseEvent ev(_apiWindow->vid());
+    Application::instance().loop().commitEvent( ev );
 }
 
 
@@ -593,7 +594,6 @@ void MainWindowImpl::onMouse(unsigned int msg, WPARAM wparam, LPARAM lparam)
         _app.screen().setPointerWindow( _apiWindow );
     }
 
-    _mouseEvent.setId( _apiWindow->vid() );
     _app.loop().commitEvent(_mouseEvent);
 }
 

@@ -50,12 +50,14 @@ Application::Application(int argc, char** argv)
 
   loop().eventReceived() += Pt::slot(*this, &Application::onResizeEvent );
   loop().eventReceived() += Pt::slot(*this, &Application::onMoveEvent );
+  loop().eventReceived() += Pt::slot(*this, &Application::onKeyEvent );
   loop().eventReceived() += Pt::slot(*this, &Application::onUpdateEvent ); 
   loop().eventReceived() += Pt::slot(*this, &Application::onPaintEvent ); 
   loop().eventReceived() += Pt::slot(*this, &Application::onMouseEvent );
   loop().eventReceived() += Pt::slot(*this, &Application::onActivateEvent );
   loop().eventReceived() += Pt::slot(*this, &Application::onEnableEvent );
   loop().eventReceived() += Pt::slot(*this, &Application::onShowEvent );
+  loop().eventReceived() += Pt::slot(*this, &Application::onCloseEvent );
 }
 
 
@@ -166,7 +168,6 @@ void Application::onActivateEvent( const ActivateEvent& ev )
 }
 
 
-
 void Application::onEnableEvent( const EnableEvent& ev )
 {
     VisualMap::iterator it = _visuals.find( ev.vid() );
@@ -176,7 +177,6 @@ void Application::onEnableEvent( const EnableEvent& ev )
 
     it->second->processEvent(ev);
 }
-
 
 
 void Application::onShowEvent( const ShowEvent& ev )
@@ -189,6 +189,27 @@ void Application::onShowEvent( const ShowEvent& ev )
     it->second->processEvent(ev);
 }
 
+
+void Application::onKeyEvent( const KeyEvent& ev )
+{
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+
+    if( it == _visuals.end() )
+        return;
+
+    it->second->processEvent(ev);    
+}
+
+
+void Application::onCloseEvent(const CloseEvent& ev )
+{
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+
+    if( it == _visuals.end() )
+        return;
+
+    it->second->processEvent(ev);   
+}
 
 } // namespace
 

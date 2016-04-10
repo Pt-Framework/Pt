@@ -36,13 +36,22 @@ namespace Hmi{
 class PT_HMI_API CloseEvent : public Pt::BasicEvent<CloseEvent>
 {
 	public:	
-		CloseEvent()
+		CloseEvent( Pt::uint64_t vid)
+        : _vid(vid)
 		{
 		}
 
 		virtual ~CloseEvent()
 		{
 		}
+
+        Pt::uint64_t vid() const
+        {
+            return _vid;
+        }
+
+    private:
+        Pt::uint64_t _vid;
 
 };
 

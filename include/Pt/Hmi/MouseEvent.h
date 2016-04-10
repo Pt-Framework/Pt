@@ -149,6 +149,12 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
             _buttonState |= mask;
         }
 
+        bool isReleased(Pt::uint32_t button) const
+        {
+             Pt::uint32_t mask = 0x1 << button;
+             return (_buttonState & mask) != mask;
+        }
+
         bool isRelease(Pt::uint32_t button) const
         {
              Pt::uint32_t mask = 0x1 << button;

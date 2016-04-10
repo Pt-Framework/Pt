@@ -115,8 +115,8 @@ void ChildW::onShowDialog(Button& button)
     //Gfx::PointF pos(0,0);
     //_childWindow2.move(pos);
 
-    //Dialog1 d;
-    //d.runModal();
+    Dialog1 d;
+    d.runModal();
 }
 
 void ChildW::onCloseApp(Button& button)

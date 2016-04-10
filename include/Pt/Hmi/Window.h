@@ -77,6 +77,7 @@ class PT_HMI_API Window : public Visual
         , _enabled(true)
         , _position(0,0)
         , _size(10,10)
+        , _isClosed(false)
         {
 
         }
@@ -85,6 +86,7 @@ class PT_HMI_API Window : public Visual
         bool        _enabled;         
         Gfx::PointF _position;
         Gfx::SizeF  _size;
+        bool        _isClosed;
    };
 
   public:           
@@ -173,6 +175,8 @@ class PT_HMI_API Window : public Visual
     void onMove(Window& w, const Gfx::PointF& to);
 
     void onResize(Window& w, const Gfx::SizeF& to);
+
+    void onClose(Window& w );
 
   protected:
     virtual void onEvent(const Pt::Event& ev);
@@ -290,7 +294,6 @@ class PT_HMI_API Window : public Visual
   private:
     Pt::Signal<const Pt::Event&>   _eventReady;
     WindowManager                  _windowManager;
-    bool                           _isClosed;
     bool                           _visible; 
     Gfx::SizeF                     _minimumSize;
     Gfx::SizeF                     _maximumSize;

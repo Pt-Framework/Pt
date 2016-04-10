@@ -53,16 +53,12 @@ Widget::Widget()
 , _mnemonic(0)
 {      
     _eventReady += Pt::slot(*this, &Widget::onKeyEvent );
-    _eventReady += Pt::slot(*this, &Widget::onPointerEvent );
-    _eventReady += Pt::slot(*this, &Widget::onTouchEvent );
     _eventReady += Pt::slot(*this, &Widget::onScrollEvent );
     _eventReady += Pt::slot(*this, &Widget::onMoveEvent );
     _eventReady += Pt::slot(*this, &Widget::onResizeEvent );
     _eventReady += Pt::slot(*this, &Widget::onPaintEvent );
-    _eventReady += Pt::slot(*this, &Widget::onKeyEvent);
     _eventReady += Pt::slot(*this, &Widget::onPointerEvent);
     _eventReady += Pt::slot(*this, &Widget::onTouchEvent);
-    _eventReady += Pt::slot(*this, &Widget::onScrollEvent);
 }
 
 

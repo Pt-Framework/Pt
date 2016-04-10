@@ -48,10 +48,17 @@ class PT_HMI_API KeyEvent : public Pt::BasicEvent<KeyEvent>
 	      };
 
     public:	
-	      KeyEvent()
-        : _action(Release)
+	      KeyEvent(Pt::uint64_t vid)
+          : _vid(vid)
+          ,  _action(Release)
 	      {
 	      }
+
+       //   KeyEvent()
+       //   : _vid(0)
+       //   ,  _action(Release)
+	      //{
+       //   }
 
         const Key& key() const
         {
@@ -87,7 +94,17 @@ class PT_HMI_API KeyEvent : public Pt::BasicEvent<KeyEvent>
             _unicode = ch;
         }
 
+        void setId(Pt::uint64_t vid)
+        {
+            _vid = vid;
+        }
+
+        Pt::uint64_t vid() const
+        {
+            return _vid;
+        }
     private:
+        Pt::uint64_t _vid;
         Action   _action;
         Key      _key;
         Pt::Char _unicode;        

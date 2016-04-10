@@ -48,11 +48,13 @@ ChildWindowImpl::ChildWindowImpl(Window& api, Window& parent)
 ChildWindowImpl::~ChildWindowImpl()
 {
     _parent->_windowManager.remove(*_apiWindow);
+    _parent->update();
 }
 
 
 void ChildWindowImpl::close()
 {
+    _parent->onClose(*_apiWindow);    
 }
 
 
@@ -124,6 +126,7 @@ void ChildWindowImpl::setDecoration( WindowDecoration::Flags d )
 
 void ChildWindowImpl::setTitle( const std::string& t )
 {
+    //_parent->onTitle(*_apiWindow, e);
 }
 
 

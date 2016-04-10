@@ -99,7 +99,10 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void onShowEvent( const ShowEvent& ev );
 
-                
+        void onKeyEvent( const KeyEvent& ev );
+
+        void onCloseEvent(const CloseEvent& ev );
+
     private:
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;
 
