@@ -81,13 +81,19 @@ class WindowManager : public Pt::Connectable
 
         void render(PaintSurface& surface, const Gfx::RectF& updateRect);
 
-        double borderWidth() const;
-
-        double titleHeight() const;
-
         void onResize(Window& w, const Gfx::SizeF& to);
 
         void onMove(Window& w, const Gfx::PointF& to);
+
+        double borderWidth() const
+        {
+            return _borderWidth;
+        }
+
+        double titleHeight()  const
+        {
+            return _titleHeight;
+        }
 
     private:
         bool onBackground(const Pt::Hmi::MouseEvent& pev);
@@ -124,6 +130,8 @@ class WindowManager : public Pt::Connectable
     private:
         Application&              _app;
         std::vector<Window*>      _children;
+        double _borderWidth;
+        double _titleHeight;
 
         typedef bool (WindowManager::*State)(const Pt::Hmi::MouseEvent&);
         State                     _state;

@@ -55,6 +55,8 @@ WindowManager::WindowManager(Window* parent)
 , _textColor(0.0, 0.0, 0.0)
 , _actionButton(0)
 , _container(parent)
+, _borderWidth(4)
+, _titleHeight(20)
 {    
 }
 
@@ -67,18 +69,6 @@ WindowManager::~WindowManager()
 void WindowManager::init(Window& parent)
 {
     _container = &parent;
-}
-
-
-double WindowManager::borderWidth() const
-{
-    return Application::instance().windowBorderWidth();
-}
-
-
-double WindowManager::titleHeight() const
-{
-    return Application::instance().windowTitleHeight();
 }
 
 
@@ -195,14 +185,11 @@ void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
 
 Gfx::PointF WindowManager::renderFrame(const Window& w, PaintSurface& surface)
 {    
-    const double borderWidth = Application::instance().windowBorderWidth();
-    const double titleHeight = Application::instance().windowTitleHeight();
-
     Gfx::SizeF clientSize =  w.size();   
     
     Gfx::SizeF winSize = w.size();
-    winSize.addWidth(borderWidth * 2);
-    winSize.addHeight(borderWidth * 2 + titleHeight);
+    winSize.addWidth(_borderWidth * 2);
+    winSize.addHeight(_borderWidth * 2 + _titleHeight);
 
     Gfx::Color color = w.isActive() ? _activeColor 
                                     : _inactiveColor;  
@@ -226,40 +213,40 @@ Gfx::PointF WindowManager::renderFrame(const Window& w, PaintSurface& surface)
             painter.setPen(pen);
                     
             Gfx::RectF leftBorder( pos.x(), 
-                                    pos.x() + _app.windowBorderWidth(),
-                                    pos.y() + _app.windowBorderWidth(), 
-                                    pos.y() + winSize.height() - _app.windowBorderWidth() - 1 );
+                                    pos.x() + _borderWidth,
+                                    pos.y() + _borderWidth, 
+                                    pos.y() + winSize.height() - _borderWidth - 1 );
             painter.fillRect(leftBorder);
 
             Gfx::RectF topBorder(pos.x(),
                                     pos.x() + winSize.width() - 1,
                                     pos.y(),
-                                    pos.y() + _app.windowBorderWidth());
+                                    pos.y() + _borderWidth);
             painter.fillRect(topBorder);
 
-            Gfx::RectF rightBorder(pos.x() + winSize.width() - _app.windowBorderWidth(),
+            Gfx::RectF rightBorder(pos.x() + winSize.width() - _borderWidth,
                                     pos.x() + winSize.width() - 1,
-                                    pos.y() + _app.windowBorderWidth(),
-                                    pos.y() + winSize.height() - _app.windowBorderWidth() - 1 );
+                                    pos.y() + _borderWidth,
+                                    pos.y() + winSize.height() - _borderWidth - 1 );
             painter.fillRect(rightBorder);
 
             Gfx::RectF bottomBorder(pos.x(),
                                     pos.x() + winSize.width() - 1,
-                                    pos.y() + winSize.height() - _app.windowBorderWidth(),
+                                    pos.y() + winSize.height() - _borderWidth,
                                     pos.y() + winSize.height() - 1);
             painter.fillRect(bottomBorder);
 
-            Gfx::RectF titleArea( pos.x() + _app.windowBorderWidth(),
-                                    pos.x() + winSize.width() - _app.windowBorderWidth() - 1,
-                                    pos.y() + _app.windowBorderWidth(),
-                                    pos.y() + _app.windowBorderWidth() + _app.windowTitleHeight() - 1);
+            Gfx::RectF titleArea( pos.x() + _borderWidth,
+                                    pos.x() + winSize.width() - _borderWidth - 1,
+                                    pos.y() + _borderWidth,
+                                    pos.y() + _borderWidth + _titleHeight - 1);
             painter.fillRect(titleArea);
 
             const Gfx::Font& font = w.font();
                     
             Gfx::FontMetrics fm = painter.fontMetrics(font, Pt::String("A") );
-            double textMargin = (_app.windowTitleHeight() - fm.height()) / 2;
-            Gfx::PointF textPos(pos.x() + _app.windowBorderWidth() + _app.windowTitleHeight(), pos.y() + _app.windowTitleHeight() - textMargin);
+            double textMargin = (_titleHeight - fm.height()) / 2;
+            Gfx::PointF textPos(pos.x() + _borderWidth + _titleHeight, pos.y() + _titleHeight - textMargin);
 
             painter.setFont(font);
             painter.drawText(textPos, Pt::String( w.title().c_str()) );
@@ -268,7 +255,7 @@ Gfx::PointF WindowManager::renderFrame(const Window& w, PaintSurface& surface)
         break;
     }
 
-  return Gfx::PointF( pos.x() + _app.windowBorderWidth(), pos.y() + _app.windowBorderWidth() + _app.windowTitleHeight()) ;     
+  return Gfx::PointF( pos.x() + _borderWidth, pos.y() + _borderWidth + _titleHeight) ;     
 }
 
 
@@ -293,8 +280,8 @@ Window* WindowManager::activeWindow( WindowManager& manager )
 
 bool WindowManager::contains(const Window& w, double x, double y)
 {  
-    Gfx::SizeF winSize(w.size().width() + _app.windowBorderWidth()*2, 
-                       w.size().height() + _app.windowBorderWidth()*2 + _app.windowTitleHeight());
+    Gfx::SizeF winSize(w.size().width() + _borderWidth*2, 
+                       w.size().height() + _borderWidth*2 + _titleHeight);
 
     if( x >= w.position().x() && x <  w.position().x() + winSize.width() &&
         y >= w.position().y() && y <  w.position().y() + winSize.height() )
@@ -327,10 +314,10 @@ bool WindowManager::isMoving(const Window& w, const Pt::Hmi::MouseEvent& ev)
 {            
     const Gfx::PointF& position = w.position();
      
-    if( (ev.x() < (position.x()  + _app.windowBorderWidth() + w.size().width() ) ) &&                  
-        (ev.x() >= (position.x() + _app.windowBorderWidth())) &&
-        (ev.y() < (position.y()  + _app.windowTitleHeight() + _app.windowBorderWidth()) ) && 
-        (ev.y() >= (position.y() + _app.windowBorderWidth()) ))
+    if( (ev.x() < (position.x()  + _borderWidth + w.size().width() ) ) &&                  
+        (ev.x() >= (position.x() + _borderWidth)) &&
+        (ev.y() < (position.y()  + _titleHeight + _borderWidth) ) && 
+        (ev.y() >= (position.y() + _borderWidth) ))
     {      
         return true;
     }
@@ -343,18 +330,18 @@ ResizeDirection::Type WindowManager::isSizing(const Window& w, const Pt::Hmi::Mo
 {    
     const Gfx::SizeF  wsize = w.size();
     const Gfx::PointF wpos  = w.position();
-    double titleHeight = _app.windowTitleHeight();
+    double titleHeight = _titleHeight;
 
     if( ev.x() < wpos.x() ||
-        ev.x() > wpos.x() + 2*_app.windowBorderWidth() + wsize.width() ||
+        ev.x() > wpos.x() + 2*_borderWidth + wsize.width() ||
         ev.y() < wpos.y() ||
-        ev.y() >= wpos.y() + 2*_app.windowBorderWidth() + titleHeight + wsize.height() )
+        ev.y() >= wpos.y() + 2*_borderWidth + titleHeight + wsize.height() )
         return ResizeDirection::None;
 
-    bool left = ev.x() < (wpos.x() + _app.windowBorderWidth());
-    bool right = ev.x() >= wpos.x() + _app.windowBorderWidth() + wsize.width();
-    bool top = ev.y() < wpos.y() + _app.windowBorderWidth();
-    bool bottom = ev.y() >= wpos.y() + _app.windowBorderWidth() + titleHeight + wsize.height();
+    bool left = ev.x() < (wpos.x() + _borderWidth);
+    bool right = ev.x() >= wpos.x() + _borderWidth + wsize.width();
+    bool top = ev.y() < wpos.y() + _borderWidth;
+    bool bottom = ev.y() >= wpos.y() + _borderWidth + titleHeight + wsize.height();
 
     if(top && left)
         return ResizeDirection::NorthWest;
@@ -417,8 +404,8 @@ MouseEvent WindowManager::toWindow(Window* w, const MouseEvent& mev)
 {
     Pt::Hmi::MouseEvent childEvent = mev;
 
-    double childX = mev.x() - w->position().x() - _app.windowBorderWidth();
-    double childY = mev.y() - w->position().y() - _app.windowTitleHeight() - _app.windowBorderWidth();
+    double childX = mev.x() - w->position().x() - _borderWidth;
+    double childY = mev.y() - w->position().y() - _titleHeight - _borderWidth;
 
     childEvent.setX(childX);
     childEvent.setY(childY);
@@ -722,17 +709,14 @@ void WindowManager::onResize(Window& w, const Gfx::SizeF& to)
 
     if( ! w.isVisible() )
         return;
-    
-    const double borderWidth = Application::instance().windowBorderWidth();
-    const double titleHeight = Application::instance().windowTitleHeight();
-    
-    const Gfx::PointF updatePos(-borderWidth, -(borderWidth + titleHeight) );
+
+    const Gfx::PointF updatePos(-_borderWidth, -(_borderWidth + _titleHeight) );
 
     Gfx::SizeF updateSize( std::max( to.width(), from.width() ),
                            std::max( to.height(), from.height() ));
 
-    updateSize.addHeight(2 * borderWidth + titleHeight);
-    updateSize.addWidth(2 * borderWidth);
+    updateSize.addHeight(2 * _borderWidth + _titleHeight);
+    updateSize.addWidth(2 * _borderWidth);
 
     Gfx::RectF updateRect( updatePos, updateSize );
     w.update(updateRect);
@@ -748,13 +732,10 @@ void WindowManager::onMove(Window& w, const Gfx::PointF& to)
 
     if( ! w.parent() )
         return;
-    
-    const double borderWidth = Application::instance().windowBorderWidth();
-    const double titleHeight = Application::instance().windowTitleHeight();
-        
+            
     Gfx::SizeF size = w.size();    
-    size.addWidth( 2 * borderWidth );
-    size.addHeight( 2 * borderWidth + titleHeight );
+    size.addWidth( 2 * _borderWidth );
+    size.addHeight( 2 * _borderWidth + _titleHeight );
 
     Gfx::RectF movedRect(to, size);
 

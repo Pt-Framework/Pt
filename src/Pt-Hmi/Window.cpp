@@ -225,8 +225,8 @@ void Window::update(const Gfx::RectF& rect)
 
 void Window::onUpdate(Window& child, const Gfx::RectF& rect)
 {
-    double borderWidth = Application::instance().windowBorderWidth();
-    double titleHeight = Application::instance().windowTitleHeight();
+    double borderWidth = _windowManager.borderWidth();
+    double titleHeight = _windowManager.titleHeight();
 
     Gfx::PointF updatePos = rect.topLeft() + child.position();
     updatePos.addX( borderWidth );
@@ -239,8 +239,8 @@ void Window::onUpdate(Window& child, const Gfx::RectF& rect)
 
 void Window::paint(const Gfx::RectF& rect)
 {
-    const double borderWidth = Application::instance().windowBorderWidth();
-    const double titleHeight = Application::instance().windowTitleHeight();
+    const double borderWidth = _windowManager.borderWidth();
+    const double titleHeight = _windowManager.titleHeight();
 
     if( ! this->isVisible() )
         return;
@@ -658,8 +658,8 @@ void Window::show(bool b)
 
 void Window::onShow( Window& w, bool visible )
 {
-    const double borderWidth = Application::instance().windowBorderWidth();
-    const double titleHeight = Application::instance().windowTitleHeight();
+    const double borderWidth = _windowManager.borderWidth();
+    const double titleHeight = _windowManager.titleHeight();
 
     Gfx::PointF framePos = w.position() - w.position();
     framePos.subX(borderWidth);
@@ -698,8 +698,8 @@ void Window::activate()
 
 void Window::onActivate(Window& w)
 {
-    const double borderWidth = Application::instance().windowBorderWidth();
-    const double titleHeight = Application::instance().windowTitleHeight();
+    const double borderWidth = _windowManager.borderWidth();
+    const double titleHeight = _windowManager.titleHeight();
 
     Gfx::PointF framePos(0, 0);
     framePos.subX( borderWidth );
@@ -758,8 +758,8 @@ void Window::enable(bool e)
 
 void Window::onEnable( Window& w, bool enable )
 {
-    const double borderWidth = Application::instance().windowBorderWidth();
-    const double titleHeight = Application::instance().windowTitleHeight();
+    const double borderWidth = _windowManager.borderWidth();
+    const double titleHeight = _windowManager.titleHeight();
 
     Gfx::PointF framePos = w.position() - w.position();
     framePos.subX(borderWidth);

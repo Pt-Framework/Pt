@@ -72,17 +72,6 @@ class PT_HMI_API Application : public Pt::System::Application
         {
             return _impl;
         }
-
-        //TODO: Style
-        double windowBorderWidth() const
-        {
-            return _windowBorderWidth;
-        }
-
-        double windowTitleHeight()  const
-        {
-            return _windowTitleHeight;
-        }
         
         Pt::uint64_t makeVid()
         {
@@ -111,8 +100,6 @@ class PT_HMI_API Application : public Pt::System::Application
 
         ApplicationImpl* _impl; 
         Screen* _mainScreen;  
-        double _windowBorderWidth;
-        double _windowTitleHeight;
         Pt::uint64_t _lastVid;
         VisualMap _visuals;
 };
