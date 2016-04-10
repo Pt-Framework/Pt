@@ -90,8 +90,6 @@ void MainWindowImpl::destroy()
 
 void MainWindowImpl::show( bool v)
 {    
-    _apiWindow->onShowEvent( ShowEvent(_apiWindow->vid(), v ) );
-
    if( v )
        ShowWindow(_hwnd, SW_SHOW);
    else
@@ -393,6 +391,12 @@ bool MainWindowImpl::processEvent(unsigned int message, WPARAM wparam, LPARAM lp
             break;
         }
 
+        case WM_SHOWWINDOW:
+        {
+            onShow( wparam != 0 );
+            handled = true;
+        }
+        break;
 
         case WM_PAINT:
         {
@@ -424,26 +428,25 @@ bool MainWindowImpl::processEvent(unsigned int message, WPARAM wparam, LPARAM lp
         case WM_CLOSE:
         {
             onClose();
+            handled = true;
         }
         break;
 
         case WM_ACTIVATE:
         {
             onActivate( wparam != 0 );
+            handled = true;
         }
         break;
                 
         case WM_ENABLE:
-              onEnable(true);
-        break;
-
-        case WS_DISABLED:
-            onEnable(false);
+              onEnable(wparam != 0 );
         break;
 
         case WM_KILLFOCUS:
         {
             onActivate( false );
+            handled = true;
         }
         break;        
 
@@ -464,11 +467,19 @@ bool MainWindowImpl::processEvent(unsigned int message, WPARAM wparam, LPARAM lp
             _mouseEvent.clear();
             _app.screen().setCursor(0);
             _app.screen().setPointerWindow(0);
-        break;
-        
+        break;        
     }
 
     return handled;
+}
+
+
+void MainWindowImpl::onShow( bool v )
+{
+    ShowEvent sev( _apiWindow->vid(), v );
+    Application::instance().loop().commitEvent( sev );
+
+    _apiWindow->update();
 }
 
 
@@ -481,13 +492,19 @@ void MainWindowImpl::onClose()
 
 void MainWindowImpl::onActivate(bool a)
 {
-    _apiWindow->processEvent( ActivateEvent(_apiWindow->vid(), a) );
+    ActivateEvent aev( _apiWindow->vid(), a );
+    Application::instance().loop().commitEvent(aev);
+
+    _apiWindow->update();
 }
 
 
 void MainWindowImpl::onEnable(bool e)
 {
-    _apiWindow->processEvent( EnableEvent(_apiWindow->vid(), e) );
+    EnableEvent eev( _apiWindow->vid(), e );
+    Application::instance().loop().commitEvent( eev );
+
+    _apiWindow->update();
 }
 
 

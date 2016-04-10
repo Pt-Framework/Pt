@@ -67,6 +67,7 @@ class PT_HMI_API Window : public Visual
    friend class WindowImpl;
    friend class ChildWindowImpl;
    friend class MainWindowImpl;
+   friend class WindowManager;
 
   public:           
     explicit Window(Window* parent = 0);     
@@ -113,12 +114,6 @@ class PT_HMI_API Window : public Visual
 
     PixmapSurface& surface();
 
-    // TODO: remove this only needed by WindowManager::activeWindow
-    WindowManager& windowManager();
-
-    // TODO: remove this only needed by WindowManager::activeWindow
-    const WindowManager& windowManager() const;
-
     WindowImpl* impl();
 
     void runModal();
@@ -145,7 +140,8 @@ class PT_HMI_API Window : public Visual
     const Gfx::PointF& position() const
     {
         return _position;
-    }
+    }    
+
 
   protected:
     void onUpdate(Window& w, const Gfx::RectF& rect);

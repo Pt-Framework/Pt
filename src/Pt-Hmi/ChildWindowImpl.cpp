@@ -58,52 +58,37 @@ void ChildWindowImpl::close()
 
 void ChildWindowImpl::update(const Gfx::RectF& rect)
 {
-    Window* parentWindow = _apiWindow->parent();
-     parentWindow->onUpdate(*_apiWindow, rect);    
+    _parent->onUpdate(*_apiWindow, rect);    
 }
+
 
 void ChildWindowImpl::activate()
 {
-    Window* parent = _apiWindow->parent();
-
-    if(parent)
-        parent->onActivate(*_apiWindow);
+    _parent->onActivate(*_apiWindow);
 }
 
 
 void ChildWindowImpl::show(bool visible)
 {
-    Window* parent = _apiWindow->parent();
-
-    if(parent)
-        parent->onShow(*_apiWindow, visible);
+    _parent->onShow(*_apiWindow, visible);
 }
 
 
 void ChildWindowImpl::resize(const Gfx::SizeF& size)
 {
-    Window* parent = _apiWindow->parent();
-
-    if(parent)
-        parent->onResize(*_apiWindow, size);
+    _parent->onResize(*_apiWindow, size);
 }
 
 
 void ChildWindowImpl::move(const Gfx::PointF& to)
 {
-    Window* parent = _apiWindow->parent();
-
-    if(parent)
-        parent->onMove(*_apiWindow, to);
+    _parent->onMove(*_apiWindow, to);
 }
 
 
 void ChildWindowImpl::enable(bool e)
 {
-    Window* parent = _apiWindow->parent();
-
-    if(parent)
-        parent->onEnable(*_apiWindow, e);
+    _parent->onEnable(*_apiWindow, e);
 }
 
 

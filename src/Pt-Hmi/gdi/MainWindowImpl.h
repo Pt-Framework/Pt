@@ -103,6 +103,7 @@ class MainWindowImpl : public WindowImpl
         void onClose();
         void onActivate(bool f);
         void onEnable(bool e);
+        void onShow( bool s );
 
     private:
         void setShowTitle(bool p);

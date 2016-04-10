@@ -108,6 +108,7 @@ void ChildW::onShowDialog(Button& button)
     _closeButton.setText("AAA");
     _closeButton.setText("BBB");
     _closeButton.setText("CCC");
+    parent()->show(false);
 
     //Gfx::SizeF size(400,260);
     //_childWindow2.resize(Gfx::SizeF(400,260));

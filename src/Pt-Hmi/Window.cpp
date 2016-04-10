@@ -67,7 +67,6 @@ Window::Window( Window* parent )
 , _requestedSize(50, 50)
 , _requestedPosition(0, 0)
 {    
-
     _windowManager.init(*this);
 
     _eventReady += Pt::slot(*this, &Window::onKeyEvent );
@@ -85,15 +84,11 @@ Window::Window( Window* parent )
 
     if(parent)
         parent->add(*this);
-
 }
 
 
 Window::~Window()
 {
-    if( !parent() )
-        Application::instance().screen().unregisterWindow(*this);
-
     setMainWidget(0);
 
     const std::vector<Window*>& children = _windowManager.windows();
@@ -101,9 +96,6 @@ Window::~Window()
     while( ! children.empty() )
         remove( *children.back() );
  
-    if( parent() )
-        parent()->remove(*this);
-
     delete _impl;
 }
 
@@ -151,15 +143,15 @@ void Window::setMainWidget(Widget* widget)
 
     _mainWidget = widget;
 
-    if(_mainWidget)
-    {
-        if( _mainWidget->parent() )
-            _mainWidget->parent()->remove(*_mainWidget);
+    if(!_mainWidget)
+        return;
+    
+    if( _mainWidget->parent() )
+        _mainWidget->parent()->remove(*_mainWidget);
 
-       _mainWidget->setWindow(this);
-       _mainWidget->move(Gfx::PointF(0,0) );
-       _mainWidget->resize( size());
-    }
+    _mainWidget->setWindow(this);
+    _mainWidget->move(Gfx::PointF(0,0) );
+    _mainWidget->resize( size());
 }
 
 
@@ -218,15 +210,7 @@ void Window::update(const Gfx::RectF& rect)
 
 void Window::onUpdate(Window& child, const Gfx::RectF& rect)
 {
-    double borderWidth = _windowManager.borderWidth();
-    double titleHeight = _windowManager.titleHeight();
-
-    Gfx::PointF updatePos = rect.topLeft() + child.position();
-    updatePos.addX( borderWidth );
-    updatePos.addY( borderWidth + titleHeight );
-
-    Gfx::RectF updateRect(updatePos, rect.size());
-    this->update(updateRect);
+    _windowManager.onUpdate(child, rect);    
 }
 
 
@@ -282,18 +266,6 @@ PixmapSurface& Window::surface()
 }
 
 
-WindowManager& Window::windowManager()
-{
-    return _windowManager;
-}
-
-
-const WindowManager& Window::windowManager() const 
-{
-    return _windowManager;
-}
-
-
 WindowImpl* Window::impl()
 {
     return _impl;   
@@ -311,14 +283,14 @@ void Window::runModal()
     {
         Window* w = (*it);
 
-        if(w != this)
-        {
-            if( w->isActive() )
-                activeWindow = w;
+        if(w == this)
+            continue;
+        
+        if( w->isActive() )
+            activeWindow = w;
 
-            states[w] = w->isEnabled();
-            w->enable(false);
-        }
+        states[w] = w->isEnabled();
+        w->enable(false);
     }
 
     enable(true);
@@ -382,7 +354,7 @@ void Window::onPointerEvent(const MouseEvent& ev)
 
 void Window::onTouchEvent( const TouchEvent& ev )
 {
-
+ //TODO:
 }
 
 
@@ -634,8 +606,7 @@ void Window::initImpl()
     _impl->setIcon(_icon);
     _impl->enable( isEnabled() );
     _impl->setState( _state );
-    _impl->show(isVisible());
-    
+    _impl->show(isVisible());    
 }
 
 
@@ -650,23 +621,7 @@ void Window::show(bool b)
 
 void Window::onShow( Window& w, bool visible )
 {
-    const double borderWidth = _windowManager.borderWidth();
-    const double titleHeight = _windowManager.titleHeight();
-
-    Gfx::PointF framePos = w.position() - w.position();
-    framePos.subX(borderWidth);
-    framePos.subY(borderWidth +  titleHeight);
-
-    Gfx::SizeF frameSize = w.size();
-    frameSize.addHeight(2 * borderWidth + titleHeight);
-    frameSize.addWidth(2 * borderWidth);
-
-    Gfx::RectF updateRect(framePos, frameSize);
-    
-    ShowEvent sev( w.vid(), visible );
-    Application::instance().loop().commitEvent( sev );
-      
-    w.parent()->update(updateRect);
+    _windowManager.onShow( w, visible);
 }
 
 
@@ -683,53 +638,12 @@ void Window::activate()
 
     if( _impl ) 
         _impl->activate();
-    else
-        _isActive = true;
 }
 
 
 void Window::onActivate(Window& w)
 {
-    const double borderWidth = _windowManager.borderWidth();
-    const double titleHeight = _windowManager.titleHeight();
-
-    Gfx::PointF framePos(0, 0);
-    framePos.subX( borderWidth );
-    framePos.subY( borderWidth +  titleHeight );
-
-    Gfx::SizeF frameSize = w.size();
-    frameSize.addHeight(2 * borderWidth + titleHeight);
-    frameSize.addWidth(2 * borderWidth);
-
-    Gfx::RectF updateRect(framePos, frameSize);
-
-    ActivateEvent acev( w.vid(), true );
-    Application::instance().loop().commitEvent(acev);
-
-    Window* child = &w;
-
-    for(Window* parent = w.parent(); parent; parent = child->parent())
-    {
-        std::vector<Window*>::const_iterator it;
-        for( it = parent->windows().begin(); it != parent->windows().end(); ++it)
-        {
-            if( (*it)->isActive() && *it != child )
-            {
-                ActivateEvent aev( (*it)->vid(), false );
-                Application::instance().loop().commitEvent(aev);
-
-                (*it)->update();
-            }
-        }
-
-        ActivateEvent aev( parent->vid(), true );
-        Application::instance().loop().commitEvent(aev);
-        parent->update();
-
-        child = parent;
-    }
-
-    w.update();
+    _windowManager.onActivate(w);
 }
 
 
@@ -743,30 +657,12 @@ void Window::enable(bool e)
 {
     if( _impl )
         _impl->enable(e);
-    else
-        _enabled = e;
 }
 
 
 void Window::onEnable( Window& w, bool enable )
 {
-    const double borderWidth = _windowManager.borderWidth();
-    const double titleHeight = _windowManager.titleHeight();
-
-    Gfx::PointF framePos = w.position() - w.position();
-    framePos.subX(borderWidth);
-    framePos.subY(borderWidth +  titleHeight);
-
-    Gfx::SizeF frameSize = w.size();
-    frameSize.addHeight(2 * borderWidth + titleHeight);
-    frameSize.addWidth(2 * borderWidth);
-
-    Gfx::RectF updateRect(framePos, frameSize);
-
-    EnableEvent eev( w.vid(), enable );
-    Application::instance().loop().commitEvent( eev );
-   
-    w.update( Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
+    _windowManager.onEnable( w, enable );
 }
 
 

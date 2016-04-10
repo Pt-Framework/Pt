@@ -260,7 +260,7 @@ Gfx::PointF WindowManager::renderFrame(const Window& w, PaintSurface& surface)
 
 
 Window* WindowManager::activeWindow( WindowManager& manager )
-{     
+{ 
   for( size_t i = 0; i < manager.windows().size(); ++i )
   {
     Window* child = manager.windows()[i];
@@ -268,7 +268,7 @@ Window* WindowManager::activeWindow( WindowManager& manager )
     if( child->isActive() )
         return child;
 
-    Window* focused = activeWindow( child->windowManager() );
+    Window* focused = activeWindow( child->_windowManager );
 
     if( focused != 0 )
       return focused;
@@ -744,6 +744,97 @@ void WindowManager::onMove(Window& w, const Gfx::PointF& to)
     
     w.parent()->update(updateRect);
 }
+
+
+void WindowManager::onUpdate(Window& child, const Gfx::RectF& rect)
+{
+    Gfx::PointF updatePos = rect.topLeft() + child.position();
+    updatePos.addX( _borderWidth );
+    updatePos.addY( _borderWidth + _titleHeight );
+
+    const Gfx::RectF updateRect(updatePos, rect.size());
+    _container->update(updateRect);
+}
+
+void WindowManager::onShow( Window& w, bool visible )
+{
+    Gfx::PointF framePos = w.position() - w.position();
+    framePos.subX(_borderWidth);
+    framePos.subY(_borderWidth +  _titleHeight);
+
+    Gfx::SizeF frameSize = w.size();
+    frameSize.addHeight(2 * _borderWidth + _titleHeight);
+    frameSize.addWidth(2 * _borderWidth);
+
+    Gfx::RectF updateRect(framePos, frameSize);
+    
+    ShowEvent sev( w.vid(), visible );
+    Application::instance().loop().commitEvent( sev );
+      
+    w.parent()->update(updateRect);
+}
+
+
+void WindowManager::onActivate(Window& w)
+{
+    Gfx::PointF framePos(0, 0);
+    framePos.subX( _borderWidth );
+    framePos.subY( _borderWidth +  _titleHeight );
+
+    Gfx::SizeF frameSize = w.size();
+    frameSize.addHeight(2 * _borderWidth + _titleHeight);
+    frameSize.addWidth(2 * _borderWidth);
+
+    Gfx::RectF updateRect(framePos, frameSize);
+
+    ActivateEvent acev( w.vid(), true );
+    Application::instance().loop().commitEvent(acev);
+
+    Window* child = &w;
+
+    for(Window* parent = w.parent(); parent; parent = child->parent())
+    {
+        std::vector<Window*>::const_iterator it;
+        for( it = parent->windows().begin(); it != parent->windows().end(); ++it)
+        {
+            if( (*it)->isActive() && *it != child )
+            {
+                ActivateEvent aev( (*it)->vid(), false );
+                Application::instance().loop().commitEvent(aev);
+
+                (*it)->update();
+            }
+        }
+
+        ActivateEvent aev( parent->vid(), true );
+        Application::instance().loop().commitEvent(aev);
+        parent->update();
+
+        child = parent;
+    }
+
+    w.update();
+}
+
+
+void WindowManager::onEnable(Window& w, bool enable)
+{
+    Gfx::PointF framePos = w.position() - w.position();
+    framePos.subX(_borderWidth);
+    framePos.subY(_borderWidth +  _titleHeight);
+
+    Gfx::SizeF frameSize = w.size();
+    frameSize.addHeight(2 * _borderWidth + _titleHeight);
+    frameSize.addWidth(2 * _borderWidth);
+
+    Gfx::RectF updateRect(framePos, frameSize);
+
+    EnableEvent eev( w.vid(), enable );
+    Application::instance().loop().commitEvent( eev );
+   
+    w.update( Gfx::RectF( Gfx::PointF(0,0), w.size() ) );
+}
+
 
 } // namespace
 

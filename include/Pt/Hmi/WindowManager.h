@@ -85,6 +85,14 @@ class WindowManager : public Pt::Connectable
 
         void onMove(Window& w, const Gfx::PointF& to);
 
+        void onUpdate(Window& child, const Gfx::RectF& rect);
+
+        void onShow( Window& w, bool visible );
+
+        void onActivate(Window& w);
+
+        void onEnable(Window& w, bool enable);
+
         double borderWidth() const
         {
             return _borderWidth;
