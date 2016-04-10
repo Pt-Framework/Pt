@@ -246,7 +246,11 @@ class PT_HMI_API Window : public Visual
     void setName(const std::string& n);
 
   private:
-    void createImpl();
+    void createChildImpl(Window& parent);
+
+    void createMainImpl();
+
+    void initImpl();
 
     void addWidget(Widget& w);
 
@@ -289,7 +293,6 @@ class PT_HMI_API Window : public Visual
     std::map<Key, Widget*>         _shortcuts; 
     std::map<Pt::Char, Widget*>    _mnemonics;     
     Widget*                        _mainWidget;
-    Window*                        _parent;
     Widget*                        _pointerWidget;
     Widget*                        _focusWidget;
     std::vector<Widget*>           _focusList;

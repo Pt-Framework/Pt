@@ -38,14 +38,16 @@ namespace Pt {
 
 namespace Hmi {
 
-ChildWindowImpl::ChildWindowImpl(Window* api)
-: WindowImpl(api)
+ChildWindowImpl::ChildWindowImpl(Window& api, Window& parent)
+: WindowImpl(&api)
+, _parent(&parent)
 {
 }
 
 
 ChildWindowImpl::~ChildWindowImpl()
 {
+    _parent->_windowManager.remove(*_apiWindow);
 }
 
 

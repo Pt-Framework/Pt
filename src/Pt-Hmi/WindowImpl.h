@@ -81,6 +81,10 @@ class WindowImpl : public Pt::Connectable
 
         virtual void update(const Gfx::RectF& rect) = 0;
 
+        virtual Window* parent() = 0;
+
+        virtual const Window* parent() const = 0;
+
     protected:
         Window*  _apiWindow;
 

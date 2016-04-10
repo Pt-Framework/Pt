@@ -39,7 +39,7 @@ namespace Hmi {
 class PT_HMI_API ChildWindowImpl  : public WindowImpl
 {
     public:
-        ChildWindowImpl(Window* api);    
+        ChildWindowImpl(Window& api, Window& parent);    
 
         virtual ~ChildWindowImpl();    
 
@@ -72,6 +72,18 @@ class PT_HMI_API ChildWindowImpl  : public WindowImpl
         virtual void paint(const Gfx::RectF& rect);
 
         virtual void update(const Gfx::RectF& rect);
+        
+        Window* parent()
+        {
+            return _parent;
+        }
+
+        const Window* parent() const
+        {
+            return _parent;
+        }
+private:
+        Window* _parent;
 };
 
 }

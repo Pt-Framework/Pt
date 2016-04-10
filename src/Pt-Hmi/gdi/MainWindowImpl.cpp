@@ -62,6 +62,7 @@ MainWindowImpl::MainWindowImpl(Window* w)
 
 MainWindowImpl::~MainWindowImpl()
 {
+    Application::instance().screen().unregisterWindow(*_apiWindow);
     destroy();
 }
 

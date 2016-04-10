@@ -49,7 +49,6 @@ namespace Hmi {
 
 Window::Window( Window* parent )
 : _impl(0)
-, _parent(0)
 , _pointerWidget(0)
 , _focusWidget(0)
 , _minimumSize(0,0)
@@ -92,7 +91,7 @@ Window::Window( Window* parent )
 
 Window::~Window()
 {
-    if( ! _parent)
+    if( !parent() )
         Application::instance().screen().unregisterWindow(*this);
 
     setMainWidget(0);
@@ -102,8 +101,8 @@ Window::~Window()
     while( ! children.empty() )
         remove( *children.back() );
  
-    if(_parent)
-        _parent->remove(*this);
+    if( parent() )
+        parent()->remove(*this);
 
     delete _impl;
 }
@@ -111,13 +110,13 @@ Window::~Window()
 
 Window* Window::parent()
 {
-   return _parent;
+   return _impl ? _impl->parent() : 0 ;
 }
 
 
 const Window* Window::parent() const
 {
-    return _parent;
+    return _impl ? _impl->parent() : 0 ;
 }
 
 
@@ -574,20 +573,13 @@ void Window::setTitle( const std::string& t )
 // TODO: are all windows updated correctly?
 void Window::add(Window& child)
 {
-    if( child._parent == this )
+    if( child.parent() == this )
         return;
 
-    if( ! child._parent )
-        Application::instance().screen().unregisterWindow(child);
-
-    if( child._parent )
-        child._parent->_windowManager.remove(child);
-    
     delete child._impl;
     child._impl = 0;
 
-    child._parent = this;    
-    child.createImpl();
+    child.createChildImpl(*this);
 
     _windowManager.add(child);
 
@@ -597,7 +589,7 @@ void Window::add(Window& child)
 // TODO: are all windows updated correctly?
 void Window::remove(Window& child)
 {
-    if(child._parent != this)
+    if(child.parent() != this)
         return;
     
     _windowManager.remove(child);
@@ -605,27 +597,33 @@ void Window::remove(Window& child)
     delete child.impl();             
     child._impl = 0;
 
-    child._parent = 0;
-    child.createImpl();
+    child.createMainImpl();
 
     update();
 }
 
-
-void Window::createImpl()
+void Window::createChildImpl(Window& parent)
 {
     assert( ! _impl);
 
-    if( _parent )
-    {
-        _impl = new ChildWindowImpl(this);
-    }
-    else
-    {
-        _impl = new MainWindowImpl(this);
-        Application::instance().screen().registerWindow(*this);
-    }
+    _impl = new ChildWindowImpl(*this, parent);
 
+    initImpl();
+}
+
+
+void Window::createMainImpl()
+{
+    assert( ! _impl);
+
+    _impl = new MainWindowImpl(this);
+    Application::instance().screen().registerWindow(*this);
+
+    initImpl();
+}
+
+void Window::initImpl()
+{
     move(_requestedPosition);
     resize(_requestedSize);
 //    _impl->setDecoration( _decoration );
@@ -644,7 +642,7 @@ void Window::createImpl()
 void Window::show(bool b)
 {
     if( ! _impl )
-        createImpl(); // also calls setVisible
+        createMainImpl(); // also calls setVisible
     else  
         _impl->show(b);
 }

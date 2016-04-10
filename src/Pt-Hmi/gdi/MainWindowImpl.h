@@ -77,6 +77,16 @@ class MainWindowImpl : public WindowImpl
 
         virtual void update(const Gfx::RectF& rect);
 
+        virtual Window* parent()
+        {
+            return 0;
+        }
+
+        virtual const Window* parent() const
+        {
+            return 0;
+        }
+
         HWND hwnd()
         {
           return _hwnd;
