@@ -94,6 +94,11 @@ class PT_HMI_API Application : public Pt::System::Application
         void onMoveEvent( const MoveEvent& ev );
 
         void onActivateEvent( const ActivateEvent& ev );
+
+        void onEnableEvent( const EnableEvent& ev );
+
+        void onShowEvent( const ShowEvent& ev );
+
                 
     private:
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;

@@ -69,6 +69,24 @@ class PT_HMI_API Window : public Visual
    friend class MainWindowImpl;
    friend class WindowManager;
 
+  private:
+   struct WindowData
+   {
+        WindowData()
+        : _isActive(false)
+        , _enabled(true)
+        , _position(0,0)
+        , _size(10,10)
+        {
+
+        }
+
+        bool        _isActive;
+        bool        _enabled;         
+        Gfx::PointF _position;
+        Gfx::SizeF  _size;
+   };
+
   public:           
     explicit Window(Window* parent = 0);     
 
@@ -134,12 +152,12 @@ class PT_HMI_API Window : public Visual
 
     const Gfx::SizeF& size() const
     {
-        return _size;
+        return _windowData._size;
     }
 
     const Gfx::PointF& position() const
     {
-        return _position;
+        return _windowData._position;
     }    
 
 
@@ -189,7 +207,7 @@ class PT_HMI_API Window : public Visual
   public:
     bool isEnabled() const
     {
-        return _enabled;
+        return _windowData._enabled;
     }
 
     bool isVisible() const
@@ -273,9 +291,7 @@ class PT_HMI_API Window : public Visual
     Pt::Signal<const Pt::Event&>   _eventReady;
     WindowManager                  _windowManager;
     bool                           _isClosed;
-    bool                           _isActive;
-    bool                           _enabled;
-    bool                           _visible;
+    bool                           _visible; 
     Gfx::SizeF                     _minimumSize;
     Gfx::SizeF                     _maximumSize;
     Hmi::WindowPosition::Type      _startPostion;
@@ -293,11 +309,10 @@ class PT_HMI_API Window : public Visual
     Widget*                        _focusWidget;
     std::vector<Widget*>           _focusList;
     PixmapSurface                  _surface;
+    WindowData                     _windowData;             
+    WindowData                     _windowDataRequested;
     WindowImpl*                    _impl;        
-    Gfx::PointF                    _position;
-    Gfx::PointF                    _requestedPosition;
-    Gfx::SizeF                     _size;
-    Gfx::SizeF                     _requestedSize;
+
 };
 
 } // namespace

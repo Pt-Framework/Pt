@@ -54,6 +54,8 @@ Application::Application(int argc, char** argv)
   loop().eventReceived() += Pt::slot(*this, &Application::onPaintEvent ); 
   loop().eventReceived() += Pt::slot(*this, &Application::onMouseEvent );
   loop().eventReceived() += Pt::slot(*this, &Application::onActivateEvent );
+  loop().eventReceived() += Pt::slot(*this, &Application::onEnableEvent );
+  loop().eventReceived() += Pt::slot(*this, &Application::onShowEvent );
 }
 
 
@@ -162,6 +164,31 @@ void Application::onActivateEvent( const ActivateEvent& ev )
 
     it->second->processEvent(ev);
 }
+
+
+
+void Application::onEnableEvent( const EnableEvent& ev )
+{
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+
+    if( it == _visuals.end() )
+        return;
+
+    it->second->processEvent(ev);
+}
+
+
+
+void Application::onShowEvent( const ShowEvent& ev )
+{
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+
+    if( it == _visuals.end() )
+        return;
+
+    it->second->processEvent(ev);
+}
+
 
 } // namespace
 
