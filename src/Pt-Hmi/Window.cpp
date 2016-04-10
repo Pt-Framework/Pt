@@ -210,16 +210,10 @@ void Window::update()
 
 void Window::update(const Gfx::RectF& rect)
 {
-    Window* parentWindow = this->parent();
-    if( parentWindow )
-    {
-        parentWindow->onUpdate(*this, rect);
-    }
-    else
-    {
-        // TODO: make screen the parent window
-        Application::instance().screen().onUpdate(*this, rect);
-    }
+    if( !_impl )
+        return;
+
+    _impl->update(rect);     
 }
 
 

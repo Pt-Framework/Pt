@@ -79,6 +79,8 @@ class WindowImpl : public Pt::Connectable
 
         virtual void paint(const Gfx::RectF& rect) = 0;
 
+        virtual void update(const Gfx::RectF& rect) = 0;
+
     protected:
         Window*  _apiWindow;
 

@@ -98,6 +98,10 @@ void MainWindowImpl::show( bool v)
     
 }
 
+void MainWindowImpl::update(const Gfx::RectF& rect)
+{
+   Application::instance().screen().onUpdate(*_apiWindow, rect);
+}
 
 void MainWindowImpl::activate()
 {

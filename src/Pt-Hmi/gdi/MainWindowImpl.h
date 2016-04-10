@@ -75,6 +75,7 @@ class MainWindowImpl : public WindowImpl
         
         virtual void paint(const Gfx::RectF& rect);
 
+        virtual void update(const Gfx::RectF& rect);
 
         HWND hwnd()
         {
