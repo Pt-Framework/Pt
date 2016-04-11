@@ -168,6 +168,10 @@ class PT_HMI_API Window : public Visual
 
     void onResize(Window& w, const Gfx::SizeF& to);
 
+    void onPaint(const Gfx::RectF& rect);
+
+    void onPaint(Window& w, const Gfx::RectF& rect);
+
     void onClose(Window& w );
 
   protected:

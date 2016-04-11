@@ -115,6 +115,12 @@ void Screen::onMove(Window& w, const Gfx::PointF& p)
 }
 
 
+void Screen::onPaint(Window& w, const Gfx::RectF& rect)
+{
+    _impl->onPaint(w, rect);
+}
+
+
 double Screen::width() const
 {
     return _impl->width();

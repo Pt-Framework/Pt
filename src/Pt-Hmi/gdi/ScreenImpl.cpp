@@ -29,6 +29,7 @@
 
 #include "ScreenImpl.h"
 #include "WindowImpl.h"
+#include "ApplicationImpl.h"
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Application.h>
 
@@ -74,6 +75,13 @@ void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
 
 void ScreenImpl::onMove(Window& w, const Gfx::PointF& p)
 {
+}
+
+
+void ScreenImpl::onPaint(Window& w, const Gfx::RectF& rect)
+{
+    Application::instance().impl()->processEvents();
+    w.impl()->paint(rect);
 }
 
 

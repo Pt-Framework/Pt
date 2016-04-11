@@ -47,11 +47,20 @@ MainWindowImpl::MainWindowImpl(Window* w)
 }
 
 
-
 MainWindowImpl::~MainWindowImpl()
 {
     Application::instance().screen().unregisterWindow(*_apiWindow);
     close();
+}
+
+
+void MainWindowImpl::close()
+{
+    if( _hwnd == 0)
+        return;
+
+    DestroyWindow(_hwnd);
+    _hwnd = 0;
 }
 
 
@@ -60,14 +69,7 @@ void MainWindowImpl::show( bool v)
    if( v )
        ShowWindow(_hwnd, SW_SHOW);
    else
-       ShowWindow(_hwnd, SW_HIDE);
-    
-}
-
-
-void MainWindowImpl::update(const Gfx::RectF& rect)
-{
-   Application::instance().screen().onUpdate(*_apiWindow, rect);
+       ShowWindow(_hwnd, SW_HIDE);   
 }
 
 
@@ -95,9 +97,6 @@ void MainWindowImpl::move(const Gfx::PointF& pos)
 
 void MainWindowImpl::resize(const Gfx::SizeF& s)
 {
-    if( _hwnd == 0)
-        return;
-
     Gfx::Size size = _screen.fromUnit(s);
 
     RECT clientRect;
@@ -115,6 +114,18 @@ void MainWindowImpl::resize(const Gfx::SizeF& s)
 }
 
 
+void MainWindowImpl::update(const Gfx::RectF& rect)
+{
+   Application::instance().screen().onUpdate(*_apiWindow, rect);
+}
+
+
+void MainWindowImpl::paint(const Gfx::RectF& rect)
+{
+    InvalidateRect(_hwnd, NULL, FALSE);
+}
+
+
 void MainWindowImpl::setDecoration( WindowDecoration::Flags deco )
 {
     setShowTitle( (deco & WindowDecoration::Flags::ShowTitleBar) != 0);
@@ -126,33 +137,33 @@ void MainWindowImpl::setDecoration( WindowDecoration::Flags deco )
 
 void MainWindowImpl::setShowTitle(bool p)
 {
-  LONG style = GetWindowLong(_hwnd, GWL_STYLE);
+    LONG style = GetWindowLong(_hwnd, GWL_STYLE);
     
     if( p)
         style |= WS_CAPTION;
-  else
-    style &= ~WS_CAPTION;
+    else
+        style &= ~WS_CAPTION;
 
-  SetWindowLong(_hwnd, GWL_STYLE, style); 
+    SetWindowLong(_hwnd, GWL_STYLE, style); 
 }
 
 
 void MainWindowImpl::setTitle(const std::string& text)
 {
-  SetWindowText(_hwnd, text.c_str());
+    SetWindowText(_hwnd, text.c_str());
 }
 
 
 void MainWindowImpl::setShowMinimizeButton(bool p)
 {
-  LONG style = GetWindowLong(_hwnd, GWL_STYLE);
+    LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 
     if(p)
         style |= WS_MINIMIZEBOX;
-  else
-    style &= ~WS_MINIMIZEBOX;
+    else
+        style &= ~WS_MINIMIZEBOX;
 
-  SetWindowLong(_hwnd, GWL_STYLE, style); 
+    SetWindowLong(_hwnd, GWL_STYLE, style); 
 }
 
 
@@ -293,22 +304,6 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 
     HICON hIcon = ::CreateIcon(hInstance, icon.width(), icon.height(), 4, 8, 0, (BYTE*)&bitmapBuffer[0]);
     SetClassLong(_hwnd, GCL_HICON, (LONG)hIcon);     
-}
-
-
-void MainWindowImpl::paint(const Gfx::RectF& rect)
-{
-    InvalidateRect(_hwnd, NULL, FALSE);
-}
-
-
-void MainWindowImpl::close()
-{
-    if( _hwnd == 0)
-        return;
-
-    DestroyWindow(_hwnd);
-    _hwnd = 0;
 }
 
 } // namespace

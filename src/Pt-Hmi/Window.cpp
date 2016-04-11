@@ -211,6 +211,20 @@ void Window::onUpdate(Window& child, const Gfx::RectF& rect)
 
 void Window::paint(const Gfx::RectF& rect)
 {
+    onPaint(rect);
+
+    if(parent())
+        parent()->onPaint(*this, rect);
+    else
+        Application::instance().screen().onPaint(*this, rect);
+}
+
+
+void Window::onPaint(const Gfx::RectF& rect)
+{
+    //
+    // TODO: move this to screen !!!
+    //
     const double borderWidth = _windowManager.borderWidth();
     const double titleHeight = _windowManager.titleHeight();
 
@@ -241,6 +255,17 @@ void Window::paint(const Gfx::RectF& rect)
 }
 
 
+void Window::onPaint(Window& w, const Gfx::RectF& rect)
+{
+    // TODO: repaint area affected by the rect of w
+
+    if( parent() )
+        parent()->onPaint(*this, rect);
+    else
+        Application::instance().screen().onPaint(*this, rect);
+}
+
+
 void Window::onPaintEvent(const PaintEvent& ev)
 {
     if( ! this->isVisible() )
@@ -249,9 +274,6 @@ void Window::onPaintEvent(const PaintEvent& ev)
     const Gfx::RectF& rect = ev.rect();   
 
     _windowManager.render(_surface, rect);
-
-    if(_impl)
-        _impl->paint(ev.rect());
 }
 
 

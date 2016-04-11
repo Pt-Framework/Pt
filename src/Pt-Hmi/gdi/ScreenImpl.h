@@ -97,6 +97,8 @@ class ScreenImpl
 
         void onResize(Window& w, const Gfx::SizeF& s);
 
+        void onPaint(Window& w, const Gfx::RectF& rect);
+
     private:
         Gfx::Size screeResolution();
         static HBITMAP createImage888(const Pt::uint8_t* data, size_t width, size_t height);
