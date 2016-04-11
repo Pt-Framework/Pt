@@ -73,20 +73,12 @@ class PT_HMI_API Window : public Visual
    struct WindowData
    {
         WindowData()
-        : _isActive(false)
-        , _enabled(true)
-        , _position(0,0)
-        , _size(10,10)
-        , _isClosed(false)
+
         {
 
         }
 
-        bool        _isActive;
-        bool        _enabled;         
-        Gfx::PointF _position;
-        Gfx::SizeF  _size;
-        bool        _isClosed;
+
    };
 
   public:           
@@ -154,12 +146,12 @@ class PT_HMI_API Window : public Visual
 
     const Gfx::SizeF& size() const
     {
-        return _windowData._size;
+        return _size;
     }
 
     const Gfx::PointF& position() const
     {
-        return _windowData._position;
+        return _position;
     }    
 
 
@@ -211,7 +203,7 @@ class PT_HMI_API Window : public Visual
   public:
     bool isEnabled() const
     {
-        return _windowData._enabled;
+        return _enabled;
     }
 
     bool isVisible() const
@@ -312,8 +304,11 @@ class PT_HMI_API Window : public Visual
     Widget*                        _focusWidget;
     std::vector<Widget*>           _focusList;
     PixmapSurface                  _surface;
-    WindowData                     _windowData;             
-    WindowData                     _windowDataRequested;
+    bool                           _isActive;
+    bool                           _enabled;         
+    Gfx::PointF                    _position;
+    Gfx::SizeF                     _size;
+    bool                           _isClosed;            
     WindowImpl*                    _impl;        
 
 };

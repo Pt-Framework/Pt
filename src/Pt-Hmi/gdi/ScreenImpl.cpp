@@ -50,13 +50,13 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
     _factorY = _height / _size.height();
 
     _offsetX = 0;
-    _offsetY = 0;    
+    _offsetY = 0;
 }
 
 
 ScreenImpl::~ScreenImpl()
-{    
-   if( _cursorHandle != 0 )            
+{
+   if( _cursorHandle != 0 )
        DestroyCursor( _cursorHandle );
 }
 
@@ -69,13 +69,11 @@ void ScreenImpl::onUpdate(Window& w, const Gfx::RectF& updateRect)
 
 void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
 {
-    w.impl()->resize(s);
 }
 
 
 void ScreenImpl::onMove(Window& w, const Gfx::PointF& p)
 {
-    w.impl()->move(p);
 }
 
 
@@ -87,13 +85,13 @@ double ScreenImpl::width() const
   return  desktop.right;
 }
 
-        
+
 double ScreenImpl::height() const
 {
     const HWND hDesktop = GetDesktopWindow();
-  RECT desktop;   
-  GetWindowRect(hDesktop, &desktop);
-  return  desktop.bottom;
+    RECT desktop;
+    GetWindowRect(hDesktop, &desktop);
+    return  desktop.bottom;
 }
 
 

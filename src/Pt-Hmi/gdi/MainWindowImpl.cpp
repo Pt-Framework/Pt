@@ -120,6 +120,8 @@ void MainWindowImpl::move(const Gfx::PointF& pos)
     Gfx::Point p = _screen.fromUnit(pos);
     SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, 
                  SWP_DRAWFRAME|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOZORDER);
+
+    Application::instance().screen().onMove(*_apiWindow, pos);
 }
 
 

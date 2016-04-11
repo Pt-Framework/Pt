@@ -78,7 +78,6 @@ void ChildWindowImpl::show(bool visible)
 
 void ChildWindowImpl::resize(const Gfx::SizeF& size)
 {
-    _parent->onResize(*_apiWindow, size);
 }
 
 

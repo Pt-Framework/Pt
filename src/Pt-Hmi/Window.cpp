@@ -60,6 +60,11 @@ Window::Window( Window* parent )
 , _canClose(true)
 , _visible(true)
 , _mainWidget(0)
+, _isActive(false)
+, _enabled(true)
+, _position(0,0)
+, _size(10,10)
+, _isClosed(false)
 {    
     _windowManager.init(*this);
 
@@ -157,16 +162,16 @@ Widget* Window::pointerWidget()
 
 bool Window::isClosed() const
 {
-    return _windowData._isClosed;       
+    return _isClosed;       
 }
 
 
 void Window::close()
 {
-    _windowDataRequested._isClosed = true;
-
     if( _impl )
         _impl->close();
+    else
+        _isClosed = true;
 }
 
 
@@ -414,8 +419,7 @@ void Window::onKeyEvent(const KeyEvent& ev)
 
 void Window::onCloseEvent(const CloseEvent& ev)
 {
-     _windowData._isClosed =  true;
-     _windowDataRequested._isClosed = true;
+     _isClosed =  true;
 }
 
 
@@ -586,12 +590,12 @@ void Window::createMainImpl()
 
 void Window::initImpl()
 {
-    _impl->move(_windowDataRequested._position);
-    _impl->resize(_windowDataRequested._size);
-    _impl->enable( _windowDataRequested._enabled );
+    move(_position);
+    resize(_size);
+    enable( _enabled );
 
-    if( _windowDataRequested._isActive )
-        _impl->activate();
+    if( _isActive )
+        activate();
 
     _impl->setTitle( _title );
     _impl->setBorder( _border );
@@ -599,7 +603,7 @@ void Window::initImpl()
     _impl->setMaximumSize(_maximumSize );
     _impl->setIcon(_icon);
     _impl->setState(_state);    
-    _impl->show( isVisible() );    
+    show( _visible );    
 }
 
 
@@ -626,19 +630,19 @@ void Window::onShowEvent( const ShowEvent& ev )
 
 bool Window::isActive() const
 {
-    return _windowData._isActive;
+    return _isActive;
 }
 
 
 void Window::activate()
 {
-    if(_windowData._isActive)
+    if(_isActive)
         return;
-
-    _windowDataRequested._isActive = true;
 
     if( _impl ) 
         _impl->activate();
+    else
+        _isActive = true;
 }
 
 
@@ -650,17 +654,16 @@ void Window::onActivate(Window& w)
 
 void Window::onActivateEvent(const ActivateEvent& ev)
 { 
-    _windowData._isActive = ev.isActive();
-    _windowDataRequested._isActive  = ev.isActive();
+    _isActive = ev.isActive();
 }
 
 
 void Window::enable(bool e)
 {
-    _windowDataRequested._enabled = e;
-
     if( _impl )
         _impl->enable(e);
+    else
+        _enabled = e;
 }
 
 
@@ -671,20 +674,17 @@ void Window::onEnable( Window& w, bool enable )
 
 
 void Window::onEnableEvent( const EnableEvent& ev )
-{
-    _windowDataRequested._enabled = ev.enabled();    
-    _windowData._enabled = ev.enabled();    
+{ 
+    _enabled = ev.enabled();    
 }
 
 
 void Window::move(const Gfx::PointF& p)
 {
-    // cache requested position in case the impl has not been created
-    // or the window type changes before the move request executed
-    _windowDataRequested._position = p;
-
     if( _impl )
         _impl->move(p);
+    else
+        _position = p;
 }
 
 
@@ -696,17 +696,23 @@ void Window::onMove(Window& w, const Gfx::PointF& to)
 
 void Window::onMoveEvent(const MoveEvent& ev)
 {    
-    _windowDataRequested._position = ev.position();
-    _windowData._position = ev.position();
+    _position = ev.position();
 }
 
 
 void Window::resize(const Gfx::SizeF& s)
 {
-    _windowDataRequested._size = s;
-
     if(_impl)
+    {
         _impl->resize(s);
+
+        if( ! parent() )
+            Application::instance().screen().onResize(*this, s);
+        else
+            parent()->onResize(*this, s);
+    }
+    else
+        _size = s;
 }
 
 
@@ -718,8 +724,7 @@ void Window::onResize(Window& w, const Gfx::SizeF& to)
 
 void Window::onResizeEvent(const ResizeEvent& s)
 {
-    _windowDataRequested._size = s.size();
-    _windowData._size = s.size();
+    _size = s.size();
     _surface.resize(s.size());
 
     if( _mainWidget )
