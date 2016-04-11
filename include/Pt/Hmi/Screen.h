@@ -49,6 +49,7 @@ class PT_HMI_API Screen : public Visual
 {
     friend class Window;
     friend class WindowManager;
+    friend class ApplicationImpl;
     friend class MainWindowImpl;
 
     public:
