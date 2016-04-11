@@ -100,8 +100,6 @@ class MainWindowImpl : public WindowImpl
         void setShowMinimizeButton(bool p);
         void setShowMaximizeButton(bool p);
         void setShowSystemMenu(bool p);
-        void create();
-        void destroy();
 
     private:    
         Pt::Hmi::Application& _app; 

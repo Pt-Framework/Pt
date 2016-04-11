@@ -41,36 +41,17 @@ MainWindowImpl::MainWindowImpl(Window* w)
 , _app( Pt::Hmi::Application::instance() )
 , _screen( _app.screen() )
 , _hwnd(0)
-{    
-    create();
+{
+  HINSTANCE hInstance = GetModuleHandle(NULL);
+  _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, GetDesktopWindow(), NULL, hInstance, NULL );
 }
+
 
 
 MainWindowImpl::~MainWindowImpl()
 {
     Application::instance().screen().unregisterWindow(*_apiWindow);
-    destroy();
-}
-
-
-void MainWindowImpl::create()
-{
-  if( _hwnd != 0 )
-    throw std::logic_error("hwnd already created");
-
-  HINSTANCE hInstance = GetModuleHandle(NULL);
-
-  _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, GetDesktopWindow(), NULL, hInstance, NULL );
-}
-
-
-void MainWindowImpl::destroy()
-{
-  if( _hwnd == 0)
-      return;
-
-  DestroyWindow(_hwnd);
-  _hwnd = 0;
+    close();
 }
 
 
@@ -83,10 +64,12 @@ void MainWindowImpl::show( bool v)
     
 }
 
+
 void MainWindowImpl::update(const Gfx::RectF& rect)
 {
    Application::instance().screen().onUpdate(*_apiWindow, rect);
 }
+
 
 void MainWindowImpl::activate()
 {
@@ -321,7 +304,11 @@ void MainWindowImpl::paint(const Gfx::RectF& rect)
 
 void MainWindowImpl::close()
 {
-    destroy();
+    if( _hwnd == 0)
+        return;
+
+    DestroyWindow(_hwnd);
+    _hwnd = 0;
 }
 
 } // namespace
