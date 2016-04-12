@@ -100,6 +100,8 @@ class PT_SYSTEM_API MainLoop : public EventLoop
         virtual void onQueueEvent(const Event& ev);
     
         virtual void onWake();
+
+        virtual void onProcessEvents();
     
         virtual void onAttachTimer(Timer& timer);
     

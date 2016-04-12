@@ -96,6 +96,10 @@ class PT_SYSTEM_API EventLoop : public Connectable
         */
         void exit();
 
+        /** @brief Process all queued events.
+        */
+        void processEvents();
+
         /** @brief Reports all events.
         */
         Signal<const Event&>& eventReceived()
@@ -132,6 +136,9 @@ class PT_SYSTEM_API EventLoop : public Connectable
 
         //! @internal EventSink interface
         virtual void onWake() = 0;
+
+        //! @internal Process all queued events
+        virtual void onProcessEvents() = 0;
 
         //! @internal A timer is attached
         virtual void onAttachTimer(Timer& timer) = 0;

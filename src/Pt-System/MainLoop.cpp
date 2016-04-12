@@ -115,6 +115,12 @@ void MainLoop::onWake()
 }
 
 
+void MainLoop::onProcessEvents()
+{
+    _impl->processEvents();
+}
+
+
 bool MainLoop::waitNext()
 {
 	return _impl->waitNext();

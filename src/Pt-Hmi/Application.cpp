@@ -27,11 +27,8 @@
 */
 
 #include "ApplicationImpl.h"
-#include "WindowImpl.h"
-#include "ScreenImpl.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/PaintEvent.h>
-#include <Pt/System/MainLoop.h>
 #include <cassert>
 
 namespace Pt {
@@ -42,29 +39,29 @@ Application::Application(int argc, char** argv)
 : System::Application(0, argc, argv)
 , _impl( new ApplicationImpl() ) 
 , _mainScreen(0)
-, _lastVid(1)
-{ 	
-	this->init(*_impl);
+, _lastId(1)
+{
+    this->init(*_impl);
 
-  _mainScreen = new Screen(*_impl);
+    _mainScreen = new Screen(*_impl);
 
-  loop().eventReceived() += Pt::slot(*this, &Application::onResizeEvent );
-  loop().eventReceived() += Pt::slot(*this, &Application::onMoveEvent );
-  loop().eventReceived() += Pt::slot(*this, &Application::onKeyEvent );
-  loop().eventReceived() += Pt::slot(*this, &Application::onUpdateEvent ); 
-  loop().eventReceived() += Pt::slot(*this, &Application::onPaintEvent ); 
-  loop().eventReceived() += Pt::slot(*this, &Application::onMouseEvent );
-  loop().eventReceived() += Pt::slot(*this, &Application::onActivateEvent );
-  loop().eventReceived() += Pt::slot(*this, &Application::onEnableEvent );
-  loop().eventReceived() += Pt::slot(*this, &Application::onShowEvent );
-  loop().eventReceived() += Pt::slot(*this, &Application::onCloseEvent );
+    loop().eventReceived() += Pt::slot(*this, &Application::onResizeEvent );
+    loop().eventReceived() += Pt::slot(*this, &Application::onMoveEvent );
+    loop().eventReceived() += Pt::slot(*this, &Application::onKeyEvent );
+    loop().eventReceived() += Pt::slot(*this, &Application::onUpdateEvent ); 
+    loop().eventReceived() += Pt::slot(*this, &Application::onPaintEvent ); 
+    loop().eventReceived() += Pt::slot(*this, &Application::onMouseEvent );
+    loop().eventReceived() += Pt::slot(*this, &Application::onActivateEvent );
+    loop().eventReceived() += Pt::slot(*this, &Application::onEnableEvent );
+    loop().eventReceived() += Pt::slot(*this, &Application::onShowEvent );
+    loop().eventReceived() += Pt::slot(*this, &Application::onCloseEvent );
 }
 
 
 Application::~Application()
 {
-	delete _mainScreen;
-	delete _impl;
+    delete _mainScreen;
+    delete _impl;
 }
 
 
@@ -72,7 +69,31 @@ Application& Application::instance()
 {
     return static_cast<Application&>( System::Application::instance() );
 }
-	
+
+
+const Screen& Application::screen() const
+{
+    return *_mainScreen;
+}
+
+
+Screen& Application::screen()
+{
+    return *_mainScreen;
+}
+
+        
+Pt::uint64_t Application::makeId()
+{
+    return _lastId++;
+}
+
+
+void Application::nextEvent()
+{
+    _impl->nextEvent();
+}
+
 
 void Application::registerVisual( Visual& visual )
 {
@@ -87,19 +108,6 @@ void Application::registerVisual( Visual& visual )
 void Application::unregisterVisual( Visual& visual )
 {
    _visuals.erase( visual.vid() );
-}
-
-
-void Application::nextEvent()
-{
-	_impl->nextEvent();
-}
-
-
-void Application::sendEvent(Visual& w, const Pt::Event& ev)
-{
-	  // TODO: check event filter before dispatching the event
-    w.processEvent(ev);
 }
 
 
@@ -209,6 +217,12 @@ void Application::onCloseEvent(const CloseEvent& ev )
         return;
 
     it->second->processEvent(ev);   
+}
+
+
+ApplicationImpl* Application::impl()
+{
+    return _impl;
 }
 
 } // namespace

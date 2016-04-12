@@ -105,18 +105,18 @@ class PT_HMI_API Screen : public Visual
           return _windows;
         }
 
-        void onUpdate(Window& w, const Gfx::RectF& rect);
-
-        void onResize(Window& w, const Gfx::SizeF& s);
-
-        void onMove(Window& w, const Gfx::PointF& p);
-
     protected:
         virtual void onEvent( const Event& ev );
         
         virtual void onUpdateEvent(const UpdateEvent& ev);
 
     protected:
+        void onUpdate(Window& w, const Gfx::RectF& rect);
+
+        void onResize(Window& w, const Gfx::SizeF& s);
+
+        void onMove(Window& w, const Gfx::PointF& p);
+
         void registerWindow(Window& w);
 
         void unregisterWindow(Window& w);

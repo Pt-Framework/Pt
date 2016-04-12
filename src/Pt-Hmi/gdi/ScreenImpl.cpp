@@ -63,7 +63,7 @@ ScreenImpl::~ScreenImpl()
 }
 
 
-void ScreenImpl::onUpdate(Window& w, const Gfx::RectF& updateRect)
+void ScreenImpl::onPaint(Window& w, const Gfx::RectF& updateRect)
 {
     // alternatively we could send an event to the screen
     Application::instance().impl()->processEvents();

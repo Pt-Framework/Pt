@@ -89,11 +89,11 @@ class MainLoopImpl
         void wake()
         { _selector.wake(); }
 
-        void commitEvent(const Event& event);
+        void commitEvent(const Event& ev);
 
-        void queueEvent(const Event& event);
+        void queueEvent(const Event& ev);
 
-        //bool processEvents();
+        void processEvents();
 
         void attach(Timer& timer)
         { _timerQueue.addTimer(timer); }

@@ -121,8 +121,8 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
     // paint the damaged window
     window->onPaint(rect);
 
-    // update the screen
-    _impl->onUpdate(*window, rect);
+    // paint the screen
+    _impl->onPaint(*window, rect);
 }
 
 

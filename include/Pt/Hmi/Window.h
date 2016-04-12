@@ -143,6 +143,8 @@ class PT_HMI_API Window : public Visual
   protected:
     void onUpdate(Window& w, const Gfx::RectF& rect);
 
+    void onPaint(const Gfx::RectF& rect);
+
     void onShow(Window& w, bool visible);
 
     void onActivate(Window& w);
@@ -156,8 +158,6 @@ class PT_HMI_API Window : public Visual
     void onClose(Window& w);
 
     void onPaint(Window& w, const Gfx::RectF& rect);
-
-    void onPaint(const Gfx::RectF& rect);
 
   protected:
     virtual void onEvent(const Pt::Event& ev);

@@ -160,21 +160,6 @@ Widget* Window::pointerWidget()
 }
 
 
-bool Window::isClosed() const
-{
-    return _isClosed;       
-}
-
-
-void Window::close()
-{
-    if( _impl )
-        _impl->close();
-    else
-        _isClosed = true;
-}
-
-
 void Window::focusPrev()
 {
     moveFocus(_focusList.rbegin(), _focusList.rend());
@@ -411,12 +396,6 @@ void Window::onKeyEvent(const KeyEvent& ev)
                 _focusWidget->update();
         }
     }
-}
-
-
-void Window::onCloseEvent(const CloseEvent& ev)
-{
-     _isClosed =  true;
 }
 
 
@@ -729,9 +708,30 @@ void Window::onResizeEvent(const ResizeEvent& s)
 }
 
 
-void Window::onClose(Window& w )
+bool Window::isClosed() const
+{
+    return _isClosed;       
+}
+
+
+void Window::close()
+{
+    if( _impl )
+        _impl->close();
+    else
+        _isClosed = true;
+}
+
+
+void Window::onClose(Window& w)
 {
     _windowManager.onClose(w);
+}
+
+
+void Window::onCloseEvent(const CloseEvent& ev)
+{
+     _isClosed =  true;
 }
 
 

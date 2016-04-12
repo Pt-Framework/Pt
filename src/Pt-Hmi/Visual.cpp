@@ -35,7 +35,7 @@ namespace Pt {
 namespace Hmi {
 
 Visual::Visual()
-: _vid( Application::instance().makeVid()  )
+: _vid( Application::instance().makeId()  )
 { 
     Application::instance().registerVisual(*this );   
 }

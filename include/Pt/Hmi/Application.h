@@ -54,33 +54,19 @@ class PT_HMI_API Application : public Pt::System::Application
 
         static Application& instance();
     
+        const Screen& screen() const;
+
+        Screen& screen();
+        
+        Pt::uint64_t makeId();
+
         void nextEvent();
-
-        void sendEvent(Visual& w, const Pt::Event& ev);
-
-        const Screen& screen() const
-        {
-            return *_mainScreen;
-        }
-
-        Screen& screen()
-        {
-            return *_mainScreen;
-        }
-        
-        ApplicationImpl* impl()
-        {
-            return _impl;
-        }
-        
-        Pt::uint64_t makeVid()
-        {
-            return _lastVid++;
-        }
 
         void registerVisual(Visual& visual);
 
         void unregisterVisual(Visual& visual);
+
+        ApplicationImpl* impl();
         
     protected:        
         void onResizeEvent( const ResizeEvent& ev );
@@ -107,9 +93,9 @@ class PT_HMI_API Application : public Pt::System::Application
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;
 
         ApplicationImpl* _impl; 
-        Screen* _mainScreen;  
-        Pt::uint64_t _lastVid;
-        VisualMap _visuals;
+        Screen*          _mainScreen;  
+        Pt::uint64_t     _lastId;
+        VisualMap        _visuals;
 };
 
 } // namespace

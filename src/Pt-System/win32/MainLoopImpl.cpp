@@ -87,16 +87,23 @@ void MainLoopImpl::exit()
 }
 
 
-void MainLoopImpl::commitEvent(const Event& event)
+void MainLoopImpl::commitEvent(const Event& ev)
 { 
-    _eventQueue.pushEvent(event); 
+    _eventQueue.pushEvent(ev); 
     wake();
 }
 
 
-void MainLoopImpl::queueEvent(const Event& event)
+void MainLoopImpl::queueEvent(const Event& ev)
 { 
-    _eventQueue.pushEvent(event); 
+    _eventQueue.pushEvent(ev); 
+}
+
+
+void MainLoopImpl::processEvents()
+{
+    //TODO: should this also check selectables?
+    _eventQueue.processEvents(*_event);
 }
 
 

@@ -151,12 +151,6 @@ void ApplicationImpl::nextEvent()
 }
 
 
-void ApplicationImpl::processEvents()
-{
-    _eventQueue.processEvents( this->eventReceived() );
-}
-
-
 void ApplicationImpl::onAttachSelectable(System::Selectable& s)
 { 
     _selector.attach(s); 
@@ -221,6 +215,12 @@ void ApplicationImpl::onQueueEvent(const Pt::Event& ev)
 void ApplicationImpl::onWake()
 { 
     _selector.wake(); 
+}
+
+
+void ApplicationImpl::onProcessEvents()
+{
+    _eventQueue.processEvents( this->eventReceived() );
 }
 
 
