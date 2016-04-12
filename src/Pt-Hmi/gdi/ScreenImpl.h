@@ -91,13 +91,11 @@ class ScreenImpl
         {
         }
 
-        void onUpdate(Window& w, const Gfx::RectF& rect);
-
         void onMove(Window& w, const Gfx::PointF& p);
 
         void onResize(Window& w, const Gfx::SizeF& s);
 
-        void onPaint(Window& w, const Gfx::RectF& rect);
+        void onUpdate(Window& w, const Gfx::RectF& rect);
 
     private:
         Gfx::Size screeResolution();

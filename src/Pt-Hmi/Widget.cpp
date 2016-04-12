@@ -413,7 +413,7 @@ void Widget::update(const Gfx::RectF& rect)
 }
 
 
-void Widget::paint(const Gfx::RectF& rect)
+void Widget::onPaint(const Gfx::RectF& rect)
 {
     PaintEvent pev( vid(), rect);
     Application::instance().loop().commitEvent(pev);
@@ -428,7 +428,7 @@ void Widget::paint(const Gfx::RectF& rect)
             continue;
 
         Gfx::RectF updateRect( rect.topLeft() - w->position(), rect.size() );
-        w->paint(updateRect);            
+        w->onPaint(updateRect);            
     }
 }
 

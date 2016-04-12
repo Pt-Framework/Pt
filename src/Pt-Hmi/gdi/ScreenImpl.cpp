@@ -30,6 +30,7 @@
 #include "ScreenImpl.h"
 #include "WindowImpl.h"
 #include "ApplicationImpl.h"
+#include "MainWindowImpl.h"
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Application.h>
 
@@ -64,7 +65,11 @@ ScreenImpl::~ScreenImpl()
 
 void ScreenImpl::onUpdate(Window& w, const Gfx::RectF& updateRect)
 {
-    w.paint(updateRect);
+    // alternatively we could send an event to the screen
+    Application::instance().impl()->processEvents();
+
+    MainWindowImpl* m = static_cast<MainWindowImpl*>( w.impl() );
+    InvalidateRect(m->hwnd(), NULL, FALSE);
 }
 
 
@@ -75,13 +80,6 @@ void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
 
 void ScreenImpl::onMove(Window& w, const Gfx::PointF& p)
 {
-}
-
-
-void ScreenImpl::onPaint(Window& w, const Gfx::RectF& rect)
-{
-    Application::instance().impl()->processEvents();
-    w.impl()->paint(rect);
 }
 
 

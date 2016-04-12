@@ -49,6 +49,18 @@ Screen::~Screen()
 }
 
 
+void Screen::onResize(Window& w, const Gfx::SizeF& s)
+{
+    _impl->onResize(w, s);
+}
+
+
+void Screen::onMove(Window& w, const Gfx::PointF& p)
+{
+    _impl->onMove(w, p);
+}
+
+
 void Screen::onUpdate(Window& w, const Gfx::RectF& updateRect)
 {        
     UpdateMap::iterator it = _updates.find( w.vid() );
@@ -79,11 +91,11 @@ void Screen::onEvent(const Event& ev)
 
 void Screen::onUpdateEvent(const UpdateEvent& ev)
 {
-    // skip all update events except the last one
     UpdateMap::iterator u = _updates.find( ev.window() );
     if( u == _updates.end() )
         return;
 
+    // skip all update events except the last one
     if( u->second.pop() != 0)
         return;
 
@@ -91,33 +103,26 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
     Pt::uint64_t windowId = u->first;
     _updates.erase( ev.vid() );
 
+    // find damaged window
+    Window* window = 0;
     std::vector<Window*>::iterator it;
     for(it = _windows.begin(); it != _windows.end(); ++it)
     {
         if( (*it)->vid() == windowId )
         {
-            _impl->onUpdate(**it, rect);
+            window = *it;
             break;
         }
     }
-}
 
+    if( ! window )
+        return;
 
-void Screen::onResize(Window& w, const Gfx::SizeF& s)
-{
-    _impl->onResize(w, s);
-}
+    // paint the damaged window
+    window->onPaint(rect);
 
-
-void Screen::onMove(Window& w, const Gfx::PointF& p)
-{
-    _impl->onMove(w, p);
-}
-
-
-void Screen::onPaint(Window& w, const Gfx::RectF& rect)
-{
-    _impl->onPaint(w, rect);
+    // update the screen
+    _impl->onUpdate(*window, rect);
 }
 
 

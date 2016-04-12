@@ -209,22 +209,8 @@ void Window::onUpdate(Window& child, const Gfx::RectF& rect)
 }
 
 
-void Window::paint(const Gfx::RectF& rect)
-{
-    onPaint(rect);
-
-    if(parent())
-        parent()->onPaint(*this, rect);
-    else
-        Application::instance().screen().onPaint(*this, rect);
-}
-
-
 void Window::onPaint(const Gfx::RectF& rect)
 {
-    //
-    // TODO: move this to screen !!!
-    //
     const double borderWidth = _windowManager.borderWidth();
     const double titleHeight = _windowManager.titleHeight();
 
@@ -236,7 +222,7 @@ void Window::onPaint(const Gfx::RectF& rect)
     painter.fillRect(rect);
 
     if( mainWidget() )
-        mainWidget()->paint(rect);
+        mainWidget()->onPaint(rect);
 
     std::vector<Window*>& windows = this->windows();
     std::vector<Window*>::iterator child;
@@ -247,22 +233,11 @@ void Window::onPaint(const Gfx::RectF& rect)
         pos.subY( borderWidth + titleHeight );
 
         Gfx::RectF updateRect( pos, rect.size() );
-        (*child)->paint(updateRect);
+        (*child)->onPaint(updateRect);
     }
 
     PaintEvent pev(vid(), rect);
     Application::instance().loop().commitEvent(pev);
-}
-
-
-void Window::onPaint(Window& w, const Gfx::RectF& rect)
-{
-    // TODO: repaint area affected by the rect of w
-
-    if( parent() )
-        parent()->onPaint(*this, rect);
-    else
-        Application::instance().screen().onPaint(*this, rect);
 }
 
 

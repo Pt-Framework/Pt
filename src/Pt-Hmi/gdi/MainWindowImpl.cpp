@@ -120,12 +120,6 @@ void MainWindowImpl::update(const Gfx::RectF& rect)
 }
 
 
-void MainWindowImpl::paint(const Gfx::RectF& rect)
-{
-    InvalidateRect(_hwnd, NULL, FALSE);
-}
-
-
 void MainWindowImpl::setDecoration( WindowDecoration::Flags deco )
 {
     setShowTitle( (deco & WindowDecoration::Flags::ShowTitleBar) != 0);

@@ -141,8 +141,6 @@ class PT_HMI_API Widget : public Visual
 
         void processEvent(const Pt::Event& ev);
 
-        void paint(const Gfx::RectF& updateRect);
-
         void resize( const Gfx::SizeF& s );
 
 
@@ -167,6 +165,9 @@ class PT_HMI_API Widget : public Visual
         void update(const Gfx::RectF& rect);
 
     protected:   
+        void onPaint(const Gfx::RectF& updateRect);
+
+    protected:
         virtual void onLayout();
         
         virtual void onPointerEnter();    

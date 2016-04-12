@@ -128,11 +128,6 @@ void ChildWindowImpl::setTitle( const std::string& t )
     //_parent->onTitle(*_apiWindow, e);
 }
 
-
-void ChildWindowImpl::paint(const Gfx::RectF& rect)
-{
-}
-
 } // namespace
 
 } // namespace

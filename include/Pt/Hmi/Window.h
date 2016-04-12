@@ -64,22 +64,10 @@ class WindowImpl;
 class PT_HMI_API Window : public Visual
 {
    friend class Widget; 
-   friend class WindowImpl;
    friend class ChildWindowImpl;
    friend class MainWindowImpl;
    friend class WindowManager;
-
-  private:
-   struct WindowData
-   {
-        WindowData()
-
-        {
-
-        }
-
-
-   };
+   friend class Screen;
 
   public:           
     explicit Window(Window* parent = 0);     
@@ -129,8 +117,6 @@ class PT_HMI_API Window : public Visual
     WindowImpl* impl();
 
     void runModal();
-    
-    void paint(const Gfx::RectF& rect);
 
     virtual void resize( const Gfx::SizeF& s );
 
@@ -152,8 +138,7 @@ class PT_HMI_API Window : public Visual
     const Gfx::PointF& position() const
     {
         return _position;
-    }    
-
+    }
 
   protected:
     void onUpdate(Window& w, const Gfx::RectF& rect);
@@ -168,11 +153,11 @@ class PT_HMI_API Window : public Visual
 
     void onResize(Window& w, const Gfx::SizeF& to);
 
-    void onPaint(const Gfx::RectF& rect);
+    void onClose(Window& w);
 
     void onPaint(Window& w, const Gfx::RectF& rect);
 
-    void onClose(Window& w );
+    void onPaint(const Gfx::RectF& rect);
 
   protected:
     virtual void onEvent(const Pt::Event& ev);

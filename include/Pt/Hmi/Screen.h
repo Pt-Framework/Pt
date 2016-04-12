@@ -111,8 +111,6 @@ class PT_HMI_API Screen : public Visual
 
         void onMove(Window& w, const Gfx::PointF& p);
 
-        void onPaint(Window& w, const Gfx::RectF& rect);
-
     protected:
         virtual void onEvent( const Event& ev );
         

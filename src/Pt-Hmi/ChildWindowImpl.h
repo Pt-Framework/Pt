@@ -69,8 +69,6 @@ class PT_HMI_API ChildWindowImpl  : public WindowImpl
         
         virtual void close();
 
-        virtual void paint(const Gfx::RectF& rect);
-
         virtual void update(const Gfx::RectF& rect);
         
         Window* parent()
