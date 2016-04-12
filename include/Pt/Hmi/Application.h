@@ -66,6 +66,8 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void unregisterVisual(Visual& visual);
 
+        void setPointerWindow(Window* w);
+
         ApplicationImpl* impl();
         
     protected:        
@@ -96,6 +98,7 @@ class PT_HMI_API Application : public Pt::System::Application
         Screen*          _mainScreen;  
         Pt::uint64_t     _lastId;
         VisualMap        _visuals;
+        Window*          _pointerWindow;
 };
 
 } // namespace

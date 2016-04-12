@@ -95,7 +95,18 @@ Window::~Window()
     while( ! children.empty() )
         remove( *children.back() );
  
-    delete _impl;
+    if(_impl)
+    {
+        if( parent() )
+        {
+            parent()->_windowManager.remove(*this);
+            parent()->update();
+        }
+        else
+            Application::instance().screen().unregisterWindow(*this);
+
+        delete _impl;
+    }
 }
 
 
@@ -122,7 +133,28 @@ std::vector<Window*>& Window::windows()
     return _windowManager.windows();
 }
 
+
+Window* Window::activeWindow()
+{
+    const std::vector<Window*>& windows = _windowManager.windows();
+    std::vector<Window*>::const_iterator it;
+
+    for(it = windows.begin(); it != windows.end(); ++it)
+    {
+        Window* window = *it;
     
+        if( window->isActive() )
+            return window;
+
+        window = window->activeWindow();
+        if(window)
+            return window;
+    }
+
+    return 0;
+}
+
+
 Widget* Window::mainWidget() 
 {
     return _mainWidget;
@@ -521,13 +553,21 @@ void Window::add(Window& child)
     if( child.parent() == this )
         return;
 
-    delete child._impl;
-    child._impl = 0;
+    if(child._impl)
+    {
+        if( child.parent() )
+        {
+            child.parent()->_windowManager.remove(child);
+            child.parent()->update();
+        }
+        else
+            Application::instance().screen().unregisterWindow(child);
+
+        delete child._impl;
+        child._impl = 0;
+    }
 
     child.createChildImpl(*this);
-
-    _windowManager.add(child);
-
     update();
 }
 
@@ -536,22 +576,25 @@ void Window::remove(Window& child)
 {
     if(child.parent() != this)
         return;
-    
-    _windowManager.remove(child);
 
-    delete child.impl();             
-    child._impl = 0;
+    if( child._impl )
+    { 
+      _windowManager.remove(child);
+      delete child._impl;             
+      child._impl = 0;
+    }
 
     child.createMainImpl();
-
     update();
 }
+
 
 void Window::createChildImpl(Window& parent)
 {
     assert( ! _impl);
 
     _impl = new ChildWindowImpl(*this, parent);
+    parent._windowManager.add(*this);
 
     initImpl();
 }

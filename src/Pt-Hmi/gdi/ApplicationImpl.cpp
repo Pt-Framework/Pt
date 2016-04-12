@@ -93,6 +93,7 @@ ApplicationImpl::ApplicationImpl()
 : Pt::System::EventLoop()
 , _mouseEvent(0)
 , _keyEvent(0)
+, _pointerInWindow(false)
 {
 #ifndef _DEBUG  
 	FreeConsole();
@@ -426,8 +427,9 @@ bool ApplicationImpl::processMessage(HWND hwnd, unsigned int msg,
             handled = true;  
             _mouseEvent.clear();
             Application::instance().screen().setCursor(0);
-            Application::instance().screen().setPointerWindow(0);
-            break;        
+            Application::instance().setPointerWindow(0);
+            _pointerInWindow = false;
+            break;
     }
 
     return handled;
@@ -544,7 +546,11 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
         break;
     }
   
-    Application::instance().screen().setPointerWindow(&w);
+    if( ! _pointerInWindow )
+    {
+        Application::instance().setPointerWindow(&w);
+        _pointerInWindow = true;
+    }
 
     Gfx::PointF p = Application::instance().screen().toUnit( Gfx::Point(xPos, yPos) );
     _mouseEvent.setX( p.x() );

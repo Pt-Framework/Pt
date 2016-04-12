@@ -40,6 +40,7 @@ Application::Application(int argc, char** argv)
 , _impl( new ApplicationImpl() ) 
 , _mainScreen(0)
 , _lastId(1)
+, _pointerWindow(0)
 {
     this->init(*_impl);
 
@@ -108,6 +109,27 @@ void Application::registerVisual( Visual& visual )
 void Application::unregisterVisual( Visual& visual )
 {
    _visuals.erase( visual.vid() );
+}
+
+
+void Application::setPointerWindow(Window* w)
+{
+    if( _pointerWindow == w )
+        return;
+
+    if( _pointerWindow )    
+    {
+        Pt::Hmi::LeaveEvent leaveEvent;
+        _pointerWindow->processEvent(leaveEvent);
+    }
+
+    _pointerWindow = w;
+
+    if( _pointerWindow )
+    {
+        Pt::Hmi::EnterEvent enterEvent;
+        _pointerWindow->processEvent(enterEvent);
+    }
 }
 
 

@@ -133,6 +133,7 @@ class ApplicationImpl : public Pt::System::EventLoop
     HINSTANCE   _instanceHandle;
     MouseEvent  _mouseEvent;
     KeyEvent    _keyEvent;
+    bool        _pointerInWindow;
 	
   private:
 		System::Mutex _mutex;

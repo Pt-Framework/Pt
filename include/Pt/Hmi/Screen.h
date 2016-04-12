@@ -49,7 +49,6 @@ class PT_HMI_API Screen : public Visual
 {
     friend class Window;
     friend class WindowManager;
-    friend class ApplicationImpl;
     friend class MainWindowImpl;
 
     public:
@@ -130,26 +129,6 @@ class PT_HMI_API Screen : public Visual
 
         void unregisterWindow(Window& w);
 
-        void setPointerWindow( Window* w)
-        {
-            if( _pointerWindow == w )
-                return;
-
-            if( _pointerWindow )    
-            {
-                Pt::Hmi::LeaveEvent leaveEvent;
-                _pointerWindow->processEvent(leaveEvent);
-            }
-
-            _pointerWindow = w;
-
-            if( _pointerWindow )
-            {
-                Pt::Hmi::EnterEvent enterEvent;
-                _pointerWindow->processEvent(enterEvent);
-            }
-          }
-
     private:
         class UpdateInfo
         {
@@ -190,7 +169,6 @@ class PT_HMI_API Screen : public Visual
         ScreenImpl*          _impl;
         std::vector<Window*> _windows;
         UpdateMap            _updates;
-        Window*              _pointerWindow;
 };
 
 } // namespace

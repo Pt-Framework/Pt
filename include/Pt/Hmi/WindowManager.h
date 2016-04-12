@@ -72,7 +72,6 @@ class WindowManager : public Pt::Connectable
 
         std::vector<Window*>& windows();
 
-        // TODO: Window::activate() should be public
         void activate(Window& w);               
 
         bool pointerInput(const Pt::Hmi::MouseEvent& pointerEvent);
@@ -130,8 +129,6 @@ class WindowManager : public Pt::Connectable
         Window* findWindow(double x, double y);
 
         void setSizingCursor( ResizeDirection::Type type );
- 
-        Window* activeWindow(WindowManager& manager); 
 
         Gfx::PointF renderFrame(const Window& w, PaintSurface& surface);
 

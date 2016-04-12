@@ -64,9 +64,6 @@ class WindowImpl;
 class PT_HMI_API Window : public Visual
 {
    friend class Widget; 
-   friend class ChildWindowImpl;
-   friend class MainWindowImpl;
-   friend class WindowManager;
    friend class Screen;
 
   public:           
@@ -85,6 +82,8 @@ class PT_HMI_API Window : public Visual
     const std::vector<Window*>& windows() const;
 
     std::vector<Window*>& windows();
+
+    Window* activeWindow();
 
     Widget* mainWidget();
 

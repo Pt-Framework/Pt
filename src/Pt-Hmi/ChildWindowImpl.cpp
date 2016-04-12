@@ -47,8 +47,6 @@ ChildWindowImpl::ChildWindowImpl(Window& api, Window& parent)
 
 ChildWindowImpl::~ChildWindowImpl()
 {
-    _parent->_windowManager.remove(*_apiWindow);
-    _parent->update();
 }
 
 
