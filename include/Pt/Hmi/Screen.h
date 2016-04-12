@@ -117,6 +117,15 @@ class PT_HMI_API Screen : public Visual
 
         void onMove(Window& w, const Gfx::PointF& p);
 
+        void onClose(Window& w);
+
+        void onShow(Window& w, bool visible);
+
+        void onActivate(Window& w);
+
+        void onEnable(Window& w, bool enable);
+
+    protected:
         void registerWindow(Window& w);
 
         void unregisterWindow(Window& w);

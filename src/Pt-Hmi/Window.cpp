@@ -184,7 +184,10 @@ void Window::update(const Gfx::RectF& rect)
     if( !_impl )
         return;
 
-    _impl->update(rect);
+    if( ! parent() )
+        Application::instance().screen().onUpdate(*this, rect);
+    else
+        parent()->onUpdate(*this, rect);
 }
 
 
@@ -587,8 +590,15 @@ void Window::show(bool b)
 {
     if( ! _impl )
         createMainImpl(); // also calls setVisible
-    else  
+    else
+    {
         _impl->show(b);
+
+        if( ! parent() )
+            Application::instance().screen().onShow(*this, b);
+        else
+            parent()->onShow(*this, b);
+    }
 }
 
 
@@ -616,7 +626,14 @@ void Window::activate()
         return;
 
     if( _impl ) 
+    {
         _impl->activate();
+
+        if( ! parent() )
+            Application::instance().screen().onActivate(*this);
+        else
+            parent()->onActivate(*this);
+    }
     else
         _isActive = true;
 }
@@ -637,7 +654,14 @@ void Window::onActivateEvent(const ActivateEvent& ev)
 void Window::enable(bool e)
 {
     if( _impl )
+    {
         _impl->enable(e);
+
+        if( ! parent() )
+            Application::instance().screen().onEnable(*this, e);
+        else
+            parent()->onEnable(*this, e);
+    }
     else
         _enabled = e;
 }
@@ -658,7 +682,14 @@ void Window::onEnableEvent( const EnableEvent& ev )
 void Window::move(const Gfx::PointF& p)
 {
     if( _impl )
+    {
         _impl->move(p);
+
+        if( ! parent() )
+            Application::instance().screen().onMove(*this, p);
+        else
+            parent()->onMove(*this, p);
+    }
     else
         _position = p;
 }
@@ -717,7 +748,14 @@ bool Window::isClosed() const
 void Window::close()
 {
     if( _impl )
+    {
         _impl->close();
+        
+        if( ! parent() )
+            Application::instance().screen().onClose(*this);
+        else
+            parent()->onClose(*this);
+    }
     else
         _isClosed = true;
 }

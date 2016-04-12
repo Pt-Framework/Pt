@@ -90,8 +90,6 @@ void MainWindowImpl::move(const Gfx::PointF& pos)
     Gfx::Point p = _screen.fromUnit(pos);
     SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, 
                  SWP_DRAWFRAME|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOZORDER);
-
-    Application::instance().screen().onMove(*_apiWindow, pos);
 }
 
 
@@ -111,12 +109,6 @@ void MainWindowImpl::resize(const Gfx::SizeF& s)
     LONG clientHeight = clientRect.bottom - clientRect.top  + 1;
     SetWindowPos(_hwnd, NULL, 0, 0, clientWidth, clientHeight, 
                  SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
-}
-
-
-void MainWindowImpl::update(const Gfx::RectF& rect)
-{
-   Application::instance().screen().onUpdate(*_apiWindow, rect);
 }
 
 
@@ -193,10 +185,10 @@ void MainWindowImpl::setState(WindowState::Type p)
 
     switch(p)
     {
-        case Pt::Hmi::WindowState::Normal:            
+        case Pt::Hmi::WindowState::Normal:
         break;
 
-        case Pt::Hmi::WindowState::Maximazed:
+        case Pt::Hmi::WindowState::Maximized:
             style |= WS_MAXIMIZE;
         break;
 
@@ -212,51 +204,51 @@ void MainWindowImpl::setState(WindowState::Type p)
 void MainWindowImpl::setBorder(WindowBorder::Type p)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
-        LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
+    LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
     switch( p )
     {
-        case Pt::Hmi::WindowBorder::NoBorder:            
-                        style &= ~WS_DLGFRAME;
-                        style &= ~WS_THICKFRAME; 
-                        exStyle &= ~WS_EX_TOOLWINDOW;                        
-        break;
+        case Pt::Hmi::WindowBorder::NoBorder:
+            style &= ~WS_DLGFRAME;
+            style &= ~WS_THICKFRAME; 
+            exStyle &= ~WS_EX_TOOLWINDOW;
+            break;
 
         case Pt::Hmi::WindowBorder::Sizeable:
             style |= WS_THICKFRAME;
-                        style |= WS_DLGFRAME;
-        break;
+            style |= WS_DLGFRAME;
+            break;
 
         case Pt::Hmi::WindowBorder::Dialog:
             style |= WS_DLGFRAME;   
-                        style &= ~WS_THICKFRAME;         
-        break;
+            style &= ~WS_THICKFRAME;
+            break;
 
         case Pt::Hmi::WindowBorder::DialogSizeable:
-            style |= WS_DLGFRAME;            
+            style |= WS_DLGFRAME;
             style |= WS_THICKFRAME;
-        break;
+            break;
 
         case Pt::Hmi::WindowBorder::Tool:
             style |= WS_DLGFRAME;
-                        style &= ~WS_THICKFRAME; 
+            style &= ~WS_THICKFRAME; 
             exStyle |= WS_EX_TOOLWINDOW;
-        break;
+            break;
 
         case Pt::Hmi::WindowBorder::ToolSizeable:
-                        style &= ~WS_DLGFRAME;
+            style &= ~WS_DLGFRAME;
             style |= WS_THICKFRAME;
             exStyle |= WS_EX_TOOLWINDOW;
-        break;
+            break;
 
         default:
             style |= WS_BORDER; 
-                        style &= ~WS_THICKFRAME;
-        break;
+            style &= ~WS_THICKFRAME;
+            break;
     }
 
-  SetWindowLong(_hwnd, GWL_STYLE, style);
-  SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle);
+    SetWindowLong(_hwnd, GWL_STYLE, style);
+    SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle);
 }
 
 

@@ -61,6 +61,30 @@ void Screen::onMove(Window& w, const Gfx::PointF& p)
 }
 
 
+void Screen::onClose(Window& w)
+{
+    _impl->onClose(w);
+}
+
+
+void Screen::onShow(Window& w, bool visible)
+{
+    _impl->onShow(w, visible);
+}
+
+
+void Screen::onActivate(Window& w)
+{
+    _impl->onActivate(w);
+}
+
+
+void Screen::onEnable(Window& w, bool enable)
+{
+    _impl->onEnable(w, enable);
+}
+
+
 void Screen::onUpdate(Window& w, const Gfx::RectF& updateRect)
 {        
     UpdateMap::iterator it = _updates.find( w.vid() );

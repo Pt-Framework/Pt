@@ -36,25 +36,25 @@ namespace Hmi{
 class WindowState
 {
   public:
-	  enum Type
-	  {
-		  Normal,
-		  Minimized,
-		  Maximazed
-	  };
+      enum Type
+      {
+          Normal,
+          Minimized,
+          Maximized
+      };
 
     static std::string toString( WindowState::Type t )
     {
       switch(t)
       {
-      	case Normal:
+          case Normal:
           return "Normal";
 
         case Minimized:
           return "Minimized";
 
-        case Maximazed:
-          return "Maximazed";
+        case Maximized:
+          return "Maximized";
       }
 
       throw std::logic_error("unknown window state");
@@ -69,12 +69,12 @@ class WindowState
       if( t == "Minimized")
         return Minimized;
 
-      if( t == "Maximazed")
-        return Maximazed;
+      if( t == "Maximized")
+        return Maximized;
 
       throw std::logic_error("unknown window state");
       return Normal;
-		} 
+        } 
 };
 
 }}//namespace

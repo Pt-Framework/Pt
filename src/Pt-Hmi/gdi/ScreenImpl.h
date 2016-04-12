@@ -78,11 +78,6 @@ class ScreenImpl
         
         void setCursor(const Cursor* cursor );
 
-        HCURSOR cursorHandle()
-        {
-            return     _cursorHandle;
-        }
-
         void registerWindow(Window& w)
         {
         }
@@ -91,14 +86,23 @@ class ScreenImpl
         {
         }
 
-        void onMove(Window& w, const Gfx::PointF& p);
+        void onPaint(Window& w, const Gfx::RectF& rect);
 
         void onResize(Window& w, const Gfx::SizeF& s);
 
-        void onPaint(Window& w, const Gfx::RectF& rect);
+        void onMove(Window& w, const Gfx::PointF& p);
+
+        void onClose(Window& w);
+
+        void onShow(Window& w, bool visible);
+
+        void onActivate(Window& w);
+
+        void onEnable(Window& w, bool enable);
 
     private:
         Gfx::Size screeResolution();
+        
         static HBITMAP createImage888(const Pt::uint8_t* data, size_t width, size_t height);
 
     private:

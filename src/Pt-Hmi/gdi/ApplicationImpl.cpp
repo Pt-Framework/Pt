@@ -577,11 +577,11 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
             break;
 
         case SIZE_MAXIMIZED:
-            state = WindowState::Maximazed;                            
+            state = WindowState::Maximized;
             break;
 
         case SIZE_MINIMIZED:
-            state = WindowState::Minimized;            
+            state = WindowState::Minimized;
             break;
  
         default:

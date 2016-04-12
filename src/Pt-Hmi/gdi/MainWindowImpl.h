@@ -76,8 +76,6 @@ class MainWindowImpl : public WindowImpl
         
         virtual void close();
 
-        virtual void update(const Gfx::RectF& rect);
-
         virtual Window* parent()
         {
             return 0;

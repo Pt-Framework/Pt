@@ -83,6 +83,26 @@ void ScreenImpl::onMove(Window& w, const Gfx::PointF& p)
 }
 
 
+void ScreenImpl::onClose(Window& w)
+{
+}
+
+
+void ScreenImpl::onShow(Window& w, bool visible)
+{
+}
+
+
+void ScreenImpl::onActivate(Window& w)
+{
+}
+
+
+void ScreenImpl::onEnable(Window& w, bool enable)
+{
+}
+
+
 double ScreenImpl::width() const
 {
   const HWND hDesktop = GetDesktopWindow();
