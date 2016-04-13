@@ -60,6 +60,7 @@ namespace Hmi {
 
 class Widget;
 class WindowImpl;
+class MainWindowImpl;
 
 class PT_HMI_API Window : public Visual
 {
@@ -113,7 +114,7 @@ class PT_HMI_API Window : public Visual
 
     PixmapSurface& surface();
 
-    WindowImpl* impl();
+    MainWindowImpl* impl();
 
     void runModal();
 
@@ -244,11 +245,9 @@ class PT_HMI_API Window : public Visual
     void setName(const std::string& n);
 
   private:
-    void createChildImpl(Window& parent);
+    void init(Window* parent);
 
-    void createMainImpl();
-
-    void initImpl();
+    void deinit();
 
     void addWidget(Widget& w);
 
@@ -271,7 +270,10 @@ class PT_HMI_API Window : public Visual
 
     void setFocusIndex(Widget& w, size_t index);  
     
-  private:
+  private:      
+    MainWindowImpl*                _impl;
+    bool                           _init;
+    Window*                        _parent;
     Pt::Signal<const Pt::Event&>   _eventReady;
     WindowManager                  _windowManager;
     bool                           _visible; 
@@ -297,7 +299,6 @@ class PT_HMI_API Window : public Visual
     Gfx::PointF                    _position;
     Gfx::SizeF                     _size;
     bool                           _isClosed;            
-    WindowImpl*                    _impl;        
 
 };
 

@@ -68,18 +68,6 @@ class PT_HMI_API ChildWindowImpl  : public WindowImpl
         virtual void setTitle( const std::string& t );
         
         virtual void close();
-        
-        Window* parent()
-        {
-            return _parent;
-        }
-
-        const Window* parent() const
-        {
-            return _parent;
-        }
-private:
-        Window* _parent;
 };
 
 }

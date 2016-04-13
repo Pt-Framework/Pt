@@ -76,16 +76,6 @@ class MainWindowImpl : public WindowImpl
         
         virtual void close();
 
-        virtual Window* parent()
-        {
-            return 0;
-        }
-
-        virtual const Window* parent() const
-        {
-            return 0;
-        }
-
         HWND hwnd()
         {
           return _hwnd;

@@ -40,7 +40,6 @@ namespace Hmi {
 
 ChildWindowImpl::ChildWindowImpl(Window& api, Window& parent)
 : WindowImpl(&api)
-, _parent(&parent)
 {
 }
 
