@@ -28,7 +28,6 @@
 */
 
 #include "ScreenImpl.h"
-#include "WindowImpl.h"
 #include "ApplicationImpl.h"
 #include "MainWindowImpl.h"
 #include <Pt/Hmi/Window.h>

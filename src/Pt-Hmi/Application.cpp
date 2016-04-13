@@ -52,10 +52,13 @@ Application::Application(int argc, char** argv)
     loop().eventReceived() += Pt::slot(*this, &Application::onUpdateEvent ); 
     loop().eventReceived() += Pt::slot(*this, &Application::onPaintEvent ); 
     loop().eventReceived() += Pt::slot(*this, &Application::onMouseEvent );
+    loop().eventReceived() += Pt::slot(*this, &Application::onScrollEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onActivateEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onEnableEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onShowEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onCloseEvent );
+    loop().eventReceived() += Pt::slot(*this, &Application::onEnterEvent );
+    loop().eventReceived() += Pt::slot(*this, &Application::onLeaveEvent );
 }
 
 
@@ -119,7 +122,7 @@ void Application::setPointerWindow(Window* w)
 
     if( _pointerWindow )    
     {
-        Pt::Hmi::LeaveEvent leaveEvent;
+        Pt::Hmi::LeaveEvent leaveEvent( _pointerWindow->vid() );
         _pointerWindow->processEvent(leaveEvent);
     }
 
@@ -127,7 +130,7 @@ void Application::setPointerWindow(Window* w)
 
     if( _pointerWindow )
     {
-        Pt::Hmi::EnterEvent enterEvent;
+        Pt::Hmi::EnterEvent enterEvent(_pointerWindow->vid());
         _pointerWindow->processEvent(enterEvent);
     }
 }
@@ -166,6 +169,17 @@ void Application::onResizeEvent(const ResizeEvent& ev)
 
 
 void Application::onMouseEvent(const MouseEvent& ev )
+{
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+
+    if( it == _visuals.end() )
+        return;
+
+    it->second->processEvent(ev);
+}
+
+
+void Application::onScrollEvent(const ScrollEvent& ev )
 {
     VisualMap::iterator it = _visuals.find( ev.vid() );
 
@@ -232,6 +246,28 @@ void Application::onKeyEvent( const KeyEvent& ev )
 
 
 void Application::onCloseEvent(const CloseEvent& ev )
+{
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+
+    if( it == _visuals.end() )
+        return;
+
+    it->second->processEvent(ev);   
+}
+
+
+void Application::onEnterEvent( const EnterEvent& ev )
+{
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+
+    if( it == _visuals.end() )
+        return;
+
+    it->second->processEvent(ev);   
+}
+
+
+void Application::onLeaveEvent(const LeaveEvent& ev )
 {
     VisualMap::iterator it = _visuals.find( ev.vid() );
 

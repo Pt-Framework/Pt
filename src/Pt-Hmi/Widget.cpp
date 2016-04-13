@@ -59,6 +59,8 @@ Widget::Widget()
     _eventReady += Pt::slot(*this, &Widget::onPaintEvent );
     _eventReady += Pt::slot(*this, &Widget::onPointerEvent);
     _eventReady += Pt::slot(*this, &Widget::onTouchEvent);
+    _eventReady += Pt::slot(*this, &Widget::onEnterEvent);
+    _eventReady += Pt::slot(*this, &Widget::onLeaveEvent);
 }
 
 
@@ -563,15 +565,26 @@ void Widget::onKeyEvent(const KeyEvent& ev)
 }
 
 
-void Widget::onPointerEnter()
+void Widget::onEnterEvent( const EnterEvent& ev )
 {
-    Application::instance().screen().setCursor( &cursor() );    
+    Application::instance().screen().setCursor( &cursor() ); 
 }
 
 
-void Widget::onPointerLeave()
-{    
+void Widget::onLeaveEvent(const LeaveEvent& ev )
+{
 }
+
+
+//void Widget::onPointerEnter()
+//{
+//    Application::instance().screen().setCursor( &cursor() );    
+//}
+//
+//
+//void Widget::onPointerLeave()
+//{    
+//}
 
 
 void Widget::onClicked(const Gfx::PointF& pos)

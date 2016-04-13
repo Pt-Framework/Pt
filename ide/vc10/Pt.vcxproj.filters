@@ -1296,12 +1296,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Spacing.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\WindowImpl.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\ChildWindowImpl.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\WindowDecoration.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -2485,12 +2479,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\PngReader.cpp">
       <Filter>Pt-Gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\WindowImpl.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\ChildWindowImpl.cpp">
-      <Filter>Pt-Hmi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Layout.cpp">
       <Filter>Pt-Hmi</Filter>

@@ -75,6 +75,8 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void onMouseEvent(const MouseEvent& ev );
 
+        void onScrollEvent(const ScrollEvent& ev );
+
         void onUpdateEvent(const UpdateEvent& ev);
 
         void onPaintEvent( const PaintEvent& ev );
@@ -90,6 +92,10 @@ class PT_HMI_API Application : public Pt::System::Application
         void onKeyEvent( const KeyEvent& ev );
 
         void onCloseEvent(const CloseEvent& ev );
+
+        void onEnterEvent( const EnterEvent& ev );
+
+        void onLeaveEvent(const LeaveEvent& ev );
 
     private:
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;

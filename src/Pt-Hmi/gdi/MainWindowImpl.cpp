@@ -29,18 +29,15 @@
 
 #include "MainWindowImpl.h"
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Window.h>
 #include <cassert>
 
 namespace Pt {
 
 namespace Hmi {
 
-MainWindowImpl::MainWindowImpl(Window* w)
-: WindowImpl(w)
-, _app( Pt::Hmi::Application::instance() )
-, _screen( _app.screen() )
-, _hwnd(0)
+MainWindowImpl::MainWindowImpl()
+: _hwnd(0)
+, _screen( Application::instance().screen() )
 {
   HINSTANCE hInstance = GetModuleHandle(NULL);
   _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, GetDesktopWindow(), NULL, hInstance, NULL );

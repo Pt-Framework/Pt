@@ -40,39 +40,44 @@ namespace Hmi{
 
 class PT_HMI_API ResizeEvent : public Pt::BasicEvent<ResizeEvent>
 {
-	public:	
-		ResizeEvent( Pt::uint64_t vid, const Gfx::SizeF& size )
-		: _size( size )
-		, _vid( vid )
-		{
-		}
+    public:
+        ResizeEvent( Pt::uint64_t vid, const Gfx::SizeF& size )
+        : _size( size )
+        , _vid( vid )
+        {
+        }
 
-		ResizeEvent()
-		{
-		}
+        ResizeEvent()
+        {
+        }
 
-		virtual ~ResizeEvent()
-		{
-		}
+        virtual ~ResizeEvent()
+        {
+        }
 
-		void setSize( const Gfx::SizeF&  size )
-		{
-			_size = size;
-		}
+        void setSize( const Gfx::SizeF&  size )
+        {
+            _size = size;
+        }
 
-		const Gfx::SizeF&  size( ) const
-		{
-			return _size;
-		}
+        const Gfx::SizeF&  size( ) const
+        {
+            return _size;
+        }
 
         
+        void setId(Pt::uint64_t vid)
+        {
+            _vid = vid;
+        }
+
         Pt::uint64_t vid() const
         {
             return _vid;
         }
 
-	private:
-		Gfx::SizeF _size;
+    private:
+        Gfx::SizeF _size;
         Pt::uint64_t _vid;
 };
 

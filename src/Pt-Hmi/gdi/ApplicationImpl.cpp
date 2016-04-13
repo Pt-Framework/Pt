@@ -322,7 +322,7 @@ bool ApplicationImpl::processMessage(HWND hwnd, unsigned int msg,
         {
             int delta = GET_WHEEL_DELTA_WPARAM(wparam);
 
-            ScrollEvent sev; //( w->vid() );
+            ScrollEvent sev( w->vid() );
             sev.set(0, delta/120.0);
 
             commitEvent(sev);

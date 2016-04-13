@@ -36,14 +36,28 @@ namespace Hmi{
 
 class LeaveEvent : public Pt::BasicEvent<LeaveEvent>
 {
-    public:	
-	    LeaveEvent()
-	    {
-	    }
+    public:
+        LeaveEvent(Pt::uint64_t vid)
+        : _vid(vid)
+        {
+        }
 
-	    virtual ~LeaveEvent()
-	    {
-	    }
+        virtual ~LeaveEvent()
+        {
+        }
+
+        void setId(Pt::uint64_t vid)
+        {
+            _vid = vid;
+        }
+
+        Pt::uint64_t vid() const
+        {
+            return _vid;
+        }
+
+    private:
+        Pt::uint64_t _vid;
 };
 
 }}

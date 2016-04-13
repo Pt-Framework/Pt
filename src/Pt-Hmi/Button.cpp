@@ -101,17 +101,17 @@ void Button::onPointerEvent(const MouseEvent& ev)
 }
 
 
-void Button::onPointerEnter()
+void Button::onEnterEvent(const EnterEvent& ev )
 {
-    Label::onPointerEnter();
+    Label::onEnterEvent(ev);
     update();
 }
 
 
-void Button::onPointerLeave()
+void Button::onLeaveEvent(const LeaveEvent& ev )
 {
     _isPressed = false;
-    Label::onPointerLeave();
+    Label::onLeaveEvent(ev);
     update();
 }
 

@@ -48,8 +48,6 @@ class ApplicationImpl;
 class PT_HMI_API Screen : public Visual
 {
     friend class Window;
-    friend class WindowManager;
-    friend class MainWindowImpl;
 
     public:
         Screen(ApplicationImpl& app);

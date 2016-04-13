@@ -48,8 +48,9 @@ class ScrollEvent : public Pt::BasicEvent<ScrollEvent>
             Depth = 2
         };
 
-        ScrollEvent()
-        : _wheel(Vertical)
+        ScrollEvent(Pt::uint64_t vid)
+        : _vid(vid)
+        , _wheel(Vertical)
         , _delta(0)
         { }
 
@@ -68,8 +69,19 @@ class ScrollEvent : public Pt::BasicEvent<ScrollEvent>
             _wheel = wheel;
             _delta = d;
         }
+        
+        void setId(Pt::uint64_t vid)
+        {
+            _vid = vid;
+        }
+
+        Pt::uint64_t vid() const
+        {
+            return _vid;
+        }
 
     private:
+        Pt::uint64_t _vid;
         Pt::uint32_t _wheel;
         double       _delta;
 };

@@ -37,6 +37,8 @@
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/PaintEvent.h>
+#include <Pt/Hmi/EnterEvent.h>
+#include <Pt/Hmi/LeaveEvent.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Docking.h>
 #include <Pt/Hmi/Visual.h>
@@ -170,9 +172,9 @@ class PT_HMI_API Widget : public Visual
     protected:
         virtual void onLayout();
         
-        virtual void onPointerEnter();    
+        //virtual void onPointerEnter();    
 
-        virtual void onPointerLeave();
+        //virtual void onPointerLeave();
 
         virtual void onClicked(const Gfx::PointF& pos);
 
@@ -192,6 +194,10 @@ class PT_HMI_API Widget : public Visual
         virtual void onMoveEvent(const MoveEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
+
+        virtual void onEnterEvent( const EnterEvent& ev );    
+
+        virtual void onLeaveEvent(const LeaveEvent& ev );
 
         virtual void onPaintEvent( const PaintEvent& ev );
 

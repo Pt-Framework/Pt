@@ -76,13 +76,11 @@ class PT_HMI_API Window : public Visual
 
     const Window* parent() const;
     
+    const std::vector<Window*>& windows() const;
+
     void add(Window& w);
 
     void remove(Window& w);
-
-    const std::vector<Window*>& windows() const;
-
-    std::vector<Window*>& windows();
 
     Window* activeWindow();
 
@@ -91,54 +89,50 @@ class PT_HMI_API Window : public Visual
     const Widget* mainWidget()  const;
 
     void setMainWidget(Widget* widget);
-
-    Visual* findVisual( Pt::uint64_t id);
     
     Widget* pointerWidget();
 
+    const Widget* pointerWidget() const;
+
     Widget* focusWidget();
 
-    bool isClosed() const;
+    void focusNext();
+    
+    void focusPrev();
 
-    void close();
+    void update();
+
+    void update(const Gfx::RectF& rect);
 
     bool isActive() const;
 
     void activate();
 
-    // TODO: return new focusWidget() and remove focusWidget()
-    void focusNext();
+    bool isVisible() const;
+
+    void show( bool b = true );
     
-    // TODO: return new focusWidget() and remove focusWidget()
-    void focusPrev();
+    bool isEnabled() const;
+
+    void enable( bool e = true );
+
+    const Gfx::PointF& position() const;
+
+    void move(const Gfx::PointF& p);
+
+    const Gfx::SizeF& size() const;
+
+    void resize( const Gfx::SizeF& s );
+
+    bool isClosed() const;
+
+    void close();
+
+    void runModal();
 
     PixmapSurface& surface();
 
     MainWindowImpl* impl();
-
-    void runModal();
-
-    virtual void resize( const Gfx::SizeF& s );
-
-    virtual void move(const Gfx::PointF& p);
-
-    virtual void show( bool b = true );
-    
-    virtual void enable( bool e = true );
-
-    virtual void update();
-
-    void update(const Gfx::RectF& rect);
-
-    const Gfx::SizeF& size() const
-    {
-        return _size;
-    }
-
-    const Gfx::PointF& position() const
-    {
-        return _position;
-    }
 
   protected:
     void onUpdate(Window& w, const Gfx::RectF& rect);
@@ -162,7 +156,7 @@ class PT_HMI_API Window : public Visual
   protected:
     virtual void onEvent(const Pt::Event& ev);
 
-    virtual void onKeyEvent( const KeyEvent& ev );
+    virtual void onPaintEvent(const PaintEvent& ev);
 
     virtual void onPointerEvent( const MouseEvent& ev );
 
@@ -170,16 +164,16 @@ class PT_HMI_API Window : public Visual
     
     virtual void onScrollEvent( const ScrollEvent& ev );
 
+    virtual void onKeyEvent( const KeyEvent& ev );
+
     virtual void onEnterEvent( const EnterEvent& ev );    
 
     virtual void onLeaveEvent(const LeaveEvent& ev );
     
-    virtual void onResizeEvent(const ResizeEvent& ev);
-    
     virtual void onMoveEvent(const MoveEvent& ev);
 
-    virtual void onPaintEvent(const PaintEvent& ev);
-
+    virtual void onResizeEvent(const ResizeEvent& ev);
+    
     virtual void onCloseEvent(const CloseEvent& ev);
 
     virtual void onActivateEvent(const ActivateEvent& ev);  
@@ -188,61 +182,66 @@ class PT_HMI_API Window : public Visual
 
     virtual void onEnableEvent( const EnableEvent& ev );
 
-    // TODO:
   public:
-    bool isEnabled() const
-    {
-        return _enabled;
-    }
-
-    bool isVisible() const
-    {
-        return _visible;
-    }
-
+    // TODO:
     const Gfx::SizeF& minimumSize() const;
 
+    // TODO:
     void setMinimumSize(const Gfx::SizeF& s);
 
+    // TODO:
     const Gfx::SizeF& maximumSize() const;
 
+    // TODO:
     void setMaximumSize(const Gfx::SizeF& s);
 
+    // TODO:
     Hmi::WindowPosition::Type defaultPosition() const;
 
+    // TODO:
     void setDefaultPosition(Hmi::WindowPosition::Type p);
 
+    // TODO:
     Hmi::WindowState::Type state() const;
 
+    // TODO:
     void setState(Hmi::WindowState::Type s);
     
+    // TODO:
     Hmi::WindowBorder::Type border() const;
 
+    // TODO:
     void setBorder( Hmi::WindowBorder::Type t);
 
+    // TODO:
     const Gfx::Image& icon() const;
 
+    // TODO:
     void setIcon(const Gfx::Image& i);
 
+    // TODO:
     bool isClosable() const;
 
+    // TODO:
     void setClosable(bool c);
 
+    // TODO:
     const std::string& title() const;
 
+    // TODO:
     void setTitle( const std::string& t );
 
+    // TODO:
     const Gfx::Font& font() const;
 
+    // TODO:
     void setFont(const Gfx::Font& ft);
 
+    // TODO:
     WindowDecoration::Flags decoration() const;
 
+    // TODO:
     void setDecoration( WindowDecoration::Flags d );
-
-    const std::string& name() const;
-
-    void setName(const std::string& n);
 
   private:
     void init(Window* parent);
@@ -253,10 +252,6 @@ class PT_HMI_API Window : public Visual
 
     void removeWidget(Widget& w);
     
-    void setShortcut(Widget& w, const Key* key);
-
-    void setMnemonic(Widget& w, const Char* ch);
-
     void setPointerWidget( Widget* widget );
 
     void setFocusWidget(Widget* widget);
@@ -270,13 +265,33 @@ class PT_HMI_API Window : public Visual
 
     void setFocusIndex(Widget& w, size_t index);  
     
+    void setShortcut(Widget& w, const Key* key);
+
+    void setMnemonic(Widget& w, const Char* ch);
+
   private:      
     MainWindowImpl*                _impl;
-    bool                           _init;
-    Window*                        _parent;
-    Pt::Signal<const Pt::Event&>   _eventReady;
     WindowManager                  _windowManager;
+    PixmapSurface                  _surface;
+    Pt::Signal<const Pt::Event&>   _eventReady;
+
+    Window*                        _parent;
+    Widget*                        _mainWidget;
+    Widget*                        _pointerWidget;
+    Widget*                        _focusWidget;
+    std::vector<Widget*>           _focusList;
+    std::map<Key, Widget*>         _shortcuts; 
+    std::map<Pt::Char, Widget*>    _mnemonics; 
+
+    bool                           _init;
     bool                           _visible; 
+    bool                           _isActive;
+    bool                           _enabled; 
+    bool                           _isClosed; 
+
+    Gfx::PointF                    _position;
+    Gfx::SizeF                     _size;
+
     Gfx::SizeF                     _minimumSize;
     Gfx::SizeF                     _maximumSize;
     Hmi::WindowPosition::Type      _startPostion;
@@ -286,20 +301,7 @@ class PT_HMI_API Window : public Visual
     Gfx::Image                     _icon;
     bool                           _canClose;    
     WindowDecoration::Flags        _decoration;   
-    Gfx::Font                      _font;    
-    std::map<Key, Widget*>         _shortcuts; 
-    std::map<Pt::Char, Widget*>    _mnemonics;     
-    Widget*                        _mainWidget;
-    Widget*                        _pointerWidget;
-    Widget*                        _focusWidget;
-    std::vector<Widget*>           _focusList;
-    PixmapSurface                  _surface;
-    bool                           _isActive;
-    bool                           _enabled;         
-    Gfx::PointF                    _position;
-    Gfx::SizeF                     _size;
-    bool                           _isClosed;            
-
+    Gfx::Font                      _font;   
 };
 
 } // namespace

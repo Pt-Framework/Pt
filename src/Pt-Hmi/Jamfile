@@ -34,8 +34,6 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   Widget.cpp					   					   
 					   Window.cpp	
 					   WindowManager.cpp
-                       WindowImpl.cpp	  
-                       ChildWindowImpl.cpp
 					   Screen.cpp 
                        Visual.cpp
 					   ;

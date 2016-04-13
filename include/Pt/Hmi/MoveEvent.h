@@ -56,6 +56,11 @@ class PT_HMI_API MoveEvent : public Pt::BasicEvent<MoveEvent>
 		}	
 
 
+        void setId(Pt::uint64_t vid)
+        {
+            _vid = vid;
+        }
+
         Pt::uint64_t vid() const
         {
             return _vid;

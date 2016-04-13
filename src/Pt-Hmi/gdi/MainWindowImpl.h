@@ -1,4 +1,5 @@
 /* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+   Copyright (C) 2015 Marc Duerner
    
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -29,56 +30,57 @@
 #ifndef Pt_Hmi_MainWindowImpl_H
 #define Pt_Hmi_MainWindowImpl_H
 
-#include "../WindowImpl.h"
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/MouseEvent.h>
-#include <Pt/Hmi/ScrollEvent.h>
-#include <Pt/Hmi/KeyEvent.h>
+#include <Pt/Hmi/WindowState.h>
+#include <Pt/Hmi/WindowBorder.h>
+#include <Pt/Hmi/WindowDecoration.h>
+#include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
 #include <Windows.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class Application;
 class Screen;
 
-class MainWindowImpl : public WindowImpl
+class MainWindowImpl
 {
     public:
-        MainWindowImpl(Window* window);
+        MainWindowImpl();
 
-        virtual ~MainWindowImpl();
+        ~MainWindowImpl();
     
-        virtual void show(bool v);
+        void show(bool v);
     
-        virtual void activate();
+        void activate();
+
+        void enable(bool e);  
        
-        virtual void move(const Gfx::PointF& pos);
+        void move(const Gfx::PointF& pos);
 
-        virtual void resize(const Gfx::SizeF& size);
+        void resize(const Gfx::SizeF& size);
+
+        void close();
     
-        virtual void setState(WindowState::Type p);
+        void setState(WindowState::Type p);
     
-        virtual void setBorder(WindowBorder::Type p);
+        void setBorder(WindowBorder::Type p);
        
-        virtual void setIcon(const Gfx::Image& p);
+        void setIcon(const Gfx::Image& p);
     
-        virtual void enable(bool e);    
+        void setMinimumSize(const Gfx::SizeF& s);
     
-        virtual void setMinimumSize(const Gfx::SizeF& s);
-    
-        virtual void setMaximumSize(const Gfx::SizeF& s);    
+        void setMaximumSize(const Gfx::SizeF& s);    
 
-        virtual void setDecoration( WindowDecoration::Flags d );    
+        void setDecoration( WindowDecoration::Flags d );    
 
-        virtual void setTitle( const std::string& t );
-        
-        virtual void close();
+        void setTitle( const std::string& t );
 
         HWND hwnd()
         {
-          return _hwnd;
+            return _hwnd;
         }
 
     private:
@@ -87,10 +89,9 @@ class MainWindowImpl : public WindowImpl
         void setShowMaximizeButton(bool p);
         void setShowSystemMenu(bool p);
 
-    private:    
-        Pt::Hmi::Application& _app; 
-        Screen&               _screen; 
-        HWND                  _hwnd;     
+    private:   
+        HWND    _hwnd;  
+        Screen& _screen;
 };
 
 } // namespace
