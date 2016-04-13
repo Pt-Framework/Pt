@@ -55,7 +55,6 @@ namespace Pt {
 namespace Hmi {
 
 class Window;
-class PaintSurface;
 
 class PT_HMI_API Widget : public Visual
 {
@@ -88,14 +87,12 @@ class PT_HMI_API Widget : public Visual
 
         void remove(Widget& w);
 
-        std::vector<Widget*>& widgets();
-
         const std::vector<Widget*>& widgets() const;
        
         Widget* findWidget( const Gfx::PointF& pos );
 
         //
-        // transformations
+        // transformations TODO
         //
 
         bool contains(const Gfx::PointF& p);
@@ -143,22 +140,31 @@ class PT_HMI_API Widget : public Visual
 
         void processEvent(const Pt::Event& ev);
 
-        void resize( const Gfx::SizeF& s );
-
-
         const Gfx::SizeF& size() const
         {
             return _size;
         }
 
-        void move( const Gfx::PointF& p );
+        void resize( const Gfx::SizeF& s );
 
         const Gfx::PointF& position() const
         {
             return _position;
         }
 
+        void move( const Gfx::PointF& p );
+
+        bool isVisible() const
+        {
+            return _visible;
+        }
+
         void show( bool b = true );
+
+        bool isEnabled() const
+        {
+            return _enabled;
+        }
 
         void enable( bool b = true );
 
@@ -169,12 +175,7 @@ class PT_HMI_API Widget : public Visual
     protected:   
         void onPaint(const Gfx::RectF& updateRect);
 
-    protected:
         virtual void onLayout();
-        
-        //virtual void onPointerEnter();    
-
-        //virtual void onPointerLeave();
 
         virtual void onClicked(const Gfx::PointF& pos);
 
@@ -213,16 +214,6 @@ class PT_HMI_API Widget : public Visual
         String setMnemonic(const String& text);
 
     public:
-        bool isEnabled() const
-        {
-            return _enabled;
-        }
-
-        bool isVisible() const
-        {
-            return _visible;
-        }
-
         void setAutoSize(bool a);
 
         bool isAutoSize() const;

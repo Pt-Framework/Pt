@@ -45,8 +45,8 @@ DockingLayout::~DockingLayout()
 
 void DockingLayout::onLayout()
 {
-    std::vector<Widget*>::iterator it = this->widgets().begin();
-    std::vector<Widget*>::iterator end = this->widgets().end();
+    std::vector<Widget*>::const_iterator it = this->widgets().begin();
+    std::vector<Widget*>::const_iterator end = this->widgets().end();
 
     double posLeft   = padding().left();
     double posTop    = padding().top();

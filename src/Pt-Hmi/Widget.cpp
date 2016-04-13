@@ -132,12 +132,6 @@ void Widget::remove(Widget& widget)
 }
 
 
-std::vector<Widget*>& Widget::widgets()
-{
-    return _children;
-}
-
-
 const std::vector<Widget*>& Widget::widgets() const
 {
     return _children;
@@ -190,7 +184,7 @@ Widget* Widget::findWidget( const Gfx::PointF& pos )
 
 bool Widget::contains(const Gfx::PointF& p)
 {
-    if( p.x()  < size().width() && p.x() >= 0 && p.y() < size().height() && p.y() >= 0)
+    if( p.x() < size().width() && p.x() >= 0 && p.y() < size().height() && p.y() >= 0)
         return true;
  
     return false;
@@ -420,8 +414,8 @@ void Widget::onPaint(const Gfx::RectF& rect)
     PaintEvent pev( vid(), rect);
     Application::instance().loop().commitEvent(pev);
 
-    std::vector<Widget*>& widgets = this->widgets();
-    std::vector<Widget*>::iterator it;
+    const std::vector<Widget*>& widgets = this->widgets();
+    std::vector<Widget*>::const_iterator it;
     for(it = widgets.begin() ; it != widgets.end(); ++it)
     {        
         Widget* w = (*it);

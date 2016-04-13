@@ -35,8 +35,8 @@ namespace Hmi {
 
 void StackLeft(Widget& parent)
 {
-    std::vector<Widget*>::iterator it = parent.widgets().begin();
-    std::vector<Widget*>::iterator end = parent.widgets().end();
+    std::vector<Widget*>::const_iterator it = parent.widgets().begin();
+    std::vector<Widget*>::const_iterator end = parent.widgets().end();
 
     double posLeft = parent.padding().left();
     
@@ -65,8 +65,8 @@ void StackLeft(Widget& parent)
 
 void StackRight(Widget& parent)
 {
-    std::vector<Widget*>::iterator it = parent.widgets().begin();
-    std::vector<Widget*>::iterator end = parent.widgets().end();
+    std::vector<Widget*>::const_iterator it = parent.widgets().begin();
+    std::vector<Widget*>::const_iterator end = parent.widgets().end();
 
     double posRight  = parent.size().width() - parent.padding().right();
 
@@ -98,8 +98,8 @@ void StackRight(Widget& parent)
 
 void StackTop(Widget& parent)
 {
-    std::vector<Widget*>::iterator it = parent.widgets().begin();
-    std::vector<Widget*>::iterator end = parent.widgets().end();
+    std::vector<Widget*>::const_iterator it = parent.widgets().begin();
+    std::vector<Widget*>::const_iterator end = parent.widgets().end();
 
     double posTop = parent.padding().top();
 
@@ -130,8 +130,8 @@ void StackTop(Widget& parent)
 
 void StackBottom(Widget& parent)
 {
-    std::vector<Widget*>::iterator it = parent.widgets().begin();
-    std::vector<Widget*>::iterator end = parent.widgets().end();
+    std::vector<Widget*>::const_iterator it = parent.widgets().begin();
+    std::vector<Widget*>::const_iterator end = parent.widgets().end();
 
     double posBottom = parent.size().height() - parent.padding().bottom();
 
@@ -174,8 +174,8 @@ FlowLayout::~FlowLayout()
 
 void FlowLayout::onLayout()
 {
-    std::vector<Widget*>::iterator it = this->widgets().begin();
-    std::vector<Widget*>::iterator end = this->widgets().end();
+    std::vector<Widget*>::const_iterator it = this->widgets().begin();
+    std::vector<Widget*>::const_iterator end = this->widgets().end();
 
     switch(_alignment)
     {
