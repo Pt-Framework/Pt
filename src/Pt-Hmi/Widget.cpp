@@ -180,8 +180,7 @@ Widget* Widget::findWidget(const Gfx::PointF& pos)
 
 Gfx::PointF Widget::toParent(const Gfx::PointF& pos) const
 {
-    return _parent ? _parent->position() + pos
-                   : pos;
+    return  pos + _position;
 }
 
 
