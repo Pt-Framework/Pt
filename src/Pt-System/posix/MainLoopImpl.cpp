@@ -86,22 +86,23 @@ void MainLoopImpl::exit()
 
 
 void MainLoopImpl::commitEvent(const Event& ev)
-{ 
-    _eventQueue.pushEvent(ev); 
+{
+    _eventQueue.pushEvent(ev);
     wake();
 }
 
 
 void MainLoopImpl::queueEvent(const Event& ev)
-{ 
-    _eventQueue.pushEvent(ev);  
+{
+    _eventQueue.pushEvent(ev);
 }
 
 
 void MainLoopImpl::processEvents()
-{ 
+{
     //TODO: should this also check selectables?
-    return _eventQueue.processEvents(*_event);
+    //return
+    _eventQueue.processEvents(*_event);
 }
 
 
@@ -122,7 +123,7 @@ bool MainLoopImpl::waitNext()
     while( true )
     {
         MutexLock lock(_mutex);
-        
+
         if( _avail.empty() )
             break;
 
