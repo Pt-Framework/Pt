@@ -75,6 +75,10 @@ class PT_HMI_API Widget : public Visual
         
         virtual ~Widget();
 
+        //
+        // widget hierachy
+        //
+
         Window* window();
 
         const Window* window() const;
@@ -92,38 +96,37 @@ class PT_HMI_API Widget : public Visual
         Widget* findWidget( const Gfx::PointF& pos );
 
         //
-        // transformations TODO
+        // coordinate transformations
         //
 
-        bool contains(const Gfx::PointF& p);
+        Gfx::PointF toParent(const Gfx::PointF& pos) const;
 
-        Gfx::PointF toClient(const Gfx::PointF& globalPoint);
+        Gfx::PointF fromParent(const Gfx::PointF& pos) const;
 
-        Gfx::PointF fromClient(const Gfx::PointF& localPoint);
+        Gfx::PointF toWindow(const Gfx::PointF& p) const;
 
-        Gfx::PointF toWindowPosition(const Gfx::PointF& p) const;
-        
-        Gfx::PointF toScreen(const Gfx::PointF& p) const;
+        Gfx::PointF fromWindow(const Gfx::PointF& pos) const;
 
         //
         // focus handling
-        //
-
+        // 
+        
         bool hasFocus() const;
 
         void focus();
 
-        bool acceptFocus() const;
+        bool acceptsFocus() const;
         
-        // TODO: focus by Tab, focus by pointer, both and none 
-        void setAcceptFocus(bool a);
+        // TODO: focus policy:
+        //       focus by Tab, focus by pointer, both and none 
+        void setAcceptsFocus(bool a);
 
         size_t focusIndex() const;
 
         void setFocusIndex(size_t index);
 
         //
-        // special keys
+        // keyboard input
         //
 
         Key actionKey() const;
@@ -134,50 +137,56 @@ class PT_HMI_API Widget : public Visual
 
         void setShortcut(const Key* k);
 
+        const Pt::Char* mnemonic() const; 
+
         void setMnemonicWidget(Widget* w);
 
-        const Pt::Char* mnemonic() const;        
-
-        void processEvent(const Pt::Event& ev);
-
-        const Gfx::SizeF& size() const
-        {
-            return _size;
-        }
-
-        void resize( const Gfx::SizeF& s );
-
-        const Gfx::PointF& position() const
-        {
-            return _position;
-        }
-
-        void move( const Gfx::PointF& p );
-
-        bool isVisible() const
-        {
-            return _visible;
-        }
-
-        void show( bool b = true );
-
-        bool isEnabled() const
-        {
-            return _enabled;
-        }
-
-        void enable( bool b = true );
-
+        //
+        // widget properties
+        //
+        
         void update();
 
         void update(const Gfx::RectF& rect);
 
+        bool isVisible() const;
+
+        void show( bool b = true );
+
+        bool isEnabled() const;
+
+        void enable( bool b = true );
+
+        const Gfx::PointF& position() const;
+
+        void move( const Gfx::PointF& p );
+
+        const Gfx::SizeF& size() const;
+
+        void resize( const Gfx::SizeF& s );
+
+        const Gfx::RectF geometry() const;
+
+        void setGeometry( const Gfx::PointF& pos, const Gfx::SizeF& size);
+
+        // TODO: rethink
+        bool isAutoSize() const;
+
+        // TODO: rethink
+        void setAutoSize(bool a);
+
+        // TODO: rethink
+        Gfx::SizeF preferredSize() const;
+
     protected:   
         void onPaint(const Gfx::RectF& updateRect);
 
+        // TODO: move this to a Layout base class
         virtual void onLayout();
 
         virtual void onClicked(const Gfx::PointF& pos);
+
+        virtual Gfx::SizeF onAutoSize() const;
 
         virtual void onFocus(bool isFocused);
 
@@ -186,21 +195,15 @@ class PT_HMI_API Widget : public Visual
         virtual void onShortcut(const KeyEvent& kev);
 
         virtual void onMnemonic();   
-        
-        virtual Gfx::SizeF onAutoSize() const;
 
     protected:
         virtual void onEvent( const Event& ev );
 
+        virtual void onPaintEvent( const PaintEvent& ev );
+
         virtual void onMoveEvent(const MoveEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
-
-        virtual void onEnterEvent( const EnterEvent& ev );    
-
-        virtual void onLeaveEvent(const LeaveEvent& ev );
-
-        virtual void onPaintEvent( const PaintEvent& ev );
 
         virtual void onPointerEvent(const MouseEvent& ev);
 
@@ -210,27 +213,14 @@ class PT_HMI_API Widget : public Visual
     
         virtual void onKeyEvent(const KeyEvent& ev);
 
+        virtual void onEnterEvent( const EnterEvent& ev );    
+
+        virtual void onLeaveEvent(const LeaveEvent& ev );
+
     protected:
         String setMnemonic(const String& text);
 
     public:
-        void setAutoSize(bool a);
-
-        bool isAutoSize() const;
-
-        Gfx::SizeF preferredSize() const;
-        
-        //
-        // geometry properties
-        //
-
-        const Gfx::RectF geometry() const
-        {
-            return Gfx::RectF( position(), size() );
-        }
-
-        void setGeometry( const Gfx::PointF& pos, const Gfx::SizeF& size);
-
         //
         // layout properties
         //
@@ -311,7 +301,7 @@ class PT_HMI_API Widget : public Visual
         Spacing                      _margin;
         Spacing                      _padding;              
         bool                         _autoSize;
-        bool                         _acceptFocus;
+        bool                         _acceptsFocus;
         bool                         _hasFocus;   
         bool                         _enabled;
         bool                         _visible; 

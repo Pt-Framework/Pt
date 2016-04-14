@@ -89,6 +89,8 @@ class PT_HMI_API Window : public Visual
     const Widget* mainWidget()  const;
 
     void setMainWidget(Widget* widget);
+
+    Widget* findWidget(const Gfx::PointF& pos);
     
     Widget* pointerWidget();
 

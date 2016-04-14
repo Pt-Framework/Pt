@@ -45,7 +45,7 @@ Widget::Widget()
 , _parent(0)
 , _cursor( Hmi::Cursor::defaultCursor() )
 , _autoSize(false)
-, _acceptFocus( false) 
+, _acceptsFocus( false) 
 , _hasFocus( false)
 , _enabled(true)
 , _visible(true)
@@ -132,12 +132,6 @@ void Widget::remove(Widget& widget)
 }
 
 
-const std::vector<Widget*>& Widget::widgets() const
-{
-    return _children;
-}
-
-
 void Widget::setWindow(Window* window)
 {
     onFocus(false);
@@ -156,71 +150,58 @@ void Widget::setWindow(Window* window)
 }
 
 
-Widget* Widget::findWidget( const Gfx::PointF& pos )
+const std::vector<Widget*>& Widget::widgets() const
 {
-    std::vector<Widget*>::reverse_iterator it = _children.rbegin();
+    return _children;
+}
 
+
+Widget* Widget::findWidget(const Gfx::PointF& pos)
+{
     if( ! isVisible() || ! isEnabled() )
         return 0;
 
-    for( ; it != _children.rend(); ++it )
+    std::vector<Widget*>::reverse_iterator it;
+    for(it = _children.rbegin(); it != _children.rend(); ++it)
     {
-        Widget* child = *it;
+        Widget* child = *it;       
 
-        Gfx::PointF localPos = child->toClient( pos );        
-        
-        if( child->contains( localPos ) )
+        if( child->geometry().contains(pos) )
         {
-            Widget* found = child->findWidget( pos );
-
-            if( found )
-                return found;
+            Gfx::PointF p = child->fromParent(pos);
+            Widget* found = child->findWidget(p);
+            return found ? found : child;
         }
     }
-        
-    return contains( toClient( pos ) )  ? this : 0;
+
+    return 0;
 }
 
 
-bool Widget::contains(const Gfx::PointF& p)
+Gfx::PointF Widget::toParent(const Gfx::PointF& pos) const
 {
-    if( p.x() < size().width() && p.x() >= 0 && p.y() < size().height() && p.y() >= 0)
-        return true;
- 
-    return false;
+    return _parent ? _parent->position() + pos
+                   : pos;
 }
 
 
-Gfx::PointF Widget::toClient(const Gfx::PointF& globalPoint)
+Gfx::PointF Widget::fromParent(const Gfx::PointF& pos) const
 {
-    if( _parent == 0 )
-        return globalPoint;
-
-    Gfx::PointF parPoint = _parent->toClient( globalPoint );
-    return Gfx::PointF( parPoint.x() - position().x(), parPoint.y() - position().y() );
+    return pos - _position;
 }
 
- 
-Gfx::PointF Widget::fromClient(const Gfx::PointF& localPoint)
+
+Gfx::PointF Widget::fromWindow(const Gfx::PointF& pos) const
 {
-    double x = localPoint.x();
-    double y = localPoint.y();
-    const Widget* widget = parent();
-    
+    if( ! _parent )
+        return pos;
 
-    while( widget != 0  &&  widget->parent() != 0 )
-    {                        
-        x += widget->position().x();
-        y += widget->position().y();    
-
-        widget = widget->parent();
-    }    
-
-    return Gfx::PointF(x,y);
+    Gfx::PointF p = _parent->fromWindow(pos);
+    return p - _position;
 }
 
 
-Gfx::PointF Widget::toWindowPosition(const Gfx::PointF& p) const
+Gfx::PointF Widget::toWindow(const Gfx::PointF& p) const
 {
     Gfx::PointF pos = p + this->position();
 
@@ -229,30 +210,6 @@ Gfx::PointF Widget::toWindowPosition(const Gfx::PointF& p) const
     for(w = w->parent(); w != 0; w = w->parent())
     {
         pos += w->position();
-    }
-
-    return pos;
-}
-
-
-Gfx::PointF Widget::toScreen(const Gfx::PointF& p) const
-{
-    Gfx::PointF pos = p + this->position();
-
-    const Widget* parentWidget = this->parent();
-    
-    for(; parentWidget; parentWidget = parentWidget->parent())
-    {
-        pos += parentWidget->position();
-    }
-
-    const Window* parentWindow = this->window();
-    if( ! parentWindow )
-        return pos;
-
-    for(; parentWindow; parentWindow = parentWindow->parent())
-    {
-        pos += parentWindow->position();
     }
 
     return pos;
@@ -272,15 +229,15 @@ void Widget::focus()
 }
 
 
-bool Widget::acceptFocus() const
+bool Widget::acceptsFocus() const
 {
-    return _acceptFocus;
+    return _acceptsFocus;
 }
      
         
-void Widget::setAcceptFocus(bool a) 
+void Widget::setAcceptsFocus(bool a) 
 {
-    _acceptFocus = a;
+    _acceptsFocus = a;
 }
 
 
@@ -299,6 +256,12 @@ void Widget::setFocusIndex(size_t index)
 }
 
 
+void Widget::onFocus(bool hasFocus)
+{    
+    _hasFocus = hasFocus;
+}
+
+
 Key Widget::actionKey() const
 {
     return _actionKey;
@@ -307,7 +270,12 @@ Key Widget::actionKey() const
 
 void Widget::setActionKey( Key ak )
 {
-  _actionKey = ak;
+    _actionKey = ak;
+}
+
+
+void Widget::onActionKey(const KeyEvent& kev)
+{
 }
 
 
@@ -332,18 +300,23 @@ void Widget::setShortcut(const Key* k)
 }
 
 
-void Widget::setMnemonicWidget(Widget* w)
+void Widget::onShortcut(const KeyEvent& kev)
 {
-    _mnemonicEntered.disconnect();
-
-    if(w)
-        _mnemonicEntered += Pt::slot(*w, &Widget::onMnemonic);
 }
 
 
 const Pt::Char* Widget::mnemonic() const
 {
     return _mnemonic != 0 ? &_mnemonic : 0;
+}
+
+
+void Widget::setMnemonicWidget(Widget* w)
+{
+    _mnemonicEntered.disconnect();
+
+    if(w)
+        _mnemonicEntered += Pt::slot(*w, &Widget::onMnemonic);
 }
 
 
@@ -383,9 +356,9 @@ String Widget::setMnemonic(const String& text)
 }
 
 
-void Widget::processEvent(const Pt::Event& ev)
+void Widget::onMnemonic()
 {
-     _eventReady.send(ev);
+    _mnemonicEntered.invoke();
 }
 
 
@@ -402,10 +375,116 @@ void Widget::update(const Gfx::RectF& rect)
     if( ! w )
         return;
     
-    Gfx::PointF updatePos = toWindowPosition( rect.topLeft() );
+    Gfx::PointF updatePos = toWindow( rect.topLeft() );
     Gfx::RectF updateRect( updatePos, rect.size() );
 
     w->update(updateRect);
+}
+
+
+bool Widget::isVisible() const
+{
+    return _visible;
+}
+
+
+void Widget::show( bool s )
+{
+    _visible = s;
+    update();
+}
+
+
+bool Widget::isEnabled() const
+{
+    return _enabled;
+}
+
+
+void Widget::enable( bool b )
+{
+    _enabled = b;
+    update();
+}
+
+
+const Gfx::PointF& Widget::position() const
+{
+    return _position;
+}
+
+
+void Widget::move(const Gfx::PointF& pos)
+{
+    Gfx::RectF updateRect(Gfx::PointF(0, 0), _size); 
+
+    Gfx::PointF to = pos - _position;
+    updateRect.unify( Gfx::RectF(to, _size) ); 
+
+    MoveEvent mev(vid(), pos);
+    Application::instance().loop().commitEvent(mev);
+
+    update(updateRect);
+}
+
+
+const Gfx::SizeF& Widget::size() const
+{
+    return _size;
+}
+
+
+void Widget::resize(const Gfx::SizeF& s)
+{
+    Gfx::SizeF updateSize( std::max( size().width(), s.width()), 
+                           std::max( size().height(), s.height()) );
+
+    Gfx::RectF updateRect(Gfx::PointF(0,0), updateSize);
+
+    ResizeEvent rev(vid(), s);
+    Application::instance().loop().commitEvent(rev);
+    
+    update(updateRect);
+}
+
+
+const Gfx::RectF Widget::geometry() const
+{
+    return Gfx::RectF( position(), size() );
+}
+
+
+void Widget::setGeometry(const Gfx::PointF& pos, const Gfx::SizeF& size)
+{
+    move(pos);
+    resize(size);
+}
+
+
+bool Widget::isAutoSize() const
+{
+    return _autoSize;
+}
+
+
+void Widget::setAutoSize(bool a)
+{
+    _autoSize = a;
+}
+
+
+Gfx::SizeF Widget::preferredSize() const
+{
+    if(_autoSize)
+        return this->onAutoSize();
+
+    return size();
+}
+
+
+Gfx::SizeF Widget::onAutoSize() const
+{
+    return Gfx::SizeF(0, 0);
 }
 
 
@@ -428,60 +507,16 @@ void Widget::onPaint(const Gfx::RectF& rect)
     }
 }
 
-// TODO: move this to a Layout base class
+
 void Widget::onLayout()
 {         
 }
 
 
-void Widget::enable( bool b )
+void Widget::onClicked(const Gfx::PointF& pos)
 {
-    _enabled = b;
-    update();
 }
 
-
-void Widget::setGeometry(const Gfx::PointF& pos, const Gfx::SizeF& size)
-{
-    move(pos);
-    resize(size);
-}
-
-
-void Widget::show( bool s )
-{
-    _visible = s;
-    update();
-}
-
-
-void Widget::move(const Gfx::PointF& pos)
-{
-    Gfx::RectF updateRect(Gfx::PointF(0, 0), _size); 
-
-    Gfx::PointF to = pos - _position;
-    updateRect.unify( Gfx::RectF(to, _size) ); 
-
-    MoveEvent mev(vid(), pos);
-    Application::instance().loop().commitEvent(mev);
-
-    update(updateRect);
-}
-
-
-void Widget::resize(const Gfx::SizeF& s)
-{
-    Gfx::SizeF updateSize( std::max( size().width(), s.width()), 
-                           std::max( size().height(), s.height()) );
-
-    Gfx::RectF updateRect(Gfx::PointF(0,0), updateSize);
-
-    ResizeEvent rev(vid(), s);
-    Application::instance().loop().commitEvent(rev);
-    
-    update(updateRect);
-}
- 
 
 void Widget::onEvent(const Pt::Event& ev)
 {
@@ -494,6 +529,12 @@ void Widget::onPaintEvent(const PaintEvent& ev)
 }
 
 
+void Widget::onMoveEvent(const MoveEvent& ev)
+{    
+    _position = ev.position();
+}
+
+
 void Widget::onResizeEvent(const ResizeEvent& ev)
 {    
     _size = ev.size();
@@ -503,15 +544,9 @@ void Widget::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-void Widget::onMoveEvent(const MoveEvent& ev)
-{    
-    _position = ev.position();
-}
-
-
 void Widget::onPointerEvent(const MouseEvent& ev)
 {        
-    if( ev.isPress(MouseEvent::Left) && _acceptFocus )
+    if( ev.isPress(MouseEvent::Left) && _acceptsFocus )
     {
         focus();
     }
@@ -567,71 +602,6 @@ void Widget::onEnterEvent( const EnterEvent& ev )
 
 void Widget::onLeaveEvent(const LeaveEvent& ev )
 {
-}
-
-
-//void Widget::onPointerEnter()
-//{
-//    Application::instance().screen().setCursor( &cursor() );    
-//}
-//
-//
-//void Widget::onPointerLeave()
-//{    
-//}
-
-
-void Widget::onClicked(const Gfx::PointF& pos)
-{
-}
-
-
-void Widget::onFocus(bool hasFocus)
-{    
-    _hasFocus = hasFocus;
-}
-
-
-void Widget::onActionKey(const KeyEvent& kev)
-{
-}
-
-
-void Widget::onShortcut(const KeyEvent& kev)
-{
-}
-
-
-void Widget::onMnemonic()
-{
-    _mnemonicEntered.invoke();
-}
-
-
-Gfx::SizeF Widget::preferredSize() const
-{
-    if(_autoSize)
-        return this->onAutoSize();
-
-    return size();
-}
-
-
-void Widget::setAutoSize(bool a)
-{
-    _autoSize = a;
-}
-
-
-bool Widget::isAutoSize() const
-{
-    return _autoSize;
-}
-
-
-Gfx::SizeF Widget::onAutoSize() const
-{
-    return Gfx::SizeF(0, 0);
 }
 
 } // namespace

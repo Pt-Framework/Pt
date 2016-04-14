@@ -50,7 +50,7 @@ Panel::Panel()
 , _borderRound(false)
 , _borderColor(Gfx::Color::fromRgb8(178,178,178))
 {
-    setAcceptFocus(false);  
+    setAcceptsFocus(false);  
 }
 
 
@@ -63,7 +63,7 @@ void Panel::onPaintEvent( const PaintEvent& ev )
 {
     Widget::onPaintEvent(ev);
 
-    Gfx::PointF winpos = toWindowPosition( Gfx::PointF(0,0) );
+    Gfx::PointF winpos = toWindow( Gfx::PointF(0,0) );
     PaintSurface& windowSurface = this->window()->surface();
 
     Gfx::RectF paintRect(winpos, size());

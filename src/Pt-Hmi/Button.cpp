@@ -48,7 +48,7 @@ Button::Button()
 
   setAutoSize(true);
   setContentAlignment(MiddleCenter);
-  setAcceptFocus(true);
+  setAcceptsFocus(true);
 
   setBorderWidth(1);
   setBorderRound(true);

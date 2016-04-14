@@ -258,6 +258,24 @@ void Window::setMainWidget(Widget* widget)
 }
 
 
+Widget* Window::findWidget(const Gfx::PointF& pos)
+{
+    if( ! isVisible() || ! isEnabled() )
+        return 0;
+
+    if(_mainWidget)
+    {
+        if( _mainWidget->geometry().contains(pos) )
+        {
+            Widget* widget = _mainWidget->findWidget(pos);
+            return widget ? widget : _mainWidget;
+        }
+    }
+
+    return 0;
+}
+
+
 void Window::addWidget(Widget& w)
 {
     addFocusWidget(w);
@@ -380,7 +398,7 @@ void Window::moveFocus(Iter begin, Iter end)
 
         Widget* w = *it;
         
-        if( w->acceptFocus() )
+        if( w->acceptsFocus() )
         {
             setFocusWidget(w);
             return;
@@ -391,7 +409,7 @@ void Window::moveFocus(Iter begin, Iter end)
 
     // handles the case when the current focus widget has just been set to 
     // not accept focus and no other widget can accept focus either.
-    if( _focusWidget && ! _focusWidget->acceptFocus() )
+    if( _focusWidget && ! _focusWidget->acceptsFocus() )
     {
         setFocusWidget(0);
     }
@@ -806,7 +824,7 @@ void Window::onPointerEvent(const MouseEvent& ev)
         return;
     }
 
-    Widget* widget = _mainWidget->findWidget( ev.position() );
+    Widget* widget = findWidget( ev.position() );
 
     // widget can be null
     setPointerWidget(widget);
@@ -815,7 +833,7 @@ void Window::onPointerEvent(const MouseEvent& ev)
     {
         MouseEvent clientEv(ev);
         clientEv.setId( widget->vid() );
-        clientEv.setPosition( widget->toClient(ev.position()) );
+        clientEv.setPosition( widget->fromWindow(ev.position()) );
         Application::instance().loop().commitEvent(clientEv); 
     }
 }
