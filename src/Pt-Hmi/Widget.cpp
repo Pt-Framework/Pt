@@ -41,15 +41,16 @@ namespace Pt {
 namespace Hmi {
 
 Widget::Widget()
-: _window(0)
-, _parent(0)
-, _cursor( Hmi::Cursor::defaultCursor() )
-, _autoSize(false)
-, _acceptsFocus( false) 
-, _hasFocus( false)
-, _enabled(true)
+: _parent(0)
+, _window(0)
 , _visible(true)
+, _enabled(true)
+, _hasFocus( false)
+, _acceptsFocus( false) 
+, _focusIndex(0)
+, _cursor( Hmi::Cursor::defaultCursor() )
 , _actionKey(Key::Space)
+, _autoSize(false)
 , _mnemonic(0)
 {      
     _eventReady += Pt::slot(*this, &Widget::onKeyEvent );
@@ -460,6 +461,21 @@ void Widget::setGeometry(const Gfx::PointF& pos, const Gfx::SizeF& size)
 }
 
 
+const Cursor& Widget::cursor() const
+{
+    return  _cursor;
+}
+
+
+void Widget::setCursor( const Cursor& c ) 
+{
+    _cursor = c;
+
+    // TODO: if this is the pointer widget do the same as onEnterEvent
+    // Application::instance().screen().setCursor( &cursor() );
+}
+
+
 bool Widget::isAutoSize() const
 {
     return _autoSize;
@@ -484,6 +500,54 @@ Gfx::SizeF Widget::preferredSize() const
 Gfx::SizeF Widget::onAutoSize() const
 {
     return Gfx::SizeF(0, 0);
+}
+
+
+const Spacing& Widget::margin() const
+{
+    return _margin;                  
+}
+
+
+void Widget::setMargin(const Spacing& s)
+{
+    _margin = s;
+}
+
+
+void Widget::setMargin(double n)
+{
+    _margin.setAll(n);
+}
+
+
+const Spacing& Widget::padding() const
+{
+    return _padding;
+}
+
+
+void Widget::setPadding( const Spacing& p )
+{
+    _padding = p;
+}
+
+
+void Widget::setPadding(double n)
+{
+    _padding.setAll(n);
+}
+
+
+const Docking& Widget::docking() const
+{
+    return _docking;
+}
+
+
+void Widget::setDocking(const Docking& d)
+{
+    _docking = d;
 }
 
 

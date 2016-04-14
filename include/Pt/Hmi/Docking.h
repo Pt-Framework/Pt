@@ -23,8 +23,8 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
-    02110-1301  USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301  USA
 */
 
 #ifndef Pt_Hmi_Docking_H
@@ -53,36 +53,37 @@ class Docking
         : _type(Fill)        
         { }
 
-        Type type() const 
+        Docking(Type type)
+        : _type(type)        
+        { }
+
+        Docking operator=(Type type)
         {
-            return _type; 
+          _type = type;
+          return *this;
         }
 
-        void setType( Type t )
+        Type type() const
         {
-            _type = t;
-        }
-
-        const Spacing& margin() const
-        {
-            return _margin;
-        }
-
-        Spacing& margin()
-        {
-            return _margin;
-        }
-
-        void setMargin( const Spacing& m )
-        {
-            _margin = m;
+            return _type;
         }
     
+        bool operator ==(const Docking& d) const
+        {
+            return _type == d._type;
+        }
+
+        bool operator !=(const Docking& d) const
+        {
+            return _type != d._type;
+        }
+
     private:
-        Type    _type;        
-        Spacing _margin;
+        Type _type;        
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif

@@ -63,14 +63,14 @@ class PT_HMI_API Widget : public Visual
     public: 
         enum ImageLayout
         {
-            NoLayout,        
+            NoLayout,
             Tile,
             Center,
             Strech,
             Zoom
         };
 
-    public:    
+    public:
         Widget();
         
         virtual ~Widget();
@@ -92,7 +92,7 @@ class PT_HMI_API Widget : public Visual
         void remove(Widget& w);
 
         const std::vector<Widget*>& widgets() const;
-       
+
         Widget* findWidget( const Gfx::PointF& pos );
 
         //
@@ -110,13 +110,13 @@ class PT_HMI_API Widget : public Visual
         //
         // focus handling
         // 
-        
+
         bool hasFocus() const;
 
         void focus();
 
         bool acceptsFocus() const;
-        
+
         // TODO: focus policy:
         //       focus by Tab, focus by pointer, both and none 
         void setAcceptsFocus(bool a);
@@ -142,9 +142,9 @@ class PT_HMI_API Widget : public Visual
         void setMnemonicWidget(Widget* w);
 
         //
-        // widget properties
+        // widget operations
         //
-        
+
         void update();
 
         void update(const Gfx::RectF& rect);
@@ -169,6 +169,14 @@ class PT_HMI_API Widget : public Visual
 
         void setGeometry( const Gfx::PointF& pos, const Gfx::SizeF& size);
 
+        const Cursor& cursor() const;
+
+        void setCursor( const Cursor& c );
+
+        //
+        // layouting
+        //
+
         // TODO: rethink
         bool isAutoSize() const;
 
@@ -178,7 +186,27 @@ class PT_HMI_API Widget : public Visual
         // TODO: rethink
         Gfx::SizeF preferredSize() const;
 
-    protected:   
+        // outer spacing
+        const Spacing& margin() const;
+
+        // outer spacing
+        void setMargin(const Spacing& s);
+
+        // outer spacing
+        void setMargin(double n);
+
+        // inner spacing
+        const Spacing& padding() const;
+
+        void setPadding(const Spacing& p);
+
+        void setPadding(double n);
+
+        const Docking& docking() const;
+
+        void setDocking(const Docking& d);
+
+    protected:
         void onPaint(const Gfx::RectF& updateRect);
 
         // TODO: move this to a Layout base class
@@ -190,11 +218,11 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onFocus(bool isFocused);
 
-        virtual void onActionKey(const KeyEvent& kev);    
-              
+        virtual void onActionKey(const KeyEvent& kev);
+
         virtual void onShortcut(const KeyEvent& kev);
 
-        virtual void onMnemonic();   
+        virtual void onMnemonic();
 
     protected:
         virtual void onEvent( const Event& ev );
@@ -208,109 +236,48 @@ class PT_HMI_API Widget : public Visual
         virtual void onPointerEvent(const MouseEvent& ev);
 
         virtual void onTouchEvent(const TouchEvent& ev);
-        
-        virtual void onScrollEvent( const ScrollEvent& ev );        
-    
+
+        virtual void onScrollEvent( const ScrollEvent& ev );
+
         virtual void onKeyEvent(const KeyEvent& ev);
 
-        virtual void onEnterEvent( const EnterEvent& ev );    
+        virtual void onEnterEvent( const EnterEvent& ev );
 
         virtual void onLeaveEvent(const LeaveEvent& ev );
 
     protected:
         String setMnemonic(const String& text);
 
-    public:
-        //
-        // layout properties
-        //
-
-        Docking& docking()
-        {
-            return _docking;
-        }
-
-        const Docking& docking() const
-        {
-            return _docking;
-        }
-
-        void setDocking( const Docking& d )
-        {
-            _docking = d;
-        }
-
-        // outer spacing
-        Spacing& margin()
-        {
-            return _margin;                  
-        }
-
-        const Spacing& margin() const
-        {
-            return _margin;                  
-        }
-
-        void setMargin( const Spacing& s )
-        {
-            _margin = s;
-        }
-
-        // inner spacing
-        const Spacing& padding() const
-        {
-            return _padding;
-        }
-
-        Spacing& padding()
-        {
-            return _padding;
-        }
-
-        void setPadding( const Spacing& p )
-        {
-            _padding = p;
-        }
-
-        //
-        // apperance properties
-        //
-        const Hmi::Cursor& cursor() const
-        {
-            return  _cursor;
-        }
-
-        void setCursor( const Hmi::Cursor& c ) 
-        {
-            _cursor = c;
-        }
-
     private:
         void setWindow(Window* window);
-        
+
     private:
         Pt::Signal<const Pt::Event&> _eventReady;
-        Window*                      _window; 
-        Widget*                      _parent;    
-        std::vector<Widget*>         _children;        
-        Hmi::Cursor                  _cursor;
-        Key                          _shortcutKey;        
-        Pt::Char                     _mnemonic;    
-        Pt::Delegate<void>           _mnemonicEntered;
-        Docking                      _docking;
-        Spacing                      _margin;
-        Spacing                      _padding;              
-        bool                         _autoSize;
-        bool                         _acceptsFocus;
-        bool                         _hasFocus;   
-        bool                         _enabled;
-        bool                         _visible; 
-        Key                          _actionKey;
-        size_t                       _focusIndex;     
-        Gfx::PointF                  _position;
-        Gfx::SizeF                   _size;   
-};
 
+        std::vector<Widget*>         _children;
+        Widget*                      _parent; 
+        Window*                      _window; 
+
+        bool                         _visible;
+        bool                         _enabled;
+        Gfx::PointF                  _position;
+        Gfx::SizeF                   _size;
+
+        bool                         _hasFocus;
+        bool                         _acceptsFocus;
+        size_t                       _focusIndex;
+
+        Hmi::Cursor                  _cursor;
+        Key                          _actionKey;
+        Key                          _shortcutKey;
+        Pt::Char                     _mnemonic;
+        Pt::Delegate<void>           _mnemonicEntered;
+
+        bool                         _autoSize;
+        Spacing                      _padding;
+        Spacing                      _margin;
+        Docking                      _docking;
+};
 
 } // namespace
 

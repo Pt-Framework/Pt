@@ -25,7 +25,7 @@ ChildW::ChildW(const std::string& title)
     _textLabel.setBackgroundColor( Gfx::Color(1,1,1,0) );
     _textLabel.setMnemonicWidget(&_toggleButton);
     _textLabel.setCursor( Hmi::Cursor::waitCursor() );
-    _textLabel.docking().setType(Docking::Fill);  
+    _textLabel.setDocking(Docking::Fill);  
 
     //Toggle button
     _toggleButton.setName("ToggleButton");
@@ -35,9 +35,9 @@ ChildW::ChildW(const std::string& title)
     _toggleButton.setShortcut( &key );
     _toggleButton.move( Gfx::PointF(20,30) );
     _toggleButton.resize( Gfx::SizeF(130,30) ); 
-    _toggleButton.margin().setAll(5);
-    _toggleButton.padding().setAll(5);
-    _toggleButton.docking().setType( Docking::Bottom );    
+    _toggleButton.setMargin(5);
+    _toggleButton.setPadding(5);
+    _toggleButton.setDocking( Docking::Bottom );    
 
     //Dialog button   
     _dialogButton.setName("DialogButton");  
@@ -46,9 +46,9 @@ ChildW::ChildW(const std::string& title)
     _dialogButton.setShortcut( &dKey );
     _dialogButton.move( Gfx::PointF(20,100));
     _dialogButton.resize( Gfx::SizeF(130,30) );
-    _dialogButton.margin().setAll(5);
-    _dialogButton.padding().setAll(5);
-    _dialogButton.docking().setType( Docking::Bottom );
+    _dialogButton.setMargin(5);
+    _dialogButton.setPadding(5);
+    _dialogButton.setDocking( Docking::Bottom );
     _dialogButton.clicked() += Pt::slot(*this, &ChildW::onShowDialog);
     
     
@@ -61,17 +61,16 @@ ChildW::ChildW(const std::string& title)
     _closeButton.setShortcut(&xKey);
     _closeButton.move( Gfx::PointF(20,200) );
     _closeButton.resize( Gfx::SizeF(130, 30) );
-    _closeButton.margin().setAll(5);
-    _closeButton.padding().setAll(5);
-    _closeButton.docking().setType( Docking::Bottom );
+    _closeButton.setMargin(5);
+    _closeButton.setPadding(5);
+    _closeButton.setDocking( Docking::Bottom );
     _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);
-    
 
     _buttonBar.setAlignment(FlowLayout::Bottom);
     _buttonBar.setName("ButtonBar");
     _buttonBar.resize( Gfx::SizeF(700, 180) );
-    _buttonBar.padding().setAll(5);
-    _buttonBar.docking().setType( Docking::Bottom );
+    _buttonBar.setPadding(5);
+    _buttonBar.setDocking(Docking::Bottom);
     _buttonBar.add(_closeButton);
     _buttonBar.add(_dialogButton);
     _buttonBar.add(_toggleButton);
@@ -81,7 +80,7 @@ ChildW::ChildW(const std::string& title)
     _mainWidget.resize( Gfx::SizeF(800, 600) );
     _mainWidget.move( Gfx::PointF(20,20) );
     _mainWidget.setName("MainPanel");
-    _mainWidget.padding().setAll(20); 
+    _mainWidget.setPadding(20); 
     _mainWidget.add(_textLabel);
     _mainWidget.add(_buttonBar);    
 

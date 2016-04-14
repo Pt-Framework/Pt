@@ -67,15 +67,15 @@ class PT_HMI_API Window : public Visual
    friend class Widget; 
    friend class Screen;
 
-  public:           
-    explicit Window(Window* parent = 0);     
+  public:
+    explicit Window(Window* parent = 0);
 
-    virtual ~Window();                                
+    virtual ~Window();
 
     Window* parent();
 
     const Window* parent() const;
-    
+
     const std::vector<Window*>& windows() const;
 
     void add(Window& w);
@@ -91,7 +91,7 @@ class PT_HMI_API Window : public Visual
     void setMainWidget(Widget* widget);
 
     Widget* findWidget(const Gfx::PointF& pos);
-    
+
     Widget* pointerWidget();
 
     const Widget* pointerWidget() const;
@@ -99,7 +99,7 @@ class PT_HMI_API Window : public Visual
     Widget* focusWidget();
 
     void focusNext();
-    
+
     void focusPrev();
 
     void update();
@@ -113,7 +113,7 @@ class PT_HMI_API Window : public Visual
     bool isVisible() const;
 
     void show( bool b = true );
-    
+
     bool isEnabled() const;
 
     void enable( bool e = true );
@@ -153,8 +153,6 @@ class PT_HMI_API Window : public Visual
 
     void onClose(Window& w);
 
-    void onPaint(Window& w, const Gfx::RectF& rect);
-
   protected:
     virtual void onEvent(const Pt::Event& ev);
 
@@ -163,22 +161,22 @@ class PT_HMI_API Window : public Visual
     virtual void onPointerEvent( const MouseEvent& ev );
 
     virtual void onTouchEvent( const TouchEvent& ev );
-    
+
     virtual void onScrollEvent( const ScrollEvent& ev );
 
     virtual void onKeyEvent( const KeyEvent& ev );
 
-    virtual void onEnterEvent( const EnterEvent& ev );    
+    virtual void onEnterEvent( const EnterEvent& ev );
 
     virtual void onLeaveEvent(const LeaveEvent& ev );
-    
+
     virtual void onMoveEvent(const MoveEvent& ev);
 
     virtual void onResizeEvent(const ResizeEvent& ev);
-    
+
     virtual void onCloseEvent(const CloseEvent& ev);
 
-    virtual void onActivateEvent(const ActivateEvent& ev);  
+    virtual void onActivateEvent(const ActivateEvent& ev);
 
     virtual void onShowEvent( const ShowEvent& ev );
 
@@ -265,7 +263,7 @@ class PT_HMI_API Window : public Visual
 
     void removeFocusWidget(Widget& w);
 
-    void setFocusIndex(Widget& w, size_t index);  
+    void setFocusIndex(Widget& w, size_t index);
     
     void setShortcut(Widget& w, const Key* key);
 
@@ -290,7 +288,6 @@ class PT_HMI_API Window : public Visual
     bool                           _isActive;
     bool                           _enabled; 
     bool                           _isClosed; 
-
     Gfx::PointF                    _position;
     Gfx::SizeF                     _size;
 
