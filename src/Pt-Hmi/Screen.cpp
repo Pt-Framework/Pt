@@ -48,6 +48,103 @@ Screen::~Screen()
 }
 
 
+const std::vector<Window*>& Screen::windows() const
+{
+  return _windows;
+}
+
+
+std::vector<Window*>& Screen::windows()
+{
+  return _windows;
+}
+    
+
+Window* Screen::findWindow(const std::string& name)
+{
+    std::vector<Window*>::iterator it;
+    for(it = _windows.begin(); it != _windows.end(); ++it)
+    {
+        if( (*it)->name() == name )
+            return *it;
+    }
+    
+    return 0;
+}
+
+
+double Screen::width() const
+{
+    return _impl->width();
+}
+        
+
+double Screen::height() const
+{
+    return _impl->height();
+}
+
+
+Gfx::SizeF Screen::size() const
+{
+    return Gfx::SizeF( width(), height() );
+}
+
+
+Gfx::PointF Screen::toUnit(const Gfx::Point& value)
+{
+    return _impl->toUnit(value);
+}
+
+
+Gfx::SizeF Screen::toUnit(const Gfx::Size& value)
+{
+    return _impl->toUnit(value);
+}
+
+
+Gfx::Point Screen::fromUnit(const Gfx::PointF& value)
+{
+    return _impl->fromUnit(value);
+}
+
+
+Gfx::Size Screen::fromUnit(const Gfx::SizeF& value)
+{
+    return _impl->fromUnit(value);
+}
+
+
+Gfx::Rect Screen::fromUnit(const Gfx::RectF& value)
+{
+    return _impl->fromUnit(value);
+}
+
+
+double Screen::unitSizeInch() const
+{
+    return _impl->unitSizeInch();
+}
+
+
+double Screen::unitSizeMm() const
+{
+    return _impl->unitSizeMm();
+}
+
+
+double Screen::resolutionDPI() const
+{
+    return _impl->resolutionDPI();
+}
+
+
+ScreenImpl* Screen::impl()
+{
+    return _impl;
+}
+
+
 void Screen::onResize(Window& w, const Gfx::SizeF& s)
 {
     _impl->onResize(w, s);
@@ -149,90 +246,6 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
 }
 
 
-double Screen::width() const
-{
-    return _impl->width();
-}
-        
-
-double Screen::height() const
-{
-    return _impl->height();
-}
-
-
-Gfx::PointF Screen::toUnit(const Gfx::Point& value)
-{
-    return _impl->toUnit(value);
-}
-
-
-Gfx::SizeF Screen::toUnit(const Gfx::Size& value)
-{
-    return _impl->toUnit(value);
-}
-
-
-Gfx::Point Screen::fromUnit(const Gfx::PointF& value)
-{
-    return _impl->fromUnit(value);
-}
-
-
-Gfx::Size Screen::fromUnit(const Gfx::SizeF& value)
-{
-    return _impl->fromUnit(value);
-}
-
-
-Gfx::Rect Screen::fromUnit(const Gfx::RectF& value)
-{
-    return _impl->fromUnit(value);
-}
-
-
-double Screen::unitSizeInch() const
-{
-    return _impl->unitSizeInch();
-}
-
-
-int Screen::fromUnit(double val) 
-{
-    return _impl->fromUnit(val);
-}
-
-
-double Screen::toUnit(int val) 
-{
-    return _impl->toUnit(val);
-}
-
-
-double Screen::unitSizeMm() const
-{
-    return _impl->unitSizeMm();
-}
-
-
-void Screen::setResolution(double dpi)
-{
-    _impl->setResolution(dpi);
-}
-
-
-double Screen::resolutionDPI() const
-{
-    return _impl->resolutionDPI();
-}
-
-
-void Screen::setCursor( const Cursor* cursor )
-{
-  _impl->setCursor( cursor );
-}
-
-
 void Screen::registerWindow(Window& w)
 {
     _windows.push_back(&w);
@@ -248,35 +261,6 @@ void Screen::unregisterWindow(Window& w)
     if( it != _windows.end() )
         _windows.erase(it);
 }
-
-/*
-Widget* Screen::findWidget(const std::string& name)
-{
-    std::vector<Window*>::iterator it;
-    for(it = _windows.begin(); it != _windows.end(); ++it)
-    {
-        Widget* w = (*it)->findWidget(name);
-        if(w)
-            return w;
-    }
-    
-    return 0;
-}
-
-
-Window* Screen::findWindow(const std::string& name)
-{
-    std::vector<Window*>::iterator it;
-    for(it = _windows.begin(); it != _windows.end(); ++it)
-    {
-        Window* w = (*it)->findWindow(name);
-        if(w)
-            return w;
-    }
-    
-    return 0;
-}
-*/
 
 } // namespace
 

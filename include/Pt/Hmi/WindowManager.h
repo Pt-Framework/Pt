@@ -42,7 +42,6 @@
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/ResizeDirection.h>
-#include <Pt/Hmi/DeviceButton.h>
 
 namespace Pt {
 

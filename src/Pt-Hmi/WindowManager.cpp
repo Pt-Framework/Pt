@@ -354,28 +354,26 @@ ResizeDirection::Type WindowManager::isSizing(const Window& w, const Pt::Hmi::Mo
 
 void WindowManager::setSizingCursor( ResizeDirection::Type type )
 {
-    Screen& screen = _app.screen();
-
     switch( type )
     {
         case ResizeDirection::East:
         case ResizeDirection::West:
-            screen.setCursor( &Hmi::Cursor::sizeWECursor() );
+            _app.setCursor( &Hmi::Cursor::sizeWECursor() );
         break;
 
         case ResizeDirection::NorthEast:
         case ResizeDirection::SouthWest:
-            screen.setCursor( &Hmi::Cursor::sizeNESWCursor() );
+            _app.setCursor( &Hmi::Cursor::sizeNESWCursor() );
         break;
 
         case ResizeDirection::North:        
         case ResizeDirection::South:
-            screen.setCursor( &Hmi::Cursor::sizeNSCursor() );
+            _app.setCursor( &Hmi::Cursor::sizeNSCursor() );
         break;
         
         case ResizeDirection::NorthWest:
         case ResizeDirection::SouthEast:
-            screen.setCursor( &Hmi::Cursor::sizeNWSECursor() );
+            _app.setCursor( &Hmi::Cursor::sizeNWSECursor() );
         break;        
     }
 }
@@ -412,7 +410,7 @@ bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
     // pointer on window title bar
     if( isMoving(*_managedWindow, mev) )
     {
-        _app.screen().setCursor( &Cursor::moveCursor() );
+        _app.setCursor( &Cursor::moveCursor() );
         _app.setPointerWindow( 0 );
         _state = &WindowManager::onWindowFrame;
         return true;
@@ -454,7 +452,7 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
     // pointer on window title bar
     if( isMoving(*_managedWindow, mev) )
     {
-        _app.screen().setCursor( &Cursor::moveCursor() );
+        _app.setCursor( &Cursor::moveCursor() );
         _app.setPointerWindow( 0);
 
         if( mev.isPress(_actionButton) )
@@ -512,7 +510,7 @@ bool WindowManager::onWindowContent(const Pt::Hmi::MouseEvent& mev)
     // pointer on window title bar
     if( isMoving(*_managedWindow, mev) )
     {
-        _app.screen().setCursor( &Cursor::moveCursor() );
+        _app.setCursor( &Cursor::moveCursor() );
         _app.setPointerWindow( 0);
         _state = &WindowManager::onWindowFrame;
         return true;
@@ -547,7 +545,7 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
         return false;
     }
     
-    _app.screen().setCursor( &Cursor::moveCursor() );        
+    _app.setCursor( &Cursor::moveCursor() );        
 
     const double dX = mev.x() - _lastPointerPosition.x();
     const double dY = mev.y() - _lastPointerPosition.y();

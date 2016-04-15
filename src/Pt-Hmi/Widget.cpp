@@ -659,7 +659,7 @@ void Widget::onKeyEvent(const KeyEvent& ev)
 
 void Widget::onEnterEvent( const EnterEvent& ev )
 {
-    Application::instance().screen().setCursor( &cursor() ); 
+    Application::instance().setCursor( &cursor() ); 
 }
 
 

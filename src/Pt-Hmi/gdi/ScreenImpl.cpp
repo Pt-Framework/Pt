@@ -39,10 +39,8 @@ namespace Hmi {
 
 ScreenImpl::ScreenImpl(ApplicationImpl&)
 : _dpi(96.0)
-, _cursorHandle(0)
-, _currentCursor(0)
 {
-      _size = screeResolution();
+      _size = screenResolution();
 
     _width  = _size.width() * unitSizeInch()*_dpi;
     _height = _size.height() * unitSizeInch()*_dpi;
@@ -57,8 +55,6 @@ ScreenImpl::ScreenImpl(ApplicationImpl&)
 
 ScreenImpl::~ScreenImpl()
 {
-   if( _cursorHandle != 0 )
-       DestroyCursor( _cursorHandle );
 }
 
 
@@ -120,29 +116,16 @@ double ScreenImpl::height() const
 }
 
 
-void ScreenImpl::setResolution(double dpi)
-{
-    _dpi = dpi;
-}
+//void ScreenImpl::setResolution(double dpi)
+//{
+//    _dpi = dpi;
+//}
 
 
 double ScreenImpl::resolutionDPI() const
 {
     return _dpi;
 }
-
-
-int ScreenImpl::fromUnit(double unit)
-{
-    return (int) (unit *unitSizeInch()* _dpi);
-}
-
-
-double ScreenImpl::toUnit(int unit)
-{
-    return unitSizeInch()/_dpi * unit;
-}
-
 
 Gfx::PointF ScreenImpl::toUnit(const Gfx::Point& value)
 {
@@ -202,77 +185,7 @@ double ScreenImpl::unitSizeMm() const
 }
 
 
-HBITMAP ScreenImpl::createImage888(const Pt::uint8_t* data, size_t width, size_t height)
-{
-    HDC hDC        = ::GetDC(NULL);
-    HDC hMainDC    = ::CreateCompatibleDC(hDC); 
-
-    BITMAPINFO bitmapInfo;
-    ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
-
-    bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER); // Size of this struct.
-    bitmapInfo.bmiHeader.biWidth       = width;             // Bitmap width.
-    bitmapInfo.bmiHeader.biHeight      = -(ssize_t)height;  // Bitmap height. Negative value = top-down image.
-    bitmapInfo.bmiHeader.biPlanes      = 1;                 // Always 1.
-    bitmapInfo.bmiHeader.biBitCount    = 32;                // We internally use a 32-bit bitmap.
-    bitmapInfo.bmiHeader.biCompression = BI_RGB;            // Uncompressed (top-down) RGB bitmap.
-    bitmapInfo.bmiHeader.biSizeImage   = 0;                 // 0 = automatic for BI_RGB-images.
-    bitmapInfo.bmiHeader.biClrUsed     = 0;                 // 0 = No color table.
-    bitmapInfo.bmiHeader.biClrImportant= 0;                 // 0 = No color table.
-
-    VOID* imageBits;
-    HBITMAP bitmap = CreateDIBSection(hMainDC, &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
-
-    memcpy(imageBits, data, width * height * 3);
-
-    ::DeleteDC(hMainDC);
-    ::ReleaseDC(NULL,hDC);
-
-    return bitmap;
-}
-
-
-void ScreenImpl::setCursor(const Cursor* cursor)
-{      
-    if( _currentCursor == cursor )
-        return;
-
-    _currentCursor = cursor;
-
-    if( cursor == 0 )
-        return;
-
-   if( _cursorHandle != 0 )            
-       DestroyCursor( _cursorHandle );
-
-    if( cursor->empty() )
-    {
-        SetCursor(0);
-        return;
-    }
-
-    HBITMAP andMask = createImage888( &cursor->andRgb888()[0], cursor->width(),  cursor->height() );
-    HBITMAP xorMask = createImage888( &cursor->xorRgb888()[0], cursor->width(),  cursor->height() );
-
-    ICONINFO iconInfo;
-
-    iconInfo.fIcon = false; 
-    iconInfo.xHotspot = cursor->xHotspot();
-    iconInfo.yHotspot = cursor->yHotspot();
-    iconInfo.hbmColor = xorMask;
-    iconInfo.hbmMask  = andMask;
-
-    _cursorHandle = CreateIconIndirect(&iconInfo);
-
-    if( _cursorHandle != 0 )
-      SetCursor( _cursorHandle );    
-
-    DeleteObject( andMask );
-    DeleteObject( xorMask );
-}
-
-
-Gfx::Size ScreenImpl::screeResolution()
+Gfx::Size ScreenImpl::screenResolution()
 {
   RECT desktop;    
   GetWindowRect(GetDesktopWindow(), &desktop);

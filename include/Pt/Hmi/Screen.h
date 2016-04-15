@@ -37,6 +37,8 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
+#include <map>
+#include <vector>
 
 namespace Pt {
 
@@ -54,62 +56,37 @@ class PT_HMI_API Screen : public Visual
 
         virtual ~Screen();
 
+        const std::vector<Window*>& windows() const;
+
+        std::vector<Window*>& windows();
+
+        Window* findWindow(const std::string& name);
+
         double width() const;
 
         double height() const;
     
-        Gfx::SizeF size() const
-        {
-            return Gfx::SizeF( width(), height() );
-        }
+        Gfx::SizeF size() const;
 
-        Gfx::PointF toUnit( const Gfx::Point& value );
+        Gfx::PointF toUnit(const Gfx::Point& value);
       
-        Gfx::SizeF toUnit( const Gfx::Size& value );
+        Gfx::SizeF toUnit(const Gfx::Size& value);
       
-        double toUnit( int value );
-
-        Gfx::Point fromUnit( const Gfx::PointF& value );
+        Gfx::Point fromUnit(const Gfx::PointF& value);
       
-        Gfx::Size fromUnit( const Gfx::SizeF& value );
+        Gfx::Size fromUnit(const Gfx::SizeF& value);
       
-        Gfx::Rect fromUnit( const Gfx::RectF& value );
-      
-        int fromUnit( double value );
+        Gfx::Rect fromUnit(const Gfx::RectF& value);
 
         double unitSizeInch() const;
       
         double unitSizeMm() const;
-
-        void setResolution( double dpi );
       
         double resolutionDPI() const;
     
-        void setCursor( const Cursor* cursor = 0 );
-
-        ScreenImpl* impl()
-        {
-            return _impl;
-        }        
-
-        const std::vector<Window*>& windows() const
-        {
-          return _windows;
-        }
-
-        std::vector<Window*>& windows()
-        {
-          return _windows;
-        }
+        ScreenImpl* impl();
 
     protected:
-        virtual void onEvent( const Event& ev );
-        
-        virtual void onUpdateEvent(const UpdateEvent& ev);
-
-    protected:
-        void onUpdate(Window& w, const Gfx::RectF& rect);
-
         void onResize(Window& w, const Gfx::SizeF& s);
 
         void onMove(Window& w, const Gfx::PointF& p);
@@ -121,6 +98,13 @@ class PT_HMI_API Screen : public Visual
         void onActivate(Window& w);
 
         void onEnable(Window& w, bool enable);
+
+        void onUpdate(Window& w, const Gfx::RectF& rect);
+
+    protected:
+        virtual void onEvent( const Event& ev );
+        
+        virtual void onUpdateEvent(const UpdateEvent& ev);
 
     protected:
         void registerWindow(Window& w);

@@ -222,6 +222,8 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onShortcut(const KeyEvent& kev);
 
+        String setMnemonic(const String& text);
+
         virtual void onMnemonic();
 
     protected:
@@ -244,9 +246,6 @@ class PT_HMI_API Widget : public Visual
         virtual void onEnterEvent( const EnterEvent& ev );
 
         virtual void onLeaveEvent(const LeaveEvent& ev );
-
-    protected:
-        String setMnemonic(const String& text);
 
     private:
         void setWindow(Window* window);

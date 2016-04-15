@@ -820,7 +820,7 @@ void Window::onPointerEvent(const MouseEvent& ev)
         ! _mainWidget->isEnabled() )
     {
         // TODO: the window manager should do this
-        Application::instance().screen().setCursor( &Cursor::defaultCursor() ); 
+        Application::instance().setCursor( &Cursor::defaultCursor() ); 
         return;
     }
 

@@ -75,6 +75,12 @@ Application& Application::instance()
 }
 
 
+void Application::setCursor( const Cursor* cursor )
+{
+  _impl->setCursor( cursor );
+}
+
+
 const Screen& Application::screen() const
 {
     return *_mainScreen;

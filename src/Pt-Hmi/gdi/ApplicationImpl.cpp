@@ -36,7 +36,41 @@
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/System/IOError.h>
+#include <Pt/Types.h>
 #include <WindowsX.h>
+
+namespace {
+
+HBITMAP createImage888(const Pt::uint8_t* data, size_t width, size_t height)
+{
+    HDC hDC        = ::GetDC(NULL);
+    HDC hMainDC    = ::CreateCompatibleDC(hDC); 
+
+    BITMAPINFO bitmapInfo;
+    ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+
+    bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER); // Size of this struct.
+    bitmapInfo.bmiHeader.biWidth       = width;             // Bitmap width.
+    bitmapInfo.bmiHeader.biHeight      = -(Pt::ssize_t)height;  // Bitmap height. Negative value = top-down image.
+    bitmapInfo.bmiHeader.biPlanes      = 1;                 // Always 1.
+    bitmapInfo.bmiHeader.biBitCount    = 32;                // We internally use a 32-bit bitmap.
+    bitmapInfo.bmiHeader.biCompression = BI_RGB;            // Uncompressed (top-down) RGB bitmap.
+    bitmapInfo.bmiHeader.biSizeImage   = 0;                 // 0 = automatic for BI_RGB-images.
+    bitmapInfo.bmiHeader.biClrUsed     = 0;                 // 0 = No color table.
+    bitmapInfo.bmiHeader.biClrImportant= 0;                 // 0 = No color table.
+
+    VOID* imageBits;
+    HBITMAP bitmap = CreateDIBSection(hMainDC, &bitmapInfo, DIB_RGB_COLORS, &imageBits, NULL, 0);
+
+    memcpy(imageBits, data, width * height * 3);
+
+    ::DeleteDC(hMainDC);
+    ::ReleaseDC(NULL,hDC);
+
+    return bitmap;
+}
+
+}
 
 namespace Pt {
 
@@ -93,6 +127,8 @@ ApplicationImpl::ApplicationImpl()
 , _mouseEvent(0)
 , _keyEvent(0)
 , _pointerInWindow(false)
+, _cursorHandle(0)
+, _currentCursor(0)
 {
 #ifdef NDEBUG  
     FreeConsole();
@@ -117,7 +153,49 @@ ApplicationImpl::ApplicationImpl()
 
 ApplicationImpl::~ApplicationImpl()
 {
+   if( _cursorHandle != 0 )
+       DestroyCursor( _cursorHandle );
+
     UnregisterClass("Pt-Hmi", _instanceHandle);
+}
+
+
+void ApplicationImpl::setCursor(const Cursor* cursor)
+{      
+    if( _currentCursor == cursor )
+        return;
+
+    _currentCursor = cursor;
+
+    if( cursor == 0 )
+        return;
+
+   if( _cursorHandle != 0 )            
+       DestroyCursor( _cursorHandle );
+
+    if( cursor->empty() )
+    {
+        SetCursor(0);
+        return;
+    }
+
+    HBITMAP andMask = createImage888( &cursor->andRgb888()[0], cursor->width(),  cursor->height() );
+    HBITMAP xorMask = createImage888( &cursor->xorRgb888()[0], cursor->width(),  cursor->height() );
+
+    ICONINFO iconInfo;
+    iconInfo.fIcon = false; 
+    iconInfo.xHotspot = cursor->xHotspot();
+    iconInfo.yHotspot = cursor->yHotspot();
+    iconInfo.hbmColor = xorMask;
+    iconInfo.hbmMask  = andMask;
+
+    _cursorHandle = CreateIconIndirect(&iconInfo);
+
+    if( _cursorHandle != 0 )
+      SetCursor( _cursorHandle );    
+
+    DeleteObject( andMask );
+    DeleteObject( xorMask );
 }
 
 
@@ -413,7 +491,7 @@ bool ApplicationImpl::processMessage(HWND hwnd, unsigned int msg,
         case WM_MOUSELEAVE:
             handled = true;  
             _mouseEvent.clear();
-            Application::instance().screen().setCursor(0);
+            Application::instance().setCursor(0);
             Application::instance().setPointerWindow(0);
             _pointerInWindow = false;
             break;

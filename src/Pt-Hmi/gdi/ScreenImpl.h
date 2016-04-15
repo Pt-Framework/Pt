@@ -33,7 +33,6 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
-#include <Pt/Hmi/Cursor.h>
 #include <Windows.h>
 
 namespace Pt {
@@ -54,13 +53,9 @@ class ScreenImpl
 
         double height() const;
 
-        double toUnit(int value);
-
         Gfx::PointF toUnit(const Gfx::Point& value);
 
         Gfx::SizeF toUnit(const Gfx::Size& value);
-
-        int fromUnit(double value);
 
         Gfx::Point fromUnit(const Gfx::PointF& value);
 
@@ -72,11 +67,7 @@ class ScreenImpl
 
         double unitSizeMm() const;
 
-        void setResolution(double dpi);
-
         double resolutionDPI() const;
-        
-        void setCursor(const Cursor* cursor );
 
         void registerWindow(Window& w)
         {
@@ -101,9 +92,7 @@ class ScreenImpl
         void onEnable(Window& w, bool enable);
 
     private:
-        Gfx::Size screeResolution();
-        
-        static HBITMAP createImage888(const Pt::uint8_t* data, size_t width, size_t height);
+        Gfx::Size screenResolution();
 
     private:
         Gfx::Size _size;
@@ -114,8 +103,6 @@ class ScreenImpl
         double _width;
         double _height;
         double _dpi;
-        HCURSOR _cursorHandle;
-        const Cursor* _currentCursor;
 };
 
 } // namespace

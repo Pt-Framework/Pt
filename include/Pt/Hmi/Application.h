@@ -42,6 +42,8 @@ class Window;
 
 class PT_HMI_API Application : public Pt::System::Application
 {
+    friend class Visual;
+
     public:
         Application(int argc = 0, char** argv = 0);
 
@@ -52,14 +54,12 @@ class PT_HMI_API Application : public Pt::System::Application
         const Screen& screen() const;
 
         Screen& screen();
+
+        void setCursor(const Cursor* cursor = 0);
         
         Pt::uint64_t makeId();
 
         void nextEvent();
-
-        void registerVisual(Visual& visual);
-
-        void unregisterVisual(Visual& visual);
 
         void setPointerWindow(Window* w);
 
@@ -91,6 +91,11 @@ class PT_HMI_API Application : public Pt::System::Application
         void onEnterEvent( const EnterEvent& ev );
 
         void onLeaveEvent(const LeaveEvent& ev );
+
+    protected:
+        void registerVisual(Visual& visual);
+
+        void unregisterVisual(Visual& visual);
 
     private:
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;

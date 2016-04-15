@@ -60,8 +60,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Button.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\DeviceButton.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\Dial.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Docking.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DockingLayout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\EnableEvent.h" />
@@ -93,7 +91,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowStartPosition.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowState.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowTitleBar.h" />
     <ClInclude Include="..\..\include\Pt\Http\Api.h" />
     <ClInclude Include="..\..\include\Pt\Http\Authenticator.h" />
     <ClInclude Include="..\..\include\Pt\Http\Authorizer.h" />
@@ -551,7 +548,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Window.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowManager.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\WindowTitleBar.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\CursorImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.cpp" />

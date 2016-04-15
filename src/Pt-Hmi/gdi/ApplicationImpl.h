@@ -33,6 +33,7 @@
 #include "win32/Selector.h"
 #include <Pt/Hmi/MouseEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
+#include <Pt/Hmi/Cursor.h>
 #include <Pt/System/EventLoop.h>
 #include <vector>
 #include <windows.h>
@@ -65,6 +66,8 @@ class ApplicationImpl : public Pt::System::EventLoop
         { 
             return _selector; 
         }
+
+        void setCursor(const Cursor* cursor );
 
         void nextEvent();
 
@@ -122,8 +125,6 @@ class ApplicationImpl : public Pt::System::EventLoop
         
         void onShow(Window& w, bool s);
 
-        void getScreeResolution(int& horizontal, int& vertical);
-
     private:
         System::Mutex                    _mutex;
         System::TimerQueue               _timerQueue;
@@ -134,6 +135,8 @@ class ApplicationImpl : public Pt::System::EventLoop
         MouseEvent                       _mouseEvent;
         KeyEvent                         _keyEvent;
         bool                             _pointerInWindow;
+        HCURSOR                          _cursorHandle;
+        const Cursor*                    _currentCursor;
 };
 
 } // namespace

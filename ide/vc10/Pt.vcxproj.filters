@@ -1017,9 +1017,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\DeviceButton.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1115,9 +1112,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowTitleBar.h">
-      <Filter>Pt-Hmi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Api.h">
       <Filter>Pt-Gfx</Filter>
@@ -1303,9 +1297,6 @@
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Docking.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Dial.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\EnterEvent.h">
@@ -2383,9 +2374,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\WindowTitleBar.cpp">
-      <Filter>Pt-Hmi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\Brush.cpp">
       <Filter>Pt-Gfx</Filter>
