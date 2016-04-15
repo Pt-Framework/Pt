@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 Marc Boris Dürner
+/* Copyright (C) 2013 Marc Boris Duerner
    Copyright (C) 2013 Laurentiu-Gheorghe Crisan
    
    This library is free software; you can redistribute it and/or
@@ -31,13 +31,8 @@
 #define Pt_Hmi_ApplicationImpl_h
 
 #include "win32/Selector.h"
-#include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/MouseEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Rect.h>
 #include <Pt/System/EventLoop.h>
 #include <vector>
 #include <windows.h>
@@ -61,86 +56,84 @@ class Selector : public System::Selector
 
 class ApplicationImpl : public Pt::System::EventLoop
 {
-	public:
-		ApplicationImpl();
+    public:
+        ApplicationImpl();
 
-		virtual ~ApplicationImpl();
+        virtual ~ApplicationImpl();
 
-		Pt::System::Selector& selector()
-		{ 
-			return _selector; 
-		}
+        Pt::System::Selector& selector()
+        { 
+            return _selector; 
+        }
 
-		void nextEvent();
+        void nextEvent();
 
-	protected:
-		static long CALLBACK wndProc(HWND hwnd, unsigned int message, unsigned int wParam, long lParam);
-		static HBITMAP createImage888(const Pt::uint8_t* data, size_t width, size_t height);
+    protected:
+        virtual void onAttachSelectable(System::Selectable&);
 
-	protected:
-    virtual void onAttachSelectable(System::Selectable&);
+        virtual void onDetachSelectable(System::Selectable&);
 
-    virtual void onDetachSelectable(System::Selectable&);
+        virtual void onCancel(System::Selectable& s);
 
-    virtual void onCancel(System::Selectable& s);
+        virtual void onReady(System::Selectable& s);
 
-    virtual void onReady(System::Selectable& s);
+        virtual void onRun();
 
-    virtual void onRun();
+        virtual void onExit();
 
-    virtual void onExit();
+        virtual void onCommitEvent(const Pt::Event& event);
 
-    virtual void onCommitEvent(const Pt::Event& event);
+        virtual void onQueueEvent(const Pt::Event& event);
 
-    virtual void onQueueEvent(const Pt::Event& event);
+        virtual void onWake();
 
-    virtual void onWake();
+        virtual void onProcessEvents();
 
-    virtual void onProcessEvents();
+        virtual void onAttachTimer(System::Timer& timer);
 
-    virtual void onAttachTimer(System::Timer& timer);
+        virtual void onDetachTimer(System::Timer& timer);
 
-    virtual void onDetachTimer(System::Timer& timer);
+    private:
+        bool waitNext();
 
-	protected:
-		bool waitNext();
+        Window* findWindow(HWND h);
 
-  public:
-    bool processMessage(HWND hwnd, unsigned int msg, 
-                        WPARAM wparam, LPARAM lparam);
+        bool processMessage(HWND hwnd, unsigned int msg, 
+                            WPARAM wparam, LPARAM lparam);
   
-  protected:
-    void onPaint(Window& w, HWND hwnd);
-    void onResize(Window& w, WPARAM wparam, LPARAM lparam);
-    void onMouse(Window& w, unsigned int msg,  WPARAM wparam, LPARAM lparam);
-    void onKey(Window& w, UINT vkey, UINT scanCode, bool isPress);
-    void onMove(Window& w, HWND hwnd, LPARAM lparam);
-    void onClose(Window& w);
-    void onActivate(Window& w, bool f);
-    void onEnable(Window& w, bool e);
-    void onShow(Window& w, bool s);
+        static long CALLBACK wndProc(HWND hwnd, unsigned int message, 
+                                     unsigned int wParam, long lParam);
 
-	private:
-		void registerWindowClasses();
+        void onPaint(Window& w, HWND hwnd);
+        
+        void onResize(Window& w, WPARAM wparam, LPARAM lparam);
 
-		void unregisterWindowClasses();
+        void onMouse(Window& w, unsigned int msg,  WPARAM wparam, LPARAM lparam);
+        
+        void onKey(Window& w, UINT vkey, UINT scanCode, bool isPress);
+        
+        void onMove(Window& w, HWND hwnd, LPARAM lparam);
+ 
+        void onClose(Window& w);
+        
+        void onActivate(Window& w, bool f);
+        
+        void onEnable(Window& w, bool e);
+        
+        void onShow(Window& w, bool s);
 
-		void getScreeResolution(int& horizontal, int& vertical);
+        void getScreeResolution(int& horizontal, int& vertical);
 
-    Window* findWindow(HWND h);
-
-	private:
-    HINSTANCE   _instanceHandle;
-    MouseEvent  _mouseEvent;
-    KeyEvent    _keyEvent;
-    bool        _pointerInWindow;
-	
-  private:
-		System::Mutex _mutex;
-		System::TimerQueue _timerQueue;
-		System::EventQueue _eventQueue;
-		Pt::Hmi::Selector _selector;        
-		std::vector<System::Selectable*> _avail;
+    private:
+        System::Mutex                    _mutex;
+        System::TimerQueue               _timerQueue;
+        System::EventQueue               _eventQueue;
+        Pt::Hmi::Selector                _selector;        
+        std::vector<System::Selectable*> _avail;
+        HINSTANCE                        _instanceHandle;
+        MouseEvent                       _mouseEvent;
+        KeyEvent                         _keyEvent;
+        bool                             _pointerInWindow;
 };
 
 } // namespace

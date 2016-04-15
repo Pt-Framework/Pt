@@ -30,11 +30,7 @@
 #define Pt_Hmi_Application_h
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Screen.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Rect.h>
 #include <Pt/System/Application.h>
 
 namespace Pt {
@@ -43,7 +39,6 @@ namespace Hmi {
 
 class ApplicationImpl;
 class Window;
-class Widget;
 
 class PT_HMI_API Application : public Pt::System::Application
 {

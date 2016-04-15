@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 Marc Boris Dürner
+/* Copyright (C) 2013 Marc Boris Duerner
    Copyright (C) 2013 Laurentiu-Gheorghe Crisan
    
    This library is free software; you can redistribute it and/or
@@ -35,8 +35,6 @@
 #include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ActivateEvent.h>
-#include <Pt/Hmi/PaintEvent.h>
-#include <Pt/Hmi/Cursor.h>
 #include <Pt/System/IOError.h>
 #include <WindowsX.h>
 
@@ -57,7 +55,7 @@ Selector::~Selector()
 }
 
 DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bool& isTimeout)
-{	
+{    
     DWORD result = MsgWaitForMultipleObjects(numHandles, (HANDLE *)handles, false, msecs, QS_ALLEVENTS);
 
     if(result == WAIT_FAILED)
@@ -73,13 +71,13 @@ DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bo
 
     if(offset == numHandles)
     {
-	    MSG msg;
+        MSG msg;
 
-	    while( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE) )
-	    {
-			    TranslateMessage(&msg);
-			    DispatchMessage(&msg);
-	    }	
+        while( PeekMessage( &msg, NULL, 0, 0, PM_REMOVE) )
+        {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+        }    
     }
 
     return offset;
@@ -91,64 +89,41 @@ DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bo
 
 ApplicationImpl::ApplicationImpl()
 : Pt::System::EventLoop()
+, _instanceHandle(NULL)
 , _mouseEvent(0)
 , _keyEvent(0)
 , _pointerInWindow(false)
 {
-#ifndef _DEBUG  
-	FreeConsole();
+#ifdef NDEBUG  
+    FreeConsole();
 #endif
 
-	_instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
+    _instanceHandle = (HINSTANCE)GetModuleHandle(NULL);
 
-	registerWindowClasses();
+    WNDCLASS winClass;
+    winClass.style         = CS_HREDRAW | CS_VREDRAW;
+    winClass.lpfnWndProc   = (WNDPROC)ApplicationImpl::wndProc;
+    winClass.cbClsExtra    = 0;
+    winClass.cbWndExtra    = 0;
+    winClass.hInstance     = _instanceHandle;
+    winClass.hIcon         = NULL;
+    winClass.hCursor       = NULL;
+    winClass.hbrBackground = NULL;
+    winClass.lpszMenuName  = NULL;
+    winClass.lpszClassName = "Pt-Hmi";
+    RegisterClass(&winClass);
 }
 
 
 ApplicationImpl::~ApplicationImpl()
 {
-}
-
-
-void ApplicationImpl::registerWindowClasses()
-{
-	std::string topLevelWindow = "Pt-Hmi";
-
-	WNDCLASS topWindowClass;
-
-	topWindowClass.style         = CS_HREDRAW | CS_VREDRAW;
-	topWindowClass.lpfnWndProc   = (WNDPROC)ApplicationImpl::wndProc;
-	topWindowClass.cbClsExtra    = 0;
-	topWindowClass.cbWndExtra    = 0;
-	topWindowClass.hInstance     = _instanceHandle;
-	topWindowClass.hIcon         = NULL;
-	topWindowClass.hCursor       = NULL;
-	topWindowClass.hbrBackground = NULL;
-	topWindowClass.lpszMenuName  = NULL;
-	topWindowClass.lpszClassName = topLevelWindow.c_str();
-
-	RegisterClass(&topWindowClass);
-}
-
-
-void ApplicationImpl::unregisterWindowClasses()
-{
     UnregisterClass("Pt-Hmi", _instanceHandle);
-}
-
-
-long CALLBACK ApplicationImpl::wndProc(HWND hwnd, unsigned int msg, unsigned int wparam, long lparam)
-{
-    Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
-    app.impl()->processMessage(hwnd, msg, wparam, lparam);
-
-    return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
 
 void ApplicationImpl::nextEvent()
 {
-	  waitNext();
+      waitNext();
 }
 
 
@@ -266,6 +241,16 @@ bool ApplicationImpl::waitNext()
 }
 
 
+long CALLBACK ApplicationImpl::wndProc(HWND hwnd, unsigned int msg, 
+                                       unsigned int wparam, long lparam)
+{
+    Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
+    app.impl()->processMessage(hwnd, msg, wparam, lparam);
+
+    return DefWindowProc(hwnd, msg, wparam, lparam);
+}
+
+
 Window* ApplicationImpl::findWindow(HWND hwnd)
 {
     std::vector<Window*>& windows = Application::instance().screen().windows();
@@ -273,9 +258,11 @@ Window* ApplicationImpl::findWindow(HWND hwnd)
     for(size_t i = 0; i < windows.size(); ++i)
     {
         Window* w = windows[i];
-        MainWindowImpl* impl = static_cast<MainWindowImpl*>( w->impl() );
 
-        if( impl->hwnd() == hwnd )
+        if( ! w->impl() )
+            continue;
+        
+        if( w->impl()->hwnd() == hwnd )
             return w;
     }
     

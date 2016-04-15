@@ -123,7 +123,7 @@ void Application::setPointerWindow(Window* w)
     if( _pointerWindow )    
     {
         Pt::Hmi::LeaveEvent leaveEvent( _pointerWindow->vid() );
-        _pointerWindow->processEvent(leaveEvent);
+        loop().commitEvent(leaveEvent);
     }
 
     _pointerWindow = w;
@@ -131,7 +131,7 @@ void Application::setPointerWindow(Window* w)
     if( _pointerWindow )
     {
         Pt::Hmi::EnterEvent enterEvent(_pointerWindow->vid());
-        _pointerWindow->processEvent(enterEvent);
+        loop().commitEvent(enterEvent);
     }
 }
 
