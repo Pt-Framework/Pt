@@ -60,16 +60,6 @@ class PT_HMI_API Widget : public Visual
 {
     friend class Window;
 
-    public: 
-        enum ImageLayout
-        {
-            NoLayout,
-            Tile,
-            Center,
-            Strech,
-            Zoom
-        };
-
     public:
         Widget();
         

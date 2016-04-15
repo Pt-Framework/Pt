@@ -50,6 +50,15 @@ class PT_HMI_API Panel : public Widget
 			    Border3D
 		    };
 
+        enum ImageLayout
+        {
+            NoLayout,
+            Tile,
+            Center,
+            Strech,
+            Zoom
+        };
+
 	  public:
         Panel();
 		
