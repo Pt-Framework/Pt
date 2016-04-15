@@ -44,7 +44,7 @@ Panel::Panel()
 : _backgroundColor(Gfx::Color::fromRgb8(237,237,237))
 , _foregroundColor( Gfx::Color::fromRgb8(0,0,0) )
 , _backgroundImage()
-, _backgroundImageLayout( NoLayout )
+, _backgroundImageLayout( ImageLayout::None )
 , _borderStyle(Single)
 , _borderWidth(1)
 , _borderRound(false)
@@ -125,16 +125,16 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 
     if( ! backImage.empty() )
     {
-        switch( backgroundImageLayout() )
+        switch( _backgroundImageLayout.type() )
         {              
             default:  
-            case NoLayout:
+            case ImageLayout::None:
             {
                 painter.drawImage( Pt::Gfx::PointF(0,0), backImage );
             }
             break;
             
-            case Tile:
+            case ImageLayout::Tile:
             {
                 for( double x = 0; x < size.width();  x += backImage.width() )
                 {
@@ -144,7 +144,7 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
             }
             break;
 
-            case Center:
+            case ImageLayout::Center:
             {
                 const double x = size.width()/2  - backImage.width()/2;
                 const double y = size.height()/2  - backImage.height()/2;
@@ -152,14 +152,14 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
             }
             break;
             
-            case Strech:
+            case ImageLayout::Strech:
             {
                 Gfx::Image strech = backImage.blockScale(Gfx::Size((int) size.width(), (int)size.height() ) );
                 painter.drawImage( Pt::Gfx::PointF(0,0), strech );
             }
             break;
 
-            case Zoom:
+            case ImageLayout::Zoom:
             {
                 const double factor = size.width()/(double)backImage.width();
                 Pt::Gfx::Size newSize( ( size_t)( backImage.width()*factor), (size_t)(backImage.height()*factor));

@@ -40,24 +40,62 @@ namespace Hmi {
 
 class PaintEvent;
 
-class PT_HMI_API Panel : public Widget
+class ImageLayout
 {
-	  public:
-		    enum BorderStyle
-		    {
-			    NoBorder,
-			    Single,
-			    Border3D
-		    };
-
-        enum ImageLayout
+    public:
+        enum Type
         {
-            NoLayout,
+            None,
             Tile,
             Center,
             Strech,
             Zoom
         };
+
+    public:
+        ImageLayout()
+        : _type(None)        
+        { }
+
+        ImageLayout(Type type)
+        : _type(type)        
+        { }
+
+        const ImageLayout& operator=(Type type)
+        {
+          _type = type;
+          return *this;
+        }
+
+        Type type() const
+        {
+            return _type;
+        }
+    
+        bool operator ==(const ImageLayout& l) const
+        {
+            return _type == l._type;
+        }
+
+        bool operator !=(const ImageLayout& l) const
+        {
+            return _type != l._type;
+        }
+
+    private:
+        Type _type;        
+};
+
+
+class PT_HMI_API Panel : public Widget
+{
+	  public:
+		    enum BorderStyle
+		    {
+			      NoBorder,
+			      Single,
+			      Border3D
+		    };
 
 	  public:
         Panel();
@@ -75,7 +113,6 @@ class PT_HMI_API Panel : public Widget
 
             if( doRepaint )
                 update();
-            
         }
 
         const Gfx::Color& foregroundColor() const
@@ -94,19 +131,9 @@ class PT_HMI_API Panel : public Widget
             return _backgroundImage;
         }
 
-        void setBackgroundImage( const Gfx::Image& im )
+        void setBackgroundImage(const Gfx::Image& i, ImageLayout l)
         {
-            _backgroundImage = im;
-            update();
-        }
-
-        ImageLayout backgroundImageLayout() const
-        {
-            return _backgroundImageLayout;
-        }
-
-        void setBackgroundImageLayout( ImageLayout l )
-        {
+            _backgroundImage = i;
             _backgroundImageLayout = l;
             update();
         }

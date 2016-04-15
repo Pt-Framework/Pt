@@ -57,7 +57,7 @@ class Docking
         : _type(type)        
         { }
 
-        Docking operator=(Type type)
+        const Docking& operator=(Type type)
         {
           _type = type;
           return *this;
