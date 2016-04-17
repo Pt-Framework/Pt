@@ -83,6 +83,8 @@ class ScreenImpl
 
         void onMove(Window& w, const Gfx::PointF& p);
 
+        void onClosing(Window& w);
+
         void onClose(Window& w);
 
         void onShow(Window& w, bool visible);

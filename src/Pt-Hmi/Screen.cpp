@@ -157,6 +157,12 @@ void Screen::onMove(Window& w, const Gfx::PointF& p)
 }
 
 
+void Screen::onClosing(Window& w)
+{
+    _impl->onClosing(w);
+}
+
+
 void Screen::onClose(Window& w)
 {
     _impl->onClose(w);

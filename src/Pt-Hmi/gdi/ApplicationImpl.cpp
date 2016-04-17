@@ -323,9 +323,12 @@ long CALLBACK ApplicationImpl::wndProc(HWND hwnd, unsigned int msg,
                                        unsigned int wparam, long lparam)
 {
     Pt::Hmi::Application& app = Pt::Hmi::Application::instance();
-    app.impl()->processMessage(hwnd, msg, wparam, lparam);
 
-    return DefWindowProc(hwnd, msg, wparam, lparam);
+    bool handled = app.impl()->processMessage(hwnd, msg, wparam, lparam);
+    if(! handled )
+        return DefWindowProc(hwnd, msg, wparam, lparam);
+
+    return !handled;
 }
 
 
@@ -443,11 +446,10 @@ bool ApplicationImpl::processMessage(HWND hwnd, unsigned int msg,
             handled = true;
             break;
         }
-
+        
         case WM_CLOSE:
         {
-            onClose(*w);
-            handled = true;
+            handled = onClose(*w);
             break;
         }
 
@@ -510,10 +512,21 @@ void ApplicationImpl::onShow(Window& w,  bool v)
 }
 
 
-void ApplicationImpl::onClose(Window& w)
-{
-    CloseEvent ev( w.vid() );
-    commitEvent(ev);
+bool ApplicationImpl::onClose(Window& w)
+{  
+    Pt::uint64_t id =  w.vid();
+
+    CloseEvent ev(id);
+    w.processEvent(ev);
+
+    bool ignored = false;
+
+    const Visual* v = Application::instance().findVisual(id);
+    if( ! v )
+        return ignored;
+    
+    ignored = ! w.isClosed();
+    return ignored;
 }
 
 

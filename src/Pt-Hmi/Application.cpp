@@ -99,6 +99,13 @@ Pt::uint64_t Application::makeId()
 }
 
 
+const Visual* Application::findVisual(Pt::uint64_t id) const
+{
+    VisualMap::const_iterator it =_visuals.find(id);
+    return it != _visuals.end() ? it->second : 0; 
+}
+
+
 void Application::nextEvent()
 {
     _impl->nextEvent();

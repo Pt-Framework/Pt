@@ -59,6 +59,8 @@ class PT_HMI_API Application : public Pt::System::Application
         
         Pt::uint64_t makeId();
 
+        const Visual* findVisual(Pt::uint64_t id) const;
+
         void nextEvent();
 
         void setPointerWindow(Window* w);

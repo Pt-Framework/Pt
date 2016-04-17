@@ -46,7 +46,7 @@ MainWindowImpl::MainWindowImpl()
 
 MainWindowImpl::~MainWindowImpl()
 {
-    close();
+    DestroyWindow( _hwnd);
 }
 
 
@@ -55,7 +55,7 @@ void MainWindowImpl::close()
     if( _hwnd == 0)
         return;
 
-    DestroyWindow(_hwnd);
+    CloseWindow( _hwnd);
     _hwnd = 0;
 }
 

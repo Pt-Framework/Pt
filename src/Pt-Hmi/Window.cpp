@@ -108,7 +108,7 @@ Window::~Window()
 
 void Window::init(Window* parent)
 {
-    if(_init)
+    if(_init || _isClosed)
         return;
 
     if( ! _impl && ! parent )
@@ -672,11 +672,11 @@ void Window::close()
     if(_impl)
     {
         _impl->close();
-        Application::instance().screen().onClose(*this);
+        Application::instance().screen().onClosing(*this);
     }
     else if(_parent)
     {
-        _parent->onClose(*this);
+        _parent->onClosing(*this);
     }
     else
     {
@@ -685,15 +685,30 @@ void Window::close()
 }
 
 
+void Window::onClosing(Window& w)
+{         
+    _windowManager.onClosing(w); 
+}
+
+
 void Window::onClose(Window& w)
-{
-    _windowManager.onClose(w);
+{         
+    _windowManager.remove(w); 
 }
 
 
 void Window::onCloseEvent(const CloseEvent& ev)
 {
-     _isClosed =  true;
+    if(_impl)
+    {
+        Application::instance().screen().onClose(*this);
+    }
+    else if(_parent)
+    {
+        _parent->onClose(*this);
+    }
+
+    _isClosed =  true;       
 }
 
 

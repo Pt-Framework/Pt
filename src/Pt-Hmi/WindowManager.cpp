@@ -85,7 +85,17 @@ void WindowManager::remove( Window& w )
     if( it == _children.end() )
         return;
 
-    _children.erase( it );            
+    _children.erase( it );       
+    
+    
+     Gfx::PointF framePos = w.position();
+    Gfx::SizeF frameSize = w.size();
+    frameSize.addHeight(2 * _borderWidth + _titleHeight);
+    frameSize.addWidth(2 * _borderWidth);
+
+    Gfx::RectF updateRect(framePos, frameSize);
+
+    _container->update( updateRect);        
 }
 
 
@@ -194,6 +204,8 @@ Gfx::PointF WindowManager::renderFrame(const Window& w, PaintSurface& surface)
     Painter painter(surface);
     Gfx::PointF pos( w.position().x(), w.position().y() );
     
+                
+
     switch( w.border() )
     {
         case WindowBorder::Dialog:
@@ -251,6 +263,11 @@ Gfx::PointF WindowManager::renderFrame(const Window& w, PaintSurface& surface)
 
         break;
     }
+
+    Gfx::Brush brush(Gfx::Color(1,0,0));
+    painter.setBrush(brush);
+
+    painter.fillRect( GetCloseButtonRect(w));
 
   return Gfx::PointF( pos.x() + _borderWidth, pos.y() + _borderWidth + _titleHeight) ;     
 }
@@ -435,7 +452,7 @@ bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
 bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
 {
     //std::clog << "onWindowFrame: " << (_container ? _container->title() : "WM") << std::endl;   
-    
+        
     _managedWindow = findWindow( mev.x(), mev.y() );
 
     // pointer on window background 
@@ -444,6 +461,16 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
         _app.setPointerWindow(_container);
         _state = &WindowManager::onBackground;
         return false;
+    }
+    
+    Gfx::RectF closeRect = GetCloseButtonRect(*_managedWindow);
+
+    if( closeRect.contains( mev.position() ) )
+    {
+        if( mev.isRelease( ))
+             onClosing(*_managedWindow);
+        
+        return true;
     }
 
     // pointer on window title bar
@@ -556,6 +583,15 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
     onMove(*_managedWindow, to);
     
     return true;
+}
+
+
+Gfx::RectF WindowManager::GetCloseButtonRect(const Window& w)
+{
+    const Gfx::PointF btPos( w.position().x() + _borderWidth + w.size().width() - _titleHeight,
+                             w.position().y() + _borderWidth );
+    
+    return Gfx::RectF(btPos, Gfx::SizeF( _titleHeight -2, _titleHeight-2 ));
 }
 
 
@@ -795,7 +831,7 @@ void WindowManager::onActivate(Window& w)
 
 void WindowManager::onEnable(Window& w, bool enable)
 {
-    Gfx::PointF framePos = w.position() - w.position();
+    Gfx::PointF framePos = w.position();
     framePos.subX(_borderWidth);
     framePos.subY(_borderWidth +  _titleHeight);
 
@@ -812,22 +848,10 @@ void WindowManager::onEnable(Window& w, bool enable)
 }
 
 
-void WindowManager::onClose(Window& w)
+void WindowManager::onClosing(Window& w)
 {
-    Gfx::PointF framePos = w.position() - w.position();
-    framePos.subX(_borderWidth);
-    framePos.subY(_borderWidth +  _titleHeight);
-
-    Gfx::SizeF frameSize = w.size();
-    frameSize.addHeight(2 * _borderWidth + _titleHeight);
-    frameSize.addWidth(2 * _borderWidth);
-
-    Gfx::RectF updateRect(framePos, frameSize);
-
     CloseEvent ev( w.vid());
     Application::instance().loop().commitEvent( ev );
-
-    _container->update( updateRect);
 }
 
 } // namespace

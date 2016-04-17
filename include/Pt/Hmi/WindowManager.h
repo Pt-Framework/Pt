@@ -91,7 +91,7 @@ class WindowManager : public Pt::Connectable
 
         void onEnable(Window& w, bool enable);
 
-        void onClose(Window& w);
+        void onClosing(Window& w);
     
     public:
         double borderWidth() const
@@ -139,6 +139,8 @@ class WindowManager : public Pt::Connectable
 
         MouseEvent toWindow(Window* w, const MouseEvent& pev);        
 
+        Gfx::RectF GetCloseButtonRect(const Window& w );
+
     private:
         Application&              _app;
         std::vector<Window*>      _children;
@@ -157,7 +159,7 @@ class WindowManager : public Pt::Connectable
         Gfx::Color                _activeColor;
         Gfx::Color                _textColor;        
         size_t                    _actionButton;  
-        Gfx::PointF               _lastPointerPosition;        
+        Gfx::PointF               _lastPointerPosition;                          
 };
 
 } // namespace

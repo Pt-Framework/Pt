@@ -153,6 +153,8 @@ class PT_HMI_API Window : public Visual
 
     void onClose(Window& w);
 
+    void onClosing(Window& w);
+
   protected:
     virtual void onEvent(const Pt::Event& ev);
 

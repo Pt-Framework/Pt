@@ -117,7 +117,7 @@ class ApplicationImpl : public Pt::System::EventLoop
         
         void onMove(Window& w, HWND hwnd, LPARAM lparam);
  
-        void onClose(Window& w);
+        bool onClose(Window& w);
         
         void onActivate(Window& w, bool f);
         
