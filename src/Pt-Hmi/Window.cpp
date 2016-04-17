@@ -709,6 +709,8 @@ void Window::onCloseEvent(const CloseEvent& ev)
     }
 
     _isClosed =  true;       
+
+    deinit();
 }
 
 

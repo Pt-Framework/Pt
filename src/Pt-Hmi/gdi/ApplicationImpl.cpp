@@ -442,7 +442,7 @@ bool ApplicationImpl::processMessage(HWND hwnd, unsigned int msg,
         }
 
         case WM_DESTROY:
-        {            
+        {                     
             handled = true;
             break;
         }
@@ -524,7 +524,7 @@ bool ApplicationImpl::onClose(Window& w)
     const Visual* v = Application::instance().findVisual(id);
     if( ! v )
         return ignored;
-    
+        
     ignored = ! w.isClosed();
     return ignored;
 }
