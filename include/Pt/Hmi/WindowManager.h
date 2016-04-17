@@ -56,7 +56,7 @@ class Screen;
 class WindowManager : public Pt::Connectable
 {
     public:
-        WindowManager(Window* parent = 0);
+        WindowManager();
 
         virtual ~WindowManager();
 
@@ -70,15 +70,15 @@ class WindowManager : public Pt::Connectable
         const std::vector<Window*>& windows() const;
 
         std::vector<Window*>& windows();
-
-        void activate(Window& w);               
-
+                  
+    public:
         bool pointerInput(const Pt::Hmi::MouseEvent& pointerEvent);
 
         bool keyInput(const Pt::Hmi::KeyEvent& keyEvent);
 
-        void render(PaintSurface& surface, const Gfx::RectF& updateRect);
+        void paint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
+    public:
         void onResize(Window& w, const Gfx::SizeF& to);
 
         void onMove(Window& w, const Gfx::PointF& to);
@@ -92,7 +92,8 @@ class WindowManager : public Pt::Connectable
         void onEnable(Window& w, bool enable);
 
         void onClose(Window& w);
-
+    
+    public:
         double borderWidth() const
         {
             return _borderWidth;
@@ -103,7 +104,8 @@ class WindowManager : public Pt::Connectable
             return _titleHeight;
         }
 
-    private:
+    private:        
+
         bool onBackground(const Pt::Hmi::MouseEvent& pev);
 
         bool onWindowFrame(const Pt::Hmi::MouseEvent& pev);
@@ -121,6 +123,10 @@ class WindowManager : public Pt::Connectable
         bool isMoving(const Window& w, const Pt::Hmi::MouseEvent& ev);
 
     private:
+        void activate(Window& w); 
+        
+        void updateAll(Window& w);   
+
         bool updateActive(const Pt::Hmi::MouseEvent& mouseEvent);
 
         bool contains(const Window& w, double x, double y);

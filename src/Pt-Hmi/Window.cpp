@@ -499,7 +499,7 @@ void Window::activate()
     else
     {
         _isActive = true;
-    }
+    }    
 }
 
 
@@ -803,7 +803,7 @@ void Window::onPaintEvent(const PaintEvent& ev)
  
     const Gfx::RectF& rect = ev.rect();   
 
-    _windowManager.render(_surface, rect);
+    _windowManager.paint(_surface, rect);
 }
 
 

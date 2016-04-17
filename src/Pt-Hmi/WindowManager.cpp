@@ -45,7 +45,7 @@ namespace Pt {
 
 namespace Hmi {
 
-WindowManager::WindowManager(Window* parent)
+WindowManager::WindowManager()
 : _app( Application::instance() )
 , _state(&WindowManager::onBackground)
 , _managedWindow(0)
@@ -54,7 +54,7 @@ WindowManager::WindowManager(Window* parent)
 , _activeColor(0.4f, 0.5f, 0.8f)
 , _textColor(0.0, 0.0, 0.0)
 , _actionButton(0)
-, _container(parent)
+, _container(0)
 , _borderWidth(4)
 , _titleHeight(20)
 {    
@@ -123,9 +123,6 @@ bool WindowManager::updateActive(const Pt::Hmi::MouseEvent& ev)
 
         if( ! contains( *w, ev.x(), ev.y() ) )
             continue;
-
-        if( w->isActive() )                                                             
-            return true;
              
         w->activate();    
         return true;
@@ -160,7 +157,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::MouseEvent& mev )
 }
 
 
-void WindowManager::render(PaintSurface& surface, const Gfx::RectF& rect)
+void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {  
     for( size_t i = 0; i < _children.size(); ++i )
     {
@@ -737,6 +734,7 @@ void WindowManager::onUpdate(Window& child, const Gfx::RectF& rect)
     _container->update(updateRect);
 }
 
+
 void WindowManager::onShow( Window& w, bool visible )
 {
     Gfx::PointF framePos = w.position() - w.position();
@@ -756,7 +754,7 @@ void WindowManager::onShow( Window& w, bool visible )
 }
 
 
-void WindowManager::onActivate(Window& w)
+void WindowManager::updateAll(Window& w)
 {
     Gfx::PointF framePos(0, 0);
     framePos.subX( _borderWidth );
@@ -768,33 +766,30 @@ void WindowManager::onActivate(Window& w)
 
     Gfx::RectF updateRect(framePos, frameSize);
 
-    ActivateEvent acev( w.vid(), true );
-    Application::instance().loop().commitEvent(acev);
+    w.update(updateRect);
+}
 
-    Window* child = &w;
 
-    for(Window* parent = w.parent(); parent; parent = child->parent())
+void WindowManager::onActivate(Window& w)
+{
+    std::vector<Window*>::const_iterator it;
+
+    for(it = _children.begin(); it != _children.end(); ++it)
     {
-        std::vector<Window*>::const_iterator it;
-        for( it = parent->windows().begin(); it != parent->windows().end(); ++it)
+        if((*it)->isActive() && *it != &w)
         {
-            if( (*it)->isActive() && *it != child )
-            {
-                ActivateEvent aev( (*it)->vid(), false );
-                Application::instance().loop().commitEvent(aev);
-
-                (*it)->update();
-            }
+            ActivateEvent aev( (*it)->vid(), false );
+            updateAll(**it);
         }
-
-        ActivateEvent aev( parent->vid(), true );
-        Application::instance().loop().commitEvent(aev);
-        parent->update();
-
-        child = parent;
     }
 
-    w.update();
+    activate(w);
+    _container->activate();
+
+    ActivateEvent aev( w.vid(), true );
+    Application::instance().loop().commitEvent(aev);
+
+    updateAll(w);
 }
 
 

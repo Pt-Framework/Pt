@@ -72,6 +72,7 @@ void MainWindowImpl::show( bool v)
 void MainWindowImpl::activate()
 {
     SetActiveWindow( _hwnd );
+    
 }
 
 
