@@ -676,8 +676,9 @@ inline int formatFloat(CharT* fraction, int fractSize, int& intpart, int& exp, T
     // intpart is first significant digit
     --precision;
 
-    // move remaining significant digits before dot and 
-    // add 0.5 to round last signicifant digit
+    // move remaining significant digits before dot and add 0.5 to round
+    // last significant digit. This might increase the exponent, for which
+    // we check later.
     n *= std::pow(T(10.0), precision - exp);
     n += 0.5;
 
@@ -704,6 +705,14 @@ inline int formatFloat(CharT* fraction, int fractSize, int& intpart, int& exp, T
     }
 
     intpart = static_cast<int>( std::floor(n) );
+
+    // check if rounding increased the exponent 
+    if(intpart == 10)
+    {
+      ++exp;
+      intpart = 1;
+    }
+
     if(neg)
         intpart = -intpart;
 

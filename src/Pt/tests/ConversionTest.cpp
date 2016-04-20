@@ -350,8 +350,11 @@ void ConversionTest::SChar8()
 
 void ConversionTest::DoubleToString()
 {
-    double value = 3.141592653579893;
     std::string str;
+    double value = 0.0;
+    
+    value = 3.141592653579893;
+    str.clear();
     Pt::formatFloat(std::back_inserter(str), value);
     PT_UNIT_ASSERT_EQUALS( str.substr(0, 7), "3.14159" );
 
@@ -374,6 +377,16 @@ void ConversionTest::DoubleToString()
     str.clear();
     Pt::formatFloat(std::back_inserter(str), value);
     PT_UNIT_ASSERT_EQUALS( str.substr(0, 12), "123456789.55" );
+
+    value = 99.999999999999965;
+    str.clear();
+    Pt::formatFloat(std::back_inserter(str), value);
+    PT_UNIT_ASSERT_EQUALS( str, "100.0" );
+
+    value = 100.00000000000015;
+    str.clear();
+    Pt::formatFloat(std::back_inserter(str), value);
+    PT_UNIT_ASSERT_EQUALS( str, "100.0" );
 
     value = 0.;
     str.clear();
