@@ -115,6 +115,12 @@ void MainLoop::onQueueEvent(const Pt::Event& ev)
 }
 
 
+void MainLoop::onProcessEvents()
+{
+    _eventQueue.processEvents( this->eventReceived() );
+}
+
+
 void MainLoop::onWake()
 {
     _selector->wake();

@@ -245,6 +245,8 @@ class MainLoopImpl : public QObject
 
         virtual void queueEvent(const Pt::Event& ev);
 
+        virtual void processEvents();
+
         virtual void wake();
 
         virtual void attachTimer(System::Timer& timer);

@@ -64,6 +64,8 @@ class PT_MFC_API MainLoop : public System::EventLoop
 
         virtual void onQueueEvent(const Pt::Event& ev);
 
+        virtual void onProcessEvents();
+
         virtual void onWake();
 
         virtual void onAttachTimer(System::Timer& timer);

@@ -119,6 +119,12 @@ void MainLoopImpl::queueEvent(const Pt::Event& ev)
 }
 
 
+void MainLoopImpl::processEvents()
+{
+    _eventQueue.processEvents(_event);
+}
+
+
 void MainLoopImpl::wake()
 {
     _selector.wake();
