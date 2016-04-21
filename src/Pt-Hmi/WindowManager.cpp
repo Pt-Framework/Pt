@@ -45,6 +45,183 @@ namespace Pt {
 
 namespace Hmi {
 
+/////////////////////////////////////////////////////////////////////////////
+// WindowFrame
+/////////////////////////////////////////////////////////////////////////////
+
+WindowFrame::WindowFrame()
+: _wm(0)
+, _window(0)
+, _inactiveColor(0.68f, 0.70f, 0.75f)
+, _activeColor(0.4f, 0.5f, 0.8f)
+, _textColor(0.0, 0.0, 0.0)
+{
+}
+
+
+WindowFrame::WindowFrame(WindowManager& wm, Window& window)
+: _wm(&wm)
+, _window(&window)
+, _closeButton(0, 10, 0, 10)
+, _maximizeButton(0, 10, 0, 10)
+, _minimizeButton(0, 10, 0, 10)
+, _inactiveColor(0.68f, 0.70f, 0.75f)
+, _activeColor(0.4f, 0.5f, 0.8f)
+, _textColor(0.0, 0.0, 0.0)
+{
+}
+
+
+WindowFrame::~WindowFrame()
+{
+}
+
+
+void WindowFrame::moveEvent(const MoveEvent& mev)
+{
+    _position = mev.position();
+
+    onLayout();
+}
+
+
+void WindowFrame::resizeEvent(const ResizeEvent& rev)
+{
+    double borderWidth = _wm->borderWidth();
+    double titleHeight = _wm->titleHeight();
+
+    _windowSize = rev.size();
+    
+    _frameSize = rev.size();
+    _frameSize.addWidth(2 * borderWidth);
+    _frameSize.addHeight(2 * borderWidth);
+    _frameSize.addHeight(titleHeight);
+    
+    onLayout();
+}
+
+
+void WindowFrame::onLayout()
+{
+    double borderWidth = _wm->borderWidth();
+    double titleHeight = _wm->titleHeight();
+    double buttonWidth = titleHeight - borderWidth;
+
+    double buttonX = _position.x() + _frameSize.width() - (borderWidth + buttonWidth);
+    double buttonY = _position.y() + borderWidth;
+    
+    _closeButton.setOrigin( Gfx::PointF(buttonX, buttonY) );
+    _closeButton.setSize( Gfx::SizeF(buttonWidth, buttonWidth) );
+
+    buttonX -= borderWidth + buttonWidth;
+    
+    _maximizeButton.setOrigin( Gfx::PointF(buttonX, buttonY) );
+    _maximizeButton.setSize( Gfx::SizeF(buttonWidth, buttonWidth) );
+
+    buttonX -= borderWidth + buttonWidth;
+    
+    _minimizeButton.setOrigin( Gfx::PointF(buttonX, buttonY) );
+    _minimizeButton.setSize( Gfx::SizeF(buttonWidth, buttonWidth) );
+}
+
+
+bool WindowFrame::mouseEvent(const MouseEvent& mev)
+{
+    if( _closeButton.contains( mev.position() ) )
+    {
+        if( mev.isRelease() )
+             _wm->onClosing(*_window);
+        
+        return true;
+    }
+
+    return false;
+}
+
+
+void WindowFrame::paintEvent(const PaintEvent& pev)
+{
+    double borderWidth = _wm->borderWidth();
+    double titleHeight = _wm->titleHeight();
+
+    PaintSurface& surface = _wm->surface();
+    Painter painter(surface);
+
+    Gfx::SizeF frameSize = _window->size();
+    frameSize.addWidth(borderWidth * 2);
+    frameSize.addHeight(borderWidth * 2 + titleHeight);
+
+    Gfx::Color color = _window->isActive() ? _activeColor 
+                                           : _inactiveColor;  
+    Gfx::Brush brush(color);
+    painter.setBrush(brush);
+
+    Gfx::PointF pos = _window->position();
+
+    Gfx::RectF leftBorder( pos.x(), 
+                           pos.x() + borderWidth,
+                           pos.y() + borderWidth, 
+                           pos.y() + frameSize.height() - borderWidth - 1 );
+    painter.fillRect(leftBorder);
+
+    Gfx::RectF topBorder(pos.x(),
+                         pos.x() + frameSize.width() - 1,
+                         pos.y(),
+                         pos.y() + borderWidth);
+    painter.fillRect(topBorder);
+
+    Gfx::RectF rightBorder(pos.x() + frameSize.width() - borderWidth,
+                           pos.x() + frameSize.width() - 1,
+                           pos.y() + borderWidth,
+                           pos.y() + frameSize.height() - borderWidth - 1 );
+    painter.fillRect(rightBorder);
+
+    Gfx::RectF bottomBorder(pos.x(),
+                            pos.x() + frameSize.width() - 1,
+                            pos.y() + frameSize.height() - borderWidth,
+                            pos.y() + frameSize.height() - 1);
+    painter.fillRect(bottomBorder);
+
+    Gfx::RectF titleArea( pos.x() + borderWidth,
+                          pos.x() + frameSize.width() - borderWidth - 1,
+                          pos.y() + borderWidth,
+                          pos.y() + borderWidth + titleHeight - 1);
+    painter.fillRect(titleArea);
+
+    const Gfx::Font& font = _window->font();
+    painter.setFont(font);
+
+    Gfx::Pen pen(1, _textColor);
+    painter.setPen(pen);
+
+    Gfx::FontMetrics fm = painter.fontMetrics( font, Pt::String("A") );
+
+    double textMargin = (titleHeight - fm.height()) / 2;
+    Gfx::PointF textPos(pos.x() + borderWidth + titleHeight, 
+                        pos.y() + titleHeight - textMargin);
+
+    painter.drawText(textPos, Pt::String( _window->title().c_str()) );
+
+
+    brush = Gfx::Color(0.9, 0.1, 0.0);
+    painter.setBrush(brush);
+    painter.fillRect(_closeButton);
+
+    brush = Gfx::Color(0.95, 0.8, 0);
+    painter.setBrush(brush);
+    painter.fillRect(_maximizeButton);
+
+    brush = Gfx::Color(0.1, 0.7, 0.1);
+    painter.setBrush(brush);
+    painter.fillRect(_minimizeButton);
+
+    //return Gfx::PointF( pos.x() + borderWidth, pos.y() + borderWidth + titleHeight) ;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// WindowManager
+/////////////////////////////////////////////////////////////////////////////
+
 WindowManager::WindowManager()
 : _app( Application::instance() )
 , _state(&WindowManager::onBackground)
@@ -72,29 +249,28 @@ void WindowManager::init(Window& parent)
 }
 
 
-void WindowManager::add( Window& w )
+void WindowManager::add(Window& w)
 {   
-    _children.insert(_children.begin(), &w);   
+    _children.insert(_children.begin(), &w);
+    _frames[&w] = WindowFrame(*this, w);
 }
 
 
-void WindowManager::remove( Window& w )
+void WindowManager::remove(Window& w)
 {
-    std::vector<Window*>::iterator it = std::find( _children.begin(), _children.end(), &w );
-
+    std::vector<Window*>::iterator it = std::find(_children.begin(), _children.end(), &w);
     if( it == _children.end() )
         return;
 
-    _children.erase( it );       
+    _children.erase( it );
+    _frames.erase(&w);   
     
-    
-     Gfx::PointF framePos = w.position();
+    Gfx::PointF framePos = w.position();
     Gfx::SizeF frameSize = w.size();
     frameSize.addHeight(2 * _borderWidth + _titleHeight);
     frameSize.addWidth(2 * _borderWidth);
 
     Gfx::RectF updateRect(framePos, frameSize);
-
     _container->update( updateRect);        
 }
 
@@ -111,10 +287,15 @@ std::vector<Window*>& WindowManager::windows()
 }
 
 
+PaintSurface& WindowManager::surface()
+{ 
+    return _container->surface(); 
+}
+
+
 void WindowManager::activate(Window& w)
 {
     std::vector<Window*>::iterator it = std::find(_children.begin(), _children.end(), &w);
-
     if( it == _children.end() )
         return;
 
@@ -176,100 +357,32 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
         if( ! w->isVisible() )
             continue; 
         
-        const Gfx::PointF clientPos = renderFrame(*w, surface);                               
+        const Gfx::PointF clientPos = renderFrame(*w, surface, rect);                               
+        
         const Gfx::PointF pos = rect.topLeft() - clientPos;
         const Gfx::RectF  updateRect(pos, rect.size());        
+        
         Gfx::RectF surfaceRect(Gfx::PointF(0, 0), w->size());
-
         surfaceRect = surfaceRect.intersect(updateRect);
 
         Painter painter(surface);
-        painter.drawSurface(clientPos + surfaceRect.topLeft(),  w->surface(), surfaceRect);
-        //painter.drawRect( rect );     
+        painter.drawSurface(clientPos + surfaceRect.topLeft(),  w->surface(), surfaceRect);    
     }
 }
 
 
-Gfx::PointF WindowManager::renderFrame(const Window& w, PaintSurface& surface)
+Gfx::PointF WindowManager::renderFrame(Window& w, PaintSurface& surface, 
+                                       const Gfx::RectF& rect)
 {    
-    Gfx::SizeF clientSize =  w.size();   
-    
-    Gfx::SizeF winSize = w.size();
-    winSize.addWidth(_borderWidth * 2);
-    winSize.addHeight(_borderWidth * 2 + _titleHeight);
-
-    Gfx::Color color = w.isActive() ? _activeColor 
-                                    : _inactiveColor;  
-
-    Painter painter(surface);
-    Gfx::PointF pos( w.position().x(), w.position().y() );
-    
-                
-
-    switch( w.border() )
+    std::map<Window*, WindowFrame>::iterator it = _frames.find(&w);
+    if(it != _frames.end() )
     {
-        case WindowBorder::Dialog:
-        case WindowBorder::DialogSizeable:
-        case WindowBorder::Fixed:
-        case WindowBorder::Sizeable:
-        case WindowBorder::Tool:
-        case WindowBorder::ToolSizeable:
-        {            
-            Gfx::Brush brush(color);
-            painter.setBrush(brush);
-
-            Gfx::Pen pen(1, _textColor);
-            painter.setPen(pen);
-                    
-            Gfx::RectF leftBorder( pos.x(), 
-                                    pos.x() + _borderWidth,
-                                    pos.y() + _borderWidth, 
-                                    pos.y() + winSize.height() - _borderWidth - 1 );
-            painter.fillRect(leftBorder);
-
-            Gfx::RectF topBorder(pos.x(),
-                                    pos.x() + winSize.width() - 1,
-                                    pos.y(),
-                                    pos.y() + _borderWidth);
-            painter.fillRect(topBorder);
-
-            Gfx::RectF rightBorder(pos.x() + winSize.width() - _borderWidth,
-                                    pos.x() + winSize.width() - 1,
-                                    pos.y() + _borderWidth,
-                                    pos.y() + winSize.height() - _borderWidth - 1 );
-            painter.fillRect(rightBorder);
-
-            Gfx::RectF bottomBorder(pos.x(),
-                                    pos.x() + winSize.width() - 1,
-                                    pos.y() + winSize.height() - _borderWidth,
-                                    pos.y() + winSize.height() - 1);
-            painter.fillRect(bottomBorder);
-
-            Gfx::RectF titleArea( pos.x() + _borderWidth,
-                                    pos.x() + winSize.width() - _borderWidth - 1,
-                                    pos.y() + _borderWidth,
-                                    pos.y() + _borderWidth + _titleHeight - 1);
-            painter.fillRect(titleArea);
-
-            const Gfx::Font& font = w.font();
-                    
-            Gfx::FontMetrics fm = painter.fontMetrics(font, Pt::String("A") );
-            double textMargin = (_titleHeight - fm.height()) / 2;
-            Gfx::PointF textPos(pos.x() + _borderWidth + _titleHeight, pos.y() + _titleHeight - textMargin);
-
-            painter.setFont(font);
-            painter.drawText(textPos, Pt::String( w.title().c_str()) );
-        }
-
-        break;
+        PaintEvent pev(w.vid(), rect);
+        it->second.paintEvent(pev);
     }
-
-    Gfx::Brush brush(Gfx::Color(1,0,0));
-    painter.setBrush(brush);
-
-    painter.fillRect( GetCloseButtonRect(w));
-
-  return Gfx::PointF( pos.x() + _borderWidth, pos.y() + _borderWidth + _titleHeight) ;     
+    
+    Gfx::PointF pos = w.position();
+    return Gfx::PointF( pos.x() + _borderWidth, pos.y() + _borderWidth + _titleHeight) ;     
 }
 
 
@@ -463,15 +576,12 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
         return false;
     }
     
-    Gfx::RectF closeRect = GetCloseButtonRect(*_managedWindow);
+    std::map<Window*, WindowFrame>::iterator frame = _frames.find(_managedWindow);
+    if( frame == _frames.end() )
+        return false;
 
-    if( closeRect.contains( mev.position() ) )
-    {
-        if( mev.isRelease( ))
-             onClosing(*_managedWindow);
-        
+    if( frame->second.mouseEvent(mev) )
         return true;
-    }
 
     // pointer on window title bar
     if( isMoving(*_managedWindow, mev) )
@@ -583,15 +693,6 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
     onMove(*_managedWindow, to);
     
     return true;
-}
-
-
-Gfx::RectF WindowManager::GetCloseButtonRect(const Window& w)
-{
-    const Gfx::PointF btPos( w.position().x() + _borderWidth + w.size().width() - _titleHeight,
-                             w.position().y() + _borderWidth );
-    
-    return Gfx::RectF(btPos, Gfx::SizeF( _titleHeight -2, _titleHeight-2 ));
 }
 
 
@@ -716,15 +817,22 @@ bool WindowManager::onWindowResize(const MouseEvent& mev)
 
 void WindowManager::onResize(Window& w, const Gfx::SizeF& to)
 {   
-    Gfx::SizeF from = w.size();
-
     ResizeEvent rev(w.vid(), to);
+
+    std::map<Window*, WindowFrame>::iterator it = _frames.find(&w);
+    if(it == _frames.end() )
+      return;
+
+    it->second.resizeEvent(rev);
+
+    Gfx::SizeF from = w.size();
     Application::instance().loop().commitEvent(rev);
 
     if( ! w.isVisible() )
         return;
 
     const Gfx::PointF updatePos(-_borderWidth, -(_borderWidth + _titleHeight) );
+
 
     Gfx::SizeF updateSize( std::max( to.width(), from.width() ),
                            std::max( to.height(), from.height() ));
@@ -739,9 +847,15 @@ void WindowManager::onResize(Window& w, const Gfx::SizeF& to)
 
 void WindowManager::onMove(Window& w, const Gfx::PointF& to)
 {   
-    Gfx::PointF from = w.position();
-
     MoveEvent mev(w.vid(), to);
+    
+    std::map<Window*, WindowFrame>::iterator it = _frames.find(&w);
+    if(it == _frames.end() )
+      return;
+
+    it->second.moveEvent(mev);
+
+    Gfx::PointF from = w.position();
     Application::instance().loop().commitEvent(mev);
 
     if( ! w.parent() )

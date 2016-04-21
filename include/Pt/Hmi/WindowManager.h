@@ -48,10 +48,45 @@ namespace Pt {
 namespace Hmi {
 
 class Window;
+class WindowManager;
+class Application;
 class MouseEvent;
 class KeyEvent;
-class Application;
-class Screen;
+
+class WindowFrame
+{
+    public:
+        WindowFrame();
+
+        WindowFrame(WindowManager& wm, Window& window);
+
+        virtual ~WindowFrame();
+
+        void moveEvent(const MoveEvent& mev);
+
+        void resizeEvent(const ResizeEvent& rev);
+
+        bool mouseEvent(const MouseEvent& mev);
+
+        void paintEvent(const PaintEvent& pev);
+    
+    protected:
+        void onLayout();
+
+    private:
+        WindowManager* _wm;
+        Window*        _window;
+        Gfx::PointF    _position;
+        Gfx::SizeF     _frameSize;
+        Gfx::SizeF     _windowSize;
+        Gfx::RectF     _closeButton;
+        Gfx::RectF     _maximizeButton;
+        Gfx::RectF     _minimizeButton;
+
+        Gfx::Color     _inactiveColor;
+        Gfx::Color     _activeColor;
+        Gfx::Color     _textColor;   
+};
 
 class WindowManager : public Pt::Connectable
 {
@@ -70,9 +105,11 @@ class WindowManager : public Pt::Connectable
         const std::vector<Window*>& windows() const;
 
         std::vector<Window*>& windows();
+
+        PaintSurface& surface();
                   
     public:
-        bool pointerInput(const Pt::Hmi::MouseEvent& pointerEvent);
+        bool pointerInput(const MouseEvent& mev);
 
         bool keyInput(const Pt::Hmi::KeyEvent& keyEvent);
 
@@ -135,15 +172,14 @@ class WindowManager : public Pt::Connectable
 
         void setSizingCursor( ResizeDirection::Type type );
 
-        Gfx::PointF renderFrame(const Window& w, PaintSurface& surface);
+        Gfx::PointF renderFrame(Window& w, PaintSurface& surface, const Gfx::RectF& rect);
 
         MouseEvent toWindow(Window* w, const MouseEvent& pev);        
 
-        Gfx::RectF GetCloseButtonRect(const Window& w );
-
     private:
-        Application&              _app;
-        std::vector<Window*>      _children;
+        Application&                   _app;
+        std::vector<Window*>           _children;
+        std::map<Window*, WindowFrame> _frames;
         double _borderWidth;
         double _titleHeight;
 
