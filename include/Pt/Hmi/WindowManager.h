@@ -62,6 +62,13 @@ class WindowFrame
 
         virtual ~WindowFrame();
 
+        Window* window()
+        {
+            return _window;
+        }
+
+        Gfx::PointF clientPos() const;
+
         void moveEvent(const MoveEvent& mev);
 
         void resizeEvent(const ResizeEvent& rev);
@@ -172,14 +179,12 @@ class WindowManager : public Pt::Connectable
 
         void setSizingCursor( ResizeDirection::Type type );
 
-        Gfx::PointF renderFrame(Window& w, PaintSurface& surface, const Gfx::RectF& rect);
-
         MouseEvent toWindow(Window* w, const MouseEvent& pev);        
 
     private:
         Application&                   _app;
         std::vector<Window*>           _children;
-        std::map<Window*, WindowFrame> _frames;
+        std::map<Window*, WindowFrame> _windows;
         double _borderWidth;
         double _titleHeight;
 

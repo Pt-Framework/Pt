@@ -77,6 +77,18 @@ WindowFrame::~WindowFrame()
 }
 
 
+Gfx::PointF WindowFrame::clientPos() const
+{
+    double borderWidth = _wm->borderWidth();
+    double titleHeight = _wm->titleHeight();
+
+    Gfx::PointF pos = _window->position();
+    pos.addX(borderWidth);
+    pos.addY(borderWidth + titleHeight);
+    return pos;
+}
+
+
 void WindowFrame::moveEvent(const MoveEvent& mev)
 {
     _position = mev.position();
@@ -252,7 +264,7 @@ void WindowManager::init(Window& parent)
 void WindowManager::add(Window& w)
 {   
     _children.insert(_children.begin(), &w);
-    _frames[&w] = WindowFrame(*this, w);
+    _windows[&w] = WindowFrame(*this, w);
 }
 
 
@@ -263,7 +275,7 @@ void WindowManager::remove(Window& w)
         return;
 
     _children.erase( it );
-    _frames.erase(&w);   
+    _windows.erase(&w);   
     
     Gfx::PointF framePos = w.position();
     Gfx::SizeF frameSize = w.size();
@@ -350,39 +362,31 @@ bool WindowManager::pointerInput( const Pt::Hmi::MouseEvent& mev )
 
 void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {  
-    for( size_t i = 0; i < _children.size(); ++i )
-    {
-        Window* w = _children[i];                
+    std::map<Window*, WindowFrame>::iterator wit;
 
+    for(wit = _windows.begin(); wit != _windows.end(); ++wit )
+    {
+        Window* w = wit->second.window();                
+        WindowFrame& frame = wit->second;
+        
         if( ! w->isVisible() )
             continue; 
-        
-        const Gfx::PointF clientPos = renderFrame(*w, surface, rect);                               
-        
+
+        PaintEvent pev(w->vid(), rect);
+        frame.paintEvent(pev);
+
+        // update rect in child coordinates
+        Gfx::PointF clientPos = frame.clientPos();
         const Gfx::PointF pos = rect.topLeft() - clientPos;
         const Gfx::RectF  updateRect(pos, rect.size());        
         
+        // area of the child window to repaint
         Gfx::RectF surfaceRect(Gfx::PointF(0, 0), w->size());
         surfaceRect = surfaceRect.intersect(updateRect);
 
         Painter painter(surface);
         painter.drawSurface(clientPos + surfaceRect.topLeft(),  w->surface(), surfaceRect);    
     }
-}
-
-
-Gfx::PointF WindowManager::renderFrame(Window& w, PaintSurface& surface, 
-                                       const Gfx::RectF& rect)
-{    
-    std::map<Window*, WindowFrame>::iterator it = _frames.find(&w);
-    if(it != _frames.end() )
-    {
-        PaintEvent pev(w.vid(), rect);
-        it->second.paintEvent(pev);
-    }
-    
-    Gfx::PointF pos = w.position();
-    return Gfx::PointF( pos.x() + _borderWidth, pos.y() + _borderWidth + _titleHeight) ;     
 }
 
 
@@ -576,8 +580,8 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
         return false;
     }
     
-    std::map<Window*, WindowFrame>::iterator frame = _frames.find(_managedWindow);
-    if( frame == _frames.end() )
+    std::map<Window*, WindowFrame>::iterator frame = _windows.find(_managedWindow);
+    if( frame == _windows.end() )
         return false;
 
     if( frame->second.mouseEvent(mev) )
@@ -819,8 +823,8 @@ void WindowManager::onResize(Window& w, const Gfx::SizeF& to)
 {   
     ResizeEvent rev(w.vid(), to);
 
-    std::map<Window*, WindowFrame>::iterator it = _frames.find(&w);
-    if(it == _frames.end() )
+    std::map<Window*, WindowFrame>::iterator it = _windows.find(&w);
+    if(it == _windows.end() )
       return;
 
     it->second.resizeEvent(rev);
@@ -849,8 +853,8 @@ void WindowManager::onMove(Window& w, const Gfx::PointF& to)
 {   
     MoveEvent mev(w.vid(), to);
     
-    std::map<Window*, WindowFrame>::iterator it = _frames.find(&w);
-    if(it == _frames.end() )
+    std::map<Window*, WindowFrame>::iterator it = _windows.find(&w);
+    if(it == _windows.end() )
       return;
 
     it->second.moveEvent(mev);
