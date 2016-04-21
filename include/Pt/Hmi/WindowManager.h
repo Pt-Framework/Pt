@@ -67,6 +67,15 @@ class WindowFrame
             return _window;
         }
 
+        const Window* window() const
+        {
+            return _window;
+        }
+
+        bool isTitle(const Gfx::PointF& p) const;
+
+        bool isBorder(const Gfx::PointF& p) const;
+
         Gfx::PointF clientPos() const;
 
         void moveEvent(const MoveEvent& mev);
@@ -149,7 +158,6 @@ class WindowManager : public Pt::Connectable
         }
 
     private:        
-
         bool onBackground(const Pt::Hmi::MouseEvent& pev);
 
         bool onWindowFrame(const Pt::Hmi::MouseEvent& pev);
@@ -162,20 +170,16 @@ class WindowManager : public Pt::Connectable
 
     private:
         // TODO: checkBorder, checkTitle
-        ResizeDirection::Type isSizing(const Window& w, const Pt::Hmi::MouseEvent& ev);
+        ResizeDirection::Type isSizing(const WindowFrame& w, const Pt::Hmi::MouseEvent& ev);
 
-        bool isMoving(const Window& w, const Pt::Hmi::MouseEvent& ev);
+        bool isMoving(const WindowFrame& w, const Pt::Hmi::MouseEvent& ev);
 
-    private:
-        void activate(Window& w); 
-        
+    private:       
         void updateAll(Window& w);   
-
-        bool updateActive(const Pt::Hmi::MouseEvent& mouseEvent);
 
         bool contains(const Window& w, double x, double y);
 
-        Window* findWindow(double x, double y);
+        WindowFrame* findWindow(double x, double y);
 
         void setSizingCursor( ResizeDirection::Type type );
 
@@ -184,21 +188,25 @@ class WindowManager : public Pt::Connectable
     private:
         Application&                   _app;
         std::vector<Window*>           _children;
+
+        //
+        // TODO TODO TODO
+        //
+
+        // make this a stack and remove WindowManager::contains()
         std::map<Window*, WindowFrame> _windows;
         double _borderWidth;
         double _titleHeight;
 
         typedef bool (WindowManager::*State)(const Pt::Hmi::MouseEvent&);
         State                     _state;
-        Window*                   _managedWindow;
+        WindowFrame*              _managedWindow;
         Gfx::PointF               _managedWindowPosition;
         Gfx::SizeF                _managedWindowSize;
         Window*                   _container;          
         ResizeDirection::Type     _sizingDirection;
         
-        Gfx::Color                _inactiveColor;
-        Gfx::Color                _activeColor;
-        Gfx::Color                _textColor;        
+ 
         size_t                    _actionButton;  
         Gfx::PointF               _lastPointerPosition;                          
 };

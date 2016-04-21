@@ -89,6 +89,30 @@ Gfx::PointF WindowFrame::clientPos() const
 }
 
 
+bool WindowFrame::isTitle(const Gfx::PointF& p) const
+{            
+    double borderWidth = _wm->borderWidth();
+    double titleHeight = _wm->titleHeight();
+
+    return p.x() >= borderWidth && 
+           p.x() < borderWidth + _windowSize.width() &&
+           p.y() >= borderWidth &&
+           p.y() < borderWidth + titleHeight;
+}
+
+
+bool WindowFrame::isBorder(const Gfx::PointF& p) const
+{            
+    double borderWidth = _wm->borderWidth();
+    double titleHeight = _wm->titleHeight();
+
+    return p.x() >= borderWidth && 
+           p.x() < borderWidth + _windowSize.width() &&
+           p.y() >= borderWidth &&
+           p.y() < borderWidth + titleHeight;
+}
+
+
 void WindowFrame::moveEvent(const MoveEvent& mev)
 {
     _position = mev.position();
@@ -226,8 +250,6 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
     brush = Gfx::Color(0.1, 0.7, 0.1);
     painter.setBrush(brush);
     painter.fillRect(_minimizeButton);
-
-    //return Gfx::PointF( pos.x() + borderWidth, pos.y() + borderWidth + titleHeight) ;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -239,9 +261,6 @@ WindowManager::WindowManager()
 , _state(&WindowManager::onBackground)
 , _managedWindow(0)
 , _sizingDirection( ResizeDirection::None )
-, _inactiveColor(0.68f, 0.70f, 0.75f)
-, _activeColor(0.4f, 0.5f, 0.8f)
-, _textColor(0.0, 0.0, 0.0)
 , _actionButton(0)
 , _container(0)
 , _borderWidth(4)
@@ -305,33 +324,24 @@ PaintSurface& WindowManager::surface()
 }
 
 
-void WindowManager::activate(Window& w)
+
+WindowFrame* WindowManager::findWindow(double x, double y)
 {
-    std::vector<Window*>::iterator it = std::find(_children.begin(), _children.end(), &w);
-    if( it == _children.end() )
-        return;
-
-    _children.erase(it);
-    _children.push_back(&w);
-}
-
-
-bool WindowManager::updateActive(const Pt::Hmi::MouseEvent& ev)
-{    
-    std::vector<Window*>::reverse_iterator rit =  _children.rbegin();
-
-    for( ; rit != _children.rend(); ++rit )
+    std::vector<Window*>::reverse_iterator rit;
+    for(rit =  _children.rbegin() ; rit != _children.rend(); ++rit )
     {
         Window* w = *rit;
-
-        if( ! contains( *w, ev.x(), ev.y() ) )
+        
+        if( ! w->isVisible() )
             continue;
-             
-        w->activate();    
-        return true;
-    }         
 
-    return false;
+        if( ! contains(*w, x, y) )
+            continue;
+
+        return &_windows[w];
+    }
+
+    return 0;
 }
 
 
@@ -352,7 +362,11 @@ bool WindowManager::keyInput(const Pt::Hmi::KeyEvent& keyEvent)
 bool WindowManager::pointerInput( const Pt::Hmi::MouseEvent& mev )
 {
     if( mev.isPress(_actionButton) )
-        updateActive(mev);    
+    {
+        WindowFrame* wf = findWindow(mev.x(), mev.y());
+        if(wf)
+            wf->window()->activate();
+    }
 
     bool r = (this->*_state)(mev);
     _lastPointerPosition = Gfx::PointF( mev.x(), mev.y() );    
@@ -366,34 +380,35 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
 
     for(wit = _windows.begin(); wit != _windows.end(); ++wit )
     {
-        Window* w = wit->second.window();                
         WindowFrame& frame = wit->second;
+        Window* w = frame.window();                
         
         if( ! w->isVisible() )
             continue; 
 
-        PaintEvent pev(w->vid(), rect);
+        Gfx::PointF clientPos = frame.clientPos();
+
+        // update rect in child window coordinates
+        Gfx::PointF updatePos = rect.topLeft() - clientPos;
+        Gfx::RectF  updateRect(updatePos, rect.size());        
+        
+        PaintEvent pev(0, updateRect);
         frame.paintEvent(pev);
 
-        // update rect in child coordinates
-        Gfx::PointF clientPos = frame.clientPos();
-        const Gfx::PointF pos = rect.topLeft() - clientPos;
-        const Gfx::RectF  updateRect(pos, rect.size());        
-        
         // area of the child window to repaint
-        Gfx::RectF surfaceRect(Gfx::PointF(0, 0), w->size());
-        surfaceRect = surfaceRect.intersect(updateRect);
+        Gfx::RectF clientRect(Gfx::PointF(0, 0), w->size());
+        updateRect = updateRect.intersect(clientRect);
 
         Painter painter(surface);
-        painter.drawSurface(clientPos + surfaceRect.topLeft(),  w->surface(), surfaceRect);    
+        painter.drawSurface(clientPos + updateRect.topLeft(),  w->surface(), updateRect);    
     }
 }
 
 
 bool WindowManager::contains(const Window& w, double x, double y)
 {  
-    Gfx::SizeF winSize(w.size().width() + _borderWidth*2, 
-                       w.size().height() + _borderWidth*2 + _titleHeight);
+    Gfx::SizeF winSize(w.size().width() + _borderWidth * 2, 
+                       w.size().height() + _borderWidth * 2 + _titleHeight);
 
     if( x >= w.position().x() && x <  w.position().x() + winSize.width() &&
         y >= w.position().y() && y <  w.position().y() + winSize.height() )
@@ -403,45 +418,19 @@ bool WindowManager::contains(const Window& w, double x, double y)
 }
 
 
-Window* WindowManager::findWindow(double x, double y)
-{
-    for( int i = _children.size() - 1;  i > -1; --i )
-    {
-        Window* w = _children[i];
-
-        if( ! w->isVisible() )
-            continue;
-
-        if( ! contains(*w, x, y) )
-            continue;
-
-        return w;
-    }
-
-    return 0;
-}
-
-
-bool WindowManager::isMoving(const Window& w, const Pt::Hmi::MouseEvent& ev)
+bool WindowManager::isMoving(const WindowFrame& wf, const Pt::Hmi::MouseEvent& ev)
 {            
-    const Gfx::PointF& position = w.position();
-     
-    if( (ev.x() < (position.x()  + _borderWidth + w.size().width() ) ) &&                  
-        (ev.x() >= (position.x() + _borderWidth)) &&
-        (ev.y() < (position.y()  + _titleHeight + _borderWidth) ) && 
-        (ev.y() >= (position.y() + _borderWidth) ))
-    {      
-        return true;
-    }
-
-    return false;
+    const Gfx::PointF& p = ev.position() - wf.window()->position();
+    return wf.isTitle(p);
 }
 
 
-ResizeDirection::Type WindowManager::isSizing(const Window& w, const Pt::Hmi::MouseEvent& ev)
+ResizeDirection::Type WindowManager::isSizing(const WindowFrame& wf, const Pt::Hmi::MouseEvent& ev)
 {    
-    const Gfx::SizeF  wsize = w.size();
-    const Gfx::PointF wpos  = w.position();
+    const Window* w = wf.window();
+
+    const Gfx::SizeF  wsize = w->size();
+    const Gfx::PointF wpos  = w->position();
     double titleHeight = _titleHeight;
 
     if( ev.x() < wpos.x() ||
@@ -560,8 +549,8 @@ bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
     
     // pointer on window content
     _state = &WindowManager::onWindowContent;    
-    _app.setPointerWindow( _managedWindow);
-    _managedWindow->processEvent( toWindow(_managedWindow, mev) );
+    _app.setPointerWindow( _managedWindow->window() );
+    _managedWindow->window()->processEvent( toWindow(_managedWindow->window(), mev) );
     return true;
 }
 
@@ -580,11 +569,7 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
         return false;
     }
     
-    std::map<Window*, WindowFrame>::iterator frame = _windows.find(_managedWindow);
-    if( frame == _windows.end() )
-        return false;
-
-    if( frame->second.mouseEvent(mev) )
+    if( _managedWindow->mouseEvent(mev) )
         return true;
 
     // pointer on window title bar
@@ -596,7 +581,7 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
         if( mev.isPress(_actionButton) )
         {
             _state = &WindowManager::onWindowMove;
-            _managedWindowPosition = _managedWindow->position();
+            _managedWindowPosition = _managedWindow->window()->position();
         }
         else
             _state = &WindowManager::onWindowFrame;
@@ -614,8 +599,8 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
         if( mev.isPress(_actionButton) )
         {
             _state = &WindowManager::onWindowResize;
-            _managedWindowPosition = _managedWindow->position();
-            _managedWindowSize = _managedWindow->size();
+            _managedWindowPosition = _managedWindow->window()->position();
+            _managedWindowSize = _managedWindow->window()->size();
         }
         else
             _state = &WindowManager::onWindowFrame;
@@ -625,8 +610,8 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
 
     // pointer on window content
     _state = &WindowManager::onWindowContent;
-    _app.setPointerWindow(_managedWindow);
-    _managedWindow->processEvent( toWindow(_managedWindow, mev) );
+    _app.setPointerWindow(_managedWindow->window());
+    _managedWindow->window()->processEvent( toWindow(_managedWindow->window(), mev) );
     return true;
 }
 
@@ -666,7 +651,7 @@ bool WindowManager::onWindowContent(const Pt::Hmi::MouseEvent& mev)
     }                                
 
     // pointer on window content
-    _managedWindow->processEvent( toWindow( _managedWindow,  mev) );
+    _managedWindow->window()->processEvent( toWindow( _managedWindow->window(),  mev) );
     return true;
 }
 
@@ -694,7 +679,7 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
                     _managedWindowPosition.y() + dY) ;     
 
     _managedWindowPosition = to;
-    onMove(*_managedWindow, to);
+    onMove(*_managedWindow->window(), to);
     
     return true;
 }
@@ -791,28 +776,28 @@ bool WindowManager::onWindowResize(const MouseEvent& mev)
     Gfx::SizeF size(width, height);
     Gfx::PointF pos(posX, posY);
 
-    if( width < _managedWindow->minimumSize().width() )
-        size.setWidth( _managedWindow->minimumSize().width() );
+    if( width < _managedWindow->window()->minimumSize().width() )
+        size.setWidth( _managedWindow->window()->minimumSize().width() );
 
-    if( height < _managedWindow->minimumSize().height() )
-        size.setHeight( _managedWindow->minimumSize().height() );
+    if( height < _managedWindow->window()->minimumSize().height() )
+        size.setHeight( _managedWindow->window()->minimumSize().height() );
                 
-    if( width > _managedWindow->maximumSize().width() )
-        size.setWidth( _managedWindow->maximumSize().width() );
+    if( width > _managedWindow->window()->maximumSize().width() )
+        size.setWidth( _managedWindow->window()->maximumSize().width() );
 
-    if( height > _managedWindow->maximumSize().height() )
-        size.setHeight( _managedWindow->maximumSize().height() );
+    if( height > _managedWindow->window()->maximumSize().height() )
+        size.setHeight( _managedWindow->window()->maximumSize().height() );
 
     if( _managedWindowPosition != pos )
     {
         _managedWindowPosition = pos;
-        onMove(*_managedWindow, pos);
+        onMove(*_managedWindow->window(), pos);
     }
 
     if( _managedWindowSize != size )
     {
         _managedWindowSize = size;
-        onResize(*_managedWindow, size);
+        onResize(*_managedWindow->window(), size);
     }
 
     return true;
@@ -926,18 +911,24 @@ void WindowManager::updateAll(Window& w)
 
 void WindowManager::onActivate(Window& w)
 {
-    std::vector<Window*>::const_iterator it;
+    std::vector<Window*>::const_iterator cit;
 
-    for(it = _children.begin(); it != _children.end(); ++it)
+    for(cit = _children.begin(); cit != _children.end(); ++cit)
     {
-        if((*it)->isActive() && *it != &w)
+        if((*cit)->isActive() && *cit != &w)
         {
-            ActivateEvent aev( (*it)->vid(), false );
-            updateAll(**it);
+            ActivateEvent aev( (*cit)->vid(), false );
+            updateAll(**cit);
         }
     }
 
-    activate(w);
+    std::vector<Window*>::iterator it = std::find(_children.begin(), _children.end(), &w);
+    if( it == _children.end() )
+        return;
+
+    _children.erase(it);
+    _children.push_back(&w);
+
     _container->activate();
 
     ActivateEvent aev( w.vid(), true );
