@@ -273,17 +273,23 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
 
     painter.drawText(textPos, Pt::String( _window->title().c_str()) );
 
+    pen = Gfx::Pen(1, Gfx::Color(0, 0, 0) );
+    painter.setPen(pen);
+
     brush = Gfx::Color(0.82, 0.25, 0.22);
     painter.setBrush(brush);
     painter.fillRect(_closeButton);
+    painter.drawRect(_closeButton);
 
     brush = Gfx::Color(0.4, 0.7, 0.3);
     painter.setBrush(brush);
     painter.fillRect(_maximizeButton);
+    painter.drawRect(_maximizeButton);
 
     brush = Gfx::Color(1.0, 0.75, 0.1);
     painter.setBrush(brush);
     painter.fillRect(_minimizeButton);
+    painter.drawRect(_minimizeButton);
 }
 
 /////////////////////////////////////////////////////////////////////////////
