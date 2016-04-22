@@ -41,7 +41,6 @@
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/MoveEvent.h>
-#include <Pt/Hmi/ResizeDirection.h>
 
 namespace Pt {
 
@@ -164,11 +163,22 @@ class WindowManager : public Pt::Connectable
         bool onWindowResize(const MouseEvent& pev);
 
     private:
-        // TODO: checkBorder, checkTitle
-        ResizeDirection::Type isSizing(const WindowFrame& w, const Pt::Hmi::MouseEvent& ev);
+        enum ResizeDirection
+        {
+		        NoResize,
+		        North,
+		        NorthEast,
+		        East,
+		        SouthEast,
+		        South,
+		        SouthWest,
+		        West,
+		        NorthWest
+        };	
 
-    private:       
-        void setSizingCursor( ResizeDirection::Type type );       
+        ResizeDirection isResize(const WindowFrame& w, const Pt::Hmi::MouseEvent& ev);
+ 
+        void setResizeCursor( ResizeDirection dir );       
 
     private:
         Application&             _app;
@@ -183,7 +193,7 @@ class WindowManager : public Pt::Connectable
         Gfx::PointF               _managedWindowPosition;
         Gfx::SizeF                _managedWindowSize;
         Window*                   _parent;          
-        ResizeDirection::Type     _sizingDirection;
+        ResizeDirection           _resizeDirection;
         
         size_t                    _actionButton;  
         Gfx::PointF               _lastPointerPosition;                          

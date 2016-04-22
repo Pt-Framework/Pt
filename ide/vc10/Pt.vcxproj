@@ -76,7 +76,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\PaintEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Panel.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\ResizeDirection.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Screen.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ScrollEvent.h" />

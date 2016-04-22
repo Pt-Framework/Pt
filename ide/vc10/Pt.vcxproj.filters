@@ -1104,9 +1104,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\WindowBorder.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ResizeDirection.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>

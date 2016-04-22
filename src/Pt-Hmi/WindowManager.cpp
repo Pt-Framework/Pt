@@ -276,17 +276,17 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
     pen = Gfx::Pen(1, Gfx::Color(0, 0, 0) );
     painter.setPen(pen);
 
-    brush = Gfx::Color(0.82, 0.25, 0.22);
+    brush = Gfx::Color(0.82f, 0.25f, 0.22f);
     painter.setBrush(brush);
     painter.fillRect(_closeButton);
     painter.drawRect(_closeButton);
 
-    brush = Gfx::Color(0.4, 0.7, 0.3);
+    brush = Gfx::Color(0.35f, 0.65f, 0.25f);
     painter.setBrush(brush);
     painter.fillRect(_maximizeButton);
     painter.drawRect(_maximizeButton);
 
-    brush = Gfx::Color(1.0, 0.75, 0.1);
+    brush = Gfx::Color(1.0f, 0.75f, 0.1f);
     painter.setBrush(brush);
     painter.fillRect(_minimizeButton);
     painter.drawRect(_minimizeButton);
@@ -300,7 +300,7 @@ WindowManager::WindowManager()
 : _app( Application::instance() )
 , _state(&WindowManager::onBackground)
 , _managedWindow(0)
-, _sizingDirection( ResizeDirection::None )
+, _resizeDirection( NoResize )
 , _actionButton(0)
 , _parent(0)
 , _borderWidth(4)
@@ -442,7 +442,7 @@ void WindowManager::paintEvent(const PaintEvent& pev)
 }
 
 
-ResizeDirection::Type WindowManager::isSizing(const WindowFrame& wf, const Pt::Hmi::MouseEvent& ev)
+WindowManager::ResizeDirection WindowManager::isResize(const WindowFrame& wf, const Pt::Hmi::MouseEvent& ev)
 {    
     const Window* w = wf.window();
 
@@ -454,7 +454,7 @@ ResizeDirection::Type WindowManager::isSizing(const WindowFrame& wf, const Pt::H
         ev.x() > wpos.x() + 2*_borderWidth + wsize.width() ||
         ev.y() < wpos.y() ||
         ev.y() >= wpos.y() + 2*_borderWidth + titleHeight + wsize.height() )
-        return ResizeDirection::None;
+        return NoResize;
 
     bool left = ev.x() < (wpos.x() + _borderWidth);
     bool right = ev.x() >= wpos.x() + _borderWidth + wsize.width();
@@ -462,54 +462,54 @@ ResizeDirection::Type WindowManager::isSizing(const WindowFrame& wf, const Pt::H
     bool bottom = ev.y() >= wpos.y() + _borderWidth + titleHeight + wsize.height();
 
     if(top && left)
-        return ResizeDirection::NorthWest;
+        return NorthWest;
 
     if(top && right)
-        return ResizeDirection::NorthEast;
+        return NorthEast;
     
     if(bottom && left)
-        return ResizeDirection::SouthWest;
+        return SouthWest;
     
     if(bottom && right)
-        return ResizeDirection::SouthEast;
+        return SouthEast;
 
     if(left)                
-        return ResizeDirection::West;
+        return West;
 
     if(right)
-        return ResizeDirection::East;
+        return East;
 
     if(top)
-        return ResizeDirection::North;
+        return North;
 
     if(bottom)
-        return ResizeDirection::South;            
+        return South;            
 
-    return ResizeDirection::None;            
+    return NoResize;            
 }
 
 
-void WindowManager::setSizingCursor( ResizeDirection::Type type )
+void WindowManager::setResizeCursor( ResizeDirection dir )
 {
-    switch( type )
+    switch( dir )
     {
-        case ResizeDirection::East:
-        case ResizeDirection::West:
+        case East:
+        case West:
             _app.setCursor( &Hmi::Cursor::sizeWECursor() );
         break;
 
-        case ResizeDirection::NorthEast:
-        case ResizeDirection::SouthWest:
+        case NorthEast:
+        case SouthWest:
             _app.setCursor( &Hmi::Cursor::sizeNESWCursor() );
         break;
 
-        case ResizeDirection::North:        
-        case ResizeDirection::South:
+        case North:        
+        case South:
             _app.setCursor( &Hmi::Cursor::sizeNSCursor() );
         break;
         
-        case ResizeDirection::NorthWest:
-        case ResizeDirection::SouthEast:
+        case NorthWest:
+        case SouthEast:
             _app.setCursor( &Hmi::Cursor::sizeNWSECursor() );
         break;        
     }
@@ -541,11 +541,11 @@ bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
     }
 
     // pointer on window border
-    _sizingDirection = isSizing(*_managedWindow, mev);
+    _resizeDirection = isResize(*_managedWindow, mev);
 
-    if( _sizingDirection != ResizeDirection::None )
+    if( _resizeDirection != NoResize )
     {
-        setSizingCursor(_sizingDirection);
+        setResizeCursor(_resizeDirection);
         _app.setPointerWindow( 0);
         _state = &WindowManager::onWindowFrame;
         return true;
@@ -600,10 +600,10 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
     }
 
     // pointer on window border
-    _sizingDirection = isSizing(*_managedWindow, mev);
-    if( _sizingDirection != ResizeDirection::None )
+    _resizeDirection = isResize(*_managedWindow, mev);
+    if( _resizeDirection != NoResize )
     {                      
-        setSizingCursor(_sizingDirection);
+        setResizeCursor(_resizeDirection);
         _app.setPointerWindow( 0);
 
         if( mev.isPress(_actionButton) )
@@ -657,11 +657,11 @@ bool WindowManager::onWindowContent(const Pt::Hmi::MouseEvent& mev)
     }
 
     // pointer on window border
-    _sizingDirection = isSizing(*_managedWindow, mev);
+    _resizeDirection = isResize(*_managedWindow, mev);
 
-    if( _sizingDirection != ResizeDirection::None )
+    if( _resizeDirection != NoResize )
     {            
-        setSizingCursor(_sizingDirection);
+        setResizeCursor(_resizeDirection);
         _app.setPointerWindow( 0);
         _state = &WindowManager::onWindowFrame;
         return true;
@@ -706,61 +706,59 @@ bool WindowManager::onWindowResize(const MouseEvent& mev)
 
     if( ! mev.isPressed(_actionButton) )
     {
-        _sizingDirection = isSizing(*_managedWindow, mev);
+        _resizeDirection = isResize(*_managedWindow, mev);
 
-        _state = _sizingDirection == ResizeDirection::None ? &WindowManager::onWindowFrame
-                                                           : &WindowManager::onBackground;
+        _state = _resizeDirection == NoResize ? &WindowManager::onWindowFrame
+                                              : &WindowManager::onBackground;
         return false;
     }
 
-    setSizingCursor(_sizingDirection);
-
-    Gfx::PointF point( mev.x(), mev.y() );
+    setResizeCursor(_resizeDirection);
     
     double width  = _managedWindowSize.width();
     double height = _managedWindowSize.height();
     double posX   = _managedWindowPosition.x();
     double posY   = _managedWindowPosition.y();
-    double deltaX = ( point.x() - _lastPointerPosition.x());
-    double deltaY = ( point.y() - _lastPointerPosition.y());
+    double deltaX = ( mev.x() - _lastPointerPosition.x());
+    double deltaY = ( mev.y() - _lastPointerPosition.y());
 
-    switch( _sizingDirection )
+    switch( _resizeDirection )
     {
-      case  ResizeDirection::North:
+        case  North:
         {            
             posY +=  deltaY;
             height -= deltaY;
         }
         break;
 
-      case ResizeDirection::NorthEast:
-      {
-          posY +=  deltaY;
-          height -= deltaY;
-          width += deltaX;
-      }
-      break;
+        case NorthEast:
+        {
+            posY +=  deltaY;
+            height -= deltaY;
+            width += deltaX;
+        }
+        break;
 
-      case ResizeDirection::East:
-      {
+        case East:
+        {
           width += deltaX;
-      }
-      break;
+        }
+        break;
 
-      case ResizeDirection::SouthEast:
+        case SouthEast:
         {
             height += deltaY;
             width += deltaX;
         }
         break;
 
-      case ResizeDirection::South:
+        case South:
         {
             height += deltaY;
         }
         break;
 
-      case ResizeDirection::SouthWest:
+        case SouthWest:
         {
             height += deltaY;
             posX +=  deltaX;
@@ -768,21 +766,21 @@ bool WindowManager::onWindowResize(const MouseEvent& mev)
         }
         break;
 
-      case ResizeDirection::West:
+        case West:
         {
             posX +=  deltaX;
             width -= deltaX;
         }        
         break;
 
-      case ResizeDirection::NorthWest:
-      {
+        case NorthWest:
+        {
           posX +=  deltaX;
           width -= deltaX;
           posY +=  deltaY;
           height -= deltaY;
-      }
-      break;
+        }
+        break;
 
       default:
         break;
