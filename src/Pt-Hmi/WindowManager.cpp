@@ -327,29 +327,21 @@ void WindowManager::init(Window& parent)
 
 void WindowManager::add(Window& w)
 {    
-    _wstack.insert( _wstack.begin(), WindowFrame(*this, w) );
+    _windows.insert( _windows.begin(), WindowFrame(*this, w) );
 }
 
 
 void WindowManager::remove(Window& w)
 {
     std::vector<WindowFrame>::iterator wit;
-    for(wit = _wstack.begin(); wit != _wstack.end(); ++wit)
+    for(wit = _windows.begin(); wit != _windows.end(); ++wit)
     {
         if(wit->window() == &w)
         {
-            _wstack.erase(wit);
+            _windows.erase(wit);
             break;
         }
     }
-    
-/*    Gfx::PointF framePos = w.position();
-    Gfx::SizeF frameSize = w.size();
-    frameSize.addHeight(2 * _borderWidth + _titleHeight);
-    frameSize.addWidth(2 * _borderWidth);
-
-    Gfx::RectF updateRect(framePos, frameSize);
-    _container->update( updateRect);   */     
 }
 
 
@@ -362,7 +354,7 @@ PaintSurface& WindowManager::surface()
 WindowFrame* WindowManager::findWindow(const Gfx::PointF& p)
 {
     std::vector<WindowFrame>::reverse_iterator rit;
-    for(rit =  _wstack.rbegin() ; rit != _wstack.rend(); ++rit )
+    for(rit =  _windows.rbegin() ; rit != _windows.rend(); ++rit )
     {
         if( ! rit->window()->isVisible() )
             continue;
@@ -380,7 +372,7 @@ WindowFrame* WindowManager::findWindow(const Gfx::PointF& p)
 WindowFrame* WindowManager::findWindow(Window& w)
 {
     std::vector<WindowFrame>::iterator it;
-    for(it = _wstack.begin(); it != _wstack.end(); ++it)
+    for(it = _windows.begin(); it != _windows.end(); ++it)
     {
         if( it->window() == &w)
             return &*it;
@@ -423,7 +415,7 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {  
     std::vector<WindowFrame>::reverse_iterator wit;
 
-    for(wit = _wstack.rbegin(); wit != _wstack.rend(); ++wit )
+    for(wit = _windows.rbegin(); wit != _windows.rend(); ++wit )
     {
         WindowFrame& frame = *wit;
         Window* w = frame.window();                
@@ -942,7 +934,7 @@ void WindowManager::updateFrame(Window& w)
 void WindowManager::onActivate(Window& w)
 {
     std::vector<WindowFrame>::iterator it;
-    for(it = _wstack.begin(); it != _wstack.end(); ++it)
+    for(it = _windows.begin(); it != _windows.end(); ++it)
     {
         Window* child = it->window();
         if(child->isActive() && child != &w)
@@ -952,13 +944,13 @@ void WindowManager::onActivate(Window& w)
         }
     }
 
-    for(it = _wstack.begin(); it != _wstack.end(); ++it)
+    for(it = _windows.begin(); it != _windows.end(); ++it)
     {
         if(it->window() == &w)
         {
             WindowFrame wf = *it;
-            _wstack.erase(it);
-            _wstack.push_back(wf);
+            _windows.erase(it);
+            _windows.push_back(wf);
             break;
         }
     }

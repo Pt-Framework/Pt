@@ -185,7 +185,7 @@ class WindowManager : public Pt::Connectable
 
     private:
         Application&             _app;
-        std::vector<WindowFrame> _wstack;
+        std::vector<WindowFrame> _windows;
 
         double _borderWidth;
         double _titleHeight;
