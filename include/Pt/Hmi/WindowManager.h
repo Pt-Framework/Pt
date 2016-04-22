@@ -178,6 +178,7 @@ class WindowManager : public Pt::Connectable
         };	
 
         // TODO: NorthEast is North + East
+        // TODO: move this to WindowFrame::getBorder
         ResizeDirection isResize(const WindowFrame& w, const Pt::Hmi::MouseEvent& ev);
  
         // TODO: NorthEast is North + East
