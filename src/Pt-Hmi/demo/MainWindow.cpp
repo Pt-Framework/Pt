@@ -22,22 +22,12 @@
  * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ * MA  02110-1301  USA 
+*/
+
 #include "MainWindow.h"
-#include "Dialog1.h"
-#include <Pt/System/Clock.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Painter.h>
-#include <Pt/Hmi/Cursor.h>
-#include <Pt/Gfx/ImageReader.h>
-#include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/ImagePainter.h>
-#include <Pt/Gfx/ClipPolygon.h>
-#include <Pt/Gfx/Rasterizer.h>
-#include "DemoImage.h"
-#include "AtesionIcon.h"
-#include <sstream>
-#include <fstream>
 
 namespace Pt {
 
@@ -62,6 +52,12 @@ MainWindow::~MainWindow()
 {
 }
 
+
+void MainWindow::onCloseEvent(const CloseEvent& ev)
+{
+    Window::onCloseEvent(ev);
+    Application::instance().exit();
+}
 
 } // namespace
 

@@ -692,13 +692,16 @@ void Window::close()
 
 void Window::onClosing(Window& w)
 {         
+    // request to close the window
     _windowManager.onClosing(w); 
 }
 
-
+ 
 void Window::onClose(Window& w)
-{         
-    _windowManager.remove(w); 
+{     
+    // the window has been closed, clean up
+    _windowManager.remove(w);
+    update();
 }
 
 
@@ -820,11 +823,9 @@ void Window::onEvent(const Pt::Event& ev)
 void Window::onPaintEvent(const PaintEvent& ev)
 {
     if( ! this->isVisible() )
-        return;
- 
-    const Gfx::RectF& rect = ev.rect();   
+        return; 
 
-    _windowManager.paint(_surface, rect);
+    _windowManager.paintEvent(ev);
 }
 
 

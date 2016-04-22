@@ -74,14 +74,6 @@ class WindowFrame
 
         Gfx::RectF frameRect() const;
 
-        Gfx::PointF toFrame(const Gfx::PointF& pos) const;
-
-        Gfx::PointF fromFrame(const Gfx::PointF& pos) const;
-
-        Gfx::PointF toClient(const Gfx::PointF& pos) const;
-
-        Gfx::PointF fromClient(const Gfx::PointF& pos) const;
-
         void moveEvent(const MoveEvent& mev);
 
         void resizeEvent(const ResizeEvent& rev);
@@ -114,20 +106,34 @@ class WindowManager : public Pt::Connectable
 
         virtual ~WindowManager();
 
+        double borderWidth() const
+        {
+            return _borderWidth;
+        }
+
+        double titleHeight()  const
+        {
+            return _titleHeight;
+        }
+
         void init(Window& parent);
 
         void add(Window& w);
 
         void remove(Window& window);
 
+        WindowFrame* findWindow(const Gfx::PointF& p);
+
+        WindowFrame* findWindow(Window& w);
+
         PaintSurface& surface();
                   
     public:
+        bool keyInput(const Pt::Hmi::KeyEvent& keyEvent);
+        
         bool pointerInput(const MouseEvent& mev);
 
-        bool keyInput(const Pt::Hmi::KeyEvent& keyEvent);
-
-        void paint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        void paintEvent(const PaintEvent& ev);
 
     public:
         void onResize(Window& w, const Gfx::SizeF& to);
@@ -144,17 +150,6 @@ class WindowManager : public Pt::Connectable
 
         void onClosing(Window& w);
     
-    public:
-        double borderWidth() const
-        {
-            return _borderWidth;
-        }
-
-        double titleHeight()  const
-        {
-            return _titleHeight;
-        }
-
     private:        
         bool onBackground(const Pt::Hmi::MouseEvent& pev);
 
@@ -175,10 +170,6 @@ class WindowManager : public Pt::Connectable
     private:       
         void updateFrame(Window& w);   
 
-        WindowFrame* findWindow(const Gfx::PointF& p);
-
-        WindowFrame* findWindow(Window& w);
-
         void setSizingCursor( ResizeDirection::Type type );
 
         MouseEvent toWindow(Window* w, const MouseEvent& pev);        
@@ -198,7 +189,6 @@ class WindowManager : public Pt::Connectable
         Window*                   _container;          
         ResizeDirection::Type     _sizingDirection;
         
- 
         size_t                    _actionButton;  
         Gfx::PointF               _lastPointerPosition;                          
 };
