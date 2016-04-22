@@ -722,6 +722,8 @@ bool WindowManager::onWindowResize(const MouseEvent& mev)
     double deltaX = ( mev.x() - _lastPointerPosition.x());
     double deltaY = ( mev.y() - _lastPointerPosition.y());
 
+    // TODO: NorthEast is North + East
+
     switch( _resizeDirection )
     {
         case  North:

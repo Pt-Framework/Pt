@@ -163,6 +163,7 @@ class WindowManager : public Pt::Connectable
         bool onWindowResize(const MouseEvent& pev);
 
     private:
+        // TODO: NorthEast is North + East
         enum ResizeDirection
         {
 		        NoResize,
@@ -176,8 +177,10 @@ class WindowManager : public Pt::Connectable
 		        NorthWest
         };	
 
+        // TODO: NorthEast is North + East
         ResizeDirection isResize(const WindowFrame& w, const Pt::Hmi::MouseEvent& ev);
  
+        // TODO: NorthEast is North + East
         void setResizeCursor( ResizeDirection dir );       
 
     private:
