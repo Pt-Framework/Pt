@@ -98,9 +98,8 @@ Window::~Window()
 {
     setMainWidget(0);
 
-    const std::vector<Window*>& children = _windowManager.windows();
-    while( ! children.empty() )
-        remove( *children.back() );
+    while( ! _windows.empty() )
+       remove( *_windows.back() );
  
     deinit();
 }
@@ -119,6 +118,7 @@ void Window::init(Window* parent)
     else
     {
         parent->_windowManager.add(*this);
+        parent->_windows.push_back(this);
     }
 
     _parent = parent;
@@ -159,7 +159,11 @@ void Window::deinit()
     else if(_parent)
     {
         _parent->_windowManager.remove(*this);
-        _parent->update();
+
+        std::vector<Window*>::iterator it;
+        it = std::find(_parent->_windows.begin(), _parent->_windows.end(), this);
+        if( it != _parent->_windows.end() )
+            _parent->_windows.erase(it); 
     }
 
     _init = false;
@@ -178,9 +182,9 @@ const Window* Window::parent() const
 }
 
 
-const std::vector<Window*>& Window::windows() const 
+const std::vector<Window*>& Window::windows() const
 {
-    return _windowManager.windows();
+    return _windows;
 }
 
 
@@ -191,7 +195,7 @@ void Window::add(Window& child)
 
     child.deinit();
     child.init(this);
-        
+
     update();
 }
 
@@ -203,15 +207,16 @@ void Window::remove(Window& child)
 
     child.deinit();
     child.init(0);
+
+    update();
 }
 
 
 Window* Window::activeWindow()
 {
-    const std::vector<Window*>& windows = _windowManager.windows();
     std::vector<Window*>::const_iterator it;
 
-    for(it = windows.begin(); it != windows.end(); ++it)
+    for(it = _windows.begin(); it != _windows.end(); ++it)
     {
         Window* window = *it;
     
@@ -790,9 +795,8 @@ void Window::onPaint(const Gfx::RectF& rect)
     if( mainWidget() )
         mainWidget()->onPaint(rect);
 
-    std::vector<Window*>& windows = _windowManager.windows();
     std::vector<Window*>::iterator child;
-    for(child = windows.begin(); child != windows.end(); ++child)
+    for(child = _windows.begin(); child != _windows.end(); ++child)
     {
         Gfx::PointF pos( rect.topLeft() - (*child)->position() );
         pos.subX( borderWidth );

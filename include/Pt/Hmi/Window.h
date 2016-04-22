@@ -277,6 +277,7 @@ class PT_HMI_API Window : public Visual
     PixmapSurface                  _surface;
     Pt::Signal<const Pt::Event&>   _eventReady;
 
+    std::vector<Window*>           _windows;
     Window*                        _parent;
     Widget*                        _mainWidget;
     Widget*                        _pointerWidget;

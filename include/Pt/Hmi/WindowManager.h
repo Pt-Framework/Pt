@@ -62,21 +62,25 @@ class WindowFrame
 
         virtual ~WindowFrame();
 
-        Window* window()
-        {
-            return _window;
-        }
+        Window* window();
 
-        const Window* window() const
-        {
-            return _window;
-        }
+        const Window* window() const;
 
         bool isTitle(const Gfx::PointF& p) const;
 
         bool isBorder(const Gfx::PointF& p) const;
 
-        Gfx::PointF clientPos() const;
+        Gfx::RectF clientRect() const;
+
+        Gfx::RectF frameRect() const;
+
+        Gfx::PointF toFrame(const Gfx::PointF& pos) const;
+
+        Gfx::PointF fromFrame(const Gfx::PointF& pos) const;
+
+        Gfx::PointF toClient(const Gfx::PointF& pos) const;
+
+        Gfx::PointF fromClient(const Gfx::PointF& pos) const;
 
         void moveEvent(const MoveEvent& mev);
 
@@ -92,9 +96,8 @@ class WindowFrame
     private:
         WindowManager* _wm;
         Window*        _window;
-        Gfx::PointF    _position;
-        Gfx::SizeF     _frameSize;
-        Gfx::SizeF     _windowSize;
+        Gfx::RectF     _frameRect;
+        Gfx::RectF     _clientRect;
         Gfx::RectF     _closeButton;
         Gfx::RectF     _maximizeButton;
         Gfx::RectF     _minimizeButton;
@@ -116,11 +119,6 @@ class WindowManager : public Pt::Connectable
         void add(Window& w);
 
         void remove(Window& window);
-
-        // TODO: WindowIterator
-        const std::vector<Window*>& windows() const;
-
-        std::vector<Window*>& windows();
 
         PaintSurface& surface();
                   
@@ -175,26 +173,20 @@ class WindowManager : public Pt::Connectable
         bool isMoving(const WindowFrame& w, const Pt::Hmi::MouseEvent& ev);
 
     private:       
-        void updateAll(Window& w);   
+        void updateFrame(Window& w);   
 
-        bool contains(const Window& w, double x, double y);
+        WindowFrame* findWindow(const Gfx::PointF& p);
 
-        WindowFrame* findWindow(double x, double y);
+        WindowFrame* findWindow(Window& w);
 
         void setSizingCursor( ResizeDirection::Type type );
 
         MouseEvent toWindow(Window* w, const MouseEvent& pev);        
 
     private:
-        Application&                   _app;
-        std::vector<Window*>           _children;
+        Application&             _app;
+        std::vector<WindowFrame> _wstack;
 
-        //
-        // TODO TODO TODO
-        //
-
-        // make this a stack and remove WindowManager::contains()
-        std::map<Window*, WindowFrame> _windows;
         double _borderWidth;
         double _titleHeight;
 
