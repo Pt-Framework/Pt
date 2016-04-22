@@ -125,6 +125,20 @@ bool WindowFrame::isBorder(const Gfx::PointF& p) const
 }
 
 
+void WindowFrame::update()
+{
+    double borderWidth = _wm->borderWidth();
+    double titleHeight = _wm->titleHeight();
+
+    Gfx::PointF updatePos(0, 0);
+    updatePos.subX(borderWidth);
+    updatePos.subY(borderWidth +  titleHeight);
+
+    Gfx::RectF updateRect(updatePos, _frameRect.size());
+    _window->update(updateRect);
+}
+
+
 void WindowFrame::moveEvent(const MoveEvent& mev)
 {
     double borderWidth = _wm->borderWidth();
@@ -283,7 +297,7 @@ WindowManager::WindowManager()
 , _managedWindow(0)
 , _sizingDirection( ResizeDirection::None )
 , _actionButton(0)
-, _container(0)
+, _parent(0)
 , _borderWidth(4)
 , _titleHeight(20)
 {    
@@ -297,7 +311,7 @@ WindowManager::~WindowManager()
 
 void WindowManager::init(Window& parent)
 {
-    _container = &parent;
+    _parent = &parent;
 }
 
 
@@ -354,13 +368,13 @@ WindowFrame* WindowManager::findWindow(Window& w)
 
 PaintSurface& WindowManager::surface()
 {
-    return _container->surface();
+    return _parent->surface();
 }
 
 
 bool WindowManager::keyInput(const Pt::Hmi::KeyEvent& keyEvent)
 {
-    Window* w = _container->activeWindow();
+    Window* w = _parent->activeWindow();
 
     if( w == 0 )
         return false;
@@ -389,7 +403,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::MouseEvent& mev )
 
 void WindowManager::paintEvent(const PaintEvent& pev)
 {  
-    PaintSurface& surface = _container->surface();
+    PaintSurface& surface = _parent->surface();
     const Gfx::RectF& rect = pev.rect();
 
     std::vector<WindowFrame>::reverse_iterator it;
@@ -522,13 +536,13 @@ MouseEvent WindowManager::toWindow(Window* w, const MouseEvent& mev)
 
 bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
 {
-    //std::clog << "onBackground: " << (_container ? _container->title() : "WM") << std::endl;    
+    //std::clog << "onBackground: " << (_parent ? _parent->title() : "WM") << std::endl;    
     _managedWindow = findWindow( mev.position() );
     
     // pointer on window background 
     if( ! _managedWindow )
     {
-        _app.setPointerWindow(_container);
+        _app.setPointerWindow(_parent);
         _state = &WindowManager::onBackground;        
         return false;
     }    
@@ -563,14 +577,14 @@ bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
 
 bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
 {
-    //std::clog << "onWindowFrame: " << (_container ? _container->title() : "WM") << std::endl;   
+    //std::clog << "onWindowFrame: " << (_parent ? _parent->title() : "WM") << std::endl;   
         
     _managedWindow = findWindow( mev.position() );
 
     // pointer on window background 
     if( ! _managedWindow)
     {
-        _app.setPointerWindow(_container);
+        _app.setPointerWindow(_parent);
         _state = &WindowManager::onBackground;
         return false;
     }
@@ -624,14 +638,14 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
 
 bool WindowManager::onWindowContent(const Pt::Hmi::MouseEvent& mev)
 {    
-    //std::clog << "onWindowContent: " << (_container ? _container->title() : "WM") << std::endl;    
+    //std::clog << "onWindowContent: " << (_parent ? _parent->title() : "WM") << std::endl;    
     
     _managedWindow = findWindow( mev.position() );
     
     // pointer on window background
     if( ! _managedWindow )
     {        
-        _app.setPointerWindow( _container);
+        _app.setPointerWindow( _parent);
         _state = &WindowManager::onBackground;
         return false;
     }        
@@ -664,7 +678,7 @@ bool WindowManager::onWindowContent(const Pt::Hmi::MouseEvent& mev)
 
 bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
 {
-    //std::clog << "onWindowMove: " << (_container ? _container->title() : "WM") << std::endl;
+    //std::clog << "onWindowMove: " << (_parent ? _parent->title() : "WM") << std::endl;
 
     if( ! mev.isPressed(_actionButton) )
     {
@@ -693,7 +707,7 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
 
 bool WindowManager::onWindowResize(const MouseEvent& mev)
 {  
-    //std::clog << "onWindowResize: " << (_container ? _container->title() : "WM") << std::endl;
+    //std::clog << "onWindowResize: " << (_parent ? _parent->title() : "WM") << std::endl;
 
     if( ! mev.isPressed(_actionButton) )
     {
@@ -818,8 +832,6 @@ void WindowManager::onResize(Window& w, const Gfx::SizeF& to)
     if(frame)
         frame->resizeEvent(rev);
 
-    frame->resizeEvent(rev);
-
     Gfx::SizeF from = w.size();
     Application::instance().loop().commitEvent(rev);
 
@@ -873,7 +885,7 @@ void WindowManager::onUpdate(Window& child, const Gfx::RectF& rect)
     updatePos.addY( _borderWidth + _titleHeight );
 
     const Gfx::RectF updateRect(updatePos, rect.size());
-    _container->update(updateRect);
+    _parent->update(updateRect);
 }
 
 
@@ -895,22 +907,6 @@ void WindowManager::onShow( Window& w, bool visible )
     w.parent()->update(updateRect);
 }
 
-// TODO TODO TODO move this to WindowFrame
-void WindowManager::updateFrame(Window& w)
-{
-    Gfx::PointF framePos(0, 0);
-    framePos.subX( _borderWidth );
-    framePos.subY( _borderWidth +  _titleHeight );
-
-    Gfx::SizeF frameSize = w.size();
-    frameSize.addHeight(2 * _borderWidth + _titleHeight);
-    frameSize.addWidth(2 * _borderWidth);
-
-    Gfx::RectF updateRect(framePos, frameSize);
-
-    w.update(updateRect);
-}
-
 
 void WindowManager::onActivate(Window& w)
 {
@@ -921,7 +917,7 @@ void WindowManager::onActivate(Window& w)
         if(child->isActive() && child != &w)
         {
             ActivateEvent aev(child->vid(), false);
-            updateFrame(*child);
+            it->update();
         }
     }
 
@@ -936,12 +932,12 @@ void WindowManager::onActivate(Window& w)
         }
     }
 
-    _container->activate();
+    _parent->activate();
 
     ActivateEvent aev( w.vid(), true );
     Application::instance().loop().commitEvent(aev);
 
-    updateFrame(w);
+    _windows.back().update();
 }
 
 
@@ -960,7 +956,7 @@ void WindowManager::onEnable(Window& w, bool enable)
     EnableEvent eev( w.vid(), enable );
     Application::instance().loop().commitEvent( eev );
      
-    _container->update( updateRect);
+    _parent->update( updateRect);
 }
 
 

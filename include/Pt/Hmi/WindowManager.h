@@ -74,6 +74,8 @@ class WindowFrame
 
         Gfx::RectF frameRect() const;
 
+        void update();
+
         void moveEvent(const MoveEvent& mev);
 
         void resizeEvent(const ResizeEvent& rev);
@@ -168,8 +170,6 @@ class WindowManager : public Pt::Connectable
         bool isMoving(const WindowFrame& w, const Pt::Hmi::MouseEvent& ev);
 
     private:       
-        void updateFrame(Window& w);   
-
         void setSizingCursor( ResizeDirection::Type type );
 
         MouseEvent toWindow(Window* w, const MouseEvent& pev);        
@@ -186,7 +186,7 @@ class WindowManager : public Pt::Connectable
         WindowFrame*              _managedWindow;
         Gfx::PointF               _managedWindowPosition;
         Gfx::SizeF                _managedWindowSize;
-        Window*                   _container;          
+        Window*                   _parent;          
         ResizeDirection::Type     _sizingDirection;
         
         size_t                    _actionButton;  
