@@ -273,16 +273,15 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
 
     painter.drawText(textPos, Pt::String( _window->title().c_str()) );
 
-
-    brush = Gfx::Color(0.9, 0.1, 0.0);
+    brush = Gfx::Color(0.82, 0.25, 0.22);
     painter.setBrush(brush);
     painter.fillRect(_closeButton);
 
-    brush = Gfx::Color(0.95, 0.8, 0);
+    brush = Gfx::Color(0.4, 0.7, 0.3);
     painter.setBrush(brush);
     painter.fillRect(_maximizeButton);
 
-    brush = Gfx::Color(0.1, 0.7, 0.1);
+    brush = Gfx::Color(1.0, 0.75, 0.1);
     painter.setBrush(brush);
     painter.fillRect(_minimizeButton);
 }
@@ -437,14 +436,6 @@ void WindowManager::paintEvent(const PaintEvent& pev)
 }
 
 
-bool WindowManager::isMoving(const WindowFrame& wf, const Pt::Hmi::MouseEvent& ev)
-{
-    // position in frame coordinates
-    Gfx::PointF p = ev.position() - wf.frameRect().topLeft();
-    return wf.isTitle(p);
-}
-
-
 ResizeDirection::Type WindowManager::isSizing(const WindowFrame& wf, const Pt::Hmi::MouseEvent& ev)
 {    
     const Window* w = wf.window();
@@ -519,21 +510,6 @@ void WindowManager::setSizingCursor( ResizeDirection::Type type )
 }
 
 
-MouseEvent WindowManager::toWindow(Window* w, const MouseEvent& mev)
-{
-    Pt::Hmi::MouseEvent childEvent = mev;
-
-    childEvent.setId( w->vid() );
-
-    double childX = mev.x() - w->position().x() - _borderWidth;
-    double childY = mev.y() - w->position().y() - _titleHeight - _borderWidth;
-
-    childEvent.setX(childX);
-    childEvent.setY(childY);
-    return childEvent;
-}
-
-
 bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
 {
     //std::clog << "onBackground: " << (_parent ? _parent->title() : "WM") << std::endl;    
@@ -547,8 +523,10 @@ bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
         return false;
     }    
 
+    Gfx::PointF framePos = mev.position() - _managedWindow->frameRect().topLeft();
+
     // pointer on window title bar
-    if( isMoving(*_managedWindow, mev) )
+    if( _managedWindow->isTitle(framePos) )
     {
         _app.setCursor( &Cursor::moveCursor() );
         _app.setPointerWindow( 0 );
@@ -570,7 +548,12 @@ bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
     // pointer on window content
     _state = &WindowManager::onWindowContent;    
     _app.setPointerWindow( _managedWindow->window() );
-    _managedWindow->window()->processEvent( toWindow(_managedWindow->window(), mev) );
+
+    // mouse event in managed window client coordinates
+    Gfx::PointF pos = mev.position() - _managedWindow->clientRect().topLeft();
+    MouseEvent mev2 = mev;
+    mev2.setPosition(pos);
+    _managedWindow->window()->processEvent(mev2);
     return true;
 }
 
@@ -592,19 +575,20 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
     if( _managedWindow->mouseEvent(mev) )
         return true;
 
+    Gfx::PointF framePos = mev.position() - _managedWindow->frameRect().topLeft();
+
     // pointer on window title bar
-    if( isMoving(*_managedWindow, mev) )
+    if( _managedWindow->isTitle(framePos) )
     {
         _app.setCursor( &Cursor::moveCursor() );
-        _app.setPointerWindow( 0);
+        _app.setPointerWindow(0);
+        _state = &WindowManager::onWindowFrame;
 
         if( mev.isPress(_actionButton) )
         {
-            _state = &WindowManager::onWindowMove;
             _managedWindowPosition = _managedWindow->window()->position();
+            _state = &WindowManager::onWindowMove;
         }
-        else
-            _state = &WindowManager::onWindowFrame;
 
         return true;
     }
@@ -630,8 +614,13 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
 
     // pointer on window content
     _state = &WindowManager::onWindowContent;
-    _app.setPointerWindow(_managedWindow->window());
-    _managedWindow->window()->processEvent( toWindow(_managedWindow->window(), mev) );
+    _app.setPointerWindow( _managedWindow->window() );
+
+    // mouse event in managed window client coordinates
+    Gfx::PointF pos = mev.position() - _managedWindow->clientRect().topLeft();
+    MouseEvent mev2 = mev;
+    mev2.setPosition(pos);
+    _managedWindow->window()->processEvent(mev2);
     return true;
 }
 
@@ -645,16 +634,18 @@ bool WindowManager::onWindowContent(const Pt::Hmi::MouseEvent& mev)
     // pointer on window background
     if( ! _managedWindow )
     {        
-        _app.setPointerWindow( _parent);
+        _app.setPointerWindow(_parent);
         _state = &WindowManager::onBackground;
         return false;
     }        
 
+    Gfx::PointF framePos = mev.position() - _managedWindow->frameRect().topLeft();
+
     // pointer on window title bar
-    if( isMoving(*_managedWindow, mev) )
+    if( _managedWindow->isTitle(framePos) )
     {
         _app.setCursor( &Cursor::moveCursor() );
-        _app.setPointerWindow( 0);
+        _app.setPointerWindow(0);
         _state = &WindowManager::onWindowFrame;
         return true;
     }
@@ -671,7 +662,12 @@ bool WindowManager::onWindowContent(const Pt::Hmi::MouseEvent& mev)
     }                                
 
     // pointer on window content
-    _managedWindow->window()->processEvent( toWindow( _managedWindow->window(),  mev) );
+
+    // mouse event in managed window client coordinates
+    Gfx::PointF pos = mev.position() - _managedWindow->clientRect().topLeft();
+    MouseEvent mev2 = mev;
+    mev2.setPosition(pos);
+    _managedWindow->window()->processEvent(mev2);
     return true;
 }
 
@@ -680,27 +676,20 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
 {
     //std::clog << "onWindowMove: " << (_parent ? _parent->title() : "WM") << std::endl;
 
+    Gfx::PointF framePos = mev.position() - _managedWindow->frameRect().topLeft();
+
     if( ! mev.isPressed(_actionButton) )
     {
-        _state = isMoving(*_managedWindow, mev) ? &WindowManager::onWindowFrame
-                                               : &WindowManager::onBackground;
+        _state = _managedWindow->isTitle(framePos) ? &WindowManager::onWindowFrame
+                                                   : &WindowManager::onBackground;
 
         return false;
     }
     
     _app.setCursor( &Cursor::moveCursor() );        
-
-    const double dX = mev.x() - _lastPointerPosition.x();
-    const double dY = mev.y() - _lastPointerPosition.y();
-
-    //Gfx::PointF from = _managedWindow->position();
-
-    Gfx::PointF to( _managedWindowPosition.x() + dX, 
-                    _managedWindowPosition.y() + dY) ;     
-
-    _managedWindowPosition = to;
-    onMove(*_managedWindow->window(), to);
+    _managedWindowPosition += mev.position() - _lastPointerPosition;
     
+    onMove(*_managedWindow->window(), _managedWindowPosition);
     return true;
 }
 

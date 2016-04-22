@@ -167,12 +167,8 @@ class WindowManager : public Pt::Connectable
         // TODO: checkBorder, checkTitle
         ResizeDirection::Type isSizing(const WindowFrame& w, const Pt::Hmi::MouseEvent& ev);
 
-        bool isMoving(const WindowFrame& w, const Pt::Hmi::MouseEvent& ev);
-
     private:       
-        void setSizingCursor( ResizeDirection::Type type );
-
-        MouseEvent toWindow(Window* w, const MouseEvent& pev);        
+        void setSizingCursor( ResizeDirection::Type type );       
 
     private:
         Application&             _app;
