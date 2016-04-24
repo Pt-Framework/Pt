@@ -1287,9 +1287,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\WindowDecoration.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Docking.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1379,6 +1376,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Qt\win32\MainLoopImpl.h">
       <Filter>Pt-Qt\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\WindowFrame.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h">
+      <Filter>Pt-Hmi</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2515,6 +2518,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Qt\win32\MainLoopImpl.cpp">
       <Filter>Pt-Qt\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\WindowFrame.cpp">
+      <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

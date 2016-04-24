@@ -40,288 +40,43 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/String.h>
 #include <cmath>
+#include "WindowFrame.h"
 
 namespace Pt {
 
 namespace Hmi {
 
-/////////////////////////////////////////////////////////////////////////////
-// WindowFrame
-/////////////////////////////////////////////////////////////////////////////
 
-WindowFrame::WindowFrame()
-: _wm(0)
-, _window(0)
-, _inactiveColor(0.68f, 0.70f, 0.75f)
-, _activeColor(0.4f, 0.5f, 0.8f)
-, _textColor(0.0, 0.0, 0.0)
+void setResizeCursor(Pt::uint8_t dir )
 {
-}
+    Application&  app =  Application::instance();
 
-
-WindowFrame::WindowFrame(WindowManager& wm, Window& window)
-: _wm(&wm)
-, _window(&window)
-, _closeButton(0, 10, 0, 10)
-, _maximizeButton(0, 10, 0, 10)
-, _minimizeButton(0, 10, 0, 10)
-, _inactiveColor(0.68f, 0.70f, 0.75f)
-, _activeColor(0.4f, 0.5f, 0.8f)
-, _textColor(0.0, 0.0, 0.0)
-{
-}
-
-
-WindowFrame::~WindowFrame()
-{
-}
-
-
-Window* WindowFrame::window()
-{
-    return _window;
-}
-
-
-const Window* WindowFrame::window() const
-{
-    return _window;
-}
-
-
-Gfx::RectF WindowFrame::clientRect() const
-{
-    return _clientRect;
-}
-
-
-Gfx::RectF WindowFrame::frameRect() const
-{
-    return _frameRect;
-}
-
-
-bool WindowFrame::isTitle(const Gfx::PointF& p) const
-{            
-    double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
-
-    return p.x() >= borderWidth && 
-           p.x() < borderWidth + _clientRect.width() &&
-           p.y() >= borderWidth &&
-           p.y() < borderWidth + titleHeight;
-}
-
-
-bool WindowFrame::isBorder(const Gfx::PointF& p) const
-{            
-    double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
-
-    return p.x() >= borderWidth && 
-           p.x() < borderWidth + _clientRect.width() &&
-           p.y() >= borderWidth &&
-           p.y() < borderWidth + titleHeight;
-}
-
-
-void WindowFrame::update()
-{
-    double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
-
-    Gfx::PointF updatePos(0, 0);
-    updatePos.subX(borderWidth);
-    updatePos.subY(borderWidth +  titleHeight);
-
-    Gfx::RectF updateRect(updatePos, _frameRect.size());
-    _window->update(updateRect);
-}
-
-
-void WindowFrame::moveEvent(const MoveEvent& mev)
-{
-    double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
-
-    _frameRect.setOrigin( mev.position() );
-
-    Gfx::PointF clientPos = mev.position();
-    clientPos.addX(borderWidth);
-    clientPos.addY(borderWidth + titleHeight);
-    _clientRect.setOrigin(clientPos);
-    
-    onLayout();
-}
-
-
-void WindowFrame::resizeEvent(const ResizeEvent& rev)
-{
-    double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
-
-    _clientRect.setSize( rev.size() );
-    
-    Gfx::SizeF frameSize = rev.size();
-    frameSize.addWidth(2 * borderWidth);
-    frameSize.addHeight(2 * borderWidth);
-    frameSize.addHeight(titleHeight);
-    _frameRect.setSize(frameSize);
-
-    onLayout();
-}
-
-
-void WindowFrame::onLayout()
-{
-    double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
-    double buttonWidth = titleHeight - borderWidth;
-
-    double buttonX = _frameRect.x() + _frameRect.width() - (borderWidth + buttonWidth);
-    double buttonY = _frameRect.y() + borderWidth;
-    
-    _closeButton.setOrigin( Gfx::PointF(buttonX, buttonY) );
-    _closeButton.setSize( Gfx::SizeF(buttonWidth, buttonWidth) );
-
-    buttonX -= borderWidth + buttonWidth;
-    
-    _maximizeButton.setOrigin( Gfx::PointF(buttonX, buttonY) );
-    _maximizeButton.setSize( Gfx::SizeF(buttonWidth, buttonWidth) );
-
-    buttonX -= borderWidth + buttonWidth;
-    
-    _minimizeButton.setOrigin( Gfx::PointF(buttonX, buttonY) );
-    _minimizeButton.setSize( Gfx::SizeF(buttonWidth, buttonWidth) );
-}
-
-
-bool WindowFrame::mouseEvent(const MouseEvent& mev)
-{
-    if( _closeButton.contains( mev.position() ) )
+    if( (dir & WindowFrame::North && dir & WindowFrame::East) ||
+        (dir & WindowFrame::South && dir & WindowFrame::West ) )
     {
-        if( mev.isRelease() )
-             _wm->onClosing(*_window);
-        
-        return true;
+        app.setCursor( &Hmi::Cursor::sizeNESWCursor() );
+        return;
     }
 
-    return false;
+    if( (dir & WindowFrame::North && dir & WindowFrame::West) ||
+        (dir & WindowFrame::South && dir & WindowFrame::East ) )
+    {
+        app.setCursor( &Hmi::Cursor::sizeNWSECursor() );
+        return;
+    }
+
+    if( (dir & WindowFrame::East || dir & WindowFrame::West))
+    {
+        app.setCursor( &Hmi::Cursor::sizeWECursor() );
+        return;
+    }
+
+    if( (dir & WindowFrame::North || dir & WindowFrame::South))
+    {
+        app.setCursor( &Hmi::Cursor::sizeNSCursor() );     
+    }
 }
 
-
-void WindowFrame::paintEvent(const PaintEvent& pev)
-{
-    double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
-
-    PaintSurface& surface = _wm->surface();
-    Painter painter(surface);
-
-    Gfx::SizeF frameSize = _window->size();
-    frameSize.addWidth(borderWidth * 2);
-    frameSize.addHeight(borderWidth * 2 + titleHeight);
-
-    Gfx::Color color = _window->isActive() ? _activeColor 
-                                           : _inactiveColor;  
-    Gfx::Brush brush(color);
-    painter.setBrush(brush);
-
-    Gfx::PointF pos = _window->position();
-
-    Gfx::RectF leftBorder( pos.x(), 
-                           pos.x() + borderWidth,
-                           pos.y() + borderWidth, 
-                           pos.y() + frameSize.height() - borderWidth - 1 );
-    painter.fillRect(leftBorder);
-
-    Gfx::RectF topBorder(pos.x(),
-                         pos.x() + frameSize.width() - 1,
-                         pos.y(),
-                         pos.y() + borderWidth);
-    painter.fillRect(topBorder);
-
-    Gfx::RectF rightBorder(pos.x() + frameSize.width() - borderWidth,
-                           pos.x() + frameSize.width() - 1,
-                           pos.y() + borderWidth,
-                           pos.y() + frameSize.height() - borderWidth - 1 );
-    painter.fillRect(rightBorder);
-
-    Gfx::RectF bottomBorder(pos.x(),
-                            pos.x() + frameSize.width() - 1,
-                            pos.y() + frameSize.height() - borderWidth,
-                            pos.y() + frameSize.height() - 1);
-    painter.fillRect(bottomBorder);
-
-    Gfx::RectF titleArea( pos.x() + borderWidth,
-                          pos.x() + frameSize.width() - borderWidth - 1,
-                          pos.y() + borderWidth,
-                          pos.y() + borderWidth + titleHeight - 1);
-    painter.fillRect(titleArea);
-
-    const Gfx::Font& font = _window->font();
-    painter.setFont(font);
-
-    Gfx::Pen pen(1, _textColor);
-    painter.setPen(pen);
-
-    Gfx::FontMetrics fm = painter.fontMetrics( font, Pt::String("A") );
-
-    double textMargin = (titleHeight - fm.height()) / 2;
-    Gfx::PointF textPos(pos.x() + borderWidth + titleHeight, 
-                        pos.y() + titleHeight - textMargin);
-
-    painter.drawText(textPos, Pt::String( _window->title().c_str()) );
-
-    pen = Gfx::Pen(1, Gfx::Color(0, 0, 0) );
-    painter.setPen(pen);
-
-    brush = Gfx::Color(0.82f, 0.25f, 0.22f);
-    painter.setBrush(brush);
-    painter.fillRect(_closeButton);
-    painter.drawRect(_closeButton);
-
-    brush = Gfx::Color(0.35f, 0.65f, 0.25f);
-    painter.setBrush(brush);
-    painter.fillRect(_maximizeButton);
-    painter.drawRect(_maximizeButton);
-
-    brush = Gfx::Color(0.95f, 0.7f, 0.05f);
-    painter.setBrush(brush);
-    painter.fillRect(_minimizeButton);
-    painter.drawRect(_minimizeButton);
-
-    pen = Gfx::Pen(2, Gfx::Color(1, 1, 1), 
-                   Gfx::Pen::SolidStyle, Gfx::Pen::RoundCap);
-    painter.setPen(pen);
-
-    Gfx::PointF tl = _closeButton.topLeft() + Gfx::PointF(4, 4);
-    Gfx::PointF br = _closeButton.bottomRight() - Gfx::PointF(4, 4);
-    Gfx::PointF tr = _closeButton.topRight() + Gfx::PointF(-4, 4);
-    Gfx::PointF bl = _closeButton.bottomLeft() - Gfx::PointF(-4, 4);
-    painter.drawLine(tl, br);
-    painter.drawLine(tr, bl);
-
-    pen = Gfx::Pen(2, Gfx::Color(1, 1, 1), 
-                   Gfx::Pen::SolidStyle, Gfx::Pen::FlatCap);
-    painter.setPen(pen);
-
-    tl = _maximizeButton.topLeft() + Gfx::PointF(5, 5);
-    tr = _maximizeButton.topRight() + Gfx::PointF(-4, 4);
-    br = _maximizeButton.bottomRight() - Gfx::PointF(4, 4);
-    bl = _maximizeButton.bottomLeft() - Gfx::PointF(-4, 4);
-    painter.drawLine(tl, tr);
-    painter.drawLine(bl, tr);
-    painter.drawLine(br, tr);
-
-    tl = _minimizeButton.topLeft() + Gfx::PointF(5, 5);
-    tr = _minimizeButton.topRight() + Gfx::PointF(-4, 4);
-    br = _minimizeButton.bottomRight() - Gfx::PointF(4, 4);
-    bl = _minimizeButton.bottomLeft() - Gfx::PointF(-4, 4);
-    painter.drawLine(bl, br);
-    painter.drawLine(tl, bl);
-    painter.drawLine(tr, bl);
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // WindowManager
@@ -331,11 +86,13 @@ WindowManager::WindowManager()
 : _app( Application::instance() )
 , _state(&WindowManager::onBackground)
 , _managedWindow(0)
-, _resizeDirection( NoResize )
-, _actionButton(0)
+, _inactiveColor(0.68f, 0.70f, 0.75f)
+, _activeColor(0.4f, 0.5f, 0.8f)
+, _textColor(0.0, 0.0, 0.0)
 , _parent(0)
 , _borderWidth(4)
 , _titleHeight(20)
+, _resizeDirection(0)
 {    
 }
 
@@ -424,7 +181,7 @@ bool WindowManager::keyInput(const Pt::Hmi::KeyEvent& keyEvent)
 
 bool WindowManager::pointerInput( const Pt::Hmi::MouseEvent& mev )
 {
-    if( mev.isPress(_actionButton) )
+    if( mev.isPress() )
     {
         WindowFrame* wf = findWindow( mev.position() );
         if(wf)
@@ -473,80 +230,6 @@ void WindowManager::paintEvent(const PaintEvent& pev)
 }
 
 
-WindowManager::ResizeDirection WindowManager::isResize(const WindowFrame& wf, const Pt::Hmi::MouseEvent& ev)
-{    
-    const Window* w = wf.window();
-
-    const Gfx::SizeF  wsize = w->size();
-    const Gfx::PointF wpos  = w->position();
-    double titleHeight = _titleHeight;
-
-    if( ev.x() < wpos.x() ||
-        ev.x() > wpos.x() + 2*_borderWidth + wsize.width() ||
-        ev.y() < wpos.y() ||
-        ev.y() >= wpos.y() + 2*_borderWidth + titleHeight + wsize.height() )
-        return NoResize;
-
-    bool left = ev.x() < (wpos.x() + _borderWidth);
-    bool right = ev.x() >= wpos.x() + _borderWidth + wsize.width();
-    bool top = ev.y() < wpos.y() + _borderWidth;
-    bool bottom = ev.y() >= wpos.y() + _borderWidth + titleHeight + wsize.height();
-
-    if(top && left)
-        return NorthWest;
-
-    if(top && right)
-        return NorthEast;
-    
-    if(bottom && left)
-        return SouthWest;
-    
-    if(bottom && right)
-        return SouthEast;
-
-    if(left)                
-        return West;
-
-    if(right)
-        return East;
-
-    if(top)
-        return North;
-
-    if(bottom)
-        return South;            
-
-    return NoResize;            
-}
-
-
-void WindowManager::setResizeCursor( ResizeDirection dir )
-{
-    switch( dir )
-    {
-        case East:
-        case West:
-            _app.setCursor( &Hmi::Cursor::sizeWECursor() );
-        break;
-
-        case NorthEast:
-        case SouthWest:
-            _app.setCursor( &Hmi::Cursor::sizeNESWCursor() );
-        break;
-
-        case North:        
-        case South:
-            _app.setCursor( &Hmi::Cursor::sizeNSCursor() );
-        break;
-        
-        case NorthWest:
-        case SouthEast:
-            _app.setCursor( &Hmi::Cursor::sizeNWSECursor() );
-        break;        
-    }
-}
-
-
 bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
 {
     //std::clog << "onBackground: " << (_parent ? _parent->title() : "WM") << std::endl;    
@@ -572,11 +255,11 @@ bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
     }
 
     // pointer on window border
-    _resizeDirection = isResize(*_managedWindow, mev);
+    Pt::uint8_t resizeDirection = _managedWindow->isResize(mev.position());
 
-    if( _resizeDirection != NoResize )
+    if( resizeDirection != WindowFrame::None )
     {
-        setResizeCursor(_resizeDirection);
+        setResizeCursor(resizeDirection);
         _app.setPointerWindow( 0);
         _state = &WindowManager::onWindowFrame;
         return true;
@@ -621,7 +304,7 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
         _app.setPointerWindow(0);
         _state = &WindowManager::onWindowFrame;
 
-        if( mev.isPress(_actionButton) )
+        if( mev.isPress() )
         {
             _managedWindowPosition = _managedWindow->window()->position();
             _state = &WindowManager::onWindowMove;
@@ -631,14 +314,15 @@ bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
     }
 
     // pointer on window border
-    _resizeDirection = isResize(*_managedWindow, mev);
-    if( _resizeDirection != NoResize )
+    Pt::uint8_t resizeDirection = _managedWindow->isResize(mev.position());
+    if( resizeDirection != WindowFrame::None )
     {                      
-        setResizeCursor(_resizeDirection);
+        setResizeCursor(resizeDirection);
         _app.setPointerWindow( 0);
 
-        if( mev.isPress(_actionButton) )
+        if( mev.isPress() )
         {
+            _resizeDirection = resizeDirection;
             _state = &WindowManager::onWindowResize;
             _managedWindowPosition = _managedWindow->window()->position();
             _managedWindowSize = _managedWindow->window()->size();
@@ -688,11 +372,11 @@ bool WindowManager::onWindowContent(const Pt::Hmi::MouseEvent& mev)
     }
 
     // pointer on window border
-    _resizeDirection = isResize(*_managedWindow, mev);
+    Pt::uint8_t resizeDirection = _managedWindow->isResize(mev.position());
 
-    if( _resizeDirection != NoResize )
+    if( resizeDirection != WindowFrame::None )
     {            
-        setResizeCursor(_resizeDirection);
+        setResizeCursor(resizeDirection);
         _app.setPointerWindow( 0);
         _state = &WindowManager::onWindowFrame;
         return true;
@@ -715,7 +399,7 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
 
     Gfx::PointF framePos = mev.position() - _managedWindow->frameRect().topLeft();
 
-    if( ! mev.isPressed(_actionButton) )
+    if( ! mev.isPressed() )
     {
         _state = _managedWindow->isTitle(framePos) ? &WindowManager::onWindowFrame
                                                    : &WindowManager::onBackground;
@@ -734,17 +418,15 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
 bool WindowManager::onWindowResize(const MouseEvent& mev)
 {  
     //std::clog << "onWindowResize: " << (_parent ? _parent->title() : "WM") << std::endl;
-
-    if( ! mev.isPressed(_actionButton) )
+   
+    if( ! mev.isPressed() )
     {
-        _resizeDirection = isResize(*_managedWindow, mev);
-
-        _state = _resizeDirection == NoResize ? &WindowManager::onWindowFrame
+        Pt::uint8_t resizeDirection = _managedWindow->isResize(mev.position());
+        _state = resizeDirection == WindowFrame::None ? &WindowManager::onWindowFrame
                                               : &WindowManager::onBackground;
         return false;
     }
 
-    setResizeCursor(_resizeDirection);
     
     double width  = _managedWindowSize.width();
     double height = _managedWindowSize.height();
@@ -755,69 +437,27 @@ bool WindowManager::onWindowResize(const MouseEvent& mev)
 
     // TODO: NorthEast is North + East
 
-    switch( _resizeDirection )
+    if( _resizeDirection & WindowFrame::North )
     {
-        case  North:
-        {            
-            posY +=  deltaY;
-            height -= deltaY;
-        }
-        break;
-
-        case NorthEast:
-        {
-            posY +=  deltaY;
-            height -= deltaY;
-            width += deltaX;
-        }
-        break;
-
-        case East:
-        {
-          width += deltaX;
-        }
-        break;
-
-        case SouthEast:
-        {
-            height += deltaY;
-            width += deltaX;
-        }
-        break;
-
-        case South:
-        {
-            height += deltaY;
-        }
-        break;
-
-        case SouthWest:
-        {
-            height += deltaY;
-            posX +=  deltaX;
-            width -= deltaX;
-        }
-        break;
-
-        case West:
-        {
-            posX +=  deltaX;
-            width -= deltaX;
-        }        
-        break;
-
-        case NorthWest:
-        {
-          posX +=  deltaX;
-          width -= deltaX;
-          posY +=  deltaY;
-          height -= deltaY;
-        }
-        break;
-
-      default:
-        break;
+        posY +=  deltaY;
+        height -= deltaY;
     }
+
+    if( _resizeDirection & WindowFrame::East )
+    {
+        width += deltaX;
+    }
+
+    if( _resizeDirection & WindowFrame::South )
+    {
+         height += deltaY;
+    }    
+
+    if( _resizeDirection & WindowFrame::West )
+    {
+        posX +=  deltaX;
+        width -= deltaX;
+    }    
 
     Gfx::SizeF size(width, height);
     Gfx::PointF pos(posX, posY);

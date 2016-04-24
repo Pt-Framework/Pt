@@ -123,24 +123,23 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
             _button = 0;
         }
 
-        bool isPressed(Pt::uint32_t button) const
+        /** @brief Returns true if the button is in pressed state.
+        */
+        bool isPressed(Pt::uint32_t button = Left) const
         {
              Pt::uint32_t mask = 0x1 << button;
              return (_buttonState & mask) == mask;
         }
 
-        bool isPress(Pt::uint32_t button) const
+        /** @brief Returns true if the button was just pressed.
+        */
+        bool isPress(Pt::uint32_t button = Left) const
         {
              Pt::uint32_t mask = 0x1 << button;
              return (_button & mask) == mask && _action == Press;
         }
 
-        bool isPress() const
-        {
-             return _action == Press;
-        }
-
-        void setPress(Pt::uint32_t button)
+        void setPress(Pt::uint32_t button = Left)
         {
             Pt::uint32_t mask = 0x1 << button;
 
@@ -149,24 +148,23 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
             _buttonState |= mask;
         }
 
-        bool isReleased(Pt::uint32_t button) const
+        /** @brief Returns true if the button is in released state.
+        */
+        bool isReleased(Pt::uint32_t button = Left) const
         {
              Pt::uint32_t mask = 0x1 << button;
              return (_buttonState & mask) != mask;
         }
 
-        bool isRelease(Pt::uint32_t button) const
+        /** @brief Returns true if the button was just released.
+        */
+        bool isRelease(Pt::uint32_t button = Left) const
         {
              Pt::uint32_t mask = 0x1 << button;
              return (_button & mask) == mask && _action == Release;
         }
 
-        bool isRelease() const
-        {
-             return _action == Release;
-        }
-
-        void setRelease(Pt::uint32_t button)
+        void setRelease(Pt::uint32_t button = Left)
         {
             Pt::uint32_t mask = 0x1 << button;
 

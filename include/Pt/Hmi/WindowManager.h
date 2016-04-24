@@ -51,54 +51,7 @@ class WindowManager;
 class Application;
 class MouseEvent;
 class KeyEvent;
-
-class WindowFrame
-{
-    public:
-        WindowFrame();
-
-        WindowFrame(WindowManager& wm, Window& window);
-
-        virtual ~WindowFrame();
-
-        Window* window();
-
-        const Window* window() const;
-
-        bool isTitle(const Gfx::PointF& p) const;
-
-        bool isBorder(const Gfx::PointF& p) const;
-
-        Gfx::RectF clientRect() const;
-
-        Gfx::RectF frameRect() const;
-
-        void update();
-
-        void moveEvent(const MoveEvent& mev);
-
-        void resizeEvent(const ResizeEvent& rev);
-
-        bool mouseEvent(const MouseEvent& mev);
-
-        void paintEvent(const PaintEvent& pev);
-    
-    protected:
-        void onLayout();
-
-    private:
-        WindowManager* _wm;
-        Window*        _window;
-        Gfx::RectF     _frameRect;
-        Gfx::RectF     _clientRect;
-        Gfx::RectF     _closeButton;
-        Gfx::RectF     _maximizeButton;
-        Gfx::RectF     _minimizeButton;
-
-        Gfx::Color     _inactiveColor;
-        Gfx::Color     _activeColor;
-        Gfx::Color     _textColor;   
-};
+class WindowFrame;
 
 class WindowManager : public Pt::Connectable
 {
@@ -115,6 +68,21 @@ class WindowManager : public Pt::Connectable
         double titleHeight()  const
         {
             return _titleHeight;
+        }
+
+        const Gfx::Color& inactiveColor() const
+        {
+            return _inactiveColor;
+        }
+
+        const Gfx::Color& activeColor() const
+        {
+            return _activeColor;
+        }
+
+        const Gfx::Color& textColor() const
+        {
+            return _textColor;
         }
 
         void init(Window& parent);
@@ -160,29 +128,7 @@ class WindowManager : public Pt::Connectable
 
         bool onWindowMove(const Pt::Hmi::MouseEvent& pev);
 
-        bool onWindowResize(const MouseEvent& pev);
-
-    private:
-        // TODO: NorthEast is North + East
-        enum ResizeDirection
-        {
-		        NoResize,
-		        North,
-		        NorthEast,
-		        East,
-		        SouthEast,
-		        South,
-		        SouthWest,
-		        West,
-		        NorthWest
-        };	
-
-        // TODO: NorthEast is North + East
-        // TODO: move this to WindowFrame::getBorder
-        ResizeDirection isResize(const WindowFrame& w, const Pt::Hmi::MouseEvent& ev);
- 
-        // TODO: NorthEast is North + East
-        void setResizeCursor( ResizeDirection dir );       
+        bool onWindowResize(const MouseEvent& pev);    
 
     private:
         Application&             _app;
@@ -197,9 +143,11 @@ class WindowManager : public Pt::Connectable
         Gfx::PointF               _managedWindowPosition;
         Gfx::SizeF                _managedWindowSize;
         Window*                   _parent;          
-        ResizeDirection           _resizeDirection;
-        
-        size_t                    _actionButton;  
+        Pt::uint8_t               _resizeDirection;
+
+        Gfx::Color                _inactiveColor;
+        Gfx::Color                _activeColor;
+        Gfx::Color                _textColor;           
         Gfx::PointF               _lastPointerPosition;                          
 };
 

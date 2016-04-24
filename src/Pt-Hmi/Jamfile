@@ -33,6 +33,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   Panel.cpp					   
 					   Widget.cpp					   					   
 					   Window.cpp	
+                       WindowFrame.cpp
 					   WindowManager.cpp
 					   Screen.cpp 
                        Visual.cpp

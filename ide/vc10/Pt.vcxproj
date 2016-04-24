@@ -349,6 +349,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\WindowFrame.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\CursorImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\GfxOutputDeviceImpl.h" />
@@ -546,6 +547,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Visual.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Window.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\WindowFrame.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\WindowManager.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\winrt\CursorImpl.cpp" />

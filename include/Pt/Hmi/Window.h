@@ -33,8 +33,8 @@
 #include <Pt/Hmi/WindowStartPosition.h>
 #include <Pt/Hmi/WindowState.h>
 #include <Pt/Hmi/WindowBorder.h>
-#include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/WindowDecoration.h>
+#include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ResizeEvent.h>
