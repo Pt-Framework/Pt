@@ -46,8 +46,7 @@ namespace Pt {
 
 namespace Hmi {
 
-
-void setResizeCursor(Pt::uint8_t dir )
+void setResizeCursor(Pt::uint8_t dir)
 {
     Application&  app =  Application::instance();
 
@@ -78,21 +77,17 @@ void setResizeCursor(Pt::uint8_t dir )
 }
 
 
-/////////////////////////////////////////////////////////////////////////////
-// WindowManager
-/////////////////////////////////////////////////////////////////////////////
-
 WindowManager::WindowManager()
 : _app( Application::instance() )
+, _parent(0)
 , _state(&WindowManager::onBackground)
 , _managedWindow(0)
+, _resizeDirection(0)
+, _borderWidth(4)
+, _titleHeight(20)
 , _inactiveColor(0.68f, 0.70f, 0.75f)
 , _activeColor(0.4f, 0.5f, 0.8f)
 , _textColor(0.0, 0.0, 0.0)
-, _parent(0)
-, _borderWidth(4)
-, _titleHeight(20)
-, _resizeDirection(0)
 {    
 }
 
@@ -165,11 +160,10 @@ PaintSurface& WindowManager::surface()
 }
 
 
-bool WindowManager::keyInput(const Pt::Hmi::KeyEvent& keyEvent)
+bool WindowManager::keyEvent(const KeyEvent& keyEvent)
 {
     Window* w = _parent->activeWindow();
-
-    if( w == 0 )
+    if( ! w )
         return false;
 
     if( w->isEnabled() )
@@ -179,7 +173,7 @@ bool WindowManager::keyInput(const Pt::Hmi::KeyEvent& keyEvent)
 }
 
 
-bool WindowManager::pointerInput( const Pt::Hmi::MouseEvent& mev )
+bool WindowManager::mouseEvent( const MouseEvent& mev )
 {
     if( mev.isPress() )
     {
@@ -189,7 +183,7 @@ bool WindowManager::pointerInput( const Pt::Hmi::MouseEvent& mev )
     }
 
     bool r = (this->*_state)(mev);
-    _lastPointerPosition = Gfx::PointF( mev.x(), mev.y() );    
+    _lastPointer = mev.position();    
     return r;
 }
 
@@ -408,7 +402,7 @@ bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
     }
     
     _app.setCursor( &Cursor::moveCursor() );        
-    _managedWindowPosition += mev.position() - _lastPointerPosition;
+    _managedWindowPosition += mev.position() - _lastPointer;
     
     onMove(*_managedWindow->window(), _managedWindowPosition);
     return true;
@@ -427,19 +421,16 @@ bool WindowManager::onWindowResize(const MouseEvent& mev)
         return false;
     }
 
-    
     double width  = _managedWindowSize.width();
     double height = _managedWindowSize.height();
     double posX   = _managedWindowPosition.x();
     double posY   = _managedWindowPosition.y();
-    double deltaX = ( mev.x() - _lastPointerPosition.x());
-    double deltaY = ( mev.y() - _lastPointerPosition.y());
-
-    // TODO: NorthEast is North + East
+    double deltaX = mev.x() - _lastPointer.x();
+    double deltaY = mev.y() - _lastPointer.y();
 
     if( _resizeDirection & WindowFrame::North )
     {
-        posY +=  deltaY;
+        posY += deltaY;
         height -= deltaY;
     }
 
@@ -450,12 +441,12 @@ bool WindowManager::onWindowResize(const MouseEvent& mev)
 
     if( _resizeDirection & WindowFrame::South )
     {
-         height += deltaY;
+        height += deltaY;
     }    
 
     if( _resizeDirection & WindowFrame::West )
     {
-        posX +=  deltaX;
+        posX += deltaX;
         width -= deltaX;
     }    
 

@@ -834,7 +834,7 @@ void Window::onPointerEvent(const MouseEvent& ev)
     if( ! isEnabled() )
         return;
 
-    if( _windowManager.pointerInput( ev ) )
+    if( _windowManager.mouseEvent(ev) )
         return;
 
     if( ! _mainWidget || 
@@ -884,7 +884,7 @@ void Window::onKeyEvent(const KeyEvent& ev)
     if( ! isEnabled() )
         return;
 
-    if( _windowManager.keyInput( ev ) )
+    if( _windowManager.keyEvent(ev) )
         return;
 
     std::map<Key, Widget*>::iterator s = _shortcuts.find( ev.key() );

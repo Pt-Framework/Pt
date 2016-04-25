@@ -98,9 +98,9 @@ class WindowManager : public Pt::Connectable
         PaintSurface& surface();
                   
     public:
-        bool keyInput(const Pt::Hmi::KeyEvent& keyEvent);
+        bool keyEvent(const KeyEvent& keyEvent);
         
-        bool pointerInput(const MouseEvent& mev);
+        bool mouseEvent(const MouseEvent& mev);
 
         void paintEvent(const PaintEvent& ev);
 
@@ -132,23 +132,23 @@ class WindowManager : public Pt::Connectable
 
     private:
         Application&             _app;
+        Window*                  _parent; 
         std::vector<WindowFrame> _windows;
-
-        double _borderWidth;
-        double _titleHeight;
-
+        
         typedef bool (WindowManager::*State)(const Pt::Hmi::MouseEvent&);
-        State                     _state;
-        WindowFrame*              _managedWindow;
-        Gfx::PointF               _managedWindowPosition;
-        Gfx::SizeF                _managedWindowSize;
-        Window*                   _parent;          
-        Pt::uint8_t               _resizeDirection;
+        State                    _state;
+        Gfx::PointF              _lastPointer;
+        WindowFrame*             _managedWindow;
+        Gfx::PointF              _managedWindowPosition;
+        Gfx::SizeF               _managedWindowSize;
+        Pt::uint8_t              _resizeDirection;
 
-        Gfx::Color                _inactiveColor;
-        Gfx::Color                _activeColor;
-        Gfx::Color                _textColor;           
-        Gfx::PointF               _lastPointerPosition;                          
+        double                   _borderWidth;
+        double                   _titleHeight;
+        Gfx::Color               _inactiveColor;
+        Gfx::Color               _activeColor;
+        Gfx::Color               _textColor;           
+                                  
 };
 
 } // namespace

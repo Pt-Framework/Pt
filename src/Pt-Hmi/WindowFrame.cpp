@@ -1,3 +1,32 @@
+/* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+   Copyright (C) 2015 Marc Boris Duerner
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+  
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
+*/
+
 #include "WindowFrame.h"
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Window.h>
@@ -8,7 +37,6 @@ namespace Hmi{
 WindowFrame::WindowFrame()
 : _wm(0)
 , _window(0)
-
 {
 }
 
@@ -137,7 +165,7 @@ void WindowFrame::moveEvent(const MoveEvent& mev)
     clientPos.addX(borderWidth);
     clientPos.addY(borderWidth + titleHeight);
     _clientRect.setOrigin(clientPos);
-    
+
     onLayout();
 }
 
@@ -168,6 +196,10 @@ void WindowFrame::onLayout()
     double buttonX = _frameRect.x() + _frameRect.width() - (borderWidth + buttonWidth);
     double buttonY = _frameRect.y() + borderWidth;
     
+    Gfx::PointF menuPos(_frameRect.x() + borderWidth, _frameRect.y() + borderWidth);
+    _menuButton.setOrigin(menuPos);
+    _menuButton.setSize( Gfx::SizeF(buttonWidth, buttonWidth) );
+
     _closeButton.setOrigin( Gfx::PointF(buttonX, buttonY) );
     _closeButton.setSize( Gfx::SizeF(buttonWidth, buttonWidth) );
 
@@ -308,7 +340,18 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
     painter.drawLine(bl, br);
     painter.drawLine(tl, bl);
     painter.drawLine(tr, bl);
+
+    Gfx::PointF triangle[3];
+    triangle[0] = _menuButton.topLeft() + Gfx::PointF(4, 3);
+    triangle[1] = _menuButton.topRight() + Gfx::PointF(-2, 3);
+    Gfx::PointF mid(_menuButton.width() / 2, _menuButton.height() / 2);
+    triangle[2] = _menuButton.topLeft() + mid;
+
+    brush = Gfx::Color(1,1,1);
+    painter.setBrush(brush);
+    painter.fillPolygon(triangle, 3);
 }
 
+} // namespace
 
-}}
+} // namespace
