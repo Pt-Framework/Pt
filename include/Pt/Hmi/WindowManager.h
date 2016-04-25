@@ -85,6 +85,11 @@ class WindowManager : public Pt::Connectable
             return _textColor;
         }
 
+        const Gfx::Color& inactiveTextColor() const
+        {
+            return _inactiveTextColor;
+        }
+
         void init(Window& parent);
 
         void add(Window& w);
@@ -119,35 +124,39 @@ class WindowManager : public Pt::Connectable
 
         void onClosing(Window& w);
     
-    private:        
-        bool onBackground(const Pt::Hmi::MouseEvent& pev);
-
-        bool onWindowFrame(const Pt::Hmi::MouseEvent& pev);
-
-        bool onWindowContent(const Pt::Hmi::MouseEvent& pev);
-
-        bool onWindowMove(const Pt::Hmi::MouseEvent& pev);
-
-        bool onWindowResize(const MouseEvent& pev);    
+//    private:        
+//        bool onBackground(const Pt::Hmi::MouseEvent& pev);
+//
+//        bool onWindowFrame(const Pt::Hmi::MouseEvent& pev);
+//
+//        bool onWindowContent(const Pt::Hmi::MouseEvent& pev);
+//
+//        bool onWindowMove(const Pt::Hmi::MouseEvent& pev);
+//
+//        bool onWindowResize(const MouseEvent& pev);    
 
     private:
         Application&             _app;
         Window*                  _parent; 
         std::vector<WindowFrame> _windows;
         
-        typedef bool (WindowManager::*State)(const Pt::Hmi::MouseEvent&);
-        State                    _state;
-        Gfx::PointF              _lastPointer;
-        WindowFrame*             _managedWindow;
-        Gfx::PointF              _managedWindowPosition;
-        Gfx::SizeF               _managedWindowSize;
-        Pt::uint8_t              _resizeDirection;
+        WindowFrame*             _currentWindow;
+        WindowFrame*             _pointerWindow;
+
+        //typedef bool (WindowManager::*State)(const Pt::Hmi::MouseEvent&);
+        //State                    _state;
+        //Gfx::PointF              _lastPointer;
+        //WindowFrame*             _managedWindow;
+        //Gfx::PointF              _managedWindowPosition;
+        //Gfx::SizeF               _managedWindowSize;
+        //Pt::uint8_t              _resizeDirection;
 
         double                   _borderWidth;
         double                   _titleHeight;
         Gfx::Color               _inactiveColor;
         Gfx::Color               _activeColor;
-        Gfx::Color               _textColor;           
+        Gfx::Color               _textColor;
+        Gfx::Color               _inactiveTextColor;            
                                   
 };
 

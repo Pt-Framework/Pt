@@ -77,8 +77,6 @@ class WindowFrame
 
         bool isTitle(const Gfx::PointF& p) const;
 
-        bool isBorder(const Gfx::PointF& p) const;
-
         Pt::uint8_t isResize(const Gfx::PointF& p) const;
 
         Gfx::RectF clientRect() const;
@@ -91,18 +89,41 @@ class WindowFrame
 
         void resizeEvent(const ResizeEvent& rev);
 
+        void enterEvent(const EnterEvent& eev);
+
+        void leaveEvent(const LeaveEvent& lev);
+
         bool mouseEvent(const MouseEvent& mev);
 
         void paintEvent(const PaintEvent& pev);
-    
+
     protected:
+        bool onMouseEvent(const MouseEvent& mev);
+
         void onLayout();
+
+    private:
+        bool isLeftBorder(const Pt::Gfx::PointF& p) const;
+        
+        bool isRightBorder(const Pt::Gfx::PointF& p) const;
+        
+        bool isTopBorder(const Pt::Gfx::PointF& p) const;
+        
+        bool isBottomBorder(const Pt::Gfx::PointF& p) const;
 
     private:
         WindowManager* _wm;
         Window*        _window;
         Gfx::RectF     _frameRect;
         Gfx::RectF     _clientRect;
+
+        Gfx::PointF    _lastPointer;
+        bool           _isMoving;
+        bool           _isLeftResizing;
+        bool           _isRightResizing;
+        bool           _isTopResizing;
+        bool           _isBottomResizing;
+
         Gfx::RectF     _closeButton;
         Gfx::RectF     _maximizeButton;
         Gfx::RectF     _minimizeButton;  

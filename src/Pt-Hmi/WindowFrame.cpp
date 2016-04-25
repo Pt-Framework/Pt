@@ -29,10 +29,12 @@
 
 #include "WindowFrame.h"
 #include <Pt/Hmi/WindowManager.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+
+namespace Hmi {
 
 WindowFrame::WindowFrame()
 : _wm(0)
@@ -44,6 +46,11 @@ WindowFrame::WindowFrame()
 WindowFrame::WindowFrame(WindowManager& wm, Window& window)
 : _wm(&wm)
 , _window(&window)
+, _isMoving(false)
+, _isLeftResizing(false)
+, _isRightResizing(false)
+, _isTopResizing(false)
+, _isBottomResizing(false)
 , _closeButton(0, 10, 0, 10)
 , _maximizeButton(0, 10, 0, 10)
 , _minimizeButton(0, 10, 0, 10)
@@ -82,25 +89,71 @@ Gfx::RectF WindowFrame::frameRect() const
 
 bool WindowFrame::isTitle(const Gfx::PointF& p) const
 {            
+    Gfx::PointF localPos = p - _frameRect.topLeft();
+
     double borderWidth = _wm->borderWidth();
     double titleHeight = _wm->titleHeight();
 
-    return p.x() >= borderWidth && 
-           p.x() < borderWidth + _clientRect.width() &&
-           p.y() >= borderWidth &&
-           p.y() < borderWidth + titleHeight;
+    return localPos.x() >= borderWidth && 
+           localPos.x() < borderWidth + _clientRect.width() &&
+           localPos.y() >= borderWidth &&
+           localPos.y() < borderWidth + titleHeight;
 }
 
 
-bool WindowFrame::isBorder(const Gfx::PointF& p) const
-{            
+bool WindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
+{        
     double borderWidth = _wm->borderWidth();
     double titleHeight = _wm->titleHeight();
 
-    return p.x() >= borderWidth && 
-           p.x() < borderWidth + _clientRect.width() &&
-           p.y() >= borderWidth &&
-           p.y() < borderWidth + titleHeight;
+    Gfx::PointF localPos = p - _frameRect.topLeft();
+
+    return localPos.x() >= 0 &&
+           localPos.x() < borderWidth &&
+           localPos.y() >= 0 &&
+           localPos.y() < _frameRect.height();
+}
+
+
+bool WindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
+{        
+    double borderWidth = _wm->borderWidth();
+    double titleHeight = _wm->titleHeight();
+
+    Gfx::PointF localPos = p - _frameRect.topLeft();
+
+    return localPos.x() >= borderWidth + _clientRect.width() &&
+           localPos.x() < 2 * borderWidth + _clientRect.width() &&
+           localPos.y() >= 0 &&
+           localPos.y() < _frameRect.height();
+}
+
+
+bool WindowFrame::isTopBorder(const Pt::Gfx::PointF& p) const
+{        
+    double borderWidth = _wm->borderWidth();
+    double titleHeight = _wm->titleHeight();
+
+    Gfx::PointF localPos = p - _frameRect.topLeft();
+
+    return localPos.x() >= 0 &&
+           localPos.x() < _frameRect.width() &&
+           localPos.y() >= 0 &&
+           localPos.y() < borderWidth;
+}
+
+
+bool WindowFrame::isBottomBorder(const Pt::Gfx::PointF& p) const
+{        
+    double borderWidth = _wm->borderWidth();
+    double titleHeight = _wm->titleHeight();
+
+    Gfx::PointF localPos = p - _frameRect.topLeft();
+
+    return localPos.x() >= 0 &&
+           localPos.x() < _frameRect.width() &&
+           localPos.y() >= borderWidth + titleHeight + _clientRect.height() &&
+           localPos.y() < _frameRect.height();
 }
 
 
@@ -215,16 +268,131 @@ void WindowFrame::onLayout()
 }
 
 
+void WindowFrame::enterEvent(const EnterEvent& eev)
+{
+  std::clog << "enter " << _window->title() << std::endl;
+}
+
+
+void WindowFrame::leaveEvent(const LeaveEvent& lev)
+{
+  std::clog << "leave " << _window->title() << std::endl;
+}
+
+
 bool WindowFrame::mouseEvent(const MouseEvent& mev)
 {
-    if( _closeButton.contains( mev.position() ) )
+    bool r = onMouseEvent(mev);
+    _lastPointer = mev.position();
+    return r;
+}
+
+
+bool WindowFrame::onMouseEvent(const MouseEvent& mev)
+{
+    bool isResizing = _isLeftResizing || _isRightResizing || 
+                      _isTopResizing || _isBottomResizing;
+    
+    if( ! _isMoving && ! isResizing )
     {
-        if( mev.isRelease() )
-             _wm->onClosing(*_window);
+        if(_clientRect.contains( mev.position() ) )
+        {        
+            Gfx::PointF pos = mev.position() - _clientRect.topLeft();
+            MouseEvent mev2 = mev;
+            mev2.setPosition(pos);
+            _window->processEvent(mev2);
+            return false;
+        }
+
+        if( _closeButton.contains( mev.position() ) )
+        {
+            Application::instance().setCursor( &Cursor::defaultCursor() ); 
+
+            if( mev.isRelease() )
+                _wm->onClosing(*_window);
+
+            return false;
+        }
+    }
+
+    bool onTitle = _isMoving || isTitle( mev.position() );
+    if( onTitle && ! isResizing )
+    {
+        Application::instance().setCursor( &Cursor::moveCursor() );
+        _isMoving = (_isMoving || mev.isPress()) && ! mev.isReleased();
         
+        if(_isMoving)
+        {
+            Gfx::PointF to = _window->position() + mev.position() - _lastPointer;
+            _window->move(to);
+            _isMoving = true;
+        }
+        
+        return _isMoving;
+    }
+ 
+    bool onLeftBorder = _isLeftResizing || isLeftBorder( mev.position() );
+    bool onRightBorder = _isRightResizing || isRightBorder( mev.position() );
+    bool onTopBorder = _isTopResizing || isTopBorder( mev.position() );
+    bool onBottomBorder = _isBottomResizing || isBottomBorder( mev.position() );
+    
+    if(onLeftBorder || onRightBorder || onTopBorder || onBottomBorder)
+    {
+        if( onTopBorder && onRightBorder || onBottomBorder && onLeftBorder )
+            Application::instance().setCursor( &Hmi::Cursor::sizeNESWCursor() );
+        else if(onTopBorder && onLeftBorder || onBottomBorder && onRightBorder )
+            Application::instance().setCursor( &Hmi::Cursor::sizeNWSECursor() );
+        else if(onRightBorder || onLeftBorder)
+            Application::instance().setCursor( &Hmi::Cursor::sizeWECursor() );
+        else if(onTopBorder || onBottomBorder)
+            Application::instance().setCursor( &Hmi::Cursor::sizeNSCursor() );     
+
+        _isLeftResizing = _isLeftResizing || (onLeftBorder && mev.isPress());
+        _isRightResizing = _isRightResizing || (onRightBorder&& mev.isPress());
+        _isTopResizing = _isTopResizing || (onTopBorder && mev.isPress());
+        _isBottomResizing =_isBottomResizing ||(onBottomBorder&& mev.isPress());
+
+        if( ! mev.isPressed() )
+        {
+            _isLeftResizing = false;
+            _isRightResizing = false;
+            _isTopResizing = false;
+            _isBottomResizing = false;
+            return false;
+        }
+
+        Gfx::SizeF size = _window->size();
+        Gfx::PointF pos = _window->position();
+        Gfx::PointF delta = mev.position() - _lastPointer;
+
+        if( _isLeftResizing )
+        {
+            pos.addX( delta.x() );
+            size.subWidth(delta.x());
+        }   
+
+        if(_isRightResizing)
+            size.addWidth( delta.x() );
+            
+        if(_isTopResizing)
+        {
+            pos.addY( delta.y() );
+            size.subHeight(delta.y());
+        }
+
+        if(_isBottomResizing)
+            size.addHeight( delta.y() );
+            
+        if( size != _window->size() )
+            _window->resize(size);
+
+        if( pos != _window->position() )
+            _window->move(pos);
+
         return true;
     }
 
+    Application::instance().setCursor( &Cursor::defaultCursor() ); 
     return false;
 }
 
@@ -281,7 +449,10 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
     const Gfx::Font& font = _window->font();
     painter.setFont(font);
 
-    Gfx::Pen pen(1, _wm->textColor());
+    Gfx::Color textColor = _window->isActive() ? _wm->textColor() 
+                                               : _wm->inactiveTextColor(); 
+
+    Gfx::Pen pen(1, textColor);
     painter.setPen(pen);
 
     Gfx::FontMetrics fm = painter.fontMetrics( font, Pt::String("A") );
