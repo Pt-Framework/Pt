@@ -118,6 +118,7 @@ class WindowFrame
         Gfx::RectF     _clientRect;
 
         Gfx::PointF    _lastPointer;
+        bool           _isClient;
         bool           _isMoving;
         bool           _isLeftResizing;
         bool           _isRightResizing;

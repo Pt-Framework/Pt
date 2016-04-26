@@ -46,6 +46,7 @@ WindowFrame::WindowFrame()
 WindowFrame::WindowFrame(WindowManager& wm, Window& window)
 : _wm(&wm)
 , _window(&window)
+, _isClient(false)
 , _isMoving(false)
 , _isLeftResizing(false)
 , _isRightResizing(false)
@@ -271,19 +272,23 @@ void WindowFrame::onLayout()
 
 void WindowFrame::enterEvent(const EnterEvent& eev)
 {
-  //std::clog << "enter " << _window->title() << std::endl;
 }
 
 
 void WindowFrame::leaveEvent(const LeaveEvent& lev)
-{
-  //std::clog << "leave " << _window->title() << std::endl;
+{   
+    if(_isClient)
+    {
+        _isClient = false;
+        LeaveEvent lev(_window->vid());
+        _window->processEvent(lev);
+    }
 
-  if(_pressedClose)
-  {
-      _pressedClose = false;
-      update(/*_closeButton*/);
-  }
+    if(_pressedClose)
+    {
+        _pressedClose = false;
+        update(/*_closeButton*/);
+    }
 }
 
 
@@ -304,11 +309,25 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
     {
         if(_clientRect.contains( mev.position() ) )
         {        
+            if( ! _isClient )
+            {
+                _isClient = true;
+                EnterEvent eev(_window->vid());
+                _window->processEvent(eev);
+            }
+
             Gfx::PointF pos = mev.position() - _clientRect.topLeft();
             MouseEvent mev2 = mev;
             mev2.setPosition(pos);
             _window->processEvent(mev2);
             return false;
+        }
+
+        if(_isClient)
+        {
+            _isClient = false;
+            LeaveEvent lev(_window->vid());
+            _window->processEvent(lev);
         }
 
         if( _closeButton.contains( mev.position() ) )
@@ -322,7 +341,7 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
             if( mev.isRelease() && _pressedClose )
                 _window->close();
 
-            _pressedClose = pressedClose;
+            _pressedClose = _pressedClose || pressedClose;
             return false;
         }
 

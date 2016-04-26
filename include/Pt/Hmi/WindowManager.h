@@ -105,7 +105,7 @@ class WindowManager : public Pt::Connectable
     public:
         void enterEvent(const EnterEvent& ev);
 
-        void leaveEvent(const EnterEvent& ev);
+        void leaveEvent(const LeaveEvent& ev);
 
         bool keyEvent(const KeyEvent& keyEvent);
         
@@ -145,7 +145,7 @@ class WindowManager : public Pt::Connectable
         std::vector<WindowFrame> _windows;
         
         WindowFrame*             _currentWindow;
-        WindowFrame*             _pointerWindow;
+        WindowFrame*             _grabbedWindow;
 
         //typedef bool (WindowManager::*State)(const Pt::Hmi::MouseEvent&);
         //State                    _state;

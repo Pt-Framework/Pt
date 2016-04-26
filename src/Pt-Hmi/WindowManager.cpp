@@ -81,7 +81,7 @@ WindowManager::WindowManager()
 : _app( Application::instance() )
 , _parent(0)
 , _currentWindow(0)
-, _pointerWindow(0)
+, _grabbedWindow(0)
 //, _state(&WindowManager::onBackground)
 //, _managedWindow(0)
 //, _resizeDirection(0)
@@ -168,8 +168,18 @@ void WindowManager::enterEvent(const EnterEvent& ev)
 }
 
 
-void WindowManager::leaveEvent(const EnterEvent& ev)
+void WindowManager::leaveEvent(const LeaveEvent& ev)
 {
+    _grabbedWindow = 0;
+
+    if(_currentWindow)
+    {
+      WindowFrame* w = _currentWindow;
+      _currentWindow = 0;
+      
+      LeaveEvent lev( w->window()->vid() );
+      w->leaveEvent(lev);
+    }
 }
 
 
@@ -195,43 +205,39 @@ bool WindowManager::mouseEvent( const MouseEvent& mev )
             wf->window()->activate();
     }
 
-    //bool r = (this->*_state)(mev);
-    //_lastPointer = mev.position();    
-    //return r;
+    WindowFrame* window = 0;
 
-    WindowFrame* pointerWindow = 0;
-
-    if(_pointerWindow)
-        pointerWindow = _pointerWindow;
+    if(_grabbedWindow)
+        window = _grabbedWindow;
     else
-        pointerWindow = findWindow( mev.position() );
+        window = findWindow( mev.position() );
     
-    if(pointerWindow)
-    {
-        bool tracking = pointerWindow->mouseEvent(mev);
-        if(tracking)
-            _pointerWindow = pointerWindow;
-        else
-            _pointerWindow = 0;
-    }
-
-    if(_currentWindow != pointerWindow)
+    if(_currentWindow != window)
     {
       if(_currentWindow)
       {
-        LeaveEvent lev( _currentWindow->window()->vid() );
-        _currentWindow->leaveEvent(lev);
+          LeaveEvent lev( _currentWindow->window()->vid() );
+          _currentWindow->leaveEvent(lev);
       }
-      if(pointerWindow)
+      if(window)
       {
-        EnterEvent eev( pointerWindow->window()->vid() );
-        pointerWindow->enterEvent(eev);
+          EnterEvent eev( window->window()->vid() );
+          window->enterEvent(eev);
       }
     }
 
-    _currentWindow = pointerWindow;
+    if(window)
+    {
+        bool tracking = window->mouseEvent(mev);
+        if(tracking)
+            _grabbedWindow = window;
+        else
+            _grabbedWindow = 0;
+    }
 
-    return pointerWindow != 0;
+    _currentWindow = window;
+
+    return window != 0;
 }
 
 

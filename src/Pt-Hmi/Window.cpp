@@ -925,13 +925,13 @@ void Window::onKeyEvent(const KeyEvent& ev)
 
 void Window::onEnterEvent(const EnterEvent& ev)
 {
-    std::clog << "enter " << title() << std::endl;
 }
 
 
 void Window::onLeaveEvent(const LeaveEvent& ev )
 {
-    std::clog << "leave " << title() << std::endl;
+    _windowManager.leaveEvent(ev);
+
     setPointerWidget(0);
 }
 
