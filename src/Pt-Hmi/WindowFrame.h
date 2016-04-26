@@ -55,16 +55,6 @@ class KeyEvent;
 class WindowFrame
 {
     public:
-        enum ResizeDirection
-        {
-            None  = 0,
-            North = 1,
-            East  = 1<<1,
-            South = 1<<2,
-            West  = 1<<3,
-        };
-
-    public:
         WindowFrame();
 
         WindowFrame(WindowManager& wm, Window& window);
@@ -74,10 +64,6 @@ class WindowFrame
         Window* window();
 
         const Window* window() const;
-
-        bool isTitle(const Gfx::PointF& p) const;
-
-        Pt::uint8_t isResize(const Gfx::PointF& p) const;
 
         Gfx::RectF clientRect() const;
 
@@ -103,6 +89,8 @@ class WindowFrame
         void onLayout();
 
     private:
+        bool isTitle(const Gfx::PointF& p) const;
+
         bool isLeftBorder(const Pt::Gfx::PointF& p) const;
         
         bool isRightBorder(const Pt::Gfx::PointF& p) const;

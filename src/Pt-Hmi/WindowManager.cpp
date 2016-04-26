@@ -46,51 +46,17 @@ namespace Pt {
 
 namespace Hmi {
 
-void setResizeCursor(Pt::uint8_t dir)
-{
-    Application&  app =  Application::instance();
-
-    if( (dir & WindowFrame::North && dir & WindowFrame::East) ||
-        (dir & WindowFrame::South && dir & WindowFrame::West ) )
-    {
-        app.setCursor( &Hmi::Cursor::sizeNESWCursor() );
-        return;
-    }
-
-    if( (dir & WindowFrame::North && dir & WindowFrame::West) ||
-        (dir & WindowFrame::South && dir & WindowFrame::East ) )
-    {
-        app.setCursor( &Hmi::Cursor::sizeNWSECursor() );
-        return;
-    }
-
-    if( (dir & WindowFrame::East || dir & WindowFrame::West))
-    {
-        app.setCursor( &Hmi::Cursor::sizeWECursor() );
-        return;
-    }
-
-    if( (dir & WindowFrame::North || dir & WindowFrame::South))
-    {
-        app.setCursor( &Hmi::Cursor::sizeNSCursor() );     
-    }
-}
-
-
 WindowManager::WindowManager()
 : _app( Application::instance() )
 , _parent(0)
 , _currentWindow(0)
 , _grabbedWindow(0)
-//, _state(&WindowManager::onBackground)
-//, _managedWindow(0)
-//, _resizeDirection(0)
-, _borderWidth(4)
-, _titleHeight(20)
+, _borderWidth(4.0f)
+, _titleHeight(20.0f)
 , _inactiveColor(0.68f, 0.70f, 0.75f)
 , _activeColor(0.4f, 0.5f, 0.8f)
-, _textColor(1.0, 1.0, 1.0)
-, _inactiveTextColor(0.2, 0.2, 0.2)
+, _textColor(1.0f, 1.0f, 1.0f)
+, _inactiveTextColor(0.2f, 0.2f, 0.2f)
 {    
 }
 
@@ -157,9 +123,9 @@ WindowFrame* WindowManager::findWindow(Window& w)
 }
 
 
-PaintSurface& WindowManager::surface()
+Window* WindowManager::parent()
 {
-    return _parent->surface();
+    return _parent;
 }
 
 
@@ -275,263 +241,6 @@ void WindowManager::paintEvent(const PaintEvent& pev)
         painter.drawSurface(to, w->surface(), updateRect);    
     }
 }
-
-
-//bool WindowManager::onBackground(const Pt::Hmi::MouseEvent& mev)
-//{
-//    //std::clog << "onBackground: " << (_parent ? _parent->title() : "WM") << std::endl;    
-//    _managedWindow = findWindow( mev.position() );
-//    
-//    // pointer on window background 
-//    if( ! _managedWindow )
-//    {
-//        _app.setPointerWindow(_parent);
-//        _state = &WindowManager::onBackground;        
-//        return false;
-//    }    
-//
-//    Gfx::PointF framePos = mev.position() - _managedWindow->frameRect().topLeft();
-//
-//    // pointer on window title bar
-//    if( _managedWindow->isTitle(framePos) )
-//    {
-//        _app.setCursor( &Cursor::moveCursor() );
-//        _app.setPointerWindow( 0 );
-//        _state = &WindowManager::onWindowFrame;
-//        return true;
-//    }
-//
-//    // pointer on window border
-//    Pt::uint8_t resizeDirection = _managedWindow->isResize(mev.position());
-//
-//    if( resizeDirection != WindowFrame::None )
-//    {
-//        setResizeCursor(resizeDirection);
-//        _app.setPointerWindow( 0);
-//        _state = &WindowManager::onWindowFrame;
-//        return true;
-//    }                                
-//    
-//    // pointer on window content
-//    _state = &WindowManager::onWindowContent;    
-//    _app.setPointerWindow( _managedWindow->window() );
-//
-//    // mouse event in managed window client coordinates
-//    Gfx::PointF pos = mev.position() - _managedWindow->clientRect().topLeft();
-//    MouseEvent mev2 = mev;
-//    mev2.setPosition(pos);
-//    _managedWindow->window()->processEvent(mev2);
-//    return true;
-//}
-//
-//
-//bool WindowManager::onWindowFrame(const Pt::Hmi::MouseEvent& mev)
-//{
-//    //std::clog << "onWindowFrame: " << (_parent ? _parent->title() : "WM") << std::endl;   
-//        
-//    _managedWindow = findWindow( mev.position() );
-//
-//    // pointer on window background 
-//    if( ! _managedWindow)
-//    {
-//        _app.setPointerWindow(_parent);
-//        _state = &WindowManager::onBackground;
-//        return false;
-//    }
-//    
-//    if( _managedWindow->mouseEvent(mev) )
-//        return true;
-//
-//    Gfx::PointF framePos = mev.position() - _managedWindow->frameRect().topLeft();
-//
-//    // pointer on window title bar
-//    if( _managedWindow->isTitle(framePos) )
-//    {
-//        _app.setCursor( &Cursor::moveCursor() );
-//        _app.setPointerWindow(0);
-//        _state = &WindowManager::onWindowFrame;
-//
-//        if( mev.isPress() )
-//        {
-//            _managedWindowPosition = _managedWindow->window()->position();
-//            _state = &WindowManager::onWindowMove;
-//        }
-//
-//        return true;
-//    }
-//
-//    // pointer on window border
-//    Pt::uint8_t resizeDirection = _managedWindow->isResize(mev.position());
-//    if( resizeDirection != WindowFrame::None )
-//    {                      
-//        setResizeCursor(resizeDirection);
-//        _app.setPointerWindow( 0);
-//
-//        if( mev.isPress() )
-//        {
-//            _resizeDirection = resizeDirection;
-//            _state = &WindowManager::onWindowResize;
-//            _managedWindowPosition = _managedWindow->window()->position();
-//            _managedWindowSize = _managedWindow->window()->size();
-//        }
-//        else
-//            _state = &WindowManager::onWindowFrame;
-//        
-//        return true;
-//    }   
-//
-//    // pointer on window content
-//    _state = &WindowManager::onWindowContent;
-//    _app.setPointerWindow( _managedWindow->window() );
-//
-//    // mouse event in managed window client coordinates
-//    Gfx::PointF pos = mev.position() - _managedWindow->clientRect().topLeft();
-//    MouseEvent mev2 = mev;
-//    mev2.setPosition(pos);
-//    _managedWindow->window()->processEvent(mev2);
-//    return true;
-//}
-//
-//
-//bool WindowManager::onWindowContent(const Pt::Hmi::MouseEvent& mev)
-//{    
-//    //std::clog << "onWindowContent: " << (_parent ? _parent->title() : "WM") << std::endl;    
-//    
-//    _managedWindow = findWindow( mev.position() );
-//    
-//    // pointer on window background
-//    if( ! _managedWindow )
-//    {        
-//        _app.setPointerWindow(_parent);
-//        _state = &WindowManager::onBackground;
-//        return false;
-//    }        
-//
-//    Gfx::PointF framePos = mev.position() - _managedWindow->frameRect().topLeft();
-//
-//    // pointer on window title bar
-//    if( _managedWindow->isTitle(framePos) )
-//    {
-//        _app.setCursor( &Cursor::moveCursor() );
-//        _app.setPointerWindow(0);
-//        _state = &WindowManager::onWindowFrame;
-//        return true;
-//    }
-//
-//    // pointer on window border
-//    Pt::uint8_t resizeDirection = _managedWindow->isResize(mev.position());
-//
-//    if( resizeDirection != WindowFrame::None )
-//    {            
-//        setResizeCursor(resizeDirection);
-//        _app.setPointerWindow( 0);
-//        _state = &WindowManager::onWindowFrame;
-//        return true;
-//    }                                
-//
-//    // pointer on window content
-//
-//    // mouse event in managed window client coordinates
-//    Gfx::PointF pos = mev.position() - _managedWindow->clientRect().topLeft();
-//    MouseEvent mev2 = mev;
-//    mev2.setPosition(pos);
-//    _managedWindow->window()->processEvent(mev2);
-//    return true;
-//}
-//
-//
-//bool WindowManager::onWindowMove(const Pt::Hmi::MouseEvent& mev)
-//{
-//    //std::clog << "onWindowMove: " << (_parent ? _parent->title() : "WM") << std::endl;
-//
-//    Gfx::PointF framePos = mev.position() - _managedWindow->frameRect().topLeft();
-//
-//    if( ! mev.isPressed() )
-//    {
-//        _state = _managedWindow->isTitle(framePos) ? &WindowManager::onWindowFrame
-//                                                   : &WindowManager::onBackground;
-//
-//        return false;
-//    }
-//    
-//    _app.setCursor( &Cursor::moveCursor() );        
-//    _managedWindowPosition += mev.position() - _lastPointer;
-//    
-//    onMove(*_managedWindow->window(), _managedWindowPosition);
-//    return true;
-//}
-//
-//
-//bool WindowManager::onWindowResize(const MouseEvent& mev)
-//{  
-//    //std::clog << "onWindowResize: " << (_parent ? _parent->title() : "WM") << std::endl;
-//   
-//    if( ! mev.isPressed() )
-//    {
-//        Pt::uint8_t resizeDirection = _managedWindow->isResize(mev.position());
-//        _state = resizeDirection == WindowFrame::None ? &WindowManager::onWindowFrame
-//                                              : &WindowManager::onBackground;
-//        return false;
-//    }
-//
-//    double width  = _managedWindowSize.width();
-//    double height = _managedWindowSize.height();
-//    double posX   = _managedWindowPosition.x();
-//    double posY   = _managedWindowPosition.y();
-//    double deltaX = mev.x() - _lastPointer.x();
-//    double deltaY = mev.y() - _lastPointer.y();
-//
-//    if( _resizeDirection & WindowFrame::North )
-//    {
-//        posY += deltaY;
-//        height -= deltaY;
-//    }
-//
-//    if( _resizeDirection & WindowFrame::East )
-//    {
-//        width += deltaX;
-//    }
-//
-//    if( _resizeDirection & WindowFrame::South )
-//    {
-//        height += deltaY;
-//    }    
-//
-//    if( _resizeDirection & WindowFrame::West )
-//    {
-//        posX += deltaX;
-//        width -= deltaX;
-//    }    
-//
-//    Gfx::SizeF size(width, height);
-//    Gfx::PointF pos(posX, posY);
-//
-//    if( width < _managedWindow->window()->minimumSize().width() )
-//        size.setWidth( _managedWindow->window()->minimumSize().width() );
-//
-//    if( height < _managedWindow->window()->minimumSize().height() )
-//        size.setHeight( _managedWindow->window()->minimumSize().height() );
-//                
-//    if( width > _managedWindow->window()->maximumSize().width() )
-//        size.setWidth( _managedWindow->window()->maximumSize().width() );
-//
-//    if( height > _managedWindow->window()->maximumSize().height() )
-//        size.setHeight( _managedWindow->window()->maximumSize().height() );
-//
-//    if( _managedWindowPosition != pos )
-//    {
-//        _managedWindowPosition = pos;
-//        onMove(*_managedWindow->window(), pos);
-//    }
-//
-//    if( _managedWindowSize != size )
-//    {
-//        _managedWindowSize = size;
-//        onResize(*_managedWindow->window(), size);
-//    }
-//
-//    return true;
-//}
 
 
 void WindowManager::onResize(Window& w, const Gfx::SizeF& to)

@@ -159,42 +159,6 @@ bool WindowFrame::isBottomBorder(const Pt::Gfx::PointF& p) const
 }
 
 
-Pt::uint8_t WindowFrame::isResize(const Pt::Gfx::PointF& p) const
-{        
-    const Window* w = _window;
-    const double borderWidth = _wm->borderWidth();
-    const double titleHeight = _wm->titleHeight();
-
-    const Gfx::SizeF  wsize = _clientRect.size();
-    const Gfx::PointF wpos  = _frameRect.topLeft();
-    
-    if( p.x() < wpos.x() ||
-        p.x() > wpos.x() + 2*borderWidth + wsize.width() ||
-        p.y() < wpos.y() ||
-        p.y() >= wpos.y() + 2*borderWidth + titleHeight + wsize.height() )
-        return None;
-
-    const bool left   = p.x() < (wpos.x() + borderWidth);
-    const bool right  = p.x() >= wpos.x() + borderWidth + wsize.width();
-    const bool top    = p.y() < wpos.y() + borderWidth;
-    const bool bottom = p.y() >= wpos.y() + borderWidth + titleHeight + wsize.height();
-    Pt::uint8_t direction = 0;
-
-    if(left)                
-        direction |= West;
-
-    if(right)
-            direction |= East;
-    if(top)
-        direction |= North;
-
-    if(bottom)
-        direction |= South;            
-
-    return direction;            
-}
-
-
 void WindowFrame::update()
 {
     double borderWidth = _wm->borderWidth();
@@ -457,7 +421,7 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
     double borderWidth = _wm->borderWidth();
     double titleHeight = _wm->titleHeight();
 
-    PaintSurface& surface = _wm->surface();
+    PaintSurface& surface = _wm->parent()->surface();
     Painter painter(surface);
 
     Gfx::Color color = _window->isActive() ? _wm->activeColor() 

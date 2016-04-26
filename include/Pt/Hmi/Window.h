@@ -40,6 +40,7 @@
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/MouseEvent.h>
+#include <Pt/Hmi/TouchEvent.h>
 #include <Pt/Hmi/ScrollEvent.h>
 #include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/EnterEvent.h>

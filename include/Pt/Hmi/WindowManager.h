@@ -30,28 +30,24 @@
 #ifndef Pt_Hmi_WindowManager_h
 #define Pt_Hmi_WindowManager_h
 
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Rect.h>
-#include <Pt/Gfx/Image.h>
-#include <Pt/Connectable.h>
 #include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/Cursor.h>
-#include <Pt/Hmi/ActivateEvent.h>
-#include <Pt/Hmi/ResizeEvent.h>
-#include <Pt/Hmi/Button.h>
-#include <Pt/Hmi/MoveEvent.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Color.h>
+#include <Pt/Connectable.h>
+#include <vector>
 
 namespace Pt {
 
 namespace Hmi {
 
 class Window;
-class WindowManager;
+class WindowFrame;
 class Application;
 class MouseEvent;
 class KeyEvent;
-class WindowFrame;
+class EnterEvent;
+class LeaveEvent;
+class PaintEvent;
 
 class WindowManager : public Pt::Connectable
 {
@@ -92,6 +88,8 @@ class WindowManager : public Pt::Connectable
 
         void init(Window& parent);
 
+        Window* parent();
+
         void add(Window& w);
 
         void remove(Window& window);
@@ -99,8 +97,6 @@ class WindowManager : public Pt::Connectable
         WindowFrame* findWindow(const Gfx::PointF& p);
 
         WindowFrame* findWindow(Window& w);
-
-        PaintSurface& surface();
                   
     public:
         void enterEvent(const EnterEvent& ev);
@@ -128,17 +124,6 @@ class WindowManager : public Pt::Connectable
 
         void onClosing(Window& w);
     
-//    private:        
-//        bool onBackground(const Pt::Hmi::MouseEvent& pev);
-//
-//        bool onWindowFrame(const Pt::Hmi::MouseEvent& pev);
-//
-//        bool onWindowContent(const Pt::Hmi::MouseEvent& pev);
-//
-//        bool onWindowMove(const Pt::Hmi::MouseEvent& pev);
-//
-//        bool onWindowResize(const MouseEvent& pev);    
-
     private:
         Application&             _app;
         Window*                  _parent; 
@@ -147,21 +132,12 @@ class WindowManager : public Pt::Connectable
         WindowFrame*             _currentWindow;
         WindowFrame*             _grabbedWindow;
 
-        //typedef bool (WindowManager::*State)(const Pt::Hmi::MouseEvent&);
-        //State                    _state;
-        //Gfx::PointF              _lastPointer;
-        //WindowFrame*             _managedWindow;
-        //Gfx::PointF              _managedWindowPosition;
-        //Gfx::SizeF               _managedWindowSize;
-        //Pt::uint8_t              _resizeDirection;
-
         double                   _borderWidth;
         double                   _titleHeight;
         Gfx::Color               _inactiveColor;
         Gfx::Color               _activeColor;
         Gfx::Color               _textColor;
-        Gfx::Color               _inactiveTextColor;            
-                                  
+        Gfx::Color               _inactiveTextColor;                             
 };
 
 } // namespace
