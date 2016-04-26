@@ -125,6 +125,8 @@ class WindowFrame
         bool           _isBottomResizing;
 
         Gfx::RectF     _closeButton;
+        bool           _pressedClose;
+
         Gfx::RectF     _maximizeButton;
         Gfx::RectF     _minimizeButton;  
         Gfx::RectF     _menuButton;

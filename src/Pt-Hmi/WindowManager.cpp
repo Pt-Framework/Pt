@@ -163,6 +163,16 @@ PaintSurface& WindowManager::surface()
 }
 
 
+void WindowManager::enterEvent(const EnterEvent& ev)
+{
+}
+
+
+void WindowManager::leaveEvent(const EnterEvent& ev)
+{
+}
+
+
 bool WindowManager::keyEvent(const KeyEvent& keyEvent)
 {
     Window* w = _parent->activeWindow();

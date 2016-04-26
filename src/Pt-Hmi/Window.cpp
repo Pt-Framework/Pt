@@ -77,7 +77,7 @@ Window::Window(Window* parent)
     _windowManager.init(*this);
 
     _eventReady += Pt::slot(*this, &Window::onKeyEvent );
-    _eventReady += Pt::slot(*this, &Window::onPointerEvent );
+    _eventReady += Pt::slot(*this, &Window::onMouseEvent );
     _eventReady += Pt::slot(*this, &Window::onTouchEvent );
     _eventReady += Pt::slot(*this, &Window::onScrollEvent );
     _eventReady += Pt::slot(*this, &Window::onPaintEvent );
@@ -829,7 +829,7 @@ void Window::onPaintEvent(const PaintEvent& ev)
 }
 
 
-void Window::onPointerEvent(const MouseEvent& ev)
+void Window::onMouseEvent(const MouseEvent& ev)
 {
     if( ! isEnabled() )
         return;
@@ -925,11 +925,13 @@ void Window::onKeyEvent(const KeyEvent& ev)
 
 void Window::onEnterEvent(const EnterEvent& ev)
 {
+    std::clog << "enter " << title() << std::endl;
 }
 
 
 void Window::onLeaveEvent(const LeaveEvent& ev )
 {
+    std::clog << "leave " << title() << std::endl;
     setPointerWidget(0);
 }
 

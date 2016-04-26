@@ -103,6 +103,10 @@ class WindowManager : public Pt::Connectable
         PaintSurface& surface();
                   
     public:
+        void enterEvent(const EnterEvent& ev);
+
+        void leaveEvent(const EnterEvent& ev);
+
         bool keyEvent(const KeyEvent& keyEvent);
         
         bool mouseEvent(const MouseEvent& mev);

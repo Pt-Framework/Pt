@@ -160,7 +160,7 @@ class PT_HMI_API Window : public Visual
 
     virtual void onPaintEvent(const PaintEvent& ev);
 
-    virtual void onPointerEvent( const MouseEvent& ev );
+    virtual void onMouseEvent( const MouseEvent& ev );
 
     virtual void onTouchEvent( const TouchEvent& ev );
 

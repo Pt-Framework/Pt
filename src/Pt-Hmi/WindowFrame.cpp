@@ -52,6 +52,7 @@ WindowFrame::WindowFrame(WindowManager& wm, Window& window)
 , _isTopResizing(false)
 , _isBottomResizing(false)
 , _closeButton(0, 10, 0, 10)
+, _pressedClose(false)
 , _maximizeButton(0, 10, 0, 10)
 , _minimizeButton(0, 10, 0, 10)
 {
@@ -270,13 +271,19 @@ void WindowFrame::onLayout()
 
 void WindowFrame::enterEvent(const EnterEvent& eev)
 {
-  std::clog << "enter " << _window->title() << std::endl;
+  //std::clog << "enter " << _window->title() << std::endl;
 }
 
 
 void WindowFrame::leaveEvent(const LeaveEvent& lev)
 {
-  std::clog << "leave " << _window->title() << std::endl;
+  //std::clog << "leave " << _window->title() << std::endl;
+
+  if(_pressedClose)
+  {
+      _pressedClose = false;
+      update(/*_closeButton*/);
+  }
 }
 
 
@@ -308,9 +315,38 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
         {
             Application::instance().setCursor( &Cursor::defaultCursor() ); 
 
-            if( mev.isRelease() )
-                _wm->onClosing(*_window);
+            bool pressedClose = mev.isPress();
+            if(pressedClose != _pressedClose)
+                update(/*_closeButton*/);
+            
+            if( mev.isRelease() && _pressedClose )
+                _window->close();
 
+            _pressedClose = pressedClose;
+            return false;
+        }
+
+        if(_pressedClose)
+        {
+            _pressedClose = false;
+            update(/*_closeButton*/);
+        }
+
+        if( _maximizeButton.contains( mev.position() ) )
+        {
+            Application::instance().setCursor( &Cursor::defaultCursor() ); 
+            return false;
+        }
+
+        if( _minimizeButton.contains( mev.position() ) )
+        {
+            Application::instance().setCursor( &Cursor::defaultCursor() ); 
+            return false;
+        }
+
+        if( _menuButton.contains( mev.position() ) )
+        {
+            Application::instance().setCursor( &Cursor::defaultCursor() ); 
             return false;
         }
     }
@@ -558,7 +594,8 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
     pen = Gfx::Pen(1, Gfx::Color(0, 0, 0) );
     painter.setPen(pen);
 
-    brush = Gfx::Color(0.82f, 0.25f, 0.22f);
+    brush = _pressedClose ? Gfx::Color(0.95f, 0.4f, 0.4f)
+                          : Gfx::Color(0.82f, 0.25f, 0.22f);
     painter.setBrush(brush);
     painter.fillRect(_closeButton);
     painter.drawRect(_closeButton);
