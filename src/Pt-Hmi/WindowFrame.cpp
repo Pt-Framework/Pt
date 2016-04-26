@@ -405,17 +405,12 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
     PaintSurface& surface = _wm->surface();
     Painter painter(surface);
 
-    Gfx::SizeF frameSize = _window->size();
-    frameSize.addWidth(borderWidth * 2);
-    frameSize.addHeight(borderWidth * 2 + titleHeight);
-
     Gfx::Color color = _window->isActive() ? _wm->activeColor() 
                                            : _wm->inactiveColor();  
     
     //
     // frame background
     //
-
     Gfx::Brush brush(color);
     painter.setBrush(brush);
 
@@ -424,35 +419,35 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
     Gfx::RectF leftBorder( pos.x(), 
                            pos.x() + borderWidth,
                            pos.y() + borderWidth, 
-                           pos.y() + frameSize.height() - borderWidth - 1 );
+                           pos.y() + _frameRect.height() - borderWidth - 1 );
     painter.fillRect(leftBorder);
 
     Gfx::RectF topBorder(pos.x(),
-                         pos.x() + frameSize.width() - 1,
+                         pos.x() + _frameRect.width() - 1,
                          pos.y(),
                          pos.y() + borderWidth);
     painter.fillRect(topBorder);
 
-    Gfx::RectF rightBorder(pos.x() + frameSize.width() - borderWidth,
-                           pos.x() + frameSize.width() - 1,
+    Gfx::RectF rightBorder(pos.x() + _frameRect.width() - borderWidth,
+                           pos.x() + _frameRect.width() - 1,
                            pos.y() + borderWidth,
-                           pos.y() + frameSize.height() - borderWidth - 1 );
+                           pos.y() + _frameRect.height() - borderWidth - 1 );
     painter.fillRect(rightBorder);
 
     Gfx::RectF bottomBorder(pos.x(),
-                            pos.x() + frameSize.width() - 1,
-                            pos.y() + frameSize.height() - borderWidth,
-                            pos.y() + frameSize.height() - 1);
+                            pos.x() + _frameRect.width() - 1,
+                            pos.y() + _frameRect.height() - borderWidth,
+                            pos.y() + _frameRect.height() - 1);
     painter.fillRect(bottomBorder);
 
     Gfx::RectF titleArea( pos.x() + borderWidth,
-                          pos.x() + frameSize.width() - borderWidth - 1,
+                          pos.x() + _frameRect.width() - borderWidth - 1,
                           pos.y() + borderWidth,
                           pos.y() + borderWidth + titleHeight - 1);
     painter.fillRect(titleArea);
 
     //
-    // light outer and inner border border contour
+    // light outer and inner border contour
     //
     Gfx::Color borderLight( color.red() * 1.25f, 
                             color.green() * 1.25f, 
@@ -478,7 +473,7 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
                       Gfx::PointF(_frameRect.bottomRight().x() - (borderWidth -2),
                                   _frameRect.bottomRight().y() - (borderWidth - 1)) );
     //
-    // dark outer and inner border border contour
+    // dark outer and inner border contour
     //
     Gfx::Color borderDark( color.red() * 0.75f, 
                            color.green() * 0.75f, 

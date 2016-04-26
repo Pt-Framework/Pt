@@ -56,13 +56,13 @@ class WindowFrame
 {
     public:
         enum ResizeDirection
-        {		    
+        {
             None  = 0,
-		    North = 1,		 
-		    East  = 1<<1,
-		    South = 1<<2,
-		    West  = 1<<3,		 
-        };	
+            North = 1,
+            East  = 1<<1,
+            South = 1<<2,
+            West  = 1<<3,
+        };
 
     public:
         WindowFrame();
