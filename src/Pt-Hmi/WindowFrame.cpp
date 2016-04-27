@@ -572,30 +572,97 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
     painter.drawText(textPos, title);
 
     //
-    // window buttons
+    // close button
     //
     pen = Gfx::Pen(1, Gfx::Color(0, 0, 0) );
     painter.setPen(pen);
 
-    brush = _pressedClose ? Gfx::Color(0.95f, 0.4f, 0.4f)
-                          : Gfx::Color(0.82f, 0.25f, 0.22f);
+    Gfx::Color closeColor = Gfx::Color(0.82f, 0.25f, 0.22f);
+    Gfx::Color closeTopLeft = Gfx::Color(0.9f, 0.52f, 0.52f);
+    Gfx::Color closeDark = Gfx::Color(0.6f, 0.15f, 0.15f);
+
+    if(_pressedClose)
+    {
+        closeColor = Gfx::Color(0.75f, 0.2f, 0.2f);
+        closeTopLeft = Gfx::Color(0.6f, 0.15f, 0.15f);
+        closeDark = Gfx::Color(0.9f, 0.52f, 0.52f);
+    }
+
+    brush = closeColor;
     painter.setBrush(brush);
     painter.fillRect(_closeButton);
-    painter.drawRect(_closeButton);
 
-    brush = Gfx::Color(0.35f, 0.65f, 0.25f);
+    painter.setPen( Gfx::Pen(1, closeDark) );
+    painter.drawLine(Gfx::PointF(_closeButton.topRight().x(),
+                                 _closeButton.topRight().y() +1), 
+                     Gfx::PointF(_closeButton.bottomRight().x(),
+                                 _closeButton.bottomRight().y() + 1) );
+    painter.drawLine(Gfx::PointF(_closeButton.bottomLeft().x() + 1,
+                                 _closeButton.bottomLeft().y() ),
+                     Gfx::PointF(_closeButton.bottomRight().x() + 1,
+                                 _closeButton.bottomRight().y() ) );
+
+    painter.setPen( Gfx::Pen(1, closeTopLeft) );
+    painter.drawLine(_closeButton.topLeft(), _closeButton.topRight() );
+    painter.drawLine(_closeButton.topLeft(), _closeButton.bottomLeft() );
+
+    //
+    // maximize button
+    //
+    Gfx::Color maximizeColor = Gfx::Color(0.35f, 0.65f, 0.25f);
+    Gfx::Color maximizeLight = Gfx::Color(0.5f, 0.8f, 0.4f);
+    Gfx::Color maximizeDark = Gfx::Color(0.2f, 0.45f, 0.1f);
+    
+    brush = maximizeColor;
     painter.setBrush(brush);
     painter.fillRect(_maximizeButton);
-    painter.drawRect(_maximizeButton);
 
-    brush = Gfx::Color(0.95f, 0.7f, 0.05f);
+    painter.setPen( Gfx::Pen(1, maximizeDark) );
+    painter.drawLine(Gfx::PointF(_maximizeButton.topRight().x(),
+                                 _maximizeButton.topRight().y() +1), 
+                     Gfx::PointF(_maximizeButton.bottomRight().x(),
+                                 _maximizeButton.bottomRight().y() + 1) );
+    painter.drawLine(Gfx::PointF(_maximizeButton.bottomLeft().x() + 1,
+                                 _maximizeButton.bottomLeft().y() ),
+                     Gfx::PointF(_maximizeButton.bottomRight().x() + 1,
+                                 _maximizeButton.bottomRight().y() ) );
+
+    painter.setPen( Gfx::Pen(1, maximizeLight) );
+    painter.drawLine(_maximizeButton.topLeft(), _maximizeButton.topRight() );
+    painter.drawLine(_maximizeButton.topLeft(), _maximizeButton.bottomLeft() );
+
+    //
+    // minimize button
+    //
+    Gfx::Color minimizeColor = Gfx::Color(0.95f, 0.7f, 0.05f);
+    Gfx::Color minimizeLight = Gfx::Color(0.95f, 0.85f, 0.4f);
+    Gfx::Color minimizeDark = Gfx::Color(0.65f, 0.45f, 0.5f);
+
+    brush = minimizeColor;
     painter.setBrush(brush);
     painter.fillRect(_minimizeButton);
-    painter.drawRect(_minimizeButton);
 
+    painter.setPen( Gfx::Pen(1, minimizeDark) );
+    painter.drawLine(Gfx::PointF(_minimizeButton.topRight().x(),
+                                 _minimizeButton.topRight().y() +1), 
+                     Gfx::PointF(_minimizeButton.bottomRight().x(),
+                                 _minimizeButton.bottomRight().y() + 1) );
+    painter.drawLine(Gfx::PointF(_minimizeButton.bottomLeft().x() + 1,
+                                 _minimizeButton.bottomLeft().y() ),
+                     Gfx::PointF(_minimizeButton.bottomRight().x() + 1,
+                                 _minimizeButton.bottomRight().y() ) );
+
+    painter.setPen( Gfx::Pen(1, minimizeLight) );
+    painter.drawLine(_minimizeButton.topLeft(), _minimizeButton.topRight() );
+    painter.drawLine(_minimizeButton.topLeft(), _minimizeButton.bottomLeft() );
+
+    //
+    // button symbols
+    //
     pen = Gfx::Pen(2, Gfx::Color(1, 1, 1), 
                    Gfx::Pen::SolidStyle, Gfx::Pen::RoundCap);
     painter.setPen(pen);
+
 
     Gfx::PointF tl = _closeButton.topLeft() + Gfx::PointF(4, 4);
     Gfx::PointF br = _closeButton.bottomRight() - Gfx::PointF(4, 4);
@@ -628,9 +695,10 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
     // menu button
     //
     Gfx::PointF triangle[3];
-    triangle[0] = _menuButton.topLeft() + Gfx::PointF(4, 3);
-    triangle[1] = _menuButton.topRight() + Gfx::PointF(-2, 3);
+    triangle[0] = _menuButton.topLeft() + Gfx::PointF(4, 4);
+    triangle[1] = _menuButton.topRight() + Gfx::PointF(-2, 4);
     Gfx::PointF mid(_menuButton.width() / 2, _menuButton.height() / 2);
+    mid.addY(1); 
     triangle[2] = _menuButton.topLeft() + mid;
 
     brush = Gfx::Color(1,1,1);
