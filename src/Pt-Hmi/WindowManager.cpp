@@ -63,6 +63,11 @@ WindowManager::WindowManager()
 
 WindowManager::~WindowManager()
 {
+    while( ! _windows.empty() )
+    {
+        delete _windows.front();
+        _windows.erase( _windows.begin() );
+    }
 }
 
 
@@ -74,17 +79,24 @@ void WindowManager::init(Window& parent)
 
 void WindowManager::add(Window& w)
 {    
-    _windows.insert( _windows.begin(), WindowFrame(*this, w) );
+    _windows.insert( _windows.begin(), new WindowFrame(*this, w) );
 }
 
 
 void WindowManager::remove(Window& w)
 {
-    std::vector<WindowFrame>::iterator wit;
+    std::vector<WindowFrame*>::iterator wit;
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
     {
-        if(wit->window() == &w)
+        if((*wit)->window() == &w)
         {
+            if(_currentWindow && _currentWindow->window() == &w)
+                _currentWindow = 0;
+
+            if(_grabbedWindow && _grabbedWindow->window() == &w)
+                _grabbedWindow = 0;
+
+            delete *wit;
             _windows.erase(wit);
             break;
         }
@@ -94,16 +106,16 @@ void WindowManager::remove(Window& w)
 
 WindowFrame* WindowManager::findWindow(const Gfx::PointF& p)
 {
-    std::vector<WindowFrame>::reverse_iterator rit;
+    std::vector<WindowFrame*>::reverse_iterator rit;
     for(rit =  _windows.rbegin() ; rit != _windows.rend(); ++rit )
     {
-        if( ! rit->window()->isVisible() )
+        if( ! (*rit)->window()->isVisible() )
             continue;
 
-        if( ! rit->frameRect().contains(p) )
+        if( ! (*rit)->frameRect().contains(p) )
             continue;
 
-        return &*rit;
+        return *rit;
     }
 
     return 0;
@@ -112,11 +124,11 @@ WindowFrame* WindowManager::findWindow(const Gfx::PointF& p)
 
 WindowFrame* WindowManager::findWindow(Window& w)
 {
-    std::vector<WindowFrame>::iterator it;
+    std::vector<WindowFrame*>::iterator it;
     for(it = _windows.begin(); it != _windows.end(); ++it)
     {
-        if( it->window() == &w)
-            return &*it;
+        if( (*it)->window() == &w)
+            return *it;
     }
 
     return 0;
@@ -212,30 +224,30 @@ void WindowManager::paintEvent(const PaintEvent& pev)
     PaintSurface& surface = _parent->surface();
     const Gfx::RectF& rect = pev.rect();
 
-    std::vector<WindowFrame>::reverse_iterator it;
+    std::vector<WindowFrame*>::reverse_iterator it;
 
     for(it = _windows.rbegin(); it != _windows.rend(); ++it )
     {
-        WindowFrame& frame = *it;
-        Window* w = frame.window();                
+        WindowFrame* frame = *it;
+        Window* w = frame->window();                
         
         if( ! w->isVisible() )
             continue; 
 
-        Gfx::RectF frameRect = frame.frameRect();
+        Gfx::RectF frameRect = frame->frameRect();
         frameRect.setOrigin( Gfx::PointF(0, 0) );
         PaintEvent ev(0, frameRect);
-        frame.paintEvent(ev);
+        frame->paintEvent(ev);
 
         // update rect in client coordinates
-        Gfx::PointF updatePos = rect.topLeft() - frame.clientRect().topLeft();
+        Gfx::PointF updatePos = rect.topLeft() - frame->clientRect().topLeft();
         Gfx::RectF updateRect(updatePos, rect.size());        
         
         // clip update rect against client rect
         Gfx::RectF clientRect(Gfx::PointF(0, 0), w->size());
         updateRect = updateRect.intersect(clientRect);
 
-        Gfx::PointF to = updateRect.topLeft() + frame.clientRect().topLeft();
+        Gfx::PointF to = updateRect.topLeft() + frame->clientRect().topLeft();
 
         Painter painter(surface);
         painter.drawSurface(to, w->surface(), updateRect);    
@@ -329,22 +341,22 @@ void WindowManager::onShow( Window& w, bool visible )
 
 void WindowManager::onActivate(Window& w)
 {
-    std::vector<WindowFrame>::iterator it;
+    std::vector<WindowFrame*>::iterator it;
     for(it = _windows.begin(); it != _windows.end(); ++it)
     {
-        Window* child = it->window();
+        Window* child = (*it)->window();
         if(child->isActive() && child != &w)
         {
             ActivateEvent aev(child->vid(), false);
-            it->update();
+            (*it)->update();
         }
     }
 
     for(it = _windows.begin(); it != _windows.end(); ++it)
     {
-        if(it->window() == &w)
+        if( (*it)->window() == &w)
         {
-            WindowFrame wf = *it;
+            WindowFrame* wf = *it;
             _windows.erase(it);
             _windows.push_back(wf);
             break;
@@ -356,7 +368,7 @@ void WindowManager::onActivate(Window& w)
     ActivateEvent aev( w.vid(), true );
     Application::instance().loop().commitEvent(aev);
 
-    _windows.back().update();
+    _windows.back()->update();
 }
 
 

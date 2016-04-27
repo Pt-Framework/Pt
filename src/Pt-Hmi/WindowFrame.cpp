@@ -32,9 +32,140 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
 
+namespace {
+
+Pt::Gfx::Color lighten(const Pt::Gfx::Color& c)
+{
+    return c;
+}
+
+}
+
 namespace Pt {
 
 namespace Hmi {
+
+//
+// WindowButton
+//
+
+WindowButton::WindowButton()
+: _frame(0)
+, _isPressed(false)
+{
+}
+
+
+WindowButton::~WindowButton()
+{
+}
+
+
+void WindowButton::update()
+{
+    if(_frame)
+        _frame->update();
+}
+
+
+void WindowButton::moveEvent(const MoveEvent& mev)
+{
+    _geometry.setOrigin( mev.position() );
+}
+
+
+void WindowButton::resizeEvent(const ResizeEvent& rev)
+{
+    _geometry.setSize( rev.size() );
+}
+
+
+void WindowButton::enterEvent(const EnterEvent& eev)
+{
+}
+
+
+void WindowButton::leaveEvent(const LeaveEvent& lev)
+{
+    if(_isPressed)
+    {
+        _isPressed = false;
+        update(/*_closeButton*/);
+    }
+}
+
+
+void WindowButton::mouseEvent(const MouseEvent& mev)
+{
+    Application::instance().setCursor( &Cursor::defaultCursor() ); 
+
+    bool isPressed = mev.isPress() || (_isPressed && mev.isPressed());
+    
+    if(_isPressed != isPressed)
+        update(/*_closeButton*/);
+    
+    bool wasPressed = _isPressed;
+    _isPressed = isPressed;
+    
+    if( wasPressed && mev.isRelease() )
+        _clicked.send();
+}
+
+
+void WindowButton::paintEvent(const PaintEvent& pev)
+{
+    PaintSurface& surface = _frame->window()->parent()->surface();
+    Painter painter(surface);
+
+    Gfx::Color maximizeColor = Gfx::Color(0.35f, 0.65f, 0.25f);
+    Gfx::Color maximizeLight = Gfx::Color(0.5f, 0.8f, 0.4f);
+    Gfx::Color maximizeDark = Gfx::Color(0.2f, 0.45f, 0.1f);
+    
+    if(_isPressed)
+    {
+        maximizeColor = Gfx::Color(0.30f, 0.60f, 0.20f);
+        maximizeLight = Gfx::Color(0.2f, 0.45f, 0.1f);
+        maximizeDark = Gfx::Color(0.5f, 0.8f, 0.4f);
+    }
+
+    Gfx::Brush brush = maximizeColor;
+    painter.setBrush(brush);
+    painter.fillRect(_geometry);
+
+    painter.setPen( Gfx::Pen(1, maximizeDark) );
+    painter.drawLine(Gfx::PointF(_geometry.topRight().x(),
+                                 _geometry.topRight().y() +1), 
+                     Gfx::PointF(_geometry.bottomRight().x(),
+                                 _geometry.bottomRight().y() + 1) );
+    painter.drawLine(Gfx::PointF(_geometry.bottomLeft().x() + 1,
+                                 _geometry.bottomLeft().y() ),
+                     Gfx::PointF(_geometry.bottomRight().x() + 1,
+                                 _geometry.bottomRight().y() ) );
+
+    painter.setPen( Gfx::Pen(1, maximizeLight) );
+    painter.drawLine(_geometry.topLeft(), _geometry.topRight() );
+    painter.drawLine(_geometry.topLeft(), _geometry.bottomLeft() );
+
+    Gfx::Pen pen = Gfx::Pen(2, Gfx::Color(1, 1, 1), 
+                   Gfx::Pen::SolidStyle, Gfx::Pen::RoundCap);
+    painter.setPen(pen);
+
+    pen = Gfx::Pen(2, Gfx::Color(1, 1, 1), 
+                   Gfx::Pen::SolidStyle, Gfx::Pen::FlatCap);
+    painter.setPen(pen);
+
+    Gfx::PointF tl = _geometry.topLeft() + Gfx::PointF(5, 5);
+    Gfx::PointF tr = _geometry.topRight() + Gfx::PointF(-4, 4);
+    Gfx::PointF br = _geometry.bottomRight() - Gfx::PointF(4, 4);
+    Gfx::PointF bl = _geometry.bottomLeft() - Gfx::PointF(-4, 4);
+    painter.drawLine(tl, tr);
+    painter.drawLine(bl, tr);
+    painter.drawLine(br, tr);
+}
+
+//
+// WindowFrame
+//
 
 WindowFrame::WindowFrame()
 : _wm(0)
@@ -57,6 +188,7 @@ WindowFrame::WindowFrame(WindowManager& wm, Window& window)
 , _maximizeButton(0, 10, 0, 10)
 , _minimizeButton(0, 10, 0, 10)
 {
+    _xxxButton.setParent(*this);
 }
 
 
@@ -231,6 +363,10 @@ void WindowFrame::onLayout()
     
     _minimizeButton.setOrigin( Gfx::PointF(buttonX, buttonY) );
     _minimizeButton.setSize( Gfx::SizeF(buttonWidth, buttonWidth) );
+
+    buttonX -= borderWidth + buttonWidth;
+    _xxxButton.moveEvent( MoveEvent(0, Gfx::PointF(buttonX, buttonY) ) );
+    _xxxButton.resizeEvent( ResizeEvent(0, Gfx::SizeF(buttonWidth, buttonWidth) ) );
 }
 
 
@@ -247,6 +383,9 @@ void WindowFrame::leaveEvent(const LeaveEvent& lev)
         LeaveEvent lev(_window->vid());
         _window->processEvent(lev);
     }
+
+    if( _xxxButton.geometry().contains(_lastPointer) )
+        _xxxButton.leaveEvent(lev);
 
     if(_pressedClose)
     {
@@ -292,6 +431,16 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
             _isClient = false;
             LeaveEvent lev(_window->vid());
             _window->processEvent(lev);
+        }
+
+        if(_xxxButton.geometry().contains( mev.position() ) )
+        {
+            _xxxButton.mouseEvent(mev);
+            return false;
+        }
+        else if(_xxxButton.geometry().contains(_lastPointer) )
+        {
+            _xxxButton.leaveEvent( LeaveEvent(0) );
         }
 
         if( _closeButton.contains( mev.position() ) )
@@ -663,7 +812,6 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
                    Gfx::Pen::SolidStyle, Gfx::Pen::RoundCap);
     painter.setPen(pen);
 
-
     Gfx::PointF tl = _closeButton.topLeft() + Gfx::PointF(4, 4);
     Gfx::PointF br = _closeButton.bottomRight() - Gfx::PointF(4, 4);
     Gfx::PointF tr = _closeButton.topRight() + Gfx::PointF(-4, 4);
@@ -704,6 +852,8 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
     brush = Gfx::Color(1,1,1);
     painter.setBrush(brush);
     painter.fillPolygon(triangle, 3);
+
+    //_xxxButton.paintEvent( PaintEvent(0, _xxxButton.geometry()) );
 }
 
 } // namespace

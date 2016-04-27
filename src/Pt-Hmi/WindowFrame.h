@@ -48,9 +48,49 @@ namespace Hmi {
 
 class Window;
 class WindowManager;
+class WindowFrame;
 class Application;
 class MouseEvent;
 class KeyEvent;
+
+class WindowButton
+{
+    public:
+        WindowButton();
+
+        ~WindowButton();
+
+        void setParent(WindowFrame& frame)
+        { 
+            _frame  = &frame; 
+        }
+
+        const Gfx::RectF&  geometry() const
+        { return _geometry; }
+
+        Signal<>& clicked()
+        { return _clicked; }
+
+        void update();
+
+        void moveEvent(const MoveEvent& mev);
+
+        void resizeEvent(const ResizeEvent& rev);
+
+        void enterEvent(const EnterEvent& eev);
+
+        void leaveEvent(const LeaveEvent& lev);
+
+        void mouseEvent(const MouseEvent& mev);
+
+        void paintEvent(const PaintEvent& pev);
+
+    private:
+        Signal<>       _clicked;
+        WindowFrame*   _frame;
+        Gfx::RectF     _geometry;
+        bool           _isPressed;
+};
 
 class WindowFrame
 {
@@ -119,6 +159,7 @@ class WindowFrame
         Gfx::RectF     _maximizeButton;
         Gfx::RectF     _minimizeButton;  
         Gfx::RectF     _menuButton;
+        WindowButton   _xxxButton;
 };
 
 } // namespace

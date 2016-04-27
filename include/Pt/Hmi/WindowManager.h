@@ -125,9 +125,9 @@ class WindowManager : public Pt::Connectable
         void onClosing(Window& w);
     
     private:
-        Application&             _app;
-        Window*                  _parent; 
-        std::vector<WindowFrame> _windows;
+        Application&              _app;
+        Window*                   _parent; 
+        std::vector<WindowFrame*> _windows;
         
         WindowFrame*             _currentWindow;
         WindowFrame*             _grabbedWindow;
