@@ -30,17 +30,13 @@
 #ifndef Pt_Hmi_WindowFrame_h
 #define Pt_Hmi_WindowFrame_h
 
+#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/Cursor.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
-#include <Pt/Gfx/Image.h>
+#include <Pt/Signal.h>
 #include <Pt/Connectable.h>
-#include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/Cursor.h>
-#include <Pt/Hmi/ActivateEvent.h>
-#include <Pt/Hmi/ResizeEvent.h>
-#include <Pt/Hmi/Button.h>
-#include <Pt/Hmi/MoveEvent.h>
 
 namespace Pt {
 
@@ -52,47 +48,104 @@ class WindowFrame;
 class Application;
 class MouseEvent;
 class KeyEvent;
+class EnterEvent;
+class LeaveEvent;
+class PaintEvent;
+class MoveEvent;
+class ResizeEvent;
 
 class WindowButton
 {
     public:
         WindowButton();
 
-        ~WindowButton();
+        virtual ~WindowButton();
+
+        WindowFrame* parent()
+        { return _frame; }
 
         void setParent(WindowFrame& frame)
-        { 
-            _frame  = &frame; 
-        }
+        { _frame  = &frame; }
 
         const Gfx::RectF&  geometry() const
         { return _geometry; }
+
+        void setColor(const Gfx::Color& c)
+        { _color = c; }
+
+        const Gfx::Color& color() const
+        { return _color; }
 
         Signal<>& clicked()
         { return _clicked; }
 
         void update();
 
-        void moveEvent(const MoveEvent& mev);
+        virtual void moveEvent(const MoveEvent& mev);
 
-        void resizeEvent(const ResizeEvent& rev);
+        virtual void resizeEvent(const ResizeEvent& rev);
 
-        void enterEvent(const EnterEvent& eev);
+        virtual void enterEvent(const EnterEvent& eev);
 
-        void leaveEvent(const LeaveEvent& lev);
+        virtual void leaveEvent(const LeaveEvent& lev);
 
-        void mouseEvent(const MouseEvent& mev);
+        virtual void mouseEvent(const MouseEvent& mev);
 
-        void paintEvent(const PaintEvent& pev);
+        virtual void paintEvent(const PaintEvent& pev);
 
     private:
         Signal<>       _clicked;
         WindowFrame*   _frame;
         Gfx::RectF     _geometry;
+        Gfx::Color     _color;
         bool           _isPressed;
 };
 
-class WindowFrame
+class MinimizeButton : public WindowButton
+{
+    public:
+        MinimizeButton();
+
+        ~MinimizeButton();
+
+        void paintEvent(const PaintEvent& pev);
+};
+
+
+class MaximizeButton : public WindowButton
+{
+    public:
+        MaximizeButton();
+
+        ~MaximizeButton();
+
+        void paintEvent(const PaintEvent& pev);
+};
+
+
+class CloseButton : public WindowButton
+{
+    public:
+        CloseButton();
+
+        ~CloseButton();
+
+        void paintEvent(const PaintEvent& pev);
+};
+
+
+class MenuButton : public WindowButton
+{
+    public:
+        MenuButton();
+
+        ~MenuButton();
+
+        void paintEvent(const PaintEvent& pev);
+};
+
+
+class WindowFrame : public Pt::Connectable
 {
     public:
         WindowFrame();
@@ -128,6 +181,14 @@ class WindowFrame
 
         void onLayout();
 
+        void onMenu();
+
+        void onMinimize();
+
+        void onMaximize();
+
+        void onClose();
+
     private:
         bool isTitle(const Gfx::PointF& p) const;
 
@@ -153,13 +214,10 @@ class WindowFrame
         bool           _isTopResizing;
         bool           _isBottomResizing;
 
-        Gfx::RectF     _closeButton;
-        bool           _pressedClose;
-
-        Gfx::RectF     _maximizeButton;
-        Gfx::RectF     _minimizeButton;  
-        Gfx::RectF     _menuButton;
-        WindowButton   _xxxButton;
+        MaximizeButton _maximizeButton;
+        MinimizeButton _minimizeButton;  
+        CloseButton    _closeButton;
+        MenuButton     _menuButton;
 };
 
 } // namespace
