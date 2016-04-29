@@ -765,7 +765,7 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
     Gfx::PointF pos = _window->position();
 
     Gfx::RectF leftBorder( pos.x(), 
-                           pos.x() + borderWidth,
+                           pos.x() + borderWidth - 1,
                            pos.y() + borderWidth, 
                            pos.y() + _frameRect.height() - borderWidth - 1 );
     painter.fillRect(leftBorder);
@@ -773,7 +773,7 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
     Gfx::RectF topBorder(pos.x(),
                          pos.x() + _frameRect.width() - 1,
                          pos.y(),
-                         pos.y() + borderWidth);
+                         pos.y() + borderWidth - 1);
     painter.fillRect(topBorder);
 
     Gfx::RectF rightBorder(pos.x() + _frameRect.width() - borderWidth,
@@ -846,6 +846,24 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
                                   _frameRect.topRight().y() + (borderWidth-1) + titleHeight) );
 
     //
+    // title bar text
+    //
+    Pt::String title = _window->title().c_str();
+
+    const Gfx::Font& font = _window->font();
+    painter.setFont(font);
+    Gfx::FontMetrics fm = painter.fontMetrics(title);
+
+    Gfx::PointF textPos(pos.x() + borderWidth + titleHeight, 
+                        pos.y() + titleHeight - borderWidth);
+
+    Gfx::Color textColor = _window->isActive() ? _wm->textColor() 
+                                               : _wm->inactiveTextColor(); 
+    Gfx::Pen pen(1, textColor);
+    painter.setPen(pen);
+    painter.drawText(textPos, title);
+
+    //
     // grip area on title bar
     //
     Gfx::Color gripColorLight( color.red() * 1.1f, 
@@ -858,11 +876,6 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
                               color.blue() * 0.9f );
     Gfx::Pen gripPenDark(1, gripColorDark);
 
-    Pt::String title = _window->title().c_str();
-    Gfx::FontMetrics fm = painter.fontMetrics(title);
-
-    Gfx::PointF textPos(pos.x() + borderWidth + titleHeight, 
-                        pos.y() + fm.height() + 1);
 
     Gfx::PointF gripStart( textPos.x() + fm.width() + borderWidth, 
                            pos.y() + borderWidth - 2); // approx.
@@ -884,18 +897,7 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
         painter.drawLine(gripStart, gripEnd);
     }
 
-    //
-    // title bar text
-    //
-    const Gfx::Font& font = _window->font();
-    painter.setFont(font);
 
-    Gfx::Color textColor = _window->isActive() ? _wm->textColor() 
-                                               : _wm->inactiveTextColor(); 
-    Gfx::Pen pen(1, textColor);
-    painter.setPen(pen);
-
-    painter.drawText(textPos, title);
 
     _maximizeButton.paintEvent( PaintEvent(0, _maximizeButton.geometry()) );
     _minimizeButton.paintEvent( PaintEvent(0, _maximizeButton.geometry()) );

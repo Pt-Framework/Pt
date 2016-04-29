@@ -249,8 +249,9 @@ void WindowManager::paintEvent(const PaintEvent& pev)
 
         Painter painter(surface);
         painter.drawSurface(to, w->surface(), updateRect);  
-        //std::clog << w->title() << ": " << updateRect.width() << "x" 
-        //                    << updateRect.height() << std::endl;  
+        //std::clog << w->title() << ": "
+        //          << to.x() << "," << to.y() << "  "
+        //          << updateRect.width() << "x" << updateRect.height() << std::endl;  
     }
 }
 
