@@ -75,7 +75,7 @@ WindowButton::~WindowButton()
 void WindowButton::update()
 {
     if(_frame)
-        _frame->update();
+        _frame->update( _geometry);
 }
 
 
@@ -101,7 +101,7 @@ void WindowButton::leaveEvent(const LeaveEvent& lev)
     if(_isPressed)
     {
         _isPressed = false;
-        update(/*_closeButton*/);
+        update();
     }
 }
 
@@ -111,10 +111,10 @@ void WindowButton::mouseEvent(const MouseEvent& mev)
     Application::instance().setCursor( &Cursor::defaultCursor() ); 
 
     bool isPressed = mev.isPress() || (_isPressed && mev.isPressed());
-    
+
     if(_isPressed != isPressed)
-        update(/*_closeButton*/);
-    
+        update();
+
     bool wasPressed = _isPressed;
     _isPressed = isPressed;
     
@@ -484,6 +484,20 @@ void WindowFrame::update()
 }
 
 
+void WindowFrame::update(const Gfx::RectF& rect)
+{
+    double borderWidth = _wm->borderWidth();
+    double titleHeight = _wm->titleHeight();
+
+    Gfx::PointF updatePos = rect.topLeft() - _frameRect.topLeft();
+    updatePos.subX(borderWidth);
+    updatePos.subY(borderWidth +  titleHeight);
+
+    Gfx::RectF updateRect(updatePos, rect.size());
+    _window->update(updateRect);
+}
+
+
 void WindowFrame::moveEvent(const MoveEvent& mev)
 {
     double borderWidth = _wm->borderWidth();
@@ -656,7 +670,7 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
         Application::instance().setCursor( &Cursor::moveCursor() );
         _isMoving = (_isMoving || mev.isPress()) && ! mev.isReleased();
         
-        if(_isMoving)
+        if(_isMoving && mev.position() != _lastPointer)
         {
             Gfx::PointF to = _window->position() + mev.position() - _lastPointer;
             _window->move(to);

@@ -164,6 +164,8 @@ class WindowFrame : public Pt::Connectable
 
         void update();
 
+        void update(const Gfx::RectF& rect);
+
         void moveEvent(const MoveEvent& mev);
 
         void resizeEvent(const ResizeEvent& rev);

@@ -176,19 +176,17 @@ bool WindowManager::keyEvent(const KeyEvent& keyEvent)
 
 bool WindowManager::mouseEvent( const MouseEvent& mev )
 {
-    if( mev.isPress() )
-    {
-        WindowFrame* wf = findWindow( mev.position() );
-        if(wf)
-            wf->window()->activate();
-    }
-
     WindowFrame* window = 0;
 
     if(_grabbedWindow)
         window = _grabbedWindow;
     else
         window = findWindow( mev.position() );
+
+    if( mev.isPress() && window && ! window->window()->isActive() )
+    {
+        window->window()->activate();
+    }
     
     if(_currentWindow != window)
     {
@@ -250,7 +248,9 @@ void WindowManager::paintEvent(const PaintEvent& pev)
         Gfx::PointF to = updateRect.topLeft() + frame->clientRect().topLeft();
 
         Painter painter(surface);
-        painter.drawSurface(to, w->surface(), updateRect);    
+        painter.drawSurface(to, w->surface(), updateRect);  
+        //std::clog << w->title() << ": " << updateRect.width() << "x" 
+        //                    << updateRect.height() << std::endl;  
     }
 }
 

@@ -227,7 +227,7 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
 
     Gfx::RectF rect = u->second.rect();
     Pt::uint64_t windowId = u->first;
-    _updates.erase( ev.vid() );
+    _updates.erase( ev.window() );
 
     // find damaged window
     Window* window = 0;
