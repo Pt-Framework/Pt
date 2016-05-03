@@ -37,6 +37,7 @@
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Signal.h>
 #include <Pt/Connectable.h>
+#include <vector>
 
 namespace Pt {
 
@@ -215,6 +216,8 @@ class WindowFrame : public Pt::Connectable
         bool           _isRightResizing;
         bool           _isTopResizing;
         bool           _isBottomResizing;
+
+        std::vector<WindowButton*> _buttons;
 
         MaximizeButton _maximizeButton;
         MinimizeButton _minimizeButton;  

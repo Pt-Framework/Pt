@@ -60,7 +60,6 @@ namespace Pt {
 namespace Hmi {
 
 class Widget;
-class WindowImpl;
 class MainWindowImpl;
 
 class PT_HMI_API Window : public Visual

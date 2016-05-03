@@ -338,15 +338,19 @@ WindowFrame::WindowFrame(WindowManager& wm, Window& window)
 {
     _maximizeButton.setParent(*this);
     _maximizeButton.clicked() += Pt::slot(*this, &WindowFrame::onMaximize);
+    _buttons.push_back(&_maximizeButton);
 
     _minimizeButton.setParent(*this);
     _minimizeButton.clicked() += Pt::slot(*this, &WindowFrame::onMinimize);
+    _buttons.push_back(&_minimizeButton);
 
     _closeButton.setParent(*this);
     _closeButton.clicked() += Pt::slot(*this, &WindowFrame::onClose);
+    _buttons.push_back(&_closeButton);
 
     _menuButton.setParent(*this);
     _menuButton.clicked() += Pt::slot(*this, &WindowFrame::onMenu);
+    _buttons.push_back(&_menuButton);
 }
 
 
@@ -571,17 +575,14 @@ void WindowFrame::leaveEvent(const LeaveEvent& lev)
         _window->processEvent(lev);
     }
 
-    if( _closeButton.geometry().contains(_lastPointer) )
-        _closeButton.leaveEvent(lev);
-
-    if( _minimizeButton.geometry().contains(_lastPointer) )
-        _minimizeButton.leaveEvent(lev);
-
-    if( _maximizeButton.geometry().contains(_lastPointer) )
-        _maximizeButton.leaveEvent(lev);
-
-    if( _menuButton.geometry().contains(_lastPointer) )
-        _menuButton.leaveEvent(lev);
+    std::vector<WindowButton*>::iterator it;
+    for(it = _buttons.begin(); it != _buttons.end(); ++it)
+    {
+        WindowButton* button = *it;
+        
+        if( button->geometry().contains(_lastPointer) )
+            button->leaveEvent(lev);
+    }
 }
 
 
@@ -623,44 +624,20 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
             _window->processEvent(lev);
         }
 
-        if(_maximizeButton.geometry().contains( mev.position() ) )
+        std::vector<WindowButton*>::iterator it;
+        for(it = _buttons.begin(); it != _buttons.end(); ++it)
         {
-            _maximizeButton.mouseEvent(mev);
-            return false;
-        }
-        else if(_maximizeButton.geometry().contains(_lastPointer) )
-        {
-            _maximizeButton.leaveEvent( LeaveEvent(0) );
-        }
-
-        if(_minimizeButton.geometry().contains( mev.position() ) )
-        {
-            _minimizeButton.mouseEvent(mev);
-            return false;
-        }
-        else if(_minimizeButton.geometry().contains(_lastPointer) )
-        {
-            _minimizeButton.leaveEvent( LeaveEvent(0) );
-        }
-
-        if(_closeButton.geometry().contains( mev.position() ) )
-        {
-            _closeButton.mouseEvent(mev);
-            return false;
-        }
-        else if(_closeButton.geometry().contains(_lastPointer) )
-        {
-            _closeButton.leaveEvent( LeaveEvent(0) );
-        }
-
-        if(_menuButton.geometry().contains( mev.position() ) )
-        {
-            _menuButton.mouseEvent(mev);
-            return false;
-        }
-        else if(_menuButton.geometry().contains(_lastPointer) )
-        {
-            _menuButton.leaveEvent( LeaveEvent(0) );
+            WindowButton* button = *it;
+        
+            if(button->geometry().contains( mev.position() ) )
+            {
+                button->mouseEvent(mev);
+                return false;
+            }
+            else if(button->geometry().contains(_lastPointer) )
+            {
+                button->leaveEvent( LeaveEvent(0) );
+            }
         }
     }
 
@@ -897,12 +874,12 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
         painter.drawLine(gripStart, gripEnd);
     }
 
-
-
-    _maximizeButton.paintEvent( PaintEvent(0, _maximizeButton.geometry()) );
-    _minimizeButton.paintEvent( PaintEvent(0, _maximizeButton.geometry()) );
-    _closeButton.paintEvent( PaintEvent(0, _maximizeButton.geometry()) );
-    _menuButton.paintEvent( PaintEvent(0, _maximizeButton.geometry()) );
+    std::vector<WindowButton*>::iterator it;
+    for(it = _buttons.begin(); it != _buttons.end(); ++it)
+    {
+        WindowButton* button = *it;
+        button->paintEvent( PaintEvent(0, button->geometry()) );
+    }
 }
 
 } // namespace
