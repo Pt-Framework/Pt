@@ -90,6 +90,9 @@ ChildW::ChildW(const std::string& title)
     _childWindow2.setTitle("Child of " + title);    
 
     _childWindow2.setMainWidget(&_mainWidget);
+    _mainWidget.enable(false);
+    _closeButton.enable(false);
+    _mainWidget.enable(true);
     
     add( _childWindow2 );
     _childWindow2.show(true); // Child A/B
@@ -107,6 +110,8 @@ void ChildW::onShowDialog(Button& button)
     _closeButton.setText("AAA");
     _closeButton.setText("BBB");
     _closeButton.setText("CCC");    
+
+    _closeButton.enable(true);
 
     //Gfx::SizeF size(400,260);
     //_childWindow2.resize(Gfx::SizeF(400,260));

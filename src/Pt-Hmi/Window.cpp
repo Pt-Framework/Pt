@@ -786,11 +786,11 @@ MainWindowImpl* Window::impl()
 
 void Window::onPaint(const Gfx::RectF& rect)
 {
-    const double borderWidth = _windowManager.borderWidth();
-    const double titleHeight = _windowManager.titleHeight();
-
     if( ! this->isVisible() )
         return;
+
+    const double borderWidth = _windowManager.borderWidth();
+    const double titleHeight = _windowManager.titleHeight();
 
     Painter painter(_surface);
     painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
@@ -831,18 +831,12 @@ void Window::onPaintEvent(const PaintEvent& ev)
 
 
 void Window::onMouseEvent(const MouseEvent& ev)
-{
-    if( ! isEnabled() )
-        return;
-
+{        
     if( _windowManager.mouseEvent(ev) )
-        return;
+        return;    
 
-    if( ! _mainWidget || 
-        ! _mainWidget->isVisible() || 
-        ! _mainWidget->isEnabled() )
+    if( ! _mainWidget )
     {
-        // TODO: the window manager should do this
         Application::instance().setCursor( &Cursor::defaultCursor() ); 
         return;
     }
@@ -852,7 +846,7 @@ void Window::onMouseEvent(const MouseEvent& ev)
     // widget can be null
     setPointerWidget(widget);
   
-    if(widget) 
+    if(widget && widget->isEnabled())
     {
         MouseEvent clientEv(ev);
         clientEv.setId( widget->vid() );
@@ -926,6 +920,10 @@ void Window::onKeyEvent(const KeyEvent& ev)
 
 void Window::onEnterEvent(const EnterEvent& ev)
 {
+    if( isEnabled() )
+        return;
+
+    Application::instance().setCursor( &Cursor::defaultCursor() ); 
 }
 
 

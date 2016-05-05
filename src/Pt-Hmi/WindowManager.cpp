@@ -176,44 +176,43 @@ bool WindowManager::keyEvent(const KeyEvent& keyEvent)
 
 bool WindowManager::mouseEvent( const MouseEvent& mev )
 {
-    WindowFrame* window = 0;
+    WindowFrame* windowFrame = 0;
 
     if(_grabbedWindow)
-        window = _grabbedWindow;
+        windowFrame = _grabbedWindow;
     else
-        window = findWindow( mev.position() );
+        windowFrame = findWindow( mev.position() );
 
-    if( mev.isPress() && window && ! window->window()->isActive() )
+    if( mev.isPress() && windowFrame && ! windowFrame->window()->isActive() )
     {
-        window->window()->activate();
+        windowFrame->window()->activate();
     }
     
-    if(_currentWindow != window)
+    if(_currentWindow != windowFrame)
     {
       if(_currentWindow)
       {
           LeaveEvent lev( _currentWindow->window()->vid() );
           _currentWindow->leaveEvent(lev);
       }
-      if(window)
+      if(windowFrame)
       {
-          EnterEvent eev( window->window()->vid() );
-          window->enterEvent(eev);
+          EnterEvent eev( windowFrame->window()->vid() );
+          windowFrame->enterEvent(eev);
       }
     }
 
-    if(window)
-    {
-        bool tracking = window->mouseEvent(mev);
-        if(tracking)
-            _grabbedWindow = window;
+    if(windowFrame)
+    {         
+        if(windowFrame->mouseEvent(mev))
+            _grabbedWindow = windowFrame;
         else
             _grabbedWindow = 0;
     }
 
-    _currentWindow = window;
+    _currentWindow = windowFrame;
 
-    return window != 0;
+    return windowFrame != 0;
 }
 
 

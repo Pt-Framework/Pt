@@ -610,10 +610,14 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
                 _window->processEvent(eev);
             }
 
-            Gfx::PointF pos = mev.position() - _clientRect.topLeft();
-            MouseEvent mev2 = mev;
-            mev2.setPosition(pos);
-            _window->processEvent(mev2);
+            if( _window->isEnabled())
+            {
+                Gfx::PointF pos = mev.position() - _clientRect.topLeft();
+                MouseEvent mev2 = mev;
+                mev2.setPosition(pos);
+                _window->processEvent(mev2);
+            }
+
             return false;
         }
 

@@ -45,6 +45,7 @@ Widget::Widget()
 , _window(0)
 , _visible(true)
 , _enabled(true)
+, _enabledState(true)
 , _hasFocus( false)
 , _acceptsFocus( false) 
 , _focusIndex(0)
@@ -122,14 +123,17 @@ void Widget::remove(Widget& widget)
 {
     std::vector<Widget*>::iterator it;
     it = std::find(_children.begin(), _children.end(), &widget);
-    if( it == _children.end() )
-        return;
     
+    if( it == _children.end() )
+        return;   
+     
     _children.erase(it);
+    
     widget._parent = 0;
-
+    widget._enabledState = widget._enabled;
     widget.setWindow(0);
-    widget.update();
+
+    widget.update();    
 }
 
 
@@ -397,14 +401,29 @@ void Widget::show( bool s )
 
 bool Widget::isEnabled() const
 {
-    return _enabled;
+    return _enabledState && _enabled;
 }
 
 
-void Widget::enable( bool b )
-{
-    _enabled = b;
+void Widget::enable( bool e )
+{    
+    _enabled = e;
+    
+    onEnable(e);        
+
+    _enabledState = e;
     update();
+}
+
+void Widget::onEnable(bool e )
+{        
+    if(!e)
+        _enabledState = false;
+    else
+        _enabledState = _enabled;
+
+    for( size_t i = 0; i < _children.size(); ++i)
+        _children[i]->onEnable(e);
 }
 
 
@@ -553,6 +572,9 @@ void Widget::setDocking(const Docking& d)
 
 void Widget::onPaint(const Gfx::RectF& rect)
 {
+    if( !isVisible())
+        return;
+
     PaintEvent pev( vid(), rect);
     Application::instance().loop().commitEvent(pev);
 

@@ -43,7 +43,7 @@ class PT_GFX_API ImagePainter : public Painter
 
     void setImage(Image& image);
 
-		virtual void setRenderMode( RenderMode::Type mode);
+    virtual void setRenderMode( RenderMode::Type mode);
     
     virtual void setPen(const Pen& pen);
 

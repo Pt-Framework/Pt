@@ -237,6 +237,9 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onLeaveEvent(const LeaveEvent& ev );
 
+    protected:
+        void onEnable(bool e);
+
     private:
         void setWindow(Window* window);
 
@@ -249,6 +252,7 @@ class PT_HMI_API Widget : public Visual
 
         bool                         _visible;
         bool                         _enabled;
+        bool                         _enabledState;
         Gfx::PointF                  _position;
         Gfx::SizeF                   _size;
 

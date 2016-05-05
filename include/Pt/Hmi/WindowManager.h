@@ -129,15 +129,15 @@ class WindowManager : public Pt::Connectable
         Window*                   _parent; 
         std::vector<WindowFrame*> _windows;
         
-        WindowFrame*             _currentWindow;
-        WindowFrame*             _grabbedWindow;
+        WindowFrame*              _currentWindow;
+        WindowFrame*              _grabbedWindow;
 
-        double                   _borderWidth;
-        double                   _titleHeight;
-        Gfx::Color               _inactiveColor;
-        Gfx::Color               _activeColor;
-        Gfx::Color               _textColor;
-        Gfx::Color               _inactiveTextColor;                             
+        double                    _borderWidth;
+        double                    _titleHeight;
+        Gfx::Color                _inactiveColor;
+        Gfx::Color                _activeColor;
+        Gfx::Color                _textColor;
+        Gfx::Color                _inactiveTextColor;                             
 };
 
 } // namespace
