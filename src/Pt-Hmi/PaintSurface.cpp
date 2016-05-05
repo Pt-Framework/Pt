@@ -54,26 +54,33 @@ PaintSurface::~PaintSurface()
 
 PaintRegion::PaintRegion()
 : _impl(new PaintRegionImpl)
+, _surface(0)
 {
 }
 
 
 PaintRegion::PaintRegion(PaintSurface& surface, const Gfx::RectF& rect)
 : _impl(new PaintRegionImpl)
-{
-    set(surface, rect);
+{        
+    set(surface, rect);   
 }
 
 
 PaintRegion::~PaintRegion()
 {
+    if( _surface) 
+        _surface->impl()->setClip( Gfx::RectF(Gfx::PointF(0,0), _surface->impl()->size() )) ;
+
     delete _impl;
 }
 
 
 void PaintRegion::set(PaintSurface& surface, const Gfx::RectF& rect)
 { 
+    _surface = &surface;
     _impl->set(surface, rect); 
+    _surface->impl()->setClip(rect);
+
 }
 
 

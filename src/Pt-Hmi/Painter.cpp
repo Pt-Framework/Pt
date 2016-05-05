@@ -53,26 +53,7 @@ Painter::~Painter()
 void Painter::setSurface(PaintSurface& surface)
 {    
   _impl->setSurface(surface);
-}
-
-
-void Painter::setOrigin(const Gfx::PointF& p)
-{
-    _impl->setOrigin(p);
-}
-
-
-void Painter::setClip( const Gfx::RectF& clip )
-{
-  _impl->setClip( clip );
-}
-        
-
-const Gfx::RectF& Painter::clip() const
-{
-  return _impl->clip(); 
-}
-
+}       
 
 void Painter::setRenderMode(Gfx::RenderMode::Type mode)
 {

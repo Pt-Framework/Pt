@@ -55,21 +55,6 @@ class PainterImpl
 
         void setSurface(PaintSurface& surface);
 
-        void setOrigin(const Gfx::PointF& p)
-        {
-            _origin = p;
-        }
-
-        void setClip(const Gfx::RectF& clip)
-        {
-            _clip = clip;
-        }
-        
-        const Gfx::RectF& clip() const
-        {
-            return _clip;
-        }
-
         void setRenderMode(Gfx::RenderMode::Type mode);
 
         void setPen(const Gfx::Pen& pen);
@@ -120,8 +105,6 @@ class PainterImpl
         
     private:
         PaintSurfaceImpl*      _surface;
-        Gfx::PointF            _origin;
-        Gfx::RectF             _clip;
         Gfx::Pen               _pen;
         Gfx::Brush             _brush;
         Gfx::Font              _font;

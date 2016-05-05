@@ -46,8 +46,8 @@ class PT_HMI_API PaintSurface
         
         virtual PaintSurfaceImpl* impl() = 0;
 
-        virtual const PaintSurfaceImpl* impl() const = 0;
-    
+        virtual const PaintSurfaceImpl* impl() const = 0;        
+
     protected:
         PaintSurface();
 };
@@ -73,6 +73,7 @@ class PaintRegion : public PaintSurface
 
     private:
         PaintRegionImpl* _impl;
+        PaintSurface* _surface;
 };
 
 class PixmapSurfaceImpl;

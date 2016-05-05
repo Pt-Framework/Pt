@@ -87,11 +87,14 @@ class PaintSurfaceImpl
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image) = 0;
 
+        virtual void setClip( const Gfx::RectF& clip) = 0;
+
         static std::string defaultFont();
 
         static std::list<std::string> fontFamilyNames(); 
 
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
+
 
     protected:
         PaintSurfaceImpl()
@@ -145,6 +148,8 @@ class PaintRegionImpl : public PaintSurfaceImpl
                                  const Gfx::RectF& pmRect);
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+
+        virtual void setClip( const Gfx::RectF& clip);
 
     private:
         PaintSurface* _surface;
@@ -200,6 +205,8 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
                                  const Gfx::RectF& pmRect);
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+
+        virtual void setClip( const Gfx::RectF& clip);
 
         HDC deviceContext() const;
 

@@ -49,12 +49,6 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         void setSurface(PaintSurface& surface); 
 
-        void setOrigin(const Gfx::PointF& p);
-
-        virtual void setClip( const Gfx::RectF& clip );
-        
-        virtual const Gfx::RectF& clip() const;
-
         virtual void setRenderMode(Gfx::RenderMode::Type mode);
 
         virtual void setPen(const Gfx::Pen& pen);

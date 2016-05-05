@@ -67,7 +67,7 @@ void Panel::onPaintEvent( const PaintEvent& ev )
     PaintSurface& windowSurface = this->window()->surface();
 
     Gfx::RectF paintRect(winpos, size());
-    PaintRegion region(windowSurface, paintRect);
+    PaintRegion region(windowSurface, paintRect);    
     onPaint(region, ev.rect());
 }
 

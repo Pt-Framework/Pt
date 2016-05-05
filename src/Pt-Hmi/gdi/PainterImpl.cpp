@@ -45,7 +45,6 @@ namespace Hmi {
 
 PainterImpl::PainterImpl(PaintSurfaceImpl* surface)
 : _surface(surface)
-, _origin(0.0f, 0.0f)
 , _pen(1)
 , _brush( Gfx::Color(0, 0, 0, 0) )
 , _font( PaintSurfaceImpl::defaultFont() )

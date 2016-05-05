@@ -733,7 +733,9 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
     double titleHeight = _wm->titleHeight();
 
     PaintSurface& surface = _wm->parent()->surface();
-    Painter painter(surface);
+//ToDo:  clipping region
+
+    Painter painter(surface);    
 
     Gfx::Color color = _window->isActive() ? _wm->activeColor() 
                                            : _wm->inactiveColor();
