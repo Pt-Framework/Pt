@@ -69,7 +69,7 @@ Window::Window(Window* parent)
 , _maximumSize(2000,2000)
 , _startPostion( WindowPosition::Manual )
 , _state(WindowState::Normal )
-, _border( WindowBorder::Sizeable)
+, _border(true)
 , _icon()
 , _canClose(true)
 {    
@@ -121,7 +121,7 @@ void Window::init(Window* parent)
     }
 
     _parent = parent;
-    _init = true;  
+    _init = true;
 
     move(_position);
     resize(_size);
@@ -133,7 +133,7 @@ void Window::init(Window* parent)
     if( _impl)
     {
         _impl->setTitle(_title);
-        _impl->setBorder(_border);
+        _impl->showBorder(_border);
         _impl->setMaximumSize(_minimumSize);
         _impl->setMaximumSize(_maximumSize );
         _impl->setIcon(_icon);
@@ -258,7 +258,9 @@ void Window::setMainWidget(Widget* widget)
 
     _mainWidget->setWindow(this);
     _mainWidget->move( Gfx::PointF(0,0) );
-    _mainWidget->resize( size() );
+
+    if( _impl )
+        _mainWidget->resize( size() );
 }
 
 
@@ -479,7 +481,7 @@ void Window::update(const Gfx::RectF& rect)
 
 void Window::onUpdate(Window& child, const Gfx::RectF& rect)
 {
-    _windowManager.onUpdate(child, rect);    
+    _windowManager.onUpdate(child, rect);
 }
 
 
@@ -678,7 +680,7 @@ void Window::onResizeEvent(const ResizeEvent& s)
 
 bool Window::isClosed() const
 {
-    return _isClosed;       
+    return _isClosed;
 }
 
 
@@ -693,17 +695,15 @@ void Window::close()
     {
         _parent->onClosing(*this);
     }
-    else
-    {
-        _isClosed = true;
-    }
+
+    _isClosed = true;
 }
 
 
 void Window::onClosing(Window& w)
 {         
     // request to close the window
-    _windowManager.onClosing(w); 
+    _windowManager.onClosing(w);
 }
 
  
@@ -726,7 +726,7 @@ void Window::onCloseEvent(const CloseEvent& ev)
         _parent->onClose(*this);
     }
 
-    _isClosed =  true;       
+    _isClosed =  true;
 
     deinit();
 }
@@ -996,18 +996,18 @@ void Window::setState( WindowState::Type s)
 }
 
 
-WindowBorder::Type Window::border() const
+bool Window::hasBorder() const
 {
     return _border;
 }
 
 
-void Window::setBorder(WindowBorder::Type t)
+void Window::showBorder(bool s)
 {
     if( _impl )
-        _impl->setBorder(t);
+        _impl->showBorder(s);
 
-    _border = t;
+    _border = s;
 }
 
 

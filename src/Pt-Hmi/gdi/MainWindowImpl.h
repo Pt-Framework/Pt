@@ -32,7 +32,6 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/WindowState.h>
-#include <Pt/Hmi/WindowBorder.h>
 #include <Pt/Hmi/WindowDecoration.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Point.h>
@@ -66,7 +65,7 @@ class MainWindowImpl
     
         void setState(WindowState::Type p);
     
-        void setBorder(WindowBorder::Type p);
+        void showBorder(bool s);
        
         void setIcon(const Gfx::Image& p);
     

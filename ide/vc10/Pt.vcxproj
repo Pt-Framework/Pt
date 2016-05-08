@@ -70,6 +70,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Label.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Layout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\LeaveEvent.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Menu.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuBar.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuItem.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MouseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MoveEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Painter.h" />
@@ -85,7 +88,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Visual.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowBorder.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowDecoration.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowStartPosition.h" />
@@ -540,6 +542,8 @@
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Menu.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\MenuItem.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Panel.cpp" />

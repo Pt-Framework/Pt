@@ -114,7 +114,7 @@ void Widget::add(Widget& widget)
     _children.push_back(&widget);
     widget._parent = this;
 
-    widget.setWindow(_window);   
+    widget.setWindow(_window);
     widget.update();
 }
 
@@ -151,7 +151,7 @@ void Widget::setWindow(Window* window)
         (*it)->setWindow(window);
 
     if( _window )
-        _window->addWidget(*this);            
+        _window->addWidget(*this);
 }
 
 

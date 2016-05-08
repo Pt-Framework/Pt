@@ -30,6 +30,7 @@
 #define Pt_Hmi_Demo_MainWindow_h
 
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Menu.h>
 #include "ChildW.h"
 
 namespace Pt {
@@ -40,18 +41,24 @@ namespace Demo {
 
 class MainWindow : public Pt::Hmi::Window
 {
-	  public:
-		    MainWindow();
-		
+      public:
+            MainWindow();
+        
         virtual ~MainWindow();
 
     protected:
+        virtual void onMouseEvent(const MouseEvent& ev);
+
         virtual void onCloseEvent(const CloseEvent& ev);
 
-	  private:
-		    ChildW _child1;
-		    //ChildW _child2;
-}; 
+      private:
+            Menu     _menu;
+            MenuItem _item1;
+            MenuItem _item2;
+            MenuItem _item3;
+            ChildW _child1;
+            //ChildW _child2;
+};
 
 } // namespace
 

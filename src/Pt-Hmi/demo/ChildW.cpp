@@ -12,8 +12,8 @@ namespace Demo{
 ChildW::ChildW(const std::string& title)
 {
     setTitle(title);
-    move( Gfx::PointF(5,5) );
-    resize( Gfx::SizeF(520, 380) );         
+    move( Gfx::PointF(0,0) );
+    resize( Gfx::SizeF(592, 406) );        
     
     //Text    
     _textLabel.setAutoSize(true);
@@ -91,9 +91,10 @@ ChildW::ChildW(const std::string& title)
 
     _childWindow2.setMainWidget(&_mainWidget);
     _mainWidget.enable(false);
-    _closeButton.enable(false);
+    _closeButton.enable(true);
     _mainWidget.enable(true);
     
+    _childWindow2.showBorder(false);
     add( _childWindow2 );
     _childWindow2.show(true); // Child A/B
 }
@@ -119,13 +120,14 @@ void ChildW::onShowDialog(Button& button)
     //Gfx::PointF pos(0,0);
     //_childWindow2.move(pos);
 
-    Dialog1 d;
+    Dialog1 d;    
     d.showModal();
 }
 
 void ChildW::onCloseApp(Button& button)
 {
-    Hmi::Application::instance().exit();
+    parent()->close();
+
 }
 
 } // namespace

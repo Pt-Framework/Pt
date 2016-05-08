@@ -42,9 +42,17 @@ MainWindow::MainWindow()
     setTitle("Main 1");
     move( Gfx::PointF(60, 30) );
     resize( Gfx::SizeF(600, 430) ); 
-    show( true );  // MainWindow   
+    
     add( _child1 );
     //add( _child2 );
+
+    _item1.setText("Item 1");
+    _item2.setText("Item 2");
+    _item3.setText("Item 3");
+
+    _menu.add(_item1);
+    _menu.add(_item2);
+    _menu.add(_item3);
 }
 
 
@@ -53,10 +61,21 @@ MainWindow::~MainWindow()
 }
 
 
+void MainWindow::onMouseEvent( const MouseEvent& ev )
+{
+    Window::onMouseEvent(ev);
+    
+    if( ev.isRelease(MouseEvent::Right) )
+    {
+        _menu.move( ev.position() + this->position() );
+        _menu.show();
+    }
+}
+
+
 void MainWindow::onCloseEvent(const CloseEvent& ev)
 {
-    Window::onCloseEvent(ev);
-    Application::instance().exit();
+   Window::onCloseEvent(ev);
 }
 
 } // namespace

@@ -197,54 +197,25 @@ void MainWindowImpl::setState(WindowState::Type p)
 }
 
 
-void MainWindowImpl::setBorder(WindowBorder::Type p)
+void MainWindowImpl::showBorder(bool s)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
-    LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
 
-    switch( p )
+    if(s)
     {
-        case Pt::Hmi::WindowBorder::NoBorder:
-            style &= ~WS_DLGFRAME;
-            style &= ~WS_THICKFRAME; 
-            exStyle &= ~WS_EX_TOOLWINDOW;
-            break;
-
-        case Pt::Hmi::WindowBorder::Sizeable:
-            style |= WS_THICKFRAME;
-            style |= WS_DLGFRAME;
-            break;
-
-        case Pt::Hmi::WindowBorder::Dialog:
-            style |= WS_DLGFRAME;   
-            style &= ~WS_THICKFRAME;
-            break;
-
-        case Pt::Hmi::WindowBorder::DialogSizeable:
-            style |= WS_DLGFRAME;
-            style |= WS_THICKFRAME;
-            break;
-
-        case Pt::Hmi::WindowBorder::Tool:
-            style |= WS_DLGFRAME;
-            style &= ~WS_THICKFRAME; 
-            exStyle |= WS_EX_TOOLWINDOW;
-            break;
-
-        case Pt::Hmi::WindowBorder::ToolSizeable:
-            style &= ~WS_DLGFRAME;
-            style |= WS_THICKFRAME;
-            exStyle |= WS_EX_TOOLWINDOW;
-            break;
-
-        default:
-            style |= WS_BORDER; 
-            style &= ~WS_THICKFRAME;
-            break;
+        style |= WS_BORDER; 
+        style |= WS_DLGFRAME;
+        style |= WS_THICKFRAME;
     }
-
+    else
+    {
+        style &= ~WS_BORDER;
+        style &= ~WS_DLGFRAME;
+        style &= ~WS_THICKFRAME; 
+    }
+   
     SetWindowLong(_hwnd, GWL_STYLE, style);
-    SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle);
+    SetWindowPos(_hwnd, 0,0,0,0,0,SWP_FRAMECHANGED| SWP_NOMOVE| SWP_NOSIZE| SWP_NOZORDER| SWP_NOOWNERZORDER);
 }
 
 

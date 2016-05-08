@@ -1101,9 +1101,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\WindowState.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowBorder.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
@@ -1381,6 +1378,15 @@
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Menu.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuBar.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuItem.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2520,6 +2526,12 @@
       <Filter>Pt-Qt\win32</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\WindowFrame.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Menu.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\MenuItem.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>

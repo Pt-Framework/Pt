@@ -32,7 +32,6 @@
 
 #include <Pt/Hmi/WindowStartPosition.h>
 #include <Pt/Hmi/WindowState.h>
-#include <Pt/Hmi/WindowBorder.h>
 #include <Pt/Hmi/WindowDecoration.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/ActivateEvent.h>
@@ -210,10 +209,10 @@ class PT_HMI_API Window : public Visual
     void setState(Hmi::WindowState::Type s);
     
     // TODO:
-    Hmi::WindowBorder::Type border() const;
+    bool hasBorder() const;
 
     // TODO:
-    void setBorder( Hmi::WindowBorder::Type t);
+    void showBorder(bool s);
 
     // TODO:
     const Gfx::Image& icon() const;
@@ -301,7 +300,7 @@ class PT_HMI_API Window : public Visual
     Gfx::SizeF                     _maximumSize;
     Hmi::WindowPosition::Type      _startPostion;
     Hmi::WindowState::Type         _state;    
-    Hmi::WindowBorder::Type        _border;
+    bool                           _border;
     std::string                    _title;
     Gfx::Image                     _icon;
     bool                           _canClose;    

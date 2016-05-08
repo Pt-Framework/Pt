@@ -37,6 +37,8 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 					   WindowManager.cpp
 					   Screen.cpp 
                        Visual.cpp
+                       Menu.cpp
+                       MenuItem.cpp
 					   ;
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx Pt-Reflex ;
