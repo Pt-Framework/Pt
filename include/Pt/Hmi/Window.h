@@ -114,6 +114,8 @@ class PT_HMI_API Window : public Visual
 
     void show( bool b = true );
 
+    void showModal();
+
     bool isEnabled() const;
 
     void enable( bool e = true );
@@ -128,9 +130,7 @@ class PT_HMI_API Window : public Visual
 
     bool isClosed() const;
 
-    void close();
-
-    void runModal();
+    void close();    
 
     PixmapSurface& surface();
 

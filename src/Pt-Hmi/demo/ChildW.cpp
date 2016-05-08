@@ -120,7 +120,7 @@ void ChildW::onShowDialog(Button& button)
     //_childWindow2.move(pos);
 
     Dialog1 d;
-    d.runModal();
+    d.showModal();
 }
 
 void ChildW::onCloseApp(Button& button)

@@ -723,12 +723,13 @@ void Window::onCloseEvent(const CloseEvent& ev)
 }
 
 
-void Window::runModal()
+void Window::showModal()
 {
+    deinit();
+
     const Screen& screen = Application::instance().screen();
 
-    const std::vector<Window*>& windows = _parent ? _parent->windows()
-                                                  : screen.windows();
+    const std::vector<Window*>& windows = screen.windows();
     Window* activeWindow = 0;
     std::map<Window*, bool> states;
 
@@ -737,9 +738,6 @@ void Window::runModal()
     {
         Window* w = (*it);
 
-        if(w == this)
-            continue;
-        
         if( w->isActive() )
             activeWindow = w;
 
@@ -762,7 +760,7 @@ void Window::runModal()
     {
         Window* w = (*it);
 
-        if( activeWindow == w )
+        if( activeWindow->vid() == w->vid() )
             activeWindow->activate();
                 
         std::map<Window*, bool>::iterator mapIt = states.find(w);
