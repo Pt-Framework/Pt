@@ -35,11 +35,8 @@
 
 //
 // TODO:
-// - runModal() funktioniert nicht für child windows
-// - show() muss children anzeigen, die nicht hidden sind
-// - WindowManager muss Cursor setzen, nicht Window::onPointerEvent
+// - show and enable event für widget
 // - FocusEvent
-//
 
 namespace {
 
@@ -64,6 +61,7 @@ Window::Window(Window* parent)
 , _visible(true)
 , _isActive(false)
 , _enabled(true)
+, _enabledState(true)
 , _isClosed(false)
 , _position(0,0)
 , _size(10,10)
@@ -557,7 +555,7 @@ void Window::onShowEvent( const ShowEvent& ev )
 
 bool Window::isEnabled() const
 {
-    return _enabled;
+    return _enabledState && _enabled;
 }
 
 
@@ -575,6 +573,7 @@ void Window::enable(bool e)
     else
     {
         _enabled = e;
+        _enabledState = e;
     }
 }
 
@@ -588,6 +587,16 @@ void Window::onEnable( Window& w, bool enable )
 void Window::onEnableEvent( const EnableEvent& ev )
 { 
     _enabled = ev.enabled();    
+    _enabledState =  ev.enabled();
+}
+
+
+void Window::onEnable( bool e )
+{
+    if( ! e)
+        _enabledState = false;
+    else
+        _enabledState = _enabled;
 }
 
 
@@ -731,18 +740,17 @@ void Window::showModal()
 
     const std::vector<Window*>& windows = screen.windows();
     Window* activeWindow = 0;
-    std::map<Window*, bool> states;
 
     std::vector<Window*>::const_iterator it;
+
     for(it = windows.begin(); it != windows.end(); ++it)
     {
         Window* w = (*it);
 
-        if( w->isActive() )
-            activeWindow = w;
+        w->onEnable(false);
 
-        states[w] = w->isEnabled();
-        w->enable(false);
+        if( w->isActive() )
+            activeWindow = w;            
     }
 
     enable(true);
@@ -760,12 +768,10 @@ void Window::showModal()
     {
         Window* w = (*it);
 
+        w->onEnable(true);
+
         if( activeWindow->vid() == w->vid() )
-            activeWindow->activate();
-                
-        std::map<Window*, bool>::iterator mapIt = states.find(w);
-        if( mapIt != states.end() )
-            mapIt->first->enable( mapIt->second );
+            activeWindow->activate();                     
     }
 }
 

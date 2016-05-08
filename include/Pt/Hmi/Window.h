@@ -271,6 +271,8 @@ class PT_HMI_API Window : public Visual
 
     void setMnemonic(Widget& w, const Char* ch);
 
+    void onEnable( bool b );
+
   private:      
     MainWindowImpl*                _impl;
     WindowManager                  _windowManager;
@@ -290,6 +292,7 @@ class PT_HMI_API Window : public Visual
     bool                           _visible; 
     bool                           _isActive;
     bool                           _enabled; 
+    bool                           _enabledState;
     bool                           _isClosed; 
     Gfx::PointF                    _position;
     Gfx::SizeF                     _size;

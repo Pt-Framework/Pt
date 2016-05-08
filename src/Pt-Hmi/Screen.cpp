@@ -183,7 +183,7 @@ void Screen::onActivate(Window& w)
 
 void Screen::onEnable(Window& w, bool enable)
 {
-    _impl->onEnable(w, enable);
+    _impl->onEnable(w, enable);      
 }
 
 
