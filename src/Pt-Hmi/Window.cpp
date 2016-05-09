@@ -259,9 +259,7 @@ void Window::setMainWidget(Widget* widget)
 
     _mainWidget->setWindow(this);
     _mainWidget->move( Gfx::PointF(0,0) );
-
-    if( _impl )
-        _mainWidget->resize( size() );
+    _mainWidget->resize( size() );
 }
 
 

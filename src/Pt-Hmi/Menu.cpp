@@ -90,12 +90,10 @@ void Menu::onActivateEvent(const ActivateEvent& ev)
 {
     Window::onActivateEvent(ev);
 
-    std::cout<<"Deactivate"<<std::endl;
     if( ! ev.isActive() )
         close();
 }
 
 } // namespace
+
 } // namespace
-
-
