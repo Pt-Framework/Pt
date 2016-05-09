@@ -197,7 +197,7 @@ void MainWindowImpl::setState(WindowState::Type p)
 }
 
 
-void MainWindowImpl::showBorder(bool s)
+void MainWindowImpl::setBorder(bool s)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
 

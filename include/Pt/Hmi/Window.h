@@ -212,7 +212,7 @@ class PT_HMI_API Window : public Visual
     bool hasBorder() const;
 
     // TODO:
-    void showBorder(bool s);
+    void setBorder(bool s);
 
     // TODO:
     const Gfx::Image& icon() const;

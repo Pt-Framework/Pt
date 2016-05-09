@@ -88,7 +88,6 @@ ChildW::ChildW(const std::string& title)
     _childWindow2.resize (Gfx::SizeF(240, 320));
     _childWindow2.setTitle("Child of " + title);    
     _childWindow2.setMainWidget(&_mainWidget);
-    _childWindow2.showBorder(false);
     _childWindow2.show(true); // Child A/B
     
     add( _childWindow2 );

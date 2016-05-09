@@ -36,7 +36,7 @@ namespace Hmi {
 Menu::Menu()
 {
     _layout.setAlignment( FlowLayout::Top);
-    showBorder(false);
+    setBorder(false);
     setMainWidget(&_layout);
 }
 

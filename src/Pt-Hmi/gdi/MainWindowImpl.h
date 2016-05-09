@@ -65,7 +65,7 @@ class MainWindowImpl
     
         void setState(WindowState::Type p);
     
-        void showBorder(bool s);
+        void setBorder(bool s);
        
         void setIcon(const Gfx::Image& p);
     
