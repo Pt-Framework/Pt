@@ -12,8 +12,8 @@ namespace Demo{
 ChildW::ChildW(const std::string& title)
 {
     setTitle(title);
-    move( Gfx::PointF(0,0) );
-    resize( Gfx::SizeF(592, 406) );        
+    move( Gfx::PointF(5,5) );
+    resize( Gfx::SizeF(480, 400) );        
     
     //Text    
     _textLabel.setAutoSize(true);
@@ -75,7 +75,6 @@ ChildW::ChildW(const std::string& title)
     _buttonBar.add(_dialogButton);
     _buttonBar.add(_toggleButton);
     
-    
     //Panel  
     _mainWidget.resize( Gfx::SizeF(800, 600) );
     _mainWidget.move( Gfx::PointF(20,20) );
@@ -88,15 +87,11 @@ ChildW::ChildW(const std::string& title)
     _childWindow2.move(Gfx::PointF(5,5));    
     _childWindow2.resize (Gfx::SizeF(240, 320));
     _childWindow2.setTitle("Child of " + title);    
-
     _childWindow2.setMainWidget(&_mainWidget);
-    _mainWidget.enable(false);
-    _closeButton.enable(true);
-    _mainWidget.enable(true);
-    
     _childWindow2.showBorder(false);
-    add( _childWindow2 );
     _childWindow2.show(true); // Child A/B
+    
+    add( _childWindow2 );
 }
 
 
@@ -112,8 +107,6 @@ void ChildW::onShowDialog(Button& button)
     _closeButton.setText("BBB");
     _closeButton.setText("CCC");    
 
-    _closeButton.enable(true);
-
     //Gfx::SizeF size(400,260);
     //_childWindow2.resize(Gfx::SizeF(400,260));
 
@@ -127,7 +120,6 @@ void ChildW::onShowDialog(Button& button)
 void ChildW::onCloseApp(Button& button)
 {
     parent()->close();
-
 }
 
 } // namespace

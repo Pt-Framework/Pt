@@ -41,7 +41,7 @@ MainWindow::MainWindow()
 {
     setTitle("Main 1");
     move( Gfx::PointF(60, 30) );
-    resize( Gfx::SizeF(600, 430) ); 
+    resize( Gfx::SizeF(600, 480) ); 
     
     add( _child1 );
     //add( _child2 );

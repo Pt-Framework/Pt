@@ -55,7 +55,7 @@ void MainWindowImpl::close()
     if( _hwnd == 0)
         return;
 
-    CloseWindow( _hwnd);    
+    PostMessage(_hwnd, WM_CLOSE, 0, 0);    
 }
 
 

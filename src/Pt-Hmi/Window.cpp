@@ -688,7 +688,9 @@ void Window::close()
 {
     if(_impl)
     {
+        // TODO: this could be moved to SeceenImpl::onClosing
         _impl->close();
+
         Application::instance().screen().onClosing(*this);
     }
     else if(_parent)
