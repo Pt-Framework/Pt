@@ -106,7 +106,7 @@ Window::~Window()
 
 void Window::init(Window* parent)
 {
-    if(_init || _isClosed)
+    if(_init)
         return;
 
     if( ! _impl && ! parent )
@@ -122,6 +122,7 @@ void Window::init(Window* parent)
 
     _parent = parent;
     _init = true;
+    _isClosed = false;
 
     move(_position);
     resize(_size);
