@@ -35,7 +35,7 @@ namespace Hmi {
 
 Menu::Menu()
 {
-    _layout.setAlignment( FlowLayout::Top);
+    _layout.setAlignment(FlowLayout::Top);
     setBorder(false);
     setMainWidget(&_layout);
 }
@@ -45,6 +45,17 @@ Menu::~Menu()
 {
 }
 
+/*
+1 Menu Resize      10x10    (setMainWidget)
+2 Item Resize      43x16    (Menu::add)
+3 Menu Resize      43x60
+
+4 Menu ResizeEvent 10x10
+5 Item ResizeEvent 10x0
+6 Menu ResizeEvent 43x60
+
+7 Item ResizeEvent 10x0    (von 4) !!!!
+*/
 
 void Menu::add( MenuItem& item )
 {
@@ -52,6 +63,7 @@ void Menu::add( MenuItem& item )
     item.contentChanged() += Pt::slot(*this, &Menu::onItemChanged);
     updateSize();
 }
+
 
 void Menu::remove( MenuItem& item )
 {
@@ -67,11 +79,9 @@ void Menu::updateSize()
 
     for( size_t i = 0; i < _layout.widgets().size(); ++i)
     {
-         MenuItem* item = static_cast<MenuItem*>(_layout.widgets().at(i));
+        MenuItem* item = static_cast<MenuItem*>(_layout.widgets().at(i));
 
         Gfx::SizeF itemSize = item->defaultSize();
-        item->resize(itemSize);
-
         size.setWidth( std::max( size.width(), itemSize.width() ));
         size.addHeight(itemSize.height());
     }
@@ -92,6 +102,20 @@ void Menu::onActivateEvent(const ActivateEvent& ev)
 
     if( ! ev.isActive() )
         close();
+}
+
+
+void Menu::onResizeEvent(const ResizeEvent& ev)
+{
+    for( size_t i = 0; i < _layout.widgets().size(); ++i)
+    {
+        MenuItem* item = static_cast<MenuItem*>(_layout.widgets().at(i));
+
+        Gfx::SizeF itemSize = item->defaultSize();
+        item->resize(itemSize);
+    }
+
+    Window::onResizeEvent(ev);
 }
 
 } // namespace

@@ -245,7 +245,7 @@ const Widget* Window::mainWidget()  const
 
 
 void Window::setMainWidget(Widget* widget)
-{   
+{
     if(_mainWidget)
         _mainWidget->setWindow(0);
 
@@ -667,13 +667,13 @@ void Window::onResize(Window& w, const Gfx::SizeF& to)
 }
 
 
-void Window::onResizeEvent(const ResizeEvent& s)
+void Window::onResizeEvent(const ResizeEvent& ev)
 {
-    _size = s.size();
-    _surface.resize(s.size());
+    _size = ev.size();
+    _surface.resize(ev.size());
 
-    if( _mainWidget )
-        _mainWidget->resize(s.size());
+    if(_mainWidget)
+        _mainWidget->resize( ev.size() );
 }
 
 
@@ -838,7 +838,7 @@ void Window::onPaintEvent(const PaintEvent& ev)
 
 
 void Window::onMouseEvent(const MouseEvent& ev)
-{        
+{
     if( _windowManager.mouseEvent(ev) )
         return;    
 

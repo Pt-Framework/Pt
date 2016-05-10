@@ -53,6 +53,8 @@ class PT_HMI_API Menu  : public Window
     protected:
         virtual void onActivateEvent(const ActivateEvent& ev);
 
+        virtual void onResizeEvent(const ResizeEvent& ev);
+
     private:
         void onItemChanged(MenuItem& m);
 
