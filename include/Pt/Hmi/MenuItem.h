@@ -71,7 +71,7 @@ class PT_HMI_API MenuItem  : public Panel
             return _font;
         }
 
-        void setShortcutX(const Key& sk);
+        void setShortcut(const Key& k);
 
         //const Key& shortcut() const
         //{

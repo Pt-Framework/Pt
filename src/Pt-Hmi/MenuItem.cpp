@@ -48,20 +48,23 @@ MenuItem::~MenuItem()
 
 void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    Panel::onPaint(surface, updateRect);
+    //Panel::onPaint(surface, updateRect);
 
     Gfx::Color foreColor = foregroundColor();
     Gfx::Pen   pen(1, foreColor);
 
     Painter painter(surface);
-    painter.setFont( font() );
+    painter.setFont(_font);
     painter.setPen(pen);
 
-    Gfx::PointF textPos(_icon.width(), _icon.height());
-    painter.drawText(textPos, _text);
+    Gfx::FontMetrics fm = Painter::fontMetrics( _font, _text);
 
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
-    painter.drawRect(rect);
+    double textX = _icon.width() + 8;
+    double textY = (size().height() - fm.height()) / 2;
+    textY += fm.ascent();
+
+    Gfx::PointF textPos(textX, textY);
+    painter.drawText(textPos, _text);
 }
 
 
@@ -92,9 +95,9 @@ void MenuItem::setFont(const Gfx::Font& font)
 }
 
 
-void MenuItem::setShortcutX(const Key& sk)
+void MenuItem::setShortcut(const Key& k)
 {
-    _shortcut = sk;
+    _shortcut = k;
     _contentChanged.send(*this);
 }
 

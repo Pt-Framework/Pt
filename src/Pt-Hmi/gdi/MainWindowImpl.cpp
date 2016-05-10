@@ -200,7 +200,14 @@ void MainWindowImpl::setState(WindowState::Type p)
 void MainWindowImpl::setBorder(bool s)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
+    LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
+    
+    RECT wrect;
+    GetWindowRect(_hwnd, &wrect);
 
+    RECT rect;
+    GetClientRect(_hwnd, &rect);
+    
     if(s)
     {
         style |= WS_BORDER; 
@@ -213,9 +220,18 @@ void MainWindowImpl::setBorder(bool s)
         style &= ~WS_DLGFRAME;
         style &= ~WS_THICKFRAME; 
     }
-   
+    
+    // changing the border also changes the window area
+    AdjustWindowRectEx(&rect, style, FALSE, exStyle);
+
+    LONG w = rect.right - rect.left;
+    LONG h = rect.bottom - rect.top;
+    LONG x = wrect.left;
+    LONG y = wrect.top;
+
     SetWindowLong(_hwnd, GWL_STYLE, style);
-    SetWindowPos(_hwnd, 0,0,0,0,0,SWP_FRAMECHANGED| SWP_NOMOVE| SWP_NOSIZE| SWP_NOZORDER| SWP_NOOWNERZORDER);
+    SetWindowPos(_hwnd, 0, x, y, w, h,
+                 SWP_FRAMECHANGED|/*SWP_NOMOVE|SWP_NOSIZE|*/SWP_NOZORDER|SWP_NOOWNERZORDER);
 }
 
 
