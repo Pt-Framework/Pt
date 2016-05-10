@@ -696,8 +696,10 @@ void Window::close()
     {
         _parent->onClosing(*this);
     }
-
-    _isClosed = true;
+    else
+    {
+        _isClosed = true;
+    }
 }
 
 
