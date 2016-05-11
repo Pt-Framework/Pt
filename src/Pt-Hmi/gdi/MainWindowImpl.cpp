@@ -231,7 +231,8 @@ void MainWindowImpl::setBorder(bool s)
 
     SetWindowLong(_hwnd, GWL_STYLE, style);
     SetWindowPos(_hwnd, 0, x, y, w, h,
-                 SWP_FRAMECHANGED|/*SWP_NOMOVE|SWP_NOSIZE|*/SWP_NOZORDER|SWP_NOOWNERZORDER);
+                 SWP_FRAMECHANGED|/*SWP_NOMOVE|SWP_NOSIZE|*/
+                 SWP_NOZORDER|SWP_NOOWNERZORDER);
 }
 
 
