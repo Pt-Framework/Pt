@@ -27,7 +27,11 @@
 */
 
 #include "MainWindow.h"
+#include "AtesionIcon.h"
 #include <Pt/Hmi/Application.h>
+#include <Pt/Gfx/PngReader.h>
+#include <sstream>
+#include <fstream>
 
 namespace Pt {
 
@@ -39,6 +43,23 @@ MainWindow::MainWindow()
 : _child1("Child 1")
 //, _child2("Child 2")
 {
+    const char* iconData = reinterpret_cast<const char*>(atesionIcon);
+    std::streamsize iconSize = sizeof(atesionIcon);
+
+    std::stringstream ss(std::ios::binary|std::ios::in|std::ios::out);
+    ss.write(iconData, iconSize);
+    ss.clear();
+    ss.seekg(0);
+
+    Gfx::Image icon;
+    Gfx::PngReader reader(ss, icon);
+
+    while( ! reader.advance() )
+    {
+        ss.peek();
+        reader.advance();
+    }
+
     setTitle("Main 1");
     move( Gfx::PointF(60, 30) );
     resize( Gfx::SizeF(600, 480) ); 
@@ -46,12 +67,15 @@ MainWindow::MainWindow()
     add( _child1 );
     //add( _child2 );
 
-    _item1.setText("Item 1");
-    _item2.setText("Item 2");
-    _item3.setText("Item 3");
-
+    _item1.setText("Heavy Metal");
+    _item1.setIcon(icon);
     _menu.add(_item1);
+
+    _item2.setText("Classic Rock");
     _menu.add(_item2);
+
+    _item3.setText("Folk Music");
+    _item3.setShortcut( Key(Key::Control, Key::F) );
     _menu.add(_item3);
 }
 

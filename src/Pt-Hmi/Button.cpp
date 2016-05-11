@@ -46,7 +46,6 @@ Button::Button()
 {
   setBackgroundColor(Gfx::Color::fromRgb8(245,245,245));
 
-  setAutoSize(true);
   setContentAlignment(MiddleCenter);
   setAcceptsFocus(true);
 

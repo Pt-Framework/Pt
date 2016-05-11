@@ -40,9 +40,6 @@ Label::Label()
 : Panel()
 , _contentAlignment(TopLeft)
 {
-    setForegroundColor(Gfx::Color::fromRgb8(0,0,0,0));
-    setBorderStyle(NoBorder);
-    setAutoSize(true);
 }
 
 
@@ -91,8 +88,7 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 
     Gfx::FontMetrics metric = painter.fontMetrics(_text);
 
-    Alignment align = ! isAutoSize() ? contentAlignment() 
-                                     : MiddleCenter;
+    Alignment align = MiddleCenter;
 
     switch(align)
     {

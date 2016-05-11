@@ -39,30 +39,30 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Menu  : public Window
+class PT_HMI_API Menu : public Window
 {
     public:
         Menu();
     
         virtual ~Menu();
 
-        void add( MenuItem& item );
+        void add(MenuItem& item);
 
-        void remove( MenuItem& item );
+        void remove(MenuItem& item);
 
     protected:
+        virtual void onPaintEvent(const PaintEvent& ev);
+        
         virtual void onActivateEvent(const ActivateEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
 
     private:
-        void onItemChanged(MenuItem& m);
-
-    private:
-        void updateSize();
+        void onContentChanged(MenuItem& m);
 
     private:        
-        FlowLayout _layout;
+        FlowLayout  _layout;
+        std::size_t _iconWidth;
 };
 
 } // namespace

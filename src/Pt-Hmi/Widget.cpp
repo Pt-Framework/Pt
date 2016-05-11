@@ -518,7 +518,7 @@ Gfx::SizeF Widget::preferredSize() const
 
 Gfx::SizeF Widget::onAutoSize() const
 {
-    return Gfx::SizeF(0, 0);
+    return size();
 }
 
 

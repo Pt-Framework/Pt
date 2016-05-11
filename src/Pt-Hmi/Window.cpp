@@ -123,9 +123,17 @@ void Window::init(Window* parent)
     _parent = parent;
     _init = true;
     _isClosed = false;
-
+    
+    Gfx::SizeF s = _size;
+    
     move(_position);
-    resize(_size);
+
+    // TODO: resize will not work if decorations are present
+    //       change win32 impl so setBorder can be called later
+    if(_impl)
+        _impl->setBorder(_border);
+
+    resize(s);
     enable(_enabled);
 
     if( _isActive )
@@ -134,7 +142,7 @@ void Window::init(Window* parent)
     if( _impl)
     {
         _impl->setTitle(_title);
-        _impl->setBorder(_border);
+        //_impl->setBorder(_border);
         _impl->setMaximumSize(_minimumSize);
         _impl->setMaximumSize(_maximumSize );
         _impl->setIcon(_icon);

@@ -49,19 +49,16 @@ class PT_GFX_API Image
     Image( Pt::uint8_t* buffer, const Size& size, const ImageFormat& format = ImageFormat::argb8888(), size_t stride = 0 );
 							
 		virtual ~Image();
-	
 
 		size_t width() const
 		{
 			return _width;
 		}
 
-
 		size_t height() const
 		{
 			return _height;
 		}
-
 
 		size_t stride() const
 		{
@@ -77,7 +74,6 @@ class PT_GFX_API Image
     {
       return _width == 0 || _height == 0;
     }
-
 
 		void setColor( const Color& color );
 

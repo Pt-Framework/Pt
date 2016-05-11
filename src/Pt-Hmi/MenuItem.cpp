@@ -30,14 +30,29 @@
 #include <Pt/Hmi/MenuItem.h>
 #include <Pt/Hmi/Painter.h>
 
+namespace {
+
+// dummy for translator
+Pt::String tr(const Pt::String& text)
+{
+  return text;
+}
+
+}
+
 namespace Pt {
 
 namespace Hmi {
 
 MenuItem::MenuItem()
-: _text("empty")
+: _text("(empty)")
 {
-    setName("item");
+    setAutoSize(true);
+    
+    setPadding( Spacing(5, 3, 5, 3) );
+    setMargin(0);
+    
+    setBorderStyle(Panel::NoBorder);
 }
 
 
@@ -54,17 +69,18 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
     Gfx::Pen   pen(1, foreColor);
 
     Painter painter(surface);
-    painter.setFont(_font);
-    painter.setPen(pen);
-
-    Gfx::FontMetrics fm = Painter::fontMetrics( _font, _text);
-
-    double textX = _icon.width() + 8;
+   
+    Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
+    double textX = padding().left();
     double textY = (size().height() - fm.height()) / 2;
     textY += fm.ascent();
-
     Gfx::PointF textPos(textX, textY);
+
+    painter.setFont(_font);
+    painter.setPen(pen);
     painter.drawText(textPos, _text);
+    
+    //painter.drawRect(Gfx::RectF(Gfx::PointF(0,0), size()));
 }
 
 
@@ -102,12 +118,57 @@ void MenuItem::setShortcut(const Key& k)
 }
 
 
-const Gfx::SizeF MenuItem::defaultSize() const
+Gfx::SizeF MenuItem::onAutoSize() const
 {
-    Gfx::FontMetrics fm = Painter::fontMetrics( _font, _text);
+    Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
     
-    return Gfx::SizeF( fm.width() + padding().leftRight() + _icon.width(),
-                       fm.height() + padding().topBottom() + _icon.height() );
+    double contentHeight = std::max( fm.height(), _icon.height() );
+    double contentWidth = fm.width();
+    
+    bool hasCtrl = _shortcut.hasModifiers(Key::Control);
+    bool hasAlt = _shortcut.hasModifiers(Key::Alt);
+    bool hasMeta = _shortcut.hasModifiers(Key::Meta);
+    bool hasShift = _shortcut.hasModifiers(Key::Shift);
+
+    int modifiers = 0;
+    
+    if(hasCtrl)
+    {
+        contentWidth += Painter::fontMetrics(_font, tr("Ctrl")).width();
+        modifiers++;
+    }
+
+    if(hasAlt)
+    {
+        contentWidth += Painter::fontMetrics(_font, tr("Alt")).width();
+        modifiers++;
+    }
+
+    if(hasMeta)
+    {
+        contentWidth += Painter::fontMetrics(_font, tr("Meta")).width();
+        modifiers++;
+    }
+
+    if(hasShift)
+    {
+        contentWidth += Painter::fontMetrics(_font, tr("Shift")).width();
+        modifiers++;
+    }
+
+    modifiers--;
+
+    double em = Painter::fontMetrics(_font, tr("M")).width();
+
+    if(modifiers > 0)
+    {
+        contentWidth += modifiers * em;
+    }
+
+    contentWidth += padding().leftRight();
+
+    return Gfx::SizeF( contentWidth + padding().leftRight(),
+                       contentHeight + padding().topBottom() );
 }
 
 } // namespace

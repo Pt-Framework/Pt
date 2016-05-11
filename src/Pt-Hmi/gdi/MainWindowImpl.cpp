@@ -40,7 +40,7 @@ MainWindowImpl::MainWindowImpl()
 , _screen( Application::instance().screen() )
 {
   HINSTANCE hInstance = GetModuleHandle(NULL);
-  _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 200, 200, GetDesktopWindow(), NULL, hInstance, NULL );
+  _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 10, 10, GetDesktopWindow(), NULL, hInstance, NULL );
 }
 
 
@@ -208,6 +208,8 @@ void MainWindowImpl::setBorder(bool s)
     RECT rect;
     GetClientRect(_hwnd, &rect);
     
+    // TODO: window position is not correct after border change
+
     if(s)
     {
         style |= WS_BORDER; 

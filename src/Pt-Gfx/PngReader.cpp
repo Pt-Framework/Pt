@@ -130,7 +130,7 @@ class PngReaderImpl
                 if(avail < 8)
                   return 0;
 
-                char signature[8];
+                char signature[7];
                 std::streamsize n = _target->rdbuf()->sgetn(signature, sizeof(signature));
                 if(n > 0)
                     avail -= n;
@@ -343,7 +343,7 @@ PngReader::PngReader()
 
 
 PngReader::PngReader(std::istream& is, Image& image)
-: _impl( new PngReaderImpl() )
+: _impl( new PngReaderImpl(is, image) )
 {
 }
 

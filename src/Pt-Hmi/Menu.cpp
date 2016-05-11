@@ -34,9 +34,11 @@ namespace Pt {
 namespace Hmi {
 
 Menu::Menu()
+: _iconWidth(0)
 {
-    _layout.setAlignment(FlowLayout::Top);
     setBorder(false);
+
+    _layout.setAlignment(FlowLayout::Top);
     setMainWidget(&_layout);
 }
 
@@ -59,40 +61,100 @@ Menu::~Menu()
 
 void Menu::add( MenuItem& item )
 {
+    // TODO: have virtual onRemove() in Widget to notify derived classes
+
     _layout.add(item);
-    item.contentChanged() += Pt::slot(*this, &Menu::onItemChanged);
-    updateSize();
+    onContentChanged(item);
+    item.contentChanged() += Pt::slot(*this, &Menu::onContentChanged);
 }
 
 
-void Menu::remove( MenuItem& item )
+void Menu::remove(MenuItem& item)
 {
-    item.contentChanged() -= Pt::slot(*this, &Menu::onItemChanged);
+    // TODO: have virtual onRemove() in Widget to notify derived classes
+
     _layout.remove(item);
-    updateSize();
+    onContentChanged(item);
+    item.contentChanged() -= Pt::slot(*this, &Menu::onContentChanged);
 }
 
 
-void Menu::updateSize()
+void Menu::onContentChanged(MenuItem& )
 {
     Gfx::SizeF size;
+    _iconWidth = 0;
 
-    for( size_t i = 0; i < _layout.widgets().size(); ++i)
+    for(std::size_t i = 0; i < _layout.widgets().size(); ++i)
     {
         MenuItem* item = static_cast<MenuItem*>(_layout.widgets().at(i));
 
-        Gfx::SizeF itemSize = item->defaultSize();
-        size.setWidth( std::max( size.width(), itemSize.width() ));
-        size.addHeight(itemSize.height());
-    }
+        Gfx::SizeF itemSize = item->preferredSize();
+        itemSize.addWidth( item->margin().leftRight() );
+        itemSize.addHeight( item->margin().topBottom() );
 
-   resize(size);
+        double width = std::max( size.width(), itemSize.width() );
+
+        size.setWidth(width);
+        size.addHeight( itemSize.height() );
+
+        _iconWidth = std::max(item->icon().width(), _iconWidth);
+    }
+    
+    size.addWidth(_layout.padding().leftRight() );
+    size.addHeight(_layout.padding().topBottom() );
+
+    // padding for the icon strip
+    if(_iconWidth > 0)
+        _layout.setPadding( Spacing(_iconWidth + 8, 2, 2, 2) );
+    else
+        _layout.setPadding( Spacing(2, 2, 2, 2) );
+
+    resize(size);
 }
 
 
-void Menu::onItemChanged(MenuItem& m)
+void Menu::onPaintEvent(const PaintEvent& ev)
 {
-    updateSize();
+    Painter painter( surface() );
+    
+    //
+    // icon strip on the left sode
+    //
+    if(_iconWidth > 0)
+    {
+        Gfx::RectF iconStrip( Gfx::PointF(0, 0),
+                              Gfx::SizeF(_layout.padding().left(),
+                                          size().height()) );
+
+        Gfx::Brush brush = Pt::Gfx::Color(0.95f, 0.95f, 0.95f);
+        painter.setBrush( Pt::Gfx::Color(0.95f, 0.95f, 0.95f) );
+        painter.fillRect(iconStrip);
+
+        // draw icon centered for each menu item
+        for(std::size_t i = 0; i < _layout.widgets().size(); ++i)
+        {
+            MenuItem* item = static_cast<MenuItem*>(_layout.widgets().at(i));
+
+            double iconX = (iconStrip.width() - item->icon().width()) / 2;
+
+            double iconY = item->position().y();
+            iconY += (item->size().height() - item->icon().height()) / 2;
+
+            Gfx::PointF iconPos(iconX, iconY);
+            painter.drawImage(iconPos, item->icon());
+        }
+    }
+    
+    //
+    // thin menu frame
+    //
+    Gfx::RectF borderRect(Gfx::PointF(0, 0), size());
+
+    Gfx::Pen pen(1, Gfx::Color(0.5f, 0.5f, 0.51f) );
+    painter.setPen(pen);
+    painter.drawRect(borderRect);
+
+    Window::onPaintEvent(ev);
 }
 
 
@@ -107,11 +169,11 @@ void Menu::onActivateEvent(const ActivateEvent& ev)
 
 void Menu::onResizeEvent(const ResizeEvent& ev)
 {
-    for( size_t i = 0; i < _layout.widgets().size(); ++i)
+    for(std::size_t i = 0; i < _layout.widgets().size(); ++i)
     {
         MenuItem* item = static_cast<MenuItem*>(_layout.widgets().at(i));
 
-        Gfx::SizeF itemSize = item->defaultSize();
+        Gfx::SizeF itemSize = item->preferredSize();
         item->resize(itemSize);
     }
 

@@ -48,36 +48,34 @@ class PT_HMI_API MenuItem  : public Panel
     
         virtual ~MenuItem();
 
-        const Gfx::SizeF defaultSize() const;
-
-        void setText(const String& t);
-
         const String& text() const 
         {
             return _text;
         }
-        
-        void setIcon(const Gfx::Image& img);
+
+        void setText(const String& t);
 
         const Gfx::Image& icon() const
         {
             return _icon;
         }
-
-        void setFont(const Gfx::Font& font);
+        
+        void setIcon(const Gfx::Image& img);
 
         const Gfx::Font& font() const
         {
             return _font;
         }
 
+        void setFont(const Gfx::Font& font);
+
+        const Key& shortcut() const
+        {
+            return _shortcut;
+        }
+
         void setShortcut(const Key& k);
 
-        //const Key& shortcut() const
-        //{
-        //    return _key;
-        //}
-        
         Pt::Signal<MenuItem&>& contentChanged()
         {
             return _contentChanged;
@@ -86,7 +84,10 @@ class PT_HMI_API MenuItem  : public Panel
     protected:    
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
-        void onResizeEvent(const ResizeEvent& ev);
+        virtual void onResizeEvent(const ResizeEvent& ev);
+
+    protected: 
+        virtual Gfx::SizeF onAutoSize() const;
 
     private:
         Gfx::Image  _icon;
