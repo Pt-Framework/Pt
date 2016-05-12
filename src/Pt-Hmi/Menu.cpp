@@ -47,18 +47,6 @@ Menu::~Menu()
 {
 }
 
-/*
-1 Menu Resize      10x10    (setMainWidget)
-2 Item Resize      43x16    (Menu::add)
-3 Menu Resize      43x60
-
-4 Menu ResizeEvent 10x10
-5 Item ResizeEvent 10x0
-6 Menu ResizeEvent 43x60
-
-7 Item ResizeEvent 10x0    (von 4) !!!!
-*/
-
 void Menu::add(MenuItem& item)
 {
     // TODO: have virtual onRemove() in Widget to notify derived classes
@@ -76,11 +64,25 @@ void Menu::remove(MenuItem& item)
     onContentChanged();
 }
 
+/* TODO: 
+this happens when item->resize() is called in onContentChanged
 
+1 Menu Resize      10x10    (setMainWidget)
+2 Item Resize      43x16    (Menu::add)
+3 Menu Resize      43x60
+
+4 Menu ResizeEvent 10x10
+5 Item ResizeEvent 10x0
+6 Menu ResizeEvent 43x60
+
+7 Item ResizeEvent 10x0    (von 4) !!!!
+*/
 void Menu::onContentChanged()
 {
-    Gfx::SizeF size;
     _iconWidth = 0;
+
+    double itemsWidth = 0;
+    double menuHeight = 0;
 
     // determine menu size
     for(std::size_t i = 0; i < _layout.widgets().size(); ++i)
@@ -92,24 +94,29 @@ void Menu::onContentChanged()
         itemSize.addWidth( item->margin().leftRight() );
         itemSize.addHeight( item->margin().topBottom() );
 
-        // the width of the menu is the width of the widest item
-        double width = std::max( size.width(), itemSize.width() );
-        size.setWidth(width);
+        // the width of the items is the width of the widest item
+        itemsWidth = std::max( itemsWidth, itemSize.width() );
 
         // the height of the menu is the sum of the item heights
-        size.addHeight( itemSize.height() );
+        menuHeight += itemSize.height();
 
         _iconWidth = std::max(item->icon().width(), _iconWidth);
     }
     
-    size.addWidth(_layout.padding().leftRight() );
-    size.addHeight(_layout.padding().topBottom() );
+    int iconPadding = 4;
+    _iconWidth += 2 * iconPadding;
 
-    // padding for the icon strip
-    if(_iconWidth > 0)
-        _layout.setPadding( Spacing(_iconWidth + 8, 2, 2, 2) );
-    else
-        _layout.setPadding( Spacing(2, 2, 2, 2) );
+    int menuPadding = 4;
+
+    // left padding is for the icon strip
+    _layout.setPadding( Spacing(menuPadding + _iconWidth, 
+                                menuPadding, 
+                                menuPadding, 
+                                menuPadding) );
+
+    Gfx::SizeF size(_iconWidth + itemsWidth, menuHeight);
+    size.addWidth(2 * menuPadding);
+    size.addHeight(2 * menuPadding);
 
     resize(size);
 }

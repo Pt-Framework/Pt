@@ -91,7 +91,7 @@ MenuItem::MenuItem()
 {
     setAutoSize(true);
     
-    setPadding( Spacing(5, 3, 5, 3) );
+    setPadding( Spacing(4, 2, 4, 2) );
     setMargin(0);
 
     setBorderStyle(Panel::NoBorder);
@@ -175,14 +175,13 @@ Gfx::SizeF MenuItem::onAutoSize() const
     if(sk)
     {
         Pt::String text = shortcutText(*sk);
-        contentWidth += padding().leftRight() * 3;
+        contentWidth += fm.height() * 2.5; // spacing towards shortcut text
         contentWidth += Painter::fontMetrics(_font, text).width();
     }
 
     return Gfx::SizeF( contentWidth + padding().leftRight(),
                        contentHeight + padding().topBottom() );
 }
-
 
 } // namespace
 
