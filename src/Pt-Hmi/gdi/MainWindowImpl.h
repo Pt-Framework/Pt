@@ -50,6 +50,8 @@ class MainWindowImpl
         MainWindowImpl();
 
         ~MainWindowImpl();
+
+        Gfx::PointF toScreen(const Gfx::PointF& pos) const;
     
         void show(bool v);
     
@@ -98,3 +100,4 @@ class MainWindowImpl
 } // namespace
 
 #endif
+

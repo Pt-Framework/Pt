@@ -55,6 +55,8 @@ class PT_HMI_API Menu : public Window
         
         virtual void onActivateEvent(const ActivateEvent& ev);
 
+        virtual void onMoveEvent(const MoveEvent& ev);
+
         virtual void onResizeEvent(const ResizeEvent& ev);
 
     private:

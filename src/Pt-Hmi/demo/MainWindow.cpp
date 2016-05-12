@@ -88,10 +88,12 @@ MainWindow::~MainWindow()
 void MainWindow::onMouseEvent( const MouseEvent& ev )
 {
     Window::onMouseEvent(ev);
-    
+
     if( ev.isRelease(MouseEvent::Right) )
     {
-        _menu.move( ev.position() + this->position() );
+        Gfx::PointF menuPos = this->toScreen( ev.position() );
+
+        _menu.move(menuPos);
         _menu.show();
     }
 }

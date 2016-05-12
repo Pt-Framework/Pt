@@ -466,6 +466,45 @@ void Window::setFocusIndex(Widget& , size_t)
 }
 
 
+Gfx::PointF Window::toParent(const Gfx::PointF& pos) const
+{
+    if(_impl)
+    {
+        return _impl->toScreen(pos);
+    }
+    else if(_parent)
+    {
+        return _parent->onToParent(*this, pos);
+    }
+
+    // unshown window
+    return pos + position();
+}
+
+
+Gfx::PointF Window::onToParent(const Window& w, const Gfx::PointF& pos) const
+{
+    return _windowManager.toParent(w, pos);
+}
+
+
+Gfx::PointF Window::toScreen(const Gfx::PointF& pos) const
+{
+    if(_impl)
+    {
+        return _impl->toScreen(pos);
+    }
+    else if(_parent)
+    {
+        Gfx::PointF p = toParent(pos);
+        return _parent->toScreen(pos);
+    }
+
+    // unshown window
+    return pos + position();
+}
+
+
 void Window::update()
 {
     Gfx::RectF rect( Gfx::PointF(0,0), size() );

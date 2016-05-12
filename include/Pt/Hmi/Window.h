@@ -101,6 +101,10 @@ class PT_HMI_API Window : public Visual
 
     void focusPrev();
 
+    Gfx::PointF toParent(const Gfx::PointF& pos) const;
+
+    Gfx::PointF toScreen(const Gfx::PointF& pos) const;
+
     void update();
 
     void update(const Gfx::RectF& rect);
@@ -153,6 +157,8 @@ class PT_HMI_API Window : public Visual
     void onClose(Window& w);
 
     void onClosing(Window& w);
+
+    Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const;
 
   protected:
     virtual void onEvent(const Pt::Event& ev);

@@ -167,6 +167,12 @@ void Menu::onActivateEvent(const ActivateEvent& ev)
 }
 
 
+void Menu::onMoveEvent(const MoveEvent& ev)
+{
+    Window::onMoveEvent(ev);
+}
+
+
 void Menu::onResizeEvent(const ResizeEvent& ev)
 {
     for(std::size_t i = 0; i < _layout.widgets().size(); ++i)

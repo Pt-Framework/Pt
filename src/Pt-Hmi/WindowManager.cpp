@@ -397,6 +397,15 @@ void WindowManager::onClosing(Window& w)
     Application::instance().loop().commitEvent( ev );
 }
 
+
+Gfx::PointF WindowManager::toParent(const Window& w, const Gfx::PointF& pos) const
+{
+    double offY = _borderWidth + _titleHeight;
+    double offX = _borderWidth;
+
+    return w.position() + pos + Gfx::PointF(offX, offY);
+}
+
 } // namespace
 
 } // namespace
