@@ -59,13 +59,12 @@ Menu::~Menu()
 7 Item ResizeEvent 10x0    (von 4) !!!!
 */
 
-void Menu::add( MenuItem& item )
+void Menu::add(MenuItem& item)
 {
     // TODO: have virtual onRemove() in Widget to notify derived classes
 
     _layout.add(item);
-    onContentChanged(item);
-    item.contentChanged() += Pt::slot(*this, &Menu::onContentChanged);
+    onContentChanged();
 }
 
 
@@ -74,27 +73,30 @@ void Menu::remove(MenuItem& item)
     // TODO: have virtual onRemove() in Widget to notify derived classes
 
     _layout.remove(item);
-    onContentChanged(item);
-    item.contentChanged() -= Pt::slot(*this, &Menu::onContentChanged);
+    onContentChanged();
 }
 
 
-void Menu::onContentChanged(MenuItem& )
+void Menu::onContentChanged()
 {
     Gfx::SizeF size;
     _iconWidth = 0;
 
+    // determine menu size
     for(std::size_t i = 0; i < _layout.widgets().size(); ++i)
     {
         MenuItem* item = static_cast<MenuItem*>(_layout.widgets().at(i));
 
+        // item size with margin
         Gfx::SizeF itemSize = item->preferredSize();
         itemSize.addWidth( item->margin().leftRight() );
         itemSize.addHeight( item->margin().topBottom() );
 
+        // the width of the menu is the width of the widest item
         double width = std::max( size.width(), itemSize.width() );
-
         size.setWidth(width);
+
+        // the height of the menu is the sum of the item heights
         size.addHeight( itemSize.height() );
 
         _iconWidth = std::max(item->icon().width(), _iconWidth);
@@ -118,7 +120,7 @@ void Menu::onPaintEvent(const PaintEvent& ev)
     Painter painter( surface() );
     
     //
-    // icon strip on the left sode
+    // icon strip on the left side
     //
     if(_iconWidth > 0)
     {
@@ -146,7 +148,7 @@ void Menu::onPaintEvent(const PaintEvent& ev)
     }
     
     //
-    // thin menu frame
+    // menu border
     //
     Gfx::RectF borderRect(Gfx::PointF(0, 0), size());
 

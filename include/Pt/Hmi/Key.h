@@ -4,6 +4,7 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Types.h>
 #include <iostream>
+#include <cassert>
 
 namespace Pt {
 
@@ -730,6 +731,50 @@ class Key
         {
             return _code < k._code || 
                    (_code == k._code && _modifier < k._modifier);
+        }
+        
+        /** @brief Converts the modifier code to a string.
+
+            The returned string can be used with the translator.
+        */
+        static Pt::String toString(Modifier m)
+        {
+            switch(m)
+            {
+                case Alt:     return "Alt";
+                case Shift:   return "Shift";
+                case Control: return "Control";
+                case Meta:    return "Meta";
+
+                default:
+                    assert(false);
+                    
+            }
+
+            return Pt::String();
+        }
+
+        /** @brief Converts the key code to a string.
+
+            The returned string can be used with the translator.
+        */
+        static Pt::String toString(Code c)
+        {
+            switch(c)
+            {
+                case A: return "A";
+                case B: return "B";
+                case C: return "C";
+
+                case F1: return "F1";
+                case F2: return "F2";
+                case F3: return "F3";
+
+                default:
+                    assert(false);
+            }
+
+            return Pt::String();
         }
 
     private:

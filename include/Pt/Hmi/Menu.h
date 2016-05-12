@@ -60,7 +60,7 @@ class PT_HMI_API Menu : public Window
         virtual void onResizeEvent(const ResizeEvent& ev);
 
     private:
-        void onContentChanged(MenuItem& m);
+        void onContentChanged();
 
     private:        
         FlowLayout  _layout;

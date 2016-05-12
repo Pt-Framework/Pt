@@ -69,18 +69,6 @@ class PT_HMI_API MenuItem  : public Panel
 
         void setFont(const Gfx::Font& font);
 
-        const Key& shortcut() const
-        {
-            return _shortcut;
-        }
-
-        void setShortcut(const Key& k);
-
-        Pt::Signal<MenuItem&>& contentChanged()
-        {
-            return _contentChanged;
-        }
-
     protected:    
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
@@ -93,8 +81,6 @@ class PT_HMI_API MenuItem  : public Panel
         Gfx::Image  _icon;
         Gfx::Font   _font;
         Pt::String  _text;
-        Key         _shortcut;
-        Pt::Signal<MenuItem&> _contentChanged;
 };
 
 } // namespace

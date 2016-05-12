@@ -69,13 +69,14 @@ MainWindow::MainWindow()
 
     _item1.setText("Heavy Metal");
     _item1.setIcon(icon);
+    _item1.setShortcut( &Key(Key::F3) );
     _menu.add(_item1);
 
     _item2.setText("Classic Rock");
     _menu.add(_item2);
 
     _item3.setText("Folk Music");
-    _item3.setShortcut( Key(Key::Control, Key::F) );
+    _item3.setShortcut( &Key(Key::Control, Key::A) );
     _menu.add(_item3);
 }
 

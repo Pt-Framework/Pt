@@ -32,10 +32,52 @@
 
 namespace {
 
-// dummy for translator
-Pt::String tr(const Pt::String& text)
+Pt::String shortcutText(const Pt::Hmi::Key& key)
 {
-  return text;
+    Pt::String text;
+
+    bool hasCtrl = key.hasModifiers(Pt::Hmi::Key::Control);
+    if(hasCtrl)
+    {
+        if( ! text.empty() )
+            text += Pt::Char('+');
+
+        text += Pt::Hmi::Key::toString(Pt::Hmi::Key::Control);
+    }
+        
+    bool hasAlt = key.hasModifiers(Pt::Hmi::Key::Alt);
+    if(hasAlt)
+    {
+        if( ! text.empty() )
+            text += Pt::Char('+');
+            
+        text += Pt::Hmi::Key::toString(Pt::Hmi::Key::Alt);
+    }
+
+    bool hasMeta = key.hasModifiers(Pt::Hmi::Key::Meta);
+    if(hasMeta)
+    {
+        if( ! text.empty() )
+            text += Pt::Char('+');
+            
+        text += Pt::Hmi::Key::toString(Pt::Hmi::Key::Meta);
+    }
+
+    bool hasShift = key.hasModifiers(Pt::Hmi::Key::Shift);
+    if(hasShift)
+    {
+        if( ! text.empty() )
+            text += Pt::Char('+');
+            
+        text += Pt::Hmi::Key::toString(Pt::Hmi::Key::Shift);
+    }
+
+    if( ! text.empty() )
+        text += Pt::Char('+');
+
+    text += Pt::Hmi::Key::toString(key.keyCode());
+
+    return text;
 }
 
 }
@@ -51,13 +93,31 @@ MenuItem::MenuItem()
     
     setPadding( Spacing(5, 3, 5, 3) );
     setMargin(0);
-    
+
     setBorderStyle(Panel::NoBorder);
 }
 
 
 MenuItem::~MenuItem()
 {
+}
+
+
+void MenuItem::setText(const Pt::String& t)
+{   
+    _text = t;
+}
+ 
+
+void MenuItem::setIcon(const Gfx::Image& img)
+{   
+    _icon = img;
+}
+
+
+void MenuItem::setFont(const Gfx::Font& font)
+{   
+    _font = font;
 }
 
 
@@ -80,6 +140,20 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
     painter.setPen(pen);
     painter.drawText(textPos, _text);
     
+    const Key* sk = shortcut();
+    if(sk)
+    {
+        Pt::String skText = shortcutText(*sk);
+        Gfx::FontMetrics skm = Painter::fontMetrics(_font, skText);
+
+        double skX = size().width() - skm.width() - padding().right();
+        double skY = (size().height() - skm.height()) / 2;
+        skY += skm.ascent();
+        Gfx::PointF skPos(skX, skY);
+
+        painter.drawText(skPos, skText);
+    }
+
     //painter.drawRect(Gfx::RectF(Gfx::PointF(0,0), size()));
 }
 
@@ -90,34 +164,6 @@ void MenuItem::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-void MenuItem::setText(const Pt::String& t)
-{   
-    _text = t;
-    _contentChanged.send(*this);
-}
- 
-
-void MenuItem::setIcon(const Gfx::Image& img)
-{   
-    _icon = img;
-    _contentChanged.send(*this);
-}
-
-
-void MenuItem::setFont(const Gfx::Font& font)
-{   
-    _font = font;
-    _contentChanged.send(*this);
-}
-
-
-void MenuItem::setShortcut(const Key& k)
-{
-    _shortcut = k;
-    _contentChanged.send(*this);
-}
-
-
 Gfx::SizeF MenuItem::onAutoSize() const
 {
     Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
@@ -125,51 +171,18 @@ Gfx::SizeF MenuItem::onAutoSize() const
     double contentHeight = std::max( fm.height(), _icon.height() );
     double contentWidth = fm.width();
     
-    bool hasCtrl = _shortcut.hasModifiers(Key::Control);
-    bool hasAlt = _shortcut.hasModifiers(Key::Alt);
-    bool hasMeta = _shortcut.hasModifiers(Key::Meta);
-    bool hasShift = _shortcut.hasModifiers(Key::Shift);
-
-    int modifiers = 0;
-    
-    if(hasCtrl)
+    const Key* sk = shortcut();
+    if(sk)
     {
-        contentWidth += Painter::fontMetrics(_font, tr("Ctrl")).width();
-        modifiers++;
+        Pt::String text = shortcutText(*sk);
+        contentWidth += padding().leftRight() * 3;
+        contentWidth += Painter::fontMetrics(_font, text).width();
     }
-
-    if(hasAlt)
-    {
-        contentWidth += Painter::fontMetrics(_font, tr("Alt")).width();
-        modifiers++;
-    }
-
-    if(hasMeta)
-    {
-        contentWidth += Painter::fontMetrics(_font, tr("Meta")).width();
-        modifiers++;
-    }
-
-    if(hasShift)
-    {
-        contentWidth += Painter::fontMetrics(_font, tr("Shift")).width();
-        modifiers++;
-    }
-
-    modifiers--;
-
-    double em = Painter::fontMetrics(_font, tr("M")).width();
-
-    if(modifiers > 0)
-    {
-        contentWidth += modifiers * em;
-    }
-
-    contentWidth += padding().leftRight();
 
     return Gfx::SizeF( contentWidth + padding().leftRight(),
                        contentHeight + padding().topBottom() );
 }
+
 
 } // namespace
 
