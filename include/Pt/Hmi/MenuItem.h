@@ -43,34 +43,31 @@ namespace Hmi {
 
 class PT_HMI_API MenuItem : public Panel
 {
+    typedef Panel BaseType;
+
     public:
         MenuItem();
     
         virtual ~MenuItem();
 
-        const String& text() const 
-        {
-            return _text;
-        }
+        const String& text() const;
 
         void setText(const String& t);
 
-        const Gfx::Image& icon() const
-        {
-            return _icon;
-        }
+        const Gfx::Image& icon() const;
         
         void setIcon(const Gfx::Image& img);
 
-        const Gfx::Font& font() const
-        {
-            return _font;
-        }
+        const Gfx::Font& font() const;
 
         void setFont(const Gfx::Font& font);
 
     protected:    
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+        virtual void onEnterEvent( const EnterEvent& ev);
+
+        virtual void onLeaveEvent(const LeaveEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
 

@@ -28,9 +28,24 @@
 */
 
 #include <Pt/Hmi/MenuItem.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Painter.h>
 
 namespace {
+
+Pt::Gfx::Color brighten(const Pt::Gfx::Color& c, float factor)
+{
+    float r = c.red() * factor;
+    float g = c.green() * factor;
+    float b = c.blue() * factor;
+
+    r = r > 1.0f ? 1.0f : r;
+    g = g > 1.0f ? 1.0f : g;
+    b = b > 1.0f ? 1.0f : b;
+
+    return Pt::Gfx::Color(c.alpha(), r, g, b);
+}
+
 
 Pt::String shortcutText(const Pt::Hmi::Key& key)
 {
@@ -80,7 +95,7 @@ Pt::String shortcutText(const Pt::Hmi::Key& key)
     return text;
 }
 
-}
+} // namespace
 
 namespace Pt {
 
@@ -103,15 +118,33 @@ MenuItem::~MenuItem()
 }
 
 
+const String& MenuItem::text() const 
+{
+    return _text;
+}
+
+
 void MenuItem::setText(const Pt::String& t)
 {   
     _text = t;
 }
- 
+
+
+const Gfx::Image& MenuItem::icon() const
+{
+    return _icon;
+}
+
 
 void MenuItem::setIcon(const Gfx::Image& img)
 {   
     _icon = img;
+}
+
+
+const Gfx::Font& MenuItem::font() const
+{
+    return _font;
 }
 
 
@@ -123,23 +156,43 @@ void MenuItem::setFont(const Gfx::Font& font)
 
 void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    //Panel::onPaint(surface, updateRect);
+    //BaseType::onPaint(surface, updateRect);
 
-    Gfx::Color foreColor = foregroundColor();
-    Gfx::Pen   pen(1, foreColor);
+    bool mouseOver = this->window()->pointerWidget() == this;
 
+    Gfx::Color fgColor = foregroundColor();
+    Gfx::Color bgColor = backgroundColor();
+    
+    if(mouseOver)
+        bgColor = brighten(bgColor, 0.85f);
+
+    Gfx::Pen pen(1, fgColor);
+    Gfx::Brush brush(bgColor);
+    
     Painter painter(surface);
-   
+    painter.setFont(_font);
+    painter.setPen(pen);
+    painter.setBrush(brush);
+
+    if(mouseOver)
+    {
+        painter.fillRect( Gfx::RectF(Gfx::PointF(0,0), size()) );
+    }
+
+    //
+    // draw item text
+    //
     Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
     double textX = padding().left();
     double textY = (size().height() - fm.height()) / 2;
     textY += fm.ascent();
     Gfx::PointF textPos(textX, textY);
 
-    painter.setFont(_font);
-    painter.setPen(pen);
     painter.drawText(textPos, _text);
     
+    //
+    // draw shortcut text
+    //
     const Key* sk = shortcut();
     if(sk)
     {
@@ -153,14 +206,26 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 
         painter.drawText(skPos, skText);
     }
+}
 
-    //painter.drawRect(Gfx::RectF(Gfx::PointF(0,0), size()));
+
+void MenuItem::onEnterEvent(const EnterEvent& ev)
+{
+    BaseType::onEnterEvent(ev);
+    update();
+}
+
+
+void MenuItem::onLeaveEvent(const LeaveEvent& ev)
+{
+    BaseType::onLeaveEvent(ev);
+    update();
 }
 
 
 void MenuItem::onResizeEvent(const ResizeEvent& ev)
 {
-    Panel::onResizeEvent(ev);
+    BaseType::onResizeEvent(ev);
 }
 
 

@@ -41,6 +41,8 @@ namespace Hmi {
 
 class PT_HMI_API Menu : public Window
 {
+    typedef Window BaseType;
+
     public:
         Menu();
     

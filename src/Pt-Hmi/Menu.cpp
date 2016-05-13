@@ -104,9 +104,10 @@ void Menu::onContentChanged()
     }
     
     int iconPadding = 4;
-    _iconWidth += 2 * iconPadding;
-
     int menuPadding = 4;
+
+    if(_iconWidth > 0)
+        _iconWidth += 2 * iconPadding;
 
     // left padding is for the icon strip
     _layout.setPadding( Spacing(menuPadding + _iconWidth, 
@@ -136,7 +137,7 @@ void Menu::onPaintEvent(const PaintEvent& ev)
                                           size().height()) );
 
         Gfx::Brush brush = Pt::Gfx::Color(0.95f, 0.95f, 0.95f);
-        painter.setBrush( Pt::Gfx::Color(0.95f, 0.95f, 0.95f) );
+        painter.setBrush(brush);
         painter.fillRect(iconStrip);
 
         // draw icon centered for each menu item
@@ -163,13 +164,13 @@ void Menu::onPaintEvent(const PaintEvent& ev)
     painter.setPen(pen);
     painter.drawRect(borderRect);
 
-    Window::onPaintEvent(ev);
+    BaseType::onPaintEvent(ev);
 }
 
 
 void Menu::onActivateEvent(const ActivateEvent& ev)
 {
-    Window::onActivateEvent(ev);
+    BaseType::onActivateEvent(ev);
 
     if( ! ev.isActive() )
         close();
@@ -178,7 +179,7 @@ void Menu::onActivateEvent(const ActivateEvent& ev)
 
 void Menu::onMoveEvent(const MoveEvent& ev)
 {
-    Window::onMoveEvent(ev);
+    BaseType::onMoveEvent(ev);
 }
 
 
@@ -192,7 +193,9 @@ void Menu::onResizeEvent(const ResizeEvent& ev)
         item->resize(itemSize);
     }
 
-    Window::onResizeEvent(ev);
+    // _layout positions the items now in OnResizeEvent
+    // TODO: our overall design should make this clearer
+    BaseType::onResizeEvent(ev);
 }
 
 } // namespace

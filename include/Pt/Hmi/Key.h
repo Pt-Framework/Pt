@@ -743,7 +743,7 @@ class Key
             {
                 case Alt:     return "Alt";
                 case Shift:   return "Shift";
-                case Control: return "Control";
+                case Control: return "Ctrl";
                 case Meta:    return "Meta";
 
                 default:
