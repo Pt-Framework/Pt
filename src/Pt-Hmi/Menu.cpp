@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Hmi/Menu.h>
+#include <Pt/Hmi/MenuItem.h>
 
 namespace Pt {
 
@@ -47,25 +48,30 @@ Menu::~Menu()
 {
 }
 
-void Menu::add(MenuItem& item)
+void Menu::addItem(MenuItem& item)
 {
     // TODO: have virtual onRemove() in Widget to notify derived classes
 
     _layout.add(item);
+    item.triggered() += Pt::slot(*this, &Menu::close);
     onContentChanged();
 }
 
 
-void Menu::remove(MenuItem& item)
+void Menu::removeItem(MenuItem& item)
 {
     // TODO: have virtual onRemove() in Widget to notify derived classes
 
     _layout.remove(item);
+    item.triggered() -= Pt::slot(*this, &Menu::close);
     onContentChanged();
 }
 
+
 /* TODO: 
 this happens when item->resize() is called in onContentChanged
+One soluton is to assign the _size member in Window::resize immediately
+and not only when the ResizeEvent is received
 
 1 Menu Resize      10x10    (setMainWidget)
 2 Item Resize      43x16    (Menu::add)

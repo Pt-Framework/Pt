@@ -42,6 +42,7 @@ namespace Demo {
 MainWindow::MainWindow()
 : _child1("Child 1")
 //, _child2("Child 2")
+, _subMenuItem(&_subMenu)
 {
     const char* iconData = reinterpret_cast<const char*>(atesionIcon);
     std::streamsize iconSize = sizeof(atesionIcon);
@@ -70,14 +71,26 @@ MainWindow::MainWindow()
     _item1.setText("Heavy Metal");
     _item1.setIcon(icon);
     _item1.setShortcut( &Key(Key::F3) );
-    _menu.add(_item1);
+    _menu.addItem(_item1);
 
     _item2.setText("Classic Rock");
-    _menu.add(_item2);
+    _menu.addItem(_item2);
 
     _item3.setText("Folk Music");
     _item3.setShortcut( &Key(Key::Control, Key::A) );
-    _menu.add(_item3);
+    _menu.addItem(_item3);
+
+    _subMenuItem.setText("Other Music");
+    _menu.addItem(_subMenuItem);
+
+    _subItem1.setText("Vegetarian Progressive Grindcore");
+    _subMenu.addItem(_subItem1);
+    
+    _subItem2.setText("Rhytm and Blues");
+    _subMenu.addItem(_subItem2);
+
+    _subItem3.setText("Romanian Polka");
+    _subMenu.addItem(_subItem3);
 }
 
 

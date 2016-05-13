@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Hmi/MenuItem.h>
+#include <Pt/Hmi/Menu.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Painter.h>
 
@@ -105,6 +106,7 @@ MenuItem::MenuItem()
 : _text("(empty)")
 {
     setAutoSize(true);
+    setAcceptsFocus(true);
     
     setPadding( Spacing(4, 2, 4, 2) );
     setMargin(0);
@@ -154,6 +156,46 @@ void MenuItem::setFont(const Gfx::Font& font)
 }
 
 
+Signal<>& MenuItem::triggered()
+{ 
+    return _triggered; 
+}
+
+
+void MenuItem::onClicked(const Gfx::PointF& pos)
+{
+    BaseType::onClicked(pos);
+    _triggered.send();
+}
+
+
+void MenuItem::onShortcut(const KeyEvent& kev)
+{
+    BaseType::onShortcut(kev);
+    _triggered.send();
+}
+
+
+Gfx::SizeF MenuItem::onAutoSize() const
+{
+    Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
+    
+    double contentHeight = std::max( fm.height(), _icon.height() );
+    double contentWidth = fm.width();
+    
+    const Key* sk = shortcut();
+    if(sk)
+    {
+        Pt::String text = shortcutText(*sk);
+        contentWidth += fm.height() * 2.5; // spacing towards shortcut text
+        contentWidth += Painter::fontMetrics(_font, text).width();
+    }
+
+    return Gfx::SizeF( contentWidth + padding().leftRight(),
+                       contentHeight + padding().topBottom() );
+}
+
+
 void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     //BaseType::onPaint(surface, updateRect);
@@ -166,12 +208,13 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
     if(mouseOver)
         bgColor = brighten(bgColor, 0.85f);
 
-    Gfx::Pen pen(1, fgColor);
-    Gfx::Brush brush(bgColor);
-    
     Painter painter(surface);
     painter.setFont(_font);
+
+    Gfx::Pen pen(1, fgColor);
     painter.setPen(pen);
+
+    Gfx::Brush brush(bgColor);
     painter.setBrush(brush);
 
     if(mouseOver)
@@ -229,23 +272,85 @@ void MenuItem::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-Gfx::SizeF MenuItem::onAutoSize() const
+SubMenu::SubMenu(Menu* menu)
+: _menu(menu)
 {
-    Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
-    
-    double contentHeight = std::max( fm.height(), _icon.height() );
-    double contentWidth = fm.width();
-    
-    const Key* sk = shortcut();
-    if(sk)
+    // TODO: use a destroyed() signal in Window to unregister Menu
+    if(_menu)
     {
-        Pt::String text = shortcutText(*sk);
-        contentWidth += fm.height() * 2.5; // spacing towards shortcut text
-        contentWidth += Painter::fontMetrics(_font, text).width();
+        _menu->destroyed() += Pt::slot(*this, &SubMenu::onRemoveMenu);
     }
+}
+    
 
-    return Gfx::SizeF( contentWidth + padding().leftRight(),
-                       contentHeight + padding().topBottom() );
+SubMenu::~SubMenu()
+{
+}
+
+
+void SubMenu::setMenu(Menu* menu)
+{
+    // TODO: use a destroyed() signal in Window to unregister Menu
+    _menu = menu;
+}
+
+
+void SubMenu::onRemoveMenu(Window& w)
+{
+    _menu = 0;
+}
+
+
+void SubMenu::onClicked(const Gfx::PointF& pos)
+{
+    if(_menu && window() )
+    {
+        Gfx::PointF topRight(size().width(), 0);
+        Gfx::PointF wpos = this->toWindow(topRight);
+        Gfx::PointF menuPos = window()->toScreen(wpos);
+
+        _menu->move(menuPos);
+        _menu->show();
+    }
+}
+
+
+static const double indicatorWidth = 10.0; 
+
+
+Gfx::SizeF SubMenu::onAutoSize() const
+{
+    Gfx::SizeF size = BaseType::onAutoSize();
+    
+    // space for the menu indicator
+    size.addWidth(indicatorWidth); 
+    
+    return size;
+}
+
+
+void SubMenu::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+    BaseType::onPaint(surface, updateRect);
+
+    Gfx::Color fgColor = this->foregroundColor();
+
+    Painter painter(surface);
+
+    //
+    // draw menu indicator
+    //
+
+    double x = size().width() - indicatorWidth - padding().right();
+    double y = size().height() / 2;
+
+    Gfx::PointF indicator[3] = { Gfx::PointF(x - 3, y - 4),
+                                 Gfx::PointF(x + 1, y),
+                                 Gfx::PointF(x - 3, y + 4) };
+
+    Gfx::Brush brush(fgColor);
+    painter.setBrush(brush);
+    painter.fillPolygon(indicator, 3);
 }
 
 } // namespace

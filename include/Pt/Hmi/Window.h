@@ -135,6 +135,9 @@ class PT_HMI_API Window : public Visual
 
     void close();    
 
+    Signal<Window&>& destroyed()
+    { return _destroyed; }
+
     PixmapSurface& surface();
 
     MainWindowImpl* impl();
@@ -279,6 +282,7 @@ class PT_HMI_API Window : public Visual
     void onEnable( bool b );
 
   private:      
+    Signal<Window&>                _destroyed;
     MainWindowImpl*                _impl;
     WindowManager                  _windowManager;
     PixmapSurface                  _surface;

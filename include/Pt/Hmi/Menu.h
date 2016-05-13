@@ -33,24 +33,26 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/FlowLayout.h>
-#include <Pt/Hmi/MenuItem.h>
 
 namespace Pt {
 
 namespace Hmi {
 
+class MenuItem;
+
 class PT_HMI_API Menu : public Window
 {
     typedef Window BaseType;
+    friend class SubMenu;
 
     public:
         Menu();
     
         virtual ~Menu();
 
-        void add(MenuItem& item);
+        void addItem(MenuItem& item);
 
-        void remove(MenuItem& item);
+        void removeItem(MenuItem& item);
 
     protected:
         virtual void onPaintEvent(const PaintEvent& ev);
@@ -63,6 +65,8 @@ class PT_HMI_API Menu : public Window
 
     private:
         void onContentChanged();
+
+        void onSubMenu(bool b);
 
     private:        
         FlowLayout  _layout;

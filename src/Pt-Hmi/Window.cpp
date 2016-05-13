@@ -101,6 +101,8 @@ Window::~Window()
        remove( *_windows.back() );
  
     deinit();
+
+    _destroyed.send(*this);
 }
 
 
