@@ -275,11 +275,8 @@ void MenuItem::onResizeEvent(const ResizeEvent& ev)
 SubMenu::SubMenu(Menu* menu)
 : _menu(menu)
 {
-    // TODO: use a destroyed() signal in Window to unregister Menu
     if(_menu)
-    {
-        _menu->destroyed() += Pt::slot(*this, &SubMenu::onRemoveMenu);
-    }
+        _menu->destroyed() += Pt::slot(*this, &SubMenu::onDestroyedMenu);
 }
     
 
@@ -290,12 +287,14 @@ SubMenu::~SubMenu()
 
 void SubMenu::setMenu(Menu* menu)
 {
-    // TODO: use a destroyed() signal in Window to unregister Menu
+    if(_menu)
+        _menu->destroyed() -= Pt::slot(*this, &SubMenu::onDestroyedMenu);
+
     _menu = menu;
 }
 
 
-void SubMenu::onRemoveMenu(Window& w)
+void SubMenu::onDestroyedMenu(Window&)
 {
     _menu = 0;
 }
