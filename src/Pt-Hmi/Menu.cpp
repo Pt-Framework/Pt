@@ -76,7 +76,11 @@ void Menu::addMenu(Menu& menu, const Pt::String& text)
     item->setText(text);
     item->triggered() += Pt::slot(*this, &Menu::onMenuTriggered);
     _subMenus[&menu] = item;
-
+    
+    //
+    // TODO: remove destroyed slot and keep a vector<SubMenuItem>
+    //       instead of a map
+    //
     menu.destroyed() += Pt::slot(*this, &Menu::onMenuDestroyed);
     menu.closed() += Pt::slot(*this, &Menu::onMenuClosed);
 
