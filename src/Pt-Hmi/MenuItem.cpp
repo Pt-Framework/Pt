@@ -156,7 +156,7 @@ void MenuItem::setFont(const Gfx::Font& font)
 }
 
 
-Signal<>& MenuItem::triggered()
+Signal<MenuItem&>& MenuItem::triggered()
 { 
     return _triggered; 
 }
@@ -165,14 +165,14 @@ Signal<>& MenuItem::triggered()
 void MenuItem::onClicked(const Gfx::PointF& pos)
 {
     BaseType::onClicked(pos);
-    _triggered.send();
+    _triggered.send(*this);
 }
 
 
 void MenuItem::onShortcut(const KeyEvent& kev)
 {
     BaseType::onShortcut(kev);
-    _triggered.send();
+    _triggered.send(*this);
 }
 
 
@@ -271,72 +271,48 @@ void MenuItem::onResizeEvent(const ResizeEvent& ev)
     BaseType::onResizeEvent(ev);
 }
 
+//
+// SubMenu
+// 
 
-SubMenu::SubMenu(Menu* menu)
-: _menu(0)
+static const double indicatorWidth = 10.0; 
+
+
+SubMenuItem::SubMenuItem(Menu& menu)
+: _menu(&menu)
 {
-    setMenu(menu);
+    _menu = &menu;
+    _menu->destroyed() += Pt::slot(*this, &SubMenuItem::onMenuDestroyed);
+    _menu->closed() += Pt::slot(*this, &SubMenuItem::onMenuClosed);
 }
     
 
-SubMenu::~SubMenu()
+SubMenuItem::~SubMenuItem()
 {
 }
 
 
-void SubMenu::setMenu(Menu* menu)
+void SubMenuItem::onMenuClosed(Menu&)
 {
-    if(_menu)
-    {
-        _menu->destroyed() -= Pt::slot(*this, &SubMenu::onMenuDestroyed);
-        _menu->closed() -= Pt::slot(*this, &SubMenu::onMenuClosed);
-    }
 
-    _menu = menu;
-
-    if(_menu)
-    {
-        _menu->destroyed() += Pt::slot(*this, &SubMenu::onMenuDestroyed);
-        _menu->closed() += Pt::slot(*this, &SubMenu::onMenuClosed);
-    }
 }
 
 
-void SubMenu::onMenuClosed()
-{
-    Window* parent = window();
-    if( ! parent )
-        return;
-
-    static_cast<Menu*>(parent)->onMenuLeave();
-}
-
-
-void SubMenu::onMenuDestroyed(Window&)
+void SubMenuItem::onMenuDestroyed(Window&)
 {
     _menu = 0;
-
-    Window* parent = window();
-    if( ! parent )
-        return;
-
-    static_cast<Menu*>(parent)->onMenuLeave();
 }
 
 
-void SubMenu::onClicked(const Gfx::PointF& pos)
+void SubMenuItem::onClicked(const Gfx::PointF& pos)
 {
-    if(_menu && window() )
+    BaseType::onClicked(pos);
+
+    if(_menu)
     {
         Gfx::PointF topRight(size().width(), 0);
         Gfx::PointF wpos = this->toWindow(topRight);
         Gfx::PointF menuPos = window()->toScreen(wpos);
-
-        Window* parent = window();
-        if( ! parent )
-            return;
-
-        static_cast<Menu*>(parent)->onMenuEnter(_menu);
 
         _menu->move(menuPos);
         _menu->show();
@@ -344,10 +320,7 @@ void SubMenu::onClicked(const Gfx::PointF& pos)
 }
 
 
-static const double indicatorWidth = 10.0; 
-
-
-Gfx::SizeF SubMenu::onAutoSize() const
+Gfx::SizeF SubMenuItem::onAutoSize() const
 {
     Gfx::SizeF size = BaseType::onAutoSize();
     
@@ -358,7 +331,7 @@ Gfx::SizeF SubMenu::onAutoSize() const
 }
 
 
-void SubMenu::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
+void SubMenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     BaseType::onPaint(surface, updateRect);
 

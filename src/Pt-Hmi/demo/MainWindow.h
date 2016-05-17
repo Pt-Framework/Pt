@@ -54,14 +54,15 @@ class MainWindow : public Pt::Hmi::Window
 
       private:
             Menu     _menu;
-            Menu     _subMenu;
             MenuItem _item1;
             MenuItem _item2;
             MenuItem _item3;
-            SubMenu  _subMenuItem;
+
+            Menu     _subMenu;
             MenuItem _subItem1;
             MenuItem _subItem2;
             MenuItem _subItem3;
+            
             ChildW _child1;
             //ChildW _child2;
 };

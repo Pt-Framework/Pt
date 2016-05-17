@@ -33,17 +33,18 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/FlowLayout.h>
+#include <map>
 
 namespace Pt {
 
 namespace Hmi {
 
 class MenuItem;
+class SubMenuItem;
 
 class PT_HMI_API Menu : public Window
 {
     typedef Window BaseType;
-    friend class SubMenu;
 
     public:
         Menu();
@@ -54,10 +55,12 @@ class PT_HMI_API Menu : public Window
 
         void removeItem(MenuItem& item);
 
-        void setParentMenu(Menu* menu);
+        void addMenu(Menu& menu, const Pt::String& text);
+
+        void removeMenu(Menu& menu);
 
         // TODO: move this to window and widget?
-        Signal<>& closed()
+        Signal<Menu&>& closed()
         {
             return _closed;
         }
@@ -69,25 +72,26 @@ class PT_HMI_API Menu : public Window
 
         virtual void onCloseEvent(const CloseEvent& ev);
 
-        virtual void onMoveEvent(const MoveEvent& ev);
-
         virtual void onResizeEvent(const ResizeEvent& ev);
 
     protected:
-        void onMenuEnter(Menu* m);
+        void onItemTriggered(MenuItem& m);
 
-        void onMenuLeave();
+        void onMenuTriggered(MenuItem& m);
+
+        void onMenuClosed(Menu&);
+
+        void onMenuDestroyed(Window& w);
 
     private:
-        void onItemTriggered();
-        
         void onContentChanged();
 
     private:        
-        Signal<>    _closed;
-        Menu*       _submenu;
-        FlowLayout  _layout;
-        std::size_t _iconWidth;
+        Signal<Menu&>             _closed;
+        std::map<Menu*, MenuItem*> _subMenus;
+        MenuItem*                 _submenu;
+        FlowLayout                _layout;
+        std::size_t               _iconWidth;
 };
 
 } // namespace

@@ -62,7 +62,7 @@ class PT_HMI_API MenuItem : public Panel
 
         void setFont(const Gfx::Font& font);
 
-        Signal<>& triggered();
+        Signal<MenuItem&>& triggered();
 
     protected:
         virtual void onClicked(const Gfx::PointF& pos);
@@ -73,6 +73,7 @@ class PT_HMI_API MenuItem : public Panel
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
+    protected:
         virtual void onEnterEvent( const EnterEvent& ev);
 
         virtual void onLeaveEvent(const LeaveEvent& ev);
@@ -80,7 +81,7 @@ class PT_HMI_API MenuItem : public Panel
         virtual void onResizeEvent(const ResizeEvent& ev);
 
     private:
-        Signal<> _triggered;
+        Signal<MenuItem&> _triggered;
         Gfx::Image  _icon;
         Gfx::Font   _font;
         Pt::String  _text;
@@ -88,16 +89,14 @@ class PT_HMI_API MenuItem : public Panel
 
 class Menu;
 
-class PT_HMI_API SubMenu : public MenuItem
+class PT_HMI_API SubMenuItem : public MenuItem
 {
     typedef MenuItem BaseType;
 
     public:
-        explicit SubMenu(Menu* menu = 0);
+        explicit SubMenuItem(Menu& menu);
     
-        virtual ~SubMenu();
-
-        void setMenu(Menu* menu);
+        virtual ~SubMenuItem();
 
     protected:
         virtual void onClicked(const Gfx::PointF& pos);
@@ -107,8 +106,8 @@ class PT_HMI_API SubMenu : public MenuItem
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
-        void onMenuClosed();
-
+        void onMenuClosed(Menu&);
+        
         void onMenuDestroyed(Window& w);
 
     private:

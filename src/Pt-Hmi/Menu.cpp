@@ -70,6 +70,65 @@ void Menu::removeItem(MenuItem& item)
 }
 
 
+void Menu::addMenu(Menu& menu, const Pt::String& text)
+{
+    SubMenuItem* item = new SubMenuItem(menu);
+    item->setText(text);
+    item->triggered() += Pt::slot(*this, &Menu::onMenuTriggered);
+    _subMenus[&menu] = item;
+
+    menu.destroyed() += Pt::slot(*this, &Menu::onMenuDestroyed);
+    menu.closed() += Pt::slot(*this, &Menu::onMenuClosed);
+
+    _layout.add(*item);
+    onContentChanged();
+}
+
+
+void Menu::removeMenu(Menu& menu)
+{
+    std::map<Menu*, MenuItem*>::iterator it = _subMenus.find(&menu);
+    if( it == _subMenus.end() )
+        return;
+
+    MenuItem* item = it->second;
+
+    if(item == _submenu)
+        onMenuClosed(menu);
+
+    delete item;
+    _subMenus.erase(it);
+
+    onContentChanged();
+}
+
+
+void Menu::onItemTriggered(MenuItem&)
+{
+    close();
+}
+
+
+void Menu::onMenuTriggered(MenuItem& m)
+{
+    _submenu = &m;
+}
+
+
+void Menu::onMenuClosed(Menu&)
+{
+    _submenu = 0;
+    close();
+}
+
+
+void Menu::onMenuDestroyed(Window& w)
+{
+    Menu* menu = static_cast<Menu*>(&w);
+    removeMenu(*menu);
+}
+
+
 /* TODO: 
 this happens when item->resize() is called in onContentChanged
 One soluton is to assign the _size member in Window::resize immediately
@@ -176,25 +235,6 @@ void Menu::onPaintEvent(const PaintEvent& ev)
 }
 
 
-void Menu::onItemTriggered()
-{
-    close();
-}
-
-
-void Menu::onMenuEnter(Menu* menu)
-{
-    _submenu = menu;
-}
-
-
-void Menu::onMenuLeave()
-{
-    _submenu = 0;
-    close();
-}
-
-
 void Menu::onActivateEvent(const ActivateEvent& ev)
 {
     BaseType::onActivateEvent(ev);
@@ -207,13 +247,7 @@ void Menu::onActivateEvent(const ActivateEvent& ev)
 void Menu::onCloseEvent(const CloseEvent& ev)
 {
     BaseType::onCloseEvent(ev);
-    _closed.send();
-}
-
-
-void Menu::onMoveEvent(const MoveEvent& ev)
-{
-    BaseType::onMoveEvent(ev);
+    _closed.send(*this);
 }
 
 
