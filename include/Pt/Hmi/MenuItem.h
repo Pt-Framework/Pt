@@ -107,7 +107,9 @@ class PT_HMI_API SubMenu : public MenuItem
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
-        void onDestroyedMenu(Window& w);
+        void onMenuClosed();
+
+        void onMenuDestroyed(Window& w);
 
     private:
         Menu* _menu;

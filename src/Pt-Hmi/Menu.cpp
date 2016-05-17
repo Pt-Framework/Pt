@@ -35,7 +35,8 @@ namespace Pt {
 namespace Hmi {
 
 Menu::Menu()
-: _iconWidth(0)
+: _submenu(0)
+, _iconWidth(0)
 {
     setBorder(false);
 
@@ -48,12 +49,13 @@ Menu::~Menu()
 {
 }
 
+
 void Menu::addItem(MenuItem& item)
 {
     // TODO: have virtual onRemove() in Widget to notify derived classes
 
     _layout.add(item);
-    item.triggered() += Pt::slot(*this, &Menu::close);
+    item.triggered() += Pt::slot(*this, &Menu::onItemTriggered);
     onContentChanged();
 }
 
@@ -63,7 +65,7 @@ void Menu::removeItem(MenuItem& item)
     // TODO: have virtual onRemove() in Widget to notify derived classes
 
     _layout.remove(item);
-    item.triggered() -= Pt::slot(*this, &Menu::close);
+    item.triggered() -= Pt::slot(*this, &Menu::onItemTriggered);
     onContentChanged();
 }
 
@@ -174,12 +176,38 @@ void Menu::onPaintEvent(const PaintEvent& ev)
 }
 
 
+void Menu::onItemTriggered()
+{
+    close();
+}
+
+
+void Menu::onMenuEnter(Menu* menu)
+{
+    _submenu = menu;
+}
+
+
+void Menu::onMenuLeave()
+{
+    _submenu = 0;
+    close();
+}
+
+
 void Menu::onActivateEvent(const ActivateEvent& ev)
 {
     BaseType::onActivateEvent(ev);
 
-    if( ! ev.isActive() )
+    if( ! ev.isActive() && ! _submenu )
         close();
+}
+
+
+void Menu::onCloseEvent(const CloseEvent& ev)
+{
+    BaseType::onCloseEvent(ev);
+    _closed.send();
 }
 
 

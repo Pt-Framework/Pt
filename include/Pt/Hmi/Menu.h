@@ -54,21 +54,38 @@ class PT_HMI_API Menu : public Window
 
         void removeItem(MenuItem& item);
 
+        void setParentMenu(Menu* menu);
+
+        // TODO: move this to window and widget?
+        Signal<>& closed()
+        {
+            return _closed;
+        }
+
     protected:
         virtual void onPaintEvent(const PaintEvent& ev);
         
         virtual void onActivateEvent(const ActivateEvent& ev);
 
+        virtual void onCloseEvent(const CloseEvent& ev);
+
         virtual void onMoveEvent(const MoveEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
 
+    protected:
+        void onMenuEnter(Menu* m);
+
+        void onMenuLeave();
+
     private:
+        void onItemTriggered();
+        
         void onContentChanged();
 
-        void onSubMenu(bool b);
-
     private:        
+        Signal<>    _closed;
+        Menu*       _submenu;
         FlowLayout  _layout;
         std::size_t _iconWidth;
 };

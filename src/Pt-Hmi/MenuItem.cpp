@@ -273,10 +273,9 @@ void MenuItem::onResizeEvent(const ResizeEvent& ev)
 
 
 SubMenu::SubMenu(Menu* menu)
-: _menu(menu)
+: _menu(0)
 {
-    if(_menu)
-        _menu->destroyed() += Pt::slot(*this, &SubMenu::onDestroyedMenu);
+    setMenu(menu);
 }
     
 
@@ -288,15 +287,40 @@ SubMenu::~SubMenu()
 void SubMenu::setMenu(Menu* menu)
 {
     if(_menu)
-        _menu->destroyed() -= Pt::slot(*this, &SubMenu::onDestroyedMenu);
+    {
+        _menu->destroyed() -= Pt::slot(*this, &SubMenu::onMenuDestroyed);
+        _menu->closed() -= Pt::slot(*this, &SubMenu::onMenuClosed);
+    }
 
     _menu = menu;
+
+    if(_menu)
+    {
+        _menu->destroyed() += Pt::slot(*this, &SubMenu::onMenuDestroyed);
+        _menu->closed() += Pt::slot(*this, &SubMenu::onMenuClosed);
+    }
 }
 
 
-void SubMenu::onDestroyedMenu(Window&)
+void SubMenu::onMenuClosed()
+{
+    Window* parent = window();
+    if( ! parent )
+        return;
+
+    static_cast<Menu*>(parent)->onMenuLeave();
+}
+
+
+void SubMenu::onMenuDestroyed(Window&)
 {
     _menu = 0;
+
+    Window* parent = window();
+    if( ! parent )
+        return;
+
+    static_cast<Menu*>(parent)->onMenuLeave();
 }
 
 
@@ -307,6 +331,12 @@ void SubMenu::onClicked(const Gfx::PointF& pos)
         Gfx::PointF topRight(size().width(), 0);
         Gfx::PointF wpos = this->toWindow(topRight);
         Gfx::PointF menuPos = window()->toScreen(wpos);
+
+        Window* parent = window();
+        if( ! parent )
+            return;
+
+        static_cast<Menu*>(parent)->onMenuEnter(_menu);
 
         _menu->move(menuPos);
         _menu->show();
