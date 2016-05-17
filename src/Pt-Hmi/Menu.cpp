@@ -47,6 +47,11 @@ Menu::Menu()
 
 Menu::~Menu()
 {
+    while( ! _subMenus.empty() )
+    {
+        delete _subMenus.begin()->second;
+        _subMenus.erase( _subMenus.begin() );
+    }
 }
 
 
