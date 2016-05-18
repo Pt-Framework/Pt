@@ -68,6 +68,8 @@ MainWindow::MainWindow()
     //add( _child2 );
 
     // context menu
+    _menu.setName("All Music");
+    
     _item1.setText("Heavy Metal");
     _item1.setIcon(icon);
     _item1.setShortcut( &Key(Key::F3) );
@@ -81,6 +83,7 @@ MainWindow::MainWindow()
     _menu.addItem(_item3);
 
     // context sub menu
+    _subMenu.setName("Other Music");
     _subItem1.setText("Vegetarian Progressive Grindcore");
     _subMenu.addItem(_subItem1);
     
