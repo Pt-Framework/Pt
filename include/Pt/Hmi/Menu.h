@@ -1,5 +1,5 @@
-/* Copyright (C) 2013 Marc Boris Duerner 
-   Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2016 Marc Boris Duerner 
+   Copyright (C) 2016 Laurentiu-Gheorghe Crisan
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -33,14 +33,12 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/FlowLayout.h>
-#include <map>
+#include <Pt/Hmi/MenuItem.h>
+#include <vector>
 
 namespace Pt {
 
 namespace Hmi {
-
-class MenuItem;
-class SubMenuItem;
 
 class PT_HMI_API Menu : public Window
 {
@@ -61,9 +59,7 @@ class PT_HMI_API Menu : public Window
 
         // TODO: move this to window and widget?
         Signal<Menu&>& closed()
-        {
-            return _closed;
-        }
+        { return _closed; }
 
     protected:
         virtual void onPaintEvent(const PaintEvent& ev);
@@ -81,17 +77,48 @@ class PT_HMI_API Menu : public Window
 
         void onMenuClosed(Menu&);
 
-        void onMenuDestroyed(Window& w);
-
     private:
+        // TODO: need a common way to react to widget content changes
         void onContentChanged();
 
+        class SubMenu : public MenuItem
+        {
+            typedef MenuItem BaseType;
+
+            public:
+                explicit SubMenu(Menu& menu);
+    
+                virtual ~SubMenu();
+
+                Menu* menu()
+                { return _menu; }
+
+                Signal<Menu&>& closed()
+                { return _closed; }
+
+            protected:
+                virtual void onClicked(const Gfx::PointF& pos);
+
+                virtual Gfx::SizeF onAutoSize() const;
+
+                virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+            private:
+                void onMenuClosed(Menu&);
+        
+                void onMenuDestroyed(Window& w);
+
+            private:
+                Signal<Menu&> _closed;
+                Menu* _menu;
+        };
+
     private:        
-        Signal<Menu&>             _closed;
-        std::map<Menu*, MenuItem*> _subMenus;
-        MenuItem*                 _submenu;
-        FlowLayout                _layout;
-        std::size_t               _iconWidth;
+        Signal<Menu&>         _closed;
+        std::vector<SubMenu*> _subMenus;
+        MenuItem*             _currentMenu;
+        FlowLayout            _layout;
+        std::size_t           _iconWidth;
 };
 
 } // namespace

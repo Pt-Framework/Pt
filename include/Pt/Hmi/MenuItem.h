@@ -1,5 +1,5 @@
-/* Copyright (C) 2013 Marc Boris Duerner 
-   Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2016 Marc Boris Duerner 
+   Copyright (C) 2016 Laurentiu-Gheorghe Crisan
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -85,33 +85,6 @@ class PT_HMI_API MenuItem : public Panel
         Gfx::Image  _icon;
         Gfx::Font   _font;
         Pt::String  _text;
-};
-
-class Menu;
-
-class PT_HMI_API SubMenuItem : public MenuItem
-{
-    typedef MenuItem BaseType;
-
-    public:
-        explicit SubMenuItem(Menu& menu);
-    
-        virtual ~SubMenuItem();
-
-    protected:
-        virtual void onClicked(const Gfx::PointF& pos);
-
-        virtual Gfx::SizeF onAutoSize() const;
-
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
-
-    private:
-        void onMenuClosed(Menu&);
-        
-        void onMenuDestroyed(Window& w);
-
-    private:
-        Menu* _menu;
 };
 
 } // namespace

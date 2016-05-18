@@ -1,5 +1,5 @@
-/* Copyright (C) 2013 Marc Boris Duerner 
-   Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2016 Marc Boris Duerner 
+   Copyright (C) 2016 Laurentiu-Gheorghe Crisan
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -34,8 +34,12 @@ namespace Pt {
 
 namespace Hmi {
 
+///////////////////////////////////////////////////////////////////////////////
+// Menu
+///////////////////////////////////////////////////////////////////////////////
+
 Menu::Menu()
-: _submenu(0)
+: _currentMenu(0)
 , _iconWidth(0)
 {
     setBorder(false);
@@ -49,8 +53,8 @@ Menu::~Menu()
 {
     while( ! _subMenus.empty() )
     {
-        delete _subMenus.begin()->second;
-        _subMenus.erase( _subMenus.begin() );
+        delete _subMenus.back();
+        _subMenus.pop_back();
     }
 }
 
@@ -77,36 +81,33 @@ void Menu::removeItem(MenuItem& item)
 
 void Menu::addMenu(Menu& menu, const Pt::String& text)
 {
-    SubMenuItem* item = new SubMenuItem(menu);
-    item->setText(text);
-    item->triggered() += Pt::slot(*this, &Menu::onMenuTriggered);
-    _subMenus[&menu] = item;
-    
-    //
-    // TODO: remove destroyed slot and keep a vector<SubMenuItem>
-    //       instead of a map
-    //
-    menu.destroyed() += Pt::slot(*this, &Menu::onMenuDestroyed);
-    menu.closed() += Pt::slot(*this, &Menu::onMenuClosed);
+    SubMenu* sm = new SubMenu(menu);
+    sm->setText(text);
+    sm->triggered() += Pt::slot(*this, &Menu::onMenuTriggered);
+    sm->closed() += Pt::slot(*this, &Menu::onMenuClosed);
+    _subMenus.push_back(sm);
 
-    _layout.add(*item);
+    _layout.add(*sm);
     onContentChanged();
 }
 
 
 void Menu::removeMenu(Menu& menu)
 {
-    std::map<Menu*, MenuItem*>::iterator it = _subMenus.find(&menu);
-    if( it == _subMenus.end() )
-        return;
+    std::vector<SubMenu*>::iterator it;
+    for(it = _subMenus.begin(); it != _subMenus.end(); ++it)
+    {
+        SubMenu* sm = *it;
 
-    MenuItem* item = it->second;
+        if( sm->menu() != &menu )
+            continue;
 
-    if(item == _submenu)
-        onMenuClosed(menu);
+        if(sm == _currentMenu)
+            onMenuClosed(menu);
 
-    delete item;
-    _subMenus.erase(it);
+        delete sm;
+        _subMenus.erase(it);
+    }
 
     onContentChanged();
 }
@@ -120,21 +121,14 @@ void Menu::onItemTriggered(MenuItem&)
 
 void Menu::onMenuTriggered(MenuItem& m)
 {
-    _submenu = &m;
+    _currentMenu = &m;
 }
 
 
 void Menu::onMenuClosed(Menu&)
 {
-    _submenu = 0;
+    _currentMenu = 0;
     close();
-}
-
-
-void Menu::onMenuDestroyed(Window& w)
-{
-    Menu* menu = static_cast<Menu*>(&w);
-    removeMenu(*menu);
 }
 
 
@@ -248,7 +242,7 @@ void Menu::onActivateEvent(const ActivateEvent& ev)
 {
     BaseType::onActivateEvent(ev);
 
-    if( ! ev.isActive() && ! _submenu )
+    if( ! ev.isActive() && ! _currentMenu )
         close();
 }
 
@@ -273,6 +267,88 @@ void Menu::onResizeEvent(const ResizeEvent& ev)
     // _layout positions the items now in OnResizeEvent
     // TODO: our overall design should make this clearer
     BaseType::onResizeEvent(ev);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// SubMenu
+///////////////////////////////////////////////////////////////////////////////
+
+static const double indicatorWidth = 5.0; 
+
+
+Menu::SubMenu::SubMenu(Menu& menu)
+: _menu(&menu)
+{
+    _menu = &menu;
+    _menu->destroyed() += Pt::slot(*this, &Menu::SubMenu::onMenuDestroyed);
+    _menu->closed() += Pt::slot(*this, &Menu::SubMenu::onMenuClosed);
+}
+    
+
+Menu::SubMenu::~SubMenu()
+{
+}
+
+
+void Menu::SubMenu::onMenuClosed(Menu& m)
+{
+    _closed.send(m);
+}
+
+
+void Menu::SubMenu::onMenuDestroyed(Window&)
+{
+    _menu = 0;
+}
+
+
+void Menu::SubMenu::onClicked(const Gfx::PointF& pos)
+{
+    BaseType::onClicked(pos);
+
+    if(_menu)
+    {
+        Gfx::PointF topRight(size().width(), 0);
+        Gfx::PointF wpos = this->toWindow(topRight);
+        Gfx::PointF menuPos = window()->toScreen(wpos);
+
+        _menu->move(menuPos);
+        _menu->show();
+    }
+}
+
+
+Gfx::SizeF Menu::SubMenu::onAutoSize() const
+{
+    Gfx::SizeF size = BaseType::onAutoSize();
+    
+    // space for the menu indicator
+    size.addWidth(indicatorWidth); 
+    
+    return size;
+}
+
+
+void Menu::SubMenu::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+    BaseType::onPaint(surface, updateRect);
+
+    Painter painter(surface);
+
+    //
+    // draw menu indicator
+    //
+    double x = size().width() - indicatorWidth - padding().right();
+    double y = size().height() / 2;
+
+    Gfx::PointF indicator[3] = { Gfx::PointF(x - 3, y - 4),
+                                 Gfx::PointF(x + 1, y),
+                                 Gfx::PointF(x - 3, y + 4) };
+  
+    Gfx::Color fgColor = this->foregroundColor();
+    Gfx::Brush brush(fgColor);
+    painter.setBrush(brush);
+    painter.fillPolygon(indicator, 3);
 }
 
 } // namespace

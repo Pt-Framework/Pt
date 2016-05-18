@@ -1,5 +1,5 @@
-/* Copyright (C) 2013 Marc Boris Duerner 
-   Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2016 Marc Boris Duerner 
+   Copyright (C) 2016 Laurentiu-Gheorghe Crisan
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -269,90 +269,6 @@ void MenuItem::onLeaveEvent(const LeaveEvent& ev)
 void MenuItem::onResizeEvent(const ResizeEvent& ev)
 {
     BaseType::onResizeEvent(ev);
-}
-
-//
-// SubMenu
-// 
-
-static const double indicatorWidth = 10.0; 
-
-
-SubMenuItem::SubMenuItem(Menu& menu)
-: _menu(&menu)
-{
-    _menu = &menu;
-    _menu->destroyed() += Pt::slot(*this, &SubMenuItem::onMenuDestroyed);
-    _menu->closed() += Pt::slot(*this, &SubMenuItem::onMenuClosed);
-}
-    
-
-SubMenuItem::~SubMenuItem()
-{
-}
-
-
-void SubMenuItem::onMenuClosed(Menu&)
-{
-
-}
-
-
-void SubMenuItem::onMenuDestroyed(Window&)
-{
-    _menu = 0;
-}
-
-
-void SubMenuItem::onClicked(const Gfx::PointF& pos)
-{
-    BaseType::onClicked(pos);
-
-    if(_menu)
-    {
-        Gfx::PointF topRight(size().width(), 0);
-        Gfx::PointF wpos = this->toWindow(topRight);
-        Gfx::PointF menuPos = window()->toScreen(wpos);
-
-        _menu->move(menuPos);
-        _menu->show();
-    }
-}
-
-
-Gfx::SizeF SubMenuItem::onAutoSize() const
-{
-    Gfx::SizeF size = BaseType::onAutoSize();
-    
-    // space for the menu indicator
-    size.addWidth(indicatorWidth); 
-    
-    return size;
-}
-
-
-void SubMenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-    BaseType::onPaint(surface, updateRect);
-
-    Gfx::Color fgColor = this->foregroundColor();
-
-    Painter painter(surface);
-
-    //
-    // draw menu indicator
-    //
-
-    double x = size().width() - indicatorWidth - padding().right();
-    double y = size().height() / 2;
-
-    Gfx::PointF indicator[3] = { Gfx::PointF(x - 3, y - 4),
-                                 Gfx::PointF(x + 1, y),
-                                 Gfx::PointF(x - 3, y + 4) };
-
-    Gfx::Brush brush(fgColor);
-    painter.setBrush(brush);
-    painter.fillPolygon(indicator, 3);
 }
 
 } // namespace
