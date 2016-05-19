@@ -49,6 +49,7 @@ namespace Hmi {
 WindowManager::WindowManager()
 : _app( Application::instance() )
 , _parent(0)
+, _activeWindow(0)
 , _currentWindow(0)
 , _grabbedWindow(0)
 , _borderWidth(4.0f)
@@ -95,6 +96,9 @@ void WindowManager::remove(Window& w)
 
             if(_grabbedWindow && _grabbedWindow->window() == &w)
                 _grabbedWindow = 0;
+
+            if(_activeWindow && _activeWindow->window() == &w)
+                _activeWindow  = 0;
 
             delete *wit;
             _windows.erase(wit);
@@ -183,11 +187,25 @@ bool WindowManager::mouseEvent( const MouseEvent& mev )
     else
         windowFrame = findWindow( mev.position() );
 
-    if( mev.isPress() && windowFrame && ! windowFrame->window()->isActive() )
+    //
+    // window activation
+    //
+    if( mev.isPress() )
     {
-        windowFrame->window()->activate();
+        if( ! windowFrame && _activeWindow )
+        {
+            onActivate(0);
+        }
+        
+        if( windowFrame && ! windowFrame->window()->isActive())
+        {
+            windowFrame->window()->activate();
+        }
     }
-    
+
+    //
+    // window enter/leave
+    //
     if(_currentWindow != windowFrame)
     {
       if(_currentWindow)
@@ -202,6 +220,9 @@ bool WindowManager::mouseEvent( const MouseEvent& mev )
       }
     }
 
+    //
+    // forward mouse event
+    //
     if(windowFrame)
     {         
         if(windowFrame->mouseEvent(mev))
@@ -247,7 +268,8 @@ void WindowManager::paintEvent(const PaintEvent& pev)
         Gfx::PointF to = updateRect.topLeft() + frame->clientRect().topLeft();
 
         Painter painter(surface);
-        painter.drawSurface(to, w->surface(), updateRect);  
+        painter.drawSurface(to, w->surface(), updateRect); 
+        //painter.drawRect( pev.rect() ); 
         //std::clog << w->title() << ": "
         //          << to.x() << "," << to.y() << "  "
         //          << updateRect.width() << "x" << updateRect.height() << std::endl;  
@@ -339,36 +361,33 @@ void WindowManager::onShow( Window& w, bool visible )
 }
 
 
-void WindowManager::onActivate(Window& w)
+void WindowManager::onActivate(Window* w)
 {
-    std::vector<WindowFrame*>::iterator it;
-    for(it = _windows.begin(); it != _windows.end(); ++it)
+    if(_activeWindow && _activeWindow->window() != w)
     {
-        Window* child = (*it)->window();
-        if(child->isActive() && child != &w)
-        {
-            ActivateEvent aev(child->vid(), false);
-            (*it)->update();
-        }
+        ActivateEvent aev(_activeWindow->window()->vid(), false);
+        Application::instance().loop().commitEvent(aev);
+        _activeWindow->update();
+        _activeWindow = 0;
     }
 
-    for(it = _windows.begin(); it != _windows.end(); ++it)
-    {
-        if( (*it)->window() == &w)
-        {
-            WindowFrame* wf = *it;
-            _windows.erase(it);
-            _windows.push_back(wf);
-            break;
-        }
-    }
+    if( ! w )
+        return;
+
+    WindowFrame* frame = findWindow(*w);
+    if( ! frame )
+        return;
+
+    // this moves frame to the back
+    std::remove(_windows.begin(), _windows.end(), frame);
 
     _parent->activate();
 
-    ActivateEvent aev( w.vid(), true );
+    ActivateEvent aev(w->vid(), true);
     Application::instance().loop().commitEvent(aev);
 
-    _windows.back()->update();
+    _activeWindow = frame;
+    _activeWindow->update();
 }
 
 

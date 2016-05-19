@@ -559,7 +559,7 @@ void Window::activate()
 
 void Window::onActivate(Window& w)
 {
-    _windowManager.onActivate(w);
+    _windowManager.onActivate(&w);
 }
 
 

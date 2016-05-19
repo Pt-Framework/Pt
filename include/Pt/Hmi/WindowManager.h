@@ -118,7 +118,7 @@ class WindowManager : public Pt::Connectable
 
         void onShow( Window& w, bool visible );
 
-        void onActivate(Window& w);
+        void onActivate(Window* w);
 
         void onEnable(Window& w, bool enable);
 
@@ -131,6 +131,8 @@ class WindowManager : public Pt::Connectable
         Window*                   _parent; 
         std::vector<WindowFrame*> _windows;
         
+        WindowFrame*              _activeWindow;
+
         WindowFrame*              _currentWindow;
         WindowFrame*              _grabbedWindow;
 
