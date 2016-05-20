@@ -68,10 +68,10 @@ class PngReaderImpl
 
         ~PngReaderImpl()
         {
-          if(_pngRead)
-          {
-              png_destroy_read_struct(&_pngRead, &_pngInfo, (png_infopp)0);
-          }
+            if(_pngRead)
+            {
+                png_destroy_read_struct(&_pngRead, &_pngInfo, (png_infopp)0);
+            }
         }
 
         void attach(std::istream& is, Image& image)

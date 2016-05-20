@@ -45,6 +45,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImagePainter.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageReader.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\JpegReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Painter.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Pen.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PngReader.h" />
@@ -492,6 +493,7 @@
     <ClCompile Include="..\..\src\Pt-Gfx\ImageFormat.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ImageReader.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\JpegReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Pen.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\PngReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer.cpp" />

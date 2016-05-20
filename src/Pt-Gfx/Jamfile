@@ -8,6 +8,11 @@ if $(PNG_INCLUDES)
     SubDirHdrs $(PNG_INCLUDES) ;
 }
 
+if $(JPEG_INCLUDES)
+{
+    SubDirHdrs $(JPEG_INCLUDES) ;
+}
+
 if $(FREETYPE_INCLUDES)
 {
     SubDirHdrs $(FREETYPE_INCLUDES) ;
@@ -27,6 +32,7 @@ SharedLibrary Pt-Gfx : Argb8888Format.cpp
                        ImageFormat.cpp
                        ImagePainter.cpp
                        ImageReader.cpp
+                       JpegReader.cpp
                        Pen.cpp
                        PngReader.cpp
                        Rasterizer.cpp
@@ -35,16 +41,6 @@ SharedLibrary Pt-Gfx : Argb8888Format.cpp
 
 LinkSharedLibraries Pt-Gfx : Pt Pt-System ;
 MakeLocate Pt-Gfx : $(PT_OUTPUT_TARGET) ;
-
-if $(WITH_BUILTIN_FREETYPE)
-{
-    LinkLibraries Pt-Gfx : freetype ;
-}
-else
-{
-    LinkFlags Pt-Gfx : $(FREETYPE_LINKFLAGS) ;
-    LinkLibs Pt-Gfx : $(FREETYPE_LINKLIBS) ;
-}
 
 if $(WITH_BUILTIN_LIBPNG)
 {
@@ -56,6 +52,16 @@ else
     LinkLibs Pt-Gfx : $(PNG_LINKLIBS) ;
 }
 
+if $(WITH_BUILTIN_LIBJPEG)
+{
+    LinkLibraries Pt-Gfx : jpeg ;
+}
+else
+{
+    LinkFlags Pt-Gfx : $(JPEG_LINKFLAGS) ;
+    LinkLibs Pt-Gfx : $(JPEG_LINKLIBS) ;
+}
+
 if $(WITH_BUILTIN_ZLIB)
 {
     LinkLibraries Pt-Gfx : $(ZLIB) ;
@@ -64,4 +70,14 @@ else
 {
     LinkFlags Pt-Gfx : $(ZLIB_LINKFLAGS) ;
     LinkLibs Pt-Gfx : $(ZLIB_LINKLIBS) ;
+}
+
+if $(WITH_BUILTIN_FREETYPE)
+{
+    LinkLibraries Pt-Gfx : freetype ;
+}
+else
+{
+    LinkFlags Pt-Gfx : $(FREETYPE_LINKFLAGS) ;
+    LinkLibs Pt-Gfx : $(FREETYPE_LINKLIBS) ;
 }
