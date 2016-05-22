@@ -103,7 +103,7 @@ class PT_HMI_API Window : public Visual
 
     Gfx::PointF toParent(const Gfx::PointF& pos) const;
 
-    Gfx::PointF toScreen(const Gfx::PointF& pos) const;
+    Gfx::PointF toScreen(const Gfx::PointF& pos) const;       
 
     void update();
 
@@ -133,6 +133,7 @@ class PT_HMI_API Window : public Visual
 
     bool isClosed() const;
 
+    
     void close();    
 
     Signal<Window&>& destroyed()
@@ -141,6 +142,9 @@ class PT_HMI_API Window : public Visual
     PixmapSurface& surface();
 
     MainWindowImpl* impl();
+
+    //Todo: 
+    void setCaptureMouse( bool capture );
 
   protected:
     void onUpdate(Window& w, const Gfx::RectF& rect);
@@ -316,6 +320,7 @@ class PT_HMI_API Window : public Visual
     bool                           _canClose;    
     WindowDecoration::Flags        _decoration;   
     Gfx::Font                      _font;   
+    bool                           _capture; 
 };
 
 } // namespace

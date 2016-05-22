@@ -94,6 +94,7 @@ MainWindow::MainWindow()
     _subMenu.addItem(_subItem3);
     
     _menu.addMenu(_subMenu, "Other Music");
+    _child1.show(true);
 }
 
 

@@ -57,25 +57,26 @@ class PT_HMI_API Menu : public Window
 
         void removeMenu(Menu& menu);
 
-        // TODO: move this to window and widget?
-        Signal<Menu&>& closed()
-        { return _closed; }
 
     protected:
         virtual void onPaintEvent(const PaintEvent& ev);
         
-        virtual void onActivateEvent(const ActivateEvent& ev);
-
         virtual void onCloseEvent(const CloseEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
+
+        virtual void onShowEvent( const ShowEvent& ev );
+
+        virtual void onMouseEvent( const MouseEvent& ev );
+
+        virtual void onEnterEvent( const EnterEvent& ev );
+
+        virtual void onLeaveEvent( const LeaveEvent& ev );
 
     protected:
         void onItemTriggered(MenuItem& m);
 
         void onMenuTriggered(MenuItem& m);
-
-        void onMenuClosed(Menu&);
 
     private:
         // TODO: need a common way to react to widget content changes
@@ -93,9 +94,6 @@ class PT_HMI_API Menu : public Window
                 Menu* menu()
                 { return _menu; }
 
-                Signal<Menu&>& closed()
-                { return _closed; }
-
             protected:
                 virtual void onClicked(const Gfx::PointF& pos);
 
@@ -109,16 +107,18 @@ class PT_HMI_API Menu : public Window
                 void onMenuDestroyed(Window& w);
 
             private:
-                Signal<Menu&> _closed;
                 Menu* _menu;
         };
 
+        Menu* findMenu( const Gfx::PointF& pos );
+        Menu& rootMenu();
+
     private:        
-        Signal<Menu&>         _closed;
         std::vector<SubMenu*> _subMenus;
-        MenuItem*             _currentMenu;
+        SubMenu*              _currentMenu;
         FlowLayout            _layout;
         std::size_t           _iconWidth;
+        Menu*                 _parentMenu;  
 };
 
 } // namespace

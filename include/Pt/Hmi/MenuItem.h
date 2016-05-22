@@ -71,7 +71,7 @@ class PT_HMI_API MenuItem : public Panel
 
         virtual Gfx::SizeF onAutoSize() const;
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);  
 
     protected:
         virtual void onEnterEvent( const EnterEvent& ev);

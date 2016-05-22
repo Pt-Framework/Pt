@@ -1,5 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/*   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -58,7 +57,7 @@ Window::Window(Window* parent)
 , _pointerWidget(0)
 , _focusWidget(0)
 , _init(false)
-, _visible(true)
+, _visible(false)
 , _isActive(false)
 , _enabled(true)
 , _enabledState(true)
@@ -72,6 +71,7 @@ Window::Window(Window* parent)
 , _border(true)
 , _icon()
 , _canClose(true)
+, _capture(false)
 {    
     _windowManager.init(*this);
 
@@ -149,6 +149,7 @@ void Window::init(Window* parent)
         _impl->setMaximumSize(_maximumSize );
         _impl->setIcon(_icon);
         _impl->setState(_state);  
+        _impl->setCaptureMouse( _capture );
     }  
     
     show(_visible);
@@ -779,6 +780,7 @@ void Window::onCloseEvent(const CloseEvent& ev)
     }
 
     _isClosed =  true;
+    _visible = false;
 
     deinit();
 }
@@ -887,7 +889,7 @@ void Window::onPaintEvent(const PaintEvent& ev)
 
 
 void Window::onMouseEvent(const MouseEvent& ev)
-{
+{    
     if( _windowManager.mouseEvent(ev) )
         return;    
 
@@ -1161,6 +1163,18 @@ void Window::setMnemonic(Widget& w, const Char* ch)
 
     if(ch)
         _mnemonics[*ch] = &w;
+}
+
+
+void Window::setCaptureMouse( bool capture )
+{
+    if( !capture && !_capture)
+        return;
+
+    if( _impl)
+        _impl->setCaptureMouse(capture);
+    else
+        _capture = capture;
 }
 
 } // namespace

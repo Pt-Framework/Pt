@@ -41,11 +41,12 @@ namespace Hmi {
 Menu::Menu()
 : _currentMenu(0)
 , _iconWidth(0)
+, _parentMenu(0)
 {
     setBorder(false);
 
     _layout.setAlignment(FlowLayout::Top);
-    setMainWidget(&_layout);
+    setMainWidget(&_layout);    
 }
 
 
@@ -84,8 +85,8 @@ void Menu::addMenu(Menu& menu, const Pt::String& text)
     SubMenu* sm = new SubMenu(menu);
     sm->setText(text);
     sm->triggered() += Pt::slot(*this, &Menu::onMenuTriggered);
-    sm->closed() += Pt::slot(*this, &Menu::onMenuClosed);
     _subMenus.push_back(sm);
+    menu._parentMenu = this;
 
     _layout.add(*sm);
     onContentChanged();
@@ -102,33 +103,24 @@ void Menu::removeMenu(Menu& menu)
         if( sm->menu() != &menu )
             continue;
 
-        if(sm == _currentMenu)
-            onMenuClosed(menu);
-
         delete sm;
         _subMenus.erase(it);
     }
 
+    menu._parentMenu = 0;
     onContentChanged();
 }
 
 
 void Menu::onItemTriggered(MenuItem&)
 {
-    close();
+    rootMenu().close();    
 }
 
 
 void Menu::onMenuTriggered(MenuItem& m)
 {
-    _currentMenu = &m;
-}
-
-
-void Menu::onMenuClosed(Menu&)
-{
-    _currentMenu = 0;
-    close();
+    _currentMenu = static_cast<SubMenu*>(&m);
 }
 
 
@@ -238,19 +230,64 @@ void Menu::onPaintEvent(const PaintEvent& ev)
 }
 
 
-void Menu::onActivateEvent(const ActivateEvent& ev)
+void Menu::onMouseEvent( const MouseEvent& ev )
 {
-    BaseType::onActivateEvent(ev);
+    BaseType::onMouseEvent( ev );
 
-    if( ! ev.isActive() && ! _currentMenu )
-        close();
+    // TODO: inplement a findMenu that searches through all
+    //       currentMenu to simplify this function 
+    Menu* menu = findMenu(ev.position() );           
+
+    if( menu )
+    {   
+        menu->setCaptureMouse(true);    
+        return;
+    }     
+
+    if( ev.isPress() )
+    {
+        rootMenu().close();            
+    }
+    else
+    {
+        if( _currentMenu )
+            _currentMenu->menu()->setCaptureMouse(true);
+    }    
+}
+
+
+Menu& Menu::rootMenu()
+{    
+    if( !_parentMenu )
+        return *this;
+      
+    return _parentMenu->rootMenu();
+}
+
+
+Menu* Menu::findMenu( const Gfx::PointF& pos )
+{
+    Gfx::RectF rect (Gfx::PointF(0,0), size() );
+
+    if( rect.contains( pos ) )
+        return this;
+
+    if( !_parentMenu )
+        return 0;
+      
+    return _parentMenu->findMenu( this->toScreen(pos) - _parentMenu->position() );
 }
 
 
 void Menu::onCloseEvent(const CloseEvent& ev)
 {
-    BaseType::onCloseEvent(ev);
-    _closed.send(*this);
+    if( _currentMenu && _currentMenu->menu() )
+        _currentMenu->menu()->close();
+
+    BaseType::onCloseEvent(ev);    
+    
+    if( _parentMenu )
+        _parentMenu->_currentMenu = 0;    
 }
 
 
@@ -269,6 +306,29 @@ void Menu::onResizeEvent(const ResizeEvent& ev)
     BaseType::onResizeEvent(ev);
 }
 
+
+void Menu::onShowEvent( const ShowEvent& ev )
+{
+    BaseType::onShowEvent(ev);
+
+    setCaptureMouse( ev.visible() );
+}
+
+
+void Menu::onEnterEvent( const EnterEvent& ev )
+{
+    BaseType::onEnterEvent(ev);
+    setCaptureMouse( true );
+}
+
+
+void Menu::onLeaveEvent( const LeaveEvent& ev )
+{
+  if( _parentMenu )
+    _parentMenu->setCaptureMouse( true);   
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // SubMenu
 ///////////////////////////////////////////////////////////////////////////////
@@ -281,7 +341,6 @@ Menu::SubMenu::SubMenu(Menu& menu)
 {
     _menu = &menu;
     _menu->destroyed() += Pt::slot(*this, &Menu::SubMenu::onMenuDestroyed);
-    _menu->closed() += Pt::slot(*this, &Menu::SubMenu::onMenuClosed);
 }
     
 
@@ -290,10 +349,6 @@ Menu::SubMenu::~SubMenu()
 }
 
 
-void Menu::SubMenu::onMenuClosed(Menu& m)
-{
-    _closed.send(m);
-}
 
 
 void Menu::SubMenu::onMenuDestroyed(Window&)
@@ -305,15 +360,22 @@ void Menu::SubMenu::onMenuDestroyed(Window&)
 void Menu::SubMenu::onClicked(const Gfx::PointF& pos)
 {
     BaseType::onClicked(pos);
+    
+    if(! _menu )
+        return;
 
-    if(_menu)
-    {
+    if(!_menu->isVisible())
+    {//Todo enter
         Gfx::PointF topRight(size().width(), 0);
         Gfx::PointF wpos = this->toWindow(topRight);
         Gfx::PointF menuPos = window()->toScreen(wpos);
 
         _menu->move(menuPos);
         _menu->show();
+    }
+    else
+    {//Leave
+       _menu->close();       
     }
 }
 

@@ -290,6 +290,16 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
     SetClassLong(_hwnd, GCL_HICON, (LONG)hIcon);     
 }
 
+
+void MainWindowImpl::setCaptureMouse( bool capture )
+{
+    if( capture)
+        SetCapture(_hwnd);
+    else
+        ReleaseCapture();
+}
+
+
 } // namespace
 
 } // namespace

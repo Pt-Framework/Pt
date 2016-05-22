@@ -79,6 +79,8 @@ class MainWindowImpl
 
         void setTitle( const std::string& t );
 
+        void setCaptureMouse( bool capture );
+
         HWND hwnd()
         {
             return _hwnd;

@@ -492,6 +492,7 @@ bool ApplicationImpl::processMessage(HWND hwnd, unsigned int msg,
 
         case WM_MOUSELEAVE:
             handled = true;  
+            std::clog<<"Leave sys " << w->name ()  << std::endl;            
             _mouseEvent.clear();
             Application::instance().setCursor(0);
             Application::instance().setPointerWindow(0);
