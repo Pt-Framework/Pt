@@ -40,7 +40,8 @@ MainWindowImpl::MainWindowImpl()
 , _screen( Application::instance().screen() )
 {
   HINSTANCE hInstance = GetModuleHandle(NULL);
-  _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 20, 20, 10, 10, GetDesktopWindow(), NULL, hInstance, NULL );
+  _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN  , 20, 20, 10, 10, GetDesktopWindow(), NULL, hInstance, NULL );
+  setBorder(false);
 }
 
 

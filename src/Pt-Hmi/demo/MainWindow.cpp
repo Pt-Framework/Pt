@@ -84,16 +84,16 @@ MainWindow::MainWindow()
 
     // context sub menu
     _subMenu.setName("Other Music");
-    _subItem1.setText("Vegetarian Progressive Grindcore");
+    _subItem1.setText("d");
     _subMenu.addItem(_subItem1);
     
-    _subItem2.setText("Rhythm and Blues");
+    _subItem2.setText("c");
     _subMenu.addItem(_subItem2);
 
-    _subItem3.setText("Romanian Polka");
+    _subItem3.setText("b");
     _subMenu.addItem(_subItem3);
     
-    _menu.addMenu(_subMenu, "Other Music");
+    _menu.addMenu(_subMenu, "a");
     _child1.show(true);
 }
 
