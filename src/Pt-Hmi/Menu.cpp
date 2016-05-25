@@ -91,6 +91,9 @@ void Menu::removeItem(MenuItem& item)
 
 void Menu::addMenu(Menu& menu, const Pt::String& text)
 {
+    if(menu._parentMenu)
+        menu._parentMenu->removeMenu(menu);
+
     SubMenuItem* item = new SubMenuItem(menu, text); 
     item->triggered() += Pt::slot(*this, &Menu::onMenuTriggered);
      
