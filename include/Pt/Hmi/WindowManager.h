@@ -107,7 +107,7 @@ class WindowManager : public Pt::Connectable
         
         bool mouseEvent(const MouseEvent& mev);
 
-        void paintEvent(const PaintEvent& ev);
+        void paintEvent(const Gfx::RectF& rect);
 
     public:
         void onResize(Window& w, const Gfx::SizeF& to);

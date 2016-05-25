@@ -155,8 +155,8 @@ void StackBottom(Widget& parent)
 }
 
 
-FlowLayout::FlowLayout()
-: _alignment(Left)
+FlowLayout::FlowLayout(Alignment a)
+: _alignment(a)
 {
 }
 

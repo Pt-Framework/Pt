@@ -199,6 +199,15 @@ class PT_HMI_API Widget : public Visual
     protected:
         void onPaint(const Gfx::RectF& updateRect);
 
+        void onEnable(bool e);
+
+    protected:
+        virtual void onAddWidget(Widget& w);
+
+        virtual void onRemoveWidget(Widget& w);
+
+        virtual void onParentChanged(Widget* w);
+
         // TODO: move this to a Layout base class
         virtual void onLayout();
 
@@ -237,10 +246,9 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onLeaveEvent(const LeaveEvent& ev );
 
-    protected:
-        void onEnable(bool e);
-
     private:
+        void setParent(Widget* parent);
+
         void setWindow(Window* window);
 
     private:

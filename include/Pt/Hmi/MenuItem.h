@@ -58,21 +58,37 @@ class PT_HMI_API MenuItem : public Panel
         
         void setIcon(const Gfx::Image& img);
 
+        double iconPadding() const;
+
+        void setIconPadding(double left);
+
         const Gfx::Font& font() const;
 
         void setFont(const Gfx::Font& font);
 
         Signal<MenuItem&>& triggered();
 
+        Signal<MenuItem&>& removed();
+
     protected:
+        virtual void onParentChanged(Widget* w);
+        
         virtual void onClicked(const Gfx::PointF& pos);
 
         virtual void onShortcut(const KeyEvent& kev);
 
         virtual Gfx::SizeF onAutoSize() const;
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);  
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        
+        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
 
+        virtual void onPaintIcon(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+        virtual void onPaintItem(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+        virtual void onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRect);
+  
     protected:
         virtual void onEnterEvent( const EnterEvent& ev);
 
@@ -82,9 +98,11 @@ class PT_HMI_API MenuItem : public Panel
 
     private:
         Signal<MenuItem&> _triggered;
-        Gfx::Image  _icon;
-        Gfx::Font   _font;
-        Pt::String  _text;
+        Signal<MenuItem&> _removed;
+        double            _iconWidth;
+        Gfx::Image        _icon;
+        Gfx::Font         _font;
+        Pt::String        _text;
 };
 
 } // namespace

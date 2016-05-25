@@ -40,7 +40,8 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Menu : public Window
+class PT_HMI_API Menu : public virtual Connectable
+                      , private Window 
 {
     typedef Window BaseType;
 
@@ -48,6 +49,8 @@ class PT_HMI_API Menu : public Window
         Menu();
     
         virtual ~Menu();
+
+        void setName(const std::string& name);
 
         void addItem(MenuItem& item);
 
@@ -57,41 +60,50 @@ class PT_HMI_API Menu : public Window
 
         void removeMenu(Menu& menu);
 
+        void show(const Gfx::PointF& pos);
 
     protected:
         virtual void onPaintEvent(const PaintEvent& ev);
+
+        virtual void onPaintBackground(const Gfx::RectF& rect);
         
         virtual void onCloseEvent(const CloseEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
 
-        virtual void onShowEvent( const ShowEvent& ev );
+        virtual void onShowEvent(const ShowEvent& ev);
 
-        virtual void onMouseEvent( const MouseEvent& ev );
+        virtual void onMouseEvent(const MouseEvent& ev);
 
-        virtual void onEnterEvent( const EnterEvent& ev );
+        virtual void onEnterEvent(const EnterEvent& ev);
 
-        virtual void onLeaveEvent( const LeaveEvent& ev );
+        virtual void onLeaveEvent(const LeaveEvent& ev);
 
     protected:
         void onItemTriggered(MenuItem& m);
 
+        void onItemRemoved(MenuItem& m);
+
         void onMenuTriggered(MenuItem& m);
 
-    private:
+        Menu* findMenu(const Gfx::PointF& pos);
+        
+        Menu& rootMenu();
+
         // TODO: need a common way to react to widget content changes
         void onContentChanged();
 
-        class SubMenu : public MenuItem
+    private:
+        class SubMenuItem : public MenuItem
         {
             typedef MenuItem BaseType;
 
             public:
-                explicit SubMenu(Menu& menu);
+                explicit SubMenuItem(Menu& menu, const Pt::String& text);
     
-                virtual ~SubMenu();
+                virtual ~SubMenuItem();
 
-                Menu* menu()
+                Menu& menu()
                 { return _menu; }
 
             protected:
@@ -99,26 +111,19 @@ class PT_HMI_API Menu : public Window
 
                 virtual Gfx::SizeF onAutoSize() const;
 
-                virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+                virtual void onPaintShortcut(PaintSurface& surface, 
+                                             const Gfx::RectF& updateRect);
 
             private:
-                void onMenuClosed(Menu&);
-        
-                void onMenuDestroyed(Window& w);
-
-            private:
-                Menu* _menu;
+                Menu& _menu;
         };
 
-        Menu* findMenu( const Gfx::PointF& pos );
-        Menu& rootMenu();
-
-    private:        
-        std::vector<SubMenu*> _subMenus;
-        SubMenu*              _currentMenu;
-        FlowLayout            _layout;
-        std::size_t           _iconWidth;
-        Menu*                 _parentMenu;  
+    private:
+        std::vector<SubMenuItem*> _subMenus;
+        SubMenuItem*              _currentMenu;
+        FlowLayout                _layout;
+        std::size_t               _iconWidth;
+        Menu*                     _parentMenu;  
 };
 
 } // namespace

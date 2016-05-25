@@ -237,10 +237,9 @@ bool WindowManager::mouseEvent( const MouseEvent& mev )
 }
 
 
-void WindowManager::paintEvent(const PaintEvent& pev)
+void WindowManager::paintEvent(const Gfx::RectF& rect)
 {  
     PaintSurface& surface = _parent->surface();
-    const Gfx::RectF& rect = pev.rect();
 
     std::vector<WindowFrame*>::reverse_iterator it;
 

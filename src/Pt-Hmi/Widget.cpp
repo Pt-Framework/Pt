@@ -112,10 +112,12 @@ void Widget::add(Widget& widget)
         widget.parent()->remove(widget);
 
     _children.push_back(&widget);
-    widget._parent = this;
-
+    
+    widget.setParent(this);
     widget.setWindow(_window);
     widget.update();
+
+    onAddWidget(widget);
 }
 
 
@@ -123,17 +125,40 @@ void Widget::remove(Widget& widget)
 {
     std::vector<Widget*>::iterator it;
     it = std::find(_children.begin(), _children.end(), &widget);
-    
     if( it == _children.end() )
         return;   
      
     _children.erase(it);
     
-    widget._parent = 0;
     widget._enabledState = widget._enabled;
+    widget.setParent(0);
     widget.setWindow(0);
 
     widget.update();    
+    
+    onRemoveWidget(widget); 
+}
+
+
+void Widget::onAddWidget(Widget& w)
+{
+}
+
+
+void Widget::onRemoveWidget(Widget& w)
+{
+}
+
+
+void Widget::onParentChanged(Widget* w)
+{
+}
+
+
+void Widget::setParent(Widget* parent)
+{
+    _parent = parent;
+    onParentChanged(parent);
 }
 
 

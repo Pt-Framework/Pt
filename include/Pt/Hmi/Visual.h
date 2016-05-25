@@ -40,7 +40,7 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Visual : public Pt::Connectable
+class PT_HMI_API Visual : public virtual Pt::Connectable
 {
     public:
         virtual ~Visual();

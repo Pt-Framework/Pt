@@ -84,16 +84,16 @@ MainWindow::MainWindow()
 
     // context sub menu
     _subMenu.setName("Other Music");
-    _subItem1.setText("d");
+    _subItem1.setText("Vegetarian Progressive Grindcore");
     _subMenu.addItem(_subItem1);
     
-    _subItem2.setText("c");
+    _subItem2.setText("Super Black Metal");
     _subMenu.addItem(_subItem2);
 
-    _subItem3.setText("b");
+    _subItem3.setText("Romanian Polka");
     _subMenu.addItem(_subItem3);
     
-    _menu.addMenu(_subMenu, "a");
+    _menu.addMenu(_subMenu, "Other Music");
     _child1.show(true);
 }
 
@@ -111,8 +111,7 @@ void MainWindow::onMouseEvent(const MouseEvent& ev)
     {
         Gfx::PointF menuPos = this->toScreen( ev.position() );
 
-        _menu.move(menuPos);
-        _menu.show();
+        _menu.show(menuPos);
     }
 }
 

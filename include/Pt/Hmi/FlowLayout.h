@@ -53,7 +53,7 @@ class PT_HMI_API FlowLayout : public Widget
         };
 
     public:
-        FlowLayout();
+        explicit FlowLayout(Alignment a = Left);
 
         virtual ~FlowLayout();
 

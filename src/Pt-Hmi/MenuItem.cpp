@@ -103,7 +103,8 @@ namespace Pt {
 namespace Hmi {
 
 MenuItem::MenuItem()
-: _text("(empty)")
+: _iconWidth(0)
+, _text("(empty)")
 {
     setAutoSize(true);
     setAcceptsFocus(true);
@@ -117,6 +118,7 @@ MenuItem::MenuItem()
 
 MenuItem::~MenuItem()
 {
+    _removed.send(*this);
 }
 
 
@@ -144,6 +146,18 @@ void MenuItem::setIcon(const Gfx::Image& img)
 }
 
 
+double MenuItem::iconPadding() const
+{
+    return _iconWidth;
+}
+
+
+void MenuItem::setIconPadding(double w)
+{
+    _iconWidth = std::max<double>(w, _icon.width());
+}
+
+
 const Gfx::Font& MenuItem::font() const
 {
     return _font;
@@ -159,6 +173,19 @@ void MenuItem::setFont(const Gfx::Font& font)
 Signal<MenuItem&>& MenuItem::triggered()
 { 
     return _triggered; 
+}
+
+
+Signal<MenuItem&>& MenuItem::removed()
+{
+    return _removed;
+}
+
+
+void MenuItem::onParentChanged(Widget* w)
+{
+    if( ! w )
+        _removed.send(*this);
 }
 
 
@@ -179,10 +206,10 @@ void MenuItem::onShortcut(const KeyEvent& kev)
 Gfx::SizeF MenuItem::onAutoSize() const
 {
     Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
-    
+
     double contentHeight = std::max( fm.height(), _icon.height() );
-    double contentWidth = fm.width();
-    
+    double contentWidth = fm.width() + _icon.width();
+
     const Key* sk = shortcut();
     if(sk)
     {
@@ -200,42 +227,69 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     //BaseType::onPaint(surface, updateRect);
 
+    onPaintBackground(surface, updateRect);
+    onPaintIcon(surface, updateRect);
+    onPaintItem(surface, updateRect);
+    onPaintShortcut(surface, updateRect);
+}
+
+
+void MenuItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
     bool mouseOver = this->window()->pointerWidget() == this;
-
-    Gfx::Color fgColor = foregroundColor();
-    Gfx::Color bgColor = backgroundColor();
-    
-    if(mouseOver)
-        bgColor = brighten(bgColor, 0.85f);
-
-    Painter painter(surface);
-    painter.setFont(_font);
-
-    Gfx::Pen pen(1, fgColor);
-    painter.setPen(pen);
-
-    Gfx::Brush brush(bgColor);
-    painter.setBrush(brush);
 
     if(mouseOver)
     {
+        Gfx::Color bgColor = backgroundColor();
+        Gfx::Brush brush = brighten(bgColor, 0.85f);
+
+        Painter painter(surface);
+        painter.setBrush(brush);
         painter.fillRect( Gfx::RectF(Gfx::PointF(0,0), size()) );
     }
+}
 
-    //
-    // draw item text
-    //
+
+void MenuItem::onPaintIcon(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+    Painter painter(surface);
+
+    double iconX = (iconPadding() - icon().width()) / 2;
+    double iconY = (size().height() - icon().height()) / 2;
+
+    Gfx::PointF iconPos(iconX, iconY);
+    painter.drawImage(iconPos, icon());
+}
+
+
+void MenuItem::onPaintItem(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+    Painter painter(surface);
+    painter.setFont(_font);
+
+    Gfx::Color fgColor = foregroundColor();
+    Gfx::Pen pen(1, fgColor);
+    painter.setPen(pen);
+
     Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
-    double textX = padding().left();
+    double textX = padding().left() + _iconWidth;
     double textY = (size().height() - fm.height()) / 2;
     textY += fm.ascent();
     Gfx::PointF textPos(textX, textY);
 
     painter.drawText(textPos, _text);
-    
-    //
-    // draw shortcut text
-    //
+}
+
+
+void MenuItem::onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+    Painter painter(surface);
+    painter.setFont(_font);
+
+    Gfx::Color fgColor = foregroundColor();
+    Gfx::Pen pen(1, fgColor);
+    painter.setPen(pen);
+
     const Key* sk = shortcut();
     if(sk)
     {

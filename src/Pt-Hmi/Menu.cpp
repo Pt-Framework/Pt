@@ -40,75 +40,91 @@ namespace Hmi {
 
 Menu::Menu()
 : _currentMenu(0)
+, _layout(FlowLayout::Top)
 , _iconWidth(0)
 , _parentMenu(0)
 {
     setBorder(false);
-
-    _layout.setAlignment(FlowLayout::Top);
     setMainWidget(&_layout);    
 }
 
 
 Menu::~Menu()
 {
+    if(_parentMenu)
+        _parentMenu->removeMenu(*this);
+
     while( ! _subMenus.empty() )
     {
-        delete _subMenus.back();
+        SubMenuItem* item = _subMenus.back();
+        item->menu()._parentMenu = 0;
+        delete item;
         _subMenus.pop_back();
     }
 }
 
 
+void Menu::setName(const std::string& name)
+{ 
+    Window::setName(name); 
+}
+
+
 void Menu::addItem(MenuItem& item)
 {
-    // TODO: have virtual onRemove() in Widget to notify derived classes
-
     _layout.add(item);
+    
     item.triggered() += Pt::slot(*this, &Menu::onItemTriggered);
+    item.removed() += Pt::slot(*this, &Menu::onItemRemoved);
+    
     onContentChanged();
 }
 
 
 void Menu::removeItem(MenuItem& item)
 {
-    // TODO: have virtual onRemove() in Widget to notify derived classes
-
     _layout.remove(item);
-    item.triggered() -= Pt::slot(*this, &Menu::onItemTriggered);
-    onContentChanged();
+
+    // parent change calls Menu::onItemRemoved
 }
 
 
 void Menu::addMenu(Menu& menu, const Pt::String& text)
 {
-    SubMenu* sm = new SubMenu(menu);
-    sm->setText(text);
-    sm->triggered() += Pt::slot(*this, &Menu::onMenuTriggered);
-    _subMenus.push_back(sm);
+    SubMenuItem* item = new SubMenuItem(menu, text); 
+    item->triggered() += Pt::slot(*this, &Menu::onMenuTriggered);
+     
+    _subMenus.push_back(item);
+    _layout.add(*item);
+    
     menu._parentMenu = this;
 
-    _layout.add(*sm);
     onContentChanged();
 }
 
 
 void Menu::removeMenu(Menu& menu)
 {
-    std::vector<SubMenu*>::iterator it;
+    std::vector<SubMenuItem*>::iterator it;
     for(it = _subMenus.begin(); it != _subMenus.end(); ++it)
     {
-        SubMenu* sm = *it;
-
-        if( sm->menu() != &menu )
-            continue;
-
-        delete sm;
-        _subMenus.erase(it);
+        if( &(*it)->menu() == &menu )
+        {
+            menu._parentMenu = 0;
+            delete *it;
+            _subMenus.erase(it);
+            break;
+        }
     }
 
-    menu._parentMenu = 0;
     onContentChanged();
+}
+
+
+void Menu::show(const Gfx::PointF& pos)
+{
+    Window::move(pos);
+    Window::show();
 }
 
 
@@ -118,9 +134,41 @@ void Menu::onItemTriggered(MenuItem&)
 }
 
 
+void Menu::onItemRemoved(MenuItem& item)
+{
+    item.triggered() -= Pt::slot(*this, &Menu::onItemTriggered);
+    item.removed() -= Pt::slot(*this, &Menu::onItemRemoved);
+    
+    onContentChanged();
+}
+
+
 void Menu::onMenuTriggered(MenuItem& m)
 {
-    _currentMenu = static_cast<SubMenu*>(&m);
+    _currentMenu = static_cast<SubMenuItem*>(&m);
+}
+
+
+Menu& Menu::rootMenu()
+{    
+    if( ! _parentMenu )
+        return *this;
+      
+    return _parentMenu->rootMenu();
+}
+
+
+Menu* Menu::findMenu(const Gfx::PointF& pos)
+{
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+
+    if( rect.contains( pos ) )
+        return this;
+
+    if( ! _parentMenu )
+        return 0;
+      
+    return _parentMenu->findMenu( this->toScreen(pos) - _parentMenu->position() );
 }
 
 
@@ -143,7 +191,7 @@ void Menu::onContentChanged()
 {
     _iconWidth = 0;
 
-    double itemsWidth = 0;
+    double menuWidth = 0;
     double menuHeight = 0;
 
     // determine menu size
@@ -156,8 +204,8 @@ void Menu::onContentChanged()
         itemSize.addWidth( item->margin().leftRight() );
         itemSize.addHeight( item->margin().topBottom() );
 
-        // the width of the items is the width of the widest item
-        itemsWidth = std::max( itemsWidth, itemSize.width() );
+        // the width of the menu is the width of the widest item
+        menuWidth = std::max( menuWidth, itemSize.width() );
 
         // the height of the menu is the sum of the item heights
         menuHeight += itemSize.height();
@@ -167,19 +215,18 @@ void Menu::onContentChanged()
     
     int iconPadding = 4;
     int menuPadding = 4;
-
+   
     if(_iconWidth > 0)
+    {
         _iconWidth += 2 * iconPadding;
+        menuWidth += 2 * iconPadding;
+    }
 
-    // left padding is for the icon strip
-    _layout.setPadding( Spacing(menuPadding + _iconWidth, 
-                                menuPadding, 
-                                menuPadding, 
-                                menuPadding) );
-
-    Gfx::SizeF size(_iconWidth + itemsWidth, menuHeight);
-    size.addWidth(2 * menuPadding);
-    size.addHeight(2 * menuPadding);
+    _layout.setPadding(menuPadding);
+    
+    Gfx::SizeF size(menuWidth, menuHeight);
+    size.addWidth( _layout.padding().leftRight() );
+    size.addHeight( _layout.padding().topBottom() );
 
     resize(size);
 }
@@ -187,36 +234,33 @@ void Menu::onContentChanged()
 
 void Menu::onPaintEvent(const PaintEvent& ev)
 {
+    BaseType::onPaintEvent(ev);
+}
+
+
+void Menu::onPaintBackground(const Gfx::RectF& rect)
+{
+    BaseType::onPaintBackground(rect);
+
     Painter painter( surface() );
-    
+
     //
     // icon strip on the left side
     //
     if(_iconWidth > 0)
     {
         Gfx::RectF iconStrip( Gfx::PointF(0, 0),
-                              Gfx::SizeF(_layout.padding().left(),
+                              Gfx::SizeF(_layout.padding().left() + _iconWidth,
                                           size().height()) );
+        
+        // only the damaged region
+        iconStrip = iconStrip.intersect(rect);
 
         Gfx::Brush brush = Pt::Gfx::Color(0.95f, 0.95f, 0.95f);
         painter.setBrush(brush);
         painter.fillRect(iconStrip);
-
-        // draw icon centered for each menu item
-        for(std::size_t i = 0; i < _layout.widgets().size(); ++i)
-        {
-            MenuItem* item = static_cast<MenuItem*>(_layout.widgets().at(i));
-
-            double iconX = (iconStrip.width() - item->icon().width()) / 2;
-
-            double iconY = item->position().y();
-            iconY += (item->size().height() - item->icon().height()) / 2;
-
-            Gfx::PointF iconPos(iconX, iconY);
-            painter.drawImage(iconPos, item->icon());
-        }
     }
-    
+
     //
     // menu border
     //
@@ -225,8 +269,6 @@ void Menu::onPaintEvent(const PaintEvent& ev)
     Gfx::Pen pen(1, Gfx::Color(0.5f, 0.5f, 0.51f) );
     painter.setPen(pen);
     painter.drawRect(borderRect);
-
-    BaseType::onPaintEvent(ev);
 }
 
 
@@ -251,38 +293,15 @@ void Menu::onMouseEvent( const MouseEvent& ev )
     else
     {
         if( _currentMenu )
-            _currentMenu->menu()->setCaptureMouse(true);
+            _currentMenu->menu().setCaptureMouse(true);
     }    
-}
-
-
-Menu& Menu::rootMenu()
-{    
-    if( !_parentMenu )
-        return *this;
-      
-    return _parentMenu->rootMenu();
-}
-
-
-Menu* Menu::findMenu( const Gfx::PointF& pos )
-{
-    Gfx::RectF rect (Gfx::PointF(0,0), size() );
-
-    if( rect.contains( pos ) )
-        return this;
-
-    if( !_parentMenu )
-        return 0;
-      
-    return _parentMenu->findMenu( this->toScreen(pos) - _parentMenu->position() );
 }
 
 
 void Menu::onCloseEvent(const CloseEvent& ev)
 {
-    if( _currentMenu && _currentMenu->menu() )
-        _currentMenu->menu()->close();
+    if( _currentMenu )
+        _currentMenu->menu().close();
 
     BaseType::onCloseEvent(ev);    
     
@@ -296,6 +315,8 @@ void Menu::onResizeEvent(const ResizeEvent& ev)
     for(std::size_t i = 0; i < _layout.widgets().size(); ++i)
     {
         MenuItem* item = static_cast<MenuItem*>(_layout.widgets().at(i));
+
+        item->setIconPadding(_iconWidth);
 
         Gfx::SizeF itemSize = item->preferredSize();
         item->resize(itemSize);
@@ -330,57 +351,47 @@ void Menu::onLeaveEvent( const LeaveEvent& ev )
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// SubMenu
+// bMenuIt
 ///////////////////////////////////////////////////////////////////////////////
 
 static const double indicatorWidth = 5.0; 
 
 
-Menu::SubMenu::SubMenu(Menu& menu)
-: _menu(&menu)
+Menu::SubMenuItem::SubMenuItem(Menu& menu, const Pt::String& text)
+: _menu(menu)
 {
-    _menu = &menu;
-    _menu->destroyed() += Pt::slot(*this, &Menu::SubMenu::onMenuDestroyed);
+    setText(text);
 }
     
 
-Menu::SubMenu::~SubMenu()
+Menu::SubMenuItem::~SubMenuItem()
 {
 }
 
 
-
-
-void Menu::SubMenu::onMenuDestroyed(Window&)
-{
-    _menu = 0;
-}
-
-
-void Menu::SubMenu::onClicked(const Gfx::PointF& pos)
+void Menu::SubMenuItem::onClicked(const Gfx::PointF& pos)
 {
     BaseType::onClicked(pos);
-    
-    if(! _menu )
-        return;
 
-    if(!_menu->isVisible())
-    {//Todo enter
+    // TODO: open menu on mouse enter and close menu on mouse leave
+    //       possibly delayed by a 500ms timer
+    
+    if( ! _menu.isVisible() )
+    {
         Gfx::PointF topRight(size().width(), 0);
         Gfx::PointF wpos = this->toWindow(topRight);
         Gfx::PointF menuPos = window()->toScreen(wpos);
 
-        _menu->move(menuPos);
-        _menu->show();
+        _menu.show(menuPos);
     }
     else
-    {//Leave
-       _menu->close();       
+    {
+       _menu.close();       
     }
 }
 
 
-Gfx::SizeF Menu::SubMenu::onAutoSize() const
+Gfx::SizeF Menu::SubMenuItem::onAutoSize() const
 {
     Gfx::SizeF size = BaseType::onAutoSize();
     
@@ -391,9 +402,9 @@ Gfx::SizeF Menu::SubMenu::onAutoSize() const
 }
 
 
-void Menu::SubMenu::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
+void Menu::SubMenuItem::onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    BaseType::onPaint(surface, updateRect);
+    //BaseType::onPaintShortcut(surface, updateRect);
 
     Painter painter(surface);
 

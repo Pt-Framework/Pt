@@ -133,17 +133,15 @@ class PT_HMI_API Window : public Visual
 
     bool isClosed() const;
 
-    
     void close();    
 
-    Signal<Window&>& destroyed()
-    { return _destroyed; }
+    // TODO: signals to observe windows e.g. close, titleChanged
 
     PixmapSurface& surface();
 
     MainWindowImpl* impl();
 
-    //Todo: 
+    // TODO: grabMouse/relaseMouse() 
     void setCaptureMouse( bool capture );
 
   protected:
@@ -171,6 +169,10 @@ class PT_HMI_API Window : public Visual
     virtual void onEvent(const Pt::Event& ev);
 
     virtual void onPaintEvent(const PaintEvent& ev);
+
+    virtual void onPaintBackground(const Gfx::RectF& rect);
+
+    virtual void onPaintContent(const Gfx::RectF& rect);
 
     virtual void onMouseEvent( const MouseEvent& ev );
 
@@ -285,8 +287,7 @@ class PT_HMI_API Window : public Visual
 
     void onEnable( bool b );
 
-  private:      
-    Signal<Window&>                _destroyed;
+  private:
     MainWindowImpl*                _impl;
     WindowManager                  _windowManager;
     PixmapSurface                  _surface;

@@ -101,8 +101,6 @@ Window::~Window()
        remove( *_windows.back() );
  
     deinit();
-
-    _destroyed.send(*this);
 }
 
 
@@ -809,14 +807,14 @@ void Window::showModal()
 
         Application::instance().nextEvent();
     }
-    
+
     for(it = windows.begin(); it != windows.end(); ++it)
     {
         Window* w = (*it);
 
         w->onEnable(true);
 
-        if( activeWindow->vid() == w->vid() )
+        if( activeWindow && activeWindow->vid() == w->vid() )
             activeWindow->activate();                     
     }
 }
@@ -842,9 +840,7 @@ void Window::onPaint(const Gfx::RectF& rect)
     const double borderWidth = _windowManager.borderWidth();
     const double titleHeight = _windowManager.titleHeight();
 
-    Painter painter(_surface);
-    painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
-    painter.fillRect(rect);
+    onPaintBackground(rect);
 
     if( mainWidget() )
         mainWidget()->onPaint(rect);
@@ -876,7 +872,21 @@ void Window::onPaintEvent(const PaintEvent& ev)
     if( ! this->isVisible() )
         return; 
 
-    _windowManager.paintEvent(ev);
+    onPaintContent( ev.rect() );
+}
+
+
+void Window::onPaintBackground(const Gfx::RectF& rect)
+{
+    Painter painter(_surface);
+    painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
+    painter.fillRect(rect);
+}
+
+
+void Window::onPaintContent(const Gfx::RectF& rect)
+{
+    _windowManager.paintEvent(rect);
 }
 
 
