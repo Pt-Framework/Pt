@@ -30,21 +30,16 @@
 #ifndef Pt_Hmi_Menu_H
 #define Pt_Hmi_Menu_H
 
-#include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/Panel.h>
-#include <Pt/Hmi/FlowLayout.h>
 #include <Pt/Hmi/MenuItem.h>
-#include <vector>
 
 namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Menu : public virtual Connectable
-                      , private Window 
-{
-    typedef Window BaseType;
+class MenuImpl;
 
+class PT_HMI_API Menu
+{
     public:
         Menu();
     
@@ -62,68 +57,15 @@ class PT_HMI_API Menu : public virtual Connectable
 
         void show(const Gfx::PointF& pos);
 
-    protected:
-        virtual void onPaintEvent(const PaintEvent& ev);
+        bool isVisible() const;
 
-        virtual void onPaintBackground(const Gfx::RectF& rect);
-        
-        virtual void onCloseEvent(const CloseEvent& ev);
+        void close();
 
-        virtual void onResizeEvent(const ResizeEvent& ev);
-
-        virtual void onShowEvent(const ShowEvent& ev);
-
-        virtual void onMouseEvent(const MouseEvent& ev);
-
-        virtual void onEnterEvent(const EnterEvent& ev);
-
-        virtual void onLeaveEvent(const LeaveEvent& ev);
-
-    protected:
-        void onItemTriggered(MenuItem& m);
-
-        void onItemRemoved(MenuItem& m);
-
-        void onMenuTriggered(MenuItem& m);
-
-        Menu* findMenu(const Gfx::PointF& pos);
-        
-        Menu& rootMenu();
-
-        // TODO: need a common way to react to widget content changes
-        void onContentChanged();
+        MenuImpl* impl();
 
     private:
-        class SubMenuItem : public MenuItem
-        {
-            typedef MenuItem BaseType;
-
-            public:
-                explicit SubMenuItem(Menu& menu, const Pt::String& text);
-    
-                virtual ~SubMenuItem();
-
-                Menu& menu()
-                { return _menu; }
-
-            protected:
-                virtual void onClicked(const Gfx::PointF& pos);
-
-                virtual Gfx::SizeF onAutoSize() const;
-
-                virtual void onPaintShortcut(PaintSurface& surface, 
-                                             const Gfx::RectF& updateRect);
-
-            private:
-                Menu& _menu;
-        };
-
-    private:
-        std::vector<SubMenuItem*> _subMenus;
-        SubMenuItem*              _currentMenu;
-        FlowLayout                _layout;
-        std::size_t               _iconWidth;
-        Menu*                     _parentMenu;  
+        MenuImpl* _impl;
+ 
 };
 
 } // namespace
