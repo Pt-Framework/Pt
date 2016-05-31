@@ -43,6 +43,7 @@ class Window;
 class PT_HMI_API Application : public Pt::System::Application
 {
     friend class Visual;
+    friend class ApplicationImpl;
 
     public:
         Application(int argc = 0, char** argv = 0);
@@ -57,13 +58,15 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void setCursor(const Cursor* cursor = 0);
         
+        void grabMouse(Window& w);
+
+        void releaseMouse(Window& w);
+
         Pt::uint64_t makeId();
 
         const Visual* findVisual(Pt::uint64_t id) const;
 
         void nextEvent();
-
-        void setPointerWindow(Window* w);
 
         ApplicationImpl* impl();
         
@@ -94,10 +97,12 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void onLeaveEvent(const LeaveEvent& ev );
 
-    protected:
+    private:
         void registerVisual(Visual& visual);
 
         void unregisterVisual(Visual& visual);
+
+        void setPointerWindow(Window* w);
 
     private:
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;
@@ -107,6 +112,7 @@ class PT_HMI_API Application : public Pt::System::Application
         Pt::uint64_t     _lastId;
         VisualMap        _visuals;
         Window*          _pointerWindow;
+        Window*          _mouseGrabber;
 };
 
 } // namespace

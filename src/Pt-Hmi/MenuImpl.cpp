@@ -56,15 +56,7 @@ MenuImpl::~MenuImpl()
         _parentMenu->impl()->removeMenu(*this);
 
     while( ! _subMenus.empty() )
-    {
-        SubMenuItem* item = _subMenus.back();
-        
-        // this menu is no longer the parent of its children
-        item->menu().impl()->_parentMenu = 0;
-        
-        delete item;
-        _subMenus.pop_back();
-    }
+        eraseMenu( _subMenus.begin() );
 }
 
 
@@ -74,7 +66,7 @@ void MenuImpl::addItem(MenuItem& item)
     
     item.triggered() += Pt::slot(*this, &MenuImpl::onItemTriggered);
 
-    // TODO: Menu pointer in MenuIteminstead of removed signal
+    // TODO: Menu pointer in MenuItem instead of removed signal
     item.removed() += Pt::slot(*this, &MenuImpl::onItemRemoved);
     
     onContentChanged();
@@ -85,6 +77,21 @@ void MenuImpl::removeItem(MenuItem& item)
 {
     // causes item to send removed() signal
     _layout.remove(item);
+}
+
+
+void MenuImpl::onItemTriggered(MenuItem&)
+{
+    rootMenu().close();    
+}
+
+
+void MenuImpl::onItemRemoved(MenuItem& item)
+{
+    item.triggered() -= Pt::slot(*this, &MenuImpl::onItemTriggered);
+    item.removed() -= Pt::slot(*this, &MenuImpl::onItemRemoved);
+    
+    onContentChanged();
 }
 
 
@@ -112,17 +119,9 @@ void MenuImpl::removeMenu(MenuImpl& impl)
     std::vector<SubMenuItem*>::iterator it;
     for(it = _subMenus.begin(); it != _subMenus.end(); ++it)
     {
-        SubMenuItem* item = *it;
-
-        if( item->menu().impl() == &impl )
+        if( (*it)->menu().impl() == &impl )
         {
-            impl._parentMenu = 0;
-
-            if(_currentMenu && _currentMenu->menu().impl() == &impl)
-                _currentMenu = 0;
-            
-            delete *it;
-            _subMenus.erase(it);
+            eraseMenu(it);
             break;
         }
     }
@@ -131,18 +130,71 @@ void MenuImpl::removeMenu(MenuImpl& impl)
 }
 
 
+void MenuImpl::eraseMenu(std::vector<SubMenuItem*>::iterator it)
+{
+    SubMenuItem* item = *it;
+    MenuImpl* subMenu = item->menu().impl();
+
+    // this menu is no longer the parent of its submenu
+    subMenu->_parentMenu = 0;
+
+    if(_currentMenu == item)
+        _currentMenu = 0;
+            
+    delete *it;
+    _subMenus.erase(it);
+}
+
+
+void MenuImpl::onMenuTriggered(MenuItem& m)
+{
+    _currentMenu = static_cast<SubMenuItem*>(&m);
+}
+
+
 MenuImpl* MenuImpl::findMenu(const Gfx::PointF& pos)
 {
     Gfx::RectF rect( Gfx::PointF(0,0), size() );
-
     if( rect.contains(pos) )
         return this;
 
+    Gfx::PointF screenPos = this->toScreen(pos);
+
+    MenuImpl* menu = findParentMenu(screenPos);
+    if( ! menu )
+        menu = findSubMenu(screenPos);
+   
+    return menu;
+}
+
+
+MenuImpl* MenuImpl::findParentMenu(const Gfx::PointF& screenPos)
+{
     if( ! _parentMenu )
         return 0;
-      
-    Gfx::PointF parentPos = _parentMenu->impl()->position();
-    return _parentMenu->impl()->findMenu(this->toScreen(pos) - parentPos);
+
+    MenuImpl* menu = _parentMenu->impl();
+
+    Gfx::RectF rect( menu->position(), menu->size() );
+    if( rect.contains(screenPos) )
+        return menu;
+
+    return menu->findParentMenu(screenPos);
+}
+
+
+MenuImpl* MenuImpl::findSubMenu(const Gfx::PointF& screenPos)
+{
+    if( ! _currentMenu )
+        return 0;
+
+    MenuImpl* menu = _currentMenu->menu().impl();
+
+    Gfx::RectF rect( menu->position(), menu->size() );
+    if( rect.contains(screenPos) )
+        return menu;
+
+    return menu->findSubMenu(screenPos);
 }
 
 
@@ -153,28 +205,6 @@ MenuImpl& MenuImpl::rootMenu()
       
     return _parentMenu->impl()->rootMenu();
 }
-
-
-void MenuImpl::onItemTriggered(MenuItem&)
-{
-    rootMenu().close();    
-}
-
-
-void MenuImpl::onItemRemoved(MenuItem& item)
-{
-    item.triggered() -= Pt::slot(*this, &MenuImpl::onItemTriggered);
-    item.removed() -= Pt::slot(*this, &MenuImpl::onItemRemoved);
-    
-    onContentChanged();
-}
-
-
-void MenuImpl::onMenuTriggered(MenuItem& m)
-{
-    _currentMenu = static_cast<SubMenuItem*>(&m);
-}
-
 
 /* TODO: 
 this happens when item->resize() is called in onContentChanged
@@ -280,26 +310,17 @@ void MenuImpl::onMouseEvent(const MouseEvent& ev)
 {
     BaseType::onMouseEvent( ev );
 
-    // TODO: inplement a findMenu that searches through all
-    //       currentMenu to simplify this function 
     MenuImpl* menu = findMenu( ev.position() );           
     if(menu)
     {   
-        // TODO: reset old mouse capture widget
-        menu->setCaptureMouse(true);
+        menu->grabMouse();
         return;
-    }     
+    }
 
     if( ev.isPress() )
     {
         rootMenu().close();            
     }
-    else
-    {
-        // this is obsolete if findMenu works correctly for children
-        if( _currentMenu )
-            _currentMenu->menu().impl()->setCaptureMouse(true);
-    }    
 }
 
 
@@ -333,11 +354,12 @@ void MenuImpl::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-void MenuImpl::onShowEvent( const ShowEvent& ev )
+void MenuImpl::onShowEvent(const ShowEvent& ev)
 {
     BaseType::onShowEvent(ev);
 
-    setCaptureMouse( ev.visible() );
+    if( ! ev.visible() )
+        releaseMouse();
 }
 
 
@@ -345,7 +367,7 @@ void MenuImpl::onEnterEvent( const EnterEvent& ev )
 {
     BaseType::onEnterEvent(ev);
     
-    setCaptureMouse(true);
+    grabMouse();
 }
 
 
@@ -354,7 +376,7 @@ void MenuImpl::onLeaveEvent( const LeaveEvent& ev )
   BaseType::onLeaveEvent(ev);
 
   if( _parentMenu )
-      _parentMenu->impl()->setCaptureMouse(true);   
+      _parentMenu->impl()->grabMouse();
 }
 
 

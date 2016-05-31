@@ -41,6 +41,7 @@ Application::Application(int argc, char** argv)
 , _mainScreen(0)
 , _lastId(1)
 , _pointerWindow(0)
+, _mouseGrabber(0)
 {
     this->init(*_impl);
 
@@ -78,6 +79,23 @@ Application& Application::instance()
 void Application::setCursor( const Cursor* cursor )
 {
   _impl->setCursor( cursor );
+}
+
+
+void Application::grabMouse(Window& w)
+{
+    _impl->grabMouse(w);
+    _mouseGrabber = &w;
+}
+
+
+void Application::releaseMouse(Window& w)
+{
+    if(_mouseGrabber != &w)
+        return;
+
+    _impl->releaseMouse(w);
+    _mouseGrabber = 0;
 }
 
 

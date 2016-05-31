@@ -199,6 +199,21 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 }
 
 
+void ApplicationImpl::grabMouse(Window& w)
+{
+    // TODO: grab mouse for top level parent HWND
+    assert( w.impl() );
+    
+    w.impl()->grabMouse();
+}
+
+
+void ApplicationImpl::releaseMouse(Window& )
+{
+    ReleaseCapture();
+}
+
+
 void ApplicationImpl::nextEvent()
 {
       waitNext();

@@ -123,6 +123,10 @@ class PT_HMI_API Window : public Visual
 
     void enable( bool e = true );
 
+    void grabMouse();
+
+    void releaseMouse();
+
     const Gfx::PointF& position() const;
 
     void move(const Gfx::PointF& p);
@@ -140,9 +144,6 @@ class PT_HMI_API Window : public Visual
     PixmapSurface& surface();
 
     MainWindowImpl* impl();
-
-    // TODO: grabMouse/relaseMouse() 
-    void setCaptureMouse( bool capture );
 
   protected:
     void onUpdate(Window& w, const Gfx::RectF& rect);
@@ -320,8 +321,7 @@ class PT_HMI_API Window : public Visual
     Gfx::Image                     _icon;
     bool                           _canClose;    
     WindowDecoration::Flags        _decoration;   
-    Gfx::Font                      _font;   
-    bool                           _capture; 
+    Gfx::Font                      _font;    
 };
 
 } // namespace

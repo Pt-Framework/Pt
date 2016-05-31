@@ -71,7 +71,6 @@ Window::Window(Window* parent)
 , _border(true)
 , _icon()
 , _canClose(true)
-, _capture(false)
 {    
     _windowManager.init(*this);
 
@@ -139,7 +138,6 @@ void Window::init(Window* parent)
         _impl->setMaximumSize(_maximumSize );
         _impl->setIcon(_icon);
         _impl->setState(_state);  
-        _impl->setCaptureMouse( _capture );
     }  
     
     show(_visible);
@@ -150,6 +148,8 @@ void Window::deinit()
 {
     if( ! _init )
         return;
+
+    releaseMouse();
 
     if(_impl)
     {
@@ -591,6 +591,52 @@ void Window::onShow( Window& w, bool visible )
 void Window::onShowEvent( const ShowEvent& ev )
 {
     _visible = ev.visible();
+
+    // TODO: release mouse when hidden?
+}
+
+
+void Window::showModal()
+{
+    deinit();
+
+    const Screen& screen = Application::instance().screen();
+
+    const std::vector<Window*>& windows = screen.windows();
+    Window* activeWindow = 0;
+
+    std::vector<Window*>::const_iterator it;
+
+    for(it = windows.begin(); it != windows.end(); ++it)
+    {
+        Window* w = (*it);
+
+        w->onEnable(false);
+
+        if( w->isActive() )
+            activeWindow = w;            
+    }
+
+    enable(true);
+    show(true);
+
+    while( ! isClosed() )
+    {           
+        if( ! isActive() )
+            activate();
+
+        Application::instance().nextEvent();
+    }
+
+    for(it = windows.begin(); it != windows.end(); ++it)
+    {
+        Window* w = (*it);
+
+        w->onEnable(true);
+
+        if( activeWindow && activeWindow->vid() == w->vid() )
+            activeWindow->activate();                     
+    }
 }
 
 
@@ -638,6 +684,19 @@ void Window::onEnable( bool e )
         _enabledState = false;
     else
         _enabledState = _enabled;
+}
+
+
+void Window::grabMouse()
+{
+    if(_init)
+        Application::instance().grabMouse(*this);
+}
+
+
+void Window::releaseMouse()
+{
+    Application::instance().releaseMouse(*this);
 }
 
 
@@ -773,50 +832,6 @@ void Window::onCloseEvent(const CloseEvent& ev)
     _visible = false;
 
     deinit();
-}
-
-
-void Window::showModal()
-{
-    deinit();
-
-    const Screen& screen = Application::instance().screen();
-
-    const std::vector<Window*>& windows = screen.windows();
-    Window* activeWindow = 0;
-
-    std::vector<Window*>::const_iterator it;
-
-    for(it = windows.begin(); it != windows.end(); ++it)
-    {
-        Window* w = (*it);
-
-        w->onEnable(false);
-
-        if( w->isActive() )
-            activeWindow = w;            
-    }
-
-    enable(true);
-    show(true);
-
-    while( ! isClosed() )
-    {           
-        if( ! isActive() )
-            activate();
-
-        Application::instance().nextEvent();
-    }
-
-    for(it = windows.begin(); it != windows.end(); ++it)
-    {
-        Window* w = (*it);
-
-        w->onEnable(true);
-
-        if( activeWindow && activeWindow->vid() == w->vid() )
-            activeWindow->activate();                     
-    }
 }
 
 
@@ -1165,18 +1180,6 @@ void Window::setMnemonic(Widget& w, const Char* ch)
 
     if(ch)
         _mnemonics[*ch] = &w;
-}
-
-
-void Window::setCaptureMouse( bool capture )
-{
-    if( !capture && !_capture)
-        return;
-
-    if( _impl)
-        _impl->setCaptureMouse(capture);
-    else
-        _capture = capture;
 }
 
 } // namespace

@@ -292,14 +292,10 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 }
 
 
-void MainWindowImpl::setCaptureMouse( bool capture )
+void MainWindowImpl::grabMouse()
 {
-    if( capture)
-        SetCapture(_hwnd);
-    else
-        ReleaseCapture();
+    SetCapture(_hwnd);       
 }
-
 
 } // namespace
 

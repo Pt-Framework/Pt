@@ -96,6 +96,12 @@ class PT_HMI_API MenuImpl : public Window
 
         // TODO: need a common way to react to widget content changes
         void onContentChanged();
+
+        MenuImpl* findParentMenu(const Gfx::PointF& pos);
+
+        MenuImpl* findSubMenu(const Gfx::PointF& pos);
+
+        void eraseMenu(std::vector<SubMenuItem*>::iterator it);
     
     protected:
         virtual void onPaintEvent(const PaintEvent& ev);
