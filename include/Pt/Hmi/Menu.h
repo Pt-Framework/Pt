@@ -65,7 +65,6 @@ class PT_HMI_API Menu
 
     private:
         MenuImpl* _impl;
- 
 };
 
 } // namespace

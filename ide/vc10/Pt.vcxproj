@@ -545,6 +545,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Menu.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\MenuBar.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MenuItem.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp" />

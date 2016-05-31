@@ -2540,5 +2540,8 @@
     <ClCompile Include="..\..\src\Pt-Gfx\JpegReader.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\MenuBar.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

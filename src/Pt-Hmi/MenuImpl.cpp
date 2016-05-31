@@ -319,7 +319,8 @@ void MenuImpl::onMouseEvent(const MouseEvent& ev)
 
     if( ev.isPress() )
     {
-        rootMenu().close();            
+        rootMenu().close();
+        releaseMouse();           
     }
 }
 

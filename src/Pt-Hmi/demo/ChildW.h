@@ -7,6 +7,8 @@
 #include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/DockingLayout.h>
 #include <Pt/Hmi/FlowLayout.h>
+#include <Pt/Hmi/MenuBar.h>
+#include <Pt/Hmi/Menu.h>
 #include "Dialog1.h"
 
 namespace Pt {
@@ -28,13 +30,21 @@ class ChildW : public Hmi::Window
         void onCloseApp(Button& button);
 
     private:
-        Hmi::Window _childWindow2;
-        Hmi::DockingLayout  _mainWidget;
-        Hmi::Button _closeButton;
-        Hmi::Button _toggleButton;
-        Hmi::Button _dialogButton;
-        Hmi::Label  _textLabel;
-        Hmi::FlowLayout _buttonBar;
+        FlowLayout _mainLayout;
+        MenuBar _menuBar;
+
+        Menu     _menu;
+        MenuItem _item1;
+        MenuItem _item2;
+        MenuItem _item3;
+
+        Window _childWindow2;
+        DockingLayout  _childView;
+        Button _closeButton;
+        Button _toggleButton;
+        Button _dialogButton;
+        Label  _textLabel;
+        FlowLayout _buttonBar;
 };
 
 } // namespace

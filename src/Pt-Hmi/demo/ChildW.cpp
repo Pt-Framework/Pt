@@ -11,8 +11,29 @@ namespace Demo{
 
 ChildW::ChildW(const std::string& title)
 {
+    _menu.setName("FileMenu");
+    
+    _item1.setText("New");
+    _item1.setShortcut( &Key(Key::F3) );
+    _menu.addItem(_item1);
+
+    _item2.setText("Open");
+    _menu.addItem(_item2);
+
+    _item3.setText("Exit");
+    _item3.setShortcut( &Key(Key::Control, Key::A) );
+    _menu.addItem(_item3);
+
+    _menuBar.resize( Pt::Gfx::SizeF(20, 24) );
+    _menuBar.addMenu(_menu, "File");
+
+    _mainLayout.setAlignment(FlowLayout::Top);
+    _mainLayout.add(_menuBar);
+
+    setMainWidget(&_mainLayout);
+
     setTitle(title);
-    move( Gfx::PointF(5,5) );
+    move( Gfx::PointF(5, 5) );
     resize( Gfx::SizeF(480, 400) );        
     
     //Text    
@@ -76,18 +97,18 @@ ChildW::ChildW(const std::string& title)
     _buttonBar.add(_toggleButton);
     
     //Panel  
-    _mainWidget.resize( Gfx::SizeF(800, 600) );
-    _mainWidget.move( Gfx::PointF(20,20) );
-    _mainWidget.setName("MainPanel");
-    _mainWidget.setPadding(20); 
-    _mainWidget.add(_textLabel);
-    _mainWidget.add(_buttonBar);    
+    _childView.resize( Gfx::SizeF(800, 600) );
+    _childView.move( Gfx::PointF(20,20) );
+    _childView.setName("MainPanel");
+    _childView.setPadding(20); 
+    _childView.add(_textLabel);
+    _childView.add(_buttonBar);    
 
     //_childWindow2.setMainWidget(&_closeButton);          
-    _childWindow2.move(Gfx::PointF(5,5));    
+    _childWindow2.move(Gfx::PointF(5, 40));    
     _childWindow2.resize (Gfx::SizeF(240, 320));
     _childWindow2.setTitle("Child of " + title);    
-    _childWindow2.setMainWidget(&_mainWidget);
+    _childWindow2.setMainWidget(&_childView);
     add( _childWindow2 );
 
     _childWindow2.show(true); // Child A/B

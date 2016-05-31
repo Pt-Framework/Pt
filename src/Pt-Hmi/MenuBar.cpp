@@ -27,37 +27,31 @@
    MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_MenuBar_H
-#define Pt_Hmi_MenuBar_H
-
-#include <Pt/Hmi/Panel.h>
-#include <Pt/Hmi/FlowLayout.h>
-#include <vector>
+#include <Pt/Hmi/MenuBar.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class Menu;
-
-class PT_HMI_API MenuBar : public Panel
+MenuBar::MenuBar()
 {
-    public:
-        MenuBar();
-    
-        virtual ~MenuBar();
+}
 
-        void addMenu(Menu& menu, const Pt::String& text);
 
-        void removeMenu(Menu& menu);
+MenuBar::~MenuBar()
+{
+}
 
-    private:
-        FlowLayout         _layout;
-        std::vector<Menu*> _menus;
-};
+
+void MenuBar::addMenu(Menu& menu, const Pt::String& text)
+{
+}
+
+
+void MenuBar::removeMenu(Menu& menu)
+{
+}
 
 } // namespace
 
 } // namespace
-
-#endif
