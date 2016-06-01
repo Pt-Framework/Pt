@@ -33,6 +33,7 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/FlowLayout.h>
 #include <Pt/Hmi/MenuItem.h>
+#include <Pt/Hmi/MenuShell.h>
 #include <vector>
 
 namespace Pt {
@@ -83,7 +84,7 @@ class PT_HMI_API MenuImpl : public Window
 
         void removeMenu(MenuImpl& impl);
 
-        MenuImpl* findMenu(const Gfx::PointF& pos);
+        MenuShell* findMenu(const Gfx::PointF& pos);
         
         MenuImpl& rootMenu();
     
@@ -97,9 +98,9 @@ class PT_HMI_API MenuImpl : public Window
         // TODO: need a common way to react to widget content changes
         void onContentChanged();
 
-        MenuImpl* findParentMenu(const Gfx::PointF& pos);
+        Menu* findParentMenu(const Gfx::PointF& pos);
 
-        MenuImpl* findSubMenu(const Gfx::PointF& pos);
+        Menu* findSubMenu(const Gfx::PointF& pos);
 
         void eraseMenu(std::vector<SubMenuItem*>::iterator it);
     

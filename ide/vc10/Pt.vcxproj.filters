@@ -1392,6 +1392,9 @@
     <ClInclude Include="..\..\include\Pt\Gfx\JpegReader.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuShell.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2541,6 +2544,9 @@
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\MenuBar.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\MenuShell.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>

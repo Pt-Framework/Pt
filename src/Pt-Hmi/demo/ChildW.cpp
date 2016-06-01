@@ -24,7 +24,7 @@ ChildW::ChildW(const std::string& title)
     _item3.setShortcut( &Key(Key::Control, Key::A) );
     _menu.addItem(_item3);
 
-    _menuBar.resize( Pt::Gfx::SizeF(20, 24) );
+    _menuBar.resize( Pt::Gfx::SizeF(100, 20) );
     _menuBar.addMenu(_menu, "File");
 
     _mainLayout.setAlignment(FlowLayout::Top);

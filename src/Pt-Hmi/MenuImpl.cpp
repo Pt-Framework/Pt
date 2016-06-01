@@ -51,10 +51,6 @@ MenuImpl::MenuImpl()
 
 MenuImpl::~MenuImpl()
 {
-    // remove this menu from its parent
-    if(_parentMenu)
-        _parentMenu->impl()->removeMenu(*this);
-
     while( ! _subMenus.empty() )
         eraseMenu( _subMenus.begin() );
 }
@@ -97,11 +93,6 @@ void MenuImpl::onItemRemoved(MenuItem& item)
 
 void MenuImpl::addMenu(Menu& parent, Menu& menu, const Pt::String& text)
 {
-    // remove this menu from its parent
-    Menu* oldParent = menu.impl()->_parentMenu;
-    if(oldParent)
-        oldParent->impl()->removeMenu(*this);
-
     SubMenuItem* item = new SubMenuItem(menu, text); 
     item->triggered() += Pt::slot(*this, &MenuImpl::onMenuTriggered);
      
@@ -152,15 +143,11 @@ void MenuImpl::onMenuTriggered(MenuItem& m)
 }
 
 
-MenuImpl* MenuImpl::findMenu(const Gfx::PointF& pos)
+MenuShell* MenuImpl::findMenu(const Gfx::PointF& pos)
 {
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
-    if( rect.contains(pos) )
-        return this;
-
     Gfx::PointF screenPos = this->toScreen(pos);
 
-    MenuImpl* menu = findParentMenu(screenPos);
+    Menu* menu = findParentMenu(screenPos);
     if( ! menu )
         menu = findSubMenu(screenPos);
    
@@ -168,7 +155,7 @@ MenuImpl* MenuImpl::findMenu(const Gfx::PointF& pos)
 }
 
 
-MenuImpl* MenuImpl::findParentMenu(const Gfx::PointF& screenPos)
+Menu* MenuImpl::findParentMenu(const Gfx::PointF& screenPos)
 {
     if( ! _parentMenu )
         return 0;
@@ -177,13 +164,13 @@ MenuImpl* MenuImpl::findParentMenu(const Gfx::PointF& screenPos)
 
     Gfx::RectF rect( menu->position(), menu->size() );
     if( rect.contains(screenPos) )
-        return menu;
+        return _parentMenu;
 
     return menu->findParentMenu(screenPos);
 }
 
 
-MenuImpl* MenuImpl::findSubMenu(const Gfx::PointF& screenPos)
+Menu* MenuImpl::findSubMenu(const Gfx::PointF& screenPos)
 {
     if( ! _currentMenu )
         return 0;
@@ -192,7 +179,7 @@ MenuImpl* MenuImpl::findSubMenu(const Gfx::PointF& screenPos)
 
     Gfx::RectF rect( menu->position(), menu->size() );
     if( rect.contains(screenPos) )
-        return menu;
+        return &_currentMenu->menu();
 
     return menu->findSubMenu(screenPos);
 }
@@ -310,16 +297,20 @@ void MenuImpl::onMouseEvent(const MouseEvent& ev)
 {
     BaseType::onMouseEvent( ev );
 
-    MenuImpl* menu = findMenu( ev.position() );           
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    if( rect.contains( ev.position() ) )
+        return;
+
+    MenuShell* menu = findMenu( ev.position() );           
     if(menu)
     {   
-        menu->grabMouse();
+        menu->activate();
         return;
     }
 
-    if( ev.isPress() )
+    if( ev.isRelease() )
     {
-        rootMenu().close();
+        close();
         releaseMouse();           
     }
 }
@@ -333,7 +324,10 @@ void MenuImpl::onCloseEvent(const CloseEvent& ev)
     BaseType::onCloseEvent(ev);    
     
     if( _parentMenu )
-        _parentMenu->impl()->_currentMenu = 0;    
+    {
+        _parentMenu->impl()->_currentMenu = 0;
+        _parentMenu->impl()->close();
+    }
 }
 
 
@@ -361,6 +355,11 @@ void MenuImpl::onShowEvent(const ShowEvent& ev)
 
     if( ! ev.visible() )
         releaseMouse();
+    else
+    {
+        if( ! _parentMenu )
+            grabMouse();
+    }
 }
 
 
@@ -417,7 +416,7 @@ void SubMenuItem::onClicked(const Gfx::PointF& pos)
     }
     else
     {
-       _menu.close();       
+       _menu.hide();       
     }
 }
 

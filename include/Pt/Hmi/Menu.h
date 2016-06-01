@@ -30,6 +30,7 @@
 #ifndef Pt_Hmi_Menu_H
 #define Pt_Hmi_Menu_H
 
+#include <Pt/Hmi/MenuShell.h>
 #include <Pt/Hmi/MenuItem.h>
 
 namespace Pt {
@@ -38,8 +39,10 @@ namespace Hmi {
 
 class MenuImpl;
 
-class PT_HMI_API Menu
+class PT_HMI_API Menu : public MenuShell
 {
+    friend class MenuShell;
+
     public:
         Menu();
     
@@ -51,20 +54,26 @@ class PT_HMI_API Menu
 
         void removeItem(MenuItem& item);
 
-        void addMenu(Menu& menu, const Pt::String& text);
-
-        void removeMenu(Menu& menu);
-
         void show(const Gfx::PointF& pos);
-
+        
+        void hide();
+        
         bool isVisible() const;
 
         void close();
 
         MenuImpl* impl();
 
+    protected:
+        virtual void onAddMenu(Menu& menu, const Pt::String& text);
+
+        virtual void onRemoveMenu(Menu& menu);
+
+        virtual void onActivate();
+
     private:
         MenuImpl* _impl;
+        MenuShell* _shell;
 };
 
 } // namespace

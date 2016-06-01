@@ -655,7 +655,7 @@ void Widget::onResizeEvent(const ResizeEvent& ev)
 
 
 void Widget::onPointerEvent(const MouseEvent& ev)
-{        
+{ 
     if( ev.isPress(MouseEvent::Left) && _acceptsFocus )
     {
         focus();

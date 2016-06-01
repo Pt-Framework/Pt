@@ -176,7 +176,6 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 						
 	  switch( _borderStyle )
 	  {
-        default:
 		    case Single:
 		    {			
             Gfx::Pen pen(static_cast<size_t>(_borderWidth), _borderColor);
@@ -220,6 +219,9 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 			      painter.drawPolyline(&points2[0], points2.size());	
             break;			
 		    }	
+
+        default:
+            break;
 	  }	
 }
 

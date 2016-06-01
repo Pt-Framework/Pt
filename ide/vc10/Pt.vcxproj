@@ -74,6 +74,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Menu.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MenuBar.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MenuItem.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\MenuShell.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MouseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MoveEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Painter.h" />
@@ -547,6 +548,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Menu.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MenuBar.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MenuItem.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\MenuShell.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Panel.cpp" />

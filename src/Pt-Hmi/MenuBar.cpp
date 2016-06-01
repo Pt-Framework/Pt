@@ -28,13 +28,77 @@
 */
 
 #include <Pt/Hmi/MenuBar.h>
+#include <Pt/Hmi/Menu.h>
+#include <Pt/Hmi/Window.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-MenuBar::MenuBar()
+///////////////////////////////////////////////////////////////////////////////
+// MenuBarItem
+///////////////////////////////////////////////////////////////////////////////
+
+MenuBarItem::MenuBarItem(Menu& menu, const Pt::String& text)
+: _menu(menu)
 {
+    setAutoSize(true);
+    setBorderStyle(Panel::NoBorder);
+    setAcceptsFocus(true);
+    setText(text);
+
+    setPadding( Spacing(8, 0, 8, 0) );
+    setMargin(0);
+}
+
+
+MenuBarItem::~MenuBarItem()
+{
+}
+
+
+void MenuBarItem::onClicked(const Gfx::PointF& pos)
+{
+    if( ! _menu.isVisible() )
+    {
+        Gfx::PointF bottomLeft(0, size().height());
+        Gfx::PointF wpos = toWindow(bottomLeft);
+
+        // TODO: toScreen should do this, but its buggy
+        wpos = window()->toParent(wpos);
+        wpos = window()->parent()->toScreen(wpos);
+        
+        std::clog << "showing menu" << std::endl;
+        _menu.show(wpos);
+    }
+    else
+    {
+        // TODO: this needs to be called when menuitem is clicked again
+        std::clog << "hiding menu" << std::endl;
+       _menu.hide();       
+    }
+}
+
+
+void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+    Label::onPaint(surface, updateRect);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// MenuBar
+///////////////////////////////////////////////////////////////////////////////
+
+MenuBar::MenuBar()
+: _layout(FlowLayout::Left)
+{
+    this->setBackgroundColor( Gfx::Color(0.9f, 0.9f, 0.9f) );
+    //this->setBorderStyle(Panel::NoBorder);
+
+    _layout.move( Gfx::PointF(0,0) );
+    _layout.setPadding(1);
+
+    add(_layout);
 }
 
 
@@ -43,13 +107,47 @@ MenuBar::~MenuBar()
 }
 
 
-void MenuBar::addMenu(Menu& menu, const Pt::String& text)
+void MenuBar::onAddMenu(Menu& menu, const Pt::String& text)
 {
+    MenuBarItem* item = new MenuBarItem(menu, text);
+    item->resize( Gfx::SizeF(50, 0) );
+
+    _menus.push_back(item);
+    _layout.add(*item);
+
+    //
+    //menu.impl()->_parentMenu = &parent;
+
+    //onContentChanged();
 }
 
 
-void MenuBar::removeMenu(Menu& menu)
+void MenuBar::onRemoveMenu(Menu& menu)
 {
+    // TODO: delete menu bar item
+}
+
+
+void MenuBar::onActivate()
+{
+    std::clog << "MenuBar::onActivate" << std::endl;
+}
+
+
+void MenuBar::onResizeEvent(const ResizeEvent& ev)
+{
+    for(std::size_t i = 0; i < _layout.widgets().size(); ++i)
+    {
+        MenuBarItem* item = static_cast<MenuBarItem*>(_layout.widgets().at(i));
+        Gfx::SizeF itemSize = item->preferredSize();
+        item->resize(itemSize);
+    }
+
+    _layout.resize( ev.size() );
+
+    // _layout positions the items now in OnResizeEvent
+    // TODO: our overall design should make this clearer
+    Panel::onResizeEvent(ev);
 }
 
 } // namespace

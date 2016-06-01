@@ -27,58 +27,42 @@
    MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_MenuBar_H
-#define Pt_Hmi_MenuBar_H
+#ifndef Pt_Hmi_MenuShell_H
+#define Pt_Hmi_MenuShell_H
 
-#include <Pt/Hmi/MenuShell.h>
-#include <Pt/Hmi/Panel.h>
-#include <Pt/Hmi/Button.h>
-#include <Pt/Hmi/FlowLayout.h>
-#include <vector>
+#include <Pt/Hmi/Api.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/String.h>
 
 namespace Pt {
 
 namespace Hmi {
 
+class MenuItem;
 class Menu;
 
-class MenuBarItem : public Label
+class PT_HMI_API MenuShell
 {
     public:
-        MenuBarItem(Menu& menu, const Pt::String& text);
-
-        ~MenuBarItem();
-
-    protected:
-        void onClicked(const Gfx::PointF& pos);
-
-        void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
-
-    private:
-        Menu& _menu;
-};
-
-class PT_HMI_API MenuBar : public MenuShell
-                         , public Panel
-{
-    public:
-        MenuBar();
+        MenuShell();
     
-        virtual ~MenuBar();
+        virtual ~MenuShell();
+
+        void addMenu(Menu& menu, const Pt::String& text);
+
+        void removeMenu(Menu& menu);
+
+        void activate();
 
     protected:
-        virtual void onAddMenu(Menu& menu, const Pt::String& text);
+        virtual void onAddMenu(Menu& menu, const Pt::String& text)
+        {}
 
-        virtual void onRemoveMenu(Menu& menu);
+        virtual void onRemoveMenu(Menu& menu)
+        {}
 
-        virtual void onActivate();
-
-    protected:
-        virtual void onResizeEvent(const ResizeEvent& ev);
-
-    private:
-        FlowLayout                _layout;
-        std::vector<MenuBarItem*> _menus;
+        virtual void onActivate()
+        {}
 };
 
 } // namespace

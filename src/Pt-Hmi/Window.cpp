@@ -916,11 +916,18 @@ void Window::onMouseEvent(const MouseEvent& ev)
         return;
     }
 
+    if(ev.isPress() || ev.isRelease())
+    {
+      int n = 0;
+    }
+
     Widget* widget = findWidget( ev.position() );
 
     // widget can be null
     setPointerWidget(widget);
   
+
+
     if(widget && widget->isEnabled())
     {
         MouseEvent clientEv(ev);
