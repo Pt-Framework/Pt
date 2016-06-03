@@ -84,6 +84,8 @@ class PT_HMI_API MenuImpl : public Window
 
         MenuShell* onFindMenu(const Gfx::PointF& screenPos);
 
+        void onOpenMenu(Menu& menu);
+
         void onCloseMenu(Menu& menu);
 
         void onCancel();
@@ -118,7 +120,7 @@ class PT_HMI_API MenuImpl : public Window
     private:
         Menu&                     _self;
         std::vector<SubMenuItem*> _subMenus;
-        SubMenuItem*              _currentMenu;
+        Menu*                     _currentMenu;
         FlowLayout                _layout;
         std::size_t               _iconWidth;
 };

@@ -72,6 +72,9 @@ class PT_HMI_API MenuBar : public MenuShell
 
         virtual void onRemoveMenu(Menu& menu);
 
+        virtual void onOpenMenu(Menu& menu)
+        {}
+
         virtual void onCloseMenu(Menu& menu)
         {}
 

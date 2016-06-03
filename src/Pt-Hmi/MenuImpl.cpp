@@ -106,18 +106,16 @@ void MenuImpl::onRemoveMenu(Menu& menu)
     std::vector<SubMenuItem*>::iterator it;
     for(it = _subMenus.begin(); it != _subMenus.end(); ++it)
     {
-        SubMenuItem* item = *it;
-
-        if( &item->menu() == &menu )
+        if( &(*it)->menu() == &menu )
         {
-            if(_currentMenu == item)
-                _currentMenu = 0;
-
             delete *it;
             _subMenus.erase(it);
             break;
         }
     }
+
+    if(_currentMenu == &menu)
+        _currentMenu = 0;
 
     onContentChanged();
 }
@@ -138,7 +136,6 @@ void MenuImpl::onMenuTriggered(MenuItem& m)
         Gfx::PointF menuPos = item->window()->toScreen(wpos);
 
         menu.show(menuPos);
-        _currentMenu = item;
     }
     else
     {
@@ -159,13 +156,19 @@ MenuShell* MenuImpl::onFindMenu(const Gfx::PointF& screenPos)
     if( ! _currentMenu)
         return 0;
 
-    return _currentMenu->menu().findMenu(screenPos);
+    return _currentMenu->findMenu(screenPos);
+}
+
+
+void MenuImpl::onOpenMenu(Menu& menu)
+{
+    _currentMenu = &menu;
 }
 
 
 void MenuImpl::onCloseMenu(Menu& menu)
 {
-    if(_currentMenu && &_currentMenu->menu() == &menu)
+    if(_currentMenu == &menu)
         _currentMenu = 0;
 }
 
@@ -309,7 +312,7 @@ void MenuImpl::onCloseEvent(const CloseEvent& ev)
 
     if( _currentMenu )
     {
-        _currentMenu->menu().close();
+        _currentMenu->close();
         _currentMenu = 0;
     }
 
@@ -345,9 +348,15 @@ void MenuImpl::onShowEvent(const ShowEvent& ev)
     if( ! ev.visible() )
     {
         releaseMouse();
+
+        if( _self.parentShell() )
+            _self.parentShell()->onCloseMenu(_self);
     }
     else
     {
+        if(_self.parentShell())
+            _self.parentShell()->onOpenMenu(_self);
+
         if( ! _self.parentShell() )
             grabMouse();
     }

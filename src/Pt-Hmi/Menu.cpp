@@ -99,6 +99,12 @@ void Menu::close()
 }
 
 
+void Menu::onOpenMenu(Menu& menu)
+{
+    _impl->onOpenMenu(menu);
+}
+
+
 void Menu::onCloseMenu(Menu& menu)
 {
     _impl->onCloseMenu(menu);

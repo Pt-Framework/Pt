@@ -61,13 +61,15 @@ class PT_HMI_API MenuShell
 
         MenuShell* findMenu(const Gfx::PointF& screenPos);
 
-        // quit
+        // quit the menu chain
         void cancel();
 
     protected:
         virtual void onAddMenu(Menu& menu, const Pt::String& text) = 0;
 
         virtual void onRemoveMenu(Menu& menu) = 0;
+
+        virtual void onOpenMenu(Menu& menu) = 0;
 
         virtual void onCloseMenu(Menu& menu) = 0;
 
