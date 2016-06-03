@@ -30,41 +30,70 @@
 #include "MenuImpl.h"
 #include <Pt/Hmi/MenuShell.h>
 #include <Pt/Hmi/Menu.h>
+#include <algorithm>
 
 namespace Pt {
 
 namespace Hmi {
 
 MenuShell::MenuShell()
+: _parentShell(0)
 {
 }
 
 
 MenuShell::~MenuShell()
 {
+    while( ! _menus.empty() )
+        removeMenu( *_menus.front() );
 }
 
 
 void MenuShell::addMenu(Menu& menu, const Pt::String& text)
 {
-    if(menu._shell)
-        menu._shell->removeMenu(menu);
-
     onAddMenu(menu, text);
-    menu._shell = this;
+    
+    menu._parentShell = this;
+
+    _menus.push_back(&menu);
 }
 
 
 void MenuShell::removeMenu(Menu& menu)
 {
     onRemoveMenu(menu);
-    menu._shell = 0;
+    
+    menu._parentShell = 0;
+
+    std::vector<Menu*>::iterator it = std::remove(_menus.begin(), _menus.end(), &menu);
+    _menus.erase(it, _menus.end());
 }
 
 
-void MenuShell::activate()
+MenuShell* MenuShell::parentShell()
+{ 
+    return _parentShell; 
+}
+
+
+MenuShell& MenuShell::rootShell()
+{    
+    if( _parentShell )
+        return _parentShell->rootShell();
+
+    return *this;
+}
+
+
+MenuShell* MenuShell::findMenu(const Gfx::PointF& screenPos)
 {
-    this->onActivate();
+    return onFindMenu(screenPos);
+}
+
+
+void MenuShell::cancel()
+{
+    this->onCancel();
 }
 
 } // namespace

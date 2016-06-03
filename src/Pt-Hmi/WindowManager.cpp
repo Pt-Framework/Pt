@@ -424,6 +424,16 @@ Gfx::PointF WindowManager::toParent(const Window& w, const Gfx::PointF& pos) con
     return w.position() + pos + Gfx::PointF(offX, offY);
 }
 
+
+Gfx::PointF WindowManager::fromParent(const Window& w, const Gfx::PointF& pos) const
+{
+    double offY = _borderWidth + _titleHeight;
+    double offX = _borderWidth;
+
+    Gfx::PointF p = pos - w.position() - Gfx::PointF(offX, offY);
+    return p;
+}
+
 } // namespace
 
 } // namespace

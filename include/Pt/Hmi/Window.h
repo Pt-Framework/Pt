@@ -103,7 +103,11 @@ class PT_HMI_API Window : public Visual
 
     Gfx::PointF toParent(const Gfx::PointF& pos) const;
 
-    Gfx::PointF toScreen(const Gfx::PointF& pos) const;       
+    Gfx::PointF fromParent(const Gfx::PointF& pos) const;
+
+    Gfx::PointF toScreen(const Gfx::PointF& pos) const;
+    
+    Gfx::PointF fromScreen(const Gfx::PointF& pos) const;       
 
     void update();
 
@@ -165,6 +169,8 @@ class PT_HMI_API Window : public Visual
     void onClosing(Window& w);
 
     Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const;
+
+    Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const;
 
   protected:
     virtual void onEvent(const Pt::Event& ev);

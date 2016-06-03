@@ -51,15 +51,27 @@ MainWindowImpl::~MainWindowImpl()
 }
 
 
-Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& pos) const
+Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& windowPos) const
 {
-    POINT screenPos = { static_cast<LONG>(pos.x()), 
-                        static_cast<LONG>(pos.y()) };
+    POINT p = { static_cast<LONG>(windowPos.x()), 
+                static_cast<LONG>(windowPos.y()) };
 
-    ClientToScreen(_hwnd, &screenPos);
+    ClientToScreen(_hwnd, &p);
 
-    return Gfx::PointF( static_cast<double>(screenPos.x), 
-                        static_cast<double>(screenPos.y) );
+    return Gfx::PointF( static_cast<double>(p.x), 
+                        static_cast<double>(p.y) );
+}
+
+
+Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& screenPos) const
+{
+    POINT p = { static_cast<LONG>(screenPos.x()), 
+                static_cast<LONG>(screenPos.y()) };
+
+    ScreenToClient(_hwnd, &p);
+
+    return Gfx::PointF( static_cast<double>(p.x), 
+                        static_cast<double>(p.y) );
 }
 
 

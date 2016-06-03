@@ -55,12 +55,10 @@ class SubMenuItem : public MenuItem
         { return _menu; }
 
     protected:
-        virtual void onClicked(const Gfx::PointF& pos);
-
         virtual Gfx::SizeF onAutoSize() const;
 
         virtual void onPaintShortcut(PaintSurface& surface, 
-                                      const Gfx::RectF& updateRect);
+                                     const Gfx::RectF& updateRect);
 
     private:
         Menu& _menu;
@@ -72,7 +70,7 @@ class PT_HMI_API MenuImpl : public Window
     typedef Window BaseType;
 
     public:
-        MenuImpl();
+        MenuImpl(Menu& self);
     
         virtual ~MenuImpl();
 
@@ -80,14 +78,16 @@ class PT_HMI_API MenuImpl : public Window
 
         void removeItem(MenuItem& item);
 
-        void addMenu(Menu& parent, Menu& menu, const Pt::String& text);
+        void onAddMenu(Menu& menu, const Pt::String& text);
 
-        void removeMenu(MenuImpl& impl);
+        void onRemoveMenu(Menu& menu);
 
-        MenuShell* findMenu(const Gfx::PointF& pos);
-        
-        MenuImpl& rootMenu();
-    
+        MenuShell* onFindMenu(const Gfx::PointF& screenPos);
+
+        void onCloseMenu(Menu& menu);
+
+        void onCancel();
+
     protected:
         void onItemTriggered(MenuItem& m);
 
@@ -97,12 +97,6 @@ class PT_HMI_API MenuImpl : public Window
 
         // TODO: need a common way to react to widget content changes
         void onContentChanged();
-
-        Menu* findParentMenu(const Gfx::PointF& pos);
-
-        Menu* findSubMenu(const Gfx::PointF& pos);
-
-        void eraseMenu(std::vector<SubMenuItem*>::iterator it);
     
     protected:
         virtual void onPaintEvent(const PaintEvent& ev);
@@ -122,11 +116,11 @@ class PT_HMI_API MenuImpl : public Window
         virtual void onLeaveEvent(const LeaveEvent& ev);
  
     private:
+        Menu&                     _self;
         std::vector<SubMenuItem*> _subMenus;
         SubMenuItem*              _currentMenu;
         FlowLayout                _layout;
         std::size_t               _iconWidth;
-        Menu*                     _parentMenu;  
 };
 
 } // namespace

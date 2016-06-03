@@ -481,6 +481,28 @@ Gfx::PointF Window::onToParent(const Window& w, const Gfx::PointF& pos) const
 }
 
 
+Gfx::PointF Window::fromParent(const Gfx::PointF& pos) const
+{
+    if(_impl)
+    {
+        return _impl->fromScreen(pos);
+    }
+    else if(_parent)
+    {
+        return _parent->onFromParent(*this, pos);
+    }
+
+    // unshown window
+    return pos - position();
+}
+
+
+Gfx::PointF Window::onFromParent(const Window& w, const Gfx::PointF& pos) const
+{
+    return _windowManager.fromParent(w, pos);
+}
+
+
 Gfx::PointF Window::toScreen(const Gfx::PointF& pos) const
 {
     if(_impl)
@@ -490,7 +512,24 @@ Gfx::PointF Window::toScreen(const Gfx::PointF& pos) const
     else if(_parent)
     {
         Gfx::PointF p = toParent(pos);
-        return _parent->toScreen(pos);
+        return _parent->toScreen(p);
+    }
+
+    // unshown window
+    return pos + position();
+}
+
+
+Gfx::PointF Window::fromScreen(const Gfx::PointF& pos) const
+{
+    if(_impl)
+    {
+        return _impl->fromScreen(pos);
+    }
+    else if(_parent)
+    {
+        Gfx::PointF p = fromParent(pos);
+        return _parent->fromScreen(p);
     }
 
     // unshown window

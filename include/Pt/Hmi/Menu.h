@@ -55,12 +55,10 @@ class PT_HMI_API Menu : public MenuShell
         void removeItem(MenuItem& item);
 
         void show(const Gfx::PointF& pos);
-        
-        void hide();
-        
-        bool isVisible() const;
 
         void close();
+        
+        bool isVisible() const;
 
         MenuImpl* impl();
 
@@ -69,11 +67,16 @@ class PT_HMI_API Menu : public MenuShell
 
         virtual void onRemoveMenu(Menu& menu);
 
-        virtual void onActivate();
+        virtual void onCloseMenu(Menu& menu);
+
+        virtual void onCancel();
+
+        virtual MenuShell* onFindMenu(const Gfx::PointF& screenPos);
+
+        // virtual void onEnter();
 
     private:
         MenuImpl* _impl;
-        MenuShell* _shell;
 };
 
 } // namespace

@@ -36,16 +36,15 @@ namespace Hmi {
 
 Menu::Menu()
 : _impl(0)
-, _shell(0)
 {
-    _impl = new MenuImpl();    
+    _impl = new MenuImpl(*this);    
 }
 
 
 Menu::~Menu()
 {
-    if(_shell)
-        _shell->removeMenu(*this);
+    if( parentShell() )
+        parentShell()->removeMenu(*this);
 
     delete _impl;
 }
@@ -76,15 +75,21 @@ void Menu::show(const Gfx::PointF& pos)
 }
 
 
-void Menu::hide()
-{
-    _impl->show(false);
-}
-
-
 bool Menu::isVisible() const
 {
     return _impl->isVisible();
+}
+
+
+void Menu::onAddMenu(Menu& menu, const Pt::String& text)
+{
+    _impl->onAddMenu(menu, text);
+}
+
+
+void Menu::onRemoveMenu(Menu& menu)
+{
+    _impl->onRemoveMenu( menu );
 }
 
 
@@ -94,21 +99,21 @@ void Menu::close()
 }
 
 
-void Menu::onAddMenu(Menu& menu, const Pt::String& text)
+void Menu::onCloseMenu(Menu& menu)
 {
-    _impl->addMenu(*this, menu, text);
+    _impl->onCloseMenu(menu);
 }
 
 
-void Menu::onRemoveMenu(Menu& menu)
+void Menu::onCancel()
 {
-    _impl->removeMenu( *menu.impl() );
+    _impl->onCancel();
 }
 
 
-void Menu::onActivate()
+MenuShell* Menu::onFindMenu(const Gfx::PointF& screenPos)
 {
-    _impl->grabMouse();
+    return _impl->onFindMenu(screenPos);
 }
 
 

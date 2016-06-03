@@ -38,11 +38,11 @@ namespace Hmi {
 // MenuImpl
 ///////////////////////////////////////////////////////////////////////////////
 
-MenuImpl::MenuImpl()
-: _currentMenu(0)
+MenuImpl::MenuImpl(Menu& self)
+: _self(self)
+, _currentMenu(0)
 , _layout(FlowLayout::Top)
 , _iconWidth(0)
-, _parentMenu(0)
 {
     setBorder(false);
     setMainWidget(&_layout);    
@@ -51,8 +51,6 @@ MenuImpl::MenuImpl()
 
 MenuImpl::~MenuImpl()
 {
-    while( ! _subMenus.empty() )
-        eraseMenu( _subMenus.begin() );
 }
 
 
@@ -78,7 +76,7 @@ void MenuImpl::removeItem(MenuItem& item)
 
 void MenuImpl::onItemTriggered(MenuItem&)
 {
-    rootMenu().close();    
+    _self.rootShell().cancel();    
 }
 
 
@@ -91,28 +89,32 @@ void MenuImpl::onItemRemoved(MenuItem& item)
 }
 
 
-void MenuImpl::addMenu(Menu& parent, Menu& menu, const Pt::String& text)
+void MenuImpl::onAddMenu(Menu& menu, const Pt::String& text)
 {
     SubMenuItem* item = new SubMenuItem(menu, text); 
     item->triggered() += Pt::slot(*this, &MenuImpl::onMenuTriggered);
      
     _subMenus.push_back(item);
     _layout.add(*item);
-    
-    menu.impl()->_parentMenu = &parent;
 
     onContentChanged();
 }
 
 
-void MenuImpl::removeMenu(MenuImpl& impl)
+void MenuImpl::onRemoveMenu(Menu& menu)
 {
     std::vector<SubMenuItem*>::iterator it;
     for(it = _subMenus.begin(); it != _subMenus.end(); ++it)
     {
-        if( (*it)->menu().impl() == &impl )
+        SubMenuItem* item = *it;
+
+        if( &item->menu() == &menu )
         {
-            eraseMenu(it);
+            if(_currentMenu == item)
+                _currentMenu = 0;
+
+            delete *it;
+            _subMenus.erase(it);
             break;
         }
     }
@@ -121,77 +123,58 @@ void MenuImpl::removeMenu(MenuImpl& impl)
 }
 
 
-void MenuImpl::eraseMenu(std::vector<SubMenuItem*>::iterator it)
-{
-    SubMenuItem* item = *it;
-    MenuImpl* subMenu = item->menu().impl();
-
-    // this menu is no longer the parent of its submenu
-    subMenu->_parentMenu = 0;
-
-    if(_currentMenu == item)
-        _currentMenu = 0;
-            
-    delete *it;
-    _subMenus.erase(it);
-}
-
-
 void MenuImpl::onMenuTriggered(MenuItem& m)
 {
-    _currentMenu = static_cast<SubMenuItem*>(&m);
+    SubMenuItem* item = static_cast<SubMenuItem*>(&m);
+    Menu& menu = item->menu();
+
+    // TODO: open menu on mouse enter and close menu on mouse leave
+    //       possibly delayed by a 500ms timer
+    
+    if( ! menu.isVisible() )
+    {
+        Gfx::PointF topRight(item->size().width(), 0);
+        Gfx::PointF wpos = item->toWindow(topRight);
+        Gfx::PointF menuPos = item->window()->toScreen(wpos);
+
+        menu.show(menuPos);
+        _currentMenu = item;
+    }
+    else
+    {
+       menu.close();
+    }
 }
 
 
-MenuShell* MenuImpl::findMenu(const Gfx::PointF& pos)
-{
-    Gfx::PointF screenPos = this->toScreen(pos);
+MenuShell* MenuImpl::onFindMenu(const Gfx::PointF& screenPos)
+{ 
+    if( ! isVisible() )
+        return false;
 
-    Menu* menu = findParentMenu(screenPos);
-    if( ! menu )
-        menu = findSubMenu(screenPos);
-   
-    return menu;
-}
+    Gfx::RectF rect( position(), size() );
+    if( rect.contains(screenPos) )
+        return &_self;
 
-
-Menu* MenuImpl::findParentMenu(const Gfx::PointF& screenPos)
-{
-    if( ! _parentMenu )
+    if( ! _currentMenu)
         return 0;
 
-    MenuImpl* menu = _parentMenu->impl();
-
-    Gfx::RectF rect( menu->position(), menu->size() );
-    if( rect.contains(screenPos) )
-        return _parentMenu;
-
-    return menu->findParentMenu(screenPos);
+    return _currentMenu->menu().findMenu(screenPos);
 }
 
 
-Menu* MenuImpl::findSubMenu(const Gfx::PointF& screenPos)
+void MenuImpl::onCloseMenu(Menu& menu)
 {
-    if( ! _currentMenu )
-        return 0;
-
-    MenuImpl* menu = _currentMenu->menu().impl();
-
-    Gfx::RectF rect( menu->position(), menu->size() );
-    if( rect.contains(screenPos) )
-        return &_currentMenu->menu();
-
-    return menu->findSubMenu(screenPos);
+    if(_currentMenu && &_currentMenu->menu() == &menu)
+        _currentMenu = 0;
 }
 
 
-MenuImpl& MenuImpl::rootMenu()
-{    
-    if( ! _parentMenu )
-        return *this;
-      
-    return _parentMenu->impl()->rootMenu();
+void MenuImpl::onCancel()
+{
+    close();
 }
+
 
 /* TODO: 
 this happens when item->resize() is called in onContentChanged
@@ -295,39 +278,45 @@ void MenuImpl::onPaintBackground(const Gfx::RectF& rect)
 
 void MenuImpl::onMouseEvent(const MouseEvent& ev)
 {
-    BaseType::onMouseEvent( ev );
+    BaseType::onMouseEvent(ev);
 
     Gfx::RectF rect( Gfx::PointF(0,0), size() );
     if( rect.contains( ev.position() ) )
         return;
 
-    MenuShell* menu = findMenu( ev.position() );           
+    Gfx::PointF screenPos = toScreen( ev.position() );
+    MenuShell* menu = _self.rootShell().findMenu(screenPos);
+    
+    // release the mouse if on another menu          
     if(menu)
     {   
-        menu->activate();
+        // menu->onEnter(); ???
+        
+        releaseMouse();
         return;
     }
 
     if( ev.isRelease() )
     {
-        close();
-        releaseMouse();           
+        _self.rootShell().cancel();          
     }
 }
 
 
 void MenuImpl::onCloseEvent(const CloseEvent& ev)
 {
-    if( _currentMenu )
-        _currentMenu->menu().close();
+    releaseMouse();
 
-    BaseType::onCloseEvent(ev);    
-    
-    if( _parentMenu )
+    if( _currentMenu )
     {
-        _parentMenu->impl()->_currentMenu = 0;
-        _parentMenu->impl()->close();
+        _currentMenu->menu().close();
+        _currentMenu = 0;
     }
+
+    if( _self.parentShell() )
+        _self.parentShell()->onCloseMenu(_self);
+    
+    BaseType::onCloseEvent(ev);    
 }
 
 
@@ -354,10 +343,12 @@ void MenuImpl::onShowEvent(const ShowEvent& ev)
     BaseType::onShowEvent(ev);
 
     if( ! ev.visible() )
+    {
         releaseMouse();
+    }
     else
     {
-        if( ! _parentMenu )
+        if( ! _self.parentShell() )
             grabMouse();
     }
 }
@@ -373,10 +364,7 @@ void MenuImpl::onEnterEvent( const EnterEvent& ev )
 
 void MenuImpl::onLeaveEvent( const LeaveEvent& ev )
 {
-  BaseType::onLeaveEvent(ev);
-
-  if( _parentMenu )
-      _parentMenu->impl()->grabMouse();
+    BaseType::onLeaveEvent(ev);
 }
 
 
@@ -396,28 +384,6 @@ SubMenuItem::SubMenuItem(Menu& menu, const Pt::String& text)
 
 SubMenuItem::~SubMenuItem()
 {
-}
-
-
-void SubMenuItem::onClicked(const Gfx::PointF& pos)
-{
-    BaseType::onClicked(pos);
-
-    // TODO: open menu on mouse enter and close menu on mouse leave
-    //       possibly delayed by a 500ms timer
-    
-    if( ! _menu.isVisible() )
-    {
-        Gfx::PointF topRight(size().width(), 0);
-        Gfx::PointF wpos = this->toWindow(topRight);
-        Gfx::PointF menuPos = window()->toScreen(wpos);
-
-        _menu.show(menuPos);
-    }
-    else
-    {
-       _menu.hide();       
-    }
 }
 
 

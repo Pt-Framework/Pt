@@ -57,32 +57,31 @@ MenuBarItem::~MenuBarItem()
 }
 
 
-void MenuBarItem::onClicked(const Gfx::PointF& pos)
+void MenuBarItem::onClicked(const Gfx::PointF&)
 {
     if( ! _menu.isVisible() )
     {
-        Gfx::PointF bottomLeft(0, size().height());
-        Gfx::PointF wpos = toWindow(bottomLeft);
+        Gfx::PointF menuPos(0, size().height());
+        menuPos = toWindow(menuPos);
 
-        // TODO: toScreen should do this, but its buggy
-        wpos = window()->toParent(wpos);
-        wpos = window()->parent()->toScreen(wpos);
+        if( window() )
+            menuPos = window()->toScreen(menuPos);
         
-        std::clog << "showing menu" << std::endl;
-        _menu.show(wpos);
+        std::clog << "showing menu: " << menuPos.x() << " " << menuPos.y() << std::endl;
+        _menu.show(menuPos);
     }
     else
     {
         // TODO: this needs to be called when menuitem is clicked again
         std::clog << "hiding menu" << std::endl;
-       _menu.hide();       
+       _menu.close();       
     }
 }
 
 
 void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    Label::onPaint(surface, updateRect);
+    Button::onPaint(surface, updateRect);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -128,9 +127,16 @@ void MenuBar::onRemoveMenu(Menu& menu)
 }
 
 
-void MenuBar::onActivate()
-{
-    std::clog << "MenuBar::onActivate" << std::endl;
+MenuShell* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
+{ 
+    Gfx::PointF pos = this->window()->fromScreen(screenPos);
+    pos = this->fromWindow(pos);
+
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    if( rect.contains( pos ) )
+        return this;
+
+    return 0; 
 }
 
 

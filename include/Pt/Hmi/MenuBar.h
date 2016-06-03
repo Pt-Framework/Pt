@@ -42,7 +42,7 @@ namespace Hmi {
 
 class Menu;
 
-class MenuBarItem : public Label
+class MenuBarItem : public Button
 {
     public:
         MenuBarItem(Menu& menu, const Pt::String& text);
@@ -58,6 +58,7 @@ class MenuBarItem : public Label
         Menu& _menu;
 };
 
+
 class PT_HMI_API MenuBar : public MenuShell
                          , public Panel
 {
@@ -71,7 +72,13 @@ class PT_HMI_API MenuBar : public MenuShell
 
         virtual void onRemoveMenu(Menu& menu);
 
-        virtual void onActivate();
+        virtual void onCloseMenu(Menu& menu)
+        {}
+
+        virtual void onCancel()
+        {}
+
+        virtual MenuShell* onFindMenu(const Gfx::PointF& screenPos);
 
     protected:
         virtual void onResizeEvent(const ResizeEvent& ev);

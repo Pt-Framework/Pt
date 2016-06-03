@@ -33,16 +33,19 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/String.h>
+#include <vector>
 
 namespace Pt {
 
 namespace Hmi {
 
-class MenuItem;
 class Menu;
 
 class PT_HMI_API MenuShell
 {
+    friend class Menu;
+    friend class MenuImpl;
+
     public:
         MenuShell();
     
@@ -52,17 +55,29 @@ class PT_HMI_API MenuShell
 
         void removeMenu(Menu& menu);
 
-        void activate();
+        MenuShell* parentShell();
+
+        MenuShell& rootShell();
+
+        MenuShell* findMenu(const Gfx::PointF& screenPos);
+
+        // quit
+        void cancel();
 
     protected:
-        virtual void onAddMenu(Menu& menu, const Pt::String& text)
-        {}
+        virtual void onAddMenu(Menu& menu, const Pt::String& text) = 0;
 
-        virtual void onRemoveMenu(Menu& menu)
-        {}
+        virtual void onRemoveMenu(Menu& menu) = 0;
 
-        virtual void onActivate()
-        {}
+        virtual void onCloseMenu(Menu& menu) = 0;
+
+        virtual void onCancel() = 0;
+
+        virtual MenuShell* onFindMenu(const Gfx::PointF& screenPos) = 0;
+
+    private:
+        MenuShell* _parentShell;
+        std::vector<Menu*> _menus;
 };
 
 } // namespace

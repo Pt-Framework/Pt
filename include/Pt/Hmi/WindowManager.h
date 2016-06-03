@@ -126,6 +126,8 @@ class WindowManager : public Pt::Connectable
 
         Gfx::PointF toParent(const Window& w, const Gfx::PointF& pos) const;
 
+        Gfx::PointF fromParent(const Window& w, const Gfx::PointF& pos) const;
+
     private:
         Application&              _app;
         Window*                   _parent; 
