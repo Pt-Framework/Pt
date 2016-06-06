@@ -33,6 +33,7 @@
 #include <Pt/Ssl/StreamBuffer.h>
 #include <Pt/Ssl/SslError.h>
 #include <Pt/System/Logger.h>
+#include <algorithm>
 #include <cassert>
 
 PT_LOG_DEFINE("Pt.Ssl.StreamBuffer")
