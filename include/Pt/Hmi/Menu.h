@@ -30,16 +30,20 @@
 #ifndef Pt_Hmi_Menu_H
 #define Pt_Hmi_Menu_H
 
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/MenuShell.h>
 #include <Pt/Hmi/MenuItem.h>
+#include <Pt/Hmi/FlowLayout.h>
+#include <vector>
 
 namespace Pt {
 
 namespace Hmi {
 
-class MenuImpl;
+class SubMenuItem;
 
 class PT_HMI_API Menu : public MenuShell
+                      , public Window
 {
     friend class MenuShell;
 
@@ -48,19 +52,11 @@ class PT_HMI_API Menu : public MenuShell
     
         virtual ~Menu();
 
-        void setName(const std::string& name);
-
         void addItem(MenuItem& item);
 
         void removeItem(MenuItem& item);
 
         void show(const Gfx::PointF& pos);
-
-        void close();
-        
-        bool isVisible() const;
-
-        MenuImpl* impl();
 
     protected:
         virtual void onAddMenu(Menu& menu, const Pt::String& text);
@@ -77,8 +73,38 @@ class PT_HMI_API Menu : public MenuShell
 
         // virtual void onEnter();
 
+    protected:
+        virtual void onPaintEvent(const PaintEvent& ev);
+
+        virtual void onPaintBackground(const Gfx::RectF& rect);
+        
+        virtual void onCloseEvent(const CloseEvent& ev);
+
+        virtual void onResizeEvent(const ResizeEvent& ev);
+
+        virtual void onShowEvent(const ShowEvent& ev);
+
+        virtual void onMouseEvent(const MouseEvent& ev);
+
+        virtual void onEnterEvent(const EnterEvent& ev);
+
+        virtual void onLeaveEvent(const LeaveEvent& ev);
+
+    protected:
+        void onItemTriggered(MenuItem& m);
+
+        void onItemRemoved(MenuItem& m);
+
+        void onMenuTriggered(MenuItem& m);
+
+        // TODO: need a common way to react to widget content changes
+        void onContentChanged();
+
     private:
-        MenuImpl* _impl;
+        std::vector<SubMenuItem*> _subMenus;
+        Menu*                     _currentMenu;
+        FlowLayout                _layout;
+        std::size_t               _iconWidth;
 };
 
 } // namespace

@@ -44,7 +44,6 @@ class Menu;
 class PT_HMI_API MenuShell
 {
     friend class Menu;
-    friend class MenuImpl;
 
     public:
         MenuShell();

@@ -27,7 +27,6 @@
    MA 02110-1301 USA
 */
 
-#include "MenuImpl.h"
 #include <Pt/Hmi/MenuShell.h>
 #include <Pt/Hmi/Menu.h>
 #include <algorithm>

@@ -39,7 +39,6 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
                        Visual.cpp
                        Menu.cpp
                        MenuBar.cpp
-                       MenuImpl.cpp
                        MenuItem.cpp
                        MenuShell.cpp ;
 
