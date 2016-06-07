@@ -50,6 +50,9 @@ MenuShell::~MenuShell()
 
 void MenuShell::addMenu(Menu& menu, const Pt::String& text)
 {
+    if(menu._parentShell == this)
+        return;
+
     onAddMenu(menu, text);
     
     menu._parentShell = this;
@@ -60,6 +63,9 @@ void MenuShell::addMenu(Menu& menu, const Pt::String& text)
 
 void MenuShell::removeMenu(Menu& menu)
 {
+    if(menu._parentShell != this)
+        return;
+
     onRemoveMenu(menu);
     
     menu._parentShell = 0;

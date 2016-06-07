@@ -153,7 +153,7 @@ void MenuBar::onResizeEvent(const ResizeEvent& ev)
 
     // _layout positions the items now in OnResizeEvent
     // TODO: our overall design should make this clearer
-    Panel::onResizeEvent(ev);
+    WidgetBaseType::onResizeEvent(ev);
 }
 
 } // namespace

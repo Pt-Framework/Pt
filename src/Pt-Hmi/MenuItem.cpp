@@ -103,7 +103,8 @@ namespace Pt {
 namespace Hmi {
 
 MenuItem::MenuItem()
-: _iconWidth(0)
+: _menu(0)
+, _iconWidth(0)
 , _text("(empty)")
 {
     setAutoSize(true);
@@ -118,7 +119,8 @@ MenuItem::MenuItem()
 
 MenuItem::~MenuItem()
 {
-    _removed.send(*this);
+    if(_menu)
+        _menu->removeItem(*this);
 }
 
 
@@ -176,29 +178,25 @@ Signal<MenuItem&>& MenuItem::triggered()
 }
 
 
-Signal<MenuItem&>& MenuItem::removed()
-{
-    return _removed;
-}
-
-
 void MenuItem::onParentChanged(Widget* w)
 {
-    if( ! w )
-        _removed.send(*this);
+    if( ! w && _menu)
+        _menu->removeItem(*this);
 }
 
 
 void MenuItem::onClicked(const Gfx::PointF& pos)
 {
-    BaseType::onClicked(pos);
+    WidgetBaseType::onClicked(pos);
+    
     _triggered.send(*this);
 }
 
 
 void MenuItem::onShortcut(const KeyEvent& kev)
 {
-    BaseType::onShortcut(kev);
+    WidgetBaseType::onShortcut(kev);
+    
     _triggered.send(*this);
 }
 
@@ -225,7 +223,7 @@ Gfx::SizeF MenuItem::onAutoSize() const
 
 void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    //BaseType::onPaint(surface, updateRect);
+    //WidgetBaseType::onPaint(surface, updateRect);
 
     onPaintBackground(surface, updateRect);
     onPaintIcon(surface, updateRect);
@@ -308,21 +306,21 @@ void MenuItem::onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRe
 
 void MenuItem::onEnterEvent(const EnterEvent& ev)
 {
-    BaseType::onEnterEvent(ev);
+    WidgetBaseType::onEnterEvent(ev);
     update();
 }
 
 
 void MenuItem::onLeaveEvent(const LeaveEvent& ev)
 {
-    BaseType::onLeaveEvent(ev);
+    WidgetBaseType::onLeaveEvent(ev);
     update();
 }
 
 
 void MenuItem::onResizeEvent(const ResizeEvent& ev)
 {
-    BaseType::onResizeEvent(ev);
+    WidgetBaseType::onResizeEvent(ev);
 }
 
 } // namespace

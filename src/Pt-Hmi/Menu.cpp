@@ -112,6 +112,9 @@ Menu::~Menu()
 {
     if( parentShell() )
         parentShell()->removeMenu(*this);
+
+    // _layout's destructor detaches all menu items and
+    // MenuShell's destructor detaches all sub menus
 }
 
 
@@ -124,12 +127,13 @@ void Menu::show(const Gfx::PointF& pos)
 
 void Menu::addItem(MenuItem& item)
 {
+    if(item._menu == this)
+        return;
+
     _layout.add(item);
     
+    item._menu = this;
     item.triggered() += Pt::slot(*this, &Menu::onItemTriggered);
-
-    // TODO: Menu pointer in MenuItem instead of removed signal
-    item.removed() += Pt::slot(*this, &Menu::onItemRemoved);
     
     onContentChanged();
 }
@@ -137,8 +141,15 @@ void Menu::addItem(MenuItem& item)
 
 void Menu::removeItem(MenuItem& item)
 {
-    // causes item to send removed() signal
+    if(item._menu != this)
+        return;
+
+    item._menu = 0;
+    item.triggered() -= Pt::slot(*this, &Menu::onItemTriggered);
+
     _layout.remove(item);
+
+    onContentChanged();
 }
 
 
@@ -146,16 +157,6 @@ void Menu::onItemTriggered(MenuItem&)
 {
     rootShell().cancel();    
 }
-
-
-void Menu::onItemRemoved(MenuItem& item)
-{
-    item.triggered() -= Pt::slot(*this, &Menu::onItemTriggered);
-    item.removed() -= Pt::slot(*this, &Menu::onItemRemoved);
-    
-    onContentChanged();
-}
-
 
 
 void Menu::onAddMenu(Menu& menu, const Pt::String& text)
@@ -310,13 +311,13 @@ void Menu::onContentChanged()
 
 void Menu::onPaintEvent(const PaintEvent& ev)
 {
-    Window::onPaintEvent(ev);
+    WindowBaseType::onPaintEvent(ev);
 }
 
 
 void Menu::onPaintBackground(const Gfx::RectF& rect)
 {
-    Window::onPaintBackground(rect);
+    WindowBaseType::onPaintBackground(rect);
 
     Painter painter( surface() );
 
@@ -350,26 +351,23 @@ void Menu::onPaintBackground(const Gfx::RectF& rect)
 
 void Menu::onMouseEvent(const MouseEvent& ev)
 {
-    Window::onMouseEvent(ev);
+    WindowBaseType::onMouseEvent(ev);
 
     Gfx::RectF rect( Gfx::PointF(0,0), size() );
     if( rect.contains( ev.position() ) )
         return;
 
     Gfx::PointF screenPos = toScreen( ev.position() );
-    MenuShell* menu = rootShell().findMenu(screenPos);
-    
-    // release the mouse if on another menu          
+    MenuShell* menu = rootShell().findMenu(screenPos);   
     if(menu)
     {   
-        // menu->onEnter(); ???
-        
+        // navigate through menu chain
         releaseMouse();
-        return;
+        // menu->onEnter();
     }
-
-    if( ev.isRelease() )
+    else if( ev.isPress() )
     {
+        // cancel when clicked outside menu chain
         rootShell().cancel();          
     }
 }
@@ -388,7 +386,7 @@ void Menu::onCloseEvent(const CloseEvent& ev)
     if( parentShell() )
         parentShell()->onCloseMenu(*this);
     
-    Window::onCloseEvent(ev);    
+    WindowBaseType::onCloseEvent(ev);    
 }
 
 
@@ -406,13 +404,13 @@ void Menu::onResizeEvent(const ResizeEvent& ev)
 
     // _layout positions the items now in OnResizeEvent
     // TODO: our overall design should make this clearer
-    Window::onResizeEvent(ev);
+    WindowBaseType::onResizeEvent(ev);
 }
 
 
 void Menu::onShowEvent(const ShowEvent& ev)
 {
-    Window::onShowEvent(ev);
+    WindowBaseType::onShowEvent(ev);
 
     if( ! ev.visible() )
     {
@@ -423,7 +421,7 @@ void Menu::onShowEvent(const ShowEvent& ev)
     }
     else
     {
-        if(parentShell())
+        if( parentShell() )
             parentShell()->onOpenMenu(*this);
 
         if( ! parentShell() )
@@ -434,7 +432,7 @@ void Menu::onShowEvent(const ShowEvent& ev)
 
 void Menu::onEnterEvent( const EnterEvent& ev )
 {
-    Window::onEnterEvent(ev);
+    WindowBaseType::onEnterEvent(ev);
     
     grabMouse();
 }
@@ -442,7 +440,7 @@ void Menu::onEnterEvent( const EnterEvent& ev )
 
 void Menu::onLeaveEvent( const LeaveEvent& ev )
 {
-    Window::onLeaveEvent(ev);
+    WindowBaseType::onLeaveEvent(ev);
 }
 
 } // namespace

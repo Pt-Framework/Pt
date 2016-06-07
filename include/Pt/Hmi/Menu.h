@@ -45,7 +45,7 @@ class SubMenuItem;
 class PT_HMI_API Menu : public MenuShell
                       , public Window
 {
-    friend class MenuShell;
+    typedef Window WindowBaseType;
 
     public:
         Menu();
@@ -90,7 +90,7 @@ class PT_HMI_API Menu : public MenuShell
 
         virtual void onLeaveEvent(const LeaveEvent& ev);
 
-    protected:
+    private:
         void onItemTriggered(MenuItem& m);
 
         void onItemRemoved(MenuItem& m);

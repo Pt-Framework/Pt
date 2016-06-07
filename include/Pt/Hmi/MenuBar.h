@@ -62,6 +62,8 @@ class MenuBarItem : public Button
 class PT_HMI_API MenuBar : public MenuShell
                          , public Panel
 {
+    typedef Panel WidgetBaseType;
+
     public:
         MenuBar();
     

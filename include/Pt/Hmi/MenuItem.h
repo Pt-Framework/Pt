@@ -43,7 +43,9 @@ namespace Hmi {
 
 class PT_HMI_API MenuItem : public Panel
 {
-    typedef Panel BaseType;
+    friend class Menu;
+
+    typedef Panel WidgetBaseType;
 
     public:
         MenuItem();
@@ -67,8 +69,6 @@ class PT_HMI_API MenuItem : public Panel
         void setFont(const Gfx::Font& font);
 
         Signal<MenuItem&>& triggered();
-
-        Signal<MenuItem&>& removed();
 
     protected:
         virtual void onParentChanged(Widget* w);
@@ -97,6 +97,7 @@ class PT_HMI_API MenuItem : public Panel
         virtual void onResizeEvent(const ResizeEvent& ev);
 
     private:
+        Menu*             _menu;
         Signal<MenuItem&> _triggered;
         Signal<MenuItem&> _removed;
         double            _iconWidth;

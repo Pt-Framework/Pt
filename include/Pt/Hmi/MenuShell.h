@@ -60,7 +60,8 @@ class PT_HMI_API MenuShell
 
         MenuShell* findMenu(const Gfx::PointF& screenPos);
 
-        // quit the menu chain
+        /** @brief Quits the menu chain.
+        */
         void cancel();
 
     protected:
