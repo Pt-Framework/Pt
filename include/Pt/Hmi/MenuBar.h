@@ -74,23 +74,25 @@ class PT_HMI_API MenuBar : public MenuShell
 
         virtual void onRemoveMenu(Menu& menu);
 
-        virtual void onOpenMenu(Menu& menu)
-        {}
+        virtual void onOpenMenu(Menu& menu);
 
-        virtual void onCloseMenu(Menu& menu)
-        {}
+        virtual void onCloseMenu(Menu& menu);
 
-        virtual void onCancel()
-        {}
+        virtual void onCancel();
 
         virtual MenuShell* onFindMenu(const Gfx::PointF& screenPos);
 
     protected:
         virtual void onResizeEvent(const ResizeEvent& ev);
 
+        virtual void MenuBar::onEnterEvent(const EnterEvent& ev);
+
+        virtual void onLeaveEvent(const LeaveEvent& ev);
+
     private:
         FlowLayout                _layout;
         std::vector<MenuBarItem*> _menus;
+        Menu*                     _currentMenu;
 };
 
 } // namespace

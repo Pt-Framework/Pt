@@ -66,14 +66,11 @@ void MenuBarItem::onClicked(const Gfx::PointF&)
 
         if( window() )
             menuPos = window()->toScreen(menuPos);
-        
-        std::clog << "showing menu: " << menuPos.x() << " " << menuPos.y() << std::endl;
+
         _menu.show(menuPos);
     }
     else
     {
-        // TODO: this needs to be called when menuitem is clicked again
-        std::clog << "hiding menu" << std::endl;
        _menu.close();       
     }
 }
@@ -90,9 +87,11 @@ void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 
 MenuBar::MenuBar()
 : _layout(FlowLayout::Left)
+, _currentMenu(0)
 {
-    this->setBackgroundColor( Gfx::Color(0.9f, 0.9f, 0.9f) );
-    //this->setBorderStyle(Panel::NoBorder);
+    this->setBackgroundColor( Gfx::Color(0.9f, 0.9f, 0.91f) );
+    this->setBorderColor( Gfx::Color(0.5f, 0.5f, 0.51f)  );
+    this->setBorderStyle(Panel::Single);
 
     _layout.move( Gfx::PointF(0,0) );
     _layout.setPadding(1);
@@ -124,11 +123,37 @@ void MenuBar::onAddMenu(Menu& menu, const Pt::String& text)
 void MenuBar::onRemoveMenu(Menu& menu)
 {
     // TODO: delete menu bar item
+
+    if(_currentMenu == &menu)
+        _currentMenu = 0;
+}
+
+
+void MenuBar::onOpenMenu(Menu& menu)
+{
+    _currentMenu = &menu;
+}
+
+
+void MenuBar::onCloseMenu(Menu& menu)
+{
+    if(_currentMenu == &menu)
+        _currentMenu = 0;
+}
+
+
+void MenuBar::onCancel()
+{
+    if(_currentMenu)
+        _currentMenu->cancel();
 }
 
 
 MenuShell* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
 { 
+    if( ! isVisible() )
+        return false;
+
     Gfx::PointF pos = this->window()->fromScreen(screenPos);
     pos = this->fromWindow(pos);
 
@@ -136,7 +161,10 @@ MenuShell* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
     if( rect.contains( pos ) )
         return this;
 
-    return 0; 
+    if( ! _currentMenu)
+        return 0;
+
+    return _currentMenu->findMenu(screenPos);
 }
 
 
@@ -154,6 +182,20 @@ void MenuBar::onResizeEvent(const ResizeEvent& ev)
     // _layout positions the items now in OnResizeEvent
     // TODO: our overall design should make this clearer
     WidgetBaseType::onResizeEvent(ev);
+}
+
+
+void MenuBar::onEnterEvent(const EnterEvent& ev)
+{
+    WidgetBaseType::onEnterEvent(ev);
+    
+    //grabMouse();
+}
+
+
+void MenuBar::onLeaveEvent(const LeaveEvent& ev)
+{
+    WidgetBaseType::onLeaveEvent(ev);
 }
 
 } // namespace
