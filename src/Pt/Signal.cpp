@@ -143,6 +143,7 @@ void SignalBase::disconnectSlots()
     {
         if( ! it->isValid() || it->sender() != this ) 
         {
+            ++it;
             continue;
         }
 
