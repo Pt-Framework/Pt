@@ -31,6 +31,23 @@
 #include <Pt/Hmi/Menu.h>
 #include <Pt/Hmi/Window.h>
 
+namespace {
+
+Pt::Gfx::Color brighten(const Pt::Gfx::Color& c, float factor)
+{
+    float r = c.red() * factor;
+    float g = c.green() * factor;
+    float b = c.blue() * factor;
+
+    r = r > 1.0f ? 1.0f : r;
+    g = g > 1.0f ? 1.0f : g;
+    b = b > 1.0f ? 1.0f : b;
+
+    return Pt::Gfx::Color(c.alpha(), r, g, b);
+}
+
+} // namepace
+
 namespace Pt {
 
 namespace Hmi {
@@ -45,8 +62,12 @@ MenuBarItem::MenuBarItem(Menu& menu, const Pt::String& text)
     setAutoSize(true);
     setBorderStyle(Panel::NoBorder);
     setAcceptsFocus(true);
-    setText(text);
+    
+    setBackgroundColor( Gfx::Color(0.9f, 0.9f, 0.91f) );
 
+    setText(text);
+    setBorderRound(false);
+    
     setPadding( Spacing(8, 0, 8, 0) );
     setMargin(0);
 }
@@ -54,6 +75,39 @@ MenuBarItem::MenuBarItem(Menu& menu, const Pt::String& text)
 
 MenuBarItem::~MenuBarItem()
 {
+}
+
+
+const String& MenuBarItem::text() const 
+{
+    return _text;
+}
+
+
+void MenuBarItem::setText(const Pt::String& t)
+{   
+    _text = t;
+}
+
+
+const Gfx::Font& MenuBarItem::font() const
+{
+    return _font;
+}
+
+
+void MenuBarItem::setFont(const Gfx::Font& font)
+{   
+    _font = font;
+}
+
+
+Gfx::SizeF MenuBarItem::onAutoSize() const
+{
+    Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
+
+    return Gfx::SizeF( fm.width() + padding().leftRight(), 
+                       fm.height() + padding().topBottom() );
 }
 
 
@@ -78,7 +132,58 @@ void MenuBarItem::onClicked(const Gfx::PointF&)
 
 void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    Button::onPaint(surface, updateRect);
+    //WidgetBaseType::onPaint(surface, updateRect);
+
+    onPaintBackground(surface, updateRect);
+    onPaintContent(surface, updateRect);
+}
+
+
+void MenuBarItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+    bool mouseOver = this->window()->pointerWidget() == this;
+    if(mouseOver)
+    {
+        Gfx::Color bgColor = backgroundColor();
+        Gfx::Brush brush = brighten(bgColor, 0.85f);
+
+        Painter painter(surface);
+        painter.setBrush(brush);
+        painter.fillRect( Gfx::RectF(Gfx::PointF(0,0), size()) );
+    }
+}
+
+
+void MenuBarItem::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+    Painter painter(surface);
+    painter.setFont(_font);
+
+    Gfx::Color fgColor = foregroundColor();
+    Gfx::Pen pen(1, fgColor);
+    painter.setPen(pen);
+
+    Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
+    double textX = padding().left();
+    double textY = (size().height() - fm.height()) / 2;
+    textY += fm.ascent();
+    Gfx::PointF textPos(textX, textY);
+
+    painter.drawText(textPos, _text);
+}
+
+
+void MenuBarItem::onEnterEvent(const EnterEvent& ev)
+{
+    WidgetBaseType::onEnterEvent(ev);
+    update();
+}
+
+
+void MenuBarItem::onLeaveEvent(const LeaveEvent& ev)
+{
+    WidgetBaseType::onLeaveEvent(ev);
+    update();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -91,7 +196,7 @@ MenuBar::MenuBar()
 {
     this->setBackgroundColor( Gfx::Color(0.9f, 0.9f, 0.91f) );
     this->setBorderColor( Gfx::Color(0.5f, 0.5f, 0.51f)  );
-    this->setBorderStyle(Panel::Single);
+    this->setBorderStyle(Panel::NoBorder);
 
     _layout.move( Gfx::PointF(0,0) );
     _layout.setPadding(1);
@@ -113,19 +218,27 @@ void MenuBar::onAddMenu(Menu& menu, const Pt::String& text)
     _menus.push_back(item);
     _layout.add(*item);
 
-    //
-    //menu.impl()->_parentMenu = &parent;
-
-    //onContentChanged();
+    update();
 }
 
 
 void MenuBar::onRemoveMenu(Menu& menu)
 {
-    // TODO: delete menu bar item
+    std::vector<MenuBarItem*>::iterator it;
+    for(it = _menus.begin(); it != _menus.end(); ++it)
+    {
+        if( &(*it)->menu() == &menu )
+        {
+            delete *it;
+            _menus.erase(it);
+            break;
+        }
+    }
 
     if(_currentMenu == &menu)
         _currentMenu = 0;
+
+    update();
 }
 
 

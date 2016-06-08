@@ -42,20 +42,46 @@ namespace Hmi {
 
 class Menu;
 
-class MenuBarItem : public Button
+class MenuBarItem : public Panel
 {
+    typedef Panel WidgetBaseType;
+
     public:
         MenuBarItem(Menu& menu, const Pt::String& text);
 
         ~MenuBarItem();
 
-    protected:
-        void onClicked(const Gfx::PointF& pos);
+        Menu& menu()
+        { return _menu; }
 
-        void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        const String& text() const;
+
+        void setText(const String& t);
+
+        const Gfx::Font& font() const;
+
+        void setFont(const Gfx::Font& font);
+
+    protected:
+        virtual Gfx::SizeF onAutoSize() const;
+
+        virtual void onClicked(const Gfx::PointF& pos);
+
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+    protected:
+        virtual void onEnterEvent( const EnterEvent& ev);
+
+        virtual void onLeaveEvent(const LeaveEvent& ev);
 
     private:
-        Menu& _menu;
+        Menu&      _menu;
+        Gfx::Font  _font;
+        Pt::String _text;
 };
 
 

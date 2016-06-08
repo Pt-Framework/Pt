@@ -11,21 +11,34 @@ namespace Demo{
 
 ChildW::ChildW(const std::string& title)
 {
-    _menu.setName("FileMenu");
+    _fileMenu.setName("FileMenu");
     
     _item1.setText("New");
     _item1.setShortcut( &Key(Key::F3) );
-    _menu.addItem(_item1);
+    _fileMenu.addItem(_item1);
 
     _item2.setText("Open");
-    _menu.addItem(_item2);
+    _fileMenu.addItem(_item2);
 
     _item3.setText("Exit");
     _item3.setShortcut( &Key(Key::Control, Key::A) );
-    _menu.addItem(_item3);
+    _fileMenu.addItem(_item3);
+
+    _editMenu.setName("FileMenu");
+    
+    _edit1.setText("Cut");
+    _editMenu.addItem(_edit1);
+
+    _edit2.setText("Copy");
+    _edit2.setShortcut( &Key(Key::Control, Key::C) );
+    _editMenu.addItem(_edit2);
+
+    _edit3.setText("Paste");
+    _editMenu.addItem(_edit3);
 
     _menuBar.resize( Pt::Gfx::SizeF(100, 20) );
-    _menuBar.addMenu(_menu, "File");
+    _menuBar.addMenu(_fileMenu, "File");
+    _menuBar.addMenu(_editMenu, "Edit");
 
     _mainLayout.setAlignment(FlowLayout::Top);
     _mainLayout.add(_menuBar);

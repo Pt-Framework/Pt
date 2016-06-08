@@ -81,8 +81,14 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 
     Painter painter(surface);
 
-	  Gfx::RectF borderRect(_borderWidth/2, size.width() - _borderWidth,
-                          _borderWidth/2, size.height() - _borderWidth);
+    Gfx::RectF borderRect( Gfx::PointF(0,0), this->size() );
+
+    if(_borderStyle != NoBorder)
+    {
+        borderRect.setOrigin( Gfx::PointF(_borderWidth/2, _borderWidth/2) );
+        borderRect.setSize( Gfx::SizeF(size.width() - _borderWidth, 
+                                       size.height() - _borderWidth) );
+    }
 
     double corner = _borderRound ? 2.0 : 0;
 		std::vector<Gfx::PointF> outline(9);

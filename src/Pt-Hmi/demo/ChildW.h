@@ -33,10 +33,15 @@ class ChildW : public Hmi::Window
         FlowLayout _mainLayout;
         MenuBar _menuBar;
 
-        Menu     _menu;
+        Menu     _fileMenu;
         MenuItem _item1;
         MenuItem _item2;
         MenuItem _item3;
+
+        Menu     _editMenu;
+        MenuItem _edit1;
+        MenuItem _edit2;
+        MenuItem _edit3;
 
         Window _childWindow2;
         DockingLayout  _childView;

@@ -765,6 +765,8 @@ class Key
                 case A: return "A";
                 case B: return "B";
                 case C: return "C";
+                case V: return "V";
+                case X: return "X";
 
                 case F1: return "F1";
                 case F2: return "F2";
