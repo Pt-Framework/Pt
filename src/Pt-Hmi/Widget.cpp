@@ -68,6 +68,8 @@ Widget::Widget()
 
 Widget::~Widget()
 {
+    releaseMouse();
+
     while( ! _children.empty() )
         remove( *_children.back() );
 
@@ -449,6 +451,18 @@ void Widget::onEnable(bool e )
 
     for( size_t i = 0; i < _children.size(); ++i)
         _children[i]->onEnable(e);
+}
+
+
+void Widget::grabMouse()
+{
+    Application::instance().grabMouse(*this);
+}
+
+
+void Widget::releaseMouse()
+{
+    Application::instance().releaseMouse(*this);
 }
 
 

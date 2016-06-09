@@ -43,6 +43,8 @@ namespace Pt {
 namespace Hmi {
 
 class Window;
+class Widget;
+class Visual;
 
 class Selector : public System::Selector
 {
@@ -69,9 +71,9 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         void setCursor(const Cursor* cursor );
 
-        void grabMouse(Window& w);
+        void grabMouse(Window& w, Widget* widget);
 
-        void releaseMouse(Window& w);
+        void releaseMouse(Window& w, Widget* widget);
 
         void nextEvent();
 
@@ -141,6 +143,7 @@ class ApplicationImpl : public Pt::System::EventLoop
         bool                             _pointerInWindow;
         HCURSOR                          _cursorHandle;
         const Cursor*                    _currentCursor;
+        Widget*                          _mouseGrabber;
 };
 
 } // namespace

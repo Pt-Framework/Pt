@@ -31,6 +31,7 @@
 #include "MainWindowImpl.h"
 #include "PaintSurfaceImpl.h"
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
@@ -129,6 +130,7 @@ ApplicationImpl::ApplicationImpl()
 , _pointerInWindow(false)
 , _cursorHandle(0)
 , _currentCursor(0)
+, _mouseGrabber(0)
 {
 #ifdef NDEBUG  
     FreeConsole();
@@ -199,24 +201,26 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 }
 
 
-void ApplicationImpl::grabMouse(Window& w)
+void ApplicationImpl::grabMouse(Window& w, Widget* widget)
 {
     // TODO: grab mouse for top level parent HWND
     assert( w.impl() );
     
     w.impl()->grabMouse();
+    _mouseGrabber = widget;
 }
 
 
-void ApplicationImpl::releaseMouse(Window& )
+void ApplicationImpl::releaseMouse(Window&, Widget*)
 {
     ReleaseCapture();
+    _mouseGrabber = 0;
 }
 
 
 void ApplicationImpl::nextEvent()
 {
-      waitNext();
+    waitNext();
 }
 
 
@@ -639,15 +643,32 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
         break;
     }
   
+    Gfx::PointF pos = Application::instance().screen().toUnit( Gfx::Point(xPos, yPos) );
+
+    if(_mouseGrabber)
+    {
+        Window* w = _mouseGrabber->window();
+        if( ! w )
+            return;
+
+        // TODO: move this to Visual API, so _mouseGrabber can be a Visual
+        pos = w->fromScreen(pos);
+        
+        _mouseEvent.setX( pos.x() );
+        _mouseEvent.setY( pos.y() );            
+        _mouseEvent.setId( _mouseGrabber->vid() );
+        commitEvent(_mouseEvent);
+        return;
+    }
+
     if( ! _pointerInWindow )
     {
         Application::instance().setPointerWindow(&w);
         _pointerInWindow = true;
     }
 
-    Gfx::PointF p = Application::instance().screen().toUnit( Gfx::Point(xPos, yPos) );
-    _mouseEvent.setX( p.x() );
-    _mouseEvent.setY( p.y() );            
+    _mouseEvent.setX( pos.x() );
+    _mouseEvent.setY( pos.y() );            
     _mouseEvent.setId( w.vid() );
     commitEvent(_mouseEvent);
 }

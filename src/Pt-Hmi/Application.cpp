@@ -29,6 +29,7 @@
 #include "ApplicationImpl.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/PaintEvent.h>
+#include <Pt/Hmi/Widget.h>
 #include <cassert>
 
 namespace Pt {
@@ -82,19 +83,50 @@ void Application::setCursor( const Cursor* cursor )
 }
 
 
-void Application::grabMouse(Window& w)
+void Application::grabMouse(Window& window)
 {
-    _impl->grabMouse(w);
-    _mouseGrabber = &w;
+    _impl->grabMouse(window, 0);
+    _mouseGrabber = &window;
 }
 
 
-void Application::releaseMouse(Window& w)
+void Application::releaseMouse(Window& window)
 {
-    if(_mouseGrabber != &w)
+    if(_mouseGrabber != static_cast<Visual*>(&window) )
         return;
 
-    _impl->releaseMouse(w);
+    _impl->releaseMouse(window, 0);
+    _mouseGrabber = 0;
+}
+
+
+void Application::grabMouse(Widget& widget)
+{
+    Window* window = widget.window();
+    if( ! window )
+        return;
+
+    while( window->parent() )
+        window = window->parent();
+
+    _impl->grabMouse(*window, &widget);
+    _mouseGrabber = &widget;
+}
+
+
+void Application::releaseMouse(Widget& widget)
+{
+    if(_mouseGrabber != static_cast<Visual*>(&widget) )
+        return;
+
+    Window* window = widget.window();
+    if( ! window )
+        return;
+
+    while( window->parent() )
+        window = window->parent();
+
+    _impl->releaseMouse(*window, &widget);
     _mouseGrabber = 0;
 }
 
@@ -199,7 +231,7 @@ void Application::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-void Application::onMouseEvent(const MouseEvent& ev )
+void Application::onMouseEvent(const MouseEvent& ev)
 {
     VisualMap::iterator it = _visuals.find( ev.vid() );
 

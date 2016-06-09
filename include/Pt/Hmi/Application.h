@@ -62,6 +62,10 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void releaseMouse(Window& w);
 
+        void grabMouse(Widget& w);
+
+        void releaseMouse(Widget& w);
+
         Pt::uint64_t makeId();
 
         const Visual* findVisual(Pt::uint64_t id) const;
@@ -112,7 +116,7 @@ class PT_HMI_API Application : public Pt::System::Application
         Pt::uint64_t     _lastId;
         VisualMap        _visuals;
         Window*          _pointerWindow;
-        Window*          _mouseGrabber;
+        Visual*          _mouseGrabber;
 };
 
 } // namespace

@@ -281,6 +281,12 @@ MenuShell* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
 }
 
 
+void MenuBar::onPointerEvent(const MouseEvent& ev)
+{ 
+    WidgetBaseType::onPointerEvent(ev);
+}
+
+
 void MenuBar::onResizeEvent(const ResizeEvent& ev)
 {
     for(std::size_t i = 0; i < _layout.widgets().size(); ++i)
@@ -302,7 +308,7 @@ void MenuBar::onEnterEvent(const EnterEvent& ev)
 {
     WidgetBaseType::onEnterEvent(ev);
     
-    //grabMouse();
+    grabMouse();
 }
 
 

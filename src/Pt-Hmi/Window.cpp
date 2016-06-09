@@ -964,8 +964,6 @@ void Window::onMouseEvent(const MouseEvent& ev)
 
     // widget can be null
     setPointerWidget(widget);
-  
-
 
     if(widget && widget->isEnabled())
     {

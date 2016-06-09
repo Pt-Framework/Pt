@@ -109,9 +109,11 @@ class PT_HMI_API MenuBar : public MenuShell
         virtual MenuShell* onFindMenu(const Gfx::PointF& screenPos);
 
     protected:
+        virtual void onPointerEvent(const MouseEvent& ev);
+
         virtual void onResizeEvent(const ResizeEvent& ev);
 
-        virtual void MenuBar::onEnterEvent(const EnterEvent& ev);
+        virtual void onEnterEvent(const EnterEvent& ev);
 
         virtual void onLeaveEvent(const LeaveEvent& ev);
 

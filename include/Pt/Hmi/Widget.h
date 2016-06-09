@@ -147,6 +147,10 @@ class PT_HMI_API Widget : public Visual
 
         void enable( bool b = true );
 
+        void grabMouse();
+
+        void releaseMouse();
+
         const Gfx::PointF& position() const;
 
         void move( const Gfx::PointF& p );
