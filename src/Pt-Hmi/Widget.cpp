@@ -299,9 +299,15 @@ Key Widget::actionKey() const
 }
 
 
-void Widget::setActionKey( Key ak )
+void Widget::setActionKey(const Key& ak)
 {
     _actionKey = ak;
+    this->onSetActionKey(ak);
+}
+
+
+void Widget::onSetActionKey(const Key&)
+{
 }
 
 
@@ -328,8 +334,15 @@ void Widget::setShortcut(const Key* k)
 
     if(_window)
         _window->setShortcut(*this, k);
+
+    this->onSetShortcut(k);
 }
 
+
+void Widget::onSetShortcut(const Key*)
+{
+}
+  
 
 void Widget::onShortcut(const KeyEvent& kev)
 {

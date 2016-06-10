@@ -98,6 +98,7 @@ class PT_HMI_API Menu : public MenuShell
         void onMenuTriggered(MenuItem& m);
 
         // TODO: need a common way to react to widget content changes
+        //       implement onSetShortCut in MenuItem to notify Menu
         void onContentChanged();
 
     private:

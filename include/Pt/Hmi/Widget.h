@@ -121,7 +121,7 @@ class PT_HMI_API Widget : public Visual
 
         Key actionKey() const;
 
-        void setActionKey( Key ak );
+        void setActionKey(const Key& ak);
 
         const Key* shortcut() const;
 
@@ -221,7 +221,11 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onFocus(bool isFocused);
 
+        virtual void onSetActionKey(const Key& ak);
+
         virtual void onActionKey(const KeyEvent& kev);
+
+        virtual void onSetShortcut(const Key* k);
 
         virtual void onShortcut(const KeyEvent& kev);
 

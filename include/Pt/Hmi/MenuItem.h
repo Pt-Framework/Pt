@@ -99,7 +99,6 @@ class PT_HMI_API MenuItem : public Panel
     private:
         Menu*             _menu;
         Signal<MenuItem&> _triggered;
-        Signal<MenuItem&> _removed;
         double            _iconWidth;
         Gfx::Image        _icon;
         Gfx::Font         _font;
