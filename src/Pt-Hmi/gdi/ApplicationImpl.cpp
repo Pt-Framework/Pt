@@ -201,17 +201,17 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 }
 
 
-void ApplicationImpl::grabMouse(Window& w, Widget* widget)
+void ApplicationImpl::grabMouse(Window& w, Visual* v)
 {
     // TODO: grab mouse for top level parent HWND
     assert( w.impl() );
     
     w.impl()->grabMouse();
-    _mouseGrabber = widget;
+    _mouseGrabber = v;
 }
 
 
-void ApplicationImpl::releaseMouse(Window&, Widget*)
+void ApplicationImpl::releaseMouse(Window&, Visual*)
 {
     ReleaseCapture();
     _mouseGrabber = 0;
@@ -647,14 +647,7 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
 
     if(_mouseGrabber)
     {
-        Window* w2 = _mouseGrabber->window();
-        if( ! w2 )
-            return;
-
-        // TODO: move this to Visual API, so _mouseGrabber can be a Visual
-        pos = w.toScreen(pos);
-        pos = w2->fromScreen(pos);
-        pos = _mouseGrabber->fromWindow(pos);
+        pos = _mouseGrabber->fromScreen(  w.toScreen(pos) );
         
         _mouseEvent.setX( pos.x() );
         _mouseEvent.setY( pos.y() );            

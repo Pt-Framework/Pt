@@ -85,7 +85,13 @@ void Application::setCursor( const Cursor* cursor )
 
 void Application::grabMouse(Window& window)
 {
-    _impl->grabMouse(window, 0);
+    Window* mainWindow = &window;
+
+    while( mainWindow->parent() )
+        mainWindow = mainWindow->parent();
+
+    _impl->grabMouse(window.mainWindow(), &window);
+
     _mouseGrabber = &window;
 }
 
@@ -94,22 +100,18 @@ void Application::releaseMouse(Window& window)
 {
     if(_mouseGrabber != static_cast<Visual*>(&window) )
         return;
-
-    _impl->releaseMouse(window, 0);
+    
+    _impl->releaseMouse(window.mainWindow(), &window);
     _mouseGrabber = 0;
 }
 
 
 void Application::grabMouse(Widget& widget)
 {
-    Window* window = widget.window();
-    if( ! window )
+    if( ! widget.window() )
         return;
 
-    while( window->parent() )
-        window = window->parent();
-
-    _impl->grabMouse(*window, &widget);
+    _impl->grabMouse(widget.window()->mainWindow(), &widget);
     _mouseGrabber = &widget;
 }
 
@@ -119,14 +121,11 @@ void Application::releaseMouse(Widget& widget)
     if(_mouseGrabber != static_cast<Visual*>(&widget) )
         return;
 
-    Window* window = widget.window();
-    if( ! window )
+    if( ! widget.window() )
         return;
 
-    while( window->parent() )
-        window = window->parent();
+    _impl->releaseMouse(widget.window()->mainWindow(), &widget);
 
-    _impl->releaseMouse(*window, &widget);
     _mouseGrabber = 0;
 }
 

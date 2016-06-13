@@ -34,6 +34,7 @@
 #include <Pt/Types.h>
 #include <Pt/Event.h>
 #include <Pt/Connectable.h>
+#include <Pt/Gfx/Point.h>
 #include <string>
 
 namespace Pt {
@@ -61,6 +62,12 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
         {
             return _name;
         }
+
+
+        virtual Gfx::PointF toScreen(const Gfx::PointF& l) const = 0;
+
+
+        virtual Gfx::PointF fromScreen(const Gfx::PointF& g) const = 0;
 
     protected:
         Visual();

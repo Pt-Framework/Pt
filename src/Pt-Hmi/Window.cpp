@@ -171,6 +171,28 @@ void Window::deinit()
 }
 
 
+Window& Window::mainWindow()
+{
+    Window* mainWindow = this;
+
+    while( mainWindow->parent() )
+        mainWindow = mainWindow->parent();
+
+   return *mainWindow;
+}
+
+
+const Window& Window::mainWindow() const
+{
+    const Window* mainWindow = this;
+
+    while( mainWindow->parent() )
+        mainWindow = mainWindow->parent();
+
+   return *mainWindow;
+}
+
+
 Window* Window::parent()
 {
    return _parent;

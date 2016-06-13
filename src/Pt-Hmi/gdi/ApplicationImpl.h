@@ -71,9 +71,9 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         void setCursor(const Cursor* cursor );
 
-        void grabMouse(Window& w, Widget* widget);
+        void grabMouse(Window& w, Visual* v);
 
-        void releaseMouse(Window& w, Widget* widget);
+        void releaseMouse(Window& w, Visual* v);
 
         void nextEvent();
 
@@ -143,7 +143,7 @@ class ApplicationImpl : public Pt::System::EventLoop
         bool                             _pointerInWindow;
         HCURSOR                          _cursorHandle;
         const Cursor*                    _currentCursor;
-        Widget*                          _mouseGrabber;
+        Visual*                          _mouseGrabber;
 };
 
 } // namespace

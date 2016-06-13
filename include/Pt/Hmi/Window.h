@@ -71,6 +71,10 @@ class PT_HMI_API Window : public Visual
 
     virtual ~Window();
 
+    Window& mainWindow();
+
+    const Window& mainWindow() const;
+
     Window* parent();
 
     const Window* parent() const;
@@ -105,9 +109,9 @@ class PT_HMI_API Window : public Visual
 
     Gfx::PointF fromParent(const Gfx::PointF& pos) const;
 
-    Gfx::PointF toScreen(const Gfx::PointF& pos) const;
+    virtual Gfx::PointF toScreen(const Gfx::PointF& pos) const;
     
-    Gfx::PointF fromScreen(const Gfx::PointF& pos) const;       
+    virtual Gfx::PointF fromScreen(const Gfx::PointF& pos) const;       
 
     void update();
 

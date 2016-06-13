@@ -247,6 +247,28 @@ Gfx::PointF Widget::toWindow(const Gfx::PointF& p) const
 }
 
 
+Gfx::PointF Widget::toScreen(const Gfx::PointF& pos) const
+{
+    Gfx::PointF screenPos = toWindow(pos);
+    
+    if( window() )
+        return window()->toScreen(screenPos);
+
+    return screenPos;
+}
+    
+
+Gfx::PointF Widget::fromScreen(const Gfx::PointF& pos) const
+{
+    Gfx::PointF widgetPos;
+
+    if( window() )
+        widgetPos = window()->fromScreen(pos);
+
+    return fromWindow( widgetPos );
+}
+
+
 bool Widget::hasFocus() const
 {
     return _hasFocus;

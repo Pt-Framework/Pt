@@ -108,6 +108,7 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void setPointerWindow(Window* w);
 
+        
     private:
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;
 
