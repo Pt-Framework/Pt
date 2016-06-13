@@ -102,16 +102,7 @@ void MenuBarItem::setFont(const Gfx::Font& font)
 }
 
 
-Gfx::SizeF MenuBarItem::onAutoSize() const
-{
-    Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
-
-    return Gfx::SizeF( fm.width() + padding().leftRight(), 
-                       fm.height() + padding().topBottom() );
-}
-
-
-void MenuBarItem::onClicked(const Gfx::PointF&)
+void MenuBarItem::toggle()
 {
     if( ! _menu.isVisible() )
     {
@@ -127,6 +118,21 @@ void MenuBarItem::onClicked(const Gfx::PointF&)
     {
        _menu.close();       
     }
+}
+
+
+Gfx::SizeF MenuBarItem::onAutoSize() const
+{
+    Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
+
+    return Gfx::SizeF( fm.width() + padding().leftRight(), 
+                       fm.height() + padding().topBottom() );
+}
+
+
+void MenuBarItem::onClicked(const Gfx::PointF&)
+{
+    toggle();
 }
 
 
@@ -245,6 +251,7 @@ void MenuBar::onRemoveMenu(Menu& menu)
 void MenuBar::onOpenMenu(Menu& menu)
 {
     _currentMenu = &menu;
+    grabMouse();
 }
 
 
@@ -259,6 +266,12 @@ void MenuBar::onCancel()
 {
     if(_currentMenu)
         _currentMenu->cancel();
+}
+
+
+void MenuBar::onEnter()
+{
+    grabMouse();
 }
 
 
@@ -284,6 +297,58 @@ MenuShell* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
 void MenuBar::onPointerEvent(const MouseEvent& ev)
 { 
     WidgetBaseType::onPointerEvent(ev);
+
+    Gfx::PointF screenPos = window()->toScreen( ev.position() );
+    MenuShell* menu = findMenu(screenPos);   
+    if(menu && menu != this)
+    {
+        releaseMouse();
+        return; 
+    }
+
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    if( ! rect.contains( ev.position() ) )
+    {
+        if( ev.isPress() )
+        {
+            // cancel when clicked outside menu chain
+            cancel();
+            releaseMouse();         
+        }
+        
+        return;
+    }
+
+    std::vector<MenuBarItem*>::iterator it;
+    for(it = _menus.begin(); it != _menus.end(); ++it)
+    {
+        MenuBarItem* item = *it;
+
+        Gfx::RectF itemRect( item->position(), item->size() );
+        if(itemRect.contains( ev.position() ) )
+        {
+            if(_currentMenu && &item->menu() != _currentMenu)
+            {
+                _currentMenu->close();
+                releaseMouse(); 
+
+                item->toggle();
+            }
+            else if( ev.isPress() )
+            {
+                releaseMouse();
+            }
+
+            return;
+        }
+    }
+
+    if( ev.isPress() )
+    {
+        // cancel when clicked outside menu chain
+        cancel();
+        releaseMouse();         
+    }
 }
 
 
@@ -304,11 +369,10 @@ void MenuBar::onResizeEvent(const ResizeEvent& ev)
 }
 
 
+
 void MenuBar::onEnterEvent(const EnterEvent& ev)
 {
     WidgetBaseType::onEnterEvent(ev);
-    
-    grabMouse();
 }
 
 

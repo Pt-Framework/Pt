@@ -667,7 +667,7 @@ void Widget::onPaintEvent(const PaintEvent& ev)
 
 
 void Widget::onMoveEvent(const MoveEvent& ev)
-{    
+{        
     _position = ev.position();
 }
 
@@ -739,6 +739,7 @@ void Widget::onEnterEvent( const EnterEvent& ev )
 
 void Widget::onLeaveEvent(const LeaveEvent& ev )
 {
+
 }
 
 } // namespace

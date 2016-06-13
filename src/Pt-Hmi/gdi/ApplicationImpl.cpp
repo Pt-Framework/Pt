@@ -647,12 +647,14 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
 
     if(_mouseGrabber)
     {
-        Window* w = _mouseGrabber->window();
-        if( ! w )
+        Window* w2 = _mouseGrabber->window();
+        if( ! w2 )
             return;
 
         // TODO: move this to Visual API, so _mouseGrabber can be a Visual
-        pos = w->fromScreen(pos);
+        pos = w.toScreen(pos);
+        pos = w2->fromScreen(pos);
+        pos = _mouseGrabber->fromWindow(pos);
         
         _mouseEvent.setX( pos.x() );
         _mouseEvent.setY( pos.y() );            

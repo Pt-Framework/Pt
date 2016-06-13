@@ -62,6 +62,8 @@ class MenuBarItem : public Panel
 
         void setFont(const Gfx::Font& font);
 
+        void toggle();
+
     protected:
         virtual Gfx::SizeF onAutoSize() const;
 
@@ -105,6 +107,8 @@ class PT_HMI_API MenuBar : public MenuShell
         virtual void onCloseMenu(Menu& menu);
 
         virtual void onCancel();
+
+        virtual void onEnter();
 
         virtual MenuShell* onFindMenu(const Gfx::PointF& screenPos);
 

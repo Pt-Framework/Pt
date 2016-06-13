@@ -249,6 +249,10 @@ void Menu::onCancel()
 }
 
 
+void Menu::onEnter()
+{
+}
+
 /* TODO: 
 this happens when item->resize() is called in onContentChanged
 One soluton is to assign the _size member in Window::resize immediately
@@ -363,7 +367,7 @@ void Menu::onMouseEvent(const MouseEvent& ev)
     {   
         // navigate through menu chain
         releaseMouse();
-        // menu->onEnter();
+        menu->onEnter();
     }
     else if( ev.isPress() )
     {

@@ -69,9 +69,9 @@ class PT_HMI_API Menu : public MenuShell
 
         virtual void onCancel();
 
-        virtual MenuShell* onFindMenu(const Gfx::PointF& screenPos);
+        virtual void onEnter();
 
-        // virtual void onEnter();
+        virtual MenuShell* onFindMenu(const Gfx::PointF& screenPos);
 
     protected:
         virtual void onPaintEvent(const PaintEvent& ev);
