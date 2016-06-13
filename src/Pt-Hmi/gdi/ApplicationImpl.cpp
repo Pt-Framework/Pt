@@ -201,13 +201,11 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 }
 
 
-void ApplicationImpl::grabMouse(Window& w, Visual* v)
+void ApplicationImpl::grabMouse(Window& mainWindow, Visual* grabber)
 {
-    // TODO: grab mouse for top level parent HWND
-    assert( w.impl() );
-    
-    w.impl()->grabMouse();
-    _mouseGrabber = v;
+    assert( mainWindow.impl() );    
+    mainWindow.impl()->grabMouse();
+    _mouseGrabber = grabber;
 }
 
 
@@ -645,26 +643,26 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
   
     Gfx::PointF pos = Application::instance().screen().toUnit( Gfx::Point(xPos, yPos) );
 
-    if(_mouseGrabber)
+    if( _mouseGrabber )
     {
-        pos = _mouseGrabber->fromScreen(  w.toScreen(pos) );
+        pos = _mouseGrabber->fromScreen( w.toScreen(pos) );
         
-        _mouseEvent.setX( pos.x() );
-        _mouseEvent.setY( pos.y() );            
         _mouseEvent.setId( _mouseGrabber->vid() );
-        commitEvent(_mouseEvent);
-        return;
     }
-
-    if( ! _pointerInWindow )
+    else        
     {
-        Application::instance().setPointerWindow(&w);
-        _pointerInWindow = true;
+        _mouseEvent.setId( w.vid() );
+    
+        if( ! _pointerInWindow )
+        {
+            Application::instance().setPointerWindow(&w);
+            _pointerInWindow = true;
+        }
     }
 
     _mouseEvent.setX( pos.x() );
     _mouseEvent.setY( pos.y() );            
-    _mouseEvent.setId( w.vid() );
+
     commitEvent(_mouseEvent);
 }
 

@@ -117,7 +117,6 @@ class PT_HMI_API Application : public Pt::System::Application
         Pt::uint64_t     _lastId;
         VisualMap        _visuals;
         Window*          _pointerWindow;
-        Visual*          _mouseGrabber;
 };
 
 } // namespace
