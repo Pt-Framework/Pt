@@ -274,14 +274,17 @@ void MenuBar::onMenuTriggered(MenuBarItem& m)
 void MenuBar::onOpenMenu(Menu& menu)
 {
     _currentMenu = &menu;
-    grabMouse();
+    onEnter();
 }
 
 
 void MenuBar::onCloseMenu(Menu& menu)
 {
     if(_currentMenu == &menu)
+    {
         _currentMenu = 0;
+        releaseMouse();
+    }
 }
 
 
@@ -328,6 +331,7 @@ void MenuBar::onPointerEvent(const MouseEvent& ev)
     if(menu && menu != this)
     {
         releaseMouse();
+        // menu->onEnter();
         return; 
     }
 
@@ -351,10 +355,7 @@ void MenuBar::onPointerEvent(const MouseEvent& ev)
     {
         if( ev.isPress() )
         {
-            // cancel when clicked outside menu chain
             cancel();
-            releaseMouse();
-            return;
         }
         
         return;
@@ -363,7 +364,6 @@ void MenuBar::onPointerEvent(const MouseEvent& ev)
     // clicking an item closes the sub menu
     if( _currentMenu == &item->menu() && ev.isRelease() )
     {
-        releaseMouse();
         _currentMenu->close();
         return;
     }
@@ -371,7 +371,6 @@ void MenuBar::onPointerEvent(const MouseEvent& ev)
     // if a sub menu is open show the next one
     if( _currentMenu != &item->menu() && _currentMenu )
     {
-        releaseMouse();
         _currentMenu->close();
         
         item->open();
