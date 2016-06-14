@@ -64,6 +64,12 @@ class MenuBarItem : public Panel
 
         void toggle();
 
+        void open();
+
+        void close();
+
+        Signal<MenuBarItem&>& triggered();
+
     protected:
         virtual Gfx::SizeF onAutoSize() const;
 
@@ -81,6 +87,7 @@ class MenuBarItem : public Panel
         virtual void onLeaveEvent(const LeaveEvent& ev);
 
     private:
+        Pt::Signal<MenuBarItem&> _triggered;
         Menu&      _menu;
         Gfx::Font  _font;
         Pt::String _text;
@@ -117,9 +124,8 @@ class PT_HMI_API MenuBar : public MenuShell
 
         virtual void onResizeEvent(const ResizeEvent& ev);
 
-        virtual void onEnterEvent(const EnterEvent& ev);
-
-        virtual void onLeaveEvent(const LeaveEvent& ev);
+    private:
+        void onMenuTriggered(MenuBarItem& m);
 
     private:
         FlowLayout                _layout;

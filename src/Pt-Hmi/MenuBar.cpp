@@ -102,22 +102,36 @@ void MenuBarItem::setFont(const Gfx::Font& font)
 }
 
 
+Signal<MenuBarItem&>& MenuBarItem::triggered()
+{
+    return _triggered;
+}
+
+
 void MenuBarItem::toggle()
 {
     if( ! _menu.isVisible() )
-    {
-        Gfx::PointF menuPos(0, size().height());
-        menuPos = toWindow(menuPos);
-
-        if( window() )
-            menuPos = window()->toScreen(menuPos);
-
-        _menu.show(menuPos);
-    }
+        open();
     else
-    {
-       _menu.close();       
-    }
+        close();      
+}
+
+
+void MenuBarItem::open()
+{
+    Gfx::PointF menuPos(0, size().height());
+    menuPos = toWindow(menuPos);
+
+    if( window() )
+        menuPos = window()->toScreen(menuPos);
+
+    _menu.show(menuPos);
+}
+
+
+void MenuBarItem::close()
+{
+    _menu.close();       
 }
 
 
@@ -130,9 +144,11 @@ Gfx::SizeF MenuBarItem::onAutoSize() const
 }
 
 
-void MenuBarItem::onClicked(const Gfx::PointF&)
+void MenuBarItem::onClicked(const Gfx::PointF& pos)
 {
-    toggle();
+    WidgetBaseType::onClicked(pos);
+    
+    _triggered.send(*this);
 }
 
 
@@ -220,6 +236,7 @@ void MenuBar::onAddMenu(Menu& menu, const Pt::String& text)
 {
     MenuBarItem* item = new MenuBarItem(menu, text);
     item->resize( Gfx::SizeF(50, 0) );
+    item->triggered() += Pt::slot(*this, &MenuBar::onMenuTriggered);
 
     _menus.push_back(item);
     _layout.add(*item);
@@ -245,6 +262,12 @@ void MenuBar::onRemoveMenu(Menu& menu)
         _currentMenu = 0;
 
     update();
+}
+
+
+void MenuBar::onMenuTriggered(MenuBarItem& m)
+{
+    m.toggle();
 }
 
 
@@ -299,6 +322,8 @@ void MenuBar::onPointerEvent(const MouseEvent& ev)
     WidgetBaseType::onPointerEvent(ev);
 
     Gfx::PointF screenPos = window()->toScreen( ev.position() );
+    
+    // check if a sub menu was entered
     MenuShell* menu = findMenu(screenPos);   
     if(menu && menu != this)
     {
@@ -306,48 +331,51 @@ void MenuBar::onPointerEvent(const MouseEvent& ev)
         return; 
     }
 
+    MenuBarItem* item = 0;
+    std::vector<MenuBarItem*>::iterator it;
+    for(it = _menus.begin(); it != _menus.end(); ++it)
+    {
+        Gfx::RectF itemRect( (*it)->position(), (*it)->size() );
+        if(itemRect.contains( ev.position() ) )
+        {
+            item = *it;
+            break;
+        }
+    }
+
+    // clicking outside the menu cancels the menu chain
     Gfx::RectF rect( Gfx::PointF(0,0), size() );
-    if( ! rect.contains( ev.position() ) )
+    bool outside = ! rect.contains( ev.position() );
+    
+    if( ! item || outside )
     {
         if( ev.isPress() )
         {
             // cancel when clicked outside menu chain
             cancel();
-            releaseMouse();         
+            releaseMouse();
+            return;
         }
         
         return;
     }
 
-    std::vector<MenuBarItem*>::iterator it;
-    for(it = _menus.begin(); it != _menus.end(); ++it)
+    // clicking an item closes the sub menu
+    if( _currentMenu == &item->menu() && ev.isRelease() )
     {
-        MenuBarItem* item = *it;
-
-        Gfx::RectF itemRect( item->position(), item->size() );
-        if(itemRect.contains( ev.position() ) )
-        {
-            if(_currentMenu && &item->menu() != _currentMenu)
-            {
-                _currentMenu->close();
-                releaseMouse(); 
-
-                item->toggle();
-            }
-            else if( ev.isPress() )
-            {
-                releaseMouse();
-            }
-
-            return;
-        }
+        releaseMouse();
+        _currentMenu->close();
+        return;
     }
 
-    if( ev.isPress() )
+    // if a sub menu is open show the next one
+    if( _currentMenu != &item->menu() && _currentMenu )
     {
-        // cancel when clicked outside menu chain
-        cancel();
-        releaseMouse();         
+        releaseMouse();
+        _currentMenu->close();
+        
+        item->open();
+        return;
     }
 }
 
@@ -356,7 +384,7 @@ void MenuBar::onResizeEvent(const ResizeEvent& ev)
 {
     for(std::size_t i = 0; i < _layout.widgets().size(); ++i)
     {
-        MenuBarItem* item = static_cast<MenuBarItem*>(_layout.widgets().at(i));
+        Widget* item = _layout.widgets().at(i);
         Gfx::SizeF itemSize = item->preferredSize();
         item->resize(itemSize);
     }
@@ -366,19 +394,6 @@ void MenuBar::onResizeEvent(const ResizeEvent& ev)
     // _layout positions the items now in OnResizeEvent
     // TODO: our overall design should make this clearer
     WidgetBaseType::onResizeEvent(ev);
-}
-
-
-
-void MenuBar::onEnterEvent(const EnterEvent& ev)
-{
-    WidgetBaseType::onEnterEvent(ev);
-}
-
-
-void MenuBar::onLeaveEvent(const LeaveEvent& ev)
-{
-    WidgetBaseType::onLeaveEvent(ev);
 }
 
 } // namespace

@@ -42,7 +42,6 @@ Application::Application(int argc, char** argv)
 , _mainScreen(0)
 , _lastId(1)
 , _pointerWindow(0)
-, _mouseGrabber(0)
 {
     this->init(*_impl);
 

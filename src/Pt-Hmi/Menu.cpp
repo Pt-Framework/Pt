@@ -251,6 +251,7 @@ void Menu::onCancel()
 
 void Menu::onEnter()
 {
+    grabMouse();
 }
 
 /* TODO: 
@@ -363,7 +364,7 @@ void Menu::onMouseEvent(const MouseEvent& ev)
 
     Gfx::PointF screenPos = toScreen( ev.position() );
     MenuShell* menu = rootShell().findMenu(screenPos);   
-    if(menu)
+    if(menu && menu != this)
     {   
         // navigate through menu chain
         releaseMouse();
@@ -438,7 +439,7 @@ void Menu::onEnterEvent( const EnterEvent& ev )
 {
     WindowBaseType::onEnterEvent(ev);
     
-    grabMouse();
+    onEnter();
 }
 
 
