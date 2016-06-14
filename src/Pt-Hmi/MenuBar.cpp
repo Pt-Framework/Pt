@@ -229,6 +229,11 @@ MenuBar::MenuBar()
 
 MenuBar::~MenuBar()
 {
+    std::vector<MenuBarItem*>::iterator it;
+    for(it = _menus.begin(); it != _menus.end(); ++it)
+    {
+        delete *it;
+    }
 }
 
 

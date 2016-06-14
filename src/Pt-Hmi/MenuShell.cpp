@@ -36,25 +36,27 @@ namespace Pt {
 namespace Hmi {
 
 MenuShell::MenuShell()
-: _parentShell(0)
 {
 }
 
 
 MenuShell::~MenuShell()
 {
-    while( ! _menus.empty() )
-        removeMenu( *_menus.front() );
+    std::vector<Menu*>::iterator it;
+    for(it = _menus.begin(); it != _menus.end(); ++it)
+    {
+        (*it)->_parentShell = 0;
+        delete (*it);
+    }
 }
 
 
 void MenuShell::addMenu(Menu& menu, const Pt::String& text)
 {
-    if(menu._parentShell == this)
+    if(menu.parentShell() == this)
         return;
 
     onAddMenu(menu, text);
-    
     menu._parentShell = this;
 
     _menus.push_back(&menu);
@@ -63,30 +65,14 @@ void MenuShell::addMenu(Menu& menu, const Pt::String& text)
 
 void MenuShell::removeMenu(Menu& menu)
 {
-    if(menu._parentShell != this)
+    if(menu.parentShell() != this)
         return;
 
     onRemoveMenu(menu);
-    
     menu._parentShell = 0;
 
     std::vector<Menu*>::iterator it = std::remove(_menus.begin(), _menus.end(), &menu);
     _menus.erase(it, _menus.end());
-}
-
-
-MenuShell* MenuShell::parentShell()
-{ 
-    return _parentShell; 
-}
-
-
-MenuShell& MenuShell::rootShell()
-{    
-    if( _parentShell )
-        return _parentShell->rootShell();
-
-    return *this;
 }
 
 

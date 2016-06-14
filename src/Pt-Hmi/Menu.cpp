@@ -99,7 +99,9 @@ class SubMenuItem : public MenuItem
 ///////////////////////////////////////////////////////////////////////////////
 
 Menu::Menu()
-: _currentMenu(0)
+: _parentShell(0)
+, _parentMenu(0)
+, _currentMenu(0)
 , _layout(FlowLayout::Top)
 , _iconWidth(0)
 {
@@ -113,8 +115,30 @@ Menu::~Menu()
     if( parentShell() )
         parentShell()->removeMenu(*this);
 
-    // _layout's destructor detaches all menu items and
-    // MenuShell's destructor detaches all sub menus
+    std::vector<SubMenuItem*>::iterator it;
+    for(it = _subMenus.begin(); it != _subMenus.end(); ++it)
+    {
+        (*it)->menu()._parentMenu = 0;
+        delete *it;
+    }
+}
+
+
+MenuShell* Menu::parentShell()
+{ 
+    return _parentShell; 
+}
+
+
+MenuShell& Menu::rootShell()
+{    
+    if( _parentMenu )
+        return _parentMenu->rootShell();
+
+    if( _parentShell )
+        return *_parentShell;
+
+    return *this;
 }
 
 
@@ -167,6 +191,8 @@ void Menu::onAddMenu(Menu& menu, const Pt::String& text)
     _subMenus.push_back(item);
     _layout.add(*item);
 
+    menu._parentMenu = this;
+    
     onContentChanged();
 }
 
@@ -180,6 +206,8 @@ void Menu::onRemoveMenu(Menu& menu)
         {
             delete *it;
             _subMenus.erase(it);
+
+            menu._parentMenu = 0;
             break;
         }
     }

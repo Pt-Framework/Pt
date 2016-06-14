@@ -45,12 +45,18 @@ class SubMenuItem;
 class PT_HMI_API Menu : public MenuShell
                       , public Window
 {
+    friend class MenuShell;
+
     typedef Window WindowBaseType;
 
     public:
         Menu();
     
         virtual ~Menu();
+
+        MenuShell* parentShell();
+
+        MenuShell& rootShell();
 
         void addItem(MenuItem& item);
 
@@ -102,6 +108,8 @@ class PT_HMI_API Menu : public MenuShell
         void onContentChanged();
 
     private:
+        MenuShell*                _parentShell;
+        Menu*                     _parentMenu;
         std::vector<SubMenuItem*> _subMenus;
         Menu*                     _currentMenu;
         FlowLayout                _layout;
