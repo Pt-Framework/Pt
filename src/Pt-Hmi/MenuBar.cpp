@@ -189,7 +189,10 @@ void MenuBarItem::onPointerEvent(const MouseEvent& ev)
             if( item->geometry().contains(pos) )
             {
                 toggle();
+                
+                // TODO: this is only neccessary because we get no leave event
                 _highlighted = false;
+                
                 setSelected(false);
                 item->toggle();
             }
@@ -205,7 +208,7 @@ void MenuBarItem::onPointerEvent(const MouseEvent& ev)
         releaseMouse();
     }
     
-    // TODO:
+    // TODO: onClick does not work properly
     //else if( ev.isPress() )
     //{
     //    // cancel when clicked outside menu chain
