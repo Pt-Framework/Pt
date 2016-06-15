@@ -41,13 +41,14 @@ namespace Pt {
 namespace Hmi {
 
 class Menu;
+class MenuBar;
 
 class MenuBarItem : public Panel
 {
     typedef Panel WidgetBaseType;
 
     public:
-        MenuBarItem(Menu& menu, const Pt::String& text);
+        MenuBarItem(MenuBar& mb, Menu& menu, const Pt::String& text);
 
         ~MenuBarItem();
 
@@ -84,12 +85,15 @@ class MenuBarItem : public Panel
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     protected:
+        virtual void onPointerEvent(const MouseEvent& ev);
+
         virtual void onEnterEvent( const EnterEvent& ev);
 
         virtual void onLeaveEvent(const LeaveEvent& ev);
 
     private:
         Pt::Signal<MenuBarItem&> _triggered;
+        MenuBar&   _menuBar;
         Menu&      _menu;
         Gfx::Font  _font;
         Pt::String _text;
@@ -101,6 +105,8 @@ class MenuBarItem : public Panel
 class PT_HMI_API MenuBar : public MenuShell
                          , public Panel
 {
+    friend class MenuBarItem;
+
     typedef Panel WidgetBaseType;
 
     public:

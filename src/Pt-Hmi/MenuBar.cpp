@@ -56,8 +56,9 @@ namespace Hmi {
 // MenuBarItem
 ///////////////////////////////////////////////////////////////////////////////
 
-MenuBarItem::MenuBarItem(Menu& menu, const Pt::String& text)
-: _menu(menu)
+MenuBarItem::MenuBarItem(MenuBar& mb, Menu& menu, const Pt::String& text)
+: _menuBar(mb)
+, _menu(menu)
 , _highlighted(false)
 , _selected(false)
 {
@@ -120,9 +121,15 @@ void MenuBarItem::setSelected(bool s)
 void MenuBarItem::toggle()
 {
     if( ! _menu.isVisible() )
+    {
         open();
+        grabMouse();
+    }
     else
-        close();      
+    {
+        close();
+        releaseMouse();
+     }      
 }
 
 
@@ -158,6 +165,52 @@ void MenuBarItem::onClicked(const Gfx::PointF& pos)
     WidgetBaseType::onClicked(pos);
     
     _triggered.send(*this);
+}
+
+
+void MenuBarItem::onPointerEvent(const MouseEvent& ev)
+{ 
+    WidgetBaseType::onPointerEvent(ev);
+
+    // nothing to do if on this item
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    if( rect.contains( ev.position() ) )
+        return;
+
+    // navigate to sibling item
+    Gfx::PointF pos = toParent( ev.position() );
+
+    if(_menuBar._currentMenu == &_menu)
+    {
+        std::vector<MenuBarItem*>::iterator it;
+        for(it = _menuBar._menus.begin(); it != _menuBar._menus.end(); ++it)
+        {
+            MenuBarItem* item = *it;
+            if( item->geometry().contains(pos) )
+            {
+                toggle();
+                _highlighted = false;
+                setSelected(false);
+                item->toggle();
+            }
+        }
+    }
+
+    // navigate to sub menu
+    Gfx::PointF screenPos = toScreen( ev.position() );
+    
+    MenuShell* menu = _menu.findMenu(screenPos);   
+    if(menu)
+    {   
+        releaseMouse();
+    }
+    
+    // TODO:
+    //else if( ev.isPress() )
+    //{
+    //    // cancel when clicked outside menu chain
+    //    _menu.cancel();          
+    //}
 }
 
 
@@ -255,7 +308,7 @@ MenuBar::~MenuBar()
 
 void MenuBar::onAddMenu(Menu& menu, const Pt::String& text)
 {
-    MenuBarItem* item = new MenuBarItem(menu, text);
+    MenuBarItem* item = new MenuBarItem(*this, menu, text);
     item->resize( Gfx::SizeF(50, 0) );
     item->triggered() += Pt::slot(*this, &MenuBar::onMenuTriggered);
 
@@ -295,7 +348,7 @@ void MenuBar::onMenuTriggered(MenuBarItem& m)
 void MenuBar::onOpenMenu(Menu& menu)
 {
     _currentMenu = &menu;
-    grabMouse();
+    ////grabMouse();
 
     std::vector<MenuBarItem*>::iterator it;
     for(it = _menus.begin(); it != _menus.end(); ++it)
@@ -313,7 +366,7 @@ void MenuBar::onCloseMenu(Menu& menu)
     if(_currentMenu == &menu)
     {
         _currentMenu = 0;
-        releaseMouse();
+        ////releaseMouse();
     }
 
     std::vector<MenuBarItem*>::iterator it;
@@ -336,7 +389,16 @@ void MenuBar::onCancel()
 
 void MenuBar::onEnter()
 {
-    grabMouse();
+    ////grabMouse();
+
+    std::vector<MenuBarItem*>::iterator it;
+    for(it = _menus.begin(); it != _menus.end(); ++it)
+    {
+        if( &(*it)->menu() == _currentMenu)
+        {
+            (*it)->grabMouse();
+        }
+    }
 }
 
 
@@ -363,58 +425,58 @@ void MenuBar::onPointerEvent(const MouseEvent& ev)
 { 
     WidgetBaseType::onPointerEvent(ev);
 
-    Gfx::PointF screenPos = window()->toScreen( ev.position() );
-    
-    // check if a sub menu was entered
-    MenuShell* menu = findMenu(screenPos);   
-    if(menu && menu != this)
-    {
-        releaseMouse();
-        // menu->onEnter();
-        return; 
-    }
+    ////Gfx::PointF screenPos = window()->toScreen( ev.position() );
+    ////
+    ////// check if a sub menu was entered
+    ////MenuShell* menu = findMenu(screenPos);   
+    ////if(menu && menu != this)
+    ////{
+    ////    releaseMouse();
+    ////    // menu->onEnter();
+    ////    return; 
+    ////}
 
-    MenuBarItem* item = 0;
-    std::vector<MenuBarItem*>::iterator it;
-    for(it = _menus.begin(); it != _menus.end(); ++it)
-    {
-        Gfx::RectF itemRect( (*it)->position(), (*it)->size() );
-        if(itemRect.contains( ev.position() ) )
-        {
-            item = *it;
-            break;
-        }
-    }
+    ////MenuBarItem* item = 0;
+    ////std::vector<MenuBarItem*>::iterator it;
+    ////for(it = _menus.begin(); it != _menus.end(); ++it)
+    ////{
+    ////    Gfx::RectF itemRect( (*it)->position(), (*it)->size() );
+    ////    if(itemRect.contains( ev.position() ) )
+    ////    {
+    ////        item = *it;
+    ////        break;
+    ////    }
+    ////}
 
-    // clicking outside the menu cancels the menu chain
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
-    bool outside = ! rect.contains( ev.position() );
-    
-    if( ! item || outside )
-    {
-        if( ev.isPress() )
-        {
-            cancel();
-        }
-        
-        return;
-    }
+    ////// clicking outside the menu cancels the menu chain
+    ////Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    ////bool outside = ! rect.contains( ev.position() );
+    ////
+    ////if( ! item || outside )
+    ////{
+    ////    if( ev.isPress() )
+    ////    {
+    ////        cancel();
+    ////    }
+    ////    
+    ////    return;
+    ////}
 
-    // clicking an item closes the sub menu
-    if( _currentMenu == &item->menu() && ev.isRelease() )
-    {
-        _currentMenu->close();
-        return;
-    }
+    ////// clicking an item closes the sub menu
+    ////if( _currentMenu == &item->menu() && ev.isRelease() )
+    ////{
+    ////    _currentMenu->close();
+    ////    return;
+    ////}
 
-    // if a sub menu is open show the next one
-    if( _currentMenu != &item->menu() && _currentMenu )
-    {
-        _currentMenu->close();
-        
-        item->open();
-        return;
-    }
+    ////// if a sub menu is open show the next one
+    ////if( _currentMenu != &item->menu() && _currentMenu )
+    ////{
+    ////    _currentMenu->close();
+    ////    
+    ////    item->open();
+    ////    return;
+    ////}
 }
 
 
