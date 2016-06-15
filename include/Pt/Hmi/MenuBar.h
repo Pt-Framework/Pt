@@ -62,6 +62,8 @@ class MenuBarItem : public Panel
 
         void setFont(const Gfx::Font& font);
 
+        void setSelected(bool s);
+
         void toggle();
 
         void open();
@@ -91,6 +93,8 @@ class MenuBarItem : public Panel
         Menu&      _menu;
         Gfx::Font  _font;
         Pt::String _text;
+        bool       _highlighted;
+        bool       _selected;
 };
 
 

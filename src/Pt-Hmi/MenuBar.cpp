@@ -58,6 +58,8 @@ namespace Hmi {
 
 MenuBarItem::MenuBarItem(Menu& menu, const Pt::String& text)
 : _menu(menu)
+, _highlighted(false)
+, _selected(false)
 {
     setAutoSize(true);
     setBorderStyle(Panel::NoBorder);
@@ -105,6 +107,13 @@ void MenuBarItem::setFont(const Gfx::Font& font)
 Signal<MenuBarItem&>& MenuBarItem::triggered()
 {
     return _triggered;
+}
+
+
+void MenuBarItem::setSelected(bool s)
+{
+    _selected = s;
+    update();      
 }
 
 
@@ -163,8 +172,9 @@ void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 
 void MenuBarItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    bool mouseOver = this->window()->pointerWidget() == this;
-    if(mouseOver)
+    //bool mouseOver = this->window()->pointerWidget() == this;
+
+    if(/*mouseOver ||*/ _highlighted || _selected)
     {
         Gfx::Color bgColor = backgroundColor();
         Gfx::Brush brush = brighten(bgColor, 0.85f);
@@ -197,14 +207,20 @@ void MenuBarItem::onPaintContent(PaintSurface& surface, const Gfx::RectF& update
 
 void MenuBarItem::onEnterEvent(const EnterEvent& ev)
 {
+    //std::clog << "enter " << text().narrow() << std::endl;
+
     WidgetBaseType::onEnterEvent(ev);
+    _highlighted = true;
     update();
 }
 
 
 void MenuBarItem::onLeaveEvent(const LeaveEvent& ev)
 {
+    //std::clog << "leave " << text().narrow() << std::endl;
+
     WidgetBaseType::onLeaveEvent(ev);
+    _highlighted = false;
     update();
 }
 
@@ -279,7 +295,16 @@ void MenuBar::onMenuTriggered(MenuBarItem& m)
 void MenuBar::onOpenMenu(Menu& menu)
 {
     _currentMenu = &menu;
-    onEnter();
+    grabMouse();
+
+    std::vector<MenuBarItem*>::iterator it;
+    for(it = _menus.begin(); it != _menus.end(); ++it)
+    {
+        if( &(*it)->menu() == &menu)
+        {
+            (*it)->setSelected(true);
+        }
+    }
 }
 
 
@@ -289,6 +314,15 @@ void MenuBar::onCloseMenu(Menu& menu)
     {
         _currentMenu = 0;
         releaseMouse();
+    }
+
+    std::vector<MenuBarItem*>::iterator it;
+    for(it = _menus.begin(); it != _menus.end(); ++it)
+    {
+        if( &(*it)->menu() == &menu)
+        {
+            (*it)->setSelected(false);
+        }
     }
 }
 
