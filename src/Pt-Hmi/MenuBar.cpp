@@ -207,6 +207,7 @@ void MenuBarItem::onPointerEvent(const MouseEvent& ev)
     // cancel when clicked outside any menu item
     if( ev.isPress() )
     {
+        releaseMouse();
         _menu.cancel();
         return;   
     }
