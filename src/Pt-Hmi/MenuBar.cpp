@@ -105,12 +105,6 @@ void MenuBarItem::setFont(const Gfx::Font& font)
 }
 
 
-Signal<MenuBarItem&>& MenuBarItem::triggered()
-{
-    return _triggered;
-}
-
-
 void MenuBarItem::setSelected(bool s)
 {
     _selected = s;
@@ -164,7 +158,7 @@ void MenuBarItem::onClicked(const Gfx::PointF& pos)
 {
     WidgetBaseType::onClicked(pos);
     
-    _triggered.send(*this);
+    toggle();
 }
 
 
@@ -211,24 +205,6 @@ void MenuBarItem::onPointerEvent(const MouseEvent& ev)
         _menu.cancel();
         return;   
     }
-}
-
-
-MenuBarItem* MenuBar::findItem(const Gfx::PointF& pos)
-{
-    MenuBarItem* item = 0;
-
-    std::vector<MenuBarItem*>::iterator it;
-    for(it = _menus.begin(); it != _menus.end(); ++it)
-    {
-        if( (*it)->geometry().contains(pos) )
-        {
-            item = *it;
-            break;
-        }
-    }
-
-    return item;
 }
 
 
@@ -302,6 +278,7 @@ void MenuBarItem::onLeaveEvent(const LeaveEvent& ev)
 MenuBar::MenuBar()
 : _layout(FlowLayout::Left)
 , _currentMenu(0)
+, _currentMenuItem(0)
 {
     this->setBackgroundColor( Gfx::Color(0.9f, 0.9f, 0.91f) );
     this->setBorderColor( Gfx::Color(0.5f, 0.5f, 0.51f)  );
@@ -324,11 +301,34 @@ MenuBar::~MenuBar()
 }
 
 
+Menu* MenuBar::selectedMenu()
+{ 
+    return _currentMenu; 
+}
+
+
+MenuBarItem* MenuBar::findItem(const Gfx::PointF& pos)
+{
+    MenuBarItem* item = 0;
+
+    std::vector<MenuBarItem*>::iterator it;
+    for(it = _menus.begin(); it != _menus.end(); ++it)
+    {
+        if( (*it)->geometry().contains(pos) )
+        {
+            item = *it;
+            break;
+        }
+    }
+
+    return item;
+}
+
+
 void MenuBar::onAddMenu(Menu& menu, const Pt::String& text)
 {
     MenuBarItem* item = new MenuBarItem(*this, menu, text);
     item->resize( Gfx::SizeF(50, 0) );
-    item->triggered() += Pt::slot(*this, &MenuBar::onMenuTriggered);
 
     _menus.push_back(item);
     _layout.add(*item);
@@ -343,7 +343,7 @@ void MenuBar::onRemoveMenu(Menu& menu)
     for(it = _menus.begin(); it != _menus.end(); ++it)
     {
         if( &(*it)->menu() == &menu )
-        {
+        {           
             delete *it;
             _menus.erase(it);
             break;
@@ -351,21 +351,17 @@ void MenuBar::onRemoveMenu(Menu& menu)
     }
 
     if(_currentMenu == &menu)
+    {
         _currentMenu = 0;
+        _currentMenuItem = 0;
+    }
 
     update();
 }
 
 
-void MenuBar::onMenuTriggered(MenuBarItem& m)
-{
-    m.toggle();
-}
-
-
 void MenuBar::onOpenMenu(Menu& menu)
 {
-    _currentMenu = &menu;
     ////grabMouse();
 
     std::vector<MenuBarItem*>::iterator it;
@@ -374,6 +370,9 @@ void MenuBar::onOpenMenu(Menu& menu)
         if( &(*it)->menu() == &menu)
         {
             (*it)->setSelected(true);
+
+            _currentMenu = &menu;
+            _currentMenuItem = *it;
         }
     }
 }
@@ -383,17 +382,13 @@ void MenuBar::onCloseMenu(Menu& menu)
 {
     if(_currentMenu == &menu)
     {
-        _currentMenu = 0;
-        ////releaseMouse();
-    }
+        if(_currentMenuItem)
+            _currentMenuItem->setSelected(false);
 
-    std::vector<MenuBarItem*>::iterator it;
-    for(it = _menus.begin(); it != _menus.end(); ++it)
-    {
-        if( &(*it)->menu() == &menu)
-        {
-            (*it)->setSelected(false);
-        }
+        _currentMenu = 0;
+        _currentMenuItem = 0;
+
+        ////releaseMouse();
     }
 }
 
@@ -409,14 +404,8 @@ void MenuBar::onEnter()
 {
     ////grabMouse();
 
-    std::vector<MenuBarItem*>::iterator it;
-    for(it = _menus.begin(); it != _menus.end(); ++it)
-    {
-        if( &(*it)->menu() == _currentMenu)
-        {
-            (*it)->grabMouse();
-        }
-    }
+    if(_currentMenuItem)
+        _currentMenuItem->grabMouse();
 }
 
 

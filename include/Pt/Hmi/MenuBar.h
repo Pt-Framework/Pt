@@ -71,8 +71,6 @@ class MenuBarItem : public Panel
 
         void close();
 
-        Signal<MenuBarItem&>& triggered();
-
     protected:
         virtual Gfx::SizeF onAutoSize() const;
 
@@ -92,7 +90,6 @@ class MenuBarItem : public Panel
         virtual void onLeaveEvent(const LeaveEvent& ev);
 
     private:
-        Pt::Signal<MenuBarItem&> _triggered;
         MenuBar&   _menuBar;
         Menu&      _menu;
         Gfx::Font  _font;
@@ -105,8 +102,6 @@ class MenuBarItem : public Panel
 class PT_HMI_API MenuBar : public MenuShell
                          , public Panel
 {
-    friend class MenuBarItem;
-
     typedef Panel WidgetBaseType;
 
     public:
@@ -114,8 +109,9 @@ class PT_HMI_API MenuBar : public MenuShell
     
         virtual ~MenuBar();
 
-        Menu* selectedMenu()
-        { return _currentMenu; }
+        Menu* selectedMenu();
+
+        MenuBarItem* findItem(const Gfx::PointF& pos);
 
     protected:
         virtual void onAddMenu(Menu& menu, const Pt::String& text);
@@ -140,12 +136,11 @@ class PT_HMI_API MenuBar : public MenuShell
     private:
         void onMenuTriggered(MenuBarItem& m);
 
-        MenuBarItem* findItem(const Gfx::PointF& pos);
-
     private:
         FlowLayout                _layout;
         std::vector<MenuBarItem*> _menus;
         Menu*                     _currentMenu;
+        MenuBarItem*              _currentMenuItem;
 };
 
 } // namespace
