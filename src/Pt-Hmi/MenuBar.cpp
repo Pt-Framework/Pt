@@ -177,43 +177,57 @@ void MenuBarItem::onPointerEvent(const MouseEvent& ev)
     if( rect.contains( ev.position() ) )
         return;
 
-    // navigate to sibling item
-    Gfx::PointF pos = toParent( ev.position() );
-
-    if(_menuBar._currentMenu == &_menu)
+    // navigate to sibling item if a sub menu is open
+    if( _menuBar.selectedMenu() )
     {
-        std::vector<MenuBarItem*>::iterator it;
-        for(it = _menuBar._menus.begin(); it != _menuBar._menus.end(); ++it)
+        Gfx::PointF pos = toParent( ev.position() );
+        MenuBarItem* item = _menuBar.findItem(pos);
+        if(item)
         {
-            MenuBarItem* item = *it;
-            if( item->geometry().contains(pos) )
-            {
-                toggle();
+            toggle();
                 
-                // TODO: this is only neccessary because we get no leave event
-                _highlighted = false;
+            // TODO: this is only neccessary because we get no leave event
+            //_highlighted = false;
                 
-                setSelected(false);
-                item->toggle();
-            }
+            setSelected(false);
+            item->toggle();
+            return;
         }
     }
 
-    // navigate to sub menu
+    // navigate to open sub menu
     Gfx::PointF screenPos = toScreen( ev.position() );
-    
     MenuShell* menu = _menu.findMenu(screenPos);   
     if(menu)
     {   
         releaseMouse();
+        return;
     }
-    
-    // TODO: onClick does not work properly
-    //else if( ev.isPress() )
-    //{
-    //    // cancel when clicked outside menu chain
-    //    _menu.cancel();          
-    //}
+
+    // cancel when clicked outside any menu item
+    if( ev.isPress() )
+    {
+        _menu.cancel();
+        return;   
+    }
+}
+
+
+MenuBarItem* MenuBar::findItem(const Gfx::PointF& pos)
+{
+    MenuBarItem* item = 0;
+
+    std::vector<MenuBarItem*>::iterator it;
+    for(it = _menus.begin(); it != _menus.end(); ++it)
+    {
+        if( (*it)->geometry().contains(pos) )
+        {
+            item = *it;
+            break;
+        }
+    }
+
+    return item;
 }
 
 

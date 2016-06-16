@@ -705,6 +705,10 @@ void Widget::onResizeEvent(const ResizeEvent& ev)
 
 void Widget::onPointerEvent(const MouseEvent& ev)
 { 
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    if( ! rect.contains( ev.position() ) )
+        return;
+
     if( ev.isPress(MouseEvent::Left) && _acceptsFocus )
     {
         focus();

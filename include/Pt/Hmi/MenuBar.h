@@ -114,6 +114,9 @@ class PT_HMI_API MenuBar : public MenuShell
     
         virtual ~MenuBar();
 
+        Menu* selectedMenu()
+        { return _currentMenu; }
+
     protected:
         virtual void onAddMenu(Menu& menu, const Pt::String& text);
 
@@ -136,6 +139,8 @@ class PT_HMI_API MenuBar : public MenuShell
 
     private:
         void onMenuTriggered(MenuBarItem& m);
+
+        MenuBarItem* findItem(const Gfx::PointF& pos);
 
     private:
         FlowLayout                _layout;
