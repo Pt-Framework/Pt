@@ -33,6 +33,7 @@
 #include <iostream>
 #include <ios>
 #include <cstdlib>
+#include <cassert>
 
 extern "C" {
 #include <jpeglib.h>
@@ -94,17 +95,41 @@ class JpegReaderImpl
 
         Image* advance()
         {
+            if( ! _target || ! _target->rdbuf() || ! _image )
+              return 0;
+
             if( ! _init )
             {
-                _err.error_exit     = &JpegReaderImpl::onJpegError;
-                //_err.emit_message   = ...;
-                //_err.output_message = ...;
-	              _decomp.err = jpeg_std_error(&_err);
+                _source.init_source = &JpegReaderImpl::onInitSource;
+                _source.fill_input_buffer = &JpegReaderImpl::onFillBuffer;
+                _source.skip_input_data = &JpegReaderImpl::onSkipInput;
+                _source.term_source = &JpegReaderImpl::onTermSource;
+                _source.resync_to_restart = &jpeg_resync_to_restart;
+                _source.next_input_byte = reinterpret_cast<JOCTET*>(_buffer);
+                _source.bytes_in_buffer = 0;
 
+                _err.error_exit = &JpegReaderImpl::onErrorExit;
+                _err.emit_message = &JpegReaderImpl::onEmitMessage;
+                _err.output_message = &JpegReaderImpl::onOutputMessage;
+	              
+                _decomp.err = jpeg_std_error(&_err);
+                _decomp.client_data = this;
                 jpeg_create_decompress(&_decomp);
-
-                //_dcomp.src = ...;
+                _decomp.src = &_source;
+                
                 _init = true;
+            }
+
+            std::streamsize n = _bufferSize - _source.bytes_in_buffer;
+            std::streamsize avail = _target->rdbuf()->in_avail();
+            if(avail < n)
+                n = avail;
+
+            if(avail > 0)
+            {
+                char* egptr = _buffer + _source.bytes_in_buffer;
+                n = _target->rdbuf()->sgetn(egptr, n);
+                _source.bytes_in_buffer += static_cast<std::size_t>(n);
             }
 
             if(_state == OnBegin)
@@ -113,31 +138,38 @@ class JpegReaderImpl
                 if(r == JPEG_SUSPENDED)
                     return 0;
 
+                if(r != JPEG_HEADER_OK)
+                    return 0;
+
                 _state = OnHeader;
             }
 
             if(_state == OnHeader)
             {
+                _decomp.out_color_space = JCS_RGB;
+
                 int r = jpeg_start_decompress(&_decomp);
                 if(r == 0)
                     return 0;
+
+                 if(_decomp.output_components != 3)
+                    throw std::logic_error("invalid jpeg output components");
+
+                Gfx::Size imageSize(_decomp.output_width, _decomp.output_height);
+                _image->resize(imageSize, ImageFormat::rgb888());
 
                 _state = OnData;
             }
             
             if(_state == OnData)
             {
-                for(;;)
+                while(_decomp.output_scanline < _decomp.output_height)
                 {
-                    JSAMPARRAY data = 0;
-                    JDIMENSION dataLines = 1;
-                    JDIMENSION n = jpeg_read_scanlines(&_decomp, data, dataLines);
+                    JSAMPROW data = _image->pixel(0, _decomp.output_scanline);
+                    JDIMENSION n = jpeg_read_scanlines(&_decomp, &data, 1);
                     if(n == 0)
                         return 0;
                 }
-
-                if(_decomp.output_scanline < _decomp.output_height)
-                    return 0;
 
                 _state = OnFinish;
             }
@@ -148,17 +180,58 @@ class JpegReaderImpl
                 if(r == 0)
                     return 0;
 
+                *_image = _image->convert( Pt::Gfx::ImageFormat::argb8888() );
                 _state = OnEnd;
             }
 
             return _state == OnEnd ? _image : 0;
         }
 
-        static void onJpegError(j_common_ptr cinfo)
+        static void onErrorExit(j_common_ptr cinfo)
         {
-            std::cerr << "jpeg error: " << cinfo->err->msg_code << std::endl;
             throw Pt::IOError("invalid jpeg format");
         } 
+
+        static void onEmitMessage(j_common_ptr, int)
+        { } 
+
+        static void onOutputMessage(j_common_ptr)
+        { } 
+
+        static void onInitSource(j_decompress_ptr)
+        { }
+
+        static boolean onFillBuffer(j_decompress_ptr decomp)
+        {
+            JpegReaderImpl* self = static_cast<JpegReaderImpl*>(decomp->client_data);
+            
+            if( decomp->src->bytes_in_buffer > 0 )
+            {
+                std::memmove(self->_buffer, 
+                             decomp->src->next_input_byte,
+                             decomp->src->bytes_in_buffer);
+
+                decomp->src->next_input_byte = reinterpret_cast<JOCTET*>(self->_buffer);
+            }
+            
+            return FALSE;
+        }
+
+        static void onSkipInput(j_decompress_ptr decomp, long n)
+        {
+            if(n > 0)
+            {
+                long avail = static_cast<long>(decomp->src->bytes_in_buffer);
+                if(n > avail)
+                    n = avail;
+                
+                decomp->src->next_input_byte += n;
+                decomp->src->bytes_in_buffer -= n;
+            }
+        }
+
+        static void onTermSource(j_decompress_ptr)
+        { }
     
     private:
         enum State 
@@ -174,9 +247,12 @@ class JpegReaderImpl
         std::ios*              _target;
         State                  _state;
         jpeg_error_mgr         _err;
+        jpeg_source_mgr        _source;
         jpeg_decompress_struct _decomp;
         bool                   _init;
         Image*                 _image;
+        static const int       _bufferSize = 2048;
+        char                   _buffer[_bufferSize];
 };
 
 

@@ -30,6 +30,7 @@
 #include "AtesionIcon.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/PngReader.h>
+#include <Pt/Gfx/JpegReader.h>
 #include <sstream>
 #include <fstream>
 
@@ -51,14 +52,21 @@ MainWindow::MainWindow()
     ss.clear();
     ss.seekg(0);
 
-    Gfx::Image icon;
-    Gfx::PngReader reader(ss, icon);
+    std::ifstream ifs("C:\\Pt\\doc\\images\\atesion_logo.jpg", 
+                      std::ios::binary|std::ios::in);
 
-    while( ! reader.advance() )
+    Gfx::Image icon;
+    
+    std::istream* is = &ss;
+    Gfx::PngReader reader(*is, icon);
+    //std::istream* is = &ifs;
+    //Gfx::JpegReader reader(*is, icon);
+
+    do
     {
-        ss.peek();
-        reader.advance();
-    }
+        is->peek();
+    } 
+    while( ! reader.advance() );
 
     setTitle("Main 1");
     move( Gfx::PointF(60, 30) );
