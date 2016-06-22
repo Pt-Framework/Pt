@@ -31,7 +31,6 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/IOError.h>
 #include <iostream>
-#include <ios>
 #include <cstdlib>
 #include <cassert>
 
@@ -121,6 +120,11 @@ class JpegReaderImpl
             }
 
             std::streamsize n = _bufferSize - _source.bytes_in_buffer;
+
+            // protecte against incorrect marker lengths larger than 2K 
+            if( n == 0 )
+                throw Pt::IOError("invalid jpeg format");
+
             std::streamsize avail = _target->rdbuf()->in_avail();
             if(avail < n)
                 n = avail;
@@ -180,7 +184,6 @@ class JpegReaderImpl
                 if(r == 0)
                     return 0;
 
-                *_image = _image->convert( Pt::Gfx::ImageFormat::argb8888() );
                 _state = OnEnd;
             }
 
@@ -266,6 +269,7 @@ JpegReader::JpegReader(std::istream& is, Image& image)
 : _impl( new JpegReaderImpl(is, image) )
 {
 }
+
 
 JpegReader::~JpegReader()
 {

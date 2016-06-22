@@ -40,9 +40,7 @@ namespace Hmi {
 
 namespace Demo {
 
-MainWindow::MainWindow()
-: _child1("Child 1")
-//, _child2("Child 2")
+void loadIcon(Gfx::Image& icon)
 {
     const char* iconData = reinterpret_cast<const char*>(atesionIcon);
     std::streamsize iconSize = sizeof(atesionIcon);
@@ -55,8 +53,6 @@ MainWindow::MainWindow()
     std::ifstream ifs("C:\\Pt\\doc\\images\\atesion_logo.jpg", 
                       std::ios::binary|std::ios::in);
 
-    Gfx::Image icon;
-    
     std::istream* is = &ss;
     Gfx::PngReader reader(*is, icon);
     //std::istream* is = &ifs;
@@ -67,6 +63,16 @@ MainWindow::MainWindow()
         is->peek();
     } 
     while( ! reader.advance() );
+
+    icon = icon.convert( Pt::Gfx::ImageFormat::argb8888() );
+}
+
+MainWindow::MainWindow()
+: _child1("Child 1")
+//, _child2("Child 2")
+{
+    Gfx::Image icon;
+    loadIcon(icon);
 
     setTitle("Main 1");
     move( Gfx::PointF(60, 30) );
