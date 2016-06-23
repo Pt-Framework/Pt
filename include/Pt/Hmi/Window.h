@@ -65,6 +65,7 @@ class PT_HMI_API Window : public Visual
 {
    friend class Widget; 
    friend class Screen;
+   friend class Application;
 
   public:
     explicit Window(Window* parent = 0);

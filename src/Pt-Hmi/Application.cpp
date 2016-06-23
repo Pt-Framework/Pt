@@ -85,6 +85,9 @@ void Application::setCursor( const Cursor* cursor )
 void Application::grabMouse(Window& window)
 {    
     _impl->grabMouse(window.mainWindow(), &window);
+
+    std::vector<Window*>& windows = screen().windows();
+    setPointerWidget(windows);
 }
 
 
@@ -97,10 +100,30 @@ void Application::releaseMouse(Window& window)
 }
 
 
+void Application::setPointerWidget(std::vector<Window*>& windows, Window* exclude)
+{
+    std::vector<Window*>::iterator it;
+    for(it = windows.begin(); it != windows.end(); ++it)
+    {
+        if(*it == exclude)
+            continue;
+
+        (*it)->setPointerWidget(0);
+
+        setPointerWidget( (*it)->_windows, exclude );
+    }
+}
+
+
 void Application::grabMouse(Widget& widget)
 {
-    if( !widget.window() )
+    if( ! widget.window() )
         return;
+
+    std::vector<Window*>& windows = screen().windows();
+    setPointerWidget(windows, widget.window());
+
+    widget.window()->setPointerWidget(&widget);
 
     _impl->grabMouse(widget.window()->mainWindow(), &widget);
 }
