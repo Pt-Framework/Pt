@@ -179,11 +179,8 @@ void MenuBarItem::onPointerEvent(const MouseEvent& ev)
         if(item)
         {
             toggle();
-                
-            // TODO: this is only neccessary because we get no leave event
-            //_highlighted = false;
-                
             setSelected(false);
+            
             item->toggle();
             return;
         }
@@ -219,9 +216,7 @@ void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 
 void MenuBarItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    //bool mouseOver = this->window()->pointerWidget() == this;
-
-    if(/*mouseOver ||*/ _highlighted || _selected)
+    if(_highlighted || _selected)
     {
         Gfx::Color bgColor = backgroundColor();
         Gfx::Brush brush = brighten(bgColor, 0.85f);
@@ -254,9 +249,8 @@ void MenuBarItem::onPaintContent(PaintSurface& surface, const Gfx::RectF& update
 
 void MenuBarItem::onEnterEvent(const EnterEvent& ev)
 {
-    //std::clog << "enter " << text().narrow() << std::endl;
-
     WidgetBaseType::onEnterEvent(ev);
+    
     _highlighted = true;
     update();
 }
@@ -264,9 +258,8 @@ void MenuBarItem::onEnterEvent(const EnterEvent& ev)
 
 void MenuBarItem::onLeaveEvent(const LeaveEvent& ev)
 {
-    //std::clog << "leave " << text().narrow() << std::endl;
-
     WidgetBaseType::onLeaveEvent(ev);
+    
     _highlighted = false;
     update();
 }
@@ -362,8 +355,6 @@ void MenuBar::onRemoveMenu(Menu& menu)
 
 void MenuBar::onOpenMenu(Menu& menu)
 {
-    ////grabMouse();
-
     std::vector<MenuBarItem*>::iterator it;
     for(it = _menus.begin(); it != _menus.end(); ++it)
     {
@@ -387,8 +378,6 @@ void MenuBar::onCloseMenu(Menu& menu)
 
         _currentMenu = 0;
         _currentMenuItem = 0;
-
-        ////releaseMouse();
     }
 }
 
@@ -402,8 +391,6 @@ void MenuBar::onCancel()
 
 void MenuBar::onEnter()
 {
-    ////grabMouse();
-
     if(_currentMenuItem)
         _currentMenuItem->grabMouse();
 }
@@ -431,59 +418,6 @@ MenuShell* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
 void MenuBar::onPointerEvent(const MouseEvent& ev)
 { 
     WidgetBaseType::onPointerEvent(ev);
-
-    ////Gfx::PointF screenPos = window()->toScreen( ev.position() );
-    ////
-    ////// check if a sub menu was entered
-    ////MenuShell* menu = findMenu(screenPos);   
-    ////if(menu && menu != this)
-    ////{
-    ////    releaseMouse();
-    ////    // menu->onEnter();
-    ////    return; 
-    ////}
-
-    ////MenuBarItem* item = 0;
-    ////std::vector<MenuBarItem*>::iterator it;
-    ////for(it = _menus.begin(); it != _menus.end(); ++it)
-    ////{
-    ////    Gfx::RectF itemRect( (*it)->position(), (*it)->size() );
-    ////    if(itemRect.contains( ev.position() ) )
-    ////    {
-    ////        item = *it;
-    ////        break;
-    ////    }
-    ////}
-
-    ////// clicking outside the menu cancels the menu chain
-    ////Gfx::RectF rect( Gfx::PointF(0,0), size() );
-    ////bool outside = ! rect.contains( ev.position() );
-    ////
-    ////if( ! item || outside )
-    ////{
-    ////    if( ev.isPress() )
-    ////    {
-    ////        cancel();
-    ////    }
-    ////    
-    ////    return;
-    ////}
-
-    ////// clicking an item closes the sub menu
-    ////if( _currentMenu == &item->menu() && ev.isRelease() )
-    ////{
-    ////    _currentMenu->close();
-    ////    return;
-    ////}
-
-    ////// if a sub menu is open show the next one
-    ////if( _currentMenu != &item->menu() && _currentMenu )
-    ////{
-    ////    _currentMenu->close();
-    ////    
-    ////    item->open();
-    ////    return;
-    ////}
 }
 
 

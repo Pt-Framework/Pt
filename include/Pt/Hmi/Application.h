@@ -108,7 +108,7 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void setPointerWindow(Window* w);
 
-        void setPointerWidget(std::vector<Window*>& windows, Window* exclude = 0);
+        void unsetPointerWidget(const std::vector<Window*>& windows, Window* exclude = 0);
         
     private:
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;
