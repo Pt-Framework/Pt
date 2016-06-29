@@ -78,16 +78,15 @@ class PT_HMI_API Screen : public Visual
       
         Gfx::Rect fromUnit(const Gfx::RectF& value);
 
-        virtual Pt::Gfx::PointF toScreen(const Pt::Gfx::PointF& l) const
+        virtual Pt::Gfx::PointF toScreen(const Pt::Gfx::PointF& p) const
         {
-            return l;
+            return p;
         }
 
-        virtual Pt::Gfx::PointF fromScreen(const Pt::Gfx::PointF& g) const
+        virtual Pt::Gfx::PointF fromScreen(const Pt::Gfx::PointF& p) const
         {
-            return g;
+            return p;
         }
-
 
         double unitSizeInch() const;
       

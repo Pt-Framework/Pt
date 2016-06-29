@@ -270,7 +270,7 @@ void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const Gf
 
 void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
 {
-    windowManager().moveWindow(w, pos);
+    windowManager().onMove(w, pos);
 }
 
 

@@ -313,20 +313,28 @@ void WindowManager::onMove(Window& w, const Gfx::PointF& to)
 
     Gfx::PointF from = w.position();
     Application::instance().loop().commitEvent(mev);
-
-    if( ! w.parent() )
-        return;
             
     Gfx::SizeF size = w.size();    
     size.addWidth( 2 * _borderWidth );
     size.addHeight( 2 * _borderWidth + _titleHeight );
 
     Gfx::RectF movedRect(to, size);
-
     Gfx::RectF updateRect(from, size);  
     updateRect.unify(movedRect);
     
-    w.parent()->update(updateRect);
+    if( w.parent() )
+    {
+        w.parent()->update(updateRect);
+    }
+    else
+    {
+        // TODO:
+        //Application::instance().screen().update(updateRect);
+
+        //Gfx::PointF winPos = fromParent( to, updateRect.topLeft() );
+        //Gfx::RectF winRect(winPos, updateRect.size());
+        //w.update(winRect);
+    }
 }
 
 
@@ -431,6 +439,16 @@ Gfx::PointF WindowManager::fromParent(const Window& w, const Gfx::PointF& pos) c
     double offX = _borderWidth;
 
     Gfx::PointF p = pos - w.position() - Gfx::PointF(offX, offY);
+    return p;
+}
+
+
+Gfx::PointF WindowManager::fromParent(const Gfx::PointF& winPos, const Gfx::PointF& pos) const
+{
+    double offY = _borderWidth + _titleHeight;
+    double offX = _borderWidth;
+
+    Gfx::PointF p = pos - winPos - Gfx::PointF(offX, offY);
     return p;
 }
 
