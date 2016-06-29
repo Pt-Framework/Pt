@@ -31,22 +31,23 @@
 #ifndef Pt_Hmi_MainWindowImpl_h
 #define Pt_Hmi_MainWindowImpl_h
 
-#include "../ChildWindowImpl.h"
-
 #include <Pt/Hmi/Api.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class Window;
 
-class MainWindowImpl : public ChildWindowImpl
+class MainWindowImpl
 {
     public:
-        MainWindowImpl(Window* window);
+        MainWindowImpl();
 
         virtual ~MainWindowImpl();
+
+        Gfx::PointF toScreen(const Gfx::PointF& pos) const;
+
+        Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
 
         virtual void activate();
 

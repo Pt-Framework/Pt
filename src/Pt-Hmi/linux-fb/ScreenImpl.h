@@ -136,7 +136,7 @@ class ScreenImpl : public Pt::Connectable
             return _dpi;
         }
 
-        void setCursor(const Hmi::Cursor* cursor );
+        void setCursor(const Hmi::Cursor* cursor);
 
         void update(const Gfx::RectF& updateRect);
 
@@ -144,6 +144,8 @@ class ScreenImpl : public Pt::Connectable
         {
             return _windowManager;
         }
+
+        void onMove(Window& w, const Gfx::PointF& pos);
 
     protected:
         virtual void onActivate();

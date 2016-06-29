@@ -38,14 +38,25 @@ namespace Pt {
 
 namespace Hmi {
 
-MainWindowImpl::MainWindowImpl(Window* window)
-: ChildWindowImpl(window)
+MainWindowImpl::MainWindowImpl()
 {
 }
 
 
 MainWindowImpl::~MainWindowImpl()
 {
+}
+
+
+Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& pos) const
+{
+    Application::instance().mainScreen().impl()->windowManager().toParent(w, pos);
+}
+
+
+Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& screenPos) const
+{
+
 }
 
 
@@ -75,7 +86,7 @@ void MainWindowImpl::resize(const Gfx::SizeF& size)
 
 void MainWindowImpl::move(const Gfx::PointF& pos)
 {
-    Application::instance().mainScreen().impl()->windowManager().moveWindow(*_apiWindow, pos);
+    //Application::instance().mainScreen().impl()->windowManager().moveWindow(*_apiWindow, pos);
 }
 
 

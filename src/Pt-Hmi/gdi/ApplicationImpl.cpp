@@ -162,6 +162,11 @@ ApplicationImpl::~ApplicationImpl()
 }
 
 
+void ApplicationImpl::nextEvent()
+{
+    waitNext();
+}
+
 void ApplicationImpl::setCursor(const Cursor* cursor)
 {      
     if( _currentCursor == cursor )
@@ -216,10 +221,7 @@ void ApplicationImpl::releaseMouse(Window&, Visual*)
 }
 
 
-void ApplicationImpl::nextEvent()
-{
-    waitNext();
-}
+
 
 
 void ApplicationImpl::onAttachSelectable(System::Selectable& s)

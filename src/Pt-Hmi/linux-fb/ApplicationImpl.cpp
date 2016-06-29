@@ -28,6 +28,8 @@
 */
 
 #include "ApplicationImpl.h"
+#include "ScreenImpl.h"
+#include <Pt/Hmi/Application.h>
 #include <Pt/System/FileInfo.h>
 #include <iostream>
 #include <sstream>
@@ -42,6 +44,8 @@ namespace Pt {
 namespace Hmi {
 
 ApplicationImpl::ApplicationImpl()
+: _currentCursor(0)
+, _mouseGrabber(0)
 {  		 
 	showConsole( false );
 	_inputDevices.reserve(10);
@@ -81,6 +85,12 @@ ApplicationImpl::~ApplicationImpl()
 } 
 
 
+void ApplicationImpl::nextEvent()
+{
+	MainLoop::waitNext();
+}
+
+
 void ApplicationImpl::showConsole(bool s)
 {
 	std::string terminal;
@@ -98,10 +108,27 @@ void ApplicationImpl::showConsole(bool s)
 	close( fd );
 }
 
-
-void ApplicationImpl::nextEvent()
+void ApplicationImpl::setCursor(const Cursor* cursor)
 {
-	MainLoop::waitNext();
+    if( _currentCursor == cursor )
+        return;
+
+    _currentCursor = cursor;
+
+    Application::instance().screen().impl()->setCursor(cursor);
+}
+
+
+void ApplicationImpl::grabMouse(Window& mainWindow, Visual* grabber)
+{
+    assert( mainWindow.impl() );    
+    _mouseGrabber = grabber;
+}
+
+
+void ApplicationImpl::releaseMouse(Window&, Visual*)
+{
+    _mouseGrabber = 0;
 }
 
 }

@@ -103,8 +103,23 @@ void ScreenImpl::onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent )
     if( _cursor.width() != 0 )
         _cursorPos = Gfx::Point( mouseEvent.x() - _cursor.xHotspot() , mouseEvent.y() - _cursor.yHotspot());
 
-    _windowManager.pointerInput( mouseEvent );        
-    
+    Visual* mouseGrabber = Application::instance().impl()->mouseGrabber();
+    if(mouseGrabber)
+    {
+        Pt::Hmi::MouseEvent mev = mouseEvent;
+
+        Gfx::PointF pos = mouseGrabber->fromScreen( mouseEvent.position() );
+        mev.setX( pos.x() );
+        mev.setY( pos.y() ); 
+        mev.setId( mouseGrabber->vid() );
+
+        Application::instance().loop().commitEvent(mev);
+    }
+    else
+    {
+        _windowManager.pointerInput( mouseEvent );        
+    }
+
     if( _drawCursor )
         updateScreen();
 }
@@ -250,6 +265,12 @@ void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const Gf
             }
         }
     }
+}
+
+
+void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
+{
+    windowManager().moveWindow(w, pos);
 }
 
 

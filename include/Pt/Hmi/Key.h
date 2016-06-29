@@ -3,6 +3,7 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Types.h>
+#include <Pt/String.h>
 #include <iostream>
 #include <cassert>
 

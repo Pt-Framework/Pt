@@ -45,6 +45,8 @@ InputDevice::InputDevice(const char* deviceName)
 , _loop(0)
 , _leftAlt(false)
 , _rightAlt(false)
+, _keyEvent(0)
+, _mouseEvent(0)
 , _touchMove(0)
 {
     _ioh.fd = ::open(deviceName, O_RDONLY|O_NONBLOCK);

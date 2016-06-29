@@ -32,6 +32,7 @@
 
 #include "InputDevice.h"
 #include "FrameBuffer.h"
+#include <Pt/Hmi/Visual.h>
 #include <Pt/System/MainLoop.h>
 
 namespace Pt {
@@ -56,6 +57,17 @@ class ApplicationImpl : public Pt::System::MainLoop
 		}
 
 		void nextEvent();
+
+    void setCursor(const Cursor* cursor );
+
+    void grabMouse(Window& mainWindow, Visual* grabber);
+
+    void releaseMouse(Window& mainWindow, Visual* grabber);
+
+    const Visual* mouseGrabber() const
+    {
+        return _mouseGrabber;
+    }
     
 	private:
 		void onInputEvent(const Pt::Event& ev);
@@ -66,6 +78,8 @@ class ApplicationImpl : public Pt::System::MainLoop
 		FrameBuffer _frameBuffer; 
 		std::vector<InputDevice*> _inputDevices;
 		Pt::Signal<const Pt::Event&> _eventReady;
+    const Cursor* _currentCursor;
+    Visual*       _mouseGrabber;
 };
 
 } // namespace
