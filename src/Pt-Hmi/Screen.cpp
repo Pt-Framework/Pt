@@ -187,6 +187,24 @@ void Screen::onEnable(Window& w, bool enable)
 }
 
 
+//void Screen::update(const Gfx::RectF& updateRect)
+//{
+//    UpdateMap::iterator it = _updates.find( vid() );
+//    if( it == _updates.end() )
+//    {
+//        UpdateInfo uinfo(updateRect);
+//        _updates.insert( std::make_pair(vid(), uinfo) );
+//    }
+//    else
+//    {
+//        it->second.push(updateRect);
+//    }
+//
+//    UpdateEvent uev(vid(), vid(), updateRect);
+//    Application::instance().loop().commitEvent(uev);
+//}
+
+
 void Screen::onUpdate(Window& w, const Gfx::RectF& updateRect)
 {        
     UpdateMap::iterator it = _updates.find( w.vid() );
@@ -229,26 +247,14 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
     Pt::uint64_t windowId = u->first;
     _updates.erase( ev.window() );
 
-    // find damaged window
-    Window* window = 0;
+    // TODO: convert rect to screen coordinates 
+    _impl->onPaint(rect);
+
     std::vector<Window*>::iterator it;
     for(it = _windows.begin(); it != _windows.end(); ++it)
     {
-        if( (*it)->vid() == windowId )
-        {
-            window = *it;
-            break;
-        }
+        (*it)->onPaint(rect);
     }
-
-    if( ! window )
-        return;
-
-    // paint the damaged window
-    window->onPaint(rect);
-
-    // paint the screen
-    _impl->onPaint(*window, rect);
 }
 
 

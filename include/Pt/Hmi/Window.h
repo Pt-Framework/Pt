@@ -320,6 +320,7 @@ class PT_HMI_API Window : public Visual
     bool                           _enabled; 
     bool                           _enabledState;
     bool                           _isClosed; 
+    bool                           _damaged;
     Gfx::PointF                    _position;
     Gfx::SizeF                     _size;
 

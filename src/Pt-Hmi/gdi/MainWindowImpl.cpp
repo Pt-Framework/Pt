@@ -84,6 +84,12 @@ void MainWindowImpl::close()
 }
 
 
+void MainWindowImpl::paint(const Gfx::RectF& rect)
+{
+    InvalidateRect(_hwnd, NULL, FALSE);
+}
+
+
 void MainWindowImpl::show( bool v)
 {    
    if( v )

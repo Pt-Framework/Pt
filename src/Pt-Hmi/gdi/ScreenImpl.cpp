@@ -58,13 +58,8 @@ ScreenImpl::~ScreenImpl()
 }
 
 
-void ScreenImpl::onPaint(Window& w, const Gfx::RectF& updateRect)
+void ScreenImpl::onPaint(const Gfx::RectF& updateRect)
 {
-    // alternatively we could send an event to the screen
-    Application::instance().impl()->processEvents();
-
-    MainWindowImpl* m = static_cast<MainWindowImpl*>( w.impl() );
-    InvalidateRect(m->hwnd(), NULL, FALSE);
 }
 
 

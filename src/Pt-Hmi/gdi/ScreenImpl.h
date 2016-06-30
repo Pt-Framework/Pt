@@ -77,7 +77,7 @@ class ScreenImpl
         {
         }
 
-        void onPaint(Window& w, const Gfx::RectF& rect);
+        void onPaint(const Gfx::RectF& rect);
 
         void onResize(Window& w, const Gfx::SizeF& s);
 

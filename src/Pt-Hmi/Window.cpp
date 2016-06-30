@@ -62,6 +62,7 @@ Window::Window(Window* parent)
 , _enabled(true)
 , _enabledState(true)
 , _isClosed(false)
+, _damaged(true)
 , _position(0,0)
 , _size(10,10)
 , _minimumSize(0,0)
@@ -568,6 +569,8 @@ void Window::update()
 
 void Window::update(const Gfx::RectF& rect)
 {
+    _damaged = true;
+
     if( _impl )
     {
         Application::instance().screen().onUpdate(*this, rect);
@@ -910,6 +913,14 @@ MainWindowImpl* Window::impl()
 
 void Window::onPaint(const Gfx::RectF& rect)
 {
+    if( ! _damaged )
+        return;
+
+    static int nnn = 0;
+    std::clog << ++nnn << " repaint " << title() << std::endl;
+
+    _damaged = false;
+
     if( ! this->isVisible() )
         return;
 
@@ -949,6 +960,9 @@ void Window::onPaintEvent(const PaintEvent& ev)
         return; 
 
     onPaintContent( ev.rect() );
+
+    if(_impl)
+      _impl->paint( ev.rect() );
 }
 
 

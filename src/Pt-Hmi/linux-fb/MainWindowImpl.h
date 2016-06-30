@@ -37,7 +37,6 @@ namespace Pt {
 
 namespace Hmi {
 
-
 class MainWindowImpl
 {
     public:

@@ -66,6 +66,8 @@ class MainWindowImpl
         void resize(const Gfx::SizeF& size);
 
         void close();
+
+        void paint(const Gfx::RectF& rect);
     
         void setState(WindowState::Type p);
     
