@@ -234,6 +234,8 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
         (*it)->onPaint(rect);
     }
 
+    // TODO: send a PaintEvent to screen, so framebuffer can be updated AFTER
+    //       all paint events for windows and widgets have been processed
     _impl->onPaint(screenRect);
 
     _updateRect.clear();

@@ -169,13 +169,13 @@ void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
 
 void ScreenImpl::updateScreen()
 {
-    _drawCursor    = false;
+    _drawCursor = false;
     drawCursor( image().pixel(0,0) );
     memcpy( _frameBuffer.buffer(), image().pixel(0,0), _frameBuffer.bufferSize() );            
 }
 
 
-void ScreenImpl::update(const Gfx::RectF& updateRect)
+void ScreenImpl::onPaint(const Gfx::RectF& updateRect)
 {                
     Pt::System::Clock clock;
     clock.start();   

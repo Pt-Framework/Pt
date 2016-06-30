@@ -138,7 +138,7 @@ class ScreenImpl : public Pt::Connectable
 
         void setCursor(const Hmi::Cursor* cursor);
 
-        void update(const Gfx::RectF& updateRect);
+        void onPaint(const Gfx::RectF& updateRect);
 
         WindowManager& windowManager()
         {
