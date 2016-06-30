@@ -328,12 +328,7 @@ void WindowManager::onMove(Window& w, const Gfx::PointF& to)
     }
     else
     {
-        // TODO:
-        //Application::instance().screen().update(updateRect);
-
-        //Gfx::PointF winPos = fromParent( to, updateRect.topLeft() );
-        //Gfx::RectF winRect(winPos, updateRect.size());
-        //w.update(winRect);
+        Application::instance().screen().update(updateRect);
     }
 }
 

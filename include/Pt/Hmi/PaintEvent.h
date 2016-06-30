@@ -70,10 +70,9 @@ class PT_HMI_API PaintEvent : public Pt::BasicEvent<PaintEvent>
 class PT_HMI_API UpdateEvent : public Pt::BasicEvent<UpdateEvent>
 {
     public:    
-        UpdateEvent( Pt::uint64_t vid, Pt::uint64_t w, const Gfx::RectF& rect )
+        UpdateEvent( Pt::uint64_t vid, const Gfx::RectF& rect )
         : _rect( rect )
         , _vid( vid )
-        , _window(w)
         {
         }
 
@@ -91,18 +90,14 @@ class PT_HMI_API UpdateEvent : public Pt::BasicEvent<UpdateEvent>
             return _vid;
         }
 
-        Pt::uint64_t window() const
-        {
-            return _window;
-        }
-
     private:
         Gfx::RectF  _rect;
         Pt::uint64_t _vid;
-        Pt::uint64_t _window;
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif
 

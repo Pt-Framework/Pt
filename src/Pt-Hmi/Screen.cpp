@@ -38,6 +38,7 @@ namespace Hmi {
 
 Screen::Screen(ApplicationImpl& app)
 : _impl( new ScreenImpl(app) )
+, _updates(0)
 {
 }
 
@@ -187,39 +188,21 @@ void Screen::onEnable(Window& w, bool enable)
 }
 
 
-//void Screen::update(const Gfx::RectF& updateRect)
-//{
-//    UpdateMap::iterator it = _updates.find( vid() );
-//    if( it == _updates.end() )
-//    {
-//        UpdateInfo uinfo(updateRect);
-//        _updates.insert( std::make_pair(vid(), uinfo) );
-//    }
-//    else
-//    {
-//        it->second.push(updateRect);
-//    }
-//
-//    UpdateEvent uev(vid(), vid(), updateRect);
-//    Application::instance().loop().commitEvent(uev);
-//}
+void Screen::update(const Gfx::RectF& updateRect)
+{
+    _updateRect.unify(updateRect);
+    ++_updates;
+
+    UpdateEvent uev(vid(), _updateRect);
+    Application::instance().loop().commitEvent(uev);
+}
 
 
 void Screen::onUpdate(Window& w, const Gfx::RectF& updateRect)
-{        
-    UpdateMap::iterator it = _updates.find( w.vid() );
-    if( it == _updates.end() )
-    {
-        UpdateInfo uinfo(updateRect);
-        _updates.insert( std::make_pair(w.vid(), uinfo) );
-    }
-    else
-    {
-        it->second.push(updateRect);
-    }
-
-    UpdateEvent uev(vid(), w.vid(), updateRect);
-    Application::instance().loop().commitEvent(uev);
+{
+    Gfx::PointF pos = w.toScreen( updateRect.topLeft() );
+    Gfx::RectF rect( pos, updateRect.size() );
+    update(rect);
 }
 
 
@@ -235,26 +218,25 @@ void Screen::onEvent(const Event& ev)
 
 void Screen::onUpdateEvent(const UpdateEvent& ev)
 {
-    UpdateMap::iterator u = _updates.find( ev.window() );
-    if( u == _updates.end() )
-        return;
-
-    // skip all update events except the last one
-    if( u->second.pop() != 0)
-        return;
-
-    Gfx::RectF rect = u->second.rect();
-    Pt::uint64_t windowId = u->first;
-    _updates.erase( ev.window() );
-
-    // TODO: convert rect to screen coordinates 
-    _impl->onPaint(rect);
+    --_updates;
+    
+    // skip all updates except the last one
+    if(_updates > 0)
+      return ;
+    
+    const Gfx::RectF& screenRect = ev.rect();
 
     std::vector<Window*>::iterator it;
     for(it = _windows.begin(); it != _windows.end(); ++it)
     {
+        Gfx::PointF pos = (*it)->fromScreen( screenRect.topLeft() );
+        Gfx::RectF rect( pos, screenRect.size() );
         (*it)->onPaint(rect);
     }
+
+    _impl->onPaint(screenRect);
+
+    _updateRect.clear();
 }
 
 

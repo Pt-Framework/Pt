@@ -93,6 +93,8 @@ class PT_HMI_API Screen : public Visual
         double unitSizeMm() const;
       
         double resolutionDPI() const;
+
+        void update(const Gfx::RectF& updateRect);
     
         ScreenImpl* impl();
 
@@ -122,47 +124,12 @@ class PT_HMI_API Screen : public Visual
         void registerWindow(Window& w);
 
         void unregisterWindow(Window& w);
-
-    private:
-        class UpdateInfo
-        {
-            public:
-                explicit UpdateInfo(const Gfx::RectF& rect)
-                : _n(1)
-                , _rect(rect)
-                { }
-
-                const Gfx::RectF& rect() const
-                {
-                    return _rect;
-                }
-
-                void push(const Gfx::RectF& rect)
-                {
-                    if(_n == 0)
-                        _rect = rect;
-                    else
-                        _rect.unify(rect);
-
-                    ++_n;
-                }
-
-                int pop()
-                {
-                    return --_n;
-                }
-
-            private:
-                int _n;
-                Gfx::RectF _rect;
-        };
-
-        typedef std::multimap<Pt::uint64_t, UpdateInfo> UpdateMap;
     
     private:
         ScreenImpl*          _impl;
         std::vector<Window*> _windows;
-        UpdateMap            _updates;
+        Gfx::RectF           _updateRect;
+        int                  _updates;
 };
 
 } // namespace
