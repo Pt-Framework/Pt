@@ -399,7 +399,7 @@ void MenuBar::onEnter()
 MenuShell* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
 { 
     if( ! isVisible() )
-        return false;
+        return 0;
 
     Gfx::PointF pos = this->window()->fromScreen(screenPos);
     pos = this->fromWindow(pos);

@@ -245,7 +245,7 @@ void Menu::onMenuTriggered(MenuItem& m)
 MenuShell* Menu::onFindMenu(const Gfx::PointF& screenPos)
 { 
     if( ! isVisible() )
-        return false;
+        return 0;
 
     Gfx::RectF rect( position(), size() );
     if( rect.contains(screenPos) )
