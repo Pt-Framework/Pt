@@ -274,45 +274,6 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
-//void WindowManager::paintEvent(const Gfx::RectF& rect)
-//{  
-//    PaintSurface& surface = _parent->surface();
-//
-//    std::vector<WindowFrame*>::reverse_iterator it;
-//
-//    for(it = _windows.rbegin(); it != _windows.rend(); ++it )
-//    {
-//        WindowFrame* frame = *it;
-//        Window* w = frame->window();                
-//        
-//        if( ! w->isVisible() )
-//            continue; 
-//
-//        Gfx::RectF frameRect = frame->frameRect();
-//        frameRect.setOrigin( Gfx::PointF(0, 0) );
-//        PaintEvent ev(0, frameRect);
-//        frame->paintEvent(ev);
-//
-//        // update rect in client coordinates
-//        Gfx::PointF updatePos = rect.topLeft() - frame->clientRect().topLeft();
-//        Gfx::RectF updateRect(updatePos, rect.size());        
-//        
-//        // clip update rect against client rect
-//        Gfx::RectF clientRect(Gfx::PointF(0, 0), w->size());
-//        updateRect = updateRect.intersect(clientRect);
-//
-//        Gfx::PointF to = updateRect.topLeft() + frame->clientRect().topLeft();
-//
-//        Painter painter(surface);
-//        painter.drawSurface(to, w->surface(), updateRect); 
-//        //painter.drawRect( pev.rect() ); 
-//        //std::clog << w->title() << ": "
-//        //          << to.x() << "," << to.y() << "  "
-//        //          << updateRect.width() << "x" << updateRect.height() << std::endl;  
-//    }
-//}
-
-
 void WindowManager::onResize(Window& w, const Gfx::SizeF& to)
 {   
     ResizeEvent rev(w.vid(), to);

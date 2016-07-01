@@ -114,7 +114,7 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
     painter.setBrush( Pt::Gfx::Color(0.4f, 0.3f, 0.4f) );
     painter.fillRect(updateRect);
 
-    _windowManager.render(_surface, updateRect);
+    _windowManager.paint(_surface, updateRect);
     
     updateScreen();
     
