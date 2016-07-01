@@ -41,6 +41,8 @@ namespace Pt {
 
 namespace Hmi {
 
+class Menu;
+
 class PT_HMI_API MenuItem : public Panel
 {
     friend class Menu;

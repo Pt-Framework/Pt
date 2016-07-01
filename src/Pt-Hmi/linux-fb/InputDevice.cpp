@@ -59,6 +59,11 @@ InputDevice::InputDevice(const char* deviceName)
 InputDevice::InputDevice()
 : _ioh(*this)
 , _loop(0)
+, _leftAlt(false)
+, _rightAlt(false)
+, _keyEvent(0)
+, _mouseEvent(0)
+, _touchMove(0)
 {
     _ioh.fd = -1;
 }
@@ -269,7 +274,7 @@ bool InputDevice::onRun()
             {
                 //std::clog << "EV_ABS" << std::endl;
                 
-                Gfx::SizeF screenSize = Application::instance().mainScreen().size();
+                Gfx::SizeF screenSize = Application::instance().screen().size();
                 double scaleX =  screenSize.width() / 800.0;
                 double scaleY =  screenSize.height() / 480.0;
 

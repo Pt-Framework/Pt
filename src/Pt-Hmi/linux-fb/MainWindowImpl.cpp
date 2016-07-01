@@ -33,6 +33,7 @@
 #include "ScreenImpl.h"
 
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Screen.h>
 
 namespace Pt {
 
@@ -50,38 +51,45 @@ MainWindowImpl::~MainWindowImpl()
 
 Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& pos) const
 {
-    return Application::instance().mainScreen().impl()->windowManager().toParent(w, pos);
+    WindowManager wm = Application::instance().screen().impl()->windowManager();
+    return wm.toParent(_position, pos);
 }
 
 
 Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& screenPos) const
 {
-    WindowManager wm = Application::instance().mainScreen().impl()->windowManager();
-    return wm.fromParent(pos, screenPos);
+    WindowManager wm = Application::instance().screen().impl()->windowManager();
+    return wm.fromParent(_position, screenPos);
+}
+
+
+void MainWindowImpl::paint(const Gfx::RectF& rect)
+{
+    // screen will update paint region
 }
 
 
 void MainWindowImpl::activate()
 {
-    Application::instance().mainScreen().impl()->windowManager().activate(*_apiWindow);
+    // window manager takes care of everything
 }
 
 
 void MainWindowImpl::show(bool b)
 {
-    Application::instance().mainScreen().impl()->windowManager().showWindow(*_apiWindow, b);
+    // window manager takes care of everything
 }
 
 
 void MainWindowImpl::enable(bool b)
 {
-    Application::instance().mainScreen().impl()->windowManager().enableWindow(*_apiWindow, b);
+    // window manager takes care of everything
 }
 
 
 void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
-    Application::instance().mainScreen().impl()->windowManager().resizeWindow(*_apiWindow, size);
+    _size = size;
 }
 
 
@@ -91,32 +99,79 @@ void MainWindowImpl::move(const Gfx::PointF& pos)
 }
 
 
-void MainWindowImpl::update(const Gfx::RectF& updateRect)
+void MainWindowImpl::close()
 {
-    double borderWidth = _apiWindow->windowManager().borderWidth();
-    double titleHeight = _apiWindow->windowManager().titleHeight();
-
-    Gfx::PointF pos = _apiWindow->position() + updateRect.topLeft();
-    pos.addX(borderWidth);
-    pos.addY(borderWidth + titleHeight);
-
-    Gfx::RectF screenRect( pos, updateRect.size() );
-    Application::instance().mainScreen().impl()->update(screenRect);
 }
 
 
-void MainWindowImpl::onUpdate(Window& child, const Gfx::RectF& childRect)
+void MainWindowImpl::setState(WindowState::Type p)
 {
-    double borderWidth = _apiWindow->windowManager().borderWidth();
-    double titleHeight = _apiWindow->windowManager().titleHeight();
-
-    Gfx::PointF pos = child.position() + childRect.topLeft();
-    pos.addX(borderWidth);
-    pos.addY(borderWidth + titleHeight);
-
-    Gfx::RectF updateRect( pos, childRect.size() );
-    update(updateRect);
+    // TODO
 }
+
+
+void MainWindowImpl::setBorder(bool s)
+{
+    // TODO
+}
+
+
+void MainWindowImpl::setIcon(const Gfx::Image& icon)
+{
+    // TODO
+}
+
+
+void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
+{
+    // TODO
+}
+
+
+void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
+{
+    // TODO
+}
+
+
+void MainWindowImpl::setDecoration( WindowDecoration::Flags deco )
+{
+    // TODO
+}
+
+
+void MainWindowImpl::setTitle(const std::string& text)
+{
+    // TODO
+}
+
+
+//void MainWindowImpl::update(const Gfx::RectF& updateRect)
+//{
+//    double borderWidth = _apiWindow->windowManager().borderWidth();
+//    double titleHeight = _apiWindow->windowManager().titleHeight();
+//
+//    Gfx::PointF pos = _apiWindow->position() + updateRect.topLeft();
+//    pos.addX(borderWidth);
+//    pos.addY(borderWidth + titleHeight);
+//
+//    Gfx::RectF screenRect( pos, updateRect.size() );
+//    Application::instance().mainScreen().impl()->update(screenRect);
+//}
+//
+//
+//void MainWindowImpl::onUpdate(Window& child, const Gfx::RectF& childRect)
+//{
+//    double borderWidth = _apiWindow->windowManager().borderWidth();
+//    double titleHeight = _apiWindow->windowManager().titleHeight();
+//
+//    Gfx::PointF pos = child.position() + childRect.topLeft();
+//    pos.addX(borderWidth);
+//    pos.addY(borderWidth + titleHeight);
+//
+//    Gfx::RectF updateRect( pos, childRect.size() );
+//    update(updateRect);
+//}
 
 } // namespace
 

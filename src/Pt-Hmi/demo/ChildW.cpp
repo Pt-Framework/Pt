@@ -14,14 +14,16 @@ ChildW::ChildW(const std::string& title)
     _fileMenu.setName("FileMenu");
     
     _item1.setText("New");
-    _item1.setShortcut( &Key(Key::F3) );
+    Key f3(Key::F3); 
+    _item1.setShortcut(&f3);
     _fileMenu.addItem(_item1);
 
     _item2.setText("Open");
     _fileMenu.addItem(_item2);
 
     _item3.setText("Exit");
-    _item3.setShortcut( &Key(Key::Control, Key::A) );
+    Key ctrlA(Key::Control, Key::A);
+    _item3.setShortcut(&ctrlA);
     _fileMenu.addItem(_item3);
 
     _editMenu.setName("FileMenu");
@@ -30,7 +32,9 @@ ChildW::ChildW(const std::string& title)
     _editMenu.addItem(_edit1);
 
     _edit2.setText("Copy");
-    _edit2.setShortcut( &Key(Key::Control, Key::C) );
+
+    Key ctrlC(Key::Control, Key::C);
+    _edit2.setShortcut(&ctrlC);
     _editMenu.addItem(_edit2);
 
     _edit3.setText("Paste");

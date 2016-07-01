@@ -421,7 +421,6 @@ bool WindowFrame::isTitle(const Gfx::PointF& p) const
 bool WindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
 {        
     double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
 
     Gfx::PointF localPos = p - _frameRect.topLeft();
 
@@ -435,7 +434,6 @@ bool WindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
 bool WindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
 {        
     double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
 
     Gfx::PointF localPos = p - _frameRect.topLeft();
 
@@ -449,7 +447,6 @@ bool WindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
 bool WindowFrame::isTopBorder(const Pt::Gfx::PointF& p) const
 {        
     double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
 
     Gfx::PointF localPos = p - _frameRect.topLeft();
 
@@ -668,9 +665,9 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
     
     if(onLeftBorder || onRightBorder || onTopBorder || onBottomBorder)
     {
-        if( onTopBorder && onRightBorder || onBottomBorder && onLeftBorder )
+        if( (onTopBorder && onRightBorder) || (onBottomBorder && onLeftBorder) )
             Application::instance().setCursor( &Hmi::Cursor::sizeNESWCursor() );
-        else if(onTopBorder && onLeftBorder || onBottomBorder && onRightBorder )
+        else if((onTopBorder && onLeftBorder) || (onBottomBorder && onRightBorder) )
             Application::instance().setCursor( &Hmi::Cursor::sizeNWSECursor() );
         else if(onRightBorder || onLeftBorder)
             Application::instance().setCursor( &Hmi::Cursor::sizeWECursor() );
@@ -733,8 +730,8 @@ void WindowFrame::paintEvent(const PaintEvent& pev)
     double titleHeight = _wm->titleHeight();
 
     PaintSurface& surface = _wm->parent()->surface();
-//ToDo:  clipping region
 
+    // TODO: clipping region
     Painter painter(surface);    
 
     Gfx::Color color = _window->isActive() ? _wm->activeColor() 

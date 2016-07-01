@@ -32,6 +32,12 @@
 #define Pt_Hmi_MainWindowImpl_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/WindowState.h>
+#include <Pt/Hmi/WindowDecoration.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/Image.h>
 
 namespace Pt {
 
@@ -48,19 +54,37 @@ class MainWindowImpl
 
         Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
 
-        virtual void activate();
+        void paint(const Gfx::RectF& rect);
 
-        virtual void show(bool b);
+        void show(bool b);
 
-        virtual void enable(bool b);
+        void activate();
 
-        virtual void resize(const Gfx::SizeF& size);
+        void enable(bool b);
 
-        virtual void move(const Gfx::PointF& pos);
+        void move(const Gfx::PointF& pos);
 
-        virtual void update(const Gfx::RectF& updateRect);
+        void resize(const Gfx::SizeF& size);
 
-        virtual void onUpdate(Window& child, const Gfx::RectF& childRect);
+        void close();
+
+        void setState(WindowState::Type p);
+
+        void setBorder(bool s);
+
+        void setIcon(const Gfx::Image& p);
+
+        void setMinimumSize(const Gfx::SizeF& s);
+    
+        void setMaximumSize(const Gfx::SizeF& s); 
+
+        void setDecoration( WindowDecoration::Flags d );
+
+        void setTitle( const std::string& t );
+
+    private:
+        Gfx::PointF _position;
+        Gfx::SizeF  _size;
 };
 
 } // namespace

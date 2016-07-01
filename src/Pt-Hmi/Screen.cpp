@@ -74,6 +74,26 @@ Window* Screen::findWindow(const std::string& name)
 }
 
 
+Window* Screen::activeWindow()
+{
+    std::vector<Window*>::const_iterator it;
+
+    for(it = _windows.begin(); it != _windows.end(); ++it)
+    {
+        Window* window = *it;
+    
+        if( window->isActive() )
+            return window;
+
+        window = window->activeWindow();
+        if(window)
+            return window;
+    }
+
+    return 0;
+}
+
+
 double Screen::width() const
 {
     return _impl->width();

@@ -62,6 +62,8 @@ class PT_HMI_API Screen : public Visual
 
         Window* findWindow(const std::string& name);
 
+        Window* activeWindow();
+
         double width() const;
 
         double height() const;

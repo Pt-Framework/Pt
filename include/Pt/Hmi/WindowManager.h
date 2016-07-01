@@ -124,7 +124,11 @@ class WindowManager : public Pt::Connectable
 
         void onClosing(Window& w);
 
+        void onClose(Window& w);
+
         Gfx::PointF toParent(const Window& w, const Gfx::PointF& pos) const;
+
+        Gfx::PointF toParent(const Gfx::PointF& winPos, const Gfx::PointF& pos) const;
 
         Gfx::PointF fromParent(const Window& w, const Gfx::PointF& pos) const;
 

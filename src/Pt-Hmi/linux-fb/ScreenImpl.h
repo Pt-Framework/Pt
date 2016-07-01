@@ -73,10 +73,6 @@ class ScreenImpl : public Pt::Connectable
             return _frameBuffer.height();
         }
 
-        virtual void activate()
-        {
-        }
-
         const Gfx::Image& image() const;
 
         Gfx::Image& image();
@@ -145,14 +141,25 @@ class ScreenImpl : public Pt::Connectable
             return _windowManager;
         }
 
+    public:
+        void onResize(Window& w, const Gfx::SizeF& s);
+
         void onMove(Window& w, const Gfx::PointF& pos);
 
+        void onClosing(Window& w);
+
+        void onClose(Window& w);
+
+        void onShow(Window& w, bool visible);
+
+        void onActivate(Window& w);
+
+        void onEnable(Window& w, bool enable);
+
     protected:
-        virtual void onActivate();
+        void onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent );
 
-        virtual void onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent );
-
-        virtual void onKeyEvent(const Pt::Hmi::KeyEvent& ev);
+        void onKeyEvent(const Pt::Hmi::KeyEvent& ev);
 
     private:
         enum BlitOp

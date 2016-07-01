@@ -46,8 +46,8 @@ Panel::Panel()
 , _backgroundImage()
 , _backgroundImageLayout( ImageLayout::None )
 , _borderStyle(Single)
-, _borderWidth(1)
 , _borderRound(false)
+, _borderWidth(1)
 , _borderColor(Gfx::Color::fromRgb8(178,178,178))
 {
     setAcceptsFocus(false);  

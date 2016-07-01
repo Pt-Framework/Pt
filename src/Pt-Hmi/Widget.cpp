@@ -51,8 +51,8 @@ Widget::Widget()
 , _focusIndex(0)
 , _cursor( Hmi::Cursor::defaultCursor() )
 , _actionKey(Key::Space)
-, _autoSize(false)
 , _mnemonic(0)
+, _autoSize(false)
 {      
     _eventReady += Pt::slot(*this, &Widget::onKeyEvent );
     _eventReady += Pt::slot(*this, &Widget::onScrollEvent );

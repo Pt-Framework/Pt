@@ -167,7 +167,13 @@ void WindowManager::leaveEvent(const LeaveEvent& ev)
 
 bool WindowManager::keyEvent(const KeyEvent& keyEvent)
 {
-    Window* w = _parent->activeWindow();
+    Window* w = 0;
+
+    if( _parent)
+        w = _parent->activeWindow();
+    else
+        w = Application::instance().screen().activeWindow();
+
     if( ! w )
         return false;
 
@@ -320,9 +326,9 @@ void WindowManager::onMove(Window& w, const Gfx::PointF& to)
     Gfx::RectF updateRect(from, size);  
     updateRect.unify(movedRect);
     
-    if( w.parent() )
+    if( _parent )
     {
-        w.parent()->update(updateRect);
+        _parent->update(updateRect);
     }
     else
     {
@@ -338,15 +344,19 @@ void WindowManager::onUpdate(Window& child, const Gfx::RectF& rect)
     updatePos.addY( _borderWidth + _titleHeight );
 
     const Gfx::RectF updateRect(updatePos, rect.size());
-    _parent->update(updateRect);
+
+    if(_parent)
+        _parent->update(updateRect);
+    else
+        Application::instance().screen().update(updateRect);
 }
 
 
 void WindowManager::onShow( Window& w, bool visible )
 {
     Gfx::PointF framePos = w.position() - w.position();
-    framePos.subX(_borderWidth);
-    framePos.subY(_borderWidth +  _titleHeight);
+    //framePos.subX(_borderWidth);
+    //framePos.subY(_borderWidth +  _titleHeight);
 
     Gfx::SizeF frameSize = w.size();
     frameSize.addHeight(2 * _borderWidth + _titleHeight);
@@ -357,7 +367,11 @@ void WindowManager::onShow( Window& w, bool visible )
     ShowEvent sev( w.vid(), visible );
     Application::instance().loop().commitEvent( sev );
       
-    w.parent()->update(updateRect);
+    if(_parent)
+        _parent->update(updateRect);
+    else
+        Application::instance().screen().update(updateRect);
+
 }
 
 
@@ -381,7 +395,8 @@ void WindowManager::onActivate(Window* w)
     // this moves frame to the back
     std::remove(_windows.begin(), _windows.end(), frame);
 
-    _parent->activate();
+    if(_parent)
+        _parent->activate();
 
     ActivateEvent aev(w->vid(), true);
     Application::instance().loop().commitEvent(aev);
@@ -394,8 +409,8 @@ void WindowManager::onActivate(Window* w)
 void WindowManager::onEnable(Window& w, bool enable)
 {
     Gfx::PointF framePos = w.position();
-    framePos.subX(_borderWidth);
-    framePos.subY(_borderWidth +  _titleHeight);
+    //framePos.subX(_borderWidth);
+    //framePos.subY(_borderWidth +  _titleHeight);
 
     Gfx::SizeF frameSize = w.size();
     frameSize.addHeight(2 * _borderWidth + _titleHeight);
@@ -406,7 +421,10 @@ void WindowManager::onEnable(Window& w, bool enable)
     EnableEvent eev( w.vid(), enable );
     Application::instance().loop().commitEvent( eev );
      
-    _parent->update( updateRect);
+    if(_parent)
+        _parent->update(updateRect);
+    else
+        Application::instance().screen().update(updateRect);
 }
 
 
@@ -417,22 +435,45 @@ void WindowManager::onClosing(Window& w)
 }
 
 
+void WindowManager::onClose(Window& w)
+{
+    remove(w);
+
+    Gfx::PointF framePos = w.position();
+    //framePos.subX(_borderWidth);
+    //framePos.subY(_borderWidth +  _titleHeight);
+
+    Gfx::SizeF frameSize = w.size();
+    frameSize.addHeight(2 * _borderWidth + _titleHeight);
+    frameSize.addWidth(2 * _borderWidth);
+
+    Gfx::RectF updateRect(framePos, frameSize);
+
+    if(_parent)
+        _parent->update(updateRect);
+    else
+        Application::instance().screen().update(updateRect);
+}
+
+
 Gfx::PointF WindowManager::toParent(const Window& w, const Gfx::PointF& pos) const
+{
+    return toParent(w.position(), pos);
+}
+
+
+Gfx::PointF WindowManager::toParent(const Gfx::PointF& winPos, const Gfx::PointF& pos) const
 {
     double offY = _borderWidth + _titleHeight;
     double offX = _borderWidth;
 
-    return w.position() + pos + Gfx::PointF(offX, offY);
+    return winPos + pos + Gfx::PointF(offX, offY);
 }
 
 
 Gfx::PointF WindowManager::fromParent(const Window& w, const Gfx::PointF& pos) const
 {
-    double offY = _borderWidth + _titleHeight;
-    double offX = _borderWidth;
-
-    Gfx::PointF p = pos - w.position() - Gfx::PointF(offX, offY);
-    return p;
+    return fromParent(w.position(), pos);
 }
 
 

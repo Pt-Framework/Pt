@@ -128,14 +128,16 @@ void ScreenImpl::onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent )
 {        
     _drawCursor =  true;
 
-    if( !_cursorBackground.empty() )
-        bitBlit( _cursorBackground.pixel(0,0), _cursorBackground.width(), _cursorBackground.height(), 
+    if( ! _cursorBackground.empty() )
+        bitBlit( _cursorBackground.pixel(0,0), 
+                 _cursorBackground.width(), _cursorBackground.height(), 
                  _cursorPos, (Pt::uint8_t*)image().pixel(0,0), CopyOp );
 
     if( _cursor.width() != 0 )
-        _cursorPos = Gfx::Point( mouseEvent.x() - _cursor.xHotspot() , mouseEvent.y() - _cursor.yHotspot());
+        _cursorPos = Gfx::Point( mouseEvent.x() - _cursor.xHotspot(), 
+                                 mouseEvent.y() - _cursor.yHotspot());
 
-    Visual* mouseGrabber = Application::instance().impl()->mouseGrabber();
+    const Visual* mouseGrabber = Application::instance().impl()->mouseGrabber();
     if(mouseGrabber)
     {
         Pt::Hmi::MouseEvent mev = mouseEvent;
@@ -149,7 +151,7 @@ void ScreenImpl::onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent )
     }
     else
     {
-        _windowManager.pointerInput( mouseEvent );        
+        _windowManager.mouseEvent( mouseEvent );        
     }
 
     if( _drawCursor )
@@ -159,7 +161,13 @@ void ScreenImpl::onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent )
 
 void ScreenImpl::onKeyEvent(const Pt::Hmi::KeyEvent& ev)
 {
-    _windowManager.keyInput(ev);
+    _windowManager.keyEvent(ev);
+}
+
+
+void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
+{
+    windowManager().onResize(w, s);
 }
 
 
@@ -169,8 +177,33 @@ void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
 }
 
 
-void ScreenImpl::onActivate()
+void ScreenImpl::onClosing(Window& w)
+{
+    _windowManager.onClosing(w);
+}
+
+
+void ScreenImpl::onClose(Window& w)
+{
+    _windowManager.onClose(w);
+}
+
+
+void ScreenImpl::onShow(Window& w, bool visible)
+{
+    windowManager().onShow(w, visible);
+}
+
+
+void ScreenImpl::onActivate(Window& w)
 { 
+    windowManager().onActivate(&w);
+}
+
+
+void ScreenImpl::onEnable(Window& w, bool enable)
+{
+    windowManager().onEnable(w, enable);
 }
 
 

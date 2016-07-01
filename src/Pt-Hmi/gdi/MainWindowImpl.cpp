@@ -271,11 +271,13 @@ void MainWindowImpl::setBorder(bool s)
 
 void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
 {
+    // TODO
 }
 
 
 void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 {
+    // TODO
 }
 
 

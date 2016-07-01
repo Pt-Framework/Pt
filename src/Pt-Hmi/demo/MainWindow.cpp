@@ -86,14 +86,18 @@ MainWindow::MainWindow()
     
     _item1.setText("Heavy Metal");
     _item1.setIcon(icon);
-    _item1.setShortcut( &Key(Key::F3) );
+
+    Key f3(Key::F3);
+    _item1.setShortcut( &f3 );
     _menu.addItem(_item1);
 
     _item2.setText("Classic Rock");
     _menu.addItem(_item2);
 
     _item3.setText("Folk Music");
-    _item3.setShortcut( &Key(Key::Control, Key::A) );
+    
+    Key ctrlA(Key::Control, Key::A);
+    _item3.setShortcut( &ctrlA );
     _menu.addItem(_item3);
 
     // context sub menu

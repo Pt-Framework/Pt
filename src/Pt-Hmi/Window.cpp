@@ -135,7 +135,7 @@ void Window::init(Window* parent)
     {
         _impl->setTitle(_title);
         _impl->setBorder(_border);
-        _impl->setMaximumSize(_minimumSize);
+        _impl->setMinimumSize(_minimumSize);
         _impl->setMaximumSize(_maximumSize );
         _impl->setIcon(_icon);
         _impl->setState(_state);  
@@ -876,8 +876,7 @@ void Window::onClosing(Window& w)
 void Window::onClose(Window& w)
 {     
     // the window has been closed, clean up
-    _windowManager.remove(w);
-    update();
+    _windowManager.onClose(w);
 }
 
 

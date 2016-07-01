@@ -200,6 +200,12 @@ void PaintRegionImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
     _surface->impl()->drawImage(toF + _area.topLeft(), image);
 }
 
+
+void PaintRegionImpl::setClip( const Gfx::RectF& clip)
+{
+    _surface->impl()->setClip( Gfx::RectF( clip.topLeft() +  _area.topLeft(), clip.size()));
+}
+
 /////////////////////////////////////////////////////////////////////
 // PixmapSurfaceImpl
 /////////////////////////////////////////////////////////////////////
@@ -243,6 +249,12 @@ void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
 const Gfx::SizeF& PixmapSurfaceImpl::size() const
 {
     return _size;
+}
+
+
+void PixmapSurfaceImpl::setClip(const Gfx::RectF& clip)
+{
+    _painter.setClip(clip);
 }
 
 
