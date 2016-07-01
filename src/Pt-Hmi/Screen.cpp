@@ -213,6 +213,12 @@ void Screen::onEvent(const Event& ev)
         const UpdateEvent& uev = static_cast<const UpdateEvent&>(ev);
         onUpdateEvent(uev);
     }
+
+    if(ev.typeInfo() == typeid(PaintEvent) )
+    {
+        const PaintEvent& pev = static_cast<const PaintEvent&>(ev);
+        onPaintEvent(pev);
+    }
 }
 
 
@@ -234,11 +240,16 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
         (*it)->onPaint(rect);
     }
 
-    // TODO: send a PaintEvent to screen, so framebuffer can be updated AFTER
-    //       all paint events for windows and widgets have been processed
-    _impl->onPaint(screenRect);
-
     _updateRect.clear();
+
+    PaintEvent pev(vid(), screenRect);
+    Application::instance().loop().commitEvent(pev);
+}
+
+
+void Screen::onPaintEvent(const PaintEvent& ev)
+{
+    _impl->paint( ev.rect() );
 }
 
 

@@ -58,7 +58,7 @@ ScreenImpl::~ScreenImpl()
 }
 
 
-void ScreenImpl::onPaint(const Gfx::RectF& updateRect)
+void ScreenImpl::paint(const Gfx::RectF& updateRect)
 {
 }
 

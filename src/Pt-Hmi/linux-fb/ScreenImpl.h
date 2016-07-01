@@ -86,7 +86,7 @@ class ScreenImpl : public Pt::Connectable
             return value;
         }
 
-            Gfx::PointF toUnit(const Gfx::Point& value)
+        Gfx::PointF toUnit(const Gfx::Point& value)
         {
           return Gfx::PointF( value.x(), value.y() );
         }
@@ -138,7 +138,7 @@ class ScreenImpl : public Pt::Connectable
 
         void setCursor(const Hmi::Cursor* cursor);
 
-        void onPaint(const Gfx::RectF& updateRect);
+        void paint(const Gfx::RectF& updateRect);
 
         WindowManager& windowManager()
         {

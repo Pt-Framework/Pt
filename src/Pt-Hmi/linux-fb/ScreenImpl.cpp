@@ -80,6 +80,12 @@ void ScreenImpl::unregisterWindow(Window& w)
 }
 
 
+void ScreenImpl::setCursor(const Hmi::Cursor* crs)
+{        
+    _cursor  = crs == 0 ? Hmi::Cursor::defaultCursor() : *crs;        
+}
+
+
 const Gfx::Image& ScreenImpl::image() const
 {
     return _surface.pixmapImpl()->image();
@@ -89,6 +95,32 @@ const Gfx::Image& ScreenImpl::image() const
 Gfx::Image& ScreenImpl::image()
 {
     return _surface.pixmapImpl()->image();
+}
+
+
+void ScreenImpl::paint(const Gfx::RectF& updateRect)
+{                
+    Pt::System::Clock clock;
+    clock.start();   
+
+    //if( ! _cursorBackground.empty() )
+    //    bitBlit( _cursorBackground.pixel(0,0), 
+    //             _cursorBackground.width(), 
+    //             _cursorBackground.height(), 
+    //             _cursorPos, 
+    //             image().pixel(0,0), CopyOp );
+
+    Painter painter(_surface);
+    painter.setBrush( Pt::Gfx::Color(0.4f, 0.3f, 0.4f) );
+    painter.fillRect(updateRect);
+
+    _windowManager.render(_surface, updateRect);
+    
+    updateScreen();
+    
+    std::clog << "screen update: " << clock.stop().toUSecs() << " usecs." << std::endl;
+    std::clog << "update area " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
+              << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
 }
 
 
@@ -131,6 +163,17 @@ void ScreenImpl::onKeyEvent(const Pt::Hmi::KeyEvent& ev)
 }
 
 
+void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
+{
+    windowManager().onMove(w, pos);
+}
+
+
+void ScreenImpl::onActivate()
+{ 
+}
+
+
 void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx::Image& image)
 {    
     const size_t pixelSizeInByte = _frameBuffer.depth() / 8;        
@@ -170,51 +213,24 @@ void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
 void ScreenImpl::updateScreen()
 {
     _drawCursor = false;
-    drawCursor( image().pixel(0,0) );
+    drawCursor( image().pixel(0, 0) );
     memcpy( _frameBuffer.buffer(), image().pixel(0,0), _frameBuffer.bufferSize() );            
 }
 
 
-void ScreenImpl::onPaint(const Gfx::RectF& updateRect)
-{                
-    Pt::System::Clock clock;
-    clock.start();   
-
-    //if( ! _cursorBackground.empty() )
-    //    bitBlit( _cursorBackground.pixel(0,0), 
-    //             _cursorBackground.width(), 
-    //             _cursorBackground.height(), 
-    //             _cursorPos, 
-    //             image().pixel(0,0), CopyOp );
-
-    Painter painter(_surface);
-    painter.setBrush( Pt::Gfx::Color(0.4f, 0.3f, 0.4f) );
-    painter.fillRect(updateRect);
-
-    _windowManager.render(_surface, updateRect);
-    
-    updateScreen();
-    std::clog << "screen update: " << clock.stop().toUSecs() << " usecs." << std::endl;
-    std::clog << "update area " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
-              << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
-}
-
-
-void ScreenImpl::setCursor( const Hmi::Cursor* crs )
-{        
-    _cursor  = crs == 0 ? Hmi::Cursor::defaultCursor() : *crs;        
-}
-
-
-void ScreenImpl::bitBlit( const Gfx::Image& image, Pt::uint8_t* buffer )
+void ScreenImpl::bitBlit(const Gfx::Image& image, Pt::uint8_t* buffer)
 {
-  const size_t imageSize = (image.width() * image.format().pixelSize() + image.stride()) * image.height();
+  size_t bytesPerLine = image.width() * image.format().pixelSize() + image.stride();
+  size_t imageSize = bytesPerLine * image.height();
 
-  memcpy( buffer , image.pixel( 0,0 ), std::min( _frameBuffer.bufferSize(), imageSize ) );  
+  imageSize = std::min(_frameBuffer.bufferSize(), imageSize);
+
+  memcpy(buffer, image.pixel(0 ,0), imageSize );  
 }
 
 
-void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op )
+void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, 
+                          const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op )
 {
     static const size_t planePixelSize = 4;
     const size_t bufferPixelSize = _frameBuffer.depth() / 8;
@@ -265,17 +281,6 @@ void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const Gf
             }
         }
     }
-}
-
-
-void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
-{
-    windowManager().onMove(w, pos);
-}
-
-
-void ScreenImpl::onActivate()
-{ 
 }
 
 } // namespace

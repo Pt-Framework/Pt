@@ -976,7 +976,7 @@ void Window::onPaintBackground(const Gfx::RectF& rect)
 
 void Window::onPaintContent(const Gfx::RectF& rect)
 {
-    _windowManager.paintEvent(rect);
+    _windowManager.paint(_surface, rect);
 }
 
 
