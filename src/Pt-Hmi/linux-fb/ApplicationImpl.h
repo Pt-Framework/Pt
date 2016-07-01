@@ -60,6 +60,9 @@ class ApplicationImpl : public Pt::System::MainLoop
 
     void setCursor(const Cursor* cursor );
 
+    const Cursor& cursor()
+    { return _cursor; }
+
     void grabMouse(Window& mainWindow, Visual* grabber);
 
     void releaseMouse(Window& mainWindow, Visual* grabber);
@@ -78,7 +81,7 @@ class ApplicationImpl : public Pt::System::MainLoop
 		FrameBuffer _frameBuffer; 
 		std::vector<InputDevice*> _inputDevices;
 		Pt::Signal<const Pt::Event&> _eventReady;
-    const Cursor* _currentCursor;
+    Cursor        _cursor;
     Visual*       _mouseGrabber;
 };
 

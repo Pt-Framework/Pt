@@ -58,8 +58,6 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 
     Painter painter(_surface);
     painter.clear( Pt::Gfx::Color(0.4f, 0.3f, 0.4f) );
-
-    setCursor(0);
 }
 
 
@@ -77,12 +75,6 @@ void ScreenImpl::registerWindow(Window& w)
 void ScreenImpl::unregisterWindow(Window& w)
 {
     _windowManager.remove(w);
-}
-
-
-void ScreenImpl::setCursor(const Hmi::Cursor* crs)
-{        
-    _cursor  = crs == 0 ? Hmi::Cursor::defaultCursor() : *crs;        
 }
 
 
@@ -133,9 +125,11 @@ void ScreenImpl::onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent )
                  _cursorBackground.width(), _cursorBackground.height(), 
                  _cursorPos, (Pt::uint8_t*)image().pixel(0,0), CopyOp );
 
-    if( _cursor.width() != 0 )
-        _cursorPos = Gfx::Point( mouseEvent.x() - _cursor.xHotspot(), 
-                                 mouseEvent.y() - _cursor.yHotspot());
+    const Cursor& cursor = Application::instance().impl()->cursor();
+
+    if( cursor.width() != 0 )
+        _cursorPos = Gfx::Point( mouseEvent.x() - cursor.xHotspot(), 
+                                 mouseEvent.y() - cursor.yHotspot() );
 
     const Visual* mouseGrabber = Application::instance().impl()->mouseGrabber();
     if(mouseGrabber)
@@ -226,20 +220,22 @@ void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx
 
 void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
 {
-    if( _cursor.width() == 0  || _cursor.height() == 0 )
+    const Cursor& cursor = Application::instance().impl()->cursor();
+
+    if( cursor.width() == 0  || cursor.height() == 0 )
         return;
 
-    if( _cursorBackground.width() != _cursor.width()  || 
-        _cursorBackground.height() != _cursor.height() )
+    if( _cursorBackground.width() != cursor.width()  || 
+        _cursorBackground.height() != cursor.height() )
     {
-        Gfx::Size size(_cursor.width(), _cursor.height());
+        Gfx::Size size(cursor.width(), cursor.height());
         _cursorBackground.resize( size, _frameBuffer.format() ); 
     }
     
     grabImage( buffer, _cursorPos, _cursorBackground );
     
-    bitBlit(&_cursor.andRgb888()[0], _cursor.width(), _cursor.height(), _cursorPos, buffer, AndOp);
-    bitBlit(&_cursor.xorRgb888()[0], _cursor.width(), _cursor.height(), _cursorPos, buffer, XorOp);    
+    bitBlit(&cursor.andRgb888()[0], cursor.width(), cursor.height(), _cursorPos, buffer, AndOp);
+    bitBlit(&cursor.xorRgb888()[0], cursor.width(), cursor.height(), _cursorPos, buffer, XorOp);    
 }
 
 

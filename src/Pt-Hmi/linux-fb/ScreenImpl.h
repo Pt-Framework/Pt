@@ -132,8 +132,6 @@ class ScreenImpl : public Pt::Connectable
             return _dpi;
         }
 
-        void setCursor(const Hmi::Cursor* cursor);
-
         void paint(const Gfx::RectF& updateRect);
 
         WindowManager& windowManager()
@@ -187,7 +185,7 @@ class ScreenImpl : public Pt::Connectable
         bool          _drawCursor;
         WindowManager _windowManager;
         PixmapSurface _surface;
-        Cursor        _cursor;
+        
 };
 
 } // namespace

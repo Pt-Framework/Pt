@@ -44,8 +44,7 @@ namespace Pt {
 namespace Hmi {
 
 ApplicationImpl::ApplicationImpl()
-: _currentCursor(0)
-, _mouseGrabber(0)
+: _mouseGrabber(0)
 {  		 
 	showConsole( false );
 	_inputDevices.reserve(10);
@@ -108,14 +107,22 @@ void ApplicationImpl::showConsole(bool s)
 	close( fd );
 }
 
+
 void ApplicationImpl::setCursor(const Cursor* cursor)
 {
-    if( _currentCursor == cursor )
+    if( &_cursor == cursor )
         return;
 
-    _currentCursor = cursor;
+    if(cursor == 0)
+        return;
 
-    Application::instance().screen().impl()->setCursor(cursor);
+    if( cursor->empty() )
+    {
+        _cursor.clear();
+        return;
+    }
+
+    _cursor = *cursor;
 }
 
 

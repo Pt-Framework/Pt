@@ -71,7 +71,7 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         void nextEvent();
 
-        void setCursor(const Cursor* cursor );
+        void setCursor(const Cursor* cursor);
 
         void grabMouse(Window& mainWindow, Visual* grabber);
 
