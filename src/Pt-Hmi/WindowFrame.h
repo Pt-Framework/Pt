@@ -177,7 +177,7 @@ class WindowFrame : public Pt::Connectable
 
         bool mouseEvent(const MouseEvent& mev);
 
-        void paintEvent(const PaintEvent& pev);
+        void paint(PaintSurface& surface, const Gfx::RectF& rect);
 
     protected:
         bool onMouseEvent(const MouseEvent& mev);

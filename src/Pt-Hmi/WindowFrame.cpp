@@ -724,18 +724,10 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
 }
 
 
-void WindowFrame::paintEvent(const PaintEvent& pev)
+void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    if( _wm->parent() == 0)
-    {
-        //TODO: draw into screen surface the frame!!
-        return;
-    }
-
     double borderWidth = _wm->borderWidth();
     double titleHeight = _wm->titleHeight();
-
-    PaintSurface& surface = _wm->parent()->surface();
 
     // TODO: clipping region
     Painter painter(surface);    
