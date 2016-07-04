@@ -726,6 +726,12 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
 
 void WindowFrame::paintEvent(const PaintEvent& pev)
 {
+    if( _wm->parent() == 0)
+    {
+        //TODO: draw into screen surface the frame!!
+        return;
+    }
+
     double borderWidth = _wm->borderWidth();
     double titleHeight = _wm->titleHeight();
 

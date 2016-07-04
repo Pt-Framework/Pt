@@ -51,14 +51,14 @@ MainWindowImpl::~MainWindowImpl()
 
 Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& pos) const
 {
-    WindowManager wm = Application::instance().screen().impl()->windowManager();
+    WindowManager& wm = Application::instance().screen().impl()->windowManager();
     return wm.toParent(_position, pos);
 }
 
 
 Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& screenPos) const
 {
-    WindowManager wm = Application::instance().screen().impl()->windowManager();
+    WindowManager& wm = Application::instance().screen().impl()->windowManager();
     return wm.fromParent(_position, screenPos);
 }
 
