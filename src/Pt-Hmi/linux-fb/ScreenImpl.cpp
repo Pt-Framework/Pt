@@ -95,12 +95,12 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
     Pt::System::Clock clock;
     clock.start();   
 
-    //if( ! _cursorBackground.empty() )
-    //    bitBlit( _cursorBackground.pixel(0,0), 
-    //             _cursorBackground.width(), 
-    //             _cursorBackground.height(), 
-    //             _cursorPos, 
-    //             image().pixel(0,0), CopyOp );
+    if( ! _cursorBackground.empty() )
+        bitBlit( _cursorBackground.pixel(0,0), 
+                 _cursorBackground.width(), 
+                 _cursorBackground.height(), 
+                 _cursorPos, 
+                 image().pixel(0,0), CopyOp );
 
     Painter painter(_surface);
     painter.setBrush( Pt::Gfx::Color(0.4f, 0.3f, 0.4f) );
@@ -244,17 +244,6 @@ void ScreenImpl::updateScreen()
     _drawCursor = false;
     drawCursor( image().pixel(0, 0) );
     memcpy( _frameBuffer.buffer(), image().pixel(0,0), _frameBuffer.bufferSize() );            
-}
-
-
-void ScreenImpl::bitBlit(const Gfx::Image& image, Pt::uint8_t* buffer)
-{
-  size_t bytesPerLine = image.width() * image.format().pixelSize() + image.stride();
-  size_t imageSize = bytesPerLine * image.height();
-
-  imageSize = std::min(_frameBuffer.bufferSize(), imageSize);
-
-  memcpy(buffer, image.pixel(0 ,0), imageSize );  
 }
 
 

@@ -171,8 +171,6 @@ class ScreenImpl : public Pt::Connectable
  
         void bitBlit( const Pt::uint8_t* , size_t width, size_t height, const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op );
 
-        void bitBlit(const Gfx::Image& image, Pt::uint8_t* buffer);
-
         void drawCursor( Pt::uint8_t* buffer );
 
         void updateScreen();
@@ -185,7 +183,6 @@ class ScreenImpl : public Pt::Connectable
         bool          _drawCursor;
         WindowManager _windowManager;
         PixmapSurface _surface;
-        
 };
 
 } // namespace

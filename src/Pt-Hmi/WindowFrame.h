@@ -92,7 +92,7 @@ class WindowButton
 
         virtual void mouseEvent(const MouseEvent& mev);
 
-        virtual void paintEvent(const PaintEvent& pev);
+        virtual void paint(PaintSurface& surface, const Gfx::RectF& rect);
 
     private:
         Signal<>       _clicked;
@@ -109,7 +109,7 @@ class MinimizeButton : public WindowButton
 
         ~MinimizeButton();
 
-        void paintEvent(const PaintEvent& pev);
+        void paint(PaintSurface& surface, const Gfx::RectF& rect);
 };
 
 
@@ -120,7 +120,7 @@ class MaximizeButton : public WindowButton
 
         ~MaximizeButton();
 
-        void paintEvent(const PaintEvent& pev);
+        void paint(PaintSurface& surface, const Gfx::RectF& rect);
 };
 
 
@@ -131,7 +131,7 @@ class CloseButton : public WindowButton
 
         ~CloseButton();
 
-        void paintEvent(const PaintEvent& pev);
+        void paint(PaintSurface& surface, const Gfx::RectF& rect);
 };
 
 
@@ -142,7 +142,7 @@ class MenuButton : public WindowButton
 
         ~MenuButton();
 
-        void paintEvent(const PaintEvent& pev);
+        void paint(PaintSurface& surface, const Gfx::RectF& rect);
 };
 
 

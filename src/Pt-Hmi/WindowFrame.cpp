@@ -123,9 +123,8 @@ void WindowButton::mouseEvent(const MouseEvent& mev)
 }
 
 
-void WindowButton::paintEvent(const PaintEvent& pev)
+void WindowButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    PaintSurface& surface = _frame->window()->parent()->surface();
     Painter painter(surface);
    
     Gfx::Color light = brighten(color(), 1.25f);
@@ -184,11 +183,10 @@ MinimizeButton::~MinimizeButton()
 }
 
 
-void MinimizeButton::paintEvent(const PaintEvent& pev)
+void MinimizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    WindowButton::paintEvent(pev);
+    WindowButton::paint(surface, rect);
 
-    PaintSurface& surface = parent()->window()->parent()->surface();
     Painter painter(surface);
 
     //
@@ -222,11 +220,10 @@ MaximizeButton::~MaximizeButton()
 }
 
 
-void MaximizeButton::paintEvent(const PaintEvent& pev)
+void MaximizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    WindowButton::paintEvent(pev);
+    WindowButton::paint(surface, rect);
 
-    PaintSurface& surface = parent()->window()->parent()->surface();
     Painter painter(surface);
 
     //
@@ -260,11 +257,10 @@ CloseButton::~CloseButton()
 }
 
 
-void CloseButton::paintEvent(const PaintEvent& pev)
+void CloseButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    WindowButton::paintEvent(pev);
+    WindowButton::paint(surface, rect);
 
-    PaintSurface& surface = parent()->window()->parent()->surface();
     Painter painter(surface);
 
     //
@@ -295,9 +291,8 @@ MenuButton::~MenuButton()
 }
 
 
-void MenuButton::paintEvent(const PaintEvent& pev)
+void MenuButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    PaintSurface& surface = parent()->window()->parent()->surface();
     Painter painter(surface);
 
     //
@@ -879,7 +874,7 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     for(it = _buttons.begin(); it != _buttons.end(); ++it)
     {
         WindowButton* button = *it;
-        button->paintEvent( PaintEvent(0, button->geometry()) );
+        button->paint( surface, button->geometry());
     }
 }
 

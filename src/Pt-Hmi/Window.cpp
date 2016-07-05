@@ -915,8 +915,8 @@ void Window::onPaint(const Gfx::RectF& rect)
     if( ! _damaged )
         return;
 
-    static int nnn = 0;
-    std::clog << ++nnn << " repaint " << title() << std::endl;
+    //static int nnn = 0;
+    //std::clog << ++nnn << " repaint " << title() << std::endl;
 
     _damaged = false;
 
