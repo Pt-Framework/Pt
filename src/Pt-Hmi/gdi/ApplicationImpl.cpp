@@ -36,6 +36,7 @@
 #include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ActivateEvent.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/System/IOError.h>
 #include <Pt/Types.h>
 #include <WindowsX.h>
@@ -353,7 +354,7 @@ long CALLBACK ApplicationImpl::wndProc(HWND hwnd, unsigned int msg,
 
 Window* ApplicationImpl::findWindow(HWND hwnd)
 {
-    std::vector<Window*>& windows = Application::instance().screen().windows();
+    const std::vector<Window*>& windows = Application::instance().screen().windows();
 
     for(size_t i = 0; i < windows.size(); ++i)
     {

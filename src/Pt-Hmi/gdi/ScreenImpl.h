@@ -49,6 +49,10 @@ class ScreenImpl
         
         virtual ~ScreenImpl();
 
+        void add(Window& w);
+
+        void remove(Window& w );
+
         double width() const;
 
         double height() const;
@@ -76,6 +80,10 @@ class ScreenImpl
         void unregisterWindow(Window& w)
         {
         }
+
+        Gfx::PointF toParent(const Window& w, const Gfx::PointF& pos) const;
+
+        Gfx::PointF fromParent(const Window& w, const Gfx::PointF& pos) const;
 
         void paint(const Gfx::RectF& rect);
 

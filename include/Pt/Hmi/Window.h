@@ -48,6 +48,7 @@
 #include <Pt/Hmi/ShowEvent.h>
 #include <Pt/Hmi/EnableEvent.h>
 #include <Pt/Hmi/Visual.h>
+#include <Pt/Hmi/WindowBase.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Connectable.h>
@@ -61,7 +62,7 @@ namespace Hmi {
 class Widget;
 class MainWindowImpl;
 
-class PT_HMI_API Window : public Visual
+class PT_HMI_API Window : public WindowBase
 {
    friend class Widget; 
    friend class Screen;
@@ -76,15 +77,15 @@ class PT_HMI_API Window : public Visual
 
     const Window& mainWindow() const;
 
-    Window* parent();
+    WindowBase* parent();
 
-    const Window* parent() const;
+    const WindowBase* parent() const;
 
     const std::vector<Window*>& windows() const;
 
-    void add(Window& w);
+    virtual void add(Window& w);
 
-    void remove(Window& w);
+    virtual void remove(Window& w);
 
     Window* activeWindow();
 
@@ -106,9 +107,9 @@ class PT_HMI_API Window : public Visual
 
     void focusPrev();
 
-    Gfx::PointF toParent(const Gfx::PointF& pos) const;
+    virtual Gfx::PointF toParent(const Gfx::PointF& pos) const;
 
-    Gfx::PointF fromParent(const Gfx::PointF& pos) const;
+    virtual Gfx::PointF fromParent(const Gfx::PointF& pos) const;
 
     virtual Gfx::PointF toScreen(const Gfx::PointF& pos) const;
     
@@ -154,24 +155,26 @@ class PT_HMI_API Window : public Visual
 
     MainWindowImpl* impl();
 
+    const MainWindowImpl* impl() const;
+
   protected:
-    void onUpdate(Window& w, const Gfx::RectF& rect);
+    virtual void onUpdate(Window& w, const Gfx::RectF& rect);
 
     void onPaint(const Gfx::RectF& rect);
 
-    void onShow(Window& w, bool visible);
+    virtual void onShow(Window& w, bool visible);
 
-    void onActivate(Window& w);
+    virtual void onActivate(Window& w);
 
-    void onEnable(Window& w, bool enable);
+    virtual void onEnable(Window& w, bool enable);
 
-    void onMove(Window& w, const Gfx::PointF& to);
+    virtual void onMove(Window& w, const Gfx::PointF& to);
 
-    void onResize(Window& w, const Gfx::SizeF& to);
+    virtual void onResize(Window& w, const Gfx::SizeF& to);
 
-    void onClose(Window& w);
+    virtual void onClose(Window& w);
 
-    void onClosing(Window& w);
+    virtual void onClosing(Window& w);
 
     Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const;
 
@@ -274,6 +277,8 @@ class PT_HMI_API Window : public Visual
   private:
     void init(Window* parent);
 
+    void init(MainWindowImpl* impl);
+
     void deinit();
 
     void addWidget(Widget& w);
@@ -306,7 +311,7 @@ class PT_HMI_API Window : public Visual
     Pt::Signal<const Pt::Event&>   _eventReady;
 
     std::vector<Window*>           _windows;
-    Window*                        _parent;
+    WindowBase*                     _parent;
     Widget*                        _mainWidget;
     Widget*                        _pointerWidget;
     Widget*                        _focusWidget;

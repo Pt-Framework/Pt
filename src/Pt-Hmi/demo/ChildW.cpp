@@ -156,7 +156,7 @@ void ChildW::onShowDialog(Button& button)
 
 void ChildW::onCloseApp(Button& button)
 {
-    parent()->close();
+    mainWindow().close();
 }
 
 } // namespace

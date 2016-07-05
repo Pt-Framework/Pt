@@ -404,11 +404,9 @@ PixmapSurfaceImpl::PixmapSurfaceImpl()
 {
     _size = Gfx::SizeF(10,10);
 
-    Gfx::Size nsize = Application::instance().screen().fromUnit(_size);
-
     HDC screenDC = CreateDC(_T("DISPLAY"), NULL, NULL, NULL);
     _deviceContext = CreateCompatibleDC(screenDC);
-    _bitmapHandle = CreateCompatibleBitmap(screenDC, nsize.width(), nsize.height());
+    _bitmapHandle = CreateCompatibleBitmap(screenDC, (int)_size.width(), (int)_size.height());
     
     DeleteDC(screenDC);
 

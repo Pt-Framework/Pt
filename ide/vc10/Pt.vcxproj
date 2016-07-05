@@ -90,6 +90,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Visual.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowBase.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowDecoration.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowStartPosition.h" />

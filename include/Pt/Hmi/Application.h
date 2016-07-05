@@ -31,6 +31,18 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Screen.h>
+#include <Pt/Hmi/ResizeEvent.h>
+#include <Pt/Hmi/MouseEvent.h>
+#include <Pt/Hmi/ScrollEvent.h>
+#include <Pt/Hmi/PaintEvent.h>
+#include <Pt/Hmi/MoveEvent.h>
+#include <Pt/Hmi/ActivateEvent.h>
+#include <Pt/Hmi/EnableEvent.h>
+#include <Pt/Hmi/ShowEvent.h>
+#include <Pt/Hmi/KeyEvent.h>
+#include <Pt/Hmi/CloseEvent.h>
+#include <Pt/Hmi/EnterEvent.h>
+#include <Pt/Hmi/LeaveEvent.h>
 #include <Pt/System/Application.h>
 
 namespace Pt {
@@ -39,6 +51,7 @@ namespace Hmi {
 
 class ApplicationImpl;
 class Window;
+class Widget;
 
 class PT_HMI_API Application : public Pt::System::Application
 {

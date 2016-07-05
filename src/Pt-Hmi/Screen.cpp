@@ -28,9 +28,11 @@
 */
 
 #include "ScreenImpl.h"
+#include "MainWindowImpl.h"
 #include <Pt/Hmi/Screen.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/PaintEvent.h>
+#include <Pt/Hmi/Window.h>
 
 namespace Pt {
 
@@ -49,15 +51,20 @@ Screen::~Screen()
 }
 
 
-const std::vector<Window*>& Screen::windows() const
+void Screen::add(Window& w)
 {
-  return _windows;
+  w.init( new MainWindowImpl() );
+
+  _impl->add(w);
+
+  registerWindow(w);
 }
 
 
-std::vector<Window*>& Screen::windows()
+void Screen::remove(Window& w)
 {
-  return _windows;
+  _impl->remove(w);
+  unregisterWindow(w);
 }
     
 
@@ -166,20 +173,35 @@ ScreenImpl* Screen::impl()
 }
 
 
+Gfx::PointF Screen::onToParent(const Window& w, const Gfx::PointF& pos) const
+{
+    return _impl->toParent(w, pos);
+}
+
+
+Gfx::PointF Screen::onFromParent(const Window& w, const Gfx::PointF& pos) const
+{
+    return _impl->fromParent(w, pos);
+}
+
+
 void Screen::onResize(Window& w, const Gfx::SizeF& s)
 {
+    w.impl()->resize(s);
     _impl->onResize(w, s);
 }
 
 
 void Screen::onMove(Window& w, const Gfx::PointF& p)
 {
+    w.impl()->move(p);
     _impl->onMove(w, p);
 }
 
 
 void Screen::onClosing(Window& w)
 {
+    w.impl()->close();
     _impl->onClosing(w);
 }
 
@@ -198,14 +220,17 @@ void Screen::onShow(Window& w, bool visible)
 
 void Screen::onActivate(Window& w)
 {
+    w.impl()->activate();
     _impl->onActivate(w);
 }
 
 
 void Screen::onEnable(Window& w, bool enable)
 {
+    w.impl()->enable(enable);
     _impl->onEnable(w, enable);      
 }
+
 
 
 void Screen::update(const Gfx::RectF& updateRect)

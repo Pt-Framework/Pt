@@ -58,6 +58,30 @@ ScreenImpl::~ScreenImpl()
 }
 
 
+void ScreenImpl::add(Window& w)
+{
+   
+}
+
+
+void ScreenImpl::remove(Window& w )
+{
+  
+}
+
+
+Gfx::PointF ScreenImpl::toParent(const Window& w, const Gfx::PointF& pos) const
+{
+    return w.impl()->toScreen(pos);
+}
+
+
+Gfx::PointF ScreenImpl::fromParent(const Window& w, const Gfx::PointF& pos) const
+{
+    return w.impl()->fromScreen(pos);
+}
+
+
 void ScreenImpl::paint(const Gfx::RectF& updateRect)
 {
 }
@@ -85,6 +109,7 @@ void ScreenImpl::onClose(Window& w)
 
 void ScreenImpl::onShow(Window& w, bool visible)
 {
+  w.impl()->show(visible);
 }
 
 

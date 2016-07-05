@@ -31,9 +31,10 @@
 #define Pt_Hmi_Screen_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/WindowBase.h>
 #include <Pt/Hmi/Visual.h>
 #include <Pt/Hmi/Cursor.h>
+#include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
@@ -47,7 +48,7 @@ namespace Hmi {
 class ScreenImpl;
 class ApplicationImpl;
 
-class PT_HMI_API Screen : public Visual
+class PT_HMI_API Screen : public WindowBase
 {
     friend class Window;
 
@@ -56,13 +57,23 @@ class PT_HMI_API Screen : public Visual
 
         virtual ~Screen();
 
-        const std::vector<Window*>& windows() const;
+        virtual void add(Window& w);
 
-        std::vector<Window*>& windows();
+        virtual void remove(Window& w);
 
         Window* findWindow(const std::string& name);
 
         Window* activeWindow();
+
+        std::vector<Window*>& windows()
+        {
+          return _windows;
+        }
+
+        const std::vector<Window*>& windows() const
+        {
+          return _windows;
+        }
 
         double width() const;
 
@@ -101,21 +112,25 @@ class PT_HMI_API Screen : public Visual
         ScreenImpl* impl();
 
     protected:
-        void onResize(Window& w, const Gfx::SizeF& s);
+        virtual Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const;
 
-        void onMove(Window& w, const Gfx::PointF& p);
+        virtual Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const;
 
-        void onClosing(Window& w);
+        virtual void onResize(Window& w, const Gfx::SizeF& s);
 
-        void onClose(Window& w);
+        virtual void onMove(Window& w, const Gfx::PointF& p);
 
-        void onShow(Window& w, bool visible);
+        virtual void onClosing(Window& w);
 
-        void onActivate(Window& w);
+        virtual void onClose(Window& w);
 
-        void onEnable(Window& w, bool enable);
+        virtual void onShow(Window& w, bool visible);
 
-        void onUpdate(Window& w, const Gfx::RectF& rect);
+        virtual void onActivate(Window& w);
+
+        virtual void onEnable(Window& w, bool enable);
+
+        virtual void onUpdate(Window& w, const Gfx::RectF& rect);
 
     protected:
         virtual void onEvent( const Event& ev );
@@ -131,9 +146,9 @@ class PT_HMI_API Screen : public Visual
     
     private:
         ScreenImpl*          _impl;
-        std::vector<Window*> _windows;
         Gfx::RectF           _updateRect;
         int                  _updates;
+        std::vector<Window*> _windows;
 };
 
 } // namespace

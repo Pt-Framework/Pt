@@ -30,6 +30,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Window.h>
 #include <cassert>
 
 namespace Pt {

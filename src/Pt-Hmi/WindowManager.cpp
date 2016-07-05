@@ -171,8 +171,6 @@ bool WindowManager::keyEvent(const KeyEvent& keyEvent)
 
     if( _parent)
         w = _parent->activeWindow();
-    else
-        w = Application::instance().screen().activeWindow();
 
     if( ! w )
         return false;
@@ -326,13 +324,7 @@ void WindowManager::onMove(Window& w, const Gfx::PointF& to)
     updateRect.unify(movedRect);
     
     if( _parent )
-    {
         _parent->update(updateRect);
-    }
-    else
-    {
-        Application::instance().screen().update(updateRect);
-    }
 }
 
 
@@ -346,8 +338,6 @@ void WindowManager::onUpdate(Window& child, const Gfx::RectF& rect)
 
     if(_parent)
         _parent->update(updateRect);
-    else
-        Application::instance().screen().update(updateRect);
 }
 
 
@@ -368,9 +358,6 @@ void WindowManager::onShow( Window& w, bool visible )
       
     if(_parent)
         _parent->update(updateRect);
-    else
-        Application::instance().screen().update(updateRect);
-
 }
 
 
@@ -422,8 +409,6 @@ void WindowManager::onEnable(Window& w, bool enable)
      
     if(_parent)
         _parent->update(updateRect);
-    else
-        Application::instance().screen().update(updateRect);
 }
 
 
@@ -450,8 +435,6 @@ void WindowManager::onClose(Window& w)
 
     if(_parent)
         _parent->update(updateRect);
-    else
-        Application::instance().screen().update(updateRect);
 }
 
 
