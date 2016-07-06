@@ -517,7 +517,11 @@ Gfx::PointF Window::toScreen(const Gfx::PointF& pos) const
         return Gfx::PointF(0, 0);
 
     Gfx::PointF p = toParent(pos);
-    return _parent->toScreen(p);    
+
+    if(_parentWindow)
+        return _parentWindow->toScreen(p);
+
+    return p;    
 }
 
 
@@ -527,7 +531,11 @@ Gfx::PointF Window::fromScreen(const Gfx::PointF& pos) const
         return Gfx::PointF(0, 0);
 
     Gfx::PointF p = fromParent(pos);
-    return _parent->fromScreen(p);
+    
+    if(_parentWindow)
+        return _parentWindow->fromScreen(p);
+
+    return p;
 }
 
 

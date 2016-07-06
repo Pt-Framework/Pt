@@ -52,7 +52,7 @@ class PT_HMI_API WindowBase : public Visual
         virtual ~WindowBase();
 
         void update(const Gfx::RectF& rect);
-    
+
     protected:
         virtual void onUpdate(const Gfx::RectF& rect) = 0;
 
