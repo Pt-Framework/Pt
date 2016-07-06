@@ -53,6 +53,7 @@ namespace Hmi {
 Window::Window(Window* parent)
 : _impl(0)
 , _parent(0)
+, _parentWindow(0)
 , _mainWidget(0)
 , _pointerWidget(0)
 , _focusWidget(0)
@@ -65,8 +66,8 @@ Window::Window(Window* parent)
 , _damaged(true)
 , _position(0,0)
 , _size(10,10)
-, _minimumSize(0,0)
-, _maximumSize(2000,2000)
+, _minimumSize(0, 0)
+, _maximumSize(64000, 64000)
 , _startPostion( WindowPosition::Manual )
 , _state(WindowState::Normal )
 , _border(true)
@@ -88,8 +89,8 @@ Window::Window(Window* parent)
     _eventReady += Pt::slot(*this, &Window::onResizeEvent );
     _eventReady += Pt::slot(*this, &Window::onShowEvent );  
 
-    _parent = parent != 0 ? (WindowBase*) parent : (WindowBase*)&Application::instance().screen(); 
-    _parent->add(*this);
+    if(parent)
+        parent->add(*this);
 }
 
 
@@ -100,34 +101,26 @@ Window::~Window()
     while( ! _windows.empty() )
        remove( *_windows.back() );
 
-     
     deinit();
-    
-    Window* winParent = dynamic_cast<Window*>(_parent);
-
-    if( !_impl && winParent)
-    {      
-      winParent->_windowManager.remove(*this);
-
-       std::vector<Window*>::const_iterator it = std::find( winParent->_windows.begin(), winParent->_windows.end(), this);
-
-      if( it != winParent->_windows.end())
-        winParent->_windows.erase(it);
-
-           update();
-    }
-    else
-    {
-        Application::instance().screen().unregisterWindow(*this);
-    }    
-
- 
 }
 
 
 void Window::init(Window* parent)
 {
-    _parent = parent;   
+    if(_init)
+        deinit();
+
+    _parent = parent;
+    _parentWindow = parent;
+
+    if( ! _parent )
+    {
+        _impl = new MainWindowImpl();
+        _parent = &Application::instance().screen();
+    }
+
+    _parent->onInit(*this);
+    
     _init = true;
     _isClosed = false;
     
@@ -136,23 +129,18 @@ void Window::init(Window* parent)
     enable(_enabled);
 
     if( _isActive )
-        activate();      
-             
-    show(_visible);
-}
+        activate();
 
-
-void Window::init(MainWindowImpl* impl)
-{
-    _impl = impl;
-    _parent = &Application::instance().screen();   
-    _impl->setTitle(_title);
-    _impl->setBorder(_border);
-    _impl->setMinimumSize(_minimumSize);
-    _impl->setMaximumSize(_maximumSize );
-    _impl->setIcon(_icon);
-    _impl->setState(_state);  
-    _init = true;
+    if( _impl)
+    {
+        _impl->setTitle(_title);
+        _impl->setBorder(_border);
+        _impl->setMinimumSize(_minimumSize);
+        _impl->setMaximumSize(_maximumSize );
+        _impl->setIcon(_icon);
+        _impl->setState(_state);  
+    }  
+    
     show(_visible);
 }
 
@@ -162,44 +150,34 @@ void Window::deinit()
     if( ! _init )
         return;
 
-    releaseMouse();  
+    releaseMouse();
 
-     delete _impl;
-    _impl = 0;
+    _parent->onDeinit(*this);
 
-   _init = false;
+    if(_impl)
+    {
+        delete _impl;
+        _impl = 0;
+    }
+
+    _init = false;
 }
 
 
-Window& Window::mainWindow()
+void Window::onInit(Window& w)
 {
-    Window* mainWindow = this;
-
-    Window* p = dynamic_cast<Window*>(mainWindow->parent());
-
-    while( p )
-    {
-       mainWindow = p;
-       p = dynamic_cast<Window*>(mainWindow->parent());
-    }
-
-   return *mainWindow;
+    _windowManager.add(w);
+    _windows.push_back(&w);
 }
 
 
-const Window& Window::mainWindow() const
+void Window::onDeinit(Window& w)
 {
-    const Window* mainWindow = this;
+    _windowManager.remove(w);
 
-    const Window* parent = dynamic_cast<const Window*>(mainWindow->parent());
-
-    while( parent )
-    {
-       mainWindow = parent;
-       parent = dynamic_cast<const Window*>(mainWindow->parent());
-    }
-
-   return *mainWindow;
+    std::vector<Window*>::iterator it;
+    it = std::remove(_windows.begin(), _windows.end(), &w);
+    _windows.erase(it, _windows.end());
 }
 
 
@@ -215,6 +193,40 @@ const WindowBase* Window::parent() const
 }
 
 
+Window& Window::mainWindow()
+{
+    Window* mainWindow = this;
+
+    while( mainWindow->parentWindow() )
+        mainWindow = mainWindow->parentWindow();
+
+   return *mainWindow;
+}
+
+
+const Window& Window::mainWindow() const
+{
+    const Window* mainWindow = this;
+
+    while( mainWindow->parentWindow() )
+        mainWindow = mainWindow->parentWindow();
+
+   return *mainWindow;
+}
+
+
+Window* Window::parentWindow()
+{
+   return _parentWindow;
+}
+
+
+const Window* Window::parentWindow() const
+{
+   return _parentWindow;
+}
+
+
 const std::vector<Window*>& Window::windows() const
 {
     return _windows;
@@ -223,11 +235,11 @@ const std::vector<Window*>& Window::windows() const
 
 void Window::add(Window& child)
 {
-    child.parent()->remove(child);
-    child.deinit();
-    _windowManager.add(child);
-    _windows.push_back(&child);
+    if( child.parent() == this )
+        return;
+
     child.init(this);
+
     update();
 }
 
@@ -237,38 +249,9 @@ void Window::remove(Window& child)
     if( child.parent() != this )
         return;
 
-    child.deinit();
-    
-    _windowManager.remove(child);
-
-    std::vector<Window*>::const_iterator it = std::find( _windows.begin(), _windows.end(), &child);
-
-    if( it != _windows.end())
-      _windows.erase(it);
-
-    Application::instance().screen().add(child);
+    child.init(0);
 
     update();
-}
-
-
-Window* Window::activeWindow()
-{
-    std::vector<Window*>::const_iterator it;
-
-    for(it = _windows.begin(); it != _windows.end(); ++it)
-    {
-        Window* window = *it;
-    
-        if( window->isActive() )
-            return window;
-
-        window = window->activeWindow();
-        if(window)
-            return window;
-    }
-
-    return 0;
 }
 
 
@@ -500,6 +483,9 @@ void Window::setFocusIndex(Widget& , size_t)
 
 Gfx::PointF Window::toParent(const Gfx::PointF& pos) const
 {
+    if( ! _init )
+        return Gfx::PointF(0, 0);
+
     return _parent->onToParent(*this, pos);
 }
 
@@ -512,6 +498,9 @@ Gfx::PointF Window::onToParent(const Window& w, const Gfx::PointF& pos) const
 
 Gfx::PointF Window::fromParent(const Gfx::PointF& pos) const
 {
+    if( ! _init )
+        return Gfx::PointF(0, 0);
+
     return _parent->onFromParent(*this, pos);
 }
 
@@ -524,7 +513,9 @@ Gfx::PointF Window::onFromParent(const Window& w, const Gfx::PointF& pos) const
 
 Gfx::PointF Window::toScreen(const Gfx::PointF& pos) const
 {
-    
+    if( ! _init )
+        return Gfx::PointF(0, 0);
+
     Gfx::PointF p = toParent(pos);
     return _parent->toScreen(p);    
 }
@@ -532,8 +523,11 @@ Gfx::PointF Window::toScreen(const Gfx::PointF& pos) const
 
 Gfx::PointF Window::fromScreen(const Gfx::PointF& pos) const
 {
-      Gfx::PointF p = fromParent(pos);
-      return _parent->fromScreen(p);
+    if( ! _init )
+        return Gfx::PointF(0, 0);
+
+    Gfx::PointF p = fromParent(pos);
+    return _parent->fromScreen(p);
 }
 
 
@@ -544,8 +538,11 @@ void Window::update()
 }
 
 
-void Window::update(const Gfx::RectF& rect)
+void Window::onUpdate(const Gfx::RectF& rect)
 {
+    if( ! _init )
+        return;
+    
     _damaged = true;
     _parent->onUpdate(*this, rect);
 }
@@ -557,6 +554,40 @@ void Window::onUpdate(Window& child, const Gfx::RectF& rect)
 }
 
 
+void Window::onPaint(const Gfx::RectF& rect)
+{
+    if( ! _damaged )
+        return;
+
+    _damaged = false;
+
+    if( ! this->isVisible() )
+        return;
+
+    const double borderWidth = _windowManager.borderWidth();
+    const double titleHeight = _windowManager.titleHeight();
+
+    onPaintBackground(rect);
+
+    if( mainWidget() )
+        mainWidget()->onPaint(rect);
+
+    std::vector<Window*>::iterator child;
+    for(child = _windows.begin(); child != _windows.end(); ++child)
+    {
+        Gfx::PointF pos( rect.topLeft() - (*child)->position() );
+        pos.subX( borderWidth );
+        pos.subY( borderWidth + titleHeight );
+
+        Gfx::RectF updateRect( pos, rect.size() );
+        (*child)->onPaint(updateRect);
+    }
+
+    PaintEvent pev(vid(), rect);
+    Application::instance().loop().commitEvent(pev);
+}
+
+
 bool Window::isActive() const
 {
     return _isActive;
@@ -565,6 +596,15 @@ bool Window::isActive() const
 
 void Window::activate()
 {
+    if( ! _init )
+    {
+        _isActive = true;
+        return;
+    }
+
+    if(_parentWindow)
+        _parentWindow->activate();
+
     _parent->onActivate(*this);
 }
 
@@ -588,8 +628,13 @@ bool Window::isVisible() const
 
 
 void Window::show(bool b)
-{    
-   _parent->onShow(*this, b);
+{
+    if( ! _init )
+    {
+        init(_parentWindow);
+    }
+    
+    _parent->onShow(*this, b);
 }
 
 
@@ -659,6 +704,13 @@ bool Window::isEnabled() const
 
 void Window::enable(bool e)
 {
+    if( ! _init )
+    {
+        _enabled = e;
+        _enabledState = e;
+        return;
+    }
+
     _parent->onEnable(*this, e);
 }
 
@@ -706,6 +758,12 @@ const Gfx::PointF& Window::position() const
 
 void Window::move(const Gfx::PointF& p)
 {
+    if( ! _init )
+    {
+        _position = p;
+        return;
+    }
+
     _parent->onMove(*this, p);
 }
 
@@ -730,6 +788,12 @@ const Gfx::SizeF& Window::size() const
 
 void Window::resize(const Gfx::SizeF& s)
 {
+    if( ! _init )
+    {
+        _size = s;
+        return;
+    }
+
     _parent->onResize(*this, s);
 }
 
@@ -758,6 +822,12 @@ bool Window::isClosed() const
 
 void Window::close()
 {
+    if( ! _init )
+    {
+        _isClosed = true;
+        return;
+    }
+
     _parent->onClosing(*this);
 }
 
@@ -783,7 +853,7 @@ void Window::onCloseEvent(const CloseEvent& ev)
     _isClosed =  true;
     _visible = false;
 
-//    deinit();
+    deinit();
 }
 
 
@@ -802,43 +872,6 @@ MainWindowImpl* Window::impl()
 const MainWindowImpl* Window::impl() const
 {
     return _impl;   
-}
-
-
-void Window::onPaint(const Gfx::RectF& rect)
-{
-    if( ! _damaged )
-        return;
-
-    //static int nnn = 0;
-    //std::clog << ++nnn << " repaint " << title() << std::endl;
-
-    _damaged = false;
-
-    if( ! this->isVisible() )
-        return;
-
-    const double borderWidth = _windowManager.borderWidth();
-    const double titleHeight = _windowManager.titleHeight();
-
-    onPaintBackground(rect);
-
-    if( mainWidget() )
-        mainWidget()->onPaint(rect);
-
-    std::vector<Window*>::iterator child;
-    for(child = _windows.begin(); child != _windows.end(); ++child)
-    {
-        Gfx::PointF pos( rect.topLeft() - (*child)->position() );
-        pos.subX( borderWidth );
-        pos.subY( borderWidth + titleHeight );
-
-        Gfx::RectF updateRect( pos, rect.size() );
-        (*child)->onPaint(updateRect);
-    }
-
-    PaintEvent pev(vid(), rect);
-    Application::instance().loop().commitEvent(pev);
 }
 
 

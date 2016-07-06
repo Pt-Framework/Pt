@@ -138,6 +138,6 @@ void ApplicationImpl::releaseMouse(Window&, Visual*)
     _mouseGrabber = 0;
 }
 
-}
+} // namespace
 
-}
+} // namespace

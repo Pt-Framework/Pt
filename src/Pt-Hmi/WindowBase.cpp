@@ -1,5 +1,5 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+   Copyright (C) 2015 Marc Boris Duerner
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -23,62 +23,32 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
-#ifndef PT_HMI_VISUAL_H
-#define PT_HMI_VISUAL_H
-
-#include <Pt/Hmi/Api.h>
-#include <Pt/Types.h>
-#include <Pt/Event.h>
-#include <Pt/Connectable.h>
-#include <Pt/Gfx/Point.h>
-#include <string>
+#include <Pt/Hmi/WindowBase.h>
+#include <Pt/Hmi/Window.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Visual : public virtual Pt::Connectable
+WindowBase::WindowBase()
+{ 
+}
+
+
+WindowBase::~WindowBase()
+{ 
+}
+
+
+void WindowBase::update(const Gfx::RectF& rect)
 {
-    public:
-        virtual ~Visual();
-
-        void processEvent(const Pt::Event& ev);    
-
-        Pt::uint64_t vid() const
-        {
-            return _vid;
-        }
-
-        void setName( const std::string& n )
-        {
-            _name = n;
-        }
-
-        const std::string& name() const
-        {
-            return _name;
-        }
-
-        virtual Gfx::PointF toScreen(const Gfx::PointF& l) const = 0;
-
-        virtual Gfx::PointF fromScreen(const Gfx::PointF& g) const = 0;
-
-    protected:
-        Visual();
-        
-        virtual void onEvent(const Pt::Event& ev) = 0;
-
-    private:
-        Pt::uint64_t _vid;
-        std::string  _name;        
-};
+    onUpdate(rect);
+}
 
 } // namespace
 
 } // namespace
-
-#endif

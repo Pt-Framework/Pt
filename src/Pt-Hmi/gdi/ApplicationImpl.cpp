@@ -222,9 +222,6 @@ void ApplicationImpl::releaseMouse(Window&, Visual*)
 }
 
 
-
-
-
 void ApplicationImpl::onAttachSelectable(System::Selectable& s)
 { 
     _selector.attach(s); 

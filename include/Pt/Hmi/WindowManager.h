@@ -31,6 +31,7 @@
 #define Pt_Hmi_WindowManager_h
 
 #include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/WindowBase.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Connectable.h>
@@ -86,9 +87,9 @@ class WindowManager : public Pt::Connectable
             return _inactiveTextColor;
         }
 
-        void init(Window& parent);
+        void init(WindowBase& parent);
 
-        Window* parent();
+        WindowBase* parent();
 
         void add(Window& w);
 
@@ -136,7 +137,7 @@ class WindowManager : public Pt::Connectable
 
     private:
         Application&              _app;
-        Window*                   _parent; 
+        WindowBase*               _parent; 
         std::vector<WindowFrame*> _windows;
         
         WindowFrame*              _activeWindow;

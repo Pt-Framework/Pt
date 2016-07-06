@@ -73,21 +73,23 @@ class PT_HMI_API Window : public WindowBase
 
     virtual ~Window();
 
-    Window& mainWindow();
-
-    const Window& mainWindow() const;
-
     WindowBase* parent();
 
     const WindowBase* parent() const;
 
+    Window& mainWindow();
+
+    const Window& mainWindow() const;
+
+    Window* parentWindow();
+
+    const Window* parentWindow() const;
+
     const std::vector<Window*>& windows() const;
 
-    virtual void add(Window& w);
+    void add(Window& w);
 
-    virtual void remove(Window& w);
-
-    Window* activeWindow();
+    void remove(Window& w);
 
     Widget* mainWidget();
 
@@ -117,7 +119,7 @@ class PT_HMI_API Window : public WindowBase
 
     void update();
 
-    void update(const Gfx::RectF& rect);
+    using WindowBase::update;
 
     bool isActive() const;
 
@@ -158,9 +160,19 @@ class PT_HMI_API Window : public WindowBase
     const MainWindowImpl* impl() const;
 
   protected:
-    virtual void onUpdate(Window& w, const Gfx::RectF& rect);
+    virtual void onUpdate(const Gfx::RectF& rect);
 
-    void onPaint(const Gfx::RectF& rect);
+    virtual void onPaint(const Gfx::RectF& rect);
+
+    virtual void onInit(Window& w);
+    
+    virtual void onDeinit(Window& w);
+
+    virtual Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const;
+
+    virtual Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const;
+
+    virtual void onUpdate(Window& w, const Gfx::RectF& rect);
 
     virtual void onShow(Window& w, bool visible);
 
@@ -175,10 +187,6 @@ class PT_HMI_API Window : public WindowBase
     virtual void onClose(Window& w);
 
     virtual void onClosing(Window& w);
-
-    Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const;
-
-    Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const;
 
   protected:
     virtual void onEvent(const Pt::Event& ev);
@@ -277,8 +285,6 @@ class PT_HMI_API Window : public WindowBase
   private:
     void init(Window* parent);
 
-    void init(MainWindowImpl* impl);
-
     void deinit();
 
     void addWidget(Widget& w);
@@ -311,7 +317,8 @@ class PT_HMI_API Window : public WindowBase
     Pt::Signal<const Pt::Event&>   _eventReady;
 
     std::vector<Window*>           _windows;
-    WindowBase*                     _parent;
+    WindowBase*                    _parent;
+    Window*                        _parentWindow;
     Widget*                        _mainWidget;
     Widget*                        _pointerWidget;
     Widget*                        _focusWidget;

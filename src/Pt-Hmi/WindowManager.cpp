@@ -72,7 +72,7 @@ WindowManager::~WindowManager()
 }
 
 
-void WindowManager::init(Window& parent)
+void WindowManager::init(WindowBase& parent)
 {
     _parent = &parent;
 }
@@ -139,7 +139,7 @@ WindowFrame* WindowManager::findWindow(Window& w)
 }
 
 
-Window* WindowManager::parent()
+WindowBase* WindowManager::parent()
 {
     return _parent;
 }
@@ -169,8 +169,8 @@ bool WindowManager::keyEvent(const KeyEvent& keyEvent)
 {
     Window* w = 0;
 
-    if( _parent)
-        w = _parent->activeWindow();
+    if( _activeWindow)
+        w = _activeWindow->window();
 
     if( ! w )
         return false;
@@ -380,9 +380,6 @@ void WindowManager::onActivate(Window* w)
 
     // this moves frame to the back
     std::remove(_windows.begin(), _windows.end(), frame);
-
-    if(_parent)
-        _parent->activate();
 
     ActivateEvent aev(w->vid(), true);
     Application::instance().loop().commitEvent(aev);

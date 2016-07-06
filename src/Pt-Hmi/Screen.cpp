@@ -51,22 +51,17 @@ Screen::~Screen()
 }
 
 
-void Screen::add(Window& w)
+void Screen::onInit(Window& w)
 {
-  w.init( new MainWindowImpl() );
-
-  _impl->add(w);
-
-  registerWindow(w);
+    registerWindow(w);
 }
 
 
-void Screen::remove(Window& w)
+void Screen::onDeinit(Window& w)
 {
-  _impl->remove(w);
-  unregisterWindow(w);
+    unregisterWindow(w);
 }
-    
+
 
 Window* Screen::findWindow(const std::string& name)
 {
@@ -77,26 +72,6 @@ Window* Screen::findWindow(const std::string& name)
             return *it;
     }
     
-    return 0;
-}
-
-
-Window* Screen::activeWindow()
-{
-    std::vector<Window*>::const_iterator it;
-
-    for(it = _windows.begin(); it != _windows.end(); ++it)
-    {
-        Window* window = *it;
-    
-        if( window->isActive() )
-            return window;
-
-        window = window->activeWindow();
-        if(window)
-            return window;
-    }
-
     return 0;
 }
 
@@ -232,8 +207,7 @@ void Screen::onEnable(Window& w, bool enable)
 }
 
 
-
-void Screen::update(const Gfx::RectF& updateRect)
+void Screen::onUpdate(const Gfx::RectF& updateRect)
 {
     _updateRect.unify(updateRect);
     ++_updates;

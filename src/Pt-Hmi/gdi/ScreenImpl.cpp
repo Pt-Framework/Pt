@@ -109,7 +109,7 @@ void ScreenImpl::onClose(Window& w)
 
 void ScreenImpl::onShow(Window& w, bool visible)
 {
-  w.impl()->show(visible);
+    w.impl()->show(visible);
 }
 
 
@@ -146,7 +146,7 @@ double ScreenImpl::width() const
   const HWND hDesktop = GetDesktopWindow();
   RECT desktop;   
   GetWindowRect(hDesktop, &desktop);
-  return  desktop.right;
+  return desktop.right;
 }
 
 
@@ -155,7 +155,7 @@ double ScreenImpl::height() const
     const HWND hDesktop = GetDesktopWindow();
     RECT desktop;
     GetWindowRect(hDesktop, &desktop);
-    return  desktop.bottom;
+    return desktop.bottom;
 }
 
 

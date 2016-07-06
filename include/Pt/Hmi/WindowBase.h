@@ -24,61 +24,65 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
-  02110-1301 USA
+  02110-1301  USA
 */
 
-#ifndef PT_HMI_VISUAL_H
-#define PT_HMI_VISUAL_H
+#ifndef PT_HMI_WINDOWBASE_H
+#define PT_HMI_WINDOWBASE_H
 
-#include <Pt/Hmi/Api.h>
-#include <Pt/Types.h>
-#include <Pt/Event.h>
-#include <Pt/Connectable.h>
+#include <Pt/Hmi/Visual.h>
 #include <Pt/Gfx/Point.h>
-#include <string>
+#include <Pt/Gfx/Rect.h>
+
+#include <vector>
 
 namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Visual : public virtual Pt::Connectable
+class Window;
+
+class PT_HMI_API WindowBase : public Visual
 {
+    friend class Window;
+
     public:
-        virtual ~Visual();
+        WindowBase();
 
-        void processEvent(const Pt::Event& ev);    
+        virtual ~WindowBase();
 
-        Pt::uint64_t vid() const
-        {
-            return _vid;
-        }
-
-        void setName( const std::string& n )
-        {
-            _name = n;
-        }
-
-        const std::string& name() const
-        {
-            return _name;
-        }
-
-        virtual Gfx::PointF toScreen(const Gfx::PointF& l) const = 0;
-
-        virtual Gfx::PointF fromScreen(const Gfx::PointF& g) const = 0;
-
+        void update(const Gfx::RectF& rect);
+    
     protected:
-        Visual();
-        
-        virtual void onEvent(const Pt::Event& ev) = 0;
+        virtual void onUpdate(const Gfx::RectF& rect) = 0;
 
-    private:
-        Pt::uint64_t _vid;
-        std::string  _name;        
+        virtual void onInit(Window& w) = 0;
+
+        virtual void onDeinit(Window& w) = 0;
+
+        virtual Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const = 0;
+    
+        virtual Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const = 0;
+    
+        virtual void onUpdate(Window& child, const Gfx::RectF& rect) = 0;
+
+        virtual void onShow(Window& w, bool visible) = 0;   
+    
+        virtual void onActivate(Window& w) = 0; 
+
+        virtual void onEnable(Window& w, bool enable) = 0;
+
+        virtual void onMove(Window& w, const Gfx::PointF& to) = 0;
+
+        virtual void onResize(Window& w, const Gfx::SizeF& to) = 0;
+
+        virtual void onClosing(Window& w) = 0;
+
+        virtual void onClose(Window& w) = 0;
 };
 
 } // namespace
 
 } // namespace
 
-#endif
+#endif // PT_HMI_WINDOWBASE_H

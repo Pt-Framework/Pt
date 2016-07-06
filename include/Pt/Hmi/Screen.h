@@ -57,18 +57,7 @@ class PT_HMI_API Screen : public WindowBase
 
         virtual ~Screen();
 
-        virtual void add(Window& w);
-
-        virtual void remove(Window& w);
-
         Window* findWindow(const std::string& name);
-
-        Window* activeWindow();
-
-        std::vector<Window*>& windows()
-        {
-          return _windows;
-        }
 
         const std::vector<Window*>& windows() const
         {
@@ -107,11 +96,15 @@ class PT_HMI_API Screen : public WindowBase
       
         double resolutionDPI() const;
 
-        void update(const Gfx::RectF& updateRect);
-    
         ScreenImpl* impl();
 
     protected:
+        virtual void onUpdate(const Gfx::RectF& updateRect);
+
+        virtual void onInit(Window& w);
+    
+        virtual void onDeinit(Window& w);
+
         virtual Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const;
