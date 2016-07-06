@@ -131,11 +131,6 @@ class PT_HMI_API Screen : public WindowBase
         virtual void onUpdateEvent(const UpdateEvent& ev);
 
         virtual void onPaintEvent(const PaintEvent& ev);
-
-    protected:
-        void registerWindow(Window& w);
-
-        void unregisterWindow(Window& w);
     
     private:
         ScreenImpl*          _impl;

@@ -140,6 +140,10 @@ class ScreenImpl : public Pt::Connectable
         }
 
     public:
+        Gfx::PointF toParent(const Window& w, const Gfx::PointF& pos) const;
+
+        Gfx::PointF fromParent(const Window& w, const Gfx::PointF& pos) const;
+
         void onResize(Window& w, const Gfx::SizeF& s);
 
         void onMove(Window& w, const Gfx::PointF& pos);

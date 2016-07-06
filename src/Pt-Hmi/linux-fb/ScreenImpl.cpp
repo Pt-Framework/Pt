@@ -31,6 +31,7 @@
 #include "ScreenImpl.h"
 #include "FrameBuffer.h"
 #include "ApplicationImpl.h"
+#include "MainWindowImpl.h"
 #include "PaintSurfaceImpl.h"
 
 #include <Pt/Hmi/Application.h>
@@ -51,6 +52,8 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 , _dpi(96.0)
 , _drawCursor(true)
 {
+    _windowManager.init( Application::instance().screen() );
+
     app.eventReady() += Pt::slot( *this, &ScreenImpl::onPointerEvent );
     app.eventReady() += Pt::slot( *this, &ScreenImpl::onKeyEvent );
 
@@ -156,6 +159,18 @@ void ScreenImpl::onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent )
 void ScreenImpl::onKeyEvent(const Pt::Hmi::KeyEvent& ev)
 {
     _windowManager.keyEvent(ev);
+}
+
+
+Gfx::PointF ScreenImpl::toParent(const Window& w, const Gfx::PointF& pos) const
+{
+    return w.impl()->toScreen(pos);
+}
+
+
+Gfx::PointF ScreenImpl::fromParent(const Window& w, const Gfx::PointF& pos) const
+{
+    return w.impl()->fromScreen(pos);
 }
 
 
