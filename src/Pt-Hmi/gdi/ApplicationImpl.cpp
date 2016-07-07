@@ -131,7 +131,6 @@ ApplicationImpl::ApplicationImpl()
 , _pointerInWindow(false)
 , _cursorHandle(0)
 , _currentCursor(0)
-, _mouseGrabber(0)
 {
 #ifdef NDEBUG  
     FreeConsole();
@@ -162,11 +161,6 @@ ApplicationImpl::~ApplicationImpl()
     UnregisterClass("Pt-Hmi", _instanceHandle);
 }
 
-
-void ApplicationImpl::nextEvent()
-{
-    waitNext();
-}
 
 void ApplicationImpl::setCursor(const Cursor* cursor)
 {      
@@ -207,18 +201,37 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 }
 
 
-void ApplicationImpl::grabMouse(Window& mainWindow, Visual* grabber)
+void ApplicationImpl::grabMouse(Window& grabber)
 {
-    assert( mainWindow.impl() );    
-    mainWindow.impl()->grabMouse();
-    _mouseGrabber = grabber;
+    grabber.mainWindow().impl()->grabMouse();
 }
 
 
-void ApplicationImpl::releaseMouse(Window&, Visual*)
+void ApplicationImpl::releaseMouse(Window& grabber)
 {
     ReleaseCapture();
-    _mouseGrabber = 0;
+}
+
+
+void ApplicationImpl::grabMouse(Widget& grabber)
+{
+    Window* w = grabber.window();
+    if( ! w )
+        return;
+
+    w->mainWindow().impl()->grabMouse();
+}
+
+
+void ApplicationImpl::releaseMouse(Widget& grabber)
+{
+    ReleaseCapture();
+}
+
+
+void ApplicationImpl::nextEvent()
+{
+    waitNext();
 }
 
 
@@ -643,11 +656,13 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
   
     Gfx::PointF pos = Application::instance().screen().toUnit( Gfx::Point(xPos, yPos) );
 
-    if( _mouseGrabber )
+    Visual* mouseGrabber = Application::instance().mouseGrabber();
+    if( mouseGrabber )
     {
-        pos = _mouseGrabber->fromScreen( w.toScreen(pos) );
+        Gfx::PointF screenPos = w.toScreen(pos);
+        pos = mouseGrabber->fromScreen(screenPos);
         
-        _mouseEvent.setId( _mouseGrabber->vid() );
+        _mouseEvent.setId( mouseGrabber->vid() );
     }
     else        
     {

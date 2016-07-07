@@ -134,7 +134,7 @@ void ScreenImpl::onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent )
         _cursorPos = Gfx::Point( mouseEvent.x() - cursor.xHotspot(), 
                                  mouseEvent.y() - cursor.yHotspot() );
 
-    const Visual* mouseGrabber = Application::instance().impl()->mouseGrabber();
+    Visual* mouseGrabber = Application::instance().mouseGrabber();
     if(mouseGrabber)
     {
         Pt::Hmi::MouseEvent mev = mouseEvent;

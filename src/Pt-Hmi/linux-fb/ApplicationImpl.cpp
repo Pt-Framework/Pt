@@ -24,12 +24,13 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-	MA 02110-1301	USA
+    MA 02110-1301    USA
 */
 
 #include "ApplicationImpl.h"
 #include "ScreenImpl.h"
-#include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Widget.h>
 #include <Pt/System/FileInfo.h>
 #include <iostream>
 #include <sstream>
@@ -44,68 +45,43 @@ namespace Pt {
 namespace Hmi {
 
 ApplicationImpl::ApplicationImpl()
-: _mouseGrabber(0)
-{  		 
-	showConsole( false );
-	_inputDevices.reserve(10);
+{           
+    showConsole( false );
+    _inputDevices.reserve(10);
 
-	for(size_t i = 0; i < 10; ++i)
-	{
-		System::Path deviceName("/dev/input/event");
+    for(size_t i = 0; i < 10; ++i)
+    {
+        System::Path deviceName("/dev/input/event");
 
-		std::ostringstream oss;
-		oss << i;
-		deviceName += oss.str().c_str();
-			
-		if( Pt::System::FileInfo::exists(deviceName) )
-		{
-			InputDevice* device = new InputDevice( deviceName.toLocal().c_str() );
-			device->setScreenLimit( _frameBuffer.size() );
-			device->setActive(*this);
-			device->begin();
-			device->eventReady() += Pt::slot(_eventReady);	
-			
-			_inputDevices.push_back(device);
-			std::clog << "using: " << deviceName.toLocal() << std::endl;
-		}
-	}
+        std::ostringstream oss;
+        oss << i;
+        deviceName += oss.str().c_str();
+            
+        if( Pt::System::FileInfo::exists(deviceName) )
+        {
+            InputDevice* device = new InputDevice( deviceName.toLocal().c_str() );
+            device->setScreenLimit( _frameBuffer.size() );
+            device->setActive(*this);
+            device->begin();
+            device->eventReady() += Pt::slot(_eventReady);    
+            
+            _inputDevices.push_back(device);
+            std::clog << "using: " << deviceName.toLocal() << std::endl;
+        }
+    }
 }
 
 
 ApplicationImpl::~ApplicationImpl()
 {
-	std::vector<InputDevice*>::iterator it;
-	for(it = _inputDevices.begin(); it != _inputDevices.end(); ++it)
-	{
-		delete *it;
-	}
+    std::vector<InputDevice*>::iterator it;
+    for(it = _inputDevices.begin(); it != _inputDevices.end(); ++it)
+    {
+        delete *it;
+    }
 
-	showConsole(true);
+    showConsole(true);
 } 
-
-
-void ApplicationImpl::nextEvent()
-{
-	MainLoop::waitNext();
-}
-
-
-void ApplicationImpl::showConsole(bool s)
-{
-	std::string terminal;
-	std::ifstream ifs("/sys/class/tty/tty0/active");
-	ifs >> terminal;
-	terminal = "/dev/" + terminal;
-
-	int fd = open(terminal.c_str(), O_RDWR);
-	
-	if( ! s )
-		ioctl( fd, KDSETMODE, KD_GRAPHICS );
-	else
-		ioctl( fd, KDSETMODE, KD_TEXT );
-
-	close( fd );
-}
 
 
 void ApplicationImpl::setCursor(const Cursor* cursor)
@@ -126,16 +102,47 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 }
 
 
-void ApplicationImpl::grabMouse(Window& mainWindow, Visual* grabber)
+void ApplicationImpl::grabMouse(Window& grabber)
 {
-    assert( mainWindow.impl() );    
-    _mouseGrabber = grabber;
 }
 
 
-void ApplicationImpl::releaseMouse(Window&, Visual*)
+void ApplicationImpl::releaseMouse(Window& grabber)
 {
-    _mouseGrabber = 0;
+}
+
+
+void ApplicationImpl::grabMouse(Widget& grabber)
+{
+}
+
+
+void ApplicationImpl::releaseMouse(Widget& grabber)
+{
+}
+
+
+void ApplicationImpl::nextEvent()
+{
+    MainLoop::waitNext();
+}
+
+
+void ApplicationImpl::showConsole(bool s)
+{
+    std::string terminal;
+    std::ifstream ifs("/sys/class/tty/tty0/active");
+    ifs >> terminal;
+    terminal = "/dev/" + terminal;
+
+    int fd = open(terminal.c_str(), O_RDWR);
+    
+    if( ! s )
+          ioctl( fd, KDSETMODE, KD_GRAPHICS );
+    else
+          ioctl( fd, KDSETMODE, KD_TEXT );
+
+    close( fd );
 }
 
 } // namespace

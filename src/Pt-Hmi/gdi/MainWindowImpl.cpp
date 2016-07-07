@@ -141,10 +141,10 @@ void MainWindowImpl::resize(const Gfx::SizeF& s)
 
 void MainWindowImpl::setDecoration( WindowDecoration::Flags deco )
 {
-    setShowTitle( (deco & WindowDecoration::Flags::ShowTitleBar) != 0);
-    setShowMinimizeButton( (deco & WindowDecoration::Flags::ShowMinimizeButton) != 0);
-    setShowMaximizeButton( (deco & WindowDecoration::Flags::ShowMaximizeButton) != 0);
-    setShowSystemMenu( (deco & WindowDecoration::Flags::ShowIcon) != 0);
+    setShowTitle( (deco & WindowDecoration::ShowTitleBar) != 0);
+    setShowMinimizeButton( (deco & WindowDecoration::ShowMinimizeButton) != 0);
+    setShowMaximizeButton( (deco & WindowDecoration::ShowMaximizeButton) != 0);
+    setShowSystemMenu( (deco & WindowDecoration::ShowIcon) != 0);
 }
 
 

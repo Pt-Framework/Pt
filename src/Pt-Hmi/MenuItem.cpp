@@ -29,7 +29,7 @@
 
 #include <Pt/Hmi/MenuItem.h>
 #include <Pt/Hmi/Menu.h>
-#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
 
 namespace {
@@ -234,7 +234,7 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 
 void MenuItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    bool mouseOver = this->window()->pointerWidget() == this;
+    bool mouseOver = Application::instance().pointerWidget() == this;
 
     if(mouseOver)
     {

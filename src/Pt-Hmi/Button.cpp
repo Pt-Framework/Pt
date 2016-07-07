@@ -28,7 +28,7 @@
 */
 
 #include <Pt/Hmi/Button.h>
-#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/MouseEvent.h>
 #include <Pt/Hmi/TouchEvent.h>
 #include <Pt/Gfx/Pen.h>
@@ -136,7 +136,9 @@ void Button::onFocus(bool hasFocus)
 
 void Button::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    bool mouseOver = window()->pointerWidget() == this;
+    // TODO: use enter/leave events
+    bool mouseOver = Application::instance().pointerWidget() == this;
+    
     Gfx::Color bkgColor = backgroundColor();
 
     if( ! isEnabled() )

@@ -43,6 +43,8 @@ Application::Application(int argc, char** argv)
 , _mainScreen(0)
 , _lastId(1)
 , _pointerWindow(0)
+, _pointerWidget(0)
+, _mouseGrabber(0)
 {
     this->init(*_impl);
 
@@ -77,68 +79,6 @@ Application& Application::instance()
 }
 
 
-void Application::setCursor( const Cursor* cursor )
-{
-  _impl->setCursor( cursor );
-}
-
-
-void Application::grabMouse(Window& window)
-{    
-    _impl->grabMouse(window.mainWindow(), &window);
-
-    unsetPointerWidget( screen().windows() );
-}
-
-
-void Application::releaseMouse(Window& window)
-{
-    if(_impl->mouseGrabber() != static_cast<Visual*>(&window) )
-        return;
-    
-    _impl->releaseMouse(window.mainWindow(), &window);    
-}
-
-
-void Application::grabMouse(Widget& widget)
-{
-    if( ! widget.window() )
-        return;
-
-    _impl->grabMouse(widget.window()->mainWindow(), &widget);
-
-    unsetPointerWidget(screen().windows(), widget.window());
-
-    widget.window()->setPointerWidget(&widget);
-}
-
-
-void Application::releaseMouse(Widget& widget)
-{
-    if( _impl->mouseGrabber() != static_cast<Visual*>(&widget) )
-        return;
-
-    if( ! widget.window() )
-        return;
-
-    _impl->releaseMouse(widget.window()->mainWindow(), &widget);
-}
-
-
-void Application::unsetPointerWidget(const std::vector<Window*>& windows, Window* exclude)
-{
-    std::vector<Window*>::const_iterator it;
-    for(it = windows.begin(); it != windows.end(); ++it)
-    {
-        if(*it == exclude)
-            continue;
-
-        (*it)->setPointerWidget(0);
-
-        unsetPointerWidget( (*it)->windows(), exclude );
-    }
-}
-
 const Screen& Application::screen() const
 {
     return *_mainScreen;
@@ -148,6 +88,60 @@ const Screen& Application::screen() const
 Screen& Application::screen()
 {
     return *_mainScreen;
+}
+
+
+void Application::setCursor( const Cursor* cursor )
+{
+  _impl->setCursor( cursor );
+}
+
+
+Visual* Application::mouseGrabber()
+{ 
+    return _mouseGrabber; 
+}
+
+
+void Application::grabMouse(Window& grabber)
+{    
+    _impl->grabMouse(grabber);
+
+    _mouseGrabber = &grabber;
+
+    setPointerWidget(0);
+}
+
+
+void Application::releaseMouse(Window& grabber)
+{
+    if(_mouseGrabber != static_cast<Visual*>(&grabber) )
+        return;
+    
+    _impl->releaseMouse(grabber); 
+    
+    _mouseGrabber = 0;  
+}
+
+
+void Application::grabMouse(Widget& grabber)
+{
+    _impl->grabMouse(grabber);
+
+    _mouseGrabber = &grabber;
+
+    setPointerWidget(&grabber);
+}
+
+
+void Application::releaseMouse(Widget& grabber)
+{
+    if( _mouseGrabber != static_cast<Visual*>(&grabber) )
+        return;
+
+    _impl->releaseMouse(grabber);
+
+    _mouseGrabber = 0;
 }
 
         
@@ -186,6 +180,18 @@ void Application::unregisterVisual( Visual& visual )
 }
 
 
+Window* Application::pointerWindow()
+{
+    return _pointerWindow;
+}
+
+
+const Window* Application::pointerWindow() const
+{
+    return _pointerWindow;
+}
+
+
 void Application::setPointerWindow(Window* w)
 {
     if( _pointerWindow == w )
@@ -203,6 +209,44 @@ void Application::setPointerWindow(Window* w)
     {
         Pt::Hmi::EnterEvent enterEvent(_pointerWindow->vid());
         loop().commitEvent(enterEvent);
+    }
+}
+
+
+Widget* Application::pointerWidget()
+{
+    return _pointerWidget;
+}
+
+
+const Widget* Application::pointerWidget() const
+{
+    return _pointerWidget;
+}
+
+
+void Application::setPointerWidget( Widget* widget ) 
+{
+    if( _pointerWidget == widget )
+        return;
+
+    if( _pointerWidget )
+    {
+        Widget* w = _pointerWidget;
+        _pointerWidget = widget;
+
+        LeaveEvent ev( w->vid() );
+        Application::instance().loop().commitEvent(ev);
+    }
+    else
+    {
+        _pointerWidget = widget;
+    }
+
+    if( _pointerWidget )
+    {
+        EnterEvent ev( _pointerWidget->vid() );
+        Application::instance().loop().commitEvent(ev);
     }
 }
 

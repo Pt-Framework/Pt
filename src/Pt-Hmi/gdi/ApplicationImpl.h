@@ -73,14 +73,13 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         void setCursor(const Cursor* cursor);
 
-        void grabMouse(Window& mainWindow, Visual* grabber);
+        void grabMouse(Window& grabber);
 
-        void releaseMouse(Window& mainWindow, Visual* grabber);
+        void releaseMouse(Window& grabber);
 
-        const Visual* mouseGrabber() const
-        {
-            return _mouseGrabber;
-        }
+        void grabMouse(Widget& grabber);
+
+        void releaseMouse(Widget& grabber);
 
     protected:
         virtual void onAttachSelectable(System::Selectable&);
@@ -148,7 +147,6 @@ class ApplicationImpl : public Pt::System::EventLoop
         bool                             _pointerInWindow;
         HCURSOR                          _cursorHandle;
         const Cursor*                    _currentCursor;
-        Visual*                          _mouseGrabber;
 };
 
 } // namespace

@@ -99,10 +99,6 @@ class PT_HMI_API Window : public WindowBase
 
     Widget* findWidget(const Gfx::PointF& pos);
 
-    Widget* pointerWidget();
-
-    const Widget* pointerWidget() const;
-
     Widget* focusWidget();
 
     void focusNext();
@@ -290,8 +286,6 @@ class PT_HMI_API Window : public WindowBase
     void addWidget(Widget& w);
 
     void removeWidget(Widget& w);
-    
-    void setPointerWidget( Widget* widget );
 
     void setFocusWidget(Widget* widget);
 
@@ -320,7 +314,6 @@ class PT_HMI_API Window : public WindowBase
     WindowBase*                    _parent;
     Window*                        _parentWindow;
     Widget*                        _mainWidget;
-    Widget*                        _pointerWidget;
     Widget*                        _focusWidget;
     std::vector<Widget*>           _focusList;
     std::map<Key, Widget*>         _shortcuts; 

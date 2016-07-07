@@ -52,10 +52,12 @@ namespace Hmi {
 class ApplicationImpl;
 class Window;
 class Widget;
+class Visual;
 
 class PT_HMI_API Application : public Pt::System::Application
 {
     friend class Visual;
+    friend class Window;
     friend class ApplicationImpl;
 
     public:
@@ -69,7 +71,17 @@ class PT_HMI_API Application : public Pt::System::Application
 
         Screen& screen();
 
+        Window* pointerWindow();
+
+        const Window* pointerWindow() const;
+
+        Widget* pointerWidget();
+
+        const Widget* pointerWidget() const;
+
         void setCursor(const Cursor* cursor = 0);
+
+        Visual* mouseGrabber();
         
         void grabMouse(Window& w);
 
@@ -121,7 +133,7 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void setPointerWindow(Window* w);
 
-        void unsetPointerWidget(const std::vector<Window*>& windows, Window* exclude = 0);
+        void setPointerWidget(Widget* widget);
         
     private:
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;
@@ -131,6 +143,8 @@ class PT_HMI_API Application : public Pt::System::Application
         Pt::uint64_t     _lastId;
         VisualMap        _visuals;
         Window*          _pointerWindow;
+        Widget*          _pointerWidget;
+        Visual*          _mouseGrabber;
 };
 
 } // namespace

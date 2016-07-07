@@ -39,6 +39,9 @@ namespace Pt {
 
 namespace Hmi {
 
+class Widget;
+class Window;
+
 class ApplicationImpl : public Pt::System::MainLoop
 {
   public:
@@ -46,6 +49,19 @@ class ApplicationImpl : public Pt::System::MainLoop
 
     virtual ~ApplicationImpl();
 
+    void setCursor(const Cursor* cursor );
+
+    const Cursor& cursor()
+    { return _cursor; }
+
+    void grabMouse(Window& grabber);
+
+    void releaseMouse(Window& grabber);
+
+    void grabMouse(Widget& grabber);
+
+    void releaseMouse(Widget& grabber);
+    
 		FrameBuffer& frameBuffer()
 		{
 			return _frameBuffer;
@@ -56,22 +72,8 @@ class ApplicationImpl : public Pt::System::MainLoop
 				return _eventReady;
 		}
 
-		void nextEvent();
+    void nextEvent();
 
-    void setCursor(const Cursor* cursor );
-
-    const Cursor& cursor()
-    { return _cursor; }
-
-    void grabMouse(Window& mainWindow, Visual* grabber);
-
-    void releaseMouse(Window& mainWindow, Visual* grabber);
-
-    const Visual* mouseGrabber() const
-    {
-        return _mouseGrabber;
-    }
-    
 	private:
 		void onInputEvent(const Pt::Event& ev);
 
@@ -82,7 +84,6 @@ class ApplicationImpl : public Pt::System::MainLoop
 		std::vector<InputDevice*> _inputDevices;
 		Pt::Signal<const Pt::Event&> _eventReady;
     Cursor        _cursor;
-    Visual*       _mouseGrabber;
 };
 
 } // namespace

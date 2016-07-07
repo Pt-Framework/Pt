@@ -63,9 +63,8 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
             return _name;
         }
 
-        //virtual Gfx::PointF toScreen(const Gfx::PointF& l) const = 0;
+        virtual Gfx::PointF toScreen(const Gfx::PointF& l) const = 0;
 
-        // TODO: remove this
         virtual Gfx::PointF fromScreen(const Gfx::PointF& g) const = 0;
 
     protected:

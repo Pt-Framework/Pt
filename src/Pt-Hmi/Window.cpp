@@ -55,7 +55,6 @@ Window::Window(Window* parent)
 , _parent(0)
 , _parentWindow(0)
 , _mainWidget(0)
-, _pointerWidget(0)
 , _focusWidget(0)
 , _init(false)
 , _visible(false)
@@ -315,8 +314,9 @@ void Window::addWidget(Widget& w)
 
 void Window::removeWidget(Widget& w)
 {
-    if( _pointerWidget == &w )
-        _pointerWidget = 0;
+    // TODO: do this in Widget's destructor
+    if( Application::instance().pointerWidget() == &w )
+        Application::instance().setPointerWidget(0);
 
     if( _focusWidget == &w )
         _focusWidget = 0;
@@ -328,44 +328,6 @@ void Window::removeWidget(Widget& w)
 
     setShortcut(w, 0);
     setMnemonic(w, 0);
-}
-
-
-Widget* Window::pointerWidget()
-{
-    return _pointerWidget;
-}
-
-
-const Widget* Window::pointerWidget() const
-{
-    return _pointerWidget;
-}
-
-
-void Window::setPointerWidget( Widget* widget ) 
-{
-    if( _pointerWidget == widget )
-        return;
-
-    if( _pointerWidget )
-    {
-        Widget* w = _pointerWidget;
-        _pointerWidget = widget;
-
-        LeaveEvent ev( w->vid() );
-        Application::instance().loop().commitEvent(ev);
-    }
-    else
-    {
-        _pointerWidget = widget;
-    }
-
-    if( _pointerWidget )
-    {
-        EnterEvent ev( _pointerWidget->vid() );
-        Application::instance().loop().commitEvent(ev);
-    }
 }
 
 
@@ -928,8 +890,8 @@ void Window::onMouseEvent(const MouseEvent& ev)
 
     Widget* widget = findWidget( ev.position() );
 
-    // widget can be null
-    setPointerWidget(widget);
+    // widget may be null to unset the pointer widget
+    Application::instance().setPointerWidget(widget);
 
     if(widget && widget->isEnabled())
     {
@@ -951,9 +913,10 @@ void Window::onScrollEvent(const ScrollEvent& ev)
     if( ! _mainWidget )
         return;
 
-    if( _pointerWidget )
+    Widget* pointerWidget = Application::instance().pointerWidget();
+    if( pointerWidget->window() == this )
     {
-        ScrollEvent sev( _pointerWidget->vid() );
+        ScrollEvent sev( pointerWidget->vid() );
         Application::instance().loop().commitEvent(sev);
     }    
 }
@@ -1016,7 +979,7 @@ void Window::onLeaveEvent(const LeaveEvent& ev )
 {
     _windowManager.leaveEvent(ev);
 
-    setPointerWidget(0);
+    Application::instance().setPointerWidget(0);
 }
 
 
