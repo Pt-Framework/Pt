@@ -184,7 +184,7 @@ Gfx::SizeF ScreenImpl::toUnit(const Gfx::Size& value)
     const double width = value.width() * _factorX  + _offsetX;
     const double height = value.height() * _factorY  + _offsetY;
 
-    return Gfx::SizeF(std::ceil(width),std::ceil(height));
+    return Gfx::SizeF(std::ceil(width), std::ceil(height));
 }
 
 
@@ -211,7 +211,10 @@ Gfx::Size ScreenImpl::fromUnit(const Gfx::SizeF& value)
 
 Gfx::Rect ScreenImpl::fromUnit(const Gfx::RectF& value)
 {
-    Gfx::Rect rect(Gfx::Point(value.x(), value.y()),Gfx::Size(value.width(), value.height()));
+    Gfx::Rect rect( Gfx::Point( static_cast<int>(value.x()), 
+                                static_cast<int>(value.y()) ),
+                    Gfx::Size( static_cast<int>(value.width()), 
+                               static_cast<int>(value.height()) ) );
     return rect;
 }
 

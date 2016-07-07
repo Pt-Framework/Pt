@@ -469,6 +469,7 @@ bool Widget::isEnabled() const
 
 void Widget::enable( bool e )
 {    
+    // TODO: enable event
     _enabled = e;
     
     onEnable(e);        
@@ -477,7 +478,7 @@ void Widget::enable( bool e )
     update();
 }
 
-void Widget::onEnable(bool e )
+void Widget::onEnable(bool e)
 {        
     if(!e)
         _enabledState = false;

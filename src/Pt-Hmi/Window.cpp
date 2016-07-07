@@ -110,7 +110,7 @@ void Window::init(Window* parent)
         deinit();
 
     _parent = parent;
-    _parentWindow = parent;
+    setParent(parent);
 
     if( ! _parent )
     {
@@ -238,8 +238,9 @@ void Window::add(Window& child)
         return;
 
     child.init(this);
-
     update();
+    
+    onAddWindow(child);
 }
 
 
@@ -249,8 +250,34 @@ void Window::remove(Window& child)
         return;
 
     child.init(0);
-
     update();
+    
+    onRemoveWindow(child);
+}
+
+
+void Window::onAddWindow(Window& w)
+{
+}
+
+
+void Window::onRemoveWindow(Window& w)
+{
+}
+
+
+void Window::onParentChanged(Window* w)
+{
+}
+
+
+void Window::setParent(Window* parent)
+{
+    if(_parentWindow == parent)
+        return;
+
+    _parentWindow = parent;
+    onParentChanged(parent);
 }
 
 
@@ -698,7 +725,7 @@ void Window::onEnableEvent( const EnableEvent& ev )
 }
 
 
-void Window::onEnable( bool e )
+void Window::onEnable(bool e)
 {
     if( ! e)
         _enabledState = false;

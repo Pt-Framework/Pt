@@ -156,9 +156,18 @@ class PT_HMI_API Window : public WindowBase
     const MainWindowImpl* impl() const;
 
   protected:
+    virtual void onAddWindow(Window& w);
+
+    virtual void onRemoveWindow(Window& w);
+
+    virtual void onParentChanged(Window* w);
+
     virtual void onUpdate(const Gfx::RectF& rect);
 
-    virtual void onPaint(const Gfx::RectF& rect);
+    // TODO: refactor to paint() with damagedRect
+    void onPaint(const Gfx::RectF& rect);
+
+    void onEnable(bool b);
 
     virtual void onInit(Window& w);
     
@@ -283,6 +292,8 @@ class PT_HMI_API Window : public WindowBase
 
     void deinit();
 
+    void setParent(Window* parent);
+
     void addWidget(Widget& w);
 
     void removeWidget(Widget& w);
@@ -301,8 +312,6 @@ class PT_HMI_API Window : public WindowBase
     void setShortcut(Widget& w, const Key* key);
 
     void setMnemonic(Widget& w, const Char* ch);
-
-    void onEnable( bool b );
 
   private:
     MainWindowImpl*                _impl;

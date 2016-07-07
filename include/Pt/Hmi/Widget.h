@@ -205,16 +205,15 @@ class PT_HMI_API Widget : public Visual
         virtual Gfx::PointF fromScreen(const Gfx::PointF& pos) const;       
 
     protected:
-        void onPaint(const Gfx::RectF& updateRect);
-
-        void onEnable(bool e);
-
-    protected:
         virtual void onAddWidget(Widget& w);
 
         virtual void onRemoveWidget(Widget& w);
 
         virtual void onParentChanged(Widget* w);
+
+        void onPaint(const Gfx::RectF& updateRect);
+
+        void onEnable(bool e);
 
         // TODO: move this to a Layout base class
         virtual void onLayout();
