@@ -35,11 +35,12 @@ namespace Pt {
 
 namespace System {
 
-void ThreadImplFunction(const Callable<void>& cb)
+void ThreadImplFunction(const Callable<void>* cb)
 {
     try
     {
-        cb.invoke();
+        if(cb)
+            cb->invoke();
     }
     catch(const ThreadImpl::ThreadExit&)
     {
@@ -58,7 +59,7 @@ void ThreadImpl::start()
 {
     try
     {
-        _thread = new std::thread( &ThreadImplFunction, std::ref(*_cb) );
+        _thread = new std::thread(&ThreadImplFunction, _cb);
     }
     catch(const std::system_error&)
     {
