@@ -44,21 +44,22 @@ namespace System {
     The Pt::System::FileInfo class provides operations to query information
     about files and directories in the file system and to add, remove and
     modify them. %FileInfo objects can be created with a path, are assignable,
-    comparable and can be used as keys for e.g. std::map. The path must not
-    be valid to successfully construct a %FileInfo object, but it can be
-    checked whether a file exists and what type of file it is, as shown in
-    the following example:
+    comparable and can be used as keys for e.g. std::map. The path may not 
+    refer to an existing item in the file system to successfully construct a
+    %FileInfo object. It can be checked whether a file exists and what type
+    of file it is, as shown in the following example:
 
     @code
-    Pt::System::FileInfo fi("/tmp/logout.txt");
+    Pt::System::Path path("/tmp/logout.txt");
+    Pt::System::FileInfo fi(path);
     
     if( fi.type() == Pt::System::FileInfo::File )
     {
-        std::cout << fi.path() << ": " << fi.size() << " bytes." << std::endl;
+        std::cout << fi.path().toLocal() << ": " << fi.size() << " bytes.\n";
     }
     else
     {
-        std::cout << fi.path() << " is invalid." << std::endl;
+        std::cout << fi.path().toLocal() << " is invalid.\n";
     }
     @endcode
     
@@ -71,14 +72,17 @@ namespace System {
     @code
     try
     {
+        Pt::System::Path tmp1("/tmp/tmpfile1");
+        Pt::System::Path tmp2("/tmp/tmpfile2");
+        
         // create a temporary file
-        Pt::System::FileInfo::createFile("/tmp/tmpfile1");
+        Pt::System::FileInfo::createFile(tmp1);
 
         // move it to a new location
-        Pt::System::FileInfo::move("/tmp/tmpfile1", "/tmp/tmpfile2");
+        Pt::System::FileInfo::move(tmp1, tmp2);
 
         // remove the file
-        Pt::System::FileInfo::remove("/tmp/tmpfile2");
+        Pt::System::FileInfo::remove(tmp2);
     }
     catch(const Pt::System::AccessFailed& e)
     {

@@ -59,7 +59,7 @@ class FileInfo;
 
         for( ; it != end; ++it)
         {
-            std::cout << "name : " << it->name() << std::endl;
+            std::cout << "name : " << it->path().toLocal() << std::endl;
         }
     }
     catch(const Pt::System::AccessFailed& e)
