@@ -91,7 +91,7 @@ class PT_SYSTEM_API SymbolNotFound : public SystemError
     given path. If no library could be found, the path is extended by the
     platform-specific library extension first, and then also by the shared
     library prefix. If no library could be found at either path, an
-    @link Pt::System::AccessFailed AccessFailed@endlink exception is thrown.
+    @link Pt::AccessFailed AccessFailed@endlink exception is thrown.
     The function @link Pt::System::Library::getSymbol getSymbol()@endlink
     returns a @link Pt::System::Symbol Symbol@endlink object when the library
     symbol could be resolved or a @link Pt::System::SymbolNotFound
