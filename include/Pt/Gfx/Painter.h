@@ -364,7 +364,7 @@ class PT_GFX_API Painter
         // TODO:
         //virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect) = 0;        
 
-        virtual void clear( const Gfx::Color& color =Gfx::Color( 1, 1, 1 ) ) = 0;        
+        virtual void clear(const Gfx::Color& color) = 0;        
 };
 
 }} // namespace

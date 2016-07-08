@@ -31,129 +31,25 @@
 #define Pt_Hmi_PaintSurfaceImpl_h
 
 #include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Painter.h>
 #include <Windows.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class PixmapSurface;
-
 class PaintSurfaceImpl
 {
     public:        
-        virtual ~PaintSurfaceImpl()
-        {}   
-
-        virtual const Gfx::SizeF& size() const = 0;
-
-        virtual void setPen(const Gfx::Pen& pen) = 0;
-
-        virtual void setBrush(const Gfx::Brush& brush) = 0;
-
-        virtual void setFont(const Gfx::Font& font) = 0;
-
-        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const = 0;
-    
-        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to) = 0;
-
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text) = 0;
-
-        virtual void drawRect(const Gfx::RectF& rectangle) = 0;
-
-        virtual void fillRect(const Gfx::RectF& rectangle) = 0;
-
-        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
-
-        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size) = 0;
-
-        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount) = 0;
-
-        virtual void drawPolyline(POINT* points, size_t pointCount) = 0;
-
-        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount) = 0;
-
-        virtual void fillPolygon(POINT* points, size_t pointCount) = 0;
-
-        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface) = 0;
-
-        virtual void drawSurface(const Gfx::PointF& toF, 
-                                 const PixmapSurface& pm,
-                                 const Gfx::RectF& pmRect) = 0;
-
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image) = 0;
-
-        virtual void setClip( const Gfx::RectF& clip) = 0;
+        ~PaintSurfaceImpl();
 
         static std::string defaultFont();
 
         static std::list<std::string> fontFamilyNames(); 
 
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);
-
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text); 
 
     protected:
-        PaintSurfaceImpl()
-        {}
-};
-
-
-class PaintRegionImpl : public PaintSurfaceImpl
-{
-    public:        
-        PaintRegionImpl();
-        
-        virtual ~PaintRegionImpl();   
-
-        void set(PaintSurface& surface, const Gfx::RectF& area); 
-
-        virtual const Gfx::SizeF& size() const;
-
-        virtual void setPen(const Gfx::Pen& pen);
-
-        virtual void setBrush(const Gfx::Brush& brush);
-
-        virtual void setFont(const Gfx::Font& font);
-
-        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
-
-        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
-
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
-
-        virtual void drawRect(const Gfx::RectF& rectangle);
-
-        virtual void fillRect(const Gfx::RectF& rectangle);
-
-        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
-
-        virtual void drawPolyline(POINT* points, size_t pointCount);
-
-        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
-
-        virtual void fillPolygon(POINT* points, size_t pointCount);
-
-        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
-
-        virtual void drawSurface(const Gfx::PointF& toF, 
-                                 const PixmapSurface& pm,
-                                 const Gfx::RectF& pmRect);
-
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
-
-        virtual void setClip( const Gfx::RectF& clip);
-
-    private:
-        PaintSurface* _surface;
-        Gfx::RectF _area;
+        PaintSurfaceImpl();
 };
 
 
@@ -192,11 +88,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
 
-        virtual void drawPolyline(POINT* points, size_t pointCount);
-
         virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
-
-        virtual void fillPolygon(POINT* points, size_t pointCount);
 
         virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
 

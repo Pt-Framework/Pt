@@ -28,7 +28,6 @@
 #define PT_HMI_PAINTER_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Painter.h>
 
@@ -36,7 +35,6 @@ namespace Pt {
 
 namespace Hmi {
 
-class PainterImpl;
 class PaintSurface;
 class PixmapSurface;
 
@@ -82,30 +80,27 @@ class PT_HMI_API Painter : public Gfx::Painter
         virtual void drawPolyline(const Gfx::PointF* points, const size_t pointCount);
 
         virtual void fillPolygon(const Gfx::PointF* points, const size_t pointCount);
-
-        virtual void drawSurface(const Gfx::PointF& to, const PixmapSurface& pm);
-
-        virtual void drawSurface(const Gfx::PointF& to, 
-                                 const PixmapSurface& pm, 
-                                 const Gfx::RectF& pmRect);
         
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
     
-        virtual void flush();    
+        virtual void clear(const Gfx::Color& color);
 
-        virtual void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
+    public:
+        void drawSurface(const Gfx::PointF& to, const PixmapSurface& pm);
+
+        void drawSurface(const Gfx::PointF& to, 
+                         const PixmapSurface& pm, 
+                         const Gfx::RectF& pmRect);
     
-        PainterImpl* impl()
-        {
-            return _impl;
-        }
-
     private:
-        PainterImpl* _impl;
+        PaintSurface*   _surface;
+        Gfx::Pen        _pen;
+        Gfx::Brush      _brush;
+        Gfx::Font       _font;
 };
 
-}
+} // namespace
 
-}
+} // namespace
 
 #endif

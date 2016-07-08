@@ -27,7 +27,6 @@
   MA  02110-1301  USA
 */
 
-#include "PainterImpl.h"
 #include "PaintSurfaceImpl.h"
 
 #include <Pt/Hmi/Api.h>
@@ -39,153 +38,167 @@ namespace Pt {
 namespace Hmi {
 
 Painter::Painter(PaintSurface& surface)
-: _impl(new PainterImpl(surface.impl()))
-{    
+: _surface(&surface)
+, _pen(1)
+, _brush( Gfx::Color(0, 0, 0, 0) )
+, _font( PaintSurfaceImpl::defaultFont() )
+{
 }
 
 
 Painter::~Painter()
 {
-    delete _impl;
 }
 
 
 void Painter::setSurface(PaintSurface& surface)
 {    
-  _impl->setSurface(surface);
+    _surface = &surface;
+    
+    _surface->setBrush(_brush);
+    _surface->setFont(_font);
+    _surface->setPen(_pen);  
 }       
+
 
 void Painter::setRenderMode(Gfx::RenderMode::Type mode)
 {
-    _impl->setRenderMode( mode );
 }
 
 
 void Painter::setPen(const Gfx::Pen& pen)
 {
-    _impl->setPen(pen);
+    _pen = pen;
+    _surface->setPen(_pen);
 }
 
 
 const Gfx::Pen& Painter::pen() const
 {
-    return _impl->pen();
+    return _pen;
 }
 
 
 void Painter::setBrush(const Gfx::Brush& brush)
 {
-    _impl->setBrush(brush);
+    _brush = brush;
+    _surface->setBrush(_brush);
 }
 
 
 const Gfx::Brush& Painter::brush() const
 {
-    return _impl->brush();
+    return _brush;
 }
 
 
 void Painter::setFont(const Gfx::Font& font)
 {
-    _impl->setFont(font);
+    if (font == _font) 
+        return;
+
+    _font = font;
+    _surface->setFont(_font);
 }
 
 
 const Gfx::Font& Painter::font() const
 {
-    return _impl->font();
+    return _font;
 }
 
 
 Gfx::FontMetrics Painter::fontMetrics(const Pt::String& text) const
 {
-    return _impl->fontMetrics(text);
+    return _surface->fontMetrics(text);
 }
 
 
 Gfx::FontMetrics Painter::fontMetrics(const Gfx::Font& font, const Pt::String& text)
 {
-  return PainterImpl::fontMetrics( font, text );
+    return PaintSurfaceImpl::fontMetrics(font, text);
 }
 
 
 void Painter::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
-    _impl->drawLine(from,to);
+    if (_pen.size() == 0) 
+        return;
+
+    _surface->drawLine(from, to);
 }
 
 
-void Painter::drawText(const Gfx::PointF& to, const Pt::String& Text)
+void Painter::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
-    _impl->drawText(to, Text);
+    _surface->drawText(to, text);
 }
 
 
 void Painter::drawRect(const Gfx::RectF& rect)
 {
-    _impl->drawRect(rect);
+    _surface->drawRect(rect);
 }
 
 
-void Painter::fillRect(const Gfx::RectF& rectangle)
+void Painter::fillRect(const Gfx::RectF& rect)
 {
-    _impl->fillRect(rectangle);
+    _surface->fillRect(rect);
 }
 
 
 void Painter::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    _impl->drawEllipse(topLeft, size);
+    _surface->drawEllipse(topLeft, size);
 }
 
 
 void Painter::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
-    _impl->fillEllipse(topLeft, size);
+    _surface->fillEllipse(topLeft, size);
 }
 
 
 void Painter::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
 {
-    _impl->drawPolyline(points, pointCount);
+    if (_pen.size() == 0)
+       return;
+
+    _surface->drawPolyline(points, pointCount);
 }
 
 
 void Painter::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
 {
-    _impl->fillPolygon(points, pointCount);
+    _surface->fillPolygon(points, pointCount);
 }
 
 
-void Painter::drawSurface(const Gfx::PointF& to, const PixmapSurface& pm)
+void Painter::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
+{
+    _surface->drawImage(to, image);
+}
+
+
+void Painter::clear( const Gfx::Color& color)
+{
+    Gfx::RectF rect(Gfx::PointF(0,0), _surface->size() );   
+    setBrush( Gfx::Brush(color) );
+    fillRect(rect);
+}
+
+
+void Painter::drawSurface(const Gfx::PointF& to, const PixmapSurface& surface)
 {  
-    _impl->drawSurface(to, pm);
+    _surface->drawSurface(to, surface);
 }    
     
 
 void Painter::drawSurface(const Gfx::PointF& to, 
                           const PixmapSurface& pm, const Gfx::RectF& pmRect)
 {  
-    _impl->drawSurface(to, pm, pmRect);
+    _surface->drawSurface(to, pm, pmRect);
 } 
-
-
-void Painter::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
-{
-    _impl->drawImage(to, image);
-}
-
-
-void Painter::flush()
-{
-    _impl->flush();
-}
-
-
-void Painter::clear( const Gfx::Color& color)
-{
-  _impl->clear( color );
-}
 
 }
 

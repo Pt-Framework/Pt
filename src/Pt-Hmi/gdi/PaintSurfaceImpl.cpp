@@ -28,7 +28,6 @@
 
 #include "win32.h"
 #include "PaintSurfaceImpl.h"
-#include "PainterImpl.h"
 #include <Pt/Hmi/Application.h>
 #include <tchar.h>
 
@@ -131,10 +130,6 @@ namespace Pt {
 
 namespace Hmi {
 
-/////////////////////////////////////////////////////////////////////
-// PaintSurfaceImpl
-/////////////////////////////////////////////////////////////////////
-
 #ifdef _WIN32_WCE
 
 static int CALLBACK EnumFontsProc(LOGFONT *logFont, TEXTMETRIC *physFont, DWORD type, LPARAM param)
@@ -163,6 +158,22 @@ static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX *logFont, NEWTEXTMETRICEX *p
 
 #endif
 
+/////////////////////////////////////////////////////////////////////
+// PaintSurfaceImpl
+/////////////////////////////////////////////////////////////////////
+
+std::string PaintSurfaceImpl::defaultFont()
+{
+    HDC dc = GetDC(NULL);
+
+    std::vector<TCHAR> buffer(32);
+    GetTextFace(dc, buffer.size(), &buffer[0]);
+
+    ReleaseDC(NULL, dc);
+
+    return Pt::win32::toMultiByte(&buffer[0]);
+}
+
 
 std::list<std::string> PaintSurfaceImpl::fontFamilyNames()
 {
@@ -184,19 +195,6 @@ std::list<std::string> PaintSurfaceImpl::fontFamilyNames()
 
     fonts.unique();
     return fonts;
-}
-
-
-std::string PaintSurfaceImpl::defaultFont()
-{
-    HDC dc = GetDC(NULL);
-
-    std::vector<TCHAR> buffer(32);
-    GetTextFace(dc, buffer.size(), &buffer[0]);
-
-    ReleaseDC(NULL, dc);
-
-    return Pt::win32::toMultiByte(&buffer[0]);
 }
 
 
@@ -229,171 +227,6 @@ Gfx::FontMetrics PaintSurfaceImpl::fontMetrics(const Gfx::Font& font, const Pt::
                             (int)sizeF.width(), 
                             (int)sizeF.height());
 }
-
-/////////////////////////////////////////////////////////////////////
-// PaintRegionImpl
-/////////////////////////////////////////////////////////////////////
-
-PaintRegionImpl::PaintRegionImpl()
-: _surface(0)
-{
-}
-
-
-PaintRegionImpl::~PaintRegionImpl()
-{
-}
-
-
-void PaintRegionImpl::set(PaintSurface& surface, const Gfx::RectF& area)
-{
-    _surface = &surface;
-    _area = area;
-}
-
-
-const Gfx::SizeF& PaintRegionImpl::size() const
-{
-    return _area.size();
-}
-
-
-void PaintRegionImpl::setPen(const Gfx::Pen& pen)
-{
-    _surface->impl()->setPen(pen);
-}
-
-
-void PaintRegionImpl::setBrush(const Gfx::Brush& brush)
-{
-    _surface->impl()->setBrush(brush);
-}
-
-
-void PaintRegionImpl::setFont(const Gfx::Font& font)
-{
-    _surface->impl()->setFont(font);
-}
-
-
-Gfx::FontMetrics PaintRegionImpl::fontMetrics(const Pt::String& text) const
-{
-    return _surface->impl()->fontMetrics(text);
-}
-
-
-void PaintRegionImpl::drawLine(const Gfx::PointF& fromF, const Gfx::PointF& toF)
-{
-    _surface->impl()->drawLine(fromF + _area.topLeft(),
-                               toF + _area.topLeft() );
-}
-
-
-void PaintRegionImpl::drawText(const Gfx::PointF& toF, const Pt::String& text)
-{
-    _surface->impl()->drawText(toF + _area.topLeft(), text);
-}
-
-
-void PaintRegionImpl::drawRect(const Gfx::RectF& r)
-{
-    Gfx::RectF rect(r);
-    rect.setOrigin(r.topLeft() + _area.topLeft());
-
-    _surface->impl()->drawRect(rect);
-}
-
-
-void PaintRegionImpl::fillRect(const Gfx::RectF& r)
-{
-    Gfx::RectF rect(r);
-    rect.setOrigin(r.topLeft() + _area.topLeft());
-
-    _surface->impl()->fillRect(rect);
-}
-
-
-void PaintRegionImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
-{
-    _surface->impl()->drawEllipse(topLeftF + _area.topLeft(), sizeF);
-}
-
-
-void PaintRegionImpl::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
-{
-    _surface->impl()->fillEllipse(topLeftF + _area.topLeft(), sizeF);
-}
-
-
-void PaintRegionImpl::drawPolyline(const Gfx::PointF* points, size_t pointCount)
-{
-    std::vector<POINT> winPoints(pointCount);
-
-    for (size_t i = 0; i < pointCount; i++)
-    {
-        Gfx::PointF pt = points[i] + _area.topLeft();
-        Gfx::Point p = Application::instance().screen().fromUnit(pt);
-        winPoints[i].x = p.x();
-        winPoints[i].y = p.y();
-    }
-
-    _surface->impl()->drawPolyline(&winPoints[0], pointCount);
-}
-
-
-void PaintRegionImpl::drawPolyline(POINT* points, size_t pointCount)
-{
-    _surface->impl()->drawPolyline(points, pointCount);
-}
-
-
-void PaintRegionImpl::fillPolygon(const Gfx::PointF* points, size_t pointCount)
-{
-    std::vector<POINT> winPoints(pointCount);
-
-    for (size_t i = 0; i < pointCount; i++)
-    {
-        Gfx::PointF pt = points[i] + _area.topLeft();
-        Gfx::Point p = Application::instance().screen().fromUnit(pt);
-        winPoints[i].x = p.x();
-        winPoints[i].y = p.y();
-    }
-
-    _surface->impl()->fillPolygon(&winPoints[0], pointCount);
-}
-
-
-void PaintRegionImpl::fillPolygon(POINT* points, size_t pointCount)
-{
-    _surface->impl()->fillPolygon(points, pointCount);
-}
-
-
-void PaintRegionImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface)
-{
-    _surface->impl()->drawSurface(toF + _area.topLeft(), surface);
-}
-
-
-void PaintRegionImpl::drawSurface(const Gfx::PointF& toF, 
-                                  const PixmapSurface& pm,
-                                  const Gfx::RectF& pmRect)
-{
-    _surface->impl()->drawSurface(toF + _area.topLeft(), pm, pmRect);
-}
-
-
-void PaintRegionImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
-{
-    _surface->impl()->drawImage(toF + _area.topLeft(), image);
-}
-
-
-void PaintRegionImpl::setClip( const Gfx::RectF& clip)
-{
-    _surface->impl()->setClip( Gfx::RectF( clip.topLeft() +  _area.topLeft(), clip.size()));
-}
-
 
 /////////////////////////////////////////////////////////////////////
 // PixmapSurfaceImpl
@@ -718,13 +551,7 @@ void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* points, const size_t poi
         winPoints[i].y = p.y();
     }
 
-    drawPolyline(&winPoints[0], pointCount);
-}
-
-
-void PixmapSurfaceImpl::drawPolyline(POINT* points, size_t pointCount)
-{
-    Polyline( _deviceContext, points, pointCount );
+    Polyline( _deviceContext, &winPoints[0], pointCount );
 }
 
 
@@ -739,14 +566,8 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t poin
         winPoints[i].y = p.y();
     }
 
-    fillPolygon(&winPoints[0], pointCount);
-}
-
-
-void PixmapSurfaceImpl::fillPolygon(POINT* points, size_t pointCount)
-{
     HPEN originalPen = (HPEN)SelectObject(_deviceContext, GetStockObject(NULL_PEN));
-    Polygon(_deviceContext, points, pointCount);
+    Polygon(_deviceContext, &winPoints[0], pointCount);
     SelectObject(_deviceContext, originalPen);
 }
 
@@ -754,7 +575,7 @@ void PixmapSurfaceImpl::fillPolygon(POINT* points, size_t pointCount)
 void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface)
 {
     Gfx::Point to = Application::instance().screen().fromUnit(toF);
-    Gfx::Size size = Application::instance().screen().fromUnit( surface.impl()->size() );
+    Gfx::Size size = Application::instance().screen().fromUnit( surface.size() );
 
     BitBlt( _deviceContext, 
             to.x(), to.y(), size.width(), size.height(), 

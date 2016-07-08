@@ -36,15 +36,9 @@ namespace Pt {
 
 namespace Hmi {
 
-PaintSurfaceImpl::PaintSurfaceImpl()
-{
-}
-
-
-PaintSurfaceImpl::~PaintSurfaceImpl()
-{
-}
-
+/////////////////////////////////////////////////////////////////////
+// PaintSurfaceImpl
+/////////////////////////////////////////////////////////////////////
 
 std::string PaintSurfaceImpl::defaultFont()
 {
@@ -58,152 +52,9 @@ std::list<std::string> PaintSurfaceImpl::fontFamilyNames()
 }
 
 
-/////////////////////////////////////////////////////////////////////
-// PaintRegionImpl
-/////////////////////////////////////////////////////////////////////
-
-PaintRegionImpl::PaintRegionImpl()
-: _surface(0)
+Gfx::FontMetrics PaintSurfaceImpl::fontMetrics(const Gfx::Font& font, const Pt::String& text)
 {
-}
-
-
-PaintRegionImpl::~PaintRegionImpl()
-{
-}
-
-
-void PaintRegionImpl::set(PaintSurface& surface, const Gfx::RectF& area)
-{
-    _surface = &surface;
-    _area = area;
-}
-
-
-const Gfx::SizeF& PaintRegionImpl::size() const
-{
-    return _area.size();
-}
-
-
-void PaintRegionImpl::setPen(const Gfx::Pen& pen)
-{
-    _surface->impl()->setPen(pen);
-}
-
-
-void PaintRegionImpl::setBrush(const Gfx::Brush& brush)
-{
-    _surface->impl()->setBrush(brush);
-}
-
-
-void PaintRegionImpl::setFont(const Gfx::Font& font)
-{
-    _surface->impl()->setFont(font);
-}
-
-
-Gfx::FontMetrics PaintRegionImpl::fontMetrics(const Pt::String& text) const
-{
-    return _surface->impl()->fontMetrics(text);
-}
-
-
-void PaintRegionImpl::drawLine(const Gfx::PointF& fromF, const Gfx::PointF& toF)
-{
-    _surface->impl()->drawLine(fromF + _area.topLeft(),
-                               toF + _area.topLeft() );
-}
-
-
-void PaintRegionImpl::drawText(const Gfx::PointF& toF, const Pt::String& text)
-{
-    _surface->impl()->drawText(toF + _area.topLeft(), text);
-}
-
-
-void PaintRegionImpl::drawRect(const Gfx::RectF& r)
-{
-    Gfx::RectF rect(r);
-    rect.setOrigin(r.topLeft() + _area.topLeft());
-
-    _surface->impl()->drawRect(rect);
-}
-
-
-void PaintRegionImpl::fillRect(const Gfx::RectF& r)
-{
-    Gfx::RectF rect(r);
-    rect.setOrigin(r.topLeft() + _area.topLeft());
-
-    _surface->impl()->fillRect(rect);
-}
-
-
-void PaintRegionImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
-{
-    _surface->impl()->drawEllipse(topLeftF + _area.topLeft(), sizeF);
-}
-
-
-void PaintRegionImpl::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
-{
-    _surface->impl()->fillEllipse(topLeftF + _area.topLeft(), sizeF);
-}
-
-
-void PaintRegionImpl::drawPolyline(const Gfx::PointF* points, size_t pointCount)
-{
-    std::vector<Gfx::PointF> translated(pointCount);
-
-    for (size_t i = 0; i < pointCount; i++)
-    {
-        Gfx::PointF pt = points[i] + _area.topLeft();
-        translated[i] = pt;
-    }
-
-    _surface->impl()->drawPolyline(&translated[0], pointCount);
-}
-
-
-void PaintRegionImpl::fillPolygon(const Gfx::PointF* points, size_t pointCount)
-{
-    std::vector<Gfx::PointF> translated(pointCount);
-
-    for (size_t i = 0; i < pointCount; i++)
-    {
-        Gfx::PointF pt = points[i] + _area.topLeft();
-        translated[i] = pt;
-    }
-
-    _surface->impl()->fillPolygon(&translated[0], pointCount);
-}
-
-
-void PaintRegionImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface)
-{
-    _surface->impl()->drawSurface(toF + _area.topLeft(), surface);
-}
-
-
-void PaintRegionImpl::drawSurface(const Gfx::PointF& toF, 
-                                  const PixmapSurface& pm,
-                                  const Gfx::RectF& pmRect)
-{
-    _surface->impl()->drawSurface(toF + _area.topLeft(), pm, pmRect);
-}
-
-
-void PaintRegionImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
-{
-    _surface->impl()->drawImage(toF + _area.topLeft(), image);
-}
-
-
-void PaintRegionImpl::setClip( const Gfx::RectF& clip)
-{
-    _surface->impl()->setClip( Gfx::RectF( clip.topLeft() +  _area.topLeft(), clip.size()));
+    return Gfx::ImagePainter::fontMetrics(font, text);   
 }
 
 /////////////////////////////////////////////////////////////////////
