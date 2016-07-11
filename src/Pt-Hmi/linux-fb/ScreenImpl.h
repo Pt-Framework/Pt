@@ -54,6 +54,8 @@ class ScreenImpl : public Pt::Connectable
 
         virtual ~ScreenImpl();
 
+        void init(WindowBase& w);
+
         void registerWindow(Window& w);
 
         void unregisterWindow(Window& w);

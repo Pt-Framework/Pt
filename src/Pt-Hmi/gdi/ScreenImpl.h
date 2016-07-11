@@ -41,6 +41,7 @@ namespace Hmi {
 
 class ApplicationImpl;
 class Window;
+class WindowBase;
 
 class ScreenImpl
 {
@@ -49,9 +50,7 @@ class ScreenImpl
         
         virtual ~ScreenImpl();
 
-        void add(Window& w);
-
-        void remove(Window& w );
+        void init(WindowBase& w);
 
         double width() const;
 

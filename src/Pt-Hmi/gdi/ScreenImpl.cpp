@@ -58,15 +58,9 @@ ScreenImpl::~ScreenImpl()
 }
 
 
-void ScreenImpl::add(Window& w)
+void ScreenImpl::init(WindowBase& w)
 {
-   
-}
 
-
-void ScreenImpl::remove(Window& w )
-{
-  
 }
 
 

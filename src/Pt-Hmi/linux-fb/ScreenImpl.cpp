@@ -52,8 +52,6 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 , _dpi(96.0)
 , _drawCursor(true)
 {
-    _windowManager.init( Application::instance().screen() );
-
     app.eventReady() += Pt::slot( *this, &ScreenImpl::onPointerEvent );
     app.eventReady() += Pt::slot( *this, &ScreenImpl::onKeyEvent );
 
@@ -66,6 +64,12 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 
 ScreenImpl::~ScreenImpl()
 {
+}
+
+
+void ScreenImpl::init(WindowBase& w)
+{
+    _windowManager.init(w);
 }
 
 
@@ -165,24 +169,26 @@ void ScreenImpl::onKeyEvent(const Pt::Hmi::KeyEvent& ev)
 Gfx::PointF ScreenImpl::toParent(const Window& w, const Gfx::PointF& pos) const
 {
     return w.impl()->toScreen(pos);
+    //return _windowManager.toParent(w, pos);
 }
 
 
 Gfx::PointF ScreenImpl::fromParent(const Window& w, const Gfx::PointF& pos) const
 {
     return w.impl()->fromScreen(pos);
+    //return _windowManager.fromParent(w, pos);
 }
 
 
 void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
 {
-    windowManager().onResize(w, s);
+    _windowManager.onResize(w, s);
 }
 
 
 void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
 {
-    windowManager().onMove(w, pos);
+    _windowManager.onMove(w, pos);
 }
 
 
@@ -200,19 +206,19 @@ void ScreenImpl::onClose(Window& w)
 
 void ScreenImpl::onShow(Window& w, bool visible)
 {
-    windowManager().onShow(w, visible);
+    _windowManager.onShow(w, visible);
 }
 
 
 void ScreenImpl::onActivate(Window& w)
 { 
-    windowManager().onActivate(&w);
+    _windowManager.onActivate(&w);
 }
 
 
 void ScreenImpl::onEnable(Window& w, bool enable)
 {
-    windowManager().onEnable(w, enable);
+    _windowManager.onEnable(w, enable);
 }
 
 

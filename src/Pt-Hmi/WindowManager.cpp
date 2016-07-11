@@ -306,6 +306,9 @@ void WindowManager::onResize(Window& w, const Gfx::SizeF& to)
 
 void WindowManager::onMove(Window& w, const Gfx::PointF& to)
 {   
+    std::clog << "WindowManager::onMove " << w.title() << " to " 
+              << to.x() << ' ' << to.y() << std::endl;
+
     MoveEvent mev(w.vid(), to);
     
     WindowFrame* frame = findWindow(w);
@@ -322,7 +325,7 @@ void WindowManager::onMove(Window& w, const Gfx::PointF& to)
     Gfx::RectF movedRect(to, size);
     Gfx::RectF updateRect(from, size);  
     updateRect.unify(movedRect);
-    
+
     if( _parent )
         _parent->update(updateRect);
 }

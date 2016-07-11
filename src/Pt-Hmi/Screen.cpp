@@ -42,6 +42,7 @@ Screen::Screen(ApplicationImpl& app)
 : _impl( new ScreenImpl(app) )
 , _updates(0)
 {
+    _impl->init(*this);
 }
 
 
@@ -174,6 +175,9 @@ void Screen::onResize(Window& w, const Gfx::SizeF& s)
 
 void Screen::onMove(Window& w, const Gfx::PointF& p)
 {
+    std::clog << "Screen::onMove " << w.title() << " to " 
+              << p.x() << ' ' << p.y() << std::endl;
+    
     w.impl()->move(p);
     _impl->onMove(w, p);
 }
