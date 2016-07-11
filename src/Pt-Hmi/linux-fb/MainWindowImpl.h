@@ -50,10 +50,6 @@ class MainWindowImpl
 
         virtual ~MainWindowImpl();
 
-        Gfx::PointF toScreen(const Gfx::PointF& pos) const;
-
-        Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
-
         void paint(const Gfx::RectF& rect);
 
         void show(bool b);

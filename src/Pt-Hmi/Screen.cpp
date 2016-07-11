@@ -224,7 +224,7 @@ void Screen::onUpdate(const Gfx::RectF& updateRect)
 
 
 void Screen::onUpdate(Window& w, const Gfx::RectF& updateRect)
-{
+{	
     Gfx::PointF pos = w.toScreen( updateRect.topLeft() );
     Gfx::RectF rect( pos, updateRect.size() );
     update(rect);
@@ -263,10 +263,9 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
         Gfx::PointF pos = (*it)->fromScreen( screenRect.topLeft() );
         Gfx::RectF rect( pos, screenRect.size() );
         (*it)->onPaint(rect);
-    }
+    }    
 
     _updateRect.clear();
-
     PaintEvent pev(vid(), screenRect);
     Application::instance().loop().commitEvent(pev);
 }

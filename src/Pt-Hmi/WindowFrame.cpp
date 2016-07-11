@@ -401,8 +401,12 @@ void WindowFrame::onClose()
 
 bool WindowFrame::isTitle(const Gfx::PointF& p) const
 {            
+    if( !_window->hasBorder() )
+	false;
+
     Gfx::PointF localPos = p - _frameRect.topLeft();
 
+	
     double borderWidth = _wm->borderWidth();
     double titleHeight = _wm->titleHeight();
 
@@ -415,6 +419,9 @@ bool WindowFrame::isTitle(const Gfx::PointF& p) const
 
 bool WindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
 {        
+    if( !_window->hasBorder() )
+	false;
+
     double borderWidth = _wm->borderWidth();
 
     Gfx::PointF localPos = p - _frameRect.topLeft();
@@ -428,6 +435,9 @@ bool WindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
 
 bool WindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
 {        
+    if( !_window->hasBorder() )
+	false;
+
     double borderWidth = _wm->borderWidth();
 
     Gfx::PointF localPos = p - _frameRect.topLeft();
@@ -441,6 +451,9 @@ bool WindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
 
 bool WindowFrame::isTopBorder(const Pt::Gfx::PointF& p) const
 {        
+    if( !_window->hasBorder() )
+	false;
+
     double borderWidth = _wm->borderWidth();
 
     Gfx::PointF localPos = p - _frameRect.topLeft();
@@ -454,6 +467,9 @@ bool WindowFrame::isTopBorder(const Pt::Gfx::PointF& p) const
 
 bool WindowFrame::isBottomBorder(const Pt::Gfx::PointF& p) const
 {        
+    if( !_window->hasBorder() )
+	false;
+
     double borderWidth = _wm->borderWidth();
     double titleHeight = _wm->titleHeight();
 
@@ -468,8 +484,8 @@ bool WindowFrame::isBottomBorder(const Pt::Gfx::PointF& p) const
 
 void WindowFrame::update()
 {
-    double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
+    double borderWidth = _window->hasBorder() ? _wm->borderWidth() : 0;
+    double titleHeight = _window->hasBorder() ? _wm->titleHeight() : 0;
 
     Gfx::PointF updatePos(0, 0);
     updatePos.subX(borderWidth);
@@ -482,8 +498,8 @@ void WindowFrame::update()
 
 void WindowFrame::update(const Gfx::RectF& rect)
 {
-    double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
+    double borderWidth = _window->hasBorder() ? _wm->borderWidth() : 0;
+    double titleHeight = _window->hasBorder() ?_wm->titleHeight() : 0;
 
     Gfx::PointF updatePos = rect.topLeft() - _frameRect.topLeft();
     updatePos.subX(borderWidth);
@@ -496,8 +512,8 @@ void WindowFrame::update(const Gfx::RectF& rect)
 
 void WindowFrame::moveEvent(const MoveEvent& mev)
 {
-    double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
+    double borderWidth = _window->hasBorder() ? _wm->borderWidth() : 0;
+    double titleHeight = _window->hasBorder() ? _wm->titleHeight(): 0;
 
     _frameRect.setOrigin( mev.position() );
 
@@ -512,8 +528,8 @@ void WindowFrame::moveEvent(const MoveEvent& mev)
 
 void WindowFrame::resizeEvent(const ResizeEvent& rev)
 {
-    double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
+    double borderWidth = _window->hasBorder() ? _wm->borderWidth(): 0;
+    double titleHeight = _window->hasBorder() ? _wm->titleHeight(): 0;
 
     _clientRect.setSize( rev.size() );
     
@@ -721,8 +737,12 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
 
 void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
+	
+    if(!_window->hasBorder()  )
+	return;
+
+    const double borderWidth = _wm->borderWidth();
+    const double titleHeight = _wm->titleHeight();
 
     // TODO: clipping region
     Painter painter(surface);    

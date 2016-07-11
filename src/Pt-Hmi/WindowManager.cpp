@@ -80,7 +80,7 @@ void WindowManager::init(WindowBase& parent)
 
 void WindowManager::add(Window& w)
 {    
-    _windows.insert( _windows.begin(), new WindowFrame(*this, w) );
+    _windows.push_back( new WindowFrame(*this, w) );
 }
 
 
@@ -243,9 +243,9 @@ bool WindowManager::mouseEvent( const MouseEvent& mev )
 
 void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {  
-    std::vector<WindowFrame*>::reverse_iterator it;
+    std::vector<WindowFrame*>::iterator it;
 
-    for(it = _windows.rbegin(); it != _windows.rend(); ++it )
+    for(it = _windows.begin(); it != _windows.end(); ++it )
     {
         WindowFrame* frame = *it;
         Window* w = frame->window();                
@@ -253,22 +253,21 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
         if( ! w->isVisible() )
             continue; 
 
-        Gfx::RectF frameRect = frame->frameRect();
-        frameRect.setOrigin( Gfx::PointF(0, 0) );
-        frame->paint(surface, frameRect);
+	Gfx::RectF frameRect = frame->frameRect();
+	frameRect.setOrigin( Gfx::PointF(0, 0) );
+	frame->paint(surface, frameRect);
+	// update rect in client coordinates
+	Gfx::PointF updatePos = rect.topLeft() - frame->clientRect().topLeft();
+	Gfx::RectF updateRect(updatePos, rect.size());        
+	
+	// clip update rect against client rect
+	Gfx::RectF clientRect(Gfx::PointF(0, 0), w->size());
+	updateRect = updateRect.intersect(clientRect);
 
-        // update rect in client coordinates
-        Gfx::PointF updatePos = rect.topLeft() - frame->clientRect().topLeft();
-        Gfx::RectF updateRect(updatePos, rect.size());        
-        
-        // clip update rect against client rect
-        Gfx::RectF clientRect(Gfx::PointF(0, 0), w->size());
-        updateRect = updateRect.intersect(clientRect);
+	Gfx::PointF to = updateRect.topLeft() + frame->clientRect().topLeft();
 
-        Gfx::PointF to = updateRect.topLeft() + frame->clientRect().topLeft();
-
-        Painter painter(surface);
-        painter.drawSurface(to, w->surface(), updateRect); 
+	Painter painter(surface);
+	painter.drawSurface(to, w->surface(), updateRect); 
         //painter.drawRect( pev.rect() ); 
         //std::clog << w->title() << ": "
         //          << to.x() << "," << to.y() << "  "
@@ -291,13 +290,16 @@ void WindowManager::onResize(Window& w, const Gfx::SizeF& to)
     if( ! w.isVisible() )
         return;
 
-    const Gfx::PointF updatePos(-_borderWidth, -(_borderWidth + _titleHeight) );
+    const double borderWidth = w.hasBorder() ? _borderWidth : 0 ;
+    const double titleHeight = w.hasBorder() ? _titleHeight : 0 ;
+
+    const Gfx::PointF updatePos(-borderWidth, -(borderWidth + titleHeight) );
 
     Gfx::SizeF updateSize( std::max( to.width(), from.width() ),
                            std::max( to.height(), from.height() ));
 
-    updateSize.addHeight(2 * _borderWidth + _titleHeight);
-    updateSize.addWidth(2 * _borderWidth);
+    updateSize.addHeight(2 * borderWidth + titleHeight);
+    updateSize.addWidth(2 * borderWidth);
 
     Gfx::RectF updateRect( updatePos, updateSize );
     w.update(updateRect);
@@ -314,10 +316,13 @@ void WindowManager::onMove(Window& w, const Gfx::PointF& to)
 
     Gfx::PointF from = w.position();
     Application::instance().loop().commitEvent(mev);
+
+    const double borderWidth = w.hasBorder() ? _borderWidth : 0 ;
+    const double titleHeight = w.hasBorder() ? _titleHeight : 0 ;
             
     Gfx::SizeF size = w.size();    
-    size.addWidth( 2 * _borderWidth );
-    size.addHeight( 2 * _borderWidth + _titleHeight );
+    size.addWidth( 2 * borderWidth );
+    size.addHeight( 2 * borderWidth + titleHeight );
 
     Gfx::RectF movedRect(to, size);
     Gfx::RectF updateRect(from, size);  
@@ -331,8 +336,13 @@ void WindowManager::onMove(Window& w, const Gfx::PointF& to)
 void WindowManager::onUpdate(Window& child, const Gfx::RectF& rect)
 {
     Gfx::PointF updatePos = rect.topLeft() + child.position();
-    updatePos.addX( _borderWidth );
-    updatePos.addY( _borderWidth + _titleHeight );
+
+    const double borderWidth = child.hasBorder() ? _borderWidth : 0 ;
+    const double titleHeight = child.hasBorder() ? _titleHeight : 0 ;
+    
+
+    updatePos.addX( borderWidth );
+    updatePos.addY( borderWidth + titleHeight );
 
     const Gfx::RectF updateRect(updatePos, rect.size());
 
@@ -344,20 +354,23 @@ void WindowManager::onUpdate(Window& child, const Gfx::RectF& rect)
 void WindowManager::onShow( Window& w, bool visible )
 {
     Gfx::PointF framePos = w.position() - w.position();
-    //framePos.subX(_borderWidth);
-    //framePos.subY(_borderWidth +  _titleHeight);
+    const double borderWidth = w.hasBorder() ? _borderWidth : 0 ;
+    const double titleHeight = w.hasBorder() ? _titleHeight : 0 ;
+
+
+    //framePos.subX(borderWidth);
+    //framePos.subY(borderWidth +  titleHeight);
 
     Gfx::SizeF frameSize = w.size();
-    frameSize.addHeight(2 * _borderWidth + _titleHeight);
-    frameSize.addWidth(2 * _borderWidth);
+    frameSize.addHeight(2 * borderWidth + titleHeight);
+    frameSize.addWidth(2 * borderWidth);
 
     Gfx::RectF updateRect(framePos, frameSize);
     
     ShowEvent sev( w.vid(), visible );
     Application::instance().loop().commitEvent( sev );
       
-    if(_parent)
-        _parent->update(updateRect);
+   _parent->update(updateRect);
 }
 
 
@@ -392,20 +405,23 @@ void WindowManager::onActivate(Window* w)
 void WindowManager::onEnable(Window& w, bool enable)
 {
     Gfx::PointF framePos = w.position();
-    //framePos.subX(_borderWidth);
-    //framePos.subY(_borderWidth +  _titleHeight);
+
+    const double borderWidth = w.hasBorder() ? _borderWidth : 0 ;
+    const double titleHeight = w.hasBorder() ? _titleHeight : 0 ;
+
+    //framePos.subX(borderWidth);
+    //framePos.subY(borderWidth +  titleHeight);
 
     Gfx::SizeF frameSize = w.size();
-    frameSize.addHeight(2 * _borderWidth + _titleHeight);
-    frameSize.addWidth(2 * _borderWidth);
+    frameSize.addHeight(2 * borderWidth + titleHeight);
+    frameSize.addWidth(2 * borderWidth);
 
     Gfx::RectF updateRect(framePos, frameSize);
 
     EnableEvent eev( w.vid(), enable );
     Application::instance().loop().commitEvent( eev );
      
-    if(_parent)
-        _parent->update(updateRect);
+    _parent->update(updateRect);
 }
 
 
@@ -418,50 +434,49 @@ void WindowManager::onClosing(Window& w)
 
 void WindowManager::onClose(Window& w)
 {
+
     remove(w);
 
+    const double borderWidth = w.hasBorder() ? _borderWidth : 0 ;
+    const double titleHeight = w.hasBorder() ? _titleHeight : 0 ;
+
+
     Gfx::PointF framePos = w.position();
-    //framePos.subX(_borderWidth);
-    //framePos.subY(_borderWidth +  _titleHeight);
+    //framePos.subX(borderWidth);
+    //framePos.subY(borderWidth +  titleHeight);
 
     Gfx::SizeF frameSize = w.size();
-    frameSize.addHeight(2 * _borderWidth + _titleHeight);
-    frameSize.addWidth(2 * _borderWidth);
+    frameSize.addHeight(2 * borderWidth + titleHeight);
+    frameSize.addWidth(2 * borderWidth);
 
     Gfx::RectF updateRect(framePos, frameSize);
 
-    if(_parent)
-        _parent->update(updateRect);
+   _parent->update(updateRect);
 }
 
 
 Gfx::PointF WindowManager::toParent(const Window& w, const Gfx::PointF& pos) const
-{
-    return toParent(w.position(), pos);
-}
+{    
+    const double borderWidth = w.hasBorder() ? _borderWidth : 0;
+    const double titleHeight = w.hasBorder() ? _titleHeight : 0;
 
+    double offY = borderWidth + titleHeight;
+    double offX = borderWidth;
 
-Gfx::PointF WindowManager::toParent(const Gfx::PointF& winPos, const Gfx::PointF& pos) const
-{
-    double offY = _borderWidth + _titleHeight;
-    double offX = _borderWidth;
-
-    return winPos + pos + Gfx::PointF(offX, offY);
+    return w.position() + pos + Gfx::PointF(offX, offY);
 }
 
 
 Gfx::PointF WindowManager::fromParent(const Window& w, const Gfx::PointF& pos) const
 {
-    return fromParent(w.position(), pos);
-}
+    const double borderWidth = w.hasBorder() ? _borderWidth : 0 ;
+    const double titleHeight = w.hasBorder() ? _titleHeight : 0 ;
 
 
-Gfx::PointF WindowManager::fromParent(const Gfx::PointF& winPos, const Gfx::PointF& pos) const
-{
-    double offY = _borderWidth + _titleHeight;
-    double offX = _borderWidth;
+    double offY = borderWidth + titleHeight;
+    double offX = borderWidth;
 
-    Gfx::PointF p = pos - winPos - Gfx::PointF(offX, offY);
+    Gfx::PointF p = pos - w.position() - Gfx::PointF(offX, offY);
     return p;
 }
 
