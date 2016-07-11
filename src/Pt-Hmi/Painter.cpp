@@ -180,6 +180,12 @@ void Painter::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
 }
 
 
+void Painter::drawPicture(const Gfx::PointF& to, const Picture& pic)
+{
+    _surface->drawPicture( to, pic );
+}
+
+
 void Painter::clear( const Gfx::Color& color)
 {
     Gfx::RectF rect(Gfx::PointF(0,0), _surface->size() );   
@@ -199,6 +205,8 @@ void Painter::drawSurface(const Gfx::PointF& to,
 {  
     _surface->drawSurface(to, pm, pmRect);
 } 
+
+
 
 }
 

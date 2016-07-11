@@ -32,6 +32,7 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Menu.h>
 #include <Pt/Hmi/MenuItem.h>
+#include <Pt/Hmi/Picture.h>
 #include "ChildW.h"
 
 namespace Pt {
@@ -52,6 +53,8 @@ class MainWindow : public Pt::Hmi::Window
 
         virtual void onCloseEvent(const CloseEvent& ev);
 
+        virtual void onPaintBackground( const Gfx::RectF& rect);
+
       private:
             Menu     _menu;
             MenuItem _item1;
@@ -65,6 +68,9 @@ class MainWindow : public Pt::Hmi::Window
             
             ChildW _child1;
             //ChildW _child2;
+
+            Gfx::Image _icon;
+            Picture   _picture;
 };
 
 } // namespace

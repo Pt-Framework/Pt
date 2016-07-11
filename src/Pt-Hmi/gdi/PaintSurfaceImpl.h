@@ -31,6 +31,7 @@
 #define Pt_Hmi_PaintSurfaceImpl_h
 
 #include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/Picture.h>
 #include <Windows.h>
 
 namespace Pt {
@@ -98,10 +99,15 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 
-        virtual void setClip( const Gfx::RectF& clip);
+        virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
 
+        virtual void setClip( const Gfx::RectF& clip);
+        
         HDC deviceContext() const;
 
+    private: 
+        void bitBlit(const Gfx::PointF& pos, const Pt::uint8_t* data, size_t width, size_t height, DWORD op );
+          
     private:
         Gfx::SizeF     _size;
         HDC            _deviceContext;

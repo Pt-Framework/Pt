@@ -219,6 +219,12 @@ void PaintRegion::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 }
 
 
+void PaintRegion::drawPicture(const Gfx::PointF& to, const Picture& pic)
+{
+    _surface->drawPicture(to + _area.topLeft(), pic);
+}
+
+
 void PaintRegion::setClip( const Gfx::RectF& clip)
 {
     _surface->setClip( Gfx::RectF( clip.topLeft() +  _area.topLeft(), clip.size()));
@@ -351,6 +357,11 @@ void PixmapSurface::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
     _impl->drawImage(to, image);
 }
 
+
+void PixmapSurface::drawPicture(const Gfx::PointF& to, const Picture& pic)
+{
+    _impl->drawPicture(to , pic);
+}
 
 void PixmapSurface::setClip( const Gfx::RectF& clip)
 {

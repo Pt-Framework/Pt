@@ -37,6 +37,7 @@ namespace Hmi {
 
 class PaintSurface;
 class PixmapSurface;
+class Picture;
 
 class PT_HMI_API Painter : public Gfx::Painter
 {
@@ -82,6 +83,8 @@ class PT_HMI_API Painter : public Gfx::Painter
         virtual void fillPolygon(const Gfx::PointF* points, const size_t pointCount);
         
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+
+        virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
     
         virtual void clear(const Gfx::Color& color);
 

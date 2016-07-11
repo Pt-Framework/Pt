@@ -50,9 +50,6 @@ void loadIcon(Gfx::Image& icon)
     ss.clear();
     ss.seekg(0);
 
-    std::ifstream ifs("C:\\Pt\\doc\\images\\atesion_logo.jpg", 
-                      std::ios::binary|std::ios::in);
-
     std::istream* is = &ss;
     Gfx::PngReader reader(*is, icon);
     //std::istream* is = &ifs;
@@ -65,15 +62,30 @@ void loadIcon(Gfx::Image& icon)
     while( ! reader.advance() );
 
     icon = icon.convert( Pt::Gfx::ImageFormat::argb8888() );
+
+    for(size_t w = 0; w < icon.width(); ++ w )
+    {
+        for(size_t h = 0; h < icon.height(); ++h )
+        {
+            Gfx::Color color = icon.color(w,h);
+
+			if( color.red() > 0.99  &&  color.green() >0.99 && color.blue() > 0.99 )				
+				color.setAlpha(0);
+			else
+				color.setAlpha(1);
+                
+            icon.setColor( w,h, color);
+        }
+    }
 }
 
 MainWindow::MainWindow()
 : _child1("Child 1")
 //, _child2("Child 2")
 {
-    Gfx::Image icon;
-    loadIcon(icon);
+    loadIcon(_icon);
 
+    _picture.set( _icon );
     setTitle("Main 1");
     move( Gfx::PointF(60, 30) );
     resize( Gfx::SizeF(600, 480) ); 
@@ -85,7 +97,7 @@ MainWindow::MainWindow()
     _menu.setName("All Music");
     
     _item1.setText("Heavy Metal");
-    _item1.setIcon(icon);
+    _item1.setIcon(_icon);
 
     Key f3(Key::F3);
     _item1.setShortcut( &f3 );
@@ -120,6 +132,15 @@ MainWindow::~MainWindow()
 {
 }
 
+
+void MainWindow::onPaintBackground( const Gfx::RectF& rect)
+{
+    Window::onPaintBackground(rect);
+
+    Hmi::Painter painter(surface());
+    painter.drawPicture( Gfx::PointF( 0,0), _picture);
+
+}
 
 void MainWindow::onMouseEvent(const MouseEvent& ev)
 {

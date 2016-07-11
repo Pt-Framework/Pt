@@ -30,6 +30,7 @@
 #include "PaintSurfaceImpl.h"
 #include <Pt/Hmi/Application.h>
 #include <tchar.h>
+#include "PictureImpl.h"
 
 namespace {
 
@@ -596,6 +597,50 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF,
             pm.pixmapImpl()->deviceContext(), from.x(), from.y(), SRCCOPY);
 }
 
+
+void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
+{
+    bitBlit(to, &(pic.impl()->andMask()[0]), pic.impl()->width(), pic.impl()->height(), SRCAND );
+    bitBlit(to, &(pic.impl()->xorMask()[0]), pic.impl()->width(), pic.impl()->height(), SRCINVERT );
+}
+
+void PixmapSurfaceImpl::bitBlit(const Gfx::PointF& pos, const Pt::uint8_t* data, size_t width, size_t height, DWORD op )
+{
+    Gfx::Point to = Application::instance().screen().fromUnit(pos);
+
+    const size_t depth = 4 * 8; 
+
+    HBITMAP bitmap = CreateBitmap(width, height, 1, depth, (VOID*)data);
+    if (bitmap == NULL) 
+    {
+        BITMAPINFO bitmapInfo;
+        ZeroMemory(&bitmapInfo.bmiHeader, sizeof(BITMAPINFOHEADER));
+
+        bitmapInfo.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER); 
+        bitmapInfo.bmiHeader.biWidth       = width;   
+        bitmapInfo.bmiHeader.biHeight      = -(ssize_t)height;  // top-down image
+        bitmapInfo.bmiHeader.biPlanes      = 1;                         // always 1            
+        bitmapInfo.bmiHeader.biBitCount    = 32;                        // 32-bit 
+        bitmapInfo.bmiHeader.biCompression = BI_RGB;                    // uncompressed RGB
+        bitmapInfo.bmiHeader.biSizeImage   = 0;                         // automatic
+        bitmapInfo.bmiHeader.biClrUsed     = 0;                         // no color table
+        bitmapInfo.bmiHeader.biClrImportant= 0;                         // no color table
+
+        VOID* imageBits;
+        bitmap = CreateDIBSection(_deviceContext, &bitmapInfo, 
+                                  DIB_RGB_COLORS, &imageBits, NULL, 0);
+
+        memcpy(imageBits, data, width * height * 4);
+    }
+
+    HDC bitmapDC = CreateCompatibleDC(NULL);
+    SelectObject(bitmapDC, bitmap);
+
+    BitBlt(_deviceContext,  to.x(), to.y(), width, height, bitmapDC, 0, 0, op);
+
+    DeleteDC(bitmapDC);
+    DeleteObject(bitmap);
+}
 
 void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 {

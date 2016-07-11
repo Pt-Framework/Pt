@@ -43,6 +43,7 @@ namespace Pt {
 namespace Hmi {
 
 class PixmapSurface;
+class Picture;
 
 /** @brief Paint target for painters.
 */
@@ -84,6 +85,8 @@ class PT_HMI_API PaintSurface
                                  const Gfx::RectF& pmRect) = 0;
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image) = 0;
+
+        virtual void drawPicture(const Gfx::PointF& to, const Picture& pic) = 0;
 
         virtual void setClip( const Gfx::RectF& clip) = 0; 
 
@@ -138,6 +141,8 @@ class PT_HMI_API PaintRegion : public PaintSurface
                                  const Gfx::RectF& pmRect);
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+
+        virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
 
         virtual void setClip( const Gfx::RectF& clip);
 
@@ -194,6 +199,8 @@ class PT_HMI_API PixmapSurface : public PaintSurface
                                  const Gfx::RectF& pmRect);
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+
+        virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
 
         virtual void setClip( const Gfx::RectF& clip);
 
