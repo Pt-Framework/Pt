@@ -168,15 +168,15 @@ void ScreenImpl::onKeyEvent(const Pt::Hmi::KeyEvent& ev)
 
 Gfx::PointF ScreenImpl::toParent(const Window& w, const Gfx::PointF& pos) const
 {
-    return w.impl()->toScreen(pos);
-    //return _windowManager.toParent(w, pos);
+    //return w.impl()->toScreen(pos);
+    return _windowManager.toParent(w, pos);
 }
 
 
 Gfx::PointF ScreenImpl::fromParent(const Window& w, const Gfx::PointF& pos) const
 {
-    return w.impl()->fromScreen(pos);
-    //return _windowManager.fromParent(w, pos);
+    //return w.impl()->fromScreen(pos);
+    return _windowManager.fromParent(w, pos);
 }
 
 
