@@ -44,10 +44,10 @@ namespace System {
     The Pt::System::FileInfo class provides operations to query information
     about files and directories in the file system and to add, remove and
     modify them. %FileInfo objects can be created with a path, are assignable,
-    comparable and can be used as keys for e.g. std::map. The path may not 
-    refer to an existing item in the file system to successfully construct a
-    %FileInfo object. It can be checked whether a file exists and what type
-    of file it is, as shown in the following example:
+    comparable and can be used as keys for e.g. std::map. The path needs not
+    to refer to existing items in the file system, when a %FileInfo object is
+    constructed. It can be checked whether a file exists and what type of file
+    it is, as shown in the following example:
 
     @code
     Pt::System::Path path("/tmp/logout.txt");
@@ -63,9 +63,9 @@ namespace System {
     }
     @endcode
     
-    All operations are also available as non-member functions, so it
-    is not neccessary to create temporary %FileInfo objects. Only the paths
-    to files or directories are required to perform file system operations.
+    Most operations are available as non-member functions, so it is not
+    neccessary to create temporary %FileInfo objects. Only the paths to
+    files or directories are required to perform file system operations.
     The next example illustrates some of the non-member functions for file
     operations:
 
