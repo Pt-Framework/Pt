@@ -41,6 +41,8 @@ namespace System {
 class PathImpl;
 
 /** @brief Represents a path in the file-system.
+
+    @ingroup FileSystem
 */
 class PT_SYSTEM_API Path
 {
