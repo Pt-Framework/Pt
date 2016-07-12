@@ -355,6 +355,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\MainWindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\WindowFrame.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.h" />
@@ -548,6 +549,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\MainWindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Menu.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MenuBar.cpp" />

@@ -111,6 +111,8 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 
+        virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
+
         virtual void setClip( const Gfx::RectF& clip);
 
     private:

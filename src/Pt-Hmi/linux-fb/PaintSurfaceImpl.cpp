@@ -202,6 +202,12 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image
     _painter.drawImage(to, image);
 }
 
+
+void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
+{
+
+}
+
 } // namespace
 
 } // namespace

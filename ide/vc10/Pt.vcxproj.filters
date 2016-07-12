@@ -1404,6 +1404,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PictureImpl.h">
       <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2566,6 +2569,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Picture.cpp">
       <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
