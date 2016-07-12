@@ -273,9 +273,9 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
         painter.drawSurface(to, w->surface(), updateRect);
 
         //painter.drawRect( pev.rect() ); 
-        std::clog << w->title() << ": "
-                  << to.x() << "," << to.y() << "  "
-                  << updateRect.width() << "x" << updateRect.height() << std::endl;  
+        //std::clog << w->title() << ": "
+        //          << to.x() << "," << to.y() << "  "
+        //          << updateRect.width() << "x" << updateRect.height() << std::endl;  
     }
 }
 
