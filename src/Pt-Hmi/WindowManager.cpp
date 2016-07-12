@@ -244,12 +244,6 @@ bool WindowManager::mouseEvent( const MouseEvent& mev )
 void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {  
     std::vector<WindowFrame*>::iterator it;
-
-    if(_windows.size() == 2)
-    {
-        int n = 0;
-        ++n;
-    }
     
     for(it = _windows.begin(); it != _windows.end(); ++it )
     {
