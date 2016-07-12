@@ -81,7 +81,7 @@ void loadIcon(Gfx::Image& icon)
 
 MainWindow::MainWindow()
 : _child1("Child 1")
-//, _child2("Child 2")
+, _child2("Child 2")
 {
     loadIcon(_icon);
 
@@ -91,7 +91,9 @@ MainWindow::MainWindow()
     resize( Gfx::SizeF(600, 480) ); 
     
     add( _child1 );
-    //add( _child2 );
+
+    add( _child2 );
+    _child2.show(true);
 
     // context menu
     _menu.setName("All Music");

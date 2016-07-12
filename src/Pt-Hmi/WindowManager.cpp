@@ -392,7 +392,14 @@ void WindowManager::onActivate(Window* w)
         return;
 
     // this moves frame to the back
-    std::remove(_windows.begin(), _windows.end(), frame);
+    std::vector<WindowFrame*>::iterator it =
+        std::find(_windows.begin(), _windows.end(), frame);
+
+    if( it != _windows.end() )
+    {
+        _windows.erase(it);
+        _windows.push_back(frame);
+    }
 
     ActivateEvent aev(w->vid(), true);
     Application::instance().loop().commitEvent(aev);
