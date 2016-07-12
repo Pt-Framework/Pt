@@ -81,7 +81,6 @@ void loadIcon(Gfx::Image& icon)
 
 MainWindow::MainWindow()
 : _child1("Child 1")
-, _child2("Child 2")
 {
     loadIcon(_icon);
 
@@ -90,10 +89,14 @@ MainWindow::MainWindow()
     move( Gfx::PointF(60, 30) );
     resize( Gfx::SizeF(600, 480) ); 
     
-    add( _child1 );
-
     add( _child2 );
+    _child2.setTitle("Child 2");
+    _child2.move( Gfx::PointF(400, 50) );
+    _child2.resize( Gfx::SizeF(180, 100) );
     _child2.show(true);
+
+    add( _child1 );
+    _child1.show(true);
 
     // context menu
     _menu.setName("All Music");
@@ -126,7 +129,6 @@ MainWindow::MainWindow()
     _subMenu.addItem(_subItem3);
     
     _menu.addMenu(_subMenu, "Other Music");
-    _child1.show(true);
 }
 
 

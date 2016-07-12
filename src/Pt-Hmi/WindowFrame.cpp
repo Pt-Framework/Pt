@@ -402,11 +402,11 @@ void WindowFrame::onClose()
 bool WindowFrame::isTitle(const Gfx::PointF& p) const
 {            
     if( !_window->hasBorder() )
-	false;
+    false;
 
     Gfx::PointF localPos = p - _frameRect.topLeft();
 
-	
+    
     double borderWidth = _wm->borderWidth();
     double titleHeight = _wm->titleHeight();
 
@@ -420,7 +420,7 @@ bool WindowFrame::isTitle(const Gfx::PointF& p) const
 bool WindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
 {        
     if( !_window->hasBorder() )
-	false;
+    false;
 
     double borderWidth = _wm->borderWidth();
 
@@ -436,7 +436,7 @@ bool WindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
 bool WindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
 {        
     if( !_window->hasBorder() )
-	false;
+    false;
 
     double borderWidth = _wm->borderWidth();
 
@@ -452,7 +452,7 @@ bool WindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
 bool WindowFrame::isTopBorder(const Pt::Gfx::PointF& p) const
 {        
     if( !_window->hasBorder() )
-	false;
+    false;
 
     double borderWidth = _wm->borderWidth();
 
@@ -468,7 +468,7 @@ bool WindowFrame::isTopBorder(const Pt::Gfx::PointF& p) const
 bool WindowFrame::isBottomBorder(const Pt::Gfx::PointF& p) const
 {        
     if( !_window->hasBorder() )
-	false;
+    false;
 
     double borderWidth = _wm->borderWidth();
     double titleHeight = _wm->titleHeight();
@@ -737,9 +737,8 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
 
 void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-	
-    if(!_window->hasBorder()  )
-	return;
+    if( ! _window->hasBorder()  )
+        return;
 
     const double borderWidth = _wm->borderWidth();
     const double titleHeight = _wm->titleHeight();

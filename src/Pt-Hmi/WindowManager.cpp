@@ -245,33 +245,43 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {  
     std::vector<WindowFrame*>::iterator it;
 
+    if(_windows.size() == 2)
+    {
+        int n = 0;
+        ++n;
+    }
+    
     for(it = _windows.begin(); it != _windows.end(); ++it )
     {
         WindowFrame* frame = *it;
-        Window* w = frame->window();                
+        Window* w = frame->window();
         
         if( ! w->isVisible() )
             continue; 
 
-	Gfx::RectF frameRect = frame->frameRect();
-	frameRect.setOrigin( Gfx::PointF(0, 0) );
-	frame->paint(surface, frameRect);
-	// update rect in client coordinates
-	Gfx::PointF updatePos = rect.topLeft() - frame->clientRect().topLeft();
-	Gfx::RectF updateRect(updatePos, rect.size());        
-	
-	// clip update rect against client rect
-	Gfx::RectF clientRect(Gfx::PointF(0, 0), w->size());
-	updateRect = updateRect.intersect(clientRect);
+        Gfx::RectF frameRect = frame->frameRect().intersect(rect);
+        
+        surface.setClip(frameRect);
+        frame->paint(surface, frameRect);
+        surface.setClip( Gfx::RectF( Gfx::PointF(0,0), surface.size()) );
 
-	Gfx::PointF to = updateRect.topLeft() + frame->clientRect().topLeft();
+        // update rect in client coordinates
+        Gfx::PointF updatePos = rect.topLeft() - frame->clientRect().topLeft();
+        Gfx::RectF updateRect(updatePos, rect.size());        
+    
+        // clip update rect against client rect
+        Gfx::RectF clientRect(Gfx::PointF(0, 0), w->size());
+        updateRect = updateRect.intersect(clientRect);
 
-	Painter painter(surface);
-	painter.drawSurface(to, w->surface(), updateRect); 
+        Gfx::PointF to = updateRect.topLeft() + frame->clientRect().topLeft();
+
+        Painter painter(surface);
+        painter.drawSurface(to, w->surface(), updateRect);
+
         //painter.drawRect( pev.rect() ); 
-        //std::clog << w->title() << ": "
-        //          << to.x() << "," << to.y() << "  "
-        //          << updateRect.width() << "x" << updateRect.height() << std::endl;  
+        std::clog << w->title() << ": "
+                  << to.x() << "," << to.y() << "  "
+                  << updateRect.width() << "x" << updateRect.height() << std::endl;  
     }
 }
 
@@ -391,15 +401,12 @@ void WindowManager::onActivate(Window* w)
     if( ! frame )
         return;
 
-    // this moves frame to the back
+    // move active frame to the back
     std::vector<WindowFrame*>::iterator it =
         std::find(_windows.begin(), _windows.end(), frame);
 
-    if( it != _windows.end() )
-    {
-        _windows.erase(it);
-        _windows.push_back(frame);
-    }
+    _windows.erase(it);
+    _windows.push_back(frame);
 
     ActivateEvent aev(w->vid(), true);
     Application::instance().loop().commitEvent(aev);
