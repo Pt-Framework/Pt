@@ -32,7 +32,6 @@
 
 #include <Pt/Hmi/WindowStartPosition.h>
 #include <Pt/Hmi/WindowState.h>
-#include <Pt/Hmi/WindowDecoration.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
@@ -50,7 +49,6 @@
 #include <Pt/Hmi/Visual.h>
 #include <Pt/Hmi/WindowBase.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Font.h>
 #include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 #include <map>
@@ -69,9 +67,21 @@ class PT_HMI_API Window : public WindowBase
    friend class Application;
 
   public:
-    explicit Window(Window* parent = 0);
+    enum Type
+    {
+        Normal = 0,
+        Popup = 1
+        // Dialog 
+    };
+
+  public:
+    explicit Window(Window* parent = 0, Window::Type type = Normal);
 
     virtual ~Window();
+
+    Type type() const;
+
+    void setType(Type type);
 
     WindowBase* parent();
 
@@ -255,37 +265,16 @@ class PT_HMI_API Window : public WindowBase
     bool hasBorder() const;
 
     // TODO:
-    void setBorder(bool s);
-
-    // TODO:
     const Gfx::Image& icon() const;
 
     // TODO:
     void setIcon(const Gfx::Image& i);
 
     // TODO:
-    bool isClosable() const;
-
-    // TODO:
-    void setClosable(bool c);
-
-    // TODO:
     const std::string& title() const;
 
     // TODO:
     void setTitle( const std::string& t );
-
-    // TODO:
-    const Gfx::Font& font() const;
-
-    // TODO:
-    void setFont(const Gfx::Font& ft);
-
-    // TODO:
-    WindowDecoration::Flags decoration() const;
-
-    // TODO:
-    void setDecoration( WindowDecoration::Flags d );
 
   private:
     void init(Window* parent);
@@ -337,17 +326,15 @@ class PT_HMI_API Window : public WindowBase
     bool                           _damaged;
     Gfx::PointF                    _position;
     Gfx::SizeF                     _size;
+    Type                           _type;
 
     Gfx::SizeF                     _minimumSize;
     Gfx::SizeF                     _maximumSize;
     Hmi::WindowPosition::Type      _startPostion;
     Hmi::WindowState::Type         _state;    
-    bool                           _border;
     std::string                    _title;
     Gfx::Image                     _icon;
-    bool                           _canClose;    
-    WindowDecoration::Flags        _decoration;   
-    Gfx::Font                      _font;    
+    bool                           _canClose;         
 };
 
 } // namespace

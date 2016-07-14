@@ -31,8 +31,8 @@
 #define Pt_Hmi_MainWindowImpl_H
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/WindowState.h>
-#include <Pt/Hmi/WindowDecoration.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
@@ -47,9 +47,11 @@ class Screen;
 class MainWindowImpl
 {
     public:
-        MainWindowImpl();
+        MainWindowImpl(Window::Type type);
 
         ~MainWindowImpl();
+
+        void setType(Window::Type type);
 
         Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 
@@ -70,16 +72,12 @@ class MainWindowImpl
         void paint(const Gfx::RectF& rect);
     
         void setState(WindowState::Type p);
-    
-        void setBorder(bool s);
        
         void setIcon(const Gfx::Image& p);
     
         void setMinimumSize(const Gfx::SizeF& s);
     
-        void setMaximumSize(const Gfx::SizeF& s);    
-
-        void setDecoration( WindowDecoration::Flags d );    
+        void setMaximumSize(const Gfx::SizeF& s);      
 
         void setTitle( const std::string& t );
 
@@ -89,12 +87,6 @@ class MainWindowImpl
         {
             return _hwnd;
         }
-
-    private:
-        void setShowTitle(bool p);
-        void setShowMinimizeButton(bool p);
-        void setShowMaximizeButton(bool p);
-        void setShowSystemMenu(bool p);
 
     private:   
         HWND    _hwnd;  

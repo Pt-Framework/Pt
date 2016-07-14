@@ -50,7 +50,7 @@ namespace Pt {
 
 namespace Hmi {
 
-Window::Window(Window* parent)
+Window::Window(Window* parent, Window::Type type)
 : _impl(0)
 , _parent(0)
 , _parentWindow(0)
@@ -65,13 +65,12 @@ Window::Window(Window* parent)
 , _damaged(true)
 , _position(0,0)
 , _size(10,10)
+, _type(type)
 , _minimumSize(0, 0)
 , _maximumSize(64000, 64000)
 , _startPostion( WindowPosition::Manual )
 , _state(WindowState::Normal )
-, _border(true)
 , _icon()
-, _canClose(true)
 {    
     _windowManager.init(*this);
 
@@ -114,7 +113,7 @@ void Window::init(Window* parent)
 
     if( ! _parent )
     {
-        _impl = new MainWindowImpl();
+        _impl = new MainWindowImpl(_type);
         _parent = &Application::instance().screen();
     }
 
@@ -133,7 +132,6 @@ void Window::init(Window* parent)
     if( _impl)
     {
         _impl->setTitle(_title);
-        _impl->setBorder(_border);
         _impl->setMinimumSize(_minimumSize);
         _impl->setMaximumSize(_maximumSize );
         _impl->setIcon(_icon);
@@ -551,8 +549,10 @@ void Window::onUpdate(Window& child, const Gfx::RectF& rect)
 }
 
 
+// TODO: rename paint/repaint
 void Window::onPaint(const Gfx::RectF& rect)
 {
+    // TODO: use a damage rect instead
     if( ! _damaged )
         return;
 
@@ -560,9 +560,6 @@ void Window::onPaint(const Gfx::RectF& rect)
 
     if( ! this->isVisible() )
         return;
-
-    const double borderWidth = _windowManager.borderWidth();
-    const double titleHeight = _windowManager.titleHeight();
 
     onPaintBackground(rect);
 
@@ -572,9 +569,7 @@ void Window::onPaint(const Gfx::RectF& rect)
     std::vector<Window*>::iterator child;
     for(child = _windows.begin(); child != _windows.end(); ++child)
     {
-        Gfx::PointF pos( rect.topLeft() - (*child)->position() );
-        pos.subX( borderWidth );
-        pos.subY( borderWidth + titleHeight );
+        Gfx::PointF pos = (*child)->fromParent( rect.topLeft() );
 
         Gfx::RectF updateRect( pos, rect.size() );
         (*child)->onPaint(updateRect);
@@ -582,6 +577,32 @@ void Window::onPaint(const Gfx::RectF& rect)
 
     PaintEvent pev(vid(), rect);
     Application::instance().loop().commitEvent(pev);
+}
+
+
+void Window::onPaintEvent(const PaintEvent& ev)
+{
+    if( ! this->isVisible() )
+        return; 
+
+    onPaintContent( ev.rect() );
+
+    if(_impl)
+        _impl->paint( ev.rect() );
+}
+
+
+void Window::onPaintBackground(const Gfx::RectF& rect)
+{
+    Painter painter(_surface);
+    painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
+    painter.fillRect(rect);
+}
+
+
+void Window::onPaintContent(const Gfx::RectF& rect)
+{
+    _windowManager.paint(_surface, rect);
 }
 
 
@@ -854,6 +875,119 @@ void Window::onCloseEvent(const CloseEvent& ev)
 }
 
 
+Window::Type Window::type() const
+{
+    return _type;
+}
+
+
+void Window::setType(Type type)
+{
+    // TODO: notify parent that frame configuration has changed !!!
+
+    if( _impl )
+        _impl->setType(type);
+
+    _type = type;
+
+    //if(_parent)
+    //    _parent->onFrameChanged(*this);
+}
+
+
+const Gfx::SizeF& Window::minimumSize() const
+{
+    return _minimumSize;
+}
+
+
+void Window::setMinimumSize(const Gfx::SizeF& s)
+{
+    if( _impl ) 
+        _impl->setMinimumSize(s);
+
+    _minimumSize = s;
+}
+
+
+const Gfx::SizeF& Window::maximumSize() const
+{
+    return _maximumSize;
+}
+
+
+void Window::setMaximumSize(const Gfx::SizeF& s)
+{
+    if( _impl )
+        _impl->setMaximumSize(s);
+
+    _maximumSize = s;
+}
+
+
+Hmi::WindowPosition::Type Window::defaultPosition() const
+{
+    return _startPostion;
+}
+
+
+void Window::setDefaultPosition( Hmi::WindowPosition::Type p)
+{    
+    _startPostion = p;
+}
+
+
+Hmi::WindowState::Type Window::state() const
+{
+    return _state;
+}
+
+
+void Window::setState( WindowState::Type s)
+{
+    if( _impl )
+        _impl->setState(s);
+
+    _state = s;
+}
+
+
+bool Window::hasBorder() const
+{
+    return _type == Window::Normal;
+}
+
+
+const Gfx::Image& Window::icon() const
+{
+    return _icon;
+}
+
+
+void Window::setIcon(const Gfx::Image& i)
+{
+    if( _impl )
+        _impl->setIcon(i);
+
+    _icon = i;
+}
+
+
+const std::string& Window::title() const
+{
+    return _title;
+}
+
+
+void Window::setTitle( const std::string& t )
+{
+    if( _impl )
+        _impl->setTitle(t);
+
+    _title = t;
+}
+
+
 PixmapSurface& Window::surface()
 {
     return _surface;
@@ -875,32 +1009,6 @@ const MainWindowImpl* Window::impl() const
 void Window::onEvent(const Pt::Event& ev)
 {
     _eventReady.send(ev ); 
-}
-
-
-void Window::onPaintEvent(const PaintEvent& ev)
-{
-    if( ! this->isVisible() )
-        return; 
-
-    onPaintContent( ev.rect() );
-
-    if(_impl)
-      _impl->paint( ev.rect() );
-}
-
-
-void Window::onPaintBackground(const Gfx::RectF& rect)
-{
-    Painter painter(_surface);
-    painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
-    painter.fillRect(rect);
-}
-
-
-void Window::onPaintContent(const Gfx::RectF& rect)
-{
-    _windowManager.paint(_surface, rect);
 }
 
 
@@ -1007,147 +1115,6 @@ void Window::onLeaveEvent(const LeaveEvent& ev )
     _windowManager.leaveEvent(ev);
 
     Application::instance().setPointerWidget(0);
-}
-
-
-const Gfx::SizeF& Window::minimumSize() const
-{
-    return _minimumSize;
-}
-
-
-void Window::setMinimumSize(const Gfx::SizeF& s)
-{
-    if( _impl ) 
-        _impl->setMinimumSize(s);
-
-    _minimumSize = s;
-}
-
-
-const Gfx::SizeF& Window::maximumSize() const
-{
-    return _maximumSize;
-}
-
-
-void Window::setMaximumSize(const Gfx::SizeF& s)
-{
-    if( _impl )
-        _impl->setMaximumSize(s);
-
-    _maximumSize = s;
-}
-
-
-Hmi::WindowPosition::Type Window::defaultPosition() const
-{
-    return _startPostion;
-}
-
-
-void Window::setDefaultPosition( Hmi::WindowPosition::Type p)
-{    
-    _startPostion = p;
-}
-
-
-Hmi::WindowState::Type Window::state() const
-{
-    return _state;
-}
-
-
-void Window::setState( WindowState::Type s)
-{
-    if( _impl )
-        _impl->setState(s);
-
-    _state = s;
-}
-
-
-bool Window::hasBorder() const
-{
-    return _border;
-}
-
-
-void Window::setBorder(bool s)
-{
-    if( _impl )
-        _impl->setBorder(s);
-
-    _border = s;
-}
-
-
-const Gfx::Image& Window::icon() const
-{
-    return _icon;
-}
-
-
-void Window::setIcon(const Gfx::Image& i)
-{
-    if( _impl )
-        _impl->setIcon(i);
-
-    _icon = i;
-}
-
-
-bool Window::isClosable() const
-{
-    return _canClose;
-}
-
-
-void Window::setClosable(bool c)
-{
-    _canClose = c;
-}
-
-
-const std::string& Window::title() const
-{
-    return _title;
-}
-
-
-void Window::setTitle( const std::string& t )
-{
-    if( _impl )
-        _impl->setTitle(t);
-
-    _title = t;
-}
-
-
-const Gfx::Font& Window::font() const
-{
-    return _font; 
-}
-
-
-void Window::setFont(const Gfx::Font& ft)
-{
-    _font = ft;
-}
-
-
-WindowDecoration::Flags Window::decoration() const
-{
-    return _decoration;
-}
-
-
-void Window::setDecoration( WindowDecoration::Flags d )
-{
-    if( _impl )            
-        _impl->setDecoration( d );
-
-    _decoration = d;
 }
 
 

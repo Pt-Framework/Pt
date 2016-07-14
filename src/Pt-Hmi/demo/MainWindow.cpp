@@ -92,7 +92,7 @@ MainWindow::MainWindow()
     add( _child2 );
     _child2.setTitle("Child 2");
     _child2.move( Gfx::PointF(400, 50) );
-    _child2.resize( Gfx::SizeF(180, 100) );
+    _child2.resize( Gfx::SizeF(200, 100) );
     _child2.show(true);
 
     add( _child1 );
@@ -119,6 +119,7 @@ MainWindow::MainWindow()
 
     // context sub menu
     _subMenu.setName("Other Music");
+    
     _subItem1.setText("Vegetarian Progressive Grindcore");
     _subMenu.addItem(_subItem1);
     

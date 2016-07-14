@@ -317,6 +317,8 @@ void MenuButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 WindowFrame::WindowFrame()
 : _wm(0)
 , _window(0)
+, _borderWidth(0)
+, _titleHeight(0)
 {
 }
 
@@ -366,13 +368,13 @@ const Window* WindowFrame::window() const
 }
 
 
-Gfx::RectF WindowFrame::clientRect() const
+const Gfx::RectF& WindowFrame::clientRect() const
 {
     return _clientRect;
 }
 
 
-Gfx::RectF WindowFrame::frameRect() const
+const Gfx::RectF& WindowFrame::frameRect() const
 {
     return _frameRect;
 }
@@ -401,12 +403,11 @@ void WindowFrame::onClose()
 
 bool WindowFrame::isTitle(const Gfx::PointF& p) const
 {            
-    if( !_window->hasBorder() )
-    false;
+    if( ! _window->hasBorder() )
+        return false;
 
     Gfx::PointF localPos = p - _frameRect.topLeft();
 
-    
     double borderWidth = _wm->borderWidth();
     double titleHeight = _wm->titleHeight();
 
@@ -419,8 +420,8 @@ bool WindowFrame::isTitle(const Gfx::PointF& p) const
 
 bool WindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
 {        
-    if( !_window->hasBorder() )
-    false;
+    if( ! _window->hasBorder() )
+        return false;
 
     double borderWidth = _wm->borderWidth();
 
@@ -435,8 +436,8 @@ bool WindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
 
 bool WindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
 {        
-    if( !_window->hasBorder() )
-    false;
+    if( ! _window->hasBorder() )
+        return false;
 
     double borderWidth = _wm->borderWidth();
 
@@ -451,8 +452,8 @@ bool WindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
 
 bool WindowFrame::isTopBorder(const Pt::Gfx::PointF& p) const
 {        
-    if( !_window->hasBorder() )
-    false;
+    if( ! _window->hasBorder() )
+        return false;
 
     double borderWidth = _wm->borderWidth();
 
@@ -467,45 +468,35 @@ bool WindowFrame::isTopBorder(const Pt::Gfx::PointF& p) const
 
 bool WindowFrame::isBottomBorder(const Pt::Gfx::PointF& p) const
 {        
-    if( !_window->hasBorder() )
-    false;
-
-    double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
+    if( ! _window->hasBorder() )
+        return false;
 
     Gfx::PointF localPos = p - _frameRect.topLeft();
 
+    // TODO: remove this, use local variables...
+    double borderWidth = _wm->borderWidth();
+    double titleHeight = _wm->titleHeight();
+
+    double minY = _clientRect.height() + borderWidth + titleHeight;
+
     return localPos.x() >= 0 &&
            localPos.x() < _frameRect.width() &&
-           localPos.y() >= borderWidth + titleHeight + _clientRect.height() &&
+           localPos.y() >= minY &&
            localPos.y() < _frameRect.height();
 }
 
 
 void WindowFrame::update()
 {
-    double borderWidth = _window->hasBorder() ? _wm->borderWidth() : 0;
-    double titleHeight = _window->hasBorder() ? _wm->titleHeight() : 0;
-
-    Gfx::PointF updatePos(0, 0);
-    updatePos.subX(borderWidth);
-    updatePos.subY(borderWidth +  titleHeight);
-
-    Gfx::RectF updateRect(updatePos, _frameRect.size());
-    _window->update(updateRect);
+    update(_frameRect);
 }
 
 
 void WindowFrame::update(const Gfx::RectF& rect)
 {
-    double borderWidth = _window->hasBorder() ? _wm->borderWidth() : 0;
-    double titleHeight = _window->hasBorder() ?_wm->titleHeight() : 0;
-
-    Gfx::PointF updatePos = rect.topLeft() - _frameRect.topLeft();
-    updatePos.subX(borderWidth);
-    updatePos.subY(borderWidth +  titleHeight);
-
+    Gfx::PointF updatePos = _window->fromParent( rect.topLeft() );
     Gfx::RectF updateRect(updatePos, rect.size());
+    
     _window->update(updateRect);
 }
 
@@ -842,7 +833,7 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     //
     Pt::String title = _window->title().c_str();
 
-    const Gfx::Font& font = _window->font();
+    const Gfx::Font& font = _wm->font();
     painter.setFont(font);
     Gfx::FontMetrics fm = painter.fontMetrics(title);
 

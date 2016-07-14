@@ -32,8 +32,8 @@
 #define Pt_Hmi_MainWindowImpl_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/WindowState.h>
-#include <Pt/Hmi/WindowDecoration.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
@@ -46,7 +46,7 @@ namespace Hmi {
 class MainWindowImpl
 {
     public:
-        MainWindowImpl();
+        MainWindowImpl(Window::Type type);
 
         virtual ~MainWindowImpl();
 
@@ -66,7 +66,7 @@ class MainWindowImpl
 
         void setState(WindowState::Type p);
 
-        void setBorder(bool s);
+        void setType(Window::Type type);
 
         void setIcon(const Gfx::Image& p);
 
@@ -74,9 +74,7 @@ class MainWindowImpl
     
         void setMaximumSize(const Gfx::SizeF& s); 
 
-        void setDecoration( WindowDecoration::Flags d );
-
-        void setTitle( const std::string& t );
+        void setTitle(const std::string& title);
 
     private:
         Gfx::PointF _position;

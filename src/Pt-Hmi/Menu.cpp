@@ -99,13 +99,13 @@ class SubMenuItem : public MenuItem
 ///////////////////////////////////////////////////////////////////////////////
 
 Menu::Menu()
-: _parentShell(0)
+: Window(0, Window::Popup)
+, _parentShell(0)
 , _parentMenu(0)
 , _currentMenu(0)
 , _layout(FlowLayout::Top)
 , _iconWidth(0)
 {
-    setBorder(false);
     setMainWidget(&_layout);    
 }
 

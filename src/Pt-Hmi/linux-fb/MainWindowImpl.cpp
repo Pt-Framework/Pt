@@ -39,7 +39,7 @@ namespace Pt {
 
 namespace Hmi {
 
-MainWindowImpl::MainWindowImpl()
+MainWindowImpl::MainWindowImpl(Window::Type type)
 {
 }
 
@@ -90,13 +90,12 @@ void MainWindowImpl::close()
 }
 
 
-void MainWindowImpl::setState(WindowState::Type p)
+void MainWindowImpl::setType(Window::Type type)
 {
-    // TODO
 }
 
 
-void MainWindowImpl::setBorder(bool s)
+void MainWindowImpl::setState(WindowState::Type p)
 {
     // TODO
 }
@@ -120,44 +119,10 @@ void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 }
 
 
-void MainWindowImpl::setDecoration( WindowDecoration::Flags deco )
-{
-    // TODO
-}
-
-
 void MainWindowImpl::setTitle(const std::string& text)
 {
     // TODO
 }
-
-
-//void MainWindowImpl::update(const Gfx::RectF& updateRect)
-//{
-//    double borderWidth = _apiWindow->windowManager().borderWidth();
-//    double titleHeight = _apiWindow->windowManager().titleHeight();
-//
-//    Gfx::PointF pos = _apiWindow->position() + updateRect.topLeft();
-//    pos.addX(borderWidth);
-//    pos.addY(borderWidth + titleHeight);
-//
-//    Gfx::RectF screenRect( pos, updateRect.size() );
-//    Application::instance().mainScreen().impl()->update(screenRect);
-//}
-//
-//
-//void MainWindowImpl::onUpdate(Window& child, const Gfx::RectF& childRect)
-//{
-//    double borderWidth = _apiWindow->windowManager().borderWidth();
-//    double titleHeight = _apiWindow->windowManager().titleHeight();
-//
-//    Gfx::PointF pos = child.position() + childRect.topLeft();
-//    pos.addX(borderWidth);
-//    pos.addY(borderWidth + titleHeight);
-//
-//    Gfx::RectF updateRect( pos, childRect.size() );
-//    update(updateRect);
-//}
 
 } // namespace
 

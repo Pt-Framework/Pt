@@ -159,9 +159,15 @@ class WindowFrame : public Pt::Connectable
 
         const Window* window() const;
 
-        Gfx::RectF clientRect() const;
+        const Gfx::RectF& clientRect() const;
 
-        Gfx::RectF frameRect() const;
+        const Gfx::RectF& frameRect() const;
+
+        void setFrame(double bw, double th)
+        { 
+            _borderWidth = bw;
+            _titleHeight = th; 
+        }
 
         void update();
 
@@ -206,6 +212,8 @@ class WindowFrame : public Pt::Connectable
     private:
         WindowManager* _wm;
         Window*        _window;
+        double         _borderWidth;
+        double         _titleHeight;
         Gfx::RectF     _frameRect;
         Gfx::RectF     _clientRect;
 

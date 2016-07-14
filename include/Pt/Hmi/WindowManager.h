@@ -34,6 +34,7 @@
 #include <Pt/Hmi/WindowBase.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Font.h>
 #include <Pt/Connectable.h>
 #include <vector>
 
@@ -56,6 +57,8 @@ class WindowManager : public Pt::Connectable
         WindowManager();
 
         virtual ~WindowManager();
+
+        void init(WindowBase& parent);
 
         double borderWidth() const
         {
@@ -87,17 +90,14 @@ class WindowManager : public Pt::Connectable
             return _inactiveTextColor;
         }
 
-        void init(WindowBase& parent);
-
-        WindowBase* parent();
+        const Gfx::Font& font() const
+        {
+            return _font;
+        }
 
         void add(Window& w);
 
         void remove(Window& window);
-
-        WindowFrame* findWindow(const Gfx::PointF& p);
-
-        WindowFrame* findWindow(Window& w);
                   
     public:
         void enterEvent(const EnterEvent& ev);
@@ -131,13 +131,20 @@ class WindowManager : public Pt::Connectable
         
         Gfx::PointF fromParent(const Window& w, const Gfx::PointF& pos) const;
 
+        WindowFrame* findWindow(const Gfx::PointF& p);
+
+        WindowFrame* findWindow(Window& w);
+
+        Gfx::SizeF toFrameSize(Window& w, const Gfx::SizeF& clientSize);
+
+        //Gfx::RectF toFrameRect(Window& w, const Gfx::RectF& clientRect);
+
     private:
         Application&              _app;
         WindowBase*               _parent; 
         std::vector<WindowFrame*> _windows;
         
         WindowFrame*              _activeWindow;
-
         WindowFrame*              _currentWindow;
         WindowFrame*              _grabbedWindow;
 
@@ -146,7 +153,8 @@ class WindowManager : public Pt::Connectable
         Gfx::Color                _inactiveColor;
         Gfx::Color                _activeColor;
         Gfx::Color                _textColor;
-        Gfx::Color                _inactiveTextColor;                             
+        Gfx::Color                _inactiveTextColor;
+        Gfx::Font                 _font;                         
 };
 
 } // namespace

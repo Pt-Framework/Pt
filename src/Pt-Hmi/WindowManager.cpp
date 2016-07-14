@@ -80,7 +80,21 @@ void WindowManager::init(WindowBase& parent)
 
 void WindowManager::add(Window& w)
 {    
-    _windows.push_back( new WindowFrame(*this, w) );
+    WindowFrame* frame = new WindowFrame(*this, w);
+
+    switch( w.type() )
+    {
+        case Window::Popup:
+            frame->setFrame(0, 0);
+            break;
+        
+        default:
+        case Window::Normal:
+            frame->setFrame(_borderWidth, _titleHeight);
+            break;
+    }
+
+    _windows.push_back(frame);
 }
 
 
@@ -139,12 +153,6 @@ WindowFrame* WindowManager::findWindow(Window& w)
 }
 
 
-WindowBase* WindowManager::parent()
-{
-    return _parent;
-}
-
-
 void WindowManager::enterEvent(const EnterEvent& ev)
 {
 }
@@ -156,11 +164,11 @@ void WindowManager::leaveEvent(const LeaveEvent& ev)
 
     if(_currentWindow)
     {
-      WindowFrame* w = _currentWindow;
-      _currentWindow = 0;
+        WindowFrame* w = _currentWindow;
+        _currentWindow = 0;
       
-      LeaveEvent lev( w->window()->vid() );
-      w->leaveEvent(lev);
+        LeaveEvent lev( w->window()->vid() );
+        w->leaveEvent(lev);
     }
 }
 
@@ -282,30 +290,25 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
 
 void WindowManager::onResize(Window& w, const Gfx::SizeF& to)
 {   
-    ResizeEvent rev(w.vid(), to);
-
     WindowFrame* frame = findWindow(w);
-    if(frame)
-        frame->resizeEvent(rev);
+    if( ! frame )
+        return;
 
-    Gfx::SizeF from = w.size();
+    ResizeEvent rev(w.vid(), to);
     Application::instance().loop().commitEvent(rev);
+    
+    Gfx::RectF updateRect = frame->frameRect();
+    
+    frame->resizeEvent(rev);
+    
+    updateRect.unify( frame->frameRect() );
 
     if( ! w.isVisible() )
         return;
 
-    const double borderWidth = w.hasBorder() ? _borderWidth : 0 ;
-    const double titleHeight = w.hasBorder() ? _titleHeight : 0 ;
-
-    const Gfx::PointF updatePos(-borderWidth, -(borderWidth + titleHeight) );
-
-    Gfx::SizeF updateSize( std::max( to.width(), from.width() ),
-                           std::max( to.height(), from.height() ));
-
-    updateSize.addHeight(2 * borderWidth + titleHeight);
-    updateSize.addWidth(2 * borderWidth);
-
-    Gfx::RectF updateRect( updatePos, updateSize );
+    Gfx::PointF updatePos = fromParent( w, updateRect.topLeft() );
+    updateRect.setOrigin(updatePos);
+    
     w.update(updateRect);
 }
 
@@ -314,6 +317,10 @@ void WindowManager::onMove(Window& w, const Gfx::PointF& to)
 {   
     MoveEvent mev(w.vid(), to);
     
+    //
+    // TODO: use old/new frameRect to calculate update rect
+    //
+
     WindowFrame* frame = findWindow(w);
     if(frame)
         frame->moveEvent(mev);
@@ -321,59 +328,45 @@ void WindowManager::onMove(Window& w, const Gfx::PointF& to)
     Gfx::PointF from = w.position();
     Application::instance().loop().commitEvent(mev);
 
-    const double borderWidth = w.hasBorder() ? _borderWidth : 0 ;
-    const double titleHeight = w.hasBorder() ? _titleHeight : 0 ;
-            
-    Gfx::SizeF size = w.size();    
-    size.addWidth( 2 * borderWidth );
-    size.addHeight( 2 * borderWidth + titleHeight );
+    Gfx::SizeF size = toFrameSize( w, w.size() );
 
     Gfx::RectF movedRect(to, size);
     Gfx::RectF updateRect(from, size);  
     updateRect.unify(movedRect);
 
-    if( _parent )
-        _parent->update(updateRect);
+    if( ! _parent )
+        throw std::logic_error("WindowManager not initialized");
+
+    _parent->update(updateRect);
 }
 
 
-void WindowManager::onUpdate(Window& child, const Gfx::RectF& rect)
+void WindowManager::onUpdate(Window& w, const Gfx::RectF& rect)
 {
-    Gfx::PointF updatePos = rect.topLeft() + child.position();
-
-    const double borderWidth = child.hasBorder() ? _borderWidth : 0 ;
-    const double titleHeight = child.hasBorder() ? _titleHeight : 0 ;
-    
-
-    updatePos.addX( borderWidth );
-    updatePos.addY( borderWidth + titleHeight );
+    Gfx::PointF updatePos = toParent( w, rect.topLeft() );
 
     const Gfx::RectF updateRect(updatePos, rect.size());
 
-    if(_parent)
-        _parent->update(updateRect);
+    if( ! _parent )
+        throw std::logic_error("WindowManager not initialized");
+        
+    _parent->update(updateRect);
 }
 
 
 void WindowManager::onShow( Window& w, bool visible )
 {
-    Gfx::PointF framePos = w.position() - w.position();
-    const double borderWidth = w.hasBorder() ? _borderWidth : 0 ;
-    const double titleHeight = w.hasBorder() ? _titleHeight : 0 ;
+    ShowEvent sev( w.vid(), visible );
+    Application::instance().loop().commitEvent(sev);
 
-
-    //framePos.subX(borderWidth);
-    //framePos.subY(borderWidth +  titleHeight);
-
-    Gfx::SizeF frameSize = w.size();
-    frameSize.addHeight(2 * borderWidth + titleHeight);
-    frameSize.addWidth(2 * borderWidth);
+    Gfx::PointF framePos = w.position();
+    Gfx::SizeF frameSize = toFrameSize( w, w.size() );
 
     Gfx::RectF updateRect(framePos, frameSize);
-    
-    ShowEvent sev( w.vid(), visible );
-    Application::instance().loop().commitEvent( sev );
-      
+
+    if( ! _parent )
+        throw std::logic_error("WindowManager not initialized");
+
    _parent->update(updateRect);
 }
 
@@ -412,23 +405,17 @@ void WindowManager::onActivate(Window* w)
 
 void WindowManager::onEnable(Window& w, bool enable)
 {
+    EnableEvent eev( w.vid(), enable );
+    Application::instance().loop().commitEvent( eev );
+
     Gfx::PointF framePos = w.position();
-
-    const double borderWidth = w.hasBorder() ? _borderWidth : 0 ;
-    const double titleHeight = w.hasBorder() ? _titleHeight : 0 ;
-
-    //framePos.subX(borderWidth);
-    //framePos.subY(borderWidth +  titleHeight);
-
-    Gfx::SizeF frameSize = w.size();
-    frameSize.addHeight(2 * borderWidth + titleHeight);
-    frameSize.addWidth(2 * borderWidth);
+    Gfx::SizeF frameSize = toFrameSize( w, w.size() );
 
     Gfx::RectF updateRect(framePos, frameSize);
 
-    EnableEvent eev( w.vid(), enable );
-    Application::instance().loop().commitEvent( eev );
-     
+    if( ! _parent )
+        throw std::logic_error("WindowManager not initialized");
+
     _parent->update(updateRect);
 }
 
@@ -442,25 +429,48 @@ void WindowManager::onClosing(Window& w)
 
 void WindowManager::onClose(Window& w)
 {
-
     remove(w);
 
-    const double borderWidth = w.hasBorder() ? _borderWidth : 0 ;
-    const double titleHeight = w.hasBorder() ? _titleHeight : 0 ;
-
-
     Gfx::PointF framePos = w.position();
-    //framePos.subX(borderWidth);
-    //framePos.subY(borderWidth +  titleHeight);
-
-    Gfx::SizeF frameSize = w.size();
-    frameSize.addHeight(2 * borderWidth + titleHeight);
-    frameSize.addWidth(2 * borderWidth);
+    Gfx::SizeF frameSize = toFrameSize( w, w.size() );
 
     Gfx::RectF updateRect(framePos, frameSize);
 
+    if( ! _parent )
+        throw std::logic_error("WindowManager not initialized");
+
    _parent->update(updateRect);
 }
+
+
+Gfx::SizeF WindowManager::toFrameSize(Window& w, const Gfx::SizeF& clientSize)
+{  
+    const double borderWidth = w.hasBorder() ? _borderWidth : 0;
+    const double titleHeight = w.hasBorder() ? _titleHeight : 0;
+
+    Gfx::SizeF size = clientSize;
+    size.addHeight(2 * borderWidth + titleHeight);
+    size.addWidth(2 * borderWidth);
+
+    return size;
+}
+
+
+//Gfx::RectF WindowManager::toFrameRect(Window& w, const Gfx::RectF& clientRect)
+//{  
+//    const double borderWidth = w.hasBorder() ? _borderWidth : 0;
+//    const double titleHeight = w.hasBorder() ? _titleHeight : 0;
+//
+//    Gfx::PointF pos = clientRect.topLeft();
+//    pos.subX(borderWidth);
+//    pos.subY(borderWidth + titleHeight);
+//
+//    Gfx::SizeF size = clientRect.size();
+//    size.addHeight(2 * borderWidth + titleHeight);
+//    size.addWidth(2 * borderWidth);
+//
+//    return Gfx::RectF(pos, size);
+//}
 
 
 Gfx::PointF WindowManager::toParent(const Window& w, const Gfx::PointF& pos) const
@@ -479,7 +489,6 @@ Gfx::PointF WindowManager::fromParent(const Window& w, const Gfx::PointF& pos) c
 {
     const double borderWidth = w.hasBorder() ? _borderWidth : 0 ;
     const double titleHeight = w.hasBorder() ? _titleHeight : 0 ;
-
 
     double offY = borderWidth + titleHeight;
     double offX = borderWidth;

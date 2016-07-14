@@ -35,13 +35,32 @@ namespace Pt {
 
 namespace Hmi {
 
-MainWindowImpl::MainWindowImpl()
+MainWindowImpl::MainWindowImpl(Window::Type type)
 : _hwnd(0)
 , _screen( Application::instance().screen() )
 {
-  HINSTANCE hInstance = GetModuleHandle(NULL);
-  _hwnd = CreateWindow( "Pt-Hmi", "", WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN  , 20, 20, 10, 10, GetDesktopWindow(), NULL, hInstance, NULL );
-  setBorder(false);
+    HINSTANCE hInstance = GetModuleHandle(NULL);
+  
+    LONG style = 0;
+    LONG exStyle = 0;
+    
+    switch(type)
+    {
+        case Window::Popup:
+            style = WS_POPUP;
+            exStyle = WS_EX_TOOLWINDOW;
+            break;
+
+        default:
+        case Window::Normal:
+            style = WS_OVERLAPPEDWINDOW;
+            exStyle = WS_EX_APPWINDOW;
+            break;
+    }
+
+    _hwnd = CreateWindowEx(exStyle, "Pt-Hmi", "", style,
+                           0, 0, 10, 10, GetDesktopWindow(), 
+                           NULL, hInstance, NULL);
 }
 
 
@@ -102,7 +121,6 @@ void MainWindowImpl::show( bool v)
 void MainWindowImpl::activate()
 {
     SetActiveWindow( _hwnd );
-    
 }
 
 
@@ -139,70 +157,9 @@ void MainWindowImpl::resize(const Gfx::SizeF& s)
 }
 
 
-void MainWindowImpl::setDecoration( WindowDecoration::Flags deco )
-{
-    setShowTitle( (deco & WindowDecoration::ShowTitleBar) != 0);
-    setShowMinimizeButton( (deco & WindowDecoration::ShowMinimizeButton) != 0);
-    setShowMaximizeButton( (deco & WindowDecoration::ShowMaximizeButton) != 0);
-    setShowSystemMenu( (deco & WindowDecoration::ShowIcon) != 0);
-}
-
-
-void MainWindowImpl::setShowTitle(bool p)
-{
-    LONG style = GetWindowLong(_hwnd, GWL_STYLE);
-    
-    if( p)
-        style |= WS_CAPTION;
-    else
-        style &= ~WS_CAPTION;
-
-    SetWindowLong(_hwnd, GWL_STYLE, style); 
-}
-
-
 void MainWindowImpl::setTitle(const std::string& text)
 {
     SetWindowText(_hwnd, text.c_str());
-}
-
-
-void MainWindowImpl::setShowMinimizeButton(bool p)
-{
-    LONG style = GetWindowLong(_hwnd, GWL_STYLE);
-
-    if(p)
-        style |= WS_MINIMIZEBOX;
-    else
-        style &= ~WS_MINIMIZEBOX;
-
-    SetWindowLong(_hwnd, GWL_STYLE, style); 
-}
-
-
-void MainWindowImpl::setShowMaximizeButton(bool p)
-{
-  LONG style = GetWindowLong(_hwnd, GWL_STYLE);
-
-    if(p)
-        style |= WS_MAXIMIZEBOX;
-  else
-    style &= ~WS_MAXIMIZEBOX;
-
-  SetWindowLong(_hwnd, GWL_STYLE, style); 
-}
-
-
-void MainWindowImpl::setShowSystemMenu(bool p)
-{
-  LONG style = GetWindowLong(_hwnd, GWL_STYLE);
-
-    if(p)
-        style |= WS_SYSMENU;
-  else
-    style &= ~WS_SYSMENU;
-
-  SetWindowLong(_hwnd, GWL_STYLE, style); 
 }
 
 
@@ -228,7 +185,7 @@ void MainWindowImpl::setState(WindowState::Type p)
 }
 
 
-void MainWindowImpl::setBorder(bool s)
+void MainWindowImpl::setType(Window::Type type)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
     LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
@@ -238,22 +195,21 @@ void MainWindowImpl::setBorder(bool s)
 
     RECT rect;
     GetClientRect(_hwnd, &rect);
-    
-    // TODO: window position is not correct after border change
 
-    if(s)
+    switch(type)
     {
-        style |= WS_BORDER; 
-        style |= WS_DLGFRAME;
-        style |= WS_THICKFRAME;
+        case Window::Popup:
+            style = WS_POPUP;
+            exStyle = WS_EX_TOOLWINDOW;
+            break;
+
+        default:
+        case Window::Normal:
+            style = WS_OVERLAPPEDWINDOW;
+            exStyle = WS_EX_APPWINDOW;
+            break;
     }
-    else
-    {
-        style &= ~WS_BORDER;
-        style &= ~WS_DLGFRAME;
-        style &= ~WS_THICKFRAME; 
-    }
-    
+
     // changing the border also changes the window area
     AdjustWindowRectEx(&rect, style, FALSE, exStyle);
 
@@ -263,6 +219,8 @@ void MainWindowImpl::setBorder(bool s)
     LONG y = wrect.top;
 
     SetWindowLong(_hwnd, GWL_STYLE, style);
+    SetWindowLong(_hwnd, GWL_EXSTYLE, exStyle);
+    
     SetWindowPos(_hwnd, 0, x, y, w, h,
                  SWP_FRAMECHANGED|
                  SWP_NOZORDER|SWP_NOOWNERZORDER);
