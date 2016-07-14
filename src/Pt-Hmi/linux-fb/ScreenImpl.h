@@ -150,6 +150,10 @@ class ScreenImpl : public Pt::Connectable
 
         void onMove(Window& w, const Gfx::PointF& pos);
 
+        void onFrameChanged(Window& w);
+
+        void onStateChanged(Window& w);
+
         void onClosing(Window& w);
 
         void onClose(Window& w);

@@ -192,6 +192,18 @@ void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
 }
 
 
+void ScreenImpl::onFrameChanged(Window& w)
+{
+    _windowManager.onFrameChanged(w);
+}
+
+
+void ScreenImpl::onStateChanged(Window& w)
+{
+    _windowManager.onStateChanged(w);
+}
+
+
 void ScreenImpl::onClosing(Window& w)
 {
     _windowManager.onClosing(w);

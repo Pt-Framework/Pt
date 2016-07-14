@@ -76,6 +76,10 @@ class PT_HMI_API WindowBase : public Visual
 
         virtual void onResize(Window& w, const Gfx::SizeF& to) = 0;
 
+        virtual void onFrameChanged(Window& w) = 0;
+
+        virtual void onStateChanged(Window& w) = 0; 
+
         virtual void onClosing(Window& w) = 0;
 
         virtual void onClose(Window& w) = 0;

@@ -68,9 +68,7 @@ Window::Window(Window* parent, Window::Type type)
 , _type(type)
 , _minimumSize(0, 0)
 , _maximumSize(64000, 64000)
-, _startPostion( WindowPosition::Manual )
-, _state(WindowState::Normal )
-, _icon()
+, _state(Normal)
 {    
     _windowManager.init(*this);
 
@@ -100,6 +98,12 @@ Window::~Window()
        remove( *_windows.back() );
 
     deinit();
+}
+
+
+PixmapSurface& Window::surface()
+{
+    return _surface;
 }
 
 
@@ -883,15 +887,55 @@ Window::Type Window::type() const
 
 void Window::setType(Type type)
 {
-    // TODO: notify parent that frame configuration has changed !!!
-
     if( _impl )
         _impl->setType(type);
 
     _type = type;
 
-    //if(_parent)
-    //    _parent->onFrameChanged(*this);
+    if(_parent)
+        _parent->onFrameChanged(*this);
+}
+
+
+const Gfx::Image& Window::icon() const
+{
+    return _icon;
+}
+
+
+void Window::setIcon(const Gfx::Image& i)
+{
+    if( _impl )
+        _impl->setIcon(i);
+
+    _icon = i;
+
+    if(_parent)
+        _parent->onFrameChanged(*this);
+}
+
+
+const std::string& Window::title() const
+{
+    return _title;
+}
+
+
+void Window::setTitle(const std::string& t)
+{
+    if( _impl )
+        _impl->setTitle(t);
+
+    _title = t;
+
+    if(_parent)
+        _parent->onFrameChanged(*this);
+}
+
+
+void Window::onFrameChanged(Window& w)
+{
+    _windowManager.onFrameChanged(w);
 }
 
 
@@ -925,72 +969,28 @@ void Window::setMaximumSize(const Gfx::SizeF& s)
 }
 
 
-Hmi::WindowPosition::Type Window::defaultPosition() const
-{
-    return _startPostion;
-}
-
-
-void Window::setDefaultPosition( Hmi::WindowPosition::Type p)
-{    
-    _startPostion = p;
-}
-
-
-Hmi::WindowState::Type Window::state() const
-{
+Window::State Window::state() const
+{   
     return _state;
 }
 
 
-void Window::setState( WindowState::Type s)
+void Window::setState(Window::State s)
 {
     if( _impl )
         _impl->setState(s);
 
+    // TODO: need a Maximize/Minimize event
     _state = s;
+
+    if(_parent)
+        _parent->onStateChanged(*this);
 }
 
 
-bool Window::hasBorder() const
+void Window::onStateChanged(Window& w)
 {
-    return _type == Window::Normal;
-}
-
-
-const Gfx::Image& Window::icon() const
-{
-    return _icon;
-}
-
-
-void Window::setIcon(const Gfx::Image& i)
-{
-    if( _impl )
-        _impl->setIcon(i);
-
-    _icon = i;
-}
-
-
-const std::string& Window::title() const
-{
-    return _title;
-}
-
-
-void Window::setTitle( const std::string& t )
-{
-    if( _impl )
-        _impl->setTitle(t);
-
-    _title = t;
-}
-
-
-PixmapSurface& Window::surface()
-{
-    return _surface;
+    _windowManager.onStateChanged(w);
 }
 
 

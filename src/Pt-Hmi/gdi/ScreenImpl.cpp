@@ -91,6 +91,16 @@ void ScreenImpl::onMove(Window& w, const Gfx::PointF& p)
 }
 
 
+void ScreenImpl::onFrameChanged(Window& w)
+{
+}
+
+
+void ScreenImpl::onStateChanged(Window& w)
+{
+}
+
+
 void ScreenImpl::onClosing(Window& w)
 {
 }

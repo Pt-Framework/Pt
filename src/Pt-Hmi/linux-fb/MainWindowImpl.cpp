@@ -29,17 +29,12 @@
 */
 
 #include "MainWindowImpl.h"
-#include "ApplicationImpl.h"
-#include "ScreenImpl.h"
-
-#include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Screen.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-MainWindowImpl::MainWindowImpl(Window::Type type)
+MainWindowImpl::MainWindowImpl(Window::Type)
 {
 }
 
@@ -51,37 +46,31 @@ MainWindowImpl::~MainWindowImpl()
 
 void MainWindowImpl::paint(const Gfx::RectF& rect)
 {
-    // screen will update paint region
 }
 
 
 void MainWindowImpl::activate()
 {
-    // window manager takes care of everything
 }
 
 
 void MainWindowImpl::show(bool b)
 {
-    // window manager takes care of everything
 }
 
 
 void MainWindowImpl::enable(bool b)
 {
-    // window manager takes care of everything
 }
 
 
 void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
-    _size = size;
 }
 
 
 void MainWindowImpl::move(const Gfx::PointF& pos)
 {
-    _position = pos;
 }
 
 
@@ -95,33 +84,28 @@ void MainWindowImpl::setType(Window::Type type)
 }
 
 
-void MainWindowImpl::setState(WindowState::Type p)
+void MainWindowImpl::setState(Window::State s)
 {
-    // TODO
 }
 
 
 void MainWindowImpl::setIcon(const Gfx::Image& icon)
 {
-    // TODO
 }
 
 
 void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
 {
-    // TODO
 }
 
 
 void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 {
-    // TODO
 }
 
 
 void MainWindowImpl::setTitle(const std::string& text)
 {
-    // TODO
 }
 
 } // namespace

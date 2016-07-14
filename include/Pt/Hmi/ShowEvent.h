@@ -29,14 +29,14 @@
 #ifndef Pt_Hmi_ShowEvent_h
 #define Pt_Hmi_ShowEvent_h
 
+#include <Pt/Hmi/Api.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
-#include <Pt/Gfx/Rect.h>
-#include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/WindowState.h>
 
-namespace Pt{
-namespace Hmi{
+namespace Pt {
+
+namespace Hmi {
 
 class PT_HMI_API ShowEvent : public Pt::BasicEvent<ShowEvent>
 {
@@ -71,7 +71,9 @@ class PT_HMI_API ShowEvent : public Pt::BasicEvent<ShowEvent>
         Pt::uint64_t _vid;
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif
 

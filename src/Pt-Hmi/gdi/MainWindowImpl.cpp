@@ -157,34 +157,6 @@ void MainWindowImpl::resize(const Gfx::SizeF& s)
 }
 
 
-void MainWindowImpl::setTitle(const std::string& text)
-{
-    SetWindowText(_hwnd, text.c_str());
-}
-
-
-void MainWindowImpl::setState(WindowState::Type p)
-{
-    LONG style = GetWindowLong(_hwnd, GWL_STYLE);
-
-    switch(p)
-    {
-        case Pt::Hmi::WindowState::Normal:
-        break;
-
-        case Pt::Hmi::WindowState::Maximized:
-            style |= WS_MAXIMIZE;
-        break;
-
-        case Pt::Hmi::WindowState::Minimized:
-            style |= WS_MINIMIZE;
-        break;
-    }
-
-  SetWindowLong(_hwnd, GWL_STYLE, style); 
-}
-
-
 void MainWindowImpl::setType(Window::Type type)
 {
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
@@ -227,18 +199,6 @@ void MainWindowImpl::setType(Window::Type type)
 }
 
 
-void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
-{
-    // TODO
-}
-
-
-void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
-{
-    // TODO
-}
-
-
 void MainWindowImpl::setIcon(const Gfx::Image& icon)
 {
     if(icon.width() == 0 || icon.height() == 0)
@@ -267,6 +227,44 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 
     HICON hIcon = ::CreateIcon(hInstance, icon.width(), icon.height(), 4, 8, 0, (BYTE*)&bitmapBuffer[0]);
     SetClassLong(_hwnd, GCL_HICON, (LONG)hIcon);     
+}
+
+
+void MainWindowImpl::setTitle(const std::string& text)
+{
+    SetWindowText(_hwnd, text.c_str());
+}
+
+
+void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
+{
+}
+
+
+void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
+{
+}
+
+
+void MainWindowImpl::setState(Window::State s)
+{
+    LONG style = GetWindowLong(_hwnd, GWL_STYLE);
+
+    switch(s)
+    {
+        case Window::Normal:
+        break;
+
+        case Window::Maximized:
+            style |= WS_MAXIMIZE;
+        break;
+
+        case Pt::Hmi::Window::Minimized:
+            style |= WS_MINIMIZE;
+        break;
+    }
+
+    SetWindowLong(_hwnd, GWL_STYLE, style); 
 }
 
 

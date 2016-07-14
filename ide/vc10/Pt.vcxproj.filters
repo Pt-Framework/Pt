@@ -1095,12 +1095,6 @@
     <ClInclude Include="..\..\include\Pt\WindowsCodec.h">
       <Filter>Pt</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowStartPosition.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\WindowState.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>

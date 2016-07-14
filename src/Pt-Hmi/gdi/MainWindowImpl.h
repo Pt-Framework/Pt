@@ -32,7 +32,6 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/WindowState.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
@@ -71,7 +70,7 @@ class MainWindowImpl
 
         void paint(const Gfx::RectF& rect);
     
-        void setState(WindowState::Type p);
+        void setState(Window::State s);
        
         void setIcon(const Gfx::Image& p);
     

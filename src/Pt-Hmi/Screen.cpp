@@ -82,6 +82,12 @@ Window* Screen::findWindow(const std::string& name)
 }
 
 
+const std::vector<Window*>& Screen::windows() const
+{
+  return _windows;
+}
+
+
 double Screen::width() const
 {
     return _impl->width();
@@ -148,6 +154,18 @@ double Screen::resolutionDPI() const
 }
 
 
+Pt::Gfx::PointF Screen::toScreen(const Pt::Gfx::PointF& p) const
+{
+    return p;
+}
+
+
+Pt::Gfx::PointF Screen::fromScreen(const Pt::Gfx::PointF& p) const
+{
+    return p;
+}
+
+
 ScreenImpl* Screen::impl()
 {
     return _impl;
@@ -177,6 +195,18 @@ void Screen::onMove(Window& w, const Gfx::PointF& p)
 {   
     w.impl()->move(p);
     _impl->onMove(w, p);
+}
+
+
+void Screen::onFrameChanged(Window& w)
+{
+    _impl->onFrameChanged(w);
+}
+
+
+void Screen::onStateChanged(Window& w)
+{
+    _impl->onStateChanged(w);
 }
 
 

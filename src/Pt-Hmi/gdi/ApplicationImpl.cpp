@@ -508,14 +508,11 @@ bool ApplicationImpl::processMessage(HWND hwnd, unsigned int msg,
             double maxWidth = w->maximumSize().width();
             double maxHeight = w->maximumSize().height();
 
-            POINT min = { static_cast<LONG>(minWidth), 
-                          static_cast<LONG>(minHeight) };
-            POINT max = { static_cast<LONG>(maxWidth), 
-                          static_cast<LONG>(maxHeight) };
-
             MINMAXINFO* mmi = (MINMAXINFO*)lparam;
-            mmi->ptMaxTrackSize = max; 
-            mmi->ptMinTrackSize = min;
+            mmi->ptMaxTrackSize.x = static_cast<LONG>(maxWidth);
+            mmi->ptMaxTrackSize.y = static_cast<LONG>(maxHeight); 
+            mmi->ptMinTrackSize.x = static_cast<LONG>(minWidth);
+            mmi->ptMinTrackSize.y = static_cast<LONG>(minHeight);
             handled = true;  
             break;
         }
@@ -684,7 +681,7 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
 
 void ApplicationImpl::onMove(Window& w, HWND hwnd, LPARAM lParam)
 { 
-    RECT  info;
+    RECT info;
     GetWindowRect(hwnd, &info);
     int xPos = info.left;
     int yPos = info.top;
@@ -696,7 +693,7 @@ void ApplicationImpl::onMove(Window& w, HWND hwnd, LPARAM lParam)
 
 void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
 {   
-    WindowState::Type state = WindowState::Normal;
+    Window::State state = Window::Normal;
 
     switch(wParam)
     {
@@ -705,18 +702,20 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
             break;
 
         case SIZE_MAXIMIZED:
-            state = WindowState::Maximized;
+            state = Window::Maximized;
             break;
 
         case SIZE_MINIMIZED:
-            state = WindowState::Minimized;
+            state = Window::Minimized;
             break;
  
         default:
         case SIZE_RESTORED:
-            state = WindowState::Normal;
+            state = Window::Normal;
             break;
-    }   
+    }
+
+    //TODO: send event that state has changed
 
     int width  = LOWORD(lParam);
     int height = HIWORD(lParam); 

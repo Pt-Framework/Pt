@@ -30,8 +30,7 @@
 #ifndef PT_HMI_WINDOW_H
 #define PT_HMI_WINDOW_H
 
-#include <Pt/Hmi/WindowStartPosition.h>
-#include <Pt/Hmi/WindowState.h>
+#include <Pt/Hmi/WindowBase.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
@@ -46,10 +45,7 @@
 #include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Hmi/ShowEvent.h>
 #include <Pt/Hmi/EnableEvent.h>
-#include <Pt/Hmi/Visual.h>
-#include <Pt/Hmi/WindowBase.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Connectable.h>
 #include <Pt/Signal.h>
 #include <map>
 
@@ -69,19 +65,23 @@ class PT_HMI_API Window : public WindowBase
   public:
     enum Type
     {
+        Default = 0, // default window frame
+        Popup = 1    // frameless window
+    };
+    
+    enum State
+    {
         Normal = 0,
-        Popup = 1
-        // Dialog 
+        Minimized = 1,
+        Maximized = 2
     };
 
   public:
-    explicit Window(Window* parent = 0, Window::Type type = Normal);
+    explicit Window(Window* parent = 0, Window::Type type = Default);
 
     virtual ~Window();
 
-    Type type() const;
-
-    void setType(Type type);
+    PixmapSurface& surface();
 
     WindowBase* parent();
 
@@ -157,9 +157,29 @@ class PT_HMI_API Window : public WindowBase
 
     void close();    
 
-    // TODO: signals to observe windows e.g. close, titleChanged
+    Type type() const;
 
-    PixmapSurface& surface();
+    void setType(Type type);
+
+    const Gfx::Image& icon() const;
+
+    void setIcon(const Gfx::Image& i);
+
+    const std::string& title() const;
+
+    void setTitle( const std::string& t );
+
+    const Gfx::SizeF& minimumSize() const;
+
+    void setMinimumSize(const Gfx::SizeF& s);
+
+    const Gfx::SizeF& maximumSize() const;
+
+    void setMaximumSize(const Gfx::SizeF& s);
+
+    State state() const;
+
+    void setState(State s);
 
     MainWindowImpl* impl();
 
@@ -199,6 +219,10 @@ class PT_HMI_API Window : public WindowBase
 
     virtual void onResize(Window& w, const Gfx::SizeF& to);
 
+    virtual void onFrameChanged(Window& w);
+
+    virtual void onStateChanged(Window& w);
+
     virtual void onClose(Window& w);
 
     virtual void onClosing(Window& w);
@@ -235,46 +259,6 @@ class PT_HMI_API Window : public WindowBase
     virtual void onShowEvent( const ShowEvent& ev );
 
     virtual void onEnableEvent( const EnableEvent& ev );
-
-  public:
-    // TODO:
-    const Gfx::SizeF& minimumSize() const;
-
-    // TODO:
-    void setMinimumSize(const Gfx::SizeF& s);
-
-    // TODO:
-    const Gfx::SizeF& maximumSize() const;
-
-    // TODO:
-    void setMaximumSize(const Gfx::SizeF& s);
-
-    // TODO:
-    Hmi::WindowPosition::Type defaultPosition() const;
-
-    // TODO:
-    void setDefaultPosition(Hmi::WindowPosition::Type p);
-
-    // TODO:
-    Hmi::WindowState::Type state() const;
-
-    // TODO:
-    void setState(Hmi::WindowState::Type s);
-    
-    // TODO:
-    bool hasBorder() const;
-
-    // TODO:
-    const Gfx::Image& icon() const;
-
-    // TODO:
-    void setIcon(const Gfx::Image& i);
-
-    // TODO:
-    const std::string& title() const;
-
-    // TODO:
-    void setTitle( const std::string& t );
 
   private:
     void init(Window* parent);
@@ -327,14 +311,11 @@ class PT_HMI_API Window : public WindowBase
     Gfx::PointF                    _position;
     Gfx::SizeF                     _size;
     Type                           _type;
-
-    Gfx::SizeF                     _minimumSize;
-    Gfx::SizeF                     _maximumSize;
-    Hmi::WindowPosition::Type      _startPostion;
-    Hmi::WindowState::Type         _state;    
     std::string                    _title;
     Gfx::Image                     _icon;
-    bool                           _canClose;         
+    Gfx::SizeF                     _minimumSize;
+    Gfx::SizeF                     _maximumSize;
+    State                          _state;
 };
 
 } // namespace

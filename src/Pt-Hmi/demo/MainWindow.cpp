@@ -90,6 +90,8 @@ MainWindow::MainWindow()
     resize( Gfx::SizeF(600, 480) ); 
     
     add( _child2 );
+    _child2.setMinimumSize( Gfx::SizeF(150, 50) );
+    _child2.setMaximumSize( Gfx::SizeF(300, 300) );
     _child2.setTitle("Child 2");
     _child2.move( Gfx::PointF(400, 50) );
     _child2.resize( Gfx::SizeF(200, 100) );

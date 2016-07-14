@@ -44,12 +44,10 @@ namespace Hmi {
 
 class Window;
 class WindowFrame;
-class Application;
 class MouseEvent;
 class KeyEvent;
 class EnterEvent;
 class LeaveEvent;
-class PaintEvent;
 
 class WindowManager : public Pt::Connectable
 {
@@ -59,6 +57,10 @@ class WindowManager : public Pt::Connectable
         virtual ~WindowManager();
 
         void init(WindowBase& parent);
+
+        void add(Window& w);
+
+        void remove(Window& window);
 
         double borderWidth() const
         {
@@ -94,10 +96,6 @@ class WindowManager : public Pt::Connectable
         {
             return _font;
         }
-
-        void add(Window& w);
-
-        void remove(Window& window);
                   
     public:
         void enterEvent(const EnterEvent& ev);
@@ -111,11 +109,11 @@ class WindowManager : public Pt::Connectable
         void paint(PaintSurface& surface, const Gfx::RectF& rect);
 
     public:
+        void onUpdate(Window& child, const Gfx::RectF& rect);
+
         void onResize(Window& w, const Gfx::SizeF& to);
 
         void onMove(Window& w, const Gfx::PointF& to);
-
-        void onUpdate(Window& child, const Gfx::RectF& rect);
 
         void onShow( Window& w, bool visible );
 
@@ -123,24 +121,24 @@ class WindowManager : public Pt::Connectable
 
         void onEnable(Window& w, bool enable);
 
+        void onFrameChanged(Window& w);
+
+        void onStateChanged(Window& w);
+
         void onClosing(Window& w);
 
         void onClose(Window& w);
 
         Gfx::PointF toParent(const Window& w, const Gfx::PointF& pos) const;
-        
+
         Gfx::PointF fromParent(const Window& w, const Gfx::PointF& pos) const;
 
+    private:
         WindowFrame* findWindow(const Gfx::PointF& p);
 
-        WindowFrame* findWindow(Window& w);
-
-        Gfx::SizeF toFrameSize(Window& w, const Gfx::SizeF& clientSize);
-
-        //Gfx::RectF toFrameRect(Window& w, const Gfx::RectF& clientRect);
+        WindowFrame* findWindow(const Window& w) const;
 
     private:
-        Application&              _app;
         WindowBase*               _parent; 
         std::vector<WindowFrame*> _windows;
         

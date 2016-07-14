@@ -380,6 +380,31 @@ const Gfx::RectF& WindowFrame::frameRect() const
 }
 
 
+void WindowFrame::setFrame(double bw, double th)
+{ 
+    _borderWidth = bw;
+    _titleHeight = th;
+}
+
+
+Gfx::PointF WindowFrame::toFrame(const Gfx::PointF& pos) const
+{
+    double offY = _borderWidth + _titleHeight;
+    double offX = _borderWidth;
+
+    return pos + Gfx::PointF(offX, offY);
+}
+
+
+Gfx::PointF WindowFrame::fromFrame(const Gfx::PointF& pos) const
+{
+    double offY = _borderWidth + _titleHeight;
+    double offX = _borderWidth;
+
+    return pos - Gfx::PointF(offX, offY);
+}
+
+
 void WindowFrame::onMenu()
 {
 }
@@ -403,32 +428,21 @@ void WindowFrame::onClose()
 
 bool WindowFrame::isTitle(const Gfx::PointF& p) const
 {            
-    if( ! _window->hasBorder() )
-        return false;
-
     Gfx::PointF localPos = p - _frameRect.topLeft();
 
-    double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
-
-    return localPos.x() >= borderWidth && 
-           localPos.x() < borderWidth + _clientRect.width() &&
-           localPos.y() >= borderWidth &&
-           localPos.y() < borderWidth + titleHeight;
+    return localPos.x() >= _borderWidth && 
+           localPos.x() < _borderWidth + _clientRect.width() &&
+           localPos.y() >= _borderWidth &&
+           localPos.y() < _borderWidth + _titleHeight;
 }
 
 
 bool WindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
 {        
-    if( ! _window->hasBorder() )
-        return false;
-
-    double borderWidth = _wm->borderWidth();
-
     Gfx::PointF localPos = p - _frameRect.topLeft();
 
     return localPos.x() >= 0 &&
-           localPos.x() < borderWidth &&
+           localPos.x() < _borderWidth &&
            localPos.y() >= 0 &&
            localPos.y() < _frameRect.height();
 }
@@ -436,15 +450,10 @@ bool WindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
 
 bool WindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
 {        
-    if( ! _window->hasBorder() )
-        return false;
-
-    double borderWidth = _wm->borderWidth();
-
     Gfx::PointF localPos = p - _frameRect.topLeft();
 
-    return localPos.x() >= borderWidth + _clientRect.width() &&
-           localPos.x() < 2 * borderWidth + _clientRect.width() &&
+    return localPos.x() >= _borderWidth + _clientRect.width() &&
+           localPos.x() < 2 * _borderWidth + _clientRect.width() &&
            localPos.y() >= 0 &&
            localPos.y() < _frameRect.height();
 }
@@ -452,32 +461,20 @@ bool WindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
 
 bool WindowFrame::isTopBorder(const Pt::Gfx::PointF& p) const
 {        
-    if( ! _window->hasBorder() )
-        return false;
-
-    double borderWidth = _wm->borderWidth();
-
     Gfx::PointF localPos = p - _frameRect.topLeft();
 
     return localPos.x() >= 0 &&
            localPos.x() < _frameRect.width() &&
            localPos.y() >= 0 &&
-           localPos.y() < borderWidth;
+           localPos.y() < _borderWidth;
 }
 
 
 bool WindowFrame::isBottomBorder(const Pt::Gfx::PointF& p) const
 {        
-    if( ! _window->hasBorder() )
-        return false;
-
     Gfx::PointF localPos = p - _frameRect.topLeft();
 
-    // TODO: remove this, use local variables...
-    double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
-
-    double minY = _clientRect.height() + borderWidth + titleHeight;
+    double minY = _clientRect.height() + _borderWidth + _titleHeight;
 
     return localPos.x() >= 0 &&
            localPos.x() < _frameRect.width() &&
@@ -503,14 +500,11 @@ void WindowFrame::update(const Gfx::RectF& rect)
 
 void WindowFrame::moveEvent(const MoveEvent& mev)
 {
-    double borderWidth = _window->hasBorder() ? _wm->borderWidth() : 0;
-    double titleHeight = _window->hasBorder() ? _wm->titleHeight(): 0;
-
     _frameRect.setOrigin( mev.position() );
 
     Gfx::PointF clientPos = mev.position();
-    clientPos.addX(borderWidth);
-    clientPos.addY(borderWidth + titleHeight);
+    clientPos.addX(_borderWidth);
+    clientPos.addY(_borderWidth + _titleHeight);
     _clientRect.setOrigin(clientPos);
 
     onLayout();
@@ -519,15 +513,12 @@ void WindowFrame::moveEvent(const MoveEvent& mev)
 
 void WindowFrame::resizeEvent(const ResizeEvent& rev)
 {
-    double borderWidth = _window->hasBorder() ? _wm->borderWidth(): 0;
-    double titleHeight = _window->hasBorder() ? _wm->titleHeight(): 0;
-
     _clientRect.setSize( rev.size() );
     
     Gfx::SizeF frameSize = rev.size();
-    frameSize.addWidth(2 * borderWidth);
-    frameSize.addHeight(2 * borderWidth);
-    frameSize.addHeight(titleHeight);
+    frameSize.addWidth(2 * _borderWidth);
+    frameSize.addHeight(2 * _borderWidth);
+    frameSize.addHeight(_titleHeight);
     _frameRect.setSize(frameSize);
 
     onLayout();
@@ -536,25 +527,23 @@ void WindowFrame::resizeEvent(const ResizeEvent& rev)
 
 void WindowFrame::onLayout()
 {
-    double borderWidth = _wm->borderWidth();
-    double titleHeight = _wm->titleHeight();
-    double buttonWidth = titleHeight - borderWidth;
+    double buttonWidth = _titleHeight - _borderWidth;
 
-    Gfx::PointF menuPos(_frameRect.x() + borderWidth, _frameRect.y() + borderWidth);
+    Gfx::PointF menuPos(_frameRect.x() + _borderWidth, _frameRect.y() + _borderWidth);
     _menuButton.moveEvent( MoveEvent(0, menuPos ) );
     _menuButton.resizeEvent( ResizeEvent(0, Gfx::SizeF(buttonWidth, buttonWidth) ) );
 
-    double buttonX = _frameRect.x() + _frameRect.width() - (borderWidth + buttonWidth);
-    double buttonY = _frameRect.y() + borderWidth;
+    double buttonX = _frameRect.x() + _frameRect.width() - (_borderWidth + buttonWidth);
+    double buttonY = _frameRect.y() + _borderWidth;
 
     _closeButton.moveEvent( MoveEvent(0, Gfx::PointF(buttonX, buttonY) ) );
     _closeButton.resizeEvent( ResizeEvent(0, Gfx::SizeF(buttonWidth, buttonWidth) ) );
 
-    buttonX -= borderWidth + buttonWidth;
+    buttonX -= _borderWidth + buttonWidth;
     _maximizeButton.moveEvent( MoveEvent(0, Gfx::PointF(buttonX, buttonY) ) );
     _maximizeButton.resizeEvent( ResizeEvent(0, Gfx::SizeF(buttonWidth, buttonWidth) ) );
 
-    buttonX -= borderWidth + buttonWidth;
+    buttonX -= _borderWidth + buttonWidth;
     _minimizeButton.moveEvent( MoveEvent(0, Gfx::PointF(buttonX, buttonY) ) );
     _minimizeButton.resizeEvent( ResizeEvent(0, Gfx::SizeF(buttonWidth, buttonWidth) ) );
 }
@@ -728,11 +717,8 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
 
 void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    if( ! _window->hasBorder()  )
+    if( _borderWidth < 0.1 && _titleHeight < 0.1  )
         return;
-
-    const double borderWidth = _wm->borderWidth();
-    const double titleHeight = _wm->titleHeight();
 
     // TODO: clipping region
     Painter painter(surface);    
@@ -748,33 +734,33 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::PointF pos = _window->position();
 
     Gfx::RectF leftBorder( pos.x(), 
-                           pos.x() + borderWidth - 1,
-                           pos.y() + borderWidth, 
-                           pos.y() + _frameRect.height() - borderWidth - 1 );
+                           pos.x() + _borderWidth - 1,
+                           pos.y() + _borderWidth, 
+                           pos.y() + _frameRect.height() - _borderWidth - 1 );
     painter.fillRect(leftBorder);
 
     Gfx::RectF topBorder(pos.x(),
                          pos.x() + _frameRect.width() - 1,
                          pos.y(),
-                         pos.y() + borderWidth - 1);
+                         pos.y() + _borderWidth - 1);
     painter.fillRect(topBorder);
 
-    Gfx::RectF rightBorder(pos.x() + _frameRect.width() - borderWidth,
+    Gfx::RectF rightBorder(pos.x() + _frameRect.width() - _borderWidth,
                            pos.x() + _frameRect.width() - 1,
-                           pos.y() + borderWidth,
-                           pos.y() + _frameRect.height() - borderWidth - 1 );
+                           pos.y() + _borderWidth,
+                           pos.y() + _frameRect.height() - _borderWidth - 1 );
     painter.fillRect(rightBorder);
 
     Gfx::RectF bottomBorder(pos.x(),
                             pos.x() + _frameRect.width() - 1,
-                            pos.y() + _frameRect.height() - borderWidth,
+                            pos.y() + _frameRect.height() - _borderWidth,
                             pos.y() + _frameRect.height() - 1);
     painter.fillRect(bottomBorder);
 
-    Gfx::RectF titleArea( pos.x() + borderWidth,
-                          pos.x() + _frameRect.width() - borderWidth - 1,
-                          pos.y() + borderWidth,
-                          pos.y() + borderWidth + titleHeight - 1);
+    Gfx::RectF titleArea( pos.x() + _borderWidth,
+                          pos.x() + _frameRect.width() - _borderWidth - 1,
+                          pos.y() + _borderWidth,
+                          pos.y() + _borderWidth + _titleHeight - 1);
     painter.fillRect(titleArea);
 
     //
@@ -792,15 +778,15 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
                      Gfx::PointF(_frameRect.bottomLeft().x(),
                                  _frameRect.bottomLeft().y() + 1) );
 
-    painter.drawLine( Gfx::PointF(_frameRect.topRight().x() - (borderWidth -1),
-                                  _frameRect.topRight().y() + (borderWidth) + titleHeight),
-                      Gfx::PointF(_frameRect.bottomRight().x() - (borderWidth -1),
-                                  _frameRect.bottomRight().y() - (borderWidth-1)) );
+    painter.drawLine( Gfx::PointF(_frameRect.topRight().x() - (_borderWidth -1),
+                                  _frameRect.topRight().y() + (_borderWidth) + _titleHeight),
+                      Gfx::PointF(_frameRect.bottomRight().x() - (_borderWidth -1),
+                                  _frameRect.bottomRight().y() - (_borderWidth-1)) );
     
-    painter.drawLine( Gfx::PointF(_frameRect.bottomLeft().x() + (borderWidth),
-                                  _frameRect.bottomLeft().y() - (borderWidth - 1)),
-                      Gfx::PointF(_frameRect.bottomRight().x() - (borderWidth -2),
-                                  _frameRect.bottomRight().y() - (borderWidth - 1)) );
+    painter.drawLine( Gfx::PointF(_frameRect.bottomLeft().x() + (_borderWidth),
+                                  _frameRect.bottomLeft().y() - (_borderWidth - 1)),
+                      Gfx::PointF(_frameRect.bottomRight().x() - (_borderWidth -2),
+                                  _frameRect.bottomRight().y() - (_borderWidth - 1)) );
 
     //
     // dark outer and inner border contour
@@ -818,15 +804,15 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
                      Gfx::PointF(_frameRect.bottomRight().x(),
                                  _frameRect.bottomRight().y() + 1) );
 
-    painter.drawLine( Gfx::PointF(_frameRect.topLeft().x() + (borderWidth-1),
-                                  _frameRect.topLeft().y() + (borderWidth) + titleHeight),
-                      Gfx::PointF(_frameRect.bottomLeft().x() + (borderWidth-1),
-                                  _frameRect.bottomLeft().y() - (borderWidth - 2)) );
+    painter.drawLine( Gfx::PointF(_frameRect.topLeft().x() + (_borderWidth-1),
+                                  _frameRect.topLeft().y() + (_borderWidth) + _titleHeight),
+                      Gfx::PointF(_frameRect.bottomLeft().x() + (_borderWidth-1),
+                                  _frameRect.bottomLeft().y() - (_borderWidth - 2)) );
 
-    painter.drawLine( Gfx::PointF(_frameRect.topLeft().x() + (borderWidth-1),
-                                  _frameRect.topLeft().y() + (borderWidth-1) + titleHeight),
-                      Gfx::PointF(_frameRect.topRight().x() - (borderWidth-2),
-                                  _frameRect.topRight().y() + (borderWidth-1) + titleHeight) );
+    painter.drawLine( Gfx::PointF(_frameRect.topLeft().x() + (_borderWidth-1),
+                                  _frameRect.topLeft().y() + (_borderWidth-1) + _titleHeight),
+                      Gfx::PointF(_frameRect.topRight().x() - (_borderWidth-2),
+                                  _frameRect.topRight().y() + (_borderWidth-1) + _titleHeight) );
 
     //
     // title bar text
@@ -837,8 +823,8 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     painter.setFont(font);
     Gfx::FontMetrics fm = painter.fontMetrics(title);
 
-    Gfx::PointF textPos(pos.x() + borderWidth + titleHeight, 
-                        pos.y() + titleHeight - borderWidth);
+    Gfx::PointF textPos(pos.x() + _borderWidth + _titleHeight, 
+                        pos.y() + _titleHeight - _borderWidth);
 
     Gfx::Color textColor = _window->isActive() ? _wm->textColor() 
                                                : _wm->inactiveTextColor(); 
@@ -860,10 +846,10 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::Pen gripPenDark(1, gripColorDark);
 
 
-    Gfx::PointF gripStart( textPos.x() + fm.width() + borderWidth, 
-                           pos.y() + borderWidth - 2); // approx.
-    Gfx::PointF gripEnd(pos.x() + _frameRect.width() - borderWidth - 3*titleHeight,
-                        pos.y() + borderWidth - 2); // approx.
+    Gfx::PointF gripStart( textPos.x() + fm.width() + _borderWidth, 
+                           pos.y() + _borderWidth - 2); // approx.
+    Gfx::PointF gripEnd(pos.x() + _frameRect.width() - _borderWidth - 3*_titleHeight,
+                        pos.y() + _borderWidth - 2); // approx.
     
     for(int n = 0; n < 4; ++n)
     {

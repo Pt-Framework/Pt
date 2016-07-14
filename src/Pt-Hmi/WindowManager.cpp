@@ -47,8 +47,7 @@ namespace Pt {
 namespace Hmi {
 
 WindowManager::WindowManager()
-: _app( Application::instance() )
-, _parent(0)
+: _parent(0)
 , _activeWindow(0)
 , _currentWindow(0)
 , _grabbedWindow(0)
@@ -81,20 +80,9 @@ void WindowManager::init(WindowBase& parent)
 void WindowManager::add(Window& w)
 {    
     WindowFrame* frame = new WindowFrame(*this, w);
-
-    switch( w.type() )
-    {
-        case Window::Popup:
-            frame->setFrame(0, 0);
-            break;
-        
-        default:
-        case Window::Normal:
-            frame->setFrame(_borderWidth, _titleHeight);
-            break;
-    }
-
     _windows.push_back(frame);
+
+    onFrameChanged(w);
 }
 
 
@@ -140,9 +128,9 @@ WindowFrame* WindowManager::findWindow(const Gfx::PointF& p)
 }
 
 
-WindowFrame* WindowManager::findWindow(Window& w)
+WindowFrame* WindowManager::findWindow(const Window& w) const
 {
-    std::vector<WindowFrame*>::iterator it;
+    std::vector<WindowFrame*>::const_iterator it;
     for(it = _windows.begin(); it != _windows.end(); ++it)
     {
         if( (*it)->window() == &w)
@@ -288,8 +276,35 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
-void WindowManager::onResize(Window& w, const Gfx::SizeF& to)
+void WindowManager::onUpdate(Window& w, const Gfx::RectF& rect)
+{
+    Gfx::PointF updatePos = toParent( w, rect.topLeft() );
+
+    const Gfx::RectF updateRect(updatePos, rect.size());
+
+    if( ! _parent )
+        throw std::logic_error("WindowManager not initialized");
+        
+    _parent->update(updateRect);
+}
+
+
+void WindowManager::onResize(Window& w, const Gfx::SizeF& sz)
 {   
+    Gfx::SizeF to = sz;
+
+    if( to.width() > w.maximumSize().width() )
+        to.setWidth( w.maximumSize().width() );
+
+    if( to.height() > w.maximumSize().height() )
+        to.setHeight( w.maximumSize().height() );
+
+    if( to.width() < w.minimumSize().width() )
+        to.setWidth( w.minimumSize().width() );
+
+    if( to.height() < w.minimumSize().height() )
+        to.setHeight( w.minimumSize().height() );
+
     WindowFrame* frame = findWindow(w);
     if( ! frame )
         return;
@@ -297,6 +312,8 @@ void WindowManager::onResize(Window& w, const Gfx::SizeF& to)
     ResizeEvent rev(w.vid(), to);
     Application::instance().loop().commitEvent(rev);
     
+    // TODO: move updating to frame
+
     Gfx::RectF updateRect = frame->frameRect();
     
     frame->resizeEvent(rev);
@@ -315,54 +332,40 @@ void WindowManager::onResize(Window& w, const Gfx::SizeF& to)
 
 void WindowManager::onMove(Window& w, const Gfx::PointF& to)
 {   
-    MoveEvent mev(w.vid(), to);
-    
-    //
-    // TODO: use old/new frameRect to calculate update rect
-    //
-
     WindowFrame* frame = findWindow(w);
-    if(frame)
-        frame->moveEvent(mev);
+    if( ! frame )
+        return;
 
-    Gfx::PointF from = w.position();
+    MoveEvent mev(w.vid(), to);
     Application::instance().loop().commitEvent(mev);
+    
+    // TODO: move updating to frame
 
-    Gfx::SizeF size = toFrameSize( w, w.size() );
+    Gfx::RectF updateRect = frame->frameRect();
 
-    Gfx::RectF movedRect(to, size);
-    Gfx::RectF updateRect(from, size);  
-    updateRect.unify(movedRect);
+    frame->moveEvent(mev);
 
-    if( ! _parent )
-        throw std::logic_error("WindowManager not initialized");
-
-    _parent->update(updateRect);
-}
-
-
-void WindowManager::onUpdate(Window& w, const Gfx::RectF& rect)
-{
-    Gfx::PointF updatePos = toParent( w, rect.topLeft() );
-
-    const Gfx::RectF updateRect(updatePos, rect.size());
+    updateRect.unify( frame->frameRect() );
 
     if( ! _parent )
         throw std::logic_error("WindowManager not initialized");
-        
+
     _parent->update(updateRect);
 }
 
 
 void WindowManager::onShow( Window& w, bool visible )
 {
+    WindowFrame* frame = findWindow(w);
+    if( ! frame )
+        return;
+
     ShowEvent sev( w.vid(), visible );
     Application::instance().loop().commitEvent(sev);
 
-    Gfx::PointF framePos = w.position();
-    Gfx::SizeF frameSize = toFrameSize( w, w.size() );
+    // TODO: move updating to frame
 
-    Gfx::RectF updateRect(framePos, frameSize);
+    Gfx::RectF updateRect = frame->frameRect();
 
     if( ! _parent )
         throw std::logic_error("WindowManager not initialized");
@@ -405,18 +408,56 @@ void WindowManager::onActivate(Window* w)
 
 void WindowManager::onEnable(Window& w, bool enable)
 {
+    WindowFrame* frame = findWindow(w);
+    if( ! frame )
+        return;
+
     EnableEvent eev( w.vid(), enable );
     Application::instance().loop().commitEvent( eev );
 
-    Gfx::PointF framePos = w.position();
-    Gfx::SizeF frameSize = toFrameSize( w, w.size() );
-
-    Gfx::RectF updateRect(framePos, frameSize);
+    // TODO: move updating to frame
+    
+    Gfx::RectF updateRect = frame->frameRect();
 
     if( ! _parent )
         throw std::logic_error("WindowManager not initialized");
 
     _parent->update(updateRect);
+}
+
+
+void WindowManager::onFrameChanged(Window& w)
+{
+    WindowFrame* frame = findWindow(w);
+    if( ! frame )
+        return;
+
+    switch( w.type() )
+    {
+        case Window::Popup:
+            frame->setFrame(0, 0);
+            break;
+        
+        default:
+        case Window::Normal:
+            frame->setFrame(_borderWidth, _titleHeight);
+            break;
+    }
+
+    // TODO: move updating to frame
+
+    Gfx::RectF updateRect = frame->frameRect();
+
+    if( ! _parent )
+        throw std::logic_error("WindowManager not initialized");
+
+    _parent->update(updateRect);
+}
+
+
+void WindowManager::onStateChanged(Window& w)
+{
+    // TODO: at least maximize should be possible
 }
 
 
@@ -429,12 +470,15 @@ void WindowManager::onClosing(Window& w)
 
 void WindowManager::onClose(Window& w)
 {
+    WindowFrame* frame = findWindow(w);
+    if( ! frame )
+        return;
+
+    Gfx::RectF updateRect = frame->frameRect();
+
     remove(w);
 
-    Gfx::PointF framePos = w.position();
-    Gfx::SizeF frameSize = toFrameSize( w, w.size() );
-
-    Gfx::RectF updateRect(framePos, frameSize);
+    // TODO: move updating to frame
 
     if( ! _parent )
         throw std::logic_error("WindowManager not initialized");
@@ -443,57 +487,23 @@ void WindowManager::onClose(Window& w)
 }
 
 
-Gfx::SizeF WindowManager::toFrameSize(Window& w, const Gfx::SizeF& clientSize)
-{  
-    const double borderWidth = w.hasBorder() ? _borderWidth : 0;
-    const double titleHeight = w.hasBorder() ? _titleHeight : 0;
-
-    Gfx::SizeF size = clientSize;
-    size.addHeight(2 * borderWidth + titleHeight);
-    size.addWidth(2 * borderWidth);
-
-    return size;
-}
-
-
-//Gfx::RectF WindowManager::toFrameRect(Window& w, const Gfx::RectF& clientRect)
-//{  
-//    const double borderWidth = w.hasBorder() ? _borderWidth : 0;
-//    const double titleHeight = w.hasBorder() ? _titleHeight : 0;
-//
-//    Gfx::PointF pos = clientRect.topLeft();
-//    pos.subX(borderWidth);
-//    pos.subY(borderWidth + titleHeight);
-//
-//    Gfx::SizeF size = clientRect.size();
-//    size.addHeight(2 * borderWidth + titleHeight);
-//    size.addWidth(2 * borderWidth);
-//
-//    return Gfx::RectF(pos, size);
-//}
-
-
 Gfx::PointF WindowManager::toParent(const Window& w, const Gfx::PointF& pos) const
 {    
-    const double borderWidth = w.hasBorder() ? _borderWidth : 0;
-    const double titleHeight = w.hasBorder() ? _titleHeight : 0;
+    WindowFrame* frame = findWindow(w);
+    if( ! frame )
+        return pos;
 
-    double offY = borderWidth + titleHeight;
-    double offX = borderWidth;
-
-    return w.position() + pos + Gfx::PointF(offX, offY);
+    return w.position() + frame->toFrame(pos);
 }
 
 
 Gfx::PointF WindowManager::fromParent(const Window& w, const Gfx::PointF& pos) const
 {
-    const double borderWidth = w.hasBorder() ? _borderWidth : 0 ;
-    const double titleHeight = w.hasBorder() ? _titleHeight : 0 ;
+    WindowFrame* frame = findWindow(w);
+    if( ! frame )
+        return pos;
 
-    double offY = borderWidth + titleHeight;
-    double offX = borderWidth;
-
-    Gfx::PointF p = pos - w.position() - Gfx::PointF(offX, offY);
+    Gfx::PointF p = frame->fromFrame(pos) - w.position();
     return p;
 }
 

@@ -59,10 +59,7 @@ class PT_HMI_API Screen : public WindowBase
 
         Window* findWindow(const std::string& name);
 
-        const std::vector<Window*>& windows() const
-        {
-          return _windows;
-        }
+        const std::vector<Window*>& windows() const;
 
         double width() const;
 
@@ -80,21 +77,15 @@ class PT_HMI_API Screen : public WindowBase
       
         Gfx::Rect fromUnit(const Gfx::RectF& value);
 
-        virtual Pt::Gfx::PointF toScreen(const Pt::Gfx::PointF& p) const
-        {
-            return p;
-        }
-
-        virtual Pt::Gfx::PointF fromScreen(const Pt::Gfx::PointF& p) const
-        {
-            return p;
-        }
-
         double unitSizeInch() const;
       
         double unitSizeMm() const;
       
         double resolutionDPI() const;
+
+        virtual Pt::Gfx::PointF toScreen(const Pt::Gfx::PointF& p) const;
+
+        virtual Pt::Gfx::PointF fromScreen(const Pt::Gfx::PointF& p) const;
 
         ScreenImpl* impl();
 
@@ -112,6 +103,10 @@ class PT_HMI_API Screen : public WindowBase
         virtual void onResize(Window& w, const Gfx::SizeF& s);
 
         virtual void onMove(Window& w, const Gfx::PointF& p);
+
+        virtual void onFrameChanged(Window& w);
+
+        virtual void onStateChanged(Window& w);
 
         virtual void onClosing(Window& w);
 

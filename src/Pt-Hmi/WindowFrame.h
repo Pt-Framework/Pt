@@ -31,6 +31,7 @@
 #define Pt_Hmi_WindowFrame_h
 
 #include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
@@ -163,11 +164,11 @@ class WindowFrame : public Pt::Connectable
 
         const Gfx::RectF& frameRect() const;
 
-        void setFrame(double bw, double th)
-        { 
-            _borderWidth = bw;
-            _titleHeight = th; 
-        }
+        void setFrame(double bw, double th);
+
+        Gfx::PointF toFrame(const Gfx::PointF& pos) const;
+
+        Gfx::PointF fromFrame(const Gfx::PointF& pos) const;
 
         void update();
 

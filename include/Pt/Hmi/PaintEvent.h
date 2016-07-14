@@ -29,13 +29,13 @@
 #ifndef Pt_Hmi_PaintEvent_h
 #define Pt_Hmi_PaintEvent_h
 
+#include <Pt/Hmi/Api.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/Types.h>
 #include <Pt/Event.h>
-#include <Pt/Gfx/Rect.h>
-#include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/WindowState.h>
 
 namespace Pt{
+
 namespace Hmi{
 
 class PT_HMI_API PaintEvent : public Pt::BasicEvent<PaintEvent>

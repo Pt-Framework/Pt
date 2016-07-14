@@ -33,7 +33,6 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/WindowState.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
@@ -64,7 +63,7 @@ class MainWindowImpl
 
         void close();
 
-        void setState(WindowState::Type p);
+        void setState(Window::State s);
 
         void setType(Window::Type type);
 
@@ -75,10 +74,6 @@ class MainWindowImpl
         void setMaximumSize(const Gfx::SizeF& s); 
 
         void setTitle(const std::string& title);
-
-    private:
-        Gfx::PointF _position;
-        Gfx::SizeF  _size;
 };
 
 } // namespace
