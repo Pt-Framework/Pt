@@ -62,7 +62,6 @@ Window::Window(Window* parent, Window::Type type)
 , _enabled(true)
 , _enabledState(true)
 , _isClosed(false)
-, _damaged(true)
 , _position(0,0)
 , _size(10,10)
 , _type(type)
@@ -542,7 +541,8 @@ void Window::onUpdate(const Gfx::RectF& rect)
     if( ! _init )
         return;
     
-    _damaged = true;
+    _damageRect.unify(rect);
+
     _parent->onUpdate(*this, rect);
 }
 
@@ -553,34 +553,29 @@ void Window::onUpdate(Window& child, const Gfx::RectF& rect)
 }
 
 
-// TODO: rename paint/repaint
-void Window::onPaint(const Gfx::RectF& rect)
+void Window::repaint()
 {
-    // TODO: use a damage rect instead
-    if( ! _damaged )
+    if( _damageRect.isNull() )
         return;
-
-    _damaged = false;
-
+    
     if( ! this->isVisible() )
-        return;
+        return;  
 
-    onPaintBackground(rect);
+    onPaintBackground(_damageRect);
 
     if( mainWidget() )
-        mainWidget()->onPaint(rect);
+        mainWidget()->repaint(_damageRect);
 
     std::vector<Window*>::iterator child;
     for(child = _windows.begin(); child != _windows.end(); ++child)
     {
-        Gfx::PointF pos = (*child)->fromParent( rect.topLeft() );
-
-        Gfx::RectF updateRect( pos, rect.size() );
-        (*child)->onPaint(updateRect);
+        (*child)->repaint();
     }
 
-    PaintEvent pev(vid(), rect);
+    PaintEvent pev(vid(), _damageRect);
     Application::instance().loop().commitEvent(pev);
+
+    _damageRect.clear();
 }
 
 

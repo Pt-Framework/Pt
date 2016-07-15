@@ -290,13 +290,12 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
     std::vector<Window*>::iterator it;
     for(it = _windows.begin(); it != _windows.end(); ++it)
     {
-        Gfx::PointF pos = (*it)->fromScreen( screenRect.topLeft() );
-        Gfx::RectF rect( pos, screenRect.size() );
-        (*it)->onPaint(rect);
+        (*it)->repaint();
     }    
 
     _updateRect.clear();
-    PaintEvent pev(vid(), screenRect);
+
+    PaintEvent pev( this->vid(), screenRect);
     Application::instance().loop().commitEvent(pev);
 }
 

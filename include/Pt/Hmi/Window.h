@@ -58,9 +58,7 @@ class MainWindowImpl;
 
 class PT_HMI_API Window : public WindowBase
 {
-   friend class Widget; 
-   friend class Screen;
-   friend class Application;
+  friend class Widget; 
 
   public:
     enum Type
@@ -126,6 +124,8 @@ class PT_HMI_API Window : public WindowBase
     void update();
 
     using WindowBase::update;
+
+    void repaint();
 
     bool isActive() const;
 
@@ -193,9 +193,6 @@ class PT_HMI_API Window : public WindowBase
     virtual void onParentChanged(Window* w);
 
     virtual void onUpdate(const Gfx::RectF& rect);
-
-    // TODO: refactor to paint() with damagedRect
-    void onPaint(const Gfx::RectF& rect);
 
     void onEnable(bool b);
 
@@ -290,6 +287,7 @@ class PT_HMI_API Window : public WindowBase
     MainWindowImpl*                _impl;
     WindowManager                  _windowManager;
     PixmapSurface                  _surface;
+    Gfx::RectF                     _damageRect;
     Pt::Signal<const Pt::Event&>   _eventReady;
 
     std::vector<Window*>           _windows;
@@ -307,7 +305,6 @@ class PT_HMI_API Window : public WindowBase
     bool                           _enabled; 
     bool                           _enabledState;
     bool                           _isClosed; 
-    bool                           _damaged;
     Gfx::PointF                    _position;
     Gfx::SizeF                     _size;
     Type                           _type;

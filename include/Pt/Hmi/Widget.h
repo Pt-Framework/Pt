@@ -139,6 +139,8 @@ class PT_HMI_API Widget : public Visual
 
         void update(const Gfx::RectF& rect);
 
+        void repaint(const Gfx::RectF& updateRect);
+
         bool isVisible() const;
 
         void show( bool b = true );
@@ -210,8 +212,6 @@ class PT_HMI_API Widget : public Visual
         virtual void onRemoveWidget(Widget& w);
 
         virtual void onParentChanged(Widget* w);
-
-        void onPaint(const Gfx::RectF& updateRect);
 
         void onEnable(bool e);
 

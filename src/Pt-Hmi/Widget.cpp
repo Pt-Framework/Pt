@@ -448,6 +448,29 @@ void Widget::update(const Gfx::RectF& rect)
 }
 
 
+void Widget::repaint(const Gfx::RectF& rect)
+{
+    if( ! isVisible() )
+        return;
+
+    PaintEvent pev( vid(), rect);
+    Application::instance().loop().commitEvent(pev);
+
+    const std::vector<Widget*>& widgets = this->widgets();
+    std::vector<Widget*>::const_iterator it;
+    for(it = widgets.begin() ; it != widgets.end(); ++it)
+    {        
+        Widget* w = (*it);
+
+        if( w->geometry().intersect(rect).isNull() )
+            continue;
+
+        Gfx::RectF updateRect( rect.topLeft() - w->position(), rect.size() );
+        w->repaint(updateRect);            
+    }
+}
+
+
 bool Widget::isVisible() const
 {
     return _visible;
@@ -642,29 +665,6 @@ const Docking& Widget::docking() const
 void Widget::setDocking(const Docking& d)
 {
     _docking = d;
-}
-
-
-void Widget::onPaint(const Gfx::RectF& rect)
-{
-    if( !isVisible())
-        return;
-
-    PaintEvent pev( vid(), rect);
-    Application::instance().loop().commitEvent(pev);
-
-    const std::vector<Widget*>& widgets = this->widgets();
-    std::vector<Widget*>::const_iterator it;
-    for(it = widgets.begin() ; it != widgets.end(); ++it)
-    {        
-        Widget* w = (*it);
-
-        if( w->geometry().intersect(rect).isNull() )
-            continue;
-
-        Gfx::RectF updateRect( rect.topLeft() - w->position(), rect.size() );
-        w->onPaint(updateRect);            
-    }
 }
 
 

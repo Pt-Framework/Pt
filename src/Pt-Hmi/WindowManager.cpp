@@ -370,7 +370,7 @@ void WindowManager::onShow( Window& w, bool visible )
     if( ! _parent )
         throw std::logic_error("WindowManager not initialized");
 
-   _parent->update(updateRect);
+   w.update(updateRect);
 }
 
 
