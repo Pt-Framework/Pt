@@ -82,8 +82,8 @@ Image Image::blockScale( const Size& newSize) const
 {
   Image resultImage(newSize,  *_format, _stride );
 
-  const double dx = newSize.width() /_width;
-  const double dy = newSize.height() / _height;
+  const double dx = newSize.width() /(double)_width;
+  const double dy = newSize.height() /(double) _height;
 
   double xTarget = 0;
   double yTarget = 0;
