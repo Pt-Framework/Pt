@@ -283,6 +283,8 @@ class PT_HMI_API Window : public WindowBase
 
     void setMnemonic(Widget& w, const Char* ch);
 
+    Widget* findWidget(const Gfx::PointF& pos, bool input);
+
   private:
     MainWindowImpl*                _impl;
     WindowManager                  _windowManager;

@@ -43,12 +43,14 @@ namespace Hmi {
 Widget::Widget()
 : _parent(0)
 , _window(0)
+, _layout(0)
 , _visible(true)
 , _enabled(true)
 , _enabledState(true)
 , _hasFocus( false)
 , _acceptsFocus( false) 
 , _focusIndex(0)
+, _acceptsInput(true)
 , _cursor( Hmi::Cursor::defaultCursor() )
 , _actionKey(Key::Space)
 , _mnemonic(0)
@@ -187,8 +189,7 @@ const std::vector<Widget*>& Widget::widgets() const
     return _children;
 }
 
-
-Widget* Widget::findWidget(const Gfx::PointF& pos)
+Widget* Widget::findWidget(const Gfx::PointF& pos, bool input)
 {
     if( ! isVisible() || ! isEnabled() )
         return 0;
@@ -196,17 +197,39 @@ Widget* Widget::findWidget(const Gfx::PointF& pos)
     std::vector<Widget*>::reverse_iterator it;
     for(it = _children.rbegin(); it != _children.rend(); ++it)
     {
-        Widget* child = *it;       
+        Widget* child = *it;
+        
+        if( ! child->geometry().contains(pos) )
+            continue;
 
-        if( child->geometry().contains(pos) )
-        {
-            Gfx::PointF p = child->fromParent(pos);
-            Widget* found = child->findWidget(p);
+        Gfx::PointF p = child->fromParent(pos);
+        Widget* found = child->findWidget(p);
+
+        if( ! input)
             return found ? found : child;
-        }
+
+        if( found && found->acceptsInput() )
+            return found;
+
+        if( child->acceptsInput() )
+            return child;
+
+        break;
     }
 
     return 0;
+}
+
+Widget* Widget::findWidget(const Gfx::PointF& pos)
+{
+  return findWidget(pos, false); 
+}
+
+
+void Widget::setLayout( Layout& layout)
+{
+  _layout = &layout;
+  add(layout); 
 }
 
 
@@ -294,6 +317,12 @@ void Widget::setAcceptsFocus(bool a)
 }
 
 
+bool Widget::acceptsInput() const
+{
+  return _acceptsInput;
+}
+
+
 size_t Widget::focusIndex() const
 {
     return _focusIndex;
@@ -312,6 +341,12 @@ void Widget::setFocusIndex(size_t index)
 void Widget::onFocus(bool hasFocus)
 {    
     _hasFocus = hasFocus;
+}
+
+
+void Widget::setAcceptInput(bool a)
+{
+  _acceptsInput = a;
 }
 
 
@@ -501,6 +536,7 @@ void Widget::enable( bool e )
     update();
 }
 
+
 void Widget::onEnable(bool e)
 {        
     if(!e)
@@ -538,6 +574,7 @@ void Widget::move(const Gfx::PointF& pos)
     Gfx::PointF to = pos - _position;
     updateRect.unify( Gfx::RectF(to, _size) ); 
 
+    _position = pos;
     MoveEvent mev(vid(), pos);
     Application::instance().loop().commitEvent(mev);
 
@@ -557,6 +594,8 @@ void Widget::resize(const Gfx::SizeF& s)
                            std::max( size().height(), s.height()) );
 
     Gfx::RectF updateRect(Gfx::PointF(0,0), updateSize);
+
+    _size = s;
 
     ResizeEvent rev(vid(), s);
     Application::instance().loop().commitEvent(rev);
@@ -629,12 +668,18 @@ const Spacing& Widget::margin() const
 void Widget::setMargin(const Spacing& s)
 {
     _margin = s;
+
+    if( parent() )
+       parent()->onLayout();
 }
 
 
 void Widget::setMargin(double n)
 {
     _margin.setAll(n);
+
+    if( parent() )
+       parent()->onLayout();
 }
 
 
@@ -647,12 +692,14 @@ const Spacing& Widget::padding() const
 void Widget::setPadding( const Spacing& p )
 {
     _padding = p;
+    onLayout();
 }
 
 
 void Widget::setPadding(double n)
 {
     _padding.setAll(n);
+    onLayout();
 }
 
 
@@ -665,6 +712,9 @@ const Docking& Widget::docking() const
 void Widget::setDocking(const Docking& d)
 {
     _docking = d;
+    
+    if( parent() )
+       parent()->onLayout();
 }
 
 
@@ -699,7 +749,10 @@ void Widget::onResizeEvent(const ResizeEvent& ev)
 {    
     _size = ev.size();
 
-    // TODO: move this to a Layout base class
+    if( _layout ) 
+      _layout->resize( _size );
+
+    // TODO: override onResizeEvent in layouts
     onLayout();
 }
 

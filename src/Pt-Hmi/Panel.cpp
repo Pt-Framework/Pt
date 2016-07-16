@@ -35,6 +35,7 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Rect.h>
+#include <Pt/Hmi/Picture.h>
 
 namespace Pt {
 
@@ -50,7 +51,7 @@ Panel::Panel()
 , _borderWidth(1)
 , _borderColor(Gfx::Color::fromRgb8(178,178,178))
 {
-    setAcceptsFocus(false);  
+    setAcceptsFocus(false);
 }
 
 
@@ -59,7 +60,7 @@ Panel::~Panel()
 }
 
 
-void Panel::onPaintEvent( const PaintEvent& ev )
+void Panel::onPaintEvent(const PaintEvent& ev)
 {
     Widget::onPaintEvent(ev);
 
@@ -67,8 +68,48 @@ void Panel::onPaintEvent( const PaintEvent& ev )
     PaintSurface& windowSurface = this->window()->surface();
 
     Gfx::RectF paintRect(winpos, size());
-    PaintRegion region(windowSurface, paintRect);    
+    PaintRegion region(windowSurface, paintRect);
+    
+    Gfx::RectF widgetRect(Gfx::PointF(0,0), size());
+    Gfx::RectF clipRect = ev.rect().intersect(widgetRect);
+
+    region.setClip(clipRect);
+
     onPaint(region, ev.rect());
+}
+
+
+void Panel::onResizeEvent(const ResizeEvent& ev)
+{
+    Widget::onResizeEvent(ev);
+
+    if(  _backgroundImage.empty() || ev.size().width() < 1 || ev.size().height() < 1 )
+     return;
+             
+    switch( _backgroundImageLayout.type() )
+    {              
+        default:    
+           _backgroundPicture.set( _backgroundImage );        
+        break;
+
+            
+        case ImageLayout::Strech:
+        {
+            Gfx::Image strech = _backgroundImage.blockScale(Gfx::Size((int) ev.size().width(), (int)ev.size().height()) );
+            _backgroundPicture.set( strech );   
+        }
+        break;
+
+        case ImageLayout::Zoom:
+        {
+            const double factor = ev.size().width()/(double)_backgroundImage.width();
+            Pt::Gfx::Size newSize( ( size_t)( _backgroundImage.width()*factor), (size_t)(_backgroundImage.height()*factor));
+
+            Gfx::Image  strech = _backgroundImage.blockScale(newSize);
+            _backgroundPicture.set( strech );        
+        }
+        break;
+    }  
 }
 
 
@@ -125,55 +166,35 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 
     Gfx::Brush brush( backgroundColor() );
     painter.setBrush(brush); 
-    painter.fillPolygon(&outline[0], outline.size());
+    painter.fillPolygon(&outline[0], outline.size());    
 
-    const Gfx::Image& backImage = backgroundImage();
-
-    if( ! backImage.empty() )
+    if( ! _backgroundPicture.empty() )
     {
         switch( _backgroundImageLayout.type() )
         {              
             default:  
-            case ImageLayout::None:
-            {
-                painter.drawImage( Pt::Gfx::PointF(0,0), backImage );
+            {              
+                painter.drawPicture( Pt::Gfx::PointF(0,0), _backgroundPicture );
             }
             break;
             
             case ImageLayout::Tile:
             {
-                for( double x = 0; x < size.width();  x += backImage.width() )
+                 for( double x = 0; x < size.width();  x += _backgroundImage.width() )
                 {
-                    for( double y = 0; y < size.height();  y += backImage.height() )
-                        painter.drawImage(Gfx::PointF(x,y), backImage);
+                    for( double y = 0; y < size.height();  y += _backgroundImage.height() )
+                        painter.drawPicture(Gfx::PointF(x,y), _backgroundPicture);
                 }
             }
             break;
 
             case ImageLayout::Center:
             {
-                const double x = size.width()/2  - backImage.width()/2;
-                const double y = size.height()/2  - backImage.height()/2;
-                painter.drawImage(Gfx::PointF(x, y), backImage);
+                const double x = size.width()/2  - _backgroundImage.width()/2;
+                const double y = size.height()/2  - _backgroundImage.height()/2;
+                painter.drawPicture(Gfx::PointF(x, y), _backgroundPicture);
             }
-            break;
-            
-            case ImageLayout::Strech:
-            {
-                Gfx::Image strech = backImage.blockScale(Gfx::Size((int) size.width(), (int)size.height() ) );
-                painter.drawImage( Pt::Gfx::PointF(0,0), strech );
-            }
-            break;
-
-            case ImageLayout::Zoom:
-            {
-                const double factor = size.width()/(double)backImage.width();
-                Pt::Gfx::Size newSize( ( size_t)( backImage.width()*factor), (size_t)(backImage.height()*factor));
-
-                Gfx::Image strech = backImage.blockScale(newSize);
-                painter.drawImage( Pt::Gfx::PointF(0,0), strech);
-            }
-            break;
+            break;            
         }
     }
 
@@ -234,3 +255,4 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 } // namespace
 
 } // namespace
+

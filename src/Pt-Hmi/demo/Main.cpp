@@ -16,7 +16,6 @@ int main(int argc, char* args[])
     
         mainWindow1.setTitle("Main 1");
         mainWindow1.show();
-                
         application.run();
     }
     catch(const std::exception& ex)

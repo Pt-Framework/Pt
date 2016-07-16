@@ -31,13 +31,13 @@
 #define Pt_Hmi_FlowLayout_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Layout.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API FlowLayout : public Widget
+class PT_HMI_API FlowLayout : public Layout
 {
     public:
         // Horizontal          use all space in row, same size for elements

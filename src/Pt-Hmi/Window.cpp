@@ -312,22 +312,34 @@ void Window::setMainWidget(Widget* widget)
     _mainWidget->resize( size() );
 }
 
-
-Widget* Window::findWidget(const Gfx::PointF& pos)
+Widget* Window::findWidget(const Gfx::PointF& pos, bool input)
 {
     if( ! isVisible() || ! isEnabled() )
         return 0;
 
-    if(_mainWidget)
+    if( ! _mainWidget )
+        return 0;
+
+    if( _mainWidget->geometry().contains(pos) )
     {
-        if( _mainWidget->geometry().contains(pos) )
-        {
-            Widget* widget = _mainWidget->findWidget(pos);
-            return widget ? widget : _mainWidget;
-        }
+        Widget* widget = _mainWidget->findWidget(pos, input);
+
+        if( ! input )
+        return widget ? widget : _mainWidget;
+
+      if( widget && widget->acceptsInput() )
+          return widget;
+
+      if( _mainWidget->acceptsInput() )
+          return _mainWidget;
     }
 
     return 0;
+}
+
+Widget* Window::findWidget(const Gfx::PointF& pos)
+{
+  return findWidget(pos, false);
 }
 
 
@@ -613,11 +625,10 @@ bool Window::isActive() const
 
 void Window::activate()
 {
+    _isActive = true;
+
     if( ! _init )
-    {
-        _isActive = true;
         return;
-    }
 
     if(_parentWindow)
         _parentWindow->activate();
@@ -721,12 +732,11 @@ bool Window::isEnabled() const
 
 void Window::enable(bool e)
 {
+    _enabled = e;
+    _enabledState = e;
+
     if( ! _init )
-    {
-        _enabled = e;
-        _enabledState = e;
         return;
-    }
 
     _parent->onEnable(*this, e);
 }
@@ -734,7 +744,7 @@ void Window::enable(bool e)
 
 void Window::onEnable( Window& w, bool enable )
 {
-    _windowManager.onEnable( w, enable );
+    _windowManager.onEnable(w, enable);
 }
 
 
@@ -775,11 +785,10 @@ const Gfx::PointF& Window::position() const
 
 void Window::move(const Gfx::PointF& p)
 {
+   _position = p;
+
     if( ! _init )
-    {
-        _position = p;
         return;
-    }
 
     _parent->onMove(*this, p);
 }
@@ -805,11 +814,10 @@ const Gfx::SizeF& Window::size() const
 
 void Window::resize(const Gfx::SizeF& s)
 {
+    _size = s;
+
     if( ! _init )
-    {
-        _size = s;
         return;
-    }
 
     _parent->onResize(*this, s);
 }
@@ -1018,7 +1026,7 @@ void Window::onMouseEvent(const MouseEvent& ev)
         return;
     }
 
-    Widget* widget = findWidget( ev.position() );
+    Widget* widget = findWidget( ev.position(), true );
 
     // widget may be null to unset the pointer widget
     Application::instance().setPointerWidget(widget);

@@ -49,7 +49,7 @@ class ChildW : public Hmi::Window
         Button _toggleButton;
         Button _dialogButton;
         Label  _textLabel;
-        FlowLayout _buttonBar;
+        DockingLayout _buttonBar;
 };
 
 } // namespace

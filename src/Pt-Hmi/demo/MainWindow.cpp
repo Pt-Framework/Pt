@@ -89,17 +89,32 @@ MainWindow::MainWindow()
     move( Gfx::PointF(60, 30) );
     resize( Gfx::SizeF(600, 480) ); 
     
+    _child2.resize( Gfx::SizeF(200, 100) );
+
     add( _child2 );
+
+
+
+    _child2.show(true);
+
+    
+
+   
+    
+
     _child2.setMinimumSize( Gfx::SizeF(150, 50) );
     _child2.setMaximumSize( Gfx::SizeF(300, 300) );
     _child2.setTitle("Child 2");
     _child2.move( Gfx::PointF(400, 50) );
-    _child2.resize( Gfx::SizeF(200, 100) );
-    _child2.show(true);
+
+    
+
+    _child1.show(true);
+    
 
     add( _child1 );
-    _child1.show(true);
-
+    
+            
     // context menu
     _menu.setName("All Music");
     

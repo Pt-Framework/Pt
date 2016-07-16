@@ -21,29 +21,30 @@ PT_HMI_SUBDIR = [ FDirName $(PT_TOP) src Pt-Hmi $(GUI:L) ] ;
 PT_HMI_IMPL += [ GLOB $(PT_HMI_SUBDIR) : *.cpp  ] ;
 PT_HMI_IMPL += [ GLOB $(PT_HMI_SUBDIR) : *.mm  ] ;
 
-SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)					   
-					   Application.cpp
-					   Cursor.cpp
-                       DockingLayout.cpp
-                       FlowLayout.cpp
-					   PaintSurface.cpp
-					   Painter.cpp                        
-					   Button.cpp					   			   					   
-					   Label.cpp	   
-					   Panel.cpp					   
-					   Widget.cpp
-                       WindowBase.cpp					   					   
-					   Window.cpp	
-                       WindowFrame.cpp
-					   WindowManager.cpp
-					   Screen.cpp 
-                       Visual.cpp
-                       Menu.cpp
-                       MenuBar.cpp
-                       MenuItem.cpp
-                       MenuShell.cpp 
-                       Picture.cpp
-                       ;
+SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
+             Application.cpp
+             Cursor.cpp
+             DockingLayout.cpp
+             FlowLayout.cpp
+             Layout.cpp
+             PaintSurface.cpp
+             Painter.cpp
+             Button.cpp
+             Label.cpp
+             Panel.cpp
+             Widget.cpp
+             WindowBase.cpp
+             Window.cpp
+             WindowFrame.cpp
+             WindowManager.cpp
+             Screen.cpp 
+             Visual.cpp
+             Menu.cpp
+             MenuBar.cpp
+             MenuItem.cpp
+             MenuShell.cpp 
+             Picture.cpp
+             ;
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx Pt-Reflex ;
 LinkLibs Pt-Hmi : $(GUILIBS) ;
@@ -58,4 +59,4 @@ if $(GUI:L) = egl-gbm
   MakeLocate egl-test : $(PT_OUTPUT_TARGET) ;
 }
 
-SubInclude PT_TOP src Pt-Hmi demo ;		
+SubInclude PT_TOP src Pt-Hmi demo ;

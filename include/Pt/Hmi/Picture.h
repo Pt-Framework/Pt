@@ -22,6 +22,11 @@ class PT_HMI_API Picture
         void set(const Gfx::Image& image);
         
                
+        bool empty() const
+        {
+          return _impl == 0;
+        }
+
         PictureImpl* impl()
         {
             return _impl;
@@ -32,9 +37,11 @@ class PT_HMI_API Picture
             return _impl;
         }
 
+        
     private:
 
-        PictureImpl* _impl;               
+        PictureImpl* _impl;     
+                  
 };
 
 }}

@@ -47,7 +47,9 @@ class PT_GFX_API Image
     Image( const Size& size, const ImageFormat& format = ImageFormat::argb8888(), size_t stride = 0 );
 
     Image( Pt::uint8_t* buffer, const Size& size, const ImageFormat& format = ImageFormat::argb8888(), size_t stride = 0 );
-							
+		
+    Image( const Image& copy);
+    					
 		virtual ~Image();
 
 		size_t width() const
@@ -152,6 +154,7 @@ class PT_GFX_API Image
 			_width = image._width;
 			_height = image._height;
 			_stride = image._stride;
+      _maxSize = image._maxSize;
 			return *this;
 		}
 

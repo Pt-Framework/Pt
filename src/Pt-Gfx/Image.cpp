@@ -58,6 +58,11 @@ Image::~Image()
 }
 
 
+Image::Image( const Image& copy)
+{
+  *this = copy;
+}
+
 Image Image::convert(const ImageFormat& toFormat) const
 {
 	if( *_format == toFormat )
@@ -94,11 +99,12 @@ Image Image::blockScale( const Size& newSize) const
 
     for( size_t xSource = 0; xSource < _width;  ++xSource)
     {
+            
       const Pt::uint8_t* pixelSource = pixel( xSource, ySource);
       
       Pt::uint8_t* pixelTarget = resultImage.pixel( (size_t) xTarget, (size_t)yTarget);       
       memcpy( pixelTarget, pixelSource, _format->pixelSize());
-      
+
       for( size_t i = 1; i < dx; ++i)
       {
         const size_t xPos = (size_t)xTarget + i;

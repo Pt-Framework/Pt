@@ -41,7 +41,11 @@ namespace Pt {
 
 namespace Hmi {
 
-
+class PT_HMI_API Layout : public Widget
+{
+  public:
+    Layout();
+};
 
 } // namespace
 

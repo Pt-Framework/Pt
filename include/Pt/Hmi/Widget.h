@@ -55,6 +55,7 @@ namespace Pt {
 namespace Hmi {
 
 class Window;
+class Layout;
 
 class PT_HMI_API Widget : public Visual
 {
@@ -80,10 +81,12 @@ class PT_HMI_API Widget : public Visual
         void add(Widget& w);
 
         void remove(Widget& w);
-
+        
         const std::vector<Widget*>& widgets() const;
 
-        Widget* findWidget( const Gfx::PointF& pos );
+        Widget* findWidget( const Gfx::PointF& pos );        
+
+        void setLayout(Layout& layout);
 
         //
         // coordinate transformations
@@ -114,6 +117,10 @@ class PT_HMI_API Widget : public Visual
         size_t focusIndex() const;
 
         void setFocusIndex(size_t index);
+
+        void setAcceptInput( bool a );
+
+        bool acceptsInput() const;
 
         //
         // keyboard input
@@ -262,12 +269,15 @@ class PT_HMI_API Widget : public Visual
 
         void setWindow(Window* window);
 
+        Widget* findWidget( const Gfx::PointF& pos, bool input );
+
     private:
         Pt::Signal<const Pt::Event&> _eventReady;
 
         std::vector<Widget*>         _children;
         Widget*                      _parent; 
         Window*                      _window; 
+        Layout*                      _layout;
 
         bool                         _visible;
         bool                         _enabled;
@@ -278,6 +288,7 @@ class PT_HMI_API Widget : public Visual
         bool                         _hasFocus;
         bool                         _acceptsFocus;
         size_t                       _focusIndex;
+        bool                         _acceptsInput; 
 
         Hmi::Cursor                  _cursor;
         Key                          _actionKey;
@@ -289,6 +300,7 @@ class PT_HMI_API Widget : public Visual
         Spacing                      _padding;
         Spacing                      _margin;
         Docking                      _docking;
+
 };
 
 } // namespace

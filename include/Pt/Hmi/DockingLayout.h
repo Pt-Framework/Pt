@@ -31,13 +31,13 @@
 #define Pt_Hmi_DockingLayout_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Layout.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API DockingLayout : public Widget
+class PT_HMI_API DockingLayout : public Layout
 {
     public:
         DockingLayout();

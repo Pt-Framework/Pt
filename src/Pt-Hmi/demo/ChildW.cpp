@@ -77,7 +77,8 @@ ChildW::ChildW(const std::string& title)
     _toggleButton.setPadding(5);
     _toggleButton.setDocking( Docking::Bottom );    
 
-    //Dialog button   
+    //Dialog button  
+    _dialogButton.setDocking(Docking::Top); 
     _dialogButton.setName("DialogButton");  
     _dialogButton.setText("&&Dia&log [CTRL+D]&");
     Pt::Hmi::Key dKey(Pt::Hmi::Key::Control, Pt::Hmi::Key::D);
@@ -90,12 +91,13 @@ ChildW::ChildW(const std::string& title)
     _dialogButton.clicked() += Pt::slot(*this, &ChildW::onShowDialog);
     
     
-    //Close button
+    //Close button    
     _closeButton.setName("CloseButton"); 
     _closeButton.setText("Close App [CTRL+X]");
     
     Pt::Hmi::Key xKey(Pt::Hmi::Key::Control, Pt::Hmi::Key::X);
 
+    _closeButton.setDocking(Docking::Bottom);
     _closeButton.setShortcut(&xKey);
     _closeButton.move( Gfx::PointF(20,200) );
     _closeButton.resize( Gfx::SizeF(130, 30) );
@@ -104,7 +106,7 @@ ChildW::ChildW(const std::string& title)
     _closeButton.setDocking( Docking::Bottom );
     _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);
 
-    _buttonBar.setAlignment(FlowLayout::Bottom);
+    
     _buttonBar.setName("ButtonBar");
     _buttonBar.resize( Gfx::SizeF(700, 180) );
     _buttonBar.setPadding(5);
@@ -143,6 +145,8 @@ void ChildW::onShowDialog(Button& button)
     _closeButton.setText("AAA");
     _closeButton.setText("BBB");
     _closeButton.setText("CCC");    
+    _closeButton.setMargin(50);
+    
 
     //Gfx::SizeF size(400,260);
     //_childWindow2.resize(Gfx::SizeF(400,260));
@@ -150,8 +154,8 @@ void ChildW::onShowDialog(Button& button)
     //Gfx::PointF pos(0,0);
     //_childWindow2.move(pos);
 
-    Dialog1 d;    
-    d.showModal();
+//    Dialog1 d;    
+//    d.showModal();
 }
 
 void ChildW::onCloseApp(Button& button)

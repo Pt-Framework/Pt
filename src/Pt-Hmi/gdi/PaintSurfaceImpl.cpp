@@ -650,6 +650,7 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& imag
     const Pt::uint8_t* data = image.pixel(0,0);
 
     HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, depth, (VOID*)data);
+
     if (bitmap == NULL) 
     {
         BITMAPINFO bitmapInfo;

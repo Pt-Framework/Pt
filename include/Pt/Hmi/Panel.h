@@ -32,6 +32,7 @@
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/Picture.h>
 #include <Pt/Gfx/Color.h>
 
 namespace Pt {
@@ -126,10 +127,6 @@ class PT_HMI_API Panel : public Widget
             update();
         }
 
-        const Gfx::Image& backgroundImage() const
-        {
-            return _backgroundImage;
-        }
 
         void setBackgroundImage(const Gfx::Image& i, ImageLayout l)
         {
@@ -189,16 +186,20 @@ class PT_HMI_API Panel : public Widget
         //       NOTE: Window has onPaintBackground and onPaintContent
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 	
+
+        virtual void onResizeEvent(const ResizeEvent& ev);
+
     private: 
-        Gfx::Color   _backgroundColor;
-        Gfx::Color   _foregroundColor;
-        Gfx::Image   _backgroundImage;
-        ImageLayout  _backgroundImageLayout;
-		    BorderStyle	 _borderStyle;
-		    bool				 _borderRound;	
-		    double			 _borderWidth;	  
-		    Gfx::Color	 _borderColor;
-};
+        Gfx::Color    _backgroundColor;
+        Gfx::Color    _foregroundColor;
+        Gfx::Image    _backgroundImage;
+        Picture       _backgroundPicture;
+        ImageLayout   _backgroundImageLayout;
+		    BorderStyle	  _borderStyle;
+		    bool				  _borderRound;	
+		    double			  _borderWidth;	  
+		    Gfx::Color	  _borderColor;
+}; 
 
 } // namespace
 
