@@ -52,9 +52,7 @@ class ScreenImpl
 
         void init(WindowBase& w);
 
-        double width() const;
-
-        double height() const;
+        Gfx::SizeF size() const;
 
         Gfx::PointF toUnit(const Gfx::Point& value);
 

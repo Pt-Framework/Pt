@@ -160,6 +160,16 @@ class WindowFrame : public Pt::Connectable
 
         const Window* window() const;
 
+        Window::State state() const;
+
+        void setState(Window::State state);
+
+        const Gfx::PointF& restorePosition() const;
+
+        const Gfx::SizeF& restoreSize() const;
+        
+        void setRestore(const Gfx::PointF& pos, const Gfx::SizeF& size);
+
         const Gfx::RectF& clientRect() const;
 
         const Gfx::RectF& frameRect() const;
@@ -169,6 +179,8 @@ class WindowFrame : public Pt::Connectable
         Gfx::PointF toFrame(const Gfx::PointF& pos) const;
 
         Gfx::PointF fromFrame(const Gfx::PointF& pos) const;
+
+        Gfx::SizeF fromFrame(const Gfx::SizeF& size) const;
 
         void update();
 
@@ -217,6 +229,9 @@ class WindowFrame : public Pt::Connectable
         double         _titleHeight;
         Gfx::RectF     _frameRect;
         Gfx::RectF     _clientRect;
+        Gfx::PointF    _restorePos;
+        Gfx::SizeF     _restoreSize;
+        Window::State  _state;
 
         Gfx::PointF    _lastPointer;
         bool           _isClient;

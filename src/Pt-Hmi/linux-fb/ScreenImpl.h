@@ -65,14 +65,10 @@ class ScreenImpl : public Pt::Connectable
             return _frameBuffer;
         }
 
-        double width() const
+        Gfx::SizeF size() const
         {
-            return _frameBuffer.width();
-        }
-
-        double height() const
-        {
-            return _frameBuffer.height();
+            Gfx::Size fs = _frameBuffer.size();
+            return Gfx::SizeF(fs.width(), fs.height());
         }
 
         const Gfx::Image& image() const;

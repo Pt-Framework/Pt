@@ -693,7 +693,7 @@ void ApplicationImpl::onMove(Window& w, HWND hwnd, LPARAM lParam)
 
 void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
 {   
-    Window::State state = Window::Normal;
+    Window::State wstate = w.state();
 
     switch(wParam)
     {
@@ -702,23 +702,29 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
             break;
 
         case SIZE_MAXIMIZED:
-            state = Window::Maximized;
+            wstate = Window::Maximized;
             break;
 
         case SIZE_MINIMIZED:
-            state = Window::Minimized;
+            wstate = Window::Minimized;
             break;
- 
-        default:
+
         case SIZE_RESTORED:
-            state = Window::Normal;
+            wstate = Window::Normal;
+            break;
+
+        default:
             break;
     }
 
-    //TODO: send event that state has changed
+    if(w.state() != wstate)
+    {
+        WindowStateEvent wse(w.vid(), wstate);
+        commitEvent(wse);
+    }
 
     int width  = LOWORD(lParam);
-    int height = HIWORD(lParam); 
+    int height = HIWORD(lParam);
 
     Gfx::SizeF to(width, height);
           

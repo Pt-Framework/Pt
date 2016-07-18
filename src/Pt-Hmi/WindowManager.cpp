@@ -457,7 +457,50 @@ void WindowManager::onFrameChanged(Window& w)
 
 void WindowManager::onStateChanged(Window& w)
 {
-    // TODO: at least maximize should be possible
+    WindowFrame* frame = findWindow(w);
+    if( ! frame )
+        return;
+
+    Window::State state = w.state();
+
+    Window::State oldState = frame->state();
+    frame->setState(state);
+
+    if(oldState == Window::Normal)
+        frame->setRestore(w.position(), w.size());
+
+    if(state == Window::Maximized)
+    {
+        
+        Gfx::SizeF maxSize = _parent->size();
+        maxSize = frame->fromFrame(maxSize);
+
+        w.move( Gfx::PointF(0,0) );
+        w.resize(maxSize);
+    }
+    else if(state == Window::Minimized)
+    {
+        if(oldState == Window::Normal)
+        {
+            Gfx::SizeF minSize(w.size().width(), 0);
+            w.resize(minSize);
+        }
+        else
+        {
+            w.move( frame->restorePosition() );
+
+            Gfx::SizeF minSize(frame->restoreSize().width(), 0);
+            w.resize(minSize);
+        }
+    }
+    else if(state == Window::Normal)
+    {
+        w.move( frame->restorePosition() );
+        w.resize( frame->restoreSize() );
+    }
+
+    WindowStateEvent wse(w.vid(), state);
+    Application::instance().loop().commitEvent(wse);
 }
 
 

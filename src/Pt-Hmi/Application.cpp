@@ -63,6 +63,7 @@ Application::Application(int argc, char** argv)
     loop().eventReceived() += Pt::slot(*this, &Application::onCloseEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onEnterEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onLeaveEvent );
+    loop().eventReceived() += Pt::slot(*this, &Application::onWindowStateEvent);
 }
 
 
@@ -120,7 +121,7 @@ void Application::releaseMouse(Window& grabber)
     
     _impl->releaseMouse(grabber); 
     
-    _mouseGrabber = 0;  
+    _mouseGrabber = 0;
 }
 
 
@@ -197,7 +198,7 @@ void Application::setPointerWindow(Window* w)
     if( _pointerWindow == w )
         return;
 
-    if( _pointerWindow )    
+    if( _pointerWindow )
     {
         Pt::Hmi::LeaveEvent leaveEvent( _pointerWindow->vid() );
         loop().commitEvent(leaveEvent);
@@ -356,7 +357,7 @@ void Application::onKeyEvent( const KeyEvent& ev )
     if( it == _visuals.end() )
         return;
 
-    it->second->processEvent(ev);    
+    it->second->processEvent(ev);
 }
 
 
@@ -367,7 +368,7 @@ void Application::onCloseEvent(const CloseEvent& ev )
     if( it == _visuals.end() )
         return;
 
-    it->second->processEvent(ev);   
+    it->second->processEvent(ev);
 }
 
 
@@ -378,7 +379,7 @@ void Application::onEnterEvent( const EnterEvent& ev )
     if( it == _visuals.end() )
         return;
 
-    it->second->processEvent(ev);   
+    it->second->processEvent(ev);
 }
 
 
@@ -389,7 +390,18 @@ void Application::onLeaveEvent(const LeaveEvent& ev )
     if( it == _visuals.end() )
         return;
 
-    it->second->processEvent(ev);   
+    it->second->processEvent(ev);
+}
+
+
+void Application::onWindowStateEvent(const WindowStateEvent& ev )
+{
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+
+    if( it == _visuals.end() )
+        return;
+
+    it->second->processEvent(ev);
 }
 
 

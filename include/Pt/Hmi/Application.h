@@ -43,6 +43,7 @@
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/EnterEvent.h>
 #include <Pt/Hmi/LeaveEvent.h>
+#include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/System/Application.h>
 
 namespace Pt {
@@ -66,7 +67,7 @@ class PT_HMI_API Application : public Pt::System::Application
         virtual ~Application();
 
         static Application& instance();
-    
+
         const Screen& screen() const;
 
         Screen& screen();
@@ -82,7 +83,7 @@ class PT_HMI_API Application : public Pt::System::Application
         void setCursor(const Cursor* cursor = 0);
 
         Visual* mouseGrabber();
-        
+
         void grabMouse(Window& w);
 
         void releaseMouse(Window& w);
@@ -98,33 +99,35 @@ class PT_HMI_API Application : public Pt::System::Application
         void nextEvent();
 
         ApplicationImpl* impl();
-        
-    protected:        
-        void onResizeEvent( const ResizeEvent& ev );
 
-        void onMouseEvent(const MouseEvent& ev );
+    protected:
+        void onResizeEvent(const ResizeEvent& ev);
 
-        void onScrollEvent(const ScrollEvent& ev );
+        void onMouseEvent(const MouseEvent& ev);
+
+        void onScrollEvent(const ScrollEvent& ev);
 
         void onUpdateEvent(const UpdateEvent& ev);
 
-        void onPaintEvent( const PaintEvent& ev );
+        void onPaintEvent(const PaintEvent& ev);
 
-        void onMoveEvent( const MoveEvent& ev );
+        void onMoveEvent(const MoveEvent& ev);
 
-        void onActivateEvent( const ActivateEvent& ev );
+        void onActivateEvent(const ActivateEvent& ev);
 
-        void onEnableEvent( const EnableEvent& ev );
+        void onEnableEvent(const EnableEvent& ev);
 
-        void onShowEvent( const ShowEvent& ev );
+        void onShowEvent(const ShowEvent& ev);
 
-        void onKeyEvent( const KeyEvent& ev );
+        void onKeyEvent(const KeyEvent& ev);
 
-        void onCloseEvent(const CloseEvent& ev );
+        void onCloseEvent(const CloseEvent& ev);
 
-        void onEnterEvent( const EnterEvent& ev );
+        void onEnterEvent(const EnterEvent& ev);
 
-        void onLeaveEvent(const LeaveEvent& ev );
+        void onLeaveEvent(const LeaveEvent& ev);
+
+        void onWindowStateEvent(const WindowStateEvent& ev);
 
     private:
         void registerVisual(Visual& visual);
@@ -134,7 +137,7 @@ class PT_HMI_API Application : public Pt::System::Application
         void setPointerWindow(Window* w);
 
         void setPointerWidget(Widget* widget);
-        
+
     private:
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;
 

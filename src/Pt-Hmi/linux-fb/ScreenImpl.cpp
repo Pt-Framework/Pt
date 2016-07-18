@@ -237,9 +237,11 @@ void ScreenImpl::onEnable(Window& w, bool enable)
 void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx::Image& image)
 {    
     const size_t pixelSizeInByte = _frameBuffer.depth() / 8;        
-    const Gfx::Size& size= image.size();
-    const size_t yMax = std::min<size_t>(pos.y() + size.height(), height() );    
-    const size_t widthInPixel = ((pos.x() + size.width())  < width() ?  size.width() : ( width()  - pos.x() ) );
+    const Gfx::Size& imageSize = image.size();
+    const size_t yMax = std::min<size_t>(pos.y() + imageSize.height(), 
+                                         _frameBuffer.height() );    
+    size_t widthInPixel = (pos.x() + imageSize.width()) < _frameBuffer.width() ? imageSize.width() 
+                                                                               : _frameBuffer.width() - pos.x();
     const size_t widthInByte = widthInPixel * pixelSizeInByte;            
     
     for( size_t y = pos.y(); y < yMax; ++y )
@@ -285,8 +287,8 @@ void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h,
 {
     static const size_t planePixelSize = 4;
     const size_t bufferPixelSize = _frameBuffer.depth() / 8;
-    const size_t bufferWidth  = std::min<size_t>(  pos.x() + w, width() ); 
-    const size_t bufferHeight = std::min<size_t>(  pos.y() + h, height() ); 
+    const size_t bufferWidth  = std::min<size_t>( pos.x() + w, _frameBuffer.width() ); 
+    const size_t bufferHeight = std::min<size_t>( pos.y() + h, _frameBuffer.height() ); 
     size_t yCursor = 0;
     size_t xCursor = 0;    
 

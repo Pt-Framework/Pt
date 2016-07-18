@@ -44,6 +44,12 @@ WindowBase::~WindowBase()
 }
 
 
+Gfx::SizeF WindowBase::size() const
+{
+    return onSize();
+}
+
+
 void WindowBase::update(const Gfx::RectF& rect)
 {
     onUpdate(rect);

@@ -145,28 +145,15 @@ void ScreenImpl::onEnable(Window& w, bool enable)
 }
 
 
-double ScreenImpl::width() const
+Gfx::SizeF ScreenImpl::size() const
 {
-  const HWND hDesktop = GetDesktopWindow();
-  RECT desktop;   
-  GetWindowRect(hDesktop, &desktop);
-  return desktop.right;
+  HWND hDesktop = GetDesktopWindow();
+  
+  RECT r;   
+  GetWindowRect(hDesktop, &r);
+  
+  return Gfx::SizeF(r.right, r.bottom);
 }
-
-
-double ScreenImpl::height() const
-{
-    const HWND hDesktop = GetDesktopWindow();
-    RECT desktop;
-    GetWindowRect(hDesktop, &desktop);
-    return desktop.bottom;
-}
-
-
-//void ScreenImpl::setResolution(double dpi)
-//{
-//    _dpi = dpi;
-//}
 
 
 double ScreenImpl::resolutionDPI() const

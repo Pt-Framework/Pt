@@ -71,18 +71,19 @@ Window::Window(Window* parent, Window::Type type)
 {    
     _windowManager.init(*this);
 
-    _eventReady += Pt::slot(*this, &Window::onKeyEvent );
-    _eventReady += Pt::slot(*this, &Window::onMouseEvent );
-    _eventReady += Pt::slot(*this, &Window::onTouchEvent );
-    _eventReady += Pt::slot(*this, &Window::onScrollEvent );
-    _eventReady += Pt::slot(*this, &Window::onPaintEvent );
+    _eventReady += Pt::slot(*this, &Window::onKeyEvent);
+    _eventReady += Pt::slot(*this, &Window::onMouseEvent);
+    _eventReady += Pt::slot(*this, &Window::onTouchEvent);
+    _eventReady += Pt::slot(*this, &Window::onScrollEvent);
+    _eventReady += Pt::slot(*this, &Window::onPaintEvent);
     _eventReady += Pt::slot(*this, &Window::onActivateEvent);
     _eventReady += Pt::slot(*this, &Window::onCloseEvent);
-    _eventReady += Pt::slot(*this, &Window::onEnterEvent );
-    _eventReady += Pt::slot(*this, &Window::onLeaveEvent );
-    _eventReady += Pt::slot(*this, &Window::onMoveEvent );
-    _eventReady += Pt::slot(*this, &Window::onResizeEvent );
-    _eventReady += Pt::slot(*this, &Window::onShowEvent );  
+    _eventReady += Pt::slot(*this, &Window::onEnterEvent);
+    _eventReady += Pt::slot(*this, &Window::onLeaveEvent);
+    _eventReady += Pt::slot(*this, &Window::onMoveEvent);
+    _eventReady += Pt::slot(*this, &Window::onResizeEvent);
+    _eventReady += Pt::slot(*this, &Window::onShowEvent);
+    _eventReady += Pt::slot(*this, &Window::onWindowStateEvent);
 
     if(parent)
         parent->add(*this);
@@ -541,6 +542,12 @@ Gfx::PointF Window::fromScreen(const Gfx::PointF& pos) const
 }
 
 
+Gfx::SizeF Window::onSize() const
+{
+    return _size;
+}
+
+
 void Window::update()
 {
     Gfx::RectF rect( Gfx::PointF(0,0), size() );
@@ -806,12 +813,6 @@ void Window::onMoveEvent(const MoveEvent& ev)
 }
 
 
-const Gfx::SizeF& Window::size() const
-{
-    return _size;
-}
-
-
 void Window::resize(const Gfx::SizeF& s)
 {
     _size = s;
@@ -983,7 +984,6 @@ void Window::setState(Window::State s)
     if( _impl )
         _impl->setState(s);
 
-    // TODO: need a Maximize/Minimize event
     _state = s;
 
     if(_parent)
@@ -994,6 +994,12 @@ void Window::setState(Window::State s)
 void Window::onStateChanged(Window& w)
 {
     _windowManager.onStateChanged(w);
+}
+
+
+void Window::onWindowStateEvent(const WindowStateEvent& ev)
+{
+    _state = ev.state();
 }
 
 

@@ -55,6 +55,7 @@ namespace Hmi {
 
 class Widget;
 class MainWindowImpl;
+class WindowStateEvent;
 
 class PT_HMI_API Window : public WindowBase
 {
@@ -149,8 +150,6 @@ class PT_HMI_API Window : public WindowBase
 
     void move(const Gfx::PointF& p);
 
-    const Gfx::SizeF& size() const;
-
     void resize( const Gfx::SizeF& s );
 
     bool isClosed() const;
@@ -192,10 +191,14 @@ class PT_HMI_API Window : public WindowBase
 
     virtual void onParentChanged(Window* w);
 
-    virtual void onUpdate(const Gfx::RectF& rect);
-
     void onEnable(bool b);
 
+  protected:
+    Gfx::SizeF onSize() const;
+
+    virtual void onUpdate(const Gfx::RectF& rect);
+
+  protected:
     virtual void onInit(Window& w);
     
     virtual void onDeinit(Window& w);
@@ -253,9 +256,11 @@ class PT_HMI_API Window : public WindowBase
 
     virtual void onActivateEvent(const ActivateEvent& ev);
 
-    virtual void onShowEvent( const ShowEvent& ev );
+    virtual void onShowEvent( const ShowEvent& ev);
 
-    virtual void onEnableEvent( const EnableEvent& ev );
+    virtual void onEnableEvent(const EnableEvent& ev);
+
+    virtual void onWindowStateEvent(const WindowStateEvent& ev);
 
   private:
     void init(Window* parent);

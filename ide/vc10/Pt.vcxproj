@@ -93,6 +93,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Window.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowBase.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\WindowManager.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowStateEvent.h" />
     <ClInclude Include="..\..\include\Pt\Http\Api.h" />
     <ClInclude Include="..\..\include\Pt\Http\Authenticator.h" />
     <ClInclude Include="..\..\include\Pt\Http\Authorizer.h" />

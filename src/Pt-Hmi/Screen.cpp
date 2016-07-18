@@ -88,21 +88,9 @@ const std::vector<Window*>& Screen::windows() const
 }
 
 
-double Screen::width() const
+Gfx::SizeF Screen::onSize() const
 {
-    return _impl->width();
-}
-        
-
-double Screen::height() const
-{
-    return _impl->height();
-}
-
-
-Gfx::SizeF Screen::size() const
-{
-    return Gfx::SizeF( width(), height() );
+    return _impl->size();
 }
 
 

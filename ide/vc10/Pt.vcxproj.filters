@@ -1398,6 +1398,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\WindowStateEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

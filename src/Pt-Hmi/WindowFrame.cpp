@@ -319,6 +319,7 @@ WindowFrame::WindowFrame()
 , _window(0)
 , _borderWidth(0)
 , _titleHeight(0)
+, _state(Window::Normal)
 {
 }
 
@@ -326,6 +327,9 @@ WindowFrame::WindowFrame()
 WindowFrame::WindowFrame(WindowManager& wm, Window& window)
 : _wm(&wm)
 , _window(&window)
+, _borderWidth(0)
+, _titleHeight(0)
+, _state( window.state() )
 , _isClient(false)
 , _isMoving(false)
 , _isLeftResizing(false)
@@ -368,6 +372,37 @@ const Window* WindowFrame::window() const
 }
 
 
+Window::State WindowFrame::state() const
+{
+    return _state;
+}
+
+
+void WindowFrame::setState(Window::State state)
+{
+    _state = state;
+}
+
+
+const Gfx::PointF& WindowFrame::restorePosition() const
+{
+    return _restorePos;
+}
+
+
+const Gfx::SizeF& WindowFrame::restoreSize() const
+{
+    return _restoreSize;
+}
+
+      
+void WindowFrame::setRestore(const Gfx::PointF& pos, const Gfx::SizeF& size)
+{
+    _restorePos = _window->position();
+    _restoreSize = _window->size();
+}
+
+
 const Gfx::RectF& WindowFrame::clientRect() const
 {
     return _clientRect;
@@ -405,6 +440,15 @@ Gfx::PointF WindowFrame::fromFrame(const Gfx::PointF& pos) const
 }
 
 
+Gfx::SizeF WindowFrame::fromFrame(const Gfx::SizeF& size) const
+{
+    double offY = (2*_borderWidth) + _titleHeight;
+    double offX = 2*_borderWidth;
+
+    return Gfx::SizeF(size.width() - offX, size.height() - offY);
+}
+
+
 void WindowFrame::onMenu()
 {
 }
@@ -412,11 +456,19 @@ void WindowFrame::onMenu()
 
 void WindowFrame::onMinimize()
 {
+    if(_state == Window::Minimized)
+        _window->setState(Window::Normal);
+    else 
+        _window->setState(Window::Minimized);
 }
 
 
 void WindowFrame::onMaximize()
 {
+    if(_state == Window::Maximized)
+        _window->setState(Window::Normal);
+    else 
+        _window->setState(Window::Maximized);
 }
 
 
