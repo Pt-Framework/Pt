@@ -313,6 +313,7 @@ void Window::setMainWidget(Widget* widget)
     _mainWidget->resize( size() );
 }
 
+
 Widget* Window::findWidget(const Gfx::PointF& pos, bool input)
 {
     if( ! isVisible() || ! isEnabled() )

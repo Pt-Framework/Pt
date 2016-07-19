@@ -133,12 +133,15 @@ void Widget::remove(Widget& widget)
         return;   
      
     _children.erase(it);
+
+    if(&widget == _layout)
+        _layout = 0;
     
     widget._enabledState = widget._enabled;
     widget.setParent(0);
     widget.setWindow(0);
 
-    widget.update();    
+    update();    
     
     onRemoveWidget(widget); 
 }
@@ -222,14 +225,18 @@ Widget* Widget::findWidget(const Gfx::PointF& pos, bool input)
 
 Widget* Widget::findWidget(const Gfx::PointF& pos)
 {
-  return findWidget(pos, false); 
+    return findWidget(pos, false); 
 }
 
 
-void Widget::setLayout( Layout& layout)
+void Widget::setLayout(Layout& layout)
 {
-  _layout = &layout;
-  add(layout); 
+    if(_layout)
+        remove(*_layout);
+
+    _layout = &layout;
+    
+    add(layout); 
 }
 
 
@@ -752,7 +759,6 @@ void Widget::onResizeEvent(const ResizeEvent& ev)
     if( _layout ) 
       _layout->resize( _size );
 
-    // TODO: override onResizeEvent in layouts
     onLayout();
 }
 
