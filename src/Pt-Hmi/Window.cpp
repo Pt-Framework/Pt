@@ -34,7 +34,7 @@
 
 //
 // TODO:
-// - show and enable event für widget
+// - enable event does not propagate to children
 // - FocusEvent
 
 namespace {

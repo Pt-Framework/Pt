@@ -77,11 +77,12 @@ class PT_HMI_API Screen : public WindowBase
       
         double resolutionDPI() const;
 
+        ScreenImpl* impl();
+
+    public:
         virtual Pt::Gfx::PointF toScreen(const Pt::Gfx::PointF& p) const;
 
         virtual Pt::Gfx::PointF fromScreen(const Pt::Gfx::PointF& p) const;
-
-        ScreenImpl* impl();
 
     protected:
         virtual Gfx::SizeF onSize() const;

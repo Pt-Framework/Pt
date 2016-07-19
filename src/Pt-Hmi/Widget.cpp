@@ -65,6 +65,8 @@ Widget::Widget()
     _eventReady += Pt::slot(*this, &Widget::onTouchEvent);
     _eventReady += Pt::slot(*this, &Widget::onEnterEvent);
     _eventReady += Pt::slot(*this, &Widget::onLeaveEvent);
+    _eventReady += Pt::slot(*this, &Widget::onEnableEvent);
+    _eventReady += Pt::slot(*this, &Widget::onShowEvent);
 }
 
 
@@ -116,7 +118,13 @@ void Widget::add(Widget& widget)
         widget.parent()->remove(widget);
 
     _children.push_back(&widget);
-    
+
+    if(widget._enabledState != _enabled)
+    {
+        EnableEvent eev( widget.vid(), _enabled);
+        Application::instance().loop().commitEvent(eev);
+    }
+
     widget.setParent(this);
     widget.setWindow(_window);
     widget.update();
@@ -137,7 +145,9 @@ void Widget::remove(Widget& widget)
     if(&widget == _layout)
         _layout = 0;
     
-    widget._enabledState = widget._enabled;
+    if(widget._enabledState != widget._enabled)
+        widget.enable(widget._enabled);
+    
     widget.setParent(0);
     widget.setWindow(0);
 
@@ -522,7 +532,17 @@ bool Widget::isVisible() const
 void Widget::show( bool s )
 {
     _visible = s;
+
+    ShowEvent ev(vid(), s);
+    Application::instance().loop().commitEvent(ev);
+
     update();
+}
+
+
+void Widget::onShowEvent(const ShowEvent& ev )
+{
+    _visible = ev.visible();
 }
 
 
@@ -532,27 +552,32 @@ bool Widget::isEnabled() const
 }
 
 
-void Widget::enable( bool e )
+void Widget::enable(bool e)
 {    
-    // TODO: enable event
     _enabled = e;
-    
-    onEnable(e);        
-
     _enabledState = e;
+
+    EnableEvent eev( vid(), e);
+    Application::instance().loop().commitEvent(eev);
+
     update();
 }
 
 
-void Widget::onEnable(bool e)
+void Widget::onEnableEvent(const EnableEvent& ev)
 {        
-    if(!e)
+    if( ! ev.enabled() )
         _enabledState = false;
     else
         _enabledState = _enabled;
 
     for( size_t i = 0; i < _children.size(); ++i)
-        _children[i]->onEnable(e);
+    {
+        Widget* w = _children[i];
+
+        EnableEvent eev( w->vid(), ev.enabled());
+        Application::instance().loop().commitEvent(eev);
+    }  
 }
 
 
@@ -582,10 +607,17 @@ void Widget::move(const Gfx::PointF& pos)
     updateRect.unify( Gfx::RectF(to, _size) ); 
 
     _position = pos;
+    
     MoveEvent mev(vid(), pos);
     Application::instance().loop().commitEvent(mev);
 
     update(updateRect);
+}
+
+
+void Widget::onMoveEvent(const MoveEvent& ev)
+{        
+    _position = ev.position();
 }
 
 
@@ -611,6 +643,17 @@ void Widget::resize(const Gfx::SizeF& s)
 }
 
 
+void Widget::onResizeEvent(const ResizeEvent& ev)
+{    
+    _size = ev.size();
+
+    if( _layout ) 
+      _layout->resize( _size );
+
+    onLayout();
+}
+
+
 const Gfx::RectF Widget::geometry() const
 {
     return Gfx::RectF( position(), size() );
@@ -630,7 +673,7 @@ const Cursor& Widget::cursor() const
 }
 
 
-void Widget::setCursor( const Cursor& c ) 
+void Widget::setCursor(const Cursor& c) 
 {
     _cursor = c;
 
@@ -743,23 +786,6 @@ void Widget::onEvent(const Pt::Event& ev)
 
 void Widget::onPaintEvent(const PaintEvent& ev)
 {
-}
-
-
-void Widget::onMoveEvent(const MoveEvent& ev)
-{        
-    _position = ev.position();
-}
-
-
-void Widget::onResizeEvent(const ResizeEvent& ev)
-{    
-    _size = ev.size();
-
-    if( _layout ) 
-      _layout->resize( _size );
-
-    onLayout();
 }
 
 

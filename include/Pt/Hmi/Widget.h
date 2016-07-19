@@ -39,6 +39,8 @@
 #include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Hmi/EnterEvent.h>
 #include <Pt/Hmi/LeaveEvent.h>
+#include <Pt/Hmi/EnableEvent.h>
+#include <Pt/Hmi/ShowEvent.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Docking.h>
 #include <Pt/Hmi/Visual.h>
@@ -220,9 +222,6 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onParentChanged(Widget* w);
 
-        void onEnable(bool e);
-
-        // TODO: move this to a Layout base class
         virtual void onLayout();
 
         virtual void onClicked(const Gfx::PointF& pos);
@@ -245,6 +244,10 @@ class PT_HMI_API Widget : public Visual
 
     protected:
         virtual void onEvent( const Event& ev );
+
+        virtual void onEnableEvent(const EnableEvent& ev);
+
+        virtual void onShowEvent(const ShowEvent& ev );
 
         virtual void onPaintEvent( const PaintEvent& ev );
 

@@ -47,7 +47,9 @@ ChildW::ChildW(const std::string& title)
     _mainLayout.setAlignment(FlowLayout::Top);
     _mainLayout.add(_menuBar);
 
+    
     setMainWidget(&_mainLayout);
+    
 
     setTitle(title);
     move( Gfx::PointF(5, 5) );
@@ -106,7 +108,6 @@ ChildW::ChildW(const std::string& title)
     _closeButton.setDocking( Docking::Bottom );
     _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);
 
-    
     _buttonBar.setName("ButtonBar");
     _buttonBar.resize( Gfx::SizeF(700, 180) );
     _buttonBar.setPadding(5);

@@ -114,13 +114,9 @@ class PT_HMI_API Window : public WindowBase
 
     void focusPrev();
 
-    virtual Gfx::PointF toParent(const Gfx::PointF& pos) const;
+    Gfx::PointF toParent(const Gfx::PointF& pos) const;
 
-    virtual Gfx::PointF fromParent(const Gfx::PointF& pos) const;
-
-    virtual Gfx::PointF toScreen(const Gfx::PointF& pos) const;
-    
-    virtual Gfx::PointF fromScreen(const Gfx::PointF& pos) const;       
+    Gfx::PointF fromParent(const Gfx::PointF& pos) const;     
 
     void update();
 
@@ -182,7 +178,7 @@ class PT_HMI_API Window : public WindowBase
 
     MainWindowImpl* impl();
 
-    const MainWindowImpl* impl() const;
+    const MainWindowImpl* impl() const; 
 
   protected:
     virtual void onAddWindow(Window& w);
@@ -191,7 +187,10 @@ class PT_HMI_API Window : public WindowBase
 
     virtual void onParentChanged(Window* w);
 
-    void onEnable(bool b);
+  public:
+    virtual Gfx::PointF toScreen(const Gfx::PointF& pos) const;
+    
+    virtual Gfx::PointF fromScreen(const Gfx::PointF& pos) const; 
 
   protected:
     Gfx::SizeF onSize() const;
@@ -272,6 +271,8 @@ class PT_HMI_API Window : public WindowBase
     void addWidget(Widget& w);
 
     void removeWidget(Widget& w);
+
+    void onEnable(bool b);
 
     void setFocusWidget(Widget* widget);
 
