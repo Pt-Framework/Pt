@@ -142,11 +142,11 @@ ChildW::~ChildW()
 
 void ChildW::onShowDialog(Button& button)
 {
-    std::clog << "----------------" << std::endl;
-    _closeButton.setText("AAA");
-    _closeButton.setText("BBB");
-    _closeButton.setText("CCC");    
-    _closeButton.setMargin(50);
+    //std::clog << "----------------" << std::endl;
+    //_closeButton.setText("AAA");
+    //_closeButton.setText("BBB");
+    //_closeButton.setText("CCC");    
+    //_closeButton.setMargin(50);
     
 
     //Gfx::SizeF size(400,260);
@@ -155,8 +155,10 @@ void ChildW::onShowDialog(Button& button)
     //Gfx::PointF pos(0,0);
     //_childWindow2.move(pos);
 
-//    Dialog1 d;    
-//    d.showModal();
+    Dialog1 d;    
+    d.showModal();
+    
+    //enable(false);
 }
 
 void ChildW::onCloseApp(Button& button)

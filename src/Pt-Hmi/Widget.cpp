@@ -119,9 +119,10 @@ void Widget::add(Widget& widget)
 
     _children.push_back(&widget);
 
-    if(widget._enabledState != _enabled)
+    // child needs to become indirectly disabled
+    if( ! isEnabled() )
     {
-        EnableEvent eev( widget.vid(), _enabled);
+        EnableEvent eev( widget.vid(), false);
         Application::instance().loop().commitEvent(eev);
     }
 
@@ -145,8 +146,9 @@ void Widget::remove(Widget& widget)
     if(&widget == _layout)
         _layout = 0;
     
-    if(widget._enabledState != widget._enabled)
-        widget.enable(widget._enabled);
+    // enable when indirectly disabled
+    if( ! widget._enabledState && widget._enabled)
+        widget.enable(true);
     
     widget.setParent(0);
     widget.setWindow(0);
@@ -566,14 +568,21 @@ void Widget::enable(bool e)
 
 void Widget::onEnableEvent(const EnableEvent& ev)
 {        
-    if( ! ev.enabled() )
-        _enabledState = false;
-    else
-        _enabledState = _enabled;
+    //if( ! ev.enabled() )
+    //    _enabledState = false;
+    //else
+    //    _enabledState = _enabled;
+
+    _enabledState = ev.enabled();
 
     for( size_t i = 0; i < _children.size(); ++i)
     {
         Widget* w = _children[i];
+
+        // skip directly disabled children, because they are either already
+        // disabled or they should not be enabled
+        if( ! w->_enabled )
+            continue;
 
         EnableEvent eev( w->vid(), ev.enabled());
         Application::instance().loop().commitEvent(eev);

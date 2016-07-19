@@ -83,6 +83,7 @@ Window::Window(Window* parent, Window::Type type)
     _eventReady += Pt::slot(*this, &Window::onMoveEvent);
     _eventReady += Pt::slot(*this, &Window::onResizeEvent);
     _eventReady += Pt::slot(*this, &Window::onShowEvent);
+    _eventReady += Pt::slot(*this, &Window::onEnableEvent);
     _eventReady += Pt::slot(*this, &Window::onWindowStateEvent);
 
     if(parent)
@@ -692,42 +693,45 @@ void Window::showModal()
 {
     deinit();
 
-    const Screen& screen = Application::instance().screen();
-
-    const std::vector<Window*>& windows = screen.windows();
     Window* activeWindow = 0;
 
-    std::vector<Window*>::const_iterator it;
+    const Screen& screen = Application::instance().screen();
+    const std::vector<Window*>& windows = screen.windows();
 
+    // TODO: only disable enabled windows
+
+    std::vector<Window*>::const_iterator it;
     for(it = windows.begin(); it != windows.end(); ++it)
     {
         Window* w = (*it);
 
-        w->onEnable(false);
+        w->enable(false);
 
         if( w->isActive() )
-            activeWindow = w;            
+            activeWindow = w;
     }
 
     enable(true);
     show(true);
 
     while( ! isClosed() )
-    {           
+    {
         if( ! isActive() )
             activate();
 
         Application::instance().nextEvent();
     }
 
+    // TODO: only enable previously disabled windows
+
     for(it = windows.begin(); it != windows.end(); ++it)
     {
         Window* w = (*it);
 
-        w->onEnable(true);
+        w->enable(true);
 
         if( activeWindow && activeWindow->vid() == w->vid() )
-            activeWindow->activate();                     
+            activeWindow->activate();
     }
 }
 
@@ -756,19 +760,27 @@ void Window::onEnable( Window& w, bool enable )
 }
 
 
-void Window::onEnableEvent( const EnableEvent& ev )
-{ 
-    _enabled = ev.enabled();    
-    _enabledState =  ev.enabled();
-}
+void Window::onEnableEvent(const EnableEvent& ev)
+{        
+    //if( ! ev.enabled() )
+    //    _enabledState = false;
+    //else
+    //    _enabledState = _enabled;
 
+    _enabledState = ev.enabled();
 
-void Window::onEnable(bool e)
-{
-    if( ! e)
-        _enabledState = false;
-    else
-        _enabledState = _enabled;
+    for( size_t i = 0; i < _windows.size(); ++i)
+    {
+        Window* w = _windows[i];
+
+        // skip directly disabled children, because they are either already
+        // disabled or they should not be enabled
+        if( ! w->_enabled )
+            continue;
+
+        EnableEvent eev( w->vid(), ev.enabled());
+        Application::instance().loop().commitEvent(eev);
+    }  
 }
 
 

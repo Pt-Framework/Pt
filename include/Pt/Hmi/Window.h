@@ -272,8 +272,6 @@ class PT_HMI_API Window : public WindowBase
 
     void removeWidget(Widget& w);
 
-    void onEnable(bool b);
-
     void setFocusWidget(Widget* widget);
 
     template <typename Iter>
