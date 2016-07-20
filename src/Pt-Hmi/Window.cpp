@@ -34,7 +34,6 @@
 
 //
 // TODO:
-// - enable event does not propagate to children
 // - FocusEvent
 
 namespace {
@@ -114,7 +113,6 @@ void Window::init(Window* parent)
         deinit();
 
     _parent = parent;
-    setParent(parent);
 
     if( ! _parent )
     {
@@ -126,10 +124,28 @@ void Window::init(Window* parent)
     
     _init = true;
     _isClosed = false;
+
+    setParent(parent);
     
     move(_position);
     resize(_size);
-    enable(_enabled);
+
+    if( ! _enabled )
+    {
+        // defered initialization
+        enable(_enabled);
+    }
+    else if( parent && ! parent->isEnabled() && isEnabled() )
+    {
+        // disable indirectly, when parent is disabled
+        EnableEvent eev( vid(), false);
+        Application::instance().loop().commitEvent(eev);
+    }
+    else if( ! _enabledState && _enabled)
+    {
+        // enable when indirectly disabled, but parent is enabled
+        enable(true);
+    }
 
     if( _isActive )
         activate();

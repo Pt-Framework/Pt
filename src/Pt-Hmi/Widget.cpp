@@ -119,8 +119,8 @@ void Widget::add(Widget& widget)
 
     _children.push_back(&widget);
 
-    // child needs to become indirectly disabled
-    if( ! isEnabled() )
+    // disable indirectly, when parent is disabled
+    if( ! isEnabled() && widget.isEnabled() )
     {
         EnableEvent eev( widget.vid(), false);
         Application::instance().loop().commitEvent(eev);
