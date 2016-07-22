@@ -99,7 +99,7 @@ void MainWindowImpl::close()
     if( _hwnd == 0)
         return;
 
-    PostMessage(_hwnd, WM_CLOSE, 0, 0);    
+    PostMessage(_hwnd, WM_CLOSE, 0, 0);
 }
 
 
@@ -114,7 +114,7 @@ void MainWindowImpl::show( bool v)
    if( v )
        ShowWindow(_hwnd, SW_SHOW);
    else
-       ShowWindow(_hwnd, SW_HIDE);   
+       ShowWindow(_hwnd, SW_HIDE);
 }
 
 
@@ -270,7 +270,7 @@ void MainWindowImpl::setState(Window::State s)
 
 void MainWindowImpl::grabMouse()
 {
-    SetCapture(_hwnd);       
+    SetCapture(_hwnd);
 }
 
 } // namespace

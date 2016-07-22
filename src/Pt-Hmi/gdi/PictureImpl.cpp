@@ -30,13 +30,23 @@
 #include "PictureImpl.h"
 
 namespace Pt {
-
 namespace Hmi {
 
-PictureImpl::PictureImpl(const Gfx::Image& image)
-: _width( image.width() )
-, _height( image.height() )
+PictureImpl::PictureImpl()
+: _andMask(0)
+, _xorMask(0)
+, _width(0)
+, _height(0)
 {
+}
+
+
+void PictureImpl::set(const Gfx::Image& image )
+{
+    clear();
+    _width = image.width();
+    _height = image.height();
+
     for( size_t y = 0; y < image.height(); ++y )
     {
         for( size_t x = 0; x < image.width(); ++x )
@@ -70,14 +80,34 @@ PictureImpl::PictureImpl(const Gfx::Image& image)
             }
         }
     }
+
+    _hAndMask = CreateBitmap(_width, _height, 1, 4*8, (VOID*)&_andMask[0]);
+    _hXorMask = CreateBitmap(_width, _height, 1, 4*8, (VOID*)&_xorMask[0]);
+}
+
+
+void PictureImpl::clear()
+{
+    if( _andMask.size() != 0)
+    {
+       DeleteObject(_hAndMask);
+       _andMask.clear();
+    }
+
+    if( _xorMask.size() != 0)
+    {
+      DeleteObject(_hXorMask);
+      _xorMask.clear();
+    }
+
+  _width = 0;
+  _height = 0;
 }
 
 
 PictureImpl::~PictureImpl()
 {
-
+  clear();
 }
 
-}  // namespace
-
-} // namespace
+}} // namespace

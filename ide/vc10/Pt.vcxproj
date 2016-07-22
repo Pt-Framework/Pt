@@ -344,7 +344,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\egl-test\Vector.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\PainterImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PictureImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.h" />
@@ -536,7 +535,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\FlowLayout.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\PainterImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PictureImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.cpp" />

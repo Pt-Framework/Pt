@@ -32,6 +32,7 @@
 
 #include <Pt/Gfx/Image.h>
 #include <vector>
+#include <Windows.h>
 
 namespace Pt {
 
@@ -40,28 +41,30 @@ namespace Hmi {
 class PictureImpl
 {
     public:
-        PictureImpl(const Gfx::Image& image);
+        PictureImpl();
 
         virtual ~PictureImpl();
 
-        const std::vector<Pt::uint8_t>& andMask() const
+        void set(const Gfx::Image& image);
+
+        const HBITMAP andMask() const
         {
-          return _andMask;
+          return _hAndMask;
         }
 
-        std::vector<Pt::uint8_t>& andMask()
+        HBITMAP andMask()
         {
-          return _andMask;
+          return _hAndMask;
         }
 
-        const std::vector<Pt::uint8_t>& xorMask() const
+        const HBITMAP xorMask() const
         {
-            return _xorMask;
+            return _hXorMask;
         }
 
-        std::vector<Pt::uint8_t>& xorMask()
+        HBITMAP xorMask()
         {
-            return _xorMask;
+            return _hXorMask;
         }
 
         size_t width() const
@@ -74,10 +77,20 @@ class PictureImpl
             return _height;
         }
 
+        bool empty() const
+        {
+          return _andMask.empty();
+        }
+          
+    private:
+      void clear();
 
     private:
         std::vector<Pt::uint8_t> _andMask;
         std::vector<Pt::uint8_t> _xorMask;
+
+        HBITMAP _hAndMask;
+        HBITMAP _hXorMask;
         size_t _width;
         size_t _height;
 };

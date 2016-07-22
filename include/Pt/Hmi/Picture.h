@@ -20,12 +20,8 @@ class PT_HMI_API Picture
         virtual ~Picture();
 
         void set(const Gfx::Image& image);
-        
-               
-        bool empty() const
-        {
-          return _impl == 0;
-        }
+
+        bool empty() const;
 
         PictureImpl* impl()
         {
@@ -40,8 +36,7 @@ class PT_HMI_API Picture
         
     private:
 
-        PictureImpl* _impl;     
-                  
+        PictureImpl* _impl;
 };
 
 }}

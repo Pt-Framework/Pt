@@ -106,8 +106,8 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         HDC deviceContext() const;
 
     private: 
-        void bitBlit(const Gfx::PointF& pos, const Pt::uint8_t* data, size_t width, size_t height, DWORD op );
-          
+        void bitBlit( const Gfx::PointF& pos, size_t width, size_t height, HBITMAP bitmap, DWORD op );
+
     private:
         Gfx::SizeF     _size;
         HDC            _deviceContext;

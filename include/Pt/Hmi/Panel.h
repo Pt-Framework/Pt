@@ -140,7 +140,7 @@ class PT_HMI_API Panel : public Widget
             return _borderStyle;
         }
 
-        void setBorderStyle(BorderStyle t)         
+        void setBorderStyle(BorderStyle t)
         {   
             _borderStyle = t;
             update();

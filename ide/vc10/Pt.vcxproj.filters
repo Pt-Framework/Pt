@@ -906,9 +906,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.h">
       <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\gdi\PainterImpl.h">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\PainterImpl.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
@@ -2229,9 +2226,6 @@
       <Filter>Pt-Ssl\nossl</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.cpp">
-      <Filter>Pt-Hmi\gdi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\gdi\PainterImpl.cpp">
       <Filter>Pt-Hmi\gdi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Qt\Application.cpp">
