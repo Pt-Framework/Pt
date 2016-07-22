@@ -126,10 +126,9 @@ void Button::onTouchEvent(const TouchEvent& ev)
     }
 }
 
-
-void Button::onFocus(bool hasFocus)
+void Button::onFocusEvent(const FocusEvent& ev)
 {    
-    Label::onFocus(hasFocus);
+    Label::onFocusEvent(ev);
     update();
 }
 

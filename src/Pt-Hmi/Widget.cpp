@@ -66,6 +66,7 @@ Widget::Widget()
     _eventReady += Pt::slot(*this, &Widget::onEnterEvent);
     _eventReady += Pt::slot(*this, &Widget::onLeaveEvent);
     _eventReady += Pt::slot(*this, &Widget::onEnableEvent);
+    _eventReady += Pt::slot(*this, &Widget::onFocusEvent);
     _eventReady += Pt::slot(*this, &Widget::onShowEvent);
 }
 
@@ -183,8 +184,6 @@ void Widget::setParent(Widget* parent)
 
 void Widget::setWindow(Window* window)
 {
-    onFocus(false);
-
     if(_window)
         _window->removeWidget(*this);
 
@@ -203,6 +202,7 @@ const std::vector<Widget*>& Widget::widgets() const
 {
     return _children;
 }
+
 
 Widget* Widget::findWidget(const Gfx::PointF& pos, bool input)
 {
@@ -311,16 +311,15 @@ Gfx::PointF Widget::fromScreen(const Gfx::PointF& pos) const
 }
 
 
-bool Widget::hasFocus() const
+bool Widget::acceptsInput() const
 {
-    return _hasFocus;
+  return _acceptsInput;
 }
 
 
-void Widget::focus()
+void Widget::setAcceptInput(bool a)
 {
-    if(_window)
-        _window->setFocusWidget(this);          
+    _acceptsInput = a;
 }
 
 
@@ -336,15 +335,22 @@ void Widget::setAcceptsFocus(bool a)
 }
 
 
-bool Widget::acceptsInput() const
-{
-  return _acceptsInput;
-}
-
-
 size_t Widget::focusIndex() const
 {
     return _focusIndex;
+}
+
+
+bool Widget::hasFocus() const
+{
+    return _hasFocus;
+}
+
+
+void Widget::focus()
+{
+    if(_window)
+        _window->setFocusWidget(this);          
 }
 
 
@@ -357,15 +363,9 @@ void Widget::setFocusIndex(size_t index)
 }
 
 
-void Widget::onFocus(bool hasFocus)
+void Widget::onFocusEvent(const FocusEvent& ev)
 {    
-    _hasFocus = hasFocus;
-}
-
-
-void Widget::setAcceptInput(bool a)
-{
-  _acceptsInput = a;
+    _hasFocus = ev.isFocused();
 }
 
 
@@ -431,19 +431,20 @@ const Pt::Char* Widget::mnemonic() const
 }
 
 
-void Widget::setMnemonicWidget(Widget* w)
-{
-    _mnemonicEntered.disconnect();
+void Widget::setMnemonic(const Char& ch)
+{  
+    _mnemonic = ch;
 
-    if(w)
-        _mnemonicEntered += Pt::slot(*w, &Widget::onMnemonic);
+    const Char* m = ch != 0 ? &ch : 0;
+    if( _window )
+        _window->setMnemonic(*this, m);
 }
 
 
 String Widget::setMnemonic(const String& text)
 {  
     String str;
-    _mnemonic = 0;
+    Char mnemonic = 0;
 
     bool onAmp = false;
     for(String::const_iterator it = text.begin(); it != text.end(); ++it)
@@ -451,7 +452,7 @@ String Widget::setMnemonic(const String& text)
         if(onAmp)
         {
             if(*it != '&')
-                _mnemonic = *it;
+                mnemonic = *it;
 
             str += *it;
             onAmp = false;
@@ -467,12 +468,19 @@ String Widget::setMnemonic(const String& text)
 
     if(onAmp)
         str += '&';
-    
-    Char* ch = _mnemonic != 0 ? &_mnemonic : 0;
-    if( _window )
-        _window->setMnemonic(*this, ch);
+
+    setMnemonic(mnemonic);
 
     return str;
+}
+
+
+void Widget::setMnemonicWidget(Widget* w)
+{
+    _mnemonicEntered.disconnect();
+
+    if(w)
+        _mnemonicEntered += Pt::slot(*w, &Widget::onMnemonic);
 }
 
 
@@ -700,6 +708,9 @@ bool Widget::isAutoSize() const
 void Widget::setAutoSize(bool a)
 {
     _autoSize = a;
+
+    if( parent() )
+       parent()->onLayout();
 }
 
 

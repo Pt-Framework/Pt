@@ -30,11 +30,8 @@
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/FocusEvent.h>
 #include <cassert>
-
-//
-// TODO:
-// - FocusEvent
 
 namespace {
 
@@ -377,11 +374,11 @@ void Window::removeWidget(Widget& w)
     if( Application::instance().pointerWidget() == &w )
         Application::instance().setPointerWidget(0);
 
-    if( _focusWidget == &w )
-        _focusWidget = 0;
-
     if(_mainWidget == &w)
         _mainWidget = 0;
+
+    if( _focusWidget == &w )
+        setFocusWidget(0);
 
     removeFocusWidget(w);
 
@@ -417,14 +414,16 @@ void Window::setFocusWidget(Widget* widget)
 
     if( _focusWidget )
     {
-        _focusWidget->onFocus(false);
+        FocusEvent fev(_focusWidget->vid(), false);
+        Application::instance().loop().commitEvent(fev);
     }
     
     _focusWidget = widget;
 
     if( _focusWidget )
     {
-        _focusWidget->onFocus(true);
+        FocusEvent fev(_focusWidget->vid(), true);
+        Application::instance().loop().commitEvent(fev);
     }
 }
 

@@ -63,6 +63,7 @@ Application::Application(int argc, char** argv)
     loop().eventReceived() += Pt::slot(*this, &Application::onCloseEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onEnterEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onLeaveEvent );
+    loop().eventReceived() += Pt::slot(*this, &Application::onFocusEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onWindowStateEvent);
 }
 
@@ -384,6 +385,17 @@ void Application::onEnterEvent( const EnterEvent& ev )
 
 
 void Application::onLeaveEvent(const LeaveEvent& ev )
+{
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+
+    if( it == _visuals.end() )
+        return;
+
+    it->second->processEvent(ev);
+}
+
+
+void Application::onFocusEvent(const FocusEvent& ev)
 {
     VisualMap::iterator it = _visuals.find( ev.vid() );
 

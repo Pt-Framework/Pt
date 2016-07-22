@@ -43,6 +43,7 @@
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/EnterEvent.h>
 #include <Pt/Hmi/LeaveEvent.h>
+#include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/System/Application.h>
 
@@ -126,6 +127,8 @@ class PT_HMI_API Application : public Pt::System::Application
         void onEnterEvent(const EnterEvent& ev);
 
         void onLeaveEvent(const LeaveEvent& ev);
+
+        void onFocusEvent(const FocusEvent& ev);
 
         void onWindowStateEvent(const WindowStateEvent& ev);
 

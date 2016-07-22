@@ -1401,6 +1401,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\WindowStateEvent.h">
       <Filter>Pt-Hmi\Events</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\FocusEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

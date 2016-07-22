@@ -41,6 +41,7 @@
 #include <Pt/Hmi/LeaveEvent.h>
 #include <Pt/Hmi/EnableEvent.h>
 #include <Pt/Hmi/ShowEvent.h>
+#include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Hmi/Docking.h>
 #include <Pt/Hmi/Visual.h>
@@ -90,6 +91,10 @@ class PT_HMI_API Widget : public Visual
 
         void setLayout(Layout& layout);
 
+        void setAcceptInput( bool a );
+
+        bool acceptsInput() const;
+
         //
         // coordinate transformations
         //
@@ -106,23 +111,19 @@ class PT_HMI_API Widget : public Visual
         // focus handling
         // 
 
-        bool hasFocus() const;
-
-        void focus();
-
         bool acceptsFocus() const;
 
         // TODO: focus policy:
         //       focus by Tab, focus by pointer, both and none 
         void setAcceptsFocus(bool a);
 
+        bool hasFocus() const;
+
+        void focus();
+
         size_t focusIndex() const;
 
         void setFocusIndex(size_t index);
-
-        void setAcceptInput( bool a );
-
-        bool acceptsInput() const;
 
         //
         // keyboard input
@@ -137,6 +138,10 @@ class PT_HMI_API Widget : public Visual
         void setShortcut(const Key* k);
 
         const Pt::Char* mnemonic() const; 
+
+        void setMnemonic(const Char& ch);
+
+        String setMnemonic(const String& text);
 
         void setMnemonicWidget(Widget* w);
 
@@ -181,14 +186,11 @@ class PT_HMI_API Widget : public Visual
         //
         // layouting
         //
-
-        // TODO: rethink
+ 
         bool isAutoSize() const;
 
-        // TODO: rethink
         void setAutoSize(bool a);
 
-        // TODO: rethink
         Gfx::SizeF preferredSize() const;
 
         // outer spacing
@@ -203,14 +205,17 @@ class PT_HMI_API Widget : public Visual
         // inner spacing
         const Spacing& padding() const;
 
+        // inner spacing
         void setPadding(const Spacing& p);
 
+        // inner spacing
         void setPadding(double n);
 
         const Docking& docking() const;
 
         void setDocking(const Docking& d);
 
+    public:
         virtual Gfx::PointF toScreen(const Gfx::PointF& pos) const;
     
         virtual Gfx::PointF fromScreen(const Gfx::PointF& pos) const;       
@@ -224,11 +229,9 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onLayout();
 
-        virtual void onClicked(const Gfx::PointF& pos);
-
         virtual Gfx::SizeF onAutoSize() const;
 
-        virtual void onFocus(bool isFocused);
+        virtual void onClicked(const Gfx::PointF& pos);
 
         virtual void onSetActionKey(const Key& ak);
 
@@ -237,8 +240,6 @@ class PT_HMI_API Widget : public Visual
         virtual void onSetShortcut(const Key* k);
 
         virtual void onShortcut(const KeyEvent& kev);
-
-        String setMnemonic(const String& text);
 
         virtual void onMnemonic();
 
@@ -264,6 +265,8 @@ class PT_HMI_API Widget : public Visual
         virtual void onKeyEvent(const KeyEvent& ev);
 
         virtual void onEnterEvent( const EnterEvent& ev );
+
+        virtual void onFocusEvent(const FocusEvent& ev);
 
         virtual void onLeaveEvent(const LeaveEvent& ev );
 
