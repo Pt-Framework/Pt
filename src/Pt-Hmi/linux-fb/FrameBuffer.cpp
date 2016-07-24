@@ -55,6 +55,7 @@ namespace Hmi {
 */
 
 FrameBuffer::FrameBuffer()
+: _rotation(Rotation90Degree)
 {           
     _fd = open ("/dev/fb0", O_RDWR);
 
@@ -93,6 +94,8 @@ FrameBuffer::FrameBuffer()
             _format =  new Gfx::Argb8888Format();
             break;
     }
+
+    std::clog<<"Sreen resolution (" <<width() << "," <<height() << ") Pixel size = "<<_format->pixelSize()<< " Stride = "<<strideInBytes()<<std::endl;
 }
 
 
@@ -107,6 +110,64 @@ FrameBuffer::~FrameBuffer()
   if( _format != 0)
      delete _format;
 } 
+
+size_t FrameBuffer::width() const
+{
+    switch( _rotation)
+    {
+      default:
+        return _screenInfo.xres;
+
+      case  Rotation90Degree:
+      case  Rotation270Degree:
+        return _screenInfo.yres; 
+    }
+
+    return 0;
+}
+
+
+size_t FrameBuffer::height() const
+{
+    switch( _rotation)
+    {
+      default:
+        return _screenInfo.yres;
+
+      case  Rotation90Degree:
+      case  Rotation270Degree:
+        return _screenInfo.xres; 
+    }
+
+    return 0;
+}
+
+void FrameBuffer::set( const Pt::uint8_t* frame )
+{
+    switch( _rotation)
+    {
+      case Rotation0Degree:
+          memcpy( _buffer, frame, bufferSize() );
+      break;
+
+      case Rotation90Degree:
+        for( size_t w = 0; w < width(); ++ w)
+        {
+           for( size_t h = 0; h < height(); ++h)
+              memcpy( pixelBuffer( h, _screenInfo.yres - w), pixelFrame(frame, w, h), _format->pixelSize() );
+        }
+      break;
+
+      case Rotation180Degree:
+        throw std::logic_error("Not implemented");
+      break;
+
+      case Rotation270Degree:
+        throw std::logic_error("Not implemented");
+      break;
+    }
+}
+
 
 } // namespace
 

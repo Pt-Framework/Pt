@@ -27,7 +27,6 @@ SharedLibrary Pt-Gfx : Argb8888Format.cpp
                        Font.cpp
                        FontMetrics.cpp
                        FreeType.cpp
-#                       GraphicsPipeline.cpp          
                        Image.cpp
                        ImageFormat.cpp
                        ImagePainter.cpp

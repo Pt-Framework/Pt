@@ -50,19 +50,22 @@ namespace Hmi {
 class FrameBuffer
 {
     public:
+        enum Rotation
+        {
+            Rotation0Degree = 0, //0 - normal orientation (0 degree)
+            Rotation90Degree,    //1 - clockwise orientation (90 degrees)
+            Rotation180Degree,   //2 - upside down orientation (180 degrees)
+            Rotation270Degree,   //3 - counterclockwise orientation (270 degrees)
+        };
+
+    public:
         FrameBuffer();
 
         virtual ~FrameBuffer();
 
-        size_t width() const
-        {
-            return _screenInfo.xres;
-        }
+        size_t width() const;
 
-        size_t height() const
-        {
-            return _screenInfo.yres;
-        }    
+        size_t height() const;
 
         size_t depth() const
         {
@@ -84,25 +87,41 @@ class FrameBuffer
             return *_format;
         }
 
-        char* buffer()
-        {
-            return _buffer;
-        }
-
         size_t bufferSize() const
         {
             return _bufferSize;
         }
 
-        const char* buffer() const
-        {                 
-            return _buffer;
+        void setRotation(Rotation r )
+        {
+          _rotation = r;
+        }
+
+        Rotation rotation() const
+        {
+          return _rotation;
         }
 
         Gfx::Size size() const 
         {
             return Gfx::Size( width(), height() );
         }
+
+        void set( const Pt::uint8_t* frame );
+
+    private:
+
+
+      char* pixelBuffer( size_t w, size_t h )
+      {
+          const size_t lineSize = lineLength() * h;
+          return _buffer + (lineSize + _format->pixelSize() * w );
+      }
+
+      const Pt::uint8_t* pixelFrame( const Pt::uint8_t* frame, size_t w, size_t h )
+      {
+        return frame + (( width() *  _format->pixelSize() + strideInBytes() ) * h + w * _format->pixelSize());
+      }
 
     private:
         int               _fd;
@@ -113,6 +132,7 @@ class FrameBuffer
         size_t            _bufferSize;
         size_t            _depth;
         Gfx::ImageFormat* _format;
+        Rotation          _rotation;
 };
 
 } // namespace

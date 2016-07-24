@@ -275,8 +275,8 @@ bool InputDevice::onRun()
                 //std::clog << "EV_ABS" << std::endl;
                 
                 Gfx::SizeF screenSize = Application::instance().screen().size();
-                double scaleX =  screenSize.width() / 800.0;
-                double scaleY =  screenSize.height() / 480.0;
+                double scaleX =  screenSize.width() / 480.0;
+                double scaleY =  screenSize.height() / 800.0;
 
                 switch(ev.code)
                 {
@@ -285,18 +285,18 @@ bool InputDevice::onRun()
 
                     case ABS_X:
                     case ABS_MT_POSITION_X:
-                        _mouseEvent.setX( static_cast<double>(ev.value)*scaleX  );
+                        _mouseEvent.setY( static_cast<double>(ev.value)*scaleX  );
                         _touchMove++;
                         break;
 
                     case ABS_Y:
                     case ABS_MT_POSITION_Y:
-                        _mouseEvent.setY( static_cast<double>(ev.value)*scaleY );
+                        _mouseEvent.setX(  screenSize.width() - static_cast<double>(ev.value)*scaleY );
                         _touchMove++;
                         break;
 
                     case ABS_PRESSURE:
-                    case ABS_MT_PRESSURE:                  
+                    case ABS_MT_PRESSURE:
                         break;
 
                     default:

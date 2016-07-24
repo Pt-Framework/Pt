@@ -31,6 +31,8 @@
 #include "ScreenImpl.h"
 #include "ApplicationImpl.h"
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Picture.h>
+#include "PictureImpl.h"
 
 namespace Pt {
 
@@ -205,7 +207,22 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image
 
 void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
 {
+  if( pic.empty() )
+    return;
 
+  for(size_t w = 0; w < pic.impl()->width() ; ++w )
+  {
+    for( size_t h = 0; h < pic.impl()->height(); ++h)
+    {
+        const Gfx::Color& c = pic.impl()->image().color( w,h);
+        
+        if( c.alpha() == 0)
+          continue;
+
+        _painter.setPen( Gfx::Pen(1, c ));
+        _painter.setPixel( Gfx::PointF( to.x() + w, to.y() + h ) );
+    }
+  }
 }
 
 } // namespace

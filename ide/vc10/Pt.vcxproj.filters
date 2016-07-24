@@ -1023,9 +1023,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.h">
-      <Filter>Pt-Hmi\linux-fb</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
@@ -1184,33 +1181,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\ImagePainter.h">
       <Filter>Pt-Gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\GraphicsPipeline.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\EllipseOp.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\FillEllipseOp.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\FillOp.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\GraphicsOp.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\ImageOp.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\PipelineOp.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\StrokeOp.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\TextOp.h">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\ZBuffer.h">
       <Filter>Pt</Filter>
@@ -2315,9 +2285,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.cpp">
-      <Filter>Pt-Hmi\linux-fb</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
@@ -2437,9 +2404,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter.cpp">
       <Filter>Pt-Gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\GraphicsPipeline.cpp">
-      <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt\ZBuffer.cpp">
       <Filter>Pt</Filter>

@@ -55,7 +55,7 @@ class PT_GFX_API ImagePainter : public Painter
 
     virtual void setFont(const Font& font);
 
-    virtual const Font& font() const;    
+    virtual const Font& font() const;
 
     virtual FontMetrics fontMetrics(const Pt::String& text) const;
 
@@ -80,6 +80,8 @@ class PT_GFX_API ImagePainter : public Painter
     virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect);
 
     virtual void setClip( const RectF& clip );
+
+    virtual void setPixel(const  PointF& to);
         
     virtual const Gfx::RectF& clip() const;
 

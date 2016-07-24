@@ -198,5 +198,11 @@ void ImagePainter::clear( const Gfx::Color& color )
 }
 
 
+void ImagePainter::setPixel( const Gfx::PointF& p)
+{
+  _rasterizer.stroke(p);
+}
+
+
 }} //namespace
 

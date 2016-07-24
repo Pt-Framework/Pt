@@ -34,16 +34,16 @@ namespace Gfx{
 Image::Image(const ImageFormat& format)		
 : _format(&format)
 {
-	resize(Gfx::Size(0,0) );
+  resize(Gfx::Size(0,0) );
 }
-			
-      	
+      
+        
 Image::Image(const Gfx::Size& size,  const ImageFormat& format, size_t stride )
 : _buffer(0)
 {
-	resize(size, format, stride);
+  resize(size, format, stride);
 }
-		
+    
 
 
 Image::Image( Pt::uint8_t* buffer, const Gfx::Size& size, const ImageFormat& format, size_t stride )
@@ -65,21 +65,21 @@ Image::Image( const Image& copy)
 
 Image Image::convert(const ImageFormat& toFormat) const
 {
-	if( *_format == toFormat )
-		return *this;
+  if( *_format == toFormat )
+    return *this;
 
-	Image image( Size(_width, _height), toFormat, _stride );
+  Image image( Size(_width, _height), toFormat, _stride );
 
-	for( size_t y = 0; y < _height; ++y)
-	{
-		for( size_t x = 0; x < _width; ++x )
-		{
-			const Color pixelColor = color(x,y);
-			image.setColor(x , y, pixelColor);
-		}
-	}
+  for( size_t y = 0; y < _height; ++y)
+  {
+    for( size_t x = 0; x < _width; ++x )
+    {
+      const Color pixelColor = color(x,y);
+      image.setColor(x , y, pixelColor);
+    }
+  }
 
-	return image;
+  return image;
 }
 
 
@@ -140,61 +140,61 @@ Image Image::blockScale( const Size& newSize) const
 
 Image Image::subImage( const Rect& regionIn) const
 {
-	//Cliping.
-	int width = _width;
-	int height = _height;
-	int x = regionIn.left();
-	int y = regionIn.top();
+  //Cliping.
+  int width = _width;
+  int height = _height;
+  int x = regionIn.left();
+  int y = regionIn.top();
 
-	if( regionIn.left() + regionIn.width() >= _width )
-		width =  _width - regionIn.left();
+  if( regionIn.left() + regionIn.width() >= _width )
+    width =  _width - regionIn.left();
 
-	if( regionIn.top() + regionIn.height() >= _height )
-		height =  _height - regionIn.top() ;
+  if( regionIn.top() + regionIn.height() >= _height )
+    height =  _height - regionIn.top() ;
 
-	if( regionIn.left() < 0)
-		x = 0;
+  if( regionIn.left() < 0)
+    x = 0;
 
-	if( regionIn.top() < 0)
-		y = 0;
+  if( regionIn.top() < 0)
+    y = 0;
 
-	Rect clipedRegion( Point(x,y), Size(width, height ) );
+  Rect clipedRegion( Point(x,y), Size(width, height ) );
 
-	//Copy to new image
-	Image image(Gfx::Size( clipedRegion.width(), clipedRegion.height()), *_format, _stride );
+  //Copy to new image
+  Image image(Gfx::Size( clipedRegion.width(), clipedRegion.height()), *_format, _stride );
 
-	for( int y = clipedRegion.top(); y  <= clipedRegion.bottom(); ++y)
-	{
-		const int lineBeginOffset = y * (_width * _format->pixelSize() + _stride);
+  for( int y = clipedRegion.top(); y  <= clipedRegion.bottom(); ++y)
+  {
+    const int lineBeginOffset = y * (_width * _format->pixelSize() + _stride);
 
-		const int targetY = y - clipedRegion.top();
-		
-		const int xStartOffset = lineBeginOffset + (clipedRegion.left() * _format->pixelSize());
-		const int xEnd   = lineBeginOffset + (clipedRegion.right() * _format->pixelSize());
+    const int targetY = y - clipedRegion.top();
+    
+    const int xStartOffset = lineBeginOffset + (clipedRegion.left() * _format->pixelSize());
+    const int xEnd   = lineBeginOffset + (clipedRegion.right() * _format->pixelSize());
 
-		const int lineSize = (clipedRegion.right() - clipedRegion.left() + 1) * _format->pixelSize();
+    const int lineSize = (clipedRegion.right() - clipedRegion.left() + 1) * _format->pixelSize();
 
-		memcpy( image.pixel(0,targetY), &_buffer[xStartOffset], lineSize );
-	}
+    memcpy( image.pixel(0,targetY), &_buffer[xStartOffset], lineSize );
+  }
 
-	return image;
+  return image;
 }
 
 
 void Image::setColor( const Color& color )
 {
-	Pt::uint8_t* it =  pixel(0,0);	
-	
-	std::vector<Pt::uint8_t> pixel( format().pixelSize() );
-	format().setColor(&pixel[0], color);
-	
-	const size_t count = (_width + _stride) * _height;
+  Pt::uint8_t* it =  pixel(0,0);	
+  
+  std::vector<Pt::uint8_t> pixel( format().pixelSize() );
+  format().setColor(&pixel[0], color);
+  
+  const size_t count = (_width + _stride) * _height;
 
-	for( size_t  i = 0; i < count; ++i )
-	{				
-		memcpy(it, &(pixel[0]), pixel.size());
-		it += pixel.size();
-	}
+  for( size_t  i = 0; i < count; ++i )
+  {				
+    memcpy(it, &(pixel[0]), pixel.size());
+    it += pixel.size();
+  }
 }
 
 
@@ -225,10 +225,10 @@ void Image::resize( const Gfx::Size& size, const ImageFormat& format, size_t str
 void Image::resize( Pt::uint8_t* buffer, const Gfx::Size& size,size_t strideInBytes  )
 {
   _stride = strideInBytes;
-	_width  = size.width();
-	_height = size.height();
+  _width  = size.width();
+  _height = size.height();
   _buffer = buffer;
-  _defaultBuffer.clear();  
+  _defaultBuffer.clear();
 }
 
 
@@ -237,6 +237,5 @@ void Image::resize( Pt::uint8_t* buffer, const Gfx::Size& size, const ImageForma
   _format = &format;
   resize( buffer, size, strideInBytes );
 }
-
 
 }}

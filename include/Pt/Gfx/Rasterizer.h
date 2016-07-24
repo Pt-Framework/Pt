@@ -102,9 +102,11 @@ class PT_GFX_API Rasterizer
     void fillRect(const RectF& r);
 
     void stroke( const PointF* points, size_t pointCount );
-    
+
+    void stroke( const PointF& pixel);
+
     void fill( const PointF* points, size_t pointCount );
-    
+
     void strokeText( const PointF& to, const Pt::String& text );
     
     void strokeEllipse( const PointF& topLeft, const SizeF& size );
@@ -114,8 +116,10 @@ class PT_GFX_API Rasterizer
     FontMetrics fontMetrics( const String& text ) const;
 
     void clear( const Color& color = Color(1,1,1) );
+
     
-    static FontMetrics fontMetrics( const Font& font, const Pt::String& text );        
+
+    static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
 
   //Output algo.
   protected: 

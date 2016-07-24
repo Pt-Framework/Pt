@@ -40,7 +40,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Exception.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Font.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\FontMetrics.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\GraphicsPipeline.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Image.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImagePainter.h" />
@@ -291,19 +290,11 @@
     <ClInclude Include="..\..\src\Pt-Gfx\DrawText.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Edge.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\EdgeTable.h" />
-    <ClInclude Include="..\..\src\Pt-Gfx\EllipseOp.h" />
-    <ClInclude Include="..\..\src\Pt-Gfx\FillEllipseOp.h" />
-    <ClInclude Include="..\..\src\Pt-Gfx\FillOp.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\FreeType.h" />
-    <ClInclude Include="..\..\src\Pt-Gfx\GraphicsOp.h" />
-    <ClInclude Include="..\..\src\Pt-Gfx\ImageOp.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\LineEdge.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\LineFace.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\LineSlope.h" />
-    <ClInclude Include="..\..\src\Pt-Gfx\PipelineOp.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Span.h" />
-    <ClInclude Include="..\..\src\Pt-Gfx\StrokeOp.h" />
-    <ClInclude Include="..\..\src\Pt-Gfx\TextOp.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Vera.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\ArrowCursor.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.h" />
@@ -351,7 +342,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\MainWindowImpl.h" />
-    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.h" />
@@ -491,7 +481,6 @@
     <ClCompile Include="..\..\src\Pt-Gfx\Font.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\FontMetrics.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\FreeType.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\GraphicsPipeline.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Image.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ImageFormat.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter.cpp" />
@@ -544,7 +533,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\MainWindowImpl.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.cpp" />

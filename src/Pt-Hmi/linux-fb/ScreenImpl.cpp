@@ -278,7 +278,7 @@ void ScreenImpl::updateScreen()
 {
     _drawCursor = false;
     drawCursor( image().pixel(0, 0) );
-    memcpy( _frameBuffer.buffer(), image().pixel(0,0), _frameBuffer.bufferSize() );            
+    _frameBuffer.set( image().pixel(0,0) );
 }
 
 

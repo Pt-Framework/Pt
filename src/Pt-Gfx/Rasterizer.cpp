@@ -138,7 +138,7 @@ inline void drawGlyph( Image& image, const Color& color, int xpos, int ypos, int
       if( buffer[ px ] )
           mixColor( pixel, color, buffer[ px ] );
 
-			image.setColor(dsx, dsy, pixel);	
+      image.setColor(dsx, dsy, pixel);	
     }
   }
 }
@@ -208,7 +208,7 @@ Rasterizer::Rasterizer( Image& image )
 , _clip(PointF(0,0), SizeF( image.width(), image.height()))
 , _mode(RenderMode::NoAlpha)
 {
-	_text->setClip( _clip );
+  _text->setClip( _clip );
   _text->setFont( _font );
 }
 
@@ -1239,7 +1239,7 @@ void Rasterizer::stepDash( int dist, int* pDashNum, int* pDashIndex, const  int*
          
          // Wrap to beginning of dash list.
         if( dashIndex == numInDashList )    	   
-	        dashIndex = 0;
+          dashIndex = 0;
     }
     
     *pDashNum = dashNum;
@@ -1256,7 +1256,7 @@ void Rasterizer::stroke(const PointF* points,  size_t pointCount)
       if( _pen.size() == 1 )
         drawThinSolidPolyline( points, pointCount );
       else
-        drawWideSolidPolyline( points, pointCount );           
+        drawWideSolidPolyline( points, pointCount );
     break;
 
     case Pen::DashStyle:
@@ -1759,7 +1759,7 @@ void Rasterizer::drawThinSolidPolyline( const PointF* points,  int pointCount)
     // that a round/butt/projecting/triangular cap that is one pixel wide is
     // the same as the single pixel of the endpoint.)
 /*    
-		if (_pen.capStyle() != Pen::NotLastCap && (xstart != x2 || ystart != y2 || ppt == points + 1) )
+    if (_pen.capStyle() != Pen::NotLastCap && (xstart != x2 || ystart != y2 || ppt == points + 1) )
         stroke( x2, y2);
 */
 }
@@ -1853,6 +1853,12 @@ void Rasterizer::bresenhamLineSegment( int signdx, int signdy, int axis, int x1,
 }
 
 
+void Rasterizer::stroke( const PointF& pixel)
+{
+  stroke( (int) pixel.x(),(int) pixel.y() );
+}
+
+
 void Rasterizer::stroke( int x, int y)
 {  
   if( x < _clip.left()  || x > _clip.right())
@@ -1861,9 +1867,9 @@ void Rasterizer::stroke( int x, int y)
   if( y < _clip.top() || y > _clip.bottom())
       return;
 
-	const Image& colorBuffer = _pen.buffer();
+  const Image& colorBuffer = _pen.buffer();
   
-	memcpy(_image->pixel(x, y), colorBuffer.pixel(0,0), _image->format().pixelSize() );
+  memcpy(_image->pixel(x, y), colorBuffer.pixel(0,0), _image->format().pixelSize() );
 }
 
 
@@ -1871,18 +1877,18 @@ void Rasterizer::stroke( int xpos, int ypos, int length )
 {
   const Image& colorBuffer = _pen.buffer();
         
-	clipSpan( xpos, ypos, length );
+  clipSpan( xpos, ypos, length );
 
-	while( length > 0  )
-	{
-			const int fillLength = std::min( length, (int) colorBuffer.width() );
+  while( length > 0  )
+  {
+      const int fillLength = std::min( length, (int) colorBuffer.width() );
 
-			if( fillLength )
-				std::memcpy( _image->pixel( xpos, ypos ), colorBuffer.pixel(0,0), fillLength * _image->format().pixelSize() );
+      if( fillLength )
+        std::memcpy( _image->pixel( xpos, ypos ), colorBuffer.pixel(0,0), fillLength * _image->format().pixelSize() );
 
-			length -= fillLength;
-			xpos   += fillLength;
-	}
+      length -= fillLength;
+      xpos   += fillLength;
+  }
 }
 
 
@@ -1923,61 +1929,61 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
 
 void Rasterizer::clipSpan( int& xpos, int& ypos, int& length )
 {
-	if( ypos < _clip.top() )
-	{
-		length = 0;
-		return;
+  if( ypos < _clip.top() )
+  {
+    length = 0;
+    return;
   }
 
-	if( ypos > _clip.bottom() )
-	{
-		length = 0;
-		return;
-	}
+  if( ypos > _clip.bottom() )
+  {
+    length = 0;
+    return;
+  }
 
-	if( xpos > _clip.right() )
-	{
-		length = 0;
-		return;
-	}
+  if( xpos > _clip.right() )
+  {
+    length = 0;
+    return;
+  }
 
-	if(xpos < _clip.left() )
-	{
-			if(  length > - xpos )
-			{
-					length -= ((int) _clip.left() - xpos );
-					xpos = (int)_clip.left();
-			}
-			else
-			{
-				length = 0;
-				return;
-			}
-	}
+  if(xpos < _clip.left() )
+  {
+      if(  length > - xpos )
+      {
+          length -= ((int) _clip.left() - xpos );
+          xpos = (int)_clip.left();
+      }
+      else
+      {
+        length = 0;
+        return;
+      }
+  }
 
-	if( (xpos + length) > _clip.right() )
-		length =  ((int) _clip.right() - xpos  + 1);
+  if( (xpos + length) > _clip.right() )
+    length =  ((int) _clip.right() - xpos  + 1);
 }
 
 
 void Rasterizer::fillSolid( const Point& pos, int length )
 {
-	int xpos = pos.x();
-	int ypos = pos.y();       
-	
-	const Image& texture = _brush.texture();
+  int xpos = pos.x();
+  int ypos = pos.y();       
+  
+  const Image& texture = _brush.texture();
 
-	// copy pixels blockwise to the target image
-	while(length)
-	{
-		const int fillLength = std::min( length, (int) texture.width() );
+  // copy pixels blockwise to the target image
+  while(length)
+  {
+    const int fillLength = std::min( length, (int) texture.width() );
 
-		if(fillLength)
-				std::memcpy( _image->pixel( xpos, ypos ), _brush.texture().pixel(0,0), fillLength * _image->format().pixelSize());        
+    if(fillLength)
+        std::memcpy( _image->pixel( xpos, ypos ), _brush.texture().pixel(0,0), fillLength * _image->format().pixelSize());        
 
-		length -= fillLength;
-		xpos   += fillLength;
-	}
+    length -= fillLength;
+    xpos   += fillLength;
+  }
 }
 
 
@@ -3456,8 +3462,8 @@ void Rasterizer::fillEllipse( const PointF& topLeftIn, const SizeF& size )
 
 void Rasterizer::image( const PointF& toIn, const Image& image )
 {
-	if( image.format() != image.format() )
-		throw std::logic_error( "wrong image format");
+  if( image.format() != image.format() )
+    throw std::logic_error( "wrong image format");
 
   Point to((int) toIn.x(),(int) toIn.y() );
 
@@ -3516,12 +3522,12 @@ void Rasterizer::image( const PointF& toIn, const Image& image )
   {
       case RenderMode::NoAlpha:
       {         
-			    for(int i = 0; i < lines; ++i )
-			    {                
+          for(int i = 0; i < lines; ++i )
+          {                
             memcpy( scanLineTarget, scanLineSource, lineSize );
             scanLineSource += sourceStride;
             scanLineTarget += targetStride;
-			    }
+          }
 
           break;
       }
@@ -3541,8 +3547,8 @@ void Rasterizer::image( const PointF& toF,
                         const Image& image, 
                         const RectF& imageRectF)
 {
-	if( image.format() != image.format() )
-		throw std::logic_error( "wrong image format");
+  if( image.format() != image.format() )
+    throw std::logic_error( "wrong image format");
 
   Point to( (int) toF.x(),
             (int) toF.y() );
@@ -3618,12 +3624,12 @@ void Rasterizer::image( const PointF& toF,
   {
       case RenderMode::NoAlpha:
       {         
-			    for(int i = 0; i < lines; ++i )
-			    {                
+          for(int i = 0; i < lines; ++i )
+          {                
             memcpy( scanLineTarget, scanLineSource, lineSize );
             scanLineSource += sourceStride;
             scanLineTarget += targetStride;
-			    }
+          }
 
           break;
       }
@@ -3670,8 +3676,9 @@ void Rasterizer::clear( const Color& color)
 
 void Rasterizer::setClip( const RectF& clip )
 {
-	_clip = clip;
-	_text->setClip( _clip );
+  _clip = clip;
+  _text->setClip( _clip );
 }
+
 
 }}

@@ -30,18 +30,28 @@
 #include "PictureImpl.h"
 
 namespace Pt {
-
 namespace Hmi {
 
-PictureImpl::PictureImpl(const Gfx::Image&)
+PictureImpl::PictureImpl()
 {
+}
+
+
+void PictureImpl::set(const Gfx::Image& image )
+{
+    _image = image;
+}
+
+
+void PictureImpl::clear()
+{
+    _image = Gfx::Image();
 }
 
 
 PictureImpl::~PictureImpl()
 {
+  clear();
 }
 
-}  // namespace
-
-} // namespace
+}} // namespace

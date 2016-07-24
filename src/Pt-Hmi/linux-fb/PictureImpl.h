@@ -33,18 +33,47 @@
 #include <Pt/Gfx/Image.h>
 
 namespace Pt {
-
 namespace Hmi {
 
 class PictureImpl
 {
     public:
-        PictureImpl(const Gfx::Image& image);
+        PictureImpl();
 
         virtual ~PictureImpl();
+
+        void set(const Gfx::Image& image);
+
+        const Gfx::Image& image() const
+        {
+          return _image;
+        }
+
+        size_t width() const
+        {
+            return _image.width();
+        }
+        
+        size_t height() const
+        {
+            return _image.height();
+        }
+
+        bool empty() const
+        {
+          return _image.empty();
+        }
+          
+    private:
+      void clear();
+
+    private:
+        Gfx::Image _image;
+        size_t _width;
+        size_t _height;
 };
 
-} // namespace
+}  // namespace
 
 } // namespace
 
