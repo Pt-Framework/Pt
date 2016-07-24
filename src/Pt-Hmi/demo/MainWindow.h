@@ -53,8 +53,6 @@ class MainWindow : public Pt::Hmi::Window
 
         virtual void onCloseEvent(const CloseEvent& ev);
 
-        virtual void onPaintBackground( const Gfx::RectF& rect);
-
       private:
             Menu     _menu;
             MenuItem _item1;
@@ -67,7 +65,7 @@ class MainWindow : public Pt::Hmi::Window
             MenuItem _subItem3;
             
             ChildW _child1;
-            Window _child2;
+//            Window _child2;
 
             Gfx::Image _icon;
             Picture   _picture;

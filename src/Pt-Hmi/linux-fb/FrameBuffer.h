@@ -72,25 +72,16 @@ class FrameBuffer
             return _screenInfo.bits_per_pixel;
         }
 
-        size_t strideInBytes() const
-        {
-            return  _fixedInfo.line_length - ( width() *  depth() /8  );
-        }
+        size_t strideInBytes() const;
 
-        size_t lineLength() const
-        {
-            return _fixedInfo.line_length;
-        }
-
+        size_t lineLength() const;
+        
         const Gfx::ImageFormat& format() const 
         {
             return *_format;
         }
 
-        size_t bufferSize() const
-        {
-            return _bufferSize;
-        }
+        size_t bufferSize() const;
 
         void setRotation(Rotation r )
         {
@@ -114,13 +105,13 @@ class FrameBuffer
 
       char* pixelBuffer( size_t w, size_t h )
       {
-          const size_t lineSize = lineLength() * h;
-          return _buffer + (lineSize + _format->pixelSize() * w );
+          const size_t lineOffset = _fixedInfo.line_length * h;
+          return &_rotationBuffer [lineOffset + _format->pixelSize() * w ];
       }
 
       const Pt::uint8_t* pixelFrame( const Pt::uint8_t* frame, size_t w, size_t h )
       {
-        return frame + (( width() *  _format->pixelSize() + strideInBytes() ) * h + w * _format->pixelSize());
+          return &frame [lineLength() * h + w * _format->pixelSize()];
       }
 
     private:
@@ -133,6 +124,7 @@ class FrameBuffer
         size_t            _depth;
         Gfx::ImageFormat* _format;
         Rotation          _rotation;
+        std::vector<char> _rotationBuffer;
 };
 
 } // namespace

@@ -71,10 +71,11 @@ FrameBuffer::FrameBuffer()
 
     // Memory map the display
     _bufferSize = _fixedInfo.line_length * _screenInfo.yres;
+    _rotationBuffer.resize(_bufferSize);
     _yoffset    = _screenInfo.yres;
-    _buffer     = (char*)  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);    
-
-    const size_t noOfBytesPerPixel = depth() % 8 != 0 ? depth() / 8 + 1 : depth() / 8;       
+    _buffer     = (char*)  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);
+    size_t stride = _fixedInfo.line_length - ( _screenInfo.xres *  depth() /8  );
+    const size_t noOfBytesPerPixel = depth() % 8 != 0 ? depth() / 8 + 1 : depth() / 8;
 
     switch( noOfBytesPerPixel )
     {
@@ -95,7 +96,8 @@ FrameBuffer::FrameBuffer()
             break;
     }
 
-    std::clog<<"Sreen resolution (" <<width() << "," <<height() << ") Pixel size = "<<_format->pixelSize()<< " Stride = "<<strideInBytes()<<std::endl;
+    std::clog<<"Sreen HW resolution (" <<_screenInfo.xres<< "," <<_screenInfo.yres << ") Pixel size = "<<_format->pixelSize()<< " Stride = "<<stride<<std::endl;
+    std::clog<<"Sreen VR resolution (" <<width()<< "," <<height() << ") Pixel size = "<<_format->pixelSize()<< " Stride = "<<strideInBytes()<<std::endl;
 }
 
 
@@ -126,6 +128,41 @@ size_t FrameBuffer::width() const
     return 0;
 }
 
+size_t FrameBuffer::lineLength() const
+{
+    switch( _rotation)
+    {
+      case  Rotation90Degree:
+      case  Rotation270Degree:
+        return width() * _format->pixelSize();
+    }
+
+    return _fixedInfo.line_length;
+}
+
+size_t FrameBuffer::strideInBytes() const
+{
+    switch( _rotation)
+    {
+      case  Rotation90Degree:
+      case  Rotation270Degree:
+        return 0;
+    }
+
+    return  _fixedInfo.line_length - ( _screenInfo.xres *  depth() /8  );
+}
+
+size_t FrameBuffer::bufferSize() const
+{
+    switch( _rotation)
+    {
+      case  Rotation90Degree:
+      case  Rotation270Degree:
+        return width()* height() * _format->pixelSize();
+    }
+
+    return _bufferSize;
+}
 
 size_t FrameBuffer::height() const
 {
@@ -147,15 +184,23 @@ void FrameBuffer::set( const Pt::uint8_t* frame )
     switch( _rotation)
     {
       case Rotation0Degree:
-          memcpy( _buffer, frame, bufferSize() );
+          memcpy( _buffer, frame, _bufferSize );
       break;
 
       case Rotation90Degree:
-        for( size_t w = 0; w < width(); ++ w)
+        for( size_t w = 0; w < width(); ++w)
         {
            for( size_t h = 0; h < height(); ++h)
-              memcpy( pixelBuffer( h, _screenInfo.yres - w), pixelFrame(frame, w, h), _format->pixelSize() );
+           {
+              char* dest = pixelBuffer( h, _screenInfo.yres - w -1);
+
+              const Pt::uint8_t* src = pixelFrame(frame, w, h);
+
+              memcpy(dest, src, _format->pixelSize() );
+            }
         }
+
+        memcpy( _buffer, &_rotationBuffer[0],_rotationBuffer.size());
       break;
 
       case Rotation180Degree:

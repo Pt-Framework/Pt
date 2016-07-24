@@ -257,7 +257,7 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
 
         // update rect in client coordinates
         Gfx::PointF updatePos = rect.topLeft() - frame->clientRect().topLeft();
-        Gfx::RectF updateRect(updatePos, rect.size());        
+        Gfx::RectF updateRect(updatePos, rect.size());
     
         // clip update rect against client rect
         Gfx::RectF clientRect(Gfx::PointF(0, 0), w->size());

@@ -132,6 +132,7 @@ class PT_HMI_API Panel : public Widget
         {
             _backgroundImage = i;
             _backgroundImageLayout = l;
+            _backgroundPicture.set( _backgroundImage );
             update();
         }
 

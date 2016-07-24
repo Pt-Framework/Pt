@@ -52,8 +52,6 @@ ChildW::ChildW(const std::string& title)
     
 
     setTitle(title);
-    move( Gfx::PointF(5, 5) );
-    resize( Gfx::SizeF(480, 400) );        
     
     //Text    
     _textLabel.setAutoSize(true);
@@ -117,8 +115,8 @@ ChildW::ChildW(const std::string& title)
     _buttonBar.add(_toggleButton);
     
     //Panel  
-    _childView.resize( Gfx::SizeF(800, 600) );
-    _childView.move( Gfx::PointF(20,20) );
+    _childView.resize( Gfx::SizeF(300, 600) );
+    _childView.move( Gfx::PointF(1,1) );
     _childView.setName("MainPanel");
     _childView.setPadding(20); 
     _childView.add(_textLabel);

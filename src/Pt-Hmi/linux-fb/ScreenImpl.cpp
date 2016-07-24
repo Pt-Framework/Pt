@@ -116,10 +116,11 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
     _windowManager.paint(_surface, updateRect);
     
     updateScreen();
-    
+
     std::clog << "screen update: " << clock.stop().toUSecs() << " usecs." << std::endl;
     std::clog << "update area " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
               << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
+
 }
 
 
@@ -242,7 +243,7 @@ void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx
                                          _frameBuffer.height() );    
     size_t widthInPixel = (pos.x() + imageSize.width()) < _frameBuffer.width() ? imageSize.width() 
                                                                                : _frameBuffer.width() - pos.x();
-    const size_t widthInByte = widthInPixel * pixelSizeInByte;            
+    const size_t widthInByte = widthInPixel * pixelSizeInByte;
     
     for( size_t y = pos.y(); y < yMax; ++y )
     {

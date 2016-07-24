@@ -151,7 +151,7 @@ bool InputDevice::onRun()
                         _mouseEvent.setPress(MouseEvent::Right);
 
                     _eventReady.send(_mouseEvent); 
-                    hasPointerEvent = false;                                            
+                    hasPointerEvent = false;
                     break;
                 }
 
@@ -280,7 +280,7 @@ bool InputDevice::onRun()
 
                 switch(ev.code)
                 {
-                    case ABS_MT_SLOT:                
+                    case ABS_MT_SLOT:
                     case ABS_MT_TRACKING_ID:
 
                     case ABS_X:
