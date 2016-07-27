@@ -410,8 +410,8 @@ void ServiceDeclaration::toWsdl( std::ostream& os) const
 
     for(; it != complexTypes.end(); ++it)
     {
-        os<<"<s:complexType name=\""<<it->first <<"\">"<<std::endl;
-        os<<"<s:sequence>"<<std::endl;
+        os << "<s:complexType name=\"" << it->first << "\">" <<std::endl;
+        os << "<s:sequence>" << std::endl;
 
         const Type* type = it->second;
 
@@ -421,26 +421,27 @@ void ServiceDeclaration::toWsdl( std::ostream& os) const
 
             if( type->typeId() == Type::Array )
             {
-                os << "<s:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\"" << member->name()
-                   << "\" type=\"s:"<< member->type()->name() << "\" />"<<std::endl;
-            }
-            else if( member->type()->isSimple() )
-            {
-                os << "<s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"" << member->name()
-                   << "\" type=\"s:"<< member->type()->name() << "\" />"<<std::endl;
+                os << "<s:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\"" 
+                   << member->name() << "\" ";
             }
             else
             {
-                os << "<s:element minOccurs=\"1\" maxOccurs=\"1\" name=\"" << member->name()
-                    << "\" type=\"tns:"<< member->type()->name() <<"\" />"<<std::endl;
+                os << "<s:element minOccurs=\"1\" maxOccurs=\"1\" name=\""
+                   << member->name() << "\" ";
             }
+
+            if( member->type()->isSimple() )
+                os << "type=\"s:"<< member->type()->name() << "\" />" << std::endl;
+            else
+                os << "type=\"tns:"<< member->type()->name() <<"\" />" << std::endl;
         }
 
-        os<<"</s:sequence>"<<std::endl;
-        os<<"</s:complexType>"<<std::endl;
+        os << "</s:sequence>" << std::endl;
+        os << "</s:complexType>" << std::endl;
     }
-    os<<"</s:schema>"<<std::endl;
-    os<<"</wsdl:types>"<<std::endl;
+    
+    os << "</s:schema>" << std::endl;
+    os << "</wsdl:types>" << std::endl;
 
     // messages
     for( size_t i = 0; i < _operations.size(); ++i)
