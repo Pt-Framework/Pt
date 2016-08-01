@@ -30,8 +30,8 @@
 #include <Pt/Api.h>
 
 #define PT_HMI_VERSION_MAJOR 1
-#define PT_HMI_VERSION_MINOR 0
-#define PT_HMI_VERSION_REVISION 1 
+#define PT_HMI_VERSION_MINOR 1
+#define PT_HMI_VERSION_REVISION 0 
  
 #if defined(PT_HMI_API_EXPORT)
 #    define PT_HMI_API PT_EXPORT

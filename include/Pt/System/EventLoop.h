@@ -110,8 +110,18 @@ class PT_SYSTEM_API EventLoop : public Connectable
         Signal<>& exited()
         { return _exited; }
 
-        /** @brief Set the Selectable to ready-state.
+        /** @brief Calls the selectables run function in the loop thread.
+
+            The event loop is woken up and the selectable's run function is 
+            called in the thread that called the event loop's run function. 
+            This function may be called from any thread, since it is meant to
+            return to the event loop thread from a selectable, that is based
+            on a parallel execution model e.g. using a worker thread.
         */
+        void post(Selectable& s)
+        { this->onReady(s); }
+
+        //! @internal Deprecated, use post() instead.
         void setReady(Selectable& s)
         { this->onReady(s); }
 
