@@ -192,15 +192,14 @@ void FrameBuffer::set( const Pt::uint8_t* frame )
         {
            for( size_t h = 0; h < height(); ++h)
            {
-              char* dest = pixelBuffer( h, _screenInfo.yres - w -1);
+              int* dest = (int*)pixelBuffer( h, _screenInfo.yres - w -1);
 
-              const Pt::uint8_t* src = pixelFrame(frame, w, h);
-
-              memcpy(dest, src, _format->pixelSize() );
+              const int* src = (int*)pixelFrame(frame, w, h);
+              *dest =  *src;
             }
         }
 
-        memcpy( _buffer, &_rotationBuffer[0],_rotationBuffer.size());
+        memcpy( _buffer, &_rotationBuffer[0], _rotationBuffer.size());
       break;
 
       case Rotation180Degree:

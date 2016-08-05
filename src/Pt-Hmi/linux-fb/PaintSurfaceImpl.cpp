@@ -210,17 +210,21 @@ void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
   if( pic.empty() )
     return;
 
+  
   for(size_t w = 0; w < pic.impl()->width() ; ++w )
   {
     for( size_t h = 0; h < pic.impl()->height(); ++h)
     {
-        const Gfx::Color& c = pic.impl()->image().color( w,h);
-        
-        if( c.alpha() == 0)
+        const Pt::uint8_t* srcPix = pic.impl()->image().pixel(w,h);
+
+        if( *(srcPix+3) == 0)
           continue;
 
-        _painter.setPen( Gfx::Pen(1, c ));
-        _painter.setPixel( Gfx::PointF( to.x() + w, to.y() + h ) );
+        const size_t x =  to.x() + w;
+        const size_t y =  to.y() + h;
+
+        if( x >= _painter.clip().left() &&  x < _painter.clip().right() && y  >=  _painter.clip().top()  && y < _painter.clip().bottom() )
+          _image.setPixel(x, y,srcPix  );
     }
   }
 }

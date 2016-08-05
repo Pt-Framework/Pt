@@ -577,7 +577,7 @@ class Key
             Pa1 = 253,
         
             // The CLEAR key.
-            OemClear = 254
+            OemClear = 254,
         };
 
         enum Modifier
@@ -781,8 +781,8 @@ class Key
         }
 
     private:
-        Pt::uint16_t _code;
-        Pt::uint16_t _modifier;
+        Pt::uint32_t _code;
+        Pt::uint32_t _modifier;
 };
 
 inline Key::Modifiers operator|(Key::Modifier m1, Key::Modifier m2)
