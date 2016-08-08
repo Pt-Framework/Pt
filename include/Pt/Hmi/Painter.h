@@ -48,8 +48,6 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         void setSurface(PaintSurface& surface); 
 
-        virtual void setRenderMode(Gfx::RenderMode::Type mode);
-
         virtual void setPen(const Gfx::Pen& pen);
 
         virtual const Gfx::Pen& pen() const;
@@ -82,7 +80,7 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         virtual void fillPolygon(const Gfx::PointF* points, const size_t pointCount);
         
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, Gfx::RenderFlags::Type flags);
 
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
     

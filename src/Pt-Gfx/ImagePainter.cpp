@@ -57,12 +57,6 @@ void ImagePainter::setImage(Image& image)
 }
 
 
-void ImagePainter::setRenderMode( RenderMode::Type mode)
-{
-	_rasterizer.setRenderMode( mode);
-}
-
-
 void ImagePainter::setPen( const Pen& pen )
 {
   _rasterizer.setPen( pen ) ;
@@ -162,15 +156,15 @@ void ImagePainter::fillPolygon( const PointF* ps, const size_t pointCount )
 }
 
 
-void ImagePainter::drawImage( const PointF& to, const Image& image )
+void ImagePainter::drawImage( const PointF& to, const Image& image, RenderFlags::Type flags )
 {
-  _rasterizer.image( to, image );
+  _rasterizer.image( to, image, flags);
 }
 
 
-void ImagePainter::drawImage(const PointF& to, const Image& image, const RectF& imageRect)
+void ImagePainter::drawImage(const PointF& to, const Image& image, const RectF& imageRect, RenderFlags::Type flags)
 {
-  _rasterizer.image( to, image, imageRect );
+  _rasterizer.image( to, image, imageRect, flags );
 }
 
 

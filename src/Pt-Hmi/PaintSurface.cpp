@@ -215,9 +215,9 @@ void PaintRegion::drawSurface(const Gfx::PointF& toF,
 }
 
 
-void PaintRegion::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
+void PaintRegion::drawImage(const Gfx::PointF& toF, const Gfx::Image& image, Gfx::RenderFlags::Type flags)
 {
-    _surface->drawImage(toF + _area.topLeft(), image);
+    _surface->drawImage(toF + _area.topLeft(), image, flags);
 }
 
 
@@ -354,9 +354,9 @@ void PixmapSurface::drawSurface(const Gfx::PointF& to,
 }
 
 
-void PixmapSurface::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
+void PixmapSurface::drawImage(const Gfx::PointF& to, const Gfx::Image& image, Gfx::RenderFlags::Type flags)
 {
-    _impl->drawImage(to, image);
+    _impl->drawImage(to, image, flags);
 }
 
 

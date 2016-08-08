@@ -117,9 +117,9 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
     
     updateScreen();
 
-    std::clog << "screen update: " << clock.stop().toUSecs() << " usecs." << std::endl;
-    std::clog << "update area " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
-              << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
+   // std::clog << "screen update: " << clock.stop().toUSecs() << " usecs." << std::endl;
+   // std::clog << "update area " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
+   //           << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
 
 }
 
@@ -279,7 +279,7 @@ void ScreenImpl::updateScreen()
 {
     _drawCursor = false;
     drawCursor( image().pixel(0, 0) );
-    _frameBuffer.set( image().pixel(0,0) );
+    _frameBuffer.output( image().pixel(0,0) );
 }
 
 

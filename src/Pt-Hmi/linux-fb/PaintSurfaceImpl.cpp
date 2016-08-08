@@ -186,7 +186,7 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t poin
 void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, const PixmapSurface& surface)
 {
     const Gfx::Image& image = surface.pixmapImpl()->image();
-    _painter.drawImage(to, image);
+    _painter.drawImage(to, image, Pt::Gfx::RenderFlags::AlphaBlend);
 }
 
 
@@ -195,13 +195,13 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to,
                                   const Gfx::RectF& pmRect)
 {
     const Gfx::Image& image = pm.pixmapImpl()->image();
-    _painter.drawImage(to, image, pmRect);
+    _painter.drawImage(to, image, pmRect, Pt::Gfx::RenderFlags::AlphaBlend);
 }
 
 
-void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
+void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image, Pt::Gfx::RenderFlags::Type flags)
 {
-    _painter.drawImage(to, image);
+    _painter.drawImage(to, image, flags);
 }
 
 
@@ -209,7 +209,6 @@ void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
 {
   if( pic.empty() )
     return;
-
   
   for(size_t w = 0; w < pic.impl()->width() ; ++w )
   {
@@ -220,11 +219,14 @@ void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
         if( *(srcPix+3) == 0)
           continue;
 
-        const size_t x =  to.x() + w;
-        const size_t y =  to.y() + h;
+        const size_t x = to.x() + w;
+        const size_t y = to.y() + h;
 
         if( x >= _painter.clip().left() &&  x < _painter.clip().right() && y  >=  _painter.clip().top()  && y < _painter.clip().bottom() )
-          _image.setPixel(x, y,srcPix  );
+        {
+          Pt::uint32_t* pix  = ( Pt::uint32_t*) _image.pixel(x,y);
+          *pix  = *(( Pt::uint32_t*)srcPix);
+        }
     }
   }
 }

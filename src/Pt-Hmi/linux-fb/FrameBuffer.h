@@ -98,18 +98,16 @@ class FrameBuffer
             return Gfx::Size( width(), height() );
         }
 
-        void set( const Pt::uint8_t* frame );
+        void output( const Pt::uint8_t* frame );
 
     private:
 
-
-      char* pixelBuffer( size_t w, size_t h )
+      inline char* pixelBuffer( size_t w, size_t h )
       {
-          const size_t lineOffset = _fixedInfo.line_length * h;
-          return &_rotationBuffer [lineOffset + _format->pixelSize() * w ];
+          return &_rotationBuffer[(_fixedInfo.line_length * h) + _format->pixelSize() * w ];
       }
 
-      const Pt::uint8_t* pixelFrame( const Pt::uint8_t* frame, size_t w, size_t h )
+      inline const Pt::uint8_t* pixelFrame( const Pt::uint8_t* frame, size_t w, size_t h )
       {
           return &frame [lineLength() * h + w * _format->pixelSize()];
       }

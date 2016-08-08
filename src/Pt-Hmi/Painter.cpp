@@ -60,12 +60,6 @@ void Painter::setSurface(PaintSurface& surface)
     _surface->setPen(_pen);  
 }       
 
-
-void Painter::setRenderMode(Gfx::RenderMode::Type mode)
-{
-}
-
-
 void Painter::setPen(const Gfx::Pen& pen)
 {
     _pen = pen;
@@ -174,9 +168,9 @@ void Painter::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
 }
 
 
-void Painter::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
+void Painter::drawImage(const Gfx::PointF& to, const Gfx::Image& image, Gfx::RenderFlags::Type flags)
 {
-    _surface->drawImage(to, image);
+    _surface->drawImage(to, image, flags);
 }
 
 

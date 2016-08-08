@@ -38,6 +38,7 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
+#include <Pt/System/Clock.h>
 #include <map>
 #include <vector>
 
@@ -130,6 +131,7 @@ class PT_HMI_API Screen : public WindowBase
         Gfx::RectF           _updateRect;
         int                  _updates;
         std::vector<Window*> _windows;
+        Pt::System::Clock    _clock;
 };
 
 } // namespace

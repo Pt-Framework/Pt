@@ -82,13 +82,13 @@ namespace Gfx{
   * in the current color, using the current paint mode, and in the current font.
   */
 
-namespace RenderMode
+namespace RenderFlags
 {	
 	enum Type
 	{
-		NoAlpha,
-		AlphaBlit,
-		AlphaBlending
+		IgnoreAlpha = 0,
+		AlphaMask,
+		AlphaBlend 
 	};
 }
 
@@ -101,9 +101,6 @@ class PT_GFX_API Painter
         //! @brief Empty virtual destructor.
         virtual ~Painter()
         {}
-
-
-        virtual void setRenderMode(RenderMode::Type mode) = 0;
 
         /**
           * @brief Sets the pen of this painter to the given pen.
@@ -359,7 +356,7 @@ class PT_GFX_API Painter
           * @param to The x|y-position to where the image should be drawn on the painter's area.
           * @param image The image to be drawn.
           */
-        virtual void drawImage(const PointF& to, const Image& image) = 0;
+        virtual void drawImage(const PointF& to, const Image& image, RenderFlags::Type flags) = 0;
 
         // TODO:
         //virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect) = 0;        

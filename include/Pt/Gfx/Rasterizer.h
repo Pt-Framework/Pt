@@ -30,6 +30,7 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/String.h>
+#include <Pt/Gfx/Painter.h>
 
 namespace Pt{
 namespace Gfx{
@@ -76,15 +77,6 @@ class PT_GFX_API Rasterizer
       return _clip;
     }
 
-    void setRenderMode( RenderMode::Type m )
-    {
-      _mode = m;
-    }
-    
-    RenderMode::Type renderMode() const
-    {
-      return _mode;
-    }
 
     void setFont( const Font& font );
 
@@ -93,11 +85,11 @@ class PT_GFX_API Rasterizer
       return _font;
     }
 
-    void image( const PointF& to, const Image& image );
+    void image( const PointF& to, const Image& image, RenderFlags::Type flags);
 
     void image(const PointF& toIn, 
                const Image& image, 
-               const RectF& imageRect);
+               const RectF& imageRect, RenderFlags::Type flags);
 
     void fillRect(const RectF& r);
 
@@ -173,9 +165,7 @@ class PT_GFX_API Rasterizer
     RectF			_clip;    
     Font			_font;
     Brush			_brush;
-    Pen				_pen;    
-    RenderMode::Type _mode;     
-      
+    Pen				_pen;      
 };
 
 

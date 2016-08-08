@@ -36,6 +36,7 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
 
 namespace Pt {
@@ -84,7 +85,7 @@ class PT_HMI_API PaintSurface
                                  const PixmapSurface& pm,
                                  const Gfx::RectF& pmRect) = 0;
 
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image) = 0;
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, Gfx::RenderFlags::Type flags) = 0;
 
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic) = 0;
 
@@ -140,7 +141,7 @@ class PT_HMI_API PaintRegion : public PaintSurface
                                  const PixmapSurface& pm,
                                  const Gfx::RectF& pmRect);
 
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, Gfx::RenderFlags::Type flags);
 
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
 
@@ -198,7 +199,7 @@ class PT_HMI_API PixmapSurface : public PaintSurface
                                  const PixmapSurface& pm,
                                  const Gfx::RectF& pmRect);
 
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, Gfx::RenderFlags::Type flags);
 
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
 

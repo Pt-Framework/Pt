@@ -41,7 +41,7 @@ PictureImpl::PictureImpl()
 }
 
 
-void PictureImpl::set(const Gfx::Image& image )
+void PictureImpl::set(const Gfx::Image& image, Gfx::RenderFlags::Type flags )
 {
     clear();
     _width = image.width();

@@ -128,11 +128,13 @@ class PT_HMI_API Panel : public Widget
         }
 
 
-        void setBackgroundImage(const Gfx::Image& i, ImageLayout l)
+        void setBackgroundImage(const Gfx::Image& image, ImageLayout layout)
         {
-            _backgroundImage = i;
-            _backgroundImageLayout = l;
-            _backgroundPicture.set( _backgroundImage );
+            if( layout == ImageLayout::Strech || layout ==  ImageLayout::Zoom)
+             _backgroundImage = image;
+            
+            _backgroundImageLayout = layout;
+            _backgroundPicture.set( image, Pt::Gfx::RenderFlags::AlphaBlend );
             update();
         }
 

@@ -33,6 +33,7 @@
 #include <Pt/Gfx/Image.h>
 #include <vector>
 #include <Windows.h>
+#include <Pt/Gfx/Painter.h>
 
 namespace Pt {
 
@@ -45,7 +46,7 @@ class PictureImpl
 
         virtual ~PictureImpl();
 
-        void set(const Gfx::Image& image);
+        void set(const Gfx::Image& image, Gfx::RenderFlags::Type flags);
 
         const HBITMAP andMask() const
         {
@@ -93,6 +94,7 @@ class PictureImpl
         HBITMAP _hXorMask;
         size_t _width;
         size_t _height;
+         Gfx::Image _image;
 };
 
 }  // namespace

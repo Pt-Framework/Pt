@@ -43,8 +43,6 @@ class PT_GFX_API ImagePainter : public Painter
 
     void setImage(Image& image);
 
-    virtual void setRenderMode( RenderMode::Type mode);
-    
     virtual void setPen(const Pen& pen);
 
     virtual const Pen& pen() const;
@@ -75,9 +73,9 @@ class PT_GFX_API ImagePainter : public Painter
     
     virtual void fillPolygon(const PointF* points, const size_t pointCount);
 
-    virtual void drawImage(const  PointF& to, const Image& image);
+    virtual void drawImage(const  PointF& to, const Image& image, RenderFlags::Type flags);
 
-    virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect);
+    virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect, RenderFlags::Type flags);
 
     virtual void setClip( const RectF& clip );
 

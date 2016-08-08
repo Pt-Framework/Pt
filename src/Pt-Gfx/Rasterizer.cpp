@@ -206,7 +206,6 @@ Rasterizer::Rasterizer( Image& image )
 , _text( new DrawText() )
 , _font("Vera", 12)
 , _clip(PointF(0,0), SizeF( image.width(), image.height()))
-, _mode(RenderMode::NoAlpha)
 {
   _text->setClip( _clip );
   _text->setFont( _font );
@@ -3460,7 +3459,7 @@ void Rasterizer::fillEllipse( const PointF& topLeftIn, const SizeF& size )
 }
 
 
-void Rasterizer::image( const PointF& toIn, const Image& image )
+void Rasterizer::image( const PointF& toIn, const Image& image, RenderFlags::Type flags )
 {
   if( image.format() != image.format() )
     throw std::logic_error( "wrong image format");
@@ -3518,9 +3517,11 @@ void Rasterizer::image( const PointF& toIn, const Image& image )
   const int sourceStride		 = image.width() * image.format().pixelSize() +  image.stride();
   const int lineSize = lineLength * _image->format().pixelSize();
 
-  switch( _mode )
+  switch( flags )
   {
-      case RenderMode::NoAlpha:
+      case RenderFlags::IgnoreAlpha:
+            case RenderFlags::AlphaMask:
+                  case RenderFlags::AlphaBlend:
       {         
           for(int i = 0; i < lines; ++i )
           {                
@@ -3531,21 +3532,13 @@ void Rasterizer::image( const PointF& toIn, const Image& image )
 
           break;
       }
-
-      case RenderMode::AlphaBlit:
-          //TODO:
-          break;
-
-      case RenderMode::AlphaBlending:
-          //TODO:
-          break;
     }
 }
 
 
 void Rasterizer::image( const PointF& toF, 
                         const Image& image, 
-                        const RectF& imageRectF)
+                        const RectF& imageRectF, RenderFlags::Type flags)
 {
   if( image.format() != image.format() )
     throw std::logic_error( "wrong image format");
@@ -3620,9 +3613,11 @@ void Rasterizer::image( const PointF& toF,
   const int sourceStride = image.width() * image.format().pixelSize() + image.stride();
   const int lineSize = lineLength * _image->format().pixelSize();
 
-  switch( _mode )
+  switch( flags )
   {
-      case RenderMode::NoAlpha:
+      case RenderFlags::IgnoreAlpha:
+      case RenderFlags::AlphaMask:
+      case RenderFlags::AlphaBlend:
       {         
           for(int i = 0; i < lines; ++i )
           {                
@@ -3634,13 +3629,6 @@ void Rasterizer::image( const PointF& toF,
           break;
       }
 
-      case RenderMode::AlphaBlit:
-          //TODO:
-          break;
-
-      case RenderMode::AlphaBlending:
-          //TODO:
-          break;
     }
 }
 

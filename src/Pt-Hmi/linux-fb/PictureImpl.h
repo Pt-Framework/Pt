@@ -31,6 +31,7 @@
 #define Pt_Hmi_PictureImpl_h
 
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Painter.h>
 
 namespace Pt {
 namespace Hmi {
@@ -42,7 +43,7 @@ class PictureImpl
 
         virtual ~PictureImpl();
 
-        void set(const Gfx::Image& image);
+        void set(const Gfx::Image& image, Gfx::RenderFlags::Type flags);
 
         const Gfx::Image& image() const
         {
@@ -71,6 +72,7 @@ class PictureImpl
         Gfx::Image _image;
         size_t _width;
         size_t _height;
+         Gfx::RenderFlags::Type _flags;
 };
 
 }  // namespace

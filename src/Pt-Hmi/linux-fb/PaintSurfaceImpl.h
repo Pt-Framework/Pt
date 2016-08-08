@@ -109,7 +109,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
                                  const PixmapSurface& pm,
                                  const Gfx::RectF& pmRect);
 
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, Gfx::RenderFlags::Type flags);
 
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
 

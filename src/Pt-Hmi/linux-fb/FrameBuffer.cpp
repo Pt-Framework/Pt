@@ -179,7 +179,7 @@ size_t FrameBuffer::height() const
     return 0;
 }
 
-void FrameBuffer::set( const Pt::uint8_t* frame )
+void FrameBuffer::output( const Pt::uint8_t* frame )
 {
     switch( _rotation)
     {
@@ -188,18 +188,20 @@ void FrameBuffer::set( const Pt::uint8_t* frame )
       break;
 
       case Rotation90Degree:
+      {
         for( size_t w = 0; w < width(); ++w)
         {
            for( size_t h = 0; h < height(); ++h)
            {
-              int* dest = (int*)pixelBuffer( h, _screenInfo.yres - w -1);
+              Pt::uint32_t* dest = ( Pt::uint32_t*)pixelBuffer( h, _screenInfo.yres - w -1);
 
-              const int* src = (int*)pixelFrame(frame, w, h);
+              const  Pt::uint32_t* src = ( Pt::uint32_t*)pixelFrame(frame, w, h);
               *dest =  *src;
             }
         }
 
         memcpy( _buffer, &_rotationBuffer[0], _rotationBuffer.size());
+      }
       break;
 
       case Rotation180Degree:

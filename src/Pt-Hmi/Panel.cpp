@@ -83,18 +83,15 @@ void Panel::onResizeEvent(const ResizeEvent& ev)
 {
     Widget::onResizeEvent(ev);
 
-    if(  _backgroundImage.empty() || ev.size().width() < 1 || ev.size().height() < 1 )
+    if(  _backgroundPicture.empty() || ev.size().width() < 1 || ev.size().height() < 1 )
      return;
 
     switch( _backgroundImageLayout.type() )
     {
         case ImageLayout::Strech:
         {
-            if( _backgroundImage.width() != (size_t) ev.size().width() || _backgroundImage.height() != (size_t) ev.size().height() )
-            {
-              Gfx::Image strech = _backgroundImage.blockScale(Gfx::Size((int) ev.size().width(), (int)ev.size().height()) );
-              _backgroundPicture.set( strech );
-            }
+            Gfx::Image strech = _backgroundImage.blockScale(Gfx::Size((int) ev.size().width(), (int)ev.size().height()) );
+            _backgroundPicture.set( strech, Gfx::RenderFlags::AlphaBlend );
         }
         break;
 
@@ -104,7 +101,7 @@ void Panel::onResizeEvent(const ResizeEvent& ev)
             Pt::Gfx::Size newSize( ( size_t)( _backgroundImage.width()*factor), (size_t)(_backgroundImage.height()*factor));
 
             Gfx::Image  strech = _backgroundImage.blockScale(newSize);
-            _backgroundPicture.set( strech );
+            _backgroundPicture.set( strech, Gfx::RenderFlags::AlphaBlend );
         }
         break;
     }  
@@ -182,9 +179,9 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
             
             case ImageLayout::Tile:
             {
-                 for( double x = 0; x < size.width();  x += _backgroundImage.width() )
+                 for( double x = 0; x < size.width();  x += _backgroundPicture.width() )
                 {
-                    for( double y = 0; y < size.height();  y += _backgroundImage.height() )
+                    for( double y = 0; y < size.height();  y += _backgroundPicture.height() )
                         painter.drawPicture(Gfx::PointF(x,y), _backgroundPicture);
                 }
             }
@@ -192,8 +189,8 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 
             case ImageLayout::Center:
             {
-                const double x = size.width()/2  - _backgroundImage.width()/2;
-                const double y = size.height()/2  - _backgroundImage.height()/2;
+                const double x = size.width()/2  - _backgroundPicture.width()/2;
+                const double y = size.height()/2  - _backgroundPicture.height()/2;
                 painter.drawPicture(Gfx::PointF(x, y), _backgroundPicture);
             }
             break;
