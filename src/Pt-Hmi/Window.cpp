@@ -1054,12 +1054,6 @@ void Window::onMouseEvent(const MouseEvent& ev)
     if( _windowManager.mouseEvent(ev) )
         return;    
 
-    //if( ! _mainWidget )
-    //{
-    //    Application::instance().setCursor( &Cursor::defaultCursor() ); 
-    //    return;
-    //}
-
     Widget* widget = findWidget( ev.position(), true );
 
     if( ! widget )
