@@ -284,7 +284,7 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
         (*it)->repaint();
     }    
 
-   _updateRect.clear()
+   _updateRect.clear();
 
     PaintEvent pev( this->vid(), screenRect);
     Application::instance().loop().commitEvent(pev);
