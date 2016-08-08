@@ -1054,18 +1054,23 @@ void Window::onMouseEvent(const MouseEvent& ev)
     if( _windowManager.mouseEvent(ev) )
         return;    
 
-    if( ! _mainWidget )
-    {
-        Application::instance().setCursor( &Cursor::defaultCursor() ); 
-        return;
-    }
+    //if( ! _mainWidget )
+    //{
+    //    Application::instance().setCursor( &Cursor::defaultCursor() ); 
+    //    return;
+    //}
 
     Widget* widget = findWidget( ev.position(), true );
+
+    if( ! widget )
+    {
+        Application::instance().setCursor( &Cursor::defaultCursor() ); 
+    }
 
     // widget may be null to unset the pointer widget
     Application::instance().setPointerWidget(widget);
 
-    if(widget && widget->isEnabled())
+    if( widget && widget->isEnabled() )
     {
         MouseEvent clientEv(ev);
         clientEv.setId( widget->vid() );
@@ -1140,10 +1145,8 @@ void Window::onKeyEvent(const KeyEvent& ev)
 
 void Window::onEnterEvent(const EnterEvent& ev)
 {
-    if( isEnabled() )
-        return;
-
-    Application::instance().setCursor( &Cursor::defaultCursor() ); 
+    if( ! isEnabled() )
+        return; 
 }
 
 
