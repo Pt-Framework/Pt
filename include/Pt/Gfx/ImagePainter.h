@@ -83,7 +83,7 @@ class PT_GFX_API ImagePainter : public Painter
         
     virtual const Gfx::RectF& clip() const;
 
-    virtual void clear( const Gfx::Color& color =Gfx::Color( 1, 1, 1 ) );
+    virtual void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
 
     static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
 

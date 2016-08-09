@@ -223,6 +223,7 @@ void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
         const Pt::uint8_t* srcPix = pic.impl()->image().pixel(w,h);
         const Pt::uint8_t alpha = (Pt::uint8_t)(*(srcPix+3));
 
+
         switch( pic.impl()->flags() )
         {
           case Gfx::RenderFlags::AlphaMask:
@@ -246,10 +247,13 @@ void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
                 break;
 
                 default:
+                {
                   Pt::uint8_t* dstPix  =  _image.pixel(x,y);
-    	            dstPix[0] = (srcPix[0] * alpha + dstPix[0] * (255 - alpha)) / 255;
-			            dstPix[1] = (srcPix[1] * alpha + dstPix[1] * (255 - alpha)) / 255;
-			            dstPix[2] = (srcPix[2] * alpha + dstPix[2] * (255 - alpha)) / 255;                
+                  const Pt::uint8_t alpha255 =  (255 - alpha);
+    	            dstPix[0] = (srcPix[0] * alpha + dstPix[0] * alpha255) / 255;
+			            dstPix[1] = (srcPix[1] * alpha + dstPix[1] * alpha255) / 255;
+			            dstPix[2] = (srcPix[2] * alpha + dstPix[2] * alpha255) / 255;                
+                }
                 break;
           }
           break;

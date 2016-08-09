@@ -88,9 +88,7 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 
     Gfx::FontMetrics metric = painter.fontMetrics(_text);
 
-    Alignment align = MiddleCenter;
-
-    switch(align)
+    switch(_contentAlignment)
     {
         case TopLeft:
         {

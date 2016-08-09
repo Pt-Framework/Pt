@@ -207,8 +207,13 @@ Rasterizer::Rasterizer( Image& image )
 , _font("Vera", 12)
 , _clip(PointF(0,0), SizeF( image.width(), image.height()))
 {
+
+  if( _image->format().pixelSize() != 4 )
+      throw std::invalid_argument("only 4 byte pixel size image accepted");
+
   _text->setClip( _clip );
   _text->setFont( _font );
+
 }
 
 
@@ -1866,9 +1871,26 @@ void Rasterizer::stroke( int x, int y)
   if( y < _clip.top() || y > _clip.bottom())
       return;
 
-  const Image& colorBuffer = _pen.buffer();
+  const Image& colorBuffer = _pen.buffer();  
+  const Pt::uint8_t alpha = *(colorBuffer.pixel(0,0)+3);
+
+  if(alpha == 0)
+    return;
+
+ Pt::uint8_t* dstPix = _image->pixel(x, y);
+ const Pt::uint8_t* srcPix = colorBuffer.pixel(0,0);
   
-  memcpy(_image->pixel(x, y), colorBuffer.pixel(0,0), _image->format().pixelSize() );
+  if(alpha == 255)
+  {
+    *((Pt::uint32_t*)dstPix) = *((const Pt::uint32_t*)srcPix);
+     return;
+  }
+  
+  const Pt::uint8_t alpha255 =  (255 - alpha);
+
+  dstPix[0] = (srcPix[0] * alpha + dstPix[0] * alpha255) / 255;
+	dstPix[1] = (srcPix[1] * alpha + dstPix[1] * alpha255) / 255;
+	dstPix[2] = (srcPix[2] * alpha + dstPix[2] * alpha255) / 255;    
 }
 
 
@@ -1878,15 +1900,40 @@ void Rasterizer::stroke( int xpos, int ypos, int length )
         
   clipSpan( xpos, ypos, length );
 
-  while( length > 0  )
+  const Pt::uint8_t alpha  = *(colorBuffer.pixel(0,0) +3);
+
+  switch( alpha )
   {
-      const int fillLength = std::min( length, (int) colorBuffer.width() );
+    case 0:
+      return;
 
-      if( fillLength )
-        std::memcpy( _image->pixel( xpos, ypos ), colorBuffer.pixel(0,0), fillLength * _image->format().pixelSize() );
+    case 255:
+      while( length > 0  )
+      {
+          const int fillLength = std::min( length, (int) colorBuffer.width() );
 
-      length -= fillLength;
-      xpos   += fillLength;
+          if( fillLength )
+            std::memcpy( _image->pixel( xpos, ypos ), colorBuffer.pixel(0,0), fillLength * _image->format().pixelSize() );
+
+          length -= fillLength;
+          xpos   += fillLength;
+      }
+    break;
+
+    default:
+    {
+      const Pt::uint8_t* srcPix =  colorBuffer.pixel(0,0);      
+      const Pt::uint8_t alpha255 =  (255 - alpha);
+
+      for( int x= xpos; x < length; ++x)
+      {
+        Pt::uint8_t* dstPix = _image->pixel( x, ypos);
+        dstPix[0] = (srcPix[0] * alpha + dstPix[0] * alpha255) / 255;
+	      dstPix[1] = (srcPix[1] * alpha + dstPix[1] * alpha255) / 255;
+	      dstPix[2] = (srcPix[2] * alpha + dstPix[2] * alpha255) / 255;    
+      }
+    }
+    break;
   }
 }
 
@@ -1971,7 +2018,7 @@ void Rasterizer::fillSolid( const Point& pos, int length )
   int ypos = pos.y();       
   
   const Image& texture = _brush.texture();
-
+  
   // copy pixels blockwise to the target image
   while(length)
   {
@@ -3459,176 +3506,106 @@ void Rasterizer::fillEllipse( const PointF& topLeftIn, const SizeF& size )
 }
 
 
-void Rasterizer::image( const PointF& toIn, const Image& image, RenderFlags::Type flags )
+void Rasterizer::image( const PointF& toIn, const Image& img, RenderFlags::Type flags )
 {
-  if( image.format() != image.format() )
-    throw std::logic_error( "wrong image format");
+    RectF imageRect( PointF(0,0), SizeF(img.size().width(), img.size().height() ));
 
-  Point to((int) toIn.x(),(int) toIn.y() );
-
-  int xSourceBegin = 0;
-  int ySourceBegin = 0;
-
-  int xTargetBegin = to.x();
-  int yTargetBegin = to.y();
-
-  // outside target image
-  if( to.x() >= _image->width() ||
-      to.y() >= _image->height() )
-     return;
-
-  if( to.x() < 0 )
-  {
-    xSourceBegin = -to.x();
-    xTargetBegin = 0;
-  }
-
-  if( to.y() < 0 )
-  {
-    ySourceBegin = -to.y();
-    yTargetBegin = 0;
-  }
-
-  int lineLength = image.width();   
-
-  if( to.x()  < 0 )
-    lineLength += to.x();
-
-  if( (xTargetBegin + lineLength) > (int)_image->width()  )
-      lineLength -= (xTargetBegin + lineLength) - _image->width() ;
- 
-  if( lineLength  <=  0 )
-    return;  
-   
-  const int endYOffset = to.y() + image.height();
-
-  int lines = image.height();   
-
-  if( endYOffset >  (int)_image->height()  )
-      lines = _image->height() - yTargetBegin;
-
-  if( endYOffset  <  0 )
-    return;
-  
-  const Pt::uint8_t* scanLineSource = image.pixel( xSourceBegin, ySourceBegin );
-  Pt::uint8_t* scanLineTarget = _image->pixel( xTargetBegin, yTargetBegin );
-
-  const int targetStride		 = _image->width() * _image->format().pixelSize() +  _image->stride();
-  const int sourceStride		 = image.width() * image.format().pixelSize() +  image.stride();
-  const int lineSize = lineLength * _image->format().pixelSize();
-
-  switch( flags )
-  {
-      case RenderFlags::IgnoreAlpha:
-            case RenderFlags::AlphaMask:
-                  case RenderFlags::AlphaBlend:
-      {         
-          for(int i = 0; i < lines; ++i )
-          {                
-            memcpy( scanLineTarget, scanLineSource, lineSize );
-            scanLineSource += sourceStride;
-            scanLineTarget += targetStride;
-          }
-
-          break;
-      }
-    }
+    image( toIn, img, imageRect , flags);
 }
 
 
-void Rasterizer::image( const PointF& toF, 
-                        const Image& image, 
-                        const RectF& imageRectF, RenderFlags::Type flags)
+void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imageRectF, RenderFlags::Type flags)
 {
   if( image.format() != image.format() )
     throw std::logic_error( "wrong image format");
 
-  Point to( (int) toF.x(),
-            (int) toF.y() );
-
-  Point imagePos( (int) imageRectF.topLeft().x(), 
-                  (int) imageRectF.topLeft().y() );
-
-  Size imageSize( (int) imageRectF.width(), 
-                  (int) imageRectF.height() );
-
-  if( imagePos.x() + imageSize.width() > image.width() )
-      imageSize.setWidth( image.width() - imagePos.x() );
-
-  if( imagePos.y() + imageSize.height() > image.height() )
-      imageSize.setHeight( image.height() - imagePos.y() );
-
-  Rect imageRect(imagePos, imageSize);
-
-  int xSourceBegin = imagePos.x();
-  int ySourceBegin = imagePos.y();
-
-  int xTargetBegin = to.x();
-  int yTargetBegin = to.y();
-
-  // outside target image
-  if( to.x() >= _image->width() ||
-      to.y() >= _image->height() ||
-      imagePos.x() >= image.width() ||
-      imagePos.y() >= image.height() )
-     return;
-
-  if( to.x() < 0 )
-  {
-      xSourceBegin = imagePos.x() - to.x();
-      xTargetBegin = 0;
-  }
-
-  if( to.y() < 0 )
-  {
-    ySourceBegin = imagePos.y() - to.y();
-    yTargetBegin = 0;
-  }
-
-  int lineLength = imageRect.width(); 
-
-  if( to.x() < 0 )
-    lineLength += to.x();
-
-  if( (xTargetBegin + lineLength) > _image->width()  )
-      lineLength -= (xTargetBegin + lineLength) - _image->width() ;
- 
-  if(lineLength <= 0)
-    return;  
-   
-  const int endYOffset = to.y() + imageRect.height();
-
-  int lines = imageRect.height();   
-
-  if( endYOffset > _image->height()  )
-      lines = _image->height() - yTargetBegin;
-
-  if( endYOffset < 0 )
-    return;
+  Point to( (int) toF.x(), (int) toF.y() );
   
-  const Pt::uint8_t* scanLineSource = image.pixel( xSourceBegin, ySourceBegin );
-  Pt::uint8_t* scanLineTarget = _image->pixel( xTargetBegin, yTargetBegin );
-
-  const int targetStride = _image->width() * _image->format().pixelSize() + _image->stride();
-  const int sourceStride = image.width() * image.format().pixelSize() + image.stride();
-  const int lineSize = lineLength * _image->format().pixelSize();
+  Rect imgRect( (Pt::ssize_t)imageRectF.left(), (Pt::ssize_t)imageRectF.right(), (Pt::ssize_t) imageRectF.top(), (Pt::ssize_t) imageRectF.bottom());
 
   switch( flags )
   {
       case RenderFlags::IgnoreAlpha:
-      case RenderFlags::AlphaMask:
-      case RenderFlags::AlphaBlend:
-      {         
-          for(int i = 0; i < lines; ++i )
-          {                
-            memcpy( scanLineTarget, scanLineSource, lineSize );
-            scanLineSource += sourceStride;
-            scanLineTarget += targetStride;
-          }
+      { //Todo Optimize this with memcpy        
+          for(size_t w = imageRectF.left(); w <= imageRectF.right() ; ++w )
+          {
+            for( size_t h = imageRectF.top(); h <= imageRectF.bottom(); ++h)
+            {
+              const size_t x = to.x() + (w - imageRectF.left());
+              const size_t y = to.y() + (h - imageRectF.top());
 
-          break;
+              if(!( x >= clip().left() &&  x < clip().right() && y  >=  clip().top()  && y < clip().bottom() ))
+                  continue;
+
+              const Pt::uint32_t* srcPix = (const Pt::uint32_t*)image.pixel(w,h);
+              Pt::uint32_t* dstPix = (Pt::uint32_t*) _image->pixel( x,y);             
+              *dstPix = *srcPix;
+            }
+          }        
       }
+      break;
 
+      case RenderFlags::AlphaMask:
+      {
+          for(size_t w = imageRectF.left(); w <= imageRectF.right() ; ++w )
+          {
+            for( size_t h = imageRectF.top(); h <= imageRectF.bottom(); ++h)
+            {
+              const size_t x = to.x() + (w - imageRectF.left());
+              const size_t y = to.y() + (h - imageRectF.top());
+
+              if(!( x >= clip().left() &&  x < clip().right() && y  >=  clip().top()  && y < clip().bottom() ))
+                  continue;
+
+              if(*(image.pixel(w,h)+3) == 0)
+                 continue;
+
+              const Pt::uint32_t* srcPix = (const Pt::uint32_t*)image.pixel(w,h);
+              Pt::uint32_t* dstPix = (Pt::uint32_t*) _image->pixel( x,y);             
+              *dstPix = *srcPix;
+            }
+          }  
+      }
+      break;
+
+      case Gfx::RenderFlags::AlphaBlend:
+      {
+          Pt::uint8_t alpha = 0;
+
+          for(size_t w = imageRectF.left(); w <= imageRectF.right() ; ++w )
+          {
+            for( size_t h = imageRectF.top(); h <= imageRectF.bottom(); ++h)
+            {
+              const size_t x = to.x() + (w - imageRectF.left());
+              const size_t y = to.y() + (h - imageRectF.top());
+
+              if(!( x >= clip().left() &&  x < clip().right() && y  >=  clip().top()  && y < clip().bottom() ))
+                  continue;
+              
+              const Pt::uint8_t* srcPix = image.pixel(w,h);
+              
+              alpha = *(srcPix+3);
+
+              if( alpha == 0)
+                  continue;
+
+              Pt::uint8_t* dstPix  =  _image->pixel(x,y);
+
+              if( alpha == 255)
+              {
+                *dstPix = *srcPix;
+                continue;
+              }
+
+              const Pt::uint8_t alpha255 =  (255 - alpha);
+
+    	        dstPix[0] = (srcPix[0] * alpha + dstPix[0] * alpha255) / 255;
+			        dstPix[1] = (srcPix[1] * alpha + dstPix[1] * alpha255) / 255;
+			        dstPix[2] = (srcPix[2] * alpha + dstPix[2] * alpha255) / 255;        
+             }
+          }        
+      }
+      break;
     }
 }
 

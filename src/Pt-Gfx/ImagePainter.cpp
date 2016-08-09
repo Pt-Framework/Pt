@@ -121,13 +121,6 @@ void ImagePainter::drawRect( const  RectF& rect )
 
 void ImagePainter::fillRect( const  RectF& r )
 {  
-    //PointF points[4];
-    //points[0] = r.topLeft();
-    //points[1] = r.topRight();
-    //points[2] = r.bottomRight();
-    //points[3] = r.bottomLeft();
-
-    //_rasterizer.fill(points, 4);
     _rasterizer.fillRect(r);
 }
 
