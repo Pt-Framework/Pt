@@ -33,6 +33,7 @@
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Picture.h>
 #include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/Color.h>
 #include <Windows.h>
 
 namespace Pt {
@@ -117,6 +118,11 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         HBRUSH         _oldBrush;
         HFONT          _oldFont;
         std::wstring   _text;
+        
+        bool                          _gradientBrush;
+        Gfx::Brush::GradientDirection _gradientDirection;
+        Gfx::Color                    _gradientStart;
+        Gfx::Color                    _gradientStop;
 };
 
 } // namespace

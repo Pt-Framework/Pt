@@ -236,6 +236,7 @@ Gfx::FontMetrics PaintSurfaceImpl::fontMetrics(const Gfx::Font& font, const Pt::
 
 PixmapSurfaceImpl::PixmapSurfaceImpl()
 : _deviceContext(0)
+, _gradientBrush(false)
 {
     _size = Gfx::SizeF(10,10);
 
@@ -351,6 +352,8 @@ void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
 
 void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
 {
+    _gradientBrush = false;
+
     HBRUSH newBrushHandle = NULL;
     DWORD brushColor = RGB(brush.color().red() * 255, 
                            brush.color().green() * 255, 
@@ -402,53 +405,11 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
 
         case Gfx::Brush::Gradient:
         {
-            BITMAPINFO bi;
-            ZeroMemory(&bi.bmiHeader, sizeof(BITMAPINFOHEADER));
-
-            bi.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER); 
-            
-            if( brush.gradientDirection() == Gfx::Brush::Horizontal )
-            {
-                bi.bmiHeader.biWidth    = _size.width();
-                bi.bmiHeader.biHeight   = 1;
-            }
-            else
-            {
-                bi.bmiHeader.biWidth    = 1;
-                bi.bmiHeader.biHeight   = _size.height();
-            }
-
-            bi.bmiHeader.biPlanes       = 1;      // always 1
-            bi.bmiHeader.biBitCount     = 32;     // ARGB 32
-            bi.bmiHeader.biCompression  = BI_RGB; // uncompressed RGB
-            bi.bmiHeader.biSizeImage    = 0;      // automatic
-            bi.bmiHeader.biClrUsed      = 0;      // no color table
-            bi.bmiHeader.biClrImportant = 0;      // no color table
-
-            VOID* imageBits = NULL;
-            HBITMAP bitmap = CreateDIBSection(_deviceContext, &bi, 
-                                              DIB_RGB_COLORS, &imageBits, NULL, 0);
-            
-            int steps = bi.bmiHeader.biHeight;
-
-            Gfx::Argb8888Format format;
-            Pt::uint32_t* gradientLine = reinterpret_cast<Pt::uint32_t*>(imageBits);
-            
-            for(int n = 0; n < bi.bmiHeader.biHeight; ++n)
-            {
-                float r1 = brush.color().red() * (steps - n) / steps;
-                float r2 = brush.gradientColor().red() * n / steps;
-                
-                Gfx::Color c( (r1 + r2),
-                              brush.color().green(),
-                              brush.color().blue() );
- 
-                format.setColor( (Pt::uint8_t*)(&gradientLine[n]), c );
-            }
-
-            newBrushHandle = CreatePatternBrush(bitmap);
-            DeleteObject(bitmap);
-            break;
+            _gradientBrush = true;
+            _gradientDirection = brush.gradientDirection();
+            _gradientStart = brush.color();
+            _gradientStop = brush.gradientColor();
+            return;
         }
 
         default:
@@ -609,15 +570,99 @@ void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* points, const size_t poi
 }
 
 
+HBRUSH gradientBrush(HDC dc, 
+                     Gfx::Color gradientStart, 
+                     Gfx::Color gradientStop, 
+                     Gfx::Brush::GradientDirection dir,
+                     int length)
+{
+    // TODO: add pixel stride from (0,0) so gradient is within filled area
+
+    BITMAPINFO bi;
+    ZeroMemory(&bi.bmiHeader, sizeof(BITMAPINFOHEADER));
+
+    bi.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER); 
+            
+    if( dir == Gfx::Brush::Horizontal )
+    {
+        bi.bmiHeader.biWidth    = length;
+        bi.bmiHeader.biHeight   = 1;
+    }
+    else
+    {
+        bi.bmiHeader.biWidth    = 1;
+        bi.bmiHeader.biHeight   = length;
+    }
+
+    bi.bmiHeader.biPlanes       = 1;      // always 1
+    bi.bmiHeader.biBitCount     = 32;     // ARGB 32
+    bi.bmiHeader.biCompression  = BI_RGB; // uncompressed RGB
+    bi.bmiHeader.biSizeImage    = 0;      // automatic
+    bi.bmiHeader.biClrUsed      = 0;      // no color table
+    bi.bmiHeader.biClrImportant = 0;      // no color table
+
+    VOID* imageBits = NULL;
+    HBITMAP bitmap = CreateDIBSection(dc, &bi, DIB_RGB_COLORS, &imageBits, NULL, 0);
+            
+    int steps = bi.bmiHeader.biHeight;
+
+    Gfx::Argb8888Format format;
+    Pt::uint32_t* gradientLine = reinterpret_cast<Pt::uint32_t*>(imageBits);
+            
+    for(int n = 0; n < bi.bmiHeader.biHeight; ++n)
+    {
+        float r1 = gradientStart.red() * (steps - n) / steps;
+        float r2 = gradientStop.red() * n / steps;
+                
+        Gfx::Color c( (r1 + r2),
+                      0.0,
+                      0.0 );
+ 
+        format.setColor( (Pt::uint8_t*)(&gradientLine[n]), c );
+    }
+
+    HBRUSH newBrushHandle = CreatePatternBrush(bitmap);
+    DeleteObject(bitmap);
+
+    return newBrushHandle;
+}
+
+
 void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
 {
     std::vector<POINT> winPoints(pointCount);
+
+    int left = 100000, right = 0, top = 100000, bottom = 0;
 
     for (size_t i = 0; i < pointCount; i++)
     {
         Gfx::Point p = Application::instance().screen().fromUnit(points[i]);
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
+
+        if( p.y() < top)
+            top = p.y();
+
+        if( p.y() > bottom)
+            bottom = p.y();
+
+        if( p.x() < left)
+            left = p.x();
+
+        if( p.x() > right)
+            right = p.x();
+    }
+
+    if(_gradientBrush)
+    {
+        int n = _gradientDirection == Gfx::Brush::Vertical ? bottom - top : _size.width();
+        
+        HBRUSH brush = gradientBrush(_deviceContext, 
+                                     _gradientStart, _gradientStop, 
+                                     _gradientDirection, n);
+
+        HBRUSH oldBrush = (HBRUSH)SelectObject(_deviceContext, brush);
+        DeleteObject(oldBrush);
     }
 
     HPEN originalPen = (HPEN)SelectObject(_deviceContext, GetStockObject(NULL_PEN));
