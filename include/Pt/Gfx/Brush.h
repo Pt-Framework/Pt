@@ -1,96 +1,114 @@
 /* Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2006-2015 Marc Boris Duerner
- * Copyright (C) 2010 Aloysius Indrayanto
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+   Copyright (C) 2006-2015 Marc Boris Duerner
+   Copyright (C) 2010 Aloysius Indrayanto
+ 
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+ 
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+ 
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+ 
+  You should have received a copy of the GNU Lesser General Public 
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
+*/
+
 #ifndef PT_GFX_BRUSH_H
 #define PT_GFX_BRUSH_H
 
-#include <Pt/SmartPtr.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/SmartPtr.h>
 
 namespace Pt {
+
 namespace Gfx {
 
 class BrushData;
 
 class PT_GFX_API Brush
 {
-  public:
-    enum FillStyle
-    {
-        SolidFill = 0,
-        TextureFill,
-        LinearGradientFill,
-        RadialGradientFill
-    };
+    public:
+        enum FillStyle
+        {
+            Solid = 0,
+            Texture = 1,
+            Gradient = 2
+        };
 
-  public:
-    Brush( const Color& color = Color(0,0,0) );
+        enum GradientDirection
+        {
+            Horizontal = 0,
+            Vertical = 1
+        };
 
-    Brush(const Image* texture);
+    public:
+        Brush();
 
-    FillStyle fillStyle() const;
+        Brush(const Color& color);
 
-    const Color& color() const;
+        Brush(const Image& texture);
 
-    const Image& texture() const;
+        Brush(const Color& from, const Color& to, GradientDirection g);
 
-    friend PT_GFX_API bool operator==(const Brush& a, const Brush& b);
+        FillStyle fillStyle() const;
 
-    friend PT_GFX_API bool operator<(const Brush& a, const Brush& b);
+        const Color& color() const;
 
+        const Color& gradientColor() const;
 
-  private:
-      SmartPtr<BrushData> _brushData;
+        const Image& texture() const;
+
+    private:
+        SmartPtr<BrushData> _brushData;
 };
 
 
-class PT_GFX_API BrushData
+class BrushData
 {
-  public:
-    BrushData(Brush::FillStyle fillStyle, const Color& color, const Image* texture);
+    public:
+        BrushData();
 
-    ~BrushData();
+        BrushData(const Color& color);
 
-    Brush::FillStyle fillStyle() const;
+        BrushData(const Image& texture);
 
-    const Color& color() const;
+        BrushData(const Color& from, const Color& to, Brush::GradientDirection g);
 
-    const Image& texture() const;
+        ~BrushData();
 
-  private:
-    Brush::FillStyle _fillStyle;
-    Color        _color;
-    Image*       _texture;
+        Brush::FillStyle fillStyle() const;
+
+        const Color& color() const;
+
+        const Color& gradientColor() const;
+
+        const Image& texture() const;
+
+    private:
+        Brush::FillStyle         _fillStyle;
+        Brush::GradientDirection _gradient;
+        Color                    _color;
+        Image                    _texture;
+        Color                    _gradientColor;
 };
 
-PT_GFX_API void operator >>=( const SerializationInfo& si, Brush& x );
+} // namespace
 
-PT_GFX_API void operator <<=( SerializationInfo& si, const Brush& x );
-
-}} // namespace
+} // namespace
 
 #endif

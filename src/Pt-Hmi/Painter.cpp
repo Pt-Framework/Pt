@@ -60,6 +60,7 @@ void Painter::setSurface(PaintSurface& surface)
     _surface->setPen(_pen);  
 }       
 
+
 void Painter::setPen(const Gfx::Pen& pen)
 {
     _pen = pen;

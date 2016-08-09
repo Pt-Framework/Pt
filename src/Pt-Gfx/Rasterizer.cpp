@@ -1996,11 +1996,11 @@ void Rasterizer::fill(const Point& origin, const Point& pos,  int length)
 {
   switch( _brush.fillStyle())
   {
-    case Brush::TextureFill:
+    case Brush::Texture:
       fillTexture( origin, pos, length);
     break;
 
-    case Brush::SolidFill:
+    case Brush::Solid:
       fillSolid(pos,  length);
     break;
   }

@@ -28,17 +28,29 @@
 #include <Pt/Gfx/Brush.h>
 #include <algorithm>
 
-namespace Pt{
-namespace Gfx{
+namespace Pt {
 
-Brush::Brush(const Color& color)
-: _brushData( new BrushData(SolidFill, color, 0) )
+namespace Gfx {
+
+Brush::Brush()
+: _brushData( new BrushData() )
 {
 }
 
 
-Brush::Brush(const Image* texture)
-: _brushData( new BrushData(TextureFill, Color(0, 0, 0), texture) )
+Brush::Brush(const Color& color)
+: _brushData( new BrushData(color) )
+{
+}
+
+
+Brush::Brush(const Image& texture)
+: _brushData( new BrushData(texture) )
+{
+}
+
+Brush::Brush(const Color& from, const Color& to, GradientDirection g)
+: _brushData( new BrushData(from, to, g) )
 {
 }
 
@@ -55,32 +67,57 @@ const Color& Brush::color() const
 }
 
 
+const Color& Brush::gradientColor() const
+{
+    return _brushData->gradientColor();
+}
+
+
 const Image& Brush::texture() const
 {
     return _brushData->texture();
 }
 
 
-BrushData::BrushData(Brush::FillStyle fillStyle, const Color& color, const Image* texture)
-: _fillStyle(fillStyle)
-, _color(color)
-, _texture(0)
+BrushData::BrushData()
+: _fillStyle(Brush::Solid)
+, _gradient(Brush::Horizontal)
+, _color(0, 0, 0)
+, _texture( Gfx::Size(16, 1) )
 {
-  if(texture != 0) 	
-	{
-		  _texture = new Image(*texture);
-	}
-	else
-	{
-		 _texture  = new Image(Gfx::Size( 64, 1 ));
-		 _texture->setColor( color );
-	}
+		 _texture.setColor(_color);
+}
+
+
+BrushData::BrushData(const Color& color)
+: _fillStyle(Brush::Solid)
+, _gradient(Brush::Horizontal)
+, _color(color)
+, _texture( Gfx::Size(64, 1) )
+{
+		 _texture.setColor(_color);
+}
+
+
+BrushData::BrushData(const Image& texture)
+: _fillStyle(Brush::Texture)
+, _gradient(Brush::Horizontal)
+, _texture(texture)
+{
+}
+
+
+BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirection g)
+: _fillStyle(Brush::Gradient)
+, _gradient(g)
+, _color(from)
+, _gradientColor(to)
+{
 }
 
 
 BrushData::~BrushData()
 {
-    delete _texture;
 }
 
 
@@ -96,37 +133,17 @@ const Color& BrushData::color() const
 }
 
 
+const Color& BrushData::gradientColor() const
+{
+    return _gradientColor;
+}
+
+
 const Image& BrushData::texture() const
 {
-    return *_texture;
+    return _texture;
 }
 
-bool operator==(const Brush& a, const Brush& b)
-{
-	return a._brushData->fillStyle() == b._brushData->fillStyle() &&
-	       a._brushData->color() == b._brushData->color();
-//           && a._brushData->texture() == b._brushData->texture();    //real image comparison needed ???
-}
+} // namespace
 
-bool operator<(const Brush& a, const Brush& b)
-{
-	return a._brushData->fillStyle() < b._brushData->fillStyle();
-}
-
-
-void operator >>=( const SerializationInfo& si, Brush& brush )
-{
-    Pt::String s;
-    si.getString(s);
-    brush = Brush( Color::fromHtml(s) );
-}
-
-
-void operator <<=( SerializationInfo& si, const Brush& brush )
-{
-    si.setString( brush.color().toHtml() );
-    si.setTypeName("Brush");
-}
-
-
-} } // namespace
+} // namespace

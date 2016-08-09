@@ -350,20 +350,20 @@ void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
 
 void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
 {
-    HBRUSH newBrushHandle;
+    HBRUSH newBrushHandle = NULL;
     DWORD brushColor = RGB(brush.color().red() * 255, 
                            brush.color().green() * 255, 
                            brush.color().blue() * 255);
 
     switch( brush.fillStyle() ) 
     {
-        case Gfx::Brush::SolidFill: 
+        case Gfx::Brush::Solid: 
         {
             newBrushHandle = CreateSolidBrush(brushColor);
             break;
         }
 
-        case Gfx::Brush::TextureFill: 
+        case Gfx::Brush::Texture: 
         {
             const Gfx::Image& texture = brush.texture();
 
