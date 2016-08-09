@@ -619,7 +619,7 @@ void PixmapSurfaceImpl::bitBlit( const Gfx::PointF& pos, size_t width, size_t he
     DeleteDC(bitmapDC);
 }
 
-void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
+void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image, Gfx::RenderFlags::Type)
 {
     Gfx::Point to = Application::instance().screen().fromUnit(toF);
 
