@@ -44,7 +44,8 @@ class PT_HMI_API FlowLayout : public Layout
         // HorizontalCenter    place elements accoring to size
         // Vertical            use all space in row, same size for elements
         // VerticalCenter      place elements accoring to size
-        enum Alignment
+        
+        enum Direction
         {
             Left,
             Right,
@@ -53,18 +54,17 @@ class PT_HMI_API FlowLayout : public Layout
         };
 
     public:
-        explicit FlowLayout(Alignment a = Left);
+        explicit FlowLayout(Direction d = Left);
 
         virtual ~FlowLayout();
 
-        void setAlignment(Alignment a)
-        { _alignment = a; }
+        void setDirection(Direction d);
 
     protected:
         virtual void onLayout();
 
     private:
-        Alignment _alignment;
+        Direction _direction;
 };
 
 } // namespace

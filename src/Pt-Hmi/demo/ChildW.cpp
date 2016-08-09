@@ -44,7 +44,7 @@ ChildW::ChildW(const std::string& title)
     _menuBar.addMenu(_fileMenu, "File");
     _menuBar.addMenu(_editMenu, "Edit");
 
-    _mainLayout.setAlignment(FlowLayout::Top);
+    _mainLayout.setDirection(FlowLayout::Top);
     _mainLayout.add(_menuBar);
 
     

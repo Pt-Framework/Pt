@@ -155,8 +155,8 @@ void StackBottom(Widget& parent)
 }
 
 
-FlowLayout::FlowLayout(Alignment a)
-: _alignment(a)
+FlowLayout::FlowLayout(Direction d)
+: _direction(d)
 {
 }
 
@@ -166,12 +166,20 @@ FlowLayout::~FlowLayout()
 }
 
 
+void FlowLayout::setDirection(Direction d)
+{ 
+    _direction = d;
+    
+    onLayout();
+}
+
+
 void FlowLayout::onLayout()
 {
     std::vector<Widget*>::const_iterator it = this->widgets().begin();
     std::vector<Widget*>::const_iterator end = this->widgets().end();
 
-    switch(_alignment)
+    switch(_direction)
     {
         default:
         case Left:

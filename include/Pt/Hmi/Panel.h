@@ -98,6 +98,28 @@ class PT_HMI_API Panel : public Widget
 			      Border3D
 		    };
 
+        enum Alignment
+        {
+            TopLeft,
+            TopCenter,
+            TopRight,
+            MiddleLeft,
+            MiddleCenter,
+            MiddleRight,
+            BottomLeft,
+            BottomCenter,
+            BottomRight
+        };
+
+        //enum TileMode
+        //{
+        //    Tile,
+        //    Strech,
+        //    Zoom
+        //};
+
+        // TODO: use TileMode and Alignment instead of ImageLayout
+
 	  public:
         Panel();
 		
@@ -126,7 +148,6 @@ class PT_HMI_API Panel : public Widget
             _foregroundColor = c;
             update();
         }
-
 
         void setBackgroundImage(const Gfx::Image& image, ImageLayout layout)
         {
@@ -189,7 +210,6 @@ class PT_HMI_API Panel : public Widget
         //       NOTE: Window has onPaintBackground and onPaintContent
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 	
-
         virtual void onResizeEvent(const ResizeEvent& ev);
 
     private: 
