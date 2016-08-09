@@ -214,23 +214,54 @@ void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
   {
     for( size_t h = 0; h < pic.impl()->height(); ++h)
     {
-        const Pt::uint8_t* srcPix = pic.impl()->image().pixel(w,h);
-
-        if( *(srcPix+3) == 0)
-          continue;
-
         const size_t x = to.x() + w;
         const size_t y = to.y() + h;
 
-        if( x >= _painter.clip().left() &&  x < _painter.clip().right() && y  >=  _painter.clip().top()  && y < _painter.clip().bottom() )
+        if(!( x >= _painter.clip().left() &&  x < _painter.clip().right() && y  >=  _painter.clip().top()  && y < _painter.clip().bottom() ))
+            continue;
+
+        const Pt::uint8_t* srcPix = pic.impl()->image().pixel(w,h);
+        const Pt::uint8_t alpha = (Pt::uint8_t)(*(srcPix+3));
+
+        switch( pic.impl()->flags() )
         {
-          Pt::uint32_t* pix  = ( Pt::uint32_t*) _image.pixel(x,y);
-          *pix  = *(( Pt::uint32_t*)srcPix);
+          case Gfx::RenderFlags::AlphaMask:
+          {
+            if( alpha == 0)
+              continue;
+
+            *(( Pt::uint32_t*) _image.pixel(x,y))  = *(( Pt::uint32_t*)srcPix);
+          }
+          break;
+
+          case Gfx::RenderFlags::AlphaBlend:
+          {
+            switch(alpha)
+            {
+                case 0:                  
+                break;
+
+                case 255:
+                   *(( Pt::uint32_t*) _image.pixel(x,y))  = *(( Pt::uint32_t*)srcPix);
+                break;
+
+                default:
+                  Pt::uint8_t* dstPix  =  _image.pixel(x,y);
+    	            dstPix[0] = (srcPix[0] * alpha + dstPix[0] * (255 - alpha)) / 255;
+			            dstPix[1] = (srcPix[1] * alpha + dstPix[1] * (255 - alpha)) / 255;
+			            dstPix[2] = (srcPix[2] * alpha + dstPix[2] * (255 - alpha)) / 255;                
+                break;
+          }
+          break;
+
+          case Gfx::RenderFlags::IgnoreAlpha:
+            *(( Pt::uint32_t*) _image.pixel(x,y)) = *(( Pt::uint32_t*)srcPix);
+          break;
         }
     }
   }
 }
 
-} // namespace
+}
 
-} // namespace
+}} // namespace

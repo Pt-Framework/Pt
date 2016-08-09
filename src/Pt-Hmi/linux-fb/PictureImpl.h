@@ -64,6 +64,11 @@ class PictureImpl
         {
           return _image.empty();
         }
+
+         Gfx::RenderFlags::Type flags() const
+         {
+            return _flags;
+         }
           
     private:
       void clear();
