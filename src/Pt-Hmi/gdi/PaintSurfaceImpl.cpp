@@ -28,9 +28,10 @@
 
 #include "win32.h"
 #include "PaintSurfaceImpl.h"
-#include <Pt/Hmi/Application.h>
-#include <tchar.h>
 #include "PictureImpl.h"
+#include <Pt/Hmi/Application.h>
+#include <Pt/Gfx/Argb8888Format.h>
+#include <tchar.h>
 
 namespace {
 
@@ -399,6 +400,57 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
             break;     
         }
 
+        case Gfx::Brush::Gradient:
+        {
+            BITMAPINFO bi;
+            ZeroMemory(&bi.bmiHeader, sizeof(BITMAPINFOHEADER));
+
+            bi.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER); 
+            
+            if( brush.gradientDirection() == Gfx::Brush::Horizontal )
+            {
+                bi.bmiHeader.biWidth    = _size.width();
+                bi.bmiHeader.biHeight   = 1;
+            }
+            else
+            {
+                bi.bmiHeader.biWidth    = 1;
+                bi.bmiHeader.biHeight   = _size.height();
+            }
+
+            bi.bmiHeader.biPlanes       = 1;      // always 1
+            bi.bmiHeader.biBitCount     = 32;     // ARGB 32
+            bi.bmiHeader.biCompression  = BI_RGB; // uncompressed RGB
+            bi.bmiHeader.biSizeImage    = 0;      // automatic
+            bi.bmiHeader.biClrUsed      = 0;      // no color table
+            bi.bmiHeader.biClrImportant = 0;      // no color table
+
+            VOID* imageBits = NULL;
+            HBITMAP bitmap = CreateDIBSection(_deviceContext, &bi, 
+                                              DIB_RGB_COLORS, &imageBits, NULL, 0);
+            
+            int steps = bi.bmiHeader.biHeight;
+
+            Gfx::Argb8888Format format;
+            Pt::uint32_t* gradientLine = reinterpret_cast<Pt::uint32_t*>(imageBits);
+            
+            for(int n = 0; n < bi.bmiHeader.biHeight; ++n)
+            {
+                float r1 = brush.color().red() * (steps - n) / steps;
+                float r2 = brush.gradientColor().red() * n / steps;
+                
+                Gfx::Color c( (r1 + r2),
+                              brush.color().green(),
+                              brush.color().blue() );
+ 
+                format.setColor( (Pt::uint8_t*)(&gradientLine[n]), c );
+            }
+
+            newBrushHandle = CreatePatternBrush(bitmap);
+            DeleteObject(bitmap);
+            break;
+        }
+
         default:
             return;
     }
@@ -503,7 +555,8 @@ void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rectF)
     rectangle.right  = rect.right() + 1;    
     rectangle.bottom = rect.bottom() + 1;
 
-    HBRUSH currentBrush = (HBRUSH)GetCurrentObject(_deviceContext, OBJ_BRUSH);
+    HBRUSH currentBrush =  (HBRUSH)GetCurrentObject(_deviceContext, OBJ_BRUSH);
+
     FillRect(_deviceContext, &rectangle, currentBrush);
 }
 

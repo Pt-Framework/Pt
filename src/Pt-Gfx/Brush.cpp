@@ -73,6 +73,12 @@ const Color& Brush::gradientColor() const
 }
 
 
+Brush::GradientDirection Brush::gradientDirection() const
+{
+    return _brushData->gradientDirection();
+}
+
+
 const Image& Brush::texture() const
 {
     return _brushData->texture();
@@ -136,6 +142,12 @@ const Color& BrushData::color() const
 const Color& BrushData::gradientColor() const
 {
     return _gradientColor;
+}
+
+
+Brush::GradientDirection BrushData::gradientDirection() const
+{
+    return _gradient;
 }
 
 

@@ -71,6 +71,8 @@ class PT_GFX_API Brush
 
         const Color& gradientColor() const;
 
+        GradientDirection gradientDirection() const;
+
         const Image& texture() const;
 
     private:
@@ -96,6 +98,8 @@ class BrushData
         const Color& color() const;
 
         const Color& gradientColor() const;
+
+        Brush::GradientDirection gradientDirection() const;
 
         const Image& texture() const;
 

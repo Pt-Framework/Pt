@@ -163,6 +163,11 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
     if( backgroundColor().alpha() != 0)
     {
       Gfx::Brush brush( backgroundColor() );
+      
+      //Gfx::Brush brush( Gfx::Color(1.0,0,0), 
+      //                  Gfx::Color(0,0,0), 
+      //                  Gfx::Brush::Vertical );
+
       painter.setBrush(brush); 
       painter.fillPolygon(&outline[0], outline.size());
     }

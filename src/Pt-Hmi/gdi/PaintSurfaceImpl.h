@@ -32,6 +32,7 @@
 
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Picture.h>
+#include <Pt/Gfx/Brush.h>
 #include <Windows.h>
 
 namespace Pt {
