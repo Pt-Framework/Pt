@@ -62,6 +62,7 @@ class PT_GFX_API Brush
 
         Brush(const Color& color);
 
+        // TODO: texture offset
         Brush(const Image& texture);
 
         Brush(const Color& from, const Color& to, GradientDirection g);
