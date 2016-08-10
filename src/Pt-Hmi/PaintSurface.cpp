@@ -255,10 +255,9 @@ void PixmapSurface::resize(const Gfx::SizeF& size)
 }
 
 
-void PixmapSurface::clear(const Gfx::Color& )
+void PixmapSurface::clear(const Gfx::Color& c)
 {
-    // TODO
-    _impl->clear();
+    _impl->clear(c);
 }
 
 

@@ -58,7 +58,9 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         virtual void setFont(const Gfx::Font& font);
 
-        virtual const Gfx::Font& font() const;    
+        virtual const Gfx::Font& font() const;  
+        
+        // TODO: setClip  
 
         virtual Gfx::FontMetrics fontMetrics(const Pt::String& Text) const; 
         

@@ -63,7 +63,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         
         virtual ~PixmapSurfaceImpl();  
         
-        void clear();  
+        void clear(const Gfx::Color& c);  
     
         void resize(const Gfx::SizeF& size);    
 

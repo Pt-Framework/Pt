@@ -336,7 +336,7 @@ PixmapSurfaceImpl::~PixmapSurfaceImpl()
 }
 
 
-void PixmapSurfaceImpl::clear()
+void PixmapSurfaceImpl::clear(const Gfx::Color& c)
 {
 }
 
