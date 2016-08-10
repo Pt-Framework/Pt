@@ -1,4 +1,5 @@
 /* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+   Copyright (C) 2015 Marc Boris Duerner 
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -81,138 +82,24 @@ class PT_HMI_API PaintSurface
 
         virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface) = 0;
 
-        virtual void drawSurface(const Gfx::PointF& toF, 
-                                 const PixmapSurface& pm,
-                                 const Gfx::RectF& pmRect) = 0;
+        virtual void drawSurface(const Gfx::PointF& toF,  const PixmapSurface& pm, const Gfx::RectF& pmRect) = 0;
 
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, Gfx::RenderFlags::Type flags) = 0;
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image) = 0;
+
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect) = 0;
 
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic) = 0;
 
         virtual void setClip( const Gfx::RectF& clip) = 0; 
 
+        virtual void setRenderFlags(Gfx::RenderFlags::Type f) = 0; 
+
+        virtual Gfx::RenderFlags::Type renderFlags() const = 0; 
+
     protected:
         PaintSurface();
 };
 
-
-/** @brief Drawing region on another surface.
-*/
-class PT_HMI_API PaintRegion : public PaintSurface
-{
-    public:
-        PaintRegion(PaintSurface& surface, const Gfx::RectF& rect);
-
-        PaintRegion();
-
-        virtual ~PaintRegion();
-
-        void set(PaintSurface& surface, const Gfx::RectF& rect);
-
-        virtual const Gfx::SizeF& size() const;
-
-        virtual void setPen(const Gfx::Pen& pen);
-
-        virtual void setBrush(const Gfx::Brush& brush);
-
-        virtual void setFont(const Gfx::Font& font);
-
-        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
-
-        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
-
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
-
-        virtual void drawRect(const Gfx::RectF& rectangle);
-
-        virtual void fillRect(const Gfx::RectF& rectangle);
-
-        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
-
-        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
-
-        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
-
-        virtual void drawSurface(const Gfx::PointF& toF, 
-                                 const PixmapSurface& pm,
-                                 const Gfx::RectF& pmRect);
-
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, Gfx::RenderFlags::Type flags);
-
-        virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
-
-        virtual void setClip( const Gfx::RectF& clip);
-
-    private:
-        PaintSurface* _surface;
-        Gfx::RectF _area;
-};
-
-class PixmapSurfaceImpl;
-
-/** @brief A back buffer drawing surface.
-*/
-class PT_HMI_API PixmapSurface : public PaintSurface
-{
-    public:
-        PixmapSurface();
-
-        virtual ~PixmapSurface();
-
-        void resize(const Gfx::SizeF& size);        
-
-        void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
-
-        virtual const Gfx::SizeF& size() const;
-
-        virtual void setPen(const Gfx::Pen& pen);
-
-        virtual void setBrush(const Gfx::Brush& brush);
-
-        virtual void setFont(const Gfx::Font& font);
-
-        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
-
-        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
-
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
-
-        virtual void drawRect(const Gfx::RectF& rectangle);
-
-        virtual void fillRect(const Gfx::RectF& rectangle);
-
-        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
-
-        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
-
-        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
-
-        virtual void drawSurface(const Gfx::PointF& toF, 
-                                 const PixmapSurface& pm,
-                                 const Gfx::RectF& pmRect);
-
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, Gfx::RenderFlags::Type flags);
-
-        virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
-
-        virtual void setClip( const Gfx::RectF& clip);
-
-        PixmapSurfaceImpl* pixmapImpl() const;
-
-    private:
-        PixmapSurfaceImpl* _impl;
-};
-
-} // namespace
-
-} // namespace
+}}
 
 #endif

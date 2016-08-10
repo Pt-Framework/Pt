@@ -84,7 +84,7 @@ MainWindow::MainWindow()
 {
     loadIcon(_icon);
 
-    _picture.set( _icon, Gfx::RenderFlags::AlphaBlend );
+    _picture.set( _icon);
     setTitle("Main 1");
     move( Gfx::PointF(60, 30) );
     resize( Gfx::SizeF(600, 480) ); 

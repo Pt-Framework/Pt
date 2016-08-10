@@ -102,6 +102,11 @@ class PT_GFX_API Painter
         virtual ~Painter()
         {}
 
+
+        virtual void setRenderFlags( RenderFlags::Type f) = 0;
+
+        virtual RenderFlags::Type renderFlags() const = 0; 
+
         /**
           * @brief Sets the pen of this painter to the given pen.
           *
@@ -356,12 +361,14 @@ class PT_GFX_API Painter
           * @param to The x|y-position to where the image should be drawn on the painter's area.
           * @param image The image to be drawn.
           */
-        virtual void drawImage(const PointF& to, const Image& image, RenderFlags::Type flags) = 0;
+        virtual void drawImage(const PointF& to, const Image& image) = 0;
 
-        // TODO:
-        //virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect) = 0;        
+        
+        virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect) = 0;      
+          
 
-        virtual void clear(const Gfx::Color& color) = 0;        
+        virtual void clear(const Gfx::Color& color) = 0;    
+            
 };
 
 }} // namespace

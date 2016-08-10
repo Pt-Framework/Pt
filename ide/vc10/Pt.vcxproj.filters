@@ -130,6 +130,9 @@
     <Filter Include="Pt-Hmi\egl-test">
       <UniqueIdentifier>{6cd21b01-de79-4a7c-aec3-d783e7c64ca3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Hmi\drawing">
+      <UniqueIdentifier>{42c34412-702e-4b18-b4a0-abe0294ae9f5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1038,9 +1041,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Panel.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\demo\AtesionIcon.h">
       <Filter>Pt-Hmi\demo</Filter>
     </ClInclude>
@@ -1082,12 +1082,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.h">
       <Filter>Pt-Hmi\gdi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\WindowsCodec.h">
-      <Filter>Pt</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
@@ -1370,6 +1364,21 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\FocusEvent.h">
       <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PixmapSurfaceImpl.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
+      <Filter>Pt-Hmi\drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PaintRegion.h">
+      <Filter>Pt-Hmi\drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h">
+      <Filter>Pt-Hmi\drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PixmapSurface.h">
+      <Filter>Pt-Hmi\drawing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2282,9 +2291,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\x11\PaintSurfaceImpl.cpp">
       <Filter>Pt-Hmi\x11</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
@@ -2342,14 +2348,8 @@
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.cpp">
       <Filter>Pt-Hmi\gdi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt\tests\WindowsCodecTest.cpp">
       <Filter>Pt\tests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt\WindowsCodec.cpp">
-      <Filter>Pt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
@@ -2527,6 +2527,21 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PixmapSurfaceImpl.cpp">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp">
+      <Filter>Pt-Hmi\drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\PaintRegion.cpp">
+      <Filter>Pt-Hmi\drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp">
+      <Filter>Pt-Hmi\drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\PixmapSurface.cpp">
+      <Filter>Pt-Hmi\drawing</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

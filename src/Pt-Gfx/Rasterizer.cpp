@@ -206,6 +206,7 @@ Rasterizer::Rasterizer( Image& image )
 , _text( new DrawText() )
 , _font("Vera", 12)
 , _clip(PointF(0,0), SizeF( image.width(), image.height()))
+, _renderFlags(RenderFlags::IgnoreAlpha)
 {
 
   if( _image->format().pixelSize() != 4 )
@@ -1871,26 +1872,49 @@ void Rasterizer::stroke( int x, int y)
   if( y < _clip.top() || y > _clip.bottom())
       return;
 
-  const Image& colorBuffer = _pen.buffer();  
-  const Pt::uint8_t alpha = *(colorBuffer.pixel(0,0)+3);
-
-  if(alpha == 0)
-    return;
-
- Pt::uint8_t* dstPix = _image->pixel(x, y);
- const Pt::uint8_t* srcPix = colorBuffer.pixel(0,0);
+  const Image& colorBuffer = _pen.buffer();   
+  const Pt::uint8_t* srcPix = colorBuffer.pixel(0,0);
   
-  if(alpha == 255)
+  Pt::uint8_t* dstPix = _image->pixel(x, y);
+ 
+  switch( _renderFlags)    
   {
-    *((Pt::uint32_t*)dstPix) = *((const Pt::uint32_t*)srcPix);
-     return;
-  }
-  
-  const Pt::uint8_t alpha255 =  (255 - alpha);
+    case RenderFlags::IgnoreAlpha:
+      *((Pt::uint32_t*)dstPix) = *((const Pt::uint32_t*)srcPix);
+    break;
 
-  dstPix[0] = (srcPix[0] * alpha + dstPix[0] * alpha255) / 255;
-	dstPix[1] = (srcPix[1] * alpha + dstPix[1] * alpha255) / 255;
-	dstPix[2] = (srcPix[2] * alpha + dstPix[2] * alpha255) / 255;    
+    case RenderFlags::AlphaMask:
+    {
+      const Pt::uint8_t alpha  = *(srcPix+3);
+
+      if( alpha == 0)
+        return;
+
+      *((Pt::uint32_t*)dstPix) = *((const Pt::uint32_t*)srcPix);
+    }
+    break;
+
+    case RenderFlags::AlphaBlend:
+    {
+      const Pt::uint8_t alpha  = *(srcPix+3);    
+
+      if(alpha == 0)
+        return;
+
+      if(alpha == 255)
+      {
+        *((Pt::uint32_t*)dstPix) = *((const Pt::uint32_t*)srcPix);
+         return;
+      }
+  
+      const Pt::uint8_t alpha255 =  (255 - alpha);
+
+      dstPix[0] = (srcPix[0] * alpha + dstPix[0] * alpha255) / 255;
+	    dstPix[1] = (srcPix[1] * alpha + dstPix[1] * alpha255) / 255;
+	    dstPix[2] = (srcPix[2] * alpha + dstPix[2] * alpha255) / 255;  
+    }
+    break;
+  }   
 }
 
 
@@ -1902,12 +1926,10 @@ void Rasterizer::stroke( int xpos, int ypos, int length )
 
   const Pt::uint8_t alpha  = *(colorBuffer.pixel(0,0) +3);
 
-  switch( alpha )
+  switch( _renderFlags )
   {
-    case 0:
-      return;
-
-    case 255:
+    case RenderFlags::IgnoreAlpha:
+    
       while( length > 0  )
       {
           const int fillLength = std::min( length, (int) colorBuffer.width() );
@@ -1920,17 +1942,35 @@ void Rasterizer::stroke( int xpos, int ypos, int length )
       }
     break;
 
-    default:
+    case RenderFlags::AlphaBlend:    
     {
       const Pt::uint8_t* srcPix =  colorBuffer.pixel(0,0);      
       const Pt::uint8_t alpha255 =  (255 - alpha);
 
-      for( int x= xpos; x < length; ++x)
+      for( int x = xpos; x <= length; ++x)
       {
         Pt::uint8_t* dstPix = _image->pixel( x, ypos);
         dstPix[0] = (srcPix[0] * alpha + dstPix[0] * alpha255) / 255;
 	      dstPix[1] = (srcPix[1] * alpha + dstPix[1] * alpha255) / 255;
 	      dstPix[2] = (srcPix[2] * alpha + dstPix[2] * alpha255) / 255;    
+      }
+    }
+    break;
+
+    case RenderFlags::AlphaMask:    
+    {
+      if( alpha == 0)
+        return;
+    
+      while( length > 0  )
+      {
+          const int fillLength = std::min( length, (int) colorBuffer.width() );
+
+          if( fillLength )
+            std::memcpy( _image->pixel( xpos, ypos ), colorBuffer.pixel(0,0), fillLength * _image->format().pixelSize() );
+
+          length -= fillLength;
+          xpos   += fillLength;
       }
     }
     break;
@@ -3506,15 +3546,15 @@ void Rasterizer::fillEllipse( const PointF& topLeftIn, const SizeF& size )
 }
 
 
-void Rasterizer::image( const PointF& toIn, const Image& img, RenderFlags::Type flags )
+void Rasterizer::image( const PointF& toIn, const Image& img)
 {
     RectF imageRect( PointF(0,0), SizeF(img.size().width(), img.size().height() ));
 
-    image( toIn, img, imageRect , flags);
+    image( toIn, img, imageRect);
 }
 
 
-void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imageRectF, RenderFlags::Type flags)
+void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imageRectF)
 {
   if( image.format() != image.format() )
     throw std::logic_error( "wrong image format");
@@ -3523,7 +3563,7 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
   
   Rect imgRect( (Pt::ssize_t)imageRectF.left(), (Pt::ssize_t)imageRectF.right(), (Pt::ssize_t) imageRectF.top(), (Pt::ssize_t) imageRectF.bottom());
 
-  switch( flags )
+  switch( _renderFlags )
   {
       case RenderFlags::IgnoreAlpha:
       { //Todo Optimize this with memcpy        
@@ -3579,31 +3619,31 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
               const size_t x = to.x() + (w - imageRectF.left());
               const size_t y = to.y() + (h - imageRectF.top());
 
-              if(!( x >= clip().left() &&  x < clip().right() && y  >=  clip().top()  && y < clip().bottom() ))
+               if(!( x >= clip().left() &&  x < clip().right() && y  >=  clip().top()  && y < clip().bottom() ))
                   continue;
-              
+                         
               const Pt::uint8_t* srcPix = image.pixel(w,h);
-              
-              alpha = *(srcPix+3);
 
+              const Pt::uint8_t alpha = *(srcPix+3);
+              
               if( alpha == 0)
                   continue;
-
-              Pt::uint8_t* dstPix  =  _image->pixel(x,y);
+              
+              Pt::uint8_t* dstPix = _image->pixel(x,y);
 
               if( alpha == 255)
               {
-                *dstPix = *srcPix;
+                *((Pt::uint32_t*)dstPix) = *((const Pt::uint32_t*)srcPix);
                 continue;
-              }
+              }              
 
               const Pt::uint8_t alpha255 =  (255 - alpha);
 
     	        dstPix[0] = (srcPix[0] * alpha + dstPix[0] * alpha255) / 255;
 			        dstPix[1] = (srcPix[1] * alpha + dstPix[1] * alpha255) / 255;
 			        dstPix[2] = (srcPix[2] * alpha + dstPix[2] * alpha255) / 255;        
-             }
-          }        
+          }
+        }        
       }
       break;
     }

@@ -41,7 +41,7 @@
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/System/Clock.h>
 #include <algorithm>
-
+#include "PixmapSurfaceImpl.h"
 namespace Pt {
 
 namespace Hmi {

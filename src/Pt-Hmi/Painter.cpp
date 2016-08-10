@@ -43,11 +43,13 @@ Painter::Painter(PaintSurface& surface)
 , _brush( Gfx::Color(0, 0, 0, 0) )
 , _font( PaintSurfaceImpl::defaultFont() )
 {
+  _oldRenderFlags = _surface->renderFlags();
 }
 
 
 Painter::~Painter()
 {
+  _surface->setRenderFlags(_oldRenderFlags); 
 }
 
 
@@ -169,9 +171,9 @@ void Painter::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
 }
 
 
-void Painter::drawImage(const Gfx::PointF& to, const Gfx::Image& image, Gfx::RenderFlags::Type flags)
+void Painter::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
 {
-    _surface->drawImage(to, image, flags);
+    _surface->drawImage(to, image);
 }
 
 
@@ -202,7 +204,20 @@ void Painter::drawSurface(const Gfx::PointF& to,
 } 
 
 
-
+void Painter::drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imageRect)
+{
+  _surface->drawImage(to, image, imageRect);
 }
 
+
+void Painter::setRenderFlags(Gfx::RenderFlags::Type f)
+{
+  _surface->setRenderFlags( f);
 }
+
+Gfx::RenderFlags::Type Painter::renderFlags() const
+{
+  return _surface->renderFlags();
+}
+
+}}

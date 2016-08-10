@@ -155,7 +155,7 @@ class PT_HMI_API Panel : public Widget
              _backgroundImage = image;
             
             _backgroundImageLayout = layout;
-            _backgroundPicture.set( image, Pt::Gfx::RenderFlags::AlphaBlend );
+            _backgroundPicture.set( image);
             update();
         }
 

@@ -191,7 +191,7 @@ Image* ImageReader::read(std::istream& source)
 						unsigned char *red = (unsigned char *)rowPtrs[ y ] + channels * x;
 						unsigned char *green = (unsigned char *)rowPtrs[ y ] + channels * x + 1;
 						unsigned char *blue = (unsigned char *)rowPtrs[ y ] + channels * x + 2;		
-						image->setColor(x,y,Gfx::Color(0, (*red)/255.0, (*green)/255.0, (*blue)/255.0));
+						image->setColor(x,y,Gfx::Color(1, (*red)/255.0, (*green)/255.0, (*blue)/255.0));
 					}
 
 

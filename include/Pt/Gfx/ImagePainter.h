@@ -73,9 +73,9 @@ class PT_GFX_API ImagePainter : public Painter
     
     virtual void fillPolygon(const PointF* points, const size_t pointCount);
 
-    virtual void drawImage(const  PointF& to, const Image& image, RenderFlags::Type flags);
+    virtual void drawImage(const  PointF& to, const Image& image);
 
-    virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect, RenderFlags::Type flags);
+    virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect);
 
     virtual void setClip( const RectF& clip );
 
@@ -84,6 +84,10 @@ class PT_GFX_API ImagePainter : public Painter
     virtual const Gfx::RectF& clip() const;
 
     virtual void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
+
+    virtual void setRenderFlags( RenderFlags::Type f);
+    
+    virtual RenderFlags::Type renderFlags() const; 
 
     static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
 

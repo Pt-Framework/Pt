@@ -45,6 +45,7 @@
 #include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Hmi/ShowEvent.h>
 #include <Pt/Hmi/EnableEvent.h>
+#include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Signal.h>
 #include <map>

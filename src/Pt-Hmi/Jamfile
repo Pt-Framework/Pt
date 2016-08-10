@@ -28,6 +28,8 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
              FlowLayout.cpp
              Layout.cpp
              PaintSurface.cpp
+             PixmapSurface.cpp 
+             PaintRegion.cpp
              Painter.cpp
              Button.cpp
              Label.cpp
@@ -43,7 +45,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
              MenuBar.cpp
              MenuItem.cpp
              MenuShell.cpp 
-             Picture.cpp
+             Picture.cpp             
              ;
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx Pt-Reflex ;

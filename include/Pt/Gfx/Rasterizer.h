@@ -85,11 +85,21 @@ class PT_GFX_API Rasterizer
       return _font;
     }
 
-    void image( const PointF& to, const Image& image, RenderFlags::Type flags);
+    void setRenderFlags( RenderFlags::Type f)
+    {
+      _renderFlags = f;
+    }
+
+    RenderFlags::Type renderFlags() const
+    {
+      return _renderFlags;
+    }
+
+    void image( const PointF& to, const Image& image);
 
     void image(const PointF& toIn, 
                const Image& image, 
-               const RectF& imageRect, RenderFlags::Type flags);
+               const RectF& imageRect);
 
     void fillRect(const RectF& r);
 
@@ -165,7 +175,8 @@ class PT_GFX_API Rasterizer
     RectF			_clip;    
     Font			_font;
     Brush			_brush;
-    Pen				_pen;      
+    Pen				_pen;   
+    RenderFlags::Type _renderFlags;   
 };
 
 

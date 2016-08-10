@@ -256,7 +256,7 @@ void MenuItem::onPaintIcon(PaintSurface& surface, const Gfx::RectF& updateRect)
     double iconY = (size().height() - icon().height()) / 2;
 
     Gfx::PointF iconPos(iconX, iconY);
-    painter.drawImage(iconPos, icon(), Gfx::RenderFlags::AlphaBlend);
+    painter.drawImage(iconPos, icon());
 }
 
 

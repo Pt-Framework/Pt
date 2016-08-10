@@ -149,15 +149,15 @@ void ImagePainter::fillPolygon( const PointF* ps, const size_t pointCount )
 }
 
 
-void ImagePainter::drawImage( const PointF& to, const Image& image, RenderFlags::Type flags )
+void ImagePainter::drawImage( const PointF& to, const Image& image)
 {
-  _rasterizer.image( to, image, flags);
+  _rasterizer.image( to, image);
 }
 
 
-void ImagePainter::drawImage(const PointF& to, const Image& image, const RectF& imageRect, RenderFlags::Type flags)
+void ImagePainter::drawImage(const PointF& to, const Image& image, const RectF& imageRect)
 {
-  _rasterizer.image( to, image, imageRect, flags );
+  _rasterizer.image( to, image, imageRect );
 }
 
 
@@ -188,6 +188,16 @@ void ImagePainter::clear( const Gfx::Color& color )
 void ImagePainter::setPixel( const Gfx::PointF& p)
 {
   _rasterizer.stroke(p);
+}
+
+void ImagePainter::setRenderFlags( RenderFlags::Type f)
+{
+  _rasterizer.setRenderFlags(f);
+}
+
+RenderFlags::Type ImagePainter::renderFlags() const
+{
+  return _rasterizer.renderFlags();
 }
 
 

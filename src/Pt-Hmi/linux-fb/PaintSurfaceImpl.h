@@ -35,7 +35,6 @@
 #include <Pt/Gfx/ImagePainter.h>
 
 namespace Pt {
-
 namespace Hmi {
 
 class PaintSurfaceImpl
@@ -48,81 +47,13 @@ class PaintSurfaceImpl
         static std::list<std::string> fontFamilyNames(); 
 
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text); 
-
+                                         
     protected:
         PaintSurfaceImpl();
 };
 
 
-class PixmapSurfaceImpl : public PaintSurfaceImpl
-{
-    public:        
-        PixmapSurfaceImpl();
-        
-        virtual ~PixmapSurfaceImpl();  
 
-        void clear(const Gfx::Color& c);
-
-        const Gfx::Image& image() const
-        {
-            return _image;
-        }
-
-        Gfx::Image& image()
-        {
-            return _image;
-        }
-    
-        void resize(const Gfx::Size& size, size_t stride);
-
-        void resize(const Gfx::SizeF& size);    
-
-        virtual const Gfx::SizeF& size() const;
-
-        virtual void setPen(const Gfx::Pen& pen);
-
-        virtual void setBrush(const Gfx::Brush& brush);
-
-        virtual void setFont(const Gfx::Font& font);
-
-        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
-
-        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
-
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
-
-        virtual void drawRect(const Gfx::RectF& rectangle);
-
-        virtual void fillRect(const Gfx::RectF& rectangle);
-
-        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
-
-        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
-
-        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
-
-        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
-
-        virtual void drawSurface(const Gfx::PointF& toF, 
-                                 const PixmapSurface& pm,
-                                 const Gfx::RectF& pmRect);
-
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, Gfx::RenderFlags::Type flags);
-
-        virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
-
-        virtual void setClip( const Gfx::RectF& clip);
-
-    private:
-        Gfx::SizeF            _size;
-        Gfx::Image            _image;
-        Gfx::ImagePainter     _painter;
-};
-
-} // namespace
-
-} // namespace
+}}
 
 #endif

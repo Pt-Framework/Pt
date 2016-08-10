@@ -12,10 +12,10 @@ Picture::Picture()
 }
 
 
-Picture::Picture(const Gfx::Image& image, Gfx::RenderFlags::Type flags)
+Picture::Picture(const Gfx::Image& image)
 : _impl( new PictureImpl() )
 {
-  set(image, flags);
+  set(image);
 }
 
 
@@ -30,9 +30,9 @@ Picture::~Picture()
   return _impl->empty();
 }
 
-void Picture::set(const Gfx::Image& image, Gfx::RenderFlags::Type flags)
+void Picture::set(const Gfx::Image& image)
 {
-    _impl->set( image,flags);
+    _impl->set( image);
 }
 
 size_t Picture::width() const

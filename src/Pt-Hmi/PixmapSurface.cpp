@@ -1,0 +1,192 @@
+/* Copyright (C) 2015 Marc Boris Duerner 
+   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+  
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
+*/
+
+#include <Pt/Hmi/PixmapSurface.h>
+#include "PixmapSurfaceImpl.h"
+#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Widget.h>
+
+namespace Pt {
+namespace Hmi {
+
+PixmapSurface::PixmapSurface()
+: _impl( new PixmapSurfaceImpl())
+{
+}
+
+
+PixmapSurface::~PixmapSurface()
+{
+    delete _impl;
+}
+
+
+void PixmapSurface::resize(const Gfx::SizeF& size)
+{
+    _impl->resize(size);
+}
+
+
+void PixmapSurface::clear(const Gfx::Color& c)
+{
+    _impl->clear(c);
+}
+
+
+const Gfx::SizeF& PixmapSurface::size() const
+{
+    return _impl->size();
+}
+
+
+void PixmapSurface::setPen(const Gfx::Pen& pen)
+{
+    _impl->setPen(pen);
+}
+
+
+void PixmapSurface::setBrush(const Gfx::Brush& brush)
+{
+    _impl->setBrush(brush);
+}
+
+
+void PixmapSurface::setFont(const Gfx::Font& font)
+{
+    _impl->setFont(font);
+}
+
+
+Gfx::FontMetrics PixmapSurface::fontMetrics(const Pt::String& text) const
+{
+    return _impl->fontMetrics(text);
+}
+
+
+void PixmapSurface::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
+{
+    _impl->drawLine(from, to);
+}
+
+
+void PixmapSurface::drawText(const Gfx::PointF& to, const Pt::String& text)
+{
+    _impl->drawText(to, text);
+}
+
+
+void PixmapSurface::drawRect(const Gfx::RectF& r)
+{
+    _impl->drawRect(r);
+}
+
+
+void PixmapSurface::fillRect(const Gfx::RectF& r)
+{
+    _impl->fillRect(r);
+}
+
+
+void PixmapSurface::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+{
+    _impl->drawEllipse(topLeft, size);
+}
+
+
+void PixmapSurface::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+{
+    _impl->fillEllipse(topLeft, size);
+}
+
+
+void PixmapSurface::drawPolyline(const Gfx::PointF* points, size_t pointCount)
+{
+    _impl->drawPolyline(points, pointCount);
+}
+
+
+void PixmapSurface::fillPolygon(const Gfx::PointF* points, size_t pointCount)
+{
+    _impl->fillPolygon(points, pointCount);
+}
+
+
+void PixmapSurface::drawSurface(const Gfx::PointF& to, const PixmapSurface& surface)
+{
+    _impl->drawSurface(to, surface);
+}
+
+
+void PixmapSurface::drawSurface(const Gfx::PointF& to, 
+                                  const PixmapSurface& pm,
+                                  const Gfx::RectF& pmRect)
+{
+    _impl->drawSurface(to, pm, pmRect);
+}
+
+
+void PixmapSurface::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
+{
+    _impl->drawImage(to, image);
+}
+
+void PixmapSurface::drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& r)
+{
+    _impl->drawImage(to, image, r);
+}
+
+
+void PixmapSurface::drawPicture(const Gfx::PointF& to, const Picture& pic)
+{
+    _impl->drawPicture(to , pic);
+}
+
+void PixmapSurface::setClip( const Gfx::RectF& clip)
+{
+    _impl->setClip(clip);
+}
+
+
+PixmapSurfaceImpl* PixmapSurface::pixmapImpl() const
+{ 
+    return _impl; 
+}
+
+void PixmapSurface::setRenderFlags(Gfx::RenderFlags::Type f)
+{
+  _impl->setRenderFlags(f);
+}
+
+Gfx::RenderFlags::Type PixmapSurface::renderFlags() const
+{
+  return _impl->renderFlags();
+}
+
+}}

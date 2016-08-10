@@ -14,13 +14,13 @@ class PictureImpl;
 class PT_HMI_API Picture
 {
     public:
-        Picture(const Gfx::Image& image,  Gfx::RenderFlags::Type flags);
+        Picture(const Gfx::Image& image);
         
         Picture();
         
         virtual ~Picture();
 
-        void set(const Gfx::Image& image,  Gfx::RenderFlags::Type flags);
+        void set(const Gfx::Image& image);
 
         bool empty() const;
 

@@ -1,6 +1,5 @@
 /* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-   Copyright (C) 2015 Marc Boris Duerner 
-
+ 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
@@ -23,54 +22,58 @@
  
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_HMI_PAINTER_H
-#define PT_HMI_PAINTER_H
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ MA  02110-1301  USA
+*/
+
+#ifndef Pt_Hmi_PixmapSurface_h
+#define Pt_Hmi_PixmapSurface_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/Image.h>
+#include <Pt/Hmi/PaintSurface.h>
 
 namespace Pt {
-
 namespace Hmi {
 
-class PaintSurface;
-class PixmapSurface;
 class Picture;
+class PixmapSurfaceImpl;
 
-class PT_HMI_API Painter : public Gfx::Painter
+/** @brief A back buffer drawing surface.
+*/
+class PT_HMI_API PixmapSurface : public PaintSurface
 {
     public:
-        Painter(PaintSurface& surface);
+        PixmapSurface();
 
-        virtual ~Painter();
+        virtual ~PixmapSurface();
 
-        void setSurface(PaintSurface& surface); 
+        void resize(const Gfx::SizeF& size);        
+
+        void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
+
+        virtual const Gfx::SizeF& size() const;
 
         virtual void setPen(const Gfx::Pen& pen);
 
-        virtual const Gfx::Pen& pen() const;
-
         virtual void setBrush(const Gfx::Brush& brush);
-
-        virtual const Gfx::Brush& brush() const;
 
         virtual void setFont(const Gfx::Font& font);
 
-        virtual const Gfx::Font& font() const;  
-        
-        // TODO: setClip  
-
-        virtual Gfx::FontMetrics fontMetrics(const Pt::String& Text) const; 
-        
-        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);   
+        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
 
         virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
 
         virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
 
-        virtual void drawRect(const Gfx::RectF& rectangle);        
+        virtual void drawRect(const Gfx::RectF& rectangle);
 
         virtual void fillRect(const Gfx::RectF& rectangle);
 
@@ -78,33 +81,30 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
-        virtual void drawPolyline(const Gfx::PointF* points, const size_t pointCount);
+        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
 
-        virtual void fillPolygon(const Gfx::PointF* points, const size_t pointCount);
-        
+        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
+
+        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
+
+        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& pm, const Gfx::RectF& pmRect);
+
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
+
+        virtual void setRenderFlags(Gfx::RenderFlags::Type f);  
+
+        virtual Gfx::RenderFlags::Type renderFlags() const; 
+
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
-    
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imageRect);
 
-        virtual void clear(const Gfx::Color& color);
+        virtual void setClip( const Gfx::RectF& clip);
 
-        virtual void setRenderFlags(Gfx::RenderFlags::Type f);
+        PixmapSurfaceImpl* pixmapImpl() const;
 
-        virtual Gfx::RenderFlags::Type renderFlags() const;
-
-    public:
-        void drawSurface(const Gfx::PointF& to, const PixmapSurface& pm);
-
-        void drawSurface(const Gfx::PointF& to,  const PixmapSurface& pm,  const Gfx::RectF& pmRect);
-    
     private:
-        PaintSurface*   _surface;
-        Gfx::Pen        _pen;
-        Gfx::Brush      _brush;
-        Gfx::Font       _font;
-        Gfx::RenderFlags::Type _oldRenderFlags;
+        PixmapSurfaceImpl* _impl;
 };
 
 } // namespace

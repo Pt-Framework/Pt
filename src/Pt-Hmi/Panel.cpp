@@ -36,6 +36,7 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Hmi/Picture.h>
+#include <Pt/Hmi/PaintRegion.h>
 
 namespace Pt {
 
@@ -91,7 +92,7 @@ void Panel::onResizeEvent(const ResizeEvent& ev)
         case ImageLayout::Strech:
         {
             Gfx::Image strech = _backgroundImage.blockScale(Gfx::Size((int) ev.size().width(), (int)ev.size().height()) );
-            _backgroundPicture.set( strech, Gfx::RenderFlags::AlphaBlend );
+            _backgroundPicture.set( strech);
         }
         break;
 
@@ -101,7 +102,7 @@ void Panel::onResizeEvent(const ResizeEvent& ev)
             Pt::Gfx::Size newSize( ( size_t)( _backgroundImage.width()*factor), (size_t)(_backgroundImage.height()*factor));
 
             Gfx::Image  strech = _backgroundImage.blockScale(newSize);
-            _backgroundPicture.set( strech, Gfx::RenderFlags::AlphaBlend );
+            _backgroundPicture.set( strech);
         }
         break;
     }  
@@ -116,6 +117,8 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
         return; 
 
     Painter painter(surface);
+
+    painter.setRenderFlags(Gfx::RenderFlags::AlphaBlend);
 
     Gfx::RectF borderRect( Gfx::PointF(0,0), this->size() );
 

@@ -79,9 +79,11 @@
     <ClInclude Include="..\..\include\Pt\Hmi\MoveEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Painter.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PaintEvent.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\PaintRegion.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Panel.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Picture.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\PixmapSurface.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Screen.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ScrollEvent.h" />
@@ -249,7 +251,6 @@
     <ClInclude Include="..\..\include\Pt\Utf32Codec.h" />
     <ClInclude Include="..\..\include\Pt\Utf8Codec.h" />
     <ClInclude Include="..\..\include\Pt\Void.h" />
-    <ClInclude Include="..\..\include\Pt\WindowsCodec.h" />
     <ClInclude Include="..\..\include\Pt\WinVer.h" />
     <ClInclude Include="..\..\include\Pt\XmlRpc\Api.h" />
     <ClInclude Include="..\..\include\Pt\XmlRpc\Client.h" />
@@ -344,6 +345,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\MainWindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PixmapSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\WindowFrame.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\winrt\ApplicationImpl.h" />
@@ -535,15 +537,18 @@
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\MainWindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PixmapSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Menu.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MenuBar.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MenuItem.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MenuShell.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\PaintRegion.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Panel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Picture.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\PixmapSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Screen.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Visual.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
@@ -809,7 +814,6 @@
     <ClCompile Include="..\..\src\Pt\Utf16Codec.cpp" />
     <ClCompile Include="..\..\src\Pt\Utf32Codec.cpp" />
     <ClCompile Include="..\..\src\Pt\Utf8Codec.cpp" />
-    <ClCompile Include="..\..\src\Pt\WindowsCodec.cpp" />
     <ClCompile Include="..\..\src\Pt\ZBuffer.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
