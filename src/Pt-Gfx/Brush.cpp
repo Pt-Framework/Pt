@@ -49,6 +49,7 @@ Brush::Brush(const Image& texture)
 {
 }
 
+
 Brush::Brush(const Color& from, const Color& to, GradientDirection g)
 : _brushData( new BrushData(from, to, g) )
 {
@@ -73,12 +74,6 @@ const Color& Brush::gradientColor() const
 }
 
 
-Brush::GradientDirection Brush::gradientDirection() const
-{
-    return _brushData->gradientDirection();
-}
-
-
 const Image& Brush::texture() const
 {
     return _brushData->texture();
@@ -87,7 +82,6 @@ const Image& Brush::texture() const
 
 BrushData::BrushData()
 : _fillStyle(Brush::Solid)
-, _gradient(Brush::Horizontal)
 , _color(0, 0, 0)
 , _texture( Gfx::Size(16, 1) )
 {
@@ -97,7 +91,6 @@ BrushData::BrushData()
 
 BrushData::BrushData(const Color& color)
 : _fillStyle(Brush::Solid)
-, _gradient(Brush::Horizontal)
 , _color(color)
 , _texture( Gfx::Size(64, 1) )
 {
@@ -107,15 +100,14 @@ BrushData::BrushData(const Color& color)
 
 BrushData::BrushData(const Image& texture)
 : _fillStyle(Brush::Texture)
-, _gradient(Brush::Horizontal)
 , _texture(texture)
 {
 }
 
 
 BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirection g)
-: _fillStyle(Brush::Gradient)
-, _gradient(g)
+: _fillStyle( g == Brush::Horizontal ? Brush::HorizontalGradient
+                                     : Brush::VerticalGradient)
 , _color(from)
 , _gradientColor(to)
 {
@@ -142,12 +134,6 @@ const Color& BrushData::color() const
 const Color& BrushData::gradientColor() const
 {
     return _gradientColor;
-}
-
-
-Brush::GradientDirection BrushData::gradientDirection() const
-{
-    return _gradient;
 }
 
 

@@ -126,6 +126,71 @@ HFONT getFont(const Pt::Gfx::Font& font)
     return hf;
 }
 
+HBRUSH gradientBrush(HDC dc, int width, int height,
+                     Pt::Gfx::Color gradientStart, 
+                     Pt::Gfx::Color gradientStop, 
+                     Pt::Gfx::Brush::FillStyle style)
+{
+    BITMAPINFO bi;
+    ZeroMemory(&bi.bmiHeader, sizeof(BITMAPINFOHEADER));
+
+    bi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER); 
+    bi.bmiHeader.biPlanes       = 1;         // always 1
+    bi.bmiHeader.biBitCount     = 32;        // ARGB 32
+    bi.bmiHeader.biCompression  = BI_RGB;    // uncompressed RGB
+    bi.bmiHeader.biSizeImage    = 0;         // automatic
+    bi.bmiHeader.biClrUsed      = 0;         // no color table
+    bi.bmiHeader.biClrImportant = 0;         // no color table 
+    
+    if( style == Pt::Gfx::Brush::HorizontalGradient )
+    {
+        bi.bmiHeader.biWidth    = width;
+        bi.bmiHeader.biHeight   = 1;
+    }
+    else // vertical
+    {
+        bi.bmiHeader.biWidth    = 1;
+        bi.bmiHeader.biHeight   = height;
+
+        std::swap(gradientStart, gradientStop);
+    }
+
+    int length = bi.bmiHeader.biWidth + bi.bmiHeader.biHeight - 1;
+
+    VOID* imageBits = NULL;
+    HBITMAP bitmap = CreateDIBSection(dc, &bi, DIB_RGB_COLORS, &imageBits, NULL, 0);
+
+    Pt::Gfx::Argb8888Format format;
+    Pt::uint8_t* pixel = reinterpret_cast<Pt::uint8_t*>(imageBits);
+            
+    for(int n = 0; n < length; ++n)
+    {
+        float f1 = (length - n) / float(length);
+        float f2 = n / float(length);
+
+        float r1 = gradientStart.red() * f1;
+        float r2 = gradientStop.red() * f2;
+
+        float g1 = gradientStart.green() * f1;
+        float g2 = gradientStop.green() * f2;
+
+        float b1 = gradientStart.blue() * f1;
+        float b2 = gradientStop.blue() * f2;
+                
+        Pt::Gfx::Color c( (r1 + r2),
+                      (g1 + g2),
+                      (b1 + b2) );
+        
+        format.setColor(pixel, c);
+        pixel += format.pixelSize();
+    }
+
+    HBRUSH brush = CreatePatternBrush(bitmap);
+    DeleteObject(bitmap);
+
+    return brush;
+}
+
 } // namespace
 
 namespace Pt {
@@ -257,14 +322,14 @@ PixmapSurfaceImpl::PixmapSurfaceImpl()
 
 PixmapSurfaceImpl::~PixmapSurfaceImpl()
 {
-    HPEN oldPen = (HPEN)SelectObject(_deviceContext, _oldPen);
-    DeleteObject(oldPen);
+    HPEN pen = (HPEN)SelectObject(_deviceContext, _oldPen);
+    DeleteObject(pen);
 
-    HPEN oldBrush = (HPEN)SelectObject(_deviceContext, _oldBrush);
-    DeleteObject(oldBrush);
+    HPEN brush = (HPEN)SelectObject(_deviceContext, _oldBrush);
+    DeleteObject(brush);
 
-    HPEN oldFont = (HPEN)SelectObject(_deviceContext, _oldFont);
-    DeleteObject(oldFont);
+    HPEN font = (HPEN)SelectObject(_deviceContext, _oldFont);
+    DeleteObject(font);
 
     DeleteDC(_deviceContext);
     DeleteObject(_bitmapHandle);
@@ -316,9 +381,14 @@ const Gfx::SizeF& PixmapSurfaceImpl::size() const
 }
 
 
-void PixmapSurfaceImpl::setClip( const Gfx::RectF& clip)
+void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
 {
-    HRGN hrgn = CreateRectRgn( clip.x(), clip.y(), clip.bottomRight().x() + 1, clip.bottomRight().y() +1 );
+    Gfx::Rect rect = Application::instance().screen().fromUnit(clipRect);
+
+    HRGN hrgn = CreateRectRgn( rect.x(), 
+                               rect.y(), 
+                               rect.bottomRight().x() + 1, 
+                               rect.bottomRight().y() +1 );
 
     SelectClipRgn( _deviceContext, hrgn );
 
@@ -329,9 +399,9 @@ void PixmapSurfaceImpl::setClip( const Gfx::RectF& clip)
 void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
 {
     DWORD penStyle = getPenStyle( pen );
-    DWORD penColor = RGB(pen.color().red() * 255, 
-                         pen.color().green() * 255, 
-                         pen.color().blue() * 255);
+    DWORD penColor = RGB( pen.color().red() * 255, 
+                          pen.color().green() * 255, 
+                          pen.color().blue() * 255 );
 
 #ifdef _WIN32_WCE
     HPEN newPen = CreatePen(penStyle, pen.size(), penColor);
@@ -354,7 +424,7 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
 {
     _gradientBrush = false;
 
-    HBRUSH newBrushHandle = NULL;
+    HBRUSH brushHandle = NULL;
     DWORD brushColor = RGB(brush.color().red() * 255, 
                            brush.color().green() * 255, 
                            brush.color().blue() * 255);
@@ -363,7 +433,7 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
     {
         case Gfx::Brush::Solid: 
         {
-            newBrushHandle = CreateSolidBrush(brushColor);
+            brushHandle = CreateSolidBrush(brushColor);
             break;
         }
 
@@ -374,7 +444,7 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
             // use an empty brush for empty textures
             if(texture.width() == 0)
             {
-                newBrushHandle = (HBRUSH)GetStockObject(NULL_BRUSH);
+                brushHandle = (HBRUSH) GetStockObject(NULL_BRUSH);
                 break;
             }
 
@@ -398,17 +468,21 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
                     texture.pixel(0,0), 
                     texture.width() * texture.height() * texture.format().pixelSize());
 
-            newBrushHandle = CreatePatternBrush(bitmap);
+            brushHandle = CreatePatternBrush(bitmap);
             DeleteObject(bitmap);
             break;     
         }
 
-        case Gfx::Brush::Gradient:
+        case Gfx::Brush::HorizontalGradient:
+        case Gfx::Brush::VerticalGradient:
         {
             _gradientBrush = true;
-            _gradientDirection = brush.gradientDirection();
+            _gradientStyle = brush.fillStyle();
             _gradientStart = brush.color();
             _gradientStop = brush.gradientColor();
+
+            // do not set a brush now, because the gradient brush pattern can
+            // only be calculated later, when the fill area is known
             return;
         }
 
@@ -416,8 +490,8 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
             return;
     }
 
-    HBRUSH oldBrushHandle = (HBRUSH)SelectObject(_deviceContext, newBrushHandle);
-    DeleteObject(oldBrushHandle);
+    HGDIOBJ oldBrush = SelectObject(_deviceContext, brushHandle);
+    DeleteObject(oldBrush);
 }
 
 
@@ -427,7 +501,7 @@ void PixmapSurfaceImpl::setFont(const Gfx::Font& font)
 
     HFONT newFont = getFont(font);
 
-    HFONT oldFont = (HFONT)SelectObject(_deviceContext, newFont);
+    HGDIOBJ oldFont = SelectObject(_deviceContext, newFont);
     DeleteObject(oldFont);
         
     //SetTextColor(_deviceContext, RGB(_pen.color().red()*255, _pen.color().green()*255, _pen.color() .blue()*255));
@@ -516,7 +590,22 @@ void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rectF)
     rectangle.right  = rect.right() + 1;    
     rectangle.bottom = rect.bottom() + 1;
 
-    HBRUSH currentBrush =  (HBRUSH)GetCurrentObject(_deviceContext, OBJ_BRUSH);
+    if(_gradientBrush)
+    {
+        HBRUSH brush = gradientBrush(_deviceContext, rect.width(), rect.height(),
+                                     _gradientStart, _gradientStop, _gradientStyle);
+
+        POINT brushOrigin = {0};
+        SetBrushOrgEx(_deviceContext, rect.x(), rect.y(), &brushOrigin);
+
+        FillRect(_deviceContext, &rectangle, brush);
+
+        SetBrushOrgEx(_deviceContext, brushOrigin.x, brushOrigin.y, NULL);
+        DeleteObject(brush);
+        return;
+    }
+
+    HBRUSH currentBrush = (HBRUSH) GetCurrentObject(_deviceContext, OBJ_BRUSH);
 
     FillRect(_deviceContext, &rectangle, currentBrush);
 }
@@ -540,10 +629,22 @@ void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::Size
 
 void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
 {
+    POINT brushOrigin = {0};
     Gfx::Point topLeft = Application::instance().screen().fromUnit(topLeftF);
     Gfx::Size size = Application::instance().screen().fromUnit(sizeF);
 
-    HPEN originalPen = (HPEN)SelectObject(_deviceContext, GetStockObject(NULL_PEN));
+    if(_gradientBrush)
+    {
+        HBRUSH brush = gradientBrush(_deviceContext, size.width(), size.height(),
+                                     _gradientStart, _gradientStop, _gradientStyle);
+
+        HGDIOBJ oldBrush = SelectObject(_deviceContext, brush);
+        DeleteObject(oldBrush);
+
+        SetBrushOrgEx(_deviceContext, topLeft.x(), topLeft.y(), &brushOrigin);
+    }
+
+    HPEN originalPen = (HPEN) SelectObject(_deviceContext, GetStockObject(NULL_PEN));
 
     Ellipse(_deviceContext,
             topLeft.x(),
@@ -552,6 +653,11 @@ void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::Size
             topLeft.y() + size.height() + 1);
 
     SelectObject(_deviceContext, originalPen);
+
+    if(_gradientBrush)
+    {
+        SetBrushOrgEx(_deviceContext, brushOrigin.x, brushOrigin.y, NULL);
+    }
 }
 
 
@@ -570,71 +676,21 @@ void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* points, const size_t poi
 }
 
 
-HBRUSH gradientBrush(HDC dc, 
-                     Gfx::Color gradientStart, 
-                     Gfx::Color gradientStop, 
-                     Gfx::Brush::GradientDirection dir,
-                     int length)
-{
-    // TODO: add pixel stride from (0,0) so gradient is within filled area
-
-    BITMAPINFO bi;
-    ZeroMemory(&bi.bmiHeader, sizeof(BITMAPINFOHEADER));
-
-    bi.bmiHeader.biSize         = sizeof(BITMAPINFOHEADER); 
-            
-    if( dir == Gfx::Brush::Horizontal )
-    {
-        bi.bmiHeader.biWidth    = length;
-        bi.bmiHeader.biHeight   = 1;
-    }
-    else
-    {
-        bi.bmiHeader.biWidth    = 1;
-        bi.bmiHeader.biHeight   = length;
-    }
-
-    bi.bmiHeader.biPlanes       = 1;      // always 1
-    bi.bmiHeader.biBitCount     = 32;     // ARGB 32
-    bi.bmiHeader.biCompression  = BI_RGB; // uncompressed RGB
-    bi.bmiHeader.biSizeImage    = 0;      // automatic
-    bi.bmiHeader.biClrUsed      = 0;      // no color table
-    bi.bmiHeader.biClrImportant = 0;      // no color table
-
-    VOID* imageBits = NULL;
-    HBITMAP bitmap = CreateDIBSection(dc, &bi, DIB_RGB_COLORS, &imageBits, NULL, 0);
-            
-    int steps = bi.bmiHeader.biHeight;
-
-    Gfx::Argb8888Format format;
-    Pt::uint32_t* gradientLine = reinterpret_cast<Pt::uint32_t*>(imageBits);
-            
-    for(int n = 0; n < bi.bmiHeader.biHeight; ++n)
-    {
-        float r1 = gradientStart.red() * (steps - n) / steps;
-        float r2 = gradientStop.red() * n / steps;
-                
-        Gfx::Color c( (r1 + r2),
-                      0.0,
-                      0.0 );
- 
-        format.setColor( (Pt::uint8_t*)(&gradientLine[n]), c );
-    }
-
-    HBRUSH newBrushHandle = CreatePatternBrush(bitmap);
-    DeleteObject(bitmap);
-
-    return newBrushHandle;
-}
-
-
 void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
 {
+    if( ! pointCount ) 
+        return;
+
+    POINT brushOrigin = {0};
+
+    int left = std::numeric_limits<int>::max();
+    int top = std::numeric_limits<int>::max();
+    int right = 0;
+    int bottom = 0;
+
     std::vector<POINT> winPoints(pointCount);
 
-    int left = 100000, right = 0, top = 100000, bottom = 0;
-
-    for (size_t i = 0; i < pointCount; i++)
+    for(size_t i = 0; i < pointCount; i++)
     {
         Gfx::Point p = Application::instance().screen().fromUnit(points[i]);
         winPoints[i].x = p.x();
@@ -655,19 +711,23 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t poin
 
     if(_gradientBrush)
     {
-        int n = _gradientDirection == Gfx::Brush::Vertical ? bottom - top : _size.width();
-        
-        HBRUSH brush = gradientBrush(_deviceContext, 
-                                     _gradientStart, _gradientStop, 
-                                     _gradientDirection, n);
+        HBRUSH brush = gradientBrush(_deviceContext, right - left, bottom - top,
+                                     _gradientStart, _gradientStop, _gradientStyle);
 
-        HBRUSH oldBrush = (HBRUSH)SelectObject(_deviceContext, brush);
+        HGDIOBJ oldBrush = SelectObject(_deviceContext, brush);
         DeleteObject(oldBrush);
+
+        SetBrushOrgEx(_deviceContext, left, top, NULL);
     }
 
-    HPEN originalPen = (HPEN)SelectObject(_deviceContext, GetStockObject(NULL_PEN));
+    HPEN originalPen = (HPEN) SelectObject(_deviceContext, GetStockObject(NULL_PEN));
     Polygon(_deviceContext, &winPoints[0], pointCount);
     SelectObject(_deviceContext, originalPen);
+
+    if(_gradientBrush)
+    {
+        SetBrushOrgEx(_deviceContext, brushOrigin.x, brushOrigin.y, NULL);
+    }
 }
 
 
@@ -705,6 +765,7 @@ void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
     bitBlit(to, pic.impl()->width(), pic.impl()->height(), pic.impl()->xorMask(), SRCINVERT );
 }
 
+
 void PixmapSurfaceImpl::bitBlit( const Gfx::PointF& pos, size_t width, size_t height, HBITMAP bitmap, DWORD op )
 {
     Gfx::Point to = Application::instance().screen().fromUnit(pos);
@@ -716,6 +777,7 @@ void PixmapSurfaceImpl::bitBlit( const Gfx::PointF& pos, size_t width, size_t he
 
     DeleteDC(bitmapDC);
 }
+
 
 void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image, Gfx::RenderFlags::Type)
 {

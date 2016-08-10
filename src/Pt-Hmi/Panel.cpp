@@ -126,50 +126,45 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
                                        size.height() - _borderWidth) );
     }
 
-    
-      double corner = _borderRound ? 2.0 : 0;
-      std::vector<Gfx::PointF> outline(9);
+    double corner = _borderRound ? 2.0 : 0;
+    std::vector<Gfx::PointF> outline(9);
 
-      // top left
-      outline[0].setX(0);
-      outline[0].setY(corner);
+    // top left
+    outline[0].setX(0);
+    outline[0].setY(corner);
 
-      outline[1].setX(corner);
-      outline[1].setY(0);
+    outline[1].setX(corner);
+    outline[1].setY(0);
 
-      // top right
-      outline[2].setX(borderRect.width() - corner);
-      outline[2].setY(0);
+    // top right
+    outline[2].setX(borderRect.width() - corner);
+    outline[2].setY(0);
 
-      outline[3].setX(borderRect.width());
-      outline[3].setY(corner);
+    outline[3].setX(borderRect.width());
+    outline[3].setY(corner);
 
-      // bottom right
-      outline[4].setX(borderRect.width());
-      outline[4].setY(borderRect.height() - corner);
+    // bottom right
+    outline[4].setX(borderRect.width());
+    outline[4].setY(borderRect.height() - corner);
 
-      outline[5].setX(borderRect.width() - corner);
-      outline[5].setY(borderRect.height());
+    outline[5].setX(borderRect.width() - corner);
+    outline[5].setY(borderRect.height());
 
-      // bottom left
-      outline[6].setX(corner);
-      outline[6].setY(borderRect.height());
+    // bottom left
+    outline[6].setX(corner);
+    outline[6].setY(borderRect.height());
 
-      outline[7].setX(0);
-      outline[7].setY(borderRect.height() - corner);
+    outline[7].setX(0);
+    outline[7].setY(borderRect.height() - corner);
             
-      outline[8] = outline[0];
+    outline[8] = outline[0];
 
     if( backgroundColor().alpha() != 0)
     {
-      Gfx::Brush brush( backgroundColor() );
-      
-      //Gfx::Brush brush( Gfx::Color(1.0,0,0), 
-      //                  Gfx::Color(0,0,0), 
-      //                  Gfx::Brush::Vertical );
+        Gfx::Brush brush( backgroundColor() );
 
-      painter.setBrush(brush); 
-      painter.fillPolygon(&outline[0], outline.size());
+        painter.setBrush(brush); 
+        painter.fillPolygon(&outline[0], outline.size());
     }
 
     if( ! _backgroundPicture.empty() )

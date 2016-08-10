@@ -47,7 +47,8 @@ class PT_GFX_API Brush
         {
             Solid = 0,
             Texture = 1,
-            Gradient = 2
+            HorizontalGradient = 2,
+            VerticalGradient = 3
         };
 
         enum GradientDirection
@@ -70,8 +71,6 @@ class PT_GFX_API Brush
         const Color& color() const;
 
         const Color& gradientColor() const;
-
-        GradientDirection gradientDirection() const;
 
         const Image& texture() const;
 
@@ -99,13 +98,10 @@ class BrushData
 
         const Color& gradientColor() const;
 
-        Brush::GradientDirection gradientDirection() const;
-
         const Image& texture() const;
 
     private:
         Brush::FillStyle         _fillStyle;
-        Brush::GradientDirection _gradient;
         Color                    _color;
         Image                    _texture;
         Color                    _gradientColor;
