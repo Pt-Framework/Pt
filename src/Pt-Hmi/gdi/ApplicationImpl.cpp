@@ -30,6 +30,7 @@
 #include "ApplicationImpl.h"
 #include "MainWindowImpl.h"
 #include "PaintSurfaceImpl.h"
+#include "PixmapSurfaceImpl.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/ResizeEvent.h>

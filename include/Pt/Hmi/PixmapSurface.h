@@ -100,6 +100,7 @@ class PT_HMI_API PixmapSurface : public PaintSurface
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
 
         virtual void setClip( const Gfx::RectF& clip);
+        
 
         PixmapSurfaceImpl* pixmapImpl() const;
 

@@ -1380,6 +1380,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\PixmapSurface.h">
       <Filter>Pt-Hmi\drawing</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\PixmapSurfaceImpl.h">
+      <Filter>Pt-Hmi\gdi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2542,6 +2545,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\PixmapSurface.cpp">
       <Filter>Pt-Hmi\drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\gdi\PixmapSurfaceImpl.cpp">
+      <Filter>Pt-Hmi\gdi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

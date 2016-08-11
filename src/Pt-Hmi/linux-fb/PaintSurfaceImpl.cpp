@@ -64,7 +64,6 @@ Gfx::FontMetrics PaintSurfaceImpl::fontMetrics(const Gfx::Font& font, const Pt::
 {
     return Gfx::ImagePainter::fontMetrics(font, text);   
 }
-
         
 
 }}

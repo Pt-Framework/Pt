@@ -338,6 +338,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PictureImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\PixmapSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.h" />
@@ -528,6 +529,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PictureImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\gdi\PixmapSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Label.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Layout.cpp" />

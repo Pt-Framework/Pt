@@ -27,8 +27,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_ImagePaintSurface_h
-#define Pt_Hmi_ImagePaintSurface_h
+#ifndef Pt_Hmi_PaintSurfaceImpl_h
+#define Pt_Hmi_PaintSurfaceImpl_h
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/PaintSurface.h>
