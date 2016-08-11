@@ -37,7 +37,7 @@ PictureImpl::PictureImpl()
 }
 
 
-void PictureImpl::set(const Gfx::Image& image)
+void PictureImpl::set(const Gfx::Image& image, Gfx::RenderFlags::Type f)
 {    
     _image = image;
 }

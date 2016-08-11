@@ -189,8 +189,15 @@ void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
     if( pic.empty() )
       return;
   
+    Gfx::RenderFlags::Type oldFlags = _painter.renderFlags();
+
+    _painter.setRenderFlags(pic.impl()->renderFlags() );
+
     _painter.drawImage(to, pic.impl()->image());
+
+    _painter.setRenderFlags( oldFlags);
 }
+
 
 void PixmapSurfaceImpl::setRenderFlags( Gfx::RenderFlags::Type f)
 {

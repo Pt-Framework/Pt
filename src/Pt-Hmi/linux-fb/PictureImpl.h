@@ -43,7 +43,12 @@ class PictureImpl
 
         virtual ~PictureImpl();
 
-        void set(const Gfx::Image& image);
+        void set(const Gfx::Image& image, Gfx::RenderFlags::Type f);
+
+        Gfx::RenderFlags::Type renderFlags() const
+        {
+            return _flags;
+        }
 
         const Gfx::Image& image() const
         {
@@ -72,6 +77,7 @@ class PictureImpl
         Gfx::Image _image;
         size_t _width;
         size_t _height;
+        Gfx::RenderFlags::Type _flags;
 };
 
 }  // namespace
