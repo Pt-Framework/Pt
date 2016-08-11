@@ -2059,16 +2059,43 @@ void Rasterizer::fillSolid( const Point& pos, int length )
   
   const Image& texture = _brush.texture();
   
-  // copy pixels blockwise to the target image
-  while(length)
+  switch(_renderFlags)
   {
-    const int fillLength = std::min( length, (int) texture.width() );
+    case RenderFlags::IgnoreAlpha:
+    case RenderFlags::AlphaMask:
+    {
+      // copy pixels blockwise to the target image
+      while(length)
+      {
+        const int fillLength = std::min( length, (int) texture.width() );
 
-    if(fillLength)
-        std::memcpy( _image->pixel( xpos, ypos ), _brush.texture().pixel(0,0), fillLength * _image->format().pixelSize());        
+        if(fillLength)
+            std::memcpy( _image->pixel( xpos, ypos ), _brush.texture().pixel(0,0), fillLength * _image->format().pixelSize());        
 
-    length -= fillLength;
-    xpos   += fillLength;
+        length -= fillLength;
+        xpos   += fillLength;
+      }
+    }
+    break;
+
+    case RenderFlags::AlphaBlend:
+    {
+      
+      const Pt::uint8_t* srcPix =  _brush.texture().pixel(0,0);      
+
+      const Pt::uint8_t alpha  = *(srcPix +3);
+      
+      const Pt::uint8_t alpha255 =  (255 - alpha);
+
+      for( int x = xpos; x < (xpos + length); ++x)
+      {
+        Pt::uint8_t* dstPix = _image->pixel( x, ypos);
+        dstPix[0] = (srcPix[0] * alpha + dstPix[0] * alpha255) / 255;
+	      dstPix[1] = (srcPix[1] * alpha + dstPix[1] * alpha255) / 255;
+	      dstPix[2] = (srcPix[2] * alpha + dstPix[2] * alpha255) / 255;    
+      }
+    }
+    break;
   }
 }
 
