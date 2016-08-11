@@ -1947,7 +1947,7 @@ void Rasterizer::stroke( int xpos, int ypos, int length )
       const Pt::uint8_t* srcPix =  colorBuffer.pixel(0,0);      
       const Pt::uint8_t alpha255 =  (255 - alpha);
 
-      for( int x = xpos; x <= length; ++x)
+      for( int x = xpos; x < (xpos + length); ++x)
       {
         Pt::uint8_t* dstPix = _image->pixel( x, ypos);
         dstPix[0] = (srcPix[0] * alpha + dstPix[0] * alpha255) / 255;
