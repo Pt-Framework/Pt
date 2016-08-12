@@ -74,9 +74,12 @@ void Panel::onPaintEvent(const PaintEvent& ev)
     Gfx::RectF widgetRect(Gfx::PointF(0,0), size());
     Gfx::RectF clipRect = ev.rect().intersect(widgetRect);
 
-    region.setClip(clipRect);
+    if( clipRect.isNull() )
+      return;
 
-    onPaint(region, ev.rect());
+    region.setClip(clipRect);
+    
+    onPaint(region, clipRect);
 }
 
 
@@ -118,9 +121,7 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 
     Painter painter(surface);
 
-    painter.setClip(updateRect);
-
-    painter.setRenderFlags(Gfx::RenderFlags::IgnoreAlpha);
+    painter.setRenderFlags(Gfx::RenderFlags::AlphaBlend);
 
     Gfx::RectF borderRect( Gfx::PointF(0,0), this->size() );
 
@@ -172,7 +173,6 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
         painter.fillPolygon(&outline[0], outline.size());
     }
 
-    painter.setRenderFlags(Gfx::RenderFlags::AlphaBlend);
     if( ! _backgroundPicture.empty() )
     {
         switch( _backgroundImageLayout.type() )
@@ -203,7 +203,6 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
         }
     }
 
-   painter.setRenderFlags(Gfx::RenderFlags::IgnoreAlpha);
 
     if( _borderWidth <= 0 )
       return;
