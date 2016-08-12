@@ -38,12 +38,12 @@ namespace Pt {
 namespace Hmi {
 
 Painter::Painter(PaintSurface& surface)
-: _surface(&surface)
+: _surface(0)
 , _pen(1)
 , _brush( Gfx::Color(0, 0, 0, 0) )
 , _font( PaintSurfaceImpl::defaultFont() )
 {
-  _oldRenderFlags = _surface->renderFlags();
+  begin(surface);
 }
 
 
@@ -53,10 +53,31 @@ Painter::~Painter()
 }
 
 
-void Painter::setSurface(PaintSurface& surface)
-{    
+void Painter::setClip(const Gfx::RectF& clip)
+{
+  _clip = clip;
+  _surface->setClip( clip);
+}
+
+const Gfx::RectF& Painter::clip() const
+{
+  return _surface->clip();
+}
+
+
+void Painter::begin(PaintSurface& surface)
+{   
+
+    if( _surface ) 
+        _surface->setRenderFlags(_oldRenderFlags); 
+
+    _oldRenderFlags = surface.renderFlags();
+
     _surface = &surface;
-    
+
+    if( !_clip.isNull() )
+     _surface->setClip(_clip);
+
     _surface->setBrush(_brush);
     _surface->setFont(_font);
     _surface->setPen(_pen);  

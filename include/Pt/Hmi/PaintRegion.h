@@ -61,6 +61,14 @@ class PT_HMI_API PaintRegion : public PaintSurface
         void set(PaintSurface& surface, const Gfx::RectF& rect);
 
         virtual const Gfx::SizeF& size() const;
+        
+        virtual void setClip( const Gfx::RectF& clip);
+
+        virtual const Gfx::RectF& clip() const;
+
+        virtual void setRenderFlags( Gfx::RenderFlags::Type t);
+
+        virtual Gfx::RenderFlags::Type renderFlags() const; 
 
         virtual void setPen(const Gfx::Pen& pen);
 
@@ -97,12 +105,6 @@ class PT_HMI_API PaintRegion : public PaintSurface
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
 
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
-
-        virtual void setClip( const Gfx::RectF& clip);
-
-        virtual void setRenderFlags( Gfx::RenderFlags::Type t);
-
-        virtual Gfx::RenderFlags::Type renderFlags() const; 
 
     private:
         PaintSurface* _surface;

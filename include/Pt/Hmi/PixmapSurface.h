@@ -55,11 +55,21 @@ class PT_HMI_API PixmapSurface : public PaintSurface
 
         virtual ~PixmapSurface();
 
+      
+
         void resize(const Gfx::SizeF& size);        
 
         void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
 
         virtual const Gfx::SizeF& size() const;
+
+        virtual void setRenderFlags(Gfx::RenderFlags::Type f);  
+
+        virtual Gfx::RenderFlags::Type renderFlags() const; 
+
+        virtual void setClip( const Gfx::RectF& clip);
+        
+        virtual const Gfx::RectF& clip() const;
 
         virtual void setPen(const Gfx::Pen& pen);
 
@@ -93,14 +103,7 @@ class PT_HMI_API PixmapSurface : public PaintSurface
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
 
-        virtual void setRenderFlags(Gfx::RenderFlags::Type f);  
-
-        virtual Gfx::RenderFlags::Type renderFlags() const; 
-
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
-
-        virtual void setClip( const Gfx::RectF& clip);
-        
 
         PixmapSurfaceImpl* pixmapImpl() const;
 

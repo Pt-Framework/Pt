@@ -54,6 +54,14 @@ class PT_HMI_API PaintSurface
     public:
         virtual ~PaintSurface();
         
+        virtual void setClip( const Gfx::RectF& clip) = 0; 
+
+        virtual const Gfx::RectF& clip() const = 0;
+
+        virtual void setRenderFlags(Gfx::RenderFlags::Type f) = 0; 
+
+        virtual Gfx::RenderFlags::Type renderFlags() const = 0; 
+
         virtual const Gfx::SizeF& size() const = 0;
 
         virtual void setPen(const Gfx::Pen& pen) = 0;
@@ -89,12 +97,6 @@ class PT_HMI_API PaintSurface
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect) = 0;
 
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic) = 0;
-
-        virtual void setClip( const Gfx::RectF& clip) = 0; 
-
-        virtual void setRenderFlags(Gfx::RenderFlags::Type f) = 0; 
-
-        virtual Gfx::RenderFlags::Type renderFlags() const = 0; 
 
     protected:
         PaintSurface();

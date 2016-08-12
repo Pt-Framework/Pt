@@ -46,7 +46,11 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         virtual ~Painter();
 
-        void setSurface(PaintSurface& surface); 
+        void begin(PaintSurface& surface);
+
+        virtual void setClip(const Gfx::RectF& clip);
+
+        virtual const Gfx::RectF& clip() const;
 
         virtual void setPen(const Gfx::Pen& pen);
 
@@ -105,6 +109,7 @@ class PT_HMI_API Painter : public Gfx::Painter
         Gfx::Brush      _brush;
         Gfx::Font       _font;
         Gfx::RenderFlags::Type _oldRenderFlags;
+        Gfx::RectF _clip;
 };
 
 } // namespace

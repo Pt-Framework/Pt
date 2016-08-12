@@ -175,6 +175,7 @@ void Button::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
         Gfx::Pen pen(1, armedColor, Gfx::Pen::DashStyle);
         
         Painter painter( surface );
+        painter.setClip(updateRect);
         painter.setPen(pen);
         Gfx::RectF rect(Gfx::PointF(2,2), size);
         painter.drawRect(rect);

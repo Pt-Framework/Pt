@@ -207,6 +207,12 @@ void PaintRegion::setClip( const Gfx::RectF& clip)
     _surface->setClip( Gfx::RectF( clip.topLeft() +  _area.topLeft(), clip.size()));
 }
 
+const Gfx::RectF& PaintRegion::clip() const
+{
+  return _surface->clip();
+}
+
+
 void PaintRegion::setRenderFlags( Gfx::RenderFlags::Type t)
 {
   _surface->setRenderFlags(t);

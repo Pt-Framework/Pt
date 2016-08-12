@@ -117,6 +117,9 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
         return; 
 
     Painter painter(surface);
+
+    painter.setClip(updateRect);
+
     painter.setRenderFlags(Gfx::RenderFlags::IgnoreAlpha);
 
     Gfx::RectF borderRect( Gfx::PointF(0,0), this->size() );

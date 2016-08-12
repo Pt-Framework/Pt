@@ -107,6 +107,10 @@ class PT_GFX_API Painter
 
         virtual RenderFlags::Type renderFlags() const = 0; 
 
+        virtual void setClip(const RectF& clip) = 0;
+
+        virtual const RectF& clip() const = 0;
+
         /**
           * @brief Sets the pen of this painter to the given pen.
           *

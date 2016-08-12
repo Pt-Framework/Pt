@@ -63,6 +63,14 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         virtual const Gfx::SizeF& size() const;
 
+        virtual void setClip( const Gfx::RectF& clip);
+
+        virtual const Gfx::RectF& clip() const;
+
+        virtual void setRenderFlags( Gfx::RenderFlags::Type f);
+
+        virtual  Gfx::RenderFlags::Type renderFlags() const;
+
         virtual void setPen(const Gfx::Pen& pen);
 
         virtual void setBrush(const Gfx::Brush& brush);
@@ -98,12 +106,6 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& r);
 
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
-
-        virtual void setClip( const Gfx::RectF& clip);
-
-        virtual void setRenderFlags( Gfx::RenderFlags::Type f);
-
-        virtual  Gfx::RenderFlags::Type renderFlags() const;
         
     private:
         Gfx::SizeF            _size;

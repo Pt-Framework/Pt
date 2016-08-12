@@ -85,6 +85,12 @@ void PixmapSurfaceImpl::setClip(const Gfx::RectF& clip)
     _painter.setClip(clip);
 }
 
+const Gfx::RectF& PixmapSurfaceImpl::clip() const
+{
+    return _painter.clip();
+}
+
+
 
 void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
 {

@@ -174,6 +174,11 @@ void PixmapSurface::setClip( const Gfx::RectF& clip)
 }
 
 
+const Gfx::RectF& PixmapSurface::clip() const
+{
+    return _impl->clip();
+}
+
 PixmapSurfaceImpl* PixmapSurface::pixmapImpl() const
 { 
     return _impl; 

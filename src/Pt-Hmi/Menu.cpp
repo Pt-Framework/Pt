@@ -353,6 +353,7 @@ void Menu::onPaintBackground(const Gfx::RectF& rect)
     WindowBaseType::onPaintBackground(rect);
 
     Painter painter( surface() );
+    painter.setClip(rect);
 
     //
     // icon strip on the left side
@@ -364,15 +365,14 @@ void Menu::onPaintBackground(const Gfx::RectF& rect)
                                           size().height()) );
         
         // only the damaged region
-        iconStrip = iconStrip.intersect(rect);
-
-        Gfx::Brush brush = Pt::Gfx::Color(0.95f, 0.95f, 0.95f);
+        //iconStrip = iconStrip.intersect(rect);
+        //Gfx::Brush brush = Pt::Gfx::Color(0.95f, 0.95f, 0.95f);
 
         // TODO: need painter clipping for gradient
-        //
-        // Gfx::Brush brush(Gfx::Color(0.90f, 0.90f, 0.91f),
-        //                  Gfx::Color(0.99f, 0.99f, 0.99f), 
-        //                  Gfx::Brush::Vertical);
+        
+         Gfx::Brush brush(Gfx::Color(0.90f, 0.90f, 0.91f),
+                          Gfx::Color(0.99f, 0.99f, 0.99f), 
+                          Gfx::Brush::Vertical);
 
         painter.setBrush(brush);
         painter.fillRect(iconStrip);

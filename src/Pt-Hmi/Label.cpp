@@ -83,9 +83,12 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
     Gfx::Pen           pen(1, foreColor);
 
     Painter painter(surface);
+
+    painter.setClip(updateRect);
     painter.setFont( font() );
     painter.setPen(pen);
 
+        
     Gfx::FontMetrics metric = painter.fontMetrics(_text);
 
     switch(_contentAlignment)

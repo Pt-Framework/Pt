@@ -291,6 +291,14 @@ void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
     SelectClipRgn( _deviceContext, hrgn );
 
     DeleteObject( hrgn);
+
+    _clip = clipRect;
+}
+
+
+const Gfx::RectF& PixmapSurfaceImpl::clip()
+{
+  return _clip;
 }
 
 

@@ -2142,6 +2142,8 @@ void Rasterizer::fill(const Point& origin, const Point& pos,  int length)
     break;
 
     case Brush::Solid:
+    case Brush::VerticalGradient:
+    case Brush::HorizontalGradient:
       fillSolid(pos,  length);
     break;
   }
