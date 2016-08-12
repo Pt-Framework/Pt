@@ -2061,8 +2061,18 @@ void Rasterizer::fillSolid( const Point& pos, int length )
   
   switch(_renderFlags)
   {
-    case RenderFlags::IgnoreAlpha:
+  
     case RenderFlags::AlphaMask:
+    {
+      const Pt::uint8_t* srcPix =  _brush.texture().pixel(0,0);      
+
+      const Pt::uint8_t alpha  = *(srcPix +3);
+
+       if( alpha == 0)
+          return;
+    }
+
+    case RenderFlags::IgnoreAlpha:
     {
       // copy pixels blockwise to the target image
       while(length)
@@ -2080,11 +2090,28 @@ void Rasterizer::fillSolid( const Point& pos, int length )
 
     case RenderFlags::AlphaBlend:
     {
-      
       const Pt::uint8_t* srcPix =  _brush.texture().pixel(0,0);      
 
       const Pt::uint8_t alpha  = *(srcPix +3);
       
+      if( alpha == 0)
+        return;
+
+      if( alpha == 255)
+      {
+        while(length)
+        {
+          const int fillLength = std::min( length, (int) texture.width() );
+
+          if(fillLength)
+              std::memcpy( _image->pixel( xpos, ypos ), _brush.texture().pixel(0,0), fillLength * _image->format().pixelSize());        
+
+          length -= fillLength;
+          xpos   += fillLength;
+        }
+        return;
+      }
+
       const Pt::uint8_t alpha255 =  (255 - alpha);
 
       for( int x = xpos; x < (xpos + length); ++x)
@@ -3593,22 +3620,81 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
   switch( _renderFlags )
   {
       case RenderFlags::IgnoreAlpha:
-      { //Todo Optimize this with memcpy        
-          for(size_t w = imageRectF.left(); w <= imageRectF.right() ; ++w )
+      { 
+      
+          Point imagePos( (int) imageRectF.topLeft().x(), 
+                          (int) imageRectF.topLeft().y() );
+
+          Size imageSize( (int) imageRectF.width(), 
+                          (int) imageRectF.height() );
+
+          if( imagePos.x() + imageSize.width() > image.width() )
+              imageSize.setWidth( image.width() - imagePos.x() );
+
+          if( imagePos.y() + imageSize.height() > image.height() )
+              imageSize.setHeight( image.height() - imagePos.y() );
+
+          Rect imageRect(imagePos, imageSize);
+
+          int xSourceBegin = imagePos.x();
+          int ySourceBegin = imagePos.y();
+
+          int xTargetBegin = to.x();
+          int yTargetBegin = to.y();
+
+          // outside target image
+          if( to.x() >= _image->width() ||
+              to.y() >= _image->height() ||
+              imagePos.x() >= image.width() ||
+              imagePos.y() >= image.height() )
+             return;
+
+          if( to.x() < 0 )
           {
-            for( size_t h = imageRectF.top(); h <= imageRectF.bottom(); ++h)
-            {
-              const size_t x = to.x() + (w - imageRectF.left());
-              const size_t y = to.y() + (h - imageRectF.top());
+              xSourceBegin = imagePos.x() - to.x();
+              xTargetBegin = 0;
+          }
 
-              if(!( x >= clip().left() &&  x < clip().right() && y  >=  clip().top()  && y < clip().bottom() ))
-                  continue;
+          if( to.y() < 0 )
+          {
+            ySourceBegin = imagePos.y() - to.y();
+            yTargetBegin = 0;
+          }
 
-              const Pt::uint32_t* srcPix = (const Pt::uint32_t*)image.pixel(w,h);
-              Pt::uint32_t* dstPix = (Pt::uint32_t*) _image->pixel( x,y);             
-              *dstPix = *srcPix;
-            }
-          }        
+          int lineLength = imageRect.width(); 
+
+          if( to.x() < 0 )
+            lineLength += to.x();
+
+          if( (xTargetBegin + lineLength) > _image->width()  )
+              lineLength -= (xTargetBegin + lineLength) - _image->width() ;
+ 
+          if(lineLength <= 0)
+            return;  
+   
+          const int endYOffset = to.y() + imageRect.height();
+
+          int lines = imageRect.height();   
+
+          if( endYOffset > _image->height()  )
+              lines = _image->height() - yTargetBegin;
+
+          if( endYOffset < 0 )
+            return;
+  
+          const Pt::uint8_t* scanLineSource = image.pixel( xSourceBegin, ySourceBegin );
+          Pt::uint8_t* scanLineTarget = _image->pixel( xTargetBegin, yTargetBegin );
+
+          const int targetStride = _image->width() * _image->format().pixelSize() + _image->stride();
+          const int sourceStride = image.width() * image.format().pixelSize() + image.stride();
+          const int lineSize = lineLength * _image->format().pixelSize();
+    
+			    for(int i = 0; i < lines; ++i )
+			    {                
+            memcpy( scanLineTarget, scanLineSource, lineSize );
+            scanLineSource += sourceStride;
+            scanLineTarget += targetStride;
+			    }
       }
       break;
 

@@ -179,7 +179,7 @@ class ScreenImpl : public Pt::Connectable
 
         void drawCursor( Pt::uint8_t* buffer );
 
-        void updateScreen();
+        void updateScreen(const Pt::Gfx::Rect& area);
 
     private:
         FrameBuffer&  _frameBuffer;

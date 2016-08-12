@@ -99,28 +99,28 @@ Gfx::Image& ScreenImpl::image()
 
 void ScreenImpl::paint(const Gfx::RectF& updateRect)
 {                
-    Pt::System::Clock clock;
-    clock.start();   
-
     if( ! _cursorBackground.empty() )
+    {
         bitBlit( _cursorBackground.pixel(0,0), 
                  _cursorBackground.width(), 
                  _cursorBackground.height(), 
                  _cursorPos, 
                  image().pixel(0,0), CopyOp );
+    }
 
     Painter painter(_surface);
+    painter.setRenderFlags(Gfx::RenderFlags::IgnoreAlpha);
     painter.setBrush( Pt::Gfx::Color(0.4f, 0.3f, 0.4f) );
     painter.fillRect(updateRect);
 
     _windowManager.paint(_surface, updateRect);
-    
-    updateScreen();
 
-   // std::clog << "screen update: " << clock.stop().toUSecs() << " usecs." << std::endl;
-   // std::clog << "update area " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
-   //           << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
 
+ //   std::clog << "screen update2: " << clock.stop().toUSecs() << " usecs." << std::endl;
+  //  std::clog << "update area2 " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
+  //            << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
+                  
+    updateScreen( Application::instance().screen().fromUnit( updateRect)  );
 }
 
 
@@ -128,10 +128,16 @@ void ScreenImpl::onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent )
 {        
     _drawCursor =  true;
 
+    Pt::System::Clock clock;
+    clock.start();
+
     if( ! _cursorBackground.empty() )
-        bitBlit( _cursorBackground.pixel(0,0), 
-                 _cursorBackground.width(), _cursorBackground.height(), 
+    {
+        bitBlit( _cursorBackground.pixel(0,0),  _cursorBackground.width(), _cursorBackground.height(), 
                  _cursorPos, (Pt::uint8_t*)image().pixel(0,0), CopyOp );
+
+       _frameBuffer.output( image().pixel(0,0),Gfx::Rect( _cursorPos, _cursorBackground.size() ) );
+    }
 
     const Cursor& cursor = Application::instance().impl()->cursor();
 
@@ -148,16 +154,22 @@ void ScreenImpl::onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent )
         mev.setX( pos.x() );
         mev.setY( pos.y() ); 
         mev.setId( mouseGrabber->vid() );
+         std::cout<<" ScreenImpl::onPointerEvent " <<  clock.stop().toUSecs() << std::endl;
 
         Application::instance().loop().commitEvent(mev);
     }
     else
     {
+           std::cout<<" ScreenImpl::onPointerEvent " <<  clock.stop().toUSecs() << std::endl;
         _windowManager.mouseEvent( mouseEvent );        
     }
 
+
     if( _drawCursor )
-        updateScreen();
+    {
+      if( !cursor.empty())
+        updateScreen(Gfx::Rect( _cursorPos, Gfx::Size (cursor.width(), cursor.height() )));
+    }
 }
 
 
@@ -275,11 +287,11 @@ void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
 }
 
 
-void ScreenImpl::updateScreen()
+void ScreenImpl::updateScreen(const Gfx::Rect& r)
 {
     _drawCursor = false;
     drawCursor( image().pixel(0, 0) );
-    _frameBuffer.output( image().pixel(0,0) );
+    _frameBuffer.output( image().pixel(0,0), r );
 }
 
 

@@ -8,6 +8,7 @@
   
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
+  
   instantiate templates or use macros or inline functions from this
   file, or you compile this file and link it with other files to
   produce an executable, this file does not by itself cause the
@@ -74,7 +75,6 @@ class FrameBuffer
 
         size_t strideInBytes() const;
 
-        size_t lineLength() const;
         
         const Gfx::ImageFormat& format() const 
         {
@@ -86,7 +86,18 @@ class FrameBuffer
         void setRotation(Rotation r )
         {
           _rotation = r;
-        }
+
+          switch( _rotation)
+          {
+            case  Rotation90Degree:
+            case  Rotation270Degree:
+              _lineLenght =  width() * _format->pixelSize();
+            break;
+            default:
+            _lineLenght = _fixedInfo.line_length;
+            break;
+          }
+       }
 
         Rotation rotation() const
         {
@@ -98,7 +109,12 @@ class FrameBuffer
             return Gfx::Size( width(), height() );
         }
 
-        void output( const Pt::uint8_t* frame );
+        size_t lineLength() const
+        {
+            return _lineLenght;
+        }
+
+        void output( const Pt::uint8_t* frame, const Gfx::Rect& area );
 
     private:
 
@@ -123,6 +139,7 @@ class FrameBuffer
         Gfx::ImageFormat* _format;
         Rotation          _rotation;
         std::vector<char> _rotationBuffer;
+        size_t            _lineLenght;
 };
 
 } // namespace

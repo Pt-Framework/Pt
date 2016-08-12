@@ -277,6 +277,9 @@ bool InputDevice::onRun()
 
                 double scaleX =  screenSize.width() / 480.0;
                 double scaleY =  screenSize.height() / 800.0;
+                
+                //double scaleX =  screenSize.width() / 800.0;
+                //double scaleY =  screenSize.height() / 480.0;
                 switch(ev.code)
                 {
                     case ABS_MT_SLOT:
@@ -285,12 +288,14 @@ bool InputDevice::onRun()
                     case ABS_X:
                     case ABS_MT_POSITION_X:
                         _mouseEvent.setY( static_cast<double>(ev.value)*scaleY );
+                        //_mouseEvent.setX(  (static_cast<double>(ev.value)) * scaleX );
                         _touchMove++;
                         break;
 
                     case ABS_Y:
                     case ABS_MT_POSITION_Y:
                         _mouseEvent.setX(  (480 - static_cast<double>(ev.value)) * scaleX );
+                        // _mouseEvent.setY( static_cast<double>(ev.value)*scaleY );
                         _touchMove++;
                         break;
 
@@ -306,7 +311,7 @@ bool InputDevice::onRun()
                 {
                     _mouseEvent.setPress(MouseEvent::Left);
                     _eventReady.send(_mouseEvent);
-                    
+     
                     _mouseEvent.setMove();
                 }
 

@@ -55,7 +55,6 @@ namespace Hmi {
 */
 
 FrameBuffer::FrameBuffer()
-: _rotation(Rotation90Degree)
 {           
     _fd = open ("/dev/fb0", O_RDWR);
 
@@ -96,6 +95,7 @@ FrameBuffer::FrameBuffer()
             break;
     }
 
+    setRotation(Rotation90Degree);
     std::clog<<"Sreen HW resolution (" <<_screenInfo.xres<< "," <<_screenInfo.yres << ") Pixel size = "<<_format->pixelSize()<< " Stride = "<<stride<<std::endl;
     std::clog<<"Sreen VR resolution (" <<width()<< "," <<height() << ") Pixel size = "<<_format->pixelSize()<< " Stride = "<<strideInBytes()<<std::endl;
 }
@@ -128,17 +128,6 @@ size_t FrameBuffer::width() const
     return 0;
 }
 
-size_t FrameBuffer::lineLength() const
-{
-    switch( _rotation)
-    {
-      case  Rotation90Degree:
-      case  Rotation270Degree:
-        return width() * _format->pixelSize();
-    }
-
-    return _fixedInfo.line_length;
-}
 
 size_t FrameBuffer::strideInBytes() const
 {
@@ -179,8 +168,11 @@ size_t FrameBuffer::height() const
     return 0;
 }
 
-void FrameBuffer::output( const Pt::uint8_t* frame )
+void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::Rect& areaIn )
 {
+    Pt::System::Clock clock;
+    clock.start();
+
     switch( _rotation)
     {
       case Rotation0Degree:
@@ -189,9 +181,12 @@ void FrameBuffer::output( const Pt::uint8_t* frame )
 
       case Rotation90Degree:
       {
-        for( size_t w = 0; w < width(); ++w)
+
+        const Gfx::Rect clipArea = areaIn.intersect( Gfx::Rect(Gfx::Point(0,0), size()));
+
+        for( size_t w = clipArea.left(); w <= clipArea.right(); ++w)
         {
-           for( size_t h = 0; h < height(); ++h)
+           for( size_t h = clipArea.top(); h <= clipArea.bottom(); ++h)
            {
               Pt::uint32_t* dest = ( Pt::uint32_t*)pixelBuffer( h, _screenInfo.yres - w -1);
 
@@ -212,6 +207,8 @@ void FrameBuffer::output( const Pt::uint8_t* frame )
         throw std::logic_error("Not implemented");
       break;
     }
+
+ //   std::cout<<"FB output time = " << clock.stop().toUSecs() <<  std::endl;
 }
 
 

@@ -86,7 +86,7 @@ MainWindow::MainWindow()
 
     _picture.set( _icon);
     setTitle("Main 1");
-    move( Gfx::PointF(60, 30) );
+    move( Gfx::PointF(60, 60) );
     resize( Gfx::SizeF(600, 480) ); 
     
 //    _child2.resize( Gfx::SizeF(200, 100) );
@@ -112,7 +112,7 @@ MainWindow::MainWindow()
 
 
     _child1.move( Gfx::PointF(30,30));
-    _child1.resize( Gfx::SizeF(300, 300) );
+    _child1.resize( Gfx::SizeF(300, 500) );
 
     _child1.show(true);
     

@@ -241,6 +241,10 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {  
     std::vector<WindowFrame*>::iterator it;
     
+            Pt::System::Clock clock;
+
+            clock.start();
+
     for(it = _windows.begin(); it != _windows.end(); ++it )
     {
         WindowFrame* frame = *it;
@@ -265,7 +269,11 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
 
         Gfx::PointF to = updateRect.topLeft() + frame->clientRect().topLeft();
 
+       
+
         Painter painter(surface);
+        
+        
         painter.drawSurface(to, w->surface(), updateRect);
 
         //painter.drawRect( pev.rect() ); 
@@ -273,6 +281,8 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
         //          << to.x() << "," << to.y() << "  "
         //          << updateRect.width() << "x" << updateRect.height() << std::endl;  
     }
+
+    std::cout<<"Copy surface: " << clock.stop().toUSecs()<<std::endl;
 }
 
 
