@@ -24,7 +24,7 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-  MA  02110-1301  USA
+  MA 02110-1301 USA
 */
 
 #ifndef Pt_Hmi_PictureImpl_h
@@ -34,6 +34,7 @@
 #include <Pt/Gfx/Painter.h>
 
 namespace Pt {
+
 namespace Hmi {
 
 class PictureImpl
@@ -43,12 +44,11 @@ class PictureImpl
 
         virtual ~PictureImpl();
 
-        void set(const Gfx::Image& image, Gfx::RenderFlags::Type f);
+        void clear();
 
-        Gfx::RenderFlags::Type renderFlags() const
-        {
-            return _flags;
-        }
+        void set(const Gfx::Image& image);
+
+        void set(const Gfx::Image& image, double alphaThreshold);
 
         const Gfx::Image& image() const
         {
@@ -70,14 +70,20 @@ class PictureImpl
           return _image.empty();
         }
 
-    private:
-      void clear();
+        bool masked() const
+        {
+            return _masked;
+        }
+
+        bool hasAlpha() const
+        {
+            return _masked;
+        }
 
     private:
         Gfx::Image _image;
-        size_t _width;
-        size_t _height;
-        Gfx::RenderFlags::Type _flags;
+        bool _masked;
+        bool _hasAlpha;
 };
 
 }  // namespace

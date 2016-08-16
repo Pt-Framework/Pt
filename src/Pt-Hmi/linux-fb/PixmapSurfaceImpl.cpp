@@ -185,23 +185,39 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image
     _painter.drawImage(to, image);
 }
 
+
 void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& r)
 {
     _painter.drawImage( to, image, r);
 }
 
+
 void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
 {
-    if( pic.empty() )
-      return;
-  
+    const PictureImpl* picImpl = pic.impl();
+    const Gfx::Image& image = pic.impl()->image();
+
+    if( picImpl->empty() )
+        return;
+
     Gfx::RenderFlags::Type oldFlags = _painter.renderFlags();
 
-    _painter.setRenderFlags(pic.impl()->renderFlags() );
+    if( picImpl->hasAlpha() )
+    {
+        _painter.setRenderFlags( Gfx::RenderFlags::IgnoreAlpha );
+    }
+    else if( picImpl->masked() )
+    {
+        //TODO: AlphaMask is only for images, IgnoreAlpha is a CompositionMode
+        _painter.setRenderFlags( Gfx::RenderFlags::AlphaMask );
+    }
+    else
+    {
+        _painter.setRenderFlags( Gfx::RenderFlags::AlphaBlend );
+    }
 
-    _painter.drawImage(to, pic.impl()->image());
-
-    _painter.setRenderFlags( oldFlags);
+    _painter.drawImage( to, image );
+    _painter.setRenderFlags(oldFlags);
 }
 
 
@@ -216,4 +232,6 @@ Gfx::RenderFlags::Type PixmapSurfaceImpl::renderFlags() const
   return _painter.renderFlags();
 }
 
-}}
+} // namespace
+
+} // namespace

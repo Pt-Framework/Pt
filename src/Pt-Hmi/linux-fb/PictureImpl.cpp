@@ -24,35 +24,71 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-  MA  02110-1301  USA
+  MA 02110-1301 USA
 */
 
 #include "PictureImpl.h"
 
 namespace Pt {
+
 namespace Hmi {
 
 PictureImpl::PictureImpl()
+: _masked(false)
+, _hasAlpha(false)
 {
 }
 
 
-void PictureImpl::set(const Gfx::Image& image, Gfx::RenderFlags::Type f)
-{    
-    _image = image;
-    _flags = f;
+PictureImpl::~PictureImpl()
+{
+    clear();
 }
 
 
 void PictureImpl::clear()
 {
     _image = Gfx::Image();
+    _masked = false;
+    _hasAlpha = false;
 }
 
 
-PictureImpl::~PictureImpl()
-{
-  clear();
+void PictureImpl::set(const Gfx::Image& image)
+{    
+    _image = image;
+    _masked = false;
+    _hasAlpha = true;
 }
 
-}} // namespace
+
+void PictureImpl::set(const Gfx::Image& i, double alphaThreshold)
+{    
+    _image = i;
+
+    _hasAlpha = false;
+    
+    for( size_t y = 0; y < _image.height(); ++y )
+    {
+        for( size_t x = 0; x < _image.width(); ++x )
+        {
+            Gfx::Color color = _image.color(x, y);
+
+            if( color.alpha() <= alphaThreshold )
+            {
+                color.setAlpha(0);
+                _hasAlpha = true;
+            }
+            else
+                color.setAlpha(1);
+
+            _image.setColor(x, y, color);
+        }
+    }
+
+    _masked = true;
+}
+
+}  // namespace
+
+} // namespace

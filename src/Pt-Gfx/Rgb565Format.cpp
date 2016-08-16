@@ -30,9 +30,8 @@
  namespace Pt{
  namespace Gfx{
 
-
 Rgb565Format::Rgb565Format()
-: ImageFormat(2,3)
+: ImageFormat(2, 3, false)
 {
 }
 
@@ -57,5 +56,6 @@ Color Rgb565Format::color(const Pt::uint8_t* pixel) const
 	return Color(1, r, g, b );
 }
 
+} // namespace
 
-}}
+} // namespace

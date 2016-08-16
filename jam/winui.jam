@@ -4,11 +4,11 @@ rule ConfigureGdi
     WITH_GDI = [ CheckBuildC++ "#include <windows.h>"
                                "int main() { HDC dc; Rectangle(dc,0,0,0,0); return 0; }"
                               : ""
-                              : gdi32.lib ] ;
+                              : gdi32.lib Msimg32.lib ] ;
 
     if $(WITH_GDI)
     {
-        GDI_LIBS = gdi32.lib ;
+        GDI_LIBS = gdi32.lib Msimg32.lib ;
     }
 
     if ! $(WITH_GDI)

@@ -33,9 +33,10 @@
 namespace Pt{
 namespace Gfx{
 
-ImageFormat::ImageFormat( size_t pixelSize, size_t channels )
+ImageFormat::ImageFormat( size_t pixelSize, size_t channels, bool alpha )
 : _pixelSize(pixelSize)
 , _channels(channels)
+, _alpha(alpha)
 {
 }
 
@@ -45,11 +46,13 @@ ImageFormat::~ImageFormat()
 
 }
 
+
 const ImageFormat& ImageFormat::rgb565()
 {
 	static const Rgb565Format f;
 	return f;
 }
+
 
 const ImageFormat& ImageFormat::rgb888()
 {
@@ -58,13 +61,13 @@ const ImageFormat& ImageFormat::rgb888()
 
 }
 
+
 const ImageFormat& ImageFormat::argb8888()
 {
 	static const Argb8888Format f;
 	return f;
 }
 
+} // namespace
 
-
-
-}}
+} // namespace

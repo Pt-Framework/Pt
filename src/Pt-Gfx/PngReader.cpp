@@ -152,7 +152,8 @@ class PngReaderImpl
                 if(avail <= 0)
                   return 0;
 
-                png_size_t signatureSize = 7;
+                std::streamsize signatureSize = 7;
+                
                 std::streamsize s = std::min(signatureSize - _bufferSize, avail);
 
                 std::streamsize n = _target->rdbuf()->sgetn(_buffer + _bufferSize, s);
@@ -165,7 +166,7 @@ class PngReaderImpl
                 if(_bufferSize < signatureSize)
                     return 0;
 
-                int isPng = png_sig_cmp((png_byte*)_buffer, 0, signatureSize);
+                int isPng = png_sig_cmp((png_byte*)_buffer, 0, png_size_t(_bufferSize));
                 
                 if(isPng != 0)
                   throw IOError("invalid png format");
@@ -214,9 +215,6 @@ class PngReaderImpl
 
         void onInfo(png_structp png, png_infop info)
         {
-            png_voidp p = png_get_progressive_ptr(png);
-            Pt::Gfx::PngReaderImpl* reader = static_cast<Pt::Gfx::PngReaderImpl*>(p);
-
             // image width in pixel
             _width = png_get_image_width(png, info);
 
@@ -279,7 +277,7 @@ class PngReaderImpl
             png_uint_32 width =  _width;
 
             // image height in pixel
-            png_uint_32 height = _height;
+            //png_uint_32 height = _height;
     
             // bits per CHANNEL
             png_uint_32 bitdepth = _depth;

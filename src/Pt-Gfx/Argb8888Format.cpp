@@ -30,7 +30,7 @@ namespace Pt{
 namespace Gfx{
 
 Argb8888Format::Argb8888Format()
-: ImageFormat(4, 4)
+: ImageFormat(4, 4, true)
 {
 
 }
@@ -57,5 +57,6 @@ Color Argb8888Format::color(const Pt::uint8_t* pixel) const
 	return Color( (*(pixel+3)) / 255.0f, *(pixel +2)/255.0f, *(pixel +1)/255.0f, *(pixel)/255.0f);
 }
 
+} // namespace
 
-}}
+} // namespace

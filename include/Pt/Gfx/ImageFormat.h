@@ -38,11 +38,10 @@ namespace Gfx{
 class PT_GFX_API ImageFormat
 {
 	public:
-		ImageFormat( size_t pixelSize, size_t channels );
+		ImageFormat(size_t pixelSize, size_t channels, bool alpha);
 
 		virtual ~ImageFormat();
 		
-
 		size_t pixelSize() const
 		{
 			return _pixelSize;
@@ -52,6 +51,11 @@ class PT_GFX_API ImageFormat
 		{
 			return _channels;
 		}
+
+    bool hasAlpha() const
+    {
+        return _alpha;
+    }
 
 		virtual void setColor(Pt::uint8_t* pixel, const Color& c) const = 0; 		
 
@@ -91,9 +95,11 @@ class PT_GFX_API ImageFormat
 	private:
 		 size_t _pixelSize;
 		 size_t _channels;
+     bool _alpha;
 };
 
+} // namespace
 
-}}
+} // namespace
 
 #endif

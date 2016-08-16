@@ -31,7 +31,7 @@ namespace Gfx{
 
 
 Rgb888Format::Rgb888Format()
-: ImageFormat(3, 3)
+: ImageFormat(3, 3, false)
 {
 }
 

@@ -662,13 +662,38 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF,
 }
 
 
-void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
+void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& toF, const Picture& pic)
 {
-    if( pic.impl()->empty() )
+    const PictureImpl* picImpl = pic.impl();
+
+    if( picImpl->empty() )
       return;
 
-    bitBlit(to, pic.impl()->width(), pic.impl()->height(), pic.impl()->andMask(), SRCAND );
-    bitBlit(to, pic.impl()->width(), pic.impl()->height(), pic.impl()->xorMask(), SRCINVERT );
+    if( picImpl->mask() )
+    {
+        bitBlit(toF, picImpl->width(), picImpl->height(), pic.impl()->mask(), SRCAND );
+        bitBlit(toF, picImpl->width(), picImpl->height(), pic.impl()->bitmap(), SRCPAINT );
+        return;
+    }
+
+    // NOTE: it is impossible to use IgnoreAlpha since picture is
+    //       already premultiplied...
+
+    Gfx::Point to = Application::instance().screen().fromUnit(toF);
+    HDC bitmapDC = CreateCompatibleDC(NULL);
+
+    SelectObject( bitmapDC, picImpl->bitmap() );
+
+    BLENDFUNCTION bf;
+    bf.BlendOp = AC_SRC_OVER;
+    bf.BlendFlags = 0;
+    bf.SourceConstantAlpha = 0xFF; // only per pixel alpha
+    bf.AlphaFormat = AC_SRC_ALPHA;    
+
+    AlphaBlend(_deviceContext, to.x(), to.y(), picImpl->width(), picImpl->height(),
+                bitmapDC, 0, 0, picImpl->width(), picImpl->height(), bf);
+
+    DeleteDC(bitmapDC);
 }
 
 

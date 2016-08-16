@@ -3612,9 +3612,6 @@ void Rasterizer::image( const PointF& toIn, const Image& img)
 
 void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imageRectF)
 {
-  if( image.format() != image.format() )
-    throw std::logic_error( "wrong image format");
-
   Point to( (int) toF.x(), (int) toF.y() );
   
   Rect imgRect( (Pt::ssize_t)imageRectF.left(), (Pt::ssize_t)imageRectF.right(), (Pt::ssize_t) imageRectF.top(), (Pt::ssize_t) imageRectF.bottom());
@@ -3623,7 +3620,6 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
   {
       case RenderFlags::IgnoreAlpha:
       { 
-      
           Point imagePos( (int) imageRectF.topLeft().x(), 
                           (int) imageRectF.topLeft().y() );
 

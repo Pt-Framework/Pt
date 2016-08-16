@@ -24,26 +24,79 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-  MA  02110-1301  USA
+  MA 02110-1301 USA
 */
 
 #include "PictureImpl.h"
 
 namespace Pt {
+
 namespace Hmi {
 
 PictureImpl::PictureImpl()
-: _andMask(0)
-, _xorMask(0)
+: _maskData(0)
+, _mask(0)
+, _bitmapData(0)
+, _bitmap(0)
 , _width(0)
 , _height(0)
 {
 }
 
 
-void PictureImpl::set(const Gfx::Image& image, Gfx::RenderFlags::Type flags )
+PictureImpl::~PictureImpl()
 {
     clear();
+}
+
+
+void PictureImpl::clear()
+{
+    if(_mask)
+    {
+       DeleteObject(_mask);
+       _maskData.clear();
+    }
+
+    if(_bitmap)
+    {
+      DeleteObject(_bitmap);
+      _bitmapData.clear();
+    }
+
+    _width = 0;
+    _height = 0;
+}
+
+
+void PictureImpl::set(const Gfx::Image& image)
+{
+    clear();
+    
+    _width = image.width();
+    _height = image.height();
+
+    for( std::size_t y = 0; y < image.height(); ++y )
+    {
+        for( std::size_t x = 0; x < image.width(); ++x )
+        {
+            const Gfx::Color& color = image.color(x, y);
+
+            _bitmapData.push_back( (Pt::uint8_t) (color.alpha() * color.blue() * 255.0) );
+            _bitmapData.push_back( (Pt::uint8_t) (color.alpha() * color.green() * 255.0) );
+            _bitmapData.push_back( (Pt::uint8_t) (color.alpha() * color.red() * 255.0) );
+            _bitmapData.push_back( (Pt::uint8_t) (color.alpha() * 255.0) );
+        }
+    }
+
+    _bitmap = CreateBitmap(_width, _height, 1, 4*8, (VOID*)&_bitmapData[0]);
+}
+
+
+void PictureImpl::set(const Gfx::Image& image, float alphaThreshold)
+{
+    clear();
+    
     _width = image.width();
     _height = image.height();
 
@@ -53,61 +106,37 @@ void PictureImpl::set(const Gfx::Image& image, Gfx::RenderFlags::Type flags )
         {
             const Gfx::Color& color = image.color( x, y );
 
-            if( color.alpha() == 0 )
+            if( color.alpha() <= alphaThreshold )
             {
-                // transparent
-                _andMask.push_back(0xff);
-                _andMask.push_back(0xff);
-                _andMask.push_back(0xff);
-                _andMask.push_back(0xff);
+                _maskData.push_back(0xff);
+                _maskData.push_back(0xff);
+                _maskData.push_back(0xff);
+                _maskData.push_back(0xff);
 
-                _xorMask.push_back(0);
-                _xorMask.push_back(0);
-                _xorMask.push_back(0);
-                _xorMask.push_back(0);
+                _bitmapData.push_back(0);
+                _bitmapData.push_back(0);
+                _bitmapData.push_back(0);
+                _bitmapData.push_back(0);
             }
             else
             {
-                _andMask.push_back(0);
-                _andMask.push_back(0);
-                _andMask.push_back(0);
-                _andMask.push_back(0);
+                _maskData.push_back(0);
+                _maskData.push_back(0);
+                _maskData.push_back(0);
+                _maskData.push_back(0);
 
-                _xorMask.push_back( (Pt::uint8_t) (color.blue() * 255.0) );
-                _xorMask.push_back( (Pt::uint8_t) (color.green() * 255.0) );
-                _xorMask.push_back( (Pt::uint8_t) (color.red() * 255.0) );
-                _xorMask.push_back( 0xff);
+                _bitmapData.push_back( (Pt::uint8_t) (color.blue() * 255.0) );
+                _bitmapData.push_back( (Pt::uint8_t) (color.green() * 255.0) );
+                _bitmapData.push_back( (Pt::uint8_t) (color.red() * 255.0) );
+                _bitmapData.push_back( 0xff);
             }
         }
     }
 
-    _hAndMask = CreateBitmap(_width, _height, 1, 4*8, (VOID*)&_andMask[0]);
-    _hXorMask = CreateBitmap(_width, _height, 1, 4*8, (VOID*)&_xorMask[0]);
+    _mask = CreateBitmap(_width, _height, 1, 4*8, (VOID*)&_maskData[0]);
+    _bitmap = CreateBitmap(_width, _height, 1, 4*8, (VOID*)&_bitmapData[0]);
 }
 
+} // namespace
 
-void PictureImpl::clear()
-{
-    if( _andMask.size() != 0)
-    {
-       DeleteObject(_hAndMask);
-       _andMask.clear();
-    }
-
-    if( _xorMask.size() != 0)
-    {
-      DeleteObject(_hXorMask);
-      _xorMask.clear();
-    }
-
-  _width = 0;
-  _height = 0;
-}
-
-
-PictureImpl::~PictureImpl()
-{
-  clear();
-}
-
-}} // namespace
+} // namespace

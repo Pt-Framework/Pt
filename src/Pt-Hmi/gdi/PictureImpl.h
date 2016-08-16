@@ -30,10 +30,10 @@
 #ifndef Pt_Hmi_PictureImpl_h
 #define Pt_Hmi_PictureImpl_h
 
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
 #include <vector>
 #include <Windows.h>
-#include <Pt/Gfx/Painter.h>
 
 namespace Pt {
 
@@ -44,28 +44,22 @@ class PictureImpl
     public:
         PictureImpl();
 
-        virtual ~PictureImpl();
+        ~PictureImpl();
 
-        void set(const Gfx::Image& image, Gfx::RenderFlags::Type flags);
+        void clear();
 
-        const HBITMAP andMask() const
+        void set(const Gfx::Image& image);
+
+        void set(const Gfx::Image& image, float alphaThreshold);
+
+        const HBITMAP mask() const
         {
-          return _hAndMask;
+          return _mask;
         }
 
-        HBITMAP andMask()
+        const HBITMAP bitmap() const
         {
-          return _hAndMask;
-        }
-
-        const HBITMAP xorMask() const
-        {
-            return _hXorMask;
-        }
-
-        HBITMAP xorMask()
-        {
-            return _hXorMask;
+            return _bitmap;
         }
 
         size_t width() const
@@ -80,21 +74,18 @@ class PictureImpl
 
         bool empty() const
         {
-          return _andMask.empty();
+          return _width == 0 || _height == 0;
         }
-          
-    private:
-      void clear();
 
     private:
-        std::vector<Pt::uint8_t> _andMask;
-        std::vector<Pt::uint8_t> _xorMask;
+        std::vector<Pt::uint8_t> _maskData;
+        HBITMAP _mask;
+        
+        std::vector<Pt::uint8_t> _bitmapData;
+        HBITMAP _bitmap;
 
-        HBITMAP _hAndMask;
-        HBITMAP _hXorMask;
         size_t _width;
         size_t _height;
-         Gfx::Image _image;
 };
 
 }  // namespace

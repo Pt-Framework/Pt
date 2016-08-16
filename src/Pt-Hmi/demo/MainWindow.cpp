@@ -66,7 +66,7 @@ void loadIcon(Gfx::Image& icon)
             Gfx::Color color = icon.color(w,h);
 
           if( color.red() > 0.99 && color.green() > 0.99 && color.blue() > 0.99 )				
-              color.setAlpha(0);
+              color.setAlpha(0.01);
           else
               color.setAlpha(1);
                 
@@ -138,6 +138,18 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
+}
+
+
+void MainWindow::onPaintBackground(const Gfx::RectF& rect)
+{
+    Window::onPaintBackground(rect);
+
+    //Picture picture(_icon, 0.01f);
+    Picture picture(_icon);
+
+    Painter painter( surface() );
+    painter.drawPicture(Gfx::PointF(0,0), picture);
 }
 
 
