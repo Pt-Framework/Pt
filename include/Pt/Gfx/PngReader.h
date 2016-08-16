@@ -71,6 +71,10 @@ class PT_GFX_API PngReader
         */
         Image* advance();
 
+        /** @brief Reads the whole image from the stream.
+        */
+        Image& get();
+
     private:
         class PngReaderImpl* _impl;
 };

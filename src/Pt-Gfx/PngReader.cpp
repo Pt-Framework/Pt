@@ -47,6 +47,7 @@ class PngReaderImpl
         , _state(OnBegin)
         , _pngRead(0)
         , _pngInfo(0)
+        , _bufferSize(0)
         , _image(0)
         , _width(0)
         , _height(0)
@@ -59,6 +60,7 @@ class PngReaderImpl
         , _state(OnBegin)
         , _pngRead(0)
         , _pngInfo(0)
+        , _bufferSize(0)
         , _image(&image)
         , _width(0)
         , _height(0)
@@ -97,12 +99,32 @@ class PngReaderImpl
             _pngRead = 0;
             _pngInfo = 0;
 
+            _bufferSize = 0;
+
             _width = 0;
             _height = 0;
             _depth = 0;
             _channels = 0;
 
             detach();
+        }
+
+        Image& get()
+        {
+            if( ! _image )
+                throw IOError("png error");
+
+            int eof = std::ios::traits_type::eof();
+            
+            do
+            {
+                int c = _target->rdbuf()->sgetc();
+                if(c == eof)
+                    throw IOError("invalid png format");
+            } 
+            while( ! advance() );
+
+            return *_image;
         }
 
         Image* advance()
@@ -120,26 +142,37 @@ class PngReaderImpl
                 _pngInfo = png_create_info_struct(_pngRead);
 
                 if( ! _pngRead || ! _pngInfo)
-                    throw IOError("internal png error");
+                    throw IOError("png error");
             }
 
             std::streamsize avail = _target->rdbuf()->in_avail();
 
             if(_state == OnBegin)
             {
-                if(avail < 8)
+                if(avail <= 0)
                   return 0;
 
-                char signature[7];
-                std::streamsize n = _target->rdbuf()->sgetn(signature, sizeof(signature));
-                if(n > 0)
-                    avail -= n;
+                png_size_t signatureSize = 7;
+                std::streamsize s = std::min(signatureSize - _bufferSize, avail);
 
-                int isPng = png_sig_cmp((png_byte*)signature, 0, static_cast<png_size_t>(n));
+                std::streamsize n = _target->rdbuf()->sgetn(_buffer + _bufferSize, s);
+                if(n > 0)
+                {
+                    avail -= n;
+                    _bufferSize += n;
+                }
+
+                if(_bufferSize < signatureSize)
+                    return 0;
+
+                int isPng = png_sig_cmp((png_byte*)_buffer, 0, signatureSize);
+                
                 if(isPng != 0)
                   throw IOError("invalid png format");
 
                 png_set_sig_bytes( _pngRead, static_cast<int>(n) );
+
+                _bufferSize = 0;
                 _state = OnData;
             }
 
@@ -328,6 +361,7 @@ class PngReaderImpl
         png_struct_def* _pngRead;
         png_info_def* _pngInfo;
         char _buffer[2048];
+        std::streamsize _bufferSize;
         Image* _image;
         std::size_t _width;
         std::size_t _height;
@@ -374,6 +408,12 @@ void PngReader::reset()
 Image* PngReader::advance()
 {
     return _impl->advance();
+}
+
+
+Image& PngReader::get()
+{
+    return _impl->get();
 }
 
 } // namespace

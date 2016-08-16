@@ -92,6 +92,24 @@ class JpegReaderImpl
             detach();
         }
 
+        Image& get()
+        {
+            if( ! _image )
+                throw IOError("jpeg error");
+
+            int eof = std::ios::traits_type::eof();
+            
+            do
+            {
+                int c = _target->rdbuf()->sgetc();
+                if(c == eof)
+                    throw IOError("invalid jpeg format");
+            } 
+            while( ! advance() );
+
+            return *_image;
+        }
+
         Image* advance()
         {
             if( ! _target || ! _target->rdbuf() || ! _image )
@@ -157,7 +175,7 @@ class JpegReaderImpl
                     return 0;
 
                  if(_decomp.output_components != 3)
-                    throw std::logic_error("invalid jpeg output components");
+                    throw IOError("jpeg error");
 
                 Gfx::Size imageSize(_decomp.output_width, _decomp.output_height);
                 _image->resize(imageSize, ImageFormat::rgb888());

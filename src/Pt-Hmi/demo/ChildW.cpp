@@ -47,10 +47,8 @@ ChildW::ChildW(const std::string& title)
     _mainLayout.setDirection(FlowLayout::Top);
     _mainLayout.add(_menuBar);
 
-    
     setMainWidget(&_mainLayout);
     
-
     setTitle(title);
     
     //Text    
@@ -124,7 +122,7 @@ ChildW::ChildW(const std::string& title)
 
     //_childWindow2.setMainWidget(&_closeButton);          
     _childWindow2.move(Gfx::PointF(5, 40));    
-    _childWindow2.resize (Gfx::SizeF(240, 320));
+    _childWindow2.resize( Gfx::SizeF(240, 320) );
     _childWindow2.setTitle("Child of " + title);    
     _childWindow2.setMainWidget(&_childView);
     add( _childWindow2 );

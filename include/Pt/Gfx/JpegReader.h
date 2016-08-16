@@ -71,6 +71,10 @@ class PT_GFX_API JpegReader
         */
         Image* advance();
 
+        /** @brief Reads the whole image from the stream.
+        */
+        Image& get();
+
     private:
         class JpegReaderImpl* _impl;
 };

@@ -54,12 +54,8 @@ void loadIcon(Gfx::Image& icon)
     Gfx::PngReader reader(*is, icon);
     //std::istream* is = &ifs;
     //Gfx::JpegReader reader(*is, icon);
-
-    do
-    {
-        is->peek();
-    } 
-    while( ! reader.advance() );
+    
+    reader.get();
 
     icon = icon.convert( Pt::Gfx::ImageFormat::argb8888() );
 
@@ -69,10 +65,10 @@ void loadIcon(Gfx::Image& icon)
         {
             Gfx::Color color = icon.color(w,h);
 
-			if( color.red() > 0.99  &&  color.green() >0.99 && color.blue() > 0.99 )				
-				color.setAlpha(0);
-			else
-				color.setAlpha(1);
+          if( color.red() > 0.99 && color.green() > 0.99 && color.blue() > 0.99 )				
+              color.setAlpha(0);
+          else
+              color.setAlpha(1);
                 
             icon.setColor( w,h, color);
         }
@@ -89,37 +85,22 @@ MainWindow::MainWindow()
     move( Gfx::PointF(60, 60) );
     resize( Gfx::SizeF(600, 480) ); 
     
-//    _child2.resize( Gfx::SizeF(200, 100) );
-
+    //_child2.resize( Gfx::SizeF(200, 100) );
     //add( _child2 );
+    //_child2.show(true);
 
+    //_child2.setMinimumSize( Gfx::SizeF(150, 50) );
+    //_child2.setMaximumSize( Gfx::SizeF(300, 300) );
+    //_child2.setTitle("Child 2");
+    //_child2.move( Gfx::PointF(10, 10) );
 
-
-//    _child2.show(true);
-
-    
-
-   
-    
-/*
-    _child2.setMinimumSize( Gfx::SizeF(150, 50) );
-    _child2.setMaximumSize( Gfx::SizeF(300, 300) );
-    _child2.setTitle("Child 2");
-    _child2.move( Gfx::PointF(10, 10) );
-    */
     
     add( _child1 );
 
-
     _child1.move( Gfx::PointF(30,30));
-    _child1.resize( Gfx::SizeF(300, 500) );
-
+    _child1.resize( Gfx::SizeF(300, 400) );
     _child1.show(true);
     
-
-    
-    
-            
     // context menu
     _menu.setName("All Music");
     
