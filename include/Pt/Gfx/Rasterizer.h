@@ -85,14 +85,14 @@ class PT_GFX_API Rasterizer
       return _font;
     }
 
-    void setRenderFlags( RenderFlags::Type f)
+    void setCompositionMode(const CompositionMode& mode)
     {
-      _renderFlags = f;
+      _compositionMode = mode;
     }
 
-    RenderFlags::Type renderFlags() const
+    const CompositionMode& compositionMode() const
     {
-      return _renderFlags;
+      return _compositionMode;
     }
 
     void image( const PointF& to, const Image& image);
@@ -170,13 +170,13 @@ class PT_GFX_API Rasterizer
     void dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash );
         
   private:
-    Image* 		_image;
-    DrawText*  _text;   
-    RectF			_clip;    
-    Font			_font;
-    Brush			_brush;
-    Pen				_pen;   
-    RenderFlags::Type _renderFlags;   
+    Image* 		      _image;
+    DrawText*       _text;   
+    RectF			      _clip;    
+    Font			      _font;
+    Brush			      _brush;
+    Pen				      _pen;   
+    CompositionMode _compositionMode;   
 };
 
 

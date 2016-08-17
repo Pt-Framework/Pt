@@ -34,8 +34,6 @@ namespace Pt {
 namespace Hmi {
 
 PictureImpl::PictureImpl()
-: _masked(false)
-, _hasAlpha(false)
 {
 }
 
@@ -49,24 +47,18 @@ PictureImpl::~PictureImpl()
 void PictureImpl::clear()
 {
     _image = Gfx::Image();
-    _masked = false;
-    _hasAlpha = false;
 }
 
 
 void PictureImpl::set(const Gfx::Image& image)
 {    
     _image = image;
-    _masked = false;
-    _hasAlpha = true;
 }
 
 
 void PictureImpl::set(const Gfx::Image& i, double alphaThreshold)
 {    
     _image = i;
-
-    _hasAlpha = false;
     
     for( size_t y = 0; y < _image.height(); ++y )
     {
@@ -77,7 +69,6 @@ void PictureImpl::set(const Gfx::Image& i, double alphaThreshold)
             if( color.alpha() <= alphaThreshold )
             {
                 color.setAlpha(0);
-                _hasAlpha = true;
             }
             else
                 color.setAlpha(1);
@@ -85,8 +76,6 @@ void PictureImpl::set(const Gfx::Image& i, double alphaThreshold)
             _image.setColor(x, y, color);
         }
     }
-
-    _masked = true;
 }
 
 }  // namespace

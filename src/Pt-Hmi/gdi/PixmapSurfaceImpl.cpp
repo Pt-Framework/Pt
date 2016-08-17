@@ -671,12 +671,12 @@ void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& toF, const Picture& pic)
 
     if( picImpl->mask() )
     {
-        bitBlit(toF, picImpl->width(), picImpl->height(), pic.impl()->mask(), SRCAND );
-        bitBlit(toF, picImpl->width(), picImpl->height(), pic.impl()->bitmap(), SRCPAINT );
+        bitBlit(toF, picImpl->width(), picImpl->height(), pic.impl()->mask(), SRCAND);
+        bitBlit(toF, picImpl->width(), picImpl->height(), pic.impl()->bitmap(), SRCPAINT);
         return;
     }
 
-    // NOTE: it is impossible to use IgnoreAlpha since picture is
+    // NOTE: it is impossible to use SourceCopy since picture is
     //       already premultiplied...
 
     Gfx::Point to = Application::instance().screen().fromUnit(toF);

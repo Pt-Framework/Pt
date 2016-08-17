@@ -190,16 +190,16 @@ void ImagePainter::setPixel( const Gfx::PointF& p)
   _rasterizer.stroke(p);
 }
 
-void ImagePainter::setRenderFlags( RenderFlags::Type f)
+void ImagePainter::setCompositionMode(const CompositionMode& mode)
 {
-  _rasterizer.setRenderFlags(f);
+  _rasterizer.setCompositionMode(mode);
 }
 
-RenderFlags::Type ImagePainter::renderFlags() const
+const CompositionMode& ImagePainter::compositionMode() const
 {
-  return _rasterizer.renderFlags();
+  return _rasterizer.compositionMode();
 }
 
+} // namespace
 
-}} //namespace
-
+} // namespace

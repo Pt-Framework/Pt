@@ -37,12 +37,53 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/String.h>
+#include <Pt/Types.h>
 #include <cstddef>
 #include <string>
 #include <list>
 
-namespace Pt{
-namespace Gfx{
+namespace Pt {
+
+namespace Gfx {
+
+class CompositionMode
+{
+    public:
+        enum Mode
+        {
+            SourceCopy = 0, // use source pixel
+            SourceOver = 1, // use alpha of source pixel
+            AlphaMask = 200 // TODO: image painter specific or obsolete
+        };
+
+        CompositionMode(Mode m = SourceCopy)
+        : _mode(m)
+        {}
+
+        CompositionMode& operator =(Mode m)
+        {
+            _mode = m;
+            return *this;
+        }
+
+        operator Pt::uint32_t() const
+        { 
+            return _mode; 
+        }
+
+        bool operator ==(const CompositionMode& m) const
+        {
+            return _mode == m._mode;
+        }
+
+        bool operator !=(const CompositionMode& m) const
+        {
+            return _mode != m._mode;
+        }
+
+    private:
+        Pt::uint32_t _mode;
+};
 
 /**
   * \brief A generic painter interface which provides methods to draw graphical primitives to surfaces.
@@ -81,31 +122,16 @@ namespace Gfx{
   * top-left corner of the drawing area the painter was created for. All drawing or writing is done
   * in the current color, using the current paint mode, and in the current font.
   */
-
-namespace RenderFlags
-{	
-	enum Type
-	{
-		IgnoreAlpha = 0,
-		AlphaMask,
-		AlphaBlend 
-	};
-}
-
-class RenderPath;
-
 class PT_GFX_API Painter
 {
     public:						
-
-        //! @brief Empty virtual destructor.
+        //! @brief Destructor.
         virtual ~Painter()
         {}
 
+        virtual void setCompositionMode(const CompositionMode& mode) = 0;
 
-        virtual void setRenderFlags( RenderFlags::Type f) = 0;
-
-        virtual RenderFlags::Type renderFlags() const = 0; 
+        virtual const CompositionMode& compositionMode() const = 0; 
 
         virtual void setClip(const RectF& clip) = 0;
 

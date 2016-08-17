@@ -66,9 +66,9 @@ class PT_HMI_API PaintRegion : public PaintSurface
 
         virtual const Gfx::RectF& clip() const;
 
-        virtual void setRenderFlags( Gfx::RenderFlags::Type t);
+        virtual void setCompositionMode(const Gfx::CompositionMode& mode);
 
-        virtual Gfx::RenderFlags::Type renderFlags() const; 
+        virtual const Gfx::CompositionMode& compositionMode() const ; 
 
         virtual void setPen(const Gfx::Pen& pen);
 

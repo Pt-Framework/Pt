@@ -57,14 +57,14 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         
         virtual  const Gfx::RectF& clip();
          
-        virtual void setRenderFlags(Gfx::RenderFlags::Type f)
+        virtual void setCompositionMode(const Gfx::CompositionMode& mode)
         {
-          _renderFlags= f; 
+            _compositionMode = mode; 
         }
 
-        virtual Gfx::RenderFlags::Type renderFlags() const
+        virtual const Gfx::CompositionMode& compositionMode() const
         {
-          return _renderFlags;
+            return _compositionMode;
         }
 
         virtual void setPen(const Gfx::Pen& pen);
@@ -122,8 +122,8 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         Gfx::Brush::FillStyle _gradientStyle;
         Gfx::Color            _gradientStart;
         Gfx::Color            _gradientStop;
-        Gfx::RenderFlags::Type _renderFlags;
-        Gfx::RectF             _clip;
+        Gfx::CompositionMode  _compositionMode;
+        Gfx::RectF            _clip;
 };
 
 }}

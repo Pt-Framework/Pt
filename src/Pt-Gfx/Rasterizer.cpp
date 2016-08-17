@@ -204,9 +204,9 @@ inline int stepAround( int v, int incr, int max )
 Rasterizer::Rasterizer( Image& image )
 : _image( &image )
 , _text( new DrawText() )
-, _font("Vera", 12)
 , _clip(PointF(0,0), SizeF( image.width(), image.height()))
-, _renderFlags(RenderFlags::IgnoreAlpha)
+, _font("Vera", 12)
+, _compositionMode(CompositionMode::SourceCopy)
 {
 
   if( _image->format().pixelSize() != 4 )
@@ -1877,13 +1877,13 @@ void Rasterizer::stroke( int x, int y)
   
   Pt::uint8_t* dstPix = _image->pixel(x, y);
  
-  switch( _renderFlags)    
+  switch( _compositionMode)    
   {
-    case RenderFlags::IgnoreAlpha:
+    case CompositionMode::SourceCopy:
       *((Pt::uint32_t*)dstPix) = *((const Pt::uint32_t*)srcPix);
     break;
 
-    case RenderFlags::AlphaMask:
+    case CompositionMode::AlphaMask:
     {
       const Pt::uint8_t alpha  = *(srcPix+3);
 
@@ -1894,7 +1894,7 @@ void Rasterizer::stroke( int x, int y)
     }
     break;
 
-    case RenderFlags::AlphaBlend:
+    case CompositionMode::SourceOver:
     {
       const Pt::uint8_t alpha  = *(srcPix+3);    
 
@@ -1926,9 +1926,9 @@ void Rasterizer::stroke( int xpos, int ypos, int length )
 
   const Pt::uint8_t alpha  = *(colorBuffer.pixel(0,0) +3);
 
-  switch( _renderFlags )
+  switch( _compositionMode )
   {
-    case RenderFlags::IgnoreAlpha:
+    case CompositionMode::SourceCopy:
     
       while( length > 0  )
       {
@@ -1942,7 +1942,7 @@ void Rasterizer::stroke( int xpos, int ypos, int length )
       }
     break;
 
-    case RenderFlags::AlphaBlend:    
+    case CompositionMode::SourceOver:    
     {
       const Pt::uint8_t* srcPix =  colorBuffer.pixel(0,0);      
       const Pt::uint8_t alpha255 =  (255 - alpha);
@@ -1957,7 +1957,7 @@ void Rasterizer::stroke( int xpos, int ypos, int length )
     }
     break;
 
-    case RenderFlags::AlphaMask:    
+    case CompositionMode::AlphaMask:    
     {
       if( alpha == 0)
         return;
@@ -2059,10 +2059,10 @@ void Rasterizer::fillSolid( const Point& pos, int length )
   
   const Image& texture = _brush.texture();
   
-  switch(_renderFlags)
+  switch(_compositionMode)
   {
   
-    case RenderFlags::AlphaMask:
+    case CompositionMode::AlphaMask:
     {
       const Pt::uint8_t* srcPix =  _brush.texture().pixel(0,0);      
 
@@ -2072,7 +2072,7 @@ void Rasterizer::fillSolid( const Point& pos, int length )
           return;
     }
 
-    case RenderFlags::IgnoreAlpha:
+    case CompositionMode::SourceCopy:
     {
       // copy pixels blockwise to the target image
       while(length)
@@ -2088,7 +2088,7 @@ void Rasterizer::fillSolid( const Point& pos, int length )
     }
     break;
 
-    case RenderFlags::AlphaBlend:
+    case CompositionMode::SourceOver:
     {
       const Pt::uint8_t* srcPix =  _brush.texture().pixel(0,0);      
 
@@ -3616,9 +3616,9 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
   
   Rect imgRect( (Pt::ssize_t)imageRectF.left(), (Pt::ssize_t)imageRectF.right(), (Pt::ssize_t) imageRectF.top(), (Pt::ssize_t) imageRectF.bottom());
 
-  switch( _renderFlags )
+  switch( _compositionMode )
   {
-      case RenderFlags::IgnoreAlpha:
+      case CompositionMode::SourceCopy:
       { 
           Point imagePos( (int) imageRectF.topLeft().x(), 
                           (int) imageRectF.topLeft().y() );
@@ -3696,7 +3696,7 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
       }
       break;
 
-      case RenderFlags::AlphaMask:
+      case CompositionMode::AlphaMask:
       {
           for(size_t w = imageRectF.left(); w <= imageRectF.right() ; ++w )
           {
@@ -3719,7 +3719,7 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
       }
       break;
 
-      case Gfx::RenderFlags::AlphaBlend:
+      case Gfx::CompositionMode::SourceOver:
       {
           Pt::uint8_t alpha = 0;
 
@@ -3730,19 +3730,18 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
               const size_t x = to.x() + (w - imageRectF.left());
               const size_t y = to.y() + (h - imageRectF.top());
 
-               if(!( x >= clip().left() &&  x < clip().right() && y  >=  clip().top()  && y < clip().bottom() ))
+               if(!( x >= clip().left() && x < clip().right() && y >= clip().top() && y < clip().bottom() ))
                   continue;
                          
               const Pt::uint8_t* srcPix = image.pixel(w,h);
-
               const Pt::uint8_t alpha = *(srcPix+3);
               
-              if( alpha == 0)
+              if(alpha == 0)
                   continue;
               
               Pt::uint8_t* dstPix = _image->pixel(x,y);
 
-              if( alpha == 255)
+              if(alpha == 255)
               {
                 *((Pt::uint32_t*)dstPix) = *((const Pt::uint32_t*)srcPix);
                 continue;

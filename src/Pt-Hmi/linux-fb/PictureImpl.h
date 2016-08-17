@@ -70,20 +70,8 @@ class PictureImpl
           return _image.empty();
         }
 
-        bool masked() const
-        {
-            return _masked;
-        }
-
-        bool hasAlpha() const
-        {
-            return _masked;
-        }
-
     private:
         Gfx::Image _image;
-        bool _masked;
-        bool _hasAlpha;
 };
 
 }  // namespace

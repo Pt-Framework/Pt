@@ -58,9 +58,9 @@ class PT_HMI_API PaintSurface
 
         virtual const Gfx::RectF& clip() const = 0;
 
-        virtual void setRenderFlags(Gfx::RenderFlags::Type f) = 0; 
+        virtual void setCompositionMode(const Gfx::CompositionMode& mode) = 0;
 
-        virtual Gfx::RenderFlags::Type renderFlags() const = 0; 
+        virtual const Gfx::CompositionMode& compositionMode() const = 0; 
 
         virtual const Gfx::SizeF& size() const = 0;
 

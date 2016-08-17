@@ -109,7 +109,7 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
     }
 
     Painter painter(_surface);
-    painter.setRenderFlags(Gfx::RenderFlags::IgnoreAlpha);
+    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
     painter.setBrush( Pt::Gfx::Color(0.4f, 0.3f, 0.4f) );
     painter.fillRect(updateRect);
 

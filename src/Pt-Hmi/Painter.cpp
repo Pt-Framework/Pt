@@ -49,7 +49,18 @@ Painter::Painter(PaintSurface& surface)
 
 Painter::~Painter()
 {
-  _surface->setRenderFlags(_oldRenderFlags); 
+}
+
+
+void Painter::setCompositionMode(const Gfx::CompositionMode& mode)
+{
+  _surface->setCompositionMode(mode);
+}
+
+
+const Gfx::CompositionMode& Painter::compositionMode() const
+{
+  return _surface->compositionMode();
 }
 
 
@@ -59,6 +70,7 @@ void Painter::setClip(const Gfx::RectF& clip)
   _surface->setClip( clip);
 }
 
+
 const Gfx::RectF& Painter::clip() const
 {
   return _surface->clip();
@@ -67,16 +79,12 @@ const Gfx::RectF& Painter::clip() const
 
 void Painter::begin(PaintSurface& surface)
 {   
-
-    if( _surface ) 
-        _surface->setRenderFlags(_oldRenderFlags); 
-
-    _oldRenderFlags = surface.renderFlags();
-
     _surface = &surface;
 
-    if( !_clip.isNull() )
-     _surface->setClip(_clip);
+    if( ! _clip.isNull() )
+        _surface->setClip(_clip);
+
+    _surface->setCompositionMode(_compositionMode); 
 
     _surface->setBrush(_brush);
     _surface->setFont(_font);
@@ -230,15 +238,6 @@ void Painter::drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gf
   _surface->drawImage(to, image, imageRect);
 }
 
+} // namespace
 
-void Painter::setRenderFlags(Gfx::RenderFlags::Type f)
-{
-  _surface->setRenderFlags( f);
-}
-
-Gfx::RenderFlags::Type Painter::renderFlags() const
-{
-  return _surface->renderFlags();
-}
-
-}}
+} // namespace

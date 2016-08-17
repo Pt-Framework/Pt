@@ -195,41 +195,24 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image
 void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
 {
     const PictureImpl* picImpl = pic.impl();
-    const Gfx::Image& image = pic.impl()->image();
+    const Gfx::Image& image = picImpl->image();
 
     if( picImpl->empty() )
         return;
 
-    Gfx::RenderFlags::Type oldFlags = _painter.renderFlags();
-
-    if( picImpl->hasAlpha() )
-    {
-        _painter.setRenderFlags( Gfx::RenderFlags::IgnoreAlpha );
-    }
-    else if( picImpl->masked() )
-    {
-        //TODO: AlphaMask is only for images, IgnoreAlpha is a CompositionMode
-        _painter.setRenderFlags( Gfx::RenderFlags::AlphaMask );
-    }
-    else
-    {
-        _painter.setRenderFlags( Gfx::RenderFlags::AlphaBlend );
-    }
-
-    _painter.drawImage( to, image );
-    _painter.setRenderFlags(oldFlags);
+    _painter.drawImage(to, image);
 }
 
 
-void PixmapSurfaceImpl::setRenderFlags( Gfx::RenderFlags::Type f)
+void PixmapSurfaceImpl::setCompositionMode(const Gfx::CompositionMode& mode)
 {
-  _painter.setRenderFlags(f);
+    _painter.setCompositionMode(mode);
 }
 
 
-Gfx::RenderFlags::Type PixmapSurfaceImpl::renderFlags() const
+const Gfx::CompositionMode& PixmapSurfaceImpl::compositionMode() const
 {
-  return _painter.renderFlags();
+    return _painter.compositionMode();
 }
 
 } // namespace

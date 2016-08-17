@@ -184,14 +184,16 @@ PixmapSurfaceImpl* PixmapSurface::pixmapImpl() const
     return _impl; 
 }
 
-void PixmapSurface::setRenderFlags(Gfx::RenderFlags::Type f)
+void PixmapSurface::setCompositionMode(const Gfx::CompositionMode& mode)
 {
-  _impl->setRenderFlags(f);
+    _impl->setCompositionMode(mode);
 }
 
-Gfx::RenderFlags::Type PixmapSurface::renderFlags() const
+const Gfx::CompositionMode& PixmapSurface::compositionMode() const
 {
-  return _impl->renderFlags();
+    return _impl->compositionMode();
 }
 
-}}
+} // namespace
+
+} // namespace

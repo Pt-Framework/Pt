@@ -209,19 +209,21 @@ void PaintRegion::setClip( const Gfx::RectF& clip)
 
 const Gfx::RectF& PaintRegion::clip() const
 {
-  return _surface->clip();
+    return _surface->clip();
 }
 
 
-void PaintRegion::setRenderFlags( Gfx::RenderFlags::Type t)
+void PaintRegion::setCompositionMode(const Gfx::CompositionMode& mode)
 {
-  _surface->setRenderFlags(t);
+    _surface->setCompositionMode(mode);
 }
 
-Gfx::RenderFlags::Type PaintRegion::renderFlags() const
+
+const Gfx::CompositionMode& PaintRegion::compositionMode() const
 {
-  return _surface->renderFlags();
+    return _surface->compositionMode();
 }
 
+} // namespace
 
-}} // namespace
+} 

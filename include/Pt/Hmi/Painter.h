@@ -48,6 +48,10 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         void begin(PaintSurface& surface);
 
+        virtual void setCompositionMode(const Gfx::CompositionMode& mode);
+
+        virtual const Gfx::CompositionMode& compositionMode() const; 
+
         virtual void setClip(const Gfx::RectF& clip);
 
         virtual const Gfx::RectF& clip() const;
@@ -63,8 +67,6 @@ class PT_HMI_API Painter : public Gfx::Painter
         virtual void setFont(const Gfx::Font& font);
 
         virtual const Gfx::Font& font() const;  
-        
-        // TODO: setClip  
 
         virtual Gfx::FontMetrics fontMetrics(const Pt::String& Text) const; 
         
@@ -94,22 +96,18 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         virtual void clear(const Gfx::Color& color);
 
-        virtual void setRenderFlags(Gfx::RenderFlags::Type f);
-
-        virtual Gfx::RenderFlags::Type renderFlags() const;
-
     public:
         void drawSurface(const Gfx::PointF& to, const PixmapSurface& pm);
 
         void drawSurface(const Gfx::PointF& to,  const PixmapSurface& pm,  const Gfx::RectF& pmRect);
     
     private:
-        PaintSurface*   _surface;
-        Gfx::Pen        _pen;
-        Gfx::Brush      _brush;
-        Gfx::Font       _font;
-        Gfx::RenderFlags::Type _oldRenderFlags;
-        Gfx::RectF _clip;
+        PaintSurface*        _surface;
+        Gfx::Pen             _pen;
+        Gfx::Brush           _brush;
+        Gfx::Font            _font;
+        Gfx::CompositionMode _compositionMode;
+        Gfx::RectF           _clip;
 };
 
 } // namespace

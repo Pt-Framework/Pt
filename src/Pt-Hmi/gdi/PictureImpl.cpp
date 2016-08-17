@@ -55,12 +55,14 @@ void PictureImpl::clear()
     if(_mask)
     {
        DeleteObject(_mask);
+       _mask = 0;
        _maskData.clear();
     }
 
     if(_bitmap)
     {
       DeleteObject(_bitmap);
+      _bitmap = 0;
       _bitmapData.clear();
     }
 

@@ -55,17 +55,15 @@ class PT_HMI_API PixmapSurface : public PaintSurface
 
         virtual ~PixmapSurface();
 
-      
-
         void resize(const Gfx::SizeF& size);        
 
         void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
 
         virtual const Gfx::SizeF& size() const;
 
-        virtual void setRenderFlags(Gfx::RenderFlags::Type f);  
+        virtual void setCompositionMode(const Gfx::CompositionMode& mode);
 
-        virtual Gfx::RenderFlags::Type renderFlags() const; 
+        virtual const Gfx::CompositionMode& compositionMode() const; 
 
         virtual void setClip( const Gfx::RectF& clip);
         
