@@ -48,7 +48,7 @@ class PictureImpl
 
         void set(const Gfx::Image& image);
 
-        void set(const Gfx::Image& image, double alphaThreshold);
+        void set(const Gfx::Image& image, float alphaThreshold);
 
         const Gfx::Image& image() const
         {

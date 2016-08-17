@@ -56,7 +56,7 @@ void PictureImpl::set(const Gfx::Image& image)
 }
 
 
-void PictureImpl::set(const Gfx::Image& i, double alphaThreshold)
+void PictureImpl::set(const Gfx::Image& i, float alphaThreshold)
 {    
     _image = i;
     
