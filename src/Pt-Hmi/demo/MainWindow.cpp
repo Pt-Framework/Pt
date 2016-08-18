@@ -75,6 +75,7 @@ void loadIcon(Gfx::Image& icon)
     }
 }
 
+
 MainWindow::MainWindow()
 : _child1("Child 1")
 {

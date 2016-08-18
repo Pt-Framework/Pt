@@ -3693,9 +3693,10 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
             scanLineSource += sourceStride;
             scanLineTarget += targetStride;
 			    }
-      }
-      break;
 
+          break;
+      }
+      
       case CompositionMode::AlphaMask:
       {
           for(size_t w = imageRectF.left(); w <= imageRectF.right() ; ++w )
@@ -3708,21 +3709,25 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
               if(!( x >= clip().left() &&  x < clip().right() && y  >=  clip().top()  && y < clip().bottom() ))
                   continue;
 
-              if(*(image.pixel(w,h)+3) == 0)
-                 continue;
+              const Pt::uint8_t* srcData = image.pixel(w,h);
+              const Pt::uint8_t alpha = srcData[3];
 
-              const Pt::uint32_t* srcPix = (const Pt::uint32_t*)image.pixel(w,h);
-              Pt::uint32_t* dstPix = (Pt::uint32_t*) _image->pixel( x,y);             
+              if(alpha == 0)
+                  continue;
+
+              Pt::uint8_t* dstData = _image->pixel(x,y);
+              Pt::uint32_t* dstPix = (Pt::uint32_t*) dstData;
+              const Pt::uint32_t* srcPix = (const Pt::uint32_t*)srcData;         
+              
               *dstPix = *srcPix;
             }
           }  
-      }
-      break;
 
+          break;
+      }
+      
       case Gfx::CompositionMode::SourceOver:
       {
-          Pt::uint8_t alpha = 0;
-
           for(size_t w = imageRectF.left(); w <= imageRectF.right() ; ++w )
           {
             for( size_t h = imageRectF.top(); h <= imageRectF.bottom(); ++h)
@@ -3733,29 +3738,38 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
                if(!( x >= clip().left() && x < clip().right() && y >= clip().top() && y < clip().bottom() ))
                   continue;
                          
-              const Pt::uint8_t* srcPix = image.pixel(w,h);
-              const Pt::uint8_t alpha = *(srcPix+3);
+              const Pt::uint8_t* srcData = image.pixel(w,h);
+              const Pt::uint8_t alpha = srcData[3];
               
               if(alpha == 0)
                   continue;
               
-              Pt::uint8_t* dstPix = _image->pixel(x,y);
+              Pt::uint8_t* dstData = _image->pixel(x,y);
+              Pt::uint32_t* dstPix = (Pt::uint32_t*) dstData;
+              const Pt::uint32_t* srcPix = (const Pt::uint32_t*)srcData;
 
               if(alpha == 255)
               {
-                *((Pt::uint32_t*)dstPix) = *((const Pt::uint32_t*)srcPix);
-                continue;
+                  *dstPix = *srcPix;
+                  continue;
               }              
 
-              const Pt::uint8_t alpha255 =  (255 - alpha);
+              //const Pt::uint8_t alpha255 = 255 - alpha;
+              //dstData[0] = (srcData[0] * alpha + dstData[0] * alpha255) / 255;
+              //dstData[1] = (srcData[1] * alpha + dstData[1] * alpha255) / 255;
+              //dstData[2] = (srcData[2] * alpha + dstData[2] * alpha255) / 255;
 
-    	        dstPix[0] = (srcPix[0] * alpha + dstPix[0] * alpha255) / 255;
-			        dstPix[1] = (srcPix[1] * alpha + dstPix[1] * alpha255) / 255;
-			        dstPix[2] = (srcPix[2] * alpha + dstPix[2] * alpha255) / 255;        
+              Pt::uint32_t alphaSrc = alpha + 1;
+              Pt::uint32_t alphaInv = 256 - alpha;
+              dstData[0] = (unsigned char)((alphaSrc * srcData[0] + alphaInv * dstData[0]) >> 8);
+              dstData[1] = (unsigned char)((alphaSrc * srcData[1] + alphaInv * dstData[1]) >> 8);
+              dstData[2] = (unsigned char)((alphaSrc * srcData[2] + alphaInv * dstData[2]) >> 8);
+              dstData[3] = (unsigned char)((alphaSrc * srcData[3] + alphaInv * dstData[3]) >> 8);
           }
-        }        
+        }   
+        
+        break;
       }
-      break;
     }
 }
 
