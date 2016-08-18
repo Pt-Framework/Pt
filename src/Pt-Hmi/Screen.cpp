@@ -273,10 +273,8 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
     if(_updates > 0)
       return ;
     
-    // start
-    std::cout<<"-------------------------------------" <<std::endl;
+    std::clog << std::endl;
     _clock.start();
-
 
     const Gfx::RectF& screenRect = ev.rect();
 
@@ -295,12 +293,10 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
 
 void Screen::onPaintEvent(const PaintEvent& ev)
 {
-
     _impl->paint( ev.rect() );
 
-
     std::clog << "screen update: " << _clock.stop().toUSecs() << " usecs." << std::endl;
-    std::clog << "update area " << ev.rect().topLeft().x() << ',' << ev.rect().topLeft().y()
+    std::clog << "               " << ev.rect().topLeft().x() << ',' << ev.rect().topLeft().y()
               << ' ' << ev.rect().width() << 'x' << ev.rect().height() << std::endl;
 }
 
