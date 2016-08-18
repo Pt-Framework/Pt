@@ -301,7 +301,7 @@ class PngReaderImpl
                 unsigned char green = data[n++];
                 unsigned char blue = data[n++];
 
-                Pt::Gfx::Color pixel(0, red/255.0f, green/255.0f, blue/255.0f);
+                Pt::Gfx::Color pixel(1.0, red/255.0f, green/255.0f, blue/255.0f);
 				        _image->setColor(x, row, pixel);
 			        }
 
