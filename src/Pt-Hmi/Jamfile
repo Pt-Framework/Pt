@@ -45,7 +45,9 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
              MenuBar.cpp
              MenuItem.cpp
              MenuShell.cpp 
-             Picture.cpp             
+             Picture.cpp
+             ScrollBar.cpp
+             ScrollView.cpp            
              ;
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx Pt-Reflex ;

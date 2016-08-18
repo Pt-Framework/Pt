@@ -86,7 +86,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\PixmapSurface.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Screen.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\ScrollBar.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ScrollEvent.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\ScrollView.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ShowEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Spacing.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\TouchEvent.h" />
@@ -552,6 +554,8 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Picture.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PixmapSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Screen.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\ScrollBar.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\ScrollView.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Visual.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Window.cpp" />

@@ -9,6 +9,7 @@
 #include <Pt/Hmi/FlowLayout.h>
 #include <Pt/Hmi/MenuBar.h>
 #include <Pt/Hmi/Menu.h>
+#include <Pt/Hmi/ScrollBar.h>
 #include "Dialog1.h"
 
 namespace Pt {
@@ -29,6 +30,11 @@ class ChildW : public Hmi::Window
         
         void onCloseApp(Button& button);
 
+        void onVScroll(ScrollBar&, int pos)
+        {
+            std::clog << "vscroll: " << pos << std::endl;
+        }
+
     private:
         FlowLayout _mainLayout;
         MenuBar _menuBar;
@@ -42,6 +48,8 @@ class ChildW : public Hmi::Window
         MenuItem _edit1;
         MenuItem _edit2;
         MenuItem _edit3;
+
+        ScrollBar _vscroll;
 
         Window _childWindow2;
         DockingLayout  _childView;

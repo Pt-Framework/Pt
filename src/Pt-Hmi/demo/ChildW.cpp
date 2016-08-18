@@ -10,6 +10,7 @@ namespace Hmi{
 namespace Demo{
 
 ChildW::ChildW(const std::string& title)
+: _vscroll(ScrollBar::Vertical)
 {
     _fileMenu.setName("FileMenu");
     
@@ -112,13 +113,19 @@ ChildW::ChildW(const std::string& title)
     _buttonBar.add(_dialogButton);
     _buttonBar.add(_toggleButton);
     
+    _vscroll.changed() += Pt::slot(*this, &ChildW::onVScroll);
+    _vscroll.resize( Gfx::SizeF(24, 24) );
+    _vscroll.setDocking(Docking::Right);
+
     //Panel  
     _childView.resize( Gfx::SizeF(300, 600) );
     _childView.move( Gfx::PointF(1,1) );
     _childView.setName("MainPanel");
     _childView.setPadding(20); 
     _childView.add(_textLabel);
-    _childView.add(_buttonBar);    
+    _childView.add(_buttonBar);   
+    _childView.add(_vscroll);
+     
 
     //_childWindow2.setMainWidget(&_closeButton);          
     _childWindow2.move(Gfx::PointF(5, 40));    

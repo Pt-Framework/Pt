@@ -1,0 +1,117 @@
+/* Copyright (C) 2016 Marc Boris Duerner 
+   Copyright (C) 2016 Laurentiu-Gheorghe Crisan
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+  
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
+*/
+
+#ifndef Pt_Hmi_SCROLLBAR_H
+#define Pt_Hmi_SCROLLBAR_H
+
+#include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Panel.h>
+
+namespace Pt {
+
+namespace Hmi {
+
+class PT_HMI_API ScrollBar : public Panel
+{
+    public:
+        enum Orientation
+        {
+            Horizontal = 0,
+            Vertical = 1
+        };
+
+        explicit ScrollBar(Orientation o);
+
+        ~ScrollBar();
+
+        void setRange(int minpos, int maxpos)
+        {
+            _minPos = minpos;
+            _maxPos = maxpos;
+        }
+
+        void setStepping(int scroll, int page)
+        {
+            _scrollStep = scroll;
+            _pageStep = page;
+        }
+
+        int minimumPosition() const
+        {
+            return _minPos;
+        }
+
+        int maximumPosition() const
+        {
+            return _maxPos;
+        }
+
+        void setPosition(int pos);
+
+        int position() const
+        {
+            return _position;
+        }
+
+        Signal<ScrollBar&, int>& changed()
+        { return _changed; }
+
+    protected:
+        virtual void onPointerEvent(const MouseEvent& ev);
+
+        virtual void onResizeEvent(const ResizeEvent& ev);
+        
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+    private:
+        int pixelToPosition(double pix);
+        
+        double positionToPixel(int pos);
+
+    private:
+        Orientation _orientation;
+        int _minPos;
+        int _maxPos;
+        int _pageStep;
+        int _scrollStep;
+        int _position;
+        bool _dragging;
+        double _factorPixel;
+        double _offsetPixel;
+        double _factorPosition;
+        double _offsetPosition;
+        Gfx::RectF              _handleRect;
+        Signal<ScrollBar&, int> _changed;
+};
+
+} // namespace
+
+} // namespace
+
+#endif

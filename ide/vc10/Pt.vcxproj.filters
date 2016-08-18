@@ -1383,6 +1383,12 @@
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PixmapSurfaceImpl.h">
       <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ScrollBar.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ScrollView.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2548,6 +2554,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PixmapSurfaceImpl.cpp">
       <Filter>Pt-Hmi\gdi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ScrollBar.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ScrollView.cpp">
+      <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
