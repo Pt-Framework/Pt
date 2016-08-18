@@ -82,6 +82,14 @@ void ScrollBar::setPosition(int pos)
 }
 
 
+void ScrollBar::setRange(int minpos, int maxpos)
+{
+    _minPos = minpos;
+    _maxPos = maxpos;
+    updateScroll();
+}
+
+
 void ScrollBar::onPointerEvent(const MouseEvent& ev)
 {
     Panel::onPointerEvent(ev);
@@ -90,12 +98,14 @@ void ScrollBar::onPointerEvent(const MouseEvent& ev)
     {
         if(_handleRect.contains( ev.position() ) )
         {
+            this->grabMouse();
             _dragging = true;
         }
     }
     else if( ev.isRelease(MouseEvent::Left) )
     {
         _dragging = false;
+        this->releaseMouse();
     }
 
     if(_dragging)
@@ -105,15 +115,13 @@ void ScrollBar::onPointerEvent(const MouseEvent& ev)
         int pos = pixelToPosition(pixPos);
 
         if( pos >= _minPos && pos <= _maxPos)
-          setPosition(pos);
+          setPosition( pos);
     }
 }
 
 
-void ScrollBar::onResizeEvent(const ResizeEvent& ev)
+void ScrollBar::updateScroll()
 {
-    Panel::onResizeEvent(ev);
-
     double buttonLength = _orientation == Vertical ? size().width()
                                                    : size().height();
 
@@ -127,8 +135,6 @@ void ScrollBar::onResizeEvent(const ResizeEvent& ev)
     _offsetPixel = (pixMin * _maxPos - pixMax *_minPos) / (_maxPos - _minPos );
        
     _factorPosition = (_maxPos -_minPos) / (pixMax -pixMin );
-//    _offsetPosition = (pixMin * _maxPos - pixMax *_minPos) / (_maxPos -_minPos );  
-
     _offsetPosition = (_minPos * pixMax - _maxPos *pixMin) / (pixMax -pixMin );  
 
     double pixpos = positionToPixel(_position);
@@ -139,6 +145,15 @@ void ScrollBar::onResizeEvent(const ResizeEvent& ev)
      Gfx::SizeF size(buttonLength, buttonLength);
     
     _handleRect.set( pos, size );
+    
+}
+
+
+void ScrollBar::onResizeEvent(const ResizeEvent& ev)
+{
+    Panel::onResizeEvent(ev);
+
+    updateScroll();
 }
 
 
@@ -155,7 +170,7 @@ void ScrollBar::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 
 
 int ScrollBar::pixelToPosition(double pix)
-{
+{    
     double pos = pix * _factorPosition + _offsetPosition;
     return static_cast<int>(pos);
 }

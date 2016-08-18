@@ -84,20 +84,35 @@ MainWindow::MainWindow()
     _picture.set( _icon);
     setTitle("Main 1");
     move( Gfx::PointF(60, 60) );
-    resize( Gfx::SizeF(600, 480) ); 
+    resize( Gfx::SizeF(1000, 1000) ); 
     
-    //_child2.resize( Gfx::SizeF(200, 100) );
-    //add( _child2 );
-    //_child2.show(true);
-
-    //_child2.setMinimumSize( Gfx::SizeF(150, 50) );
-    //_child2.setMaximumSize( Gfx::SizeF(300, 300) );
-    //_child2.setTitle("Child 2");
-    //_child2.move( Gfx::PointF(10, 10) );
-
+    _child2.resize( Gfx::SizeF(800, 600) );
+    add( _child2 );
     
+
+    _child2.setTitle("Child 2");
+    _child2.move( Gfx::PointF(10, 10) );
+    
+    _bt1.move(Pt::Gfx::PointF(80,60));
+    _bt1.resize(Pt::Gfx::SizeF(100, 40));
+
+    _bt2.move(Pt::Gfx::PointF(500,500));
+    _bt2.resize(Pt::Gfx::SizeF(100, 40));
+
+    _scrollView.addLayout(_bt1 );
+    _scrollView.addLayout(_bt2 );
+    
+
+    _child2.setMainWidget(&_scrollView);
+
+    _child2.show(true);
+
+
     add( _child1 );
+    
 
+
+    
     _child1.move( Gfx::PointF(30,30));
     _child1.resize( Gfx::SizeF(300, 400) );
     _child1.show(true);

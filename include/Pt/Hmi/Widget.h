@@ -215,6 +215,8 @@ class PT_HMI_API Widget : public Visual
 
         void setDocking(const Docking& d);
 
+        void bringToFront();
+
     public:
         virtual Gfx::PointF toScreen(const Gfx::PointF& pos) const;
     

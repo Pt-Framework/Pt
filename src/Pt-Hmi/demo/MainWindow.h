@@ -33,6 +33,7 @@
 #include <Pt/Hmi/Menu.h>
 #include <Pt/Hmi/MenuItem.h>
 #include <Pt/Hmi/Picture.h>
+#include <Pt/Hmi/ScrollView.h>
 #include "ChildW.h"
 
 namespace Pt {
@@ -67,10 +68,15 @@ class MainWindow : public Pt::Hmi::Window
             MenuItem _subItem3;
             
             ChildW _child1;
-//            Window _child2;
+            Window _child2;
 
             Gfx::Image _icon;
             Picture   _picture;
+
+            ScrollView _scrollView;
+            Button _bt1;
+            Button _bt2;
+
 };
 
 } // namespace

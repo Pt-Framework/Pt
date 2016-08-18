@@ -50,6 +50,7 @@ ChildW::ChildW(const std::string& title)
 
     setMainWidget(&_mainLayout);
     
+    
     setTitle(title);
     
     //Text    

@@ -1053,9 +1053,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\demo\Dialog2.h">
       <Filter>Pt-Hmi\demo</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Hmi\demo\MainWindow.h">
-      <Filter>Pt-Hmi\demo</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\WindowImpl.h">
       <Filter>Pt-Hmi\cocoa</Filter>
     </ClInclude>
@@ -1388,6 +1385,12 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\ScrollView.h">
       <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ScrollLayout.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\demo\MainWindow.h">
+      <Filter>Pt-Hmi\drawing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2559,6 +2562,9 @@
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollView.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ScrollLayout.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>

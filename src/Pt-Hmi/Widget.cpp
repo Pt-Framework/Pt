@@ -874,6 +874,21 @@ void Widget::onLeaveEvent(const LeaveEvent& ev )
 
 }
 
+
+void Widget::bringToFront()
+{
+    if( _parent == 0)
+        return;
+
+    std::vector<Widget*>::iterator it =  std::find(_parent->_children.begin(), _parent->_children.end(), this);
+
+    if( it == _parent->_children.end() )
+        return;
+
+    _parent->_children.erase( it);
+    _parent->_children.push_back(this);        
+}
+
 } // namespace
 
 } // namespace

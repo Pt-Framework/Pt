@@ -50,12 +50,8 @@ class PT_HMI_API ScrollBar : public Panel
 
         ~ScrollBar();
 
-        void setRange(int minpos, int maxpos)
-        {
-            _minPos = minpos;
-            _maxPos = maxpos;
-        }
-
+        void setRange(int minpos, int maxpos);
+        
         void setStepping(int scroll, int page)
         {
             _scrollStep = scroll;
@@ -93,6 +89,8 @@ class PT_HMI_API ScrollBar : public Panel
         int pixelToPosition(double pix);
         
         double positionToPixel(int pos);
+
+        void updateScroll();
 
     private:
         Orientation _orientation;

@@ -31,12 +31,36 @@
 #define Pt_Hmi_SCROLLVIEW_H
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/ScrollLayout.h>
+#include <Pt/Hmi/ScrollBar.h>
 
 namespace Pt {
 
 namespace Hmi {
 
+class PT_HMI_API ScrollView : public Widget
+{
+    public:
+        ScrollView();
 
+        virtual ~ScrollView();
+
+        void addLayout( Widget& w);
+
+    protected:
+        virtual void onResizeEvent(const ResizeEvent& ev );
+        
+        void onHScroll(ScrollBar& bar, int pos);
+        void onVScroll(ScrollBar& bar, int pos);
+
+    private:
+        ScrollLayout _layout;
+        ScrollBar _hScrollBar; 
+        ScrollBar _vScrollBar;
+        double _maxWidth;
+        double _maxHeight;
+};
 
 } // namespace
 

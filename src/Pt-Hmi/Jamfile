@@ -48,6 +48,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
              Picture.cpp
              ScrollBar.cpp
              ScrollView.cpp            
+             ScrollLayout.cpp
              ;
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx Pt-Reflex ;

@@ -9,7 +9,7 @@
 #include <Pt/Hmi/FlowLayout.h>
 #include <Pt/Hmi/MenuBar.h>
 #include <Pt/Hmi/Menu.h>
-#include <Pt/Hmi/ScrollBar.h>
+#include <Pt/Hmi/ScrollView.h>
 #include "Dialog1.h"
 
 namespace Pt {
@@ -58,6 +58,7 @@ class ChildW : public Hmi::Window
         Button _dialogButton;
         Label  _textLabel;
         DockingLayout _buttonBar;
+        ScrollView _scrollView;
 };
 
 } // namespace

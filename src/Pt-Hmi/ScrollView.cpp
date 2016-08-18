@@ -28,10 +28,85 @@
 */
 
 #include <Pt/Hmi/ScrollView.h>
+#include <algorithm>
 
 namespace Pt {
 
 namespace Hmi {
+
+ScrollView::ScrollView()
+: _hScrollBar(ScrollBar::Horizontal)
+, _vScrollBar(ScrollBar::Vertical)
+{
+
+    _hScrollBar.resize(Gfx::SizeF(100,16));
+    _vScrollBar.resize(Gfx::SizeF(16,100));
+
+    _hScrollBar.changed() += Pt::slot(*this, &ScrollView::onHScroll);
+    _vScrollBar.changed() += Pt::slot(*this, &ScrollView::onVScroll);
+
+    add(_hScrollBar);
+    add(_vScrollBar);
+    add(_layout);
+}
+
+
+ScrollView::~ScrollView()
+{
+
+}
+
+void ScrollView::addLayout( Widget& widget)
+{
+    _layout.add(widget);
+
+        _maxWidth = 0;
+        _maxHeight = 0;
+    for( size_t i = 0; i < _layout.widgets().size(); ++i)
+    {
+        Widget* curWidget =   _layout.widgets().at(i);
+        _maxWidth = std::max( _maxWidth,  curWidget->position().x() + curWidget->size().width());
+        _maxHeight = std::max( _maxHeight,  curWidget->position().y() + curWidget->size().height());         
+    }
+
+    _hScrollBar.setRange( 0, (int) _maxWidth );
+    _vScrollBar.setRange( 0, (int) _maxHeight );    
+}
+
+
+void ScrollView::onHScroll(ScrollBar& bar, int pos)
+{
+    _layout.scrollX(pos);
+}
+
+void ScrollView::onVScroll(ScrollBar& bar, int pos)
+{
+    _layout.scrollY(pos);
+}
+
+
+
+void ScrollView::onResizeEvent(const ResizeEvent& ev )
+{
+    Widget::onResizeEvent(ev);
+
+    _layout.move(Gfx::PointF(0,0));
+    _layout.resize(Gfx::SizeF( ev.size().width() - _hScrollBar.size().height(),  ev.size().height() -  _vScrollBar.size().width()));
+
+    _hScrollBar.show( (_layout.size().width() <= _maxWidth) );
+    
+    _vScrollBar.show( (_layout.size().height() <= _maxHeight) );    
+
+    _hScrollBar.move(Gfx::PointF( 0, ev.size().height() -  _hScrollBar.size().height()));
+    _hScrollBar.resize(Gfx::SizeF( ev.size().width() - _hScrollBar.size().height(), _hScrollBar.size().height()));
+
+    _vScrollBar.move(Gfx::PointF( ev.size().width() - _vScrollBar.size().width(), 0));
+    _vScrollBar.resize(Gfx::SizeF(_vScrollBar.size().width(), ev.size().height() - _vScrollBar.size().width()));
+
+    _hScrollBar.setRange( 0, (int) _maxWidth -_layout.size().width() );
+    _vScrollBar.setRange( 0, (int) _maxHeight -_layout.size().height() );    
+
+}
 
 
 } // namespace
