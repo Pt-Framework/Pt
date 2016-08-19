@@ -618,17 +618,18 @@ const Gfx::PointF& Widget::position() const
 
 void Widget::move(const Gfx::PointF& pos)
 {
-    Gfx::RectF updateRect(Gfx::PointF(0, 0), _size); 
+    Gfx::RectF updateRect(Gfx::PointF(0, 0), _size);
 
     Gfx::PointF to = pos - _position;
     updateRect.unify( Gfx::RectF(to, _size) ); 
-
-    _position = pos;
     
     MoveEvent mev(vid(), pos);
     Application::instance().loop().commitEvent(mev);
 
+    // update needs to refer to previous position
     update(updateRect);
+
+    _position = pos;
 }
 
 

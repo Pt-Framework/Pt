@@ -210,7 +210,7 @@ class BasicRect
 				  const T r	 = std::min( this->right(), rect.right() );
 				  const T b  = std::min( this->bottom(), rect.bottom() );
 
-				  return r > l && b > t ? BasicRect<T>(l, r, t, b) 
+				  return r >= l && b >= t ? BasicRect<T>(l, r, t, b) 
                                 : BasicRect<T>();
 			}
 

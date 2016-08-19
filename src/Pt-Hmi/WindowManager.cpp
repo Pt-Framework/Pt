@@ -269,11 +269,7 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
 
         Gfx::PointF to = updateRect.topLeft() + frame->clientRect().topLeft();
 
-       
-
         Painter painter(surface);
-        
-        
         painter.drawSurface(to, w->surface(), updateRect);
 
         //painter.drawRect( pev.rect() ); 
