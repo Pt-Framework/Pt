@@ -1,30 +1,32 @@
 /*
- * Copyright (C) 2006,2010 by Tommi Maekitalo
- * 
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * 
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
+  Copyright (C) 2006,2010 by Tommi Maekitalo
+  Copyright (C) 2006-2016 by Marc Duerner
+ 
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+  
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
+*/
 
 #ifndef Pt_Arg_h
 #define Pt_Arg_h
@@ -152,9 +154,14 @@ class ArgBaseT<std::string> : public ArgBase
 
     Arg objects can be used to process command line options passed to the
     main function of the program. A syntax for short-named and long-named
-    options is supported. Short-named options start with a single hypen ('-')
-    followed by a single character and optionally a value. Long-named options
-    start with two hyphens followed by string and optionally a value.
+    options is supported. Short-named options start with a single hypen
+    followd by a character (-O). Optionally, a value follows directly (-Ofoo) 
+    or separated by whitespace(-O foo). Alternatively, option names can be
+    consist of any character sequence to support unix style options(--option)
+    and windows style options (/OPTION). An optional value follows either
+    separated by whitespace (--option yes) or an equal character (/OPTION=yes).
+    Note that constructing an Arg from with the character 'n' or with the
+    string "-n" are equivalent.
 
     The template parameter of the Arg class is the argument value type, which
     must be streamable, i.e. the operator >> (std::istream&, T&) must be defined
@@ -175,12 +182,12 @@ class ArgBaseT<std::string> : public ArgBase
     A specialization exists for boolean parameters. This implements a switch,
     which is on, if the option is present and off, if it is missing. The option
     consists, in this case, only of a command line flag without a value. Boolean
-    parameters can also be grouped, so -abc is processed like -a -b -b.
+    parameters can also be grouped, so -abc is processed like -a -b -c.
 
     @code
-    Pt::Arg<bool> debug(argc, argv, "debug");
+    Pt::Arg<bool> debug(argc, argv, "--debug");
     if (debug)
-        std::cout << "debug-mode is set" << std::endl;
+        std::cout << "debug flag is set" << std::endl;
     @endcode
 
     The example shown above not only shows a boolean parameter, but also how
@@ -205,7 +212,7 @@ class Arg : public ArgBaseT<T>
           \param ch        optioncharacter
           \param def       default-value
 
-          example:
+          Example:
           \code
           Pt::Arg<unsigned> offset(argc, argv, 'o', 0);
           unsigned value = offset.getValue();
@@ -222,7 +229,7 @@ class Arg : public ArgBaseT<T>
           Long option names starting with "--". This (and more) is supported
           here. Instead of giving a single option-character, you specify a string.
 
-          example:
+          Example:
           \code
           Pt::Arg<int> option_number(argc, argv, "--number", 0);
           std::cout << "number =" << option_number.getValue() << std::endl;
@@ -314,8 +321,8 @@ class Arg : public ArgBaseT<T>
 
                     if (argv[i][n] == '=')
                     {
-                        // --option=vlaue
-                        if (this->extract(argv[i] + n, argc, argv, i, 1))
+                        // --option=value
+                        if (this->extract(argv[i] + n + 1, argc, argv, i, 1))
                             return true;
                     }
                 }
@@ -457,4 +464,3 @@ inline std::ostream& operator<<(std::ostream& out, const Arg<T>& arg)
 } // namespace Pt
 
 #endif
-
