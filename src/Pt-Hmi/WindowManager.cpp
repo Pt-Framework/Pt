@@ -360,7 +360,7 @@ void WindowManager::onMove(Window& w, const Gfx::PointF& to)
 }
 
 
-void WindowManager::onShow( Window& w, bool visible )
+void WindowManager::onShow(Window& w, bool visible)
 {
     WindowFrame* frame = findWindow(w);
     if( ! frame )
@@ -376,7 +376,10 @@ void WindowManager::onShow( Window& w, bool visible )
     if( ! _parent )
         throw std::logic_error("WindowManager not initialized");
 
-   w.update(updateRect);
+    Gfx::PointF updatePos = fromParent( w, updateRect.topLeft() );
+    updateRect.setOrigin(updatePos);
+
+    w.update(updateRect);
 }
 
 
