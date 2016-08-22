@@ -240,10 +240,6 @@ bool WindowManager::mouseEvent( const MouseEvent& mev )
 void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {  
     std::vector<WindowFrame*>::iterator it;
-    
-            Pt::System::Clock clock;
-
-            clock.start();
 
     for(it = _windows.begin(); it != _windows.end(); ++it )
     {
@@ -277,8 +273,6 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
         //          << to.x() << "," << to.y() << "  "
         //          << updateRect.width() << "x" << updateRect.height() << std::endl;  
     }
-
-    std::cout<<"Copy surface: " << clock.stop().toUSecs()<<std::endl;
 }
 
 
