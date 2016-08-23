@@ -88,9 +88,9 @@ void Button::onShortcut( const KeyEvent& kev )
 }
 
 
-void Button::onPointerEvent(const MouseEvent& ev)
+void Button::onMouseEvent(const MouseEvent& ev)
 {    
-    Label::onPointerEvent(ev);
+    Label::onMouseEvent(ev);
 
     if( ev.isPressed(MouseEvent::Left) != _isPressed )
     {

@@ -61,7 +61,7 @@ Widget::Widget()
     _eventReady += Pt::slot(*this, &Widget::onMoveEvent );
     _eventReady += Pt::slot(*this, &Widget::onResizeEvent );
     _eventReady += Pt::slot(*this, &Widget::onPaintEvent );
-    _eventReady += Pt::slot(*this, &Widget::onPointerEvent);
+    _eventReady += Pt::slot(*this, &Widget::onMouseEvent);
     _eventReady += Pt::slot(*this, &Widget::onTouchEvent);
     _eventReady += Pt::slot(*this, &Widget::onEnterEvent);
     _eventReady += Pt::slot(*this, &Widget::onLeaveEvent);
@@ -810,7 +810,7 @@ void Widget::onPaintEvent(const PaintEvent& ev)
 }
 
 
-void Widget::onPointerEvent(const MouseEvent& ev)
+void Widget::onMouseEvent(const MouseEvent& ev)
 { 
     Gfx::RectF rect( Gfx::PointF(0,0), size() );
     if( ! rect.contains( ev.position() ) )

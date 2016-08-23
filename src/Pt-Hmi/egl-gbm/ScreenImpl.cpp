@@ -51,7 +51,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 , _dpi(96.0)
 , _drawCursor(true)
 {
-    app.eventReady() += Pt::slot( *this, &ScreenImpl::onPointerEvent );
+    app.eventReady() += Pt::slot( *this, &ScreenImpl::onMouseEvent );
     app.eventReady() += Pt::slot( *this, &ScreenImpl::onKeyEvent );
 
     _surface.pixmapImpl()->resize(_frameBuffer.size(), _frameBuffer.strideInBytes() );
@@ -92,7 +92,7 @@ Gfx::Image& ScreenImpl::image()
 }
 
 
-void ScreenImpl::onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent )
+void ScreenImpl::onMouseEvent( const Pt::Hmi::MouseEvent& mouseEvent )
 {        
     _drawCursor =  true;
 

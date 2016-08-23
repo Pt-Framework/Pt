@@ -148,7 +148,7 @@ class ScreenImpl : public Pt::Connectable
     protected:
         virtual void onActivate();
 
-        virtual void onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent );
+        virtual void onMouseEvent( const Pt::Hmi::MouseEvent& mouseEvent );
 
         virtual void onKeyEvent(const Pt::Hmi::KeyEvent& ev);
 

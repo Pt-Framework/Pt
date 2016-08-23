@@ -162,9 +162,9 @@ void MenuBarItem::onClicked(const Gfx::PointF& pos)
 }
 
 
-void MenuBarItem::onPointerEvent(const MouseEvent& ev)
+void MenuBarItem::onMouseEvent(const MouseEvent& ev)
 { 
-    WidgetBaseType::onPointerEvent(ev);
+    WidgetBaseType::onMouseEvent(ev);
 
     // nothing to do if on this item
     Gfx::RectF rect( Gfx::PointF(0,0), size() );
@@ -415,9 +415,9 @@ MenuShell* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
 }
 
 
-void MenuBar::onPointerEvent(const MouseEvent& ev)
+void MenuBar::onMouseEvent(const MouseEvent& ev)
 { 
-    WidgetBaseType::onPointerEvent(ev);
+    WidgetBaseType::onMouseEvent(ev);
 }
 
 

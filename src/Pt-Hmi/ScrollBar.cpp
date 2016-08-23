@@ -90,9 +90,9 @@ void ScrollBar::setRange(int minpos, int maxpos)
 }
 
 
-void ScrollBar::onPointerEvent(const MouseEvent& ev)
+void ScrollBar::onMouseEvent(const MouseEvent& ev)
 {
-    Panel::onPointerEvent(ev);
+    Panel::onMouseEvent(ev);
 
     if( ev.isPress(MouseEvent::Left) )
     {

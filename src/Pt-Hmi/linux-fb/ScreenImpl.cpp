@@ -52,7 +52,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 , _dpi(96.0)
 , _drawCursor(true)
 {
-    app.eventReady() += Pt::slot( *this, &ScreenImpl::onPointerEvent );
+    app.eventReady() += Pt::slot( *this, &ScreenImpl::onMouseEvent );
     app.eventReady() += Pt::slot( *this, &ScreenImpl::onKeyEvent );
 
     _surface.pixmapImpl()->resize(_frameBuffer.size(), _frameBuffer.strideInBytes() );
@@ -124,7 +124,7 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
 }
 
 
-void ScreenImpl::onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent )
+void ScreenImpl::onMouseEvent( const Pt::Hmi::MouseEvent& mouseEvent )
 {        
     _drawCursor =  true;
 
@@ -154,13 +154,13 @@ void ScreenImpl::onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent )
         mev.setX( pos.x() );
         mev.setY( pos.y() ); 
         mev.setId( mouseGrabber->vid() );
-         std::cout<<" ScreenImpl::onPointerEvent " <<  clock.stop().toUSecs() << std::endl;
+         std::cout<<" ScreenImpl::onMouseEvent " <<  clock.stop().toUSecs() << std::endl;
 
         Application::instance().loop().commitEvent(mev);
     }
     else
     {
-           std::cout<<" ScreenImpl::onPointerEvent " <<  clock.stop().toUSecs() << std::endl;
+           std::cout<<" ScreenImpl::onMouseEvent " <<  clock.stop().toUSecs() << std::endl;
         _windowManager.mouseEvent( mouseEvent );        
     }
 

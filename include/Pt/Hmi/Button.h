@@ -74,7 +74,7 @@ class PT_HMI_API Button  : public Label
 
         virtual void onActionKey(const KeyEvent& kev);
 
-        virtual void onPointerEvent(const MouseEvent& ev);
+        virtual void onMouseEvent(const MouseEvent& ev);
 
         virtual void onEnterEvent( const EnterEvent& ev );
 

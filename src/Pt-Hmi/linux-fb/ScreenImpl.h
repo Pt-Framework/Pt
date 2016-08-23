@@ -161,7 +161,7 @@ class ScreenImpl : public Pt::Connectable
         void onEnable(Window& w, bool enable);
 
     protected:
-        void onPointerEvent( const Pt::Hmi::MouseEvent& mouseEvent );
+        void onMouseEvent(const Pt::Hmi::MouseEvent& mev);
 
         void onKeyEvent(const Pt::Hmi::KeyEvent& ev);
 
