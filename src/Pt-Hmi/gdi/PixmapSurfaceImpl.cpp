@@ -281,16 +281,22 @@ const Gfx::SizeF& PixmapSurfaceImpl::size() const
 
 void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
 {
+    if( clipRect.isNull() )
+    {
+        SelectClipRgn( _deviceContext, NULL );
+        return;
+    }
+
     Gfx::Rect rect = Application::instance().screen().fromUnit(clipRect);
 
     HRGN hrgn = CreateRectRgn( rect.x(), 
                                rect.y(), 
                                rect.bottomRight().x() + 1, 
-                               rect.bottomRight().y() +1 );
+                               rect.bottomRight().y() + 1 );
 
-    SelectClipRgn( _deviceContext, hrgn );
+    SelectClipRgn(_deviceContext, hrgn);
 
-    DeleteObject( hrgn);
+    DeleteObject(hrgn);
 
     _clip = clipRect;
 }

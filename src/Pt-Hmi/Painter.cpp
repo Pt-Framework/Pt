@@ -24,7 +24,7 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-  MA  02110-1301  USA
+  MA 02110-1301 USA
 */
 
 #include "PaintSurfaceImpl.h"
@@ -43,7 +43,7 @@ Painter::Painter(PaintSurface& surface)
 , _brush( Gfx::Color(0, 0, 0, 0) )
 , _font( PaintSurfaceImpl::defaultFont() )
 {
-  begin(surface);
+    begin(surface);
 }
 
 
@@ -52,50 +52,57 @@ Painter::~Painter()
 }
 
 
+void Painter::begin(PaintSurface& surface)
+{
+    _surface = &surface;
+
+    // TODO: null rect means no clipping rect
+    if( ! _clip.isNull() )
+        _surface->setClip(_clip);
+
+    _surface->setCompositionMode(_compositionMode); 
+    _surface->setBrush(_brush);
+    _surface->setFont(_font);
+    _surface->setPen(_pen);
+}
+
+
 void Painter::setCompositionMode(const Gfx::CompositionMode& mode)
 {
-  _surface->setCompositionMode(mode);
+    _compositionMode = mode;
+
+    if(_surface)
+        _surface->setCompositionMode(mode);
 }
 
 
 const Gfx::CompositionMode& Painter::compositionMode() const
 {
-  return _surface->compositionMode();
+    return _compositionMode;
 }
 
 
 void Painter::setClip(const Gfx::RectF& clip)
 {
-  _clip = clip;
-  _surface->setClip( clip);
+    if(_surface)
+        _clip = clip;
+
+    _surface->setClip( clip);
 }
 
 
 const Gfx::RectF& Painter::clip() const
 {
-  return _surface->clip();
+    return _clip;
 }
-
-
-void Painter::begin(PaintSurface& surface)
-{   
-    _surface = &surface;
-
-    if( ! _clip.isNull() )
-        _surface->setClip(_clip);
-
-    _surface->setCompositionMode(_compositionMode); 
-
-    _surface->setBrush(_brush);
-    _surface->setFont(_font);
-    _surface->setPen(_pen);  
-}       
 
 
 void Painter::setPen(const Gfx::Pen& pen)
 {
     _pen = pen;
-    _surface->setPen(_pen);
+
+    if(_surface)
+        _surface->setPen(_pen);
 }
 
 
@@ -108,7 +115,9 @@ const Gfx::Pen& Painter::pen() const
 void Painter::setBrush(const Gfx::Brush& brush)
 {
     _brush = brush;
-    _surface->setBrush(_brush);
+
+    if(_surface)
+        _surface->setBrush(_brush);
 }
 
 
@@ -124,7 +133,9 @@ void Painter::setFont(const Gfx::Font& font)
         return;
 
     _font = font;
-    _surface->setFont(_font);
+
+    if(_surface)
+        _surface->setFont(_font);
 }
 
 
@@ -136,6 +147,9 @@ const Gfx::Font& Painter::font() const
 
 Gfx::FontMetrics Painter::fontMetrics(const Pt::String& text) const
 {
+    if( ! _surface)
+        return fontMetrics(_font, text);
+
     return _surface->fontMetrics(text);
 }
 
@@ -148,7 +162,7 @@ Gfx::FontMetrics Painter::fontMetrics(const Gfx::Font& font, const Pt::String& t
 
 void Painter::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
-    if (_pen.size() == 0) 
+    if( _pen.size() == 0 )
         return;
 
     _surface->drawLine(from, to);
@@ -187,7 +201,7 @@ void Painter::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 
 void Painter::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
 {
-    if (_pen.size() == 0)
+    if( _pen.size() == 0 )
        return;
 
     _surface->drawPolyline(points, pointCount);
@@ -214,28 +228,29 @@ void Painter::drawPicture(const Gfx::PointF& to, const Picture& pic)
 
 void Painter::clear( const Gfx::Color& color)
 {
-    Gfx::RectF rect(Gfx::PointF(0,0), _surface->size() );   
+    Gfx::RectF rect( Gfx::PointF(0,0), _surface->size() );
     setBrush( Gfx::Brush(color) );
     fillRect(rect);
 }
 
 
 void Painter::drawSurface(const Gfx::PointF& to, const PixmapSurface& surface)
-{  
+{
     _surface->drawSurface(to, surface);
-}    
-    
+}
+
 
 void Painter::drawSurface(const Gfx::PointF& to, 
                           const PixmapSurface& pm, const Gfx::RectF& pmRect)
-{  
-    _surface->drawSurface(to, pm, pmRect);
-} 
-
-
-void Painter::drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imageRect)
 {
-  _surface->drawImage(to, image, imageRect);
+    _surface->drawSurface(to, pm, pmRect);
+}
+
+
+void Painter::drawImage(const Gfx::PointF& to, 
+                        const Gfx::Image& image, const Gfx::RectF& imageRect)
+{
+    _surface->drawImage(to, image, imageRect);
 }
 
 } // namespace
