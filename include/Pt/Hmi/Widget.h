@@ -163,6 +163,8 @@ class PT_HMI_API Widget : public Visual
 
         void enable( bool b = true );
 
+        void raise();
+
         void grabMouse();
 
         void releaseMouse();
@@ -215,8 +217,6 @@ class PT_HMI_API Widget : public Visual
 
         void setDocking(const Docking& d);
 
-        void bringToFront();
-
     public:
         virtual Gfx::PointF toScreen(const Gfx::PointF& pos) const;
     
@@ -228,6 +228,8 @@ class PT_HMI_API Widget : public Visual
         virtual void onRemoveWidget(Widget& w);
 
         virtual void onParentChanged(Widget* w);
+
+        virtual void onRaise(Widget& w);
 
         virtual void onLayout();
 

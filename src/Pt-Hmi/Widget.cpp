@@ -598,6 +598,29 @@ void Widget::onEnableEvent(const EnableEvent& ev)
 }
 
 
+void Widget::raise()
+{
+    if( ! _parent )
+        return;
+
+    _parent->onRaise(*this);     
+}
+
+
+void Widget::onRaise(Widget& w)
+{
+    std::vector<Widget*>::iterator it = std::find(_children.begin(), _children.end(), &w);
+
+    if( it == _children.end() )
+        return;
+
+    _children.erase(it);
+    _children.push_back(&w);
+    
+    w.update();   
+}
+
+
 void Widget::grabMouse()
 {
     Application::instance().grabMouse(*this);
@@ -873,21 +896,6 @@ void Widget::onEnterEvent( const EnterEvent& ev )
 void Widget::onLeaveEvent(const LeaveEvent& ev )
 {
 
-}
-
-
-void Widget::bringToFront()
-{
-    if( _parent == 0)
-        return;
-
-    std::vector<Widget*>::iterator it =  std::find(_parent->_children.begin(), _parent->_children.end(), this);
-
-    if( it == _parent->_children.end() )
-        return;
-
-    _parent->_children.erase( it);
-    _parent->_children.push_back(this);        
 }
 
 } // namespace
