@@ -51,15 +51,17 @@ class PT_HMI_API ScrollView : public Widget
     protected:
         virtual void onResizeEvent(const ResizeEvent& ev );
         
+    protected:
         void onHScroll(ScrollBar& bar, int pos);
+        
         void onVScroll(ScrollBar& bar, int pos);
 
     private:
         ScrollLayout _layout;
-        ScrollBar _hScrollBar; 
-        ScrollBar _vScrollBar;
-        double _maxWidth;
-        double _maxHeight;
+        ScrollBar    _hScrollBar; 
+        ScrollBar    _vScrollBar;
+        double       _maxWidth;
+        double       _maxHeight;
 };
 
 } // namespace
