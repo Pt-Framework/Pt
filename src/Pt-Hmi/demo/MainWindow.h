@@ -73,8 +73,9 @@ class MainWindow : public Pt::Hmi::Window
             Gfx::Image _icon;
             Picture   _picture;
 
+            FlowLayout _scrollContainer;
             ScrollView _scrollView;
-            Button _bt1;
+            Button _btns[20];
             Button _bt2;
 
 };

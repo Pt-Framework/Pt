@@ -35,20 +35,21 @@ namespace Pt {
 namespace Hmi {
 
 ScrollView::ScrollView()
-: _hScrollBar(ScrollBar::Horizontal)
+: _widget(0)
+, _hScrollBar(ScrollBar::Horizontal)
 , _vScrollBar(ScrollBar::Vertical)
 , _maxWidth(0)
 , _maxHeight(0)
 {
-    _hScrollBar.resize( Gfx::SizeF(100,16) );
-    _vScrollBar.resize( Gfx::SizeF(16,100) );
+    _hScrollBar.resize( Gfx::SizeF(100,32) );
+    _vScrollBar.resize( Gfx::SizeF(32,100) );
 
     _hScrollBar.changed() += Pt::slot(*this, &ScrollView::onHScroll);
     _vScrollBar.changed() += Pt::slot(*this, &ScrollView::onVScroll);
 
+    add(_layout);
     add(_hScrollBar);
     add(_vScrollBar);
-    add(_layout);
 }
 
 
@@ -57,20 +58,17 @@ ScrollView::~ScrollView()
 }
 
 
-void ScrollView::addLayout( Widget& widget)
+void ScrollView::setWidget(Widget& widget)
 {
+    if(_widget)
+        _layout.remove(*_widget);
+
     _layout.add(widget);
-    
-    for(size_t i = 0; i < _layout.widgets().size(); ++i)
-    {
-        Widget* w = _layout.widgets().at(i);
-        
-        _maxWidth = std::max( _maxWidth, 
-                              w->position().x() + w->size().width() );
-        
-        _maxHeight = std::max( _maxHeight, 
-                               w->position().y() + w->size().height() );         
-    }
+    _widget = &widget;
+    _widget->move( Gfx::PointF(0,0) );    
+
+    _maxWidth = _widget->size().width();
+    _maxHeight = _widget->size().height();      
 
     int hrange = static_cast<int>(_maxWidth);
     int vrange = static_cast<int>(_maxHeight);

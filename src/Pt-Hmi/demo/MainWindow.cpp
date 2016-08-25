@@ -78,6 +78,7 @@ void loadIcon(Gfx::Image& icon)
 
 MainWindow::MainWindow()
 : _child1("Child 1")
+, _scrollContainer(Hmi::FlowLayout::Top)
 {
     loadIcon(_icon);
 
@@ -86,32 +87,44 @@ MainWindow::MainWindow()
     move( Gfx::PointF(60, 60) );
     resize( Gfx::SizeF(1000, 1000) ); 
     
-    _child2.resize( Gfx::SizeF(800, 600) );
+    _child2.resize( Gfx::SizeF(600, 800) );
     add( _child2 );
     
 
     _child2.setTitle("Child 2");
     _child2.move( Gfx::PointF(10, 10) );
     
-    _bt1.move(Pt::Gfx::PointF(80,60));
-    _bt1.resize(Pt::Gfx::SizeF(100, 40));
 
-    _bt2.move(Pt::Gfx::PointF(500,500));
-    _bt2.resize(Pt::Gfx::SizeF(100, 40));
+    for(int n = 0; n < 20; ++n)
+    {
+        _btns[n].resize(Pt::Gfx::SizeF(100, 40));
 
-    _scrollView.addLayout(_bt1 );
-    _scrollView.addLayout(_bt2 );
+        _btns[n].setPadding(5);
+        _btns[n].setMargin(5);
+
+        _btns[n].setText("Hallo");
+        
+        _scrollContainer.add(_btns[n] );
+    }
     
+    _bt2.resize(Pt::Gfx::SizeF(100, 40));
+    _bt2.setText("Ende");
+    _bt2.setPadding(5);
+    _bt2.setMargin(5);
 
+    _scrollContainer.add(_bt2);
+
+    _scrollContainer.setPadding(5);
+    _scrollContainer.setMargin(5);
+
+    _scrollContainer.resize( Gfx::SizeF(500, 1000) );
+
+    _scrollView.setWidget(_scrollContainer);
+    
     _child2.setMainWidget(&_scrollView);
-
     _child2.show(true);
 
-
     add( _child1 );
-    
-
-
     
     _child1.move( Gfx::PointF(30,30));
     _child1.resize( Gfx::SizeF(300, 400) );

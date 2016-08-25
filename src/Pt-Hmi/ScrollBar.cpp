@@ -145,7 +145,6 @@ void ScrollBar::updateScroll()
      Gfx::SizeF size(buttonLength, buttonLength);
     
     _handleRect.set( pos, size );
-    
 }
 
 

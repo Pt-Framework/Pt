@@ -515,7 +515,9 @@ void Widget::repaint(const Gfx::RectF& rect)
     if( ! isVisible() )
         return;
 
-    PaintEvent pev( vid(), rect);
+    Gfx::RectF widgetRect = rect.intersect( Gfx::RectF(Gfx::PointF(0,0),
+                                                       this->size() ) );
+    PaintEvent pev( vid(), widgetRect);
     Application::instance().loop().commitEvent(pev);
 
     const std::vector<Widget*>& widgets = this->widgets();
@@ -524,10 +526,10 @@ void Widget::repaint(const Gfx::RectF& rect)
     {        
         Widget* w = (*it);
 
-        if( w->geometry().intersect(rect).isNull() )
+        if( w->geometry().intersect(widgetRect).isNull() )
             continue;
 
-        Gfx::RectF updateRect( rect.topLeft() - w->position(), rect.size() );
+        Gfx::RectF updateRect( widgetRect.topLeft() - w->position(), widgetRect.size() );
         w->repaint(updateRect);            
     }
 }

@@ -1390,7 +1390,7 @@
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\demo\MainWindow.h">
-      <Filter>Pt-Hmi\drawing</Filter>
+      <Filter>Pt-Hmi\demo</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
