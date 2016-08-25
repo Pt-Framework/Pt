@@ -57,6 +57,9 @@ class PT_HMI_API ScrollView : public Widget
         void onVScroll(ScrollBar& bar, int pos);
 
     private:
+        void updateScrollBar(ScrollBar& scroll, double maxRange);
+
+    private:
         ScrollLayout _layout;
         Widget*      _widget;
         ScrollBar    _hScrollBar; 

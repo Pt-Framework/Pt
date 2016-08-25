@@ -104,8 +104,6 @@ void ScrollView::onResizeEvent(const ResizeEvent& ev)
     _hScrollBar.resize( Gfx::SizeF( ev.size().width() - _hScrollBar.size().height(), 
                                     _hScrollBar.size().height()) );
     
-    double hrange = _maxWidth -_layout.size().width();
-    _hScrollBar.setRange(0, static_cast<int>(hrange));
 
     _vScrollBar.show(_layout.size().height() <= _maxHeight);  
     _vScrollBar.move( Gfx::PointF( ev.size().width() - _vScrollBar.size().width(), 
@@ -113,8 +111,27 @@ void ScrollView::onResizeEvent(const ResizeEvent& ev)
     _vScrollBar.resize( Gfx::SizeF(_vScrollBar.size().width(), 
                                    ev.size().height() - _vScrollBar.size().width()));
 
+    double hrange = _maxWidth -_layout.size().width();
+    updateScrollBar(_hScrollBar, hrange);
+
     double vrange = _maxHeight -_layout.size().height();
-    _vScrollBar.setRange( 0, static_cast<int>(vrange) );    
+    updateScrollBar(_vScrollBar, vrange);
+}
+
+
+void ScrollView::updateScrollBar(ScrollBar& scroll, double maxRange)
+{
+    int oldPos = scroll.position();
+    int oldMax = scroll.maximumPosition();
+
+    scroll.setRange( 0, static_cast<int>(maxRange) );    
+
+    if(scroll.maximumPosition() > 0)
+    {      
+      double relPos = double(oldPos) / oldMax;
+      double newPos = maxRange * relPos + 0.5;
+      scroll.setPosition( static_cast<int>(newPos) );
+    }
 }
 
 } // namespace

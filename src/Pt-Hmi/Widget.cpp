@@ -42,7 +42,7 @@ namespace Hmi {
 Widget::Widget()
 : _parent(0)
 , _window(0)
-, _layout(0)
+, _content(0)
 , _visible(true)
 , _enabled(true)
 , _enabledState(true)
@@ -143,8 +143,8 @@ void Widget::remove(Widget& widget)
      
     _children.erase(it);
 
-    if(&widget == _layout)
-        _layout = 0;
+    if(&widget == _content)
+        _content = 0;
     
     // enable when indirectly disabled
     if( ! widget._enabledState && widget._enabled)
@@ -241,14 +241,14 @@ Widget* Widget::findWidget(const Gfx::PointF& pos)
 }
 
 
-void Widget::setLayout(Layout& layout)
+void Widget::setContent(Widget& widget)
 {
-    if(_layout)
-        remove(*_layout);
+    if(_content)
+        remove(*_content);
 
-    _layout = &layout;
+    _content = &widget;
     
-    add(layout); 
+    add(widget); 
 }
 
 
@@ -690,8 +690,8 @@ void Widget::onResizeEvent(const ResizeEvent& ev)
 {    
     _size = ev.size();
 
-    if( _layout ) 
-      _layout->resize( _size );
+    if( _content ) 
+      _content->resize( _size );
 
     onLayout();
 }

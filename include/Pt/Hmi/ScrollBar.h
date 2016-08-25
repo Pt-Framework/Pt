@@ -52,28 +52,15 @@ class PT_HMI_API ScrollBar : public Panel
 
         void setRange(int minpos, int maxpos);
         
-        void setStepping(int scroll, int page)
-        {
-            _scrollStep = scroll;
-            _pageStep = page;
-        }
+        void setStepping(int scroll, int page);
 
-        int minimumPosition() const
-        {
-            return _minPos;
-        }
+        int minimumPosition() const;
 
-        int maximumPosition() const
-        {
-            return _maxPos;
-        }
+        int maximumPosition() const;
 
         void setPosition(int pos);
 
-        int position() const
-        {
-            return _position;
-        }
+        int position() const;
 
         Signal<ScrollBar&, int>& changed()
         { return _changed; }

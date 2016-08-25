@@ -36,15 +36,12 @@ namespace Hmi {
 ScrollLayout::ScrollLayout()
 : _lastScrollPos(0,0)
 {
-
 }
 
 
 ScrollLayout::~ScrollLayout()
 {
-
 }
-
 
 
 void ScrollLayout::scrollX(double position)

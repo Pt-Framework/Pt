@@ -47,7 +47,7 @@ class PT_HMI_API ScrollLayout : public Layout
 
         void scrollX(double x);
 
-        void scrollY(double x);
+        void scrollY(double y);
 
     private:
         Gfx::PointF _lastScrollPos;        

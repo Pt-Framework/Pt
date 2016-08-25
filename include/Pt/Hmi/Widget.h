@@ -89,7 +89,7 @@ class PT_HMI_API Widget : public Visual
 
         Widget* findWidget( const Gfx::PointF& pos );        
 
-        void setLayout(Layout& layout);
+        void setContent(Widget& widget);
 
         void setAcceptInput( bool a );
 
@@ -287,7 +287,7 @@ class PT_HMI_API Widget : public Visual
         std::vector<Widget*>         _children;
         Widget*                      _parent; 
         Window*                      _window; 
-        Layout*                      _layout;
+        Widget*                      _content;
 
         bool                         _visible;
         bool                         _enabled;
