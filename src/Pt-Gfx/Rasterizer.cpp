@@ -3805,9 +3805,18 @@ void Rasterizer::clear( const Color& color)
 
 void Rasterizer::setClip( const RectF& clip )
 {
-  _clip = clip;
+  if( clip.isNull() )
+  {
+      _clip = Gfx::RectF( Gfx::PointF(0,0),
+                          Gfx::SizeF( _image->size().width(), 
+                                      _image->size().height() ) );
+  }
+  else
+  {
+      _clip = clip;
+  }
+  
   _text->setClip( _clip );
 }
-
 
 }}

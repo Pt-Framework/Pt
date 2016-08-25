@@ -119,10 +119,6 @@ class PT_HMI_API Window : public WindowBase
 
     Gfx::PointF fromParent(const Gfx::PointF& pos) const;     
 
-    void update();
-
-    using WindowBase::update;
-
     void repaint();
 
     bool isActive() const;

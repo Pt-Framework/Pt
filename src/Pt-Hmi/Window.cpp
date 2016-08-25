@@ -565,13 +565,6 @@ Gfx::SizeF Window::onSize() const
 }
 
 
-void Window::update()
-{
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
-    update(rect);
-}
-
-
 void Window::onUpdate(const Gfx::RectF& rect)
 {
     if( ! _init )

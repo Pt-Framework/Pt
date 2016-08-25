@@ -222,6 +222,7 @@ void MenuBarItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& upd
         Gfx::Brush brush = brighten(bgColor, 0.85f);
 
         Painter painter(surface);
+        painter.setClip(updateRect);
         painter.setBrush(brush);
         painter.fillRect( Gfx::RectF(Gfx::PointF(0,0), size()) );
     }
@@ -231,6 +232,7 @@ void MenuBarItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& upd
 void MenuBarItem::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     Painter painter(surface);
+    painter.setClip(updateRect);
     painter.setFont(_font);
 
     Gfx::Color fgColor = foregroundColor();

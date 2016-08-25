@@ -77,7 +77,7 @@ void Panel::onPaintEvent(const PaintEvent& ev)
     if( clipRect.isNull() )
       return;
 
-    region.setClip(clipRect);
+    //region.setClip(clipRect);
     
     onPaint(region, clipRect);
 }
@@ -117,10 +117,11 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
     const Gfx::SizeF& size = this->size();
 
     if( size.width() < 0 || size.height() < 0)
-        return; 
+        return;
 
     Painter painter(surface);
-    painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+    painter.setClip(updateRect);
+    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
     Gfx::RectF borderRect( Gfx::PointF(0,0), this->size() );
 
@@ -174,6 +175,8 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 
     if( ! _backgroundPicture.empty() )
     {
+        painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+
         switch( _backgroundImageLayout.type() )
         {
             default:
@@ -200,6 +203,8 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
             }
             break;
         }
+
+        painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
     }
 
 

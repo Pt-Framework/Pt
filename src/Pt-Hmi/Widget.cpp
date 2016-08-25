@@ -31,7 +31,6 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Layout.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/String.h>
 #include <cassert>
@@ -234,6 +233,7 @@ Widget* Widget::findWidget(const Gfx::PointF& pos, bool input)
 
     return 0;
 }
+
 
 Widget* Widget::findWidget(const Gfx::PointF& pos)
 {

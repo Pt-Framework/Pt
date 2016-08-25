@@ -50,6 +50,15 @@ Gfx::SizeF WindowBase::size() const
 }
 
 
+void WindowBase::update()
+{
+    Gfx::RectF updateRect( Gfx::PointF(0,0),
+                           size() );
+
+    onUpdate(updateRect);
+}
+
+
 void WindowBase::update(const Gfx::RectF& rect)
 {
     onUpdate(rect);

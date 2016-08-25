@@ -33,11 +33,11 @@ namespace Pt {
 
 namespace Hmi {
 
-
 Layout::Layout()
 {
-  setAcceptInput(false);
+    setAcceptInput(false);
 }
+
 } // namespace
 
 } // namespace

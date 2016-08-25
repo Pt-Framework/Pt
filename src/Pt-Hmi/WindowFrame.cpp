@@ -126,6 +126,7 @@ void WindowButton::mouseEvent(const MouseEvent& mev)
 void WindowButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     Painter painter(surface);
+    painter.setClip(rect);
    
     Gfx::Color light = brighten(color(), 1.25f);
     Gfx::Color dark = brighten(color(), 0.75f);
@@ -188,6 +189,7 @@ void MinimizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     WindowButton::paint(surface, rect);
 
     Painter painter(surface);
+    painter.setClip(rect);
 
     //
     // draw symbol
@@ -225,6 +227,7 @@ void MaximizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     WindowButton::paint(surface, rect);
 
     Painter painter(surface);
+    painter.setClip(rect);
 
     //
     // draw symbol
@@ -262,6 +265,7 @@ void CloseButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     WindowButton::paint(surface, rect);
 
     Painter painter(surface);
+    painter.setClip(rect);
 
     //
     // draw symbol
@@ -294,6 +298,7 @@ MenuButton::~MenuButton()
 void MenuButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     Painter painter(surface);
+    painter.setClip(rect);
 
     //
     // draw symbol
@@ -773,7 +778,8 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
         return;
 
     // TODO: clipping region
-    Painter painter(surface);    
+    Painter painter(surface); 
+    painter.setClip(rect);   
 
     Gfx::Color color = _window->isActive() ? _wm->activeColor() 
                                            : _wm->inactiveColor();

@@ -56,10 +56,7 @@ void Painter::begin(PaintSurface& surface)
 {
     _surface = &surface;
 
-    // TODO: null rect means no clipping rect
-    if( ! _clip.isNull() )
-        _surface->setClip(_clip);
-
+    _surface->setClip(_clip);
     _surface->setCompositionMode(_compositionMode); 
     _surface->setBrush(_brush);
     _surface->setFont(_font);

@@ -51,8 +51,6 @@ PaintRegion::PaintRegion(PaintSurface& surface, const Gfx::RectF& rect)
 
 PaintRegion::~PaintRegion()
 {
-    if( _surface) 
-        _surface->setClip( Gfx::RectF(Gfx::PointF(0,0), _surface->size() ));
 }
 
 
@@ -60,8 +58,6 @@ void PaintRegion::set(PaintSurface& surface, const Gfx::RectF& area)
 {
     _surface = &surface;
     _area = area;
-
-    _surface->setClip(area);
 }
 
 

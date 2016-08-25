@@ -242,6 +242,7 @@ void MenuItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& update
         Gfx::Brush brush = brighten(bgColor, 0.85f);
 
         Painter painter(surface);
+        painter.setClip(updateRect);
         painter.setBrush(brush);
         painter.fillRect( Gfx::RectF(Gfx::PointF(0,0), size()) );
     }
@@ -251,6 +252,7 @@ void MenuItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& update
 void MenuItem::onPaintIcon(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     Painter painter(surface);
+    painter.setClip(updateRect);
 
     double iconX = (iconPadding() - icon().width()) / 2;
     double iconY = (size().height() - icon().height()) / 2;
@@ -263,6 +265,7 @@ void MenuItem::onPaintIcon(PaintSurface& surface, const Gfx::RectF& updateRect)
 void MenuItem::onPaintItem(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     Painter painter(surface);
+    painter.setClip(updateRect);
     painter.setFont(_font);
 
     Gfx::Color fgColor = foregroundColor();
@@ -282,6 +285,7 @@ void MenuItem::onPaintItem(PaintSurface& surface, const Gfx::RectF& updateRect)
 void MenuItem::onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     Painter painter(surface);
+    painter.setClip(updateRect);
     painter.setFont(_font);
 
     Gfx::Color fgColor = foregroundColor();

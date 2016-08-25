@@ -53,7 +53,7 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
             return _vid;
         }
 
-        void setName( const std::string& n )
+        void setName(const std::string& n)
         {
             _name = n;
         }

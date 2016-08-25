@@ -73,6 +73,7 @@ class SubMenuItem : public MenuItem
             //BaseType::onPaintShortcut(surface, updateRect);
 
             Painter painter(surface);
+            painter.setClip(updateRect);
 
             //
             // draw menu indicator

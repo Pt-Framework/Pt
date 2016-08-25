@@ -162,6 +162,7 @@ void ScrollBar::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
     Panel::onPaint(surface, updateRect);
 
     Painter painter(surface);
+    painter.setClip(updateRect);
     
     Gfx::Brush handleBrush( Gfx::Color(0.4f, 0.4f, 0.4f) );
     painter.setBrush(handleBrush);
