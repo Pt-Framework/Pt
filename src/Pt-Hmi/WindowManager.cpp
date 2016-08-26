@@ -250,20 +250,21 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
             continue; 
 
         Gfx::RectF frameRect = frame->frameRect().intersect(rect);
+        if( frameRect.isNull() )
+            continue;
+        
         frame->paint(surface, frameRect);
 
-        // update rect in client coordinates
-        Gfx::PointF updatePos = rect.topLeft() - frame->clientRect().topLeft();
-        Gfx::RectF updateRect(updatePos, rect.size());
-    
-        // clip update rect against client rect
-        Gfx::RectF clientRect(Gfx::PointF(0, 0), w->size());
-        updateRect = updateRect.intersect(clientRect);
+        // clip against client rect
+        Gfx::RectF updateRect = frame->clientRect().intersect(rect);
 
-        Gfx::PointF to = updateRect.topLeft() + frame->clientRect().topLeft();
+        // update rect in client coordinates
+        Gfx::PointF clientUpdatePos = w->fromParent( updateRect.topLeft() );
+        Gfx::RectF clientUpdateRect( clientUpdatePos, updateRect.size() );
 
         Painter painter(surface);
-        painter.drawSurface(to, w->surface(), updateRect);
+        painter.drawSurface(updateRect.topLeft(), 
+                            w->surface(), clientUpdateRect);
 
         //painter.drawRect( pev.rect() ); 
         //std::clog << w->title() << ": "

@@ -928,7 +928,12 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     for(it = _buttons.begin(); it != _buttons.end(); ++it)
     {
         WindowButton* button = *it;
-        button->paint( surface, button->geometry());
+
+        Gfx::RectF buttonUpdateRect = button->geometry().intersect(rect);
+        if( buttonUpdateRect.isNull() )
+            continue;
+
+        button->paint(surface, buttonUpdateRect);
     }
 }
 

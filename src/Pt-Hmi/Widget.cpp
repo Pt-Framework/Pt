@@ -526,10 +526,13 @@ void Widget::repaint(const Gfx::RectF& rect)
     {        
         Widget* w = (*it);
 
-        if( w->geometry().intersect(widgetRect).isNull() )
+        Gfx::RectF updateRect = w->geometry().intersect(rect);
+        if( updateRect.isNull() )
             continue;
 
-        Gfx::RectF updateRect( widgetRect.topLeft() - w->position(), widgetRect.size() );
+        Gfx::PointF updatePos = w->fromParent( updateRect.topLeft() );
+        updateRect.setOrigin(updatePos);
+
         w->repaint(updateRect);            
     }
 }
