@@ -99,10 +99,10 @@ class InputDevice : public System::Selectable
         bool _leftAlt;
         bool _rightAlt;
         Key::Modifiers _modifiers;
-        Pt::Hmi::KeyEvent _keyEvent;
-        Pt::Hmi::MouseEvent _mouseEvent;
+        KeyEvent _keyEvent;
+        MouseEvent _mouseEvent;        
         int _touchMove;
-        Pt::Hmi::TouchEvent _touchEvent;
+        TouchEvent _touchEvent;
         Pt::Signal<const Pt::Event&> _eventReady;
 };
 

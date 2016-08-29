@@ -55,8 +55,6 @@ class FrameBuffer
         {
             Rotation0Degree = 0, //0 - normal orientation (0 degree)
             Rotation90Degree,    //1 - clockwise orientation (90 degrees)
-            Rotation180Degree,   //2 - upside down orientation (180 degrees)
-            Rotation270Degree,   //3 - counterclockwise orientation (270 degrees)
         };
 
     public:
@@ -90,11 +88,10 @@ class FrameBuffer
           switch( _rotation)
           {
             case  Rotation90Degree:
-            case  Rotation270Degree:
               _lineLenght =  width() * _format->pixelSize();
             break;
             default:
-            _lineLenght = _fixedInfo.line_length;
+              _lineLenght = _fixedInfo.line_length;
             break;
           }
        }

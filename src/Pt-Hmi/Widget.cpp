@@ -858,6 +858,20 @@ void Widget::onMouseEvent(const MouseEvent& ev)
 
 void Widget::onTouchEvent(const TouchEvent& ev)
 {
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+
+    if( ! rect.contains( ev.position() ) )
+        return;
+
+    if( ev.isPress() && _acceptsFocus )
+    {
+        focus();
+    }
+
+    if( ev.isRelease() && hasFocus() )
+    {
+        onClicked( ev.position() );
+    }
 }
 
 

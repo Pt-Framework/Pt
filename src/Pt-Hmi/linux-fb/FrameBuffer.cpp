@@ -121,7 +121,6 @@ size_t FrameBuffer::width() const
         return _screenInfo.xres;
 
       case  Rotation90Degree:
-      case  Rotation270Degree:
         return _screenInfo.yres; 
     }
 
@@ -134,7 +133,6 @@ size_t FrameBuffer::strideInBytes() const
     switch( _rotation)
     {
       case  Rotation90Degree:
-      case  Rotation270Degree:
         return 0;
     }
 
@@ -145,8 +143,7 @@ size_t FrameBuffer::bufferSize() const
 {
     switch( _rotation)
     {
-      case  Rotation90Degree:
-      case  Rotation270Degree:
+      case  Rotation90Degree:      
         return width()* height() * _format->pixelSize();
     }
 
@@ -161,7 +158,6 @@ size_t FrameBuffer::height() const
         return _screenInfo.yres;
 
       case  Rotation90Degree:
-      case  Rotation270Degree:
         return _screenInfo.xres; 
     }
 
@@ -181,12 +177,12 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::Rect& areaIn )
 
       case Rotation90Degree:
       {
+        const Gfx::Rect clipArea = areaIn.intersect( Gfx::Rect(Gfx::Point(0,0), size()));        
+        std::cout<<"l =" << clipArea.left() << " r = " << clipArea.right() << " t = " << clipArea.top() << " b = " << clipArea.bottom() << std::endl;
 
-        const Gfx::Rect clipArea = areaIn.intersect( Gfx::Rect(Gfx::Point(0,0), size()));
-
-        for( size_t w = clipArea.left(); w <= clipArea.right(); ++w)
+        for( Pt::ssize_t w = clipArea.left(); w < clipArea.right(); ++w)
         {
-           for( size_t h = clipArea.top(); h <= clipArea.bottom(); ++h)
+           for(  Pt::ssize_t h = clipArea.top(); h < clipArea.bottom(); ++h)
            {
               Pt::uint32_t* dest = ( Pt::uint32_t*)pixelBuffer( h, _screenInfo.yres - w -1);
 
@@ -199,16 +195,8 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::Rect& areaIn )
       }
       break;
 
-      case Rotation180Degree:
-        throw std::logic_error("Not implemented");
-      break;
-
-      case Rotation270Degree:
-        throw std::logic_error("Not implemented");
-      break;
     }
 
- //   std::cout<<"FB output time = " << clock.stop().toUSecs() <<  std::endl;
 }
 
 

@@ -1073,6 +1073,9 @@ void Window::onTouchEvent(const TouchEvent& tev)
 
     Widget* widget = findWidget( tev.position(), true );
 
+    // widget may be null to unset the pointer widget
+    Application::instance().setPointerWidget(widget);
+
     if( widget && widget->isEnabled() )
     {
         TouchEvent ev(tev);

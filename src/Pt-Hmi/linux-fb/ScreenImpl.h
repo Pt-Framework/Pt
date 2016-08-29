@@ -163,6 +163,8 @@ class ScreenImpl : public Pt::Connectable
     protected:
         void onMouseEvent(const Pt::Hmi::MouseEvent& mev);
 
+        void onTouchEvent(const Pt::Hmi::TouchEvent& mev);
+
         void onKeyEvent(const Pt::Hmi::KeyEvent& ev);
 
     private:

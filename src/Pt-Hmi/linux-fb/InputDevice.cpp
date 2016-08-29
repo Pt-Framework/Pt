@@ -48,6 +48,7 @@ InputDevice::InputDevice(const char* deviceName)
 , _keyEvent(0)
 , _mouseEvent(0)
 , _touchMove(0)
+, _touchEvent(0)
 {
     _ioh.fd = ::open(deviceName, O_RDONLY|O_NONBLOCK);
 
@@ -64,6 +65,7 @@ InputDevice::InputDevice()
 , _keyEvent(0)
 , _mouseEvent(0)
 , _touchMove(0)
+, _touchEvent(0)
 {
     _ioh.fd = -1;
 }
@@ -112,7 +114,6 @@ bool InputDevice::onRun()
         return false;
     }
 
-    bool hasPointerEvent = false;
 
     // event sequence for touch events
     //EV_KEY 330 1
@@ -139,7 +140,6 @@ bool InputDevice::onRun()
                         _mouseEvent.setPress(MouseEvent::Left);
 
                     _eventReady.send(_mouseEvent); 
-                    hasPointerEvent = false;                                               
                     break;
                 }
 
@@ -151,7 +151,6 @@ bool InputDevice::onRun()
                         _mouseEvent.setPress(MouseEvent::Right);
 
                     _eventReady.send(_mouseEvent); 
-                    hasPointerEvent = false;
                     break;
                 }
 
@@ -160,8 +159,8 @@ bool InputDevice::onRun()
                     if( ev.value == 0  )
                     {
                         _touchMove = 0;
-                        _mouseEvent.setRelease(MouseEvent::Left);
-                        _eventReady.send(_mouseEvent);
+                        _touchEvent.setRelease();
+                        _eventReady.send(_touchEvent);
                     }
                                                                    
                     break;
@@ -266,36 +265,26 @@ bool InputDevice::onRun()
                 if( _mouseEvent.y() >= _screenSize.height() )
                     _mouseEvent.setY( _screenSize.height() - 1 );
 
-                hasPointerEvent = true;
+                _eventReady.send(_touchEvent);    
                 break;
             }
 
             case EV_ABS:
             {
-                //std::clog << "EV_ABS" << std::endl;
-                Gfx::SizeF screenSize = Application::instance().screen().size();
-
-                double scaleX =  screenSize.width() / 480.0;
-                double scaleY =  screenSize.height() / 800.0;
-                
-                //double scaleX =  screenSize.width() / 800.0;
-                //double scaleY =  screenSize.height() / 480.0;
                 switch(ev.code)
                 {
                     case ABS_MT_SLOT:
                     case ABS_MT_TRACKING_ID:
 
                     case ABS_X:
-                    case ABS_MT_POSITION_X:
-                        _mouseEvent.setY( static_cast<double>(ev.value)*scaleY );
-                        //_mouseEvent.setX(  (static_cast<double>(ev.value)) * scaleX );
+                    case ABS_MT_POSITION_X:                        
+                        _touchEvent.setX(  (static_cast<double>(ev.value)));
                         _touchMove++;
                         break;
 
                     case ABS_Y:
-                    case ABS_MT_POSITION_Y:
-                        _mouseEvent.setX(  (480 - static_cast<double>(ev.value)) * scaleX );
-                        // _mouseEvent.setY( static_cast<double>(ev.value)*scaleY );
+                    case ABS_MT_POSITION_Y:                        
+                         _touchEvent.setY( static_cast<double>(ev.value));
                         _touchMove++;
                         break;
 
@@ -307,12 +296,14 @@ bool InputDevice::onRun()
                         break;
                 }
                 
-                if( _touchMove == 2 )
+                if(_touchMove > 1)
                 {
-                    _mouseEvent.setPress(MouseEvent::Left);
-                    _eventReady.send(_mouseEvent);
-     
-                    _mouseEvent.setMove();
+                    if(_touchMove == 2)
+                        _touchEvent.setPress();
+                    else
+                        _touchEvent.setMove();
+
+                    _eventReady.send(_touchEvent);  
                 }
 
                 break;
@@ -320,12 +311,6 @@ bool InputDevice::onRun()
         }
     }
 
-    if(hasPointerEvent || _touchMove > 2)
-    {
-        //std::clog << "mouse: " << _mouseEvent.isPressed(MouseEvent::Left) << " "
-        //          << _mouseEvent.x() << " " << _mouseEvent.y() << std::endl;
-        _eventReady.send(_mouseEvent);
-    }
 
     return true;
 }

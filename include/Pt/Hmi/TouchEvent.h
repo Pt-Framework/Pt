@@ -144,7 +144,7 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
 
         void setRelease()
         {
-            _action = Press;
+            _action = Release;
         }
 
         bool isMove() const

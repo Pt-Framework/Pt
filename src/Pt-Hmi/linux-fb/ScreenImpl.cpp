@@ -53,6 +53,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 , _drawCursor(true)
 {
     app.eventReady() += Pt::slot( *this, &ScreenImpl::onMouseEvent );
+    app.eventReady() += Pt::slot( *this, &ScreenImpl::onTouchEvent );
     app.eventReady() += Pt::slot( *this, &ScreenImpl::onKeyEvent );
 
     _surface.pixmapImpl()->resize(_frameBuffer.size(), _frameBuffer.strideInBytes() );
@@ -121,6 +122,39 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
   //            << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
                   
     updateScreen( Application::instance().screen().fromUnit( updateRect)  );
+}
+
+
+void ScreenImpl::onTouchEvent(const TouchEvent& ev)
+{     
+    const Gfx::SizeF screenSize = Application::instance().screen().size();
+    const double touchWidth  = 800;
+    const double touchHeight = 480;
+
+    TouchEvent tev = ev;
+
+    switch( _frameBuffer.rotation() )
+    {
+        case FrameBuffer::Rotation0Degree:
+        {
+            double scaleX =  screenSize.width() / touchWidth;
+            double scaleY =  screenSize.height() / touchHeight;
+            tev.setX( scaleX * ev.x() );
+            tev.setY( scaleY * ev.y() );
+        }
+        break;
+
+        case FrameBuffer::Rotation90Degree:
+        {
+             double scaleX =  screenSize.width() / touchHeight;
+             double scaleY =  screenSize.height() / touchWidth;
+             tev.setY( ev.x() * scaleY );
+             tev.setX(  (touchHeight - ev.y()) * scaleX );
+        }
+        break;
+     }
+
+    _windowManager.touchEvent( tev );   
 }
 
 

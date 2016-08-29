@@ -204,16 +204,14 @@ inline int stepAround( int v, int incr, int max )
 Rasterizer::Rasterizer( Image& image )
 : _image( &image )
 , _text( new DrawText() )
-, _clip(PointF(0,0), SizeF( image.width(), image.height()))
 , _font("Vera", 12)
 , _compositionMode(CompositionMode::SourceCopy)
 {
 
   if( _image->format().pixelSize() != 4 )
       throw std::invalid_argument("only 4 byte pixel size image accepted");
-
-  _text->setClip( _clip );
-  _text->setFont( _font );
+  
+    _text->setFont( _font );
 
 }
 
@@ -226,10 +224,7 @@ Rasterizer::~Rasterizer()
 
 void Rasterizer::setImage( Image& image )
 {
-    _image = &image;
-
-    _clip.set( PointF(0,0), SizeF( image.width(), image.height() ) );
-    _text->setClip( _clip );
+    _image = &image;     
 }
 
 
@@ -1866,10 +1861,13 @@ void Rasterizer::stroke( const PointF& pixel)
 
 void Rasterizer::stroke( int x, int y)
 {  
-  if( x < _clip.left()  || x > _clip.right())
+  const RectF imageRect(PointF(0,0), Gfx::SizeF(_image->size().width(), _image->size().height()));
+  const RectF clip = _clip.isNull() ? imageRect : _clip.intersect(imageRect);
+
+  if( x < clip.left()  || x > clip.right())
       return;
 
-  if( y < _clip.top() || y > _clip.bottom())
+  if( y < clip.top() || y > clip.bottom())
       return;
 
   const Image& colorBuffer = _pen.buffer();   
@@ -2015,30 +2013,33 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
 
 void Rasterizer::clipSpan( int& xpos, int& ypos, int& length )
 {
-  if( ypos < _clip.top() )
+  const RectF imageRect(PointF(0,0), Gfx::SizeF(_image->size().width(), _image->size().height()));
+  const RectF clip = _clip.isNull() ? imageRect : _clip.intersect(imageRect);
+
+  if( ypos < clip.top() )
   {
     length = 0;
     return;
   }
 
-  if( ypos > _clip.bottom() )
+  if( ypos > clip.bottom() )
   {
     length = 0;
     return;
   }
 
-  if( xpos > _clip.right() )
+  if( xpos > clip.right() )
   {
     length = 0;
     return;
   }
 
-  if(xpos < _clip.left() )
+  if(xpos < clip.left() )
   {
       if(  length > - xpos )
       {
-          length -= ((int) _clip.left() - xpos );
-          xpos = (int)_clip.left();
+          length -= ((int) clip.left() - xpos );
+          xpos = (int)clip.left();
       }
       else
       {
@@ -2047,8 +2048,8 @@ void Rasterizer::clipSpan( int& xpos, int& ypos, int& length )
       }
   }
 
-  if( (xpos + length) > _clip.right() )
-    length =  ((int) _clip.right() - xpos  + 1);
+  if( (xpos + length) > clip.right() )
+    length =  ((int) clip.right() - xpos  + 1);
 }
 
 
@@ -2129,6 +2130,10 @@ void Rasterizer::fillSolid( const Point& pos, int length )
 
 void Rasterizer::strokeText( const PointF& to, const Pt::String& text )
 { 
+  const RectF imageRect(PointF(0,0), Gfx::SizeF(_image->size().width(), _image->size().height()));
+  const RectF clip = _clip.isNull() ? imageRect : _clip.intersect( imageRect);
+
+  _text->setClip(clip);
   _text->draw( *_image, _pen.color(), to, text );
 }
 
@@ -2365,8 +2370,11 @@ void Rasterizer::fillRect(int x, int y,  int w,  int h)
     int ypos = std::max( 0, y );
     int yend = 0;
 
+    const RectF imageRect(PointF(0,0), Gfx::SizeF(_image->size().width(), _image->size().height()));
+    const RectF clip = _clip.isNull() ? imageRect : _clip.intersect( imageRect);
+
     if( (y + h) > 0 )
-        yend = std::min<int>( _clip.bottom(), y + h ) ;
+        yend = std::min<int>( clip.bottom(), y + h ) ;
 
     for( ; ypos < yend; ypos++ )
         stroke(x, ypos, w );
@@ -3356,7 +3364,10 @@ void Rasterizer::fill( const PointF* pts, size_t pointCount)
 
     ClipPolygon clipper;
 
-    clipper( points, _clip );
+    const RectF imageRect(PointF(0,0), Gfx::SizeF(_image->size().width(), _image->size().height()));
+    const RectF clip = _clip.isNull() ? imageRect :_clip.intersect(imageRect);
+
+    clipper( points, clip );
 
     // find unclipped origin coordinates
     //
@@ -3614,6 +3625,9 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
 {
   Point to( (int) toF.x(), (int) toF.y() );
   
+  const RectF imageRect(PointF(0,0), Gfx::SizeF(_image->size().width(), _image->size().height()));
+  const RectF clip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
+
   Rect imgRect( (Pt::ssize_t)imageRectF.left(), (Pt::ssize_t)imageRectF.right(), (Pt::ssize_t) imageRectF.top(), (Pt::ssize_t) imageRectF.bottom());
 
   switch( _compositionMode )
@@ -3641,8 +3655,8 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
           int yTargetBegin = to.y();
 
           // outside target image
-          if( to.x() >= _image->width() ||
-              to.y() >= _image->height() ||
+          if( to.x() >= clip.width() || 
+              to.y() >= clip.height() ||
               imagePos.x() >= image.width() ||
               imagePos.y() >= image.height() )
              return;
@@ -3650,12 +3664,20 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
           if( to.x() < 0 )
           {
               xSourceBegin = imagePos.x() - to.x();
+
+              if( xSourceBegin < 0 ) 
+                xSourceBegin = 0;
+
               xTargetBegin = 0;
           }
 
           if( to.y() < 0 )
           {
             ySourceBegin = imagePos.y() - to.y();
+
+            if( ySourceBegin < 0 ) 
+                ySourceBegin = 0;
+
             yTargetBegin = 0;
           }
 
@@ -3664,8 +3686,8 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
           if( to.x() < 0 )
             lineLength += to.x();
 
-          if( (xTargetBegin + lineLength) > _image->width()  )
-              lineLength -= (xTargetBegin + lineLength) - _image->width() ;
+          if( (xTargetBegin + lineLength) > clip.width()  )
+              lineLength -= (xTargetBegin + lineLength) - clip.width() ;
  
           if(lineLength <= 0)
             return;  
@@ -3674,8 +3696,8 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
 
           int lines = imageRect.height();   
 
-          if( endYOffset > _image->height()  )
-              lines = _image->height() - yTargetBegin;
+          if( endYOffset > clip.height()  )
+              lines = clip.height() - yTargetBegin;
 
           if( endYOffset < 0 )
             return;
@@ -3706,7 +3728,7 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
               const size_t x = to.x() + (w - imageRectF.left());
               const size_t y = to.y() + (h - imageRectF.top());
 
-              if(!( x >= clip().left() &&  x < clip().right() && y  >=  clip().top()  && y < clip().bottom() ))
+              if(!( x >= clip.left() &&  x < clip.right() && y  >=  clip.top()  && y < clip.bottom() ))
                   continue;
 
               const Pt::uint8_t* srcData = image.pixel(w,h);
@@ -3735,7 +3757,7 @@ void Rasterizer::image( const PointF& toF, const Image& image, const RectF& imag
               const size_t x = to.x() + (w - imageRectF.left());
               const size_t y = to.y() + (h - imageRectF.top());
 
-               if(!( x >= clip().left() && x < clip().right() && y >= clip().top() && y < clip().bottom() ))
+               if(!( x >= clip.left() && x < clip.right() && y >= clip.top() && y < clip.bottom() ))
                   continue;
                          
               const Pt::uint8_t* srcData = image.pixel(w,h);
@@ -3805,18 +3827,7 @@ void Rasterizer::clear( const Color& color)
 
 void Rasterizer::setClip( const RectF& clip )
 {
-  if( clip.isNull() )
-  {
-      _clip = Gfx::RectF( Gfx::PointF(0,0),
-                          Gfx::SizeF( _image->size().width(), 
-                                      _image->size().height() ) );
-  }
-  else
-  {
-      _clip = clip;
-  }
-  
-  _text->setClip( _clip );
+  _clip = clip;
 }
 
 }}
