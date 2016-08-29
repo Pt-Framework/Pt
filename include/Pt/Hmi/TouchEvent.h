@@ -50,11 +50,31 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
         };
 
     public:
-        TouchEvent()
-        : _pos(0, 0)
+        TouchEvent(Pt::uint64_t vid)
+        : _vid( vid )
+        , _pos(0, 0)
         , _action(Move)
         , _trackingId(0)
+        , _pressure(1.0)
         {
+        }
+        
+        void clear()
+        {
+            _pos.set(0, 0);
+            _action = Move;
+            _trackingId = 0;
+            _pressure = 1.0;
+        }
+        
+        void setId(Pt::uint64_t vid)
+        {
+            _vid = vid;
+        }
+
+        Pt::uint64_t vid() const
+        {
+            return _vid;
         }
 
         const Gfx::PointF& position() const
@@ -71,17 +91,17 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
         {
             return _pos.x();
         }
-
-        double y() const
-        {
-            return _pos.y();
-        }
-    
+        
         void setX(double x)
         {
             _pos.setX(x);
         }
-    
+        
+        double y() const
+        {
+            return _pos.y();
+        }
+
         void setY(double y)
         {
             _pos.setY(y);
@@ -91,10 +111,20 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
         {
             return _trackingId;
         }
-
+        
+        void setTrackingId(Pt::uint32_t tid)
+        {
+            _trackingId = tid;
+        }
+        
         double pressure() const
         {
             return _pressure;
+        }
+
+        void setPressure(double p)
+        {
+            _pressure = p;
         }
 
         bool isPress() const
@@ -102,12 +132,9 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
             return _action == Press;
         }
 
-        void setPress(Pt::uint32_t trackId, double x, double y, double p)
+        void setPress()
         {
             _action = Press;
-            _trackingId = trackId;
-            _pos.set(x, y);
-            _pressure = p;
         }
 
         bool isRelease() const
@@ -115,12 +142,9 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
             return _action == Release;
         }
 
-        void setRelease(Pt::uint32_t trackId, double x, double y, double p)
+        void setRelease()
         {
             _action = Press;
-            _trackingId = trackId;
-            _pos.set(x, y);
-            _pressure = p;
         }
 
         bool isMove() const
@@ -128,19 +152,17 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
             return _action == Move;
         }
 
-        void setMove(Pt::uint32_t trackId, double x, double y, double p)
+        void setMove()
         {
             _action = Move;
-            _trackingId = trackId;
-            _pos.set(x, y);
-            _pressure = p;
         }
 
     private:
+        Pt::uint64_t _vid;
         Gfx::PointF  _pos;
-        Action _action;
+        Action       _action;
         Pt::uint32_t _trackingId;
-        double _pressure;
+        double       _pressure;
 };
 
 } // namespace

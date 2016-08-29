@@ -56,6 +56,7 @@ Application::Application(int argc, char** argv)
     loop().eventReceived() += Pt::slot(*this, &Application::onUpdateEvent ); 
     loop().eventReceived() += Pt::slot(*this, &Application::onPaintEvent ); 
     loop().eventReceived() += Pt::slot(*this, &Application::onMouseEvent );
+    loop().eventReceived() += Pt::slot(*this, &Application::onTouchEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onScrollEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onActivateEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onEnableEvent );
@@ -286,6 +287,17 @@ void Application::onResizeEvent(const ResizeEvent& ev)
 
 
 void Application::onMouseEvent(const MouseEvent& ev)
+{
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+
+    if( it == _visuals.end() )
+        return;
+
+    it->second->processEvent(ev);
+}
+
+
+void Application::onTouchEvent(const TouchEvent& ev)
 {
     VisualMap::iterator it = _visuals.find( ev.vid() );
 

@@ -225,7 +225,66 @@ bool WindowManager::mouseEvent( const MouseEvent& mev )
     //
     if(windowFrame)
     {         
-        if(windowFrame->mouseEvent(mev))
+        if( windowFrame->mouseEvent(mev) )
+            _grabbedWindow = windowFrame;
+        else
+            _grabbedWindow = 0;
+    }
+
+    _currentWindow = windowFrame;
+
+    return windowFrame != 0;
+}
+
+
+bool WindowManager::touchEvent( const TouchEvent& tev )
+{
+    WindowFrame* windowFrame = 0;
+
+    if(_grabbedWindow)
+        windowFrame = _grabbedWindow;
+    else
+        windowFrame = findWindow( tev.position() );
+
+    //
+    // window activation
+    //
+    if( tev.isPress() )
+    {
+        if( ! windowFrame && _activeWindow )
+        {
+            onActivate(0);
+        }
+        
+        if( windowFrame && ! windowFrame->window()->isActive())
+        {
+            windowFrame->window()->activate();
+        }
+    }
+
+    //
+    // window enter/leave
+    //
+    if(_currentWindow != windowFrame)
+    {
+      if(_currentWindow)
+      {
+          LeaveEvent lev( _currentWindow->window()->vid() );
+          _currentWindow->leaveEvent(lev);
+      }
+      if(windowFrame)
+      {
+          EnterEvent eev( windowFrame->window()->vid() );
+          windowFrame->enterEvent(eev);
+      }
+    }
+
+    //
+    // forward touch event
+    //
+    if(windowFrame)
+    {         
+        if(windowFrame->touchEvent(tev))
             _grabbedWindow = windowFrame;
         else
             _grabbedWindow = 0;

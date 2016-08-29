@@ -93,6 +93,8 @@ class WindowButton
 
         virtual void mouseEvent(const MouseEvent& mev);
 
+        virtual void touchEvent(const TouchEvent& tev);
+
         virtual void paint(PaintSurface& surface, const Gfx::RectF& rect);
 
     private:
@@ -194,12 +196,18 @@ class WindowFrame : public Pt::Connectable
 
         void leaveEvent(const LeaveEvent& lev);
 
+        //! @brief Returns true if window was grabbed for moving or resizing.
         bool mouseEvent(const MouseEvent& mev);
+
+        //! @brief Returns true if window was grabbed for moving or resizing.
+        bool touchEvent(const TouchEvent& tev);
 
         void paint(PaintSurface& surface, const Gfx::RectF& rect);
 
     protected:
         bool onMouseEvent(const MouseEvent& mev);
+
+        bool onTouchEvent(const TouchEvent& tev);
 
         void onLayout();
 
@@ -221,6 +229,16 @@ class WindowFrame : public Pt::Connectable
         bool isTopBorder(const Pt::Gfx::PointF& p) const;
         
         bool isBottomBorder(const Pt::Gfx::PointF& p) const;
+
+        Window* checkWindow(const Gfx::PointF& pos);
+
+        WindowButton* checkButton(const Gfx::PointF& pos);
+
+        //! @brief Returns true if window was grabbed for moving or resizing.
+        bool checkMove(const Gfx::PointF& pos, bool isPressed);
+
+        //! @brief Returns true if window was grabbed for moving or resizing.
+        bool checkResize(const Gfx::PointF& pos, bool isPressed);
 
     private:
         WindowManager* _wm;

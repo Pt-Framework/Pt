@@ -33,6 +33,7 @@
 #include <Pt/Hmi/Screen.h>
 #include <Pt/Hmi/ResizeEvent.h>
 #include <Pt/Hmi/MouseEvent.h>
+#include <Pt/Hmi/TouchEvent.h>
 #include <Pt/Hmi/ScrollEvent.h>
 #include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Hmi/MoveEvent.h>
@@ -105,6 +106,8 @@ class PT_HMI_API Application : public Pt::System::Application
         void onResizeEvent(const ResizeEvent& ev);
 
         void onMouseEvent(const MouseEvent& ev);
+
+        void onTouchEvent(const TouchEvent& ev);
 
         void onScrollEvent(const ScrollEvent& ev);
 

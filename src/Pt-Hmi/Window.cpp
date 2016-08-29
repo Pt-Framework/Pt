@@ -1048,7 +1048,6 @@ void Window::onMouseEvent(const MouseEvent& ev)
         return;    
 
     Widget* widget = findWidget( ev.position(), true );
-
     if( ! widget )
     {
         Application::instance().setCursor( &Cursor::defaultCursor() ); 
@@ -1067,8 +1066,20 @@ void Window::onMouseEvent(const MouseEvent& ev)
 }
 
 
-void Window::onTouchEvent(const TouchEvent& ev)
+void Window::onTouchEvent(const TouchEvent& tev)
 {
+    if( _windowManager.touchEvent(tev) )
+        return;
+
+    Widget* widget = findWidget( tev.position(), true );
+
+    if( widget && widget->isEnabled() )
+    {
+        TouchEvent ev(tev);
+        ev.setId( widget->vid() );
+        ev.setPosition( widget->fromWindow(tev.position()) );
+        Application::instance().loop().commitEvent(ev); 
+    }
 }
 
 

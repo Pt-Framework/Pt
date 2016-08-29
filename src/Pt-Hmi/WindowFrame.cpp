@@ -123,6 +123,21 @@ void WindowButton::mouseEvent(const MouseEvent& mev)
 }
 
 
+void WindowButton::touchEvent(const TouchEvent& tev)
+{
+    bool isPressed = tev.isPress() || tev.isMove();
+
+    if(_isPressed != isPressed)
+        update();
+
+    bool wasPressed = _isPressed;
+    _isPressed = isPressed;
+    
+    if( wasPressed && tev.isRelease() )
+        _clicked.send();
+}
+
+
 void WindowButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     Painter painter(surface);
@@ -483,63 +498,6 @@ void WindowFrame::onClose()
 }
 
 
-bool WindowFrame::isTitle(const Gfx::PointF& p) const
-{            
-    Gfx::PointF localPos = p - _frameRect.topLeft();
-
-    return localPos.x() >= _borderWidth && 
-           localPos.x() < _borderWidth + _clientRect.width() &&
-           localPos.y() >= _borderWidth &&
-           localPos.y() < _borderWidth + _titleHeight;
-}
-
-
-bool WindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
-{        
-    Gfx::PointF localPos = p - _frameRect.topLeft();
-
-    return localPos.x() >= 0 &&
-           localPos.x() < _borderWidth &&
-           localPos.y() >= 0 &&
-           localPos.y() < _frameRect.height();
-}
-
-
-bool WindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
-{        
-    Gfx::PointF localPos = p - _frameRect.topLeft();
-
-    return localPos.x() >= _borderWidth + _clientRect.width() &&
-           localPos.x() < 2 * _borderWidth + _clientRect.width() &&
-           localPos.y() >= 0 &&
-           localPos.y() < _frameRect.height();
-}
-
-
-bool WindowFrame::isTopBorder(const Pt::Gfx::PointF& p) const
-{        
-    Gfx::PointF localPos = p - _frameRect.topLeft();
-
-    return localPos.x() >= 0 &&
-           localPos.x() < _frameRect.width() &&
-           localPos.y() >= 0 &&
-           localPos.y() < _borderWidth;
-}
-
-
-bool WindowFrame::isBottomBorder(const Pt::Gfx::PointF& p) const
-{        
-    Gfx::PointF localPos = p - _frameRect.topLeft();
-
-    double minY = _clientRect.height() + _borderWidth + _titleHeight;
-
-    return localPos.x() >= 0 &&
-           localPos.x() < _frameRect.width() &&
-           localPos.y() >= minY &&
-           localPos.y() < _frameRect.height();
-}
-
-
 void WindowFrame::update()
 {
     update(_frameRect);
@@ -639,77 +597,48 @@ bool WindowFrame::mouseEvent(const MouseEvent& mev)
 }
 
 
+bool WindowFrame::touchEvent(const TouchEvent& tev)
+{
+    bool r = onTouchEvent(tev);
+    _lastPointer = tev.position();
+    return r;
+}
+
+
 bool WindowFrame::onMouseEvent(const MouseEvent& mev)
 {
-    bool isResizing = _isLeftResizing || _isRightResizing || 
-                      _isTopResizing || _isBottomResizing;
-    
-    if( ! _isMoving && ! isResizing )
+    Window* window = checkWindow( mev.position() );
+    if(window)
     {
-        if(_clientRect.contains( mev.position() ) )
-        {        
-            if( ! _isClient )
-            {
-                _isClient = true;
-                EnterEvent eev(_window->vid());
-                _window->processEvent(eev);
-            }
-
-            if( _window->isEnabled())
-            {
-                Gfx::PointF pos = mev.position() - _clientRect.topLeft();
-                MouseEvent mev2 = mev;
-                mev2.setPosition(pos);
-                _window->processEvent(mev2);
-            }
-
-            return false;
-        }
-
-        if(_isClient)
+        if( window->isEnabled() )
         {
-            _isClient = false;
-            LeaveEvent lev(_window->vid());
-            _window->processEvent(lev);
+            Gfx::PointF pos = mev.position() - _clientRect.topLeft();
+            MouseEvent mev2 = mev;
+            mev2.setPosition(pos);
+            window->processEvent(mev2);
         }
-
-        std::vector<WindowButton*>::iterator it;
-        for(it = _buttons.begin(); it != _buttons.end(); ++it)
-        {
-            WindowButton* button = *it;
         
-            if(button->geometry().contains( mev.position() ) )
-            {
-                button->mouseEvent(mev);
-                return false;
-            }
-            else if(button->geometry().contains(_lastPointer) )
-            {
-                button->leaveEvent( LeaveEvent(0) );
-            }
-        }
+        return false;
     }
 
-    bool onTitle = _isMoving || isTitle( mev.position() );
-    if( onTitle && ! isResizing )
+    WindowButton* button = checkButton( mev.position() );
+    if(button)
+    {
+        button->mouseEvent(mev);
+        return false;
+    }
+
+    if( isTitle( mev.position() ) )
     {
         Application::instance().setCursor( &Cursor::moveCursor() );
-        _isMoving = (_isMoving || mev.isPress()) && ! mev.isReleased();
         
-        if(_isMoving && mev.position() != _lastPointer)
-        {
-            Gfx::PointF to = _window->position() + mev.position() - _lastPointer;
-            _window->move(to);
-            _isMoving = true;
-        }
-        
-        return _isMoving;
+        return checkMove(mev.position(), mev.isPressed() );
     }
- 
-    bool onLeftBorder = _isLeftResizing || isLeftBorder( mev.position() );
-    bool onRightBorder = _isRightResizing || isRightBorder( mev.position() );
-    bool onTopBorder = _isTopResizing || isTopBorder( mev.position() );
-    bool onBottomBorder = _isBottomResizing || isBottomBorder( mev.position() );
+
+    bool onLeftBorder = isLeftBorder( mev.position() );
+    bool onRightBorder = isRightBorder( mev.position() );
+    bool onTopBorder = isTopBorder( mev.position() );
+    bool onBottomBorder = isBottomBorder( mev.position() );
     
     if(onLeftBorder || onRightBorder || onTopBorder || onBottomBorder)
     {
@@ -720,14 +649,215 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
         else if(onRightBorder || onLeftBorder)
             Application::instance().setCursor( &Hmi::Cursor::sizeWECursor() );
         else if(onTopBorder || onBottomBorder)
-            Application::instance().setCursor( &Hmi::Cursor::sizeNSCursor() );     
+            Application::instance().setCursor( &Hmi::Cursor::sizeNSCursor() );
 
-        _isLeftResizing = _isLeftResizing || (onLeftBorder && mev.isPress());
-        _isRightResizing = _isRightResizing || (onRightBorder&& mev.isPress());
-        _isTopResizing = _isTopResizing || (onTopBorder && mev.isPress());
-        _isBottomResizing =_isBottomResizing ||(onBottomBorder&& mev.isPress());
+        return checkResize(mev.position(), mev.isPressed());
+    }
 
-        if( ! mev.isPressed() )
+    Application::instance().setCursor( &Cursor::defaultCursor() );
+    return false;
+}
+
+
+bool WindowFrame::onTouchEvent(const TouchEvent& tev)
+{
+    Window* window = checkWindow( tev.position() );
+    if(window)
+    {
+        if( window->isEnabled() )
+        {
+            Gfx::PointF pos = tev.position() - _clientRect.topLeft();
+            TouchEvent tev2 = tev;
+            tev2.setPosition(pos);
+            window->processEvent(tev2);
+        }
+        
+        return false;
+    }
+
+    WindowButton* button = checkButton( tev.position() );
+    if(button)
+    {
+        button->touchEvent(tev);
+        return false;
+    }
+
+    bool isPressed = tev.isPress() || tev.isMove();
+
+    bool isMove = checkMove(tev.position(), isPressed);
+    if(isMove)
+    {
+        return true;
+    }
+
+    return checkResize(tev.position(), isPressed);
+}
+
+
+bool WindowFrame::isTitle(const Gfx::PointF& p) const
+{            
+    bool isResizing = _isLeftResizing || _isRightResizing || 
+                      _isTopResizing || _isBottomResizing;
+
+
+    Gfx::PointF localPos = p - _frameRect.topLeft();
+
+    bool overTitle = localPos.x() >= _borderWidth && 
+                     localPos.x() < _borderWidth + _clientRect.width() &&
+                     localPos.y() >= _borderWidth &&
+                     localPos.y() < _borderWidth + _titleHeight;
+
+    return (_isMoving || overTitle) && ! isResizing;
+}
+
+
+bool WindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
+{        
+    Gfx::PointF localPos = p - _frameRect.topLeft();
+
+    bool r =  localPos.x() >= 0 &&
+              localPos.x() < _borderWidth &&
+              localPos.y() >= 0 &&
+              localPos.y() < _frameRect.height();
+
+    return _isLeftResizing || r;
+}
+
+
+bool WindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
+{        
+    Gfx::PointF localPos = p - _frameRect.topLeft();
+
+    bool r =   localPos.x() >= _borderWidth + _clientRect.width() &&
+               localPos.x() < 2 * _borderWidth + _clientRect.width() &&
+               localPos.y() >= 0 &&
+               localPos.y() < _frameRect.height();
+
+    return _isRightResizing || r;
+}
+
+
+bool WindowFrame::isTopBorder(const Pt::Gfx::PointF& p) const
+{        
+    Gfx::PointF localPos = p - _frameRect.topLeft();
+
+    bool r =   localPos.x() >= 0 &&
+               localPos.x() < _frameRect.width() &&
+               localPos.y() >= 0 &&
+               localPos.y() < _borderWidth;
+    
+    return _isTopResizing || r;
+}
+
+
+bool WindowFrame::isBottomBorder(const Pt::Gfx::PointF& p) const
+{        
+    Gfx::PointF localPos = p - _frameRect.topLeft();
+
+    double minY = _clientRect.height() + _borderWidth + _titleHeight;
+
+    bool r =   localPos.x() >= 0 &&
+               localPos.x() < _frameRect.width() &&
+               localPos.y() >= minY &&
+               localPos.y() < _frameRect.height();
+    
+    return _isBottomResizing || r;
+}
+
+
+Window* WindowFrame::checkWindow(const Gfx::PointF& pos)
+{
+    bool isResizing = _isLeftResizing || _isRightResizing || 
+                      _isTopResizing || _isBottomResizing;
+
+    if( ! _isMoving && ! isResizing )
+    {
+        if(_clientRect.contains( pos ) )
+        {        
+            if( ! _isClient )
+            {
+                _isClient = true;
+                EnterEvent eev(_window->vid());
+                _window->processEvent(eev);
+            }
+
+            return _window;
+        }
+
+        if(_isClient)
+        {
+            _isClient = false;
+            LeaveEvent lev(_window->vid());
+            _window->processEvent(lev);
+        }
+    }
+
+    return false;
+}
+
+
+WindowButton* WindowFrame::checkButton(const Gfx::PointF& pos)
+{
+    bool isResizing = _isLeftResizing || _isRightResizing || 
+                      _isTopResizing || _isBottomResizing;
+    
+    if( ! _isMoving && ! isResizing )
+    {
+        std::vector<WindowButton*>::iterator it;
+        for(it = _buttons.begin(); it != _buttons.end(); ++it)
+        {
+            WindowButton* button = *it;
+        
+            if(button->geometry().contains(pos) )
+            {
+                return button;
+            }
+            else if(button->geometry().contains(_lastPointer) )
+            {
+                button->leaveEvent( LeaveEvent(0) );
+            }
+        }
+    }
+
+    return 0;
+}
+
+
+bool WindowFrame::checkMove(const Gfx::PointF& pos, bool isPressed)
+{
+    if( isTitle(pos) )
+    {       
+        _isMoving = isPressed;
+
+        if(_isMoving && pos != _lastPointer)
+        {
+            Gfx::PointF to = _window->position() + pos - _lastPointer;
+            _window->move(to);
+            _isMoving = true;
+        }
+        
+        return _isMoving;
+    }
+
+    return false;
+}
+ 
+
+bool WindowFrame::checkResize(const Gfx::PointF& pos, bool isPressed)
+{
+    bool onLeftBorder = isLeftBorder(pos);
+    bool onRightBorder = isRightBorder(pos);
+    bool onTopBorder = isTopBorder(pos);
+    bool onBottomBorder = isBottomBorder(pos);
+    
+    if(onLeftBorder || onRightBorder || onTopBorder || onBottomBorder)
+    {
+        _isLeftResizing   = onLeftBorder && isPressed;
+        _isRightResizing  = onRightBorder && isPressed;
+        _isTopResizing    = onTopBorder && isPressed;
+        _isBottomResizing = onBottomBorder&& isPressed;
+
+        if( ! isPressed )
         {
             _isLeftResizing = false;
             _isRightResizing = false;
@@ -737,12 +867,12 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
         }
 
         Gfx::SizeF size = _window->size();
-        Gfx::PointF pos = _window->position();
-        Gfx::PointF delta = mev.position() - _lastPointer;
+        Gfx::PointF winpos = _window->position();
+        Gfx::PointF delta = pos - _lastPointer;
 
         if( _isLeftResizing )
         {
-            pos.addX( delta.x() );
+            winpos.addX( delta.x() );
             size.subWidth(delta.x());
         }   
 
@@ -751,7 +881,7 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
             
         if(_isTopResizing)
         {
-            pos.addY( delta.y() );
+            winpos.addY( delta.y() );
             size.subHeight(delta.y());
         }
 
@@ -761,13 +891,12 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
         if( size != _window->size() )
             _window->resize(size);
 
-        if( pos != _window->position() )
-            _window->move(pos);
+        if( winpos != _window->position() )
+            _window->move(winpos);
 
         return true;
     }
 
-    Application::instance().setCursor( &Cursor::defaultCursor() ); 
     return false;
 }
 
