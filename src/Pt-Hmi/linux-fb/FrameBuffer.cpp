@@ -178,7 +178,6 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::Rect& areaIn )
       case Rotation90Degree:
       {
         const Gfx::Rect clipArea = areaIn.intersect( Gfx::Rect(Gfx::Point(0,0), size()));        
-        std::cout<<"l =" << clipArea.left() << " r = " << clipArea.right() << " t = " << clipArea.top() << " b = " << clipArea.bottom() << std::endl;
 
         for( Pt::ssize_t w = clipArea.left(); w < clipArea.right(); ++w)
         {
