@@ -235,10 +235,10 @@ class WindowFrame : public Pt::Connectable
         WindowButton* checkButton(const Gfx::PointF& pos);
 
         //! @brief Returns true if window was grabbed for moving or resizing.
-        bool checkMove(const Gfx::PointF& pos, bool isPressed);
+        bool checkMove(const Gfx::PointF& pos, bool isDrag, bool isPress);
 
         //! @brief Returns true if window was grabbed for moving or resizing.
-        bool checkResize(const Gfx::PointF& pos, bool isPressed);
+        bool checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress);
 
     private:
         WindowManager* _wm;
