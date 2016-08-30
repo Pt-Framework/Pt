@@ -148,8 +148,42 @@ void ScrollBar::onMouseEvent(const MouseEvent& ev)
 
     if(_dragging)
     {
-        double pixPos =_orientation == Vertical ? ev.position().y() 
-                                                : ev.position().x();
+        double pixPos = _orientation == Vertical ? ev.position().y() 
+                                                 : ev.position().x();
+        int pos = pixelToPosition(pixPos);
+
+        if( pos >= _minPos && pos <= _maxPos)
+          setPosition( pos);
+    }
+}
+
+
+void ScrollBar::onTouchEvent(const TouchEvent& tev)
+{
+    Panel::onTouchEvent(tev);
+
+    if( tev.isPress() )
+    {
+        if(_handleRect.contains( tev.position() ) )
+        {
+            // TODO: need grabPointer
+            //this->grabMouse();
+            
+            _dragging = true;
+        }
+    }
+    else if( tev.isRelease() )
+    {
+        _dragging = false;
+
+        // TODO: need grabPointer
+        //this->releaseMouse();
+    }
+
+    if(_dragging)
+    {
+        double pixPos = _orientation == Vertical ? tev.position().y() 
+                                                 : tev.position().x();
         int pos = pixelToPosition(pixPos);
 
         if( pos >= _minPos && pos <= _maxPos)

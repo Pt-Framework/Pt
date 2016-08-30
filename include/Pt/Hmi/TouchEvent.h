@@ -127,6 +127,25 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
             _pressure = p;
         }
 
+        bool isMove() const
+        {
+            return _action == Move;
+        }
+
+        void setMove()
+        {
+            _action = Move;
+        }
+
+        /** @brief Returns true if touch device is in pressed state.
+        */
+        bool isPressed() const
+        {
+             return _action == Move || _action == Press;
+        }
+
+        /** @brief Returns true if touch device was just pressed.
+        */
         bool isPress() const
         {
             return _action == Press;
@@ -137,6 +156,8 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
             _action = Press;
         }
 
+        /** @brief Returns true if touch device was released.
+        */
         bool isRelease() const
         {
             return _action == Release;
@@ -145,16 +166,6 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
         void setRelease()
         {
             _action = Release;
-        }
-
-        bool isMove() const
-        {
-            return _action == Move;
-        }
-
-        void setMove()
-        {
-            _action = Move;
         }
 
     private:

@@ -68,6 +68,8 @@ class PT_HMI_API ScrollBar : public Panel
     protected:
         virtual void onMouseEvent(const MouseEvent& ev);
 
+        virtual void onTouchEvent(const TouchEvent& ev);
+
         virtual void onResizeEvent(const ResizeEvent& ev);
         
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);

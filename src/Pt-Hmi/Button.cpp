@@ -100,6 +100,18 @@ void Button::onMouseEvent(const MouseEvent& ev)
 }
 
 
+void Button::onTouchEvent(const TouchEvent& ev)
+{    
+    Label::onTouchEvent(ev);
+
+    if( ev.isPressed() != _isPressed )
+    {
+        _isPressed = ev.isPressed();
+        update();
+    }
+}
+
+
 void Button::onEnterEvent(const EnterEvent& ev )
 {
     Label::onEnterEvent(ev);
@@ -114,17 +126,6 @@ void Button::onLeaveEvent(const LeaveEvent& ev )
     update();
 }
 
-
-void Button::onTouchEvent(const TouchEvent& ev)
-{    
-    Label::onTouchEvent(ev);
-
-    if( ev.isPress() != _isPressed )
-    {
-        _isPressed = ev.isPress();
-        update();
-    }
-}
 
 void Button::onFocusEvent(const FocusEvent& ev)
 {    
@@ -146,7 +147,6 @@ void Button::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
         return;
     }
 
-    
     if( mouseOver )
     {
         setBackgroundColor( Gfx::Color(bkgColor.red() * 0.9f ,
