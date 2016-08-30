@@ -828,7 +828,7 @@ bool WindowFrame::checkMove(const Gfx::PointF& pos, bool isDrag, bool isPress)
 {
     if( isTitle(pos) )
     {       
-        _isMoving = isDrag || isPress;
+        _isMoving = (_isMoving && isDrag) || isPress;
 
         if(_isMoving && ! isPress)
         {
@@ -852,12 +852,13 @@ bool WindowFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress)
     
     if(onLeftBorder || onRightBorder || onTopBorder || onBottomBorder)
     {
-        bool isResizing = isDrag || isPress;
+        _isLeftResizing   = onLeftBorder && ((_isLeftResizing && isDrag) || isPress);
+        _isRightResizing  = onRightBorder && ((_isRightResizing && isDrag) || isPress);
+        _isTopResizing    = onTopBorder && ((_isTopResizing && isDrag) || isPress);
+        _isBottomResizing = onBottomBorder && ((_isBottomResizing && isDrag) || isPress);
 
-        _isLeftResizing   = onLeftBorder && isResizing;
-        _isRightResizing  = onRightBorder && isResizing;
-        _isTopResizing    = onTopBorder && isResizing;
-        _isBottomResizing = onBottomBorder && isResizing;
+        bool isResizing = _isLeftResizing || _isRightResizing || 
+                          _isTopResizing || _isBottomResizing;
 
         if(isResizing && ! isPress)
         {
