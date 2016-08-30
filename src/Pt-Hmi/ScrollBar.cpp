@@ -228,9 +228,15 @@ void ScrollBar::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-void ScrollBar::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
+void ScrollBar::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    Panel::onPaint(surface, updateRect);
+    Panel::onPaintBackground(surface, updateRect);
+}
+
+
+void ScrollBar::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+    Panel::onPaintContent(surface, updateRect);
 
     Painter painter(surface);
     painter.setClip(updateRect);

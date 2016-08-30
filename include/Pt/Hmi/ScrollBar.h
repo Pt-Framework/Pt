@@ -72,7 +72,9 @@ class PT_HMI_API ScrollBar : public Panel
 
         virtual void onResizeEvent(const ResizeEvent& ev);
         
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
         int pixelToPosition(double pix);

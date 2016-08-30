@@ -80,10 +80,10 @@ class PT_HMI_API MenuItem : public Panel
         virtual void onShortcut(const KeyEvent& kev);
 
         virtual Gfx::SizeF onAutoSize() const;
-
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
         
         virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         virtual void onPaintIcon(PaintSurface& surface, const Gfx::RectF& updateRect);
 

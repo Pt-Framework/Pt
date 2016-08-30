@@ -221,17 +221,6 @@ Gfx::SizeF MenuItem::onAutoSize() const
 }
 
 
-void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-    //WidgetBaseType::onPaint(surface, updateRect);
-
-    onPaintBackground(surface, updateRect);
-    onPaintIcon(surface, updateRect);
-    onPaintItem(surface, updateRect);
-    onPaintShortcut(surface, updateRect);
-}
-
-
 void MenuItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     bool mouseOver = Application::instance().pointerWidget() == this;
@@ -246,6 +235,14 @@ void MenuItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& update
         painter.setBrush(brush);
         painter.fillRect( Gfx::RectF(Gfx::PointF(0,0), size()) );
     }
+}
+
+
+void MenuItem::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+    onPaintIcon(surface, updateRect);
+    onPaintItem(surface, updateRect);
+    onPaintShortcut(surface, updateRect);
 }
 
 

@@ -71,11 +71,15 @@ Gfx::SizeF Label::onAutoSize() const
 }
 
 
-void Label::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
+void Label::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    //std::clog << "Label::onPaint: " << _text.narrow() << std::endl;
+    Panel::onPaintBackground(surface, updateRect);
+}
 
-    Panel::onPaint(surface, updateRect);
+
+void Label::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+    Panel::onPaintContent(surface, updateRect);
        
     Gfx::SizeF         size = this->size();
     Gfx::PointF        pos(0,0);

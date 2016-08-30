@@ -61,28 +61,6 @@ Panel::~Panel()
 }
 
 
-void Panel::onPaintEvent(const PaintEvent& ev)
-{
-    Widget::onPaintEvent(ev);
-
-    Gfx::PointF winpos = toWindow( Gfx::PointF(0,0) );
-    PaintSurface& windowSurface = this->window()->surface();
-
-    Gfx::RectF paintRect(winpos, size());
-    PaintRegion region(windowSurface, paintRect);
-    
-    Gfx::RectF widgetRect(Gfx::PointF(0,0), size());
-    Gfx::RectF clipRect = ev.rect().intersect(widgetRect);
-
-    if( clipRect.isNull() )
-      return;
-
-    //region.setClip(clipRect);
-    
-    onPaint(region, clipRect);
-}
-
-
 void Panel::onResizeEvent(const ResizeEvent& ev)
 {
     Widget::onResizeEvent(ev);
@@ -112,7 +90,22 @@ void Panel::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
+void Panel::onPaintEvent(const PaintEvent& ev)
+{
+    Widget::onPaintEvent(ev);
+
+    Gfx::PointF winpos = toWindow( Gfx::PointF(0,0) );
+    PaintSurface& windowSurface = this->window()->surface();
+
+    Gfx::RectF paintRect(winpos, size());
+    PaintRegion region(windowSurface, paintRect);
+
+    onPaintBackground(region, ev.rect());
+    onPaintContent(region, ev.rect());
+}
+
+
+void Panel::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     const Gfx::SizeF& size = this->size();
 
@@ -260,6 +253,11 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
         default:
             break;
     }
+}
+
+
+void Panel::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
 }
 
 } // namespace

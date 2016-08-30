@@ -205,15 +205,6 @@ void MenuBarItem::onMouseEvent(const MouseEvent& ev)
 }
 
 
-void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-    //WidgetBaseType::onPaint(surface, updateRect);
-
-    onPaintBackground(surface, updateRect);
-    onPaintContent(surface, updateRect);
-}
-
-
 void MenuBarItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     if(_highlighted || _selected)

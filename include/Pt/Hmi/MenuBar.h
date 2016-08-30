@@ -76,8 +76,6 @@ class MenuBarItem : public Panel
 
         virtual void onClicked(const Gfx::PointF& pos);
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
-
         virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);

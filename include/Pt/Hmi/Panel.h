@@ -204,13 +204,14 @@ class PT_HMI_API Panel : public Widget
         }
 
     protected:
+        virtual void onResizeEvent(const ResizeEvent& ev);
+
         virtual void onPaintEvent( const PaintEvent& ev );
 	
-        // TODO: name clash with Widget::onPaint
-        //       NOTE: Window has onPaintBackground and onPaintContent
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
-	
-        virtual void onResizeEvent(const ResizeEvent& ev);
+    protected:
+        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private: 
         Gfx::Color    _backgroundColor;

@@ -521,6 +521,7 @@ void Widget::repaint(const Gfx::RectF& rect)
     Application::instance().loop().commitEvent(pev);
 
     const std::vector<Widget*>& widgets = this->widgets();
+    
     std::vector<Widget*>::const_iterator it;
     for(it = widgets.begin() ; it != widgets.end(); ++it)
     {        

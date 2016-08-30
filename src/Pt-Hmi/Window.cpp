@@ -593,7 +593,12 @@ void Window::repaint()
     onPaintBackground(_damageRect);
 
     if( mainWidget() )
-        mainWidget()->repaint(_damageRect);
+    {
+        Gfx::RectF updateRect = mainWidget()->geometry().intersect(_damageRect);
+
+        if( ! updateRect.isNull() )
+            mainWidget()->repaint(_damageRect);
+    }
 
     std::vector<Window*>::iterator child;
     for(child = _windows.begin(); child != _windows.end(); ++child)

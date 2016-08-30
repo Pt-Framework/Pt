@@ -134,18 +134,18 @@ void Button::onFocusEvent(const FocusEvent& ev)
 }
 
 
-void Button::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
+void Button::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
+    if( ! isEnabled() )
+    {
+        Label::onPaintBackground(surface, updateRect);
+        return;
+    }
+
     // TODO: use enter/leave events
     bool mouseOver = Application::instance().pointerWidget() == this;
     
     Gfx::Color bkgColor = backgroundColor();
-
-    if( ! isEnabled() )
-    {
-        Label::onPaint(surface, updateRect);
-        return;
-    }
 
     if( mouseOver )
     {
@@ -161,9 +161,15 @@ void Button::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
                                        bkgColor.blue() * 0.8f ), false );
     }
     
-    Label::onPaint(surface, updateRect);
+    Label::onPaintBackground(surface, updateRect);
     
     setBackgroundColor(bkgColor, false);
+}
+
+
+void Button::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+    Label::onPaintContent(surface, updateRect);
 
     if( hasFocus() )
     {
