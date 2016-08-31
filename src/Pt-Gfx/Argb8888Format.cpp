@@ -80,7 +80,7 @@ void Argb8888Format::onCopy(const ImageInfo& toInfo, const Point& toPoint,
 
             for(Pt::ssize_t y = 0; y < fromRect.height(); ++y)
             {
-                memcpy(toLine, toLine, n);
+                memcpy(toLine, fromLine, n);
 
                 toLine += toStride;
                 fromLine += fromStride;
