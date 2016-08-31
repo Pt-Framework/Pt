@@ -3532,16 +3532,15 @@ void Rasterizer::image( const Point& toIn, const Image& img)
 
 void Rasterizer::image( const Point& to, const Image& image, const Rect& imageRectIn)
 {  
-  const Rect clip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
+  const Rect clip = _clip.isNull() ? imageRectIn : _clip.intersect( imageRectIn );
   
-
   switch( _compositionMode )
   {
       case CompositionMode::SourceCopy:
       { 
-          Point imagePos( imageRect.x(),  imageRect.y() );
+          Point imagePos( imageRectIn.x(),  imageRectIn.y() );
 
-          Size imageSize(imageRect.size());
+          Size imageSize(imageRectIn.size());
 
           if( imagePos.x() + imageSize.width() > image.width() )
               imageSize.setWidth( image.width() - imagePos.x() );
@@ -3624,12 +3623,12 @@ void Rasterizer::image( const Point& to, const Image& image, const Rect& imageRe
       
       case CompositionMode::AlphaMask:
       {
-          for(size_t w = imageRect.left(); w <= imageRect.right() ; ++w )
+          for(size_t w = imageRectIn.left(); w <= imageRectIn.right() ; ++w )
           {
-            for( size_t h = imageRect.top(); h <= imageRect.bottom(); ++h)
+            for( size_t h = imageRectIn.top(); h <= imageRectIn.bottom(); ++h)
             {
-              const size_t x = to.x() + (w - imageRect.left());
-              const size_t y = to.y() + (h - imageRect.top());
+              const size_t x = to.x() + (w - imageRectIn.left());
+              const size_t y = to.y() + (h - imageRectIn.top());
 
               if(!( x >= clip.left() &&  x < clip.right() && y  >=  clip.top()  && y < clip.bottom() ))
                   continue;
@@ -3653,12 +3652,12 @@ void Rasterizer::image( const Point& to, const Image& image, const Rect& imageRe
       
       case Gfx::CompositionMode::SourceOver:
       {
-          for(size_t w = imageRect.left(); w <= imageRect.right() ; ++w )
+          for(size_t w = imageRectIn.left(); w <= imageRectIn.right() ; ++w )
           {
-            for( size_t h = imageRect.top(); h <= imageRect.bottom(); ++h)
+            for( size_t h = imageRectIn.top(); h <= imageRectIn.bottom(); ++h)
             {
-              const size_t x = to.x() + (w - imageRect.left());
-              const size_t y = to.y() + (h - imageRect.top());
+              const size_t x = to.x() + (w - imageRectIn.left());
+              const size_t y = to.y() + (h - imageRectIn.top());
 
                if(!( x >= clip.left() && x < clip.right() && y >= clip.top() && y < clip.bottom() ))
                   continue;
