@@ -1775,7 +1775,7 @@ void Rasterizer::stroke( const Point& pixel)
 
 void Rasterizer::stroke( int x, int y)
 {  
-  const Rect imageRect(Point(0,0), Gfx::Size(_image->size().width(), _image->size().height()));
+  const Rect imageRect(Point(0,0), _image->size());
   const Rect clip = _clip.isNull() ? imageRect : _clip.intersect(imageRect);
 
   if( x < clip.left()  || x > clip.right())
@@ -1927,7 +1927,7 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
 
 void Rasterizer::clipSpan( int& xpos, int& ypos, int& length )
 {
-  const Rect imageRect(Point(0,0), Gfx::Size(_image->size().width(), _image->size().height()));
+  const Rect imageRect(Point(0,0), _image->size());
   const Rect clip = _clip.isNull() ? imageRect : _clip.intersect(imageRect);
 
   if( ypos < clip.top() )
@@ -2044,7 +2044,7 @@ void Rasterizer::fillSolid( const Point& pos, int length )
 
 void Rasterizer::strokeText( const Point& to, const Pt::String& text )
 { 
-  const Rect imageRect(Point(0,0), Gfx::Size(_image->size().width(), _image->size().height()));
+  const Rect imageRect(Point(0,0), _image->size());
   const Rect clip = _clip.isNull() ? imageRect : _clip.intersect( imageRect);
 
   _text->setClip(clip);
@@ -2284,7 +2284,7 @@ void Rasterizer::fillRect(int x, int y,  int w,  int h)
     int ypos = std::max( 0, y );
     int yend = 0;
 
-    const Rect imageRect(Point(0,0), Gfx::Size(_image->size().width(), _image->size().height()));
+    const Rect imageRect(Point(0,0), _image->size());
     const Rect clip = _clip.isNull() ? imageRect : _clip.intersect( imageRect);
 
     if( (y + h) > 0 )
@@ -3246,19 +3246,19 @@ void Rasterizer::lineProjectingCap( const LineFace *face, bool isLeft, bool isIn
 }
 
 
-void Rasterizer::fillRect(const Rect& rect)
-{         
+void Rasterizer::fillRect(const Rect& rectIn)
+{ 
     Rect imageRect(Point(0,0), _image->size());
-    Rect fillRect = imageRect.intersect(rect);
+    Rect rect = imageRect.intersect(rectIn);
 
-    if( fillRect.isNull() )
+    if( rect.isNull() )
         return;
 
-    int length = fillRect.width();
-    Point linePos = fillRect.topLeft();
-    for(int y = 0; y < fillRect.height(); y++)
+    int length = rect.width();
+    Point linePos = rect.topLeft();
+    for(int y = 0; y < rect.height(); y++)
     {
-        fill(fillRect.topLeft(), linePos, length);
+        fill(rect.topLeft(), linePos, length);
         linePos.addY(1);
     }
 }
@@ -3524,32 +3524,30 @@ void Rasterizer::fillEllipse( const Point& topLeftIn, const Size& size )
 
 void Rasterizer::image( const Point& toIn, const Image& img)
 {
-    Rect imageRect( Point(0,0), Size(img.size().width(), img.size().height() ));
+    Rect imageRect( Point(0,0), img.size());
 
     image( toIn, img, imageRect);
 }
 
 
-void Rasterizer::image( const Point& toF, const Image& image, const Rect& imageRect)
-{
-  Point to( (int) toF.x(), (int) toF.y() );
-    
-  const Rect clip = _clip.isNull() ? imageRect : _clip.intersect( Rect(Point(0,0), _image->size()) );
+void Rasterizer::image( const Point& to, const Image& image, const Rect& imageRect)
+{  
+  const Rect clip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
 
-    switch( _compositionMode )
+  Rect imgRect(imageRect);
+
+  switch( _compositionMode )
   {
       case CompositionMode::SourceCopy:
       { 
-          Point imagePos( (int) imageRect.topLeft().x(), 
-                          (int) imageRect.topLeft().y() );
+          Point imagePos( imageRect.x(),  imageRect.y() );
 
-          Size imageSize( (int) imageRect.width(), 
-                          (int) imageRect.height() );
+          Size imageSize(imageRect.size());
 
-          if( imagePos.x() + (int)imageSize.width() > (int)image.width() )
+          if( imagePos.x() + imageSize.width() > image.width() )
               imageSize.setWidth( image.width() - imagePos.x() );
 
-          if( imagePos.y() + (int)imageSize.height() > (int)image.height() )
+          if( imagePos.y() + imageSize.height() > image.height() )
               imageSize.setHeight( image.height() - imagePos.y() );
 
           Rect imageRect(imagePos, imageSize);
@@ -3563,8 +3561,8 @@ void Rasterizer::image( const Point& toF, const Image& image, const Rect& imageR
           // outside target image
           if( to.x() >= clip.width() || 
               to.y() >= clip.height() ||
-              imagePos.x() >= (int)image.width() ||
-              imagePos.y() >= (int)image.height() )
+              imagePos.x() >= image.width() ||
+              imagePos.y() >= image.height() )
              return;
 
           if( to.x() < 0 )
@@ -3627,12 +3625,12 @@ void Rasterizer::image( const Point& toF, const Image& image, const Rect& imageR
       
       case CompositionMode::AlphaMask:
       {
-          for(int w = imageRect.left(); w <= imageRect.right() ; ++w )
+          for(size_t w = imageRect.left(); w <= imageRect.right() ; ++w )
           {
-            for( int h = imageRect.top(); h <= imageRect.bottom(); ++h)
+            for( size_t h = imageRect.top(); h <= imageRect.bottom(); ++h)
             {
-              const int x = to.x() + (w - imageRect.left());
-              const int y = to.y() + (h - imageRect.top());
+              const size_t x = to.x() + (w - imageRect.left());
+              const size_t y = to.y() + (h - imageRect.top());
 
               if(!( x >= clip.left() &&  x < clip.right() && y  >=  clip.top()  && y < clip.bottom() ))
                   continue;
@@ -3656,12 +3654,12 @@ void Rasterizer::image( const Point& toF, const Image& image, const Rect& imageR
       
       case Gfx::CompositionMode::SourceOver:
       {
-          for(int w = imageRect.left(); w <= imageRect.right() ; ++w )
+          for(size_t w = imageRect.left(); w <= imageRect.right() ; ++w )
           {
-            for( int h = imageRect.top(); h <= imageRect.bottom(); ++h)
+            for( size_t h = imageRect.top(); h <= imageRect.bottom(); ++h)
             {
-              const int x = to.x() + (w - imageRect.left());
-              const int y = to.y() + (h - imageRect.top());
+              const size_t x = to.x() + (w - imageRect.left());
+              const size_t y = to.y() + (h - imageRect.top());
 
                if(!( x >= clip.left() && x < clip.right() && y >= clip.top() && y < clip.bottom() ))
                   continue;
@@ -3700,7 +3698,6 @@ void Rasterizer::image( const Point& toF, const Image& image, const Rect& imageR
       }
     }
 }
-
 
 FontMetrics Rasterizer::fontMetrics( const String& text ) const
 {
