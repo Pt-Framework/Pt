@@ -46,35 +46,6 @@ namespace Pt {
 
 namespace Gfx {
 
-class CompositionMode
-{
-    public:
-        enum Mode
-        {
-            SourceCopy = 0, // use source pixel
-            SourceOver = 1, // use alpha of source pixel
-            AlphaMask = 200 // TODO: image painter specific or obsolete
-        };
-
-        CompositionMode(Mode m = SourceCopy)
-        : _mode(m)
-        {}
-
-        CompositionMode& operator =(Mode m)
-        {
-            _mode = m;
-            return *this;
-        }
-
-        operator Pt::uint32_t() const
-        { 
-            return _mode; 
-        }
-
-    private:
-        Pt::uint32_t _mode;
-};
-
 /**
   * \brief A generic painter interface which provides methods to draw graphical primitives to surfaces.
   *

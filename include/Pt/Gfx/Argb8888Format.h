@@ -31,12 +31,7 @@
 #define PT_GFX_ARGB8888FORMAT_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/ImageInfo.h>
 #include <Pt/Gfx/ImageFormat.h>
-#include <Pt/Gfx/ImagePainter.h> // CompositionMode
-#include <Pt/Gfx/Color.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Rect.h>
 
 namespace Pt {
 
@@ -44,16 +39,17 @@ namespace Gfx {
 
 class PT_GFX_API Argb8888Format : public ImageFormat
 {
-	public:	
-		Argb8888Format();
+	  public:	
+		    Argb8888Format();
 
-    Color color(const Pt::uint8_t* pixel) const;
+        virtual Color color(const Pt::uint8_t* pixel) const;
 
-		void setColor(Pt::uint8_t* pixel, const Color& c) const;
+		    virtual void setColor(Pt::uint8_t* pixel, const Color& c) const;
 
-    void copy(const ImageInfo& to, const Point& toPoint,
-              const ImageInfo& from, const Rect& fromRect,
-              CompositionMode mode) const;
+    protected:
+        virtual void onCopy(const ImageInfo& to, const Point& toPoint,
+                            const ImageInfo& from, const Rect& fromRect,
+                            CompositionMode mode) const;
 };
 
 } // namespace

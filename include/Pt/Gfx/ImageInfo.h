@@ -31,7 +31,6 @@
 #define PT_GFX_IMAGEINFO_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Types.h>
 
@@ -39,7 +38,9 @@ namespace Pt {
 
 namespace Gfx {
 
-class PT_GFX_API ImageInfo
+class ImageFormat;
+
+class ImageInfo
 {
 	  public:	
         explicit ImageInfo(const ImageFormat& format)

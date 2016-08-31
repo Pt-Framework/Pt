@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Gfx/ImageFormat.h>
+#include <Pt/Gfx/ImageInfo.h>
 #include <Pt/Gfx/Argb8888Format.h>
 #include <Pt/Gfx/Rgb888Format.h>
 #include <Pt/Gfx/Rgb565Format.h>
@@ -45,6 +46,20 @@ ImageFormat::ImageFormat( size_t pixelSize, size_t channels)
 
 ImageFormat::~ImageFormat()
 {
+}
+
+
+void ImageFormat::copy(const ImageInfo& toInfo, const Point& toPoint,
+                       const ImageInfo& fromInfo, const Rect& fromRect,
+                       CompositionMode mode) const
+{
+    Rect destRect(toPoint, fromRect.size());
+    Rect toRect(Point(0,0), toInfo.size());
+    
+    Rect fromClip( fromRect.topLeft(),
+                   toRect.intersect(destRect).size() );
+
+    onCopy(toInfo, toPoint, fromInfo, fromClip, mode);
 }
 
 

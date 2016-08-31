@@ -32,51 +32,94 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/Rect.h>
 
 namespace Pt {
 
 namespace Gfx {
 
+class CompositionMode
+{
+    public:
+        enum Mode
+        {
+            SourceCopy = 0, // use source pixel
+            SourceOver = 1, // use alpha of source pixel
+            AlphaMask = 200 // TODO: image painter specific or obsolete
+        };
+
+        CompositionMode(Mode m = SourceCopy)
+        : _mode(m)
+        {}
+
+        CompositionMode& operator =(Mode m)
+        {
+            _mode = m;
+            return *this;
+        }
+
+        operator Pt::uint32_t() const
+        { 
+            return _mode; 
+        }
+
+    private:
+        Pt::uint32_t _mode;
+};
+
+class ImageInfo;
+
 class PT_GFX_API ImageFormat
 {
-	public:
-		ImageFormat(size_t pixelSize, size_t channels);
+    public:
+	      ImageFormat(size_t pixelSize, size_t channels);
 
-		virtual ~ImageFormat();
+	      virtual ~ImageFormat();
 		
-		size_t pixelSize() const
-		{
-			return _pixelSize;
-		}
+	      size_t pixelSize() const
+	      {
+		      return _pixelSize;
+	      }
 
-		size_t channels() const
-		{
-			return _channels;
-		}
+	      size_t channels() const
+	      {
+		      return _channels;
+	      }
 
-		virtual void setColor(Pt::uint8_t* pixel, const Color& c) const = 0; 		
+	      virtual void setColor(Pt::uint8_t* pixel, const Color& c) const = 0; 		
 
-		virtual Color color(const Pt::uint8_t* pixel ) const = 0;
+	      virtual Color color(const Pt::uint8_t* pixel ) const = 0;
 
-		bool operator==(const ImageFormat& a) const
-		{
-			return ( _pixelSize == a._pixelSize && _channels == a._channels );				
-		}
+        void copy(const ImageInfo& to, const Point& toPoint,
+                  const ImageInfo& from, const Rect& fromRect,
+                  CompositionMode mode) const;
 
-		bool operator!=(const ImageFormat& a) const
-		{
-			return ( _pixelSize != a._pixelSize || _channels != a._channels );				
-		}		
+	      bool operator==(const ImageFormat& a) const
+	      {
+		      return ( _pixelSize == a._pixelSize && _channels == a._channels );				
+	      }
 
-		static const ImageFormat& rgb565();
+	      bool operator!=(const ImageFormat& a) const
+	      {
+		      return ( _pixelSize != a._pixelSize || _channels != a._channels );				
+	      }		
+
+	      static const ImageFormat& rgb565();
 		
-    static const ImageFormat& rgb888();
+        static const ImageFormat& rgb888();
 		
-    static const ImageFormat& argb8888();
+        static const ImageFormat& argb8888();
 
-	private:
-		 size_t _pixelSize;
-		 size_t _channels;
+    protected:
+        virtual void onCopy(const ImageInfo& to, const Point& toPoint,
+                            const ImageInfo& from, const Rect& fromRect,
+                            CompositionMode mode) const = 0;
+
+	  private:
+		    size_t _pixelSize;
+		    size_t _channels;
 };
 
 } // namespace

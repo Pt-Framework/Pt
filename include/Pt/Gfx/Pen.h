@@ -145,7 +145,6 @@ class PT_GFX_API Pen
         */
         const Image& buffer() const;
 
-
   private:
       SmartPtr<PenData> _penData;
 };

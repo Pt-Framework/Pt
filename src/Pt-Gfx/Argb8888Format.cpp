@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Gfx/Argb8888Format.h>
+#include <Pt/Gfx/ImageInfo.h>
 
 namespace Pt {
 
@@ -57,9 +58,9 @@ void Argb8888Format::setColor(Pt::uint8_t* pixel, const Color& c) const
 }
 
 
-void Argb8888Format::copy(const ImageInfo& toInfo, const Point& toPoint,
-                          const ImageInfo& fromInfo, const Rect& fromRect,
-                          CompositionMode mode) const
+void Argb8888Format::onCopy(const ImageInfo& toInfo, const Point& toPoint,
+                            const ImageInfo& fromInfo, const Rect& fromRect,
+                            CompositionMode mode) const
 {
     Pt::ssize_t toStride = (toInfo.width() * pixelSize()) + toInfo.stride();
     Pt::ssize_t fromStride = (fromRect.width() * pixelSize()) + fromInfo.stride();
