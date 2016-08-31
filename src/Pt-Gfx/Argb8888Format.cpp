@@ -41,17 +41,10 @@ Argb8888Format::Argb8888Format()
 
 void Argb8888Format::setColor(Pt::uint8_t* pixel, const Color& c) const
 {
-	  *pixel = (Pt::uint8_t)(c.blue() * 255.0f);	
-	
-	  pixel++;
-	  *pixel = (Pt::uint8_t)(c.green() * 255.0f);
-	
-	  pixel++;
-	  *pixel = (Pt::uint8_t)(c.red() * 255.0f);
-	
-	  pixel++;
-	  *pixel = (Pt::uint8_t) (c.alpha() * 255.0f);
-		 
+	  pixel[0] = (Pt::uint8_t) (c.blue() * 255.0f);	
+	  pixel[1] = (Pt::uint8_t) (c.green() * 255.0f);
+	  pixel[2] = (Pt::uint8_t) (c.red() * 255.0f);
+	  pixel[3] = (Pt::uint8_t) (c.alpha() * 255.0f);
 }
 
 
@@ -60,7 +53,7 @@ Color Argb8888Format::color(const Pt::uint8_t* pixel) const
     return Color( pixel[3] / 255.0f, 
                   pixel[2] / 255.0f, 
                   pixel[1] / 255.0f, 
-                  pixel[0] / 255.0f);
+                  pixel[0] / 255.0f );
 }
 
 } // namespace
