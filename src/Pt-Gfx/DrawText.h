@@ -118,7 +118,7 @@ class DrawText
             
             if(xpos < _clip.left() ) 
             {
-                ofsx = -xpos;
+                ofsx = _clip.left()  - xpos;
                 xpos = (int) _clip.left();
             }
             
@@ -126,7 +126,7 @@ class DrawText
             
             if(ypos < _clip.top()) 
             {
-                ofsy = -ypos;
+                ofsy = _clip.top() - ypos;
                 ypos = (int)_clip.top();
             }
 
