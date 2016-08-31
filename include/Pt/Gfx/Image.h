@@ -31,12 +31,14 @@
 #define PT_GFX_IMAGE_H
 
 #include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/ImageInfo.h>
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Types.h>
 #include <vector>
 #include <cstring>
+#include <cstddef>
 
 namespace Pt {
 
@@ -55,33 +57,50 @@ class PT_GFX_API Image
           const ImageFormat& format = ImageFormat::argb8888(), 
           size_t stride = 0);
 		
-    Image( const Image& copy);
+    Image( const Image& image);
     					
 		virtual ~Image();
 
+		const Image& operator=(const Image& image);
+
+		const ImageFormat& format() const
+		{
+			  return _info.format();
+		}		
+
 		size_t width() const
 		{
-			return _width;
+			return _info.width();
 		}
 
 		size_t height() const
 		{
-			return _height;
+			return _info.height();
 		}
+		
+    const Size& size() const
+    {
+        return _info.size();
+    }
 
 		size_t stride() const
 		{
-			return _stride;
+			return _info.stride();
 		}
-
-		Size size() const
-    {
-        return Size( _width, _height );
-    }
 
     bool empty() const
     {
-      return _width == 0 || _height == 0;
+      return _info.width() == 0 || _info.height() == 0;
+    }
+
+    Pt::uint8_t* data()
+    { 
+        return _info.data(); 
+    }
+
+    const Pt::uint8_t* data() const
+    { 
+        return _info.data(); 
     }
 
 		void setColor( const Color& color );
@@ -96,39 +115,30 @@ class PT_GFX_API Image
 
 		Color color(size_t x, size_t y) const
 		{
-			return _format->color(pixel(x,y));
+			  return format().color(pixel(x,y));
 		}
 
 		void setColor(size_t x, size_t y, const Color& c)
 		{
-			_format->setColor( pixel(x,y), c);
+			  format().setColor(pixel(x,y), c);
 		}
 
 		Pt::uint8_t* pixel(size_t x, size_t y)
 		{
-			return &_buffer[pixelOffsetInBytes(x,y)];
+        Pt::uint8_t* data = _info.data();
+			  return &data[ pixelOffsetInBytes(x,y) ];
 		}
 
 		const Pt::uint8_t* pixel(size_t x, size_t y) const 
 		{
-			return &_buffer[pixelOffsetInBytes(x,y)];
+        Pt::uint8_t* data = _info.data();
+			  return &data[pixelOffsetInBytes(x,y)];
 		}
 
-		void setPixel( size_t x, size_t y, const Pt::uint8_t* p)
+		void setPixel(size_t x, size_t y, const Pt::uint8_t* p)
 		{
-				memcpy( pixel(x, y), p, _format->pixelSize() );
+				memcpy( pixel(x, y), p, format().pixelSize() );
 		}
-
-		void setPixels( size_t x, size_t y, size_t count, const Pt::uint8_t* pixel)
-		{
-			for( size_t i = x; i < (x + count); ++i) 
-				setPixel(i, y, pixel);			
-		}
-
-		const ImageFormat& format() const
-		{
-			return *_format;
-		}		
 
 		Image convert(const ImageFormat& toFormat) const;
 		
@@ -136,40 +146,16 @@ class PT_GFX_API Image
     
     Image blockScale( const Size& newSize) const;
 
-		const Image& operator=(const Image& image)
-		{
-			_format = image._format;
-
-      _defaultBuffer = image._defaultBuffer;
-
-      if( _defaultBuffer.size() != 0 )         
-        _buffer = &_defaultBuffer[0];
-      else
-        _buffer = image._buffer;
-
-			_width = image._width;
-			_height = image._height;
-			_stride = image._stride;
-      _maxSize = image._maxSize;
-			return *this;
-		}
-
 	protected:
-		size_t pixelOffsetInBytes( size_t x, size_t y) const
+		size_t pixelOffsetInBytes(size_t x, size_t y) const
 		{
-			const size_t rowOffsetInBytes   = y * (_width * _format->pixelSize() + _stride);
-			return rowOffsetInBytes + x * _format->pixelSize();
+			const size_t rowOffsetInBytes = y * (width() * format().pixelSize() + stride());
+			return rowOffsetInBytes + x * format().pixelSize();
 		}
 
 	private:
-	  const ImageFormat* _format;
-		std::vector<Pt::uint8_t> _defaultBuffer;		
-    Pt::uint8_t* _buffer;
-
-		size_t _width;
-		size_t _height;
-		size_t _stride;
-		Size _maxSize;
+    ImageInfo _info;
+		std::vector<Pt::uint8_t> _buffer;
 };
 
 } // namespace

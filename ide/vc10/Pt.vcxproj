@@ -42,6 +42,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\FontMetrics.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Image.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\ImageInfo.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImagePainter.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\JpegReader.h" />

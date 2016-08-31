@@ -1392,6 +1392,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\demo\MainWindow.h">
       <Filter>Pt-Hmi\demo</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\ImageInfo.h">
+      <Filter>Pt-Gfx\Imaging</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
