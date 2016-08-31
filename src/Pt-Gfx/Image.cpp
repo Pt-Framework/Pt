@@ -158,48 +158,6 @@ Image Image::blockScale(const Size& newSize) const
 }
 
 
-Image Image::subImage(const Rect& rect) const
-{
-  int width = this->width();
-  int height = this->height();
-  int x = rect.left();
-  int y = rect.top();
-
-  if( rect.left() + rect.width() >= width )
-    width = width - rect.left();
-
-  if( rect.top() + rect.height() >= height )
-    height = height - rect.top() ;
-
-  if( rect.left() < 0)
-    x = 0;
-
-  if( rect.top() < 0)
-    y = 0;
-
-  Rect clipRect( Point(x,y), Size(width, height) );
-
-  Image image( clipRect.size(), format(), stride() );
-
-  for( int y = clipRect.top(); y <= clipRect.bottom(); ++y)
-  {
-    const int lineBeginOffset = y * (this->width() * format().pixelSize() + stride());
-
-    const int targetY = y - clipRect.top();
-    
-    const int xStartOffset = lineBeginOffset + (clipRect.left() * format().pixelSize());
-    const int xEnd   = lineBeginOffset + (clipRect.right() * format().pixelSize());
-
-    const int lineSize = (clipRect.right() - clipRect.left() + 1) * format().pixelSize();
-
-    Pt::uint8_t* from = _info.data();
-    memcpy( image.pixel(0, targetY), &from[xStartOffset], lineSize );
-  }
-
-  return image;
-}
-
-
 void Image::setColor(const Color& color)
 {
     Pt::uint8_t* it = data();	

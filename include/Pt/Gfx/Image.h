@@ -146,8 +146,6 @@ class PT_GFX_API Image
 		}
 
 		Image convert(const ImageFormat& toFormat) const;
-		
-		Image subImage( const Rect& rect) const ;
     
     Image blockScale( const Size& newSize) const;
 
