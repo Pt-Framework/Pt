@@ -59,6 +59,9 @@ void ImageFormat::copy(const ImageInfo& toInfo, const Point& toPoint,
     Rect fromClip( fromRect.topLeft(),
                    toRect.intersect(destRect).size() );
 
+    if( fromClip.isNull() )
+        return;
+
     onCopy(toInfo, toPoint, fromInfo, fromClip, mode);
 }
 
