@@ -71,16 +71,6 @@ class CompositionMode
             return _mode; 
         }
 
-        bool operator ==(const CompositionMode& m) const
-        {
-            return _mode == m._mode;
-        }
-
-        bool operator !=(const CompositionMode& m) const
-        {
-            return _mode != m._mode;
-        }
-
     private:
         Pt::uint32_t _mode;
 };
