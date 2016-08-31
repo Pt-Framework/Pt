@@ -41,7 +41,7 @@ DrawText::DrawText()
 : _fontAngle( 0 )
 , _faceId( 0 )
 , _charMapId( 0 )
-, _clip( PointF( 0, 0), SizeF( 60000, 60000))
+, _clip( Point( 0, 0), Size( 60000, 60000))
 {
     _matrix.xx = 0;
     _matrix.xy = 0;
@@ -183,7 +183,7 @@ FontMetrics DrawText::fontMetrics( const String& text )
 }
 
 
-void DrawText::draw( Image& image, const Color& color, const PointF& pos, const String& text, const Color* backGround )
+void DrawText::draw( Image& image, const Color& color, const Point& pos, const String& text, const Color* backGround )
 {
     FT_Vector            glyphPos;
     FT_Vector            delta;

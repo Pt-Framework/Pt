@@ -2393,9 +2393,6 @@
     <ClCompile Include="..\..\src\Pt-Gfx\DrawText.cpp">
       <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\ClipPolygon.cpp">
-      <Filter>Pt-Gfx\Cliping</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\FreeType.cpp">
       <Filter>Pt-Gfx\Rasterizer</Filter>
     </ClCompile>
@@ -2569,6 +2566,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollLayout.cpp">
       <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\ClipPolygon.cpp">
+      <Filter>Pt-Gfx\Cliping</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

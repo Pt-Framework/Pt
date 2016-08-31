@@ -54,8 +54,8 @@ class PT_GFX_API ClipPolygon
 
             @see ClipPolygon::clip
         */
-        void operator() (std::vector<PointF>& in,
-                         const RectF& clippingArea )
+        void operator() (std::vector<Point>& in,
+                         const Rect& clippingArea )
         { this-> clip(in, clippingArea); }
 
         /** @brief Perform clipping
@@ -68,23 +68,23 @@ class PT_GFX_API ClipPolygon
             @param clippingArea Rectangle to clip against
 
         */
-        void clip( std::vector<PointF>& in,
-                   const RectF& clippingArea );
+        void clip( std::vector<Point>& in,
+                   const Rect& clippingArea );
 
     private:
         enum Orientation{Left, Right, Top, Bottom} ;
 
-        void clipEdge( const std::vector<PointF>& in,
-                       std::vector<PointF>& out,
-                       PointF edgePoint0, PointF edgePoint1);
+        void clipEdge( const std::vector<Point>& in,
+                       std::vector<Point>& out,
+                       Point edgePoint0, Point edgePoint1);
 
-        PointF intersect( const PointF& from,
-                                   const PointF& to,
-                                   const PointF& edge0,
-                                   PointF& edge1 );
+        Point intersect( const Point& from,
+                                   const Point& to,
+                                   const Point& edge0,
+                                   Point& edge1 );
 
-        bool inside( const PointF& p, const PointF& edge0,
-                     PointF& edge1 );
+        bool inside( const Point& p, const Point& edge0,
+                     Point& edge1 );
 };
 
 }

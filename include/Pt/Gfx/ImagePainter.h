@@ -93,6 +93,7 @@ class PT_GFX_API ImagePainter : public Painter
 
   private:
     Rasterizer _rasterizer;
+    RectF _clip;
 };
 
 }}

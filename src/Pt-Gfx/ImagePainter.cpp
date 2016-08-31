@@ -101,62 +101,86 @@ FontMetrics ImagePainter::fontMetrics(const String& text) const
 
 void ImagePainter::drawLine(const PointF& from, const  PointF& to)
 {
-	PointF points[] = { from ,  to  };
+	Point points[] = { Point((int)from.x(), (int)from.y()) ,  Point((int)to.x(), (int)to.y())  };
 	_rasterizer.stroke( points, 2);
 }
 
 
-void ImagePainter::drawText( const PointF& to, const String& text )
+void ImagePainter::drawText( const PointF& toIn, const String& text )
 { 
+  Point to((int)toIn.x(), (int)toIn.y());
   _rasterizer.strokeText( to, text );
 }
 
 
 void ImagePainter::drawRect( const  RectF& rect )
 {
-	PointF points[5] = { rect.topLeft(), rect.topRight(), rect.bottomRight(), rect.bottomLeft(),  rect.topLeft()  };
+	Point points[5] = { Point(rect.topLeft().x(),rect.topLeft().y()) ,
+                        Point(rect.topRight().x(),rect.topRight().y()) ,
+                        Point(rect.bottomRight().x(),rect.bottomRight().y()) ,
+                        Point(rect.topLeft().x(),rect.topLeft().y())};
 	_rasterizer.stroke( points, 5);
 }
 
 
-void ImagePainter::fillRect( const  RectF& r )
+void ImagePainter::fillRect( const  RectF& rIn )
 {  
+    Rect r( Point( (int)rIn.x(), (int)rIn.y() ), Size((int) rIn.width(), (int)rIn.height()));
     _rasterizer.fillRect(r);
 }
 
 
-void ImagePainter::drawEllipse( const PointF& topLeft, const  SizeF& size )
+void ImagePainter::drawEllipse( const PointF& topLeftIn, const  SizeF& sizeIn )
 {
+    Point topLeft((int) topLeftIn.x(), (int)topLeftIn.y());
+    Size size((int)sizeIn.width(), (int)sizeIn.height() );
+
   _rasterizer.strokeEllipse( topLeft, size );
 }
 
 
-void ImagePainter::fillEllipse( const PointF& topLeft, const  SizeF& size )
+void ImagePainter::fillEllipse( const PointF& topLeftIn, const  SizeF& sizeIn )
 {
+    Point topLeft((int) topLeftIn.x(), (int)topLeftIn.y());
+    Size size((int)sizeIn.width(), (int)sizeIn.height() );
+
    _rasterizer.fillEllipse( topLeft, size );
 }
 
 
 void ImagePainter::drawPolyline( const PointF* ps, const size_t pointCount )
 {
-  _rasterizer.stroke( ps, pointCount );
+   std::vector<Point> points(pointCount);
+
+   for( size_t i = 0; i < pointCount; ++i)
+        points[i].set( (int)ps[i].x(), (int)ps[i].y());
+
+  _rasterizer.stroke( &points[0], points.size() );
 }
 
 
 void ImagePainter::fillPolygon( const PointF* ps, const size_t pointCount )
 {    
-  _rasterizer.fill( ps, pointCount );
+   std::vector<Point> points(pointCount);
+
+   for( size_t i = 0; i < pointCount; ++i)
+        points[i].set( (int)ps[i].x(), (int)ps[i].y());
+
+  _rasterizer.fill( &points[0], points.size() );
 }
 
 
-void ImagePainter::drawImage( const PointF& to, const Image& image)
+void ImagePainter::drawImage( const PointF& toIn, const Image& image)
 {
+   Point to( (int)toIn.x(), (int)toIn.y());
   _rasterizer.image( to, image);
 }
 
 
-void ImagePainter::drawImage(const PointF& to, const Image& image, const RectF& imageRect)
+void ImagePainter::drawImage(const PointF& toIn, const Image& image, const RectF& imageRectIn)
 {
+   Point to( (int)toIn.x(), (int)toIn.y());
+   Rect  imageRect( Point( (int)imageRectIn.x(), (int)imageRectIn.y()), Size((int) imageRectIn.width(),(int) imageRectIn.height() ));
   _rasterizer.image( to, image, imageRect );
 }
 
@@ -167,15 +191,17 @@ FontMetrics ImagePainter::fontMetrics( const Font& font, const Pt::String& text 
 }
 
 
-void ImagePainter::setClip( const RectF& clip )
+void ImagePainter::setClip( const RectF& clipIn )
 {
+   Rect  clip( Point( (int)clipIn.x(), (int)clipIn.y()), Size((int) clipIn.width(),(int) clipIn.height() ));
   _rasterizer.setClip( clip );
+  _clip = clipIn;
 }
       
 			  
 const Gfx::RectF& ImagePainter::clip() const
 {
-  return _rasterizer.clip();
+  return _clip;
 }
 
 
@@ -187,7 +213,8 @@ void ImagePainter::clear( const Gfx::Color& color )
 
 void ImagePainter::setPixel( const Gfx::PointF& p)
 {
-  _rasterizer.stroke(p);
+   Point pixel((int)p.x(),(int) p.y());
+  _rasterizer.stroke(pixel);
 }
 
 void ImagePainter::setCompositionMode(const CompositionMode& mode)

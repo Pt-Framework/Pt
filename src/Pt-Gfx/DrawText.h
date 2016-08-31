@@ -73,7 +73,7 @@ class DrawText
         */
         void setFont( const Font& font );
 
-				void setClip( const RectF& clip )
+				void setClip( const Rect& clip )
 				{
 					_clip = clip;
 				}
@@ -99,7 +99,7 @@ class DrawText
             @param text The text to draw
             @param background The background color of the font
         */
-        void draw( Image& image, const Color& color, const PointF& pos, const String& text, const Color* background = 0 );
+        void draw( Image& image, const Color& color, const Point& pos, const String& text, const Color* background = 0 );
 
     private:
         void drawGlyph( Image& image, const Color& color, int xpos, int ypos, int bmPitch, int height, int width, const unsigned char* buffer )
@@ -136,7 +136,7 @@ class DrawText
             {
                 yOffset = y * bmPitch;
 
-                if( dsy < 0 )
+                if( dsy < _clip.top() )
                     continue;
 
                 if( dsy > y2 )
@@ -147,7 +147,7 @@ class DrawText
 
                 for( Pt::int32_t x = ofsx; x < width; ++x, ++dsx )
                 {
-                    if( dsx < 0 )
+                    if( dsx < _clip.left() )
                         continue;
 
                     if( dsx > x2 )
@@ -201,7 +201,7 @@ class DrawText
         FTC_ImageTypeRec    _imageType;
         size_t                _faceId;
         size_t                _charMapId;
-				RectF									_clip;
+        Rect				_clip;
 };
 
 }} //namespace

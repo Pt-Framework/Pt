@@ -37,7 +37,7 @@ namespace Gfx{
 ClipPolygon::ClipPolygon()
 { }
 
-void ClipPolygon::clip( std::vector<PointF>& in, const RectF& clippingArea )
+void ClipPolygon::clip( std::vector<Point>& in, const Rect& clippingArea )
 {
     if( clippingArea.isNull())
     {
@@ -45,7 +45,7 @@ void ClipPolygon::clip( std::vector<PointF>& in, const RectF& clippingArea )
         return;
     }
 
-    std::vector<PointF> buffer;
+    std::vector<Point> buffer;
 
     clipEdge( in, buffer, clippingArea.topLeft(), clippingArea.bottomLeft() );
 
@@ -60,15 +60,15 @@ void ClipPolygon::clip( std::vector<PointF>& in, const RectF& clippingArea )
 }
 
 
-void ClipPolygon::clipEdge( const std::vector<PointF>& in, std::vector<PointF>& out,
-                 PointF edgePoint0, PointF edgePoint1)
+void ClipPolygon::clipEdge( const std::vector<Point>& in, std::vector<Point>& out,
+                 Point edgePoint0, Point edgePoint1)
 {
     if( in.empty() )
         return;
 
-    PointF p;
-    PointF i;
-    PointF s = in[ in.size() - 1 ];
+    Point p;
+    Point i;
+    Point s = in[ in.size() - 1 ];
 
     for( size_t j = 0; j < in.size(); ++j )
     {
@@ -99,9 +99,9 @@ void ClipPolygon::clipEdge( const std::vector<PointF>& in, std::vector<PointF>& 
 }
 
 
-PointF ClipPolygon::intersect( const PointF& from, const PointF& to, const PointF& edge0, PointF& edge1 )
+Point ClipPolygon::intersect( const Point& from, const Point& to, const Point& edge0, Point& edge1 )
 {
-    PointF p;
+    Point p;
 
     if( edge0.y() == edge1.y() )
     {
@@ -119,7 +119,7 @@ PointF ClipPolygon::intersect( const PointF& from, const PointF& to, const Point
 }
 
 
-bool ClipPolygon::inside( const PointF& p, const PointF& edge0, PointF& edge1 )
+bool ClipPolygon::inside( const Point& p, const Point& edge0, Point& edge1 )
 {
 /*  TODO: is very performant but at time has a logic bug :).
       return ( ( (  edge0.x() == edge1.x() ) && ( edge0.y() < edge1.y()  ) && ( p.x() > edge0.x() ) ) ||

@@ -56,7 +56,7 @@ class ClipLine
             @param ymin Minimum y to clip against
             @param ymax Maximum y to clip against
         */
-        bool clip( PointF& from, PointF& to,
+        bool clip( Point& from, Point& to,
                    Pt::ssize_t xmin, Pt::ssize_t xmax,
                    Pt::ssize_t ymin, Pt::ssize_t ymax )
         { return this->operator()(from, to, xmin, xmax, ymin, ymax); }
@@ -65,7 +65,7 @@ class ClipLine
 
             @see ClipLine::clip
         */
-        bool operator()( PointF& from, PointF& to,
+        bool operator()( Point& from, Point& to,
                          Pt::ssize_t xmin, Pt::ssize_t xmax,
                          Pt::ssize_t ymin, Pt::ssize_t ymax )
         {
