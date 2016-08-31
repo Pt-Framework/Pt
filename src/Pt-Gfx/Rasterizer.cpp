@@ -3530,17 +3530,24 @@ void Rasterizer::image( const Point& toIn, const Image& img)
 }
 
 
-void Rasterizer::image( const Point& to, const Image& image, const Rect& imageRectIn)
-{  
-  const Rect clip = _clip.isNull() ? imageRectIn : _clip.intersect( imageRectIn );
+void Rasterizer::image( const Point& toF, const Image& image, const Rect& imageRectF)
+{
+  Point to( (int) toF.x(), (int) toF.y() );
   
+  const Rect imageRect(Point(0,0), _image->size());
+  const Rect clip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
+
+  Rect imgRect( (Pt::ssize_t)imageRectF.left(), (Pt::ssize_t)imageRectF.right(), (Pt::ssize_t) imageRectF.top(), (Pt::ssize_t) imageRectF.bottom());
+
   switch( _compositionMode )
   {
       case CompositionMode::SourceCopy:
       { 
-          Point imagePos( imageRectIn.x(),  imageRectIn.y() );
+          Point imagePos( (int) imageRectF.topLeft().x(), 
+                          (int) imageRectF.topLeft().y() );
 
-          Size imageSize(imageRectIn.size());
+          Size imageSize( (int) imageRectF.width(), 
+                          (int) imageRectF.height() );
 
           if( imagePos.x() + imageSize.width() > image.width() )
               imageSize.setWidth( image.width() - imagePos.x() );
@@ -3623,12 +3630,12 @@ void Rasterizer::image( const Point& to, const Image& image, const Rect& imageRe
       
       case CompositionMode::AlphaMask:
       {
-          for(size_t w = imageRectIn.left(); w <= imageRectIn.right() ; ++w )
+          for(size_t w = imageRectF.left(); w <= imageRectF.right() ; ++w )
           {
-            for( size_t h = imageRectIn.top(); h <= imageRectIn.bottom(); ++h)
+            for( size_t h = imageRectF.top(); h <= imageRectF.bottom(); ++h)
             {
-              const size_t x = to.x() + (w - imageRectIn.left());
-              const size_t y = to.y() + (h - imageRectIn.top());
+              const size_t x = to.x() + (w - imageRectF.left());
+              const size_t y = to.y() + (h - imageRectF.top());
 
               if(!( x >= clip.left() &&  x < clip.right() && y  >=  clip.top()  && y < clip.bottom() ))
                   continue;
@@ -3652,12 +3659,12 @@ void Rasterizer::image( const Point& to, const Image& image, const Rect& imageRe
       
       case Gfx::CompositionMode::SourceOver:
       {
-          for(size_t w = imageRectIn.left(); w <= imageRectIn.right() ; ++w )
+          for(size_t w = imageRectF.left(); w <= imageRectF.right() ; ++w )
           {
-            for( size_t h = imageRectIn.top(); h <= imageRectIn.bottom(); ++h)
+            for( size_t h = imageRectF.top(); h <= imageRectF.bottom(); ++h)
             {
-              const size_t x = to.x() + (w - imageRectIn.left());
-              const size_t y = to.y() + (h - imageRectIn.top());
+              const size_t x = to.x() + (w - imageRectF.left());
+              const size_t y = to.y() + (h - imageRectF.top());
 
                if(!( x >= clip.left() && x < clip.right() && y >= clip.top() && y < clip.bottom() ))
                   continue;
