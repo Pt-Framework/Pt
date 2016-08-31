@@ -30,7 +30,7 @@ namespace Pt{
 namespace Gfx{
 
 Argb8888Format::Argb8888Format()
-: ImageFormat(4, 4, true)
+: ImageFormat(4, 4)
 {
 
 }

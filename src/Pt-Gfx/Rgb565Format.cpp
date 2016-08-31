@@ -31,7 +31,7 @@
  namespace Gfx{
 
 Rgb565Format::Rgb565Format()
-: ImageFormat(2, 3, false)
+: ImageFormat(2, 3)
 {
 }
 
