@@ -3530,11 +3530,10 @@ void Rasterizer::image( const Point& toIn, const Image& img)
 }
 
 
-void Rasterizer::image( const Point& to, const Image& image, const Rect& imageRect)
+void Rasterizer::image( const Point& to, const Image& image, const Rect& imageRectIn)
 {  
   const Rect clip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
-
-  Rect imgRect(imageRect);
+  
 
   switch( _compositionMode )
   {
