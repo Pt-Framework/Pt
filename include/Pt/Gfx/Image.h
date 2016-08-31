@@ -68,6 +68,11 @@ class PT_GFX_API Image
 			  return _info.format();
 		}		
 
+		const ImageInfo& info() const
+		{
+			  return _info;
+		}		
+
 		size_t width() const
 		{
 			return _info.width();

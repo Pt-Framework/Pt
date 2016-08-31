@@ -63,7 +63,7 @@ void Argb8888Format::onCopy(const ImageInfo& toInfo, const Point& toPoint,
                             CompositionMode mode) const
 {
     Pt::ssize_t toStride = (toInfo.width() * pixelSize()) + toInfo.stride();
-    Pt::ssize_t fromStride = (fromRect.width() * pixelSize()) + fromInfo.stride();
+    Pt::ssize_t fromStride = (fromInfo.width() * pixelSize()) + fromInfo.stride();
     
     Pt::ssize_t toBegin = (toPoint.y() * toStride) + (toPoint.x() * pixelSize());
     Pt::ssize_t fromBegin = (fromRect.y() * fromStride) + (fromRect.x() * pixelSize());
