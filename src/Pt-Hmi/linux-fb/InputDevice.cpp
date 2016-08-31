@@ -265,7 +265,7 @@ bool InputDevice::onRun()
                 if( _mouseEvent.y() >= _screenSize.height() )
                     _mouseEvent.setY( _screenSize.height() - 1 );
 
-                _eventReady.send(_touchEvent);    
+                _eventReady.send(_mouseEvent);    
                 break;
             }
 
