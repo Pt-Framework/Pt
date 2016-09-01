@@ -117,7 +117,7 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 
 
 void PixmapSurfaceImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
-{
+{    
     _painter.drawLine(from, to);
 }
 
@@ -129,7 +129,7 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 
 
 void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
-{
+{  
     _painter.drawRect(rect); 
 }
 

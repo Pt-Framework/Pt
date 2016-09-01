@@ -99,7 +99,7 @@ void Panel::onPaintEvent(const PaintEvent& ev)
 
     Gfx::RectF paintRect(winpos, size());
     PaintRegion region(windowSurface, paintRect);
-
+    
     onPaintBackground(region, ev.rect());
     onPaintContent(region, ev.rect());
 }

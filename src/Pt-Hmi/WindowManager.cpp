@@ -51,8 +51,8 @@ WindowManager::WindowManager()
 , _activeWindow(0)
 , _currentWindow(0)
 , _grabbedWindow(0)
-, _borderWidth(4.0f)
-, _titleHeight(20.0f)
+, _borderWidth(4.0)
+, _titleHeight(20.0)
 , _inactiveColor(0.68f, 0.70f, 0.75f)
 , _activeColor(0.4f, 0.5f, 0.8f)
 , _textColor(1.0f, 1.0f, 1.0f)
@@ -309,9 +309,10 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
             continue; 
 
         Gfx::RectF frameRect = frame->frameRect().intersect(rect);
+
         if( frameRect.isNull() )
             continue;
-        
+
         frame->paint(surface, frameRect);
 
         // clip against client rect

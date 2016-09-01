@@ -178,10 +178,12 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::Rect& areaIn )
       case Rotation90Degree:
       {
         const Gfx::Rect clipArea = areaIn.intersect( Gfx::Rect(Gfx::Point(0,0), size()));        
+        const int clipRight = clipArea.x() + clipArea.width();
+        const int clipBottom = clipArea.y() + clipArea.height();
 
-        for( Pt::ssize_t w = clipArea.left(); w < clipArea.right(); ++w)
+        for( Pt::ssize_t w = clipArea.x(); w < clipRight; ++w)
         {
-           for(  Pt::ssize_t h = clipArea.top(); h < clipArea.bottom(); ++h)
+           for(  Pt::ssize_t h = clipArea.y(); h < clipBottom; ++h)
            {
               Pt::uint32_t* dest = ( Pt::uint32_t*)pixelBuffer( h, _screenInfo.yres - w -1);
 

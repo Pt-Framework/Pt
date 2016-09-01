@@ -912,6 +912,7 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     //
     // frame background
     //
+    
     Gfx::Brush brush(color);
     painter.setBrush(brush);
 
@@ -946,7 +947,7 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
                           pos.y() + _borderWidth,
                           pos.y() + _borderWidth + _titleHeight - 1);
     painter.fillRect(titleArea);
-
+ 
     //
     // light outer and inner border contour
     //
@@ -996,7 +997,9 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     painter.drawLine( Gfx::PointF(_frameRect.topLeft().x() + (_borderWidth-1),
                                   _frameRect.topLeft().y() + (_borderWidth-1) + _titleHeight),
                       Gfx::PointF(_frameRect.topRight().x() - (_borderWidth-2),
-                                  _frameRect.topRight().y() + (_borderWidth-1) + _titleHeight) );
+                                 _frameRect.topRight().y() + (_borderWidth-1) + _titleHeight) );
+
+
 
     //
     // title bar text
@@ -1060,7 +1063,7 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
             continue;
 
         button->paint(surface, buttonUpdateRect);
-    }
+    }           
 }
 
 } // namespace

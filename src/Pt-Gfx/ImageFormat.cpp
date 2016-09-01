@@ -53,16 +53,17 @@ void ImageFormat::copy(const ImageInfo& toInfo, const Point& toPoint,
                        const ImageInfo& fromInfo, const Rect& fromRect,
                        CompositionMode mode) const
 {
+    Rect imageRect(Point(0,0), toInfo.size());
+
     Rect destRect(toPoint, fromRect.size());
-    Rect toRect(Point(0,0), toInfo.size());
-    
-    Rect fromClip( fromRect.topLeft(),
-                   toRect.intersect(destRect).size() );
+   
+    Rect clipRect = destRect.intersect(imageRect);
+    Point d( clipRect.topLeft() - toPoint);
 
-    if( fromClip.isNull() )
-        return;
-
-    onCopy(toInfo, toPoint, fromInfo, fromClip, mode);
+    Point p = fromRect.topLeft() + d;
+    Point toClip = clipRect.topLeft();
+    clipRect.setOrigin(p);
+    onCopy(toInfo, toClip, fromInfo, clipRect, mode);
 }
 
 

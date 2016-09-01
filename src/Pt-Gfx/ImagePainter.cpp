@@ -101,14 +101,14 @@ FontMetrics ImagePainter::fontMetrics(const String& text) const
 
 void ImagePainter::drawLine(const PointF& from, const  PointF& to)
 {
-	Point points[] = { Point((int)from.x(), (int)from.y()) ,  Point((int)to.x(), (int)to.y())  };
+	Point points[] = { Point((int)(from.x()), (int)(from.y())) ,  Point((int)(to.x()), (int)(to.y()))  };
 	_rasterizer.stroke( points, 2);
 }
 
 
 void ImagePainter::drawText( const PointF& toIn, const String& text )
 { 
-  Point to((int)toIn.x(), (int)toIn.y());
+  Point to((int)(toIn.x()), (int)(toIn.y()));
   _rasterizer.strokeText( to, text );
 }
 
@@ -118,22 +118,24 @@ void ImagePainter::drawRect( const  RectF& rect )
 	Point points[5] = { Point(rect.topLeft().x(),rect.topLeft().y()) ,
                         Point(rect.topRight().x(),rect.topRight().y()) ,
                         Point(rect.bottomRight().x(),rect.bottomRight().y()) ,
-                        Point(rect.topLeft().x(),rect.topLeft().y())};
+                        Point(rect.bottomLeft().x(),rect.bottomLeft().y()) ,
+                        Point(rect.topLeft().x(),rect.topLeft().y()),
+                        };
 	_rasterizer.stroke( points, 5);
 }
 
 
 void ImagePainter::fillRect( const  RectF& rIn )
 {  
-    Rect r( Point( (int)rIn.x(), (int)rIn.y() ), Size((int) rIn.width(), (int)rIn.height()));
+    Rect r( Point( (int)(rIn.x()), (int)(rIn.y()) ), Size((int) (rIn.width()), (int)(rIn.height())));
     _rasterizer.fillRect(r);
 }
 
 
 void ImagePainter::drawEllipse( const PointF& topLeftIn, const  SizeF& sizeIn )
 {
-    Point topLeft((int) topLeftIn.x(), (int)topLeftIn.y());
-    Size size((int)sizeIn.width(), (int)sizeIn.height() );
+    Point topLeft((int)(topLeftIn.x()), (int)(topLeftIn.y()));
+    Size size((int)(sizeIn.width()), (int)(sizeIn.height()) );
 
   _rasterizer.strokeEllipse( topLeft, size );
 }
@@ -141,8 +143,8 @@ void ImagePainter::drawEllipse( const PointF& topLeftIn, const  SizeF& sizeIn )
 
 void ImagePainter::fillEllipse( const PointF& topLeftIn, const  SizeF& sizeIn )
 {
-    Point topLeft((int) topLeftIn.x(), (int)topLeftIn.y());
-    Size size((int)sizeIn.width(), (int)sizeIn.height() );
+    Point topLeft((int) (topLeftIn.x()), (int)(topLeftIn.y()));
+    Size size((int)(sizeIn.width()), (int)(sizeIn.height()) );
 
    _rasterizer.fillEllipse( topLeft, size );
 }
@@ -153,7 +155,7 @@ void ImagePainter::drawPolyline( const PointF* ps, const size_t pointCount )
    std::vector<Point> points(pointCount);
 
    for( size_t i = 0; i < pointCount; ++i)
-        points[i].set( (int)ps[i].x(), (int)ps[i].y());
+        points[i].set( (int)(ps[i].x()), (int)(ps[i].y()));
 
   _rasterizer.stroke( &points[0], points.size() );
 }
@@ -164,7 +166,7 @@ void ImagePainter::fillPolygon( const PointF* ps, const size_t pointCount )
    std::vector<Point> points(pointCount);
 
    for( size_t i = 0; i < pointCount; ++i)
-        points[i].set( (int)ps[i].x(), (int)ps[i].y());
+        points[i].set( (int)(ps[i].x()), (int)(ps[i].y()));
 
   _rasterizer.fill( &points[0], points.size() );
 }
@@ -172,15 +174,15 @@ void ImagePainter::fillPolygon( const PointF* ps, const size_t pointCount )
 
 void ImagePainter::drawImage( const PointF& toIn, const Image& image)
 {
-   Point to( (int)toIn.x(), (int)toIn.y());
+   Point to( (int)(toIn.x()), (int)(toIn.y()));
   _rasterizer.image( to, image);
 }
 
 
 void ImagePainter::drawImage(const PointF& toIn, const Image& image, const RectF& imageRectIn)
 {
-   Point to( (int)toIn.x(), (int)toIn.y());
-   Rect  imageRect( Point( (int)imageRectIn.x(), (int)imageRectIn.y()), Size((int) imageRectIn.width(),(int) imageRectIn.height() ));
+   Point to( (int)(toIn.x()), (int)(toIn.y()));
+   Rect  imageRect( Point( (int)(imageRectIn.x()), (int)(imageRectIn.y())), Size((int)( imageRectIn.width()),(int) (imageRectIn.height()) ));
   _rasterizer.image( to, image, imageRect );
 }
 
@@ -193,7 +195,7 @@ FontMetrics ImagePainter::fontMetrics( const Font& font, const Pt::String& text 
 
 void ImagePainter::setClip( const RectF& clipIn )
 {
-   Rect  clip( Point( (int)clipIn.x(), (int)clipIn.y()), Size((int) clipIn.width(),(int) clipIn.height() ));
+   Rect  clip( Point( (int)(clipIn.x()), (int)(clipIn.y())), Size((int) (clipIn.width()),(int) (clipIn.height())));
   _rasterizer.setClip( clip );
   _clip = clipIn;
 }
@@ -213,7 +215,7 @@ void ImagePainter::clear( const Gfx::Color& color )
 
 void ImagePainter::setPixel( const Gfx::PointF& p)
 {
-   Point pixel((int)p.x(),(int) p.y());
+   Point pixel((int)(p.x()),(int) (p.y()));
   _rasterizer.stroke(pixel);
 }
 

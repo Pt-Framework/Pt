@@ -42,6 +42,8 @@
 #include <Pt/System/Clock.h>
 #include <algorithm>
 #include "PixmapSurfaceImpl.h"
+#include <cmath>
+
 namespace Pt {
 
 namespace Hmi {
@@ -148,8 +150,8 @@ void ScreenImpl::onTouchEvent(const TouchEvent& ev)
         {
              double scaleX =  screenSize.width() / touchHeight;
              double scaleY =  screenSize.height() / touchWidth;
-             tev.setY( ev.x() * scaleY );
-             tev.setX(  (touchHeight - ev.y()) * scaleX );
+             tev.setY( std::floor(ev.x() * scaleY) );
+             tev.setX( std::floor((touchHeight - ev.y()) * scaleX) );
         }
         break;
      }
@@ -188,13 +190,11 @@ void ScreenImpl::onMouseEvent( const Pt::Hmi::MouseEvent& mouseEvent )
         mev.setX( pos.x() );
         mev.setY( pos.y() ); 
         mev.setId( mouseGrabber->vid() );
-         std::cout<<" ScreenImpl::onMouseEvent " <<  clock.stop().toUSecs() << std::endl;
 
         Application::instance().loop().commitEvent(mev);
     }
     else
     {
-           std::cout<<" ScreenImpl::onMouseEvent " <<  clock.stop().toUSecs() << std::endl;
         _windowManager.mouseEvent( mouseEvent );        
     }
 

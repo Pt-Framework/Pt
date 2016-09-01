@@ -379,7 +379,7 @@ void Rasterizer::drawWideDashPolyline( const Point* pPts, int npt )
 
             case Pen::ProjectingCap: // Draw a square box with edge size equal to line width
                 w1 = _pen.size();
-                fillRect( (int)(x2 - (w1 >> 1)), (int)(y2 - (w1 >> 1)), w1, w1);
+                fillSpans( (int)(x2 - (w1 >> 1)), (int)(y2 - (w1 >> 1)), w1, w1);
             break;
 
             case Pen::ButtCap:
@@ -869,7 +869,7 @@ void Rasterizer::drawSegment( Point from, Point to, bool projectLeft, bool proje
 
         dy = lw;
 
-        fillRect( x, y,( int)dx, ( int)dy );
+        fillSpans( x, y,( int)dx, ( int)dy );
     }
     else if (dx == 0) // Segment is vertical.
     {
@@ -892,7 +892,7 @@ void Rasterizer::drawSegment( Point from, Point to, bool projectLeft, bool proje
 
         dx = lw;
 
-        fillRect(  x, y, dx, dy );
+        fillSpans(  x, y, dx, dy );
     }
     else
     { // General case: segment is neither horizontal nor vertical.
@@ -1778,10 +1778,13 @@ void Rasterizer::stroke( int x, int y)
   const Rect imageRect(Point(0,0), _image->size());
   const Rect clip = _clip.isNull() ? imageRect : _clip.intersect(imageRect);
 
-  if( x < clip.left()  || x > clip.right())
+  const int clipRight = clip.x() + clip.width();
+  const int clipBottom = clip.y() + clip.height();
+
+  if( x < clip.x()  || x >= clipRight)
       return;
 
-  if( y < clip.top() || y > clip.bottom())
+  if( y < clip.y() || y >= clipBottom)
       return;
 
   const Image& colorBuffer = _pen.buffer();   
@@ -1902,14 +1905,17 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
     const Image& texture = _brush.texture();
     int xpos = pos.x();
     int ypos = pos.y();		
+    int originx =  origin.x();
+    int originy = origin.y();
 
+    
     while(length)
     {
         // x position in the texture to copy from
-        const int textureXPos = (int)( xpos - origin.x() ) % texture.width();
+        const int textureXPos = (int)( xpos - originx ) % texture.width();
 
         // determine the scanline of the texture to copy from
-        const int textureYPos = (int) ( ypos - origin.y() ) % texture.height();
+        const int textureYPos = (int) ( ypos - originy ) % texture.height();
 
         // number of pixels to copy from texture
         const int fillLength = std::min( length, (int)texture.width() - textureXPos );
@@ -1928,49 +1934,48 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
 void Rasterizer::clipSpan( int& xpos, int& ypos, int& length )
 {
   const Rect imageRect(Point(0,0), _image->size());
-  const Rect clip = _clip.isNull() ? imageRect : _clip.intersect(imageRect);
+  const Rect clip      = _clip.isNull() ? imageRect : _clip.intersect(imageRect);
+  const int clipRight  = clip.x()  + clip.width();
+  const int clipBottom = clip.y()  + clip.height();
 
-  if( ypos < clip.top() )
+  if( ypos < clip.y() )
+  {
+    length = 0;    
+    return;
+  }
+  
+  if( ypos >= clipBottom )
   {
     length = 0;
     return;
   }
-
-  if( ypos > clip.bottom() )
+  
+  if( xpos >= clipRight )
   {
     length = 0;
-    return;
+    return;  
   }
-
-  if( xpos > clip.right() )
+  
+  
+  if(xpos < clip.x() )
   {
-    length = 0;
-    return;
+      length -= (clip.x()- xpos);            
+      xpos = clip.x();
   }
 
-  if(xpos < clip.left() )
-  {
-      if(  length > - xpos )
-      {
-          length -= ((int) clip.left() - xpos );
-          xpos = (int)clip.left();
-      }
-      else
-      {
-        length = 0;
-        return;
-      }
-  }
-
-  if( (xpos + length) > clip.right() )
-    length =  ((int) clip.right() - xpos  + 1);
+  if( (xpos + length) >= clipRight )
+    length =  clipRight - xpos;
 }
 
 
 void Rasterizer::fillSolid( const Point& pos, int length )
 {
   int xpos = pos.x();
-  int ypos = pos.y();       
+  int ypos = pos.y();
+  
+  if( length <= 0)
+    return;
+   
   
   const Image& texture = _brush.texture();
   
@@ -1990,6 +1995,7 @@ void Rasterizer::fillSolid( const Point& pos, int length )
     case CompositionMode::SourceCopy:
     {
       // copy pixels blockwise to the target image
+
       while(length)
       {
         const int fillLength = std::min( length, (int) texture.width() );
@@ -2279,16 +2285,18 @@ int Rasterizer::buildLineEdge( double x0, double y0, double k, int dx, int dy, i
 }
 
 
-void Rasterizer::fillRect(int x, int y,  int w,  int h)
+void Rasterizer::fillSpans(int x, int y,  int w,  int h)
 {
     int ypos = std::max( 0, y );
-    int yend = 0;
+    int yend = 0;    
 
     const Rect imageRect(Point(0,0), _image->size());
     const Rect clip = _clip.isNull() ? imageRect : _clip.intersect( imageRect);
+    
+    int clipBottom = clip.y() + clip.height();
 
     if( (y + h) > 0 )
-        yend = std::min<int>( clip.bottom(), y + h ) ;
+        yend = std::min<int>( clipBottom, y + h ) ;
 
     for( ; ypos < yend; ypos++ )
         stroke(x, ypos, w );
@@ -3249,13 +3257,16 @@ void Rasterizer::lineProjectingCap( const LineFace *face, bool isLeft, bool isIn
 void Rasterizer::fillRect(const Rect& rectIn)
 { 
     Rect imageRect(Point(0,0), _image->size());
-    Rect rect = imageRect.intersect(rectIn);
+    Rect clip = _clip.isNull() ? imageRect: _clip.intersect( imageRect);
+    Rect rect =  clip.intersect( rectIn);
 
     if( rect.isNull() )
         return;
 
     int length = rect.width();
+    
     Point linePos = rect.topLeft();
+    
     for(int y = 0; y < rect.height(); y++)
     {
         fill(rect.topLeft(), linePos, length);
@@ -3522,187 +3533,23 @@ void Rasterizer::fillEllipse( const Point& topLeftIn, const Size& size )
 }
 
 
-void Rasterizer::image( const Point& toIn, const Image& img)
+void Rasterizer::image( const Point& to, const Image& img)
 {
     Rect imageRect( Point(0,0), img.size());
 
-    image( toIn, img, imageRect);
-}
-
-
-void Rasterizer::image( const Point& toF, const Image& image, const Rect& imageRectF)
-{
-  Point to( (int) toF.x(), (int) toF.y() );
-  
-  const Rect imageRect(Point(0,0), _image->size());
-  const Rect clip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
-
-  Rect imgRect( (Pt::ssize_t)imageRectF.left(), (Pt::ssize_t)imageRectF.right(), (Pt::ssize_t) imageRectF.top(), (Pt::ssize_t) imageRectF.bottom());
-
-  switch( _compositionMode )
-  {
-      case CompositionMode::SourceCopy:
-      { 
-          Point imagePos( (int) imageRectF.topLeft().x(), 
-                          (int) imageRectF.topLeft().y() );
-
-          Size imageSize( (int) imageRectF.width(), 
-                          (int) imageRectF.height() );
-
-          if( imagePos.x() + imageSize.width() > image.width() )
-              imageSize.setWidth( image.width() - imagePos.x() );
-
-          if( imagePos.y() + imageSize.height() > image.height() )
-              imageSize.setHeight( image.height() - imagePos.y() );
-
-          Rect imageRect(imagePos, imageSize);
-
-          int xSourceBegin = imagePos.x();
-          int ySourceBegin = imagePos.y();
-
-          int xTargetBegin = to.x();
-          int yTargetBegin = to.y();
-
-          // outside target image
-          if( to.x() >= clip.width() || 
-              to.y() >= clip.height() ||
-              imagePos.x() >= image.width() ||
-              imagePos.y() >= image.height() )
-             return;
-
-          if( to.x() < 0 )
-          {
-              xSourceBegin = imagePos.x() - to.x();
-
-              if( xSourceBegin < 0 ) 
-                xSourceBegin = 0;
-
-              xTargetBegin = 0;
-          }
-
-          if( to.y() < 0 )
-          {
-            ySourceBegin = imagePos.y() - to.y();
-
-            if( ySourceBegin < 0 ) 
-                ySourceBegin = 0;
-
-            yTargetBegin = 0;
-          }
-
-          int lineLength = imageRect.width(); 
-
-          if( to.x() < 0 )
-            lineLength += to.x();
-
-          if( (xTargetBegin + lineLength) > clip.width()  )
-              lineLength -= (xTargetBegin + lineLength) - clip.width() ;
- 
-          if(lineLength <= 0)
-            return;  
-   
-          const int endYOffset = to.y() + imageRect.height();
-
-          int lines = imageRect.height();   
-
-          if( endYOffset > clip.height()  )
-              lines = clip.height() - yTargetBegin;
-
-          if( endYOffset < 0 )
-            return;
-  
-          const Pt::uint8_t* scanLineSource = image.pixel( xSourceBegin, ySourceBegin );
-          Pt::uint8_t* scanLineTarget = _image->pixel( xTargetBegin, yTargetBegin );
-
-          const int targetStride = _image->width() * _image->format().pixelSize() + _image->stride();
-          const int sourceStride = image.width() * image.format().pixelSize() + image.stride();
-          const int lineSize = lineLength * _image->format().pixelSize();
     
-			    for(int i = 0; i < lines; ++i )
-			    {                
-            memcpy( scanLineTarget, scanLineSource, lineSize );
-            scanLineSource += sourceStride;
-            scanLineTarget += targetStride;
-			    }
-
-          break;
-      }
-      
-      case CompositionMode::AlphaMask:
-      {
-          for(size_t w = imageRectF.left(); w <= imageRectF.right() ; ++w )
-          {
-            for( size_t h = imageRectF.top(); h <= imageRectF.bottom(); ++h)
-            {
-              const size_t x = to.x() + (w - imageRectF.left());
-              const size_t y = to.y() + (h - imageRectF.top());
-
-              if(!( x >= clip.left() &&  x < clip.right() && y  >=  clip.top()  && y < clip.bottom() ))
-                  continue;
-
-              const Pt::uint8_t* srcData = image.pixel(w,h);
-              const Pt::uint8_t alpha = srcData[3];
-
-              if(alpha == 0)
-                  continue;
-
-              Pt::uint8_t* dstData = _image->pixel(x,y);
-              Pt::uint32_t* dstPix = (Pt::uint32_t*) dstData;
-              const Pt::uint32_t* srcPix = (const Pt::uint32_t*)srcData;         
-              
-              *dstPix = *srcPix;
-            }
-          }  
-
-          break;
-      }
-      
-      case Gfx::CompositionMode::SourceOver:
-      {
-          for(size_t w = imageRectF.left(); w <= imageRectF.right() ; ++w )
-          {
-            for( size_t h = imageRectF.top(); h <= imageRectF.bottom(); ++h)
-            {
-              const size_t x = to.x() + (w - imageRectF.left());
-              const size_t y = to.y() + (h - imageRectF.top());
-
-               if(!( x >= clip.left() && x < clip.right() && y >= clip.top() && y < clip.bottom() ))
-                  continue;
-                         
-              const Pt::uint8_t* srcData = image.pixel(w,h);
-              const Pt::uint8_t alpha = srcData[3];
-              
-              if(alpha == 0)
-                  continue;
-              
-              Pt::uint8_t* dstData = _image->pixel(x,y);
-              Pt::uint32_t* dstPix = (Pt::uint32_t*) dstData;
-              const Pt::uint32_t* srcPix = (const Pt::uint32_t*)srcData;
-
-              if(alpha == 255)
-              {
-                  *dstPix = *srcPix;
-                  continue;
-              }              
-
-              //const Pt::uint8_t alpha255 = 255 - alpha;
-              //dstData[0] = (srcData[0] * alpha + dstData[0] * alpha255) / 255;
-              //dstData[1] = (srcData[1] * alpha + dstData[1] * alpha255) / 255;
-              //dstData[2] = (srcData[2] * alpha + dstData[2] * alpha255) / 255;
-
-              Pt::uint32_t alphaSrc = alpha + 1;
-              Pt::uint32_t alphaInv = 256 - alpha;
-              dstData[0] = (unsigned char)((alphaSrc * srcData[0] + alphaInv * dstData[0]) >> 8);
-              dstData[1] = (unsigned char)((alphaSrc * srcData[1] + alphaInv * dstData[1]) >> 8);
-              dstData[2] = (unsigned char)((alphaSrc * srcData[2] + alphaInv * dstData[2]) >> 8);
-              dstData[3] = (unsigned char)((alphaSrc * srcData[3] + alphaInv * dstData[3]) >> 8);
-          }
-        }   
-        
-        break;
-      }
-    }
+    image( to, img, imageRect);
 }
+
+
+
+void Rasterizer::image( const Point& to, const Image& from, const Rect& fromRect)
+{    
+  //Todo: cliping again _clip
+  _image->format().copy(_image->info(), to, from.info(), fromRect, _compositionMode);
+}
+
+
 
 FontMetrics Rasterizer::fontMetrics( const String& text ) const
 {
@@ -3720,7 +3567,7 @@ FontMetrics Rasterizer::fontMetrics( const Font& font, const Pt::String& text )
 
 void Rasterizer::clear( const Color& color)
 {
-  Rect rect( Point(0,0), Size(_image->width(), _image->height() ) );
+  Rect rect( Point(0,0), _image->size());
   Brush bs( color );
   setBrush( bs );
 

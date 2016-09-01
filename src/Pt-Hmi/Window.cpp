@@ -583,7 +583,7 @@ void Window::onUpdate(Window& child, const Gfx::RectF& rect)
 
 
 void Window::repaint()
-{
+{      
     if( _damageRect.isNull() )
         return;
     
@@ -629,6 +629,7 @@ void Window::onPaintBackground(const Gfx::RectF& rect)
 {
     Painter painter(_surface);
     painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
+    painter.setPen( Gfx::Pen(Pt::Gfx::Color(1.0f, 0.0f, 0.0f)) );
     painter.fillRect(rect);
 }
 

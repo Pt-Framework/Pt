@@ -77,6 +77,7 @@ class MainWindow : public Pt::Hmi::Window
             ScrollView _scrollView;
             Button _btns[20];
             Button _bt2;
+            Pt::Gfx::Image _image;
 
 };
 

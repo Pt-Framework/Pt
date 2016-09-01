@@ -131,7 +131,7 @@ class PT_HMI_API Screen : public WindowBase
         Gfx::RectF           _updateRect;
         int                  _updates;
         std::vector<Window*> _windows;
-        //Pt::System::Clock    _clock;
+        Pt::System::Clock    _clock;
 };
 
 } // namespace

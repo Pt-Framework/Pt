@@ -146,7 +146,7 @@ class PT_GFX_API Rasterizer
   protected:      
     int polyBuildPoly( const Point *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, int *h );        
     int buildLineEdge( double x0, double y0, double k, int dx, int dy, int xi, int yi, bool left, LineEdge *edge);
-    void fillRect(int x, int y,  int w,  int h );
+    void fillSpans(int x, int y,  int w,  int h );
     void fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count );
     void lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt );
     void roundJoinClip( LineFace *pLeft, LineFace *pRight, LineEdge *edge1, LineEdge *edge2, int *y1, int *y2, bool *left1, bool *left2 );
