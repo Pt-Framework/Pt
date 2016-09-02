@@ -49,21 +49,23 @@ ImageFormat::~ImageFormat()
 }
 
 
-void ImageFormat::copy(const ImageInfo& toInfo, const Point& toPoint,
+void ImageFormat::copy(const ImageInfo& toInfo, const Point& to,
                        const ImageInfo& fromInfo, const Rect& fromRect,
                        CompositionMode mode) const
 {
-    Rect imageRect(Point(0,0), toInfo.size());
+    Rect clipRect(Point(0,0), toInfo.size());
 
-    Rect destRect(toPoint, fromRect.size());
-   
-    Rect clipRect = destRect.intersect(imageRect);
-    Point d( clipRect.topLeft() - toPoint);
+    // clip fromRect to fit into the clip/image rect
+    Point d = clipRect.topLeft() - to;
+    Point fromPos = fromRect.topLeft() + d;
 
-    Point p = fromRect.topLeft() + d;
-    Point toClip = clipRect.topLeft();
-    clipRect.setOrigin(p);
-    onCopy(toInfo, toClip, fromInfo, clipRect, mode);
+    Rect fromClip( fromPos, clipRect.size() );
+    fromClip = fromRect.intersect(fromClip);
+
+    // account for smaller fromRect
+    Point toClip = to + (fromClip.topLeft() - fromRect.topLeft());
+    
+    onCopy(toInfo, toClip, fromInfo, fromClip, mode);
 }
 
 

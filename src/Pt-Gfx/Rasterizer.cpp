@@ -3546,12 +3546,14 @@ void Rasterizer::image( const Point& to, const Image& from, const Rect& fromRect
   Rect imageRect( Point(0,0), _image->size() );
   Rect clipRect = _clip.isNull() ? imageRect : _clip;
 
+  // clip fromRect to fit into the clip/image rect
   Point d = clipRect.topLeft() - to;
   Point fromPos = fromRect.topLeft() + d;
 
   Rect fromClip( fromPos, clipRect.size() );
   fromClip = fromRect.intersect(fromClip);
 
+  // account for smaller fromRect
   Point toClip = to + (fromClip.topLeft() - fromRect.topLeft());
 
   _image->format().copy(_image->info(), toClip, from.info(), fromClip, _compositionMode);
