@@ -3536,8 +3536,6 @@ void Rasterizer::fillEllipse( const Point& topLeftIn, const Size& size )
 void Rasterizer::image( const Point& to, const Image& img)
 {
     Rect imageRect( Point(0,0), img.size());
-
-    
     image( to, img, imageRect);
 }
 
@@ -3545,8 +3543,18 @@ void Rasterizer::image( const Point& to, const Image& img)
 
 void Rasterizer::image( const Point& to, const Image& from, const Rect& fromRect)
 {    
-  //Todo: cliping again _clip
-  _image->format().copy(_image->info(), to, from.info(), fromRect, _compositionMode);
+  Rect imageRect( Point(0,0), _image->size() );
+  Rect clipRect = _clip.isNull() ? imageRect : _clip;
+
+  Point d = clipRect.topLeft() - to;
+  Point fromPos = fromRect.topLeft() + d;
+
+  Rect fromClip( fromPos, clipRect.size() );
+  fromClip = fromRect.intersect(fromClip);
+
+  Point toClip = to + (fromClip.topLeft() - fromRect.topLeft());
+
+  _image->format().copy(_image->info(), toClip, from.info(), fromClip, _compositionMode);
 }
 
 
