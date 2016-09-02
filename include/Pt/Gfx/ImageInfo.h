@@ -33,12 +33,12 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Types.h>
-
+#include <Pt/Gfx/ImageFormat.h>
 namespace Pt {
 
 namespace Gfx {
 
-class ImageFormat;
+
 
 class ImageInfo
 {
@@ -49,6 +49,7 @@ class ImageInfo
         , _size()
         , _stride(0)
         {
+          _lineSize = (_size.width() * _format->pixelSize())  + _stride;
         }
 
         ImageInfo(const ImageFormat& format, Pt::uint8_t* data, 
@@ -58,6 +59,7 @@ class ImageInfo
         , _size(size)
         , _stride(stride)
         {
+          _lineSize = (_size.width() * _format->pixelSize())  + _stride;
         }
         
         void set(const ImageFormat& format, Pt::uint8_t* data, 
@@ -67,6 +69,7 @@ class ImageInfo
             _data = data;
             _size = size;
             _stride = stride;
+            _lineSize = (_size.width() * _format->pixelSize())  + _stride;
         }
 
         void set(Pt::uint8_t* data, const Size& size, Pt::ssize_t stride)
@@ -74,6 +77,7 @@ class ImageInfo
             _data = data;
             _size = size;
             _stride = stride;
+            _lineSize = (_size.width() * _format->pixelSize())  + _stride;
         }
         
         const ImageFormat& format() const
@@ -94,12 +98,18 @@ class ImageInfo
         Pt::ssize_t stride() const
         { return _stride; }
 
+        Pt::ssize_t lineSize() const
+        {
+            return _lineSize;
+        }
+
 	  private:
 	      const ImageFormat* _format;
 	
         Pt::uint8_t* _data;
 		    Size         _size;
 		    Pt::ssize_t  _stride;
+        Pt::ssize_t  _lineSize;
 };
 
 } // namespace

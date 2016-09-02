@@ -74,42 +74,49 @@ class ImageInfo;
 class PT_GFX_API ImageFormat
 {
     public:
-	      ImageFormat(size_t pixelSize, size_t channels);
+        ImageFormat(size_t pixelSize, size_t channels);
 
-	      virtual ~ImageFormat();
-		
-	      size_t pixelSize() const
-	      {
-		      return _pixelSize;
-	      }
+        virtual ~ImageFormat();
+    
+        size_t pixelSize() const
+        {
+          return _pixelSize;
+        }
 
-	      size_t channels() const
-	      {
-		      return _channels;
-	      }
+        size_t channels() const
+        {
+          return _channels;
+        }
+        
+        virtual void setColor(Pt::uint8_t* pixel, const Color& c,
+                              CompositionMode mode) const = 0;
 
-	      virtual void setColor(Pt::uint8_t* pixel, const Color& c) const = 0; 		
+        virtual Color color(const Pt::uint8_t* pixel) const = 0;
 
-	      virtual Color color(const Pt::uint8_t* pixel ) const = 0;
+        virtual void setPixel(Pt::uint8_t* dst, const Pt::uint8_t* src,
+                              CompositionMode mode) const = 0;
+
+        virtual void setSpan(Pt::uint8_t* dst, const Pt::uint8_t* src, 
+                             size_t length, CompositionMode mode) const = 0;
 
         void copy(const ImageInfo& to, const Point& toPoint,
                   const ImageInfo& from, const Rect& fromRect,
                   CompositionMode mode) const;
 
-	      bool operator==(const ImageFormat& a) const
-	      {
-		      return ( _pixelSize == a._pixelSize && _channels == a._channels );				
-	      }
+        bool operator==(const ImageFormat& a) const
+        {
+          return ( _pixelSize == a._pixelSize && _channels == a._channels );
+        }
 
-	      bool operator!=(const ImageFormat& a) const
-	      {
-		      return ( _pixelSize != a._pixelSize || _channels != a._channels );				
-	      }		
+        bool operator!=(const ImageFormat& a) const
+        {
+          return ( _pixelSize != a._pixelSize || _channels != a._channels );
+        }
 
-	      static const ImageFormat& rgb565();
-		
+        static const ImageFormat& rgb565();
+    
         static const ImageFormat& rgb888();
-		
+    
         static const ImageFormat& argb8888();
 
     protected:
@@ -117,9 +124,9 @@ class PT_GFX_API ImageFormat
                             const ImageInfo& from, const Rect& fromRect,
                             CompositionMode mode) const = 0;
 
-	  private:
-		    size_t _pixelSize;
-		    size_t _channels;
+    private:
+        size_t _pixelSize;
+        size_t _channels;
 };
 
 } // namespace

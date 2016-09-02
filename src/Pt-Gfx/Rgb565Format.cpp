@@ -40,7 +40,8 @@ Rgb565Format::Rgb565Format()
 }
 
 
-void Rgb565Format::setColor(Pt::uint8_t* pixel, const Color& c) const
+void Rgb565Format::setColor(Pt::uint8_t* pixel, const Color& c,
+                            CompositionMode mode) const
 {
 	Pt::uint16_t* val = (Pt::uint16_t*) pixel;			
 	*val  =  (Pt::uint16_t) (c.red() * 32.0f);
@@ -58,6 +59,18 @@ Color Rgb565Format::color(const Pt::uint8_t* pixel) const
 	const float b = (*val & 0x001F) / 32.0f;
 
 	return Color(1, r, g, b );
+}
+
+
+void Rgb565Format::setPixel(Pt::uint8_t* dst, const Pt::uint8_t* src,
+                            CompositionMode mode) const
+{
+}
+
+
+void Rgb565Format::setSpan(Pt::uint8_t* dst, const Pt::uint8_t* src, 
+                           size_t length, CompositionMode mode) const
+{
 }
 
 

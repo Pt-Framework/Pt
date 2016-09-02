@@ -163,7 +163,7 @@ void Image::setColor(const Color& color)
     Pt::uint8_t* it = data();	
   
     std::vector<Pt::uint8_t> pixel( format().pixelSize() );
-    format().setColor(&pixel[0], color);
+    format().setColor(&pixel[0], color, CompositionMode::SourceCopy);
   
     const size_t count = (width() + stride()) * height();
 

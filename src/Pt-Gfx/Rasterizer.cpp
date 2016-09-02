@@ -124,10 +124,6 @@ Rasterizer::Rasterizer( Image& image )
 , _font("Vera", 12)
 , _compositionMode(CompositionMode::SourceCopy)
 {
-
-  if( _image->format().pixelSize() != 4 )
-      throw std::invalid_argument("only 4 byte pixel size image accepted");
-  
     _text->setFont( _font );
 
 }
@@ -147,6 +143,8 @@ void Rasterizer::setImage( Image& image )
 
 void Rasterizer::strokeEllipse( const Point& topLeft, const Size& size )
 {
+    updateClip();
+
     if( size.width() <= 1 || size.height() <= 1 )
         return;
 
@@ -1164,6 +1162,8 @@ void Rasterizer::stepDash( int dist, int* pDashNum, int* pDashIndex, const  int*
 
 void Rasterizer::stroke(const Point* points,  size_t pointCount)
 {
+  updateClip();
+
   switch( _pen.style() )
   {
     case Pen::SolidStyle:
@@ -1769,127 +1769,8 @@ void Rasterizer::bresenhamLineSegment( int signdx, int signdy, int axis, int x1,
 
 void Rasterizer::stroke( const Point& pixel)
 {
+  updateClip();
   stroke( (int) pixel.x(),(int) pixel.y() );
-}
-
-
-void Rasterizer::stroke( int x, int y)
-{  
-  const Rect imageRect(Point(0,0), _image->size());
-  const Rect clip = _clip.isNull() ? imageRect : _clip.intersect(imageRect);
-
-  const int clipRight = clip.x() + clip.width();
-  const int clipBottom = clip.y() + clip.height();
-
-  if( x < clip.x()  || x >= clipRight)
-      return;
-
-  if( y < clip.y() || y >= clipBottom)
-      return;
-
-  const Image& colorBuffer = _pen.buffer();   
-  const Pt::uint8_t* srcPix = colorBuffer.pixel(0,0);
-  
-  Pt::uint8_t* dstPix = _image->pixel(x, y);
- 
-  switch( _compositionMode)    
-  {
-    case CompositionMode::SourceCopy:
-      *((Pt::uint32_t*)dstPix) = *((const Pt::uint32_t*)srcPix);
-    break;
-
-    case CompositionMode::AlphaMask:
-    {
-      const Pt::uint8_t alpha  = *(srcPix+3);
-
-      if( alpha == 0)
-        return;
-
-      *((Pt::uint32_t*)dstPix) = *((const Pt::uint32_t*)srcPix);
-    }
-    break;
-
-    case CompositionMode::SourceOver:
-    {
-      const Pt::uint8_t alpha  = *(srcPix+3);    
-
-      if(alpha == 0)
-        return;
-
-      if(alpha == 255)
-      {
-        *((Pt::uint32_t*)dstPix) = *((const Pt::uint32_t*)srcPix);
-         return;
-      }
-  
-      const Pt::uint8_t alpha255 =  (255 - alpha);
-
-      dstPix[0] = (srcPix[0] * alpha + dstPix[0] * alpha255) / 255;
-	    dstPix[1] = (srcPix[1] * alpha + dstPix[1] * alpha255) / 255;
-	    dstPix[2] = (srcPix[2] * alpha + dstPix[2] * alpha255) / 255;  
-    }
-    break;
-  }   
-}
-
-
-void Rasterizer::stroke( int xpos, int ypos, int length )
-{
-  const Image& colorBuffer = _pen.buffer();
-        
-  clipSpan( xpos, ypos, length );
-
-  const Pt::uint8_t alpha  = *(colorBuffer.pixel(0,0) +3);
-
-  switch( _compositionMode )
-  {
-    case CompositionMode::SourceCopy:
-    
-      while( length > 0  )
-      {
-          const int fillLength = std::min( length, (int) colorBuffer.width() );
-
-          if( fillLength )
-            std::memcpy( _image->pixel( xpos, ypos ), colorBuffer.pixel(0,0), fillLength * _image->format().pixelSize() );
-
-          length -= fillLength;
-          xpos   += fillLength;
-      }
-    break;
-
-    case CompositionMode::SourceOver:    
-    {
-      const Pt::uint8_t* srcPix =  colorBuffer.pixel(0,0);      
-      const Pt::uint8_t alpha255 =  (255 - alpha);
-
-      for( int x = xpos; x < (xpos + length); ++x)
-      {
-        Pt::uint8_t* dstPix = _image->pixel( x, ypos);
-        dstPix[0] = (srcPix[0] * alpha + dstPix[0] * alpha255) / 255;
-	      dstPix[1] = (srcPix[1] * alpha + dstPix[1] * alpha255) / 255;
-	      dstPix[2] = (srcPix[2] * alpha + dstPix[2] * alpha255) / 255;    
-      }
-    }
-    break;
-
-    case CompositionMode::AlphaMask:    
-    {
-      if( alpha == 0)
-        return;
-    
-      while( length > 0  )
-      {
-          const int fillLength = std::min( length, (int) colorBuffer.width() );
-
-          if( fillLength )
-            std::memcpy( _image->pixel( xpos, ypos ), colorBuffer.pixel(0,0), fillLength * _image->format().pixelSize() );
-
-          length -= fillLength;
-          xpos   += fillLength;
-      }
-    }
-    break;
-  }
 }
 
 
@@ -1908,7 +1789,6 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
     int originx =  origin.x();
     int originy = origin.y();
 
-    
     while(length)
     {
         // x position in the texture to copy from
@@ -1922,7 +1802,9 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
 
         // Copy pixels from textrure to image
         if(fillLength)
-            std::memcpy( _image->pixel( xpos, ypos ), texture.pixel(textureXPos, textureYPos), fillLength * _image->format().pixelSize() );
+            _image->format().setSpan( _image->pixel( xpos, ypos ), 
+                                      texture.pixel(textureXPos, textureYPos), 
+                                      fillLength, _compositionMode );
 
         // Remaining unfilled pixels of the span
         length -= fillLength;
@@ -1933,42 +1815,38 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
 
 void Rasterizer::clipSpan( int& xpos, int& ypos, int& length )
 {
-  const Rect imageRect(Point(0,0), _image->size());
-  const Rect clip      = _clip.isNull() ? imageRect : _clip.intersect(imageRect);
-  const int clipRight  = clip.x()  + clip.width();
-  const int clipBottom = clip.y()  + clip.height();
 
-  if( ypos < clip.y() )
+  if( ypos < _currentClip.y() )
   {
     length = 0;
     return;
   }
   
-  if( ypos >= clipBottom )
+  if( ypos >= _clipBottom )
   {
     length = 0;
     return;
   }
   
-  if( xpos >= clipRight )
+  if( xpos >= _clipRight )
   {
     length = 0;
     return;  
   }
   
   
-  if(xpos < clip.x() )
+  if(xpos < _currentClip.x() )
   {
-      length -= (clip.x()- xpos);
-      xpos = clip.x();
+      length -= (_currentClip.x()- xpos);
+      xpos = _currentClip.x();
   }
 
-  if( (xpos + length) >= clipRight )
-    length =  clipRight - xpos;
+  if( (xpos + length) >= _clipRight )
+    length =  _clipRight - xpos;
 }
 
 
-void Rasterizer::fillSolid( const Point& pos, int length )
+void Rasterizer::fillSolid(const Point& pos, int length)
 {
   int xpos = pos.x();
   int ypos = pos.y();
@@ -1976,84 +1854,29 @@ void Rasterizer::fillSolid( const Point& pos, int length )
   if( length <= 0)
     return;
    
-  
-  const Image& texture = _brush.texture();
-  
-  switch(_compositionMode)
+  const Pt::uint8_t* buffer = _brush.texture().pixel(0,0);
+  Pt::ssize_t bufferWidth = _brush.texture().width();
+
+  while(length > 0)
   {
-  
-    case CompositionMode::AlphaMask:
-    {
-      const Pt::uint8_t* srcPix =  _brush.texture().pixel(0,0);
-
-      const Pt::uint8_t alpha  = *(srcPix +3);
-
-       if( alpha == 0)
-          return;
-    }
-
-    case CompositionMode::SourceCopy:
-    {
-      // copy pixels blockwise to the target image
-
-      while(length)
+      Pt::ssize_t n = std::min(length, bufferWidth);
+      if( n )
       {
-        const int fillLength = std::min( length, (int) texture.width() );
-
-        if(fillLength)
-            std::memcpy( _image->pixel( xpos, ypos ), _brush.texture().pixel(0,0), fillLength * _image->format().pixelSize());
-
-        length -= fillLength;
-        xpos   += fillLength;
-      }
-    }
-    break;
-
-    case CompositionMode::SourceOver:
-    {
-      const Pt::uint8_t* srcPix =  _brush.texture().pixel(0,0);      
-
-      const Pt::uint8_t alpha  = *(srcPix +3);
-      
-      if( alpha == 0)
-        return;
-
-      if( alpha == 255)
-      {
-        while(length)
-        {
-          const int fillLength = std::min( length, (int) texture.width() );
-
-          if(fillLength)
-              std::memcpy( _image->pixel( xpos, ypos ), _brush.texture().pixel(0,0), fillLength * _image->format().pixelSize());        
-
-          length -= fillLength;
-          xpos   += fillLength;
-        }
-        return;
+          Pt::uint8_t* dest =_image->pixel(xpos, ypos);
+          _image->format().setSpan(dest, buffer, n, _compositionMode);
       }
 
-      const Pt::uint8_t alpha255 =  (255 - alpha);
-
-      for( int x = xpos; x < (xpos + length); ++x)
-      {
-        Pt::uint8_t* dstPix = _image->pixel( x, ypos);
-        dstPix[0] = (srcPix[0] * alpha + dstPix[0] * alpha255) / 255;
-	      dstPix[1] = (srcPix[1] * alpha + dstPix[1] * alpha255) / 255;
-	      dstPix[2] = (srcPix[2] * alpha + dstPix[2] * alpha255) / 255;    
-      }
-    }
-    break;
+      length -= n;
+      xpos   += n;
   }
 }
 
 
 void Rasterizer::strokeText( const Point& to, const Pt::String& text )
 { 
-  const Rect imageRect(Point(0,0), _image->size());
-  const Rect clip = _clip.isNull() ? imageRect : _clip.intersect( imageRect);
+  updateClip();
 
-  _text->setClip(clip);
+  _text->setClip(_currentClip);
   _text->draw( *_image, _pen.color(), to, text );
 }
 
@@ -2289,11 +2112,8 @@ void Rasterizer::fillSpans(int x, int y,  int w,  int h)
 {
     int ypos = std::max( 0, y );
     int yend = 0;    
-
-    const Rect imageRect(Point(0,0), _image->size());
-    const Rect clip = _clip.isNull() ? imageRect : _clip.intersect( imageRect);
     
-    int clipBottom = clip.y() + clip.height();
+    int clipBottom = _currentClip.y() + _currentClip.height();
 
     if( (y + h) > 0 )
         yend = std::min<int>( clipBottom, y + h ) ;
@@ -3256,9 +3076,8 @@ void Rasterizer::lineProjectingCap( const LineFace *face, bool isLeft, bool isIn
 
 void Rasterizer::fillRect(const Rect& rectIn)
 { 
-    Rect imageRect(Point(0,0), _image->size());
-    Rect clip = _clip.isNull() ? imageRect: _clip.intersect( imageRect);
-    Rect rect =  clip.intersect( rectIn);
+    updateClip();
+    Rect rect = _currentClip.intersect( rectIn );
 
     if( rect.isNull() )
         return;
@@ -3275,8 +3094,20 @@ void Rasterizer::fillRect(const Rect& rectIn)
 }
 
 
+void Rasterizer::updateClip()
+{
+  Rect imageRect(Point(0,0) , _image->size());
+  _currentClip =  _clip.isNull() ? imageRect : _clip.intersect( imageRect);
+  _clipRight = _currentClip.x() + _currentClip.width();
+  _clipBottom = _currentClip.y() + _currentClip.height();
+
+}
+
+
 void Rasterizer::fill( const Point* pts, size_t pointCount)
 {
+    updateClip();
+
     EdgeSet           globalEdgeTable;
     ActiveEdgeTable   activeEdgeTable;
     EdgeSet::iterator currentPos;
@@ -3284,10 +3115,7 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
 
     ClipPolygon clipper;
 
-    const Rect imageRect(Point(0,0), Gfx::Size(_image->size().width(), _image->size().height()));
-    const Rect clip = _clip.isNull() ? imageRect :_clip.intersect(imageRect);
-
-    clipper( points, clip );
+    clipper( points, _currentClip );
 
     // find unclipped origin coordinates
     //
@@ -3448,6 +3276,8 @@ void Rasterizer::outputSpan( const Point& topLeft, int x, int y, int width )
 
 void Rasterizer::fillEllipse( const Point& topLeftIn, const Size& size )
 {
+    updateClip();
+
     const Point topLeft( (int) topLeftIn.x(), (int) topLeftIn.y() );
 
     if( size.width() == 0 || size.height() == 0 )
@@ -3543,14 +3373,13 @@ void Rasterizer::image( const Point& to, const Image& img)
 
 void Rasterizer::image( const Point& to, const Image& from, const Rect& fromRect)
 {    
-  Rect imageRect( Point(0,0), _image->size() );
-  Rect clipRect = _clip.isNull() ? imageRect : _clip;
+  updateClip();
 
   // clip fromRect to fit into the clip/image rect
-  Point d = clipRect.topLeft() - to;
+  Point d = _currentClip.topLeft() - to;
   Point fromPos = fromRect.topLeft() + d;
 
-  Rect fromClip( fromPos, clipRect.size() );
+  Rect fromClip( fromPos, _currentClip.size() );
   fromClip = fromRect.intersect(fromClip);
 
   // account for smaller fromRect
@@ -3576,7 +3405,8 @@ FontMetrics Rasterizer::fontMetrics( const Font& font, const Pt::String& text )
 }
 
 void Rasterizer::clear( const Color& color)
-{
+{  
+
   Rect rect( Point(0,0), _image->size());
   Brush bs( color );
   setBrush( bs );

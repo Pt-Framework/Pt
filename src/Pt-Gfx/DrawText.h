@@ -111,7 +111,6 @@ class DrawText
             int                      dsx     = 0;
             const Pt::ssize_t        x2      = clipRight;
             const Pt::ssize_t        y2      = clipBottom;
-            
 
             if( bmPitch < width )
                 bmPitch += width;
@@ -134,6 +133,8 @@ class DrawText
 
             dsy = ypos;
 
+            Color pixelColor = color;
+
             for( Pt::int32_t y = ofsy; y < height; ++y, ++dsy )
             {
                 yOffset = y * bmPitch;
@@ -145,7 +146,6 @@ class DrawText
                     break;
 
                 dsx   = xpos;
-                
 
                 for( Pt::int32_t x = ofsx; x < width; ++x, ++dsx )
                 {
@@ -155,19 +155,25 @@ class DrawText
                     if( dsx > x2 )
                         break;
 
-                    Color pixel = image.color( dsx, dsy );
+                    Pt::uint8_t* pixel = image.pixel(dsx, dsy);
 
-                    const int px = yOffset + x ;
-
-                    if( buffer[ px ] )
-                        mixColor( pixel, color, buffer[ px ] );
-
-										image.setColor(dsx, dsy, pixel);
-									
+                    const int px = yOffset + x;
+                    unsigned char value = buffer[px];
+                    
+                    if(value != 255)
+                    {
+                        pixelColor.setAlpha( value/255.0f);
+                        image.format().setColor(pixel, pixelColor,
+                                                CompositionMode::SourceOver);
+                    }
+                    else
+                    {                    
+                        image.format().setColor(pixel, color, CompositionMode::SourceCopy);
+                    }
                 }
             }
         }
-
+/*
         inline void mixColor(Color& dst, const Color& src, const uint8_t& factor)
         {
              const float oF = factor/255.0f;
@@ -184,7 +190,8 @@ class DrawText
              dst.setRed  ( (dR + sR) );
              dst.setGreen( (dG + sG) );
              dst.setBlue ( (dB + sB) );
-        }
+        }*/
+
 
         inline FTC_FaceID faceId() const
         { 

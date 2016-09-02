@@ -100,9 +100,10 @@ void Cursor::loadCursor( std::istream& pngStream, const Gfx::Color& alphaColor, 
 
 void Cursor::loadCursor( const Pt::uint8_t* pngStream, const size_t size, const Gfx::Color& alphaColor, Cursor& cursor )
 {						
-	std::stringstream ms;
+	std::stringstream ms(std::ios::binary|std::ios::in|std::ios::out);
 		
 	ms.write((char*)pngStream, size);	
+  ms.seekg(0,std::ios::beg);
 
   loadCursor(ms, alphaColor, cursor);
 }

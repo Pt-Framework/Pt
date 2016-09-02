@@ -40,7 +40,8 @@ Rgb888Format::Rgb888Format()
 }
 
 
-void Rgb888Format::setColor(Pt::uint8_t* pixel, const Color& c) const
+void Rgb888Format::setColor(Pt::uint8_t* pixel, const Color& c,
+                            CompositionMode mode) const
 {
 	*pixel = (Pt::uint8_t)(c.red() * 255.0f);		
 	
@@ -56,6 +57,19 @@ void Rgb888Format::setColor(Pt::uint8_t* pixel, const Color& c) const
 Color Rgb888Format::color(const Pt::uint8_t* pixel) const
 {
 	return Color(1, *(pixel)/255.0f, *(pixel +1)/255.0f, *(pixel+2)/255.0f);
+}
+
+
+void Rgb888Format::setSpan(Pt::uint8_t* dst, const Pt::uint8_t* src, 
+                           size_t length, CompositionMode mode) const
+{
+
+}
+
+
+void Rgb888Format::setPixel(Pt::uint8_t* dst, const Pt::uint8_t* src,
+                            CompositionMode mode) const
+{
 }
 
 

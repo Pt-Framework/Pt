@@ -46,8 +46,8 @@ namespace Gfx {
 
 class PT_GFX_API Image
 {
-	public:		
-		Image( const ImageFormat& format = ImageFormat::argb8888() );
+  public:		
+    Image( const ImageFormat& format = ImageFormat::argb8888() );
     
     Image(const Size& size, 
           const ImageFormat& format = ImageFormat::argb8888(), 
@@ -56,42 +56,42 @@ class PT_GFX_API Image
     Image(Pt::uint8_t* buffer, const Size& size, 
           const ImageFormat& format = ImageFormat::argb8888(), 
           size_t stride = 0);
-		
+    
     Image( const Image& image);
-    					
-		virtual ~Image();
+              
+    virtual ~Image();
 
-		const Image& operator=(const Image& image);
+    const Image& operator=(const Image& image);
 
-		const ImageFormat& format() const
-		{
-			  return _info.format();
-		}		
+    const ImageFormat& format() const
+    {
+        return _info.format();
+    }		
 
-		const ImageInfo& info() const
-		{
-			  return _info;
-		}		
+    const ImageInfo& info() const
+    {
+        return _info;
+    }		
 
-		size_t width() const
-		{
-			return _info.width();
-		}
+    size_t width() const
+    {
+      return _info.width();
+    }
 
-		size_t height() const
-		{
-			return _info.height();
-		}
-		
+    size_t height() const
+    {
+      return _info.height();
+    }
+    
     const Size& size() const
     {
         return _info.size();
     }
 
-		size_t stride() const
-		{
-			return _info.stride();
-		}
+    size_t stride() const
+    {
+      return _info.stride();
+    }
 
     bool empty() const
     {
@@ -108,57 +108,58 @@ class PT_GFX_API Image
         return _info.data(); 
     }
 
-		void setColor( const Color& color );
+    void setColor( const Color& color );
 
-		void resize( const Size& size,  size_t strideInBytes = 0 );
+    void resize( const Size& size,  size_t strideInBytes = 0 );
 
-		void resize( const Size& size, const ImageFormat& format, size_t strideInBytes = 0);
+    void resize( const Size& size, const ImageFormat& format, size_t strideInBytes = 0);
 
     void resize( Pt::uint8_t* buffer, const Size& size,size_t strideInBytes = 0 );    
 
     void resize( Pt::uint8_t* buffer, const Size& size, const ImageFormat& format, size_t strideInBytes = 0 );
 
-		Color color(size_t x, size_t y) const
-		{
-			  return format().color(pixel(x,y));
-		}
+    Color color(size_t x, size_t y) const
+    {
+        return format().color(pixel(x,y));
+    }
 
-		void setColor(size_t x, size_t y, const Color& c)
-		{
-			  format().setColor(pixel(x,y), c);
-		}
+    void setColor(size_t x, size_t y, const Color& c, 
+                  CompositionMode mode = CompositionMode::SourceCopy)
+    {
+        format().setColor(pixel(x,y), c, mode);
+    }
 
-		Pt::uint8_t* pixel(size_t x, size_t y)
-		{
+    Pt::uint8_t* pixel(size_t x, size_t y)
+    {
         Pt::uint8_t* data = _info.data();
-			  return &data[ pixelOffsetInBytes(x,y) ];
-		}
+        return &data[ pixelOffsetInBytes(x,y) ];
+    }
 
-		const Pt::uint8_t* pixel(size_t x, size_t y) const 
-		{
+    const Pt::uint8_t* pixel(size_t x, size_t y) const 
+    {
         Pt::uint8_t* data = _info.data();
-			  return &data[pixelOffsetInBytes(x,y)];
-		}
+        return &data[pixelOffsetInBytes(x,y)];
+    }
 
-		void setPixel(size_t x, size_t y, const Pt::uint8_t* p)
-		{
-				memcpy( pixel(x, y), p, format().pixelSize() );
-		}
+    void setPixel(size_t x, size_t y, const Pt::uint8_t* p)
+    {
+        memcpy( pixel(x, y), p, format().pixelSize() );
+    }
 
-		Image convert(const ImageFormat& toFormat) const;
+    Image convert(const ImageFormat& toFormat) const;
     
     Image blockScale( const Size& newSize) const;
 
-	protected:
-		size_t pixelOffsetInBytes(size_t x, size_t y) const
-		{
-			const size_t rowOffsetInBytes = y * (width() * format().pixelSize() + stride());
-			return rowOffsetInBytes + x * format().pixelSize();
-		}
+  protected:
+    size_t pixelOffsetInBytes(size_t x, size_t y) const
+    {
+      const size_t rowOffsetInBytes = y * _info.lineSize();
+      return rowOffsetInBytes + x * format().pixelSize();
+    }
 
-	private:
+  private:
     ImageInfo _info;
-		std::vector<Pt::uint8_t> _buffer;
+    std::vector<Pt::uint8_t> _buffer;
 };
 
 } // namespace

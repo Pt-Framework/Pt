@@ -182,7 +182,7 @@ HBRUSH gradientBrush(HDC dc, int width, int height,
                       (g1 + g2),
                       (b1 + b2) );
         
-        format.setColor(pixel, c);
+        format.setColor(pixel, c, Pt::Gfx::CompositionMode::SourceCopy);
         pixel += format.pixelSize();
     }
 

@@ -30,6 +30,34 @@
 #include <Pt/Gfx/Argb8888Format.h>
 #include <Pt/Gfx/ImageInfo.h>
 
+namespace {
+
+void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from)
+{
+    Pt::uint8_t alpha = from[3];
+    Pt::uint32_t alphaSrc = alpha + 1;
+    Pt::uint32_t alphaInv = 256 - alpha;
+
+    to[0] = (unsigned char)((alphaSrc * from[0] + alphaInv * to[0]) >> 8);
+    to[1] = (unsigned char)((alphaSrc * from[1] + alphaInv * to[1]) >> 8);
+    to[2] = (unsigned char)((alphaSrc * from[2] + alphaInv * to[2]) >> 8);
+    to[3] = (unsigned char)((alphaSrc * from[3] + alphaInv * to[3]) >> 8);
+}
+
+void sourceOver(Pt::uint8_t* to, const Pt::Gfx::Color& from)
+{
+    Pt::uint8_t alpha = (unsigned char)(from.alpha() * 255);
+    Pt::uint32_t alphaSrc = alpha + 1;
+    Pt::uint32_t alphaInv = 256 - alpha;
+
+    to[0] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.red()*255) + alphaInv * to[0]) >> 8);
+    to[1] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.green()*255) + alphaInv * to[1]) >> 8);
+    to[2] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.blue()*255) + alphaInv * to[2]) >> 8);
+    to[3] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.alpha()*255) + alphaInv * to[3]) >> 8);
+}
+
+}
+
 namespace Pt {
 
 namespace Gfx {
@@ -49,12 +77,64 @@ Color Argb8888Format::color(const Pt::uint8_t* pixel) const
 }
 
 
-void Argb8888Format::setColor(Pt::uint8_t* pixel, const Color& c) const
+void Argb8888Format::setColor(Pt::uint8_t* pixel, const Color& c,
+                              CompositionMode mode) const
 {
-	  pixel[0] = (Pt::uint8_t) (c.blue() * 255.0f);	
-	  pixel[1] = (Pt::uint8_t) (c.green() * 255.0f);
-	  pixel[2] = (Pt::uint8_t) (c.red() * 255.0f);
-	  pixel[3] = (Pt::uint8_t) (c.alpha() * 255.0f);
+  switch( mode)
+  {
+    default:
+    case CompositionMode::SourceCopy:
+        pixel[0] = (Pt::uint8_t) (c.blue() * 255.0f);
+        pixel[1] = (Pt::uint8_t) (c.green() * 255.0f);
+        pixel[2] = (Pt::uint8_t) (c.red() * 255.0f);
+        pixel[3] = (Pt::uint8_t) (c.alpha() * 255.0f);
+        break;
+
+    case CompositionMode::SourceOver:
+        sourceOver(pixel, c);
+        break;
+  }  
+}
+
+
+void Argb8888Format::setPixel(Pt::uint8_t* dst, const Pt::uint8_t* src, 
+                              CompositionMode mode) const
+{
+  switch( mode)
+  {
+    default:
+    case CompositionMode::SourceCopy:
+        *((Pt::uint32_t*)dst) = *((const Pt::uint32_t*)src);
+        break;
+
+    case CompositionMode::SourceOver:
+        sourceOver(dst, src);
+        break;
+  }  
+}
+
+
+void Argb8888Format::setSpan(Pt::uint8_t* dst, const Pt::uint8_t* src, 
+                             size_t length, CompositionMode mode) const
+{
+  switch( mode)
+  {
+    default:
+    case CompositionMode::SourceCopy:
+        memcpy(dst, src, length * 4);
+        break;
+
+    case CompositionMode::SourceOver:
+    {
+      for( size_t i = 0; i < length; ++i)
+      {
+        sourceOver(dst, src); 
+        src += 4;
+        dst += 4;
+      }
+    }
+    break;
+  }   
 }
 
 
@@ -98,15 +178,7 @@ void Argb8888Format::onCopy(const ImageInfo& toInfo, const Point& toPoint,
             
                 for(int x = fromRect.x(); x < fromRect.width() ; ++x )
                 {
-                    Pt::uint8_t alpha = from[3];
-                    Pt::uint32_t alphaSrc = alpha + 1;
-                    Pt::uint32_t alphaInv = 256 - alpha;
-                
-                    to[0] = (unsigned char)((alphaSrc * from[0] + alphaInv * to[0]) >> 8);
-                    to[1] = (unsigned char)((alphaSrc * from[1] + alphaInv * to[1]) >> 8);
-                    to[2] = (unsigned char)((alphaSrc * from[2] + alphaInv * to[2]) >> 8);
-                    to[3] = (unsigned char)((alphaSrc * from[3] + alphaInv * to[3]) >> 8);
-
+                    sourceOver(to, from);
                     to += pixelSize();
                     from += pixelSize();
                 }
@@ -115,7 +187,7 @@ void Argb8888Format::onCopy(const ImageInfo& toInfo, const Point& toPoint,
                 fromLine += fromStride;
             }
             
-            break;  
+            break;
         }
     }
 }
