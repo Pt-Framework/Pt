@@ -61,7 +61,7 @@ void ClipPolygon::clip( std::vector<Point>& in, const Rect& clippingArea )
 
 
 void ClipPolygon::clipEdge( const std::vector<Point>& in, std::vector<Point>& out,
-                 Point edgePoint0, Point edgePoint1)
+                            Point edgePoint0, Point edgePoint1)
 {
     if( in.empty() )
         return;
@@ -103,6 +103,12 @@ Point ClipPolygon::intersect( const Point& from, const Point& to, const Point& e
 {
     Point p;
 
+    if( to.y()  == from.y() )
+      return p;
+
+    if( to.x() == from.x()) 
+      return p;
+
     if( edge0.y() == edge1.y() )
     {
         p.setX(  from.x() + ( to.x() - from.x() ) * ( edge0.y() - from.y() ) / ( to.y() - from.y() ) );
@@ -121,13 +127,6 @@ Point ClipPolygon::intersect( const Point& from, const Point& to, const Point& e
 
 bool ClipPolygon::inside( const Point& p, const Point& edge0, Point& edge1 )
 {
-/*  TODO: is very performant but at time has a logic bug :).
-      return ( ( (  edge0.x() == edge1.x() ) && ( edge0.y() < edge1.y()  ) && ( p.x() > edge0.x() ) ) ||
-             ( (  edge0.x() == edge1.x() ) && ( edge0.y() >= edge1.y() ) && ( p.x() < edge1.x() ) ) ||
-             ( (  edge0.y() == edge1.y() ) && ( edge0.x() < edge1.x()  ) && ( p.y() < edge0.y() ) ) ||
-             ( (  edge0.y() == edge1.y() ) && ( edge0.x() >= edge1.x() ) && ( p.y() > edge0.y() ) ) );  */
-
-
     if( edge0.x() == edge1.x())
     {  //Vertical
         if( edge0.y() < edge1.y())
