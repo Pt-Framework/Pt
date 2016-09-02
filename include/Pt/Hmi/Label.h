@@ -42,7 +42,7 @@ class PT_HMI_API Label  : public Panel
     public:
         Label();
 
-        ~Label(); 
+        virtual ~Label(); 
 
         const Pt::String& text() const
         {
@@ -50,7 +50,7 @@ class PT_HMI_API Label  : public Panel
         }
 
         void setText(const Pt::String& text);
-           
+
         Alignment contentAlignment()
         {
             return _contentAlignment;
@@ -68,12 +68,12 @@ class PT_HMI_API Label  : public Panel
             return _font;
         }
 
-    protected:           
+    protected:
         virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
 
-        virtual Gfx::SizeF onAutoSize() const;       
+        virtual Gfx::SizeF onAutoSize() const;
 
     private:
         Alignment _contentAlignment;

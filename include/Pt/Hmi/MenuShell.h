@@ -47,7 +47,7 @@ class PT_HMI_API MenuShell
 
     public:
         MenuShell();
-    
+
         virtual ~MenuShell();
 
         void addMenu(Menu& menu, const Pt::String& text);

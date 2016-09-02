@@ -141,8 +141,8 @@ void ScreenImpl::onTouchEvent(const TouchEvent& ev)
         {
             double scaleX =  screenSize.width() / touchWidth;
             double scaleY =  screenSize.height() / touchHeight;
-            tev.setX( scaleX * ev.x() );
-            tev.setY( scaleY * ev.y() );
+            tev.setX( std::floor(scaleX * ev.x()) );
+            tev.setY( std::floor(scaleY * ev.y()) );
         }
         break;
 
@@ -291,7 +291,7 @@ void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx
                                                                                : _frameBuffer.width() - pos.x();
     const size_t widthInByte = widthInPixel * pixelSizeInByte;
     
-    for( size_t y = pos.y(); y < yMax; ++y )
+    for( Pt::ssize_t y = pos.y(); y < yMax; ++y )
     {
         size_t lineOffset = y * _frameBuffer.lineLength() + 
                             pos.x() * pixelSizeInByte;

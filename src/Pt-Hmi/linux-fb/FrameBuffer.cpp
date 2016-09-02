@@ -96,7 +96,7 @@ FrameBuffer::FrameBuffer()
     }
 
     setRotation(Rotation90Degree);
-    std::clog<<"Sreen HW resolution (" <<_screenInfo.xres<< "," <<_screenInfo.yres << ") Pixel size = "<<_format->pixelSize()<< " Stride = "<<stride<<std::endl;
+    std::clog<<"Sreen HW resolution (" <<_screenInfo.xres<< "," <<_screenInfo.yres << ") Pixel size = "<<_format->pixelSize()<< " Stride = "<<stride<<" Buffer Size =" << _bufferSize<< std::endl;
     std::clog<<"Sreen VR resolution (" <<width()<< "," <<height() << ") Pixel size = "<<_format->pixelSize()<< " Stride = "<<strideInBytes()<<std::endl;
 }
 
@@ -143,7 +143,7 @@ size_t FrameBuffer::bufferSize() const
 {
     switch( _rotation)
     {
-      case  Rotation90Degree:      
+      case  Rotation90Degree:
         return width()* height() * _format->pixelSize();
     }
 
@@ -177,7 +177,7 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::Rect& areaIn )
 
       case Rotation90Degree:
       {
-        const Gfx::Rect clipArea = areaIn.intersect( Gfx::Rect(Gfx::Point(0,0), size()));        
+        const Gfx::Rect clipArea = areaIn.intersect( Gfx::Rect(Gfx::Point(0,0), size()));
         const int clipRight = clipArea.x() + clipArea.width();
         const int clipBottom = clipArea.y() + clipArea.height();
 
@@ -195,9 +195,7 @@ void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::Rect& areaIn )
         memcpy( _buffer, &_rotationBuffer[0], _rotationBuffer.size());
       }
       break;
-
     }
-
 }
 
 

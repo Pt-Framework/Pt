@@ -177,16 +177,15 @@ void Image::setColor(const Color& color)
 
 void Image::resize(const Gfx::Size& size, size_t strideInBytes)
 {
-    Pt::ssize_t n = (size.width() * format().pixelSize() + stride()) * size.height();
+    Pt::ssize_t n = (size.width() * format().pixelSize() + strideInBytes) * size.height();
     _buffer.resize(n); 
- 
-    _info.set(&_buffer[0], size, strideInBytes); 	       
+    _info.set(&_buffer[0], size, strideInBytes);
 }
 
 
 void Image::resize(const Gfx::Size& size, const ImageFormat& f, size_t strideInBytes)
 {
-    Pt::ssize_t n = (size.width() * format().pixelSize() + stride()) * size.height();
+    Pt::ssize_t n = (size.width() * format().pixelSize() + strideInBytes) * size.height();
     _buffer.resize(n); 
  
     _info.set(f, &_buffer[0], size, strideInBytes); 

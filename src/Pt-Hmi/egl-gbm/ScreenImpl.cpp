@@ -103,7 +103,7 @@ void ScreenImpl::onMouseEvent( const Pt::Hmi::MouseEvent& mouseEvent )
     if( _cursor.width() != 0 )
         _cursorPos = Gfx::Point( mouseEvent.x() - _cursor.xHotspot() , mouseEvent.y() - _cursor.yHotspot());
 
-    _windowManager.pointerInput( mouseEvent );        
+    _windowManager.pointerInput( mouseEvent );
     
     if( _drawCursor )
         updateScreen();

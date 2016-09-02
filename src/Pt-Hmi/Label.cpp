@@ -50,7 +50,6 @@ Label::~Label()
 
 void Label::setText(const Pt::String& text)
 {
-    //std::clog << "Label::setText: " << text.narrow() << std::endl;
     _text = Widget::setMnemonic(text);
     update();
 }
@@ -98,29 +97,29 @@ void Label::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
     {
         case TopLeft:
         {
-            pos = Gfx::PointF(0, metric.ascent());            
+            pos = Gfx::PointF(0, metric.ascent());
         }
         break;
 
         case TopCenter:
         {
-            const double widthHalf          = size.width()/2;                                              
-            const double textWidthHalf    = metric.width()/2;                                                  
-            pos = Gfx::PointF(widthHalf - textWidthHalf, metric.ascent());    
+            const double widthHalf     = size.width()/2;
+            const double textWidthHalf = metric.width()/2;
+            pos = Gfx::PointF(widthHalf - textWidthHalf, metric.ascent());
         }
         break;
 
         case TopRight:
         {
-            const double width          = size.width();                
-            const double textWidth    = metric.width();                                    
-            pos = Gfx::PointF(width - textWidth, metric.ascent());    
+            const double width     = size.width();
+            const double textWidth = metric.width();
+            pos = Gfx::PointF(width - textWidth, metric.ascent());
         }
         break;
 
         case MiddleLeft:
-        {              
-            const double heightHalf          = size.height()/2;                
+        {
+            const double heightHalf     = size.height()/2;
             const double textHeightHalf = metric.height()/2;
 
             pos = Gfx::PointF(0, (heightHalf - textHeightHalf) + metric.ascent());
@@ -130,57 +129,54 @@ void Label::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
         default:
         case MiddleCenter:
         {            
-            const double widthHalf          = size.width()/2;                
-            const double heightHalf          = size.height()/2;                
-            const double textWidthHalf    = metric.width()/2;    
-            const double textHeightHalf = metric.height()/2;    
+            const double widthHalf      = size.width()/2;
+            const double heightHalf     = size.height()/2;
+            const double textWidthHalf  = metric.width()/2;
+            const double textHeightHalf = metric.height()/2;
 
-            pos = Gfx::PointF(widthHalf - textWidthHalf, (heightHalf - textHeightHalf) + metric.ascent());                            
+            pos = Gfx::PointF(widthHalf - textWidthHalf, (heightHalf - textHeightHalf) + metric.ascent());
         }
         break;
 
         case MiddleRight:
         {
-            const double width          = size.width();                
-            const double textWidth    = metric.width();    
+            const double width          = size.width();
+            const double textWidth      = metric.width();
+            const double heightHalf     = size.height()/2;
+            const double textHeightHalf = metric.height()/2;
 
-            const double heightHalf          = size.height()/2;                
-            const double textHeightHalf = metric.height()/2;    
-
-            pos = Gfx::PointF(width - textWidth, (heightHalf - textHeightHalf) + metric.ascent());    
+            pos = Gfx::PointF(width - textWidth, (heightHalf - textHeightHalf) + metric.ascent());
         }
         break;
 
         case BottomLeft:
         {
-            const double height      = size.height();                
-            const double textHeight = metric.height();    
+            const double height     = size.height();
+            const double textHeight = metric.height();
 
-            pos = Gfx::PointF(0, (height- textHeight) + metric.ascent());    
+            pos = Gfx::PointF(0, (height- textHeight) + metric.ascent());
         }
         break;
 
         case BottomCenter:
         {
-            const double widthHalf          = size.width()/2;                
-            const double textWidthHalf    = metric.width()/2;    
+            const double widthHalf     = size.width()/2;
+            const double textWidthHalf = metric.width()/2;
+            const double height        = size.height();
+            const double textHeight    = metric.height();
 
-            const double height      = size.height();                
-            const double textHeight = metric.height();    
-
-            pos = Gfx::PointF(widthHalf - textWidthHalf, (height- textHeight) + metric.ascent());    
+            pos = Gfx::PointF(widthHalf - textWidthHalf, (height- textHeight) + metric.ascent());
         }
         break;
 
         case BottomRight:
         {
-            const double width          = size.width();                
-            const double textWidth    = metric.width();    
+            const double width      = size.width();
+            const double textWidth  = metric.width();
+            const double height     = size.height();
+            const double textHeight = metric.height();
 
-            const double height      = size.height();                
-            const double textHeight = metric.height();    
-
-            pos = Gfx::PointF(width - textWidth, (height- textHeight) + metric.ascent());    
+            pos = Gfx::PointF(width - textWidth, (height- textHeight) + metric.ascent());
         }
         break;
     }
@@ -188,9 +184,11 @@ void Label::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
     painter.drawText(pos, _text);
 
     const Char* ch = mnemonic();
+
     if(ch)
-    {            
+    {
         String::size_type n = _text.find( *ch );
+
         if(n != String::npos)
         {
             Pt::String text(_text, 0, n);

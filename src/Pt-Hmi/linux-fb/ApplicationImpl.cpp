@@ -63,7 +63,7 @@ ApplicationImpl::ApplicationImpl()
             device->setScreenLimit( _frameBuffer.size() );
             device->setActive(*this);
             device->begin();
-            device->eventReady() += Pt::slot(_eventReady);    
+            device->eventReady() += Pt::slot(_eventReady);
             
             _inputDevices.push_back(device);
             std::clog << "using: " << deviceName.toLocal() << std::endl;
