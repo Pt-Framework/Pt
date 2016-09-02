@@ -103,22 +103,38 @@ Point ClipPolygon::intersect( const Point& from, const Point& to, const Point& e
 {
     Point p;
 
-    if( to.y()  == from.y() )
-      return p;
-
-    if( to.x() == from.x()) 
-      return p;
-
     if( edge0.y() == edge1.y() )
     {
-        p.setX(  from.x() + ( to.x() - from.x() ) * ( edge0.y() - from.y() ) / ( to.y() - from.y() ) );
-        p.setY( edge0.y() );
+        if( to.y() == from.y())
+        {
+          if( edge0.y() == to.y() )
+          {
+              p.setX( to.x() );
+              p.setY( edge0.y() );
+          }
+        }
+        else
+        {
+          p.setX(  from.x() + ( to.x() - from.x() ) * ( edge0.y() - from.y() ) / ( to.y() - from.y() ) );
+          p.setY( edge0.y() );
+        }
     }
 
     if( edge0.x() == edge1.x() )
     {
-        p.setY( from.y() + ( to.y() - from.y() ) * ( edge0.x() - from.x() ) / ( to.x() - from.x() ) );
-        p.setX( edge0.x() );
+        if( to.x() == from.x() )
+        {
+            if( to.x() == edge0.x() )
+            {
+              p.setY(  to.y());
+              p.setX( edge0.x() );
+            }
+        }
+        else
+        {
+            p.setY( from.y() + ( to.y() - from.y() ) * ( edge0.x() - from.x() ) / ( to.x() - from.x() ) );
+            p.setX( edge0.x() );
+        }
     }
 
     return p;

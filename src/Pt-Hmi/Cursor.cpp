@@ -25,7 +25,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
 #include <Pt/Hmi/Cursor.h>
 #include <Pt/Byteorder.h>
-#include <Pt/Gfx/ImageReader.h>
+#include <Pt/Gfx/PngReader.h>
 #include <fstream>
 #include <sstream>
 #include "ArrowCursor.h"
@@ -72,27 +72,29 @@ void Cursor::loadCursor( const char* pngFile, const Gfx::Color& alphaColor, Curs
 
 void Cursor::loadCursor( std::istream& pngStream, const Gfx::Color& alphaColor, Cursor& cursor )
 {
-	Gfx::Image* im =Gfx::ImageReader::read(pngStream);
+  Gfx::Image image;
+  Gfx::PngReader reader(pngStream, image);
+
+  reader.get();
 
 	//Generate alpha channel
-	for( size_t y = 0;  y < im->height(); ++y )
+	for( size_t y = 0;  y < image.height(); ++y )
 	{
-		for( size_t x = 0;  x < im->width(); ++x )
+		for( size_t x = 0;  x < image.width(); ++x )
 		{
-			Gfx::Color color =  im->color(x,y);
+			Gfx::Color color =  image.color(x,y);
 				
-			if( color.red() == alphaColor.red() &&  color.green() == alphaColor.green() && color.blue() == alphaColor.blue() )				
+			if( color.red() == alphaColor.red() &&  color.green() == alphaColor.green() && color.blue() == alphaColor.blue() )
 				color.setAlpha(0);
 			else
 				color.setAlpha(1);
 
-			im->setColor(x,y, color);
+			image.setColor(x,y, color);
 		}
-	}			
+	}
 
-	im->setColor(cursor.xHotspot(),cursor.yHotspot(), Gfx::Color(0,1,0) );
-    fromImage(*im, cursor);
-    delete im;
+	 image.setColor(cursor.xHotspot(),cursor.yHotspot(), Gfx::Color(0,1,0) );
+   fromImage(image, cursor);
 }
 
 

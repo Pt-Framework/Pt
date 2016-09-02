@@ -1940,7 +1940,7 @@ void Rasterizer::clipSpan( int& xpos, int& ypos, int& length )
 
   if( ypos < clip.y() )
   {
-    length = 0;    
+    length = 0;
     return;
   }
   
@@ -1959,7 +1959,7 @@ void Rasterizer::clipSpan( int& xpos, int& ypos, int& length )
   
   if(xpos < clip.x() )
   {
-      length -= (clip.x()- xpos);            
+      length -= (clip.x()- xpos);
       xpos = clip.x();
   }
 
@@ -1984,7 +1984,7 @@ void Rasterizer::fillSolid( const Point& pos, int length )
   
     case CompositionMode::AlphaMask:
     {
-      const Pt::uint8_t* srcPix =  _brush.texture().pixel(0,0);      
+      const Pt::uint8_t* srcPix =  _brush.texture().pixel(0,0);
 
       const Pt::uint8_t alpha  = *(srcPix +3);
 
@@ -2001,7 +2001,7 @@ void Rasterizer::fillSolid( const Point& pos, int length )
         const int fillLength = std::min( length, (int) texture.width() );
 
         if(fillLength)
-            std::memcpy( _image->pixel( xpos, ypos ), _brush.texture().pixel(0,0), fillLength * _image->format().pixelSize());        
+            std::memcpy( _image->pixel( xpos, ypos ), _brush.texture().pixel(0,0), fillLength * _image->format().pixelSize());
 
         length -= fillLength;
         xpos   += fillLength;

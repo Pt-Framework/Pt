@@ -30,7 +30,6 @@ SharedLibrary Pt-Gfx : Argb8888Format.cpp
                        Image.cpp
                        ImageFormat.cpp
                        ImagePainter.cpp
-                       ImageReader.cpp
                        JpegReader.cpp
                        Pen.cpp
                        PngReader.cpp
