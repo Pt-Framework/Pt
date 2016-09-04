@@ -133,10 +133,28 @@ class Pixel
         , _meta(p._meta)
         { }
 
-        void reset(Pt::uint8_t* data)
+        Pixel& operator=(const Pixel& p)
         {
-            _data = data;
+            copy(p);
+            return *this;
         }
+
+        void reset(const ImageInfo& info, Pt::uint8_t* data)
+        {
+             _info = &info;
+             _data = data;
+             _meta = 0;
+        }
+
+        void reset(const Pixel& p)
+        {
+             _info = p._info;
+             _data = p._data;
+             _meta = p._meta;
+        }
+
+        const ImageInfo& info() const
+        { return *_info; }
         
         Pt::uint8_t* data()
         { return _data; }

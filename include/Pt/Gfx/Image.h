@@ -44,34 +44,15 @@ namespace Pt {
 
 namespace Gfx {
 
-class PixelRef
-{
-    public:
-        explicit PixelRef(Pixel& p)
-        : _pixel(&p)
-        { }
-
-        Pt::uint8_t* data()
-        { return _pixel->data(); }
-
-        const Pt::uint8_t* data() const
-        { return _pixel->data(); }
-        
-        Pt::uint32_t meta() const
-        { return _pixel->meta(); }
-
-    private:
-        Pixel* _pixel;
-};
-
 class PixelIterator
 {
     public:
         PixelIterator(const ImageInfo& image, Pt::ssize_t x, Pt::ssize_t y)
         : _image(&image)
         , _offset((y * image.width()) + x)
-        , _pixel( _image->format().pixel(image, x, y) )
+        , _pixel(image, 0)
         {
+            _image->format().getPixel(_pixel, image, x, y);
         }
 
         PixelIterator(const PixelIterator& it)
@@ -84,7 +65,7 @@ class PixelIterator
         {
             _image = it._image;
             _offset = it._offset;
-            _pixel = it._pixel;
+            _pixel.reset(it._pixel);
             return *this;
         }
 
@@ -97,15 +78,16 @@ class PixelIterator
         { 
             return _offset == it._offset; 
         }
-
-        // TODO: return same type as used in ImageFormat !!!
-        PixelRef operator*()
+        
+        Pixel& operator*()
         { 
-            return PixelRef(_pixel); 
+            return _pixel; 
         }
 
         PixelIterator& operator++()
-        {       
+        {
+            // TODO: handle image stride
+                   
             ++_offset;
             _image->format().advance(_pixel, 1);
             return *this; 
@@ -113,6 +95,8 @@ class PixelIterator
 
         PixelIterator operator+=(Pt::ssize_t n)
         {
+            // TODO: handle image stride
+
             _image->format().advance(_pixel, n);  
             return *this; 
         }

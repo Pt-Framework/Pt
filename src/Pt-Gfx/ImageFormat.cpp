@@ -49,11 +49,9 @@ ImageFormat::~ImageFormat()
 }
 
 
-Pixel ImageFormat::pixel(const ImageInfo& image, 
-                         Pt::ssize_t x, Pt::ssize_t y) const
+void ImageFormat::getPixel(Pixel& pixel, const ImageInfo& image, 
+                           Pt::ssize_t x, Pt::ssize_t y) const
 {
-    Pixel* p = 0;
-    return *p; 
 }
 
 
