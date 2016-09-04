@@ -39,16 +39,29 @@ namespace Gfx {
 
 class PT_GFX_API Argb8888Format : public ImageFormat
 {
-	  public:	
-		    Argb8888Format();
+    public:
+        Argb8888Format();
 
         virtual Color color(const Pt::uint8_t* pixel) const;
 
-		    virtual void setColor(Pt::uint8_t* pixel, const Color& c, 
+        virtual void setColor(Pt::uint8_t* pixel, const Color& c, 
                               CompositionMode mode) const;
 
+        // new API
+        virtual Pixel pixel(const ImageInfo& image, 
+                            Pt::ssize_t x, Pt::ssize_t y) const;
+
+        virtual void advance(Pixel& pixel, Pt::ssize_t n) const;
+
+        virtual void setPixel(Pixel& to, const Pixel& from,
+                              CompositionMode mode) const;
+
+        // current API
         virtual void setPixel(Pt::uint8_t* dst, const Pt::uint8_t* src,
                               CompositionMode mode) const;
+
+        virtual void setPixel(const ImageInfo& to, Pt::ssize_t x, Pt::ssize_t y,
+                              const Pt::uint8_t* src, CompositionMode mode) const;
 
         virtual void setSpan(Pt::uint8_t* dst, const Pt::uint8_t* src,
                              size_t length, CompositionMode mode) const;

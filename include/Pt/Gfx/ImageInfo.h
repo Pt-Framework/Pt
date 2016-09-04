@@ -34,15 +34,14 @@
 #include <Pt/Gfx/Size.h>
 #include <Pt/Types.h>
 #include <Pt/Gfx/ImageFormat.h>
+
 namespace Pt {
 
 namespace Gfx {
 
-
-
 class ImageInfo
 {
-	  public:	
+    public:
         explicit ImageInfo(const ImageFormat& format)
         : _format(&format)
         , _data(0)
@@ -61,7 +60,7 @@ class ImageInfo
         {
           _lineSize = (_size.width() * _format->pixelSize())  + _stride;
         }
-        
+
         void set(const ImageFormat& format, Pt::uint8_t* data, 
                  const Size& size, Pt::ssize_t stride)
         {
@@ -79,12 +78,15 @@ class ImageInfo
             _stride = stride;
             _lineSize = (_size.width() * _format->pixelSize())  + _stride;
         }
-        
+
         const ImageFormat& format() const
         { return *_format; }
 
         Pt::uint8_t* data() const
         { return _data; }
+
+        std::size_t pixelSize() const
+        { return _format->pixelSize(); }
 
         Pt::ssize_t width() const
         { return _size.width(); }
@@ -95,6 +97,9 @@ class ImageInfo
         const Size& size() const
         { return _size; }
 
+        bool empty() const
+        { return _size.width() == 0 || _size.height() == 0; }
+
         Pt::ssize_t stride() const
         { return _stride; }
 
@@ -103,14 +108,56 @@ class ImageInfo
             return _lineSize;
         }
 
-	  private:
-	      const ImageFormat* _format;
-	
+    private:
+        const ImageFormat* _format;
+
         Pt::uint8_t* _data;
-		    Size         _size;
-		    Pt::ssize_t  _stride;
+        Size         _size;
+        Pt::ssize_t  _stride;
         Pt::ssize_t  _lineSize;
 };
+
+
+class Pixel
+{
+    public:
+        Pixel(const ImageInfo& info, Pt::uint8_t* data)
+        : _info(&info)
+        , _data(data)
+        , _meta(0)
+        { }
+
+        Pixel(const Pixel& p)
+        : _info(p._info)
+        , _data(p._data)
+        , _meta(p._meta)
+        { }
+
+        void reset(Pt::uint8_t* data)
+        {
+            _data = data;
+        }
+        
+        Pt::uint8_t* data()
+        { return _data; }
+
+        const Pt::uint8_t* data() const
+        { return _data; }
+        
+        Pt::uint32_t meta() const
+        { return _meta; }
+
+        void copy(const Pixel& p)
+        {
+            _info->format().setPixel(*this, p, CompositionMode::SourceCopy);
+        }
+
+    private:
+        const ImageInfo* _info;
+        Pt::uint8_t* _data;
+        Pt::uint32_t _meta;
+};
+
 
 } // namespace
 

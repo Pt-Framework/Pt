@@ -40,13 +40,13 @@ namespace Gfx {
 
 class PT_GFX_API Rgb888Format : public ImageFormat
 {
-	  public:	
-		    Rgb888Format();
+    public:
+        Rgb888Format();
 
-		    virtual void setColor(Pt::uint8_t* pixel, const Color& c, 
-                              CompositionMode mode) const;
-		
-		    virtual Color color(const Pt::uint8_t* pixel) const;
+        virtual void setColor(Pt::uint8_t* pixel, const Color& c, 
+                            CompositionMode mode) const;
+        
+        virtual Color color(const Pt::uint8_t* pixel) const;
 
         virtual void setPixel(Pt::uint8_t* dst, const Pt::uint8_t* src,
                               CompositionMode mode) const;

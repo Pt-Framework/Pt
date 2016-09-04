@@ -3389,6 +3389,46 @@ void Rasterizer::image( const Point& to, const Image& from, const Rect& fromRect
 }
 
 
+void Rasterizer::stroke(int x, int y)
+{
+    if( x < _currentClip.x() || x >= _clipRight || 
+        y < _currentClip.y() || y >= _clipBottom)
+        return;
+
+    const Image& colorBuffer = _pen.buffer();
+    const Pt::uint8_t* srcPix = colorBuffer.pixel(0,0);
+    Pt::uint8_t* dstPix = _image->pixel(x, y);
+ 
+    _image->format().setPixel(dstPix, srcPix, _compositionMode);
+
+    // TODO: new API
+    //Pixel from; // = _pen.colorPixel();
+    //Pixel p = _image->format().pixel(_image->info(), x, y);
+    //_image->format().setPixel(p, from, _compositionMode);
+}
+
+
+void Rasterizer::stroke(int xpos, int ypos, Pt::ssize_t length)
+{       
+    clipSpan( xpos, ypos, length );
+
+    const Pt::uint8_t* buffer = _pen.buffer().pixel(0,0);
+    Pt::ssize_t bufferWidth = _pen.buffer().width();
+
+    while(length > 0)
+    {
+        Pt::ssize_t n = std::min(length, bufferWidth);
+        if( n )
+        {
+            Pt::uint8_t* dest =_image->pixel(xpos, ypos);
+            _image->format().setSpan(dest, buffer, n, _compositionMode);
+        }
+
+        length -= n;
+        xpos   += n;
+    }
+}
+
 
 FontMetrics Rasterizer::fontMetrics( const String& text ) const
 {

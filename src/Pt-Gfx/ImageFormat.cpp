@@ -49,6 +49,25 @@ ImageFormat::~ImageFormat()
 }
 
 
+Pixel ImageFormat::pixel(const ImageInfo& image, 
+                         Pt::ssize_t x, Pt::ssize_t y) const
+{
+    Pixel* p = 0;
+    return *p; 
+}
+
+
+void ImageFormat::advance(Pixel& pixel, Pt::ssize_t n) const
+{ 
+}
+
+
+void ImageFormat::setPixel(Pixel& to, const Pixel& from,
+                           CompositionMode mode) const
+{
+}
+
+
 void ImageFormat::copy(const ImageInfo& toInfo, const Point& to,
                        const ImageInfo& fromInfo, const Rect& fromRect,
                        CompositionMode mode) const

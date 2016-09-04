@@ -70,6 +70,8 @@ class CompositionMode
 };
 
 class ImageInfo;
+class Pixel;
+class PixelPtr;
 
 class PT_GFX_API ImageFormat
 {
@@ -93,6 +95,16 @@ class PT_GFX_API ImageFormat
 
         virtual Color color(const Pt::uint8_t* pixel) const = 0;
 
+        // new Api
+        virtual Pixel pixel(const ImageInfo& image, 
+                            Pt::ssize_t x, Pt::ssize_t y) const;
+
+        virtual void advance(Pixel& pixel, Pt::ssize_t n) const;
+
+        virtual void setPixel(Pixel& to, const Pixel& from,
+                              CompositionMode mode) const;
+
+        // current API
         virtual void setPixel(Pt::uint8_t* dst, const Pt::uint8_t* src,
                               CompositionMode mode) const = 0;
 
@@ -105,12 +117,12 @@ class PT_GFX_API ImageFormat
 
         bool operator==(const ImageFormat& a) const
         {
-          return ( _pixelSize == a._pixelSize && _channels == a._channels );
+          return _pixelSize == a._pixelSize && _channels == a._channels;
         }
 
         bool operator!=(const ImageFormat& a) const
         {
-          return ( _pixelSize != a._pixelSize || _channels != a._channels );
+          return _pixelSize != a._pixelSize || _channels != a._channels;
         }
 
         static const ImageFormat& rgb565();

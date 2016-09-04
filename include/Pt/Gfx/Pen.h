@@ -153,19 +153,17 @@ class PT_GFX_API Pen
 class PT_GFX_API PenData
 {
   public:
-      PenData( size_t size, const Color& color, Pen::PenStyle style, Pen::CapStyle cap, Pen::JoinStyle join )
-      : _size( size )
-      , _style( style )
-      , _buffer(Gfx::Size( 64, 1) )
-      , _capStyle( cap )
-      , _joinStyle( join )
-			, _color(color)
-      { 
-				_buffer.setColor( color);
-			}
-
-      ~PenData()
-      { }
+      PenData(size_t size, const Color& color, 
+              Pen::PenStyle style, Pen::CapStyle cap, Pen::JoinStyle join)
+      : _size(size)
+      , _style(style )
+      , _buffer( Gfx::Size(64, 1) )
+      , _capStyle(cap)
+      , _joinStyle(join)
+      , _color(color)
+      {
+          _buffer.setColor( color);
+      }
 
       const Color& color() const
       { return _color; }
@@ -186,14 +184,16 @@ class PT_GFX_API PenData
       { return _joinStyle; }
 
   private:
-      size_t          _size;
-      Pen::PenStyle   _style;
-      Image       _buffer;
-      Pen::CapStyle   _capStyle;
-      Pen::JoinStyle  _joinStyle;
-			Color						_color;
+      size_t         _size;
+      Pen::PenStyle  _style;
+      Image          _buffer;
+      Pen::CapStyle  _capStyle;
+      Pen::JoinStyle _joinStyle;
+      Color          _color;
 };
 
-} } // namespace 
+} // namespace 
+
+} // namespace 
 
 #endif

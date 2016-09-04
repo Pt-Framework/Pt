@@ -30,10 +30,10 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/String.h>
-#include <Pt/Gfx/Painter.h>
 
-namespace Pt{
-namespace Gfx{
+namespace Pt {
+
+namespace Gfx {
 
 class LineSlope;
 class LineEdge;
@@ -44,7 +44,7 @@ class Image;
 class PT_GFX_API Rasterizer
 {    
   public:
-    Rasterizer( Image& image );    
+    Rasterizer( Image& image );
     
     ~Rasterizer();
 
@@ -165,57 +165,31 @@ class PT_GFX_API Rasterizer
   //Wide dashed polyline algo.
   protected:
     enum { V_TOP =  0, V_RIGHT = 1, V_BOTTOM = 2, V_LEFT = 3 };
+    
     void drawWideDashPolyline( const Point* points, int pointCount );
+    
     void dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash );
       
-    void stroke(int x, int y)
-    {
-      if( x < _currentClip.x() || x >= _clipRight || y < _currentClip.y() || y >= _clipBottom)
-          return;
+  private:
+    void stroke(int x, int y);
 
-      const Image& colorBuffer = _pen.buffer();
-      const Pt::uint8_t* srcPix = colorBuffer.pixel(0,0);
-      Pt::uint8_t* dstPix = _image->pixel(x, y);
- 
-     _image->format().setPixel(dstPix, srcPix, _compositionMode);  
-    }
-
-    
-    void stroke(int xpos, int ypos, Pt::ssize_t length)
-    {       
-      clipSpan( xpos, ypos, length );
-
-      const Pt::uint8_t* buffer = _pen.buffer().pixel(0,0);
-      Pt::ssize_t bufferWidth = _pen.buffer().width();
-
-      while(length > 0)
-      {
-          Pt::ssize_t n = std::min(length, bufferWidth);
-          if( n )
-          {
-              Pt::uint8_t* dest =_image->pixel(xpos, ypos);
-              _image->format().setSpan(dest, buffer, n, _compositionMode);
-          }
-
-          length -= n;
-          xpos   += n;
-      }
-    }
+    void stroke(int xpos, int ypos, Pt::ssize_t length);
         
   private:
-    Image* 		      _image;
-    DrawText*       _text;   
-    Rect			      _clip;    
-    Rect			      _currentClip;
-    Font			      _font;
-    Brush			      _brush;
-    Pen				      _pen;   
-    CompositionMode _compositionMode;   
-    int _clipRight;
-    int _clipBottom;
+    Image*          _image;
+    DrawText*       _text;
+    Rect            _clip;
+    Rect            _currentClip;
+    Font            _font;
+    Brush           _brush;
+    Pen             _pen;
+    CompositionMode _compositionMode;
+    int             _clipRight;
+    int             _clipBottom;
 };
 
+} //namespace
 
-}}//namespace
+} //namespace
 
 #endif

@@ -44,9 +44,89 @@ namespace Pt {
 
 namespace Gfx {
 
+class PixelRef
+{
+    public:
+        explicit PixelRef(Pixel& p)
+        : _pixel(&p)
+        { }
+
+        Pt::uint8_t* data()
+        { return _pixel->data(); }
+
+        const Pt::uint8_t* data() const
+        { return _pixel->data(); }
+        
+        Pt::uint32_t meta() const
+        { return _pixel->meta(); }
+
+    private:
+        Pixel* _pixel;
+};
+
+class PixelIterator
+{
+    public:
+        PixelIterator(const ImageInfo& image, Pt::ssize_t x, Pt::ssize_t y)
+        : _image(&image)
+        , _offset((y * image.width()) + x)
+        , _pixel( _image->format().pixel(image, x, y) )
+        {
+        }
+
+        PixelIterator(const PixelIterator& it)
+        : _image(it._image)
+        , _offset(it._offset)
+        , _pixel(it._pixel)
+        {}
+
+        PixelIterator& operator=(const PixelIterator& it)
+        {
+            _image = it._image;
+            _offset = it._offset;
+            _pixel = it._pixel;
+            return *this;
+        }
+
+        bool operator!=(const PixelIterator& it) const
+        { 
+            return _offset != it._offset;  
+        }
+
+        bool operator==(const PixelIterator& it) const
+        { 
+            return _offset == it._offset; 
+        }
+
+        // TODO: return same type as used in ImageFormat !!!
+        PixelRef operator*()
+        { 
+            return PixelRef(_pixel); 
+        }
+
+        PixelIterator& operator++()
+        {       
+            ++_offset;
+            _image->format().advance(_pixel, 1);
+            return *this; 
+        }
+
+        PixelIterator operator+=(Pt::ssize_t n)
+        {
+            _image->format().advance(_pixel, n);  
+            return *this; 
+        }
+
+    private:
+        const ImageInfo* _image;
+        Pt::ssize_t      _offset;
+        Pixel            _pixel;
+};
+
+
 class PT_GFX_API Image
 {
-  public:		
+  public:
     Image( const ImageFormat& format = ImageFormat::argb8888() );
     
     Image(const Size& size, 
@@ -66,12 +146,12 @@ class PT_GFX_API Image
     const ImageFormat& format() const
     {
         return _info.format();
-    }		
+    }
 
     const ImageInfo& info() const
     {
         return _info;
-    }		
+    }
 
     size_t width() const
     {
@@ -88,16 +168,6 @@ class PT_GFX_API Image
         return _info.size();
     }
 
-    size_t stride() const
-    {
-      return _info.stride();
-    }
-
-    bool empty() const
-    {
-      return _info.width() == 0 || _info.height() == 0;
-    }
-
     Pt::uint8_t* data()
     { 
         return _info.data(); 
@@ -107,6 +177,22 @@ class PT_GFX_API Image
     { 
         return _info.data(); 
     }
+
+    size_t stride() const
+    {
+      return _info.stride();
+    }
+
+    bool empty() const
+    {
+      return _info.empty();
+    }
+
+    PixelIterator begin()
+    { return PixelIterator(_info, 0, 0); }
+
+    PixelIterator end()
+    { return PixelIterator(_info, 0, height()); }
 
     void setColor( const Color& color );
 
@@ -137,13 +223,8 @@ class PT_GFX_API Image
 
     const Pt::uint8_t* pixel(size_t x, size_t y) const 
     {
-        Pt::uint8_t* data = _info.data();
-        return &data[pixelOffsetInBytes(x,y)];
-    }
-
-    void setPixel(size_t x, size_t y, const Pt::uint8_t* p)
-    {
-        memcpy( pixel(x, y), p, format().pixelSize() );
+        std::size_t off = y * _info.lineSize() + x * format().pixelSize();
+        return &_info.data()[off];
     }
 
     Image convert(const ImageFormat& toFormat) const;
@@ -161,6 +242,41 @@ class PT_GFX_API Image
     ImageInfo _info;
     std::vector<Pt::uint8_t> _buffer;
 };
+
+
+template<typename IteratorT>
+void blockScale(IteratorT from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
+                IteratorT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight)
+{
+    Pt::ssize_t dh = 0;
+    Pt::ssize_t y  = 0;
+
+    while(y < toHeight) 
+    {
+        IteratorT pos = from;
+        do 
+        {
+            Pt::ssize_t dw = 0;
+            for(Pt::ssize_t x = 0; x < toWidth; ++x) 
+            {
+                *to = *from;
+                
+                ++to;
+                for(dw += fromWidth; dw >= toWidth; ++from, dw -= toWidth)
+                    ;
+            }
+            from = pos;
+            y++;
+        }
+        while( (dh += fromHeight) < toHeight );
+
+        while(dh >= toHeight) 
+        {
+            from += fromWidth;
+            dh -= toHeight;
+        }
+    }
+}
 
 } // namespace
 
