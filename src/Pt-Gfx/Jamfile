@@ -79,3 +79,5 @@ else
     LinkFlags Pt-Gfx : $(FREETYPE_LINKFLAGS) ;
     LinkLibs Pt-Gfx : $(FREETYPE_LINKLIBS) ;
 }
+
+SubInclude PT_TOP src Pt-Gfx tests ;

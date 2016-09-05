@@ -37,8 +37,25 @@
 #include <algorithm>
 #include <cmath>
 
-namespace Pt{
-namespace Gfx{
+namespace {
+
+void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from)
+{
+    Pt::uint8_t alpha = from[3];
+    Pt::uint32_t alphaSrc = alpha + 1;
+    Pt::uint32_t alphaInv = 256 - alpha;
+
+    to[0] = (unsigned char)((alphaSrc * from[0] + alphaInv * to[0]) >> 8);
+    to[1] = (unsigned char)((alphaSrc * from[1] + alphaInv * to[1]) >> 8);
+    to[2] = (unsigned char)((alphaSrc * from[2] + alphaInv * to[2]) >> 8);
+    to[3] = (unsigned char)((alphaSrc * from[3] + alphaInv * to[3]) >> 8);
+}
+
+}
+
+namespace Pt {
+
+namespace Gfx {
 
 class EllipseSpan
 {
@@ -1857,13 +1874,36 @@ void Rasterizer::fillSolid(const Point& pos, int length)
   const Pt::uint8_t* buffer = _brush.texture().pixel(0,0);
   Pt::ssize_t bufferWidth = _brush.texture().width();
 
+
   while(length > 0)
   {
       Pt::ssize_t n = std::min(length, bufferWidth);
       if( n )
       {
           Pt::uint8_t* dest =_image->pixel(xpos, ypos);
+          
+          const Pt::uint8_t* buf = buffer;
+#ifdef USE_ARGB
+          switch(_compositionMode)
+          {
+              default:
+              case CompositionMode::SourceCopy:
+                  memcpy(dest, buffer, n * 4);
+                  break;
+
+              case CompositionMode::SourceOver:
+                  
+                  for(size_t i = 0; i < n; ++i)
+                  {
+                      sourceOver(dest, buf);
+                      buf += 4;
+                      dest += 4;
+                  }
+                  break;
+          }
+#else
           _image->format().setSpan(dest, buffer, n, _compositionMode);
+#endif
       }
 
       length -= n;
@@ -1881,9 +1921,9 @@ void Rasterizer::strokeText( const Point& to, const Pt::String& text )
 }
 
 
-void Rasterizer::fill(const Point& origin, const Point& pos,  int length)
+void Rasterizer::fill(const Point& origin, const Point& pos, int length)
 {
-  switch( _brush.fillStyle())
+  switch( _brush.fillStyle() )
   {
     case Brush::Texture:
       fillTexture( origin, pos, length);
@@ -3395,12 +3435,28 @@ void Rasterizer::stroke(int x, int y)
         y < _currentClip.y() || y >= _clipBottom)
         return;
 
-    const Image& colorBuffer = _pen.buffer();
-    const Pt::uint8_t* srcPix = colorBuffer.pixel(0,0);
-    Pt::uint8_t* dstPix = _image->pixel(x, y);
- 
-    _image->format().setPixel(dstPix, srcPix, _compositionMode);
+    const Pt::uint8_t* srcPix = _pen.buffer().pixel(0,0);
 
+#ifdef USE_ARGB
+    Pt::uint8_t* dstPix = _image->pixel(x, y);
+
+    switch(_compositionMode)
+    {
+        default:
+        case CompositionMode::SourceCopy:
+            *((Pt::uint32_t*)dstPix) = *((const Pt::uint32_t*)srcPix);
+            break;
+
+        case CompositionMode::SourceOver:
+            sourceOver(dstPix, srcPix);
+            break;
+    }
+#else
+    Pixel pixel(_image->info(), 0);
+    _image->format().getPixel(pixel, _image->info(), x, y);
+    _image->format().setPixel(pixel.data(), srcPix, _compositionMode);
+#endif
+    
     // TODO: new API
     //Pixel from; // = _pen.colorPixel();
     //Pixel p = _image->format().pixel(_image->info(), x, y);

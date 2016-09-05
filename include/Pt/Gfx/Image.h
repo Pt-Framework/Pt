@@ -50,6 +50,8 @@ class PixelIterator
         PixelIterator(const ImageInfo& image, Pt::ssize_t x, Pt::ssize_t y)
         : _image(&image)
         , _offset((y * image.width()) + x)
+        , _x(x)
+        , _y(y)
         , _pixel(image, 0)
         {
             _image->format().getPixel(_pixel, image, x, y);
@@ -58,14 +60,20 @@ class PixelIterator
         PixelIterator(const PixelIterator& it)
         : _image(it._image)
         , _offset(it._offset)
+        , _x(it._x)
+        , _y(it._y)
         , _pixel(it._pixel)
         {}
 
         PixelIterator& operator=(const PixelIterator& it)
         {
-            _image = it._image;
+            _image  = it._image;
             _offset = it._offset;
+            _x      = it._x;
+            _y      = it._y;
+            
             _pixel.reset(it._pixel);
+            
             return *this;
         }
 
@@ -86,24 +94,37 @@ class PixelIterator
 
         PixelIterator& operator++()
         {
-            // TODO: handle image stride
-                   
             ++_offset;
-            _image->format().advance(_pixel, 1);
+            
+            if( ++_x >= _image->width() )
+            {
+                _x = 0;
+                _image->format().getPixel(_pixel, *_image, _x, _y);
+            }
+            else
+            {
+                _image->format().advance(_pixel);
+            }
+            
             return *this; 
         }
 
-        PixelIterator operator+=(Pt::ssize_t n)
+        PixelIterator& operator+=(Pt::ssize_t n)
         {
-            // TODO: handle image stride
+            _offset += n;
 
-            _image->format().advance(_pixel, n);  
+            _y = _offset / _image->width();
+            _x = _offset % _image->width();
+            
+            _image->format().getPixel(_pixel, *_image, _x, _y);  
             return *this; 
         }
 
     private:
         const ImageInfo* _image;
         Pt::ssize_t      _offset;
+        Pt::ssize_t      _x;
+        Pt::ssize_t      _y;
         Pixel            _pixel;
 };
 

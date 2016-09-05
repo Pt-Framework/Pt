@@ -1,0 +1,7 @@
+SubDir PT_TOP src Pt-Gfx tests ;
+SubDirHdrs $(PT_TOP)/include ;
+SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx ;
+
+Main ImagePainterTest : ImagePainterTest.cpp ;
+LinkSharedLibraries ImagePainterTest : Pt Pt-Gfx Pt-System ;
+MakeLocate ImagePainterTest : $(PT_OUTPUT_TARGET) ;

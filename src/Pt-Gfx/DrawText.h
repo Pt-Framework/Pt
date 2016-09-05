@@ -45,6 +45,8 @@
 #include <Pt/Gfx/FontMetrics.h>
 #include <cassert>
 
+//#define USE_ARGB 1
+
 namespace Pt{
 namespace Gfx{
 

@@ -80,22 +80,6 @@ MainWindow::MainWindow()
 : _child1("Child 1")
 , _scrollContainer(Hmi::FlowLayout::Top)
 {
-    //Gfx::Image image( Gfx::Size(2, 5) );
-    //Gfx::Image image2( Gfx::Size(1, 3) );
-    //std::clog << "i: " << (void*)image.data() << std::endl;
-
-    //int n = 0;
-    //Gfx::PixelIterator it = image.begin();
-    //Gfx::PixelIterator end = image.end();
-    //for(; it != end; ++it)
-    //{
-    //    void* p = (*it).data();
-    //    std::clog << n++ << ": " << p << std::endl;
-    //}
-
-    //Gfx::blockScale(image.begin(), 2, 5, image2.begin(), 1, 3);
-
-
     loadIcon(_icon);
 
     _picture.set( _icon);

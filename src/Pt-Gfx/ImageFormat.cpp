@@ -55,7 +55,7 @@ void ImageFormat::getPixel(Pixel& pixel, const ImageInfo& image,
 }
 
 
-void ImageFormat::advance(Pixel& pixel, Pt::ssize_t n) const
+void ImageFormat::advance(Pixel& pixel) const
 { 
 }
 

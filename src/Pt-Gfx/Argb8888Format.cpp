@@ -126,9 +126,9 @@ void Argb8888Format::getPixel(Pixel& pixel, const ImageInfo& image,
 }
 
 
-void Argb8888Format::advance(Pixel& pixel, Pt::ssize_t n) const
+void Argb8888Format::advance(Pixel& pixel) const
 {
-    Pt::uint8_t* data = pixel.data() + (n * pixelSize());
+    Pt::uint8_t* data = pixel.data() + 4;
     pixel.reset(pixel.info(), data);
 }
 
@@ -184,7 +184,7 @@ void Argb8888Format::setSpan(Pt::uint8_t* dst, const Pt::uint8_t* src,
             break;
 
         case CompositionMode::SourceOver:
-            for( size_t i = 0; i < length; ++i)
+            for(size_t i = 0; i < length; ++i)
             {
                 sourceOver(dst, src); 
                 src += 4;

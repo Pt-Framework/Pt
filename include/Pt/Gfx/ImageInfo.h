@@ -135,7 +135,7 @@ class Pixel
 
         Pixel& operator=(const Pixel& p)
         {
-            copy(p);
+            _info->format().setPixel(*this, p, CompositionMode::SourceCopy);
             return *this;
         }
 
@@ -151,6 +151,11 @@ class Pixel
              _info = p._info;
              _data = p._data;
              _meta = p._meta;
+        }
+
+        void reset(Pt::uint8_t* data)
+        {
+             _data = data;
         }
 
         const ImageInfo& info() const
@@ -175,7 +180,6 @@ class Pixel
         Pt::uint8_t* _data;
         Pt::uint32_t _meta;
 };
-
 
 } // namespace
 
