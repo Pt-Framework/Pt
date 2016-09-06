@@ -60,6 +60,10 @@ void ImageFormat::advance(Pixel& pixel) const
 }
 
 
+void ImageFormat::assign(Pixel& to, const Pixel& from) const
+{
+}
+
 void ImageFormat::setPixel(Pixel& to, const Pixel& from,
                            CompositionMode mode) const
 {

@@ -122,14 +122,23 @@ void Argb8888Format::getPixel(Pixel& pixel, const ImageInfo& image,
     Pt::ssize_t off = xoff + yoff;
     Pt::uint8_t* data = &image.data()[off];
     
-    return pixel.reset(image, data);
+    return pixel.reset(*this, data);
 }
 
 
 void Argb8888Format::advance(Pixel& pixel) const
 {
     Pt::uint8_t* data = pixel.data() + 4;
-    pixel.reset(pixel.info(), data);
+    pixel.reset(data);
+}
+
+
+void Argb8888Format::assign(Pixel& to, const Pixel& from) const
+{
+    Pt::uint8_t* dst = to.data();
+    const Pt::uint8_t* src = from.data();
+
+    *((Pt::uint32_t*)dst) = *((const Pt::uint32_t*)src);
 }
 
 

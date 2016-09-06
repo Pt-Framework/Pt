@@ -3452,15 +3452,10 @@ void Rasterizer::stroke(int x, int y)
             break;
     }
 #else
-    Pixel pixel(_image->info(), 0);
+    Pixel pixel(_image->format(), 0);
     _image->format().getPixel(pixel, _image->info(), x, y);
     _image->format().setPixel(pixel.data(), srcPix, _compositionMode);
 #endif
-    
-    // TODO: new API
-    //Pixel from; // = _pen.colorPixel();
-    //Pixel p = _image->format().pixel(_image->info(), x, y);
-    //_image->format().setPixel(p, from, _compositionMode);
 }
 
 

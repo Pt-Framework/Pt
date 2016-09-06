@@ -121,7 +121,7 @@ class ImageInfo
 class Pixel
 {
     public:
-        Pixel(const ImageInfo& info, Pt::uint8_t* data)
+        Pixel(const ImageFormat& info, Pt::uint8_t* data)
         : _info(&info)
         , _data(data)
         , _meta(0)
@@ -135,11 +135,11 @@ class Pixel
 
         Pixel& operator=(const Pixel& p)
         {
-            _info->format().setPixel(*this, p, CompositionMode::SourceCopy);
+            _info->assign(*this, p);
             return *this;
         }
 
-        void reset(const ImageInfo& info, Pt::uint8_t* data)
+        void reset(const ImageFormat& info, Pt::uint8_t* data)
         {
              _info = &info;
              _data = data;
@@ -158,7 +158,7 @@ class Pixel
              _data = data;
         }
 
-        const ImageInfo& info() const
+        const ImageFormat& info() const
         { return *_info; }
         
         Pt::uint8_t* data()
@@ -170,13 +170,8 @@ class Pixel
         Pt::uint32_t meta() const
         { return _meta; }
 
-        void copy(const Pixel& p)
-        {
-            _info->format().setPixel(*this, p, CompositionMode::SourceCopy);
-        }
-
     private:
-        const ImageInfo* _info;
+        const ImageFormat* _info;
         Pt::uint8_t* _data;
         Pt::uint32_t _meta;
 };

@@ -53,6 +53,8 @@ class PT_GFX_API Argb8888Format : public ImageFormat
 
         virtual void advance(Pixel& pixel) const;
 
+        virtual void assign(Pixel& to, const Pixel& from) const;
+
         virtual void setPixel(Pixel& to, const Pixel& from,
                               CompositionMode mode) const;
 

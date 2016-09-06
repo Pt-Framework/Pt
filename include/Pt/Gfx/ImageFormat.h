@@ -95,11 +95,13 @@ class PT_GFX_API ImageFormat
 
         virtual Color color(const Pt::uint8_t* pixel) const = 0;
 
-        // new Api
+        // new API
         virtual void getPixel(Pixel& pixel, const ImageInfo& image, 
                               Pt::ssize_t x, Pt::ssize_t y) const;
 
         virtual void advance(Pixel& pixel) const;
+
+        virtual void assign(Pixel& to, const Pixel& from) const;
 
         virtual void setPixel(Pixel& to, const Pixel& from,
                               CompositionMode mode) const;

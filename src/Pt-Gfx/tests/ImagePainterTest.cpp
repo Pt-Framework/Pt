@@ -33,14 +33,14 @@ void Paint()
             {
                 painter.fillRect(RectF(PointF(0,0), SizeF(1280,800)));
 
-               for(int l = 0; l < 10; l++)
+               for(int i = 0; i < 10; i++)
                     painter.fillRect( RectF(PointF(0,0), SizeF(100,100)));
 
-                //for(int l = 0; l < 20; l++)
-                //    painter.drawLine( PointF(l, 0), PointF(l, 200) );
+                for(int x = 0; x < 50; x++)
+                    painter.drawLine( PointF(x, 0), PointF(x, 200) );
 
-                //for(int l = 0; l < 20; l++)
-                //    painter.drawLine( PointF(0, l), PointF(200, l) );
+                for(int y = 0; y < 20; y++)
+                    painter.drawLine( PointF(0, y), PointF(200, y) );
             }
 
             std::clog << "drawing: " << clock.stop().toUSecs() << std::endl;
@@ -107,8 +107,8 @@ void BlockScale()
                     Pt::uint16_t* to = reinterpret_cast<Pt::uint16_t*>( &frameBuffer[n] );
 
                     *to  = (Pt::uint16_t) (r / 8);
-                    *to  |= ((Pt::uint16_t) (g / 4))  << 5;
-                    *to  |= ((Pt::uint16_t) (b / 8))  << 11;
+                    *to  |= ((Pt::uint16_t) (g / 4)) << 5;
+                    *to  |= ((Pt::uint16_t) (b / 8)) << 11;
                 }
             }
 
@@ -124,7 +124,12 @@ void BlockScale()
 
 int main(int argc, char* args[])
 {
+    BlockScale();
+    
+    std::clog << std::endl;
+    
     Paint();
-    return 1;
+    
+    return 0;
 }
 

@@ -49,17 +49,15 @@ class PixelIterator
     public:
         PixelIterator(const ImageInfo& image, Pt::ssize_t x, Pt::ssize_t y)
         : _image(&image)
-        , _offset((y * image.width()) + x)
         , _x(x)
         , _y(y)
-        , _pixel(image, 0)
+        , _pixel(image.format(), 0)
         {
             _image->format().getPixel(_pixel, image, x, y);
         }
 
         PixelIterator(const PixelIterator& it)
         : _image(it._image)
-        , _offset(it._offset)
         , _x(it._x)
         , _y(it._y)
         , _pixel(it._pixel)
@@ -68,7 +66,6 @@ class PixelIterator
         PixelIterator& operator=(const PixelIterator& it)
         {
             _image  = it._image;
-            _offset = it._offset;
             _x      = it._x;
             _y      = it._y;
             
@@ -79,12 +76,12 @@ class PixelIterator
 
         bool operator!=(const PixelIterator& it) const
         { 
-            return _offset != it._offset;  
+            return _x != it._x || _y != it._y;  
         }
 
         bool operator==(const PixelIterator& it) const
         { 
-            return _offset == it._offset; 
+            return _x == it._x && _y == it._y; 
         }
         
         Pixel& operator*()
@@ -93,9 +90,7 @@ class PixelIterator
         }
 
         PixelIterator& operator++()
-        {
-            ++_offset;
-            
+        {           
             if( ++_x >= _image->width() )
             {
                 _x = 0;
@@ -111,10 +106,9 @@ class PixelIterator
 
         PixelIterator& operator+=(Pt::ssize_t n)
         {
-            _offset += n;
-
-            _y = _offset / _image->width();
-            _x = _offset % _image->width();
+            Pt::ssize_t off = _x + n;
+            _y += off / _image->width();
+            _x += off % _image->width();
             
             _image->format().getPixel(_pixel, *_image, _x, _y);  
             return *this; 
@@ -122,7 +116,6 @@ class PixelIterator
 
     private:
         const ImageInfo* _image;
-        Pt::ssize_t      _offset;
         Pt::ssize_t      _x;
         Pt::ssize_t      _y;
         Pixel            _pixel;
