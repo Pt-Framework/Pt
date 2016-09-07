@@ -311,7 +311,7 @@ void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
         _cursorBackground.height() != cursor.height() )
     {
         Gfx::Size size(cursor.width(), cursor.height());
-        _cursorBackground.resize( size, _frameBuffer.format() ); 
+        _cursorBackground.resize( size, _frameBuffer.format(), 0 ); 
     }
     
     grabImage( buffer, _cursorPos, _cursorBackground );

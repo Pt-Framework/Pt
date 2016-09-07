@@ -125,35 +125,31 @@ class PT_GFX_API Image
     void resize(Pt::uint8_t* buffer, const Size& size, 
                 const ImageFormat& format, size_t padding);
 
-    Color color(size_t x, size_t y) const
+    Color colorXXX(size_t x, size_t y) const
     {
-        return format().color(pixel(x,y));
+        return format().color(pixelXXX(x,y));
     }
 
-    void setColor(size_t x, size_t y, const Color& c, 
+    void setColorXXX(size_t x, size_t y, const Color& c, 
                   CompositionMode mode = CompositionMode::SourceCopy)
     {
-        format().setColor(pixel(x,y), c, mode);
+        format().setColor(pixelXXX(x,y), c, mode);
     }
 
-    Pt::uint8_t* pixel(size_t x, size_t y)
+    Pt::uint8_t* pixelXXX(size_t x, size_t y)
     {
         Pt::uint8_t* data = _info.data();
         return &data[ pixelOffsetInBytes(x,y) ];
     }
 
-    const Pt::uint8_t* pixel(size_t x, size_t y) const 
+    const Pt::uint8_t* pixelXXX(size_t x, size_t y) const 
     {
         std::size_t off = y * _info.pitch() + x * format().pixelSize();
         return &_info.data()[off];
     }
 
-    Image convert(const ImageFormat& toFormat) const;
-
     void convert(Image& image) const;
-    
-    Image blockScale( const Size& newSize) const;
-
+   
   protected:
     size_t pixelOffsetInBytes(size_t x, size_t y) const
     {

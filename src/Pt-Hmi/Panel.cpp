@@ -72,18 +72,30 @@ void Panel::onResizeEvent(const ResizeEvent& ev)
     {
         case ImageLayout::Strech:
         {
-            Gfx::Image strech = _backgroundImage.blockScale(Gfx::Size((int) ev.size().width(), (int)ev.size().height()) );
-            _backgroundPicture.set( strech);
+            Gfx::Size newSize( (int) ev.size().width(), 
+                               (int)ev.size().height() );
+
+            Gfx::Image strech(newSize, _backgroundImage.format());
+            
+            Gfx::blockScale(_backgroundImage.begin(),_backgroundImage.width(), _backgroundImage.height(),
+                            strech.begin(), strech.width(), strech.height() );
+
+            _backgroundPicture.set(strech);
         }
         break;
 
         case ImageLayout::Zoom:
         {
-            const double factor = ev.size().width()/(double)_backgroundImage.width();
-            Pt::Gfx::Size newSize( ( size_t)( _backgroundImage.width()*factor), (size_t)(_backgroundImage.height()*factor));
+            const double factor = ev.size().width() / (double)_backgroundImage.width();
+            Pt::Gfx::Size newSize( ( size_t)(_backgroundImage.width() * factor), 
+                                   (size_t)(_backgroundImage.height() * factor) );
 
-            Gfx::Image  strech = _backgroundImage.blockScale(newSize);
-            _backgroundPicture.set( strech);
+            Gfx::Image strech(newSize, _backgroundImage.format());
+            
+            Gfx::blockScale( _backgroundImage.begin(),_backgroundImage.width(), _backgroundImage.height(),
+                             strech.begin(), strech.width(), strech.height() );
+
+            _backgroundPicture.set(strech);
         }
         break;
     }  

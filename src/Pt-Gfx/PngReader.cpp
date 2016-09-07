@@ -295,14 +295,17 @@ class PngReaderImpl
             std::size_t n = 0;
 		        for( size_t x = 0; x < width; ++x)
 		        {
+              Pixel pixel(_image->format(), 0);
+              _image->format().getPixel(pixel, _image->info(), x, row);
+
 			        if( bitdepth == 8 && channels == 3)
 			        {
                 unsigned char red = data[n++];
                 unsigned char green = data[n++];
                 unsigned char blue = data[n++];
 
-                Pt::Gfx::Color pixel(1.0, red/255.0f, green/255.0f, blue/255.0f);
-				        _image->setColor(x, row, pixel);
+                Pt::Gfx::Color color(1.0, red/255.0f, green/255.0f, blue/255.0f);
+                _image->format().setPixel(pixel, color, CompositionMode::SourceCopy);
 			        }
 
 			        if( bitdepth == 8 && channels == 4)
@@ -312,8 +315,8 @@ class PngReaderImpl
                 unsigned char blue = data[n++];
                 unsigned char alpha = data[n++];
         
-                Pt::Gfx::Color pixel(alpha/255.0f, red/255.0f, green/255.0f, blue/255.0f);
-				        _image->setColor(x, row, pixel);
+                Pt::Gfx::Color color(alpha/255.0f, red/255.0f, green/255.0f, blue/255.0f);
+                _image->format().setPixel(pixel, color, CompositionMode::SourceCopy);
 			        }
 		        }
         }

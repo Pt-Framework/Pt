@@ -214,14 +214,16 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 
         for(size_t x = 0; x < icon.width(); ++x)
         {
-          const size_t index  = offsetLine + (x*planes);
+          const size_t index = offsetLine + (x*planes);
 
-          const Gfx::Color& pix =  icon.color(x,y);
+          Gfx::Pixel pixel(icon.format(), 0);
+          icon.format().getPixel(pixel, icon.info(), x, y);
+          Gfx::Color color = icon.format().getColor(pixel);
                 
-          bitmapBuffer[index]     = static_cast<unsigned char>(pix.blue());    
-          bitmapBuffer[index + 1] = static_cast<unsigned char>(pix.green());
-          bitmapBuffer[index + 2] = static_cast<unsigned char>(pix.red());
-          bitmapBuffer[index + 3] = static_cast<unsigned char>(pix.alpha());
+          bitmapBuffer[index]     = static_cast<unsigned char>(color.blue());    
+          bitmapBuffer[index + 1] = static_cast<unsigned char>(color.green());
+          bitmapBuffer[index + 2] = static_cast<unsigned char>(color.red());
+          bitmapBuffer[index + 3] = static_cast<unsigned char>(color.alpha());
         }        
     }
 

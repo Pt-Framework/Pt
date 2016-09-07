@@ -80,21 +80,26 @@ void Cursor::loadCursor( std::istream& pngStream, const Gfx::Color& alphaColor, 
 	//Generate alpha channel
 	for( size_t y = 0;  y < image.height(); ++y )
 	{
-		for( size_t x = 0;  x < image.width(); ++x )
-		{
-			Gfx::Color color =  image.color(x,y);
+		  for( size_t x = 0;  x < image.width(); ++x )
+		  {
+          Gfx::Pixel pixel(image.format(), 0);
+          image.format().getPixel(pixel, image.info(), x, y);
+          Gfx::Color color = image.format().getColor(pixel);
 				
-			if( color.red() == alphaColor.red() &&  color.green() == alphaColor.green() && color.blue() == alphaColor.blue() )
-				color.setAlpha(0);
-			else
-				color.setAlpha(1);
+			    if( color.red() == alphaColor.red() &&  color.green() == alphaColor.green() && color.blue() == alphaColor.blue() )
+				    color.setAlpha(0);
+			    else
+				    color.setAlpha(1);
 
-			image.setColor(x,y, color);
-		}
+			    image.format().setPixel(pixel, color, Gfx::CompositionMode::SourceCopy);
+		  }
 	}
 
-	 image.setColor(cursor.xHotspot(),cursor.yHotspot(), Gfx::Color(0,1,0) );
-   fromImage(image, cursor);
+  Gfx::Pixel pixel(image.format(), 0);
+  image.format().getPixel(pixel, image.info(), cursor.xHotspot(), cursor.yHotspot());
+	image.format().setPixel( pixel, Gfx::Color(0,1,0), Gfx::CompositionMode::SourceCopy );
+  
+  fromImage(image, cursor);
 }
 
 
@@ -230,7 +235,9 @@ void Cursor::fromImage( const Gfx::Image& image, Cursor& cursor)
 	{
 		for( size_t x = 0; x < cursor._width; ++x )
 		{
-			const Gfx::Color& color = image.color( x, y );
+      Gfx::Pixel pixel(image.format(), 0);
+      image.format().getPixel(pixel, image.info(), x, y);
+      Gfx::Color color = image.format().getColor(pixel);
 
 			if( color.alpha() == 0 )
 			{//Transparent

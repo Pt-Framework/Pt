@@ -377,7 +377,7 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
             HBITMAP bitmap = CreateDIBSection(_deviceContext, &bi, 
                                               DIB_RGB_COLORS, &imageBits, NULL, 0);
             memcpy(imageBits, 
-                    texture.pixel(0,0), 
+                    texture.data(), 
                     texture.width() * texture.height() * texture.format().pixelSize());
 
             brushHandle = CreatePatternBrush(bitmap);
@@ -729,7 +729,7 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& imag
     Gfx::Point to = Application::instance().screen().fromUnit(toF);
 
     const size_t depth = image.format().pixelSize() * 8; 
-    const Pt::uint8_t* data = image.pixel(0,0);
+    const Pt::uint8_t* data = image.data();
 
     HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, depth, (VOID*)data);
 

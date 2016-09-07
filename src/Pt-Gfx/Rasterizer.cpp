@@ -1819,10 +1819,12 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
 
         // Copy pixels from textrure to image
         if(fillLength)
-            _image->format().setSpan( _image->pixel( xpos, ypos ), 
-                                      texture.pixel(textureXPos, textureYPos), 
+        {
+            _image->format().setSpan( _image->pixelXXX( xpos, ypos ), 
+                                      texture.pixelXXX(textureXPos, textureYPos), 
                                       fillLength, _compositionMode );
-
+        }
+        
         // Remaining unfilled pixels of the span
         length -= fillLength;
         xpos   += fillLength;
@@ -1871,7 +1873,7 @@ void Rasterizer::fillSolid(const Point& pos, int length)
   if( length <= 0)
     return;
    
-  const Pt::uint8_t* buffer = _brush.texture().pixel(0,0);
+  const Pt::uint8_t* buffer = _brush.texture().pixelXXX(0,0);
   Pt::ssize_t bufferWidth = _brush.texture().width();
 
 
@@ -1880,7 +1882,7 @@ void Rasterizer::fillSolid(const Point& pos, int length)
       Pt::ssize_t n = std::min(length, bufferWidth);
       if( n )
       {
-          Pt::uint8_t* dest =_image->pixel(xpos, ypos);
+          Pt::uint8_t* dest =_image->pixelXXX(xpos, ypos);
           
           const Pt::uint8_t* buf = buffer;
 #ifdef USE_ARGB
@@ -3435,7 +3437,7 @@ void Rasterizer::stroke(int x, int y)
         y < _currentClip.y() || y >= _clipBottom)
         return;
 
-    const Pt::uint8_t* srcPix = _pen.buffer().pixel(0,0);
+    const Pt::uint8_t* srcPix = _pen.buffer().pixelXXX(0,0);
 
 #ifdef USE_ARGB
     Pt::uint8_t* dstPix = _image->pixel(x, y);
@@ -3463,7 +3465,7 @@ void Rasterizer::stroke(int xpos, int ypos, Pt::ssize_t length)
 {       
     clipSpan( xpos, ypos, length );
 
-    const Pt::uint8_t* buffer = _pen.buffer().pixel(0,0);
+    const Pt::uint8_t* buffer = _pen.buffer().pixelXXX(0,0);
     Pt::ssize_t bufferWidth = _pen.buffer().width();
 
     while(length > 0)
@@ -3471,7 +3473,7 @@ void Rasterizer::stroke(int xpos, int ypos, Pt::ssize_t length)
         Pt::ssize_t n = std::min(length, bufferWidth);
         if( n )
         {
-            Pt::uint8_t* dest =_image->pixel(xpos, ypos);
+            Pt::uint8_t* dest =_image->pixelXXX(xpos, ypos);
             _image->format().setSpan(dest, buffer, n, _compositionMode);
         }
 

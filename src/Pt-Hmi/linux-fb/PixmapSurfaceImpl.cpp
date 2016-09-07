@@ -68,7 +68,7 @@ void PixmapSurfaceImpl::resize(const Gfx::Size& size, size_t stride)
 void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
 {
     _size = size;
-    _image.resize( Gfx::Size(_size.width(), _size.height() ) );
+    _image.resize( Gfx::Size(_size.width(), _size.height() ), 0 );
 
     _painter.setImage(_image);
 }

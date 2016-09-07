@@ -51,26 +51,30 @@ void loadIcon(Gfx::Image& icon)
     ss.seekg(0);
 
     std::istream* is = &ss;
-    Gfx::PngReader reader(*is, icon);
+    Gfx::Image image;
+    Gfx::PngReader reader(*is, image);
     //std::istream* is = &ifs;
-    //Gfx::JpegReader reader(*is, icon);
+    //Gfx::JpegReader reader(*is, image);
     
     reader.get();
 
-    icon = icon.convert( Pt::Gfx::ImageFormat::argb8888() );
+    icon.resize(image.size(), Pt::Gfx::ImageFormat::argb8888(), 0);
+    image.convert(icon);
 
     for(size_t w = 0; w < icon.width(); ++ w )
     {
         for(size_t h = 0; h < icon.height(); ++h )
         {
-            Gfx::Color color = icon.color(w,h);
-
-          if( color.red() > 0.99 && color.green() > 0.99 && color.blue() > 0.99 )				
-              color.setAlpha(0.01);
-          else
-              color.setAlpha(1);
+            Gfx::Pixel pixel(icon.format(), 0);
+            icon.format().getPixel(pixel, icon.info(), w, h);
+            Gfx::Color color = icon.format().getColor(pixel);
+         
+            if( color.red() > 0.99 && color.green() > 0.99 && color.blue() > 0.99 )				
+                color.setAlpha(0.01);
+            else
+                color.setAlpha(1);
                 
-            icon.setColor( w,h, color);
+            icon.format().setPixel(pixel, color, Gfx::CompositionMode::SourceCopy);
         }
     }
 }

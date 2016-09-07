@@ -136,6 +136,7 @@ class DrawText
             dsy = ypos;
 
             Color pixelColor = color;
+            Pixel pixel(image.format(), 0);
 
             for( Pt::int32_t y = ofsy; y < height; ++y, ++dsy )
             {
@@ -157,7 +158,7 @@ class DrawText
                     if( dsx > x2 )
                         break;
 
-                    Pt::uint8_t* pixel = image.pixel(dsx, dsy);
+                    image.format().getPixel(pixel, image.info(), dsx, dsy);
 
                     const int px = yOffset + x;
                     unsigned char value = buffer[px];
@@ -165,12 +166,12 @@ class DrawText
                     if(value != 255)
                     {
                         pixelColor.setAlpha( value/255.0f);
-                        image.format().setColor(pixel, pixelColor,
+                        image.format().setPixel(pixel, pixelColor,
                                                 CompositionMode::SourceOver);
                     }
                     else
                     {                    
-                        image.format().setColor(pixel, color, CompositionMode::SourceCopy);
+                        image.format().setPixel(pixel, color, CompositionMode::SourceCopy);
                     }
                 }
             }

@@ -113,26 +113,6 @@ void Image::resize(Pt::uint8_t* buffer, const Gfx::Size& size,
 }
 
 
-Image Image::convert(const ImageFormat& f) const
-{
-    if( format() == f )
-        return *this;
-
-    Image image( size(), f, padding() );
-
-    for(Pt::ssize_t y = 0; y < height(); ++y)
-    {
-        for(Pt::ssize_t x = 0; x < width(); ++x)
-        {
-            const Color pixelColor = color(x,y);
-            image.setColor(x , y, pixelColor);
-        }
-    }
-
-    return image;
-}
-
-
 void Image::convert(Image& image) const
 {
     image.resize( size(), image.padding() );
@@ -153,62 +133,6 @@ void Image::convert(Image& image) const
     }
 }
 
-
-Image Image::blockScale(const Size& newSize) const
-{
-  Image resultImage( newSize, format(), padding() );
-
-  const double dx = newSize.width() /(double)width();
-  const double dy = newSize.height() /(double) width();
-
-  double xTarget = 0;
-  double yTarget = 0;
-
-  for( Pt::ssize_t ySource = 0; ySource < height(); ++ySource)
-  {        
-    xTarget = 0;
-
-    for( Pt::ssize_t xSource = 0; xSource < width(); ++xSource)
-    {
-            
-      const Pt::uint8_t* pixelSource = pixel( xSource, ySource);
-      
-      Pt::uint8_t* pixelTarget = resultImage.pixel( (size_t) xTarget, (size_t)yTarget);       
-      memcpy( pixelTarget, pixelSource, format().pixelSize());
-
-      for( size_t i = 1; i < dx; ++i)
-      {
-        const size_t xPos = (size_t)xTarget + i;
-        const size_t yPos = (size_t)yTarget;
-
-        if( xPos >= resultImage.width() )
-          break;
-
-        memcpy( resultImage.pixel( xPos, yPos), pixelSource, format().pixelSize());
-      }
-
-       xTarget += dx;
-    }
-        
-    const Pt::uint8_t* sourceLine = resultImage.pixel( 0, (size_t)yTarget);     
-    
-    for( size_t i = 1 ; i < dy ; ++i)
-    {      
-      const size_t yPos = (size_t) yTarget + i;
-
-      if( yPos >= resultImage.height() )
-        break;
-                 
-      memcpy( resultImage.pixel(0, yPos), 
-              sourceLine, 
-              resultImage.width() * format().pixelSize() + padding());
-    }
-
-    yTarget += dy;
-  }  
-
-  return resultImage;
-}
 
 
 void Image::setColor(const Color& color)

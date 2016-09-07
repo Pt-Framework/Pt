@@ -60,11 +60,6 @@ class PT_GFX_API ImageFormat
           return _channels;
         }
         
-        virtual void setColor(Pt::uint8_t* pixel, const Color& c,
-                              CompositionMode mode) const = 0;
-
-        virtual Color color(const Pt::uint8_t* pixel) const = 0;
-
         // new API
         virtual void getPixel(Pixel& pixel, const ImageInfo& image, 
                               Pt::ssize_t x, Pt::ssize_t y) const;
@@ -75,22 +70,29 @@ class PT_GFX_API ImageFormat
 
         virtual void setPixel(Pixel& to, const Pixel& from,
                               CompositionMode mode) const;
-
-        virtual Color getColor(const Pixel& pixel) const;
-
+        
         virtual void setPixel(Pixel& pixel, const Color& c,
                               CompositionMode mode) const;
+        
+        virtual Color getColor(const Pixel& pixel) const;
+
+        void copy(const ImageInfo& to, const Point& toPoint,
+                  const ImageInfo& from, const Rect& fromRect,
+                  CompositionMode mode) const;
 
         // current API
+        virtual void setColor(Pt::uint8_t* pixel, const Color& c,
+                              CompositionMode mode) const = 0;
+
+        virtual Color color(const Pt::uint8_t* pixel) const = 0;
+
         virtual void setPixel(Pt::uint8_t* dst, const Pt::uint8_t* src,
                               CompositionMode mode) const = 0;
 
         virtual void setSpan(Pt::uint8_t* dst, const Pt::uint8_t* src, 
                              size_t length, CompositionMode mode) const = 0;
 
-        void copy(const ImageInfo& to, const Point& toPoint,
-                  const ImageInfo& from, const Rect& fromRect,
-                  CompositionMode mode) const;
+
 
         bool operator==(const ImageFormat& a) const
         {

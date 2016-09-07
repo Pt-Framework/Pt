@@ -187,7 +187,10 @@ class JpegReaderImpl
             {
                 while(_decomp.output_scanline < _decomp.output_height)
                 {
-                    JSAMPROW data = _image->pixel(0, _decomp.output_scanline);
+                    Pixel pixel(_image->format(), 0);
+                    _image->format().getPixel(pixel, _image->info(), 0, _decomp.output_scanline);
+                    
+                    JSAMPROW data = pixel.data();
                     JDIMENSION n = jpeg_read_scanlines(&_decomp, &data, 1);
                     if(n == 0)
                         return 0;
