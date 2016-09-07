@@ -31,21 +31,18 @@
 #define PT_GFX_PIXELITERATOR_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/ImageInfo.h>
-#include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Pixel.h>
 
 namespace Pt {
-namespace Gfx {
 
+namespace Gfx {
 
 class PixelIterator
 {
     public:
         PixelIterator(ImageInfo& image, Pt::ssize_t x, Pt::ssize_t y)
-        : _pixel(image, x,y)
-        {
-        }
+        : _pixel(image, x, y)
+        {}
 
         PixelIterator(const PixelIterator& it)
         : _pixel(it._pixel)
@@ -54,7 +51,6 @@ class PixelIterator
         PixelIterator& operator=(const PixelIterator& it)
         {
             _pixel.reset(it._pixel);
-            
             return *this;
         }
 
@@ -86,9 +82,11 @@ class PixelIterator
         }
 
     private:
-        Pixel            _pixel;
+        Pixel _pixel;
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif

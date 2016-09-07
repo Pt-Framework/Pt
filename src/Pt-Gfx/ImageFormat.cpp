@@ -37,10 +37,9 @@ namespace Pt {
 
 namespace Gfx {
 
-ImageFormat::ImageFormat( size_t pixelSize, size_t channels, bool planar)
+ImageFormat::ImageFormat( size_t pixelSize, size_t channels)
 : _pixelSize(pixelSize)
 , _channels(channels)
-, _planar(planar)
 {
 }
 

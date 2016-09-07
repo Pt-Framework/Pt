@@ -71,7 +71,6 @@ Argb8888Format::Argb8888Format()
 
 void Argb8888Format::assign(Pixel& to, const Pixel& from) const
 {
-  
     Pt::uint8_t* dst = to.imageInfo().data() + to.imageInfo().pitch() * to.y() + to.x() * 4;
     const Pt::uint8_t* src = from.imageInfo().data() + from.imageInfo().pitch() * from.y() + from.x() * 4;
 
@@ -82,8 +81,8 @@ void Argb8888Format::assign(Pixel& to, const Pixel& from) const
 void Argb8888Format::setPixel(Pixel& to, const Pixel& from,
                               CompositionMode mode) const
 {
-    Pt::uint8_t* dst = to.imageInfo().data() + to.imageInfo().pitch() * to.y() + to.x() * 4;
-    const Pt::uint8_t* src = from.imageInfo().data() + from.imageInfo().pitch() * from.y() + from.x() * 4;
+    Pt::uint8_t* dst = to.base();// + to.imageInfo().pitch() * to.y() + to.x() * 4;
+    const Pt::uint8_t* src = from.base();// + from.imageInfo().pitch() * from.y() + from.x() * 4;
 
     switch(mode)
     {
@@ -101,7 +100,6 @@ void Argb8888Format::setPixel(Pixel& to, const Pixel& from,
 
 Color Argb8888Format::getColor(const Pixel& pixel) const
 {
-
   const Pt::uint8_t* data = pixel.imageInfo().data() + pixel.imageInfo().pitch() * pixel.y() + pixel.x() * 4;
 
     return Color( data[3] * 257, 

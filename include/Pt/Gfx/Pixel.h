@@ -31,29 +31,33 @@
 #define PT_GFX_PIXEL_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/ImageFormat.h>
-#include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/ImageInfo.h>
 
 namespace Pt {
-namespace Gfx {
 
+namespace Gfx {
 
 class Pixel
 {
     public:
         Pixel(const ImageInfo& info, int x, int y)
+        : _info(&info)
+        , _x(x)
+        , _y(y)
         { 
-          reset( info, x, y);
+            _base = info.data() + info.pitch() * y + x * info.pixelSize();
         }
 
         Pixel(const Pixel& p)
-        { 
-          reset(p);
-        }
+        : _info(p._info)
+        , _base(p._base)
+        , _x(p._x)
+        , _y(p._y)
+        {  }
 
         Pixel& operator=(const Pixel& p)
         {
-            _info->format().assign(*this, p);
+            _info->format().setPixel(*this, p, CompositionMode::SourceCopy);
             return *this;
         }
 
@@ -63,14 +67,21 @@ class Pixel
             {
                 _x = 0;
                 ++_y;
+
+                _base += _info->padding();
             }
+
+            _base += _info->pixelSize();
         }
 
-        void advance( int n )
+        void advance( Pt::ssize_t n )
         {
             Pt::ssize_t off = _x + n;
             _y += off / _info->width();
             _x += off % _info->width();
+
+            // pixelStride(), pixelPitch()
+            _base = _info->data() + _info->pitch() * _y + _x * _info->pixelSize();
         }
 
         void reset(const ImageInfo& info, int x, int y)
@@ -78,11 +89,14 @@ class Pixel
             _info = &info;
              _x = x;
              _y = y;
+
+             _base = info.data() + info.pitch() * _y + _x * info.pixelSize();
         }
 
         void reset(const Pixel& p)
         {
              _info = p._info;
+             _base = p._base;
              _x = p._x;
              _y = p._y;
         }
@@ -102,12 +116,20 @@ class Pixel
             return _y;
         }
 
+        Pt::uint8_t* base() const
+        {
+            return _base;
+        }
+
     private:
         const ImageInfo* _info;
+        Pt::uint8_t* _base;
         int _x;
         int _y;
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif

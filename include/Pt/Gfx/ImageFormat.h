@@ -46,7 +46,7 @@ class ImageInfo;
 class PT_GFX_API ImageFormat
 {
     public:
-        ImageFormat(size_t pixelSize, size_t channels, bool planar = false);
+        ImageFormat(size_t pixelSize, size_t channels);
 
         virtual ~ImageFormat();
     
@@ -60,8 +60,6 @@ class PT_GFX_API ImageFormat
           return _channels;
         }
                
-
-
         virtual void assign(Pixel& to, const Pixel& from) const;
 
         virtual void setPixel(Pixel& to, const Pixel& from,
@@ -95,11 +93,6 @@ class PT_GFX_API ImageFormat
     
         static const ImageFormat& argb8888();
 
-        bool isPlanar() const
-        {
-          return _planar;
-        }
-
     protected:
         virtual void onCopy(const ImageInfo& to, const Point& toPoint,
                             const ImageInfo& from, const Rect& fromRect,
@@ -108,7 +101,6 @@ class PT_GFX_API ImageFormat
     private:
         size_t _pixelSize;
         size_t _channels;
-        bool   _planar;
 };
 
 } // namespace
