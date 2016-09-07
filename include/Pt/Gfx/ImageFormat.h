@@ -46,7 +46,7 @@ class ImageInfo;
 class PT_GFX_API ImageFormat
 {
     public:
-        ImageFormat(size_t pixelSize, size_t channels);
+        ImageFormat(size_t pixelSize, size_t channels, bool planar = false);
 
         virtual ~ImageFormat();
     
@@ -59,12 +59,8 @@ class PT_GFX_API ImageFormat
         {
           return _channels;
         }
-        
-        
-        virtual void getPixel(Pixel& pixel, const ImageInfo& image, 
-                              Pt::ssize_t x, Pt::ssize_t y) const;
+               
 
-        virtual void advance(Pixel& pixel) const;
 
         virtual void assign(Pixel& to, const Pixel& from) const;
 
@@ -99,6 +95,11 @@ class PT_GFX_API ImageFormat
     
         static const ImageFormat& argb8888();
 
+        bool isPlanar() const
+        {
+          return _planar;
+        }
+
     protected:
         virtual void onCopy(const ImageInfo& to, const Point& toPoint,
                             const ImageInfo& from, const Rect& fromRect,
@@ -106,66 +107,8 @@ class PT_GFX_API ImageFormat
 
     private:
         size_t _pixelSize;
-        size_t _channels;        
-};
-
-
-class Pixel
-{
-    public:
-        Pixel(const ImageFormat& format, Pt::uint8_t* data)
-        : _format(&format)
-        , _data(data)
-        , _meta(0)
-        { }
-
-        Pixel(const Pixel& p)
-        : _format(p._format)
-        , _data(p._data)
-        , _meta(p._meta)
-        { }
-
-        Pixel& operator=(const Pixel& p)
-        {
-            _format->assign(*this, p);
-            return *this;
-        }
-
-        void reset(const ImageFormat& format, Pt::uint8_t* data)
-        {
-             _format = &format;
-             _data = data;
-             _meta = 0;
-        }
-
-        void reset(const Pixel& p)
-        {
-             _format = p._format;
-             _data = p._data;
-             _meta = p._meta;
-        }
-
-        void reset(Pt::uint8_t* data)
-        {
-             _data = data;
-        }
-
-        const ImageFormat& format() const
-        { return *_format; }
-        
-        Pt::uint8_t* data()
-        { return _data; }
-
-        const Pt::uint8_t* data() const
-        { return _data; }
-        
-        Pt::uint32_t meta() const
-        { return _meta; }
-
-    private:
-        const ImageFormat* _format;
-        Pt::uint8_t* _data;
-        Pt::uint32_t _meta;
+        size_t _channels;
+        bool   _planar;
 };
 
 } // namespace

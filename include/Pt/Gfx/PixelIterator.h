@@ -27,43 +27,68 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_ARGB8888FORMAT_H
-#define PT_GFX_ARGB8888FORMAT_H
+#ifndef PT_GFX_PIXELITERATOR_H
+#define PT_GFX_PIXELITERATOR_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/ImageFormat.h>
+#include <Pt/Gfx/ImageInfo.h>
+#include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Pixel.h>
 
 namespace Pt {
-
 namespace Gfx {
 
-class PT_GFX_API Argb8888Format : public ImageFormat
+
+class PixelIterator
 {
     public:
-        Argb8888Format();
+        PixelIterator(ImageInfo& image, Pt::ssize_t x, Pt::ssize_t y)
+        : _pixel(image, x,y)
+        {
+        }
+
+        PixelIterator(const PixelIterator& it)
+        : _pixel(it._pixel)
+        {}
+
+        PixelIterator& operator=(const PixelIterator& it)
+        {
+            _pixel.reset(it._pixel);
+            
+            return *this;
+        }
+
+        bool operator!=(const PixelIterator& it) const
+        { 
+            return _pixel.x() != it._pixel.x() || _pixel.y() != it._pixel.y();  
+        }
+
+        bool operator==(const PixelIterator& it) const
+        { 
+            return _pixel.x() == it._pixel.x() && _pixel.y() == it._pixel.y();
+        }
         
+        Pixel& operator*()
+        { 
+            return _pixel; 
+        }
 
-        virtual void assign(Pixel& to, const Pixel& from) const;
+        PixelIterator& operator++()
+        {            
+            _pixel.advance();
+            return *this; 
+        }
 
-        virtual void setPixel(Pixel& to, const Pixel& from,
-                              CompositionMode mode) const;
-        
-        virtual Color getColor(const Pixel& pixel) const;
+        PixelIterator& operator+=(Pt::ssize_t n)
+        {
+            _pixel.advance(n);  
+            return *this; 
+        }
 
-        virtual void setSpan(Pixel& dst, const Pixel& src, size_t length, CompositionMode mode) const;
-
-        virtual void setPixel(Pixel& pixel, const Color& c,
-                              CompositionMode mode) const;
-        
-
-    protected:
-        virtual void onCopy(const ImageInfo& to, const Point& toPoint,
-                            const ImageInfo& from, const Rect& fromRect,
-                            CompositionMode mode) const;
+    private:
+        Pixel            _pixel;
 };
 
-} // namespace
-
-} // namespace
+}}
 
 #endif

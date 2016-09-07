@@ -37,9 +37,10 @@ namespace Pt {
 
 namespace Gfx {
 
-ImageFormat::ImageFormat( size_t pixelSize, size_t channels)
+ImageFormat::ImageFormat( size_t pixelSize, size_t channels, bool planar)
 : _pixelSize(pixelSize)
 , _channels(channels)
+, _planar(planar)
 {
 }
 
@@ -47,18 +48,6 @@ ImageFormat::ImageFormat( size_t pixelSize, size_t channels)
 ImageFormat::~ImageFormat()
 {
 }
-
-
-void ImageFormat::getPixel(Pixel& pixel, const ImageInfo& image, 
-                           Pt::ssize_t x, Pt::ssize_t y) const
-{
-}
-
-
-void ImageFormat::advance(Pixel& pixel) const
-{ 
-}
-
 
 void ImageFormat::assign(Pixel& to, const Pixel& from) const
 {

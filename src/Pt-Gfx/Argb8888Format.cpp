@@ -29,6 +29,7 @@
 
 #include <Pt/Gfx/Argb8888Format.h>
 #include <Pt/Gfx/ImageInfo.h>
+#include <Pt/Gfx/Pixel.h>
 
 namespace {
 
@@ -68,75 +69,11 @@ Argb8888Format::Argb8888Format()
 }
 
 
-Color Argb8888Format::color(const Pt::uint8_t* pixel) const
-{
-    return Color( pixel[3] * 257, 
-                  pixel[2] * 257, 
-                  pixel[1] * 257, 
-                  pixel[0] * 257 );
-}
-
-
-void Argb8888Format::setColor(Pt::uint8_t* pixel, const Color& c,
-                              CompositionMode mode) const
-{
-  switch( mode)
-  {
-    default:
-    case CompositionMode::SourceCopy:
-        pixel[0] = (Pt::uint8_t) (c.blue() / 257);
-        pixel[1] = (Pt::uint8_t) (c.green() / 257);
-        pixel[2] = (Pt::uint8_t) (c.red() / 257);
-        pixel[3] = (Pt::uint8_t) (c.alpha() /257);
-        break;
-
-    case CompositionMode::SourceOver:
-        sourceOver(pixel, c);
-        break;
-  }  
-}
-
-
-void Argb8888Format::setPixel(Pt::uint8_t* dst, const Pt::uint8_t* src, 
-                              CompositionMode mode) const
-{
-    switch(mode)
-    {
-        default:
-        case CompositionMode::SourceCopy:
-            *((Pt::uint32_t*)dst) = *((const Pt::uint32_t*)src);
-            break;
-
-        case CompositionMode::SourceOver:
-            sourceOver(dst, src);
-            break;
-    }
-}
-
-
-void Argb8888Format::getPixel(Pixel& pixel, const ImageInfo& image, 
-                              Pt::ssize_t x, Pt::ssize_t y) const
-{
-    Pt::ssize_t yoff = y * image.pitch(); 
-    Pt::ssize_t xoff = x * pixelSize();
-    Pt::ssize_t off = xoff + yoff;
-    Pt::uint8_t* data = &image.data()[off];
-    
-    return pixel.reset(*this, data);
-}
-
-
-void Argb8888Format::advance(Pixel& pixel) const
-{
-    Pt::uint8_t* data = pixel.data() + 4;
-    pixel.reset(data);
-}
-
-
 void Argb8888Format::assign(Pixel& to, const Pixel& from) const
 {
-    Pt::uint8_t* dst = to.data();
-    const Pt::uint8_t* src = from.data();
+  
+    Pt::uint8_t* dst = to.imageInfo().data() + to.imageInfo().pitch() * to.y() + to.x() * 4;
+    const Pt::uint8_t* src = from.imageInfo().data() + from.imageInfo().pitch() * from.y() + from.x() * 4;
 
     *((Pt::uint32_t*)dst) = *((const Pt::uint32_t*)src);
 }
@@ -145,8 +82,8 @@ void Argb8888Format::assign(Pixel& to, const Pixel& from) const
 void Argb8888Format::setPixel(Pixel& to, const Pixel& from,
                               CompositionMode mode) const
 {
-    Pt::uint8_t* dst = to.data();
-    const Pt::uint8_t* src = from.data();
+    Pt::uint8_t* dst = to.imageInfo().data() + to.imageInfo().pitch() * to.y() + to.x() * 4;
+    const Pt::uint8_t* src = from.imageInfo().data() + from.imageInfo().pitch() * from.y() + from.x() * 4;
 
     switch(mode)
     {
@@ -164,7 +101,8 @@ void Argb8888Format::setPixel(Pixel& to, const Pixel& from,
 
 Color Argb8888Format::getColor(const Pixel& pixel) const
 {
-    const Pt::uint8_t* data = pixel.data();
+
+  const Pt::uint8_t* data = pixel.imageInfo().data() + pixel.imageInfo().pitch() * pixel.y() + pixel.x() * 4;
 
     return Color( data[3] * 257, 
                   data[2] * 257, 
@@ -176,7 +114,7 @@ Color Argb8888Format::getColor(const Pixel& pixel) const
 void Argb8888Format::setPixel(Pixel& pixel, const Color& c,
                               CompositionMode mode) const
 {
-    Pt::uint8_t* data = pixel.data();
+    Pt::uint8_t* data = pixel.imageInfo().data() + pixel.imageInfo().pitch() * pixel.y() + pixel.x() * 4;
 
     switch( mode)
     {
@@ -194,53 +132,11 @@ void Argb8888Format::setPixel(Pixel& pixel, const Color& c,
     }  
 }
 
-
-void Argb8888Format::setPixel(const ImageInfo& to, Pt::ssize_t x, Pt::ssize_t y,
-                              const Pt::uint8_t* src, CompositionMode mode) const
-{
-    std::size_t off = y * to.pitch() + x * pixelSize();
-    Pt::uint8_t* dst = &to.data()[off];
-
-    switch(mode)
-    {
-        default:
-        case CompositionMode::SourceCopy:
-            *((Pt::uint32_t*)dst) = *((const Pt::uint32_t*)src);
-            break;
-
-        case CompositionMode::SourceOver:
-            sourceOver(dst, src);
-            break;
-    } 
-}
-
 void Argb8888Format::setSpan(Pixel& to, const Pixel& from, size_t length, CompositionMode mode) const
 {
-    Pt::uint8_t* dst = to.data();
-    const Pt::uint8_t* src = from.data();
+    Pt::uint8_t* dst = to.imageInfo().data() + to.imageInfo().pitch() * to.y() + to.x() * 4;
+    const Pt::uint8_t* src = from.imageInfo().data() + from.imageInfo().pitch() * from.y() + from.x() * 4;
 
-    switch(mode)
-    {
-        default:
-        case CompositionMode::SourceCopy:
-            memcpy(dst, src, length * 4);
-            break;
-
-        case CompositionMode::SourceOver:
-            for(size_t i = 0; i < length; ++i)
-            {
-                sourceOver(dst, src); 
-                src += 4;
-                dst += 4;
-            }
-            break;
-    }   
-}
-
-
-void Argb8888Format::setSpan(Pt::uint8_t* dst, const Pt::uint8_t* src, 
-                             size_t length, CompositionMode mode) const
-{
     switch(mode)
     {
         default:

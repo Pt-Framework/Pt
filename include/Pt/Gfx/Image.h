@@ -35,6 +35,7 @@
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/PixelIterator.h>
 #include <Pt/Types.h>
 #include <vector>
 #include <cstring>
@@ -72,6 +73,12 @@ class PT_GFX_API Image
     {
         return _info;
     }
+
+    ImageInfo& info()
+    {
+        return _info;
+    }
+
 
     Pt::ssize_t width() const
     {

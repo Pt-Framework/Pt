@@ -116,19 +116,15 @@ void Image::resize(Pt::uint8_t* buffer, const Gfx::Size& size,
 void Image::convert(Image& image) const
 {
     image.resize( size(), image.padding() );
-
-    Pixel from(format(), 0);
-    Pixel to(image.format(), 0);
-
+    
     for(Pt::ssize_t y = 0; y < height(); ++y)
     {
         for(Pt::ssize_t x = 0; x < width(); ++x)
         {
-            format().getPixel(from, info(), x, y);
-            Color color = format().getColor(from);
-            
-            format().getPixel(to, image.info(), x, y);
-            image.format().setPixel(to, color, CompositionMode::SourceCopy);
+          Pixel from(info(), x,y);
+          Pixel to(image.info(), x,y);
+
+          image.format().setPixel(to,from, CompositionMode::SourceCopy);
         }
     }
 }
@@ -141,9 +137,8 @@ void Image::erase(const Color& color)
     {
         for( Pt::ssize_t w = 0; w < width(); ++w)
         {
-          Pixel source(format(), 0);
-          format().getPixel(source,  info(), w,h);
-          format().setPixel(source, color, CompositionMode::SourceCopy);
+          Pixel to(this->info(), w, h);
+          format().setPixel(to, color, CompositionMode::SourceCopy);
         }
     }
 }

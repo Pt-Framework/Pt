@@ -132,6 +132,7 @@ HBRUSH gradientBrush(HDC dc, int width, int height,
                      Pt::Gfx::Color gradientStop, 
                      Pt::Gfx::Brush::FillStyle style)
 {
+
     BITMAPINFO bi;
     ZeroMemory(&bi.bmiHeader, sizeof(BITMAPINFOHEADER));
 
@@ -182,13 +183,13 @@ HBRUSH gradientBrush(HDC dc, int width, int height,
                       (g1 + g2),
                       (b1 + b2) );
         
-        format.setColor(pixel, c, Pt::Gfx::CompositionMode::SourceCopy);
+    //    format.setColor(pixel, c, Pt::Gfx::CompositionMode::SourceCopy);
         pixel += format.pixelSize();
     }
 
     HBRUSH brush = CreatePatternBrush(bitmap);
     DeleteObject(bitmap);
-
+    
     return brush;
 }
 

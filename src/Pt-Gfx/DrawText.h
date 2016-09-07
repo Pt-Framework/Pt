@@ -135,7 +135,7 @@ class DrawText
             dsy = ypos;
 
             Color pixelColor = color;
-            Pixel pixel(image.format(), 0);
+            Pixel pixel(image.info(), 0,0);
 
             for( Pt::int32_t y = ofsy; y < height; ++y, ++dsy )
             {
@@ -157,7 +157,8 @@ class DrawText
                     if( dsx > x2 )
                         break;
 
-                    image.format().getPixel(pixel, image.info(), dsx, dsy);
+
+                   Pixel pixel(image.info(), dsx,dsy);
 
                     const int px = yOffset + x;
                     unsigned char value = buffer[px];

@@ -27,43 +27,87 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_ARGB8888FORMAT_H
-#define PT_GFX_ARGB8888FORMAT_H
+#ifndef PT_GFX_PIXEL_H
+#define PT_GFX_PIXEL_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ImageFormat.h>
+#include <Pt/Gfx/Color.h>
 
 namespace Pt {
-
 namespace Gfx {
 
-class PT_GFX_API Argb8888Format : public ImageFormat
+
+class Pixel
 {
     public:
-        Argb8888Format();
+        Pixel(const ImageInfo& info, int x, int y)
+        { 
+          reset( info, x, y);
+        }
+
+        Pixel(const Pixel& p)
+        { 
+          reset(p);
+        }
+
+        Pixel& operator=(const Pixel& p)
+        {
+            _info->format().assign(*this, p);
+            return *this;
+        }
+
+        void advance()
+        {
+            if( ++_x >= _info->width() )
+            {
+                _x = 0;
+                ++_y;
+            }
+        }
+
+        void advance( int n )
+        {
+            Pt::ssize_t off = _x + n;
+            _y += off / _info->width();
+            _x += off % _info->width();
+        }
+
+        void reset(const ImageInfo& info, int x, int y)
+        {
+            _info = &info;
+             _x = x;
+             _y = y;
+        }
+
+        void reset(const Pixel& p)
+        {
+             _info = p._info;
+             _x = p._x;
+             _y = p._y;
+        }
+
+        const ImageInfo& imageInfo() const
+        { 
+          return *_info; 
+        }
         
+        int x() const
+        {
+            return _x;
+        }
 
-        virtual void assign(Pixel& to, const Pixel& from) const;
+        int y() const 
+        {
+            return _y;
+        }
 
-        virtual void setPixel(Pixel& to, const Pixel& from,
-                              CompositionMode mode) const;
-        
-        virtual Color getColor(const Pixel& pixel) const;
-
-        virtual void setSpan(Pixel& dst, const Pixel& src, size_t length, CompositionMode mode) const;
-
-        virtual void setPixel(Pixel& pixel, const Color& c,
-                              CompositionMode mode) const;
-        
-
-    protected:
-        virtual void onCopy(const ImageInfo& to, const Point& toPoint,
-                            const ImageInfo& from, const Rect& fromRect,
-                            CompositionMode mode) const;
+    private:
+        const ImageInfo* _info;
+        int _x;
+        int _y;
 };
 
-} // namespace
-
-} // namespace
+}}
 
 #endif

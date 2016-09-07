@@ -141,8 +141,8 @@ Rasterizer::Rasterizer( Image& image )
 , _font("Vera", 12)
 , _compositionMode(CompositionMode::SourceCopy)
 , _penBuffer( Gfx::Size(64, 1) )
-, _penPixel( _penBuffer.format(),_penBuffer.data()) 
-, _brushPixel( _brush.texture().format(), 0)
+, _penPixel( _penBuffer.info(),0,0) 
+, _brushPixel( _brush.texture().info(), 0,0)
 {
     _text->setFont( _font );
     updateClip();
@@ -168,7 +168,7 @@ void Rasterizer::setPen( const Pen& pen )
   _pen = pen;
   _penBuffer.resize(_penBuffer.size(), _image->format(), 0);
   _penBuffer.erase(pen.color());
-  _penPixel.reset( _image->format(), _penBuffer.data());
+  _penPixel.reset( _penBuffer.info(), 0,0);
 }
 
 
@@ -176,7 +176,7 @@ void Rasterizer::setBrush( const Brush& brush )
 {
   _brush = brush;
   _brush.texture().convert(_brushBuffer);
-  _brushPixel.reset( _image->format(), _brushBuffer.data());
+  _brushPixel.reset(  _brush.texture().info(), 0,0);
 }
 
 
@@ -1838,11 +1838,9 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
         // Copy pixels from textrure to image
         if(fillLength)
         {
-            Pixel sourcePixel(_image->format(), 0);
-            Pixel destPixel(_image->format(), 0);
+            Pixel sourcePixel(_brushBuffer.info(),  textureXPos, textureYPos);
+            Pixel destPixel(_image->info(), xpos, ypos);
 
-            _brushBuffer.format().getPixel(sourcePixel, _brushBuffer.info(),  textureXPos, textureYPos); 
-            _image->format().getPixel(destPixel, _image->info(), xpos, ypos);    
             _image->format().setSpan( destPixel,  sourcePixel,  fillLength, _compositionMode );
         }
         
@@ -1894,8 +1892,7 @@ void Rasterizer::fillSolid(const Point& pos, int length)
   if( length <= 0)
     return;
      
-  Pt::ssize_t bufferWidth = _brush.texture().width();
-  Pixel destPixel(_image->format(), _image->data());
+  Pt::ssize_t bufferWidth = _brush.texture().width();  
 
   while(length > 0)
   {
@@ -1903,7 +1900,7 @@ void Rasterizer::fillSolid(const Point& pos, int length)
 
       if( n )
       {          
-         _image->format().getPixel(  destPixel, _image->info(), xpos,ypos);
+          Pixel destPixel(_image->info(), xpos,ypos);
          _image->format().setSpan(destPixel, _brushPixel, n, _compositionMode);
       }
 
@@ -3428,8 +3425,7 @@ void Rasterizer::stroke(int x, int y)
         y < _currentClip.y() || y >= _clipBottom)
         return;
 
-    Pixel pixel(_image->format(), 0);
-    _image->format().getPixel(pixel, _image->info(), x, y);    
+    Pixel pixel(_image->info(), x, y);
     _image->format().setPixel(pixel, _penPixel, _compositionMode);
 }
 
@@ -3439,14 +3435,14 @@ void Rasterizer::stroke(int xpos, int ypos, Pt::ssize_t length)
     clipSpan( xpos, ypos, length );
 
     Pt::ssize_t bufferWidth = _penBuffer.width();
-    Pixel destPixel( _image->format(), 0);
+
 
     while(length > 0)
     {
         Pt::ssize_t n = std::min(length, bufferWidth);
         if( n )
         {
-            _image->format().getPixel(destPixel, _image->info(), xpos, ypos);
+             Pixel destPixel( _image->info(), xpos, ypos);
             _image->format().setSpan(destPixel, _penPixel, n, _compositionMode);
         }
 

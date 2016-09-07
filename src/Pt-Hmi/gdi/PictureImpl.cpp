@@ -82,8 +82,7 @@ void PictureImpl::set(const Gfx::Image& image)
     {
         for( std::size_t x = 0; x < image.width(); ++x )
         {
-            Gfx::Pixel pixel(image.format(), 0);
-            image.format().getPixel(pixel, image.info(), x, y);
+            Gfx::Pixel pixel(image.info(), x, y);
             Gfx::Color color = image.format().getColor(pixel);
             
             _bitmapData.push_back( (Pt::uint8_t) (( color.alpha() * (int) color.blue()) / (257*65535))) ;
@@ -109,8 +108,7 @@ void PictureImpl::set(const Gfx::Image& image, Pt::uint16_t alphaThreshold)
     {
         for( size_t x = 0; x < image.width(); ++x )
         {
-            Gfx::Pixel pixel(image.format(), 0);
-            image.format().getPixel(pixel, image.info(), x, y);
+            Gfx::Pixel pixel(image.info(), x, y);
             Gfx::Color color = image.format().getColor(pixel);
 
             if( color.alpha() <= alphaThreshold )

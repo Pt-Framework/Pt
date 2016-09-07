@@ -65,8 +65,8 @@ void loadIcon(Gfx::Image& icon)
     {
         for(size_t h = 0; h < icon.height(); ++h )
         {
-            Gfx::Pixel pixel(icon.format(), 0);
-            icon.format().getPixel(pixel, icon.info(), w, h);
+            Gfx::Pixel pixel(icon.info(), w, h);
+
             Gfx::Color color = icon.format().getColor(pixel);
          
             if( color.red() >= 65535 && color.green() >= 65535 && color.blue() >= 65535 )				

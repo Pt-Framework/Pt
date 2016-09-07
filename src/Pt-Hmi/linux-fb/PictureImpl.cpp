@@ -64,8 +64,8 @@ void PictureImpl::set(const Gfx::Image& i, float alphaThreshold)
     {
         for( size_t x = 0; x < _image.width(); ++x )
         {
-            Gfx::Pixel pixel(_image.format(), 0);
-            _image.format().getPixel(pixel, _image.info(), x, y);
+            Gfx::Pixel pixel(_image.info(), x, y);
+
             Gfx::Color color = _image.format().getColor(pixel);
 
             if( color.alpha() <= alphaThreshold )

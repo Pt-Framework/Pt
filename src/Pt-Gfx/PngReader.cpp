@@ -295,8 +295,7 @@ class PngReaderImpl
             std::size_t n = 0;
 		        for( size_t x = 0; x < width; ++x)
 		        {
-              Pixel pixel(_image->format(), 0);
-              _image->format().getPixel(pixel, _image->info(), x, row);
+              Pixel pixel(_image->info(), x, row);
 
 			        if( bitdepth == 8 && channels == 3)
 			        {
