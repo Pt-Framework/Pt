@@ -85,7 +85,7 @@ BrushData::BrushData()
 , _color(0, 0, 0)
 , _texture( Gfx::Size(16, 1) )
 {
-		 _texture.setColor(_color);
+		 _texture.erase(_color);
 }
 
 
@@ -94,7 +94,7 @@ BrushData::BrushData(const Color& color)
 , _color(color)
 , _texture( Gfx::Size(64, 1) )
 {
-		 _texture.setColor(_color);
+		 _texture.erase(_color);
 }
 
 

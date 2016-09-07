@@ -628,8 +628,8 @@ void Window::onPaintEvent(const PaintEvent& ev)
 void Window::onPaintBackground(const Gfx::RectF& rect)
 {
     Painter painter(_surface);
-    painter.setBrush( Pt::Gfx::Color(0.9f, 0.9f, 0.9f) );
-    painter.setPen( Gfx::Pen(Pt::Gfx::Color(1.0f, 0.0f, 0.0f)) );
+    painter.setBrush( Pt::Gfx::Color(58981, 58981, 58981) );
+    painter.setPen( Gfx::Pen(Pt::Gfx::Color(65535, 0, 0)) );
     painter.fillRect(rect);
 }
 

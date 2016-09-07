@@ -50,7 +50,7 @@ class PictureImpl
 
         void set(const Gfx::Image& image);
 
-        void set(const Gfx::Image& image, float alphaThreshold);
+        void set(const Gfx::Image& image, Pt::uint16_t alphaThreshold);
 
         const HBITMAP mask() const
         {

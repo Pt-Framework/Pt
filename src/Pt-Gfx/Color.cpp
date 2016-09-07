@@ -45,7 +45,7 @@ Color::Color()
 }
 
 
-Color::Color(float a, float r, float g, float b )
+Color::Color(Pt::uint16_t a, Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b )
 : _a(a)
 , _r(r)
 , _g(g)
@@ -54,7 +54,7 @@ Color::Color(float a, float r, float g, float b )
 }	
 
 
-Color::Color(float r, float g, float b )
+Color::Color(Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b )
 : _a(1)
 , _r(r)
 , _g(g)
@@ -68,9 +68,9 @@ Pt::String Color::toHtml() const
   Pt::StringStream ss;
 
   ss << std::hex << Pt::Char('#')
-      << std::hex << std::setw(2) << std::setfill( Pt::Char('0') ) << (int)(red() * 255)
-      << std::hex << std::setw(2) << std::setfill( Pt::Char('0') ) << (int)(green()* 255)
-      << std::hex << std::setw(2) << std::setfill( Pt::Char('0') ) << (int)(blue() * 255);
+      << std::hex << std::setw(2) << std::setfill( Pt::Char('0') ) << (int)(red() / 257)
+      << std::hex << std::setw(2) << std::setfill( Pt::Char('0') ) << (int)(green()/ 257)
+      << std::hex << std::setw(2) << std::setfill( Pt::Char('0') ) << (int)(blue() / 257);
 
   return ss.str();
 }
@@ -108,7 +108,7 @@ Color Color::fromHtml(const Pt::String& s)
     if( ss.fail() )
         throw Pt::ConversionError( "conversion from HTML color code failed" );
 
-    return Color(r/255.0f,g/255.0f, b/255.0f);
+    return Color(r*257,g*257, b*257);
 }
 
 

@@ -53,10 +53,10 @@ WindowManager::WindowManager()
 , _grabbedWindow(0)
 , _borderWidth(4.0)
 , _titleHeight(20.0)
-, _inactiveColor(0.68f, 0.70f, 0.75f)
-, _activeColor(0.4f, 0.5f, 0.8f)
-, _textColor(1.0f, 1.0f, 1.0f)
-, _inactiveTextColor(0.2f, 0.2f, 0.2f)
+, _inactiveColor(65535*0.68f, 65535 *0.70f, 65535 *0.75f)
+, _activeColor(65535* 0.4f, 65535 *0.5f, 65535 *0.8f)
+, _textColor(65535, 65535, 65535)
+, _inactiveTextColor(65535*0.2f, 65535 *0.2f, 65535 *0.2f)
 {    
 }
 

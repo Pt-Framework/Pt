@@ -56,7 +56,7 @@ class PT_HMI_API Picture
             masked and each pixel with an alpha value above will be drawn 
             as if its alpha value is 1.
         */
-        Picture(const Gfx::Image& image, float alphaThreshold);
+        Picture(const Gfx::Image& image, Pt::uint16_t alphaThreshold);
         
         ~Picture();
 

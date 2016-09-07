@@ -89,10 +89,5 @@ Pen::JoinStyle Pen::joinStyle() const
 }
 
 
-const Image& Pen::buffer() const
-{
-    return _penData->buffer();
-}
-
 } } // namespace
 

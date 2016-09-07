@@ -60,6 +60,8 @@ class PT_GFX_API Argb8888Format : public ImageFormat
         
         virtual Color getColor(const Pixel& pixel) const;
 
+        virtual void setSpan(Pixel& dst, const Pixel& src, size_t length, CompositionMode mode) const;
+
         virtual void setPixel(Pixel& pixel, const Color& c,
                               CompositionMode mode) const;
         

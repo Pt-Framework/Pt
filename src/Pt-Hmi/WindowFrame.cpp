@@ -38,14 +38,14 @@
 namespace {
 
 Pt::Gfx::Color brighten(const Pt::Gfx::Color& c, float factor)
-{
-    float r = c.red() * factor;
-    float g = c.green() * factor;
-    float b = c.blue() * factor;
+{    
+    float rf = c.red() * factor;
+    float gf = c.green() * factor;
+    float bf = c.blue() * factor;
 
-    r = r > 1.0f ? 1.0f : r;
-    g = g > 1.0f ? 1.0f : g;
-    b = b > 1.0f ? 1.0f : b;
+    Pt::uint16_t r = rf > 65535 ? 65535 : (Pt::uint16_t) rf ;
+    Pt::uint16_t g = gf > 65535 ? 65535 : (Pt::uint16_t) gf ;
+    Pt::uint16_t b = bf > 65535 ? 65535 : (Pt::uint16_t) bf ;
 
     return Pt::Gfx::Color(c.alpha(), r, g, b);
 }
@@ -190,7 +190,7 @@ void WindowButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 
 MinimizeButton::MinimizeButton()
 {
-    setColor( Gfx::Color(0.95f, 0.7f, 0.05f) );
+    setColor( Gfx::Color(62258, 45874, 3276 ));
 }
 
 
@@ -209,7 +209,7 @@ void MinimizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     //
     // draw symbol
     //
-    Gfx::Pen pen(2, Gfx::Color(1, 1, 1), 
+    Gfx::Pen pen(2, Gfx::Color(65535, 65535, 65535), 
                  Gfx::Pen::SolidStyle, Gfx::Pen::FlatCap);
     painter.setPen(pen);
 
@@ -228,7 +228,7 @@ void MinimizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 
 MaximizeButton::MaximizeButton()
 {
-    setColor( Gfx::Color(0.35f, 0.65f, 0.25f) );
+    setColor( Gfx::Color(22937, 42597, 16383) );
 }
 
 
@@ -247,7 +247,7 @@ void MaximizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     //
     // draw symbol
     //
-    Pt::Gfx::Pen pen(2, Gfx::Color(1, 1, 1), 
+    Pt::Gfx::Pen pen(2, Gfx::Color(65535, 65535, 65535), 
                      Gfx::Pen::SolidStyle, Gfx::Pen::FlatCap);
     painter.setPen(pen);
 
@@ -266,7 +266,7 @@ void MaximizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 
 CloseButton::CloseButton()
 {
-    setColor( Gfx::Color(0.82f, 0.25f, 0.22f) );
+    setColor( Gfx::Color(53738, 16383, 14417) );
 }
 
 
@@ -284,7 +284,7 @@ void CloseButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 
     //
     // draw symbol
-    Pt::Gfx::Pen pen(2, Gfx::Color(1, 1, 1), 
+    Pt::Gfx::Pen pen(2, Gfx::Color(65535, 65535, 65535), 
                      Gfx::Pen::SolidStyle, Gfx::Pen::RoundCap);
     painter.setPen(pen);
 
@@ -325,7 +325,7 @@ void MenuButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     mid.addY(1); 
     triangle[2] = geometry().topLeft() + mid;
 
-    Gfx::Brush brush( Gfx::Color(1,1,1) );
+    Gfx::Brush brush( Gfx::Color(65535,65535,65535) );
     painter.setBrush(brush);
     painter.fillPolygon(triangle, 3);
 }

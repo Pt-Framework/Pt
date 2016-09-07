@@ -135,19 +135,16 @@ void Image::convert(Image& image) const
 
 
 
-void Image::setColor(const Color& color)
+void Image::erase(const Color& color)
 {
-    Pt::uint8_t* it = data();	
-  
-    std::vector<Pt::uint8_t> pixel( format().pixelSize() );
-    format().setColor(&pixel[0], color, CompositionMode::SourceCopy);
-  
-    const size_t count = (width() + padding()) * height();
-
-    for(size_t i = 0; i < count; ++i)
-    {				
-        memcpy(it, &(pixel[0]), pixel.size());
-        it += pixel.size();
+    for( Pt::ssize_t h = 0; h < height(); ++h )
+    {
+        for( Pt::ssize_t w = 0; w < width(); ++w)
+        {
+          Pixel source(format(), 0);
+          format().getPixel(source,  info(), w,h);
+          format().setPixel(source, color, CompositionMode::SourceCopy);
+        }
     }
 }
 

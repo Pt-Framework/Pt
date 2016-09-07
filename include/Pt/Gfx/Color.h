@@ -40,9 +40,9 @@ class PT_GFX_API Color
 	public:	
 		Color();
 
-		Color(float a, float r, float g, float b );
+		Color(Pt::uint16_t a, Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b );
     
-    Color(float r, float g, float b );
+    Color(Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b );
     
 
 		float alpha() const
@@ -50,37 +50,37 @@ class PT_GFX_API Color
 			return _a;
 		}
 
-		float red() const
+		Pt::uint16_t red() const
 		{
 			return _r;
 		}
 		
-		float green() const
+		Pt::uint16_t green() const
 		{
 			return _g;
 		}
 		
-		float blue() const		
+		Pt::uint16_t blue() const		
 		{
 			return _b;
 		}
 		
-		void setAlpha( float c)
+		void setAlpha( Pt::uint16_t c)
 		{
 			_a = c;
 		}
 		
-		void setRed( float c)
+		void setRed( Pt::uint16_t c)
 		{
 			_r = c;
 		}
 		
-		void setGreen( float c)
+		void setGreen( Pt::uint16_t c)
 		{
 			_g = c;
 		}
 		
-		void setBlue( float c)
+		void setBlue( Pt::uint16_t c)
 		{
 			_b = c;
 		}
@@ -91,14 +91,14 @@ class PT_GFX_API Color
 
     static Color fromRgb8( Pt::uint8_t r, Pt::uint8_t g, Pt::uint8_t b, Pt::uint8_t a = 255)
     {
-      return Color( a/255.0f,  r/255.0f, g/255.0f, b/255.0f);
+      return Color( a*257,  r*257, g*257, b*257);
     }
 
 	private:
-		float _a;
-		float _r;
-		float _g;
-		float _b;
+		Pt::uint16_t _a;
+		Pt::uint16_t _r;
+		Pt::uint16_t _g;
+		Pt::uint16_t _b;
 };
 
 

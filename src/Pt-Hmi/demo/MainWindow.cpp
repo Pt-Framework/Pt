@@ -60,7 +60,7 @@ void loadIcon(Gfx::Image& icon)
 
     icon.resize(image.size(), Pt::Gfx::ImageFormat::argb8888(), 0);
     image.convert(icon);
-
+    
     for(size_t w = 0; w < icon.width(); ++ w )
     {
         for(size_t h = 0; h < icon.height(); ++h )
@@ -69,10 +69,10 @@ void loadIcon(Gfx::Image& icon)
             icon.format().getPixel(pixel, icon.info(), w, h);
             Gfx::Color color = icon.format().getColor(pixel);
          
-            if( color.red() > 0.99 && color.green() > 0.99 && color.blue() > 0.99 )				
-                color.setAlpha(0.01);
+            if( color.red() >= 65535 && color.green() >= 65535 && color.blue() >= 65535 )				
+                color.setAlpha(0);
             else
-                color.setAlpha(1);
+                color.setAlpha(65535);
                 
             icon.format().setPixel(pixel, color, Gfx::CompositionMode::SourceCopy);
         }

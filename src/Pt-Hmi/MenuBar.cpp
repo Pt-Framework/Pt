@@ -35,13 +35,10 @@ namespace {
 
 Pt::Gfx::Color brighten(const Pt::Gfx::Color& c, float factor)
 {
-    float r = c.red() * factor;
-    float g = c.green() * factor;
-    float b = c.blue() * factor;
+    Pt::uint16_t r = c.red() * factor;
+    Pt::uint16_t g = c.green() * factor;
+    Pt::uint16_t b = c.blue() * factor;
 
-    r = r > 1.0f ? 1.0f : r;
-    g = g > 1.0f ? 1.0f : g;
-    b = b > 1.0f ? 1.0f : b;
 
     return Pt::Gfx::Color(c.alpha(), r, g, b);
 }
@@ -66,7 +63,7 @@ MenuBarItem::MenuBarItem(MenuBar& mb, Menu& menu, const Pt::String& text)
     setBorderStyle(Panel::NoBorder);
     setAcceptsFocus(true);
     
-    setBackgroundColor( Gfx::Color(0.9f, 0.9f, 0.91f) );
+    setBackgroundColor( Gfx::Color(58981, 58981, 58981) );
 
     setText(text);
     setBorderRound(false);
@@ -266,8 +263,8 @@ MenuBar::MenuBar()
 , _currentMenu(0)
 , _currentMenuItem(0)
 {
-    this->setBackgroundColor( Gfx::Color(0.9f, 0.9f, 0.91f) );
-    this->setBorderColor( Gfx::Color(0.5f, 0.5f, 0.51f)  );
+    this->setBackgroundColor( Gfx::Color(58981, 58981, 58981) );
+    this->setBorderColor( Gfx::Color(32767, 32767, 32767)  );
     this->setBorderStyle(Panel::NoBorder);
 
     _layout.move( Gfx::PointF(0,0) );

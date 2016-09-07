@@ -95,7 +95,7 @@ FrameBuffer::FrameBuffer()
             break;
     }
 
-    setRotation(Rotation0Degree);
+    setRotation(Rotation90Degree);
     std::clog<<"Sreen HW resolution (" <<_screenInfo.xres<< "," <<_screenInfo.yres << ") Pixel size = "<<_format->pixelSize()<< " Stride = "<<stride<<" Buffer Size =" << _bufferSize<< std::endl;
     std::clog<<"Sreen VR resolution (" <<width()<< "," <<height() << ") Pixel size = "<<_format->pixelSize()<< " Stride = "<<strideInBytes()<<std::endl;
 }

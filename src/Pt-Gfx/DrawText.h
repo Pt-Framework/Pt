@@ -45,7 +45,6 @@
 #include <Pt/Gfx/FontMetrics.h>
 #include <cassert>
 
-//#define USE_ARGB 1
 
 namespace Pt{
 namespace Gfx{
@@ -165,7 +164,7 @@ class DrawText
                     
                     if(value != 255)
                     {
-                        pixelColor.setAlpha( value/255.0f);
+                        pixelColor.setAlpha( value * 257);
                         image.format().setPixel(pixel, pixelColor,
                                                 CompositionMode::SourceOver);
                     }
@@ -176,25 +175,6 @@ class DrawText
                 }
             }
         }
-/*
-        inline void mixColor(Color& dst, const Color& src, const uint8_t& factor)
-        {
-             const float oF = factor/255.0f;
-             const float rF = 1.0f - oF;
-
-             const float dR = dst.red() * rF;
-             const float dG = dst.green() * rF;
-             const float dB = dst.blue() * rF;
-
-             const float sR = src.red() * oF;
-             const float sG = src.green() * oF;
-             const float sB = src.blue()* oF;
-
-             dst.setRed  ( (dR + sR) );
-             dst.setGreen( (dG + sG) );
-             dst.setBlue ( (dB + sB) );
-        }*/
-
 
         inline FTC_FaceID faceId() const
         { 

@@ -30,6 +30,7 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/String.h>
+#include <Pt/Gfx/ImageInfo.h>
 
 namespace Pt {
 
@@ -50,20 +51,14 @@ class PT_GFX_API Rasterizer
 
     void setImage(Image& image);
 
-    void setPen( const Pen& pen )
-    {
-      _pen = pen;
-    }
+    void setPen( const Pen& pen );
 
     const Pen& pen() const
     {
       return _pen;
     }
 
-    void setBrush( const Brush& brush )
-    {
-      _brush = brush;
-    }
+    void setBrush( const Brush& brush );
 
     const Brush& brush() const
     {
@@ -186,6 +181,11 @@ class PT_GFX_API Rasterizer
     CompositionMode _compositionMode;
     int             _clipRight;
     int             _clipBottom;
+    Image          _penBuffer;
+    Pixel          _penPixel;
+    Image          _brushBuffer; 
+    Pixel          _brushPixel;
+
 };
 
 } //namespace

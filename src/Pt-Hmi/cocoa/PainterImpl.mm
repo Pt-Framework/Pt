@@ -48,10 +48,10 @@ void PainterImpl::setPen(const Gfx::Pen& pen)
 {
     _pen = pen;
   
-    CGContextSetRGBStrokeColor(_surface->context(), _pen.color().red()/255.0,
-                               _pen.color().green()/255.0,
-                               _pen.color().blue()/255.0,
-                               _pen.color().alpha()/255.0);
+    CGContextSetRGBStrokeColor(_surface->context(), _pen.color().red()/ 257,
+                               _pen.color().green() /257,
+                               _pen.color().blue()/257,
+                               _pen.color().alpha()/257);
     
     CGContextSetLineWidth(_surface->context(), _pen.size());
     

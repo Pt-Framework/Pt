@@ -61,7 +61,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     _surface.pixmapImpl()->resize(_frameBuffer.size(), _frameBuffer.strideInBytes() );
 
     Painter painter(_surface);
-    painter.clear( Pt::Gfx::Color(0.4f, 0.3f, 0.4f) );
+    painter.clear( Pt::Gfx::Color(65535*0.4f, 65535*0.3f, 65535*0.4f) );
 }
 
 
@@ -104,16 +104,16 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
 {                
     if( ! _cursorBackground.empty() )
     {
-        bitBlit( _cursorBackground.pixel(0,0), 
+        bitBlit( _cursorBackground.data(), 
                  _cursorBackground.width(), 
                  _cursorBackground.height(), 
                  _cursorPos, 
-                 image().pixel(0,0), CopyOp );
+                 image().data(), CopyOp );
     }
 
     Painter painter(_surface);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
-    painter.setBrush( Pt::Gfx::Color(0.4f, 0.3f, 0.4f) );
+    painter.setBrush( Pt::Gfx::Color(65535*0.4f, 65535*0.3f, 65535*0.4f) );
     painter.fillRect(updateRect);
 
     _windowManager.paint(_surface, updateRect);
@@ -169,10 +169,10 @@ void ScreenImpl::onMouseEvent( const Pt::Hmi::MouseEvent& mouseEvent )
 
     if( ! _cursorBackground.empty() )
     {
-        bitBlit( _cursorBackground.pixel(0,0),  _cursorBackground.width(), _cursorBackground.height(), 
-                 _cursorPos, (Pt::uint8_t*)image().pixel(0,0), CopyOp );
+        bitBlit( _cursorBackground.data(),  _cursorBackground.width(), _cursorBackground.height(), 
+                 _cursorPos, (Pt::uint8_t*)image().data(), CopyOp );
 
-       _frameBuffer.output( image().pixel(0,0),Gfx::Rect( _cursorPos, _cursorBackground.size() ) );
+       _frameBuffer.output( image().data(),Gfx::Rect( _cursorPos, _cursorBackground.size() ) );
     }
 
     const Cursor& cursor = Application::instance().impl()->cursor();
@@ -295,7 +295,10 @@ void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx
     {
         size_t lineOffset = y * _frameBuffer.lineLength() + 
                             pos.x() * pixelSizeInByte;
-        memcpy( image.pixel(0,y - pos.y()), &buffer[lineOffset], widthInByte );
+
+       Gfx::Pixel dest(image.format(), 0);
+       image.format().getPixel(dest, image.info(), 0,y - pos.y());
+        memcpy( dest.data(), &buffer[lineOffset], widthInByte );
     }
 }
 
@@ -324,8 +327,8 @@ void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
 void ScreenImpl::updateScreen(const Gfx::Rect& r)
 {
     _drawCursor = false;
-    drawCursor( image().pixel(0, 0) );
-    _frameBuffer.output( image().pixel(0,0), r );
+    drawCursor( image().data() );
+    _frameBuffer.output( image().data(), r );
 }
 
 

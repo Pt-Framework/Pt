@@ -46,14 +46,14 @@ void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from)
 
 void sourceOver(Pt::uint8_t* to, const Pt::Gfx::Color& from)
 {
-    Pt::uint8_t alpha = (unsigned char)(from.alpha() * 255);
+    Pt::uint8_t alpha = (unsigned char)(from.alpha() / 257);
     Pt::uint32_t alphaSrc = alpha + 1;
     Pt::uint32_t alphaInv = 256 - alpha;
 
-    to[0] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.red()*255) + alphaInv * to[0]) >> 8);
-    to[1] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.green()*255) + alphaInv * to[1]) >> 8);
-    to[2] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.blue()*255) + alphaInv * to[2]) >> 8);
-    to[3] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.alpha()*255) + alphaInv * to[3]) >> 8);
+    to[0] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.red() / 257) + alphaInv * to[0]) >> 8);
+    to[1] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.green() / 257) + alphaInv * to[1]) >> 8);
+    to[2] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.blue() / 257) + alphaInv * to[2]) >> 8);
+    to[3] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.alpha() / 257) + alphaInv * to[3]) >> 8);
 }
 
 }
@@ -70,10 +70,10 @@ Argb8888Format::Argb8888Format()
 
 Color Argb8888Format::color(const Pt::uint8_t* pixel) const
 {
-    return Color( pixel[3] / 255.0f, 
-                  pixel[2] / 255.0f, 
-                  pixel[1] / 255.0f, 
-                  pixel[0] / 255.0f );
+    return Color( pixel[3] * 257, 
+                  pixel[2] * 257, 
+                  pixel[1] * 257, 
+                  pixel[0] * 257 );
 }
 
 
@@ -84,10 +84,10 @@ void Argb8888Format::setColor(Pt::uint8_t* pixel, const Color& c,
   {
     default:
     case CompositionMode::SourceCopy:
-        pixel[0] = (Pt::uint8_t) (c.blue() * 255.0f);
-        pixel[1] = (Pt::uint8_t) (c.green() * 255.0f);
-        pixel[2] = (Pt::uint8_t) (c.red() * 255.0f);
-        pixel[3] = (Pt::uint8_t) (c.alpha() * 255.0f);
+        pixel[0] = (Pt::uint8_t) (c.blue() / 257);
+        pixel[1] = (Pt::uint8_t) (c.green() / 257);
+        pixel[2] = (Pt::uint8_t) (c.red() / 257);
+        pixel[3] = (Pt::uint8_t) (c.alpha() /257);
         break;
 
     case CompositionMode::SourceOver:
@@ -166,10 +166,10 @@ Color Argb8888Format::getColor(const Pixel& pixel) const
 {
     const Pt::uint8_t* data = pixel.data();
 
-    return Color( data[3] / 255.0f, 
-                  data[2] / 255.0f, 
-                  data[1] / 255.0f, 
-                  data[0] / 255.0f );
+    return Color( data[3] * 257, 
+                  data[2] * 257, 
+                  data[1] * 257, 
+                  data[0] * 257 );
 }
 
 
@@ -182,10 +182,10 @@ void Argb8888Format::setPixel(Pixel& pixel, const Color& c,
     {
       default:
       case CompositionMode::SourceCopy:
-          data[0] = (Pt::uint8_t) (c.blue() * 255.0f);
-          data[1] = (Pt::uint8_t) (c.green() * 255.0f);
-          data[2] = (Pt::uint8_t) (c.red() * 255.0f);
-          data[3] = (Pt::uint8_t) (c.alpha() * 255.0f);
+          data[0] = (Pt::uint8_t) (c.blue() / 257);
+          data[1] = (Pt::uint8_t) (c.green() / 257);
+          data[2] = (Pt::uint8_t) (c.red() / 257);
+          data[3] = (Pt::uint8_t) (c.alpha() / 257);
           break;
 
       case CompositionMode::SourceOver:
@@ -212,6 +212,29 @@ void Argb8888Format::setPixel(const ImageInfo& to, Pt::ssize_t x, Pt::ssize_t y,
             sourceOver(dst, src);
             break;
     } 
+}
+
+void Argb8888Format::setSpan(Pixel& to, const Pixel& from, size_t length, CompositionMode mode) const
+{
+    Pt::uint8_t* dst = to.data();
+    const Pt::uint8_t* src = from.data();
+
+    switch(mode)
+    {
+        default:
+        case CompositionMode::SourceCopy:
+            memcpy(dst, src, length * 4);
+            break;
+
+        case CompositionMode::SourceOver:
+            for(size_t i = 0; i < length; ++i)
+            {
+                sourceOver(dst, src); 
+                src += 4;
+                dst += 4;
+            }
+            break;
+    }   
 }
 
 

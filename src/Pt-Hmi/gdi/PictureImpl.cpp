@@ -85,11 +85,12 @@ void PictureImpl::set(const Gfx::Image& image)
             Gfx::Pixel pixel(image.format(), 0);
             image.format().getPixel(pixel, image.info(), x, y);
             Gfx::Color color = image.format().getColor(pixel);
-
-            _bitmapData.push_back( (Pt::uint8_t) (color.alpha() * color.blue() * 255.0) );
-            _bitmapData.push_back( (Pt::uint8_t) (color.alpha() * color.green() * 255.0) );
-            _bitmapData.push_back( (Pt::uint8_t) (color.alpha() * color.red() * 255.0) );
-            _bitmapData.push_back( (Pt::uint8_t) (color.alpha() * 255.0) );
+            
+            _bitmapData.push_back( (Pt::uint8_t) (( color.alpha() * (int) color.blue()) / (257*65535))) ;
+            _bitmapData.push_back( (Pt::uint8_t)( ( color.alpha()* (int) color.green()) / (257*65535)));
+            _bitmapData.push_back( (Pt::uint8_t) (( color.alpha() * (int) color.red())/ (257*65535) ));
+            _bitmapData.push_back( (Pt::uint8_t) ( color.alpha() / 257) );
+            
         }
     }
 
@@ -97,7 +98,7 @@ void PictureImpl::set(const Gfx::Image& image)
 }
 
 
-void PictureImpl::set(const Gfx::Image& image, float alphaThreshold)
+void PictureImpl::set(const Gfx::Image& image, Pt::uint16_t alphaThreshold)
 {
     clear();
     
@@ -131,9 +132,9 @@ void PictureImpl::set(const Gfx::Image& image, float alphaThreshold)
                 _maskData.push_back(0);
                 _maskData.push_back(0);
 
-                _bitmapData.push_back( (Pt::uint8_t) (color.blue() * 255.0) );
-                _bitmapData.push_back( (Pt::uint8_t) (color.green() * 255.0) );
-                _bitmapData.push_back( (Pt::uint8_t) (color.red() * 255.0) );
+                _bitmapData.push_back( (Pt::uint8_t) (color.blue() / 257) );
+                _bitmapData.push_back( (Pt::uint8_t) (color.green()/ 257) );
+                _bitmapData.push_back( (Pt::uint8_t) (color.red()/ 257) );
                 _bitmapData.push_back( 0xff);
             }
         }

@@ -371,8 +371,8 @@ void Menu::onPaintBackground(const Gfx::RectF& rect)
 
         // TODO: need painter clipping for gradient
         
-         Gfx::Brush brush(Gfx::Color(0.90f, 0.90f, 0.91f),
-                          Gfx::Color(0.99f, 0.99f, 0.99f), 
+         Gfx::Brush brush(Gfx::Color(65535* 0.90f, 65535*0.90f, 65535*0.91f),
+                          Gfx::Color(65535*0.99f, 65535*0.99f, 65535*0.99f), 
                           Gfx::Brush::Vertical);
 
         painter.setBrush(brush);
@@ -384,7 +384,7 @@ void Menu::onPaintBackground(const Gfx::RectF& rect)
     //
     Gfx::RectF borderRect(Gfx::PointF(0, 0), size());
 
-    Gfx::Pen pen(1, Gfx::Color(0.5f, 0.5f, 0.51f) );
+    Gfx::Pen pen(1, Gfx::Color(65535*0.5f, 65535*0.5f, 65535*0.51f) );
     painter.setPen(pen);
     painter.drawRect(borderRect);
 }

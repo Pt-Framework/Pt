@@ -114,7 +114,7 @@ class PT_GFX_API Image
     PixelIterator end()
     { return PixelIterator(_info, 0, height()); }
 
-    void setColor(const Color& color);
+    void erase(const Color& color);
 
     void resize(const Size& size, Pt::ssize_t padding);
 
@@ -123,30 +123,7 @@ class PT_GFX_API Image
     void resize(Pt::uint8_t* buffer, const Size& size, size_t padding);    
 
     void resize(Pt::uint8_t* buffer, const Size& size, 
-                const ImageFormat& format, size_t padding);
-
-    Color colorXXX(size_t x, size_t y) const
-    {
-        return format().color(pixelXXX(x,y));
-    }
-
-    void setColorXXX(size_t x, size_t y, const Color& c, 
-                  CompositionMode mode = CompositionMode::SourceCopy)
-    {
-        format().setColor(pixelXXX(x,y), c, mode);
-    }
-
-    Pt::uint8_t* pixelXXX(size_t x, size_t y)
-    {
-        Pt::uint8_t* data = _info.data();
-        return &data[ pixelOffsetInBytes(x,y) ];
-    }
-
-    const Pt::uint8_t* pixelXXX(size_t x, size_t y) const 
-    {
-        std::size_t off = y * _info.pitch() + x * format().pixelSize();
-        return &_info.data()[off];
-    }
+                const ImageFormat& format, size_t padding);    
 
     void convert(Image& image) const;
    

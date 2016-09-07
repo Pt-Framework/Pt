@@ -47,7 +47,7 @@ Picture::Picture(const Gfx::Image& image)
 }
 
 
-Picture::Picture(const Gfx::Image& image, float alphaThreshold)
+Picture::Picture(const Gfx::Image& image, Pt::uint16_t alphaThreshold)
 : _impl( new PictureImpl )
 {
     _impl->set(image, alphaThreshold);

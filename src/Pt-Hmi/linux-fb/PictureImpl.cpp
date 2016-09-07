@@ -64,16 +64,16 @@ void PictureImpl::set(const Gfx::Image& i, float alphaThreshold)
     {
         for( size_t x = 0; x < _image.width(); ++x )
         {
-            Gfx::Color color = _image.color(x, y);
+            Gfx::Pixel pixel(_image.format(), 0);
+            _image.format().getPixel(pixel, _image.info(), x, y);
+            Gfx::Color color = _image.format().getColor(pixel);
 
             if( color.alpha() <= alphaThreshold )
-            {
                 color.setAlpha(0);
-            }
             else
-                color.setAlpha(1);
+                color.setAlpha(65535);
 
-            _image.setColor(x, y, color);
+            _image.format().setPixel(pixel, color, Gfx::CompositionMode::SourceCopy);
         }
     }
 }

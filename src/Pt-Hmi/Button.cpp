@@ -177,7 +177,7 @@ void Button::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
         size.addHeight(-4);
         size.addWidth(-4);
 
-        Gfx::Color armedColor(1, 0, 0);
+        Gfx::Color armedColor(65535, 0, 0);
         Gfx::Pen pen(1, armedColor, Gfx::Pen::DashStyle);
         
         Painter painter( surface );

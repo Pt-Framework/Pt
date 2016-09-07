@@ -138,13 +138,6 @@ class PT_GFX_API Pen
         */
         JoinStyle joinStyle() const;
 
-        /**
-        * @brief Returns a reference to the pen color buffer
-        *
-        * @return The color buffer of the pen.
-        */
-        const Image& buffer() const;
-
   private:
       SmartPtr<PenData> _penData;
 };
@@ -156,20 +149,15 @@ class PT_GFX_API PenData
       PenData(size_t size, const Color& color, 
               Pen::PenStyle style, Pen::CapStyle cap, Pen::JoinStyle join)
       : _size(size)
-      , _style(style )
-      , _buffer( Gfx::Size(64, 1) )
+      , _style(style )      
       , _capStyle(cap)
       , _joinStyle(join)
       , _color(color)
       {
-          _buffer.setColor( color);
       }
 
       const Color& color() const
       { return _color; }
-
-      const Image& buffer() const
-      { return _buffer; }
 
       size_t size() const
       { return _size; }
@@ -185,8 +173,7 @@ class PT_GFX_API PenData
 
   private:
       size_t         _size;
-      Pen::PenStyle  _style;
-      Image          _buffer;
+      Pen::PenStyle  _style;   
       Pen::CapStyle  _capStyle;
       Pen::JoinStyle _joinStyle;
       Color          _color;

@@ -89,7 +89,7 @@ void Cursor::loadCursor( std::istream& pngStream, const Gfx::Color& alphaColor, 
 			    if( color.red() == alphaColor.red() &&  color.green() == alphaColor.green() && color.blue() == alphaColor.blue() )
 				    color.setAlpha(0);
 			    else
-				    color.setAlpha(1);
+				    color.setAlpha(65535);
 
 			    image.format().setPixel(pixel, color, Gfx::CompositionMode::SourceCopy);
 		  }
@@ -97,7 +97,7 @@ void Cursor::loadCursor( std::istream& pngStream, const Gfx::Color& alphaColor, 
 
   Gfx::Pixel pixel(image.format(), 0);
   image.format().getPixel(pixel, image.info(), cursor.xHotspot(), cursor.yHotspot());
-	image.format().setPixel( pixel, Gfx::Color(0,1,0), Gfx::CompositionMode::SourceCopy );
+	image.format().setPixel( pixel, Gfx::Color(0,65535,0), Gfx::CompositionMode::SourceCopy );
   
   fromImage(image, cursor);
 }
@@ -125,7 +125,7 @@ const Cursor& Cursor::moveCursor()
     cursor.setYHotspot( 11 );
     cursor.setName( "move" );
 
-	loadCursor( g_moveCursor, g_moveCursorSize, Gfx::Color( 1, 0, 0 ), cursor );
+	loadCursor( g_moveCursor, g_moveCursorSize, Gfx::Color( 65535, 0, 0 ), cursor );
 	return cursor;
 }
 
@@ -140,7 +140,7 @@ const Cursor& Cursor::arrowCursor()
     cursor.setYHotspot( 0 );
     cursor.setName( "arrow" );
 
-	loadCursor( g_arrowCursor, g_arrowCursorSize, Gfx::Color( 1, 0, 0 ), cursor );
+	loadCursor( g_arrowCursor, g_arrowCursorSize, Gfx::Color( 65535, 0, 0 ), cursor );
 	return cursor;
 }
 
@@ -156,7 +156,7 @@ const Cursor& Cursor::waitCursor()
     cursor.setYHotspot( 16 );
     cursor.setName( "wait" );
 
-	loadCursor( g_waitCursor, g_waitCursorSize, Gfx::Color( 1, 0, 0 ), cursor );
+	loadCursor( g_waitCursor, g_waitCursorSize, Gfx::Color( 65535, 0, 0 ), cursor );
 	return cursor;
 }
 
@@ -172,7 +172,7 @@ const Cursor& Cursor::sizeNWSECursor()
     cursor.setYHotspot( 8 );
     cursor.setName( "sizeNWSE" );
 
-	loadCursor( g_sizeNWSECursor, g_sizeNWSECursorSize, Gfx::Color( 1, 0, 0 ), cursor );
+	loadCursor( g_sizeNWSECursor, g_sizeNWSECursorSize, Gfx::Color( 65535, 0, 0 ), cursor );
 	return cursor;
 }
 
@@ -188,7 +188,7 @@ const Cursor& Cursor::sizeNESWCursor()
     cursor.setYHotspot( 8 );
     cursor.setName( "sizeNESW" );
 
-	loadCursor( g_sizeNESWCursor, g_sizeNESWCursorSize, Gfx::Color( 1, 0, 0 ), cursor );
+	loadCursor( g_sizeNESWCursor, g_sizeNESWCursorSize, Gfx::Color( 65535, 0, 0 ), cursor );
 	return cursor;
 }
 
@@ -204,7 +204,7 @@ const Cursor& Cursor::sizeWECursor()
     cursor.setYHotspot( 4 );
     cursor.setName( "sizeWE" );
 
-	loadCursor( g_sizeWECursor, g_sizeWECursorSize, Gfx::Color( 1, 0, 0 ), cursor );
+	loadCursor( g_sizeWECursor, g_sizeWECursorSize, Gfx::Color( 65535, 0, 0 ), cursor );
 
 	return cursor;
 }
@@ -221,7 +221,7 @@ const Cursor& Cursor::sizeNSCursor()
     cursor.setYHotspot( 12 );
     cursor.setName( "sizeNS" );
 
-	loadCursor( g_sizeNSCursor, g_sizeNSCursorSize, Gfx::Color( 1, 0, 0 ), cursor );
+	loadCursor( g_sizeNSCursor, g_sizeNSCursorSize, Gfx::Color( 65535, 0, 0 ), cursor );
 	return cursor;
 }
 
@@ -258,9 +258,9 @@ void Cursor::fromImage( const Gfx::Image& image, Cursor& cursor)
 				cursor._andMask.push_back( 0 );
 				cursor._andMask.push_back( 0 );
 					
-				cursor._xorMask.push_back( (Pt::uint8_t) (color.red() * 255.0) );
-				cursor._xorMask.push_back( (Pt::uint8_t) (color.green()* 255.0) );
-				cursor._xorMask.push_back( (Pt::uint8_t) (color.blue() * 255.0));
+				cursor._xorMask.push_back( (Pt::uint8_t) (color.red() / 257) );
+				cursor._xorMask.push_back( (Pt::uint8_t) (color.green() / 257) );
+				cursor._xorMask.push_back( (Pt::uint8_t) (color.blue() / 257));
 				cursor._xorMask.push_back( 0xFF);
 			}
 		}

@@ -311,9 +311,9 @@ const Gfx::RectF& PixmapSurfaceImpl::clip()
 void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
 {
     DWORD penStyle = getPenStyle( pen );
-    DWORD penColor = RGB( pen.color().red() * 255, 
-                          pen.color().green() * 255, 
-                          pen.color().blue() * 255 );
+    DWORD penColor = RGB( pen.color().red()  / 257, 
+                          pen.color().green() / 257, 
+                          pen.color().blue()  / 257 );
 
 #ifdef _WIN32_WCE
     HPEN newPen = CreatePen(penStyle, pen.size(), penColor);
@@ -337,9 +337,9 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
     _gradientBrush = false;
 
     HBRUSH brushHandle = NULL;
-    DWORD brushColor = RGB(brush.color().red() * 255, 
-                           brush.color().green() * 255, 
-                           brush.color().blue() * 255);
+    DWORD brushColor = RGB(brush.color().red() / 257, 
+                           brush.color().green() / 257, 
+                           brush.color().blue() / 257);
 
     switch( brush.fillStyle() ) 
     {

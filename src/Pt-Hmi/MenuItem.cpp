@@ -40,9 +40,9 @@ Pt::Gfx::Color brighten(const Pt::Gfx::Color& c, float factor)
     float g = c.green() * factor;
     float b = c.blue() * factor;
 
-    r = r > 1.0f ? 1.0f : r;
-    g = g > 1.0f ? 1.0f : g;
-    b = b > 1.0f ? 1.0f : b;
+    r = r > 65535 ? 65535 : r;
+    g = g > 65535 ? 65535 : g;
+    b = b > 65535 ? 65535 : b;
 
     return Pt::Gfx::Color(c.alpha(), r, g, b);
 }

@@ -82,6 +82,11 @@ void ImageFormat::setPixel(Pixel& pixel, const Color& c,
 }
 
 
+void ImageFormat::setSpan(Pixel& dst, const Pixel& src, size_t length, CompositionMode mode) const
+{
+
+}
+
 void ImageFormat::copy(const ImageInfo& toInfo, const Point& to,
                        const ImageInfo& fromInfo, const Rect& fromRect,
                        CompositionMode mode) const
