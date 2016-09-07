@@ -57,7 +57,12 @@ class PT_GFX_API Argb8888Format : public ImageFormat
 
         virtual void setPixel(Pixel& to, const Pixel& from,
                               CompositionMode mode) const;
+        
+        virtual Color getColor(const Pixel& pixel) const;
 
+        virtual void setPixel(Pixel& pixel, const Color& c,
+                              CompositionMode mode) const;
+        
         // current API
         virtual void setPixel(Pt::uint8_t* dst, const Pt::uint8_t* src,
                               CompositionMode mode) const;

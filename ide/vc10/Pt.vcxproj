@@ -37,6 +37,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ClipLine.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ClipPolygon.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Color.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\CompositionMode.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Exception.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Font.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\FontMetrics.h" />

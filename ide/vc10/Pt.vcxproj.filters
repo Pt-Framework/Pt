@@ -1383,6 +1383,9 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ClipPolygon.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\CompositionMode.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

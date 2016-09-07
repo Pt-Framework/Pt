@@ -70,6 +70,18 @@ void ImageFormat::setPixel(Pixel& to, const Pixel& from,
 }
 
 
+Color ImageFormat::getColor(const Pixel& pixel) const
+{
+    return Color(0,0,0);
+}
+
+
+void ImageFormat::setPixel(Pixel& pixel, const Color& c,
+                           CompositionMode mode) const
+{
+}
+
+
 void ImageFormat::copy(const ImageInfo& toInfo, const Point& to,
                        const ImageInfo& fromInfo, const Rect& fromRect,
                        CompositionMode mode) const

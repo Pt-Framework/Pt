@@ -44,84 +44,6 @@ namespace Pt {
 
 namespace Gfx {
 
-class PixelIterator
-{
-    public:
-        PixelIterator(const ImageInfo& image, Pt::ssize_t x, Pt::ssize_t y)
-        : _image(&image)
-        , _x(x)
-        , _y(y)
-        , _pixel(image.format(), 0)
-        {
-            _image->format().getPixel(_pixel, image, x, y);
-        }
-
-        PixelIterator(const PixelIterator& it)
-        : _image(it._image)
-        , _x(it._x)
-        , _y(it._y)
-        , _pixel(it._pixel)
-        {}
-
-        PixelIterator& operator=(const PixelIterator& it)
-        {
-            _image  = it._image;
-            _x      = it._x;
-            _y      = it._y;
-            
-            _pixel.reset(it._pixel);
-            
-            return *this;
-        }
-
-        bool operator!=(const PixelIterator& it) const
-        { 
-            return _x != it._x || _y != it._y;  
-        }
-
-        bool operator==(const PixelIterator& it) const
-        { 
-            return _x == it._x && _y == it._y; 
-        }
-        
-        Pixel& operator*()
-        { 
-            return _pixel; 
-        }
-
-        PixelIterator& operator++()
-        {           
-            if( ++_x >= _image->width() )
-            {
-                _x = 0;
-                _image->format().getPixel(_pixel, *_image, _x, _y);
-            }
-            else
-            {
-                _image->format().advance(_pixel);
-            }
-            
-            return *this; 
-        }
-
-        PixelIterator& operator+=(Pt::ssize_t n)
-        {
-            Pt::ssize_t off = _x + n;
-            _y += off / _image->width();
-            _x += off % _image->width();
-            
-            _image->format().getPixel(_pixel, *_image, _x, _y);  
-            return *this; 
-        }
-
-    private:
-        const ImageInfo* _image;
-        Pt::ssize_t      _x;
-        Pt::ssize_t      _y;
-        Pixel            _pixel;
-};
-
-
 class PT_GFX_API Image
 {
   public:
@@ -129,13 +51,13 @@ class PT_GFX_API Image
     
     Image(const Size& size, 
           const ImageFormat& format = ImageFormat::argb8888(), 
-          size_t stride = 0);
+          size_t padding = 0);
 
     Image(Pt::uint8_t* buffer, const Size& size, 
           const ImageFormat& format = ImageFormat::argb8888(), 
-          size_t stride = 0);
+          size_t padding = 0);
     
-    Image( const Image& image);
+    Image(const Image& image);
               
     virtual ~Image();
 
@@ -151,12 +73,12 @@ class PT_GFX_API Image
         return _info;
     }
 
-    size_t width() const
+    Pt::ssize_t width() const
     {
       return _info.width();
     }
 
-    size_t height() const
+    Pt::ssize_t height() const
     {
       return _info.height();
     }
@@ -176,9 +98,9 @@ class PT_GFX_API Image
         return _info.data(); 
     }
 
-    size_t stride() const
+    Pt::ssize_t padding() const
     {
-      return _info.stride();
+      return _info.padding();
     }
 
     bool empty() const
@@ -192,15 +114,16 @@ class PT_GFX_API Image
     PixelIterator end()
     { return PixelIterator(_info, 0, height()); }
 
-    void setColor( const Color& color );
+    void setColor(const Color& color);
 
-    void resize( const Size& size,  size_t strideInBytes = 0 );
+    void resize(const Size& size, Pt::ssize_t padding);
 
-    void resize( const Size& size, const ImageFormat& format, size_t strideInBytes = 0);
+    void resize(const Size& size, const ImageFormat& format, size_t padding);
 
-    void resize( Pt::uint8_t* buffer, const Size& size,size_t strideInBytes = 0 );    
+    void resize(Pt::uint8_t* buffer, const Size& size, size_t padding);    
 
-    void resize( Pt::uint8_t* buffer, const Size& size, const ImageFormat& format, size_t strideInBytes = 0 );
+    void resize(Pt::uint8_t* buffer, const Size& size, 
+                const ImageFormat& format, size_t padding);
 
     Color color(size_t x, size_t y) const
     {
@@ -221,18 +144,20 @@ class PT_GFX_API Image
 
     const Pt::uint8_t* pixel(size_t x, size_t y) const 
     {
-        std::size_t off = y * _info.lineSize() + x * format().pixelSize();
+        std::size_t off = y * _info.pitch() + x * format().pixelSize();
         return &_info.data()[off];
     }
 
     Image convert(const ImageFormat& toFormat) const;
+
+    void convert(Image& image) const;
     
     Image blockScale( const Size& newSize) const;
 
   protected:
     size_t pixelOffsetInBytes(size_t x, size_t y) const
     {
-      const size_t rowOffsetInBytes = y * _info.lineSize();
+      const size_t rowOffsetInBytes = y * _info.pitch();
       return rowOffsetInBytes + x * format().pixelSize();
     }
 
@@ -258,11 +183,12 @@ void blockScale(IteratorT from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
             for(Pt::ssize_t x = 0; x < toWidth; ++x) 
             {
                 *to = *from;
-                
                 ++to;
+                
                 for(dw += fromWidth; dw >= toWidth; ++from, dw -= toWidth)
                     ;
             }
+            
             from = pos;
             y++;
         }

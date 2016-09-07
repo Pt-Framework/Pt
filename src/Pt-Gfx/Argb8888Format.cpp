@@ -117,7 +117,7 @@ void Argb8888Format::setPixel(Pt::uint8_t* dst, const Pt::uint8_t* src,
 void Argb8888Format::getPixel(Pixel& pixel, const ImageInfo& image, 
                               Pt::ssize_t x, Pt::ssize_t y) const
 {
-    Pt::ssize_t yoff = y * image.lineSize(); 
+    Pt::ssize_t yoff = y * image.pitch(); 
     Pt::ssize_t xoff = x * pixelSize();
     Pt::ssize_t off = xoff + yoff;
     Pt::uint8_t* data = &image.data()[off];
@@ -162,10 +162,43 @@ void Argb8888Format::setPixel(Pixel& to, const Pixel& from,
 }
 
 
+Color Argb8888Format::getColor(const Pixel& pixel) const
+{
+    const Pt::uint8_t* data = pixel.data();
+
+    return Color( data[3] / 255.0f, 
+                  data[2] / 255.0f, 
+                  data[1] / 255.0f, 
+                  data[0] / 255.0f );
+}
+
+
+void Argb8888Format::setPixel(Pixel& pixel, const Color& c,
+                              CompositionMode mode) const
+{
+    Pt::uint8_t* data = pixel.data();
+
+    switch( mode)
+    {
+      default:
+      case CompositionMode::SourceCopy:
+          data[0] = (Pt::uint8_t) (c.blue() * 255.0f);
+          data[1] = (Pt::uint8_t) (c.green() * 255.0f);
+          data[2] = (Pt::uint8_t) (c.red() * 255.0f);
+          data[3] = (Pt::uint8_t) (c.alpha() * 255.0f);
+          break;
+
+      case CompositionMode::SourceOver:
+          sourceOver(data, c);
+          break;
+    }  
+}
+
+
 void Argb8888Format::setPixel(const ImageInfo& to, Pt::ssize_t x, Pt::ssize_t y,
                               const Pt::uint8_t* src, CompositionMode mode) const
 {
-    std::size_t off = y * to.lineSize() + x * pixelSize();
+    std::size_t off = y * to.pitch() + x * pixelSize();
     Pt::uint8_t* dst = &to.data()[off];
 
     switch(mode)
@@ -208,8 +241,9 @@ void Argb8888Format::onCopy(const ImageInfo& toInfo, const Point& toPoint,
                             const ImageInfo& fromInfo, const Rect& fromRect,
                             CompositionMode mode) const
 {
-    Pt::ssize_t toStride = (toInfo.width() * pixelSize()) + toInfo.stride();
-    Pt::ssize_t fromStride = (fromInfo.width() * pixelSize()) + fromInfo.stride();
+    // TODO: equals to toInfo.pitch()
+    Pt::ssize_t toStride = (toInfo.width() * pixelSize()) + toInfo.padding();
+    Pt::ssize_t fromStride = (fromInfo.width() * pixelSize()) + fromInfo.padding();
     
     Pt::ssize_t toBegin = (toPoint.y() * toStride) + (toPoint.x() * pixelSize());
     Pt::ssize_t fromBegin = (fromRect.y() * fromStride) + (fromRect.x() * pixelSize());

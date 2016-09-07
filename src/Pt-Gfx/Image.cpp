@@ -39,18 +39,18 @@ Image::Image(const ImageFormat& format)
 }
       
         
-Image::Image(const Gfx::Size& size, const ImageFormat& format, size_t stride)
+Image::Image(const Gfx::Size& size, const ImageFormat& format, size_t padding)
 : _info(format)
 {
-    resize(size, format, stride);
+    resize(size, format, padding);
 }
     
 
 Image::Image(Pt::uint8_t* buffer, const Gfx::Size& size, 
-             const ImageFormat& format, size_t stride)
+             const ImageFormat& format, size_t padding)
 : _info(format)
 {
-    resize(buffer, size, format, stride);
+    resize(buffer, size, format, padding);
 }
 
 
@@ -75,22 +75,54 @@ const Image& Image::operator=(const Image& image)
     Pt::uint8_t* data = _buffer.empty() ? image._info.data()
                                         : &_buffer[0];
 
-    _info.set(image.format(), data, image.size(), image.stride());
+    _info.set(image.format(), data, image.size(), image.padding());
 
 	  return *this;
 }
 
 
-Image Image::convert(const ImageFormat& toFormat) const
+void Image::resize(const Gfx::Size& size, Pt::ssize_t padding)
 {
-    if( format() == toFormat )
+    Pt::ssize_t n = (size.width() * format().pixelSize() + padding) * size.height();
+    _buffer.resize(n); 
+    _info.set(&_buffer[0], size, padding);
+}
+
+
+void Image::resize(const Gfx::Size& size, const ImageFormat& f, size_t padding)
+{
+    Pt::ssize_t n = (size.width() * format().pixelSize() + padding) * size.height();
+    _buffer.resize(n); 
+ 
+    _info.set(f, &_buffer[0], size, padding); 
+}
+
+
+void Image::resize(Pt::uint8_t* buffer, const Gfx::Size& size, size_t padding)
+{
+    _info.set(buffer, size, padding);
+    _buffer.clear();  
+}
+
+
+void Image::resize(Pt::uint8_t* buffer, const Gfx::Size& size, 
+                   const ImageFormat& format, size_t padding)
+{
+    _info.set(format, buffer, size, padding);
+    _buffer.clear();  
+}
+
+
+Image Image::convert(const ImageFormat& f) const
+{
+    if( format() == f )
         return *this;
 
-    Image image( size(), toFormat, stride() );
+    Image image( size(), f, padding() );
 
-    for(size_t y = 0; y < height(); ++y)
+    for(Pt::ssize_t y = 0; y < height(); ++y)
     {
-        for(size_t x = 0; x < width(); ++x)
+        for(Pt::ssize_t x = 0; x < width(); ++x)
         {
             const Color pixelColor = color(x,y);
             image.setColor(x , y, pixelColor);
@@ -101,9 +133,30 @@ Image Image::convert(const ImageFormat& toFormat) const
 }
 
 
+void Image::convert(Image& image) const
+{
+    image.resize( size(), image.padding() );
+
+    Pixel from(format(), 0);
+    Pixel to(image.format(), 0);
+
+    for(Pt::ssize_t y = 0; y < height(); ++y)
+    {
+        for(Pt::ssize_t x = 0; x < width(); ++x)
+        {
+            format().getPixel(from, info(), x, y);
+            Color color = format().getColor(from);
+            
+            format().getPixel(to, image.info(), x, y);
+            image.format().setPixel(to, color, CompositionMode::SourceCopy);
+        }
+    }
+}
+
+
 Image Image::blockScale(const Size& newSize) const
 {
-  Image resultImage( newSize, format(), stride() );
+  Image resultImage( newSize, format(), padding() );
 
   const double dx = newSize.width() /(double)width();
   const double dy = newSize.height() /(double) width();
@@ -111,11 +164,11 @@ Image Image::blockScale(const Size& newSize) const
   double xTarget = 0;
   double yTarget = 0;
 
-  for( size_t ySource = 0; ySource < height(); ++ySource)
+  for( Pt::ssize_t ySource = 0; ySource < height(); ++ySource)
   {        
     xTarget = 0;
 
-    for( size_t xSource = 0; xSource < width(); ++xSource)
+    for( Pt::ssize_t xSource = 0; xSource < width(); ++xSource)
     {
             
       const Pt::uint8_t* pixelSource = pixel( xSource, ySource);
@@ -148,7 +201,7 @@ Image Image::blockScale(const Size& newSize) const
                  
       memcpy( resultImage.pixel(0, yPos), 
               sourceLine, 
-              resultImage.width() * format().pixelSize() + stride());
+              resultImage.width() * format().pixelSize() + padding());
     }
 
     yTarget += dy;
@@ -165,45 +218,13 @@ void Image::setColor(const Color& color)
     std::vector<Pt::uint8_t> pixel( format().pixelSize() );
     format().setColor(&pixel[0], color, CompositionMode::SourceCopy);
   
-    const size_t count = (width() + stride()) * height();
+    const size_t count = (width() + padding()) * height();
 
     for(size_t i = 0; i < count; ++i)
     {				
         memcpy(it, &(pixel[0]), pixel.size());
         it += pixel.size();
     }
-}
-
-
-void Image::resize(const Gfx::Size& size, size_t strideInBytes)
-{
-    Pt::ssize_t n = (size.width() * format().pixelSize() + strideInBytes) * size.height();
-    _buffer.resize(n); 
-    _info.set(&_buffer[0], size, strideInBytes);
-}
-
-
-void Image::resize(const Gfx::Size& size, const ImageFormat& f, size_t strideInBytes)
-{
-    Pt::ssize_t n = (size.width() * format().pixelSize() + strideInBytes) * size.height();
-    _buffer.resize(n); 
- 
-    _info.set(f, &_buffer[0], size, strideInBytes); 
-}
-
-
-void Image::resize(Pt::uint8_t* buffer, const Gfx::Size& size, size_t strideInBytes)
-{
-    _info.set(buffer, size, strideInBytes);
-    _buffer.clear();  
-}
-
-
-void Image::resize(Pt::uint8_t* buffer, const Gfx::Size& size, 
-                   const ImageFormat& format, size_t strideInBytes)
-{
-    _info.set(format, buffer, size, strideInBytes);
-    _buffer.clear();  
 }
 
 } // namespace

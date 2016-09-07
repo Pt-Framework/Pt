@@ -81,8 +81,8 @@ MainWindow::MainWindow()
 , _scrollContainer(Hmi::FlowLayout::Top)
 {
     loadIcon(_icon);
-
-    _picture.set( _icon);
+    _picture.set(_icon);
+    
     setTitle("Main 1");
     move( Gfx::PointF(60, 60) );
     resize( Gfx::SizeF(1000, 1000) ); 
@@ -174,11 +174,8 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 {
     Window::onPaintBackground(rect);
 
-    //Picture picture(_icon, 0.01f);
-    Picture picture(_icon);
-
     Painter painter( surface() );
-    painter.drawPicture(Gfx::PointF(0,0), picture);
+    painter.drawPicture(Gfx::PointF(0,0), _picture);
 }
 
 

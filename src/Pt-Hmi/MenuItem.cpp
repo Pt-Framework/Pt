@@ -205,7 +205,7 @@ Gfx::SizeF MenuItem::onAutoSize() const
 {
     Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
 
-    double contentHeight = std::max( fm.height(), _icon.height() );
+    double contentHeight = std::max<Pt::ssize_t>( fm.height(), _icon.height() );
     double contentWidth = fm.width() + _icon.width();
 
     const Key* sk = shortcut();

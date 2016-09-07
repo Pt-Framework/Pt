@@ -113,7 +113,7 @@ class PT_HMI_API Menu : public MenuShell
         std::vector<SubMenuItem*> _subMenus;
         Menu*                     _currentMenu;
         FlowLayout                _layout;
-        std::size_t               _iconWidth;
+        Pt::ssize_t               _iconWidth;
 };
 
 } // namespace

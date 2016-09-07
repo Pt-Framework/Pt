@@ -33,45 +33,15 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/CompositionMode.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-class CompositionMode
-{
-    public:
-        enum Mode
-        {
-            SourceCopy = 0, // use source pixel
-            SourceOver = 1, // use alpha of source pixel
-            AlphaMask = 200 // TODO: image painter specific or obsolete
-        };
-
-        CompositionMode(Mode m = SourceCopy)
-        : _mode(m)
-        {}
-
-        CompositionMode& operator =(Mode m)
-        {
-            _mode = m;
-            return *this;
-        }
-
-        operator Pt::uint32_t() const
-        { 
-            return _mode; 
-        }
-
-    private:
-        Pt::uint32_t _mode;
-};
-
-class ImageInfo;
 class Pixel;
-class PixelPtr;
+class ImageInfo;
 
 class PT_GFX_API ImageFormat
 {
@@ -104,6 +74,11 @@ class PT_GFX_API ImageFormat
         virtual void assign(Pixel& to, const Pixel& from) const;
 
         virtual void setPixel(Pixel& to, const Pixel& from,
+                              CompositionMode mode) const;
+
+        virtual Color getColor(const Pixel& pixel) const;
+
+        virtual void setPixel(Pixel& pixel, const Color& c,
                               CompositionMode mode) const;
 
         // current API
@@ -141,6 +116,65 @@ class PT_GFX_API ImageFormat
     private:
         size_t _pixelSize;
         size_t _channels;
+};
+
+
+class Pixel
+{
+    public:
+        Pixel(const ImageFormat& format, Pt::uint8_t* data)
+        : _format(&format)
+        , _data(data)
+        , _meta(0)
+        { }
+
+        Pixel(const Pixel& p)
+        : _format(p._format)
+        , _data(p._data)
+        , _meta(p._meta)
+        { }
+
+        Pixel& operator=(const Pixel& p)
+        {
+            _format->assign(*this, p);
+            return *this;
+        }
+
+        void reset(const ImageFormat& format, Pt::uint8_t* data)
+        {
+             _format = &format;
+             _data = data;
+             _meta = 0;
+        }
+
+        void reset(const Pixel& p)
+        {
+             _format = p._format;
+             _data = p._data;
+             _meta = p._meta;
+        }
+
+        void reset(Pt::uint8_t* data)
+        {
+             _data = data;
+        }
+
+        const ImageFormat& format() const
+        { return *_format; }
+        
+        Pt::uint8_t* data()
+        { return _data; }
+
+        const Pt::uint8_t* data() const
+        { return _data; }
+        
+        Pt::uint32_t meta() const
+        { return _meta; }
+
+    private:
+        const ImageFormat* _format;
+        Pt::uint8_t* _data;
+        Pt::uint32_t _meta;
 };
 
 } // namespace

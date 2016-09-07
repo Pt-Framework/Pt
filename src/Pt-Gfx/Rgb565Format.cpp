@@ -78,8 +78,9 @@ void Rgb565Format::onCopy(const ImageInfo& toInfo, const Point& toPoint,
                           const ImageInfo& fromInfo, const Rect& fromRect,
                           CompositionMode mode) const
 {
-    Pt::ssize_t toStride = (toInfo.width() * pixelSize()) + toInfo.stride();
-    Pt::ssize_t fromStride = (fromRect.width() * pixelSize()) + fromInfo.stride();
+    // TODO: equals to toInfo.pitch()
+    Pt::ssize_t toStride = (toInfo.width() * pixelSize()) + toInfo.padding();
+    Pt::ssize_t fromStride = (fromRect.width() * pixelSize()) + fromInfo.padding();
     
     Pt::ssize_t toBegin = (toPoint.y() * toStride) + (toPoint.x() * pixelSize());
     Pt::ssize_t fromBegin = (fromRect.y() * fromStride) + (fromRect.x() * pixelSize());

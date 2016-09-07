@@ -32,8 +32,8 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Size.h>
-#include <Pt/Types.h>
 #include <Pt/Gfx/ImageFormat.h>
+#include <Pt/Types.h>
 
 namespace Pt {
 
@@ -46,37 +46,37 @@ class ImageInfo
         : _format(&format)
         , _data(0)
         , _size()
-        , _stride(0)
+        , _padding(0)
         {
-          _lineSize = (_size.width() * _format->pixelSize())  + _stride;
+            _pitch = (_size.width() * _format->pixelSize())  + _padding;
         }
 
         ImageInfo(const ImageFormat& format, Pt::uint8_t* data, 
-                  const Size& size, Pt::ssize_t stride)
+                  const Size& size, Pt::ssize_t padding)
         : _format(&format)
         , _data(data)
         , _size(size)
-        , _stride(stride)
+        , _padding(padding)
         {
-          _lineSize = (_size.width() * _format->pixelSize())  + _stride;
+            _pitch = (_size.width() * _format->pixelSize())  + _padding;
         }
 
         void set(const ImageFormat& format, Pt::uint8_t* data, 
-                 const Size& size, Pt::ssize_t stride)
+                 const Size& size, Pt::ssize_t padding)
         {
             _format = &format;
             _data = data;
             _size = size;
-            _stride = stride;
-            _lineSize = (_size.width() * _format->pixelSize())  + _stride;
+            _padding = padding;
+            _pitch = (_size.width() * _format->pixelSize())  + _padding;
         }
 
-        void set(Pt::uint8_t* data, const Size& size, Pt::ssize_t stride)
+        void set(Pt::uint8_t* data, const Size& size, Pt::ssize_t padding)
         {
             _data = data;
             _size = size;
-            _stride = stride;
-            _lineSize = (_size.width() * _format->pixelSize())  + _stride;
+            _padding = padding;
+            _pitch = (_size.width() * _format->pixelSize())  + _padding;
         }
 
         const ImageFormat& format() const
@@ -100,80 +100,98 @@ class ImageInfo
         bool empty() const
         { return _size.width() == 0 || _size.height() == 0; }
 
-        Pt::ssize_t stride() const
-        { return _stride; }
+        Pt::ssize_t padding() const
+        { return _padding; }
 
-        Pt::ssize_t lineSize() const
-        {
-            return _lineSize;
-        }
+        Pt::ssize_t pitch() const
+        { return _pitch; }
 
     private:
         const ImageFormat* _format;
 
         Pt::uint8_t* _data;
         Size         _size;
-        Pt::ssize_t  _stride;
-        Pt::ssize_t  _lineSize;
+        Pt::ssize_t  _padding;
+        Pt::ssize_t  _pitch;
 };
 
 
-class Pixel
+class PixelIterator
 {
     public:
-        Pixel(const ImageFormat& info, Pt::uint8_t* data)
-        : _info(&info)
-        , _data(data)
-        , _meta(0)
-        { }
-
-        Pixel(const Pixel& p)
-        : _info(p._info)
-        , _data(p._data)
-        , _meta(p._meta)
-        { }
-
-        Pixel& operator=(const Pixel& p)
+        PixelIterator(const ImageInfo& image, Pt::ssize_t x, Pt::ssize_t y)
+        : _image(&image)
+        , _x(x)
+        , _y(y)
+        , _pixel(image.format(), 0)
         {
-            _info->assign(*this, p);
+            _image->format().getPixel(_pixel, image, x, y);
+        }
+
+        PixelIterator(const PixelIterator& it)
+        : _image(it._image)
+        , _x(it._x)
+        , _y(it._y)
+        , _pixel(it._pixel)
+        {}
+
+        PixelIterator& operator=(const PixelIterator& it)
+        {
+            _image  = it._image;
+            _x      = it._x;
+            _y      = it._y;
+            
+            _pixel.reset(it._pixel);
+            
             return *this;
         }
 
-        void reset(const ImageFormat& info, Pt::uint8_t* data)
-        {
-             _info = &info;
-             _data = data;
-             _meta = 0;
+        bool operator!=(const PixelIterator& it) const
+        { 
+            return _x != it._x || _y != it._y;  
         }
 
-        void reset(const Pixel& p)
-        {
-             _info = p._info;
-             _data = p._data;
-             _meta = p._meta;
+        bool operator==(const PixelIterator& it) const
+        { 
+            return _x == it._x && _y == it._y; 
         }
-
-        void reset(Pt::uint8_t* data)
-        {
-             _data = data;
-        }
-
-        const ImageFormat& info() const
-        { return *_info; }
         
-        Pt::uint8_t* data()
-        { return _data; }
+        Pixel& operator*()
+        { 
+            return _pixel; 
+        }
 
-        const Pt::uint8_t* data() const
-        { return _data; }
-        
-        Pt::uint32_t meta() const
-        { return _meta; }
+        PixelIterator& operator++()
+        {           
+            if( ++_x >= _image->width() )
+            {
+                _x = 0;
+                ++_y;
+                _image->format().getPixel(_pixel, *_image, _x, _y);
+            }
+            else
+            {
+                _image->format().advance(_pixel);
+            }
+            
+            return *this; 
+        }
+
+        PixelIterator& operator+=(Pt::ssize_t n)
+        {
+            Pt::ssize_t off = _x + n;
+            _y += off / _image->width();
+            _x += off % _image->width();
+            
+            _image->format().getPixel(_pixel, *_image, _x, _y);  
+            return *this; 
+        }
 
     private:
-        const ImageFormat* _info;
-        Pt::uint8_t* _data;
-        Pt::uint32_t _meta;
+        const ImageInfo* _image;
+        Pt::ssize_t      _x;
+        Pt::ssize_t      _y;
+        Pixel            _pixel;
 };
 
 } // namespace
