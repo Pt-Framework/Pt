@@ -75,7 +75,7 @@ void Panel::onResizeEvent(const ResizeEvent& ev)
             Gfx::Size newSize( (int) ev.size().width(), 
                                (int)ev.size().height() );
 
-            Gfx::Image strech(newSize, _backgroundImage.format());
+            Gfx::Image strech(_backgroundImage.format(), newSize);
             
             Gfx::blockScale(_backgroundImage.begin(),_backgroundImage.width(), _backgroundImage.height(),
                             strech.begin(), strech.width(), strech.height() );
@@ -90,7 +90,7 @@ void Panel::onResizeEvent(const ResizeEvent& ev)
             Pt::Gfx::Size newSize( ( size_t)(_backgroundImage.width() * factor), 
                                    (size_t)(_backgroundImage.height() * factor) );
 
-            Gfx::Image strech(newSize, _backgroundImage.format());
+            Gfx::Image strech(_backgroundImage.format(), newSize);
             
             Gfx::blockScale( _backgroundImage.begin(),_backgroundImage.width(), _backgroundImage.height(),
                              strech.begin(), strech.width(), strech.height() );

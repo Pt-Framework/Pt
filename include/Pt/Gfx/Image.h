@@ -50,13 +50,13 @@ class PT_GFX_API Image
   public:
     Image( const ImageFormat& format = ImageFormat::argb8888() );
     
-    Image(const Size& size, 
-          const ImageFormat& format = ImageFormat::argb8888(), 
+    Image(const ImageFormat& format, const Size& size,
           size_t padding = 0);
 
-    Image(Pt::uint8_t* buffer, const Size& size, 
-          const ImageFormat& format = ImageFormat::argb8888(), 
-          size_t padding = 0);
+    Image(const Size& size, size_t padding = 0);
+
+    Image(const ImageFormat& format, Pt::uint8_t* buffer, 
+          const Size& size, size_t padding = 0);
     
     Image(const Image& image);
               
@@ -64,12 +64,12 @@ class PT_GFX_API Image
 
     const Image& operator=(const Image& image);
 
-    const ImageInfo& info() const
-    {
-        return _info;
-    }
+    void reset(const ImageFormat& format, const Size& size, size_t padding = 0);   
 
-    ImageInfo& info()
+    void reset(const ImageFormat& format, Pt::uint8_t* buffer, 
+               const Size& size, size_t padding = 0);
+
+    const ImageInfo& info() const
     {
         return _info;
     }
@@ -122,16 +122,7 @@ class PT_GFX_API Image
 
     void erase(const Color& color);
 
-    void resize(const Size& size, Pt::ssize_t padding);
-
-    void resize(const Size& size, const ImageFormat& format, size_t padding);
-
-    void resize(Pt::uint8_t* buffer, const Size& size, size_t padding);    
-
-    void resize(Pt::uint8_t* buffer, const Size& size, 
-                const ImageFormat& format, size_t padding);    
-
-    void convert(Image& image) const;
+    Image convert(const ImageFormat& format) const;
 
   private:
     ImageInfo _info;

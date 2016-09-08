@@ -58,8 +58,7 @@ void loadIcon(Gfx::Image& icon)
     
     reader.get();
 
-    icon.resize(image.size(), Pt::Gfx::ImageFormat::argb8888(), 0);
-    image.convert(icon);
+    icon = image.convert( Pt::Gfx::ImageFormat::argb8888() );
     
     for(size_t w = 0; w < icon.width(); ++ w )
     {

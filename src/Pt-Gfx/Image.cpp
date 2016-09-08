@@ -39,18 +39,25 @@ Image::Image(const ImageFormat& format)
 }
       
         
-Image::Image(const Gfx::Size& size, const ImageFormat& format, size_t padding)
+Image::Image( const ImageFormat& format, const Gfx::Size& size, size_t padding)
 : _info(format)
 {
-    resize(size, format, padding);
+    reset(format, size, padding);
 }
     
 
-Image::Image(Pt::uint8_t* buffer, const Gfx::Size& size, 
-             const ImageFormat& format, size_t padding)
+Image::Image(const Size& size, size_t padding)
+: _info( ImageFormat::argb8888() )
+{
+    reset(ImageFormat::argb8888(), size, padding);
+}
+
+
+Image::Image(const ImageFormat& format, Pt::uint8_t* buffer, 
+             const Gfx::Size& size, size_t padding)
 : _info(format)
 {
-    resize(buffer, size, format, padding);
+    reset(format, buffer, size, padding);
 }
 
 
@@ -81,22 +88,8 @@ const Image& Image::operator=(const Image& image)
 }
 
 
-void Image::resize(const Gfx::Size& size, Pt::ssize_t padding)
+void Image::reset(const ImageFormat& f, const Gfx::Size& size, size_t padding)
 {
-    //Pt::ssize_t n = (size.width() * format().pixelSize() + padding) * size.height();
-
-    ImageInfo info(format(), 0, size, padding); 
-    Pt::ssize_t n = format().imageSize(info);
-
-    _buffer.resize(n); 
-    _info.set(&_buffer[0], size, padding);
-}
-
-
-void Image::resize(const Gfx::Size& size, const ImageFormat& f, size_t padding)
-{
-    //Pt::ssize_t n = (size.width() * format().pixelSize() + padding) * size.height();
-
     ImageInfo info(f, 0, size, padding); 
     Pt::ssize_t n = f.imageSize(info);
     
@@ -105,37 +98,12 @@ void Image::resize(const Gfx::Size& size, const ImageFormat& f, size_t padding)
 }
 
 
-void Image::resize(Pt::uint8_t* buffer, const Gfx::Size& size, size_t padding)
-{
-    _info.set(buffer, size, padding);
-    _buffer.clear();  
-}
-
-
-void Image::resize(Pt::uint8_t* buffer, const Gfx::Size& size, 
-                   const ImageFormat& format, size_t padding)
+void Image::reset(const ImageFormat& format, Pt::uint8_t* buffer, 
+                  const Gfx::Size& size, size_t padding)
 {
     _info.set(format, buffer, size, padding);
     _buffer.clear();  
 }
-
-
-void Image::convert(Image& image) const
-{
-    image.resize( size(), image.padding() );
-    
-    for(Pt::ssize_t y = 0; y < height(); ++y)
-    {
-        for(Pt::ssize_t x = 0; x < width(); ++x)
-        {
-          Pixel from(info(), x,y);
-          Pixel to(image.info(), x,y);
-
-          image.format().setPixel(to,from, CompositionMode::SourceCopy);
-        }
-    }
-}
-
 
 
 void Image::erase(const Color& color)
@@ -148,6 +116,26 @@ void Image::erase(const Color& color)
           format().setPixel(to, color, CompositionMode::SourceCopy);
         }
     }
+}
+
+
+Image Image::convert(const ImageFormat& fmt) const
+{
+    Image image(fmt, size(), padding() );
+    
+    for(Pt::ssize_t y = 0; y < height(); ++y)
+    {
+        for(Pt::ssize_t x = 0; x < width(); ++x)
+        {
+          Pixel from(info(), x, y);
+          Pixel to(image.info(), x, y);
+
+          Color col = format().getColor(from);
+          image.format().setPixel(to, col, CompositionMode::SourceCopy);
+        }
+    }
+
+    return image;
 }
 
 } // namespace

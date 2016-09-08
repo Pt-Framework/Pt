@@ -161,7 +161,7 @@ Rasterizer::~Rasterizer()
 void Rasterizer::setImage( Image& image )
 {
     _image = &image;     
-    _brushBuffer.resize(_brushBuffer.size(), _image->format(), 0);
+    _brushBuffer.reset(_image->format(), _brushBuffer.size());
     updateClip();
 }
 
@@ -169,7 +169,7 @@ void Rasterizer::setImage( Image& image )
 void Rasterizer::setPen( const Pen& pen )
 {
   _pen = pen;
-  _penBuffer.resize(_penBuffer.size(), _image->format(), 0);
+  _penBuffer.reset(_image->format(), _penBuffer.size());
   _penBuffer.erase(pen.color());
   _penPixel.reset( _penBuffer.info(), 0,0);
 }
@@ -178,8 +178,8 @@ void Rasterizer::setPen( const Pen& pen )
 void Rasterizer::setBrush( const Brush& brush )
 {
   _brush = brush;
-  _brush.texture().convert(_brushBuffer);
-  _brushPixel.reset(  _brush.texture().info(), 0,0);
+  _brushBuffer = _brush.texture().convert(_image->format());
+  _brushPixel.reset(_brush.texture().info(), 0, 0);
 }
 
 

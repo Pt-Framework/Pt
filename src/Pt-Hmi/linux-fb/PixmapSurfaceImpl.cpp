@@ -40,8 +40,8 @@ namespace Hmi {
 
 PixmapSurfaceImpl::PixmapSurfaceImpl()
 : _size(10,10)
-, _image( Gfx::Size(_size.width(), _size.height()), 
-          Application::instance().impl()->frameBuffer().format() )
+, _image( Application::instance().impl()->frameBuffer().format(),
+          Gfx::Size(_size.width(), _size.height()) )
 , _painter(_image)
 {
 }
@@ -57,10 +57,10 @@ void PixmapSurfaceImpl::clear(const Gfx::Color& c)
 }
 
 
-void PixmapSurfaceImpl::resize(const Gfx::Size& size, size_t stride)
+void PixmapSurfaceImpl::resize(const Gfx::Size& size, size_t padding)
 {
     _size.set(size.width(), size.height());
-    _image.resize(size, stride);
+    _image.reset(_image.format(), size, padding);
     _painter.setImage(_image);
 }
 
@@ -68,7 +68,7 @@ void PixmapSurfaceImpl::resize(const Gfx::Size& size, size_t stride)
 void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
 {
     _size = size;
-    _image.resize( Gfx::Size(_size.width(), _size.height() ), 0 );
+    _image.reset(_image.format(), Gfx::Size(_size.width(), _size.height() ) );
 
     _painter.setImage(_image);
 }
