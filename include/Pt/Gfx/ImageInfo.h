@@ -48,7 +48,7 @@ class ImageInfo
         , _size()
         , _padding(0)
         {
-            _pitch = (_size.width() * _format->pixelSize())  + _padding;
+            _stride = (_size.width() * _format->pixelStride()) + _padding;
         }
 
         ImageInfo(const ImageFormat& format, Pt::uint8_t* data, 
@@ -58,7 +58,7 @@ class ImageInfo
         , _size(size)
         , _padding(padding)
         {
-            _pitch = (_size.width() * _format->pixelSize())  + _padding;
+            _stride = (_size.width() * _format->pixelStride()) + _padding;
         }
 
         void set(const ImageFormat& format, Pt::uint8_t* data, 
@@ -68,7 +68,7 @@ class ImageInfo
             _data = data;
             _size = size;
             _padding = padding;
-            _pitch = (_size.width() * _format->pixelSize())  + _padding;
+            _stride = (_size.width() * _format->pixelStride()) + _padding;
         }
 
         void set(Pt::uint8_t* data, const Size& size, Pt::ssize_t padding)
@@ -76,7 +76,7 @@ class ImageInfo
             _data = data;
             _size = size;
             _padding = padding;
-            _pitch = (_size.width() * _format->pixelSize())  + _padding;
+            _stride = (_size.width() * _format->pixelStride()) + _padding;
         }
 
         const ImageFormat& format() const
@@ -84,9 +84,6 @@ class ImageInfo
 
         Pt::uint8_t* data() const
         { return _data; }
-
-        std::size_t pixelSize() const
-        { return _format->pixelSize(); }
 
         Pt::ssize_t width() const
         { return _size.width(); }
@@ -100,11 +97,14 @@ class ImageInfo
         bool empty() const
         { return _size.width() == 0 || _size.height() == 0; }
 
+        std::size_t pixelStride() const
+        { return _format->pixelStride(); }
+
+        Pt::ssize_t stride() const
+        { return _stride; }
+
         Pt::ssize_t padding() const
         { return _padding; }
-
-        Pt::ssize_t pitch() const
-        { return _pitch; }
 
     private:
         const ImageFormat* _format;
@@ -112,7 +112,7 @@ class ImageInfo
         Pt::uint8_t* _data;
         Size         _size;
         Pt::ssize_t  _padding;
-        Pt::ssize_t  _pitch;
+        Pt::ssize_t  _stride;
 };
 
 

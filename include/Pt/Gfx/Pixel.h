@@ -45,7 +45,7 @@ class Pixel
         , _x(x)
         , _y(y)
         { 
-            _base = info.data() + info.pitch() * y + x * info.pixelSize();
+            _base = info.data() + info.stride() * y + x * info.pixelStride();
         }
 
         Pixel(const Pixel& p)
@@ -71,7 +71,7 @@ class Pixel
                 _base += _info->padding();
             }
 
-            _base += _info->pixelSize();
+            _base += _info->pixelStride();
         }
 
         void advance( Pt::ssize_t n )
@@ -80,8 +80,7 @@ class Pixel
             _y += off / _info->width();
             _x += off % _info->width();
 
-            // pixelStride(), pixelPitch()
-            _base = _info->data() + _info->pitch() * _y + _x * _info->pixelSize();
+            _base = _info->data() + _info->stride() * _y + _x * _info->pixelStride();
         }
 
         void reset(const ImageInfo& info, int x, int y)
@@ -90,7 +89,7 @@ class Pixel
              _x = x;
              _y = y;
 
-             _base = info.data() + info.pitch() * _y + _x * info.pixelSize();
+             _base = info.data() + info.stride() * _y + _x * info.pixelStride();
         }
 
         void reset(const Pixel& p)

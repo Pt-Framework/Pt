@@ -64,11 +64,6 @@ class PT_GFX_API Image
 
     const Image& operator=(const Image& image);
 
-    const ImageFormat& format() const
-    {
-        return _info.format();
-    }
-
     const ImageInfo& info() const
     {
         return _info;
@@ -79,6 +74,10 @@ class PT_GFX_API Image
         return _info;
     }
 
+    const ImageFormat& format() const
+    {
+        return _info.format();
+    }
 
     Pt::ssize_t width() const
     {
@@ -95,6 +94,11 @@ class PT_GFX_API Image
         return _info.size();
     }
 
+    Pt::ssize_t padding() const
+    {
+      return _info.padding();
+    }
+
     Pt::uint8_t* data()
     { 
         return _info.data(); 
@@ -103,11 +107,6 @@ class PT_GFX_API Image
     const Pt::uint8_t* data() const
     { 
         return _info.data(); 
-    }
-
-    Pt::ssize_t padding() const
-    {
-      return _info.padding();
     }
 
     bool empty() const
@@ -133,13 +132,6 @@ class PT_GFX_API Image
                 const ImageFormat& format, size_t padding);    
 
     void convert(Image& image) const;
-   
-  protected:
-    size_t pixelOffsetInBytes(size_t x, size_t y) const
-    {
-      const size_t rowOffsetInBytes = y * _info.pitch();
-      return rowOffsetInBytes + x * format().pixelSize();
-    }
 
   private:
     ImageInfo _info;

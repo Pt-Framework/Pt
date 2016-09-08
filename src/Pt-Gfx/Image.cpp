@@ -83,7 +83,11 @@ const Image& Image::operator=(const Image& image)
 
 void Image::resize(const Gfx::Size& size, Pt::ssize_t padding)
 {
-    Pt::ssize_t n = (size.width() * format().pixelSize() + padding) * size.height();
+    //Pt::ssize_t n = (size.width() * format().pixelSize() + padding) * size.height();
+
+    ImageInfo info(format(), 0, size, padding); 
+    Pt::ssize_t n = format().imageSize(info);
+
     _buffer.resize(n); 
     _info.set(&_buffer[0], size, padding);
 }
@@ -91,9 +95,12 @@ void Image::resize(const Gfx::Size& size, Pt::ssize_t padding)
 
 void Image::resize(const Gfx::Size& size, const ImageFormat& f, size_t padding)
 {
-    Pt::ssize_t n = (size.width() * format().pixelSize() + padding) * size.height();
+    //Pt::ssize_t n = (size.width() * format().pixelSize() + padding) * size.height();
+
+    ImageInfo info(f, 0, size, padding); 
+    Pt::ssize_t n = f.imageSize(info);
+    
     _buffer.resize(n); 
- 
     _info.set(f, &_buffer[0], size, padding); 
 }
 

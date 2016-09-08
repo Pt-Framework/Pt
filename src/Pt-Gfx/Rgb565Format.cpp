@@ -27,8 +27,9 @@
   02110-1301 USA
 */
 
- #include <Pt/Gfx/Rgb565Format.h>
- #include <Pt/Gfx/ImageInfo.h>
+#include <Pt/Gfx/Rgb565Format.h>
+#include <Pt/Gfx/ImageInfo.h>
+#include <Pt/Gfx/Pixel.h>
 
  namespace Pt {
 
@@ -40,37 +41,66 @@ Rgb565Format::Rgb565Format()
 }
 
 
-void Rgb565Format::setColor(Pt::uint8_t* pixel, const Color& c,
+std::size_t Rgb565Format::imageSize(const ImageInfo& image) const
+{
+    std::size_t l = (image.width() * 2) + image.padding();
+    std::size_t n = l* image.height();
+    return n;
+}
+
+
+void Rgb565Format::setPixel(Pixel& to, const Pixel& from, 
                             CompositionMode mode) const
 {
-    Pt::uint16_t* val = (Pt::uint16_t*) pixel;
-    *val  =  (Pt::uint16_t) (c.red() * 32.0f);
-    *val  |=  ((Pt::uint16_t) (c.green() * 64.0f))  << 5;
-    *val  |=  ((Pt::uint16_t) (c.blue() * 32.0f))  << 11;
+    Pt::uint8_t* dst = to.base();
+    const Pt::uint8_t* src = from.base();
+
+    *((Pt::uint16_t*)dst) = *((const Pt::uint16_t*)src);
 }
 
 
-Color Rgb565Format::color(const Pt::uint8_t* pixel) const
-{
-    const Pt::uint16_t* val = (const Pt::uint16_t*) pixel;
-
-    const float r = ((*val & 0xF800) >> 11) / 32.0f;
-    const float g = ((*val & 0x07E0) >> 5) / 64.0f;
-    const float b = (*val & 0x001F) / 32.0f;
-
-    return Color(1, r, g, b );
-}
-
-
-void Rgb565Format::setPixel(Pt::uint8_t* dst, const Pt::uint8_t* src,
+void Rgb565Format::setPixel(Pixel& pixel, const Color& c,
                             CompositionMode mode) const
 {
+    Pt::uint32_t val =   uint32_t(c.red() & 0xF800) |
+                       ( uint32_t(c.green() & 0xFC00) >> 5 ) |
+                       ( uint32_t(c.blue () ) >> 11 );
+
+    Pt::uint16_t* dst = reinterpret_cast<Pt::uint16_t*>( pixel.base() );
+    *((Pt::uint16_t*)dst) = *((const Pt::uint16_t*)val);
 }
 
 
-void Rgb565Format::setSpan(Pt::uint8_t* dst, const Pt::uint8_t* src, 
-                           size_t length, CompositionMode mode) const
+Color Rgb565Format::getColor(const Pixel& pixel) const
 {
+    const Pt::uint16_t* p = (const Pt::uint16_t*) pixel.base();
+
+    const uint16_t tr = (*p & 0xF800) >> 11;
+    const uint16_t tg = (*p & 0x07E0) >> 5;
+    const uint16_t tb = *p & 0x001F;
+
+    uint16_t a = 0xFFFF;
+    uint16_t r = ((tr + !!tr) << 11) - !!tr;
+    uint16_t g = ((tg + !!tg) << 10) - !!tg;
+    uint16_t b = ((tb + !!tb) << 11) - !!tb;
+    
+    return Color(a, r, g, b);
+}
+
+
+void Rgb565Format::copy(Pixel& to, const Pixel& from, size_t length, 
+                          CompositionMode mode) const
+{
+    Pt::uint8_t* dst = to.base();
+    const Pt::uint8_t* src = from.base();
+
+    switch(mode)
+    {
+        default:
+        case CompositionMode::SourceCopy:
+            memcpy(dst, src, length * 2);
+            break;
+    }   
 }
 
 
@@ -78,17 +108,19 @@ void Rgb565Format::onCopy(const ImageInfo& toInfo, const Point& toPoint,
                           const ImageInfo& fromInfo, const Rect& fromRect,
                           CompositionMode mode) const
 {
+    Pt::ssize_t pixelSize = 2;
+
     // TODO: equals to toInfo.pitch()
-    Pt::ssize_t toStride = (toInfo.width() * pixelSize()) + toInfo.padding();
-    Pt::ssize_t fromStride = (fromRect.width() * pixelSize()) + fromInfo.padding();
+    Pt::ssize_t toStride = (toInfo.width() * pixelSize) + toInfo.padding();
+    Pt::ssize_t fromStride = (fromRect.width() * pixelSize) + fromInfo.padding();
     
-    Pt::ssize_t toBegin = (toPoint.y() * toStride) + (toPoint.x() * pixelSize());
-    Pt::ssize_t fromBegin = (fromRect.y() * fromStride) + (fromRect.x() * pixelSize());
+    Pt::ssize_t toBegin = (toPoint.y() * toStride) + (toPoint.x() * pixelSize);
+    Pt::ssize_t fromBegin = (fromRect.y() * fromStride) + (fromRect.x() * pixelSize);
 
     Pt::uint8_t* toLine = toInfo.data() + toBegin;
     const Pt::uint8_t* fromLine = fromInfo.data() + fromBegin;
 
-    Pt::ssize_t n = fromRect.width() * pixelSize();
+    Pt::ssize_t n = fromRect.width() * pixelSize;
 
     for(Pt::ssize_t y = 0; y < fromRect.height(); ++y)
     {

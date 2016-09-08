@@ -1844,7 +1844,7 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
             Pixel sourcePixel(_brushBuffer.info(),  textureXPos, textureYPos);
             Pixel destPixel(_image->info(), xpos, ypos);
 
-            _image->format().setSpan( destPixel,  sourcePixel,  fillLength, _compositionMode );
+            _image->format().copy( destPixel,  sourcePixel,  fillLength, _compositionMode );
         }
         
         // Remaining unfilled pixels of the span
@@ -1904,7 +1904,7 @@ void Rasterizer::fillSolid(const Point& pos, int length)
       if( n )
       {          
           Pixel destPixel(_image->info(), xpos,ypos);
-         _image->format().setSpan(destPixel, _brushPixel, n, _compositionMode);
+         _image->format().copy(destPixel, _brushPixel, n, _compositionMode);
       }
 
       length -= n;
@@ -3446,7 +3446,7 @@ void Rasterizer::stroke(int xpos, int ypos, Pt::ssize_t length)
         if( n )
         {
              Pixel destPixel( _image->info(), xpos, ypos);
-            _image->format().setSpan(destPixel, _penPixel, n, _compositionMode);
+            _image->format().copy(destPixel, _penPixel, n, _compositionMode);
         }
 
         length -= n;

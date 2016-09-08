@@ -29,6 +29,7 @@
 
 #include <Pt/Gfx/Rgb888Format.h>
 #include <Pt/Gfx/ImageInfo.h>
+#include <Pt/Gfx/Pixel.h>
 
 namespace Pt {
 
@@ -40,35 +41,67 @@ Rgb888Format::Rgb888Format()
 }
 
 
-void Rgb888Format::setColor(Pt::uint8_t* pixel, const Color& c,
+std::size_t Rgb888Format::imageSize(const ImageInfo& image) const
+{
+    std::size_t l = (image.width() * 4) + image.padding();
+    std::size_t n = l* image.height();
+    return n;
+}
+
+
+void Rgb888Format::setPixel(Pixel& to, const Pixel& from, 
                             CompositionMode mode) const
 {
-    *pixel = (Pt::uint8_t)(c.red() /257);
-    
-    pixel++;
-    *pixel = (Pt::uint8_t)(c.green()  /257);
-    
-    pixel++;
-    *pixel = (Pt::uint8_t)(c.blue()  /257);
+    Pt::uint8_t* dst = to.base();
+    const Pt::uint8_t* src = from.base();
+
+    *((Pt::uint32_t*)dst) = *((const Pt::uint32_t*)src);
 }
 
 
-Color Rgb888Format::color(const Pt::uint8_t* pixel) const
-{
-    return Color(65535, *(pixel)*257, *(pixel +1)*257, *(pixel+2)*257);
-}
-
-
-void Rgb888Format::setSpan(Pt::uint8_t* dst, const Pt::uint8_t* src, 
-                           size_t length, CompositionMode mode) const
-{
-
-}
-
-
-void Rgb888Format::setPixel(Pt::uint8_t* dst, const Pt::uint8_t* src,
+void Rgb888Format::setPixel(Pixel& pixel, const Color& c,
                             CompositionMode mode) const
 {
+    const uint32_t val = ( uint32_t(c.red  () & 0xFF) << 16 ) |
+                         ( uint32_t(c.green() & 0xFF) << 8)  |
+                         ( uint32_t(c.blue () & 0xFF) );
+
+    Pt::uint16_t* dst = reinterpret_cast<Pt::uint16_t*>( pixel.base() );
+    *((Pt::uint32_t*)dst) = *((const Pt::uint32_t*)val);
+}
+
+
+
+Color Rgb888Format::getColor(const Pixel& pixel) const
+{
+    const Pt::uint16_t* p = (const Pt::uint16_t*) pixel.base();
+
+    const uint16_t tr = (*p & 0x00FF0000) >> 16;
+    const uint16_t tg = (*p & 0x0000FF00) >> 8;
+    const uint16_t tb = *p & 0x000000FF;
+
+    uint16_t a = 0xFFFF;
+    uint16_t r = ((tr + !!tr) << 8) - !!tr;
+    uint16_t g = ((tg + !!tg) << 8) - !!tg;
+    uint16_t b = ((tb + !!tb) << 8) - !!tb;
+    
+    return Color(a, r, g, b);
+}
+
+
+void Rgb888Format::copy(Pixel& to, const Pixel& from, size_t length, 
+                          CompositionMode mode) const
+{
+    Pt::uint8_t* dst = to.base();
+    const Pt::uint8_t* src = from.base();
+
+    switch(mode)
+    {
+        default:
+        case CompositionMode::SourceCopy:
+            memcpy(dst, src, length * 4);
+            break;
+    }   
 }
 
 
@@ -76,17 +109,19 @@ void Rgb888Format::onCopy(const ImageInfo& toInfo, const Point& toPoint,
                           const ImageInfo& fromInfo, const Rect& fromRect,
                           CompositionMode mode) const
 {
+    Pt::ssize_t pixelSize = 4;
+
     // TODO: equals to toInfo.pitch()
-    Pt::ssize_t toStride = (toInfo.width() * pixelSize()) + toInfo.padding();
-    Pt::ssize_t fromStride = (fromRect.width() * pixelSize()) + fromInfo.padding();
+    Pt::ssize_t toStride = (toInfo.width() * pixelSize) + toInfo.padding();
+    Pt::ssize_t fromStride = (fromRect.width() * pixelSize) + fromInfo.padding();
     
-    Pt::ssize_t toBegin = (toPoint.y() * toStride) + (toPoint.x() * pixelSize());
-    Pt::ssize_t fromBegin = (fromRect.y() * fromStride) + (fromRect.x() * pixelSize());
+    Pt::ssize_t toBegin = (toPoint.y() * toStride) + (toPoint.x() * pixelSize);
+    Pt::ssize_t fromBegin = (fromRect.y() * fromStride) + (fromRect.x() * pixelSize);
 
     Pt::uint8_t* toLine = toInfo.data() + toBegin;
     const Pt::uint8_t* fromLine = fromInfo.data() + fromBegin;
 
-    Pt::ssize_t n = fromRect.width() * pixelSize();
+    Pt::ssize_t n = fromRect.width() * pixelSize;
 
     for(Pt::ssize_t y = 0; y < fromRect.height(); ++y)
     {

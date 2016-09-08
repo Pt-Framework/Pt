@@ -41,20 +41,19 @@ class PT_GFX_API Argb8888Format : public ImageFormat
 {
     public:
         Argb8888Format();
+
+        virtual std::size_t imageSize(const ImageInfo& image) const;
         
-
-        virtual void assign(Pixel& to, const Pixel& from) const;
-
         virtual void setPixel(Pixel& to, const Pixel& from,
                               CompositionMode mode) const;
-        
-        virtual Color getColor(const Pixel& pixel) const;
-
-        virtual void setSpan(Pixel& dst, const Pixel& src, size_t length, CompositionMode mode) const;
 
         virtual void setPixel(Pixel& pixel, const Color& c,
                               CompositionMode mode) const;
         
+        virtual Color getColor(const Pixel& pixel) const;
+
+        virtual void copy(Pixel& dst, const Pixel& src, size_t length, 
+                          CompositionMode mode) const;
 
     protected:
         virtual void onCopy(const ImageInfo& to, const Point& toPoint,

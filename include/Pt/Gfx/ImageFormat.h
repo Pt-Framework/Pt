@@ -50,41 +50,24 @@ class PT_GFX_API ImageFormat
 
         virtual ~ImageFormat();
     
-        size_t pixelSize() const
+        size_t pixelStride() const
         {
-          return _pixelSize;
+            return _pixelStride;
         }
 
         size_t channels() const
         {
-          return _channels;
+            return _channels;
         }
-               
-        virtual void assign(Pixel& to, const Pixel& from) const;
-
-        virtual void setPixel(Pixel& to, const Pixel& from,
-                              CompositionMode mode) const;
-        
-        virtual void setPixel(Pixel& pixel, const Color& c,
-                              CompositionMode mode) const;
-        
-        virtual Color getColor(const Pixel& pixel) const;
-
-        virtual void setSpan(Pixel& dst, const Pixel& src, 
-                             size_t length, CompositionMode mode) const;
-
-        void copy(const ImageInfo& to, const Point& toPoint,
-                  const ImageInfo& from, const Rect& fromRect,
-                  CompositionMode mode) const;
 
         bool operator==(const ImageFormat& a) const
         {
-          return _pixelSize == a._pixelSize && _channels == a._channels;
+          return _pixelStride == a._pixelStride && _channels == a._channels;
         }
 
         bool operator!=(const ImageFormat& a) const
         {
-          return _pixelSize != a._pixelSize || _channels != a._channels;
+          return _pixelStride != a._pixelStride || _channels != a._channels;
         }
 
         static const ImageFormat& rgb565();
@@ -93,13 +76,31 @@ class PT_GFX_API ImageFormat
     
         static const ImageFormat& argb8888();
 
+    public:
+        virtual void setPixel(Pixel& to, const Pixel& from,
+                              CompositionMode mode) const = 0;
+        
+        virtual void setPixel(Pixel& pixel, const Color& c,
+                              CompositionMode mode) const = 0;
+        
+        virtual Color getColor(const Pixel& pixel) const = 0;
+
+        virtual void copy(Pixel& dst, const Pixel& src, size_t length, 
+                          CompositionMode mode) const = 0;
+
+        void copy(const ImageInfo& to, const Point& toPoint,
+                  const ImageInfo& from, const Rect& fromRect,
+                  CompositionMode mode) const;
+
+        virtual std::size_t imageSize(const ImageInfo& image) const = 0;
+
     protected:
         virtual void onCopy(const ImageInfo& to, const Point& toPoint,
                             const ImageInfo& from, const Rect& fromRect,
                             CompositionMode mode) const = 0;
 
     private:
-        size_t _pixelSize;
+        size_t _pixelStride;
         size_t _channels;
 };
 

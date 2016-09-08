@@ -88,7 +88,7 @@ class FrameBuffer
           switch( _rotation)
           {
             case  Rotation90Degree:
-              _lineLenght =  width() * _format->pixelSize();
+              _lineLenght =  width() * (depth() / 8);
             break;
             default:
               _lineLenght = _fixedInfo.line_length;
@@ -114,15 +114,14 @@ class FrameBuffer
         void output( const Pt::uint8_t* frame, const Gfx::Rect& area );
 
     private:
-
-      inline char* pixelBuffer( size_t w, size_t h )
+      inline char* pixelBuffer(size_t w, size_t h)
       {
-          return &_rotationBuffer[(_fixedInfo.line_length * h) + _format->pixelSize() * w ];
+          return &_rotationBuffer[(_fixedInfo.line_length * h) + _format->pixelStride() * w ];
       }
 
-      inline const Pt::uint8_t* pixelFrame( const Pt::uint8_t* frame, size_t w, size_t h )
+      inline const Pt::uint8_t* pixelFrame(const Pt::uint8_t* frame, size_t w, size_t h)
       {
-          return &frame [lineLength() * h + w * _format->pixelSize()];
+          return &frame [lineLength() * h + w * _format->pixelStride()];
       }
 
     private:

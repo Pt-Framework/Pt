@@ -96,8 +96,11 @@ FrameBuffer::FrameBuffer()
     }
 
     setRotation(Rotation90Degree);
-    std::clog<<"Sreen HW resolution (" <<_screenInfo.xres<< "," <<_screenInfo.yres << ") Pixel size = "<<_format->pixelSize()<< " Stride = "<<stride<<" Buffer Size =" << _bufferSize<< std::endl;
-    std::clog<<"Sreen VR resolution (" <<width()<< "," <<height() << ") Pixel size = "<<_format->pixelSize()<< " Stride = "<<strideInBytes()<<std::endl;
+    std::clog<< "Sreen HW resolution (" << _screenInfo.xres<< "," << _screenInfo.yres << ") "
+             << "Pixel stride = " << _format->pixelStride() << " Stride = " << stride
+             << " Buffer Size =" << _bufferSize << std::endl;
+    std::clog<< "Sreen VR resolution (" << width() << "," << height() << ") Pixel stride = "
+             << _format->pixelStride() << " Stride = " << strideInBytes() << std::endl;
 }
 
 
@@ -144,7 +147,7 @@ size_t FrameBuffer::bufferSize() const
     switch( _rotation)
     {
       case  Rotation90Degree:
-        return width()* height() * _format->pixelSize();
+        return width()* height() * (depth() / 8);
     }
 
     return _bufferSize;

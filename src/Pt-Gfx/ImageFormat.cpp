@@ -37,8 +37,8 @@ namespace Pt {
 
 namespace Gfx {
 
-ImageFormat::ImageFormat( size_t pixelSize, size_t channels)
-: _pixelSize(pixelSize)
+ImageFormat::ImageFormat( size_t pixelStride, size_t channels)
+: _pixelStride(pixelStride)
 , _channels(channels)
 {
 }
@@ -48,32 +48,6 @@ ImageFormat::~ImageFormat()
 {
 }
 
-void ImageFormat::assign(Pixel& to, const Pixel& from) const
-{
-}
-
-void ImageFormat::setPixel(Pixel& to, const Pixel& from,
-                           CompositionMode mode) const
-{
-}
-
-
-Color ImageFormat::getColor(const Pixel& pixel) const
-{
-    return Color(0,0,0);
-}
-
-
-void ImageFormat::setPixel(Pixel& pixel, const Color& c,
-                           CompositionMode mode) const
-{
-}
-
-
-void ImageFormat::setSpan(Pixel& dst, const Pixel& src, size_t length, CompositionMode mode) const
-{
-
-}
 
 void ImageFormat::copy(const ImageInfo& toInfo, const Point& to,
                        const ImageInfo& fromInfo, const Rect& fromRect,
@@ -106,7 +80,6 @@ const ImageFormat& ImageFormat::rgb888()
 {
 	static const Rgb888Format f;
 	return f;
-
 }
 
 
