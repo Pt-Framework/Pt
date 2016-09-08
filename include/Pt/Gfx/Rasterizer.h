@@ -123,7 +123,10 @@ class PT_GFX_API Rasterizer
     void outputSpan( const Point& topLeft, int x, int y, int width );
     void fill( const Point& origin, const Point& pos, int length );
     void fillSolid( const Point& pos,  int length );
+    void fillVerticalGradient( const Point& origin, const Point& pos,  int length );
+    void fillHorizontalGradient( const Point& origin, const Point& pos,  int length );
     void fillTexture( const Point& origin, const Point& pos,  int length );
+    void createGradientTexture(Image& img, int width, int height,Pt::Gfx::Color gradientStart,  Pt::Gfx::Color gradientStop,  Pt::Gfx::Brush::FillStyle style);
     void clipSpan( int& x, int& y, int& length );
     void updateClip();
  

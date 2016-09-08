@@ -94,7 +94,11 @@ void Image::reset(const ImageFormat& f, const Gfx::Size& size, size_t padding)
     Pt::ssize_t n = f.imageSize(info);
     
     _buffer.resize(n); 
-    _info.set(f, &_buffer[0], size, padding); 
+    
+    if( _buffer.empty() )
+      _info.set(f, 0, size, padding); 
+    else
+      _info.set(f, &_buffer[0], size, padding); 
 }
 
 

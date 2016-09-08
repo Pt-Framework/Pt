@@ -162,7 +162,6 @@ HBRUSH gradientBrush(HDC dc, int width, int height,
     VOID* imageBits = NULL;
     HBITMAP bitmap = CreateDIBSection(dc, &bi, DIB_RGB_COLORS, &imageBits, NULL, 0);
 
-    Pt::Gfx::Argb8888Format format;
     Pt::uint8_t* pixel = reinterpret_cast<Pt::uint8_t*>(imageBits);
             
     for(int n = 0; n < length; ++n)
@@ -179,11 +178,12 @@ HBRUSH gradientBrush(HDC dc, int width, int height,
         float b1 = gradientStart.blue() * f1;
         float b2 = gradientStop.blue() * f2;
                 
-        Pt::Gfx::Color c( (r1 + r2),
-                      (g1 + g2),
-                      (b1 + b2) );
         
-    //    format.setColor(pixel, c, Pt::Gfx::CompositionMode::SourceCopy);
+        pixel[0] = (r1 + r2) / 257;
+        pixel[1] = (g1 + g2) / 257;
+        pixel[2] = (b1 + b2) / 257;
+        pixel[3] = 0;
+
         pixel += 4;
     }
 
@@ -368,7 +368,7 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
             bi.bmiHeader.biWidth        = texture.width();                // width
             bi.bmiHeader.biHeight       = -(ssize_t)texture.height();     // top-down image
             bi.bmiHeader.biPlanes       = 1;                              // always 1
-            bi.bmiHeader.biBitCount     = texture.info().stride()*8; // 32-bit
+            bi.bmiHeader.biBitCount     = texture.info().pixelStride()*8; // 32-bit
             bi.bmiHeader.biCompression  = BI_RGB;                         // uncompressed RGB
             bi.bmiHeader.biSizeImage    = 0;                              // automatic
             bi.bmiHeader.biClrUsed      = 0;                              // no color table
@@ -379,7 +379,7 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
                                               DIB_RGB_COLORS, &imageBits, NULL, 0);
             memcpy(imageBits, 
                     texture.data(), 
-                    texture.width() * texture.height() * texture.info().stride());
+                    texture.width() * texture.height() * texture.info().pixelStride());
 
             brushHandle = CreatePatternBrush(bitmap);
             DeleteObject(bitmap);
@@ -729,7 +729,7 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& imag
 {
     Gfx::Point to = Application::instance().screen().fromUnit(toF);
 
-    const size_t depth = image.info().stride() * 8; 
+    const size_t depth = image.info().pixelStride() * 8; 
     const Pt::uint8_t* data = image.data();
 
     HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, depth, (VOID*)data);
