@@ -111,17 +111,22 @@ class FrameBuffer
             return _lineLenght;
         }
 
+        size_t pixelSize() const
+        {
+          return _pixelSize;
+        }
+
         void output( const Pt::uint8_t* frame, const Gfx::Rect& area );
 
     private:
       inline char* pixelBuffer(size_t w, size_t h)
       {
-          return &_rotationBuffer[(_fixedInfo.line_length * h) + _format->pixelStride() * w ];
+          return &_rotationBuffer[(_fixedInfo.line_length * h) + _pixelSize * w ];
       }
 
       inline const Pt::uint8_t* pixelFrame(const Pt::uint8_t* frame, size_t w, size_t h)
       {
-          return &frame [lineLength() * h + w * _format->pixelStride()];
+          return &frame [_lineLenght * h + w * _pixelSize];
       }
 
     private:
@@ -136,6 +141,7 @@ class FrameBuffer
         Rotation          _rotation;
         std::vector<char> _rotationBuffer;
         size_t            _lineLenght;
+        size_t            _pixelSize;
 };
 
 } // namespace

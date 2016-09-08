@@ -184,7 +184,7 @@ HBRUSH gradientBrush(HDC dc, int width, int height,
                       (b1 + b2) );
         
     //    format.setColor(pixel, c, Pt::Gfx::CompositionMode::SourceCopy);
-        pixel += format.pixelSize();
+        pixel += 4;
     }
 
     HBRUSH brush = CreatePatternBrush(bitmap);
@@ -368,7 +368,7 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
             bi.bmiHeader.biWidth        = texture.width();                // width
             bi.bmiHeader.biHeight       = -(ssize_t)texture.height();     // top-down image
             bi.bmiHeader.biPlanes       = 1;                              // always 1
-            bi.bmiHeader.biBitCount     = texture.format().pixelSize()*8; // 32-bit
+            bi.bmiHeader.biBitCount     = texture.info().stride()*8; // 32-bit
             bi.bmiHeader.biCompression  = BI_RGB;                         // uncompressed RGB
             bi.bmiHeader.biSizeImage    = 0;                              // automatic
             bi.bmiHeader.biClrUsed      = 0;                              // no color table
@@ -379,7 +379,7 @@ void PixmapSurfaceImpl::setBrush(const Gfx::Brush& brush)
                                               DIB_RGB_COLORS, &imageBits, NULL, 0);
             memcpy(imageBits, 
                     texture.data(), 
-                    texture.width() * texture.height() * texture.format().pixelSize());
+                    texture.width() * texture.height() * texture.info().stride());
 
             brushHandle = CreatePatternBrush(bitmap);
             DeleteObject(bitmap);
@@ -729,7 +729,7 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& imag
 {
     Gfx::Point to = Application::instance().screen().fromUnit(toF);
 
-    const size_t depth = image.format().pixelSize() * 8; 
+    const size_t depth = image.info().stride() * 8; 
     const Pt::uint8_t* data = image.data();
 
     HBITMAP bitmap = CreateBitmap(image.width(), image.height(), 1, depth, (VOID*)data);
@@ -743,7 +743,7 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& imag
         bitmapInfo.bmiHeader.biWidth       = image.width();   
         bitmapInfo.bmiHeader.biHeight      = -(ssize_t)image.height();  // top-down image
         bitmapInfo.bmiHeader.biPlanes      = 1;                         // always 1            
-        bitmapInfo.bmiHeader.biBitCount    = 32;                        // 32-bit 
+        bitmapInfo.bmiHeader.biBitCount    = depth;                     // 32-bit 
         bitmapInfo.bmiHeader.biCompression = BI_RGB;                    // uncompressed RGB
         bitmapInfo.bmiHeader.biSizeImage   = 0;                         // automatic
         bitmapInfo.bmiHeader.biClrUsed     = 0;                         // no color table

@@ -57,7 +57,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     _surface.pixmapImpl()->resize(_frameBuffer.size(), _frameBuffer.strideInBytes() );
 
     Painter painter(_surface);
-    painter.clear( Pt::Gfx::Color(0.4f, 0.3f, 0.4f) );
+    painter.clear( Pt::Gfx::Color(65535*0.4f, 65535 *0.3f, 65535 *0.4f) );
 
     setCursor(0);
 }
@@ -97,8 +97,10 @@ void ScreenImpl::onMouseEvent( const Pt::Hmi::MouseEvent& mouseEvent )
     _drawCursor =  true;
 
     if( !_cursorBackground.empty() )
-        bitBlit( _cursorBackground.pixel(0,0), _cursorBackground.width(), _cursorBackground.height(), 
-                 _cursorPos, (Pt::uint8_t*)image().pixel(0,0), CopyOp );
+    {
+        bitBlit( _cursorBackground.data(), _cursorBackground.width(), _cursorBackground.height(), 
+                 _cursorPos, image().data(), CopyOp );
+    }
 
     if( _cursor.width() != 0 )
         _cursorPos = Gfx::Point( mouseEvent.x() - _cursor.xHotspot() , mouseEvent.y() - _cursor.yHotspot());
@@ -118,16 +120,16 @@ void ScreenImpl::onKeyEvent(const Pt::Hmi::KeyEvent& ev)
 
 void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx::Image& image)
 {    
-    const size_t pixelSizeInByte = _frameBuffer.depth() / 8;        
     const Gfx::Size& size= image.size();
     const size_t yMax = std::min<size_t>(pos.y() + size.height(), height() );    
     const size_t widthInPixel = ((pos.x() + size.width())  < width() ?  size.width() : ( width()  - pos.x() ) );
-    const size_t widthInByte = widthInPixel * pixelSizeInByte;            
+    const size_t widthInByte = widthInPixel * _frameBuffer.pixelSize();            
     
     for( size_t y = pos.y(); y < yMax; ++y )
     {
         size_t lineOffset = y * _frameBuffer.lineLength() + 
-                            pos.x() * pixelSizeInByte;
+                            pos.x() * _frameBuffer.pixelSize();
+
         memcpy( image.pixel(0,y - pos.y()), &buffer[lineOffset], widthInByte );
     }
 }
@@ -155,8 +157,8 @@ void ScreenImpl::drawCursor(Pt::uint8_t* buffer)
 void ScreenImpl::updateScreen()
 {
     _drawCursor    = false;
-    drawCursor( image().pixel(0,0) );
-    memcpy( _frameBuffer.buffer(), image().pixel(0,0), _frameBuffer.bufferSize() );            
+    drawCursor( image().data() );
+    memcpy( _frameBuffer.buffer(), image().data(), _frameBuffer.bufferSize() );            
 }
 
 
@@ -187,22 +189,12 @@ void ScreenImpl::update(const Gfx::RectF& updateRect)
 
 void ScreenImpl::setCursor( const Hmi::Cursor* crs )
 {        
-    _cursor  = crs == 0 ? Hmi::Cursor::defaultCursor() : *crs;        
-}
-
-
-void ScreenImpl::bitBlit( const Gfx::Image& image, Pt::uint8_t* buffer )
-{
-  const size_t imageSize = (image.width() * image.format().pixelSize() + image.stride()) * image.height();
-
-  memcpy( buffer , image.pixel( 0,0 ), std::min( _frameBuffer.bufferSize(), imageSize ) );  
+    _cursor = crs == 0 ? Hmi::Cursor::defaultCursor() : *crs;        
 }
 
 
 void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op )
-{
-    static const size_t planePixelSize = 4;
-    const size_t bufferPixelSize = _frameBuffer.depth() / 8;
+{    
     const size_t bufferWidth  = std::min<size_t>(  pos.x() + w, width() ); 
     const size_t bufferHeight = std::min<size_t>(  pos.y() + h, height() ); 
     size_t yCursor = 0;
@@ -211,14 +203,14 @@ void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const Gf
     for( size_t yBuffer = pos.y(); yBuffer < bufferHeight; ++yBuffer, ++yCursor )
     {
         const size_t lineOffsetBuffer  = yBuffer * _frameBuffer.lineLength();
-        const size_t lineOffsetCursor  = yCursor * (w * planePixelSize);
+        const size_t lineOffsetCursor  = yCursor * (w * _frameBuffer.pixelSize());
         
         xCursor = 0;
 
         for( size_t xBuffer = pos.x(); xBuffer < bufferWidth; ++xBuffer, ++xCursor  )
         {            
-            Pt::uint8_t* pointerBuffer = &((Pt::uint8_t*)buffer)[lineOffsetBuffer + (xBuffer * bufferPixelSize)];
-            const Pt::uint8_t* pointerCursor = &plane[lineOffsetCursor + (xCursor * planePixelSize)];
+            Pt::uint8_t* pointerBuffer = &((Pt::uint8_t*)buffer)[lineOffsetBuffer + (xBuffer * _frameBuffer.pixelSize())];
+            const Pt::uint8_t* pointerCursor = &plane[lineOffsetCursor + (xCursor * _frameBuffer.pixelSize())];
 
             switch( _frameBuffer.depth() )
             {
@@ -245,8 +237,26 @@ void ScreenImpl::bitBlit( const Pt::uint8_t* plane, size_t w, size_t h, const Gf
                 }
 
                 case 16:
-                    //TODO:
-                    break;
+                {
+                    Pt::uint16_t* pixelBuffer = (Pt::uint16_t*) pointerBuffer;
+                    const Pt::uint16_t* pixelCursor = (const Pt::uint16_t*) pointerCursor;
+
+                    switch( op )
+                    {
+                        case AndOp:
+                            *pixelBuffer &= *pixelCursor;
+                        break;
+
+                        case XorOp:
+                            *pixelBuffer ^= *pixelCursor;
+                        break;
+
+                        case CopyOp://ToDo::optimize this with memcpy
+                            *pixelBuffer = *pixelCursor;
+                        break;
+                    }
+                }
+                break;
             }
         }
     }

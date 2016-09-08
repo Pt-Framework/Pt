@@ -74,9 +74,9 @@ FrameBuffer::FrameBuffer()
     _yoffset    = _screenInfo.yres;
     _buffer     = (char*)  mmap(NULL, _bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);
     size_t stride = _fixedInfo.line_length - ( _screenInfo.xres *  depth() /8  );
-    const size_t noOfBytesPerPixel = depth() % 8 != 0 ? depth() / 8 + 1 : depth() / 8;
-
-    switch( noOfBytesPerPixel )
+    _pixelSize = depth() % 8 != 0 ? depth() / 8 + 1 : depth() / 8;
+    
+    switch( _pixelSize )
     {
         case 2:
             _format = new Gfx::Rgb565Format();
@@ -97,10 +97,10 @@ FrameBuffer::FrameBuffer()
 
     setRotation(Rotation90Degree);
     std::clog<< "Sreen HW resolution (" << _screenInfo.xres<< "," << _screenInfo.yres << ") "
-             << "Pixel stride = " << _format->pixelStride() << " Stride = " << stride
+             << "Pixel stride = " << _pixelSize << " Stride = " << stride
              << " Buffer Size =" << _bufferSize << std::endl;
     std::clog<< "Sreen VR resolution (" << width() << "," << height() << ") Pixel stride = "
-             << _format->pixelStride() << " Stride = " << strideInBytes() << std::endl;
+             << _pixelSize << " Stride = " << strideInBytes() << std::endl;
 }
 
 
@@ -144,9 +144,9 @@ size_t FrameBuffer::strideInBytes() const
 
 size_t FrameBuffer::bufferSize() const
 {
-    switch( _rotation)
+    switch( _rotation )
     {
-      case  Rotation90Degree:
+      case Rotation90Degree:
         return width()* height() * (depth() / 8);
     }
 

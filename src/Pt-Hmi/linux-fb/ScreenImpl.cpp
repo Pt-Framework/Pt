@@ -283,10 +283,10 @@ void ScreenImpl::onEnable(Window& w, bool enable)
 
 void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx::Image& image)
 {    
-    const size_t pixelSizeInByte = _frameBuffer.depth() / 8;        
+    const size_t pixelSizeInByte = _frameBuffer.pixelSize();
     const Gfx::Size& imageSize = image.size();
-    const size_t yMax = std::min<size_t>(pos.y() + imageSize.height(), 
-                                         _frameBuffer.height() );    
+    const size_t yMax = std::min<size_t>(pos.y() + imageSize.height(), _frameBuffer.height() );    
+
     size_t widthInPixel = (pos.x() + imageSize.width()) < _frameBuffer.width() ? imageSize.width() 
                                                                                : _frameBuffer.width() - pos.x();
     const size_t widthInByte = widthInPixel * pixelSizeInByte;
