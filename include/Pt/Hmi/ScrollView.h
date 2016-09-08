@@ -55,6 +55,7 @@ class PT_HMI_API ScrollView : public Widget
         void onHScroll(ScrollBar& bar, int pos);
         
         void onVScroll(ScrollBar& bar, int pos);
+        void onScrollChanged(ScrollLayout& layout, int w , int h);
 
     private:
         void updateScrollBar(ScrollBar& scroll, double maxRange);
@@ -64,8 +65,6 @@ class PT_HMI_API ScrollView : public Widget
         Widget*      _widget;
         ScrollBar    _hScrollBar; 
         ScrollBar    _vScrollBar;
-        double       _maxWidth;
-        double       _maxHeight;
 };
 
 } // namespace

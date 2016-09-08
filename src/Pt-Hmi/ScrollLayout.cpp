@@ -35,7 +35,13 @@ namespace Hmi {
 
 ScrollLayout::ScrollLayout()
 : _lastScrollPos(0,0)
+, _doScroll(false)
+, _enableX(true)
+, _enableY(true)
+, _hrange(0)
+, _vrange(0)
 {
+  setAcceptInput(true);
 }
 
 
@@ -44,8 +50,93 @@ ScrollLayout::~ScrollLayout()
 }
 
 
+void ScrollLayout::onMouseEvent(const MouseEvent& ev)
+{
+   if( ev.isPress())
+   {
+     _lastPos = ev.position();
+      _doScroll = true;    
+    }
+
+   if( ev.isRelease() )
+      _doScroll = false;
+
+   if( _doScroll )
+   {
+      Gfx::PointF delta = ev.position() - _lastPos;
+
+      if(_enableY) 
+        scrollY( _lastScrollPos.y() - delta.y());
+
+      if(_enableX) 
+        scrollX( _lastScrollPos.x() - delta.x());
+
+      _lastPos = ev.position();
+   }
+}
+
+void ScrollLayout::onTouchEvent(const TouchEvent& ev)
+{    
+   if( ev.isPress() )
+   {
+     _lastPos = ev.position();
+      _doScroll = true;    
+    }
+
+   if( ev.isRelease() )
+      _doScroll = false;
+
+   if( _doScroll )
+   {
+      Gfx::PointF delta = ev.position() - _lastPos;
+
+      if(_enableY) 
+        scrollY( _lastScrollPos.y() - delta.y());
+
+      if(_enableX) 
+        scrollX( _lastScrollPos.x() - delta.x());
+
+      _lastPos = ev.position();
+   }
+}
+
+
+void ScrollLayout::onAddWidget(Widget& w)
+{
+  Layout::onAddWidget(w);
+  updateRange();
+}
+
+void ScrollLayout::onRemoveWidget(Widget& w)
+{
+    Layout::onRemoveWidget(w);
+    updateRange();
+}
+
+
+void ScrollLayout::updateRange()
+{
+    double maxWidth = 0;
+    double maxHeight = 0;      
+    
+    for( size_t i = 0;  i < widgets().size(); ++ i)
+    {
+      const Widget& w =  *widgets()[i];
+
+      maxWidth = std::max( maxWidth, w.position().x() +  w.size().width() );
+      maxHeight= std::max( maxHeight, w.position().y() +  w.size().height() );   
+    }
+
+    _hrange = static_cast<int>(maxWidth);
+    _vrange = static_cast<int>(maxHeight);
+}
+
+
 void ScrollLayout::scrollX(double position)
 {
+    if( position  > (_hrange - size().width()) || position < 0  )
+        return;
+
     double delta = position - _lastScrollPos.x();
 
     for( size_t i = 0; i < widgets().size();  ++i)
@@ -58,11 +149,15 @@ void ScrollLayout::scrollX(double position)
     }
 
     _lastScrollPos.setX( position);
+    _scrollChanged.send(*this, (int)_lastScrollPos.x(), (int)_lastScrollPos.y() );
 }
 
 
 void ScrollLayout::scrollY(double position)
 {    
+    if( position  > (_vrange - size().height()) || position < 0  )
+        return;
+
     double delta = position - _lastScrollPos.y();
 
     for( size_t i = 0; i < widgets().size();  ++ i)
@@ -75,6 +170,7 @@ void ScrollLayout::scrollY(double position)
     }
 
     _lastScrollPos.setY( position);
+    _scrollChanged.send(*this, (int)_lastScrollPos.x(), (int)_lastScrollPos.y() );
 }
 
 } // namespace

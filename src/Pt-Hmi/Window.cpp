@@ -578,7 +578,7 @@ void Window::onUpdate(const Gfx::RectF& rect)
 
 void Window::onUpdate(Window& child, const Gfx::RectF& rect)
 {
-    _windowManager.onUpdate(child, rect);
+     _windowManager.onUpdate(child, rect);
 }
 
 

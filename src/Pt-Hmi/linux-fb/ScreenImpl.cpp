@@ -62,6 +62,8 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 
     Painter painter(_surface);
     painter.clear( Pt::Gfx::Color(65535*0.4f, 65535*0.3f, 65535*0.4f) );
+
+    updateScreen( Gfx::Rect( Gfx::Point(0,0), _frameBuffer.size()));    
 }
 
 

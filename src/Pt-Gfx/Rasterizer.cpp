@@ -143,9 +143,8 @@ Rasterizer::Rasterizer( Image& image )
 , _text( new DrawText() )
 , _font("Vera", 12)
 , _compositionMode(CompositionMode::SourceCopy)
-, _penBuffer(image.format(), Gfx::Size(64, 1) )
-, _penPixel( _penBuffer.info(),0,0) 
-, _brushPixel( _brush.texture().info(), 0,0)
+, _penPixel(_image->info(), 0, 0) 
+, _brushPixel(_image->info(), 0, 0)
 {
     _text->setFont( _font );
     updateClip();
@@ -171,20 +170,44 @@ const ImageFormat& Rasterizer::format() const
   return _image->format();
 }
 
+
 void Rasterizer::setPen( const Pen& pen )
 {
   _pen = pen;
-  _penBuffer.reset(_image->format(), _penBuffer.size());
-  _penBuffer.erase(pen.color());
-  _penPixel.reset( _penBuffer.info(), 0,0);
+  _penBuffer.reset(_image->format(),Size(64,1));
+  _penBuffer.erase( pen.color() );
+  _penPixel.reset(_penBuffer.info(), 0, 0);
 }
 
 
 void Rasterizer::setBrush( const Brush& brush )
-{
+{  
   _brush = brush;
-  _brushBuffer = _brush.texture().convert(_image->format());
-  _brushPixel.reset(_brush.texture().info(), 0, 0);
+        
+  switch( brush.fillStyle() )
+  {
+    case Brush::HorizontalGradient:
+    case Brush::VerticalGradient:
+    case Brush::Solid:      
+      _brushBuffer.reset( _image->format() , Size(64,1) );
+      _brushBuffer.erase( brush.color());
+      _brushImage = &_brushBuffer;
+    break;
+    
+    case Brush::Texture:
+      if( brush.texture().format() != _image->format() )        
+      {
+        _brushBuffer = brush.texture().convert(_image->format());
+        _brushImage = &_brushBuffer;
+      }
+      else
+      {
+        _brushImage = &_brush.texture();
+      }
+    break;
+  }
+
+  _brushPixel.reset(_brushImage->info(), 0, 0);
 }
 
 
@@ -1826,7 +1849,7 @@ void Rasterizer::setFont( const Font& font )
 
 void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length )
 {
-    const Image& texture = _brush.texture();
+    const Image& texture = *_brushImage;
     int xpos = pos.x();
     int ypos = pos.y();		
     int originx =  origin.x();
@@ -1846,7 +1869,7 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
         // Copy pixels from textrure to image
         if(fillLength)
         {
-            Pixel sourcePixel(_brushBuffer.info(),  textureXPos, textureYPos);
+            Pixel sourcePixel(texture.info(),  textureXPos, textureYPos);
             Pixel destPixel(_image->info(), xpos, ypos);
 
             _image->format().copy( destPixel,  sourcePixel,  fillLength, _compositionMode );
@@ -1944,7 +1967,7 @@ void Rasterizer::fillSolid(const Point& pos, int length)
   if( length <= 0)
     return;
      
-  Pt::ssize_t bufferWidth = _brush.texture().width();  
+  Pt::ssize_t bufferWidth = _brushImage->width();  
 
   while(length > 0)
   {
