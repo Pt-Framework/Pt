@@ -84,6 +84,11 @@ void Picture::set(const Gfx::Image& image)
     _impl->set(image);
 }
 
+void Picture::set(const Gfx::Image& image,  Pt::uint16_t alphaThreshold)
+{
+  _impl->set(image, alphaThreshold);
+}
+
 
 size_t Picture::width() const
 {

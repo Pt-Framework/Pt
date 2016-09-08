@@ -66,6 +66,8 @@ class PT_HMI_API Picture
 
         void set(const Gfx::Image& image);
 
+        void set(const Gfx::Image& image,  Pt::uint16_t alphaThreshold);
+
         bool empty() const;
 
         std::size_t width() const;
