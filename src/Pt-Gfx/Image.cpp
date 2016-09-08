@@ -46,13 +46,6 @@ Image::Image( const ImageFormat& format, const Gfx::Size& size, size_t padding)
 }
     
 
-Image::Image(const Size& size, size_t padding)
-: _info( ImageFormat::argb8888() )
-{
-    reset(ImageFormat::argb8888(), size, padding);
-}
-
-
 Image::Image(const ImageFormat& format, Pt::uint8_t* buffer, 
              const Gfx::Size& size, size_t padding)
 : _info(format)

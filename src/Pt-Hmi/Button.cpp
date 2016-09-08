@@ -40,7 +40,7 @@ namespace Pt {
 namespace Hmi {
 
 Button::Button()
-: _image(Gfx::Image(0,0))
+: _image()
 , _imageAlign( MiddleLeft)
 , _isPressed(false)
 {

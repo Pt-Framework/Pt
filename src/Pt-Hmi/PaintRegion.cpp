@@ -53,6 +53,11 @@ PaintRegion::~PaintRegion()
 {
 }
 
+const Gfx::ImageFormat& PaintRegion::format() const
+{
+  return _surface->format();
+}
+
 
 void PaintRegion::set(PaintSurface& surface, const Gfx::RectF& area)
 {

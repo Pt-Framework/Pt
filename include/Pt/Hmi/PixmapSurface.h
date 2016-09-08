@@ -59,6 +59,8 @@ class PT_HMI_API PixmapSurface : public PaintSurface
 
         void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
 
+        virtual const Gfx::ImageFormat& format() const; 
+
         virtual const Gfx::SizeF& size() const;
 
         virtual void setCompositionMode(const Gfx::CompositionMode& mode);

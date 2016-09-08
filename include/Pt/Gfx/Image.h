@@ -53,8 +53,6 @@ class PT_GFX_API Image
     Image(const ImageFormat& format, const Size& size,
           size_t padding = 0);
 
-    Image(const Size& size, size_t padding = 0);
-
     Image(const ImageFormat& format, Pt::uint8_t* buffer, 
           const Size& size, size_t padding = 0);
     

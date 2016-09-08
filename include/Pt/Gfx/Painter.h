@@ -90,6 +90,8 @@ class PT_GFX_API Painter
         virtual ~Painter()
         {}
 
+        virtual const ImageFormat& format() const  = 0;
+
         virtual void setCompositionMode(const CompositionMode& mode) = 0;
 
         virtual const CompositionMode& compositionMode() const = 0; 

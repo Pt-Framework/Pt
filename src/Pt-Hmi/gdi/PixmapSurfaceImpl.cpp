@@ -235,6 +235,11 @@ PixmapSurfaceImpl::~PixmapSurfaceImpl()
 }
 
 
+const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
+{
+  return Gfx::ImageFormat::argb8888();
+}
+
 void PixmapSurfaceImpl::clear(const Gfx::Color& c)
 {
 }

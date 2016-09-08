@@ -64,6 +64,11 @@ void Painter::begin(PaintSurface& surface)
 }
 
 
+const Gfx::ImageFormat& Painter::format() const
+{
+  return _surface->format();
+}
+
 void Painter::setCompositionMode(const Gfx::CompositionMode& mode)
 {
     _compositionMode = mode;

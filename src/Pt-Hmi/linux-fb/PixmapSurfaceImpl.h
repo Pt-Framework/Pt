@@ -57,6 +57,8 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
             return _image;
         }
     
+        const Gfx::ImageFormat& format() const;
+
         void resize(const Gfx::Size& size, size_t stride);
 
         void resize(const Gfx::SizeF& size);    

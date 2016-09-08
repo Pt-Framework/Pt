@@ -143,7 +143,7 @@ Rasterizer::Rasterizer( Image& image )
 , _text( new DrawText() )
 , _font("Vera", 12)
 , _compositionMode(CompositionMode::SourceCopy)
-, _penBuffer( Gfx::Size(64, 1) )
+, _penBuffer(image.format(), Gfx::Size(64, 1) )
 , _penPixel( _penBuffer.info(),0,0) 
 , _brushPixel( _brush.texture().info(), 0,0)
 {
@@ -165,6 +165,11 @@ void Rasterizer::setImage( Image& image )
     updateClip();
 }
 
+
+const ImageFormat& Rasterizer::format() const
+{
+  return _image->format();
+}
 
 void Rasterizer::setPen( const Pen& pen )
 {

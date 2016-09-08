@@ -6,16 +6,16 @@
 #include <Pt/System/Logger.h>
 #include <Pt/System/Clock.h>
 
+using namespace Pt::Gfx;
 
 void Paint()
 {
     try
     {
         for(int n = 0; n < 10 ; ++n)
-        {
-            using namespace Pt::Gfx;
+        {            
         
-            Image image( Size(1280, 800) );
+            Image image( ImageFormat::argb8888(), Size(1280, 800) );
 
             Pt::System::Clock clock;
             clock.start();
@@ -68,8 +68,8 @@ void BlockScale()
     {
         for(int n = 0; n < 10 ; ++n)
         {
-            Pt::Gfx::Image image( Pt::Gfx::Size(1000, 1000) );
-            Pt::Gfx::Image image2( Pt::Gfx::Size(900, 900) );
+            Pt::Gfx::Image image(ImageFormat::argb8888(), Pt::Gfx::Size(1000, 1000) );
+            Pt::Gfx::Image image2(ImageFormat::argb8888(), Pt::Gfx::Size(900, 900) );
 
             Pt::System::Clock clock;
             clock.start();

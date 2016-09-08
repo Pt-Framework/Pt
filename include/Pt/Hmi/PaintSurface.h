@@ -54,6 +54,8 @@ class PT_HMI_API PaintSurface
     public:
         virtual ~PaintSurface();
         
+        virtual const Gfx::ImageFormat& format()  const = 0; 
+
         virtual void setClip( const Gfx::RectF& clip) = 0; 
 
         virtual const Gfx::RectF& clip() const = 0;

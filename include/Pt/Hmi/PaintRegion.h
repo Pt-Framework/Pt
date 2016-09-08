@@ -60,6 +60,8 @@ class PT_HMI_API PaintRegion : public PaintSurface
 
         void set(PaintSurface& surface, const Gfx::RectF& rect);
 
+        virtual const Gfx::ImageFormat& format() const;
+
         virtual const Gfx::SizeF& size() const;
         
         virtual void setClip( const Gfx::RectF& clip);

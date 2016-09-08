@@ -48,6 +48,12 @@ PixmapSurface::~PixmapSurface()
 }
 
 
+const Gfx::ImageFormat& PixmapSurface::format() const
+{
+  return _impl->format();
+}
+
+
 void PixmapSurface::resize(const Gfx::SizeF& size)
 {
     _impl->resize(size);

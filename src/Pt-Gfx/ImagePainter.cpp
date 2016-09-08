@@ -57,6 +57,11 @@ void ImagePainter::setImage(Image& image)
 }
 
 
+const ImageFormat& ImagePainter::format() const
+{
+    return _rasterizer.format();
+}
+
 void ImagePainter::setPen( const Pen& pen )
 {
   _rasterizer.setPen( pen ) ;

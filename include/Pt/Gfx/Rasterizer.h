@@ -49,7 +49,10 @@ class PT_GFX_API Rasterizer
     
     ~Rasterizer();
 
+
     void setImage(Image& image);
+
+    const ImageFormat& format() const;
 
     void setPen( const Pen& pen );
 

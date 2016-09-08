@@ -48,6 +48,8 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         void begin(PaintSurface& surface);
 
+        virtual const Gfx::ImageFormat& format() const;
+
         virtual void setCompositionMode(const Gfx::CompositionMode& mode);
 
         virtual const Gfx::CompositionMode& compositionMode() const; 

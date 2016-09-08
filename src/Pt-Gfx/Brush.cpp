@@ -83,7 +83,7 @@ const Image& Brush::texture() const
 BrushData::BrushData()
 : _fillStyle(Brush::Solid)
 , _color(0, 0, 0)
-, _texture( Gfx::Size(16, 1) )
+, _texture(ImageFormat::argb8888(), Gfx::Size(16, 1) )
 {
     _texture.erase(_color);
 }
@@ -92,7 +92,7 @@ BrushData::BrushData()
 BrushData::BrushData(const Color& color)
 : _fillStyle(Brush::Solid)
 , _color(color)
-, _texture( Gfx::Size(64, 1) )
+, _texture(ImageFormat::argb8888(),Gfx::Size(64, 1) )
 {
 		 _texture.erase(_color);
 }

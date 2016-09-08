@@ -39,9 +39,11 @@ class PT_GFX_API ImagePainter : public Painter
   public:
     ImagePainter( Image& image );
     
-    virtual ~ImagePainter();
+    virtual ~ImagePainter();    
 
     void setImage(Image& image);
+
+    virtual const ImageFormat& format() const;
 
     virtual void setCompositionMode(const CompositionMode& mode);
 

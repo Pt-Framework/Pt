@@ -57,6 +57,12 @@ void PixmapSurfaceImpl::clear(const Gfx::Color& c)
 }
 
 
+const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
+{
+  return _painter.format();
+}
+
+
 void PixmapSurfaceImpl::resize(const Gfx::Size& size, size_t padding)
 {
     _size.set(size.width(), size.height());

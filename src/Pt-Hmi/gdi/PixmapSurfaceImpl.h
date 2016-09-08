@@ -49,59 +49,61 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         
         void clear(const Gfx::Color& c);  
     
-        void resize(const Gfx::SizeF& size);    
-
-        virtual const Gfx::SizeF& size() const;
-
-        virtual void setClip( const Gfx::RectF& clip);
+        void resize(const Gfx::SizeF& size);            
         
-        virtual  const Gfx::RectF& clip();
+        const Gfx::ImageFormat& format() const;
+
+        const Gfx::SizeF& size() const;
+
+        void setClip( const Gfx::RectF& clip);
+        
+        const Gfx::RectF& clip();
          
-        virtual void setCompositionMode(const Gfx::CompositionMode& mode)
+        void setCompositionMode(const Gfx::CompositionMode& mode)
         {
             _compositionMode = mode; 
         }
 
-        virtual const Gfx::CompositionMode& compositionMode() const
+        const Gfx::CompositionMode& compositionMode() const
         {
             return _compositionMode;
         }
 
-        virtual void setPen(const Gfx::Pen& pen);
+        void setPen(const Gfx::Pen& pen);
 
-        virtual void setBrush(const Gfx::Brush& brush);
+        void setBrush(const Gfx::Brush& brush);
 
-        virtual void setFont(const Gfx::Font& font);
+        void setFont(const Gfx::Font& font);
 
-        virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
+        Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
 
-        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
+        void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
 
-        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
+        void drawText(const Gfx::PointF& to, const Pt::String& Text);
 
-        virtual void drawRect(const Gfx::RectF& rectangle);
+        void drawRect(const Gfx::RectF& rectangle);
 
-        virtual void fillRect(const Gfx::RectF& rectangle);
+        void fillRect(const Gfx::RectF& rectangle);
 
-        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+        void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
-        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+        void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
-        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
+        void drawPolyline(const Gfx::PointF* points, size_t pointCount);
 
-        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
+        void fillPolygon(const Gfx::PointF* points, size_t pointCount);
 
-        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
+        void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
 
-        virtual void drawSurface(const Gfx::PointF& toF, 
+        void drawSurface(const Gfx::PointF& toF, 
                                  const PixmapSurface& pm,
                                  const Gfx::RectF& pmRect);
 
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+        void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 
-        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
+        void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
 
-        virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
+        void drawPicture(const Gfx::PointF& to, const Picture& pic);
 
 
         HDC deviceContext() const;
