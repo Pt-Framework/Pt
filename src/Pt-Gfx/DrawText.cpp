@@ -75,7 +75,7 @@ FT_Error DrawText::fontRequest( FTC_FaceID face_id, FT_Library library, FT_Point
      return error;*/
 }
 
-void DrawText::setFont( const Font& font )
+void DrawText::setFont(const Font& font)
 {
     //Setup the image type.
     _imageType.face_id    = faceId();
@@ -99,7 +99,7 @@ void DrawText::setFont( const Font& font )
     _matrix.yy = (FT_Fixed) std::ceil( cosinus );
 
     //Search the unicode charmap.
-    FT_Face    face;
+    FT_Face face;
 
     FTC_Manager_LookupFace( _manager, faceId(), &face );
 
@@ -115,7 +115,7 @@ void DrawText::setFont( const Font& font )
         }
     }
 
-    if( !charMapFound )
+    if( ! charMapFound )
         throw InvalidFont( "No unicode charmap found" + PT_SOURCEINFO );
 }
 

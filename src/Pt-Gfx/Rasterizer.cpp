@@ -28,15 +28,16 @@
   02110-1301 USA
 */
 
-#include <Pt/Gfx/Rasterizer.h>
+#include "ClipPolygon.h"
 #include "LineSlope.h"
 #include "LineEdge.h"
 #include "LineFace.h"
 #include "EdgeTable.h"
 #include "DrawText.h"
-#include <Pt/Math.h>
-#include <Pt/Gfx/ClipPolygon.h>
+
+#include <Pt/Gfx/Rasterizer.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Math.h>
 #include <algorithm>
 #include <cmath>
 

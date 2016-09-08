@@ -1,5 +1,4 @@
-/* Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
-   Copyright (C) 2006-2015 Marc Boris Duerner
+/* Copyright (C) 2006-2016 Marc Boris Duerner
    Copyright (C) 2010 Aloysius Indrayanto
  
   This library is free software; you can redistribute it and/or
