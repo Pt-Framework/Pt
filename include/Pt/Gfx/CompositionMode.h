@@ -44,7 +44,6 @@ class CompositionMode
         {
             SourceCopy = 0, // use source pixel
             SourceOver = 1, // use alpha of source pixel
-            AlphaMask = 200 // TODO: image painter specific or obsolete
         };
 
         CompositionMode(Mode m = SourceCopy)
