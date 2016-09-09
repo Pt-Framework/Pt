@@ -23,7 +23,6 @@ SharedLibrary Pt-Gfx : Argb8888Format.cpp
                        ClipPolygon.cpp
                        Color.cpp
                        DrawText.cpp
-                       Exception.cpp
                        Font.cpp
                        FontMetrics.cpp
                        FreeType.cpp

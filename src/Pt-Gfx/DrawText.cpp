@@ -1,40 +1,41 @@
-/* Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2006-2015 Marc Boris Duerner
- * Copyright (C) 2010 Aloysius Indrayanto
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+/* Copyright (C) 2015 Marc Boris Duerner 
+   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+  
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  02110-1301 USA
+*/
+
+#include "Vera.h"
 #include "DrawText.h"
-#include <Pt/Gfx/Exception.h>
 #include <Pt/Gfx/Font.h>
-#include <Pt/System/Clock.h>
 #include <Pt/String.h>
 #include <cmath>
 #include <algorithm>
-#include "Vera.h"
 
 namespace Pt {
+
 namespace Gfx {
 
 DrawText::DrawText()
@@ -66,6 +67,7 @@ DrawText::~DrawText()
     FTC_Manager_Done( _manager );
 }
 
+
 FT_Error DrawText::fontRequest( FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* aface )
 {
     return  FT_New_Memory_Face( library, vera, veraSize, 0, aface );
@@ -74,6 +76,7 @@ FT_Error DrawText::fontRequest( FTC_FaceID face_id, FT_Library library, FT_Point
     FT_Attach_File( *aface, "c:\\WINDOWS\\fonts\\tahoma" );
      return error;*/
 }
+
 
 void DrawText::setFont(const Font& font)
 {
@@ -116,8 +119,9 @@ void DrawText::setFont(const Font& font)
     }
 
     if( ! charMapFound )
-        throw InvalidFont( "No unicode charmap found" + PT_SOURCEINFO );
+        throw std::invalid_argument("No fonts installed" + PT_SOURCEINFO );
 }
+
 
 FontMetrics DrawText::fontMetrics( const String& text )
 {
@@ -302,5 +306,6 @@ void DrawText::draw( Image& image, const Color& color, const Point& pos, const S
     }
 }
 
-}} //namespace
+}  //namespace
 
+} //namespace

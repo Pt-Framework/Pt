@@ -185,16 +185,16 @@ class DrawText
         static FT_Error fontRequest( FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* aface );
 
   private:
-        FT_Matrix            _matrix;
-        FTC_Manager            _manager;
-        FTC_ImageCache        _imageChace;
-        FTC_CMapCache        _charMapCache;
-        FTC_SBitCache        _bitmapCache;
-        Pt::ssize_t            _fontAngle;
-        FTC_ImageTypeRec    _imageType;
-        size_t                _faceId;
-        size_t                _charMapId;
-        Rect				_clip;
+        FT_Matrix        _matrix;
+        FTC_Manager      _manager;
+        FTC_ImageCache   _imageChace;
+        FTC_CMapCache    _charMapCache;
+        FTC_SBitCache    _bitmapCache;
+        Pt::ssize_t      _fontAngle;
+        FTC_ImageTypeRec _imageType;
+        size_t           _faceId;
+        size_t           _charMapId;
+        Rect				     _clip;
 };
 
 }} //namespace

@@ -38,7 +38,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ClipPolygon.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Color.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\CompositionMode.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\Exception.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Font.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\FontMetrics.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Image.h" />
@@ -487,7 +486,6 @@
     <ClCompile Include="..\..\src\Pt-Gfx\ClipPolygon.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Color.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\DrawText.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\Exception.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Font.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\FontMetrics.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\FreeType.cpp" />

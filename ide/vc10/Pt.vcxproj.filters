@@ -1083,9 +1083,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Color.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\Exception.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Font.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
@@ -2373,9 +2370,6 @@
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\Color.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\Exception.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\Font.cpp">

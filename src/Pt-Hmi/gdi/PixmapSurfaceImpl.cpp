@@ -127,6 +127,7 @@ HFONT getFont(const Pt::Gfx::Font& font)
     return hf;
 }
 
+
 HBRUSH gradientBrush(HDC dc, int width, int height,
                      Pt::Gfx::Color gradientStart, 
                      Pt::Gfx::Color gradientStop, 

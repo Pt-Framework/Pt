@@ -121,10 +121,10 @@ PaintSurfaceImpl::PaintSurfaceImpl()
 }
 
 
-
 PaintSurfaceImpl::~PaintSurfaceImpl()
 {
 }
+
 
 std::string PaintSurfaceImpl::defaultFont()
 {
