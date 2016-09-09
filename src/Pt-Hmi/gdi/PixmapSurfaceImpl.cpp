@@ -180,9 +180,9 @@ HBRUSH gradientBrush(HDC dc, int width, int height,
         float b2 = gradientStop.blue() * f2;
                 
         
-        pixel[0] = (r1 + r2) / 257;
+        pixel[0] = (b1 + b2) / 257;
         pixel[1] = (g1 + g2) / 257;
-        pixel[2] = (b1 + b2) / 257;
+        pixel[2] = (r1 + r2) / 257;                
         pixel[3] = 0;
 
         pixel += 4;
