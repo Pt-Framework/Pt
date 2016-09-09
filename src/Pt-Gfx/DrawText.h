@@ -100,100 +100,23 @@ class DrawText
             @param text The text to draw
             @param background The background color of the font
         */
-        void draw( Image& image, const Color& color, const Point& pos, const String& text, const Color* background = 0 );
+        void draw(Image& image, const Color& color, const Point& pos, const String& text);
 
     private:
-        void drawGlyph( Image& image, const Color& color, int xpos, int ypos, int bmPitch, int height, int width, const unsigned char* buffer )
-        {
-            const int clipRight = _clip.x() + _clip.width();
-            const int clipBottom = _clip.y() + _clip.height();
-            Pt::uint32_t             yOffset = 0;
-            int                      dsy     = 0;
-            int                      dsx     = 0;
-            const Pt::ssize_t        x2      = clipRight;
-            const Pt::ssize_t        y2      = clipBottom;
-
-            if( bmPitch < width )
-                bmPitch += width;
-
-            int ofsx = 0;
-            
-            if(xpos < _clip.x() ) 
-            {
-                ofsx = _clip.x()  - xpos;
-                xpos =  _clip.x();
-            }
-            
-            int ofsy = 0;
-            
-            if(ypos < _clip.y()) 
-            {
-                ofsy = _clip.y() - ypos;
-                ypos = _clip.y();
-            }
-
-            dsy = ypos;
-
-            Color pixelColor = color;
-            Pixel pixel(image.info(), 0,0);
-
-            for( Pt::int32_t y = ofsy; y < height; ++y, ++dsy )
-            {
-                yOffset = y * bmPitch;
-
-                if( dsy < _clip.y() )
-                    continue;
-
-                if( dsy > y2 )
-                    break;
-
-                dsx   = xpos;
-
-                for( Pt::int32_t x = ofsx; x < width; ++x, ++dsx )
-                {
-                    if( dsx < _clip.x() )
-                        continue;
-
-                    if( dsx > x2 )
-                        break;
-
-
-                   Pixel pixel(image.info(), dsx,dsy);
-
-                    const int px = yOffset + x;
-                    unsigned char value = buffer[px];
-                    
-                    if(value != 255)
-                    {
-                        pixelColor.setAlpha( value * 257);
-                        image.format().setPixel(pixel, pixelColor,
-                                                CompositionMode::SourceOver);
-                    }
-                    else
-                    {                    
-                        image.format().setPixel(pixel, color, CompositionMode::SourceCopy);
-                    }
-                }
-            }
-        }
-
-        inline FTC_FaceID faceId() const
-        { 
-          return (FTC_FaceID) &_faceId ; 
-        }
-
-        static FT_Error fontRequest( FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* aface );
+        void drawGlyph(Image& image, const Color& color, int xpos, int ypos, 
+                       int bmPitch, int height, int width, const unsigned char* buffer);
 
   private:
         FT_Matrix        _matrix;
-        FTC_Manager      _manager;
-        FTC_ImageCache   _imageChace;
-        FTC_CMapCache    _charMapCache;
-        FTC_SBitCache    _bitmapCache;
+        //FTC_Manager      _manager;
+        //FTC_ImageCache   _imageCache;
+        //FTC_CMapCache    _charMapCache;
+        //FTC_SBitCache    _bitmapCache;
         Pt::ssize_t      _fontAngle;
         FTC_ImageTypeRec _imageType;
-        size_t           _faceId;
-        size_t           _charMapId;
+        FTC_FaceID       _faceId;
+        FT_Face          _face;
+        FT_Int           _charMapId;
         Rect				     _clip;
 };
 

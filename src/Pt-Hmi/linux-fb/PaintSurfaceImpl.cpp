@@ -28,15 +28,10 @@
 */
 
 #include "PaintSurfaceImpl.h"
-#include "ScreenImpl.h"
-#include "ApplicationImpl.h"
-#include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Picture.h>
-#include "PictureImpl.h"
 
 namespace Pt {
-namespace Hmi {
 
+namespace Hmi {
 
 PaintSurfaceImpl::PaintSurfaceImpl()
 {
@@ -48,22 +43,24 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
 {
 }
 
+
 std::string PaintSurfaceImpl::defaultFont()
 {
-    return "Vera";
+    return Gfx::ImagePainter::defaultFont();
 }
 
 
 std::list<std::string> PaintSurfaceImpl::fontFamilyNames()
 {
-    return std::list<std::string>();
+    return Gfx::ImagePainter::fontFamilyNames();
 }
 
 
 Gfx::FontMetrics PaintSurfaceImpl::fontMetrics(const Gfx::Font& font, const Pt::String& text)
 {
     return Gfx::ImagePainter::fontMetrics(font, text);   
-}
-        
+}  
 
-}}
+} // namespace
+
+} // namespace

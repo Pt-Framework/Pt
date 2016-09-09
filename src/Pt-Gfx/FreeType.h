@@ -1,22 +1,31 @@
-/***************************************************************************
- *   Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan                     *
- *   Copyright (C) 2006-2007 Marc Boris Duerner                            *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU Library General Public     *
- *   License along with this program; if not, write to the                 *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+/* Copyright (C) 2015 Marc Boris Duerner 
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+  
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  02110-1301 USA
+*/
+
 #ifndef PT_GFX_FREETYPE_H
 #define PT_GFX_FREETYPE_H
 
@@ -25,10 +34,12 @@
 #include FT_GLYPH_H
 #include FT_CACHE_H
 
-#include "Pt/Singleton.h"
+#include <Pt/Singleton.h>
+#include <string>
 
-namespace Pt{
-namespace Gfx{
+namespace Pt {
+
+namespace Gfx {
 
 class FreeType : public Pt::Singleton<FreeType>
 {
@@ -41,21 +52,49 @@ class FreeType : public Pt::Singleton<FreeType>
             { FreeType::instance(); }
         };
 
+        ~FreeType();
+
         FT_Library library() const
         { return _ft; }
 
-        ~FreeType();
+        static FT_Error fontRequest(FTC_FaceID face_id, FT_Library library, 
+                                    FT_Pointer request_data, FT_Face* face);
+
+        FTC_FaceID findFaceId(const std::string& name);
+
+        FT_Error findFace(FTC_FaceID faceId, FT_Face* face);
+
+        FT_UInt findCharMap(FTC_FaceID faceId, FT_Int charMapId, FT_UInt32 value);
+
+        FT_Error findBitmap(FTC_ImageType type,
+                            FT_UInt       gindex,
+                            FTC_SBit*     sbit,
+                            FTC_Node*     node);
+        
+        FT_Error findImage(FTC_ImageType type,
+                           FT_UInt       gindex,
+                           FT_Glyph*     glyph,
+                           FTC_Node*     node);
+
+        FT_Error findSize(FTC_Scaler scaler, FT_Size* size);
 
     protected:
         FreeType();
 
     private:
-        FT_Library _ft;
+        FT_Library        _ft;
+        FTC_Manager       _manager;
+        FTC_ImageCache    _imageCache;
+        FTC_CMapCache     _charMapCache;
+        FTC_SBitCache     _bitmapCache;
+        
+        static FTC_FaceID _veraId;
 };
 
- static FreeType::Init initFreeType;
+static FreeType::Init initFreeType;
 
-}
-}
+} // namespace
+
+} // namespace
 
 #endif

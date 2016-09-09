@@ -36,6 +36,7 @@
 #include "DrawText.h"
 
 #include <Pt/Gfx/Rasterizer.h>
+#include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Math.h>
 #include <algorithm>
@@ -142,7 +143,7 @@ inline int stepAround( int v, int incr, int max )
 Rasterizer::Rasterizer( Image& image )
 : _image( &image )
 , _text( new DrawText() )
-, _font("Vera", 12)
+, _font( ImagePainter::defaultFont() )
 , _compositionMode(CompositionMode::SourceCopy)
 , _penPixel(_image->info(), 0, 0) 
 , _brushPixel(_image->info(), 0, 0)
@@ -154,7 +155,7 @@ Rasterizer::Rasterizer( Image& image )
 
 Rasterizer::~Rasterizer()
 {
-  delete _text;
+    delete _text;
 }
 
 
