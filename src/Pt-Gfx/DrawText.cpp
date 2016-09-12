@@ -38,11 +38,12 @@ namespace Pt {
 namespace Gfx {
 
 DrawText::DrawText()
-: _fontAngle(0)
+: _charMapId(0)
 , _faceId(0)
 , _face(0)
-, _charMapId(0)
-, _clip( Point(0, 0), Size(999999, 999999) )
+, _fontAngle(0)
+// TODO: handle _clip.isNull() like no clipping
+, _clip( Point(0, 0), Size(999999, 999999) ) 
 {
     _matrix.xx = 0;
     _matrix.xy = 0;
@@ -121,7 +122,6 @@ FontMetrics DrawText::fontMetrics( const String& text )
     FTC_Node            node;
     FT_UInt             glyph_index;
 
-
     FT_Size size;
     FTC_ScalerRec scaler;
     scaler.face_id = _imageType.face_id;
@@ -180,26 +180,26 @@ FontMetrics DrawText::fontMetrics( const String& text )
 
 void DrawText::draw( Image& image, const Color& color, const Point& pos, const String& text )
 {
-    FT_Vector            glyphPos;
-    FT_Vector            delta;
-    FT_UInt                previous = 0;
-    FT_Glyph            glyph;
-    FT_Glyph            glyphCopy = 0;
-    FTC_Node            node;
-    FT_Face             face = _face;
-    FTC_SBit            smalGlyphBitmap;
-    FT_BitmapGlyph        glyphBitmap;
-    FT_UInt                glyph_index;
+    FT_Vector      glyphPos;
+    FT_Vector      delta;
+    FT_UInt        previous = 0;
+    FT_Glyph       glyph;
+    FT_Glyph       glyphCopy = 0;
+    FTC_Node       node;
+    FT_Face        face = _face;
+    FTC_SBit       smalGlyphBitmap;
+    FT_BitmapGlyph glyphBitmap;
+    FT_UInt        glyph_index;
 
     //Glyph bitmap description
-    int                    incX;
-    int                    incY;
-    int                    left;
-    int                    top;
-    int                    pitch;
-    int                    height;
-    int                    width;
-    unsigned char*        buffer;
+    int            incX;
+    int            incY;
+    int            left;
+    int            top;
+    int            pitch;
+    int            height;
+    int            width;
+    unsigned char* buffer;
    
     //FTC_Manager_LookupFace( _manager, _faceId, &face );
 
@@ -289,13 +289,13 @@ void DrawText::draw( Image& image, const Color& color, const Point& pos, const S
 void DrawText::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
                          int bmPitch, int height, int width, const unsigned char* buffer)
 {
-    const int clipRight = _clip.x() + _clip.width();
+    const int clipRight  = _clip.x() + _clip.width();
     const int clipBottom = _clip.y() + _clip.height();
-    Pt::uint32_t             yOffset = 0;
-    int                      dsy     = 0;
-    int                      dsx     = 0;
-    const Pt::ssize_t        x2      = clipRight;
-    const Pt::ssize_t        y2      = clipBottom;
+    Pt::ssize_t yOffset  = 0;
+    Pt::ssize_t dsy      = 0;
+    Pt::ssize_t dsx      = 0;
+    const Pt::ssize_t x2 = clipRight;
+    const Pt::ssize_t y2 = clipBottom;
 
     if( bmPitch < width )
         bmPitch += width;

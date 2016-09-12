@@ -40,7 +40,7 @@ namespace Gfx {
 class Pixel
 {
     public:
-        Pixel(const ImageInfo& info, int x, int y)
+        Pixel(const ImageInfo& info, Pt::ssize_t x, Pt::ssize_t y)
         : _info(&info)
         , _x(x)
         , _y(y)
@@ -60,7 +60,24 @@ class Pixel
             _info->format().setPixel(*this, p, CompositionMode::SourceCopy);
             return *this;
         }
+        
+        void reset(const ImageInfo& info, Pt::ssize_t x, Pt::ssize_t y)
+        {
+            _info = &info;
+             _x = x;
+             _y = y;
 
+             _base = info.data() + info.stride() * _y + _x * info.pixelStride();
+        }
+
+        void reset(const Pixel& p)
+        {
+             _info = p._info;
+             _base = p._base;
+             _x = p._x;
+             _y = p._y;
+        }
+        
         void advance()
         {
             if( ++_x >= _info->width() )
@@ -83,34 +100,17 @@ class Pixel
             _base = _info->data() + _info->stride() * _y + _x * _info->pixelStride();
         }
 
-        void reset(const ImageInfo& info, int x, int y)
-        {
-            _info = &info;
-             _x = x;
-             _y = y;
-
-             _base = info.data() + info.stride() * _y + _x * info.pixelStride();
-        }
-
-        void reset(const Pixel& p)
-        {
-             _info = p._info;
-             _base = p._base;
-             _x = p._x;
-             _y = p._y;
-        }
-
         const ImageInfo& imageInfo() const
         { 
           return *_info; 
         }
         
-        int x() const
+        Pt::ssize_t x() const
         {
             return _x;
         }
 
-        int y() const 
+        Pt::ssize_t y() const 
         {
             return _y;
         }
@@ -123,8 +123,8 @@ class Pixel
     private:
         const ImageInfo* _info;
         Pt::uint8_t* _base;
-        int _x;
-        int _y;
+        Pt::ssize_t _x;
+        Pt::ssize_t _y;
 };
 
 } // namespace

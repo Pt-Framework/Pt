@@ -61,6 +61,145 @@ class PT_GFX_API Argb8888Format : public ImageFormat
                             CompositionMode mode) const;
 };
 
+
+class Yuv12View
+{
+    public:
+        Yuv12View(Pt::uint8_t* data, const Size& size, Pt::ssize_t padding)
+        : _data(data)
+        , _size(size)
+        , _padding(padding)
+        { }
+
+        const Size& size() const
+        { return _size; }
+
+        Pt::uint8_t* data() const
+        { return _data; }
+
+        Pt::ssize_t padding() const
+        { return _padding; }
+
+    private:
+        Pt::uint8_t* _data;
+        Size         _size;
+        Pt::ssize_t  _padding;
+};
+
+
+class Yuv12Image
+{
+};
+
+
+class Yuv12Pixel
+{
+    public:
+        Yuv12Pixel(const Yuv12View& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+        : _view(&view)
+        , _xpos(xpos)
+        , _ypos(ypos)
+        { 
+            std::size_t off = (_view->size().width() + _view->padding()) * ypos + xpos;
+            _y = _view->data() + off;
+        }
+
+        Yuv12Pixel(const Yuv12Pixel& p)
+        : _view(p._view)
+        , _xpos(p._xpos)
+        , _ypos(p._ypos)
+        , _y(p._y)
+        , _u(p._u)
+        , _v(p._v)
+        { }
+
+        Yuv12Pixel& operator=(const Yuv12Pixel& p)
+        {
+            *_y = *(p._y);
+            *_u = *(p._u);
+            *_v = *(p._v);
+            return *this;
+        }
+
+        void reset(const Yuv12Pixel& p)
+        {
+             _view = p._view;            
+             _xpos = p._xpos;
+             _ypos = p._ypos;
+
+            _y = p._y;
+            _u = p._u;
+            _v = p._v;
+        }
+
+        void advance()
+        {
+            ++_y;
+
+            size_t uvOffset = _xpos % 2;
+            _u += uvOffset;
+            _v += uvOffset;
+
+            if( ++_xpos == _view->size().width() )
+            {
+                _xpos = 0;
+                ++_ypos;
+
+                _y += (_view->size().width() / 2) + _view->padding();
+                _u += (_view->size().width() / 2) + _view->padding();
+            }
+        }
+
+        bool operator!=(const Yuv12Pixel& p) const
+        { return _y != p._y; }
+        
+        bool operator==(const Yuv12Pixel& p) const
+        { return _y == p._y; }
+
+    private:
+        const Yuv12View*  _view;
+        Pt::ssize_t _xpos;
+        Pt::ssize_t _ypos;
+        Pt::uint8_t* _y;
+        Pt::uint8_t* _u;
+        Pt::uint8_t* _v;
+};
+
+
+class Yuv12Iterator
+{
+    public:
+        Yuv12Iterator(const Yuv12View& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+        : _pixel(view, xpos, ypos)
+        {
+        }
+
+        Yuv12Iterator& operator=(const Yuv12Iterator& it)
+        {
+            _pixel.reset(it._pixel);
+            return *this;
+        }
+
+        Yuv12Pixel operator*()
+        { return _pixel; }
+
+        Yuv12Iterator& operator++()
+        {
+            _pixel.advance();
+            return *this; 
+        }
+
+        bool operator!=(const Yuv12Iterator& it) const
+        { return _pixel != it._pixel; }
+        
+        bool operator==(const Yuv12Iterator& it) const
+        { return _pixel == it._pixel; }
+
+    private:
+        Yuv12Pixel _pixel;
+};
+
+
 } // namespace
 
 } // namespace

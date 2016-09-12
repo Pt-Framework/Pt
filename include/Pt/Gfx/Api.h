@@ -37,4 +37,15 @@
 #  define PT_GFX_API PT_IMPORT
 #endif
 
+namespace Pt {
+
+/** @namespace Pt::Gfx
+    @brief Graphics and Images
+*/
+namespace Gfx {
+
+} // namespace
+
+} // namespace
+
 #endif

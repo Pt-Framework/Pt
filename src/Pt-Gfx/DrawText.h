@@ -72,9 +72,9 @@ class DrawText
 
             @param font The text font
         */
-        void setFont( const Font& font );
+        void setFont(const Font& font);
 
-				void setClip( const Rect& clip )
+				void setClip(const Rect& clip)
 				{
 					_clip = clip;
 				}
@@ -84,7 +84,7 @@ class DrawText
             @param font The text font
             @param text The text to calculate
         */
-        FontMetrics fontMetrics( const String& text );
+        FontMetrics fontMetrics(const String& text);
 
         /** @brief Draw text on the image
 
@@ -107,16 +107,18 @@ class DrawText
                        int bmPitch, int height, int width, const unsigned char* buffer);
 
   private:
-        FT_Matrix        _matrix;
         //FTC_Manager      _manager;
         //FTC_ImageCache   _imageCache;
         //FTC_CMapCache    _charMapCache;
         //FTC_SBitCache    _bitmapCache;
-        Pt::ssize_t      _fontAngle;
+        
         FTC_ImageTypeRec _imageType;
+        FT_Int           _charMapId;
         FTC_FaceID       _faceId;
         FT_Face          _face;
-        FT_Int           _charMapId;
+        FT_Matrix        _matrix;
+
+        Pt::ssize_t      _fontAngle;
         Rect				     _clip;
 };
 
