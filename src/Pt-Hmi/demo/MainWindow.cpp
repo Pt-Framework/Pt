@@ -31,6 +31,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/PngReader.h>
 #include <Pt/Gfx/JpegReader.h>
+#include <Pt/Gfx/Algorithm.h>
 #include <sstream>
 #include <fstream>
 
@@ -58,13 +59,14 @@ void loadIcon(Gfx::Image& icon)
     
     reader.get();
 
-    icon = image.convert( Pt::Gfx::ImageFormat::argb8888() );
+    icon.reset(Pt::Gfx::ImageFormat::argb8888(), image.size() );
+    Gfx::copy(image.begin(), image.end(), icon.begin() );
     
     for(size_t w = 0; w < icon.width(); ++ w )
     {
         for(size_t h = 0; h < icon.height(); ++h )
         {
-            Gfx::Pixel pixel(icon.info(), w, h);
+            Gfx::Pixel pixel(icon.view(), w, h);
 
             Gfx::Color color = icon.format().getColor(pixel);
          

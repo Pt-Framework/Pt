@@ -30,18 +30,19 @@
 #define PT_GFX_YUV12IMAGE_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/ImageInfo.h>
+#include <Pt/Gfx/BasicImage.h>
+#include <Pt/Types.h>
 
 namespace Pt {
 
 namespace Gfx {
 
 class Yuv12Format : public ImageFormat
-{
+{   
     public:
         Yuv12Format();
 
-        virtual std::size_t imageSize(const ImageInfo& image) const
+        virtual std::size_t imageSize(const Size& size, Pt::ssize_t padding) const
         { return 0; }
         
         virtual void setPixel(Pixel& to, const Pixel& from,
@@ -60,8 +61,8 @@ class Yuv12Format : public ImageFormat
         {}
 
     protected:
-        virtual void onCopy(const ImageInfo& to, const Point& toPoint,
-                            const ImageInfo& from, const Rect& fromRect,
+        virtual void onCopy(const ImageView& to, const Point& toPoint,
+                            const ImageView& from, const Rect& fromRect,
                             CompositionMode mode) const
         {}
 };
@@ -70,7 +71,7 @@ class Yuv12Format : public ImageFormat
 class Yuv12Pixel
 {
     public:
-        Yuv12Pixel(const ImageInfo& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+        Yuv12Pixel(const ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
         : _view(&view)
         , _xpos(xpos)
         , _ypos(ypos)
@@ -132,7 +133,7 @@ class Yuv12Pixel
         { return _y == p._y; }
 
     private:
-        const ImageInfo*  _view;
+        const ImageView*  _view;
         Pt::ssize_t _xpos;
         Pt::ssize_t _ypos;
         Pt::uint8_t* _y;
@@ -141,49 +142,16 @@ class Yuv12Pixel
 };
 
 
-class Yuv12Iterator
+class Yuv12Image : public BasicImage<Yuv12Pixel, Yuv12Format>
 {
     public:
-        Yuv12Iterator(const ImageInfo& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
-        : _pixel(view, xpos, ypos)
+        Yuv12Image(const Size& size, size_t padding = 0)
+        : BasicImage(size, padding)
         { }
-
-        Yuv12Iterator& operator=(const Yuv12Iterator& it)
-        {
-            _pixel.reset(it._pixel);
-            return *this;
-        }
-
-        Yuv12Pixel operator*()
-        { return _pixel; }
-
-        Yuv12Iterator& operator++()
-        {
-            _pixel.advance();
-            return *this; 
-        }
-
-        bool operator!=(const Yuv12Iterator& it) const
-        { return _pixel != it._pixel; }
         
-        bool operator==(const Yuv12Iterator& it) const
-        { return _pixel == it._pixel; }
-
-    private:
-        Yuv12Pixel _pixel;
-};
-
-
-class Yuv12Image
-{
-    public:
         Yuv12Image(Pt::uint8_t* data, const Size& size, size_t padding = 0)
-        : _info(_yuvFormat, data, size, padding)
+        : BasicImage(data, size, padding)
         { }
-
-    private:
-        Yuv12Format _yuvFormat;
-        ImageInfo _info;
 };
 
 } // namespace

@@ -28,8 +28,7 @@
 */
 
 #include <Pt/Gfx/Rgb888Format.h>
-#include <Pt/Gfx/ImageInfo.h>
-#include <Pt/Gfx/Pixel.h>
+#include <Pt/Gfx/ImageView.h>
 
 namespace Pt {
 
@@ -41,10 +40,10 @@ Rgb888Format::Rgb888Format()
 }
 
 
-std::size_t Rgb888Format::imageSize(const ImageInfo& image) const
+std::size_t Rgb888Format::imageSize(const Size& size, Pt::ssize_t padding) const
 {
-    std::size_t l = (image.width() * 4) + image.padding();
-    std::size_t n = l* image.height();
+    std::size_t l = (size.width() * 4) + padding;
+    std::size_t n = l * size.height();
     return n;
 }
 
@@ -105,21 +104,21 @@ void Rgb888Format::copy(Pixel& to, const Pixel& from, size_t length,
 }
 
 
-void Rgb888Format::onCopy(const ImageInfo& toInfo, const Point& toPoint,
-                          const ImageInfo& fromInfo, const Rect& fromRect,
+void Rgb888Format::onCopy(const ImageView& to, const Point& toPoint,
+                          const ImageView& from, const Rect& fromRect,
                           CompositionMode mode) const
 {
     Pt::ssize_t pixelSize = 4;
 
     // TODO: equals to toInfo.pitch()
-    Pt::ssize_t toStride = (toInfo.width() * pixelSize) + toInfo.padding();
-    Pt::ssize_t fromStride = (fromRect.width() * pixelSize) + fromInfo.padding();
+    Pt::ssize_t toStride = (to.width() * pixelSize) + to.padding();
+    Pt::ssize_t fromStride = (fromRect.width() * pixelSize) + from.padding();
     
     Pt::ssize_t toBegin = (toPoint.y() * toStride) + (toPoint.x() * pixelSize);
     Pt::ssize_t fromBegin = (fromRect.y() * fromStride) + (fromRect.x() * pixelSize);
 
-    Pt::uint8_t* toLine = toInfo.data() + toBegin;
-    const Pt::uint8_t* fromLine = fromInfo.data() + fromBegin;
+    Pt::uint8_t* toLine = to.data() + toBegin;
+    const Pt::uint8_t* fromLine = from.data() + fromBegin;
 
     Pt::ssize_t n = fromRect.width() * pixelSize;
 

@@ -38,6 +38,7 @@
 #include <Pt/Gfx/Rasterizer.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Algorithm.h>
 #include <Pt/Math.h>
 #include <algorithm>
 #include <cmath>
@@ -145,8 +146,8 @@ Rasterizer::Rasterizer( Image& image )
 , _text( new DrawText() )
 , _font( ImagePainter::defaultFont() )
 , _compositionMode(CompositionMode::SourceCopy)
-, _penPixel(_image->info(), 0, 0) 
-, _brushPixel(_image->info(), 0, 0)
+, _penPixel(_image->view(), 0, 0) 
+, _brushPixel(_image->view(), 0, 0)
 {
     _text->setFont( _font );
     updateClip();
@@ -176,9 +177,11 @@ const ImageFormat& Rasterizer::format() const
 void Rasterizer::setPen( const Pen& pen )
 {
   _pen = pen;
-  _penBuffer.reset(_image->format(),Size(64,1));
-  _penBuffer.erase( pen.color() );
-  _penPixel.reset(_penBuffer.info(), 0, 0);
+  _penBuffer.reset(_image->format(), Size(64, 1));
+  Gfx::fill(_penBuffer.begin(), _penBuffer.end(), pen.color());
+  //_penBuffer.erase( pen.color() );
+  
+  _penPixel.reset(_penBuffer.view(), 0, 0);
 }
 
 
@@ -191,15 +194,19 @@ void Rasterizer::setBrush( const Brush& brush )
     case Brush::HorizontalGradient:
     case Brush::VerticalGradient:
     case Brush::Solid:      
-      _brushBuffer.reset( _image->format() , Size(64,1) );
-      _brushBuffer.erase( brush.color());
+      _brushBuffer.reset( _image->format(), Size(64, 1) );
+      Gfx::fill(_brushBuffer.begin(), _brushBuffer.end(), brush.color());
+      //_brushBuffer.erase( brush.color());
       _brushImage = &_brushBuffer;
     break;
     
     case Brush::Texture:
       if( brush.texture().format() != _image->format() )        
       {
-        _brushBuffer = brush.texture().convert(_image->format());
+        _brushBuffer.reset( _image->format(), brush.texture().size() );
+        Gfx::copy( brush.texture().begin(), brush.texture().end(), _brushBuffer.begin() );
+        
+        //_brushBuffer = brush.texture().convert(_image->format());
         _brushImage = &_brushBuffer;
       }
       else
@@ -209,7 +216,7 @@ void Rasterizer::setBrush( const Brush& brush )
     break;
   }
 
-  _brushPixel.reset(_brushImage->info(), 0, 0);
+  _brushPixel.reset(_brushImage->view(), 0, 0);
 }
 
 
@@ -1871,8 +1878,8 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
         // Copy pixels from textrure to image
         if(fillLength)
         {
-            Pixel sourcePixel(texture.info(),  textureXPos, textureYPos);
-            Pixel destPixel(_image->info(), xpos, ypos);
+            Pixel sourcePixel(texture.view(),  textureXPos, textureYPos);
+            Pixel destPixel(_image->view(), xpos, ypos);
 
             _image->format().copy( destPixel,  sourcePixel,  fillLength, _compositionMode );
         }
@@ -1977,7 +1984,7 @@ void Rasterizer::fillSolid(const Point& pos, int length)
 
       if( n )
       {          
-          Pixel destPixel(_image->info(), xpos,ypos);
+          Pixel destPixel(_image->view(), xpos,ypos);
          _image->format().copy(destPixel, _brushPixel, n, _compositionMode);
       }
 
@@ -3498,7 +3505,7 @@ void Rasterizer::image( const Point& to, const Image& from, const Rect& fromRect
   // account for smaller fromRect
   Point toClip = to + (fromClip.topLeft() - fromRect.topLeft());
 
-  _image->format().copy(_image->info(), toClip, from.info(), fromClip, _compositionMode);
+  _image->format().copy(_image->view(), toClip, from.view(), fromClip, _compositionMode);
 }
 
 
@@ -3508,7 +3515,7 @@ void Rasterizer::stroke(int x, int y)
         y < _currentClip.y() || y >= _clipBottom)
         return;
 
-    Pixel pixel(_image->info(), x, y);
+    Pixel pixel(_image->view(), x, y);
     _image->format().setPixel(pixel, _penPixel, _compositionMode);
 }
 
@@ -3525,7 +3532,7 @@ void Rasterizer::stroke(int xpos, int ypos, Pt::ssize_t length)
         Pt::ssize_t n = std::min(length, bufferWidth);
         if( n )
         {
-             Pixel destPixel( _image->info(), xpos, ypos);
+             Pixel destPixel( _image->view(), xpos, ypos);
             _image->format().copy(destPixel, _penPixel, n, _compositionMode);
         }
 

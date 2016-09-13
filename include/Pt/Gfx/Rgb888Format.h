@@ -43,7 +43,7 @@ class PT_GFX_API Rgb888Format : public ImageFormat
     public:
         Rgb888Format();
 
-        virtual std::size_t imageSize(const ImageInfo& image) const;
+        virtual std::size_t imageSize(const Size& size, Pt::ssize_t padding) const;
 
         virtual void setPixel(Pixel& to, const Pixel& from,
                               CompositionMode mode) const;
@@ -57,8 +57,8 @@ class PT_GFX_API Rgb888Format : public ImageFormat
                           CompositionMode mode) const;
 
     protected:
-        virtual void onCopy(const ImageInfo& to, const Point& toPoint,
-                            const ImageInfo& from, const Rect& fromRect,
+        virtual void onCopy(const ImageView& to, const Point& toPoint,
+                            const ImageView& from, const Rect& fromRect,
                             CompositionMode mode) const;
 };
 

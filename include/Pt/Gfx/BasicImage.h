@@ -27,8 +27,8 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_IMAGE_H
-#define PT_GFX_IMAGE_H
+#ifndef PT_GFX_BASICIMAGE_H
+#define PT_GFX_BASICIMAGE_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ImageView.h>
@@ -40,36 +40,66 @@ namespace Pt {
 
 namespace Gfx {
 
-class PT_GFX_API Image
+template <typename PixelT, typename FormatT>
+class BasicImage
 {
     public:
-        explicit Image( const ImageFormat& format = ImageFormat::argb8888() );
-    
-        Image(const ImageFormat& format, const Size& size,
-              size_t padding = 0);
+        class Iterator
+        {
+            public:
+                Iterator(const ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+                : _pixel(view, xpos, ypos)
+                { }
 
-        Image(const ImageFormat& format, Pt::uint8_t* buffer, 
-              const Size& size, size_t padding = 0);
-    
-        Image(const Image& image);
-              
-        virtual ~Image();
+                Iterator& operator=(const Iterator& it)
+                {
+                    _pixel.reset(it._pixel);
+                    return *this;
+                }
 
-        const Image& operator=(const Image& image);
+                PixelT operator*()
+                { return _pixel; }
 
-        void reset(const ImageFormat& format, const Size& size, size_t padding = 0);   
+                Iterator& operator++()
+                {
+                    _pixel.advance();
+                    return *this; 
+                }
 
-        void reset(const ImageFormat& format, Pt::uint8_t* buffer, 
-                   const Size& size, size_t padding = 0);
+                bool operator!=(const Iterator& it) const
+                { return _pixel != it._pixel; }
+        
+                bool operator==(const Iterator& it) const
+                { return _pixel == it._pixel; }
+
+            private:
+                PixelT _pixel;
+        };
+
+    public:
+        BasicImage(const Size& size, size_t padding = 0)
+        : _buffer( _format.imageSize(size, padding) )
+        , _view( _format, 
+                 _buffer.empty() ? 0 : &_buffer[0], 
+                 size, 
+                 padding )
+        { }
+
+        BasicImage(Pt::uint8_t* data, const Size& size, Pt::ssize_t padding = 0)
+        : _view(_format, data, size, padding)
+        { }
+
+        virtual ~BasicImage()
+        {}
 
         const ImageView& view() const
         {
             return _view;
         }
 
-        const ImageFormat& format() const
+        const FormatT& format() const
         {
-            return _view.format();
+            return _format;
         }
 
         Pt::ssize_t width() const
@@ -102,19 +132,14 @@ class PT_GFX_API Image
             return _view.empty();
         }
 
-        PixelIterator begin()
-        { return _view.begin(); }
+        Iterator begin()
+        { return Iterator(_view, 0, 0); }
 
-        PixelIterator end()
-        { return _view.end(); }
-
-        PixelIterator begin() const
-        { return _view.begin(); }
-
-        PixelIterator end() const
-        { return _view.end(); }
+        Iterator end()
+        { return Iterator(_view, 0, height()); }
 
     private:
+        FormatT                  _format;
         std::vector<Pt::uint8_t> _buffer;
         ImageView                _view;
 };

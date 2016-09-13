@@ -1,6 +1,6 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+/* Copyright (C) 2010-2016 Marc Boris Duerner 
+   Copyright (C) 2006-2010 by Aloysius Indrayanto
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -27,63 +27,46 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_PIXELITERATOR_H
-#define PT_GFX_PIXELITERATOR_H
+#ifndef PT_GFX_ALGORITHM_H
+#define PT_GFX_ALGORITHM_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Pixel.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-class PixelIterator
+template<typename InputIteratorT, typename OutputIteratorT>
+void copy(InputIteratorT from, InputIteratorT fromEnd, OutputIteratorT to)
 {
-    public:
-        PixelIterator(ImageInfo& image, Pt::ssize_t x, Pt::ssize_t y)
-        : _pixel(image, x, y)
-        {}
+    for( ; from != fromEnd; ++from, ++to)
+        *to = *from;
+}
 
-        PixelIterator(const PixelIterator& it)
-        : _pixel(it._pixel)
-        {}
 
-        PixelIterator& operator=(const PixelIterator& it)
-        {
-            _pixel.reset(it._pixel);
-            return *this;
-        }
+template<typename OutputIteratorT, typename T>
+void fill(OutputIteratorT to, OutputIteratorT toEnd, const T& value)
+{
+    for (; to != toEnd; ++to)
+        *to = value;
+}
 
-        bool operator!=(const PixelIterator& it) const
-        { 
-            return _pixel.x() != it._pixel.x() || _pixel.y() != it._pixel.y();  
-        }
 
-        bool operator==(const PixelIterator& it) const
-        { 
-            return _pixel.x() == it._pixel.x() && _pixel.y() == it._pixel.y();
-        }
-        
-        Pixel& operator*()
-        { 
-            return _pixel; 
-        }
+template<typename InputIteratorT, typename OutputIteratorT, typename OperationT>
+void transform(InputIteratorT from, InputIteratorT fromEnd, 
+               OutputIteratorT to, OperationT op)
+{
+    for( ; from != fromEnd; ++from, ++to)
+        op(*to, *from);
+}
 
-        PixelIterator& operator++()
-        {            
-            _pixel.advance();
-            return *this; 
-        }
 
-        PixelIterator& operator+=(Pt::ssize_t n)
-        {
-            _pixel.advance(n);  
-            return *this; 
-        }
-
-    private:
-        Pixel _pixel;
-};
+template<typename IteratorT, typename OperationT>
+void transform(IteratorT begin, IteratorT end, OperationT op)
+{
+    for( ; begin != end; ++begin) 
+        op(*begin);
+}
 
 } // namespace
 

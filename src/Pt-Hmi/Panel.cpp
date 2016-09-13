@@ -31,12 +31,13 @@
 #include <Pt/Hmi/Layout.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/PaintRegion.h>
 #include <Pt/Hmi/PaintEvent.h>
+#include <Pt/Hmi/Picture.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Rect.h>
-#include <Pt/Hmi/Picture.h>
-#include <Pt/Hmi/PaintRegion.h>
+#include <Pt/Gfx/BlockScale.h>
 
 namespace Pt {
 

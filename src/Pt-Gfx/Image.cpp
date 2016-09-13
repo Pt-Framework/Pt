@@ -28,7 +28,6 @@
 */
 
 #include <Pt/Gfx/Image.h>
-
 #include <Pt/Gfx/Yuv12Image.h>
 
 namespace Pt {
@@ -36,28 +35,30 @@ namespace Pt {
 namespace Gfx {
  
 Image::Image(const ImageFormat& format)		
-: _info(format)
+: _view(format)
 {
 }
-      
-        
-Image::Image( const ImageFormat& format, const Gfx::Size& size, size_t padding)
-: _info(format)
+
+
+Image::Image(const ImageFormat& format, const Size& size, size_t padding)
+: _buffer( format.imageSize(size, padding) )
+, _view( format, 
+         _buffer.empty() ? 0 : &_buffer[0], 
+         size, 
+         padding )
 {
-    reset(format, size, padding);
 }
-    
+
 
 Image::Image(const ImageFormat& format, Pt::uint8_t* buffer, 
              const Gfx::Size& size, size_t padding)
-: _info(format)
+: _view(format, buffer, size, padding)
 {
-    reset(format, buffer, size, padding);
 }
 
 
 Image::Image(const Image& image)
-: _info( image.format() )
+: _view( image.format() )
 {
     *this = image;
 }
@@ -74,10 +75,10 @@ const Image& Image::operator=(const Image& image)
 
     _buffer = image._buffer;
 
-    Pt::uint8_t* data = _buffer.empty() ? image._info.data()
+    Pt::uint8_t* data = _buffer.empty() ? image._view.data()
                                         : &_buffer[0];
 
-    _info.set(image.format(), data, image.size(), image.padding());
+    _view.set(image.format(), data, image.size(), image.view().padding());
 
 	  return *this;
 }
@@ -85,56 +86,22 @@ const Image& Image::operator=(const Image& image)
 
 void Image::reset(const ImageFormat& f, const Gfx::Size& size, size_t padding)
 {
-    ImageInfo info(f, 0, size, padding); 
-    Pt::ssize_t n = f.imageSize(info);
+    Pt::ssize_t n = f.imageSize(size, padding);
     
     _buffer.resize(n); 
     
     if( _buffer.empty() )
-      _info.set(f, 0, size, padding); 
+      _view.set(f, 0, size, padding); 
     else
-      _info.set(f, &_buffer[0], size, padding); 
+      _view.set(f, &_buffer[0], size, padding); 
 }
 
 
 void Image::reset(const ImageFormat& format, Pt::uint8_t* buffer, 
                   const Gfx::Size& size, size_t padding)
 {
-    _info.set(format, buffer, size, padding);
+    _view.set(format, buffer, size, padding);
     _buffer.clear();  
-}
-
-
-void Image::erase(const Color& color)
-{
-    for( Pt::ssize_t h = 0; h < height(); ++h )
-    {
-        for( Pt::ssize_t w = 0; w < width(); ++w)
-        {
-          Pixel to(this->info(), w, h);
-          format().setPixel(to, color, CompositionMode::SourceCopy);
-        }
-    }
-}
-
-
-Image Image::convert(const ImageFormat& fmt) const
-{
-    Image image(fmt, size(), padding() );
-    
-    for(Pt::ssize_t y = 0; y < height(); ++y)
-    {
-        for(Pt::ssize_t x = 0; x < width(); ++x)
-        {
-          Pixel from(info(), x, y);
-          Pixel to(image.info(), x, y);
-
-          Color col = format().getColor(from);
-          image.format().setPixel(to, col, CompositionMode::SourceCopy);
-        }
-    }
-
-    return image;
 }
 
 } // namespace

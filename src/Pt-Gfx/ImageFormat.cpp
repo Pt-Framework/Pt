@@ -28,7 +28,7 @@
 */
 
 #include <Pt/Gfx/ImageFormat.h>
-#include <Pt/Gfx/ImageInfo.h>
+#include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/Argb8888Format.h>
 #include <Pt/Gfx/Rgb888Format.h>
 #include <Pt/Gfx/Rgb565Format.h>
@@ -49,23 +49,23 @@ ImageFormat::~ImageFormat()
 }
 
 
-void ImageFormat::copy(const ImageInfo& toInfo, const Point& to,
-                       const ImageInfo& fromInfo, const Rect& fromRect,
+void ImageFormat::copy(const ImageView& to, const Point& toPos,
+                       const ImageView& from, const Rect& fromRect,
                        CompositionMode mode) const
 {
-    Rect clipRect(Point(0,0), toInfo.size());
+    Rect clipRect(Point(0,0), to.size());
 
     // clip fromRect to fit into the clip/image rect
-    Point d = clipRect.topLeft() - to;
+    Point d = clipRect.topLeft() - toPos;
     Point fromPos = fromRect.topLeft() + d;
 
     Rect fromClip( fromPos, clipRect.size() );
     fromClip = fromRect.intersect(fromClip);
 
     // account for smaller fromRect
-    Point toClip = to + (fromClip.topLeft() - fromRect.topLeft());
+    Point toClip = toPos + (fromClip.topLeft() - fromRect.topLeft());
     
-    onCopy(toInfo, toClip, fromInfo, fromClip, mode);
+    onCopy(to, toClip, from, fromClip, mode);
 }
 
 

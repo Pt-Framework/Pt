@@ -28,8 +28,7 @@
 */
 
 #include <Pt/Gfx/Rgb565Format.h>
-#include <Pt/Gfx/ImageInfo.h>
-#include <Pt/Gfx/Pixel.h>
+#include <Pt/Gfx/ImageView.h>
 
  namespace Pt {
 
@@ -41,10 +40,10 @@ Rgb565Format::Rgb565Format()
 }
 
 
-std::size_t Rgb565Format::imageSize(const ImageInfo& image) const
+std::size_t Rgb565Format::imageSize(const Size& size, Pt::ssize_t padding) const
 {
-    std::size_t l = (image.width() * 2) + image.padding();
-    std::size_t n = l* image.height();
+    std::size_t l = (size.width() * 2) + padding;
+    std::size_t n = l * size.height();
     return n;
 }
 
@@ -104,21 +103,21 @@ void Rgb565Format::copy(Pixel& to, const Pixel& from, size_t length,
 }
 
 
-void Rgb565Format::onCopy(const ImageInfo& toInfo, const Point& toPoint,
-                          const ImageInfo& fromInfo, const Rect& fromRect,
+void Rgb565Format::onCopy(const ImageView& to, const Point& toPoint,
+                          const ImageView& from, const Rect& fromRect,
                           CompositionMode mode) const
 {
     Pt::ssize_t pixelSize = 2;
 
     // TODO: equals to toInfo.pitch()
-    Pt::ssize_t toStride = (toInfo.width() * pixelSize) + toInfo.padding();
-    Pt::ssize_t fromStride = (fromRect.width() * pixelSize) + fromInfo.padding();
+    Pt::ssize_t toStride = (to.width() * pixelSize) + to.padding();
+    Pt::ssize_t fromStride = (fromRect.width() * pixelSize) + from.padding();
     
     Pt::ssize_t toBegin = (toPoint.y() * toStride) + (toPoint.x() * pixelSize);
     Pt::ssize_t fromBegin = (fromRect.y() * fromStride) + (fromRect.x() * pixelSize);
 
-    Pt::uint8_t* toLine = toInfo.data() + toBegin;
-    const Pt::uint8_t* fromLine = fromInfo.data() + fromBegin;
+    Pt::uint8_t* toLine = to.data() + toBegin;
+    const Pt::uint8_t* fromLine = from.data() + fromBegin;
 
     Pt::ssize_t n = fromRect.width() * pixelSize;
 

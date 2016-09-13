@@ -3,6 +3,7 @@
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/BlockScale.h>
 #include <Pt/System/Logger.h>
 #include <Pt/System/Clock.h>
 

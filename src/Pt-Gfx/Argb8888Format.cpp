@@ -28,8 +28,7 @@
 */
 
 #include <Pt/Gfx/Argb8888Format.h>
-#include <Pt/Gfx/ImageInfo.h>
-#include <Pt/Gfx/Pixel.h>
+#include <Pt/Gfx/ImageView.h>
 
 namespace {
 
@@ -69,10 +68,10 @@ Argb8888Format::Argb8888Format()
 }
 
 
-std::size_t Argb8888Format::imageSize(const ImageInfo& image) const
+std::size_t Argb8888Format::imageSize(const Size& size, Pt::ssize_t padding) const
 {
-    std::size_t l = (image.width() * 4) + image.padding();
-    std::size_t n = l* image.height();
+    std::size_t l = (size.width() * 4) + padding;
+    std::size_t n = l * size.height();
     return n;
 }
 
@@ -80,8 +79,8 @@ std::size_t Argb8888Format::imageSize(const ImageInfo& image) const
 void Argb8888Format::setPixel(Pixel& to, const Pixel& from,
                               CompositionMode mode) const
 {
-    Pt::uint8_t* dst = to.base();//to.imageInfo().data() + to.imageInfo().pitch() * to.y() + to.x() * 4;
-    const Pt::uint8_t* src = from.base(); //from.imageInfo().data() + from.imageInfo().pitch() * from.y() + from.x() * 4;
+    Pt::uint8_t* dst = to.base();
+    const Pt::uint8_t* src = from.base();
 
     switch(mode)
     {
@@ -100,7 +99,7 @@ void Argb8888Format::setPixel(Pixel& to, const Pixel& from,
 void Argb8888Format::setPixel(Pixel& pixel, const Color& c,
                               CompositionMode mode) const
 {
-    Pt::uint8_t* data = pixel.base(); //pixel.imageInfo().data() + pixel.imageInfo().pitch() * pixel.y() + pixel.x() * 4;
+    Pt::uint8_t* data = pixel.base();
 
     switch( mode)
     {
@@ -121,7 +120,7 @@ void Argb8888Format::setPixel(Pixel& pixel, const Color& c,
 
 Color Argb8888Format::getColor(const Pixel& pixel) const
 {
-  const Pt::uint8_t* data = pixel.base(); //pixel.imageInfo().data() + pixel.imageInfo().pitch() * pixel.y() + pixel.x() * 4;
+  const Pt::uint8_t* data = pixel.base();
 
     return Color( data[3] * 257, 
                   data[2] * 257, 
@@ -133,8 +132,8 @@ Color Argb8888Format::getColor(const Pixel& pixel) const
 void Argb8888Format::copy(Pixel& to, const Pixel& from, size_t length, 
                           CompositionMode mode) const
 {
-    Pt::uint8_t* dst = to.base();//to.imageInfo().data() + to.imageInfo().pitch() * to.y() + to.x() * 4;
-    const Pt::uint8_t* src = from.base(); //from.imageInfo().data() + from.imageInfo().pitch() * from.y() + from.x() * 4;
+    Pt::uint8_t* dst = to.base();;
+    const Pt::uint8_t* src = from.base(); 
 
     switch(mode)
     {
@@ -155,21 +154,21 @@ void Argb8888Format::copy(Pixel& to, const Pixel& from, size_t length,
 }
 
 
-void Argb8888Format::onCopy(const ImageInfo& toInfo, const Point& toPoint,
-                            const ImageInfo& fromInfo, const Rect& fromRect,
+void Argb8888Format::onCopy(const ImageView& to, const Point& toPoint,
+                            const ImageView& from, const Rect& fromRect,
                             CompositionMode mode) const
 {
     Pt::ssize_t pixelSize = 4;
 
     // TODO: equals to toInfo.pitch()
-    Pt::ssize_t toStride = (toInfo.width() * pixelSize) + toInfo.padding();
-    Pt::ssize_t fromStride = (fromInfo.width() * pixelSize) + fromInfo.padding();
+    Pt::ssize_t toStride = (to.width() * pixelSize) + to.padding();
+    Pt::ssize_t fromStride = (from.width() * pixelSize) + from.padding();
     
     Pt::ssize_t toBegin = (toPoint.y() * toStride) + (toPoint.x() * pixelSize);
     Pt::ssize_t fromBegin = (fromRect.y() * fromStride) + (fromRect.x() * pixelSize);
 
-    Pt::uint8_t* toLine = toInfo.data() + toBegin;
-    const Pt::uint8_t* fromLine = fromInfo.data() + fromBegin;
+    Pt::uint8_t* toLine = to.data() + toBegin;
+    const Pt::uint8_t* fromLine = from.data() + fromBegin;
 
     switch(mode)
     {

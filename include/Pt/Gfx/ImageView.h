@@ -1,0 +1,345 @@
+/* Copyright (C) 2015 Marc Boris Duerner 
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+  
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  02110-1301 USA
+*/
+
+#ifndef PT_GFX_IMAGEVIEW_H
+#define PT_GFX_IMAGEVIEW_H
+
+#include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/ImageFormat.h>
+#include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/CompositionMode.h>
+#include <Pt/Types.h>
+
+namespace Pt {
+
+namespace Gfx {
+
+class ImageView;
+
+class Pixel
+{
+    public:
+        Pixel(const ImageView& view, Pt::ssize_t x, Pt::ssize_t y);
+
+        Pixel(const Pixel& p)
+        : _view(p._view)
+        , _base(p._base)
+        , _x(p._x)
+        , _y(p._y)
+        {  }
+
+        Pixel& operator=(const Pixel& p);
+
+        Pixel& operator=(const Color& color);
+
+        void assign(const Color& color, CompositionMode mode);
+
+        void assign(const Pixel& p, CompositionMode mode);
+        
+        void reset(const ImageView& view, Pt::ssize_t x, Pt::ssize_t y);
+
+        void reset(const Pixel& p)
+        {
+             _view = p._view;
+             _base = p._base;
+             _x = p._x;
+             _y = p._y;
+        }
+        
+        void advance();
+
+        void advance( Pt::ssize_t n );
+
+        Color toColor() const;
+
+        Color toGray() const;
+
+        const ImageView& view() const
+        { 
+          return *_view; 
+        }
+        
+        Pt::ssize_t x() const
+        {
+            return _x;
+        }
+
+        Pt::ssize_t y() const 
+        {
+            return _y;
+        }
+
+        Pt::uint8_t* base() const
+        {
+            return _base;
+        }
+
+    private:
+        const ImageView* _view;
+        Pt::uint8_t* _base;
+        Pt::ssize_t _x;
+        Pt::ssize_t _y;
+};
+
+
+class PixelIterator
+{
+    public:
+        PixelIterator(const ImageView& image, Pt::ssize_t x, Pt::ssize_t y)
+        : _pixel(image, x, y)
+        {}
+
+        PixelIterator(const PixelIterator& it)
+        : _pixel(it._pixel)
+        {}
+
+        PixelIterator& operator=(const PixelIterator& it)
+        {
+            _pixel.reset(it._pixel);
+            return *this;
+        }
+
+        bool operator!=(const PixelIterator& it) const
+        { 
+            return _pixel.x() != it._pixel.x() || _pixel.y() != it._pixel.y();  
+        }
+
+        bool operator==(const PixelIterator& it) const
+        { 
+            return _pixel.x() == it._pixel.x() && _pixel.y() == it._pixel.y();
+        }
+        
+        Pixel& operator*()
+        { 
+            return _pixel; 
+        }
+
+        PixelIterator& operator++()
+        {            
+            _pixel.advance();
+            return *this; 
+        }
+
+        PixelIterator& operator+=(Pt::ssize_t n)
+        {
+            _pixel.advance(n);  
+            return *this; 
+        }
+
+    private:
+        Pixel _pixel;
+};
+
+
+class ImageView
+{
+    public:
+        explicit ImageView(const ImageFormat& format)
+        : _format(&format)
+        , _data(0)
+        , _size()
+        , _padding(0)
+        {
+            _stride = (_size.width() * _format->pixelStride()) + _padding;
+        }
+
+        ImageView(const ImageFormat& format, Pt::uint8_t* data, 
+                  const Size& size, Pt::ssize_t padding)
+        : _format(&format)
+        , _data(data)
+        , _size(size)
+        , _padding(padding)
+        {
+            _stride = (_size.width() * _format->pixelStride()) + _padding;
+        }
+
+        void set(const ImageFormat& format, Pt::uint8_t* data, 
+                 const Size& size, Pt::ssize_t padding)
+        {
+            _format = &format;
+            _data = data;
+            _size = size;
+            _padding = padding;
+            _stride = (_size.width() * _format->pixelStride()) + _padding;
+        }
+
+        void set(Pt::uint8_t* data, const Size& size, Pt::ssize_t padding)
+        {
+            _data = data;
+            _size = size;
+            _padding = padding;
+            _stride = (_size.width() * _format->pixelStride()) + _padding;
+        }
+
+        PixelIterator begin()
+        { return PixelIterator(*this, 0, 0); }
+
+        PixelIterator end()
+        { return PixelIterator(*this, 0, height()); }
+
+        PixelIterator begin() const
+        { return PixelIterator(*this, 0, 0); }
+
+        PixelIterator end() const
+        { return PixelIterator(*this, 0, height()); }
+
+        const ImageFormat& format() const
+        { return *_format; }
+
+        const Size& size() const
+        { return _size; }
+
+        Pt::ssize_t width() const
+        { return _size.width(); }
+
+        Pt::ssize_t height() const
+        { return _size.height(); }
+
+        bool empty() const
+        { return _size.width() == 0 || _size.height() == 0; }
+
+        Pt::uint8_t* data() const
+        { return _data; }
+
+        std::size_t pixelStride() const
+        { return _format->pixelStride(); }
+
+        Pt::ssize_t stride() const
+        { return _stride; }
+
+        Pt::ssize_t padding() const
+        { return _padding; }
+
+    private:
+        const ImageFormat* _format;
+
+        Pt::uint8_t* _data;
+        Size         _size;
+        Pt::ssize_t  _padding;
+        Pt::ssize_t  _stride;
+};
+
+
+inline Pixel::Pixel(const ImageView& view, Pt::ssize_t x, Pt::ssize_t y)
+: _view(&view)
+, _x(x)
+, _y(y)
+{ 
+    _base = view.data() + view.stride() * y + x * view.pixelStride();
+}
+
+
+inline Pixel& Pixel::operator=(const Pixel& p)
+{
+    assign(p.toColor(), CompositionMode::SourceCopy);
+    return *this;
+}
+
+
+inline Pixel& Pixel::operator=(const Color& color)
+{
+    assign(color, CompositionMode::SourceCopy);
+    return *this;
+}
+
+
+inline void Pixel::reset(const ImageView& view, Pt::ssize_t x, Pt::ssize_t y)
+{
+    _view = &view;
+    _x = x;
+    _y = y;
+
+    _base = view.data() + view.stride() * _y + _x * view.pixelStride();
+}
+
+
+inline void Pixel::advance()
+{
+    if( ++_x >= _view->width() )
+    {
+        _x = 0;
+        ++_y;
+
+        _base += _view->padding();
+    }
+
+    _base += _view->pixelStride();
+}
+
+
+inline void Pixel::advance(Pt::ssize_t n)
+{
+    Pt::ssize_t off = _x + n;
+    _y += off / _view->width();
+    _x += off % _view->width();
+
+    _base = _view->data() + _view->stride() * _y + _x * _view->pixelStride();
+}
+
+
+inline void Pixel::assign(const Color& color, CompositionMode mode)
+{
+    _view->format().setPixel(*this, color, mode);
+}
+
+
+inline void Pixel::assign(const Pixel& p, CompositionMode mode)
+{
+    assign(p.toColor(), mode);
+}
+
+
+inline Color Pixel::toColor() const
+{
+    return _view->format().getColor(*this);
+}
+
+
+inline Color Pixel::toGray() const
+{
+    const Pt::uint32_t rf = 77;
+    const Pt::uint32_t gf = 128;
+    const Pt::uint32_t bf = 51;
+
+    Color c = toColor();
+    
+    const Pt::uint32_t v = (c.red() * rf + 
+                            c.green() * gf + 
+                            c.blue() * bf) >> 8;
+    
+    const Pt::uint16_t s = static_cast<Pt::uint16_t>(v);
+
+    return Color(c.alpha(), s, s, s);
+}
+
+} // namespace
+
+} // namespace
+
+#endif

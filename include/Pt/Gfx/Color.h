@@ -44,8 +44,7 @@ class PT_GFX_API Color
     
     Color(Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b );
     
-
-		float alpha() const
+		Pt::uint16_t alpha() const
 		{
 			return _a;
 		}
