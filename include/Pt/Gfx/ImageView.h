@@ -188,14 +188,6 @@ class ImageView
             _stride = (_size.width() * _format->pixelStride()) + _padding;
         }
 
-        /*void set(Pt::uint8_t* data, const Size& size, Pt::ssize_t padding)
-        {
-            _data = data;
-            _size = size;
-            _padding = padding;
-            _stride = (_size.width() * _format->pixelStride()) + _padding;
-        }*/
-
         PixelIterator begin()
         { return PixelIterator(*this, 0, 0); }
 
