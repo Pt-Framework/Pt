@@ -82,9 +82,6 @@ class ImageInfo
         const ImageFormat& format() const
         { return *_format; }
 
-        Pt::uint8_t* data() const
-        { return _data; }
-
         Pt::ssize_t width() const
         { return _size.width(); }
 
@@ -96,6 +93,9 @@ class ImageInfo
 
         bool empty() const
         { return _size.width() == 0 || _size.height() == 0; }
+
+        Pt::uint8_t* data() const
+        { return _data; }
 
         std::size_t pixelStride() const
         { return _format->pixelStride(); }
@@ -114,7 +114,6 @@ class ImageInfo
         Pt::ssize_t  _padding;
         Pt::ssize_t  _stride;
 };
-
 
 } // namespace
 

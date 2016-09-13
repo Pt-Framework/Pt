@@ -29,6 +29,8 @@
 
 #include <Pt/Gfx/Image.h>
 
+#include <Pt/Gfx/Yuv12Image.h>
+
 namespace Pt {
 
 namespace Gfx {

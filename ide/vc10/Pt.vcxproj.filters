@@ -1389,6 +1389,9 @@
     <ClInclude Include="..\..\include\Pt\Gfx\PixelIterator.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Image.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

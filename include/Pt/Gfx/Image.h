@@ -48,7 +48,7 @@ namespace Gfx {
 class PT_GFX_API Image
 {
   public:
-    Image( const ImageFormat& format = ImageFormat::argb8888() );
+    explicit Image( const ImageFormat& format = ImageFormat::argb8888() );
     
     Image(const ImageFormat& format, const Size& size,
           size_t padding = 0);

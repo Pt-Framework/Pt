@@ -56,6 +56,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb565Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb888Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Size.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Image.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ActivateEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Api.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Application.h" />
