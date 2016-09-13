@@ -165,9 +165,8 @@ class ImageView
         , _data(0)
         , _size()
         , _padding(0)
-        {
-            _stride = (_size.width() * _format->pixelStride()) + _padding;
-        }
+        , _stride(0)
+        { }
 
         ImageView(const ImageFormat& format, Pt::uint8_t* data, 
                   const Size& size, Pt::ssize_t padding)
@@ -189,13 +188,13 @@ class ImageView
             _stride = (_size.width() * _format->pixelStride()) + _padding;
         }
 
-        void set(Pt::uint8_t* data, const Size& size, Pt::ssize_t padding)
+        /*void set(Pt::uint8_t* data, const Size& size, Pt::ssize_t padding)
         {
             _data = data;
             _size = size;
             _padding = padding;
             _stride = (_size.width() * _format->pixelStride()) + _padding;
-        }
+        }*/
 
         PixelIterator begin()
         { return PixelIterator(*this, 0, 0); }

@@ -298,7 +298,7 @@ void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx
         size_t lineOffset = y * _frameBuffer.lineLength() + 
                             pos.x() * pixelSizeInByte;
        
-       Pt::uint8_t* pdata = image.data() + (y - pos.y()) * image.info().stride();
+       Pt::uint8_t* pdata = image.data() + (y - pos.y()) * image.view().stride();
         memcpy( pdata, &buffer[lineOffset], widthInByte );
     }
 }
