@@ -58,10 +58,6 @@ class Pixel
 
         Pixel& operator=(const Color& color);
 
-        void assign(const Color& color, CompositionMode mode);
-
-        void assign(const Pixel& p, CompositionMode mode);
-        
         void reset(const ImageView& view, Pt::ssize_t x, Pt::ssize_t y);
 
         void reset(const Pixel& p)
@@ -76,9 +72,11 @@ class Pixel
 
         void advance( Pt::ssize_t n );
 
-        Color toColor() const;
+        void assign(const Color& color, CompositionMode mode);
 
-        Color toGray() const;
+        void assign(const Pixel& p, CompositionMode mode);
+        
+        Color toColor() const;
 
         const ImageView& view() const
         { 
@@ -99,6 +97,12 @@ class Pixel
         {
             return _base;
         }
+
+        bool operator!=(const Pixel& p) const
+        { return _base != p._base; }
+        
+        bool operator==(const Pixel& p) const
+        { return _base == p._base; }
 
     private:
         const ImageView* _view;
@@ -317,24 +321,6 @@ inline void Pixel::assign(const Pixel& p, CompositionMode mode)
 inline Color Pixel::toColor() const
 {
     return _view->format().getColor(*this);
-}
-
-
-inline Color Pixel::toGray() const
-{
-    const Pt::uint32_t rf = 77;
-    const Pt::uint32_t gf = 128;
-    const Pt::uint32_t bf = 51;
-
-    Color c = toColor();
-    
-    const Pt::uint32_t v = (c.red() * rf + 
-                            c.green() * gf + 
-                            c.blue() * bf) >> 8;
-    
-    const Pt::uint16_t s = static_cast<Pt::uint16_t>(v);
-
-    return Color(c.alpha(), s, s, s);
 }
 
 } // namespace

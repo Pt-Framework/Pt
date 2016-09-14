@@ -27,6 +27,7 @@
 */
 
 #include <Pt/Gfx/Yuv12Image.h>
+#include <Pt/Gfx/Color.h>
 
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/TestSuite.h>
@@ -34,19 +35,17 @@
 
 Pt::uint8_t yuv12Data[] = 
 {
-0,  1,  2,  3, // y plane
-4,  5,  6,  7, 
-8,  9,  10, 11,
-10, 13, 14, 15,
+    0,  1,  2,  3, // y plane
+    4,  5,  6,  7, 
+    8,  9,  10, 11,
+    10, 13, 14, 15,
 
-100, 101, // u plane
-102, 103,
+    100, 101, // u plane
+    102, 103,
 
-200, 201, // v plane
-202, 203
+    200, 201, // v plane
+    202, 203
 };
-
-
 
 class Yuv12Test : public Pt::Unit::TestSuite
 {
@@ -56,6 +55,7 @@ class Yuv12Test : public Pt::Unit::TestSuite
         {
             registerMethod("Pixel",*this, &Yuv12Test::Pixel);
             registerMethod("Iterator", *this, &Yuv12Test::Iterator);
+            registerMethod("Color", *this, &Yuv12Test::Color);
         }
 
     protected:
@@ -105,6 +105,24 @@ class Yuv12Test : public Pt::Unit::TestSuite
 
             PT_UNIT_ASSERT_EQUAL(u, 406 * 4);
             PT_UNIT_ASSERT_EQUAL(v, 806 * 4);
+        }
+
+        void Color()
+        {
+            using namespace Pt::Gfx;
+
+            Pt::uint8_t yuv12[] = { 100, 100, 100 };
+
+            Yuv12Image image( yuv12, Size(1, 1) );
+            Yuv12Pixel pixel(image.view(), 0, 0);
+
+            Pt::Gfx::Color c = pixel.toColor();
+            pixel.assign(c, CompositionMode::SourceCopy);
+
+            PT_UNIT_ASSERT(yuv12[0] > 99 && yuv12[0] < 101);
+            PT_UNIT_ASSERT(yuv12[1] > 99 && yuv12[1] < 101);
+            PT_UNIT_ASSERT(yuv12[2] > 99 && yuv12[2] < 101);
+
         }
 };
 

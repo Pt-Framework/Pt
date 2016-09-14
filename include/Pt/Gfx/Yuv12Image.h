@@ -37,8 +37,7 @@
 namespace Pt {
 
 namespace Gfx {
-/**
-*/
+
 class Yuv12Pixel
 {
     public:
@@ -47,7 +46,7 @@ class Yuv12Pixel
         , _xpos(xpos)
         , _ypos(ypos)
         { 
-            Pt::ssize_t stride = _view->size().width() + _view->padding();
+            Pt::ssize_t stride = _view->stride();
             Pt::ssize_t planeSize = stride * _view->size().height();
             
             _subStride = stride / 2;
@@ -85,14 +84,11 @@ class Yuv12Pixel
             return *this;
         }
 
-        Pt::uint8_t y() const
-        { return *_y; }
-
-        Pt::uint8_t u() const
-        { return *_u; }
-
-        Pt::uint8_t v() const
-        { return *_v; }
+        Yuv12Pixel& operator=(const Color& color)
+        {
+            assign(color, CompositionMode::SourceCopy);
+            return *this;
+        }
 
         void reset(const Yuv12Pixel& p)
         {
@@ -131,11 +127,68 @@ class Yuv12Pixel
             }
         }
 
+        //void advance( Pt::ssize_t n )
+        //{
+        //}
+
+        void assign(const Color& color, CompositionMode)
+        {
+            Pt::int32_t r = color.red();
+            Pt::int32_t g = color.green();
+            Pt::int32_t b = color.blue();
+
+            Pt::int32_t Y = (( 66 * r + 129 * g +  25 * b + 128) >> 16) +  16;
+            Pt::int32_t U = ((-38 * r -  74 * g + 112 * b + 128) >> 16) + 128;
+            Pt::int32_t V = ((112 * r -  94 * g -  18 * b + 128) >> 16) + 128;
+
+            *_y = Y > 255 ? 255 : static_cast<Pt::uint8_t>(Y);
+            *_u = U > 255 ? 255 : static_cast<Pt::uint8_t>(U);
+            *_v = V > 255 ? 255 : static_cast<Pt::uint8_t>(V);
+        }
+
+        void assign(const Yuv12Pixel& p, CompositionMode)
+        {
+            *_y = *(p._y);
+            *_u = *(p._u);
+            *_v = *(p._v);
+        }
+
+        Color toColor() const
+        {
+            Pt::uint32_t R = ( 298 * (*_y - 16)                     + 409 * (*_v - 128) + 128);
+            Pt::uint32_t G = ( 298 * (*_y - 16) - 100 * (*_u - 128) - 208 * (*_v - 128) + 128);
+            Pt::uint32_t B = ( 298 * (*_y - 16) + 516 * (*_u - 128)                     + 128);
+
+            Pt::uint16_t r = R > 65535 ? 65535 : static_cast<Pt::uint16_t>(R);
+            Pt::uint16_t g = G > 65535 ? 65535 : static_cast<Pt::uint16_t>(G);
+            Pt::uint16_t b = B > 65535 ? 65535 : static_cast<Pt::uint16_t>(B);
+            
+            return Color(r, g, b);
+        }
+
         bool operator!=(const Yuv12Pixel& p) const
         { return _y != p._y; }
         
         bool operator==(const Yuv12Pixel& p) const
         { return _y == p._y; }
+
+        Pt::uint8_t y() const
+        { return *_y; }
+
+        void setY(Pt::uint8_t y) const
+        { *_y = y; }
+
+        Pt::uint8_t u() const
+        { return *_u; }
+
+        void setU(Pt::uint8_t u) const
+        { *_u = u; }
+
+        Pt::uint8_t v() const
+        { return *_v; }
+
+        void setV(Pt::uint8_t v) const
+        { *_v = v; }
 
     private:
         const ImageView*  _view;

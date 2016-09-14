@@ -2582,5 +2582,8 @@
     <ClCompile Include="..\..\src\Pt-Gfx\tests\Yuv12Test.cpp">
       <Filter>Pt-Gfx\tests</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\Yuv12Format.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

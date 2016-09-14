@@ -31,42 +31,33 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ImageFormat.h>
-#include <Pt/Types.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-class Yuv12Format : public ImageFormat
+class PT_GFX_API Yuv12Format : public ImageFormat
 {   
     public:
-        Yuv12Format()
-        : ImageFormat(1, 3)
-        {}
+        Yuv12Format();
 
-        virtual std::size_t imageSize(const Size& size, Pt::ssize_t padding) const
-        { return 0; }
+        virtual std::size_t imageSize(const Size& size, Pt::ssize_t padding) const;
         
         virtual void setPixel(Pixel& to, const Pixel& from,
-                              CompositionMode mode) const
-        {}
+                              CompositionMode mode) const;
 
         virtual void setPixel(Pixel& pixel, const Color& c,
-                              CompositionMode mode) const
-        {}
+                              CompositionMode mode) const;
         
-        virtual Color getColor(const Pixel& pixel) const
-        { return Color(0, 0, 0); }
+        virtual Color getColor(const Pixel& pixel) const;
 
         virtual void copy(Pixel& dst, const Pixel& src, size_t length, 
-                          CompositionMode mode) const
-        {}
+                          CompositionMode mode) const;
 
     protected:
         virtual void onCopy(const ImageView& to, const Point& toPoint,
                             const ImageView& from, const Rect& fromRect,
-                            CompositionMode mode) const
-        {}
+                            CompositionMode mode) const;
 };
 
 } // namespace

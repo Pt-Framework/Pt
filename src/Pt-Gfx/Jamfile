@@ -34,7 +34,9 @@ SharedLibrary Pt-Gfx : Argb8888Format.cpp
                        PngReader.cpp
                        Rasterizer.cpp
                        Rgb888Format.cpp
-                       Rgb565Format.cpp ;
+                       Rgb565Format.cpp 
+                       Yuv12Format.cpp
+                       ;
 
 LinkSharedLibraries Pt-Gfx : Pt Pt-System ;
 MakeLocate Pt-Gfx : $(PT_OUTPUT_TARGET) ;

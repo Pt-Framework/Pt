@@ -504,6 +504,7 @@
     <ClCompile Include="..\..\src\Pt-Gfx\tests\ImagePainterTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\Pt-Gfx-test.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\Yuv12Test.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\Yuv12Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Button.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp" />
