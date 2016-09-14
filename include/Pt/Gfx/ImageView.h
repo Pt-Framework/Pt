@@ -112,57 +112,57 @@ class Pixel
 };
 
 
-class PixelIterator
-{
-    public:
-        PixelIterator(const ImageView& image, Pt::ssize_t x, Pt::ssize_t y)
-        : _pixel(image, x, y)
-        {}
-
-        PixelIterator(const PixelIterator& it)
-        : _pixel(it._pixel)
-        {}
-
-        PixelIterator& operator=(const PixelIterator& it)
-        {
-            _pixel.reset(it._pixel);
-            return *this;
-        }
-
-        bool operator!=(const PixelIterator& it) const
-        { 
-            return _pixel.x() != it._pixel.x() || _pixel.y() != it._pixel.y();  
-        }
-
-        bool operator==(const PixelIterator& it) const
-        { 
-            return _pixel.x() == it._pixel.x() && _pixel.y() == it._pixel.y();
-        }
-        
-        Pixel& operator*()
-        { 
-            return _pixel; 
-        }
-
-        PixelIterator& operator++()
-        {            
-            _pixel.advance();
-            return *this; 
-        }
-
-        PixelIterator& operator+=(Pt::ssize_t n)
-        {
-            _pixel.advance(n);  
-            return *this; 
-        }
-
-    private:
-        Pixel _pixel;
-};
-
-
 class ImageView
 {
+    public:
+        class PixelIterator
+        {
+            public:
+                PixelIterator(const ImageView& image, Pt::ssize_t x, Pt::ssize_t y)
+                : _pixel(image, x, y)
+                {}
+
+                PixelIterator(const PixelIterator& it)
+                : _pixel(it._pixel)
+                {}
+
+                PixelIterator& operator=(const PixelIterator& it)
+                {
+                    _pixel.reset(it._pixel);
+                    return *this;
+                }
+
+                bool operator!=(const PixelIterator& it) const
+                { 
+                    return _pixel.x() != it._pixel.x() || _pixel.y() != it._pixel.y();  
+                }
+
+                bool operator==(const PixelIterator& it) const
+                { 
+                    return _pixel.x() == it._pixel.x() && _pixel.y() == it._pixel.y();
+                }
+        
+                Pixel& operator*()
+                { 
+                    return _pixel; 
+                }
+
+                PixelIterator& operator++()
+                {            
+                    _pixel.advance();
+                    return *this; 
+                }
+
+                PixelIterator& operator+=(Pt::ssize_t n)
+                {
+                    _pixel.advance(n);  
+                    return *this; 
+                }
+
+            private:
+                Pixel _pixel;
+        };
+    
     public:
         ImageView()
         : _format( &ImageFormat::argb8888() )

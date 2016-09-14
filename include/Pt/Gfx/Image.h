@@ -107,6 +107,9 @@ class PT_GFX_API ImageBase
 class PT_GFX_API Image : public ImageBase
 {
     public:
+        typedef ImageView::PixelIterator PixelIterator;
+
+    public:
         Image();
     
         Image(const ImageFormat& format, const Size& size,
@@ -148,14 +151,14 @@ template <typename PixelT, typename FormatT>
 class BasicImage : public ImageBase
 {
     public:
-        class Iterator
+        class PixelIterator
         {
             public:
-                Iterator(const ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+                PixelIterator(const ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
                 : _pixel(view, xpos, ypos)
                 { }
 
-                Iterator& operator=(const Iterator& it)
+                PixelIterator& operator=(const PixelIterator& it)
                 {
                     _pixel.reset(it._pixel);
                     return *this;
@@ -164,16 +167,16 @@ class BasicImage : public ImageBase
                 PixelT& operator*()
                 { return _pixel; }
 
-                Iterator& operator++()
+                PixelIterator& operator++()
                 {
                     _pixel.advance();
                     return *this; 
                 }
 
-                bool operator!=(const Iterator& it) const
+                bool operator!=(const PixelIterator& it) const
                 { return _pixel != it._pixel; }
         
-                bool operator==(const Iterator& it) const
+                bool operator==(const PixelIterator& it) const
                 { return _pixel == it._pixel; }
 
             private:
@@ -196,11 +199,11 @@ class BasicImage : public ImageBase
         virtual ~BasicImage()
         {}
 
-        Iterator begin()
-        { return Iterator(view(), 0, 0); }
+        PixelIterator begin()
+        { return PixelIterator(view(), 0, 0); }
 
-        Iterator end()
-        { return Iterator(view(), 0, height()); }
+        PixelIterator end()
+        { return PixelIterator(view(), 0, height()); }
 
     private:
         FormatT                  _format;

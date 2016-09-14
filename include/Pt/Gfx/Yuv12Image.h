@@ -120,7 +120,7 @@ class Yuv12Pixel
                 _xpos = 0;
                 ++_ypos;
             }
-            else  if(_xpos % 2 == 0)
+            else if(_xpos % 2 == 0)
             {
                 ++_u;
                 ++_v;
