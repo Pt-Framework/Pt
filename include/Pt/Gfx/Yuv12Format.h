@@ -40,7 +40,9 @@ namespace Gfx {
 class Yuv12Format : public ImageFormat
 {   
     public:
-        Yuv12Format();
+        Yuv12Format()
+        : ImageFormat(1, 3)
+        {}
 
         virtual std::size_t imageSize(const Size& size, Pt::ssize_t padding) const
         { return 0; }

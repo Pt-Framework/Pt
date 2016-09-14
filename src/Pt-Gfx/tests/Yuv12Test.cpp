@@ -26,9 +26,27 @@
   02110-1301 USA
 */
 
+#include <Pt/Gfx/Yuv12Image.h>
+
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/TestSuite.h>
 #include <Pt/Unit/RegisterTest.h>
+
+Pt::uint8_t yuv12Data[] = 
+{
+0,  1,  2,  3, // y plane
+4,  5,  6,  7, 
+8,  9,  10, 11,
+10, 13, 14, 15,
+
+100, 101, // u plane
+102, 103,
+
+200, 201, // v plane
+202, 203
+};
+
+
 
 class Yuv12Test : public Pt::Unit::TestSuite
 {
@@ -36,12 +54,57 @@ class Yuv12Test : public Pt::Unit::TestSuite
         Yuv12Test()
         : Pt::Unit::TestSuite("Yuv12Test")
         {
-            Pt::Unit::TestSuite::registerMethod("Iterator", *this, &Yuv12Test::Iterator);
+            registerMethod("Pixel",*this, &Yuv12Test::Pixel);
+            registerMethod("Iterator", *this, &Yuv12Test::Iterator);
         }
 
     protected:
+        void Pixel()
+        {
+            using namespace Pt::Gfx;
+
+            Yuv12Image image( yuv12Data, Size(4, 4) );
+
+            Yuv12Pixel pixel(image.view(), 1, 3);
+            
+            Pt::uint8_t y = pixel.y();
+            Pt::uint8_t u = pixel.u();
+            Pt::uint8_t v = pixel.v();
+            
+            PT_UNIT_ASSERT_EQUAL(y, 13);
+            PT_UNIT_ASSERT_EQUAL(u, 102);
+            PT_UNIT_ASSERT_EQUAL(v, 202);
+
+            pixel.advance();
+
+            Pt::uint8_t y2 = pixel.y();
+            Pt::uint8_t u2 = pixel.u();
+            Pt::uint8_t v2 = pixel.v();
+            
+            PT_UNIT_ASSERT_EQUAL(y2, 14);
+            PT_UNIT_ASSERT_EQUAL(u2, 103);
+            PT_UNIT_ASSERT_EQUAL(v2, 203);
+        }
+
         void Iterator()
         {
+            using namespace Pt::Gfx;
+
+            Yuv12Image image( yuv12Data, Size(4, 4) );
+
+            Yuv12Image::Iterator it = image.begin();
+            Yuv12Image::Iterator end = image.end();
+
+            Pt::uint32_t u = 0;
+            Pt::uint32_t v = 0;
+            for( ; it != end; ++it)
+            {
+                v += (*it).v();
+                u += (*it).u();
+            }
+
+            PT_UNIT_ASSERT_EQUAL(u, 406 * 4);
+            PT_UNIT_ASSERT_EQUAL(v, 806 * 4);
         }
 };
 

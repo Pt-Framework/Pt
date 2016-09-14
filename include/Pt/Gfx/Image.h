@@ -161,7 +161,7 @@ class BasicImage : public ImageBase
                     return *this;
                 }
 
-                PixelT operator*()
+                PixelT& operator*()
                 { return _pixel; }
 
                 Iterator& operator++()
@@ -197,10 +197,10 @@ class BasicImage : public ImageBase
         {}
 
         Iterator begin()
-        { return Iterator(_view, 0, 0); }
+        { return Iterator(view(), 0, 0); }
 
         Iterator end()
-        { return Iterator(_view, 0, height()); }
+        { return Iterator(view(), 0, height()); }
 
     private:
         FormatT                  _format;

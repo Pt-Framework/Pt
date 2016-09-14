@@ -37,7 +37,8 @@
 namespace Pt {
 
 namespace Gfx {
-
+/**
+*/
 class Yuv12Pixel
 {
     public:
@@ -46,14 +47,31 @@ class Yuv12Pixel
         , _xpos(xpos)
         , _ypos(ypos)
         { 
-            std::size_t off = (_view->size().width() + _view->padding()) * ypos + xpos;
-            _y = _view->data() + off;
+            Pt::ssize_t stride = _view->size().width() + _view->padding();
+            Pt::ssize_t planeSize = stride * _view->size().height();
+            
+            _subStride = stride / 2;
+            Pt::ssize_t subPlaneSize = planeSize / 4;
+
+            Pt::ssize_t yOffset = stride * ypos + xpos;
+            _y = _view->data() + yOffset;
+
+            Pt::ssize_t subXPos = xpos / 2;
+            Pt::ssize_t subYPos = ypos / 2;
+            Pt::ssize_t subOffset = _subStride * subYPos + subXPos;
+
+            Pt::ssize_t uOffset = planeSize + subOffset;
+            _u = _view->data() + uOffset;
+
+            Pt::ssize_t vOffset = uOffset + subPlaneSize;
+            _v = _view->data() + vOffset;
         }
 
         Yuv12Pixel(const Yuv12Pixel& p)
         : _view(p._view)
         , _xpos(p._xpos)
         , _ypos(p._ypos)
+        , _subStride(p._subStride)
         , _y(p._y)
         , _u(p._u)
         , _v(p._v)
@@ -67,11 +85,21 @@ class Yuv12Pixel
             return *this;
         }
 
+        Pt::uint8_t y() const
+        { return *_y; }
+
+        Pt::uint8_t u() const
+        { return *_u; }
+
+        Pt::uint8_t v() const
+        { return *_v; }
+
         void reset(const Yuv12Pixel& p)
         {
              _view = p._view;            
              _xpos = p._xpos;
              _ypos = p._ypos;
+             _subStride = p._subStride;
 
             _y = p._y;
             _u = p._u;
@@ -82,17 +110,24 @@ class Yuv12Pixel
         {
             ++_y;
 
-            size_t uvOffset = _xpos % 2;
-            _u += uvOffset;
-            _v += uvOffset;
-
-            if( ++_xpos == _view->size().width() )
+            if( ++_xpos >= _view->width() )
             {
+                ++_u;
+                ++_v;
+                
+                if(_ypos % 2 == 0)
+                {
+                  _u -= _subStride;
+                  _v -= _subStride;
+                }
+
                 _xpos = 0;
                 ++_ypos;
-
-                _y += (_view->size().width() / 2) + _view->padding();
-                _u += (_view->size().width() / 2) + _view->padding();
+            }
+            else  if(_xpos % 2 == 0)
+            {
+                ++_u;
+                ++_v;
             }
         }
 
@@ -106,12 +141,18 @@ class Yuv12Pixel
         const ImageView*  _view;
         Pt::ssize_t _xpos;
         Pt::ssize_t _ypos;
+        Pt::ssize_t _subStride;
         Pt::uint8_t* _y;
         Pt::uint8_t* _u;
         Pt::uint8_t* _v;
 };
 
+/** @brief YV-12 Image.
 
+    If the Y plane has pad bytes after each row, then the U and V planes have
+    half as many pad bytes after their rows. In other words, two U/V rows 
+    (including padding) is exactly as long as one Y row (including padding).
+*/
 class Yuv12Image : public BasicImage<Yuv12Pixel, Yuv12Format>
 {
     public:
