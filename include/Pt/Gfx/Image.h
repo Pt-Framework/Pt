@@ -40,27 +40,15 @@ namespace Pt {
 
 namespace Gfx {
 
-class PT_GFX_API Image
+class PT_GFX_API ImageBase
 {
     public:
-        explicit Image( const ImageFormat& format = ImageFormat::argb8888() );
+        ImageBase();
+
+        ImageBase(const ImageFormat& format, Pt::uint8_t* data, 
+                  const Size& size, Pt::ssize_t padding);
     
-        Image(const ImageFormat& format, const Size& size,
-              size_t padding = 0);
-
-        Image(const ImageFormat& format, Pt::uint8_t* buffer, 
-              const Size& size, size_t padding = 0);
-    
-        Image(const Image& image);
-              
-        virtual ~Image();
-
-        const Image& operator=(const Image& image);
-
-        void reset(const ImageFormat& format, const Size& size, size_t padding = 0);   
-
-        void reset(const ImageFormat& format, Pt::uint8_t* buffer, 
-                   const Size& size, size_t padding = 0);
+        virtual ~ImageBase();
 
         const ImageView& view() const
         {
@@ -72,19 +60,24 @@ class PT_GFX_API Image
             return _view.format();
         }
 
+        const Size& size() const
+        {
+            return _view.size();
+        }
+
         Pt::ssize_t width() const
         {
-          return _view.width();
+            return _view.width();
         }
 
         Pt::ssize_t height() const
         {
-          return _view.height();
+            return _view.height();
         }
     
-        const Size& size() const
+        Pt::ssize_t padding() const
         {
-            return _view.size();
+            return _view.padding();
         }
 
         Pt::uint8_t* data()
@@ -102,21 +95,116 @@ class PT_GFX_API Image
             return _view.empty();
         }
 
+    protected:
+        void init(const ImageFormat& format, Pt::uint8_t* data, 
+                  const Size& size, Pt::ssize_t padding);
+
+    private:
+        ImageView _view;
+};
+
+
+class PT_GFX_API Image : public ImageBase
+{
+    public:
+        Image();
+    
+        Image(const ImageFormat& format, const Size& size,
+              size_t padding = 0);
+
+        Image(const ImageFormat& format, Pt::uint8_t* buffer, 
+              const Size& size, size_t padding = 0);
+    
+        Image(const Image& image);
+              
+        virtual ~Image();
+
+        const Image& operator=(const Image& image);
+
+        void reset(const ImageFormat& format, 
+                   const Size& size, Pt::ssize_t padding = 0);   
+
+        void reset(const ImageFormat& format, Pt::uint8_t* data, 
+                   const Size& size, Pt::ssize_t padding = 0);
+
         PixelIterator begin()
-        { return _view.begin(); }
+        { return view().begin(); }
 
         PixelIterator end()
-        { return _view.end(); }
+        { return view().end(); }
 
         PixelIterator begin() const
-        { return _view.begin(); }
+        { return view().begin(); }
 
         PixelIterator end() const
-        { return _view.end(); }
+        { return view().end(); }
 
     private:
         std::vector<Pt::uint8_t> _buffer;
-        ImageView                _view;
+};
+
+
+template <typename PixelT, typename FormatT>
+class BasicImage : public ImageBase
+{
+    public:
+        class Iterator
+        {
+            public:
+                Iterator(const ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+                : _pixel(view, xpos, ypos)
+                { }
+
+                Iterator& operator=(const Iterator& it)
+                {
+                    _pixel.reset(it._pixel);
+                    return *this;
+                }
+
+                PixelT operator*()
+                { return _pixel; }
+
+                Iterator& operator++()
+                {
+                    _pixel.advance();
+                    return *this; 
+                }
+
+                bool operator!=(const Iterator& it) const
+                { return _pixel != it._pixel; }
+        
+                bool operator==(const Iterator& it) const
+                { return _pixel == it._pixel; }
+
+            private:
+                PixelT _pixel;
+        };
+
+    public:
+        BasicImage(const Size& size, size_t padding = 0)
+        : _buffer( _format.imageSize(size, padding) )
+        { 
+            Pt::uint8_t* data = _buffer.empty() ? 0 : &_buffer[0];
+            init(_format, data, size, padding);
+        }
+
+        BasicImage(Pt::uint8_t* data, const Size& size, Pt::ssize_t padding = 0)
+        { 
+            init(_format, data, size, padding);
+        }
+
+        virtual ~BasicImage()
+        {}
+
+        Iterator begin()
+        { return Iterator(_view, 0, 0); }
+
+        Iterator end()
+        { return Iterator(_view, 0, height()); }
+
+    private:
+        FormatT                  _format;
+        std::vector<Pt::uint8_t> _buffer;
 };
 
 } // namespace

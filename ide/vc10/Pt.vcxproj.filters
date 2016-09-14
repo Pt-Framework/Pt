@@ -124,6 +124,9 @@
     <Filter Include="Pt-Hmi\drawing">
       <UniqueIdentifier>{42c34412-702e-4b18-b4a0-abe0294ae9f5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pt-Gfx\tests">
+      <UniqueIdentifier>{95cc65fe-94a1-48f6-95de-b0af331fe0d2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Pt\Allocator.h">
@@ -1392,7 +1395,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Algorithm.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.h">
+    <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Format.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1532,6 +1535,9 @@
     </None>
     <None Include="..\..\src\Pt-Gfx\Jamfile">
       <Filter>Pt-Gfx</Filter>
+    </None>
+    <None Include="..\..\src\Pt-Gfx\tests\Jamfile">
+      <Filter>Pt-Gfx\tests</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -2563,6 +2569,18 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\ClipPolygon.cpp">
       <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\tests\BlockscaleTest.cpp">
+      <Filter>Pt-Gfx\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\tests\ImagePainterTest.cpp">
+      <Filter>Pt-Gfx\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\tests\Pt-Gfx-test.cpp">
+      <Filter>Pt-Gfx\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\tests\Yuv12Test.cpp">
+      <Filter>Pt-Gfx\tests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

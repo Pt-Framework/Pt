@@ -2,6 +2,14 @@ SubDir PT_TOP src Pt-Gfx tests ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx ;
 
+Main Pt-Gfx-test : Pt-Gfx-test.cpp 
+                   BlockScaleTest.cpp
+                   Yuv12Test.cpp ;
+
+LinkSharedLibraries Pt-Gfx-test : Pt Pt-Gfx Pt-System Pt-Unit ;
+MakeLocate Pt-Gfx-test : $(PT_OUTPUT_TARGET) ;
+RunUnitTest Pt-Gfx-test : $(PT_OUTPUT_TEST) ;
+
 Main ImagePainterTest : ImagePainterTest.cpp ;
 LinkSharedLibraries ImagePainterTest : Pt Pt-Gfx Pt-System ;
 MakeLocate ImagePainterTest : $(PT_OUTPUT_TARGET) ;

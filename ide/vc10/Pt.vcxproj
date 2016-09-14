@@ -34,7 +34,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Algorithm.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Api.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Argb8888Format.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\BasicImage.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\BlockScale.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Brush.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ClipLine.h" />
@@ -57,6 +56,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb565Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb888Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Size.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Image.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ActivateEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Api.h" />
@@ -446,6 +446,7 @@
     <None Include="..\..\Jamconfigure" />
     <None Include="..\..\Jamfile" />
     <None Include="..\..\src\Pt-Gfx\Jamfile" />
+    <None Include="..\..\src\Pt-Gfx\tests\Jamfile" />
     <None Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\CoWindow.mm" />
     <None Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.mm" />
@@ -499,6 +500,10 @@
     <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rgb565Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rgb888Format.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\tests\BlockscaleTest.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\tests\ImagePainterTest.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\tests\Pt-Gfx-test.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\tests\Yuv12Test.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Button.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp" />

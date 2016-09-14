@@ -160,6 +160,14 @@ class PixelIterator
 class ImageView
 {
     public:
+        ImageView()
+        : _format( &ImageFormat::argb8888() )
+        , _data(0)
+        , _size(0, 0)
+        , _padding(0)
+        , _stride(0)
+        { }
+
         explicit ImageView(const ImageFormat& format)
         : _format(&format)
         , _data(0)

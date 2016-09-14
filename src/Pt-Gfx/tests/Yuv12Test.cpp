@@ -1,6 +1,5 @@
-/* Copyright (C) 2010-2016 Marc Boris Duerner 
-   Copyright (C) 2006-2010 by Aloysius Indrayanto
-
+/* Copyright (C) 2016 Marc Boris Duerner 
+  
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -27,49 +26,23 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_ALGORITHM_H
-#define PT_GFX_ALGORITHM_H
+#include <Pt/Unit/Assertion.h>
+#include <Pt/Unit/TestSuite.h>
+#include <Pt/Unit/RegisterTest.h>
 
-#include <Pt/Gfx/Api.h>
-
-namespace Pt {
-
-namespace Gfx {
-
-template<typename InputIteratorT, typename OutputIteratorT>
-void copy(InputIteratorT from, InputIteratorT fromEnd, OutputIteratorT to)
+class Yuv12Test : public Pt::Unit::TestSuite
 {
-    for( ; from != fromEnd; ++from, ++to)
-        *to = *from;
-}
+    public:
+        Yuv12Test()
+        : Pt::Unit::TestSuite("Yuv12Test")
+        {
+            Pt::Unit::TestSuite::registerMethod("Iterator", *this, &Yuv12Test::Iterator);
+        }
 
+    protected:
+        void Iterator()
+        {
+        }
+};
 
-template<typename OutputIteratorT, typename T>
-void fill(OutputIteratorT to, OutputIteratorT toEnd, const T& value)
-{
-    for (; to != toEnd; ++to)
-        *to = value;
-}
-
-
-template<typename InputIteratorT, typename OutputIteratorT, typename OperationT>
-void transform(InputIteratorT from, InputIteratorT fromEnd, 
-               OutputIteratorT to, OperationT op)
-{
-    for( ; from != fromEnd; ++from, ++to)
-        op(*to, *from);
-}
-
-
-template<typename IteratorT, typename OperationT>
-void transform(IteratorT begin, IteratorT end, OperationT op)
-{
-    for( ; begin != end; ++begin) 
-        op(*begin);
-}
-
-} // namespace
-
-} // namespace
-
-#endif
+Pt::Unit::RegisterTest<Yuv12Test> register_Yuv12Test;

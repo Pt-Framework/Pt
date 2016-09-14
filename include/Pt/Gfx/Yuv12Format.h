@@ -1,6 +1,5 @@
-/* Copyright (C) 2010-2016 Marc Boris Duerner 
-   Copyright (C) 2006-2010 by Aloysius Indrayanto
-
+/* Copyright (C) 2016 Marc Boris Duerner 
+  
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -27,46 +26,46 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_ALGORITHM_H
-#define PT_GFX_ALGORITHM_H
+#ifndef PT_GFX_YUV12FORMAT_H
+#define PT_GFX_YUV12FORMAT_H
 
 #include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/ImageFormat.h>
+#include <Pt/Types.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-template<typename InputIteratorT, typename OutputIteratorT>
-void copy(InputIteratorT from, InputIteratorT fromEnd, OutputIteratorT to)
-{
-    for( ; from != fromEnd; ++from, ++to)
-        *to = *from;
-}
+class Yuv12Format : public ImageFormat
+{   
+    public:
+        Yuv12Format();
 
+        virtual std::size_t imageSize(const Size& size, Pt::ssize_t padding) const
+        { return 0; }
+        
+        virtual void setPixel(Pixel& to, const Pixel& from,
+                              CompositionMode mode) const
+        {}
 
-template<typename OutputIteratorT, typename T>
-void fill(OutputIteratorT to, OutputIteratorT toEnd, const T& value)
-{
-    for (; to != toEnd; ++to)
-        *to = value;
-}
+        virtual void setPixel(Pixel& pixel, const Color& c,
+                              CompositionMode mode) const
+        {}
+        
+        virtual Color getColor(const Pixel& pixel) const
+        { return Color(0, 0, 0); }
 
+        virtual void copy(Pixel& dst, const Pixel& src, size_t length, 
+                          CompositionMode mode) const
+        {}
 
-template<typename InputIteratorT, typename OutputIteratorT, typename OperationT>
-void transform(InputIteratorT from, InputIteratorT fromEnd, 
-               OutputIteratorT to, OperationT op)
-{
-    for( ; from != fromEnd; ++from, ++to)
-        op(*to, *from);
-}
-
-
-template<typename IteratorT, typename OperationT>
-void transform(IteratorT begin, IteratorT end, OperationT op)
-{
-    for( ; begin != end; ++begin) 
-        op(*begin);
-}
+    protected:
+        virtual void onCopy(const ImageView& to, const Point& toPoint,
+                            const ImageView& from, const Rect& fromRect,
+                            CompositionMode mode) const
+        {}
+};
 
 } // namespace
 

@@ -30,43 +30,13 @@
 #define PT_GFX_YUV12IMAGE_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/BasicImage.h>
+#include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Yuv12Format.h>
 #include <Pt/Types.h>
 
 namespace Pt {
 
 namespace Gfx {
-
-class Yuv12Format : public ImageFormat
-{   
-    public:
-        Yuv12Format();
-
-        virtual std::size_t imageSize(const Size& size, Pt::ssize_t padding) const
-        { return 0; }
-        
-        virtual void setPixel(Pixel& to, const Pixel& from,
-                              CompositionMode mode) const
-        {}
-
-        virtual void setPixel(Pixel& pixel, const Color& c,
-                              CompositionMode mode) const
-        {}
-        
-        virtual Color getColor(const Pixel& pixel) const
-        { return Color(0, 0, 0); }
-
-        virtual void copy(Pixel& dst, const Pixel& src, size_t length, 
-                          CompositionMode mode) const
-        {}
-
-    protected:
-        virtual void onCopy(const ImageView& to, const Point& toPoint,
-                            const ImageView& from, const Rect& fromRect,
-                            CompositionMode mode) const
-        {}
-};
-
 
 class Yuv12Pixel
 {
