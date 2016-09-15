@@ -59,8 +59,8 @@ class Yuv12Test : public Pt::Unit::TestSuite
             registerMethod("Iterator", *this, &Yuv12Test::Iterator);
             registerMethod("Color", *this, &Yuv12Test::Color);
 
-            registerMethod("Benchmark", *this, &Yuv12Test::Benchmark);
-            registerMethod("BenchmarkRaw", *this, &Yuv12Test::BenchmarkRaw);
+            //registerMethod("BenchmarkPixel", *this, &Yuv12Test::Benchmark);
+            //registerMethod("BenchmarkDirectYUV", *this, &Yuv12Test::BenchmarkRaw);
         }
 
     protected:
@@ -134,43 +134,49 @@ class Yuv12Test : public Pt::Unit::TestSuite
         {
             using namespace Pt::Gfx;
 
-            Yuv12Format format;
-            Image image( format, Size(1000, 1000) );
-            Image::PixelIterator it = image.begin();
-            Image::PixelIterator end = image.end();
-            
-            Pt::Gfx::Color color(100, 100, 100);
-            
-            Pt::System::Clock clock;
-            clock.start();
-            
-            for( ; it != end; ++it)
+            for(int n = 0; n < 10; ++n)
             {
-                (*it) = color;
-            }
+                Yuv12Format format;
+                Image image( format, Size(1000, 1000) );
+                Image::PixelIterator it = image.begin();
+                Image::PixelIterator end = image.end();
+            
+                Pt::Gfx::Color color(100, 100, 100);
+            
+                Pt::System::Clock clock;
+                clock.start();
+            
+                for( ; it != end; ++it)
+                {
+                    (*it) = color;
+                }
 
-            std::clog << "pixel: " << clock.stop().toUSecs() << std::endl;
+                std::clog << "pixel: " << clock.stop().toUSecs() << std::endl;
+            }
         }
 
         void BenchmarkRaw()
         {
             using namespace Pt::Gfx;
-
-            Yuv12Image image( Size(1000, 1000) );
-            Yuv12Image::PixelIterator it = image.begin();
-            Yuv12Image::PixelIterator end = image.end();
             
-            Pt::Gfx::Color color(100, 100, 100);
-            
-            Pt::System::Clock clock;
-            clock.start();
-            
-            for( ; it != end; ++it)
+            for(int n = 0; n < 10; ++n)
             {
-                (*it) = color;
-            }
+                Yuv12Image image( Size(1000, 1000) );
+                Yuv12Image::PixelIterator it = image.begin();
+                Yuv12Image::PixelIterator end = image.end();
+            
+                Pt::Gfx::Color color(100, 100, 100);
+            
+                Pt::System::Clock clock;
+                clock.start();
+            
+                for( ; it != end; ++it)
+                {
+                    (*it) = color;
+                }
 
-            std::clog << "yv12 direct: " << clock.stop().toUSecs() << std::endl;
+                std::clog << "yv12 direct: " << clock.stop().toUSecs() << std::endl;
+            }
         }
 };
 

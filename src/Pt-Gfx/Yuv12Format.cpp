@@ -53,24 +53,25 @@ std::size_t Yuv12Format::imageSize(const Size& size, Pt::ssize_t padding) const
 void Yuv12Format::setPixel(Pixel& to, const Pixel& from,
                            CompositionMode mode) const
 {
-    Yuv12Pixel toYuv(to.view(), to.x(), to.y() );
-    Yuv12Pixel fromYuv(from.view(), from.x(), from.y() );
+    Yuv12Pixel toYuv( to.view(), to.base(), to.x(), to.y() );
+    Yuv12Pixel fromYuv( from.view(), from.base(), from.x(), from.y() );
 
-    toYuv = fromYuv;
+    toYuv.assign(fromYuv, mode);
 }
 
 
 void Yuv12Format::setPixel(Pixel& p, const Color& c,
                            CompositionMode mode) const
 {
-    Yuv12Pixel yuv(p.view(), p.x(), p.y() );
+    Yuv12Pixel yuv( p.view(), p.base(), p.x(), p.y() );
     yuv.assign(c, mode);
+    
 }
 
 
 Color Yuv12Format::getColor(const Pixel& p) const
 {
-    Yuv12Pixel yuv(p.view(), p.x(), p.y() );
+    Yuv12Pixel yuv( p.view(), p.base(), p.x(), p.y() );
     return yuv.toColor();
 }
 

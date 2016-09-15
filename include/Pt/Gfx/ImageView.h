@@ -79,27 +79,19 @@ class Pixel
         Color toColor() const;
 
         const ImageView& view() const
-        { 
-          return *_view; 
-        }
+        { return *_view; }
         
         Pt::ssize_t x() const
-        {
-            return _x;
-        }
+        { return _x; }
 
         Pt::ssize_t y() const 
-        {
-            return _y;
-        }
+        { return _y; }
 
         Pt::uint8_t* base() const
-        {
-            return _base;
-        }
+        { return _base; }
 
         bool operator!=(const Pixel& p) const
-        { return _base != p._base; }
+        {  return _base != p._base; }
         
         bool operator==(const Pixel& p) const
         { return _base == p._base; }
@@ -133,19 +125,13 @@ class ImageView
                 }
 
                 bool operator!=(const PixelIterator& it) const
-                { 
-                    return _pixel.x() != it._pixel.x() || _pixel.y() != it._pixel.y();  
-                }
+                { return _pixel != it._pixel; }
 
                 bool operator==(const PixelIterator& it) const
-                { 
-                    return _pixel.x() == it._pixel.x() && _pixel.y() == it._pixel.y();
-                }
+                { return _pixel == it._pixel; }
         
                 Pixel& operator*()
-                { 
-                    return _pixel; 
-                }
+                { return _pixel; }
 
                 PixelIterator& operator++()
                 {            

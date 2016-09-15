@@ -154,7 +154,8 @@ class BasicImage : public ImageBase
         class PixelIterator
         {
             public:
-                PixelIterator(const ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+                PixelIterator(const ImageView& view, 
+                              Pt::ssize_t xpos, Pt::ssize_t ypos)
                 : _pixel(view, xpos, ypos)
                 { }
 
