@@ -53,7 +53,7 @@ ImageBase::~ImageBase()
 void ImageBase::init(const ImageFormat& format, Pt::uint8_t* data, 
                      const Size& size, Pt::ssize_t padding)
 {
-    _view.set(format, data, size, padding);
+    _view.reset(format, data, size, padding);
 }
 
 

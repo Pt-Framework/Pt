@@ -41,6 +41,7 @@ namespace Pt {
 namespace Gfx {
 
 class Pixel;
+class ConstPixel;
 class ImageView;
 
 class PT_GFX_API ImageFormat
@@ -80,22 +81,30 @@ class PT_GFX_API ImageFormat
         virtual void setPixel(Pixel& to, const Pixel& from,
                               CompositionMode mode) const = 0;
         
+        virtual void setPixel(Pixel& to, const ConstPixel& from,
+                              CompositionMode mode) const = 0;
+        
         virtual void setPixel(Pixel& pixel, const Color& c,
                               CompositionMode mode) const = 0;
         
         virtual Color getColor(const Pixel& pixel) const = 0;
 
+        virtual Color getColor(const ConstPixel& pixel) const = 0;
+
         virtual void copy(Pixel& dst, const Pixel& src, size_t length, 
                           CompositionMode mode) const = 0;
-
-        void copy(const ImageView& to, const Point& toPoint,
+        
+        virtual void copy(Pixel& dst, const ConstPixel& src, size_t length, 
+                          CompositionMode mode) const = 0;
+        
+        void copy(ImageView& to, const Point& toPoint,
                   const ImageView& from, const Rect& fromRect,
                   CompositionMode mode) const;
 
         virtual std::size_t imageSize(const Size& size, Pt::ssize_t padding) const = 0;
 
     protected:
-        virtual void onCopy(const ImageView& to, const Point& toPos,
+        virtual void onCopy(ImageView& to, const Point& toPos,
                             const ImageView& from, const Rect& fromRect,
                             CompositionMode mode) const = 0;
 

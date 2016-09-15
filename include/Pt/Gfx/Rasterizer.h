@@ -188,11 +188,11 @@ class PT_GFX_API Rasterizer
     Brush           _brush;
     Image           _brushBuffer; 
     const Image*    _brushImage;
-    Pixel           _brushPixel;      
+    ConstPixel      _brushPixel;      
 
     Pen             _pen;
     Image           _penBuffer;
-    Pixel           _penPixel;
+    ConstPixel      _penPixel;
 
     CompositionMode _compositionMode;
     int             _clipRight;

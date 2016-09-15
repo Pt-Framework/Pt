@@ -70,21 +70,21 @@ class Yuv12Test : public Pt::Unit::TestSuite
 
             Yuv12Image image( yuv12Data, Size(4, 4) );
 
-            Yuv12Pixel pixel(image.view(), 1, 3);
+            Yuv12Image::PixelIterator pixel = image.pixel(1, 3);
             
-            Pt::uint8_t y = pixel.y();
-            Pt::uint8_t u = pixel.u();
-            Pt::uint8_t v = pixel.v();
+            Pt::uint8_t y = pixel->y();
+            Pt::uint8_t u = pixel->u();
+            Pt::uint8_t v = pixel->v();
             
             PT_UNIT_ASSERT_EQUAL(y, 13);
             PT_UNIT_ASSERT_EQUAL(u, 102);
             PT_UNIT_ASSERT_EQUAL(v, 202);
 
-            pixel.advance();
+            ++pixel;
 
-            Pt::uint8_t y2 = pixel.y();
-            Pt::uint8_t u2 = pixel.u();
-            Pt::uint8_t v2 = pixel.v();
+            Pt::uint8_t y2 = pixel->y();
+            Pt::uint8_t u2 = pixel->u();
+            Pt::uint8_t v2 = pixel->v();
             
             PT_UNIT_ASSERT_EQUAL(y2, 14);
             PT_UNIT_ASSERT_EQUAL(u2, 103);
@@ -119,15 +119,14 @@ class Yuv12Test : public Pt::Unit::TestSuite
             Pt::uint8_t yuv12[] = { 100, 100, 100 };
 
             Yuv12Image image( yuv12, Size(1, 1) );
-            Yuv12Pixel pixel(image.view(), 0, 0);
+            Yuv12Image::PixelIterator pixel = image.pixel(0, 0);
 
-            Pt::Gfx::Color c = pixel.toColor();
-            pixel.assign(c, CompositionMode::SourceCopy);
+            Pt::Gfx::Color c = pixel->toColor();
+            pixel->assign(c, CompositionMode::SourceCopy);
 
             PT_UNIT_ASSERT(yuv12[0] > 99 && yuv12[0] < 101);
             PT_UNIT_ASSERT(yuv12[1] > 99 && yuv12[1] < 101);
             PT_UNIT_ASSERT(yuv12[2] > 99 && yuv12[2] < 101);
-
         }
 
         void Benchmark()

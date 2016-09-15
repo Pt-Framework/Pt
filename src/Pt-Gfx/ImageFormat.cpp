@@ -49,7 +49,7 @@ ImageFormat::~ImageFormat()
 }
 
 
-void ImageFormat::copy(const ImageView& to, const Point& toPos,
+void ImageFormat::copy(ImageView& to, const Point& toPos,
                        const ImageView& from, const Rect& fromRect,
                        CompositionMode mode) const
 {

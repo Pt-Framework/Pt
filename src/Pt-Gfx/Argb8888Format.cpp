@@ -96,6 +96,26 @@ void Argb8888Format::setPixel(Pixel& to, const Pixel& from,
 }
 
 
+void Argb8888Format::setPixel(Pixel& to, const ConstPixel& from,
+                              CompositionMode mode) const
+{
+    Pt::uint8_t* dst = to.base();
+    const Pt::uint8_t* src = from.base();
+
+    switch(mode)
+    {
+        default:
+        case CompositionMode::SourceCopy:
+            *((Pt::uint32_t*)dst) = *((const Pt::uint32_t*)src);
+            break;
+
+        case CompositionMode::SourceOver:
+            sourceOver(dst, src);
+            break;
+    } 
+}
+
+
 void Argb8888Format::setPixel(Pixel& pixel, const Color& c,
                               CompositionMode mode) const
 {
@@ -119,6 +139,17 @@ void Argb8888Format::setPixel(Pixel& pixel, const Color& c,
 
 
 Color Argb8888Format::getColor(const Pixel& pixel) const
+{
+  const Pt::uint8_t* data = pixel.base();
+
+    return Color( data[3] * 257, 
+                  data[2] * 257, 
+                  data[1] * 257, 
+                  data[0] * 257 );
+}
+
+
+Color Argb8888Format::getColor(const ConstPixel& pixel) const
 {
   const Pt::uint8_t* data = pixel.base();
 
@@ -154,7 +185,32 @@ void Argb8888Format::copy(Pixel& to, const Pixel& from, size_t length,
 }
 
 
-void Argb8888Format::onCopy(const ImageView& to, const Point& toPoint,
+void Argb8888Format::copy(Pixel& to, const ConstPixel& from, size_t length, 
+                          CompositionMode mode) const
+{
+    Pt::uint8_t* dst = to.base();;
+    const Pt::uint8_t* src = from.base(); 
+
+    switch(mode)
+    {
+        default:
+        case CompositionMode::SourceCopy:
+            memcpy(dst, src, length * 4);
+            break;
+
+        case CompositionMode::SourceOver:
+            for(size_t i = 0; i < length; ++i)
+            {
+                sourceOver(dst, src); 
+                src += 4;
+                dst += 4;
+            }
+            break;
+    }   
+}
+
+
+void Argb8888Format::onCopy(ImageView& to, const Point& toPoint,
                             const ImageView& from, const Rect& fromRect,
                             CompositionMode mode) const
 {

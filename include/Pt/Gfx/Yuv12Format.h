@@ -45,17 +45,25 @@ class PT_GFX_API Yuv12Format : public ImageFormat
         
         virtual void setPixel(Pixel& to, const Pixel& from,
                               CompositionMode mode) const;
-
+        
+        virtual void setPixel(Pixel& to, const ConstPixel& from,
+                              CompositionMode mode) const;
+        
         virtual void setPixel(Pixel& pixel, const Color& c,
                               CompositionMode mode) const;
         
         virtual Color getColor(const Pixel& pixel) const;
 
+        virtual Color getColor(const ConstPixel& pixel) const;
+
         virtual void copy(Pixel& dst, const Pixel& src, size_t length, 
                           CompositionMode mode) const;
 
+        virtual void copy(Pixel& dst, const ConstPixel& src, size_t length, 
+                          CompositionMode mode) const;
+
     protected:
-        virtual void onCopy(const ImageView& to, const Point& toPoint,
+        virtual void onCopy(ImageView& to, const Point& toPoint,
                             const ImageView& from, const Rect& fromRect,
                             CompositionMode mode) const;
 };

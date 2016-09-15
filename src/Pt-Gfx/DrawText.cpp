@@ -319,7 +319,6 @@ void DrawText::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
     dsy = ypos;
 
     Color pixelColor = color;
-    Pixel pixel(image.view(), 0, 0);
 
     for( Pt::int32_t y = ofsy; y < height; ++y, ++dsy )
     {
@@ -361,6 +360,6 @@ void DrawText::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
     }
 }
 
-}  //namespace
+} //namespace
 
 } //namespace

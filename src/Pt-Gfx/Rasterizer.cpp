@@ -1878,7 +1878,7 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
         // Copy pixels from textrure to image
         if(fillLength)
         {
-            Pixel sourcePixel(texture.view(),  textureXPos, textureYPos);
+            ConstPixel sourcePixel(texture.view(),  textureXPos, textureYPos);
             Pixel destPixel(_image->view(), xpos, ypos);
 
             _image->format().copy( destPixel,  sourcePixel,  fillLength, _compositionMode );

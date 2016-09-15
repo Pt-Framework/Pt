@@ -233,7 +233,7 @@ void Cursor::fromImage( const Gfx::Image& image, Cursor& cursor)
 	{
 		for( size_t x = 0; x < cursor._width; ++x )
 		{
-      Gfx::Pixel pixel(image.view(), x, y);      
+      Gfx::ConstPixel pixel(image.view(), x, y);      
       Gfx::Color color = image.format().getColor(pixel);
 
 			if( color.alpha() == 0 )

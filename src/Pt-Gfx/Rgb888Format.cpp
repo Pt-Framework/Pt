@@ -58,6 +58,16 @@ void Rgb888Format::setPixel(Pixel& to, const Pixel& from,
 }
 
 
+void Rgb888Format::setPixel(Pixel& to, const ConstPixel& from, 
+                            CompositionMode mode) const
+{
+    Pt::uint8_t* dst = to.base();
+    const Pt::uint8_t* src = from.base();
+
+    *((Pt::uint32_t*)dst) = *((const Pt::uint32_t*)src);
+}
+
+
 void Rgb888Format::setPixel(Pixel& pixel, const Color& c,
                             CompositionMode mode) const
 {
@@ -70,8 +80,24 @@ void Rgb888Format::setPixel(Pixel& pixel, const Color& c,
 }
 
 
-
 Color Rgb888Format::getColor(const Pixel& pixel) const
+{
+    const Pt::uint16_t* p = (const Pt::uint16_t*) pixel.base();
+
+    const uint16_t tr = (*p & 0x00FF0000) >> 16;
+    const uint16_t tg = (*p & 0x0000FF00) >> 8;
+    const uint16_t tb = *p & 0x000000FF;
+
+    uint16_t a = 0xFFFF;
+    uint16_t r = ((tr + !!tr) << 8) - !!tr;
+    uint16_t g = ((tg + !!tg) << 8) - !!tg;
+    uint16_t b = ((tb + !!tb) << 8) - !!tb;
+    
+    return Color(a, r, g, b);
+}
+
+
+Color Rgb888Format::getColor(const ConstPixel& pixel) const
 {
     const Pt::uint16_t* p = (const Pt::uint16_t*) pixel.base();
 
@@ -104,7 +130,23 @@ void Rgb888Format::copy(Pixel& to, const Pixel& from, size_t length,
 }
 
 
-void Rgb888Format::onCopy(const ImageView& to, const Point& toPoint,
+void Rgb888Format::copy(Pixel& to, const ConstPixel& from, size_t length, 
+                          CompositionMode mode) const
+{
+    Pt::uint8_t* dst = to.base();
+    const Pt::uint8_t* src = from.base();
+
+    switch(mode)
+    {
+        default:
+        case CompositionMode::SourceCopy:
+            memcpy(dst, src, length * 4);
+            break;
+    }   
+}
+
+
+void Rgb888Format::onCopy(ImageView& to, const Point& toPoint,
                           const ImageView& from, const Rect& fromRect,
                           CompositionMode mode) const
 {
