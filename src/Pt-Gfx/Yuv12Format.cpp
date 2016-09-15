@@ -54,7 +54,7 @@ void Yuv12Format::setPixel(Pixel& to, const Pixel& from,
                            CompositionMode mode) const
 {
     Yuv12Pixel toYuv( to.view(), to.base(), to.x(), to.y() );
-    Yuv12Pixel fromYuv( from.view(), from.base(), from.x(), from.y() );
+    ConstYuv12Pixel fromYuv( from.view(), from.base(), from.x(), from.y() );
 
     toYuv.assign(fromYuv, mode);
 }
@@ -71,7 +71,7 @@ void Yuv12Format::setPixel(Pixel& p, const Color& c,
 
 Color Yuv12Format::getColor(const Pixel& p) const
 {
-    Yuv12Pixel yuv( p.view(), p.base(), p.x(), p.y() );
+    ConstYuv12Pixel yuv( p.view(), p.base(), p.x(), p.y() );
     return yuv.toColor();
 }
 

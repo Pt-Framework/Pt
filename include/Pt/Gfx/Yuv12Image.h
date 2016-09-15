@@ -38,12 +38,118 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief Piel in a YV-12 Image.
-*/
-class Yuv12Pixel
+class Yuv12Base
 {
     public:
-        Yuv12Pixel(const ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+        static Color toColor(Pt::uint8_t y, Pt::uint8_t u, Pt::uint8_t v)
+        {
+            Pt::uint32_t rv = 298 * (y - 16)                   + 409 * (v - 128) + 128;
+            Pt::uint32_t gv = 298 * (y - 16) - 100 * (u - 128) - 208 * (v - 128) + 128;
+            Pt::uint32_t bv = 298 * (y - 16) + 516 * (u - 128)                   + 128;
+
+            Pt::uint16_t r = rv > 65535 ? 65535 : static_cast<Pt::uint16_t>(rv);
+            Pt::uint16_t g = gv > 65535 ? 65535 : static_cast<Pt::uint16_t>(gv);
+            Pt::uint16_t b = bv > 65535 ? 65535 : static_cast<Pt::uint16_t>(bv);
+            
+            return Color(r, g, b);
+        }
+
+        static void fromColor(const Color& color, 
+                              Pt::uint8_t& y, Pt::uint8_t& u, Pt::uint8_t& v)
+        {
+            Pt::int32_t r = color.red();
+            Pt::int32_t g = color.green();
+            Pt::int32_t b = color.blue();
+
+            Pt::int32_t yy = (( 66 * r + 129 * g +  25 * b + 128) >> 16) +  16;
+            Pt::int32_t uu = ((-38 * r -  74 * g + 112 * b + 128) >> 16) + 128;
+            Pt::int32_t vv = ((112 * r -  94 * g -  18 * b + 128) >> 16) + 128;
+
+            y = yy > 255 ? 255 : static_cast<Pt::uint8_t>(yy);
+            u = uu > 255 ? 255 : static_cast<Pt::uint8_t>(uu);
+            v = vv > 255 ? 255 : static_cast<Pt::uint8_t>(vv);
+        }
+
+        template <typename T>
+        static void init(const ImageView& view, Pt::ssize_t& subStride,
+                         Pt::ssize_t xpos, Pt::ssize_t ypos,
+                         T*& y, T*& u, T*& v)
+        {
+            Pt::ssize_t yOffset = view.stride() * ypos + xpos;
+            y = view.data() + yOffset;
+
+            init(view, subStride, xpos, ypos, u, v);
+        }
+
+        template <typename T>
+        static void init(const ImageView& view, Pt::ssize_t& subStride,
+                         Pt::ssize_t xpos, Pt::ssize_t ypos,
+                         T*& u, T*& v)
+        {
+            Pt::ssize_t stride = view.stride();
+            Pt::ssize_t planeSize = stride * view.size().height();
+            
+            subStride = stride / 2;
+            Pt::ssize_t subPlaneSize = planeSize / 4;
+
+            Pt::ssize_t subXPos = xpos / 2;
+            Pt::ssize_t subYPos = ypos / 2;
+            Pt::ssize_t subOffset = subStride * subYPos + subXPos;
+
+            Pt::ssize_t uOffset = planeSize + subOffset;
+            u = view.data() + uOffset;
+
+            Pt::ssize_t vOffset = uOffset + subPlaneSize;
+            v = view.data() + vOffset;
+        }
+
+        template <typename T>
+        static void advance(const ImageView& view, Pt::ssize_t subStride,
+                            Pt::ssize_t& xpos, Pt::ssize_t& ypos,
+                            T*& y, T*& u, T*& v)
+        {
+            ++y;
+
+            if( ++xpos >= view.width() )
+            {
+                ++u;
+                ++v;
+                
+                if(ypos % 2 == 0)
+                {
+                  u -= subStride;
+                  v -= subStride;
+                }
+
+                xpos = 0;
+                ++ypos;
+            }
+            else if(xpos % 2 == 0)
+            {
+                ++u;
+                ++v;
+            }
+        }
+
+        template <typename T>
+        static void advance(const ImageView& view, Pt::ssize_t subStride,
+                            Pt::ssize_t& xpos, Pt::ssize_t& ypos,
+                            T*& y, T*& u, T*& v, Pt::ssize_t n)
+        {
+            Pt::ssize_t off = xpos + n;
+            ypos += off / view.width();
+            xpos += off % view.width();
+
+            init(view, subStride, xpos, ypos, y, u, v);
+        }
+};
+
+/** @brief Const pixel in a YV-12 Image.
+*/
+class ConstYuv12Pixel
+{
+    public:
+        ConstYuv12Pixel(const ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
         : _view(0)
         , _xpos(0)
         , _ypos(0)
@@ -55,16 +161,121 @@ class Yuv12Pixel
             reset(view, xpos, ypos);
         }
 
-        Yuv12Pixel(const ImageView& view, Pt::uint8_t* y, Pt::ssize_t xpos, Pt::ssize_t ypos)
-        : _view(0)
-        , _xpos(0)
-        , _ypos(0)
+        ConstYuv12Pixel(const ImageView& view, const Pt::uint8_t* y, 
+                        Pt::ssize_t xpos, Pt::ssize_t ypos)
+        : _view(&view)
+        , _xpos(xpos)
+        , _ypos(ypos)
+        , _subStride(0)
+        , _y(y)
+        , _u(0)
+        , _v(0)
+        { 
+            Yuv12Base::init(view, _subStride,  xpos,  ypos, _u, _v);
+        }
+
+        ConstYuv12Pixel(const ConstYuv12Pixel& p)
+        : _view(p._view)
+        , _xpos(p._xpos)
+        , _ypos(p._ypos)
+        , _subStride(p._subStride)
+        , _y(p._y)
+        , _u(p._u)
+        , _v(p._v)
+        { }
+
+        void reset(const ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+        {
+            _view = &view;
+            _xpos = xpos;
+            _ypos = ypos;
+
+            Yuv12Base::init(view, _subStride,  xpos,  ypos, _y, _u, _v);
+        }
+
+        void reset(const ConstYuv12Pixel& p)
+        {
+            _view = p._view;            
+            _xpos = p._xpos;
+            _ypos = p._ypos;
+            _subStride = p._subStride;
+
+            _y = p._y;
+            _u = p._u;
+            _v = p._v;
+        }
+
+        void advance()
+        {
+            Yuv12Base::advance(*_view, _subStride, _xpos, _ypos, _y, _u, _v);
+        }
+
+        void advance( Pt::ssize_t n )
+        {
+            Yuv12Base::advance(*_view, _subStride, _xpos, _ypos, _y, _u, _v, n);
+        }
+
+        Color toColor() const
+        {
+            return Yuv12Base::toColor(*_y, *_u, *_v);
+        }
+
+        Pt::uint8_t y() const
+        { return *_y; }
+
+        Pt::uint8_t u() const
+        { return *_u; }
+
+        Pt::uint8_t v() const
+        { return *_v; }
+
+        bool operator!=(const ConstYuv12Pixel& p) const
+        { return _y != p._y; }
+        
+        bool operator==(const ConstYuv12Pixel& p) const
+        { return _y == p._y; }
+
+    private:
+        ConstYuv12Pixel& operator=(const ConstYuv12Pixel&);
+
+    private:
+        const ImageView*   _view;
+        Pt::ssize_t        _xpos;
+        Pt::ssize_t        _ypos;
+        Pt::ssize_t        _subStride;
+        const Pt::uint8_t* _y;
+        const Pt::uint8_t* _u;
+        const Pt::uint8_t* _v;
+};
+
+/** @brief Pixel in a YV-12 Image.
+*/
+class Yuv12Pixel
+{
+    public:
+        Yuv12Pixel(const ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+        : _view(&view)
+        , _xpos(xpos)
+        , _ypos(ypos)
         , _subStride(0)
         , _y(0)
         , _u(0)
         , _v(0)
         { 
-            init(view, y, xpos, ypos);
+            Yuv12Base::init(view, _subStride,  xpos,  ypos, _y, _u, _v);
+        }
+
+        Yuv12Pixel(const ImageView& view, Pt::uint8_t* y, 
+                   Pt::ssize_t xpos, Pt::ssize_t ypos)
+        : _view(&view)
+        , _xpos(xpos)
+        , _ypos(ypos)
+        , _subStride(0)
+        , _y(y)
+        , _u(0)
+        , _v(0)
+        { 
+            Yuv12Base::init(view, _subStride,  xpos,  ypos, _u, _v);
         }
 
         Yuv12Pixel(const Yuv12Pixel& p)
@@ -85,6 +296,14 @@ class Yuv12Pixel
             return *this;
         }
 
+        Yuv12Pixel& operator=(const ConstYuv12Pixel& p)
+        {
+            *_y = p.y();
+            *_u = p.u();
+            *_v = p.v();
+            return *this;
+        }
+
         Yuv12Pixel& operator=(const Color& color)
         {
             assign(color, CompositionMode::SourceCopy);
@@ -93,10 +312,11 @@ class Yuv12Pixel
 
         void reset(const ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
         {
-            Pt::ssize_t yOffset = view.stride() * ypos + xpos;
-            Pt::uint8_t* y = view.data() + yOffset;
+            _view = &view;
+            _xpos = xpos;
+            _ypos = ypos;
 
-            init(view, y, xpos, ypos);
+            Yuv12Base::init(view, _subStride,  xpos,  ypos, _y, _u, _v);
         }
 
         void reset(const Yuv12Pixel& p)
@@ -113,51 +333,17 @@ class Yuv12Pixel
 
         void advance()
         {
-            ++_y;
-
-            if( ++_xpos >= _view->width() )
-            {
-                ++_u;
-                ++_v;
-                
-                if(_ypos % 2 == 0)
-                {
-                  _u -= _subStride;
-                  _v -= _subStride;
-                }
-
-                _xpos = 0;
-                ++_ypos;
-            }
-            else if(_xpos % 2 == 0)
-            {
-                ++_u;
-                ++_v;
-            }
+            Yuv12Base::advance(*_view, _subStride, _xpos, _ypos, _y, _u, _v);
         }
 
         void advance( Pt::ssize_t n )
         {
-            Pt::ssize_t off = _xpos + n;
-            _ypos += off / _view->width();
-            _xpos += off % _view->width();
-
-            reset(*_view, _xpos, _ypos);
+            Yuv12Base::advance(*_view, _subStride, _xpos, _ypos, _y, _u, _v, n);
         }
 
         void assign(const Color& color, CompositionMode)
         {
-            Pt::int32_t r = color.red();
-            Pt::int32_t g = color.green();
-            Pt::int32_t b = color.blue();
-
-            Pt::int32_t y = (( 66 * r + 129 * g +  25 * b + 128) >> 16) +  16;
-            Pt::int32_t u = ((-38 * r -  74 * g + 112 * b + 128) >> 16) + 128;
-            Pt::int32_t v = ((112 * r -  94 * g -  18 * b + 128) >> 16) + 128;
-
-            *_y = y > 255 ? 255 : static_cast<Pt::uint8_t>(y);
-            *_u = u > 255 ? 255 : static_cast<Pt::uint8_t>(u);
-            *_v = v > 255 ? 255 : static_cast<Pt::uint8_t>(v);
+            Yuv12Base::fromColor(color, *_y, *_u, *_v);
         }
 
         void assign(const Yuv12Pixel& p, CompositionMode)
@@ -167,17 +353,16 @@ class Yuv12Pixel
             *_v = *(p._v);
         }
 
+        void assign(const ConstYuv12Pixel& p, CompositionMode)
+        {
+            *_y = p.y();
+            *_u = p.u();
+            *_v = p.v();
+        }
+
         Color toColor() const
         {
-            Pt::uint32_t rv = 298 * (*_y - 16)                     + 409 * (*_v - 128) + 128;
-            Pt::uint32_t gv = 298 * (*_y - 16) - 100 * (*_u - 128) - 208 * (*_v - 128) + 128;
-            Pt::uint32_t bv = 298 * (*_y - 16) + 516 * (*_u - 128)                     + 128;
-
-            Pt::uint16_t r = rv > 65535 ? 65535 : static_cast<Pt::uint16_t>(rv);
-            Pt::uint16_t g = gv > 65535 ? 65535 : static_cast<Pt::uint16_t>(gv);
-            Pt::uint16_t b = bv > 65535 ? 65535 : static_cast<Pt::uint16_t>(bv);
-            
-            return Color(r, g, b);
+            return Yuv12Base::toColor(*_y, *_u, *_v);
         }
 
         Pt::uint8_t y() const
@@ -205,39 +390,23 @@ class Yuv12Pixel
         { return _y == p._y; }
 
     private:
-        void init(const ImageView& view, Pt::uint8_t* y, 
-                  Pt::ssize_t xpos, Pt::ssize_t ypos)
-        {
-            _view = &view;
-            _xpos = xpos;
-            _ypos = ypos;
-            _y = y;
-
-            Pt::ssize_t stride = _view->stride();
-            Pt::ssize_t planeSize = stride * _view->size().height();
-            
-            _subStride = stride / 2;
-            Pt::ssize_t subPlaneSize = planeSize / 4;
-
-            Pt::ssize_t subXPos = _xpos / 2;
-            Pt::ssize_t subYPos = _ypos / 2;
-            Pt::ssize_t subOffset = _subStride * subYPos + subXPos;
-
-            Pt::ssize_t uOffset = planeSize + subOffset;
-            _u = _view->data() + uOffset;
-
-            Pt::ssize_t vOffset = uOffset + subPlaneSize;
-            _v = _view->data() + vOffset;
-        }
-
-    private:
         const ImageView*  _view;
-        Pt::ssize_t _xpos;
-        Pt::ssize_t _ypos;
-        Pt::ssize_t _subStride;
-        Pt::uint8_t* _y;
-        Pt::uint8_t* _u;
-        Pt::uint8_t* _v;
+        Pt::ssize_t       _xpos;
+        Pt::ssize_t       _ypos;
+        Pt::ssize_t       _subStride;
+        Pt::uint8_t*      _y;
+        Pt::uint8_t*      _u;
+        Pt::uint8_t*      _v;
+};
+
+/** @brief YV-12 image model.
+*/
+class Yuv12Model
+{
+    public:
+        typedef Yuv12Pixel      PixelType;
+        typedef ConstYuv12Pixel ConstPixelType;
+        typedef Yuv12Format     FormatType;
 };
 
 /** @brief YV-12 Image.
@@ -246,7 +415,7 @@ class Yuv12Pixel
     half as many pad bytes after their rows. In other words, two U/V rows 
     (including padding) is exactly as long as one Y row (including padding).
 */
-class Yuv12Image : public BasicImage<Yuv12Pixel, Yuv12Format>
+class Yuv12Image : public BasicImage<Yuv12Model>
 {
     public:
         Yuv12Image(const Size& size, size_t padding = 0)

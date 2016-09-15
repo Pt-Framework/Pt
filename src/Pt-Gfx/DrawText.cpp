@@ -319,7 +319,7 @@ void DrawText::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
     dsy = ypos;
 
     Color pixelColor = color;
-    Pixel pixel(image.view(), 0,0);
+    Pixel pixel(image.view(), 0, 0);
 
     for( Pt::int32_t y = ofsy; y < height; ++y, ++dsy )
     {
@@ -342,14 +342,14 @@ void DrawText::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
                 break;
 
 
-            Pixel pixel(image.view(), dsx,dsy);
+            Pixel pixel(image.view(), dsx, dsy);
 
             const int px = yOffset + x;
             unsigned char value = buffer[px];
                     
             if(value != 255)
             {
-                pixelColor.setAlpha( value * 257);
+                pixelColor.setAlpha(value * 257);
                 image.format().setPixel(pixel, pixelColor,
                                         CompositionMode::SourceOver);
             }

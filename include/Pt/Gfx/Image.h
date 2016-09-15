@@ -108,6 +108,7 @@ class PT_GFX_API Image : public ImageBase
 {
     public:
         typedef ImageView::PixelIterator PixelIterator;
+        typedef ImageView::ConstPixelIterator ConstPixelIterator;
 
     public:
         Image();
@@ -142,14 +143,24 @@ class PT_GFX_API Image : public ImageBase
         PixelIterator end() const
         { return view().end(); }
 
+        //ConstPixelIterator begin() const
+        //{ return view().cbegin(); }
+
+        //ConstPixelIterator end() const
+        //{ return view().cend(); }
+
     private:
         std::vector<Pt::uint8_t> _buffer;
 };
 
 
-template <typename PixelT, typename FormatT>
+template <typename ModelT>
 class BasicImage : public ImageBase
 {
+    typedef typename ModelT::PixelType      PixelType;
+    typedef typename ModelT::ConstPixelType ConstPixelType;
+    typedef typename ModelT::FormatType     FormatType;
+
     public:
         class PixelIterator
         {
@@ -165,7 +176,7 @@ class BasicImage : public ImageBase
                     return *this;
                 }
 
-                PixelT& operator*()
+                PixelType& operator*()
                 { return _pixel; }
 
                 PixelIterator& operator++()
@@ -181,7 +192,40 @@ class BasicImage : public ImageBase
                 { return _pixel == it._pixel; }
 
             private:
-                PixelT _pixel;
+                PixelType _pixel;
+        };
+
+        class ConstPixelIterator
+        {
+            public:
+                ConstPixelIterator(const ImageView& view, 
+                                   Pt::ssize_t xpos, Pt::ssize_t ypos)
+                : _pixel(view, xpos, ypos)
+                { }
+
+                ConstPixelIterator& operator=(const ConstPixelIterator& it)
+                {
+                    _pixel.reset(it._pixel);
+                    return *this;
+                }
+
+                ConstPixelType& operator*()
+                { return _pixel; }
+
+                ConstPixelIterator& operator++()
+                {
+                    _pixel.advance();
+                    return *this; 
+                }
+
+                bool operator!=(const ConstPixelIterator& it) const
+                { return _pixel != it._pixel; }
+        
+                bool operator==(const ConstPixelIterator& it) const
+                { return _pixel == it._pixel; }
+
+            private:
+                ConstPixelType _pixel;
         };
 
     public:
@@ -207,7 +251,7 @@ class BasicImage : public ImageBase
         { return PixelIterator(view(), 0, height()); }
 
     private:
-        FormatT                  _format;
+        FormatType               _format;
         std::vector<Pt::uint8_t> _buffer;
 };
 
