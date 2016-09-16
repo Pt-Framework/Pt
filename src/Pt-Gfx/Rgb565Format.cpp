@@ -40,7 +40,7 @@ Rgb565Format::Rgb565Format()
 }
 
 
-std::size_t Rgb565Format::imageSize(const Size& size, Pt::ssize_t padding) const
+std::size_t Rgb565Format::onImageSize(const Size& size, Pt::ssize_t padding) const
 {
     std::size_t l = (size.width() * 2) + padding;
     std::size_t n = l * size.height();
@@ -48,8 +48,8 @@ std::size_t Rgb565Format::imageSize(const Size& size, Pt::ssize_t padding) const
 }
 
 
-void Rgb565Format::setPixel(Pixel& to, const Pixel& from, 
-                            CompositionMode mode) const
+void Rgb565Format::onSetPixel(Pixel& to, const Pixel& from, 
+                              CompositionMode mode) const
 {
     Pt::uint8_t* dst = to.base();
     const Pt::uint8_t* src = from.base();
@@ -58,8 +58,8 @@ void Rgb565Format::setPixel(Pixel& to, const Pixel& from,
 }
 
 
-void Rgb565Format::setPixel(Pixel& to, const ConstPixel& from, 
-                            CompositionMode mode) const
+void Rgb565Format::onSetPixel(Pixel& to, const ConstPixel& from, 
+                              CompositionMode mode) const
 {
     Pt::uint8_t* dst = to.base();
     const Pt::uint8_t* src = from.base();
@@ -68,8 +68,8 @@ void Rgb565Format::setPixel(Pixel& to, const ConstPixel& from,
 }
 
 
-void Rgb565Format::setPixel(Pixel& pixel, const Color& c,
-                            CompositionMode mode) const
+void Rgb565Format::onSetPixel(Pixel& pixel, const Color& c,
+                              CompositionMode mode) const
 {
     Pt::uint32_t val =   uint32_t(c.red() & 0xF800) |
                        ( uint32_t(c.green() & 0xFC00) >> 5 ) |
@@ -80,7 +80,7 @@ void Rgb565Format::setPixel(Pixel& pixel, const Color& c,
 }
 
 
-Color Rgb565Format::getColor(const Pixel& pixel) const
+Color Rgb565Format::onGetColor(const Pixel& pixel) const
 {
     const Pt::uint16_t* p = (const Pt::uint16_t*) pixel.base();
 
@@ -97,7 +97,7 @@ Color Rgb565Format::getColor(const Pixel& pixel) const
 }
 
 
-Color Rgb565Format::getColor(const ConstPixel& pixel) const
+Color Rgb565Format::onGetColor(const ConstPixel& pixel) const
 {
     const Pt::uint16_t* p = (const Pt::uint16_t*) pixel.base();
 
@@ -114,7 +114,7 @@ Color Rgb565Format::getColor(const ConstPixel& pixel) const
 }
 
 
-void Rgb565Format::copy(Pixel& to, const Pixel& from, size_t length, 
+void Rgb565Format::onCopy(Pixel& to, const Pixel& from, size_t length, 
                           CompositionMode mode) const
 {
     Pt::uint8_t* dst = to.base();
@@ -130,7 +130,7 @@ void Rgb565Format::copy(Pixel& to, const Pixel& from, size_t length,
 }
 
 
-void Rgb565Format::copy(Pixel& to, const ConstPixel& from, size_t length, 
+void Rgb565Format::onCopy(Pixel& to, const ConstPixel& from, size_t length, 
                           CompositionMode mode) const
 {
     Pt::uint8_t* dst = to.base();

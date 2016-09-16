@@ -44,6 +44,8 @@ class Pixel;
 class ConstPixel;
 class ImageView;
 
+/** @brief %Image format.
+*/
 class PT_GFX_API ImageFormat
 {
     public:
@@ -78,35 +80,64 @@ class PT_GFX_API ImageFormat
         static const ImageFormat& argb8888();
 
     public:
-        virtual void setPixel(Pixel& to, const Pixel& from,
-                              CompositionMode mode) const = 0;
+        void setPixel(Pixel& to, const Pixel& from,
+                      CompositionMode mode) const
+        { onSetPixel(to, from, mode); }
         
-        virtual void setPixel(Pixel& to, const ConstPixel& from,
-                              CompositionMode mode) const = 0;
+        void setPixel(Pixel& to, const ConstPixel& from,
+                      CompositionMode mode) const
+        { onSetPixel(to, from, mode); }
         
-        virtual void setPixel(Pixel& pixel, const Color& c,
-                              CompositionMode mode) const = 0;
+        void setPixel(Pixel& to, const Color& c,
+                      CompositionMode mode) const
+        { onSetPixel(to, c, mode); }
         
-        virtual Color getColor(const Pixel& pixel) const = 0;
-
-        virtual Color getColor(const ConstPixel& pixel) const = 0;
-
-        virtual void copy(Pixel& dst, const Pixel& src, size_t length, 
-                          CompositionMode mode) const = 0;
+        Color getColor(const Pixel& pixel) const
+        { return onGetColor(pixel); }
         
-        virtual void copy(Pixel& dst, const ConstPixel& src, size_t length, 
-                          CompositionMode mode) const = 0;
+        Color getColor(const ConstPixel& pixel) const
+        { return onGetColor(pixel); }
+        
+        void copy(Pixel& dst, const Pixel& src, size_t length, 
+                  CompositionMode mode) const
+        { onCopy(dst, src, length, mode); }
+        
+        void copy(Pixel& dst, const ConstPixel& src, size_t length, 
+                  CompositionMode mode) const
+        { onCopy(dst, src, length, mode); }
         
         void copy(ImageView& to, const Point& toPoint,
                   const ImageView& from, const Rect& fromRect,
                   CompositionMode mode) const;
 
-        virtual std::size_t imageSize(const Size& size, Pt::ssize_t padding) const = 0;
+        std::size_t imageSize(const Size& size, Pt::ssize_t padding) const
+        { return onImageSize(size, padding); }
 
     protected:
+        virtual void onSetPixel(Pixel& to, const Pixel& from,
+                                CompositionMode mode) const = 0;
+        
+        virtual void onSetPixel(Pixel& to, const ConstPixel& from,
+                                CompositionMode mode) const = 0;
+        
+        virtual void onSetPixel(Pixel& pixel, const Color& c,
+                                CompositionMode  mode) const = 0;
+        
+        virtual Color onGetColor(const Pixel& pixel) const = 0;
+
+        virtual Color onGetColor(const ConstPixel& pixel) const = 0;
+
+        virtual void onCopy(Pixel& dst, const Pixel& src, size_t length, 
+                            CompositionMode mode) const = 0;
+        
+        virtual void onCopy(Pixel& dst, const ConstPixel& src, size_t length, 
+                            CompositionMode mode) const = 0;
+
         virtual void onCopy(ImageView& to, const Point& toPos,
                             const ImageView& from, const Rect& fromRect,
                             CompositionMode mode) const = 0;
+
+        virtual std::size_t onImageSize(const Size& size, Pt::ssize_t padding) const = 0;
 
     private:
         size_t _pixelStride;

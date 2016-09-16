@@ -40,32 +40,32 @@ class PT_GFX_API Yuv12Format : public ImageFormat
 {   
     public:
         Yuv12Format();
-
-        virtual std::size_t imageSize(const Size& size, Pt::ssize_t padding) const;
-        
-        virtual void setPixel(Pixel& to, const Pixel& from,
-                              CompositionMode mode) const;
-        
-        virtual void setPixel(Pixel& to, const ConstPixel& from,
-                              CompositionMode mode) const;
-        
-        virtual void setPixel(Pixel& pixel, const Color& c,
-                              CompositionMode mode) const;
-        
-        virtual Color getColor(const Pixel& pixel) const;
-
-        virtual Color getColor(const ConstPixel& pixel) const;
-
-        virtual void copy(Pixel& dst, const Pixel& src, size_t length, 
-                          CompositionMode mode) const;
-
-        virtual void copy(Pixel& dst, const ConstPixel& src, size_t length, 
-                          CompositionMode mode) const;
-
+    
     protected:
-        virtual void onCopy(ImageView& to, const Point& toPoint,
+        virtual void onSetPixel(Pixel& to, const Pixel& from,
+                                CompositionMode mode) const;
+        
+        virtual void onSetPixel(Pixel& to, const ConstPixel& from,
+                                CompositionMode mode) const;
+        
+        virtual void onSetPixel(Pixel& pixel, const Color& c,
+                                CompositionMode mode) const;
+        
+        virtual Color onGetColor(const Pixel& pixel) const;
+
+        virtual Color onGetColor(const ConstPixel& pixel) const;
+
+        virtual void onCopy(Pixel& dst, const Pixel& src, size_t length, 
+                            CompositionMode mode) const;
+        
+        virtual void onCopy(Pixel& dst, const ConstPixel& src, size_t length, 
+                            CompositionMode mode) const;
+
+        virtual void onCopy(ImageView& to, const Point& toPos,
                             const ImageView& from, const Rect& fromRect,
                             CompositionMode mode) const;
+
+        virtual std::size_t onImageSize(const Size& size, Pt::ssize_t padding) const;
 };
 
 } // namespace

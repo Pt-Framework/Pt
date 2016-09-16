@@ -41,7 +41,7 @@ Yuv12Format::Yuv12Format()
 }
 
 
-std::size_t Yuv12Format::imageSize(const Size& size, Pt::ssize_t padding) const
+std::size_t Yuv12Format::onImageSize(const Size& size, Pt::ssize_t padding) const
 {
     Pt::ssize_t stride = size.width() + padding;
     Pt::ssize_t planeSize = stride * size.height();
@@ -50,8 +50,8 @@ std::size_t Yuv12Format::imageSize(const Size& size, Pt::ssize_t padding) const
 }
 
 
-void Yuv12Format::setPixel(Pixel& to, const Pixel& from,
-                           CompositionMode mode) const
+void Yuv12Format::onSetPixel(Pixel& to, const Pixel& from,
+                             CompositionMode mode) const
 {
     Yuv12Pixel toYuv( to.view(), to.base(), to.x(), to.y() );
     ConstYuv12Pixel fromYuv( from.view(), from.base(), from.x(), from.y() );
@@ -60,8 +60,8 @@ void Yuv12Format::setPixel(Pixel& to, const Pixel& from,
 }
 
 
-void Yuv12Format::setPixel(Pixel& to, const ConstPixel& from,
-                           CompositionMode mode) const
+void Yuv12Format::onSetPixel(Pixel& to, const ConstPixel& from,
+                             CompositionMode mode) const
 {
     Yuv12Pixel toYuv( to.view(), to.base(), to.x(), to.y() );
     ConstYuv12Pixel fromYuv( from.view(), from.base(), from.x(), from.y() );
@@ -70,37 +70,36 @@ void Yuv12Format::setPixel(Pixel& to, const ConstPixel& from,
 }
 
 
-void Yuv12Format::setPixel(Pixel& p, const Color& c,
-                           CompositionMode mode) const
+void Yuv12Format::onSetPixel(Pixel& p, const Color& c,
+                             CompositionMode mode) const
 {
     Yuv12Pixel yuv( p.view(), p.base(), p.x(), p.y() );
     yuv.assign(c, mode);
-    
 }
 
 
-Color Yuv12Format::getColor(const Pixel& p) const
+Color Yuv12Format::onGetColor(const Pixel& p) const
 {
     ConstYuv12Pixel yuv( p.view(), p.base(), p.x(), p.y() );
     return yuv.toColor();
 }
 
 
-Color Yuv12Format::getColor(const ConstPixel& p) const
+Color Yuv12Format::onGetColor(const ConstPixel& p) const
 {
     ConstYuv12Pixel yuv( p.view(), p.base(), p.x(), p.y() );
     return yuv.toColor();
 }
 
 
-void Yuv12Format::copy(Pixel& to, const Pixel& from, size_t length, 
-                       CompositionMode mode) const
+void Yuv12Format::onCopy(Pixel& to, const Pixel& from, size_t length, 
+                         CompositionMode mode) const
 {
 }
 
 
-void Yuv12Format::copy(Pixel& to, const ConstPixel& from, size_t length, 
-                       CompositionMode mode) const
+void Yuv12Format::onCopy(Pixel& to, const ConstPixel& from, size_t length, 
+                         CompositionMode mode) const
 {
 }
 

@@ -68,7 +68,7 @@ Argb8888Format::Argb8888Format()
 }
 
 
-std::size_t Argb8888Format::imageSize(const Size& size, Pt::ssize_t padding) const
+std::size_t Argb8888Format::onImageSize(const Size& size, Pt::ssize_t padding) const
 {
     std::size_t l = (size.width() * 4) + padding;
     std::size_t n = l * size.height();
@@ -76,7 +76,7 @@ std::size_t Argb8888Format::imageSize(const Size& size, Pt::ssize_t padding) con
 }
 
 
-void Argb8888Format::setPixel(Pixel& to, const Pixel& from,
+void Argb8888Format::onSetPixel(Pixel& to, const Pixel& from,
                               CompositionMode mode) const
 {
     Pt::uint8_t* dst = to.base();
@@ -96,8 +96,8 @@ void Argb8888Format::setPixel(Pixel& to, const Pixel& from,
 }
 
 
-void Argb8888Format::setPixel(Pixel& to, const ConstPixel& from,
-                              CompositionMode mode) const
+void Argb8888Format::onSetPixel(Pixel& to, const ConstPixel& from,
+                                CompositionMode mode) const
 {
     Pt::uint8_t* dst = to.base();
     const Pt::uint8_t* src = from.base();
@@ -116,8 +116,8 @@ void Argb8888Format::setPixel(Pixel& to, const ConstPixel& from,
 }
 
 
-void Argb8888Format::setPixel(Pixel& pixel, const Color& c,
-                              CompositionMode mode) const
+void Argb8888Format::onSetPixel(Pixel& pixel, const Color& c,
+                                CompositionMode mode) const
 {
     Pt::uint8_t* data = pixel.base();
 
@@ -138,7 +138,7 @@ void Argb8888Format::setPixel(Pixel& pixel, const Color& c,
 }
 
 
-Color Argb8888Format::getColor(const Pixel& pixel) const
+Color Argb8888Format::onGetColor(const Pixel& pixel) const
 {
   const Pt::uint8_t* data = pixel.base();
 
@@ -149,7 +149,7 @@ Color Argb8888Format::getColor(const Pixel& pixel) const
 }
 
 
-Color Argb8888Format::getColor(const ConstPixel& pixel) const
+Color Argb8888Format::onGetColor(const ConstPixel& pixel) const
 {
   const Pt::uint8_t* data = pixel.base();
 
@@ -160,8 +160,8 @@ Color Argb8888Format::getColor(const ConstPixel& pixel) const
 }
 
 
-void Argb8888Format::copy(Pixel& to, const Pixel& from, size_t length, 
-                          CompositionMode mode) const
+void Argb8888Format::onCopy(Pixel& to, const Pixel& from, size_t length, 
+                            CompositionMode mode) const
 {
     Pt::uint8_t* dst = to.base();;
     const Pt::uint8_t* src = from.base(); 
@@ -185,8 +185,8 @@ void Argb8888Format::copy(Pixel& to, const Pixel& from, size_t length,
 }
 
 
-void Argb8888Format::copy(Pixel& to, const ConstPixel& from, size_t length, 
-                          CompositionMode mode) const
+void Argb8888Format::onCopy(Pixel& to, const ConstPixel& from, size_t length, 
+                            CompositionMode mode) const
 {
     Pt::uint8_t* dst = to.base();;
     const Pt::uint8_t* src = from.base(); 
