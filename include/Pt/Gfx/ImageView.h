@@ -305,16 +305,9 @@ class ImageView
         {
             _stride = (_size.width() * _format->pixelStride()) + _padding;
         }
-
-        void reset(const ImageFormat& format, Pt::uint8_t* data, 
-                 const Size& size, Pt::ssize_t padding)
-        {
-            _format = &format;
-            _data = data;
-            _size = size;
-            _padding = padding;
-            _stride = (_size.width() * _format->pixelStride()) + _padding;
-        }
+        
+        virtual ~ImageView()
+        {}
 
         PixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y)
         { return PixelIterator(*this, x, y); }
@@ -364,6 +357,17 @@ class ImageView
         Pt::ssize_t padding() const
         { return _padding; }
 
+    protected:
+        void init(const ImageFormat& format, Pt::uint8_t* data, 
+                  const Size& size, Pt::ssize_t padding)
+        {
+            _format = &format;
+            _data = data;
+            _size = size;
+            _padding = padding;
+            _stride = (_size.width() * _format->pixelStride()) + _padding;
+        }
+
     private:
         const ImageFormat* _format;
 
@@ -372,6 +376,7 @@ class ImageView
         Pt::ssize_t  _padding;
         Pt::ssize_t  _stride;
 };
+
 
 /////////////////////////////////////////////////////////////////////////////
 // Pixel Implementation

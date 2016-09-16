@@ -614,10 +614,9 @@ RECURSIVE              = YES
 # excluded from the INPUT source files. This way you can easily exclude a 
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 
-EXCLUDE                = ../include/Pt/Gui ../include/Pt/Gfx ../include/Pt/Db \
+EXCLUDE                = ../include/Pt/Gui ../include/Pt/_Gfx ../include/Pt/Db \
                          ../include/Pt/Cma ../include/Pt/Hmi ../include/Pt/Reflex \
-                         ../include/Pt/_Gfx ../include/Pt/Mfc ../include/Pt/Qt \
-                         ../include/Pt/WxWidgets
+                         ../include/Pt/Mfc ../include/Pt/Qt ../include/Pt/WxWidgets
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or 
 # directories that are symbolic links (a Unix filesystem feature) are excluded 

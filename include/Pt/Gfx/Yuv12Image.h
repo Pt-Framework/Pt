@@ -409,7 +409,7 @@ class Yuv12Model
         typedef Yuv12Format     FormatType;
 };
 
-/** @brief YV-12 Image.
+/** @brief YV-12 image.
 
     If the Y plane has pad bytes after each row, then the U and V planes have
     half as many pad bytes after their rows. In other words, two U/V rows 
@@ -418,10 +418,14 @@ class Yuv12Model
 class Yuv12Image : public BasicImage<Yuv12Model>
 {
     public:
+        /** @brief Constructor.
+        */
         Yuv12Image(const Size& size, size_t padding = 0)
         : BasicImage(size, padding)
         { }
         
+        /** @brief Constructor.
+        */
         Yuv12Image(Pt::uint8_t* data, const Size& size, size_t padding = 0)
         : BasicImage(data, size, padding)
         { }

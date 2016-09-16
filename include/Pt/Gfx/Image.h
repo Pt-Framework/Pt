@@ -40,8 +40,34 @@ namespace Pt {
 
 namespace Gfx {
 
+/** @brief Base for all image types.
+*/
 class PT_GFX_API ImageBase
 {
+    private:
+        class ImageData : public ImageView
+        {
+            public:
+                ImageData()
+                { }
+
+                explicit ImageData(const ImageFormat& format)
+                : ImageView(format)
+                { }
+
+                ImageData(const ImageFormat& format, Pt::uint8_t* data, 
+                          const Size& size, Pt::ssize_t padding)
+                : ImageView(format, data, size, padding)
+
+                { }
+
+                void reset(const ImageFormat& format, Pt::uint8_t* data, 
+                           const Size& size, Pt::ssize_t padding)
+                {
+                    init(format, data, size, padding);
+                }
+        };
+
     public:
         ImageBase();
 
@@ -49,56 +75,63 @@ class PT_GFX_API ImageBase
                   const Size& size, Pt::ssize_t padding);
     
         virtual ~ImageBase();
-
+        
+        /** @brief Returns a view on the image data.
+        */
         const ImageView& view() const
         {
-            return _view;
+            return _data;
         }
 
-        // TODO: image format must not be changed via BasicImage public API
+        /** @brief Returns a view on the image data.
+        */
         ImageView& view()
         {
-            return _view;
+            return _data;
         }
 
+        /** @brief Returns the format of the image.
+        */
         const ImageFormat& format() const
         {
-            return _view.format();
+            return _data.format();
         }
-
+        
+        /** @brief Returns the size of the image.
+        */
         const Size& size() const
         {
-            return _view.size();
+            return _data.size();
         }
 
         Pt::ssize_t width() const
         {
-            return _view.width();
+            return _data.width();
         }
 
         Pt::ssize_t height() const
         {
-            return _view.height();
+            return _data.height();
         }
     
         Pt::ssize_t padding() const
         {
-            return _view.padding();
+            return _data.padding();
         }
 
         Pt::uint8_t* data()
         { 
-            return _view.data(); 
+            return _data.data(); 
         }
 
         const Pt::uint8_t* data() const
         { 
-            return _view.data(); 
+            return _data.data(); 
         }
 
         bool empty() const
         {
-            return _view.empty();
+            return _data.empty();
         }
 
     protected:
@@ -106,10 +139,11 @@ class PT_GFX_API ImageBase
                   const Size& size, Pt::ssize_t padding);
 
     private:
-        ImageView _view;
+        ImageData _data;
 };
 
-
+/** @brief Generic image.
+*/
 class PT_GFX_API Image : public ImageBase
 {
     public:
@@ -259,6 +293,8 @@ class BasicImage : public ImageBase
         PixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y)
         { return PixelIterator(view(), x, y); }
 
+        /** @brief Returns an iterator to the first pixel.
+        */
         PixelIterator begin()
         { return PixelIterator(view(), 0, 0); }
 
