@@ -52,6 +52,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\PngReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Point.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rect.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Rgb32Image.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb565Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb888Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Size.h" />
@@ -503,6 +504,7 @@
     <ClCompile Include="..\..\src\Pt-Gfx\tests\BlockscaleTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\ImagePainterTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\Pt-Gfx-test.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\tests\Rgb32Test.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\Yuv12Test.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Yuv12Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp" />

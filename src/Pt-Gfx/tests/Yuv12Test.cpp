@@ -59,8 +59,8 @@ class Yuv12Test : public Pt::Unit::TestSuite
             registerMethod("Iterator", *this, &Yuv12Test::Iterator);
             registerMethod("Color", *this, &Yuv12Test::Color);
 
-            registerMethod("BenchmarkPixel", *this, &Yuv12Test::Benchmark);
-            registerMethod("BenchmarkDirectYUV", *this, &Yuv12Test::BenchmarkRaw);
+            //registerMethod("BenchmarkPixel", *this, &Yuv12Test::Benchmark);
+            //registerMethod("BenchmarkDirectYUV", *this, &Yuv12Test::BenchmarkRaw);
         }
 
     protected:

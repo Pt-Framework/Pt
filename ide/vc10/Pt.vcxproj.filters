@@ -1398,6 +1398,9 @@
     <ClInclude Include="..\..\src\Pt-Gfx\Rasterizer.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Rgb32Image.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2584,6 +2587,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\Yuv12Format.cpp">
       <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\tests\Rgb32Test.cpp">
+      <Filter>Pt-Gfx\tests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

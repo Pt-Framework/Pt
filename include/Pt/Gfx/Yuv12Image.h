@@ -290,17 +290,13 @@ class Yuv12Pixel
 
         Yuv12Pixel& operator=(const Yuv12Pixel& p)
         {
-            *_y = *(p._y);
-            *_u = *(p._u);
-            *_v = *(p._v);
+            assign(p, CompositionMode::SourceCopy);
             return *this;
         }
 
         Yuv12Pixel& operator=(const ConstYuv12Pixel& p)
         {
-            *_y = p.y();
-            *_u = p.u();
-            *_v = p.v();
+            assign(p, CompositionMode::SourceCopy);
             return *this;
         }
 
@@ -424,7 +420,7 @@ class Yuv12Image : public BasicImage<Yuv12Model>
         : BasicImage(size, padding)
         { }
         
-        /** @brief Constructor.
+        /** @brief Construct from external buffer.
         */
         Yuv12Image(Pt::uint8_t* data, const Size& size, size_t padding = 0)
         : BasicImage(data, size, padding)

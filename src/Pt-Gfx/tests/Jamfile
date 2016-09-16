@@ -4,6 +4,7 @@ SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx ;
 
 Main Pt-Gfx-test : Pt-Gfx-test.cpp 
                    BlockScaleTest.cpp
+                   Rgb32Test.cpp
                    Yuv12Test.cpp ;
 
 LinkSharedLibraries Pt-Gfx-test : Pt Pt-Gfx Pt-System Pt-Unit ;
