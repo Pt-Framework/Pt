@@ -1368,9 +1368,6 @@
     <ClInclude Include="..\..\src\Pt-Gfx\LineSlope.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\Rasterizer.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\Span.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
@@ -1396,6 +1393,9 @@
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Format.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\Rasterizer.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
   </ItemGroup>

@@ -35,7 +35,7 @@
 #include "EdgeTable.h"
 #include "DrawText.h"
 
-#include <Pt/Gfx/Rasterizer.h>
+#include "Rasterizer.h"
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Algorithm.h>
@@ -188,11 +188,10 @@ void Rasterizer::setPen( const Pen& pen )
 void Rasterizer::setBrush( const Brush& brush )
 {  
   _brush = brush;
-        
+  _isGradient = false;      
+
   switch( brush.fillStyle() )
   {
-    case Brush::HorizontalGradient:
-    case Brush::VerticalGradient:
     case Brush::Solid:      
       _brushBuffer.reset( _image->format(), Size(64, 1) );
       Gfx::fill(_brushBuffer.begin(), _brushBuffer.end(), brush.color());
@@ -213,6 +212,12 @@ void Rasterizer::setBrush( const Brush& brush )
       {
         _brushImage = &_brush.texture();
       }
+    break;
+
+    case Brush::HorizontalGradient:
+    case Brush::VerticalGradient:
+        _isGradient = true;
+        _brushImage = &_brushBuffer;
     break;
   }
 
@@ -1964,7 +1969,7 @@ void Rasterizer::fillVerticalGradient( const Point& origin, const Point& pos,  i
 
 void Rasterizer::fillHorizontalGradient( const Point& origin, const Point& pos,  int length )
 {
-  fillTexture(origin, pos, length);
+   fillTexture(origin, pos, length);
 }
 
 
@@ -3201,12 +3206,60 @@ void Rasterizer::lineProjectingCap( const LineFace *face, bool isLeft, bool isIn
 }
 
 
+void Rasterizer::updateGradientBrush(int width, int height)
+{   
+    Color gradientStart = _brush.color();
+    Color gradientStop = _brush.gradientColor();
+
+    switch( _brush.fillStyle())
+    {
+        case Pt::Gfx::Brush::HorizontalGradient:
+          _brushBuffer.reset(_image->format(), Size(width, 1));
+        break;
+
+        case Pt::Gfx::Brush::VerticalGradient:
+          _brushBuffer.reset(_image->format(), Size(1, height));
+          std::swap(gradientStart, gradientStop);
+        break;
+    }
+
+    int length = width + height - 1;
+    Pt::uint8_t* pixel = _brushBuffer.data();
+            
+    for(int n = 0; n < length; ++n)
+    {
+        float f1 = (length - n) / float(length);
+        float f2 = n / float(length);
+
+        float r1 = gradientStart.red() * f1;
+        float r2 = gradientStop.red() * f2;
+
+        float g1 = gradientStart.green() * f1;
+        float g2 = gradientStop.green() * f2;
+
+        float b1 = gradientStart.blue() * f1;
+        float b2 = gradientStop.blue() * f2;
+                
+        
+        pixel[0] = (b1 + b2) / 257;
+        pixel[1] = (g1 + g2) / 257;
+        pixel[2] = (r1 + r2) / 257;                
+        pixel[3] = 0;
+
+        pixel += 4;
+    }
+}
+
+
 void Rasterizer::fillRect(const Rect& rectIn)
 { 
     Rect rect = _currentClip.intersect( rectIn );
 
     if( rect.isNull() )
         return;
+
+    if( _isGradient )
+        updateGradientBrush(rectIn.width(), rectIn.height() );
 
     int length = rect.width();
     
@@ -3244,18 +3297,43 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
     // find unclipped origin coordinates
     //
     Point origin( std::numeric_limits<Pt::ssize_t>::max(), std::numeric_limits<Pt::ssize_t>::max() );
+    
+    int leftPos = std::numeric_limits<int>::max();
+    int topPos = std::numeric_limits<int>::max();
+    int rightPos = 0;
+    int bottomPos = 0;
 
     for(size_t n = 0; n < points.size(); ++n)
     {
-        origin.setX( std::min( origin.x(), points[n].x() ) );
-        origin.setY( std::min( origin.y(), points[n].y() ) );
+        const Gfx::Point& p = points[n];
+        origin.setX( std::min( origin.x(), p.x() ) );
+        origin.setY( std::min( origin.y(), p.y() ) );
+
+        if(!_isGradient)
+          continue;
+        
+        if( p.y() < topPos)
+            topPos = p.y();
+
+        if( p.y() > bottomPos)
+            bottomPos = p.y();
+
+        if( p.x() < leftPos)
+            leftPos = p.x();
+
+        if( p.x() > rightPos)
+            rightPos = p.x();
     }
+
 
     if( points.end() != points.begin() )
         points.push_back( points[0] );
 
     if( points.empty())
         return;
+
+    if( _isGradient )
+        updateGradientBrush(rightPos - leftPos, bottomPos - topPos);
 
     // might as well create a new table here...
     globalEdgeTable.clear();
@@ -3407,6 +3485,9 @@ void Rasterizer::fillEllipse( const Point& topLeftIn, const Size& size )
 
     if( size.width() ==  1 && size.height() == 1 )
         return;
+
+    if( _isGradient )
+        updateGradientBrush(size.width(), size.height() );
 
     /* e(x,y) = b^2*x^2 + a^2*y^2 - a^2*b^2 */
     int errorx = 1;

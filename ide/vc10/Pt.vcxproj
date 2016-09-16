@@ -51,7 +51,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Pen.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PngReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Point.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\Rasterizer.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rect.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb565Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb888Format.h" />
@@ -302,6 +301,7 @@
     <ClInclude Include="..\..\src\Pt-Gfx\LineEdge.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\LineFace.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\LineSlope.h" />
+    <ClInclude Include="..\..\src\Pt-Gfx\Rasterizer.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Span.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Vera.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\ArrowCursor.h" />

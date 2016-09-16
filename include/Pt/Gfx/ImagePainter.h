@@ -32,11 +32,12 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/Rasterizer.h>
 
 namespace Pt {
 
 namespace Gfx {
+
+class Rasterizer;
 
 class PT_GFX_API ImagePainter : public Painter
 {
@@ -101,7 +102,7 @@ class PT_GFX_API ImagePainter : public Painter
     static std::list<std::string> fontFamilyNames(); 
 
   private:
-    Rasterizer _rasterizer;
+    Rasterizer* _rasterizer;
     RectF _clip;
 };
 

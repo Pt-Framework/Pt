@@ -44,7 +44,7 @@ class LineFace;
 class DrawText;
 class Image;
 
-class PT_GFX_API Rasterizer
+class Rasterizer
 {    
   public:
     Rasterizer( Image& image );
@@ -177,7 +177,8 @@ class PT_GFX_API Rasterizer
     void stroke(int x, int y);
 
     void stroke(int xpos, int ypos, Pt::ssize_t length);
-        
+    void updateGradientBrush(int width, int height);
+      
   private:
     Image*          _image;
     DrawText*       _text;
@@ -188,7 +189,8 @@ class PT_GFX_API Rasterizer
     Brush           _brush;
     Image           _brushBuffer; 
     const Image*    _brushImage;
-    ConstPixel      _brushPixel;      
+    ConstPixel      _brushPixel;     
+    bool            _isGradient; 
 
     Pen             _pen;
     Image           _penBuffer;
