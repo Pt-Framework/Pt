@@ -39,7 +39,6 @@
 
 namespace Pt {
 
-
 /** @namespace Pt::Gfx
     @brief Graphics and Imaging
 

@@ -1,30 +1,33 @@
 /* Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2006-2015 Marc Boris Duerner
- * Copyright (C) 2010 Aloysius Indrayanto
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+   Copyright (C) 2006-2015 Marc Boris Duerner
+   Copyright (C) 2010 Aloysius Indrayanto
+ 
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+  
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  02110-1301 USA
+*/
+
 #ifndef PT_GFX_PEN_H
 #define PT_GFX_PEN_H
 
@@ -34,31 +37,37 @@
 #include <Pt/SmartPtr.h>
 
 namespace Pt {
+
 namespace Gfx {
 
 class PenData;
 
-/**
-* @brief A pen which contains of attributes (size, color) for the drawing of outlines.
-*
-* Pen objects are used as container of drawing attributes for Painter objects. A size
-* and a color can be specified per pen. The size and color are used to draw outlined
-* shapes by the Painter. Outlined shapes for example are lines, outlined rectangles
-* or ellipses and text.
-*
-* Example: When setting the pen color to green and the pen size to 5 and setting this
-* Pen object as pen for a Painter, painting a line would result in a 5-pixel-sized
-* green line.
-*
-* The Pen object is immutable. Thus a new object has to be created when a pen with
-* other attributes is needed.
+/** @brief Attributs for the drawing of outlines.
+   
+    Pen objects are used as container of drawing attributes for Painter 
+    objects. A size and a color can be specified per pen. The size and
+    color are used to draw outlined shapes by the Painter. Outlined shapes 
+    or example are lines, outlined rectangles or ellipses and text.
+
 */
 class PT_GFX_API Pen
 {
     public:
-        enum PenStyle{ SolidStyle = 0, DashStyle =1, DoubleDash = 2};
-        enum CapStyle{ FlatCap = 0, RoundCap = 1, TriangularCap = 2, ProjectingCap = 3, ButtCap = 4, NotLastCap = 5 };
-        enum JoinStyle{ RoundJoin = 0, BevelJoin = 1, MiterJoin = 2, TriangularJoin = 3};
+        enum PenStyle { SolidStyle = 0, 
+                        DashStyle = 1, 
+                        DoubleDash = 2 };
+        
+        enum CapStyle { FlatCap = 0, 
+                        RoundCap = 1, 
+                        TriangularCap = 2, 
+                        ProjectingCap = 3, 
+                        ButtCap = 4, 
+                        NotLastCap = 5 };
+        
+        enum JoinStyle { RoundJoin = 0, 
+                         BevelJoin = 1, 
+                         MiterJoin = 2, 
+                         TriangularJoin = 3 };
 
         /**
         * @brief Creates a new Pen object.

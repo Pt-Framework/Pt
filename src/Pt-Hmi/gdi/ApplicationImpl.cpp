@@ -96,7 +96,7 @@ DWORD Selector::waitFor(DWORD numHandles, const HANDLE *handles, DWORD msecs, bo
     DWORD result = MsgWaitForMultipleObjects(numHandles, (HANDLE *)handles, false, msecs, QS_ALLEVENTS);
 
     if(result == WAIT_FAILED)
-        throw Pt::System::IOError( PT_ERROR_MSG("WaitForMultipleObjects failed") );
+        throw Pt::System::IOError("WaitForMultipleObjects");
 
     if( result == WAIT_TIMEOUT)
     {

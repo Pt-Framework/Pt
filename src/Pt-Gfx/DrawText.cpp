@@ -30,8 +30,8 @@
 #include "DrawText.h"
 #include <Pt/Gfx/Font.h>
 #include <Pt/String.h>
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 
 namespace Pt {
 
@@ -107,7 +107,7 @@ void DrawText::setFont(const Font& font)
         }
     }
 
-    throw std::invalid_argument("No fonts installed" + PT_SOURCEINFO );
+    throw std::invalid_argument("No fonts installed" );
 }
 
 

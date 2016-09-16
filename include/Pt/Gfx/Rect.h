@@ -227,8 +227,9 @@ class BasicRect
       BasicSize<T>  _s;
 };
 
-typedef BasicRect<Pt::ssize_t>  Rect;
-typedef BasicRect<double>       RectF;
+typedef BasicRect<Pt::ssize_t> Rect;
+
+typedef BasicRect<double>      RectF;
 
 }  // namespace
 

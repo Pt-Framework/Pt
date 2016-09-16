@@ -289,7 +289,9 @@ class BasicImage : public ImageBase
 
         virtual ~BasicImage()
         {}
-
+        
+        /** @brief Returns an iterator to the pixel at the given position.
+        */
         PixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y)
         { return PixelIterator(view(), x, y); }
 
@@ -297,16 +299,24 @@ class BasicImage : public ImageBase
         */
         PixelIterator begin()
         { return PixelIterator(view(), 0, 0); }
-
+        
+        /** @brief Returns an iterator to the end of the pixels.
+        */
         PixelIterator end()
         { return PixelIterator(view(), 0, height()); }
-
+        
+        /** @brief Returns a const iterator to the pixel at the given position.
+        */
         ConstPixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y) const
         { return ConstPixelIterator(view(), x, y); }
-
+        
+        /** @brief Returns a const iterator to the first pixel.
+        */
         ConstPixelIterator begin() const
         { return PixelIterator(view(), 0, 0); }
-
+        
+        /** @brief Returns a const iterator to the end of the pixels.
+        */
         ConstPixelIterator end() const
         { return PixelIterator(view(), 0, height()); }
 

@@ -38,80 +38,96 @@ namespace Pt {
 
 namespace Gfx {
 
-class PT_GFX_API Color
+class Color
 {	
-	public:	
-		Color();
+	  public:	  
+        Color::Color()
+        : _a(1)
+        , _r(0)
+        , _g(0)
+        , _b(0)
+        { }
 
-		Color(Pt::uint16_t a, Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b );
+        Color::Color(Pt::uint16_t a, Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b )
+        : _a(a)
+        , _r(r)
+        , _g(g)
+        , _b(b) 
+        { }	
+
+        Color::Color(Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b )
+        : _a(1)
+        , _r(r)
+        , _g(g)
+        , _b(b) 
+        { }
+
+		    Pt::uint16_t alpha() const
+		    {
+			      return _a;
+		    }
+
+		    Pt::uint16_t red() const
+		    {
+			      return _r;
+		    }
+		
+		    Pt::uint16_t green() const
+		    {
+			      return _g;
+		    }
+		
+		    Pt::uint16_t blue() const		
+		    {
+			      return _b;
+		    }
+		
+		    void setAlpha( Pt::uint16_t c)
+		    {
+			      _a = c;
+		    }
+		
+		    void setRed( Pt::uint16_t c)
+		    {
+			      _r = c;
+		    }
+		
+		    void setGreen( Pt::uint16_t c)
+		    {
+			      _g = c;
+		    }
+		
+		    void setBlue( Pt::uint16_t c)
+		    {
+			      _b = c;
+		    }
+
+        Color toGray() const
+        {
+            const Pt::uint32_t rf = 77;
+            const Pt::uint32_t gf = 128;
+            const Pt::uint32_t bf = 51;
     
-    Color(Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b );
+            const Pt::uint32_t v = (_r * rf + 
+                                    _g * gf + 
+                                    _b * bf) >> 8;
     
-		Pt::uint16_t alpha() const
-		{
-			  return _a;
-		}
+            const Pt::uint16_t s = static_cast<Pt::uint16_t>(v);
 
-		Pt::uint16_t red() const
-		{
-			  return _r;
-		}
-		
-		Pt::uint16_t green() const
-		{
-			  return _g;
-		}
-		
-		Pt::uint16_t blue() const		
-		{
-			  return _b;
-		}
-		
-		void setAlpha( Pt::uint16_t c)
-		{
-			  _a = c;
-		}
-		
-		void setRed( Pt::uint16_t c)
-		{
-			  _r = c;
-		}
-		
-		void setGreen( Pt::uint16_t c)
-		{
-			  _g = c;
-		}
-		
-		void setBlue( Pt::uint16_t c)
-		{
-			  _b = c;
-		}
+            return Color(_a, s, s, s);
+        }
 
-    Color toGray() const
-    {
-        const Pt::uint32_t rf = 77;
-        const Pt::uint32_t gf = 128;
-        const Pt::uint32_t bf = 51;
-    
-        const Pt::uint32_t v = (_r * rf + 
-                                _g * gf + 
-                                _b * bf) >> 8;
-    
-        const Pt::uint16_t s = static_cast<Pt::uint16_t>(v);
+        static Color fromRgb8(Pt::uint8_t r, Pt::uint8_t g, 
+                              Pt::uint8_t b, Pt::uint8_t a = 255)
+        {
+            return Color(a * 257, r * 257, g * 257, b * 257);
+        }
 
-        return Color(_a, s, s, s);
-    }
-
-    static Color fromRgb8(Pt::uint8_t r, Pt::uint8_t g, Pt::uint8_t b, Pt::uint8_t a = 255)
-    {
-      return Color( a*257,  r*257, g*257, b*257);
-    }
-
-	private:
-		Pt::uint16_t _a;
-		Pt::uint16_t _r;
-		Pt::uint16_t _g;
-		Pt::uint16_t _b;
+	  private:
+		    Pt::uint16_t _a;
+		    Pt::uint16_t _r;
+		    Pt::uint16_t _g;
+		    Pt::uint16_t _b;
 };
 
 } // namespace

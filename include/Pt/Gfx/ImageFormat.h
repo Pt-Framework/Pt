@@ -53,6 +53,8 @@ class PT_GFX_API ImageFormat
 
         virtual ~ImageFormat();
     
+        /** @brief Returns distance in bytes between two pixel base pointers.
+        */
         size_t pixelStride() const
         {
             return _pixelStride;
@@ -80,36 +82,54 @@ class PT_GFX_API ImageFormat
         static const ImageFormat& argb8888();
 
     public:
+        /** @brief Sets the pixel color.
+        */
         void setPixel(Pixel& to, const Pixel& from,
                       CompositionMode mode) const
         { onSetPixel(to, from, mode); }
         
+        /** @brief Sets the pixel color.
+        */
         void setPixel(Pixel& to, const ConstPixel& from,
                       CompositionMode mode) const
         { onSetPixel(to, from, mode); }
         
+        /** @brief Sets the pixel color.
+        */
         void setPixel(Pixel& to, const Color& c,
                       CompositionMode mode) const
         { onSetPixel(to, c, mode); }
         
+        /** @brief Gets the pixel color.
+        */
         Color getColor(const Pixel& pixel) const
         { return onGetColor(pixel); }
         
+        /** @brief Gets the pixel color.
+        */
         Color getColor(const ConstPixel& pixel) const
         { return onGetColor(pixel); }
         
+        /** @brief Sets the color in a pixel span.
+        */
         void copy(Pixel& dst, const Pixel& src, size_t length, 
                   CompositionMode mode) const
         { onCopy(dst, src, length, mode); }
         
+        /** @brief Sets the color in a pixel span.
+        */
         void copy(Pixel& dst, const ConstPixel& src, size_t length, 
                   CompositionMode mode) const
         { onCopy(dst, src, length, mode); }
         
+        /** @brief Copies an area of pixels.
+        */
         void copy(ImageView& to, const Point& toPoint,
                   const ImageView& from, const Rect& fromRect,
                   CompositionMode mode) const;
 
+        /** @brief Returns the size in bytes for a given image size.
+        */
         std::size_t imageSize(const Size& size, Pt::ssize_t padding) const
         { return onImageSize(size, padding); }
 
