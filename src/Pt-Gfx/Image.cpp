@@ -97,10 +97,16 @@ const Image& Image::operator=(const Image& image)
     Pt::ssize_t n = image.format().imageSize(image.size(), image.padding());
     
     _buffer.resize(n);
-    std::memcpy(&_buffer[0], imageData, n);
-
-    Pt::uint8_t* data = _buffer.empty() ? 0 : &_buffer[0];
-    init(image.format(), data, image.size(), image.view().padding());
+    if( n != 0)
+    {
+      std::memcpy(&_buffer[0], imageData, n);
+      Pt::uint8_t* data = _buffer.empty() ? 0 : &_buffer[0];    
+      init(image.format(), data, image.size(), image.view().padding());
+    }
+    else
+    {
+      init(image.format(), 0, image.size(), image.view().padding());
+    }
 	  
     return *this;
 }
