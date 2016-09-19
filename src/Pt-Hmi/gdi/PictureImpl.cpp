@@ -85,11 +85,15 @@ void PictureImpl::set(const Gfx::Image& image)
             Gfx::ConstPixel pixel(image.view(), x, y);
             Gfx::Color color = image.format().getColor(pixel);
             
-            _bitmapData.push_back( (Pt::uint8_t) (( color.alpha() * (int) color.blue()) / (257*65535))) ;
-            _bitmapData.push_back( (Pt::uint8_t)( ( color.alpha()* (int) color.green()) / (257*65535)));
-            _bitmapData.push_back( (Pt::uint8_t) (( color.alpha() * (int) color.red())/ (257*65535) ));
-            _bitmapData.push_back( (Pt::uint8_t) ( color.alpha() / 257) );
-            
+            const Pt::uint8_t r = color.red() / 257;
+            const Pt::uint8_t g = color.green() / 257;
+            const Pt::uint8_t b = color.blue() / 257;
+            const Pt::uint8_t a = color.alpha() / 257;
+
+            _bitmapData.push_back( (Pt::uint8_t) (a * b/255) );
+            _bitmapData.push_back( (Pt::uint8_t) (a * g/255) );
+            _bitmapData.push_back( (Pt::uint8_t) (a * r/255) );
+            _bitmapData.push_back( (Pt::uint8_t) (a ) );
         }
     }
 
