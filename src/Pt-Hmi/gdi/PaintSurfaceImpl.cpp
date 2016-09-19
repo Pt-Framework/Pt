@@ -31,7 +31,6 @@
 #include "PaintSurfaceImpl.h"
 #include "PictureImpl.h"
 #include <Pt/Hmi/Application.h>
-#include <Pt/Gfx/Argb8888Format.h>
 #include <tchar.h>
 
 namespace {

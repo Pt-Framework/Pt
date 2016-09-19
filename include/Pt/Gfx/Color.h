@@ -41,21 +41,21 @@ namespace Gfx {
 class Color
 {	
 	  public:	  
-        Color::Color()
+        Color()
         : _a(1)
         , _r(0)
         , _g(0)
         , _b(0)
         { }
 
-        Color::Color(Pt::uint16_t a, Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b )
+        Color(Pt::uint16_t a, Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b )
         : _a(a)
         , _r(r)
         , _g(g)
         , _b(b) 
         { }	
 
-        Color::Color(Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b )
+        Color(Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b )
         : _a(1)
         , _r(r)
         , _g(g)

@@ -281,7 +281,7 @@ class ImageView
     
     public:
         ImageView()
-        : _format( &ImageFormat::argb8888() )
+        : _format( &ImageFormat::bgra32() )
         , _data(0)
         , _size(0, 0)
         , _padding(0)

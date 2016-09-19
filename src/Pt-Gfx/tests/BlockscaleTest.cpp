@@ -61,10 +61,10 @@ class BlockScaleTest : public Pt::Unit::TestSuite
 
         void ScaleDown()
         {
-            Pt::Gfx::Image from( Pt::Gfx::ImageFormat::argb8888(), 
+            Pt::Gfx::Image from( Pt::Gfx::ImageFormat::bgra32(), 
                                  Pt::Gfx::Size(100, 100) );
 
-            Pt::Gfx::Image to( Pt::Gfx::ImageFormat::argb8888(), 
+            Pt::Gfx::Image to( Pt::Gfx::ImageFormat::bgra32(), 
                                Pt::Gfx::Size(20, 40) );
 
             Pt::Gfx::blockScale(from.begin(), from.width(), from.height(), 

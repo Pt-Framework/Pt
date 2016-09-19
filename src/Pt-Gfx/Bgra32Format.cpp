@@ -1,0 +1,272 @@
+/* Copyright (C) 2015 Marc Boris Duerner 
+   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+  
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  02110-1301 USA
+*/
+
+#include <Pt/Gfx/Bgra32Format.h>
+#include <Pt/Gfx/ImageView.h>
+
+namespace {
+
+void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from, Pt::uint8_t alpha)
+{
+    //Pt::uint8_t alpha = from[3];
+    Pt::uint32_t alphaSrc = alpha + 1;
+    Pt::uint32_t alphaInv = 256 - alpha;
+
+    to[0] = (unsigned char)((alphaSrc * from[0] + alphaInv * to[0]) >> 8);
+    to[1] = (unsigned char)((alphaSrc * from[1] + alphaInv * to[1]) >> 8);
+    to[2] = (unsigned char)((alphaSrc * from[2] + alphaInv * to[2]) >> 8);
+    to[3] = (unsigned char)((alphaSrc * from[3] + alphaInv * to[3]) >> 8);
+}
+
+void sourceOver(Pt::uint8_t* to, const Pt::Gfx::Color& from)
+{
+    Pt::uint8_t alpha = (unsigned char)(from.alpha() / 257);
+    Pt::uint32_t alphaSrc = alpha + 1;
+    Pt::uint32_t alphaInv = 256 - alpha;
+
+    to[0] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.red() / 257) + alphaInv * to[0]) >> 8);
+    to[1] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.green() / 257) + alphaInv * to[1]) >> 8);
+    to[2] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.blue() / 257) + alphaInv * to[2]) >> 8);
+    to[3] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.alpha() / 257) + alphaInv * to[3]) >> 8);
+}
+
+}
+
+namespace Pt {
+
+namespace Gfx {
+
+Bgra32Format::Bgra32Format()
+: ImageFormat(4, 4)
+{
+}
+
+
+std::size_t Bgra32Format::onImageSize(const Size& size, Pt::ssize_t padding) const
+{
+    std::size_t l = (size.width() * 4) + padding;
+    std::size_t n = l * size.height();
+    return n;
+}
+
+
+void Bgra32Format::onSetPixel(Pixel& to, const Pixel& from,
+                              CompositionMode mode) const
+{
+    Pt::uint8_t* dst = to.base();
+    const Pt::uint8_t* src = from.base();
+
+    switch(mode)
+    {
+        default:
+        case CompositionMode::SourceCopy:
+            *((Pt::uint32_t*)dst) = *((const Pt::uint32_t*)src);
+            break;
+
+        case CompositionMode::SourceOver:
+            sourceOver(dst, src, src[3]);
+            break;
+    } 
+}
+
+
+void Bgra32Format::onSetPixel(Pixel& to, const ConstPixel& from,
+                                CompositionMode mode) const
+{
+    Pt::uint8_t* dst = to.base();
+    const Pt::uint8_t* src = from.base();
+
+    switch(mode)
+    {
+        default:
+        case CompositionMode::SourceCopy:
+            *((Pt::uint32_t*)dst) = *((const Pt::uint32_t*)src);
+            break;
+
+        case CompositionMode::SourceOver:
+            sourceOver(dst, src, src[3]);
+            break;
+    } 
+}
+
+
+void Bgra32Format::onSetPixel(Pixel& pixel, const Color& c,
+                                CompositionMode mode) const
+{
+    Pt::uint8_t* data = pixel.base();
+
+    switch( mode)
+    {
+      default:
+      case CompositionMode::SourceCopy:
+          data[0] = (Pt::uint8_t) (c.blue() / 257);
+          data[1] = (Pt::uint8_t) (c.green() / 257);
+          data[2] = (Pt::uint8_t) (c.red() / 257);
+          data[3] = (Pt::uint8_t) (c.alpha() / 257);
+          break;
+
+      case CompositionMode::SourceOver:
+          sourceOver(data, c);
+          break;
+    }  
+}
+
+
+Color Bgra32Format::onGetColor(const Pixel& pixel) const
+{
+  const Pt::uint8_t* data = pixel.base();
+
+    return Color( data[3] * 257, 
+                  data[2] * 257, 
+                  data[1] * 257, 
+                  data[0] * 257 );
+}
+
+
+Color Bgra32Format::onGetColor(const ConstPixel& pixel) const
+{
+  const Pt::uint8_t* data = pixel.base();
+
+    return Color( data[3] * 257, 
+                  data[2] * 257, 
+                  data[1] * 257, 
+                  data[0] * 257 );
+}
+
+
+void Bgra32Format::onCopy(Pixel& to, const Pixel& from, size_t length, 
+                            CompositionMode mode) const
+{
+    Pt::uint8_t* dst = to.base();;
+    const Pt::uint8_t* src = from.base(); 
+
+    switch(mode)
+    {
+        default:
+        case CompositionMode::SourceCopy:
+            memcpy(dst, src, length * 4);
+            break;
+
+        case CompositionMode::SourceOver:
+            for(size_t i = 0; i < length; ++i)
+            {
+                sourceOver(dst, src, src[3]); 
+                src += 4;
+                dst += 4;
+            }
+            break;
+    }   
+}
+
+
+void Bgra32Format::onCopy(Pixel& to, const ConstPixel& from, size_t length, 
+                            CompositionMode mode) const
+{
+    Pt::uint8_t* dst = to.base();;
+    const Pt::uint8_t* src = from.base(); 
+
+    switch(mode)
+    {
+        default:
+        case CompositionMode::SourceCopy:
+            memcpy(dst, src, length * 4);
+            break;
+
+        case CompositionMode::SourceOver:
+            for(size_t i = 0; i < length; ++i)
+            {
+                sourceOver(dst, src, src[3]); 
+                src += 4;
+                dst += 4;
+            }
+            break;
+    }   
+}
+
+
+void Bgra32Format::onCopy(ImageView& to, const Point& toPoint,
+                            const ImageView& from, const Rect& fromRect,
+                            CompositionMode mode) const
+{
+    Pt::ssize_t pixelSize = 4;
+
+    // TODO: equals to toInfo.pitch()
+    Pt::ssize_t toStride = (to.width() * pixelSize) + to.padding();
+    Pt::ssize_t fromStride = (from.width() * pixelSize) + from.padding();
+    
+    Pt::ssize_t toBegin = (toPoint.y() * toStride) + (toPoint.x() * pixelSize);
+    Pt::ssize_t fromBegin = (fromRect.y() * fromStride) + (fromRect.x() * pixelSize);
+
+    Pt::uint8_t* toLine = to.data() + toBegin;
+    const Pt::uint8_t* fromLine = from.data() + fromBegin;
+
+    switch(mode)
+    {
+        default:
+        case CompositionMode::SourceCopy:
+        {
+            Pt::ssize_t n = fromRect.width() * pixelSize;
+
+            for(Pt::ssize_t y = 0; y < fromRect.height(); ++y)
+            {
+                memcpy(toLine, fromLine, n);
+
+                toLine += toStride;
+                fromLine += fromStride;
+            }
+
+            break;
+        }
+
+        case CompositionMode::SourceOver:
+        {
+            for(int y = fromRect.y(); y < fromRect.height(); ++y)
+            {
+                Pt::uint8_t* to = toLine;
+                const Pt::uint8_t* from = fromLine;
+            
+                for(int x = fromRect.x(); x < fromRect.width() ; ++x )
+                {
+                    sourceOver(to, from, from[3]);
+                    to += 4;
+                    from += 4;
+                }
+
+                toLine += toStride;
+                fromLine += fromStride;
+            }
+            
+            break;
+        }
+    }
+}
+
+} // namespace
+
+} // namespace

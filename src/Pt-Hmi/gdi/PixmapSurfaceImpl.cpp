@@ -31,7 +31,7 @@
 #include "PaintSurfaceImpl.h"
 #include "PictureImpl.h"
 #include <Pt/Hmi/Application.h>
-#include <Pt/Gfx/Argb8888Format.h>
+#include <Pt/Gfx/Bgra32Format.h>
 #include <tchar.h>
 #include "PixmapSurfaceImpl.h"
 
@@ -238,7 +238,7 @@ PixmapSurfaceImpl::~PixmapSurfaceImpl()
 
 const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
 {
-  return Gfx::ImageFormat::argb8888();
+  return Gfx::ImageFormat::bgra32();
 }
 
 void PixmapSurfaceImpl::clear(const Gfx::Color& c)

@@ -26,37 +26,45 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_RGB32IMAGE_H
-#define PT_GFX_RGB32IMAGE_H
+#ifndef PT_GFX_BGRA32IMAGE_H
+#define PT_GFX_BGRA32IMAGE_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Argb8888Format.h>
+#include <Pt/Gfx/Bgra32Format.h>
 #include <Pt/Types.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-class Rgb32Base
+class Bgra32Model
 {
+    public:
+        class Pixel;
+        class ConstPixel;
+
+        typedef Pixel        PixelType;
+        typedef ConstPixel   ConstPixelType;
+        typedef Bgra32Format FormatType;
+
     public:
         static Color toColor(const Pt::uint8_t* p)
         {
-            Pt::uint16_t a = *p++ * 257;
-            Pt::uint16_t r = *p++ * 257;
+            Pt::uint16_t b = *p++ * 257;
             Pt::uint16_t g = *p++ * 257;
-            Pt::uint16_t b = *p * 257;
+            Pt::uint16_t r = *p++ * 257;
+            Pt::uint16_t a = *p * 257;
             
             return Color(a, r, g, b);
         }
 
         static void fromColor(const Color& c, Pt::uint8_t* p)
         {
-            p[0] = (Pt::uint8_t) (c.alpha() / 257);
-            p[1] = (Pt::uint8_t) (c.red() / 257);
-            p[2] = (Pt::uint8_t) (c.green() / 257);
-            p[3] = (Pt::uint8_t) (c.blue() / 257);
+            p[0] = (Pt::uint8_t) (c.blue() / 257);
+            p[1] = (Pt::uint8_t) (c.green() / 257);
+            p[2] = (Pt::uint8_t) (c.red() / 257);
+            p[3] = (Pt::uint8_t) (c.alpha() / 257);
         }
         
         template <typename V, typename T>
@@ -85,12 +93,12 @@ class Rgb32Base
         }
 };
 
-/** @brief Const pixel in a RGB-32 Image.
+/** @brief Const pixel in a ARGB-32 Image.
 */
-class ConstRgb32Pixel
+class Bgra32Model::ConstPixel
 {
     public:
-        ConstRgb32Pixel(const ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+        ConstPixel(const ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
         : _view(0)
         , _xpos(0)
         , _ypos(0)
@@ -99,7 +107,7 @@ class ConstRgb32Pixel
             reset(view, xpos, ypos);
         }
 
-        ConstRgb32Pixel(const ConstRgb32Pixel& p)
+        ConstPixel(const ConstPixel& p)
         : _view(p._view)
         , _xpos(p._xpos)
         , _ypos(p._ypos)
@@ -116,7 +124,7 @@ class ConstRgb32Pixel
             _p = view.data() + off;
         }
 
-        void reset(const ConstRgb32Pixel& p)
+        void reset(const ConstPixel& p)
         {
             _view = p._view;            
             _xpos = p._xpos;
@@ -127,43 +135,43 @@ class ConstRgb32Pixel
 
         void advance()
         {
-            Rgb32Base::advance(*_view, _xpos, _ypos, _p);
+            Bgra32Model::advance(*_view, _xpos, _ypos, _p);
         }
 
         void advance( Pt::ssize_t n )
         {
-            Rgb32Base::advance(n, *_view, _xpos, _ypos, _p);
+            Bgra32Model::advance(n, *_view, _xpos, _ypos, _p);
         }
 
         Color toColor() const
         {
-            return Rgb32Base::toColor(_p);
+            return Bgra32Model::toColor(_p);
         }
 
-        bool operator!=(const ConstRgb32Pixel& p) const
+        bool operator!=(const ConstPixel& p) const
         { 
             return _p != p._p; 
         }
         
         Pt::uint8_t alpha() const
-        { return _p[0]; }
-
-        Pt::uint8_t red() const
-        { return _p[1]; }
-
-        Pt::uint8_t green() const
-        { return _p[2]; }
-
-        Pt::uint8_t blue() const
         { return _p[3]; }
 
-        bool operator==(const ConstRgb32Pixel& p) const
+        Pt::uint8_t red() const
+        { return _p[2]; }
+
+        Pt::uint8_t green() const
+        { return _p[1]; }
+
+        Pt::uint8_t blue() const
+        { return _p[0]; }
+
+        bool operator==(const ConstPixel& p) const
         { 
             return _p == p._p; 
         }
 
     private:
-        ConstRgb32Pixel& operator=(const ConstRgb32Pixel&);
+        ConstPixel& operator=(const ConstPixel&);
 
     private:
         const ImageView*   _view;
@@ -172,12 +180,12 @@ class ConstRgb32Pixel
         const Pt::uint8_t* _p;
 };
 
-/** @brief Const pixel in a RGB-32 Image.
+/** @brief Const pixel in a ARGB-32 Image.
 */
-class Rgb32Pixel
+class Bgra32Model::Pixel
 {
     public:
-        Rgb32Pixel(ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+        Pixel(ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
         : _view(0)
         , _xpos(0)
         , _ypos(0)
@@ -186,26 +194,26 @@ class Rgb32Pixel
             reset(view, xpos, ypos);
         }
 
-        Rgb32Pixel(const Rgb32Pixel& p)
+        Pixel(const Pixel& p)
         : _view(p._view)
         , _xpos(p._xpos)
         , _ypos(p._ypos)
         , _p(p._p)
         { }
 
-        Rgb32Pixel& operator=(const Rgb32Pixel& p)
+        Pixel& operator=(const Pixel& p)
         {
             assign(p, CompositionMode::SourceCopy);
             return *this;
         }
 
-        Rgb32Pixel& operator=(const ConstRgb32Pixel& p)
+        Pixel& operator=(const ConstPixel& p)
         {
             assign(p, CompositionMode::SourceCopy);
             return *this;
         }
 
-        Rgb32Pixel& operator=(const Color& color)
+        Pixel& operator=(const Color& color)
         {
             assign(color, CompositionMode::SourceCopy);
             return *this;
@@ -221,7 +229,7 @@ class Rgb32Pixel
             _p = view.data() + off;
         }
 
-        void reset(const Rgb32Pixel& p)
+        void reset(const Pixel& p)
         {
             _view = p._view;            
             _xpos = p._xpos;
@@ -232,56 +240,56 @@ class Rgb32Pixel
 
         void advance()
         {
-            Rgb32Base::advance(*_view, _xpos, _ypos, _p);
+            Bgra32Model::advance(*_view, _xpos, _ypos, _p);
         }
 
         void advance( Pt::ssize_t n )
         {
-            Rgb32Base::advance(n, *_view, _xpos, _ypos, _p);
+            Bgra32Model::advance(n, *_view, _xpos, _ypos, _p);
         }
 
         void assign(const Color& color, CompositionMode)
         {
-            Rgb32Base::fromColor(color, _p);
+            Bgra32Model::fromColor(color, _p);
         }
 
-        void assign(const Rgb32Pixel& p, CompositionMode)
+        void assign(const Pixel& p, CompositionMode)
         {
-            _p[0] = p.alpha();
-            _p[1] = p.red();
-            _p[2] = p.green();
-            _p[3] = p.blue();
+            _p[0] = p.blue();
+            _p[1] = p.green();
+            _p[2] = p.red();
+            _p[3] = p.alpha();
         }
 
-        void assign(const ConstRgb32Pixel& p, CompositionMode)
+        void assign(const ConstPixel& p, CompositionMode)
         {
-            _p[0] = p.alpha();
-            _p[1] = p.red();
-            _p[2] = p.green();
-            _p[3] = p.blue();
+            _p[0] = p.blue();
+            _p[1] = p.green();
+            _p[2] = p.red();
+            _p[3] = p.alpha();
         }
 
         Color toColor() const
         {
-            return Rgb32Base::toColor(_p);
+            return Bgra32Model::toColor(_p);
         }
         
         Pt::uint8_t alpha() const
-        { return _p[0]; }
-
-        Pt::uint8_t red() const
-        { return _p[1]; }
-
-        Pt::uint8_t green() const
-        { return _p[2]; }
-
-        Pt::uint8_t blue() const
         { return _p[3]; }
 
-        bool operator!=(const Rgb32Pixel& p) const
+        Pt::uint8_t red() const
+        { return _p[2]; }
+
+        Pt::uint8_t green() const
+        { return _p[1]; }
+
+        Pt::uint8_t blue() const
+        { return _p[0]; }
+
+        bool operator!=(const Pixel& p) const
         { return _p != p._p; }
         
-        bool operator==(const Rgb32Pixel& p) const
+        bool operator==(const Pixel& p) const
         { return _p == p._p; }
 
     private:
@@ -291,30 +299,30 @@ class Rgb32Pixel
         Pt::uint8_t* _p;
 };
 
-/** @brief RGB-32 image model.
+/** @brief ARGB-32 image model.
 */
-class Rgb32Model
-{
-    public:
-        typedef Rgb32Pixel      PixelType;
-        typedef ConstRgb32Pixel ConstPixelType;
-        typedef Argb8888Format  FormatType;
-};
+//class Bgra32Model
+//{
+//    public:
+//        typedef Bgra32Pixel      PixelType;
+//        typedef ConstBgra32Pixel ConstPixelType;
+//        typedef Bgra32Format     FormatType;
+//};
 
-/** @brief RGB-32 image.
+/** @brief ARGB-32 image.
 */
-class Rgb32Image : public BasicImage<Rgb32Model>
+class Bgra32Image : public BasicImage<Bgra32Model>
 {
     public:
         /** @brief Constructor.
         */
-        Rgb32Image(const Size& size, size_t padding = 0)
+        Bgra32Image(const Size& size, size_t padding = 0)
         : BasicImage(size, padding)
         { }
         
         /** @brief Construct from external buffer.
         */
-        Rgb32Image(Pt::uint8_t* data, const Size& size, size_t padding = 0)
+        Bgra32Image(Pt::uint8_t* data, const Size& size, size_t padding = 0)
         : BasicImage(data, size, padding)
         { }
 };

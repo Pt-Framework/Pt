@@ -1,5 +1,5 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2016 Marc Boris Duerner 
+   Copyright (C) 2016 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -27,68 +27,50 @@
   02110-1301 USA
 */
 
+#ifndef PT_GFX_BGRA32FORMAT_H
+#define PT_GFX_BGRA32FORMAT_H
+
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ImageFormat.h>
-#include <Pt/Gfx/ImageView.h>
-#include <Pt/Gfx/Bgra32Format.h>
-#include <Pt/Gfx/Rgb888Format.h>
-#include <Pt/Gfx/Rgb565Format.h>
 
 namespace Pt {
 
 namespace Gfx {
 
-ImageFormat::ImageFormat( size_t pixelStride, size_t channels)
-: _pixelStride(pixelStride)
-, _channels(channels)
+class PT_GFX_API Bgra32Format : public ImageFormat
 {
-}
-
-
-ImageFormat::~ImageFormat()
-{
-}
-
-
-void ImageFormat::copy(ImageView& to, const Point& toPos,
-                       const ImageView& from, const Rect& fromRect,
-                       CompositionMode mode) const
-{
-    Rect clipRect(Point(0,0), to.size());
-
-    // clip fromRect to fit into the clip/image rect
-    Point d = clipRect.topLeft() - toPos;
-    Point fromPos = fromRect.topLeft() + d;
-
-    Rect fromClip( fromPos, clipRect.size() );
-    fromClip = fromRect.intersect(fromClip);
-
-    // account for smaller fromRect
-    Point toClip = toPos + (fromClip.topLeft() - fromRect.topLeft());
+    public:
+        Bgra32Format();
     
-    onCopy(to, toClip, from, fromClip, mode);
-}
+    protected:
+        virtual void onSetPixel(Pixel& to, const Pixel& from,
+                                CompositionMode mode) const;
+        
+        virtual void onSetPixel(Pixel& to, const ConstPixel& from,
+                                CompositionMode mode) const;
+        
+        virtual void onSetPixel(Pixel& pixel, const Color& c,
+                                CompositionMode mode) const;
+        
+        virtual Color onGetColor(const Pixel& pixel) const;
 
+        virtual Color onGetColor(const ConstPixel& pixel) const;
 
-const ImageFormat& ImageFormat::rgb565()
-{
-	static const Rgb565Format f;
-	return f;
-}
+        virtual void onCopy(Pixel& dst, const Pixel& src, size_t length, 
+                            CompositionMode mode) const;
+        
+        virtual void onCopy(Pixel& dst, const ConstPixel& src, size_t length, 
+                            CompositionMode mode) const;
 
+        virtual void onCopy(ImageView& to, const Point& toPos,
+                            const ImageView& from, const Rect& fromRect,
+                            CompositionMode mode) const;
 
-const ImageFormat& ImageFormat::rgb888()
-{
-	static const Rgb888Format f;
-	return f;
-}
-
-
-const ImageFormat& ImageFormat::bgra32()
-{
-	static const Bgra32Format f;
-	return f;
-}
+        virtual std::size_t onImageSize(const Size& size, Pt::ssize_t padding) const;
+};
 
 } // namespace
 
 } // namespace
+
+#endif

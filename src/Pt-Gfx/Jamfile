@@ -18,7 +18,8 @@ if $(FREETYPE_INCLUDES)
     SubDirHdrs $(FREETYPE_INCLUDES) ;
 }
 
-SharedLibrary Pt-Gfx : Argb8888Format.cpp
+SharedLibrary Pt-Gfx : Argb32Format.cpp
+                       Bgra32Format.cpp
                        Brush.cpp
                        ClipPolygon.cpp
                        Color.cpp

@@ -28,8 +28,13 @@
 */
 
 #include "FrameBuffer.h"
-#include <Pt/Hmi/Application.h>
 #include "ScreenImpl.h"
+
+#include <Pt/Hmi/Application.h>
+#include <Pt/Gfx/Rgb565Format.h>
+#include <Pt/Gfx/Rgb888Format.h>
+#include <Pt/Gfx/Bgra32Format.h>
+
 #include <fcntl.h>
 #include <sys/ioctl.h> 
 #include <sys/mman.h>
@@ -87,11 +92,11 @@ FrameBuffer::FrameBuffer()
             break;
 
         case 4:
-            _format =  new Gfx::Argb8888Format();
+            _format =  new Gfx::Bgra32Format();
             break;
 
         default:
-            _format =  new Gfx::Argb8888Format();
+            _format =  new Gfx::Bgra32Format();
             break;
     }
 

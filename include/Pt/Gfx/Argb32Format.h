@@ -27,8 +27,8 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_ARGB8888FORMAT_H
-#define PT_GFX_ARGB8888FORMAT_H
+#ifndef PT_GFX_ARGB32FORMAT_H
+#define PT_GFX_ARGB32FORMAT_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ImageFormat.h>
@@ -37,10 +37,10 @@ namespace Pt {
 
 namespace Gfx {
 
-class PT_GFX_API Argb8888Format : public ImageFormat
+class PT_GFX_API Argb32Format : public ImageFormat
 {
     public:
-        Argb8888Format();
+        Argb32Format();
     
     protected:
         virtual void onSetPixel(Pixel& to, const Pixel& from,

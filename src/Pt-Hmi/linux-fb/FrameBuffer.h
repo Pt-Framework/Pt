@@ -39,9 +39,6 @@
 #include <Pt/Gfx/Image.h>
 #include <Pt/Hmi/WindowManager.h>
 #include <Pt/Hmi/Cursor.h>
-#include <Pt/Gfx/Rgb565Format.h>
-#include <Pt/Gfx/Rgb888Format.h>
-#include <Pt/Gfx/Argb8888Format.h>
 #include <linux/fb.h>
 
 namespace Pt {
