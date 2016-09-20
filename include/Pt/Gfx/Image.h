@@ -147,6 +147,8 @@ class PT_GFX_API ImageBase
 class PT_GFX_API Image : public ImageBase
 {
     public:
+        typedef ImageView::Pixel Pixel;
+        typedef ImageView::ConstPixel ConstPixel;
         typedef ImageView::PixelIterator PixelIterator;
         typedef ImageView::ConstPixelIterator ConstPixelIterator;
 

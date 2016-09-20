@@ -189,6 +189,9 @@ class ConstPixel
 class ImageView
 {
     public:
+        typedef Pixel Pixel;
+        typedef ConstPixel ConstPixel;
+
         class PixelIterator
         {
             public:
