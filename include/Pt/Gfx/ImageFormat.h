@@ -79,7 +79,7 @@ class PT_GFX_API ImageFormat
     
         static const ImageFormat& rgb888();
     
-        static const ImageFormat& bgra32();
+        static const ImageFormat& argb32();
 
     public:
         /** @brief Sets the pixel color.

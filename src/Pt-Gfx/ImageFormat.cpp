@@ -29,7 +29,7 @@
 
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/ImageView.h>
-#include <Pt/Gfx/Bgra32Format.h>
+#include <Pt/Gfx/Argb32Format.h>
 #include <Pt/Gfx/Rgb888Format.h>
 #include <Pt/Gfx/Rgb565Format.h>
 
@@ -83,9 +83,9 @@ const ImageFormat& ImageFormat::rgb888()
 }
 
 
-const ImageFormat& ImageFormat::bgra32()
+const ImageFormat& ImageFormat::argb32()
 {
-	static const Bgra32Format f;
+	static const Argb32Format f;
 	return f;
 }
 

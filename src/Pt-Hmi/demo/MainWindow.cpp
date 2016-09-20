@@ -59,7 +59,7 @@ void loadIcon(Gfx::Image& icon)
     
     reader.get();
 
-    icon.reset(Pt::Gfx::ImageFormat::bgra32(), image.size() );
+    icon.reset(Pt::Gfx::ImageFormat::argb32(), image.size() );
     Gfx::copy(image.begin(), image.end(), icon.begin() );
     
     for(size_t w = 0; w < icon.width(); ++ w )

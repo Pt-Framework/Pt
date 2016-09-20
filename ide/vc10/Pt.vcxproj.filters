@@ -1401,12 +1401,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32Format.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\Bgra32Format.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\Bgra32Image.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2595,9 +2589,6 @@
       <Filter>Pt-Gfx\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\Argb32Format.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\Bgra32Format.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
   </ItemGroup>

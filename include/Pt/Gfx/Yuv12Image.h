@@ -103,8 +103,35 @@ class Yuv12Base
             v = view.data() + vOffset;
         }
 
-        template <typename V, typename T>
-        static void advance(V& view, Pt::ssize_t subStride,
+        template <typename T>
+        static void advance2(const ImageView& view, Pt::ssize_t subStride,
+                            Pt::ssize_t xpos, Pt::ssize_t ypos,
+                            T*& y, T*& u, T*& v)
+        {
+            ++y;
+
+            if( ++xpos >= view.width() )
+            {
+                ++u;
+                ++v;
+                
+                if(ypos % 2 == 0)
+                {
+                  u -= subStride;
+                  v -= subStride;
+                }
+
+                y += view.padding();
+            }
+            else if(xpos % 2 == 0)
+            {
+                ++u;
+                ++v;
+            }
+        }
+
+        template <typename T>
+        static void advance(const ImageView& view, Pt::ssize_t subStride,
                             Pt::ssize_t& xpos, Pt::ssize_t& ypos,
                             T*& y, T*& u, T*& v)
         {
@@ -123,6 +150,8 @@ class Yuv12Base
 
                 xpos = 0;
                 ++ypos;
+
+                y += view.padding();
             }
             else if(xpos % 2 == 0)
             {

@@ -288,7 +288,7 @@ class PngReaderImpl
             // resize target image
             Pt::Gfx::Size imageSize(_width, _height);
             if( imageSize != _image->size() )
-                _image->reset(Pt::Gfx::ImageFormat::bgra32(), imageSize );
+                _image->reset(Pt::Gfx::ImageFormat::argb32(), imageSize );
 
             // TODO: png_progressive_combine_row(png_ptr, old_row, data);
     

@@ -19,7 +19,6 @@ if $(FREETYPE_INCLUDES)
 }
 
 SharedLibrary Pt-Gfx : Argb32Format.cpp
-                       Bgra32Format.cpp
                        Brush.cpp
                        ClipPolygon.cpp
                        Color.cpp

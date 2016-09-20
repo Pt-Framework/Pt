@@ -16,7 +16,7 @@ void Paint()
         for(int n = 0; n < 10 ; ++n)
         {            
         
-            Image image( ImageFormat::bgra32(), Size(1280, 800) );
+            Image image( ImageFormat::argb32(), Size(1280, 800) );
 
             Pt::System::Clock clock;
             clock.start();
@@ -69,8 +69,8 @@ void BlockScale()
     {
         for(int n = 0; n < 10 ; ++n)
         {
-            Pt::Gfx::Image image(ImageFormat::bgra32(), Pt::Gfx::Size(1000, 1000) );
-            Pt::Gfx::Image image2(ImageFormat::bgra32(), Pt::Gfx::Size(900, 900) );
+            Pt::Gfx::Image image(ImageFormat::argb32(), Pt::Gfx::Size(1000, 1000) );
+            Pt::Gfx::Image image2(ImageFormat::argb32(), Pt::Gfx::Size(900, 900) );
 
             Pt::System::Clock clock;
             clock.start();

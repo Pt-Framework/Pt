@@ -207,12 +207,25 @@ class BasicImage : public ImageBase
             public:
                 PixelIterator(ImageView& view, 
                               Pt::ssize_t xpos, Pt::ssize_t ypos)
-                : _pixel(view, xpos, ypos)
+                : _view(&view)
+                , _pixel(view, xpos, ypos)
+                , _xpos(xpos)
+                , _ypos(ypos)
                 { }
-
+                
+                PixelIterator(const PixelIterator& it)
+                : _view(it._view)
+                , _pixel(it._pixel)
+                , _xpos(it._xpos)
+                , _ypos(it._ypos)
+                {}
+                
                 PixelIterator& operator=(const PixelIterator& it)
                 {
+                    _view = it._view;
                     _pixel.reset(it._pixel);
+                    _xpos = it._xpos;
+                    _ypos = it._ypos;
                     return *this;
                 }
 
@@ -225,6 +238,13 @@ class BasicImage : public ImageBase
                 PixelIterator& operator++()
                 {
                     _pixel.advance();
+
+                    if( ++_xpos >= _view->width() )
+                    {
+                        _xpos = 0;
+                        ++_ypos;
+                    }
+
                     return *this; 
                 }
 
@@ -235,7 +255,10 @@ class BasicImage : public ImageBase
                 { return _pixel == it._pixel; }
 
             private:
-                PixelType _pixel;
+                ImageView*  _view;
+                PixelType   _pixel;
+                Pt::ssize_t _xpos;
+                Pt::ssize_t _ypos;
         };
 
         class ConstPixelIterator
@@ -243,12 +266,25 @@ class BasicImage : public ImageBase
             public:
                 ConstPixelIterator(const ImageView& view, 
                                    Pt::ssize_t xpos, Pt::ssize_t ypos)
-                : _pixel(view, xpos, ypos)
+                : _view(&view)
+                , _pixel(view, xpos, ypos)
+                , _xpos(xpos)
+                , _ypos(ypos)
                 { }
+
+                ConstPixelIterator(const ConstPixelIterator& it)
+                : _view(it._view)
+                , _pixel(it._pixel)
+                , _xpos(it._xpos)
+                , _ypos(it._ypos)
+                {}
 
                 ConstPixelIterator& operator=(const ConstPixelIterator& it)
                 {
+                    _view = it._view;
                     _pixel.reset(it._pixel);
+                    _xpos = it._xpos;
+                    _ypos = it._ypos;
                     return *this;
                 }
 
@@ -261,6 +297,13 @@ class BasicImage : public ImageBase
                 ConstPixelIterator& operator++()
                 {
                     _pixel.advance();
+
+                    if( ++_xpos >= _view->width() )
+                    {
+                        _xpos = 0;
+                        ++_ypos;
+                    }
+                    
                     return *this; 
                 }
 
@@ -271,7 +314,10 @@ class BasicImage : public ImageBase
                 { return _pixel == it._pixel; }
 
             private:
-                ConstPixelType _pixel;
+                const ImageView* _view;
+                ConstPixelType   _pixel;
+                Pt::ssize_t      _xpos;
+                Pt::ssize_t      _ypos;
         };
 
     public:

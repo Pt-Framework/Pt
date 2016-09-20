@@ -27,11 +27,8 @@
 */
 
 #include <Pt/Gfx/Argb32Image.h>
-#include <Pt/Gfx/Bgra32Image.h>
 #include <Pt/Gfx/Color.h>
-
 #include <Pt/System/Clock.h>
-
 #include <Pt/Unit/Assertion.h>
 #include <Pt/Unit/TestSuite.h>
 #include <Pt/Unit/RegisterTest.h>
@@ -50,11 +47,12 @@ class Argb32Test : public Pt::Unit::TestSuite
         Argb32Test()
         : Pt::Unit::TestSuite("Argb32Test")
         {
-            registerMethod("Pixel",*this, &Argb32Test::Pixel);
-            registerMethod("Iterator",*this, &Argb32Test::Iterator);
-            registerMethod("Color",*this, &Argb32Test::Color);
+            //registerMethod("Pixel",*this, &Argb32Test::Pixel);
+            //registerMethod("Iterator",*this, &Argb32Test::Iterator);
+            //registerMethod("Color",*this, &Argb32Test::Color);
 
-            Pt::Gfx::Bgra32Image iii(0, Pt::Gfx::Size(0, 0));
+            registerMethod("BenchmarkA_Pixel", *this, &Argb32Test::Benchmark);
+            registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
         }
 
         void Pixel()
@@ -109,6 +107,59 @@ class Argb32Test : public Pt::Unit::TestSuite
             PT_UNIT_ASSERT(argb32[1] > 99 && argb32[1] < 101);
             PT_UNIT_ASSERT(argb32[2] > 99 && argb32[2] < 101);
             PT_UNIT_ASSERT(argb32[3] > 99 && argb32[3] < 101);
+        }
+
+        void Benchmark()
+        {
+            using namespace Pt::Gfx;
+
+            for(int n = 0; n < 10; ++n)
+            {
+                Argb32Format format;
+                Image image( format, Size(1000, 1000) );
+                Image::PixelIterator it = image.begin();
+                Image::PixelIterator end = image.end();
+            
+                Pt::Gfx::Color color(100, 100, 100);
+            
+                Pt::System::Clock clock;
+                clock.start();
+            
+                for( ; it != end; ++it)
+                {
+                    Pt::Gfx::Color c = it->toColor();
+                    c.setRed(99);
+                    (*it) = c;
+                }
+
+                std::clog << "pixel: " << clock.stop().toUSecs() << std::endl;
+            }
+        }
+
+        void BenchmarkRaw()
+        {
+            using namespace Pt::Gfx;
+
+            for(int n = 0; n < 20; ++n)
+            {
+                Argb32Image image( Size(1000, 1000) );
+                Argb32Image::PixelIterator it = image.begin();
+                Argb32Image::PixelIterator end = image.end();
+            
+                Pt::Gfx::Color color(100, 100, 100);
+            
+                Pt::System::Clock clock;
+                clock.start();
+            
+                for( ; it != end; ++it)
+                {
+                    Pt::Gfx::Color c = it->toColor();
+                    c.setRed(99);
+                    (*it) = c;
+                }
+
+                std::clog << "direct: " << clock.stop().toUSecs() << std::endl;
+            }
         }
 };
 
