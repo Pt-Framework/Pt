@@ -33,7 +33,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Rgb565Format.h>
 #include <Pt/Gfx/Rgb888Format.h>
-#include <Pt/Gfx/Bgra32Format.h>
+#include <Pt/Gfx/Argb32Format.h>
 
 #include <fcntl.h>
 #include <sys/ioctl.h> 
@@ -92,11 +92,11 @@ FrameBuffer::FrameBuffer()
             break;
 
         case 4:
-            _format =  new Gfx::Bgra32Format();
+            _format =  new Gfx::Argb32Format();
             break;
 
         default:
-            _format =  new Gfx::Bgra32Format();
+            _format =  new Gfx::Argb32Format();
             break;
     }
 

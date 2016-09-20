@@ -166,7 +166,7 @@ class Argb32Model
         static void advance2(T*& p, const ImageView& view, 
                             Pt::ssize_t xpos, Pt::ssize_t ypos)
         {
-            if( ++_xpos >= view.width() )
+            if( ++xpos >= view.width() )
             {
                 p += view.padding();
             }
