@@ -172,22 +172,22 @@ class PT_GFX_API Image : public ImageBase
                    const Size& size, Pt::ssize_t padding = 0);
 
         PixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y)
-        { return view().pixel(x, y); }
+        { return PixelIterator(view(), x, y); }
 
         PixelIterator begin()
-        { return view().begin(); }
+        { return PixelIterator(view(), 0, 0); }
 
         PixelIterator end()
-        { return view().end(); }
+        { return PixelIterator(view(), 0, height()); }
 
         ConstPixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y) const
-        { return view().pixel(x, y); }
+        { return ConstPixelIterator(view(), x, y); }
 
         ConstPixelIterator begin() const
-        { return view().begin(); }
+        { return ConstPixelIterator(view(), 0, 0); }
 
         ConstPixelIterator end() const
-        { return view().end(); }
+        { return ConstPixelIterator(view(), 0, height()); }
 
     private:
         std::vector<Pt::uint8_t> _buffer;
@@ -197,54 +197,38 @@ class PT_GFX_API Image : public ImageBase
 template <typename ModelT>
 class BasicImage : public ImageBase
 {
-    typedef typename ModelT::PixelType      PixelType;
-    typedef typename ModelT::ConstPixelType ConstPixelType;
-    typedef typename ModelT::FormatType     FormatType;
-
     public:
+        typedef typename ModelT::Pixel      Pixel;
+        typedef typename ModelT::ConstPixel ConstPixel;
+        typedef typename ModelT::Format     Format;
+
         class PixelIterator
         {
             public:
                 PixelIterator(ImageView& view, 
                               Pt::ssize_t xpos, Pt::ssize_t ypos)
-                : _view(&view)
-                , _pixel(view, xpos, ypos)
-                , _xpos(xpos)
-                , _ypos(ypos)
+                : _pixel(view, xpos, ypos)
                 { }
                 
                 PixelIterator(const PixelIterator& it)
-                : _view(it._view)
-                , _pixel(it._pixel)
-                , _xpos(it._xpos)
-                , _ypos(it._ypos)
+                : _pixel(it._pixel)
                 {}
                 
                 PixelIterator& operator=(const PixelIterator& it)
                 {
-                    _view = it._view;
                     _pixel.reset(it._pixel);
-                    _xpos = it._xpos;
-                    _ypos = it._ypos;
                     return *this;
                 }
 
-                PixelType& operator*()
+                Pixel& operator*()
                 { return _pixel; }
                 
-                PixelType* operator->()
+                Pixel* operator->()
                 { return &_pixel; }
                 
                 PixelIterator& operator++()
                 {
                     _pixel.advance();
-
-                    if( ++_xpos >= _view->width() )
-                    {
-                        _xpos = 0;
-                        ++_ypos;
-                    }
-
                     return *this; 
                 }
 
@@ -255,10 +239,7 @@ class BasicImage : public ImageBase
                 { return _pixel == it._pixel; }
 
             private:
-                ImageView*  _view;
-                PixelType   _pixel;
-                Pt::ssize_t _xpos;
-                Pt::ssize_t _ypos;
+                Pixel   _pixel;
         };
 
         class ConstPixelIterator
@@ -266,44 +247,28 @@ class BasicImage : public ImageBase
             public:
                 ConstPixelIterator(const ImageView& view, 
                                    Pt::ssize_t xpos, Pt::ssize_t ypos)
-                : _view(&view)
-                , _pixel(view, xpos, ypos)
-                , _xpos(xpos)
-                , _ypos(ypos)
+                : _pixel(view, xpos, ypos)
                 { }
 
                 ConstPixelIterator(const ConstPixelIterator& it)
-                : _view(it._view)
-                , _pixel(it._pixel)
-                , _xpos(it._xpos)
-                , _ypos(it._ypos)
+                : _pixel(it._pixel)
                 {}
 
                 ConstPixelIterator& operator=(const ConstPixelIterator& it)
                 {
-                    _view = it._view;
                     _pixel.reset(it._pixel);
-                    _xpos = it._xpos;
-                    _ypos = it._ypos;
                     return *this;
                 }
 
-                const ConstPixelType& operator*() const
+                const ConstPixel& operator*() const
                 { return _pixel; }
 
-                const ConstPixelType* operator->() const
+                const ConstPixel* operator->() const
                 { return &_pixel; }
 
                 ConstPixelIterator& operator++()
                 {
                     _pixel.advance();
-
-                    if( ++_xpos >= _view->width() )
-                    {
-                        _xpos = 0;
-                        ++_ypos;
-                    }
-                    
                     return *this; 
                 }
 
@@ -314,10 +279,7 @@ class BasicImage : public ImageBase
                 { return _pixel == it._pixel; }
 
             private:
-                const ImageView* _view;
-                ConstPixelType   _pixel;
-                Pt::ssize_t      _xpos;
-                Pt::ssize_t      _ypos;
+                ConstPixel _pixel;
         };
 
     public:
@@ -367,7 +329,7 @@ class BasicImage : public ImageBase
         { return PixelIterator(view(), 0, height()); }
 
     private:
-        FormatType               _format;
+        Format                   _format;
         std::vector<Pt::uint8_t> _buffer;
 };
 

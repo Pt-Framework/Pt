@@ -44,12 +44,10 @@ class Argb32Model
 {
     public:
         class Pixel;
+        
         class ConstPixel;
 
-    public:
-        typedef Pixel        PixelType;
-        typedef ConstPixel   ConstPixelType;
-        typedef Argb32Format FormatType;
+        typedef Argb32Format Format;
 
     public:
         static Color toColor(const Pt::uint8_t* p)
@@ -163,26 +161,15 @@ class Argb32Model
         }
 
         template <typename T>
-        static void advance2(T*& p, const ImageView& view, 
-                            Pt::ssize_t xpos, Pt::ssize_t ypos)
-        {
-            if( ++xpos >= view.width() )
-            {
-                p += view.padding();
-            }
-
-            p += 4;
-        }
-
-        template <typename V, typename T>
-        static void advance(Pt::ssize_t n, V& view, 
-                            Pt::ssize_t& xpos, Pt::ssize_t& ypos, T*& p)
+        static void advance(T*& p, Pt::ssize_t n, 
+                            const ImageView& view, T* data,
+                            Pt::ssize_t& xpos, Pt::ssize_t& ypos)
         {
             Pt::ssize_t off = xpos + n;
             ypos += off / view.width();
             xpos += off % view.width();
 
-            p = view.data() + view.stride() * ypos + xpos * 4;
+            p = data + view.stride() * ypos + xpos * 4;
         }
 };
 
@@ -235,7 +222,7 @@ class Argb32Model::ConstPixel
 
         void advance( Pt::ssize_t n )
         {
-            Argb32Model::advance(n, *_view, _xpos, _ypos, _p);
+            Argb32Model::advance(_p, n, *_view, _view->data(), _xpos, _ypos);
         }
 
         Color toColor() const
@@ -352,7 +339,7 @@ class Argb32Model::Pixel
 
         void advance( Pt::ssize_t n )
         {
-            Argb32Model::advance(n, *_view, _xpos, _ypos, _p);
+            Argb32Model::advance(_p, n, *_view, _view->data(), _xpos, _ypos);
         }
 
         void assign(const Color& c, CompositionMode mode)
@@ -435,7 +422,6 @@ class Argb32Model::Pixel
         Pt::ssize_t  _ypos;
         Pt::uint8_t* _p;
 };
-
 
 /** @brief ARGB-32 image.
 */

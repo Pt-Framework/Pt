@@ -70,19 +70,19 @@ class Yuv12Base
             v = vv > 255 ? 255 : static_cast<Pt::uint8_t>(vv);
         }
 
-        template <typename V, typename T>
-        static void init(V& view, Pt::ssize_t& subStride,
+        template <typename T>
+        static void init(const ImageView& view, T* data, Pt::ssize_t& subStride,
                          Pt::ssize_t xpos, Pt::ssize_t ypos,
                          T*& y, T*& u, T*& v)
         {
             Pt::ssize_t yOffset = view.stride() * ypos + xpos;
-            y = view.data() + yOffset;
+            y = data + yOffset;
 
-            init(view, subStride, xpos, ypos, u, v);
+            init(view, data, subStride, xpos, ypos, u, v);
         }
 
-        template <typename V, typename T>
-        static void init(V& view, Pt::ssize_t& subStride,
+        template <typename T>
+        static void init(const ImageView& view, T* data, Pt::ssize_t& subStride,
                          Pt::ssize_t xpos, Pt::ssize_t ypos,
                          T*& u, T*& v)
         {
@@ -97,37 +97,10 @@ class Yuv12Base
             Pt::ssize_t subOffset = subStride * subYPos + subXPos;
 
             Pt::ssize_t uOffset = planeSize + subOffset;
-            u = view.data() + uOffset;
+            u = data + uOffset;
 
             Pt::ssize_t vOffset = uOffset + subPlaneSize;
-            v = view.data() + vOffset;
-        }
-
-        template <typename T>
-        static void advance2(const ImageView& view, Pt::ssize_t subStride,
-                            Pt::ssize_t xpos, Pt::ssize_t ypos,
-                            T*& y, T*& u, T*& v)
-        {
-            ++y;
-
-            if( ++xpos >= view.width() )
-            {
-                ++u;
-                ++v;
-                
-                if(ypos % 2 == 0)
-                {
-                  u -= subStride;
-                  v -= subStride;
-                }
-
-                y += view.padding();
-            }
-            else if(xpos % 2 == 0)
-            {
-                ++u;
-                ++v;
-            }
+            v = data + vOffset;
         }
 
         template <typename T>
@@ -160,16 +133,16 @@ class Yuv12Base
             }
         }
 
-        template <typename V, typename T>
-        static void advance(V& view, Pt::ssize_t subStride,
-                            Pt::ssize_t& xpos, Pt::ssize_t& ypos,
-                            T*& y, T*& u, T*& v, Pt::ssize_t n)
+        template <typename T>
+        static void advance(T*& y, T*& u, T*& v, Pt::ssize_t n, 
+                            const ImageView& view, Pt::ssize_t subStride, T* data,
+                            Pt::ssize_t& xpos, Pt::ssize_t& ypos)
         {
             Pt::ssize_t off = xpos + n;
             ypos += off / view.width();
             xpos += off % view.width();
 
-            init(view, subStride, xpos, ypos, y, u, v);
+            init(view, data, subStride, xpos, ypos, y, u, v);
         }
 };
 
@@ -200,7 +173,7 @@ class ConstYuv12Pixel
         , _u(0)
         , _v(0)
         { 
-            Yuv12Base::init(view, _subStride,  xpos,  ypos, _u, _v);
+            Yuv12Base::init(view, view.data(), _subStride,  xpos,  ypos, _u, _v);
         }
 
         ConstYuv12Pixel(const ConstYuv12Pixel& p)
@@ -219,7 +192,7 @@ class ConstYuv12Pixel
             _xpos = xpos;
             _ypos = ypos;
 
-            Yuv12Base::init(view, _subStride,  xpos,  ypos, _y, _u, _v);
+            Yuv12Base::init(view, view.data(), _subStride,  xpos,  ypos, _y, _u, _v);
         }
 
         void reset(const ConstYuv12Pixel& p)
@@ -241,7 +214,8 @@ class ConstYuv12Pixel
 
         void advance( Pt::ssize_t n )
         {
-            Yuv12Base::advance(*_view, _subStride, _xpos, _ypos, _y, _u, _v, n);
+            Yuv12Base::advance(_y, _u, _v, n, *_view, 
+                               _subStride, _view->data(), _xpos, _ypos);
         }
 
         Color toColor() const
@@ -291,7 +265,7 @@ class Yuv12Pixel
         , _u(0)
         , _v(0)
         { 
-            Yuv12Base::init(view, _subStride,  xpos,  ypos, _y, _u, _v);
+            Yuv12Base::init(view, view.data(), _subStride,  xpos,  ypos, _y, _u, _v);
         }
 
         Yuv12Pixel(ImageView& view, Pt::uint8_t* y, 
@@ -304,7 +278,7 @@ class Yuv12Pixel
         , _u(0)
         , _v(0)
         { 
-            Yuv12Base::init(view, _subStride,  xpos,  ypos, _u, _v);
+            Yuv12Base::init(view, view.data(), _subStride,  xpos,  ypos, _u, _v);
         }
 
         Yuv12Pixel(const Yuv12Pixel& p)
@@ -341,7 +315,7 @@ class Yuv12Pixel
             _xpos = xpos;
             _ypos = ypos;
 
-            Yuv12Base::init(view, _subStride,  xpos,  ypos, _y, _u, _v);
+            Yuv12Base::init(view, view.data(), _subStride,  xpos,  ypos, _y, _u, _v);
         }
 
         void reset(const Yuv12Pixel& p)
@@ -363,7 +337,8 @@ class Yuv12Pixel
 
         void advance( Pt::ssize_t n )
         {
-            Yuv12Base::advance(*_view, _subStride, _xpos, _ypos, _y, _u, _v, n);
+            Yuv12Base::advance(_y, _u, _v, n, *_view, 
+                               _subStride, _view->data(), _xpos, _ypos);
         }
 
         void assign(const Color& color, CompositionMode)
@@ -429,9 +404,9 @@ class Yuv12Pixel
 class Yuv12Model
 {
     public:
-        typedef Yuv12Pixel      PixelType;
-        typedef ConstYuv12Pixel ConstPixelType;
-        typedef Yuv12Format     FormatType;
+        typedef Yuv12Pixel      Pixel;
+        typedef ConstYuv12Pixel ConstPixel;
+        typedef Yuv12Format     Format;
 };
 
 /** @brief YV-12 image.
