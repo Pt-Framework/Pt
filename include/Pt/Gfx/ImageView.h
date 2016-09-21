@@ -189,8 +189,8 @@ class ConstPixel
 class ImageView
 {
     public:
-        typedef Pixel Pixel;
-        typedef ConstPixel ConstPixel;
+        typedef Gfx::Pixel Pixel;
+        typedef Gfx::ConstPixel ConstPixel;
 
         class PixelIterator
         {
