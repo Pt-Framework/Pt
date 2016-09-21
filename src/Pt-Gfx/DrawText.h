@@ -113,7 +113,7 @@ class DrawText
         //FTC_SBitCache    _bitmapCache;
         
         FTC_ImageTypeRec _imageType;
-        FT_Int           _charMapId;
+        FT_Int           _charMapIndex;
         FTC_FaceID       _faceId;
         FT_Face          _face;
         FT_Matrix        _matrix;

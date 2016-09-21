@@ -38,7 +38,7 @@ namespace Pt {
 namespace Gfx {
 
 DrawText::DrawText()
-: _charMapId(0)
+: _charMapIndex(0)
 , _faceId(0)
 , _face(0)
 , _fontAngle(0)
@@ -98,11 +98,11 @@ void DrawText::setFont(const Font& font)
     //FTC_Manager_LookupFace( _manager, _faceId, &_face );
     FreeType::instance().findFace(_faceId, &_face);
 
-    for( int i = 0; i < _face->num_charmaps; ++i )
+    for( int index = 0; index < _face->num_charmaps; ++index )
     {
-        if( _face->charmap[i].encoding == FT_ENCODING_UNICODE )
+        if( _face->charmap[index].encoding == FT_ENCODING_UNICODE )
         {
-            _charMapId = _face->charmap[i].encoding_id;
+            _charMapIndex = index;
             return;
         }
     }
@@ -140,8 +140,8 @@ FontMetrics DrawText::fontMetrics( const String& text )
 
     for( String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
-        //glyph_index = FTC_CMapCache_Lookup( _charMapCache, _faceId, _charMapId, it->value() );
-        glyph_index = FreeType::instance().findCharMap(_faceId, _charMapId, it->value() );
+        //glyph_index = FTC_CMapCache_Lookup( _charMapCache, _faceId, _charMapIndex, it->value() );
+        glyph_index = FreeType::instance().findCharMap(_faceId, _charMapIndex, it->value() );
 
         if( ! glyph_index )
             continue;
@@ -208,8 +208,8 @@ void DrawText::draw( Image& image, const Color& color, const Point& pos, const S
 
     for( String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
-        //glyph_index = FTC_CMapCache_Lookup( _charMapCache, _faceId, _charMapId, it->value() );
-        glyph_index = FreeType::instance().findCharMap(_faceId, _charMapId, it->value() );
+        //glyph_index = FTC_CMapCache_Lookup( _charMapCache, _faceId, _charMapIndex, it->value() );
+        glyph_index = FreeType::instance().findCharMap(_faceId, _charMapIndex, it->value() );
 
         if( ! glyph_index )
             continue;
